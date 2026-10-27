@@ -37,16 +37,15 @@ extern s32 g_ScreenFadeGreen;
 extern s32 g_ScreenFadeBlue;
 
 void DrawTextureRect(Gfx** displayListHead, s32 xl, s32 yl, s32 xh, s32 yh,
-                     s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
+    s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 void LoadSmallPalette(Gfx** displayListHead, s32 palette, void* tlut);
 void LoadLargePalette(Gfx** displayListHead, void* tlut);
 void LoadNibbleTextureBlock(Gfx** displayListHead, void* texels, s32 format,
-                            s32 width, s32 height, s32 palette, s32 cms,
-                            s32 cmt, s32 masks, s32 maskt, s32 shifts,
-                            s32 shiftt);
+    s32 width, s32 height, s32 palette, s32 cms, s32 cmt, s32 masks, s32 maskt,
+    s32 shifts, s32 shiftt);
 void LoadTextureBlock(Gfx** displayListHead, void* texels, s32 format, s32 size,
-                      s32 width, s32 height, s32 palette, s32 cms, s32 cmt,
-                      s32 masks, s32 maskt, s32 shifts, s32 shiftt);
+    s32 width, s32 height, s32 palette, s32 cms, s32 cmt, s32 masks, s32 maskt,
+    s32 shifts, s32 shiftt);
 void InitScreenLayers(void);
 void LoadWipeShape(s32 courseIndex);
 void StopWipe(void);

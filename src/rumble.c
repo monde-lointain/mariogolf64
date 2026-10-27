@@ -124,7 +124,7 @@ s32 HasGameBoyPak(void) {
 
 s32 IsGameBoyCharacterPresent(s32 characterIndex) {
   return g_GameBoyCharacters[characterIndex].status ==
-         GAME_BOY_CHARACTER_STATUS_PRESENT;
+      GAME_BOY_CHARACTER_STATUS_PRESENT;
 }
 
 u8* GetGameBoyCharacterName(s32 characterIndex) {
@@ -275,7 +275,7 @@ void LoadHelpBoardImage(void* buffer, s32 image) {
   if (memory->helpTopicIndex < LISTED_TOPIC_COUNT) {
     f_FirstListedTopic = 0;
   } else if (memory->helpTopicIndex + LISTED_TOPIC_COUNT - 1 <
-             HELP_TOPIC_COUNT - 1) {
+      HELP_TOPIC_COUNT - 1) {
     f_FirstListedTopic = memory->helpTopicIndex;
   } else {
     f_FirstListedTopic = HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT;
@@ -301,17 +301,17 @@ static inline void SetHelpTextColors(void) {
 
 /* Shows the open topic's title and its current page */
 static inline void ShowTopicPage(void) {
-  SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_TITLE, 1, 0xFF, 0xFF, 0xFF,
-              0xFF);
-  SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_PAGE, 1, 0xFF, 0xFF, 0xFF,
-              0xFF);
+  SetTextSlot(
+      0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_TITLE, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+  SetTextSlot(
+      0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_PAGE, 1, 0xFF, 0xFF, 0xFF, 0xFF);
   SetHelpTextColors();
   SetTextSlot(TOPIC_TITLE_X, TOPIC_TITLE_Y, f_TopicTitleMessages[f_OpenTopic],
-              1, HELP_TEXT_SLOT_TITLE, 2, 0xFF, 0xFF, 0xFF, 0xFF);
+      1, HELP_TEXT_SLOT_TITLE, 2, 0xFF, 0xFF, 0xFF, 0xFF);
   SetHelpTextColors();
   SetTextSlot(TOPIC_PAGE_X, TOPIC_PAGE_Y,
-              f_TopicTitleMessages[f_OpenTopic] + f_TopicPage, 1,
-              HELP_TEXT_SLOT_PAGE, 3, 0xFF, 0xFF, 0xFF, 0xFF);
+      f_TopicTitleMessages[f_OpenTopic] + f_TopicPage, 1, HELP_TEXT_SLOT_PAGE,
+      3, 0xFF, 0xFF, 0xFF, 0xFF);
 }
 
 /* Opens and pages through topics with A, closes them or leaves with B, and
@@ -362,7 +362,7 @@ void UpdateHelpBoard(void) {
       f_OpenTopic = 0;
       ClearHelpText();
     } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_TITLE) &&
-               IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
+        IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
       f_OpenTopic = 0;
       f_TopicPage = 0;
       ClearHelpText();
@@ -408,8 +408,8 @@ void UpdateHelpBoard(void) {
  */
 #define IsTopicArrowShown(index)                          \
   ((((index) == ARROW_UP) && (f_FirstListedTopic > 0)) || \
-   (((index) == ARROW_DOWN) &&                            \
-    (f_FirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)))
+      (((index) == ARROW_DOWN) &&                         \
+          (f_FirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)))
 
 /* Draws the chalkboard, the topic list with its hand and arrows, and the text
  */
@@ -445,8 +445,8 @@ void DrawHelpBoard(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_HandImages + IMAGE_HEADER_SIZE) & ~7);
-    gDPLoadTextureTile_4b(
-        gfx++, ((u32)f_HandImages + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+    gDPLoadTextureTile_4b(gfx++,
+        ((u32)f_HandImages + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
         HAND_SIZE, 0, 0, 0, HAND_SIZE - 1, HAND_SIZE - 1, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -466,13 +466,12 @@ void DrawHelpBoard(Gfx** displayListHead) {
       f_IsHandReturning = FALSE;
     }
     handLeft = f_HandOffset + HAND_LEFT;
-    handTop =
-        f_HelpListLayout.top + (memory->helpTopicIndex - f_FirstListedTopic) *
-                                   f_HelpListLayout.rowSpacing;
+    handTop = f_HelpListLayout.top +
+        (memory->helpTopicIndex - f_FirstListedTopic) *
+            f_HelpListLayout.rowSpacing;
     gSPScisTextureRectangle(gfx++, handLeft << 2, handTop << 2,
-                            (handLeft + HAND_SIZE) << 2,
-                            (handTop + HAND_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-                            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (handLeft + HAND_SIZE) << 2, (handTop + HAND_SIZE) << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     f_ArrowFrameTime++;
     if (f_ArrowFrameTime == ARROW_FRAME_TIME) {
@@ -497,11 +496,10 @@ void DrawHelpBoard(Gfx** displayListHead) {
     gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_ArrowImages + IMAGE_HEADER_SIZE) & ~7);
     for (index = 0; index != ARROW_COUNT; index++) {
       if (IsTopicArrowShown(index)) {
-        gDPLoadTextureTile_4b(
-            gfx++,
+        gDPLoadTextureTile_4b(gfx++,
             (u32)((u8*)f_ArrowImages +
-                  (index * ARROW_IMAGE_SIZE + f_ArrowFrame * ARROW_FRAME_SIZE +
-                   PALETTED_TEXELS_OFFSET)) &
+                (index * ARROW_IMAGE_SIZE + f_ArrowFrame * ARROW_FRAME_SIZE +
+                    PALETTED_TEXELS_OFFSET)) &
                 ~7,
             G_IM_FMT_CI, ARROW_SIZE, 0, 0, 0, ARROW_SIZE - 1, ARROW_SIZE - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -513,9 +511,8 @@ void DrawHelpBoard(Gfx** displayListHead) {
           arrowTop = ARROW_UP_TOP;
         }
         gSPScisTextureRectangle(gfx++, arrowLeft << 2, arrowTop << 2,
-                                (arrowLeft + ARROW_SIZE) << 2,
-                                (arrowTop + ARROW_SIZE) << 2, G_TX_RENDERTILE,
-                                0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            (arrowLeft + ARROW_SIZE) << 2, (arrowTop + ARROW_SIZE) << 2,
+            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
     }
@@ -525,21 +522,21 @@ void DrawHelpBoard(Gfx** displayListHead) {
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
   if (f_OpenTopic == 0) {
     for (index = 0, topic = f_FirstListedTopic; index != LISTED_TOPIC_COUNT;
-         index++, topic++) {
+        index++, topic++) {
       f_ListColorPhase += DEGREES_TO_RADIANS(5);
       red = (s32)(sinf(f_ListColorPhase) * 127.0f) + 127;
       blue = (s32)(sinf(f_ListColorPhase + M_PI / 2) * 127.0f) + 127;
       green = (s32)(sinf(f_ListColorPhase + M_PI) * 127.0f) + 127;
       if (topic == memory->helpTopicIndex) {
         SetTextSlot(LIST_LEFT,
-                    f_HelpListLayout.top + index * f_HelpListLayout.rowSpacing,
-                    f_TopicTitleMessages[0] + topic, 1, index, 0x10, red, green,
-                    blue, 0xFF);
+            f_HelpListLayout.top + index * f_HelpListLayout.rowSpacing,
+            f_TopicTitleMessages[0] + topic, 1, index, 0x10, red, green, blue,
+            0xFF);
       } else {
         SetTextSlot(LIST_LEFT,
-                    f_HelpListLayout.top + index * f_HelpListLayout.rowSpacing,
-                    f_TopicTitleMessages[f_OpenTopic] + topic, 1, index, 0x10,
-                    0xFF, 0xFF, 0xFF, 0xFF);
+            f_HelpListLayout.top + index * f_HelpListLayout.rowSpacing,
+            f_TopicTitleMessages[f_OpenTopic] + topic, 1, index, 0x10, 0xFF,
+            0xFF, 0xFF, 0xFF);
       }
     }
   }
@@ -567,14 +564,13 @@ void DrawUnusedHelpBoardImage(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
-                    TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
+      TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
   gDPLoadTextureBlock_4b(gfx++, ((u32)f_UnusedImage + IMAGE_HEADER_SIZE) & ~7,
-                         G_IM_FMT_I, UNUSED_IMAGE_WIDTH, UNUSED_IMAGE_HEIGHT, 0,
-                         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
-                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      G_IM_FMT_I, UNUSED_IMAGE_WIDTH, UNUSED_IMAGE_HEIGHT, 0,
+      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gSPTextureRectangle(
-      gfx++, UNUSED_IMAGE_LEFT << 2, UNUSED_IMAGE_TOP << 2,
+  gSPTextureRectangle(gfx++, UNUSED_IMAGE_LEFT << 2, UNUSED_IMAGE_TOP << 2,
       UNUSED_IMAGE_RIGHT << 2, UNUSED_IMAGE_BOTTOM << 2, G_TX_RENDERTILE, 0, 0,
       (UNUSED_IMAGE_WIDTH << 10) / (UNUSED_IMAGE_RIGHT - UNUSED_IMAGE_LEFT),
       (UNUSED_IMAGE_HEIGHT << 10) / (UNUSED_IMAGE_BOTTOM - UNUSED_IMAGE_TOP));
@@ -594,7 +590,7 @@ void DrawChalkboard(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF | AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL,
-                   G_RM_OPA_SURF2);
+      G_RM_OPA_SURF2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
@@ -602,18 +598,16 @@ void DrawChalkboard(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPLoadTLUT_pal256(gfx++, ((u32)f_ChalkboardImage + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != CHALKBOARD_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)f_ChalkboardImage + CHALKBOARD_TEXELS_OFFSET +
-         stripIndex * CHALKBOARD_WIDTH * CHALKBOARD_STRIP_HEIGHT) &
+            stripIndex * CHALKBOARD_WIDTH * CHALKBOARD_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, CHALKBOARD_WIDTH, CHALKBOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = CHALKBOARD_TOP + stripIndex * CHALKBOARD_DRAWN_STRIP_HEIGHT;
-    gSPScisTextureRectangle(
-        gfx++, CHALKBOARD_LEFT << 2, stripTop << 2,
+    gSPScisTextureRectangle(gfx++, CHALKBOARD_LEFT << 2, stripTop << 2,
         (CHALKBOARD_LEFT + CHALKBOARD_WIDTH) << 2,
         (stripTop + CHALKBOARD_DRAWN_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE,

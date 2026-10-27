@@ -20,18 +20,16 @@ extern s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT];
 
 /* Plays a character's sound, where soundIndex is the sound's pair's first value
  */
-void PlayCharacterSound(s32 character, s32 slot, s32 soundIndex, s32 volume,
-                        s32 pan) {
+void PlayCharacterSound(
+    s32 character, s32 slot, s32 soundIndex, s32 volume, s32 pan) {
   s32 reverb = (character != DRY_CHARACTER) ? CHARACTER_SOUND_REVERB : 0;
 
   if (volume == CHARACTER_SOUND_VOLUME) {
     PlaySoundWithEffects(f_CharacterSounds[character][soundIndex],
-                         slot + FIRST_CHARACTER_SOUND_CHANNEL,
-                         f_CharacterSounds[character][soundIndex + 1], reverb,
-                         pan);
+        slot + FIRST_CHARACTER_SOUND_CHANNEL,
+        f_CharacterSounds[character][soundIndex + 1], reverb, pan);
   } else {
     PlaySoundWithEffects(f_CharacterSounds[character][soundIndex],
-                         slot + FIRST_CHARACTER_SOUND_CHANNEL, volume, reverb,
-                         pan);
+        slot + FIRST_CHARACTER_SOUND_CHANNEL, volume, reverb, pan);
   }
 }

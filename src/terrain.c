@@ -54,14 +54,14 @@ typedef struct MapOverviewControls {
  * The map image texel at a texel column and row; the first texel row and
  * column of each tile are its border
  */
-#define MAP_TEXEL(column, row)                                            \
-  g_WorkArea.hole                                                         \
-      .tiles[(column) / GROUND_TILE_TEXEL_SPAN +                          \
-             ((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT] \
-      .texels[1][((column) & (GROUND_TILE_TEXEL_SPAN - 1)) +              \
-                 ((row) & (GROUND_TILE_TEXEL_SPAN - 1)) *                 \
-                     GROUND_TILE_TEXEL_ROW_LENGTH +                       \
-                 1]
+#define MAP_TEXEL(column, row)                                         \
+  g_WorkArea.hole                                                      \
+      .tiles[(column) / GROUND_TILE_TEXEL_SPAN +                       \
+          ((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT] \
+      .texels[1][((column) & (GROUND_TILE_TEXEL_SPAN - 1)) +           \
+          ((row) & (GROUND_TILE_TEXEL_SPAN - 1)) *                     \
+              GROUND_TILE_TEXEL_ROW_LENGTH +                           \
+          1]
 
 /*
  * Water tests probe a vertical segment from -reach to +reach; the height
@@ -229,9 +229,9 @@ s32 GetTerrainCodeColor(s32 code) {
       break;
   }
   return (f_TerrainColors[colorIndex].red << 11) |
-         (f_TerrainColors[colorIndex].green << 6) |
-         (f_TerrainColors[colorIndex].blue << 1) |
-         f_TerrainColors[colorIndex].alpha;
+      (f_TerrainColors[colorIndex].green << 6) |
+      (f_TerrainColors[colorIndex].blue << 1) |
+      f_TerrainColors[colorIndex].alpha;
 }
 
 /* Returns the terrain code whose colour is nearest an RGBA16 colour */
@@ -309,8 +309,7 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
     return SURFACE_OUT_OF_COURSE;
   }
   if (FindHoleTriangleHit(shiftedX, -MINI_GOLF_WATER_PROBE_REACH, shiftedZ,
-                          shiftedX, MINI_GOLF_WATER_PROBE_REACH, shiftedZ, &hit,
-                          &fraction)) {
+          shiftedX, MINI_GOLF_WATER_PROBE_REACH, shiftedZ, &hit, &fraction)) {
     waterBias = WATER_BIAS;
     if (lowersWaterLevel) {
       waterBias = LOWERED_WATER_BIAS;
@@ -319,8 +318,8 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
       char text[0x80];
 
       sprintf(text, "ratio %f,%x", fraction,
-              (s32)(WATER_PROBE_HEIGHT(fraction, MINI_GOLF_WATER_PROBE_REACH) +
-                    waterBias));
+          (s32)(WATER_PROBE_HEIGHT(fraction, MINI_GOLF_WATER_PROBE_REACH) +
+              waterBias));
       PrintDebugText(text, 10, 11);
     }
     if (hit.unk0 == HOLE_TRIANGLE_KIND_FLAT) {
@@ -337,7 +336,7 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
   stepRow = ((shiftedZ & 0x7FF) < 0x400) ? -1 : 1;
   for (i = 0; i < 4; i++) {
     switch (GetTerrainCode((i & 1) ? column + stepColumn : column,
-                           (i & 2) ? row + stepRow : row)) {
+        (i & 2) ? row + stepRow : row)) {
       case TERRAIN_CODE_FAIRWAY:
         weight = 1.0f;
         surface = SURFACE_MINI_GOLF_FAIRWAY;
@@ -444,8 +443,8 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
   if ((u32)(z - 0x3C00) > 0x7F87FF) {
     return SURFACE_OUT_OF_COURSE;
   }
-  if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z,
-                          &hit, &fraction)) {
+  if (FindHoleTriangleHit(
+          x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
     char unusedText[0x80]; /* Unused, but keeps the stack frame the same size as
                               the original */
 
@@ -466,7 +465,7 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
   stepRow = (fractionZ < 0x2000) ? -1 : 1;
   for (i = 0; i < 4; i++) {
     switch (GetTerrainCode((i & 1) ? column + stepColumn : column,
-                           (i & 2) ? row + stepRow : row)) {
+        (i & 2) ? row + stepRow : row)) {
       case TERRAIN_CODE_FAIRWAY:
         weight = 1.0f;
         surface = SURFACE_FAIRWAY;
@@ -542,24 +541,27 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
   distanceX = ABS(0x2000 - fractionX);
   distanceZ = ABS(0x2000 - fractionZ);
   if (((stepColumn + 1) ^ (stepRow + 1)) == 0) {
-    weights[0] = weights[0] * (3.7252903e-9f * ((f32)(0x4000 - distanceX) *
-                                                (f32)(0x4000 - distanceZ)));
+    weights[0] = weights[0] *
+        (3.7252903e-9f *
+            ((f32)(0x4000 - distanceX) * (f32)(0x4000 - distanceZ)));
     weights[1] = weights[1] *
-                 (3.7252903e-9f * ((f32)distanceX * (f32)(0x4000 - distanceZ)));
+        (3.7252903e-9f * ((f32)distanceX * (f32)(0x4000 - distanceZ)));
     weights[2] = weights[2] * (6.1035156e-5f * (f32)distanceZ);
   } else if (distanceX < distanceZ) {
     surfaces[1] = surfaces[3];
-    weights[0] = weights[0] * (3.7252903e-9f * ((f32)(0x4000 - distanceZ) *
-                                                (f32)(0x4000 - distanceX)));
+    weights[0] = weights[0] *
+        (3.7252903e-9f *
+            ((f32)(0x4000 - distanceZ) * (f32)(0x4000 - distanceX)));
     weights[2] = weights[2] *
-                 (3.7252903e-9f * ((f32)distanceZ * (f32)(0x4000 - distanceX)));
+        (3.7252903e-9f * ((f32)distanceZ * (f32)(0x4000 - distanceX)));
     weights[1] = weights[3] * (f32)distanceX * 6.1035156e-5f;
   } else {
     surfaces[2] = surfaces[3];
-    weights[0] = weights[0] * (3.7252903e-9f * ((f32)(0x4000 - distanceX) *
-                                                (f32)(0x4000 - distanceZ)));
+    weights[0] = weights[0] *
+        (3.7252903e-9f *
+            ((f32)(0x4000 - distanceX) * (f32)(0x4000 - distanceZ)));
     weights[1] = weights[1] *
-                 (3.7252903e-9f * ((f32)distanceX * (f32)(0x4000 - distanceZ)));
+        (3.7252903e-9f * ((f32)distanceX * (f32)(0x4000 - distanceZ)));
     weights[2] = weights[3] * (f32)distanceZ * 6.1035156e-5f;
   }
   if (surfaces[0] == surfaces[1]) {
@@ -678,7 +680,7 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface) {
     surfaceRed = surfaceColor >> 11;
     surfaceGreen = (surfaceColor >> 6) & 0x1F;
     osSyncPrintf("c1(%d,%d,%d) c2(%d,%d,%d)\n", groundRed, groundGreen,
-                 groundBlue, surfaceRed, surfaceGreen, surfaceBlue);
+        groundBlue, surfaceRed, surfaceGreen, surfaceBlue);
     groundRed = (groundRed + surfaceRed) >> 1;
     groundGreen = (groundGreen + surfaceGreen) >> 1;
     groundBlue = (groundBlue + surfaceBlue) / 2;
@@ -1013,7 +1015,7 @@ void UpdateFlagPanel(void) {
 
   s32 GetSelectedFlag(void) {
     return (f_FlagPanelFirstRow + f_FlagPanelRow) * FLAG_PANEL_COLUMN_COUNT +
-           f_FlagPanelColumn;
+        f_FlagPanelColumn;
   }
 
   ClearDebugText();
@@ -1025,15 +1027,14 @@ void UpdateFlagPanel(void) {
     sprintf(text, "%x0|", row + f_FlagPanelFirstRow);
     PrintDebugText(text, 3, row + 14);
     for (column = 0, textColumn = 6; column < FLAG_PANEL_COLUMN_COUNT;
-         column++, textColumn += 2) {
+        column++, textColumn += 2) {
       if (row == 0) {
         sprintf(text, "%X", column);
         PrintDebugText(text, textColumn, 12);
       }
-      sprintf(
-          text, "%X",
-          IsGameFlagSet((row + f_FlagPanelFirstRow) * FLAG_PANEL_COLUMN_COUNT +
-                        column));
+      sprintf(text, "%X",
+          IsGameFlagSet(
+              (row + f_FlagPanelFirstRow) * FLAG_PANEL_COLUMN_COUNT + column));
       if (row == f_FlagPanelRow && column == f_FlagPanelColumn) {
         SetDebugTextHighlight(TRUE);
       }
@@ -1217,7 +1218,7 @@ void PrepareHoleTriangles(void) {
   s32 highest[3];
 
   for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT;
-       triangleIndex++) {
+      triangleIndex++) {
     lowest[0] = lowest[1] = lowest[2] = 0x20000000;
     highest[0] = highest[1] = highest[2] = -0x20000000;
     for (corner = 0; corner < 3; corner++) {
@@ -1284,8 +1285,8 @@ void MarkBillboardsOnMap(void) {
  */
 #define IsSceneMenuRequested()                                            \
   (g_IsDebugEnabled && (g_MenuControllerData[0].button & START_BUTTON) && \
-   ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) ==             \
-    (START_BUTTON | L_TRIG)))
+      ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) ==          \
+          (START_BUTTON | L_TRIG)))
 
 /* Runs the debug scene menu and the update routine of the current debug scene
  */
@@ -1302,10 +1303,10 @@ void UpdateDebugScenes(void) {
     return;
   }
   if (IsGameFlagSet(0x1A)) {
-    PrintDebugText(GetSurfaceInfoAt(g_CurrentShot.unk44[AXIS_X],
-                                    g_CurrentShot.unk44[AXIS_Z])
+    PrintDebugText(GetSurfaceInfoAt(
+                       g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z])
                        ->name,
-                   2, 4);
+        2, 4);
   }
   if (f_IsSceneMenuOpen && f_SceneMenuBox.state == openState) {
     UpdateDebugSceneMenu();
@@ -1451,8 +1452,8 @@ Vtx* GetTileCellPoint(Vtx* midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
   Vtx* vertex;
 
   if (slot & 0x80) {
-    vertex = GetGridVertex(tileColumn * 2 + ((slot >> 2) & 3),
-                           tileRow * 2 + (slot & 3));
+    vertex = GetGridVertex(
+        tileColumn * 2 + ((slot >> 2) & 3), tileRow * 2 + (slot & 3));
   } else {
     vertex = &midpoints[slot];
   }
@@ -1461,9 +1462,9 @@ Vtx* GetTileCellPoint(Vtx* midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
 
 /* Returns the cross product of two points' offsets from an origin */
 s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ,
-                   s32 secondX, s32 secondZ) {
+    s32 secondX, s32 secondZ) {
   return (firstX - originX) * (secondZ - originZ) -
-         (firstZ - originZ) * (secondX - originX);
+      (firstZ - originZ) * (secondX - originX);
 }
 
 /*
@@ -1485,8 +1486,8 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
    * end */
   inline s32 IsOutsideEdge(Vtx * start, Vtx * end) {
     return (end->v.ob[0] - start->v.ob[0]) * (z - (start->v.ob[2] << 10)) -
-               (end->v.ob[2] - start->v.ob[2]) * (x - (start->v.ob[0] << 10)) <
-           0;
+        (end->v.ob[2] - start->v.ob[2]) * (x - (start->v.ob[0] << 10)) <
+        0;
   }
 
   inline s32 ContainsPoint(Vtx * first, Vtx * second, Vtx * third) {
@@ -1574,7 +1575,7 @@ s32 AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
  */
 #define IsNormalTooLong(normalX, normalY, normalZ)       \
   ((ABS(normalX) > 0x4000) || (ABS(normalY) > 0x4000) || \
-   (ABS(normalZ) > 0x4000))
+      (ABS(normalZ) > 0x4000))
 
 /* Integer GetTrianglePlane. Returns 0, or -1 for a degenerate triangle. */
 
@@ -1603,8 +1604,8 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
   normalY = -firstX * secondZ + secondX * firstZ;
   normalZ = -firstY * secondX + secondY * firstX;
   distance = -(normalX * triangle->corners[AXIS_X][0] +
-               normalY * triangle->corners[AXIS_Y][0] +
-               normalZ * triangle->corners[AXIS_Z][0]);
+      normalY * triangle->corners[AXIS_Y][0] +
+      normalZ * triangle->corners[AXIS_Z][0]);
   while (IsNormalTooLong(normalX, normalY, normalZ)) {
     normalX /= 256;
     normalY /= 256;
@@ -1659,8 +1660,8 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
   normalZ = -firstY * secondX + secondY * firstX;
   length = sqrtf(normalX * normalX + normalY * normalY + normalZ * normalZ);
   distance = -(normalX * triangle->corners[AXIS_X][0] +
-               normalY * triangle->corners[AXIS_Y][0] +
-               normalZ * triangle->corners[AXIS_Z][0]);
+      normalY * triangle->corners[AXIS_Y][0] +
+      normalZ * triangle->corners[AXIS_Z][0]);
   if (length == 0.0f) {
     if (g_IsDebugEnabled) {
       PrintDebugText("NormalFError", 3, 15);
@@ -1768,8 +1769,8 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
   s32 height = GetTerrainHeight(x, z);
   s32 waterHeight;
 
-  if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z,
-                          &hit, &fraction)) {
+  if (FindHoleTriangleHit(
+          x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
     char unusedText[0x80]; /* Unused, but keeps the stack frame the same size as
                               the original */
 

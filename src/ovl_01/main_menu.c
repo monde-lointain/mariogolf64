@@ -278,7 +278,7 @@ void StartLoadingChosenHole(void) {
   } else {
     if (g_IsMiniGolf) {
       g_CourseIndex = g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
-                      g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
+          g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
     } else {
       g_CourseIndex = D_801323A0.courseChoice;
     }
@@ -301,7 +301,7 @@ void StartLoadingChosenHole(void) {
 s32 GetChosenCourseIndex(void) {
   if (g_IsMiniGolf) {
     return g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
-           g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
+        g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
   }
   return D_801323A0.courseChoice;
 }
@@ -435,7 +435,7 @@ void func_801F6B28_ovl_01(void) {
     player->characterIndex = D_8012F480[index];
     player->controllerIndex = D_800C1FF4[index];
     sprintf(player->name, D_80231514_ovl_01,
-            D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
+        D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
     if (D_8012F480[index] >= CHARACTER_KID) {
       row = D_801323A0.characterRows[index];
       column = D_801323A0.characterColumns[index];
@@ -443,11 +443,11 @@ void func_801F6B28_ovl_01(void) {
         player->gameBoyCharacterIndex = column;
       }
       sprintf(player->name, D_80231514_ovl_01,
-              g_GameBoyCharacters[player->gameBoyCharacterIndex].name);
+          g_GameBoyCharacters[player->gameBoyCharacterIndex].name);
     } else {
       player->gameBoyCharacterIndex = -1;
       sprintf(player->name, D_80231514_ovl_01,
-              D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
+          D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
     }
     if (player->controllerIndex == MAXCONTROLLERS) {
       g_Players[index].unk1E[0] = 1;
@@ -472,7 +472,7 @@ void func_801F6B28_ovl_01(void) {
     if (g_GameMode == GAME_MODE_TRAINING) {
       player->unk28 = PLAYER_UNK28_TRAINING;
     } else if (g_SkippedNines == BACK_NINE_SKIPPED ||
-               g_SkippedNines == FRONT_NINE_SKIPPED) {
+        g_SkippedNines == FRONT_NINE_SKIPPED) {
       player->unk28 = PLAYER_UNK28_NINE_HOLES;
     } else {
       player->unk28 = PLAYER_UNK28_EIGHTEEN_HOLES;
@@ -561,8 +561,8 @@ void func_801F70F0_ovl_01(void) {
       D_80105B68 = 1;
       if ((g_MenuRepeatButtons == TRANSMIT_BUTTONS) |
           (g_MenuRepeatButtons == TRANSMIT_OTHER_BUTTONS)) {
-        PlaySound(SOUND_TRANSMIT_SHOWN, TRANSMIT_SOUND_CHANNEL,
-                  MENU_VOLUME_SOFT);
+        PlaySound(
+            SOUND_TRANSMIT_SHOWN, TRANSMIT_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         D_801323E6 = 1;
         g_MenuScreen = titleChoice;
       } else {
@@ -588,8 +588,8 @@ void func_801F70F0_ovl_01(void) {
     g_SceneModuleToUnload = SCENE_MODULE_MENU;
     g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
     PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
-    SetTextSlot(SCREEN_WIDTH / 2, TITLE_SCREEN_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0,
-                0, 0, 0);
+    SetTextSlot(
+        SCREEN_WIDTH / 2, TITLE_SCREEN_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
     return;
   }
   /* titleChoice is moved through the array's bytes, which keeps its address in
@@ -693,7 +693,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
     if ((g_MenuPressedButtons & (A_BUTTON | R_TRIG)) &&
         D_800FBD40[D_801323A0.unk2 + 2] == 0) {
       PlayCharacterSound(D_801323A0.unk2, 0, CHOSEN_CHARACTER_VOICE,
-                         MENU_VOLUME_SOFT, CHOSEN_CHARACTER_PAN);
+          MENU_VOLUME_SOFT, CHOSEN_CHARACTER_PAN);
       D_8022BE2C_ovl_01 = 1;
       SetAnimationSpeed(0, 1.0f);
       return 0;
@@ -863,7 +863,7 @@ void func_801F8BAC_ovl_01(void) {
         SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       }
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
-               MAP_CAMERA_MODE_TOP_BYTE == isDone) {
+        MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
         PlaySound(SOUND_UNK6A, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         D_8022BE88_ovl_01 = 1;
@@ -872,19 +872,19 @@ void func_801F8BAC_ovl_01(void) {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       }
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
-               MAP_CAMERA_MODE_TOP_BYTE == 1) {
+        MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
       g_SkippedNines = 0;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
-               MAP_CAMERA_MODE_TOP_BYTE == 1) {
+        MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
       g_SkippedNines = BACK_NINE_SKIPPED;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
-               MAP_CAMERA_MODE_TOP_BYTE == 1) {
+        MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
       g_SkippedNines = FRONT_NINE_SKIPPED;
@@ -949,22 +949,22 @@ void func_801F93D8_ovl_01(void) {
             }
             OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT]
                                        [D_8022F8D4_ovl_01],
-                             &asset);
+                &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][0], &asset);
             OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1]
                                        [D_8022F8D4_ovl_01],
-                             &asset);
+                &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
             course = g_MenuChoices.unk14;
             buffers = D_801049A0;
             OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT]
                                        [D_8022F8D4_ovl_01],
-                             &asset);
+                &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
             OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1]
                                        [D_8022F8D4_ovl_01],
-                             &asset);
+                &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           }
           D_8022F8DD_ovl_01 ^= 1;
@@ -990,22 +990,22 @@ void func_801F93D8_ovl_01(void) {
             }
             OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT]
                                        [D_8022F8D4_ovl_01],
-                             &asset);
+                &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][0], &asset);
             OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1]
                                        [D_8022F8D4_ovl_01],
-                             &asset);
+                &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
             course = g_MenuChoices.unk14;
             buffers = D_801049A0;
             OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT]
                                        [D_8022F8D4_ovl_01],
-                             &asset);
+                &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
             OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1]
                                        [D_8022F8D4_ovl_01],
-                             &asset);
+                &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           }
           D_8022F8DD_ovl_01 ^= 1;
@@ -1049,8 +1049,8 @@ void func_801F93D8_ovl_01(void) {
       D_801B9410 = 0;
       FreeAllCharacterSlots();
       LoadWipeShape(g_MenuChoices.unk14 +
-                    g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD +
-                    MINI_GOLF_COURSE_INDEX);
+          g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD +
+          MINI_GOLF_COURSE_INDEX);
       StartWipe(WIPE_CLOSING);
       D_801052E8 = 0;
     }
@@ -1090,7 +1090,7 @@ void func_801F93D8_ovl_01(void) {
       PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_NEXT;
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
-               MAP_CAMERA_MODE_TOP_BYTE == isDone) {
+        MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
         PlaySound(SOUND_UNK6A, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         D_8022BE88_ovl_01 = 1;
@@ -1099,19 +1099,19 @@ void func_801F93D8_ovl_01(void) {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       }
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
-               MAP_CAMERA_MODE_TOP_BYTE == 1) {
+        MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
       g_SkippedNines = 0;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
-               MAP_CAMERA_MODE_TOP_BYTE == 1) {
+        MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
       g_SkippedNines = BACK_NINE_SKIPPED;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
-               MAP_CAMERA_MODE_TOP_BYTE == 1) {
+        MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
       g_SkippedNines = FRONT_NINE_SKIPPED;
@@ -1354,7 +1354,7 @@ void func_801FADBC_ovl_01(void) {
     PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     g_MenuChoices.unk1--;
   } else if ((g_MenuRepeatButtons & D_JPAD) &&
-             g_MenuChoices.unk1 < CADDY_COUNT - 1) {
+      g_MenuChoices.unk1 < CADDY_COUNT - 1) {
     PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     g_MenuChoices.unk1++;
   }
@@ -1446,8 +1446,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
   gDPSetFillColor(
       gfx++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
   gDPFillRectangle(gfx++, SCREEN_BORDER, SCREEN_BORDER,
-                   SCREEN_WIDTH - SCREEN_BORDER - 1,
-                   SCREEN_HEIGHT - SCREEN_BORDER - 1);
+      SCREEN_WIDTH - SCREEN_BORDER - 1, SCREEN_HEIGHT - SCREEN_BORDER - 1);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -1581,14 +1580,14 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
     if (stripIndex == 0) {
       /* The first strip has no row above it, so it shows its first row too */
       gDPLoadTextureBlock(gfx++,
-                          ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
-                          G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
-                          BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
-                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+          G_IM_SIZ_8b, BACKDROP_WIDTH,
+          BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(
-          gfx++, BACKDROP_LEFT << 2, BACKDROP_FIRST_TOP << 2,
+      gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
+          BACKDROP_FIRST_TOP << 2,
           (BACKDROP_LEFT + BACKDROP_WIDTH * BACKDROP_SCALE) << 2,
           (BACKDROP_FIRST_TOP + (BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)
               << 2,
@@ -1596,10 +1595,9 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
           TEXEL_STEP_ONE / BACKDROP_SCALE);
     } else {
       gDPPipeSync(gfx++);
-      gDPLoadTextureBlock(
-          gfx++,
+      gDPLoadTextureBlock(gfx++,
           ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET +
-           stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT) &
+              stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
           shownRowCount + BACKDROP_SEAM_ROW_COUNT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1608,12 +1606,11 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       stripTop =
           BACKDROP_TOP + stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE;
-      gSPScisTextureRectangle(
-          gfx++, BACKDROP_LEFT << 2, stripTop << 2,
+      gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
           (BACKDROP_LEFT + BACKDROP_WIDTH * BACKDROP_SCALE) << 2,
           (BACKDROP_TOP +
-           stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE +
-           shownRowCount * BACKDROP_SCALE)
+              stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE +
+              shownRowCount * BACKDROP_SCALE)
               << 2,
           G_TX_RENDERTILE, 0, BACKDROP_SECOND_ROW_START,
           TEXEL_STEP_ONE / BACKDROP_SCALE, TEXEL_STEP_ONE / BACKDROP_SCALE);
@@ -1638,18 +1635,16 @@ void func_801FCB74_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, ((u32)D_800FF420[D_8022BE92_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != NARROW_BOARD_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_800FF420[D_8022BE92_ovl_01] + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * NARROW_BOARD_WIDTH * NARROW_BOARD_STRIP_HEIGHT) &
+            stripIndex * NARROW_BOARD_WIDTH * NARROW_BOARD_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, NARROW_BOARD_WIDTH, NARROW_BOARD_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = NARROW_BOARD_TOP + stripIndex * NARROW_BOARD_STRIP_SPACING;
-    gSPScisTextureRectangle(
-        gfx++, NARROW_BOARD_LEFT << 2, stripTop << 2,
+    gSPScisTextureRectangle(gfx++, NARROW_BOARD_LEFT << 2, stripTop << 2,
         (NARROW_BOARD_LEFT + NARROW_BOARD_SHOWN_WIDTH) << 2,
         (stripTop + NARROW_BOARD_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         (NARROW_BOARD_WIDTH << 10) / NARROW_BOARD_SHOWN_WIDTH,
@@ -1669,10 +1664,9 @@ void func_801FCEF8_ovl_01(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1680,10 +1674,9 @@ void func_801FCEF8_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     stripTop = UNUSED_BANNER_TOP + stripIndex * MENU_BANNER_STRIP_HEIGHT;
     gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
-                            (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
-                            (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2,
-                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-                            TEXEL_STEP_ONE);
+        (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
+        (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
   *displayListHead = gfx;
@@ -1700,19 +1693,18 @@ void func_801FD1B4_ovl_01(Gfx** displayListHead, s16 left, s16 top) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, left << 2, top << 2, (left + SMALL_BANNER_WIDTH) << 2,
-        (top + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH, TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2,
+        (left + SMALL_BANNER_WIDTH) << 2, (top + MENU_BANNER_STRIP_HEIGHT) << 2,
+        G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH,
+        TEXEL_STEP_ONE);
     top += MENU_BANNER_STRIP_HEIGHT;
     gDPPipeSync(gfx++);
   }
@@ -1732,18 +1724,16 @@ void func_801FD4F0_ovl_01(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = LARGE_BANNER_TOP + stripIndex * LARGE_BANNER_STRIP_SPACING;
-    gSPScisTextureRectangle(
-        gfx++, LARGE_BANNER_LEFT << 2, stripTop << 2,
+    gSPScisTextureRectangle(gfx++, LARGE_BANNER_LEFT << 2, stripTop << 2,
         (LARGE_BANNER_LEFT + LARGE_BANNER_WIDTH) << 2,
         (stripTop + LARGE_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         (MENU_BANNER_WIDTH << 10) / LARGE_BANNER_WIDTH,
@@ -1761,10 +1751,9 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1772,10 +1761,9 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     stripTop = MENU_BANNER_TOP + stripIndex * MENU_BANNER_STRIP_HEIGHT;
     gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
-                            (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
-                            (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2,
-                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-                            TEXEL_STEP_ONE);
+        (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
+        (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
   *displayListHead = gfx;
@@ -1830,16 +1818,16 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
 
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  DrawShadowedText(&gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y,
-                   D_80231634_ovl_01);
+  DrawShadowedText(
+      &gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y, D_80231634_ovl_01);
   for (labelIndex = 0; labelIndex != PLAIN_MENU_NAME_COUNT; labelIndex++) {
     DrawShadowedText(&gfx, PLAIN_MENU_NAME_X,
-                     PLAIN_MENU_NAME_TOP + labelIndex * PLAIN_MENU_NAME_SPACING,
-                     D_8022BF28_ovl_01[labelIndex]);
+        PLAIN_MENU_NAME_TOP + labelIndex * PLAIN_MENU_NAME_SPACING,
+        D_8022BF28_ovl_01[labelIndex]);
   }
   sprintf(g_PrintBuffer, D_80231640_ovl_01, 0x820, 0x208, 0x2A78);
-  DrawShadowedText(&gfx, PLAIN_MENU_FIGURES_X, PLAIN_MENU_FIGURES_Y,
-                   g_PrintBuffer);
+  DrawShadowedText(
+      &gfx, PLAIN_MENU_FIGURES_X, PLAIN_MENU_FIGURES_Y, g_PrintBuffer);
   func_801FB54C_ovl_01(&gfx, TITLE_BOARD_KIND);
   if (g_ControllerStates[0].buttons & B_BUTTON) {
     gDPPipeSync(gfx++);
@@ -1849,13 +1837,14 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
       gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
     if ((D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
-         labelIndex == TITLE_LABEL_NEW_GAME) ||
+            labelIndex == TITLE_LABEL_NEW_GAME) ||
         (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
-         labelIndex ==
-             D_801323A0.playerCountChoice + TITLE_LABEL_FIRST_PLAYER_COUNT) ||
+            labelIndex ==
+                D_801323A0.playerCountChoice +
+                    TITLE_LABEL_FIRST_PLAYER_COUNT) ||
         (D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE ==
-             labelIndex &&
-         D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
+                labelIndex &&
+            D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
       continue;
     }
     {
@@ -1865,16 +1854,14 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
         labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
       }
       gDPLoadTextureBlock_4b(gfx++,
-                             ((u32)D_801B5CD0[D_8022BE90_ovl_01] +
-                              PALETTED_TEXELS_OFFSET + labelOffset) &
-                                 ~7,
-                             G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT,
-                             0, G_TX_NOMIRROR | G_TX_WRAP,
-                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          ((u32)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET +
+              labelOffset) &
+              ~7,
+          G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(
-          gfx++, D_8022F940_ovl_01[labelIndex][0] << 2,
+      gSPScisTextureRectangle(gfx++, D_8022F940_ovl_01[labelIndex][0] << 2,
           D_8022F940_ovl_01[labelIndex][1] << 2,
           (D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH) << 2,
           (D_8022F940_ovl_01[labelIndex][1] + TITLE_LABEL_HEIGHT) << 2,
@@ -1886,34 +1873,34 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
       gfx++, 0, ((u32)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
     if ((D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
-         labelIndex == TITLE_LABEL_NEW_GAME) ||
+            labelIndex == TITLE_LABEL_NEW_GAME) ||
         (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
-         labelIndex ==
-             D_801323A0.playerCountChoice + TITLE_LABEL_FIRST_PLAYER_COUNT) ||
+            labelIndex ==
+                D_801323A0.playerCountChoice +
+                    TITLE_LABEL_FIRST_PLAYER_COUNT) ||
         (labelIndex ==
-             D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE &&
-         D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
+                D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE &&
+            D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
       if (labelIndex == TITLE_LABEL_SAVED_GAMES && D_800C42D0 == TRUE) {
         labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
       } else {
         labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
       }
       gDPLoadTextureBlock_4b(gfx++,
-                             ((u32)D_8012D420[D_8022BE8E_ovl_01] +
-                              PALETTED_TEXELS_OFFSET + labelOffset) &
-                                 ~7,
-                             G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT,
-                             0, G_TX_NOMIRROR | G_TX_WRAP,
-                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          ((u32)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET +
+              labelOffset) &
+              ~7,
+          G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       /* NEW GAME stays still */
       growth = 0;
       if (labelIndex != TITLE_LABEL_NEW_GAME) {
         growth = D_800FE33C;
       }
-      gSPScisTextureRectangle(
-          gfx++, (D_8022F940_ovl_01[labelIndex][0] - growth / 2) << 2,
+      gSPScisTextureRectangle(gfx++,
+          (D_8022F940_ovl_01[labelIndex][0] - growth / 2) << 2,
           (D_8022F940_ovl_01[labelIndex][1] - growth / 2) << 2,
           (D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH + growth / 2)
               << 2,

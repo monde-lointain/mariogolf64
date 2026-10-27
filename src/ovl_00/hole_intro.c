@@ -95,13 +95,11 @@ s32 UpdateHoleIntroCamera(void) {
   }
   if (g_HoleIndex == GetFirstHoleIndex()) {
     if (f_IntroFrame < FIRST_HOLE_INTRO_FRAMES) {
-      f_IntroCameraDistance =
-          FIRST_HOLE_INTRO_START_DISTANCE -
+      f_IntroCameraDistance = FIRST_HOLE_INTRO_START_DISTANCE -
           f_IntroFrame *
               (FIRST_HOLE_INTRO_START_DISTANCE - INTRO_CAMERA_END_DISTANCE) /
               FIRST_HOLE_INTRO_FRAMES;
-      f_IntroCameraHeight =
-          FIRST_HOLE_INTRO_START_HEIGHT -
+      f_IntroCameraHeight = FIRST_HOLE_INTRO_START_HEIGHT -
           f_IntroFrame *
               (FIRST_HOLE_INTRO_START_HEIGHT - INTRO_CAMERA_END_HEIGHT) /
               FIRST_HOLE_INTRO_FRAMES;
@@ -116,16 +114,14 @@ s32 UpdateHoleIntroCamera(void) {
       heading = -(f32)M_PI;
     }
     heading = heading +
-              ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2);
+        ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2);
   } else {
     if (f_IntroFrame < LATER_HOLE_INTRO_FRAMES) {
-      f_IntroCameraDistance =
-          LATER_HOLE_INTRO_START_DISTANCE -
+      f_IntroCameraDistance = LATER_HOLE_INTRO_START_DISTANCE -
           f_IntroFrame *
               (LATER_HOLE_INTRO_START_DISTANCE - INTRO_CAMERA_END_DISTANCE) /
               LATER_HOLE_INTRO_FRAMES;
-      f_IntroCameraHeight =
-          LATER_HOLE_INTRO_START_HEIGHT -
+      f_IntroCameraHeight = LATER_HOLE_INTRO_START_HEIGHT -
           f_IntroFrame *
               (LATER_HOLE_INTRO_START_HEIGHT - INTRO_CAMERA_END_HEIGHT) /
               LATER_HOLE_INTRO_FRAMES;
@@ -134,7 +130,7 @@ s32 UpdateHoleIntroCamera(void) {
       f_IntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
     }
     heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2 +
-              -(f32)M_PI;
+        -(f32)M_PI;
   }
   g_Cameras[1].view.lookAt[AXIS_X] =
       g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
@@ -146,7 +142,7 @@ s32 UpdateHoleIntroCamera(void) {
   offset[AXIS_X] =
       -sinf(heading) * f_IntroCameraDistance * COURSE_TO_WORLD_SCALE;
   offset[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] + f_IntroCameraHeight) *
-                   COURSE_TO_WORLD_SCALE;
+      COURSE_TO_WORLD_SCALE;
   offset[AXIS_Z] =
       cosf(heading) * f_IntroCameraDistance * COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.eye[AXIS_Y] = offset[AXIS_Y];
@@ -166,8 +162,8 @@ s32 UpdateHoleIntroCamera(void) {
       StartMovie(MOVIE_READY_GO);
     }
     if (f_IntroFrame == LATER_HOLE_INTRO_SOUND_FRAME) {
-      PlaySound(SOUND_HOLE_INTRO, HOLE_INTRO_SOUND_CHANNEL,
-                HOLE_INTRO_SOUND_VOLUME);
+      PlaySound(
+          SOUND_HOLE_INTRO, HOLE_INTRO_SOUND_CHANNEL, HOLE_INTRO_SOUND_VOLUME);
     }
     if (f_IntroFrame == LATER_HOLE_INTRO_FRAMES) {
       return TRUE;

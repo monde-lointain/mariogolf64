@@ -179,8 +179,8 @@ Vtx f_SpreadingCircleVertices[] = {
     {{{7, 0, -7}, 0, {0, 0x1FFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 s32 f_AreEffectImagesLoaded = FALSE;
-f32 f_UnreferencedValues[] = {1,  2,  3,  10, 11, 12, 13,
-                              14, 20, 21, 22, 25, 30, 1};
+f32 f_UnreferencedValues[] = {
+    1, 2, 3, 10, 11, 12, 13, 14, 20, 21, 22, 25, 30, 1};
 u8 f_PingPongFrameIndices[] = {0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1};
 s32 f_RaindropCount = RAINDROP_COUNT;
 s32 f_RainSplashCount = RAIN_SPLASH_COUNT;
@@ -191,8 +191,8 @@ Vtx f_RainStreakVertices[] = {
     {{{48, 0, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
 };
 s32 f_Weather = WEATHER_NONE; /* A WEATHER_* value */
-Vec3 f_LastRainEye = {0.0f, 0.0f,
-                      0.0f}; /* The camera's eye on UpdateRain's last frame */
+Vec3 f_LastRainEye = {
+    0.0f, 0.0f, 0.0f}; /* The camera's eye on UpdateRain's last frame */
 s32 f_ShownBadgeCount = 0;
 s32 f_IsBadgeCountShown = FALSE;
 s32 f_BadgeCountFrame = 0;
@@ -371,7 +371,7 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
     /* The (f32) conversion is there to match */
     f_SpawnGroundHeight =
         (f32)GetGroundHeight(point[AXIS_X] * WORLD_TO_COURSE_SCALE,
-                             point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
+            point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
     for (index = 0; index != EFFECT_COUNT; index++) {
       effect = &f_Effects[index];
       if (effect->kind == EFFECT_KIND_NONE) {
@@ -431,30 +431,25 @@ void SpawnTear(u32 slotIndex, s32 pointId, f32 heading) {
     /* The (f32) conversion is there to match */
     f_SpawnGroundHeight =
         (f32)GetGroundHeight(point[AXIS_X] * WORLD_TO_COURSE_SCALE,
-                             point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
+            point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
     for (index = 0; index != EFFECT_COUNT; index++) {
       effect = &f_Effects[index];
       if (effect->kind == EFFECT_KIND_NONE) {
-        effect->position[AXIS_X] =
-            point[AXIS_X] +
+        effect->position[AXIS_X] = point[AXIS_X] +
             (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) * TEAR_OFFSET_SCALE;
-        effect->position[AXIS_Y] =
-            point[AXIS_Y] +
+        effect->position[AXIS_Y] = point[AXIS_Y] +
             (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) * TEAR_OFFSET_SCALE;
-        effect->position[AXIS_Z] =
-            point[AXIS_Z] +
+        effect->position[AXIS_Z] = point[AXIS_Z] +
             (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) * TEAR_OFFSET_SCALE;
         /* Overwritten at once; the original has it */
         effect->velocity[AXIS_X] = 0;
         effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
-        effect->velocity[AXIS_X] =
-            cosf(heading) *
+        effect->velocity[AXIS_X] = cosf(heading) *
             (guRandom() % TEAR_SPEED_RANGE + TEAR_SPEED_RANGE * 0.4) / 1024.0;
         effect->velocity[AXIS_Y] =
             (-TEAR_SPEED_RANGE * 0.7 - guRandom() % TEAR_SPEED_RANGE * 0.3f) /
             1024.0;
-        effect->velocity[AXIS_Z] =
-            sinf(heading) *
+        effect->velocity[AXIS_Z] = sinf(heading) *
             (guRandom() % TEAR_SPEED_RANGE + TEAR_SPEED_RANGE * 0.4) / 1024.0;
         effect->position[AXIS_X] += effect->velocity[AXIS_X];
         effect->position[AXIS_Y] += effect->velocity[AXIS_Y];
@@ -490,19 +485,19 @@ void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
     /* The (f32) conversion is there to match */
     f_SpawnGroundHeight =
         (f32)GetGroundHeight(point[AXIS_X] * WORLD_TO_COURSE_SCALE,
-                             point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
+            point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
     for (index = 0; index != EFFECT_COUNT; index++) {
       effect = &f_Effects[index];
       if (effect->kind == EFFECT_KIND_NONE) {
-        effect->position[AXIS_X] =
-            point[AXIS_X] + (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
-                                COURSE_TO_WORLD_SCALE;
-        effect->position[AXIS_Y] =
-            point[AXIS_Y] + (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
-                                COURSE_TO_WORLD_SCALE;
-        effect->position[AXIS_Z] =
-            point[AXIS_Z] + (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
-                                COURSE_TO_WORLD_SCALE;
+        effect->position[AXIS_X] = point[AXIS_X] +
+            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
+                COURSE_TO_WORLD_SCALE;
+        effect->position[AXIS_Y] = point[AXIS_Y] +
+            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
+                COURSE_TO_WORLD_SCALE;
+        effect->position[AXIS_Z] = point[AXIS_Z] +
+            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
+                COURSE_TO_WORLD_SCALE;
         effect->velocity[AXIS_X] = 0;
         effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
         effect->velocity[AXIS_Z] = 0;
@@ -702,9 +697,8 @@ void SpawnImpactEffects(BallSimulation* simulation) {
   s32 color;
   Effect* effect;
 
-  color =
-      BlendSurfaceMapColor(simulation->position[AXIS_X],
-                           simulation->position[AXIS_Z], simulation->surface);
+  color = BlendSurfaceMapColor(simulation->position[AXIS_X],
+      simulation->position[AXIS_Z], simulation->surface);
   puffNumber = 1;
   switch (GetSurfaceInfo(simulation->surface)->kind) {
     case SURFACE_KIND_FAIRWAY:
@@ -931,10 +925,10 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
         speed = launchSpeed;
         if (kind == EFFECT_KIND_UNK2) {
           speed = (RandomBelow(spawnedCount * 2) + DEBRIS_SLOWEST_STEP_COUNT) *
-                  DEBRIS_SPEED_STEP;
+              DEBRIS_SPEED_STEP;
         } else {
           speed = (RandomBelow(spawnedCount * 3) + DEBRIS_SLOWEST_STEP_COUNT) *
-                  DEBRIS_SPEED_STEP;
+              DEBRIS_SPEED_STEP;
         }
         effect->velocity[AXIS_X] = cosYaw * speed * DEBRIS_OUTWARD_SCALE;
         effect->velocity[AXIS_Y] =
@@ -977,7 +971,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
         effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         speed = (RandomBelow(spawnedCount * 3) + DEBRIS_SLOWEST_STEP_COUNT) *
-                DEBRIS_SPEED_STEP;
+            DEBRIS_SPEED_STEP;
         effect->velocity[AXIS_X] = cosYaw * speed * DEBRIS_OUTWARD_SCALE;
         effect->velocity[AXIS_Y] =
             sinPitch * speed * (0.15f * COURSE_TO_WORLD_SCALE);
@@ -1001,8 +995,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
   nextIndex = 0;
   dropCount = 0;
   groundColor = BlendSurfaceMapColor(g_CurrentShot.ballPosition[AXIS_X],
-                                     g_CurrentShot.ballPosition[AXIS_Z],
-                                     g_CurrentShot.surface);
+      g_CurrentShot.ballPosition[AXIS_Z], g_CurrentShot.surface);
   sinPitch = sinf(pitch);
   cosYaw = cosf(yaw);
   divotCount = 0;
@@ -1083,17 +1076,14 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
       headingIndex = g_CurrentShot.unk0 & (DROP_HEADING_COUNT - 1);
       speed = headingIndex * DROP_SPEED_STEP + DROP_SLOWEST_SPEED;
       heading = (f32)((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) +
-                (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) -
-                M_PI / 4;
+          (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) - M_PI / 4;
       effect->velocity[AXIS_X] = cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
       effect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
       if (f_ShotDebris.clubKind == CLUB_KIND_PUTTER) {
-        effect->velocity[AXIS_Y] =
-            -PUTTED_DROP_SLOWEST_RISE_SPEED -
+        effect->velocity[AXIS_Y] = -PUTTED_DROP_SLOWEST_RISE_SPEED -
             headingIndex * PUTTED_DROP_RISE_STEP * COURSE_TO_WORLD_SCALE;
       } else {
-        effect->velocity[AXIS_Y] =
-            -DROP_SLOWEST_RISE_SPEED -
+        effect->velocity[AXIS_Y] = -DROP_SLOWEST_RISE_SPEED -
             headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE;
       }
       effect->unk24 = 0.0f;
@@ -1131,8 +1121,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
       headingIndex = g_CurrentShot.unk0 & (DROP_HEADING_COUNT - 1);
       speed = headingIndex * DROP_SPEED_STEP + DROP_SLOWEST_SPEED;
       heading = (f32)((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) -
-                (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) +
-                M_PI / 4;
+          (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) + M_PI / 4;
       divotEffect->velocity[AXIS_X] =
           cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
       divotEffect->velocity[AXIS_Z] =
@@ -1141,8 +1130,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
       divotEffect->unk24 = 0;
       divotEffect->alphaStep = 0;
       divotEffect->alpha = 255.0f;
-      divotEffect->velocity[AXIS_Y] =
-          -DROP_SLOWEST_RISE_SPEED -
+      divotEffect->velocity[AXIS_Y] = -DROP_SLOWEST_RISE_SPEED -
           headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE;
       divotEffect->scale = debrisAmount * DIVOT_SCALE_PER_AMOUNT;
       if (divotEffect->scale < DIVOT_SMALLEST_SCALE) {
@@ -1251,7 +1239,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
  */
 #define IsPastSpawnGround(effect) \
   ((f32)f_SpawnGroundHeight <     \
-   (effect)->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)
+      (effect)->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)
 
 /*
  * Moves, fades, spins and animates every effect for a frame, and removes those
@@ -1321,7 +1309,7 @@ void UpdateEffects(void) {
         effect->velocity[AXIS_Y] *= LIGHT_EFFECT_VELOCITY_KEPT;
         effect->velocity[AXIS_Z] *= LIGHT_EFFECT_VELOCITY_KEPT;
       } else if (effect->kind == EFFECT_KIND_UNK0 ||
-                 effect->kind == EFFECT_KIND_UNK3) {
+          effect->kind == EFFECT_KIND_UNK3) {
         effect->velocity[AXIS_X] += windPushX;
         effect->velocity[AXIS_Y] += EFFECT_FALL_ACCELERATION;
         effect->velocity[AXIS_Z] += windPushZ;
@@ -1329,7 +1317,7 @@ void UpdateEffects(void) {
         effect->velocity[AXIS_Y] *= HIGH_DEBRIS_VELOCITY_KEPT;
         effect->velocity[AXIS_Z] *= HIGH_DEBRIS_VELOCITY_KEPT;
       } else if (effect->kind == EFFECT_KIND_RIPPLE ||
-                 effect->kind == EFFECT_KIND_SPREADING_CIRCLE) {
+          effect->kind == EFFECT_KIND_SPREADING_CIRCLE) {
         /* The empty branch is there to match */
       } else {
         effect->velocity[AXIS_Y] += OTHER_EFFECT_FALL_ACCELERATION;
@@ -1370,7 +1358,7 @@ void UpdateEffects(void) {
           effect->kind = EFFECT_KIND_NONE;
         }
       } else if (effect->kind == EFFECT_KIND_RISING_CLUMP ||
-                 effect->kind == EFFECT_KIND_UNKE) {
+          effect->kind == EFFECT_KIND_UNKE) {
         effect->unk3B = (effect->unk3B + 1) % CYCLING_FRAME_COUNT;
       } else {
         if (effect->velocity[AXIS_Y] < OTHER_EFFECT_FAST_RISE_SPEED) {
@@ -1383,8 +1371,9 @@ void UpdateEffects(void) {
         effect->unk3B =
             0; /* Overwrites the frame picked above; the original has it */
       }
-      if (IsPastSpawnGround(effect) && (effect->kind == EFFECT_KIND_DROP ||
-                                        effect->kind == EFFECT_KIND_DIVOT)) {
+      if (IsPastSpawnGround(effect) &&
+          (effect->kind == EFFECT_KIND_DROP ||
+              effect->kind == EFFECT_KIND_DIVOT)) {
         effect->position[AXIS_Y] =
             (f_SpawnGroundHeight + GROUNDED_EFFECT_DEPTH) *
             COURSE_TO_WORLD_SCALE;
@@ -1457,8 +1446,8 @@ void UpdateEffects(void) {
 
 void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color);
 void DrawEffectShadow(Gfx** displayListHead, Effect* effect);
-void DrawDrop(Gfx** displayListHead, CameraMatrices* matrices,
-              Effect* unusedEffect);
+void DrawDrop(
+    Gfx** displayListHead, CameraMatrices* matrices, Effect* unusedEffect);
 void DrawDivot(Gfx** displayListHead, Effect* effect);
 void DrawDivotMark(Gfx** displayListHead);
 void DrawRipple(Gfx** displayListHead, Effect* effect);
@@ -1502,13 +1491,13 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-                    PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+      PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTextureBlock_4b(
-      gfx++, TEXTURE_ADDRESS(f_RippleImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+  gDPLoadTextureBlock_4b(gfx++,
+      TEXTURE_ADDRESS(f_RippleImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
       RIPPLE_IMAGE_SIZE, RIPPLE_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP,
       G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   for (index = 0; index != EFFECT_COUNT; index++) {
@@ -1519,9 +1508,8 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   }
 
   gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(f_ArcImage + IMAGE_HEADER_SIZE),
-                         G_IM_FMT_I, ARC_IMAGE_SIZE, ARC_IMAGE_SIZE, 0,
-                         G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 6, 6,
-                         G_TX_NOLOD, G_TX_NOLOD);
+      G_IM_FMT_I, ARC_IMAGE_SIZE, ARC_IMAGE_SIZE, 0, G_TX_MIRROR | G_TX_WRAP,
+      G_TX_MIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
@@ -1581,7 +1569,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BILLBOARD_ALPHA_THRESHOLD);
   gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
-                    TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
+      TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
     if (effect->kind == EFFECT_KIND_UNK3 || effect->kind == EFFECT_KIND_UNK4) {
@@ -1596,7 +1584,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BILLBOARD_ALPHA_THRESHOLD);
   gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
-                    TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
+      TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
     if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
@@ -1609,7 +1597,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BILLBOARD_ALPHA_THRESHOLD);
   gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
-                    TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
+      TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
     if (effect->kind == EFFECT_KIND_UNKE) {
@@ -1618,8 +1606,8 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   }
 
   gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE, PRIMITIVE,
-                    0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
-                    PRIMITIVE, 0, TEXEL0, 0);
+      0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE, PRIMITIVE, 0,
+      TEXEL0, 0);
   color = SPARKLE_TINT;
   gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, SPARKLE_ALPHA_THRESHOLD);
@@ -1633,11 +1621,11 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-                    TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+      TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    TEXTURE_ADDRESS(f_DropletImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(
+      gfx++, 0, TEXTURE_ADDRESS(f_DropletImage + IMAGE_HEADER_SIZE));
   /* Reusing the sparkles' color for the tears is there to match */
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
@@ -1696,7 +1684,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
   s32 blue;
 
   if (ProjectPoint(effect->position[AXIS_X], effect->position[AXIS_Y],
-                   effect->position[AXIS_Z], &center) < EFFECT_NEAREST_DEPTH) {
+          effect->position[AXIS_Z], &center) < EFFECT_NEAREST_DEPTH) {
     halfSize = center.scaleX * effect->scale;
     /* Returning early here is there to match */
     if (effect->alpha == 0.0f) {
@@ -1711,8 +1699,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
       /* Texels per pixel, in s5.10 fixed point */
       textureStep = ((BILLBOARD_IMAGE_SIZE / 2) << 10) / halfSize;
       if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
-        gDPLoadTextureBlock(
-            gfx++,
+        gDPLoadTextureBlock(gfx++,
             TEXTURE_ADDRESS(f_ClumpImage + (frameOffset + IMAGE_HEADER_SIZE)),
             G_IM_FMT_I, G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE,
             0, G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
@@ -1731,8 +1718,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         if (frameOffset > STAR_LAST_FRAME * STAR_FRAME_SIZE) {
           frameOffset = STAR_LAST_FRAME * STAR_FRAME_SIZE;
         }
-        gDPLoadTextureBlock_4b(
-            gfx++,
+        gDPLoadTextureBlock_4b(gfx++,
             TEXTURE_ADDRESS(f_StarImage + (frameOffset + IMAGE_HEADER_SIZE)),
             G_IM_FMT_I, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0,
             G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
@@ -1744,20 +1730,18 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         } else {
           frameOffset = 2 * DROPLET_FRAME_SIZE;
         }
-        gDPLoadTextureBlock_4b(
-            gfx++,
-            TEXTURE_ADDRESS(f_DropletImage +
-                            (frameOffset + PALETTED_TEXELS_OFFSET)),
+        gDPLoadTextureBlock_4b(gfx++,
+            TEXTURE_ADDRESS(
+                f_DropletImage + (frameOffset + PALETTED_TEXELS_OFFSET)),
             G_IM_FMT_CI, DROPLET_IMAGE_SIZE, DROPLET_IMAGE_SIZE, 0, G_TX_MIRROR,
             G_TX_WRAP, 4, 0, 2, 2);
       } else if (effect->kind == EFFECT_KIND_UNKE) {
-        gDPLoadTextureBlock_4b(
-            gfx++, TEXTURE_ADDRESS(f_SpeckleImage + IMAGE_HEADER_SIZE),
-            G_IM_FMT_I, SPECKLE_IMAGE_SIZE, SPECKLE_IMAGE_SIZE, 0, G_TX_WRAP,
-            G_TX_WRAP, 6, 6, 1, 1);
+        gDPLoadTextureBlock_4b(gfx++,
+            TEXTURE_ADDRESS(f_SpeckleImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+            SPECKLE_IMAGE_SIZE, SPECKLE_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP, 6,
+            6, 1, 1);
       } else {
-        gDPLoadTextureBlock(
-            gfx++,
+        gDPLoadTextureBlock(gfx++,
             TEXTURE_ADDRESS(f_DebrisImage + (frameOffset + IMAGE_HEADER_SIZE)),
             G_IM_FMT_I, G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE,
             0, G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
@@ -1785,16 +1769,16 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
       gDPPipeSync(gfx++);
       /* Odd frames of a tear draw the droplet mirrored */
       if (effect->kind == EFFECT_KIND_TEAR) {
-        gSPScisTextureRectangle(
-            gfx++, (center.x - halfSize) << 2, (center.y - halfSize) << 2,
-            (center.x + halfSize) << 2, (center.y + halfSize) << 2,
-            G_TX_RENDERTILE, (effect->unk3B & 1) << TEAR_MIRROR_S_SHIFT, 0,
-            textureStep, textureStep);
+        gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2,
+            (center.y - halfSize) << 2, (center.x + halfSize) << 2,
+            (center.y + halfSize) << 2, G_TX_RENDERTILE,
+            (effect->unk3B & 1) << TEAR_MIRROR_S_SHIFT, 0, textureStep,
+            textureStep);
       } else {
-        gSPScisTextureRectangle(
-            gfx++, (center.x - halfSize) << 2, (center.y - halfSize) << 2,
-            (center.x + halfSize) << 2, (center.y + halfSize) << 2,
-            G_TX_RENDERTILE, 0, 0, textureStep, textureStep);
+        gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2,
+            (center.y - halfSize) << 2, (center.x + halfSize) << 2,
+            (center.y + halfSize) << 2, G_TX_RENDERTILE, 0, 0, textureStep,
+            textureStep);
       }
       gDPPipeSync(gfx++);
     }
@@ -1813,8 +1797,8 @@ void DrawEffectShadow(Gfx** displayListHead, Effect* effect) {
   f32 depth;
 
   depth = ProjectPoint(effect->position[AXIS_X],
-                       f_SpawnGroundHeight * COURSE_TO_WORLD_SCALE,
-                       effect->position[AXIS_Z], &shadow);
+      f_SpawnGroundHeight * COURSE_TO_WORLD_SCALE, effect->position[AXIS_Z],
+      &shadow);
   /* Nesting the tests is there to match */
   if (depth < EFFECT_NEAREST_DEPTH) {
     if (depth > SHADOW_FARTHEST_DEPTH) {
@@ -1825,8 +1809,8 @@ void DrawEffectShadow(Gfx** displayListHead, Effect* effect) {
       gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, SHADOW_ALPHA);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, (shadow.x - 1) << 2, (shadow.y - 1) << 2,
-                              (shadow.x + 1) << 2, (shadow.y + 1) << 2,
-                              G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+          (shadow.x + 1) << 2, (shadow.y + 1) << 2, G_TX_RENDERTILE, 0, 0,
+          1 << 10, 1 << 10);
       gDPPipeSync(gfx++);
     }
   }
@@ -1837,8 +1821,8 @@ void DrawEffectShadow(Gfx** displayListHead, Effect* effect) {
 #define DROP_GRAY 239
 
 /* Draws the drop that LaunchDrop placed, turned to face the camera */
-void DrawDrop(Gfx** displayListHead, CameraMatrices* matrices,
-              Effect* unusedEffect) {
+void DrawDrop(
+    Gfx** displayListHead, CameraMatrices* matrices, Effect* unusedEffect) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
@@ -1852,14 +1836,14 @@ void DrawDrop(Gfx** displayListHead, CameraMatrices* matrices,
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   /* The masks of 6 are wider than the image; the original has them */
   gDPLoadTextureBlock_4b(gfx++,
-                         TEXTURE_ADDRESS(f_DropImage + IMAGE_HEADER_SIZE),
-                         G_IM_FMT_I, DROP_IMAGE_SIZE, DROP_IMAGE_SIZE, 0,
-                         G_TX_CLAMP, G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+      TEXTURE_ADDRESS(f_DropImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+      DROP_IMAGE_SIZE, DROP_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP, 6, 6,
+      G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_DropMatrices[g_DrawBufferIndex]),
-            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->billboard),
-            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_UprightQuadVertices, 4, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -1890,14 +1874,14 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    TEXTURE_ADDRESS(f_DivotImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(
+      gfx++, 0, TEXTURE_ADDRESS(f_DivotImage + IMAGE_HEADER_SIZE));
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   if (ProjectPoint(effect->position[AXIS_X], effect->position[AXIS_Y],
-                   effect->position[AXIS_Z], &center) < EFFECT_NEAREST_DEPTH) {
+          effect->position[AXIS_Z], &center) < EFFECT_NEAREST_DEPTH) {
     halfSize = center.scaleX * effect->scale;
     if (halfSize > 0) {
       /* Texels per pixel, in s5.10 fixed point */
@@ -1913,18 +1897,17 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
       center.depth -= center.depthStep * DIVOT_DEPTH_BIAS;
       gDPSetPrimDepth(gfx++, center.depth, 0);
       spinStep = angle * DIVOT_SPIN_STEP_COUNT / (2 * M_PI);
-      gDPLoadTextureBlock_4b(
-          gfx++,
+      gDPLoadTextureBlock_4b(gfx++,
           TEXTURE_ADDRESS(f_DivotImage +
-                          (f_PingPongFrameIndices[spinStep] * DIVOT_FRAME_SIZE +
-                           PALETTED_TEXELS_OFFSET)),
+              (f_PingPongFrameIndices[spinStep] * DIVOT_FRAME_SIZE +
+                  PALETTED_TEXELS_OFFSET)),
           G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP,
           G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(
-          gfx++, (center.x - halfSize) << 2, (center.y - halfSize) << 2,
-          (center.x + halfSize) << 2, (center.y + halfSize) << 2,
-          G_TX_RENDERTILE, 0, 0, textureStep, textureStep);
+      gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2,
+          (center.y - halfSize) << 2, (center.x + halfSize) << 2,
+          (center.y + halfSize) << 2, G_TX_RENDERTILE, 0, 0, textureStep,
+          textureStep);
       gDPPipeSync(gfx++);
     }
   }
@@ -1944,19 +1927,18 @@ void DrawDivotMark(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    TEXTURE_ADDRESS(f_DivotImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(
+      gfx++, 0, TEXTURE_ADDRESS(f_DivotImage + IMAGE_HEADER_SIZE));
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   /* Grouping the frame's offset is there to match */
-  gDPLoadTextureBlock_4b(
-      gfx++,
-      TEXTURE_ADDRESS(f_DivotImage + (DIVOT_MARK_FRAME * DIVOT_FRAME_SIZE +
-                                      PALETTED_TEXELS_OFFSET)),
+  gDPLoadTextureBlock_4b(gfx++,
+      TEXTURE_ADDRESS(f_DivotImage +
+          (DIVOT_MARK_FRAME * DIVOT_FRAME_SIZE + PALETTED_TEXELS_OFFSET)),
       G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP,
       G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_DivotMarkMatrix),
-            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_SmallFlatQuadVertices, 4, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -1973,10 +1955,10 @@ void DrawRipple(Gfx** displayListHead, Effect* effect) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY,
-                  (u32)effect->alpha);
+  gDPSetPrimColor(
+      gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY, (u32)effect->alpha);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_EffectMatrices[effect->matrixIndex]),
-            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_RippleVertices, 4, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -1990,10 +1972,10 @@ void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY,
-                  (u32)effect->alpha);
+  gDPSetPrimColor(
+      gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY, (u32)effect->alpha);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_EffectMatrices[effect->matrixIndex]),
-            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_SpreadingCircleVertices, 4, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -2012,7 +1994,7 @@ void StartPlayerRumble(UnkB8* player) {
     switch (nuContRmbCheck(g_PlayerControllerPorts[player->controllerIndex])) {
       case 0:
         nuContRmbStart(g_PlayerControllerPorts[player->controllerIndex],
-                       RUMBLE_FREQUENCY, RUMBLE_FRAME_COUNT);
+            RUMBLE_FREQUENCY, RUMBLE_FRAME_COUNT);
         break;
       /* The empty cases are there to match */
       case PFS_ERR_NOPACK:
@@ -2030,7 +2012,7 @@ void StartRingPassRumble(UnkB8* player) {
     switch (nuContRmbCheck(g_PlayerControllerPorts[player->controllerIndex])) {
       case 0:
         nuContRmbStart(g_PlayerControllerPorts[player->controllerIndex],
-                       RUMBLE_FREQUENCY, RUMBLE_FRAME_COUNT);
+            RUMBLE_FREQUENCY, RUMBLE_FRAME_COUNT);
         break;
       /* The empty cases are there to match */
       case PFS_ERR_NOPACK:
@@ -2125,8 +2107,8 @@ void ResetRaindrop(Raindrop* drop) {
       f_RainCenter[0];
   /* Course y points down */
   drop->head[AXIS_Y] = (-RAINDROP_LOWEST_RISE -
-                        rand() % RAIN_SPREAD_STEP_COUNT * RAIN_SPREAD_STEP) *
-                       COURSE_TO_WORLD_SCALE;
+                           rand() % RAIN_SPREAD_STEP_COUNT * RAIN_SPREAD_STEP) *
+      COURSE_TO_WORLD_SCALE;
   drop->head[AXIS_Z] =
       (rand() % RAIN_SPREAD_STEP_COUNT - RAIN_SPREAD_STEP_COUNT / 2) *
           RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
@@ -2151,16 +2133,16 @@ INCLUDE_ASM("asm/nonmatchings/effects", ResetRaindrop);
 /* Moves a splash to a random spot on the ground around the rain's center */
 void ResetRainSplash(RainSplash* splash) {
   splash->position[AXIS_X] = (rand() % RAIN_SPLASH_SPREAD_STEP_COUNT -
-                              RAIN_SPLASH_SPREAD_STEP_COUNT / 2) *
-                                 RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
-                             f_RainCenter[0];
+                                 RAIN_SPLASH_SPREAD_STEP_COUNT / 2) *
+          RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
+      f_RainCenter[0];
   splash->position[AXIS_Z] = (rand() % RAIN_SPLASH_SPREAD_STEP_COUNT -
-                              RAIN_SPLASH_SPREAD_STEP_COUNT / 2) *
-                                 RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
-                             f_RainCenter[1];
+                                 RAIN_SPLASH_SPREAD_STEP_COUNT / 2) *
+          RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
+      f_RainCenter[1];
   splash->position[AXIS_Y] =
       GetGroundHeight(splash->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
-                      splash->position[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
+          splash->position[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
       COURSE_TO_WORLD_SCALE;
   splash->column = 0;
 }
@@ -2224,7 +2206,7 @@ void UpdateRain(void) {
     SetSoundVolume(RAIN_SOUND_CHANNEL, g_RainSoundVolume);
     direction = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
     speed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT *
-            RAIN_DRIFT_PER_WIND_SPEED;
+        RAIN_DRIFT_PER_WIND_SPEED;
     f_RainDriftX = cosf(direction) * speed;
     f_RainDriftZ = sinf(direction) * speed;
     f_RainVelocity[AXIS_Y] = RAIN_FALL_SPEED;
@@ -2246,9 +2228,9 @@ void UpdateRain(void) {
     /* Indexing the drop each time is there to match */
     f_Raindrops[f_GroundCheckDropIndex].groundHeight =
         GetGroundHeight(f_Raindrops[f_GroundCheckDropIndex].head[AXIS_X] *
-                            WORLD_TO_COURSE_SCALE,
-                        f_Raindrops[f_GroundCheckDropIndex].head[AXIS_Z] *
-                            WORLD_TO_COURSE_SCALE) *
+                WORLD_TO_COURSE_SCALE,
+            f_Raindrops[f_GroundCheckDropIndex].head[AXIS_Z] *
+                WORLD_TO_COURSE_SCALE) *
         COURSE_TO_WORLD_SCALE;
     for (index = 0; index != f_RainSplashCount; index++) {
       splash = &f_RainSplashes[index];
@@ -2279,13 +2261,11 @@ void UpdateRain(void) {
         drop->tail[AXIS_Z] += f_RainVelocity[AXIS_Z] + cameraShift[AXIS_Z];
         if (drop->tail[AXIS_Y] > drop->groundHeight) {
           drop->landedFrameCount = 0;
-          drop->tail[AXIS_X] =
-              drop->head[AXIS_X] +
+          drop->tail[AXIS_X] = drop->head[AXIS_X] +
               (drop->groundHeight - drop->head[AXIS_Y]) * f_RainDriftX;
           drop->tail[AXIS_Y] =
               drop->head[AXIS_Y] + (drop->groundHeight - drop->head[AXIS_Y]);
-          drop->tail[AXIS_Z] =
-              drop->head[AXIS_Z] +
+          drop->tail[AXIS_Z] = drop->head[AXIS_Z] +
               (drop->groundHeight - drop->head[AXIS_Y]) * f_RainDriftZ;
         }
       } else {
@@ -2350,12 +2330,12 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
       f_Weather == WEATHER_RAIN
       /* Comparing with FALSE is there to match */
       && (g_Cameras[0].view.mode == CAMERA_MODE_UNK2 ||
-          g_Cameras[0].view.mode == CAMERA_MODE_UNK8) == FALSE) {
+             g_Cameras[0].view.mode == CAMERA_MODE_UNK8) == FALSE) {
     UpdateRain();
     for (index = 0; index != f_RaindropCount; index++) {
       drop = &f_Raindrops[index];
       if (ProjectPoint(drop->tail[AXIS_X], drop->tail[AXIS_Y],
-                       drop->tail[AXIS_Z], &point) < RAINDROP_NEAREST_DEPTH) {
+              drop->tail[AXIS_Z], &point) < RAINDROP_NEAREST_DEPTH) {
         drop->tailScreenX = point.x * QUARTER_PIXELS_PER_PIXEL;
         drop->tailScreenY = point.y * QUARTER_PIXELS_PER_PIXEL;
         /* Storing the depth before the flags is there to match */
@@ -2364,8 +2344,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
         drop->tailScale = point.scaleX;
         if (!(drop->flags & RAINDROP_HEAD_GROUNDED)) {
           if (ProjectPointToScreen(drop->head[AXIS_X], drop->head[AXIS_Y],
-                                   drop->head[AXIS_Z],
-                                   &point) < RAINDROP_NEAREST_DEPTH) {
+                  drop->head[AXIS_Z], &point) < RAINDROP_NEAREST_DEPTH) {
             drop->headScreenX = point.x * QUARTER_PIXELS_PER_PIXEL;
             drop->headScreenY = point.y * QUARTER_PIXELS_PER_PIXEL;
           } else {
@@ -2393,11 +2372,11 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_RainModelViewMatrix),
-              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_RainStreakVertices, ARRAY_COUNT(f_RainStreakVertices),
-              0);
+        G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPVertex(
+        gfx++, f_RainStreakVertices, ARRAY_COUNT(f_RainStreakVertices), 0);
     for (index = 0; index != f_RaindropCount; index++) {
       streak = &f_Raindrops[index];
       /* On screen, with the head still falling */
@@ -2415,18 +2394,18 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
           /* Scaling the lengths in place is there to match */
           lengthY *= widthScale;
           gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-                          ((streak->headScreenX + (s32)lengthY) << 16) +
-                              streak->headScreenY);
+              ((streak->headScreenX + (s32)lengthY) << 16) +
+                  streak->headScreenY);
           lengthX *= widthScale;
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-                          (streak->headScreenX << 16) +
-                              (streak->headScreenY + (s32)lengthX));
+              (streak->headScreenX << 16) +
+                  (streak->headScreenY + (s32)lengthX));
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-                          ((streak->tailScreenX + (s32)lengthY) << 16) +
-                              streak->tailScreenY);
+              ((streak->tailScreenX + (s32)lengthY) << 16) +
+                  streak->tailScreenY);
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-                          (streak->tailScreenX << 16) +
-                              (streak->tailScreenY + (s32)lengthX));
+              (streak->tailScreenX << 16) +
+                  (streak->tailScreenY + (s32)lengthX));
           gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
         }
       }
@@ -2439,19 +2418,19 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0,
-                      0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
+        0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
     gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, RAIN_ALPHA_THRESHOLD);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPLoadTextureBlock_4b(
-        gfx++, TEXTURE_ADDRESS(f_RainSplashImage + IMAGE_HEADER_SIZE),
-        G_IM_FMT_I, RAIN_SPLASH_IMAGE_WIDTH, RAIN_SPLASH_IMAGE_HEIGHT, 0,
+    gDPLoadTextureBlock_4b(gfx++,
+        TEXTURE_ADDRESS(f_RainSplashImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+        RAIN_SPLASH_IMAGE_WIDTH, RAIN_SPLASH_IMAGE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPSetPrimColor(gfx++, 0, 0, RAIN_SPLASH_GRAY, RAIN_SPLASH_GRAY,
-                    RAIN_SPLASH_GRAY, RAIN_SPLASH_ALPHA);
+        RAIN_SPLASH_GRAY, RAIN_SPLASH_ALPHA);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     for (index = 0; index != f_RaindropCount; index++) {
@@ -2467,8 +2446,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
             halfSize = RAIN_SPLASH_LARGEST_HALF_SIZE;
           }
           textureStep = ((RAIN_SPLASH_FRAME_SIZE * 2) << 10) / halfSize;
-          gSPScisTextureRectangle(
-              gfx++, landedDrop->tailScreenX - halfSize,
+          gSPScisTextureRectangle(gfx++, landedDrop->tailScreenX - halfSize,
               landedDrop->tailScreenY - halfSize,
               landedDrop->tailScreenX + halfSize,
               landedDrop->tailScreenY + halfSize, G_TX_RENDERTILE,
@@ -2482,17 +2460,16 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
     for (index = 0; index != f_RainSplashCount; index++) {
       splash = &f_RainSplashes[index];
       if (ProjectPointToScreen(splash->position[AXIS_X],
-                               splash->position[AXIS_Y],
-                               splash->position[AXIS_Z],
-                               &splashPoint) < RAIN_SPLASH_NEAREST_DEPTH) {
+              splash->position[AXIS_Y], splash->position[AXIS_Z],
+              &splashPoint) < RAIN_SPLASH_NEAREST_DEPTH) {
         splashSize = splashPoint.scaleX * RAIN_SPLASH_HALF_SIZE_PER_SCALE;
         if (splashSize >= RAIN_SPLASH_SMALLEST_HALF_SIZE) {
           if (splashSize > (f32)RAIN_SPLASH_LARGEST_HALF_SIZE) {
             splashSize = RAIN_SPLASH_LARGEST_HALF_SIZE;
           }
           splashStep = ((RAIN_SPLASH_FRAME_SIZE * 2) << 10) / splashSize;
-          gSPScisTextureRectangle(
-              gfx++, splashPoint.x * QUARTER_PIXELS_PER_PIXEL - splashSize,
+          gSPScisTextureRectangle(gfx++,
+              splashPoint.x * QUARTER_PIXELS_PER_PIXEL - splashSize,
               splashPoint.y * QUARTER_PIXELS_PER_PIXEL - splashSize,
               splashPoint.x * QUARTER_PIXELS_PER_PIXEL + splashSize,
               splashPoint.y * QUARTER_PIXELS_PER_PIXEL + splashSize,
@@ -2505,7 +2482,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
     }
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection),
-              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PIXEL);
@@ -2579,25 +2556,23 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
     }
     LoadSmallPalette(&gfx, 0, f_CloudImage + IMAGE_HEADER_SIZE);
     /* Grouping the frame's offset is there to match */
-    gDPLoadTextureTile_4b(
-        gfx++,
-        TEXTURE_ADDRESS(f_CloudImage + (spinFrame * BADGE_FRAME_SIZE +
-                                        PALETTED_TEXELS_OFFSET)),
+    gDPLoadTextureTile_4b(gfx++,
+        TEXTURE_ADDRESS(f_CloudImage +
+            (spinFrame * BADGE_FRAME_SIZE + PALETTED_TEXELS_OFFSET)),
         G_IM_FMT_CI, BADGE_SIZE, BADGE_SIZE, 0, 0, BADGE_SIZE - 1,
         BADGE_SIZE - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, BADGE_LEFT << 2, (offsetY + BADGE_RESTING_TOP) << 2,
-                    (BADGE_LEFT + BADGE_SIZE) << 2,
-                    (offsetY + BADGE_RESTING_TOP + BADGE_SIZE) << 2,
-                    G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        (BADGE_LEFT + BADGE_SIZE) << 2,
+        (offsetY + BADGE_RESTING_TOP + BADGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+        1 << 10, 1 << 10);
     LoadSmallPalette(&gfx, 0, f_ClumpImage + IMAGE_HEADER_SIZE);
     LoadNibbleTextureBlock(&gfx, f_ClumpImage + PALETTED_TEXELS_OFFSET,
-                           G_IM_FMT_CI, 16, COUNT_GLYPHS_HEIGHT, 0, 0, 0, 0, 0,
-                           0, 0);
-    DrawDigitText(&gfx, BADGE_LEFT + BADGE_SIZE, offsetY + BADGE_COUNT_TOP,
-                  "*");
+        G_IM_FMT_CI, 16, COUNT_GLYPHS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    DrawDigitText(
+        &gfx, BADGE_LEFT + BADGE_SIZE, offsetY + BADGE_COUNT_TOP, "*");
     sprintf(g_PrintBuffer, "%d", f_ShownBadgeCount);
-    DrawDigitText(&gfx, BADGE_COUNT_LEFT, offsetY + BADGE_COUNT_TOP,
-                  g_PrintBuffer);
+    DrawDigitText(
+        &gfx, BADGE_COUNT_LEFT, offsetY + BADGE_COUNT_TOP, g_PrintBuffer);
     f_BadgeCountFrame++;
     if (f_BadgeCountFrame == BADGE_COUNT_ADD_FRAME) {
       f_ShownBadgeCount++;

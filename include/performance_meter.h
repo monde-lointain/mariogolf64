@@ -14,7 +14,7 @@
 #define METER_READOUT_FREE_MEMORY (1 << 3)
 
 void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
-                          u32 cpuEndTime, s32 taskFlags, s32 readoutMode);
+    u32 cpuEndTime, s32 taskFlags, s32 readoutMode);
 void DrawMemoryMeter(u32 y, s32 taskFlags);
 
 #endif

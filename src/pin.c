@@ -160,24 +160,19 @@ void BuildPinShadow(void) {
 
   for (i = 0; i != PIN_SHADOW_ROW_COUNT; i++) {
     points[i * 2][AXIS_X] = sinf(heading) * i * PIN_SHADOW_ROW_SPACING +
-                            sinf(heading - M_PI / 2) *
-                                (PIN_SHADOW_ROW_COUNT - i) *
-                                PIN_SHADOW_WIDTH_STEP;
+        sinf(heading - M_PI / 2) * (PIN_SHADOW_ROW_COUNT - i) *
+            PIN_SHADOW_WIDTH_STEP;
     points[i * 2][AXIS_Z] = -cosf(heading) * i * PIN_SHADOW_ROW_SPACING -
-                            cosf(heading - M_PI / 2) *
-                                (PIN_SHADOW_ROW_COUNT - i) *
-                                PIN_SHADOW_WIDTH_STEP;
+        cosf(heading - M_PI / 2) * (PIN_SHADOW_ROW_COUNT - i) *
+            PIN_SHADOW_WIDTH_STEP;
     points[i * 2 + 1][AXIS_X] = sinf(heading) * i * PIN_SHADOW_ROW_SPACING +
-                                sinf(heading + M_PI / 2) *
-                                    (PIN_SHADOW_ROW_COUNT - i) *
-                                    PIN_SHADOW_WIDTH_STEP;
+        sinf(heading + M_PI / 2) * (PIN_SHADOW_ROW_COUNT - i) *
+            PIN_SHADOW_WIDTH_STEP;
     points[i * 2 + 1][AXIS_Z] = -cosf(heading) * i * PIN_SHADOW_ROW_SPACING -
-                                cosf(heading + M_PI / 2) *
-                                    (PIN_SHADOW_ROW_COUNT - i) *
-                                    PIN_SHADOW_WIDTH_STEP;
+        cosf(heading + M_PI / 2) * (PIN_SHADOW_ROW_COUNT - i) *
+            PIN_SHADOW_WIDTH_STEP;
     points[i * 2][AXIS_Y] =
-        GetGroundHeight(
-            D_800BA9D8.cupPosition[AXIS_X] + points[i * 2][AXIS_X],
+        GetGroundHeight(D_800BA9D8.cupPosition[AXIS_X] + points[i * 2][AXIS_X],
             D_800BA9D8.cupPosition[AXIS_Z] + points[i * 2][AXIS_Z]) -
         D_800BA9D8.cupPosition[AXIS_Y];
     points[i * 2 + 1][AXIS_Y] =
@@ -205,13 +200,13 @@ void DrawPinShadow(void) {
   s32 i;
 
   gDPSetCombineLERP(g_DisplayListHead++, 0, 0, 0, SHADE, SHADE, 0, TEXEL0, 0, 0,
-                    0, 0, SHADE, SHADE, 0, TEXEL0, 0);
+      0, 0, SHADE, SHADE, 0, TEXEL0, 0);
   gDPPipeSync(g_DisplayListHead++);
-  gSPVertex(g_DisplayListHead++, f_PinShadowVertices, PIN_SHADOW_VERTEX_COUNT,
-            0);
+  gSPVertex(
+      g_DisplayListHead++, f_PinShadowVertices, PIN_SHADOW_VERTEX_COUNT, 0);
   for (i = 0; i != PIN_SHADOW_ROW_COUNT - 1; i++) {
     gSP2Triangles(g_DisplayListHead++, i * 2, i * 2 + 2, i * 2 + 1, 0,
-                  i * 2 + 1, i * 2 + 2, i * 2 + 3, 0);
+        i * 2 + 1, i * 2 + 2, i * 2 + 3, 0);
   }
 }
 
@@ -245,9 +240,9 @@ void SetPinMatrix(s32 cameraIndex) {
   Vec3 scale;
   Mat4 matrix;
   f32 heading = atan2(D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE -
-                          g_Cameras[0].view.eye[AXIS_X],
-                      D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE -
-                          g_Cameras[0].view.eye[AXIS_Z]);
+          g_Cameras[0].view.eye[AXIS_X],
+      D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE -
+          g_Cameras[0].view.eye[AXIS_Z]);
 
   translation[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
   translation[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
@@ -327,14 +322,14 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
   gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
   gDPPipeSync(g_DisplayListHead++);
   offset[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE -
-                   view->eye[AXIS_X];
+      view->eye[AXIS_X];
   offset[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE -
-                   view->eye[AXIS_Y];
+      view->eye[AXIS_Y];
   offset[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE -
-                   view->eye[AXIS_Z];
-  cupHalfHeight =
-      sinf(atan2(offset[AXIS_Y], sqrtf(offset[AXIS_X] * offset[AXIS_X] +
-                                       offset[AXIS_Z] * offset[AXIS_Z]))) *
+      view->eye[AXIS_Z];
+  cupHalfHeight = sinf(atan2(offset[AXIS_Y],
+                      sqrtf(offset[AXIS_X] * offset[AXIS_X] +
+                          offset[AXIS_Z] * offset[AXIS_Z]))) *
       CUP_MAX_HALF_HEIGHT;
   if (cupHalfHeight < CUP_MIN_HALF_HEIGHT) {
     cupHalfHeight = CUP_MIN_HALF_HEIGHT;
@@ -370,8 +365,8 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       shadowScale[AXIS_Y] = PIN_SHADOW_SCALE;
       shadowScale[AXIS_Z] = PIN_SHADOW_SCALE;
     }
-    BuildTransformMatrix(shadowMatrix, shadowRotation, shadowTranslation,
-                         shadowScale);
+    BuildTransformMatrix(
+        shadowMatrix, shadowRotation, shadowTranslation, shadowScale);
     ConvertMatrixToFixed(shadowMatrix, &f_PinShadowMatrix);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
@@ -382,25 +377,25 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-    gDPLoadTextureBlock_4b(
-        g_DisplayListHead++, ((u32)f_PinShadowTexture + IMAGE_HEADER_SIZE) & ~7,
-        G_IM_FMT_I, PIN_SHADOW_TEXTURE_WIDTH, PIN_SHADOW_TEXTURE_HEIGHT, 0,
+    gDPLoadTextureBlock_4b(g_DisplayListHead++,
+        ((u32)f_PinShadowTexture + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+        PIN_SHADOW_TEXTURE_WIDTH, PIN_SHADOW_TEXTURE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&f_PinShadowMatrix),
-              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     DrawPinShadow();
     gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
     gDPPipeSync(g_DisplayListHead++);
   }
   ProjectPoint(D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-               (D_800BA9D8.cupPosition[AXIS_Y] - FLAGSTICK_HEIGHT) *
-                   COURSE_TO_WORLD_SCALE,
-               D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE, &top);
-  cupDepth = ProjectPoint(
-      D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-      D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-      D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE, &cup);
+      (D_800BA9D8.cupPosition[AXIS_Y] - FLAGSTICK_HEIGHT) *
+          COURSE_TO_WORLD_SCALE,
+      D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE, &top);
+  cupDepth =
+      ProjectPoint(D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+          D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+          D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE, &cup);
   ProjectPoint(
       (D_800BA9D8.cupPosition[AXIS_X] - footOffsetX) * COURSE_TO_WORLD_SCALE,
       D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
@@ -417,22 +412,22 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       primDepth = LARGE_CUP_PRIM_DEPTH;
     } else {
       primDepth = cup.depth -
-                  cup.depthStep * (f64)(g_PinVertexScale * CUP_DEPTH_HEIGHT) +
-                  CUP_DEPTH_OFFSET - PART_DEPTH_BIAS;
+          cup.depthStep * (f64)(g_PinVertexScale * CUP_DEPTH_HEIGHT) +
+          CUP_DEPTH_OFFSET - PART_DEPTH_BIAS;
     }
     gDPSetPrimDepth(g_DisplayListHead++, primDepth & PRIM_DEPTH_MASK, 0);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetDepthSource(g_DisplayListHead++, G_ZS_PRIM);
     gSPLoadGeometryMode(g_DisplayListHead++, 0);
     gSPSetGeometryMode(g_DisplayListHead++,
-                       G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+        G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
     gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(g_DisplayListHead++);
-    gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE,
-                     G_RM_AA_ZB_TEX_EDGE2);
+    gDPSetRenderMode(
+        g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
     gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIA, G_CC_MODULATEIA);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
@@ -443,8 +438,8 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
     gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x01);
     gSPMatrix(g_DisplayListHead++,
-              OS_K0_TO_PHYSICAL(&f_PinMatrices[cameraIndex][g_DrawBufferIndex]),
-              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        OS_K0_TO_PHYSICAL(&f_PinMatrices[cameraIndex][g_DrawBufferIndex]),
+        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     if (g_IsCupViewShown == 1) {
       gSPVertex(g_DisplayListHead++, f_LargePinVertices, PIN_VERTEX_COUNT, 0);
     } else {
@@ -452,25 +447,24 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     }
     if (cupDepth < SMALL_CUP_DEPTH) {
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                        ((u32)f_SmallCupTexture + IMAGE_HEADER_SIZE) & ~7);
+          ((u32)f_SmallCupTexture + IMAGE_HEADER_SIZE) & ~7);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
-      gDPLoadTextureBlock_4b(
-          g_DisplayListHead++,
+      gDPLoadTextureBlock_4b(g_DisplayListHead++,
           ((u32)f_SmallCupTexture + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
           SMALL_CUP_TEXTURE_SIZE, SMALL_CUP_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
           G_TX_NOLOD, G_TX_NOLOD);
-      gSPModifyVertex(g_DisplayListHead++, 1, G_MWO_POINT_ST,
-                      SMALL_CUP_TEXCOORDS(0, 4));
-      gSPModifyVertex(g_DisplayListHead++, 2, G_MWO_POINT_ST,
-                      SMALL_CUP_TEXCOORDS(8, 4));
-      gSPModifyVertex(g_DisplayListHead++, 3, G_MWO_POINT_ST,
-                      SMALL_CUP_TEXCOORDS(8, 0));
+      gSPModifyVertex(
+          g_DisplayListHead++, 1, G_MWO_POINT_ST, SMALL_CUP_TEXCOORDS(0, 4));
+      gSPModifyVertex(
+          g_DisplayListHead++, 2, G_MWO_POINT_ST, SMALL_CUP_TEXCOORDS(8, 4));
+      gSPModifyVertex(
+          g_DisplayListHead++, 3, G_MWO_POINT_ST, SMALL_CUP_TEXCOORDS(8, 0));
     } else {
-      gDPLoadTextureBlock(
-          g_DisplayListHead++, ((u32)f_CupTexture + IMAGE_HEADER_SIZE) & ~7,
-          G_IM_FMT_RGBA, G_IM_SIZ_16b, CUP_TEXTURE_WIDTH, CUP_TEXTURE_HEIGHT, 0,
+      gDPLoadTextureBlock(g_DisplayListHead++,
+          ((u32)f_CupTexture + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_RGBA,
+          G_IM_SIZ_16b, CUP_TEXTURE_WIDTH, CUP_TEXTURE_HEIGHT, 0,
           G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, 5, 6, G_TX_NOLOD,
           G_TX_NOLOD);
     }
@@ -481,28 +475,23 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       }
       if ((f32)(cupScreenScale * (CUP_SCREEN_RADIUS * g_PinVertexScale)) <
           SCREEN_CUP_MAX_SIZE) {
-        gSPModifyVertex(
-            g_DisplayListHead++, 0, G_MWO_POINT_XYSCREEN,
+        gSPModifyVertex(g_DisplayListHead++, 0, G_MWO_POINT_XYSCREEN,
             SCREEN_XY(cup.x + SCREEN_CUP_RIGHT, cup.y - cupHalfHeight));
-        gSPModifyVertex(
-            g_DisplayListHead++, 1, G_MWO_POINT_XYSCREEN,
+        gSPModifyVertex(g_DisplayListHead++, 1, G_MWO_POINT_XYSCREEN,
             SCREEN_XY(cup.x + SCREEN_CUP_RIGHT, cup.y + cupHalfHeight));
-        gSPModifyVertex(
-            g_DisplayListHead++, 2, G_MWO_POINT_XYSCREEN,
+        gSPModifyVertex(g_DisplayListHead++, 2, G_MWO_POINT_XYSCREEN,
             SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y + cupHalfHeight));
-        gSPModifyVertex(
-            g_DisplayListHead++, 3, G_MWO_POINT_XYSCREEN,
+        gSPModifyVertex(g_DisplayListHead++, 3, G_MWO_POINT_XYSCREEN,
             SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y - cupHalfHeight));
         gSPModifyVertex(g_DisplayListHead++, 4, G_MWO_POINT_XYSCREEN,
-                        SCREEN_XY(cup.x + SCREEN_CUP_RIGHT, cup.y));
+            SCREEN_XY(cup.x + SCREEN_CUP_RIGHT, cup.y));
         gSPModifyVertex(g_DisplayListHead++, 5, G_MWO_POINT_XYSCREEN,
-                        SCREEN_XY(cup.x + SCREEN_CUP_RIGHT,
-                                  cup.y + SCREEN_CUP_WALL_HEIGHT));
-        gSPModifyVertex(
-            g_DisplayListHead++, 6, G_MWO_POINT_XYSCREEN,
+            SCREEN_XY(
+                cup.x + SCREEN_CUP_RIGHT, cup.y + SCREEN_CUP_WALL_HEIGHT));
+        gSPModifyVertex(g_DisplayListHead++, 6, G_MWO_POINT_XYSCREEN,
             SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y + SCREEN_CUP_WALL_HEIGHT));
         gSPModifyVertex(g_DisplayListHead++, 7, G_MWO_POINT_XYSCREEN,
-                        SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y));
+            SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y));
       }
     }
     if (g_Cameras[cameraIndex].view.mode != CAMERA_MODE_UNK2) {
@@ -515,17 +504,16 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       primDepth = LARGE_CUP_WALL_PRIM_DEPTH;
     } else {
       primDepth = cup.depth -
-                  cup.depthStep * (CUP_WALL_DEPTH_HEIGHT * g_PinVertexScale) +
-                  CUP_WALL_DEPTH_OFFSET - PART_DEPTH_BIAS;
+          cup.depthStep * (CUP_WALL_DEPTH_HEIGHT * g_PinVertexScale) +
+          CUP_WALL_DEPTH_OFFSET - PART_DEPTH_BIAS;
       primDepth &= PRIM_DEPTH_MASK;
     }
     if (g_IsCupViewShown == 1) {
       gDPSetPrimDepth(g_DisplayListHead++, primDepth, 0);
       gDPSetCombineLERP(g_DisplayListHead++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1,
-                        0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
+          0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
       gDPPipeSync(g_DisplayListHead++);
-      gDPSetRenderMode(
-          g_DisplayListHead++,
+      gDPSetRenderMode(g_DisplayListHead++,
           GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
           G_RM_AA_ZB_TEX_EDGE2);
       gDPPipeSync(g_DisplayListHead++);
@@ -552,27 +540,25 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       }
       if ((f32)(stickScreenScale * FLAGSTICK_SCREEN_RADIUS) <
           SCREEN_FLAGSTICK_MAX_SIZE) {
-        gSPModifyVertex(
-            g_DisplayListHead++, 11, G_MWO_POINT_XYSCREEN,
+        gSPModifyVertex(g_DisplayListHead++, 11, G_MWO_POINT_XYSCREEN,
             (((top.x * SCREEN_SUBPIXEL_COUNT) - SCREEN_FLAGSTICK_HALF_WIDTH)
-             << 16) +
+                << 16) +
                 top.y * SCREEN_SUBPIXEL_COUNT);
         gSPModifyVertex(g_DisplayListHead++, 10, G_MWO_POINT_XYSCREEN,
-                        (((stickFoot.x * SCREEN_SUBPIXEL_COUNT) -
-                          SCREEN_FLAGSTICK_HALF_WIDTH)
-                         << 16) +
-                            (stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
-                                SCREEN_SUBPIXEL_COUNT);
+            (((stickFoot.x * SCREEN_SUBPIXEL_COUNT) -
+                 SCREEN_FLAGSTICK_HALF_WIDTH)
+                << 16) +
+                (stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
+                    SCREEN_SUBPIXEL_COUNT);
         gSPModifyVertex(g_DisplayListHead++, 9, G_MWO_POINT_XYSCREEN,
-                        (((stickFoot.x * SCREEN_SUBPIXEL_COUNT) +
-                          SCREEN_FLAGSTICK_HALF_WIDTH)
-                         << 16) +
-                            (stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
-                                SCREEN_SUBPIXEL_COUNT);
-        gSPModifyVertex(
-            g_DisplayListHead++, 8, G_MWO_POINT_XYSCREEN,
+            (((stickFoot.x * SCREEN_SUBPIXEL_COUNT) +
+                 SCREEN_FLAGSTICK_HALF_WIDTH)
+                << 16) +
+                (stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
+                    SCREEN_SUBPIXEL_COUNT);
+        gSPModifyVertex(g_DisplayListHead++, 8, G_MWO_POINT_XYSCREEN,
             (((top.x * SCREEN_SUBPIXEL_COUNT) + SCREEN_FLAGSTICK_HALF_WIDTH)
-             << 16) +
+                << 16) +
                 top.y * SCREEN_SUBPIXEL_COUNT);
       }
       if (g_IsCupViewShown == 1) {
@@ -580,19 +566,18 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       } else if (cupDepth < SMALL_CUP_DEPTH) {
         primDepth = cup.depth;
       } else {
-        primDepth =
-            cup.depth -
+        primDepth = cup.depth -
             cup.depthStep * (g_PinVertexScale * FLAGSTICK_DEPTH_HEIGHT) +
             FLAGSTICK_DEPTH_OFFSET - PART_DEPTH_BIAS;
       }
       if (cupDepth < FAR_FLAGSTICK_DEPTH) {
         gDPPipeSync(g_DisplayListHead++);
-        gDPSetRenderMode(g_DisplayListHead++, G_RM_ZB_OPA_SURF,
-                         G_RM_ZB_OPA_SURF2);
+        gDPSetRenderMode(
+            g_DisplayListHead++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
       } else {
         gDPPipeSync(g_DisplayListHead++);
-        gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_OPA_SURF,
-                         G_RM_AA_ZB_OPA_SURF2);
+        gDPSetRenderMode(
+            g_DisplayListHead++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
       }
       gDPPipeSync(g_DisplayListHead++);
       gDPSetPrimDepth(g_DisplayListHead++, primDepth & PRIM_DEPTH_MASK, 0);
@@ -608,9 +593,8 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                        ((u32)f_FlagstickTexture + IMAGE_HEADER_SIZE) & ~7);
-      gDPLoadTextureBlock_4b(
-          g_DisplayListHead++,
+          ((u32)f_FlagstickTexture + IMAGE_HEADER_SIZE) & ~7);
+      gDPLoadTextureBlock_4b(g_DisplayListHead++,
           ((u32)f_FlagstickTexture + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
           FLAGSTICK_TEXTURE_SIZE, FLAGSTICK_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 4,
@@ -634,9 +618,9 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
         f_FlagWavePhase += 2 * M_PI;
       }
       wave = ((g_HoleConditions.windSpeed / FLAG_WIND_SPEED_UNIT) *
-                  FLAG_WAVE_PER_WIND +
-              MIN_FLAG_WAVE) *
-             sinf(f_FlagWavePhase);
+                     FLAG_WAVE_PER_WIND +
+                 MIN_FLAG_WAVE) *
+          sinf(f_FlagWavePhase);
     } else {
       wave = 0.0f;
     }
@@ -660,11 +644,11 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
     gDPPipeSync(g_DisplayListHead++);
-    gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_OPA_SURF,
-                     G_RM_AA_ZB_OPA_SURF2);
+    gDPSetRenderMode(
+        g_DisplayListHead++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
     gSPMatrix(g_DisplayListHead++,
-              OS_K0_TO_PHYSICAL(&f_FlagMatrices[g_DrawBufferIndex]),
-              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        OS_K0_TO_PHYSICAL(&f_FlagMatrices[g_DrawBufferIndex]),
+        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     DrawHoleFlag(TRUE);
     gDPPipeSync(g_DisplayListHead++);
     gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);

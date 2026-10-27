@@ -91,8 +91,8 @@
  * distance. It returns the color, shifted by PAINTED_COLOR_SHIFT, with the
  * terrain code it painted.
  */
-typedef s32 (*PaintRoutine)(s32 code, s32 nearestCode, s32 nearestDistance,
-                            s32 x, s32 z);
+typedef s32 (*PaintRoutine)(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 
 #define PAINTED_COLOR_SHIFT 16
 
@@ -198,8 +198,8 @@ extern Vec3 g_MiniGolfScale;
 extern s32 f_HolePaintLogics[][COURSE_HOLE_COUNT];
 extern s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN];
 
-void BuildGroundTileDisplayList(s32 column, s32 row, Gfx** gfxCursor,
-                                Vtx** vertexCursor);
+void BuildGroundTileDisplayList(
+    s32 column, s32 row, Gfx** gfxCursor, Vtx** vertexCursor);
 
 void LoadCodeMap(char* path);
 void EncodeCodeMap(void);
@@ -354,8 +354,8 @@ void DrawBandHeights(s16* heights, s32 band) {
     s32 z;
 
     /* DrawHeightRow is a nested function, a GNU C extension. */
-    inline void DrawHeightRow(s32 longX, s32 longHeight, s32 shortX,
-                              s32 shortHeight, s32 texelRow) {
+    inline void DrawHeightRow(
+        s32 longX, s32 longHeight, s32 shortX, s32 shortHeight, s32 texelRow) {
       s32 fromX;
       s32 fromHeight;
       s32 toX;
@@ -431,8 +431,8 @@ void DrawBandHeights(s16* heights, s32 band) {
       longX = shortX = corners[0]->v.ob[0] << HEIGHT_FRACTION_BITS;
       longHeight = shortHeight = corners[0]->v.ob[1] << HEIGHT_FRACTION_BITS;
       for (z = 0; z < span + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
-        DrawHeightRow(longX, longHeight, shortX, shortHeight,
-                      corners[0]->v.ob[2] + z);
+        DrawHeightRow(
+            longX, longHeight, shortX, shortHeight, corners[0]->v.ob[2] + z);
         longX += longXStep;
         shortX += shortXStep;
         longHeight += longHeightStep;
@@ -446,9 +446,9 @@ void DrawBandHeights(s16* heights, s32 band) {
         cachedReciprocal = 1.0f / lowerSpan;
       }
       longX = ((s32)(longSlopeX * span) + corners[0]->v.ob[0])
-              << HEIGHT_FRACTION_BITS;
+          << HEIGHT_FRACTION_BITS;
       longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[1])
-                   << HEIGHT_FRACTION_BITS;
+          << HEIGHT_FRACTION_BITS;
       shortSlopeX =
           (corners[2]->v.ob[0] - corners[1]->v.ob[0]) * cachedReciprocal;
       shortSlopeHeight =
@@ -460,8 +460,8 @@ void DrawBandHeights(s16* heights, s32 band) {
       shortX = corners[1]->v.ob[0] << HEIGHT_FRACTION_BITS;
       shortHeight = corners[1]->v.ob[1] << HEIGHT_FRACTION_BITS;
       for (z = 0; z < lowerSpan + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
-        DrawHeightRow(longX, longHeight, shortX, shortHeight,
-                      corners[1]->v.ob[2] + z);
+        DrawHeightRow(
+            longX, longHeight, shortX, shortHeight, corners[1]->v.ob[2] + z);
         longX += longXStep;
         shortX += shortXStep;
         longHeight += longHeightStep;
@@ -476,11 +476,11 @@ void DrawBandHeights(s16* heights, s32 band) {
     ((u32*)heights)[1] = NO_HEIGHT_PAIR;
     fill = *(f64*)heights;
     for (column = 1; column < HEIGHT_BAND_ROW_COUNT * MAP_COLUMN_COUNT / 4;
-         column++) {
+        column++) {
       ((f64*)heights)[column] = fill;
     }
     for (row = band * GROUND_TILE_POINT_SPAN;
-         row < (band + 1) * GROUND_TILE_POINT_SPAN; row++) {
+        row < (band + 1) * GROUND_TILE_POINT_SPAN; row++) {
       for (column = 0; column < GROUND_POINT_COLUMN_COUNT - 1; column++) {
         corners[0] = GetGroundPoint(column, row);
         corners[1] = GetGroundPoint(column + 1, row);
@@ -559,7 +559,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ResetTerrainCodeCells);
  */
 #define IsGreenEdge(code, nearestCode, nearestDistance)       \
   ((code) == TERRAIN_CODE_GREEN && (code) != (nearestCode) && \
-   (nearestDistance) < 2)
+      (nearestDistance) < 2)
 
 /*
  * The paint logic of Toad Highlands, Koopa Park and Mario's Star. It returns
@@ -568,8 +568,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ResetTerrainCodeCells);
  * greens are striped, rough away from fairway and TERRAIN_CODE_UNK3 are
  * mottled with random colours, and greens are edged as green edge.
  */
-s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
-                    s32 z) {
+s32 PaintMainCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 random;
@@ -668,8 +668,8 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
  * and has no stack frame.
  */
 #ifdef NON_MATCHING
-s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
-                         s32 z) {
+s32 PaintPaleRoughCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 fairwayRandom;
@@ -772,8 +772,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintPaleRoughCourse);
  * colours, except that deep rough is painted as waste area and rough away
  * from fairway is mottled with other random colours
  */
-s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
-                      s32 z) {
+s32 PaintShyGuyDesert(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 random;
@@ -866,8 +866,8 @@ s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
 
 /* The paint logic of Boo Valley: PaintMainCourse with other bunker and
  * out-of-bounds colours */
-s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
-                   s32 z) {
+s32 PaintBooValley(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 random;
@@ -959,8 +959,8 @@ s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
 }
 
 /* The paint logic of Yoshi's Island: PaintMainCourse with other colours */
-s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
-                      s32 z) {
+s32 PaintYoshisIsland(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 random;
@@ -1055,8 +1055,8 @@ s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
  * PaintMainCourse with PaintFirstMiniGolfCourse's mottling of
  * TERRAIN_CODE_UNK3. Neither the paint-logic table nor any code refers to it.
  */
-s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
-                        s32 z) {
+s32 PaintUnlistedCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 random;
@@ -1154,8 +1154,8 @@ s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
  * random colours, and anything other than out of bounds is painted white as
  * out of bounds.
  */
-s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
-                             s32 x, s32 z) {
+s32 PaintFirstMiniGolfCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 isOtherNearest;
@@ -1203,8 +1203,8 @@ s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
  * PaintFirstMiniGolfCourse with other colours, except that greens are painted
  * as fairway
  */
-s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
-                              s32 x, s32 z) {
+s32 PaintSecondMiniGolfCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 isOtherNearest;
@@ -1252,8 +1252,8 @@ s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
  * PaintFirstMiniGolfCourse with other colours, except that greens are painted
  * as cart way and other terrain is painted red
  */
-s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
-                             s32 x, s32 z) {
+s32 PaintThirdMiniGolfCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 random;
@@ -1296,8 +1296,8 @@ s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
  * are striped, rough away from fairway and TERRAIN_CODE_UNK3 are mottled
  * with random colours, and greens are edged as green edge.
  */
-s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
-                      s32 z) {
+s32 PaintDrivingRange(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
   s32 random;
@@ -1379,12 +1379,11 @@ s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
 static inline u16* GetMapTexel(s32 column, s32 row) {
   /* tileRow is there to match */
   s32 tileRow = row >> MAP_TILE_SHIFT;
-  u16* texels =
-      (u16*)&g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
-                                   tileRow * GROUND_TILE_COLUMN_COUNT];
+  u16* texels = (u16*)&g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
+      tileRow * GROUND_TILE_COLUMN_COUNT];
 
   return &texels[(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN +
-                 (column & MAP_TILE_MASK)];
+      (column & MAP_TILE_MASK)];
 }
 
 /* Returns the map texel at a column and row, or 0 off the map */
@@ -1468,9 +1467,9 @@ void LoadCodeMap(char* path) {
     f_BuildCursor = f_BuildBuffer;
   }
   for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
-    for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_ROW_COUNT *
-                                          GROUND_TILE_TEXEL_ROW_LENGTH;
-         texelIndex++) {
+    for (texelIndex = 0;
+        texelIndex < GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH;
+        texelIndex++) {
       g_WorkArea.hole.tiles[tileIndex].texels[0][texelIndex] = 0;
     }
   }
@@ -1516,8 +1515,8 @@ static inline void SetCode(s32 column, s32 row, u8 code) {
  * code, if they are equal and it differs. The neighbours are a step away
  * each side.
  */
-static inline void FillCodeGap(s32 column, s32 row, s32 columnStep,
-                               s32 rowStep) {
+static inline void FillCodeGap(
+    s32 column, s32 row, s32 columnStep, s32 rowStep) {
   u8 code = GetCode(column, row);
   u8 previousCode = GetCode(column - columnStep, row - rowStep);
   /* The second read of the previous code is there to match */
@@ -1574,14 +1573,14 @@ void FinishCodeMapCleanup(void) {}
 /* The byte offset of a map texel's terrain code cell */
 static inline s32 GetCellOffset(u32 column, u32 row) {
   return (column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE +
-         (row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE;
+      (row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE;
 }
 
 /* The offset of a map texel's code in the packed codes */
 static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
   return (column % TERRAIN_CODE_CELL_SPAN) / 2 +
-         (row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2) +
-         block * TERRAIN_CODE_BLOCK_SIZE;
+      (row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2) +
+      block * TERRAIN_CODE_BLOCK_SIZE;
 }
 
 /*
@@ -1590,25 +1589,25 @@ static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
  */
 static inline s32 GetCellCodeOffset(s32 cell, u32 column, u32 row) {
   return (column % TERRAIN_CODE_CELL_SPAN) / 2 +
-         (row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2) +
-         (cell & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE;
+      (row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2) +
+      (cell & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE;
 }
 
 /*
  * Sets a map texel's code in a block of packed codes, two to a byte, with
  * the even column's code in the high bits
  */
-static inline void SetPackedTerrainCode(s32 block, u32 column, u32 row,
-                                        s32 code) {
+static inline void SetPackedTerrainCode(
+    s32 block, u32 column, u32 row, s32 code) {
   if (column & 1) {
     g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] =
         (g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] &
-         EVEN_COLUMN_CODE_MASK) |
+            EVEN_COLUMN_CODE_MASK) |
         code;
   } else {
     g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] =
         (g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] &
-         TERRAIN_CODE_MASK) |
+            TERRAIN_CODE_MASK) |
         (code << TERRAIN_CODE_BITS);
   }
 }
@@ -1654,12 +1653,12 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     if (column & 1) {
       g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
           (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] &
-           EVEN_COLUMN_CODE_MASK) |
+              EVEN_COLUMN_CODE_MASK) |
           code;
     } else {
       g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
           (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] &
-           TERRAIN_CODE_MASK) |
+              TERRAIN_CODE_MASK) |
           (code << TERRAIN_CODE_BITS);
     }
   }
@@ -1710,12 +1709,10 @@ void PaintGroundTiles(void) {
   }
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT;) {
-      texel =
-          &((u16*)&g_WorkArea.hole
-                .tiles[column / GROUND_TILE_TEXEL_SPAN +
-                       row / GROUND_TILE_TEXEL_SPAN *
-                           GROUND_TILE_COLUMN_COUNT])[(row & MAP_TILE_MASK) *
-                                                      GROUND_TILE_TEXEL_SPAN];
+      texel = &((u16*)&g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
+          row / GROUND_TILE_TEXEL_SPAN *
+              GROUND_TILE_COLUMN_COUNT])[(row & MAP_TILE_MASK) *
+          GROUND_TILE_TEXEL_SPAN];
       for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_SPAN; texelIndex++) {
         nearestCode = code = *nextCode++;
         nearestDistance = searchSpans[code];
@@ -1809,10 +1806,10 @@ f32 MeasureGroundTiles(void) {
       highest = -0x40000000;
       for (pointRow = 0; pointRow <= GROUND_TILE_POINT_SPAN; pointRow++) {
         for (pointColumn = 0; pointColumn <= GROUND_TILE_POINT_SPAN;
-             pointColumn++) {
+            pointColumn++) {
           point =
               GetGroundPoint(tileColumn * GROUND_TILE_POINT_SPAN + pointColumn,
-                             tileRow * GROUND_TILE_POINT_SPAN + pointRow);
+                  tileRow * GROUND_TILE_POINT_SPAN + pointRow);
           sumX += point->v.ob[0];
           sumY += point->v.ob[1];
           sumZ += point->v.ob[2];
@@ -2071,7 +2068,7 @@ void MoveRingsToEnd(void) {
   for (i = 0; i != HOLE_TRIANGLE_COUNT - RING_COUNT; i++) {
     if (g_WorkArea.hole.triangles[i].kind == HOLE_TRIANGLE_KIND_RING) {
       for (slot = HOLE_TRIANGLE_COUNT - RING_COUNT; slot != HOLE_TRIANGLE_COUNT;
-           slot++, i++) {
+          slot++, i++) {
         sprintf(g_PrintBuffer, "%d <-- %d", slot, i);
         PrintDebugText(g_PrintBuffer, 4, -141);
         g_WorkArea.hole.triangles[slot] = g_WorkArea.hole.triangles[i];
@@ -2606,9 +2603,9 @@ extern s8 f_ShadowlessTextures[];
 static inline u16* GetShadowedTexel(u32 column, u32 row) {
   return &g_WorkArea.hole
               .tiles[column / GROUND_TILE_TEXEL_SPAN +
-                     (row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT]
+                  (row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT]
               .texels[0][(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN +
-                         (column & MAP_TILE_MASK)];
+                  (column & MAP_TILE_MASK)];
 }
 
 /*
@@ -2692,8 +2689,8 @@ void CastBillboardShadows(void) {
         for (column = 0; column <= BILLBOARD_MASK_SIZE; column++) {
           solidityCells[(row << SOLIDITY_ROW_SHIFT) + column] =
               GetBillboardSolidity(g_Billboards[index].textureIndex,
-                                   column * (1.0f / BILLBOARD_MASK_SIZE),
-                                   row * (1.0f / BILLBOARD_MASK_SIZE));
+                  column * (1.0f / BILLBOARD_MASK_SIZE),
+                  row * (1.0f / BILLBOARD_MASK_SIZE));
         }
       }
       lastTextureIndex = g_Billboards[index].textureIndex;
@@ -2710,7 +2707,7 @@ void CastBillboardShadows(void) {
         cosf(lightPitch) * sinf(lightYaw) * SHADOW_LIGHT_DISTANCE + z;
     lightPoint[1] = sinf(lightPitch) * SHADOW_LIGHT_DISTANCE;
     guLookAtF(lightView, x, 0.0f, z, lightPoint[0], lightPoint[1],
-              lightPoint[2], 0.0f, -1.0f, 0.0f);
+        lightPoint[2], 0.0f, -1.0f, 0.0f);
     centerColumn = x / BILLBOARD_UNITS_PER_TEXEL;
     centerRow = z / BILLBOARD_UNITS_PER_TEXEL;
     lightView[0][0] *= BILLBOARD_UNITS_PER_TEXEL;
@@ -2758,21 +2755,20 @@ void CastBillboardShadows(void) {
         widthFraction = fabsf(viewX) * widthScale;
         if (widthFraction + fabsf(heightFraction * 2) < 1.0f) {
           litPercent = sqrtf(widthFraction * widthFraction +
-                             heightFraction * heightFraction * 4.0f) *
-                           LIT_PERCENT_AT_BASE +
-                       LIT_PERCENT_AT_BASE;
+                           heightFraction * heightFraction * 4.0f) *
+                  LIT_PERCENT_AT_BASE +
+              LIT_PERCENT_AT_BASE;
         }
         if (viewY >= 0.0f) {
           solidity = solidityCells[((s32)(heightFraction * BILLBOARD_MASK_SIZE)
-                                    << SOLIDITY_ROW_SHIFT) +
-                                   (s32)(widthFraction * BILLBOARD_MASK_SIZE)];
+                                       << SOLIDITY_ROW_SHIFT) +
+              (s32)(widthFraction * BILLBOARD_MASK_SIZE)];
           if (solidity != 0) {
-            nearness =
-                SHADOW_NEARNESS_LIMIT -
+            nearness = SHADOW_NEARNESS_LIMIT -
                 fabsf(lightView[0][2] * column + rowPoint[2]) * heightScale;
             if (nearness > SHADOW_NEARNESS_MIN) {
               solidLitPercent = LIT_PERCENT_FULL -
-                                solidity * nearness * SHADOW_SOLIDITY_SCALE;
+                  solidity * nearness * SHADOW_SOLIDITY_SCALE;
               if (solidLitPercent < litPercent) {
                 litPercent = solidLitPercent;
               }
@@ -2793,8 +2789,9 @@ void CastBillboardShadows(void) {
         if (brightness > SHADOW_BRIGHTNESS_MAX) {
           brightness = SHADOW_BRIGHTNESS_MAX;
         }
-        scale = SHADOW_SCALE_ONE - (LIT_PERCENT_FULL - litPercent) *
-                                       brightness * SHADOW_DARKENING_SCALE;
+        scale = SHADOW_SCALE_ONE -
+            (LIT_PERCENT_FULL - litPercent) * brightness *
+                SHADOW_DARKENING_SCALE;
         red = (red * scale) >> SHADOW_SCALE_FRACTION_BITS;
         green = (green * scale) >> SHADOW_SCALE_FRACTION_BITS;
         blue = (blue * scale) >> SHADOW_SCALE_FRACTION_BITS;
@@ -2847,7 +2844,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
   if (g_HoleConditions.sceneColorIndex == SCENE_COLOR_INDEX_UNK11) {
     keyIndexes[1] = keyIndexes[0] = g_HoleConditions.sceneColorIndex;
   } else if ((s32)g_HoleConditions.sceneColorIndex >=
-             SCENE_COLOR_INDEX_DRIVING_RANGE) {
+      SCENE_COLOR_INDEX_DRIVING_RANGE) {
     keyIndexes[0] = SCENE_COLOR_INDEX_DRIVING_RANGE;
     keyIndexes[1] = SCENE_COLOR_INDEX_ROUND_END;
   } else {
@@ -2895,7 +2892,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
     fraction = 0.0f;
   } else {
     fraction = (f32)((s32)g_HoleConditions.sceneColorIndex - keyIndexes[0]) /
-               (f32)(keyIndexes[1] - keyIndexes[0]);
+        (f32)(keyIndexes[1] - keyIndexes[0]);
   }
   light->red = InterpolateChannel(keyLights[0].red, keyLights[1].red, fraction);
   light->green =
@@ -3027,24 +3024,24 @@ void ShadeGroundTiles(void) {
       scale = LIGHT_SCALE_MAX;
     }
     slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                SLOPE_LIGHT_RED] = light.red * scale;
+        SLOPE_LIGHT_RED] = light.red * scale;
     slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                SLOPE_LIGHT_GREEN] = light.green * scale;
+        SLOPE_LIGHT_GREEN] = light.green * scale;
     slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                SLOPE_LIGHT_BLUE] = light.blue * scale;
+        SLOPE_LIGHT_BLUE] = light.blue * scale;
   }
   lightColumnOffset =
       cosf(g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS) *
       LIGHT_OFFSET_LENGTH;
   lightRowOffset = sinf(g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS) *
-                   LIGHT_OFFSET_LENGTH;
+      LIGHT_OFFSET_LENGTH;
   osSyncPrintf("LightXd%d Zd%d\n", lightColumnOffset, lightRowOffset);
   for (row = 1 - HEIGHT_BAND_ROW_COUNT; row < MAP_ROW_COUNT; row++) {
     bandRow = row + HEIGHT_BAND_LEAD;
     if (bandRow >= 0) {
       if (bandRow < MAP_ROW_COUNT && !(bandRow & MAP_TILE_MASK)) {
         DrawBandHeights(heightRows[bandRow & HEIGHT_BAND_ROW_COUNT],
-                        bandRow / HEIGHT_BAND_ROW_COUNT);
+            bandRow / HEIGHT_BAND_ROW_COUNT);
       }
     }
     if (row < 0) {
@@ -3058,7 +3055,7 @@ void ShadeGroundTiles(void) {
       texel =
           &g_WorkArea.hole
                .tiles[column / GROUND_TILE_TEXEL_SPAN +
-                      (row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT]
+                   (row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT]
                .texels[0][(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
       /* The offset heights can be off the map only in the edge tiles */
       isMapEdge =
@@ -3095,60 +3092,60 @@ void ShadeGroundTiles(void) {
         }
         texelColor = *texel;
         if (*heights < 0) {
-          color =
-              ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
-               slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                           SLOPE_LIGHT_RED]) >>
+          color = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
+                      slopeLights[(slope - LIGHT_SLOPE_MIN) *
+                              SLOPE_LIGHT_WORD_COUNT +
+                          SLOPE_LIGHT_RED]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
           if (color > TEXEL_CHANNEL_MAX) {
             color = TEXEL_CHANNEL_MAX;
           }
           color <<= TEXEL_RED_SHIFT;
-          channel =
-              ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
-               slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                           SLOPE_LIGHT_GREEN]) >>
+          channel = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
+                        slopeLights[(slope - LIGHT_SLOPE_MIN) *
+                                SLOPE_LIGHT_WORD_COUNT +
+                            SLOPE_LIGHT_GREEN]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
-               TEXEL_GREEN_SHIFT);
+                  TEXEL_GREEN_SHIFT);
           if (channel > TEXEL_CHANNEL_MAX) {
             channel = TEXEL_CHANNEL_MAX;
           }
           color |= channel << TEXEL_GREEN_SHIFT;
-          channel =
-              ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
-               slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                           SLOPE_LIGHT_BLUE]) >>
+          channel = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
+                        slopeLights[(slope - LIGHT_SLOPE_MIN) *
+                                SLOPE_LIGHT_WORD_COUNT +
+                            SLOPE_LIGHT_BLUE]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
-               TEXEL_BLUE_SHIFT);
+                  TEXEL_BLUE_SHIFT);
           if (channel > TEXEL_CHANNEL_MAX) {
             channel = TEXEL_CHANNEL_MAX;
           }
           color |= channel << TEXEL_BLUE_SHIFT;
           *texel = color | (texelColor & TEXEL_ALPHA_MASK);
         } else {
-          red =
-              ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
-               slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                           SLOPE_LIGHT_RED]) >>
+          red = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
+                    slopeLights[(slope - LIGHT_SLOPE_MIN) *
+                            SLOPE_LIGHT_WORD_COUNT +
+                        SLOPE_LIGHT_RED]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
           if ((shaded.red = red) > TEXEL_CHANNEL_MAX) {
             shaded.red = TEXEL_CHANNEL_MAX;
           }
-          green =
-              ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
-               slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                           SLOPE_LIGHT_GREEN]) >>
+          green = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
+                      slopeLights[(slope - LIGHT_SLOPE_MIN) *
+                              SLOPE_LIGHT_WORD_COUNT +
+                          SLOPE_LIGHT_GREEN]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
-               TEXEL_GREEN_SHIFT);
+                  TEXEL_GREEN_SHIFT);
           if ((shaded.green = green) > TEXEL_CHANNEL_MAX) {
             shaded.green = TEXEL_CHANNEL_MAX;
           }
-          blue =
-              ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
-               slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
-                           SLOPE_LIGHT_BLUE]) >>
+          blue = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
+                     slopeLights[(slope - LIGHT_SLOPE_MIN) *
+                             SLOPE_LIGHT_WORD_COUNT +
+                         SLOPE_LIGHT_BLUE]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
-               TEXEL_BLUE_SHIFT);
+                  TEXEL_BLUE_SHIFT);
           if ((shaded.blue = blue) > TEXEL_CHANNEL_MAX) {
             shaded.blue = TEXEL_CHANNEL_MAX;
           }
@@ -3198,9 +3195,10 @@ void ShadeGroundTiles(void) {
             }
             texelColor = fadedRed | fadedGreen | fadedBlue | shaded.alpha;
           } else {
-            texelColor = shaded.alpha | ((shaded.red << TEXEL_RED_SHIFT) |
-                                         (shaded.green << TEXEL_GREEN_SHIFT) |
-                                         (shaded.blue << TEXEL_BLUE_SHIFT));
+            texelColor = shaded.alpha |
+                ((shaded.red << TEXEL_RED_SHIFT) |
+                    (shaded.green << TEXEL_GREEN_SHIFT) |
+                    (shaded.blue << TEXEL_BLUE_SHIFT));
           }
           *texel = texelColor;
         }
@@ -3235,8 +3233,8 @@ void ShadeGround(void) {
  * tileRow, in either layout. Texels past a tile's last ones are in the next
  * tile; past the map's edges they repeat the edge texels.
  */
-static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn,
-                                s32 texelRow) {
+static inline u16 ReadTileTexel(
+    s32 tileColumn, s32 tileRow, s32 texelColumn, s32 texelRow) {
   s32 tileIndex;
   GroundTile* tile;
   u16* texel;
@@ -3262,12 +3260,11 @@ static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn,
   texelColumn = (texelColumn + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
   texelRow = (texelRow + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
   tile = &g_WorkArea.hole.tiles[tileIndex];
-  if (g_WorkArea.hole.tiles[tileIndex]
-          .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
-                 [GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
+  if (g_WorkArea.hole.tiles[tileIndex].texels[GROUND_TILE_TEXEL_ROW_COUNT -
+          1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
     texel = &tile->texels[0][(texelRow + TILE_BORDER_BEFORE) *
-                                 GROUND_TILE_TEXEL_ROW_LENGTH +
-                             texelColumn + TILE_BORDER_BEFORE];
+            GROUND_TILE_TEXEL_ROW_LENGTH +
+        texelColumn + TILE_BORDER_BEFORE];
   } else {
     texel = &tile->texels[0][texelRow * GROUND_TILE_TEXEL_SPAN + texelColumn];
   }
@@ -3298,10 +3295,10 @@ void ToggleGroundTileBorders(void) {
                                      [GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
     for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
       for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT;
-           tileColumn++) {
+          tileColumn++) {
         for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
           for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN;
-               texelColumn++) {
+              texelColumn++) {
             texels[0][texelRow * GROUND_TILE_TEXEL_SPAN + texelColumn] =
                 ReadTileTexel(tileColumn, tileRow, texelColumn, texelRow);
           }
@@ -3324,20 +3321,19 @@ void ToggleGroundTileBorders(void) {
               .texels[0];
       for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
         for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN;
-             texelColumn++) {
+            texelColumn++) {
           *texel++ = *tileTexel++;
         }
         texel += GROUND_TILE_TEXEL_ROW_LENGTH - GROUND_TILE_TEXEL_SPAN;
       }
       texel = texels[0];
       for (texelRow = -TILE_BORDER_BEFORE;
-           texelRow < GROUND_TILE_TEXEL_ROW_COUNT - TILE_BORDER_BEFORE;
-           texelRow++) {
+          texelRow < GROUND_TILE_TEXEL_ROW_COUNT - TILE_BORDER_BEFORE;
+          texelRow++) {
         for (texelColumn = -TILE_BORDER_BEFORE;
-             texelColumn < TILE_BORDER_END;) {
+            texelColumn < TILE_BORDER_END;) {
           *texel = ReadTileTexel(tileColumn + (texelColumn >> MAP_TILE_SHIFT),
-                                 tileRow + (texelRow >> MAP_TILE_SHIFT),
-                                 texelColumn, texelRow);
+              tileRow + (texelRow >> MAP_TILE_SHIFT), texelColumn, texelRow);
           /* Skips the texels already copied */
           if ((u32)texelRow < GROUND_TILE_TEXEL_SPAN &&
               texelColumn == -TILE_BORDER_BEFORE) {
@@ -3372,20 +3368,20 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ToggleGroundTileBorders);
  * Gives the vertices from start up to end texture coordinates on the
  * mini golf ground tile at column and row
  */
-void SetMiniGolfTileTextureCoords(s32 column, s32 row, Vtx_t* start,
-                                  Vtx_t* end) {
+void SetMiniGolfTileTextureCoords(
+    s32 column, s32 row, Vtx_t* start, Vtx_t* end) {
   Vtx_t* vertex;
   s32 coord;
 
   for (vertex = start; vertex < end; vertex++) {
     coord = ((vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X -
-              (column << TILE_ORIGIN_SHIFT))
-             << TEXTURE_COORD_FRACTION_BITS) +
-            TILE_TEXTURE_ORIGIN;
+                 (column << TILE_ORIGIN_SHIFT))
+                << TEXTURE_COORD_FRACTION_BITS) +
+        TILE_TEXTURE_ORIGIN;
     vertex->tc[0] = coord;
     /* The second coordinate's two steps are there to match */
     coord = vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z -
-            (row << TILE_ORIGIN_SHIFT);
+        (row << TILE_ORIGIN_SHIFT);
     coord = (coord << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
     vertex->tc[1] = coord;
   }
@@ -3405,8 +3401,8 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t* start, Vtx_t* end) {
   }
   for (vertex = start; vertex < end; vertex++) {
     coord = ((vertex->ob[AXIS_X] - (column << TILE_ORIGIN_SHIFT))
-             << TEXTURE_COORD_FRACTION_BITS) +
-            TILE_TEXTURE_ORIGIN;
+                << TEXTURE_COORD_FRACTION_BITS) +
+        TILE_TEXTURE_ORIGIN;
     vertex->tc[0] = coord;
     /* The second coordinate's two steps are there to match */
     coord = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
@@ -3432,8 +3428,8 @@ static inline void CopyVertices(Vtx* destination, Vtx* source, s32 count) {
  * Builds the display list and vertices of the ground tile at column and
  * row, at the cursors, and moves the cursors past them
  */
-void BuildGroundTileDisplayList(s32 column, s32 row, Gfx** gfxCursor,
-                                Vtx** vertexCursor) {
+void BuildGroundTileDisplayList(
+    s32 column, s32 row, Gfx** gfxCursor, Vtx** vertexCursor) {
   /*
    * Sets midpoint halfway between from and to, as SetVertexMidpoint does.
    * SetTileVertexMidpoint is a nested function, a GNU C extension.
@@ -3466,17 +3462,17 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx** gfxCursor,
           .midpoints[g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex];
   g_GroundTileDisplayLists[tileIndex] = gfx;
   gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-                     TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]));
+      TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]));
   gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0,
-             G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, 3,
-             G_TX_MIRROR | G_TX_WRAP, 6, 3);
+      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, 3, G_TX_MIRROR | G_TX_WRAP, 6,
+      3);
   gDPLoadSync(gfx++);
-  gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, GROUND_TEXTURE_LOAD_SIZE,
-               GROUND_TEXTURE_DXT);
+  gDPLoadBlock(
+      gfx++, G_TX_LOADTILE, 0, 0, GROUND_TEXTURE_LOAD_SIZE, GROUND_TEXTURE_DXT);
   gDPPipeSync(gfx++);
   gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TEXTURE_LINE_SIZE, 0, 1,
-             0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, 3,
-             G_TX_MIRROR | G_TX_WRAP, 6, 3);
+      0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, 3, G_TX_MIRROR | G_TX_WRAP, 6,
+      3);
   /* 33.5 by 32.5 texels, in 10.2 fixed point */
   gDPSetTileSize(gfx++, 1, 0, 0, 0x86, 0x82);
   coarseOffsets = g_CoarseVertexOffsets[tileIndex];
@@ -3492,39 +3488,31 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx** gfxCursor,
   gSPVertex(gfx++, SegmentedVertex(1, &midpoints[0]), 2, 12);
   coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)midpoints;
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
-                        &GetGridVertex(column * 2 + 1, row * 2)->v,
-                        &vertex++->v);
+      &GetGridVertex(column * 2 + 1, row * 2)->v, &vertex++->v);
   SetTileVertexMidpoint(&GetGridVertex(column * 2 + 1, row * 2)->v,
-                        &GetGridVertex(column * 2 + 2, row * 2)->v,
-                        &vertex++->v);
+      &GetGridVertex(column * 2 + 2, row * 2)->v, &vertex++->v);
   gSPVertex(gfx++, SegmentedVertex(2, &midpoints[2]), 1, 14);
   gSPVertex(gfx++, SegmentedVertex(2, &midpoints[4]), 1, 15);
   gSPVertex(gfx++, SegmentedVertex(3, &midpoints[3]), 1, 16);
   gSPVertex(gfx++, SegmentedVertex(3, &midpoints[5]), 1, 17);
   coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 2);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
-                        &GetGridVertex(column * 2, row * 2 + 1)->v,
-                        &vertex[0].v);
+      &GetGridVertex(column * 2, row * 2 + 1)->v, &vertex[0].v);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 1)->v,
-                        &GetGridVertex(column * 2, row * 2 + 2)->v,
-                        &vertex[2].v);
+      &GetGridVertex(column * 2, row * 2 + 2)->v, &vertex[2].v);
   vertex++;
   coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 3);
   SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2)->v,
-                        &GetGridVertex(column * 2 + 2, row * 2 + 1)->v,
-                        &vertex[0].v);
+      &GetGridVertex(column * 2 + 2, row * 2 + 1)->v, &vertex[0].v);
   SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2 + 1)->v,
-                        &GetGridVertex(column * 2 + 2, row * 2 + 2)->v,
-                        &vertex[2].v);
+      &GetGridVertex(column * 2 + 2, row * 2 + 2)->v, &vertex[2].v);
   vertex += 3;
   gSPVertex(gfx++, SegmentedVertex(4, &midpoints[6]), 2, 18);
   coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 6);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 2)->v,
-                        &GetGridVertex(column * 2 + 1, row * 2 + 2)->v,
-                        &vertex++->v);
+      &GetGridVertex(column * 2 + 1, row * 2 + 2)->v, &vertex++->v);
   SetTileVertexMidpoint(&GetGridVertex(column * 2 + 1, row * 2 + 2)->v,
-                        &GetGridVertex(column * 2 + 2, row * 2 + 2)->v,
-                        &vertex++->v);
+      &GetGridVertex(column * 2 + 2, row * 2 + 2)->v, &vertex++->v);
 
   /* The grid vertices at the middles of the edges and at the center */
   CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2), 1);
@@ -3532,15 +3520,13 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx** gfxCursor,
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
-                        &GetGridVertex(column * 2 + 2, row * 2)->v,
-                        &vertex++->v);
+      &GetGridVertex(column * 2 + 2, row * 2)->v, &vertex++->v);
   CopyVertices(vertex, GetGridVertex(column * 2, row * 2 + 1), 1);
   gSPVertex(gfx++, SegmentedVertex(6, vertex), 1, 21);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
-                        &GetGridVertex(column * 2, row * 2 + 2)->v,
-                        &vertex++->v);
+      &GetGridVertex(column * 2, row * 2 + 2)->v, &vertex++->v);
   CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2 + 1), 1);
   gSPVertex(gfx++, vertex, 1, 22);
   vertex++;
@@ -3549,35 +3535,33 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx** gfxCursor,
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2)->v,
-                        &GetGridVertex(column * 2 + 2, row * 2 + 2)->v,
-                        &vertex++->v);
+      &GetGridVertex(column * 2 + 2, row * 2 + 2)->v, &vertex++->v);
   CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2 + 2), 1);
   gSPVertex(gfx++, SegmentedVertex(8, vertex), 1, 24);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 2)->v,
-                        &GetGridVertex(column * 2 + 2, row * 2 + 2)->v,
-                        &vertex++->v);
+      &GetGridVertex(column * 2 + 2, row * 2 + 2)->v, &vertex++->v);
 
   for (columnBlock = 0; columnBlock < TILE_POINT_SPAN - 1; columnBlock += 2) {
     for (rowBlock = 0; rowBlock < TILE_POINT_SPAN - 1; rowBlock += 2) {
       for (pointRow = rowBlock; pointRow < rowBlock + 2; pointRow++) {
         for (pointColumn = columnBlock; pointColumn < columnBlock + 2;
-             pointColumn++) {
+            pointColumn++) {
           gSP2Triangles(gfx++, f_TileVertexSlots[pointRow][pointColumn],
-                        f_TileVertexSlots[pointRow][pointColumn + 1],
-                        f_TileVertexSlots[pointRow + 1][pointColumn], 0,
-                        f_TileVertexSlots[pointRow][pointColumn + 1],
-                        f_TileVertexSlots[pointRow + 1][pointColumn + 1],
-                        f_TileVertexSlots[pointRow + 1][pointColumn], 0);
+              f_TileVertexSlots[pointRow][pointColumn + 1],
+              f_TileVertexSlots[pointRow + 1][pointColumn], 0,
+              f_TileVertexSlots[pointRow][pointColumn + 1],
+              f_TileVertexSlots[pointRow + 1][pointColumn + 1],
+              f_TileVertexSlots[pointRow + 1][pointColumn], 0);
         }
       }
     }
   }
   gSPEndDisplayList(gfx++);
   SetTileTextureCoords(column, row, &(*vertexCursor)->v, &vertex->v);
-  SetTileTextureCoords(column, row, &midpoints->v,
-                       &midpoints[TILE_MIDPOINT_COUNT].v);
+  SetTileTextureCoords(
+      column, row, &midpoints->v, &midpoints[TILE_MIDPOINT_COUNT].v);
   *gfxCursor = gfx;
   *vertexCursor = vertex;
 }

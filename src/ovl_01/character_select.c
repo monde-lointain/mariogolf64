@@ -213,8 +213,8 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
       break;
     }
   } while (g_CharacterGrid[row][column] < 0 &&
-           (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT &&
-            canChooseMarked == TRUE) == FALSE);
+      (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT &&
+          canChooseMarked == TRUE) == FALSE);
   memory->characterColumns[playerNumber] = column;
   memory->characterRows[playerNumber] = row;
   if (column != oldColumn || row != oldRow) {
@@ -289,9 +289,9 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
       }
     } else {
       column -= diagonal == STICK_DIAGONAL_UP_LEFT ||
-                diagonal == STICK_DIAGONAL_DOWN_LEFT;
+          diagonal == STICK_DIAGONAL_DOWN_LEFT;
       column += diagonal == STICK_DIAGONAL_UP_RIGHT ||
-                diagonal == STICK_DIAGONAL_DOWN_RIGHT;
+          diagonal == STICK_DIAGONAL_DOWN_RIGHT;
     }
     if (row < 0) {
       row = CHARACTER_GRID_ROW_COUNT - 1;
@@ -310,7 +310,7 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     }
     if (g_CharacterGrid[row][column] >= 0 ||
         (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT &&
-         canChooseMarked == TRUE)) {
+            canChooseMarked == TRUE)) {
       break;
     }
     /* After a blocked diagonal, try moving sideways only from where the cursor
@@ -362,8 +362,8 @@ s32 func_80209BE0_ovl_01(void) {
 
   func_8005AF74();
   anyStick = g_ControllerStates[3].stickX |
-             (g_ControllerStates[2].stickX |
-              (g_ControllerStates[0].stickX | g_ControllerStates[1].stickX));
+      (g_ControllerStates[2].stickX |
+          (g_ControllerStates[0].stickX | g_ControllerStates[1].stickX));
   stickX = D_8023BFD4_ovl_01 ^ anyStick;
   stickX &= anyStick;
   if (D_8023BFD4_ovl_01 == stickX) {
@@ -376,8 +376,8 @@ s32 func_80209BE0_ovl_01(void) {
     D_8023BFD4_ovl_01 = stickX;
   }
   anyStick = g_ControllerStates[3].stickY |
-             (g_ControllerStates[2].stickY |
-              (g_ControllerStates[0].stickY | g_ControllerStates[1].stickY));
+      (g_ControllerStates[2].stickY |
+          (g_ControllerStates[0].stickY | g_ControllerStates[1].stickY));
   stickY = D_8023BFD8_ovl_01 ^ anyStick;
   stickY &= anyStick;
   if (D_8023BFD8_ovl_01 == stickY) {
@@ -556,10 +556,10 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   } else {
     playerNumber = 1;
   }
-  column = *(s8*)((s32)&func_8005AF74()->characterColumns[1] +
-                  (s16)playerNumber - 1);
+  column = *(
+      s8*)((s32)&func_8005AF74()->characterColumns[1] + (s16)playerNumber - 1);
   slot = g_CharacterGrid[*(s8*)((s32)&func_8005AF74()->characterRows[1] +
-                                (s16)playerNumber - 1)][column];
+      (s16)playerNumber - 1)][column];
   if (slot < CHOOSABLE_MARK_LIMIT) {
     choiceIndex = slot + MARKED_CHARACTER_OFFSET;
   } else {
@@ -571,18 +571,18 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   SetTextColor(&gfx, 255, 255, 255);
   SetTextName(D_800C2A00[choiceIndex]);
   SetTextSlot(CHARACTER_NAME_X, CHARACTER_NAME_Y,
-              MESSAGE_FIRST_CHARACTER_NAME + choiceIndex, 1, 1,
-              TEXT_FLAG_CENTERED, 255, 255, 255, 255);
+      MESSAGE_FIRST_CHARACTER_NAME + choiceIndex, 1, 1, TEXT_FLAG_CENTERED, 255,
+      255, 255, 255);
   clubSet = *character;
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   sprintf(g_PrintBuffer, "%dY",
-          g_Clubs[clubSet * CLUB_SET_SIZE + CLUB_TYPE_DRIVER].distance);
+      g_Clubs[clubSet * CLUB_SET_SIZE + CLUB_TYPE_DRIVER].distance);
   DrawShadowedText(&gfx, DRIVE_DISTANCE_X, DRIVE_DISTANCE_Y, g_PrintBuffer);
   if (D_8022FF00_ovl_01 == FALSE) {
     if ((u8)isSinglePlayer == TRUE) {
       SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_CHARACTER, 1, 0, 1, 255,
-                  255, 255, 255);
+          255, 255, 255);
     } else {
       SetTextSlotValue(D_801B7070 + 1, 0, 0);
       /* The prompt names the player in the player's own colour */
@@ -599,7 +599,7 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
         SetTextPaletteColor(63, 255, 63, 0);
       }
       SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_PLAYER_CHARACTER, 1, 0, 1,
-                  255, 255, 255, 255);
+          255, 255, 255, 255);
     }
     D_8022FF00_ovl_01 = TRUE;
   }
@@ -664,32 +664,32 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
         facePalette = D_80105B78[(s16)slot];
         gDPLoadTLUT_pal256(gfx++, (u32)facePalette & ~7);
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        gDPLoadTextureBlock(
-            gfx++, (u32)faceImage & ~7, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE,
-            FACE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++, (u32)faceImage & ~7, G_IM_FMT_CI,
+            G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(
-            gfx++, (column * FACE_SPACING + FACE_GRID_LEFT) << 2,
+        gSPScisTextureRectangle(gfx++,
+            (column * FACE_SPACING + FACE_GRID_LEFT) << 2,
             (row * FACE_SPACING + FACE_GRID_TOP) << 2,
             (column * FACE_SPACING + FACE_GRID_LEFT + FACE_SIZE) << 2,
             (row * FACE_SPACING + FACE_GRID_TOP + FACE_SIZE) << 2,
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       } else if (isSinglePlayer == TRUE &&
-                 g_CharacterGrid[row][column] < HIDDEN_MARK_LIMIT) {
+          g_CharacterGrid[row][column] < HIDDEN_MARK_LIMIT) {
         faceImage = D_8012D430[(s16)slot + MARKED_CHARACTER_OFFSET];
         facePalette = D_80105B78[(s16)slot + MARKED_CHARACTER_OFFSET];
         gDPLoadTLUT_pal256(gfx++, (u32)facePalette & ~7);
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 10, 10, 10, 255);
-        gDPLoadTextureBlock(
-            gfx++, (u32)faceImage & ~7, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE,
-            FACE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++, (u32)faceImage & ~7, G_IM_FMT_CI,
+            G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(
-            gfx++, (column * FACE_SPACING + FACE_GRID_LEFT) << 2,
+        gSPScisTextureRectangle(gfx++,
+            (column * FACE_SPACING + FACE_GRID_LEFT) << 2,
             (row * FACE_SPACING + FACE_GRID_TOP) << 2,
             (column * FACE_SPACING + FACE_GRID_LEFT + FACE_SIZE) << 2,
             (row * FACE_SPACING + FACE_GRID_TOP + FACE_SIZE) << 2,
@@ -797,34 +797,32 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
   u8* labelImage;
 
   GetMenuImageBuffer();
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    ((u32)D_8023A568_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023A568_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock_4b(gfx++,
-                           ((u32)D_8023A568_ovl_01 + PALETTED_TEXELS_OFFSET +
-                            stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT / 2) &
-                               ~7,
-                           G_IM_FMT_CI, BOARD_WIDTH, BOARD_STRIP_HEIGHT, 0,
-                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        ((u32)D_8023A568_ovl_01 + PALETTED_TEXELS_OFFSET +
+            stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT / 2) &
+            ~7,
+        G_IM_FMT_CI, BOARD_WIDTH, BOARD_STRIP_HEIGHT, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = BOARD_TOP + stripIndex * BOARD_STRIP_HEIGHT;
-    gSPScisTextureRectangle(
-        gfx++, BOARD_LEFT << 2, stripTop << 2, (BOARD_LEFT + BOARD_WIDTH) << 2,
-        (stripTop + BOARD_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, BOARD_LEFT << 2, stripTop << 2,
+        (BOARD_LEFT + BOARD_WIDTH) << 2, (stripTop + BOARD_STRIP_HEIGHT) << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
   labelImage = GetMenuImageBuffer();
   labelImage += CHARACTER_SELECT_FIRST_IMAGE_SIZE;
   LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx, labelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-                         LABEL_IMAGE_WIDTH, LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0,
-                         0, 0);
+      LABEL_IMAGE_WIDTH, LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&gfx, LABEL_LEFT << 2, LABEL_TOP << 2,
-                  (LABEL_LEFT + LABEL_SHOWN_WIDTH) << 2,
-                  (LABEL_TOP + LABEL_IMAGE_HEIGHT) << 2, G_TX_RENDERTILE,
-                  LABEL_SHOWN_WIDTH << 5, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      (LABEL_LEFT + LABEL_SHOWN_WIDTH) << 2,
+      (LABEL_TOP + LABEL_IMAGE_HEIGHT) << 2, G_TX_RENDERTILE,
+      LABEL_SHOWN_WIDTH << 5, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 
@@ -871,8 +869,8 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    ((u32)D_8023A570_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023A570_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   if (g_MenuScreen == MENU_SCREEN_UNK24) {
     tagCount = 1;
   }
@@ -880,9 +878,9 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
     if (tagMode != PLAYER_TAG_LINED_UP) {
       shiftX = 0;
       left = D_8022FFCC_ovl_01[playerIndex][0] +
-             memory->characterColumns[playerIndex] * GRID_CELL_SIZE;
+          memory->characterColumns[playerIndex] * GRID_CELL_SIZE;
       top = D_8022FFCC_ovl_01[playerIndex][1] +
-            memory->characterRows[playerIndex] * GRID_CELL_SIZE;
+          memory->characterRows[playerIndex] * GRID_CELL_SIZE;
     } else {
       left = D_8022FFD4_ovl_01[tagCount - 1][playerIndex];
       top = ((playerIndex & 1) == 0) ? PLAYER_TAG_RAISE : 0;
@@ -892,42 +890,38 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
       shiftX = 0;
     }
     if ((tagMode == PLAYER_TAG_SINGLE_PLAYER) & (playerIndex == 1)) {
-      gDPLoadTextureBlock_4b(
-          gfx++,
-          PLAYER_TAG_TEXELS(PALETTED_TEXELS_OFFSET +
-                            PLAYER_TAG_COM * PLAYER_TAG_IMAGE_SIZE),
+      gDPLoadTextureBlock_4b(gfx++,
+          PLAYER_TAG_TEXELS(
+              PALETTED_TEXELS_OFFSET + PLAYER_TAG_COM * PLAYER_TAG_IMAGE_SIZE),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (D_800C1FF4[playerIndex] == NO_CONTROLLER_INDEX) {
-      gDPLoadTextureBlock_4b(
-          gfx++,
-          PLAYER_TAG_TEXELS(playerIndex * PLAYER_TAG_IMAGE_SIZE +
-                            COMPUTER_TAG_TEXELS_OFFSET),
+      gDPLoadTextureBlock_4b(gfx++,
+          PLAYER_TAG_TEXELS(
+              playerIndex * PLAYER_TAG_IMAGE_SIZE + COMPUTER_TAG_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (D_8022FF07_ovl_01 == TRUE && playerIndex == D_801B7070) {
-      gDPLoadTextureBlock_4b(
-          gfx++,
-          PLAYER_TAG_TEXELS(playerIndex * PLAYER_TAG_IMAGE_SIZE +
-                            COMPUTER_TAG_TEXELS_OFFSET),
+      gDPLoadTextureBlock_4b(gfx++,
+          PLAYER_TAG_TEXELS(
+              playerIndex * PLAYER_TAG_IMAGE_SIZE + COMPUTER_TAG_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
-      gDPLoadTextureBlock_4b(
-          gfx++,
-          PLAYER_TAG_TEXELS(playerIndex * PLAYER_TAG_IMAGE_SIZE +
-                            PALETTED_TEXELS_OFFSET),
+      gDPLoadTextureBlock_4b(gfx++,
+          PLAYER_TAG_TEXELS(
+              playerIndex * PLAYER_TAG_IMAGE_SIZE + PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     }
     left = shiftX + (s16)(left + GRID_LEFT);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, (left - PLAYER_TAG_SHIFT_LEFT) << 2, (top + PLAYER_TAG_TOP) << 2,
+    gSPScisTextureRectangle(gfx++, (left - PLAYER_TAG_SHIFT_LEFT) << 2,
+        (top + PLAYER_TAG_TOP) << 2,
         (left - PLAYER_TAG_SHIFT_LEFT + PLAYER_TAG_WIDTH) << 2,
         (top + PLAYER_TAG_TOP + PLAYER_TAG_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -939,9 +933,8 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
     playerIndex = D_801B7070;
   }
   cursorLeft = memory->characterColumns[playerIndex] * GRID_CELL_SIZE -
-               GRID_CURSOR_SHIFT_LEFT;
-  func_8020CD20_ovl_01(
-      &gfx, cursorLeft + GRID_LEFT,
+      GRID_CURSOR_SHIFT_LEFT;
+  func_8020CD20_ovl_01(&gfx, cursorLeft + GRID_LEFT,
       memory->characterRows[playerIndex] * GRID_CELL_SIZE + GRID_TOP);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
@@ -961,37 +954,37 @@ void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   s32 green;
 
   for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT;
-       vertexIndex++) {
+      vertexIndex++) {
     D_80230080_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
     red =
         (s32)(sinf(D_80230080_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
     blue = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + M_PI / 2) *
-                 MENU_CURSOR_COLOR_SWING) +
-           MENU_CURSOR_COLOR_MIDDLE;
+               MENU_CURSOR_COLOR_SWING) +
+        MENU_CURSOR_COLOR_MIDDLE;
     green = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + M_PI) *
-                  MENU_CURSOR_COLOR_SWING) +
-            MENU_CURSOR_COLOR_MIDDLE;
+                MENU_CURSOR_COLOR_SWING) +
+        MENU_CURSOR_COLOR_MIDDLE;
     D_80230038_ovl_01[vertexIndex].v.cn[0] = red;
     D_80230038_ovl_01[vertexIndex].v.cn[2] = blue;
     D_80230038_ovl_01[vertexIndex].v.cn[1] = green;
   }
   guOrtho(&D_8023A3A0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
-          -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
-          MENU_CURSOR_FAR, 1.0f);
+      -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
+      MENU_CURSOR_FAR, 1.0f);
   guTranslate(&D_8023A3E0_ovl_01[g_DrawBufferIndex],
-              (f32)(x - CHARACTER_CURSOR_ORIGIN_X) - HALF_PIXEL,
-              (f32)(CHARACTER_CURSOR_ORIGIN_Y - y) + HALF_PIXEL, MENU_CURSOR_Z);
+      (f32)(x - CHARACTER_CURSOR_ORIGIN_X) - HALF_PIXEL,
+      (f32)(CHARACTER_CURSOR_ORIGIN_Y - y) + HALF_PIXEL, MENU_CURSOR_Z);
   guRotate(&D_8023A460_ovl_01[g_DrawBufferIndex], 0.0f, 0.0f, 1.0f, 0.0f);
   guScale(&D_8023A4E0_ovl_01[g_DrawBufferIndex], 1.0f, 1.0f, 1.0f);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPLoadTextureBlock_4b(gfx++,
-                         ((u32)D_8023A574_ovl_01 + IMAGE_HEADER_SIZE) & ~7,
-                         G_IM_FMT_IA, MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      ((u32)D_8023A574_ovl_01 + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA,
+      MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1005,13 +998,13 @@ void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A3A0_ovl_01),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A3E0_ovl_01[g_DrawBufferIndex]),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A460_ovl_01[g_DrawBufferIndex]),
-            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A4E0_ovl_01[g_DrawBufferIndex]),
-            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
   gSPVertex(gfx++, D_80230038_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -1042,14 +1035,14 @@ void func_8020D338_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_801B69EC + IMAGE_HEADER_SIZE) & ~7);
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock_4b(gfx++, ((u32)D_801B69EC + PALETTED_TEXELS_OFFSET) & ~7,
-                         G_IM_FMT_CI, BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      G_IM_FMT_CI, BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, COMPUTER_ICON_LEFT << 2, BUTTON_ICON_TOP << 2,
-                      (COMPUTER_ICON_LEFT + BUTTON_ICON_WIDTH) << 2,
-                      (BUTTON_ICON_TOP + BUTTON_ICON_HEIGHT) << 2,
-                      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      (COMPUTER_ICON_LEFT + BUTTON_ICON_WIDTH) << 2,
+      (BUTTON_ICON_TOP + BUTTON_ICON_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1073,17 +1066,16 @@ void func_8020D734_ovl_01(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_801B69EC + IMAGE_HEADER_SIZE) & ~7);
   gDPPipeSync(gfx++);
-  gDPLoadTextureBlock_4b(
-      gfx++,
+  gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_801B69EC + PALETTED_TEXELS_OFFSET + LEFTY_ICON_OFFSET) & ~7,
       G_IM_FMT_CI, BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, LEFTY_ICON_LEFT << 2, BUTTON_ICON_TOP << 2,
-                      (LEFTY_ICON_LEFT + BUTTON_ICON_WIDTH) << 2,
-                      (BUTTON_ICON_TOP + BUTTON_ICON_HEIGHT) << 2,
-                      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      (LEFTY_ICON_LEFT + BUTTON_ICON_WIDTH) << 2,
+      (BUTTON_ICON_TOP + BUTTON_ICON_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1121,20 +1113,19 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal256(gfx++, ((u32)D_8023A584_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   for (cellIndex = firstCell; cellIndex != endCell; cellIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_8023A584_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-         cellIndex * CURVE_METER_CELL_SIZE * CURVE_METER_CELL_SIZE) &
+            cellIndex * CURVE_METER_CELL_SIZE * CURVE_METER_CELL_SIZE) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, CURVE_METER_CELL_SIZE, CURVE_METER_CELL_SIZE,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, (CURVE_METER_LEFT + cellIndex * CURVE_METER_CELL_SIZE) << 2,
+    gSPScisTextureRectangle(gfx++,
+        (CURVE_METER_LEFT + cellIndex * CURVE_METER_CELL_SIZE) << 2,
         CURVE_METER_TOP << 2,
         (CURVE_METER_LEFT + cellIndex * CURVE_METER_CELL_SIZE +
-         CURVE_METER_CELL_SIZE)
+            CURVE_METER_CELL_SIZE)
             << 2,
         (CURVE_METER_TOP + CURVE_METER_CELL_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1143,8 +1134,7 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
   labelImage = GetMenuImageBuffer();
   LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx, labelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-                         CURVE_LABEL_WIDTH, CURVE_LABEL_IMAGE_HEIGHT, 0, 0, 0,
-                         0, 0, 0, 0);
+      CURVE_LABEL_WIDTH, CURVE_LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   if (g_Clubs[clubSet * CLUB_SET_SIZE].curve > 0) {
     labelRow = CURVE_LABEL_DRAW;
   } else if (g_Clubs[clubSet * CLUB_SET_SIZE].curve < 0) {
@@ -1153,10 +1143,9 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
     labelRow = CURVE_LABEL_STRAIGHT;
   }
   DrawTextureRect(&gfx, CURVE_LABEL_LEFT << 2, CURVE_LABEL_TOP << 2,
-                  (CURVE_LABEL_LEFT + CURVE_LABEL_WIDTH) << 2,
-                  (CURVE_LABEL_TOP + CURVE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE,
-                  0, (labelRow * CURVE_LABEL_HEIGHT) << 5, TEXEL_STEP_ONE,
-                  TEXEL_STEP_ONE);
+      (CURVE_LABEL_LEFT + CURVE_LABEL_WIDTH) << 2,
+      (CURVE_LABEL_TOP + CURVE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+      (labelRow * CURVE_LABEL_HEIGHT) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 

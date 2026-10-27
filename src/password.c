@@ -41,47 +41,232 @@
  * are accepted because they look alike.
  */
 static char* f_PasswordAlphabet[PASSWORD_SYMBOL_COUNT] = {
-    "4", "6", "X", "Y", "17I", "2Z", "5S", "8B", "0OD", "VU",
-    "9", "A", "C", "E", "R",   "T",  "W",  "L",  "M",   "N",
-    "P", "J", "K", "Q", "3",   "F",  "G",  "H",
+    "4",
+    "6",
+    "X",
+    "Y",
+    "17I",
+    "2Z",
+    "5S",
+    "8B",
+    "0OD",
+    "VU",
+    "9",
+    "A",
+    "C",
+    "E",
+    "R",
+    "T",
+    "W",
+    "L",
+    "M",
+    "N",
+    "P",
+    "J",
+    "K",
+    "Q",
+    "3",
+    "F",
+    "G",
+    "H",
 };
 
 /* XORed with the tournament password's bytes */
 static u8 f_TournamentKey[] = "evi";
 
 static TournamentRules f_TournamentRules[TOURNAMENT_RULES_COUNT] = {
-    {-1, 0, 0}, {-1, 0, 1}, {-1, 0, 2}, {-1, 0, 3}, {-1, 0, 4},  {-1, 0, 5},
-    {-1, 0, 6}, {-1, 0, 7}, {-1, 0, 8}, {-1, 0, 9}, {-1, 0, 10}, {-1, 0, 11},
-    {-1, 1, 0}, {-1, 1, 1}, {-1, 1, 2}, {-1, 1, 3}, {-1, 1, 4},  {-1, 1, 5},
-    {-1, 1, 6}, {-1, 1, 7}, {-1, 1, 8}, {-1, 1, 9}, {-1, 1, 10}, {-1, 1, 11},
-    {0, 0, 0},  {0, 0, 1},  {0, 0, 2},  {0, 0, 3},  {0, 0, 4},   {0, 0, 5},
-    {0, 1, 0},  {0, 1, 1},  {0, 1, 2},  {0, 1, 3},  {0, 1, 4},   {0, 1, 5},
-    {1, 0, 0},  {1, 0, 1},  {1, 0, 2},  {1, 0, 3},  {1, 0, 4},   {1, 0, 5},
-    {1, 1, 0},  {1, 1, 1},  {1, 1, 2},  {1, 1, 3},  {1, 1, 4},   {1, 1, 5},
-    {2, 0, 0},  {2, 0, 1},  {2, 0, 2},  {2, 0, 3},  {2, 0, 4},   {2, 0, 5},
-    {2, 1, 0},  {2, 1, 1},  {2, 1, 2},  {2, 1, 3},  {2, 1, 4},   {2, 1, 5},
-    {3, 0, 0},  {3, 0, 1},  {3, 0, 2},  {3, 0, 3},  {3, 0, 4},   {3, 0, 5},
-    {3, 1, 0},  {3, 1, 1},  {3, 1, 2},  {3, 1, 3},  {3, 1, 4},   {3, 1, 5},
-    {4, 0, 0},  {4, 0, 1},  {4, 0, 2},  {4, 0, 3},  {4, 0, 4},   {4, 0, 5},
-    {4, 1, 0},  {4, 1, 1},  {4, 1, 2},  {4, 1, 3},  {4, 1, 4},   {4, 1, 5},
-    {5, 0, 0},  {5, 0, 1},  {5, 0, 2},  {5, 0, 3},  {5, 0, 4},   {5, 0, 5},
-    {5, 1, 0},  {5, 1, 1},  {5, 1, 2},  {5, 1, 3},  {5, 1, 4},   {5, 1, 5},
-    {6, 0, 0},  {6, 0, 1},  {6, 0, 2},  {6, 0, 3},  {6, 0, 4},   {6, 0, 5},
-    {6, 1, 0},  {6, 1, 1},  {6, 1, 2},  {6, 1, 3},  {6, 1, 4},   {6, 1, 5},
-    {7, 0, 0},  {7, 0, 1},  {7, 0, 2},  {7, 0, 3},  {7, 0, 4},   {7, 0, 5},
-    {7, 1, 0},  {7, 1, 1},  {7, 1, 2},  {7, 1, 3},  {7, 1, 4},   {7, 1, 5},
-    {8, 0, 0},  {8, 0, 1},  {8, 0, 2},  {8, 0, 3},  {8, 0, 4},   {8, 0, 5},
-    {8, 1, 0},  {8, 1, 1},  {8, 1, 2},  {8, 1, 3},  {8, 1, 4},   {8, 1, 5},
-    {9, 0, 0},  {9, 0, 1},  {9, 0, 2},  {9, 0, 3},  {9, 0, 4},   {9, 0, 5},
-    {9, 1, 0},  {9, 1, 1},  {9, 1, 2},  {9, 1, 3},  {9, 1, 4},   {9, 1, 5},
-    {10, 0, 0}, {10, 0, 1}, {10, 0, 2}, {10, 0, 3}, {10, 0, 4},  {10, 0, 5},
-    {10, 1, 0}, {10, 1, 1}, {10, 1, 2}, {10, 1, 3}, {10, 1, 4},  {10, 1, 5},
-    {11, 0, 0}, {11, 0, 1}, {11, 0, 2}, {11, 0, 3}, {11, 0, 4},  {11, 0, 5},
-    {11, 1, 0}, {11, 1, 1}, {11, 1, 2}, {11, 1, 3}, {11, 1, 4},  {11, 1, 5},
-    {12, 0, 0}, {12, 0, 1}, {12, 0, 2}, {12, 0, 3}, {12, 0, 4},  {12, 0, 5},
-    {12, 1, 0}, {12, 1, 1}, {12, 1, 2}, {12, 1, 3}, {12, 1, 4},  {12, 1, 5},
-    {13, 0, 0}, {13, 0, 1}, {13, 0, 2}, {13, 0, 3}, {13, 0, 4},  {13, 0, 5},
-    {13, 1, 0}, {13, 1, 1}, {13, 1, 2}, {13, 1, 3}, {13, 1, 4},  {13, 1, 5},
+    {-1, 0, 0},
+    {-1, 0, 1},
+    {-1, 0, 2},
+    {-1, 0, 3},
+    {-1, 0, 4},
+    {-1, 0, 5},
+    {-1, 0, 6},
+    {-1, 0, 7},
+    {-1, 0, 8},
+    {-1, 0, 9},
+    {-1, 0, 10},
+    {-1, 0, 11},
+    {-1, 1, 0},
+    {-1, 1, 1},
+    {-1, 1, 2},
+    {-1, 1, 3},
+    {-1, 1, 4},
+    {-1, 1, 5},
+    {-1, 1, 6},
+    {-1, 1, 7},
+    {-1, 1, 8},
+    {-1, 1, 9},
+    {-1, 1, 10},
+    {-1, 1, 11},
+    {0, 0, 0},
+    {0, 0, 1},
+    {0, 0, 2},
+    {0, 0, 3},
+    {0, 0, 4},
+    {0, 0, 5},
+    {0, 1, 0},
+    {0, 1, 1},
+    {0, 1, 2},
+    {0, 1, 3},
+    {0, 1, 4},
+    {0, 1, 5},
+    {1, 0, 0},
+    {1, 0, 1},
+    {1, 0, 2},
+    {1, 0, 3},
+    {1, 0, 4},
+    {1, 0, 5},
+    {1, 1, 0},
+    {1, 1, 1},
+    {1, 1, 2},
+    {1, 1, 3},
+    {1, 1, 4},
+    {1, 1, 5},
+    {2, 0, 0},
+    {2, 0, 1},
+    {2, 0, 2},
+    {2, 0, 3},
+    {2, 0, 4},
+    {2, 0, 5},
+    {2, 1, 0},
+    {2, 1, 1},
+    {2, 1, 2},
+    {2, 1, 3},
+    {2, 1, 4},
+    {2, 1, 5},
+    {3, 0, 0},
+    {3, 0, 1},
+    {3, 0, 2},
+    {3, 0, 3},
+    {3, 0, 4},
+    {3, 0, 5},
+    {3, 1, 0},
+    {3, 1, 1},
+    {3, 1, 2},
+    {3, 1, 3},
+    {3, 1, 4},
+    {3, 1, 5},
+    {4, 0, 0},
+    {4, 0, 1},
+    {4, 0, 2},
+    {4, 0, 3},
+    {4, 0, 4},
+    {4, 0, 5},
+    {4, 1, 0},
+    {4, 1, 1},
+    {4, 1, 2},
+    {4, 1, 3},
+    {4, 1, 4},
+    {4, 1, 5},
+    {5, 0, 0},
+    {5, 0, 1},
+    {5, 0, 2},
+    {5, 0, 3},
+    {5, 0, 4},
+    {5, 0, 5},
+    {5, 1, 0},
+    {5, 1, 1},
+    {5, 1, 2},
+    {5, 1, 3},
+    {5, 1, 4},
+    {5, 1, 5},
+    {6, 0, 0},
+    {6, 0, 1},
+    {6, 0, 2},
+    {6, 0, 3},
+    {6, 0, 4},
+    {6, 0, 5},
+    {6, 1, 0},
+    {6, 1, 1},
+    {6, 1, 2},
+    {6, 1, 3},
+    {6, 1, 4},
+    {6, 1, 5},
+    {7, 0, 0},
+    {7, 0, 1},
+    {7, 0, 2},
+    {7, 0, 3},
+    {7, 0, 4},
+    {7, 0, 5},
+    {7, 1, 0},
+    {7, 1, 1},
+    {7, 1, 2},
+    {7, 1, 3},
+    {7, 1, 4},
+    {7, 1, 5},
+    {8, 0, 0},
+    {8, 0, 1},
+    {8, 0, 2},
+    {8, 0, 3},
+    {8, 0, 4},
+    {8, 0, 5},
+    {8, 1, 0},
+    {8, 1, 1},
+    {8, 1, 2},
+    {8, 1, 3},
+    {8, 1, 4},
+    {8, 1, 5},
+    {9, 0, 0},
+    {9, 0, 1},
+    {9, 0, 2},
+    {9, 0, 3},
+    {9, 0, 4},
+    {9, 0, 5},
+    {9, 1, 0},
+    {9, 1, 1},
+    {9, 1, 2},
+    {9, 1, 3},
+    {9, 1, 4},
+    {9, 1, 5},
+    {10, 0, 0},
+    {10, 0, 1},
+    {10, 0, 2},
+    {10, 0, 3},
+    {10, 0, 4},
+    {10, 0, 5},
+    {10, 1, 0},
+    {10, 1, 1},
+    {10, 1, 2},
+    {10, 1, 3},
+    {10, 1, 4},
+    {10, 1, 5},
+    {11, 0, 0},
+    {11, 0, 1},
+    {11, 0, 2},
+    {11, 0, 3},
+    {11, 0, 4},
+    {11, 0, 5},
+    {11, 1, 0},
+    {11, 1, 1},
+    {11, 1, 2},
+    {11, 1, 3},
+    {11, 1, 4},
+    {11, 1, 5},
+    {12, 0, 0},
+    {12, 0, 1},
+    {12, 0, 2},
+    {12, 0, 3},
+    {12, 0, 4},
+    {12, 0, 5},
+    {12, 1, 0},
+    {12, 1, 1},
+    {12, 1, 2},
+    {12, 1, 3},
+    {12, 1, 4},
+    {12, 1, 5},
+    {13, 0, 0},
+    {13, 0, 1},
+    {13, 0, 2},
+    {13, 0, 3},
+    {13, 0, 4},
+    {13, 0, 5},
+    {13, 1, 0},
+    {13, 1, 1},
+    {13, 1, 2},
+    {13, 1, 3},
+    {13, 1, 4},
+    {13, 1, 5},
 };
 
 static u8 ReverseBits(u8 bits) {
@@ -103,12 +288,12 @@ static u8 ReverseBits(u8 bits) {
  * outside the alphabet. The caller passes a fourth argument that this
  * routine doesn't read.
  */
-s32 WritePasswordSymbols(u8* symbols, char* password, s32 symbolCount,
-                         s32 unused);
+s32 WritePasswordSymbols(
+    u8* symbols, char* password, s32 symbolCount, s32 unused);
 
 #ifdef NON_MATCHING
-s32 WritePasswordSymbols(u8* symbols, char* password, s32 symbolCount,
-                         s32 unused) {
+s32 WritePasswordSymbols(
+    u8* symbols, char* password, s32 symbolCount, s32 unused) {
   s32 i;
 
   for (i = 0; i < symbolCount; i++) {
@@ -137,7 +322,7 @@ static s32 ReadPasswordSymbols(u8* symbols, char* password, s32 symbolCount) {
       s32 isFound = FALSE;
 
       for (characterIndex = 0; characters[characterIndex] != '\0';
-           characterIndex++) {
+          characterIndex++) {
         if (characters[characterIndex] == password[i]) {
           isFound = TRUE;
           break;
@@ -226,7 +411,7 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
     clamped->gameBoyLevel = PASSWORD_GAME_BOY_LEVEL_LIMIT - 1;
   }
   number = (clamped->tournamentCode[0] << 16) |
-           (clamped->tournamentCode[1] << 8) | clamped->tournamentCode[2];
+      (clamped->tournamentCode[1] << 8) | clamped->tournamentCode[2];
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
     number /= PASSWORD_SYMBOL_COUNT;
@@ -237,8 +422,7 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
     symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
     number /= PASSWORD_SYMBOL_COUNT;
   }
-  number =
-      clamped->characterIndex * SCORE_RANGE + (s16)clamped->score +
+  number = clamped->characterIndex * SCORE_RANGE + (s16)clamped->score +
       (rand() % SCORE_NOISE_RANGE) * (PASSWORD_CHARACTER_COUNT * SCORE_RANGE) +
       SCORE_NUMBER_SALT;
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
@@ -247,15 +431,16 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
   }
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[i] = (symbols[i] + symbols[2 * NUMBER_SYMBOL_COUNT + i]) %
-                 PASSWORD_SYMBOL_COUNT;
-    symbols[NUMBER_SYMBOL_COUNT + i] = (symbols[NUMBER_SYMBOL_COUNT + i] +
-                                        symbols[2 * NUMBER_SYMBOL_COUNT + i]) %
-                                       PASSWORD_SYMBOL_COUNT;
+        PASSWORD_SYMBOL_COUNT;
+    symbols[NUMBER_SYMBOL_COUNT + i] =
+        (symbols[NUMBER_SYMBOL_COUNT + i] +
+            symbols[2 * NUMBER_SYMBOL_COUNT + i]) %
+        PASSWORD_SYMBOL_COUNT;
   }
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = (symbols[i] + symbols[NUMBER_SYMBOL_COUNT + i] +
-                              symbols[2 * NUMBER_SYMBOL_COUNT + i]) %
-                             PASSWORD_SYMBOL_COUNT;
+                                 symbols[2 * NUMBER_SYMBOL_COUNT + i]) %
+        PASSWORD_SYMBOL_COUNT;
   }
   WritePasswordSymbols(symbols, password, SCORE_PASSWORD_LENGTH, 0);
 }

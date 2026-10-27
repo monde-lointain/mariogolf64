@@ -265,7 +265,7 @@ void UnloadTitleScreen(void) {
  */
 #define IsLeavingForLogos(pressedButtons)                 \
   ((((pressedButtons) & B_BUTTON) && g_IsDebugEnabled) || \
-   (f_TitleFrame == TITLE_IDLE_FRAME_COUNT))
+      (f_TitleFrame == TITLE_IDLE_FRAME_COUNT))
 
 /* With g_IsDebugEnabled set, B also starts going back to the logos */
 void UpdateTitleScreen(void) {
@@ -289,7 +289,7 @@ void UpdateTitleScreen(void) {
       if (HasScreenFadeEnded() && IsHudAnimationDone()) {
         pressedButtons = 0;
         for (controllerIndex = 0; controllerIndex != g_ControllerCount;
-             controllerIndex++) {
+            controllerIndex++) {
           pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
         }
         if (pressedButtons & (A_BUTTON | START_BUTTON)) {
@@ -352,10 +352,9 @@ void DrawTitleScreen(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   for (stripIndex = 0; stripIndex != TITLE_STRIP_COUNT; stripIndex++) {
     stripHeight = (stripIndex == TITLE_STRIP_COUNT - 1)
-                      ? TITLE_LAST_STRIP_HEIGHT
-                      : TITLE_STRIP_HEIGHT;
-    gDPLoadTextureTile(
-        gfx++,
+        ? TITLE_LAST_STRIP_HEIGHT
+        : TITLE_STRIP_HEIGHT;
+    gDPLoadTextureTile(gfx++,
         (u32)&f_TitleImage
                 .texels[stripIndex * TITLE_STRIP_HEIGHT * TITLE_IMAGE_WIDTH] &
             ~7,
@@ -364,8 +363,7 @@ void DrawTitleScreen(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, SCREEN_BORDER << 2,
+    gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
         (SCREEN_BORDER + stripIndex * TITLE_STRIP_HEIGHT) << 2,
         (SCREEN_BORDER + TITLE_IMAGE_WIDTH) << 2,
         (SCREEN_BORDER + stripIndex * TITLE_STRIP_HEIGHT + stripHeight) << 2,
@@ -380,17 +378,17 @@ void DrawTitleScreen(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
-                      TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
+        TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
     gDPLoadTextureTile_4b(gfx++, (u32)f_PressStartText.texels & ~7, G_IM_FMT_I,
-                          PRESS_START_WIDTH, PRESS_START_HEIGHT, 0, 0,
-                          PRESS_START_WIDTH - 1, PRESS_START_HEIGHT - 1, 0,
-                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        PRESS_START_WIDTH, PRESS_START_HEIGHT, 0, 0, PRESS_START_WIDTH - 1,
+        PRESS_START_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     gDPPipeSync(gfx++);
     DrawTextureRect(&gfx, PRESS_START_LEFT << 2, PRESS_START_TOP << 2,
-                    (PRESS_START_LEFT + PRESS_START_WIDTH) << 2,
-                    (PRESS_START_TOP + PRESS_START_HEIGHT) << 2,
-                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (PRESS_START_LEFT + PRESS_START_WIDTH) << 2,
+        (PRESS_START_TOP + PRESS_START_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   *displayListHead = gfx;
 }

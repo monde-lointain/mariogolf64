@@ -91,8 +91,11 @@ float acosf(float x) {
     z = x * x;
     p = z *
         (f_AsinP0 +
-         z * (f_AsinP1 +
-              z * (f_AsinP2 + z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
+            z *
+                (f_AsinP1 +
+                    z *
+                        (f_AsinP2 +
+                            z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
     q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
     r = p / q;
     return f_HalfPiHigh - (x - (f_HalfPiLow - x * r));
@@ -100,8 +103,11 @@ float acosf(float x) {
     z = (f_One + x) * 0.5f;
     p = z *
         (f_AsinP0 +
-         z * (f_AsinP1 +
-              z * (f_AsinP2 + z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
+            z *
+                (f_AsinP1 +
+                    z *
+                        (f_AsinP2 +
+                            z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
     q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
     s = sqrtf(z);
     r = p / q;
@@ -118,8 +124,11 @@ float acosf(float x) {
     c = (z - sqrtHigh * sqrtHigh) / (s + sqrtHigh);
     p = z *
         (f_AsinP0 +
-         z * (f_AsinP1 +
-              z * (f_AsinP2 + z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
+            z *
+                (f_AsinP1 +
+                    z *
+                        (f_AsinP2 +
+                            z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
     q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
     r = p / q;
     w = r * s + c;
@@ -243,10 +252,17 @@ static const float f_AtanLow[] = {
 };
 /* atan(x) ~ x - x * (sum of f_AtanTerms[i] * x^(2i+2)) for |x| <= 7/16 */
 static const float f_AtanTerms[] = {
-    3.3333334327e-01f,  -2.0000000298e-01f, 1.4285714924e-01f,
-    -1.1111110449e-01f, 9.0908870101e-02f,  -7.6918758452e-02f,
-    6.6610731184e-02f,  -5.8335702866e-02f, 4.9768779427e-02f,
-    -3.6531571299e-02f, 1.6285819933e-02f,
+    3.3333334327e-01f,
+    -2.0000000298e-01f,
+    1.4285714924e-01f,
+    -1.1111110449e-01f,
+    9.0908870101e-02f,
+    -7.6918758452e-02f,
+    6.6610731184e-02f,
+    -5.8335702866e-02f,
+    4.9768779427e-02f,
+    -3.6531571299e-02f,
+    1.6285819933e-02f,
 };
 static const float f_Huge = 1.0e30f;
 
@@ -300,16 +316,24 @@ float atanf(float x) {
   }
   z = x * x;
   w = z * z;
-  oddSum = z * (f_AtanTerms[0] +
-                w * (f_AtanTerms[2] +
-                     w * (f_AtanTerms[4] +
-                          w * (f_AtanTerms[6] +
-                               w * (f_AtanTerms[8] + w * f_AtanTerms[10])))));
-  evenSum =
-      w *
+  oddSum = z *
+      (f_AtanTerms[0] +
+          w *
+              (f_AtanTerms[2] +
+                  w *
+                      (f_AtanTerms[4] +
+                          w *
+                              (f_AtanTerms[6] +
+                                  w *
+                                      (f_AtanTerms[8] +
+                                          w * f_AtanTerms[10])))));
+  evenSum = w *
       (f_AtanTerms[1] +
-       w * (f_AtanTerms[3] +
-            w * (f_AtanTerms[5] + w * (f_AtanTerms[7] + w * f_AtanTerms[9]))));
+          w *
+              (f_AtanTerms[3] +
+                  w *
+                      (f_AtanTerms[5] +
+                          w * (f_AtanTerms[7] + w * f_AtanTerms[9]))));
   if (reductionIndex < 0) {
     return x - x * (oddSum + evenSum);
   } else {

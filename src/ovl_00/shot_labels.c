@@ -190,28 +190,28 @@ void DrawShotLabels(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     switch (corner) {
       case CORNER_LOWER_RIGHT:
-        gSPScisTextureRectangle(
-            gfx++, (x - LEADER_LINE_FAR_X) << 2, (y - LEADER_LINE_FAR_Y) << 2,
-            (x - LEADER_LINE_NEAR_X) << 2, (y - LEADER_LINE_NEAR_Y) << 2,
-            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        gSPScisTextureRectangle(gfx++, (x - LEADER_LINE_FAR_X) << 2,
+            (y - LEADER_LINE_FAR_Y) << 2, (x - LEADER_LINE_NEAR_X) << 2,
+            (y - LEADER_LINE_NEAR_Y) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+            1 << 10);
         break;
       case CORNER_LOWER_LEFT:
-        gSPScisTextureRectangle(
-            gfx++, (x + LEADER_LINE_NEAR_X) << 2, (y - LEADER_LINE_FAR_Y) << 2,
-            (x + LEADER_LINE_FAR_X) << 2, (y - LEADER_LINE_NEAR_Y) << 2,
-            G_TX_RENDERTILE, TAG_WIDTH << 5, 0, 1 << 10, 1 << 10);
+        gSPScisTextureRectangle(gfx++, (x + LEADER_LINE_NEAR_X) << 2,
+            (y - LEADER_LINE_FAR_Y) << 2, (x + LEADER_LINE_FAR_X) << 2,
+            (y - LEADER_LINE_NEAR_Y) << 2, G_TX_RENDERTILE, TAG_WIDTH << 5, 0,
+            1 << 10, 1 << 10);
         break;
       case CORNER_UPPER_LEFT:
-        gSPScisTextureRectangle(
-            gfx++, (x + LEADER_LINE_NEAR_X) << 2, (y + LEADER_LINE_NEAR_Y) << 2,
-            (x + LEADER_LINE_FAR_X) << 2, (y + LEADER_LINE_FAR_Y) << 2,
-            G_TX_RENDERTILE, TAG_WIDTH << 5, TAG_HEIGHT << 5, 1 << 10, 1 << 10);
+        gSPScisTextureRectangle(gfx++, (x + LEADER_LINE_NEAR_X) << 2,
+            (y + LEADER_LINE_NEAR_Y) << 2, (x + LEADER_LINE_FAR_X) << 2,
+            (y + LEADER_LINE_FAR_Y) << 2, G_TX_RENDERTILE, TAG_WIDTH << 5,
+            TAG_HEIGHT << 5, 1 << 10, 1 << 10);
         break;
       case CORNER_UPPER_RIGHT:
-        gSPScisTextureRectangle(
-            gfx++, (x - LEADER_LINE_FAR_X) << 2, (y + LEADER_LINE_NEAR_Y) << 2,
-            (x - LEADER_LINE_NEAR_X) << 2, (y + LEADER_LINE_FAR_Y) << 2,
-            G_TX_RENDERTILE, 0, TAG_HEIGHT << 5, 1 << 10, 1 << 10);
+        gSPScisTextureRectangle(gfx++, (x - LEADER_LINE_FAR_X) << 2,
+            (y + LEADER_LINE_NEAR_Y) << 2, (x - LEADER_LINE_NEAR_X) << 2,
+            (y + LEADER_LINE_FAR_Y) << 2, G_TX_RENDERTILE, 0, TAG_HEIGHT << 5,
+            1 << 10, 1 << 10);
         break;
     }
     gDPPipeSync(gfx++);
@@ -221,17 +221,16 @@ void DrawShotLabels(Gfx** displayListHead) {
   void DrawPlayerTag(s32 x, s32 y, s32 corner, s32 tag) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
-                           ((u32)g_PlayerTagImages + PALETTED_TEXELS_OFFSET +
-                            tag * TAG_IMAGE_SIZE) &
-                               ~7,
-                           G_IM_FMT_CI, TAG_WIDTH, TAG_HEIGHT, 0,
-                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        ((u32)g_PlayerTagImages + PALETTED_TEXELS_OFFSET +
+            tag * TAG_IMAGE_SIZE) &
+            ~7,
+        G_IM_FMT_CI, TAG_WIDTH, TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, (x - TAG_WIDTH / 2) << 2,
-                            (y - TAG_HEIGHT / 2) << 2, (x + TAG_WIDTH / 2) << 2,
-                            (y + TAG_HEIGHT / 2) << 2, G_TX_RENDERTILE, 0, 0,
-                            1 << 10, 1 << 10);
+        (y - TAG_HEIGHT / 2) << 2, (x + TAG_WIDTH / 2) << 2,
+        (y + TAG_HEIGHT / 2) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
   }
 
@@ -239,11 +238,11 @@ void DrawShotLabels(Gfx** displayListHead) {
   if (g_Cameras[0].view.mode == CAMERA_MODE_UNK2) {
     players = SHOT_LABELS_OVERHEAD;
   } else if (g_GameState.unk0 == GAME_STATE_UNK6 &&
-             g_CurrentShot.playerIndex >= 0 &&
-             g_CurrentShot.playerIndex < MAX_PLAYER_COUNT &&
-             g_Players[g_CurrentShot.playerIndex].unkC == PLAYER_STATE_UNK2 &&
-             (D_800C308C != LETTERBOX_STATE_NONE &
-              D_800C308C != LETTERBOX_STATE_UNK5)) {
+      g_CurrentShot.playerIndex >= 0 &&
+      g_CurrentShot.playerIndex < MAX_PLAYER_COUNT &&
+      g_Players[g_CurrentShot.playerIndex].unkC == PLAYER_STATE_UNK2 &&
+      (D_800C308C != LETTERBOX_STATE_NONE &
+          D_800C308C != LETTERBOX_STATE_UNK5)) {
     players = SHOT_LABELS_OTHER_BALLS;
   }
   if (f_ShotLabelPlayers != players) {
@@ -255,9 +254,9 @@ void DrawShotLabels(Gfx** displayListHead) {
   if (players != SHOT_LABELS_NONE) {
     /* This projects the cup with its x for all three coordinates */
     if (ProjectPoint(D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                     D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                     D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                     &point) < 0) {
+            D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            &point) < 0) {
       cup.isHidden = SPOT_SHOWN;
       cup.x = point.x;
       cup.y = point.y;
@@ -334,7 +333,7 @@ void DrawShotLabels(Gfx** displayListHead) {
         while (TRUE) {
           overlaps = FALSE;
           corner = (f_ShotLabels[i].corner + tries) % UPPER_CORNER_COUNT +
-                   CORNER_UPPER_LEFT;
+              CORNER_UPPER_LEFT;
           if (cup.isHidden == SPOT_SHOWN &&
               cup.x - TAG_WIDTH < point.x + f_TagOffsetsX[corner] &&
               point.x + f_TagOffsetsX[corner] < cup.x + TAG_WIDTH &&
@@ -381,8 +380,7 @@ void DrawShotLabels(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     if (players == SHOT_LABELS_OTHER_BALLS) {
-      gDPSetRenderMode(
-          gfx++,
+      gDPSetRenderMode(gfx++,
           AA_EN | Z_CMP | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA |
               CVG_X_ALPHA | ALPHA_CVG_SEL |
               GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
@@ -397,10 +395,10 @@ void DrawShotLabels(Gfx** displayListHead) {
     gDPSetBlendColor(gfx++, 255, 255, 255, 1);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPSetCombineMode(gfx++, G_CC_MODULATEIDECALA_PRIM,
-                      G_CC_MODULATEIDECALA_PRIM);
-    gDPLoadTextureBlock_4b(
-        gfx++, ((u32)g_LeaderLineImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+    gDPSetCombineMode(
+        gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPLoadTextureBlock_4b(gfx++,
+        ((u32)g_LeaderLineImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
         TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 3, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
@@ -409,25 +407,24 @@ void DrawShotLabels(Gfx** displayListHead) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         gDPSetPrimColor(gfx++, 0, 0, f_PlayerTagColors[i][0],
-                        f_PlayerTagColors[i][1], f_PlayerTagColors[i][2],
-                        TAG_ALPHA);
-        DrawLeaderLine(f_ShotLabels[i].x, f_ShotLabels[i].y,
-                       f_ShotLabels[i].corner);
+            f_PlayerTagColors[i][1], f_PlayerTagColors[i][2], TAG_ALPHA);
+        DrawLeaderLine(
+            f_ShotLabels[i].x, f_ShotLabels[i].y, f_ShotLabels[i].corner);
       }
     }
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0,
-                      ((u32)g_PlayerTagImages + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(
+        gfx++, 0, ((u32)g_PlayerTagImages + IMAGE_HEADER_SIZE) & ~7);
     gDPPipeSync(gfx++);
     for (i = 0; i != g_PlayerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         DrawPlayerTag(f_ShotLabels[i].x, f_ShotLabels[i].y,
-                      f_ShotLabels[i].corner,
-                      g_Players[i].unk1E[0] ? i + COMPUTER_TAG_OFFSET : i);
+            f_ShotLabels[i].corner,
+            g_Players[i].unk1E[0] ? i + COMPUTER_TAG_OFFSET : i);
       }
     }
     /* Then translucent over what covers them, so that they show through */
@@ -436,36 +433,35 @@ void DrawShotLabels(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
-                      TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
-    gDPLoadTextureBlock_4b(
-        gfx++, ((u32)g_LeaderLineImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+        TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
+    gDPLoadTextureBlock_4b(gfx++,
+        ((u32)g_LeaderLineImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
         TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 3, G_TX_NOLOD, G_TX_NOLOD);
     for (i = 0; i != g_PlayerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         gDPSetPrimColor(gfx++, 0, 0, f_PlayerTagColors[i][0],
-                        f_PlayerTagColors[i][1], f_PlayerTagColors[i][2],
-                        TAG_SHADOW_ALPHA);
-        DrawLeaderLine(f_ShotLabels[i].x, f_ShotLabels[i].y,
-                       f_ShotLabels[i].corner);
+            f_PlayerTagColors[i][1], f_PlayerTagColors[i][2], TAG_SHADOW_ALPHA);
+        DrawLeaderLine(
+            f_ShotLabels[i].x, f_ShotLabels[i].y, f_ShotLabels[i].corner);
       }
     }
     gDPPipeSync(gfx++);
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-                      TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+        TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TAG_SHADOW_ALPHA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0,
-                      ((u32)g_PlayerTagImages + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(
+        gfx++, 0, ((u32)g_PlayerTagImages + IMAGE_HEADER_SIZE) & ~7);
     gDPPipeSync(gfx++);
     for (i = 0; i != g_PlayerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         DrawPlayerTag(f_ShotLabels[i].x, f_ShotLabels[i].y,
-                      f_ShotLabels[i].corner,
-                      g_Players[i].unk1E[0] ? i + COMPUTER_TAG_OFFSET : i);
+            f_ShotLabels[i].corner,
+            g_Players[i].unk1E[0] ? i + COMPUTER_TAG_OFFSET : i);
       }
     }
     gDPPipeSync(gfx++);
@@ -516,8 +512,8 @@ void DrawAimGuides(CameraMatrices* matrices) {
     position[AXIS_X] = g_CurrentShot.unk44[AXIS_X] * COURSE_TO_WORLD_SCALE;
     position[AXIS_Y] = g_CurrentShot.unk44[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     position[AXIS_Z] = g_CurrentShot.unk44[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    depth = ProjectPoint(position[AXIS_X], position[AXIS_Y], position[AXIS_Z],
-                         &point);
+    depth = ProjectPoint(
+        position[AXIS_X], position[AXIS_Y], position[AXIS_Z], &point);
     if (depth < 0) {
       heightYards =
           (g_CurrentShot.ballPosition[AXIS_Y] - g_CurrentShot.unk44[AXIS_Y]) *
@@ -546,8 +542,8 @@ void DrawAimGuides(CameraMatrices* matrices) {
           alpha = 255;
         } else {
           alpha = (depth - SIGN_FADE_START_DEPTH) * SIGN_FADE_ALPHA_RANGE /
-                      SIGN_FADE_DEPTH_RANGE +
-                  SIGN_MIN_ALPHA;
+                  SIGN_FADE_DEPTH_RANGE +
+              SIGN_MIN_ALPHA;
         }
       }
       distance = GetSelectedShotDistance();
@@ -555,48 +551,46 @@ void DrawAimGuides(CameraMatrices* matrices) {
       gDPSetPrimDepth(g_DisplayListHead++, point.depth, 0);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetDepthSource(g_DisplayListHead++, G_ZS_PRIM);
-      gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIA_PRIM,
-                        G_CC_MODULATEIA_PRIM);
+      gDPSetCombineMode(
+          g_DisplayListHead++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, alpha);
       gDPPipeSync(g_DisplayListHead++);
-      gDPSetRenderMode(g_DisplayListHead++, G_RM_ZB_XLU_SURF,
-                       G_RM_ZB_XLU_SURF2);
+      gDPSetRenderMode(
+          g_DisplayListHead++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetAlphaCompare(g_DisplayListHead++, G_AC_THRESHOLD);
       gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                        ((u32)g_DistanceSignImage + IMAGE_HEADER_SIZE) & ~7);
-      gDPLoadTextureTile_4b(
-          g_DisplayListHead++,
+          ((u32)g_DistanceSignImage + IMAGE_HEADER_SIZE) & ~7);
+      gDPLoadTextureTile_4b(g_DisplayListHead++,
           ((u32)g_DistanceSignImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
           SIGN_WIDTH, SIGN_HEIGHT, 0, 0, SIGN_WIDTH - 1, SIGN_HEIGHT - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, alpha);
       gDPPipeSync(g_DisplayListHead++);
-      gSPScisTextureRectangle(
-          g_DisplayListHead++, (point.x - SIGN_WIDTH / 2) << 2,
-          (point.y - SIGN_HEIGHT) << 2, (point.x + SIGN_WIDTH / 2) << 2,
+      gSPScisTextureRectangle(g_DisplayListHead++,
+          (point.x - SIGN_WIDTH / 2) << 2, (point.y - SIGN_HEIGHT) << 2,
+          (point.x + SIGN_WIDTH / 2) << 2,
           (point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT) << 2, G_TX_RENDERTILE, 0,
           0, 1 << 10, 1 << 10);
       /* The post is drawn opaque */
       gDPPipeSync(g_DisplayListHead++);
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
       gDPPipeSync(g_DisplayListHead++);
-      gSPScisTextureRectangle(
-          g_DisplayListHead++, (point.x - SIGN_WIDTH / 2) << 2,
+      gSPScisTextureRectangle(g_DisplayListHead++,
+          (point.x - SIGN_WIDTH / 2) << 2,
           (point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT) << 2,
           (point.x + SIGN_WIDTH / 2) << 2, point.y << 2, G_TX_RENDERTILE, 0,
           SIGN_BOARD_HEIGHT << 5, 1 << 10, 1 << 10);
       gDPPipeSync(g_DisplayListHead++);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
-      gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIA_PRIM,
-                        G_CC_MODULATEIA_PRIM);
-      gDPLoadTextureBlock_4b(
-          g_DisplayListHead++,
+      gDPSetCombineMode(
+          g_DisplayListHead++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+      gDPLoadTextureBlock_4b(g_DisplayListHead++,
           ((u32)g_ShadowedFontImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA,
           SHADOWED_FONT_IMAGE_WIDTH, SHADOWED_FONT_IMAGE_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -612,24 +606,24 @@ void DrawAimGuides(CameraMatrices* matrices) {
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
         gDPPipeSync(g_DisplayListHead++);
         DrawCenteredShadowedText(&g_DisplayListHead, point.x,
-                                 point.y - SIGN_DISTANCE_TEXT_Y,
-                                 g_PrintBuffer + DISTANCE_TEXT_OFFSET);
+            point.y - SIGN_DISTANCE_TEXT_Y,
+            g_PrintBuffer + DISTANCE_TEXT_OFFSET);
       }
       /* Uphill is tinted red and downhill blue */
       gDPPipeSync(g_DisplayListHead++);
       if (tintYards > 0) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
-                        255 - tintYards * TINT_PER_YARD,
-                        255 - tintYards * TINT_PER_YARD, 255);
+            255 - tintYards * TINT_PER_YARD, 255 - tintYards * TINT_PER_YARD,
+            255);
         gDPPipeSync(g_DisplayListHead++);
         sprintf(g_PrintBuffer, "%dyUP", heightYards);
       } else if (tintYards < 0) {
         sprintf(g_PrintBuffer, "%dyDW", -heightYards);
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0,
-                        255 + tintYards * TINT_PER_YARD,
-                        255 + tintYards * TINT_PER_YARD, 255, 255);
+            255 + tintYards * TINT_PER_YARD, 255 + tintYards * TINT_PER_YARD,
+            255, 255);
         gDPPipeSync(g_DisplayListHead++);
       } else {
         gDPPipeSync(g_DisplayListHead++);
@@ -640,61 +634,59 @@ void DrawAimGuides(CameraMatrices* matrices) {
       if (D_800C308C != LETTERBOX_STATE_UNK3 &&
           D_800C308C != LETTERBOX_STATE_UNK4) {
         DrawCenteredShadowedText(&g_DisplayListHead, point.x,
-                                 point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
+            point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
       }
       if (surfaceKind == SURFACE_KIND_UNK13 ||
           surfaceKind == SURFACE_KIND_UNK21) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
-                        outOfBoundsGreen + OUT_OF_BOUNDS_GREEN, 0, 255);
+            outOfBoundsGreen + OUT_OF_BOUNDS_GREEN, 0, 255);
         gDPPipeSync(g_DisplayListHead++);
         f_OutOfBoundsPulseAngle += OUT_OF_BOUNDS_PULSE_STEP;
-        DrawCenteredShadowedText(&g_DisplayListHead, point.x,
-                                 point.y - OUT_OF_BOUNDS_TEXT_Y, "OB!");
+        DrawCenteredShadowedText(
+            &g_DisplayListHead, point.x, point.y - OUT_OF_BOUNDS_TEXT_Y, "OB!");
       }
       /* Then translucent, so that the text shows through what covers it */
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-      gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIA_PRIM,
-                        G_CC_MODULATEIA_PRIM);
+      gDPSetCombineMode(
+          g_DisplayListHead++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
       if (tintYards > 0) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
-                        255 - tintYards * TINT_PER_YARD,
-                        255 - tintYards * TINT_PER_YARD, TEXT_SHADOW_ALPHA);
+            255 - tintYards * TINT_PER_YARD, 255 - tintYards * TINT_PER_YARD,
+            TEXT_SHADOW_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
       } else if (tintYards < 0) {
         gDPPipeSync(g_DisplayListHead++);
-        gDPSetPrimColor(
-            g_DisplayListHead++, 0, 0, 255 + tintYards * TINT_PER_YARD,
-            255 + tintYards * TINT_PER_YARD, 255, TEXT_SHADOW_ALPHA);
+        gDPSetPrimColor(g_DisplayListHead++, 0, 0,
+            255 + tintYards * TINT_PER_YARD, 255 + tintYards * TINT_PER_YARD,
+            255, TEXT_SHADOW_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
       } else {
         gDPPipeSync(g_DisplayListHead++);
-        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255,
-                        TEXT_SHADOW_ALPHA);
+        gDPSetPrimColor(
+            g_DisplayListHead++, 0, 0, 255, 255, 255, TEXT_SHADOW_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
       }
       DrawCenteredShadowedText(&g_DisplayListHead, point.x,
-                               point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
+          point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
       if (surfaceKind == SURFACE_KIND_UNK13 ||
           surfaceKind == SURFACE_KIND_UNK21) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
-                        outOfBoundsGreen + OUT_OF_BOUNDS_GREEN, 0,
-                        TEXT_SHADOW_ALPHA);
+            outOfBoundsGreen + OUT_OF_BOUNDS_GREEN, 0, TEXT_SHADOW_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
         f_OutOfBoundsPulseAngle += OUT_OF_BOUNDS_PULSE_STEP;
-        DrawCenteredShadowedText(&g_DisplayListHead, point.x,
-                                 point.y - OUT_OF_BOUNDS_TEXT_Y, "OB!");
+        DrawCenteredShadowedText(
+            &g_DisplayListHead, point.x, point.y - OUT_OF_BOUNDS_TEXT_Y, "OB!");
       }
       gDPPipeSync(g_DisplayListHead++);
-      gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255,
-                      TEXT_SHADOW_ALPHA);
+      gDPSetPrimColor(
+          g_DisplayListHead++, 0, 0, 255, 255, 255, TEXT_SHADOW_ALPHA);
       gDPPipeSync(g_DisplayListHead++);
       DrawCenteredShadowedText(&g_DisplayListHead, point.x,
-                               point.y - SIGN_DISTANCE_TEXT_Y,
-                               g_PrintBuffer + DISTANCE_TEXT_OFFSET);
+          point.y - SIGN_DISTANCE_TEXT_Y, g_PrintBuffer + DISTANCE_TEXT_OFFSET);
     }
   }
   if (D_800C307C < PIN_FLAG_HIDE_FRAME) {
@@ -709,60 +701,60 @@ void DrawAimGuides(CameraMatrices* matrices) {
       position[AXIS_Y] =
           (g_CupPositionY - PIN_FLAG_DROP) * COURSE_TO_WORLD_SCALE;
     }
-    if (ProjectPoint(position[AXIS_X], position[AXIS_Y], position[AXIS_Z],
-                     &point) < 0) {
+    if (ProjectPoint(
+            position[AXIS_X], position[AXIS_Y], position[AXIS_Z], &point) < 0) {
       flagImage = PIN_FLAG_IMAGE;
       if (point.y < SCREEN_HEIGHT) {
         if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
-          gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA,
-                            G_CC_DECALRGBA);
+          gDPSetCombineMode(
+              g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           gDPPipeSync(g_DisplayListHead++);
-          gDPSetRenderMode(g_DisplayListHead++, PIN_FLAG_RENDER_MODE,
-                           PIN_FLAG_RENDER_MODE2);
+          gDPSetRenderMode(
+              g_DisplayListHead++, PIN_FLAG_RENDER_MODE, PIN_FLAG_RENDER_MODE2);
         } else if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
           flagImage = PIN_FLAG_GREEN_IMAGE;
           if (D_800C307C == PIN_FLAG_HIDE_FRAME) {
             flagImage = PIN_FLAG_HIDDEN;
           } else if (D_800C307C >= PIN_FLAG_FADE_FRAME) {
             gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255,
-                            255 - ((D_800C307C - (PIN_FLAG_FADE_FRAME - 1)) *
-                                   PIN_FLAG_FADE_STEP));
+                255 -
+                    ((D_800C307C - (PIN_FLAG_FADE_FRAME - 1)) *
+                        PIN_FLAG_FADE_STEP));
             gDPPipeSync(g_DisplayListHead++);
-            gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF,
-                             G_RM_XLU_SURF2);
+            gDPSetRenderMode(
+                g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIA_PRIM,
-                              G_CC_MODULATEIA_PRIM);
+                G_CC_MODULATEIA_PRIM);
             gDPPipeSync(g_DisplayListHead++);
             gDPSetAlphaCompare(g_DisplayListHead++, G_AC_THRESHOLD);
             gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
           } else {
-            gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA,
-                              G_CC_DECALRGBA);
+            gDPSetCombineMode(
+                g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
             gDPPipeSync(g_DisplayListHead++);
             gDPSetRenderMode(g_DisplayListHead++, PIN_FLAG_RENDER_MODE,
-                             PIN_FLAG_RENDER_MODE2);
+                PIN_FLAG_RENDER_MODE2);
           }
           if (point.y < PIN_FLAG_TOP_Y) {
             point.y = PIN_FLAG_TOP_Y;
           }
         } else {
-          gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA,
-                            G_CC_DECALRGBA);
+          gDPSetCombineMode(
+              g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           gDPPipeSync(g_DisplayListHead++);
-          gDPSetRenderMode(g_DisplayListHead++, PIN_FLAG_RENDER_MODE,
-                           PIN_FLAG_RENDER_MODE2);
+          gDPSetRenderMode(
+              g_DisplayListHead++, PIN_FLAG_RENDER_MODE, PIN_FLAG_RENDER_MODE2);
           point.y = PIN_FLAG_TOP_Y;
         }
         if (flagImage != PIN_FLAG_HIDDEN) {
           gDPPipeSync(g_DisplayListHead++);
           gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                            ((u32)g_PinFlagImages + IMAGE_HEADER_SIZE) & ~7);
+              ((u32)g_PinFlagImages + IMAGE_HEADER_SIZE) & ~7);
           gDPPipeSync(g_DisplayListHead++);
           gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
-          gDPLoadTextureBlock_4b(
-              g_DisplayListHead++,
+          gDPLoadTextureBlock_4b(g_DisplayListHead++,
               ((u32)g_PinFlagImages + PALETTED_TEXELS_OFFSET +
-               flagImage * PIN_FLAG_IMAGE_SIZE) &
+                  flagImage * PIN_FLAG_IMAGE_SIZE) &
                   ~7,
               G_IM_FMT_CI, PIN_FLAG_IMAGE_WIDTH, PIN_FLAG_IMAGE_HEIGHT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -776,8 +768,8 @@ void DrawAimGuides(CameraMatrices* matrices) {
           } else {
             point.y += f_PinFlagWaveFrame / PIN_FLAG_WAVE_TICKS;
           }
-          gSPScisTextureRectangle(
-              g_DisplayListHead++, (point.x - PIN_FLAG_LEFT) << 2,
+          gSPScisTextureRectangle(g_DisplayListHead++,
+              (point.x - PIN_FLAG_LEFT) << 2,
               (point.y - PIN_FLAG_IMAGE_HEIGHT) << 2,
               (point.x + PIN_FLAG_RIGHT) << 2, point.y << 2, G_TX_RENDERTILE,
               (f_PinFlagWaveFrame / PIN_FLAG_WAVE_TICKS * PIN_FLAG_FRAME_WIDTH)

@@ -113,9 +113,9 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
     g_CpuScreenScaleX = -g_CpuViewportCenterX * g_CpuProjectionMatrix[0][0];
     g_CpuScreenScaleY = g_CpuViewportCenterY * g_CpuProjectionMatrix[1][1];
     g_CpuScreenScaleX = g_CpuProjectionMatrix[0][0] * (SCREEN_WIDTH / 2.0f) /
-                        g_CpuProjectionMatrix[2][3];
+        g_CpuProjectionMatrix[2][3];
     g_CpuScreenScaleY = g_CpuProjectionMatrix[1][1] * -(SCREEN_HEIGHT / 2.0f) /
-                        g_CpuProjectionMatrix[2][3];
+        g_CpuProjectionMatrix[2][3];
   }
 }
 
@@ -132,29 +132,29 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
   f32 perspective;
 
   depth = g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y +
-          g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2] - radius;
+      g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2] - radius;
   if ((s32)depth >= 0) {
     return 0;
   }
   viewX = g_CpuViewingMatrix[0][0] * x + g_CpuViewingMatrix[1][0] * y +
-          g_CpuViewingMatrix[2][0] * z + g_CpuViewingMatrix[3][0];
+      g_CpuViewingMatrix[2][0] * z + g_CpuViewingMatrix[3][0];
   if ((s32)g_CpuProjectionMatrix[3][3] == 1) {
     perspective = 1.0f;
   } else {
     perspective = 1.0f / depth;
   }
   if ((viewX > 0.0f) ? g_CpuViewportCenterX <
-                           g_CpuScreenScaleX * (viewX - radius) * perspective
+              g_CpuScreenScaleX * (viewX - radius) * perspective
                      : g_CpuScreenScaleX * (viewX + radius) * perspective <
-                           -g_CpuViewportCenterX) {
+              -g_CpuViewportCenterX) {
     return 1;
   }
   viewY = g_CpuViewingMatrix[0][1] * x + g_CpuViewingMatrix[1][1] * y +
-          g_CpuViewingMatrix[2][1] * z + g_CpuViewingMatrix[3][1];
+      g_CpuViewingMatrix[2][1] * z + g_CpuViewingMatrix[3][1];
   if ((viewY > 0.0f) ? g_CpuScreenScaleY * (viewY - radius) * perspective <
-                           -g_CpuViewportCenterY
+              -g_CpuViewportCenterY
                      : g_CpuViewportCenterY <
-                           g_CpuScreenScaleY * (viewY + radius) * perspective) {
+              g_CpuScreenScaleY * (viewY + radius) * perspective) {
     return 2;
   }
   return depth;
@@ -166,7 +166,7 @@ INCLUDE_ASM("asm/nonmatchings/cpu_projection", GetSphereVisibility);
 
 s32 GetViewDepth(f32 x, f32 y, f32 z) {
   return g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y +
-         g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2];
+      g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2];
 }
 
 /* Returns the view depth, which is negative when the point is in front of the
@@ -191,9 +191,9 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
     point->y = (s32)-viewY + g_CpuViewportCenterY;
   } else {
     point->x = (s32)(point->scaleX * viewX * g_CpuViewportWidthRatio) +
-               g_CpuViewportCenterX;
+        g_CpuViewportCenterX;
     point->y = (s32)(point->scaleY * viewY * g_CpuViewportHeightRatio) +
-               g_CpuViewportCenterY;
+        g_CpuViewportCenterY;
   }
   if (point->x < -SCREEN_COORDINATE_LIMIT) {
     point->x = -SCREEN_COORDINATE_LIMIT;
@@ -208,14 +208,14 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
     point->y = SCREEN_COORDINATE_LIMIT;
   }
   depth = (-g_CpuProjectionMatrix[2][2] - g_CpuProjectionMatrix[3][2] / viewZ) *
-              SCREEN_DEPTH_SCALE +
-          SCREEN_DEPTH_SCALE;
+          SCREEN_DEPTH_SCALE +
+      SCREEN_DEPTH_SCALE;
   point->depth = depth;
   point->depthStep = fabsf(((g_CpuProjectionMatrix[2][2] * (viewZ - 1.0f) +
-                             g_CpuProjectionMatrix[3][2]) /
-                            (1.0f - viewZ)) *
-                               SCREEN_DEPTH_SCALE +
-                           SCREEN_DEPTH_SCALE - depth);
+                                g_CpuProjectionMatrix[3][2]) /
+                               (1.0f - viewZ)) *
+          SCREEN_DEPTH_SCALE +
+      SCREEN_DEPTH_SCALE - depth);
   return viewZ;
 }
 
@@ -235,14 +235,14 @@ s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint* point) {
   f32 perspective;
 
   depth = g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y +
-          g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2];
+      g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2];
   if ((s32)depth == 0) {
     return 0;
   }
   viewX = g_CpuViewingMatrix[0][0] * x + g_CpuViewingMatrix[2][0] * z +
-          g_CpuViewingMatrix[3][0];
+      g_CpuViewingMatrix[3][0];
   viewY = g_CpuViewingMatrix[0][1] * x + g_CpuViewingMatrix[1][1] * y +
-          g_CpuViewingMatrix[2][1] * z + g_CpuViewingMatrix[3][1];
+      g_CpuViewingMatrix[2][1] * z + g_CpuViewingMatrix[3][1];
   perspective = 1.0f / depth;
   point->scaleX = g_CpuScreenScaleX * perspective;
   point->scaleY = g_CpuScreenScaleY * perspective;
@@ -294,8 +294,8 @@ void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation) {
   matrix[3][3] = 1.0f;
 }
 
-void BuildTransformMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation,
-                          Vec3 scale) {
+void BuildTransformMatrix(
+    Mat4 matrix, Vec3 rotation, Vec3 translation, Vec3 scale) {
   f32 sinX = sinf(rotation[0]);
   f32 cosX = cosf(rotation[0]);
   f32 sinY = sinf(rotation[1]);
@@ -327,9 +327,9 @@ void MultiplyMatrices(Mat4 a, Mat4 b, Mat4 product) {
 
   for (row = 0; row != 4; row++) {
     for (column = 0; column != 4; column++) {
-      product[row][column] =
-          a[row][0] * b[0][column] + a[row][1] * b[1][column] +
-          a[row][2] * b[2][column] + a[row][3] * b[3][column];
+      product[row][column] = a[row][0] * b[0][column] +
+          a[row][1] * b[1][column] + a[row][2] * b[2][column] +
+          a[row][3] * b[3][column];
     }
   }
 }
@@ -356,7 +356,7 @@ void ConvertMatrixToFixed(Mat4 matrix, Mtx* fixedMatrix) {
 /* No code calls this */
 #ifdef NON_MATCHING
 void SetTriangleNormal(Vtx* vertices, s32 firstIndex, s32 secondIndex,
-                       s32 thirdIndex, s32 target) {
+    s32 thirdIndex, s32 target) {
   Vtx_tn* first = (Vtx_tn*)(firstIndex * sizeof(Vtx) + (u32)vertices);
   Vtx_tn* second = (Vtx_tn*)(secondIndex * sizeof(Vtx) + (u32)vertices);
   Vtx_tn* third = (Vtx_tn*)(thirdIndex * sizeof(Vtx) + (u32)vertices);
@@ -370,7 +370,7 @@ void SetTriangleNormal(Vtx* vertices, s32 firstIndex, s32 secondIndex,
   f32 normalY = firstEdgeZ * secondEdgeX - firstEdgeX * secondEdgeZ;
   f32 normalZ = firstEdgeX * secondEdgeY - secondEdgeX * firstEdgeY;
   f32 scale = NORMAL_LENGTH /
-              sqrtf(normalX * normalX + normalY * normalY + normalZ * normalZ);
+      sqrtf(normalX * normalX + normalY * normalY + normalZ * normalZ);
   s8 scaledX;
   s8 scaledY;
   s8 scaledZ;

@@ -29,7 +29,7 @@ void InitAssetFiles(void) {
   AssetFile* file;
 
   for (index = 0, file = f_AssetFilePool; index != ASSET_FILE_POOL_SIZE;
-       index++) {
+      index++) {
     file->cursor = 0;
     file++;
   }
@@ -61,7 +61,7 @@ AssetFile* OpenPooledAssetFile(s32 assetId) {
   AssetFile* file;
 
   for (index = 0, file = f_AssetFilePool; index != ASSET_FILE_POOL_SIZE;
-       index++) {
+      index++) {
     if (file->cursor == 0) {
       ReadAssetFileBounds(assetId, file);
       return file;

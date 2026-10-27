@@ -22,3 +22,8 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortEnumsOnASingleLine: false
+# Code Complete's chapter 31 indents continuation lines a standard amount
+# rather than aligning them under an open bracket or the first operand, so
+# renaming a routine doesn't move every line of its argument list
+AlignAfterOpenBracket: false
+AlignOperands: DontAlign

@@ -173,23 +173,71 @@ extern s32 f_PressedButtons;
 extern u32 f_RepeatedButtons;
 
 static u16 f_StarFrameAssets[STAR_FRAME_COUNT] = {
-    0x5BE, 0x5BF, 0x5C0, 0x5C1, 0x5C2, 0x5C3, 0x5C4, 0x5C5,
-    0x5C6, 0x5C7, 0x5C8, 0x5C9, 0x5CA, 0x5CB, 0x5CC,
+    0x5BE,
+    0x5BF,
+    0x5C0,
+    0x5C1,
+    0x5C2,
+    0x5C3,
+    0x5C4,
+    0x5C5,
+    0x5C6,
+    0x5C7,
+    0x5C8,
+    0x5C9,
+    0x5CA,
+    0x5CB,
+    0x5CC,
 };
 static u16 f_EmptyStarFrameAssets[STAR_FRAME_COUNT] = {
-    0x5E5, 0x5E6, 0x5E7, 0x5E8, 0x5E9, 0x5EA, 0x5EB, 0x5EC,
-    0x5ED, 0x5EE, 0x5EF, 0x5F0, 0x5F1, 0x5F2, 0x5F3,
+    0x5E5,
+    0x5E6,
+    0x5E7,
+    0x5E8,
+    0x5E9,
+    0x5EA,
+    0x5EB,
+    0x5EC,
+    0x5ED,
+    0x5EE,
+    0x5EF,
+    0x5F0,
+    0x5F1,
+    0x5F2,
+    0x5F3,
 };
 /* "COURSE" badges, numbered for the main courses; read in, but never drawn here
  */
 static u16 f_CourseBadgeAssets[COURSE_INDEX_COUNT] = {
-    0x733, 0x734, 0x735, 0x736, 0x737, 0x738, 0x738,
-    0x738, 0x738, 0x738, 0x738, 0x738, 0x738,
+    0x733,
+    0x734,
+    0x735,
+    0x736,
+    0x737,
+    0x738,
+    0x738,
+    0x738,
+    0x738,
+    0x738,
+    0x738,
+    0x738,
+    0x738,
 };
 /* Each course has five images of turning, the third its front */
 static u16 f_CourseImageAssets[COURSE_INDEX_COUNT] = {
-    0x835, 0x83A, 0x83F, 0x844, 0x849, 0x84E, 0x853,
-    0x858, 0x85D, 0x862, 0x867, 0x86C, 0x871,
+    0x835,
+    0x83A,
+    0x83F,
+    0x844,
+    0x849,
+    0x84E,
+    0x853,
+    0x858,
+    0x85D,
+    0x862,
+    0x867,
+    0x86C,
+    0x871,
 };
 static s32 f_StarFrameIndex = 0;
 static u8 f_StarBufferIndex = 0;
@@ -585,8 +633,8 @@ void DrawPlanks(Gfx** displayListHead) {
   }
   for (stripIndex = 0; stripIndex != PLANK_STRIP_COUNT; stripIndex++) {
     stripHeight = (stripIndex != PLANK_STRIP_COUNT - 1)
-                      ? PLANK_STRIP_HEIGHT
-                      : PLANK_LAST_STRIP_HEIGHT;
+        ? PLANK_STRIP_HEIGHT
+        : PLANK_LAST_STRIP_HEIGHT;
     if (f_PlankMotion == PLANKS_SHUT) {
       slide = PLANKS_MIDDLE;
     } else {
@@ -604,20 +652,19 @@ void DrawPlanks(Gfx** displayListHead) {
     }
     gDPPipeSync(gfx++);
     LoadTextureBlock(&gfx,
-                     f_PlanksImage + LARGE_PALETTED_TEXELS_OFFSET +
-                         stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH,
-                     G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0,
-                     0, 0, 0, 0, 0);
+        f_PlanksImage + LARGE_PALETTED_TEXELS_OFFSET +
+            stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH,
+        G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0, 0, 0, 0, 0,
+        0);
     top = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT) << 2;
     bottom = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT + stripHeight)
-             << 2;
+        << 2;
     DrawTextureRect(&gfx, SCREEN_BORDER << 2, top, slide << 2, bottom,
-                    G_TX_RENDERTILE, (PLANKS_MIDDLE - slide) << 5, 1 << 5,
-                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, (PLANKS_MIDDLE - slide) << 5, 1 << 5, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     DrawTextureRect(&gfx, (SCREEN_WIDTH - slide) << 2, top,
-                    (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom,
-                    G_TX_RENDERTILE, (PLANKS_WIDTH / 2) << 5, 1 << 5,
-                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom, G_TX_RENDERTILE,
+        (PLANKS_WIDTH / 2) << 5, 1 << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   *displayListHead = gfx;
 }
@@ -647,19 +694,19 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     LoadLargePalette(&gfx, f_CourseImagePalette);
     for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
-                       f_CourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE,
-                       G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH,
-                       COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          f_CourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI,
+          G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
+          0, 0, 0, 0);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
-                       RING_SHOT_COURSE_IMAGE_TOP)
-                          << 2,
-                      (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
-                       RING_SHOT_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
-                          << 2,
-                      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
+              RING_SHOT_COURSE_IMAGE_TOP)
+              << 2,
+          (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
+          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
+              RING_SHOT_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
+              << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -674,21 +721,18 @@ void DrawRingShotSelect(Gfx** displayListHead) {
       arrowFrame =
           f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
       LoadNibbleTextureBlock(&gfx,
-                             f_ArrowsImage + PALETTED_TEXELS_OFFSET +
-                                 arrowFrame * ARROWS_FRAME_SIZE,
-                             G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0,
-                             0, 0, 0, 0);
+          f_ArrowsImage + PALETTED_TEXELS_OFFSET +
+              arrowFrame * ARROWS_FRAME_SIZE,
+          G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-      DrawTextureRect(
-          &gfx, ARROW_LEFT << 2,
+      DrawTextureRect(&gfx, ARROW_LEFT << 2,
           (f_PressedDirection == DIRECTION_UP ? push + 128 : push + 132) << 2,
           (ARROW_LEFT + ARROW_SIZE) << 2,
           (f_PressedDirection == DIRECTION_UP ? push + 144 : push + 148) << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-      DrawTextureRect(
-          &gfx, ARROW_LEFT << 2,
+      DrawTextureRect(&gfx, ARROW_LEFT << 2,
           (f_PressedDirection == DIRECTION_DOWN ? push + 208 : push + 204) << 2,
           (ARROW_LEFT + ARROW_SIZE) << 2,
           (f_PressedDirection == DIRECTION_DOWN ? push + 224 : push + 220) << 2,
@@ -700,9 +744,9 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     SetTextSlot(SCREEN_WIDTH / 2, 42,
-                memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex +
-                    RING_SHOT_TEXT_FIRST_IMAGE,
-                1, RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
+        memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex +
+            RING_SHOT_TEXT_FIRST_IMAGE,
+        1, RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, RING_SHOT_TEXT_SLOT);
     *displayListHead = gfx;
   }
@@ -738,8 +782,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadLargePalette(&gfx, f_BoardImage + IMAGE_HEADER_SIZE);
     for (stripIndex = 0; stripIndex != HOLE_SIGN_STRIP_COUNT; stripIndex++) {
-      gDPLoadTextureTile(
-          gfx++,
+      gDPLoadTextureTile(gfx++,
           f_BoardImage + LARGE_PALETTED_TEXELS_OFFSET +
               stripIndex * HOLE_SIGN_STRIP_HEIGHT * HOLE_SIGN_WIDTH,
           G_IM_FMT_CI, G_IM_SIZ_8b, HOLE_SIGN_WIDTH, 0, 0, 0,
@@ -747,14 +790,13 @@ void DrawHoleSelect(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      DrawTextureRect(
-          &gfx, HOLE_SIGN_LEFT << 2,
+      DrawTextureRect(&gfx, HOLE_SIGN_LEFT << 2,
           (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
-           (f_SlideOffset - HOLE_SIGN_TOP))
+              (f_SlideOffset - HOLE_SIGN_TOP))
               << 2,
           (HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH) << 2,
           (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
-           (f_SlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT)))
+              (f_SlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT)))
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -763,19 +805,19 @@ void DrawHoleSelect(Gfx** displayListHead) {
     LoadLargePalette(&gfx, f_CourseImagePalette);
     for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
-                       f_CourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE,
-                       G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH,
-                       COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          f_CourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI,
+          G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
+          0, 0, 0, 0);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
-                       HOLE_COURSE_IMAGE_TOP)
-                          << 2,
-                      (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
-                       HOLE_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
-                          << 2,
-                      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
+              HOLE_COURSE_IMAGE_TOP)
+              << 2,
+          (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
+          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
+              HOLE_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
+              << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
     arrowFrame = f_CourseArrowFrameTime++;
@@ -787,53 +829,51 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadSmallPalette(&gfx, 0, f_ArrowsImage + IMAGE_HEADER_SIZE);
-    LoadNibbleTextureBlock(
-        &gfx,
+    LoadNibbleTextureBlock(&gfx,
         f_ArrowsImage + PALETTED_TEXELS_OFFSET +
             ((arrowFrame % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME) *
-             ARROWS_FRAME_SIZE),
+                ARROWS_FRAME_SIZE),
         G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
     push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
     DrawTextureRect(&gfx, ARROW_LEFT << 2,
-                    (f_PressedDirection != DIRECTION_UP
-                         ? push + 140 + f_SlideOffset
-                         : push + 140 + f_SlideOffset - ARROW_STEP)
-                        << 2,
-                    (ARROW_LEFT + ARROW_SIZE) << 2,
-                    (f_PressedDirection != DIRECTION_UP
-                         ? push + 156 + f_SlideOffset
-                         : push + 156 + f_SlideOffset - ARROW_STEP)
-                        << 2,
-                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (f_PressedDirection != DIRECTION_UP
+                ? push + 140 + f_SlideOffset
+                : push + 140 + f_SlideOffset - ARROW_STEP)
+            << 2,
+        (ARROW_LEFT + ARROW_SIZE) << 2,
+        (f_PressedDirection != DIRECTION_UP
+                ? push + 156 + f_SlideOffset
+                : push + 156 + f_SlideOffset - ARROW_STEP)
+            << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
     DrawTextureRect(&gfx, ARROW_LEFT << 2,
-                    (f_PressedDirection != DIRECTION_DOWN
-                         ? push + 212 + f_SlideOffset
-                         : push + 212 + f_SlideOffset + ARROW_STEP)
-                        << 2,
-                    (ARROW_LEFT + ARROW_SIZE) << 2,
-                    (f_PressedDirection != DIRECTION_DOWN
-                         ? push + 228 + f_SlideOffset
-                         : push + 228 + f_SlideOffset + ARROW_STEP)
-                        << 2,
-                    G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE,
-                    TEXEL_STEP_ONE);
+        (f_PressedDirection != DIRECTION_DOWN
+                ? push + 212 + f_SlideOffset
+                : push + 212 + f_SlideOffset + ARROW_STEP)
+            << 2,
+        (ARROW_LEFT + ARROW_SIZE) << 2,
+        (f_PressedDirection != DIRECTION_DOWN
+                ? push + 228 + f_SlideOffset
+                : push + 228 + f_SlideOffset + ARROW_STEP)
+            << 2,
+        G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     if (!IsOnDrivingRange()) {
       DrawTextureRect(&gfx,
-                      (f_PressedDirection == DIRECTION_LEFT ? 100 : 104) << 2,
-                      (44 - f_SlideOffset) << 2,
-                      (f_PressedDirection == DIRECTION_LEFT ? 116 : 120) << 2,
-                      (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0,
-                      3 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (f_PressedDirection == DIRECTION_LEFT ? 100 : 104) << 2,
+          (44 - f_SlideOffset) << 2,
+          (f_PressedDirection == DIRECTION_LEFT ? 116 : 120) << 2,
+          (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0, 3 * ARROW_SIZE << 5,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx,
-                      (f_PressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2,
-                      (44 - f_SlideOffset) << 2,
-                      (f_PressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2,
-                      (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0,
-                      2 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (f_PressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2,
+          (44 - f_SlideOffset) << 2,
+          (f_PressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2,
+          (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0, 2 * ARROW_SIZE << 5,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
     gDPPipeSync(gfx++);
@@ -845,15 +885,13 @@ void DrawHoleSelect(Gfx** displayListHead) {
     }
     sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
     DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - f_SlideOffset,
-                            g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
-                            g_CourseNamePrimColors[colorIndex],
-                            TEXT_FLAG_CENTERED);
+        g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
+        g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);
     if (!IsOnDrivingRange()) {
       sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
       DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - f_SlideOffset,
-                              g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
-                              g_CourseNamePrimColors[colorIndex],
-                              TEXT_FLAG_CENTERED);
+          g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
+          g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);
     }
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -877,17 +915,15 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   LoadLargePalette(&gfx, f_BoardImage + IMAGE_HEADER_SIZE);
   for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
-    LoadTextureBlock(
-        &gfx,
+    LoadTextureBlock(&gfx,
         f_BoardImage + LARGE_PALETTED_TEXELS_OFFSET +
             stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH,
         G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
     DrawTextureRect(&gfx, (centerX - NAME_PLATE_HALF_WIDTH) << 2,
-                    (top - 15) << 2, (centerX + NAME_PLATE_HALF_WIDTH) << 2,
-                    (top - 5) << 2, G_TX_RENDERTILE, 0, 0,
-                    NAME_PLATE_TEXEL_STEP, TEXEL_STEP_ONE);
+        (top - 15) << 2, (centerX + NAME_PLATE_HALF_WIDTH) << 2, (top - 5) << 2,
+        G_TX_RENDERTILE, 0, 0, NAME_PLATE_TEXEL_STEP, TEXEL_STEP_ONE);
     top += NAME_PLATE_STRIP_HEIGHT;
     gDPPipeSync(gfx++);
   }
@@ -908,8 +944,12 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   /* Unused */
   f32 hexagon[6][2] = {
-      {0.0f, -1.0f}, {0.89f, -0.45f}, {0.89f, 0.45f},
-      {0.0f, 1.0f},  {-0.89f, 0.45f}, {-0.89f, -0.45f},
+      {0.0f, -1.0f},
+      {0.89f, -0.45f},
+      {0.89f, 0.45f},
+      {0.0f, 1.0f},
+      {-0.89f, 0.45f},
+      {-0.89f, -0.45f},
   };
   u8 hole;
   s32 width;
@@ -921,31 +961,30 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
 
   LoadSmallPalette(&gfx, TILE_SPINNING_STAR, starImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureBlock_4b(gfx++, starImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-                         STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_STAR,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_STAR, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(gfx++);
   emptyStarImage = f_EmptyStarImages[f_StarBufferIndex];
-  LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR,
-                   emptyStarImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(
+      &gfx, TILE_SPINNING_EMPTY_STAR, emptyStarImage + IMAGE_HEADER_SIZE);
   gDPLoadMultiBlock_4b(gfx++, emptyStarImage + PALETTED_TEXELS_OFFSET,
-                       STAR_TMEM_STEP * TILE_SPINNING_EMPTY_STAR,
-                       TILE_SPINNING_EMPTY_STAR, G_IM_FMT_CI, STAR_WIDTH,
-                       STAR_HEIGHT, TILE_SPINNING_EMPTY_STAR,
-                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      STAR_TMEM_STEP * TILE_SPINNING_EMPTY_STAR, TILE_SPINNING_EMPTY_STAR,
+      G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_EMPTY_STAR,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   LoadSmallPalette(&gfx, TILE_STILL_STAR,
-                   f_StarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
+      f_StarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
   gDPLoadMultiBlock_4b(gfx++,
-                       f_StarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
-                       STAR_TMEM_STEP * TILE_STILL_STAR, TILE_STILL_STAR,
-                       G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_STILL_STAR,
-                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      f_StarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
+      STAR_TMEM_STEP * TILE_STILL_STAR, TILE_STILL_STAR, G_IM_FMT_CI,
+      STAR_WIDTH, STAR_HEIGHT, TILE_STILL_STAR, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   LoadSmallPalette(&gfx, TILE_STILL_EMPTY_STAR,
-                   f_EmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
-  gDPLoadMultiBlock_4b(
-      gfx++, f_EmptyStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
+      f_EmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
+  gDPLoadMultiBlock_4b(gfx++,
+      f_EmptyStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
       STAR_TMEM_STEP * TILE_STILL_EMPTY_STAR, TILE_STILL_EMPTY_STAR,
       G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_STILL_EMPTY_STAR,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -962,19 +1001,18 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
     left = hole * STAR_SPACING + STARS_LEFT;
     if (hole == memory->holeIndex) {
       tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
-                 ? TILE_SPINNING_EMPTY_STAR
-                 : TILE_SPINNING_STAR;
+          ? TILE_SPINNING_EMPTY_STAR
+          : TILE_SPINNING_STAR;
     } else {
       tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
-                 ? TILE_STILL_EMPTY_STAR
-                 : TILE_STILL_STAR;
+          ? TILE_STILL_EMPTY_STAR
+          : TILE_STILL_STAR;
     }
     DrawTextureRect(&gfx, (left - width / 2) << 2,
-                    (STARS_TOP - height / 2) << 2,
-                    (left + width / 2 + STAR_WIDTH) << 2,
-                    (height / 2 + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
-                    (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
-                    (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
+        (STARS_TOP - height / 2) << 2, (left + width / 2 + STAR_WIDTH) << 2,
+        (height / 2 + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
+        (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
+        (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);
   }
   f_StarFrameTime++;
@@ -996,8 +1034,12 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
 #else
 /* The hexagon above, which the asm copies to the stack */
 static const f32 f_UnusedHexagon[6][2] = {
-    {0.0f, -1.0f}, {0.89f, -0.45f}, {0.89f, 0.45f},
-    {0.0f, 1.0f},  {-0.89f, 0.45f}, {-0.89f, -0.45f},
+    {0.0f, -1.0f},
+    {0.89f, -0.45f},
+    {0.89f, 0.45f},
+    {0.0f, 1.0f},
+    {-0.89f, 0.45f},
+    {-0.89f, -0.45f},
 };
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotStars);
 #endif

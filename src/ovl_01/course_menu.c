@@ -155,15 +155,15 @@ extern void* D_8023A830_ovl_01;
 s32 GetOpenCourseCount(void);
 void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row);
 void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
-void func_80210D34_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4);
-void func_80210D94_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4);
-void func_80210DF4_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4);
+void func_80210D34_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+void func_80210D94_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+void func_80210DF4_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4);
 void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value);
-void DrawMenuNumber(Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4,
-                    u8 style);
+void DrawMenuNumber(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4, u8 style);
 
 void func_8020E010_ovl_01(void** buffers) {
   EncodedAsset asset;
@@ -284,8 +284,8 @@ void func_8020E390_ovl_01(void) {
     if (memory->statsSpin == 0) {
       if (g_MenuRepeatButtons & R_JPAD) {
         PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255,
-                    255);
+        SetTextSlot(
+            0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
         memory->statsCourse++;
         if (memory->statsCourse > courseCount) {
           memory->statsCourse = 0;
@@ -304,8 +304,8 @@ void func_8020E390_ovl_01(void) {
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
         PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255,
-                    255);
+        SetTextSlot(
+            0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
         memory->statsCourse--;
         if (memory->statsCourse < 0) {
           memory->statsCourse = courseCount;
@@ -415,9 +415,9 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
 
   func_801FB54C_ovl_01(&gfx, COURSE_BOARD_KIND);
   guPerspectiveF(D_8023A790_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
-                 WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
+      WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
   guLookAtF(D_8023A7D0_ovl_01, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+      0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
   SetCpuProjectionF(D_8023A790_ovl_01, D_8023A7D0_ovl_01, g_Viewports);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -445,8 +445,8 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
     ScreenPoint point;
 
     angle = -((((statsCourse - index) % (courseCount + 1)) * angleStep +
-               spin * DEGREES_PER_SPIN_STEP) *
-              DEGREES_TO_RADIANS);
+                  spin * DEGREES_PER_SPIN_STEP) *
+        DEGREES_TO_RADIANS);
     wheelX = sinf(angle) * WHEEL_RADIUS_X;
     if (ProjectPoint(wheelX, 0.0f, cosf(angle) * WHEEL_RADIUS_Z, &point) < 0) {
       iconX[index] = point.x;
@@ -461,7 +461,7 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   for (sortIndex = 1; sortIndex != courseCount + 1; sortIndex++) {
     key = drawOrder[sortIndex];
     for (index = sortIndex - 1;
-         index >= 0 && iconY[drawOrder[index]] > iconY[key]; index--) {
+        index >= 0 && iconY[drawOrder[index]] > iconY[key]; index--) {
       drawOrder[index + 1] = drawOrder[index];
     }
     drawOrder[index + 1] = key;
@@ -481,19 +481,17 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     for (sortIndex = 0; sortIndex != COURSE_ICON_STRIP_COUNT; sortIndex++) {
-      gDPLoadTextureBlock(
-          gfx++,
+      gDPLoadTextureBlock(gfx++,
           (u32)((u8*)D_8023A820_ovl_01[image] + LARGE_PALETTED_TEXELS_OFFSET +
-                sortIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT) &
+              sortIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH, COURSE_ICON_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(
-          gfx++, (s32)(iconX[slot] - halfSize) << 2,
+      gSPScisTextureRectangle(gfx++, (s32)(iconX[slot] - halfSize) << 2,
           ((s32)(iconY[slot] - halfSize + sortIndex * halfSize) -
-           WHEEL_ICON_RAISE)
+              WHEEL_ICON_RAISE)
               << 2,
           (s32)(iconX[slot] + halfSize) << 2,
           ((s32)(iconY[slot] + sortIndex * halfSize) - WHEEL_ICON_RAISE) << 2,
@@ -504,8 +502,7 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   func_80212C54_ovl_01(&gfx, D_8023A830_ovl_01, &D_802300A8_ovl_01,
-                       &D_802300AC_ovl_01, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X,
-                       WHEEL_ARROW_Y);
+      &D_802300AC_ovl_01, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
   image = (memory->statsCourse == courseCount) ? COURSE_TOTALS_IMAGE
                                                : memory->statsCourse;
   func_8020F2D0_ovl_01(&gfx, 0, image);
@@ -520,8 +517,8 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E898_ovl_01);
 #endif
 
-void func_8020F2D0_ovl_01(Gfx** displayListHead, u8 useCourseNames,
-                          s32 courseIndex) {
+void func_8020F2D0_ovl_01(
+    Gfx** displayListHead, u8 useCourseNames, s32 courseIndex) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripTop;
@@ -538,18 +535,16 @@ void func_8020F2D0_ovl_01(Gfx** displayListHead, u8 useCourseNames,
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal256(gfx++, ((u32)D_8023A824_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_8023A824_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = COURSE_BANNER_TOP + stripIndex * COURSE_BANNER_STRIP_SPACING;
-    gSPScisTextureRectangle(
-        gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
+    gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
         (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
         (stripTop + COURSE_BANNER_STRIP_SPACING) << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE,
@@ -563,14 +558,14 @@ void func_8020F2D0_ovl_01(Gfx** displayListHead, u8 useCourseNames,
       sprintf(g_PrintBuffer, D_802318A8_ovl_01, g_TournamentNames[courseIndex]);
     } else {
       sprintf(g_PrintBuffer, D_802318AC_ovl_01, courseIndex + 1,
-              g_TournamentNames[courseIndex]);
+          g_TournamentNames[courseIndex]);
     }
   } else if (courseIndex + 1 == COURSE_COUNT + 1) {
-    sprintf(g_PrintBuffer, D_802318A8_ovl_01,
-            g_CourseRecords[courseIndex].name);
+    sprintf(
+        g_PrintBuffer, D_802318A8_ovl_01, g_CourseRecords[courseIndex].name);
   } else {
     sprintf(g_PrintBuffer, D_802318AC_ovl_01, courseIndex + 1,
-            g_CourseRecords[courseIndex].name);
+        g_CourseRecords[courseIndex].name);
   }
   DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, COURSE_NAME_Y, g_PrintBuffer);
   *displayListHead = gfx;
@@ -593,16 +588,16 @@ void func_8020F794_ovl_01(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, STATS_PANEL_LEFT << 2, STATS_PANEL_TOP << 2,
-                      STATS_PANEL_RIGHT << 2, STATS_PANEL_BOTTOM << 2,
-                      G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      STATS_PANEL_RIGHT << 2, STATS_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0, 0,
+      1 << 10, 1 << 10);
   gDPPipeSync(gfx++);
   for (statIndex = D_802300A0_ovl_01;
-       statIndex != D_802300A0_ovl_01 + STATS_SHOWN_ROW_COUNT; statIndex++) {
+      statIndex != D_802300A0_ovl_01 + STATS_SHOWN_ROW_COUNT; statIndex++) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     sprintf(g_PrintBuffer, D_802318A8_ovl_01, D_802300B4_ovl_01[statIndex]);
     DrawLargeText(&gfx, STATS_LABEL_X,
-                  STATS_FIRST_Y + (s16)row * STATS_LINE_HEIGHT, g_PrintBuffer);
+        STATS_FIRST_Y + (s16)row * STATS_LINE_HEIGHT, g_PrintBuffer);
     func_8020F9B8_ovl_01(&gfx, statIndex, row);
     row++;
   }
@@ -632,83 +627,77 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
   switch (statIndex) {
     case STAT_ROUND_COUNT:
       func_80210D94_ovl_01(&gfx, STATS_ROUND_COUNT_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].roundCount, 0);
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].roundCount, 0);
       break;
     case STAT_BEST_SCORE:
       bestScore = D_80105C38[courseIndex].bestScore;
       if (bestScore >= -9 && bestScore <= 9) {
         func_80210DF4_ovl_01(&gfx, STATS_ONE_DIGIT_X,
-                             STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
-                             MENU_NUMBER_UNK2);
+            STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+            MENU_NUMBER_UNK2);
       } else if ((bestScore >= 10 && bestScore <= 99) ||
-                 (bestScore >= -99 && bestScore <= -10)) {
+          (bestScore >= -99 && bestScore <= -10)) {
         func_80210DF4_ovl_01(&gfx, STATS_TWO_DIGIT_X,
-                             STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
-                             MENU_NUMBER_UNK2);
+            STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+            MENU_NUMBER_UNK2);
       } else {
         func_80210D34_ovl_01(&gfx, STATS_VALUE_X,
-                             STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
-                             MENU_NUMBER_UNK2);
+            STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+            MENU_NUMBER_UNK2);
       }
       break;
     case STAT_AVERAGE_SCORE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].averageScore);
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].averageScore);
       break;
     case STAT_BEST_DRIVE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].bestDrive);
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].bestDrive);
       gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-      func_8020FD48_ovl_01(
-          &gfx, STATS_UNIT_X,
+      func_8020FD48_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_DRIVE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].averageDrive);
-      func_8020FD48_ovl_01(
-          &gfx, STATS_UNIT_X,
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].averageDrive);
+      func_8020FD48_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_FAIRWAY_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].fairwayPercent);
-      func_8020FE20_ovl_01(
-          &gfx, STATS_UNIT_X,
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].fairwayPercent);
+      func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_PUTTS:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].averagePutts);
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].averagePutts);
       break;
     case STAT_PAR_SAVE_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].parSavePercent);
-      func_8020FE20_ovl_01(
-          &gfx, STATS_UNIT_X,
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].parSavePercent);
+      func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_PAR_ON_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].parOnPercent);
-      func_8020FE20_ovl_01(
-          &gfx, STATS_UNIT_X,
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].parOnPercent);
+      func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_SAND_SAVE_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-                           STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
-                           D_80105C38[courseIndex].sandSavePercent);
-      func_8020FE20_ovl_01(
-          &gfx, STATS_UNIT_X,
+          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          D_80105C38[courseIndex].sandSavePercent);
+      func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
       break;
   }
@@ -789,10 +778,10 @@ void func_8020FEF8_ovl_01(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  func_80207E28_ovl_01(&gfx, D_8023A810_ovl_01, BADGE_ICON_X + index,
-                       BADGE_ICON_Y);
-  func_80210DF4_ovl_01(&gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y, badgeCount,
-                       1);
+  func_80207E28_ovl_01(
+      &gfx, D_8023A810_ovl_01, BADGE_ICON_X + index, BADGE_ICON_Y);
+  func_80210DF4_ovl_01(
+      &gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y, badgeCount, 1);
   *displayListHead = gfx;
 }
 #else
@@ -830,28 +819,27 @@ void func_80210190_ovl_01(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0,
-                      ((u32)D_8023A828_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(
+        gfx++, 0, ((u32)D_8023A828_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
     for (arrowIndex = 0; arrowIndex != arrowCount; arrowIndex++) {
       top = (arrowIndex != 0) ? STATS_DOWN_ARROW_TOP : STATS_UP_ARROW_TOP;
       if (arrowCount == 1 && firstArrow) {
         top = STATS_DOWN_ARROW_TOP;
       }
-      gDPLoadTextureBlock_4b(
-          gfx++,
+      gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_8023A828_ovl_01 +
-           (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE +
-           (PALETTED_TEXELS_OFFSET +
-            STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE)) &
+              (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE +
+              (PALETTED_TEXELS_OFFSET +
+                  STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE)) &
               ~7,
           G_IM_FMT_CI, STATS_ARROW_WIDTH, STATS_ARROW_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, STATS_ARROW_LEFT << 2, top << 2,
-                          (STATS_ARROW_LEFT + STATS_ARROW_WIDTH) << 2,
-                          (top + STATS_ARROW_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-                          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (STATS_ARROW_LEFT + STATS_ARROW_WIDTH) << 2,
+          (top + STATS_ARROW_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
   }
@@ -887,10 +875,10 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
       SetTextSlotValue(
           GetCoursePointsNeeded(openCourseCount) - save->coursePoints, 0, 0);
       SetTextSlot(POINTS_NEEDED_X, POINTS_NEEDED_Y,
-                  MESSAGE_POINTS_TO_NEXT_COURSE, 1, 0, 0, 255, 255, 255, 255);
+          MESSAGE_POINTS_TO_NEXT_COURSE, 1, 0, 0, 255, 255, 255, 255);
     } else {
       SetTextSlot(ALL_COURSES_OPEN_X, ALL_COURSES_OPEN_Y,
-                  MESSAGE_ALL_COURSES_OPEN, 1, 0, 0, 255, 255, 255, 255);
+          MESSAGE_ALL_COURSES_OPEN, 1, 0, 0, 255, 255, 255, 255);
     }
   } else {
     gDPPipeSync(gfx++);
@@ -915,22 +903,22 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
         texels = D_8023A814_ovl_01[D_802300A4_ovl_01];
         gDPLoadTLUT_pal256(gfx++, (u32)palette & ~7);
         gDPLoadTextureTile(gfx++, (u32)texels & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
-                           D_800C20E0[memory->statsCourse].width,
-                           D_800C20E0[memory->statsCourse].height, 0, 0,
-                           D_800C20E0[memory->statsCourse].width - 1,
-                           D_800C20E0[memory->statsCourse].height - 1, 0,
-                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            D_800C20E0[memory->statsCourse].width,
+            D_800C20E0[memory->statsCourse].height, 0, 0,
+            D_800C20E0[memory->statsCourse].width - 1,
+            D_800C20E0[memory->statsCourse].height - 1, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         left = place * TROPHY_SPACING + -TROPHY_SHIFT_LEFT;
-        gSPScisTextureRectangle(
-            gfx++, (D_80230100_ovl_01[memory->statsCourse].x + left) << 2,
+        gSPScisTextureRectangle(gfx++,
+            (D_80230100_ovl_01[memory->statsCourse].x + left) << 2,
             D_80230100_ovl_01[memory->statsCourse].y << 2,
             (D_800C20E0[memory->statsCourse].width +
-             D_80230100_ovl_01[memory->statsCourse].x + left)
+                D_80230100_ovl_01[memory->statsCourse].x + left)
                 << 2,
             (D_800C20E0[memory->statsCourse].height +
-             D_80230100_ovl_01[memory->statsCourse].y)
+                D_80230100_ovl_01[memory->statsCourse].y)
                 << 2,
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
@@ -948,8 +936,8 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
         D_802300A2_ovl_01 = 0;
       }
       D_802300A4_ovl_01 ^= 1;
-      OpenEncodedAsset(D_800C21B8[memory->statsCourse][D_802300A2_ovl_01],
-                       &asset);
+      OpenEncodedAsset(
+          D_800C21B8[memory->statsCourse][D_802300A2_ovl_01], &asset);
       ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
     }
   }
@@ -959,8 +947,8 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802104F0_ovl_01);
 #endif
 
-void func_80210C18_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4) {
+void func_80210C18_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
   Gfx* gfx = *displayListHead;
 
   if (value > 99) {
@@ -973,8 +961,8 @@ void func_80210C18_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
   *displayListHead = gfx;
 }
 
-void func_80210C74_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4) {
+void func_80210C74_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
   Gfx* gfx = *displayListHead;
 
   if (value > 9) {
@@ -987,8 +975,8 @@ void func_80210C74_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
   *displayListHead = gfx;
 }
 
-void func_80210CD4_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4) {
+void func_80210CD4_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
   Gfx* gfx = *displayListHead;
 
   if (value > 99) {
@@ -1001,8 +989,8 @@ void func_80210CD4_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
   *displayListHead = gfx;
 }
 
-void func_80210D34_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4) {
+void func_80210D34_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
   Gfx* gfx = *displayListHead;
 
   if (value > 999) {
@@ -1015,8 +1003,8 @@ void func_80210D34_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
   *displayListHead = gfx;
 }
 
-void func_80210D94_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4) {
+void func_80210D94_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
   Gfx* gfx = *displayListHead;
 
   if (value > 9999) {
@@ -1029,8 +1017,8 @@ void func_80210D94_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
   *displayListHead = gfx;
 }
 
-void func_80210DF4_ovl_01(Gfx** displayListHead, s32 x, s32 y, s32 value,
-                          u8 arg4) {
+void func_80210DF4_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
   Gfx* gfx = *displayListHead;
 
   DrawMenuNumber(&gfx, x, y, value, arg4, 5);
@@ -1091,8 +1079,8 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   shift = 0;
   if (whole >= 0 && whole < DECIMAL_BASE) {
     shift = 2 * MENU_GLYPH_SIZE;
@@ -1106,52 +1094,49 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
     if (digit == '\0') {
       break;
     }
-    gDPLoadTextureBlock_4b(
-        gfx++,
+    gDPLoadTextureBlock_4b(gfx++,
         ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-         (digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
+            (digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
             ~7,
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, (x + shift + digitIndex * MENU_GLYPH_SIZE) << 2, y << 2,
+    gSPScisTextureRectangle(gfx++,
+        (x + shift + digitIndex * MENU_GLYPH_SIZE) << 2, y << 2,
         (x + shift + digitIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
         (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
   gDPLoadTextureBlock_4b(gfx++,
-                         ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-                          MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE) &
-                             ~7,
-                         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  gDPPipeSync(gfx++);
-  gSPScisTextureRectangle(
-      gfx++,
-      (x + shift + (digitIndex - 1) * MENU_GLYPH_SIZE + DECIMAL_POINT_OFFSET)
-          << 2,
-      y << 2,
-      (x + shift + (digitIndex - 1) * MENU_GLYPH_SIZE + DECIMAL_POINT_OFFSET +
-       MENU_GLYPH_SIZE)
-          << 2,
-      (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
-  gDPPipeSync(gfx++);
-  gDPLoadTextureBlock_4b(
-      gfx++,
       ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-       (fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
+          MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE) &
           ~7,
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gSPScisTextureRectangle(
-      gfx++, (x + shift + digitIndex * MENU_GLYPH_SIZE) << 2, y << 2,
+  gSPScisTextureRectangle(gfx++,
+      (x + shift + (digitIndex - 1) * MENU_GLYPH_SIZE + DECIMAL_POINT_OFFSET)
+          << 2,
+      y << 2,
+      (x + shift + (digitIndex - 1) * MENU_GLYPH_SIZE + DECIMAL_POINT_OFFSET +
+          MENU_GLYPH_SIZE)
+          << 2,
+      (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
+  gDPPipeSync(gfx++);
+  gDPLoadTextureBlock_4b(gfx++,
+      ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+          (fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
+          ~7,
+      G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPPipeSync(gfx++);
+  gSPScisTextureRectangle(gfx++,
+      (x + shift + digitIndex * MENU_GLYPH_SIZE) << 2, y << 2,
       (x + shift + digitIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
       (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
@@ -1187,19 +1172,19 @@ void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureBlock_4b(gfx++,
-                         ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-                          glyphIndex * MENU_GLYPH_IMAGE_SIZE) &
-                             ~7,
-                         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+          glyphIndex * MENU_GLYPH_IMAGE_SIZE) &
+          ~7,
+      G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++, x << 2, y << 2, (x + MENU_GLYPH_SIZE) << 2,
-                          (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-                          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1217,21 +1202,19 @@ void func_80212858_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   for (glyphIndex = 0; glyphIndex != OFF_GLYPH_COUNT; glyphIndex++) {
-    gDPLoadTextureBlock_4b(
-        gfx++,
+    gDPLoadTextureBlock_4b(gfx++,
         ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-         (OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE) &
+            (OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE) &
             ~7,
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, (x + glyphIndex * MENU_GLYPH_SIZE) << 2, y << 2,
-        (x + glyphIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
+    gSPScisTextureRectangle(gfx++, (x + glyphIndex * MENU_GLYPH_SIZE) << 2,
+        y << 2, (x + glyphIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
         (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -1246,8 +1229,7 @@ void func_80212858_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
  */
 #ifdef NON_MATCHING
 void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
-                          s32* blinkTimer, s32 width, s32 centerX,
-                          s32 centerY) {
+    s32* blinkTimer, s32 width, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 left = 0;
   s32 arrowIndex;
@@ -1263,14 +1245,14 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
   frameOffset = *blinkFrame * SIDE_ARROW_BLINK_STRIDE + PALETTED_TEXELS_OFFSET;
   for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
-                          ((u32)image + ((SIDE_ARROW_FIRST_IMAGE + arrowIndex) *
-                                             SIDE_ARROW_IMAGE_SIZE +
-                                         frameOffset)) &
-                              ~7,
-                          G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0,
-                          SIDE_ARROW_SIZE - 1, SIDE_ARROW_SIZE - 1, 0,
-                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        ((u32)image +
+            ((SIDE_ARROW_FIRST_IMAGE + arrowIndex) * SIDE_ARROW_IMAGE_SIZE +
+                frameOffset)) &
+            ~7,
+        G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0,
+        SIDE_ARROW_SIZE - 1, SIDE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     gDPPipeSync(gfx++);
     if (arrowIndex == SIDE_ARROW_RIGHT) {
       left = centerX + width / 2;
@@ -1278,10 +1260,10 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
     if (arrowIndex == SIDE_ARROW_LEFT) {
       left = centerX - width / 2 - SIDE_ARROW_SIZE;
     }
-    gSPScisTextureRectangle(
-        gfx++, left << 2, (centerY - SIDE_ARROW_SIZE / 2) << 2,
-        (left + SIDE_ARROW_SIZE) << 2, (centerY + SIDE_ARROW_SIZE / 2) << 2,
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, left << 2,
+        (centerY - SIDE_ARROW_SIZE / 2) << 2, (left + SIDE_ARROW_SIZE) << 2,
+        (centerY + SIDE_ARROW_SIZE / 2) << 2, G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
   *displayListHead = gfx;
@@ -1296,7 +1278,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212C54_ovl_01);
  */
 #ifdef NON_MATCHING
 void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
-                          s32 direction, s32 centerX, s32 centerY) {
+    s32 direction, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 top;
   s32 left;
@@ -1317,21 +1299,22 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureTile_4b(gfx++,
-                        ((u32)image + (direction * SIDE_ARROW_IMAGE_SIZE +
-                                       (blinkFrame * SIDE_ARROW_BLINK_STRIDE +
-                                        PALETTED_TEXELS_OFFSET))) &
-                            ~7,
-                        G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0,
-                        SIDE_ARROW_SIZE - 1, SIDE_ARROW_SIZE - 1, 0,
-                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      ((u32)image +
+          (direction * SIDE_ARROW_IMAGE_SIZE +
+              (blinkFrame * SIDE_ARROW_BLINK_STRIDE +
+                  PALETTED_TEXELS_OFFSET))) &
+          ~7,
+      G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0, SIDE_ARROW_SIZE - 1,
+      SIDE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(gfx++);
   left = centerX - SIDE_ARROW_SIZE / 2;
   top = centerY - SIDE_ARROW_SIZE / 2;
   gSPScisTextureRectangle(gfx++, left << 2, top << 2,
-                          (centerX + SIDE_ARROW_SIZE / 2) << 2,
-                          (centerY + SIDE_ARROW_SIZE / 2) << 2, G_TX_RENDERTILE,
-                          0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      (centerX + SIDE_ARROW_SIZE / 2) << 2,
+      (centerY + SIDE_ARROW_SIZE / 2) << 2, G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }

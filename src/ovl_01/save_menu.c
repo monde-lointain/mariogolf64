@@ -326,7 +326,7 @@ void func_8021F79C_ovl_01(void) {
             }
           }
         } else if (memory->ringShotFirstCharacters[index] <
-                   RING_SHOT_LAST_FIRST_CHARACTER) {
+            RING_SHOT_LAST_FIRST_CHARACTER) {
           memory->ringShotFirstCharacters[index]++;
         }
       }
@@ -441,7 +441,7 @@ s32 func_80220E28_ovl_01(Unk68* record) {
 }
 
 void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
-                          s32 top, u8 showsCourseWord) {
+    s32 top, u8 showsCourseWord) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
@@ -452,26 +452,24 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    ((u32)D_8023B678_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023B678_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureTile_4b(gfx++,
-                        ((u32)D_8023B678_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7,
-                        G_IM_FMT_CI, COURSE_LABEL_WIDTH, COURSE_LABEL_HEIGHT, 0,
-                        0, COURSE_LABEL_WIDTH - 1, COURSE_LABEL_HEIGHT - 1, 0,
-                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      ((u32)D_8023B678_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+      COURSE_LABEL_WIDTH, COURSE_LABEL_HEIGHT, 0, 0, COURSE_LABEL_WIDTH - 1,
+      COURSE_LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   if (showsCourseWord == TRUE) {
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, (left + COURSE_WORD_OFFSET_X) << 2, top << 2,
+    gSPScisTextureRectangle(gfx++, (left + COURSE_WORD_OFFSET_X) << 2, top << 2,
         (left + COURSE_WORD_OFFSET_X + COURSE_WORD_WIDTH) << 2,
         (top + COURSE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE,
         (COURSE_DIGIT_WIDTH * COURSE_COUNT) << 5, 0, 1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
   }
   gDPPipeSync(gfx++);
-  gSPScisTextureRectangle(
-      gfx++, (left + COURSE_DIGIT_OFFSET_X) << 2, top << 2,
+  gSPScisTextureRectangle(gfx++, (left + COURSE_DIGIT_OFFSET_X) << 2, top << 2,
       (left + COURSE_DIGIT_OFFSET_X + COURSE_DIGIT_WIDTH) << 2,
       (top + COURSE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE,
       (courseIndex * COURSE_DIGIT_WIDTH) << 5, 0, 1 << 10, 1 << 10);
@@ -479,8 +477,8 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
   *displayListHead = gfx;
 }
 
-void func_802213C8_ovl_01(Gfx** displayListHead, s32 imageIndex, s32 left,
-                          s32 top) {
+void func_802213C8_ovl_01(
+    Gfx** displayListHead, s32 imageIndex, s32 left, s32 top) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
 
@@ -496,21 +494,19 @@ void func_802213C8_ovl_01(Gfx** displayListHead, s32 imageIndex, s32 left,
   gDPLoadTLUT_pal256(
       gfx++, ((u32)D_8023B680_ovl_01[imageIndex] + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != SAVE_ICON_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_8023B680_ovl_01[imageIndex] + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * SAVE_ICON_WIDTH * SAVE_ICON_STRIP_HEIGHT) &
+            stripIndex * SAVE_ICON_WIDTH * SAVE_ICON_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, SAVE_ICON_WIDTH, SAVE_ICON_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, left << 2,
+    gSPScisTextureRectangle(gfx++, left << 2,
         (top + stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT) << 2,
         (left + SAVE_ICON_SHOWN_WIDTH) << 2,
         (top + stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT +
-         SAVE_ICON_SHOWN_STRIP_HEIGHT)
+            SAVE_ICON_SHOWN_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0, (SAVE_ICON_WIDTH << 10) / SAVE_ICON_SHOWN_WIDTH,
         (SAVE_ICON_STRIP_HEIGHT << 10) / SAVE_ICON_SHOWN_STRIP_HEIGHT);
@@ -609,7 +605,7 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
         ReadEncodedAsset(*bufferSlot, &asset);
       } else {
         miniGolfIndex = save->savedGames[gameIndex].state.courseIndex -
-                        MINI_GOLF_COURSE_INDEX;
+            MINI_GOLF_COURSE_INDEX;
         OpenEncodedAsset(D_800C208C[miniGolfIndex], &asset);
         ReadEncodedAsset(*bufferSlot, &asset);
         OpenAssetFile(D_800C20D4[miniGolfIndex], &file);
@@ -635,7 +631,7 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
         ReadEncodedAsset(*bufferSlot, &asset);
       } else {
         miniGolfIndex = save->savedGames[gameIndex].state.courseIndex -
-                        MINI_GOLF_COURSE_INDEX;
+            MINI_GOLF_COURSE_INDEX;
         OpenEncodedAsset(D_800C208C[miniGolfIndex], &asset);
         ReadEncodedAsset(*bufferSlot, &asset);
         OpenAssetFile(D_800C20D4[miniGolfIndex], &file);
@@ -766,7 +762,7 @@ void func_80221EBC_ovl_01(void** buffers, u8 bufferKind) {
       D_8023BD74_ovl_01 = buffers;
       modeImages = D_80230B5C_ovl_01;
       for (imageIndex = 0; imageIndex != SAVE_MENU_CHOSEN_IMAGE_COUNT;
-           imageIndex++) {
+          imageIndex++) {
         mode = D_80230B50_ovl_01[memory->savedGameIndex];
         if (mode == -1) {
           mode = 0;
@@ -879,8 +875,8 @@ s32 func_80222F2C_ovl_01(void) {
     character = (s8)savedPlayer->characterIndex;
     D_8012F480[playerIndex] = character;
     g_Players[playerIndex].characterIndex = character;
-    LoadPlayerFace(playerIndex, character,
-                   (s8)g_Players[playerIndex].paletteIndex);
+    LoadPlayerFace(
+        playerIndex, character, (s8)g_Players[playerIndex].paletteIndex);
     savedPlayer++;
   }
   if (!IsGameFlagSet(GAME_FLAG_KEEP_SAVED_GAMES)) {
@@ -912,8 +908,8 @@ extern s32 D_80230BB0_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
 extern s32 D_8023BDAC_ovl_01;
 extern s32 D_8023BDB0_ovl_01;
 
-void func_80224AFC_ovl_01(Gfx** displayListHead, s32 left, s32 top,
-                          s32 halfSize, s32 scale) {
+void func_80224AFC_ovl_01(
+    Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
   MenuMemory* memory = func_8005AF74();
   Gfx* gfx = *displayListHead;
   s32 iconHalfSize = D_8023BDB0_ovl_01;
@@ -924,42 +920,38 @@ void func_80224AFC_ovl_01(Gfx** displayListHead, s32 left, s32 top,
   u8 iconIndex;
 
   gDPPipeSync(gfx++);
-  gDPLoadTLUT_pal256(gfx++, ((u32)(&D_8023BD98_ovl_01)[memory->savedGameIndex] +
-                             IMAGE_HEADER_SIZE) &
-                                ~7);
+  gDPLoadTLUT_pal256(gfx++,
+      ((u32)(&D_8023BD98_ovl_01)[memory->savedGameIndex] + IMAGE_HEADER_SIZE) &
+          ~7);
   for (stripIndex = 0; stripIndex != GAME_BOARD_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)(&D_8023BD98_ovl_01)[memory->savedGameIndex] +
-         LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT) &
+            LARGE_PALETTED_TEXELS_OFFSET +
+            stripIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, left << 2,
-                            (top + stripIndex * halfSize) << 2,
-                            (left + halfSize + halfSize) << 2,
-                            (top + halfSize + stripIndex * halfSize) << 2,
-                            G_TX_RENDERTILE, 0, 0, scale, scale);
+        (top + stripIndex * halfSize) << 2, (left + halfSize + halfSize) << 2,
+        (top + halfSize + stripIndex * halfSize) << 2, G_TX_RENDERTILE, 0, 0,
+        scale, scale);
     gDPPipeSync(gfx++);
   }
   if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
     image = D_8023BD74_ovl_01[D_8022F8C4_ovl_01];
     gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
-      gDPLoadTextureBlock(
-          gfx++,
+      gDPLoadTextureBlock(gfx++,
           ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-           stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) &
+              stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(
-          gfx++, (left + MODE_ICON_OFFSET_X) << 2,
+      gSPScisTextureRectangle(gfx++, (left + MODE_ICON_OFFSET_X) << 2,
           (top + stripIndex * iconHalfSize + MODE_ICON_OFFSET_Y) << 2,
           (left + iconHalfSize + iconHalfSize + MODE_ICON_OFFSET_X) << 2,
           (top + iconHalfSize + stripIndex * iconHalfSize + MODE_ICON_OFFSET_Y)
@@ -980,8 +972,8 @@ void func_80224AFC_ovl_01(Gfx** displayListHead, s32 left, s32 top,
         D_8022F8C0_ovl_01 = 0;
       }
       D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
-      OpenEncodedAsset(g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01],
-                       &asset);
+      OpenEncodedAsset(
+          g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01], &asset);
       ReadEncodedAsset(D_8023BD74_ovl_01[D_8022F8C4_ovl_01], &asset);
     }
   }
@@ -1036,11 +1028,11 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
       break;
   }
   guOrtho(&D_8023BCE0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
-          -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, SAVED_CHARACTERS_NEAR,
-          SAVED_CHARACTERS_FAR, SAVED_CHARACTERS_ORTHO_SCALE);
+      -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, SAVED_CHARACTERS_NEAR,
+      SAVED_CHARACTERS_FAR, SAVED_CHARACTERS_ORTHO_SCALE);
   guLookAtReflectF(viewing, &D_8023BD30_ovl_01[g_DrawBufferIndex], 0.0f,
-                   SAVED_CHARACTERS_EYE_Y, SAVED_CHARACTERS_EYE_Z, 0.0f, 0.0f,
-                   0.0f, 0.0f, 1.0f, 0.0f);
+      SAVED_CHARACTERS_EYE_Y, SAVED_CHARACTERS_EYE_Z, 0.0f, 0.0f, 0.0f, 0.0f,
+      1.0f, 0.0f);
   gSPLookAt(gfx++, &D_8023BD30_ovl_01[g_DrawBufferIndex]);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     fidgetTimer = &D_8023BFC0_ovl_01[playerIndex];
@@ -1065,8 +1057,8 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
         FreeCharacterSlot(playerIndex);
       } else {
         LoadCharacter(playerIndex,
-                      (s8)players[playerIndex].characterIndex + CHARACTER_COUNT,
-                      (s8)players[playerIndex].paletteIndex);
+            (s8)players[playerIndex].characterIndex + CHARACTER_COUNT,
+            (s8)players[playerIndex].paletteIndex);
         D_801B70F0[playerIndex] = TRUE;
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
         SetAnimationSpeed(playerIndex, 1.0f);
@@ -1076,8 +1068,8 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
     rotation[1] = DEGREES_TO_RADIANS(D_80230D18_ovl_01[1]);
     rotation[2] = 0.0f;
     raise = ((s8)players[playerIndex].characterIndex == CHARACTER_BABY_MARIO)
-                ? BABY_MARIO_RAISE
-                : 0;
+        ? BABY_MARIO_RAISE
+        : 0;
     translation[0] = D_80230D28_ovl_01[playerCount - 1][playerIndex][0];
     translation[1] = D_80230D28_ovl_01[playerCount - 1][playerIndex][1] + raise;
     translation[2] = D_80230D28_ovl_01[playerCount - 1][playerIndex][2];
@@ -1085,8 +1077,8 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
     scale[1] = D_8023BD20_ovl_01[playerIndex];
     scale[2] = D_8023BD20_ovl_01[playerIndex];
     BuildTransformMatrix(transform, rotation, translation, scale);
-    ConvertMatrixToFixed(transform,
-                         &D_8023BAE0_ovl_01[playerIndex][g_DrawBufferIndex]);
+    ConvertMatrixToFixed(
+        transform, &D_8023BAE0_ovl_01[playerIndex][g_DrawBufferIndex]);
     AnimateCharacter(playerIndex);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
@@ -1094,9 +1086,8 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BCE0_ovl_01),
-              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(
-        gfx++,
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++,
         OS_K0_TO_PHYSICAL(&D_8023BAE0_ovl_01[playerIndex][g_DrawBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
@@ -1158,19 +1149,18 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
       controller = D_80230B40_ovl_01[playerIndex];
       if (controller != COMPUTER_CONTROLLER) {
         gDPLoadTextureBlock(gfx++,
-                            ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-                             controller * CONTROLLER_ICON_IMAGE_SIZE) &
-                                ~7,
-                            G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLLER_ICON_SIZE,
-                            CONTROLLER_ICON_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                            G_TX_NOLOD, G_TX_NOLOD);
+            ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+                controller * CONTROLLER_ICON_IMAGE_SIZE) &
+                ~7,
+            G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLLER_ICON_SIZE,
+            CONTROLLER_ICON_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++, position[0] << 2, position[1] << 2,
-                                (position[0] + CONTROLLER_ICON_SIZE) << 2,
-                                (position[1] + CONTROLLER_ICON_SIZE) << 2,
-                                G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-                                TEXEL_STEP_ONE);
+            (position[0] + CONTROLLER_ICON_SIZE) << 2,
+            (position[1] + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
     }
@@ -1188,26 +1178,23 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
         labelIndex = playerIndex + PLAYER_LABEL_COMPUTER_FIRST;
       }
       gDPLoadTextureBlock_4b(gfx++,
-                             ((u32)image + PALETTED_TEXELS_OFFSET +
-                              labelIndex * PLAYER_LABEL_IMAGE_SIZE) &
-                                 ~7,
-                             G_IM_FMT_CI, PLAYER_LABEL_WIDTH,
-                             PLAYER_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          ((u32)image + PALETTED_TEXELS_OFFSET +
+              labelIndex * PLAYER_LABEL_IMAGE_SIZE) &
+              ~7,
+          G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureBlock_4b(gfx++,
-                             ((u32)image + PALETTED_TEXELS_OFFSET +
-                              playerIndex * PLAYER_LABEL_IMAGE_SIZE) &
-                                 ~7,
-                             G_IM_FMT_CI, PLAYER_LABEL_WIDTH,
-                             PLAYER_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          ((u32)image + PALETTED_TEXELS_OFFSET +
+              playerIndex * PLAYER_LABEL_IMAGE_SIZE) &
+              ~7,
+          G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     }
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, (position[0] + PLAYER_LABEL_OFFSET_X) << 2,
+    gSPScisTextureRectangle(gfx++, (position[0] + PLAYER_LABEL_OFFSET_X) << 2,
         (position[1] + PLAYER_LABEL_OFFSET_Y) << 2,
         (position[0] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH) << 2,
         (position[1] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT) << 2,
@@ -1224,16 +1211,15 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
 
   GetSaveData();
   func_8005AF74();
-  gDPLoadTLUT_pal256(
-      gfx++,
+  gDPLoadTLUT_pal256(gfx++,
       ((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT;
-       stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+      stripIndex++) {
+    gDPLoadTextureBlock(gfx++,
         ((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] +
-         LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * COURSE_THUMBNAIL_WIDTH * COURSE_THUMBNAIL_STRIP_HEIGHT) &
+            LARGE_PALETTED_TEXELS_OFFSET +
+            stripIndex * COURSE_THUMBNAIL_WIDTH *
+                COURSE_THUMBNAIL_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_THUMBNAIL_WIDTH,
         COURSE_THUMBNAIL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1242,8 +1228,7 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     stripTop =
         COURSE_THUMBNAIL_TOP + stripIndex * COURSE_THUMBNAIL_SHOWN_HEIGHT;
-    gSPScisTextureRectangle(
-        gfx++, COURSE_THUMBNAIL_LEFT << 2, stripTop << 2,
+    gSPScisTextureRectangle(gfx++, COURSE_THUMBNAIL_LEFT << 2, stripTop << 2,
         (COURSE_THUMBNAIL_LEFT + COURSE_THUMBNAIL_SHOWN_WIDTH) << 2,
         (stripTop + COURSE_THUMBNAIL_SHOWN_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         (COURSE_THUMBNAIL_WIDTH << 10) / COURSE_THUMBNAIL_SHOWN_WIDTH,
@@ -1264,13 +1249,13 @@ void func_8022644C_ovl_01(Gfx** displayListHead) {
   palette = D_801052C4[0];
   gDPLoadTLUT_pal256(gfx++, (u32)palette & ~7);
   for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT;
-       stripIndex++) {
+      stripIndex++) {
     /* The course and chosen course buffers are adjacent; D_80230B4E picks one
      */
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] +
-         stripIndex * COURSE_THUMBNAIL_WIDTH * COURSE_THUMBNAIL_STRIP_HEIGHT) &
+            stripIndex * COURSE_THUMBNAIL_WIDTH *
+                COURSE_THUMBNAIL_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_THUMBNAIL_WIDTH,
         COURSE_THUMBNAIL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1279,8 +1264,7 @@ void func_8022644C_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     stripTop =
         COURSE_THUMBNAIL_TOP + stripIndex * COURSE_THUMBNAIL_SHOWN_HEIGHT;
-    gSPScisTextureRectangle(
-        gfx++, COURSE_THUMBNAIL_LEFT << 2, stripTop << 2,
+    gSPScisTextureRectangle(gfx++, COURSE_THUMBNAIL_LEFT << 2, stripTop << 2,
         (COURSE_THUMBNAIL_LEFT + COURSE_THUMBNAIL_SHOWN_WIDTH) << 2,
         (stripTop + COURSE_THUMBNAIL_SHOWN_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         (COURSE_THUMBNAIL_WIDTH << 10) / COURSE_THUMBNAIL_SHOWN_WIDTH,

@@ -47,17 +47,15 @@ void SimulateShot(Unk20* shot) {
   hasUnk40Flag = FALSE;
   g_SimulatedShot.unk2E0C =
       GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
-  g_SimulatedShot.unk2E14 =
-      shot->unkC == 0 && shot->unk8 >= 0x100 &&
+  g_SimulatedShot.unk2E14 = shot->unkC == 0 && shot->unk8 >= 0x100 &&
       !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
-  g_SimulatedShot.unk2E42 =
-      GetUnkCEntry(GetClub(g_Players[g_CurrentShot.playerIndex]
-                               .clubs[g_CurrentShot.clubSlot]),
-                   g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
-          ->unk5;
+  g_SimulatedShot.unk2E42 = GetUnkCEntry(
+      GetClub(
+          g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
+      g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
+                                ->unk5;
   LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
-  g_SimulatedShot.unk2E08 =
-      g_IsMiniGolf ||
+  g_SimulatedShot.unk2E08 = g_IsMiniGolf ||
       GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
   step = 0;
   while (simulation->isRunning) {

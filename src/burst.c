@@ -87,10 +87,10 @@ void LoadBursts(s32 courseRecordIndex) {
   s32 row;
   s32 column;
 
-  f_BurstShape = AllocMemory(
-      OpenEncodedAsset(f_BurstShapeAssetIds[courseRecordIndex %
-                                            ARRAY_COUNT(f_BurstShapeAssetIds)],
-                       &asset));
+  f_BurstShape =
+      AllocMemory(OpenEncodedAsset(f_BurstShapeAssetIds[courseRecordIndex %
+                                       ARRAY_COUNT(f_BurstShapeAssetIds)],
+          &asset));
   ReadEncodedAsset(f_BurstShape, &asset);
   for (index = 0; index != BURST_COUNT; index++) {
     f_Bursts[index].unk24 = 0;
@@ -243,7 +243,7 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
   for (index = 0; index != f_BurstCount; index++) {
     if (f_Bursts[index].isActive == TRUE) {
       for (particleIndex = 0; particleIndex != f_Bursts[index].particleCount;
-           particleIndex++) {
+          particleIndex++) {
         particle = &f_Bursts[index].particles[particleIndex];
         if (particle->life > 0) {
           particle->x += particle->velocityX;
@@ -254,7 +254,7 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
             particle->life -= 4;
           }
           speed = sqrtf(particle->velocityX * particle->velocityX +
-                        particle->velocityY * particle->velocityY);
+              particle->velocityY * particle->velocityY);
           directionX = 0.0f;
           if (speed != 0.0f) {
             inverseSpeed = 1.0f / speed;
@@ -282,8 +282,8 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
           transform[3][0] = particle->x;
           transform[3][1] = particle->y;
           transform[3][2] = -100.0f;
-          ConvertMatrixToFixed(transform,
-                               &particle->matrices[g_MatrixBufferIndex]);
+          ConvertMatrixToFixed(
+              transform, &particle->matrices[g_MatrixBufferIndex]);
         }
       }
     }
@@ -303,10 +303,10 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetAlphaDither(gfx++, G_AD_PATTERN);
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0,
-                    PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0);
+      PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   f_BurstHue += DEGREES_TO_RADIANS(3);
   /* index is f_BurstCount here, so every burst shares one color */
   red = (s32)(sinf(f_BurstHue + index) * 64.0f) + 127;
@@ -331,15 +331,15 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
       }
       gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
       for (particleIndex = 0; particleIndex != f_Bursts[index].particleCount;
-           particleIndex++) {
+          particleIndex++) {
         particle = &f_Bursts[index].particles[particleIndex];
         if (particle->life > 0) {
           gDPPipeSync(gfx++);
           gSPMatrix(gfx++,
-                    OS_K0_TO_PHYSICAL(&particle->matrices[g_MatrixBufferIndex]),
-                    G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+              OS_K0_TO_PHYSICAL(&particle->matrices[g_MatrixBufferIndex]),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPVertex(gfx++, f_BurstParticleVertices,
-                    ARRAY_COUNT(f_BurstParticleVertices), 0);
+              ARRAY_COUNT(f_BurstParticleVertices), 0);
           gSP1Triangle(gfx++, 0, 1, 2, 0);
         }
       }

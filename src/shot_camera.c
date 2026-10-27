@@ -252,20 +252,18 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
 
   player = &g_Players[g_CurrentShot.playerIndex];
   aimYaw = g_CurrentShot.unk0;
-  distance = GetBallDistance(0, player->clubs[g_CurrentShot.clubSlot], FALSE,
-                             g_CurrentShot.shotMode);
+  distance = GetBallDistance(
+      0, player->clubs[g_CurrentShot.clubSlot], FALSE, g_CurrentShot.shotMode);
   angle = ((aimYaw + BINARY_ANGLE_TURN / 4) & BINARY_ANGLE_MASK) *
-          BINARY_ANGLE_TO_RADIANS;
+      BINARY_ANGLE_TO_RADIANS;
   if (player->unk22) {
     distance = -distance;
   }
   groundPoint[AXIS_X] = cosf(angle) * distance +
-                        sinf(angle) * STANCE_AIM_OFFSET +
-                        player->ballPosition[AXIS_X];
+      sinf(angle) * STANCE_AIM_OFFSET + player->ballPosition[AXIS_X];
   /* The offset's sign on z differs from the loop's; the original has it */
   groundPoint[AXIS_Z] = sinf(angle) * distance +
-                        cosf(angle) * STANCE_AIM_OFFSET +
-                        player->ballPosition[AXIS_Z];
+      cosf(angle) * STANCE_AIM_OFFSET + player->ballPosition[AXIS_Z];
   groundPoint[AXIS_Y] =
       GetGroundHeight(groundPoint[AXIS_X], groundPoint[AXIS_Z]);
   ballHeight = player->ballPosition[AXIS_Y];
@@ -273,9 +271,9 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
   for (passIndex = 0; passIndex < STANCE_SLOPE_PASS_COUNT; passIndex++) {
     reach = cosf(slope) * distance;
     position[AXIS_X] = cosf(angle) * reach + sinf(angle) * STANCE_AIM_OFFSET +
-                       player->ballPosition[AXIS_X];
+        player->ballPosition[AXIS_X];
     position[AXIS_Z] = sinf(angle) * reach - cosf(angle) * STANCE_AIM_OFFSET +
-                       player->ballPosition[AXIS_Z];
+        player->ballPosition[AXIS_Z];
     position[AXIS_Y] = GetGroundHeight(position[AXIS_X], position[AXIS_Z]);
     if (position[AXIS_Y] - ballHeight > AbsoluteF32(distance)) {
       position[AXIS_Y] = AbsoluteF32(distance) + ballHeight;
@@ -316,7 +314,7 @@ s16 GetCrossSlopeAngle(UnkB8* player, Unk20* shot) {
   yaw = aimYaw + BINARY_ANGLE_TURN / 4;
   if (player->unk22) {
     angle = BINARY_ANGLE_TO_RADIANS *
-            ((yaw + BINARY_ANGLE_TURN / 2) & BINARY_ANGLE_MASK);
+        ((yaw + BINARY_ANGLE_TURN / 2) & BINARY_ANGLE_MASK);
   } else {
     angle = (yaw & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
   }
@@ -358,9 +356,8 @@ s16 GetAimSlopeAngle(UnkB8* player, Unk20* shot) {
   angle = (u16)shot->unk0 * BINARY_ANGLE_TO_RADIANS;
   step[0] = cosf(angle) * AIM_SLOPE_STEP;
   step[1] = sinf(angle) * AIM_SLOPE_STEP;
-  aheadHeight =
-      GetGroundHeight((s32)step[0] / 2 + player->ballPosition[AXIS_X],
-                      (s32)step[1] / 2 + player->ballPosition[AXIS_Z]);
+  aheadHeight = GetGroundHeight((s32)step[0] / 2 + player->ballPosition[AXIS_X],
+      (s32)step[1] / 2 + player->ballPosition[AXIS_Z]);
   if (aheadHeight < player->ballPosition[AXIS_Y] - AIM_SLOPE_MAX_RISE) {
     aheadHeight = player->ballPosition[AXIS_Y] - AIM_SLOPE_MAX_RISE;
   }
@@ -368,7 +365,7 @@ s16 GetAimSlopeAngle(UnkB8* player, Unk20* shot) {
     aheadHeight = player->ballPosition[AXIS_Y] + AIM_SLOPE_MAX_RISE;
   }
   behindHeight = GetGroundHeight(player->ballPosition[AXIS_X] - (s32)step[0],
-                                 player->ballPosition[AXIS_Z] - (s32)step[1]);
+      player->ballPosition[AXIS_Z] - (s32)step[1]);
   if (behindHeight < player->ballPosition[AXIS_Y] - AIM_SLOPE_MAX_RISE) {
     behindHeight = player->ballPosition[AXIS_Y] - AIM_SLOPE_MAX_RISE;
   }
@@ -376,7 +373,7 @@ s16 GetAimSlopeAngle(UnkB8* player, Unk20* shot) {
     behindHeight = player->ballPosition[AXIS_Y] + AIM_SLOPE_MAX_RISE;
   }
   return atan2(aheadHeight - behindHeight, AIM_SLOPE_STEP * 1.5) *
-         RADIANS_TO_BINARY_ANGLE;
+      RADIANS_TO_BINARY_ANGLE;
 }
 
 /* Unreferenced; the original has it, and its zero is in the ROM */
@@ -391,8 +388,8 @@ s32 StepHoleFlyover(void);
 
 /* The surface under the player's ball */
 SurfaceInfo* GetBallSurfaceInfo(UnkB8* player) {
-  return GetSurfaceInfoAt(player->ballPosition[AXIS_X],
-                          player->ballPosition[AXIS_Z]);
+  return GetSurfaceInfoAt(
+      player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
 }
 
 s32 IsDebugBButtonView(void) {
@@ -586,10 +583,10 @@ void StartFlightCamera(s32 earlierFlightCount) {
   f_ShotEndPosition[AXIS_Z] = (f32)g_SimulatedShot.endPosition[AXIS_Z];
   f_ShotFlightYaw =
       -atan2((f32)(f_ShotEndPosition[AXIS_X] - f_ShotStartPosition[AXIS_X]),
-             (f32)(f_ShotEndPosition[AXIS_Z] - f_ShotStartPosition[AXIS_Z]));
+          (f32)(f_ShotEndPosition[AXIS_Z] - f_ShotStartPosition[AXIS_Z]));
   f_EndYawFromCup =
       -atan2((f32)(f_ShotEndPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X]),
-             (f32)(f_ShotEndPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]));
+          (f32)(f_ShotEndPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]));
   f_StartYawFromCup = -atan2(
       (f32)(f_ShotStartPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X]),
       (f32)(f_ShotStartPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]));
@@ -598,23 +595,23 @@ void StartFlightCamera(s32 earlierFlightCount) {
       f_ShotStartPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
   D_800BE640 =
       IntLength3D(f_ShotStartPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
-                  f_ShotStartPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
-                  f_ShotStartPosition[AXIS_Z] - f_ShotEndPosition[AXIS_Z]);
+          f_ShotStartPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
+          f_ShotStartPosition[AXIS_Z] - f_ShotEndPosition[AXIS_Z]);
   if (D_800BE640 < MIN_SHOT_LENGTH) {
     D_800BE640 = MIN_SHOT_LENGTH;
   }
-  f_LandingCupDistance = GetCupDistance(
-      f_ShotEndPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-      f_ShotEndPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+  f_LandingCupDistance =
+      GetCupDistance(f_ShotEndPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+          f_ShotEndPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
   D_800BE658 = 0;
   /* The != tests are there to match */
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
     if (i < g_SimulatedShot.stepCount &&
         IsCupPassPoint(IntLength2D(g_SimulatedShot.path[i][AXIS_X] -
-                                       D_800BA9D8.cupPosition[AXIS_X],
-                                   g_SimulatedShot.path[i][AXIS_Z] -
-                                       D_800BA9D8.cupPosition[AXIS_Z]),
-                       g_SimulatedShot.path[i][AXIS_Y])) {
+                               D_800BA9D8.cupPosition[AXIS_X],
+                           g_SimulatedShot.path[i][AXIS_Z] -
+                               D_800BA9D8.cupPosition[AXIS_Z]),
+            g_SimulatedShot.path[i][AXIS_Y])) {
       D_800BE658 |= 2;
     }
   }
@@ -635,10 +632,10 @@ void StartFlightCamera(s32 earlierFlightCount) {
   for (i = 0; i != GROUND_PROBE_COUNT; i++) {
     if (g_Players[g_CurrentShot.playerIndex].unk22 == 1) {
       yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS +
-            (f32)i * GROUND_PROBE_ANGLE_STEP;
+          (f32)i * GROUND_PROBE_ANGLE_STEP;
     } else {
       yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS -
-            (f32)i * GROUND_PROBE_ANGLE_STEP;
+          (f32)i * GROUND_PROBE_ANGLE_STEP;
     }
     probe[AXIS_X] =
         cosf(yaw) * GROUND_PROBE_DISTANCE + g_CurrentShot.ballPosition[AXIS_X];
@@ -655,7 +652,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     }
   }
   degrees = g_RoundHud.lieTilt * (360.0f * BINARY_ANGLE_TO_RADIANS) *
-            (1.0 / (2 * M_PI));
+      (1.0 / (2 * M_PI));
   if (degrees < 350.0f && degrees > 10.0f) {
     D_800BE690 = FALSE;
   }
@@ -697,13 +694,13 @@ void StartFlightCamera(s32 earlierFlightCount) {
  */
 #define IsUnk2E14PowerShot() \
   (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && g_SimulatedShot.unk2E14)
-#define IsFairwayKind(kind)                   \
-  ((kind) == SURFACE_KIND_FAIRWAY ||          \
-   (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE || \
-   (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
+#define IsFairwayKind(kind)                      \
+  ((kind) == SURFACE_KIND_FAIRWAY ||             \
+      (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE || \
+      (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
 #define IsBunkerKind(kind)                                                    \
   ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
-   (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
+      (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
 
 /* Plays the sound of the simulated shot's club meeting the ball */
 void PlayContactSound(void) {
@@ -711,21 +708,21 @@ void PlayContactSound(void) {
   SurfaceInfo* surfaceInfo;
 
   club = GetClub(g_Players[g_SimulatedShot.shot.unk18]
-                     .clubs[g_SimulatedShot.shot.clubIndex]);
+          .clubs[g_SimulatedShot.shot.clubIndex]);
   surfaceInfo = GetSurfaceInfo(g_CurrentShot.surface);
   if (club->kind == CLUB_KIND_WOOD) {
     if (IsUnk2E14PowerShot()) {
       PlaySound(CONTACT_SOUND_WOOD_UNK50, CONTACT_SOUND_CHANNEL,
-                CONTACT_SOUND_VOLUME);
+          CONTACT_SOUND_VOLUME);
       StartContactEffect(CONTACT_EFFECT_POWER_WOOD);
     } else if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
       StartContactEffect(CONTACT_EFFECT_SHOT);
       PlaySound(CONTACT_SOUND_WOOD_UNK50, CONTACT_SOUND_CHANNEL,
-                CONTACT_SOUND_VOLUME);
+          CONTACT_SOUND_VOLUME);
     } else {
       StartContactEffect(CONTACT_EFFECT_SHOT);
-      PlaySound(CONTACT_SOUND_WOOD, CONTACT_SOUND_CHANNEL,
-                CONTACT_SOUND_VOLUME);
+      PlaySound(
+          CONTACT_SOUND_WOOD, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
     }
     StartImpactSparks();
   } else if (club->kind == CLUB_KIND_IRON || club->kind == CLUB_KIND_WEDGE) {
@@ -739,21 +736,21 @@ void PlayContactSound(void) {
       StartContactEffect(CONTACT_EFFECT_SHOT);
     }
     if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
-      PlaySound(CONTACT_SOUND_IRON_TEE, CONTACT_SOUND_CHANNEL,
-                CONTACT_SOUND_VOLUME);
+      PlaySound(
+          CONTACT_SOUND_IRON_TEE, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
     } else if (IsFairwayKind(surfaceInfo->kind)) {
-      PlaySound(CONTACT_SOUND_IRON, CONTACT_SOUND_CHANNEL,
-                CONTACT_SOUND_VOLUME);
+      PlaySound(
+          CONTACT_SOUND_IRON, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
     } else if (IsBunkerKind(surfaceInfo->kind)) {
       PlaySound(CONTACT_SOUND_IRON_BUNKER, CONTACT_SOUND_CHANNEL,
-                CONTACT_SOUND_VOLUME);
+          CONTACT_SOUND_VOLUME);
     } else {
-      PlaySound(CONTACT_SOUND_IRON, CONTACT_SOUND_CHANNEL,
-                CONTACT_SOUND_VOLUME);
+      PlaySound(
+          CONTACT_SOUND_IRON, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
     }
   } else {
-    PlaySound(CONTACT_SOUND_PUTTER, CONTACT_SOUND_CHANNEL,
-              CONTACT_SOUND_VOLUME);
+    PlaySound(
+        CONTACT_SOUND_PUTTER, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
     if (f_FlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
       StartContactEffect(CONTACT_EFFECT_PUTT);
     }
@@ -784,11 +781,11 @@ s32 IsCupPassPoint(s32 cupDistance, s32 height) {
 
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsShotLengthRated(endKind)                          \
-  ((endKind) != SURFACE_KIND_WATER_HAZARD &&                \
-   D_800BE644 >= f_LandingCupDistance && D_800BE648 != 1 && \
-   g_SimulatedShot.unk2E14 && !g_SimulatedShot.unk2E00 &&   \
-   g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
+#define IsShotLengthRated(endKind)                             \
+  ((endKind) != SURFACE_KIND_WATER_HAZARD &&                   \
+      D_800BE644 >= f_LandingCupDistance && D_800BE648 != 1 && \
+      g_SimulatedShot.unk2E14 && !g_SimulatedShot.unk2E00 &&   \
+      g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
 
 /*
  * Rates how far the simulated shot goes, in yards, against the distance
@@ -890,7 +887,7 @@ static inline void QueueOnlookerSounds(s32 kind) {
   for (i = 0; i != g_PlayerCount; i++) {
     if (i != g_CurrentShot.playerIndex) {
       QueueCharacterSound((s8)g_Players[i].characterIndex, i, kind,
-                          FLIGHT_SOUND_VOLUME, g_Players[i].soundPan);
+          FLIGHT_SOUND_VOLUME, g_Players[i].soundPan);
     }
   }
 }
@@ -926,22 +923,22 @@ void PlayFlightSounds(s32 step) {
   if (step == SHOT_RESULT_STEP) {
     if (f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE && !g_IsMiniGolf) {
       PlaySound(FLIGHT_SOUND_OUT_OF_COURSE, FLIGHT_SOUND_CHANNEL_UNK3,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
       QueueOnlookerSounds(4);
     } else if (RateShotLength() == SHOT_LENGTH_FULL) {
       PlaySoundWithEffects(FLIGHT_SOUND_FULL_SHOT, FLIGHT_SOUND_CHANNEL_UNK3,
-                           FLIGHT_SOUND_VOLUME, FULL_SHOT_REVERB,
-                           g_Players[g_CurrentShot.playerIndex].soundPan);
+          FLIGHT_SOUND_VOLUME, FULL_SHOT_REVERB,
+          g_Players[g_CurrentShot.playerIndex].soundPan);
     }
   }
   if (step == UNK2E42_SOUND_STEP && g_SimulatedShot.unk2E42) {
     /* Plays the sound again for each player; the original has it */
     for (i = 0; i != g_PlayerCount; i++) {
-      PlaySound(FLIGHT_SOUND_UNK97, FLIGHT_SOUND_CHANNEL_UNK3,
-                FLIGHT_SOUND_VOLUME);
+      PlaySound(
+          FLIGHT_SOUND_UNK97, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
       if (i != g_CurrentShot.playerIndex) {
         QueueCharacterSound((s8)g_Players[i].characterIndex, i, 5,
-                            FLIGHT_SOUND_VOLUME, g_Players[i].soundPan);
+            FLIGHT_SOUND_VOLUME, g_Players[i].soundPan);
       }
     }
   }
@@ -954,24 +951,24 @@ void PlayFlightSounds(s32 step) {
         f_EndSurfaceInfo->kind == SURFACE_KIND_GREEN) {
       if (g_HolePar > g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
         (*greenSoundCount)++;
-        PlaySound(FLIGHT_SOUND_UNK75, FLIGHT_SOUND_CHANNEL_UNKB,
-                  GREEN_SOUND_VOLUME);
+        PlaySound(
+            FLIGHT_SOUND_UNK75, FLIGHT_SOUND_CHANNEL_UNKB, GREEN_SOUND_VOLUME);
       } else if (g_HolePar >
-                     g_Players[g_CurrentShot.playerIndex].strokeCount + 2 &&
-                 f_LandingCupDistance < GREEN_SOUND_MAX_DISTANCE) {
+              g_Players[g_CurrentShot.playerIndex].strokeCount + 2 &&
+          f_LandingCupDistance < GREEN_SOUND_MAX_DISTANCE) {
         (*greenSoundCount)++;
-        PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKB,
-                  GREEN_SOUND_VOLUME);
+        PlaySound(
+            FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKB, GREEN_SOUND_VOLUME);
       }
     }
   }
   if (D_800BE620 == RESULT_SOUND_STAGE) {
     if (f_PendingResultSound == RESULT_SOUND_UNK1) {
-      PlaySound(FLIGHT_SOUND_UNK17, FLIGHT_SOUND_CHANNEL_UNKE,
-                FLIGHT_SOUND_VOLUME);
+      PlaySound(
+          FLIGHT_SOUND_UNK17, FLIGHT_SOUND_CHANNEL_UNKE, FLIGHT_SOUND_VOLUME);
     } else if (f_PendingResultSound == RESULT_SOUND_UNK2) {
-      PlaySound(FLIGHT_SOUND_UNK67, FLIGHT_SOUND_CHANNEL_UNKE,
-                FLIGHT_SOUND_VOLUME);
+      PlaySound(
+          FLIGHT_SOUND_UNK67, FLIGHT_SOUND_CHANNEL_UNKE, FLIGHT_SOUND_VOLUME);
     }
   }
   if (!g_IsMiniGolf) {
@@ -994,62 +991,62 @@ void PlayFlightSounds(s32 step) {
           g_HolePar > g_Players[g_CurrentShot.playerIndex].strokeCount) {
         StartBanner(BANNER_NICE_TOUCH);
         PlaySound(FLIGHT_SOUND_CALL_NICE_TOUCH, FLIGHT_SOUND_CHANNEL_UNK3,
-                  FLIGHT_SOUND_VOLUME);
+            FLIGHT_SOUND_VOLUME);
       }
     } else if (g_SimulatedShot.unkB0Step != NO_STEP) {
       StartBanner(BANNER_FLAG_SHOT);
       PlaySound(FLIGHT_SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_UNK3,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
       f_PendingResultSound = RESULT_SOUND_UNK2;
     } else if (f_PassedPathFlags & PATH_FLAG_UNK8) {
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_PIN_SHOT);
       StartBanner(BANNER_PIN_SHOT);
       PlaySound(FLIGHT_SOUND_CALL_PIN_SHOT, FLIGHT_SOUND_CHANNEL_UNK3,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
       f_PendingResultSound = RESULT_SOUND_UNK2;
     } else if (g_SimulatedShot.endsOnGreen) {
       if (g_HolePar - 3 >= g_Players[g_CurrentShot.playerIndex].strokeCount) {
         CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_GREAT);
         StartBanner(BANNER_GREAT);
         PlaySound(FLIGHT_SOUND_CALL_GREAT, FLIGHT_SOUND_CHANNEL_UNK3,
-                  FLIGHT_SOUND_VOLUME);
+            FLIGHT_SOUND_VOLUME);
         QueueOnlookerSounds(2);
         f_PendingResultSound = RESULT_SOUND_UNK2;
       } else if (g_HolePar - 2 ==
-                 g_Players[g_CurrentShot.playerIndex].strokeCount) {
+          g_Players[g_CurrentShot.playerIndex].strokeCount) {
         if (f_LandingCupDistance <= CLOSE_LANDING_DISTANCE) {
           CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_EXCELLENT);
           StartBanner(BANNER_EXCELLENT);
           PlaySound(FLIGHT_SOUND_CALL_EXCELLENT, FLIGHT_SOUND_CHANNEL_UNK3,
-                    FLIGHT_SOUND_VOLUME);
+              FLIGHT_SOUND_VOLUME);
           QueueOnlookerSounds(1);
           f_PendingResultSound = RESULT_SOUND_UNK1;
         } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
-                   g_SimulatedShot.unk2E0C) {
+            g_SimulatedShot.unk2E0C) {
           if (f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
             StartBanner(BANNER_NICE_APPROACH);
             PlaySound(FLIGHT_SOUND_CALL_NICE_APPROACH,
-                      FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+                FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
             f_PendingResultSound = RESULT_SOUND_UNK1;
           } else {
             StartBanner(BANNER_NICE_ON);
             PlaySound(FLIGHT_SOUND_CALL_NICE_ON, FLIGHT_SOUND_CHANNEL_UNK3,
-                      FLIGHT_SOUND_VOLUME);
+                FLIGHT_SOUND_VOLUME);
           }
         } else {
           StartBanner(BANNER_NICE_ON);
           PlaySound(FLIGHT_SOUND_CALL_NICE_ON, FLIGHT_SOUND_CHANNEL_UNK3,
-                    FLIGHT_SOUND_VOLUME);
+              FLIGHT_SOUND_VOLUME);
         }
       } else if (g_HolePar - 1 ==
-                     g_Players[g_CurrentShot.playerIndex].strokeCount &&
-                 (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
-                  g_SimulatedShot.unk2E0C) &&
-                 f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
+              g_Players[g_CurrentShot.playerIndex].strokeCount &&
+          (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
+              g_SimulatedShot.unk2E0C) &&
+          f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
         StartBanner(BANNER_NICE_APPROACH);
         PlaySound(FLIGHT_SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_UNK3,
-                  FLIGHT_SOUND_VOLUME);
+            FLIGHT_SOUND_VOLUME);
       }
     }
   }
@@ -1060,7 +1057,7 @@ void PlayFlightSounds(s32 step) {
         g_SimulatedShot.unkB0Step != NO_STEP) {
       StartBanner(BANNER_FLAG_SHOT);
       PlaySound(FLIGHT_SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_UNK3,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
       QueueOnlookerSounds(1);
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
       f_EndReaction = END_REACTION_ONLOOKERS;
@@ -1073,7 +1070,7 @@ void PlayFlightSounds(s32 step) {
         g_SimulatedShot.unkB0Step == NO_STEP) {
       StartBanner(BANNER_CHIP_IN);
       PlaySound(FLIGHT_SOUND_CALL_CHIP_IN, FLIGHT_SOUND_CHANNEL_UNK3,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
       QueueOnlookerSounds(2);
       f_EndReaction = END_REACTION_ONLOOKERS;
     }
@@ -1089,7 +1086,7 @@ void PlayFlightSounds(s32 step) {
           StartMovie(MOVIE_GOOMBA);
         }
       } else if (scoreToPar >= -2 && scoreToPar <= 0 && !IsPinInCup() &&
-                 g_IsCupViewShown == 1) {
+          g_IsCupViewShown == 1) {
         if (g_SimulatedShot.shot.shotMode == SHOT_MODE_NORMAL) {
           StartMovie(MOVIE_MONTY_MOLE);
         } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER) {
@@ -1100,7 +1097,7 @@ void PlayFlightSounds(s32 step) {
         if (D_800BE644 > LONG_SHOT_SOUND_MIN_DISTANCE ||
             IsGameFlagSet(GAME_FLAG_UNK48)) {
           PlaySound(FLIGHT_SOUND_UNK9B, FLIGHT_SOUND_CHANNEL_UNK3,
-                    FLIGHT_SOUND_VOLUME);
+              FLIGHT_SOUND_VOLUME);
           f_EndReaction = END_REACTION_UNK2;
         }
       }
@@ -1114,20 +1111,20 @@ void PlayFlightSounds(s32 step) {
         }
       }
       if (g_Players[g_CurrentShot.playerIndex].strokeCount == 1) {
-        PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF,
-                  FLIGHT_SOUND_VOLUME);
+        PlaySound(
+            FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME);
       } else if (g_HolePar - 3 ==
-                 g_Players[g_CurrentShot.playerIndex].strokeCount) {
+          g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF,
-                  FLIGHT_SOUND_VOLUME_UNK64);
+            FLIGHT_SOUND_VOLUME_UNK64);
       } else if (g_HolePar - 2 ==
-                 g_Players[g_CurrentShot.playerIndex].strokeCount) {
+          g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF,
-                  FLIGHT_SOUND_VOLUME_UNK50);
+            FLIGHT_SOUND_VOLUME_UNK50);
       } else if (g_HolePar - 1 ==
-                 g_Players[g_CurrentShot.playerIndex].strokeCount) {
+          g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(FLIGHT_SOUND_UNK74, FLIGHT_SOUND_CHANNEL_UNKF,
-                  FLIGHT_SOUND_VOLUME_UNK60);
+            FLIGHT_SOUND_VOLUME_UNK60);
       }
     }
     isStillPlayed = &f_IsLandingSoundPlayed;
@@ -1139,8 +1136,8 @@ void PlayFlightSounds(s32 step) {
         !g_IsMiniGolf && D_800BE644 > f_LandingCupDistance &&
         g_HolePar - 3 >= g_Players[g_CurrentShot.playerIndex].strokeCount) {
       *isStillPlayed = TRUE;
-      PlaySound(FLIGHT_SOUND_UNK75, FLIGHT_SOUND_CHANNEL_UNKB,
-                FAIRWAY_SOUND_VOLUME);
+      PlaySound(
+          FLIGHT_SOUND_UNK75, FLIGHT_SOUND_CHANNEL_UNKB, FAIRWAY_SOUND_VOLUME);
     }
   }
   if (g_BallFlightStep > EARLY_STEP_COUNT &&
@@ -1149,21 +1146,21 @@ void PlayFlightSounds(s32 step) {
     if (IsBunkerKind(f_EndSurfaceInfo->kind)) {
       f_IsLandingSoundPlayed = TRUE;
       PlaySound(FLIGHT_SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
       QueueOnlookerSounds(6);
     } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_DEEP_ROUGH) {
       PlaySound(FLIGHT_SOUND_DEEP_ROUGH_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
       QueueOnlookerSounds(6);
     } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WASTE_AREA) {
       PlaySound(FLIGHT_SOUND_WASTE_AREA_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
     } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WATER_HAZARD ||
-               f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
-               f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) {
+        f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
+        f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) {
       f_IsLandingSoundPlayed = TRUE;
       PlaySound(FLIGHT_SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
-                FLIGHT_SOUND_VOLUME);
+          FLIGHT_SOUND_VOLUME);
       QueueOnlookerSounds(5);
     }
   }
@@ -1173,14 +1170,14 @@ void PlayFlightSounds(s32 step) {
  */
 #define IsBallLanding()                                                 \
   (g_SimulatedShot.stepCount < g_BallFlightStep + LANDING_STEP_COUNT && \
-   (f32)f_ShotEndPosition[AXIS_X] <                                     \
-       (f32)(f_FlightBallPosition[AXIS_X] + LANDING_RADIUS) &&          \
-   (f32)(f_FlightBallPosition[AXIS_X] - LANDING_RADIUS) <               \
-       (f32)f_ShotEndPosition[AXIS_X] &&                                \
-   (f32)f_ShotEndPosition[AXIS_Z] <                                     \
-       (f32)(f_FlightBallPosition[AXIS_Z] + LANDING_RADIUS) &&          \
-   (f32)(f_FlightBallPosition[AXIS_Z] - LANDING_RADIUS) <               \
-       (f32)f_ShotEndPosition[AXIS_Z])
+      (f32)f_ShotEndPosition[AXIS_X] <                                  \
+          (f32)(f_FlightBallPosition[AXIS_X] + LANDING_RADIUS) &&       \
+      (f32)(f_FlightBallPosition[AXIS_X] - LANDING_RADIUS) <            \
+          (f32)f_ShotEndPosition[AXIS_X] &&                             \
+      (f32)f_ShotEndPosition[AXIS_Z] <                                  \
+          (f32)(f_FlightBallPosition[AXIS_Z] + LANDING_RADIUS) &&       \
+      (f32)(f_FlightBallPosition[AXIS_Z] - LANDING_RADIUS) <            \
+          (f32)f_ShotEndPosition[AXIS_Z])
 
 /*
  * Eases the look-at point toward the ball, unless it is landing.
@@ -1193,15 +1190,15 @@ void EaseLookAtFlyingBall(void) {
   if (!IsBallLanding()) {
     f_LookAtPoint[AXIS_X] +=
         (f_FlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE -
-         f_LookAtPoint[AXIS_X]) *
+            f_LookAtPoint[AXIS_X]) *
         LOOK_AT_EASE_FRACTION;
     f_LookAtPoint[AXIS_Y] +=
         (f_FlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE -
-         f_LookAtPoint[AXIS_Y]) *
+            f_LookAtPoint[AXIS_Y]) *
         LOOK_AT_HEIGHT_EASE_FRACTION;
     f_LookAtPoint[AXIS_Z] +=
         (f_FlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE -
-         f_LookAtPoint[AXIS_Z]) *
+            f_LookAtPoint[AXIS_Z]) *
         LOOK_AT_EASE_FRACTION;
   }
 }
@@ -1220,15 +1217,15 @@ void EaseLookAtBelowBall(f32 drop) {
   if (!IsBallLanding()) {
     f_LookAtPoint[AXIS_X] +=
         (f_FlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE -
-         f_LookAtPoint[AXIS_X]) *
+            f_LookAtPoint[AXIS_X]) *
         LOOK_AT_EASE_FRACTION;
     f_LookAtPoint[AXIS_Y] +=
         ((f_FlightBallPosition[AXIS_Y] - drop) * COURSE_TO_WORLD_SCALE -
-         f_LookAtPoint[AXIS_Y]) *
+            f_LookAtPoint[AXIS_Y]) *
         LOOK_AT_HEIGHT_EASE_FRACTION;
     f_LookAtPoint[AXIS_Z] +=
         (f_FlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE -
-         f_LookAtPoint[AXIS_Z]) *
+            f_LookAtPoint[AXIS_Z]) *
         LOOK_AT_EASE_FRACTION;
   }
 }
@@ -1247,15 +1244,15 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtBelowBall);
 void EaseLookAtPoint(f32 yaw) {
   f_LookAtPoint[AXIS_X] +=
       (f_FlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE -
-       f_LookAtPoint[AXIS_X]) *
+          f_LookAtPoint[AXIS_X]) *
       LOOK_AT_EASE_FRACTION;
   f_LookAtPoint[AXIS_Y] +=
       (f_FlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE - LOOK_AT_DROP -
-       f_LookAtPoint[AXIS_Y]) *
+          f_LookAtPoint[AXIS_Y]) *
       LOOK_AT_HEIGHT_EASE_FRACTION;
   f_LookAtPoint[AXIS_Z] +=
       (f_FlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE -
-       f_LookAtPoint[AXIS_Z]) *
+          f_LookAtPoint[AXIS_Z]) *
       LOOK_AT_EASE_FRACTION;
 }
 #else
@@ -1327,7 +1324,7 @@ void PlaceCameraAroundShotEnd(void) {
 
   if (g_SimulatedShot.unk2E08) {
     height = RandomBelow(D_800BE640 * UNK2E08_HEIGHT_SPREAD_FRACTION) +
-             UNK2E08_MIN_HEIGHT;
+        UNK2E08_MIN_HEIGHT;
     distance =
         (guRandom() % RANDOM_DISTANCE_STEP_COUNT) * UNK2E08_DISTANCE_STEP +
         UNK2E08_MIN_DISTANCE;
@@ -1339,7 +1336,7 @@ void PlaceCameraAroundShotEnd(void) {
       distance = SHORT_SHOT_DISTANCE;
       height = 0.0f;
       yaw = f_ShotFlightYaw + M_PI / 8 -
-            (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 131072);
+          (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 131072);
     } else {
       if (g_SimulatedShot.endsOnGreen) {
         distance =
@@ -1347,13 +1344,13 @@ void PlaceCameraAroundShotEnd(void) {
             GREEN_MIN_DISTANCE;
       } else if (D_800BE640 * DISTANCE_SPREAD_FRACTION != 0.0f) {
         distance = (guRandom() % D_800BE640) * DISTANCE_SPREAD_FRACTION +
-                   MIN_CAMERA_DISTANCE;
+            MIN_CAMERA_DISTANCE;
       } else {
         distance = MIN_CAMERA_DISTANCE;
       }
       if (D_800BE640 * DEFAULT_HEIGHT_SPREAD_FRACTION != 0.0f) {
         height = (guRandom() % D_800BE640) * DEFAULT_HEIGHT_SPREAD_FRACTION +
-                 DEFAULT_MIN_HEIGHT;
+            DEFAULT_MIN_HEIGHT;
       } else {
         height = DEFAULT_MIN_HEIGHT;
       }
@@ -1364,18 +1361,18 @@ void PlaceCameraAroundShotEnd(void) {
         distance = MAX_CAMERA_DISTANCE;
       }
       yaw = f_ShotFlightYaw + M_PI + M_PI * 5 / 8 +
-            (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 32768 * 1.225f);
+          (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 32768 * 1.225f);
     }
   } else {
     if (D_800BE640 * DISTANCE_SPREAD_FRACTION != 0.0f) {
       distance = (guRandom() % D_800BE640) * DISTANCE_SPREAD_FRACTION +
-                 MIN_CAMERA_DISTANCE;
+          MIN_CAMERA_DISTANCE;
     } else {
       distance = MIN_CAMERA_DISTANCE;
     }
     if (D_800BE640 * OPTION_UNK3_HEIGHT_SPREAD_FRACTION != 0.0f) {
       height = (guRandom() % D_800BE640) * OPTION_UNK3_HEIGHT_SPREAD_FRACTION +
-               OPTION_UNK3_MIN_HEIGHT;
+          OPTION_UNK3_MIN_HEIGHT;
     } else {
       height = OPTION_UNK3_MIN_HEIGHT;
     }
@@ -1386,7 +1383,7 @@ void PlaceCameraAroundShotEnd(void) {
       distance = MAX_CAMERA_DISTANCE;
     }
     yaw = f_ShotFlightYaw + M_PI + M_PI / 2 +
-          (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 32768);
+        (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 32768);
   }
   point[AXIS_X] = -sinf(yaw) * distance + f_ShotEndPosition[AXIS_X];
   point[AXIS_Z] = cosf(yaw) * distance + f_ShotEndPosition[AXIS_Z];
@@ -1493,7 +1490,7 @@ void StartHoleFlyover(void) {
   SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK0, 0, 0, 0, 0, 0);
   SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);
   SetInsetViewRect(FLYOVER_INSET_CENTER_X, FLYOVER_INSET_CENTER_Y,
-                   FLYOVER_INSET_SIZE, FLYOVER_INSET_SIZE);
+      FLYOVER_INSET_SIZE, FLYOVER_INSET_SIZE);
   StepHoleFlyover();
 }
 
@@ -1540,7 +1537,7 @@ s32 StepHoleFlyover(void) {
   } else {
     approach = (1.0f - sinf(DEGREES_TO_RADIANS(g_HoleFlyoverFrame))) * 0.5f;
     widening = (FLYOVER_HALF_TURN_FRAME_COUNT - g_HoleFlyoverFrame) *
-               (1.0f / FLYOVER_HALF_TURN_FRAME_COUNT);
+        (1.0f / FLYOVER_HALF_TURN_FRAME_COUNT);
   }
   if (halfTurns > FLYOVER_MAX_HALF_TURNS) {
     halfTurns = FLYOVER_MAX_HALF_TURNS;
@@ -1571,15 +1568,15 @@ s32 StepHoleFlyover(void) {
   /* Storing the sine before computing distance is there to match */
   offset[AXIS_X] = sinf(yaw);
   distance = ((holeRadius - approach * FLYOVER_RADIUS_APPROACH) +
-              holeRadius * widening) *
-             FLYOVER_DISTANCE_SCALE;
+                 holeRadius * widening) *
+      FLYOVER_DISTANCE_SCALE;
   offset[AXIS_X] *= distance;
   offset[AXIS_Z] = cosf(yaw) * distance;
   g_Cameras[0].view.eye[AXIS_X] =
       g_Cameras[0].view.lookAt[AXIS_X] + offset[AXIS_X] * COURSE_TO_WORLD_SCALE;
   yaw += yaw;
   height = (holeRadius / 2 + approach * FLYOVER_HEIGHT_APPROACH) *
-           FLYOVER_HEIGHT_SCALE;
+      FLYOVER_HEIGHT_SCALE;
   g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] =
       D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.eye[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y] - height;
@@ -1830,9 +1827,9 @@ void PlaceFlightCamera(s32 step) {
             g_SimulatedShot.path[LAUNCH_VIEW_STEP][AXIS_Y];
         f_CameraPosition[AXIS_Z] =
             g_SimulatedShot.path[LAUNCH_VIEW_STEP][AXIS_Z];
-        height = GetGroundHeight(f_CameraPosition[AXIS_X],
-                                 f_CameraPosition[AXIS_Z]) -
-                 LAUNCH_VIEW_MIN_RISE;
+        height = GetGroundHeight(
+                     f_CameraPosition[AXIS_X], f_CameraPosition[AXIS_Z]) -
+            LAUNCH_VIEW_MIN_RISE;
         if (height < f_CameraPosition[AXIS_Y]) {
           f_CameraPosition[AXIS_Y] = height;
         }
@@ -1850,13 +1847,14 @@ void PlaceFlightCamera(s32 step) {
     case FLIGHT_CAMERA_CHASING_BALL:
       /* Back along the path, level with the ball */
       position[AXIS_X] = g_SimulatedShot.path[step - 1][AXIS_X] -
-                         (f32)f_FlightBallPosition[AXIS_X];
+          (f32)f_FlightBallPosition[AXIS_X];
       position[AXIS_Y] = 0.0f;
       position[AXIS_Z] = g_SimulatedShot.path[step - 1][AXIS_Z] -
-                         (f32)f_FlightBallPosition[AXIS_Z];
-      distance = CHASE_DISTANCE / sqrtf(position[AXIS_X] * position[AXIS_X] +
-                                        position[AXIS_Y] * position[AXIS_Y] +
-                                        position[AXIS_Z] * position[AXIS_Z]);
+          (f32)f_FlightBallPosition[AXIS_Z];
+      distance = CHASE_DISTANCE /
+          sqrtf(position[AXIS_X] * position[AXIS_X] +
+              position[AXIS_Y] * position[AXIS_Y] +
+              position[AXIS_Z] * position[AXIS_Z]);
       position[AXIS_X] *= distance;
       position[AXIS_Y] *= distance;
       position[AXIS_Z] *= distance;
@@ -1884,7 +1882,7 @@ void PlaceFlightCamera(s32 step) {
           COURSE_TO_WORLD_SCALE;
       f_CameraPosition[AXIS_Y] =
           (f32)(g_SimulatedShot.path[step - FOLLOW_STEP_COUNT][AXIS_Y] -
-                FOLLOW_RISE) *
+              FOLLOW_RISE) *
           COURSE_TO_WORLD_SCALE;
       f_CameraPosition[AXIS_Z] =
           (f32)g_SimulatedShot.path[step - FOLLOW_STEP_COUNT][AXIS_Z] *
@@ -1900,7 +1898,7 @@ void PlaceFlightCamera(s32 step) {
       if (D_800BE628 == TRUE) {
         D_800BE628 = FALSE;
         yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS -
-              TEE_VIEW_YAW_OFFSET;
+            TEE_VIEW_YAW_OFFSET;
         point[AXIS_X] =
             cosf(yaw) * TEE_VIEW_DISTANCE + f_ShotStartPosition[AXIS_X];
         point[AXIS_Z] =
@@ -1932,24 +1930,24 @@ void PlaceFlightCamera(s32 step) {
         g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
         if (f_IsBehindViewFar == FALSE) {
           sideYaw = f_ShotFlightYaw + M_PI / 4 +
-                    (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536);
+              (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536);
           distance = D_800BE640 * NEAR_BEHIND_VIEW_LENGTH_FRACTION +
-                     NEAR_BEHIND_VIEW_DISTANCE -
-                     RandomBelow(D_800BE640 * BEHIND_VIEW_SPREAD_FRACTION);
+              NEAR_BEHIND_VIEW_DISTANCE -
+              RandomBelow(D_800BE640 * BEHIND_VIEW_SPREAD_FRACTION);
         } else {
           sideYaw = f_ShotFlightYaw - M_PI / 4 -
-                    (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536);
+              (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536);
           distance = D_800BE640 * FAR_BEHIND_VIEW_LENGTH_FRACTION +
-                     FAR_BEHIND_VIEW_DISTANCE -
-                     RandomBelow(D_800BE640 * BEHIND_VIEW_SPREAD_FRACTION);
+              FAR_BEHIND_VIEW_DISTANCE -
+              RandomBelow(D_800BE640 * BEHIND_VIEW_SPREAD_FRACTION);
         }
         sideDistance =
             RandomBelow(D_800BE640 * BEHIND_VIEW_SIDE_SPREAD_FRACTION) +
             BEHIND_VIEW_SIDE_DISTANCE;
         point[AXIS_X] = f_ShotStartPosition[AXIS_X] + sinf(yaw) * distance +
-                        sinf(sideYaw) * sideDistance;
+            sinf(sideYaw) * sideDistance;
         point[AXIS_Z] = f_ShotStartPosition[AXIS_Z] - cosf(yaw) * distance -
-                        cosf(sideYaw) * sideDistance;
+            cosf(sideYaw) * sideDistance;
         point[AXIS_Y] =
             GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - BEHIND_VIEW_RISE;
         f_CameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
@@ -1967,7 +1965,7 @@ void PlaceFlightCamera(s32 step) {
         if (f_SideViewCount & 1) {
           /* Beside the path's highest point */
           sideYaw = f_ShotFlightYaw - M_PI / 2 +
-                    (f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
+              (f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
           f_IsApexViewFar ^= TRUE;
           if (f_IsApexViewFar == FALSE) {
             /* RandomBelow(1) is always 0; the original has it */
@@ -1999,7 +1997,7 @@ void PlaceFlightCamera(s32 step) {
                 cosf(sideYaw) * APEX_VIEW_FAR_DISTANCE;
           }
           height = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) -
-                   APEX_VIEW_MIN_RISE;
+              APEX_VIEW_MIN_RISE;
           if (height < point[AXIS_Y]) {
             point[AXIS_Y] = height;
           }
@@ -2009,7 +2007,7 @@ void PlaceFlightCamera(s32 step) {
           distance = D_800BE640 * SIDE_VIEW_AHEAD_FRACTION;
           /* Holding this yaw in angle is there to match */
           angle = f_ShotFlightYaw + M_PI / 2 +
-                  (f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
+              (f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
           g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
           yaw = f_ShotFlightYaw + M_PI;
           sideDistance -=
@@ -2021,9 +2019,9 @@ void PlaceFlightCamera(s32 step) {
             sideDistance = SIDE_VIEW_MIN_DISTANCE;
           }
           point[AXIS_X] = f_ShotStartPosition[AXIS_X] + sinf(yaw) * distance +
-                          sinf(angle) * sideDistance;
+              sinf(angle) * sideDistance;
           point[AXIS_Z] = f_ShotStartPosition[AXIS_Z] - cosf(yaw) * distance -
-                          cosf(angle) * sideDistance;
+              cosf(angle) * sideDistance;
           /* Computing extraRise before GetGroundHeight is there to match */
           extraRise = D_800BE640 * SIDE_VIEW_RISE_FRACTION;
           point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
@@ -2032,7 +2030,7 @@ void PlaceFlightCamera(s32 step) {
           }
           height = g_SimulatedShot
                        .path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_Y] +
-                   SIDE_VIEW_MAX_DROP_BELOW_APEX;
+              SIDE_VIEW_MAX_DROP_BELOW_APEX;
           if (height < point[AXIS_Y]) {
             point[AXIS_Y] = height;
           }
@@ -2041,7 +2039,7 @@ void PlaceFlightCamera(s32 step) {
             point[AXIS_Y] = height;
           }
           height = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) -
-                   SIDE_VIEW_MIN_RISE;
+              SIDE_VIEW_MIN_RISE;
           if (height < point[AXIS_Y]) {
             point[AXIS_Y] = height;
           }
@@ -2112,11 +2110,11 @@ void PlaceFlightCamera(s32 step) {
         angle = (angle - M_PI) * TRAIL_ANGLE_SCALE;
       }
       position[AXIS_X] = (-sinf(f_ShotFlightYaw + angle) * sideDistance +
-                          f_FlightBallPosition[AXIS_X]) *
-                         COURSE_TO_WORLD_SCALE;
+                             f_FlightBallPosition[AXIS_X]) *
+          COURSE_TO_WORLD_SCALE;
       position[AXIS_Z] = (cosf(f_ShotFlightYaw + angle) * sideDistance +
-                          f_FlightBallPosition[AXIS_Z]) *
-                         COURSE_TO_WORLD_SCALE;
+                             f_FlightBallPosition[AXIS_Z]) *
+          COURSE_TO_WORLD_SCALE;
       position[AXIS_Y] =
           (f_FlightBallPosition[AXIS_Y] - riseDistance) * COURSE_TO_WORLD_SCALE;
       f_CameraPosition[AXIS_X] +=
@@ -2167,13 +2165,13 @@ void PlaceFlightCamera(s32 step) {
       }
       f_FlaggedStepYaw =
           -atan2((f32)(g_SimulatedShot.path[D_800BE64C][AXIS_X] -
-                       g_SimulatedShot.path[D_800BE64C - 1][AXIS_X]),
-                 (f32)(g_SimulatedShot.path[D_800BE64C][AXIS_Z] -
-                       g_SimulatedShot.path[D_800BE64C - 1][AXIS_Z]));
+                     g_SimulatedShot.path[D_800BE64C - 1][AXIS_X]),
+              (f32)(g_SimulatedShot.path[D_800BE64C][AXIS_Z] -
+                  g_SimulatedShot.path[D_800BE64C - 1][AXIS_Z]));
       point[AXIS_X] = -sinf(f_FlaggedStepYaw) * FLAGGED_VIEW_DISTANCE +
-                      g_SimulatedShot.path[D_800BE64C][AXIS_X];
+          g_SimulatedShot.path[D_800BE64C][AXIS_X];
       point[AXIS_Z] = cosf(f_FlaggedStepYaw) * FLAGGED_VIEW_DISTANCE +
-                      g_SimulatedShot.path[D_800BE64C][AXIS_Z];
+          g_SimulatedShot.path[D_800BE64C][AXIS_Z];
       point[AXIS_Y] =
           GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - FLAGGED_VIEW_RISE;
       f_CameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
@@ -2220,9 +2218,9 @@ void PlaceFlightCamera(s32 step) {
       circleYaw =
           (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + f_CircleAngle;
       f_CameraPosition[AXIS_X] = cosf(circleYaw) * CIRCLE_DISTANCE +
-                                 g_CurrentShot.ballPosition[AXIS_X];
+          g_CurrentShot.ballPosition[AXIS_X];
       f_CameraPosition[AXIS_Z] = sinf(circleYaw) * CIRCLE_DISTANCE +
-                                 g_CurrentShot.ballPosition[AXIS_Z];
+          g_CurrentShot.ballPosition[AXIS_Z];
       f_CameraPosition[AXIS_Y] =
           GetGroundHeight(f_CameraPosition[AXIS_X], f_CameraPosition[AXIS_Z]) -
           CIRCLE_RISE;
@@ -2249,15 +2247,15 @@ void PlaceFlightCamera(s32 step) {
           yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS - M_PI / 2;
         }
         for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT;
-             index++) {
+            index++) {
           f_CameraPosition[AXIS_X] =
               cosf(yaw) * (distance = index * BESIDE_GOLFER_STEP) +
               g_CurrentShot.ballPosition[AXIS_X];
           f_CameraPosition[AXIS_Z] =
               sinf(yaw) * distance + g_CurrentShot.ballPosition[AXIS_Z];
           f_CameraPosition[AXIS_Y] = GetGroundHeight(f_CameraPosition[AXIS_X],
-                                                     f_CameraPosition[AXIS_Z]) -
-                                     BESIDE_GOLFER_RISE;
+                                         f_CameraPosition[AXIS_Z]) -
+              BESIDE_GOLFER_RISE;
           if (g_CurrentShot.ballPosition[AXIS_Y] - BESIDE_GOLFER_MIN_RISE <
               f_CameraPosition[AXIS_Y]) {
             f_CameraPosition[AXIS_Y] =
@@ -2267,7 +2265,7 @@ void PlaceFlightCamera(s32 step) {
           f_CameraPosition[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
           f_CameraPosition[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
           if (Length2D(f_CameraPosition[AXIS_X] - position[AXIS_X],
-                       f_CameraPosition[AXIS_Z] - position[AXIS_Z]) >
+                  f_CameraPosition[AXIS_Z] - position[AXIS_Z]) >
               BESIDE_GOLFER_CLEARANCE) {
             break;
           }
@@ -2288,7 +2286,7 @@ void PlaceFlightCamera(s32 step) {
   position[AXIS_Y] = f_CameraPosition[AXIS_Y] * WORLD_TO_COURSE_SCALE;
   position[AXIS_Z] = f_CameraPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE;
   lowestHeight = GetGroundHeight(position[AXIS_X], position[AXIS_Z]) +
-                 MAX_EYE_DEPTH_BELOW_GROUND;
+      MAX_EYE_DEPTH_BELOW_GROUND;
   if (f_FlightCameraKind == FLIGHT_CAMERA_CIRCLING_BALL) {
     if (lowestHeight < position[AXIS_Y]) {
       position[AXIS_Y] = lowestHeight;
@@ -2298,7 +2296,7 @@ void PlaceFlightCamera(s32 step) {
       position[AXIS_Y] = height;
     }
   } else if (f_FlightCameraKind != FLIGHT_CAMERA_BESIDE_GOLFER &&
-             f_FlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
+      f_FlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
     height = lowestHeight;
     if (height < position[AXIS_Y]) {
       position[AXIS_Y] = height;
@@ -2351,12 +2349,12 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
 
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsTroubleSurface(info)                     \
-  ((info)->kind == SURFACE_KIND_BUNKER ||          \
-   (info)->kind == SURFACE_KIND_BUNKER_FAIR_LIE || \
-   (info)->kind == SURFACE_KIND_BUNKER_POOR_LIE || \
-   (info)->kind == SURFACE_KIND_WATER_HAZARD ||    \
-   (info)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
+#define IsTroubleSurface(info)                        \
+  ((info)->kind == SURFACE_KIND_BUNKER ||             \
+      (info)->kind == SURFACE_KIND_BUNKER_FAIR_LIE || \
+      (info)->kind == SURFACE_KIND_BUNKER_POOR_LIE || \
+      (info)->kind == SURFACE_KIND_WATER_HAZARD ||    \
+      (info)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
 
 /*
  * Picks a flight camera kind for the value of D_800DAF50, and switches to it if
@@ -2387,7 +2385,7 @@ void ChooseFlightCameraKind(void) {
             D_800BE644 >= CUP_LANDING_MIN_DISTANCE &&
             D_800BE644 <= CUP_LANDING_MAX_DISTANCE &&
             (g_SimulatedShot.unk2E10 ||
-             f_LandingCupDistance < NEAR_CUP_DISTANCE)) {
+                f_LandingCupDistance < NEAR_CUP_DISTANCE)) {
           kind = FLIGHT_CAMERA_FRAMING_CUP;
         } else if (g_IsMiniGolf) {
           pick = RandomBelow(10);
@@ -2576,7 +2574,7 @@ void ChooseFlightCameraKind(void) {
           if (D_800BE674 || g_SimulatedShot.stepCount < 21) {
             D_800BE630 = TRUE;
           } else if (f_LandingCupDistance <= SHORT_SHOT_MAX_LENGTH ||
-                     f_FlightCameraKind == FLIGHT_CAMERA_AROUND_END) {
+              f_FlightCameraKind == FLIGHT_CAMERA_AROUND_END) {
             kind = FLIGHT_CAMERA_UNKD;
           }
         }
@@ -2751,13 +2749,13 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     f_FlightBallPosition[AXIS_Y] = g_SimulatedShot.path[step][AXIS_Y];
     f_FlightBallPosition[AXIS_Z] = g_SimulatedShot.path[step][AXIS_Z];
   }
-  f_BallCupDistance = IntLength3D(
-      f_FlightBallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-      f_FlightBallPosition[AXIS_Y] - D_800BA9D8.cupPosition[AXIS_Y],
-      f_FlightBallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
-  f_BallCupGroundDistance = IntLength2D(
-      f_FlightBallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-      f_FlightBallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+  f_BallCupDistance =
+      IntLength3D(f_FlightBallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+          f_FlightBallPosition[AXIS_Y] - D_800BA9D8.cupPosition[AXIS_Y],
+          f_FlightBallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+  f_BallCupGroundDistance =
+      IntLength2D(f_FlightBallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+          f_FlightBallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
   if (g_SimulatedShot.unk2E08) {
     switch (D_800DAF50) {
       case 1:
@@ -2843,10 +2841,10 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
   aheadStep = step + CUP_PASS_LOOKAHEAD_STEP_COUNT;
   if (aheadStep <= g_SimulatedShot.stepCount &&
       IsCupPassPoint(IntLength2D(g_SimulatedShot.path[aheadStep][AXIS_X] -
-                                     D_800BA9D8.cupPosition[AXIS_X],
-                                 g_SimulatedShot.path[aheadStep][AXIS_Z] -
-                                     D_800BA9D8.cupPosition[AXIS_Z]),
-                     g_SimulatedShot.path[aheadStep][AXIS_Y])) {
+                             D_800BA9D8.cupPosition[AXIS_X],
+                         g_SimulatedShot.path[aheadStep][AXIS_Z] -
+                             D_800BA9D8.cupPosition[AXIS_Z]),
+          g_SimulatedShot.path[aheadStep][AXIS_Y])) {
     D_800BE658 |= 2;
   }
   aheadStep = step + PATH_FLAG_LOOKAHEAD_STEP_COUNT;
@@ -2863,8 +2861,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
   }
   if (D_800BE64C != -1 && D_800BE64C + 10 < step &&
       f_FlightCameraKind != FLIGHT_CAMERA_AROUND_END &&
-      (s32)IntLength3D(
-          f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
+      (s32)IntLength3D(f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
           f_FlightBallPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
           f_FlightBallPosition[AXIS_Z] - f_ShotEndPosition[AXIS_Z]) > 0x25800) {
     D_800BE628 = TRUE;
@@ -2882,7 +2879,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
   }
   if (g_IsDebugEnabled && IsGameFlagSet(GAME_FLAG_UNK5F)) {
     sprintf(g_PrintBuffer, "C:%d F:%2d %3d %3d ", D_800BE630, D_800BE674, step,
-            g_BallFlightStep);
+        g_BallFlightStep);
     PrintDebugText(g_PrintBuffer, 8, 2);
     sprintf(g_PrintBuffer, "TYPE:%2d TIME:%2d", f_FlightCameraKind, D_800DAF50);
     PrintDebugText(g_PrintBuffer, 10, 3);
@@ -2908,7 +2905,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         case FLIGHT_CAMERA_CHASING_BALL:
         case FLIGHT_CAMERA_FOLLOWING_PATH:
           PlaySoundWithEffects(BALL_SOUND_UNK59, BALL_SOUND_CHANNEL, volume,
-                               BALL_SOUND_REVERB, BALL_SOUND_PAN);
+              BALL_SOUND_REVERB, BALL_SOUND_PAN);
           break;
       }
     }
@@ -2925,7 +2922,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         case FLIGHT_CAMERA_UNK10:
         case FLIGHT_CAMERA_UNK11:
           PlaySoundWithEffects(BALL_SOUND_UNK5A, BALL_SOUND_CHANNEL, volume,
-                               BALL_SOUND_REVERB, BALL_SOUND_PAN);
+              BALL_SOUND_REVERB, BALL_SOUND_PAN);
           break;
       }
     }
@@ -2963,7 +2960,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     }
     if (!g_IsMiniGolf && !g_SimulatedShot.unk2E10 &&
         ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) ||
-         IsMonkeyShown() || D_800BE680 == TRUE)) {
+            IsMonkeyShown() || D_800BE680 == TRUE)) {
       g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
       StartHudAnimation(HUD_ANIMATION_NONE);
       g_InsetView.animation = INSET_VIEW_STILL;
@@ -2976,17 +2973,15 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Z] =
           (f32)D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-      g_Cameras[0].view.eye[AXIS_X] =
-          g_Cameras[0].view.lookAt[AXIS_X] +
+      g_Cameras[0].view.eye[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X] +
           sinf(D_800BE684) * CUP_CLOSE_VIEW_DISTANCE;
       g_Cameras[0].view.eye[AXIS_Y] =
           g_Cameras[0].view.lookAt[AXIS_Y] - CUP_CLOSE_VIEW_HEIGHT;
-      g_Cameras[0].view.eye[AXIS_Z] =
-          g_Cameras[0].view.lookAt[AXIS_Z] -
+      g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] -
           cosf(D_800BE684) * CUP_CLOSE_VIEW_DISTANCE;
-    } else if (IsCupPassPoint(f_BallCupGroundDistance,
-                              f_FlightBallPosition[AXIS_Y]) ||
-               f_CupViewHoldCount > 0) {
+    } else if (IsCupPassPoint(
+                   f_BallCupGroundDistance, f_FlightBallPosition[AXIS_Y]) ||
+        f_CupViewHoldCount > 0) {
       g_Cameras[0].view.fieldOfView = CUP_VIEW_FIELD_OF_VIEW;
       StartHudAnimation(HUD_ANIMATION_NONE);
       g_IsCupViewShown = TRUE;
@@ -3006,10 +3001,10 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
       g_Cameras[0].view.lookAt[AXIS_Z] =
           (f32)D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       point[AXIS_X] = -sinf(f_CameraYaw) * CUP_VIEW_DISTANCE +
-                      D_800BA9D8.cupPosition[AXIS_X];
+          D_800BA9D8.cupPosition[AXIS_X];
       point[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] - CUP_VIEW_HEIGHT;
       point[AXIS_Z] = cosf(f_CameraYaw) * CUP_VIEW_DISTANCE +
-                      D_800BA9D8.cupPosition[AXIS_Z];
+          D_800BA9D8.cupPosition[AXIS_Z];
       g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
@@ -3108,7 +3103,7 @@ void SetLandingWaitFrameCount(s32 frameCount) {
  * either way from the main camera's yaw.
  */
 void GetViewSidePoints(CoursePoint center, CoursePoint plusQuarterPoint,
-                       CoursePoint minusQuarterPoint) {
+    CoursePoint minusQuarterPoint) {
   f32 offsetX;
   f32 offsetZ;
   f32 yaw;
@@ -3177,12 +3172,12 @@ void BuildSpotTexels(u8* texels, s32 isSoft) {
     for (row = 0; row != height; row++) {
       for (column = 0; column != width; column++) {
         radius = sqrtf((row - height) * (row - height) +
-                       (column - width) * (column - width));
+            (column - width) * (column - width));
         if (radius <= SPOT_DISC_RADIUS) {
           intensity = SPOT_PEAK_INTENSITY;
         } else if (radius <= SPOT_GAP_RADIUS) {
           intensity = SPOT_PEAK_INTENSITY -
-                      (radius - SPOT_DISC_RADIUS) * SPOT_GAP_FALL_PER_TEXEL;
+              (radius - SPOT_DISC_RADIUS) * SPOT_GAP_FALL_PER_TEXEL;
         } else if (radius < SPOT_QUARTER_SIZE) {
           intensity = (radius - SPOT_GAP_RADIUS) * SPOT_RING_RISE_PER_TEXEL;
         } else {
@@ -3193,17 +3188,17 @@ void BuildSpotTexels(u8* texels, s32 isSoft) {
     }
   } else {
     for (row = 0, softDiscRadius = SPOT_SOFT_DISC_RADIUS; row != height;
-         row++) {
+        row++) {
       for (column = 0; column != width; column++) {
         distance = (row - height) * (row - height) +
-                   (column - width) * (column - width);
+            (column - width) * (column - width);
         distance = sqrtf(distance);
         radius = distance;
         if (radius <= softDiscRadius) {
           intensity = SPOT_PEAK_INTENSITY;
         } else if (radius <= lastRadius) {
-          intensity = SPOT_PEAK_INTENSITY - (s32)(distance - softDiscRadius) *
-                                                SPOT_SOFT_FALL_PER_TEXEL;
+          intensity = SPOT_PEAK_INTENSITY -
+              (s32)(distance - softDiscRadius) * SPOT_SOFT_FALL_PER_TEXEL;
         } else {
           intensity = 0;
         }
@@ -3233,16 +3228,16 @@ void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius) {
   for (row = 0; row != height; row++) {
     for (column = 0; column != width; column++) {
       distance = sqrtf((row - height) * (row - height) +
-                       (column - width) * (column - width));
+          (column - width) * (column - width));
       radius = distance;
       if (radius < RING_INNER_RADIUS) {
         intensity = 0;
       } else if (radius < RING_PEAK_RADIUS) {
         intensity = (s32)(distance - RING_INNER_RADIUS) * RING_RISE_PER_TEXEL +
-                    RING_INNER_INTENSITY;
+            RING_INNER_INTENSITY;
       } else if (radius < RING_OUTER_RADIUS) {
         intensity = RING_PEAK_INTENSITY -
-                    (s32)(distance - RING_PEAK_RADIUS) * RING_FALL_PER_TEXEL;
+            (s32)(distance - RING_PEAK_RADIUS) * RING_FALL_PER_TEXEL;
       } else {
         intensity = 0;
       }
@@ -3395,9 +3390,9 @@ void StepNoiseTexture(void) {
     for (row = f_NoiseRow; row < f_NoiseRow + 1; row++) {
       for (column = 0; column < NOISE_GRID_SIZE; column++) {
         blend = (f_NoiseGrids[f_NoiseGridIndex][row][column] *
-                     (NOISE_MAX_BLEND_WEIGHT - weight) +
-                 f_NoiseGrids[f_NoiseGridIndex ^ 1][row][column] * weight) >>
-                NOISE_INTENSITY_SHIFT;
+                        (NOISE_MAX_BLEND_WEIGHT - weight) +
+                    f_NoiseGrids[f_NoiseGridIndex ^ 1][row][column] * weight) >>
+            NOISE_INTENSITY_SHIFT;
         intensity = ABS(blend);
         if (intensity > NOISE_MAX_INTENSITY) {
           intensity = NOISE_MAX_INTENSITY;

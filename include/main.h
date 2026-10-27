@@ -14,7 +14,7 @@ extern s32 g_FramesPerSecond;
 extern s8 g_FrameStepState;
 extern s8 g_FramePacingMode;
 
-void ReportFailedAssertion(const char* expression, const char* fileName,
-                           s32 lineNumber);
+void ReportFailedAssertion(
+    const char* expression, const char* fileName, s32 lineNumber);
 
 #endif

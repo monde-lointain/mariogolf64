@@ -37,8 +37,8 @@ typedef struct HoleTriangle {
 } HoleTriangle; /* size = 0x60 */
 
 void DimNextTranslucentTriangles(void);
-void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices,
-                       Camera* camera);
+void DrawHoleTriangles(
+    Gfx** displayListHead, CameraMatrices* matrices, Camera* camera);
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices, Camera* camera);
 void InitRings(void);
 

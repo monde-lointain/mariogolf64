@@ -56,8 +56,8 @@ static void DrawAnimatedBox(Gfx** gfxHead, AnimatedBox* box) {
   }
   gDPSetPrimColor(gfx++, 0, 0, box->red, box->green, box->blue, box->alpha);
   gSPTextureRectangle(gfx++, left << 2, box->top << 2, right << 2,
-                      box->bottom << 2, G_TX_RENDERTILE, 0, 0,
-                      ONE_TEXEL_PER_PIXEL, ONE_TEXEL_PER_PIXEL);
+      box->bottom << 2, G_TX_RENDERTILE, 0, 0, ONE_TEXEL_PER_PIXEL,
+      ONE_TEXEL_PER_PIXEL);
   *gfxHead = gfx;
 }
 

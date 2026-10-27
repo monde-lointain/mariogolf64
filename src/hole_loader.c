@@ -248,8 +248,8 @@ s32 DecodeLzChunk(LzStream* stream) {
         return (u8*)output - (u8*)stream->outputStart;
       }
       source = output - (reference >> LZ_REFERENCE_DISTANCE_SHIFT);
-      referenceEnd = output + ((reference & LZ_REFERENCE_LENGTH_MASK) +
-                               LZ_MIN_REFERENCE_LENGTH);
+      referenceEnd = output +
+          ((reference & LZ_REFERENCE_LENGTH_MASK) + LZ_MIN_REFERENCE_LENGTH);
       *output = *source++;
       repeat = output + 1;
       do {
@@ -608,8 +608,8 @@ void ShrinkMiniGolfHolePoints(void) {
 /* Reads the current hole's asset files, then shrinks its points for mini-golf
  */
 void LoadHole(void) {
-  osSyncPrintf("putter%d:course%d:hole%d\n", g_IsMiniGolf, g_CourseIndex,
-               g_HoleIndex);
+  osSyncPrintf(
+      "putter%d:course%d:hole%d\n", g_IsMiniGolf, g_CourseIndex, g_HoleIndex);
   BuildHole(GetCourseRecordIndex(), GetHoleRecordIndex());
   ShrinkMiniGolfHolePoints();
 }
@@ -622,7 +622,7 @@ void LoadHole(void) {
  */
 #define IsRaisedShadedVertex(index, vertexIndex)                        \
   ((((index) & 1) && (((vertexIndex) == 1) || ((vertexIndex) == 2))) || \
-   (!((index) & 1) && ((vertexIndex) == 2)))
+      (!((index) & 1) && ((vertexIndex) == 2)))
 
 /*
  * On a mini-golf course, scales the hole's ground, billboards and triangles
@@ -661,7 +661,7 @@ void ShrinkMiniGolfHole(void) {
     }
     for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
       for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
-           vertexIndex++) {
+          vertexIndex++) {
         vertex = g_WorkArea.hole.triangles[index].vertices;
         vertex[vertexIndex].v.ob[AXIS_X] *= g_MiniGolfScale[AXIS_X];
         vertex[vertexIndex].v.ob[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
@@ -771,8 +771,7 @@ s32 ChooseHoleConditions(void) {
       } else {
         s32 firstHoleIndex = GetFirstHoleIndex();
         s32 colorIndex = (g_GameState.holeIndex - firstHoleIndex) *
-                         (SCENE_COLOR_INDEX_ROUND_END + 1) /
-                         GetRoundHoleCount();
+            (SCENE_COLOR_INDEX_ROUND_END + 1) / GetRoundHoleCount();
 
         if (colorIndex > SCENE_COLOR_INDEX_ROUND_END) {
           colorIndex = SCENE_COLOR_INDEX_ROUND_END;
@@ -961,8 +960,8 @@ void StartLoaderThread(void) {
   UnloadOverlay(GetOverlayOfModule(LOADER_REPLACED_MODULE_ID));
   LoadOverlay(GetOverlayOfModule(LOADER_MODULE_ID));
   osCreateThread(&f_LoaderThread, LOADER_THREAD_ID,
-                 (void (*)(void*))RunLoaderThread, NULL, D_8025D350,
-                 LOADER_THREAD_PRIORITY);
+      (void (*)(void*))RunLoaderThread, NULL, D_8025D350,
+      LOADER_THREAD_PRIORITY);
   osStartThread(&f_LoaderThread);
   g_HasLoaderFinished = FALSE;
   BuildNoiseTexture();

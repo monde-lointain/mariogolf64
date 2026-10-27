@@ -46,8 +46,8 @@ void ResetCameraEditor(void) {
 }
 
 /* Puts the camera's eye and look-at point at the given positions */
-void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY,
-                       f32 lookAtZ) {
+void PlaceEditorCamera(
+    f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY, f32 lookAtZ) {
   g_CameraEditor.points[EDITOR_POINT_EYE][0] = eyeX;
   g_CameraEditor.points[EDITOR_POINT_EYE][1] = eyeY;
   g_CameraEditor.points[EDITOR_POINT_EYE][2] = eyeZ;
@@ -90,30 +90,29 @@ void MeasureEditorCamera(void) {
   f32 offsetZ;
 
   offsetX = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
-            g_CameraEditor.points[EDITOR_POINT_EYE][0];
-  g_CameraEditor.pitch =
-      atan2f(g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] -
-                 g_CameraEditor.points[EDITOR_POINT_EYE][1],
-             sqrtf(offsetX * offsetX +
-                   (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
-                    g_CameraEditor.points[EDITOR_POINT_EYE][2]) *
-                       (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
-                        g_CameraEditor.points[EDITOR_POINT_EYE][2])));
+      g_CameraEditor.points[EDITOR_POINT_EYE][0];
+  g_CameraEditor.pitch = atan2f(g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] -
+          g_CameraEditor.points[EDITOR_POINT_EYE][1],
+      sqrtf(offsetX * offsetX +
+          (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
+              g_CameraEditor.points[EDITOR_POINT_EYE][2]) *
+              (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
+                  g_CameraEditor.points[EDITOR_POINT_EYE][2])));
   g_CameraEditor.heading =
       atan2f(g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
-                 g_CameraEditor.points[EDITOR_POINT_EYE][2],
-             g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
-                 g_CameraEditor.points[EDITOR_POINT_EYE][0]);
+              g_CameraEditor.points[EDITOR_POINT_EYE][2],
+          g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
+              g_CameraEditor.points[EDITOR_POINT_EYE][0]);
   offsetY = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] -
-            g_CameraEditor.points[EDITOR_POINT_EYE][1];
+      g_CameraEditor.points[EDITOR_POINT_EYE][1];
   offsetZ = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
-            g_CameraEditor.points[EDITOR_POINT_EYE][2];
+      g_CameraEditor.points[EDITOR_POINT_EYE][2];
   g_CameraEditor.distance =
       sqrtf((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
-             g_CameraEditor.points[EDITOR_POINT_EYE][0]) *
-                (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
-                 g_CameraEditor.points[EDITOR_POINT_EYE][0]) +
-            offsetY * offsetY + offsetZ * offsetZ);
+                g_CameraEditor.points[EDITOR_POINT_EYE][0]) *
+              (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
+                  g_CameraEditor.points[EDITOR_POINT_EYE][0]) +
+          offsetY * offsetY + offsetZ * offsetZ);
 }
 
 /* Starts moving point index to (x, y, z) over frameCount frames, or snaps it
@@ -124,11 +123,11 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   f32 speed;
 
   distance = sqrtf((x - g_CameraEditor.points[index][0]) *
-                       (x - g_CameraEditor.points[index][0]) +
-                   (y - g_CameraEditor.points[index][1]) *
-                       (y - g_CameraEditor.points[index][1]) +
-                   (z - g_CameraEditor.points[index][2]) *
-                       (z - g_CameraEditor.points[index][2]));
+          (x - g_CameraEditor.points[index][0]) +
+      (y - g_CameraEditor.points[index][1]) *
+          (y - g_CameraEditor.points[index][1]) +
+      (z - g_CameraEditor.points[index][2]) *
+          (z - g_CameraEditor.points[index][2]));
   if (distance < 0.1f) {
     g_CameraEditor.points[index][0] = x;
     g_CameraEditor.points[index][1] = y;

@@ -8,7 +8,7 @@
 /* Whether -INT_LENGTH_COMPONENT_LIMIT <= value < INT_LENGTH_COMPONENT_LIMIT */
 #define IS_SMALL_COMPONENT(value)               \
   ((u32)(value) - INT_LENGTH_COMPONENT_LIMIT >= \
-   (u32)(-2 * INT_LENGTH_COMPONENT_LIMIT))
+      (u32)(-2 * INT_LENGTH_COMPONENT_LIMIT))
 
 /* CRC-16/X.25: reflected CCITT polynomial, all ones in and inverted out */
 #define CRC16_REFLECTED_POLYNOMIAL 0x8408

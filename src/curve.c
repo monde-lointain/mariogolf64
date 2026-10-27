@@ -33,7 +33,7 @@ void ResetPath(void) {
  * last path's.
  */
 s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
-                  f32 position[AXIS_COUNT]) {
+    f32 position[AXIS_COUNT]) {
   s32 nextPointIndex;
   f32 stepsPerSegment;
   f32 progress;
@@ -106,19 +106,19 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
   progress = f_PathProgress;
   f_PathPosition[0] +=
       (s32)((f_PathSegment[0][0] +
-             (f_PathSegment[1][0] - f_PathSegment[0][0]) * progress -
-             f_PathPosition[0]) *
-            catchUpFraction);
+                (f_PathSegment[1][0] - f_PathSegment[0][0]) * progress -
+                f_PathPosition[0]) *
+          catchUpFraction);
   f_PathPosition[1] +=
       (s32)((f_PathSegment[0][1] +
-             (f_PathSegment[1][1] - f_PathSegment[0][1]) * progress -
-             f_PathPosition[1]) *
-            catchUpFraction);
+                (f_PathSegment[1][1] - f_PathSegment[0][1]) * progress -
+                f_PathPosition[1]) *
+          catchUpFraction);
   f_PathPosition[2] +=
       (s32)((f_PathSegment[0][2] +
-             (f_PathSegment[1][2] - f_PathSegment[0][2]) * progress -
-             f_PathPosition[2]) *
-            catchUpFraction);
+                (f_PathSegment[1][2] - f_PathSegment[0][2]) * progress -
+                f_PathPosition[2]) *
+          catchUpFraction);
   position[0] = f_PathPosition[0];
   position[1] = f_PathPosition[1];
   position[2] = f_PathPosition[2];
@@ -200,8 +200,8 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
 }
 
 /* Returns the height at x of the spline that InitPeriodicSpline set up */
-f32 EvaluatePeriodicSpline(f32 x, f32 knotX[], f32 knotY[],
-                           f32 coefficients[]) {
+f32 EvaluatePeriodicSpline(
+    f32 x, f32 knotX[], f32 knotY[], f32 coefficients[]) {
   s32 low;
   s32 high;
   s32 middle;
@@ -232,12 +232,12 @@ f32 EvaluatePeriodicSpline(f32 x, f32 knotX[], f32 knotY[],
   width = knotX[low + 1] - knotX[low];
   offset = x - knotX[low];
   return (((coefficients[low + 1] - coefficients[low]) * offset / width +
-           coefficients[low] * 3.0f) *
-              offset +
-          ((knotY[low + 1] - knotY[low]) / width -
-           (2.0f * coefficients[low] + coefficients[low + 1]) * width)) *
-             offset +
-         knotY[low];
+              coefficients[low] * 3.0f) *
+                 offset +
+             ((knotY[low + 1] - knotY[low]) / width -
+                 (2.0f * coefficients[low] + coefficients[low + 1]) * width)) *
+      offset +
+      knotY[low];
 }
 
 /*
@@ -265,10 +265,10 @@ f32 InterpolateHermite(f32 values[], f32 position) {
   startSlope = nearValues[1] - nearValues[0];
   endSlope = nearValues[2] - nearValues[1];
   return ((start - end) * 2 + startSlope + endSlope) * fraction * fraction *
-             fraction +
-         (-(start * 3) + end * 3 - startSlope * 2 - endSlope) * fraction *
-             fraction +
-         startSlope * fraction + start;
+      fraction +
+      (-(start * 3) + end * 3 - startSlope * 2 - endSlope) * fraction *
+      fraction +
+      startSlope * fraction + start;
 }
 
 /* Adds nothing to the display list */

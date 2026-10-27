@@ -90,17 +90,15 @@ static void DrawDigits(Gfx** gfxP, u16 x, u16 y, char* text) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock_4b(gfx++, (u32)f_DigitTexture & ~7, G_IM_FMT_IA, 64, 8, 0,
-                         G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                         G_TX_NOLOD, G_TX_NOLOD);
+      G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   f_DigitDrawCount = (f_DigitDrawCount + 1) & 0x3FF;
   gDPPipeSync(gfx++);
 
   for (; (character = *text) != '\0'; text++, x += DIGIT_SPACING) {
     if (character != ' ') {
       gSPTextureRectangle(gfx++, x << 2, y << 2, (x + DIGIT_WIDTH) << 2,
-                          (y + DIGIT_HEIGHT) << 2, G_TX_RENDERTILE,
-                          ((character - '0') & 0xF) * DIGIT_WIDTH << 5, 0,
-                          1 << 10, 1 << 10);
+          (y + DIGIT_HEIGHT) << 2, G_TX_RENDERTILE,
+          ((character - '0') & 0xF) * DIGIT_WIDTH << 5, 0, 1 << 10, 1 << 10);
     }
   }
 
@@ -114,7 +112,7 @@ static void DrawDigits(Gfx** gfxP, u16 x, u16 y, char* text) {
  * as its own graphics task. cpuStartTime and cpuEndTime are in microseconds.
  */
 void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
-                          u32 cpuEndTime, s32 taskFlags, s32 readoutMode) {
+    u32 cpuEndTime, s32 taskFlags, s32 readoutMode) {
   u32 i;
   s64 taskTime;
   s16 startX;
@@ -147,7 +145,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   gSPViewport(gfx++, &f_MeterViewport);
   gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_InitRcpDisplayList));
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320 * scale,
-                   osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+      osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
 
   /* The projection's origin is at the bottom left, so y is flipped */
   posY = (240.0 - METER_TOP_Y) - y;
@@ -159,25 +157,25 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   }
 
   guOrtho(&f_MeterProjectionMatrix, 0.0f, (f32)(320 * scale), 0.0f,
-          (f32)(240 * scale), -1.0f, 10.0f, 1.0f);
-  guLookAt(&f_MeterViewMatrix, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-           0.0f);
+      (f32)(240 * scale), -1.0f, 10.0f, 1.0f);
+  guLookAt(
+      &f_MeterViewMatrix, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
   guScale(&f_MeterScaleMatrix, f_FrameScales[extraFrameCount] * (f32)scale,
-          (f32)scale, 1.0f);
+      (f32)scale, 1.0f);
   /* Moves the meter 20 pixels right of the screen's left edge */
   guTranslate(&f_MeterTranslationMatrix, 20.0 / f_FrameScales[extraFrameCount],
-              posY, 0.0f);
+      posY, 0.0f);
   gSPMatrix(gfx++, &f_MeterProjectionMatrix,
-            G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-  gSPMatrix(gfx++, &f_MeterViewMatrix,
-            G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+      G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+  gSPMatrix(
+      gfx++, &f_MeterViewMatrix, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
   guMtxIdent(&f_MeterIdentityMatrix);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_MeterIdentityMatrix),
-            G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+      G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_MeterScaleMatrix),
-            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+      G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_MeterTranslationMatrix),
-            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+      G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
 
   gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_FrameDisplayList));
   f_FrameVertices[1].v.ob[0] = FRAME_WIDTH * (extraFrameCount + 1) + 2;
@@ -185,7 +183,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   for (i = 0; i < extraFrameCount + 1; i++) {
     vertexIndex = i * 4 + 4;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 1, vertexIndex + 2, 0,
-                  vertexIndex + 2, vertexIndex + 3, vertexIndex + 0, 0);
+        vertexIndex + 2, vertexIndex + 3, vertexIndex + 0, 0);
   }
 
   gSPVertex(gfx++, f_CpuBarVertices, 4, 0);
@@ -212,7 +210,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   for (i = 0; i < nuDebTaskPerfPtr->auTaskCnt; i++) {
     vertexIndex = i * 4;
     taskTime = nuDebTaskPerfPtr->auTaskTime[i].rspEnd -
-               nuDebTaskPerfPtr->auTaskTime[i].rspStart;
+        nuDebTaskPerfPtr->auTaskTime[i].rspStart;
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     audioBarLength = barLength;
     if (f_AudioBarAverage == 0) {
@@ -228,7 +226,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     f_AudioBarVertices[vertexIndex + 2].v.ob[0] = startX + barLength;
     f_AudioBarVertices[vertexIndex + 3].v.ob[0] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
-                  vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
+        vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
   }
 
@@ -237,7 +235,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
     vertexIndex = i * 4;
     taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].rspEnd -
-               nuDebTaskPerfPtr->gfxTaskTime[i].rspStart;
+        nuDebTaskPerfPtr->gfxTaskTime[i].rspStart;
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rspBarLength = barLength;
     if (f_RspBarAverage == 0) {
@@ -253,7 +251,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     f_RspBarVertices[vertexIndex + 2].v.ob[0] = startX + barLength;
     f_RspBarVertices[vertexIndex + 3].v.ob[0] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
-                  vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
+        vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
   }
 
@@ -262,7 +260,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
     vertexIndex = i * 4;
     taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].rdpEnd -
-               nuDebTaskPerfPtr->gfxTaskTime[i].rspStart;
+        nuDebTaskPerfPtr->gfxTaskTime[i].rspStart;
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rdpBarLength = barLength;
     if (f_RdpBarAverage == 0) {
@@ -278,7 +276,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     f_RdpBarVertices[vertexIndex + 2].v.ob[0] = barLength;
     f_RdpBarVertices[vertexIndex + 3].v.ob[0] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
-                  vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
+        vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
   }
 
@@ -303,7 +301,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     f_RdpCommandBarVertices[vertexIndex + 2].v.ob[0] = barLength;
     f_RdpCommandBarVertices[vertexIndex + 3].v.ob[0] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
-                  vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
+        vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
   }
 
@@ -328,7 +326,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     f_RdpPipeBarVertices[vertexIndex + 2].v.ob[0] = barLength;
     f_RdpPipeBarVertices[vertexIndex + 3].v.ob[0] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
-                  vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
+        vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
   }
 
@@ -353,7 +351,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     f_RdpTmemBarVertices[vertexIndex + 2].v.ob[0] = barLength;
     f_RdpTmemBarVertices[vertexIndex + 3].v.ob[0] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
-                  vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
+        vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
   }
 
@@ -374,35 +372,34 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   if (readoutMode & METER_READOUT_CURRENT) {
     sprintf(f_ReadoutText, "%05d", rspBarLength);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT,
-               f_ReadoutText);
+        f_ReadoutText);
   } else if (readoutMode & METER_READOUT_MAXIMUM) {
     sprintf(f_ReadoutText, "%05d", f_RspBarMaximum);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT,
-               f_ReadoutText);
+        f_ReadoutText);
   } else if (readoutMode & METER_READOUT_AVERAGE) {
     sprintf(f_ReadoutText, "%05d", f_RspBarAverage);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT,
-               f_ReadoutText);
+        f_ReadoutText);
   }
 
   if (readoutMode & METER_READOUT_CURRENT) {
     sprintf(f_ReadoutText, "%05d", rdpBarLength);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT * 2,
-               f_ReadoutText);
+        f_ReadoutText);
   } else if (readoutMode & METER_READOUT_MAXIMUM) {
     sprintf(f_ReadoutText, "%05d", f_RdpBarMaximum);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT * 2,
-               f_ReadoutText);
+        f_ReadoutText);
   } else if (readoutMode & METER_READOUT_AVERAGE) {
     sprintf(f_ReadoutText, "%05d", f_RdpBarAverage);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT * 2,
-               f_ReadoutText);
+        f_ReadoutText);
   }
 
   gDPFullSync(gfx++);
   gSPEndDisplayList(gfx++);
-  nuGfxTaskStart(
-      f_MeterDisplayLists[f_MeterDisplayListIndex],
+  nuGfxTaskStart(f_MeterDisplayLists[f_MeterDisplayListIndex],
       (s32)(gfx - f_MeterDisplayLists[f_MeterDisplayListIndex]) * sizeof(Gfx),
       NU_GFX_UCODE_F3DEX, taskFlags);
   f_MeterDisplayListIndex++;
@@ -418,7 +415,7 @@ void DrawMemoryMeter(u32 y, s32 taskFlags) {
 
   gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_InitRcpDisplayList));
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
-                   osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+      osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -432,7 +429,7 @@ void DrawMemoryMeter(u32 y, s32 taskFlags) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, 250 << 2, (y - 8) << 2, 302 << 2, (y + 20) << 2,
-                      G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
   sprintf(f_ReadoutText, "% 8d", nuGfxCfbNum);
   DrawDigits(&gfx, 252, y - 7, f_ReadoutText);
   sprintf(f_ReadoutText, "%08d", GetFreeMemorySize());
@@ -441,8 +438,7 @@ void DrawMemoryMeter(u32 y, s32 taskFlags) {
   DrawDigits(&gfx, 252, y + 10, f_ReadoutText);
   gDPFullSync(gfx++);
   gSPEndDisplayList(gfx++);
-  nuGfxTaskStart(
-      f_MeterDisplayLists[f_MeterDisplayListIndex],
+  nuGfxTaskStart(f_MeterDisplayLists[f_MeterDisplayListIndex],
       (s32)(gfx - f_MeterDisplayLists[f_MeterDisplayListIndex]) * sizeof(Gfx),
       NU_GFX_UCODE_F3DEX, taskFlags);
   f_MeterDisplayListIndex = (f_MeterDisplayListIndex + 1) & 1;

@@ -197,8 +197,8 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
         g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &asset));
     ReadEncodedAsset(g_Scorecard.faceImages[i], &asset);
     OpenAssetFile(g_CharacterPaletteAssets[(s8)g_Players[i].characterIndex] +
-                      (s8)g_Players[i].paletteIndex,
-                  &file);
+            (s8)g_Players[i].paletteIndex,
+        &file);
     size = GetAssetFileSize(&file);
     g_Scorecard.facePalettes[i] = AllocMemory(size);
     ReadAssetFile(g_Scorecard.facePalettes[i], size, &file);
@@ -294,24 +294,23 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
           RankTournament(shownHoleCount - 1, 0, 0, D_801B60B4);
         } else {
           RankTournament(shownHoleCount - 1, 0,
-                         GetNetScoreToPar(g_Scorecard.content.holeIndex - 1, 0),
-                         D_801B60B4);
+              GetNetScoreToPar(g_Scorecard.content.holeIndex - 1, 0),
+              D_801B60B4);
         }
         oldPlace = -1;
         for (standingIndex = 0, standing = g_TournamentStandings;
-             standingIndex != TOURNAMENT_CONTESTANT_COUNT;
-             standingIndex++, standing++) {
+            standingIndex != TOURNAMENT_CONTESTANT_COUNT;
+            standingIndex++, standing++) {
           if (standing->contestantId == PLAYER_CONTESTANT) {
             oldPlace = standing->place & PLACE_MASK;
             break;
           }
         }
         RankTournament(shownHoleCount, 0,
-                       GetNetScoreToPar(g_Scorecard.content.holeIndex, 0),
-                       D_801B60B4);
+            GetNetScoreToPar(g_Scorecard.content.holeIndex, 0), D_801B60B4);
         for (standingIndex = 0, standing = g_TournamentStandings;
-             standingIndex != TOURNAMENT_CONTESTANT_COUNT;
-             standingIndex++, standing++) {
+            standingIndex != TOURNAMENT_CONTESTANT_COUNT;
+            standingIndex++, standing++) {
           if (standing->contestantId == PLAYER_CONTESTANT) {
             newPlace = standing->place & PLACE_MASK;
             if (oldPlace < newPlace) {
@@ -326,8 +325,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
         }
       } else {
         RankTournament(shownHoleCount, 0,
-                       GetNetScoreToPar(g_Scorecard.content.holeIndex, 0),
-                       D_801B60B4);
+            GetNetScoreToPar(g_Scorecard.content.holeIndex, 0), D_801B60B4);
         g_Scorecard.placeChange = PLACE_HELD;
       }
       g_Scorecard.topRow = 0;
@@ -478,7 +476,7 @@ void StartScorecardTally(s32 layout) {
             g_Players[1].holes[holeIndex].strokes) {
           song = SONG_HOLE_WON;
         } else if (g_Players[1].holes[holeIndex].strokes <
-                   g_Players[0].holes[holeIndex].strokes) {
+            g_Players[0].holes[holeIndex].strokes) {
           song = SONG_HOLE_LOST;
         } else {
           goto halved;
@@ -496,7 +494,7 @@ void StartScorecardTally(s32 layout) {
           g_Players[1].holes[holeIndex].strokes) {
         g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;
       } else if (g_Players[0].holes[holeIndex].strokes <
-                 g_Players[1].holes[holeIndex].strokes) {
+          g_Players[1].holes[holeIndex].strokes) {
         g_Scorecard.holeWinnerIndex = 0;
       } else {
         g_Scorecard.holeWinnerIndex = 1;
@@ -546,7 +544,7 @@ void StartScorecardTally(s32 layout) {
             SECONDS_PER_MINUTE;
         g_HoleTimeHundredths[timedHoleCount - 1] =
             (s32)(g_GameState.stopwatchFrameCount *
-                  ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+                ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
             HUNDREDTHS_PER_SECOND;
         if (timedHoleCount == 1 && g_HoleTimeMinutes[0] >= SHOWN_MINUTE_LIMIT) {
           g_HoleTimeMinutes[0] = -1;
@@ -623,8 +621,7 @@ void StartScorecardTally(s32 layout) {
         if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes -
                 (s8)course->holes[g_Scorecard.content.holeIndex - 1].par +
                 GetHandicapOffset(g_CourseIndex,
-                                  g_Scorecard.content.holeIndex - 1,
-                                  g_Players[i].handicap) <=
+                    g_Scorecard.content.holeIndex - 1, g_Players[i].handicap) <=
             0) {
           g_Scorecard.content.faceImageOffsets[i] = 0;
         } else {
@@ -639,9 +636,7 @@ void StartScorecardTally(s32 layout) {
         g_Scorecard.content.faceImageOffsets[0] = 0;
         g_Scorecard.content.faceImageOffsets[1] = BEHIND_FACE_IMAGE_OFFSET;
       } else if (g_Players[1].holes[g_Scorecard.content.holeIndex - 1].strokes <
-                 g_Players[0]
-                     .holes[g_Scorecard.content.holeIndex - 1]
-                     .strokes) {
+          g_Players[0].holes[g_Scorecard.content.holeIndex - 1].strokes) {
         g_Scorecard.content.faceImageOffsets[0] = BEHIND_FACE_IMAGE_OFFSET;
         g_Scorecard.content.faceImageOffsets[1] = 0;
       } else {
@@ -751,7 +746,7 @@ void SetScorecardLayout(s32 layout) {
         if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
           holesWon[0]++;
         } else if (g_Players[1].holes[i].strokes <
-                   g_Players[0].holes[i].strokes) {
+            g_Players[0].holes[i].strokes) {
           holesWon[1]++;
         }
       }
@@ -793,12 +788,12 @@ void SetScorecardLayout(s32 layout) {
 void SetScorecardState(s32 state) {
   if (state == SCORECARD_OPENING) {
     PlaySoundWithEffects(SOUND_SCORECARD_OPEN, g_NextSoundChannel,
-                         SCORECARD_SOUND_VOLUME, SCORECARD_SLIDE_SOUND_REVERB,
-                         SCORECARD_OPEN_SOUND_PAN);
+        SCORECARD_SOUND_VOLUME, SCORECARD_SLIDE_SOUND_REVERB,
+        SCORECARD_OPEN_SOUND_PAN);
   } else if (state == SCORECARD_CLOSING) {
     PlaySoundWithEffects(SOUND_SCORECARD_CLOSE, g_NextSoundChannel,
-                         SCORECARD_SOUND_VOLUME, SCORECARD_SLIDE_SOUND_REVERB,
-                         SCORECARD_CLOSE_SOUND_PAN);
+        SCORECARD_SOUND_VOLUME, SCORECARD_SLIDE_SOUND_REVERB,
+        SCORECARD_CLOSE_SOUND_PAN);
   }
   if (state == SCORECARD_OPENING) {
     g_Scorecard.x = SCREEN_WIDTH;
@@ -928,9 +923,9 @@ void TurnScorecardPage(u16 buttons) {
     }
     /* The sound pans further right on each later page */
     PlaySoundWithEffects(SOUND_SCORECARD_PAGE, g_NextSoundChannel,
-                         SCORECARD_SOUND_VOLUME, 0,
-                         (g_RoundHud.scorecardPage + 1) *
-                             (SOUND_PAN_FULL_RIGHT / (pageCount + 1)));
+        SCORECARD_SOUND_VOLUME, 0,
+        (g_RoundHud.scorecardPage + 1) *
+            (SOUND_PAN_FULL_RIGHT / (pageCount + 1)));
   }
 }
 #else
@@ -954,8 +949,8 @@ void ScrollLeaderboard(u16 buttons) {
           DEGREES_TO_RADIANS(ROW_FLIP_END_DEGREES)) {
         g_Scorecard.content.rowFlipAngles[row] = 0.0f;
         g_Scorecard.content.isRowFlipping[row] = FALSE;
-        PlaySound(SOUND_ROW_FLIPPED, ROW_FLIP_SOUND_CHANNEL,
-                  SCORECARD_SOUND_VOLUME);
+        PlaySound(
+            SOUND_ROW_FLIPPED, ROW_FLIP_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
       }
     }
   }
@@ -963,14 +958,14 @@ void ScrollLeaderboard(u16 buttons) {
     if (buttons & U_JPAD) {
       if (g_Scorecard.topRow > 0) {
         g_Scorecard.topRow--;
-        PlaySound(SOUND_SCORECARD_PAGE, g_NextSoundChannel,
-                  SCORECARD_SOUND_VOLUME);
+        PlaySound(
+            SOUND_SCORECARD_PAGE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
       }
     }
     if ((buttons & D_JPAD) && g_Scorecard.topRow < LEADERBOARD_LAST_TOP_ROW) {
       g_Scorecard.topRow++;
-      PlaySound(SOUND_SCORECARD_PAGE, g_NextSoundChannel,
-                SCORECARD_SOUND_VOLUME);
+      PlaySound(
+          SOUND_SCORECARD_PAGE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
     }
   }
 }
@@ -1048,13 +1043,12 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
   LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
   height /= stripCount;
   for (stripIndex = 0; stripIndex != stripCount; stripIndex++) {
-    LoadTextureBlock(
-        &gfx,
+    LoadTextureBlock(&gfx,
         image + LARGE_PALETTED_TEXELS_OFFSET + stripIndex * width * height,
         G_IM_FMT_CI, G_IM_SIZ_8b, width, height, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, left << 2, top << 2, (left + width) << 2,
-                    (top + height) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-                    TEXEL_STEP_ONE);
+        (top + height) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     top += height;
   }
   *displayListHead = gfx;
@@ -1093,19 +1087,17 @@ void DrawScorecard(Gfx** displayListHead) {
         } else {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           gDPSetPrimColor(gfx++, 0, 0, UNSHOWN_PAGE_GRAY, UNSHOWN_PAGE_GRAY,
-                          UNSHOWN_PAGE_GRAY, 0xFF);
+              UNSHOWN_PAGE_GRAY, 0xFF);
           dropY = 1;
         }
         gDPPipeSync(gfx++);
         if (g_Scorecard.pageCount == THREE_PAGE_COUNT) {
-          DrawLargeImage(
-              &gfx, g_Scorecard.pageTitleImages[i],
+          DrawLargeImage(&gfx, g_Scorecard.pageTitleImages[i],
               (i * THREE_PAGE_TITLE_SPACING + THREE_PAGE_TITLE_LEFT) +
                   g_Scorecard.x,
               g_Scorecard.y + PAGE_TITLE_TOP + dropY);
         } else {
-          DrawLargeImage(
-              &gfx, g_Scorecard.pageTitleImages[i],
+          DrawLargeImage(&gfx, g_Scorecard.pageTitleImages[i],
               (i * PAGE_TITLE_SPACING + PAGE_TITLE_LEFT) + g_Scorecard.x,
               g_Scorecard.y + PAGE_TITLE_TOP + dropY);
         }
@@ -1247,11 +1239,11 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
 
   LoadLargePalette(&gfx, g_Scorecard.tableImage + IMAGE_HEADER_SIZE);
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-  gDPSetPrimColor(gfx++, 0, 0, TAB_BACK_GRAY, TAB_BACK_GRAY, TAB_BACK_GRAY,
-                  0xFF);
+  gDPSetPrimColor(
+      gfx++, 0, 0, TAB_BACK_GRAY, TAB_BACK_GRAY, TAB_BACK_GRAY, 0xFF);
   for (tabIndex = 0; tabIndex != pageCount; tabIndex++) {
     texelsOffset = tabStrips[tabIndex] * TAB_HEIGHT * TABLE_WIDTH +
-                   LARGE_PALETTED_TEXELS_OFFSET;
+        LARGE_PALETTED_TEXELS_OFFSET;
     dropY = TAB_BACK_DROP;
     if (tabIndex == pageCount - 1) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -1259,11 +1251,9 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
     }
     for (row = 0; row < TAB_HEIGHT; row += TABLE_LOAD_HEIGHT) {
       LoadTextureBlock(&gfx, g_Scorecard.tableImage + texelsOffset, G_IM_FMT_CI,
-                       G_IM_SIZ_8b, TABLE_WIDTH, TABLE_LOAD_HEIGHT, 0, 0, 0, 0,
-                       0, 0, 0);
+          G_IM_SIZ_8b, TABLE_WIDTH, TABLE_LOAD_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
-      DrawTextureRect(
-          &gfx, (g_Scorecard.x + TABLE_LEFT) << 2,
+      DrawTextureRect(&gfx, (g_Scorecard.x + TABLE_LEFT) << 2,
           (row + g_Scorecard.y + TAB_TOP + dropY) << 2,
           (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2,
           (row + (g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT) + dropY) << 2,
@@ -1278,16 +1268,16 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
     loadHeight =
         (row + TABLE_LOAD_HEIGHT <= TABLE_BODY_HEIGHT) ? TABLE_LOAD_HEIGHT : 1;
     gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-                       (u32)(g_Scorecard.tableImage + texelsOffset) & ~7);
+        (u32)(g_Scorecard.tableImage + texelsOffset) & ~7);
     gDPLoadSync(gfx++);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, loadHeight * (TABLE_WIDTH / 2) - 1,
-                 CALC_DXT(TABLE_WIDTH, G_IM_SIZ_8b_BYTES));
+        CALC_DXT(TABLE_WIDTH, G_IM_SIZ_8b_BYTES));
     top = g_Scorecard.y + TABLE_BODY_TOP;
     texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
     DrawTextureRect(&gfx, (g_Scorecard.x + TABLE_LEFT) << 2, (row + top) << 2,
-                    (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2,
-                    (row + loadHeight + top) << 2, G_TX_RENDERTILE, 0, 0,
-                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2,
+        (row + loadHeight + top) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
   }
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
@@ -1321,16 +1311,16 @@ s32 LoadResultCharacters(void) {
     return FALSE;
   }
   LoadCharacter(0, (s8)g_Players[0].characterIndex + CHARACTER_COUNT,
-                (s8)g_Players[0].paletteIndex);
+      (s8)g_Players[0].paletteIndex);
   LoadCharacter(1, (s8)g_Players[1].characterIndex + CHARACTER_COUNT,
-                (s8)g_Players[1].paletteIndex);
+      (s8)g_Players[1].paletteIndex);
   song = SONG_MATCH_RESULT;
   if (g_GameMode == GAME_MODE_GET_CHARACTER) {
     if (g_Players[0].holes[holeIndex].strokes <
         g_Players[1].holes[holeIndex].strokes) {
       song = SONG_HOLE_WON;
     } else if (g_Players[1].holes[holeIndex].strokes <
-               g_Players[0].holes[holeIndex].strokes) {
+        g_Players[0].holes[holeIndex].strokes) {
       song = SONG_HOLE_LOST;
     } else {
       song = SONG_HOLE_HALVED;
@@ -1342,7 +1332,7 @@ s32 LoadResultCharacters(void) {
     SetCharacterAnimation(0, REACTION_ANIMATION_BIRDIE);
     SetCharacterAnimation(1, REACTION_ANIMATION_BOGEY);
   } else if (g_Players[1].holes[holeIndex].strokes <
-             g_Players[0].holes[holeIndex].strokes) {
+      g_Players[0].holes[holeIndex].strokes) {
     SetCharacterAnimation(0, REACTION_ANIMATION_BOGEY);
     SetCharacterAnimation(1, REACTION_ANIMATION_BIRDIE);
   } else {
@@ -1375,8 +1365,8 @@ s32 TallyScorecardSkins(void) {
       if (g_Scorecard.stateTime == MATCH_RESULT_TIME) {
         g_Scorecard.skinsCarryover.onLastHole = 1;
         if (g_Scorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
-          PlaySound(SOUND_UNK67, MATCH_RESULT_SOUND_CHANNEL,
-                    SCORECARD_SOUND_VOLUME);
+          PlaySound(
+              SOUND_UNK67, MATCH_RESULT_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
         }
         return TRUE;
       }
@@ -1385,8 +1375,8 @@ s32 TallyScorecardSkins(void) {
       if (g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED) {
         if (g_Scorecard.stateTime == SKINS_TALLY_TIME) {
           g_Scorecard.skinsCarryover.intoLastHole++;
-          PlaySound(SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL,
-                    SCORECARD_SOUND_VOLUME);
+          PlaySound(
+              SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
           return TRUE;
         }
       } else if (g_Scorecard.stateTime >= SKINS_TALLY_TIME) {
@@ -1399,8 +1389,8 @@ s32 TallyScorecardSkins(void) {
             g_Scorecard.skinsCarryover.intoLastHole--;
           }
           g_Scorecard.skinsCarryover.onLastHole--;
-          PlaySound(SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL,
-                    SCORECARD_SOUND_VOLUME);
+          PlaySound(
+              SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
         }
       }
       break;

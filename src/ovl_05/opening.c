@@ -271,13 +271,13 @@ void AdvanceOpeningSoundChannel(void) {
 /* Plays the title logo's club striking while it swings round */
 void PlayLogoClubSound(void) {
   if (f_IsLogoClubSwinging != 0) {
-    PlaySoundWithEffects(
-        SOUND_CONTACT_PLAIN, LOGO_CLUB_SOUND_CHANNEL,
+    PlaySoundWithEffects(SOUND_CONTACT_PLAIN, LOGO_CLUB_SOUND_CHANNEL,
         LOGO_CLUB_SOUND_LOUDEST_VOLUME -
             (s32)(f_LogoClubOrbitRadius * LOGO_CLUB_SOUND_FADE_RATE),
         0,
-        OPENING_SOUND_PAN_CENTRE - (f_LogoClubPosition[0] - SCREEN_WIDTH / 2) /
-                                       LOGO_CLUB_PIXELS_PER_PAN_STEP);
+        OPENING_SOUND_PAN_CENTRE -
+            (f_LogoClubPosition[0] - SCREEN_WIDTH / 2) /
+                LOGO_CLUB_PIXELS_PER_PAN_STEP);
   }
 }
 
@@ -363,16 +363,16 @@ void PlayOpeningAmbientSounds(void) {
     if (f_AlternatingSoundTimer != 0) {
       if (f_AlternatingSound == AMBIENT_SOUND_FIRST &&
           f_AlternatingSoundTimer == f_AlternatingSoundFirstLength) {
-        PlaySoundWithEffects(
-            SOUND_AMBIENT_ALTERNATING_FIRST, ALTERNATING_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_AMBIENT_ALTERNATING_FIRST,
+            ALTERNATING_SOUND_CHANNEL,
             AMBIENT_SOUND_FULL_VOLUME -
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, ALTERNATING_SOUND_PAN);
       }
       if (f_AlternatingSound == AMBIENT_SOUND_SECOND &&
           f_AlternatingSoundTimer == f_AlternatingSoundSecondLength) {
-        PlaySoundWithEffects(
-            SOUND_AMBIENT_ALTERNATING_SECOND, ALTERNATING_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_AMBIENT_ALTERNATING_SECOND,
+            ALTERNATING_SOUND_CHANNEL,
             AMBIENT_SOUND_FULL_VOLUME -
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, ALTERNATING_SOUND_PAN);
@@ -381,8 +381,7 @@ void PlayOpeningAmbientSounds(void) {
     }
     if (f_RepeatingSoundTimer != 0) {
       if (f_RepeatingSoundTimer == f_RepeatingSoundLength) {
-        PlaySoundWithEffects(
-            SOUND_AMBIENT_REPEATING, REPEATING_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_AMBIENT_REPEATING, REPEATING_SOUND_CHANNEL,
             AMBIENT_SOUND_FULL_VOLUME -
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, REPEATING_SOUND_PAN);
@@ -392,16 +391,14 @@ void PlayOpeningAmbientSounds(void) {
     if (f_RandomSoundTimer != 0) {
       if (f_RandomSound == AMBIENT_SOUND_FIRST &&
           f_RandomSoundTimer == f_RandomSoundFirstLength) {
-        PlaySoundWithEffects(
-            SOUND_AMBIENT_RANDOM_FIRST, RANDOM_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_AMBIENT_RANDOM_FIRST, RANDOM_SOUND_CHANNEL,
             AMBIENT_SOUND_FULL_VOLUME -
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, RANDOM_SOUND_PAN);
       }
       if (f_RandomSound == AMBIENT_SOUND_SECOND &&
           f_RandomSoundTimer == f_RandomSoundSecondLength) {
-        PlaySoundWithEffects(
-            SOUND_AMBIENT_RANDOM_SECOND, RANDOM_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_AMBIENT_RANDOM_SECOND, RANDOM_SOUND_CHANNEL,
             AMBIENT_SOUND_FULL_VOLUME -
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, RANDOM_SOUND_PAN);
@@ -422,7 +419,7 @@ void LoadOpening(void) {
   InitBillboardManager(f_OpeningBillboardHeap, OPENING_BILLBOARD_HEAP_SIZE);
   f_OpeningCue = OPENING_CUE_DONE;
   for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(f_OpeningCharacterBuffers);
-       bufferIndex++) {
+      bufferIndex++) {
     f_OpeningCharacterBuffers[bufferIndex] =
         AllocMemory(GetCharacterBufferSize());
     SetCharacterBuffer(bufferIndex + 1, f_OpeningCharacterBuffers[bufferIndex]);
@@ -440,7 +437,7 @@ void FreeOpening(void) {
 
   FreeMemory(&g_ShadowTexture);
   for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(f_OpeningCharacterBuffers);
-       bufferIndex++) {
+      bufferIndex++) {
     FreeMemory(&f_OpeningCharacterBuffers[bufferIndex]);
   }
   AssignCharacterBuffers();
@@ -450,8 +447,8 @@ void FreeOpening(void) {
 }
 
 /* The caller passes the frame parity too, which goes unused */
-void DrawOpeningCharacters(CameraMatrices* matrices, Gfx** displayListHead,
-                           s32 frameParity) {
+void DrawOpeningCharacters(
+    CameraMatrices* matrices, Gfx** displayListHead, s32 frameParity) {
   s32 slotIndex = 0;
 
   g_DisplayListHead = *displayListHead;
@@ -480,21 +477,21 @@ void BuildOpeningShotPath(void) {
     StepBallSimulation(&f_OpeningShotSimulation);
     length =
         IntLength3D(f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
-                    f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
-                    f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]);
+            f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
+            f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]);
     guTranslateF(dash, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                 (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
-                 start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+        (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
+        start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
     if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
       guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
       guAlignF(transform, 0.0f,
-               f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
-               f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
-               f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]);
+          f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
+          f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
+          f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]);
       guMtxCatF(dash, transform, dash);
       guTranslateF(transform, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                   start[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-                   start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+          start[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+          start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
       guMtxCatF(dash, transform, dash);
     }
     guMtxF2L(dash, &f_OpeningShotDashMatrices[g_DrawBufferIndex][step]);
@@ -512,14 +509,14 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
   gDPPipeSync(g_DisplayListHead++);
-  gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF,
-                   G_RM_AA_ZB_XLU_SURF2);
+  gDPSetRenderMode(
+      g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
   gSPLoadGeometryMode(g_DisplayListHead++, 0);
-  gSPSetGeometryMode(g_DisplayListHead++,
-                     G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+  gSPSetGeometryMode(
+      g_DisplayListHead++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPSetCombineLERP(g_DisplayListHead++, PRIMITIVE, ENVIRONMENT, TEXEL0,
-                    ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE,
-                    ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
+      ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, TEXEL0,
+      ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
   gDPPipeSync(g_DisplayListHead++);
@@ -528,17 +525,16 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-  gDPLoadTextureBlock(
-      g_DisplayListHead++,
+  gDPLoadTextureBlock(g_DisplayListHead++,
       TEXTURE_ADDRESS((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
       G_IM_FMT_I, G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
       G_TX_NOLOD);
   gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, f_OpeningShotPathScroll,
-                 0,
-                 f_OpeningShotPathScroll +
-                     (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
-                 SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC);
+      0,
+      f_OpeningShotPathScroll +
+          (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
+      SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC);
   gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   if (f_IsOpeningShotPathRed) {
     gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0x00, 0x00, 0xC8);
@@ -548,8 +544,8 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
   gDPPipeSync(g_DisplayListHead++);
   for (step = 0; step < f_OpeningShotPathDashCount; step++) {
     gSPMatrix(g_DisplayListHead++,
-              &f_OpeningShotDashMatrices[g_DrawBufferIndex][step],
-              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        &f_OpeningShotDashMatrices[g_DrawBufferIndex][step],
+        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPVertex(g_DisplayListHead++, f_OpeningShotDashVertices, 4, 0);
     gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
     gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
@@ -1038,7 +1034,7 @@ void UpdateOpening(void) {
     if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons &
         B_BUTTON) {
       PlaySound(SOUND_MENU_BLOCKED, OPENING_MENU_SOUND_CHANNEL,
-                OPENING_SOUND_FULL_VOLUME);
+          OPENING_SOUND_FULL_VOLUME);
       ClearGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
       f_IsLookAtMarkerShown = 0;
       ClearDebugText();
@@ -1051,8 +1047,8 @@ void UpdateOpening(void) {
     }
     if (g_IsDebugEnabled) {
       sprintf(g_PrintBuffer, "%04d", f_OpeningFrameCount);
-      PrintDebugText(g_PrintBuffer, FRAME_COUNT_TEXT_COLUMN,
-                     FRAME_COUNT_TEXT_ROW);
+      PrintDebugText(
+          g_PrintBuffer, FRAME_COUNT_TEXT_COLUMN, FRAME_COUNT_TEXT_ROW);
       sprintf(g_PrintBuffer, "CAMERA:%d    ", f_OpeningScene);
       PrintDebugText(g_PrintBuffer, SCENE_TEXT_COLUMN, SCENE_TEXT_ROW);
       sprintf(g_PrintBuffer, "(%d)    ", f_OpeningSceneFramesLeft);
@@ -1081,8 +1077,8 @@ void UpdateOpening(void) {
           LoadNameLogo(0, 0);
           f_OpeningCue = 0;
           StartScreenFadeIn(0, 0, 0, 0x1E);
-          PlaceEditorCamera(997.598f, -160.581f, 4594.014f, 973.0f, -130.0f,
-                            4672.0f);
+          PlaceEditorCamera(
+              997.598f, -160.581f, 4594.014f, 973.0f, -130.0f, 4672.0f);
           ZoomEditorCamera(1, 38.01875f, 0x3C);
           TurnEditorCamera(1, -0.8528241f, 0x28);
           TiltEditorCamera(1, -0.324127f, 0x28);
@@ -1141,8 +1137,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x14:
-        PlaceEditorCamera(679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f,
-                          4746.187f);
+        PlaceEditorCamera(
+            679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f, 4746.187f);
         ZoomEditorCamera(1, 18.469883f, 0x1E);
         MoveEditorCamera(1, 642.835f, -100.5f, 4746.187f, 0x1E);
         f_IsNameSlotShown[0] = 0;
@@ -1177,8 +1173,8 @@ void UpdateOpening(void) {
         f_OpeningScene = 0x28;
         break;
       case 0x1E:
-        PlaceEditorCamera(1400.411f, -101.306f, 4781.043f, 1414.02f, -107.0f,
-                          4800.41f);
+        PlaceEditorCamera(
+            1400.411f, -101.306f, 4781.043f, 1414.02f, -107.0f, 4800.41f);
         f_OpeningSceneFramesLeft = 0xE;
         f_OpeningScene++;
         break;
@@ -1191,8 +1187,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x28:
-        PlaceEditorCamera(1269.768f, -127.806f, 4719.564f, 1179.989f, -111.987f,
-                          4715.451f);
+        PlaceEditorCamera(
+            1269.768f, -127.806f, 4719.564f, 1179.989f, -111.987f, 4715.451f);
         f_OpeningShotSimulation.position[0] = 0xF1B96;
         f_OpeningShotSimulation.position[2] = 0x48CFDC;
         f_OpeningShotSimulation.position[1] =
@@ -1227,8 +1223,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x32:
-        PlaceEditorCamera(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f,
-                          4671.789f);
+        PlaceEditorCamera(
+            957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
         f_OpeningCue = 4;
         f_LookAtEaseMode = 0;
         f_OpeningSceneFramesLeft = 0x64;
@@ -1276,8 +1272,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x3C:
-        PlaceEditorCamera(726.63f, -98.049f, 5063.849f, 713.268f, -96.0f,
-                          5094.7f);
+        PlaceEditorCamera(
+            726.63f, -98.049f, 5063.849f, 713.268f, -96.0f, 5094.7f);
         MoveEditorPoint(1, 713.268f, -102.0f, 5094.7f, 0x28);
         MoveEditorPoint(0, 708.085f, -98.243f, 5073.215f, 0x28);
         f_OpeningSceneFramesLeft = 0x28;
@@ -1318,8 +1314,8 @@ void UpdateOpening(void) {
           D_8020AE44_ovl_05 = 1;
         }
         if (AreEditorMovesDone()) {
-          PlaceEditorCamera(973.156f, -317.049f, 3703.677f, 1276.871f,
-                            -112.538f, 4540.245f);
+          PlaceEditorCamera(
+              973.156f, -317.049f, 3703.677f, 1276.871f, -112.538f, 4540.245f);
           f_ShotBallScale = 1;
           f_LookAtEaseMode = 1;
           f_OpeningSceneFramesLeft = 0x46;
@@ -1334,8 +1330,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x50:
-        PlaceEditorCamera(980.776f, -123.436f, 4636.89f, 971.837f, -133.5f,
-                          4671.701f);
+        PlaceEditorCamera(
+            980.776f, -123.436f, 4636.89f, 971.837f, -133.5f, 4671.701f);
         f_OpeningSceneFramesLeft = 0x64;
         f_OpeningCue = 7;
         f_OpeningScene++;
@@ -1385,8 +1381,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x5A:
-        PlaceEditorCamera(1402.165f, -101.306f, 4774.711f, 1412.049f, -107.0f,
-                          4798.309f);
+        PlaceEditorCamera(
+            1402.165f, -101.306f, 4774.711f, 1412.049f, -107.0f, 4798.309f);
         TiltEditorCamera(1, 0.183044f, 0x32);
         TurnEditorCamera(1, 1.1519989f, 0x32);
         ZoomEditorCamera(1, 47.392056f, 0x1E);
@@ -1419,8 +1415,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x65:
-        PlaceEditorCamera(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f,
-                          4671.789f);
+        PlaceEditorCamera(
+            957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
         TurnEditorCamera(1, 1.0471976f, 1);
         TiltEditorCamera(1, 0.34906584f, 1);
         f_OpeningCue = 9;
@@ -1479,8 +1475,7 @@ void UpdateOpening(void) {
       case 0x70:
         func_80206AA4_ovl_05(&f_OpeningShotSimulation);
         if (AreEditorMovesDone()) {
-          PlaceEditorCamera(
-              934.786f, -128.501f, 4716.105f,
+          PlaceEditorCamera(934.786f, -128.501f, 4716.105f,
               f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE,
               f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE,
               f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE);
@@ -1536,8 +1531,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x79:
-        PlaceEditorCamera(2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f,
-                          2488.521f);
+        PlaceEditorCamera(
+            2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f, 2488.521f);
         f_OpeningCue = 0xB;
         f_OpeningBallStates[0] = 1;
         f_OpeningBallStates[1] = 1;
@@ -1557,8 +1552,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0x82:
-        PlaceEditorCamera(2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f,
-                          1850.029f);
+        PlaceEditorCamera(
+            2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f, 1850.029f);
         f_OpeningBallStates[1] = 0;
         f_OpeningBallPositions[0][0] = 2483.922f;
         f_OpeningBallPositions[0][2] = 1800.958f;
@@ -1628,8 +1623,8 @@ void UpdateOpening(void) {
       case 0x96:
         if (f_OpeningSceneFramesLeft == 0) {
           StartHudAnimation(9);
-          PlaceEditorCamera(2801.815f, -255.822f, 2196.813f, 2823.524f, -256.5f,
-                            2177.502f);
+          PlaceEditorCamera(
+              2801.815f, -255.822f, 2196.813f, 2823.524f, -256.5f, 2177.502f);
           MoveEditorPoint(1, 2855.966f, -256.5f, 2213.121f, 0x32);
           MoveEditorPoint(0, 2702.606f, -279.683f, 2250.851f, 0x32);
           f_OpeningSceneFramesLeft = 0x5A;
@@ -1671,7 +1666,7 @@ void UpdateOpening(void) {
           g_CurrentShot.ballPosition[2] = (s32)point[2] * 1024;
           g_CurrentShot.ballPosition[1] =
               GetGroundHeight(g_CurrentShot.ballPosition[0],
-                              g_CurrentShot.ballPosition[2]) +
+                  g_CurrentShot.ballPosition[2]) +
               15360.0f;
           SpawnRisingClumps(D_8020C404_ovl_05);
         }
@@ -1705,8 +1700,8 @@ void UpdateOpening(void) {
         break;
       case 0xA0:
         if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f,
-                            2337.548f);
+          PlaceEditorCamera(
+              2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f, 2337.548f);
           f_OpeningCue = 0xF;
           f_OpeningSceneFramesLeft = 0x40;
           f_OpeningScene = 0xAA;
@@ -1724,8 +1719,8 @@ void UpdateOpening(void) {
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(2670.074f, -270.531f, 2375.225f, 2692.222f, -248.0f,
-                            2366.292f);
+          PlaceEditorCamera(
+              2670.074f, -270.531f, 2375.225f, 2692.222f, -248.0f, 2366.292f);
           ZoomEditorCamera(1, 16.721228f, 0x28);
           f_OpeningScene++;
           PlaySound(0x60, f_OpeningSoundChannel, 0x3C);
@@ -1752,8 +1747,8 @@ void UpdateOpening(void) {
         break;
       case 0xB4:
         if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f,
-                            2337.548f);
+          PlaceEditorCamera(
+              2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f, 2337.548f);
           f_OpeningCue = 0x11;
           f_OpeningSceneFramesLeft = 0x38;
           g_CameraEditor.fieldOfView = 45.0f;
@@ -1797,11 +1792,11 @@ void UpdateOpening(void) {
         f_OpeningBallPositions[1][1] = -560.0f;
         f_OpeningBallPositions[1][2] = 342.12f;
         f_OpeningBallScales[1] = 2.0f;
-        PlaceEditorCamera(2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f,
-                          665.178f);
+        PlaceEditorCamera(
+            2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f, 665.178f);
         MoveEditorPoint(0, 2671.388f, -257.489f, 2351.288f, 0x28);
         MoveEditorPoint(1, logoBallPoint[0], logoBallPoint[1] - 4.5f,
-                        logoBallPoint[2], 0x28);
+            logoBallPoint[2], 0x28);
         f_IsLogoBallSlot[1] = 1;
         f_OpeningScene++;
         D_80217078_ovl_05 = 1.0f;
@@ -1858,8 +1853,8 @@ void UpdateOpening(void) {
         }
         if (f_OpeningSceneFramesLeft == 0) {
           StartHudAnimation(9);
-          PlaceEditorCamera(2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f,
-                            992.943f);
+          PlaceEditorCamera(
+              2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f, 992.943f);
           MoveEditorPoint(0, 2051.33f, -258.127f, 862.423f, 0x28);
           MoveEditorPoint(1, 2058.79f, -254.0f, 825.963f, 0x28);
           f_OpeningCue = 0x15;
@@ -1999,8 +1994,8 @@ void UpdateOpening(void) {
           AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(2708.301f, -264.204f, 2343.526f, 2770.098f, -260.0f,
-                            2337.539f);
+          PlaceEditorCamera(
+              2708.301f, -264.204f, 2343.526f, 2770.098f, -260.0f, 2337.539f);
           f_OpeningCue = 0x17;
           f_OpeningSceneFramesLeft = 0x46;
           f_IsNameSlotShown[0] = 0;
@@ -2043,8 +2038,8 @@ void UpdateOpening(void) {
         break;
       case 0xDC:
         if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(1423.923f, -248.221f, 1595.031f, 1450.829f, -254.0f,
-                            1546.087f);
+          PlaceEditorCamera(
+              1423.923f, -248.221f, 1595.031f, 1450.829f, -254.0f, 1546.087f);
           MoveEditorPoint(1, 1420.136f, -250.5f, 1551.713f, 0x32);
           f_OpeningCue = 0x19;
           f_OpeningScene++;
@@ -2103,8 +2098,8 @@ void UpdateOpening(void) {
         }
         break;
       case 0xE6:
-        PlaceEditorCamera(956.687f, -259.45f, 1874.671f, 933.391f, -243.5f,
-                          1884.391f);
+        PlaceEditorCamera(
+            956.687f, -259.45f, 1874.671f, 933.391f, -243.5f, 1884.391f);
         f_OpeningSceneFramesLeft = 0x14;
         f_OpeningCue = 0x1A;
         f_AreImpactLinesShown = 0;
@@ -2159,8 +2154,8 @@ void UpdateOpening(void) {
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(1423.703f, -250.799f, 1574.041f, 1420.135f, -252.0f,
-                            1551.713f);
+          PlaceEditorCamera(
+              1423.703f, -250.799f, 1574.041f, 1420.135f, -252.0f, 1551.713f);
           f_OpeningScene = 0xFA;
           f_OpeningSceneFramesLeft = 0x50;
           f_OpeningCue = 0x1B;
@@ -2265,7 +2260,7 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_SKIPPED:
         StartScreenFadeOut(SKIP_FADE_WHITE_LEVEL, SKIP_FADE_WHITE_LEVEL,
-                           SKIP_FADE_WHITE_LEVEL, SKIP_FADE_FRAME_COUNT);
+            SKIP_FADE_WHITE_LEVEL, SKIP_FADE_FRAME_COUNT);
         f_OpeningScene = OPENING_SCENE_END;
         break;
       case OPENING_SCENE_END:
@@ -2282,16 +2277,16 @@ void UpdateOpening(void) {
           for (channel = 0; channel < SCRIPT_SOUND_CHANNEL_COUNT; channel++) {
             if (g_TitleScreenEntrance != TITLE_ENTRANCE_FROM_OPENING ||
                 (channel != f_DonkeyKongSoundChannel &&
-                 channel != f_ClosingSoundChannel)) {
+                    channel != f_ClosingSoundChannel)) {
               StopSound(channel);
             }
           }
           if (!f_HasLogoStarted) {
             PlaySound(SOUND_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
-                      OPENING_SOUND_FULL_VOLUME);
+                OPENING_SOUND_FULL_VOLUME);
           }
-          SetTextSlot(CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0,
-                      0, 0);
+          SetTextSlot(
+              CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
           return;
         }
         break;
@@ -2347,14 +2342,14 @@ void UpdateOpening(void) {
       if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons &
           A_BUTTON) {
         PlaySound(SOUND_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
-                  OPENING_SOUND_FULL_VOLUME);
+            OPENING_SOUND_FULL_VOLUME);
         SetGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
         f_IsLookAtMarkerShown = 1;
         f_LookAtEaseMode = 0;
       }
       if (g_IsDebugEnabled &&
           (g_ControllerStates[OPENING_SCENE_CONTROLLER].pressedButtons &
-           R_TRIG)) {
+              R_TRIG)) {
         f_OpeningSceneFramesLeft = 0;
         StopEditorMoves();
       }
@@ -2380,9 +2375,9 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   f_OpeningFrameParity ^= 1;
   if (f_IsLookAtMarkerShown) {
     guTranslate(&f_LookAtMarkerTranslation, g_Cameras[0].view.lookAt[0],
-                g_Cameras[0].view.lookAt[1], g_Cameras[0].view.lookAt[2]);
+        g_Cameras[0].view.lookAt[1], g_Cameras[0].view.lookAt[2]);
     guScale(&f_LookAtMarkerScaling, g_LookAtMarkerScale, g_LookAtMarkerScale,
-            g_LookAtMarkerScale);
+        g_LookAtMarkerScale);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -2392,9 +2387,9 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LookAtMarkerTranslation),
-              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LookAtMarkerScaling),
-              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_LookAtMarkerVertices[0], 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gSPVertex(gfx++, f_LookAtMarkerVertices[1], 4, 0);
@@ -2486,7 +2481,7 @@ void DrawNameLogos(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       for (strip = 0; strip != NAME_LOGO_STRIP_COUNT; strip++) {
         texelsOffset = LARGE_PALETTED_TEXELS_OFFSET +
-                       strip * SLOT_LOGO.width * NAME_LOGO_STRIP_ROWS;
+            strip * SLOT_LOGO.width * NAME_LOGO_STRIP_ROWS;
         stripHeight = SLOT_LOGO.shownHeight / NAME_LOGO_STRIP_COUNT;
         xEdges[0] = SLOT_LOGO.x - SLOT_LOGO.shownWidth / 2;
         xEdges[1] = SLOT_LOGO.x + SLOT_LOGO.shownWidth / 2;
@@ -2499,8 +2494,8 @@ void DrawNameLogos(Gfx** displayListHead) {
           s32 drawnWidth;
           s32 drawnHeight;
 
-          gDPLoadTextureBlock(
-              gfx++, TEXTURE_ADDRESS(f_NameSlotImages[slot] + texelsOffset),
+          gDPLoadTextureBlock(gfx++,
+              TEXTURE_ADDRESS(f_NameSlotImages[slot] + texelsOffset),
               G_IM_FMT_CI, G_IM_SIZ_8b, SLOT_LOGO.width,
               SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -2511,12 +2506,11 @@ void DrawNameLogos(Gfx** displayListHead) {
             drawnWidth = 1;
           }
           drawnHeight = yEdges[NAME_LOGO_STRIP_COUNT - strip] -
-                        yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip];
+              yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip];
           if (drawnHeight <= 0) {
             drawnHeight = 1;
           }
-          gSPScisTextureRectangle(
-              gfx++, xEdges[0] << 2,
+          gSPScisTextureRectangle(gfx++, xEdges[0] << 2,
               yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip] << 2, xEdges[1] << 2,
               yEdges[NAME_LOGO_STRIP_COUNT - strip] << 2, G_TX_RENDERTILE, 0,
               NAME_LOGO_STRIP_ROWS << 5, (SLOT_LOGO.width << 10) / drawnWidth,
@@ -2525,8 +2519,8 @@ void DrawNameLogos(Gfx** displayListHead) {
           s32 drawnWidth;
           s32 drawnHeight;
 
-          gDPLoadTextureBlock(
-              gfx++, TEXTURE_ADDRESS(f_NameSlotImages[slot] + texelsOffset),
+          gDPLoadTextureBlock(gfx++,
+              TEXTURE_ADDRESS(f_NameSlotImages[slot] + texelsOffset),
               G_IM_FMT_CI, G_IM_SIZ_8b, SLOT_LOGO.width,
               SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -2541,10 +2535,9 @@ void DrawNameLogos(Gfx** displayListHead) {
             drawnHeight = 1;
           }
           gSPScisTextureRectangle(gfx++, xEdges[0] << 2, yEdges[strip] << 2,
-                                  xEdges[1] << 2, yEdges[strip + 1] << 2,
-                                  G_TX_RENDERTILE, 0, 0,
-                                  (SLOT_LOGO.width << 10) / drawnWidth,
-                                  (SLOT_LOGO.height << 8) / drawnHeight);
+              xEdges[1] << 2, yEdges[strip + 1] << 2, G_TX_RENDERTILE, 0, 0,
+              (SLOT_LOGO.width << 10) / drawnWidth,
+              (SLOT_LOGO.height << 8) / drawnHeight);
         }
         gDPPipeSync(gfx++);
       }
@@ -2732,32 +2725,31 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         position[0] = f_OpeningBallPositions[slot][0];
         position[2] = f_OpeningBallPositions[slot][2];
         position[1] = GetGroundHeight(position[0] * WORLD_TO_COURSE_SCALE,
-                                      position[2] * WORLD_TO_COURSE_SCALE) *
-                      COURSE_TO_WORLD_SCALE;
+                          position[2] * WORLD_TO_COURSE_SCALE) *
+            COURSE_TO_WORLD_SCALE;
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_1CYCLE);
         if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
           guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-                      position[0],
-                      position[1] - OPENING_BALL_IN_AIR_SHADOW_DROP,
-                      position[2]);
+              position[0], position[1] - OPENING_BALL_IN_AIR_SHADOW_DROP,
+              position[2]);
         } else if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
           guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-                      position[0], position[1] - OPENING_BALL_LARGE_SHADOW_DROP,
-                      position[2]);
+              position[0], position[1] - OPENING_BALL_LARGE_SHADOW_DROP,
+              position[2]);
         } else {
           guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-                      position[0], position[1], position[2]);
+              position[0], position[1], position[2]);
         }
         guScale(&f_OpeningBallScaleMatrices[slot],
-                f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
-                f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
-                f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE);
+            f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
+            f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
+            f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE);
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
         gDPSetCombineLERP(gfx++, 0, 0, 0, 0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
-                          0, TEXEL0, 0, PRIMITIVE, 0);
+            0, TEXEL0, 0, PRIMITIVE, 0);
         gDPPipeSync(gfx++);
         gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
         gDPSetBlendColor(gfx++, 255, 255, 255, 16);
@@ -2770,22 +2762,22 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         gDPSetTexturePersp(gfx++, G_TP_PERSP);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_NONE);
-        gDPLoadTextureBlock(
-            gfx++, TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
-            G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE,
-            0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++,
+            TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+            G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gDPSetTextureLOD(gfx++, G_TL_TILE);
         gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
         gSPLoadGeometryMode(gfx++, 0);
         gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
         gSPMatrix(gfx++,
-                  OS_K0_TO_PHYSICAL(
-                      &f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex]),
-                  G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            OS_K0_TO_PHYSICAL(
+                &f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex]),
+            G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_OpeningBallScaleMatrices[slot]),
-                  G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
         gSPVertex(gfx++, f_OpeningBallShadowVertices, 4, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -2797,7 +2789,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           position[1] += OPENING_BALL_LARGE_LIFT;
         }
         guTranslate(&f_OpeningBallMatrices[slot][g_DrawBufferIndex],
-                    position[0], position[1], position[2]);
+            position[0], position[1], position[2]);
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -2818,39 +2810,37 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPLoadTLUT_pal256(
               gfx++, TEXTURE_ADDRESS(f_LogoBallImages + IMAGE_HEADER_SIZE));
         } else {
-          gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
-                                                    IMAGE_HEADER_SIZE));
+          gDPLoadTLUT_pal256(gfx++,
+              TEXTURE_ADDRESS(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
         }
         for (stripIndex = 0; stripIndex < OPENING_BALL_STRIP_COUNT;
-             stripIndex++) {
+            stripIndex++) {
           gDPPipeSync(gfx++);
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
-                    OS_K0_TO_PHYSICAL(
-                        &f_OpeningBallMatrices[slot][g_DrawBufferIndex]),
-                    G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+              OS_K0_TO_PHYSICAL(
+                  &f_OpeningBallMatrices[slot][g_DrawBufferIndex]),
+              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->billboard),
-                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_OpeningBallScaleMatrices[slot]),
-                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           if (f_IsLogoBallSlot[slot]) {
-            gDPLoadTextureBlock(
-                gfx++,
+            gDPLoadTextureBlock(gfx++,
                 TEXTURE_ADDRESS(f_LogoBallImages +
-                                LARGE_PALETTED_TEXELS_OFFSET +
-                                (stripIndex * OPENING_BALL_STRIP_SIZE +
-                                 f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE)),
+                    LARGE_PALETTED_TEXELS_OFFSET +
+                    (stripIndex * OPENING_BALL_STRIP_SIZE +
+                        f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE)),
                 G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                 OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                 G_TX_NOLOD);
           } else {
-            gDPLoadTextureBlock(
-                gfx++,
+            gDPLoadTextureBlock(gfx++,
                 TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
-                                LARGE_PALETTED_TEXELS_OFFSET +
-                                stripIndex * OPENING_BALL_STRIP_SIZE),
+                    LARGE_PALETTED_TEXELS_OFFSET +
+                    stripIndex * OPENING_BALL_STRIP_SIZE),
                 G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                 OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -2865,7 +2855,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             guMtxIdentF(f_LogoBallRoll);
             f_ShouldResetLogoBallRoll = 0;
             guRotateRPYF(f_LogoBallRoll, LOGO_BALL_START_ROLL,
-                         LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
+                LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
           }
           if (f_HasLogoBallLastPosition) {
             movement[0] =
@@ -2880,9 +2870,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             movement[1] = 0.0f;
             movement[2] = 0.0f;
           }
-          rollAngle =
-              sqrtf(movement[0] * movement[0] + movement[1] * movement[1] +
-                    movement[2] * movement[2]);
+          rollAngle = sqrtf(movement[0] * movement[0] +
+              movement[1] * movement[1] + movement[2] * movement[2]);
           rollAngle *= (f32)RADIANS_TO_DEGREES;
           f_LogoBallLastPosition[0] = f_OpeningBallPositions[slot][0];
           f_LogoBallLastPosition[1] = f_OpeningBallPositions[slot][1];
@@ -2895,19 +2884,19 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             }
           }
           guScale(&f_LogoBallMarioScale, LOGO_BALL_MARIO_SCALE,
-                  LOGO_BALL_MARIO_SCALE, LOGO_BALL_MARIO_SCALE);
+              LOGO_BALL_MARIO_SCALE, LOGO_BALL_MARIO_SCALE);
           if (movement[2] != 0.0f || movement[0] != 0.0f) {
             guRotateF(turn, rollAngle, -movement[2], 0.0f, movement[0]);
             guMtxCatF(f_LogoBallRoll, turn, f_LogoBallRoll);
-            ConvertMatrixToFixed(f_LogoBallRoll,
-                                 &f_LogoBallMarioRolls[g_DrawBufferIndex]);
+            ConvertMatrixToFixed(
+                f_LogoBallRoll, &f_LogoBallMarioRolls[g_DrawBufferIndex]);
           }
-          guTranslate(&f_LogoBallMarioOffset, 0.0f, LOGO_BALL_MARIO_OFFSET_Y,
-                      0.0f);
+          guTranslate(
+              &f_LogoBallMarioOffset, 0.0f, LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
           guTranslate(&f_LogoBallMarioTranslations[g_DrawBufferIndex],
-                      f_OpeningBallPositions[slot][0],
-                      f_OpeningBallPositions[slot][1] - LOGO_BALL_MARIO_DROP,
-                      f_OpeningBallPositions[slot][2]);
+              f_OpeningBallPositions[slot][0],
+              f_OpeningBallPositions[slot][1] - LOGO_BALL_MARIO_DROP,
+              f_OpeningBallPositions[slot][2]);
           gDPPipeSync(gfx++);
           gDPSetCycleType(gfx++, G_CYC_1CYCLE);
           gDPPipeSync(gfx++);
@@ -2923,8 +2912,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetTextureLUT(gfx++, G_TT_RGBA16);
           gDPLoadTLUT_pal256(
               gfx++, TEXTURE_ADDRESS(f_LogoMarioImage + IMAGE_HEADER_SIZE));
-          gDPLoadTextureBlock(
-              gfx++,
+          gDPLoadTextureBlock(gfx++,
               TEXTURE_ADDRESS(f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
               G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
               LOGO_MARIO_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2936,16 +2924,16 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
-                    OS_K0_TO_PHYSICAL(
-                        &f_LogoBallMarioTranslations[g_DrawBufferIndex]),
-                    G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+              OS_K0_TO_PHYSICAL(
+                  &f_LogoBallMarioTranslations[g_DrawBufferIndex]),
+              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPMatrix(gfx++,
-                    OS_K0_TO_PHYSICAL(&f_LogoBallMarioRolls[g_DrawBufferIndex]),
-                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+              OS_K0_TO_PHYSICAL(&f_LogoBallMarioRolls[g_DrawBufferIndex]),
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LogoBallMarioScale),
-                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LogoBallMarioOffset),
-                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           if (f_OpeningScene >= OPENING_SCENE_LOGO_BALL_MARIO &&
               f_OpeningSceneFramesLeft < LOGO_BALL_MARIO_FRAMES_LEFT) {
             gSPVertex(gfx++, f_LogoBallMarioVertices, 4, 0);
@@ -2978,13 +2966,13 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               COURSE_TO_WORLD_SCALE;
         }
         if (ProjectPoint(f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
-                         f_ProjectedBallPosition[2], &ballPoint) < 0) {
+                f_ProjectedBallPosition[2], &ballPoint) < 0) {
           screenScale = ballPoint.scaleX;
           if (screenScale < 0.0f) {
             screenScale = -screenScale;
           }
-          halfSize = screenScale * (PROJECTED_BALL_WIDTH_PER_SCALE *
-                                    f_OpeningBallScales[slot]);
+          halfSize = screenScale *
+              (PROJECTED_BALL_WIDTH_PER_SCALE * f_OpeningBallScales[slot]);
           if (halfSize & 1) {
             f_ProjectedBallExtraPixel = 1;
           } else {
@@ -3007,26 +2995,25 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             f_ProjectedBallPosition[1] -= PROJECTED_BALL_LARGE_SHADOW_DROP;
           }
           if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-            guTranslate(
-                &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
+            guTranslate(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
                 f_ProjectedBallPosition[0],
                 f_ProjectedBallPosition[1] - OPENING_BALL_IN_AIR_SHADOW_DROP,
                 f_ProjectedBallPosition[2]);
           } else {
             guTranslate(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
-                        f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
-                        f_ProjectedBallPosition[2]);
+                f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
+                f_ProjectedBallPosition[2]);
           }
           guScale(&f_ProjectedShadowScaleMatrices[slot],
-                  f_OpeningBallScales[slot], f_OpeningBallScales[slot],
-                  f_OpeningBallScales[slot]);
+              f_OpeningBallScales[slot], f_OpeningBallScales[slot],
+              f_OpeningBallScales[slot]);
           gDPPipeSync(gfx++);
           gDPPipeSync(gfx++);
           gDPSetCycleType(gfx++, G_CYC_1CYCLE);
           gDPPipeSync(gfx++);
           gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
           gDPSetCombineLERP(gfx++, 0, 0, 0, 0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
-                            0, TEXEL0, 0, PRIMITIVE, 0);
+              0, TEXEL0, 0, PRIMITIVE, 0);
           gDPPipeSync(gfx++);
           gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
           gDPSetBlendColor(gfx++, 255, 255, 255, 16);
@@ -3039,23 +3026,23 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetTexturePersp(gfx++, G_TP_PERSP);
           gDPPipeSync(gfx++);
           gDPSetTextureLUT(gfx++, G_TT_NONE);
-          gDPLoadTextureBlock(
-              gfx++, TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
-              G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE,
-              0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPLoadTextureBlock(gfx++,
+              TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+              G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
           gDPSetTextureLOD(gfx++, G_TL_TILE);
           gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
-                    OS_K0_TO_PHYSICAL(
-                        &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot]),
-                    G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+              OS_K0_TO_PHYSICAL(
+                  &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot]),
+              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPMatrix(gfx++,
-                    OS_K0_TO_PHYSICAL(&f_ProjectedShadowScaleMatrices[slot]),
-                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+              OS_K0_TO_PHYSICAL(&f_ProjectedShadowScaleMatrices[slot]),
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           gSPVertex(gfx++, f_ProjectedShadowVertices, 4, 0);
           gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -3078,30 +3065,28 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPLoadTLUT_pal256(
                 gfx++, TEXTURE_ADDRESS(f_LogoBallImages + IMAGE_HEADER_SIZE));
           } else {
-            gDPLoadTLUT_pal256(
-                gfx++,
+            gDPLoadTLUT_pal256(gfx++,
                 TEXTURE_ADDRESS(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
           }
           gDPPipeSync(gfx++);
           for (stripIndex = 0; stripIndex != OPENING_BALL_STRIP_COUNT;
-               stripIndex++) {
+              stripIndex++) {
             if (f_IsLogoBallSlot[slot]) {
-              gDPLoadTextureBlock(
-                  gfx++,
-                  TEXTURE_ADDRESS(
-                      f_LogoBallImages + LARGE_PALETTED_TEXELS_OFFSET +
+              gDPLoadTextureBlock(gfx++,
+                  TEXTURE_ADDRESS(f_LogoBallImages +
+                      LARGE_PALETTED_TEXELS_OFFSET +
                       (stripIndex * OPENING_BALL_STRIP_SIZE +
-                       f_ProjectedLogoBallFrameIndex * LOGO_BALL_FRAME_SIZE)),
+                          f_ProjectedLogoBallFrameIndex *
+                              LOGO_BALL_FRAME_SIZE)),
                   G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                   OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                   G_TX_NOLOD, G_TX_NOLOD);
             } else {
-              gDPLoadTextureBlock(
-                  gfx++,
+              gDPLoadTextureBlock(gfx++,
                   TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
-                                  LARGE_PALETTED_TEXELS_OFFSET +
-                                  stripIndex * OPENING_BALL_STRIP_SIZE),
+                      LARGE_PALETTED_TEXELS_OFFSET +
+                      stripIndex * OPENING_BALL_STRIP_SIZE),
                   G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                   OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
@@ -3114,8 +3099,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 f_ProjectedBallLeft =
                     ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
                 f_ProjectedBallRight = ballPoint.x + halfSize;
-                f_ProjectedBallTop =
-                    ballPoint.y -
+                f_ProjectedBallTop = ballPoint.y -
                     halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex) -
                     f_ProjectedBallExtraPixel;
                 f_ProjectedBallBottom =
@@ -3124,21 +3108,18 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 f_ProjectedBallLeft =
                     ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
                 f_ProjectedBallRight = ballPoint.x + halfSize;
-                f_ProjectedBallTop =
-                    ballPoint.y -
+                f_ProjectedBallTop = ballPoint.y -
                     halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex) -
                     f_ProjectedBallExtraPixel + PROJECTED_BALL_DROP;
                 f_ProjectedBallBottom = ballPoint.y + stripIndex * halfSize -
-                                        halfSize + PROJECTED_BALL_DROP;
+                    halfSize + PROJECTED_BALL_DROP;
               }
               f_ProjectedBallTexelStep = OPENING_BALL_STRIP_HEIGHT *
-                                         TEXEL_STEP_ONE /
-                                         (halfSize + f_ProjectedBallExtraPixel);
-              gSPScisTextureRectangle(
-                  gfx++, f_ProjectedBallLeft << 2, f_ProjectedBallTop << 2,
-                  f_ProjectedBallRight << 2, f_ProjectedBallBottom << 2,
-                  G_TX_RENDERTILE, 0, 0, f_ProjectedBallTexelStep,
-                  f_ProjectedBallTexelStep);
+                  TEXEL_STEP_ONE / (halfSize + f_ProjectedBallExtraPixel);
+              gSPScisTextureRectangle(gfx++, f_ProjectedBallLeft << 2,
+                  f_ProjectedBallTop << 2, f_ProjectedBallRight << 2,
+                  f_ProjectedBallBottom << 2, G_TX_RENDERTILE, 0, 0,
+                  f_ProjectedBallTexelStep, f_ProjectedBallTexelStep);
             }
             gDPPipeSync(gfx++);
           }
@@ -3147,24 +3128,23 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               guMtxIdentF(f_ProjectedLogoBallRoll);
               f_ShouldResetProjectedLogoBallRoll = 0;
               guRotateRPYF(f_ProjectedLogoBallRoll, LOGO_BALL_START_ROLL,
-                           LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
+                  LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
             }
             if (f_HasProjectedLogoBallLastPosition) {
               movement[0] = f_OpeningBallPositions[slot][0] -
-                            f_ProjectedLogoBallLastPosition[0];
+                  f_ProjectedLogoBallLastPosition[0];
               movement[1] = f_OpeningBallPositions[slot][1] -
-                            f_ProjectedLogoBallLastPosition[1];
+                  f_ProjectedLogoBallLastPosition[1];
               movement[2] = f_OpeningBallPositions[slot][2] -
-                            f_ProjectedLogoBallLastPosition[2];
+                  f_ProjectedLogoBallLastPosition[2];
             } else {
               f_HasProjectedLogoBallLastPosition = 1;
               movement[0] = 0.0f;
               movement[1] = 0.0f;
               movement[2] = 0.0f;
             }
-            rollAngle =
-                sqrtf(movement[0] * movement[0] + movement[1] * movement[1] +
-                      movement[2] * movement[2]);
+            rollAngle = sqrtf(movement[0] * movement[0] +
+                movement[1] * movement[1] + movement[2] * movement[2]);
             rollAngle *= (f32)RADIANS_TO_DEGREES;
             f_ProjectedLogoBallLastPosition[0] =
                 f_OpeningBallPositions[slot][0];
@@ -3180,20 +3160,19 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               }
             }
             guScale(&f_ProjectedLogoBallMarioScale,
-                    PROJECTED_LOGO_BALL_MARIO_SCALE,
-                    PROJECTED_LOGO_BALL_MARIO_SCALE,
-                    PROJECTED_LOGO_BALL_MARIO_SCALE);
+                PROJECTED_LOGO_BALL_MARIO_SCALE,
+                PROJECTED_LOGO_BALL_MARIO_SCALE,
+                PROJECTED_LOGO_BALL_MARIO_SCALE);
             if (movement[2] != 0.0f || movement[0] != 0.0f) {
-              guRotateF(projectedTurn, rollAngle, -movement[2], 0.0f,
-                        movement[0]);
+              guRotateF(
+                  projectedTurn, rollAngle, -movement[2], 0.0f, movement[0]);
               guMtxCatF(f_ProjectedLogoBallRoll, projectedTurn,
-                        f_ProjectedLogoBallRoll);
-              ConvertMatrixToFixed(
-                  f_ProjectedLogoBallRoll,
+                  f_ProjectedLogoBallRoll);
+              ConvertMatrixToFixed(f_ProjectedLogoBallRoll,
                   &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]);
             }
             guTranslate(&f_ProjectedLogoBallMarioOffset, 0.0f,
-                        PROJECTED_LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
+                PROJECTED_LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
             guTranslate(
                 &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex],
                 f_OpeningBallPositions[slot][0],
@@ -3216,32 +3195,30 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPLoadTLUT_pal256(
                 gfx++, TEXTURE_ADDRESS(f_LogoMarioImage + IMAGE_HEADER_SIZE));
             gDPLoadTextureBlock(gfx++,
-                                TEXTURE_ADDRESS(f_LogoMarioImage +
-                                                LARGE_PALETTED_TEXELS_OFFSET),
-                                G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
-                                LOGO_MARIO_IMAGE_SIZE, 0,
-                                G_TX_NOMIRROR | G_TX_WRAP,
-                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                                G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                TEXTURE_ADDRESS(
+                    f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
+                G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
+                LOGO_MARIO_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                G_TX_NOLOD);
             gDPPipeSync(gfx++);
             gDPSetTextureLOD(gfx++, G_TL_TILE);
             gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
             gSPLoadGeometryMode(gfx++, 0);
-            gSPSetGeometryMode(gfx++,
-                               G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
-            gSPMatrix(
-                gfx++,
+            gSPSetGeometryMode(
+                gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
+            gSPMatrix(gfx++,
                 OS_K0_TO_PHYSICAL(
                     &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex]),
                 G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gSPMatrix(gfx++,
-                      OS_K0_TO_PHYSICAL(
-                          &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]),
-                      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+                OS_K0_TO_PHYSICAL(
+                    &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]),
+                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
             gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ProjectedLogoBallMarioScale),
-                      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
             gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ProjectedLogoBallMarioOffset),
-                      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
             gSPVertex(gfx++, f_ProjectedLogoBallMarioVertices, 4, 0);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
             gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -3303,11 +3280,11 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
   if (f_AreImpactLinesShown) {
     frame = f_ImpactLinesFrame++;
     if ((frame < IMPACT_LINES_FIRST_BLINK_FRAME ||
-         frame >=
-             IMPACT_LINES_FIRST_BLINK_FRAME + IMPACT_LINES_BLINK_FRAME_COUNT) &&
+            frame >= IMPACT_LINES_FIRST_BLINK_FRAME +
+                    IMPACT_LINES_BLINK_FRAME_COUNT) &&
         (frame < IMPACT_LINES_SECOND_BLINK_FRAME ||
-         frame >= IMPACT_LINES_SECOND_BLINK_FRAME +
-                      IMPACT_LINES_BLINK_FRAME_COUNT) &&
+            frame >= IMPACT_LINES_SECOND_BLINK_FRAME +
+                    IMPACT_LINES_BLINK_FRAME_COUNT) &&
         f_ImpactLinesFrame < IMPACT_LINES_FRAME_COUNT) {
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
@@ -3326,26 +3303,26 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(gfx++,
-                         (u32)(D_80212830_ovl_05 + IMAGE_HEADER_SIZE) & ~7);
+      gDPLoadTLUT_pal256(
+          gfx++, (u32)(D_80212830_ovl_05 + IMAGE_HEADER_SIZE) & ~7);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
       /* The rows count up from the bottom, so the top strip is row 1 */
       row = IMPACT_LINES_STRIP_COUNT - 1;
       for (stripIndex = 0; stripIndex != IMPACT_LINES_STRIP_COUNT;
-           stripIndex++) {
+          stripIndex++) {
         bottom = IMPACT_LINES_BOTTOM - row * IMPACT_LINES_STRIP_HEIGHT;
-        gDPLoadTextureBlock(
-            gfx++, (u32)(D_80212830_ovl_05 + texelOffset) & ~7, G_IM_FMT_I,
-            G_IM_SIZ_8b, IMPACT_LINES_SIZE, IMPACT_LINES_STRIP_HEIGHT, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++, (u32)(D_80212830_ovl_05 + texelOffset) & ~7,
+            G_IM_FMT_I, G_IM_SIZ_8b, IMPACT_LINES_SIZE,
+            IMPACT_LINES_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++, IMPACT_LINES_LEFT << 2,
-                                (bottom - IMPACT_LINES_STRIP_HEIGHT) << 2,
-                                (IMPACT_LINES_LEFT + width) << 2, bottom << 2,
-                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            (bottom - IMPACT_LINES_STRIP_HEIGHT) << 2,
+            (IMPACT_LINES_LEFT + width) << 2, bottom << 2, G_TX_RENDERTILE, 0,
+            0, 1 << 10, 1 << 10);
         gDPPipeSync(gfx++);
         texelOffset += IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT;
         row--;
@@ -3376,11 +3353,10 @@ void LoadLakitu(void) {
   /* The game places the trail twice over */
   for (pass = 0; pass < 2; pass++) {
     for (segmentIndex = 0; segmentIndex < LAKITU_TRAIL_SEGMENT_COUNT;
-         segmentIndex++) {
+        segmentIndex++) {
       guTranslate(&f_LakituTrailMatrices[segmentIndex],
-                  f_LakituScreenPoint[0] - SCREEN_WIDTH / 2,
-                  SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1],
-                  -LAKITU_TRAIL_DEPTH);
+          f_LakituScreenPoint[0] - SCREEN_WIDTH / 2,
+          SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1], -LAKITU_TRAIL_DEPTH);
     }
   }
   f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH;
@@ -3409,7 +3385,7 @@ extern Vtx f_LakituTrailVertices[2];
 /* First vertex buffer slot of a segment in the second batch */
 #define LAKITU_TRAIL_SECOND_BATCH_SLOT(segment) \
   ((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2 - \
-   ((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2)
+      ((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2)
 #define LAKITU_TRAIL_FADE_STEP 4
 
 /*
@@ -3445,17 +3421,17 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++,
-                       TEXTURE_ADDRESS(f_LakituImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(
+        gfx++, TEXTURE_ADDRESS(f_LakituImage + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
-    gDPLoadTextureBlock(
-        gfx++, TEXTURE_ADDRESS(f_LakituImage + LARGE_PALETTED_TEXELS_OFFSET),
+    gDPLoadTextureBlock(gfx++,
+        TEXTURE_ADDRESS(f_LakituImage + LARGE_PALETTED_TEXELS_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_IMAGE_SIZE, LAKITU_IMAGE_SIZE, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOMASK,
         G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, (f_LakituScreenPoint[0] - LAKITU_DRAWN_SIZE / 2) << 2,
+    gSPScisTextureRectangle(gfx++,
+        (f_LakituScreenPoint[0] - LAKITU_DRAWN_SIZE / 2) << 2,
         (f_LakituScreenPoint[1] - LAKITU_DRAWN_SIZE / 2) << 2,
         (f_LakituScreenPoint[0] + LAKITU_DRAWN_SIZE / 2) << 2,
         (f_LakituScreenPoint[1] + LAKITU_DRAWN_SIZE / 2) << 2, G_TX_RENDERTILE,
@@ -3464,15 +3440,15 @@ void DrawLakitu(Gfx** displayListHead) {
     rotation[0] = 0.0f;
     rotation[1] = 0.0f;
     rotation[2] = atan2(f_LakituTrailStart[0] -
-                            (f32)(f_LakituScreenPoint[0] - SCREEN_WIDTH / 2),
-                        f_LakituTrailStart[1] -
-                            (f32)(SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1]));
+            (f32)(f_LakituScreenPoint[0] - SCREEN_WIDTH / 2),
+        f_LakituTrailStart[1] -
+            (f32)(SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1]));
     translation[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH / 2;
     translation[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
     translation[2] = -LAKITU_TRAIL_DEPTH;
     BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(matrix,
-                         &f_LakituTrailMatrices[f_LakituTrailNewestIndex]);
+    ConvertMatrixToFixed(
+        matrix, &f_LakituTrailMatrices[f_LakituTrailNewestIndex]);
     f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH / 2;
     f_LakituTrailStart[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
     gSPLoadGeometryMode(gfx++, 0);
@@ -3489,25 +3465,24 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_LakituTrailAlpha);
     gDPSetEnvColor(gfx++, 255, 255, 255, 255);
     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
-                      0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-    gDPLoadTextureBlock_4b(
-        gfx++, TEXTURE_ADDRESS(f_LakituTrailImage + IMAGE_HEADER_SIZE),
-        G_IM_FMT_I, LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
+        0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+    gDPLoadTextureBlock_4b(gfx++,
+        TEXTURE_ADDRESS(f_LakituTrailImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+        LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, 7,
         G_TX_NOLOD, G_TX_NOLOD);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gDPPipeSync(gfx++);
     segmentIndex = f_LakituTrailNewestIndex;
     for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
-         drawnIndex++) {
+        drawnIndex++) {
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
-                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_LakituTrailVertices, 2, drawnIndex * 2);
-      gSPModifyVertex(gfx++, drawnIndex * 2, G_MWO_POINT_ST,
-                      LAKITU_TRAIL_T(drawnIndex));
       gSPModifyVertex(
-          gfx++, drawnIndex * 2 + 1, G_MWO_POINT_ST,
+          gfx++, drawnIndex * 2, G_MWO_POINT_ST, LAKITU_TRAIL_T(drawnIndex));
+      gSPModifyVertex(gfx++, drawnIndex * 2 + 1, G_MWO_POINT_ST,
           (LAKITU_TRAIL_RIGHT_S << 16) + LAKITU_TRAIL_T(drawnIndex));
       segmentIndex--;
       if (segmentIndex < 0) {
@@ -3515,10 +3490,10 @@ void DrawLakitu(Gfx** displayListHead) {
       }
     }
     for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
-         drawnIndex++) {
+        drawnIndex++) {
       gSP2Triangles(gfx++, drawnIndex * 2 + 1, drawnIndex * 2,
-                    drawnIndex * 2 + 2, 0, drawnIndex * 2 + 1,
-                    drawnIndex * 2 + 2, drawnIndex * 2 + 3, 0);
+          drawnIndex * 2 + 2, 0, drawnIndex * 2 + 1, drawnIndex * 2 + 2,
+          drawnIndex * 2 + 3, 0);
     }
     /*
      * The second batch fills the vertex buffer from the end, keeping the
@@ -3526,15 +3501,15 @@ void DrawLakitu(Gfx** displayListHead) {
      * up the rest of the trail.
      */
     for (drawnIndex = LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
-         drawnIndex != LAKITU_TRAIL_DRAWN_SEGMENT_COUNT; drawnIndex++) {
+        drawnIndex != LAKITU_TRAIL_DRAWN_SEGMENT_COUNT; drawnIndex++) {
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
-                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_LakituTrailVertices, 2,
-                LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex));
+          LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex));
       gSPModifyVertex(gfx++, LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex),
-                      G_MWO_POINT_ST, LAKITU_TRAIL_T(drawnIndex));
-      gSPModifyVertex(
-          gfx++, LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex) + 1, G_MWO_POINT_ST,
+          G_MWO_POINT_ST, LAKITU_TRAIL_T(drawnIndex));
+      gSPModifyVertex(gfx++, LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex) + 1,
+          G_MWO_POINT_ST,
           (LAKITU_TRAIL_RIGHT_S << 16) + LAKITU_TRAIL_T(drawnIndex));
       segmentIndex--;
       if (segmentIndex < 0) {
@@ -3542,10 +3517,10 @@ void DrawLakitu(Gfx** displayListHead) {
       }
     }
     for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
-         drawnIndex++) {
+        drawnIndex++) {
       gSP2Triangles(gfx++, drawnIndex * 2 + 1, drawnIndex * 2,
-                    drawnIndex * 2 + 2, 0, drawnIndex * 2 + 1,
-                    drawnIndex * 2 + 2, drawnIndex * 2 + 3, 0);
+          drawnIndex * 2 + 2, 0, drawnIndex * 2 + 1, drawnIndex * 2 + 2,
+          drawnIndex * 2 + 3, 0);
     }
     gDPPipeSync(gfx++);
     if (++f_LakituTrailNewestIndex >= LAKITU_TRAIL_SEGMENT_COUNT) {
@@ -3648,14 +3623,13 @@ void DrawOpeningBurst(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++, D_80212830_ovl_05 + PALETTED_TEXELS_OFFSET,
-                           G_IM_FMT_CI, BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0,
-                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        G_IM_FMT_CI, BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
-                        G_TX_RENDERTILE, 0, 0,
-                        (BURST_IMAGE_SIZE << 10) / (right - left),
-                        (BURST_IMAGE_SIZE << 10) / (bottom - top));
+        G_TX_RENDERTILE, 0, 0, (BURST_IMAGE_SIZE << 10) / (right - left),
+        (BURST_IMAGE_SIZE << 10) / (bottom - top));
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
   }
@@ -3739,7 +3713,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(gfx++);
     if (ProjectPoint(f_ShotBallPosition[0], f_ShotBallPosition[1],
-                     f_ShotBallPosition[2], &ballPoint) < 0) {
+            f_ShotBallPosition[2], &ballPoint) < 0) {
       gDPPipeSync(gfx++);
       gDPSetDepthSource(gfx++, G_ZS_PRIM);
       gDPSetPrimDepth(gfx++, ballPoint.depth, 0);
@@ -3747,18 +3721,18 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       f_ShotBallPosition[1] =
           GetGroundHeight(f_ShotBallPosition[0] * WORLD_TO_COURSE_SCALE,
-                          f_ShotBallPosition[2] * WORLD_TO_COURSE_SCALE) *
+              f_ShotBallPosition[2] * WORLD_TO_COURSE_SCALE) *
           COURSE_TO_WORLD_SCALE;
       guTranslate(&f_ShotBallShadowTranslation, f_ShotBallPosition[0],
-                  f_ShotBallPosition[1], f_ShotBallPosition[2]);
+          f_ShotBallPosition[1], f_ShotBallPosition[2]);
       guScale(&f_ShotBallShadowScaling,
-              f_ShotBallScale * SHOT_BALL_SHADOW_SCALE,
-              f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE,
-              f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE);
+          f_ShotBallScale * SHOT_BALL_SHADOW_SCALE,
+          f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE,
+          f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0,
-                        0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
+          0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
@@ -3776,15 +3750,15 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPSetTextureLOD(gfx++, G_TL_TILE);
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
-      gDPLoadTextureBlock(
-          gfx++, TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
-          G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
+      gDPLoadTextureBlock(gfx++,
+          TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+          G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowTranslation),
-                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowScaling),
-                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_ShotBallShadowVertices, 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -3793,7 +3767,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
-                        0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+          0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
       gDPPipeSync(gfx++);
       gDPSetColorDither(gfx++, G_CD_DISABLE);
       gDPPipeSync(gfx++);
@@ -3810,15 +3784,13 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(gfx++,
-                         TEXTURE_ADDRESS(f_ShotBallImage + IMAGE_HEADER_SIZE));
+      gDPLoadTLUT_pal256(
+          gfx++, TEXTURE_ADDRESS(f_ShotBallImage + IMAGE_HEADER_SIZE));
       gDPPipeSync(gfx++);
       for (stripIndex = 0; stripIndex != SHOT_BALL_STRIP_COUNT; stripIndex++) {
-        gDPLoadTextureBlock(
-            gfx++,
+        gDPLoadTextureBlock(gfx++,
             TEXTURE_ADDRESS(f_ShotBallImage + LARGE_PALETTED_TEXELS_OFFSET +
-                            stripIndex * SHOT_BALL_IMAGE_SIZE *
-                                SHOT_BALL_STRIP_HEIGHT),
+                stripIndex * SHOT_BALL_IMAGE_SIZE * SHOT_BALL_STRIP_HEIGHT),
             G_IM_FMT_CI, G_IM_SIZ_8b, SHOT_BALL_IMAGE_SIZE,
             SHOT_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -3830,7 +3802,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           top = ballPoint.y - (SHOT_BALL_STRIP_COUNT - stripIndex) * size;
           bottom = top + SHOT_BALL_DOT_SIZE;
           f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA -
-                            (u32)g_CameraEditor.distance * SHOT_BALL_FADE_RATE;
+              (u32)g_CameraEditor.distance * SHOT_BALL_FADE_RATE;
           if (f_ShotBallAlpha < 0) {
             f_ShotBallAlpha = 0;
           }
@@ -3843,9 +3815,9 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           bottom = ballPoint.y + stripIndex * size - size;
         }
         gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
-                            G_TX_RENDERTILE, 0, 0,
-                            (SHOT_BALL_IMAGE_SIZE << 10) / (right - left),
-                            SHOT_BALL_STRIP_ROWS_FIXED / (bottom - top));
+            G_TX_RENDERTILE, 0, 0,
+            (SHOT_BALL_IMAGE_SIZE << 10) / (right - left),
+            SHOT_BALL_STRIP_ROWS_FIXED / (bottom - top));
         gDPPipeSync(gfx++);
       }
       gDPPipeSync(gfx++);
@@ -3873,45 +3845,45 @@ void EaseOpeningLookAt(void) {
     case LOOK_AT_EASE_FAST:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
           (f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           0.1f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
           (f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           0.1f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
           (f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.1f;
       MeasureEditorCamera();
       break;
     case LOOK_AT_EASE_SLOW:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
           (f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           0.01f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
           (f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           0.01f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
           (f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.01f;
       MeasureEditorCamera();
       break;
     case LOOK_AT_EASE_SPEEDING_UP:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
           ((f_OpeningBallPositions[1][0] + 38.1f) -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           f_LookAtEaseRate;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
           ((f_OpeningBallPositions[1][1] - 4.5f) -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           f_LookAtEaseRate;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
           ((f_OpeningBallPositions[1][2] - 4.795f) -
-           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           f_LookAtEaseRate;
       MeasureEditorCamera();
       f_LookAtEaseRate += 0.002f;
@@ -4151,7 +4123,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
       g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
           (s32)((LOGO_FADE_WHITENING_FRAMES - f_LogoFadeFramesLeft) *
-                LOGO_FADE_WHITENING_STEP) +
+              LOGO_FADE_WHITENING_STEP) +
           LOGO_FADE_GRAY_LEVEL;
       f_LogoFadeFramesLeft--;
       if (f_LogoFadeFramesLeft == 0) {
@@ -4248,20 +4220,20 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
   if (isDrawn == 1) {
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       guTranslate(&f_LogoLetterTranslations[i][g_DrawBufferIndex],
-                  f_LogoLetters[i].x - SCREEN_WIDTH / 2.0f,
-                  (SCREEN_HEIGHT - f_LogoLetters[i].y) - SCREEN_HEIGHT / 2.0f,
-                  f_LogoLetters[i].depth + LOGO_Z);
+          f_LogoLetters[i].x - SCREEN_WIDTH / 2.0f,
+          (SCREEN_HEIGHT - f_LogoLetters[i].y) - SCREEN_HEIGHT / 2.0f,
+          f_LogoLetters[i].depth + LOGO_Z);
       guScale(&f_LogoLetterScalings[i][g_DrawBufferIndex],
-              f_LogoLetterScales[i][0], f_LogoLetterScales[i][1], 1.0f);
+          f_LogoLetterScales[i][0], f_LogoLetterScales[i][1], 1.0f);
     }
     guTranslate(&f_LogoClubTranslations[g_DrawBufferIndex],
-                f_LogoClubPosition[0] - SCREEN_WIDTH / 2.0f,
-                f_LogoClubPosition[1] - SCREEN_HEIGHT / 2.0f,
-                f_LogoClubPosition[2] + LOGO_Z);
+        f_LogoClubPosition[0] - SCREEN_WIDTH / 2.0f,
+        f_LogoClubPosition[1] - SCREEN_HEIGHT / 2.0f,
+        f_LogoClubPosition[2] + LOGO_Z);
     guRotate(&f_LogoClubRotations[g_DrawBufferIndex], f_LogoClubAngle, 0.0f,
-             0.0f, 1.0f);
+        0.0f, 1.0f);
     guScale(&f_LogoClubScalings[g_DrawBufferIndex], f_LogoClubScale[0],
-            f_LogoClubScale[1], 1.0f);
+        f_LogoClubScale[1], 1.0f);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -4270,14 +4242,14 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-                      TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+        TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
     if (f_LogoFadeStage == LOGO_FADE_LOGO_OUT) {
       gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_FADING_ALPHA_THRESHOLD);
       gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD,
-                       G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
+      gDPSetRenderMode(
+          gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD, G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
     } else {
       gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_ALPHA_THRESHOLD);
       gDPPipeSync(gfx++);
@@ -4297,33 +4269,30 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     gDPPipeSync(gfx++);
     gDPSetTextureLOD(gfx++, G_TL_TILE);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
-    gDPLoadTLUT_pal256(gfx++,
-                       TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(
+        gfx++, TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-        gDPLoadTextureBlock(
-            gfx++,
+        gDPLoadTextureBlock(gfx++,
             TEXTURE_ADDRESS(f_LogoLetterImages +
-                            ((j + i * LOGO_LETTER_HALF_COUNT) *
-                                 LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT +
-                             LARGE_PALETTED_TEXELS_OFFSET)),
+                ((j + i * LOGO_LETTER_HALF_COUNT) * LOGO_LETTER_WIDTH *
+                        LOGO_LETTER_HALF_HEIGHT +
+                    LARGE_PALETTED_TEXELS_OFFSET)),
             G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
             LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
         gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-                  G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(
-            gfx++,
+            G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(gfx++,
             OS_K0_TO_PHYSICAL(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(
-            gfx++,
+        gSPMatrix(gfx++,
             OS_K0_TO_PHYSICAL(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-        gDPSetPrimDepth(gfx++,
-                        f_LogoLetters[i].depth + LOGO_LETTER_DEPTH_OFFSET, 0);
+        gDPSetPrimDepth(
+            gfx++, f_LogoLetters[i].depth + LOGO_LETTER_DEPTH_OFFSET, 0);
         gDPPipeSync(gfx++);
         gSPVertex(gfx++, f_LogoLetterVertices[j], 4, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -4331,29 +4300,28 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       }
     }
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
-    gDPLoadTLUT_pal256(gfx++,
-                       TEXTURE_ADDRESS(f_LogoClubImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(
+        gfx++, TEXTURE_ADDRESS(f_LogoClubImage + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_CLUB_STRIP_COUNT; i++) {
-      gDPLoadTextureBlock(
-          gfx++,
+      gDPLoadTextureBlock(gfx++,
           TEXTURE_ADDRESS(f_LogoClubImage +
-                          (i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT +
-                           LARGE_PALETTED_TEXELS_OFFSET)),
+              (i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT +
+                  LARGE_PALETTED_TEXELS_OFFSET)),
           G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-                G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+          G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
       gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(&f_LogoClubTranslations[g_DrawBufferIndex]),
-                G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+          OS_K0_TO_PHYSICAL(&f_LogoClubTranslations[g_DrawBufferIndex]),
+          G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
       gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(&f_LogoClubRotations[g_DrawBufferIndex]),
-                G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+          OS_K0_TO_PHYSICAL(&f_LogoClubRotations[g_DrawBufferIndex]),
+          G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
       gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(&f_LogoClubScalings[g_DrawBufferIndex]),
-                G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+          OS_K0_TO_PHYSICAL(&f_LogoClubScalings[g_DrawBufferIndex]),
+          G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
       gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
       gDPPipeSync(gfx++);
       gSPVertex(gfx++, f_LogoClubVertices[i], 4, 0);
@@ -4368,45 +4336,41 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++,
-                     GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
-                     G_RM_AA_ZB_OPA_SURF2);
+        GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+        G_RM_AA_ZB_OPA_SURF2);
     gSPTextureRectangle(gfx++, LOGO_SHINE_MASK_LEFT << 2, LOGO_SHINE_TOP << 2,
-                        LOGO_SHINE_MASK_RIGHT << 2, LOGO_SHINE_BOTTOM << 2,
-                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        LOGO_SHINE_MASK_RIGHT << 2, LOGO_SHINE_BOTTOM << 2, G_TX_RENDERTILE, 0,
+        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPSetPrimDepth(gfx++, LOGO_SHINE_LETTER_DEPTH, 0);
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(
-        gfx++,
+    gDPSetRenderMode(gfx++,
         AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA |
             ALPHA_CVG_SEL |
             GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
         AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA |
             ALPHA_CVG_SEL |
             GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM));
-    gDPLoadTLUT_pal256(gfx++,
-                       TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(
+        gfx++, TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-        gDPLoadTextureBlock(
-            gfx++,
+        gDPLoadTextureBlock(gfx++,
             TEXTURE_ADDRESS(f_LogoLetterImages +
-                            ((j + i * LOGO_LETTER_HALF_COUNT) *
-                                 LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT +
-                             LARGE_PALETTED_TEXELS_OFFSET)),
+                ((j + i * LOGO_LETTER_HALF_COUNT) * LOGO_LETTER_WIDTH *
+                        LOGO_LETTER_HALF_HEIGHT +
+                    LARGE_PALETTED_TEXELS_OFFSET)),
             G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
             LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-                  G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(
-            gfx++,
+            G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(gfx++,
             OS_K0_TO_PHYSICAL(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(
-            gfx++,
+        gSPMatrix(gfx++,
             OS_K0_TO_PHYSICAL(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         gDPPipeSync(gfx++);
@@ -4420,7 +4384,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
-                        0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+          0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_NONE);
       gDPPipeSync(gfx++);
@@ -4430,10 +4394,10 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
-      gDPLoadTextureBlock(
-          gfx++, TEXTURE_ADDRESS(f_LogoShineImage + IMAGE_HEADER_SIZE),
-          G_IM_FMT_I, G_IM_SIZ_8b, LOGO_SHINE_IMAGE_SIZE, LOGO_SHINE_IMAGE_SIZE,
-          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      gDPLoadTextureBlock(gfx++,
+          TEXTURE_ADDRESS(f_LogoShineImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+          G_IM_SIZ_8b, LOGO_SHINE_IMAGE_SIZE, LOGO_SHINE_IMAGE_SIZE, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
     }
@@ -4443,11 +4407,10 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     }
     if (isDrawn == 1 && f_LogoShineFrame > LOGO_SHINE_FIRST_SHOWN_FRAME &&
         f_LogoShineFrame < LOGO_SHINE_LAST_SHOWN_FRAME) {
-      gSPTextureRectangle(
-          gfx++, LOGO_SHINE_LEFT << 2, LOGO_SHINE_TOP << 2,
+      gSPTextureRectangle(gfx++, LOGO_SHINE_LEFT << 2, LOGO_SHINE_TOP << 2,
           LOGO_SHINE_RIGHT << 2, LOGO_SHINE_BOTTOM << 2, G_TX_RENDERTILE,
           (LOGO_SHINE_ORIGIN_TEXEL -
-           (f_LogoShineFrame - LOGO_SHINE_ORIGIN_FRAME) * LOGO_SHINE_SPEED)
+              (f_LogoShineFrame - LOGO_SHINE_ORIGIN_FRAME) * LOGO_SHINE_SPEED)
               << 5,
           0, LOGO_SHINE_TEXEL_STEP, LOGO_SHINE_TEXEL_STEP);
       gDPPipeSync(gfx++);
@@ -4530,7 +4493,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     angle = f_LogoClubOrbitAngle * LOGO_DEGREES_TO_RADIANS;
     sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
     wobble = -sinf(f_LogoClubWobbleAngle * LOGO_DEGREES_TO_RADIANS) *
-             LOGO_CLUB_FIRST_WOBBLE;
+        LOGO_CLUB_FIRST_WOBBLE;
     f_LogoState = LOGO_CLUB_CIRCLING;
     f_LogoClubPosition[0] =
         (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
@@ -4544,7 +4507,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     angle = f_LogoClubOrbitAngle * LOGO_DEGREES_TO_RADIANS;
     sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
     wobble = -sinf(f_LogoClubWobbleAngle * LOGO_DEGREES_TO_RADIANS) *
-             LOGO_CLUB_WOBBLE;
+        LOGO_CLUB_WOBBLE;
     f_LogoClubPosition[0] =
         (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_X;
@@ -4680,18 +4643,17 @@ void DrawOpeningSparks(Gfx** displayListHead) {
 
   if (f_OpeningSparksState == SPARKS_STARTING) {
     depth = ProjectPoint(f_OpeningSparksOrigin[0], f_OpeningSparksOrigin[1],
-                         f_OpeningSparksOrigin[2], &origin);
+        f_OpeningSparksOrigin[2], &origin);
     if (depth < 0) {
       f_OpeningSparkScale = SPARK_SCALE_DEPTH / (f32)-depth;
       for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
         f_OpeningSparkPositions[sparkIndex][0] = origin.x - SCREEN_WIDTH / 2;
         f_OpeningSparkPositions[sparkIndex][1] = SCREEN_HEIGHT / 2 - origin.y;
-        f_OpeningSparkAngles[sparkIndex] =
-            (f32)sparkIndex * SPARK_ANGLE_STEP +
+        f_OpeningSparkAngles[sparkIndex] = (f32)sparkIndex * SPARK_ANGLE_STEP +
             (f32)DEGREES_TO_RADIANS(guRandom() % SPARK_ANGLE_JITTER_RANGE -
-                                    SPARK_ANGLE_JITTER_RANGE / 2);
+                SPARK_ANGLE_JITTER_RANGE / 2);
         speed = (guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale +
-                SPARK_MIN_SPEED;
+            SPARK_MIN_SPEED;
         f_OpeningSparkVelocities[sparkIndex][0] =
             sinf(f_OpeningSparkAngles[sparkIndex]) * speed *
             f_OpeningSparkScale;
@@ -4721,13 +4683,13 @@ void DrawOpeningSparks(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE, PRIMITIVE,
-                      0, SHADE, 0, 0, 0, 0, SHADE);
+        0, SHADE, 0, 0, 0, 0, SHADE);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
       f_OpeningSparkPositions[sparkIndex][0] +=
           f_OpeningSparkVelocities[sparkIndex][0];
@@ -4748,9 +4710,9 @@ void DrawOpeningSparks(Gfx** displayListHead) {
       ConvertMatrixToFixed(
           matrix, &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]);
       gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(
-                    &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]),
-                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          OS_K0_TO_PHYSICAL(
+              &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]),
+          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_OpeningSparkVertices, 3, 0);
       gSP1Triangle(gfx++, 0, 1, 2, 0);
     }

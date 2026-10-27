@@ -109,7 +109,7 @@ void RecordTournamentPlace(void) {
   hasPlace = FALSE;
   if (g_GameMode == GAME_MODE_TOURNAMENT) {
     RankTournament(GetLastHoleIndex() + 1, 0,
-                   GetNetScoreToPar(GetLastHoleIndex() + 1, 0), D_801B60B4);
+        GetNetScoreToPar(GetLastHoleIndex() + 1, 0), D_801B60B4);
     place = PLACE_UNPLACED;
     for (index = 0; index != TOURNAMENT_CONTESTANT_COUNT; index++) {
       standing = &g_TournamentStandings[index];

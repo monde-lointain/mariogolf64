@@ -204,7 +204,7 @@ void StartImpactSparks(void) {
         f_SparkOffsets[i][0] = 0;
         f_SparkOffsets[i][1] = 0;
         f_SparkAngles[i] = (f32)count * IMPACT_SPARK_SPACING +
-                           DEGREES_TO_RADIANS(guRandom() % 20 - 10);
+            DEGREES_TO_RADIANS(guRandom() % 20 - 10);
         f_SparkKinds[i] = SPARK_KIND_IMPACT;
         speed = guRandom() % IMPACT_SPARK_SPEED_RANGE + IMPACT_SPARK_MIN_SPEED;
         f_SparkVelocities[i][0] = sinf(f_SparkAngles[i]) * speed;
@@ -234,8 +234,8 @@ void LoadShotEffectImages(void) {
   OpenEncodedAsset(SHARED_EFFECT_IMAGE_ASSET, &asset);
   ReadEncodedAsset(g_SharedEffectImages, &asset);
   OpenEncodedAsset(SHARED_EFFECT_SECOND_IMAGE_ASSET, &asset);
-  ReadEncodedAsset(g_SharedEffectImages + SHARED_EFFECT_SECOND_IMAGE_OFFSET,
-                   &asset);
+  ReadEncodedAsset(
+      g_SharedEffectImages + SHARED_EFFECT_SECOND_IMAGE_OFFSET, &asset);
 }
 
 void FreeShotEffectImages(void) {
@@ -352,9 +352,9 @@ void DrawSparks(Gfx** displayListHead) {
   for (i = 0; i != SPARK_BURST_COUNT; i++) {
     if (f_SparkBurstAges[i] != NO_SPARK_BURST) {
       if (ProjectPoint(f_SparkBurstPoints[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
-                       f_SparkBurstPoints[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
-                       f_SparkBurstPoints[i][AXIS_Z] * COURSE_TO_WORLD_SCALE,
-                       &point) < 0) {
+              f_SparkBurstPoints[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
+              f_SparkBurstPoints[i][AXIS_Z] * COURSE_TO_WORLD_SCALE,
+              &point) < 0) {
         size = f_SparkBurstAges[i] * SPARK_AGE_GROWTH + SPARK_START_SIZE;
         burstShown[i] = SPARK_BURST_SHOWN;
         burstPoints[i][0] = point.x;
@@ -394,7 +394,7 @@ void DrawSparks(Gfx** displayListHead) {
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
-                    PRIMITIVE, 0, 0, 0, TEXEL0);
+      PRIMITIVE, 0, 0, 0, TEXEL0);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 255, 255, 255, 1);
@@ -403,9 +403,8 @@ void DrawSparks(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPLoadTextureBlock_4b(gfx++, ((u32)f_SparkImage + IMAGE_HEADER_SIZE) & ~7,
-                         G_IM_FMT_I, SPARK_IMAGE_SIZE, SPARK_IMAGE_SIZE, 0,
-                         G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK,
-                         G_TX_NOLOD, G_TX_NOLOD);
+      G_IM_FMT_I, SPARK_IMAGE_SIZE, SPARK_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   for (i = 0; i != SPARK_COUNT; i++) {
     if (f_SparkLives[i] != 0) {
@@ -420,17 +419,17 @@ void DrawSparks(Gfx** displayListHead) {
         rotation[AXIS_Y] = 0;
         rotation[AXIS_Z] = f_SparkAngles[i];
         translation[AXIS_X] = f_SparkOffsets[i][0] * burstScales[burst] +
-                              burstPoints[burst][0] - SCREEN_WIDTH / 2;
+            burstPoints[burst][0] - SCREEN_WIDTH / 2;
         translation[AXIS_Y] = f_SparkOffsets[i][1] * burstScales[burst] -
-                              burstPoints[burst][1] + SCREEN_HEIGHT / 2;
+            burstPoints[burst][1] + SCREEN_HEIGHT / 2;
         translation[AXIS_Z] = SPARK_MODEL_Z;
         scale[AXIS_X] = burstScales[burst] * SPARK_MODEL_SCALE;
         scale[AXIS_Y] = burstScales[burst] * SPARK_MODEL_SCALE;
         scale[AXIS_Z] = burstScales[burst] * SPARK_MODEL_SCALE;
         if (f_SparkKinds[i] == SPARK_KIND_IMPACT) {
           BuildTransformMatrix(matrix, rotation, translation, scale);
-          ConvertMatrixToFixed(matrix,
-                               &f_SparkMatrices[g_MatrixBufferIndex][i]);
+          ConvertMatrixToFixed(
+              matrix, &f_SparkMatrices[g_MatrixBufferIndex][i]);
         }
         if (f_SparkKinds[i] == SPARK_KIND_FLAGSTICK &&
             burstPoints[burst][0] >= -SPARK_MAX_SCREEN_COORD &&
@@ -441,8 +440,7 @@ void DrawSparks(Gfx** displayListHead) {
               f_SparkOffsets[i][0] * burstScales[burst] + burstPoints[burst][0];
           top =
               f_SparkOffsets[i][1] * burstScales[burst] + burstPoints[burst][1];
-          gSPScisTextureRectangle(
-              gfx++, (left - burstHalfSizes[burst]) << 2,
+          gSPScisTextureRectangle(gfx++, (left - burstHalfSizes[burst]) << 2,
               (top - burstHalfSizes[burst]) << 2,
               (left + burstHalfSizes[burst]) << 2,
               (top + burstHalfSizes[burst]) << 2, G_TX_RENDERTILE, 0, 0,
@@ -461,20 +459,20 @@ void DrawSparks(Gfx** displayListHead) {
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE, PRIMITIVE, 0,
-                    SHADE, 0, 0, 0, 0, SHADE);
+      SHADE, 0, 0, 0, 0, SHADE);
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   for (i = 0; i != SPARK_COUNT; i++) {
     if (f_SparkKinds[i] == SPARK_KIND_IMPACT &&
         burstShown[f_SparkBursts[i]] == SPARK_BURST_SHOWN) {
       gDPSetPrimDepth(gfx++, burstPoints[f_SparkBursts[i]][2], 0);
       if (f_SparkLives[i] != 0) {
         gSPMatrix(gfx++,
-                  OS_K0_TO_PHYSICAL(&f_SparkMatrices[g_MatrixBufferIndex][i]),
-                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            OS_K0_TO_PHYSICAL(&f_SparkMatrices[g_MatrixBufferIndex][i]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPVertex(gfx++, f_SparkVertices, 3, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
       }
@@ -559,11 +557,9 @@ void StartSwingTrail(s32 kind) {
     }
     for (i = 0; i != SWING_TRAIL_MATRIX_COUNT; i++) {
       guTranslate(&f_SwingTrailMatrices[i][0], f_SwingTrailOuterPath[0][AXIS_X],
-                  f_SwingTrailOuterPath[0][AXIS_Y],
-                  f_SwingTrailOuterPath[0][AXIS_Z]);
+          f_SwingTrailOuterPath[0][AXIS_Y], f_SwingTrailOuterPath[0][AXIS_Z]);
       guTranslate(&f_SwingTrailMatrices[i][1], f_SwingTrailInnerPath[0][AXIS_X],
-                  f_SwingTrailInnerPath[0][AXIS_Y],
-                  f_SwingTrailInnerPath[0][AXIS_Z]);
+          f_SwingTrailInnerPath[0][AXIS_Y], f_SwingTrailInnerPath[0][AXIS_Z]);
     }
   } else if (f_SwingTrailState == SWING_TRAIL_SHOWN) {
     f_SwingTrailState = SWING_TRAIL_FADING;
@@ -600,11 +596,11 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       f32 fade;
 
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailMatrices[matrixIndex][0]),
-                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, &f_SwingTrailVertices[0], 1, step * 2);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailMatrices[matrixIndex][1]),
-                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, &f_SwingTrailVertices[1], 1, step * 2 + 1);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       /* Fades the segments towards the tail of the trail */
@@ -615,17 +611,17 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       if (alpha > 255) {
         alpha = 255;
       }
-      gSPModifyVertex(gfx++, step * 2 + 1, G_MWO_POINT_RGBA,
-                      0xFFFFFF00 | alpha);
+      gSPModifyVertex(
+          gfx++, step * 2 + 1, G_MWO_POINT_RGBA, 0xFFFFFF00 | alpha);
       gSPModifyVertex(gfx++, step * 2, G_MWO_POINT_ST,
-                      ((textureStep * segment - 1) << 16) + 0x400);
+          ((textureStep * segment - 1) << 16) + 0x400);
       gSPModifyVertex(gfx++, step * 2 + 1, G_MWO_POINT_ST,
-                      (textureStep * segment - 1) << 16);
+          (textureStep * segment - 1) << 16);
       segment++;
     }
     for (step = 0; step != SWING_TRAIL_SEGMENTS; step++) {
       gSP2Triangles(gfx++, step * 2, step * 2 + 2, step * 2 + 1, 0,
-                    step * 2 + 2, step * 2 + 3, step * 2 + 1, 0);
+          step * 2 + 2, step * 2 + 3, step * 2 + 1, 0);
     }
   }
 
@@ -633,8 +629,8 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
     return;
   }
   f_SwingTrailAlpha = (f_SwingTrailState == SWING_TRAIL_FADING)
-                          ? f_SwingTrailAlpha - 16
-                          : f_SwingTrailAlpha - 4;
+      ? f_SwingTrailAlpha - 16
+      : f_SwingTrailAlpha - 4;
   if (f_SwingTrailAlpha < 0) {
     f_SwingTrailState = SWING_TRAIL_NONE;
     return;
@@ -647,18 +643,18 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       GetCharacterPointPosition(0, SWING_TRAIL_OUTER_POINT, outerPoint);
       GetCharacterPointPosition(0, SWING_TRAIL_INNER_POINT, innerPoint);
       guTranslate(&f_SwingTrailMatrices[f_SwingTrailHead][0],
-                  outerPoint[AXIS_X], outerPoint[AXIS_Y], outerPoint[AXIS_Z]);
+          outerPoint[AXIS_X], outerPoint[AXIS_Y], outerPoint[AXIS_Z]);
       guTranslate(&f_SwingTrailMatrices[f_SwingTrailHead][1],
-                  innerPoint[AXIS_X], innerPoint[AXIS_Y], innerPoint[AXIS_Z]);
+          innerPoint[AXIS_X], innerPoint[AXIS_Y], innerPoint[AXIS_Z]);
     } else {
       guTranslate(&f_SwingTrailMatrices[f_SwingTrailHead][0],
-                  f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_X],
-                  f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_Y],
-                  f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_Z]);
+          f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_X],
+          f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_Y],
+          f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_Z]);
       guTranslate(&f_SwingTrailMatrices[f_SwingTrailHead][1],
-                  f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_X],
-                  f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_Y],
-                  f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_Z]);
+          f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_X],
+          f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_Y],
+          f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_Z]);
     }
     f_SwingTrailLength++;
     if (f_SwingTrailLength > SWING_TRAIL_SEGMENTS - 1) {
@@ -692,15 +688,14 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal256(gfx++, ((u32)f_SwingTrailImage + IMAGE_HEADER_SIZE) & ~7);
-  gDPLoadTextureBlock(
-      gfx++, ((u32)f_SwingTrailImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
-      G_IM_FMT_CI, G_IM_SIZ_8b, SWING_TRAIL_IMAGE_WIDTH,
-      SWING_TRAIL_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+  gDPLoadTextureBlock(gfx++,
+      ((u32)f_SwingTrailImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+      G_IM_SIZ_8b, SWING_TRAIL_IMAGE_WIDTH, SWING_TRAIL_IMAGE_HEIGHT, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (f_SwingTrailKind == SWING_TRAIL_KIND_UNK1) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, SHADE, 0, 0, 0, 0,
-                      TEXEL0, TEXEL0, 0, SHADE, 0);
+        TEXEL0, TEXEL0, 0, SHADE, 0);
   } else {
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
   }
@@ -717,14 +712,14 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   guMtxF2L(projection, &f_SwingTrailProjections[g_DrawBufferIndex]);
   segment = 0;
   gSPMatrix(gfx++, &f_SwingTrailProjections[g_DrawBufferIndex],
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailOrigin),
-            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   LoadSwingTrailSegments(0, SWING_TRAIL_SEGMENTS, 1);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, &matrices->projection,
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);

@@ -294,7 +294,7 @@
 #define MAP_CAPTURE_HEIGHT (GROUND_TILE_ROW_COUNT * GROUND_TILE_TEXEL_SPAN)
 #define MAP_CAPTURE_SIZE \
   (CAPTURE_HEADER_SIZE + \
-   MAP_CAPTURE_WIDTH * MAP_CAPTURE_HEIGHT * CAPTURE_BYTES_PER_PIXEL)
+      MAP_CAPTURE_WIDTH * MAP_CAPTURE_HEIGHT * CAPTURE_BYTES_PER_PIXEL)
 #define GROUND_TILE_TEXEL_BORDER 1
 #define CAPTURE_FILE_NAME_SIZE 0x80
 #define SCREEN_CAPTURE_SIZE \
@@ -335,8 +335,8 @@ extern u8 D_80491A60[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
 s32 GetTerrainCode(s32 column, s32 row);
 void BuildAllTileMidpoints(void);
-s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ,
-                   s32 secondX, s32 secondZ);
+s32 CrossProductXZ(
+    s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
 void MarkBillboardsOnMap(void);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
 extern s32 f_ScreenCaptureNumber;
@@ -515,7 +515,7 @@ void func_8040000C_hole_editor(void) {
  */
 void func_804002C0_hole_editor(void) {
   Vtx_t points[POINT_MOVE_COUNT +
-               1]; /* Each move saves its point into the next move's slot */
+      1]; /* Each move saves its point into the next move's slot */
   char text[DEBUG_TEXT_BUFFER_SIZE];
   Vtx_t unusedPoint; /* The game's frame has room for another point */
   s32 madeDeadTriangle;
@@ -679,11 +679,11 @@ void func_804002C0_hole_editor(void) {
     g_MapCamera.view.eye[AXIS_Z] = point->v.ob[AXIS_Z];
   }
   sprintf(text, "SuperMacro X:%2d Z:%2d",
-          f_PointCursorColumn / GROUND_TILE_POINT_SPAN,
-          f_PointCursorRow / GROUND_TILE_POINT_SPAN);
+      f_PointCursorColumn / GROUND_TILE_POINT_SPAN,
+      f_PointCursorRow / GROUND_TILE_POINT_SPAN);
   PrintDebugText(text, POINT_TEXT_COLUMN, TILE_TEXT_ROW);
   sprintf(text, "SubX:%d SubZ:%d", f_PointCursorColumn & TILE_POINT_MASK,
-          f_PointCursorRow & TILE_POINT_MASK);
+      f_PointCursorRow & TILE_POINT_MASK);
   PrintDebugText(text, POINT_TEXT_COLUMN, TILE_POINT_TEXT_ROW);
   SetDebugTextHighlight(TRUE);
   if (!(f_PointCursorColumn & TILE_POINT_MASK)) {
@@ -700,8 +700,8 @@ void func_804002C0_hole_editor(void) {
   }
   PrintDebugText(text, POINT_TEXT_COLUMN, Z_LIMIT_TEXT_ROW);
   sprintf(text, "Height:%dM   ",
-          -GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v.ob[AXIS_Y] /
-              HEIGHT_UNITS_PER_METER);
+      -GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v.ob[AXIS_Y] /
+          HEIGHT_UNITS_PER_METER);
   PrintDebugText(text, POINT_TEXT_COLUMN, POINT_HEIGHT_TEXT_ROW);
   if (madeDeadTriangle) {
     sprintf(text, "DeadTriangle");
@@ -726,16 +726,16 @@ void func_80400FBC_hole_editor(void) {
   f64 cameraDistance;
 
   sprintf(text, "X:%d Z:%d             ", f_HolePointCursor[0],
-          f_HolePointCursor[1]);
+      f_HolePointCursor[1]);
   PrintDebugText(text, CURSOR_TEXT_COLUMN, CURSOR_TEXT_ROW);
   D_800C30D1 = FALSE;
   isStepping = FALSE;
   if (f_HolePointEditMode == HOLE_POINT_MODE_UNSET) {
     f_HolePointEditMode = HOLE_POINT_MODE_PIN_TEE;
     f_HolePointCursor[0] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] /
-                           (1 << WORLD_TO_COURSE_SHIFT);
+        (1 << WORLD_TO_COURSE_SHIFT);
     f_HolePointCursor[1] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] /
-                           (1 << WORLD_TO_COURSE_SHIFT);
+        (1 << WORLD_TO_COURSE_SHIFT);
   }
   if (g_MenuControllerData[EDITOR_PAD].button & R_CBUTTONS) {
     ClearDebugText();
@@ -745,17 +745,17 @@ void func_80400FBC_hole_editor(void) {
     }
     if (f_HolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
       f_HolePointCursor[0] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_MesonPointIndex = 0;
       f_RoutePointIndex = 0;
     }
     if (f_HolePointEditMode == HOLE_POINT_MODE_MESON) {
       f_HolePointCursor[0] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
     }
     if (f_HolePointEditMode == HOLE_POINT_MODE_ROUTE) {
       f_HolePointCursor[0] =
@@ -774,17 +774,17 @@ void func_80400FBC_hole_editor(void) {
     }
     if (f_HolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
       f_HolePointCursor[0] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_MesonPointIndex = 0;
       f_RoutePointIndex = 0;
     }
     if (f_HolePointEditMode == HOLE_POINT_MODE_MESON) {
       f_HolePointCursor[0] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
     }
     if (f_HolePointEditMode == HOLE_POINT_MODE_ROUTE) {
       f_HolePointCursor[0] =
@@ -797,17 +797,17 @@ void func_80400FBC_hole_editor(void) {
   }
   if (f_HolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
     if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
-      g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] =
-          f_HolePointCursor[0] << WORLD_TO_COURSE_SHIFT;
-      g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] =
-          f_HolePointCursor[1] << WORLD_TO_COURSE_SHIFT;
+      g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[0]
+          << WORLD_TO_COURSE_SHIFT;
+      g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[1]
+          << WORLD_TO_COURSE_SHIFT;
       g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
-                          g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z]);
+              g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z]);
       PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
-                           g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z])
+              g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z])
               ->name,
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
       if (f_PinTeeIndex == 0) {
@@ -817,17 +817,17 @@ void func_80400FBC_hole_editor(void) {
       }
     }
     if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
-      g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] =
-          f_HolePointCursor[0] << WORLD_TO_COURSE_SHIFT;
-      g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] =
-          f_HolePointCursor[1] << WORLD_TO_COURSE_SHIFT;
+      g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] = f_HolePointCursor[0]
+          << WORLD_TO_COURSE_SHIFT;
+      g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] = f_HolePointCursor[1]
+          << WORLD_TO_COURSE_SHIFT;
       g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
-                          g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z]);
+              g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z]);
       PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
-                           g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z])
+              g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z])
               ->name,
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
       if (f_PinTeeIndex == 0) {
@@ -853,9 +853,9 @@ void func_80400FBC_hole_editor(void) {
         f_PinTeeIndex = 0;
       }
       f_HolePointCursor[0] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
     }
     if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
       f_PinTeeIndex--;
@@ -863,35 +863,35 @@ void func_80400FBC_hole_editor(void) {
         f_PinTeeIndex = CUP_POSITION_COUNT - 1;
       }
       f_HolePointCursor[0] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
     }
     /* Start jumps to the tee */
     if (g_MenuControllerData[EDITOR_PAD].button & START_BUTTON) {
       f_HolePointCursor[0] = g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
     }
-    PrintDebugText("Pin Tee Edit Mode", HOLE_POINT_TEXT_COLUMN,
-                   HOLE_POINT_MODE_TEXT_ROW);
-    PrintDebugHex(f_PinTeeIndex, HOLE_POINT_TEXT_COLUMN,
-                  HOLE_POINT_INDEX_TEXT_ROW);
+    PrintDebugText(
+        "Pin Tee Edit Mode", HOLE_POINT_TEXT_COLUMN, HOLE_POINT_MODE_TEXT_ROW);
+    PrintDebugHex(
+        f_PinTeeIndex, HOLE_POINT_TEXT_COLUMN, HOLE_POINT_INDEX_TEXT_ROW);
   }
   if (f_HolePointEditMode == HOLE_POINT_MODE_MESON) {
     if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
       g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] = f_HolePointCursor[0]
-                                                      << WORLD_TO_COURSE_SHIFT;
+          << WORLD_TO_COURSE_SHIFT;
       g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] = f_HolePointCursor[1]
-                                                      << WORLD_TO_COURSE_SHIFT;
+          << WORLD_TO_COURSE_SHIFT;
       g_HolePoints.unk60[f_MesonPointIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.unk60[f_MesonPointIndex][AXIS_X],
-                          g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z]);
+              g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z]);
       PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.unk60[f_MesonPointIndex][AXIS_X],
-                           g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z])
+              g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z])
               ->name,
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
     }
@@ -909,9 +909,9 @@ void func_80400FBC_hole_editor(void) {
         f_MesonPointIndex = 0;
       }
       f_HolePointCursor[0] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
     }
     if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
       f_MesonPointIndex--;
@@ -919,28 +919,28 @@ void func_80400FBC_hole_editor(void) {
         f_MesonPointIndex = ARRAY_COUNT(g_HolePoints.unk60) - 1;
       }
       f_HolePointCursor[0] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
       f_HolePointCursor[1] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] /
-                             (1 << WORLD_TO_COURSE_SHIFT);
+          (1 << WORLD_TO_COURSE_SHIFT);
     }
-    PrintDebugText("Meson Edit Mode", HOLE_POINT_TEXT_COLUMN,
-                   HOLE_POINT_MODE_TEXT_ROW);
-    PrintDebugHex(f_MesonPointIndex, HOLE_POINT_TEXT_COLUMN,
-                  HOLE_POINT_INDEX_TEXT_ROW);
+    PrintDebugText(
+        "Meson Edit Mode", HOLE_POINT_TEXT_COLUMN, HOLE_POINT_MODE_TEXT_ROW);
+    PrintDebugHex(
+        f_MesonPointIndex, HOLE_POINT_TEXT_COLUMN, HOLE_POINT_INDEX_TEXT_ROW);
   }
   if (f_HolePointEditMode == HOLE_POINT_MODE_ROUTE) {
     if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
-      g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] =
-          f_HolePointCursor[0] << WORLD_TO_COURSE_SHIFT;
-      g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] =
-          f_HolePointCursor[1] << WORLD_TO_COURSE_SHIFT;
+      g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X] = f_HolePointCursor[0]
+          << WORLD_TO_COURSE_SHIFT;
+      g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] = f_HolePointCursor[1]
+          << WORLD_TO_COURSE_SHIFT;
       g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
-                          g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z]);
+              g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z]);
       PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
-                           g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z])
+              g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z])
               ->name,
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
     }
@@ -976,18 +976,18 @@ void func_80400FBC_hole_editor(void) {
           g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z] /
           (1 << WORLD_TO_COURSE_SHIFT);
     }
-    PrintDebugText("AI Edit Mode", HOLE_POINT_TEXT_COLUMN,
-                   HOLE_POINT_MODE_TEXT_ROW);
-    PrintDebugHex(f_RoutePointIndex, HOLE_POINT_TEXT_COLUMN,
-                  HOLE_POINT_INDEX_TEXT_ROW);
+    PrintDebugText(
+        "AI Edit Mode", HOLE_POINT_TEXT_COLUMN, HOLE_POINT_MODE_TEXT_ROW);
+    PrintDebugHex(
+        f_RoutePointIndex, HOLE_POINT_TEXT_COLUMN, HOLE_POINT_INDEX_TEXT_ROW);
   }
   /* Z held turns the camera instead of moving the cursor */
   if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
     if (*(u16*)&g_MenuControllerData[EDITOR_PAD].stick_x != 0) {
       stepX = -cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_y -
-              sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_x;
+          sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_x;
       stepZ = -sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_y +
-              cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_x;
+          cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_x;
       f_HolePointCursor[0] += stepX;
       f_HolePointCursor[1] += stepZ;
     } else {
@@ -1033,9 +1033,9 @@ void func_80400FBC_hole_editor(void) {
   }
   if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
     f_HolePointCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x /
-                                     STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        STICK_STEP_SIZE * HEADING_STICK_SPEED;
     f_HolePointCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y /
-                              STICK_STEP_SIZE * PITCH_STICK_SPEED;
+        STICK_STEP_SIZE * PITCH_STICK_SPEED;
   }
   if (f_HolePointCameraPitch > 0.0f) {
     f_HolePointCameraPitch = 0.0f;
@@ -1049,17 +1049,17 @@ void func_80400FBC_hole_editor(void) {
   g_MapCamera.view.lookAt[AXIS_Z] = f_HolePointCursor[1];
   g_MapCamera.view.lookAt[AXIS_Y] =
       GetGroundHeight(f_HolePointCursor[0] << WORLD_TO_COURSE_SHIFT,
-                      f_HolePointCursor[1] << WORLD_TO_COURSE_SHIFT) *
+          f_HolePointCursor[1] << WORLD_TO_COURSE_SHIFT) *
       (1.0f / (1 << WORLD_TO_COURSE_SHIFT));
   cameraDistance = EDITOR_CAMERA_DISTANCE;
   g_MapCamera.view.eye[AXIS_X] = cos(f_HolePointCameraPitch) *
-                                     cos(f_HolePointCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_X];
+          cos(f_HolePointCameraHeading) *
+          (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_X];
   g_MapCamera.view.eye[AXIS_Z] = cos(f_HolePointCameraPitch) *
-                                     sin(f_HolePointCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_Z];
+          sin(f_HolePointCameraHeading) *
+          (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_Z];
   g_MapCamera.view.eye[AXIS_Y] =
       sin(f_HolePointCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) +
       g_MapCamera.view.lookAt[AXIS_Y];
@@ -1124,13 +1124,13 @@ void func_80402428_hole_editor(void) {
   PrintDebugHex(editKind, TRIANGLE_TEXT_COLUMN, EDIT_KIND_TEXT_ROW);
   if (editKind == TRIANGLE_EDIT_MOVE) {
     stepX = -cos((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                stepUp -
-            sin((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                stepRight;
+            stepUp -
+        sin((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+            stepRight;
     stepZ = -sin((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                stepUp +
-            cos((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                stepRight;
+            stepUp +
+        cos((u16)f_TriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+            stepRight;
     /* Scaled in two steps; in one expression GCC would multiply 10 by the zoom
      * first */
     {
@@ -1153,8 +1153,8 @@ void func_80402428_hole_editor(void) {
         vertex->ob[AXIS_X] = vertex->ob[AXIS_X] + stepX;
         vertex->ob[AXIS_Y] = vertex->ob[AXIS_Y] + moveY;
         vertex->ob[AXIS_Z] = vertex->ob[AXIS_Z] + stepZ;
-        PrintDebugHex(vertex->ob[AXIS_Y], TRIANGLE_TEXT_COLUMN,
-                      CORNER_HEIGHT_TEXT_ROW);
+        PrintDebugHex(
+            vertex->ob[AXIS_Y], TRIANGLE_TEXT_COLUMN, CORNER_HEIGHT_TEXT_ROW);
       }
     }
     PrepareHoleTriangles();
@@ -1186,13 +1186,13 @@ void func_80402428_hole_editor(void) {
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_SELECT;
     f_EditedTriangleIndex++;
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_SELECT;
     f_EditedTriangleIndex--;
   }
@@ -1204,7 +1204,7 @@ void func_80402428_hole_editor(void) {
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind++;
     editKind = TRIANGLE_EDIT_KIND;
     if (g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind >=
@@ -1215,7 +1215,7 @@ void func_80402428_hole_editor(void) {
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind--;
     editKind = TRIANGLE_EDIT_KIND;
     PrepareHoleTriangles();
@@ -1236,9 +1236,9 @@ void func_80402428_hole_editor(void) {
   }
   if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
     f_TriangleCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x /
-                                    STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        STICK_STEP_SIZE * HEADING_STICK_SPEED;
     f_TriangleCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y /
-                             STICK_STEP_SIZE * PITCH_STICK_SPEED;
+        STICK_STEP_SIZE * PITCH_STICK_SPEED;
   }
   if (f_TriangleCameraPitch > 0.0f) {
     f_TriangleCameraPitch = 0.0f;
@@ -1262,13 +1262,13 @@ void func_80402428_hole_editor(void) {
   f_LastTriangleEditKind = editKind;
   g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
   g_MapCamera.view.eye[AXIS_X] = cos(f_TriangleCameraPitch) *
-                                     cos(f_TriangleCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_X];
+          cos(f_TriangleCameraHeading) *
+          (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_X];
   g_MapCamera.view.eye[AXIS_Z] = cos(f_TriangleCameraPitch) *
-                                     sin(f_TriangleCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_Z];
+          sin(f_TriangleCameraHeading) *
+          (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_Z];
   g_MapCamera.view.eye[AXIS_Y] =
       sin(f_TriangleCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) +
       g_MapCamera.view.lookAt[AXIS_Y];
@@ -1405,13 +1405,13 @@ void func_80402E1C_hole_editor(void) {
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_SELECT;
     f_RingTriangleIndex++;
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_SELECT;
     f_RingTriangleIndex--;
   }
@@ -1484,9 +1484,9 @@ void func_80402E1C_hole_editor(void) {
   }
   if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
     f_RingCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x /
-                                STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        STICK_STEP_SIZE * HEADING_STICK_SPEED;
     f_RingCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y /
-                         STICK_STEP_SIZE * PITCH_STICK_SPEED;
+        STICK_STEP_SIZE * PITCH_STICK_SPEED;
   }
   if (f_RingCameraPitch > 0.0f) {
     f_RingCameraPitch = 0.0f;
@@ -1509,13 +1509,11 @@ void func_80402E1C_hole_editor(void) {
   f_LastRingEditKind = editKind;
   g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
   g_MapCamera.view.eye[AXIS_X] = cos(f_RingCameraPitch) *
-                                     cos(f_RingCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_X];
+          cos(f_RingCameraHeading) * (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_X];
   g_MapCamera.view.eye[AXIS_Z] = cos(f_RingCameraPitch) *
-                                     sin(f_RingCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_Z];
+          sin(f_RingCameraHeading) * (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_Z];
   g_MapCamera.view.eye[AXIS_Y] =
       sin(f_RingCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) +
       g_MapCamera.view.lookAt[AXIS_Y];
@@ -1621,8 +1619,8 @@ void func_80403A04_hole_editor(void) {
         if (isDropping == TRUE) {
           s32 height =
               (GetGroundHeight(vertex->ob[AXIS_X] << WORLD_TO_COURSE_SHIFT,
-                               vertex->ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT) -
-               WALL_SINK_DEPTH) *
+                   vertex->ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT) -
+                  WALL_SINK_DEPTH) *
               (1.0f / (1 << WORLD_TO_COURSE_SHIFT));
 
           if (corner == WALL_TOP_CORNER) {
@@ -1636,8 +1634,8 @@ void func_80403A04_hole_editor(void) {
           vertex->ob[AXIS_Y] = vertex->ob[AXIS_Y] + moveY;
           vertex->ob[AXIS_Z] = vertex->ob[AXIS_Z] + stepZ;
         }
-        PrintDebugHex(vertex->ob[AXIS_Y], TRIANGLE_TEXT_COLUMN,
-                      CORNER_HEIGHT_TEXT_ROW);
+        PrintDebugHex(
+            vertex->ob[AXIS_Y], TRIANGLE_TEXT_COLUMN, CORNER_HEIGHT_TEXT_ROW);
       }
     }
     for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
@@ -1690,13 +1688,13 @@ void func_80403A04_hole_editor(void) {
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_SELECT;
     f_WallTriangleIndex += WALL_TRIANGLE_COUNT;
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_SELECT;
     f_WallTriangleIndex -= WALL_TRIANGLE_COUNT;
   }
@@ -1715,7 +1713,7 @@ void func_80403A04_hole_editor(void) {
       HOLE_TRIANGLE_KIND_SHADED;
   if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_KIND;
     /* Never true; the triangle editor's kind cycling without the step */
     if (g_WorkArea.hole.triangles[f_WallTriangleIndex].kind >=
@@ -1727,7 +1725,7 @@ void func_80403A04_hole_editor(void) {
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_KIND;
     PrepareHoleTriangles();
   }
@@ -1747,9 +1745,9 @@ void func_80403A04_hole_editor(void) {
   }
   if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
     f_WallCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x /
-                                STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        STICK_STEP_SIZE * HEADING_STICK_SPEED;
     f_WallCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y /
-                         STICK_STEP_SIZE * PITCH_STICK_SPEED;
+        STICK_STEP_SIZE * PITCH_STICK_SPEED;
   }
   if (f_WallCameraPitch > 0.0f) {
     f_WallCameraPitch = 0.0f;
@@ -1772,13 +1770,11 @@ void func_80403A04_hole_editor(void) {
   f_LastWallEditKind = editKind;
   g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
   g_MapCamera.view.eye[AXIS_X] = cos(f_WallCameraPitch) *
-                                     cos(f_WallCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_X];
+          cos(f_WallCameraHeading) * (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_X];
   g_MapCamera.view.eye[AXIS_Z] = cos(f_WallCameraPitch) *
-                                     sin(f_WallCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_Z];
+          sin(f_WallCameraHeading) * (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_Z];
   g_MapCamera.view.eye[AXIS_Y] =
       sin(f_WallCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) +
       g_MapCamera.view.lookAt[AXIS_Y];
@@ -1807,10 +1803,10 @@ void func_804045C0_hole_editor(void) {
           GetGroundHeight(g_Billboards[i].x, g_Billboards[i].z) *
           COURSE_TO_WORLD_SCALE;
       height = GetGroundHeight(g_Billboards[i].x << WORLD_TO_COURSE_SHIFT,
-                               g_Billboards[i].z << WORLD_TO_COURSE_SHIFT) /
-               (1 << WORLD_TO_COURSE_SHIFT);
-      guTranslateF(translation, g_Billboards[i].x, height + 1,
-                   g_Billboards[i].z);
+                   g_Billboards[i].z << WORLD_TO_COURSE_SHIFT) /
+          (1 << WORLD_TO_COURSE_SHIFT);
+      guTranslateF(
+          translation, g_Billboards[i].x, height + 1, g_Billboards[i].z);
       PlaceBillboards();
     }
   }
@@ -1819,10 +1815,10 @@ void func_804045C0_hole_editor(void) {
         g_HolePoints.cupPositions[i][AXIS_Z] != 0) {
       g_HolePoints.cupPositions[i][AXIS_Y] =
           GetGroundHeight(g_HolePoints.cupPositions[i][AXIS_X],
-                          g_HolePoints.cupPositions[i][AXIS_Z]);
+              g_HolePoints.cupPositions[i][AXIS_Z]);
       g_HolePoints.teePositions[i][AXIS_Y] =
           GetGroundHeight(g_HolePoints.teePositions[i][AXIS_X],
-                          g_HolePoints.teePositions[i][AXIS_Z]);
+              g_HolePoints.teePositions[i][AXIS_Z]);
     }
   }
   D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
@@ -1841,7 +1837,7 @@ void func_804045C0_hole_editor(void) {
         g_HolePoints.routePoints[i][AXIS_Z] != 0) {
       g_HolePoints.routePoints[i][AXIS_Y] =
           GetGroundHeight(g_HolePoints.routePoints[i][AXIS_X],
-                          g_HolePoints.routePoints[i][AXIS_Z]);
+              g_HolePoints.routePoints[i][AXIS_Z]);
     }
   }
 }
@@ -1869,7 +1865,7 @@ void func_80404850_hole_editor(void) {
     for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
       groundPoint = GetGroundPoint(column, row);
       if (GetTerrainCode(groundPoint->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
-                         groundPoint->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE) !=
+              groundPoint->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE) !=
           TERRAIN_CODE_OUT_OF_BOUNDS) {
         continue;
       }
@@ -1879,9 +1875,9 @@ void func_80404850_hole_editor(void) {
           break;
         }
         neighbor = GetGroundPoint(column + offsets[offsetIndex].column,
-                                  row + offsets[offsetIndex].row);
+            row + offsets[offsetIndex].row);
         if (GetTerrainCode(neighbor->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
-                           neighbor->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE) !=
+                neighbor->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE) !=
             TERRAIN_CODE_OUT_OF_BOUNDS) {
           break;
         }
@@ -1898,10 +1894,10 @@ void func_80404850_hole_editor(void) {
         point.ob[AXIS_Y] +=
             (rand() & SLOPE_NOISE_MASK) * SLOPE_NOISE_SCALE + SLOPE_FAR_DROP;
       } else if (offsets[offsetIndex].distance / OFFSET_DISTANCE_SCALE >=
-                 SLOPE_START_DISTANCE) {
+          SLOPE_START_DISTANCE) {
         point.ob[AXIS_Y] += (offsets[offsetIndex].distance -
-                             SLOPE_BASE_DISTANCE * OFFSET_DISTANCE_SCALE) *
-                            SLOPE_DROP_PER_DISTANCE;
+                                SLOPE_BASE_DISTANCE * OFFSET_DISTANCE_SCALE) *
+            SLOPE_DROP_PER_DISTANCE;
       }
       SetGroundPoint(column, row, &point);
     }
@@ -1967,8 +1963,7 @@ void func_80404B84_hole_editor(void) {
     s32 change = f_CUpPickedHeight - f_CLeftPickedHeight;
 
     editKind = HEIGHT_EDIT_POINT;
-    SetGroundPointHeightAndShade(
-        f_HeightCursorColumn, f_HeightCursorRow,
+    SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
         GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y] +
             change,
         EDITED_POINT_SHADE);
@@ -1978,8 +1973,7 @@ void func_80404B84_hole_editor(void) {
     s32 change = f_CLeftPickedHeight - f_CUpPickedHeight;
 
     editKind = HEIGHT_EDIT_POINT;
-    SetGroundPointHeightAndShade(
-        f_HeightCursorColumn, f_HeightCursorRow,
+    SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
         GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y] +
             change,
         EDITED_POINT_SHADE);
@@ -2004,8 +1998,8 @@ void func_80404B84_hole_editor(void) {
 
       height -= HEIGHT_STEP;
       f_LastSetHeight = height;
-      SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
-                                   height, EDITED_POINT_SHADE);
+      SetGroundPointHeightAndShade(
+          f_HeightCursorColumn, f_HeightCursorRow, height, EDITED_POINT_SHADE);
     }
     editKind = HEIGHT_EDIT_POINT;
     MeasureGroundTiles();
@@ -2019,21 +2013,20 @@ void func_80404B84_hole_editor(void) {
 
       height += HEIGHT_STEP;
       f_LastSetHeight = height;
-      SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
-                                   height, EDITED_POINT_SHADE);
+      SetGroundPointHeightAndShade(
+          f_HeightCursorColumn, f_HeightCursorRow, height, EDITED_POINT_SHADE);
     }
     editKind = HEIGHT_EDIT_POINT;
     MeasureGroundTiles();
   }
   if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
     SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
-                                 f_LastSetHeight, EDITED_POINT_SHADE);
+        f_LastSetHeight, EDITED_POINT_SHADE);
     editKind = HEIGHT_EDIT_POINT;
     MeasureGroundTiles();
   }
   if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
-    SetGroundPointHeightAndShade(
-        f_HeightCursorColumn, f_HeightCursorRow,
+    SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
         f_LastSetHeight + (rand() & COARSE_NOISE_MASK) - COARSE_NOISE_OFFSET,
         EDITED_POINT_SHADE);
     editKind = HEIGHT_EDIT_POINT;
@@ -2045,8 +2038,7 @@ void func_80404B84_hole_editor(void) {
         GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
     baseHeight -= ROUGH_NOISE_OFFSET;
     SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
-                                 baseHeight + (rand() & ROUGH_NOISE_MASK),
-                                 EDITED_POINT_SHADE);
+        baseHeight + (rand() & ROUGH_NOISE_MASK), EDITED_POINT_SHADE);
     MeasureGroundTiles();
   }
   if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
@@ -2055,8 +2047,7 @@ void func_80404B84_hole_editor(void) {
         GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
     baseHeight -= HEIGHT_STEP;
     SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
-                                 baseHeight + (rand() & STEP_NOISE_BIT),
-                                 EDITED_POINT_SHADE);
+        baseHeight + (rand() & STEP_NOISE_BIT), EDITED_POINT_SHADE);
     MeasureGroundTiles();
   }
   if (g_MenuControllerData[SECOND_EDITOR_PAD].button & B_BUTTON) {
@@ -2064,8 +2055,7 @@ void func_80404B84_hole_editor(void) {
     baseHeight =
         GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Y];
     SetGroundPointHeightAndShade(f_HeightCursorColumn, f_HeightCursorRow,
-                                 baseHeight - (rand() & DIP_NOISE_BIT),
-                                 EDITED_POINT_SHADE);
+        baseHeight - (rand() & DIP_NOISE_BIT), EDITED_POINT_SHADE);
     MeasureGroundTiles();
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
@@ -2134,13 +2124,13 @@ void func_80404B84_hole_editor(void) {
   }
   if (direction != CURSOR_DIRECTION_NONE) {
     columnStep = cos((direction * BINARY_ANGLE_EIGHTH_TURN +
-                      f_HeightCameraHeadingAngle) *
+                         f_HeightCameraHeadingAngle) *
                      EDITOR_ANGLE_TO_RADIANS) *
-                 CURSOR_STEP_LENGTH;
+        CURSOR_STEP_LENGTH;
     rowStep = sin((direction * BINARY_ANGLE_EIGHTH_TURN +
-                   f_HeightCameraHeadingAngle) *
+                      f_HeightCameraHeadingAngle) *
                   EDITOR_ANGLE_TO_RADIANS) *
-              CURSOR_STEP_LENGTH;
+        CURSOR_STEP_LENGTH;
     f_HeightCursorColumn += columnStep;
     f_HeightCursorRow += rowStep;
     if (f_HeightCursorColumn < 0) {
@@ -2172,9 +2162,9 @@ void func_80404B84_hole_editor(void) {
   }
   if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
     f_HeightCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x /
-                                  STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        STICK_STEP_SIZE * HEADING_STICK_SPEED;
     f_HeightCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y /
-                           STICK_STEP_SIZE * PITCH_STICK_SPEED;
+        STICK_STEP_SIZE * PITCH_STICK_SPEED;
   }
   if ((g_ControllerData[SECOND_EDITOR_PAD].button & (Z_TRIG | R_TRIG)) ==
       R_TRIG) {
@@ -2196,7 +2186,7 @@ void func_80404B84_hole_editor(void) {
         g_MenuControllerData[SECOND_EDITOR_PAD].stick_x / STICK_STEP_SIZE *
         HEADING_STICK_SPEED;
     f_HeightCameraPitch -= g_MenuControllerData[SECOND_EDITOR_PAD].stick_y /
-                           STICK_STEP_SIZE * PITCH_STICK_SPEED;
+        STICK_STEP_SIZE * PITCH_STICK_SPEED;
   }
   if (f_HeightCameraPitch > 0.0f) {
     f_HeightCameraPitch = 0.0f;
@@ -2217,20 +2207,20 @@ void func_80404B84_hole_editor(void) {
   g_MapCamera.view.lookAt[AXIS_Z] =
       GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)->v.ob[AXIS_Z];
   g_MapCamera.view.eye[AXIS_X] = cos(f_HeightCameraPitch) *
-                                     cos(f_HeightCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_X];
+          cos(f_HeightCameraHeading) *
+          (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_X];
   g_MapCamera.view.eye[AXIS_Z] = cos(f_HeightCameraPitch) *
-                                     sin(f_HeightCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_Z];
+          sin(f_HeightCameraHeading) *
+          (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_Z];
   g_MapCamera.view.eye[AXIS_Y] =
       sin(f_HeightCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) +
       g_MapCamera.view.lookAt[AXIS_Y];
   sprintf(text, "%fm  ",
-          -(f32)GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)
-                  ->v.ob[AXIS_Y] *
-              METERS_PER_HEIGHT_UNIT);
+      -(f32)GetGroundPoint(f_HeightCursorColumn, f_HeightCursorRow)
+              ->v.ob[AXIS_Y] *
+          METERS_PER_HEIGHT_UNIT);
   PrintDebugText(text, HEIGHT_TEXT_COLUMN, HEIGHT_TEXT_ROW);
 }
 
@@ -2239,10 +2229,10 @@ static const char f_EditorFileName[] = "c:/usgolf64/hiedit.c";
 
 /* A plain if leaves GCC to invert the condition, which the game's code does not
  */
-#define EDITOR_ASSERT(condition, lineNumber)                  \
-  ((condition) ? (void)0                                      \
-               : ReportFailedAssertion(f_EditorAssertionText, \
-                                       f_EditorFileName, lineNumber))
+#define EDITOR_ASSERT(condition, lineNumber) \
+  ((condition) ? (void)0                     \
+               : ReportFailedAssertion(      \
+                     f_EditorAssertionText, f_EditorFileName, lineNumber))
 
 /*
  * Gathers the terrain codes on each side of the two diagonals of the
@@ -2291,7 +2281,7 @@ s32 func_80405870_hole_editor(s32 column, s32 row, s32 endColumn, s32 endRow) {
     for (columnOffset = 0; columnOffset < width; columnOffset++) {
       code = GetTerrainCode(column + columnOffset, row + rowOffset);
       distance = (width * (rowOffset - height) + columnOffset * height) *
-                 inverseLength;
+          inverseLength;
       absDistance = distance < 0.0f ? -distance : distance;
       if (absDistance >= DIAGONAL_MIN_DISTANCE) {
         if (distance >= 0.0f) {
@@ -2314,7 +2304,7 @@ s32 func_80405870_hole_editor(s32 column, s32 row, s32 endColumn, s32 endRow) {
   if (sideCodes[0][1] != NO_TERRAIN_CODE &&
       sideCodes[1][1] != NO_TERRAIN_CODE &&
       (sideCodes[2][1] == NO_TERRAIN_CODE ||
-       sideCodes[3][1] == NO_TERRAIN_CODE)) {
+          sideCodes[3][1] == NO_TERRAIN_CODE)) {
     return TRUE;
   }
   return FALSE;
@@ -2445,7 +2435,7 @@ void func_80405DB0_hole_editor(void) {
         continue;
       }
       codeColumn = (point = GetGroundPoint(column, row))->v.ob[AXIS_X] /
-                   VERTEX_UNITS_PER_CODE;
+          VERTEX_UNITS_PER_CODE;
       codeRow = point->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE;
       code = GetTerrainCode(codeColumn, codeRow);
       if (code == TERRAIN_CODE_GREEN) {
@@ -2453,7 +2443,7 @@ void func_80405DB0_hole_editor(void) {
       } else {
         height =
             (f32)((s32)IntLength2D(codeColumn - greenColumn, codeRow - greenRow)
-                  << GROUND_TEXEL_SHIFT) *
+                << GROUND_TEXEL_SHIFT) *
             HEIGHT_PER_COURSE_UNIT;
         height -= rand() & GROUND_NOISE_MASK;
         if (code == TERRAIN_CODE_BUNKER) {
@@ -2461,7 +2451,7 @@ void func_80405DB0_hole_editor(void) {
           for (offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++) {
             neighborCode =
                 GetTerrainCode(codeColumn + offsets[offsetIndex].column,
-                               codeRow + offsets[offsetIndex].row);
+                    codeRow + offsets[offsetIndex].row);
             if (neighborCode != TERRAIN_CODE_BUNKER ||
                 offsets[offsetIndex].distance >=
                     BUNKER_INNER_DISTANCE * OFFSET_DISTANCE_SCALE) {
@@ -2474,8 +2464,7 @@ void func_80405DB0_hole_editor(void) {
         } else if (code == TERRAIN_CODE_ROUGH) {
           for (offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++) {
             if (GetTerrainCode(codeColumn + offsets[offsetIndex].column,
-                               codeRow + offsets[offsetIndex].row) !=
-                    TERRAIN_CODE_ROUGH ||
+                    codeRow + offsets[offsetIndex].row) != TERRAIN_CODE_ROUGH ||
                 offsets[offsetIndex].distance >=
                     ROUGH_INNER_DISTANCE * OFFSET_DISTANCE_SCALE) {
               break;
@@ -2508,36 +2497,34 @@ void func_80405DB0_hole_editor(void) {
           if ((edgeRow & 1) == 0) {
             edgePoints[0] =
                 GetGroundPoint(column * GROUND_TILE_POINT_SPAN + edgeColumn - 1,
-                               row * GROUND_TILE_POINT_SPAN + edgeRow);
+                    row * GROUND_TILE_POINT_SPAN + edgeRow);
             edgePoints[1] =
                 &g_WorkArea.hole.midpoints
                      [g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex]
                      [D_8040C580_hole_editor[edgeRow][edgeColumn]];
             edgePoints[2] =
                 GetGroundPoint(column * GROUND_TILE_POINT_SPAN + edgeColumn + 1,
-                               row * GROUND_TILE_POINT_SPAN + edgeRow);
-            edgePoints[1]->v.ob[AXIS_Y] =
-                edgePoints[0]->v.ob[AXIS_Y] +
+                    row * GROUND_TILE_POINT_SPAN + edgeRow);
+            edgePoints[1]->v.ob[AXIS_Y] = edgePoints[0]->v.ob[AXIS_Y] +
                 (edgePoints[2]->v.ob[AXIS_Y] - edgePoints[0]->v.ob[AXIS_Y]) *
                     (edgePoints[1]->v.ob[AXIS_X] -
-                     edgePoints[0]->v.ob[AXIS_X]) /
+                        edgePoints[0]->v.ob[AXIS_X]) /
                     (edgePoints[2]->v.ob[AXIS_X] - edgePoints[0]->v.ob[AXIS_X]);
           } else {
             edgePoints[0] =
                 GetGroundPoint(column * GROUND_TILE_POINT_SPAN + edgeColumn,
-                               row * GROUND_TILE_POINT_SPAN + edgeRow - 1);
+                    row * GROUND_TILE_POINT_SPAN + edgeRow - 1);
             edgePoints[1] =
                 &g_WorkArea.hole.midpoints
                      [g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex]
                      [D_8040C580_hole_editor[edgeRow][edgeColumn]];
             edgePoints[2] =
                 GetGroundPoint(column * GROUND_TILE_POINT_SPAN + edgeColumn,
-                               row * GROUND_TILE_POINT_SPAN + edgeRow + 1);
-            edgePoints[1]->v.ob[AXIS_Y] =
-                edgePoints[0]->v.ob[AXIS_Y] +
+                    row * GROUND_TILE_POINT_SPAN + edgeRow + 1);
+            edgePoints[1]->v.ob[AXIS_Y] = edgePoints[0]->v.ob[AXIS_Y] +
                 (edgePoints[2]->v.ob[AXIS_Y] - edgePoints[0]->v.ob[AXIS_Y]) *
                     (edgePoints[1]->v.ob[AXIS_Z] -
-                     edgePoints[0]->v.ob[AXIS_Z]) /
+                        edgePoints[0]->v.ob[AXIS_Z]) /
                     (edgePoints[2]->v.ob[AXIS_Z] - edgePoints[0]->v.ob[AXIS_Z]);
           }
         }
@@ -2550,8 +2537,7 @@ void func_80405DB0_hole_editor(void) {
       if (GetTerrainCode(column, row) == TERRAIN_CODE_ROUGH) {
         for (offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++) {
           if (GetTerrainCode(column + offsets[offsetIndex].column,
-                             row + offsets[offsetIndex].row) !=
-                  TERRAIN_CODE_ROUGH ||
+                  row + offsets[offsetIndex].row) != TERRAIN_CODE_ROUGH ||
               offsets[offsetIndex].distance >=
                   TREE_MAX_DISTANCE * OFFSET_DISTANCE_SCALE) {
             break;
@@ -2565,7 +2551,7 @@ void func_80405DB0_hole_editor(void) {
           z = row * VERTEX_UNITS_PER_CODE;
           for (treeIndex = 0; treeIndex < treeCount; treeIndex++) {
             if (IntLength2D(x - treePositions[treeIndex][0],
-                            z - treePositions[treeIndex][1]) < TREE_SPACING) {
+                    z - treePositions[treeIndex][1]) < TREE_SPACING) {
               break;
             }
           }
@@ -2609,7 +2595,7 @@ planted:
     g_Billboards[billboardIndex].height = TREE_HEIGHT;
   }
   for (billboardIndex = treeCount; billboardIndex < BILLBOARD_COUNT;
-       billboardIndex++) {
+      billboardIndex++) {
     g_Billboards[billboardIndex].textureIndex = -1;
   }
   PlaceBillboards();
@@ -2635,10 +2621,10 @@ void func_80406570_hole_editor(void) {
       tileIndex = tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn;
       for (cellRow = 0; cellRow < GROUND_TILE_POINT_SPAN; cellRow++) {
         for (cellColumn = 0; cellColumn < GROUND_TILE_POINT_SPAN;
-             cellColumn++) {
+            cellColumn++) {
           corners[0] =
               GetGroundPoint(tileColumn * GROUND_TILE_POINT_SPAN + cellColumn,
-                             tileRow * GROUND_TILE_POINT_SPAN + cellRow);
+                  tileRow * GROUND_TILE_POINT_SPAN + cellRow);
           corners[1] = GetGroundPoint(
               tileColumn * GROUND_TILE_POINT_SPAN + cellColumn + 1,
               tileRow * GROUND_TILE_POINT_SPAN + cellRow + 1);
@@ -2647,7 +2633,7 @@ void func_80406570_hole_editor(void) {
                           corners[0]->v.ob[2] / VERTEX_UNITS_PER_CODE,
                           corners[1]->v.ob[0] / VERTEX_UNITS_PER_CODE,
                           corners[1]->v.ob[2] / VERTEX_UNITS_PER_CODE)
-                      << (cellRow * GROUND_TILE_POINT_SPAN + cellColumn);
+              << (cellRow * GROUND_TILE_POINT_SPAN + cellColumn);
         }
       }
       g_WorkArea.hole.tiles[tileIndex].unk992 = cellBits;
@@ -2675,13 +2661,13 @@ s32 func_804066C8_hole_editor(s32 column, s32 row) {
       corners[3] =
           GetGroundPoint(column + columnOffset + 1, row + rowOffset + 1);
       if (CrossProductXZ(corners[0]->v.ob[AXIS_X], corners[0]->v.ob[AXIS_Z],
-                         corners[1]->v.ob[AXIS_X], corners[1]->v.ob[AXIS_Z],
-                         corners[2]->v.ob[AXIS_X],
-                         corners[2]->v.ob[AXIS_Z]) < MIN_CELL_CROSS_PRODUCT ||
+              corners[1]->v.ob[AXIS_X], corners[1]->v.ob[AXIS_Z],
+              corners[2]->v.ob[AXIS_X],
+              corners[2]->v.ob[AXIS_Z]) < MIN_CELL_CROSS_PRODUCT ||
           CrossProductXZ(corners[1]->v.ob[AXIS_X], corners[1]->v.ob[AXIS_Z],
-                         corners[3]->v.ob[AXIS_X], corners[3]->v.ob[AXIS_Z],
-                         corners[2]->v.ob[AXIS_X],
-                         corners[2]->v.ob[AXIS_Z]) < MIN_CELL_CROSS_PRODUCT) {
+              corners[3]->v.ob[AXIS_X], corners[3]->v.ob[AXIS_Z],
+              corners[2]->v.ob[AXIS_X],
+              corners[2]->v.ob[AXIS_Z]) < MIN_CELL_CROSS_PRODUCT) {
         return -1;
       }
       columnOffset++;
@@ -2753,7 +2739,7 @@ void func_80406818_hole_editor(void) {
       SetDebugTextHighlight(TRUE);
     }
     PrintDebugText("Are you sure? (Exec -> A_BUTTON)", HOLE_FILE_PROMPT_COLUMN,
-                   HOLE_FILE_PROMPT_ROW);
+        HOLE_FILE_PROMPT_ROW);
     f_HoleFilePromptFrames++;
     if (g_MenuControllerData[0].trigger & A_BUTTON) {
       if (f_IsSavingHoleFiles) {
@@ -2814,7 +2800,7 @@ void func_80406C3C_hole_editor(void) {
   PrintDebugText("KIND", TREE_TEXT_COLUMN, TREE_KIND_LABEL_ROW);
   PrintDebugText("        ", TREE_TEXT_COLUMN, TREE_KIND_TEXT_ROW);
   PrintDebugHex(g_Billboards[f_EditedTreeIndex].textureIndex, TREE_TEXT_COLUMN,
-                TREE_KIND_TEXT_ROW);
+      TREE_KIND_TEXT_ROW);
   PrintDebugText("EDIT NUM", TREE_TEXT_COLUMN, TREE_INDEX_LABEL_ROW);
   PrintDebugText("        ", TREE_TEXT_COLUMN, TREE_INDEX_TEXT_ROW);
   PrintDebugHex(f_EditedTreeIndex, TREE_TEXT_COLUMN, TREE_INDEX_TEXT_ROW);
@@ -2855,14 +2841,14 @@ void func_80406C3C_hole_editor(void) {
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_SELECT;
     g_Billboards[f_EditedTreeIndex].isNearCourseEdge = FALSE;
     f_EditedTreeIndex++;
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_SELECT;
     g_Billboards[f_EditedTreeIndex].isNearCourseEdge = FALSE;
     f_EditedTreeIndex--;
@@ -2875,13 +2861,13 @@ void func_80406C3C_hole_editor(void) {
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_KIND;
     g_Billboards[f_EditedTreeIndex].textureIndex++;
   }
   if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
       (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX |
-       g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+          g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
     editKind = TRIANGLE_EDIT_KIND;
     g_Billboards[f_EditedTreeIndex].textureIndex--;
   }
@@ -2912,13 +2898,13 @@ void func_80406C3C_hole_editor(void) {
   if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG) &&
       *(u16*)&g_MenuControllerData[EDITOR_PAD].stick_x != 0) {
     s32 moveX = -cos((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                    g_MenuControllerData[EDITOR_PAD].stick_y -
-                sin((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                    g_MenuControllerData[EDITOR_PAD].stick_x;
+            g_MenuControllerData[EDITOR_PAD].stick_y -
+        sin((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+            g_MenuControllerData[EDITOR_PAD].stick_x;
     s32 moveZ = -sin((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                    g_MenuControllerData[EDITOR_PAD].stick_y +
-                cos((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
-                    g_MenuControllerData[EDITOR_PAD].stick_x;
+            g_MenuControllerData[EDITOR_PAD].stick_y +
+        cos((u16)f_TreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+            g_MenuControllerData[EDITOR_PAD].stick_x;
 
     editKind = TRIANGLE_EDIT_MOVE;
     g_Billboards[f_EditedTreeIndex].x += moveX;
@@ -2929,9 +2915,9 @@ void func_80406C3C_hole_editor(void) {
     height = GetGroundHeight(
                  g_Billboards[f_EditedTreeIndex].x << WORLD_TO_COURSE_SHIFT,
                  g_Billboards[f_EditedTreeIndex].z << WORLD_TO_COURSE_SHIFT) /
-             (1 << WORLD_TO_COURSE_SHIFT);
+        (1 << WORLD_TO_COURSE_SHIFT);
     guTranslateF(translation, g_Billboards[f_EditedTreeIndex].x, height + 1,
-                 g_Billboards[f_EditedTreeIndex].z);
+        g_Billboards[f_EditedTreeIndex].z);
     RevertBillboardManager();
     PlaceBillboards();
   } else {
@@ -2955,9 +2941,9 @@ void func_80406C3C_hole_editor(void) {
   }
   if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
     f_TreeCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x /
-                                STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        STICK_STEP_SIZE * HEADING_STICK_SPEED;
     f_TreeCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y /
-                         STICK_STEP_SIZE * PITCH_STICK_SPEED;
+        STICK_STEP_SIZE * PITCH_STICK_SPEED;
   }
   if (f_TreeCameraPitch > 0.0f) {
     f_TreeCameraPitch = 0.0f;
@@ -2972,13 +2958,11 @@ void func_80406C3C_hole_editor(void) {
   g_MapCamera.view.lookAt[AXIS_Z] = g_Billboards[f_EditedTreeIndex].z;
   f_TreeCameraHeading = f_TreeCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
   g_MapCamera.view.eye[AXIS_X] = cos(f_TreeCameraPitch) *
-                                     cos(f_TreeCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_X];
+          cos(f_TreeCameraHeading) * (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_X];
   g_MapCamera.view.eye[AXIS_Z] = cos(f_TreeCameraPitch) *
-                                     sin(f_TreeCameraHeading) *
-                                     (g_MapCamera.view.zoom * cameraDistance) +
-                                 g_MapCamera.view.lookAt[AXIS_Z];
+          sin(f_TreeCameraHeading) * (g_MapCamera.view.zoom * cameraDistance) +
+      g_MapCamera.view.lookAt[AXIS_Z];
   g_MapCamera.view.eye[AXIS_Y] =
       sin(f_TreeCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) +
       g_MapCamera.view.lookAt[AXIS_Y];
@@ -3009,20 +2993,19 @@ void func_804077B0_hole_editor(u32 column, u32 row, s32 radius, s32 falloff) {
       }
       halfWidth = sqrt(halfWidth);
       for (columnOffset = -halfWidth; columnOffset <= halfWidth;
-           columnOffset++) {
+          columnOffset++) {
         if (column + columnOffset < GROUND_POINT_COLUMN_COUNT) {
           point = GetGroundPoint(column + columnOffset, row + rowOffset);
           distance =
               (f32)IntLength2D(center->v.ob[AXIS_X] - point->v.ob[AXIS_X],
-                               center->v.ob[AXIS_Z] - point->v.ob[AXIS_Z]) /
+                  center->v.ob[AXIS_Z] - point->v.ob[AXIS_Z]) /
               BLEND_DISTANCE_SCALE;
           weight = distance * falloff;
           if (weight > 1.0f) {
             weight = 1.0f;
           }
           weight *= weight;
-          SetGroundPointHeightAndShade(
-              column + columnOffset, row + rowOffset,
+          SetGroundPointHeightAndShade(column + columnOffset, row + rowOffset,
               point->v.ob[AXIS_Y] * weight +
                   center->v.ob[AXIS_Y] * (1.0f - weight),
               BLENDED_POINT_SHADE);
@@ -3072,13 +3055,13 @@ void func_804079B8_hole_editor(void) {
   for (half = 0; half < SLOPE_HALF_COUNT; half++) {
     for (blockRow = 0; blockRow < SLOPE_BLOCK_ROW_COUNT; blockRow++) {
       for (blockColumn = 0; blockColumn < SLOPE_BLOCK_COLUMN_COUNT;
-           blockColumn++) {
+          blockColumn++) {
         block = half * SLOPE_BLOCK_COLUMN_COUNT + blockColumn;
         for (pairRow = 0; pairRow < 2; pairRow++) {
           cellRow = (blockRow * 2 + pairRow) * 2;
           for (cellRowInPair = 0; cellRowInPair < 2; cellRowInPair++) {
             for (cellColumnInBlock = 0; cellColumnInBlock < 2;
-                 cellColumnInBlock++) {
+                cellColumnInBlock++) {
               row = cellRow + cellRowInPair;
               column = block * 2 + cellColumnInBlock;
               corner = GetGroundPoint(column, row);
@@ -3179,8 +3162,7 @@ void func_80407D64_hole_editor(void) {
   for (row = 0; row < WAVE_TEXTURE_HEIGHT; row++) {
     for (column = 0; column < WAVE_TEXTURE_WIDTH; column++) {
       level = cos((f32)(column * WAVE_TEXEL_STEP) * WAVE_ANGLE_STEP) *
-              sin((f32)(row * WAVE_TEXEL_STEP) * WAVE_ANGLE_STEP) *
-              WAVE_AMPLITUDE;
+          sin((f32)(row * WAVE_TEXEL_STEP) * WAVE_ANGLE_STEP) * WAVE_AMPLITUDE;
       level *= level * level;
       level /= 1 << WAVE_LEVEL_SHIFT;
       if (level <= 0) {
@@ -3226,14 +3208,14 @@ void func_80407F08_hole_editor(u32* words, s32 byteCount, char* fileName) {
   end = buffer + HEX_DUMP_BUFFER_SIZE;
   EDITOR_ASSERT(buffer != NULL, HOLE_EDITOR_HEX_DUMP_ASSERT_LINE);
   for (line = 0;
-       line < (byteCount + HEX_DUMP_LINE_BYTES - 1) / HEX_DUMP_LINE_BYTES;
-       line++) {
+      line < (byteCount + HEX_DUMP_LINE_BYTES - 1) / HEX_DUMP_LINE_BYTES;
+      line++) {
     lineWords = words;
     sprintf(text, "%4.4X: ", line * HEX_DUMP_LINE_BYTES);
     AppendText(text);
     for (wordIndex = 0; wordIndex < HEX_DUMP_LINE_WORDS; wordIndex++) {
-      sprintf(text, "%8.8X ",
-              lineWords[line * HEX_DUMP_LINE_WORDS + wordIndex]);
+      sprintf(
+          text, "%8.8X ", lineWords[line * HEX_DUMP_LINE_WORDS + wordIndex]);
       AppendText(text);
     }
     sprintf(text, "\n");
@@ -3292,10 +3274,10 @@ void func_8040BFC8_hole_editor(void) {
     /* The game indexes the texels past the border as one run of rows */
     return g_WorkArea.hole
         .tiles[column / GROUND_TILE_TEXEL_SPAN +
-               row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT]
+            row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT]
         .texels[GROUND_TILE_TEXEL_BORDER]
                [GROUND_TILE_TEXEL_BORDER + column % GROUND_TILE_TEXEL_SPAN +
-                row % GROUND_TILE_TEXEL_SPAN * GROUND_TILE_TEXEL_ROW_LENGTH];
+                   row % GROUND_TILE_TEXEL_SPAN * GROUND_TILE_TEXEL_ROW_LENGTH];
   }
 
   MarkBillboardsOnMap();
@@ -3306,16 +3288,16 @@ void func_8040BFC8_hole_editor(void) {
   for (row = MAP_CAPTURE_HEIGHT - 1; row != -1; row--) {
     for (column = 0; column != MAP_CAPTURE_WIDTH; column++) {
       capture[byteIndex++] = ((GetMapTexel(row * MAP_CAPTURE_WIDTH + column) >>
-                               RGBA16_BLUE_SHIFT) &
-                              RGBA16_CHANNEL_MASK)
-                             << RGBA16_CHANNEL_WIDEN_SHIFT;
+                                  RGBA16_BLUE_SHIFT) &
+                                 RGBA16_CHANNEL_MASK)
+          << RGBA16_CHANNEL_WIDEN_SHIFT;
       capture[byteIndex++] = ((GetMapTexel(row * MAP_CAPTURE_WIDTH + column) >>
-                               RGBA16_GREEN_SHIFT) &
-                              RGBA16_CHANNEL_MASK)
-                             << RGBA16_CHANNEL_WIDEN_SHIFT;
+                                  RGBA16_GREEN_SHIFT) &
+                                 RGBA16_CHANNEL_MASK)
+          << RGBA16_CHANNEL_WIDEN_SHIFT;
       capture[byteIndex++] =
           ((GetMapTexel(row * MAP_CAPTURE_WIDTH + column) >> RGBA16_RED_SHIFT) &
-           RGBA16_CHANNEL_MASK)
+              RGBA16_CHANNEL_MASK)
           << RGBA16_CHANNEL_WIDEN_SHIFT;
     }
   }
@@ -3342,20 +3324,20 @@ void func_8040C124_hole_editor(void) {
     for (column = 0; column != SCREEN_WIDTH; column++) {
       capture[byteIndex++] =
           ((frame[row * SCREEN_WIDTH + column] >> RGBA16_BLUE_SHIFT) &
-           RGBA16_CHANNEL_MASK)
+              RGBA16_CHANNEL_MASK)
           << RGBA16_CHANNEL_WIDEN_SHIFT;
       capture[byteIndex++] =
           ((frame[row * SCREEN_WIDTH + column] >> RGBA16_GREEN_SHIFT) &
-           RGBA16_CHANNEL_MASK)
+              RGBA16_CHANNEL_MASK)
           << RGBA16_CHANNEL_WIDEN_SHIFT;
       capture[byteIndex++] =
           ((frame[row * SCREEN_WIDTH + column] >> RGBA16_RED_SHIFT) &
-           RGBA16_CHANNEL_MASK)
+              RGBA16_CHANNEL_MASK)
           << RGBA16_CHANNEL_WIDEN_SHIFT;
     }
   }
-  sprintf(g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp",
-          f_ScreenCaptureNumber);
+  sprintf(
+      g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp", f_ScreenCaptureNumber);
   WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
   FreeMemory(&capture);
   f_ScreenCaptureNumber++;
@@ -3382,15 +3364,15 @@ void func_8040C260_hole_editor(s32 captureIndex) {
     for (column = 0; column != CORNER_CAPTURE_WIDTH; column++) {
       capture[byteIndex++] =
           ((frame[row * SCREEN_WIDTH + column] >> RGBA16_BLUE_SHIFT) &
-           RGBA16_CHANNEL_MASK)
+              RGBA16_CHANNEL_MASK)
           << RGBA16_CHANNEL_WIDEN_SHIFT;
       capture[byteIndex++] =
           ((frame[row * SCREEN_WIDTH + column] >> RGBA16_GREEN_SHIFT) &
-           RGBA16_CHANNEL_MASK)
+              RGBA16_CHANNEL_MASK)
           << RGBA16_CHANNEL_WIDEN_SHIFT;
       capture[byteIndex++] =
           ((frame[row * SCREEN_WIDTH + column] >> RGBA16_RED_SHIFT) &
-           RGBA16_CHANNEL_MASK)
+              RGBA16_CHANNEL_MASK)
           << RGBA16_CHANNEL_WIDEN_SHIFT;
     }
   }
@@ -3402,12 +3384,12 @@ void func_8040C260_hole_editor(s32 captureIndex) {
  * Draws a pole, red at the foot and blue at the top, at the map camera's
  * look-at point
  */
-void func_8040C360_hole_editor(CameraMatrices* matrices,
-                               Gfx** displayListHead) {
+void func_8040C360_hole_editor(
+    CameraMatrices* matrices, Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
   guTranslate(&D_8040CC98, g_MapCamera.view.lookAt[0],
-              g_MapCamera.view.lookAt[1], g_MapCamera.view.lookAt[2]);
+      g_MapCamera.view.lookAt[1], g_MapCamera.view.lookAt[2]);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -3417,7 +3399,7 @@ void func_8040C360_hole_editor(CameraMatrices* matrices,
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8040CC98),
-            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_PoleVertices[0], POLE_QUAD_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
   gSPVertex(gfx++, f_PoleVertices[1], POLE_QUAD_VERTEX_COUNT, 0);

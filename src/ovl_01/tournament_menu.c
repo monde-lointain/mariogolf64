@@ -221,10 +221,10 @@ s32 IsNintendoClubTournament(void);
 s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentModeMessage(void);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32);
-void func_8022747C_ovl_01(Gfx** displayListHead, s32, s32, s32, s32, s32, s32,
-                          s32);
-void func_802296C4_ovl_01(Gfx** displayListHead, s32 centerX, s32 top,
-                          s32 number);
+void func_8022747C_ovl_01(
+    Gfx** displayListHead, s32, s32, s32, s32, s32, s32, s32);
+void func_802296C4_ovl_01(
+    Gfx** displayListHead, s32 centerX, s32 top, s32 number);
 /*
  * func_802296C4 writes the club tournament's number as an ordinal from the
  * 24x24 glyphs of asset 0x98E: the digits, then "st", "nd", "rd" and "th"
@@ -424,8 +424,7 @@ void func_80226A34_ovl_01(void) {
  */
 #ifdef NON_MATCHING
 void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
-                          s32 centerX, s32 centerY, s32 okTextShown,
-                          s32 chosenButton) {
+    s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton) {
   Gfx* gfx = *displayListHead;
   f32 windowWidth;
   f32 windowHalfHeight;
@@ -515,9 +514,8 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
   for (index = 0, windowTop = centerY - halfHeight;
-       index != MENU_WINDOW_STRIP_COUNT; index++) {
-    LoadNibbleTextureBlock(
-        &gfx,
+      index != MENU_WINDOW_STRIP_COUNT; index++) {
+    LoadNibbleTextureBlock(&gfx,
         (u8*)D_80230E70_ovl_01 + IMAGE_HEADER_SIZE +
             index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2,
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
@@ -525,11 +523,10 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
     windowLeft = centerX - halfWidth;
     windowRight = centerX + halfWidth;
     DrawTextureRect(&gfx, windowLeft << 2,
-                    (windowTop + index * halfHeight) << 2, windowRight << 2,
-                    (windowTop + index * halfHeight + halfHeight) << 2,
-                    G_TX_RENDERTILE, 0, 0,
-                    (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
-                    (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
+        (windowTop + index * halfHeight) << 2, windowRight << 2,
+        (windowTop + index * halfHeight + halfHeight) << 2, G_TX_RENDERTILE, 0,
+        0, (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
+        (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
     gDPPipeSync(gfx++);
   }
   gDPPipeSync(gfx++);
@@ -540,17 +537,17 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   LoadLargePalette(&gfx, (u8*)D_80230E74_ovl_01 + IMAGE_HEADER_SIZE);
   for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
     LoadTextureBlock(&gfx,
-                     (u8*)D_80230E74_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-                         index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT,
-                     G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH,
-                     YES_NO_BUTTON_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        (u8*)D_80230E74_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT,
+        G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
+        0, 0, 0, 0, 0, 0);
     if (index == 0) {
       buttonX = centerX - (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     } else {
       buttonX = centerX + (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     }
     buttonY = centerY + windowHalfHeight -
-              (s32)(g_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
+        (s32)(g_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
     growth = 0;
     if (index == chosenButton) {
       pulse = D_80230E9C_ovl_01;
@@ -559,12 +556,11 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
       pulse = 0;
     }
     DrawTextureRect(&gfx, (buttonX - buttonHalfWidth - growth) << 2,
-                    (buttonY - buttonHalfHeight - growth) << 2,
-                    (buttonX + buttonHalfWidth + growth) << 2,
-                    (buttonY + buttonHalfHeight + growth) << 2, G_TX_RENDERTILE,
-                    0, 0,
-                    (YES_NO_BUTTON_WIDTH << 10) / (s32)(buttonWidth + pulse),
-                    (YES_NO_BUTTON_HEIGHT << 10) / (s32)(buttonHeight + pulse));
+        (buttonY - buttonHalfHeight - growth) << 2,
+        (buttonX + buttonHalfWidth + growth) << 2,
+        (buttonY + buttonHalfHeight + growth) << 2, G_TX_RENDERTILE, 0, 0,
+        (YES_NO_BUTTON_WIDTH << 10) / (s32)(buttonWidth + pulse),
+        (YES_NO_BUTTON_HEIGHT << 10) / (s32)(buttonHeight + pulse));
     gDPPipeSync(gfx++);
   }
   if (D_80230EA0_ovl_01 == YES_NO_PULSE_GROWING) {
@@ -581,8 +577,8 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   }
   if (okTextShown != NO_OK_TEXT && IsMenuWindowOpen()) {
     SetTextSlot(centerX + OK_TEXT_OFFSET_X, buttonY - OK_TEXT_OFFSET_Y,
-                MESSAGE_OK, 1, OK_TEXT_SLOT, TEXT_FLAG_CENTERED, OK_TEXT_RED,
-                OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
+        MESSAGE_OK, 1, OK_TEXT_SLOT, TEXT_FLAG_CENTERED, OK_TEXT_RED,
+        OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
   }
   *displayListHead = gfx;
 }
@@ -597,8 +593,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022747C_ovl_01);
 #ifdef NON_MATCHING
 /* The original never stores the list's end back through displayListHead */
 void func_802287EC_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY,
-                          s32 halfWidth, s32 stripHeight, s32 width,
-                          s32 shownStripHeight) {
+    s32 halfWidth, s32 stripHeight, s32 width, s32 shownStripHeight) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripTop = centerY - stripHeight;
@@ -616,18 +611,17 @@ void func_802287EC_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY,
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
   for (stripIndex = 0; stripIndex != TOURNAMENT_BANNER_STRIP_COUNT;
-       stripIndex++) {
+      stripIndex++) {
     LoadNibbleTextureBlock(&gfx,
-                           (u8*)D_80230E70_ovl_01 + IMAGE_HEADER_SIZE +
-                               stripIndex * TOURNAMENT_BANNER_WIDTH *
-                                   TOURNAMENT_BANNER_STRIP_HEIGHT / 2,
-                           G_IM_FMT_I, TOURNAMENT_BANNER_WIDTH,
-                           TOURNAMENT_BANNER_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        (u8*)D_80230E70_ovl_01 + IMAGE_HEADER_SIZE +
+            stripIndex * TOURNAMENT_BANNER_WIDTH *
+                TOURNAMENT_BANNER_STRIP_HEIGHT / 2,
+        G_IM_FMT_I, TOURNAMENT_BANNER_WIDTH, TOURNAMENT_BANNER_STRIP_HEIGHT, 0,
+        0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, (centerX - halfWidth) << 2, stripTop << 2,
-                    (centerX + halfWidth) << 2, (stripTop + stripHeight) << 2,
-                    G_TX_RENDERTILE, 0, 0,
-                    (TOURNAMENT_BANNER_WIDTH << 10) / width,
-                    (TOURNAMENT_BANNER_STRIP_HEIGHT << 10) / shownStripHeight);
+        (centerX + halfWidth) << 2, (stripTop + stripHeight) << 2,
+        G_TX_RENDERTILE, 0, 0, (TOURNAMENT_BANNER_WIDTH << 10) / width,
+        (TOURNAMENT_BANNER_STRIP_HEIGHT << 10) / shownStripHeight);
     stripTop += stripHeight;
     gDPPipeSync(gfx++);
   }
@@ -749,8 +743,8 @@ void func_80228C00_ovl_01(void) {
         SetDebugTextHighlight(TRUE);
       }
       sprintf(debugText, "P%d[%d]  ", index, g_TournamentCode[index]);
-      PrintDebugText(debugText, CODE_DEBUG_TEXT_COLUMN,
-                     index + CODE_DEBUG_TEXT_FIRST_ROW);
+      PrintDebugText(
+          debugText, CODE_DEBUG_TEXT_COLUMN, index + CODE_DEBUG_TEXT_FIRST_ROW);
     }
   }
   if (g_MenuRepeatButtons & A_BUTTON) {
@@ -760,8 +754,8 @@ void func_80228C00_ovl_01(void) {
       if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
         isInvalid = FALSE;
       } else {
-        isInvalid = DecodeTournamentPassword(g_TournamentCode,
-                                             (char*)D_80230FD4_ovl_01);
+        isInvalid = DecodeTournamentPassword(
+            g_TournamentCode, (char*)D_80230FD4_ovl_01);
       }
       if (!isInvalid) {
         D_80230F74_ovl_01 = g_TournamentCode[0] & CLUB_CODE_NAME_MASK;
@@ -774,7 +768,7 @@ void func_80228C00_ovl_01(void) {
         *(TournamentRules*)&D_80105DBC[4] = *rules;
         D_80105DCC = g_TournamentCode[2] + 1;
         osSyncPrintf("bkTour %x, %x, %x\n", g_TournamentCode[0],
-                     g_TournamentCode[1], g_TournamentCode[2]);
+            g_TournamentCode[1], g_TournamentCode[2]);
         PlaySound(SOUND_CODE_ACCEPTED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         ResetMenuWindow();
         func_80226904_ovl_01(GetClubTournamentCourse());
@@ -869,7 +863,7 @@ void func_80229278_ovl_01(void) {
     }
     if (GetWipeProgress() == 0) {
       D_801B60B4 = (g_TournamentCode[0] << 16) | (g_TournamentCode[1] << 8) |
-                   g_TournamentCode[2];
+          g_TournamentCode[2];
       StartLoadingChosenHole();
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
@@ -912,8 +906,8 @@ void func_80229278_ovl_01(void) {
         D_801B7070 = 1;
         g_PlayerCount = 1;
         buttons = g_ControllerStates[0].buttons |
-                  g_ControllerStates[1].buttons |
-                  g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
+            g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
+            g_ControllerStates[3].buttons;
         /* The held C buttons pick the player's colours */
         if (buttons & L_CBUTTONS) {
           g_Players[0].paletteIndex = 1;
@@ -958,8 +952,8 @@ void func_80229278_ovl_01(void) {
  * shifts the texel address and the rectangle's halves along a register.
  */
 #ifdef NON_MATCHING
-void func_802296C4_ovl_01(Gfx** displayListHead, s32 centerX, s32 top,
-                          s32 number) {
+void func_802296C4_ovl_01(
+    Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
   Gfx* gfx = *displayListHead;
   u8* image = GetMenuImageBuffer();
   char* digit;
@@ -981,21 +975,21 @@ void func_802296C4_ovl_01(Gfx** displayListHead, s32 centerX, s32 top,
   left -= width / 2;
   width = 0;
   for (digit = g_PrintBuffer; *digit != '\0';
-       digit++, width += ORDINAL_DIGIT_SPACING) {
+      digit++, width += ORDINAL_DIGIT_SPACING) {
     glyph = *digit;
     if (glyph != ' ') {
-      gDPLoadTextureTile(
-          gfx++, ((u32)image + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+      gDPLoadTextureTile(gfx++,
+          ((u32)image + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
           G_IM_SIZ_8b, ORDINAL_GLYPH_SIZE, ORDINAL_IMAGE_HEIGHT, 0,
           (glyph - '0') * ORDINAL_GLYPH_SIZE, ORDINAL_GLYPH_SIZE - 1,
           (glyph - '0') * ORDINAL_GLYPH_SIZE + ORDINAL_GLYPH_SIZE - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPScisTextureRectangle(gfx++, (left + width) << 2, top << 2,
-                              (left + width + ORDINAL_GLYPH_SIZE) << 2,
-                              (top + ORDINAL_GLYPH_SIZE) << 2, G_TX_RENDERTILE,
-                              0, ((glyph - '0') * ORDINAL_GLYPH_SIZE) << 5,
-                              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (left + width + ORDINAL_GLYPH_SIZE) << 2,
+          (top + ORDINAL_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,
+          ((glyph - '0') * ORDINAL_GLYPH_SIZE) << 5, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
   suffix = number;
@@ -1015,20 +1009,18 @@ void func_802296C4_ovl_01(Gfx** displayListHead, s32 centerX, s32 top,
     }
   }
   gDPLoadTextureTile(gfx++, ((u32)image + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
-                     G_IM_FMT_CI, G_IM_SIZ_8b, ORDINAL_GLYPH_SIZE,
-                     ORDINAL_IMAGE_HEIGHT, 0,
-                     (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE,
-                     ORDINAL_GLYPH_SIZE - 1,
-                     (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE +
-                         ORDINAL_GLYPH_SIZE - 1,
-                     0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                     G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      G_IM_FMT_CI, G_IM_SIZ_8b, ORDINAL_GLYPH_SIZE, ORDINAL_IMAGE_HEIGHT, 0,
+      (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE,
+      ORDINAL_GLYPH_SIZE - 1,
+      (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE +
+          ORDINAL_GLYPH_SIZE - 1,
+      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gSPScisTextureRectangle(gfx++, (left + width) << 2, top << 2,
-                          (left + width + ORDINAL_GLYPH_SIZE) << 2,
-                          (top + ORDINAL_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,
-                          ((suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE)
-                              << 5,
-                          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      (left + width + ORDINAL_GLYPH_SIZE) << 2, (top + ORDINAL_GLYPH_SIZE) << 2,
+      G_TX_RENDERTILE, 0,
+      ((suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE) << 5,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 #else
@@ -1054,15 +1046,15 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
   if (D_80230F70_ovl_01 == 1) {
     if (IsNintendoClubTournament()) {
       windowStyle = (func_8022BDC4_ovl_01() != -1)
-                        ? CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO
-                        : CLUB_WINDOW_STYLE_NINTENDO;
+          ? CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO
+          : CLUB_WINDOW_STYLE_NINTENDO;
       /* The held C buttons pick which of the tournament's pictures shows */
       if (windowStyle ==
               (CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO) &&
           GetWipeKind() == WIPE_NONE) {
         buttons = g_ControllerStates[0].buttons |
-                  g_ControllerStates[1].buttons |
-                  g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
+            g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
+            g_ControllerStates[3].buttons;
         if (buttons & L_CBUTTONS) {
           func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 1);
         } else if (buttons & D_CBUTTONS) {
@@ -1074,8 +1066,8 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
         }
       }
       func_8022747C_ovl_01(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
-                           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0,
-                           D_80230F80_ovl_01, windowStyle);
+          CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
+          windowStyle);
       func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
     } else {
       windowStyle = (func_8022BDC4_ovl_01() != -1) ? CLUB_WINDOW_STYLE_PICTURE
@@ -1083,8 +1075,8 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
       if (windowStyle != CLUB_WINDOW_STYLE_PLAIN &&
           GetWipeKind() == WIPE_NONE) {
         buttons = g_ControllerStates[0].buttons |
-                  g_ControllerStates[1].buttons |
-                  g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
+            g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
+            g_ControllerStates[3].buttons;
         if (buttons & L_CBUTTONS) {
           func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 1);
         } else if (buttons & D_CBUTTONS) {
@@ -1096,25 +1088,25 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
         }
       }
       func_8022747C_ovl_01(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
-                           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0,
-                           D_80230F80_ovl_01, windowStyle);
+          CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
+          windowStyle);
       func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
     }
     if (IsMenuWindowOpen() != -1 && !IsMenuWindowClosed()) {
       MeasureMessage(D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME,
-                     FONT_SIZE_LARGE, &width, &height, 0);
+          FONT_SIZE_LARGE, &width, &height, 0);
       MeasureMessage(GetClubTournamentCourseTitleMessage(), FONT_SIZE_LARGE,
-                     &width, &height, 0);
-      MeasureMessage(GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width,
-                     &height, 0);
+          &width, &height, 0);
+      MeasureMessage(
+          GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width, &height, 0);
       SetTextSlot(CLUB_TEXT_X, CLUB_NAME_Y,
-                  D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME, 1,
-                  CLUB_NAME_SLOT, TEXT_FLAG_CENTERED, 95, 63, 255, 255);
+          D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME, 1, CLUB_NAME_SLOT,
+          TEXT_FLAG_CENTERED, 95, 63, 255, 255);
       SetTextSlot(CLUB_TEXT_X, CLUB_COURSE_Y,
-                  GetClubTournamentCourseTitleMessage(), 1, CLUB_COURSE_SLOT,
-                  TEXT_FLAG_CENTERED, 43, 255, 75, 255);
+          GetClubTournamentCourseTitleMessage(), 1, CLUB_COURSE_SLOT,
+          TEXT_FLAG_CENTERED, 43, 255, 75, 255);
       SetTextSlot(CLUB_TEXT_X, CLUB_MODE_Y, GetClubTournamentModeMessage(), 1,
-                  CLUB_MODE_SLOT, TEXT_FLAG_CENTERED, 255, 63, 127, 255);
+          CLUB_MODE_SLOT, TEXT_FLAG_CENTERED, 255, 63, 127, 255);
     }
   }
   gDPPipeSync(gfx++);
@@ -1136,22 +1128,20 @@ void func_8022A090_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, ((u32)D_80230F48_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPPipeSync(gfx++);
   for (stripIndex = 0; stripIndex != CODE_ENTRY_BAR_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_80230F48_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * CODE_ENTRY_BAR_WIDTH * CODE_ENTRY_BAR_STRIP_HEIGHT) &
+            stripIndex * CODE_ENTRY_BAR_WIDTH * CODE_ENTRY_BAR_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, CODE_ENTRY_BAR_WIDTH,
         CODE_ENTRY_BAR_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, CODE_ENTRY_BAR_LEFT << 2,
+    gSPScisTextureRectangle(gfx++, CODE_ENTRY_BAR_LEFT << 2,
         (CODE_ENTRY_BAR_TOP + stripIndex * CODE_ENTRY_BAR_STRIP_HEIGHT) << 2,
         (CODE_ENTRY_BAR_LEFT + CODE_ENTRY_BAR_WIDTH) << 2,
         (CODE_ENTRY_BAR_TOP + stripIndex * CODE_ENTRY_BAR_STRIP_HEIGHT +
-         CODE_ENTRY_BAR_STRIP_HEIGHT)
+            CODE_ENTRY_BAR_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -1174,34 +1164,31 @@ void func_8022A43C_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, ((u32)D_80230F44_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPPipeSync(gfx++);
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
-    gDPLoadTextureBlock(
-        gfx++,
+    gDPLoadTextureBlock(gfx++,
         ((u32)D_80230F44_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-         stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, CODE_UPPER_PANEL_LEFT << 2,
+    gSPScisTextureRectangle(gfx++, CODE_UPPER_PANEL_LEFT << 2,
         (CODE_UPPER_PANEL_TOP + stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT)
             << 2,
         (CODE_UPPER_PANEL_LEFT + CODE_UPPER_PANEL_WIDTH) << 2,
         (CODE_UPPER_PANEL_TOP + stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT +
-         CODE_UPPER_PANEL_STRIP_HEIGHT)
+            CODE_UPPER_PANEL_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0,
         (MENU_BANNER_WIDTH << 10) / CODE_UPPER_PANEL_WIDTH,
         (MENU_BANNER_STRIP_HEIGHT << 10) / CODE_UPPER_PANEL_STRIP_HEIGHT);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, CODE_LOWER_PANEL_LEFT << 2,
+    gSPScisTextureRectangle(gfx++, CODE_LOWER_PANEL_LEFT << 2,
         (CODE_LOWER_PANEL_TOP + stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT)
             << 2,
         (CODE_LOWER_PANEL_LEFT + CODE_LOWER_PANEL_WIDTH) << 2,
         (CODE_LOWER_PANEL_TOP + stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT +
-         CODE_LOWER_PANEL_STRIP_HEIGHT)
+            CODE_LOWER_PANEL_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0,
         (MENU_BANNER_WIDTH << 10) / CODE_LOWER_PANEL_WIDTH,
@@ -1224,14 +1211,14 @@ void func_8022A8F4_ovl_01(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    ((u32)D_80230F50_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_80230F50_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureTile_4b(gfx++,
-                        ((u32)D_80230F50_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7,
-                        G_IM_FMT_CI, CODE_HAND_SIZE, CODE_HAND_SIZE, 0, 0,
-                        CODE_HAND_SIZE - 1, CODE_HAND_SIZE - 1, 0,
-                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      ((u32)D_80230F50_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+      CODE_HAND_SIZE, CODE_HAND_SIZE, 0, 0, CODE_HAND_SIZE - 1,
+      CODE_HAND_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(gfx++);
   D_80230F64_ovl_01++;
   if (D_80230F64_ovl_01 == CODE_HAND_STEP_FRAMES) {
@@ -1256,12 +1243,11 @@ void func_8022A8F4_ovl_01(Gfx** displayListHead) {
     }
   }
   left = memory->codeKeyColumn * CODE_KEY_SPACING_X + CODE_HAND_FIRST_X +
-         D_80230F60_ovl_01;
+      D_80230F60_ovl_01;
   top = memory->codeKeyRow * CODE_KEY_SPACING_Y + CODE_HAND_FIRST_Y;
   gSPScisTextureRectangle(gfx++, left << 2, top << 2,
-                          (left + CODE_HAND_SIZE) << 2,
-                          (top + CODE_HAND_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-                          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      (left + CODE_HAND_SIZE) << 2, (top + CODE_HAND_SIZE) << 2,
+      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1280,8 +1266,8 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gDPLoadTLUT_pal16(gfx++, 0,
-                    ((u32)D_80230F4C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_80230F4C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   for (row = 0; row != CODE_KEYBOARD_ROW_COUNT; row++) {
     for (column = 0; column != CODE_KEYBOARD_COLUMN_COUNT; column++) {
       glyph = D_80230FAC_ovl_01[row][column];
@@ -1301,21 +1287,20 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead) {
         size = CODE_GLYPH_SIZE;
       }
       gDPLoadTextureBlock_4b(gfx++,
-                             ((u32)D_80230F4C_ovl_01 + PALETTED_TEXELS_OFFSET +
-                              glyph * (CODE_GLYPH_SIZE * CODE_GLYPH_SIZE / 2)) &
-                                 ~7,
-                             G_IM_FMT_CI, CODE_GLYPH_SIZE, CODE_GLYPH_SIZE, 0,
-                             G_TX_NOMIRROR | G_TX_WRAP,
-                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPScisTextureRectangle(
-          gfx++, (column * CODE_KEY_SPACING_X + CODE_GLYPH_FIRST_X - grow) << 2,
+          ((u32)D_80230F4C_ovl_01 + PALETTED_TEXELS_OFFSET +
+              glyph * (CODE_GLYPH_SIZE * CODE_GLYPH_SIZE / 2)) &
+              ~7,
+          G_IM_FMT_CI, CODE_GLYPH_SIZE, CODE_GLYPH_SIZE, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gSPScisTextureRectangle(gfx++,
+          (column * CODE_KEY_SPACING_X + CODE_GLYPH_FIRST_X - grow) << 2,
           (row * CODE_KEY_SPACING_Y + CODE_GLYPH_FIRST_Y - grow) << 2,
           (column * CODE_KEY_SPACING_X + CODE_GLYPH_FIRST_X + CODE_GLYPH_SIZE +
-           grow)
+              grow)
               << 2,
           (row * CODE_KEY_SPACING_Y + CODE_GLYPH_FIRST_Y + CODE_GLYPH_SIZE +
-           grow)
+              grow)
               << 2,
           G_TX_RENDERTILE, 0, 0, (CODE_GLYPH_SIZE << 10) / size,
           (CODE_GLYPH_SIZE << 10) / size);
@@ -1338,9 +1323,9 @@ void func_8022B360_ovl_01(Gfx** displayListHead) {
   for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
     if (D_80230FD4_ovl_01[charIndex] != CLUB_CODE_NO_CHAR) {
       sprintf(g_PrintBuffer, "%c", D_80230FD4_ovl_01[charIndex]);
-      DrawLargeTextWithShadow(
-          &gfx, charIndex * CLUB_CODE_CHAR_WIDTH + CLUB_CODE_FIRST_X,
-          CLUB_CODE_Y, g_PrintBuffer, -1, -1, 0);
+      DrawLargeTextWithShadow(&gfx,
+          charIndex * CLUB_CODE_CHAR_WIDTH + CLUB_CODE_FIRST_X, CLUB_CODE_Y,
+          g_PrintBuffer, -1, -1, 0);
     }
   }
   gDPPipeSync(gfx++);
@@ -1438,7 +1423,7 @@ void func_8022B668_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
     SetTextSlot(x, CLUB_CODE_MESSAGE_Y, MESSAGE_ENTER_CODE + messageOffset, 1,
-                0, flags, 255, 255, 255, 255);
+        0, flags, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, 0);
   }
   *displayListHead = gfx;
@@ -1484,41 +1469,41 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead) {
   s32 charIndex;
 
   for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT;
-       vertexIndex++) {
+      vertexIndex++) {
     D_80231180_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
     red =
         (s32)(sinf(D_80231180_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
     blue = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + M_PI / 2) *
-                 MENU_CURSOR_COLOR_SWING) +
-           MENU_CURSOR_COLOR_MIDDLE;
+               MENU_CURSOR_COLOR_SWING) +
+        MENU_CURSOR_COLOR_MIDDLE;
     green = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + M_PI) *
-                  MENU_CURSOR_COLOR_SWING) +
-            MENU_CURSOR_COLOR_MIDDLE;
+                MENU_CURSOR_COLOR_SWING) +
+        MENU_CURSOR_COLOR_MIDDLE;
     D_80231138_ovl_01[vertexIndex].v.cn[0] = red;
     D_80231138_ovl_01[vertexIndex].v.cn[2] = blue;
     D_80231138_ovl_01[vertexIndex].v.cn[1] = green;
   }
   guOrtho(&D_8023BE40_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
-          -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
-          MENU_CURSOR_FAR, 1.0f);
+      -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
+      MENU_CURSOR_FAR, 1.0f);
   charIndex = D_80230F68_ovl_01;
   if (charIndex >= CLUB_TOURNAMENT_CODE_LENGTH) {
     charIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
   }
   guTranslate(&D_8023BE80_ovl_01,
-              charIndex * CLUB_CODE_CHAR_WIDTH + CODE_CURSOR_FIRST_X,
-              CODE_CURSOR_Y, MENU_CURSOR_Z);
+      charIndex * CLUB_CODE_CHAR_WIDTH + CODE_CURSOR_FIRST_X, CODE_CURSOR_Y,
+      MENU_CURSOR_Z);
   guRotate(&D_8023BEC0_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
   guScale(&D_8023BF80_ovl_01, CODE_CURSOR_SCALE, CODE_CURSOR_SCALE, 1.0f);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPLoadTextureBlock_4b(gfx++,
-                         ((u32)D_80230F54_ovl_01 + IMAGE_HEADER_SIZE) & ~7,
-                         G_IM_FMT_IA, MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      ((u32)D_80230F54_ovl_01 + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA,
+      MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1532,13 +1517,13 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead) {
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BE40_ovl_01),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BE80_ovl_01),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BEC0_ovl_01),
-            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BF80_ovl_01),
-            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
   gSPVertex(gfx++, D_80231138_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);

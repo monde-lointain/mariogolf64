@@ -94,8 +94,8 @@ extern char g_SaveBuildDate[];
 
 void HandleGfxRetrace(s32 pendingTaskCount);
 
-void ReportFailedAssertion(const char* expression, const char* fileName,
-                           s32 lineNumber) {
+void ReportFailedAssertion(
+    const char* expression, const char* fileName, s32 lineNumber) {
   osSyncPrintf("Assertion Fault : File %s Line %d\n", fileName, lineNumber);
 }
 
@@ -283,7 +283,7 @@ void mainproc(void* arg) {
 }
 
 s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold,
-                      u32 releaseThreshold) {
+    u32 releaseThreshold) {
   u32 magnitude = stick;
 
   if (stick < 0) {
@@ -304,8 +304,8 @@ hasDirection:
 
 /* PREVIOUSMENUPAD is unused; the caller has already saved the last reading
  * there */
-void UpdateMenuController(NUContData* pad, NUContData* previousMenuPad,
-                          s32 portIndex) {
+void UpdateMenuController(
+    NUContData* pad, NUContData* previousMenuPad, s32 portIndex) {
   s32 ApplyStickDeadZone(s32 stick) {
     s32 magnitude = ABS(stick);
 

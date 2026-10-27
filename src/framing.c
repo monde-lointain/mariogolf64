@@ -61,9 +61,9 @@ void AddFramedSphere(Vec3 center, f32 radius) {
     f_FramedSphereRadii[f_FramedSphereCount] = radius;
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
       osSyncPrintf("ox %f ox %f oz %f\n",
-                   f_FramedSphereCenters[f_FramedSphereCount][0],
-                   f_FramedSphereCenters[f_FramedSphereCount][1],
-                   f_FramedSphereCenters[f_FramedSphereCount][2]);
+          f_FramedSphereCenters[f_FramedSphereCount][0],
+          f_FramedSphereCenters[f_FramedSphereCount][1],
+          f_FramedSphereCenters[f_FramedSphereCount][2]);
     }
     f_FramedSphereCount++;
   }
@@ -80,8 +80,8 @@ void SetFramingAngles(f32 pitch, f32 yaw) {
   }
   f_FramingPitch = pitch;
   f_FramingYaw = yaw;
-  guRotateF(pitchRotation, (s32)(pitch * RADIANS_TO_DEGREES), -1.0f, 0.0f,
-            0.0f);
+  guRotateF(
+      pitchRotation, (s32)(pitch * RADIANS_TO_DEGREES), -1.0f, 0.0f, 0.0f);
   guRotateF(yawRotation, (s32)(yaw * RADIANS_TO_DEGREES), 0.0f, -1.0f, 0.0f);
   guMtxCatF(yawRotation, pitchRotation, f_FramingRotation);
 }
@@ -188,7 +188,7 @@ void FrameSpheres(f32 depthOffset) {
   }
 
   angle = FRAMING_DEGREES_TO_RADIANS(rightAngle - leftAngle) -
-          FRAMING_DEGREES_TO_RADIANS(90);
+      FRAMING_DEGREES_TO_RADIANS(90);
   distance = -minX / cosf(angle);
   eyeX = sinf(FRAMING_DEGREES_TO_RADIANS(leftAngle)) * distance;
   horizontalEyeZ = cosf(FRAMING_DEGREES_TO_RADIANS(leftAngle)) * distance;
@@ -197,7 +197,7 @@ void FrameSpheres(f32 depthOffset) {
   horizontalEyeZ += cosf(FRAMING_DEGREES_TO_RADIANS(rightAngle)) * distance;
 
   angle = FRAMING_DEGREES_TO_RADIANS(topAngle - bottomAngle) -
-          FRAMING_DEGREES_TO_RADIANS(90);
+      FRAMING_DEGREES_TO_RADIANS(90);
   distance = -minY / cosf(angle);
   eyeY = sinf(FRAMING_DEGREES_TO_RADIANS(bottomAngle)) * distance;
   verticalEyeZ = cosf(FRAMING_DEGREES_TO_RADIANS(bottomAngle)) * distance;
@@ -206,7 +206,7 @@ void FrameSpheres(f32 depthOffset) {
   verticalEyeZ += cosf(FRAMING_DEGREES_TO_RADIANS(topAngle)) * distance;
   if (g_ControllerData[1].trigger & D_CBUTTONS) {
     osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ,
-                 verticalEyeZ);
+        verticalEyeZ);
   }
 
   if (verticalEyeZ <= horizontalEyeZ) {
@@ -270,21 +270,21 @@ void FrameSpheres(f32 depthOffset) {
   eyeY += centerY;
 
   guRotateF(pitchRotation, (s32)(f_FramingPitch * RADIANS_TO_DEGREES), 1.0f,
-            0.0f, 0.0f);
-  guRotateF(yawRotation, (s32)(f_FramingYaw * RADIANS_TO_DEGREES), 0.0f, 1.0f,
-            0.0f);
+      0.0f, 0.0f);
+  guRotateF(
+      yawRotation, (s32)(f_FramingYaw * RADIANS_TO_DEGREES), 0.0f, 1.0f, 0.0f);
   guMtxCatF(pitchRotation, yawRotation, orientation);
   depth = depthOffset - depth;
   guMtxXFMF(orientation, eyeX, eyeY, depth, &f_FramedEye[0], &f_FramedEye[1],
-            &f_FramedEye[2]);
+      &f_FramedEye[2]);
   guMtxXFMF(orientation, eyeX, eyeY, depth + LOOK_DISTANCE, &f_FramedLookAt[0],
-            &f_FramedLookAt[1], &f_FramedLookAt[2]);
+      &f_FramedLookAt[1], &f_FramedLookAt[2]);
   if (g_ControllerData[1].trigger & D_CBUTTONS) {
-    osSyncPrintf("px %f py %f pz %f\n", f_FramedEye[0], f_FramedEye[1],
-                 f_FramedEye[2]);
+    osSyncPrintf(
+        "px %f py %f pz %f\n", f_FramedEye[0], f_FramedEye[1], f_FramedEye[2]);
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
       osSyncPrintf("tx %f ty %f tz %f\n", f_FramedLookAt[0], f_FramedLookAt[1],
-                   f_FramedLookAt[2]);
+          f_FramedLookAt[2]);
     }
   }
 }

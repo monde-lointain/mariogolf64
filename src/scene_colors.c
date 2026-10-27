@@ -38,7 +38,7 @@ void DeriveSceneColors(void) {
   /* This steps through the table a course of colors at a time, unlike
    * BlendSkyColors */
   entry = g_SkyColors[g_HoleConditions.isRaining * 3 +
-                      g_HoleConditions.sceneColorIndex];
+      g_HoleConditions.sceneColorIndex];
   for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
     for (channelIndex = 0; channelIndex != RGB_CHANNEL_COUNT; channelIndex++) {
       g_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
@@ -76,31 +76,29 @@ void DrawTexturePlane(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
   gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
-                    PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
+      PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
   gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xBF);
   gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, 0xFF);
   SetSceneFog(&gfx);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
   gDPLoadTextureBlock(gfx++, (u32)(g_BlendedTextureScrollingLayer + 8) & ~7,
-                      G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
-                      DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+      G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE,
+      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPLoadMultiBlock(gfx++, (u32)(g_BlendedTextureStillLayer + 8) & ~7,
-                    SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-                    DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
-                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
-                    G_TX_NOLOD, G_TX_NOLOD);
+      SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
+      DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
   gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PLANE_TILE_SIZE << 2,
-                 PLANE_TILE_SIZE << 2);
+  gDPSetTileSize(
+      gfx++, G_TX_RENDERTILE, 0, 0, PLANE_TILE_SIZE << 2, PLANE_TILE_SIZE << 2);
   f_PlaneTextureScroll++;
   gDPSetTileSize(gfx++, 1, f_PlaneTextureScroll, 0,
-                 f_PlaneTextureScroll + (PLANE_TILE_SIZE << 2),
-                 PLANE_TILE_SIZE << 2);
+      f_PlaneTextureScroll + (PLANE_TILE_SIZE << 2), PLANE_TILE_SIZE << 2);
   gDPPipeSync(gfx++);
-  gSPVertex(gfx++, g_TexturePlaneVertices, ARRAY_COUNT(g_TexturePlaneVertices),
-            0);
+  gSPVertex(
+      gfx++, g_TexturePlaneVertices, ARRAY_COUNT(g_TexturePlaneVertices), 0);
   gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
   gSP2Triangles(gfx++, 3, 2, 4, 0, 3, 4, 5, 0);
   gDPPipeSync(gfx++);

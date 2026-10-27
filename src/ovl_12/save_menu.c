@@ -265,8 +265,8 @@ extern s32 f_IconFrames[SAVED_GAME_COUNT];
 
 void func_8005B28C(s32 recordIndex, Unk68* record);
 void func_8005D0D8(void);
-void SetTextSlot(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32,
-                 s32);
+void SetTextSlot(
+    s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void InvalidateBrokenSavedGames(void);
 s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing);
 void func_80060358(void);
@@ -277,7 +277,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
 void SetUpGradientTextDrawing(Gfx** displayListHead, s32);
 void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
 void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
-                             s32 envColor, s32 primColor, s32 flags);
+    s32 envColor, s32 primColor, s32 flags);
 /*
  * The call leaves out MeasureText's flags, so this file declares its text
  * routines itself rather than including text.h; it is there to match.
@@ -308,8 +308,13 @@ s32 f_StateFrame = 0;
 s32 f_MenuState = SAVE_MENU_STATE_OPENING;
 /* Indexed in the order of DrawGameSaveMenu's cases */
 char* f_ModeNames[MODE_NAME_COUNT] = {
-    "Tournament",  "Get Character", "Stroke",    "Match Game",
-    "Skins Match", "Club Slots",    "Mini-Golf",
+    "Tournament",
+    "Get Character",
+    "Stroke",
+    "Match Game",
+    "Skins Match",
+    "Club Slots",
+    "Mini-Golf",
 };
 char f_NoSavedGameText[] = "There is no saved data.";
 char f_NoReplayText[] = "There is no replay data.";
@@ -318,8 +323,8 @@ char f_SaveMenuText[] = "Save Menu";
 s32 f_IconImageIndex = 0;
 s32 f_UnusedSaveMenuWord = 0;
 s32 f_ResumedSongId = NO_SONG;
-s16 f_ReplayLabelIds[REPLAY_LABEL_COUNT] = {0x697, 0x698, 0x699,
-                                            0x69A, 0x69B, 0x69C};
+s16 f_ReplayLabelIds[REPLAY_LABEL_COUNT] = {
+    0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C};
 s32 f_IconFrameTimer = 0;
 f32 f_PanelWaveAngle = 0.0f;
 f32 f_TitleSwayAngle = 0.0f;
@@ -391,23 +396,22 @@ void OpenSaveMenu(s32 kind) {
   }
   ReadEncodedAsset(f_PanelImage = AllocMemory(
                        OpenEncodedAsset(SAVE_MENU_PANEL_IMAGE, &encodedAsset)),
-                   &encodedAsset);
+      &encodedAsset);
   ReadEncodedAsset(f_SaveMenuTitleImage = AllocMemory(
                        OpenEncodedAsset(SAVE_MENU_TITLE_IMAGE, &encodedAsset)),
-                   &encodedAsset);
+      &encodedAsset);
   PlaySoundWithEffects(SOUND_SAVE_MENU_OPEN, g_NextSoundChannel,
-                       MENU_SOUND_VOLUME, MENU_SOUND_REVERB,
-                       SAVE_MENU_SOUND_PAN);
+      MENU_SOUND_VOLUME, MENU_SOUND_REVERB, SAVE_MENU_SOUND_PAN);
   for (slot = 0; slot != CHARACTER_IMAGE_COUNT; slot++) {
     ReadEncodedAsset(f_CharacterImages[slot] = AllocMemory(OpenEncodedAsset(
                          g_CharacterImageAssets[CHARACTER_PLUM] +
                              CHARACTER_FACE_IMAGE_OFFSET,
                          &encodedAsset)),
-                     &encodedAsset);
+        &encodedAsset);
     OpenAssetFile(g_CharacterPaletteAssets[CHARACTER_PLUM], &file);
     fileSize = GetAssetFileSize(&file);
-    ReadAssetFile(f_CharacterFiles[slot] = AllocMemory(fileSize), fileSize,
-                  &file);
+    ReadAssetFile(
+        f_CharacterFiles[slot] = AllocMemory(fileSize), fileSize, &file);
   }
   if (kind == SAVE_MENU_GAMES) {
     for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
@@ -434,30 +438,30 @@ void OpenSaveMenu(s32 kind) {
     for (slot = 0; slot != REPLAY_LABEL_COUNT; slot++) {
       ReadEncodedAsset(f_ReplayLabelImages[slot] = AllocMemory(OpenEncodedAsset(
                            f_ReplayLabelIds[slot], &encodedAsset)),
-                       &encodedAsset);
+          &encodedAsset);
     }
     ReadEncodedAsset(f_CourseNumbersImage = AllocMemory(
                          OpenEncodedAsset(COURSE_NUMBERS_IMAGE, &encodedAsset)),
-                     &encodedAsset);
+        &encodedAsset);
   }
   if (kind == SAVE_MENU_GAMES) {
     for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
       if (save->savedGames[slot].isValid) {
         state = &save->savedGames[slot].state;
         for (playerIndex = 0; playerIndex != state->playerCount;
-             playerIndex++) {
+            playerIndex++) {
           player = &save->savedPlayers[slot][playerIndex];
           OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] +
-                               CHARACTER_FACE_IMAGE_OFFSET,
-                           &encodedAsset);
+                  CHARACTER_FACE_IMAGE_OFFSET,
+              &encodedAsset);
           ReadEncodedAsset(
               f_CharacterImages[slot * MAX_PLAYER_COUNT + playerIndex],
               &encodedAsset);
           OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] +
-                            (s8)player->paletteIndex,
-                        &file);
+                  (s8)player->paletteIndex,
+              &file);
           ReadAssetFile(f_CharacterFiles[slot * MAX_PLAYER_COUNT + playerIndex],
-                        GetAssetFileSize(&file), &file);
+              GetAssetFileSize(&file), &file);
         }
       }
     }
@@ -466,8 +470,8 @@ void OpenSaveMenu(s32 kind) {
       record = &save->unk1DF0[slot];
       if (record->unk36 & RECORD_IN_USE) {
         OpenEncodedAsset(g_CharacterImageAssets[(s8)record->unk37] +
-                             CHARACTER_FACE_IMAGE_OFFSET,
-                         &encodedAsset);
+                CHARACTER_FACE_IMAGE_OFFSET,
+            &encodedAsset);
         ReadEncodedAsset(f_CharacterImages[slot], &encodedAsset);
         OpenAssetFile(
             g_CharacterPaletteAssets[(s8)record->unk37] + (s8)record->unk39,
@@ -556,7 +560,7 @@ void AnimateModeIcons(s32 isImmediate) {
   if ((++f_IconFrameTimer >= ICON_FRAME_PERIOD) | (isImmediate == TRUE)) {
     f_IconFrameTimer = 0;
     for (slot = 0, images = f_ModeIconImages[0]; slot != SAVED_GAME_COUNT;
-         slot++, images += 2) {
+        slot++, images += 2) {
       game = &save->savedGames[slot];
       if (!save->savedGames[slot].isValid) {
         continue;
@@ -571,8 +575,8 @@ void AnimateModeIcons(s32 isImmediate) {
               g_ModeIconAnimations[MODE_ICON_MINI_GOLF][f_IconFrames[slot]],
               &encodedAsset);
         } else {
-          OpenEncodedAsset(g_ModeIconAnimations[MODE_ICON_MINI_GOLF][0],
-                           &encodedAsset);
+          OpenEncodedAsset(
+              g_ModeIconAnimations[MODE_ICON_MINI_GOLF][0], &encodedAsset);
         }
       } else if (f_CursorIndex == slot) {
         if (g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]]
@@ -581,7 +585,7 @@ void AnimateModeIcons(s32 isImmediate) {
         }
         OpenEncodedAsset(g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]]
                                              [f_IconFrames[slot]],
-                         &encodedAsset);
+            &encodedAsset);
       } else {
         OpenEncodedAsset(
             g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]][0],
@@ -645,55 +649,52 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     LoadLargePalette(&gfx, (u8*)f_PanelImage + IMAGE_HEADER_SIZE);
     for (strip = 0; strip != PANEL_STRIP_COUNT; strip++) {
       LoadTextureBlock(&gfx,
-                       (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-                           strip * PANEL_STRIP_SIZE,
-                       G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH,
-                       PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0,
-                       0);
+          (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
+              strip * PANEL_STRIP_SIZE,
+          G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
+          G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       for (index = 0; index != SAVED_GAME_COUNT; index++) {
         if (index == f_CursorIndex) {
           gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
-                          CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
+              CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                          OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, 0xFF);
         }
         stripHeight = GAME_PANEL_STRIP_HEIGHT;
-        DrawTextureRect(
-            &gfx, (f_SlideOffsets[index] + WIDE_PANEL_LEFT) << 2,
+        DrawTextureRect(&gfx, (f_SlideOffsets[index] + WIDE_PANEL_LEFT) << 2,
             (GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING +
-             strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2)
+                strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2)
                 << 2,
             (f_SlideOffsets[index] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH) << 2,
             (GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING +
-             strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2 +
-             stripHeight)
+                strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2 +
+                stripHeight)
                 << 2,
             G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
             (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
       }
       if (f_CursorIndex == index) {
         gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
-                        CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
+            CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
       } else {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                        OTHER_PANEL_SHADE, 0xFF);
+            OTHER_PANEL_SHADE, 0xFF);
       }
       stripHeight = END_GAME_PANEL_STRIP_HEIGHT;
-      DrawTextureRect(
-          &gfx, (f_SlideOffsets[index] + NARROW_PANEL_LEFT) << 2,
+      DrawTextureRect(&gfx, (f_SlideOffsets[index] + NARROW_PANEL_LEFT) << 2,
           (END_GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING +
-           strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2)
+              strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2)
               << 2,
           (f_SlideOffsets[index] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH) << 2,
           (END_GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING +
-           strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2 +
-           stripHeight)
+              strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2 +
+              stripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / NARROW_PANEL_WIDTH,
           (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
       gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
-                      CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
+          CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
     }
 
     /* The title, swaying to a fraction of a pixel */
@@ -705,11 +706,10 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         titleLeftExact < 0.0f ? titleLeftExact + 0.5f : titleLeftExact - 0.5f;
     titleTop =
         titleTopExact < 0.0f ? titleTopExact + 0.5f : titleTopExact - 0.5f;
-    titleTexelLeft =
-        (s32)(HALF_TEXEL_COORDINATE -
-              (titleLeftExact - titleLeft) * HALF_TEXEL_COORDINATE);
+    titleTexelLeft = (s32)(HALF_TEXEL_COORDINATE -
+        (titleLeftExact - titleLeft) * HALF_TEXEL_COORDINATE);
     titleTexelTop = (s32)(HALF_TEXEL_COORDINATE -
-                          (titleTopExact - titleTop) * HALF_TEXEL_COORDINATE);
+        (titleTopExact - titleTop) * HALF_TEXEL_COORDINATE);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
     f_TitleSwayAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
@@ -721,16 +721,15 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
       if (row == TITLE_STRIP_COUNT - 1) {
         drawnHeight = TITLE_LAST_STRIP_HEIGHT;
       }
-      gDPLoadTextureTile(
-          gfx++,
+      gDPLoadTextureTile(gfx++,
           ((u32)f_SaveMenuTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
-           row * TITLE_STRIP_SIZE) &
+              row * TITLE_STRIP_SIZE) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_IMAGE_WIDTH, TITLE_STRIP_DRAWN_HEIGHT,
           0, 0, TITLE_IMAGE_WIDTH - 1, TITLE_STRIP_DRAWN_HEIGHT - 1, 0, 0, 0, 0,
           0, 0, 0);
-      gSPTextureRectangle(
-          gfx++, (titleLeft + imageLeft - f_SlideOffsets[1]) << 2,
+      gSPTextureRectangle(gfx++,
+          (titleLeft + imageLeft - f_SlideOffsets[1]) << 2,
           (titleTop + row * TITLE_STRIP_HEIGHT) << 2,
           (titleLeft + (imageLeft + TITLE_IMAGE_WIDTH) - f_SlideOffsets[1])
               << 2,
@@ -742,34 +741,33 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
 
     /* Each saved game's mode icon, from the image not being loaded into */
     for (row = 0; row != SAVED_GAME_COUNT; row++) {
-      LoadLargePalette(&gfx, (u8*)f_ModeIconImages[row][f_IconImageIndex ^ 1] +
-                                 IMAGE_HEADER_SIZE);
+      LoadLargePalette(&gfx,
+          (u8*)f_ModeIconImages[row][f_IconImageIndex ^ 1] + IMAGE_HEADER_SIZE);
       if (save->savedGames[row].isValid) {
         gDPPipeSync(gfx++);
         if (row == f_CursorIndex) {
           gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
-                          CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
+              CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                          OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, 0xFF);
         }
         gDPPipeSync(gfx++);
         for (index = 0; index != MODE_ICON_PART_COUNT; index++) {
           LoadTextureBlock(&gfx,
-                           (u8*)f_ModeIconImages[row][f_IconImageIndex ^ 1] +
-                               LARGE_PALETTED_TEXELS_OFFSET +
-                               index * MODE_ICON_PART_HEIGHT * MODE_ICON_SIZE,
-                           G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_SIZE,
-                           MODE_ICON_PART_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR,
-                           0, 0, 0, 0);
-          DrawTextureRect(
-              &gfx, (f_SlideOffsets[row] + MODE_ICON_LEFT) << 2,
+              (u8*)f_ModeIconImages[row][f_IconImageIndex ^ 1] +
+                  LARGE_PALETTED_TEXELS_OFFSET +
+                  index * MODE_ICON_PART_HEIGHT * MODE_ICON_SIZE,
+              G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_SIZE, MODE_ICON_PART_HEIGHT,
+              0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
+          DrawTextureRect(&gfx, (f_SlideOffsets[row] + MODE_ICON_LEFT) << 2,
               (MODE_ICON_TOP + row * GAME_ROW_SPACING +
-               index * (MODE_ICON_PART_HEIGHT / 2))
+                  index * (MODE_ICON_PART_HEIGHT / 2))
                   << 2,
               (f_SlideOffsets[row] + MODE_ICON_LEFT + MODE_ICON_SIZE / 2) << 2,
               (MODE_ICON_TOP + row * GAME_ROW_SPACING +
-               index * (MODE_ICON_PART_HEIGHT / 2) + MODE_ICON_PART_HEIGHT / 2)
+                  index * (MODE_ICON_PART_HEIGHT / 2) +
+                  MODE_ICON_PART_HEIGHT / 2)
                   << 2,
               G_TX_RENDERTILE, 0, 0, HALF_SIZE_TEXEL_STEP,
               HALF_SIZE_TEXEL_STEP);
@@ -794,24 +792,23 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                          OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, 0xFF);
         }
         gDPPipeSync(gfx++);
         for (index = 0; index != state->playerCount; index++) {
-          LoadLargePalette(&gfx,
-                           f_CharacterFiles[row * MAX_PLAYER_COUNT + index]);
+          LoadLargePalette(
+              &gfx, f_CharacterFiles[row * MAX_PLAYER_COUNT + index]);
           LoadTextureBlock(&gfx,
-                           f_CharacterImages[row * MAX_PLAYER_COUNT + index],
-                           G_IM_FMT_CI, G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH,
-                           CHARACTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-          DrawTextureRect(
-              &gfx,
+              f_CharacterImages[row * MAX_PLAYER_COUNT + index], G_IM_FMT_CI,
+              G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH, CHARACTER_IMAGE_HEIGHT, 0, 0,
+              0, 0, 0, 0, 0);
+          DrawTextureRect(&gfx,
               (index * GOLFER_SPACING + (f_SlideOffsets[row] + golfersLeft) -
-               state->playerCount * (GOLFER_SPACING / 2))
+                  state->playerCount * (GOLFER_SPACING / 2))
                   << 2,
               (GOLFER_TOP + row * GAME_ROW_SPACING) << 2,
               (index * GOLFER_SPACING + (f_SlideOffsets[row] + golfersRight) -
-               state->playerCount * (GOLFER_SPACING / 2))
+                  state->playerCount * (GOLFER_SPACING / 2))
                   << 2,
               (GOLFER_TOP + row * GAME_ROW_SPACING + CHARACTER_IMAGE_HEIGHT)
                   << 2,
@@ -831,62 +828,62 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
       centerX = SCREEN_WIDTH / 2;
       rowTop = FIRST_GAME_ROW_TOP;
       gDPSetPrimColor(gfx++, 0, 0, 0x00, 0xBF, 0xFF,
-                      (s32)(sinf(f_CursorPulseAngle) * CURSOR_ALPHA_SWING) +
-                          CURSOR_ALPHA_MIDDLE);
+          (s32)(sinf(f_CursorPulseAngle) * CURSOR_ALPHA_SWING) +
+              CURSOR_ALPHA_MIDDLE);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
       gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-      DrawTextureRect(
-          &gfx,
+      DrawTextureRect(&gfx,
           (f_SlideOffsets[f_CursorIndex] + centerX -
-           rowHalfWidths[f_CursorIndex])
+              rowHalfWidths[f_CursorIndex])
               << 2,
           (rowTop + f_CursorIndex * GAME_ROW_SPACING) << 2,
           (rowHalfWidths[f_CursorIndex] +
-           (f_SlideOffsets[f_CursorIndex] + centerX))
+              (f_SlideOffsets[f_CursorIndex] + centerX))
               << 2,
           (rowTop + f_CursorIndex * GAME_ROW_SPACING + CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      DrawTextureRect(
-          &gfx,
+      DrawTextureRect(&gfx,
           (f_SlideOffsets[f_CursorIndex] + centerX -
-           rowHalfWidths[f_CursorIndex])
+              rowHalfWidths[f_CursorIndex])
               << 2,
           (rowHeights[f_CursorIndex] +
-           (rowTop + f_CursorIndex * GAME_ROW_SPACING))
+              (rowTop + f_CursorIndex * GAME_ROW_SPACING))
               << 2,
           (rowHalfWidths[f_CursorIndex] +
-           (f_SlideOffsets[f_CursorIndex] + centerX))
+              (f_SlideOffsets[f_CursorIndex] + centerX))
               << 2,
           (rowHeights[f_CursorIndex] +
-           (rowTop + f_CursorIndex * GAME_ROW_SPACING) + CURSOR_FRAME_THICKNESS)
+              (rowTop + f_CursorIndex * GAME_ROW_SPACING) +
+              CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      DrawTextureRect(
-          &gfx,
+      DrawTextureRect(&gfx,
           (f_SlideOffsets[f_CursorIndex] + centerX -
-           rowHalfWidths[f_CursorIndex])
+              rowHalfWidths[f_CursorIndex])
               << 2,
           (rowTop + f_CursorIndex * GAME_ROW_SPACING) << 2,
           (f_SlideOffsets[f_CursorIndex] + centerX -
-           rowHalfWidths[f_CursorIndex] + CURSOR_FRAME_THICKNESS)
+              rowHalfWidths[f_CursorIndex] + CURSOR_FRAME_THICKNESS)
               << 2,
           (rowHeights[f_CursorIndex] +
-           (rowTop + f_CursorIndex * GAME_ROW_SPACING) + CURSOR_FRAME_THICKNESS)
+              (rowTop + f_CursorIndex * GAME_ROW_SPACING) +
+              CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      DrawTextureRect(
-          &gfx,
+      DrawTextureRect(&gfx,
           (rowHalfWidths[f_CursorIndex] +
-           (f_SlideOffsets[f_CursorIndex] + centerX) - CURSOR_FRAME_THICKNESS)
+              (f_SlideOffsets[f_CursorIndex] + centerX) -
+              CURSOR_FRAME_THICKNESS)
               << 2,
           (rowTop + f_CursorIndex * GAME_ROW_SPACING) << 2,
           (rowHalfWidths[f_CursorIndex] +
-           (f_SlideOffsets[f_CursorIndex] + centerX))
+              (f_SlideOffsets[f_CursorIndex] + centerX))
               << 2,
           (rowHeights[f_CursorIndex] +
-           (rowTop + f_CursorIndex * GAME_ROW_SPACING) + CURSOR_FRAME_THICKNESS)
+              (rowTop + f_CursorIndex * GAME_ROW_SPACING) +
+              CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
@@ -899,7 +896,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       } else {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                        OTHER_PANEL_SHADE, 0xFF);
+            OTHER_PANEL_SHADE, 0xFF);
       }
       gDPPipeSync(gfx++);
       if (save->savedGames[row].isValid) {
@@ -913,8 +910,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               sprintf(g_PrintBuffer, "%s", f_ModeNames[MODE_NAME_TOURNAMENT]);
               break;
             case GAME_MODE_GET_CHARACTER:
-              sprintf(g_PrintBuffer, "%s",
-                      f_ModeNames[MODE_NAME_GET_CHARACTER]);
+              sprintf(
+                  g_PrintBuffer, "%s", f_ModeNames[MODE_NAME_GET_CHARACTER]);
               break;
             case GAME_MODE_STROKE:
               sprintf(g_PrintBuffer, "%s", f_ModeNames[MODE_NAME_STROKE]);
@@ -931,68 +928,66 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           }
         }
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
-                                MODE_TEXT_TOP + row * GAME_ROW_SPACING,
-                                g_PrintBuffer, 0xFFFF9300, 0x44FF0000, 0);
+            MODE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer, 0xFFFF9300,
+            0x44FF0000, 0);
         if (state->isMiniGolf) {
           if (state->courseIndex ==
               LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_GREEN) {
             sprintf(g_PrintBuffer, "%s GREEN",
-                    g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
+                g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
           }
           if (state->courseIndex ==
               LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_SLOW) {
             sprintf(g_PrintBuffer, "%s SLOW",
-                    g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
+                g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
           }
           if (state->courseIndex ==
               LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_FAST) {
             sprintf(g_PrintBuffer, "%s FAST",
-                    g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
+                g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
           }
           if (state->courseIndex ==
               PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_GREEN) {
             sprintf(g_PrintBuffer, "%s GREEN",
-                    g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
+                g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
           }
           if (state->courseIndex ==
               PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_SLOW) {
             sprintf(g_PrintBuffer, "%s SLOW",
-                    g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
+                g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
           }
           if (state->courseIndex ==
               PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_FAST) {
             sprintf(g_PrintBuffer, "%s FAST",
-                    g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
+                g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
           }
         } else if (state->gameMode == GAME_MODE_TOURNAMENT) {
           sprintf(g_PrintBuffer, "%s", g_TournamentNames[state->courseIndex]);
         } else {
-          sprintf(g_PrintBuffer, "%s",
-                  g_CourseRecords[state->courseIndex].name);
+          sprintf(
+              g_PrintBuffer, "%s", g_CourseRecords[state->courseIndex].name);
         }
         MeasureText(g_PrintBuffer, COURSE_NAME_FONT_SIZE);
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
-                                COURSE_TEXT_TOP + row * GAME_ROW_SPACING,
-                                g_PrintBuffer, 0x00FFFF00, 0xFFFFFF00, 0);
+            COURSE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer, 0x00FFFF00,
+            0xFFFFFF00, 0);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         sprintf(g_PrintBuffer, "Hole%d", state->holeIndex + 1);
         DrawLargeText(&gfx, f_SlideOffsets[row] + GAME_HOLE_TEXT_LEFT,
-                      GAME_HOLE_TEXT_TOP + row * GAME_ROW_SPACING,
-                      g_PrintBuffer);
+            GAME_HOLE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer);
       } else {
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
         sprintf(g_PrintBuffer, "%s", f_NoSavedGameText);
         DrawCenteredLargeText(&gfx, f_SlideOffsets[row] + SCREEN_WIDTH / 2,
-                              EMPTY_GAME_TEXT_TOP + row * GAME_ROW_SPACING,
-                              g_PrintBuffer);
+            EMPTY_GAME_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer);
       }
     }
     gDPPipeSync(gfx++);
-    DrawLargeTextWithShadow(
-        &gfx, f_SlideOffsets[END_GAME_ROW] + END_GAME_TEXT_LEFT,
-        END_GAME_TEXT_TOP, f_EndGameText, 0xFF571300, 0xFFDB4C00, 0);
+    DrawLargeTextWithShadow(&gfx,
+        f_SlideOffsets[END_GAME_ROW] + END_GAME_TEXT_LEFT, END_GAME_TEXT_TOP,
+        f_EndGameText, 0xFF571300, 0xFFDB4C00, 0);
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, 0xFF);
     gDPSetEnvColor(gfx++, 0xFF, 0x68, 0x00, 0xFF);
@@ -1026,14 +1021,14 @@ void SaveGameToSlot(void) {
     for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
       player = &save->savedPlayers[f_CursorIndex][playerIndex];
       OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] +
-                           CHARACTER_FACE_IMAGE_OFFSET,
-                       &encodedAsset);
+              CHARACTER_FACE_IMAGE_OFFSET,
+          &encodedAsset);
       ReadEncodedAsset(
           f_CharacterImages[f_CursorIndex * MAX_PLAYER_COUNT + playerIndex],
           &encodedAsset);
       OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] +
-                        (s8)player->paletteIndex,
-                    &file);
+              (s8)player->paletteIndex,
+          &file);
       ReadAssetFile(
           f_CharacterFiles[f_CursorIndex * MAX_PLAYER_COUNT + playerIndex],
           GetAssetFileSize(&file), &file);
@@ -1067,8 +1062,8 @@ void SaveReplayToSlot(void) {
     ReadEncodedAsset(f_CharacterImages[f_CursorIndex], &encodedAsset);
     OpenAssetFile(
         g_CharacterPaletteAssets[(s8)record->unk37] + (s8)record->unk39, &file);
-    ReadAssetFile(f_CharacterFiles[f_CursorIndex], GetAssetFileSize(&file),
-                  &file);
+    ReadAssetFile(
+        f_CharacterFiles[f_CursorIndex], GetAssetFileSize(&file), &file);
     f_MenuState = SAVE_MENU_STATE_SAVED;
   } else {
     f_MenuState = SAVE_MENU_STATE_CHOOSING;
@@ -1110,7 +1105,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       }
       if (controller->pressedButtons & B_BUTTON) {
         PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
-                             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
+            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
         AnimateModeIcons(TRUE);
         f_StateFrame = 0;
         f_MenuState = SAVE_MENU_STATE_BACKING_OUT;
@@ -1121,8 +1116,8 @@ void UpdateGameSaveMenu(ControllerState* controller) {
           if (save->savedGames[f_CursorIndex].isValid) {
             g_PauseScreen = PAUSE_SCREEN_UNK6;
             OpenPrompt(PROMPT_OVERWRITE_GAME);
-            PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
           } else {
             SaveGameToSlot();
             PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
@@ -1161,7 +1156,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       }
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
-                             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
+            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
       }
       if (f_StateFrame == SLIDE_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_BACKED_OUT;
@@ -1201,7 +1196,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       }
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
-                             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
+            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
       }
       if (f_StateFrame == SLIDE_FRAMES) {
         g_PauseScreen = PAUSE_SCREEN_NONE;
@@ -1247,8 +1242,8 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
           if ((save->unk1DF0 + f_CursorIndex)->unk36 & RECORD_IN_USE) {
             g_PauseScreen = PAUSE_SCREEN_UNK6;
             OpenPrompt(PROMPT_OVERWRITE_REPLAY);
-            PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
             return REPLAY_MENU_PROMPTING;
           }
           SaveReplayToSlot();
@@ -1351,28 +1346,26 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     for (index = 0; index != PANEL_STRIP_COUNT; index++) {
       stripHeight = RECORD_PANEL_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
-                       (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-                           index * PANEL_STRIP_SIZE,
-                       G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH,
-                       PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0,
-                       0);
+          (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
+              index * PANEL_STRIP_SIZE,
+          G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
+          G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       for (row = 0; row != SAVE_RECORD_COUNT; row++) {
         if (row == f_CursorIndex) {
           gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
-                          CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
+              CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                          OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, 0xFF);
         }
-        DrawTextureRect(
-            &gfx, (rowOffsets[row] + WIDE_PANEL_LEFT) << 2,
+        DrawTextureRect(&gfx, (rowOffsets[row] + WIDE_PANEL_LEFT) << 2,
             (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING +
-             index * stripHeight)
+                index * stripHeight)
                 << 2,
             (rowOffsets[row] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH) << 2,
             (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING +
-             index * stripHeight + stripHeight)
+                index * stripHeight + stripHeight)
                 << 2,
             G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
             (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
@@ -1381,19 +1374,18 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       if (f_CursorIndex == row) {
         gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
-                        CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
+            CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
       } else {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                        OTHER_PANEL_SHADE, 0xFF);
+            OTHER_PANEL_SHADE, 0xFF);
       }
-      DrawTextureRect(
-          &gfx, (rowOffsets[row] + NARROW_PANEL_LEFT) << 2,
+      DrawTextureRect(&gfx, (rowOffsets[row] + NARROW_PANEL_LEFT) << 2,
           (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING +
-           index * stripHeight)
+              index * stripHeight)
               << 2,
           (rowOffsets[row] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH) << 2,
           (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING +
-           index * stripHeight + stripHeight)
+              index * stripHeight + stripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / NARROW_PANEL_WIDTH,
           (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
@@ -1401,9 +1393,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
 
     /* Each record's "COURSE" and course number */
     LoadSmallPalette(&gfx, 0, (u8*)f_CourseNumbersImage + IMAGE_HEADER_SIZE);
-    gDPLoadTextureTile_4b(
-        gfx++, ((u32)f_CourseNumbersImage + PALETTED_TEXELS_OFFSET) & ~7,
-        G_IM_FMT_CI, COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0,
+    gDPLoadTextureTile_4b(gfx++,
+        ((u32)f_CourseNumbersImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+        COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0,
         COURSE_NUMBERS_WIDTH - 1, COURSE_NUMBERS_HEIGHT - 1, 0, G_TX_MIRROR,
         G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     for (index = 0; index != SAVE_RECORD_COUNT; index++) {
@@ -1417,23 +1409,21 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                          OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, 0xFF);
         }
         gDPPipeSync(gfx++);
-        DrawTextureRect(
-            &gfx, (rowOffsets[index] + COURSE_WORD_LEFT) << 2,
+        DrawTextureRect(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT) << 2,
             (COURSE_TOP + index * REPLAY_ROW_SPACING) << 2,
             (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
             (COURSE_TOP + index * REPLAY_ROW_SPACING + COURSE_NUMBERS_HEIGHT)
                 << 2,
             G_TX_RENDERTILE, COURSE_WORD_TEXEL_LEFT << 5, 0, TEXEL_STEP_ONE,
             TEXEL_STEP_ONE);
-        DrawTextureRect(
-            &gfx,
+        DrawTextureRect(&gfx,
             (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
             (COURSE_TOP + index * REPLAY_ROW_SPACING) << 2,
             (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH +
-             COURSE_DIGIT_WIDTH)
+                COURSE_DIGIT_WIDTH)
                 << 2,
             (COURSE_TOP + index * REPLAY_ROW_SPACING + COURSE_NUMBERS_HEIGHT)
                 << 2,
@@ -1471,23 +1461,20 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                          OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, 0xFF);
         }
         gDPPipeSync(gfx++);
-        LoadSmallPalette(
-            &gfx, 0,
+        LoadSmallPalette(&gfx, 0,
             (u8*)f_ReplayLabelImages[rowLabels[index]] + IMAGE_HEADER_SIZE);
-        LoadNibbleTextureBlock(
-            &gfx,
+        LoadNibbleTextureBlock(&gfx,
             (u8*)f_ReplayLabelImages[rowLabels[index]] + PALETTED_TEXELS_OFFSET,
             G_IM_FMT_CI, labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR,
             0, 0, 0, 0);
         DrawTextureRect(&gfx, (rowOffsets[index] + LABEL_LEFT) << 2,
-                        (LABEL_TOP + index * REPLAY_ROW_SPACING) << 2,
-                        (rowOffsets[index] + LABEL_LEFT + labelWidth) << 2,
-                        (LABEL_TOP + index * REPLAY_ROW_SPACING + labelHeight)
-                            << 2,
-                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            (LABEL_TOP + index * REPLAY_ROW_SPACING) << 2,
+            (rowOffsets[index] + LABEL_LEFT + labelWidth) << 2,
+            (LABEL_TOP + index * REPLAY_ROW_SPACING + labelHeight) << 2,
+            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
     }
 
@@ -1503,21 +1490,20 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                          OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, 0xFF);
         }
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         LoadLargePalette(&gfx, f_CharacterFiles[index]);
         LoadTextureBlock(&gfx, f_CharacterImages[index], G_IM_FMT_CI,
-                         G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH,
-                         CHARACTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-        DrawTextureRect(
-            &gfx, (rowOffsets[index] + CHARACTER_LEFT) << 2,
+            G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH, CHARACTER_IMAGE_HEIGHT, 0, 0, 0,
+            0, 0, 0, 0);
+        DrawTextureRect(&gfx, (rowOffsets[index] + CHARACTER_LEFT) << 2,
             (CHARACTER_TOP + index * REPLAY_ROW_SPACING) << 2,
             (rowOffsets[index] + CHARACTER_LEFT + CHARACTER_IMAGE_WIDTH) << 2,
             (CHARACTER_TOP + index * REPLAY_ROW_SPACING +
-             CHARACTER_IMAGE_HEIGHT)
+                CHARACTER_IMAGE_HEIGHT)
                 << 2,
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
@@ -1534,52 +1520,48 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
       gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-      DrawTextureRect(
-          &gfx,
+      DrawTextureRect(&gfx,
           (rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX))
               << 2,
           (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING) << 2,
           (rowOffsets[f_CursorIndex] + (rowHalfWidths[f_CursorIndex] + centerX))
               << 2,
           (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
-           CURSOR_FRAME_THICKNESS)
+              CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      DrawTextureRect(
-          &gfx,
+      DrawTextureRect(&gfx,
           (rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX))
               << 2,
           (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
-           rowHeights[f_CursorIndex] - CURSOR_FRAME_THICKNESS)
+              rowHeights[f_CursorIndex] - CURSOR_FRAME_THICKNESS)
               << 2,
           (rowOffsets[f_CursorIndex] + (rowHalfWidths[f_CursorIndex] + centerX))
               << 2,
           (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
-           rowHeights[f_CursorIndex])
+              rowHeights[f_CursorIndex])
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      DrawTextureRect(
-          &gfx,
+      DrawTextureRect(&gfx,
           (rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX))
               << 2,
           (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING) << 2,
           (rowOffsets[f_CursorIndex] -
-           (rowHalfWidths[f_CursorIndex] - centerX) + CURSOR_FRAME_THICKNESS)
+              (rowHalfWidths[f_CursorIndex] - centerX) + CURSOR_FRAME_THICKNESS)
               << 2,
           (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
-           rowHeights[f_CursorIndex])
+              rowHeights[f_CursorIndex])
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      DrawTextureRect(
-          &gfx,
+      DrawTextureRect(&gfx,
           (rowOffsets[f_CursorIndex] +
-           (rowHalfWidths[f_CursorIndex] + centerX) - CURSOR_FRAME_THICKNESS)
+              (rowHalfWidths[f_CursorIndex] + centerX) - CURSOR_FRAME_THICKNESS)
               << 2,
           (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING) << 2,
           (rowOffsets[f_CursorIndex] + (rowHalfWidths[f_CursorIndex] + centerX))
               << 2,
           (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
-           rowHeights[f_CursorIndex])
+              rowHeights[f_CursorIndex])
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
@@ -1598,18 +1580,16 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       /* Unused; it is there to match */
       stripHeight = TITLE_PANEL_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
-                       (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-                           index * PANEL_STRIP_SIZE,
-                       G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH,
-                       PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0,
-                       0);
+          (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
+              index * PANEL_STRIP_SIZE,
+          G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
+          G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       titleHeight = TITLE_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT;
-      DrawTextureRect(
-          &gfx, (rowOffsets[1] + TITLE_PANEL_LEFT) << 2,
+      DrawTextureRect(&gfx, (rowOffsets[1] + TITLE_PANEL_LEFT) << 2,
           (titleBob + TITLE_PANEL_TOP + index * TITLE_PANEL_STRIP_HEIGHT) << 2,
           (rowOffsets[1] + TITLE_PANEL_LEFT + TITLE_PANEL_WIDTH) << 2,
           (titleBob + TITLE_PANEL_TOP + index * TITLE_PANEL_STRIP_HEIGHT +
-           TITLE_PANEL_STRIP_HEIGHT)
+              TITLE_PANEL_STRIP_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / TITLE_PANEL_WIDTH,
           (PANEL_IMAGE_HEIGHT << 10) / titleHeight);
@@ -1626,7 +1606,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       } else {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-                        OTHER_PANEL_SHADE, 0xFF);
+            OTHER_PANEL_SHADE, 0xFF);
       }
       gDPPipeSync(gfx++);
       if (!(record->unk36 & RECORD_IN_USE)) {
@@ -1636,26 +1616,23 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         /* The saved-game message is printed but never drawn */
         sprintf(g_PrintBuffer, "%s", f_NoSavedGameText);
         DrawCenteredLargeText(&gfx, rowOffsets[index] + SCREEN_WIDTH / 2,
-                              EMPTY_TEXT_TOP + index * REPLAY_ROW_SPACING,
-                              f_NoReplayText);
+            EMPTY_TEXT_TOP + index * REPLAY_ROW_SPACING, f_NoReplayText);
       } else {
         text = (s8)record->unk34 * RING_SHOT_HOLE_COUNT + (s8)record->unk35;
         SetUpTextDrawing(&gfx);
         SetTextSlot(rowOffsets[index] + HOLE_TEXT_LEFT,
-                    HOLE_TEXT_TOP + index * REPLAY_ROW_SPACING,
-                    text + RING_SHOT_TEXT_FIRST_IMAGE, 1,
-                    FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF, 0xFF, 0xFF);
+            HOLE_TEXT_TOP + index * REPLAY_ROW_SPACING,
+            text + RING_SHOT_TEXT_FIRST_IMAGE, 1,
+            FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF, 0xFF, 0xFF);
         DrawLargeTextSlot(&gfx, FIRST_RECORD_TEXT_SLOT + index);
       }
     }
     SetUpGradientTextDrawing(&gfx, 0);
     DrawLargeTextWithShadow(&gfx, rowOffsets[5] + HOLE_OUT_TEXT_LEFT,
-                            HOLE_OUT_TEXT_TOP, "HoleOut", 0xFF571300,
-                            0xFFDB4C00, 0);
+        HOLE_OUT_TEXT_TOP, "HoleOut", 0xFF571300, 0xFFDB4C00, 0);
     gDPPipeSync(gfx++);
     DrawLargeTextWithShadow(&gfx, rowOffsets[1] + TITLE_TEXT_LEFT,
-                            titleBob + TITLE_TEXT_TOP, f_SaveMenuText,
-                            0xFF000000, 0xFFFFFF00, 0);
+        titleBob + TITLE_TEXT_TOP, f_SaveMenuText, 0xFF000000, 0xFFFFFF00, 0);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1713,8 +1690,7 @@ void DrawControlsScreen(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     LoadLargePalette(&gfx, (u8*)f_PanelImage + IMAGE_HEADER_SIZE);
     for (strip = 0; strip != CONTROLS_STRIP_COUNT; strip++) {
-      LoadTextureBlock(
-          &gfx,
+      LoadTextureBlock(&gfx,
           (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
               strip * CONTROLS_STRIP_HEIGHT * CONTROLS_PICTURE_WIDTH,
           G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLS_PICTURE_WIDTH,
@@ -1724,10 +1700,10 @@ void DrawControlsScreen(Gfx** displayListHead) {
       topRaise = f_SlideOffsets[0] - SCREEN_BORDER;
       bottomRaise = f_SlideOffsets[0] - (SCREEN_BORDER + CONTROLS_STRIP_HEIGHT);
       DrawTextureRect(&gfx, CONTROLS_PICTURE_LEFT << 2,
-                      (strip * CONTROLS_STRIP_HEIGHT - topRaise) << 2,
-                      (CONTROLS_PICTURE_LEFT + CONTROLS_PICTURE_WIDTH) << 2,
-                      (strip * CONTROLS_STRIP_HEIGHT - bottomRaise) << 2,
-                      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (strip * CONTROLS_STRIP_HEIGHT - topRaise) << 2,
+          (CONTROLS_PICTURE_LEFT + CONTROLS_PICTURE_WIDTH) << 2,
+          (strip * CONTROLS_STRIP_HEIGHT - bottomRaise) << 2, G_TX_RENDERTILE,
+          0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
     *displayListHead = gfx;
   }
@@ -1746,8 +1722,7 @@ void UpdateControlsScreen(ControllerState* controller) {
       }
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_CONTROLS_OPEN, g_NextSoundChannel,
-                             MENU_SOUND_VOLUME, MENU_SOUND_REVERB,
-                             CONTROLS_SOUND_PAN);
+            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, CONTROLS_SOUND_PAN);
       }
       if (f_StateFrame == SLIDE_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_CHOOSING;
@@ -1768,8 +1743,7 @@ void UpdateControlsScreen(ControllerState* controller) {
       }
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_CONTROLS_CLOSE, g_NextSoundChannel,
-                             MENU_SOUND_VOLUME, MENU_SOUND_REVERB,
-                             CONTROLS_SOUND_PAN);
+            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, CONTROLS_SOUND_PAN);
       }
       if (f_StateFrame == SLIDE_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_BACKED_OUT;

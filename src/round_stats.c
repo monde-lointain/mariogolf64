@@ -54,8 +54,7 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
   }
   for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
     /* The par's cast is there to match */
-    score +=
-        g_Players[playerIndex].holes[hole].strokes -
+    score += g_Players[playerIndex].holes[hole].strokes -
         (s8)course->holes[hole].par +
         GetHandicapOffset(g_CourseIndex, hole, g_Players[playerIndex].handicap);
   }
@@ -112,7 +111,7 @@ void TallySkins(s32 endHole) {
     }
   }
   sprintf(g_PrintBuffer, "%2d %d    ", g_Scorecard.skinsCarryover.intoLastHole,
-          g_Scorecard.skinsCarryover.onLastHole);
+      g_Scorecard.skinsCarryover.onLastHole);
   PrintDebugText(g_PrintBuffer, SKINS_DEBUG_COLUMN, SKINS_DEBUG_ROW);
 }
 
@@ -379,9 +378,8 @@ void RecordCourseRound(void) {
       record->averageDrive = 0;
     }
   } else if (stats->averagedDriveCount > 0) {
-    record->averageDrive =
-        (record->averageDrive * record->averagedDriveCount +
-         stats->averagedDriveTotal) /
+    record->averageDrive = (record->averageDrive * record->averagedDriveCount +
+                               stats->averagedDriveTotal) /
         (record->averagedDriveCount + stats->averagedDriveCount);
     record->averagedDriveCount += stats->averagedDriveCount;
   }
@@ -394,7 +392,7 @@ void RecordCourseRound(void) {
   }
   if (isAtRoundLimit == TRUE) {
     record->measuredDriveTotal = record->measuredDriveTotal *
-                                 ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+        ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
   }
 
   total = 0;
@@ -419,7 +417,7 @@ void RecordCourseRound(void) {
       }
       if (isAtRoundLimit == TRUE) {
         record->parOrBetterCount = record->parOrBetterCount *
-                                   ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+            ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
       }
     }
   }
@@ -546,8 +544,7 @@ void SettleHoleBets(void) {
     for (i = 0; i != g_GameState.playerCount; i++) {
       totals[i] = 0;
       for (j = startHole; j != endHole; j++) {
-        totals[i] +=
-            g_Players[i].holes[j].strokes +
+        totals[i] += g_Players[i].holes[j].strokes +
             GetHandicapOffset(GetCourseRecordIndex(), j, g_Players[i].handicap);
       }
     }
@@ -573,13 +570,13 @@ void SettleHoleBets(void) {
       for (j = 0; j != g_GameState.playerCount; j++) {
         if (j != i) {
           score = g_Players[i].strokeCount +
-                  GetHandicapOffset(GetCourseRecordIndex(), lastHole,
-                                    g_Players[i].handicap);
+              GetHandicapOffset(
+                  GetCourseRecordIndex(), lastHole, g_Players[i].handicap);
           g_BetTallies[i][BET_STROKES] +=
               (g_Players[j].strokeCount +
-               GetHandicapOffset(GetCourseRecordIndex(), lastHole,
-                                 g_Players[j].handicap) -
-               score) *
+                  GetHandicapOffset(
+                      GetCourseRecordIndex(), lastHole, g_Players[j].handicap) -
+                  score) *
               g_GameState.betRates[BET_STROKES];
         }
       }
@@ -589,15 +586,15 @@ void SettleHoleBets(void) {
   if (*lasVegasRate > 0) {
     lasVegasTally = &g_BetTallies[0][BET_LAS_VEGAS];
     teamScore = g_Players[0].strokeCount + g_Players[1].strokeCount +
-                GetHandicapOffset(GetCourseRecordIndex(), lastHole,
-                                  g_Players[0].handicap) +
-                GetHandicapOffset(GetCourseRecordIndex(), lastHole,
-                                  g_Players[1].handicap);
+        GetHandicapOffset(
+            GetCourseRecordIndex(), lastHole, g_Players[0].handicap) +
+        GetHandicapOffset(
+            GetCourseRecordIndex(), lastHole, g_Players[1].handicap);
     rivalTeamScore = g_Players[2].strokeCount + g_Players[3].strokeCount +
-                     GetHandicapOffset(GetCourseRecordIndex(), lastHole,
-                                       g_Players[2].handicap) +
-                     GetHandicapOffset(GetCourseRecordIndex(), lastHole,
-                                       g_Players[3].handicap);
+        GetHandicapOffset(
+            GetCourseRecordIndex(), lastHole, g_Players[2].handicap) +
+        GetHandicapOffset(
+            GetCourseRecordIndex(), lastHole, g_Players[3].handicap);
     *lasVegasTally += (rivalTeamScore - teamScore) * *lasVegasRate;
     g_BetTallies[1][BET_LAS_VEGAS] +=
         (rivalTeamScore - teamScore) * *lasVegasRate;
@@ -616,7 +613,7 @@ void SettleHoleBets(void) {
         SettleNassau(FRONT_NINE_END, BACK_NINE_END);
       }
       if (!(g_GameState.holeSelection &
-            (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
+              (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
         SettleNassau(0, BACK_NINE_END);
       }
     }
@@ -658,7 +655,7 @@ void SettleHoleBets(void) {
           g_BetTallies[1][bet] -= g_HolePot;
           g_HolePot = g_GameState.betRates[bet];
         } else if (g_Players[1].holes[g_GameState.holeIndex - 1].strokes <
-                   g_Players[0].holes[g_GameState.holeIndex - 1].strokes) {
+            g_Players[0].holes[g_GameState.holeIndex - 1].strokes) {
           g_BetTallies[0][bet] -= g_HolePot;
           g_BetTallies[1][bet] += g_HolePot;
           g_HolePot = g_GameState.betRates[bet];
@@ -671,9 +668,8 @@ void SettleHoleBets(void) {
       case GAME_MODE_UNK6: {
         for (i = 0; i != g_GameState.playerCount; i++) {
           scores[i] = g_Players[i].strokeCount +
-                      GetHandicapOffset(g_GameState.courseIndex,
-                                        g_GameState.holeIndex - 1,
-                                        g_Players[i].handicap);
+              GetHandicapOffset(g_GameState.courseIndex,
+                  g_GameState.holeIndex - 1, g_Players[i].handicap);
         }
         best = WORST_HOLE_SCORE;
         for (i = 0; i != g_GameState.playerCount; i++) {

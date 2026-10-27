@@ -272,10 +272,10 @@ void DrawHoleCreatures(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD,
-                   G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
+  gDPSetRenderMode(
+      gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD, G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
   gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-                    TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+      TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
@@ -296,13 +296,13 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       creature->position[2] += creature->velocity[2];
       horizontalSpeed = 0.0f;
       horizontalSpeedSquared = creature->velocity[0] * creature->velocity[0] +
-                               creature->velocity[2] * creature->velocity[2];
+          creature->velocity[2] * creature->velocity[2];
       if ((s32)horizontalSpeedSquared > 0) {
         horizontalSpeed = sqrtf(horizontalSpeedSquared);
       }
       creature->pitch = ((f32)atan2(creature->velocity[1], horizontalSpeed) -
-                         creature->pitch) *
-                        CHEEP_CHEEP_PITCH_EASING;
+                            creature->pitch) *
+          CHEEP_CHEEP_PITCH_EASING;
       translation[0] = creature->position[0] * COURSE_TO_WORLD_SCALE;
       translation[1] = creature->position[1] * COURSE_TO_WORLD_SCALE;
       translation[2] = creature->position[2] * COURSE_TO_WORLD_SCALE;
@@ -341,7 +341,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       } else {
         s32 alpha = (g_BallPosition[1] - creature->position[1]) * 0xFF /
-                    CHEEP_CHEEP_FADE_DEPTH;
+            CHEEP_CHEEP_FADE_DEPTH;
 
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, alpha);
       }
@@ -350,15 +350,14 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         creature->state = HOLE_CREATURE_NONE;
       }
       gDPLoadTextureBlock(gfx++,
-                          TEXTURE_ADDRESS(f_CheepCheepImages[creature->isGold] +
-                                          IMAGE_HEADER_SIZE),
-                          G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 32, 0,
-                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                          5, 5, G_TX_NOLOD, G_TX_NOLOD);
+          TEXTURE_ADDRESS(
+              f_CheepCheepImages[creature->isGold] + IMAGE_HEADER_SIZE),
+          G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(&creature->matrices[g_MatrixBufferIndex]),
-                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          OS_K0_TO_PHYSICAL(&creature->matrices[g_MatrixBufferIndex]),
+          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_CheepCheepVertices, 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -400,23 +399,23 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       gDPPipeSync(gfx++);
       gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(&creature->matrices[g_MatrixBufferIndex]),
-                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          OS_K0_TO_PHYSICAL(&creature->matrices[g_MatrixBufferIndex]),
+          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_MonkeyVertices, 8, 0);
       gDPLoadTextureBlock(gfx++,
-                          TEXTURE_ADDRESS(f_MonkeyImage + IMAGE_HEADER_SIZE),
-                          G_IM_FMT_RGBA, G_IM_SIZ_16b, 64, 32, 0,
-                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          TEXTURE_ADDRESS(f_MonkeyImage + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
+          G_IM_SIZ_16b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gDPPipeSync(gfx++);
       gDPLoadTextureBlock(gfx++,
-                          TEXTURE_ADDRESS(f_MonkeyImage + IMAGE_HEADER_SIZE +
-                                          MONKEY_HALF_IMAGE_SIZE),
-                          G_IM_FMT_RGBA, G_IM_SIZ_16b, 64, 32, 0,
-                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          TEXTURE_ADDRESS(
+              f_MonkeyImage + IMAGE_HEADER_SIZE + MONKEY_HALF_IMAGE_SIZE),
+          G_IM_FMT_RGBA, G_IM_SIZ_16b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
       gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
       gDPPipeSync(gfx++);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);

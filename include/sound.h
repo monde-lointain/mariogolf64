@@ -46,18 +46,18 @@
 extern s32 g_NextSoundChannel;
 
 void PlaySound(s32 soundId, s32 channel, s32 volume);
-void PlaySoundWithEffects(s32 soundId, s32 channel, s32 volume, s32 reverb,
-                          s32 pan);
+void PlaySoundWithEffects(
+    s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan);
 void StopSound(s32 channel);
 void SetSoundPan(s32 channel, s32 pan);
 void SetSoundVolume(s32 channel, s32 volume);
 void SetSoundReverb(s32 channel, s32 reverb);
 void FadeOutSound(s32 channel, u32 frameCount);
 void SetSoundTempo(s32 channel, s32 tempo);
-void PlayCharacterSound(s32 character, s32 slot, s32 soundIndex, s32 volume,
-                        s32 pan);
-void QueueCharacterSound(s32 character, s32 slot, s32 kind, s32 volume,
-                         s32 pan);
+void PlayCharacterSound(
+    s32 character, s32 slot, s32 soundIndex, s32 volume, s32 pan);
+void QueueCharacterSound(
+    s32 character, s32 slot, s32 kind, s32 volume, s32 pan);
 void SetSoundFrequencyOffset(s32 channel, f32 offset);
 s32 UpdateAudio(void);
 void StopSong(s32 fadeFrameCount);

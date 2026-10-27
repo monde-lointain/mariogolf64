@@ -48,11 +48,26 @@ u8 f_IsAudioTaskEnabled = TRUE;
 /* Counts the pre-NMI and the audio tasks after it */
 u8 f_ResetFrame = 0;
 AudioEventCallback f_AudioEventCallback = NULL;
-musSched f_AudioScheduler = {InstallAudioScheduler, WaitForAudioFrame,
-                             RunAudioTask};
+musSched f_AudioScheduler = {
+    InstallAudioScheduler, WaitForAudioFrame, RunAudioTask};
 musConfig f_DefaultMusicConfig = {
-    0,     24,    NULL, 70, (u8*)0x80335000, 0x5A800, NULL, NULL, NULL, 64, 128,
-    32000, 0x800, 1,    96, 0x400,           NULL,
+    0,
+    24,
+    NULL,
+    70,
+    (u8*)0x80335000,
+    0x5A800,
+    NULL,
+    NULL,
+    NULL,
+    64,
+    128,
+    32000,
+    0x800,
+    1,
+    96,
+    0x400,
+    NULL,
 };
 
 /* Sets the routine called on audio events, with interrupts off while it changes
@@ -90,8 +105,8 @@ void LoadSampleBank(u8* pointerBankRom, u32 pointerBankSize, u8* waveBankRom) {
 
   f_PointerBank = __MusIntMemMalloc(pointerBankSize);
   nuPiReadRom((u32)pointerBankRom, f_PointerBank, pointerBankSize);
-  osSyncPrintf("nuAuSampleBank_ptr %x, size%d\n", f_PointerBank,
-               pointerBankSize);
+  osSyncPrintf(
+      "nuAuSampleBank_ptr %x, size%d\n", f_PointerBank, pointerBankSize);
   for (i = 0; i < PRINTED_BANK_SIZE; i++) {
     osSyncPrintf("%2.2X ", f_PointerBank[i]);
     if ((i & PRINTED_ROW_END) == PRINTED_ROW_END) {
@@ -137,8 +152,8 @@ void StartMusicPlayer(musConfig* config) {
 void InstallAudioScheduler(void) {
   osCreateMesgQueue(&f_RetraceQueue, f_RetraceMessages, RETRACE_QUEUE_SIZE);
   osCreateMesgQueue(&f_TaskDoneQueue, f_TaskDoneMessages, TASK_DONE_QUEUE_SIZE);
-  nuScAddClient(&f_AudioClient, &f_RetraceQueue,
-                NU_SC_RETRACE_MSG | NU_SC_PRENMI_MSG);
+  nuScAddClient(
+      &f_AudioClient, &f_RetraceQueue, NU_SC_RETRACE_MSG | NU_SC_PRENMI_MSG);
 }
 
 /* Waits for the next retrace, reporting any pre-NMI on the way */
@@ -196,8 +211,8 @@ musHandle StartSoundEffect(s32 soundId) {
   return MusStartEffect(soundId);
 }
 
-musHandle StartSoundEffectWith(s32 soundId, s32 volume, s32 pan,
-                               s32 restartFlag, s32 priority) {
+musHandle StartSoundEffectWith(
+    s32 soundId, s32 volume, s32 pan, s32 restartFlag, s32 priority) {
   return MusStartEffect2(soundId, volume, pan, restartFlag, priority);
 }
 

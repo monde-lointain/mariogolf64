@@ -167,8 +167,8 @@ void UpdateClubPanelImages(void) {
           break;
       }
     }
-    ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex],
-                     &panelAsset);
+    ReadEncodedAsset(
+        D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex], &panelAsset);
     g_ClubPanelImage = D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex];
   }
   if (f_ShownShotMode != g_CurrentShot.shotMode) {
@@ -240,8 +240,8 @@ void UpdateClubPanelImages(void) {
       }
       OpenEncodedAsset(assetId, &frameAsset);
     }
-    ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex],
-                     &frameAsset);
+    ReadEncodedAsset(
+        D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex], &frameAsset);
     f_ShotModeChangeFrame++;
     g_ClubPanelImage = D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex];
     if (f_ShotModeChangeFrame == SHOT_MODE_CHANGE_FRAME_COUNT) {
@@ -374,17 +374,16 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE,
-                    PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
-  gDPLoadTextureBlock_4b(
-      gfx++, ((u32)f_ClubPanelImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+      PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
+  gDPLoadTextureBlock_4b(gfx++,
+      ((u32)f_ClubPanelImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
       GAUGE_TICK_IMAGE_WIDTH, GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP,
       2, 0, 0, 0);
   for (group = 0, firstTick = 0; group != GAUGE_GROUP_COUNT;
-       group++, firstTick += GAUGE_TICKS_PER_GROUP) {
+      group++, firstTick += GAUGE_TICKS_PER_GROUP) {
     for (tick = 1; tick != GAUGE_TICKS_PER_GROUP; tick++) {
       x = (firstTick + tick) * GAUGE_TICK_SPACING;
-      gSPTextureRectangle(
-          gfx++, (GAUGE_FULL_X + x) << 2,
+      gSPTextureRectangle(gfx++, (GAUGE_FULL_X + x) << 2,
           (GAUGE_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
           (GAUGE_FULL_X + GAUGE_TICK_WIDTH + x) << 2,
           (GAUGE_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
@@ -393,29 +392,26 @@ void DrawClubPanel(Gfx** displayListHead) {
   }
   for (tick = 0; tick != GAUGE_EXTRA_TICK_COUNT; tick++) {
     x = (firstTick + tick) * GAUGE_TICK_SPACING;
-    gSPTextureRectangle(
-        gfx++, (GAUGE_FULL_X + x) << 2,
+    gSPTextureRectangle(gfx++, (GAUGE_FULL_X + x) << 2,
         (GAUGE_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
         (GAUGE_FULL_X + GAUGE_TICK_WIDTH + x) << 2,
         (GAUGE_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE, 0, 0, 0x400, 0x600);
   }
   for (tick = 0; tick < GAUGE_END_TICK_COUNT; tick++) {
-    gSPTextureRectangle(
-        gfx++, (GAUGE_FULL_X + tick * GAUGE_LENGTH) << 2,
+    gSPTextureRectangle(gfx++, (GAUGE_FULL_X + tick * GAUGE_LENGTH) << 2,
         (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
         (GAUGE_FULL_X + tick * GAUGE_LENGTH + GAUGE_TICK_WIDTH) << 2,
         (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
   }
   for (tick = 1; tick <= GAUGE_MEDIUM_TICK_COUNT; tick++) {
-    gSPTextureRectangle(
-        gfx++,
+    gSPTextureRectangle(gfx++,
         (GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING) << 2,
         (GAUGE_MEDIUM_TICK_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX)
             << 2,
         (GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING +
-         GAUGE_TICK_WIDTH)
+            GAUGE_TICK_WIDTH)
             << 2,
         (GAUGE_MEDIUM_TICK_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX)
             << 2,
@@ -432,17 +428,15 @@ void DrawClubPanel(Gfx** displayListHead) {
   fillWidth = GAUGE_FILL_IMAGE_WIDTH;
   value = func_8005F224();
   gDPLoadTextureBlock(gfx++, ((u32)f_ShotModeImage + IMAGE_HEADER_SIZE) & ~7,
-                      G_IM_FMT_RGBA, G_IM_SIZ_16b, fillWidth,
-                      GAUGE_FILL_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0,
-                      0);
+      G_IM_FMT_RGBA, G_IM_SIZ_16b, fillWidth, GAUGE_FILL_IMAGE_HEIGHT, 0,
+      G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
   if (playerState != PLAYER_STATE_UNK2 && playerState == PLAYER_STATE_UNK4) {
     f_ClubPanelUnk24 = value;
   }
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   if (playerState != PLAYER_STATE_UNK2) {
-    gSPTextureRectangle(
-        gfx++,
+    gSPTextureRectangle(gfx++,
         (GAUGE_EMPTY_X - f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE)
             << 2,
         (GAUGE_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
@@ -450,25 +444,24 @@ void DrawClubPanel(Gfx** displayListHead) {
         (GAUGE_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE,
         (((GAUGE_MAX_VALUE * 5 - f_ClubPanelUnk24 * 5) << 6) /
-         (GAUGE_MAX_VALUE * 5))
+            (GAUGE_MAX_VALUE * 5))
             << 5,
         0, 0x1B4, 0x800);
   }
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPLoadTextureBlock_4b(
-      gfx++, ((u32)f_ClubPanelImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+  gDPLoadTextureBlock_4b(gfx++,
+      ((u32)f_ClubPanelImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
       GAUGE_TICK_IMAGE_WIDTH, GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP,
       2, 0, 0, 0);
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE,
-                    PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
+      PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
   gDPPipeSync(gfx++);
-  gSPTextureRectangle(
-      gfx++, GAUGE_EMPTY_X << 2,
+  gSPTextureRectangle(gfx++, GAUGE_EMPTY_X << 2,
       (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
       (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH) << 2,
       (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
@@ -501,10 +494,8 @@ void DrawClubPanel(Gfx** displayListHead) {
   }
   gDPPipeSync(gfx++);
   gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0,
-                    0, 0, 1, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
-                    TEXEL0, 0, 0, 1);
-  gSPTextureRectangle(
-      gfx++, (GAUGE_EMPTY_X - markerOffset) << 2,
+      0, 0, 1, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, 0, 1);
+  gSPTextureRectangle(gfx++, (GAUGE_EMPTY_X - markerOffset) << 2,
       (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
       (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset) << 2,
       (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
@@ -520,8 +511,7 @@ void DrawClubPanel(Gfx** displayListHead) {
       gDPSetEnvColor(gfx++, 0, 0, 0, 255);
     }
     gDPPipeSync(gfx++);
-    gSPTextureRectangle(
-        gfx++, (GAUGE_EMPTY_X - markerOffset) << 2,
+    gSPTextureRectangle(gfx++, (GAUGE_EMPTY_X - markerOffset) << 2,
         (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
         (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset) << 2,
         (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
@@ -536,16 +526,15 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   if (span != 0) {
     guTranslate(&f_SpanBarTranslation, SPAN_BAR_X,
-                SPAN_BAR_Y - f_ShotPanelOffsetX - f_ClubPanelDebugValue,
-                SPAN_BAR_Z);
+        SPAN_BAR_Y - f_ShotPanelOffsetX - f_ClubPanelDebugValue, SPAN_BAR_Z);
     guScale(&f_SpanBarScale, span * SPAN_BAR_SCALE_PER_SPAN, SPAN_BAR_THICKNESS,
-            SPAN_BAR_THICKNESS);
+        SPAN_BAR_THICKNESS);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SpanBarTranslation),
-              G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SpanBarScale),
-              G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+        G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gSPVertex(gfx++, f_SpanBarVertices, SPAN_BAR_VERTEX_COUNT, 0);
     gSPDisplayList(gfx++, f_SpanBarDisplayList);
   }

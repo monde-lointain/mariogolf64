@@ -148,7 +148,7 @@ void LeaveBootLogos(void) {
     ResetGameBoyTransfer(0);
     StartWipe(WIPE_OPENING);
   } else if (f_HasResetGameState && g_HasLoaderFinished == 1 &&
-             g_ControllerCount != 0) {
+      g_ControllerCount != 0) {
     g_Scene = SCENE_SWAPPING_MODULES;
     g_SceneModuleToUnload = SCENE_MODULE_BOOT_LOGOS;
     g_NextScene = SCENE_OPENING;
@@ -193,7 +193,7 @@ void UpdateBootLogos(void) {
         PlaySound(0x62, 0xF, 0x7F);
       }
       for (controllerIndex = 0; controllerIndex != g_ControllerCount;
-           controllerIndex++) {
+          controllerIndex++) {
         pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
       }
       if ((pressedButtons & (A_BUTTON | START_BUTTON)) && g_IsDebugEnabled) {
@@ -222,7 +222,7 @@ void UpdateBootLogos(void) {
         f_BootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
         f_BootLogoFrame = 0;
       } else if (g_HasLoaderFinished == 1 &&
-                 f_BootLogoFrame >= CAMELOT_LEAVE_FRAME) {
+          f_BootLogoFrame >= CAMELOT_LEAVE_FRAME) {
         if (f_BootLogoFrame > 0) {
           f_BootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
           f_BootLogoFrame = 0;
@@ -280,23 +280,22 @@ void DrawBootLogos(Gfx** displayListHead) {
       gDPSetTextureLUT(gfx++, G_TT_NONE);
       if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-                        MAX(FADE_OUT_ALPHA(f_BootLogoFrame), 0));
+            MAX(FADE_OUT_ALPHA(f_BootLogoFrame), 0));
       } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-                        MIN(FADE_IN_ALPHA(f_BootLogoFrame), 255));
+            MIN(FADE_IN_ALPHA(f_BootLogoFrame), 255));
       }
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
-                        0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+          0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
       n64Texels = f_N64Logo.texels;
       top = N64_LOGO_TOP << 2;
       bottom = (N64_LOGO_TOP + N64_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != N64_LOGO_STRIP_COUNT; stripIndex++) {
         LoadTextureBlock(&gfx, n64Texels, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-                         N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0, 0, 0, 0, 0,
-                         0, 0);
+            N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
         DrawTextureRect(&gfx, N64_LOGO_LEFT << 2, top,
-                        (N64_LOGO_LEFT + N64_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
-                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            (N64_LOGO_LEFT + N64_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += N64_LOGO_STRIP_HEIGHT << 2;
         top += N64_LOGO_STRIP_HEIGHT << 2;
         n64Texels += N64_LOGO_WIDTH * N64_LOGO_STRIP_HEIGHT;
@@ -307,7 +306,7 @@ void DrawBootLogos(Gfx** displayListHead) {
       if (f_BootLogoStage == BOOT_LOGO_NINTENDO) {
         if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
           gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-                          MAX(FADE_OUT_ALPHA(f_BootLogoFrame), 0));
+              MAX(FADE_OUT_ALPHA(f_BootLogoFrame), 0));
         } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
           alpha = FADE_IN_ALPHA(f_BootLogoFrame);
           if (alpha > 255) {
@@ -317,21 +316,21 @@ void DrawBootLogos(Gfx** displayListHead) {
         }
       }
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
-                        0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+          0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
       texelOffset = 0;
       top = NINTENDO_LOGO_TOP << 2;
       bottom = (NINTENDO_LOGO_TOP + NINTENDO_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != NINTENDO_LOGO_STRIP_COUNT;
-           stripIndex++) {
-        gDPLoadTextureTile(
-            gfx++, (u32)&f_NintendoLogo.texels[texelOffset] & ~7, G_IM_FMT_I,
-            G_IM_SIZ_8b, NINTENDO_LOGO_WIDTH, NINTENDO_LOGO_STRIP_HEIGHT, 0, 0,
-            NINTENDO_LOGO_WIDTH - 1, NINTENDO_LOGO_STRIP_HEIGHT - 1, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          stripIndex++) {
+        gDPLoadTextureTile(gfx++, (u32)&f_NintendoLogo.texels[texelOffset] & ~7,
+            G_IM_FMT_I, G_IM_SIZ_8b, NINTENDO_LOGO_WIDTH,
+            NINTENDO_LOGO_STRIP_HEIGHT, 0, 0, NINTENDO_LOGO_WIDTH - 1,
+            NINTENDO_LOGO_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         DrawTextureRect(&gfx, NINTENDO_LOGO_LEFT << 2, top,
-                        (NINTENDO_LOGO_LEFT + NINTENDO_LOGO_WIDTH) << 2, bottom,
-                        0, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            (NINTENDO_LOGO_LEFT + NINTENDO_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += NINTENDO_LOGO_STRIP_HEIGHT << 2;
         top += NINTENDO_LOGO_STRIP_HEIGHT << 2;
         texelOffset += NINTENDO_LOGO_WIDTH * NINTENDO_LOGO_STRIP_HEIGHT;
@@ -348,7 +347,7 @@ void DrawBootLogos(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
       }
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
-                        0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+          0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       LoadSmallPalette(&gfx, 0, f_CamelotLogo.palette);
@@ -356,16 +355,16 @@ void DrawBootLogos(Gfx** displayListHead) {
       top = CAMELOT_LOGO_TOP << 2;
       bottom = (CAMELOT_LOGO_TOP + CAMELOT_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != CAMELOT_LOGO_STRIP_COUNT;
-           stripIndex++) {
-        gDPLoadTextureTile_4b(
-            gfx++, (u32)&f_CamelotLogo.texels[texelOffset] & ~7, G_IM_FMT_CI,
+          stripIndex++) {
+        gDPLoadTextureTile_4b(gfx++,
+            (u32)&f_CamelotLogo.texels[texelOffset] & ~7, G_IM_FMT_CI,
             CAMELOT_LOGO_WIDTH, CAMELOT_LOGO_STRIP_HEIGHT, 0, 0,
             CAMELOT_LOGO_WIDTH - 1, CAMELOT_LOGO_STRIP_HEIGHT - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         DrawTextureRect(&gfx, CAMELOT_LOGO_LEFT << 2, top,
-                        (CAMELOT_LOGO_LEFT + CAMELOT_LOGO_WIDTH) << 2, bottom,
-                        0, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            (CAMELOT_LOGO_LEFT + CAMELOT_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += CAMELOT_LOGO_STRIP_HEIGHT << 2;
         top += CAMELOT_LOGO_STRIP_HEIGHT << 2;
         texelOffset += CAMELOT_LOGO_WIDTH / 2 * CAMELOT_LOGO_STRIP_HEIGHT;

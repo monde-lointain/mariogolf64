@@ -46,7 +46,7 @@ u32 NextTournamentRandom(void) {
  * is returned; the return type is there to match.
  */
 s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
-                   s32 endIndex, s32 playerScore) {
+    s32 endIndex, s32 playerScore) {
   s32 index;
   s32 shape;
   s32 swing;
@@ -68,8 +68,9 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
         swing = 9;
       }
     }
-    holesPlayed = holeCount + (f_ContestantProfiles[index - 1].holeOffset +
-                               (lastAheadIndex < 0 | lastAheadIndex >= index));
+    holesPlayed = holeCount +
+        (f_ContestantProfiles[index - 1].holeOffset +
+            (lastAheadIndex < 0 | lastAheadIndex >= index));
     if (holesPlayed > COURSE_HOLE_COUNT) {
       holesPlayed = COURSE_HOLE_COUNT;
     }
@@ -92,11 +93,11 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
         break;
       case 1:
         score = finalScore * holesPlayed / COURSE_HOLE_COUNT +
-                sin(holesPlayed * RADIANS_PER_HOLE) * swing;
+            sin(holesPlayed * RADIANS_PER_HOLE) * swing;
         break;
       case 2:
         score = finalScore * holesPlayed / COURSE_HOLE_COUNT -
-                sin(holesPlayed * RADIANS_PER_HOLE) * swing;
+            sin(holesPlayed * RADIANS_PER_HOLE) * swing;
         break;
     }
     g_TournamentStandings[index].contestantId = index - 1;
@@ -109,8 +110,8 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
  * Simulates the computer contestants, ranks everyone by score and returns
  * the player's place
  */
-u8 RankTournament(s32 holeCount, s32 lastAheadIndex, s32 playerScore,
-                  s32 seed) {
+u8 RankTournament(
+    s32 holeCount, s32 lastAheadIndex, s32 playerScore, s32 seed) {
   s32 keys[TOURNAMENT_CONTESTANT_COUNT];
   s32 order[TOURNAMENT_CONTESTANT_COUNT];
   TournamentStanding unsorted[TOURNAMENT_CONTESTANT_COUNT];
@@ -123,7 +124,7 @@ u8 RankTournament(s32 holeCount, s32 lastAheadIndex, s32 playerScore,
   playerPlace = 1;
   SeedTournamentRandom(seed);
   SimulateScores(holeCount, lastAheadIndex, FIRST_COMPUTER_CONTESTANT,
-                 TOURNAMENT_CONTESTANT_COUNT, playerScore);
+      TOURNAMENT_CONTESTANT_COUNT, playerScore);
   NameContestants();
   g_TournamentStandings[0].score = playerScore;
   g_TournamentStandings[0].contestantId = PLAYER_CONTESTANT;
@@ -177,9 +178,10 @@ void NameContestants(void) {
   nameIndex = &g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 2];
   lastName = (g_CourseIndex + 1) * NAMES_PER_COURSE - 2;
   for (index = TOURNAMENT_CONTESTANT_COUNT - 2; index >= 0;
-       index--, nameIndex--) {
-    if (!hasSkipped && strcmp(g_Players[0].name,
-                              g_ContestantNames[lastName - nameOffset]) == 0) {
+      index--, nameIndex--) {
+    if (!hasSkipped &&
+        strcmp(g_Players[0].name, g_ContestantNames[lastName - nameOffset]) ==
+            0) {
       hasSkipped = TRUE;
       nameOffset--;
     }

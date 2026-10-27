@@ -45,14 +45,12 @@ void FillScreen(void) {
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
-  gDPSetFillColor(
-      g_DisplayListHead++,
+  gDPSetFillColor(g_DisplayListHead++,
       GPACK_RGBA5551(f_FillColor[0], f_FillColor[1], f_FillColor[2], 1) << 16 |
           GPACK_RGBA5551(f_FillColor[0], f_FillColor[1], f_FillColor[2], 1));
   gDPPipeSync(g_DisplayListHead++);
   gDPFillRectangle(g_DisplayListHead++, SCREEN_BORDER, SCREEN_BORDER,
-                   SCREEN_WIDTH - SCREEN_BORDER - 1,
-                   SCREEN_HEIGHT - SCREEN_BORDER - 1);
+      SCREEN_WIDTH - SCREEN_BORDER - 1, SCREEN_HEIGHT - SCREEN_BORDER - 1);
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
@@ -74,13 +72,13 @@ void AppendBufferClear(s32 clearMode, Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_FILL);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                   OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~7);
-  gDPSetFillColor(gfx++,
-                  GPACK_ZDZ(MAX_DEPTH, 0) << 16 | GPACK_ZDZ(MAX_DEPTH, 0));
+      OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~7);
+  gDPSetFillColor(
+      gfx++, GPACK_ZDZ(MAX_DEPTH, 0) << 16 | GPACK_ZDZ(MAX_DEPTH, 0));
   gDPFillRectangle(gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
   gDPPipeSync(gfx++);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                   osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+      osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
   if (clearMode == BUFFER_CLEAR_BY_LINE) {
     /* Stops a line short, which the screen's border hides */
     for (line = 0; line < SCREEN_HEIGHT - 1; line++) {

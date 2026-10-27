@@ -425,7 +425,7 @@ void KeepAimCameraOnCourse(void) {
         g_CurrentShot.aimCameraDistance += AIM_CAMERA_MINI_GOLF_PUSH_STEP;
       }
     } else if (g_CurrentShot.aimCameraDistance < oldDistance &&
-               (g_TurnController.buttons & U_CBUTTONS)) {
+        (g_TurnController.buttons & U_CBUTTONS)) {
       g_CurrentShot.aimCameraDistance -= AIM_CAMERA_MINI_GOLF_PUSH_STEP;
     }
   } else {
@@ -434,7 +434,7 @@ void KeepAimCameraOnCourse(void) {
         g_CurrentShot.aimCameraDistance += AIM_CAMERA_PUSH_STEP;
       }
     } else if (g_CurrentShot.aimCameraDistance < oldDistance &&
-               (g_TurnController.buttons & U_CBUTTONS)) {
+        (g_TurnController.buttons & U_CBUTTONS)) {
       g_CurrentShot.aimCameraDistance -= AIM_CAMERA_PUSH_STEP;
     }
   }
@@ -477,7 +477,7 @@ void PlaceShotCamera(void) {
       g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Z] =
           (point[AXIS_Z] - g_CurrentShot.aimCameraDistance +
-           sinf(heading) * PAUSE_CAMERA_RADIUS) *
+              sinf(heading) * PAUSE_CAMERA_RADIUS) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_X] =
           (point[AXIS_X] + cosf(heading) * -PAUSE_CAMERA_RADIUS) *
@@ -486,21 +486,22 @@ void PlaceShotCamera(void) {
           (point[AXIS_Y] - PAUSE_CAMERA_RISE) * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Z] =
           (point[AXIS_Z] - g_CurrentShot.aimCameraDistance +
-           sinf(heading) * -PAUSE_CAMERA_RADIUS) *
+              sinf(heading) * -PAUSE_CAMERA_RADIUS) *
           COURSE_TO_WORLD_SCALE;
     } else {
       point[AXIS_X] = MINI_GOLF_CENTER_X;
       point[AXIS_Z] = MINI_GOLF_CENTER_Z;
       point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y] +
-                      (g_CupPositionY - D_800BA9D8.teePosition[AXIS_Y]) * 0.5f;
+          (g_CupPositionY - D_800BA9D8.teePosition[AXIS_Y]) * 0.5f;
       g_Cameras[0].view.lookAt[AXIS_X] =
           (point[AXIS_X] + cosf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Z] =
           (point[AXIS_Z] -
-           (g_CurrentShot.aimCameraDistance + MINI_GOLF_PAUSE_CAMERA_DISTANCE) +
-           sinf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS) *
+              (g_CurrentShot.aimCameraDistance +
+                  MINI_GOLF_PAUSE_CAMERA_DISTANCE) +
+              sinf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_X] =
           (point[AXIS_X] + cosf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS) *
@@ -509,15 +510,16 @@ void PlaceShotCamera(void) {
           (point[AXIS_Y] - MINI_GOLF_PAUSE_CAMERA_RISE) * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Z] =
           (point[AXIS_Z] -
-           (g_CurrentShot.aimCameraDistance + MINI_GOLF_PAUSE_CAMERA_DISTANCE) +
-           sinf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS) *
+              (g_CurrentShot.aimCameraDistance +
+                  MINI_GOLF_PAUSE_CAMERA_DISTANCE) +
+              sinf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS) *
           COURSE_TO_WORLD_SCALE;
     }
   } else if (D_800C308C == LETTERBOX_STATE_NONE ||
-             D_800C308C == LETTERBOX_STATE_UNK5) {
+      D_800C308C == LETTERBOX_STATE_UNK5) {
     PlaceAimCamera();
   } else if (D_800C308C == LETTERBOX_STATE_UNK1 ||
-             D_800C308C == LETTERBOX_STATE_UNK2) {
+      D_800C308C == LETTERBOX_STATE_UNK2) {
     s32 lowestGround;
     s32 ground;
     s32 probe;
@@ -528,9 +530,9 @@ void PlaceShotCamera(void) {
     heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
     KeepAimCameraOnCourse();
     point[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance +
-                    g_CurrentShot.ballPosition[AXIS_X];
+        g_CurrentShot.ballPosition[AXIS_X];
     point[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance +
-                    g_CurrentShot.ballPosition[AXIS_Z];
+        g_CurrentShot.ballPosition[AXIS_Z];
     if (point[AXIS_X] < AIM_CAMERA_MIN_COORD) {
       point[AXIS_X] = AIM_CAMERA_MIN_COORD;
     } else if (point[AXIS_X] > AIM_CAMERA_MAX_X) {
@@ -561,8 +563,7 @@ void PlaceShotCamera(void) {
       }
     }
     if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
-      point[AXIS_Y] =
-          lowestGround - NO_IMPACT_POINT_DROP +
+      point[AXIS_Y] = lowestGround - NO_IMPACT_POINT_DROP +
           g_CurrentShot.aimCameraHeight * NO_IMPACT_POINT_HEIGHT_SCALE;
     } else {
       point[AXIS_Y] = lowestGround + g_CurrentShot.aimCameraHeight;
@@ -572,7 +573,7 @@ void PlaceShotCamera(void) {
             rise * rise / AIM_CAMERA_RISE_DIVISOR <
         point[AXIS_Y]) {
       point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] +
-                      rise * rise / AIM_CAMERA_RISE_DIVISOR;
+          rise * rise / AIM_CAMERA_RISE_DIVISOR;
     }
     g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
@@ -580,23 +581,23 @@ void PlaceShotCamera(void) {
           cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) +
           g_CurrentShot.ballPosition[AXIS_X];
       point[AXIS_Y] = (lowestGround - GREEN_LOOK_RISE) -
-                      g_CurrentShot.aimCameraHeight * GREEN_LOOK_HEIGHT_SCALE;
+          g_CurrentShot.aimCameraHeight * GREEN_LOOK_HEIGHT_SCALE;
       point[AXIS_Z] =
           sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) +
           g_CurrentShot.ballPosition[AXIS_Z];
       g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     } else {
       tilt = (AIM_TILT_FULL_DISTANCE - GetSelectedClub()->distance) *
-             AIM_TILT_PER_YARD;
+          AIM_TILT_PER_YARD;
       if (tilt < 0.0f) {
         tilt = 0.0f;
       }
-      point[AXIS_X] = cosf(heading) * (g_CurrentShot.aimCameraDistance +
-                                       DOWN_RANGE_LOOK_AHEAD) +
-                      g_CurrentShot.ballPosition[AXIS_X];
-      point[AXIS_Z] = sinf(heading) * (g_CurrentShot.aimCameraDistance +
-                                       DOWN_RANGE_LOOK_AHEAD) +
-                      g_CurrentShot.ballPosition[AXIS_Z];
+      point[AXIS_X] = cosf(heading) *
+              (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD) +
+          g_CurrentShot.ballPosition[AXIS_X];
+      point[AXIS_Z] = sinf(heading) *
+              (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD) +
+          g_CurrentShot.ballPosition[AXIS_Z];
       point[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
       g_Cameras[0].view.lookAt[AXIS_Y] =
           g_Cameras[0].view.eye[AXIS_Y] * COURSE_TO_WORLD_SCALE -
@@ -612,13 +613,11 @@ void PlaceShotCamera(void) {
     center[AXIS_Y] = g_CupPositionY;
     center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     heading = (u16)D_800C3078 * BINARY_ANGLE_TO_RADIANS + M_PI;
-    center[AXIS_X] =
-        g_CurrentShot.ballPosition[AXIS_X] +
+    center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] +
         (D_800BA9D8.cupPosition[AXIS_X] - g_CurrentShot.ballPosition[AXIS_X]) *
             0.5f;
     center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-    center[AXIS_Z] =
-        g_CurrentShot.ballPosition[AXIS_Z] +
+    center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] +
         (g_CupPositionZ - g_CurrentShot.ballPosition[AXIS_Z]) * 0.5f;
     center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     point[AXIS_X] =
@@ -627,7 +626,7 @@ void PlaceShotCamera(void) {
     point[AXIS_Z] =
         sinf(heading) * g_CurrentShot.aimCameraDistance + center[AXIS_Z];
     point[AXIS_Y] = func_8005F30C(point[AXIS_X], point[AXIS_Z]) +
-                    g_CurrentShot.aimCameraHeight;
+        g_CurrentShot.aimCameraHeight;
     g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
@@ -635,7 +634,7 @@ void PlaceShotCamera(void) {
         cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) +
         center[AXIS_X];
     point[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] - LOOK_BACK_RISE) -
-                    g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE;
+        g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE;
     point[AXIS_Z] =
         sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) +
         center[AXIS_Z];
@@ -670,32 +669,31 @@ void AimDownRange(void) {
   }
   heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
   lookAt[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance +
-                   g_CurrentShot.ballPosition[AXIS_X];
+      g_CurrentShot.ballPosition[AXIS_X];
   if (lookAt[AXIS_X] < 0.0f) {
     lookAt[AXIS_X] = 0.0f;
   } else if (lookAt[AXIS_X] >= AIM_CAMERA_MAX_X) {
     lookAt[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
   }
   lookAt[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance +
-                   g_CurrentShot.ballPosition[AXIS_Z];
+      g_CurrentShot.ballPosition[AXIS_Z];
   if (lookAt[AXIS_Z] < 0.0f) {
     lookAt[AXIS_Z] = 0.0f;
   } else if (lookAt[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
     lookAt[AXIS_Z] = AIM_CAMERA_MAX_Z - 1.0f;
   }
-  lookAt[AXIS_X] = cosf(heading) * (g_CurrentShot.aimCameraDistance +
-                                    DOWN_RANGE_LOOK_AHEAD) +
-                   g_CurrentShot.ballPosition[AXIS_X];
-  lookAt[AXIS_Z] = sinf(heading) * (g_CurrentShot.aimCameraDistance +
-                                    DOWN_RANGE_LOOK_AHEAD) +
-                   g_CurrentShot.ballPosition[AXIS_Z];
+  lookAt[AXIS_X] = cosf(heading) *
+          (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD) +
+      g_CurrentShot.ballPosition[AXIS_X];
+  lookAt[AXIS_Z] = sinf(heading) *
+          (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD) +
+      g_CurrentShot.ballPosition[AXIS_Z];
   lookAt[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
   GetGroundHeight(lookAt[AXIS_X], lookAt[AXIS_Z]);
   g_Cameras[0].view.heading = heading;
   g_Cameras[0].view.lookAt[AXIS_X] = lookAt[AXIS_X] * COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.lookAt[AXIS_Z] = lookAt[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-  g_Cameras[0].view.lookAt[AXIS_Y] =
-      lookAt[AXIS_Y] * COURSE_TO_WORLD_SCALE -
+  g_Cameras[0].view.lookAt[AXIS_Y] = lookAt[AXIS_Y] * COURSE_TO_WORLD_SCALE -
       g_CurrentShot.aimCameraHeight * COURSE_TO_WORLD_SCALE;
 }
 
@@ -706,14 +704,14 @@ void PlaceAimCamera(void) {
   f32 heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
 
   eye[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance +
-                g_CurrentShot.ballPosition[AXIS_X];
+      g_CurrentShot.ballPosition[AXIS_X];
   if (eye[AXIS_X] < 0.0f) {
     eye[AXIS_X] = 0.0f;
   } else if (eye[AXIS_X] >= AIM_CAMERA_MAX_X) {
     eye[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
   }
   eye[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance +
-                g_CurrentShot.ballPosition[AXIS_Z];
+      g_CurrentShot.ballPosition[AXIS_Z];
   if (eye[AXIS_Z] < 0.0f) {
     eye[AXIS_Z] = 0.0f;
   } else if (eye[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
@@ -734,7 +732,7 @@ void PlaceAimCamera(void) {
   g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
   g_Cameras[0].view.lookAt[AXIS_Y] =
       func_8005F30C(g_CurrentShot.ballPosition[AXIS_X],
-                    g_CurrentShot.ballPosition[AXIS_Z]) *
+          g_CurrentShot.ballPosition[AXIS_Z]) *
           COURSE_TO_WORLD_SCALE -
       AIM_LOOK_AT_RISE;
   g_Cameras[0].view.lookAt[AXIS_X] *= COURSE_TO_WORLD_SCALE;
@@ -769,8 +767,8 @@ void UpdateImpactPointMode(void) {
       !(D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT)) {
     if (!g_IsSettingImpactPoint && D_80227194_ovl_00 == 0) {
       PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
-                           IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
-                           IMPACT_POINT_SOUND_PAN);
+          IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
+          IMPACT_POINT_SOUND_PAN);
     }
     g_IsSettingImpactPoint = TRUE;
   } else {
@@ -952,14 +950,12 @@ void MoveAimCameraDistance(void) {
   if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
     if (ABS(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
       g_CurrentShot.aimCameraDistance += g_TurnController.stickY /
-                                         AIM_DISTANCE_STICK_STEP *
-                                         AIM_CAMERA_PUTT_DISTANCE_STEP;
+          AIM_DISTANCE_STICK_STEP * AIM_CAMERA_PUTT_DISTANCE_STEP;
     }
   } else {
     if (ABS(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
       g_CurrentShot.aimCameraDistance += g_TurnController.stickY /
-                                         AIM_DISTANCE_STICK_STEP *
-                                         AIM_CAMERA_DISTANCE_STEP;
+          AIM_DISTANCE_STICK_STEP * AIM_CAMERA_DISTANCE_STEP;
     }
   }
 }
@@ -1097,8 +1093,8 @@ s32 UpdateAimControls(void) {
   if (g_TurnController.buttons == AIM_RESET_BUTTONS) {
     g_CurrentShot.unk0 =
         atan2(g_CupPositionZ - g_CurrentShot.ballPosition[AXIS_Z],
-              D_800BA9D8.cupPosition[AXIS_X] -
-                  g_CurrentShot.ballPosition[AXIS_X]) *
+            D_800BA9D8.cupPosition[AXIS_X] -
+                g_CurrentShot.ballPosition[AXIS_X]) *
         RADIANS_TO_BINARY_ANGLE;
   }
   if (IsGameFlagSet(GAME_FLAG_AIM_DOWN_RANGE)) {
@@ -1109,18 +1105,18 @@ s32 UpdateAimControls(void) {
           D_800C3074 = 1;
           ResetAimCamera();
         } else if (g_TurnController.pressedButtons & R_TRIG) {
-          PlaySound(SOUND_LOOK_DOWN_RANGE, g_NextSoundChannel,
-                    LOOK_SOUND_VOLUME);
+          PlaySound(
+              SOUND_LOOK_DOWN_RANGE, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           if (D_800C3084 & SHOT_UNK3084_UNK8) {
             D_800C308C = LETTERBOX_STATE_UNK3;
             toCup[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] -
-                            g_CurrentShot.ballPosition[AXIS_X];
+                g_CurrentShot.ballPosition[AXIS_X];
             toCup[AXIS_Z] = g_CupPositionZ - g_CurrentShot.ballPosition[AXIS_Z];
             D_800C3078 = (atan2(toCup[AXIS_Z], toCup[AXIS_X]) + M_PI) *
-                         RADIANS_TO_BINARY_ANGLE;
+                RADIANS_TO_BINARY_ANGLE;
             g_CurrentShot.aimCameraDistance =
                 -sqrtf(toCup[AXIS_X] * toCup[AXIS_X] +
-                       toCup[AXIS_Z] * toCup[AXIS_Z]) -
+                    toCup[AXIS_Z] * toCup[AXIS_Z]) -
                 LOOK_BACK_EXTRA_DISTANCE;
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
           } else {
@@ -1190,9 +1186,8 @@ s32 UpdateAimControls(void) {
           !(D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT)) {
         if (g_IsSettingImpactPoint != TRUE) {
           PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
-                               IMPACT_POINT_SOUND_VOLUME,
-                               IMPACT_POINT_SOUND_REVERB,
-                               IMPACT_POINT_SOUND_PAN);
+              IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
+              IMPACT_POINT_SOUND_PAN);
         }
         g_IsSettingImpactPoint = TRUE;
         D_800C3080 = 0;
@@ -1218,17 +1213,17 @@ s32 UpdateAimControls(void) {
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(SOUND_LOOK_AT_CUP, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           if ((D_800C3084 &
-               (SHOT_UNK3084_UNK8 | SHOT_UNK3084_NO_IMPACT_POINT)) ==
+                  (SHOT_UNK3084_UNK8 | SHOT_UNK3084_NO_IMPACT_POINT)) ==
               (SHOT_UNK3084_UNK8 | SHOT_UNK3084_NO_IMPACT_POINT)) {
             toCup[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] -
-                            g_CurrentShot.ballPosition[AXIS_X];
+                g_CurrentShot.ballPosition[AXIS_X];
             toCup[AXIS_Z] = g_CupPositionZ - g_CurrentShot.ballPosition[AXIS_Z];
             D_800C308C = LETTERBOX_STATE_UNK3;
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
             D_800C3078 = g_CurrentShot.unk0;
             g_CurrentShot.aimCameraDistance =
                 -sqrtf(toCup[AXIS_X] * toCup[AXIS_X] +
-                       toCup[AXIS_Z] * toCup[AXIS_Z]) -
+                    toCup[AXIS_Z] * toCup[AXIS_Z]) -
                 LOOK_BACK_EXTRA_DISTANCE;
           } else {
             D_800C308C = LETTERBOX_STATE_UNK2;
@@ -1319,12 +1314,12 @@ s32 UpdateAimControls(void) {
       }
     }
     if (g_TurnController.pressedButtons & AIM_CAMERA_RAISE_BUTTONS) {
-      PlaySound(SOUND_AIM_CAMERA_RAISE, g_NextSoundChannel,
-                AIM_CAMERA_SOUND_VOLUME);
+      PlaySound(
+          SOUND_AIM_CAMERA_RAISE, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
     }
     if (g_TurnController.pressedButtons & AIM_CAMERA_LOWER_BUTTONS) {
-      PlaySound(SOUND_AIM_CAMERA_LOWER, g_NextSoundChannel,
-                AIM_CAMERA_SOUND_VOLUME);
+      PlaySound(
+          SOUND_AIM_CAMERA_LOWER, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
     }
     if (D_800C3070 == 1) {
       EaseAimCamera();
@@ -1446,9 +1441,8 @@ void PickStartingClub(Unk800BA9D8* hole) {
 
   g_CurrentShot.clubSlot = 0;
   g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
-  clubCount =
-      MarkUsableClubs((s32)GetSurfaceInfo(g_CurrentShot.surface),
-                      g_Players[g_CurrentShot.playerIndex].clubs, isUsable);
+  clubCount = MarkUsableClubs((s32)GetSurfaceInfo(g_CurrentShot.surface),
+      g_Players[g_CurrentShot.playerIndex].clubs, isUsable);
   cupDistance = GetCupDistance(
       g_CurrentShot.ballPosition[AXIS_X] - hole->cupPosition[AXIS_X],
       g_CurrentShot.ballPosition[AXIS_Z] - hole->cupPosition[AXIS_Z]);
@@ -1465,7 +1459,7 @@ void PickStartingClub(Unk800BA9D8* hole) {
       if (GetShotWorldDistance(club, PUTT_MODE_SHORT) >= cupDistance) {
         g_CurrentShot.shotMode = PUTT_MODE_SHORT;
       } else if (g_CurrentShot.unk54 &&
-                 GetShotWorldDistance(club, PUTT_MODE_MIDDLE) < cupDistance) {
+          GetShotWorldDistance(club, PUTT_MODE_MIDDLE) < cupDistance) {
         g_CurrentShot.shotMode = PUTT_MODE_LONG;
       } else {
         g_CurrentShot.shotMode = PUTT_MODE_MIDDLE;
@@ -1545,8 +1539,8 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
   simulation->playerIndex = playerIndex;
   simulation->unkA0 = 0;
   simulation->isRunning = FALSE;
-  groundHeight = GetGroundHeight(simulation->position[AXIS_X],
-                                 simulation->position[AXIS_Z]);
+  groundHeight = GetGroundHeight(
+      simulation->position[AXIS_X], simulation->position[AXIS_Z]);
   if (groundHeight < simulation->position[AXIS_Y]) {
     simulation->position[AXIS_Y] = groundHeight;
   }
@@ -1737,11 +1731,11 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
     start[AXIS_Z] = simulation.position[AXIS_Z];
     StepBallSimulation(&simulation);
     length = IntLength3D(simulation.position[AXIS_X] - start[AXIS_X],
-                         simulation.position[AXIS_Y] - start[AXIS_Y],
-                         simulation.position[AXIS_Z] - start[AXIS_Z]);
+        simulation.position[AXIS_Y] - start[AXIS_Y],
+        simulation.position[AXIS_Z] - start[AXIS_Z]);
     guTranslateF(dash, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                 (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
-                 start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+        (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
+        start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
     D_80227BA0_ovl_00[step][AXIS_X] =
         simulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
     D_80227BA0_ovl_00[step][AXIS_Y] =
@@ -1751,12 +1745,12 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
     if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
       guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
       guAlignF(align, 0.0f, simulation.position[AXIS_X] - start[AXIS_X],
-               simulation.position[AXIS_Y] - start[AXIS_Y],
-               simulation.position[AXIS_Z] - start[AXIS_Z]);
+          simulation.position[AXIS_Y] - start[AXIS_Y],
+          simulation.position[AXIS_Z] - start[AXIS_Z]);
       guMtxCatF(dash, align, dash);
       guTranslateF(align, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                   start[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-                   start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+          start[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+          start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
       guMtxCatF(dash, align, dash);
     }
     guMtxF2L(dash, &D_802271A0_ovl_00[g_DrawBufferIndex][step]);
@@ -1800,14 +1794,12 @@ void DrawShotPreview(CameraMatrices* matrices) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-  gDPLoadTextureBlock(
-      g_DisplayListHead++,
+  gDPLoadTextureBlock(g_DisplayListHead++,
       TEXTURE_ADDRESS((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
       G_IM_FMT_I, G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
       G_TX_NOLOD);
-  gDPSetTileSize(
-      g_DisplayListHead++, G_TX_RENDERTILE, D_80223EAC_ovl_00, 0,
+  gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, D_80223EAC_ovl_00, 0,
       D_80223EAC_ovl_00 + (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
       SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC);
   gDPSetEnvColor(g_DisplayListHead++, 0xE0, 0xE0, 0x00, 0x40);
@@ -1825,15 +1817,14 @@ void DrawShotPreview(CameraMatrices* matrices) {
     s32 offsetY;
 
     if (ProjectPoint(g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-                     g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-                     g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE,
-                     &ball) >= 0) {
+            g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE,
+            &ball) >= 0) {
       return;
     }
     if (ProjectPoint(D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_X],
-                     D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Y],
-                     D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Z],
-                     &end) >= 0) {
+            D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Y],
+            D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Z], &end) >= 0) {
       return;
     }
     guMtxIdent(&D_80227110_ovl_00);
@@ -1848,28 +1839,28 @@ void DrawShotPreview(CameraMatrices* matrices) {
       gSPLoadGeometryMode(g_DisplayListHead++, 0);
       gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_SHADING_SMOOTH);
       gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM,
-                        G_CC_MODULATEIDECALA_PRIM);
+          G_CC_MODULATEIDECALA_PRIM);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(g_DisplayListHead++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
       gDPPipeSync(g_DisplayListHead++);
       gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
-                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
       gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&D_80227110_ovl_00),
-                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(g_DisplayListHead++, D_80223EB0_ovl_00, 4, 0);
       offsetX = dy * scale;
       offsetY = dx * scale;
       gSPModifyVertex(g_DisplayListHead++, 0, G_MWO_POINT_XYSCREEN,
-                      ((ball.x + offsetX) << 16) + ball.y);
+          ((ball.x + offsetX) << 16) + ball.y);
       gSPModifyVertex(g_DisplayListHead++, 1, G_MWO_POINT_XYSCREEN,
-                      (ball.x << 16) + (ball.y + offsetY));
+          (ball.x << 16) + (ball.y + offsetY));
       gSPModifyVertex(g_DisplayListHead++, 2, G_MWO_POINT_XYSCREEN,
-                      ((end.x + offsetX) << 16) + end.y);
+          ((end.x + offsetX) << 16) + end.y);
       gSPModifyVertex(g_DisplayListHead++, 3, G_MWO_POINT_XYSCREEN,
-                      (end.x << 16) + (end.y + offsetY));
+          (end.x << 16) + (end.y + offsetY));
       gSP2Triangles(g_DisplayListHead++, 1, 0, 2, 0, 1, 2, 3, 0);
       gSPMatrix(g_DisplayListHead++, &matrices->projection,
-                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
       gDPPipeSync(g_DisplayListHead++);
     }
   } else {
@@ -1878,22 +1869,22 @@ void DrawShotPreview(CameraMatrices* matrices) {
     gDPPipeSync(g_DisplayListHead++);
     if (D_800C308C == LETTERBOX_STATE_NONE ||
         D_800C308C == LETTERBOX_STATE_UNK5) {
-      gDPSetRenderMode(g_DisplayListHead++, G_RM_ZB_CLD_SURF,
-                       G_RM_ZB_CLD_SURF2);
+      gDPSetRenderMode(
+          g_DisplayListHead++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
     } else {
-      gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF,
-                       G_RM_AA_ZB_XLU_SURF2);
+      gDPSetRenderMode(
+          g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
     }
     gSPLoadGeometryMode(g_DisplayListHead++, 0);
-    gSPSetGeometryMode(g_DisplayListHead++,
-                       G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+    gSPSetGeometryMode(
+        g_DisplayListHead++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
     gSPFogFactor(g_DisplayListHead++, 320, -128);
     gDPSetCombineLERP(g_DisplayListHead++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0,
-                      SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0);
+        SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0);
     for (step = 0; step < D_80223EA4_ovl_00; step++) {
       gSPMatrix(g_DisplayListHead++,
-                &D_802271A0_ovl_00[g_DrawBufferIndex][step],
-                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          &D_802271A0_ovl_00[g_DrawBufferIndex][step],
+          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(g_DisplayListHead++, D_80223E60_ovl_00, 4, 0);
       gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
@@ -2121,13 +2112,13 @@ static s32 GetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
 }
 
 static void SetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
-  SetCharacterAnimation(slotIndex,
-                        GetStanceAnimation(slotIndex, club, shotMode));
+  SetCharacterAnimation(
+      slotIndex, GetStanceAnimation(slotIndex, club, shotMode));
 }
 
 static void SetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
-  SetCharacterAnimation(slotIndex,
-                        GetSwingAnimation(slotIndex, club, shotMode));
+  SetCharacterAnimation(
+      slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
 }
 
 /*
@@ -2152,8 +2143,8 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.unk14 = 0;
   g_CurrentShot.unk54 = player->unk28;
   g_CurrentShot.unk40 = 0;
-  g_CurrentShot.unk50 = GetCupDistance(x - D_800BA9D8.cupPosition[AXIS_X],
-                                       z - D_800BA9D8.cupPosition[AXIS_Z]);
+  g_CurrentShot.unk50 = GetCupDistance(
+      x - D_800BA9D8.cupPosition[AXIS_X], z - D_800BA9D8.cupPosition[AXIS_Z]);
   if (!D_800C3068 || g_GameMode != GAME_MODE_TRAINING) {
     s32 surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
 
@@ -2163,8 +2154,9 @@ void StartPlayerShot(s32 playerIndex) {
       g_HolePoints.unk60[0][AXIS_Y] = g_CupPositionY;
       g_HolePoints.unk60[0][AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
     }
-    if (g_HolePar != 3 && (surfaceKind == SURFACE_KIND_TEE_UP ||
-                           surfaceKind == SURFACE_KIND_TEE_GROUND)) {
+    if (g_HolePar != 3 &&
+        (surfaceKind == SURFACE_KIND_TEE_UP ||
+            surfaceKind == SURFACE_KIND_TEE_GROUND)) {
       target[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
       target[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
       target[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
@@ -2174,8 +2166,8 @@ void StartPlayerShot(s32 playerIndex) {
       target[AXIS_Z] = g_CupPositionZ;
     }
     g_CurrentShot.unk0 = atan2(target[AXIS_Z] - player->ballPosition[AXIS_Z],
-                               target[AXIS_X] - player->ballPosition[AXIS_X]) *
-                         RADIANS_TO_BINARY_ANGLE;
+                             target[AXIS_X] - player->ballPosition[AXIS_X]) *
+        RADIANS_TO_BINARY_ANGLE;
     PickStartingClub(&D_800BA9D8);
   }
   D_800C3068 = FALSE;
@@ -2250,7 +2242,7 @@ void PickNextPlayer(void) {
     } else {
       if (g_Players[i].strokeCount != 0) {
         priority = GetSurfaceInfo((s8)g_Players[i].ballSurface)->kind !=
-                   SURFACE_KIND_GREEN;
+            SURFACE_KIND_GREEN;
       }
       distance = IntLength2D(
           D_800BA9D8.cupPosition[AXIS_X] - g_Players[i].ballPosition[AXIS_X],
@@ -2267,7 +2259,7 @@ void PickNextPlayer(void) {
         bestTeeOrder = g_Players[nextPlayer].teeOrder;
         bestDistance = distance;
       } else if (distance == bestDistance &&
-                 g_Players[i].teeOrder < bestTeeOrder) {
+          g_Players[i].teeOrder < bestTeeOrder) {
         bestTeeOrder = g_Players[i].teeOrder;
         bestDistance = distance;
         nextPlayer = i;
@@ -2306,8 +2298,8 @@ void PlayAmbientSound(void) {
     D_80223FEC_ovl_00 = 0;
     if (D_80223EF0_ovl_00[GetCourseRecordIndex()][choice] != NO_AMBIENT_SOUND) {
       PlaySoundWithEffects(D_80223EF0_ovl_00[GetCourseRecordIndex()][choice],
-                           AMBIENT_SOUND_CHANNEL, AMBIENT_SOUND_VOLUME,
-                           AMBIENT_SOUND_REVERB, guRandom() % SOUND_PAN_RANGE);
+          AMBIENT_SOUND_CHANNEL, AMBIENT_SOUND_VOLUME, AMBIENT_SOUND_REVERB,
+          guRandom() % SOUND_PAN_RANGE);
     }
   }
 }
@@ -2336,9 +2328,9 @@ void MeasureTeeShot(s32 playerIndex) {
       case SURFACE_KIND_GREEN:
       case SURFACE_KIND_GREEN_EDGE:
         distance = IntLength2D(g_SimulatedShot.startPosition[AXIS_X] -
-                                   g_SimulatedShot.endPosition[AXIS_X],
-                               g_SimulatedShot.startPosition[AXIS_Z] -
-                                   g_SimulatedShot.endPosition[AXIS_Z]);
+                g_SimulatedShot.endPosition[AXIS_X],
+            g_SimulatedShot.startPosition[AXIS_Z] -
+                g_SimulatedShot.endPosition[AXIS_Z]);
         break;
     }
     g_Players[playerIndex].driveDistance = distance;
@@ -2348,7 +2340,7 @@ void MeasureTeeShot(s32 playerIndex) {
     } else if (info->kind == SURFACE_KIND_GREEN) {
       distance =
           GetCupDistance(g_CupPositionX - g_SimulatedShot.endPosition[AXIS_X],
-                         g_CupPositionZ - g_SimulatedShot.endPosition[AXIS_Z]);
+              g_CupPositionZ - g_SimulatedShot.endPosition[AXIS_Z]);
     }
     g_Players[playerIndex].pinDistance = distance;
   }
@@ -2378,7 +2370,7 @@ void StartTurnRumble(s32 playerIndex) {
       switch (nuContRmbCheck(g_PlayerControllerPorts[controllerIndex])) {
         case 0:
           nuContRmbStart(g_PlayerControllerPorts[controllerIndex],
-                         TURN_RUMBLE_FREQUENCY, TURN_RUMBLE_FRAME_COUNT);
+              TURN_RUMBLE_FREQUENCY, TURN_RUMBLE_FRAME_COUNT);
           break;
         /* The empty cases are there to match */
         case PFS_ERR_NOPACK:
@@ -2413,36 +2405,28 @@ void PlayWaitingPlayersCalls(void) {
         pressed = g_ControllerStates[controllerIndex].pressedButtons;
         if (pressed & U_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-                             CALL_OUT_SOUND_UP, CALL_OUT_VOLUME,
-                             g_Players[i].soundPan);
+              CALL_OUT_SOUND_UP, CALL_OUT_VOLUME, g_Players[i].soundPan);
         } else if (pressed & D_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-                             CALL_OUT_SOUND_DOWN, CALL_OUT_VOLUME,
-                             g_Players[i].soundPan);
+              CALL_OUT_SOUND_DOWN, CALL_OUT_VOLUME, g_Players[i].soundPan);
         } else if (pressed & L_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-                             CALL_OUT_SOUND_LEFT, CALL_OUT_VOLUME,
-                             g_Players[i].soundPan);
+              CALL_OUT_SOUND_LEFT, CALL_OUT_VOLUME, g_Players[i].soundPan);
         } else if (pressed & R_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-                             CALL_OUT_SOUND_RIGHT, CALL_OUT_VOLUME,
-                             g_Players[i].soundPan);
+              CALL_OUT_SOUND_RIGHT, CALL_OUT_VOLUME, g_Players[i].soundPan);
         } else if (pressed & U_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-                             CALL_OUT_SOUND_C_UP, CALL_OUT_VOLUME,
-                             g_Players[i].soundPan);
+              CALL_OUT_SOUND_C_UP, CALL_OUT_VOLUME, g_Players[i].soundPan);
         } else if (pressed & D_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-                             CALL_OUT_SOUND_C_DOWN, CALL_OUT_VOLUME,
-                             g_Players[i].soundPan);
+              CALL_OUT_SOUND_C_DOWN, CALL_OUT_VOLUME, g_Players[i].soundPan);
         } else if (pressed & L_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-                             CALL_OUT_SOUND_C_LEFT, CALL_OUT_VOLUME,
-                             g_Players[i].soundPan);
+              CALL_OUT_SOUND_C_LEFT, CALL_OUT_VOLUME, g_Players[i].soundPan);
         } else if (pressed & R_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-                             CALL_OUT_SOUND_C_RIGHT, CALL_OUT_VOLUME,
-                             g_Players[i].soundPan);
+              CALL_OUT_SOUND_C_RIGHT, CALL_OUT_VOLUME, g_Players[i].soundPan);
         }
       }
     }
@@ -2497,44 +2481,44 @@ void ShowHoleOutBanner(s32 playerIndex) {
 
   if (g_GameMode == GAME_MODE_SPEED_GOLF) {
     StartBanner(BANNER_FINISH);
-    PlaySound(HOLE_OUT_CALL_FINISH, HOLE_OUT_CALL_CHANNEL,
-              HOLE_OUT_CALL_VOLUME);
+    PlaySound(
+        HOLE_OUT_CALL_FINISH, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
   } else if (g_GameMode == GAME_MODE_RING_SHOT) {
     if (AreAllRingsPassed(&g_Players[playerIndex])) {
       StartBanner(BANNER_COMPLETE);
-      PlaySound(HOLE_OUT_CALL_COMPLETE, HOLE_OUT_CALL_CHANNEL,
-                HOLE_OUT_CALL_VOLUME);
+      PlaySound(
+          HOLE_OUT_CALL_COMPLETE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
     }
   } else if (strokeCount == 1) {
     banner = BANNER_HOLE_IN_ONE;
-    PlaySound(HOLE_OUT_CALL_HOLE_IN_ONE, HOLE_OUT_CALL_CHANNEL,
-              HOLE_OUT_CALL_VOLUME);
+    PlaySound(
+        HOLE_OUT_CALL_HOLE_IN_ONE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
   } else {
     switch (scoreToPar) {
       case -1:
         banner = BANNER_BIRDIE;
-        PlaySound(HOLE_OUT_CALL_BIRDIE, HOLE_OUT_CALL_CHANNEL,
-                  HOLE_OUT_CALL_VOLUME);
+        PlaySound(
+            HOLE_OUT_CALL_BIRDIE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
         break;
       case -2:
         banner = BANNER_EAGLE;
-        PlaySound(HOLE_OUT_CALL_EAGLE, HOLE_OUT_CALL_CHANNEL,
-                  HOLE_OUT_CALL_VOLUME);
+        PlaySound(
+            HOLE_OUT_CALL_EAGLE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
         break;
       case -3:
         banner = BANNER_ALBATROSS;
         PlaySound(HOLE_OUT_CALL_ALBATROSS, HOLE_OUT_CALL_CHANNEL,
-                  HOLE_OUT_CALL_VOLUME);
+            HOLE_OUT_CALL_VOLUME);
         break;
       case 0:
         banner = BANNER_PAR;
-        PlaySound(HOLE_OUT_CALL_PAR, HOLE_OUT_CALL_CHANNEL,
-                  HOLE_OUT_CALL_VOLUME);
+        PlaySound(
+            HOLE_OUT_CALL_PAR, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
         break;
       case 1:
         banner = BANNER_BOGEY;
-        PlaySound(HOLE_OUT_CALL_BOGEY, HOLE_OUT_CALL_CHANNEL,
-                  HOLE_OUT_CALL_VOLUME);
+        PlaySound(
+            HOLE_OUT_CALL_BOGEY, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
         break;
       case 2:
         banner = BANNER_STROKES_OVER_PAR + 2;
@@ -2607,19 +2591,16 @@ static inline void DebugPlaceBall(s32 playerIndex) {
   D_80227188_ovl_00 = g_CourseIndex;
   D_8022718C_ovl_00 = g_HoleIndex;
   SetGameFlag(0x9F);
-  sprintf(
-      text, "X:%X Y:%X Z:%X  Attr%d             ",
+  sprintf(text, "X:%X Y:%X Z:%X  Attr%d             ",
       g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[1],
       g_CurrentShot.ballPosition[2],
       GetSurface(g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]));
   PrintDebugText(text, 3, 6);
   ClearGameFlag(0x9F);
   if (g_ControllerData[1].button & Z_TRIG) {
-    g_CurrentShot.ballPosition[0] +=
-        g_ControllerStates[1].stickX *
+    g_CurrentShot.ballPosition[0] += g_ControllerStates[1].stickX *
         (ABS(g_ControllerStates[1].stickX) * 2 + 1);
-    g_CurrentShot.ballPosition[2] +=
-        g_ControllerStates[1].stickY *
+    g_CurrentShot.ballPosition[2] += g_ControllerStates[1].stickY *
         (ABS(g_ControllerStates[1].stickY) * 2 + 1);
     g_CurrentShot.ballPosition[1] = GetGroundHeight(
         g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]);
@@ -2755,8 +2736,8 @@ void UpdateTurns(void) {
   /* Makes the golfer translucent while a club for the green is held */
   void UpdateGolferTranslucency(void) {
     if ((GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])
-             ->surfaceMask &
-         CLUB_SURFACE_GREEN) &&
+                ->surfaceMask &
+            CLUB_SURFACE_GREEN) &&
         D_800C308C != LETTERBOX_STATE_UNK4) {
       SetCharacterTranslucent(0, TRUE);
     } else {
@@ -2780,13 +2761,13 @@ void UpdateTurns(void) {
       UpdateGolferTranslucency();
       if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
         SetSwingAnimation(0,
-                          g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
-                          SHOT_MODE_APPROACH);
+            g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+            SHOT_MODE_APPROACH);
         SetAnimationSpeed(0, 0);
       } else {
         SetStanceAnimation(0,
-                           g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
-                           g_CurrentShot.shotMode);
+            g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+            g_CurrentShot.shotMode);
         SkipToAnimationEnd(0);
       }
     }
@@ -2822,7 +2803,7 @@ void UpdateTurns(void) {
 
     if (!g_GameState.unk31 &&
         (g_GameMode == GAME_MODE_MATCH_GAME ||
-         g_GameMode == GAME_MODE_GET_CHARACTER) &&
+            g_GameMode == GAME_MODE_GET_CHARACTER) &&
         g_Players[playerIndex ^ 1].unk26 == HOLE_STATUS_HOLED_OUT) {
       g_Players[playerIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes =
           g_Players[playerIndex ^ 1]
@@ -2833,8 +2814,8 @@ void UpdateTurns(void) {
           g_Players[playerIndex]
               .holes[g_HoleIndex % COURSE_HOLE_COUNT]
               .strokes -
-          GetHandicapOffset(g_CourseIndex, g_HoleIndex,
-                            g_Players[playerIndex].handicap);
+          GetHandicapOffset(
+              g_CourseIndex, g_HoleIndex, g_Players[playerIndex].handicap);
       g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
     } else {
       g_Players[playerIndex].strokeCount = g_HolePar * GIVE_UP_PAR_MULTIPLE;
@@ -2854,13 +2835,13 @@ void UpdateTurns(void) {
             .strokes = g_Players[playerIndex]
                            .holes[g_HoleIndex % COURSE_HOLE_COUNT]
                            .strokes -
-                       1;
+            1;
         g_Players[opponentIndex].strokeCount =
             g_Players[opponentIndex]
                 .holes[g_HoleIndex % COURSE_HOLE_COUNT]
                 .strokes -
-            GetHandicapOffset(g_CourseIndex, g_HoleIndex,
-                              g_Players[opponentIndex].handicap);
+            GetHandicapOffset(
+                g_CourseIndex, g_HoleIndex, g_Players[opponentIndex].handicap);
         SkipUnmeasuredDistances(opponentIndex);
       }
     }
@@ -2881,7 +2862,7 @@ void UpdateTurns(void) {
    * mishit */
   s32 DoesImpactRumble(void) {
     return GetUnkCEntry(GetSelectedClub(), g_CurrentShot.surface,
-                        g_CurrentShot.shotMode, D_8022715C_ovl_00)
+        g_CurrentShot.shotMode, D_8022715C_ovl_00)
         ->unk5;
   }
 
@@ -2929,7 +2910,7 @@ void UpdateTurns(void) {
     nextState = state;
     D_80227168_ovl_00 = playerIndex;
     if ((state == 2 || state == 4 || state == 5 || state == 6 || state == 8 ||
-         state == 9) &&
+            state == 9) &&
         (g_PauseScreen == 0 || g_PauseScreen == 4)) {
       TickStopwatches();
     }
@@ -2954,7 +2935,7 @@ void UpdateTurns(void) {
           break;
         }
         LoadCharacter(0, g_Players[playerIndex].characterIndex,
-                      g_Players[playerIndex].paletteIndex);
+            g_Players[playerIndex].paletteIndex);
         if (g_Players[playerIndex].unk22) {
           SetTextureAnimationFrame(0, 1, 1);
           SetCharacterUnk188(0, 1);
@@ -2971,23 +2952,23 @@ void UpdateTurns(void) {
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
         g_CurrentShot.unk50 =
             GetCupDistance(g_BallPosition[0] - D_800BA9D8.cupPosition[0],
-                           g_BallPosition[2] - g_CupPositionZ);
+                g_BallPosition[2] - g_CupPositionZ);
         g_RoundHud.greenGridState = 1;
         g_RoundHud.unkF = 1;
         g_RoundHud.unk12 = 1;
         D_80227154_ovl_00 = g_CurrentShot.clubSlot;
         D_8022716C_ovl_00 = g_CurrentShot.shotMode;
         D_800C307C = 0;
-        SetCharacterClub(0,
-                         g_Players[playerIndex].clubs[g_CurrentShot.clubSlot]);
+        SetCharacterClub(
+            0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot]);
         if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
-          SetSwingAnimation(
-              0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+          SetSwingAnimation(0,
+              g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
               SHOT_MODE_APPROACH);
           SetAnimationSpeed(0, 0.0f);
         } else {
-          SetStanceAnimation(
-              0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+          SetStanceAnimation(0,
+              g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
               g_CurrentShot.shotMode);
         }
         PlaceCharacterForShot(0);
@@ -3000,7 +2981,7 @@ void UpdateTurns(void) {
           }
           D_80227194_ovl_00 = 1;
         } else if (IsGameFlagSet(0x32) || g_Players[playerIndex].unk1E[0] ||
-                   IsGameFlagSet(0x9B)) {
+            IsGameFlagSet(0x9B)) {
           g_Players[playerIndex].unk1E[1] = -9;
           LoadOverlay(GetOverlayOfModule(7));
           ListOffsetsByDistance();
@@ -3016,8 +2997,9 @@ void UpdateTurns(void) {
         }
         D_8022B5C0_ovl_00 = 0;
         D_80223E44_ovl_00 = 0;
-        if (!D_801B60B9 && (g_GameMode == GAME_MODE_MATCH_GAME ||
-                            g_GameMode == GAME_MODE_GET_CHARACTER)) {
+        if (!D_801B60B9 &&
+            (g_GameMode == GAME_MODE_MATCH_GAME ||
+                g_GameMode == GAME_MODE_GET_CHARACTER)) {
           s32 scoreToPar = GetNetScoreToPar(g_HoleIndex, playerIndex);
 
           g_RoundHud.skinsTotals[playerIndex] =
@@ -3052,7 +3034,7 @@ void UpdateTurns(void) {
             if (g_IsMiniGolf) {
               PlaySong(song, 0x11);
             } else if (g_GameMode != GAME_MODE_SPEED_GOLF &&
-                       g_GameMode != GAME_MODE_RING_SHOT) {
+                g_GameMode != GAME_MODE_RING_SHOT) {
               s32 scoreToPar =
                   g_Players[playerIndex].strokeCount - (g_HolePar - 1);
 
@@ -3114,21 +3096,21 @@ void UpdateTurns(void) {
               } else if (g_GameMode == GAME_MODE_RING_SHOT) {
                 song = 0x1E;
               } else if (GetLastHoleIndex() == g_HoleIndex &&
-                         g_PlayerCount != 1) {
+                  g_PlayerCount != 1) {
                 song = 0x14;
               } else if ((g_GameMode == GAME_MODE_MATCH_GAME ||
-                          g_GameMode == GAME_MODE_GET_CHARACTER) &&
-                         GetMatchStanding(0, 1) != 0) {
+                             g_GameMode == GAME_MODE_GET_CHARACTER) &&
+                  GetMatchStanding(0, 1) != 0) {
                 song = 0x14;
               } else if (g_PlayerCount == 4 &&
-                         (g_Players[0].characterIndex == 10 ||
-                          g_Players[0].characterIndex == 11) &&
-                         (g_Players[1].characterIndex == 10 ||
-                          g_Players[1].characterIndex == 11) &&
-                         (g_Players[2].characterIndex == 10 ||
-                          g_Players[2].characterIndex == 11) &&
-                         (g_Players[3].characterIndex == 10 ||
-                          g_Players[3].characterIndex == 11)) {
+                  (g_Players[0].characterIndex == 10 ||
+                      g_Players[0].characterIndex == 11) &&
+                  (g_Players[1].characterIndex == 10 ||
+                      g_Players[1].characterIndex == 11) &&
+                  (g_Players[2].characterIndex == 10 ||
+                      g_Players[2].characterIndex == 11) &&
+                  (g_Players[3].characterIndex == 10 ||
+                      g_Players[3].characterIndex == 11)) {
                 song = 0x28;
               } else {
                 switch (g_CourseIndex) {
@@ -3218,8 +3200,7 @@ void UpdateTurns(void) {
             HideRoundHud();
           }
         } else if (g_PauseScreen == 1 && D_80227194_ovl_00 == 0 &&
-                   (g_TurnController.pressedButtons &
-                    (START_BUTTON | B_BUTTON))) {
+            (g_TurnController.pressedButtons & (START_BUTTON | B_BUTTON))) {
           ForceStopRumble();
           PlaySound(0x66, 2, 0x7F);
           RequestPauseMenu(0, -1);
@@ -3258,10 +3239,10 @@ void UpdateTurns(void) {
             } else if (g_GameMode == GAME_MODE_SPEED_GOLF) {
               SetScorecardLayout(4);
             } else if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                       g_GameMode == GAME_MODE_CLUB_SLOTS) {
+                g_GameMode == GAME_MODE_CLUB_SLOTS) {
               SetScorecardLayout(2);
             } else if (g_GameMode == GAME_MODE_MATCH_GAME ||
-                       g_GameMode == GAME_MODE_GET_CHARACTER) {
+                g_GameMode == GAME_MODE_GET_CHARACTER) {
               SetScorecardLayout(1);
             } else {
               SetScorecardLayout(0);
@@ -3360,8 +3341,7 @@ void UpdateTurns(void) {
             BuildShotPreview(&D_80227150_ovl_00, state);
             break;
           }
-          SetCharacterSlotAlpha(
-              0,
+          SetCharacterSlotAlpha(0,
               sinf(g_Players[playerIndex].stopwatchFrameCount * 0.20933335f) *
                       32.0f +
                   64.0f);
@@ -3414,12 +3394,10 @@ void UpdateTurns(void) {
             HandleShotModeInput();
           }
           PoseGolferForShot();
-          D_80224000_ovl_00 = GetAnimationEventFrame(
-              0,
-              GetAnimationIndex(
-                  0,
-                  GetSwingAnimation(
-                      0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+          D_80224000_ovl_00 = GetAnimationEventFrame(0,
+              GetAnimationIndex(0,
+                  GetSwingAnimation(0,
+                      g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
                       g_CurrentShot.shotMode)),
               6);
           D_80224004_ovl_00 = 0;
@@ -3437,16 +3415,16 @@ void UpdateTurns(void) {
           }
           if (D_800C308C == 0 || D_800C308C == 5) {
             if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
-              SetSwingAnimation(
-                  0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+              SetSwingAnimation(0,
+                  g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
                   SHOT_MODE_APPROACH);
               SetAnimationSpeed(0, 0.0f);
             } else {
               SetAnimationSpeed(0, 1.0f);
             }
           } else {
-            SetStanceAnimation(
-                0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+            SetStanceAnimation(0,
+                g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
                 g_CurrentShot.shotMode);
             SetAnimationSpeed(0, 0.0f);
           }
@@ -3459,8 +3437,8 @@ void UpdateTurns(void) {
             g_CurrentShot.unk40 = 0;
             g_CurrentShot.unk4 = 0;
             g_CurrentShot.unk8 = 0;
-            PlaySound(SOUND_IMPACT_OFF_MARK, g_NextSoundChannel,
-                      IMPACT_SOUND_VOLUME);
+            PlaySound(
+                SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
             SetFramebufferCount(2);
             nextState = 4;
             if (g_ScreenEffect != 3) {
@@ -3586,13 +3564,13 @@ void UpdateTurns(void) {
           }
           PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
         } else if (g_CurrentShot.unk40 >= 59 ||
-                   (D_80227194_ovl_00 == 0 &&
-                    (g_TurnController.pressedButtons & B_BUTTON))) {
+            (D_80227194_ovl_00 == 0 &&
+                (g_TurnController.pressedButtons & B_BUTTON))) {
           UpdateGolferTranslucency();
           nextState = 2;
           ResetShotModeChange();
-          PlaySound(SOUND_IMPACT_MISHIT, g_NextSoundChannel,
-                    IMPACT_SOUND_VOLUME);
+          PlaySound(
+              SOUND_IMPACT_MISHIT, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
           if (g_RoundHud.greenGridState != 0) {
             g_RoundHud.greenGridState = 1;
           }
@@ -3632,8 +3610,8 @@ void UpdateTurns(void) {
         D_80227160_ovl_00 = g_CurrentShot.unk14;
         D_80227164_ovl_00 = g_CurrentShot.unk18;
         if (((D_80227194_ovl_00 != 0)
-                 ? (g_CurrentShot.unk40 == D_80104F78.unk8)
-                 : (g_TurnController.pressedButtons & A_BUTTON)) ||
+                    ? (g_CurrentShot.unk40 == D_80104F78.unk8)
+                    : (g_TurnController.pressedButtons & A_BUTTON)) ||
             g_CurrentShot.unk40 >= 69) {
           g_CurrentShot.unk8 = g_CurrentShot.unk40;
           D_8022715C_ovl_00 = g_CurrentShot.unk40 - 60;
@@ -3661,10 +3639,10 @@ void UpdateTurns(void) {
               !D_80224004_ovl_00) {
             D_80227170_ovl_00[playerIndex] = 0;
             D_80224004_ovl_00 = 1;
-            SetCharacterAnimation(
-                0, GetSwingAnimation(
-                       0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
-                       g_CurrentShot.shotMode));
+            SetCharacterAnimation(0,
+                GetSwingAnimation(0,
+                    g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+                    g_CurrentShot.shotMode));
             SetAnimationSpeed(0, 1.0f);
             SetPlaysRandomTextureAnimation(0, 0);
           }
@@ -3738,12 +3716,9 @@ void UpdateTurns(void) {
               }
             }
             if (D_80223FF8_ovl_00 < 2) {
-              D_80224000_ovl_00 = GetAnimationEventFrame(
-                  0,
-                  GetAnimationIndex(
-                      0,
-                      GetSwingAnimation(
-                          0,
+              D_80224000_ovl_00 = GetAnimationEventFrame(0,
+                  GetAnimationIndex(0,
+                      GetSwingAnimation(0,
                           g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
                           shotMode)),
                   6);
@@ -3751,10 +3726,10 @@ void UpdateTurns(void) {
           } else {
             shotMode = g_CurrentShot.shotMode;
           }
-          SetCharacterAnimation(
-              0, GetSwingAnimation(
-                     0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
-                     shotMode));
+          SetCharacterAnimation(0,
+              GetSwingAnimation(0,
+                  g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
+                  shotMode));
           SetPlaysRandomTextureAnimation(0, 0);
           if (D_80223FF8_ovl_00 >= 3) {
             if (D_80223FF8_ovl_00 == 3) {
@@ -3838,16 +3813,16 @@ void UpdateTurns(void) {
         if (g_MergedController.buttons & (Z_TRIG | L_TRIG)) {
           u32 previousDistance =
               IntLength2D(previousPosition[0] - D_800BA9D8.cupPosition[0],
-                          previousPosition[2] - g_CupPositionZ);
+                  previousPosition[2] - g_CupPositionZ);
 
           for (i = 0; i < 4; i++) {
             u32 distance =
                 IntLength2D(g_BallPosition[0] - D_800BA9D8.cupPosition[0],
-                            g_BallPosition[2] - g_CupPositionZ);
+                    g_BallPosition[2] - g_CupPositionZ);
 
             if (g_TurnBallSimulation.isRunning != 2 || g_IsMiniGolf ||
                 (GetSurfaceInfo(g_TurnBallSimulation.unkA4)->kind == 0xB &&
-                 (s32)distance < (s32)previousDistance)) {
+                    (s32)distance < (s32)previousDistance)) {
               break;
             }
             StepBallSimulation(&g_TurnBallSimulation);
@@ -3960,8 +3935,8 @@ void UpdateTurns(void) {
           } else if (surfaceInfo->kind == 0xA) {
             player->ballPosition[0] = g_TurnBallSimulation.unkC[0];
             player->ballPosition[2] = g_TurnBallSimulation.unkC[2];
-            player->ballPosition[1] = GetGroundHeight(player->ballPosition[0],
-                                                      player->ballPosition[2]);
+            player->ballPosition[1] = GetGroundHeight(
+                player->ballPosition[0], player->ballPosition[2]);
             player->ballSurface =
                 GetSurface(player->ballPosition[0], player->ballPosition[2]);
             g_Players[playerIndex].strokeCount++;
@@ -3988,15 +3963,16 @@ void UpdateTurns(void) {
             g_Players[playerIndex]
                 .holes[g_HoleIndex % COURSE_HOLE_COUNT]
                 .strokes = g_Players[playerIndex].strokeCount;
-            if (!D_801B60B9 && ((g_GameMode == GAME_MODE_MATCH_GAME ||
-                                 g_GameMode == GAME_MODE_GET_CHARACTER) ||
-                                (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                                 g_GameMode == GAME_MODE_CLUB_SLOTS))) {
+            if (!D_801B60B9 &&
+                ((g_GameMode == GAME_MODE_MATCH_GAME ||
+                     g_GameMode == GAME_MODE_GET_CHARACTER) ||
+                    (g_GameMode == GAME_MODE_SKINS_MATCH ||
+                        g_GameMode == GAME_MODE_CLUB_SLOTS))) {
               g_Players[playerIndex]
                   .holes[g_HoleIndex % COURSE_HOLE_COUNT]
-                  .strokes += GetHandicapOffset(
-                  GetCourseRecordIndex(g_GameMode), g_HoleIndex,
-                  g_Players[playerIndex].handicap);
+                  .strokes +=
+                  GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
+                      g_HoleIndex, g_Players[playerIndex].handicap);
             }
             nextState = 0xB;
             g_Players[playerIndex]
@@ -4019,8 +3995,9 @@ void UpdateTurns(void) {
             } else if (g_GameMode == GAME_MODE_TRAINING) {
               nextState = 0xF;
               OpenChoiceBox(g_CourseIndex == 0xC ? 3 : 0);
-            } else if (!D_801B60B9 && (g_GameMode == GAME_MODE_MATCH_GAME ||
-                                       g_GameMode == GAME_MODE_GET_CHARACTER)) {
+            } else if (!D_801B60B9 &&
+                (g_GameMode == GAME_MODE_MATCH_GAME ||
+                    g_GameMode == GAME_MODE_GET_CHARACTER)) {
               if (g_Players[playerIndex].strokeCount >= g_HolePar * 3 ||
                   GetMatchHoleResult(0, 1)) {
                 nextState = 0xB;
@@ -4030,8 +4007,9 @@ void UpdateTurns(void) {
                 StartHudAnimation(2);
                 nextState = 0x10;
               }
-            } else if (!D_801B60B9 && (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                                       g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+            } else if (!D_801B60B9 &&
+                (g_GameMode == GAME_MODE_SKINS_MATCH ||
+                    g_GameMode == GAME_MODE_CLUB_SLOTS)) {
               s8 results[MAX_PLAYER_COUNT];
 
               if (g_Players[playerIndex].strokeCount >= g_HolePar * 3) {
@@ -4199,8 +4177,8 @@ void UpdateTurns(void) {
               OpenChoiceBox(1);
             }
           } else if (g_GameMode == GAME_MODE_RING_SHOT &&
-                     (!g_TurnBallSimulation.unkA0 ||
-                      !HasNoRingsLeft(&g_Players[playerIndex]))) {
+              (!g_TurnBallSimulation.unkA0 ||
+                  !HasNoRingsLeft(&g_Players[playerIndex]))) {
             nextState = 0xF;
             OpenChoiceBox(2);
           } else {
@@ -4288,7 +4266,7 @@ void UpdateTurns(void) {
           if (D_801B60B9) {
             nextState = 0x14;
           } else if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                     g_GameMode == GAME_MODE_CLUB_SLOTS) {
+              g_GameMode == GAME_MODE_CLUB_SLOTS) {
             s8 results[MAX_PLAYER_COUNT];
             s32 isAnyOut = FALSE;
             s32 isHoleOver = GetGroupHoleResult(results);
@@ -4306,10 +4284,10 @@ void UpdateTurns(void) {
                 g_GameMode == GAME_MODE_GET_CHARACTER) {
               s32 result;
 
+              GetHandicapOffset(
+                  g_CourseIndex, g_HoleIndex, g_Players[playerIndex].handicap);
               GetHandicapOffset(g_CourseIndex, g_HoleIndex,
-                                g_Players[playerIndex].handicap);
-              GetHandicapOffset(g_CourseIndex, g_HoleIndex,
-                                g_Players[playerIndex ^ 1].handicap);
+                  g_Players[playerIndex ^ 1].handicap);
               result = GetMatchHoleResult(playerIndex, playerIndex ^ 1);
               osSyncPrintf("CheckHoltOutMatch %d\n", result);
               if (result == 1) {
@@ -4318,14 +4296,13 @@ void UpdateTurns(void) {
                     .strokes = g_Players[playerIndex]
                                    .holes[g_HoleIndex % COURSE_HOLE_COUNT]
                                    .strokes +
-                               1;
+                    1;
                 g_Players[playerIndex ^ 1].strokeCount =
                     g_Players[playerIndex ^ 1]
                         .holes[g_HoleIndex % COURSE_HOLE_COUNT]
                         .strokes -
                     GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
-                                      g_HoleIndex,
-                                      g_Players[playerIndex ^ 1].handicap);
+                        g_HoleIndex, g_Players[playerIndex ^ 1].handicap);
                 g_Players[playerIndex ^ 1].unk26 = HOLE_STATUS_OUT;
               } else if (result == 2) {
                 g_Players[playerIndex ^ 1]
@@ -4333,14 +4310,13 @@ void UpdateTurns(void) {
                     .strokes = g_Players[playerIndex]
                                    .holes[g_HoleIndex % COURSE_HOLE_COUNT]
                                    .strokes -
-                               1;
+                    1;
                 g_Players[playerIndex ^ 1].strokeCount =
                     g_Players[playerIndex ^ 1]
                         .holes[g_HoleIndex % COURSE_HOLE_COUNT]
                         .strokes -
                     GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
-                                      g_HoleIndex,
-                                      g_Players[playerIndex ^ 1].handicap);
+                        g_HoleIndex, g_Players[playerIndex ^ 1].handicap);
               } else if (result == 3 && g_Players[playerIndex ^ 1].unk26 == 0) {
                 g_Players[playerIndex ^ 1]
                     .holes[g_HoleIndex % COURSE_HOLE_COUNT]
@@ -4352,8 +4328,7 @@ void UpdateTurns(void) {
                         .holes[g_HoleIndex % COURSE_HOLE_COUNT]
                         .strokes -
                     GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
-                                      g_HoleIndex,
-                                      g_Players[playerIndex ^ 1].handicap);
+                        g_HoleIndex, g_Players[playerIndex ^ 1].handicap);
                 g_Players[playerIndex ^ 1].unk26 = HOLE_STATUS_OUT;
               }
             }
@@ -4384,7 +4359,7 @@ void UpdateTurns(void) {
         if (i != g_PlayerCount) {
           ClearReactionSpot();
           LoadCharacter(0, g_Players[i].characterIndex + CHARACTER_COUNT,
-                        g_Players[i].paletteIndex);
+              g_Players[i].paletteIndex);
           ConsiderReactionSpot(g_Players[i].ballPosition);
           ConsiderReactionSpot(D_800BA9D8.cupPosition);
           ConsiderReactionSpot(D_800BA9D8.teePosition);
@@ -4424,8 +4399,8 @@ void UpdateTurns(void) {
     g_BallSimulations[0] = g_TurnBallSimulation;
     g_PreviousBallSurfaceInfo = D_80227150_ovl_00;
   }
-  MarkNearbyGroundTiles(g_CurrentShot.ballPosition[0],
-                        g_CurrentShot.ballPosition[2]);
+  MarkNearbyGroundTiles(
+      g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]);
   GetBallSurfaceInfo(&g_Players[D_801B60A8], &D_80227150_ovl_00);
   if (areCallsAllowed) {
     PlayWaitingPlayersCalls();

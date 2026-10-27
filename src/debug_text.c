@@ -58,8 +58,8 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, TextRenderMode(1), TextRenderMode(2));
-  gDPSetCombineMode(gfx++, G_CC_MODULATEIDECALA_PRIM,
-                    G_CC_MODULATEIDECALA_PRIM);
+  gDPSetCombineMode(
+      gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
@@ -73,9 +73,8 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock_4b(gfx++, (u32)f_DebugFont & ~7, G_IM_FMT_IA, FONT_WIDTH,
-                         FONT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                         G_TX_NOLOD, G_TX_NOLOD);
+      FONT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -106,8 +105,7 @@ void DrawTextIntoTexture(s8* text, s32 length, u16* texture) {
     }
     character -= FIRST_GLYPH;
     y = 0;
-    fontIndex =
-        (character & (GLYPHS_PER_FONT_ROW - 1)) *
+    fontIndex = (character & (GLYPHS_PER_FONT_ROW - 1)) *
             (GLYPH_SIZE / PIXELS_PER_FONT_WORD) |
         (character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT);
     textureIndex = index;
@@ -159,8 +157,7 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
     character = FIRST_GLYPH;
   }
   character -= FIRST_GLYPH;
-  glyphStart =
-      (character & (GLYPHS_PER_FONT_ROW - 1)) *
+  glyphStart = (character & (GLYPHS_PER_FONT_ROW - 1)) *
           (GLYPH_SIZE / PIXELS_PER_FONT_WORD) +
       (character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT);
   y = 0;
@@ -171,10 +168,10 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
   for (; y < GLYPH_SIZE; y++) {
     for (x = 0; x < GLYPH_SIZE; x++) {
       color = ((f_DebugFont[fontIndex + x / PIXELS_PER_FONT_WORD] >>
-                ((3 - (x & 3)) * 4)) &
-               0xF) == FONT_INK
-                  ? MESSAGE_INK_COLOR
-                  : MESSAGE_PAPER_COLOR;
+                   ((3 - (x & 3)) * 4)) &
+                  0xF) == FONT_INK
+          ? MESSAGE_INK_COLOR
+          : MESSAGE_PAPER_COLOR;
       /* The glyph start is reused for the pixel row, to match */
       glyphStart =
           (row * GLYPH_SIZE + y) * MESSAGE_SCREEN_WIDTH + column * GLYPH_SIZE;
@@ -196,7 +193,7 @@ void ClearDebugText(void) {
   u8* cell;
 
   for (index = ARRAY_COUNT(f_DebugText) - 1, cell = &f_DebugText[index];
-       index >= 0; index--) {
+      index >= 0; index--) {
     *cell-- = 0;
   }
 }
@@ -235,11 +232,10 @@ void DrawDebugText(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
       }
       gSPTextureRectangle(gfx++, (column * GLYPH_SIZE) << 2,
-                          (row * GLYPH_SIZE) << 2,
-                          (column * GLYPH_SIZE + GLYPH_SIZE) << 2,
-                          (row * GLYPH_SIZE + GLYPH_SIZE) << 2, G_TX_RENDERTILE,
-                          ((glyph & 0x1F) * GLYPH_SIZE) << 5,
-                          ((glyph >> 5) * GLYPH_SIZE) << 5, 1 << 10, 1 << 10);
+          (row * GLYPH_SIZE) << 2, (column * GLYPH_SIZE + GLYPH_SIZE) << 2,
+          (row * GLYPH_SIZE + GLYPH_SIZE) << 2, G_TX_RENDERTILE,
+          ((glyph & 0x1F) * GLYPH_SIZE) << 5, ((glyph >> 5) * GLYPH_SIZE) << 5,
+          1 << 10, 1 << 10);
     }
   }
   gDPPipeSync(gfx++);
@@ -336,7 +332,7 @@ void AddToDebugLog(char* text) {
     if (character == '\r' || character == '\n') {
       f_DebugLogCursor =
           ((f_DebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT +
-           TEXT_COLUMN_COUNT) %
+              TEXT_COLUMN_COUNT) %
           ARRAY_COUNT(f_DebugLog);
       for (count = TEXT_COLUMN_COUNT; count != 0; count--) {
         f_DebugLog[f_DebugLogCursor++] = ' ';
@@ -351,14 +347,13 @@ void AddToDebugLog(char* text) {
 
 /* Copies the last lines of the log into the grid */
 void ShowDebugLog(void) {
-  s32 textIndex =
-      ARRAY_COUNT(f_DebugText) -
+  s32 textIndex = ARRAY_COUNT(f_DebugText) -
       (f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT;
   /* The line is reused for the cursor's line, to match */
   s32 line = f_DebugLogCursor / TEXT_COLUMN_COUNT;
   s32 logIndex = ((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT +
-                  ARRAY_COUNT(f_DebugLog)) %
-                 ARRAY_COUNT(f_DebugLog);
+                     ARRAY_COUNT(f_DebugLog)) %
+      ARRAY_COUNT(f_DebugLog);
   s32 column;
 
   for (line = 0; line < f_DebugLogShownLineCount; line++) {

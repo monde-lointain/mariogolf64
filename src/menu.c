@@ -805,7 +805,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
         if (index + 1 < scanIndex) {
           for (runIndex = index; runIndex != scanIndex; runIndex++) {
             for (otherIndex = runIndex + 1; otherIndex != scanIndex;
-                 otherIndex++) {
+                otherIndex++) {
               if (save->unkD78[courseIndex][runIndex] >
                   save->unkD78[courseIndex][otherIndex]) {
                 save->bestTimes[courseIndex][runIndex] =
@@ -833,7 +833,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
         }
         if (index < BEST_TIME_COUNT) {
           for (scanIndex = BEST_TIME_COUNT - 1; index < scanIndex;
-               scanIndex--) {
+              scanIndex--) {
             save->bestTimes[courseIndex][scanIndex] =
                 save->bestTimes[courseIndex][scanIndex - 1];
             save->unkE08[courseIndex][scanIndex] =
@@ -1084,7 +1084,7 @@ void func_8005CA48(void) {
         name = g_GameBoyCharacters[index].name;
       }
       for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH;
-           byteIndex++) {
+          byteIndex++) {
         letter = *name++;
         D_800C2AA8[index][byteIndex] = letter;
         g_ImportedCharacters[index].name[byteIndex] = letter;
@@ -1354,7 +1354,7 @@ void func_8005D334(void) {
     g_ImportedCharacters[index].unk4 = 0;
     g_ImportedCharacters[index].unk6 = 0;
     for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH;
-         byteIndex++) {
+        byteIndex++) {
       g_ImportedCharacters[index].name[byteIndex] = 0;
     }
     g_ImportedCharacters[index].unk14 = 0;
@@ -1763,9 +1763,9 @@ s32 ReadSaveCopies(SaveData* save, u8 isInSram) {
       }
     } else {
       nuPiReadSram(g_SaveCopyLocations[copyIndex].dataSramAddress, save,
-                   sizeof(SaveData));
+          sizeof(SaveData));
       nuPiReadSram(g_SaveCopyLocations[copyIndex].checkSramAddress, check,
-                   sizeof(SaveCheck));
+          sizeof(SaveCheck));
     }
     if (save->magic != SAVE_MAGIC) {
       unmarkedCount++;
@@ -1796,7 +1796,7 @@ s32 WriteSaveCopies(SaveData* save, u8 isInSram) {
 
   check = (SaveCheck*)ALIGN_FOR_DMA(checkBuffer);
   for (dateIndex = 0; dateIndex < ARRAY_COUNT(save->invertedBuildDate);
-       dateIndex++) {
+      dateIndex++) {
     save->invertedBuildDate[dateIndex] = ~g_RomBuildDate[dateIndex];
   }
   crc = ComputeCrc16((u8*)save, sizeof(SaveData));
@@ -1805,15 +1805,15 @@ s32 WriteSaveCopies(SaveData* save, u8 isInSram) {
     check->keyedCrc = check->key ^ crc;
     if (!isInSram) {
       if (WriteHostFile(g_SaveCopyLocations[copyIndex].dataFileName,
-                        sizeof(SaveData)) == HOST_FILE_OK) {
-        WriteHostFile(g_SaveCopyLocations[copyIndex].checkFileName,
-                      sizeof(SaveCheck));
+              sizeof(SaveData)) == HOST_FILE_OK) {
+        WriteHostFile(
+            g_SaveCopyLocations[copyIndex].checkFileName, sizeof(SaveCheck));
       }
     } else {
       nuPiWriteSram(g_SaveCopyLocations[copyIndex].dataSramAddress, save,
-                    sizeof(SaveData));
+          sizeof(SaveData));
       nuPiWriteSram(g_SaveCopyLocations[copyIndex].checkSramAddress, check,
-                    sizeof(SaveCheck));
+          sizeof(SaveCheck));
     }
   }
   return TRUE;

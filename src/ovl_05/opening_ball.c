@@ -118,8 +118,8 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   sideSign = 1;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     groundHeight = GetGroundHeight(simulation->position[AXIS_X],
-                                   simulation->position[AXIS_Z]) -
-                   1.536f;
+                       simulation->position[AXIS_Z]) -
+        1.536f;
     if (groundHeight < simulation->position[AXIS_Y]) {
       simulation->position[AXIS_Y] = groundHeight;
     }
@@ -145,7 +145,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     speed = GetPuttPower(shot->unk8, shot->shotMode);
   } else {
     speed = GetClubPower(club, shot->shotMode) *
-            (shot->unk8 + entry->unk0 * 2) / 256;
+        (shot->unk8 + entry->unk0 * 2) / 256;
     if (speed <= 0) {
       speed = 10;
     }
@@ -156,7 +156,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     blend = PickLieBlend();
     GetSurfacePercentRange(info, club, percentRange);
     speed = (percentRange[0] * blend + percentRange[1] * (1.0f - blend)) *
-            speed * 0.01f;
+        speed * 0.01f;
   } else {
     s32 percent = 198; /* The local is there to match */
 
@@ -167,14 +167,14 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     pitch = 0.0f;
   }
   simulation->unk38 = (((sideSign * entry->unk3 + shot->unk10) * 2 +
-                        (club->sideSpin * 2) * sideSign) *
-                       speed) *
-                      0.00078125f;
+                           (club->sideSpin * 2) * sideSign) *
+                          speed) *
+      0.00078125f;
   pitch += (f32)club->unk10 * shot->unk14 * 0.00054541545f;
   yawRadians = (u16)shot->unk0 * BINARY_ANGLE_TO_RADIANS;
   spinBase = club->spin * 0.5f;
   simulation->unk34 = ((spinBase + 25.0f) * (shot->unk14 * 0.006f) - spinBase) *
-                      speed * 0.0078125f;
+      speed * 0.0078125f;
   simulation->unk40 = 0.0f;
   simulation->unk3C = yawRadians;
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
@@ -194,9 +194,9 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   simulation->velocity[AXIS_X] = cosf(yawRadians) * speed;
   simulation->velocity[AXIS_Z] = sinf(yawRadians) * speed;
   osSyncPrintf("SVX%f, SVY%f, SVZ%f\n",
-               simulation->velocity[AXIS_X] * 0.00007030687f,
-               simulation->velocity[AXIS_Y] * 0.00007030687f,
-               simulation->velocity[AXIS_Z] * 0.00007030687f);
+      simulation->velocity[AXIS_X] * 0.00007030687f,
+      simulation->velocity[AXIS_Y] * 0.00007030687f,
+      simulation->velocity[AXIS_Z] * 0.00007030687f);
   if (club->surfaceMask & CLUB_SURFACE_GREEN) {
     simulation->isRunning = BALL_STATE_ROLLING;
     simulation->velocity[AXIS_Y] += PUTT_VELOCITY_Y_OFFSET;
@@ -233,14 +233,14 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       PrintDebugText(text, 3, 10);
       sprintf(text, "SpinVel = %fRPM      ", simulation->unk34 * 0.8741959f);
       PrintDebugText(text, 3, 11);
-      sprintf(text, "SpinAngle = %3.3d/360",
-              (s32)(simulation->unk3C * 57.295776f));
+      sprintf(
+          text, "SpinAngle = %3.3d/360", (s32)(simulation->unk3C * 57.295776f));
       PrintDebugText(text, 3, 12);
-      sprintf(text, "SpinVelX = %fkm/h      ",
-              simulation->unk34 * 0.0070306873f);
+      sprintf(
+          text, "SpinVelX = %fkm/h      ", simulation->unk34 * 0.0070306873f);
       PrintDebugText(text, 3, 13);
-      sprintf(text, "SpinVelY = %fkm/h      ",
-              simulation->unk38 * 0.0070306873f);
+      sprintf(
+          text, "SpinVelY = %fkm/h      ", simulation->unk38 * 0.0070306873f);
       PrintDebugText(text, 3, 14);
     }
   }

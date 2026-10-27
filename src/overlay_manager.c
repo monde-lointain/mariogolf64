@@ -19,15 +19,24 @@
 /* Size of the RDRAM that every console has, without the Expansion Pak */
 #define BASE_RDRAM_SIZE 0x400000
 
-#define OVERLAY_ENTRY(name, moduleIds, onLoad, onUnload)                     \
-  {FALSE,       moduleIds,       (u32)name##_ROM_START, (u32)name##_ROM_END, \
-   name##_VRAM, name##_TEXT_END, name##_BSS_START,      name##_BSS_END,      \
-   onLoad,      onUnload}
+#define OVERLAY_ENTRY(name, moduleIds, onLoad, onUnload)                      \
+  {FALSE, moduleIds, (u32)name##_ROM_START, (u32)name##_ROM_END, name##_VRAM, \
+      name##_TEXT_END, name##_BSS_START, name##_BSS_END, onLoad, onUnload}
 
 static s8 f_UnusedModuleIds[] = {0x00, MODULE_ID_END};
 static s8 f_ModuleIdsOfOverlays00To02[] = {
-    0x0F, 0x09, 0x01, 0x0A, 0x0B, 0x11,
-    0x12, 0x14, 0x17, 0x18, 0x19, MODULE_ID_END,
+    0x0F,
+    0x09,
+    0x01,
+    0x0A,
+    0x0B,
+    0x11,
+    0x12,
+    0x14,
+    0x17,
+    0x18,
+    0x19,
+    MODULE_ID_END,
 };
 static s8 f_ModuleIdsOfOverlay03[] = {0x02, MODULE_ID_END};
 static s8 f_ModuleIdsOfOverlay04[] = {0x06, 0x1C, MODULE_ID_END};
@@ -47,26 +56,26 @@ static s8 f_ModuleIdsOfOverlay16[] = {0x1F, MODULE_ID_END};
 Overlay g_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
-    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, OnLoadOverlay2,
-                  FreeScenery),
-    OVERLAY_ENTRY(ovl_01, f_ModuleIdsOfOverlay03, LoadMenuResources,
-                  FreeMenuResources),
+    OVERLAY_ENTRY(
+        ovl_00, f_ModuleIdsOfOverlays00To02, OnLoadOverlay2, FreeScenery),
+    OVERLAY_ENTRY(
+        ovl_01, f_ModuleIdsOfOverlay03, LoadMenuResources, FreeMenuResources),
     OVERLAY_ENTRY(ovl_02, f_ModuleIdsOfOverlay04, NULL, NULL),
     OVERLAY_ENTRY(ovl_03, f_ModuleIdsOfOverlay05, NULL, NULL),
     OVERLAY_ENTRY(ovl_04, f_ModuleIdsOfOverlay06, NULL, NULL),
     OVERLAY_ENTRY(ovl_05, f_ModuleIdsOfOverlay07, OnLoadOverlay7, FreeOpening),
-    OVERLAY_ENTRY(ovl_06, f_ModuleIdsOfOverlay08, LoadTitleScreen,
-                  UnloadTitleScreen),
+    OVERLAY_ENTRY(
+        ovl_06, f_ModuleIdsOfOverlay08, LoadTitleScreen, UnloadTitleScreen),
     OVERLAY_ENTRY(ovl_07, f_ModuleIdsOfOverlay09, LoadBootLogos, NULL),
     OVERLAY_ENTRY(ovl_08, f_ModuleIdsOfOverlay10, NULL, NULL),
     OVERLAY_ENTRY(ovl_09, f_ModuleIdsOfOverlay11, NULL, NULL),
     OVERLAY_ENTRY(ovl_10, f_ModuleIdsOfOverlay12, NULL, NULL),
     OVERLAY_ENTRY(ovl_11, f_ModuleIdsOfOverlay13, NULL, NULL),
     OVERLAY_ENTRY(ovl_12, f_ModuleIdsOfOverlay14, NULL, NULL),
-    OVERLAY_ENTRY(ovl_13, f_ModuleIdsOfOverlay15, LoadTransmitMenu,
-                  FreeTransmitMenu),
-    OVERLAY_ENTRY(ovl_14, f_ModuleIdsOfOverlay16, LoadStaffRoll,
-                  UnloadStaffRoll),
+    OVERLAY_ENTRY(
+        ovl_13, f_ModuleIdsOfOverlay15, LoadTransmitMenu, FreeTransmitMenu),
+    OVERLAY_ENTRY(
+        ovl_14, f_ModuleIdsOfOverlay16, LoadStaffRoll, UnloadStaffRoll),
 };
 
 /* The index of the overlay that holds each module, or -1 for none */
@@ -141,7 +150,7 @@ s32 CanLoadOverlay(s32 overlayId) {
   }
 
   for (otherOverlayIndex = 0; otherOverlayIndex < OVERLAY_COUNT;
-       otherOverlayIndex++) {
+      otherOverlayIndex++) {
     if (otherOverlayIndex == overlayIndex) {
       continue;
     }
@@ -156,7 +165,7 @@ s32 CanLoadOverlay(s32 overlayId) {
     if (g_Overlays[otherOverlayIndex].isLoaded) {
       if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Conflicting %d m.s. and other moduleset[%x] is alive\n",
-                     overlayIndex, otherOverlayIndex);
+            overlayIndex, otherOverlayIndex);
       }
       return FALSE;
     }
@@ -164,7 +173,7 @@ s32 CanLoadOverlay(s32 overlayId) {
     moduleIndex = 0;
     while (moduleIds[moduleIndex] != MODULE_ID_END) {
       if ((u32)(g_FrameCount -
-                g_ModuleRdpRequestFrames[moduleIds[moduleIndex]]) <
+              g_ModuleRdpRequestFrames[moduleIds[moduleIndex]]) <
           RDP_REQUEST_FRAMES_IN_USE) {
         if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
           osSyncPrintf(
@@ -193,7 +202,7 @@ s32 LoadOverlay(s32 overlayId) {
     moduleIds = overlay->moduleIds;
     osWritebackDCacheAll();
     nuPiReadRom(overlay->romStart, overlay->vramStart,
-                overlay->romEnd - overlay->romStart);
+        overlay->romEnd - overlay->romStart);
     bzero(overlay->bssStart, overlay->bssEnd - overlay->bssStart);
     osWritebackDCache(overlay->bssStart, overlay->bssEnd - overlay->bssStart);
     osInvalICache(overlay->vramStart, overlay->textEnd - overlay->vramStart);
@@ -242,8 +251,8 @@ void UnloadOverlay(s32 overlayId) {
     if (g_IsDebugEnabled &&
         osVirtualToPhysical(overlay->vramStart) < BASE_RDRAM_SIZE) {
       bzero(overlay->vramStart, overlay->textEnd - overlay->vramStart);
-      osWritebackDCache(overlay->vramStart,
-                        overlay->textEnd - overlay->vramStart);
+      osWritebackDCache(
+          overlay->vramStart, overlay->textEnd - overlay->vramStart);
       osInvalICache(overlay->vramStart, overlay->textEnd - overlay->vramStart);
     }
   }

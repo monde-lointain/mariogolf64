@@ -451,7 +451,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       case PAUSE_ACTION_RETRY_HOLE:
         if (g_GameMode == GAME_MODE_RING_SHOT) {
           PlaySound(SOUND_RING_SHOT_RETRY, RING_SHOT_RETRY_SOUND_CHANNEL,
-                    RING_SHOT_RETRY_SOUND_VOLUME);
+              RING_SHOT_RETRY_SOUND_VOLUME);
         }
       case PAUSE_ACTION_UNK6:
         PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -564,7 +564,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       }
       g_CurrentShot.ballPosition[AXIS_Y] =
           GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X],
-                          g_CurrentShot.ballPosition[AXIS_Z]);
+              g_CurrentShot.ballPosition[AXIS_Z]);
       switch (lie) {
         case PAUSE_LIE_TEE_UP:
           g_CurrentShot.ballPosition[AXIS_Y] -= PAUSE_TEE_UP_HEIGHT;
@@ -699,20 +699,20 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   LoadSmallPalette(&gfx, 0, f_PauseArrowsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx,
-                         f_PauseArrowsImage + PALETTED_TEXELS_OFFSET +
-                             f_PauseArrowsTick / PAUSE_ARROWS_TICKS_PER_FRAME *
-                                 PAUSE_ARROWS_FRAME_SIZE,
-                         G_IM_FMT_CI, PAUSE_ARROW_SIZE,
-                         PAUSE_ARROWS_FRAME_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      f_PauseArrowsImage + PALETTED_TEXELS_OFFSET +
+          f_PauseArrowsTick / PAUSE_ARROWS_TICKS_PER_FRAME *
+              PAUSE_ARROWS_FRAME_SIZE,
+      G_IM_FMT_CI, PAUSE_ARROW_SIZE, PAUSE_ARROWS_FRAME_HEIGHT, 0, 0, 0, 0, 0,
+      0, 0);
   top = (y - PAUSE_ARROW_SIZE / 2) << 2;
   bottom = (y + PAUSE_ARROW_SIZE / 2) << 2;
   gDPPipeSync(gfx++);
   DrawTextureRect(&gfx, (x - gap / 2 - PAUSE_ARROW_SIZE / 2) << 2, top,
-                  (x - gap / 2 + PAUSE_ARROW_SIZE / 2) << 2, bottom,
-                  G_TX_RENDERTILE, 0, PAUSE_LEFT_ARROW_T, 1 << 10, 1 << 10);
+      (x - gap / 2 + PAUSE_ARROW_SIZE / 2) << 2, bottom, G_TX_RENDERTILE, 0,
+      PAUSE_LEFT_ARROW_T, 1 << 10, 1 << 10);
   DrawTextureRect(&gfx, (x + gap / 2 - PAUSE_ARROW_SIZE / 2) << 2, top,
-                  (x + gap / 2 + PAUSE_ARROW_SIZE / 2) << 2, bottom,
-                  G_TX_RENDERTILE, 0, PAUSE_RIGHT_ARROW_T, 1 << 10, 1 << 10);
+      (x + gap / 2 + PAUSE_ARROW_SIZE / 2) << 2, bottom, G_TX_RENDERTILE, 0,
+      PAUSE_RIGHT_ARROW_T, 1 << 10, 1 << 10);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   *displayListHead = gfx;
@@ -792,21 +792,20 @@ void DrawPauseMenu(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
-                    TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
+      TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
   labelsHeight = f_PauseLayoutOptionCounts[f_PauseLayout] * PAUSE_LABEL_SPACING;
   LoadNibbleTextureBlock(&gfx, f_MenuCloudImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
-                         PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0,
-                         G_TX_CLAMP, G_TX_CLAMP, 0, 0, 0, 0);
+      PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, G_TX_CLAMP,
+      G_TX_CLAMP, 0, 0, 0, 0);
   cloudMiddle = (labelsHeight + PAUSE_CLOUD_TOP) * 4;
   DrawTextureRect(&gfx, PAUSE_CLOUD_LEFT * 4, PAUSE_CLOUD_TOP * 4,
-                  PAUSE_CLOUD_RIGHT * 4, cloudMiddle, G_TX_RENDERTILE, 0, 0,
-                  1 << 10, 1 << 10);
-  LoadNibbleTextureBlock(
-      &gfx, f_MenuCloudImage + IMAGE_HEADER_SIZE + PAUSE_CLOUD_PART_SIZE,
-      G_IM_FMT_I, PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, 0, 0, 0,
-      0, 0, 0);
-  DrawTextureRect(
-      &gfx, PAUSE_CLOUD_LEFT * 4, cloudMiddle, PAUSE_CLOUD_RIGHT * 4,
+      PAUSE_CLOUD_RIGHT * 4, cloudMiddle, G_TX_RENDERTILE, 0, 0, 1 << 10,
+      1 << 10);
+  LoadNibbleTextureBlock(&gfx,
+      f_MenuCloudImage + IMAGE_HEADER_SIZE + PAUSE_CLOUD_PART_SIZE, G_IM_FMT_I,
+      PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+  DrawTextureRect(&gfx, PAUSE_CLOUD_LEFT * 4, cloudMiddle,
+      PAUSE_CLOUD_RIGHT * 4,
       (labelsHeight + PAUSE_CLOUD_TOP + PAUSE_CLOUD_PART_HEIGHT) * 4,
       G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
   gDPPipeSync(gfx++);
@@ -814,15 +813,15 @@ void DrawPauseMenu(Gfx** displayListHead) {
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   f_PauseGlowAngle += M_PI / 18;
   glowRed = (s32)(sinf(f_PauseGlowAngle) * PAUSE_RED_WAVE_AMPLITUDE) +
-            PAUSE_RED_WAVE_MIDDLE;
+      PAUSE_RED_WAVE_MIDDLE;
   glowGreen = (s32)(sinf(f_PauseGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) +
-              COLOR_WAVE_MIDDLE;
+      COLOR_WAVE_MIDDLE;
   glowBlue = (s32)(sinf(f_PauseGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) +
-             COLOR_WAVE_MIDDLE;
+      COLOR_WAVE_MIDDLE;
   SetUpTextDrawing(&gfx);
   for (i = 0, y = PAUSE_LABELS_TOP;
-       i != f_PauseLayoutOptionCounts[f_PauseLayout];
-       i++, y += PAUSE_LABEL_SPACING) {
+      i != f_PauseLayoutOptionCounts[f_PauseLayout];
+      i++, y += PAUSE_LABEL_SPACING) {
     message = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].message;
     kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind;
     red = PAUSE_LABEL_RED;
@@ -841,19 +840,17 @@ void DrawPauseMenu(Gfx** displayListHead) {
       }
     }
     SetTextSlot(PAUSE_LABEL_X, y, message + PAUSE_OPTION_MESSAGE_BASE,
-                PAUSE_LABEL_FONT, i, PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
+        PAUSE_LABEL_FONT, i, PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
     gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
     DrawLargeTextSlot(&gfx, i);
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
-      DrawLargeText(
-          &gfx, PAUSE_VALUE_X, y,
+      DrawLargeText(&gfx, PAUSE_VALUE_X, y,
           (s8)g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_BLACK
               ? f_BlackText
               : f_WhiteText);
     }
     if (kind == PAUSE_OPTION_KIND_WEATHER) {
-      DrawLargeText(
-          &gfx, PAUSE_VALUE_X, y,
+      DrawLargeText(&gfx, PAUSE_VALUE_X, y,
           g_HoleConditions.isRaining == TRUE ? f_RainText : f_ClearText);
     }
   }
@@ -869,16 +866,16 @@ void DrawPauseMenu(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   teeFrame = sway >= PAUSE_TEE_LEAN_SWAY;
   LoadSmallPalette(&gfx, 0, f_PauseCursorImage + IMAGE_HEADER_SIZE);
-  gDPLoadTextureTile_4b(
-      gfx++, TEXTURE_ADDRESS(f_PauseCursorImage + PALETTED_TEXELS_OFFSET),
-      G_IM_FMT_CI, PAUSE_CURSOR_SIZE, 0, 0, 0, PAUSE_CURSOR_SIZE - 1,
+  gDPLoadTextureTile_4b(gfx++,
+      TEXTURE_ADDRESS(f_PauseCursorImage + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
+      PAUSE_CURSOR_SIZE, 0, 0, 0, PAUSE_CURSOR_SIZE - 1,
       PAUSE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);
   if (f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection] ==
           PAUSE_OPTION_UNKD678 &&
       !f_PauseMenuUnkD678) {
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
-                      TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0);
+        TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0);
     gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
   }
   selectedKind =
@@ -889,22 +886,20 @@ void DrawPauseMenu(Gfx** displayListHead) {
       selectedKind == PAUSE_OPTION_KIND_WIND_SPEED ||
       selectedKind == PAUSE_OPTION_KIND_WIND_DIRECTION ||
       selectedKind == PAUSE_OPTION_KIND_LIE) {
-    DrawTextureRect(
-        &gfx, PAUSE_TEE_X * 4,
+    DrawTextureRect(&gfx, PAUSE_TEE_X * 4,
         (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8) * 4,
         PAUSE_CURSOR_RIGHT * 4,
         (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8 +
-         PAUSE_CURSOR_SIZE) *
+            PAUSE_CURSOR_SIZE) *
             4,
         G_TX_RENDERTILE, 0, PAUSE_TEES_T + teeFrame * (PAUSE_CURSOR_SIZE << 5),
         1 << 10, 1 << 10);
   } else {
-    DrawTextureRect(
-        &gfx, (PAUSE_TEE_X - sway) * 4,
+    DrawTextureRect(&gfx, (PAUSE_TEE_X - sway) * 4,
         (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4) * 4,
         (PAUSE_CURSOR_RIGHT - sway) * 4,
         (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4 +
-         PAUSE_CURSOR_SIZE) *
+            PAUSE_CURSOR_SIZE) *
             4,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
   }
@@ -964,31 +959,31 @@ s32 UpdateChoiceBox(ControllerState* controller) {
       return box->results[f_ChoiceBoxSelection];
     case CHOICE_BOX_CHOOSING:
       if (controller->pressedButtons == A_BUTTON) {
-        PlaySound(CHOICE_BOX_CHOOSE_SOUND, g_NextSoundChannel,
-                  MENU_SOUND_VOLUME);
+        PlaySound(
+            CHOICE_BOX_CHOOSE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
         f_ChoiceBoxState = CHOICE_BOX_CHOSEN;
         return -1;
       }
       if (!box->isVertical) {
         if (controller->repeatedButtons & L_JPAD) {
           f_ChoiceBoxSelection--;
-          PlaySound(CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel,
-                    MENU_SOUND_VOLUME);
+          PlaySound(
+              CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
         }
         if (controller->repeatedButtons & R_JPAD) {
           f_ChoiceBoxSelection++;
-          PlaySound(CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel,
-                    MENU_SOUND_VOLUME);
+          PlaySound(
+              CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
         }
       } else {
         if (controller->repeatedButtons & U_JPAD) {
-          PlaySound(CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel,
-                    MENU_SOUND_VOLUME);
+          PlaySound(
+              CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
           f_ChoiceBoxSelection--;
         }
         if (controller->repeatedButtons & D_JPAD) {
-          PlaySound(CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel,
-                    MENU_SOUND_VOLUME);
+          PlaySound(
+              CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
           f_ChoiceBoxSelection++;
         }
       }
@@ -1024,9 +1019,9 @@ void DrawChoiceBox(Gfx** displayListHead) {
   red =
       (s32)(sinf(f_ChoiceGlowAngle) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
   blue = (s32)(sinf(f_ChoiceGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) +
-         COLOR_WAVE_MIDDLE;
+      COLOR_WAVE_MIDDLE;
   green = (s32)(sinf(f_ChoiceGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) +
-          COLOR_WAVE_MIDDLE;
+      COLOR_WAVE_MIDDLE;
   textWidth = 0;
   if (f_ChoiceBoxIndex != CHOICE_BOX_CLOSED) {
     gDPPipeSync(gfx++);
@@ -1035,36 +1030,35 @@ void DrawChoiceBox(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
-                      PRIMITIVE, 0, 0, 0, TEXEL0);
+        PRIMITIVE, 0, 0, 0, TEXEL0);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     for (i = 0; i != box->optionCount; i++) {
       labelWidth = MeasureText(f_ChoiceBoxLabels[box->labels[i]],
-                               FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
+          FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
       if (textWidth < labelWidth) {
         textWidth = labelWidth;
       }
       halfWidth = textWidth / 2 + CHOICE_BOX_MARGIN;
     }
     for (i = 0; i != CHOICE_BOX_CLOUD_PART_COUNT; i++) {
-      LoadNibbleTextureBlock(
-          &gfx,
+      LoadNibbleTextureBlock(&gfx,
           f_MenuCloudImage + IMAGE_HEADER_SIZE + i * CHOICE_BOX_CLOUD_PART_SIZE,
           G_IM_FMT_I, CHOICE_BOX_CLOUD_WIDTH, CHOICE_BOX_CLOUD_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
-      DrawTextureRect(
-          &gfx, (CHOICE_BOX_CENTER_X - halfWidth) << 2, CHOICE_BOX_TOP << 2,
-          (CHOICE_BOX_CENTER_X + halfWidth) << 2, CHOICE_BOX_BOTTOM << 2,
-          G_TX_RENDERTILE, 0, 0, (CHOICE_BOX_CLOUD_WIDTH << 10) / 2 / halfWidth,
+      DrawTextureRect(&gfx, (CHOICE_BOX_CENTER_X - halfWidth) << 2,
+          CHOICE_BOX_TOP << 2, (CHOICE_BOX_CENTER_X + halfWidth) << 2,
+          CHOICE_BOX_BOTTOM << 2, G_TX_RENDERTILE, 0, 0,
+          (CHOICE_BOX_CLOUD_WIDTH << 10) / 2 / halfWidth,
           CHOICE_BOX_CLOUD_DTDY);
     }
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
     if (box->isVertical) {
       labelsTop = CHOICE_LABELS_MIDDLE_Y -
-                  (box->optionCount - 1) * (CHOICE_LABEL_SPACING / 2);
+          (box->optionCount - 1) * (CHOICE_LABEL_SPACING / 2);
       for (i = 0, labelY = labelsTop; i != box->optionCount;
-           i++, labelY += CHOICE_LABEL_SPACING) {
+          i++, labelY += CHOICE_LABEL_SPACING) {
         if (i == f_ChoiceBoxSelection) {
           gDPPipeSync(gfx++);
           gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
@@ -1075,7 +1069,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
           gDPPipeSync(gfx++);
         }
         DrawCenteredLargeText(&gfx, CHOICE_BOX_CENTER_X, labelY,
-                              f_ChoiceBoxLabels[box->labels[i]]);
+            f_ChoiceBoxLabels[box->labels[i]]);
       }
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -1088,21 +1082,20 @@ void DrawChoiceBox(Gfx** displayListHead) {
       }
       labelWidth =
           MeasureText(f_ChoiceBoxLabels[box->labels[f_ChoiceBoxSelection]],
-                      FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
+              FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
       cursorX = (s32)(sinf(f_ChoiceCursorAngle) * CHOICE_CURSOR_SWAY) +
-                CHOICE_CURSOR_X;
+          CHOICE_CURSOR_X;
       cursorX -= textWidth / 2;
       LoadSmallPalette(&gfx, 0, f_ChoiceBoxCursorImage + IMAGE_HEADER_SIZE);
       cursorY = labelsTop + f_ChoiceBoxSelection * CHOICE_LABEL_SPACING;
-      gDPLoadTextureTile_4b(
-          gfx++,
+      gDPLoadTextureTile_4b(gfx++,
           TEXTURE_ADDRESS(f_ChoiceBoxCursorImage + PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, CHOICE_CURSOR_SIZE, 0, 0, 0, CHOICE_CURSOR_SIZE - 1,
           CHOICE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&gfx, cursorX << 2, (cursorY - 2) << 2,
-                      (cursorX + CHOICE_CURSOR_SIZE) << 2,
-                      (cursorY + CHOICE_CURSOR_SIZE - 2) << 2, G_TX_RENDERTILE,
-                      0, 0, 1 << 10, 1 << 10);
+          (cursorX + CHOICE_CURSOR_SIZE) << 2,
+          (cursorY + CHOICE_CURSOR_SIZE - 2) << 2, G_TX_RENDERTILE, 0, 0,
+          1 << 10, 1 << 10);
     }
   }
   *displayListHead = gfx;

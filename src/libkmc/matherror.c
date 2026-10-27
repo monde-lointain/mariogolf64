@@ -1,8 +1,8 @@
 #include "libm.h"
 
 /* Gives matherr a chance to handle the error, and sets errno if it doesn't */
-double ReportMathError(int type, char* name, double arg1, double arg2,
-                       double retval) {
+double ReportMathError(
+    int type, char* name, double arg1, double arg2, double retval) {
   struct exception exc;
 
   exc.type = type;

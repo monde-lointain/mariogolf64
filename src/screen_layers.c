@@ -197,7 +197,7 @@ extern Gfx D_800C3FC0[];
  * the screen's top or left
  */
 void DrawTextureRect(Gfx** displayListHead, s32 xl, s32 yl, s32 xh, s32 yh,
-                     s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy) {
+    s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
@@ -221,13 +221,12 @@ void LoadLargePalette(Gfx** displayListHead, void* tlut) {
 }
 
 void LoadNibbleTextureBlock(Gfx** displayListHead, void* texels, s32 format,
-                            s32 width, s32 height, s32 palette, s32 cms,
-                            s32 cmt, s32 masks, s32 maskt, s32 shifts,
-                            s32 shiftt) {
+    s32 width, s32 height, s32 palette, s32 cms, s32 cmt, s32 masks, s32 maskt,
+    s32 shifts, s32 shiftt) {
   Gfx* gfx = *displayListHead;
 
   gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(texels), format, width, height,
-                         palette, cms, cmt, masks, maskt, shifts, shiftt);
+      palette, cms, cmt, masks, maskt, shifts, shiftt);
   *displayListHead = gfx;
 }
 
@@ -237,37 +236,35 @@ void LoadNibbleTextureBlock(Gfx** displayListHead, void* texels, s32 format,
  * tile
  */
 #define LOAD_TEXTURE_BLOCK(pkt, timg, fmt, loadSiz, siz, width, height, pal,  \
-                           cms, cmt, masks, maskt, shifts, shiftt)            \
+    cms, cmt, masks, maskt, shifts, shiftt)                                   \
   {                                                                           \
-    gDPSetTextureImage(pkt++, fmt, loadSiz##_LOAD_BLOCK, 1,                   \
-                       TEXTURE_ADDRESS(timg));                                \
+    gDPSetTextureImage(                                                       \
+        pkt++, fmt, loadSiz##_LOAD_BLOCK, 1, TEXTURE_ADDRESS(timg));          \
     gDPSetTile(pkt++, fmt, loadSiz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE, 0, cmt, \
-               maskt, shiftt, cms, masks, shifts);                            \
+        maskt, shiftt, cms, masks, shifts);                                   \
     gDPLoadSync(pkt++);                                                       \
-    gDPLoadBlock(                                                             \
-        pkt++, G_TX_LOADTILE, 0, 0,                                           \
+    gDPLoadBlock(pkt++, G_TX_LOADTILE, 0, 0,                                  \
         (((width) * (height) + loadSiz##_INCR) >> loadSiz##_SHIFT) - 1,       \
         CALC_DXT(width, loadSiz##_BYTES));                                    \
     gDPPipeSync(pkt++);                                                       \
     gDPSetTile(pkt++, fmt, siz, (((width) * loadSiz##_LINE_BYTES) + 7) >> 3,  \
-               0, G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks,       \
-               shifts);                                                       \
+        0, G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, shifts);     \
     gDPSetTileSize(pkt++, G_TX_RENDERTILE, 0, 0,                              \
-                   ((width) - 1) << G_TEXTURE_IMAGE_FRAC,                     \
-                   ((height) - 1) << G_TEXTURE_IMAGE_FRAC);                   \
+        ((width) - 1) << G_TEXTURE_IMAGE_FRAC,                                \
+        ((height) - 1) << G_TEXTURE_IMAGE_FRAC);                              \
   }
 
 void LoadTextureBlock(Gfx** displayListHead, void* texels, s32 format, s32 size,
-                      s32 width, s32 height, s32 palette, s32 cms, s32 cmt,
-                      s32 masks, s32 maskt, s32 shifts, s32 shiftt) {
+    s32 width, s32 height, s32 palette, s32 cms, s32 cmt, s32 masks, s32 maskt,
+    s32 shifts, s32 shiftt) {
   Gfx* gfx = *displayListHead;
 
   if (size == G_IM_SIZ_8b) {
     LOAD_TEXTURE_BLOCK(gfx, texels, format, G_IM_SIZ_8b, size, width, height,
-                       palette, cms, cmt, masks, maskt, shifts, shiftt);
+        palette, cms, cmt, masks, maskt, shifts, shiftt);
   } else {
     LOAD_TEXTURE_BLOCK(gfx, texels, format, G_IM_SIZ_16b, size, width, height,
-                       palette, cms, cmt, masks, maskt, shifts, shiftt);
+        palette, cms, cmt, masks, maskt, shifts, shiftt);
   }
   *displayListHead = gfx;
 }
@@ -327,15 +324,13 @@ void StartWipe(s32 kind) {
       case WIPE_CLOSING:
         f_WipeProgress = WIPE_CLOSE_START_PROGRESS;
         PlaySoundWithEffects(SOUND_WIPE_CLOSE, WIPE_SOUND_CHANNEL,
-                             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB,
-                             WIPE_SOUND_PAN);
+            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
         break;
       case WIPE_OPENING:
       case WIPE_OPENING_FAST:
         f_WipeProgress = WIPE_OPEN_START_PROGRESS;
         PlaySoundWithEffects(SOUND_WIPE_OPEN, WIPE_SOUND_CHANNEL,
-                             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB,
-                             WIPE_SOUND_PAN);
+            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
         break;
     }
   }
@@ -395,26 +390,25 @@ void DrawWipe(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, alpha);
   gDPPipeSync(gfx++);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-                    PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+      PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   if (shapeSize < WIPE_SMALLEST_SHAPE) {
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, SCREEN_BORDER << 2,
-                        (SCREEN_WIDTH - SCREEN_BORDER) << 2,
-                        (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE,
-                        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (SCREEN_WIDTH - SCREEN_BORDER) << 2,
+        (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   } else {
     texelOffset = (shapeOffset * WIPE_SHAPE_TEXELS << 5) / shapeSize;
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPLoadTextureBlock_4b(
-        gfx++, TEXTURE_ADDRESS((u8*)f_WipeShapeImage + IMAGE_HEADER_SIZE),
-        G_IM_FMT_I, WIPE_SHAPE_TEXELS, WIPE_SHAPE_TEXELS, 0,
-        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadTextureBlock_4b(gfx++,
+        TEXTURE_ADDRESS((u8*)f_WipeShapeImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+        WIPE_SHAPE_TEXELS, WIPE_SHAPE_TEXELS, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(
-        gfx++, WIPE_SQUARE_LEFT << 2, WIPE_SQUARE_TOP << 2,
+    gSPScisTextureRectangle(gfx++, WIPE_SQUARE_LEFT << 2, WIPE_SQUARE_TOP << 2,
         (WIPE_SQUARE_LEFT + WIPE_SQUARE_SIZE) << 2,
         (WIPE_SQUARE_TOP + WIPE_SQUARE_SIZE) << 2, G_TX_RENDERTILE, texelOffset,
         texelOffset, WIPE_SHAPE_TEXELS * TEXEL_STEP_ONE / (f32)shapeSize,
@@ -457,8 +451,8 @@ void DrawScreenFade(Gfx** displayListHead) {
 
   if (g_ScreenFadeKind != FADE_NONE) {
     if (g_ScreenFadeKind == FADE_OUT) {
-      alpha = FADE_ALPHA_RANGE - (g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) /
-                                     g_ScreenFadeDuration;
+      alpha = FADE_ALPHA_RANGE -
+          (g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) / g_ScreenFadeDuration;
     } else {
       alpha =
           (g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) / g_ScreenFadeDuration;
@@ -481,13 +475,13 @@ void DrawScreenFade(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
     gDPSetPrimColor(gfx++, 0, 0, g_ScreenFadeRed, g_ScreenFadeGreen,
-                    g_ScreenFadeBlue, alpha);
+        g_ScreenFadeBlue, alpha);
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, SCREEN_BORDER << 2,
-                        (SCREEN_WIDTH - SCREEN_BORDER) << 2,
-                        (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE,
-                        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (SCREEN_WIDTH - SCREEN_BORDER) << 2,
+        (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     g_ScreenFadeFramesLeft--;
     if (g_ScreenFadeFramesLeft == 0) {
@@ -544,7 +538,7 @@ s32 UpdatePrompt(ControllerState* controller) {
 
   if (f_PromptState == PROMPT_STATE_CHOOSING) {
     SetTextSlot(PROMPT_TEXT_X, PROMPT_TEXT_Y, prompt->messageId, 1,
-                PROMPT_TEXT_SLOT, 0x10, 0x5F, 0x3F, 0xFF, 0xFF);
+        PROMPT_TEXT_SLOT, 0x10, 0x5F, 0x3F, 0xFF, 0xFF);
     if (controller->pressedButtons == A_BUTTON) {
       f_PromptState = PROMPT_STATE_CHOSEN;
       if (prompt->results[f_PromptChoice] >= 0 &&
@@ -597,8 +591,8 @@ void DrawPrompt(Gfx** displayListHead) {
   if (f_PromptState == PROMPT_STATE_CLOSED) {
     return;
   }
-  MeasureMessage(prompt->messageId, PROMPT_FONT_SIZE, &textWidth, &textHeight,
-                 0);
+  MeasureMessage(
+      prompt->messageId, PROMPT_FONT_SIZE, &textWidth, &textHeight, 0);
   cloudHeight = textHeight + PROMPT_CLOUD_MARGIN;
   if (cloudHeight < PROMPT_CLOUD_SMALLEST_HEIGHT) {
     cloudHeight = PROMPT_CLOUD_SMALLEST_HEIGHT;
@@ -643,13 +637,11 @@ void DrawPrompt(Gfx** displayListHead) {
       halfHeight = cloudHeight * f_PromptFrame / PROMPT_GROWTH_FRAMES;
     }
     LoadNibbleTextureBlock(&gfx, (u8*)f_PromptCloudImage + texelOffset,
-                           G_IM_FMT_I, PROMPT_CLOUD_WIDTH,
-                           PROMPT_CLOUD_HALF_TEXELS, 0,
-                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        G_IM_FMT_I, PROMPT_CLOUD_WIDTH, PROMPT_CLOUD_HALF_TEXELS, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     texelOffset += PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2;
-    DrawTextureRect(
-        &gfx, (PROMPT_CENTER_X - halfWidth) << 2,
+    DrawTextureRect(&gfx, (PROMPT_CENTER_X - halfWidth) << 2,
         (PROMPT_CLOUD_MIDDLE_Y + half * halfHeight - halfHeight) << 2,
         (PROMPT_CENTER_X + halfWidth) << 2,
         (PROMPT_CLOUD_MIDDLE_Y + half * halfHeight) << 2, G_TX_RENDERTILE, 0, 0,
@@ -677,16 +669,15 @@ void DrawPrompt(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     LoadLargePalette(&gfx, (u8*)f_YesNoImage + IMAGE_HEADER_SIZE);
     LoadTextureBlock(&gfx, (u8*)f_YesNoImage + YES_TEXELS_OFFSET, G_IM_FMT_CI,
-                     G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
-                     G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                     G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, (YES_CENTER_X - halfWidth) << 2,
-                    (cloudHeight / 4 + CHOICES_MIDDLE_Y - halfHeight) << 2,
-                    (YES_CENTER_X + halfWidth) << 2,
-                    (cloudHeight / 4 + CHOICES_MIDDLE_Y + halfHeight) << 2,
-                    G_TX_RENDERTILE, 0, 0,
-                    CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
-                    CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
+        (cloudHeight / 4 + CHOICES_MIDDLE_Y - halfHeight) << 2,
+        (YES_CENTER_X + halfWidth) << 2,
+        (cloudHeight / 4 + CHOICES_MIDDLE_Y + halfHeight) << 2, G_TX_RENDERTILE,
+        0, 0, CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+        CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
     if (f_PromptChoice == PROMPT_CHOICE_NO) {
       halfWidth = sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB + CHOSEN_HALF_WIDTH;
       halfHeight =
@@ -696,16 +687,15 @@ void DrawPrompt(Gfx** displayListHead) {
       halfHeight = CHOICE_HALF_HEIGHT;
     }
     LoadTextureBlock(&gfx, (u8*)f_YesNoImage + NO_TEXELS_OFFSET, G_IM_FMT_CI,
-                     G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
-                     G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                     G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, (NO_CENTER_X - halfWidth) << 2,
-                    (cloudHeight / 4 + CHOICES_MIDDLE_Y - halfHeight) << 2,
-                    (NO_CENTER_X + halfWidth) << 2,
-                    (cloudHeight / 4 + CHOICES_MIDDLE_Y + halfHeight) << 2,
-                    G_TX_RENDERTILE, 0, 0,
-                    CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
-                    CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
+        (cloudHeight / 4 + CHOICES_MIDDLE_Y - halfHeight) << 2,
+        (NO_CENTER_X + halfWidth) << 2,
+        (cloudHeight / 4 + CHOICES_MIDDLE_Y + halfHeight) << 2, G_TX_RENDERTILE,
+        0, 0, CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+        CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
   }
   *displayListHead = gfx;
 }
@@ -741,8 +731,8 @@ void HideHalfTurn(void) {
  * are set, which hides them again.
  */
 #ifdef NON_MATCHING
-void MarkHalfTurnCircle(u32* texelPairs, s32 centerColumn, s32 centerRow,
-                        s32 radius) {
+void MarkHalfTurnCircle(
+    u32* texelPairs, s32 centerColumn, s32 centerRow, s32 radius) {
   s32 step = 0;
   s32 error = radius;
   s32 radiusOffset;
@@ -790,14 +780,12 @@ void DrawHalfTurn(Gfx** displayListHead) {
     if (f_HalfTurnTimer > 0) {
       for (i = 0; i != HALF_TURN_SHOW_STEPS; i++) {
         MarkHalfTurnCircle((u32*)((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE),
-                           HALF_TURN_CENTER_COLUMN, HALF_TURN_CENTER_ROW,
-                           f_HalfTurnTimer);
+            HALF_TURN_CENTER_COLUMN, HALF_TURN_CENTER_ROW, f_HalfTurnTimer);
         f_HalfTurnTimer--;
       }
       if (f_HalfTurnTimer == HALF_TURN_SHOW_SOUND_RADIUS) {
         PlaySoundWithEffects(SOUND_WIPE_OPEN, WIPE_SOUND_CHANNEL,
-                             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB,
-                             WIPE_SOUND_PAN);
+            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
       }
     } else if (f_HalfTurnTimer > -HALF_TURN_WAIT_FRAMES) {
       f_HalfTurnTimer--;
@@ -811,14 +799,12 @@ void DrawHalfTurn(Gfx** displayListHead) {
     } else if (f_HalfTurnTimer < HALF_TURN_FRAMES) {
       for (i = 0; i != HALF_TURN_HIDE_STEPS; i++) {
         MarkHalfTurnCircle((u32*)((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE),
-                           HALF_TURN_CENTER_COLUMN, HALF_TURN_CENTER_ROW,
-                           f_HalfTurnTimer);
+            HALF_TURN_CENTER_COLUMN, HALF_TURN_CENTER_ROW, f_HalfTurnTimer);
         f_HalfTurnTimer++;
       }
       if (f_HalfTurnTimer == HALF_TURN_HIDE_SOUND_RADIUS) {
         PlaySoundWithEffects(SOUND_WIPE_CLOSE, WIPE_SOUND_CHANNEL,
-                             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB,
-                             WIPE_SOUND_PAN);
+            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
       }
     } else {
       f_HalfTurnState = HALF_TURN_STATE_DONE;
@@ -842,25 +828,24 @@ void DrawHalfTurn(Gfx** displayListHead) {
   /* The texels' alpha is inverted, so texels whose alpha bit is clear are drawn
    */
   gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0,
-                    1, TEXEL0, 1);
+      1, TEXEL0, 1);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   for (i = 0; i != HALF_TURN_STRIP_COUNT; i++) {
     stripRows = (i == HALF_TURN_STRIP_COUNT - 1) ? HALF_TURN_LAST_STRIP_ROWS
                                                  : HALF_TURN_STRIP_ROWS;
-    gDPLoadTextureTile(
-        gfx++,
+    gDPLoadTextureTile(gfx++,
         TEXTURE_ADDRESS((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE +
-                        i * HALF_TURN_STRIP_SIZE),
+            i * HALF_TURN_STRIP_SIZE),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, HALF_TURN_WIDTH, stripRows, 0, 0,
         HALF_TURN_WIDTH - 1, stripRows - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     DrawTextureRect(&gfx, SCREEN_BORDER << 2,
-                    (SCREEN_BORDER + i * HALF_TURN_STRIP_ROWS) << 2,
-                    (SCREEN_BORDER + HALF_TURN_WIDTH) << 2,
-                    (SCREEN_BORDER + i * HALF_TURN_STRIP_ROWS + stripRows) << 2,
-                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (SCREEN_BORDER + i * HALF_TURN_STRIP_ROWS) << 2,
+        (SCREEN_BORDER + HALF_TURN_WIDTH) << 2,
+        (SCREEN_BORDER + i * HALF_TURN_STRIP_ROWS + stripRows) << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   *displayListHead = gfx;
 }

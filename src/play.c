@@ -241,8 +241,8 @@ void SetUpPlayers(void) {
       g_Players[0].holes[hole].putts = UNCOUNTED_PUTTS;
     }
     g_Players[0].unk28 = -1;
-    LoadPlayerFace(0, (s8)g_Players[0].characterIndex,
-                   (s8)g_Players[0].paletteIndex);
+    LoadPlayerFace(
+        0, (s8)g_Players[0].characterIndex, (s8)g_Players[0].paletteIndex);
     for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
       if (slot >= CLUB_SET_SIZE) {
         g_Players[0].clubs[slot] = NO_CLUB;
@@ -338,9 +338,8 @@ void PlacePlayersOnTee(void) {
       g_Players[i].unk26 = 0;
       g_Players[i].ballSurface = SURFACE_TEE_UP;
       if (g_GameState.isMiniGolf) {
-        g_Players[i].ballSurface =
-            GetSurface(g_Players[i].ballPosition[AXIS_X],
-                       g_Players[i].ballPosition[AXIS_Z]);
+        g_Players[i].ballSurface = GetSurface(g_Players[i].ballPosition[AXIS_X],
+            g_Players[i].ballPosition[AXIS_Z]);
       }
       g_Players[i].driveDistance = UNMEASURED_DISTANCE;
       g_Players[i].pinDistance = UNMEASURED_DISTANCE;
@@ -450,10 +449,10 @@ INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
  * It is a macro, as an inline function compiles differently from the
  * original.
  */
-#define TeesAfter(player, other)                                     \
-  (g_Players[player].strokeCount > g_Players[other].strokeCount ||   \
-   (g_Players[player].strokeCount == g_Players[other].strokeCount && \
-    g_Players[player].teeOrder > g_Players[other].teeOrder))
+#define TeesAfter(player, other)                                        \
+  (g_Players[player].strokeCount > g_Players[other].strokeCount ||      \
+      (g_Players[player].strokeCount == g_Players[other].strokeCount && \
+          g_Players[player].teeOrder > g_Players[other].teeOrder))
 
 /*
  * Sets each player's teeOrder for the next hole. In the group modes a
@@ -466,8 +465,9 @@ void SetNextTeeOrder(void) {
   s32 i;
   s32 j;
 
-  if (!g_GameState.unk31 && (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                             g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+  if (!g_GameState.unk31 &&
+      (g_GameMode == GAME_MODE_SKINS_MATCH ||
+          g_GameMode == GAME_MODE_CLUB_SLOTS)) {
     if (GetGroupHoleResult(results) != GROUP_HOLE_WON) {
       for (i = 0; i < g_GameState.playerCount; i++) {
         orders[i] = g_Players[i].teeOrder;
@@ -577,8 +577,8 @@ void func_80060358(void) {
 
 s32 func_800603A8(void) {
   return (IsGameFlagSet(0x82) << 4) | (IsGameFlagSet(0x83) << 3) |
-         (IsGameFlagSet(0x84) << 2) | (IsGameFlagSet(0x85) << 1) |
-         IsGameFlagSet(0x86);
+      (IsGameFlagSet(0x84) << 2) | (IsGameFlagSet(0x85) << 1) |
+      IsGameFlagSet(0x86);
 }
 
 /* Copies the game state and players to D_801B55F0 and D_8012D0C8 */
@@ -611,8 +611,7 @@ s32 HasWonFinalChallenge(void) {
         g_CourseIndex == COURSE_RECORD_MARIOS_STAR) {
       firstHole = GetFirstHoleIndex();
       RankTournament(COURSE_HOLE_COUNT, 0,
-                     GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0),
-                     D_801B60B4);
+          GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0), D_801B60B4);
       for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
         standing = &g_TournamentStandings[i];
         if (standing->contestantId == PLAYER_CONTESTANT &&
@@ -779,7 +778,7 @@ void func_8005DDAC(void);
  * staff */
 #define IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()               \
   ((HasEveryRingShotStar() && !g_HadEveryRingShotStar) || \
-   IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL))
+      IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL))
 
 /* The debug cup picker's text position */
 #define DEBUG_CUP_TEXT_COLUMN 3
@@ -789,8 +788,8 @@ void func_8005DDAC(void);
 #define INTRO_ORBIT_ANGLE_PER_FRAME 256 /* In binary angle units */
 #define INTRO_ORBIT_ANGLE()                                 \
   (((g_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & \
-    BINARY_ANGLE_MASK) *                                    \
-   BINARY_ANGLE_TO_RADIANS)
+       BINARY_ANGLE_MASK) *                                 \
+      BINARY_ANGLE_TO_RADIANS)
 #define DEBUG_ORBIT_RADIUS 1500.0f
 #define DEBUG_ORBIT_HEIGHT (-1500.0f)
 #define INTRO_ORBIT_RADIUS 3000.0f
@@ -894,8 +893,7 @@ void UpdatePlay(void) {
           if (g_GameMode == GAME_MODE_TRAINING) {
             if (g_IsModuleAlive[MODULE_UNK21] &&
                 func_80241FF0(g_MergedController.pressedButtons,
-                              g_MergedController.repeatedButtons) ==
-                    HOLE_MENU_RELOAD) {
+                    g_MergedController.repeatedButtons) == HOLE_MENU_RELOAD) {
               LoadWipeShape(g_CourseIndex);
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               if (GetWipeProgress() == WIPE_OPEN_PROGRESS) {
@@ -905,9 +903,9 @@ void UpdatePlay(void) {
               repeat = TRUE;
             }
           } else if (g_GameMode == GAME_MODE_RING_SHOT && !g_GameState.unk31 &&
-                     g_IsModuleAlive[MODULE_UNK21]) {
+              g_IsModuleAlive[MODULE_UNK21]) {
             result = func_80241DF0(g_MergedController.pressedButtons,
-                                   g_MergedController.repeatedButtons);
+                g_MergedController.repeatedButtons);
             if (result == HOLE_MENU_RELOAD) {
               LoadWipeShape(g_CourseIndex);
               SetMenuBackdrop(MENU_BACKDROP_STILL);
@@ -924,7 +922,7 @@ void UpdatePlay(void) {
         if (g_GameMode == GAME_MODE_TRAINING) {
           if (g_IsModuleAlive[MODULE_UNK21]) {
             result = func_80241FF0(g_MergedController.pressedButtons,
-                                   g_MergedController.repeatedButtons);
+                g_MergedController.repeatedButtons);
             switch (result) {
               case HOLE_MENU_RELOAD:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
@@ -952,7 +950,7 @@ void UpdatePlay(void) {
         } else if (g_GameMode == GAME_MODE_RING_SHOT && !g_GameState.unk31) {
           if (g_IsModuleAlive[MODULE_UNK21]) {
             result = func_80241DF0(g_MergedController.pressedButtons,
-                                   g_MergedController.repeatedButtons);
+                g_MergedController.repeatedButtons);
             switch (result) {
               case HOLE_MENU_RELOAD:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
@@ -981,7 +979,7 @@ void UpdatePlay(void) {
         } else if (g_GameMode == GAME_MODE_CLUB_SLOTS) {
           if (g_IsModuleAlive[MODULE_UNK26] &&
               (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
-               IS_A_PRESSED())) {
+                  IS_A_PRESSED())) {
             if (!g_GameState.unk30) {
               g_GameState.unk0 = GAME_STATE_SLOTS;
               func_80241800();
@@ -1006,10 +1004,9 @@ void UpdatePlay(void) {
             }
           }
         } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
-                   (g_PlayStateFrameCount >= HOLE_INTRO_FRAMES ||
-                    IS_A_PRESSED() ||
-                    (func_8005F180() &&
-                     g_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
+            (g_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IS_A_PRESSED() ||
+                (func_8005F180() &&
+                    g_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
           if (g_GameMode == GAME_MODE_SPEED_GOLF) {
             StartHoleFlyover();
             EndHoleIntro();
@@ -1057,23 +1054,23 @@ void UpdatePlay(void) {
                 sinf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS + lookAt[AXIS_Z];
           } else {
             lookAt[AXIS_X] = (D_800BA9D8.cupPosition[AXIS_X] + g_TeePositionX) *
-                             (COURSE_TO_WORLD_SCALE / 2);
+                (COURSE_TO_WORLD_SCALE / 2);
             lookAt[AXIS_Y] =
                 (g_CupPositionY + g_TeePositionY) * (COURSE_TO_WORLD_SCALE / 2);
             lookAt[AXIS_Z] =
                 (g_CupPositionZ + g_TeePositionZ) * (COURSE_TO_WORLD_SCALE / 2);
             if (!g_GameState.isMiniGolf) {
               eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS +
-                            lookAt[AXIS_X];
+                  lookAt[AXIS_X];
               eye[AXIS_Y] = lookAt[AXIS_Y] + INTRO_ORBIT_HEIGHT;
               eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS +
-                            lookAt[AXIS_Z];
+                  lookAt[AXIS_Z];
             } else {
               eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS +
-                            lookAt[AXIS_X];
+                  lookAt[AXIS_X];
               eye[AXIS_Y] = lookAt[AXIS_Y] + MINI_GOLF_ORBIT_HEIGHT;
               eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS +
-                            lookAt[AXIS_Z];
+                  lookAt[AXIS_Z];
             }
           }
           g_Cameras[0].view.mode = CAMERA_MODE_UNK8;
@@ -1157,8 +1154,9 @@ void UpdatePlay(void) {
               AddBirdieBadge();
             }
           }
-          if (!g_GameState.unk31 && (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                                     g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+          if (!g_GameState.unk31 &&
+              (g_GameMode == GAME_MODE_SKINS_MATCH ||
+                  g_GameMode == GAME_MODE_CLUB_SLOTS)) {
             s8 results[MAX_PLAYER_COUNT];
 
             if (GetGroupHoleResult(results) != TRUE) {
@@ -1218,14 +1216,14 @@ void UpdatePlay(void) {
                 if (!D_800C30A4) {
                   nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
                 } else if ((IsDonkeyKongUnlocked() &&
-                            !g_WasDonkeyKongUnlocked) ||
-                           IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
+                               !g_WasDonkeyKongUnlocked) ||
+                    IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
                   func_801F5C24(UNLOCK_NOTICE_DONKEY_KONG);
                   nextStep = HOLE_END_STEP_DONKEY_KONG_NOTICE;
                 } else if (!g_RingShotCourseOpenedAtStart &&
-                           GetRingShotCourseOpenedAtStarCount()) {
+                    GetRingShotCourseOpenedAtStarCount()) {
                   func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
-                                UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
+                      UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
                   nextStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
                 } else if (D_800C42D0) {
                   nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
@@ -1261,7 +1259,7 @@ void UpdatePlay(void) {
                 func_801F5C24(UNLOCK_NOTICE_METAL_MARIO);
                 g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
               } else if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
-                         HAS_PLAYED_LAST_HOLE()) {
+                  HAS_PLAYED_LAST_HOLE()) {
                 RecordCourseRound();
                 RecordTournamentPlace();
                 g_PlayExit = PLAY_EXIT_ROUND_OVER;
@@ -1276,10 +1274,10 @@ void UpdatePlay(void) {
                   HAS_PLAYED_LAST_HOLE()) {
                 g_PlayExit = PLAY_EXIT_ROUND_OVER;
                 InsertBestTime(g_GameState.courseIndex,
-                               g_GameState.stopwatchFrameCount,
-                               GetNetScoreToPar(COURSE_HOLE_COUNT, 0),
-                               (s8)g_Players[0].characterIndex,
-                               (s8)g_Players[0].paletteIndex);
+                    g_GameState.stopwatchFrameCount,
+                    GetNetScoreToPar(COURSE_HOLE_COUNT, 0),
+                    (s8)g_Players[0].characterIndex,
+                    (s8)g_Players[0].paletteIndex);
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
@@ -1287,7 +1285,7 @@ void UpdatePlay(void) {
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               StartWipe(WIPE_CLOSING);
             } else if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                       g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+                g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
               g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
               g_PendingSubModuleId = SUB_MODULE_SCORECARD;
@@ -1298,7 +1296,7 @@ void UpdatePlay(void) {
                 g_PlayExit = PLAY_EXIT_ROUND_OVER;
               }
             } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
-                       g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+                g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
               g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
               g_PendingSubModuleId = SUB_MODULE_SCORECARD;
@@ -1342,7 +1340,7 @@ void UpdatePlay(void) {
               if (!g_RingShotCourseOpenedAtStart &&
                   GetRingShotCourseOpenedAtStarCount()) {
                 func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
-                              UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
+                    UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
                 g_HoleEndStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
               } else if (D_800C42D0) {
                 g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
@@ -1380,7 +1378,7 @@ void UpdatePlay(void) {
           case HOLE_END_STEP_UNK5:
             if (IS_A_PRESSED() ||
                 (func_8005F180() &&
-                 g_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
+                    g_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               g_PauseScreen = PAUSE_SCREEN_UNK2;
               func_8020FAE8(-2);
@@ -1409,7 +1407,7 @@ void UpdatePlay(void) {
             if (g_PlayExit == PLAY_EXIT_NONE) {
               if (!g_GameState.unk31 &&
                   (g_GameMode == GAME_MODE_MATCH_GAME ||
-                   g_GameMode == GAME_MODE_GET_CHARACTER) &&
+                      g_GameMode == GAME_MODE_GET_CHARACTER) &&
                   HAS_PLAYED_LAST_HOLE()) {
                 g_HoleIndex = GetFirstHoleIndex();
                 D_801B60A0 = TRUE;
@@ -1489,9 +1487,9 @@ void UpdatePlay(void) {
           case HOLE_END_STEP_SCORECARD:
             if (func_802436C8(g_MergedController.repeatedButtons) &&
                 (IS_A_PRESSED() ||
-                 (func_8005F180() &&
-                  g_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
-                  g_PlayExit != PLAY_EXIT_ROUND_OVER))) {
+                    (func_8005F180() &&
+                        g_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
+                        g_PlayExit != PLAY_EXIT_ROUND_OVER))) {
               if (g_PlayExit == PLAY_EXIT_ROUND_OVER) {
                 g_HoleEndStep = HOLE_END_STEP_FINAL_RESULTS;
                 func_80205C78();
@@ -1661,11 +1659,11 @@ void SetSceneFog(Gfx** displayListHead) {
   if (IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
     gSPFogPosition(gfx++, g_DebugFog.near, g_DebugFog.far);
     gDPSetFogColor(gfx++, g_DebugFog.color[0], g_DebugFog.color[1],
-                   g_DebugFog.color[2], 0);
+        g_DebugFog.color[2], 0);
   } else {
     gSPFogPosition(gfx++, g_SceneFog.near, g_SceneFog.far);
     gDPSetFogColor(gfx++, g_SceneFog.color[0], g_SceneFog.color[1],
-                   g_SceneFog.color[2], 0xFF);
+        g_SceneFog.color[2], 0xFF);
   }
   *displayListHead = gfx;
 }
@@ -1695,7 +1693,7 @@ void MarkNearbyGroundTiles(u32 x, u32 z) {
             if (column + j < GROUND_TILE_COLUMN_COUNT &&
                 row + i < GROUND_TILE_ROW_COUNT) {
               g_IsGroundTileNearby[(row + i) * GROUND_TILE_COLUMN_COUNT +
-                                   (column + j)] = TRUE;
+                  (column + j)] = TRUE;
             }
           }
         }
@@ -1797,7 +1795,7 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
  * this */
 #define NOISE_TMEM                                              \
   (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH * \
-   G_IM_SIZ_16b_BYTES / 8)
+      G_IM_SIZ_16b_BYTES / 8)
 #define NOISE_BLEND_ALPHA 110
 
 #define CLIP_RATIO_COUNT 6
@@ -1811,7 +1809,7 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 /* The grid vertex at a vertex column and row, as GetGridVertex finds it */
 #define GRID_VERTEX(column, row)                                     \
   (&g_WorkArea.hole.gridVertices[(row) * 17 + ((u32)(column) >> 1) + \
-                                 ((u32)(column) & 1) * 9])
+      ((u32)(column) & 1) * 9])
 
 /* Whether a fine tile's neighbor makes it snap the vertices of their shared
  * edge's middle */
@@ -1820,7 +1818,7 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 /* Whether the neighbor makes it snap the edge's midpoints */
 #define IS_COARSER_THAN_FINE(tileIndex)                               \
   (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
-   g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
+      g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
 
 /* Sets a vertex halfway between two others */
 #define SET_AVERAGE_VERTEX(midpoint, from, to)                   \
@@ -1849,35 +1847,34 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 /* Loads a tile's texture, skipping its one-texel border */
 #define LOAD_TILE_TEXTURE(tileIndex, column, row)                            \
   {                                                                          \
-    gDPLoadMultiBlock(                                                       \
-        gfx++, TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1,     \
+    gDPLoadMultiBlock(gfx++,                                                 \
+        TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1,            \
         G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH,           \
         GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP,             \
         G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
     gDPSetTileSize(gfx++, 1, (column) * 128 + 2, (row) * 128 + 2,            \
-                   (column) * 128 + 0x86, (row) * 128 + 0x82);               \
+        (column) * 128 + 0x86, (row) * 128 + 0x82);                          \
   }
 
 /* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
-#define DRAW_TILE_QUADS(top, topOdd, top1, middle, middleOdd, middle1, bottom, \
-                        bottomOdd, bottom1)                                    \
+#define DRAW_TILE_QUADS(                                                       \
+    top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
   {                                                                            \
-    gSP2Triangles(gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle,    \
-                  0);                                                          \
-    gSP2Triangles(gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd,   \
-                  bottom, 0);                                                  \
-    gSP2Triangles(gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, \
-                  0);                                                          \
+    gSP2Triangles(                                                             \
+        gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0);          \
+    gSP2Triangles(                                                             \
+        gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0); \
+    gSP2Triangles(                                                             \
+        gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0);       \
     gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1,   \
-                  bottomOdd, 0);                                               \
+        bottomOdd, 0);                                                         \
   }
 
 /* Loads the noise texture that DrawGround blends over the tiles */
-#define LOAD_NOISE_TEXTURE(shiftS, shiftT)                              \
-  gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_800E12B0), NOISE_TMEM,     \
-                    G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b,           \
-                    RANDOM_GRID_SIZE, RANDOM_GRID_SIZE, 0, G_TX_MIRROR, \
-                    G_TX_MIRROR, 5, 5, shiftS, shiftT)
+#define LOAD_NOISE_TEXTURE(shiftS, shiftT)                          \
+  gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_800E12B0), NOISE_TMEM, \
+      G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, RANDOM_GRID_SIZE,   \
+      RANDOM_GRID_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
 extern s32 g_GroundClipRatio;
 extern Vtx* g_VertexListHead;
@@ -1930,8 +1927,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL1, 0, ENVIRONMENT, SHADE, TEXEL1,
-                      ENVIRONMENT, COMBINED, TEXEL0, COMBINED_ALPHA, TEXEL0, 0,
-                      0, 0, 1);
+        ENVIRONMENT, COMBINED, TEXEL0, COMBINED_ALPHA, TEXEL0, 0, 0, 0, 1);
   }
 
   current = 0;
@@ -2042,18 +2038,18 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   tiles = g_WorkArea.hole.tiles;
   for (i = 0; i < GROUND_TILE_COUNT; i++) {
     radius = (g_GroundTileHeightRanges[i] >= MIN_GROUND_TILE_RADIUS)
-                 ? g_GroundTileHeightRanges[i]
-                 : MIN_GROUND_TILE_RADIUS;
-    visibility = GetSphereVisibility(tiles[i].center[0], tiles[i].center[1],
-                                     tiles[i].center[2], radius);
+        ? g_GroundTileHeightRanges[i]
+        : MIN_GROUND_TILE_RADIUS;
+    visibility = GetSphereVisibility(
+        tiles[i].center[0], tiles[i].center[1], tiles[i].center[2], radius);
     detail = GROUND_DETAIL_HIDDEN;
     if (visibility < 0) {
       if (tiles[i].midpointBlockIndex >= 0 &&
           (g_IsGroundTileNearby[i] ||
-           visibility * fineScale < g_GroundTileHeightRanges[i])) {
+              visibility * fineScale < g_GroundTileHeightRanges[i])) {
         detail = GROUND_DETAIL_FINE;
       } else if (visibility * MEDIUM_DEPTH_SCALE <
-                 g_GroundTileHeightRanges[i]) {
+          g_GroundTileHeightRanges[i]) {
         detail = GROUND_DETAIL_MEDIUM;
       } else {
         detail = GROUND_DETAIL_COARSE;
@@ -2062,7 +2058,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
     /* The map scenes draw every visible tile finely */
     if ((g_Scene == SCENE_UNK9 || g_Scene == SCENE_UNK10) &&
         (terrainStyle == TERRAIN_STYLE_MAP ||
-         terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) &&
+            terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) &&
         detail != GROUND_DETAIL_HIDDEN) {
       detail = GROUND_DETAIL_FINE;
     }
@@ -2180,8 +2176,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
                 /* Moves a snapped edge's vertices, or moves back those snapped
                  * for the last tile */
                 if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
-                  gSPSegment(gfx++, j + 1,
-                             snapsEdge[current][j] ? offsets[j] : 0);
+                  gSPSegment(
+                      gfx++, j + 1, snapsEdge[current][j] ? offsets[j] : 0);
                 }
               }
               current ^= 1;
@@ -2192,11 +2188,11 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
             gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2), 2, 0);
             gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2), 1, 2);
             gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 1), 2, 3);
-            gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 1), 1,
-                      5);
+            gSPVertex(
+                gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 1), 1, 5);
             gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 2), 2, 6);
-            gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 2), 1,
-                      8);
+            gSPVertex(
+                gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 2), 1, 8);
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
               LOAD_TILE_TEXTURE(tileIndex, tileColumn, row);
               DRAW_TILE_QUADS(0, 2, 1, 3, 5, 4, 6, 8, 7);
@@ -2217,36 +2213,35 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
          * fine or skipped */
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
           gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
-                    GROUND_TILE_GROUP_SIZE + 1, topSlot);
+              GROUND_TILE_GROUP_SIZE + 1, topSlot);
           gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2),
-                    GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
+              GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
         } else if (previousDetail == GROUND_DETAIL_COARSE) {
           LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2), topSlot + ODD_SLOT);
         }
         gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 1),
-                  GROUND_TILE_GROUP_SIZE + 1, middleSlot);
+            GROUND_TILE_GROUP_SIZE + 1, middleSlot);
         gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 1),
-                  GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
+            GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
         gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2),
-                  GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
+            GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         if (row != GROUND_TILE_ROW_COUNT - 1 &&
             g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
                     .detail == GROUND_DETAIL_COARSE) {
-          LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2 + 2),
-                            bottomSlot + ODD_SLOT);
+          LOAD_AVERAGED_ROW(
+              GRID_VERTEX(column, row * 2 + 2), bottomSlot + ODD_SLOT);
         } else {
           gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 2),
-                    GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
+              GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
         }
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LOAD_TILE_TEXTURE(tileIndex, half * GROUND_TILE_GROUP_SIZE + k,
-                                row);
+              LOAD_TILE_TEXTURE(
+                  tileIndex, half * GROUND_TILE_GROUP_SIZE + k, row);
               DRAW_TILE_QUADS(topSlot, topSlot + ODD_SLOT, topSlot + 1,
-                              middleSlot, middleSlot + ODD_SLOT, middleSlot + 1,
-                              bottomSlot, bottomSlot + ODD_SLOT,
-                              bottomSlot + 1);
+                  middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
+                  bottomSlot + ODD_SLOT, bottomSlot + 1);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
                 break;
               }
@@ -2269,17 +2264,17 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
         bottomSlot = spareSlot;
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
           gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
-                    GROUND_TILE_GROUP_SIZE + 1, topSlot);
+              GROUND_TILE_GROUP_SIZE + 1, topSlot);
         }
         gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2),
-                  GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
+            GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LOAD_TILE_TEXTURE(tileIndex, half * GROUND_TILE_GROUP_SIZE + k,
-                                row);
+              LOAD_TILE_TEXTURE(
+                  tileIndex, half * GROUND_TILE_GROUP_SIZE + k, row);
               gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
-                            topSlot + 1, bottomSlot + 1, bottomSlot, 0);
+                  topSlot + 1, bottomSlot + 1, bottomSlot, 0);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
                 break;
               }
@@ -2313,7 +2308,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   if (IsGameFlagSet(GAME_FLAG_TIME_GROUND)) {
     start = osGetCount() - start;
     PrintDebugPaddedHex(start / GROUND_TIMING_TICKS, GROUND_TIMING_COLUMN,
-                        g_GroundTimingRow + GROUND_TIMING_ROW);
+        g_GroundTimingRow + GROUND_TIMING_ROW);
     g_GroundTimingRow = 1 - g_GroundTimingRow;
   }
 }

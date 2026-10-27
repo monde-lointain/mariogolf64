@@ -27,11 +27,11 @@ s32 GetViewDepth(f32 x, f32 y, f32 z);
 s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point);
 s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint* point);
 void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation);
-void BuildTransformMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation,
-                          Vec3 scale);
+void BuildTransformMatrix(
+    Mat4 matrix, Vec3 rotation, Vec3 translation, Vec3 scale);
 void MultiplyMatrices(Mat4 a, Mat4 b, Mat4 product);
 void ConvertMatrixToFixed(Mat4 matrix, Mtx* fixedMatrix);
-void SetTriangleNormal(Vtx* vertices, s32 firstIndex, s32 secondIndex,
-                       s32 thirdIndex, s32 target);
+void SetTriangleNormal(
+    Vtx* vertices, s32 firstIndex, s32 secondIndex, s32 thirdIndex, s32 target);
 
 #endif

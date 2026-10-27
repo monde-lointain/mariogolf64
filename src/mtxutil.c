@@ -66,7 +66,7 @@ void guMtxL2F(f32 mf[4][4], Mtx* m) {
     for (pair = 0; pair < 2; pair++) {
       first = (*integerParts & 0xFFFF0000) | ((*fractionParts >> 16) & 0xFFFF);
       second = ((*(integerParts++) << 16) & 0xFFFF0000) |
-               (*(fractionParts++) & 0xFFFF);
+          (*(fractionParts++) & 0xFFFF);
       signedFirst = *((s32*)&first);
       signedSecond = *((s32*)&second);
       mf[row][pair * 2] = FIXED_TO_FLOAT(signedFirst);

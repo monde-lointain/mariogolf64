@@ -85,17 +85,16 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
     f_CursorBoxVertices[corner].v.cn[3] = 191;
   }
   guOrtho(&f_CursorBoxProjection, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
-          -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, 10.0f, 2000.0f, 1.0f);
+      -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, 10.0f, 2000.0f, 1.0f);
   guTranslate(&f_CursorBoxTranslations[g_DrawBufferIndex],
-              (f32)(left + CURSOR_BOX_HALF_SIZE - SCREEN_WIDTH / 2) - 0.5f,
-              (f32)(SCREEN_HEIGHT / 2 - CURSOR_BOX_HALF_SIZE - top) + 0.5f,
-              -100.0f);
+      (f32)(left + CURSOR_BOX_HALF_SIZE - SCREEN_WIDTH / 2) - 0.5f,
+      (f32)(SCREEN_HEIGHT / 2 - CURSOR_BOX_HALF_SIZE - top) + 0.5f, -100.0f);
   gDPPipeSync(displayList++);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_NONE);
   gDPLoadTextureBlock_4b(displayList++,
-                         ((u32)f_CursorBoxImage + IMAGE_HEADER_SIZE) & ~7,
-                         G_IM_FMT_IA, width, height, 0, 0, 0, 0, 0, 0, 0);
+      ((u32)f_CursorBoxImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA, width,
+      height, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(displayList++);
   gDPPipeSync(displayList++);
   gDPSetCycleType(displayList++, G_CYC_1CYCLE);
@@ -107,15 +106,15 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
   gDPPipeSync(displayList++);
   gDPSetRenderMode(displayList++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPSetCombineLERP(displayList++, 0, 0, 0, SHADE, SHADE, 0, TEXEL0, 0, 0, 0, 0,
-                    SHADE, SHADE, 0, TEXEL0, 0);
+      SHADE, SHADE, 0, TEXEL0, 0);
   gSPClearGeometryMode(displayList++, 0xFFFFFFFF);
   gSPSetGeometryMode(displayList++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(displayList++);
   gSPMatrix(displayList++, OS_K0_TO_PHYSICAL(&f_CursorBoxProjection),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gSPMatrix(displayList++,
-            OS_K0_TO_PHYSICAL(&f_CursorBoxTranslations[g_DrawBufferIndex]),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+      OS_K0_TO_PHYSICAL(&f_CursorBoxTranslations[g_DrawBufferIndex]),
+      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gDPPipeSync(displayList++);
   gSPVertex(displayList++, f_CursorBoxVertices, CURSOR_BOX_CORNER_COUNT, 0);
   gSP2Triangles(displayList++, 0, 1, 2, 0, 0, 2, 3, 0);

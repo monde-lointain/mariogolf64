@@ -36,13 +36,34 @@ void GrantWinsStarsAndBadges(void);
 void GrantRingShotProgressAndPoints(void);
 
 static s32 f_UnusedCodeButtons[UNUSED_CODE_LENGTH] = {
-    L_CBUTTONS, R_CBUTTONS, D_CBUTTONS, U_CBUTTONS, L_TRIG, R_TRIG, L_TRIG,
-    R_TRIG,     U_JPAD,     D_JPAD,     L_JPAD,     R_JPAD, Z_TRIG,
+    L_CBUTTONS,
+    R_CBUTTONS,
+    D_CBUTTONS,
+    U_CBUTTONS,
+    L_TRIG,
+    R_TRIG,
+    L_TRIG,
+    R_TRIG,
+    U_JPAD,
+    D_JPAD,
+    L_JPAD,
+    R_JPAD,
+    Z_TRIG,
 };
 static s32 f_UnusedCodeEntered[UNUSED_CODE_LENGTH] = {
-    NO_BUTTONS, NO_BUTTONS, NO_BUTTONS, NO_BUTTONS, NO_BUTTONS,
-    NO_BUTTONS, NO_BUTTONS, NO_BUTTONS, NO_BUTTONS, NO_BUTTONS,
-    NO_BUTTONS, NO_BUTTONS, NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
+    NO_BUTTONS,
 };
 static s32 f_UnusedCodeLength = 0;
 

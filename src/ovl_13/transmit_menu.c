@@ -450,7 +450,7 @@ extern s32 D_800C42D0;
 extern void* g_PressingHandImage;
 
 void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
-                        GameBoyTransfer* transfer);
+    GameBoyTransfer* transfer);
 void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer);
 void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top);
 extern Gfx D_800C3FC0[];
@@ -470,11 +470,11 @@ void DumpCartridgeRam(void) {
   PrintDebugText("          ", 10, 5);
   /* The original takes 0 from OpenGameBoyPakWithRetries as success, which is
    * not PAK_RESULT_OK */
-  if (OpenGameBoyPakWithRetries(0, &transfer->cartridgeHeader,
-                                &transfer->pakFile) == 0) {
+  if (OpenGameBoyPakWithRetries(
+          0, &transfer->cartridgeHeader, &transfer->pakFile) == 0) {
     PrintDebugText("GOLF OK", 10, 3);
     if (nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS,
-                         cartridgeRam, CARTRIDGE_RAM_SIZE) == 0) {
+            cartridgeRam, CARTRIDGE_RAM_SIZE) == 0) {
       PrintDebugText("READ OK", 10, 4);
       if (WriteHostFile("x:/golf/capture/gbsram.bin", CARTRIDGE_RAM_SIZE) ==
           0) {
@@ -496,46 +496,46 @@ void LoadTransmitMenu(void) {
 
   ReadEncodedAsset(g_GameBoyTransfer.woodPanelImage =
                        AllocMemory(OpenEncodedAsset(WOOD_PANEL_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.courseSceneImage = AllocMemory(
                        OpenEncodedAsset(COURSE_SCENE_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.pointerImage =
                        AllocMemory(OpenEncodedAsset(POINTER_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.arrowsImage =
                        AllocMemory(OpenEncodedAsset(ARROWS_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.controllerIconsImage = AllocMemory(
                        OpenEncodedAsset(CONTROLLER_ICONS_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.titleImage =
                        AllocMemory(OpenEncodedAsset(TITLE_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.cursorBoxImage =
                        AllocMemory(OpenEncodedAsset(CURSOR_BOX_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.curveSegmentsImage = AllocMemory(
                        OpenEncodedAsset(CURVE_SEGMENTS_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.pressingHandImage = AllocMemory(
                        OpenEncodedAsset(PRESSING_HAND_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.statBarsImage =
                        AllocMemory(OpenEncodedAsset(STAT_BARS_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.shotTypesImage =
                        AllocMemory(OpenEncodedAsset(SHOT_TYPES_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.noticeCloudImage = AllocMemory(
                        OpenEncodedAsset(NOTICE_CLOUD_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.accessingImage =
                        AllocMemory(OpenEncodedAsset(ACCESSING_ASSET, &asset)),
-                   &asset);
+      &asset);
   ReadEncodedAsset(g_GameBoyTransfer.statLabelsImage =
                        AllocMemory(OpenEncodedAsset(STAT_LABELS_ASSET, &asset)),
-                   &asset);
+      &asset);
   g_GameBoyTransfer.pressingHandPosition = PRESSING_HAND_HIDDEN;
   g_GameBoyTransfer.isAccessing = FALSE;
   for (index = 0; index != GAME_BOY_GOLFER_COUNT; index++) {
@@ -543,11 +543,11 @@ void LoadTransmitMenu(void) {
         g_GameBoyTransfer.faceImages[index] = AllocMemory(OpenEncodedAsset(
             g_CharacterImageAssets[FIRST_GAME_BOY_GOLFER + index], &asset)),
         &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[FIRST_GAME_BOY_GOLFER + index],
-                  &file);
+    OpenAssetFile(
+        g_CharacterPaletteAssets[FIRST_GAME_BOY_GOLFER + index], &file);
     size = GetAssetFileSize(&file);
-    ReadAssetFile(g_GameBoyTransfer.facePalettes[index] = AllocMemory(size),
-                  size, &file);
+    ReadAssetFile(
+        g_GameBoyTransfer.facePalettes[index] = AllocMemory(size), size, &file);
   }
   PlaySong(TRANSMIT_MENU_SONG, 0);
   LoadCursorBox(g_GameBoyTransfer.cursorBoxImage);
@@ -601,8 +601,8 @@ void UpdateBringCharacters(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
           break;
       }
@@ -636,8 +636,8 @@ void UpdateBringCharacters(void) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
@@ -671,13 +671,13 @@ void UpdateBringCharacters(void) {
     case BRING_BRINGING:
       D_800C42D0 = 1;
       if (++transfer->bringingFrame == BRINGING_FRAME_COUNT) {
-        BringOverCharacter(transfer->listedCharacterIndex,
-                           transfer->characterIndex);
-        transfer->listingStates
-            [transfer->listedCharacters[transfer->listedCharacterIndex]] =
+        BringOverCharacter(
+            transfer->listedCharacterIndex, transfer->characterIndex);
+        transfer->listingStates[transfer
+                ->listedCharacters[transfer->listedCharacterIndex]] =
             LISTING_NONE;
         GenerateClubSet(FIRST_GAME_BOY_GOLFER + transfer->characterIndex,
-                        &g_GameBoyCharacters[transfer->characterIndex]);
+            &g_GameBoyCharacters[transfer->characterIndex]);
         SetTextName(g_GameBoyCharacters[transfer->characterIndex].name);
         SetTextPaletteColor(255, 255, 0, 0);
         if (transfer->characterCount < GAME_BOY_GOLFER_COUNT) {
@@ -690,8 +690,8 @@ void UpdateBringCharacters(void) {
     case BRING_CHOOSING_SLOT:
       if (f_TransmitController.pressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-        transfer->listingStates
-            [transfer->listedCharacters[transfer->listedCharacterIndex]] =
+        transfer->listingStates[transfer
+                ->listedCharacters[transfer->listedCharacterIndex]] =
             LISTING_BRINGING;
         transfer->screenStep = BRING_BRINGING;
         transfer->bringingFrame = 0;
@@ -699,11 +699,11 @@ void UpdateBringCharacters(void) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screenStep = BRING_CHOOSING;
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
-                 transfer->characterIndex > 0) {
+          transfer->characterIndex > 0) {
         transfer->characterIndex--;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
-                 transfer->characterIndex < GAME_BOY_GOLFER_COUNT - 1) {
+          transfer->characterIndex < GAME_BOY_GOLFER_COUNT - 1) {
         transfer->characterIndex++;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       }
@@ -716,8 +716,8 @@ void UpdateBringCharacters(void) {
         } else {
           transfer->screenStep = BRING_BRINGING;
           transfer->characterIndex = transfer->characterCount;
-          transfer->listingStates
-              [transfer->listedCharacters[transfer->listedCharacterIndex]] =
+          transfer->listingStates[transfer
+                  ->listedCharacters[transfer->listedCharacterIndex]] =
               LISTING_BRINGING;
           transfer->bringingFrame = 0;
         }
@@ -725,15 +725,14 @@ void UpdateBringCharacters(void) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
-                 transfer->listedCharacterIndex > 0) {
+          transfer->listedCharacterIndex > 0) {
         transfer->listedCharacterIndex--;
         if (transfer->listedCharacterIndex < transfer->unk7B8) {
           transfer->unk7B8--;
         }
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
-                 transfer->listedCharacterIndex <
-                     transfer->listedCharacterCount - 1) {
+          transfer->listedCharacterIndex < transfer->listedCharacterCount - 1) {
         transfer->listedCharacterIndex++;
         if (transfer->unk7B8 + 5 < transfer->listedCharacterIndex) {
           transfer->unk7B8++;
@@ -850,8 +849,8 @@ void UpdateSendStatus(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
           break;
         case NOTICE_CLOSING:
@@ -886,8 +885,8 @@ void UpdateSendStatus(void) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
@@ -916,12 +915,11 @@ void UpdateSendStatus(void) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
-                 transfer->chosenCartridgeIndex > 0) {
+          transfer->chosenCartridgeIndex > 0) {
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->chosenCartridgeIndex--;
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
-                 transfer->chosenCartridgeIndex <
-                     transfer->taggedCartridgeCount - 1) {
+          transfer->chosenCartridgeIndex < transfer->taggedCartridgeCount - 1) {
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->chosenCartridgeIndex++;
       }
@@ -1024,8 +1022,8 @@ void UpdateSendExperience(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
           break;
       }
@@ -1045,11 +1043,11 @@ void UpdateSendExperience(void) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
-                 transfer->characterIndex > 0) {
+          transfer->characterIndex > 0) {
         transfer->characterIndex--;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
-                 transfer->characterIndex < transfer->characterCount - 1) {
+          transfer->characterIndex < transfer->characterCount - 1) {
         transfer->characterIndex++;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       }
@@ -1074,8 +1072,8 @@ void UpdateSendExperience(void) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
@@ -1130,8 +1128,8 @@ void UpdateSendExperience(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
           break;
       }
@@ -1155,8 +1153,8 @@ s32 HaveAllRumblePaks(void) {
 /* A macro rather than an inline function, which leaves a store-flag result */
 #define AreAllCButtonsHeld(buttons)                         \
   ((((buttons) & (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) == \
-    (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) &&              \
-   ((buttons) & R_CBUTTONS))
+       (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) &&           \
+      ((buttons) & R_CBUTTONS))
 
 /*
  * Runs the options screen and hands each frame to the screen chosen there, then
@@ -1268,8 +1266,8 @@ void UpdateTransmitMenu(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
-                      MENU_SOUND_VOLUME);
+            PlaySound(
+                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
           break;
       }
@@ -1297,12 +1295,12 @@ void UpdateTransmitMenu(void) {
 }
 
 /* Fills the slot for a cartridge's save from the save's bytes */
-void DecodeCartridgeCharacter(u8* save, s32 cartridgeIndex, s32 saveIndex,
-                              s32 unk34) {
+void DecodeCartridgeCharacter(
+    u8* save, s32 cartridgeIndex, s32 saveIndex, s32 unk34) {
   GameBoyCharacter* character =
       &g_GameBoyTransfer
            .cartridgeCharacters[cartridgeIndex * CARTRIDGE_SAVE_COUNT +
-                                saveIndex];
+               saveIndex];
   s32 index;
 
   character->status = GAME_BOY_CHARACTER_STATUS_PRESENT;
@@ -1354,7 +1352,7 @@ void DecodeCartridgeCharacter(u8* save, s32 cartridgeIndex, s32 saveIndex,
   character->experience = 0;
   character->driveDistance = save[0x1A] | (save[0x1B] << 8);
   osSyncPrintf("%d, %d %d\n", character->experience, character->unk1C,
-               character->shotCurve);
+      character->shotCurve);
   for (index = 0; index != GAME_BOY_CHARACTER_UNK3C_COUNT; index++) {
     character->unk3C[index].unk0 =
         save[0x100 + index * 6] | (save[0x101 + index * 6] << 8);
@@ -1363,14 +1361,14 @@ void DecodeCartridgeCharacter(u8* save, s32 cartridgeIndex, s32 saveIndex,
     character->unk3C[index].unk4 = save[0x104 + index * 6];
     character->unk3C[index].unk5 = save[0x105 + index * 6];
     osSyncPrintf("%d, %d %d\n", index, character->unk3C[index].unk0,
-                 character->unk3C[index].unk2);
+        character->unk3C[index].unk2);
   }
   character->unk34 = unk34;
   character->unk38 = saveIndex;
 }
 
 void SkipCartridgeSave(u8* unusedData, s32 unusedCartridgeIndex,
-                       s32 unusedSaveIndex, u8* unusedTitle, s32 unusedUnk34) {}
+    s32 unusedSaveIndex, u8* unusedTitle, s32 unusedUnk34) {}
 
 s32 IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
   s32 index;
@@ -1399,7 +1397,7 @@ s32 IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
  */
 s32 f_ModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_CHARACTERS,
-     TRANSMIT_OPTION_MAIN_MENU},
+        TRANSMIT_OPTION_MAIN_MENU},
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_EXPERIENCE, TRANSMIT_OPTION_NONE},
 };
 char* f_UnusedShotTypeNames[] = {"Straight", "Draw", "Fade"};
@@ -1416,8 +1414,8 @@ s32 f_NoticeMessage = 0;
 s32 f_NoticeSize = 0;
 s32 f_PressingHandFrame = 0;
 s32 f_UnusedZeros[2] = {0, 0};
-s32 f_StatusHoleOrder[COURSE_HOLE_COUNT] = {0, 1,  2,  3,  4,  5,  6,  7,  8,
-                                            9, 10, 11, 12, 13, 14, 15, 16, 17};
+s32 f_StatusHoleOrder[COURSE_HOLE_COUNT] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
 void BringOverCharacter(s32 listedIndex, s32 slot) {
   /* The transfer pointer is there to match */
@@ -1461,7 +1459,7 @@ s32 ComputeSaveChecksum(u8* save) {
   s32 offset;
 
   for (offset = SAVE_CHECKSUM_OFFSET + 2; offset != CARTRIDGE_SAVE_SIZE;
-       offset++) {
+      offset++) {
     sum += save[offset];
   }
   return sum;
@@ -1501,7 +1499,7 @@ void DrawSendStatusHint(Gfx** displayListHead, GameBoyTransfer* transfer) {
   }
   if (message != NO_MESSAGE) {
     SetTextSlot(HINT_LEFT, HINT_TOP, message, 1, HINT_TEXT_SLOT,
-                TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
   *displayListHead = displayList;
@@ -1512,7 +1510,7 @@ void DrawSendStatusHint(Gfx** displayListHead, GameBoyTransfer* transfer) {
  * type and a bar from its centre out to their shot curve.
  */
 void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
-                        GameBoyTransfer* transfer) {
+    GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   s32 segment;
   /* Holding the shot type row in segmentCurve first is there to match */
@@ -1522,7 +1520,7 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   DrawLargeText(&displayList, STATS_NAME_LEFT, STATS_NAME_TOP, character->name);
   BeginShadowedText(&displayList);
   sprintf(g_PrintBuffer, "  %2d     :%3d", character->level,
-          character->driveDistance);
+      character->driveDistance);
   DrawSmallText(&displayList, STATS_LEFT, STATS_TOP, g_PrintBuffer);
   if (character->shotCurve == 0) {
     segmentCurve = SHOT_TYPE_STRAIGHT;
@@ -1532,54 +1530,51 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
     segmentCurve = SHOT_TYPE_FADE;
   }
   SetTextSlot(HINT_LEFT, HINT_TOP, CHOOSE_CHARACTER_MESSAGE, 1, HINT_TEXT_SLOT,
-              TEXT_FLAG_UNK20, 255, 255, 255, 255);
+      TEXT_FLAG_UNK20, 255, 255, 255, 255);
   gDPPipeSync(displayList++);
   gDPSetAlphaCompare(displayList++, G_AC_NONE);
   gDPPipeSync(displayList++);
-  gDPSetRenderMode(displayList++, G_RM_TEX_EDGE | AA_EN,
-                   G_RM_TEX_EDGE2 | AA_EN);
+  gDPSetRenderMode(
+      displayList++, G_RM_TEX_EDGE | AA_EN, G_RM_TEX_EDGE2 | AA_EN);
   gDPSetCombineMode(displayList++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-  LoadSmallPalette(&displayList, 0,
-                   (u8*)transfer->shotTypesImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(
-      &displayList, (u8*)transfer->shotTypesImage + PALETTED_TEXELS_OFFSET,
-      G_IM_FMT_CI, SHOT_TYPE_WIDTH, SHOT_TYPE_HEIGHT * 3, 0, 0, 0, 0, 0, 0, 0);
+  LoadSmallPalette(
+      &displayList, 0, (u8*)transfer->shotTypesImage + IMAGE_HEADER_SIZE);
+  LoadNibbleTextureBlock(&displayList,
+      (u8*)transfer->shotTypesImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+      SHOT_TYPE_WIDTH, SHOT_TYPE_HEIGHT * 3, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&displayList, SHOT_TYPE_LEFT << 2, SHOT_TYPE_TOP << 2,
-                  (SHOT_TYPE_LEFT + SHOT_TYPE_WIDTH) << 2,
-                  (SHOT_TYPE_TOP + SHOT_TYPE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-                  (segmentCurve * SHOT_TYPE_HEIGHT) << 5, TEXEL_STEP_ONE,
-                  TEXEL_STEP_ONE);
-  LoadSmallPalette(&displayList, 0,
-                   (u8*)transfer->statLabelsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(
-      &displayList, (u8*)transfer->statLabelsImage + PALETTED_TEXELS_OFFSET,
-      G_IM_FMT_CI, STAT_LABELS_WIDTH, STAT_LABELS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      (SHOT_TYPE_LEFT + SHOT_TYPE_WIDTH) << 2,
+      (SHOT_TYPE_TOP + SHOT_TYPE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+      (segmentCurve * SHOT_TYPE_HEIGHT) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  LoadSmallPalette(
+      &displayList, 0, (u8*)transfer->statLabelsImage + IMAGE_HEADER_SIZE);
+  LoadNibbleTextureBlock(&displayList,
+      (u8*)transfer->statLabelsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+      STAT_LABELS_WIDTH, STAT_LABELS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&displayList, STATS_LEFT << 2, STATS_TOP << 2,
-                  (STATS_LEFT + STAT_LABELS_WIDTH) << 2,
-                  (STATS_TOP + STAT_LABELS_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-                  TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  LoadSmallPalette(&displayList, 0,
-                   (u8*)transfer->statBarsImage + IMAGE_HEADER_SIZE);
-  gDPLoadTextureTile_4b(
-      displayList++,
+      (STATS_LEFT + STAT_LABELS_WIDTH) << 2,
+      (STATS_TOP + STAT_LABELS_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  LoadSmallPalette(
+      &displayList, 0, (u8*)transfer->statBarsImage + IMAGE_HEADER_SIZE);
+  gDPLoadTextureTile_4b(displayList++,
       ((u32)transfer->statBarsImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
       CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0,
       0, 0, 0, 0, 0);
   DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2,
-                  (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
-                  (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-                  0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  LoadLargePalette(&displayList,
-                   (u8*)transfer->curveSegmentsImage + IMAGE_HEADER_SIZE);
-  LoadTextureBlock(
-      &displayList,
+      (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
+      (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  LoadLargePalette(
+      &displayList, (u8*)transfer->curveSegmentsImage + IMAGE_HEADER_SIZE);
+  LoadTextureBlock(&displayList,
       (u8*)transfer->curveSegmentsImage + LARGE_PALETTED_TEXELS_OFFSET,
       G_IM_FMT_CI, G_IM_SIZ_8b, CURVE_SEGMENT_WIDTH,
       CURVE_SEGMENT_WIDTH * CURVE_SEGMENT_COUNT, 0, 0, 0, 0, 0, 0, 0);
   for (segment = 0, segmentCurve = -CURVE_SEGMENT_COUNT / 2;
-       segment != CURVE_SEGMENT_COUNT; segment++, segmentCurve++) {
+      segment != CURVE_SEGMENT_COUNT; segment++, segmentCurve++) {
     /* Light segments from the centre out to the shot curve; the continues are
      * there to match */
     if (character->shotCurve < 0) {
@@ -1601,8 +1596,8 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
     if (character->shotCurve == 0 && segment != CURVE_SEGMENT_COUNT / 2) {
       continue;
     }
-    DrawTextureRect(
-        &displayList, (CURVE_BAR_LEFT + segment * CURVE_SEGMENT_WIDTH) << 2,
+    DrawTextureRect(&displayList,
+        (CURVE_BAR_LEFT + segment * CURVE_SEGMENT_WIDTH) << 2,
         CURVE_BAR_TOP << 2,
         (CURVE_BAR_LEFT + (segment + 1) * CURVE_SEGMENT_WIDTH) << 2,
         (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0,
@@ -1626,12 +1621,11 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
     character = &g_GameBoyCharacters[transfer->characterIndex];
   }
   if ((transfer->screenStep == BRING_CHOOSING ||
-       transfer->screenStep == BRING_BRINGING) &&
+          transfer->screenStep == BRING_BRINGING) &&
       g_GameBoyTransfer.listedCharacterCount > 0) {
     isCharacterShown = TRUE;
-    character =
-        &transfer->cartridgeCharacters
-             [transfer->listedCharacters[transfer->listedCharacterIndex]];
+    character = &transfer->cartridgeCharacters[transfer
+            ->listedCharacters[transfer->listedCharacterIndex]];
   }
   if (isCharacterShown) {
     DrawCharacterStats(&displayList, character, transfer);
@@ -1652,7 +1646,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
     }
     if (message != NO_MESSAGE) {
       SetTextSlot(HINT_LEFT, HINT_TOP, message, 1, HINT_TEXT_SLOT,
-                  TEXT_FLAG_UNK20, 255, 255, 255, 255);
+          TEXT_FLAG_UNK20, 255, 255, 255, 255);
       DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
     }
   }
@@ -1671,10 +1665,10 @@ void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
 
     sprintf(g_PrintBuffer, "%4d", character->experience);
     DrawSmallText(&displayList, EXPERIENCE_LEFT + slot * FACE_SPACING,
-                  EXPERIENCE_TOP, g_PrintBuffer);
+        EXPERIENCE_TOP, g_PrintBuffer);
   }
-  DrawCharacterStats(&displayList,
-                     &g_GameBoyCharacters[transfer->characterIndex], transfer);
+  DrawCharacterStats(
+      &displayList, &g_GameBoyCharacters[transfer->characterIndex], transfer);
   SetUpTextDrawing(&displayList);
   message = NO_MESSAGE;
   switch (transfer->screenStep) {
@@ -1687,7 +1681,7 @@ void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   }
   if (message != NO_MESSAGE) {
     SetTextSlot(HINT_LEFT, HINT_TOP, message, 1, HINT_TEXT_SLOT,
-                TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
   *displayListHead = displayList;
@@ -1709,12 +1703,11 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
   DrawImportedFaces(&displayList, transfer);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-  gDPSetCombineMode(displayList++, G_CC_MODULATERGBA_PRIM,
-                    G_CC_MODULATERGBA_PRIM);
-  LoadSmallPalette(&displayList, 0,
-                   (u8*)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(
-      &displayList,
+  gDPSetCombineMode(
+      displayList++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+  LoadSmallPalette(
+      &displayList, 0, (u8*)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
+  LoadNibbleTextureBlock(&displayList,
       (u8*)transfer->controllerIconsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0,
       0, 0, 0);
@@ -1727,12 +1720,11 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
     } else {
       gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
     }
-    DrawTextureRect(
-        &displayList,
+    DrawTextureRect(&displayList,
         (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING) << 2,
         CONTROLLER_ICONS_TOP << 2,
         (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING +
-         CONTROLLER_ICON_SIZE)
+            CONTROLLER_ICON_SIZE)
             << 2,
         (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
         (transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE) << 5,
@@ -1751,17 +1743,15 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
       pointerSwing = sinf(f_StatusPointerAngle) * 8.0f;
       gDPPipeSync(displayList++);
       gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-      LoadSmallPalette(&displayList, 0,
-                       (u8*)transfer->pointerImage + IMAGE_HEADER_SIZE);
+      LoadSmallPalette(
+          &displayList, 0, (u8*)transfer->pointerImage + IMAGE_HEADER_SIZE);
       /* The original loads the controller icons again, which the pointer
        * replaces */
-      LoadNibbleTextureBlock(
-          &displayList,
+      LoadNibbleTextureBlock(&displayList,
           (u8*)transfer->controllerIconsImage + PALETTED_TEXELS_OFFSET,
           G_IM_FMT_CI, CONTROLLER_ICON_SIZE,
           CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0, 0, 0, 0);
-      gDPLoadTextureTile_4b(
-          displayList++,
+      gDPLoadTextureTile_4b(displayList++,
           ((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET) & ~7,
           G_IM_FMT_CI, POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1,
           POINTER_IMAGE_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
@@ -1770,13 +1760,12 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
           transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING +
           (CONTROLLER_ICONS_LEFT - POINTER_WIDTH);
       DrawTextureRect(&displayList, (pointerRestLeft - pointerSwing) << 2,
-                      POINTER_TOP << 2,
-                      (pointerRestLeft - pointerSwing + POINTER_WIDTH) << 2,
-                      (POINTER_TOP + POINTER_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-                      0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          POINTER_TOP << 2,
+          (pointerRestLeft - pointerSwing + POINTER_WIDTH) << 2,
+          (POINTER_TOP + POINTER_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else if (transfer->screenStep == SEND_STATUS_READY) {
-      DrawCursorBox(
-          &displayList,
+      DrawCursorBox(&displayList,
           CONTROLLER_ICONS_LEFT - CONTROLLER_CURSOR_MARGIN +
               transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING,
           CONTROLLER_ICONS_TOP - CONTROLLER_CURSOR_MARGIN);
@@ -1797,13 +1786,11 @@ void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer) {
       character = g_GameBoyCharacters[slot].character;
       LoadLargePalette(&displayList, transfer->facePalettes[character]);
       LoadTextureBlock(&displayList, transfer->faceImages[character],
-                       G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0,
-                       0, 0, 0, 0);
+          G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&displayList, (FACES_LEFT + slot * FACE_SPACING) << 2,
-                      FACES_TOP << 2,
-                      (FACES_LEFT + slot * FACE_SPACING + FACE_SIZE) << 2,
-                      (FACES_TOP + FACE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-                      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          FACES_TOP << 2, (FACES_LEFT + slot * FACE_SPACING + FACE_SIZE) << 2,
+          (FACES_TOP + FACE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
   *displayListHead = displayList;
@@ -1828,8 +1815,8 @@ static inline s32 IsListed(s32 listing) {
  * arrows when the list scrolls. A character being brought over moves from the
  * list to its slot.
  */
-void DrawBringCharactersScreen(Gfx** displayListHead,
-                               GameBoyTransfer* transfer) {
+void DrawBringCharactersScreen(
+    Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   s32 index;
   s32 shownCount;
@@ -1842,10 +1829,9 @@ void DrawBringCharactersScreen(Gfx** displayListHead,
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_RGBA16);
   DrawImportedFaces(&displayList, transfer);
-  LoadSmallPalette(&displayList, 0,
-                   (u8*)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(
-      &displayList,
+  LoadSmallPalette(
+      &displayList, 0, (u8*)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
+  LoadNibbleTextureBlock(&displayList,
       (u8*)transfer->controllerIconsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0,
       0, 0, 0);
@@ -1854,16 +1840,15 @@ void DrawBringCharactersScreen(Gfx** displayListHead,
     if (transfer->cartridgeCharacters[transfer->listedCharacters[index]]
                 .status == GAME_BOY_CHARACTER_STATUS_PRESENT &&
         IsListed(transfer->listingStates[transfer->listedCharacters[index]])) {
-      DrawTextureRect(
-          &displayList,
+      DrawTextureRect(&displayList,
           (LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING) << 2,
           LISTED_ICONS_TOP << 2,
           (LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING +
-           CONTROLLER_ICON_SIZE)
+              CONTROLLER_ICON_SIZE)
               << 2,
           (LISTED_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
           (transfer->listedCharacters[index] / CARTRIDGE_SAVE_COUNT *
-           CONTROLLER_ICON_SIZE)
+              CONTROLLER_ICON_SIZE)
               << 5,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       shownCount++;
@@ -1872,17 +1857,16 @@ void DrawBringCharactersScreen(Gfx** displayListHead,
       }
     }
   }
-  LoadSmallPalette(&displayList, 0,
-                   (u8*)transfer->statBarsImage + IMAGE_HEADER_SIZE);
-  gDPLoadTextureTile_4b(
-      displayList++,
+  LoadSmallPalette(
+      &displayList, 0, (u8*)transfer->statBarsImage + IMAGE_HEADER_SIZE);
+  gDPLoadTextureTile_4b(displayList++,
       ((u32)transfer->statBarsImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
       CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0,
       0, 0, 0, 0, 0);
   DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2,
-                  (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
-                  (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-                  0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
+      (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   shownCount = 0;
   for (index = transfer->unk7B8; index != CARTRIDGE_CHARACTER_COUNT; index++) {
     listed = transfer->listedCharacters[index];
@@ -1895,17 +1879,16 @@ void DrawBringCharactersScreen(Gfx** displayListHead,
       if (transfer->listingStates[listed] == LISTING_BRINGING) {
         slotLeft = FACES_LEFT + transfer->characterIndex * FACE_SPACING;
         left += (slotLeft - left) * transfer->bringingFrame /
-                (BRINGING_FRAME_COUNT - 1);
+            (BRINGING_FRAME_COUNT - 1);
         top += (FACES_TOP - top) * transfer->bringingFrame /
-               (BRINGING_FRAME_COUNT - 1);
+            (BRINGING_FRAME_COUNT - 1);
       }
       LoadLargePalette(&displayList, transfer->facePalettes[character]);
       LoadTextureBlock(&displayList, transfer->faceImages[character],
-                       G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0,
-                       0, 0, 0, 0);
+          G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&displayList, left << 2, top << 2,
-                      (left + FACE_SIZE) << 2, (top + FACE_SIZE) << 2,
-                      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (left + FACE_SIZE) << 2, (top + FACE_SIZE) << 2, G_TX_RENDERTILE, 0,
+          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       shownCount++;
       if (shownCount == SHOWN_LISTED_COUNT) {
         break;
@@ -1915,15 +1898,15 @@ void DrawBringCharactersScreen(Gfx** displayListHead,
   if (g_GameBoyTransfer.listedCharacterCount != 0) {
     if (transfer->screenStep == BRING_CHOOSING) {
       DrawCursorBox(&displayList,
-                    LISTED_FACES_LEFT - BRING_CURSOR_MARGIN +
-                        (transfer->listedCharacterIndex - transfer->unk7B8) *
-                            LISTED_FACE_SPACING,
-                    LISTED_FACES_TOP - BRING_CURSOR_MARGIN);
+          LISTED_FACES_LEFT - BRING_CURSOR_MARGIN +
+              (transfer->listedCharacterIndex - transfer->unk7B8) *
+                  LISTED_FACE_SPACING,
+          LISTED_FACES_TOP - BRING_CURSOR_MARGIN);
     } else if (transfer->screenStep == BRING_CHOOSING_SLOT) {
       DrawCursorBox(&displayList,
-                    FACES_LEFT - BRING_CURSOR_MARGIN +
-                        transfer->characterIndex * FACE_SPACING,
-                    FACES_TOP - BRING_CURSOR_MARGIN);
+          FACES_LEFT - BRING_CURSOR_MARGIN +
+              transfer->characterIndex * FACE_SPACING,
+          FACES_TOP - BRING_CURSOR_MARGIN);
     }
   }
   gSPDisplayList(displayList++, D_800C3FC0);
@@ -1933,34 +1916,33 @@ void DrawBringCharactersScreen(Gfx** displayListHead,
   gDPSetTexturePersp(displayList++, G_TP_NONE);
   if (transfer->screenStep == BRING_CHOOSING) {
     f_CharacterArrowFrame = (f_CharacterArrowFrame + 1) % ARROW_FRAME_COUNT;
-    LoadSmallPalette(&displayList, 0,
-                     (u8*)transfer->arrowsImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(
+        &displayList, 0, (u8*)transfer->arrowsImage + IMAGE_HEADER_SIZE);
     LoadNibbleTextureBlock(&displayList,
-                           (u8*)transfer->arrowsImage +
-                               (f_CharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE +
-                                PALETTED_TEXELS_OFFSET),
-                           G_IM_FMT_CI, ARROW_SIZE, ARROW_SIZE * 4, 0, 0, 0, 0,
-                           0, 0, 0);
+        (u8*)transfer->arrowsImage +
+            (f_CharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE +
+                PALETTED_TEXELS_OFFSET),
+        G_IM_FMT_CI, ARROW_SIZE, ARROW_SIZE * 4, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(displayList++);
     if (transfer->unk7B8 > 0) {
       DrawTextureRect(&displayList, LEFT_ARROW_LEFT << 2, ARROWS_TOP << 2,
-                      (LEFT_ARROW_LEFT + ARROW_SIZE) << 2,
-                      (ARROWS_TOP + ARROW_SIZE) << 2, G_TX_RENDERTILE, 0,
-                      LEFT_ARROW_ROW << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (LEFT_ARROW_LEFT + ARROW_SIZE) << 2, (ARROWS_TOP + ARROW_SIZE) << 2,
+          G_TX_RENDERTILE, 0, LEFT_ARROW_ROW << 5, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
     if (transfer->unk7B8 <
         transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
       DrawTextureRect(&displayList, RIGHT_ARROW_LEFT << 2, ARROWS_TOP << 2,
-                      (RIGHT_ARROW_LEFT + ARROW_SIZE) << 2,
-                      (ARROWS_TOP + ARROW_SIZE) << 2, G_TX_RENDERTILE, 0,
-                      RIGHT_ARROW_ROW << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (RIGHT_ARROW_LEFT + ARROW_SIZE) << 2, (ARROWS_TOP + ARROW_SIZE) << 2,
+          G_TX_RENDERTILE, 0, RIGHT_ARROW_ROW << 5, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
   *displayListHead = displayList;
 }
 
-void DrawSendExperienceScreen(Gfx** displayListHead,
-                              GameBoyTransfer* transfer) {
+void DrawSendExperienceScreen(
+    Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   s32 index;
   /* A second counter alongside index is there to match */
@@ -1969,18 +1951,17 @@ void DrawSendExperienceScreen(Gfx** displayListHead,
   DrawImportedFaces(&displayList, transfer);
   if (transfer->screenStep == 0) {
     DrawCursorBox(&displayList,
-                  FACES_LEFT - FACE_CURSOR_MARGIN +
-                      transfer->characterIndex * FACE_SPACING,
-                  FACES_TOP - FACE_CURSOR_MARGIN);
+        FACES_LEFT - FACE_CURSOR_MARGIN +
+            transfer->characterIndex * FACE_SPACING,
+        FACES_TOP - FACE_CURSOR_MARGIN);
     gDPPipeSync(displayList++);
     gDPSetTexturePersp(displayList++, G_TP_NONE);
     gDPPipeSync(displayList++);
     gDPSetTextureLUT(displayList++, G_TT_RGBA16);
   }
-  LoadSmallPalette(&displayList, 0,
-                   (u8*)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(
-      &displayList,
+  LoadSmallPalette(
+      &displayList, 0, (u8*)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
+  LoadNibbleTextureBlock(&displayList,
       (u8*)transfer->controllerIconsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0,
       0, 0, 0);
@@ -1992,12 +1973,11 @@ void DrawSendExperienceScreen(Gfx** displayListHead,
     } else {
       gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
     }
-    DrawTextureRect(
-        &displayList,
+    DrawTextureRect(&displayList,
         (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING) << 2,
         CONTROLLER_ICONS_TOP << 2,
         (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING +
-         CONTROLLER_ICON_SIZE)
+            CONTROLLER_ICON_SIZE)
             << 2,
         (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
         (transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE) << 5,
@@ -2037,69 +2017,62 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   gDPSetAlphaCompare(displayList++, G_AC_NONE);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-  LoadLargePalette(&displayList,
-                   (u8*)transfer->courseSceneImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(
+      &displayList, (u8*)transfer->courseSceneImage + IMAGE_HEADER_SIZE);
   for (index = 0; index != COURSE_SCENE_STRIP_COUNT; index++) {
     rowCount =
         (index != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROWS : 1;
     if (index == 0) {
-      LoadTextureBlock(
-          &displayList,
+      LoadTextureBlock(&displayList,
           (u8*)transfer->courseSceneImage + LARGE_PALETTED_TEXELS_OFFSET,
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_SCENE_WIDTH,
           COURSE_SCENE_STRIP_ROWS + 2, 0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(
-          &displayList, COURSE_SCENE_LEFT << 2, COURSE_SCENE_TOP << 2,
+      DrawTextureRect(&displayList, COURSE_SCENE_LEFT << 2,
+          COURSE_SCENE_TOP << 2,
           (COURSE_SCENE_LEFT + COURSE_SCENE_WIDTH * 2) << 2,
           (COURSE_SCENE_TOP + (COURSE_SCENE_STRIP_ROWS + 1) * 2) << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
     } else {
-      LoadTextureBlock(
-          &displayList,
+      LoadTextureBlock(&displayList,
           (u8*)transfer->courseSceneImage + LARGE_PALETTED_TEXELS_OFFSET +
               index * (COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROWS),
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_SCENE_WIDTH, rowCount + 2, 0, 0, 0,
           0, 0, 0, 0);
-      DrawTextureRect(
-          &displayList, COURSE_SCENE_LEFT << 2,
+      DrawTextureRect(&displayList, COURSE_SCENE_LEFT << 2,
           (COURSE_SCENE_TOP + 2 + index * COURSE_SCENE_STRIP_ROWS * 2) << 2,
           (COURSE_SCENE_LEFT + COURSE_SCENE_WIDTH * 2) << 2,
           (COURSE_SCENE_TOP + 2 + index * COURSE_SCENE_STRIP_ROWS * 2 +
-           rowCount * 2)
+              rowCount * 2)
               << 2,
           G_TX_RENDERTILE, 0, 1 << 5, TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
     }
   }
   LoadLargePalette(&displayList, (u8*)transfer->titleImage + IMAGE_HEADER_SIZE);
   for (index = 0; index != TITLE_STRIP_COUNT; index++) {
-    gDPLoadTextureTile(
-        displayList++,
+    gDPLoadTextureTile(displayList++,
         ((u32)transfer->titleImage + LARGE_PALETTED_TEXELS_OFFSET +
-         index * (TITLE_WIDTH * TITLE_STRIP_ROWS)) &
+            index * (TITLE_WIDTH * TITLE_STRIP_ROWS)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_WIDTH, 0, 0, 0, TITLE_WIDTH - 1,
         TITLE_STRIP_ROWS - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&displayList, TITLE_LEFT << 2,
-                    (TITLE_TOP + index * TITLE_STRIP_ROWS) << 2,
-                    (TITLE_LEFT + TITLE_WIDTH) << 2,
-                    (TITLE_TOP + index * TITLE_STRIP_ROWS + TITLE_STRIP_ROWS)
-                        << 2,
-                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (TITLE_TOP + index * TITLE_STRIP_ROWS) << 2,
+        (TITLE_LEFT + TITLE_WIDTH) << 2,
+        (TITLE_TOP + index * TITLE_STRIP_ROWS + TITLE_STRIP_ROWS) << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_NONE);
   for (index = 0; index != WOOD_PANEL_STRIP_COUNT; index++) {
     panelRowCount =
         (index != WOOD_PANEL_STRIP_COUNT - 1) ? WOOD_PANEL_STRIP_ROWS : 1;
-    gDPLoadTextureTile(
-        displayList++,
+    gDPLoadTextureTile(displayList++,
         ((u32)transfer->woodPanelImage + IMAGE_HEADER_SIZE +
-         index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2)) &
+            index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2)) &
             ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, WOOD_PANEL_WIDTH, 0, 0, 0,
         WOOD_PANEL_WIDTH - 1, panelRowCount - 1, 0, 0, 0, 0, 0, 0, 0);
-    DrawTextureRect(
-        &displayList, WOOD_PANEL_LEFT << 2,
+    DrawTextureRect(&displayList, WOOD_PANEL_LEFT << 2,
         (WOOD_PANEL_TOP + index * WOOD_PANEL_STRIP_ROWS) << 2,
         (WOOD_PANEL_LEFT + WOOD_PANEL_WIDTH) << 2,
         (WOOD_PANEL_TOP + index * WOOD_PANEL_STRIP_ROWS + panelRowCount) << 2,
@@ -2132,21 +2105,19 @@ void DrawTransmitMenu(Gfx** displayListHead) {
     pointerSwing = sinf(f_OptionPointerAngle) * 8.0f;
     gDPPipeSync(displayList++);
     gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-    LoadSmallPalette(&displayList, 0,
-                     (u8*)transfer->pointerImage + IMAGE_HEADER_SIZE);
-    gDPLoadTextureTile_4b(
-        displayList++,
+    LoadSmallPalette(
+        &displayList, 0, (u8*)transfer->pointerImage + IMAGE_HEADER_SIZE);
+    gDPLoadTextureTile_4b(displayList++,
         ((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET) & ~7,
         G_IM_FMT_CI, POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1,
         POINTER_IMAGE_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
     pointerLeft = OPTIONS_CENTRE_X - OPTION_POINTER_GAP - POINTER_WIDTH -
-                  width / 2 - pointerSwing;
-    DrawTextureRect(
-        &displayList, pointerLeft << 2,
+        width / 2 - pointerSwing;
+    DrawTextureRect(&displayList, pointerLeft << 2,
         (OPTION_POINTER_TOP + transfer->optionIndex * OPTION_SPACING) << 2,
         (pointerLeft + POINTER_WIDTH) << 2,
         (OPTION_POINTER_TOP + transfer->optionIndex * OPTION_SPACING +
-         POINTER_HEIGHT)
+            POINTER_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
@@ -2160,15 +2131,15 @@ void DrawTransmitMenu(Gfx** displayListHead) {
       option = f_ModeOptions[transfer->transferMode][index];
       if (option != TRANSMIT_OPTION_NONE) {
         SetTextSlot(OPTIONS_CENTRE_X, OPTIONS_TOP + index * OPTION_SPACING,
-                    option + TRANSMIT_OPTION_MESSAGES, 1, index,
-                    TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
+            option + TRANSMIT_OPTION_MESSAGES, 1, index,
+            TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
         DrawLargeTextSlot(&displayList, index);
       }
     }
     SetTextSlot(HINT_LEFT, HINT_TOP,
-                f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
-                    TRANSMIT_OPTION_HINTS,
-                1, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
+            TRANSMIT_OPTION_HINTS,
+        1, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
   if (transfer->screen == TRANSMIT_SCREEN_SEND_STATUS) {
@@ -2249,9 +2220,9 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
   transfer->unk7BC = 0;
   result = 0;
   for (controller = 0; controller != g_ControllerCount; controller++) {
-    transfer->transferResult = OpenGameBoyPakWithRetries(
-        g_PlayerControllerPorts[controller], &transfer->cartridgeHeader,
-        &transfer->pakFile);
+    transfer->transferResult =
+        OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controller],
+            &transfer->cartridgeHeader, &transfer->pakFile);
     if (transfer->transferResult == PAK_RESULT_NO_PAK) {
       transfer->unk7C8 = TRUE;
     }
@@ -2271,8 +2242,8 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
       saveIndex = character->unk38;
       transfer->unk7BC++;
       osSyncPrintf("PHASE 1\n");
-      result = nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save,
-                                CARTRIDGE_SAVE_SIZE);
+      result = nuContGBPakFread(
+          &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
       /* Powering off and continuing after each pak error is there to match */
       if (result != 0) {
         nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
@@ -2304,13 +2275,12 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         }
         osSyncPrintf("PHASE 5\n");
         dataAddress = save[recordOffset + RECORD_ADDRESS_OFFSET] +
-                      (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8);
+            (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8);
         dataSize = save[recordOffset + RECORD_SIZE_OFFSET] +
-                   (save[recordOffset + RECORD_SIZE_OFFSET + 1] << 8);
+            (save[recordOffset + RECORD_SIZE_OFFSET + 1] << 8);
         osSyncPrintf("PHASE 6\n");
         result = nuContGBPakFread(&transfer->pakFile,
-                                  dataAddress - STATUS_ADDRESS_BIAS,
-                                  characterData, dataSize);
+            dataAddress - STATUS_ADDRESS_BIAS, characterData, dataSize);
         if (result != 0) {
           nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
           continue;
@@ -2318,7 +2288,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         sum = 0;
         osSyncPrintf("PHASE 7\n");
         storedSum = save[recordOffset + RECORD_SUM_OFFSET] |
-                    (save[recordOffset + RECORD_SUM_OFFSET + 1] << 8);
+            (save[recordOffset + RECORD_SUM_OFFSET + 1] << 8);
         for (index = 0; index != dataSize; index++) {
           sum += characterData[index];
         }
@@ -2333,15 +2303,14 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         if (IsCharacterFromSave(character, characterData)) {
           osSyncPrintf("PHASE 9.5\n");
           sum = character->experience +
-                ((characterData[DATA_EXPERIENCE_OFFSET + 1] << 8) |
-                 characterData[DATA_EXPERIENCE_OFFSET]);
+              ((characterData[DATA_EXPERIENCE_OFFSET + 1] << 8) |
+                  characterData[DATA_EXPERIENCE_OFFSET]);
           experience = (sum > MAX_EXPERIENCE) ? MAX_EXPERIENCE : sum;
           osSyncPrintf("PHASE 10\n");
           characterData[DATA_EXPERIENCE_OFFSET + 1] = experience >> 8;
           characterData[DATA_EXPERIENCE_OFFSET] = experience;
           characterData[DATA_UNK15E_OFFSET] = 100;
-          result = nuContGBPakFwrite(
-              &transfer->pakFile,
+          result = nuContGBPakFwrite(&transfer->pakFile,
               dataAddress - STATUS_ADDRESS_BIAS + DATA_EXPERIENCE_OFFSET,
               &characterData[DATA_EXPERIENCE_OFFSET],
               DATA_EXPERIENCE_WRITE_SIZE);
@@ -2359,8 +2328,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           osSyncPrintf("PHASE 12\n");
           save[recordOffset + RECORD_SUM_OFFSET] = sum;
           save[recordOffset + RECORD_SUM_OFFSET + 1] = sum >> 8;
-          result = nuContGBPakFwrite(
-              &transfer->pakFile,
+          result = nuContGBPakFwrite(&transfer->pakFile,
               CARTRIDGE_RAM_ADDRESS + recordOffset + RECORD_SUM_OFFSET,
               &save[recordOffset + RECORD_SUM_OFFSET], SAVE_HALFWORD_SIZE);
           if (result != 0) {
@@ -2371,8 +2339,8 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           sum = ComputeSaveChecksum(save);
           save[SAVE_CHECKSUM_OFFSET] = sum;
           save[SAVE_CHECKSUM_OFFSET + 1] = sum >> 8;
-          result = nuContGBPakFwrite(
-              &transfer->pakFile, CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
+          result = nuContGBPakFwrite(&transfer->pakFile,
+              CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
               &save[SAVE_CHECKSUM_OFFSET], SAVE_HALFWORD_SIZE);
           if (result != 0) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
@@ -2449,18 +2417,18 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
   s32 computedSum;
   s32 storedSum;
 
-  result = OpenGameBoyPakWithRetries(
-      g_PlayerControllerPorts[g_GameBoyTransfer
-                                  .taggedControllers[cartridgeIndex]],
-      &transfer->cartridgeHeader, &transfer->pakFile);
+  result =
+      OpenGameBoyPakWithRetries(g_PlayerControllerPorts[g_GameBoyTransfer
+                                        .taggedControllers[cartridgeIndex]],
+          &transfer->cartridgeHeader, &transfer->pakFile);
   g_GameBoyTransfer.transferResult = result;
   if (result != PAK_RESULT_OK) {
     /* Going to the shared power-off is there to match */
     goto failed;
   }
   isSignatureWrong = FALSE;
-  readResult = nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save,
-                                CARTRIDGE_SAVE_SIZE);
+  readResult = nuContGBPakFread(
+      &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
   if (readResult != 0) {
     osSyncPrintf("head error  2\n");
     g_GameBoyTransfer.transferResult = readResult;
@@ -2528,8 +2496,8 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     /* Going to the shared power-off is there to match */
     goto failed;
   }
-  result = nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save,
-                            CARTRIDGE_SAVE_SIZE);
+  result = nuContGBPakFread(
+      &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
   if (result != 0) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     g_GameBoyTransfer.transferResult = result;
@@ -2553,22 +2521,21 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     return STATUS_WRITE_FAILED;
   }
   statusAddress = save[SAVE_STATUS_ADDRESS_OFFSET] +
-                  (save[SAVE_STATUS_ADDRESS_OFFSET + 1] << 8);
+      (save[SAVE_STATUS_ADDRESS_OFFSET + 1] << 8);
   save[SAVE_HAS_STATUS_OFFSET] = TRUE;
   statusSize =
       save[SAVE_STATUS_SIZE_OFFSET] + (save[SAVE_STATUS_SIZE_OFFSET + 1] << 8);
   result = nuContGBPakFwrite(&transfer->pakFile,
-                             CARTRIDGE_RAM_ADDRESS + SAVE_HAS_STATUS_OFFSET,
-                             &save[SAVE_HAS_STATUS_OFFSET], SAVE_HALFWORD_SIZE);
+      CARTRIDGE_RAM_ADDRESS + SAVE_HAS_STATUS_OFFSET,
+      &save[SAVE_HAS_STATUS_OFFSET], SAVE_HALFWORD_SIZE);
   if (result != 0) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     transfer->transferResult = result;
     return STATUS_WRITE_PAK_ERROR;
   }
   BuildStatusData(status);
-  result =
-      nuContGBPakFwrite(&transfer->pakFile, statusAddress - STATUS_ADDRESS_BIAS,
-                        status, statusSize);
+  result = nuContGBPakFwrite(&transfer->pakFile,
+      statusAddress - STATUS_ADDRESS_BIAS, status, statusSize);
   if (result != 0) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     transfer->transferResult = result;
@@ -2583,8 +2550,8 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
   save[SAVE_STATUS_SUM_OFFSET] = sum;
   save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> 8;
   result = nuContGBPakFwrite(&transfer->pakFile,
-                             CARTRIDGE_RAM_ADDRESS + SAVE_STATUS_SUM_OFFSET,
-                             &save[SAVE_STATUS_SUM_OFFSET], SAVE_HALFWORD_SIZE);
+      CARTRIDGE_RAM_ADDRESS + SAVE_STATUS_SUM_OFFSET,
+      &save[SAVE_STATUS_SUM_OFFSET], SAVE_HALFWORD_SIZE);
   if (result != 0) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     transfer->transferResult = result;
@@ -2595,8 +2562,8 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
   save[SAVE_CHECKSUM_OFFSET + 1] = sum >> 8;
   osSyncPrintf("write sum2 %04x\n", sum);
   result = nuContGBPakFwrite(&transfer->pakFile,
-                             CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
-                             &save[SAVE_CHECKSUM_OFFSET], SAVE_HALFWORD_SIZE);
+      CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET, &save[SAVE_CHECKSUM_OFFSET],
+      SAVE_HALFWORD_SIZE);
   if (result != 0) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     transfer->transferResult = result;
@@ -2684,8 +2651,8 @@ s32 ReadCartridgeCharacters(void) {
       recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE * 2;
     }
     for (attempt = 0; attempt != SAVE_READ_ATTEMPTS; attempt++) {
-      result = nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save,
-                                CARTRIDGE_SAVE_SIZE);
+      result = nuContGBPakFread(
+          &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
       if (result == 0) {
         sum = ComputeSaveChecksum(save);
         storedSum = GetStoredChecksum(save);
@@ -2711,16 +2678,16 @@ s32 ReadCartridgeCharacters(void) {
           checkedState = NOT_CHECKED;
           /* Working out the address in storedSum first is there to match */
           storedSum = save[recordOffset + RECORD_ADDRESS_OFFSET] +
-                      (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8) -
-                      STATUS_ADDRESS_BIAS;
+              (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8) -
+              STATUS_ADDRESS_BIAS;
           dataSize = save[recordOffset + RECORD_SIZE_OFFSET] +
-                     (save[recordOffset + RECORD_SIZE_OFFSET + 1] << 8);
+              (save[recordOffset + RECORD_SIZE_OFFSET + 1] << 8);
           dataAddress = storedSum;
           for (attempt = 0; attempt != DATA_READ_ATTEMPTS; attempt++) {
-            result = nuContGBPakFread(&transfer->pakFile, dataAddress,
-                                      characterData, dataSize);
+            result = nuContGBPakFread(
+                &transfer->pakFile, dataAddress, characterData, dataSize);
             storedSum = save[recordOffset + RECORD_SUM_OFFSET] |
-                        (save[recordOffset + RECORD_SUM_OFFSET + 1] << 8);
+                (save[recordOffset + RECORD_SUM_OFFSET + 1] << 8);
             sum = 0;
             for (index = 0; index != dataSize; index++) {
               sum += characterData[index];
@@ -2744,13 +2711,13 @@ s32 ReadCartridgeCharacters(void) {
           for (slot = 0; slot != GAME_BOY_CHARACTER_COUNT; slot++) {
             if (g_GameBoyCharacters[slot].status ==
                     GAME_BOY_CHARACTER_STATUS_PRESENT &&
-                IsCharacterFromSave(&g_GameBoyCharacters[slot],
-                                    characterData)) {
+                IsCharacterFromSave(
+                    &g_GameBoyCharacters[slot], characterData)) {
               isAlreadyBrought = TRUE;
               transfer
                   ->cartridgeCharacters[transfer->unk7A0 / 4 *
-                                            CARTRIDGE_SAVE_COUNT +
-                                        saveIndex]
+                          CARTRIDGE_SAVE_COUNT +
+                      saveIndex]
                   .status = GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER;
               ListPresentCharacters();
               break;
@@ -2760,16 +2727,15 @@ s32 ReadCartridgeCharacters(void) {
             /* transferResult is OK here, so the original never skips a save */
             if (transfer->transferResult == PAK_RESULT_NO_CHARACTERS) {
               SkipCartridgeSave(characterData, transfer->unk7A0 / 4, saveIndex,
-                                transfer->cartridgeHeader.game_title,
-                                transfer->cartridgeHeader.company_code);
+                  transfer->cartridgeHeader.game_title,
+                  transfer->cartridgeHeader.company_code);
             } else {
               DecodeCartridgeCharacter(characterData, transfer->unk7A0 / 4,
-                                       saveIndex,
-                                       transfer->cartridgeHeader.company_code);
+                  saveIndex, transfer->cartridgeHeader.company_code);
             }
             transfer
                 ->listingStates[transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT +
-                                saveIndex] = LISTING_SHOWN;
+                    saveIndex] = LISTING_SHOWN;
             transfer->listedCharacterCount++;
             ListPresentCharacters();
           }
@@ -2834,13 +2800,13 @@ s32 ReadCartridgeCharacters(void) {
   return PAK_RESULT_STILL_READING;
 }
 
-s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId* header,
-                              NUContPakFile* file) {
+s32 OpenGameBoyPakWithRetries(
+    s32 port, OSGbpakId* header, NUContPakFile* file) {
   s32 failureCount;
   s32 result;
 
   for (failureCount = 0; failureCount != GAME_BOY_PAK_OPEN_ATTEMPTS;
-       failureCount++) {
+      failureCount++) {
     result = OpenGameBoyPak(port, header, file);
     if (result == PAK_RESULT_OK) {
       return PAK_RESULT_OK;
@@ -3001,8 +2967,8 @@ s32 TagCartridges(void) {
   }
   nuContGBPakMgrInit();
   for (controller = 0; controller < g_ControllerCount; controller++) {
-    result = OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controller],
-                                       &header, &file);
+    result = OpenGameBoyPakWithRetries(
+        g_PlayerControllerPorts[controller], &header, &file);
     if (result == PAK_RESULT_NO_PAK) {
       wasNoPak = TRUE;
     }
@@ -3020,8 +2986,8 @@ s32 TagCartridges(void) {
         transfer->cartridgeTags[controller][index] = tag[index] =
             guRandom() % 256;
       }
-      if (nuContGBPakFwrite(&file, CARTRIDGE_RAM_ADDRESS, tag,
-                            CARTRIDGE_TAG_SIZE) == 0 &&
+      if (nuContGBPakFwrite(
+              &file, CARTRIDGE_RAM_ADDRESS, tag, CARTRIDGE_TAG_SIZE) == 0 &&
           nuContGBPakGetStatus(&file, &status) == 0) {
         if (status & OS_GBPAK_GBCART_PULL) {
           wasCartridgePulled = TRUE;
@@ -3110,7 +3076,7 @@ void DrawNotice(Gfx** displayListHead) {
   gDPPipeSync(displayList++);
   gDPSetRenderMode(displayList++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(displayList++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
-                    0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+      0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   gDPPipeSync(displayList++);
   gDPSetAlphaCompare(displayList++, G_AC_NONE);
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 240);
@@ -3119,18 +3085,17 @@ void DrawNotice(Gfx** displayListHead) {
       halfHeight = f_NoticeSize * NOTICE_HALF_HEIGHT_STEP;
       halfWidth = f_NoticeSize * NOTICE_HALF_WIDTH_STEP;
       LoadNibbleTextureBlock(&displayList,
-                             (u8*)g_GameBoyTransfer.noticeCloudImage +
-                                 IMAGE_HEADER_SIZE + strip * NOTICE_STRIP_SIZE,
-                             G_IM_FMT_I, NOTICE_WIDTH, NOTICE_STRIP_HEIGHT, 0,
-                             G_TX_CLAMP, G_TX_CLAMP, 0, 0, 0, 0);
+          (u8*)g_GameBoyTransfer.noticeCloudImage + IMAGE_HEADER_SIZE +
+              strip * NOTICE_STRIP_SIZE,
+          G_IM_FMT_I, NOTICE_WIDTH, NOTICE_STRIP_HEIGHT, 0, G_TX_CLAMP,
+          G_TX_CLAMP, 0, 0, 0, 0);
       stripHeight = halfHeight;
       bottom = strip * stripHeight + NOTICE_CENTRE_Y;
       DrawTextureRect(&displayList, (NOTICE_CENTRE_X - halfWidth) << 2,
-                      (bottom - stripHeight) << 2,
-                      (NOTICE_CENTRE_X + halfWidth) << 2, bottom << 2,
-                      G_TX_RENDERTILE, 0, 0,
-                      (NOTICE_WIDTH << 10) / 2 / halfWidth,
-                      (NOTICE_STRIP_HEIGHT << 10) / stripHeight);
+          (bottom - stripHeight) << 2, (NOTICE_CENTRE_X + halfWidth) << 2,
+          bottom << 2, G_TX_RENDERTILE, 0, 0,
+          (NOTICE_WIDTH << 10) / 2 / halfWidth,
+          (NOTICE_STRIP_HEIGHT << 10) / stripHeight);
     }
   }
   if (f_NoticeState == NOTICE_SHOWN) {
@@ -3138,8 +3103,8 @@ void DrawNotice(Gfx** displayListHead) {
     s32 unused[2];
 
     SetTextSlot(NOTICE_CENTRE_X, NOTICE_TEXT_TOP, f_NoticeMessage, 1,
-                NOTICE_TEXT_SLOT, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255,
-                255, 255, 255);
+        NOTICE_TEXT_SLOT, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255,
+        255);
     gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, 255);
     DrawLargeTextSlot(&displayList, NOTICE_TEXT_SLOT);
   }
@@ -3150,22 +3115,21 @@ void DrawAccessingSign(Gfx** displayListHead) {
   Gfx* displayList = *displayListHead;
   s32 strip;
 
-  LoadLargePalette(&displayList,
-                   (u8*)g_GameBoyTransfer.accessingImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(
+      &displayList, (u8*)g_GameBoyTransfer.accessingImage + IMAGE_HEADER_SIZE);
   for (strip = 0; strip != ACCESSING_STRIP_COUNT; strip++) {
     LoadTextureBlock(&displayList,
-                     (u8*)g_GameBoyTransfer.accessingImage +
-                         LARGE_PALETTED_TEXELS_OFFSET +
-                         strip * ACCESSING_STRIP_SIZE,
-                     G_IM_FMT_CI, G_IM_SIZ_8b, ACCESSING_WIDTH,
-                     ACCESSING_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        (u8*)g_GameBoyTransfer.accessingImage + LARGE_PALETTED_TEXELS_OFFSET +
+            strip * ACCESSING_STRIP_SIZE,
+        G_IM_FMT_CI, G_IM_SIZ_8b, ACCESSING_WIDTH, ACCESSING_STRIP_HEIGHT, 0, 0,
+        0, 0, 0, 0, 0);
     DrawTextureRect(&displayList, ACCESSING_LEFT << 2,
-                    (ACCESSING_TOP + strip * ACCESSING_STRIP_HEIGHT) << 2,
-                    (ACCESSING_LEFT + ACCESSING_WIDTH) << 2,
-                    (ACCESSING_TOP + strip * ACCESSING_STRIP_HEIGHT +
-                     ACCESSING_STRIP_HEIGHT)
-                        << 2,
-                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (ACCESSING_TOP + strip * ACCESSING_STRIP_HEIGHT) << 2,
+        (ACCESSING_LEFT + ACCESSING_WIDTH) << 2,
+        (ACCESSING_TOP + strip * ACCESSING_STRIP_HEIGHT +
+            ACCESSING_STRIP_HEIGHT)
+            << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   *displayListHead = displayList;
 }
@@ -3176,23 +3140,23 @@ void DrawPressingHand(Gfx** displayListHead) {
   f_PressingHandFrame = (f_PressingHandFrame + 1) % PRESSING_HAND_FRAME_COUNT;
   LoadLargePalette(&displayList, (u8*)g_PressingHandImage + IMAGE_HEADER_SIZE);
   LoadTextureBlock(&displayList,
-                   (u8*)g_PressingHandImage + LARGE_PALETTED_TEXELS_OFFSET +
-                       f_PressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE *
-                           PRESSING_HAND_IMAGE_SIZE,
-                   G_IM_FMT_CI, G_IM_SIZ_8b, PRESSING_HAND_SIZE,
-                   PRESSING_HAND_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      (u8*)g_PressingHandImage + LARGE_PALETTED_TEXELS_OFFSET +
+          f_PressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE *
+              PRESSING_HAND_IMAGE_SIZE,
+      G_IM_FMT_CI, G_IM_SIZ_8b, PRESSING_HAND_SIZE, PRESSING_HAND_SIZE, 0, 0, 0,
+      0, 0, 0, 0);
   if (g_GameBoyTransfer.pressingHandPosition == PRESSING_HAND_LOW) {
     DrawTextureRect(&displayList, LOW_PRESSING_HAND_LEFT << 2,
-                    LOW_PRESSING_HAND_TOP << 2,
-                    (LOW_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE) << 2,
-                    (LOW_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2,
-                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        LOW_PRESSING_HAND_TOP << 2,
+        (LOW_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE) << 2,
+        (LOW_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2, G_TX_RENDERTILE, 0,
+        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   } else {
     DrawTextureRect(&displayList, NOTICE_PRESSING_HAND_LEFT << 2,
-                    NOTICE_PRESSING_HAND_TOP << 2,
-                    (NOTICE_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE) << 2,
-                    (NOTICE_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2,
-                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        NOTICE_PRESSING_HAND_TOP << 2,
+        (NOTICE_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE) << 2,
+        (NOTICE_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2, G_TX_RENDERTILE,
+        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   *displayListHead = displayList;
 }
@@ -3277,13 +3241,13 @@ void BuildStatusData(u8* status) {
         course->averageDrive[0] = value;
         course->averageDrive[1] = value >> 8;
         course->unk8 = RoundedWholePart(entry->measuredDriveTotal * reciprocal *
-                                        (100.0f / HOLES_PER_ROUND));
-        course->averagePutts = PackTenths(entry->puttTotal * reciprocal *
-                                          (1.0f / HOLES_PER_ROUND));
+            (100.0f / HOLES_PER_ROUND));
+        course->averagePutts = PackTenths(
+            entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
         course->parOrBetterRate = RoundedWholePart(
             entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND));
-        course->parOnRate = RoundedWholePart(entry->parOnCount * reciprocal *
-                                             (100.0f / HOLES_PER_ROUND));
+        course->parOnRate = RoundedWholePart(
+            entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND));
         sum = entry->unk28 + entry->unk2C;
         if (sum == 0) {
           course->unkC = 0;
@@ -3320,8 +3284,8 @@ void BuildStatusData(u8* status) {
         value = records->bestTimes[courseIndex][index] / FRAMES_PER_SECOND % 60;
         course->bestTimes[index].seconds = value;
         value = (s32)(records->bestTimes[courseIndex][index] *
-                      (100.0f / FRAMES_PER_SECOND)) %
-                100;
+                    (100.0f / FRAMES_PER_SECOND)) %
+            100;
         course->bestTimes[index].hundredths = value;
         course->bestTimes[index].unk3 = records->unkE08[courseIndex][index];
         course->bestTimes[index].unk4 =

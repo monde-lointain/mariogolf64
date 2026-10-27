@@ -180,8 +180,8 @@ extern SkyState g_SkyState;
  */
 #define VIEWED_WIND_ANGLE(windDirection, view)          \
   ((windDirection) * WIND_DIRECTION_TO_RADIANS + M_PI - \
-   atan2((view)->eye[2] - (view)->lookAt[2],            \
-         (view)->eye[0] - (view)->lookAt[0]))
+      atan2((view)->eye[2] - (view)->lookAt[2],         \
+          (view)->eye[0] - (view)->lookAt[0]))
 
 /*
  * Textures that are drawn every frame and that the course model reads
