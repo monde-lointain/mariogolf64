@@ -183,9 +183,9 @@ extern s32 f_HalfTurnTimer;
 extern f32 f_WipeProgress;
 extern s32 f_WipeKind;
 extern s32 f_WipeShapeIds[WIPE_SHAPE_COUNT];
-extern s32 f_ScreenFadeDuration;
-extern s32 f_ScreenFadeFramesLeft;
-extern s32 f_ScreenFadeKind;
+extern s32 g_ScreenFadeDuration;
+extern s32 g_ScreenFadeFramesLeft;
+extern s32 g_ScreenFadeKind;
 extern Prompt f_Prompts[];
 extern s32 f_PromptIndex;
 extern s32 f_PromptFrame;
@@ -195,9 +195,9 @@ extern void* f_HalfTurnImage;
 extern void* f_WipeShapeImage;
 extern void* f_PromptCloudImage;
 extern void* f_YesNoImage;
-extern s32 f_ScreenFadeRed;
-extern s32 f_ScreenFadeGreen;
-extern s32 f_ScreenFadeBlue;
+extern s32 g_ScreenFadeRed;
+extern s32 g_ScreenFadeGreen;
+extern s32 g_ScreenFadeBlue;
 extern f32 f_ChoiceBobAngle;
 extern Gfx D_800C3FC0[];
 
@@ -429,25 +429,25 @@ void DrawWipe(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void StopScreenFade(void) { f_ScreenFadeKind = FADE_NONE; }
+void StopScreenFade(void) { g_ScreenFadeKind = FADE_NONE; }
 
 /* This is true from the fade's last frame on */
-s32 HasScreenFadeEnded(void) { return f_ScreenFadeFramesLeft < 2; }
+s32 HasScreenFadeEnded(void) { return g_ScreenFadeFramesLeft < 2; }
 
 void StartScreenFadeOut(s32 red, s32 green, s32 blue, s32 frameCount) {
-  f_ScreenFadeKind = FADE_OUT;
-  f_ScreenFadeFramesLeft = f_ScreenFadeDuration = frameCount;
-  f_ScreenFadeRed = red;
-  f_ScreenFadeGreen = green;
-  f_ScreenFadeBlue = blue;
+  g_ScreenFadeKind = FADE_OUT;
+  g_ScreenFadeFramesLeft = g_ScreenFadeDuration = frameCount;
+  g_ScreenFadeRed = red;
+  g_ScreenFadeGreen = green;
+  g_ScreenFadeBlue = blue;
 }
 
 void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
-  f_ScreenFadeKind = FADE_IN;
-  f_ScreenFadeFramesLeft = f_ScreenFadeDuration = frameCount;
-  f_ScreenFadeRed = red;
-  f_ScreenFadeGreen = green;
-  f_ScreenFadeBlue = blue;
+  g_ScreenFadeKind = FADE_IN;
+  g_ScreenFadeFramesLeft = g_ScreenFadeDuration = frameCount;
+  g_ScreenFadeRed = red;
+  g_ScreenFadeGreen = green;
+  g_ScreenFadeBlue = blue;
 }
 
 /* Covers the screen with the fade's colour, at the opacity it has reached */
@@ -456,13 +456,13 @@ void DrawScreenFade(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 alpha;
 
-  if (f_ScreenFadeKind != FADE_NONE) {
-    if (f_ScreenFadeKind == FADE_OUT) {
-      alpha = FADE_ALPHA_RANGE - (f_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) /
-                                     f_ScreenFadeDuration;
+  if (g_ScreenFadeKind != FADE_NONE) {
+    if (g_ScreenFadeKind == FADE_OUT) {
+      alpha = FADE_ALPHA_RANGE - (g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) /
+                                     g_ScreenFadeDuration;
     } else {
       alpha =
-          (f_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) / f_ScreenFadeDuration;
+          (g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) / g_ScreenFadeDuration;
     }
     if (alpha >= FADE_ALPHA_RANGE) {
       alpha = FADE_ALPHA_RANGE - 1;
@@ -481,8 +481,8 @@ void DrawScreenFade(Gfx** displayListHead) {
     gDPSetBlendColor(gfx++, 255, 255, 255, 1);
     gDPPipeSync(gfx++);
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-    gDPSetPrimColor(gfx++, 0, 0, f_ScreenFadeRed, f_ScreenFadeGreen,
-                    f_ScreenFadeBlue, alpha);
+    gDPSetPrimColor(gfx++, 0, 0, g_ScreenFadeRed, g_ScreenFadeGreen,
+                    g_ScreenFadeBlue, alpha);
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, SCREEN_BORDER << 2,
@@ -490,9 +490,9 @@ void DrawScreenFade(Gfx** displayListHead) {
                         (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE,
                         0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
-    f_ScreenFadeFramesLeft--;
-    if (f_ScreenFadeFramesLeft == 0) {
-      f_ScreenFadeKind = FADE_NONE;
+    g_ScreenFadeFramesLeft--;
+    if (g_ScreenFadeFramesLeft == 0) {
+      g_ScreenFadeKind = FADE_NONE;
     }
     *displayListHead = gfx;
   }
