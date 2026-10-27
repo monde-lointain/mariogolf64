@@ -2498,7 +2498,10 @@ void UpdateTurns(void) {
 
     /* Returns whether the B button is held */
     s32 IsBButtonHeld(void) {
-        return (g_MergedController.buttons & B_BUTTON) != 0;
+        if (g_MergedController.buttons & B_BUTTON) {
+            return TRUE;
+        }
+        return FALSE;
     }
 
     /* The turn controller's stick X, which left and right on the control pad tilt fully */
