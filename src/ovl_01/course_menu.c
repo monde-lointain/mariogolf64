@@ -100,7 +100,30 @@
 #define BADGE_COUNT_Y 146
 #define BADGE_COUNT_DIGIT_WIDTH 16
 
+/* func_802104F0 draws the course's tournament trophies, spinning, or on the totals page the course points */
+#define TROPHY_SPACING 24
+#define TROPHY_SHIFT_LEFT 20
+#define TROPHY_FRAME_DELAY 4
+#define TROPHY_FRAME_END (-1)
+#define POINTS_NEEDED_X 192
+#define POINTS_NEEDED_Y 174
+#define ALL_COURSES_OPEN_X 190
+#define ALL_COURSES_OPEN_Y 180
+#define MESSAGE_POINTS_TO_NEXT_COURSE 0x163
+#define MESSAGE_ALL_COURSES_OPEN 0x164
+
+typedef struct TrophySize {
+    s8 width;
+    s8 height;
+} TrophySize;
+
+typedef struct TrophyPosition {
+    s32 x;
+    u32 y;
+} TrophyPosition;
+
 extern u16 D_800C2064[];
+extern TrophySize D_800C20E0[COURSE_COUNT];
 extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
 extern s16 D_800C2278[][COURSE_FILE_COUNT];
 extern void *D_800FBE38[COURSE_FILE_COUNT];
@@ -110,6 +133,7 @@ extern s16 D_802300A4_ovl_01; /* Which of D_8023A814's buffers holds the course 
 extern s16 D_802300A6_ovl_01;
 extern s32 D_802300A8_ovl_01;
 extern s32 D_802300AC_ovl_01;
+extern TrophyPosition D_80230100_ovl_01[COURSE_COUNT];
 extern const char *D_802300B4_ovl_01[STATS_COUNT];
 extern const char D_802318A8_ovl_01[];
 extern const char D_802318AC_ovl_01[];
@@ -612,7 +636,91 @@ void func_80210190_ovl_01(Gfx **displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80210190_ovl_01);
 #endif
 
+/*
+ * Doesn't match: the original adds the trophies' shift as 0xFFEC, the low half of -20, after reading the course's
+ * position, and adds the position to it before the width. "+ (u16)-TROPHY_SHIFT_LEFT" gives that constant.
+ */
+#ifdef NON_MATCHING
+void func_802104F0_ovl_01(Gfx **displayListHead) {
+    EncodedAsset asset;
+    Gfx *gfx = *displayListHead;
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    void *palette = NULL;
+    s32 openCourseCount;
+    s32 left;
+    void *texels;
+    s16 place;
+
+    openCourseCount = GetOpenCourseCount();
+    if (memory->statsCourse == openCourseCount) {
+        BeginShadowedText(&gfx);
+        SetTextColor(&gfx, 255, 255, 255);
+        openCourseCount = CountOpenCourses(save->coursePoints);
+        if (openCourseCount < COURSE_COUNT) {
+            SetTextSlotValue(GetCoursePointsNeeded(openCourseCount) - save->coursePoints, 0, 0);
+            SetTextSlot(POINTS_NEEDED_X, POINTS_NEEDED_Y, MESSAGE_POINTS_TO_NEXT_COURSE, 1, 0, 0, 255, 255, 255, 255);
+        } else {
+            SetTextSlot(ALL_COURSES_OPEN_X, ALL_COURSES_OPEN_Y, MESSAGE_ALL_COURSES_OPEN, 1, 0, 0, 255, 255, 255, 255);
+        }
+    } else {
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        for (place = 0; place != TOURNAMENT_PLACE_COUNT; place++) {
+            if (D_80105C38[memory->statsCourse].hasPlace[place]) {
+                gDPPipeSync(gfx++);
+                if (place == FIRST_PLACE_INDEX) {
+                    palette = D_800FBE38[FIRST_PLACE_INDEX];
+                }
+                if (place == SECOND_PLACE_INDEX) {
+                    palette = D_800FBE38[SECOND_PLACE_INDEX];
+                }
+                if (place == THIRD_PLACE_INDEX) {
+                    palette = D_800FBE38[THIRD_PLACE_INDEX];
+                }
+                texels = D_8023A814_ovl_01[D_802300A4_ovl_01];
+                gDPLoadTLUT_pal256(gfx++, (u32)palette & ~7);
+                gDPLoadTextureTile(gfx++, (u32)texels & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
+                                   D_800C20E0[memory->statsCourse].width, D_800C20E0[memory->statsCourse].height, 0, 0,
+                                   D_800C20E0[memory->statsCourse].width - 1,
+                                   D_800C20E0[memory->statsCourse].height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                gDPPipeSync(gfx++);
+                left = place * TROPHY_SPACING + -TROPHY_SHIFT_LEFT;
+                gSPScisTextureRectangle(
+                    gfx++, (D_80230100_ovl_01[memory->statsCourse].x + left) << 2,
+                    D_80230100_ovl_01[memory->statsCourse].y << 2,
+                    (D_800C20E0[memory->statsCourse].width + D_80230100_ovl_01[memory->statsCourse].x + left) << 2,
+                    (D_800C20E0[memory->statsCourse].height + D_80230100_ovl_01[memory->statsCourse].y) << 2,
+                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                gDPPipeSync(gfx++);
+            }
+        }
+        D_802300A6_ovl_01++;
+        if (D_802300A6_ovl_01 >= TROPHY_FRAME_DELAY) {
+            D_802300A6_ovl_01 = 0;
+            D_802300A2_ovl_01++;
+            if ((s16)D_800C21B8[memory->statsCourse][D_802300A2_ovl_01] == TROPHY_FRAME_END) {
+                D_802300A2_ovl_01 = 0;
+            }
+            if (D_802300A2_ovl_01 >= COURSE_IMAGE_COUNT) {
+                D_802300A2_ovl_01 = 0;
+            }
+            D_802300A4_ovl_01 ^= 1;
+            OpenEncodedAsset(D_800C21B8[memory->statsCourse][D_802300A2_ovl_01], &asset);
+            ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802104F0_ovl_01);
+#endif
 
 void func_80210C18_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
     Gfx *gfx = *displayListHead;
@@ -810,6 +918,7 @@ void func_80212FEC_ovl_01(Gfx **displayListHead, void *image, s32 blinkFrame, s3
     Gfx *gfx = *displayListHead;
     s32 top;
     s32 left;
+    void *texels;
 
     if (blinkFrame < 0) {
         blinkFrame = 0;
