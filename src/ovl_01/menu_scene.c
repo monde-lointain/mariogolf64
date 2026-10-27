@@ -22,15 +22,6 @@
 #define BEST_TIMES_TURN 90
 #define BEST_TIMES_SPIN_SPEED 18
 
-/* func_802144E4 draws a character's 32x24 face from D_8023AA44; nothing calls it */
-#define FACE_WIDTH 32
-#define FACE_HEIGHT 24
-#define FACE_WITH_NAME 0
-#define FACE_DARKENED 10
-#define FACE_DARKENED_SHADE 10
-#define FACE_NAME_OFFSET_X 24
-#define FACE_NAME_OFFSET_Y 12
-
 extern u16 D_800C2064[];
 extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];

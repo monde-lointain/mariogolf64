@@ -112,6 +112,18 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define MENU_BANNER_STRIP_COUNT 3
 #define MENU_BANNER_LEFT 60
 
+/*
+ * The menus draw characters' 32x24 faces, darkened or with the name
+ * beside them
+ */
+#define FACE_WIDTH 32
+#define FACE_HEIGHT 24
+#define FACE_WITH_NAME 0
+#define FACE_DARKENED 10
+#define FACE_DARKENED_SHADE 10
+#define FACE_NAME_OFFSET_X 24
+#define FACE_NAME_OFFSET_Y 12
+
 /* The title screen's song */
 #define SONG_TITLE 0x27
 
