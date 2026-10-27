@@ -36,6 +36,7 @@ void func_8005C674(s32 arg0, s32 arg1);
 #define TABLE_POPUP_TOP_RIGHT 1
 #define TABLE_POPUP_BOTTOM_LEFT 2
 #define TABLE_POPUP_BOTTOM_RIGHT 3
+#define TABLE_POPUP_CORNER_COUNT 4
 #define TABLE_POPUP_LEFT_X 68
 #define TABLE_POPUP_RIGHT_X 164
 #define TABLE_POPUP_TOP_Y 84
@@ -44,6 +45,17 @@ void func_8005C674(s32 arg0, s32 arg1);
 #define TABLE_POPUP_RIGHT_COLUMN 3
 #define TABLE_POPUP_TOP_ROW_LIMIT 2
 #define TABLE_POPUP_BOTTOM_ROW 3
+/* The popup is the menu banner shrunk to this size, with two faces and their wins against each other */
+#define TABLE_POPUP_WIDTH 120
+#define TABLE_POPUP_STRIP_HEIGHT 20
+#define TABLE_POPUP_ROW_FACE_X 16
+#define TABLE_POPUP_COLUMN_FACE_X 74
+#define TABLE_POPUP_FACE_Y 6
+#define TABLE_POPUP_SIGN_X 48
+#define TABLE_POPUP_SIGN_Y 12
+#define TABLE_POPUP_WINS_Y 36
+#define MENU_NUMBER_UNK3 3
+#define MENU_NUMBER_UNK4 4
 
 /* The characters that func_8021730C shows on the table, the first ones being those of the character grid */
 #define TABLE_CHARACTER_HIDDEN (-1)
@@ -90,6 +102,14 @@ extern void *D_8023AC6C_ovl_01;
 extern void *D_8023AC70_ovl_01;
 extern s32 D_8023AC78_ovl_01[CHARACTER_COUNT];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_SCENE_FILE_SIZE];
+extern s32 D_802301A8_ovl_01[CHARACTER_COUNT]; /* The character in each place of the table */
+/* Which of the cursor's shown cells each popup corner would cover */
+extern u8 D_80230310_ovl_01[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT][TABLE_SHOWN_COLUMN_COUNT];
+/* func_8021F124 takes an s16 character, but this file calls it without narrowing the argument */
+void func_8021F124_ovl_01(Gfx **displayListHead, void *texels, void *palette, s32 left, s32 top, s32 character,
+                          u8 drawMode);
+void func_80210DF4_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+void func_802123E0_ovl_01(Gfx **displayListHead, s32 x, s32 y, u8 sign);
 
 void func_802159C0_ovl_01(void *buffer, s16 bufferKind) {
     EncodedAsset asset;
@@ -282,7 +302,118 @@ void func_802169CC_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+/*
+ * Doesn't match: the row and column characters and their wins swap
+ * registers among $s0-$s3, 25 diff lines.
+ */
+#ifdef NON_MATCHING
+void func_80216C14_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s32 index; /* Counts the banner strips, then holds the x of each count of wins */
+    s32 rowIndex;
+    s32 rowCharacter;
+    s32 columnCharacter;
+    s32 rowWins;
+    s32 columnWins;
+    u8 faceMode;
+
+    if (D_80230310_ovl_01[D_80230198_ovl_01][memory->tableRow][memory->tableColumn] == TRUE) {
+        switch (D_80230198_ovl_01) {
+            case TABLE_POPUP_TOP_LEFT:
+                D_80230190_ovl_01 = TABLE_POPUP_RIGHT_X;
+                D_80230194_ovl_01 = TABLE_POPUP_BOTTOM_Y;
+                D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_RIGHT;
+                break;
+            case TABLE_POPUP_TOP_RIGHT:
+                D_80230190_ovl_01 = TABLE_POPUP_LEFT_X;
+                D_80230194_ovl_01 = TABLE_POPUP_BOTTOM_Y;
+                D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_LEFT;
+                break;
+            case TABLE_POPUP_BOTTOM_LEFT:
+                D_80230190_ovl_01 = TABLE_POPUP_RIGHT_X;
+                D_80230194_ovl_01 = TABLE_POPUP_TOP_Y;
+                D_80230198_ovl_01 = TABLE_POPUP_TOP_RIGHT;
+                break;
+            case TABLE_POPUP_BOTTOM_RIGHT:
+                D_80230190_ovl_01 = TABLE_POPUP_LEFT_X;
+                D_80230194_ovl_01 = TABLE_POPUP_TOP_Y;
+                D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
+                break;
+        }
+    }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_8023AC68_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_8023AC68_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+                             index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, D_80230190_ovl_01 << 2,
+                                (D_80230194_ovl_01 + index * TABLE_POPUP_STRIP_HEIGHT) << 2,
+                                (D_80230190_ovl_01 + TABLE_POPUP_WIDTH) << 2,
+                                (D_80230194_ovl_01 + index * TABLE_POPUP_STRIP_HEIGHT + TABLE_POPUP_STRIP_HEIGHT)
+                                    << 2,
+                                G_TX_RENDERTILE, 0, 0,
+                                (MENU_BANNER_WIDTH << 10) / TABLE_POPUP_WIDTH,
+                                (MENU_BANNER_STRIP_HEIGHT << 10) / TABLE_POPUP_STRIP_HEIGHT);
+        gDPPipeSync(gfx++);
+    }
+    rowIndex = memory->tableFirstRow + memory->tableRow;
+    rowCharacter = D_802301A8_ovl_01[rowIndex];
+    columnCharacter = D_802301A8_ovl_01[memory->tableFirstColumn + memory->tableColumn];
+    columnWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk0 & 0x7F;
+    rowWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk1 & 0x7F;
+    faceMode = FACE_DARKENED;
+    if (D_8023AC78_ovl_01[rowIndex] != TABLE_CHARACTER_HIDDEN) {
+        faceMode = FACE_PLAIN;
+    }
+    func_8021F124_ovl_01(&gfx, D_8012D430[rowCharacter], D_8023BFF0_ovl_01[rowCharacter],
+                         D_80230190_ovl_01 + TABLE_POPUP_ROW_FACE_X, D_80230194_ovl_01 + TABLE_POPUP_FACE_Y,
+                         rowCharacter, faceMode);
+    faceMode = FACE_DARKENED;
+    if (D_8023AC78_ovl_01[memory->tableFirstColumn + memory->tableColumn] != TABLE_CHARACTER_HIDDEN) {
+        faceMode = FACE_PLAIN;
+    }
+    func_8021F124_ovl_01(&gfx, D_8012D430[columnCharacter], D_8023BFF0_ovl_01[columnCharacter],
+                         D_80230190_ovl_01 + TABLE_POPUP_COLUMN_FACE_X, D_80230194_ovl_01 + TABLE_POPUP_FACE_Y,
+                         columnCharacter, faceMode);
+    if (rowWins < 10) {
+        index = 20;
+    } else if (rowWins >= 10 && rowWins < 100) {
+        index = 12;
+    } else if (rowWins >= 100 && rowWins < 1000) {
+        index = 4;
+    } else {
+        index = 4;
+    }
+    func_80210DF4_ovl_01(&gfx, D_80230190_ovl_01 + index, D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, rowWins,
+                         MENU_NUMBER_UNK3);
+    if (columnWins < 10) {
+        index = 80;
+    } else if (columnWins >= 10 && columnWins < 100) {
+        index = 72;
+    } else if (columnWins >= 100 && columnWins < 1000) {
+        index = 64;
+    } else {
+        index = 58;
+    }
+    func_80210DF4_ovl_01(&gfx, D_80230190_ovl_01 + index, D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, columnWins,
+                         MENU_NUMBER_UNK4);
+    func_802123E0_ovl_01(&gfx, D_80230190_ovl_01 + TABLE_POPUP_SIGN_X, D_80230194_ovl_01 + TABLE_POPUP_SIGN_Y,
+                         MENU_SIGN_TIMES);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_80216C14_ovl_01);
+#endif
 
 void func_8021730C_ovl_01(void) {
     SaveData *save = GetSaveData();
