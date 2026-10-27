@@ -3214,5 +3214,6 @@ D_8023040C_ovl_01 = 0x8023040C; // type:s16 size:0x54 segment:ovl_01
 D_80230460_ovl_01 = 0x80230460; // type:s16 size:0x54 segment:ovl_01
 D_802304B4_ovl_01 = 0x802304B4; // type:u8 size:0x8 segment:ovl_01
 D_802309F0_ovl_01 = 0x802309F0; // type:s32 size:0x40 segment:ovl_01
+D_80231138_ovl_01 = 0x80231138; // type:s32 size:0x40 segment:ovl_01
 D_80230D18_ovl_01 = 0x80230D18; // type:f32 size:0xC segment:ovl_01
 D_80230D28_ovl_01 = 0x80230D28; // type:f32 size:0xC0 segment:ovl_01
