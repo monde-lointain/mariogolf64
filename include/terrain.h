@@ -100,6 +100,16 @@ extern s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT][TERRAIN_CODE_CELL_COL
 /* Each ground tile's height range, which also serves as the radius of its bounding sphere */
 extern f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT];
 
+/*
+ * The vertices of a ground tile's edge or middle-line midpoints go through a
+ * segment, which can move them to coarse vertices halfway between their
+ * neighbors. g_CoarseVertexOffsets holds each segment's offset to them.
+ */
+#define TILE_VERTEX_SEGMENT_COUNT 8
+
+extern Gfx *g_GroundTileDisplayLists[GROUND_TILE_COUNT];
+extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
+
 Vtx *GetGroundPoint(u32 column, u32 row);
 Vtx *GetGridVertex(u32 column, u32 row);
 s32 SetGroundPoint(s32 column, s32 row, Vtx_t *point);

@@ -154,13 +154,8 @@ typedef struct GroundLightColor {
 #define MAP_TILE_SHIFT 5
 #define MAP_TILE_MASK (GROUND_TILE_TEXEL_SPAN - 1)
 
-/*
- * A ground tile has 5 by 5 points: its grid vertices and midpoints. The
- * vertices of an edge's or a middle line's midpoints go through a segment,
- * which can move them to coarse vertices halfway between their neighbors.
- */
+/* A ground tile has 5 by 5 points: its grid vertices and midpoints */
 #define TILE_POINT_SPAN 5
-#define TILE_VERTEX_SEGMENT_COUNT 8
 
 /* A ground tile's texture is its bordered 16-bit texels */
 #define GROUND_TEXTURE_LOAD_SIZE (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH - 1)
@@ -197,8 +192,6 @@ extern s32 sPaintLogic;
 extern PaintLogic sPaintLogics[];
 extern Vec3 g_MiniGolfScale;
 extern s32 sHolePaintLogics[][COURSE_HOLE_COUNT];
-extern Gfx *g_GroundTileDisplayLists[GROUND_TILE_COUNT];
-extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
 extern s8 sTileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN];
 
 void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vertexCursor);
