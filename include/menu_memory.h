@@ -9,7 +9,9 @@
 
 /* What the menus keep between visits, such as the last choices made */
 typedef struct MenuMemory {
-    /* 0x00 */ u8 unk0[4];
+    /* 0x00 */ s8 playerCountChoice; /* The title screen's player count, less one */
+    /* 0x01 */ s8 titleChoice;       /* The title screen's row: a new game, the saved games or the menus */
+    /* 0x02 */ u8 unk2[2];
     /* 0x04 */ s8 characterColumn; /* The character select cursor's column */
     /* 0x05 */ u8 unk5[3];
     /* 0x08 */ s8 characterRow; /* And its row */
