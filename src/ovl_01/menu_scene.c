@@ -35,7 +35,6 @@ extern void *D_8023AA44_ovl_01;
 extern s32 D_8023013C_ovl_01[CHARACTER_COUNT];
 extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 
-void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 extern void *D_8023AA48_ovl_01;
 extern void *D_8023AA4C_ovl_01;
 extern void *D_8023AA50_ovl_01;

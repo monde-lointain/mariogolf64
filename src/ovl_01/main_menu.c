@@ -212,7 +212,6 @@ void func_8021FC5C_ovl_01(Gfx **displayListHead);
 void func_802230C0_ovl_01(Gfx **displayListHead);
 void func_80229CB0_ovl_01(Gfx **displayListHead);
 void DrawHelpBoard(Gfx **displayListHead);
-void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 
 void *GetMenuImageBuffer(void) {
     return g_MenuImageBuffer;

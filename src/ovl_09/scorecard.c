@@ -187,7 +187,6 @@ void DrawBetsPage(Gfx **displayListHead);
 void DrawSpeedGolfPage(Gfx **displayListHead);
 void DrawLeaderboardPage(Gfx **displayListHead);
 void DrawScoresPage(Gfx **displayListHead);
-void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 
 void ScrollLeaderboard(u16 buttons);
 

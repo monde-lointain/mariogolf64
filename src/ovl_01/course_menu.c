@@ -120,7 +120,6 @@ extern void *D_8023A830_ovl_01;
 
 s32 GetOpenCourseCount(void);
 void func_8020F9B8_ovl_01(Gfx **displayListHead, s16 statIndex, u8 row);
-void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 void func_80207E28_ovl_01(Gfx **displayListHead, void *image, s32 x, s32 y);
 void func_80210D34_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4);
 void func_80210D94_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4);

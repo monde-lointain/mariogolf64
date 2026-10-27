@@ -150,8 +150,6 @@
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
 #define RING_SHOT_TEXT_SLOT 2
 
-void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
-
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY);
 

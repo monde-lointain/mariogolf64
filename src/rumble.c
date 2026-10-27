@@ -99,7 +99,6 @@ typedef struct TextListLayout {
 extern TextListLayout sHelpListLayout;
 
 void func_801FB54C(Gfx **displayListHead, s32);
-void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 void DrawChalkboard(Gfx **displayListHead);
 /* Indexed by topic; each topic's pages are the messages that follow its title */
 extern s8 sTopicPageCounts[];
