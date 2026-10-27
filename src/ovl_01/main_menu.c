@@ -112,6 +112,9 @@ extern s16 D_8022BE8C_ovl_01;
 extern s16 D_8022BE92_ovl_01;
 extern s32 D_8022F8C8_ovl_01;
 extern s8 D_8022F8CD_ovl_01;
+extern u8 D_8022F8CC_ovl_01; /* Which of D_801B93E0's buffers holds the star frame shown */
+extern void *D_801B93E0[];
+extern s32 D_8022F848_ovl_01[]; /* The star's frames */
 extern u8 D_8022F8CE_ovl_01;
 extern s32 D_80105B68;
 extern s32 D_8022F8C0_ovl_01;
@@ -125,6 +128,12 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define ANIMATED_ICON_IMAGE_SIZE (ANIMATED_ICON_SIZE * ANIMATED_ICON_SIZE / 2)
 #define ANIMATED_ICON_FRAME_COUNT 6
 #define ANIMATED_ICON_FRAME_DURATION 2
+/* func_802081E8 draws a row of spinning stars, one per hole, from D_801B93E0, and enlarges the chosen hole's */
+#define STAR_WIDTH 32
+#define STAR_HEIGHT 24
+#define STAR_FRAME_COUNT 15
+#define MAX_STAR_COUNT 6
+#define CHOSEN_STAR_GROWTH 8
 /* func_80200A40 draws the chosen mode's icon, 64x64 CI8, in two strips */
 #define MODE_ICON_WIDTH 64
 #define MODE_ICON_STRIP_HEIGHT 32
@@ -1305,7 +1314,65 @@ void func_80207E28_ovl_01(Gfx **displayListHead, void *image, s32 x, s32 y) {
     *displayListHead = gfx;
 }
 
+/*
+ * Doesn't match: the two growths swap registers ($t1 and $t8), and the
+ * right and bottom edges add their constants last.
+ */
+#ifdef NON_MATCHING
+void func_802081E8_ovl_01(Gfx **displayListHead, s32 left, s32 top, u8 starCount, u8 enlargesChosenHole) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    void *image = D_801B93E0[D_8022F8CC_ovl_01];
+    u8 starIndex = 0;
+    s32 growWidth = 0;
+    s32 growHeight;
+
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)image + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, 0,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                           G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    if (starCount > MAX_STAR_COUNT) {
+        starCount = MAX_STAR_COUNT;
+    }
+    if (starCount == 0) {
+        starCount = 1;
+    }
+    for (; starIndex < starCount; starIndex++) {
+        growWidth = 0;
+        if (enlargesChosenHole == TRUE) {
+            growHeight = 0;
+            if (starIndex == g_MenuChoices.holeIndex) {
+                growWidth = CHOSEN_STAR_GROWTH;
+                growHeight = CHOSEN_STAR_GROWTH;
+            }
+        } else {
+            growHeight = 0;
+        }
+        gSPScisTextureRectangle(gfx++, (left + starIndex * STAR_WIDTH - growWidth / 2) << 2,
+                                (top - growHeight / 2) << 2,
+                                (left + starIndex * STAR_WIDTH + growWidth / 2 + STAR_WIDTH) << 2,
+                                (top + growHeight / 2 + STAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                (STAR_WIDTH << 10) / (growWidth + STAR_WIDTH),
+                                (STAR_HEIGHT << 10) / (growHeight + STAR_HEIGHT));
+        gDPPipeSync(gfx++);
+    }
+    D_8022F8CD_ovl_01++;
+    if (D_8022F8CD_ovl_01 == ANIMATED_ICON_FRAME_DURATION) {
+        D_8022F8CD_ovl_01 = 0;
+        D_8022F8C8_ovl_01++;
+        if (D_8022F8C8_ovl_01 >= STAR_FRAME_COUNT) {
+            D_8022F8C8_ovl_01 = 0;
+        }
+        D_8022F8CC_ovl_01 = D_8022F8CC_ovl_01 == 0;
+        OpenEncodedAsset(D_8022F848_ovl_01[D_8022F8C8_ovl_01], &asset);
+        ReadEncodedAsset(D_801B93E0[D_8022F8CC_ovl_01], &asset);
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802081E8_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_8020879C_ovl_01);
 
