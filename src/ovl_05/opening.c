@@ -874,7 +874,112 @@ void func_801FA83C_ovl_05(s32 logoIndex, s32 slot) {
   f_IsNameSlotShown[slot] = 0;
 }
 
+#define LOGO f_OpeningNameLogos[f_NameSlotLogoIndices[slot]]
+
+#ifdef NON_MATCHING
+/*
+ * Draws the shown name logos in four strips each. Until a logo flips back up,
+ * its strips are drawn in reverse order with their rows mirrored, which turns
+ * it upside down.
+ *
+ * Differs from the original only in stack slots: the pointers of the second
+ * and third commands swap slots, as in the opening's sparks.
+ */
+void func_801FA8D8_ovl_05(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  s32 x[2];
+  s32 y[5];
+  s32 strip;
+  s32 slot;
+  s32 stripHeight;
+  s32 texelsOffset;
+
+  for (slot = 0; slot != OPENING_NAME_SLOT_COUNT; slot++) {
+    if (f_IsNameSlotShown[slot]) {
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      gDPPipeSync(gfx++);
+      gDPSetColorDither(gfx++, G_CD_DISABLE);
+      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gDPPipeSync(gfx++);
+      gDPSetTexturePersp(gfx++, G_TP_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetTextureFilter(gfx++, G_TF_BILERP);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+      gDPLoadTLUT_pal256(
+          gfx++, TEXTURE_ADDRESS(D_8020E400_ovl_05[slot] + IMAGE_HEADER_SIZE));
+      gDPPipeSync(gfx++);
+      for (strip = 0; strip != 4; strip++) {
+        texelsOffset = LARGE_PALETTED_TEXELS_OFFSET + strip * LOGO.width * 8;
+        stripHeight = LOGO.shownHeight / 4;
+        x[0] = LOGO.x - LOGO.shownWidth / 2;
+        x[1] = LOGO.x + LOGO.shownWidth / 2;
+        y[0] = LOGO.y - LOGO.shownHeight / 2;
+        y[1] = y[0] + stripHeight;
+        y[2] = y[1] + stripHeight;
+        y[3] = y[2] + stripHeight;
+        y[4] = y[3] + stripHeight;
+        if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_UP) {
+          s32 drawnWidth;
+          s32 drawnHeight;
+
+          gDPLoadTextureBlock(
+              gfx++, TEXTURE_ADDRESS(D_8020E400_ovl_05[slot] + texelsOffset),
+              G_IM_FMT_CI, G_IM_SIZ_8b, LOGO.width, LOGO.height / 4, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
+              3, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+          drawnWidth = x[1] - x[0];
+          if (drawnWidth <= 0) {
+            drawnWidth = 1;
+          }
+          drawnHeight = y[4 - strip] - y[3 - strip];
+          if (drawnHeight <= 0) {
+            drawnHeight = 1;
+          }
+          gSPScisTextureRectangle(gfx++, x[0] << 2, y[3 - strip] << 2,
+                                  x[1] << 2, y[4 - strip] << 2, G_TX_RENDERTILE,
+                                  0, 8 << 5, (LOGO.width << 10) / drawnWidth,
+                                  (LOGO.height << 8) / drawnHeight);
+        } else {
+          s32 drawnWidth;
+          s32 drawnHeight;
+
+          gDPLoadTextureBlock(
+              gfx++, TEXTURE_ADDRESS(D_8020E400_ovl_05[slot] + texelsOffset),
+              G_IM_FMT_CI, G_IM_SIZ_8b, LOGO.width, LOGO.height / 4, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+          drawnWidth = x[1] - x[0];
+          if (drawnWidth <= 0) {
+            drawnWidth = 1;
+          }
+          drawnHeight = y[strip + 1] - y[strip];
+          if (drawnHeight <= 0) {
+            drawnHeight = 1;
+          }
+          gSPScisTextureRectangle(gfx++, x[0] << 2, y[strip] << 2, x[1] << 2,
+                                  y[strip + 1] << 2, G_TX_RENDERTILE, 0, 0,
+                                  (LOGO.width << 10) / drawnWidth,
+                                  (LOGO.height << 8) / drawnHeight);
+        }
+        gDPPipeSync(gfx++);
+      }
+    }
+  }
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FA8D8_ovl_05);
+#endif
 
 /* Steps the shown name logos' animations: each unfolds, flips over, then
  * stays */
