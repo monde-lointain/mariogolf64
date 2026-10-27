@@ -12,6 +12,7 @@
 #include "hole_display.h"
 #include "libc.h"
 #include "math_util.h"
+#include "round_hud.h"
 #include "screen.h"
 #include "sound.h"
 #include "variables.h"
@@ -137,8 +138,18 @@ extern BallSimulation f_OpeningShotSimulation;
 extern Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
                                     [OPENING_SHOT_MAX_DASH_COUNT];
 
+/*
+ * The opening's shot path is drawn as the turn's shot preview is, but
+ * nothing in the opening sets f_IsOpeningShotPathShown, so it never shows
+ */
+extern s32 f_IsOpeningShotPathShown;
+extern s32 f_OpeningShotPathDashCount; /* Starts at 198 */
+extern s8 f_IsOpeningShotPathRed;
+extern s32 f_OpeningShotPathScroll; /* Of the dash image, in texels */
+extern Vtx f_OpeningShotDashVertices[4];
+
 void AssignCharacterBuffers(void);
-void func_801F5454_ovl_05(CameraMatrices* matrices);
+void DrawOpeningShotPath(CameraMatrices* matrices);
 void func_801FA8D8_ovl_05(Gfx** displayListHead);
 void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices);
 void func_801FE2A0_ovl_05(Gfx** displayListHead);
@@ -252,7 +263,61 @@ void BuildOpeningShotPath(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F5454_ovl_05);
+/* Draws the dashes that BuildOpeningShotPath placed along the shot's path */
+void DrawOpeningShotPath(CameraMatrices* matrices) {
+  s32 step;
+
+  if (!f_IsOpeningShotPathShown) {
+    return;
+  }
+  gDPPipeSync(g_DisplayListHead++);
+  gDPPipeSync(g_DisplayListHead++);
+  gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+  gDPPipeSync(g_DisplayListHead++);
+  gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF,
+                   G_RM_AA_ZB_XLU_SURF2);
+  gSPLoadGeometryMode(g_DisplayListHead++, 0);
+  gSPSetGeometryMode(g_DisplayListHead++,
+                     G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+  gDPSetCombineLERP(g_DisplayListHead++, PRIMITIVE, ENVIRONMENT, TEXEL0,
+                    ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE,
+                    ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
+  gDPPipeSync(g_DisplayListHead++);
+  gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+  gDPPipeSync(g_DisplayListHead++);
+  gDPSetAlphaCompare(g_DisplayListHead++, G_AC_THRESHOLD);
+  gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x40);
+  gDPPipeSync(g_DisplayListHead++);
+  gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+  gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPLoadTextureBlock(
+      g_DisplayListHead++,
+      TEXTURE_ADDRESS((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
+      G_IM_FMT_I, G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE,
+      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
+      G_TX_NOLOD);
+  gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, f_OpeningShotPathScroll,
+                 0,
+                 f_OpeningShotPathScroll +
+                     (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
+                 SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC);
+  gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+  if (f_IsOpeningShotPathRed) {
+    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0x00, 0x00, 0xC8);
+  } else {
+    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, 0x80);
+  }
+  gDPPipeSync(g_DisplayListHead++);
+  for (step = 0; step < f_OpeningShotPathDashCount; step++) {
+    gSPMatrix(g_DisplayListHead++,
+              &f_OpeningShotDashMatrices[g_DrawBufferIndex][step],
+              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPVertex(g_DisplayListHead++, f_OpeningShotDashVertices, 4, 0);
+    gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
+  }
+  gDPPipeSync(g_DisplayListHead++);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F58EC_ovl_05);
 
@@ -301,7 +366,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   }
   DrawOpeningCharacters(matrices, &gfx, f_OpeningFrameParity);
   g_DisplayListHead = gfx;
-  func_801F5454_ovl_05(matrices);
+  DrawOpeningShotPath(matrices);
   gfx = g_DisplayListHead;
   DrawLensFlare(&gfx);
   func_801FE2A0_ovl_05(&gfx);
