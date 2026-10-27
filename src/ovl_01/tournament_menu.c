@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "screen.h"
 #include "screen_layers.h"
 #include "text.h"
 #include "variables.h"
@@ -46,6 +47,12 @@ extern s32 D_80230F7C_ovl_01;
 extern u8 D_80230F80_ovl_01;
 extern void *D_80230F44_ovl_01;
 extern void *D_80230F48_ovl_01;
+/* The "CODE ENTRY" bar of D_80230F48 that func_8022A090 draws, in 8-row strips */
+#define CODE_ENTRY_BAR_WIDTH 256
+#define CODE_ENTRY_BAR_STRIP_HEIGHT 8
+#define CODE_ENTRY_BAR_STRIP_COUNT 4
+#define CODE_ENTRY_BAR_LEFT 32
+#define CODE_ENTRY_BAR_TOP 140
 extern void *D_80230F4C_ovl_01;
 extern void *D_80230F50_ovl_01;
 extern void *D_80230F54_ovl_01;
@@ -330,7 +337,39 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802296C4_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80229CB0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022A090_ovl_01);
+void func_8022A090_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_80230F48_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    for (stripIndex = 0; stripIndex != CODE_ENTRY_BAR_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_80230F48_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * CODE_ENTRY_BAR_WIDTH * CODE_ENTRY_BAR_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, CODE_ENTRY_BAR_WIDTH, CODE_ENTRY_BAR_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, CODE_ENTRY_BAR_LEFT << 2,
+                                (CODE_ENTRY_BAR_TOP + stripIndex * CODE_ENTRY_BAR_STRIP_HEIGHT) << 2,
+                                (CODE_ENTRY_BAR_LEFT + CODE_ENTRY_BAR_WIDTH) << 2,
+                                (CODE_ENTRY_BAR_TOP + stripIndex * CODE_ENTRY_BAR_STRIP_HEIGHT +
+                                 CODE_ENTRY_BAR_STRIP_HEIGHT)
+                                    << 2,
+                                G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022A43C_ovl_01);
 
