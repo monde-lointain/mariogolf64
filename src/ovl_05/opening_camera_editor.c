@@ -46,39 +46,40 @@ void ResetCameraEditor(void) {
 }
 
 /* Puts the camera's eye and look-at point at the given positions */
-void PlaceEditorCamera(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
-                       f32 arg5) {
-  g_CameraEditor.points[EDITOR_POINT_EYE][0] = arg0;
-  g_CameraEditor.points[EDITOR_POINT_EYE][1] = arg1;
-  g_CameraEditor.points[EDITOR_POINT_EYE][2] = arg2;
-  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] = arg3;
-  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] = arg4;
-  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] = arg5;
+void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY,
+                       f32 lookAtZ) {
+  g_CameraEditor.points[EDITOR_POINT_EYE][0] = eyeX;
+  g_CameraEditor.points[EDITOR_POINT_EYE][1] = eyeY;
+  g_CameraEditor.points[EDITOR_POINT_EYE][2] = eyeZ;
+  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] = lookAtX;
+  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] = lookAtY;
+  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] = lookAtZ;
   MeasureEditorCamera();
 }
 
-/* Sets the speeds of point index's moves. Nothing calls it */
-void SetEditorPointSpeeds(s32 index, f32 speed, f32 easeSpeed) {
-  g_CameraEditor.unk70[index] = speed;
-  g_CameraEditor.unk78[index] = easeSpeed;
+/* Sets the top speed and acceleration of point index's moves. Nothing calls
+ * it */
+void SetEditorPointSpeeds(s32 index, f32 topSpeed, f32 acceleration) {
+  g_CameraEditor.unk70[index] = topSpeed;
+  g_CameraEditor.unk78[index] = acceleration;
 }
 
 /* Sets the top speed and acceleration of turns. Nothing calls it */
-void SetEditorTurnSpeeds(s32 arg0, f32 arg1, f32 arg2) {
-  g_CameraEditor.unk80 = arg1;
-  g_CameraEditor.unk84 = arg2;
+void SetEditorTurnSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
+  g_CameraEditor.unk80 = topSpeed;
+  g_CameraEditor.unk84 = acceleration;
 }
 
 /* Sets the top speed and acceleration of tilts. Nothing calls it */
-void SetEditorTiltSpeeds(s32 arg0, f32 arg1, f32 arg2) {
-  g_CameraEditor.unk88 = arg1;
-  g_CameraEditor.unk8C = arg2;
+void SetEditorTiltSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
+  g_CameraEditor.unk88 = topSpeed;
+  g_CameraEditor.unk8C = acceleration;
 }
 
 /* Sets the top speed and acceleration of zooms. Nothing calls it */
-void SetEditorZoomSpeeds(s32 arg0, f32 arg1, f32 arg2) {
-  g_CameraEditor.unk90 = arg1;
-  g_CameraEditor.unk94 = arg2;
+void SetEditorZoomSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
+  g_CameraEditor.unk90 = topSpeed;
+  g_CameraEditor.unk94 = acceleration;
 }
 
 /* Works out the camera's heading, pitch and distance from its eye and look-at
