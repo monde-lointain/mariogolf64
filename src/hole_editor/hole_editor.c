@@ -36,6 +36,13 @@
 #define SLOPE_SHADE_OFFSET 0x40
 #define SLOPE_SHADE_MAX 0xFF
 
+/* func_80407F08's hex dump */
+#define HEX_DUMP_BUFFER_SIZE 0x40000
+#define HEX_DUMP_TEXT_SIZE 0x100
+#define HEX_DUMP_LINE_WORDS 4
+#define HEX_DUMP_LINE_BYTES (HEX_DUMP_LINE_WORDS * (s32)sizeof(u32))
+#define HOLE_EDITOR_HEX_DUMP_ASSERT_LINE 3027
+
 /* func_80406818's steps, in sHoleFileStep */
 #define HOLE_FILE_STEP_ACTION 0
 #define HOLE_FILE_STEP_COURSE 1
@@ -704,9 +711,55 @@ void func_80407D64_hole_editor(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80407EC4_hole_editor);
+/*
+ * Writes a hex dump of words to the host as a text file: lines of four
+ * words, each line led by its byte offset. Nothing calls it.
+ */
+void func_80407F08_hole_editor(u32 *words, s32 byteCount, char *fileName) {
+    char text[HEX_DUMP_TEXT_SIZE];
+    char *cursor;
+    char *end;
+    char *buffer;
+    s32 line;
+    s32 wordIndex;
+    u32 *lineWords;
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80407F08_hole_editor);
+    /* Copies text to the buffer, dropping what doesn't fit */
+    void AppendText(char *source) {
+        char character;
+
+        for (;;) {
+            if ((character = *source++) == '\0') {
+                return;
+            }
+            if (cursor < end) {
+                *cursor++ = character;
+            }
+        }
+    }
+
+    buffer = AllocMemory(HEX_DUMP_BUFFER_SIZE);
+    cursor = buffer;
+    end = buffer + HEX_DUMP_BUFFER_SIZE;
+    EDITOR_ASSERT(buffer != NULL, HOLE_EDITOR_HEX_DUMP_ASSERT_LINE);
+    for (line = 0; line < (byteCount + HEX_DUMP_LINE_BYTES - 1) / HEX_DUMP_LINE_BYTES; line++) {
+        lineWords = words;
+        sprintf(text, "%4.4X: ", line * HEX_DUMP_LINE_BYTES);
+        AppendText(text);
+        for (wordIndex = 0; wordIndex < HEX_DUMP_LINE_WORDS; wordIndex++) {
+            sprintf(text, "%8.8X ", lineWords[line * HEX_DUMP_LINE_WORDS + wordIndex]);
+            AppendText(text);
+        }
+        sprintf(text, "\n");
+        AppendText(text);
+    }
+    text[0] = END_OF_FILE_CHARACTER;
+    text[1] = '\0';
+    AppendText(text);
+    sprintf(text, fileName);
+    WriteHostFile(text, cursor - buffer);
+    FreeMemory(&buffer);
+}
 
 /*
  * Doesn't match: the original opens with an 8-byte frame and stores an unset
