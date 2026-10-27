@@ -23,9 +23,9 @@
 /* The buffers of func_802218C0, and what it reads into them */
 #define SAVE_GAME_BUFFER_CONTROLLER_ICONS 1
 #define SAVE_GAME_BUFFER_PLAYER_LABELS 2
-#define SAVE_GAME_BUFFER_UNK3 3
-#define SAVE_GAME_BUFFER_UNK4 4
-#define SAVE_GAME_BUFFER_UNK5 5
+#define SAVE_GAME_BUFFER_FIRST_BOARD 3
+#define SAVE_GAME_BUFFER_SECOND_BOARD 4
+#define SAVE_GAME_BUFFER_THIRD_BOARD 5
 #define SAVE_GAME_BUFFER_COURSE 6
 #define SAVE_GAME_BUFFER_CHOSEN_COURSE 7
 
@@ -41,9 +41,10 @@
 #define COURSE_THUMBNAIL_SHOWN_WIDTH 52
 #define COURSE_THUMBNAIL_SHOWN_HEIGHT 18
 #define ASSET_CONTROLLER_ICONS 0x63D /* Controllers numbered 1 to 4, 32 by 32 each */
-#define ASSET_SAVE_GAME_UNK3 0x82A
-#define ASSET_SAVE_GAME_UNK4 0x82B
-#define ASSET_SAVE_GAME_UNK5 0x82C
+/* The wooden boards numbered 1 to 3, one for each saved game, 64 by 64 each */
+#define ASSET_FIRST_GAME_BOARD 0x82A
+#define ASSET_SECOND_GAME_BOARD 0x82B
+#define ASSET_THIRD_GAME_BOARD 0x82C
 
 /* The games that func_80222CDC continues from the save's mode tables, by the save menu's slot */
 #define SAVE_MENU_GAME_TOURNAMENT 0
@@ -542,22 +543,22 @@ void func_802218C0_ovl_01(void *buffer, u8 bufferKind) {
             OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset);
             ReadEncodedAsset(D_8023BD84_ovl_01, &asset);
             break;
-        case SAVE_GAME_BUFFER_UNK3:
+        case SAVE_GAME_BUFFER_FIRST_BOARD:
             imageSlot = &D_8023BD98_ovl_01;
             *imageSlot = buffer;
-            OpenEncodedAsset(ASSET_SAVE_GAME_UNK3, &asset);
+            OpenEncodedAsset(ASSET_FIRST_GAME_BOARD, &asset);
             ReadEncodedAsset(*imageSlot, &asset);
             break;
-        case SAVE_GAME_BUFFER_UNK4:
+        case SAVE_GAME_BUFFER_SECOND_BOARD:
             imageSlot = &D_8023BD9C_ovl_01;
             *imageSlot = buffer;
-            OpenEncodedAsset(ASSET_SAVE_GAME_UNK4, &asset);
+            OpenEncodedAsset(ASSET_SECOND_GAME_BOARD, &asset);
             ReadEncodedAsset(*imageSlot, &asset);
             break;
-        case SAVE_GAME_BUFFER_UNK5:
+        case SAVE_GAME_BUFFER_THIRD_BOARD:
             imageSlot = &D_8023BDA0_ovl_01;
             *imageSlot = buffer;
-            OpenEncodedAsset(ASSET_SAVE_GAME_UNK5, &asset);
+            OpenEncodedAsset(ASSET_THIRD_GAME_BOARD, &asset);
             ReadEncodedAsset(*imageSlot, &asset);
             break;
         case SAVE_GAME_BUFFER_COURSE:
