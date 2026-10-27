@@ -11,6 +11,7 @@
 #include "controller.h"
 #include "course.h"
 #include "game_flags.h"
+#include "help_board.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
@@ -245,7 +246,6 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead);
 void func_8021FC5C_ovl_01(Gfx** displayListHead);
 void func_802230C0_ovl_01(Gfx** displayListHead);
 void func_80229CB0_ovl_01(Gfx** displayListHead);
-void DrawHelpBoard(Gfx** displayListHead);
 
 void* GetMenuImageBuffer(void) {
   return g_MenuImageBuffer;
