@@ -62,6 +62,12 @@ extern u8* f_OpeningCharacterBuffers[2];
 extern void* f_OpeningBillboardHeap;
 extern s32 D_8022BFA8_ovl_05;
 extern u8* g_ShadowTexture;
+extern s32 D_8020ADA0_ovl_05[2];
+extern u8 D_8021A2A0_ovl_05[];
+extern u8 D_8021A8B0_ovl_05[];
+extern Mtx D_8021B4C0_ovl_05[40];
+extern f32 D_8021BEC0_ovl_05;
+extern f32 D_8021BEC4_ovl_05;
 
 extern s32 f_OpeningFrameParity;
 extern s32 f_IsLookAtMarkerShown;
@@ -248,7 +254,26 @@ void func_801FE270_ovl_05(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE2A0_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE7B4_ovl_05);
+/* Loads two images and places 40 matrices at D_8020ADA0_ovl_05's screen point
+ */
+void func_801FE7B4_ovl_05(void) {
+  EncodedAsset asset;
+  s32 pass;
+  s32 i;
+
+  OpenEncodedAsset(0x64B, &asset);
+  ReadEncodedAsset(D_8021A2A0_ovl_05, &asset);
+  OpenEncodedAsset(0x6AF, &asset);
+  ReadEncodedAsset(D_8021A8B0_ovl_05, &asset);
+  for (pass = 0; pass < 2; pass++) {
+    for (i = 0; i < 40; i++) {
+      guTranslate(&D_8021B4C0_ovl_05[i], D_8020ADA0_ovl_05[0] - 160,
+                  120 - D_8020ADA0_ovl_05[1], -300.0f);
+    }
+  }
+  D_8021BEC0_ovl_05 = D_8020ADA0_ovl_05[0] - 320;
+  D_8021BEC4_ovl_05 = 120 - D_8020ADA0_ovl_05[1];
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE8F8_ovl_05);
 
