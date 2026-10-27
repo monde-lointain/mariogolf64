@@ -56,13 +56,21 @@ u32 IntLength2D(s32 x, s32 y) {
   return (u32)sqrt((f64)x * x + (f64)y * y) << shiftCount;
 }
 
-void SetRandomSeed(s32 seed) { f_RandomSeed = seed; }
+void SetRandomSeed(s32 seed) {
+  f_RandomSeed = seed;
+}
 
-s32 NextRandom(void) { return f_RandomSeed = f_RandomSeed * 0x5D588B65 + 1; }
+s32 NextRandom(void) {
+  return f_RandomSeed = f_RandomSeed * 0x5D588B65 + 1;
+}
 
-f32 Length2D(f32 x, f32 y) { return sqrtf(x * x + y * y); }
+f32 Length2D(f32 x, f32 y) {
+  return sqrtf(x * x + y * y);
+}
 
-f32 Length3D(f32 x, f32 y, f32 z) { return sqrtf(x * x + y * y + z * z); }
+f32 Length3D(f32 x, f32 y, f32 z) {
+  return sqrtf(x * x + y * y + z * z);
+}
 
 u16 ComputeCrc16(u8* data, u32 size) {
   u32 crc;

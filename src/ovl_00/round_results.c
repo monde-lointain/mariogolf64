@@ -1635,7 +1635,9 @@ s32 UpdateRoundResults(void) {
   return FALSE;
 }
 
-s32 GetBannerState(void) { return f_BannerState; }
+s32 GetBannerState(void) {
+  return f_BannerState;
+}
 
 void SetResultsBanner(s32 state, s32 kind) {
   f_BannerState = state;

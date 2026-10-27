@@ -818,7 +818,9 @@ s32 RateShotLength(void) {
   return SHOT_LENGTH_UNRATED;
 }
 
-s32 GetEndReaction(void) { return f_EndReaction; }
+s32 GetEndReaction(void) {
+  return f_EndReaction;
+}
 
 /*
  * PlayFlightSounds' sounds, by what they follow where that is clear. The

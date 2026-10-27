@@ -9,4 +9,6 @@ int rand(void) {
   return ((f_RandomState + 1) >> 16) & 0x7FFF;
 }
 
-void srand(unsigned int seed) { f_RandomState = seed; }
+void srand(unsigned int seed) {
+  f_RandomState = seed;
+}

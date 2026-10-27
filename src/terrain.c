@@ -406,7 +406,9 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
 }
 
 /* No jal in the ROM calls this */
-f32 ConvertToFloat(s32 value) { return value; }
+f32 ConvertToFloat(s32 value) {
+  return value;
+}
 
 /*
  * Returns the surface at a point: water if the water is above the ground,
@@ -587,7 +589,9 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
 INCLUDE_ASM("asm/nonmatchings/terrain", FindSurface);
 #endif
 
-s32 GetSurface(s32 x, s32 z) { return FindSurface(x, z, FALSE); }
+s32 GetSurface(s32 x, s32 z) {
+  return FindSurface(x, z, FALSE);
+}
 
 SurfaceInfo* GetSurfaceInfoAt(s32 x, s32 z) {
   return GetSurfaceInfo(GetSurface(x, z));
@@ -1253,7 +1257,9 @@ void PrepareHoleTriangles(void) {
  * Tests whether BuildHole was linked above the first 4 MB of RAM. It
  * is not, so this returns FALSE and the debug scene menu never opens.
  */
-s32 IsOverlayInExpansionMemory(void) { return (u32)BuildHole > 0x803FFFFF; }
+s32 IsOverlayInExpansionMemory(void) {
+  return (u32)BuildHole > 0x803FFFFF;
+}
 
 /* Marks each billboard on the map image in red */
 void MarkBillboardsOnMap(void) {
@@ -1751,7 +1757,9 @@ s32 GetTerrainHeight(s32 x, s32 z) {
 INCLUDE_ASM("asm/nonmatchings/terrain", GetTerrainHeight);
 #endif
 
-s32 GetGroundHeight(s32 x, s32 z) { return GetTerrainHeight(x, z); }
+s32 GetGroundHeight(s32 x, s32 z) {
+  return GetTerrainHeight(x, z);
+}
 
 /* Returns the lower of the ground's height and the water's */
 s32 GetGroundOrWaterHeight(s32 x, s32 z) {

@@ -523,7 +523,9 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", UpdateHoleSelect);
 #endif
 
-s32 ArePlanksOpen(void) { return f_PlankSlide == 0; }
+s32 ArePlanksOpen(void) {
+  return f_PlankSlide == 0;
+}
 
 void SetPlankMotion(s32 motion) {
   if (f_PlankMotion != motion) {

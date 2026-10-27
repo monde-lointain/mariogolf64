@@ -48,7 +48,9 @@ void GetFramedView(Vec3 eye, Vec3 lookAt) {
   lookAt[2] = f_FramedLookAt[2];
 }
 
-void ClearFramedSpheres(void) { f_FramedSphereCount = 0; }
+void ClearFramedSpheres(void) {
+  f_FramedSphereCount = 0;
+}
 
 /* Adds a sphere for FrameSpheres to keep in view; extra spheres are ignored */
 void AddFramedSphere(Vec3 center, f32 radius) {

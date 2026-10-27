@@ -272,4 +272,6 @@ f32 InterpolateHermite(f32 values[], f32 position) {
 }
 
 /* Adds nothing to the display list */
-void DrawNothing(Gfx** displayListHead) { *displayListHead = *displayListHead; }
+void DrawNothing(Gfx** displayListHead) {
+  *displayListHead = *displayListHead;
+}

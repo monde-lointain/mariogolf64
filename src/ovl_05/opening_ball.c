@@ -109,7 +109,9 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   s32 index;
   s8 surface;
 
-  f32 PickLieBlend(void) { return 0.0f; }
+  f32 PickLieBlend(void) {
+    return 0.0f;
+  }
 
   simulation->purpose = purpose;
   D_8020BA60_ovl_05++;

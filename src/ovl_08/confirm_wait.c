@@ -24,4 +24,6 @@ void WaitForConfirmButton(void) {
   }
 }
 
-void RewriteWord(s32* word) { *word = *word; }
+void RewriteWord(s32* word) {
+  *word = *word;
+}

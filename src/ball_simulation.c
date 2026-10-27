@@ -309,7 +309,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
            127.5f;
   }
 
-  inline f32 AbsoluteValue(f32 value) { return value < 0.0f ? -value : value; }
+  inline f32 AbsoluteValue(f32 value) {
+    return value < 0.0f ? -value : value;
+  }
 
   inline f32 GetStepNoise(void) {
     return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +

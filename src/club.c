@@ -796,7 +796,9 @@ INCLUDE_ASM("asm/nonmatchings/club", InterpolatePuttPower);
 INCLUDE_ASM("asm/nonmatchings/club", GetPuttPower);
 #endif
 
-s32 GetClubPower(Club* club, s32 shotMode) { return club->power[shotMode]; }
+s32 GetClubPower(Club* club, s32 shotMode) {
+  return club->power[shotMode];
+}
 
 Club* GetClub(u32 clubIndex) {
   return (clubIndex < CLUB_COUNT) ? &g_Clubs[clubIndex] : &f_NoClub;

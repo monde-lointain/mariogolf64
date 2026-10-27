@@ -486,7 +486,9 @@ s32 UpdateClubSlots(void) {
   return FALSE;
 }
 
-s32 GetClubSlotsState(void) { return f_ClubSlotsState; }
+s32 GetClubSlotsState(void) {
+  return f_ClubSlotsState;
+}
 
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {

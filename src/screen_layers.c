@@ -288,9 +288,13 @@ void LoadWipeShape(s32 courseIndex) {
   ReadEncodedAsset(f_WipeShapeImage, &asset);
 }
 
-void StopWipe(void) { f_WipeKind = WIPE_NONE; }
+void StopWipe(void) {
+  f_WipeKind = WIPE_NONE;
+}
 
-s32 GetWipeKind(void) { return f_WipeKind; }
+s32 GetWipeKind(void) {
+  return f_WipeKind;
+}
 
 /*
  * While the Half Turn picture is shown, it stands in for the wipe: the
@@ -420,10 +424,14 @@ void DrawWipe(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void StopScreenFade(void) { g_ScreenFadeKind = FADE_NONE; }
+void StopScreenFade(void) {
+  g_ScreenFadeKind = FADE_NONE;
+}
 
 /* This is true from the fade's last frame on */
-s32 HasScreenFadeEnded(void) { return g_ScreenFadeFramesLeft < 2; }
+s32 HasScreenFadeEnded(void) {
+  return g_ScreenFadeFramesLeft < 2;
+}
 
 void StartScreenFadeOut(s32 red, s32 green, s32 blue, s32 frameCount) {
   g_ScreenFadeKind = FADE_OUT;
@@ -508,7 +516,9 @@ void FreePromptImages(void) {
   FreeMemory(&f_YesNoImage);
 }
 
-s32 IsPromptClosed(void) { return f_PromptState == PROMPT_STATE_CLOSED; }
+s32 IsPromptClosed(void) {
+  return f_PromptState == PROMPT_STATE_CLOSED;
+}
 
 void OpenPrompt(s32 prompt) {
   Prompt* entry;

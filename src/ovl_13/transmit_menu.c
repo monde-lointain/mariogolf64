@@ -3067,7 +3067,9 @@ void SetNoticeState(s32 state, s32 message) {
   }
 }
 
-s32 GetNoticeState(void) { return f_NoticeState; }
+s32 GetNoticeState(void) {
+  return f_NoticeState;
+}
 
 /*
  * Steps the notice cloud's size and draws it from its centre, with its message

@@ -436,7 +436,9 @@ s16 func_80220DF8_ovl_01(void) {
   return D_8023B684_ovl_01[func_8005AF74()->ringShotReplaySlot];
 }
 
-s32 func_80220E28_ovl_01(Unk68* record) { return (u8)record->unk36 >> 7; }
+s32 func_80220E28_ovl_01(Unk68* record) {
+  return (u8)record->unk36 >> 7;
+}
 
 void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
                           s32 top, u8 showsCourseWord) {

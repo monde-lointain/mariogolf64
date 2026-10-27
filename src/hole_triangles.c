@@ -86,7 +86,9 @@ static void AddTestRing(void);
 static s32 BuildRingMatrices(void);
 
 /* Makes the shaded triangles more see-through for the next frame */
-void DimNextTranslucentTriangles(void) { f_DimsTranslucentTriangles = TRUE; }
+void DimNextTranslucentTriangles(void) {
+  f_DimsTranslucentTriangles = TRUE;
+}
 
 /* Draws the hole's triangles other than the rings */
 #ifdef NON_MATCHING

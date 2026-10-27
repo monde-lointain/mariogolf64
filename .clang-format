@@ -15,3 +15,10 @@ IncludeCategories:
 # splat reads the function or symbol name from each INCLUDE_ASM and
 # INCLUDE_RODATA call, and doesn't expect it on a line of its own
 WhitespaceSensitiveMacros: [INCLUDE_ASM, INCLUDE_RODATA]
+# Code Complete's style 2: every if and loop body is a braced block on lines
+# of its own, so a statement added to it can't fall outside the block
+InsertBraces: true
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortEnumsOnASingleLine: false

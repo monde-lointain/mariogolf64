@@ -265,7 +265,9 @@ void ShowMenuWindow(void) {
   g_MenuWindowScaleY = 1.0f;
 }
 
-void CloseMenuWindow(void) { g_MenuWindowState = MENU_WINDOW_CLOSING; }
+void CloseMenuWindow(void) {
+  g_MenuWindowState = MENU_WINDOW_CLOSING;
+}
 
 s32 IsMenuWindowOpen(void) {
   s32 isOpen;
@@ -1547,9 +1549,13 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B7E0_ovl_01);
 #endif
 
-s32 func_8022BDB0_ovl_01(void) { return D_80105DBC[4] == -1; }
+s32 func_8022BDB0_ovl_01(void) {
+  return D_80105DBC[4] == -1;
+}
 
-s32 func_8022BDC4_ovl_01(void) { return D_80105DBC[4]; }
+s32 func_8022BDC4_ovl_01(void) {
+  return D_80105DBC[4];
+}
 
 s32 func_8022BDD0_ovl_01(void) {
   if (D_80230F40_ovl_01) {

@@ -98,7 +98,9 @@ s32 PlanCupDistance(s32 arg0);
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
 s32 ChooseClubForDistance(s32 distance);
 
-void RestartShotPlan(void) { f_PlanStage = PLAN_STAGE_UNSTARTED; }
+void RestartShotPlan(void) {
+  f_PlanStage = PLAN_STAGE_UNSTARTED;
+}
 
 /* Starts planning the shot that sets g_CurrentShot up, on its own thread */
 void StartShotPlan(void) {

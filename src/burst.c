@@ -72,7 +72,9 @@ void StartBursts(void) {
   f_Bursts[0].isActive = TRUE;
 }
 
-void StopBursts(void) { f_Bursts[0].isActive = FALSE; }
+void StopBursts(void) {
+  f_Bursts[0].isActive = FALSE;
+}
 
 /* Loads the shape for the course record and allocates the bursts' particles */
 #ifdef NON_MATCHING

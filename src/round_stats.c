@@ -166,9 +166,13 @@ void ResumeBets(void) {
   g_HolePot = g_GameState.carriedPots[CARRIED_POT_HOLE];
 }
 
-s32 GetContestWinner(void) { return f_ContestWinner; }
+s32 GetContestWinner(void) {
+  return f_ContestWinner;
+}
 
-void SetContestWinner(s32 playerIndex) { f_ContestWinner = playerIndex; }
+void SetContestWinner(s32 playerIndex) {
+  f_ContestWinner = playerIndex;
+}
 
 /* The longest drive wins the pot from each other player */
 void SettleLongestDrive(void) {
@@ -240,7 +244,9 @@ void SettleNearestPin(void) {
   }
 }
 
-void ClearContestWinner(void) { f_ContestWinner = NO_CONTEST_WINNER; }
+void ClearContestWinner(void) {
+  f_ContestWinner = NO_CONTEST_WINNER;
+}
 
 /*
  * Settles the hole's contest once every player's distance is measured.

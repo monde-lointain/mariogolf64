@@ -1417,10 +1417,14 @@ void UpdateShotFlags(void) {
   }
 }
 
-void StartTurnTimer(void) { f_TurnTimerStart = osGetCount(); }
+void StartTurnTimer(void) {
+  f_TurnTimerStart = osGetCount();
+}
 
 /* Always FALSE; maybe once a debug check */
-s32 func_8020561C_ovl_00(s32 arg0) { return FALSE; }
+s32 func_8020561C_ovl_00(s32 arg0) {
+  return FALSE;
+}
 
 s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 

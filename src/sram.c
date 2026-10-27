@@ -4,4 +4,6 @@
 
 #include <lib/libnusys/nusys.h>
 
-void InitSram(void) { nuPiInitSram(); }
+void InitSram(void) {
+  nuPiInitSram();
+}

@@ -175,9 +175,13 @@ void RunAudioTask(musTask* task) {
   }
 }
 
-void AllocSongBuffer(s32 size) { f_SongBuffer = __MusIntMemMalloc(size); }
+void AllocSongBuffer(s32 size) {
+  f_SongBuffer = __MusIntMemMalloc(size);
+}
 
-musHandle StartLoadedSong(void) { return MusStartSong(f_SongBuffer); }
+musHandle StartLoadedSong(void) {
+  return MusStartSong(f_SongBuffer);
+}
 
 /* Reads a song into the song buffer; the PI reads even sizes */
 void LoadSong(u32 romAddress, u32 size) {
@@ -188,7 +192,9 @@ void AllocSoundEffectBuffer(s32 size) {
   f_SoundEffectBuffer = __MusIntMemMalloc(size);
 }
 
-musHandle StartSoundEffect(s32 soundId) { return MusStartEffect(soundId); }
+musHandle StartSoundEffect(s32 soundId) {
+  return MusStartEffect(soundId);
+}
 
 musHandle StartSoundEffectWith(s32 soundId, s32 volume, s32 pan,
                                s32 restartFlag, s32 priority) {

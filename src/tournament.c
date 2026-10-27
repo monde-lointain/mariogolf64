@@ -31,7 +31,9 @@ void SortIndicesDescending(s32* values, s32* order, s32 count);
 double sin(double angle);
 void NameContestants(void);
 
-void SeedTournamentRandom(s32 seed) { f_TournamentSeed = seed; }
+void SeedTournamentRandom(s32 seed) {
+  f_TournamentSeed = seed;
+}
 
 u32 NextTournamentRandom(void) {
   return f_TournamentSeed = f_TournamentSeed * RANDOM_MULTIPLIER + 1;

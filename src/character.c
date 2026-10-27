@@ -1548,7 +1548,9 @@ void AnimateAllCharacters(void) {
   }
 }
 
-s32 GetCharacterBufferSize(void) { return CHARACTER_BUFFER_SIZE; }
+s32 GetCharacterBufferSize(void) {
+  return CHARACTER_BUFFER_SIZE;
+}
 
 void SetCharacterBuffer(s32 slotIndex, u8* buffer) {
   /* Aligned for SetMultiTlb */

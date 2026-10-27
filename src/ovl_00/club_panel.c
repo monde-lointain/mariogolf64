@@ -251,7 +251,9 @@ void UpdateClubPanelImages(void) {
   }
 }
 
-s32 IsShotModeChangeDone(void) { return f_ShotModeChangeFrame == 0; }
+s32 IsShotModeChangeDone(void) {
+  return f_ShotModeChangeFrame == 0;
+}
 
 #ifdef NON_MATCHING
 /*

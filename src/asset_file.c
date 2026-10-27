@@ -81,7 +81,9 @@ void CloseAssetFile(AssetFile* file) {
   file->cursor = 0;
 }
 
-s32 GetAssetFileSize(AssetFile* file) { return file->size; }
+s32 GetAssetFileSize(AssetFile* file) {
+  return file->size;
+}
 
 /* Reads the next size bytes of the file, or what remains of it if fewer */
 void ReadAssetFile(void* buffer, u32 size, AssetFile* file) {

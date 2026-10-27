@@ -263,10 +263,14 @@ void SetPinMatrix(s32 cameraIndex) {
 }
 
 /* Takes the pin out of the cup until it is next drawn */
-void TakePinOut(void) { f_IsPinOut = TRUE; }
+void TakePinOut(void) {
+  f_IsPinOut = TRUE;
+}
 
 /* Makes the next DrawPin draw nothing */
-void SkipNextPinDraw(void) { f_SkipsNextPinDraw = TRUE; }
+void SkipNextPinDraw(void) {
+  f_SkipsNextPinDraw = TRUE;
+}
 
 /*
  * Returns whether the pin stands in the cup. During GameState.unk0 6 and 7 it

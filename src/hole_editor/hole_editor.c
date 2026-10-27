@@ -442,7 +442,9 @@ extern u8 f_MapCaptureHeader[CAPTURE_HEADER_SIZE];
 extern u8 f_ScreenCaptureHeader[CAPTURE_HEADER_SIZE];
 extern u8 f_CornerCaptureHeader[CAPTURE_HEADER_SIZE];
 
-void* func_80400000_hole_editor(void) { return D_80451A60; }
+void* func_80400000_hole_editor(void) {
+  return D_80451A60;
+}
 
 /*
  * Runs scene 9's cell cursor: the D-pad moves it over the ground cells,

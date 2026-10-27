@@ -570,7 +570,9 @@ s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size) {
 
 /* A pseudo-random number that is the same each time for a seed and a hole */
 s32 GetHoleRandom(s32 seed, s32 holeIndex) {
-  void SetHoleSeed(s32 value) { f_HoleSeed = value; }
+  void SetHoleSeed(s32 value) {
+    f_HoleSeed = value;
+  }
   s32 NextHoleRandom(void) {
     return f_HoleSeed =
                f_HoleSeed * HOLE_RANDOM_MULTIPLIER + HOLE_RANDOM_INCREMENT;
@@ -951,7 +953,9 @@ void RunLoaderThread(void) {
   }
 }
 
-void ResetLoaderThread(void) { g_HasLoaderFinished = TRUE; }
+void ResetLoaderThread(void) {
+  g_HasLoaderFinished = TRUE;
+}
 
 void StartLoaderThread(void) {
   UnloadOverlay(GetOverlayOfModule(LOADER_REPLACED_MODULE_ID));

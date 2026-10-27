@@ -229,7 +229,9 @@ void StartReaction(u32 slotIndex, s32 character, s32 animation) {
   f_ReactionFrameCount = GetAnimationFrameCount(slotIndex, animation);
 }
 
-void TurnOffReactionLight(void) { f_HasReactionLight = FALSE; }
+void TurnOffReactionLight(void) {
+  f_HasReactionLight = FALSE;
+}
 
 /* Plays the sound if this is the frame after the given one */
 void CueReactionSound(s32 frame, s32 soundId) {
@@ -1198,7 +1200,9 @@ s32 UpdateReaction(u32 slotIndex) {
 }
 
 /* Forgets the reaction spot, so that the next spot considered is taken */
-void ClearReactionSpot(void) { f_HasReactionSpot = FALSE; }
+void ClearReactionSpot(void) {
+  f_HasReactionSpot = FALSE;
+}
 
 /*
  * Takes the point as the reaction spot if there is none, or if the ground

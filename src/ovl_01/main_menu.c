@@ -247,7 +247,9 @@ void func_802230C0_ovl_01(Gfx** displayListHead);
 void func_80229CB0_ovl_01(Gfx** displayListHead);
 void DrawHelpBoard(Gfx** displayListHead);
 
-void* GetMenuImageBuffer(void) { return g_MenuImageBuffer; }
+void* GetMenuImageBuffer(void) {
+  return g_MenuImageBuffer;
+}
 
 void StartLoadingChosenHole(void) {
   u32 slotIndex;

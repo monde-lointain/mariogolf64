@@ -915,7 +915,9 @@ void DrawFlipMessage(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-s32 IsMovieFinished(void) { return f_CurrentMovie == MOVIE_NONE; }
+s32 IsMovieFinished(void) {
+  return f_CurrentMovie == MOVIE_NONE;
+}
 
 void StartMovie(s32 movie) {
   EncodedAsset asset;
@@ -1019,7 +1021,9 @@ void StartMovie(s32 movie) {
   }
 }
 
-s32 IsMoviePastCue(void) { return f_MovieFrame >= MOVIE_CUE_FRAME; }
+s32 IsMoviePastCue(void) {
+  return f_MovieFrame >= MOVIE_CUE_FRAME;
+}
 
 void DrawMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

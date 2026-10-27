@@ -74,7 +74,9 @@ void ResetHeap(s32 heapIndex) {
   f_Heaps[heapIndex].largestFreeSize = UNMEASURED_SIZE;
 }
 
-s32 GetHeapFreeSize(s32 heapIndex) { return f_Heaps[heapIndex].freeSize; }
+s32 GetHeapFreeSize(s32 heapIndex) {
+  return f_Heaps[heapIndex].freeSize;
+}
 
 s32 GetHeapLargestFreeSize(s32 heapIndex) {
   return f_Heaps[heapIndex].largestFreeSize;
@@ -215,7 +217,9 @@ INCLUDE_ASM("asm/nonmatchings/heap", AddMemoryRegion);
 INCLUDE_ASM("asm/nonmatchings/heap", InitHeapRegions);
 #endif
 
-u32 GetFreeMemorySize(void) { return f_Memory.freeSize; }
+u32 GetFreeMemorySize(void) {
+  return f_Memory.freeSize;
+}
 
 u32 FindLargestFreeMemorySize(void) {
   MemoryBlock* block = f_Memory.sentinel.next;

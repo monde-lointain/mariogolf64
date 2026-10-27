@@ -118,7 +118,9 @@ void AddGameBoyExperience(s32 characterIndex, s32 experience) {
   }
 }
 
-s32 HasGameBoyPak(void) { return g_GameBoyTransfer.hasGameBoyPak; }
+s32 HasGameBoyPak(void) {
+  return g_GameBoyTransfer.hasGameBoyPak;
+}
 
 s32 IsGameBoyCharacterPresent(s32 characterIndex) {
   return g_GameBoyCharacters[characterIndex].status ==
@@ -157,9 +159,13 @@ void ResetGameBoyTransfer(s32 transferMode) {
 INCLUDE_ASM("asm/nonmatchings/rumble", ResetGameBoyTransfer);
 #endif
 
-void ClearBootTransmitPending(void) { f_IsBootTransmitPending = FALSE; }
+void ClearBootTransmitPending(void) {
+  f_IsBootTransmitPending = FALSE;
+}
 
-s32 IsBootTransmitPending(void) { return f_IsBootTransmitPending; }
+s32 IsBootTransmitPending(void) {
+  return f_IsBootTransmitPending;
+}
 
 /* Sets hasGameBoyPak if any controller holds a Transfer Pak with a Game Boy
  * cartridge in it */
@@ -212,7 +218,9 @@ void InitRumblePaks(void) {
   DetectGameBoyPaks();
 }
 
-void StopAllRumble(void) { nuContRmbForceStop(); }
+void StopAllRumble(void) {
+  nuContRmbForceStop();
+}
 
 /* StopAllRumble, logged */
 void ForceStopRumble(void) {

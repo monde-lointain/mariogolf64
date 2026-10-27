@@ -123,9 +123,13 @@ s32 g_TitleUnusedWord = 0;
 /* "PRESS START" turns from red to green and back as this goes round */
 static f32 f_PressStartPhase = 0.0f;
 
-void OnUnlockCodeEntered(void) { UnlockEverything(); }
+void OnUnlockCodeEntered(void) {
+  UnlockEverything();
+}
 
-void EnableDebug(void) { g_IsDebugEnabled = TRUE; }
+void EnableDebug(void) {
+  g_IsDebugEnabled = TRUE;
+}
 
 /* No code calls this */
 void SetUnknownGameFlags(void) {

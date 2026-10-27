@@ -410,7 +410,9 @@ void DrawTextSlots(Gfx** displayListHead) {
 }
 
 /* Shows the whole of a slot's message at once */
-void RevealTextSlot(s32 slot) { g_TextSlots[slot].shownCount = 0xFF; }
+void RevealTextSlot(s32 slot) {
+  g_TextSlots[slot].shownCount = 0xFF;
+}
 
 s32 IsTextSlotRevealed(s32 slot) {
   TextSlot* textSlot = &g_TextSlots[slot];

@@ -36,4 +36,6 @@ void* memset(void* dst, int value, size_t length) {
 }
 
 /* memset with the older argument order */
-void setmem(void* dst, size_t length, int value) { memset(dst, value, length); }
+void setmem(void* dst, size_t length, int value) {
+  memset(dst, value, length);
+}

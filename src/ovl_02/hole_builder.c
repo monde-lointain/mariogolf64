@@ -224,7 +224,9 @@ static inline void ReadFileBytes(void* destination, s32 size) {
 }
 
 /* Seeds the random numbers that paint logic draws */
-void SetPaintSeed(u32 seed) { f_PaintSeed = seed; }
+void SetPaintSeed(u32 seed) {
+  f_PaintSeed = seed;
+}
 
 /*
  * Fills offsets with up to maxCount column and row offsets less than span
@@ -1485,7 +1487,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", LoadCodeMap);
 #endif
 
 /* Repaints the ground tiles from the code map saved before the last clean-up */
-void LoadBackupCodeMap(void) { LoadCodeMap("c:/golf64/attr.tmp"); }
+void LoadBackupCodeMap(void) {
+  LoadCodeMap("c:/golf64/attr.tmp");
+}
 
 /* Repaints the ground tiles from the tool's code map */
 void LoadToolCodeMap(void) {

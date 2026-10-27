@@ -2349,7 +2349,9 @@ void UpdateOverlays(void) {
   }
 }
 
-s32 IsSubModuleLoaded(void) { return g_SubModuleState == SUB_MODULE_LOADED; }
+s32 IsSubModuleLoaded(void) {
+  return g_SubModuleState == SUB_MODULE_LOADED;
+}
 
 /* The game modes are still known only by number */
 void RequestSubModule(void) {

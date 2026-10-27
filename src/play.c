@@ -84,7 +84,9 @@ void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
 void LoadSuperShotReplay(PlayRecord* record);
 
-s32 func_8005F180(void) { return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B); }
+s32 func_8005F180(void) {
+  return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B);
+}
 
 void func_8005F1C8(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
@@ -560,7 +562,9 @@ void LoadRingShotRecord(RingShotRecord* record) {
   SetUpPlayers();
 }
 
-void func_8006034C(s8 value) { D_800C30A4 = value; }
+void func_8006034C(s8 value) {
+  D_800C30A4 = value;
+}
 
 void func_80060358(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;

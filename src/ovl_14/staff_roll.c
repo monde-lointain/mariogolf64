@@ -381,7 +381,9 @@ void StartFadeIn(s32 frameCount) {
   f_FadeFramesLeft = frameCount;
 }
 
-void StopFade(void) { f_FadeLength = 0; }
+void StopFade(void) {
+  f_FadeLength = 0;
+}
 
 /*
  * Module 0x1F's onLoad. It reads the painting, the font and the staff

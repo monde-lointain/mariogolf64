@@ -359,7 +359,9 @@ SaveData* GetSaveData(void) {
   return &g_SaveData;
 }
 
-void* func_8005AF74(void) { return D_801323A0; }
+void* func_8005AF74(void) {
+  return D_801323A0;
+}
 
 void ResetSaveData(void) {
   SaveData* save;
@@ -1267,9 +1269,13 @@ s32 GetClubTournamentGameMode(void) {
   return value;
 }
 
-s32 GetClubTournamentCourse(void) { return D_80105DC2; }
+s32 GetClubTournamentCourse(void) {
+  return D_80105DC2;
+}
 
-s32 IsNintendoClubTournament(void) { return D_80105DC4 != 0; }
+s32 IsNintendoClubTournament(void) {
+  return D_80105DC4 != 0;
+}
 
 s32 GetClubTournamentNameMessage(void) {
   s32 value;
@@ -1656,13 +1662,21 @@ void func_8005DDAC(void) {
   g_MenuScreen = 0xC;
 }
 
-s8 func_8005DE00(void) { return GetSaveData()->options[SAVE_OPTION_UNK0]; }
+s8 func_8005DE00(void) {
+  return GetSaveData()->options[SAVE_OPTION_UNK0];
+}
 
-s8 func_8005DE20(void) { return GetSaveData()->options[SAVE_OPTION_MONO]; }
+s8 func_8005DE20(void) {
+  return GetSaveData()->options[SAVE_OPTION_MONO];
+}
 
-s8 func_8005DE40(void) { return GetSaveData()->options[SAVE_OPTION_UNK3]; }
+s8 func_8005DE40(void) {
+  return GetSaveData()->options[SAVE_OPTION_UNK3];
+}
 
-void WriteSaveData(void) { TransferSaveData(GetSaveData(), TRUE); }
+void WriteSaveData(void) {
+  TransferSaveData(GetSaveData(), TRUE);
+}
 
 /* Copies the options between the save data and g_OptionBits, in the direction
  * of the transfer */

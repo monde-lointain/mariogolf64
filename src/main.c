@@ -119,7 +119,9 @@ void guNormalize(f32* x, f32* y, f32* z) {
   }
 }
 
-void InitFramebuffers(void) { nuGfxSetCfb(f_Framebuffers, FRAMEBUFFER_COUNT); }
+void InitFramebuffers(void) {
+  nuGfxSetCfb(f_Framebuffers, FRAMEBUFFER_COUNT);
+}
 
 s32 IsGameFlagSet(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {

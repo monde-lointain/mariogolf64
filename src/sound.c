@@ -494,7 +494,9 @@ void SetSongFrequencyOffset(f32 offset) {
   }
 }
 
-s32 GetSongId(void) { return f_SongId; }
+s32 GetSongId(void) {
+  return f_SongId;
+}
 
 /*
  * Starts a song. While another song plays, or this one with
@@ -561,7 +563,9 @@ void alSynNew(ALSynth* synth, ALSynConfig* config) {
   osSyncPrintf("alSynNew\n");
 }
 
-void alSynDelete(ALSynth* synth) { osSyncPrintf("alSynDelete\n"); }
+void alSynDelete(ALSynth* synth) {
+  osSyncPrintf("alSynDelete\n");
+}
 
 void __freeParam(struct ALParam_s* param) {}
 

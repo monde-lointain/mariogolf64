@@ -137,7 +137,9 @@ void RollGolfBall(GolfBall* ball, BallSimulation* simulation) {
   s32 movement[3];
   f32 distance;
 
-  f32 GetLength(f32 x, f32 y, f32 z) { return sqrtf(x * x + y * y + z * z); }
+  f32 GetLength(f32 x, f32 y, f32 z) {
+    return sqrtf(x * x + y * y + z * z);
+  }
 
   if (simulation->isRunning == BALL_STATE_FLYING ||
       simulation->isRunning == BALL_STATE_ROLLING) {
@@ -187,7 +189,9 @@ void StartFastBallAfterimage(void) {
   f_BallAfterimageLength = AFTERIMAGE_FAST_LENGTH;
 }
 
-void ResetBallRotation(void) { guMtxIdentF(f_BallRotation); }
+void ResetBallRotation(void) {
+  guMtxIdentF(f_BallRotation);
+}
 
 void ResetGolfBalls(void) {
   s32 i;

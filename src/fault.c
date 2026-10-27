@@ -171,7 +171,9 @@ RegisterFieldValue f_FloatStatusFields[] = {
 };
 
 /* Prints the fault text to the host */
-void PrintFaultText(void) { osSyncPrintf(f_FaultText); }
+void PrintFaultText(void) {
+  osSyncPrintf(f_FaultText);
+}
 
 /*
  * Prints the faulted thread's registers to the host, and all but the

@@ -964,7 +964,9 @@ void LoadRoundHud(void) {
 }
 
 /* Frees what the round HUD loaded for the round */
-void FreeRoundHudTextures(void) { FreePinTextures(); }
+void FreeRoundHudTextures(void) {
+  FreePinTextures();
+}
 
 /* The inset view's frame is a 16x3 I4 texture, wrapped along its lines */
 #define INSET_FRAME_TEXTURE_WIDTH 16
@@ -4083,4 +4085,6 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleIntroText);
 #endif
 
 /* Switches to the other matrix buffer, which the RSP is not reading */
-void SwapMatrixBuffers(void) { g_MatrixBufferIndex ^= 1; }
+void SwapMatrixBuffers(void) {
+  g_MatrixBufferIndex ^= 1;
+}
