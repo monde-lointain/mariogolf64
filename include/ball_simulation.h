@@ -62,6 +62,9 @@ typedef struct Unk20 {
 
 #define UNKA8_COUNT 8
 
+/* Added to a putt's y velocity as it launches */
+#define PUTT_VELOCITY_Y_OFFSET 0x106
+
 /* What LaunchBallSimulation is called for */
 #define LAUNCH_PURPOSE_STROKE 0
 #define LAUNCH_PURPOSE_CLUB_TEST 1

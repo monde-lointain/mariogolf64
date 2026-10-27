@@ -1905,9 +1905,6 @@ s32 GetAimSlopeAngle(UnkB8* player, Unk20* shot);
  * Sets the simulation's start, velocity and wind from the shot.
  * Only a stroke spawns debris, starts rumble and prints the launch values.
  */
-/* Added to a putt's y velocity */
-#define PUTT_VELOCITY_Y_OFFSET 0x106
-
 s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   s32 percentRange[2];
   Club* club;
