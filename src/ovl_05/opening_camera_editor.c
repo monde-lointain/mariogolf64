@@ -17,9 +17,14 @@ extern f32 D_8022BEB8_ovl_05;
 extern f32 D_8022BEBC_ovl_05;
 extern f32 D_8022BEC0_ovl_05;
 extern f32 D_8022BEC4_ovl_05;
+/* D_8022BEDC_ovl_05 bits */
+#define EDITOR_FLAG_UNK8 0x8
+#define EDITOR_FLAG_UNK80 0x80
+
 extern s32 D_8022BEDC_ovl_05[2];
 
 void func_80203620_ovl_05(void);
+void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802033B0_ovl_05);
 
@@ -72,7 +77,22 @@ void func_80203620_ovl_05(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_8020370C_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203984_ovl_05);
+/* Sets the flags of entry index and clears them in the other before calling func_8020370C */
+void func_80203984_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
+    if (!(D_8022BEDC_ovl_05[index] & EDITOR_FLAG_UNK80)) {
+        D_8022BEDC_ovl_05[index] ^= EDITOR_FLAG_UNK80;
+    }
+    if (D_8022BEDC_ovl_05[index ^ 1] & EDITOR_FLAG_UNK80) {
+        D_8022BEDC_ovl_05[index ^ 1] ^= EDITOR_FLAG_UNK80;
+    }
+    if (!(D_8022BEDC_ovl_05[index] & EDITOR_FLAG_UNK8)) {
+        D_8022BEDC_ovl_05[index] ^= EDITOR_FLAG_UNK8;
+    }
+    if (D_8022BEDC_ovl_05[index ^ 1] & EDITOR_FLAG_UNK8) {
+        D_8022BEDC_ovl_05[index ^ 1] ^= EDITOR_FLAG_UNK8;
+    }
+    func_8020370C_ovl_05(index, x, y, z, frameCount);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203A30_ovl_05);
 
