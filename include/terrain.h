@@ -116,6 +116,13 @@ extern f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT];
 extern Gfx *g_GroundTileDisplayLists[GROUND_TILE_COUNT];
 extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
 
+/* The plane through a triangle in fixed point, with a normal of length 256 */
+typedef struct IntegerPlane {
+    /* 0x00 */ s32 normal[AXIS_COUNT];
+    /* 0x0C */ s32 distance;
+    /* 0x10 */ s32 unk10; /* Always 256 */
+} IntegerPlane; /* size = 0x14 */
+
 Vtx *GetGroundPoint(u32 column, u32 row);
 Vtx *GetGridVertex(u32 column, u32 row);
 s32 SetGroundPoint(s32 column, s32 row, Vtx_t *point);
@@ -123,6 +130,7 @@ void PrepareHoleTriangles(void);
 s32 IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
 s32 GetTerrainCodeColor(s32 code);
+s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane);
 s32 GetColorTerrainCode(s32 color);
 s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface);
 s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel);

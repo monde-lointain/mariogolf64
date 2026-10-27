@@ -1501,13 +1501,6 @@ s32 AreTrianglesDifferent(PlaneTriangle *first, PlaneTriangle *second) {
     return FALSE;
 }
 
-/* The plane through a triangle in fixed point, with a normal of length 256 */
-typedef struct IntegerPlane {
-    /* 0x00 */ s32 normal[AXIS_COUNT];
-    /* 0x0C */ s32 distance;
-    /* 0x10 */ s32 unk10; /* Always 256 */
-} IntegerPlane; /* size = 0x14 */
-
 /*
  * Whether any of a normal's parts is longer than an integer plane's
  * normals may be. It is a macro, as an inline function compiles
