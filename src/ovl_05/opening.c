@@ -11,6 +11,7 @@
 #include "hole_display.h"
 #include "libc.h"
 #include "math_util.h"
+#include "screen.h"
 #include "sound.h"
 #include "variables.h"
 
@@ -70,7 +71,8 @@ extern s32 f_CometScreenPoint[2];
 extern u8 f_CometHeadImage[];
 /* A 48x128 I4 image with its header */
 extern u8 f_CometTrailImage[];
-extern Mtx f_CometTrailMatrices[40];
+#define COMET_TRAIL_SEGMENT_COUNT 40
+extern Mtx f_CometTrailMatrices[COMET_TRAIL_SEGMENT_COUNT];
 extern f32 f_CometTrailStartX;
 extern f32 f_CometTrailStartY;
 
@@ -266,41 +268,61 @@ void func_801FE270_ovl_05(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE2A0_ovl_05);
 
+#define ASSET_COMET_HEAD_IMAGE 0x64B
+#define ASSET_COMET_TRAIL_IMAGE 0x6AF
+/* How far in front of the camera the comet's trail is drawn */
+#define COMET_TRAIL_DEPTH 300.0f
+
 /* Loads the comet's images and gathers its trail at the comet */
 void LoadComet(void) {
   EncodedAsset asset;
   s32 pass;
-  s32 i;
+  s32 segmentIndex;
 
-  OpenEncodedAsset(0x64B, &asset);
+  OpenEncodedAsset(ASSET_COMET_HEAD_IMAGE, &asset);
   ReadEncodedAsset(f_CometHeadImage, &asset);
-  OpenEncodedAsset(0x6AF, &asset);
+  OpenEncodedAsset(ASSET_COMET_TRAIL_IMAGE, &asset);
   ReadEncodedAsset(f_CometTrailImage, &asset);
+  /* The game places the trail twice over */
   for (pass = 0; pass < 2; pass++) {
-    for (i = 0; i < 40; i++) {
-      guTranslate(&f_CometTrailMatrices[i], f_CometScreenPoint[0] - 160,
-                  120 - f_CometScreenPoint[1], -300.0f);
+    for (segmentIndex = 0; segmentIndex < COMET_TRAIL_SEGMENT_COUNT;
+         segmentIndex++) {
+      guTranslate(&f_CometTrailMatrices[segmentIndex],
+                  f_CometScreenPoint[0] - SCREEN_WIDTH / 2,
+                  SCREEN_HEIGHT / 2 - f_CometScreenPoint[1],
+                  -COMET_TRAIL_DEPTH);
     }
   }
-  f_CometTrailStartX = f_CometScreenPoint[0] - 320;
-  f_CometTrailStartY = 120 - f_CometScreenPoint[1];
+  f_CometTrailStartX = f_CometScreenPoint[0] - SCREEN_WIDTH;
+  f_CometTrailStartY = SCREEN_HEIGHT / 2 - f_CometScreenPoint[1];
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE8F8_ovl_05);
 
 /* Flies the comet across the screen in loops until it has turned through 540
  * degrees */
+#define COMET_TURN_STEP 12 /* In degrees a frame */
+#define COMET_LAST_ANGLE 540
+/* In pixels a frame, besides the loops */
+#define COMET_DRIFT_X 8
+#define COMET_DRIFT_Y 2
+/* The radii of the comet's loops, in pixels */
+#define COMET_LOOP_RADIUS_X 20.0
+#define COMET_LOOP_RADIUS_Y 16.0
+
 void MoveComet(void) {
   f32 angle;
 
   if (f_IsCometFlying) {
     angle = DEGREES_TO_RADIANS(f_CometAngle);
-    f_CometAngle += 12;
-    if (f_CometAngle >= 541) {
+    f_CometAngle += COMET_TURN_STEP;
+    if (f_CometAngle > COMET_LAST_ANGLE) {
       f_IsCometFlying = FALSE;
     }
-    f_CometScreenPoint[0] += 8 + (s32)(cos(angle) * 20.0);
-    f_CometScreenPoint[1] -= 2 + (s32)(sin(angle) * 16.0);
+    f_CometScreenPoint[0] +=
+        COMET_DRIFT_X + (s32)(cos(angle) * COMET_LOOP_RADIUS_X);
+    f_CometScreenPoint[1] -=
+        COMET_DRIFT_Y + (s32)(sin(angle) * COMET_LOOP_RADIUS_Y);
   }
 }
 
@@ -323,7 +345,8 @@ void func_801FFC10_ovl_05(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FFC40_ovl_05);
 
 /* f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point */
-#define LOOK_AT_EASE_FAST 1 /* To f_LookAtTarget, a tenth of the way a frame \
+#define LOOK_AT_EASE_FAST                                                    \
+  1                         /* To f_LookAtTarget, a tenth of the way a frame \
                              */
 #define LOOK_AT_EASE_SLOW 2 /* To f_LookAtTarget, a hundredth of the way */
 /* Near D_8021706C_ovl_05, at a rate that grows to a tenth */
