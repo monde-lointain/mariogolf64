@@ -161,7 +161,7 @@ void func_801FE8F8_ovl_05(Gfx** displayListHead);
 void DrawOpeningBurst(Gfx** displayListHead);
 void func_801FFC40_ovl_05(Gfx** displayListHead);
 void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1);
-void func_80202D34_ovl_05(Gfx** displayListHead);
+void DrawOpeningSparks(Gfx** displayListHead);
 
 void func_801F4A40_ovl_05(void) {
   D_8020AC4C_ovl_05++;
@@ -508,7 +508,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   func_801FE8F8_ovl_05(&gfx);
   func_801FBB94_ovl_05(&gfx, matrices);
   func_801FFC40_ovl_05(&gfx);
-  func_80202D34_ovl_05(&gfx);
+  DrawOpeningSparks(&gfx);
   func_801FA8D8_ovl_05(&gfx);
   func_80200CBC_ovl_05(&gfx, 0);
   *displayListHead = gfx;
@@ -935,57 +935,87 @@ void LoadOpeningLogo(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80200CBC_ovl_05);
 
-extern s32 D_8020AE38_ovl_05;
-extern Vtx D_8020B4A0_ovl_05[3];
-extern f32 D_8020D850_ovl_05[20][2];
-extern f32 D_8020D8F0_ovl_05[20];
-extern f32 D_8020D940_ovl_05[20][2];
-extern f32 D_8020D9E0_ovl_05;
-extern s32 D_8020D9E4_ovl_05;
-extern Mtx D_8020D9F0_ovl_05[DRAW_BUFFER_COUNT][20];
-extern Vec3 D_802259E0_ovl_05;
+/* The opening's sparks, which fan out from a point and slow down */
+#define SPARK_COUNT 20
+#define SPARK_FRAME_COUNT 10
+/* The spark scale is this divided by the origin's depth */
+#define SPARK_SCALE_DEPTH 48.0f
+/* The sparks are spread evenly around a circle, then jittered */
+#define SPARK_ANGLE_STEP (M_PI * (2.0f / SPARK_COUNT))
+#define SPARK_ANGLE_JITTER_RANGE 20
+/* Before scaling, a spark's speed is this plus a random amount */
+#define SPARK_MIN_SPEED 10.0f
+#define SPARK_SPEED_RANGE 16
+/* How much of its speed a spark keeps each frame */
+#define SPARK_DRAG 0.98
+/* The depth the sparks are drawn at under the screen's projection */
+#define SPARK_DEPTH -100.0f
+
+/* What the sparks are doing */
+typedef enum SparksState {
+  SPARKS_HIDDEN,
+  SPARKS_STARTING, /* Set elsewhere to start the sparks */
+  SPARKS_FLYING
+} SparksState;
+
+extern s32 f_OpeningSparksState;
+extern Vtx f_OpeningSparkVertices[3];
+extern f32 f_OpeningSparkPositions[SPARK_COUNT][2];
+extern f32 f_OpeningSparkAngles[SPARK_COUNT];
+extern f32 f_OpeningSparkVelocities[SPARK_COUNT][2];
+extern f32 f_OpeningSparkScale;
+extern s32 f_OpeningSparkFramesLeft;
+extern Mtx f_OpeningSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
+extern Vec3 f_OpeningSparksOrigin;
 
 #ifdef NON_MATCHING
 /*
- * Draws sparks flying out from a point once D_8020AE38 is set to 1.
+ * Draws sparks flying out from a point once f_OpeningSparksState is set to
+ * SPARKS_STARTING. The point is projected to the screen, and the sparks
+ * are scaled down the further away it is.
  *
  * The only difference from the original is that the display list
  * pointers spilled after the first and second commands swap stack slots.
  */
-void func_80202D34_ovl_05(Gfx** displayListHead) {
+void DrawOpeningSparks(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  ScreenPoint point;
+  ScreenPoint origin;
   Vec3 translation;
   Vec3 rotation;
   Vec3 scale;
   Mat4 matrix;
   s32 depth;
-  s32 i;
+  s32 sparkIndex;
   f32 speed;
 
-  if (D_8020AE38_ovl_05 == 1) {
-    depth = ProjectPoint(D_802259E0_ovl_05[0], D_802259E0_ovl_05[1],
-                         D_802259E0_ovl_05[2], &point);
+  if (f_OpeningSparksState == SPARKS_STARTING) {
+    depth = ProjectPoint(f_OpeningSparksOrigin[0], f_OpeningSparksOrigin[1],
+                         f_OpeningSparksOrigin[2], &origin);
     if (depth < 0) {
-      D_8020D9E0_ovl_05 = 48.0f / (f32)-depth;
-      for (i = 0; i < 20; i++) {
-        D_8020D850_ovl_05[i][0] = point.x - 160;
-        D_8020D850_ovl_05[i][1] = 120 - point.y;
-        D_8020D8F0_ovl_05[i] = (f32)i * (M_PI * 0.1f) +
-                               (f32)DEGREES_TO_RADIANS(guRandom() % 20 - 10);
-        speed = (guRandom() % 16) * D_8020D9E0_ovl_05 + 10.0f;
-        D_8020D940_ovl_05[i][0] =
-            sinf(D_8020D8F0_ovl_05[i]) * speed * D_8020D9E0_ovl_05;
-        D_8020D940_ovl_05[i][1] =
-            -cosf(D_8020D8F0_ovl_05[i]) * speed * D_8020D9E0_ovl_05;
-        D_8020AE38_ovl_05 = 2;
+      f_OpeningSparkScale = SPARK_SCALE_DEPTH / (f32)-depth;
+      for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
+        f_OpeningSparkPositions[sparkIndex][0] = origin.x - SCREEN_WIDTH / 2;
+        f_OpeningSparkPositions[sparkIndex][1] = SCREEN_HEIGHT / 2 - origin.y;
+        f_OpeningSparkAngles[sparkIndex] =
+            (f32)sparkIndex * SPARK_ANGLE_STEP +
+            (f32)DEGREES_TO_RADIANS(guRandom() % SPARK_ANGLE_JITTER_RANGE -
+                                    SPARK_ANGLE_JITTER_RANGE / 2);
+        speed = (guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale +
+                SPARK_MIN_SPEED;
+        f_OpeningSparkVelocities[sparkIndex][0] =
+            sinf(f_OpeningSparkAngles[sparkIndex]) * speed *
+            f_OpeningSparkScale;
+        f_OpeningSparkVelocities[sparkIndex][1] =
+            -cosf(f_OpeningSparkAngles[sparkIndex]) * speed *
+            f_OpeningSparkScale;
+        f_OpeningSparksState = SPARKS_FLYING;
       }
-      D_8020D9E4_ovl_05 = 10;
+      f_OpeningSparkFramesLeft = SPARK_FRAME_COUNT;
     } else {
-      D_8020AE38_ovl_05 = 0;
+      f_OpeningSparksState = SPARKS_HIDDEN;
     }
   }
-  if (D_8020AE38_ovl_05 == 2) {
+  if (f_OpeningSparksState == SPARKS_FLYING) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1008,34 +1038,38 @@ void func_80202D34_ovl_05(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    for (i = 0; i < 20; i++) {
-      D_8020D850_ovl_05[i][0] += D_8020D940_ovl_05[i][0];
-      D_8020D850_ovl_05[i][1] += D_8020D940_ovl_05[i][1];
-      D_8020D940_ovl_05[i][0] *= 0.98;
-      D_8020D940_ovl_05[i][1] *= 0.98;
-      translation[0] = D_8020D850_ovl_05[i][0];
-      translation[1] = D_8020D850_ovl_05[i][1];
-      translation[2] = -100.0f;
+    for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
+      f_OpeningSparkPositions[sparkIndex][0] +=
+          f_OpeningSparkVelocities[sparkIndex][0];
+      f_OpeningSparkPositions[sparkIndex][1] +=
+          f_OpeningSparkVelocities[sparkIndex][1];
+      f_OpeningSparkVelocities[sparkIndex][0] *= SPARK_DRAG;
+      f_OpeningSparkVelocities[sparkIndex][1] *= SPARK_DRAG;
+      translation[0] = f_OpeningSparkPositions[sparkIndex][0];
+      translation[1] = f_OpeningSparkPositions[sparkIndex][1];
+      translation[2] = SPARK_DEPTH;
       rotation[0] = 0.0f;
       rotation[1] = 0.0f;
-      rotation[2] = D_8020D8F0_ovl_05[i];
-      scale[0] = D_8020D9E0_ovl_05;
-      scale[1] = D_8020D9E0_ovl_05;
-      scale[2] = D_8020D9E0_ovl_05;
+      rotation[2] = f_OpeningSparkAngles[sparkIndex];
+      scale[0] = f_OpeningSparkScale;
+      scale[1] = f_OpeningSparkScale;
+      scale[2] = f_OpeningSparkScale;
       BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(matrix, &D_8020D9F0_ovl_05[g_DrawBufferIndex][i]);
+      ConvertMatrixToFixed(
+          matrix, &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]);
       gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(&D_8020D9F0_ovl_05[g_DrawBufferIndex][i]),
+                OS_K0_TO_PHYSICAL(
+                    &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]),
                 G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, D_8020B4A0_ovl_05, 3, 0);
+      gSPVertex(gfx++, f_OpeningSparkVertices, 3, 0);
       gSP1Triangle(gfx++, 0, 1, 2, 0);
     }
-    if (--D_8020D9E4_ovl_05 == 0) {
-      D_8020AE38_ovl_05 = 0;
+    if (--f_OpeningSparkFramesLeft == 0) {
+      f_OpeningSparksState = SPARKS_HIDDEN;
     }
   }
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80202D34_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningSparks);
 #endif
