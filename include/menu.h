@@ -127,6 +127,20 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define FACE_NAME_OFFSET_X 24
 #define FACE_NAME_OFFSET_Y 12
 
+/*
+ * The cursor of the character table and the player stats: a quad whose corners
+ * cycle through the colours, masked by the 48x48 IA4 image of asset 0x6EF
+ */
+#define MENU_CURSOR_SIZE 48
+#define MENU_CURSOR_VERTEX_COUNT 4
+#define MENU_CURSOR_PHASE_STEP (M_PI / 12)
+#define MENU_CURSOR_COLOR_SWING 127.0f
+#define MENU_CURSOR_COLOR_MIDDLE 127
+#define MENU_CURSOR_NEAR 10.0f
+#define MENU_CURSOR_FAR 2000.0f
+#define MENU_CURSOR_Z -100.0f
+#define MENU_CURSOR_SCALE_Y 0.87f
+
 /* The title screen's song */
 #define SONG_TITLE 0x27
 
