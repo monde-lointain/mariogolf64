@@ -163,13 +163,13 @@ void func_8020E0AC_ovl_01(void **buffers, s32 requestedKind) {
             D_8023A81C_ovl_01 = buffers;
             break;
     }
-    if (memory->unk30 != COURSE_COUNT) {
+    if (memory->statsCourse != COURSE_COUNT) {
         for (index = 0; index != COURSE_IMAGE_COPY_COUNT; index++) {
-            OpenEncodedAsset(D_800C21B8[memory->unk30][0], &asset);
+            OpenEncodedAsset(D_800C21B8[memory->statsCourse][0], &asset);
             ReadEncodedAsset(buffers[index], &asset);
         }
         for (index = 0; index != COURSE_FILE_COUNT; index++) {
-            OpenAssetFile(D_800C2278[memory->unk30][index], &file);
+            OpenAssetFile(D_800C2278[memory->statsCourse][index], &file);
             ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
         }
     }
@@ -310,8 +310,8 @@ void func_8020F9B8_ovl_01(Gfx **displayListHead, s16 statIndex, u8 row) {
     GetSaveData();
     memory = func_8005AF74();
     openCourseCount = GetOpenCourseCount();
-    if (memory->unk30 != openCourseCount) {
-        courseIndex = memory->unk30;
+    if (memory->statsCourse != openCourseCount) {
+        courseIndex = memory->statsCourse;
     } else {
         /* The figures for all the courses together */
         courseIndex = COURSE_COUNT;
@@ -417,9 +417,9 @@ void func_8020FEF8_ovl_01(Gfx **displayListHead) {
     s16 index; /* A hole, then a course, then where the count moves to */
     s16 holeIndex;
 
-    if (GetOpenCourseCount() != memory->unk30) {
+    if (GetOpenCourseCount() != memory->statsCourse) {
         for (index = 0; index != COURSE_HOLE_COUNT; index++) {
-            if (save->unk990.birdieBadgeCounts[memory->unk30][index]) {
+            if (save->unk990.birdieBadgeCounts[memory->statsCourse][index]) {
                 badgeCount++;
             }
         }
