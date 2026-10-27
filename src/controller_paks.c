@@ -58,7 +58,7 @@ void ResetGameBoyTransfer(s32 transferMode) {
 }
 
 #else
-INCLUDE_ASM("asm/nonmatchings/rumble", ResetGameBoyTransfer);
+INCLUDE_ASM("asm/nonmatchings/controller_paks", ResetGameBoyTransfer);
 #endif
 
 void ClearBootTransmitPending(void) {
