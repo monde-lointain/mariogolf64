@@ -3,12 +3,12 @@
 #include "hole_display.h"
 
 #include "asset.h"
-#include "burst.h"
 #include "camera.h"
 #include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
 #include "debug_text.h"
+#include "fireworks.h"
 #include "game_flags.h"
 #include "hole_loader.h"
 #include "libc.h"
@@ -1405,7 +1405,7 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_DISABLE);
   if (cameraIndex == 0) {
-    UpdateAndDrawBursts(&gfx);
+    UpdateAndDrawFireworks(&gfx);
   }
   yawOffset =
       g_SkyState.yaws[cameraIndex] * BACKDROP_YAW_TEXELS * (1 / (2 * M_PI));

@@ -1,6 +1,6 @@
 #include "common.h"
 
-#include "burst.h"
+#include "fireworks.h"
 
 #include "asset.h"
 #include "cpu_projection.h"
@@ -11,33 +11,33 @@
 #include "sound.h"
 #include "variables.h"
 
-/* How many bursts f_Bursts has room for */
-#define BURST_CAPACITY 4
+/* How many fireworks f_Fireworks has room for */
+#define FIREWORK_CAPACITY 4
 
-/* How many of them LoadBursts sets up */
-#define BURST_COUNT 1
+/* How many of them LoadFireworks sets up */
+#define FIREWORK_COUNT 1
 
-/* f_BurstState's value while the bursts' memory is allocated */
-#define BURSTS_LOADED 1
+/* f_FireworkState's value while the fireworks' memory is allocated */
+#define FIREWORKS_LOADED 1
 
-/* Frames of a burst's timer at which it plays a sound and launches */
-#define BURST_SOUND_FRAME 160
-#define BURST_LAUNCH_FRAME 220
+/* Frames of a firework's timer at which it plays a sound and launches */
+#define FIREWORK_SOUND_FRAME 160
+#define FIREWORK_LAUNCH_FRAME 220
 
 /* Below this life, a particle's life runs out five times as fast */
 #define PARTICLE_FADE_LIFE 128
 
-/* An image whose zero cells each become a particle of a burst */
-typedef struct BurstShape {
+/* An image whose zero cells each become a particle of a firework */
+typedef struct FireworkShape {
   /* 0x0 */ u8 unk0[3];
   /* 0x3 */ u8 width;
   /* 0x4 */ u8 unk4;
   /* 0x5 */ u8 height;
   /* 0x6 */ u8 unk6[2];
   /* 0x8 */ u8 cells[1]; /* width * height, by rows */
-} BurstShape;
+} FireworkShape;
 
-typedef struct BurstParticle {
+typedef struct FireworkParticle {
   /* 0x00 */ Mtx matrices[2]; /* Indexed by g_MatrixBufferIndex */
   /* 0x80 */ f32 x;
   /* 0x84 */ f32 y;
@@ -45,113 +45,120 @@ typedef struct BurstParticle {
   /* 0x8C */ f32 velocityY;
   /* 0x90 */ u8 unk90[4];
   /* 0x94 */ s16 life; /* Drawn while above 0 */
-} BurstParticle; /* size = 0x98 */
+} FireworkParticle; /* size = 0x98 */
 
-typedef struct Burst {
-  /* 0x00 */ BurstParticle* particles;
+typedef struct Firework {
+  /* 0x00 */ FireworkParticle* particles;
   /* 0x04 */ s32 particleCount;
   /* 0x08 */ s32 timer;
   /* 0x0C */ s32 unkC;
   /* 0x10 */ u8 unk10[0x14];
   /* 0x24 */ u8 unk24;
   /* 0x25 */ u8 isActive;
-  /* 0x28 */ BurstShape* shape;
-} Burst; /* size = 0x2C */
+  /* 0x28 */ FireworkShape* shape;
+} Firework; /* size = 0x2C */
 
-extern s32 f_BurstCount;
-extern s32 f_BurstState;
-extern Vtx f_BurstParticleVertices[3];
-extern u16 f_BurstShapeAssetIds[8];
-extern f32 f_BurstHue;
-extern BurstShape* f_BurstShape;
-extern Burst f_Bursts[BURST_CAPACITY];
+extern s32 f_FireworkCount;
+extern s32 f_FireworkState;
+extern Vtx f_FireworkParticleVertices[3];
+/*
+ * The shapes, by course record index: outlines of Toad, a Koopa Troopa, a Shy
+ * Guy, Yoshi, a Boo, Wario, Mario and Peach
+ */
+extern u16 f_FireworkShapeAssetIds[8];
+extern f32 f_FireworkHue;
+extern FireworkShape* f_FireworkShape;
+extern Firework f_Fireworks[FIREWORK_CAPACITY];
 
-/* Makes the first burst launch in 70 frames */
-void StartBursts(void) {
-  f_Bursts[0].timer = 150;
-  f_Bursts[0].isActive = TRUE;
+/* Makes the first firework launch in 70 frames */
+void StartFireworks(void) {
+  f_Fireworks[0].timer = 150;
+  f_Fireworks[0].isActive = TRUE;
 }
 
-void StopBursts(void) {
-  f_Bursts[0].isActive = FALSE;
+void StopFireworks(void) {
+  f_Fireworks[0].isActive = FALSE;
 }
 
-/* Loads the shape for the course record and allocates the bursts' particles */
+/*
+ * Loads the shape for the course, picked by its record index, and allocates
+ * the fireworks' particles
+ */
 #ifdef NON_MATCHING
-void LoadBursts(s32 courseRecordIndex) {
+void LoadFireworks(s32 courseRecordIndex) {
   EncodedAsset asset;
   s32 index;
-  Burst* burst;
+  Firework* firework;
   s32 width;
   s32 height;
   s32 row;
   s32 column;
 
-  f_BurstShape =
-      AllocMemory(OpenEncodedAsset(f_BurstShapeAssetIds[courseRecordIndex %
-                                       ARRAY_COUNT(f_BurstShapeAssetIds)],
+  f_FireworkShape =
+      AllocMemory(OpenEncodedAsset(f_FireworkShapeAssetIds[courseRecordIndex %
+                                       ARRAY_COUNT(f_FireworkShapeAssetIds)],
           &asset));
-  ReadEncodedAsset(f_BurstShape, &asset);
-  for (index = 0; index != BURST_COUNT; index++) {
-    f_Bursts[index].unk24 = 0;
-    f_Bursts[index].isActive = FALSE;
-    f_Bursts[index].timer = 159 - (index * 50);
-    f_Bursts[index].unkC = 0xFF;
-    f_Bursts[index].particleCount = 0;
-    f_Bursts[index].shape = f_BurstShape;
+  ReadEncodedAsset(f_FireworkShape, &asset);
+  for (index = 0; index != FIREWORK_COUNT; index++) {
+    f_Fireworks[index].unk24 = 0;
+    f_Fireworks[index].isActive = FALSE;
+    f_Fireworks[index].timer = 159 - (index * 50);
+    f_Fireworks[index].unkC = 0xFF;
+    f_Fireworks[index].particleCount = 0;
+    f_Fireworks[index].shape = f_FireworkShape;
   }
-  f_BurstCount = index;
-  for (index = 0; index != f_BurstCount; index++) {
-    burst = &f_Bursts[index];
-    width = burst->shape->width;
-    height = burst->shape->height;
+  f_FireworkCount = index;
+  for (index = 0; index != f_FireworkCount; index++) {
+    firework = &f_Fireworks[index];
+    width = firework->shape->width;
+    height = firework->shape->height;
     for (row = 0; row != height; row++) {
       for (column = 0; column != width; column++) {
-        if (burst->shape->cells[column + (row * width)] == 0) {
-          burst->particleCount++;
+        if (firework->shape->cells[column + (row * width)] == 0) {
+          firework->particleCount++;
         }
       }
     }
-    burst->particles =
-        AllocMemory(burst->particleCount * sizeof(BurstParticle));
-    for (row = 0; row != burst->particleCount; row++) {
-      burst->particles[row].life = 0;
+    firework->particles =
+        AllocMemory(firework->particleCount * sizeof(FireworkParticle));
+    for (row = 0; row != firework->particleCount; row++) {
+      firework->particles[row].life = 0;
     }
   }
-  f_BurstState = BURSTS_LOADED;
+  f_FireworkState = FIREWORKS_LOADED;
 }
 
 #else
-INCLUDE_ASM("asm/nonmatchings/burst", LoadBursts);
+INCLUDE_ASM("asm/nonmatchings/fireworks", LoadFireworks);
 #endif
 
-void FreeBursts(void) {
+void FreeFireworks(void) {
   s32 index;
 
-  if (f_BurstState == BURSTS_LOADED) {
-    FreeMemory(&f_BurstShape);
-    for (index = 0; index != f_BurstCount; index++) {
-      FreeMemory(&f_Bursts[index].particles);
+  if (f_FireworkState == FIREWORKS_LOADED) {
+    FreeMemory(&f_FireworkShape);
+    for (index = 0; index != f_FireworkCount; index++) {
+      FreeMemory(&f_Fireworks[index].particles);
     }
   }
-  f_BurstState = 0;
+  f_FireworkState = 0;
 }
 
 /*
- * Unless the bursts are loaded, counts a call and returns TRUE from the
- * third call after FreeBursts on. Nothing calls it.
+ * Unless the fireworks are loaded, counts a call and returns TRUE from the
+ * third call after FreeFireworks on. Nothing calls it.
  */
-s32 HaveBurstsStayedFreed(void) {
-  if (f_BurstState > 0) {
+s32 HaveFireworksStayedFreed(void) {
+  if (f_FireworkState > 0) {
     return FALSE;
   }
-  f_BurstState--;
-  return f_BurstState < -2;
+  f_FireworkState--;
+  return f_FireworkState < -2;
 }
 
-/* Sends every particle of the burst out from one random point */
+/* Sends every particle of the firework out from one random point */
 #ifdef NON_MATCHING
-void LaunchBurst(Burst* burst, s32 burstIndex) {
+void LaunchFirework(Firework* firework, s32 fireworkIndex) {
   s32 particleIndex;
   f32 originX;
   s32 random;
@@ -165,23 +172,23 @@ void LaunchBurst(Burst* burst, s32 burstIndex) {
   particleIndex = 0;
   originX = guRandom() % 32;
   random = guRandom() % 4;
-  width = burst->shape->width;
-  height = burst->shape->height;
-  burst->unkC = 0xFF;
+  width = firework->shape->width;
+  height = firework->shape->height;
+  firework->unkC = 0xFF;
   originY = random + 64.0f;
   halfWidth = width / 2;
   for (row = 0; row != height; row++) {
     for (column = 0; column != width; column++) {
-      if (burst->shape->cells[column + (row * width)] == 0) {
-        burst->particles[particleIndex].x = originX;
-        burst->particles[particleIndex].y = originY;
-        burst->particles[particleIndex].velocityX =
+      if (firework->shape->cells[column + (row * width)] == 0) {
+        firework->particles[particleIndex].x = originX;
+        firework->particles[particleIndex].y = originY;
+        firework->particles[particleIndex].velocityX =
             ((column - halfWidth) * 0.1f) +
             (((guRandom() % 64) - 32) * 0.0005f);
-        burst->particles[particleIndex].velocityY =
+        firework->particles[particleIndex].velocityY =
             ((s32)((height / 2) - row) * 0.1f) - 0.5 +
             (((guRandom() % 64) - 32) * 0.0005f);
-        burst->particles[particleIndex].life = (guRandom() % 128) + 192;
+        firework->particles[particleIndex].life = (guRandom() % 128) + 192;
         particleIndex++;
       }
     }
@@ -189,21 +196,21 @@ void LaunchBurst(Burst* burst, s32 burstIndex) {
 }
 
 #else
-INCLUDE_ASM("asm/nonmatchings/burst", LaunchBurst);
+INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
 #endif
 
-/* Moves the active bursts' particles and draws each as a triangle along its
+/* Moves the active fireworks' particles and draws each as a triangle along its
  * path */
 #ifdef NON_MATCHING
-void UpdateAndDrawBursts(Gfx** displayListHead) {
+void UpdateAndDrawFireworks(Gfx** displayListHead) {
   Gfx* gfx;
   s32 unused[12]; /* The original frame has room for this */
   Mat4 transform;
   s32 unusedAfter[6]; /* The original frame has room for this too */
-  s32 burstIndex;
+  s32 fireworkIndex;
   s32 index;
   s32 particleIndex;
-  BurstParticle* particle;
+  FireworkParticle* particle;
   f32 speed;
   f32 directionX;
   f32 directionY;
@@ -216,18 +223,18 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
   s32 alpha;
 
   gfx = *displayListHead;
-  if (f_BurstState <= 0) {
+  if (f_FireworkState <= 0) {
     return;
   }
-  for (burstIndex = 0; burstIndex != f_BurstCount; burstIndex++) {
-    if (f_Bursts[burstIndex].isActive == TRUE) {
-      timer = f_Bursts[burstIndex].timer + 1;
-      f_Bursts[burstIndex].timer = timer;
-      if (timer == BURST_SOUND_FRAME) {
+  for (fireworkIndex = 0; fireworkIndex != f_FireworkCount; fireworkIndex++) {
+    if (f_Fireworks[fireworkIndex].isActive == TRUE) {
+      timer = f_Fireworks[fireworkIndex].timer + 1;
+      f_Fireworks[fireworkIndex].timer = timer;
+      if (timer == FIREWORK_SOUND_FRAME) {
         PlaySound(0x31, 8, 0x7F);
-      } else if (timer == BURST_LAUNCH_FRAME) {
-        f_Bursts[burstIndex].timer = 0;
-        LaunchBurst(&f_Bursts[burstIndex], burstIndex);
+      } else if (timer == FIREWORK_LAUNCH_FRAME) {
+        f_Fireworks[fireworkIndex].timer = 0;
+        LaunchFirework(&f_Fireworks[fireworkIndex], fireworkIndex);
         PlaySound(0x32, 8, 0x7F);
       }
     }
@@ -241,11 +248,11 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
   transform[2][3] = 0.0f;
   transform[2][2] = 0.1f;
   transform[3][3] = 1.0f;
-  for (index = 0; index != f_BurstCount; index++) {
-    if (f_Bursts[index].isActive == TRUE) {
-      for (particleIndex = 0; particleIndex != f_Bursts[index].particleCount;
+  for (index = 0; index != f_FireworkCount; index++) {
+    if (f_Fireworks[index].isActive == TRUE) {
+      for (particleIndex = 0; particleIndex != f_Fireworks[index].particleCount;
           particleIndex++) {
-        particle = &f_Bursts[index].particles[particleIndex];
+        particle = &f_Fireworks[index].particles[particleIndex];
         if (particle->life > 0) {
           particle->x += particle->velocityX;
           particle->y += particle->velocityY;
@@ -265,7 +272,7 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
             directionY = 0.1f;
             speed = 0.5f;
           }
-          timer = f_Bursts[index].timer;
+          timer = f_Fireworks[index].timer;
           if (timer < 8) {
             length = speed * 0.5f * timer;
           } else if (timer > 64) {
@@ -308,14 +315,14 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  f_BurstHue += DEGREES_TO_RADIANS(3);
-  /* index is f_BurstCount here, so every burst shares one color */
-  red = (s32)(sinf(f_BurstHue + index) * 64.0f) + 127;
-  green = (s32)(sinf(f_BurstHue + 2.0f + index) * 64.0f) + 127;
-  blue = (s32)(sinf(f_BurstHue + 4.0f + index) * 64.0f) + 127;
-  for (index = 0; index != f_BurstCount; index++) {
-    if (f_Bursts[index].isActive == TRUE) {
-      timer = f_Bursts[index].timer;
+  f_FireworkHue += DEGREES_TO_RADIANS(3);
+  /* index is f_FireworkCount here, so every firework shares one color */
+  red = (s32)(sinf(f_FireworkHue + index) * 64.0f) + 127;
+  green = (s32)(sinf(f_FireworkHue + 2.0f + index) * 64.0f) + 127;
+  blue = (s32)(sinf(f_FireworkHue + 4.0f + index) * 64.0f) + 127;
+  for (index = 0; index != f_FireworkCount; index++) {
+    if (f_Fireworks[index].isActive == TRUE) {
+      timer = f_Fireworks[index].timer;
       alpha = 0xFF;
       /* Fades out from frame 40, flickering on odd frames */
       if (timer >= 40) {
@@ -331,16 +338,16 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
         alpha = 0xFF;
       }
       gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
-      for (particleIndex = 0; particleIndex != f_Bursts[index].particleCount;
+      for (particleIndex = 0; particleIndex != f_Fireworks[index].particleCount;
           particleIndex++) {
-        particle = &f_Bursts[index].particles[particleIndex];
+        particle = &f_Fireworks[index].particles[particleIndex];
         if (particle->life > 0) {
           gDPPipeSync(gfx++);
           gSPMatrix(gfx++,
               OS_K0_TO_PHYSICAL(&particle->matrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-          gSPVertex(gfx++, f_BurstParticleVertices,
-              ARRAY_COUNT(f_BurstParticleVertices), 0);
+          gSPVertex(gfx++, f_FireworkParticleVertices,
+              ARRAY_COUNT(f_FireworkParticleVertices), 0);
           gSP1Triangle(gfx++, 0, 1, 2, 0);
         }
       }
@@ -350,5 +357,5 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
 }
 
 #else
-INCLUDE_ASM("asm/nonmatchings/burst", UpdateAndDrawBursts);
+INCLUDE_ASM("asm/nonmatchings/fireworks", UpdateAndDrawFireworks);
 #endif

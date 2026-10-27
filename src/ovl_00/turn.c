@@ -4082,7 +4082,7 @@ void UpdateTurns(void) {
           break;
         }
         if (g_HoleConditions.sceneColorIndex == 0xB) {
-          StartBursts();
+          StartFireworks();
         }
         ClearReactionSpot();
         ConsiderReactionSpot(g_CurrentShot.ballPosition);
@@ -4176,7 +4176,7 @@ void UpdateTurns(void) {
           D_80224000_ovl_00 = 160;
         }
         if (D_80227170_ovl_00[playerIndex] >= D_80224000_ovl_00) {
-          StopBursts();
+          StopFireworks();
           if (g_GameMode == GAME_MODE_TRAINING) {
             nextState = 0xF;
             if (g_CourseIndex == 0xC) {

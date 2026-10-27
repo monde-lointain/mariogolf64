@@ -120,7 +120,7 @@ segments:
       - [0x4C770, c, text]
       - [0x51900, c, framing]
       - [0x526B0, c, curve]
-      - [0x52FF0, c, burst]
+      - [0x52FF0, c, fireworks]
       - [0x53D10, c, effects]
       - [0x5B620, c, round_hud]
       - [0x68500, c, hole_display]

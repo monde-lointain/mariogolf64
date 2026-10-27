@@ -2,10 +2,10 @@
 
 #include "asset.h"
 #include "billboard.h"
-#include "burst.h"
 #include "character_slot.h"
 #include "course.h"
 #include "cpu_projection.h"
+#include "fireworks.h"
 #include "hole_loader.h"
 #include "math_util.h"
 #include "round_hud.h"
@@ -220,7 +220,7 @@ void DrawMatchResult(Gfx** displayListHead) {
     }
     x += MATCH_RESULT_SPACING;
   }
-  UpdateAndDrawBursts(&gfx);
+  UpdateAndDrawFireworks(&gfx);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);

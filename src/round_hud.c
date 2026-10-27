@@ -4,7 +4,6 @@
 
 #include "asset.h"
 #include "billboard.h"
-#include "burst.h"
 #include "camera.h"
 #include "character.h"
 #include "club_panel.h"
@@ -14,6 +13,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
+#include "fireworks.h"
 #include "functions.h"
 #include "game_flags.h"
 #include "golf_balls.h"
@@ -760,7 +760,7 @@ void LoadSceneryImages(void) {
   g_DistanceSignImage =
       AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_SIGN_IMAGE, &asset));
   ReadEncodedAsset(g_DistanceSignImage, &asset);
-  LoadBursts(GetCourseRecordIndex());
+  LoadFireworks(GetCourseRecordIndex());
 }
 
 /* Frees what LoadSceneryImages loaded */
@@ -796,7 +796,7 @@ void FreeSceneryImages(void) {
     FreeMemory(&f_UpLabelImage);
     FreeMemory(&D_800E2178);
     FreeMemory(&g_DistanceSignImage);
-    FreeBursts();
+    FreeFireworks();
   }
 }
 
