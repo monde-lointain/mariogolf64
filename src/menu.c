@@ -115,7 +115,6 @@ extern void *D_801B5CD0[2];
 extern void *D_801052BC[2];
 extern void *D_800FBDFC[2];
 extern void *D_800FF4C4[2];
-extern void *D_800FBE38[3];
 extern void *D_801B93E0[5];
 extern void *D_8010526C[2];
 extern void *D_800FF180[2];
@@ -133,8 +132,6 @@ extern u16 D_800C2028[1];
 extern u16 D_800C2064[7];
 extern s16 D_800C20D4[2];
 extern u16 D_800C20E0[][12];
-extern u16 D_800C21B8[1];
-extern s16 D_800C2278[3];
 extern u16 D_800C28B0[1];
 void SetFramebufferCount(s32 count);
 
@@ -241,14 +238,14 @@ void LoadMenuResources(void) {
         D_801052C4[index] = AllocMemory(size);
         ReadAssetFile(D_801052C4[index], size, &file);
     }
-    OpenEncodedAsset(*D_800C21B8, &asset);
+    OpenEncodedAsset(D_800C21B8[0][0], &asset);
     D_800FBDFC[0] = AllocMemory(0xFA0);
     ReadEncodedAsset(D_800FBDFC[0], &asset);
-    OpenEncodedAsset(*D_800C21B8, &asset);
+    OpenEncodedAsset(D_800C21B8[0][0], &asset);
     D_800FBDFC[1] = AllocMemory(0xFA0);
     ReadEncodedAsset(D_800FBDFC[1], &asset);
     for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
-        OpenEncodedAsset(*D_800C21B8, &asset);
+        OpenEncodedAsset(D_800C21B8[0][0], &asset);
         D_800FF4C4[index] = AllocMemory(0x125C);
         ReadEncodedAsset(D_800FF4C4[index], &asset);
     }
@@ -277,7 +274,7 @@ void LoadMenuResources(void) {
         ReadAssetFile(D_80105B78[index], size, &file);
     }
     for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
-        OpenAssetFile(D_800C2278[index], &file);
+        OpenAssetFile(D_800C2278[0][index], &file);
         size = GetAssetFileSize(&file);
         D_800FBE38[index] = AllocMemory(size);
         ReadAssetFile(D_800FBE38[index], size, &file);

@@ -21,8 +21,6 @@
 
 /* func_8020E0AC reads the chosen course's first image into two buffers, and its three files */
 #define COURSE_IMAGE_COPY_COUNT 2
-#define COURSE_IMAGE_COUNT 16
-#define COURSE_FILE_COUNT 3
 
 /* func_8020F2D0 squeezes the banner's strips under the course menu's title, with the course's name on it */
 #define COURSE_BANNER_TOP 110
@@ -124,9 +122,6 @@ typedef struct TrophyPosition {
 
 extern u16 D_800C2064[];
 extern TrophySize D_800C20E0[COURSE_COUNT];
-extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
-extern s16 D_800C2278[][COURSE_FILE_COUNT];
-extern void *D_800FBE38[COURSE_FILE_COUNT];
 extern s16 D_802300A0_ovl_01;
 extern s16 D_802300A2_ovl_01;
 extern s16 D_802300A4_ovl_01; /* Which of D_8023A814's buffers holds the course image shown */

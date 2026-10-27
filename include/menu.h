@@ -58,6 +58,13 @@ typedef struct MenuChoices {
 } MenuChoices; /* size = 0x18 */
 extern MenuChoices g_MenuChoices;
 
+/* Each course's images for the menus' turning wheel of courses, and the trophy files read with them */
+#define COURSE_IMAGE_COUNT 16
+#define COURSE_FILE_COUNT 3
+extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
+extern s16 D_800C2278[][COURSE_FILE_COUNT];
+extern void *D_800FBE38[COURSE_FILE_COUNT];
+
 /* An image buffer of the menu overlay */
 extern u8 g_MenuImageBuffer[];
 void *GetMenuImageBuffer(void);
