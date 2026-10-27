@@ -142,6 +142,7 @@ extern f32 f_LookAtEaseRate;
 
 /* "MARIO GOLF" */
 #define LOGO_LETTER_COUNT 9
+
 /* The letters of "MARIO GOLF", left to right */
 typedef enum LogoLetterIndex {
   LOGO_LETTER_M,
@@ -154,6 +155,7 @@ typedef enum LogoLetterIndex {
   LOGO_LETTER_L,
   LOGO_LETTER_F
 } LogoLetterIndex;
+
 /* Where a letter starts, off the screen */
 #define LOGO_LETTER_HIDDEN (-1000)
 

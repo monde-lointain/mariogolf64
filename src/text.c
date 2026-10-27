@@ -136,6 +136,7 @@ extern s32 g_MessageCodesStart;
 extern TextSlot g_TextSlots[TEXT_SLOT_COUNT];
 extern u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
 extern char g_TextName[TEXT_NAME_SIZE];
+
 /*
  * A glyph drawn with its own matrix, so text can be moved a glyph at a
  * time. Glyphs are placed in groups.

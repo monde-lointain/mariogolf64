@@ -129,6 +129,7 @@ extern u16 f_MontyMoleMovieFrameAssets[];
 extern u16 f_GoombaMovieFrameAssets[];
 /* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
 extern s32 f_MovieDrawCount;
+
 typedef struct LakituFlight {
   /* 0x0 */ f32 x;
   /* 0x4 */ f32 y;

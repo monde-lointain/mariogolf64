@@ -155,6 +155,7 @@ extern HoleConditions g_HoleConditions;
 /* What UpdateSky works out about the main and inset cameras, for drawing the
  * sky */
 #define SKY_VIEW_COUNT 2
+
 typedef struct SkyState {
   /* 0x00 */ f32 horizonLevels[SKY_VIEW_COUNT];
   /* 0x08 */ f32 screenHeights[SKY_VIEW_COUNT]; /* SCREEN_HEIGHT once UpdateSky
@@ -169,6 +170,7 @@ typedef struct SkyState {
       viewedWindAngles[SKY_VIEW_COUNT]; /* The wind's direction as each camera
                                            sees it, in radians */
 } SkyState; /* size = 0x38 */
+
 extern SkyState g_SkyState;
 
 /* HoleConditions.windDirection's units per radian */

@@ -17,6 +17,7 @@
  */
 typedef union WorkArea {
   u8 bytes[WORK_AREA_SIZE];
+
   struct {
     /* 0x00000 */ GroundTile tiles[GROUND_TILE_COUNT];
     /* 0x50000 */ Vtx gridVertices[GROUND_GRID_VERTEX_SLOT_COUNT];

@@ -34,3 +34,7 @@ AlignTrailingComments:
 AlignEscapedNewlines: DontAlign
 # Chapter 31 also outdents goto labels to the margin, where they stand out
 IndentGotoLabels: NoIndent
+# Exactly one blank line between definitions, which the user asked for
+# in place of chapter 31's two or three
+SeparateDefinitionBlocks: Always
+MaxEmptyLinesToKeep: 1

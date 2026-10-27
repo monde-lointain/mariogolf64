@@ -159,10 +159,12 @@ extern void* D_80105BB0[4];
 extern void* D_8012D468[4];
 
 void func_8005CA48(void);
+
 typedef struct Unk800C29B8 {
   /* 0x0 */ s16 column;
   /* 0x2 */ s16 row;
 } Unk800C29B8; /* size = 0x4 */
+
 extern Unk800C29B8 D_800C29B8[];
 extern s16 D_800C2BB0[15];
 

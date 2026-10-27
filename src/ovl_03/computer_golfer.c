@@ -63,6 +63,7 @@ extern s32 f_HoleStrokeTarget;
 extern s32 D_801B60B4;
 /* Where the planned shot aims */
 extern CoursePoint f_PlanTarget;
+
 /* The route points and the tee, as PlanRoute gathers them */
 typedef struct RouteCoordinates {
   /* 0x00 */ s32 x[ROUTE_POINT_COUNT + 1];

@@ -61,6 +61,7 @@ typedef struct MenuChoices {
   /* 0x16 */ s8 holeIndex;
   /* 0x17 */ s8 courseIndex;
 } MenuChoices; /* size = 0x18 */
+
 extern MenuChoices g_MenuChoices;
 
 /* Each course's images for the menus' turning wheel of courses, and the trophy

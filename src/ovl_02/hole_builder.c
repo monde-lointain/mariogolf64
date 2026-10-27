@@ -2967,18 +2967,22 @@ void ShadeGroundTiles(void) {
   s32 unused[20]; /* Unused; it is there to match */
   GroundLightColor light = {24, 22, 16};
   GroundLightColor shade;
+
   struct {
     u8 red;
     u8 green;
     u8 blue;
   } fadeColor;
+
   u32 slopeLights[LIGHT_SLOPE_COUNT * SLOPE_LIGHT_WORD_COUNT];
+
   struct {
     u16 red;
     u16 green;
     u16 blue;
     u16 alpha;
   } shaded;
+
   s8 isHighGroundFaded;
   s8 isFadeUnlimited;
   s8 isFadeDisabled;
