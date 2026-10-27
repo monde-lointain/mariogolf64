@@ -274,7 +274,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203F70_ovl_0
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80204EA8_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802065FC_ovl_05);
+/* Moves the whole camera by offset */
+void func_802065FC_ovl_05(Vec3 offset) {
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] += offset[0];
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[1];
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] += offset[2];
+    g_CameraEditor.points[EDITOR_POINT_EYE][0] += offset[0];
+    g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[1];
+    g_CameraEditor.points[EDITOR_POINT_EYE][2] += offset[2];
+}
 
 /* Ground kind names in half-width katakana; the data block points at the last four */
 const char D_8020C190_ovl_05[] = "\332\257\304\336";
