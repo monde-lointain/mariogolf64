@@ -283,11 +283,12 @@ s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX
 void MarkBillboardsOnMap(void);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
 extern s32 sScreenCaptureNumber;
-/* The cell that scene 9's cursor is on, and the cell it hands to scene 10 */
+/* The cell that scene 9's cursor is on */
 extern s32 sCellCursorColumn;
 extern s32 sCellCursorRow;
-extern s32 D_8040C5B0_hole_editor;
-extern s32 D_8040C5B4_hole_editor;
+/* The ground point that scene 10's cursor is on, starting at scene 9's cell */
+extern s32 sPointCursorColumn;
+extern s32 sPointCursorRow;
 
 /* func_80402428's state */
 extern f32 sTriangleCameraPitch;   /* In radians */
@@ -424,8 +425,8 @@ void func_8040000C_hole_editor(void) {
         func_80405AF4_hole_editor(sCellCursorColumn, sCellCursorRow);
     }
     if (g_MenuControllerData[0].trigger & Z_TRIG) {
-        D_8040C5B0_hole_editor = sCellCursorColumn;
-        D_8040C5B4_hole_editor = sCellCursorRow;
+        sPointCursorColumn = sCellCursorColumn;
+        sPointCursorRow = sCellCursorRow;
         ClearDebugText();
         g_Scene = SCENE_UNK10;
     }
