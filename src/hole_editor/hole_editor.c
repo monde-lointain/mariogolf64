@@ -73,10 +73,10 @@ s32 GetTerrainCode(s32 column, s32 row);
 void MarkBillboardsOnMap(void);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
 extern s32 sScreenCaptureNumber;
-extern s32 D_8040C6D0_hole_editor;
-extern u8 D_8040C6D4_hole_editor[CAPTURE_HEADER_SIZE];
-extern u8 D_8040C710_hole_editor[CAPTURE_HEADER_SIZE];
-extern u8 D_8040C748_hole_editor[CAPTURE_HEADER_SIZE];
+extern s32 sMapCaptureNumber;
+extern u8 sMapCaptureHeader[CAPTURE_HEADER_SIZE];
+extern u8 sScreenCaptureHeader[CAPTURE_HEADER_SIZE];
+extern u8 sCornerCaptureHeader[CAPTURE_HEADER_SIZE];
 
 void *func_80400000_hole_editor(void) {
     return D_80451A60;
@@ -364,7 +364,7 @@ void func_8040BFC8_hole_editor(void) {
     MarkBillboardsOnMap();
     capture = AllocMemory(MAP_CAPTURE_SIZE);
     for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
-        capture[byteIndex] = D_8040C6D4_hole_editor[byteIndex];
+        capture[byteIndex] = sMapCaptureHeader[byteIndex];
     }
     for (row = MAP_CAPTURE_HEIGHT - 1; row != -1; row--) {
         for (column = 0; column != MAP_CAPTURE_WIDTH; column++) {
@@ -379,10 +379,10 @@ void func_8040BFC8_hole_editor(void) {
                                    << RGBA16_CHANNEL_WIDEN_SHIFT;
         }
     }
-    sprintf(fileName, "x:\\usgolf64\\capture\\temp%02d.bmp", D_8040C6D0_hole_editor);
+    sprintf(fileName, "x:\\usgolf64\\capture\\temp%02d.bmp", sMapCaptureNumber);
     WriteHostFile(fileName, MAP_CAPTURE_SIZE);
     FreeMemory(&capture);
-    D_8040C6D0_hole_editor++;
+    sMapCaptureNumber++;
 }
 
 /* Writes the whole frame to the host as the next numbered capture file */
@@ -396,7 +396,7 @@ void func_8040C124_hole_editor(void) {
     frame = (u16 *)((u8 *)nuGfxCfb_ptr + KSEG1_OFFSET);
     capture = AllocMemory(SCREEN_CAPTURE_SIZE);
     for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
-        capture[byteIndex] = D_8040C710_hole_editor[byteIndex];
+        capture[byteIndex] = sScreenCaptureHeader[byteIndex];
     }
     for (row = SCREEN_HEIGHT - 1; row != -1; row--) {
         for (column = 0; column != SCREEN_WIDTH; column++) {
@@ -428,7 +428,7 @@ void func_8040C260_hole_editor(s32 captureIndex) {
     capture = g_WorkArea.bytes;
     frame = (u16 *)((u8 *)nuGfxCfb_ptr + KSEG1_OFFSET);
     for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
-        capture[byteIndex] = D_8040C748_hole_editor[byteIndex];
+        capture[byteIndex] = sCornerCaptureHeader[byteIndex];
     }
     /* BMP rows run from the bottom up, and each pixel is blue, green, red */
     for (row = CORNER_CAPTURE_HEIGHT - 1; row != -1; row--) {
