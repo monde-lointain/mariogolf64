@@ -2,13 +2,19 @@
 #include "asset.h"
 #include "ball_simulation.h"
 #include "billboard.h"
+#include "camera.h"
 #include "cpu_projection.h"
 #include "debug_text.h"
+#include "functions.h"
+#include "game_flags.h"
 #include "golf_balls.h"
 #include "heap.h"
+#include "hole_loader.h"
+#include "overlay_manager.h"
 #include "pin.h"
 #include "save.h"
 #include "surface.h"
+#include "terrain.h"
 #include "variables.h"
 
 /*
@@ -57,7 +63,7 @@ typedef struct GolfBall {
     /* 0x98 */ s32 state; /* A BALL_STATE_* value */
     /* 0x9C */ s8 markerPlayerIndex; /* Or BALL_NO_MARKER */
     /* 0x9D */ s8 purpose; /* A LAUNCH_PURPOSE_* value */
-    /* 0x9E */ u8 unk9E;
+    /* 0x9E */ s8 unk9E;
 } GolfBall; /* size = 0xA0 */
 
 typedef struct BallAfterimage {
@@ -382,4 +388,570 @@ s32 IsAnyBallInCup(void) {
     return isInCup;
 }
 
+/* The images in sBallImages */
+#define BALL_IMAGE_SHADOW 0
+#define BALL_IMAGE_ROLLING 1
+#define BALL_IMAGE_SPARKLE 2
+#define BALL_IMAGE_MARKER 3
+#define BALL_IMAGE_AFTERIMAGE 4
+/* The rolling ball turns through this many frames, each shown for four draws */
+#define BALL_ROLL_FRAME_COUNT 16
+#define BALL_ROLL_FRAME_SIZE 0x400
+/* The tiles that the ball images are loaded into */
+#define BALL_TILE_ROLLING G_TX_RENDERTILE
+#define BALL_TILE_STILL 1
+#define BALL_TILE_SHADOW 2
+#define BALL_TILE_MARKER 3
+#define BALL_TILE_SMALL 4
+#define BALL_TILE_AFTERIMAGE 5
+#define BALL_TEXTURE_SIZE 32
+#define SMALL_BALL_TEXTURE_SIZE 8
+
+/* How a ball sits in its surface, from SurfaceInfo.unk14 */
+#define BALL_BURIED -1
+#define BALL_HALF_SUNK 0
+#define BALL_EXPOSED 1
+
+/* How each ball was drawn, which decides whether it gets a shadow */
+#define BALL_SPRITE_FULL 0
+#define BALL_SPRITE_SMALL 1
+#define BALL_SPRITE_DOT 2
+#define BALL_SPRITE_FAR_DOT 3
+#define BALL_SPRITE_DOT_SHADOWED 4
+#define BALL_SPRITE_FAR_DOT_SHADOWED 5
+
+/* Balls nearer than this are not drawn */
+#define BALL_NEAREST_DEPTH (-5)
+#define BALL_FULL_SPRITE_DEPTH (-86)
+#define BALL_NEAR_DEPTH (-200)
+#define BALL_DOT_DEPTH (-40000)
+#define BALL_DEPTH_BIAS 60.0f
+/* The pika balls are drawn as models only while the current ball is nearer than this */
+#define PIKA_BALL_DEPTH 20000
+
+extern Vtx sPikaBallVertices[];
+/* sBallRollFrame cycles through BALL_ROLL_FRAME_COUNT frames, this through nine unused ones */
+extern s32 sUnusedBallFrame;
+extern s32 sBallRollFrame;
+/* Where the ball of the player whose turn it is was last drawn */
+extern s32 sCurrentBallScreenX;
+extern s32 sCurrentBallScreenY;
+extern s32 sCurrentBallDepth;
+
+/* Like G_RM_ZB_XLU_SURF and G_RM_AA_ZB_XLU_SURF, but also updating the depth buffer */
+#define RM_ZB_XLU_SURF_UPDATE(clk)                                           \
+    (Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL | \
+     GBL_c##clk(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
+#define RM_AA_ZB_XLU_SURF_UPDATE(clk)                                                            \
+    (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | FORCE_BL | \
+     GBL_c##clk(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
+
+/* The texture coordinate step that stretches texelCount texels from from to to, in quarter pixels */
+#define TEXEL_STEP(texelCount, from, to) ((to) - (from) != 0 ? (((texelCount) << 13) / ((to) - (from)) + 1) >> 1 : 0)
+#define gSPStretchedTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, width, height) \
+    gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, TEXEL_STEP(width, xl, xh), TEXEL_STEP(height, yl, yh))
+
+#define ABSF(value) ({ f32 absValue = (value); (absValue < 0.0f) ? -absValue : absValue; })
+
+
+#ifdef NON_MATCHING
+void DrawGolfBalls(CameraMatrices *matrices) {
+    Gfx *gfx = g_DisplayListHead;
+    ScreenPoint ballPoint;
+    ScreenPoint shadowPoint;
+    s32 i;
+    s32 isCurrentBallAboveGround = FALSE;
+    GolfBall *ball;
+    BallAfterimage *afterimage;
+    SurfaceInfo *surface;
+    s32 groundHeight;
+    s32 spriteKind;
+    s32 isAboveGround;
+    s32 exposure;
+    s32 isAboveCup;
+    s32 ballDepth;
+    s32 shadowDepth;
+    s32 primDepth;
+    s32 shadowPrimDepth;
+    s32 size;
+    s32 shade;
+    s32 halfWidth;
+    s32 halfHeight;
+    u32 afterimageDepth;
+
+    if (g_GameState.unk0 != GAME_STATE_UNK6 && g_GameState.unk0 != GAME_STATE_UNK11) {
+        return;
+    }
+    {
+        g_ModuleRdpRequestFrames[MODULE_UNK1] = g_FrameCount;
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, RM_ZB_XLU_SURF_UPDATE(1), RM_ZB_XLU_SURF_UPDATE(2));
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x01);
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PRIM);
+        sBallRollFrame = (sBallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
+        sUnusedBallFrame = (sUnusedBallFrame + 1) % 9;
+        gDPLoadTextureBlock(gfx++,
+                            TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_ROLLING] +
+                                            (sBallRollFrame / 4 * BALL_ROLL_FRAME_SIZE + IMAGE_HEADER_SIZE)),
+                            G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE, 0,
+                            G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_ROLLING] + IMAGE_HEADER_SIZE), 0x80,
+                          BALL_TILE_STILL, G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE, 0,
+                          G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadMultiBlock_4b(gfx++, TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_SPARKLE] + IMAGE_HEADER_SIZE), 0x100,
+                             BALL_TILE_SHADOW, G_IM_FMT_I, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP,
+                             G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadMultiBlock_4b(gfx++, TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_MARKER] + IMAGE_HEADER_SIZE), 0x140,
+                             BALL_TILE_MARKER, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+                             G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadMultiBlock_4b(gfx++, TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_SHADOW] + IMAGE_HEADER_SIZE), 0x150,
+                             BALL_TILE_SMALL, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+                             G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadMultiBlock_4b(gfx++, TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_AFTERIMAGE] + IMAGE_HEADER_SIZE), 0x190,
+                             BALL_TILE_AFTERIMAGE, G_IM_FMT_I, 16, 64, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+                             G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
+        gDPPipeSync(gfx++);
+        for (i = 0; i < GOLF_BALL_COUNT; i++) {
+            ball = &sGolfBalls[i];
+            if (ball->alpha > 0) {
+                surface = ball->surface;
+                groundHeight = GetGroundHeight(ball->position[0] * WORLD_TO_COURSE_SCALE,
+                                               ball->position[2] * WORLD_TO_COURSE_SCALE);
+                spriteKind = BALL_SPRITE_FULL;
+                isAboveGround = TRUE;
+                if (ball->position[1] * WORLD_TO_COURSE_SCALE < groundHeight - 153.6f) {
+                    isAboveGround = FALSE;
+                }
+                if (isAboveGround) {
+                    if (surface->unk14 == 2) {
+                        exposure = BALL_BURIED;
+                    } else if (surface->unk14 == 1) {
+                        exposure = BALL_HALF_SUNK;
+                    } else {
+                        exposure = BALL_EXPOSED;
+                    }
+                } else {
+                    exposure = BALL_EXPOSED;
+                }
+                isAboveCup = FALSE;
+                if (groundHeight + 768.0f < ball->position[1] * WORLD_TO_COURSE_SCALE) {
+                    isAboveCup = ball->isInCup == TRUE;
+                }
+                ballDepth = ProjectPoint(ball->position[0], ball->position[1] - g_PinVertexScale * 0.3f,
+                                         ball->position[2], &ballPoint);
+                shadowDepth = ProjectPoint(ball->position[0],
+                                           groundHeight * COURSE_TO_WORLD_SCALE - g_PinVertexScale * 0.06f,
+                                           ball->position[2], &shadowPoint);
+                if (ball->markerPlayerIndex == BALL_NO_MARKER) {
+                    if (ballDepth < BALL_NEAREST_DEPTH && exposure >= BALL_HALF_SUNK) {
+                        gDPPipeSync(gfx++);
+                        if (ball->unk9E) {
+                            groundHeight = GetGroundOrWaterHeight(ball->position[0] * WORLD_TO_COURSE_SCALE,
+                                                                  ball->position[2] * WORLD_TO_COURSE_SCALE);
+                            gDPPipeSync(gfx++);
+                            gDPSetRenderMode(gfx++, RM_AA_ZB_XLU_SURF_UPDATE(1), RM_AA_ZB_XLU_SURF_UPDATE(2));
+                            shade = 100 - (s32)((ball->position[1] * WORLD_TO_COURSE_SCALE - groundHeight) *
+                                                0.0032552085f);
+                            if (shade < 0) {
+                                shade = 0;
+                            }
+                            gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xFF, shade);
+                            gDPPipeSync(gfx++);
+                            gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+                        } else {
+                            gDPPipeSync(gfx++);
+                            gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+                            gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xFF, 0xFF);
+                        }
+                        if (g_IsCupViewShown == TRUE) {
+                            if (ballDepth < g_CupViewDepth) {
+                                primDepth = 0x402F;
+                            } else {
+                                primDepth = isAboveCup ? 0x401F : 0x4007;
+                            }
+                        } else if (ball->purpose == LAUNCH_PURPOSE_UNK3) {
+                            primDepth = ballPoint.depth;
+                        } else if (ballDepth < g_CupViewDepth) {
+                            if (isAboveCup == TRUE) {
+                                continue;
+                            }
+                            if (ballDepth < BALL_NEAR_DEPTH) {
+                                primDepth = ballPoint.depth;
+                            } else {
+                                primDepth = ballPoint.depth - ballPoint.depthStep * (10.5f * g_PinVertexScale) + 48.0f -
+                                            BALL_DEPTH_BIAS;
+                            }
+                        } else {
+                            if (isAboveCup == TRUE) {
+                                continue;
+                            }
+                            if (ballDepth < BALL_NEAR_DEPTH) {
+                                primDepth = ballPoint.depth;
+                            } else {
+                                primDepth = ballPoint.depth - ballPoint.depthStep * (10.5f * g_PinVertexScale) + 8.0f -
+                                            BALL_DEPTH_BIAS;
+                            }
+                        }
+                        primDepth &= ~3;
+                        if (D_801B60A8 == i) {
+                            isCurrentBallAboveGround = isAboveGround;
+                            sCurrentBallDepth = primDepth;
+                            sCurrentBallScreenX = ballPoint.x;
+                            sCurrentBallScreenY = ballPoint.y;
+                        }
+                        if (primDepth < 0) {
+                            primDepth = 0;
+                        }
+                        gDPSetPrimDepth(gfx++, primDepth, 0);
+                        gDPPipeSync(gfx++);
+                        size = (s32)(ABSF(ballPoint.scaleX) * (0.6f * (2.0f * g_PinVertexScale)) * 0.25f);
+                        if (size <= 0) {
+                            size = 1;
+                        }
+                        if (g_IsCupViewShown == TRUE || ballDepth >= BALL_FULL_SPRITE_DEPTH) {
+                            spriteKind = BALL_SPRITE_FULL;
+                            if (ball->state == BALL_STATE_STOPPED) {
+                                gSPStretchedTextureRectangle(gfx++, (ballPoint.x - size) << 2,
+                                                             (ballPoint.y - size) << 2, (ballPoint.x + size) << 2,
+                                                             (ballPoint.y + exposure * size) << 2, BALL_TILE_STILL,
+                                                             0, 0, BALL_TEXTURE_SIZE,
+                                                             (exposure + 1) * (BALL_TEXTURE_SIZE / 2));
+                            } else {
+                                gSPStretchedTextureRectangle(gfx++, (ballPoint.x - size) << 2,
+                                                             (ballPoint.y - size) << 2, (ballPoint.x + size) << 2,
+                                                             (ballPoint.y + exposure * size) << 2, BALL_TILE_ROLLING,
+                                                             0, 0, BALL_TEXTURE_SIZE,
+                                                             (exposure + 1) * (BALL_TEXTURE_SIZE / 2));
+                            }
+                        } else if (ballDepth >= BALL_FULL_SPRITE_DEPTH) {
+                            gSPStretchedTextureRectangle(gfx++, (ballPoint.x - size) << 2, (ballPoint.y - size) << 2,
+                                                         (ballPoint.x + size) << 2,
+                                                         (ballPoint.y + exposure * size) << 2, BALL_TILE_SMALL, 0, 0,
+                                                         SMALL_BALL_TEXTURE_SIZE,
+                                                         (exposure + 1) * (SMALL_BALL_TEXTURE_SIZE / 2));
+                            spriteKind = BALL_SPRITE_SMALL;
+                        } else if (ballDepth > BALL_DOT_DEPTH) {
+                            gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+                            gDPPipeSync(gfx++);
+                            gSPStretchedTextureRectangle(gfx++, (ballPoint.x - 1) << 2, (ballPoint.y - 1) << 2,
+                                                         (ballPoint.x + 1) << 2, ballPoint.y << 2, BALL_TILE_SMALL, 0,
+                                                         0, SMALL_BALL_TEXTURE_SIZE, SMALL_BALL_TEXTURE_SIZE);
+                            gDPPipeSync(gfx++);
+                            gDPSetPrimColor(gfx++, 0, 0, 0xBF, 0xBF, 0xBF, 0xFF);
+                            gDPPipeSync(gfx++);
+                            gDPPipeSync(gfx++);
+                            gDPPipeSync(gfx++);
+                            gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+                            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0x3F);
+                            gDPPipeSync(gfx++);
+                            if (isAboveGround == TRUE) {
+                                spriteKind = BALL_SPRITE_DOT_SHADOWED;
+                                gSPStretchedTextureRectangle(gfx++, (ballPoint.x - 1) << 2, (ballPoint.y + 1) << 2,
+                                                             (ballPoint.x + 1) << 2, (ballPoint.y + 2) << 2,
+                                                             BALL_TILE_SMALL, 0, 0, SMALL_BALL_TEXTURE_SIZE,
+                                                             SMALL_BALL_TEXTURE_SIZE);
+                            } else {
+                                spriteKind = BALL_SPRITE_DOT;
+                            }
+                        } else {
+                            gDPPipeSync(gfx++);
+                            gDPSetRenderMode(gfx++, RM_ZB_XLU_SURF_UPDATE(1), RM_ZB_XLU_SURF_UPDATE(2));
+                            gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+                            gDPPipeSync(gfx++);
+                            gSPScisTextureRectangle(gfx++, (ballPoint.x << 2) - 4, (ballPoint.y << 2) - 8,
+                                                    ballPoint.x << 2, ballPoint.y << 2, BALL_TILE_SMALL, 0, 0,
+                                                    TEXEL_STEP(SMALL_BALL_TEXTURE_SIZE, (ballPoint.x << 2) - 4,
+                                                               ballPoint.x << 2),
+                                                    TEXEL_STEP(SMALL_BALL_TEXTURE_SIZE, (ballPoint.y - 1) << 2,
+                                                               (ballPoint.y + 1) << 2));
+                            gDPPipeSync(gfx++);
+                            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0xFF);
+                            gDPPipeSync(gfx++);
+                            spriteKind = BALL_SPRITE_FAR_DOT;
+                            if (isAboveGround == TRUE) {
+                                spriteKind = BALL_SPRITE_FAR_DOT_SHADOWED;
+                            }
+                        }
+                        gDPPipeSync(gfx++);
+                        gDPPipeSync(gfx++);
+                        gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+                        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    }
+                    if (exposure == BALL_EXPOSED && shadowDepth < BALL_NEAREST_DEPTH && !isAboveCup && !ball->unk9E) {
+                        size = (s32)(ABSF(shadowPoint.scaleX) * (0.6f * (2.0f * g_PinVertexScale)) * 0.25f);
+                        if (g_IsCupViewShown == TRUE) {
+                            if (shadowDepth < g_CupViewDepth) {
+                                shadowPrimDepth = 0x4033;
+                            } else if (ball->isInCup == TRUE) {
+                                shadowPrimDepth = 0x4023;
+                            } else {
+                                shadowPrimDepth = 0x400B;
+                            }
+                            shade = 0x7F - (s32)(groundHeight - ball->position[1] * WORLD_TO_COURSE_SCALE) / 128;
+                            if (shade < 0x3F) {
+                                shade = 0x3F;
+                            }
+                        } else {
+                            if (ball->purpose == LAUNCH_PURPOSE_UNK3) {
+                                shadowPrimDepth = ballPoint.depth;
+                            } else {
+                                f32 depth;
+
+                                if (shadowDepth < g_CupViewDepth) {
+                                    depth = shadowPoint.depth - shadowPoint.depthStep * (10.5f * g_PinVertexScale) +
+                                            56.0f;
+                                } else if (ball->isInCup == TRUE) {
+                                    depth = shadowPoint.depth - shadowPoint.depthStep * (10.5f * g_PinVertexScale) +
+                                            40.0f;
+                                } else {
+                                    depth = shadowPoint.depth - shadowPoint.depthStep * (10.5f * g_PinVertexScale) +
+                                            16.0f;
+                                }
+                                shadowPrimDepth = depth - BALL_DEPTH_BIAS;
+                            }
+                            shade = 0x7F - (s32)(groundHeight - ball->position[1] * WORLD_TO_COURSE_SCALE) / 512;
+                            if (shade < 0x5F) {
+                                shade = 0x5F;
+                            }
+                        }
+                        if (shade > 0x7F) {
+                            shade = 0x7F;
+                        }
+                        size = size * (shade * 0.007874016f);
+                        if (size <= 0) {
+                            size = 1;
+                        }
+                        shadowPrimDepth &= ~3;
+                        if (shadowPrimDepth < 0) {
+                            shadowPrimDepth = 0;
+                        }
+                        if (shadowPrimDepth < primDepth + 8) {
+                            shadowPrimDepth = primDepth + 8;
+                        }
+                        gDPSetPrimDepth(gfx++, shadowPrimDepth, 0);
+                        gDPPipeSync(gfx++);
+                        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, shade);
+                        if (spriteKind < BALL_SPRITE_DOT_SHADOWED) {
+                            gDPPipeSync(gfx++);
+                            gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+                            gDPPipeSync(gfx++);
+                            gSPStretchedTextureRectangle(gfx++, (shadowPoint.x - size) << 2,
+                                                         (shadowPoint.y - size) << 2, (shadowPoint.x + size) << 2,
+                                                         (shadowPoint.y + size) << 2, BALL_TILE_SHADOW, 0, 0,
+                                                         BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
+                        }
+                    }
+                } else if (shadowDepth < BALL_NEAREST_DEPTH) {
+                    f32 depth;
+
+                    size = ABSF(shadowPoint.scaleX) * (0.6f * (2.0f * g_PinVertexScale)) * 0.25f;
+                    if (g_IsCupViewShown != TRUE) {
+                        if (shadowDepth < g_CupViewDepth) {
+                            depth = shadowPoint.depth - shadowPoint.depthStep * (10.5f * g_PinVertexScale) + 56.0f;
+                        } else if (ball->isInCup == TRUE) {
+                            depth = shadowPoint.depth - shadowPoint.depthStep * (10.5f * g_PinVertexScale) + 40.0f;
+                        } else {
+                            depth = shadowPoint.depth - shadowPoint.depthStep * (10.5f * g_PinVertexScale) + 16.0f;
+                        }
+                        shadowPrimDepth = depth - BALL_DEPTH_BIAS;
+                        if (size <= 0) {
+                            size = 1;
+                        }
+                        gDPSetPrimDepth(gfx++, shadowPrimDepth & ~3, 0);
+                        gDPPipeSync(gfx++);
+                        switch (ball->markerPlayerIndex) {
+                            case -1:
+                                gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0);
+                                break;
+                            case 0:
+                                gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, 0xFF);
+                                break;
+                            case 1:
+                                gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0xFF, 0xFF);
+                                break;
+                            case 2:
+                                gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0xFF, 0xFF);
+                                break;
+                            case 3:
+                                gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xBF, 0x7F, 0xFF);
+                                break;
+                        }
+                        gDPPipeSync(gfx++);
+                        gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+                        gDPPipeSync(gfx++);
+                        gSPStretchedTextureRectangle(gfx++, (ballPoint.x - size) << 2, (ballPoint.y - size) << 2,
+                                                     (ballPoint.x + size) << 2, (ballPoint.y + size) << 2,
+                                                     BALL_TILE_MARKER, 0, 0, 16, 16);
+                    }
+                }
+            }
+        }
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+        gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0,
+                          ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
+        gDPSetEnvColor(gfx++, 0x00, 0x00, 0x80, 0x1E);
+        for (i = 0; i != sBallAfterimageLength; i++) {
+            afterimage = &sBallAfterimages[i];
+            if (afterimage->alpha > 0) {
+                ballDepth = ProjectPoint(afterimage->position[0], afterimage->position[1] - g_PinVertexScale * 0.27f,
+                                         afterimage->position[2], &ballPoint);
+                if (ballDepth < BALL_NEAREST_DEPTH) {
+                    if (g_IsCupViewShown == TRUE) {
+                        afterimageDepth = 0x402F;
+                        if (ballDepth >= g_CupViewDepth) {
+                            afterimageDepth = afterimage->isInCup == TRUE ? 0x401F : 0x4007;
+                        }
+                        gDPSetPrimColor(gfx++, 0, 0, 0xA0, 0xA0, 0xFF, afterimage->alpha / 2);
+                    } else {
+                        if (ballDepth < g_CupViewDepth) {
+                            afterimageDepth = ballPoint.depth - ballPoint.depthStep * (10.5f * g_PinVertexScale) +
+                                              48.0f - BALL_DEPTH_BIAS;
+                        } else if (afterimage->isInCup == FALSE) {
+                            afterimageDepth = ballPoint.depth - ballPoint.depthStep * (10.5f * g_PinVertexScale) +
+                                              8.0f - BALL_DEPTH_BIAS;
+                        } else {
+                            continue;
+                        }
+                        if (sIsBallAfterimageFast == TRUE) {
+                            gDPSetPrimColor(gfx++, 0, 0, 0xA0, 0xA0, 0xFF, afterimage->alpha / 2);
+                        } else {
+                            gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, afterimage->alpha / 2);
+                        }
+                    }
+                    gDPSetPrimDepth(gfx++, afterimageDepth & ~3, 0);
+                    gDPPipeSync(gfx++);
+                    halfWidth = ABSF(ballPoint.scaleX) * ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2)) - 1.0;
+                    halfHeight = ABSF(ballPoint.scaleY) * ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2)) - 1.0;
+                    if (halfWidth < 4) {
+                        halfWidth = 4;
+                    }
+                    if (halfHeight < 4) {
+                        halfHeight = 4;
+                    }
+                    if (sIsBallAfterimageFast == TRUE) {
+                        gSPStretchedTextureRectangle(gfx++, (ballPoint.x << 2) - halfWidth - 1,
+                                                     (ballPoint.y << 2) - halfHeight - 1,
+                                                     (ballPoint.x << 2) + halfWidth + 2,
+                                                     (ballPoint.y << 2) + halfHeight + 2, BALL_TILE_AFTERIMAGE, 0,
+                                                     (guRandom() % 3) << 9, 15, 15);
+                    } else {
+                        gSPStretchedTextureRectangle(gfx++, (ballPoint.x << 2) - halfWidth - 1,
+                                                     (ballPoint.y << 2) - halfHeight - 1,
+                                                     (ballPoint.x << 2) + halfWidth + 2,
+                                                     (ballPoint.y << 2) + halfHeight + 2, BALL_TILE_STILL, 0, 0,
+                                                     BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
+                    }
+                    gDPPipeSync(gfx++);
+                }
+            }
+        }
+        if (IsGameFlagSet(0x4C)) {
+            for (i = 0; i != ROUTE_POINT_COUNT; i++) {
+                afterimage = &sBallAfterimages[i];
+                shadowDepth = ProjectPoint(g_HolePoints.routePoints[i][0] * COURSE_TO_WORLD_SCALE,
+                                           g_HolePoints.routePoints[i][1] * COURSE_TO_WORLD_SCALE -
+                                               g_PinVertexScale * 0.27f,
+                                           g_HolePoints.routePoints[i][2] * COURSE_TO_WORLD_SCALE, &shadowPoint);
+                if (shadowDepth < BALL_NEAREST_DEPTH) {
+                    if (shadowDepth < g_CupViewDepth) {
+                        afterimageDepth = shadowPoint.depth - shadowPoint.depthStep * (10.5f * g_PinVertexScale) +
+                                          48.0f - BALL_DEPTH_BIAS;
+                    } else if (afterimage->isInCup == FALSE) {
+                        afterimageDepth = shadowPoint.depth - shadowPoint.depthStep * (10.5f * g_PinVertexScale) +
+                                          8.0f - BALL_DEPTH_BIAS;
+                    } else {
+                        continue;
+                    }
+                    if (sIsBallAfterimageFast == TRUE) {
+                        gDPSetPrimColor(gfx++, 0, 0, 0xA0, 0xA0, 0xFF, afterimage->alpha / 2);
+                    } else {
+                        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, afterimage->alpha / 2);
+                    }
+                    gDPSetPrimDepth(gfx++, afterimageDepth & ~3, 0);
+                    gDPPipeSync(gfx++);
+                    halfWidth = ABSF(shadowPoint.scaleX) * ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2)) - 1.0;
+                    halfHeight = ABSF(shadowPoint.scaleY) * ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2)) - 1.0;
+                    if (halfWidth < 4) {
+                        halfWidth = 4;
+                    }
+                    if (halfHeight < 4) {
+                        halfHeight = 4;
+                    }
+                    if (sIsBallAfterimageFast == TRUE) {
+                        gSPStretchedTextureRectangle(gfx++, (shadowPoint.x << 2) - halfWidth - 1,
+                                                     (shadowPoint.y << 2) - halfHeight - 1,
+                                                     (shadowPoint.x << 2) + halfWidth + 2,
+                                                     (shadowPoint.y << 2) + halfHeight + 2, BALL_TILE_AFTERIMAGE, 0,
+                                                     (guRandom() % 3) << 9, 15, 15);
+                    } else {
+                        gSPStretchedTextureRectangle(gfx++, (shadowPoint.x << 2) - halfWidth - 1,
+                                                     (shadowPoint.y << 2) - halfHeight - 1,
+                                                     (shadowPoint.x << 2) + halfWidth + 2,
+                                                     (shadowPoint.y << 2) + halfHeight + 2, BALL_TILE_STILL, 0, 0,
+                                                     BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
+                    }
+                    gDPPipeSync(gfx++);
+                }
+            }
+        }
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, RM_AA_ZB_XLU_SURF_UPDATE(1), RM_AA_ZB_XLU_SURF_UPDATE(2));
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, SHADE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, SHADE, PRIMITIVE, 0, TEXEL0, 0);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x00, 0x60);
+        gDPLoadTextureBlock_4b(gfx++, sPikaBallTexture, G_IM_FMT_IA, 32, 8, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+                               G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPSetPrimDepth(gfx++, sCurrentBallDepth - 4, 0);
+        if (sCurrentBallDepth < PIKA_BALL_DEPTH) {
+            for (i = 0, ball = sGolfBalls; i < GOLF_BALL_COUNT; i++, ball++) {
+                if (ball->markerPlayerIndex == BALL_NO_MARKER && sGolfBalls[i].alpha == BALL_SHOWN &&
+                    (g_IsCupViewShown || ball->isInCup != TRUE) &&
+                    (!isCurrentBallAboveGround || ball->surface->unk14 == 0) && ball->alpha > 0) {
+                    gDPPipeSync(gfx++);
+                    gSPMatrix(gfx++, &ball->matrices[g_DrawBufferIndex], G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+                    gSPVertex(gfx++, sPikaBallVertices, 16, 0);
+                    gSP2Triangles(gfx++, 0, 2, 1, 0, 1, 2, 3, 0);
+                    gSP2Triangles(gfx++, 4, 6, 5, 0, 5, 6, 7, 0);
+                    gSP2Triangles(gfx++, 8, 9, 10, 0, 9, 11, 10, 0);
+                    gSP2Triangles(gfx++, 12, 13, 14, 0, 13, 15, 14, 0);
+                    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+                    gDPPipeSync(gfx++);
+                }
+            }
+        }
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+        gDPPipeSync(gfx++);
+        g_DisplayListHead = gfx;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", DrawGolfBalls);
+#endif
