@@ -33,6 +33,22 @@
 #define PLACE_LABEL_SUFFIX_X 16
 #define PLACE_LABEL_LAST_PLACE 3
 
+/*
+ * func_8021508C writes a best time as minutes, seconds and hundredths, two digits each, from the 16 by 16 CI4
+ * glyphs of D_8023AA48: the digits follow a first glyph, and a separator follows each group but the last
+ */
+#define TIME_GROUP_COUNT 3
+#define TIME_GROUP_DIGIT_COUNT 2
+#define TIME_DIGIT_BASE 10
+#define HUNDREDTHS_PER_MINUTE (SECONDS_PER_MINUTE * HUNDREDTHS_PER_SECOND)
+#define TIME_GLYPH_SIZE 16
+#define TIME_GLYPH_BYTES (TIME_GLYPH_SIZE * TIME_GLYPH_SIZE / 2)
+#define TIME_FIRST_DIGIT_GLYPH 1
+#define TIME_SEPARATOR_GLYPH 11
+#define TIME_DIGIT_SPACING 14
+#define TIME_SEPARATOR_SHIFT_LEFT 4
+#define TIME_SEPARATOR_SPACING 6
+
 extern u16 D_800C2064[];
 extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
@@ -248,7 +264,74 @@ void func_802149A8_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 place) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_802149A8_ovl_01);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_8021508C_ovl_01);
+void func_8021508C_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 frameCount) {
+    s32 digits[TIME_GROUP_COUNT][TIME_GROUP_DIGIT_COUNT];
+    Gfx *gfx = *displayListHead;
+    s32 hundredths = frameCount * HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND;
+    s32 minutes = hundredths / HUNDREDTHS_PER_MINUTE;
+    s32 seconds;
+    u16 separatorShift;
+    s16 group;
+    s16 digit;
+
+    hundredths %= HUNDREDTHS_PER_MINUTE;
+    seconds = hundredths / HUNDREDTHS_PER_SECOND;
+    hundredths %= HUNDREDTHS_PER_SECOND;
+    digits[0][0] = minutes / TIME_DIGIT_BASE;
+    digits[0][1] = minutes % TIME_DIGIT_BASE;
+    digits[1][0] = seconds / TIME_DIGIT_BASE;
+    digits[1][1] = seconds % TIME_DIGIT_BASE;
+    digits[2][0] = hundredths / TIME_DIGIT_BASE;
+    digits[2][1] = hundredths % TIME_DIGIT_BASE;
+    separatorShift = 0;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023AA48_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (group = 0; group != TIME_GROUP_COUNT; group++) {
+        for (digit = 0; digit != TIME_GROUP_DIGIT_COUNT; digit++) {
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)D_8023AA48_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                    (digits[group][digit] + TIME_FIRST_DIGIT_GLYPH) * TIME_GLYPH_BYTES) & ~7,
+                                   G_IM_FMT_CI, TIME_GLYPH_SIZE, TIME_GLYPH_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(
+                gfx++, (separatorShift + left + (group * TIME_GROUP_DIGIT_COUNT + digit) * TIME_DIGIT_SPACING) << 2,
+                top << 2,
+                (separatorShift + left + (group * TIME_GROUP_DIGIT_COUNT + digit) * TIME_DIGIT_SPACING +
+                 TIME_GLYPH_SIZE) << 2,
+                (top + TIME_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            gDPPipeSync(gfx++);
+        }
+        if (group != TIME_GROUP_COUNT - 1) {
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)D_8023AA48_ovl_01 + TIME_SEPARATOR_GLYPH * TIME_GLYPH_BYTES +
+                                    PALETTED_TEXELS_OFFSET) & ~7,
+                                   G_IM_FMT_CI, TIME_GLYPH_SIZE, TIME_GLYPH_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(
+                gfx++,
+                (separatorShift + left +
+                 (group * TIME_GROUP_DIGIT_COUNT + TIME_GROUP_DIGIT_COUNT) * TIME_DIGIT_SPACING -
+                 TIME_SEPARATOR_SHIFT_LEFT) << 2,
+                top << 2,
+                (separatorShift + left +
+                 (group * TIME_GROUP_DIGIT_COUNT + TIME_GROUP_DIGIT_COUNT) * TIME_DIGIT_SPACING -
+                 TIME_SEPARATOR_SHIFT_LEFT + TIME_GLYPH_SIZE) << 2,
+                (top + TIME_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            gDPPipeSync(gfx++);
+            separatorShift += TIME_SEPARATOR_SPACING;
+        }
+    }
+    *displayListHead = gfx;
+}
 
 void func_8021585C_ovl_01(void) {
     EncodedAsset asset;
