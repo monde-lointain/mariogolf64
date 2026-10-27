@@ -174,6 +174,18 @@
 #define WALL_TEXT_COLUMN 5
 #define WALL_TEXT_ROW 3
 
+/* func_80406C3C's tree editor */
+#define TREE_TEXT_COLUMN 19
+#define TREE_KIND_LABEL_ROW 24
+#define TREE_KIND_TEXT_ROW 25
+#define TREE_INDEX_LABEL_ROW 26
+#define TREE_INDEX_TEXT_ROW 27
+#define TREE_SIZE_MAX 0x800
+/* A billboard from 1 to these limits in x and z is taken */
+#define TREE_X_LIMIT 0x1000
+#define TREE_Z_LIMIT 0x2000
+#define COPIED_TREE_OFFSET 0x100 /* In x */
+
 /* func_80407F08's hex dump */
 #define HEX_DUMP_BUFFER_SIZE 0x40000
 #define HEX_DUMP_TEXT_SIZE 0x100
@@ -346,6 +358,13 @@ extern s32 sHoleFileStep; /* A HOLE_FILE_STEP_* */
 extern s32 sHoleFileHoleNumber; /* From 1 */
 extern s32 sHoleFileCourseNumber; /* From 1 */
 extern s32 sHoleFilePromptFrames;
+
+/* func_80406C3C's state */
+extern f32 sTreeCameraPitch;   /* In radians */
+extern f32 sTreeCameraHeading; /* In radians, from sTreeCameraHeadingAngle */
+extern s32 sTreeCameraHeadingAngle;
+extern s32 sEditedTreeIndex;
+extern s32 sLastTreeEditKind; /* A TRIANGLE_EDIT_*; nothing reads it */
 
 extern s32 sMapCaptureNumber;
 extern u8 sMapCaptureHeader[CAPTURE_HEADER_SIZE];
@@ -1942,7 +1961,179 @@ void func_80406818_hole_editor(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80406C3C_hole_editor);
+/*
+ * Scene SCENE_TREES's editor for the billboards that stand for a hole's
+ * trees. The editor pad's C-up and C-down change the edited tree's height,
+ * C-right and C-left its width, A toggles unk8, up and down on the control
+ * pad its texture, and the stick moves it. Right and left on the control pad
+ * pick the tree, and B copies it. R zooms in, L or Z with R zooms out, and Z
+ * with the stick orbits the camera around the tree.
+ */
+void func_80406C3C_hole_editor(void) {
+    Mat4 translation;
+    Mat4 unusedMatrix; /* The game's frame has room for a second matrix */
+    s32 editKind;
+    s32 i;
+    s32 height;
+    f64 cameraDistance; /* As a literal, GCC would fold it into the angles before the zoom */
+
+    PrintDebugText("KIND", TREE_TEXT_COLUMN, TREE_KIND_LABEL_ROW);
+    PrintDebugText("        ", TREE_TEXT_COLUMN, TREE_KIND_TEXT_ROW);
+    PrintDebugHex(g_Billboards[sEditedTreeIndex].textureIndex, TREE_TEXT_COLUMN, TREE_KIND_TEXT_ROW);
+    PrintDebugText("EDIT NUM", TREE_TEXT_COLUMN, TREE_INDEX_LABEL_ROW);
+    PrintDebugText("        ", TREE_TEXT_COLUMN, TREE_INDEX_TEXT_ROW);
+    PrintDebugHex(sEditedTreeIndex, TREE_TEXT_COLUMN, TREE_INDEX_TEXT_ROW);
+    D_800C30D1 = FALSE;
+    editKind = TRIANGLE_EDIT_NONE;
+    if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        g_Billboards[sEditedTreeIndex].height++;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        g_Billboards[sEditedTreeIndex].height--;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        g_Billboards[sEditedTreeIndex].width++;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        g_Billboards[sEditedTreeIndex].width--;
+    }
+    if (g_Billboards[sEditedTreeIndex].height > TREE_SIZE_MAX) {
+        g_Billboards[sEditedTreeIndex].height = TREE_SIZE_MAX;
+    }
+    if (g_Billboards[sEditedTreeIndex].height == 0) {
+        g_Billboards[sEditedTreeIndex].height = 1;
+    }
+    if (g_Billboards[sEditedTreeIndex].width > TREE_SIZE_MAX) {
+        g_Billboards[sEditedTreeIndex].width = TREE_SIZE_MAX;
+    }
+    if (g_Billboards[sEditedTreeIndex].width == 0) {
+        g_Billboards[sEditedTreeIndex].width = 1;
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        g_Billboards[sEditedTreeIndex].unk8 = !g_Billboards[sEditedTreeIndex].unk8;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_SELECT;
+        g_Billboards[sEditedTreeIndex].isNearCourseEdge = FALSE;
+        sEditedTreeIndex++;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_SELECT;
+        g_Billboards[sEditedTreeIndex].isNearCourseEdge = FALSE;
+        sEditedTreeIndex--;
+    }
+    if (sEditedTreeIndex < 0) {
+        sEditedTreeIndex = BILLBOARD_COUNT - 1;
+    }
+    if (sEditedTreeIndex >= BILLBOARD_COUNT) {
+        sEditedTreeIndex = 0;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_KIND;
+        g_Billboards[sEditedTreeIndex].textureIndex++;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_KIND;
+        g_Billboards[sEditedTreeIndex].textureIndex--;
+    }
+    if (g_Billboards[sEditedTreeIndex].textureIndex >= BILLBOARD_TEXTURE_COUNT) {
+        g_Billboards[sEditedTreeIndex].textureIndex = 0;
+    }
+    if (g_Billboards[sEditedTreeIndex].textureIndex < 0) {
+        g_Billboards[sEditedTreeIndex].textureIndex = BILLBOARD_TEXTURE_COUNT - 1;
+    }
+    /* B copies the tree into the first free billboard and edits the copy */
+    i = 0;
+    if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+        for (; i < BILLBOARD_COUNT; i++) {
+            if (g_Billboards[i].x <= 0 || g_Billboards[i].x >= TREE_X_LIMIT || g_Billboards[i].z <= 0 ||
+                g_Billboards[i].z >= TREE_Z_LIMIT) {
+                break;
+            }
+        }
+        if (i != BILLBOARD_COUNT) {
+            g_Billboards[i] = g_Billboards[sEditedTreeIndex];
+            g_Billboards[i].x += COPIED_TREE_OFFSET;
+            editKind = TRIANGLE_EDIT_SELECT;
+            g_Billboards[sEditedTreeIndex].isNearCourseEdge = FALSE;
+            sEditedTreeIndex = i;
+        }
+    }
+    /* The u16 holds stick_x and stick_y */
+    if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG) && *(u16 *)&g_MenuControllerData[EDITOR_PAD].stick_x != 0) {
+        s32 moveX = -cos((u16)sTreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+                        g_MenuControllerData[EDITOR_PAD].stick_y -
+                    sin((u16)sTreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+                        g_MenuControllerData[EDITOR_PAD].stick_x;
+        s32 moveZ = -sin((u16)sTreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+                        g_MenuControllerData[EDITOR_PAD].stick_y +
+                    cos((u16)sTreeCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+                        g_MenuControllerData[EDITOR_PAD].stick_x;
+
+        editKind = TRIANGLE_EDIT_MOVE;
+        g_Billboards[sEditedTreeIndex].x += moveX;
+        g_Billboards[sEditedTreeIndex].z += moveZ;
+    }
+    /* The translation goes unused; PlaceBillboards places every tree again */
+    if (editKind != TRIANGLE_EDIT_NONE) {
+        height = GetGroundHeight(g_Billboards[sEditedTreeIndex].x << WORLD_TO_COURSE_SHIFT,
+                                 g_Billboards[sEditedTreeIndex].z << WORLD_TO_COURSE_SHIFT) /
+                 (1 << WORLD_TO_COURSE_SHIFT);
+        guTranslateF(translation, g_Billboards[sEditedTreeIndex].x, height + 1,
+                     g_Billboards[sEditedTreeIndex].z);
+        RevertBillboardManager();
+        PlaceBillboards();
+    } else {
+        /* Blinks the tree, as drawing skips billboards near the course edge */
+        g_Billboards[sEditedTreeIndex].isNearCourseEdge = !g_Billboards[sEditedTreeIndex].isNearCourseEdge;
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
+        }
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+        sTreeCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        sTreeCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+    }
+    if (sTreeCameraPitch > 0.0f) {
+        sTreeCameraPitch = 0.0f;
+    }
+    if (sTreeCameraPitch < EDITOR_PITCH_MIN) {
+        sTreeCameraPitch = EDITOR_PITCH_MIN;
+    }
+    cameraDistance = EDITOR_CAMERA_DISTANCE;
+    g_MapCamera.view.lookAt[AXIS_X] = g_Billboards[sEditedTreeIndex].x;
+    g_MapCamera.view.lookAt[AXIS_Y] = g_Billboards[sEditedTreeIndex].y;
+    sLastTreeEditKind = editKind;
+    g_MapCamera.view.lookAt[AXIS_Z] = g_Billboards[sEditedTreeIndex].z;
+    sTreeCameraHeading = sTreeCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    g_MapCamera.view.eye[AXIS_X] = cos(sTreeCameraPitch) * cos(sTreeCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_X];
+    g_MapCamera.view.eye[AXIS_Z] = cos(sTreeCameraPitch) * sin(sTreeCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_Y] = sin(sTreeCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Y];
+}
 
 /*
  * Blends the ground points within a radius of a ground point toward its
