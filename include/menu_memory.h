@@ -11,11 +11,9 @@
 typedef struct MenuMemory {
     /* 0x00 */ s8 playerCountChoice; /* The title screen's player count, less one */
     /* 0x01 */ s8 titleChoice;       /* The title screen's row: a new game, the saved games or the menus */
-    /* 0x02 */ u8 unk2[2];
-    /* 0x04 */ s8 characterColumn; /* The character select cursor's column */
-    /* 0x05 */ u8 unk5[3];
-    /* 0x08 */ s8 characterRow; /* And its row */
-    /* 0x09 */ u8 unk9[0xB - 0x9];
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ s8 characterColumns[MAX_PLAYER_COUNT]; /* Each player's character select cursor column */
+    /* 0x07 */ s8 characterRows[MAX_PLAYER_COUNT];    /* And row */
     /* 0x0B */ s8 modeChoice; /* The mode select cursor's place in the player count's modes */
     /* 0x0C */ u8 unkC;
     /* 0x0D */ s8 unkD;

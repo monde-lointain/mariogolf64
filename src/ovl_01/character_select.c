@@ -163,8 +163,8 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = func_8005AF74();
-    s16 oldColumn = (s8)*((s8 *)memory + playerNumber + 3);
-    s16 oldRow = (s8)*((s8 *)memory + playerNumber + 7);
+    s16 oldColumn = memory->characterColumns[playerNumber];
+    s16 oldRow = memory->characterRows[playerNumber];
     s16 column = oldColumn;
     s16 row = oldRow;
     u16 slot;
@@ -203,8 +203,8 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
         }
     } while (g_CharacterGrid[row][column] < 0 &&
              (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT && canChooseMarked == TRUE) == FALSE);
-    *((s8 *)memory + playerNumber + 3) = column;
-    *((s8 *)memory + playerNumber + 7) = row;
+    memory->characterColumns[playerNumber] = column;
+    memory->characterRows[playerNumber] = row;
     if (column != oldColumn || row != oldRow) {
         character = g_CharacterGrid[oldRow][oldColumn];
         D_8022FF04_ovl_01 = 0;
@@ -246,8 +246,8 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     AssetFile file;
     MenuMemory *memory = func_8005AF74();
     s32 retryCount = 0;
-    s16 oldRow = (s8)*((s8 *)memory + playerNumber + 7);
-    s16 oldColumn = (s8)*((s8 *)memory + playerNumber + 3);
+    s16 oldRow = memory->characterRows[playerNumber];
+    s16 oldColumn = memory->characterColumns[playerNumber];
     s32 column = oldColumn;
     s32 row = oldRow;
     u16 slot;
@@ -304,8 +304,8 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
         }
         retryCount++;
     }
-    *((s8 *)memory + playerNumber + 3) = column;
-    *((s8 *)memory + playerNumber + 7) = row;
+    memory->characterColumns[playerNumber] = column;
+    memory->characterRows[playerNumber] = row;
     if (column != oldColumn || row != oldRow) {
         character = g_CharacterGrid[oldRow][oldColumn];
         D_8022FF04_ovl_01 = 0;
@@ -432,8 +432,8 @@ void func_8020B3CC_ovl_01(void) {
     for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
         for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
             if (g_CharacterGrid[row][column] < MARKED_CHARACTER_LIMIT) {
-                memory->characterColumn = column;
-                memory->characterRow = row;
+                memory->characterColumns[1] = column;
+                memory->characterRows[1] = row;
             }
         }
     }
@@ -533,8 +533,8 @@ void func_8020B590_ovl_01(Gfx **displayListHead, u8 isSinglePlayer) {
     } else {
         playerNumber = 1;
     }
-    column = *(s8 *)((s32)&func_8005AF74()->characterColumn + (s16)playerNumber - 1);
-    slot = g_CharacterGrid[*(s8 *)((s32)&func_8005AF74()->characterRow + (s16)playerNumber - 1)][column];
+    column = *(s8 *)((s32)&func_8005AF74()->characterColumns[1] + (s16)playerNumber - 1);
+    slot = g_CharacterGrid[*(s8 *)((s32)&func_8005AF74()->characterRows[1] + (s16)playerNumber - 1)][column];
     if (slot < CHOOSABLE_MARK_LIMIT) {
         choiceIndex = slot + MARKED_CHARACTER_OFFSET;
     } else {
