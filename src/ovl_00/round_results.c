@@ -997,16 +997,19 @@ void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
 #define RANK_BANNER_WIDTH 96
 #define RANK_BANNER_STRIP_HEIGHT 16
 #define RANK_BANNER_STRIP_COUNT 3
-/* The place suffixes' icons: st, nd, rd and th */
-#define PLACE_SUFFIX_TH 3
-#define PLACE_TWENTY_FIRST 20
-#define PLACE_TWENTY_FOURTH 23
+/*
+ * DrawRank's ranks count from 0 for the 1st place. From the 4th, it draws
+ * the place as digits and a suffix icon: st, nd, rd or th.
+ */
+#define RANK_FOURTH 3
+#define RANK_TWENTY_FIRST 20
+#define RANK_TWENTY_FOURTH 23
 #define PLACE_DIGIT_WIDTH 24
 #define PLACE_DIGIT_SPACING 20
 #define PLACE_DIGIT_X 4
 #define PLACE_DIGIT_Y 10
 /* Two-digit places start further left, from the 10th */
-#define PLACE_TENTH 9
+#define RANK_TENTH 9
 #define PLACE_TWO_DIGIT_SHIFT 16
 /* The suffix icons follow the 1st to 4th place icons in the image */
 #define PLACE_SUFFIX_ICON_FIRST 4
@@ -1030,11 +1033,11 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
   if (rank & RANK_AS_PLACE) {
     rank &= ~RANK_AS_PLACE;
     suffix = rank;
-    if (rank >= PLACE_SUFFIX_TH) {
-      if (rank < PLACE_TWENTY_FIRST) {
+    if (rank >= RANK_FOURTH) {
+      if (rank < RANK_TWENTY_FIRST) {
         suffix = PLACE_SUFFIX_TH;
-      } else if (rank < PLACE_TWENTY_FOURTH) {
-        suffix = rank - PLACE_TWENTY_FIRST;
+      } else if (rank < RANK_TWENTY_FOURTH) {
+        suffix = rank - RANK_TWENTY_FIRST;
       } else {
         suffix = PLACE_SUFFIX_TH;
       }
@@ -1051,10 +1054,10 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         (x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE) * 4,
         (y + PLACE_ICON_SIZE) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
-    if (rank >= PLACE_SUFFIX_TH) {
+    if (rank >= RANK_FOURTH) {
       sprintf(g_PrintBuffer, f_PlaceNumberFormat, rank + 1);
       LoadSmallPalette(&gfx, 0, D_80225708_ovl_00 + IMAGE_HEADER_SIZE);
-      if (rank >= PLACE_TENTH) {
+      if (rank >= RANK_TENTH) {
         x -= PLACE_TWO_DIGIT_SHIFT;
       }
       for (i = 0; g_PrintBuffer[i] != '\0'; i++) {
@@ -2418,8 +2421,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 #define MATCH_STEP_START_TALLY 10
 #define CHARACTER_NOTICE_TITLE_ASSET 0x560
 #define CHARACTER_NOTICE_WAIT_FRAMES 8
-/* f_PlayerRanks[0] when the first player wins the match */
-#define MATCH_RANK_WON RANK_BANNER
 
 extern s32 f_DebugUnlockCharacter;
 
