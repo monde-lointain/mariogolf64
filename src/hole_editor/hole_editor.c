@@ -37,6 +37,21 @@
 #define SLOPE_SHADE_OFFSET 0x40
 #define SLOPE_SHADE_MAX 0xFF
 
+/* func_80404850's out-of-bounds slope searches this many nearest offsets */
+#define SLOPE_OFFSET_COUNT 400
+#define SLOPE_OFFSET_SPAN 10
+/* The distances, in grid steps, where the slope starts and turns to noise */
+#define SLOPE_START_DISTANCE 5
+#define SLOPE_NOISE_DISTANCE 6
+#define SLOPE_EXTRA_NOISE_DISTANCE 12
+/* The slope's line meets zero at this distance */
+#define SLOPE_BASE_DISTANCE 2
+#define SLOPE_DROP_PER_DISTANCE (30.0f / OFFSET_DISTANCE_SCALE)
+#define SLOPE_NOISE_MASK 0x3FFF
+#define SLOPE_NOISE_SCALE 0.001f
+#define SLOPE_FAR_DROP 60.0f
+#define SLOPE_EXTRA_DROP 15.0f
+
 /* func_80404B84's ground height editor */
 #define EDITOR_PAD 0
 #define OPTION_PAD 1
@@ -214,7 +229,6 @@ extern s32 sLastHeightEditKind; /* The last frame's HEIGHT_EDIT_* */
 extern s8 D_800C30D1;
 
 s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade);
-void func_80404850_hole_editor(void);
 
 /* func_80406818's menu */
 extern s32 sIsSavingHoleFiles;
@@ -352,7 +366,57 @@ void func_804045C0_hole_editor(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80404850_hole_editor);
+/*
+ * Slopes the out-of-bounds ground: each out-of-bounds ground point moves
+ * along y by how far it is from the nearest point with another code, with
+ * noise from SLOPE_NOISE_DISTANCE on. The height editor's option pad calls
+ * it with C-down.
+ */
+void func_80404850_hole_editor(void) {
+    Vtx_t point;
+    GridOffset *offsets;
+    s32 offsetCount;
+    s32 offsetIndex;
+    s32 column;
+    s32 row;
+    Vtx *groundPoint;
+    Vtx *neighbor;
+
+    offsets = AllocMemory(SLOPE_OFFSET_COUNT * sizeof(GridOffset));
+    offsetCount = ListOffsetsByDistance(SLOPE_OFFSET_SPAN, offsets, SLOPE_OFFSET_COUNT);
+    for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
+        for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
+            groundPoint = GetGroundPoint(column, row);
+            if (GetTerrainCode(groundPoint->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
+                               groundPoint->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE) != TERRAIN_CODE_OUT_OF_BOUNDS) {
+                continue;
+            }
+            for (offsetIndex = 1; offsetIndex < offsetCount; offsetIndex++) {
+                if (offsets[offsetIndex].distance >= SLOPE_NOISE_DISTANCE * OFFSET_DISTANCE_SCALE) {
+                    break;
+                }
+                neighbor = GetGroundPoint(column + offsets[offsetIndex].column, row + offsets[offsetIndex].row);
+                if (GetTerrainCode(neighbor->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
+                                   neighbor->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE) != TERRAIN_CODE_OUT_OF_BOUNDS) {
+                    break;
+                }
+            }
+            point = groundPoint->v;
+            /* Never true, as the search stops at SLOPE_NOISE_DISTANCE */
+            if (offsets[offsetIndex].distance / OFFSET_DISTANCE_SCALE >= SLOPE_EXTRA_NOISE_DISTANCE) {
+                point.ob[AXIS_Y] += (rand() & SLOPE_NOISE_MASK) * SLOPE_NOISE_SCALE + SLOPE_EXTRA_DROP;
+            }
+            if (offsets[offsetIndex].distance / OFFSET_DISTANCE_SCALE >= SLOPE_NOISE_DISTANCE) {
+                point.ob[AXIS_Y] += (rand() & SLOPE_NOISE_MASK) * SLOPE_NOISE_SCALE + SLOPE_FAR_DROP;
+            } else if (offsets[offsetIndex].distance / OFFSET_DISTANCE_SCALE >= SLOPE_START_DISTANCE) {
+                point.ob[AXIS_Y] += (offsets[offsetIndex].distance - SLOPE_BASE_DISTANCE * OFFSET_DISTANCE_SCALE) *
+                                    SLOPE_DROP_PER_DISTANCE;
+            }
+            SetGroundPoint(column, row, &point);
+        }
+    }
+    FreeMemory(&offsets);
+}
 
 /*
  * Runs the ground height editor. On the editor pads, the D-pad moves a
