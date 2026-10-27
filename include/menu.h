@@ -127,6 +127,11 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define FACE_NAME_OFFSET_X 24
 #define FACE_NAME_OFFSET_Y 12
 
+/* The signs that func_802123E0 draws */
+#define MENU_SIGN_PLUS 0
+#define MENU_SIGN_TIMES 1
+#define MENU_SIGN_PLUS_MINUS 2
+
 /*
  * The cursor of the character table and the player stats: a quad whose corners
  * cycle through the colours, masked by the 48x48 IA4 image of asset 0x6EF

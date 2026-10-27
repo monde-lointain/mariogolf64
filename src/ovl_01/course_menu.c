@@ -68,10 +68,6 @@
 #define MENU_GLYPH_TIMES 0
 #define MENU_GLYPH_PLUS 13
 #define MENU_GLYPH_PLUS_MINUS 15
-/* The signs that func_802123E0 draws */
-#define MENU_SIGN_PLUS 0
-#define MENU_SIGN_TIMES 1
-#define MENU_SIGN_PLUS_MINUS 2
 #define OFF_FIRST_GLYPH 16
 #define OFF_GLYPH_COUNT 2
 
