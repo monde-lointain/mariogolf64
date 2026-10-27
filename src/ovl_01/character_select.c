@@ -1,6 +1,27 @@
 #include "common.h"
+#include "menu.h"
+#include "menu_memory.h"
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209500_ovl_01);
+/* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
+#define MARKED_CHARACTER_LIMIT (-10)
+
+extern s32 D_8022FF1C_ovl_01[4];
+
+void func_80209500_ovl_01(void) {
+    s32 firstSlot = g_CharacterGrid[2][0];
+    s32 secondSlot = g_CharacterGrid[2][1];
+    s32 thirdSlot = g_CharacterGrid[2][2];
+    s32 fourthSlot = g_CharacterGrid[2][3];
+
+    g_CharacterGrid[2][0] = -1;
+    g_CharacterGrid[2][1] = -1;
+    g_CharacterGrid[2][2] = -1;
+    g_CharacterGrid[2][3] = -1;
+    D_8022FF1C_ovl_01[0] = firstSlot;
+    D_8022FF1C_ovl_01[1] = secondSlot;
+    D_8022FF1C_ovl_01[2] = thirdSlot;
+    D_8022FF1C_ovl_01[3] = fourthSlot;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209568_ovl_01);
 
@@ -12,7 +33,20 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209D50_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B2C4_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B3CC_ovl_01);
+void func_8020B3CC_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+    s32 row;
+    s32 column;
+
+    for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
+        for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+            if (g_CharacterGrid[row][column] < MARKED_CHARACTER_LIMIT) {
+                memory->characterColumn = column;
+                memory->characterRow = row;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B438_ovl_01);
 

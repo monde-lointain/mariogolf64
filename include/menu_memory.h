@@ -5,7 +5,11 @@
 
 /* What the menus keep between visits, such as the last choices made */
 typedef struct MenuMemory {
-    /* 0x00 */ u8 unk0[0x20];
+    /* 0x00 */ u8 unk0[4];
+    /* 0x04 */ s8 characterColumn; /* The character select cursor's column */
+    /* 0x05 */ u8 unk5[3];
+    /* 0x08 */ s8 characterRow; /* And its row */
+    /* 0x09 */ u8 unk9[0x20 - 0x9];
     /* 0x20 */ s8 helpTopicIndex;
     /* 0x21 */ u8 unk21[0x2E - 0x21];
     /* 0x2E */ s8 holeIndex;   /* The hole the Ring Shot select points at */
