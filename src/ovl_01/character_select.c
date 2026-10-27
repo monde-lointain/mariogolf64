@@ -128,11 +128,16 @@ extern s32 D_80105B68;
 extern u8 D_8022FF00_ovl_01;
 extern s8 D_8022FF07_ovl_01;
 extern s8 D_8022FF08_ovl_01;
+extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+/* Each player's tag offset from their cursor's grid cell, as x and y */
+extern s8 D_8022FFCC_ovl_01[MAX_PLAYER_COUNT][2];
+/* The tags' x when lined up, by the player count less one */
+extern s32 D_8022FFD4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 void func_801FC754_ovl_01(Gfx **displayListHead);
 void func_801FD7B0_ovl_01(Gfx **displayListHead);
 void func_8020BA08_ovl_01(Gfx **displayListHead, u8 isSinglePlayer);
 void func_8020C3B8_ovl_01(Gfx **displayListHead);
-void func_8020C6D8_ovl_01(Gfx **displayListHead, s32 arg1);
+void func_8020C6D8_ovl_01(Gfx **displayListHead, u8 tagMode);
 /* The original passes these a second argument that they ignore */
 void func_8020D338_ovl_01();
 void func_8020D734_ovl_01();
@@ -652,7 +657,105 @@ void func_8020C3B8_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+/* How func_8020C6D8 places the player tags. Nothing passes PLAYER_TAG_LINED_UP. */
+#define PLAYER_TAG_LINED_UP 0
+#define PLAYER_TAG_SINGLE_PLAYER 2 /* The second tag then reads "Com" */
+/* The player tag images: 1P to 4P, then 1C to 4C, then Com */
+#define PLAYER_TAG_FIRST_COMPUTER 4
+#define PLAYER_TAG_COM 8
+#define PLAYER_TAG_IMAGE_SIZE 64 /* Bytes, as 16 by 8 nibbles */
+#define COMPUTER_TAG_TEXELS_OFFSET (PALETTED_TEXELS_OFFSET + PLAYER_TAG_FIRST_COMPUTER * PLAYER_TAG_IMAGE_SIZE)
+#define PLAYER_TAG_TEXELS(offset) ((u32)((u8 *)D_8023A570_ovl_01 + (offset)) & ~7)
+#define PLAYER_TAG_WIDTH 16
+#define PLAYER_TAG_HEIGHT 8
+#define PLAYER_TAG_SHIFT_LEFT 4
+#define PLAYER_TAG_TOP 56
+#define PLAYER_TAG_RAISE (-14) /* Lined-up tags alternate between two heights */
+/* The character grid's cells on screen */
+#define GRID_CELL_SIZE 40
+#define GRID_LEFT 28
+#define GRID_TOP 48
+#define GRID_CURSOR_SHIFT_LEFT 8
+
+/*
+ * Doesn't match: the original sign-extends the cursor's x to 16 bits before
+ * adding GRID_LEFT, where GCC here sees that it already fits and folds the
+ * two offsets together.
+ */
+#ifdef NON_MATCHING
+void func_8020C6D8_ovl_01(Gfx **displayListHead, u8 tagMode) {
+    MenuMemory *memory = func_8005AF74();
+    s16 tagCount = D_801B7070 + 1;
+    Gfx *gfx = *displayListHead;
+    s8 playerIndex;
+    s16 left;
+    s16 shiftX; /* Both layouts leave it at 0 */
+    s16 top;
+    s16 cursorLeft;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023A570_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    if (g_MenuScreen == MENU_SCREEN_UNK24) {
+        tagCount = 1;
+    }
+    for (playerIndex = 0; playerIndex != tagCount; playerIndex++) {
+        if (tagMode != PLAYER_TAG_LINED_UP) {
+            shiftX = 0;
+            left = D_8022FFCC_ovl_01[playerIndex][0] + memory->characterColumns[playerIndex] * GRID_CELL_SIZE;
+            top = D_8022FFCC_ovl_01[playerIndex][1] + memory->characterRows[playerIndex] * GRID_CELL_SIZE;
+        } else {
+            left = D_8022FFD4_ovl_01[tagCount - 1][playerIndex];
+            top = ((playerIndex & 1) == 0) ? PLAYER_TAG_RAISE : 0;
+            if ((tagCount == 2) & (playerIndex == 1)) {
+                top = PLAYER_TAG_RAISE;
+            }
+            shiftX = 0;
+        }
+        if ((tagMode == PLAYER_TAG_SINGLE_PLAYER) & (playerIndex == 1)) {
+            gDPLoadTextureBlock_4b(gfx++,
+                                   PLAYER_TAG_TEXELS(PALETTED_TEXELS_OFFSET + PLAYER_TAG_COM * PLAYER_TAG_IMAGE_SIZE),
+                                   G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        } else if (D_800C1FF4[playerIndex] == NO_CONTROLLER_INDEX) {
+            gDPLoadTextureBlock_4b(gfx++,
+                                   PLAYER_TAG_TEXELS(playerIndex * PLAYER_TAG_IMAGE_SIZE + COMPUTER_TAG_TEXELS_OFFSET),
+                                   G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        } else if (D_8022FF07_ovl_01 == TRUE && playerIndex == D_801B7070) {
+            gDPLoadTextureBlock_4b(gfx++,
+                                   PLAYER_TAG_TEXELS(playerIndex * PLAYER_TAG_IMAGE_SIZE + COMPUTER_TAG_TEXELS_OFFSET),
+                                   G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        } else {
+            gDPLoadTextureBlock_4b(gfx++,
+                                   PLAYER_TAG_TEXELS(playerIndex * PLAYER_TAG_IMAGE_SIZE + PALETTED_TEXELS_OFFSET),
+                                   G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        }
+        left = shiftX + (s16)(left + GRID_LEFT);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (left - PLAYER_TAG_SHIFT_LEFT) << 2, (top + PLAYER_TAG_TOP) << 2,
+                                (left - PLAYER_TAG_SHIFT_LEFT + PLAYER_TAG_WIDTH) << 2,
+                                (top + PLAYER_TAG_TOP + PLAYER_TAG_HEIGHT) << 2,
+                                G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    /* playerIndex now picks whose cursor to draw */
+    playerIndex = 0;
+    if (g_MenuScreen != MENU_SCREEN_UNK24) {
+        playerIndex = D_801B7070;
+    }
+    cursorLeft = memory->characterColumns[playerIndex] * GRID_CELL_SIZE - GRID_CURSOR_SHIFT_LEFT;
+    func_8020CD20_ovl_01(&gfx, cursorLeft + GRID_LEFT,
+                         memory->characterRows[playerIndex] * GRID_CELL_SIZE + GRID_TOP);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C6D8_ovl_01);
+#endif
 
 /* Doesn't match: the original loads the 96 for the cursor's y after g_DrawBufferIndex, not before */
 #ifdef NON_MATCHING
