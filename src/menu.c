@@ -77,7 +77,7 @@ extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern s8 D_801B60B8;
-extern s8 D_800FF4C0;
+extern u8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_800C2BD5;
 extern s8 D_801052E8;

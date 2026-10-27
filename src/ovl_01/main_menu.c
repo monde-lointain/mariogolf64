@@ -261,7 +261,7 @@ extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
 extern u8 D_801B9410;
-extern s8 D_800FF4C0;
+extern u8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
