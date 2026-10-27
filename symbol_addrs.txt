@@ -3376,3 +3376,7 @@ f_ShotBallPosition = 0x8020CCF4; // type:f32 size:0xC segment:ovl_05
 f_ShotBallShadowTranslation = 0x8020CD08; // type:Mtx size:0x40 segment:ovl_05
 f_ShotBallShadowScaling = 0x8020CD48; // type:Mtx size:0x40 segment:ovl_05
 f_ShotBallImage = 0x80213A40; // type:u8 size:0x1208 segment:ovl_05
+DrawLakitu = 0x801FE8F8; // type:func segment:ovl_05
+f_LakituTrailNewestIndex = 0x8020ADAC; // type:s32 size:0x4 segment:ovl_05
+f_LakituTrailAlpha = 0x8020B1EC; // type:s32 size:0x4 segment:ovl_05
+f_LakituTrailVertices = 0x8020B1F0; // type:Vtx size:0x20 segment:ovl_05

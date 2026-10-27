@@ -156,7 +156,7 @@ void DrawOpeningShotPath(CameraMatrices* matrices);
 void func_801FA8D8_ovl_05(Gfx** displayListHead);
 void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices);
 void DrawOpeningImpactLines(Gfx** displayListHead);
-void func_801FE8F8_ovl_05(Gfx** displayListHead);
+void DrawLakitu(Gfx** displayListHead);
 void DrawOpeningBurst(Gfx** displayListHead);
 void DrawOpeningShotBall(Gfx** displayListHead);
 void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1);
@@ -504,7 +504,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   DrawLensFlare(&gfx);
   DrawOpeningImpactLines(&gfx);
   DrawOpeningBurst(&gfx);
-  func_801FE8F8_ovl_05(&gfx);
+  DrawLakitu(&gfx);
   func_801FBB94_ovl_05(&gfx, matrices);
   DrawOpeningShotBall(&gfx);
   DrawOpeningSparks(&gfx);
@@ -721,11 +721,31 @@ void LoadLakitu(void) {
   f_LakituTrailStart[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
 }
 
-extern s32 D_8020ADAC_ovl_05;
-extern s32 D_8020B1EC_ovl_05;
-extern Vtx D_8020B1F0_ovl_05[2];
+extern s32 f_LakituTrailNewestIndex;
+extern s32 f_LakituTrailAlpha;
+extern Vtx f_LakituTrailVertices[2];
 
 #ifdef NON_MATCHING
+#define LAKITU_IMAGE_SIZE 32
+#define LAKITU_DRAWN_SIZE 48
+/* Texels a pixel when stretching Lakitu's image to its drawn size, in 5.10 */
+#define LAKITU_SCALE ((LAKITU_IMAGE_SIZE << 10) / LAKITU_DRAWN_SIZE)
+#define LAKITU_TRAIL_IMAGE_WIDTH 48
+#define LAKITU_TRAIL_IMAGE_HEIGHT 128
+/* Segments whose vertices fit in the vertex buffer at once */
+#define LAKITU_TRAIL_BATCH_SEGMENT_COUNT 16
+#define LAKITU_TRAIL_DRAWN_SEGMENT_COUNT 31
+#define LAKITU_TRAIL_ROWS_PER_SEGMENT 8
+/* Texture coordinates, in 10.5, of the trail's right edge and of a segment */
+#define LAKITU_TRAIL_RIGHT_S ((LAKITU_TRAIL_IMAGE_WIDTH << 5) - 1)
+#define LAKITU_TRAIL_T(segment) \
+  (((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT) << 5)
+/* First vertex buffer slot of a segment in the second batch */
+#define LAKITU_TRAIL_SECOND_BATCH_SLOT(segment) \
+  ((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2 - \
+   ((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2)
+#define LAKITU_TRAIL_FADE_STEP 4
+
 /*
  * Draws Lakitu while he flies, with a fading trail of the places he has been.
  *
@@ -733,13 +753,13 @@ extern Vtx D_8020B1F0_ovl_05[2];
  * of a pipe sync and the command after it swap slots, as in the opening's
  * sparks.
  */
-void func_801FE8F8_ovl_05(Gfx** displayListHead) {
+void DrawLakitu(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   Vec3 translation;
   Vec3 rotation;
   Mat4 matrix;
   s32 segmentIndex;
-  s32 i;
+  s32 drawnIndex;
 
   if (f_IsLakituFlying) {
     gDPPipeSync(gfx++);
@@ -764,14 +784,16 @@ void func_801FE8F8_ovl_05(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock(
         gfx++, TEXTURE_ADDRESS(f_LakituImage + LARGE_PALETTED_TEXELS_OFFSET),
-        G_IM_FMT_CI, G_IM_SIZ_8b, 32, 32, 0, G_TX_MIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_IMAGE_SIZE, LAKITU_IMAGE_SIZE, 0,
+        G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (f_LakituScreenPoint[0] - 24) << 2,
-                            (f_LakituScreenPoint[1] - 24) << 2,
-                            (f_LakituScreenPoint[0] + 24) << 2,
-                            (f_LakituScreenPoint[1] + 24) << 2, G_TX_RENDERTILE,
-                            32 << 5, 0, (32 << 10) / 48, (32 << 10) / 48);
+    gSPScisTextureRectangle(
+        gfx++, (f_LakituScreenPoint[0] - LAKITU_DRAWN_SIZE / 2) << 2,
+        (f_LakituScreenPoint[1] - LAKITU_DRAWN_SIZE / 2) << 2,
+        (f_LakituScreenPoint[0] + LAKITU_DRAWN_SIZE / 2) << 2,
+        (f_LakituScreenPoint[1] + LAKITU_DRAWN_SIZE / 2) << 2, G_TX_RENDERTILE,
+        LAKITU_IMAGE_SIZE << 5, 0, LAKITU_SCALE, LAKITU_SCALE);
     gDPPipeSync(gfx++);
     rotation[0] = 0.0f;
     rotation[1] = 0.0f;
@@ -783,7 +805,8 @@ void func_801FE8F8_ovl_05(Gfx** displayListHead) {
     translation[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
     translation[2] = -LAKITU_TRAIL_DEPTH;
     BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(matrix, &f_LakituTrailMatrices[D_8020ADAC_ovl_05]);
+    ConvertMatrixToFixed(matrix,
+                         &f_LakituTrailMatrices[f_LakituTrailNewestIndex]);
     f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH / 2;
     f_LakituTrailStart[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
     gSPLoadGeometryMode(gfx++, 0);
@@ -797,63 +820,80 @@ void func_801FE8F8_ovl_05(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, D_8020B1EC_ovl_05);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_LakituTrailAlpha);
     gDPSetEnvColor(gfx++, 255, 255, 255, 255);
     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
                       0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
     gDPLoadTextureBlock_4b(
         gfx++, TEXTURE_ADDRESS(f_LakituTrailImage + IMAGE_HEADER_SIZE),
-        G_IM_FMT_I, 48, 128, 0, G_TX_MIRROR | G_TX_WRAP,
-        G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
+        G_IM_FMT_I, LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
+        G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, 7,
+        G_TX_NOLOD, G_TX_NOLOD);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gDPPipeSync(gfx++);
-    segmentIndex = D_8020ADAC_ovl_05;
-    for (i = 0; i != 16; i++) {
+    segmentIndex = f_LakituTrailNewestIndex;
+    for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
+         drawnIndex++) {
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
                 G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, D_8020B1F0_ovl_05, 2, i * 2);
-      gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, i << 8);
-      gSPModifyVertex(gfx++, i * 2 + 1, G_MWO_POINT_ST,
-                      (0x5FF << 16) + (i << 8));
+      gSPVertex(gfx++, f_LakituTrailVertices, 2, drawnIndex * 2);
+      gSPModifyVertex(gfx++, drawnIndex * 2, G_MWO_POINT_ST,
+                      LAKITU_TRAIL_T(drawnIndex));
+      gSPModifyVertex(
+          gfx++, drawnIndex * 2 + 1, G_MWO_POINT_ST,
+          (LAKITU_TRAIL_RIGHT_S << 16) + LAKITU_TRAIL_T(drawnIndex));
       segmentIndex--;
       if (segmentIndex < 0) {
         segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
       }
     }
-    for (i = 0; i != 15; i++) {
-      gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2,
-                    i * 2 + 3, 0);
+    for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
+         drawnIndex++) {
+      gSP2Triangles(gfx++, drawnIndex * 2 + 1, drawnIndex * 2,
+                    drawnIndex * 2 + 2, 0, drawnIndex * 2 + 1,
+                    drawnIndex * 2 + 2, drawnIndex * 2 + 3, 0);
     }
-    for (i = 16; i != 31; i++) {
+    /*
+     * The second batch fills the vertex buffer from the end, keeping the
+     * last pair of the first batch in its slots, so the same triangles join
+     * up the rest of the trail.
+     */
+    for (drawnIndex = LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
+         drawnIndex != LAKITU_TRAIL_DRAWN_SEGMENT_COUNT; drawnIndex++) {
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
                 G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, D_8020B1F0_ovl_05, 2, 28 - (i - 16) * 2);
-      gSPModifyVertex(gfx++, 28 - (i - 16) * 2, G_MWO_POINT_ST, i << 8);
-      gSPModifyVertex(gfx++, 29 - (i - 16) * 2, G_MWO_POINT_ST,
-                      (0x5FF << 16) + (i << 8));
+      gSPVertex(gfx++, f_LakituTrailVertices, 2,
+                LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex));
+      gSPModifyVertex(gfx++, LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex),
+                      G_MWO_POINT_ST, LAKITU_TRAIL_T(drawnIndex));
+      gSPModifyVertex(
+          gfx++, LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex) + 1, G_MWO_POINT_ST,
+          (LAKITU_TRAIL_RIGHT_S << 16) + LAKITU_TRAIL_T(drawnIndex));
       segmentIndex--;
       if (segmentIndex < 0) {
         segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
       }
     }
-    for (i = 0; i != 15; i++) {
-      gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2,
-                    i * 2 + 3, 0);
+    for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
+         drawnIndex++) {
+      gSP2Triangles(gfx++, drawnIndex * 2 + 1, drawnIndex * 2,
+                    drawnIndex * 2 + 2, 0, drawnIndex * 2 + 1,
+                    drawnIndex * 2 + 2, drawnIndex * 2 + 3, 0);
     }
     gDPPipeSync(gfx++);
-    if (++D_8020ADAC_ovl_05 >= LAKITU_TRAIL_SEGMENT_COUNT) {
-      D_8020ADAC_ovl_05 = 0;
+    if (++f_LakituTrailNewestIndex >= LAKITU_TRAIL_SEGMENT_COUNT) {
+      f_LakituTrailNewestIndex = 0;
     }
-    D_8020B1EC_ovl_05 -= 4;
-    if (D_8020B1EC_ovl_05 < 0) {
-      D_8020B1EC_ovl_05 = 0;
+    f_LakituTrailAlpha -= LAKITU_TRAIL_FADE_STEP;
+    if (f_LakituTrailAlpha < 0) {
+      f_LakituTrailAlpha = 0;
     }
     *displayListHead = gfx;
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE8F8_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawLakitu);
 #endif
 
 /* Flies Lakitu across the screen in loops until it has turned through 540
