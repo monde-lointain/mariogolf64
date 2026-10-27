@@ -45,6 +45,24 @@
 #define LABEL_SHOWN_WIDTH 40
 #define LABEL_LEFT 200
 #define LABEL_TOP 200
+
+/*
+ * func_8020DB30 shows a character's shot curve as a meter of the 8x8
+ * cells of asset 0x8EE, filled from the middle one toward the draw or the
+ * fade, beside the 64x8 label of asset 0x979 that names it
+ */
+#define CURVE_METER_CENTER 4
+#define CURVE_METER_CELL_SIZE 8
+#define CURVE_METER_LEFT 204
+#define CURVE_METER_TOP 185
+#define CURVE_LABEL_WIDTH 64
+#define CURVE_LABEL_HEIGHT 8
+#define CURVE_LABEL_IMAGE_HEIGHT 24
+#define CURVE_LABEL_LEFT 210
+#define CURVE_LABEL_TOP 174
+#define CURVE_LABEL_STRAIGHT 0
+#define CURVE_LABEL_DRAW 1
+#define CURVE_LABEL_FADE 2
 /* Asset 0x709 in D_801B69EC holds the "R: COM" icon above the "L: LEFTY" icon */
 #define BUTTON_ICON_WIDTH 32
 #define BUTTON_ICON_HEIGHT 24
@@ -118,7 +136,7 @@ void func_8020C6D8_ovl_01(Gfx **displayListHead, s32 arg1);
 /* The original passes these a second argument that they ignore */
 void func_8020D338_ovl_01();
 void func_8020D734_ovl_01();
-void func_8020DB30_ovl_01(Gfx **displayListHead, s32 character);
+void func_8020DB30_ovl_01(Gfx **displayListHead, s32 clubSet);
 
 void func_80209500_ovl_01(void) {
     s32 firstSlot = g_CharacterGrid[2][0];
@@ -759,7 +777,69 @@ void func_8020D734_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020DB30_ovl_01);
+void func_8020DB30_ovl_01(Gfx **displayListHead, s32 clubSet) {
+    Gfx *gfx = *displayListHead;
+    s32 curve = g_Clubs[clubSet * CLUB_SET_SIZE].unk30;
+    s32 firstCell;
+    s32 cellIndex;
+    s32 endCell;
+    u8 *labelImage;
+    s32 labelRow;
+
+    if (curve < 0) {
+        firstCell = CURVE_METER_CENTER + curve;
+        endCell = CURVE_METER_CENTER + 1;
+    } else if (curve > 0) {
+        firstCell = CURVE_METER_CENTER;
+        endCell = CURVE_METER_CENTER + 1 + curve;
+    } else {
+        firstCell = CURVE_METER_CENTER;
+        endCell = CURVE_METER_CENTER + 1;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_8023A584_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (cellIndex = firstCell; cellIndex != endCell; cellIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_8023A584_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+                             cellIndex * CURVE_METER_CELL_SIZE * CURVE_METER_CELL_SIZE) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, CURVE_METER_CELL_SIZE, CURVE_METER_CELL_SIZE, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (CURVE_METER_LEFT + cellIndex * CURVE_METER_CELL_SIZE) << 2,
+                                CURVE_METER_TOP << 2,
+                                (CURVE_METER_LEFT + cellIndex * CURVE_METER_CELL_SIZE + CURVE_METER_CELL_SIZE) << 2,
+                                (CURVE_METER_TOP + CURVE_METER_CELL_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+                                TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    labelImage = GetMenuImageBuffer();
+    LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, labelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, CURVE_LABEL_WIDTH,
+                           CURVE_LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    if (g_Clubs[clubSet * CLUB_SET_SIZE].unk30 > 0) {
+        labelRow = CURVE_LABEL_DRAW;
+    } else if (g_Clubs[clubSet * CLUB_SET_SIZE].unk30 < 0) {
+        labelRow = CURVE_LABEL_FADE;
+    } else {
+        labelRow = CURVE_LABEL_STRAIGHT;
+    }
+    DrawTextureRect(&gfx, CURVE_LABEL_LEFT << 2, CURVE_LABEL_TOP << 2, (CURVE_LABEL_LEFT + CURVE_LABEL_WIDTH) << 2,
+                    (CURVE_LABEL_TOP + CURVE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+                    (labelRow * CURVE_LABEL_HEIGHT) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    *displayListHead = gfx;
+}
 
 const char D_80231810_ovl_01[] = "Sand Saves";
 const char D_8023181C_ovl_01[] = "Par Ons";
