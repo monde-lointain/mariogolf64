@@ -10,10 +10,10 @@
 /* An interpolation weight runs from 0, all the first end, to this, all the second */
 #define EDGE_WEIGHT_MAX 16
 
-/* The screen capture, a 24-bit BMP of the frame's top-left corner */
+/* The screen captures, 24-bit BMPs; the corner capture covers the frame's top-left corner */
 #define CAPTURE_HEADER_SIZE 54
-#define CAPTURE_WIDTH 64
-#define CAPTURE_HEIGHT 128
+#define CORNER_CAPTURE_WIDTH 64
+#define CORNER_CAPTURE_HEIGHT 128
 #define CAPTURE_BYTES_PER_PIXEL 3
 /* Where the 5-bit channels sit in an RGBA16 pixel, and the shift that widens one to 8 bits */
 #define RGBA16_RED_SHIFT 11
@@ -177,8 +177,8 @@ void func_8040C260_hole_editor(s32 captureIndex) {
         capture[byteIndex] = D_8040C748_hole_editor[byteIndex];
     }
     /* BMP rows run from the bottom up, and each pixel is blue, green, red */
-    for (row = CAPTURE_HEIGHT - 1; row != -1; row--) {
-        for (column = 0; column != CAPTURE_WIDTH; column++) {
+    for (row = CORNER_CAPTURE_HEIGHT - 1; row != -1; row--) {
+        for (column = 0; column != CORNER_CAPTURE_WIDTH; column++) {
             capture[byteIndex++] = ((frame[row * SCREEN_WIDTH + column] >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK)
                                     << RGBA16_CHANNEL_WIDEN_SHIFT;
             capture[byteIndex++] = ((frame[row * SCREEN_WIDTH + column] >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK)
