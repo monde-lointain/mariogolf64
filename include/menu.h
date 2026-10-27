@@ -9,8 +9,13 @@
 #define MENU_SCREEN_OPTIONS 4
 #define MENU_SCREEN_UNK5 5
 #define MENU_SCREEN_UNK6 6
+#define MENU_SCREEN_BEST_TIMES 7
 #define MENU_SCREEN_CLUBHOUSE 9
+#define MENU_SCREEN_UNK11 11
+#define MENU_SCREEN_UNK12 12
 #define MENU_SCREEN_UNK13 13
+#define MENU_SCREEN_BIRDIE_BADGES 14
+#define MENU_SCREEN_CHARACTER_TABLE 15
 #define MENU_SCREEN_HELP 17
 #define MENU_SCREEN_EXIT 19                  /* Loads what the chosen game needs and leaves the menu */
 #define MENU_SCREEN_UNK23 23

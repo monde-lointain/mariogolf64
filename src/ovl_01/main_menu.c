@@ -56,6 +56,15 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define MAIN_CHOICE_OPTIONS 2
 #define MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT 3
 
+/* The clubhouse's rows, and the rooms that D_8022BF1C gives each of them */
+#define CLUBHOUSE_CHOICE_COUNT 5
+#define CLUBHOUSE_ROOM_UNK11 0
+#define CLUBHOUSE_ROOM_UNK12 1
+#define CLUBHOUSE_ROOM_UNK13 2
+#define CLUBHOUSE_ROOM_BIRDIE_BADGES 3
+#define CLUBHOUSE_ROOM_CHARACTER_TABLE 4
+#define CLUBHOUSE_ROOM_BEST_TIMES 5
+
 /* Past func_80217B88's presets, so that it clears the values instead */
 #define MENU_UNKE_PRESET_NONE 10
 
@@ -79,6 +88,7 @@ extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern s8 D_801B60B9;
 extern u8 D_801323E6;
+extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
 extern s32 D_8022BE18_ovl_01;
 extern s32 D_801B609C;
 extern s32 D_800FBD40[];
@@ -310,7 +320,65 @@ void func_801F9E38_ovl_01(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F9FF8_ovl_01);
+void func_801F9FF8_ovl_01(void) {
+    s32 isDone = IsHudAnimationDone();
+
+    if (isDone == TRUE) {
+        if (g_MenuPressedButtons & A_BUTTON) {
+            switch (D_8022BF1C_ovl_01[g_MenuChoices.clubhouseChoice]) {
+                case CLUBHOUSE_ROOM_UNK11:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_UNK11;
+                    break;
+                case CLUBHOUSE_ROOM_UNK12:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_UNK12;
+                    break;
+                case CLUBHOUSE_ROOM_UNK13:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_UNK13;
+                    break;
+                case CLUBHOUSE_ROOM_BIRDIE_BADGES:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_BIRDIE_BADGES;
+                    break;
+                case CLUBHOUSE_ROOM_CHARACTER_TABLE:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_CHARACTER_TABLE;
+                    break;
+                case CLUBHOUSE_ROOM_BEST_TIMES:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_BEST_TIMES;
+                    break;
+            }
+            PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            return;
+        }
+        if (g_MenuPressedButtons & B_BUTTON) {
+            PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            if (D_801323E6 == isDone) {
+                g_MenuScreen = MENU_SCREEN_MAIN;
+            } else {
+                g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
+            }
+            PlaySong(SONG_TITLE, 0);
+            return;
+        }
+        if (g_MenuRepeatButtons & U_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            g_MenuChoices.clubhouseChoice--;
+        } else if (g_MenuRepeatButtons & D_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            g_MenuChoices.clubhouseChoice++;
+        }
+        if (g_MenuChoices.clubhouseChoice >= CLUBHOUSE_CHOICE_COUNT) {
+            g_MenuChoices.clubhouseChoice = 0;
+        }
+        if (g_MenuChoices.clubhouseChoice < 0) {
+            g_MenuChoices.clubhouseChoice = CLUBHOUSE_CHOICE_COUNT - 1;
+        }
+    }
+}
 
 void func_801FA1B8_ovl_01(void) {
     if (IsHudAnimationDone() == TRUE && (g_MenuPressedButtons & B_BUTTON)) {
@@ -499,22 +567,22 @@ void DrawMenuScreen(Gfx **displayListHead) {
         case 18:
             func_80207E18_ovl_01(&gfx);
             break;
-        case 12:
+        case MENU_SCREEN_UNK12:
             func_8021D3AC_ovl_01(&gfx);
             break;
         case MENU_SCREEN_UNK13:
             func_8021FC5C_ovl_01(&gfx);
             break;
-        case 11:
+        case MENU_SCREEN_UNK11:
             func_8020E898_ovl_01(&gfx);
             break;
-        case 7:
+        case MENU_SCREEN_BEST_TIMES:
             func_80213748_ovl_01(&gfx);
             break;
-        case 14:
+        case MENU_SCREEN_BIRDIE_BADGES:
             DrawBirdieBadgeLabel(&gfx);
             break;
-        case 15:
+        case MENU_SCREEN_CHARACTER_TABLE:
             func_80215DC4_ovl_01(&gfx);
             break;
         case 5:
