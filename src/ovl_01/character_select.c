@@ -90,9 +90,22 @@ extern void *D_8023A578_ovl_01;
 extern void *D_8023A57C_ovl_01;
 extern void *D_8023A580_ovl_01;
 extern void *D_8023A584_ovl_01;
+extern Vtx D_80230038_ovl_01[MENU_CURSOR_VERTEX_COUNT];
+extern f32 D_80230080_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each corner's colour */
+extern Mtx D_8023A3A0_ovl_01;
+extern Mtx D_8023A3E0_ovl_01[2];
+extern Mtx D_8023A460_ovl_01[2];
+extern Mtx D_8023A4E0_ovl_01[2];
 extern s32 D_8022FF1C_ovl_01[4];
 extern s32 D_8022FF50_ovl_01[];
 extern char D_800C2A00[][IMPORTED_CHARACTER_NAME_LENGTH];
+
+/* Where the character cursor's translation is measured from, so that it is placed by its corner */
+#define CHARACTER_CURSOR_ORIGIN_X 140
+#define CHARACTER_CURSOR_ORIGIN_Y 96
+/* Moves the cursor by half a pixel so that its edges sit on pixel centres */
+#define HALF_PIXEL 0.5f
+
 extern s32 D_80105B68;
 extern u8 D_8022FF00_ovl_01;
 extern s8 D_8022FF07_ovl_01;
@@ -623,7 +636,66 @@ void func_8020C3B8_ovl_01(Gfx **displayListHead) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C6D8_ovl_01);
 
+/* Doesn't match: the original loads the 96 for the cursor's y after g_DrawBufferIndex, not before */
+#ifdef NON_MATCHING
+void func_8020CD20_ovl_01(Gfx **displayListHead, s32 x, s32 y) {
+    Gfx *gfx = *displayListHead;
+    s32 vertexIndex;
+    s32 red;
+    s32 blue;
+    s32 green;
+
+    for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT; vertexIndex++) {
+        D_80230080_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
+        red = (s32)(sinf(D_80230080_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) + MENU_CURSOR_COLOR_MIDDLE;
+        blue = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + M_PI / 2) * MENU_CURSOR_COLOR_SWING) +
+               MENU_CURSOR_COLOR_MIDDLE;
+        green = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + M_PI) * MENU_CURSOR_COLOR_SWING) +
+                MENU_CURSOR_COLOR_MIDDLE;
+        D_80230038_ovl_01[vertexIndex].v.cn[0] = red;
+        D_80230038_ovl_01[vertexIndex].v.cn[2] = blue;
+        D_80230038_ovl_01[vertexIndex].v.cn[1] = green;
+    }
+    guOrtho(&D_8023A3A0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2, -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2,
+            MENU_CURSOR_NEAR, MENU_CURSOR_FAR, 1.0f);
+    guTranslate(&D_8023A3E0_ovl_01[g_DrawBufferIndex], (f32)(x - CHARACTER_CURSOR_ORIGIN_X) - HALF_PIXEL,
+                (f32)(CHARACTER_CURSOR_ORIGIN_Y - y) + HALF_PIXEL, MENU_CURSOR_Z);
+    guRotate(&D_8023A460_ovl_01[g_DrawBufferIndex], 0.0f, 0.0f, 1.0f, 0.0f);
+    guScale(&D_8023A4E0_ovl_01[g_DrawBufferIndex], 1.0f, 1.0f, 1.0f);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)D_8023A574_ovl_01 + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA, MENU_CURSOR_SIZE,
+                           MENU_CURSOR_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gDPSetCombineMode(gfx++, G_CC_SHADEDECALA, G_CC_SHADEDECALA);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A3A0_ovl_01), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A3E0_ovl_01[g_DrawBufferIndex]),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A460_ovl_01[g_DrawBufferIndex]),
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A4E0_ovl_01[g_DrawBufferIndex]),
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    gSPVertex(gfx++, D_80230038_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020CD20_ovl_01);
+#endif
 
 void func_8020D338_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
