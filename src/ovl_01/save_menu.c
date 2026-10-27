@@ -57,6 +57,12 @@ extern void *D_8023B67C_ovl_01;
 
 /* The images of D_800C2064 that func_8021F6E0 reads, before one of its own */
 #define SAVE_MENU_IMAGE_COUNT 6
+/* The 64x64 CI8 icons of D_8023B680, which func_802213C8 shrinks to 32x24 in two strips */
+#define SAVE_ICON_WIDTH 64
+#define SAVE_ICON_STRIP_HEIGHT 32
+#define SAVE_ICON_STRIP_COUNT 2
+#define SAVE_ICON_SHOWN_WIDTH 32
+#define SAVE_ICON_SHOWN_STRIP_HEIGHT 12
 
 /* The game modes that have an image of their own, in image order, then mini golf's */
 #define SAVE_MENU_MODE_COUNT 10
@@ -268,7 +274,37 @@ s32 func_80220E28_ovl_01(Unk68 *record) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220E34_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802213C8_ovl_01);
+void func_802213C8_ovl_01(Gfx **displayListHead, s32 imageIndex, s32 left, s32 top) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_8023B680_ovl_01[imageIndex] + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != SAVE_ICON_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_8023B680_ovl_01[imageIndex] + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * SAVE_ICON_WIDTH * SAVE_ICON_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, SAVE_ICON_WIDTH, SAVE_ICON_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, left << 2, (top + stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT) << 2,
+                                (left + SAVE_ICON_SHOWN_WIDTH) << 2,
+                                (top + stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT + SAVE_ICON_SHOWN_STRIP_HEIGHT) << 2,
+                                G_TX_RENDERTILE, 0, 0, (SAVE_ICON_WIDTH << 10) / SAVE_ICON_SHOWN_WIDTH,
+                                (SAVE_ICON_STRIP_HEIGHT << 10) / SAVE_ICON_SHOWN_STRIP_HEIGHT);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 s32 func_8022181C_ovl_01(void) {
     SaveData *save = GetSaveData();
