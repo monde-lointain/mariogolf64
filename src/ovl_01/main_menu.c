@@ -2319,7 +2319,89 @@ void func_802081E8_ovl_01(Gfx **displayListHead, s32 left, s32 top, u8 starCount
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802081E8_ovl_01);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_8020879C_ovl_01);
+/*
+ * func_8020879C draws the course's Ring Shot holes as stars on a hexagon
+ * around a centre, gold where the hole's star was won and silver where not,
+ * with the chosen hole larger. Nothing calls it.
+ */
+#define RING_SHOT_STAR_RADIUS 56
+#define RING_SHOT_STAR_WIDTH 32
+#define RING_SHOT_STAR_HEIGHT 24
+#define RING_SHOT_STAR_GROWTH 16
+#define RING_SHOT_STAR_FRAME_DURATION 2
+#define GOLD_STAR_PALETTE 0
+#define SILVER_STAR_PALETTE 1
+/* The silver star's texels follow the gold star's in texture memory */
+#define SILVER_STAR_TMEM 128
+#define SILVER_STAR_TILE 1
+
+extern s32 D_8022F884_ovl_01[STAR_FRAME_COUNT]; /* The silver star's frames */
+extern void *D_800FF180[2];
+
+void func_8020879C_ovl_01(Gfx **displayListHead, s32 centerX, s32 centerY) {
+    EncodedAsset asset;
+    SaveData *save = GetSaveData();
+    Gfx *gfx = *displayListHead;
+    f32 starPositions[RING_SHOT_HOLE_COUNT][2] = {
+        { 0.0f, -1.0f }, { 0.89f, -0.45f }, { 0.89f, 0.45f }, { 0.0f, 1.0f }, { -0.89f, 0.45f }, { -0.89f, -0.45f },
+    };
+    void *image;
+    s32 tile;
+    u8 holeIndex;
+    s32 growWidth;
+    s32 growHeight;
+    s32 left;
+    s32 top;
+
+    image = D_8010526C[D_8022F8C4_ovl_01];
+    gDPLoadTLUT_pal16(gfx++, GOLD_STAR_PALETTE, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)image + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                           RING_SHOT_STAR_WIDTH, RING_SHOT_STAR_HEIGHT, GOLD_STAR_PALETTE, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    image = D_800FF180[D_8022F8C4_ovl_01];
+    gDPLoadTLUT_pal16(gfx++, SILVER_STAR_PALETTE, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadMultiBlock_4b(gfx++, ((u32)image + PALETTED_TEXELS_OFFSET) & ~7, SILVER_STAR_TMEM,
+                         SILVER_STAR_TILE, G_IM_FMT_CI, RING_SHOT_STAR_WIDTH, RING_SHOT_STAR_HEIGHT,
+                         SILVER_STAR_PALETTE, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    for (holeIndex = 0; holeIndex < RING_SHOT_HOLE_COUNT; holeIndex++) {
+        growWidth = 0;
+        if (holeIndex == g_MenuChoices.holeIndex) {
+            growWidth = RING_SHOT_STAR_GROWTH;
+            growHeight = RING_SHOT_STAR_GROWTH;
+        } else {
+            growHeight = 0;
+        }
+        left = starPositions[holeIndex][0] * RING_SHOT_STAR_RADIUS;
+        top = starPositions[holeIndex][1] * RING_SHOT_STAR_RADIUS;
+        left += centerX - RING_SHOT_STAR_WIDTH / 2;
+        top += centerY - RING_SHOT_STAR_HEIGHT / 2;
+        /* A hole without its star draws from the silver star's tile */
+        tile = save->hasRingShotStar[g_MenuChoices.courseIndex][holeIndex] == FALSE;
+        gSPScisTextureRectangle(gfx++, (left - growWidth / 2) << 2, (top - growHeight / 2) << 2,
+                                (left + RING_SHOT_STAR_WIDTH + growWidth / 2) << 2,
+                                (top + RING_SHOT_STAR_HEIGHT + growHeight / 2) << 2, tile, 0, 0,
+                                (RING_SHOT_STAR_WIDTH << 10) / (growWidth + RING_SHOT_STAR_WIDTH),
+                                (RING_SHOT_STAR_HEIGHT << 10) / (growHeight + RING_SHOT_STAR_HEIGHT));
+        gDPPipeSync(gfx++);
+    }
+    D_8022F8C5_ovl_01++;
+    if (D_8022F8C5_ovl_01 == RING_SHOT_STAR_FRAME_DURATION) {
+        D_8022F8C5_ovl_01 = 0;
+        D_8022F8C0_ovl_01++;
+        if (D_8022F8C0_ovl_01 >= STAR_FRAME_COUNT) {
+            D_8022F8C0_ovl_01 = 0;
+        }
+        D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
+        OpenEncodedAsset(D_8022F848_ovl_01[D_8022F8C0_ovl_01], &asset);
+        ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
+        OpenEncodedAsset(D_8022F884_ovl_01[D_8022F8C0_ovl_01], &asset);
+        ReadEncodedAsset(D_800FF180[D_8022F8C4_ovl_01], &asset);
+    }
+    *displayListHead = gfx;
+}
 
 void func_80208F8C_ovl_01(Gfx **displayListHead, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
