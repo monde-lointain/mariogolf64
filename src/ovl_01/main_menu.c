@@ -102,12 +102,19 @@ extern s16 D_8022BE8C_ovl_01;
 extern s16 D_8022BE92_ovl_01;
 extern s32 D_8022F8C8_ovl_01;
 extern s8 D_8022F8CD_ovl_01;
+extern u8 D_8022F8CE_ovl_01;
+extern void *D_800FBE30[2];
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 /* The 24x24 icon that func_80207E28 animates, such as the birdie badge; each frame shows for two calls */
 #define ANIMATED_ICON_SIZE 24
 #define ANIMATED_ICON_IMAGE_SIZE (ANIMATED_ICON_SIZE * ANIMATED_ICON_SIZE / 2)
 #define ANIMATED_ICON_FRAME_COUNT 6
 #define ANIMATED_ICON_FRAME_DURATION 2
+/* func_80208F8C draws a frame of the waving Toad (assets 0x710 onward), 48x51 CI8, in two strips */
+#define TOAD_WIDTH 48
+#define TOAD_STRIP_HEIGHT 30
+#define TOAD_LAST_STRIP_HEIGHT 21
+#define TOAD_STRIP_COUNT 2
 /* The parts of the menu backdrop that func_801FC60C draws */
 #define MENU_LAYER_UNK1 (1 << 0)
 #define MENU_LAYER_UNK4 (1 << 2)
@@ -1037,7 +1044,39 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802081E8_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_8020879C_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80208F8C_ovl_01);
+void func_80208F8C_ovl_01(Gfx **displayListHead, s32 left, s32 top) {
+    Gfx *gfx = *displayListHead;
+    s16 stripIndex;
+    s32 rowCount;
+    s32 unused[8];
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_800FBE30[D_8022F8CE_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != TOAD_STRIP_COUNT; stripIndex++) {
+        rowCount = TOAD_LAST_STRIP_HEIGHT;
+        if (stripIndex == 0) {
+            rowCount = TOAD_STRIP_HEIGHT;
+        }
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_800FBE30[D_8022F8CE_ovl_01] + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * TOAD_WIDTH * TOAD_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, rowCount, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, left << 2, (top + stripIndex * TOAD_STRIP_HEIGHT) << 2, (left + TOAD_WIDTH) << 2,
+                                (top + stripIndex * TOAD_STRIP_HEIGHT + rowCount) << 2, G_TX_RENDERTILE, 0, 0,
+                                TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 void DrawBirdieBadgeLabel(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
