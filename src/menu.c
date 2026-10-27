@@ -44,21 +44,6 @@ extern SaveCopyLocation g_SaveCopyLocations[];
 extern s32 g_CoursePointsNeeded[COURSE_COUNT];
 extern char g_RomBuildDate[];
 
-#define IMPORTED_CHARACTER_COUNT 4
-#define IMPORTED_CHARACTER_NAME_LENGTH 12
-/* The character ids that stand for the imported characters in the grid */
-#define FIRST_IMPORTED_CHARACTER 14
-
-/* A character imported from the Game Boy Color version */
-typedef struct ImportedCharacter {
-    /* 0x00 */ s16 character;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s8 name[IMPORTED_CHARACTER_NAME_LENGTH];
-    /* 0x14 */ s8 unk14;
-} ImportedCharacter; /* size = 0x16 */
-
 typedef struct Unk800C2B90 {
     /* 0x0 */ s16 unk0;
     /* 0x2 */ s16 column;
@@ -92,7 +77,6 @@ extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern s8 D_801B60B8;
-extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 extern s8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_800C2BD5;
@@ -157,17 +141,11 @@ void SetFramebufferCount(s32 count);
 /* D_800C29B8 lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
 
-typedef struct Unk800C2590 {
-    /* 0x0 */ s16 assetId;
-    /* 0x2 */ u8 unk2[6];
-} Unk800C2590; /* size = 0x8 */
-
 typedef struct Unk800C2650 {
     /* 0x0 */ u16 assetId;
     /* 0x2 */ u8 unk2[0xE];
 } Unk800C2650; /* size = 0x10 */
 
-extern Unk800C2590 D_800C2590[];
 extern Unk800C2650 D_800C2650[];
 extern s16 g_EveryCharacterGrid[CHARACTER_CHOICE_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 extern s16 D_800C293C[CHARACTER_CHOICE_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];

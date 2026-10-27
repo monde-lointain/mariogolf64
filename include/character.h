@@ -35,4 +35,28 @@ extern u16 g_CharacterImageAssets[CHARACTER_COUNT];
 extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
 #define CHARACTER_PALETTE_COUNT 4
 
+#define IMPORTED_CHARACTER_COUNT 4
+#define IMPORTED_CHARACTER_NAME_LENGTH 12
+/* The character ids that stand for the imported characters in the grid */
+#define FIRST_IMPORTED_CHARACTER 14
+
+/* A character imported from the Game Boy Color version */
+typedef struct ImportedCharacter {
+    /* 0x00 */ s16 character;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ s8 name[IMPORTED_CHARACTER_NAME_LENGTH];
+    /* 0x14 */ s8 unk14;
+} ImportedCharacter; /* size = 0x16 */
+
+extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
+
+typedef struct Unk800C2590 {
+    /* 0x0 */ s16 assetId;
+    /* 0x2 */ u8 unk2[6];
+} Unk800C2590; /* size = 0x8 */
+
+extern Unk800C2590 D_800C2590[];
+
 #endif
