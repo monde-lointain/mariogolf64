@@ -365,14 +365,14 @@ void func_80217B88_ovl_01(s32 requestedPreset) {
   s16 index;
 
   if ((u8)requestedPreset < MENU_UNKE_PRESET_COUNT) {
-    if ((s8)requestedPreset == MENU_UNKE_PRESET_FIRST &&
+    if ((s8)requestedPreset == MENU_UNKE_PRESET_STROKE &&
         g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
-      presetIndex = MENU_UNKE_PRESET_FIRST_FOUR_PLAYER;
+      presetIndex = MENU_UNKE_PRESET_STROKE_FOUR_PLAYER;
     }
 
-    if (presetIndex == MENU_UNKE_PRESET_SECOND &&
+    if (presetIndex == MENU_UNKE_PRESET_MINI_GOLF &&
         g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
-      presetIndex = MENU_UNKE_PRESET_SECOND_FOUR_PLAYER;
+      presetIndex = MENU_UNKE_PRESET_MINI_GOLF_FOUR_PLAYER;
     }
 
     for (index = 0; index != MENU_UNKE_COUNT; index++) {

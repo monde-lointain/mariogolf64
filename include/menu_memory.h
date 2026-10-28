@@ -12,10 +12,10 @@
 /* The presets of func_80217B88; two of them have a variant that four players
  * take instead */
 #define MENU_UNKE_PRESET_COUNT 7
-#define MENU_UNKE_PRESET_FIRST 0
-#define MENU_UNKE_PRESET_FIRST_FOUR_PLAYER 1
-#define MENU_UNKE_PRESET_SECOND 5
-#define MENU_UNKE_PRESET_SECOND_FOUR_PLAYER 6
+#define MENU_UNKE_PRESET_STROKE 0
+#define MENU_UNKE_PRESET_STROKE_FOUR_PLAYER 1
+#define MENU_UNKE_PRESET_MINI_GOLF 5
+#define MENU_UNKE_PRESET_MINI_GOLF_FOUR_PLAYER 6
 /* Past func_80217B88's presets, so that it clears the values instead */
 #define MENU_UNKE_PRESET_NONE 10
 
