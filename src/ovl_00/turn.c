@@ -4602,16 +4602,17 @@ void UpdateTurns(void) {
               g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
             s8 results[MAX_PLAYER_COUNT];
             Boolean isAnyOut = FALSE;
-            s32 isHoleOver = GetGroupHoleResult(results);
+            s32 holeResult = GetGroupHoleResult(results);
 
             for (i = 0; i < g_GameState.playerCount; i++) {
-              if (results[i] == 2 && g_Players[i].unk26 == 0) {
+              if (results[i] == GROUP_PLAYER_OUT && g_Players[i].unk26 == 0) {
                 g_Players[i].unk26 = 2;
                 isAnyOut = TRUE;
               }
             }
 
-            nextState = (!isHoleOver && isAnyOut) ? 0x16 : 0x14;
+            nextState =
+                (holeResult == GROUP_HOLE_OPEN && isAnyOut) ? 0x16 : 0x14;
           } else {
             nextState = 0x14;
             if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
