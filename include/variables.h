@@ -218,6 +218,7 @@ extern char g_PrintBuffer[];
 #define VIEWPORT_FULL_SCREEN 0
 #define VIEWPORT_INSET 2
 #define VIEWPORT_STAFF_ROLL 4
-extern Vp g_Viewports[];
+#define VIEWPORT_COUNT 6
+extern Vp g_Viewports[VIEWPORT_COUNT];
 
 #endif

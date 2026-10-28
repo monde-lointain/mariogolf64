@@ -117,7 +117,9 @@ extern s32 g_SubModuleState;
  * white after the opening and from black otherwise.
  */
 typedef enum TitleScreenEntrance {
-  TITLE_ENTRANCE_FROM_OPENING = 1,
+  /* Neither entrance has set it yet */
+  TITLE_ENTRANCE_NONE,
+  TITLE_ENTRANCE_FROM_OPENING,
   TITLE_ENTRANCE_FROM_BOOT_LOGOS,
   /* Set as the title screen fades in, so that any later return is from black */
   TITLE_ENTRANCE_SHOWN

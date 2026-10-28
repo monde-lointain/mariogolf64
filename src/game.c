@@ -16,6 +16,7 @@
 #include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "heap.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "hole_objects.h"
@@ -53,10 +54,131 @@
 /* Steps that the inset view takes to open or close fully */
 #define INSET_VIEW_STEP_COUNT 8
 
-extern s32 f_InsetViewCenterX;
-extern s32 f_InsetViewCenterY;
-extern s32 f_InsetViewWidth;
-extern s32 f_InsetViewHeight;
+/* Values of g_FramePacingMode, which the second controller's Start cycles */
+#define PACING_MODE_NORMAL 0
+#define PACING_MODE_PERFORMANCE_METER 1 /* The other modes print debug text */
+#define PACING_MODE_COUNT 4
+
+/* Values of f_FadeColor */
+#define FADE_COLOR_NONE 0
+#define FADE_COLOR_WHITE 1
+#define FADE_COLOR_NOISE 2
+#define FADE_COLOR_BLACK 3
+#define FADE_NOISE_GREY 0xBF
+
+/* Values a debug menu edits; nothing reads them */
+#define DEBUG_MENU_VALUE_COUNT 3
+#define DEBUG_MENU_VALUE_MAX 128
+#define DEBUG_MENU_VALUE_START 127
+
+/* A viewport over the whole screen, in the RSP's quarter pixels */
+#define FULL_SCREEN_VIEWPORT \
+  { \
+    { \
+      {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0}, \
+          {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0} \
+    } \
+  }
+
+/* A viewport over the screen's bottom-right quarter */
+#define QUARTER_SCREEN_VIEWPORT \
+  { \
+    { \
+      {SCREEN_WIDTH, SCREEN_HEIGHT, G_MAXZ / 2, 0}, \
+          {SCREEN_WIDTH * 3, SCREEN_HEIGHT * 3, G_MAXZ / 2, 0} \
+    } \
+  }
+
+/* Palette loads that each read from an address inside the list itself */
+#define LOAD_LIST_PALETTE(list, index) gsDPLoadTLUT_pal256(&(list)[index])
+
+s8 g_FramePacingMode = PACING_MODE_NORMAL;
+static s32 f_FadeAlpha = 0;
+s32 g_TitleScreenEntrance = TITLE_ENTRANCE_NONE;
+s32 g_ScreenEffect = SCREEN_EFFECT_NONE;
+/* The effect's length in frames; the tiled image counts it down */
+static s32 f_ScreenEffectFrameCount = 0;
+/* Holds a frame for the saved-frame effect, past the general pool */
+static u16* f_SavedFrameBuffer = (u16*)MAIN_REGION_END;
+/* Set when the effects stop, never read */
+static s32 f_UnreadEffectSetting = 0;
+static f32 f_SpinAngle = 0.0f; /* In radians */
+
+/* Read by no routine */
+static Gfx f_UnreadPaletteLoads[] = {
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 0),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 1),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 2),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 3),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 4),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 5),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 6),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 7),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 8),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 9),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 10),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 11),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 12),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 13),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 14),
+    LOAD_LIST_PALETTE(f_UnreadPaletteLoads, 15),
+    gsSPEndDisplayList(),
+};
+
+/* The sources of g_FlameTexture */
+static u8 f_NoiseTexture[] = {
+#include "assets/game/noise_texture.i8.inc.c"
+};
+static u16 f_FlameGradientTexture[] = {
+#include "assets/game/flame_gradient_texture.rgba16.inc.c"
+};
+
+s32 g_HorizonRow = 0;
+/* How far BuildHorizonDynamicTextures has scrolled its textures */
+static s32 f_HorizonTextureScroll = 0;
+/* How far BuildDynamicTextures has scrolled its textures */
+static s32 f_DynamicTextureScroll = 0;
+/* When DrawGame last started, in microseconds */
+static u32 f_DrawStartTime = 0;
+/* When the last graphics task started, in microseconds */
+static u32 f_GfxTaskStartTime = 0;
+/* When UpdateGame last started and finished, in microseconds */
+static u32 f_UpdateStartTime = 0;
+static u32 f_UpdateEndTime = 0;
+static f32 f_MapFieldOfView = 60.0f; /* In degrees */
+static s8 f_NeedsIdentityMatrix = TRUE;
+static s32 f_FadeColor = FADE_COLOR_WHITE;
+/* The frame CopyPreviousFrame copies, and the one shown last */
+static u16* f_CopySourceFrame = NULL;
+static u16* f_PreviousFrame = NULL;
+static s32 f_DebugMenuValues[DEBUG_MENU_VALUE_COUNT] = {
+    DEBUG_MENU_VALUE_START,
+    DEBUG_MENU_VALUE_START,
+    DEBUG_MENU_VALUE_START,
+};
+static s32 f_DebugMenuValueIndex = 0;
+static s32 f_HasUnloadedSceneModule = FALSE;
+static s32 f_HasUnloadedSubModule = FALSE;
+static s32 f_InsetViewCenterX = 0;
+static s32 f_InsetViewCenterY = 0;
+static s32 f_InsetViewWidth = 0;
+static s32 f_InsetViewHeight = 0;
+s32 g_DrawBufferIndex = 0;
+
+/* Read by no routine */
+static Gfx f_UnreadEmptyList[] = {
+    gsSPEndDisplayList(),
+};
+
+Vp g_Viewports[VIEWPORT_COUNT] = {
+    FULL_SCREEN_VIEWPORT,
+    FULL_SCREEN_VIEWPORT,
+    QUARTER_SCREEN_VIEWPORT,
+    QUARTER_SCREEN_VIEWPORT,
+    QUARTER_SCREEN_VIEWPORT,
+    QUARTER_SCREEN_VIEWPORT,
+};
+
 void DrawSpinEffect(Gfx** displayListHead, CameraView* view);
 void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view);
 
@@ -74,44 +196,6 @@ static Mtx f_SpinMatrices[DRAW_BUFFER_COUNT];
 
 /* Read by no routine */
 static u8 D_800DAC30[16];
-
-extern f32 f_SpinAngle; /* In radians */
-
-/* The frame CopyPreviousFrame copies, and the one shown last */
-extern u16* f_CopySourceFrame;
-extern u16* f_PreviousFrame;
-
-/* When the last graphics task started, in microseconds */
-extern u32 f_GfxTaskStartTime;
-
-/* When UpdateGame last started and finished, in microseconds */
-extern u32 f_UpdateStartTime;
-extern u32 f_UpdateEndTime;
-
-/* Values a debug menu edits; nothing reads them */
-#define DEBUG_MENU_VALUE_COUNT 3
-#define DEBUG_MENU_VALUE_MAX 128
-extern s32 f_DebugMenuValues[DEBUG_MENU_VALUE_COUNT];
-extern s32 f_DebugMenuValueIndex;
-
-/* The sources of g_FlameTexture */
-extern u8 f_NoiseTexture[];
-extern u16 f_FlameGradientTexture[];
-
-/* How far BuildDynamicTextures has scrolled its textures */
-extern s32 f_DynamicTextureScroll;
-
-/* How far BuildHorizonDynamicTextures has scrolled its textures */
-extern s32 f_HorizonTextureScroll;
-
-/* Holds a frame for the saved-frame effect */
-extern u16* f_SavedFrameBuffer;
-/* The effect's length in frames; the tiled image counts it down */
-extern s32 f_ScreenEffectFrameCount;
-/* Set when the effects stop, never read */
-extern s32 f_UnreadEffectSetting;
-extern s32 f_HasUnloadedSceneModule;
-extern s32 f_HasUnloadedSubModule;
 
 /* How the saved-frame effect splits the screen into strips, in rows */
 #define SAVED_FRAME_STRIP_HEIGHT 6
@@ -979,18 +1063,6 @@ void BuildDynamicTextures(Gfx** displayListHead) {
 #define CLOSE_UP_NEAR_CLIP 200.0f
 #define SHORT_FAR_CLIP 500.0f
 
-/* Values of f_FadeColor */
-#define FADE_COLOR_NONE 0
-#define FADE_COLOR_WHITE 1
-#define FADE_COLOR_NOISE 2
-#define FADE_COLOR_BLACK 3
-#define FADE_NOISE_GREY 0xBF
-
-/* Values of g_FramePacingMode, which the second controller's Start cycles */
-#define PACING_MODE_NORMAL 0
-#define PACING_MODE_PERFORMANCE_METER 1 /* The other modes print debug text */
-#define PACING_MODE_COUNT 4
-
 /* Vertices that the course drawers may add to a frame */
 #define VERTEX_BUFFER_LENGTH 512
 #define EXPANSION_VERTEX_BUFFER_LENGTH 5000
@@ -998,16 +1070,10 @@ void BuildDynamicTextures(Gfx** displayListHead) {
 
 #define GFX_TASK_FLAGS (NU_SC_TASK_DP_WAIT | NU_SC_SWAPBUFFER)
 
-/* When DrawGame last started, in microseconds */
-extern u32 f_DrawStartTime;
-extern f32 f_MapFieldOfView; /* In degrees */
-extern s8 f_NeedsIdentityMatrix;
 /* Indexed by view, then by draw buffer */
 extern CameraMatrices f_CameraMatrices[2 * 2];
 /* The next free vertex of the frame's vertex buffer */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
-extern s32 f_FadeAlpha;
-extern s32 f_FadeColor;
 /* Toggled by a debug button; nothing reads it */
 extern s32 f_UnreadDebugSwitch;
 /*
