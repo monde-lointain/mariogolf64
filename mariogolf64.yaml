@@ -360,6 +360,8 @@ segments:
       - [0x92BF0, .data, rcp]
       - [0x92C50, .data, ball_simulation]
       - [0x931A0, data]
+      - [0x931B0, .data, collision]
+      - [0x95AF0, data]
       - [0x9E010, .data, fault]
       - [0x9E3F0, .data, music]
       - [0x9E460, data]
