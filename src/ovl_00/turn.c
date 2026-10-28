@@ -129,10 +129,6 @@
 /* A shorter pulse than the shots' rumble in effects.c */
 #define TURN_RUMBLE_FREQUENCY 0x100
 #define TURN_RUMBLE_FRAME_COUNT 8
-/* Players in these states may make their characters call out during another
- * player's turn */
-#define PLAYER_STATE_UNK11 0x11
-#define PLAYER_STATE_UNK14 0x14
 /* The character sound that each button plays; the D-pad and C buttons give
  * eight calls */
 #define CALL_OUT_SOUND_UP 0
@@ -2392,8 +2388,8 @@ void PickNextPlayer(void) {
 
   for (finishedCount = 0; finishedCount < g_GameState.playerCount;
       finishedCount++) {
-    if (g_Players[finishedCount].unkC != PLAYER_STATE_UNK11 &&
-        g_Players[finishedCount].unkC != PLAYER_STATE_UNK14) {
+    if (g_Players[finishedCount].unkC != PLAYER_STATE_UNK17 &&
+        g_Players[finishedCount].unkC != PLAYER_STATE_UNK20) {
       break;
     }
   }
@@ -2576,8 +2572,8 @@ void PlayWaitingPlayersCalls(void) {
 
   if (D_801051F0 == TRUE) {
     for (i = 0; i < g_GameState.playerCount; i++) {
-      if ((g_Players[i].unkC == PLAYER_STATE_UNK11) |
-          (g_Players[i].unkC == PLAYER_STATE_UNK14)) {
+      if ((g_Players[i].unkC == PLAYER_STATE_UNK17) |
+          (g_Players[i].unkC == PLAYER_STATE_UNK20)) {
         controllerIndex = g_Players[i].controllerIndex;
         if (controllerIndex ==
             g_Players[g_GameState.currentPlayerIndex].controllerIndex) {

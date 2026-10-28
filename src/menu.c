@@ -34,13 +34,6 @@
 /* The SRAM check buffer is read and written by DMA, so it starts on a cache
  * line */
 #define DMA_ALIGNMENT 0x10
-/* Player states that a saved game may hold; the first group restarts as 0 */
-#define PLAYER_STATE_UNK0 0
-#define PLAYER_STATE_UNK2 2
-#define PLAYER_STATE_UNK3 3
-#define PLAYER_STATE_UNK17 17
-#define PLAYER_STATE_UNK20 20
-#define PLAYER_STATE_UNK21 21
 
 #define ALIGN_FOR_DMA(address) \
   (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))

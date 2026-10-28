@@ -313,9 +313,30 @@ typedef struct PlayerHole {
 
 #define PLAYER_UNKAA_COUNT 12
 
+/*
+ * UnkB8.unkC's values, which the game's messages call the PlayerState. A
+ * saved game may hold only these; it keeps PLAYER_STATE_UNK17 and
+ * PLAYER_STATE_UNK20 and restarts the others as PLAYER_STATE_UNK0.
+ */
+enum PlayerState {
+  PLAYER_STATE_UNK0,
+  PLAYER_STATE_UNK2 = 2, /* Hides the gauge's markers */
+  PLAYER_STATE_UNK3,
+  PLAYER_STATE_UNK4, /* Hides the gauge's markers */
+  PLAYER_STATE_UNK5, /* Hides the gauge's markers */
+  /*
+   * PlayContestMovies waits for every player to be in this state or
+   * PLAYER_STATE_UNK20. Players in either may make their characters call
+   * out during another player's turn.
+   */
+  PLAYER_STATE_UNK17 = 17,
+  PLAYER_STATE_UNK20 = 20,
+  PLAYER_STATE_UNK21
+};
+
 typedef struct UnkB8 {
   /* 0x00 */ char name[PLAYER_NAME_SIZE];
-  /* 0x0C */ s32 unkC;
+  /* 0x0C */ s32 unkC; /* A PLAYER_STATE_* value */
   /* 0x10 */ CoursePoint ballPosition;
   /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
   /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */

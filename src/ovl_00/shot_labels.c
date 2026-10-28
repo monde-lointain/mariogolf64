@@ -21,7 +21,6 @@
 #include "surface.h"
 #include "variables.h"
 
-#define PLAYER_STATE_UNK2 2
 #define LETTERBOX_STATE_NONE 0
 #define LETTERBOX_STATE_UNK3 3
 #define LETTERBOX_STATE_UNK4 4

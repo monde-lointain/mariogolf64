@@ -40,10 +40,6 @@
 /* D_800E12B0 is a square of random bytes this many on a side */
 #define RANDOM_GRID_SIZE 32
 
-/* UnkB8.unkC values; PlayContestMovies waits for every player to have one */
-#define PLAYER_STATE_UNK11 0x11
-#define PLAYER_STATE_UNK14 0x14
-
 /* A fog color and the range over which the fog thickens */
 /* How far above the tee a ball starts on the main courses */
 #define TEE_HEIGHT 307.2f
@@ -356,7 +352,7 @@ void PlacePlayersOnTee(void) {
   D_800C3098 = 0;
   if (g_GameState.unk30 != 2) {
     for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-      g_Players[i].unkC = PLAYER_STATE_UNK11;
+      g_Players[i].unkC = PLAYER_STATE_UNK17;
       g_Players[i].ballPosition[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
       teeHeight = g_HoleSetup.teePosition[AXIS_Y];
       g_Players[i].ballPosition[AXIS_Y] =
@@ -402,8 +398,8 @@ void PlayContestMovies(void) {
         break;
       }
 
-      if (g_Players[i].unkC != PLAYER_STATE_UNK11 &&
-          g_Players[i].unkC != PLAYER_STATE_UNK14) {
+      if (g_Players[i].unkC != PLAYER_STATE_UNK17 &&
+          g_Players[i].unkC != PLAYER_STATE_UNK20) {
         break;
       }
     }
@@ -447,8 +443,8 @@ s32 func_8005FCB8(void) {
       }
 
       for (i = 0; i < g_GameState.playerCount; i++) {
-        if (g_Players[i].unkC != PLAYER_STATE_UNK14 &&
-            g_Players[i].unkC != PLAYER_STATE_UNK11) {
+        if (g_Players[i].unkC != PLAYER_STATE_UNK20 &&
+            g_Players[i].unkC != PLAYER_STATE_UNK17) {
           break;
         }
       }
@@ -463,8 +459,8 @@ s32 func_8005FCB8(void) {
       }
 
       for (i = 0; i < g_GameState.playerCount; i++) {
-        if (g_Players[i].unkC != PLAYER_STATE_UNK14 &&
-            g_Players[i].unkC != PLAYER_STATE_UNK11) {
+        if (g_Players[i].unkC != PLAYER_STATE_UNK20 &&
+            g_Players[i].unkC != PLAYER_STATE_UNK17) {
           break;
         }
       }
@@ -474,7 +470,7 @@ s32 func_8005FCB8(void) {
   }
 
   for (i = 0; i < g_GameState.playerCount; i++) {
-    if (g_Players[i].unkC != PLAYER_STATE_UNK14) {
+    if (g_Players[i].unkC != PLAYER_STATE_UNK20) {
       break;
     }
   }

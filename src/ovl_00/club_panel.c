@@ -15,6 +15,7 @@
 #include "game_flags.h"
 #include "heap.h"
 #include "round_hud.h"
+#include "save.h"
 #include "scene.h"
 #include "variables.h"
 
@@ -303,11 +304,6 @@ s32 IsShotModeChangeDone(void) {
 #define GAUGE_FILL_IMAGE_HEIGHT 16
 #define GAUGE_TICK_IMAGE_WIDTH 16
 #define GAUGE_TICK_IMAGE_HEIGHT 12
-
-/* g_Players[].unkC values that hide the gauge's markers */
-#define PLAYER_STATE_UNK2 2
-#define PLAYER_STATE_UNK4 4
-#define PLAYER_STATE_UNK5 5
 
 /* The bar that shows the lie's span below the gauge */
 #define SPAN_BAR_X 38.0f
