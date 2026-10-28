@@ -102,6 +102,14 @@ enum GridMove {
 #define DRIVE_DISTANCE_X 246
 #define DRIVE_DISTANCE_Y 200
 
+/* The palettes that the C buttons choose, which the A button wears and which
+ * the faces preview while held */
+#define UP_C_PALETTE 0
+#define LEFT_C_PALETTE 1
+#define DOWN_C_PALETTE 2
+#define RIGHT_C_PALETTE 3
+#define NO_PALETTE (-1)
+
 extern void* D_80105B78[CHARACTER_COUNT];
 extern void* D_8012D430[CHARACTER_COUNT];
 extern void* D_801B69EC;
@@ -463,14 +471,6 @@ s32 func_80209BE0_ovl_01(void) {
 /* The text slots that the character select writes, the prompt's first */
 #define CHARACTER_SELECT_TEXT_SLOT_COUNT 4
 #define PROMPT_TEXT_SLOT 0
-
-/* The palettes that the C buttons choose, which the A button wears and which
- * the faces preview while held */
-#define UP_C_PALETTE 0
-#define LEFT_C_PALETTE 1
-#define DOWN_C_PALETTE 2
-#define RIGHT_C_PALETTE 3
-#define NO_PALETTE (-1)
 
 #define Z_OR_L_BUTTONS (Z_TRIG | L_TRIG)
 
