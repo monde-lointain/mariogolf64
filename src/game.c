@@ -1079,8 +1079,6 @@ enum DrawMode {
 extern CameraMatrices f_CameraMatrices[2 * 2];
 /* The next free vertex of the frame's vertex buffer */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
-/* Toggled by a debug button; nothing reads it */
-extern s32 g_UnreadDebugSwitch;
 /*
  * The hole flyover's frame; DrawGame fades the screen out over its last
  * frames, and back in while it is -1

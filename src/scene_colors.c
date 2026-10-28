@@ -5,6 +5,7 @@
 #include "common.h"
 
 #include "functions.h"
+#include "game.h"
 #include "save.h"
 #include "variables.h"
 
