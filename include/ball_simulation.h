@@ -52,7 +52,7 @@ typedef struct Unk6 {
 typedef struct Unk20 {
   /* 0x00 */ s16 unk0;
   /* 0x04 */ s32 clubIndex;
-  /* 0x08 */ s32 unk8;
+  /* 0x08 */ s32 power; /* Out of MAX_LAUNCH_POWER */
   /* 0x0C */ s32 unkC;
   /* 0x10 */ s32 unk10;
   /* 0x14 */ s32 unk14;

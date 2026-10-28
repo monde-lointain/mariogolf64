@@ -2242,7 +2242,7 @@ s32 StepTrialShot(void) {
     f_TrialLaunch->unk0 = f_Shot.unk0;
     f_TrialLaunch->clubIndex = f_Shot.clubSlot;
     f_ClosestTargetDistance = FAR_FROM_TARGET;
-    f_TrialLaunch->unk8 = func_8005F248(f_Shot.unk4);
+    f_TrialLaunch->power = func_8005F248(f_Shot.unk4);
     f_TrialLaunch->unkC = 0;
     f_TrialLaunch->unk10 = f_Shot.unk14;
     f_TrialLaunch->unk14 = f_Shot.unk18;
@@ -2502,7 +2502,7 @@ EVALUATE:
         f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk2);
     if (flyDistance != 0) {
       ratio = (f32)targetDistance / flyDistance;
-      launchPower = f_TrialLaunch->unk8 * ratio;
+      launchPower = f_TrialLaunch->power * ratio;
       if (launchPower > MAX_LAUNCH_POWER) {
         if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.unk54 > 0 &&
             ((f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex]
@@ -2563,13 +2563,13 @@ EVALUATE:
           f_Shot.unk4 = 2;
         }
 
-        if (f_TrialLaunch->unk8 < launchPower) {
-          if (func_8005F248(f_Shot.unk4) <= f_TrialLaunch->unk8 &&
+        if (f_TrialLaunch->power < launchPower) {
+          if (func_8005F248(f_Shot.unk4) <= f_TrialLaunch->power &&
               f_Shot.unk4 < SHOT_UNK4_MAX) {
             f_Shot.unk4++;
           }
-        } else if (launchPower < f_TrialLaunch->unk8) {
-          if (func_8005F248(f_Shot.unk4) >= f_TrialLaunch->unk8 &&
+        } else if (launchPower < f_TrialLaunch->power) {
+          if (func_8005F248(f_Shot.unk4) >= f_TrialLaunch->power &&
               f_Shot.unk4 >= 4) {
             f_Shot.unk4--;
           }
@@ -2940,7 +2940,7 @@ s32 IsTrialShotSafe(void) {
 
   f_TrialLaunch->unk0 = f_TrialShot.unk0;
   f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
-  f_TrialLaunch->unk8 = func_8005F248(f_TrialShot.unk4);
+  f_TrialLaunch->power = func_8005F248(f_TrialShot.unk4);
   f_TrialLaunch->unkC = f_TrialShot.unk8 - 60;
   f_TrialLaunch->unk10 = f_TrialShot.unk14;
   f_TrialLaunch->unk14 = f_TrialShot.unk18;

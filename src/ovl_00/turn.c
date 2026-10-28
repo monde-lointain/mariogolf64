@@ -1836,9 +1836,9 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
 
   if (swingPhase == SWING_PHASE_UNK2 || swingPhase == SWING_PHASE_UNK4 ||
       swingPhase == SWING_PHASE_UNK3) {
-    shot.unk8 = 0x100;
+    shot.power = 0x100;
   } else {
-    shot.unk8 = swing->unk8;
+    shot.power = swing->power;
   }
 
   shot.unkC = 0;
@@ -3777,7 +3777,7 @@ void UpdateTurns(void) {
           s32 sound;
 
           g_CurrentShot.unk4 = g_CurrentShot.unk40;
-          D_80227150_ovl_00.unk8 = func_8005F248(g_CurrentShot.unk40);
+          D_80227150_ovl_00.power = func_8005F248(g_CurrentShot.unk40);
           g_SavedPlayers[playerIndex] = g_Players[playerIndex];
           g_Players[playerIndex].strokeCount++;
           if (g_Players[playerIndex].strokeCount >= 100) {
@@ -3803,7 +3803,7 @@ void UpdateTurns(void) {
             sound = SOUND_IMPACT_OFF_MARK;
           } else {
             nextState = 5;
-            if (D_80227150_ovl_00.unk8 == 0x100) {
+            if (D_80227150_ovl_00.power == 0x100) {
               StartShotEffect(1);
               sound = SOUND_IMPACT_ON_MARK;
             } else {
@@ -3880,7 +3880,8 @@ void UpdateTurns(void) {
           StopSound(8);
           nextState = 6;
           if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
-              (D_80227150_ovl_00.unkC != 0 || D_80227150_ovl_00.unk8 < 0x100)) {
+              (D_80227150_ovl_00.unkC != 0 ||
+                  D_80227150_ovl_00.power < 0x100)) {
             if (g_Players[playerIndex].unk28 > 0) {
               g_Players[playerIndex].unk28--;
             }
@@ -3908,7 +3909,7 @@ void UpdateTurns(void) {
             (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
           g_CurrentShot.unk8 = g_CurrentShot.unk40;
           if (g_TurnController.pressedButtons & B_BUTTON) {
-            D_80227150_ovl_00.unk8 = 0x100;
+            D_80227150_ovl_00.power = 0x100;
           }
 
           D_80227150_ovl_00.unkC = 0;
@@ -3959,7 +3960,7 @@ void UpdateTurns(void) {
         if (!D_80224004_ovl_00) {
           D_80227170_ovl_00[playerIndex] = 0;
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
-            s32 power = D_80227150_ovl_00.unk8;
+            s32 power = D_80227150_ovl_00.power;
 
             if (D_80227150_ovl_00.shotMode == 0) {
               power *= 6;
@@ -4051,7 +4052,7 @@ void UpdateTurns(void) {
 
           LaunchBallSimulation(&g_TurnBallSimulation, 0, &D_80227150_ovl_00);
           nextState = 9;
-          if (D_80227150_ovl_00.unkC == 0 && D_80227150_ovl_00.unk8 >= 0x100 &&
+          if (D_80227150_ovl_00.unkC == 0 && D_80227150_ovl_00.power >= 0x100 &&
               !(GetClub(D_80227150_ovl_00.clubIndex)->surfaceMask &
                   CLUB_SURFACE_GREEN) &&
               RateShotLength() == 1) {

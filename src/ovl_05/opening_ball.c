@@ -1575,10 +1575,10 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   rumbles = D_8020B86C_ovl_05[0][UNKC_ENTRY_LIMIT].unk5;
   if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
       simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    speed = GetPuttPower(shot->unk8, shot->shotMode);
+    speed = GetPuttPower(shot->power, shot->shotMode);
   } else {
     speed = GetClubPower(club, shot->shotMode) *
-        (shot->unk8 + (entry->unk0 * 2)) / 256;
+        (shot->power + (entry->unk0 * 2)) / 256;
     if (speed <= 0) {
       speed = 10;
     }

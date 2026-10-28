@@ -2185,10 +2185,10 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
 
   if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
       simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    speed = GetPuttPower(shot->unk8, shot->shotMode);
+    speed = GetPuttPower(shot->power, shot->shotMode);
   } else {
     speed = GetClubPower(club, shot->shotMode);
-    speed = speed * (shot->unk8 * ((entry->unk0 * 2) + 0x100) / 256) / 256;
+    speed = speed * (shot->power * ((entry->unk0 * 2) + 0x100) / 256) / 256;
     if (speed <= 0) {
       speed = 10;
     }
@@ -2256,7 +2256,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     slopeSpin = curve;
     yaw = shot->unk0 + (crossSlope / 2) +
         (sideSign *
-            ((club->deflection[shot->shotMode] * shot->unk8 / 256) +
+            ((club->deflection[shot->shotMode] * shot->power / 256) +
                 (entry->unk1 * club->unk0)));
     yawRadians = (u16)yaw * BINARY_ANGLE_TO_RADIANS;
   }
