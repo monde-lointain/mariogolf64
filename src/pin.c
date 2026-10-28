@@ -123,11 +123,64 @@
 #define GAME_STATE_UNK6 6
 #define GAME_STATE_UNK7 7
 
-extern Vtx f_PinShadowVertices[PIN_SHADOW_VERTEX_COUNT];
+s32 g_PinVertexScale = PIN_VERTEX_SCALE;
+
+/* Read by no routine */
+static u8 D_800BA704[4] = {0};
+
+static Vtx f_PinVertices[PIN_VERTEX_COUNT] = {
+    {{{-16, 0, -16}, 0, {0, 0}, {0xBF, 0xBF, 0xBF, 0xFF}}},
+    {{{-16, 0, 16}, 0, {0, 4096}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{16, 0, 16}, 0, {4096, 4096}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{16, 0, -16}, 0, {4096, 0}, {0xBF, 0xBF, 0xBF, 0xFF}}},
+    {{{-16, 0, 0}, 0, {64, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-16, 0, 99}, 0, {64, 10240}, {0xDF, 0xDF, 0xDF, 0xFF}}},
+    {{{16, 0, 99}, 0, {4096, 10240}, {0x70, 0x70, 0x70, 0xFF}}},
+    {{{16, 0, 0}, 0, {4096, 2048}, {0x80, 0x80, 0x80, 0xFF}}},
+    {{{-3, -450, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-3, 8, 0}, 0, {0, 3072}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{3, 8, 0}, 0, {1024, 3072}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+    {{{3, -450, 0}, 0, {1024, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+};
+static Vtx f_LargePinVertices[PIN_VERTEX_COUNT] = {
+    {{{-33, 0, -33}, 0, {0, 0}, {0xBF, 0xBF, 0xBF, 0xFF}}},
+    {{{-33, 0, 33}, 0, {0, 4096}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{33, 0, 33}, 0, {4096, 4096}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{33, 0, -33}, 0, {4096, 0}, {0xBF, 0xBF, 0xBF, 0xFF}}},
+    {{{-33, 0, 0}, 0, {64, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-33, 0, 198}, 0, {64, 14336}, {0xDF, 0xDF, 0xDF, 0xFF}}},
+    {{{33, 0, 198}, 0, {4096, 14336}, {0x70, 0x70, 0x70, 0xFF}}},
+    {{{33, 0, 0}, 0, {4096, 2048}, {0x80, 0x80, 0x80, 0xFF}}},
+    {{{-6, -450, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-6, 33, 0}, 0, {0, 3072}, {0xDF, 0xDF, 0xDF, 0xFF}}},
+    {{{6, 33, 0}, 0, {1024, 3072}, {0x70, 0x70, 0x70, 0xFF}}},
+    {{{6, -450, 0}, 0, {1024, 0}, {0x80, 0x80, 0x80, 0xFF}}},
+};
+static Vtx f_PinShadowVertices[PIN_SHADOW_VERTEX_COUNT] = {
+    {{{-40, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x60}}},
+    {{{40, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x60}}},
+    {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x5C}}},
+    {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x5C}}},
+    {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x58}}},
+    {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x58}}},
+    {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x54}}},
+    {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x54}}},
+    {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x50}}},
+    {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x50}}},
+    {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x4C}}},
+    {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x4C}}},
+    {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x48}}},
+    {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x48}}},
+    {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x44}}},
+    {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x44}}},
+    {{{-30, 0, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x00}}},
+    {{{30, 0, 0}, 0, {1024, 0}, {0x00, 0x00, 0x00, 0x00}}},
+};
 /* Set by TakePinOut and cleared when the pin is next drawn */
-extern s8 f_IsPinOut;
+static s8 f_IsPinOut = FALSE;
 /* Set by SkipNextPinDraw and cleared by the draw it skips */
-extern s8 f_SkipsNextPinDraw;
+static s8 f_SkipsNextPinDraw = FALSE;
+static f32 f_FlagWavePhase = 0.0f;
 
 static Mtx f_PinShadowMatrix;
 static Mtx f_FlagMatrices[DRAW_BUFFER_COUNT];
@@ -136,9 +189,6 @@ static u8* f_CupTexture;
 static u8* f_FlagstickTexture;
 static u8* f_PinShadowTexture;
 static Mtx f_PinMatrices[CAMERA_COUNT][DRAW_BUFFER_COUNT];
-extern Vtx f_PinVertices[PIN_VERTEX_COUNT];
-extern Vtx f_LargePinVertices[PIN_VERTEX_COUNT];
-extern f32 f_FlagWavePhase;
 
 /*
  * Returns the length of (x, z), less CUP_DISTANCE_OFFSET but at least 0.
