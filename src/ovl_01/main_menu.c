@@ -170,6 +170,16 @@ extern s32 D_801B609C;
 extern s32 D_800FBD40[];
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_8022BE2C_ovl_01;
+extern s32 D_8022BE30_ovl_01[MAX_PLAYER_COUNT]; /* Each player count's mode
+                                                  count */
+extern s16 D_800C200C[MAX_PLAYER_COUNT];
+extern void* D_8010526C[2];
+extern s32 D_801B60B4;
+extern s32 D_8022F8C0_ovl_01;
+extern u8 D_8022F8C4_ovl_01;
+extern s8 D_8022F8C5_ovl_01;
+extern s32 D_8022F8C8_ovl_01;
+extern s8 D_8022F8CD_ovl_01;
 extern s32 D_8022BE84_ovl_01;
 extern u8 D_8022BE89_ovl_01;
 extern s32 D_802322F0_ovl_01;
@@ -816,7 +826,391 @@ void func_801F7CD0_ovl_01(void) {
   }
 }
 
+/* The mode select's wheel, turned like the course select's */
+#define MODE_SELECT_TURN 90
+#define MODE_SELECT_SPIN_SPEED 18
+
+/* Divides a turn among the player count's modes, keeping it whole should a
+ * count be zero */
+#define SPREAD_OVER_MODES(amount) \
+  (D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] != 0 \
+          ? (amount) / D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] \
+          : (amount))
+
+/* The chosen mode's message, below the wheel */
+#define MODE_TEXT_X 40
+#define MODE_TEXT_Y 188
+#define MODE_TEXT_SLOT 0
+#define MESSAGE_FIRST_MODE 4 /* Followed by one per mode icon */
+#define MESSAGE_SOLO_STROKE 0x39
+#define MESSAGE_MODE_NEEDS_CONTROLLERS 0x4A
+
+/*
+ * The mode icons are double-buffered like the course select's images: the
+ * chosen mode's first icon frame is read into the buffer not shown, and then
+ * the buffers swap.
+ */
+#define LOAD_CHOSEN_MODE_ICON() \
+  D_8022F8C0_ovl_01 = 0; \
+  D_8022F8C5_ovl_01 = 0; \
+  OpenEncodedAsset( \
+      g_ModeIconAnimations[D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1] \
+                                            [D_801323A0.modeChoice]][0], \
+      &asset); \
+  ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01 ^ 1], &asset); \
+  D_8022F8C4_ovl_01 ^= 1
+
+/*
+ * Updates the mode select (MENU_SCREEN_UNK5), the wheel of the modes that
+ * the chosen player count can play. A starts the chosen mode, or first
+ * stops the wheel on it while it still turns; B goes back to the
+ * character select, undoing the last player's character.
+ */
+/*
+ * Doesn't match: the stroke and mini golf cases load their 1 and store
+ * g_GameMode in another order, the B button's path loads D_8012F480 and
+ * g_CharacterGrid in another order, and the spin's slowing keeps the spin
+ * in a register where the original reads it again after the step.
+ */
+#ifdef NON_MATCHING
+void func_801F7D28_ovl_01(void) {
+  EncodedAsset asset;
+  s32 isDone = IsHudAnimationDone();
+  s32 direction;
+  s32 step;
+  s32 index;
+  s16 slot;
+  s32 mode;
+
+  if (isDone != TRUE || GetWipeKind() != WIPE_NONE) {
+    return;
+  }
+
+  D_800C2BD5 = 0;
+  if (g_MenuPressedButtons & A_BUTTON) {
+    if (D_801323A0.modeSpin != 0) {
+      D_801323A0.modeSpin = 0;
+      LOAD_CHOSEN_MODE_ICON();
+      return;
+    }
+
+    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    SetTextSlot(0, 0, NO_MESSAGE, 1, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF,
+        0xFF, 0xFF, 0xFF);
+    D_8022BE84_ovl_01 = 0;
+    D_8022BE88_ovl_01 = 0;
+    D_8022BE89_ovl_01 = 0;
+    D_8023BFD0_ovl_01 = 0;
+    D_802322F0_ovl_01 = 0;
+    D_802322F4_ovl_01 = 0;
+    g_IsMiniGolf = FALSE;
+    mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+    D_801B60B4 = rand();
+    switch (mode) {
+      case MODE_ICON_TOURNAMENT:
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_GameMode = GAME_MODE_TOURNAMENT;
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_800FF4C0 = 2;
+        MAP_CAMERA_MODE_TOP_BYTE = 0;
+        D_801B5634 = 0;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        break;
+      case MODE_ICON_GET_CHARACTER:
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_GameMode = GAME_MODE_GET_CHARACTER;
+        g_PlayerCount = 2;
+        g_MenuScreen = MENU_SCREEN_UNK16;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 2;
+        D_801B5634 = 0;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+          D_8023BFDC_ovl_01[index] = 0;
+        }
+
+        /* The last setting is left as it was */
+        for (index = 0; index != MENU_UNKE_COUNT - 1; index++) {
+          D_801B60BA[index] = -1;
+        }
+
+        break;
+      case MODE_ICON_STROKE:
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        g_GameMode = GAME_MODE_STROKE;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 1;
+        if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
+          D_801B5634 = 2;
+        } else {
+          D_801B5634 = 1;
+        }
+
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_STROKE);
+        if (g_ChosenPlayerCount == 1) {
+          for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+            D_8023BFDC_ovl_01[index] = 0;
+          }
+
+          for (index = 0; index != MENU_UNKE_COUNT - 1; index++) {
+            D_801B60BA[index] = -1;
+          }
+
+          D_800C2BD5 = 1;
+        }
+
+        break;
+      case MODE_ICON_MATCH_GAME:
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_GameMode = GAME_MODE_MATCH_GAME;
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 1;
+        D_801B5634 = 3;
+        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_MATCH_GAME);
+        break;
+      case MODE_ICON_SKINS_MATCH:
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_GameMode = GAME_MODE_SKINS_MATCH;
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 1;
+        D_801B5634 = 4;
+        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_SKINS_MATCH);
+        break;
+      case MODE_ICON_SPEED_GOLF:
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_GameMode = GAME_MODE_SPEED_GOLF;
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 2;
+        D_801B5634 = 0;
+        g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        break;
+      case MODE_ICON_MINI_GOLF:
+        /* Mini golf needs every player on a controller */
+        for (index = 0; index != g_ChosenPlayerCount; index++) {
+          if (D_800C1FF4[index] == NO_CONTROLLER_INDEX) {
+            break;
+          }
+        }
+
+        if (index < g_ChosenPlayerCount) {
+          PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+          return;
+        }
+
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        g_GameMode = GAME_MODE_STROKE;
+        g_IsMiniGolf = TRUE;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 1;
+        if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
+          D_801B5634 = 7;
+        } else {
+          D_801B5634 = 6;
+        }
+
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_MINI_GOLF);
+        if (g_ChosenPlayerCount == 1) {
+          for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+            D_8023BFDC_ovl_01[index] = 0;
+          }
+
+          for (index = 0; index != MENU_UNKE_COUNT - 1; index++) {
+            D_801B60BA[index] = -1;
+          }
+
+          D_800C2BD5 = 1;
+        }
+
+        break;
+      case MODE_ICON_TRAINING:
+        PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+        g_GameMode = GAME_MODE_TRAINING;
+        g_SkippedNines = 0;
+        StartLoadingChosenHole();
+        g_MenuScreen = MENU_SCREEN_UNK26;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 2;
+        D_801B5634 = 0;
+        g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        break;
+      case MODE_ICON_UNK9:
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_GameMode = GAME_MODE_UNK1;
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 2;
+        D_801B5634 = 0;
+        g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        break;
+      case MODE_ICON_RING_SHOT:
+        PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+        g_GameMode = GAME_MODE_RING_SHOT;
+        g_MenuScreen = MENU_SCREEN_UNK23;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 2;
+        D_801B5634 = 0;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        break;
+      case MODE_ICON_CLUB_SLOTS:
+        /* The club slots need every player on a controller too */
+        for (index = 0; index != g_ChosenPlayerCount; index++) {
+          if (D_800C1FF4[index] == NO_CONTROLLER_INDEX) {
+            break;
+          }
+        }
+
+        if (index < g_ChosenPlayerCount) {
+          PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+          return;
+        }
+
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_GameMode = GAME_MODE_CLUB_SLOTS;
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = 1;
+        D_801B5634 = 5;
+        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        func_80217B88_ovl_01(MENU_UNKE_PRESET_CLUB_SLOTS);
+        break;
+    }
+
+    g_SkippedNines = 0;
+
+    /* Training's hole is already loading */
+    if (g_MenuScreen != MENU_SCREEN_UNK26) {
+      StopLoaderThread();
+    }
+
+    FreeAllCharacterSlots();
+    D_800FE334 = 0;
+    return;
+  }
+
+  if (g_MenuPressedButtons & B_BUTTON) {
+    if (D_801323A0.modeSpin != 0) {
+      D_801323A0.modeSpin = 0;
+      LOAD_CHOSEN_MODE_ICON();
+    }
+
+    StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+    D_801323A0.modeSpin = 0;
+    SetTextSlot(0, 0, NO_MESSAGE, 1, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF,
+        0xFF, 0xFF, 0xFF);
+    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+    g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
+    D_801B7070--;
+    D_800FBE08[D_801B7070] = 0;
+    D_800FBD40[D_8012F480[D_801B7070] + 2] = 0;
+    D_800C1FF4[D_801B7070] = 0;
+    slot = g_CharacterGrid[D_801323A0.characterRows[D_801B7070]]
+                          [D_801323A0.characterColumns[D_801B7070]];
+    if (slot >= FIRST_IMPORTED_CHARACTER) {
+      g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].unk14 = 0;
+      D_800C200C[D_801B7070] = -1;
+    }
+
+    StopLoaderThread();
+    FreeAllCharacterSlots();
+    return;
+  }
+
+  if (D_801323A0.modeSpin == 0) {
+    if (g_MenuRepeatButtons & L_JPAD) {
+      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      if (--D_801323A0.modeChoice < 0) {
+        D_801323A0.modeChoice = D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1;
+      }
+
+      D_801323A0.modeSpin = SPREAD_OVER_MODES(MODE_SELECT_TURN);
+      if (g_ChosenPlayerCount == 1) {
+        D_8022F8C5_ovl_01 = 0;
+        D_8022F8C0_ovl_01 = 0;
+        D_8022F8CD_ovl_01 = 0;
+        D_8022F8C8_ovl_01 = 0;
+      }
+    } else if (g_MenuRepeatButtons & R_JPAD) {
+      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      if (++D_801323A0.modeChoice >
+          D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1) {
+        D_801323A0.modeChoice = 0;
+      }
+
+      D_801323A0.modeSpin = SPREAD_OVER_MODES(-MODE_SELECT_TURN);
+      if (g_ChosenPlayerCount == 1) {
+        D_8022F8C5_ovl_01 = 0;
+        D_8022F8C0_ovl_01 = 0;
+        D_8022F8CD_ovl_01 = 0;
+        D_8022F8C8_ovl_01 = 0;
+      }
+    }
+  }
+
+  if (ABS(D_801323A0.modeSpin) != 0) {
+    step = SPREAD_OVER_MODES(MODE_SELECT_SPIN_SPEED);
+    direction = D_801323A0.modeSpin < 0 ? -1 : 1;
+    if (step == 0) {
+      step = 1;
+    }
+
+    D_801323A0.modeSpin -= direction * step;
+
+    /* Stop on reaching the mode rather than turning past it */
+    if ((D_801323A0.modeSpin < 0 ? -1 : 1) != direction) {
+      D_801323A0.modeSpin = 0;
+    }
+
+    if (D_801323A0.modeSpin == 0) {
+      LOAD_CHOSEN_MODE_ICON();
+    }
+  }
+
+  mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+  for (index = 0; index != g_ChosenPlayerCount; index++) {
+    if (D_800C1FF4[index] == NO_CONTROLLER_INDEX) {
+      break;
+    }
+  }
+
+  if (((mode == MODE_ICON_CLUB_SLOTS) | (mode == MODE_ICON_MINI_GOLF)) &&
+      index < g_ChosenPlayerCount) {
+    SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, MESSAGE_MODE_NEEDS_CONTROLLERS, 1,
+        MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+  } else if (g_ChosenPlayerCount == 1 &&
+      D_8022BEBC_ovl_01[0][D_801323A0.modeChoice] == MODE_ICON_STROKE) {
+    SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, MESSAGE_SOLO_STROKE, 1,
+        MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+  } else {
+    SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, mode + MESSAGE_FIRST_MODE, 1,
+        MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+  }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F7D28_ovl_01);
+#endif
 
 void func_801F8BAC_ovl_01(void) {
   EncodedAsset asset;

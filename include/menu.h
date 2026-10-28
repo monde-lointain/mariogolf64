@@ -26,6 +26,7 @@
 #define MENU_SCREEN_UNK22 22
 #define MENU_SCREEN_UNK23 23
 #define MENU_SCREEN_UNK24 24
+#define MENU_SCREEN_UNK26 26
 /* A tournament entered with a code */
 #define MENU_SCREEN_CLUB_TOURNAMENT 27
 /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
@@ -128,9 +129,13 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
 #define MODE_ICON_TOURNAMENT 0
 #define MODE_ICON_GET_CHARACTER 1
 #define MODE_ICON_STROKE 2
+#define MODE_ICON_SPEED_GOLF 3
+#define MODE_ICON_TRAINING 4
 #define MODE_ICON_MINI_GOLF 5
 #define MODE_ICON_MATCH_GAME 6
 #define MODE_ICON_SKINS_MATCH 7
+#define MODE_ICON_RING_SHOT 8
+#define MODE_ICON_UNK9 9
 #define MODE_ICON_CLUB_SLOTS 10
 #define NO_MODE_ICON -1
 #define MODE_ICON_COUNT 11
