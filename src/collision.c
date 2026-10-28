@@ -22,7 +22,7 @@
 
 /*
  * Each billboard texture has a hit mask: BILLBOARD_MASK_SIZE rows of
- * BILLBOARD_MASK_SIZE digits, from the billboard's foot up and from its
+ * BILLBOARD_MASK_SIZE digits, from the billboard's top down and from its
  * middle out to its side. A digit names what a ball hits there; '0' is
  * nothing.
  */
