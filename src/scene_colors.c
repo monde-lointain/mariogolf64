@@ -8,7 +8,7 @@
 #include "save.h"
 #include "variables.h"
 
-/* Each half of g_ShadedVertices is two quads; the second takes the derived
+/* Each half of f_ShadedVertices is two quads; the second takes the derived
  * color */
 #define QUAD_VERTEX_COUNT 4
 #define SHADED_QUAD_START QUAD_VERTEX_COUNT
@@ -17,8 +17,8 @@
 
 #define PLANE_TILE_SIZE 16
 
-extern Vtx g_TexturePlaneVertices[6];
-extern Vtx g_ShadedVertices[2][2 * QUAD_VERTEX_COUNT];
+extern Vtx f_TexturePlaneVertices[6];
+extern Vtx f_ShadedVertices[2][2 * QUAD_VERTEX_COUNT];
 extern s32 f_PlaneTextureScroll;
 static s32 D_800E1C10;
 static s32 D_800E1C14;
@@ -30,7 +30,7 @@ static u8 D_800E1C1C;
 static u8 D_800E1C1D;
 
 /*
- * Sets the shaded quads of g_ShadedVertices and two color globals from
+ * Sets the shaded quads of f_ShadedVertices and two color globals from
  * the colors of the g_SkyColors entry that g_HoleSetup.conditions selects
  */
 void DeriveSceneColors(void) {
@@ -47,9 +47,9 @@ void DeriveSceneColors(void) {
       g_HoleSetup.conditions.sceneColorIndex];
   for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
     for (channelIndex = 0; channelIndex != RGB_CHANNEL_COUNT; channelIndex++) {
-      g_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
+      f_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
           (s32)((entry->unk4[channelIndex] + entry->unk7[channelIndex]) * 0.3f);
-      g_ShadedVertices[1][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
+      f_ShadedVertices[1][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
           (s32)((entry->unk4[channelIndex] + entry->unk7[channelIndex]) * 0.3f);
     }
   }
@@ -65,7 +65,7 @@ void DeriveSceneColors(void) {
 void DoNothing(void) {}
 
 /*
- * Draws the flat strip of g_TexturePlaneVertices with the two blended
+ * Draws the flat strip of f_TexturePlaneVertices with the two blended
  * texture layers, moving the second layer on by a quarter texel each call
  */
 void DrawTexturePlane(Gfx** displayListHead) {
@@ -105,7 +105,7 @@ void DrawTexturePlane(Gfx** displayListHead) {
       f_PlaneTextureScroll + (PLANE_TILE_SIZE << 2), PLANE_TILE_SIZE << 2);
   gDPPipeSync(gfx++);
   gSPVertex(
-      gfx++, g_TexturePlaneVertices, ARRAY_COUNT(g_TexturePlaneVertices), 0);
+      gfx++, f_TexturePlaneVertices, ARRAY_COUNT(f_TexturePlaneVertices), 0);
   gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
   gSP2Triangles(gfx++, 3, 2, 4, 0, 3, 4, 5, 0);
   gDPPipeSync(gfx++);
