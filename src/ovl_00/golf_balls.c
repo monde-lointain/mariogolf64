@@ -16,6 +16,7 @@
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_loader.h"
+#include "main.h"
 #include "overlay_manager.h"
 #include "pin.h"
 #include "save.h"

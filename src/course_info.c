@@ -6,6 +6,7 @@
 
 #include "billboard.h"
 #include "course.h"
+#include "main.h"
 #include "save.h"
 #include "scene.h"
 #include "variables.h"

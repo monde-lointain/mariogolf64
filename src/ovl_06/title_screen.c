@@ -12,6 +12,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "hole_display.h"
+#include "main.h"
 #include "math_util.h"
 #include "scene.h"
 #include "screen.h"

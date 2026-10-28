@@ -15,6 +15,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "main.h"
 #include "password.h"
 #include "round_hud.h"
 #include "save.h"

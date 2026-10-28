@@ -10,6 +10,7 @@
 #include "controller.h"
 #include "debug_text.h"
 #include "heap.h"
+#include "main.h"
 #include "math_util.h"
 #include "screen.h"
 #include "sound.h"

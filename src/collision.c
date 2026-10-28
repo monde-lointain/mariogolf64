@@ -14,6 +14,7 @@
 #include "game_flags.h"
 #include "hole_triangles.h"
 #include "libc.h"
+#include "main.h"
 #include "math_util.h"
 #include "save.h"
 #include "terrain.h"

@@ -8,6 +8,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "golf_balls.h"
+#include "main.h"
 #include "round_hud.h"
 #include "segment_symbols.h"
 #include "variables.h"

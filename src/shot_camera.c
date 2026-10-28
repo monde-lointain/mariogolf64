@@ -22,6 +22,7 @@
 #include "hole_loader.h"
 #include "hole_objects.h"
 #include "libc.h"
+#include "main.h"
 #include "math_util.h"
 #include "movie.h"
 #include "overlay_manager.h"

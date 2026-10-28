@@ -15,6 +15,7 @@
 #include "functions.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "main.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"

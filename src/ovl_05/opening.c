@@ -20,6 +20,7 @@
 #include "heap.h"
 #include "hole_display.h"
 #include "libc.h"
+#include "main.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "scene.h"

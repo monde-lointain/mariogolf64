@@ -13,6 +13,7 @@
 #include "functions.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "main.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"

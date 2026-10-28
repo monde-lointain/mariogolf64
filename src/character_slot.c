@@ -9,6 +9,7 @@
 
 #include "camera.h"
 #include "club.h"
+#include "main.h"
 #include "math_util.h"
 #include "variables.h"
 

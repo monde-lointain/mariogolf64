@@ -10,6 +10,7 @@
 
 #include "functions.h"
 #include "game_flags.h"
+#include "main.h"
 #include "text.h"
 #include "variables.h"
 

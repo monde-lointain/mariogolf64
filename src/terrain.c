@@ -19,6 +19,7 @@
 #include "game_flags.h"
 #include "hole_builder.h"
 #include "libc.h"
+#include "main.h"
 #include "round_hud.h"
 #include "scene.h"
 #include "sound.h"

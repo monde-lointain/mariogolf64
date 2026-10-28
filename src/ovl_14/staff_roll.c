@@ -22,6 +22,7 @@
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
+#include "main.h"
 #include "math_util.h"
 #include "pin.h"
 #include "reaction.h"

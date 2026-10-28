@@ -5,10 +5,6 @@
 
 /* Globals whose defining file is not decompiled yet */
 
-extern s8 g_IsDebugEnabled;
-/* Frames the game has drawn since boot */
-extern volatile s32 g_FrameCount;
-
 /* libmus plays silence instead of the audio while this is set */
 extern u8 __libmus_output_muted;
 
