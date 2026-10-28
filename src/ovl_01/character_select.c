@@ -480,9 +480,6 @@ s32 func_80209BE0_ovl_01(void) {
 #define RIGHT_C_PALETTE 3
 #define NO_PALETTE (-1)
 
-/* A player's controller before the player chooses */
-#define UNCHOSEN_CONTROLLER (-1)
-
 #define Z_OR_L_BUTTONS (Z_TRIG | L_TRIG)
 
 /* The chosen character's voice plays on its player's channel */
@@ -499,10 +496,6 @@ s32 func_80209BE0_ovl_01(void) {
 
 /* R leaves a player without a controller only among this many players */
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
-
-/* g_ImportedCharacterColumns's value for a player without an imported character
- */
-#define NO_IMPORTED_COLUMN (-1)
 
 #define BITS_PER_BYTE 8
 

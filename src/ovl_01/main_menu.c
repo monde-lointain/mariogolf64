@@ -695,10 +695,10 @@ void func_801F4C78_ovl_01(void) {
         D_8022BE92_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
-        g_ImportedCharacterColumns[0] = -1;
-        g_ImportedCharacterColumns[1] = -1;
-        g_ImportedCharacterColumns[2] = -1;
-        g_ImportedCharacterColumns[3] = -1;
+        g_ImportedCharacterColumns[0] = NO_IMPORTED_COLUMN;
+        g_ImportedCharacterColumns[1] = NO_IMPORTED_COLUMN;
+        g_ImportedCharacterColumns[2] = NO_IMPORTED_COLUMN;
+        g_ImportedCharacterColumns[3] = NO_IMPORTED_COLUMN;
         func_8005D334();
         break;
 
@@ -1890,7 +1890,7 @@ void func_801F7D28_ovl_01(void) {
                           [D_801323A0.characterColumns[D_801B7070]];
     if (slot >= FIRST_IMPORTED_CHARACTER) {
       g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].isChosen = 0;
-      g_ImportedCharacterColumns[D_801B7070] = -1;
+      g_ImportedCharacterColumns[D_801B7070] = NO_IMPORTED_COLUMN;
     }
 
     StopLoaderThread();

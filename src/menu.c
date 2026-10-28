@@ -330,7 +330,7 @@ void LoadMenuResources(void) {
 void FreeMenuResources(void) {
   s32 index;
 
-  g_LoadedMenuScreen = -1;
+  g_LoadedMenuScreen = NO_MENU_SCREEN;
   FreeMemory(&D_801F4A20);
   FreeMemory(&D_8012D3AC);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
@@ -1742,10 +1742,10 @@ void func_8005DC50(void) {
   g_ImportedCharacters[1].isChosen = 0;
   g_ImportedCharacters[2].isChosen = 0;
   g_ImportedCharacters[3].isChosen = 0;
-  g_PlayerControllerIndices[0] = -1;
-  g_PlayerControllerIndices[1] = -1;
-  g_PlayerControllerIndices[2] = -1;
-  g_PlayerControllerIndices[3] = -1;
+  g_PlayerControllerIndices[0] = UNCHOSEN_CONTROLLER;
+  g_PlayerControllerIndices[1] = UNCHOSEN_CONTROLLER;
+  g_PlayerControllerIndices[2] = UNCHOSEN_CONTROLLER;
+  g_PlayerControllerIndices[3] = UNCHOSEN_CONTROLLER;
   g_MenuScreen = 0;
 }
 

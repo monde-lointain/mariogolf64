@@ -35,6 +35,8 @@ enum MenuScreen {
 };
 
 #define MENU_SCREEN_COUNT 29
+/* g_LoadedMenuScreen's value before any screen's assets are read */
+#define NO_MENU_SCREEN (-1)
 extern s32 g_MenuScreen;
 
 /* The buttons of every controller: those repeating while held, and those just
@@ -72,6 +74,8 @@ extern MenuChoices g_MenuChoices;
 #define COURSE_IMAGE_COUNT 16
 #define COURSE_FILE_COUNT 3
 extern u16 g_CourseWheelImageAssets[][COURSE_IMAGE_COUNT];
+/* Ends a course's images before COURSE_IMAGE_COUNT */
+#define TROPHY_FRAME_END (-1)
 extern s16 g_CourseTrophyFiles[][COURSE_FILE_COUNT];
 extern void* D_800FBE38[COURSE_FILE_COUNT];
 
@@ -134,6 +138,11 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
  * own. The computer plays them, and they never clash with the others.
  */
 #define NO_CONTROLLER_INDEX 4
+/* A player's controller before the player chooses */
+#define UNCHOSEN_CONTROLLER (-1)
+/* g_ImportedCharacterColumns's value for a player without an imported character
+ */
+#define NO_IMPORTED_COLUMN (-1)
 
 /* The 1P to 4P, 1C to 4C and Com labels, 16 by 8 each */
 #define PLAYER_LABEL_WIDTH 16
