@@ -7,6 +7,7 @@
 
 #include "asset.h"
 #include "character.h"
+#include "course.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "libc.h"
@@ -266,6 +267,11 @@ extern u8 D_8023BFF0_ovl_01[STATS_GRID_ROW_COUNT * STATS_GRID_COLUMN_COUNT]
                            [PLAYER_STATS_FILE_SIZE];
 
 s16 func_8021E468_ovl_01(void);
+void func_8021E97C_ovl_01(Gfx** displayListHead);
+void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
+    s32 left, s32 top, s16 character, u8 drawMode);
+void func_80210C74_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -1147,7 +1153,219 @@ void func_8021D0B8_ovl_01(void) {
   }
 }
 
+/*
+ * func_8021D3AC draws the records page: a shaded panel, the image in
+ * D_8023B634 in strips below it, and a row of up to five ranked faces for each
+ * label of D_80230984. The chosen record also shows its course's image and
+ * name.
+ */
+#define RECORDS_BOARD_KIND 11
+#define RECORDS_PANEL_LEFT 24
+#define RECORDS_PANEL_TOP 48
+#define RECORDS_PANEL_RIGHT 302
+#define RECORDS_PANEL_BOTTOM 166
+#define RECORDS_STRIP_WIDTH 200
+#define RECORDS_STRIP_HEIGHT 10
+#define RECORDS_STRIP_COUNT 3
+#define RECORDS_STRIP_LEFT 28
+#define RECORDS_STRIP_RIGHT 298
+#define RECORDS_STRIP_TOP 168
+#define RECORDS_STRIP_SPACING 20
+#define RECORD_FACE_X 134
+#define RECORD_FACE_Y 56
+#define RECORD_PLACE_X 124
+#define RECORD_PLACE_Y 64
+#define RECORD_LABEL_X 32
+#define RECORD_LABEL_SIZE 16
+#define RECORD_COURSE_IMAGE_WIDTH 64
+#define RECORD_COURSE_STRIP_HEIGHT 32
+#define RECORD_COURSE_STRIP_COUNT 2
+#define RECORD_COURSE_LEFT 40
+#define RECORD_COURSE_RIGHT 96
+#define RECORD_COURSE_TOP 176
+#define RECORD_COURSE_STRIP_SPACING 20
+#define RECORD_COURSE_NAME_X 120
+#define RECORD_COURSE_NAME_Y 180
+#define RECORD_DETAIL_X 200
+#define RECORD_DETAIL_Y 204
+#define MESSAGE_RECORD_DETAIL 0x76
+#define NO_RECORDS_X 160
+#define NO_RECORDS_Y 192
+#define MESSAGE_NO_RECORDS 0x16E
+
+extern char D_80230984_ovl_01[STATS_GRID_ROW_COUNT][RECORD_LABEL_SIZE];
+
+/*
+ * Doesn't match: the original works out the chosen cell's address again after
+ * checking that it holds a record, before drawing its course's image and name,
+ * where GCC reuses the address from the check.
+ */
+#ifdef NON_MATCHING
+void func_8021D3AC_ovl_01(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  s16 index = 0;
+  SaveData* save = GetSaveData();
+  MenuMemory* memory = func_8005AF74();
+  s16 row;
+  s16 column;
+  s16 character;
+  s32 chosenRow;
+  s32 chosenColumn;
+
+  func_801FB54C_ovl_01(&gfx, RECORDS_BOARD_KIND);
+  gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+  gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+  gDPPipeSync(gfx++);
+  gSPTextureRectangle(gfx++, RECORDS_PANEL_LEFT << 2, RECORDS_PANEL_TOP << 2,
+      RECORDS_PANEL_RIGHT << 2, RECORDS_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0,
+      0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPLoadTLUT_pal256(gfx++, ((u32)D_8023B634_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  do {
+    gDPLoadTextureBlock(gfx++,
+        ((u32)D_8023B634_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (index * RECORDS_STRIP_WIDTH * RECORDS_STRIP_HEIGHT)) &
+            ~7,
+        G_IM_FMT_CI, G_IM_SIZ_8b, RECORDS_STRIP_WIDTH, RECORDS_STRIP_HEIGHT, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, RECORDS_STRIP_LEFT << 2,
+        (RECORDS_STRIP_TOP + (index * RECORDS_STRIP_SPACING)) << 2,
+        RECORDS_STRIP_RIGHT << 2,
+        (RECORDS_STRIP_TOP + RECORDS_STRIP_SPACING +
+            (index * RECORDS_STRIP_SPACING))
+            << 2,
+        G_TX_RENDERTILE, 0, 0,
+        (RECORDS_STRIP_WIDTH << 10) /
+            (RECORDS_STRIP_RIGHT - RECORDS_STRIP_LEFT),
+        (RECORDS_STRIP_HEIGHT << 10) / RECORDS_STRIP_SPACING);
+    gDPPipeSync(gfx++);
+    index++;
+  } while (index != RECORDS_STRIP_COUNT);
+
+  for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
+    for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
+      if (D_8023B640_ovl_01[row][column] != STATS_CELL_EMPTY) {
+        character =
+            (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]].unk3B;
+        func_8021F124_ovl_01(&gfx, D_8012D430[character],
+            D_8023B5E0_ovl_01[row][column],
+            RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
+            RECORD_FACE_Y + (row * STATS_CURSOR_ROW_HEIGHT), character,
+            FACE_PLAIN);
+      }
+
+      func_80210C74_ovl_01(&gfx,
+          RECORD_PLACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
+          RECORD_PLACE_Y + (row * STATS_CURSOR_ROW_HEIGHT), column + 1,
+          MENU_NUMBER_PLAIN);
+    }
+  }
+
+  if (D_8023B640_ovl_01[memory->unk3A][memory->unk39] != STATS_CELL_EMPTY) {
+    func_8021E97C_ovl_01(&gfx);
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPPipeSync(gfx++);
+  chosenRow = memory->unk3A;
+  chosenColumn = memory->unk39;
+  if (D_8023B640_ovl_01[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
+    gDPLoadTLUT_pal256(gfx++,
+        ((u32)D_8023B630_ovl_01[(
+             s8)save->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
+                 .unk38] +
+            IMAGE_HEADER_SIZE) &
+            ~7);
+    for (index = 0; index != RECORD_COURSE_STRIP_COUNT; index++) {
+      gDPLoadTextureBlock(gfx++,
+          ((u32)D_8023B630_ovl_01[(s8)save
+                   ->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
+                   .unk38] +
+              LARGE_PALETTED_TEXELS_OFFSET +
+              (index * RECORD_COURSE_IMAGE_WIDTH *
+                  RECORD_COURSE_STRIP_HEIGHT)) &
+              ~7,
+          G_IM_FMT_CI, G_IM_SIZ_8b, RECORD_COURSE_IMAGE_WIDTH,
+          RECORD_COURSE_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(gfx++, RECORD_COURSE_LEFT << 2,
+          (RECORD_COURSE_TOP + (index * RECORD_COURSE_STRIP_SPACING)) << 2,
+          RECORD_COURSE_RIGHT << 2,
+          (RECORD_COURSE_TOP + RECORD_COURSE_STRIP_SPACING +
+              (index * RECORD_COURSE_STRIP_SPACING))
+              << 2,
+          G_TX_RENDERTILE, 0, 0,
+          (RECORD_COURSE_IMAGE_WIDTH << 10) /
+              (RECORD_COURSE_RIGHT - RECORD_COURSE_LEFT),
+          (RECORD_COURSE_STRIP_HEIGHT << 10) / RECORD_COURSE_STRIP_SPACING);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  SetUpTextDrawing(&gfx);
+  SetTextColor(&gfx, 255, 255, 255);
+  for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
+    sprintf(g_PrintBuffer, D_802319E0_ovl_01, D_80230984_ovl_01[row]);
+    DrawLargeText(&gfx, RECORD_LABEL_X,
+        (s16)(RECORD_PLACE_Y + (row * STATS_CURSOR_ROW_HEIGHT)), g_PrintBuffer);
+  }
+
+  chosenRow = memory->unk3A;
+  chosenColumn = memory->unk39;
+  if (D_8023B640_ovl_01[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
+    sprintf(g_PrintBuffer, D_802319E0_ovl_01,
+        g_CourseRecords
+            [(s8)save->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
+                    .unk38]
+                .name);
+    DrawLargeText(
+        &gfx, RECORD_COURSE_NAME_X, RECORD_COURSE_NAME_Y, g_PrintBuffer);
+    SetTextSlotValue(
+        (s8)save->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
+                .unk39 +
+            1,
+        1, 0);
+    SetTextSlot(RECORD_DETAIL_X, RECORD_DETAIL_Y, MESSAGE_RECORD_DETAIL, 1, 1,
+        0, 255, 255, 255, 255);
+  }
+
+  if (D_802308A0_ovl_01 == 0) {
+    SetTextSlot(NO_RECORDS_X, NO_RECORDS_Y, MESSAGE_NO_RECORDS, 1, 0,
+        TEXT_FLAG_CENTERED, 255, 255, 255, 255);
+  }
+
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021D3AC_ovl_01);
+#endif
 
 /*
  * Doesn't match: the original copies the chosen row's zero into the column
