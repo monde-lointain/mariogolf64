@@ -30,6 +30,7 @@
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"
+#include "pause_menu.h"
 #include "pin.h"
 #include "play.h"
 #include "reaction.h"
@@ -4295,7 +4296,9 @@ void UpdateTurns(void) {
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               nextState = 0xF;
-              OpenChoiceBox(g_GameState.courseIndex == 0xC ? 3 : 0);
+              OpenChoiceBox(g_GameState.courseIndex == 0xC
+                      ? CHOICE_BOX_ID_DRIVING_RANGE
+                      : CHOICE_BOX_ID_TRAINING_SHOT);
             } else if (!g_GameState.unk31 &&
                 (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                     g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
@@ -4492,15 +4495,15 @@ void UpdateTurns(void) {
           if (g_GameState.gameMode == GAME_MODE_TRAINING) {
             nextState = 0xF;
             if (g_GameState.courseIndex == 0xC) {
-              OpenChoiceBox(3);
+              OpenChoiceBox(CHOICE_BOX_ID_DRIVING_RANGE);
             } else {
-              OpenChoiceBox(1);
+              OpenChoiceBox(CHOICE_BOX_ID_TRAINING_HOLE_END);
             }
           } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
               (!g_TurnBallSimulation.unkA0 ||
                   !HasNoRingsLeft(&g_Players[playerIndex]))) {
             nextState = 0xF;
-            OpenChoiceBox(2);
+            OpenChoiceBox(CHOICE_BOX_ID_RING_SHOT);
           } else {
             nextState = 0x12;
           }
@@ -4516,13 +4519,13 @@ void UpdateTurns(void) {
           }
 
           switch (UpdateChoiceBox(&g_TurnController)) {
-            case 3:
+            case CHOICE_RESULT_CONTINUE:
               EndFlightCamera();
               StartHudAnimation(2);
               nextState = 0x11;
               ForceStopRumble();
               break;
-            case 4:
+            case CHOICE_RESULT_MULLIGAN:
               g_IsTrainingHeadingKept = 1;
               g_Players[playerIndex] = g_SavedPlayers[playerIndex];
               EndFlightCamera();
@@ -4530,7 +4533,7 @@ void UpdateTurns(void) {
               nextState = 0x11;
               ForceStopRumble();
               break;
-            case 2:
+            case CHOICE_RESULT_HOLE_OUT:
               if (g_Players[playerIndex].unk26 == HOLE_STATUS_HOLED_OUT &&
                   IsRecordableHoleOut(playerIndex)) {
                 InsertRankedRecord(&D_800FEDD8[playerIndex]);
@@ -4545,14 +4548,14 @@ void UpdateTurns(void) {
 
               ForceStopRumble();
               break;
-            case 7:
+            case CHOICE_RESULT_RETURN_TO_MENU:
               func_80060358();
               ForceStopRumble();
               break;
           }
         } else {
           switch (UpdateChoiceBox(&g_TurnController)) {
-            case 5:
+            case CHOICE_RESULT_START_OVER:
               EndFlightCamera();
               PlaySound(0x8E, 3, SOUND_FULL_SCALE);
               SkipNextPinDraw();
@@ -4560,13 +4563,13 @@ void UpdateTurns(void) {
               nextState = 0x11;
               ForceStopRumble();
               break;
-            case 6:
+            case CHOICE_RESULT_RING_SHOT_HOLE_OUT:
               nextState = 0x14;
               EndFlightCamera();
               FreeCharacterAndReactionLight(0);
               ForceStopRumble();
               break;
-            case 7:
+            case CHOICE_RESULT_RETURN_TO_MENU:
               func_80060358();
               ForceStopRumble();
               break;

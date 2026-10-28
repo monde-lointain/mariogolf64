@@ -987,13 +987,13 @@ s32 UpdateChoiceBox(ControllerState* controller) {
   ChoiceBox* box = &f_ChoiceBoxes[f_ChoiceBoxIndex];
 
   if (f_ChoiceBoxIndex == CHOICE_BOX_CLOSED) {
-    return -1;
+    return CHOICE_RESULT_NONE;
   }
 
   switch (f_ChoiceBoxState) {
     case CHOICE_BOX_CHOSEN:
       f_ChoiceBoxState = CHOICE_BOX_CLOSING;
-      return -1;
+      return CHOICE_RESULT_NONE;
     case CHOICE_BOX_CLOSING:
       OpenChoiceBox(CHOICE_BOX_CLOSED);
       return box->results[f_ChoiceBoxSelection];
@@ -1002,7 +1002,7 @@ s32 UpdateChoiceBox(ControllerState* controller) {
         PlaySound(
             CHOICE_BOX_CHOOSE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
         f_ChoiceBoxState = CHOICE_BOX_CHOSEN;
-        return -1;
+        return CHOICE_RESULT_NONE;
       }
 
       if (!box->isVertical) {
@@ -1039,10 +1039,10 @@ s32 UpdateChoiceBox(ControllerState* controller) {
         f_ChoiceBoxSelection = box->optionCount - 1;
       }
 
-      return -1;
+      return CHOICE_RESULT_NONE;
   }
 
-  return -1;
+  return CHOICE_RESULT_NONE;
 }
 
 #ifdef NON_MATCHING
