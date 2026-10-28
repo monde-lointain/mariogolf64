@@ -3203,6 +3203,7 @@ D_80231868_ovl_01 = 0x80231868; // type:asciz segment:ovl_01 force_not_migration
 D_80231874_ovl_01 = 0x80231874; // type:asciz segment:ovl_01 force_not_migration:True
 f_EditorAssertionText = 0x8040C9B0; // size:0x4 segment:hole_editor force_migration:True
 f_EditorFileName = 0x8040C9B4; // size:0x18 segment:hole_editor force_migration:True
+D_8020B564_ovl_05 = 0x8020B564; // size:0x2F4 segment:ovl_05
 D_8020C0A8_ovl_05 = 0x8020C0A8; // type:f64 size:0x8 segment:ovl_05 force_migration:True
 g_MenuRepeatButtons = 0x800C2000; // size:0x4
 g_MenuPressedButtons = 0x800C2004; // size:0x4
