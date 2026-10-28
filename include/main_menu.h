@@ -65,6 +65,10 @@ extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
 /* Where the options' lit values follow their lit labels in D_8012D420 */
 #define OPTION_VALUES_OFFSET 0x3228
 
+/* Where the course select's images follow the sky in D_801F4A20 */
+#define COURSE_SELECT_WATER_OFFSET 0x1E88
+#define COURSE_SELECT_LAYER_OFFSET 0x2E90
+
 /* The sound test's song and sound file names, which it prints */
 #define SOUND_TEST_SONG_NAME_LENGTH 12
 #define SOUND_TEST_SOUND_NAME_LENGTH 24

@@ -458,9 +458,6 @@ s32 GetChosenCourseIndex(void) {
 #define ASSET_CONTROLLER_ICONS 0x63D
 #define ASSET_MENU_GAME_MODES 0x528
 #define ASSET_PLACE_DIGITS 0x98E
-/* Where the course select's images follow the sky in D_801F4A20 */
-#define COURSE_SELECT_WATER_OFFSET 0x1E88
-#define COURSE_SELECT_LAYER_OFFSET 0x2E90
 
 /*
  * The menus' update: gathers every controller's buttons, starts loading the
