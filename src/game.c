@@ -56,11 +56,6 @@
 /* Steps that the inset view takes to open or close fully */
 #define INSET_VIEW_STEP_COUNT 8
 
-/* Values of g_FramePacingMode, which the second controller's Start cycles */
-#define PACING_MODE_NORMAL 0
-#define PACING_MODE_PERFORMANCE_METER 1 /* The other modes print debug text */
-#define PACING_MODE_COUNT 4
-
 /* Values of f_FadeColor */
 #define FADE_COLOR_NONE 0
 #define FADE_COLOR_WHITE 1

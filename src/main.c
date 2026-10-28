@@ -536,8 +536,9 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
 
   f_IsOddRetrace ^= 1;
   if (!f_IsOddRetrace) {
-    if ((g_FramePacingMode != 0) ? pendingTaskCount < PENDING_TASK_MAX_RELAXED
-                                 : pendingTaskCount < PENDING_TASK_MAX) {
+    if ((g_FramePacingMode != PACING_MODE_NORMAL)
+            ? pendingTaskCount < PENDING_TASK_MAX_RELAXED
+            : pendingTaskCount < PENDING_TASK_MAX) {
       UpdateAudio();
       if (g_FrameStepState < FRAME_STEP_PAUSED) {
         ReadControllers();

@@ -5,7 +5,10 @@
 
 /* The globals that game.c, the game's frame, shares */
 
-/* The frame pacing mode, which the second controller's Start cycles */
+/* Values of g_FramePacingMode, which the second controller's Start cycles */
+#define PACING_MODE_NORMAL 0
+#define PACING_MODE_PERFORMANCE_METER 1 /* The other modes print debug text */
+#define PACING_MODE_COUNT 4
 extern s8 g_FramePacingMode;
 
 /* Which of DRAW_BUFFER_COUNT sets of per-frame matrices and vertices the frame
