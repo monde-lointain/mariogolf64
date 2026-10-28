@@ -1006,7 +1006,6 @@ extern s8 f_NeedsIdentityMatrix;
 extern CameraMatrices f_CameraMatrices[2 * 2];
 /* The next free vertex of the frame's vertex buffer */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
-extern s32 g_HasThreeFrameBuffers;
 extern s32 f_FadeAlpha;
 extern s32 f_FadeColor;
 /* Toggled by a debug button; nothing reads it */

@@ -20,6 +20,7 @@
 #include "libc.h"
 #include "overlay_manager.h"
 #include "save.h"
+#include "screen.h"
 #include "segment_symbols.h"
 #include "sound.h"
 #include "variables.h"
@@ -33,6 +34,13 @@
 
 /* Frame buffers that the game swaps between */
 #define FRAMEBUFFER_COUNT 3
+
+/* The bytes of one frame buffer's 16-bit texels */
+#define FRAMEBUFFER_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16))
+
+/* The frame buffers fill the end of the base RDRAM, in order */
+#define FRAMEBUFFER_ADDRESS(index) \
+  ((u16*)(BASE_RDRAM_END - ((FRAMEBUFFER_COUNT - (index)) * FRAMEBUFFER_SIZE)))
 
 /* The longest build date that fits g_RomBuildDate with its terminator */
 #define BUILD_DATE_LENGTH_MAX 63
@@ -56,6 +64,7 @@
 /* Values of f_DebugHaltState. Holding HALT_BUTTONS on the first controller
    while halting is allowed halts the game and hands the console over to
    the development debugger. */
+#define HALT_STATE_DISALLOWED 0
 #define HALT_STATE_ALLOWED 1
 #define HALT_STATE_HALTED 2
 #define HALT_BUTTONS (A_BUTTON | B_BUTTON | L_TRIG | R_TRIG)
@@ -86,11 +95,25 @@
 /* A ControllerState counts the stick as pressing a direction past this */
 #define STATE_STICK_DIRECTION_MIN 30
 
-extern volatile u8 f_DebugHaltState;
-extern u16* f_Framebuffers[FRAMEBUFFER_COUNT];
-extern s32 f_RetraceCount;
-extern s32 f_FramesThisSecond;
-extern s32 f_IsOddRetrace;
+s8 g_IsDebugEnabled = FALSE;
+s32 g_HasExpansionPak = FALSE;
+static volatile u8 f_DebugHaltState = HALT_STATE_DISALLOWED;
+s32 g_HasThreeFrameBuffers = FALSE;
+s32 g_FramesPerSecond = 0;
+
+/* Read by no routine */
+static u8 D_800B67D4[4] = {0};
+
+static u16* f_Framebuffers[FRAMEBUFFER_COUNT] = {
+    FRAMEBUFFER_ADDRESS(0),
+    FRAMEBUFFER_ADDRESS(1),
+    FRAMEBUFFER_ADDRESS(2),
+};
+static s32 f_RetraceCount = 0;
+static s32 f_FramesThisSecond = 0;
+s8 g_FrameStepState = FRAME_STEP_RUNNING;
+volatile s32 g_FrameCount = 0;
+static s32 f_IsOddRetrace = FALSE;
 extern u16* g_MessageFramebuffer;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 extern char g_SaveBuildDate[];

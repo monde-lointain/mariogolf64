@@ -10,6 +10,7 @@
 #define FRAME_STEP_PAUSED 2
 
 extern s32 g_HasExpansionPak;
+extern s32 g_HasThreeFrameBuffers;
 extern s32 g_FramesPerSecond;
 extern s8 g_FrameStepState;
 extern s8 g_FramePacingMode;
