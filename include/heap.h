@@ -10,6 +10,10 @@
 
 #define HEAP_BILLBOARD 1
 
+/* The memory the game gives the general pool */
+#define MAIN_REGION_START 0x8025D800
+#define MAIN_REGION_END 0x802EA000
+
 void AddHeapRegion(s32 heapIndex, void* start, void* end);
 void ResetHeap(s32 heapIndex);
 s32 GetHeapFreeSize(s32 heapIndex);

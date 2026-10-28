@@ -24,9 +24,6 @@
 /* The largest free size before any allocation has measured it */
 #define UNMEASURED_SIZE -1
 
-/* The memory the game gives the general pool */
-#define MAIN_REGION_START 0x8025D800
-#define MAIN_REGION_END 0x802EA000
 /* The Expansion Pak's memory */
 #define EXPANSION_REGION_START 0x80600000
 #define EXPANSION_REGION_END 0x80800000
