@@ -120,6 +120,13 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
  */
 #define NO_CONTROLLER_INDEX 4
 
+/* The 1P to 4P, 1C to 4C and Com labels, 16 by 8 each */
+#define PLAYER_LABEL_WIDTH 16
+#define PLAYER_LABEL_HEIGHT 8
+#define PLAYER_LABEL_IMAGE_SIZE (PLAYER_LABEL_WIDTH * PLAYER_LABEL_HEIGHT / 2)
+#define PLAYER_LABEL_COMPUTER_FIRST 4
+#define PLAYER_LABEL_COM 8
+
 /* The menus' character models */
 /* Baby Mario stands higher to look as tall as the others */
 #define BABY_MARIO_RAISE 24
