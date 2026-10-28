@@ -67,7 +67,7 @@ typedef struct ClubParameters {
 
 typedef struct Club {
   /* 0x00 */ u8 unk0;
-  /* 0x01 */ u8 unk1[4];
+  /* 0x01 */ char name[4]; /* Its short name, such as "1W" or "PT" */
   /* 0x05 */ u8 unk5;
   /* 0x06 */ u8 unk6[2];
   /* 0x08 */ s32 surfaceMask;
