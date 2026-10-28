@@ -71,6 +71,16 @@
 #define TOPIC_PAGE_Y 105
 #define LISTED_TOPIC_COUNT 5
 
+typedef struct TextListLayout {
+  /* 0x0 */ s32 top;
+  /* 0x4 */ s32 rowSpacing;
+} TextListLayout;
+
+typedef struct TopicPageTable {
+  /* 0x00 */ u8 unread[11];
+  /* 0x0B */ s8 counts[HELP_TOPIC_COUNT + 1];
+} TopicPageTable; /* size = 0x1D */
+
 extern s32 D_800FE334;
 extern s32 g_MenuScreen;
 static void* f_HandImages;
@@ -78,30 +88,35 @@ static void* f_ArrowImages;
 static void* f_UnusedImage;
 static void* f_ChalkboardImage;
 /* The open topic, counted from 1, or 0 while the list shows */
-extern s8 f_OpenTopic;
-extern s8 f_TopicPage;
-extern s32 f_HandOffset;
-extern s32 f_IsHandReturning;
-extern s32 f_ArrowFrame;
-extern s32 f_ArrowFrameTime;
-extern s32 f_IsUnusedSwingReturning;
-extern s32 f_UnusedSwingOffset;
-extern s32 f_FirstListedTopic;
-extern f32 f_ListColorPhase;
+static s8 f_OpenTopic = 0;
+static s8 f_TopicPage = 0;
+static s32 f_HandOffset = 0;
+static s32 f_IsHandReturning = FALSE;
+static s32 f_ArrowFrame = 0;
+static s32 f_ArrowFrameTime = 0;
+static s32 f_IsUnusedSwingReturning = FALSE;
+static s32 f_UnusedSwingOffset = 0;
+static s32 f_FirstListedTopic = 0;
 
-typedef struct TextListLayout {
-  /* 0x0 */ s32 top;
-  /* 0x4 */ s32 rowSpacing;
-} TextListLayout;
-
-extern TextListLayout f_HelpListLayout;
+/*
+ * Indexed by topic; each topic's pages are the messages that follow its title.
+ * The code reads the counts at their own address, 11 bytes into the table.
+ */
+static TopicPageTable f_TopicPages = {
+    {0x11, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01},
+    {1, 4, 4, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 4, 4, 3, 6}};
+/* The list's first message, then each topic's title */
+static s16 f_TopicTitleMessages[HELP_TOPIC_COUNT + 1] = {0x0D6, 0x0E7, 0x0EC,
+    0x0F1, 0x0F6, 0x0FB, 0x0FF, 0x104, 0x10A, 0x10F, 0x114, 0x118, 0x11E, 0x123,
+    0x128, 0x12D, 0x139, 0x132};
+static f32 f_ListColorPhase = 0.0f;
+static TextListLayout f_HelpListLayout = {84, 22};
+/* Read by no routine */
+static TextListLayout D_800C4350[8] = {{86, 18}, {108, 32}, {98, 24}, {104, 24},
+    {106, 32}, {98, 21}, {80, 20}, {0, 0}};
 
 void func_801FB54C(Gfx** displayListHead, s32);
 void DrawChalkboard(Gfx** displayListHead);
-/* Indexed by topic; each topic's pages are the messages that follow its title
- */
-extern s8 f_TopicPageCounts[];
-extern s16 f_TopicTitleMessages[];
 
 /* Reads one of the help board's images into buffer */
 void LoadHelpBoardImage(void* buffer, s32 image) {
@@ -194,7 +209,7 @@ void UpdateHelpBoard(void) {
       PlaySound(0x5D, 0xF, 0x50);
       f_TopicPage++;
       ShowTopicPage();
-    } else if (f_TopicPage < f_TopicPageCounts[f_OpenTopic]) {
+    } else if (f_TopicPage < f_TopicPages.counts[f_OpenTopic]) {
       if (IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
         PlaySound(0x5D, 0xF, 0x50);
         f_TopicPage++;
