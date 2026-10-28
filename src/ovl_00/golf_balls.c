@@ -370,8 +370,8 @@ void RollGolfBall(GolfBall* ball, BallSimulation* simulation) {
     return sqrtf(x * x + y * y + z * z);
   }
 
-  if (simulation->isRunning == BALL_STATE_FLYING ||
-      simulation->isRunning == BALL_STATE_ROLLING) {
+  if (simulation->state == BALL_STATE_FLYING ||
+      simulation->state == BALL_STATE_ROLLING) {
     movement[0] = simulation->position[0] - f_LastRolledBallPosition[0];
     movement[1] = simulation->position[1] - f_LastRolledBallPosition[1];
     movement[2] = simulation->position[2] - f_LastRolledBallPosition[2];
@@ -384,7 +384,7 @@ void RollGolfBall(GolfBall* ball, BallSimulation* simulation) {
     movement[2] = simulation->velocity[2];
   }
 
-  if (simulation->isRunning != BALL_STATE_STOPPED) {
+  if (simulation->state != BALL_STATE_STOPPED) {
     distance = GetLength(movement[0], movement[1], movement[2]);
     if (movement[2] != 0 || movement[0] != 0) {
       guRotateF(rotation, distance * BALL_ROLL_DEGREES_PER_UNIT, -movement[2],
@@ -513,7 +513,7 @@ void UpdateGolfBalls(void) {
 
         ball->alpha = BALL_SHOWN;
         ball->surface = GetSurfaceInfo(simulation->surface);
-        if (simulation->isRunning != BALL_STATE_IN_CUP) {
+        if (simulation->state != BALL_STATE_IN_CUP) {
           ball->isInCup = FALSE;
         } else {
           ball->isInCup = TRUE;
@@ -521,15 +521,14 @@ void UpdateGolfBalls(void) {
 
         if (GetCupDistance(simulation->position[0] - g_HoleSetup.cupPosition[0],
                 simulation->position[2] - g_HoleSetup.cupPosition[2]) == 0 ||
-            simulation->isRunning == BALL_STATE_IN_CUP ||
-            simulation->unkA0 != 0) {
+            simulation->state == BALL_STATE_IN_CUP || simulation->unkA0 != 0) {
           ball->isInCup = TRUE;
         } else {
           ball->isInCup = FALSE;
         }
 
         RollGolfBall(ball, simulation);
-        ball->state = simulation->isRunning;
+        ball->state = simulation->state;
         ball->unk9E = simulation->unkA1;
         ball->purpose = simulation->purpose;
         markerPlayerIndex = BALL_NO_MARKER;
@@ -613,7 +612,7 @@ void UpdateGolfBalls(void) {
 
     if (f_IsBallAfterimageFast == TRUE) {
       if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.00009765625f < distance &&
-          g_BallSimulations[0].isRunning == BALL_STATE_ROLLING) {
+          g_BallSimulations[0].state == BALL_STATE_ROLLING) {
         head->alpha = AFTERIMAGE_FAST_ALPHA;
         head->position[0] = ball->position[0];
         head->position[1] = ball->position[1];

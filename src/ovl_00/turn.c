@@ -1675,7 +1675,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
   simulation->position[AXIS_Z] = player->ballPosition[AXIS_Z];
   simulation->playerIndex = playerIndex;
   simulation->unkA0 = 0;
-  simulation->isRunning = FALSE;
+  simulation->state = FALSE;
   groundHeight = GetGroundHeight(
       simulation->position[AXIS_X], simulation->position[AXIS_Z]);
   if (groundHeight < simulation->position[AXIS_Y]) {
@@ -4103,7 +4103,7 @@ void UpdateTurns(void) {
                 IntLength2D(g_BallPosition[0] - g_HoleSetup.cupPosition[0],
                     g_BallPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
 
-            if (g_TurnBallSimulation.isRunning != 2 || g_GameState.isMiniGolf ||
+            if (g_TurnBallSimulation.state != 2 || g_GameState.isMiniGolf ||
                 (GetSurfaceInfo(g_TurnBallSimulation.unkA4)->kind == 0xB &&
                     (s32)distance < (s32)previousDistance)) {
               break;
@@ -4144,7 +4144,7 @@ void UpdateTurns(void) {
           }
 
           if (g_MergedController.buttons & A_BUTTON) {
-            while (g_TurnBallSimulation.isRunning) {
+            while (g_TurnBallSimulation.state) {
               StepBallSimulation(&g_TurnBallSimulation);
               TickStopwatches();
               UpdateFlightCamera(TRUE, g_TurnController.buttons);
@@ -4155,7 +4155,7 @@ void UpdateTurns(void) {
           }
         }
 
-        if (!g_TurnBallSimulation.isRunning) {
+        if (!g_TurnBallSimulation.state) {
           ClearShotEffects(0);
           nextState = 10;
           D_800C3094 = 1;

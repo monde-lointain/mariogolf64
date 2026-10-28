@@ -2214,7 +2214,7 @@ s32 StepTrialShot(void) {
   PlaneTriangle hit;
   f32 fraction;
   s32 flags;
-  s32 isRunning;
+  s32 ballState;
   s32 stepFlags;
   s32 velocityY;
   s32 unk94;
@@ -2277,8 +2277,8 @@ s32 StepTrialShot(void) {
     f_LandingPosition[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
   }
 
-  isRunning = f_TrialSimulation.isRunning;
-  if (isRunning) {
+  ballState = f_TrialSimulation.state;
+  if (ballState) {
     do {
       velocityY = f_TrialSimulation.velocity[AXIS_Y];
       unk94 = f_TrialSimulation.unk94;
@@ -2296,12 +2296,12 @@ s32 StepTrialShot(void) {
       }
 
       if (unk94 == 0 && (flags & 3) && velocityY < 0 &&
-          isRunning == BALL_STATE_FLYING) {
+          ballState == BALL_STATE_FLYING) {
         if (f_HasBestEvaluation || f_TrialLevel < 2) {
           break;
         }
 
-        f_HasUnk3Contact = isRunning;
+        f_HasUnk3Contact = ballState;
       }
 
       if (f_IsPutting) {
@@ -2322,8 +2322,8 @@ s32 StepTrialShot(void) {
           }
         }
       } else if ((stepFlags & STEP_FLAG_GROUND_HIT) &&
-          f_TrialSimulation.isRunning == BALL_STATE_FLYING && !f_HasLanded) {
-        f_HasLanded = f_TrialSimulation.isRunning;
+          f_TrialSimulation.state == BALL_STATE_FLYING && !f_HasLanded) {
+        f_HasLanded = f_TrialSimulation.state;
         f_LandingPosition[AXIS_X] = f_TrialSimulation.position[AXIS_X];
         f_LandingPosition[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
         f_LandingPosition[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
@@ -2342,7 +2342,7 @@ s32 StepTrialShot(void) {
     f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
   }
 
-  if (!f_TrialSimulation.isRunning) {
+  if (!f_TrialSimulation.state) {
     IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
         g_HoleSetup.cupPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]);
     targetMiss = IntLength2D(f_PlanTarget[AXIS_X] - f_TrialEndPoint[AXIS_X],
@@ -2935,9 +2935,10 @@ s32 IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * Simulates f_TrialShot and returns TRUE if the ball comes to rest, and not out
  * of bounds, off the course or in a water hazard
  *
- * It does not match: ours reads isRunning in the loop test from its address,
- * where the original reads it through the register that holds the simulation's
- * address, and the original places the fault report after the surface test.
+ * It does not match: ours reads the simulation's state in the loop test from
+ * its address, where the original reads it through the register that holds the
+ * simulation's address, and the original places the fault report after the
+ * surface test.
  */
 #ifdef NON_MATCHING
 s32 IsTrialShotSafe(void) {
@@ -2958,7 +2959,7 @@ s32 IsTrialShotSafe(void) {
   f_TrialSimulation.surface = f_TrialShot.surface;
   LaunchBallSimulation(&f_TrialSimulation, LAUNCH_PURPOSE_TRIAL, f_TrialLaunch);
   f_TrialStepCount = 0;
-  while (f_TrialSimulation.isRunning) {
+  while (f_TrialSimulation.state) {
     f_TrialStepCount++;
     flags = StepBallSimulation(&f_TrialSimulation);
     if (f_TrialStepCount < MAX_STEP_COUNT) {
@@ -2972,7 +2973,7 @@ s32 IsTrialShotSafe(void) {
     }
   }
 
-  if (!f_TrialSimulation.isRunning) {
+  if (!f_TrialSimulation.state) {
     kind = GetSurfaceInfo(f_TrialSimulation.surface)->kind;
     if (kind == SURFACE_KIND_OUT_OF_BOUNDS ||
         kind == SURFACE_KIND_OUT_OF_COURSE) {

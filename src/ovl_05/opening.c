@@ -1282,7 +1282,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0x18) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
-          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.state = 0;
           f_OpeningShotSimulation.surface = 0x17;
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADB8_ovl_05);
           D_8020AE44_ovl_05 = 1;
@@ -1358,7 +1358,7 @@ void UpdateOpening(void) {
             GetGroundHeight(0xF1B96, 0x48CFDC);
         f_OpeningShotSimulation.playerIndex = 0;
         f_OpeningShotSimulation.unkA0 = 0;
-        f_OpeningShotSimulation.isRunning = 0;
+        f_OpeningShotSimulation.state = 0;
         f_OpeningShotSimulation.surface = 0x17;
         func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADB8_ovl_05);
         D_8020AE44_ovl_05 = 1;
@@ -1428,7 +1428,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0x16) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
-          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.state = 0;
           f_OpeningShotSimulation.surface = 0x17;
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
           D_8020AE44_ovl_05 = 1;
@@ -1481,7 +1481,7 @@ void UpdateOpening(void) {
               GetGroundHeight(0xF1B96, 0x48CFDC);
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
-          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.state = 0;
           f_OpeningShotSimulation.surface = 0x17;
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
           D_8020AE44_ovl_05 = 1;
@@ -1545,7 +1545,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0x14) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
-          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.state = 0;
           f_OpeningShotSimulation.surface = 0x17;
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADF8_ovl_05);
           D_8020AE44_ovl_05 = 1;
@@ -1644,7 +1644,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
-          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.state = 0;
           f_OpeningShotSimulation.surface = 0x17;
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020AE18_ovl_05);
           D_8020AE44_ovl_05 = 1;

@@ -18,7 +18,7 @@
 #define STEP_FLAG_HOLE_TRIANGLE_BOUNCE 0x40
 #define STEP_FLAG_CUP_PULL 0x80
 
-/* Values of a BallSimulation's isRunning */
+/* Values of a BallSimulation's state */
 enum BallState {
   BALL_STATE_STOPPED,
   BALL_STATE_FLYING,
@@ -92,7 +92,7 @@ typedef struct BallSimulation {
   /* 0x44 */ u8 unk44[0x84 - 0x44];
   /* 0x84 */ f32 windVelocityX;
   /* 0x88 */ f32 windVelocityZ;
-  /* 0x8C */ s32 isRunning;
+  /* 0x8C */ s32 state; /* A BALL_STATE_* value */
   /* 0x90 */ s32 purpose;
   /* 0x94 */ s32 unk94;
   /* 0x98 */ s32 unk98;

@@ -1107,7 +1107,7 @@ void GenerateClub(s32 clubIndex) {
       LaunchBallSimulation(
           &simulation, LAUNCH_PURPOSE_CLUB_TEST, &f_ClubTestShot);
       for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
-        if (!simulation.isRunning) {
+        if (!simulation.state) {
           break;
         }
 
@@ -1338,7 +1338,7 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
     LaunchBallSimulation(
         &simulation, LAUNCH_PURPOSE_CLUB_TEST, &f_PutterTestShot);
     for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
-      if (!simulation.isRunning) {
+      if (!simulation.state) {
         break;
       }
 

@@ -224,7 +224,7 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
  * the original.
  */
 #define IsBareCrossing(simulation, startSide, endSide) \
-  (((simulation)->isRunning == BALL_STATE_ROLLING) && \
+  (((simulation)->state == BALL_STATE_ROLLING) && \
       (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
 
 /* The hit masks, and which mask each billboard texture has */
@@ -1862,7 +1862,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       velocity[AXIS_Z] = 0;
     } else {
       bounceSpeed = (speed * FLAGSTICK_MOST_BOUNCE) - (ABS(deltaY) * 2);
-      if (simulation->isRunning == BALL_STATE_FLYING) {
+      if (simulation->state == BALL_STATE_FLYING) {
         bounceSpeed *= 0.5f;
       }
 

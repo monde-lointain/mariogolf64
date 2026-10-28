@@ -69,7 +69,7 @@ void SimulateShot(Unk20* shot) {
   g_SimulatedShot.unk2E08 = g_GameState.isMiniGolf ||
       GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
   step = 0;
-  while (simulation->isRunning) {
+  while (simulation->state) {
     flags = StepBallSimulation(simulation);
     if (step < PATH_STEP_COUNT) {
       g_SimulatedShot.pathFlags[step] = flags;
