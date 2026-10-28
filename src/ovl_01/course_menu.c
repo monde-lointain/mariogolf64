@@ -165,11 +165,11 @@ s32 GetOpenCourseCount(void);
 void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row);
 void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
 void func_80210D34_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_80210D94_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_80210DF4_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
@@ -819,8 +819,8 @@ void func_8020FEF8_ovl_01(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   func_80207E28_ovl_01(
       &gfx, D_8023A810_ovl_01, BADGE_ICON_X + index, BADGE_ICON_Y);
-  func_80210DF4_ovl_01(
-      &gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y, badgeCount, 1);
+  func_80210DF4_ovl_01(&gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y, badgeCount,
+      MENU_NUMBER_TIMES);
   *displayListHead = gfx;
 }
 #else
@@ -997,8 +997,16 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802104F0_ovl_01);
 #endif
 
+/* DrawMenuNumber's sixth argument: the field it right-aligns the number in */
+#define NUMBER_FIELD_TWO_NARROW 0
+#define NUMBER_FIELD_ONE 1
+#define NUMBER_FIELD_TWO 2
+#define NUMBER_FIELD_THREE 3
+#define NUMBER_FIELD_FOUR 4
+#define NUMBER_FIELD_NONE 5
+
 void func_80210C18_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
   if (value > 99) {
@@ -1009,12 +1017,12 @@ void func_80210C18_ovl_01(
     value = -99;
   }
 
-  DrawMenuNumber(&gfx, x, y, value, arg4, 0);
+  DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_TWO_NARROW);
   *displayListHead = gfx;
 }
 
 void func_80210C74_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
   if (value > 9) {
@@ -1025,12 +1033,12 @@ void func_80210C74_ovl_01(
     value = -9;
   }
 
-  DrawMenuNumber(&gfx, x, y, value, arg4, 1);
+  DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_ONE);
   *displayListHead = gfx;
 }
 
 void func_80210CD4_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
   if (value > 99) {
@@ -1041,12 +1049,12 @@ void func_80210CD4_ovl_01(
     value = -99;
   }
 
-  DrawMenuNumber(&gfx, x, y, value, arg4, 2);
+  DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_TWO);
   *displayListHead = gfx;
 }
 
 void func_80210D34_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
   if (value > 999) {
@@ -1057,12 +1065,12 @@ void func_80210D34_ovl_01(
     value = -999;
   }
 
-  DrawMenuNumber(&gfx, x, y, value, arg4, 3);
+  DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_THREE);
   *displayListHead = gfx;
 }
 
 void func_80210D94_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
   if (value > 9999) {
@@ -1073,25 +1081,18 @@ void func_80210D94_ovl_01(
     value = -9999;
   }
 
-  DrawMenuNumber(&gfx, x, y, value, arg4, 4);
+  DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_FOUR);
   *displayListHead = gfx;
 }
 
 void func_80210DF4_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4) {
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
-  DrawMenuNumber(&gfx, x, y, value, arg4, 5);
+  DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_NONE);
   *displayListHead = gfx;
 }
 
-/* DrawMenuNumber's sixth argument: the field it right-aligns the number in */
-#define NUMBER_FIELD_TWO_NARROW 0
-#define NUMBER_FIELD_ONE 1
-#define NUMBER_FIELD_TWO 2
-#define NUMBER_FIELD_THREE 3
-#define NUMBER_FIELD_FOUR 4
-#define NUMBER_FIELD_NONE 5
 #define NARROW_DIGIT_SPACING 12
 #define MENU_NUMBER_DIGIT_LIMIT 4
 #define MENU_NUMBER_LIMIT 9999

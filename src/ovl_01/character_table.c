@@ -152,7 +152,7 @@ extern u8 D_80230310_ovl_01[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
 void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s32 character, u8 drawMode);
 void func_80210DF4_ovl_01(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
