@@ -35,13 +35,19 @@
 /* Drives are compared at this scale, so those nearly as long tie */
 #define DRIVE_COMPARISON_SCALE 7.119878e-05f
 
-extern s32 f_IsContestDecided;
+s32 g_LongestDrivePot = 0;
+s32 g_NearestPinPot = 0;
+s32 g_HolePot = 0;
+static s32 f_IsContestDecided = FALSE;
+s32 g_ScorecardState = SCORECARD_CLOSED;
 
 /*
  * The player who won the hole's contest: the longest drive on a marked par
  * 5, or the shot nearest the pin on a par 3
  */
-extern s32 f_ContestWinner;
+static s32 f_ContestWinner = NO_CONTEST_WINNER;
+/* Read by no routine */
+static void* D_800C4148[6] = {NULL, NULL, guPosition, NULL, NULL, NULL};
 
 /*
  * Sums the player's net strokes over par from the round's first hole to
