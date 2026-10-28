@@ -48,11 +48,11 @@
 /* g_GameState.holeIndex under a symbol of its own, which
  * UpdateHoleIntroCamera needs to match */
 extern s32 g_HoleIndex;
-extern s32 f_IntroFrame;
+static s32 f_IntroFrame = 0;
 /* How far in front of the ball the camera is; negative when behind it */
-extern f32 f_IntroCameraDistance;
+static f32 f_IntroCameraDistance = 0.0f;
 /* How far above the ball the camera is; negative values are above */
-extern f32 f_IntroCameraHeight;
+static f32 f_IntroCameraHeight = 0.0f;
 
 #ifdef NON_MATCHING
 /* Places the camera for the start of the hole intro */
