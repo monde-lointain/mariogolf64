@@ -133,45 +133,6 @@ enum BannerAnimation {
 
 typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_MAX_LETTERS];
 
-/* Frames since the banner started, or BANNER_FRAME_NONE */
-extern s32 f_BannerFrame;
-extern s32 f_CurrentBanner;
-/* The banner whose images are in f_MovieBuffer */
-extern s32 f_LoadedBanner;
-/* The number that BANNER_STROKES_OVER_PAR's banner shows after its "+" */
-extern s32 f_BannerNumber;
-/* The "+" and the number's digits */
-extern s32 f_BannerNumberLetterCount;
-extern Vtx f_BannerLetterVertices[4];
-extern Banner f_Banners[];
-extern BannerLayout f_BannerLayouts[];
-extern s32 f_IsMovieBufferAllocated;
-/* The contact effect's quad spans from vertex 0 to vertex 1 */
-extern Vtx f_ContactVertices[2];
-extern s32 f_IsContactEffectFading;
-extern s32 f_ContactStyle;
-/* The texture coordinates of the quad's far corner, in S10.5 */
-extern s32 f_ContactTextureS;
-extern s32 f_ContactTextureT;
-extern s32 f_ContactTrailHead;
-extern f32 f_ContactSpinAngle;
-extern Vtx f_ContactSpinVertices[4];
-extern s32 f_CurrentMovie;
-extern s32 f_MovieFrame;
-/* Counts up to MOVIE_TICKS_PER_FRAME between the frames of a Monty Mole movie
- */
-extern s32 f_MovieTick;
-/* Sets the render state for drawing a movie's paletted strips */
-extern Gfx f_MovieSetupDisplayList[];
-extern Gfx f_MovieImageSetupDisplayList[];
-extern s32 f_MovieBackBuffer; /* Which of a two-buffer movie's frame buffers to
-                                read into next */
-extern u16 f_ToadMovieFrameAssets[];
-extern u16 f_MontyMoleMovieFrameAssets[];
-extern u16 f_GoombaMovieFrameAssets[];
-/* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
-extern s32 f_MovieDrawCount;
-
 typedef struct LakituFlight {
   /* 0x0 */ f32 x;
   /* 0x4 */ f32 y;
@@ -183,22 +144,12 @@ typedef struct LakituVelocity {
   /* 0x4 */ f32 y;
 } LakituVelocity;
 
-extern Vtx f_ReadyGoVertices[];
-extern u16 f_LakituMovieFrameAssets[];
-extern s32 f_WindFlyGuyFrame;
-extern s32 f_WindFlyGuyAsset;
-extern s32 f_IsFlipMessageLeaving;
-extern s32
-    f_FlipMessageFrame; /* FLIP_MESSAGE_FRAME_NONE while no message is shown */
-extern s32 f_FlipMessageId;
-extern s32 f_FlipMessageHalfWidth;
-extern s32 f_FlipMessageHalfHeight;
-extern Vtx f_FlipMessageBoardVertices[4];
-
 /* ShowFlipMessage's arguments, besides a message to flip in */
 #define FLIP_MESSAGE_RESET (-2)
 #define FLIP_MESSAGE_LEAVE (-1)
 #define FLIP_MESSAGE_FRAME_NONE (-1)
+/* ShowFlipMessage sets f_IsFlipMessageLeaving before it is read */
+#define INITIAL_IS_FLIP_MESSAGE_LEAVING (-1)
 #define FLIP_MESSAGE_GLYPH_GROUP 0
 #define FLIP_MESSAGE_TEXT_SLOT 0
 #define FLIP_MESSAGE_X 160
@@ -349,16 +300,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
  * GAME_FLAG_TEST_AIM_TILT_AND_MOVIES */
 #define MOVIE_TEST_CONTROLLER 1
 
-void ResetPath(void);
-void DrawContestWinnerMovie(Gfx** displayListHead);
-void DrawDriveRecord(Gfx** displayListHead);
-void DrawPuttCaption(Gfx** displayListHead);
-void DrawReadyGoMovie(Gfx** displayListHead);
-void DrawMontyMoleMovie(Gfx** displayListHead);
-void DrawGoombaMovie(Gfx** displayListHead);
-void DrawLakituMovie(Gfx** displayListHead);
-void DrawToadMovie(Gfx** displayListHead);
-
 /* The Fly Guy and its streak are drawn on screen; a point's x and y are in
  * screen pixels */
 typedef struct FlyGuyPoint {
@@ -366,6 +307,251 @@ typedef struct FlyGuyPoint {
   /* 0x4 */ f32 y;
   /* 0x8 */ f32 z;
 } FlyGuyPoint;
+
+/* Frames since the banner started, or BANNER_FRAME_NONE */
+static s32 f_BannerFrame = BANNER_FRAME_NONE;
+static s32 f_CurrentBanner = BANNER_NONE;
+/* The number that BANNER_STROKES_OVER_PAR's banner shows after its "+" */
+static s32 f_BannerNumber = 0;
+/* The "+" and the number's digits */
+static s32 f_BannerNumberLetterCount = 0;
+/* The banner whose images are in f_MovieBuffer */
+static s32 f_LoadedBanner = BANNER_NONE;
+static s32 f_IsMovieBufferAllocated = FALSE;
+/* Read by no routine */
+static s32 D_80224128_ovl_00 = -1;
+static Vtx f_BannerLetterVertices[4] = {
+    {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{0, -32, 0}, 0, {0, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{32, -32, 0}, 0, {0x7FF, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{32, 32, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* clang-format off */
+static Banner f_Banners[] = {
+    /* BANNER_NICE_SHOT */
+    {0, 0x542, 10, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SLIDE},
+    /* BANNER_NICE_ON */
+    {0, 0x544, 8, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SPIN},
+    /* BANNER_NICE_APPROACH */
+    {0, 0x543, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SPIN},
+    /* BANNER_NICE_TOUCH */
+    {0, 0x545, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SPIN},
+    /* BANNER_CHIP_IN */
+    {0, 0x546, 8, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SPIN},
+    /* BANNER_PIN_SHOT */
+    {0, 0x547, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SPIN},
+    /* BANNER_FLAG_SHOT */
+    {0, 0x548, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SPIN},
+    /* BANNER_EXCELLENT */
+    {0, 0x54B, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SPIN},
+    /* BANNER_GREAT */
+    {0, 0x54C, 7, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SPIN},
+    /* BANNER_FINISH */
+    {0, 0x54A, 6, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SLIDE},
+    /* BANNER_COMPLETE */
+    {0, 0x549, 8, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SLIDE},
+    /* BANNER_HOLE_IN_ONE */
+    {0, 0x551, 10, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SLIDE},
+    /* BANNER_ALBATROSS */
+    {0, 0x552, 9, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SLIDE},
+    /* BANNER_EAGLE */
+    {0, 0x550, 6, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SLIDE},
+    /* BANNER_BIRDIE */
+    {0, 0x54E, 7, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SLIDE},
+    /* BANNER_PAR */
+    {0, 0x54D, 5, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_SLIDE},
+    /* BANNER_BOGEY */
+    {0, 0x54F, 6, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_ZOOM_STAY},
+    /* BANNER_OVER_PAR_NUMBER */
+    {0, 0x553, 11, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT,
+        BANNER_ANIMATION_ZOOM_STAY}
+};
+static BannerLayout f_BannerLayouts[] = {
+    /* BANNER_NICE_SHOT */
+    {-144, 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 0},
+    /* BANNER_NICE_ON */
+    {-128, 0, 32, 64, 96, 128, 160, 192, 224, 0, 0, 0},
+    /* BANNER_NICE_APPROACH */
+    {-144, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
+    /* BANNER_NICE_TOUCH */
+    {-132, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
+    /* BANNER_CHIP_IN */
+    {-128, 0, 32, 64, 96, 128, 160, 192, 224, 0, 0, 0},
+    /* BANNER_PIN_SHOT */
+    {-128, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
+    /* BANNER_FLAG_SHOT */
+    {-136, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
+    /* BANNER_EXCELLENT */
+    {-144, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
+    /* BANNER_GREAT */
+    {-96, 0, 32, 64, 96, 128, 160, 192, 0, 0, 0, 0},
+    /* BANNER_FINISH */
+    {-88, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
+    /* BANNER_COMPLETE */
+    {-120, 0, 32, 64, 96, 128, 160, 192, 224, 0, 0, 0},
+    /* BANNER_HOLE_IN_ONE */
+    {-148, 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 0},
+    /* BANNER_ALBATROSS */
+    {-132, 0, 32, 64, 96, 128, 160, 192, 224, 256, 0, 0},
+    /* BANNER_EAGLE */
+    {-88, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
+    /* BANNER_BIRDIE */
+    {-104, 0, 32, 64, 96, 128, 160, 192, 0, 0, 0, 0},
+    /* BANNER_PAR */
+    {-64, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
+    /* BANNER_BOGEY */
+    {-96, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
+    /* BANNER_OVER_PAR_NUMBER */
+    {-105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+/* clang-format on */
+static s32 f_TestBanner = 0;
+static s32 f_IsFlipMessageLeaving = INITIAL_IS_FLIP_MESSAGE_LEAVING;
+/* FLIP_MESSAGE_FRAME_NONE while no message is shown */
+static s32 f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
+static s32 f_FlipMessageId = 0;
+static s32 f_FlipMessageHalfWidth = 0;
+static s32 f_FlipMessageHalfHeight = 0;
+static Vtx f_FlipMessageBoardVertices[4] = {
+    {{{-72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
+static s32 f_MovieDrawCount = 0;
+/* Counts up to MOVIE_TICKS_PER_FRAME between the frames of a Monty Mole movie
+ */
+static s32 f_MovieTick = 0;
+static s32 f_CurrentMovie = MOVIE_NONE;
+/* Which of a two-buffer movie's frame buffers to read into next */
+static s32 f_MovieBackBuffer = 0;
+static s32 f_MovieFrame = 0;
+static u16 f_ToadMovieFrameAssets[] = {0x92D, 0x92E, 0x92F, 0x930, 0x931, 0x932,
+    0x933, 0x934, 0x935, 0x936, 0x937, 0x938};
+static u16 f_LakituMovieFrameAssets[] = {0x64E, 0x64F, 0x650, 0x651, 0x652,
+    0x653, 0x654, 0x655, 0x656, 0x657, 0x658, 0x659, 0x65A};
+static u16 f_MontyMoleMovieFrameAssets[] = {0x915, 0x916, 0x917, 0x918, 0x919,
+    0x91A, 0x91B, 0x91A, 0x919, 0x91C, 0x91D, 0x91E, 0x919, 0x918, 0x917, 0x916,
+    0x915};
+static u16 f_GoombaMovieFrameAssets[] = {0x920, 0x921, 0x922, 0x923, 0x924,
+    0x924, 0x925, 0x926, 0x927, 0x928, 0x929};
+static Gfx f_MovieImageSetupDisplayList[] = {
+    gsDPPipeSync(),
+    gsDPPipeSync(),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsDPPipeSync(),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_THRESHOLD),
+    gsDPSetBlendColor(0xFF, 0xFF, 0xFF, 0x01),
+    gsDPPipeSync(),
+    gsDPSetTextureLUT(G_TT_RGBA16),
+    gsDPPipeSync(),
+    gsDPSetTextureFilter(G_TF_BILERP),
+    gsDPPipeSync(),
+    gsDPSetTexturePersp(G_TP_NONE),
+    gsDPPipeSync(),
+    gsDPSetTextureLUT(G_TT_RGBA16),
+    gsSPEndDisplayList(),
+    /* Commands after the end, which no display list reaches */
+    gsDPPipeSync(),
+    gsDPSetAlphaDither(G_AD_DISABLE),
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2),
+};
+static Vtx f_ReadyGoVertices[12] = {
+    {{{-76, 28, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{76, 28, 0}, 0, {0x1300, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-76, 16, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{76, 16, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-76, 4, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{76, 4, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-76, -8, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{76, -8, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-76, -20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{76, -20, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-76, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{76, -32, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* Sets the render state for drawing a movie's paletted strips */
+static Gfx f_MovieSetupDisplayList[] = {
+    gsDPPipeSync(),
+    gsDPPipeSync(),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsDPPipeSync(),
+    gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsDPPipeSync(),
+    gsDPSetTextureLUT(G_TT_RGBA16),
+    gsDPPipeSync(),
+    gsDPSetTextureFilter(G_TF_BILERP),
+    gsDPPipeSync(),
+    gsDPSetTexturePersp(G_TP_NONE),
+    gsDPPipeSync(),
+    gsDPSetDepthSource(G_ZS_PRIM),
+    gsDPSetPrimDepth(16415, 0),
+    gsSPEndDisplayList(),
+};
+static Vtx f_ContactSpinVertices[4] = {
+    {{{-25, 25, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
+    {{{-25, -15, 0}, 0, {0, 0x7FF}, {0xFF, 0xFF, 0xBF, 0xFF}}},
+    {{{15, -15, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0x7F, 0x00, 0xFF}}},
+    {{{15, 25, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
+/* The contact effect's quad spans from vertex 0 to vertex 1 */
+static Vtx f_ContactVertices[2] = {
+    {{{-12, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
+    {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
+s32 g_ContactEffect = CONTACT_EFFECT_NONE;
+static s32 f_IsContactEffectFading = FALSE;
+static s32 f_ContactStyle = 0;
+/* The texture coordinates of the quad's far corner, in S10.5 */
+static s32 f_ContactTextureS = 0;
+static s32 f_ContactTextureT = 0;
+/* Read by no routine */
+static Mtx D_80224710_ovl_00 = IDENTITY_MTX;
+static s32 f_ContactTrailHead = 0;
+static f32 f_ContactSpinAngle = 0.0f;
+/*
+ * StepAlongPath flies the Fly Guy through the first
+ * WIND_FLY_GUY_PATH_POINT_COUNT points; the last two are read by no routine
+ */
+static FlyGuyPoint f_WindFlyGuyPath[] = {{-128.0f, 214.0f, 0.0f},
+    {1e+02f, 215.0f, 0.0f}, {1.6e+02f, 1.9e+02f, 0.0f},
+    {1.8e+02f, 1.5e+02f, 0.0f}, {1.8e+02f, 1.2e+02f, 0.0f},
+    {1.7e+02f, 1e+02f, 0.0f}, {1.5e+02f, 85.0f, 0.0f}, {1.3e+02f, 8e+01f, 0.0f},
+    {115.0f, 85.0f, 0.0f}, {1e+02f, 1e+02f, 0.0f}, {95.0f, 1.2e+02f, 0.0f},
+    {1e+02f, 1.5e+02f, 0.0f}, {1.2e+02f, 1.8e+02f, 0.0f},
+    {145.0f, 195.0f, 0.0f}, {2e+02f, 2e+02f, 0.0f}, {285.0f, 1.9e+02f, 0.0f},
+    {3.3e+02f, 1.8e+02f, 0.0f}, {3.6e+02f, 175.0f, 0.0f},
+    {3.8e+02f, 1.7e+02f, 0.0f}};
+/* Where the Fly Guy stays while its streak fades */
+static FlyGuyPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};
+static s32 f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
+static s32 f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
+/* Read by no routine */
+static s32 D_80224850_ovl_00 = 0;
+/* The contact matrix that the streak starts from; the streak's matrices form a
+ * ring behind it */
+static s32 f_WindStreakHead = 0;
 
 static Mtx f_FlipMessageMatrices[2];
 static Mtx f_ReadyGoMatrices[2];
@@ -380,6 +566,16 @@ u8* f_MovieBuffer;
 Mtx f_ContactMatrices[CONTACT_MATRIX_COUNT];
 LakituFlight f_Lakitu;
 LakituVelocity f_LakituVelocity;
+
+void ResetPath(void);
+void DrawContestWinnerMovie(Gfx** displayListHead);
+void DrawDriveRecord(Gfx** displayListHead);
+void DrawPuttCaption(Gfx** displayListHead);
+void DrawReadyGoMovie(Gfx** displayListHead);
+void DrawMontyMoleMovie(Gfx** displayListHead);
+void DrawGoombaMovie(Gfx** displayListHead);
+void DrawLakituMovie(Gfx** displayListHead);
+void DrawToadMovie(Gfx** displayListHead);
 
 void AllocMovieBuffer(void) {
   EncodedAsset unused;
@@ -581,8 +777,6 @@ void func_8020EEEC_ovl_00(Gfx** displayListHead) {
 /* The banner's shading shows through less as it fades in */
 #define BANNER_MAX_ALPHA 255
 #define BANNER_BLEND_ALPHA 1
-
-extern s32 f_TestBanner;
 
 /* Animates the shown banner and draws it, its letters each on their own square
  */
@@ -2726,14 +2920,6 @@ void ShowWindFlyGuy(s32 show) {
     ResetPath();
   }
 }
-
-extern FlyGuyPoint f_WindFlyGuyPath[];
-/* Where the Fly Guy stays while its streak fades */
-extern FlyGuyPoint f_WindFlyGuyExit;
-
-/* The contact matrix that the streak starts from; the streak's matrices form a
- * ring behind it */
-extern s32 f_WindStreakHead;
 
 #define WIND_FLY_GUY_PATH_POINT_COUNT 17
 #define WIND_FLY_GUY_PATH_PACE 12

@@ -584,7 +584,7 @@ segments:
       - [0xD9160, .data, ovl_00/golf_balls]
       - [0xDD140, .data, ovl_00/turn]
       - [0xDD320, .data, ovl_00/hole_objects]
-      - [0xDD410, data]
+      - [0xDD410, .data, ovl_00/round_events]
       - [0xDDB60, .data, ovl_00/shot_effects]
       - [0xDDC20, data]
       - [0xDDDB0, .data, ovl_00/shot_labels]
