@@ -310,10 +310,6 @@ extern s32 D_80223FF8_ovl_00;
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
 extern s8 D_800C3098; /* Asks for the HUD to turn away when the next player is
                          picked */
-extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing
-                                 was stopped */
-extern s32
-    D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
 extern s32 D_80223E40_ovl_00; /* Set once the shot preview has been built */
 extern f32 D_80223E48_ovl_00; /* A debug tilt of the aim camera, which the C
                                  buttons tune */
@@ -330,8 +326,6 @@ extern Mtx D_802271A0_ovl_00[2]
                                                          by draw buffer */
 extern f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS]
                             [AXIS_COUNT]; /* The preview's points */
-extern s32
-    D_8022716C_ovl_00; /* The shot mode that the golfer was last posed with */
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
 extern s32 D_80223FEC_ovl_00; /* Frames since the last ambient sound */
@@ -2733,11 +2727,13 @@ extern s32 D_8022400C_ovl_00;
 extern f32 D_80224014_ovl_00;
 extern f32 D_80224018_ovl_00;
 extern u32 D_80223E58_ovl_00;
+/*
+ * The launch of the shot being taken, which the shot preview and the ball
+ * simulation start from. unkC is how far from the meter's impact mark the swing
+ * was stopped, and clubIndex and shotMode are also the club slot and shot mode
+ * that the golfer was last posed with.
+ */
 extern Unk20 D_80227150_ovl_00;
-extern s32 D_80227158_ovl_00;
-extern s32 D_80227160_ovl_00;
-extern s32 D_80227164_ovl_00;
-extern s32 D_80227168_ovl_00;
 extern s32 D_80227170_ovl_00[MAX_PLAYER_COUNT];
 extern f32 D_80227180_ovl_00;
 extern f32 D_80227184_ovl_00;
@@ -2939,12 +2935,12 @@ void UpdateTurns(void) {
    * show the stance.
    */
   void PoseGolferForShot(void) {
-    s32* lastClubSlot = &D_80227154_ovl_00;
+    s32* lastClubSlot = &D_80227150_ovl_00.clubIndex;
 
     if (*lastClubSlot != g_CurrentShot.clubSlot ||
-        D_8022716C_ovl_00 != g_CurrentShot.shotMode) {
+        D_80227150_ovl_00.shotMode != g_CurrentShot.shotMode) {
       *lastClubSlot = g_CurrentShot.clubSlot;
-      D_8022716C_ovl_00 = g_CurrentShot.shotMode;
+      D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
       SetCharacterClub(0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot]);
       UpdateGolferTranslucency();
       if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
@@ -3055,7 +3051,7 @@ void UpdateTurns(void) {
    * mishit */
   s32 DoesImpactRumble(void) {
     return GetUnkCEntry(GetSelectedClub(), g_CurrentShot.surface,
-        g_CurrentShot.shotMode, D_8022715C_ovl_00)
+        g_CurrentShot.shotMode, D_80227150_ovl_00.unkC)
         ->unk5;
   }
 
@@ -3064,7 +3060,7 @@ void UpdateTurns(void) {
   void PlayImpactClickSound(void) {
     if (DoesImpactRumble()) {
       PlaySound(SOUND_IMPACT_MISHIT, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
-    } else if (D_8022715C_ovl_00 == 0) {
+    } else if (D_80227150_ovl_00.unkC == 0) {
       PlaySound(SOUND_IMPACT_ON_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
     } else {
       PlaySound(SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
@@ -3105,7 +3101,7 @@ void UpdateTurns(void) {
 
     D_80227170_ovl_00[playerIndex]++;
     nextState = state;
-    D_80227168_ovl_00 = playerIndex;
+    D_80227150_ovl_00.unk18 = playerIndex;
     if ((state == 2 || state == 4 || state == 5 || state == 6 || state == 8 ||
             state == 9) &&
         (g_PauseScreen == 0 || g_PauseScreen == 4)) {
@@ -3157,8 +3153,8 @@ void UpdateTurns(void) {
         g_RoundHud.greenGridState = 1;
         g_RoundHud.unkF = 1;
         g_RoundHud.unk12 = 1;
-        D_80227154_ovl_00 = g_CurrentShot.clubSlot;
-        D_8022716C_ovl_00 = g_CurrentShot.shotMode;
+        D_80227150_ovl_00.clubIndex = g_CurrentShot.clubSlot;
+        D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
         D_800C307C = 0;
         SetCharacterClub(
             0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot]);
@@ -3364,8 +3360,8 @@ void UpdateTurns(void) {
         StartTurnRumble(g_GameState.currentPlayerIndex);
         break;
       case 0x15:
-        D_80227154_ovl_00 = g_CurrentShot.clubSlot;
-        D_8022716C_ovl_00 = g_CurrentShot.shotMode;
+        D_80227150_ovl_00.clubIndex = g_CurrentShot.clubSlot;
+        D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
         D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
         if (D_80227194_ovl_00 == 2) {
           StartTurnTimer();
@@ -3537,15 +3533,15 @@ void UpdateTurns(void) {
             HandleClubInput();
             HandleShotModeInput();
             PoseGolferForShot();
-            D_8022716C_ovl_00 = g_CurrentShot.shotMode;
+            D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
             UpdateAimControls();
             PlaceShotCamera();
             SetFramebufferCount(3);
             SetScreenEffect(4, 0);
           }
 
-          D_80227160_ovl_00 = 0;
-          D_80227164_ovl_00 = 0;
+          D_80227150_ovl_00.unk10 = 0;
+          D_80227150_ovl_00.unk14 = 0;
           D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
           BuildShotPreview(&D_80227150_ovl_00, state);
         } else if (g_PauseScreen == 0) {
@@ -3685,7 +3681,8 @@ void UpdateTurns(void) {
               GetAimSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
           g_RoundHud.lieTilt =
               GetCrossSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
-          if (GetClub(D_80227154_ovl_00)->surfaceMask & CLUB_SURFACE_GREEN) {
+          if (GetClub(D_80227150_ovl_00.clubIndex)->surfaceMask &
+              CLUB_SURFACE_GREEN) {
             g_RoundHud.unk84[1] = 1;
           } else {
             g_RoundHud.unk84[1] = 0;
@@ -3710,8 +3707,8 @@ void UpdateTurns(void) {
           }
 
           SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
-          D_80227160_ovl_00 = g_CurrentShot.unk14;
-          D_80227164_ovl_00 = g_CurrentShot.unk18;
+          D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
+          D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
           PlaceShotCamera();
           if (D_800C3084 & 1) {
             if (D_800C308C == 5 || D_800C308C == 0) {
@@ -3769,15 +3766,15 @@ void UpdateTurns(void) {
         }
 
         SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
-        D_80227160_ovl_00 = g_CurrentShot.unk14;
-        D_80227164_ovl_00 = g_CurrentShot.unk18;
+        D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
+        D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
         if ((D_80227194_ovl_00 != 0)
                 ? (D_80104F78.unk4 == g_CurrentShot.unk40)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
           s32 sound;
 
           g_CurrentShot.unk4 = g_CurrentShot.unk40;
-          D_80227158_ovl_00 = func_8005F248(g_CurrentShot.unk40);
+          D_80227150_ovl_00.unk8 = func_8005F248(g_CurrentShot.unk40);
           g_SavedPlayers[playerIndex] = g_Players[playerIndex];
           g_Players[playerIndex].strokeCount++;
           if (g_Players[playerIndex].strokeCount >= 100) {
@@ -3792,9 +3789,9 @@ void UpdateTurns(void) {
               }
             }
 
-            D_8022715C_ovl_00 = 0;
-            D_80227160_ovl_00 = 0;
-            D_80227164_ovl_00 = 0;
+            D_80227150_ovl_00.unkC = 0;
+            D_80227150_ovl_00.unk10 = 0;
+            D_80227150_ovl_00.unk14 = 0;
             nextState = 6;
             if (g_ScreenEffect == 3) {
               SetScreenEffect(4, 0);
@@ -3803,7 +3800,7 @@ void UpdateTurns(void) {
             sound = SOUND_IMPACT_OFF_MARK;
           } else {
             nextState = 5;
-            if (D_80227158_ovl_00 == 0x100) {
+            if (D_80227150_ovl_00.unk8 == 0x100) {
               StartShotEffect(1);
               sound = SOUND_IMPACT_ON_MARK;
             } else {
@@ -3860,27 +3857,27 @@ void UpdateTurns(void) {
         }
 
         SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
-        D_80227160_ovl_00 = g_CurrentShot.unk14;
-        D_80227164_ovl_00 = g_CurrentShot.unk18;
+        D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
+        D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
         if (((D_80227194_ovl_00 != 0)
                     ? (g_CurrentShot.unk40 == D_80104F78.unk8)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||
             g_CurrentShot.unk40 >= 69) {
           g_CurrentShot.unk8 = g_CurrentShot.unk40;
-          D_8022715C_ovl_00 = g_CurrentShot.unk40 - 60;
-          if (D_8022715C_ovl_00 > 6) {
-            D_8022715C_ovl_00 = 6;
+          D_80227150_ovl_00.unkC = g_CurrentShot.unk40 - 60;
+          if (D_80227150_ovl_00.unkC > 6) {
+            D_80227150_ovl_00.unkC = 6;
           }
 
-          if (D_8022715C_ovl_00 < -6) {
-            D_8022715C_ovl_00 = -6;
+          if (D_80227150_ovl_00.unkC < -6) {
+            D_80227150_ovl_00.unkC = -6;
           }
 
           PlayImpactClickSound();
           StopSound(8);
           nextState = 6;
           if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
-              (D_8022715C_ovl_00 != 0 || D_80227158_ovl_00 < 0x100)) {
+              (D_80227150_ovl_00.unkC != 0 || D_80227150_ovl_00.unk8 < 0x100)) {
             if (g_Players[playerIndex].unk28 > 0) {
               g_Players[playerIndex].unk28--;
             }
@@ -3908,16 +3905,16 @@ void UpdateTurns(void) {
             (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
           g_CurrentShot.unk8 = g_CurrentShot.unk40;
           if (g_TurnController.pressedButtons & B_BUTTON) {
-            D_80227158_ovl_00 = 0x100;
+            D_80227150_ovl_00.unk8 = 0x100;
           }
 
-          D_8022715C_ovl_00 = 0;
-          if (D_8022715C_ovl_00 > 6) {
-            D_8022715C_ovl_00 = 6;
+          D_80227150_ovl_00.unkC = 0;
+          if (D_80227150_ovl_00.unkC > 6) {
+            D_80227150_ovl_00.unkC = 6;
           }
 
-          if (D_8022715C_ovl_00 < -6) {
-            D_8022715C_ovl_00 = -6;
+          if (D_80227150_ovl_00.unkC < -6) {
+            D_80227150_ovl_00.unkC = -6;
           }
 
           PlayImpactClickSound();
@@ -3959,13 +3956,13 @@ void UpdateTurns(void) {
         if (!D_80224004_ovl_00) {
           D_80227170_ovl_00[playerIndex] = 0;
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
-            s32 power = D_80227158_ovl_00;
+            s32 power = D_80227150_ovl_00.unk8;
 
-            if (D_8022716C_ovl_00 == 0) {
+            if (D_80227150_ovl_00.shotMode == 0) {
               power *= 6;
             }
 
-            if (D_8022716C_ovl_00 == 1) {
+            if (D_80227150_ovl_00.shotMode == 1) {
               power *= 3;
             }
 
@@ -4051,8 +4048,9 @@ void UpdateTurns(void) {
 
           LaunchBallSimulation(&g_TurnBallSimulation, 0, &D_80227150_ovl_00);
           nextState = 9;
-          if (D_8022715C_ovl_00 == 0 && D_80227158_ovl_00 >= 0x100 &&
-              !(GetClub(D_80227154_ovl_00)->surfaceMask & CLUB_SURFACE_GREEN) &&
+          if (D_80227150_ovl_00.unkC == 0 && D_80227150_ovl_00.unk8 >= 0x100 &&
+              !(GetClub(D_80227150_ovl_00.clubIndex)->surfaceMask &
+                  CLUB_SURFACE_GREEN) &&
               RateShotLength() == 1) {
             StartBanner(0);
           }
