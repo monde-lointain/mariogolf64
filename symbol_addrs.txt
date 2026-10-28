@@ -2119,6 +2119,7 @@ f_CastOrder = 0x802237C0; // size:0x44 segment:ovl_14
 f_FadeFramesLeft = 0x80223804; // size:0x4 segment:ovl_14
 g_StaffTextRomStart = 0x152A680;
 g_PlayerCount = 0x801B6090; // size:0x4
+g_ChosenPlayerCount = 0x80105B68; // size:0x4
 g_SkippedNines = 0x801B60AC; // size:0x4
 g_ModeIconAnimations = 0x800C229C; // size:0x252
 DrawTextureRect = 0x8006A2C0; // type:func

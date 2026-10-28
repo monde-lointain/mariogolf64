@@ -187,7 +187,7 @@ extern u16 D_800C2064[];
 extern void* D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
-extern s32 D_80105B68;
+extern s32 g_ChosenPlayerCount;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT][MENU_UNKE_COUNT];
 extern u8 D_802304F4_ovl_01[];
@@ -374,12 +374,12 @@ void func_80217B88_ovl_01(s32 requestedPreset) {
 
   if ((u8)requestedPreset < MENU_UNKE_PRESET_COUNT) {
     if ((s8)requestedPreset == MENU_UNKE_PRESET_FIRST &&
-        D_80105B68 == MAX_PLAYER_COUNT) {
+        g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
       presetIndex = MENU_UNKE_PRESET_FIRST_FOUR_PLAYER;
     }
 
     if (presetIndex == MENU_UNKE_PRESET_SECOND &&
-        D_80105B68 == MAX_PLAYER_COUNT) {
+        g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
       presetIndex = MENU_UNKE_PRESET_SECOND_FOUR_PLAYER;
     }
 
@@ -396,7 +396,7 @@ void func_80217B88_ovl_01(s32 requestedPreset) {
 
   memory->unkD = 0;
   for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-    D_8023BFDC_ovl_01[index] = index < D_80105B68 ? 0 : -1;
+    D_8023BFDC_ovl_01[index] = index < g_ChosenPlayerCount ? 0 : -1;
   }
 
   memory->unk29 = 0;
@@ -590,7 +590,7 @@ s32 func_80219948_ovl_01(void) {
       PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       memory->unk29--;
       if (memory->unk29 < 0) {
-        memory->unk29 = D_80105B68 - 1;
+        memory->unk29 = g_ChosenPlayerCount - 1;
       }
 
       D_802303A1_ovl_01 = 0;
@@ -600,7 +600,7 @@ s32 func_80219948_ovl_01(void) {
     if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       memory->unk29++;
-      if (memory->unk29 > D_80105B68 - 1) {
+      if (memory->unk29 > g_ChosenPlayerCount - 1) {
         memory->unk29 = 0;
       }
 

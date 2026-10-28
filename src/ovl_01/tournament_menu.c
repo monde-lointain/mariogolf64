@@ -186,7 +186,7 @@ extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT]
 extern s8 D_80105DBC[7];
 extern s32 D_80105DC4;
 extern s32 D_80231134_ovl_01; /* The tournament code byte being edited */
-extern s32 D_80105B68;
+extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC8;
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern s32 D_801B60B4;
@@ -950,7 +950,7 @@ void func_80229278_ovl_01(void) {
     if (D_80230F80_ovl_01 == CLUB_CHOICE_YES) {
       PlaySound(SOUND_ENTER_TOURNAMENT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_IsClubTournament = TRUE;
-      D_80105B68 = 1;
+      g_ChosenPlayerCount = 1;
       if (func_8022BDB0_ovl_01()) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         StartLoadingChosenHole();

@@ -135,7 +135,7 @@ extern char D_800C2A00[][IMPORTED_CHARACTER_NAME_LENGTH];
 /* Moves the cursor by half a pixel so that its edges sit on pixel centres */
 #define HALF_PIXEL 0.5f
 
-extern s32 D_80105B68;
+extern s32 g_ChosenPlayerCount;
 extern u8 D_8022FF00_ovl_01;
 extern s8 D_8022FF07_ovl_01;
 extern s8 D_8022FF08_ovl_01;
@@ -596,8 +596,8 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   gDPPipeSync(gfx++);
   if ((u8)isSinglePlayer == FALSE) {
     playerNumber = D_801B7070;
-    if (playerNumber >= D_80105B68) {
-      playerNumber = D_80105B68 - 1;
+    if (playerNumber >= g_ChosenPlayerCount) {
+      playerNumber = g_ChosenPlayerCount - 1;
     }
   } else {
     playerNumber = 1;

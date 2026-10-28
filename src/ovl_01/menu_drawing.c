@@ -161,7 +161,8 @@ void func_802004A0_ovl_01(Gfx** displayListHead) {
 
   D_8022F8C5_ovl_01++;
   if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
-    iconIndex = D_8022BEBC_ovl_01[D_80105B68 - 1][D_801323A0.modeChoice];
+    iconIndex =
+        D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
     D_8022F8C5_ovl_01 = 0;
     D_8022F8C0_ovl_01++;
     if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
@@ -211,7 +212,8 @@ void func_80200A40_ovl_01(
 
   D_8022F8C5_ovl_01++;
   if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
-    iconIndex = D_8022BEBC_ovl_01[D_80105B68 - 1][D_801323A0.modeChoice];
+    iconIndex =
+        D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
     D_8022F8C5_ovl_01 = 0;
     D_8022F8C0_ovl_01++;
     if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
@@ -256,7 +258,7 @@ void func_80200EF0_ovl_01(Gfx** displayListHead) {
   Mat4 transform;
 
   memory = func_8005AF74();
-  characterCount = D_80105B68;
+  characterCount = g_ChosenPlayerCount;
   if (D_8022BEBC_ovl_01[characterCount - 1][memory->modeChoice] ==
       MODE_ICON_GET_CHARACTER) {
     if (characterCount == 1) {
@@ -468,7 +470,7 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
   sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.unk2 + 1,
       D_8022BF70_ovl_01[D_801323A0.unk2]);
   DrawLargeText(&gfx, VIEWER_NAME_X, VIEWER_NAME_Y, g_PrintBuffer);
-  for (index = 0; index != D_80105B68; index++) {
+  for (index = 0; index != g_ChosenPlayerCount; index++) {
     sprintf(g_PrintBuffer, D_80231668_ovl_01, index + 1);
     DrawTextStub(&gfx, VIEWER_PLAYER_NUMBER_X,
         VIEWER_PLAYER_TOP + (index * VIEWER_PLAYER_SPACING), g_PrintBuffer);

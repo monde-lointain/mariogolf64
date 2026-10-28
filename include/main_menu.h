@@ -60,7 +60,9 @@ extern s16 D_800FE33C;
 extern u8 D_800FBDB9;
 
 extern void* D_801B60D0;
-extern s32 D_80105B68;
+/* The player count chosen on the title screen, which the saved games, the
+ * menus and the club tournament set to 1 */
+extern s32 g_ChosenPlayerCount;
 extern MenuMemory D_801323A0;
 extern u8 D_8022BE88_ovl_01;
 extern s32 D_8023BFD0_ovl_01;

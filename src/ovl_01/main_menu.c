@@ -451,7 +451,7 @@ void func_801F6B28_ovl_01(void) {
   }
 
   D_801B609C = 0;
-  g_PlayerCount = D_80105B68;
+  g_PlayerCount = g_ChosenPlayerCount;
   if (g_GameMode == GAME_MODE_GET_CHARACTER) {
     g_PlayerCount = 2;
   }
@@ -586,7 +586,7 @@ void func_801F70F0_ovl_01(void) {
       memory->courseIndex = 0;
       StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
       g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
-      D_80105B68 = D_801323A0.playerCountChoice + 1;
+      g_ChosenPlayerCount = D_801323A0.playerCountChoice + 1;
       for (index = 0; index != MAX_PLAYER_COUNT; index++) {
         D_800FBE08[index] = 0;
       }
@@ -602,12 +602,12 @@ void func_801F70F0_ovl_01(void) {
         StartWipe(WIPE_CLOSING);
         D_801052E8 = 0;
       } else {
-        D_80105B68 = titleChoice;
+        g_ChosenPlayerCount = titleChoice;
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_SAVED_GAMES;
       }
     } else if (titleChoice == TITLE_CHOICE_MENUS) {
-      D_80105B68 = 1;
+      g_ChosenPlayerCount = 1;
       if ((g_MenuRepeatButtons == TRANSMIT_BUTTONS) |
           (g_MenuRepeatButtons == TRANSMIT_OTHER_BUTTONS)) {
         PlaySound(
@@ -904,7 +904,7 @@ void func_801F8BAC_ovl_01(void) {
     D_801323A0.courseSpin = 0;
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-    if (D_8022BEBC_ovl_01[D_80105B68 - 1][D_801323A0.modeChoice] ==
+    if (D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice] ==
         MODE_ICON_GET_CHARACTER) {
       g_MenuScreen = MENU_SCREEN_UNK16;
       D_801B7070--;

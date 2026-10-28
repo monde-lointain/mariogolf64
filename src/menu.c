@@ -99,7 +99,7 @@ extern u8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_800C2BD5;
 extern s8 D_801052E8;
-extern s32 D_80105B68;
+extern s32 g_ChosenPlayerCount;
 extern s8 D_80105DC1;
 extern s8 D_80105DC2;
 extern s32 D_80105DC4;
@@ -243,7 +243,7 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_801052BC[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
     if (g_MenuScreen == 5) {
-      size = OpenEncodedAsset(D_800C20E0[D_80105B68][index], &asset);
+      size = OpenEncodedAsset(D_800C20E0[g_ChosenPlayerCount][index], &asset);
     } else {
       size = OpenEncodedAsset(D_800C2064[index], &asset);
     }
@@ -251,7 +251,7 @@ void LoadMenuResources(void) {
     D_801049A0[index] = AllocMemory(size);
     ReadEncodedAsset(D_801049A0[index], &asset);
     if (g_MenuScreen == 5) {
-      size = OpenEncodedAsset(D_800C20E0[D_80105B68][index], &asset);
+      size = OpenEncodedAsset(D_800C20E0[g_ChosenPlayerCount][index], &asset);
     } else {
       size = OpenEncodedAsset(D_800C2064[index], &asset);
     }
@@ -1647,7 +1647,7 @@ void func_8005D9A0(void) {
   D_800C2BD0 = 6;
   D_800FE334 = 0;
   g_MenuScreen = 0;
-  D_80105B68 = 0;
+  g_ChosenPlayerCount = 0;
   D_801B7070 = 0;
   D_8012F480 = -1;
   D_8012F484 = -1;
@@ -1693,7 +1693,7 @@ void func_8005DAFC(void) {
     case 0:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
-      if (D_80105B68 == 4) {
+      if (g_ChosenPlayerCount == 4) {
         D_801B5634 = 2;
       } else {
         D_801B5634 = 1;
