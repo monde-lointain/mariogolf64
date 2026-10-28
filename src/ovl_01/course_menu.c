@@ -370,33 +370,10 @@ void func_8020E390_ovl_01(void) {
   }
 }
 
-/* func_8020E898 turns the open courses' 64 by 64 images and the totals image on
- * a wheel, seen from above */
+/* func_8020E898 turns a totals image on the wheel of menu.h after the open
+ * courses' images */
 #define COURSE_BOARD_KIND 11
-#define WHEEL_FIELD_OF_VIEW 120.0f
-#define WHEEL_ASPECT_RATIO (4.0f / 3.0f)
-#define WHEEL_NEAR_PLANE 10.0f
-#define WHEEL_FAR_PLANE 30000.0f
-#define WHEEL_EYE_HEIGHT 80.0f
-#define WHEEL_EYE_DISTANCE 120.0f
-#define WHEEL_RADIUS_X 104.0f
-#define WHEEL_RADIUS_Z 40.0f
-#define WHEEL_SLOT_LIMIT 8
-/* The images sit above the wheel's projected points, and each strip 12 pixels
- * higher again */
-#define WHEEL_RAISE 32
-#define WHEEL_ICON_RAISE 12
-#define DEGREES_PER_TURN 360
-/* statsSpin counts steps of four degrees */
-#define DEGREES_PER_SPIN_STEP 4
-#define COURSE_ICON_WIDTH 64
-#define COURSE_ICON_STRIP_HEIGHT 32
-#define COURSE_ICON_STRIP_COUNT 2
-#define COURSE_ICON_HALF_SIZE 32.0f
 #define COURSE_TOTALS_IMAGE COURSE_COUNT
-#define WHEEL_ARROW_WIDTH 32
-#define WHEEL_ARROW_X 160
-#define WHEEL_ARROW_Y 94
 
 extern Mat4 D_8023A790_ovl_01;
 extern Mat4 D_8023A7D0_ovl_01;
