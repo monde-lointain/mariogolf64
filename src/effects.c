@@ -182,7 +182,9 @@ extern s32 f_RainCenter[2];
 extern f32 f_RainDriftX;
 extern f32 f_RainDriftZ;
 extern Vec3 f_RainVelocity; /* Per frame */
-extern s32 f_GroundCheckDropIndex; /* The raindrop whose ground height
+/* The raindrop whose ground height UpdateRain refreshes next */
+extern s32 f_GroundCheckDropIndex;
+
 void DrawEffectShadow(Gfx** displayListHead, Effect* effect);
 void DrawDrop(
     Gfx** displayListHead, CameraMatrices* matrices, Effect* unusedEffect);
@@ -190,7 +192,6 @@ void DrawDivot(Gfx** displayListHead, Effect* effect);
 void DrawDivotMark(Gfx** displayListHead);
 void DrawRipple(Gfx** displayListHead, Effect* effect);
 void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect);
-                                     UpdateRain refreshes next */
 
 static s32 f_DebrisKind = 0;
 static s32 f_NextMatrixIndex = 0;
