@@ -117,8 +117,6 @@ typedef struct {
 
 extern void* D_801052C4[2];
 extern void* D_8012D430[CHARACTER_COUNT];
-extern u16 g_CharacterFaceAssets[CHARACTER_COUNT];
-extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern u8 D_801B70F0[MAXCONTROLLERS];
 
 /* What D_80230B40 holds for a player with no controller, or for the computer */

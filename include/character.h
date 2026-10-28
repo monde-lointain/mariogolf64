@@ -41,6 +41,11 @@ extern AssetId g_CharacterImageAssets[CHARACTER_COUNT];
  * other colours */
 extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
 #define CHARACTER_PALETTE_COUNT 4
+/* What the menus read by character id: each face, its g_CharacterImageAssets
+ * entry plus CHARACTER_FACE_IMAGE_OFFSET, and its g_CharacterPaletteAssets
+ * entry with the palette files after it */
+extern AssetId g_CharacterFaceAssets[CHARACTER_COUNT];
+extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 
 #define IMPORTED_CHARACTER_COUNT 4
 #define IMPORTED_CHARACTER_NAME_LENGTH 12

@@ -61,8 +61,6 @@
 #define TIME_SEPARATOR_SPACING 6
 
 extern void* D_8012D430[CHARACTER_COUNT];
-extern u16 g_CharacterFaceAssets[CHARACTER_COUNT];
-extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern u8 D_8023BFF0_ovl_01[COURSE_COUNT * BEST_TIME_COUNT]
                            [BEST_TIME_HOLDER_FILE_SIZE];
 extern s32 D_80230130_ovl_01;

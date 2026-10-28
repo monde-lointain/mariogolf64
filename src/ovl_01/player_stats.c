@@ -150,8 +150,6 @@ enum StatsDirection {
 #define PLAYER_OPTION_SLIDE_START -512
 
 extern void* D_8012D430[CHARACTER_COUNT];
-extern u16 g_CharacterFaceAssets[CHARACTER_COUNT];
-extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern s32 g_ChosenPlayerCount;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT][MENU_UNKE_COUNT];

@@ -116,8 +116,6 @@ extern s32 D_8023019C_ovl_01;
 extern s32 D_802301A0_ovl_01;
 extern s32 D_802301A4_ovl_01;
 extern TableCorner D_80230248_ovl_01[TABLE_LINE_COUNT * 2];
-extern u16 g_CharacterFaceAssets[CHARACTER_COUNT];
-extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern Vtx D_802301F0_ovl_01[MENU_CURSOR_VERTEX_COUNT];
 extern f32 D_80230238_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
                                                            corner's colour */
