@@ -101,9 +101,9 @@ enum HaltState {
 #define STATE_STICK_DIRECTION_MIN 30
 
 s8 g_IsDebugEnabled = FALSE;
-s32 g_HasExpansionPak = FALSE;
+Boolean g_HasExpansionPak = FALSE;
 static volatile u8 f_DebugHaltState = HALT_STATE_DISALLOWED;
-s32 g_HasThreeFrameBuffers = FALSE;
+Boolean g_HasThreeFrameBuffers = FALSE;
 s32 g_FramesPerSecond = 0;
 
 /* Read by no routine */
@@ -118,7 +118,7 @@ static s32 f_RetraceCount = 0;
 static s32 f_FramesThisSecond = 0;
 s8 g_FrameStepState = FRAME_STEP_RUNNING;
 volatile s32 g_FrameCount = 0;
-static s32 f_IsOddRetrace = FALSE;
+static Boolean f_IsOddRetrace = FALSE;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 extern char g_SaveBuildDate[];
 

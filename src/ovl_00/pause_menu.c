@@ -284,7 +284,7 @@ static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS] = {
 static s8 f_PauseLayoutOptionCounts[] = {5, 6, 9, 7, 9, 6, 6, 5, 6, 5, 6};
 
 static s32 f_PauseLayout = PAUSE_LAYOUT_NONE;
-static s32 f_IsPauseMenuLoaded = FALSE;
+static Boolean f_IsPauseMenuLoaded = FALSE;
 static s32 f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
 static s32 f_PauseArrowsTick = 0;
 static Radians f_PauseGlowAngle = 0.0f;
@@ -308,7 +308,7 @@ static u8* f_ChoiceBoxCursorImage;
  * Set while the player has taken a stroke on the hole, as UpdateTurns asks
  * for the menu. Not static: the original left it to the linker's common block.
  */
-s32 f_CanGiveUp;
+Boolean f_CanGiveUp;
 
 void SetFramebufferCount(s32 count);
 

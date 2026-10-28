@@ -285,7 +285,7 @@ extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
 extern CurrentShot D_80104F78; /* The replayed shot */
 /* Set once the shot preview has been built */
-static s32 f_IsShotPreviewBuilt = FALSE;
+static Boolean f_IsShotPreviewBuilt = FALSE;
 /* Frames that a replayed shot's aim has been settled */
 static s32 f_ReplayAimSettledFrameCount = 0;
 /* A debug tilt of the aim camera, which the C buttons tune */

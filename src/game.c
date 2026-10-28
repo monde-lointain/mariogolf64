@@ -151,8 +151,8 @@ static s32 f_DebugMenuValues[DEBUG_MENU_VALUE_COUNT] = {
     DEBUG_MENU_VALUE_START,
 };
 static s32 f_DebugMenuValueIndex = 0;
-static s32 f_HasUnloadedSceneModule = FALSE;
-static s32 f_HasUnloadedSubModule = FALSE;
+static Boolean f_HasUnloadedSceneModule = FALSE;
+static Boolean f_HasUnloadedSubModule = FALSE;
 static s32 f_InsetViewCenterX = 0;
 static s32 f_InsetViewCenterY = 0;
 static s32 f_InsetViewWidth = 0;

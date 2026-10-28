@@ -290,7 +290,7 @@ static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_CLUB_SLOTS,
 };
 static s32 f_MenuKind = SAVE_MENU_CLOSED;
-static s32 f_IsControlsShown = FALSE;
+static Boolean f_IsControlsShown = FALSE;
 static s32 f_CursorIndex = 0;
 static s32 f_StateFrame = 0;
 static s32 f_MenuState = SAVE_MENU_STATE_OPENING;

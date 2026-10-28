@@ -38,7 +38,7 @@
 s32 g_LongestDrivePot = 0;
 s32 g_NearestPinPot = 0;
 s32 g_HolePot = 0;
-static s32 f_IsContestDecided = FALSE;
+static Boolean f_IsContestDecided = FALSE;
 s32 g_ScorecardState = SCORECARD_CLOSED;
 
 /*

@@ -14,6 +14,6 @@ extern s32 g_HoleFlyoverFrame;
 /* While set, characters are drawn for every camera but the inset */
 extern s32 D_800BE698;
 /* Set while the camera shows the cup up close, at twice the distance from it */
-extern s32 g_IsCupViewShown;
+extern Boolean g_IsCupViewShown;
 
 #endif

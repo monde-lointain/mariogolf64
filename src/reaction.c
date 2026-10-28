@@ -108,7 +108,7 @@ static s32 f_ReactionChannel = FIRST_REACTION_CHANNEL;
 static s32 f_ReactionCharacter;
 static s32 f_ReactionAnimation;
 static s32 f_ReactionFrameCount;
-static s32 f_HasReactionLight;
+static Boolean f_HasReactionLight;
 
 /* Read by no routine */
 static u8 D_800E4C60[24];

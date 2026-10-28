@@ -26,7 +26,7 @@ extern HolePoints g_HolePoints;
 
 /* Cleared while the loader thread loads a hole; set once it is done or stopped
  */
-extern s32 g_HasLoaderFinished;
+extern Boolean g_HasLoaderFinished;
 
 /* Each hole's time in Speed Golf. A negative minute count shows as dashes. */
 extern s32

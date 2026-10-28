@@ -80,7 +80,7 @@ typedef struct RingCorners {
 static s8 f_DimsTranslucentTriangles = FALSE;
 /* Read by no routine */
 static s32 D_800C3104 = 0;
-static s32 f_HasTestRing = FALSE;
+static Boolean f_HasTestRing = FALSE;
 static s32 f_TextureScroll = 0;
 static Degrees f_RingAngle = 0.0f;
 /* Read by no routine */

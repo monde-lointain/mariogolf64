@@ -90,8 +90,8 @@ typedef struct OpeningNameLogo {
 extern s32 f_OpeningSoundChannel;
 extern s32 f_LogoClubPosition[3];
 extern f32 f_LogoClubOrbitRadius;
-extern s32 f_IsLogoClubSwinging;
-extern s32 f_AreAmbientSoundsOn;
+extern Boolean f_IsLogoClubSwinging;
+extern Boolean f_AreAmbientSoundsOn;
 
 /* The steps that a name logo's animation starts each phase at */
 #define NAME_LOGO_UNFOLD 0 /* Widens over 8 frames */
@@ -119,11 +119,11 @@ extern s32 f_LakituScreenPoint[2];
 #define LAKITU_TRAIL_SEGMENT_COUNT 40
 
 extern s32 f_OpeningFrameParity;
-extern s32 f_IsLookAtMarkerShown;
+extern Boolean f_IsLookAtMarkerShown;
 extern f32 g_LookAtMarkerScale;
 extern Vtx f_LookAtMarkerVertices[6][4];
 
-extern s32 f_IsLakituFlying;
+extern Boolean f_IsLakituFlying;
 extern s32 f_LakituAngle;
 extern s32 f_LookAtEaseMode;
 extern f32 f_LookAtEaseRate;
@@ -217,17 +217,17 @@ extern s32 f_OpeningShotDashCount;
  * The opening's shot path is drawn as the turn's shot preview is, but
  * nothing in the opening sets f_IsOpeningShotPathShown, so it never shows
  */
-extern s32 f_IsOpeningShotPathShown;
+extern Boolean f_IsOpeningShotPathShown;
 extern s32 f_OpeningShotPathDashCount; /* Starts at 198 */
 extern s8 f_IsOpeningShotPathRed;
 extern s32 f_OpeningShotPathScroll; /* Of the dash image, in texels */
 extern Vtx f_OpeningShotDashVertices[4];
 
-extern s32 f_IsBurstShown;
+extern Boolean f_IsBurstShown;
 extern s32 f_BurstFrame; /* Starts at -1, before the burst's first frame */
 
 /* Whether Donkey Kong stands in for Yoshi, once he is unlocked */
-extern s32 f_IsDonkeyKongShown;
+extern Boolean f_IsDonkeyKongShown;
 /* The opening script's current scene */
 extern s32 f_OpeningScene;
 /* The frames left before the opening's current scene moves on */
@@ -238,7 +238,7 @@ extern s32 f_OpeningSceneFramesLeft;
  * the screen
  */
 extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
-extern s32 f_AreImpactLinesShown;
+extern Boolean f_AreImpactLinesShown;
 extern s32 f_ShotBallScale;
 extern s32 f_OpeningSparksState;
 
@@ -246,7 +246,7 @@ extern s32 f_OpeningSparksState;
  * Set once the title logo starts forming. The opening can no longer be skipped
  * after that, and it ends without the confirm sound.
  */
-extern s32 f_HasLogoStarted;
+extern Boolean f_HasLogoStarted;
 
 void AssignCharacterBuffers(void);
 void DrawOpeningShotPath(CameraMatrices* matrices);
@@ -351,7 +351,7 @@ static s32 f_ClosingSoundChannel;
 static u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
 static s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
 static s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
-static s32 f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
+static Boolean f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
 /* The impact lines' image, and later the burst's */
 static u8 f_OpeningEffectImage[OPENING_EFFECT_IMAGE_SIZE];
 static u8 f_ShotBallImage[OPENING_BALL_IMAGE_SIZE];
@@ -2958,17 +2958,17 @@ extern Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][4];
 extern Vtx f_OpeningBallShadowVertices[4];
 
 /* The logo ball's roll, from its position's change each frame */
-extern s32 f_ShouldResetLogoBallRoll;
+extern Boolean f_ShouldResetLogoBallRoll;
 
-extern s32 f_HasLogoBallLastPosition;
+extern Boolean f_HasLogoBallLastPosition;
 extern s32 f_LogoBallFrameIndex;
 extern Vtx f_LogoBallMarioVertices[4];
 
 extern Vtx f_ProjectedShadowVertices[4];
 
 /* The same as the logo ball's roll, kept apart for the projected logo ball */
-extern s32 f_ShouldResetProjectedLogoBallRoll;
-extern s32 f_HasProjectedLogoBallLastPosition;
+extern Boolean f_ShouldResetProjectedLogoBallRoll;
+extern Boolean f_HasProjectedLogoBallLastPosition;
 extern s32 f_ProjectedLogoBallFrameIndex;
 extern Vtx f_ProjectedLogoBallMarioVertices[4];
 

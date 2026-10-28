@@ -286,18 +286,18 @@ void LoadEffectImages(void);
 
 static u8 f_IsPaintingShown = TRUE;
 static s32 f_StaffRollFrame = 0;
-static s32 f_IsLeavingStaffRoll = FALSE;
+static Boolean f_IsLeavingStaffRoll = FALSE;
 static s32 f_TextScrollOffset = 0;
 static s32 f_TopLineIndex = 0;
 static s32 f_ShownSceneColorIndex = -1;
-static s32 f_IsTextScrolling = TRUE;
+static Boolean f_IsTextScrolling = TRUE;
 static s32 f_DebugRestartCount = 0;
 /* Negative while fading out; zero when not fading */
 static s32 f_FadeLength = 0;
 static f32 f_CastFramingYaw = 0.0f;
 static f32 f_CastFramingPitch = 0.0f;
 static s32 f_CastIndex = 0;
-static s32 f_IsReactionShown = 0;
+static Boolean f_IsReactionShown = 0;
 static f32 f_UnreadValue = 0.0f;
 static s32 f_ViewShrinkStartFrame = NEVER_FRAME;
 static s32 f_UnusedWord = 0; /* Unused */

@@ -172,7 +172,7 @@ static MapOverviewControls f_MapOverviewControls = {
 static s32 f_FlagPanelFirstRow = 0;
 static s32 f_FlagPanelColumn = 0;
 static s32 f_FlagPanelRow = 0;
-static s32 f_IsSceneMenuOpen = FALSE;
+static Boolean f_IsSceneMenuOpen = FALSE;
 static AnimatedBox f_SceneMenuBox = {SCENE_MENU_BOX_LEFT, SCENE_MENU_BOX_TOP,
     SCENE_MENU_BOX_RIGHT, SCENE_MENU_BOX_BOTTOM, 0x00, 0x00, 0x00, 0x9F,
     BOX_CLOSED, 0};
@@ -194,7 +194,7 @@ static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_RINGS,
     SCENE_WALLS,
 };
-static s32 f_IsFirstDebugUpdate = TRUE;
+static Boolean f_IsFirstDebugUpdate = TRUE;
 s32 D_800BB0E8 = 0;
 /*
  * The order in which to search a point's cells: its own, the next, the one

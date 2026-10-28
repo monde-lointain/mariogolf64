@@ -85,7 +85,7 @@ static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] = {
     CHEEP_CHEEP_FIRST_VIEW_ASSET + 4};
 static AssetId f_MonkeyFrameAssets[MONKEY_FRAME_COUNT] = {
     MONKEY_ASSET, MONKEY_ASSET + 1, MONKEY_ASSET + 2, MONKEY_ASSET + 3};
-static s32 f_AreCheepCheepsLeaping = FALSE;
+static Boolean f_AreCheepCheepsLeaping = FALSE;
 static s32 f_CheepCheepLeapUnk38 = 0;
 static s32 f_CheepCheepLeapUnk3C = 0;
 static s32 f_CheepCheepLeapUnk40 = 0;

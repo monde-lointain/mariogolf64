@@ -434,7 +434,7 @@ static s32 f_SecondLightDirectionX = 0;
 static s32 f_SecondLightDirectionY = 0;
 static s32 f_SecondLightDirectionZ = 0;
 /* Set until the first draw sets up the matrices */
-static s32 f_IsMatrixSetupPending = TRUE;
+static Boolean f_IsMatrixSetupPending = TRUE;
 /* Flips between 0 and 1 on each draw */
 static s32 f_DrawParity = 0;
 /* Read by no routine */

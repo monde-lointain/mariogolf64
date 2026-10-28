@@ -230,7 +230,7 @@ typedef struct TrophyAssets {
 /* An unread pointer to one of this file's strings */
 extern char D_80224E10_ovl_00[];
 
-static s32 f_AreResultsLoaded = FALSE;
+static Boolean f_AreResultsLoaded = FALSE;
 static s32 f_ResultsState = RESULTS_SLIDING_IN;
 static s32 f_ResultsUnk78 = 0;
 static s32 f_ResultsUnk7C = 0;
@@ -238,7 +238,7 @@ static s32 f_ResultsSlide = SCREEN_WIDTH;
 static s32 f_ResultsTop = 0;
 static s32 f_TallySpeed = NORMAL_TALLY_SPEED;
 /* The pressing hand shows while the results wait for A */
-static s32 f_IsAwaitingConfirm = FALSE;
+static Boolean f_IsAwaitingConfirm = FALSE;
 /*
  * Each course's tournament prizes, in course points: first to third
  * place, then up to PRIZE_TOP_TEN, PRIZE_TOP_TWENTY and the rest
@@ -304,14 +304,14 @@ static u8* f_NintendoBadgeImage;
 static u8* f_DigitsImage;
 static u8* f_PlaceDigitsImage;
 static s32 f_UnlockNoticeKind;
-static s32 f_HasBets;
+static Boolean f_HasBets;
 static s32 f_PortraitCharacterIndex;
 static s32 f_NoticeStage;
 static s32 f_NoticeFrameCount;
 static s32 f_NoticeSwing;
 static s32 f_NoticeUnk54;
 static Radians f_NoticeAngle;
-static s32 f_IsNoticeHeld;
+static Boolean f_IsNoticeHeld;
 static s32 f_NoticeTime;
 static s32 f_NoticeFaceIndex;
 static s32 f_NoticeLift;

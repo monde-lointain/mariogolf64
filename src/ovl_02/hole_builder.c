@@ -251,7 +251,7 @@ static PaintLogic f_PaintLogics[] = {
         PaintThirdMiniGolfCourse},
     {{0, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintDrivingRange},
 };
-static s32 f_IsCodeMapCleaned = FALSE;
+static Boolean f_IsCodeMapCleaned = FALSE;
 /* Indexed by course record, then by hole */
 static HoleAssetIds f_HoleAssetIds[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT] =
     {

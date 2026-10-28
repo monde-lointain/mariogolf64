@@ -293,12 +293,12 @@ static GolfBall f_GolfBalls[GOLF_BALL_COUNT] = {0};
 static BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH] = {0};
 /* The point that the next one is written over */
 static s32 f_BallAfterimageHead = 0;
-static s32 f_IsBallAfterimageShown = FALSE;
+static Boolean f_IsBallAfterimageShown = FALSE;
 static s32 f_BallAfterimageFrameCount = 0;
 /* Whether the points are scaled for the close view of the cup */
-static s32 f_IsBallAfterimageZoomed = FALSE;
+static Boolean f_IsBallAfterimageZoomed = FALSE;
 /* Set for the few afterimages that fade quickly */
-static s32 f_IsBallAfterimageFast = FALSE;
+static Boolean f_IsBallAfterimageFast = FALSE;
 static s32 f_BallAfterimageLength = AFTERIMAGE_MAX_LENGTH;
 /* f_BallRollFrame cycles through BALL_ROLL_FRAME_COUNT frames, this through
  * nine unused ones */

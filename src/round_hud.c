@@ -560,7 +560,7 @@ static s32 f_ClubHeadImageAsset = NO_IMAGE_ASSET;
 static s32 f_LieImageAsset = NO_IMAGE_ASSET;
 static s32 f_SceneryState = SCENERY_UNLOADED;
 /* Set while the overlay of the course selection is loaded for the hole */
-static s32 f_IsCourseSelectLoaded = FALSE;
+static Boolean f_IsCourseSelectLoaded = FALSE;
 /* Read by no routine */
 static Gfx D_800C59E8[] = {
     gsDPNoOp(),
@@ -676,7 +676,7 @@ static s32 f_TestTextX = SCREEN_WIDTH / 2;
 static s32 f_TestTextY = SCREEN_HEIGHT / 2;
 static s32 f_TestChannelIndex = 0;
 static s32 f_TestColorIndex = 0;
-static s32 f_IsTestGradientShown = FALSE;
+static Boolean f_IsTestGradientShown = FALSE;
 /* Read by no routine */
 static s32 D_800C5E98 = 0;
 /* The HUD's letterbox height, which DrawLetterbox grows each frame */

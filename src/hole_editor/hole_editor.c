@@ -657,7 +657,7 @@ static f32 f_HeightCameraHeading = EDITOR_CAMERA_START_ANGLE;
 static s32 D_8040C65C_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_HeightCameraHeadingAngle = 0;
 static s32 f_LastSetHeight = 0; /* The height C-up or C-down last set */
-static s32 f_ShowsGroundWaves = TRUE; /* Copied to g_ShowsGroundWaves */
+static Boolean f_ShowsGroundWaves = TRUE; /* Copied to g_ShowsGroundWaves */
 static s32 f_CLeftPickedHeight =
     0; /* Heights picked up by the second editor pad */
 static s32 f_CUpPickedHeight = 0;
@@ -672,7 +672,7 @@ s32 SetGroundPointHeightAndShade();
 /* func_80406818's menu */
 /* Read by no routine */
 static s32 D_8040C678_hole_editor = 1;
-static s32 f_IsSavingHoleFiles = FALSE;
+static Boolean f_IsSavingHoleFiles = FALSE;
 static s32 f_HoleFileStep = 0; /* A HOLE_FILE_STEP_* */
 static s32 f_HoleFileHoleNumber = 1; /* From 1 */
 static s32 f_HoleFileCourseNumber = 1; /* From 1 */

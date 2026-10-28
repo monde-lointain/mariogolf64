@@ -44,7 +44,7 @@ extern s32 g_PauseScreen;
 extern s8 g_IsTrainingHeadingKept;
 extern s32 D_800C3070;
 /* Set once A has been pressed to take the shot */
-extern s32 g_HasPressedShotButton;
+extern Boolean g_HasPressedShotButton;
 /* A heading that TurnAim can turn in place of the shot's */
 extern s16 g_AltHeading;
 /* The free-look camera's heading, in binary angle units */

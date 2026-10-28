@@ -226,7 +226,7 @@ static Vtx f_SpreadingCircleVertices[] = {
     {{{7, 0, 7}, 0, {0x1FFF, 0x1FFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 0, -7}, 0, {0, 0x1FFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-static s32 f_AreEffectImagesLoaded = FALSE;
+static Boolean f_AreEffectImagesLoaded = FALSE;
 static f32 f_UnreferencedValues[] = {
     1, 2, 3, 10, 11, 12, 13, 14, 20, 21, 22, 25, 30, 1};
 static u8 f_PingPongFrameIndices[] = {0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1};
@@ -242,7 +242,7 @@ static s32 f_Weather = WEATHER_NONE; /* A WEATHER_* value */
 static Vec3 f_LastRainEye = {
     0.0f, 0.0f, 0.0f}; /* The camera's eye on UpdateRain's last frame */
 static s32 f_ShownBadgeCount = 0;
-static s32 f_IsBadgeCountShown = FALSE;
+static Boolean f_IsBadgeCountShown = FALSE;
 static s32 f_BadgeCountFrame = 0;
 void ResetRaindrop(Raindrop* drop);
 void StartRain(void);

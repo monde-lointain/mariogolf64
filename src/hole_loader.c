@@ -128,7 +128,7 @@ static s32 f_CycledCupIndex = 0;
  * hole_loader.h declares this without volatile, as the files that only read
  * it were compiled; the loader thread waits on it, so here it is volatile
  */
-volatile s32 g_HasLoaderFinished = TRUE;
+volatile Boolean g_HasLoaderFinished = TRUE;
 /* Read by no routine */
 static s32 D_800C3FAC = 0;
 static OSThread f_LoaderThread;

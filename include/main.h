@@ -12,8 +12,8 @@ enum FrameStep {
 };
 
 extern s8 g_IsDebugEnabled;
-extern s32 g_HasExpansionPak;
-extern s32 g_HasThreeFrameBuffers;
+extern Boolean g_HasExpansionPak;
+extern Boolean g_HasThreeFrameBuffers;
 extern s32 g_FramesPerSecond;
 extern s8 g_FrameStepState;
 

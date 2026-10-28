@@ -174,7 +174,7 @@ static s32 f_PlanThreadState = PLAN_THREAD_RUNNING;
 /* Read by no routine */
 static u32 D_80253C68_ovl_03 = 0xD24CC5E5;
 /* Whether there is a best evaluation yet */
-static s32 f_HasBestEvaluation = FALSE;
+static Boolean f_HasBestEvaluation = FALSE;
 /*
  * The upper limits of each approach band, as shares of the cup distance that
  * lie short of the green, for each value of the golfer's unk1 trait
@@ -185,7 +185,7 @@ static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT] = {
     {0.4f, 0.45f, 0.35f},
     {0.6f, 0.7f, 0.5f},
 };
-static s32 f_HasUnk3Contact = FALSE;
+static Boolean f_HasUnk3Contact = FALSE;
 /* Read by no routine. The 2W and AW share the 3W's and SW's types. */
 static ClubName D_80253CA4_ovl_03[] = {
     {"1W", CLUB_TYPE_DRIVER},
@@ -243,7 +243,7 @@ static s32 f_HoleTargetToPar;
 /* The strokes the golfer aims to take on the hole */
 static s32 f_HoleStrokeTarget;
 /* Whether f_TrialShot holds a copy of f_Shot yet */
-static s32 f_HasTrialShot;
+static Boolean f_HasTrialShot;
 /* Where the planned shot aims */
 static CoursePoint f_PlanTarget;
 /* PlanShot clears these, and nothing in the overlay reads them */
@@ -253,7 +253,7 @@ static s8 f_RouteOrder[ROUTE_POINT_COUNT];
 /* Read by no routine */
 static u8 D_8025C664_ovl_03[4];
 /* Whether the trial's club is one for the green */
-static s32 f_IsPutting;
+static Boolean f_IsPutting;
 /* How much worse than ideal an evaluation may be for the trial to be taken */
 static s32 f_AcceptableEvaluation;
 /* How many times PlanShot has changed the club or carry */
@@ -266,7 +266,7 @@ static CurrentShot f_TrialShot;
 static s8 f_IsClubUsable[CLUB_SLOT_COUNT];
 /* Whether the flying trial ball has come down on the ground yet, and where it
  * first did */
-static s32 f_HasLanded;
+static Boolean f_HasLanded;
 /* The carry that the landing target is chosen for, and what the club's carry is
  * scaled by for it */
 static s32 f_TargetCarry;
@@ -278,12 +278,12 @@ static s32 f_LevelTrialCount;
 static s32 f_ShotOffset;
 static s32 f_TrialStepCount;
 /* Set when the trial is good enough to take */
-static s32 f_IsTrialAccepted;
+static Boolean f_IsTrialAccepted;
 static BallSimulation f_TrialSimulation;
 /* Whether the trial ended out of bounds, off the course or in water */
-static s32 f_IsTrialLost;
+static Boolean f_IsTrialLost;
 /* Set when the level needs a new landing target */
-static s32 f_NeedsNewTarget;
+static Boolean f_NeedsNewTarget;
 /* The nearest that a putt has come to the target */
 static s32 f_ClosestTargetDistance;
 /* Read by no routine */
@@ -292,7 +292,7 @@ static f32 f_CarryScale;
 /* The count of trials at this level */
 static s32 f_TrialIndex;
 /* Set when the trial asks PlanShot for a longer or a shorter club */
-static s32 f_NeedsLongerClub;
+static Boolean f_NeedsLongerClub;
 /* The trial's evaluation; lower is better */
 static s32 f_TrialEvaluation;
 /* Read by no routine */
@@ -305,7 +305,7 @@ static s8 f_Unk840;
 static s32 f_LostTrialCount;
 /* How far PlanShot has got with the shot */
 static s8 f_PlanStage;
-static s32 f_NeedsShorterClub;
+static Boolean f_NeedsShorterClub;
 /* Read by no routine */
 static u8 D_8025C850_ovl_03[8];
 static CurrentShot f_Shot;

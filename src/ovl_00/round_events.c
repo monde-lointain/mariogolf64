@@ -317,7 +317,7 @@ static s32 f_BannerNumber = 0;
 static s32 f_BannerNumberLetterCount = 0;
 /* The banner whose images are in f_MovieBuffer */
 static s32 f_LoadedBanner = BANNER_NONE;
-static s32 f_IsMovieBufferAllocated = FALSE;
+static Boolean f_IsMovieBufferAllocated = FALSE;
 /* Read by no routine */
 static s32 D_80224128_ovl_00 = -1;
 static Vtx f_BannerLetterVertices[4] = {
@@ -422,7 +422,7 @@ static BannerLayout f_BannerLayouts[] = {
 };
 /* clang-format on */
 static s32 f_TestBanner = 0;
-static s32 f_IsFlipMessageLeaving = INITIAL_IS_FLIP_MESSAGE_LEAVING;
+static Boolean f_IsFlipMessageLeaving = INITIAL_IS_FLIP_MESSAGE_LEAVING;
 /* FLIP_MESSAGE_FRAME_NONE while no message is shown */
 static s32 f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
 static s32 f_FlipMessageId = 0;
@@ -521,7 +521,7 @@ static Vtx f_ContactVertices[2] = {
     {{{-12, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
 s32 g_ContactEffect = CONTACT_EFFECT_NONE;
-static s32 f_IsContactEffectFading = FALSE;
+static Boolean f_IsContactEffectFading = FALSE;
 static s32 f_ContactStyle = 0;
 /* The texture coordinates of the quad's far corner, in S10.5 */
 static s32 f_ContactTextureS = 0;

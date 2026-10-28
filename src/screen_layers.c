@@ -186,7 +186,7 @@ Gfx g_DecalTextureSetup[] = {
     gsDPSetAlphaCompare(G_AC_NONE),
     gsSPEndDisplayList(),
 };
-static s32 f_IsHalfTurnShown = FALSE;
+static Boolean f_IsHalfTurnShown = FALSE;
 static s32 f_HalfTurnState = HALF_TURN_STATE_SHOWING;
 static s32 f_HalfTurnTimer = 9;
 static f32 f_WipeProgress = 0.0f;

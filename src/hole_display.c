@@ -230,7 +230,7 @@ static s32 f_SkyTimeIndex = 0;
 static s32 f_SkyColorTimeIndex = 0;
 static s32 f_SkyBlendStep = 0;
 static s32 f_SkyBlendStepCount = 0;
-static s32 f_IsPrimitiveDepthSet = FALSE;
+static Boolean f_IsPrimitiveDepthSet = FALSE;
 static s8 f_SceneSkyBlendTimes[] = {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2};
 static s8 f_SceneSkyColorTimes[] = {0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3};
 static s8 f_SceneSkyBlendPercents[] = {
@@ -473,7 +473,7 @@ SkyColors g_SkyColors[COURSE_RECORD_COUNT][SKY_WEATHER_COUNT * SKY_TIME_COUNT] =
                 {0x06, 0x06, 0x08}, 90, FALSE, {0, 0}, &f_Suns[6],
                 {0xC8, 0xE6, 0xC8}, 970, 1080}}};
 static u16 f_SunDepth = 0;
-static s32 f_IsSunGlareSettled = FALSE;
+static Boolean f_IsSunGlareSettled = FALSE;
 static f32 f_SunGlareStrength = 0.0f;
 static LensFlare f_LensFlares[LENS_FLARE_COUNT] = {
     {{0xDF, 0xDF, 0xFF}, {0xFF, 0xFF, 0xFF}, 24, 2728, -1.0f},
@@ -642,7 +642,7 @@ static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] =
             {{{40, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
             {{{104, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
             {{{168, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}}}};
-static s32 f_IsFrameCapturePending = FALSE;
+static Boolean f_IsFrameCapturePending = FALSE;
 static s32 f_HudAnimationFrame = 0;
 s32 g_CapturedSliceCount = 0;
 s32 g_MenuBackdropStyle = MENU_BACKDROP_STYLE_NONE;

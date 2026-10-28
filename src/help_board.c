@@ -91,10 +91,10 @@ static void* f_ChalkboardImage;
 static s8 f_OpenTopic = 0;
 static s8 f_TopicPage = 0;
 static s32 f_HandOffset = 0;
-static s32 f_IsHandReturning = FALSE;
+static Boolean f_IsHandReturning = FALSE;
 static s32 f_ArrowFrame = 0;
 static s32 f_ArrowFrameTime = 0;
-static s32 f_IsUnusedSwingReturning = FALSE;
+static Boolean f_IsUnusedSwingReturning = FALSE;
 static s32 f_UnusedSwingOffset = 0;
 static s32 f_FirstListedTopic = 0;
 
