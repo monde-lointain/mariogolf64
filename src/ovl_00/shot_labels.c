@@ -736,12 +736,12 @@ OPAQUE:
 
   if (g_RoundHud.unk12 == 1) {
     position[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    position[AXIS_Z] = g_CupPositionZ * COURSE_TO_WORLD_SCALE;
+    position[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
-      position[AXIS_Y] = g_CupPositionY * COURSE_TO_WORLD_SCALE;
+      position[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     } else {
-      position[AXIS_Y] =
-          (g_CupPositionY - PIN_FLAG_DROP) * COURSE_TO_WORLD_SCALE;
+      position[AXIS_Y] = (D_800BA9D8.cupPosition[AXIS_Y] - PIN_FLAG_DROP) *
+          COURSE_TO_WORLD_SCALE;
     }
 
     if (ProjectPoint(

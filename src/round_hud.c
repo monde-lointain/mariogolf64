@@ -850,7 +850,7 @@ void StartShotPanel(void) {
   s32 playerIndex;
   s32 holeIndex;
 
-  height = g_CurrentShot.ballPosition[AXIS_Y] - g_CupPositionY;
+  height = g_CurrentShot.ballPosition[AXIS_Y] - D_800BA9D8.cupPosition[AXIS_Y];
   g_RoundHud.ballHeightYards = height * YARDS_PER_UNIT;
   g_RoundHud.ballHeightMeters = height * METERS_PER_UNIT;
   g_RoundHud.ballHeightFeet = (height * FEET_PER_YARD) * YARDS_PER_UNIT;
@@ -883,7 +883,7 @@ void StartShotPanel(void) {
 
   g_RoundHud.cupDistance = (f32)GetCupDistance(
       g_CurrentShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-      g_CurrentShot.ballPosition[AXIS_Z] - g_CupPositionZ);
+      g_CurrentShot.ballPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
   if (GetSurfaceInfo(g_CurrentShot.surface)->unk10 != f_LieImageAsset) {
     f_LieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->unk10;
     if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
@@ -1211,7 +1211,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
     if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
       distance = GetCupDistance(
           g_BallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-          g_BallPosition[AXIS_Z] - g_CupPositionZ);
+          g_BallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
       /* Mini golf and the green measure in feet */
       if (g_IsMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
         hundredths =

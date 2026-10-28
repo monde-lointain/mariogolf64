@@ -1143,8 +1143,8 @@ void func_80400FBC_hole_editor(void) {
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
       if (f_PinTeeIndex == 0) {
         D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
-        g_CupPositionY = g_HolePoints.cupPositions[0][AXIS_Y];
-        g_CupPositionZ = g_HolePoints.cupPositions[0][AXIS_Z];
+        D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
+        D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
       }
     }
 
@@ -1163,9 +1163,9 @@ void func_80400FBC_hole_editor(void) {
               ->name,
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
       if (f_PinTeeIndex == 0) {
-        g_TeePositionX = g_HolePoints.teePositions[0][AXIS_X];
-        g_TeePositionY = g_HolePoints.teePositions[0][AXIS_Y];
-        g_TeePositionZ = g_HolePoints.teePositions[0][AXIS_Z];
+        D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
+        D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
+        D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
       }
     }
 
@@ -2280,11 +2280,11 @@ void func_804045C0_hole_editor(void) {
   }
 
   D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
-  g_CupPositionY = g_HolePoints.cupPositions[0][AXIS_Y];
-  g_CupPositionZ = g_HolePoints.cupPositions[0][AXIS_Z];
-  g_TeePositionX = g_HolePoints.teePositions[0][AXIS_X];
-  g_TeePositionY = g_HolePoints.teePositions[0][AXIS_Y];
-  g_TeePositionZ = g_HolePoints.teePositions[0][AXIS_Z];
+  D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
+  D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
+  D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
+  D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
+  D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
   for (i = 0; i < ROUTE_POINT_COUNT; i++) {
     if (g_HolePoints.unk60[i][AXIS_X] != 0 &&
         g_HolePoints.unk60[i][AXIS_Z] != 0) {

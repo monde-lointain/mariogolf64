@@ -936,7 +936,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindBillboardHit);
 void MoveBallToCupEdge(BallSimulation* simulation) {
   s32 distance =
       IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - simulation->position[AXIS_X],
-          g_CupPositionZ - simulation->position[AXIS_Z]);
+          D_800BA9D8.cupPosition[AXIS_Z] - simulation->position[AXIS_Z]);
   Vec3 direction;
   f32 offsetX;
   s32 deltaX;
@@ -948,7 +948,7 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
     if (distance != 0) {
       direction[AXIS_Y] = 0;
       deltaX = simulation->position[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X];
-      deltaZ = simulation->position[AXIS_Z] - g_CupPositionZ;
+      deltaZ = simulation->position[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z];
       direction[AXIS_X] = deltaX;
       direction[AXIS_Z] = deltaZ;
       guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
@@ -959,7 +959,7 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
        * cup load */
       position = simulation->position;
       position[AXIS_X] = offsetX + D_800BA9D8.cupPosition[AXIS_X];
-      position[AXIS_Z] = offsetZ + g_CupPositionZ;
+      position[AXIS_Z] = offsetZ + D_800BA9D8.cupPosition[AXIS_Z];
     }
   }
 }
@@ -1012,22 +1012,22 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       }
     }
 
-    if (startZ < (s32)(g_CupPositionZ - FLAG_REACH)) {
-      if (endZ < (s32)(g_CupPositionZ - FLAG_REACH)) {
+    if (startZ < (s32)(D_800BA9D8.cupPosition[AXIS_Z] - FLAG_REACH)) {
+      if (endZ < (s32)(D_800BA9D8.cupPosition[AXIS_Z] - FLAG_REACH)) {
         continue;
       }
     }
 
-    if ((s32)(g_CupPositionZ + FLAG_REACH) < startZ) {
-      if ((s32)(g_CupPositionZ + FLAG_REACH) < endZ) {
+    if ((s32)(D_800BA9D8.cupPosition[AXIS_Z] + FLAG_REACH) < startZ) {
+      if ((s32)(D_800BA9D8.cupPosition[AXIS_Z] + FLAG_REACH) < endZ) {
         continue;
       }
     }
 
     endToCupX = D_800BA9D8.cupPosition[AXIS_X] - endX;
-    endToCupZ = g_CupPositionZ - endZ;
+    endToCupZ = D_800BA9D8.cupPosition[AXIS_Z] - endZ;
     startSide = (deltaX * (D_800BA9D8.cupPosition[AXIS_X] - startX)) +
-        (deltaZ * (g_CupPositionZ - startZ));
+        (deltaZ * (D_800BA9D8.cupPosition[AXIS_Z] - startZ));
     endSide = (deltaX * endToCupX) + (deltaZ * endToCupZ);
     if (HaveSameSign(startSide, endSide)) {
       if ((s32)IntLength2D(endToCupX, endToCupZ) <= FLAGSTICK_RADIUS) {
@@ -1047,7 +1047,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       }
     }
 
-    height = g_CupPositionY - (s32)(startY + (deltaY * hitFraction));
+    height =
+        D_800BA9D8.cupPosition[AXIS_Y] - (s32)(startY + (deltaY * hitFraction));
     hitX = startX + (deltaX * hitFraction);
     hitZ = startZ + (deltaZ * hitFraction);
     isFlagHit = FALSE;
@@ -1065,8 +1066,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       isFlagHit &= -(IsGameFlagSet(GAME_FLAG_RISING_FLAG_HITS) != 0);
     }
 
-    distance = IntLength2D(
-        D_800BA9D8.cupPosition[AXIS_X] - hitX, g_CupPositionZ - hitZ);
+    distance = IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - hitX,
+        D_800BA9D8.cupPosition[AXIS_Z] - hitZ);
     if (distance > FLAG_REACH) {
       continue;
     }
@@ -1099,7 +1100,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
     direction[AXIS_X] *= halfChord;
     direction[AXIS_Y] *= halfChord;
     direction[AXIS_Z] *= halfChord;
-    contactZ = (s32)(hitZ + direction[AXIS_Z]) - g_CupPositionZ;
+    contactZ = (s32)(hitZ + direction[AXIS_Z]) - D_800BA9D8.cupPosition[AXIS_Z];
     contactX = (s32)(hitX + direction[AXIS_X]) - D_800BA9D8.cupPosition[AXIS_X];
     angle = 0.0f;
     if (contactX != 0 || contactZ != 0) {

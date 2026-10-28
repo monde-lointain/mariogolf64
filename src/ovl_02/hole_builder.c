@@ -2536,8 +2536,8 @@ void ClearHolePoints(void) {
 
   if (!g_GameState.unk30) {
     D_800BA9D8.cupPosition[AXIS_X] = 0;
-    g_CupPositionY = 0;
-    g_CupPositionZ = 0;
+    D_800BA9D8.cupPosition[AXIS_Y] = 0;
+    D_800BA9D8.cupPosition[AXIS_Z] = 0;
     D_800BA9D8.teePosition[AXIS_X] = 0;
     D_800BA9D8.teePosition[AXIS_Y] = 0;
     D_800BA9D8.teePosition[AXIS_Z] = 0;

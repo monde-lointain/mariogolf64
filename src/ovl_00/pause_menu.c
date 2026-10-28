@@ -561,22 +561,22 @@ s32 UpdatePauseMenu(ControllerState* controller) {
     }
 
     if (hasLieChanged) {
-      g_Players[0].ballPosition[AXIS_Z] = g_TeePositionZ;
-      g_CurrentShot.ballPosition[AXIS_Z] = g_TeePositionZ;
+      g_Players[0].ballPosition[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
+      g_CurrentShot.ballPosition[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
       if (lie < PAUSE_LIE_SEMI_ROUGH) {
-        g_Players[0].ballPosition[AXIS_X] = g_TeePositionX;
+        g_Players[0].ballPosition[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
         g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X];
       } else if (lie < PAUSE_LIE_DEEP_ROUGH) {
         g_Players[0].ballPosition[AXIS_X] =
-            g_TeePositionX + PAUSE_ROUGH_LIES_OFFSET_X;
+            D_800BA9D8.teePosition[AXIS_X] + PAUSE_ROUGH_LIES_OFFSET_X;
         g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X];
       } else if (lie == PAUSE_LIE_DEEP_ROUGH) {
         g_Players[0].ballPosition[AXIS_X] =
-            g_TeePositionX + PAUSE_DEEP_ROUGH_OFFSET_X;
+            D_800BA9D8.teePosition[AXIS_X] + PAUSE_DEEP_ROUGH_OFFSET_X;
         g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X];
       } else {
         g_Players[0].ballPosition[AXIS_X] =
-            g_TeePositionX + PAUSE_BUNKER_LIES_OFFSET_X;
+            D_800BA9D8.teePosition[AXIS_X] + PAUSE_BUNKER_LIES_OFFSET_X;
         g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X];
       }
 

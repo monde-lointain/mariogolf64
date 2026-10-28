@@ -388,8 +388,8 @@ void DrawHoleCreatures(Gfx** displayListHead) {
           break;
       }
 
-      if (creature->position[1] > g_CupPositionY) {
-        creature->position[1] = g_CupPositionY;
+      if (creature->position[1] > D_800BA9D8.cupPosition[AXIS_Y]) {
+        creature->position[1] = D_800BA9D8.cupPosition[AXIS_Y];
       }
 
       if (creature->frameCount >= MONKEY_LIFETIME) {

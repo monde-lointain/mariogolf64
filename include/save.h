@@ -220,17 +220,6 @@ typedef struct RingShotRecord {
 } RingShotRecord; /* size = 0x68 */
 
 extern Unk800BA9D8 D_800BA9D8;
-/*
- * D_800BA9D8.cupPosition's x, y and z. Some code reads them under symbols
- * of their own, which GCC does not address from D_800BA9D8's base.
- */
-extern s32 g_CupPositionX;
-extern s32 g_CupPositionY;
-extern s32 g_CupPositionZ;
-/* D_800BA9D8.teePosition's x, y and z, under symbols of their own */
-extern s32 g_TeePositionX;
-extern s32 g_TeePositionY;
-extern s32 g_TeePositionZ;
 
 /* The current round's statistics, for the course's records */
 typedef struct RoundStats {

@@ -498,10 +498,15 @@ void func_801F4C78_ovl_01(void) {
   }
 
   D_8022F8E0_ovl_01++;
-  center[AXIS_X] = (D_800BA9D8.cupPosition[AXIS_X] + g_TeePositionX) *
+  center[AXIS_X] =
+      (D_800BA9D8.cupPosition[AXIS_X] + D_800BA9D8.teePosition[AXIS_X]) *
       MIDPOINT_TO_WORLD_SCALE;
-  center[AXIS_Y] = (g_CupPositionY + g_TeePositionY) * MIDPOINT_TO_WORLD_SCALE;
-  center[AXIS_Z] = (g_CupPositionZ + g_TeePositionZ) * MIDPOINT_TO_WORLD_SCALE;
+  center[AXIS_Y] =
+      (D_800BA9D8.cupPosition[AXIS_Y] + D_800BA9D8.teePosition[AXIS_Y]) *
+      MIDPOINT_TO_WORLD_SCALE;
+  center[AXIS_Z] =
+      (D_800BA9D8.cupPosition[AXIS_Z] + D_800BA9D8.teePosition[AXIS_Z]) *
+      MIDPOINT_TO_WORLD_SCALE;
   eye[AXIS_X] =
       (cosf(((D_8022F8E0_ovl_01 * ORBIT_ANGLE_PER_UPDATE) & BINARY_ANGLE_MASK) *
            BINARY_ANGLE_TO_RADIANS) *

@@ -1101,25 +1101,31 @@ void UpdatePlay(void) {
             PrintDebugText(text, DEBUG_CUP_TEXT_COLUMN, DEBUG_CUP_TEXT_ROW);
             D_800BA9D8.cupPosition[AXIS_X] =
                 g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_X];
-            g_CupPositionZ = g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_Z];
-            g_CupPositionY =
-                GetGroundHeight(D_800BA9D8.cupPosition[AXIS_X], g_CupPositionZ);
+            D_800BA9D8.cupPosition[AXIS_Z] =
+                g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_Z];
+            D_800BA9D8.cupPosition[AXIS_Y] = GetGroundHeight(
+                D_800BA9D8.cupPosition[AXIS_X], D_800BA9D8.cupPosition[AXIS_Z]);
             lookAt[AXIS_X] =
                 D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-            lookAt[AXIS_Y] = g_CupPositionY * COURSE_TO_WORLD_SCALE;
-            lookAt[AXIS_Z] = g_CupPositionZ * COURSE_TO_WORLD_SCALE;
+            lookAt[AXIS_Y] =
+                D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            lookAt[AXIS_Z] =
+                D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
             eye[AXIS_X] = (cosf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS) +
                 lookAt[AXIS_X];
             eye[AXIS_Y] = lookAt[AXIS_Y] + DEBUG_ORBIT_HEIGHT;
             eye[AXIS_Z] = (sinf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS) +
                 lookAt[AXIS_Z];
           } else {
-            lookAt[AXIS_X] = (D_800BA9D8.cupPosition[AXIS_X] + g_TeePositionX) *
+            lookAt[AXIS_X] = (D_800BA9D8.cupPosition[AXIS_X] +
+                                 D_800BA9D8.teePosition[AXIS_X]) *
                 (COURSE_TO_WORLD_SCALE / 2);
-            lookAt[AXIS_Y] =
-                (g_CupPositionY + g_TeePositionY) * (COURSE_TO_WORLD_SCALE / 2);
-            lookAt[AXIS_Z] =
-                (g_CupPositionZ + g_TeePositionZ) * (COURSE_TO_WORLD_SCALE / 2);
+            lookAt[AXIS_Y] = (D_800BA9D8.cupPosition[AXIS_Y] +
+                                 D_800BA9D8.teePosition[AXIS_Y]) *
+                (COURSE_TO_WORLD_SCALE / 2);
+            lookAt[AXIS_Z] = (D_800BA9D8.cupPosition[AXIS_Z] +
+                                 D_800BA9D8.teePosition[AXIS_Z]) *
+                (COURSE_TO_WORLD_SCALE / 2);
             if (!g_GameState.isMiniGolf) {
               eye[AXIS_X] = (cosf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS) +
                   lookAt[AXIS_X];

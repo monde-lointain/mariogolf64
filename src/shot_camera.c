@@ -848,7 +848,7 @@ s32 RandomBelow(s32 limit) {
  */
 s32 IsCupPassPoint(s32 cupDistance, s32 height) {
   if (cupDistance < CUP_PASS_RADIUS &&
-      height > g_CupPositionY - CUP_PASS_MAX_DEPTH &&
+      height > D_800BA9D8.cupPosition[AXIS_Y] - CUP_PASS_MAX_DEPTH &&
       f_LandingCupDistance < CUP_PASS_MAX_LANDING_DISTANCE &&
       (f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_UNK2)) {
     return TRUE;
@@ -1654,17 +1654,21 @@ s32 StepHoleFlyover(void) {
 
   offset[AXIS_X] =
       D_800BA9D8.teePosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X];
-  offset[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y] - g_CupPositionY;
-  offset[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z] - g_CupPositionZ;
+  offset[AXIS_Y] =
+      D_800BA9D8.teePosition[AXIS_Y] - D_800BA9D8.cupPosition[AXIS_Y];
+  offset[AXIS_Z] =
+      D_800BA9D8.teePosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z];
   g_InsetView.unk8 = 100;
   g_InsetView.unkC = 101;
   g_Cameras[0].view.lookAt[AXIS_X] =
       (D_800BA9D8.cupPosition[AXIS_X] + (offset[AXIS_X] * approach)) *
       COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.lookAt[AXIS_Y] =
-      (g_CupPositionY + (offset[AXIS_Y] * approach)) * COURSE_TO_WORLD_SCALE;
+      (D_800BA9D8.cupPosition[AXIS_Y] + (offset[AXIS_Y] * approach)) *
+      COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.lookAt[AXIS_Z] =
-      (g_CupPositionZ + (offset[AXIS_Z] * approach)) * COURSE_TO_WORLD_SCALE;
+      (D_800BA9D8.cupPosition[AXIS_Z] + (offset[AXIS_Z] * approach)) *
+      COURSE_TO_WORLD_SCALE;
   yaw = atan2(offset[AXIS_X], offset[AXIS_Z]) + (halfTurns * M_PI);
   holeRadius = GetHoleRadius(GetCourseRecordIndex(), GetHoleRecordIndex());
 
@@ -1686,9 +1690,10 @@ s32 StepHoleFlyover(void) {
   g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] +
       (offset[AXIS_Z] * COURSE_TO_WORLD_SCALE);
   g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] =
-      (g_CupPositionY - FLYOVER_INSET_LOOK_AT_DROP) * COURSE_TO_WORLD_SCALE;
+      (D_800BA9D8.cupPosition[AXIS_Y] - FLYOVER_INSET_LOOK_AT_DROP) *
+      COURSE_TO_WORLD_SCALE;
   g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] =
-      g_CupPositionZ * COURSE_TO_WORLD_SCALE;
+      D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   offset[AXIS_X] = sinf(yaw) * FLYOVER_INSET_DISTANCE;
   offset[AXIS_Z] = cosf(yaw) * FLYOVER_INSET_DISTANCE;
   g_Cameras[INSET_CAMERA].view.eye[AXIS_X] =
