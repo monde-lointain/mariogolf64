@@ -82,7 +82,27 @@
 #define BETS_PAGE_TALLY_LEFT 53
 #define BETS_PAGE_TALLY_TOP 112
 
-extern s32 f_MatchResultFrameCount;
+#define NO_BET_SUBTITLE -1
+/* The rows of the subtitles image */
+#define BET_SUBTITLE_SCORE 0
+#define BET_SUBTITLE_SKINS 1
+#define BET_SUBTITLE_NASSAU 2
+
+/* The quads of f_FlapVertices */
+#define FLAP_TOP_QUAD 0
+/* The top flap's far side, once it has turned down */
+#define FLAP_BOTTOM_QUAD 1
+#define FLAP_NAME_QUAD 2
+#define FLAP_QUAD_COUNT 3
+#define QUAD_VERTEX_COUNT 4
+
+/* The page's four looks. No code changes f_ScoresStyle, so the page keeps
+ * SCORES_STYLE_OPAQUE. */
+#define SCORES_STYLE_YELLOW 0
+#define SCORES_STYLE_FADED 1
+#define SCORES_STYLE_OPAQUE 2
+#define SCORES_STYLE_TINTED 3
+
 extern Mtx f_ResultCharacterMatrices[MATCH_PLAYER_COUNT];
 /* "Hole %d" in half-width katakana */
 extern const char f_HoleNumberFormat[];
@@ -98,6 +118,64 @@ extern const char f_TotalFormat[];
 extern const char f_DrawText[];
 extern const char f_WinText[];
 extern const char f_LoseText[];
+/* " ", still in the assembly's rodata */
+extern char D_8024C848_ovl_09[];
+
+s32 f_MatchResultFrameCount = 0;
+u8 f_WinMarkFrames[] = {3, 4, 5, 0, 1, 2, 3, 4, 5, 0};
+char f_CarryOverText[] = "Carry over";
+/* The angle the colors of "Win" are at */
+f32 f_WinColorAngle = 0.0f;
+char* f_BetNames[BET_COUNT] = {
+    D_8024C848_ovl_09,
+    D_8024C848_ovl_09,
+    D_8024C848_ovl_09,
+    D_8024C848_ovl_09,
+    D_8024C848_ovl_09,
+    D_8024C848_ovl_09,
+    D_8024C848_ovl_09,
+};
+/* Read by no routine */
+char D_8024C4EC_ovl_09[] = "Carry";
+/* The headings blink between their two images, a frame each this many draws */
+s32 f_BetBlinkFrame = 0;
+s32 f_BetBlinkTime = 0;
+s8 f_BetSubtitleRows[BET_COUNT] = {
+    NO_BET_SUBTITLE,
+    NO_BET_SUBTITLE,
+    BET_SUBTITLE_SCORE,
+    BET_SUBTITLE_NASSAU,
+    BET_SUBTITLE_SKINS,
+    NO_BET_SUBTITLE,
+    NO_BET_SUBTITLE,
+};
+/* The bottom quad faces away, its normal's Z of 0x81 being -127 */
+Vtx f_FlapVertices[FLAP_QUAD_COUNT][QUAD_VERTEX_COUNT] = {
+    {
+        {{{-128, 5, 0}, 0, {0, 0}, {0, 0, 127, 0xFF}}},
+        {{{-128, -1, 0}, 0, {0, 0x180}, {0, 0, 127, 0xFF}}},
+        {{{128, -1, 0}, 0, {0x3FC0, 0x180}, {0, 0, 127, 0xFF}}},
+        {{{128, 5, 0}, 0, {0x3FC0, 0}, {0, 0, 127, 0xFF}}},
+    },
+    {
+        {{{-128, -7, 0}, 0, {0, 0x340}, {0, 0, 0x81, 0xFF}}},
+        {{{-128, -2, 0}, 0, {0, 0x200}, {0, 0, 0x81, 0xFF}}},
+        {{{128, -2, 0}, 0, {0x3FC0, 0x200}, {0, 0, 0x81, 0xFF}}},
+        {{{128, -7, 0}, 0, {0x3FC0, 0x340}, {0, 0, 0x81, 0xFF}}},
+    },
+    {
+        {{{-64, 5, 0}, 0, {0, 0}, {0, 0, 127, 0xFF}}},
+        {{{-64, -1, 0}, 0, {0, 0x180}, {0, 0, 127, 0xFF}}},
+        {{{64, -1, 0}, 0, {0x1FC0, 0x180}, {0, 0, 127, 0xFF}}},
+        {{{64, 5, 0}, 0, {0x1FC0, 0}, {0, 0, 127, 0xFF}}},
+    },
+};
+Lights1 f_FlapLights =
+    gdSPDefLights1(0xFF, 0xFF, 0xFF, 0x1F, 0x1F, 0x1F, 0, 0, -127);
+f32 f_ArrowPulseAngle = 0.0f;
+f32 f_ScorePulseAngle = 0.0f;
+s32 f_ScoresStyle = SCORES_STYLE_OPAQUE;
+f32 f_BadgeGlowAngle = 0.0f;
 
 /* Where DrawMatchResult draws its text */
 #define MATCH_TITLE_X 32
@@ -466,8 +544,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat)
 #define ARROW_TOP 81
 #define MATCH_COUNT_TIME 20 /* When the hole's result joins the counts */
 #define MATCH_ANIMATION_TIME 30
-
-extern u8 f_WinMarkFrames[];
 
 /*
  * Draws a match's first page: the hole, any sudden death or dormie, and, for
@@ -839,10 +915,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_StringFormat);
 #define WIN_COLOR_MIDPOINT 0x7F
 #define WIN_COLOR_SWING 127.0f
 
-extern const char f_CarryOverText[];
-/* The angle the colors of "Win" are at */
-extern f32 f_WinColorAngle;
-
 /*
  * Draws the skins page of a skins match or club slots round: the hole, each
  * player's place, face and skins, and the skins carried over. The last hole's
@@ -1007,7 +1079,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C848_ovl_09);
 #define BET_SUBTITLE_IMAGE_HEIGHT 48
 #define BET_SUBTITLE_LEFT 56
 #define BET_SUBTITLE_TOP 58
-#define NO_BET_SUBTITLE -1
 #define BET_FACE_LEFT 18
 #define BET_FACE_TOP 100
 #define BET_NAME_LEFT 71
@@ -1021,12 +1092,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C848_ovl_09);
 #define BET_POT_LEFT 69
 #define BET_POT_TOP 86
 #define NO_TALLY_LEFT 69
-
-/* The headings blink between their two images, a frame each this many draws */
-extern s32 f_BetBlinkFrame;
-extern s32 f_BetBlinkTime;
-extern s8 f_BetSubtitleRows[BET_COUNT];
-extern char* f_BetNames[BET_COUNT];
 
 /*
  * Draws the bets page: each bet being played, its rate, any pot carried over,
@@ -1529,17 +1594,6 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
 #define FELL_ARROW_PULSE_STEP 0.4f
 #define ROSE_ARROW_PULSE_STEP 0.3f
 
-/* The quads of f_FlapVertices */
-#define FLAP_TOP_QUAD 0
-/* The top flap's far side, once it has turned down */
-#define FLAP_BOTTOM_QUAD 1
-#define FLAP_NAME_QUAD 2
-#define FLAP_QUAD_COUNT 3
-#define QUAD_VERTEX_COUNT 4
-
-extern Vtx f_FlapVertices[FLAP_QUAD_COUNT][QUAD_VERTEX_COUNT];
-extern Lights1 f_FlapLights;
-extern f32 f_ArrowPulseAngle;
 /* A turning flap's matrix, one for each draw buffer */
 extern Mtx f_FlapMatrices[LEADERBOARD_ROW_COUNT][2];
 
@@ -2050,17 +2104,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
 #define PULSE_RANGE 127
 #define BADGE_GLOW_STEP DEGREES_TO_RADIANS(10)
 #define BADGE_GLOW_RANGE 30
-
-/* The page's four looks. No code changes f_ScoresStyle, so the page keeps
- * SCORES_STYLE_OPAQUE. */
-#define SCORES_STYLE_YELLOW 0
-#define SCORES_STYLE_FADED 1
-#define SCORES_STYLE_OPAQUE 2
-#define SCORES_STYLE_TINTED 3
-
-extern f32 f_ScorePulseAngle;
-extern s32 f_ScoresStyle;
-extern f32 f_BadgeGlowAngle;
 
 /*
  * Draws the scores page: the par and each player's score of every hole, in
