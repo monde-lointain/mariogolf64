@@ -58,8 +58,8 @@ extern s32 g_ImpactPointLingerFrameCount;
 extern s32 g_ShotFlags;
 extern s32 D_800C3088;
 extern s8 D_800C30A4;
-extern s32 g_PlayExit;
-extern s32 g_HoleEndStep;
+extern s32 f_PlayExit;
+extern s32 f_HoleEndStep;
 static u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 extern s16 D_80104F78;
 extern s32 D_80104F7C;
@@ -619,8 +619,8 @@ void func_80060358(void) {
   SaveOrContinueGameByMode(FALSE);
   ClearShotEffects(0);
   g_GameState.unk0 = 7;
-  g_PlayExit = 3;
-  g_HoleEndStep = 9;
+  f_PlayExit = 3;
+  f_HoleEndStep = 9;
 }
 
 s32 func_800603A8(void) {
@@ -674,11 +674,11 @@ s32 HasWonFinalChallenge(void) {
   return FALSE;
 }
 
-extern s32 g_HoleResultsKind;
-extern s32 g_PlayStateFrameCount;
-extern s32 g_PlayFrameCount;
-extern s8 g_IsPlayStateBackedUp;
-extern s32 g_DebugCupIndex;
+extern s32 f_HoleResultsKind;
+extern s32 f_PlayStateFrameCount;
+extern s32 f_PlayFrameCount;
+extern s8 f_IsPlayStateBackedUp;
+extern s32 f_DebugCupIndex;
 extern s8 g_IsTrainingHeadingKept;
 void func_80241800();
 void func_80242384();
@@ -714,7 +714,7 @@ void func_8005DD78(void);
 void func_8005DDAC(void);
 
 #ifdef NON_MATCHING
-/* g_HoleEndStep, the step of the sequence between holes */
+/* f_HoleEndStep, the step of the sequence between holes */
 enum HoleEndStep {
   HOLE_END_STEP_START,
   /* Frees the character slot, then loads the next hole */
@@ -736,7 +736,7 @@ enum HoleEndStep {
   HOLE_END_STEP_RING_SHOT_COURSE_NOTICE
 };
 
-/* g_PlayExit, the menu that play returns to once the hole ends */
+/* f_PlayExit, the menu that play returns to once the hole ends */
 enum PlayExit {
   PLAY_EXIT_NONE, /* Plays on to the next hole */
   PLAY_EXIT_UNK1,
@@ -748,7 +748,7 @@ enum PlayExit {
   PLAY_EXIT_ROUND_OVER
 };
 
-/* g_HoleResultsKind, the results that the scorecard shows between holes */
+/* f_HoleResultsKind, the results that the scorecard shows between holes */
 #define HOLE_RESULTS_STROKE 0
 #define HOLE_RESULTS_MATCH 1
 #define HOLE_RESULTS_SKINS 2
@@ -814,7 +814,7 @@ enum PromptResult {
 /* The hole intro camera circles the hole at these distances */
 #define INTRO_ORBIT_ANGLE_PER_FRAME 256 /* In binary angle units */
 #define INTRO_ORBIT_ANGLE() \
-  (((g_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & \
+  (((f_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & \
        BINARY_ANGLE_MASK) * \
       BINARY_ANGLE_TO_RADIANS)
 #define DEBUG_ORBIT_RADIUS 1500.0f
@@ -839,7 +839,7 @@ void UpdatePlay(void) {
   s32 nextStep;
 
   repeat = FALSE;
-  g_PlayFrameCount++;
+  f_PlayFrameCount++;
   if (g_Players[0].controllerIndex < MAXCONTROLLERS) {
     g_TurnController = g_ControllerStates[g_Players[0].controllerIndex];
   } else {
@@ -922,9 +922,9 @@ void UpdatePlay(void) {
           memset(&g_RoundHud, 0, sizeof(RoundHud));
           StartHoleIntro();
           StartHoleCamerasAndSong();
-          g_PlayStateFrameCount = 0;
+          f_PlayStateFrameCount = 0;
         } else {
-          g_PlayStateFrameCount++;
+          f_PlayStateFrameCount++;
           if (g_GameState.gameMode == GAME_MODE_TRAINING) {
             if (g_IsModuleAlive[MODULE_COURSE_SELECT] &&
                 func_80241FF0(g_MergedController.pressedButtons,
@@ -954,7 +954,7 @@ void UpdatePlay(void) {
 
         break;
       case GAME_STATE_HOLE_INTRO:
-        g_IsPlayStateBackedUp = 0;
+        f_IsPlayStateBackedUp = 0;
         nuGfxDisplayOn();
         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
           if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
@@ -970,10 +970,10 @@ void UpdatePlay(void) {
                 break;
               case HOLE_MENU_QUIT:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
-                g_PlayExit = PLAY_EXIT_QUIT;
+                f_PlayExit = PLAY_EXIT_QUIT;
                 PlaySound(SOUND_MENU_CANCEL, SOUND_CHANNEL, SOUND_FULL_SCALE);
                 g_GameState.unk0 = GAME_STATE_HOLE_END;
-                g_HoleEndStep = HOLE_END_STEP_START;
+                f_HoleEndStep = HOLE_END_STEP_START;
                 ClearHoleIntroText();
                 break;
               case HOLE_MENU_NONE:
@@ -1000,10 +1000,10 @@ void UpdatePlay(void) {
                 break;
               case HOLE_MENU_QUIT:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
-                g_PlayExit = PLAY_EXIT_QUIT;
+                f_PlayExit = PLAY_EXIT_QUIT;
                 PlaySound(SOUND_MENU_CANCEL, SOUND_CHANNEL, SOUND_FULL_SCALE);
                 g_GameState.unk0 = GAME_STATE_HOLE_END;
-                g_HoleEndStep = HOLE_END_STEP_START;
+                f_HoleEndStep = HOLE_END_STEP_START;
                 ClearHoleIntroText();
                 break;
               case HOLE_MENU_NONE:
@@ -1018,7 +1018,7 @@ void UpdatePlay(void) {
           }
         } else if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
           if (g_IsModuleAlive[MODULE_CLUB_SLOTS] &&
-              (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
+              (f_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
                   IS_A_PRESSED())) {
             if (!g_GameState.unk30) {
               g_GameState.unk0 = GAME_STATE_SLOTS;
@@ -1029,7 +1029,7 @@ void UpdatePlay(void) {
             }
           }
         } else if (g_GameState.unk31) {
-          if (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
+          if (f_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
               IS_A_PRESSED()) {
             if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
               StartHoleFlyover();
@@ -1037,30 +1037,30 @@ void UpdatePlay(void) {
               g_GameState.unk0 = GAME_STATE_UNK6;
               EndHoleFlyover();
               StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-              g_PlayStateFrameCount = 0;
+              f_PlayStateFrameCount = 0;
             } else {
               StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
               g_GameState.unk0 = GAME_STATE_END_INTRO;
             }
           }
         } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
-            (g_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IS_A_PRESSED() ||
+            (f_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IS_A_PRESSED() ||
                 (func_8005F180() &&
-                    g_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
+                    f_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
           if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
             StartHoleFlyover();
             EndHoleIntro();
             g_GameState.unk0 = GAME_STATE_UNK6;
             EndHoleFlyover();
             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-            g_PlayStateFrameCount = 0;
+            f_PlayStateFrameCount = 0;
           } else {
             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
             g_GameState.unk0 = GAME_STATE_END_INTRO;
           }
         }
 
-        g_PlayStateFrameCount++;
+        f_PlayStateFrameCount++;
 
         /* The camera circles the hole while its intro is shown */
         {
@@ -1072,20 +1072,20 @@ void UpdatePlay(void) {
            * there */
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
             if (g_ControllerData[1].button & L_TRIG) {
-              g_DebugCupIndex--;
+              f_DebugCupIndex--;
             }
 
             if (g_ControllerData[1].button & R_TRIG) {
-              g_DebugCupIndex++;
+              f_DebugCupIndex++;
             }
 
-            g_DebugCupIndex &= CUP_POSITION_COUNT - 1;
-            sprintf(text, "PinNo%d ", g_DebugCupIndex);
+            f_DebugCupIndex &= CUP_POSITION_COUNT - 1;
+            sprintf(text, "PinNo%d ", f_DebugCupIndex);
             PrintDebugText(text, DEBUG_CUP_TEXT_COLUMN, DEBUG_CUP_TEXT_ROW);
             g_HoleSetup.cupPosition[AXIS_X] =
-                g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_X];
+                g_HolePoints.cupPositions[f_DebugCupIndex][AXIS_X];
             g_HoleSetup.cupPosition[AXIS_Z] =
-                g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_Z];
+                g_HolePoints.cupPositions[f_DebugCupIndex][AXIS_Z];
             g_HoleSetup.cupPosition[AXIS_Y] =
                 GetGroundHeight(g_HoleSetup.cupPosition[AXIS_X],
                     g_HoleSetup.cupPosition[AXIS_Z]);
@@ -1166,18 +1166,18 @@ void UpdatePlay(void) {
           EndHoleFlyover();
         }
 
-        g_PlayStateFrameCount = 0;
+        f_PlayStateFrameCount = 0;
         break;
       case GAME_STATE_UNK5:
-        g_PlayStateFrameCount++;
+        f_PlayStateFrameCount++;
         break;
       case GAME_STATE_UNK6:
         UnloadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
       case GAME_STATE_UNK11:
-        if (!g_IsPlayStateBackedUp) {
+        if (!f_IsPlayStateBackedUp) {
           D_800FBDB8 = 0;
           ClearContestWinner();
-          g_IsPlayStateBackedUp = TRUE;
+          f_IsPlayStateBackedUp = TRUE;
           BackUpPlayState();
           g_WasDonkeyKongUnlocked = IsDonkeyKongUnlocked();
           g_WasMapleUnlocked = IsMapleUnlocked();
@@ -1199,8 +1199,8 @@ void UpdatePlay(void) {
             ChooseConditionsAndInitHole();
           } else {
             g_GameState.unk0 = GAME_STATE_HOLE_END;
-            g_HoleEndStep = HOLE_END_STEP_START;
-            g_PlayStateFrameCount = 0;
+            f_HoleEndStep = HOLE_END_STEP_START;
+            f_PlayStateFrameCount = 0;
           }
         }
 
@@ -1239,12 +1239,12 @@ void UpdatePlay(void) {
 
         break;
       case GAME_STATE_HOLE_END:
-        g_PlayStateFrameCount++;
+        f_PlayStateFrameCount++;
         clearHud = TRUE;
-        switch (g_HoleEndStep) {
+        switch (f_HoleEndStep) {
           case HOLE_END_STEP_START:
-            g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
-            g_PlayStateFrameCount = 0;
+            f_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
+            f_PlayStateFrameCount = 0;
             g_RoundHud.scorecardPage = -1;
             g_RoundHud.isHoleIntroTextShown = FALSE;
             EndHoleIntro();
@@ -1253,7 +1253,7 @@ void UpdatePlay(void) {
             }
 
             if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-              if (g_PlayExit == PLAY_EXIT_NONE) {
+              if (f_PlayExit == PLAY_EXIT_NONE) {
                 g_GameState.holeIndex =
                     (g_GameState.holeIndex + 1) % COURSE_HOLE_COUNT;
               }
@@ -1265,22 +1265,22 @@ void UpdatePlay(void) {
               g_GameState.unk31 = 0;
               func_80060358();
               if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-                g_PlayExit = PLAY_EXIT_RING_SHOT;
+                f_PlayExit = PLAY_EXIT_RING_SHOT;
               } else {
-                g_PlayExit = PLAY_EXIT_UNK4;
+                f_PlayExit = PLAY_EXIT_UNK4;
               }
 
               StartWipe(WIPE_CLOSING);
               clearHud = FALSE;
-              g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
+              f_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
               SetMenuBackdrop(MENU_BACKDROP_STILL);
             } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-              if (g_PlayExit == PLAY_EXIT_NONE) {
+              if (f_PlayExit == PLAY_EXIT_NONE) {
                 g_GameState.holeIndex %= RING_SHOT_HOLE_COUNT;
                 func_8005D1E4();
               }
 
-              if (g_PlayExit == PLAY_EXIT_NONE) {
+              if (f_PlayExit == PLAY_EXIT_NONE) {
                 if (!D_800C30A4) {
                   nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
                 } else if ((IsDonkeyKongUnlocked() &&
@@ -1296,13 +1296,13 @@ void UpdatePlay(void) {
                 } else if (g_HasBroughtOverCharacter) {
                   nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
                 } else {
-                  g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
+                  f_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                   g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                   g_PendingSubModuleId = MODULE_SAVE_MENU;
                   goto DIM_BACKDROP;
                 }
 
-                g_HoleEndStep = nextStep;
+                f_HoleEndStep = nextStep;
 
 DIM_BACKDROP:
 
@@ -1310,40 +1310,40 @@ DIM_BACKDROP:
                 clearHud = FALSE;
               } else {
                 clearHud = FALSE;
-                if (g_PlayExit == PLAY_EXIT_QUIT) {
-                  g_HoleEndStep = HOLE_END_STEP_QUIT;
+                if (f_PlayExit == PLAY_EXIT_QUIT) {
+                  f_HoleEndStep = HOLE_END_STEP_QUIT;
                 }
               }
             } else if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
               g_PendingSubModuleId = MODULE_SCORECARD;
-              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-              g_HoleResultsKind = HOLE_RESULTS_TOURNAMENT;
+              f_HoleResultsKind = HOLE_RESULTS_TOURNAMENT;
               if (IsMapleUnlocked() && !g_WasMapleUnlocked) {
                 func_801F5C24(UNLOCK_NOTICE_MAPLE);
-                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
+                f_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
               } else if (IsMetalMarioUnlocked() && !g_WasMetalMarioUnlocked) {
                 func_801F5C24(UNLOCK_NOTICE_METAL_MARIO);
-                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
+                f_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
               } else if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
                 func_801F5C24(UNLOCK_NOTICE_METAL_MARIO);
-                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
+                f_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
               } else if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
                   HAS_PLAYED_LAST_HOLE()) {
                 RecordCourseRound();
                 RecordTournamentPlace();
-                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                f_PlayExit = PLAY_EXIT_ROUND_OVER;
               }
             } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
               g_PendingSubModuleId = MODULE_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-              g_HoleResultsKind = HOLE_RESULTS_SPEED_GOLF;
+              f_HoleResultsKind = HOLE_RESULTS_SPEED_GOLF;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
                   HAS_PLAYED_LAST_HOLE()) {
-                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                f_PlayExit = PLAY_EXIT_ROUND_OVER;
                 InsertBestTime(g_GameState.courseIndex,
                     g_GameState.stopwatchFrameCount,
                     GetNetScoreToPar(COURSE_HOLE_COUNT, 0),
@@ -1351,45 +1351,45 @@ DIM_BACKDROP:
                     (s8)g_Players[0].paletteIndex);
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-              g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
+              f_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
               clearHud = FALSE;
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               StartWipe(WIPE_CLOSING);
             } else if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                 g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
               g_PendingSubModuleId = MODULE_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-              g_HoleResultsKind = HOLE_RESULTS_MATCH;
+              f_HoleResultsKind = HOLE_RESULTS_MATCH;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
                   GetMatchWinner(0, 1) != 0) {
-                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                f_PlayExit = PLAY_EXIT_ROUND_OVER;
               }
             } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
               g_PendingSubModuleId = MODULE_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-              g_HoleResultsKind = HOLE_RESULTS_SKINS;
+              f_HoleResultsKind = HOLE_RESULTS_SKINS;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
                   HAS_PLAYED_LAST_HOLE()) {
-                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                f_PlayExit = PLAY_EXIT_ROUND_OVER;
               }
             } else {
-              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
               g_PendingSubModuleId = MODULE_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-              g_HoleResultsKind = HOLE_RESULTS_STROKE;
+              f_HoleResultsKind = HOLE_RESULTS_STROKE;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE)) {
-                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                f_PlayExit = PLAY_EXIT_ROUND_OVER;
               } else if (HAS_PLAYED_LAST_HOLE()) {
                 if (IsGameFlagSet(GAME_FLAG_REPEAT_ROUND)) {
                   g_GameState.holeIndex = GetFirstHoleIndex();
                 } else {
-                  g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                  f_PlayExit = PLAY_EXIT_ROUND_OVER;
                 }
               }
             }
@@ -1414,11 +1414,11 @@ DIM_BACKDROP:
                   GetRingShotCourseOpenedAtStarCount()) {
                 func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
                     UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
-                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
+                f_HoleEndStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
               } else if (g_HasBroughtOverCharacter) {
-                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
+                f_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
               } else {
-                g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
+                f_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                 g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                 g_PendingSubModuleId = MODULE_SAVE_MENU;
               }
@@ -1429,9 +1429,9 @@ DIM_BACKDROP:
             if (func_801F5F2C()) {
               func_801F5E9C();
               if (g_HasBroughtOverCharacter) {
-                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
+                f_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
               } else {
-                g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
+                f_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                 g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                 g_PendingSubModuleId = MODULE_SAVE_MENU;
               }
@@ -1441,12 +1441,12 @@ DIM_BACKDROP:
           case HOLE_END_STEP_UNLOCK_NOTICE:
             if (func_801F5F2C()) {
               func_801F5E9C();
-              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
                   HAS_PLAYED_LAST_HOLE()) {
                 RecordCourseRound();
                 RecordTournamentPlace();
-                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                f_PlayExit = PLAY_EXIT_ROUND_OVER;
               }
             }
 
@@ -1454,17 +1454,17 @@ DIM_BACKDROP:
           case HOLE_END_STEP_UNK5:
             if (IS_A_PRESSED() ||
                 (func_8005F180() &&
-                    g_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
+                    f_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               g_PauseScreen = PAUSE_SCREEN_UNK2;
               func_8020FAE8(-2);
-              g_HoleEndStep = HOLE_END_STEP_SCORECARD;
+              f_HoleEndStep = HOLE_END_STEP_SCORECARD;
               g_RoundHud.unk2 = 0;
               func_8024407C();
               func_80241800(GetCourseRecordIndex(g_GameState.courseIndex),
                   g_GameState.holeIndex);
               func_80242334(0);
-              if (g_PlayExit == PLAY_EXIT_NONE) {
+              if (f_PlayExit == PLAY_EXIT_NONE) {
                 StartLoaderThread();
               }
             }
@@ -1472,10 +1472,10 @@ DIM_BACKDROP:
             break;
           case HOLE_END_STEP_LOAD_SCORECARD:
             if (IsSubModuleLoaded()) {
-              g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
+              f_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
               func_80241800(GetCourseRecordIndex(g_GameState.courseIndex),
                   g_GameState.holeIndex);
-              func_80242334(g_HoleResultsKind);
+              func_80242334(f_HoleResultsKind);
             }
 
             break;
@@ -1485,7 +1485,7 @@ DIM_BACKDROP:
               break;
             }
 
-            if (g_PlayExit == PLAY_EXIT_NONE) {
+            if (f_PlayExit == PLAY_EXIT_NONE) {
               if (!g_GameState.unk31 &&
                   (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                       g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
@@ -1498,15 +1498,15 @@ DIM_BACKDROP:
             }
 
             if (g_RoundHud.scorecardPage != 0) {
-              g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+              f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
             } else {
-              g_HoleEndStep = HOLE_END_STEP_SCORECARD;
+              f_HoleEndStep = HOLE_END_STEP_SCORECARD;
             }
 
             break;
           case HOLE_END_STEP_LOAD_RING_SHOT:
             if (IsSubModuleLoaded()) {
-              g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
+              f_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
               func_8024186C(RING_SHOT_RESULTS_MODE_UNK2);
             }
 
@@ -1517,20 +1517,20 @@ DIM_BACKDROP:
               break;
             }
 
-            if (g_PlayExit == PLAY_EXIT_NONE) {
+            if (f_PlayExit == PLAY_EXIT_NONE) {
               StartLoaderThread();
               if (D_800C30A4 && !g_HasBroughtOverCharacter) {
-                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
+                f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
               } else {
                 StartWipe(WIPE_CLOSING);
                 if (IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()) {
-                  g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
+                  f_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
                 } else {
-                  g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+                  f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
                 }
               }
             } else {
-              g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+              f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
               StartWipe(WIPE_CLOSING);
             }
 
@@ -1541,14 +1541,14 @@ DIM_BACKDROP:
               case RING_SHOT_RESULTS_DONE:
                 StartWipe(WIPE_CLOSING);
                 if (IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()) {
-                  g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
+                  f_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
                 } else {
-                  g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+                  f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
                 }
 
                 break;
               case RING_SHOT_RESULTS_SAVE:
-                g_HoleEndStep = HOLE_END_STEP_PROMPT;
+                f_HoleEndStep = HOLE_END_STEP_PROMPT;
                 break;
             }
 
@@ -1558,18 +1558,18 @@ DIM_BACKDROP:
             switch (result) {
               case PROMPT_RESULT_UNK7:
                 func_802439B0();
-                g_HoleEndStep = result;
+                f_HoleEndStep = result;
                 OpenPrompt(NO_PROMPT);
                 break;
               case PROMPT_RESULT_UNK1:
                 func_80243898();
-                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
+                f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
                 OpenPrompt(NO_PROMPT);
                 break;
               case PROMPT_RESULT_UNK2:
                 g_PauseScreen = PAUSE_SCREEN_UNK5;
                 OpenPrompt(NO_PROMPT);
-                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
+                f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
                 break;
             }
 
@@ -1578,16 +1578,16 @@ DIM_BACKDROP:
             if (func_802436C8(g_MergedController.repeatedButtons) &&
                 (IS_A_PRESSED() ||
                     (func_8005F180() &&
-                        g_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
-                        g_PlayExit != PLAY_EXIT_ROUND_OVER))) {
-              if (g_PlayExit == PLAY_EXIT_ROUND_OVER) {
-                g_HoleEndStep = HOLE_END_STEP_FINAL_RESULTS;
+                        f_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
+                        f_PlayExit != PLAY_EXIT_ROUND_OVER))) {
+              if (f_PlayExit == PLAY_EXIT_ROUND_OVER) {
+                f_HoleEndStep = HOLE_END_STEP_FINAL_RESULTS;
                 func_80205C78();
                 func_80242074();
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 func_801F4AA4(FALSE);
               } else {
-                g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+                f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
                 func_80242074();
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
@@ -1604,23 +1604,23 @@ DIM_BACKDROP:
             if (func_801F8A30(&g_MergedController)) {
               if (HasWonFinalChallenge() ||
                   IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL)) {
-                g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
+                f_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
               } else {
-                g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+                f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
               }
 
               StartWipe(WIPE_CLOSING);
               SetMenuBackdrop(MENU_BACKDROP_STILL);
-              g_PlayExit = PLAY_EXIT_UNK3;
+              f_PlayExit = PLAY_EXIT_UNK3;
             }
 
             break;
           case HOLE_END_STEP_STAFF_ROLL:
             if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
-              g_HoleEndStep = HOLE_END_STEP_LOAD_NEXT_HOLE;
+              f_HoleEndStep = HOLE_END_STEP_LOAD_NEXT_HOLE;
               StartWipe(WIPE_OPENING);
               ClearTextSlots();
-              g_HoleEndStep = HOLE_END_STEP_START;
+              f_HoleEndStep = HOLE_END_STEP_START;
               func_80216B74(TRUE);
               g_Scene = SCENE_SWAPPING_MODULES;
               g_NextScene = SCENE_STAFF_ROLL;
@@ -1629,7 +1629,7 @@ DIM_BACKDROP:
               UnloadSubModule();
               func_8005DC50();
               StopLoaderThread();
-              g_PlayExit = PLAY_EXIT_NONE;
+              f_PlayExit = PLAY_EXIT_NONE;
               SetMenuBackdrop(MENU_BACKDROP_NONE);
               SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
               SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -1640,18 +1640,18 @@ DIM_BACKDROP:
             if (GetWipeProgress() == WIPE_CLOSED_PROGRESS &&
                 IsHalfTurnDismissed(&g_MergedController)) {
               ForceStopRumble();
-              g_HoleEndStep = HOLE_END_STEP_LOAD_NEXT_HOLE;
-              if (g_PlayExit != PLAY_EXIT_NONE) {
+              f_HoleEndStep = HOLE_END_STEP_LOAD_NEXT_HOLE;
+              if (f_PlayExit != PLAY_EXIT_NONE) {
                 StartWipe(WIPE_OPENING);
                 ClearTextSlots();
-                g_HoleEndStep = HOLE_END_STEP_START;
+                f_HoleEndStep = HOLE_END_STEP_START;
                 func_80216B74(TRUE);
                 g_Scene = SCENE_SWAPPING_MODULES;
                 g_NextScene = SCENE_MENU;
                 g_SceneModuleToUnload = MODULE_PLAY;
                 g_SceneModuleToLoad = MODULE_MENU;
                 UnloadSubModule();
-                switch (g_PlayExit) {
+                switch (f_PlayExit) {
                   case PLAY_EXIT_QUIT:
                     func_8005DD10();
                     break;
@@ -1673,7 +1673,7 @@ DIM_BACKDROP:
                 }
 
                 StopLoaderThread();
-                g_PlayExit = PLAY_EXIT_NONE;
+                f_PlayExit = PLAY_EXIT_NONE;
                 SetMenuBackdrop(MENU_BACKDROP_NONE);
                 SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
                 SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -1699,8 +1699,8 @@ DIM_BACKDROP:
               }
 
               StartWipe(WIPE_OPENING);
-              g_PlayStateFrameCount = 0;
-              g_HoleEndStep = HOLE_END_STEP_START;
+              f_PlayStateFrameCount = 0;
+              f_HoleEndStep = HOLE_END_STEP_START;
             }
 
             break;
@@ -1711,7 +1711,7 @@ DIM_BACKDROP:
             }
 
             StartWipe(WIPE_CLOSING);
-            g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+            f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
             break;
         }
 
@@ -1906,8 +1906,8 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
       G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, RANDOM_GRID_SIZE, \
       RANDOM_GRID_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
-extern s32 g_GroundClipRatio;
-extern s32 g_GroundTimingRow;
+extern s32 f_GroundClipRatio;
+extern s32 f_GroundTimingRow;
 extern u32 g_GroundDrawFrame;
 void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
 
@@ -1978,9 +1978,9 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   if (IsGameFlagSet(GAME_FLAG_CYCLE_CLIP_RATIO)) {
     char text[0x98];
 
-    sprintf(text, "CLIPRATIO=%d", g_GroundClipRatio);
+    sprintf(text, "CLIPRATIO=%d", f_GroundClipRatio);
     PrintDebugText(text, CLIP_RATIO_TEXT_COLUMN, CLIP_RATIO_TEXT_ROW);
-    switch (g_GroundClipRatio) {
+    switch (f_GroundClipRatio) {
       case 1:
         gSPClipRatio(gfx++, FRUSTRATIO_1);
         break;
@@ -2002,7 +2002,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
     }
 
     if (g_ControllerData[1].trigger & A_BUTTON) {
-      g_GroundClipRatio = (g_GroundClipRatio % CLIP_RATIO_COUNT) + 1;
+      f_GroundClipRatio = (f_GroundClipRatio % CLIP_RATIO_COUNT) + 1;
     }
   } else {
     gSPClipRatio(gfx++, FRUSTRATIO_1);
@@ -2376,8 +2376,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   if (IsGameFlagSet(GAME_FLAG_TIME_GROUND)) {
     start = osGetCount() - start;
     PrintDebugPaddedHex(start / GROUND_TIMING_TICKS, GROUND_TIMING_COLUMN,
-        g_GroundTimingRow + GROUND_TIMING_ROW);
-    g_GroundTimingRow = 1 - g_GroundTimingRow;
+        f_GroundTimingRow + GROUND_TIMING_ROW);
+    f_GroundTimingRow = 1 - f_GroundTimingRow;
   }
 }
 #else
