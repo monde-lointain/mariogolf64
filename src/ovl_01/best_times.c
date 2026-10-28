@@ -165,7 +165,7 @@ void func_80213558_ovl_01(void) {
     if (memory->bestTimesSpin == 0) {
       if (g_MenuRepeatButtons & R_JPAD) {
         if (courseCount >= 2) {
-          PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->bestTimesCourse++;
           if (memory->bestTimesCourse > courseCount - 1) {
             memory->bestTimesCourse = 0;
@@ -175,7 +175,7 @@ void func_80213558_ovl_01(void) {
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
         if (courseCount >= 2) {
-          PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->bestTimesCourse--;
           if (memory->bestTimesCourse < 0) {
             memory->bestTimesCourse = courseCount - 1;

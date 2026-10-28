@@ -434,12 +434,7 @@ void PlayLogoClubSound(void) {
   }
 }
 
-/* The opening's ambient sounds, each with a channel and pan of its own */
-#define SOUND_AMBIENT_ALTERNATING_FIRST 0x184
-#define SOUND_AMBIENT_ALTERNATING_SECOND 0x185
-#define SOUND_AMBIENT_REPEATING 0x18B
-#define SOUND_AMBIENT_RANDOM_FIRST 0x1A3
-#define SOUND_AMBIENT_RANDOM_SECOND 0x1BA
+/* The channel and pan of each of the opening's ambient sounds */
 #define ALTERNATING_SOUND_CHANNEL 13
 #define REPEATING_SOUND_CHANNEL 14
 #define RANDOM_SOUND_CHANNEL 15
@@ -2557,7 +2552,7 @@ void UpdateOpening(void) {
           }
 
           if (!f_HasLogoStarted) {
-            PlaySound(SOUND_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
+            PlaySound(SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
                 OPENING_SOUND_FULL_VOLUME);
           }
 
@@ -2625,7 +2620,7 @@ void UpdateOpening(void) {
     if (g_IsDebugEnabled) {
       if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons &
           A_BUTTON) {
-        PlaySound(SOUND_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
+        PlaySound(SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
             OPENING_SOUND_FULL_VOLUME);
         SetGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
         f_IsLookAtMarkerShown = 1;

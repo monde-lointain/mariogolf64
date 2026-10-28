@@ -42,9 +42,6 @@
 #include "variables.h"
 #include "work_area.h"
 
-/* Sounds that the inset view plays as it opens and closes */
-#define SOUND_INSET_VIEW_OPEN 0x64
-#define SOUND_INSET_VIEW_CLOSE 0x65
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E
 #define INSET_VIEW_SOUND_PAN 0x7F
@@ -2559,7 +2556,7 @@ void UpdateInsetView(void) {
 
   if (*animation == INSET_VIEW_OPENING) {
     if (g_InsetView.step == 1) {
-      PlaySoundWithEffects(SOUND_INSET_VIEW_OPEN, g_NextSoundChannel,
+      PlaySoundWithEffects(SOUND_PROMPT_OPEN, g_NextSoundChannel,
           INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
           INSET_VIEW_SOUND_PAN);
     }
@@ -2572,7 +2569,7 @@ void UpdateInsetView(void) {
     }
   } else if (*animation == INSET_VIEW_CLOSING) {
     if (g_InsetView.step == INSET_VIEW_STEP_COUNT - 1) {
-      PlaySoundWithEffects(SOUND_INSET_VIEW_CLOSE, g_NextSoundChannel,
+      PlaySoundWithEffects(SOUND_PROMPT_CLOSE, g_NextSoundChannel,
           INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
           INSET_VIEW_SOUND_PAN);
     }

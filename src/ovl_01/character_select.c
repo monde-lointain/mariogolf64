@@ -573,7 +573,7 @@ s32 func_80209D50_ovl_01(
 
   playerIndex = D_801B7070;
   if (g_MenuRepeatButtons == (U_JPAD | L_JPAD)) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209894_ovl_01(
             playerIndex, STICK_DIAGONAL_UP_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
@@ -585,7 +585,7 @@ s32 func_80209D50_ovl_01(
   }
 
   if (g_MenuRepeatButtons == (U_JPAD | R_JPAD)) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209894_ovl_01(
             playerIndex, STICK_DIAGONAL_UP_RIGHT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
@@ -597,7 +597,7 @@ s32 func_80209D50_ovl_01(
   }
 
   if (g_MenuRepeatButtons == (D_JPAD | L_JPAD)) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209894_ovl_01(
             playerIndex, STICK_DIAGONAL_DOWN_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
@@ -609,7 +609,7 @@ s32 func_80209D50_ovl_01(
   }
 
   if (g_MenuRepeatButtons == (D_JPAD | R_JPAD)) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209894_ovl_01(
             playerIndex, STICK_DIAGONAL_DOWN_RIGHT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
@@ -623,7 +623,7 @@ s32 func_80209D50_ovl_01(
   if (g_MenuRepeatButtons & U_JPAD) {
     PrintDebugText(
         "          ", BLANKED_DEBUG_TEXT_COLUMN, BLANKED_DEBUG_TEXT_ROW);
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209568_ovl_01(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked) ==
         0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
@@ -635,7 +635,7 @@ s32 func_80209D50_ovl_01(
   }
 
   if (g_MenuRepeatButtons & D_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209568_ovl_01(
             playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
@@ -647,7 +647,7 @@ s32 func_80209D50_ovl_01(
   }
 
   if (g_MenuRepeatButtons & L_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209568_ovl_01(
             playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
@@ -659,7 +659,7 @@ s32 func_80209D50_ovl_01(
   }
 
   if (g_MenuRepeatButtons & R_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209568_ovl_01(
             playerIndex, GRID_MOVE_RIGHT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {

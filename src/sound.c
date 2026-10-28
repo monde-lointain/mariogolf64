@@ -36,8 +36,6 @@
 #define DEFAULT_REVERB 2
 #define NO_REVERB 0
 #define ECHOING_SOUND_COUNT 34
-#define SOUND_ID_UNK5A 0x5A
-#define SOUND_ID_UNK9A 0x9A
 
 /* Character sounds, which play after a delay set for each character */
 #define CHARACTER_COUNT 18
@@ -274,7 +272,7 @@ void PlaySound(s32 soundId, s32 channel, s32 volume) {
       }
 
       if (index < ECHOING_SOUND_COUNT) {
-        if (f_EchoingSoundIds[index] == SOUND_ID_UNK9A) {
+        if (f_EchoingSoundIds[index] == SOUND_UNK154) {
           SetSoundReverb(channel, NO_REVERB);
         } else {
           SetSoundReverb(channel, ECHO_REVERB);
@@ -282,7 +280,7 @@ void PlaySound(s32 soundId, s32 channel, s32 volume) {
 
         SetSoundFrequencyOffset(channel, 0.0f);
       } else {
-        if (soundId == SOUND_ID_UNK5A) {
+        if (soundId == SOUND_UNK90) {
           SetSoundReverb(channel, ECHO_REVERB);
         } else {
           SetSoundReverb(channel, DEFAULT_REVERB);
@@ -332,7 +330,7 @@ void PlaySoundWithEffects(
       }
 
       if (index < ECHOING_SOUND_COUNT) {
-        if (f_EchoingSoundIds[index] == SOUND_ID_UNK9A) {
+        if (f_EchoingSoundIds[index] == SOUND_UNK154) {
           SetSoundReverb(channel, NO_REVERB);
         } else {
           SetSoundReverb(channel, ECHO_REVERB);
@@ -340,7 +338,7 @@ void PlaySoundWithEffects(
 
         SetSoundFrequencyOffset(channel, 0.0f);
       } else {
-        if (soundId == SOUND_ID_UNK5A) {
+        if (soundId == SOUND_UNK90) {
           SetSoundReverb(channel, ECHO_REVERB);
         } else {
           SetSoundReverb(channel, DEFAULT_REVERB);

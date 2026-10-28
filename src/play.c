@@ -787,7 +787,6 @@ enum PromptResult {
 #define PLAYER_CHARACTER_SLOT 0
 #define TOURNAMENT_HALF_TURN_HOLE 9 /* The hole index after the front nine */
 
-#define SOUND_CANCEL 0x5F
 #define SOUND_CHANNEL 15
 #define SOUND_VOLUME 127
 
@@ -973,7 +972,7 @@ void UpdatePlay(void) {
               case HOLE_MENU_QUIT:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 g_PlayExit = PLAY_EXIT_QUIT;
-                PlaySound(SOUND_CANCEL, SOUND_CHANNEL, SOUND_VOLUME);
+                PlaySound(SOUND_MENU_CANCEL, SOUND_CHANNEL, SOUND_VOLUME);
                 g_GameState.unk0 = GAME_STATE_HOLE_END;
                 g_HoleEndStep = HOLE_END_STEP_START;
                 ClearHoleIntroText();
@@ -1003,7 +1002,7 @@ void UpdatePlay(void) {
               case HOLE_MENU_QUIT:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 g_PlayExit = PLAY_EXIT_QUIT;
-                PlaySound(SOUND_CANCEL, SOUND_CHANNEL, SOUND_VOLUME);
+                PlaySound(SOUND_MENU_CANCEL, SOUND_CHANNEL, SOUND_VOLUME);
                 g_GameState.unk0 = GAME_STATE_HOLE_END;
                 g_HoleEndStep = HOLE_END_STEP_START;
                 ClearHoleIntroText();

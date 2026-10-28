@@ -56,13 +56,6 @@ enum SaveMenuState {
 #define CONTROLS_STRIP_HEIGHT 7
 #define CONTROLS_STRIP_COUNT 32
 
-#define SOUND_CONTROLS_OPEN 0x72
-#define SOUND_CONTROLS_CLOSE 0x73
-#define SOUND_MENU_CONFIRM 0x5D
-#define SOUND_MENU_MOVE 0x5C
-#define SOUND_SAVE_MENU_OPEN 0x47
-#define SOUND_SAVE_MENU_CLOSE 0x48
-#define SOUND_SAVED 0x3B
 #define MENU_SOUND_CHANNEL 15
 #define MENU_SOUND_VOLUME 0x64
 #define MENU_SOUND_REVERB 0x14
@@ -412,8 +405,8 @@ void OpenSaveMenu(s32 kind) {
   ReadEncodedAsset(f_SaveMenuTitleImage = AllocMemory(
                        OpenEncodedAsset(SAVE_MENU_TITLE_IMAGE, &encodedAsset)),
       &encodedAsset);
-  PlaySoundWithEffects(SOUND_SAVE_MENU_OPEN, g_NextSoundChannel,
-      MENU_SOUND_VOLUME, MENU_SOUND_REVERB, SAVE_MENU_SOUND_PAN);
+  PlaySoundWithEffects(SOUND_PANEL_OPEN, g_NextSoundChannel, MENU_SOUND_VOLUME,
+      MENU_SOUND_REVERB, SAVE_MENU_SOUND_PAN);
   for (slot = 0; slot != CHARACTER_IMAGE_COUNT; slot++) {
     ReadEncodedAsset(f_CharacterImages[slot] = AllocMemory(OpenEncodedAsset(
                          g_CharacterImageAssets[CHARACTER_PLUM] +
@@ -1156,7 +1149,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       }
 
       if (controller->pressedButtons & B_BUTTON) {
-        PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
+        PlaySoundWithEffects(SOUND_PANEL_CLOSE, g_NextSoundChannel,
             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
         AnimateModeIcons(TRUE);
         f_StateFrame = 0;
@@ -1214,7 +1207,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       }
 
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
-        PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
+        PlaySoundWithEffects(SOUND_PANEL_CLOSE, g_NextSoundChannel,
             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
       }
 
@@ -1258,7 +1251,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       }
 
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
-        PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
+        PlaySoundWithEffects(SOUND_PANEL_CLOSE, g_NextSoundChannel,
             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
       }
 

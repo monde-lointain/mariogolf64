@@ -57,9 +57,6 @@ enum ScorecardState {
 #define MATCH_RESULT_TIME 5
 #define SKINS_TALLY_TIME 20
 #define SKINS_TALLY_INTERVAL 4
-#define SOUND_UNK22 0x22
-#define SOUND_UNK67 0x67
-#define SOUND_SKIN_COUNTED 0x6B
 #define MATCH_RESULT_SOUND_CHANNEL 14
 
 #define SCORECARD_OPEN_TIME 12 /* Frames the scorecard takes to slide in */
@@ -72,9 +69,6 @@ enum ScorecardState {
 #define FACE_FRAME_COUNT 5
 #define FACE_FRAME_TIME 3
 
-#define SOUND_SCORECARD_OPEN 0x47
-#define SOUND_SCORECARD_CLOSE 0x48
-#define SOUND_SCORECARD_PAGE 0x5C
 #define SCORECARD_SLIDE_SOUND_REVERB 20
 /* The opening sound pans from the right, the closing one from the left */
 #define SCORECARD_OPEN_SOUND_PAN 0xDF
@@ -91,7 +85,6 @@ enum ScorecardState {
   (TOURNAMENT_CONTESTANT_COUNT - LEADERBOARD_ROW_COUNT)
 #define ROW_FLIP_DEGREES_PER_FRAME 20
 #define ROW_FLIP_END_DEGREES 175
-#define SOUND_ROW_FLIPPED 0x5B
 #define ROW_FLIP_SOUND_CHANNEL 13
 
 #define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
@@ -867,11 +860,11 @@ void SetScorecardLayout(s32 layout) {
 
 void SetScorecardState(s32 state) {
   if (state == SCORECARD_OPENING) {
-    PlaySoundWithEffects(SOUND_SCORECARD_OPEN, g_NextSoundChannel,
+    PlaySoundWithEffects(SOUND_PANEL_OPEN, g_NextSoundChannel,
         SCORECARD_SOUND_VOLUME, SCORECARD_SLIDE_SOUND_REVERB,
         SCORECARD_OPEN_SOUND_PAN);
   } else if (state == SCORECARD_CLOSING) {
-    PlaySoundWithEffects(SOUND_SCORECARD_CLOSE, g_NextSoundChannel,
+    PlaySoundWithEffects(SOUND_PANEL_CLOSE, g_NextSoundChannel,
         SCORECARD_SOUND_VOLUME, SCORECARD_SLIDE_SOUND_REVERB,
         SCORECARD_CLOSE_SOUND_PAN);
   }
@@ -1014,7 +1007,7 @@ void TurnScorecardPage(u16 buttons) {
     }
 
     /* The sound pans further right on each later page */
-    PlaySoundWithEffects(SOUND_SCORECARD_PAGE, g_NextSoundChannel,
+    PlaySoundWithEffects(SOUND_MENU_MOVE, g_NextSoundChannel,
         SCORECARD_SOUND_VOLUME, 0,
         (g_RoundHud.scorecardPage + 1) *
             (SOUND_PAN_FULL_RIGHT / (pageCount + 1)));
@@ -1042,8 +1035,8 @@ void ScrollLeaderboard(u16 buttons) {
           DEGREES_TO_RADIANS(ROW_FLIP_END_DEGREES)) {
         g_Scorecard.content.rowFlipAngles[row] = 0.0f;
         g_Scorecard.content.isRowFlipping[row] = FALSE;
-        PlaySound(
-            SOUND_ROW_FLIPPED, ROW_FLIP_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
+        PlaySound(SOUND_LOOK_DOWN_RANGE, ROW_FLIP_SOUND_CHANNEL,
+            SCORECARD_SOUND_VOLUME);
       }
     }
   }
@@ -1052,15 +1045,13 @@ void ScrollLeaderboard(u16 buttons) {
     if (buttons & U_JPAD) {
       if (g_Scorecard.topRow > 0) {
         g_Scorecard.topRow--;
-        PlaySound(
-            SOUND_SCORECARD_PAGE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
       }
     }
 
     if ((buttons & D_JPAD) && g_Scorecard.topRow < LEADERBOARD_LAST_TOP_ROW) {
       g_Scorecard.topRow++;
-      PlaySound(
-          SOUND_SCORECARD_PAGE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
     }
   }
 }
@@ -1474,14 +1465,15 @@ s32 TallyScorecardSkins(void) {
     case SCORECARD_LAYOUT_MATCH:
       if (g_Scorecard.stateTime == MATCH_RESULT_SOUND_TIME &&
           g_Scorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
-        PlaySound(SOUND_UNK22, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
+        PlaySound(
+            SOUND_TALLY_DONE, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
       }
 
       if (g_Scorecard.stateTime == MATCH_RESULT_TIME) {
         g_Scorecard.skinsCarryover.onLastHole = 1;
         if (g_Scorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
-          PlaySound(
-              SOUND_UNK67, MATCH_RESULT_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
+          PlaySound(SOUND_THREE_STARS, MATCH_RESULT_SOUND_CHANNEL,
+              SCORECARD_SOUND_VOLUME);
         }
 
         return TRUE;

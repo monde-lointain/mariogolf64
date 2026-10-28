@@ -421,7 +421,7 @@ void func_80217D20_ovl_01(void) {
   }
 
   if (g_MenuPressedButtons & A_BUTTON) {
-    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
     D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
     D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
@@ -463,19 +463,19 @@ void func_80217D20_ovl_01(void) {
   }
 
   if (g_MenuRepeatButtons & U_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     index = D_80230460_ovl_01[D_801B5634 - 1][memory->unkD];
     if (memory->unkE[index] < BET_STAKE_LEVEL_COUNT - 1) {
       memory->unkE[index]++;
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     index = D_80230460_ovl_01[D_801B5634 - 1][memory->unkD];
     if (memory->unkE[index] > 0) {
       memory->unkE[index]--;
     }
   } else if (g_MenuRepeatButtons & L_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     memory->unkD--;
     if (memory->unkD < 0) {
       memory->unkD = D_802304B4_ovl_01[D_801B5634 - 1] - 1;
@@ -491,7 +491,7 @@ void func_80217D20_ovl_01(void) {
     ReadEncodedAsset(D_8023B350_ovl_01[D_8022F8C4_ovl_01 ^ 1], &asset);
     D_8022F8C4_ovl_01 ^= 1;
   } else if (g_MenuRepeatButtons & R_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     memory->unkD++;
     if (memory->unkD > D_802304B4_ovl_01[D_801B5634 - 1] - 1) {
       memory->unkD = 0;
@@ -825,7 +825,7 @@ s32 func_80219948_ovl_01(void) {
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_CHOOSING) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
       SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
       D_8023BFD0_ovl_01 = PLAYER_OPTION_SLIDE_START;
       D_802303A1_ovl_01 = 0;
@@ -843,7 +843,7 @@ s32 func_80219948_ovl_01(void) {
     }
 
     if (g_MenuRepeatButtons & L_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       memory->unk29--;
       if (memory->unk29 < 0) {
         memory->unk29 = g_ChosenPlayerCount - 1;
@@ -854,7 +854,7 @@ s32 func_80219948_ovl_01(void) {
     }
 
     if (g_MenuRepeatButtons & R_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       memory->unk29++;
       if (memory->unk29 > g_ChosenPlayerCount - 1) {
         memory->unk29 = 0;
@@ -865,7 +865,7 @@ s32 func_80219948_ovl_01(void) {
     }
 
     if (g_MenuRepeatButtons & U_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_8023BFDC_ovl_01[memory->unk29]++;
       if (D_8023BFDC_ovl_01[memory->unk29] >= PLAYER_OPTION_COUNT) {
         D_8023BFDC_ovl_01[memory->unk29] = 0;
@@ -875,7 +875,7 @@ s32 func_80219948_ovl_01(void) {
     }
 
     if (g_MenuRepeatButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_8023BFDC_ovl_01[memory->unk29]--;
       if (D_8023BFDC_ovl_01[memory->unk29] < 0) {
         D_8023BFDC_ovl_01[memory->unk29] = PLAYER_OPTION_COUNT - 1;
@@ -1757,7 +1757,7 @@ void func_8021D0B8_ovl_01(void) {
     } else if (GetWipeKind() == WIPE_NONE || D_801B9410 != 1) {
       if (g_MenuPressedButtons & A_BUTTON) {
         if (func_8021E468_ovl_01() != STATS_CELL_EMPTY) {
-          PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+          PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           D_801B9410 = 0;
           column = memory->unk39;
           LoadWipeShape(
@@ -1778,28 +1778,28 @@ void func_8021D0B8_ovl_01(void) {
         moved = func_8021E340_ovl_01(
             memory->unk39, memory->unk3A, STATS_DIRECTION_UP);
         if ((s16)moved != STATS_CELL_EMPTY) {
-          PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->unk3A = moved;
         }
       } else if (g_MenuRepeatButtons & D_JPAD) {
         moved = func_8021E340_ovl_01(
             memory->unk39, memory->unk3A, STATS_DIRECTION_DOWN);
         if ((s16)moved != STATS_CELL_EMPTY) {
-          PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->unk3A = moved;
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
         moved = func_8021E340_ovl_01(
             memory->unk39, memory->unk3A, STATS_DIRECTION_LEFT);
         if ((s16)moved != STATS_CELL_EMPTY) {
-          PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->unk39 = moved;
         }
       } else if (g_MenuRepeatButtons & R_JPAD) {
         moved = func_8021E340_ovl_01(
             memory->unk39, memory->unk3A, STATS_DIRECTION_RIGHT);
         if ((s16)moved != STATS_CELL_EMPTY) {
-          PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->unk39 = moved;
         }
       }

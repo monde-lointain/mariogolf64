@@ -60,7 +60,6 @@
  * the main menu */
 #define TRANSMIT_BUTTONS (A_BUTTON | L_TRIG | R_TRIG)
 #define TRANSMIT_OTHER_BUTTONS (A_BUTTON | Z_TRIG | R_TRIG)
-#define SOUND_TRANSMIT_SHOWN 0x73
 #define TRANSMIT_SOUND_CHANNEL 14
 /* The wipe that leaves for the Transmit scene from the saved games row */
 #define TRANSMIT_WIPE_SHAPE 12
@@ -210,8 +209,6 @@ extern s32 D_8022F8F4_ovl_01[];
 #define HOLES_CHOICE_ALL 3
 /* D_8022BE88's value once the popup opened with C-up has finished */
 #define MENU_PHASE_UNK2 2
-#define SOUND_UNK6A 0x6A
-#define SOUND_HOLES_CHOSEN 0x45
 
 extern u16 D_800C2098[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_IMAGE_COUNT]
                      [MINI_GOLF_TURN_FRAME_COUNT];
@@ -1333,7 +1330,7 @@ void func_801F70F0_ovl_01(void) {
   }
 
   if (g_MenuPressedButtons & A_BUTTON) {
-    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     titleChoice = D_801323A0.titleChoice;
     if (titleChoice == TITLE_CHOICE_NEW_GAME) {
       for (index = 0; index != MAX_PLAYER_COUNT; index++) {
@@ -1379,7 +1376,7 @@ void func_801F70F0_ovl_01(void) {
       if ((g_MenuRepeatButtons == TRANSMIT_BUTTONS) |
           (g_MenuRepeatButtons == TRANSMIT_OTHER_BUTTONS)) {
         PlaySound(
-            SOUND_TRANSMIT_SHOWN, TRANSMIT_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            SOUND_CONTROLS_CLOSE, TRANSMIT_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         D_801323E6 = 1;
         g_MenuScreen = titleChoice;
       } else {
@@ -1407,7 +1404,7 @@ void func_801F70F0_ovl_01(void) {
     g_NextScene = SCENE_TITLE_SCREEN;
     g_SceneModuleToUnload = MODULE_MENU;
     g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
-    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
     SetTextSlot(
         SCREEN_WIDTH / 2, TITLE_SCREEN_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
     return;
@@ -1417,10 +1414,10 @@ void func_801F70F0_ovl_01(void) {
    * a register as the original does */
   if (g_MenuRepeatButtons & U_JPAD) {
     D_801323A0.titleChoice--;
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
   } else if (g_MenuRepeatButtons & D_JPAD) {
     D_801323A0.titleChoice++;
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
   }
 
   if (D_801323A0.titleChoice < 0) {
@@ -1434,10 +1431,10 @@ void func_801F70F0_ovl_01(void) {
   if (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME) {
     if (g_MenuRepeatButtons & L_JPAD) {
       D_801323A0.playerCountChoice--;
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     } else if (g_MenuRepeatButtons & R_JPAD) {
       D_801323A0.playerCountChoice++;
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     }
   }
 
@@ -1480,7 +1477,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
 
     if (g_ControllerStates[0].pressedButtons & U_JPAD) {
       D_801323A0.unk2--;
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
       while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
         D_801323A0.unk2--;
         if (D_801323A0.unk2 < 0) {
@@ -1488,7 +1485,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
         }
       }
     } else if (g_ControllerStates[0].pressedButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
       D_801323A0.unk2++;
       while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
         D_801323A0.unk2++;
@@ -1541,7 +1538,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       D_801323A0.unk2--;
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
         D_801323A0.unk2--;
         if (D_801323A0.unk2 < 0) {
@@ -1549,7 +1546,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
         }
       }
     } else if (g_MenuRepeatButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_801323A0.unk2++;
       while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
         D_801323A0.unk2++;
@@ -1648,7 +1645,7 @@ void func_801F7D28_ovl_01(void) {
       return;
     }
 
-    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     SetTextSlot(0, 0, NO_MESSAGE, 1, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF,
         0xFF, 0xFF, 0xFF);
     D_8022BE84_ovl_01 = 0;
@@ -1662,7 +1659,7 @@ void func_801F7D28_ovl_01(void) {
     g_GameState.unk2C = rand();
     switch (mode) {
       case MODE_ICON_TOURNAMENT:
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_TOURNAMENT;
         g_MenuScreen = MENU_SCREEN_UNK6;
@@ -1672,7 +1669,7 @@ void func_801F7D28_ovl_01(void) {
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_GET_CHARACTER:
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
         g_GameState.playerCount = 2;
@@ -1692,7 +1689,7 @@ void func_801F7D28_ovl_01(void) {
 
         break;
       case MODE_ICON_STROKE:
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_UNK6;
         g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
@@ -1720,7 +1717,7 @@ void func_801F7D28_ovl_01(void) {
 
         break;
       case MODE_ICON_MATCH_GAME:
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_MATCH_GAME;
         g_MenuScreen = MENU_SCREEN_UNK6;
@@ -1731,7 +1728,7 @@ void func_801F7D28_ovl_01(void) {
         func_80217B88_ovl_01(MENU_UNKE_PRESET_MATCH_GAME);
         break;
       case MODE_ICON_SKINS_MATCH:
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_SKINS_MATCH;
         g_MenuScreen = MENU_SCREEN_UNK6;
@@ -1742,7 +1739,7 @@ void func_801F7D28_ovl_01(void) {
         func_80217B88_ovl_01(MENU_UNKE_PRESET_SKINS_MATCH);
         break;
       case MODE_ICON_SPEED_GOLF:
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_SPEED_GOLF;
         g_MenuScreen = MENU_SCREEN_UNK6;
@@ -1765,7 +1762,7 @@ void func_801F7D28_ovl_01(void) {
           return;
         }
 
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_UNK6;
         g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
@@ -1807,7 +1804,7 @@ void func_801F7D28_ovl_01(void) {
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_UNK9:
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_UNK1;
         g_MenuScreen = MENU_SCREEN_UNK6;
@@ -1840,7 +1837,7 @@ void func_801F7D28_ovl_01(void) {
           return;
         }
 
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_CLUB_SLOTS;
         g_MenuScreen = MENU_SCREEN_UNK6;
@@ -1894,7 +1891,7 @@ void func_801F7D28_ovl_01(void) {
 
   if (D_801323A0.modeSpin == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (--D_801323A0.modeChoice < 0) {
         D_801323A0.modeChoice = D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1;
       }
@@ -1907,7 +1904,7 @@ void func_801F7D28_ovl_01(void) {
         D_8022F8C8_ovl_01 = 0;
       }
     } else if (g_MenuRepeatButtons & R_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (++D_801323A0.modeChoice >
           D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1) {
         D_801323A0.modeChoice = 0;
@@ -2072,7 +2069,7 @@ void func_801F8BAC_ovl_01(void) {
   /* isDone is still TRUE, and the C-up test compares with it */
   if (D_801323A0.courseSpin == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (--D_801323A0.courseChoice < 0) {
         D_801323A0.courseChoice = courseCount - 1;
       }
@@ -2082,7 +2079,7 @@ void func_801F8BAC_ovl_01(void) {
         SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       }
     } else if (g_MenuRepeatButtons & R_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (++D_801323A0.courseChoice > courseCount - 1) {
         D_801323A0.courseChoice = 0;
       }
@@ -2094,7 +2091,7 @@ void func_801F8BAC_ovl_01(void) {
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
-        PlaySound(SOUND_UNK6A, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         D_8022BE88_ovl_01 = 1;
         D_8022BE89_ovl_01 = 1;
       } else {
@@ -2102,19 +2099,19 @@ void func_801F8BAC_ovl_01(void) {
       }
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
-      PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
       g_SkippedNines = 0;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
-      PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
       g_SkippedNines = BACK_NINE_SKIPPED;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
-      PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
       g_SkippedNines = FRONT_NINE_SKIPPED;
       StartLoadingChosenHole();
@@ -2328,29 +2325,29 @@ void func_801F93D8_ovl_01(void) {
   /* isDone is still TRUE, and the C-up test compares with it */
   if (g_MenuChoices.unk15 == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (--g_MenuChoices.unk13 < 0) {
         g_MenuChoices.unk13 = MINI_GOLF_RECORD_COUNT - 1;
       }
 
       g_MenuChoices.unk15 = MINI_GOLF_RECORD_SLIDE;
     } else if (g_MenuRepeatButtons & R_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (++g_MenuChoices.unk13 >= MINI_GOLF_RECORD_COUNT) {
         g_MenuChoices.unk13 = 0;
       }
 
       g_MenuChoices.unk15 = -MINI_GOLF_RECORD_SLIDE;
     } else if (g_MenuRepeatButtons & U_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_PREVIOUS;
     } else if (g_MenuRepeatButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_NEXT;
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
-        PlaySound(SOUND_UNK6A, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         D_8022BE88_ovl_01 = 1;
         D_8022BE89_ovl_01 = 1;
       } else {
@@ -2358,19 +2355,19 @@ void func_801F93D8_ovl_01(void) {
       }
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
-      PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
       g_SkippedNines = 0;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
-      PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
       g_SkippedNines = BACK_NINE_SKIPPED;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
-      PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
       g_SkippedNines = FRONT_NINE_SKIPPED;
       StartLoadingChosenHole();
@@ -2395,7 +2392,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F93D8_ovl_01);
 void func_801F9BCC_ovl_01(void) {
   if (IsHudAnimationDone() == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuScreen = MENU_SCREEN_EXIT;
       g_GameState.gameMode = GAME_MODE_STROKE;
       SaveOrContinueGameByMode(TRUE);
@@ -2442,7 +2439,7 @@ void func_801F9C58_ovl_01(void) {
           break;
       }
 
-      PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       return;
     }
 
@@ -2454,10 +2451,10 @@ void func_801F9C58_ovl_01(void) {
     }
 
     if (g_MenuRepeatButtons & U_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       g_MenuChoices.mainChoice--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       g_MenuChoices.mainChoice++;
     }
 
@@ -2499,7 +2496,7 @@ void func_801F9E38_ovl_01(void) {
           break;
       }
 
-      PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       return;
     }
 
@@ -2511,10 +2508,10 @@ void func_801F9E38_ovl_01(void) {
     }
 
     if (g_MenuRepeatButtons & U_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       g_MenuChoices.mainChoiceWithoutTransmit--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       g_MenuChoices.mainChoiceWithoutTransmit++;
     }
 
@@ -2562,7 +2559,7 @@ void func_801F9FF8_ovl_01(void) {
           break;
       }
 
-      PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       return;
     }
 
@@ -2579,10 +2576,10 @@ void func_801F9FF8_ovl_01(void) {
     }
 
     if (g_MenuRepeatButtons & U_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       g_MenuChoices.clubhouseChoice--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       g_MenuChoices.clubhouseChoice++;
     }
 
@@ -2604,10 +2601,6 @@ void func_801FA1B8_ovl_01(void) {
 }
 
 #define OPTIONS_TEXT_SLOT_COUNT 11
-#define SOUND_OPTION_TOGGLED 0x6F
-#define SOUND_ERASE_WINDOW_OPENED 0x4A
-#define SOUND_SAVE_DATA_ERASED 0x4B
-#define SOUND_ERASE_DECLINED 0x49
 #define ERASE_DECLINED_SOUND_CHANNEL 13
 /* MenuMemory.eraseChoice values, which left and right toggle */
 #define ERASE_CHOICE_YES 0
@@ -2662,14 +2655,13 @@ void func_801FA20C_ovl_01(void) {
 
     if (g_MenuPressedButtons & A_BUTTON) {
       if (memory->eraseChoice == ERASE_CHOICE_YES) {
-        PlaySound(SOUND_SAVE_DATA_ERASED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_CAPTION_MEET, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         ResetSaveData();
         memory->unk45 = 0;
         g_SoundOptionBits = 0;
         MusSetStereo(TRUE);
       } else {
-        PlaySound(SOUND_ERASE_DECLINED, ERASE_DECLINED_SOUND_CHANNEL,
-            MENU_VOLUME_SOFT);
+        PlaySound(SOUND_READY, ERASE_DECLINED_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       }
 
       CloseMenuWindow();
@@ -2677,19 +2669,19 @@ void func_801FA20C_ovl_01(void) {
         SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       }
     } else if (g_MenuPressedButtons & B_BUTTON) {
-      PlaySound(SOUND_ERASE_DECLINED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_READY, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       CloseMenuWindow();
       for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
         SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       }
     } else if (g_MenuRepeatButtons & L_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       memory->eraseChoice--;
       if (memory->eraseChoice < 0) {
         memory->eraseChoice = ERASE_CHOICE_COUNT - 1;
       }
     } else if (g_MenuRepeatButtons & R_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       memory->eraseChoice++;
       if (memory->eraseChoice >= ERASE_CHOICE_COUNT) {
         memory->eraseChoice = 0;
@@ -2702,8 +2694,7 @@ void func_801FA20C_ovl_01(void) {
       case OPTIONS_CHOICE_CAMERA:
         break;
       case OPTIONS_CHOICE_ERASE_SAVE_DATA:
-        PlaySound(
-            SOUND_ERASE_WINDOW_OPENED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_GO, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_IsEraseWindowUp = TRUE;
         memory->eraseChoice = ERASE_CHOICE_NO;
         ResetMenuWindow();
@@ -2741,10 +2732,10 @@ void func_801FA20C_ovl_01(void) {
   } else {
     if (g_MenuRepeatButtons & U_JPAD) {
       g_MenuChoices.optionsChoice--;
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     } else if (g_MenuRepeatButtons & D_JPAD) {
       g_MenuChoices.optionsChoice++;
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     }
 
     if (IsGameFlagSet(GAME_FLAG_UNK55)) {
@@ -3018,11 +3009,11 @@ void func_801FADBC_ovl_01(void) {
   }
 
   if ((g_MenuRepeatButtons & U_JPAD) && g_MenuChoices.unk1 > 0) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     g_MenuChoices.unk1--;
   } else if ((g_MenuRepeatButtons & D_JPAD) &&
       g_MenuChoices.unk1 < CADDY_COUNT - 1) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     g_MenuChoices.unk1++;
   }
 }
@@ -3056,7 +3047,7 @@ void LeaveMenuWithCourseWipe(void) {
 void func_801FAFEC_ovl_01(void) {
   GetSaveData();
   if (g_MenuPressedButtons & A_BUTTON) {
-    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     g_MenuScreen = MENU_SCREEN_EXIT;
     D_800FE334 = 0;
     g_GameState.unk31 = 2;
@@ -3076,10 +3067,10 @@ void func_801FAFEC_ovl_01(void) {
 
   if (g_MenuRepeatButtons & U_JPAD) {
     D_8022BE18_ovl_01--;
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
   } else if (g_MenuRepeatButtons & D_JPAD) {
     D_8022BE18_ovl_01++;
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
   }
 
   if (D_8022BE18_ovl_01 < 0) {
@@ -3100,7 +3091,7 @@ void func_801FB11C_ovl_01(void) {
 
 void func_801FB15C_ovl_01(void) {
   if (g_MenuPressedButtons & A_BUTTON) {
-    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     g_MenuScreen = MENU_SCREEN_TITLE;
   }
 }

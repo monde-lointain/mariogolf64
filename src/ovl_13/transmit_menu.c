@@ -413,9 +413,6 @@ enum ExperienceWriteResult {
 
 #define FIRST_GAME_BOY_GOLFER CHARACTER_KID
 
-#define SOUND_MENU_MOVE 0x5C
-#define SOUND_MENU_CONFIRM 0x5D
-#define SOUND_MENU_CANCEL 0x5F
 #define MENU_SOUND_VOLUME 127
 
 /* WriteExperienceToCartridge and WriteStatusToCartridge share one copy of this

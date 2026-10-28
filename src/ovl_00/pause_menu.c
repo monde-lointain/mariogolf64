@@ -351,8 +351,6 @@ enum PromptId {
   PROMPT_UNK8
 };
 
-#define SOUND_MENU_MOVE 0x5C
-#define SOUND_RING_SHOT_RETRY 0x8E
 #define RING_SHOT_RETRY_SOUND_CHANNEL 3
 #define RING_SHOT_RETRY_SOUND_VOLUME 0x7F
 
@@ -414,32 +412,32 @@ s32 UpdatePauseMenu(ControllerState* controller) {
             .action;
     switch (action) {
       case PAUSE_ACTION_UNK4:
-        PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
         OpenPrompt(PROMPT_UNK4);
         break;
       case PAUSE_ACTION_UNK14:
-        PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
         OpenPrompt(PROMPT_UNK7);
         break;
       case PAUSE_ACTION_UNK15:
-        PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
         OpenPrompt(PROMPT_UNK8);
         break;
       case PAUSE_ACTION_UNK3:
-        PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK8;
         g_SubModuleState = SUB_MODULE_SWAP_PENDING;
         g_PendingSubModuleId = MODULE_SAVE_MENU;
         break;
       case PAUSE_ACTION_UNK13:
-        PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK9;
         g_SubModuleState = SUB_MODULE_SWAP_PENDING;
@@ -447,7 +445,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         break;
       case PAUSE_ACTION_UNKD678:
         if (g_IsDebugEnabled || f_PauseMenuUnkD678) {
-          PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+          PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           RequestPauseMenu(0, -1);
           g_PauseScreen = PAUSE_SCREEN_UNK6;
           OpenPrompt(PROMPT_UNK3);
@@ -462,7 +460,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         break;
       case PAUSE_ACTION_FREE_LOOK:
         RequestPauseMenu(0, -1);
-        PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         StartFreeLook();
         break;
       case PAUSE_ACTION_RETRY_HOLE:
@@ -471,7 +469,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
               RING_SHOT_RETRY_SOUND_VOLUME);
         }
       case PAUSE_ACTION_UNK6:
-        PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         break;
     }
 
@@ -565,11 +563,11 @@ s32 UpdatePauseMenu(ControllerState* controller) {
     if (controller->repeatedButtons & L_JPAD) {
       hasLieChanged = TRUE;
       lie = (lie + PAUSE_LIE_COUNT - 1) % PAUSE_LIE_COUNT;
-      PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
     } else if (controller->repeatedButtons & R_JPAD) {
       hasLieChanged = TRUE;
       lie = (lie + 1) % PAUSE_LIE_COUNT;
-      PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
 
     if (hasLieChanged) {
@@ -687,11 +685,11 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         WriteSaveData();
       }
 
-      PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
   } else if (kind == PAUSE_OPTION_KIND_WEATHER) {
     if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
-      PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
       if (g_HoleSetup.conditions.isRaining == TRUE) {
         StopSound(RAIN_SOUND_CHANNEL);
         g_HoleSetup.conditions.isRaining = FALSE;

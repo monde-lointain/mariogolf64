@@ -11,7 +11,6 @@
 /* The message the fault event posts; nothing reads it */
 #define FAULT_MESSAGE 0x10
 
-#define SOUND_FAULT 0x30
 #define FAULT_SOUND_CHANNEL 11
 #define FAULT_SOUND_VOLUME 127
 
@@ -89,7 +88,7 @@ void RunFaultThread(void* arg) {
     osSyncPrintf("\n=> fltproc - got a flt msg.\n");
     f_FaultedThread = __osGetCurrFaultedThread();
     if (f_FaultedThread != NULL) {
-      PlaySound(SOUND_FAULT, FAULT_SOUND_CHANNEL, FAULT_SOUND_VOLUME);
+      PlaySound(SOUND_CONTACT_WARIO, FAULT_SOUND_CHANNEL, FAULT_SOUND_VOLUME);
       PrintFaultContext(f_FaultedThread);
     }
   }

@@ -153,11 +153,6 @@
 /* Players whose controllerIndex is this read the first controller */
 #define CONTROLLER_INDEX_UNK4 4
 
-#define SOUND_CLUB_SLOTS_TURN 0x22
-#define SOUND_REELS_START 0x64
-#define SOUND_REEL_STOP 0x21
-#define SOUND_REEL_CLICK 0x20
-#define SOUND_THREE_STARS 0x67
 #define REEL_CLICK_CHANNEL 13
 #define CLUB_SLOTS_SOUND_VOLUME 127
 /* Each stopping reel's sound pans this much further right */
@@ -367,7 +362,7 @@ void LoadClubSlots(void) {
   f_Slots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
   f_Slots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
   f_Slots->shadeVertices[6].v.cn[3] = SHADE_ALPHA;
-  PlaySound(SOUND_CLUB_SLOTS_TURN, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+  PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
 }
 
 void FreeClubSlots(void) {
@@ -478,7 +473,7 @@ s32 UpdateClubSlots(void) {
         f_StateTime = 0;
         f_ClubSlotsState = CLUB_SLOTS_SPEEDING;
         PlaySound(
-            SOUND_REELS_START, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+            SOUND_PROMPT_OPEN, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
       }
 
       break;
@@ -522,8 +517,8 @@ s32 UpdateClubSlots(void) {
           f_Slots->stoppedSymbols[0] = NO_SYMBOL;
           f_Slots->stoppedSymbols[1] = NO_SYMBOL;
           f_Slots->stoppedSymbols[2] = NO_SYMBOL;
-          PlaySound(SOUND_CLUB_SLOTS_TURN, g_NextSoundChannel,
-              CLUB_SLOTS_SOUND_VOLUME);
+          PlaySound(
+              SOUND_TALLY_DONE, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
         }
       }
 
@@ -650,7 +645,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   f_TickTime %= REEL_TICK_TIME;
   if (f_Slots->stoppedReelCount < REEL_COUNT && f_TickTime == 0) {
-    PlaySound(SOUND_REEL_CLICK, REEL_CLICK_CHANNEL, CLUB_SLOTS_SOUND_VOLUME);
+    PlaySound(SOUND_TICK, REEL_CLICK_CHANNEL, CLUB_SLOTS_SOUND_VOLUME);
   }
 
   rotation[0] = 0;

@@ -148,10 +148,6 @@
 /* The most shots that each kind of replay record keeps */
 #define HOLE_RECORD_MAX_STROKES 5
 #define RING_SHOT_RECORD_MAX_STROKES 6
-/* The swing meter's impact clicks */
-#define SOUND_IMPACT_ON_MARK 0x62
-#define SOUND_IMPACT_MISHIT 0x63
-#define SOUND_IMPACT_OFF_MARK 0x6E
 #define IMPACT_SOUND_VOLUME 0x64
 /* D_800FBDB8 while the contest movies play */
 #define CONTEST_MOVIES_PLAYING 60
@@ -225,11 +221,6 @@
 #define AIM_CAMERA_BUTTONS (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)
 #define AIM_CAMERA_RAISE_BUTTONS (U_CBUTTONS | R_CBUTTONS)
 #define AIM_CAMERA_LOWER_BUTTONS (D_CBUTTONS | L_CBUTTONS)
-#define SOUND_LOOK_DOWN_RANGE 0x5B
-#define SOUND_LOOK_AT_CUP 0x60
-#define SOUND_LOOK_BACK 0x61
-#define SOUND_AIM_CAMERA_RAISE 0x65
-#define SOUND_AIM_CAMERA_LOWER 0x64
 #define AIM_CAMERA_SOUND_VOLUME 0x50
 #define LOOK_SOUND_VOLUME 0x3F
 /* Frames that the impact point stays shown after Z or L is let go */
@@ -1396,12 +1387,11 @@ s32 UpdateAimControls(void) {
 
     if (g_TurnController.pressedButtons & AIM_CAMERA_RAISE_BUTTONS) {
       PlaySound(
-          SOUND_AIM_CAMERA_RAISE, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
+          SOUND_PROMPT_CLOSE, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
     }
 
     if (g_TurnController.pressedButtons & AIM_CAMERA_LOWER_BUTTONS) {
-      PlaySound(
-          SOUND_AIM_CAMERA_LOWER, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
+      PlaySound(SOUND_PROMPT_OPEN, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
     }
 
     if (D_800C3070 == 1) {
@@ -3052,7 +3042,7 @@ void UpdateTurns(void) {
    */
   void PlayImpactClickSound(void) {
     if (DoesImpactRumble()) {
-      PlaySound(SOUND_IMPACT_MISHIT, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
     } else if (D_80227150_ovl_00.unkC == 0) {
       PlaySound(SOUND_IMPACT_ON_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
     } else {
@@ -3810,7 +3800,7 @@ void UpdateTurns(void) {
           nextState = 2;
           ResetShotModeChange();
           PlaySound(
-              SOUND_IMPACT_MISHIT, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
+              SOUND_MENU_BLOCKED, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
           if (g_RoundHud.greenGridState != 0) {
             g_RoundHud.greenGridState = 1;
           }

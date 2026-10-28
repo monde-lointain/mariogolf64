@@ -493,7 +493,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_TotalFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat);
 
-#define SOUND_UNK61 0x61
 #define MATCH_SOUND_PAN 0x7F
 /* SetTextSlot messages */
 #define WINS_NEEDED_MESSAGE 1 /* Shows SetTextSlotValue's count */
@@ -616,7 +615,7 @@ void DrawMatchPage(Gfx** displayListHead) {
       g_Scorecard.content.isSuddenDeath == FALSE &&
       g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED &&
       (halvedCount & 1) == ((GetRoundHoleCount() - 1) & 1)) {
-    PlaySoundWithEffects(SOUND_UNK61, TALLY_SOUND_CHANNEL,
+    PlaySoundWithEffects(SOUND_LOOK_BACK, TALLY_SOUND_CHANNEL,
         SCORECARD_SOUND_VOLUME, 0, MATCH_SOUND_PAN);
   }
 

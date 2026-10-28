@@ -23,8 +23,6 @@
 #define WIPE_CLOSE_START_PROGRESS 12.0f
 #define WIPE_OPEN_START_PROGRESS -2.0f
 #define WIPE_OPEN_PROGRESS 20
-#define SOUND_WIPE_CLOSE 0x64
-#define SOUND_WIPE_OPEN 0x65
 #define WIPE_SOUND_CHANNEL 2
 #define WIPE_SOUND_VOLUME 0x28
 #define WIPE_SOUND_REVERB 0x14
@@ -139,10 +137,7 @@ enum HalfTurnState {
 #define PROMPT_TEXT_X 160
 #define PROMPT_TEXT_Y 108
 #define PROMPT_TEXT_SLOT 0
-#define SOUND_PROMPT_SAVE 0x3B
 #define SAVE_SOUND_CHANNEL 15
-#define SOUND_PROMPT_MOVE 0x5C
-#define SOUND_PROMPT_CLOSE 0x65
 #define PROMPT_CHOICE_YES 0
 #define PROMPT_FONT_SIZE 12
 #define PROMPT_GROWTH_FRAMES 4
@@ -172,7 +167,6 @@ enum HalfTurnState {
 #define CHOSEN_WIDTH_BOB 6.0f
 #define CHOSEN_HEIGHT_BOB 2.0f
 #define CHOICE_BOB_STEP_DEGREES 20
-#define SOUND_PROMPT_OPEN 0x64
 #define PROMPT_SOUND_VOLUME 0x64
 
 /* A yes-or-no question; the choices index results */
@@ -333,13 +327,13 @@ void StartWipe(s32 kind) {
     switch (kind) {
       case WIPE_CLOSING:
         f_WipeProgress = WIPE_CLOSE_START_PROGRESS;
-        PlaySoundWithEffects(SOUND_WIPE_CLOSE, WIPE_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_PROMPT_OPEN, WIPE_SOUND_CHANNEL,
             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
         break;
       case WIPE_OPENING:
       case WIPE_OPENING_FAST:
         f_WipeProgress = WIPE_OPEN_START_PROGRESS;
-        PlaySoundWithEffects(SOUND_WIPE_OPEN, WIPE_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_PROMPT_CLOSE, WIPE_SOUND_CHANNEL,
             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
         break;
     }
@@ -560,9 +554,9 @@ s32 UpdatePrompt(ControllerState* controller) {
       f_PromptState = PROMPT_STATE_CHOSEN;
       if (prompt->results[f_PromptChoice] >= 0 &&
           prompt->results[f_PromptChoice] < SAVING_RESULT_COUNT) {
-        PlaySound(SOUND_PROMPT_SAVE, SAVE_SOUND_CHANNEL, PROMPT_SOUND_VOLUME);
+        PlaySound(SOUND_SAVED, SAVE_SOUND_CHANNEL, PROMPT_SOUND_VOLUME);
       } else {
-        PlaySound(SOUND_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
       }
 
       return NO_PROMPT_RESULT;
@@ -571,13 +565,13 @@ s32 UpdatePrompt(ControllerState* controller) {
     if (controller->pressedButtons == B_BUTTON) {
       f_PromptChoice = PROMPT_CHOICE_NO;
       f_PromptState = PROMPT_STATE_CHOSEN;
-      PlaySound(SOUND_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
       return NO_PROMPT_RESULT;
     }
 
     if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
       f_PromptChoice ^= 1;
-      PlaySound(SOUND_PROMPT_MOVE, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
       return NO_PROMPT_RESULT;
     }
   } else if (f_PromptState == PROMPT_STATE_CHOSEN) {
@@ -820,7 +814,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
       }
 
       if (f_HalfTurnTimer == HALF_TURN_SHOW_SOUND_RADIUS) {
-        PlaySoundWithEffects(SOUND_WIPE_OPEN, WIPE_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_PROMPT_CLOSE, WIPE_SOUND_CHANNEL,
             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
       }
     } else if (f_HalfTurnTimer > -HALF_TURN_WAIT_FRAMES) {
@@ -841,7 +835,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
       }
 
       if (f_HalfTurnTimer == HALF_TURN_HIDE_SOUND_RADIUS) {
-        PlaySoundWithEffects(SOUND_WIPE_CLOSE, WIPE_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_PROMPT_OPEN, WIPE_SOUND_CHANNEL,
             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
       }
     } else {

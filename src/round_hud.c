@@ -348,8 +348,6 @@ extern Vtx f_LandingPanelVertices[4];
  * contact styles.
  */
 #define SHOT_EFFECT_TIME_OFF (-1.0f)
-#define SOUND_LONG_SHOT 0x70
-#define SOUND_LONG_SHOT_HEAVY 0x71
 #define LONG_SHOT_SOUND_CHANNEL 14
 #define LONG_SHOT_SOUND_VOLUME 0x40
 #define LONG_SHOT_HEAVY_SOUND_VOLUME 0x60

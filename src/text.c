@@ -92,7 +92,6 @@ typedef struct MessageTable {
 /* With TEXT_FLAG_WIDE_SPACING, the large font advances by this rather than its
  * size */
 #define WIDE_LARGE_FONT_ADVANCE 14
-#define SOUND_TEXT_TYPING 0x6C
 #define TYPING_SOUND_CHANNEL 2
 #define TYPING_SOUND_VOLUME 64
 #define TYPING_SOUND_INTERVAL 3 /* Codes shown between sounds */

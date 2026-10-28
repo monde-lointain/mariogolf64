@@ -48,7 +48,6 @@ enum PlanksState {
   PLANKS_OPENING
 };
 
-#define SOUND_MENU_MOVE 0x5C
 #define MENU_SOUND_CHANNEL 15
 #define MENU_SOUND_VOLUME 127
 

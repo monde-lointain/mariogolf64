@@ -56,8 +56,6 @@ enum UnlockNoticeKind {
 #define RESULTS_DIGIT_WIDTH 8
 #define RESULTS_DIGIT_HEIGHT 12
 
-#define SOUND_TALLY_TICK 0x20
-#define SOUND_TALLY_DONE 0x22
 #define TALLY_DONE_SOUND_VOLUME 127
 /* f_TallySpeed while A is held */
 #define FAST_TALLY_SPEED 10
@@ -900,7 +898,7 @@ void StartPortraitAnimation(s32 animation, s32 playerIndex) {
 void PlayTallySound(void) {
   f_TallySoundCount++;
   if (f_TallySpeed != 1 || !(f_TallySoundCount & 3)) {
-    PlaySound(SOUND_TALLY_TICK, g_NextSoundChannel, 0x7F);
+    PlaySound(SOUND_TICK, g_NextSoundChannel, 0x7F);
   }
 }
 
@@ -2135,7 +2133,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawResultsBanner);
 #define TOURNAMENT_STEP_SLIDING_OUT_POINTS 9
 #define TOURNAMENT_STEP_WAITING 10
 #define TOURNAMENT_STEP_SHOWN 11
-#define SOUND_NEW_BEST_SCORE 0x9C
 #define NEW_BEST_SCORE_SOUND_CHANNEL 3
 #define CHARACTER_SOUND_WIN 0x1C
 #define WIN_SOUND_PAN 32
@@ -2184,8 +2181,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           if (controller->buttons & A_BUTTON) {
             f_IsAwaitingConfirm = FALSE;
             SetResultsBanner(0, 1);
-            PlaySound(
-                SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                CONFIRM_SOUND_VOLUME);
             f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
           }
 
@@ -2245,8 +2242,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           break;
         case TOURNAMENT_STEP_PRIZE_TALLIED:
           if (controller->buttons & A_BUTTON) {
-            PlaySound(
-                SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                CONFIRM_SOUND_VOLUME);
             f_TallySpeed = 1;
             f_IsAwaitingConfirm = FALSE;
             f_ResultsUnk78 = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
@@ -2315,8 +2312,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           break;
         case TOURNAMENT_STEP_POINTS_TALLIED:
           if (controller->buttons & A_BUTTON) {
-            PlaySound(
-                SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                CONFIRM_SOUND_VOLUME);
             SetResultsBanner(4, 3);
             f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
           }
@@ -2332,8 +2329,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
         case TOURNAMENT_STEP_WAITING:
           f_IsAwaitingConfirm = TRUE;
           if (controller->buttons & A_BUTTON) {
-            PlaySound(
-                SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                CONFIRM_SOUND_VOLUME);
             return TRUE;
           }
 
@@ -2386,7 +2383,8 @@ s32 ShowScorePassword(ControllerState* controller) {
         f_IsAwaitingConfirm = FALSE;
         f_ResultsUnk78 = SCORE_PASSWORD_STEP_ASKING;
         OpenPrompt(PROMPT_SCORE_PASSWORD);
-        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+        PlaySound(
+            SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
       }
 
       break;
@@ -2462,8 +2460,8 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
           if (controller->buttons & A_BUTTON) {
             f_IsAwaitingConfirm = FALSE;
             f_ResultsUnk78 = POINTS_STEP_START_TALLY;
-            PlaySound(
-                SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                CONFIRM_SOUND_VOLUME);
           }
 
           break;
@@ -2545,8 +2543,8 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
         case POINTS_STEP_WAITING:
           f_IsAwaitingConfirm = TRUE;
           if (controller->pressedButtons & A_BUTTON) {
-            PlaySound(
-                SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                CONFIRM_SOUND_VOLUME);
             f_IsAwaitingConfirm = FALSE;
             return TRUE;
           }
@@ -2620,8 +2618,8 @@ s32 UpdateMatchResults(ControllerState* controller) {
           if (controller->buttons & A_BUTTON) {
             f_IsAwaitingConfirm = FALSE;
             f_ResultsUnk78 = MATCH_STEP_START_TALLY;
-            PlaySound(
-                SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                CONFIRM_SOUND_VOLUME);
           }
 
           break;
@@ -2781,8 +2779,8 @@ s32 UpdateMatchResults(ControllerState* controller) {
           }
 
           if (controller->buttons & A_BUTTON) {
-            PlaySound(
-                SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                CONFIRM_SOUND_VOLUME);
             f_IsAwaitingConfirm = FALSE;
             return TRUE;
           }

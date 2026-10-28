@@ -205,7 +205,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define MOVIE_IMAGE_PIXELS_OFFSET 0x208
 #define MOVIE_IMAGE_STRIP_HEIGHT 6
 #define SHRINKING_IMAGE_SOUND_DRAW 26
-#define SOUND_SHRINKING_IMAGE 0x43
 #define SHRINKING_IMAGE_SOUND_CHANNEL 13
 #define SHRINKING_IMAGE_SOUND_VOLUME 63
 #define SHRINKING_IMAGE_DRAW_COUNT 90
@@ -219,9 +218,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define CONTACT_SOUND_CHANNEL 2
 #define CONTACT_STYLE_SOUND_CHANNEL 15
 #define CONTACT_SOUND_VOLUME 127
-#define SOUND_CONTACT_MARIO 0x2E /* Also Bowser's */
-#define SOUND_CONTACT_HEAVY_HITTER 0x2F
-#define SOUND_CONTACT_WARIO 0x30
 #define CONTACT_PUTT_Y -2
 /* The banner that shows "+N", which BANNER_STROKES_OVER_PAR + N starts */
 #define BANNER_OVER_PAR_NUMBER (BANNER_STROKES_OVER_PAR + 1)
@@ -265,13 +261,11 @@ extern Vtx f_FlipMessageBoardVertices[4];
 /* The flag swishes as it swings to each side */
 #define TOAD_SWING_LEFT_FRAME 8
 #define TOAD_SWING_RIGHT_FRAME 2
-#define SOUND_FLAG_SWISH 0x1F
 #define FLAG_SWISH_SOUND_CHANNEL 15
 #define FLAG_SWISH_SOUND_VOLUME 127
 #define FLAG_SWISH_LEFT_PAN 16
 #define FLAG_SWISH_RIGHT_PAN 239
 #define FLAG_SWISH_PITCH 12.0f
-#define SOUND_OUT_OF_BOUNDS 0x77
 #define OUT_OF_BOUNDS_SOUND_DRAW 16
 #define OUT_OF_BOUNDS_SOUND_CHANNEL 13
 /* Toad draws in the inset view, kept off its frame */
@@ -304,8 +298,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define LAKITU_RED_LIGHT_DRAW 50
 #define LAKITU_SECOND_RED_LIGHT_DRAW 80
 #define LAKITU_GO_LIGHT_DRAW 110
-#define SOUND_START_LIGHT_RED 0x23
-#define SOUND_START_LIGHT_GO 0x24
 #define START_LIGHT_SOUND_VOLUME 127
 #define ASSET_MONTY_MOLE_MOVIE_PALETTE 0x914
 #define ASSET_GOOMBA_MOVIE_PALETTE 0x91F
@@ -327,7 +319,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define MOVIE_SOUND_REVERB 10
 #define MOVIE_SOUND_PAN 127
 
-#define SOUND_MONTY_MOLE 0x2A
 #define MONTY_MOLE_FRAME_COUNT 17
 /* Each frame is drawn in strips, as a frame is too big to load at once */
 #define MONTY_MOLE_WIDTH 108
@@ -337,7 +328,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define MONTY_MOLE_X 106
 #define MONTY_MOLE_Y 62
 
-#define SOUND_GOOMBA 0x2A
 #define GOOMBA_FRAME_COUNT 11
 #define GOOMBA_WIDTH 80
 #define GOOMBA_STRIP_HEIGHT 25
@@ -573,7 +563,6 @@ enum BannerAnimation {
 
 #define BANNER_LAST_FRAME 200
 #define BANNER_END_FRAME 60
-#define SOUND_BANNER 0x44
 #define BANNER_SOUND_FRAME 10
 #define BANNER_SOUND_CHANNEL 13
 #define BANNER_SOUND_VOLUME 63
@@ -1220,8 +1209,6 @@ void DrawMovie(Gfx** displayListHead) {
  * CONTEST_MEET_DRAW */
 #define WINNER_FIRST_FRAME 1
 #define WINNER_LAST_FRAME 32
-#define SOUND_WINNER_APPEAR 0x49
-#define SOUND_WINNER_VANISH 0x4A
 #define WINNER_SOUND_VOLUME 63
 #define WINNER_SOUND_REVERB 30
 #define WINNER_SOUND_PAN 127
@@ -1383,13 +1370,13 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     }
 
     if (frame == WINNER_FIRST_FRAME) {
-      PlaySoundWithEffects(SOUND_WINNER_APPEAR, g_NextSoundChannel,
-          WINNER_SOUND_VOLUME, WINNER_SOUND_REVERB, WINNER_SOUND_PAN);
+      PlaySoundWithEffects(SOUND_READY, g_NextSoundChannel, WINNER_SOUND_VOLUME,
+          WINNER_SOUND_REVERB, WINNER_SOUND_PAN);
     }
 
     if (frame == WINNER_SHRINK_FRAME) {
-      PlaySoundWithEffects(SOUND_WINNER_VANISH, g_NextSoundChannel,
-          WINNER_SOUND_VOLUME, WINNER_SOUND_REVERB, WINNER_SOUND_PAN);
+      PlaySoundWithEffects(SOUND_GO, g_NextSoundChannel, WINNER_SOUND_VOLUME,
+          WINNER_SOUND_REVERB, WINNER_SOUND_PAN);
     }
 
     if (frame >= WINNER_SHRINK_FRAME) {
@@ -1430,8 +1417,6 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #endif
-
-#define SOUND_CAPTION_MEET 0x4B
 
 /* The record distance shows under the caption once it has met at the centre */
 #define DRIVE_RECORD_DISTANCE_DRAW 26
@@ -1665,8 +1650,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawPuttCaption);
  * grows and fades. Each word is a textured quad, drawn in strips whose
  * texture coordinates are patched into the shared vertices.
  */
-#define SOUND_READY 0x49
-#define SOUND_GO 0x4A
 #define READY_GO_SOUND_VOLUME 63
 #define READY_GO_SOUND_REVERB 30
 #define READY_SOUND_DRAW 1
@@ -1927,8 +1910,8 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
   }
 
   if (f_MovieDrawCount == 1) {
-    PlaySoundWithEffects(SOUND_MONTY_MOLE, MOVIE_SOUND_CHANNEL,
-        MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB, MOVIE_SOUND_PAN);
+    PlaySoundWithEffects(SOUND_GOOMBA, MOVIE_SOUND_CHANNEL, MOVIE_SOUND_VOLUME,
+        MOVIE_SOUND_REVERB, MOVIE_SOUND_PAN);
   }
 
   gSPDisplayList(gfx++, f_MovieSetupDisplayList);
@@ -2796,7 +2779,6 @@ extern s32 f_WindStreakHead;
 #define WIND_STREAK_DEPTH -300.0f
 #define FLY_GUY_IMAGE_WIDTH 32
 #define FLY_GUY_IMAGE_HEIGHT 32
-#define SOUND_WIND_FLY_GUY 0x28
 #define WIND_FLY_GUY_SOUND_CHANNEL 10
 #define WIND_FLY_GUY_SOUND_VOLUME 63
 

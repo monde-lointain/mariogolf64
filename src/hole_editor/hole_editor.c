@@ -1139,7 +1139,7 @@ void func_80400FBC_hole_editor(void) {
       g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
               g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z]);
-      PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
               g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z])
@@ -1160,7 +1160,7 @@ void func_80400FBC_hole_editor(void) {
       g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
               g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z]);
-      PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
               g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z])
@@ -1232,7 +1232,7 @@ void func_80400FBC_hole_editor(void) {
       g_HolePoints.unk60[f_MesonPointIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.unk60[f_MesonPointIndex][AXIS_X],
               g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z]);
-      PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.unk60[f_MesonPointIndex][AXIS_X],
               g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z])
@@ -1288,7 +1288,7 @@ void func_80400FBC_hole_editor(void) {
       g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
               g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z]);
-      PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
               g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z])
@@ -2256,7 +2256,7 @@ void func_804045C0_hole_editor(void) {
   s32 height;
   s32 i;
 
-  PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+  PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
   for (i = 0; i < BILLBOARD_COUNT; i++) {
     if (!g_Billboards[i].isNearCourseEdge) {
       g_Billboards[i].y =

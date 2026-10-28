@@ -298,7 +298,7 @@ void func_8021F79C_ovl_01(void) {
       if (g_MenuPressedButtons & A_BUTTON) {
         if (memory->ringShotRow == RING_SHOT_REPLAY_ROW &&
             func_80220DF8_ovl_01() != -1) {
-          PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+          PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           index = memory->ringShotReplaySlot;
           memory->holeIndex = save->unk1DF0[D_8023B684_ovl_01[index]].unk35;
           memory->courseIndex = save->unk1DF0[D_8023B684_ovl_01[index]].unk34;
@@ -320,7 +320,7 @@ void func_8021F79C_ovl_01(void) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
 
-        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
           memory->ringShotRow = openCourseCount - 1;
           return;
@@ -335,7 +335,7 @@ void func_8021F79C_ovl_01(void) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
 
-        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         memory->ringShotRow++;
         if (memory->ringShotRow > RING_SHOT_REPLAY_ROW) {
           memory->ringShotRow = 0;
@@ -346,7 +346,7 @@ void func_8021F79C_ovl_01(void) {
           memory->ringShotRow = RING_SHOT_REPLAY_ROW;
         }
       } else if (g_MenuRepeatButtons & U_JPAD) {
-        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         index = memory->ringShotRow;
         if (index == RING_SHOT_REPLAY_ROW) {
           if (memory->ringShotReplaySlot > 0) {
@@ -363,7 +363,7 @@ void func_8021F79C_ovl_01(void) {
           memory->ringShotFirstCharacters[index]--;
         }
       } else if (g_MenuRepeatButtons & D_JPAD) {
-        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         index = memory->ringShotRow;
         if (index == RING_SHOT_REPLAY_ROW) {
           if (memory->ringShotReplaySlot < SAVE_MENU_SLOT_COUNT - 1) {
@@ -1310,7 +1310,7 @@ void func_8022209C_ovl_01(void) {
         }
 
         FreeAllCharacterSlots();
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         LoadWipeShape(
             save->savedGames[memory->savedGameIndex].state.courseIndex);
         StartWipe(WIPE_CLOSING);
@@ -1354,7 +1354,7 @@ void func_8022209C_ovl_01(void) {
     } else if (g_MenuPressedButtons & A_BUTTON) {
       if (memory->savedGameTurn != 0) {
         PlaySound(D_80230B50_ovl_01[memory->savedGameIndex] != -1
-                ? SOUND_CONFIRM
+                ? SOUND_MENU_CONFIRM
                 : SOUND_MENU_BLOCKED,
             MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         memory->savedGameTurn = 0;
@@ -1362,7 +1362,7 @@ void func_8022209C_ovl_01(void) {
       }
 
       if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
-        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         if (!D_80230B4C_ovl_01) {
           D_80230B4C_ovl_01 = TRUE;
           if (D_80230B4A_ovl_01 == 1) {
@@ -1451,7 +1451,7 @@ void func_8022209C_ovl_01(void) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
 
-        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         memory->savedGameIndex--;
         if (memory->savedGameIndex < 0) {
           memory->savedGameIndex = SAVED_GAME_COUNT - 1;
@@ -1466,7 +1466,7 @@ void func_8022209C_ovl_01(void) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
 
-        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
         memory->savedGameIndex++;
         if (memory->savedGameIndex >= SAVED_GAME_COUNT) {
           memory->savedGameIndex = 0;

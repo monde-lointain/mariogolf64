@@ -42,11 +42,8 @@ extern s32 g_MenuScreen;
 extern s32 g_MenuRepeatButtons;
 extern s32 g_MenuPressedButtons;
 
-/* The sounds of the menus, and how loud each plays */
+/* The menus' sound channel, and how loud each of their sounds plays */
 #define MENU_SOUND_CHANNEL 15
-#define SOUND_MENU_CURSOR 0x5C
-#define SOUND_MENU_CANCEL 0x5F
-#define SOUND_MENU_START 0x50
 #define MENU_VOLUME_SOFT 80
 #define MENU_VOLUME_MEDIUM 100
 #define MENU_VOLUME_FULL 127

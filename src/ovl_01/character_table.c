@@ -239,7 +239,7 @@ void func_80215B84_ovl_01(void) {
     column = memory->tableColumn;
     row = memory->tableRow;
     if (g_MenuRepeatButtons & R_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (column == TABLE_SHOWN_COLUMN_COUNT - 1 &&
           firstColumn < TABLE_COLUMN_COUNT - TABLE_SHOWN_COLUMN_COUNT) {
         memory->tableFirstColumn++;
@@ -250,7 +250,7 @@ void func_80215B84_ovl_01(void) {
         memory->tableColumn = TABLE_SHOWN_COLUMN_COUNT - 1;
       }
     } else if (g_MenuRepeatButtons & L_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (column == 0 && firstColumn > 0) {
         memory->tableFirstColumn--;
       }
@@ -260,7 +260,7 @@ void func_80215B84_ovl_01(void) {
         memory->tableColumn = 0;
       }
     } else if (g_MenuRepeatButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (row == TABLE_SHOWN_ROW_COUNT - 1 &&
           firstRow < TABLE_ROW_COUNT - TABLE_SHOWN_ROW_COUNT) {
         memory->tableFirstRow++;
@@ -271,7 +271,7 @@ void func_80215B84_ovl_01(void) {
         memory->tableRow = TABLE_SHOWN_ROW_COUNT - 1;
       }
     } else if (g_MenuRepeatButtons & U_JPAD) {
-      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (row == 0 && firstRow > 0) {
         memory->tableFirstRow--;
       }

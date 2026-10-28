@@ -151,9 +151,6 @@ enum ClubCodePhase {
 #define CODE_DEBUG_TEXT_COLUMN 2
 #define CODE_DEBUG_TEXT_FIRST_ROW 3
 
-#define SOUND_CODE_ACCEPTED 0x4A
-#define SOUND_CODE_INCORRECT 0x63
-
 /* What func_8022B46C reports after a key is pressed */
 enum CodeKeyResult {
   CODE_KEY_RESULT_TOO_SHORT = -1,
@@ -219,8 +216,6 @@ extern s32 D_80105DCC;
 /* The window's choice in D_80230F80, which left and right toggle */
 #define CLUB_CHOICE_YES 0
 #define CLUB_CHOICE_NO 1
-#define SOUND_ENTER_TOURNAMENT 0x54
-#define SOUND_DECLINE_TOURNAMENT 0x49
 
 s32 IsNintendoClubTournament(void);
 s32 GetClubTournamentCourseTitleMessage(void);
@@ -1133,7 +1128,7 @@ void func_80228C00_ovl_01(void) {
   }
 
   if (g_MenuRepeatButtons & A_BUTTON) {
-    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     result = func_8022B46C_ovl_01();
     if (result == CODE_KEY_RESULT_DONE) {
       if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
@@ -1156,7 +1151,7 @@ void func_80228C00_ovl_01(void) {
         D_80105DCC = g_TournamentCode[2] + 1;
         osSyncPrintf("bkTour %x, %x, %x\n", g_TournamentCode[0],
             g_TournamentCode[1], g_TournamentCode[2]);
-        PlaySound(SOUND_CODE_ACCEPTED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_GO, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         ResetMenuWindow();
         func_80226904_ovl_01(GetClubTournamentCourse());
         D_80230F70_ovl_01 = CLUB_CODE_PHASE_DETAILS;
@@ -1171,11 +1166,11 @@ void func_80228C00_ovl_01(void) {
         return;
       }
 
-      PlaySound(SOUND_CODE_INCORRECT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_80230F70_ovl_01 = CLUB_CODE_PHASE_INCORRECT;
       D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
     } else if (result == CODE_KEY_RESULT_TOO_SHORT) {
-      PlaySound(SOUND_CODE_INCORRECT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_80230F70_ovl_01 = CLUB_CODE_PHASE_INCORRECT;
       D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
     }
@@ -1194,7 +1189,7 @@ void func_80228C00_ovl_01(void) {
       }
     }
   } else if (g_MenuRepeatButtons & U_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     memory->codeKeyRow--;
     if (memory->codeKeyRow < 0) {
       memory->codeKeyRow = CODE_KEYBOARD_ROW_COUNT - 1;
@@ -1205,7 +1200,7 @@ void func_80228C00_ovl_01(void) {
       memory->codeKeyRow = CODE_KEYBOARD_END_ROW - 1;
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (D_80230F84_ovl_01[++memory->codeKeyRow][memory->codeKeyColumn] ==
         CODE_KEY_BLANK) {
       memory->codeKeyRow = 0;
@@ -1215,7 +1210,7 @@ void func_80228C00_ovl_01(void) {
       memory->codeKeyRow = 0;
     }
   } else if (g_MenuRepeatButtons & L_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (D_80230F84_ovl_01[memory->codeKeyRow][--memory->codeKeyColumn] ==
         CODE_KEY_BLANK) {
       memory->codeKeyColumn = CODE_KEYBOARD_FIRST_BLANK_COLUMN - 1;
@@ -1225,7 +1220,7 @@ void func_80228C00_ovl_01(void) {
       memory->codeKeyColumn = CODE_KEYBOARD_COLUMN_COUNT - 1;
     }
   } else if (g_MenuRepeatButtons & R_JPAD) {
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (D_80230F84_ovl_01[memory->codeKeyRow][++memory->codeKeyColumn] ==
         CODE_KEY_BLANK) {
       memory->codeKeyColumn = CODE_KEYBOARD_BACK_COLUMN;
@@ -1288,7 +1283,7 @@ void func_80229278_ovl_01(void) {
 
   pressedButtons = g_MenuRepeatButtons;
   if (pressedButtons & A_BUTTON) {
-    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     if (D_80230F80_ovl_01 == CLUB_CHOICE_YES) {
       PlaySound(SOUND_ENTER_TOURNAMENT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_GameState.isClubTournament = TRUE;
@@ -1330,7 +1325,7 @@ void func_80229278_ovl_01(void) {
         SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
       }
     } else {
-      PlaySound(SOUND_DECLINE_TOURNAMENT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      PlaySound(SOUND_READY, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       func_80228B60_ovl_01();
       CloseMenuWindow();
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
@@ -1347,7 +1342,7 @@ void func_80229278_ovl_01(void) {
   } else if ((pressedButtons & L_JPAD) || ((u16)pressedButtons & R_JPAD)) {
     /* The cast above stops the compiler from merging the two tests, which the
      * original keeps apart */
-    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     D_80230F80_ovl_01 ^= 1;
   }
 }
