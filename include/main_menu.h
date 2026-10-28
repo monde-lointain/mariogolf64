@@ -98,6 +98,8 @@ extern char g_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH];
 
 /* The mini-golf course select's records, of three courses each */
 #define MINI_GOLF_RECORD_COUNT 2
+/* The mini-golf disc's images in each of D_801049A0's buffers */
+#define MINI_GOLF_DISC_IMAGE_COUNT 2
 
 /* The chosen label grows two pixels a frame until it passes the limit, then
  * shrinks until it passes 0 */
