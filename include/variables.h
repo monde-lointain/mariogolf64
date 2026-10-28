@@ -100,8 +100,7 @@ typedef struct Unk800C5F34 {
   /* 0x14 */ s16 unk14;
   /* 0x16 */ s16 sunTexelStep;
   /* 0x18 */ f32 maxSunGlare; /* The most that DrawLensFlare's glare grows to */
-  /* 0x1C */ u8
-      imageKind; /* Which images InitSkyColors loads into g_SkyImage */
+  /* 0x1C */ u8 imageKind; /* A SKY_IMAGE_KIND_* value */
 } Unk800C5F34;
 
 /* Images that InitSkyColors loads and recolors with the sky's colors */

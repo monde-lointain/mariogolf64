@@ -40,6 +40,15 @@
 #define GAME_FLAG_UNK7 0x07
 #define TITLE_FRAMEBUFFER_COUNT 2
 
+/* Unk800C5F34.imageKind values: which images InitSkyColors loads */
+enum SkyImageKind {
+  SKY_IMAGE_KIND_0, /* ASSET_SKY_IMAGE_0 */
+  SKY_IMAGE_KIND_1, /* ASSET_SKY_IMAGE_1 */
+  /* The two halves of ASSET_SKY_IMAGE_2_*, which DrawSky draws as
+   * two textures */
+  SKY_IMAGE_KIND_TWO_TEXTURES
+};
+
 /*
  * The sun's glare grows while the sun is on the screen with nothing in front
  * of it, flaring past SUN_GLARE_FLARE_STRENGTH before settling at full
@@ -77,8 +86,6 @@ extern s32 f_SkyBlendStepCount;
  */
 #define SKY_PERCENT_TO_STEPS (SKY_BLEND_STEP_COUNT / 100)
 #define PERCENT_COUNT 100
-#define SKY_IMAGE_KIND_0 0
-#define SKY_IMAGE_KIND_1 1
 /* The course sky image is paletted, and InitSkyColors recolors its palette */
 #define PALETTE_START (IMAGE_HEADER_SIZE / PALETTE_COLOR_SIZE)
 #define SKY_IMAGE_CHANNEL_MAX 31
@@ -1236,7 +1243,6 @@ void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {
 #define SUN_HORIZON_Y 112.0f
 #define SUN_CULL_MARGIN 64.0f
 #define SUN_DEPTH 0x7FF7
-#define SUN_IMAGE_KIND_TWO_TEXTURES 2
 #define SUN_IMAGE_SIZE 32
 #define SUN_GLOW_IMAGE_SIZE 64
 #define SUN_GLOW_MASK 6
@@ -1382,7 +1388,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
       }
 
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-      if (colors->unk14->imageKind == SUN_IMAGE_KIND_TWO_TEXTURES) {
+      if (colors->unk14->imageKind == SKY_IMAGE_KIND_TWO_TEXTURES) {
         gDPPipeSync(gfx++);
         gDPSetAlphaDither(gfx++, G_AD_PATTERN);
         gDPPipeSync(gfx++);
