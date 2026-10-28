@@ -19,6 +19,15 @@
 #define SNAPSHOT_EYE 1
 #define SNAPSHOT_POINT_COUNT 2
 
+/* What the first controller's stick and C buttons change */
+enum EditorChoice {
+  EDITOR_CHOICE_SLIDE, /* Both points */
+  EDITOR_CHOICE_TARGET, /* The look-at point */
+  EDITOR_CHOICE_POSITION, /* The eye */
+  EDITOR_CHOICE_FIELD_OF_VIEW, /* And the look-at marker's size */
+  EDITOR_CHOICE_COUNT
+};
+
 /* The editor's menu choice, an EditorChoice */
 extern s32 f_EditorChoice;
 extern Boolean f_IsSnapshotSaved[SNAPSHOT_COUNT];
@@ -844,15 +853,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
 #define SNAPSHOT_SAVE_SOUND 0x62
 /* Also for deleting a snapshot */
 #define SNAPSHOT_LOAD_SOUND 0x46
-
-/* What the first controller's stick and C buttons change */
-enum EditorChoice {
-  EDITOR_CHOICE_SLIDE, /* Both points */
-  EDITOR_CHOICE_TARGET, /* The look-at point */
-  EDITOR_CHOICE_POSITION, /* The eye */
-  EDITOR_CHOICE_FIELD_OF_VIEW, /* And the look-at marker's size */
-  EDITOR_CHOICE_COUNT
-};
 
 /* The snapshots are shown as two rows of this many */
 #define SNAPSHOT_ROW_LENGTH 16
