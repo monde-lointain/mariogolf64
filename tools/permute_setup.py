@@ -17,14 +17,17 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PERMUTER_DIR = os.environ.get(
-    "PERMUTER_DIR", os.path.expanduser("~/src/decomp-permuter")
+import fncompare
+
+ROOT = fncompare.ROOT
+PERMUTER_DIR = Path(
+    os.environ.get("PERMUTER_DIR", Path("~/src/decomp-permuter").expanduser())
 )
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import fncompare  # noqa: E402
+OUT_DIR_ARGUMENT_COUNT = 5
+# compile.sh has to be executable for the permuter to run it
+SCRIPT_MODE = 0o755
 
 COMPILE_SH = """#!/bin/bash
 # Invoked by the permuter as: compile.sh INPUT.c -o OUTPUT.o
@@ -32,18 +35,10 @@ COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
 """
 
 
-def main():
-    c_path, asm_path, function = sys.argv[1:4]
-    out_dir = (
-        sys.argv[4]
-        if len(sys.argv) > 4
-        else os.path.join(ROOT, "build", "permuter", function)
-    )
-    os.makedirs(out_dir, exist_ok=True)
-
+def write_base(c_path: str, function: str, base_path: Path) -> None:
+    """Write C_PATH preprocessed, with every function but FUNCTION stripped."""
     # Preprocess without KMC's cpp quirks; INCLUDE_ASM expands to nothing
     # under PERMUTER
-    base_path = os.path.join(out_dir, "base.c")
     preprocessed = subprocess.run(
         [
             "mips-linux-gnu-cpp",
@@ -62,40 +57,37 @@ def main():
         capture_output=True,
         text=True,
     ).stdout
-    with open(base_path, "w") as base_file:
-        base_file.write(preprocessed)
-    subprocess.run(
+    _ = base_path.write_text(preprocessed)
+    _ = subprocess.run(
         [
             sys.executable,
-            os.path.join(PERMUTER_DIR, "strip_other_fns.py"),
-            base_path,
+            str(PERMUTER_DIR / "strip_other_fns.py"),
+            str(base_path),
             function,
         ],
         check=True,
     )
     # Nothing calls the function once the others are stripped, so a static
     # one would not be emitted at all
-    with open(base_path) as base_file:
-        base = base_file.read()
     base = re.sub(
-        r"^static\s+(.*\b%s\s*\()" % re.escape(function),
+        rf"^static\s+(.*\b{re.escape(function)}\s*\()",
         r"\1",
-        base,
+        base_path.read_text(),
         flags=re.MULTILINE,
     )
-    with open(base_path, "w") as base_file:
-        base_file.write(base)
+    _ = base_path.write_text(base)
 
-    target_s = os.path.join(out_dir, "target.s")
+
+def write_target(asm_path: str, out_dir: Path) -> None:
+    """Assemble the original function into OUT_DIR/target.o."""
+    target_s = out_dir / "target.s"
     header = ".set noat\n.set noreorder\n.set gp=64\n"
-    with open(asm_path) as asm:
-        body = asm.read()
+    body = Path(asm_path).read_text()
     # Splat writes some low parts as %lo(SYMBOL + (OFFSET & 0xFFFF)), which
     # leaves the assembler unable to pair them with their %hi parts
     body = re.sub(r"(%lo\([\w.]+ \+ )\((0x[0-9A-Fa-f]+) & 0xFFFF\)\)", r"\1\2)", body)
-    with open(target_s, "w") as target:
-        target.write(header + '.include "macro.inc"\n' + body)
-    subprocess.run(
+    _ = target_s.write_text(header + '.include "macro.inc"\n' + body)
+    _ = subprocess.run(
         [
             "mips-linux-gnu-as",
             "-march=vr4300",
@@ -104,23 +96,34 @@ def main():
             "-EB",
             "-Iinclude",
             "-o",
-            os.path.join(out_dir, "target.o"),
-            target_s,
+            str(out_dir / "target.o"),
+            str(target_s),
         ],
         cwd=ROOT,
         check=True,
     )
 
-    compile_sh = os.path.join(out_dir, "compile.sh")
-    with open(compile_sh, "w") as script:
-        flags = " ".join(fncompare.CFLAGS + fncompare.get_optflags(c_path))
-        script.write(
-            COMPILE_SH.format(kmc=os.path.join(ROOT, "tools", "gcc_kmc"), flags=flags)
-        )
-    os.chmod(compile_sh, 0o755)
 
-    with open(os.path.join(out_dir, "settings.toml"), "w") as settings:
-        settings.write(f'func_name = "{function}"\ncompiler_type = "gcc"\n')
+def main() -> None:
+    """Fill the permuter directory for the function named."""
+    c_path, asm_path, function = sys.argv[1:4]
+    out_dir = (
+        Path(sys.argv[4])
+        if len(sys.argv) >= OUT_DIR_ARGUMENT_COUNT
+        else ROOT / "build" / "permuter" / function
+    )
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    write_base(c_path, function, out_dir / "base.c")
+    write_target(asm_path, out_dir)
+
+    compile_sh = out_dir / "compile.sh"
+    flags = " ".join(fncompare.CFLAGS + fncompare.get_optflags(c_path))
+    _ = compile_sh.write_text(COMPILE_SH.format(kmc=fncompare.KMC_DIR, flags=flags))
+    compile_sh.chmod(SCRIPT_MODE)
+
+    settings = f'func_name = "{function}"\ncompiler_type = "gcc"\n'
+    _ = (out_dir / "settings.toml").write_text(settings)
     print(out_dir)
 
 
