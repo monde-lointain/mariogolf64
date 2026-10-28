@@ -49,7 +49,7 @@ typedef struct ImportedCharacter {
   /* 0x04 */ s16 unk4;
   /* 0x06 */ s16 unk6;
   /* 0x08 */ s8 name[IMPORTED_CHARACTER_NAME_LENGTH];
-  /* 0x14 */ s8 unk14;
+  /* 0x14 */ u8 isChosen; /* Set while a player has chosen the character */
 } ImportedCharacter; /* size = 0x16 */
 
 extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];

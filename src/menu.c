@@ -1479,7 +1479,7 @@ void func_8005D334(void) {
       g_ImportedCharacters[index].name[byteIndex] = 0;
     }
 
-    g_ImportedCharacters[index].unk14 = 0;
+    g_ImportedCharacters[index].isChosen = 0;
   }
 }
 
@@ -1740,10 +1740,10 @@ void func_8005DC50(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_ImportedCharacters[0].unk14 = 0;
-  g_ImportedCharacters[1].unk14 = 0;
-  g_ImportedCharacters[2].unk14 = 0;
-  g_ImportedCharacters[3].unk14 = 0;
+  g_ImportedCharacters[0].isChosen = 0;
+  g_ImportedCharacters[1].isChosen = 0;
+  g_ImportedCharacters[2].isChosen = 0;
+  g_ImportedCharacters[3].isChosen = 0;
   D_800C1FF4 = -1;
   D_800C1FF5 = -1;
   D_800C1FF6 = -1;

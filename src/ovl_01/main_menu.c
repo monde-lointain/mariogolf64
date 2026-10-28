@@ -1121,7 +1121,7 @@ void func_801F7D28_ovl_01(void) {
     slot = g_CharacterGrid[D_801323A0.characterRows[D_801B7070]]
                           [D_801323A0.characterColumns[D_801B7070]];
     if (slot >= FIRST_IMPORTED_CHARACTER) {
-      g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].unk14 = 0;
+      g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].isChosen = 0;
       D_800C200C[D_801B7070] = -1;
     }
 
