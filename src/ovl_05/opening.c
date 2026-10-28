@@ -86,23 +86,11 @@ typedef struct OpeningNameLogo {
   /* 0x18 */ s32 shownHeight;
 } OpeningNameLogo; /* size = 0x1C */
 
-/* The channel for the script's next sound */
-extern s32 f_OpeningSoundChannel;
-extern s32 f_LogoClubPosition[3];
-extern f32 f_LogoClubOrbitRadius;
-extern Boolean f_IsLogoClubSwinging;
-extern Boolean f_AreAmbientSoundsOn;
-
 /* The steps that a name logo's animation starts each phase at */
 #define NAME_LOGO_UNFOLD 0 /* Widens over 8 frames */
 #define NAME_LOGO_FLIP_DOWN 10 /* Flattens over 4 frames */
 #define NAME_LOGO_FLIP_UP 20 /* Grows back over 4 frames */
 #define NAME_LOGO_STILL 30
-
-extern OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT];
-extern s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT];
-extern f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT];
-extern s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
 
 /* f_OpeningCue's values: the cues, then the states past them */
 #define OPENING_CUE_COUNT 29
@@ -111,21 +99,11 @@ extern s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
 #define OPENING_CUE_DONE 31
 
 extern u8* g_ShadowTexture;
-extern s32 f_LakituScreenPoint[2];
 /* The sizes of Lakitu's image and his trail's, with header and palette */
 #define LAKITU_IMAGE_BUFFER_SIZE 0x608
 #define LAKITU_TRAIL_IMAGE_BUFFER_SIZE 0xC08
 
 #define LAKITU_TRAIL_SEGMENT_COUNT 40
-
-extern s32 f_OpeningFrameParity;
-extern Boolean f_IsLookAtMarkerShown;
-extern Vtx f_LookAtMarkerVertices[6][4];
-
-extern Boolean f_IsLakituFlying;
-extern s32 f_LakituAngle;
-extern s32 f_LookAtEaseMode;
-extern f32 f_LookAtEaseRate;
 
 /* A 48x432 CI8 image of the letters, one above the next */
 #define ASSET_LOGO_LETTER_IMAGES 0x945
@@ -207,45 +185,8 @@ typedef enum LogoLetterState {
   LOGO_LETTER_LANDED = 9
 } LogoLetterState;
 
-extern s32 f_OpeningShotDashCount;
-
 /* f_OpeningShotDashCount's starting value, and the most it can be */
 #define OPENING_SHOT_MAX_DASH_COUNT 200
-
-/*
- * The opening's shot path is drawn as the turn's shot preview is, but
- * nothing in the opening sets f_IsOpeningShotPathShown, so it never shows
- */
-extern Boolean f_IsOpeningShotPathShown;
-extern s32 f_OpeningShotPathDashCount; /* Starts at 198 */
-extern s8 f_IsOpeningShotPathRed;
-extern s32 f_OpeningShotPathScroll; /* Of the dash image, in texels */
-extern Vtx f_OpeningShotDashVertices[4];
-
-extern Boolean f_IsBurstShown;
-extern s32 f_BurstFrame; /* Starts at -1, before the burst's first frame */
-
-/* Whether Donkey Kong stands in for Yoshi, once he is unlocked */
-extern Boolean f_IsDonkeyKongShown;
-/* The opening script's current scene */
-extern s32 f_OpeningScene;
-/* The frames left before the opening's current scene moves on */
-extern s32 f_OpeningSceneFramesLeft;
-/*
- * Whether a slot shows the logo ball, the ball in the title logo. Only this
- * slot's flag is ever set, and setting it also has all balls projected to
- * the screen
- */
-extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
-extern Boolean f_AreImpactLinesShown;
-extern s32 f_ShotBallScale;
-extern s32 f_OpeningSparksState;
-
-/*
- * Set once the title logo starts forming. The opening can no longer be skipped
- * after that, and it ends without the confirm sound.
- */
-extern Boolean f_HasLogoStarted;
 
 void AssignCharacterBuffers(void);
 void DrawOpeningShotPath(CameraMatrices* matrices);
@@ -328,6 +269,273 @@ typedef enum LogoFadeStage {
 
 /* A 64x64 CI8 image of a plain golf ball */
 #define ASSET_SHOT_BALL_IMAGE 0x939
+
+/* The golf balls with faces, as f_OpeningBallAssets lists them */
+#define ASSET_MARIO_BALL_IMAGE 0x901
+#define ASSET_DONKEY_KONG_BALL_IMAGE 0x902
+#define ASSET_YOSHI_BALL_IMAGE 0x903
+#define ASSET_LUIGI_BALL_IMAGE 0x92B
+
+/*
+ * The character name logos: 160x32 CI8 images, but for Baby Mario's, 216
+ * wide, and Donkey Kong's, 256 wide
+ */
+#define ASSET_MARIO_NAME_LOGO 0x904
+#define ASSET_BABY_MARIO_NAME_LOGO 0x905
+#define ASSET_DONKEY_KONG_NAME_LOGO 0x906
+#define ASSET_LUIGI_NAME_LOGO 0x907
+#define ASSET_PEACH_NAME_LOGO 0x909
+#define ASSET_PLUM_NAME_LOGO 0x90A
+#define ASSET_YOSHI_NAME_LOGO 0x90B
+
+/* f_BurstFrame counts up before each frame is drawn, so it starts one early */
+#define BURST_NOT_STARTED (-1)
+#define LAKITU_TRAIL_START_ALPHA 220
+/* How fast the look-at point first eases, before it speeds up */
+#define LOOK_AT_START_EASE_RATE 0.05f
+#define LOGO_OPAQUE_ALPHA 0xFF
+#define LOGO_FADE_FIRST_FRAMES_LEFT 63
+#define LOGO_CLUB_MIN_SPIN_FRAMES 40
+/* Where the club starts its spiral, in pixels and degrees */
+#define LOGO_CLUB_START_ORBIT_RADIUS 240.0f
+#define LOGO_CLUB_START_ORBIT_ANGLE 330.0f
+#define LOGO_CLUB_START_UNUSED_ANGLE 180.0f
+/* A full turn, which the club spins back down from */
+#define LOGO_CLUB_START_ANGLE 360.0f
+
+/* Written but never read */
+static s32 f_LastPlacedSlotIndex = 0;
+/* The frames since the opening started, after which it ends itself */
+static s32 f_OpeningFrameCount = 0;
+/*
+ * Set once the title logo starts forming. The opening can no longer be skipped
+ * after that, and it ends without the confirm sound.
+ */
+static Boolean f_HasLogoStarted = FALSE;
+/* The channel for the script's next sound */
+static s32 f_OpeningSoundChannel = 0;
+static s32 f_LogoClubPosition[3] = {0, 2300, 32};
+static f32 f_LogoClubOrbitRadius = LOGO_CLUB_START_ORBIT_RADIUS;
+static Boolean f_IsLogoClubSwinging = FALSE;
+static Boolean f_AreAmbientSoundsOn = FALSE;
+static s32 f_AlternatingSoundTimer = 0;
+static s32 f_RepeatingSoundTimer = 0;
+static s32 f_RandomSoundTimer = 0;
+static s32 f_AlternatingSound = AMBIENT_SOUND_FIRST;
+static s32 f_RandomSound = AMBIENT_SOUND_NONE;
+static s32 f_AlternatingSoundFirstLength = 50;
+static s32 f_AlternatingSoundSecondLength = 100;
+static s32 f_RepeatingSoundLength = 60;
+static s32 f_RandomSoundFirstLength = 30;
+static s32 f_RandomSoundSecondLength = 60;
+/* The opening script's current scene */
+static s32 f_OpeningScene = 0;
+/* The frames left before the opening's current scene moves on */
+static s32 f_OpeningSceneFramesLeft = 0;
+static OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT] = {
+    {ASSET_MARIO_NAME_LOGO, 160, 32, 88, 208, 1, 32},
+    {ASSET_LUIGI_NAME_LOGO, 160, 32, 80, 208, 1, 32},
+    {ASSET_PEACH_NAME_LOGO, 160, 32, 84, 208, 1, 32},
+    {ASSET_PLUM_NAME_LOGO, 160, 32, 88, 208, 1, 32},
+    {ASSET_YOSHI_NAME_LOGO, 160, 32, 88, 208, 1, 32},
+    {ASSET_BABY_MARIO_NAME_LOGO, 216, 32, 196, 32, 1, 32},
+    {ASSET_DONKEY_KONG_NAME_LOGO, 256, 32, 136, 208, 1, 32}};
+static Boolean f_AreImpactLinesShown = FALSE;
+static Boolean f_IsBurstShown = FALSE;
+static s32 f_ShotBallScale = 0;
+static s32 f_LookAtEaseMode = 0;
+/* Read by no routine */
+static s32 D_8020AD6C_ovl_05 = 0;
+static s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT] = {
+    OPENING_BALL_HIDDEN, OPENING_BALL_HIDDEN};
+/* Read by no routine */
+static s32 D_8020AD78_ovl_05[2] = {0, 0};
+static f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT] = {
+    OPENING_BALL_NORMAL_SCALE, OPENING_BALL_NORMAL_SCALE};
+static s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT] = {
+    ASSET_MARIO_BALL_IMAGE, ASSET_DONKEY_KONG_BALL_IMAGE,
+    ASSET_YOSHI_BALL_IMAGE, ASSET_LUIGI_BALL_IMAGE, ASSET_SHOT_BALL_IMAGE};
+/* Whether Donkey Kong stands in for Yoshi, once he is unlocked */
+static Boolean f_IsDonkeyKongShown = FALSE;
+static s32 f_LakituScreenPoint[2] = {0, 230};
+static Boolean f_IsLakituFlying = FALSE;
+static s32 f_LakituTrailNewestIndex = 0;
+/* Read by no routine */
+static s32 D_8020ADB0_ovl_05 = 0;
+/*
+ * Whether a slot shows the logo ball, the ball in the title logo. Only this
+ * slot's flag is ever set, and setting it also has all balls projected to
+ * the screen
+ */
+static u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT] = {FALSE, FALSE};
+/* The opening's shots, each starting with its yaw as a binary angle */
+static Unk20 D_8020ADB8_ovl_05 = {
+    -0x3400, 0, 280, 0, 40, -15, 0, SHOT_MODE_NORMAL};
+static Unk20 D_8020ADD8_ovl_05 = {
+    -0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
+static Unk20 D_8020ADF8_ovl_05 = {
+    -0x2300, 0, 240, 0, 0, 20, 0, SHOT_MODE_NORMAL};
+static Unk20 D_8020AE18_ovl_05 = {
+    -0x2B00, 1, 400, 0, -180, -720, 0, SHOT_MODE_NORMAL};
+static s32 f_OpeningSparksState = SPARKS_HIDDEN;
+f32 g_LookAtMarkerScale = 1.0f;
+static Boolean f_IsLookAtMarkerShown = FALSE;
+static s32 D_8020AE44_ovl_05 = 0;
+/* Read by no routine; the same as D_8020ADD8_ovl_05 */
+static Unk20 D_8020AE48_ovl_05 = {
+    -0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
+static Vtx f_OpeningShotDashVertices[4] = {
+    {{{-15, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
+    {{{15, 0, 0}, 0, {0, 2048}, {0x00, 0x00, 0x00, 0xFF}}},
+    {{{15, 0, -1}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0x00}}},
+    {{{-15, 0, -1}, 0, {2048, 0}, {0xFF, 0x00, 0x00, 0x00}}}};
+/*
+ * The opening's shot path is drawn as the turn's shot preview is, but
+ * nothing in the opening sets f_IsOpeningShotPathShown, so it never shows
+ */
+static Boolean f_IsOpeningShotPathShown = FALSE;
+static s32 f_OpeningShotDashCount = OPENING_SHOT_MAX_DASH_COUNT;
+static s32 f_OpeningShotPathDashCount = 198;
+static s8 f_IsOpeningShotPathRed = FALSE;
+/* Of the dash image, in texels */
+static s32 f_OpeningShotPathScroll = 0;
+static f32 D_8020AEBC_ovl_05 = 0.0f;
+static f32 D_8020AEC0_ovl_05 = 0.0f;
+static s32 f_OpeningFrameParity = 0;
+static Vtx f_LookAtMarkerVertices[6][4] = {
+    {{{{-50, 0, 5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{-50, 0, -5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{50, 0, -5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{50, 0, 5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}}},
+    {{{{-50, 5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{-50, -5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{50, -5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{50, 5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}}},
+    {{{{0, -50, -5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+        {{{0, 50, -5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+        {{{0, 50, 5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+        {{{0, -50, 5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}},
+    {{{{-5, -50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+        {{{-5, 50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+        {{{5, 50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+        {{{5, -50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}},
+    {{{{-3, 3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+        {{{3, -3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+        {{{3, -3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+        {{{-3, 3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}}},
+    {{{{-3, -3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+        {{{3, 3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+        {{{3, 3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+        {{{-3, -3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}}}};
+static Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][4] = {
+    {{{{1, -1, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{1, -2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, -2, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, -1, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+    {{{{1, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, -1, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
+static Boolean f_HasLogoBallLastPosition = FALSE;
+static Vtx f_OpeningBallShadowVertices[4] = {
+    {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static Vtx f_LogoBallMarioVertices[4] = {
+    {{{-1, -1, 1}, 0, {1536, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, -1, -1}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* The logo ball's roll, from its position's change each frame */
+static Boolean f_ShouldResetLogoBallRoll = TRUE;
+static s32 f_LogoBallFrameIndex = 0;
+static Boolean f_HasProjectedLogoBallLastPosition = FALSE;
+static Vtx f_ProjectedShadowVertices[4] = {
+    {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static Vtx f_ProjectedLogoBallMarioVertices[4] = {
+    {{{-1, -1, 1}, 0, {1536, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, -1, -1}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* The same as the logo ball's roll, kept apart for the projected logo ball */
+static Boolean f_ShouldResetProjectedLogoBallRoll = TRUE;
+static s32 f_ProjectedLogoBallFrameIndex = 0;
+static s32 f_ImpactLinesFrame = 0;
+static s32 f_LakituTrailAlpha = LAKITU_TRAIL_START_ALPHA;
+static Vtx f_LakituTrailVertices[2] = {
+    {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
+    {{{10, 0, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
+static s32 f_LakituAngle = 0;
+static s32 f_BurstFrame = BURST_NOT_STARTED;
+static s32 f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA;
+static Vtx f_ShotBallShadowVertices[4] = {
+    {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static f32 f_LookAtEaseRate = LOOK_AT_START_EASE_RATE;
+static s32 f_LogoLettersAlpha = LOGO_OPAQUE_ALPHA;
+static s32 f_LogoClubAlpha = LOGO_OPAQUE_ALPHA;
+/* Counts while the logo shines */
+static s32 f_LogoShineFrame = LOGO_SHINE_FIRST_FRAME;
+/* How long, at least, the club spins in place */
+static s32 f_LogoClubSpinFramesLeft = LOGO_CLUB_MIN_SPIN_FRAMES;
+static s32 f_LogoState = LOGO_DROPPING_LETTERS;
+static s32 f_LogoFadeStage = LOGO_FADE_NONE;
+static s32 f_LogoFadeFramesLeft = LOGO_FADE_FIRST_FRAMES_LEFT;
+/* Across, then up */
+static f32 f_LogoClubScale[2] = {1.0f, 1.0f};
+/* In degrees */
+static Degrees f_LogoClubAngle = LOGO_CLUB_START_ANGLE;
+static f32 f_LogoClubOrbitAngle = LOGO_CLUB_START_ORBIT_ANGLE;
+/* Read by no routine */
+static f32 D_8020B290_ovl_05 = 0.0f;
+/* Its sine is never used */
+static f32 f_LogoClubUnusedAngle = LOGO_CLUB_START_UNUSED_ANGLE;
+static f32 f_LogoClubWobbleAngle = 0.0f;
+/* The top and bottom halves of a letter */
+static Vtx f_LogoLetterVertices[2][4] = {
+    {{{{-24, 48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-24, 24, 0}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{24, 24, 0}, 0, {3072, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{24, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+    {{{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-24, 0, 0}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{24, 0, 0}, 0, {3072, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
+static Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][4] = {
+    {{{{-76, 39, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-76, 26, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 26, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 39, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+    {{{{-76, 26, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-76, 13, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 13, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+    {{{{-76, 13, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-76, 0, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 0, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 13, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+    {{{{-76, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-76, -13, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, -13, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 0, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+    {{{{-76, -13, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-76, -26, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, -26, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, -13, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+    {{{{-76, -26, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-76, -39, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, -39, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, -26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
+static Vtx f_OpeningSparkVertices[3] = {
+    {{{0, 16, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
+    {{{-1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
+    {{{1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
 
 static s32 f_CueSlotIndex;
 static CoursePoint D_8020C404_ovl_05;
@@ -498,17 +706,6 @@ void PlayLogoClubSound(void) {
 #define AMBIENT_SOUND_CHANCE 80
 /* The random sound picks from four choices, two of which are silence */
 #define RANDOM_SOUND_CHOICE_MASK 3
-
-extern s32 f_AlternatingSoundTimer;
-extern s32 f_RepeatingSoundTimer;
-extern s32 f_RandomSoundTimer;
-extern s32 f_AlternatingSound;
-extern s32 f_RandomSound;
-extern s32 f_AlternatingSoundFirstLength;
-extern s32 f_AlternatingSoundSecondLength;
-extern s32 f_RepeatingSoundLength;
-extern s32 f_RandomSoundFirstLength;
-extern s32 f_RandomSoundSecondLength;
 
 /*
  * Plays the opening's ambient sounds while f_AreAmbientSoundsOn is set,
@@ -776,9 +973,6 @@ enum OpeningModel {
 };
 
 s32 func_80206680_ovl_05(u32 slotIndex, s32 character);
-
-/* Written but never read */
-extern s32 f_LastPlacedSlotIndex;
 
 /* Places the cue slot's character, leaving the point's height unset */
 #define PLACE_CUE_CHARACTER(point, x, z, heading) \
@@ -1150,17 +1344,8 @@ s32 UpdateOpeningCharacters(void) {
 
 #define LOGO_BALL_SLOT 1
 
-/* The frames since the opening started, after which it ends itself */
-extern s32 f_OpeningFrameCount;
-
+/* The value of f_OpeningFrameCount at which the opening ends itself */
 #define OPENING_FRAME_LIMIT 9000
-extern Unk20 D_8020ADB8_ovl_05;
-extern Unk20 D_8020ADD8_ovl_05;
-extern Unk20 D_8020ADF8_ovl_05;
-extern Unk20 D_8020AE18_ovl_05;
-extern s32 D_8020AE44_ovl_05;
-extern f32 D_8020AEBC_ovl_05;
-extern f32 D_8020AEC0_ovl_05;
 
 /* The first channel after the rotating ones */
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
@@ -2992,24 +3177,6 @@ void LoadOpeningBall(s32 ballIndex, s32 slot) {
 /* The balls other than the logo ball are drawn this many pixels lower */
 #define PROJECTED_BALL_DROP 2
 
-extern Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][4];
-extern Vtx f_OpeningBallShadowVertices[4];
-
-/* The logo ball's roll, from its position's change each frame */
-extern Boolean f_ShouldResetLogoBallRoll;
-
-extern Boolean f_HasLogoBallLastPosition;
-extern s32 f_LogoBallFrameIndex;
-extern Vtx f_LogoBallMarioVertices[4];
-
-extern Vtx f_ProjectedShadowVertices[4];
-
-/* The same as the logo ball's roll, kept apart for the projected logo ball */
-extern Boolean f_ShouldResetProjectedLogoBallRoll;
-extern Boolean f_HasProjectedLogoBallLastPosition;
-extern s32 f_ProjectedLogoBallFrameIndex;
-extern Vtx f_ProjectedLogoBallMarioVertices[4];
-
 #ifdef NON_MATCHING
 /*
  * Draws the balls in the opening's ball slots, each with a shadow on the
@@ -3589,8 +3756,6 @@ void LoadOpeningImpactLines(void) {
   ReadEncodedAsset(f_OpeningEffectImage, &asset);
 }
 
-extern s32 f_ImpactLinesFrame;
-
 /* The impact lines' left and bottom edges on the screen, in pixels */
 #define IMPACT_LINES_LEFT 206
 #define IMPACT_LINES_BOTTOM 88
@@ -3709,10 +3874,6 @@ void LoadLakitu(void) {
   f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH;
   f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
 }
-
-extern s32 f_LakituTrailNewestIndex;
-extern s32 f_LakituTrailAlpha;
-extern Vtx f_LakituTrailVertices[2];
 
 #ifdef NON_MATCHING
 #define LAKITU_IMAGE_SIZE 32
@@ -4020,9 +4181,6 @@ void LoadOpeningShotBall(void) {
 #define SHOT_BALL_FADE_RATE 0.04
 /* The shadow's scale for each step of f_ShotBallScale */
 #define SHOT_BALL_SHADOW_SCALE 0.5
-
-extern s32 f_ShotBallAlpha;
-extern Vtx f_ShotBallShadowVertices[4];
 
 #ifdef NON_MATCHING
 /*
@@ -4373,27 +4531,6 @@ void LoadOpeningLogo(void) {
 
 /* Where the logo is drawn, in the screen's orthographic projection */
 #define LOGO_Z (-300.0f)
-
-/* Starts at 0xFF */
-extern s32 f_LogoLettersAlpha;
-extern s32 f_LogoClubAlpha;
-/* Starts at LOGO_SHINE_FIRST_FRAME, and counts while the logo shines */
-extern s32 f_LogoShineFrame;
-/* How long, at least, the club spins in place; starts at 40 */
-extern s32 f_LogoClubSpinFramesLeft;
-extern s32 f_LogoState;
-extern s32 f_LogoFadeStage;
-extern s32 f_LogoFadeFramesLeft; /* Starts at 63 */
-extern f32 f_LogoClubScale[2]; /* Across, then up */
-/* In degrees */
-extern Degrees f_LogoClubAngle;
-extern f32 f_LogoClubOrbitAngle;
-extern f32 f_LogoClubUnusedAngle; /* Its sine is never used */
-extern f32 f_LogoClubWobbleAngle;
-/* The top and bottom halves of a letter */
-extern Vtx f_LogoLetterVertices[2][4];
-
-extern Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][4];
 
 /*
  * Drives the title logo: Lakitu drops the letters, which bounce into place,
@@ -4962,8 +5099,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
 #define SPARK_DRAG 0.98
 /* The depth the sparks are drawn at under the screen's projection */
 #define SPARK_DEPTH -100.0f
-
-extern Vtx f_OpeningSparkVertices[3];
 
 #ifdef NON_MATCHING
 /*
