@@ -372,7 +372,7 @@ segments:
       - [0x9C260, .data, sound]
       - [0x9C770, .data, course_info]
       - [0x9CF70, .data, character]
-      - [0x9D3F0, data]
+      - [0x9D3F0, .data, menu]
       - [0x9E010, .data, fault]
       - [0x9E3F0, .data, music]
       - [0x9E460, data]

@@ -160,8 +160,9 @@ void LoadMenuWindowImage(s32 imageIndex);
  * func_80200EF0 shows that character as the rival.
  */
 #define MARKED_CHARACTER_OFFSET 50
-/* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones
- * hold -1 */
+/* A slot of the grid that holds no character */
+#define EMPTY_GRID_SLOT (-1)
+/* Slots marked with MARKED_CHARACTER_OFFSET hold values below this */
 #define MARKED_CHARACTER_LIMIT (-10)
 
 extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
