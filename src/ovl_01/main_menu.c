@@ -2622,7 +2622,7 @@ void func_801FA1B8_ovl_01(void) {
 void func_801FA20C_ovl_01(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
-  s32 windowState;
+  s32 closedCheck;
   s32 slot;
   u8* optionBits;
 
@@ -2631,16 +2631,16 @@ void func_801FA20C_ovl_01(void) {
   }
 
   if (g_IsEraseWindowUp) {
-    windowState = IsMenuWindowClosed();
+    closedCheck = IsMenuWindowClosed();
     for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
       SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
     }
 
-    if (windowState == -1) {
+    if (closedCheck == MENU_WINDOW_CHECK_MOVING) {
       return;
     }
 
-    if (windowState == TRUE) {
+    if (closedCheck == MENU_WINDOW_CHECK_YES) {
       g_IsEraseWindowUp = FALSE;
       for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
         SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);

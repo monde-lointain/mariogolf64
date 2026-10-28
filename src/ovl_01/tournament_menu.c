@@ -283,27 +283,27 @@ void CloseMenuWindow(void) {
 }
 
 s32 IsMenuWindowOpen(void) {
-  s32 isOpen;
+  s32 check;
 
   if (g_MenuWindowState == MENU_WINDOW_OPENING) {
-    isOpen = -1;
+    check = MENU_WINDOW_CHECK_MOVING;
   } else {
-    isOpen = g_MenuWindowState == MENU_WINDOW_OPEN;
+    check = g_MenuWindowState == MENU_WINDOW_OPEN;
   }
 
-  return isOpen;
+  return check;
 }
 
 s32 IsMenuWindowClosed(void) {
-  s32 isClosed;
+  s32 check;
 
   if (g_MenuWindowState == MENU_WINDOW_CLOSING) {
-    isClosed = -1;
+    check = MENU_WINDOW_CHECK_MOVING;
   } else {
-    isClosed = g_MenuWindowState == MENU_WINDOW_CLOSED;
+    check = g_MenuWindowState == MENU_WINDOW_CLOSED;
   }
 
-  return isClosed;
+  return check;
 }
 
 void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
@@ -1262,11 +1262,11 @@ void func_80229278_ovl_01(void) {
     return;
   }
 
-  if (IsMenuWindowOpen() == -1) {
+  if (IsMenuWindowOpen() == MENU_WINDOW_CHECK_MOVING) {
     return;
   }
 
-  if (IsMenuWindowClosed() == -1) {
+  if (IsMenuWindowClosed() == MENU_WINDOW_CHECK_MOVING) {
     return;
   }
 
@@ -1499,7 +1499,8 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
       func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
     }
 
-    if (IsMenuWindowOpen() != -1 && !IsMenuWindowClosed()) {
+    if (IsMenuWindowOpen() != MENU_WINDOW_CHECK_MOVING &&
+        !IsMenuWindowClosed()) {
       MeasureMessage(D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME,
           FONT_SIZE_LARGE, &width, &height, 0);
       MeasureMessage(GetClubTournamentCourseTitleMessage(), FONT_SIZE_LARGE,
