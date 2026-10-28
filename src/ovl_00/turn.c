@@ -83,7 +83,6 @@
 /* How far the control pad tilts the stick, as GetTurnStickX and GetTurnStickY
  * read it */
 #define DPAD_STICK_TILT 40
-#define LETTERBOX_STATE_UNK4 4
 /* The aim camera stays inside the course's ground, in course units */
 #define AIM_CAMERA_MAX_X 4347904.0f
 #define AIM_CAMERA_MAX_Z 8542208.0f
@@ -122,10 +121,6 @@
 #define FREE_LOOK_START_DISTANCE (-0x12C00)
 #define FREE_LOOK_TURN_STEP 200
 #define FREE_LOOK_HUD_FLAGS 0x47
-#define LETTERBOX_STATE_NONE 0
-#define LETTERBOX_STATE_UNK1 1
-#define LETTERBOX_STATE_UNK2 2
-#define LETTERBOX_STATE_UNK5 5
 #define FREE_LOOK_FRAMEBUFFER_COUNT 3
 /* A shorter pulse than the shots' rumble in effects.c */
 #define TURN_RUMBLE_FREQUENCY 0x100
@@ -226,7 +221,6 @@
 #define REPLAY_AIM_STEP_DIVISOR 128
 #define REPLAY_AIM_SETTLE_FRAMES 6
 #define REPLAY_FRAMEBUFFER_COUNT 2
-#define LETTERBOX_STATE_UNK3 3
 #define AIM_RESET_BUTTONS (L_CBUTTONS | R_CBUTTONS)
 #define AIM_CAMERA_BUTTONS (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)
 #define AIM_CAMERA_RAISE_BUTTONS (U_CBUTTONS | R_CBUTTONS)

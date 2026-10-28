@@ -22,11 +22,6 @@
 #include "surface.h"
 #include "variables.h"
 
-#define LETTERBOX_STATE_NONE 0
-#define LETTERBOX_STATE_UNK3 3
-#define LETTERBOX_STATE_UNK4 4
-#define LETTERBOX_STATE_UNK5 5
-
 /* The players whose balls are tagged */
 enum ShotLabels {
   SHOT_LABELS_NONE = -1,

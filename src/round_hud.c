@@ -334,7 +334,6 @@ extern Vtx f_LandingPanelVertices[4];
 /* The black bars that grow over the top and bottom of the HUD's area */
 #define LETTERBOX_GROWTH_STEP 2
 #define LETTERBOX_MAX_HEIGHT 16
-#define LETTERBOX_STATE_UNK5 5
 
 /* Where the hole image sits in front of the perspective camera, at a tenth of
  * its size */
@@ -3154,7 +3153,8 @@ s32 DrawLetterbox(Gfx** gfxP, s32 height) {
   Gfx* gfx = *gfxP;
 
   if (g_RoundHud.isLetterboxShown) {
-    if (g_LetterboxState != 0 & g_LetterboxState != LETTERBOX_STATE_UNK5) {
+    if (g_LetterboxState != LETTERBOX_STATE_NONE &
+        g_LetterboxState != LETTERBOX_STATE_UNK5) {
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(
@@ -3797,7 +3797,8 @@ void DrawRoundHud(CameraView* view) {
     gDPPipeSync(g_DisplayListHead++);
   }
 
-  if ((g_LetterboxState != 0 & g_LetterboxState != LETTERBOX_STATE_UNK5) &&
+  if ((g_LetterboxState != LETTERBOX_STATE_NONE &
+          g_LetterboxState != LETTERBOX_STATE_UNK5) &&
       g_RoundHud.isLetterboxShown) {
     DrawAnimatedIcon(&g_DisplayListHead, f_LetterboxHeight);
   }
