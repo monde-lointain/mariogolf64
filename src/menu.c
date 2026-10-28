@@ -137,12 +137,6 @@ void SetFramebufferCount(s32 count);
 /* f_SlotCells lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
 
-typedef struct Unk800C2650 {
-  /* 0x0 */ u16 assetId;
-  /* 0x2 */ u8 unk2[0xE];
-} Unk800C2650; /* size = 0x10 */
-
-extern Unk800C2650 g_FaceAnimationAssets[];
 extern s16 f_EveryCharacterGrid[CHARACTER_CHOICE_ROW_COUNT]
                                [CHARACTER_GRID_COLUMN_COUNT];
 extern s16 f_RecordGrid[CHARACTER_CHOICE_ROW_COUNT]
@@ -291,8 +285,8 @@ void LoadMenuResources(void) {
   D_800FC898 = AllocMemory(OpenEncodedAsset(0x663, &asset));
   ReadEncodedAsset(D_800FC898, &asset);
   for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {
-    D_8012D430[index] = AllocMemory(
-        OpenEncodedAsset(g_FaceAnimationAssets[index].assetId, &asset));
+    D_8012D430[index] =
+        AllocMemory(OpenEncodedAsset(g_FaceAnimationAssets[index][0], &asset));
     ReadEncodedAsset(D_8012D430[index], &asset);
   }
 
@@ -1121,7 +1115,7 @@ void func_8005C674(s32 arg0, s32 arg1) {
       recordIndex = g_CharacterGrid[2][index];
       if (recordIndex >= 0) {
         arg0 = g_ImportedCharacters[index].character;
-        OpenEncodedAsset(g_FaceAnimationAssets[arg0].assetId, &asset);
+        OpenEncodedAsset(g_FaceAnimationAssets[arg0][0], &asset);
         ReadEncodedAsset(D_8012D468[index], &asset);
         OpenAssetFile(g_CharacterFacePaletteFiles[arg0][0], &file);
         ReadAssetFile(D_80105BB0[index], GetAssetFileSize(&file), &file);

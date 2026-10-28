@@ -61,4 +61,14 @@ extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
  */
 extern s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];
 
+/*
+ * Each character's face, as the asset IDs of its animation's frames, in two
+ * sets: Club Slots shows the first after three stars and the second after
+ * fewer, and the character select shows the second while GAME_FLAG_UNK64 is
+ * set
+ */
+#define FACE_ANIMATION_FRAME_COUNT 8
+extern u16 g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
+extern u16 g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
+
 #endif

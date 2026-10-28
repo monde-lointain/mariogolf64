@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include "asset.h"
+#include "character.h"
 #include "club.h"
 #include "controller.h"
 #include "cpu_projection.h"
@@ -114,7 +115,6 @@
 
 /* The faces of the players, the one spinning brighter and larger */
 #define FACE_SIZE 32
-#define FACE_FRAME_COUNT 8
 #define FACE_BUFFER_COUNT 2
 #define FACE_LEFT 256
 #define FACE_TOP 72
@@ -188,10 +188,6 @@ void SetFramebufferCount(s32 count);
 void DrawClubSlotsLogo(
     Gfx** displayListHead, s32 centerX, s32 centerY, f32 scale);
 
-/* The faces of the characters, by row of f_CharacterFaceRows, after three stars
- * and after fewer */
-extern u16 g_FaceAnimationAssets[][FACE_FRAME_COUNT];
-extern u16 g_AlternateFaceAnimationAssets[][FACE_FRAME_COUNT];
 /* The faces of the players and their palettes */
 
 static s32 f_ClubSlotsState = CLUB_SLOTS_DONE;

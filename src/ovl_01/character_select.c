@@ -102,10 +102,6 @@ enum GridMove {
 #define DRIVE_DISTANCE_X 246
 #define DRIVE_DISTANCE_Y 200
 
-/* The characters' faces, the first set of them shown with GAME_FLAG_UNK64 set
- */
-extern u16 g_FaceAnimationAssets[][8];
-extern u16 g_AlternateFaceAnimationAssets[][8];
 extern void* D_80105B78[CHARACTER_COUNT];
 extern void* D_8012D430[CHARACTER_COUNT];
 extern void* D_801B69EC;
@@ -1353,7 +1349,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B590_ovl_01);
 #define HIDDEN_MARK_LIMIT (-10)
 /* The faces' animation steps a frame every four draws, through eight frames */
 #define FACE_FRAME_DURATION 4
-#define FACE_FRAME_COUNT 8
 
 extern s16 D_8022FFC6_ovl_01;
 extern s16 D_8022FFC8_ovl_01;
@@ -1436,7 +1431,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   if ((s8)D_8022FF06_ovl_01 == FACE_FRAME_DURATION) {
     D_8022FF06_ovl_01 = 0;
     D_8022FF04_ovl_01++;
-    if (D_8022FF04_ovl_01 >= FACE_FRAME_COUNT) {
+    if (D_8022FF04_ovl_01 >= FACE_ANIMATION_FRAME_COUNT) {
       D_8022FF04_ovl_01 = 0;
     }
 
