@@ -10,6 +10,7 @@
 #include "game.h"
 #include "game_flags.h"
 #include "save.h"
+#include "shot_camera.h"
 #include "variables.h"
 #include "work_area.h"
 
@@ -81,7 +82,6 @@ extern f32 f_RingAngle;
 extern Lights1 f_RingLights;
 static Mtx f_RingSpinMatrices[2];
 static Vtx f_RingVertices[RING_VERTEX_COUNT];
-extern s32 g_IsCupViewShown;
 extern u8* g_BlendedTextureScrollingLayer;
 extern u8* g_BlendedTextureStillLayer;
 

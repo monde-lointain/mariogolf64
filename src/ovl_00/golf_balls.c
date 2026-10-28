@@ -21,6 +21,7 @@
 #include "overlay_manager.h"
 #include "pin.h"
 #include "save.h"
+#include "shot_camera.h"
 #include "surface.h"
 #include "terrain.h"
 #include "variables.h"

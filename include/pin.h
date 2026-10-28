@@ -8,8 +8,6 @@
 /* How many times its model's size the pin, the cup and the ball's trail are
  * drawn */
 extern s32 g_PinVertexScale;
-/* Set while the camera shows the cup up close, at twice the distance from it */
-extern s32 g_IsCupViewShown;
 extern s32 g_CupViewDepth;
 
 s32 GetCupDistance(s32 x, s32 z);

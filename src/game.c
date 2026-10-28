@@ -35,6 +35,7 @@
 #include "scorecard.h"
 #include "screen.h"
 #include "screen_layers.h"
+#include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
 #include "text.h"
@@ -1072,7 +1073,6 @@ extern s32 f_UnreadDebugSwitch;
  * The hole flyover's frame; DrawGame fades the screen out over its last
  * frames, and back in while it is -1
  */
-extern s32 g_HoleFlyoverFrame;
 extern s32 D_8022BE08;
 extern s32 _mus_cpu_last;
 extern s32 _mus_cpu_worst;

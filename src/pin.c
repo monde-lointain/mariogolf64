@@ -18,6 +18,7 @@
 #include "math_util.h"
 #include "round_hud.h"
 #include "save.h"
+#include "shot_camera.h"
 #include "surface.h"
 #include "variables.h"
 

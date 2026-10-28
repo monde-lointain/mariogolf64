@@ -5,6 +5,8 @@
  */
 #include "common.h"
 
+#include "shot_camera.h"
+
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "camera.h"

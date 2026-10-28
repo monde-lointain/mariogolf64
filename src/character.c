@@ -22,6 +22,7 @@
 #include "main.h"
 #include "math_util.h"
 #include "save.h"
+#include "shot_camera.h"
 #include "shot_effects.h"
 #include "variables.h"
 
@@ -220,7 +221,6 @@ extern Gfx f_BackCulling[];
 #define OPAQUE_ALPHA 0xFF
 
 /* Written elsewhere */
-extern s32 D_800BE698;
 /* Each slot's matrices, for each draw buffer */
 static Mtx f_ModelMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadowMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];

@@ -24,6 +24,7 @@
 #include "save.h"
 #include "screen.h"
 #include "screen_layers.h"
+#include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
 #include "text.h"

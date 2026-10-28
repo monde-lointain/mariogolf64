@@ -17,6 +17,7 @@
 #include "round_hud.h"
 #include "save.h"
 #include "screen.h"
+#include "shot_camera.h"
 #include "surface.h"
 #include "variables.h"
 
@@ -151,7 +152,6 @@ extern s8 f_TagOffsetsY[CORNER_COUNT];
 extern f32 f_OutOfBoundsPulseAngle;
 extern s32 f_PinFlagWaveFrame;
 extern s32 D_800C3084;
-extern s32 g_IsCupViewShown;
 extern s32 D_800C307C; /* Frames, up to PIN_FLAG_HIDE_FRAME, since the shot was
                           set up */
 
