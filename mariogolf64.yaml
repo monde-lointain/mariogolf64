@@ -688,7 +688,7 @@ segments:
     subsegments:
       - [0x136BA0, c, ovl_04/shot_simulation]
       - [0x137090, .rodata, ovl_04/shot_simulation]
-      - [0x1370AC, rodata]
+      - [0x1370AC, pad]
       - { start: 0x1370B0, type: bss, vram: 0x8024DD10 }
 
   - name: ovl_05
