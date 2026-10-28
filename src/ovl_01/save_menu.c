@@ -31,7 +31,6 @@
 #include "text.h"
 #include "variables.h"
 
-/* The image listing the game modes, in orange */
 /* The buffers of func_802218C0, and what it reads into them */
 #define SAVE_GAME_BUFFER_CONTROLLER_ICONS 1
 #define SAVE_GAME_BUFFER_PLAYER_LABELS 2
@@ -65,6 +64,7 @@
 #define SAVE_MENU_GAME_GET_CHARACTER 1
 #define SAVE_MENU_GAME_STROKE 2
 
+/* The image listing the game modes, in orange */
 #define ASSET_MENU_GAME_MODES 0x528
 
 extern s32 D_80230A90_ovl_01;
