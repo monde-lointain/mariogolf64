@@ -31,6 +31,9 @@ BYTE_MAX = 0xFF
 NIBBLE_SHIFT = 4
 NIBBLE_MASK = 0xF
 IA4_INTENSITY_SCALE = 36
+# I4 packs two texels to a byte, each four bits of intensity, spread over
+# 0 to 255 in the PNG
+I4_INTENSITY_SCALE = 17
 
 
 def expand_color(value: int) -> int:
@@ -59,6 +62,15 @@ def decode_i8(data: bytes, width: int, height: int) -> Image.Image:
     return Image.frombytes("L", (width, height), data[: width * height])
 
 
+def decode_i4(data: bytes, width: int, height: int) -> Image.Image:
+    """Read I4 texels into a greyscale image."""
+    pixels = bytearray()
+    for byte in data[: width * height // 2]:
+        for texel in (byte >> NIBBLE_SHIFT, byte & NIBBLE_MASK):
+            pixels.append(texel * I4_INTENSITY_SCALE)
+    return Image.frombytes("L", (width, height), bytes(pixels))
+
+
 def decode_ia4(data: bytes, width: int, height: int) -> Image.Image:
     """Read IA4 texels into a greyscale image with alpha."""
     pixels = bytearray()
@@ -69,7 +81,12 @@ def decode_ia4(data: bytes, width: int, height: int) -> Image.Image:
     return Image.frombytes("LA", (width, height), bytes(pixels))
 
 
-DECODERS = {"i8": decode_i8, "ia4": decode_ia4, "rgba16": decode_rgba16}
+DECODERS = {
+    "i4": decode_i4,
+    "i8": decode_i8,
+    "ia4": decode_ia4,
+    "rgba16": decode_rgba16,
+}
 
 
 def main() -> None:

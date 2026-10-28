@@ -3,10 +3,10 @@
 
     png_to_c.py IN.FORMAT.png OUT.inc.c
 
-FORMAT is i8, ia4 or rgba16, as extract_textures.py names the files.
+FORMAT is i4, i8, ia4 or rgba16, as extract_textures.py names the files.
 The output lists the texels, eight array elements to a line, for a C
-file to include between the braces of a u8 or u16 array; ia4 packs
-four texels into each u16.
+file to include between the braces of a u8 or u16 array; i4 packs
+two texels into each u8, and ia4 four into each u16.
 """
 
 import sys
@@ -28,6 +28,11 @@ ALPHA_HALF = 0x80
 IA4_INTENSITY_SCALE = 36
 IA4_BITS = 4
 IA4_TEXELS_PER_WORD = 4
+
+# I4 keeps four bits of intensity, spread over 0 to 255 in the PNG, two
+# texels to a byte
+I4_INTENSITY_SCALE = 17
+I4_BITS = 4
 
 
 def encode_rgba16(image: Image.Image) -> list[str]:
@@ -51,6 +56,15 @@ def encode_i8(image: Image.Image) -> list[str]:
     return [f"0x{texel:02X}" for texel in image.convert("L").tobytes()]
 
 
+def encode_i4(image: Image.Image) -> list[str]:
+    """Pack each texel's intensity into I4, two to a byte."""
+    texels = [value // I4_INTENSITY_SCALE for value in image.convert("L").tobytes()]
+    return [
+        f"0x{texels[i] << I4_BITS | texels[i + 1]:02X}"
+        for i in range(0, len(texels), 2)
+    ]
+
+
 def encode_ia4(image: Image.Image) -> list[str]:
     """Pack each texel's intensity and alpha into IA4, four to a u16."""
     data = image.convert("LA").tobytes()
@@ -67,7 +81,12 @@ def encode_ia4(image: Image.Image) -> list[str]:
     return words
 
 
-ENCODERS = {"i8": encode_i8, "ia4": encode_ia4, "rgba16": encode_rgba16}
+ENCODERS = {
+    "i4": encode_i4,
+    "i8": encode_i8,
+    "ia4": encode_ia4,
+    "rgba16": encode_rgba16,
+}
 
 
 def main() -> None:
