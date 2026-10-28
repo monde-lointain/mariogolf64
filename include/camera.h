@@ -35,7 +35,10 @@ typedef struct Camera {
   /* 0x04 */ CameraView view;
 } Camera; /* size = 0x50 */
 
-extern Camera g_Cameras[];
+/* The main view's camera and INSET_CAMERA */
+#define CAMERA_COUNT 2
+
+extern Camera g_Cameras[CAMERA_COUNT];
 
 /* The matrices that DrawGame builds for one camera in one frame */
 typedef struct CameraMatrices {
