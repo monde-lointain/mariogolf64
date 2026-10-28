@@ -129,15 +129,6 @@ typedef struct TrophyPosition {
   u32 y;
 } TrophyPosition;
 
-extern s16 D_802300A0_ovl_01;
-extern s16 D_802300A2_ovl_01;
-extern s16 D_802300A4_ovl_01; /* Which of D_8023A814's buffers holds the course
-                                 image shown */
-extern s16 D_802300A6_ovl_01;
-extern s32 D_802300A8_ovl_01;
-extern s32 D_802300AC_ovl_01;
-extern TrophyPosition D_80230100_ovl_01[COURSE_COUNT];
-extern const char* D_802300B4_ovl_01[STATS_COUNT];
 extern const char D_802318A8_ovl_01[];
 extern const char D_802318AC_ovl_01[];
 
@@ -154,17 +145,23 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
 
-/* The stats' names, which D_802300B4 points to */
-const char D_80231810_ovl_01[] = "Sand Saves";
-const char D_8023181C_ovl_01[] = "Par Ons";
-const char D_80231824_ovl_01[] = "Par Saves";
-const char D_80231830_ovl_01[] = "Avg. Putt";
-const char D_8023183C_ovl_01[] = "On Fairway";
-const char D_80231848_ovl_01[] = "Avg. Drive";
-const char D_80231854_ovl_01[] = "Best Drive";
-const char D_80231860_ovl_01[] = "Average";
-const char D_80231868_ovl_01[] = "Best Score";
-const char D_80231874_ovl_01[] = "Round";
+static s16 D_802300A0_ovl_01 = 0;
+static s16 D_802300A2_ovl_01 = 0;
+/* Which of D_8023A814's buffers holds the course image shown */
+static s16 D_802300A4_ovl_01 = 0;
+static s16 D_802300A6_ovl_01 = 0;
+static s32 D_802300A8_ovl_01 = 0;
+static s32 D_802300AC_ovl_01 = 0;
+/* Read by no routine */
+static s32 D_802300B0_ovl_01 = 0;
+static const char* D_802300B4_ovl_01[STATS_COUNT] = {"Round", "Best Score",
+    "Average", "Best Drive", "Avg. Drive", "On Fairway", "Avg. Putt",
+    "Par Saves", "Par Ons", "Sand Saves"};
+static f32 D_802300DC_ovl_01 = 0.0f;
+/* Read by no routine */
+static char D_802300E0_ovl_01[3][10] = {"EXP", "ｺｰｽｹﾞｯﾄ", "純ﾞ"};
+static TrophyPosition D_80230100_ovl_01[COURSE_COUNT] = {
+    {230, 177}, {230, 177}, {230, 177}, {236, 165}, {226, 184}, {236, 175}};
 
 static Mat4 D_8023A790_ovl_01;
 static Mat4 D_8023A7D0_ovl_01;
@@ -387,8 +384,6 @@ void func_8020E390_ovl_01(void) {
  * courses' images */
 #define COURSE_BOARD_KIND 11
 #define COURSE_TOTALS_IMAGE COURSE_COUNT
-
-extern f32 D_802300DC_ovl_01;
 
 /*
  * Doesn't match: the original copies the wheel's slot count to a saved register
