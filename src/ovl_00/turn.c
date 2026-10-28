@@ -55,12 +55,12 @@
 /* The buttons that hold the impact point mode */
 #define IMPACT_POINT_BUTTONS (Z_TRIG | L_TRIG)
 
-/* D_800C3084's bits, which UpdateShotFlags sets for the shot being set up */
-#define SHOT_UNK3084_ON_GREEN 1
-#define SHOT_UNK3084_NO_IMPACT_POINT 2 /* For a putter, or in mini golf */
-#define SHOT_UNK3084_APPROACH 4
+/* g_ShotFlags's bits, which UpdateShotFlags sets for the shot being set up */
+#define SHOT_FLAG_ON_GREEN 1
+#define SHOT_FLAG_NO_IMPACT_POINT 2 /* For a putter, or in mini golf */
+#define SHOT_FLAG_APPROACH 4
 /* Set while g_CurrentShot.unk50 is at most SHOT_UNK8_MAX_UNK50 */
-#define SHOT_UNK3084_UNK8 8
+#define SHOT_FLAG_UNK8 8
 #define SHOT_UNK50_SCALE (1.0f / 1536)
 #define SHOT_UNK8_MAX_UNK50 600.0f
 
@@ -157,7 +157,7 @@
  */
 #define STROKE_PRIORITY_BASE 200
 /* The stick turns the aim by half its tilt, times a quarter (a sixth for
- * D_800C3078) of it */
+ * g_AltHeading) of it */
 #define AIM_STICK_SPEED_DIVISOR 4
 #define ALT_HEADING_STICK_SPEED_DIVISOR 6
 /* The D-pad's turn speeds up over this many frames */
@@ -283,13 +283,13 @@
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
 extern s32 D_800C3070;
-extern s8
-    D_800C3068; /* Keeps the last heading for the next shot, in Training */
+extern s8 g_IsTrainingHeadingKept; /* Keeps the last heading for the next shot,
+                                      in Training */
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
-extern s8 D_800C3098; /* Asks for the HUD to turn away when the next player is
-                         picked */
+extern s8 g_IsHudTurnAwayRequested; /* Asks for the HUD to turn away when the
+                         next player is picked */
 extern s32 D_80223E40_ovl_00; /* Set once the shot preview has been built */
 extern f32 D_80223E48_ovl_00; /* A debug tilt of the aim camera, which the C
                                  buttons tune */
@@ -305,19 +305,20 @@ extern RingShotRecord D_80105F40[];
 extern s32 D_80223FEC_ovl_00; /* Frames since the last ambient sound */
 /* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
 extern s32 D_80223EF0_ovl_00[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES];
+extern s16 g_FreeLookHeading; /* The free-look camera's heading, in binary angle
+                                 units */
+extern s32 g_ImpactPointLingerFrameCount;
+extern s32 g_ShotFlags;
 extern s16
-    D_800C307A; /* The free-look camera's heading, in binary angle units */
-extern s32 D_800C3080;
-extern s32 D_800C3084;
-extern s16
-    D_800C3078; /* A heading that TurnAim can turn in place of the shot's */
+    g_AltHeading; /* A heading that TurnAim can turn in place of the shot's */
 extern s32 D_80223E50_ovl_00; /* Frames that the D-pad has turned the aim,
                                  negative to the right */
 extern s32
     D_80223E44_ovl_00; /* Frames that a replayed shot's aim has been settled */
 extern CurrentShot D_80104F78; /* The replayed shot */
-extern s32 D_800C3074; /* Set once A has been pressed to take the shot */
-extern s32 D_800C307C;
+extern s32
+    g_HasPressedShotButton; /* Set once A has been pressed to take the shot */
+extern s32 g_ShotSetupFrameCount;
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
 extern s32 f_ShotFlightCount;
@@ -471,7 +472,7 @@ void PlaceShotCamera(void) {
     point[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     point[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-    heading = (u16)D_800C307A * BINARY_ANGLE_TO_RADIANS;
+    heading = (u16)g_FreeLookHeading * BINARY_ANGLE_TO_RADIANS;
     if (!g_GameState.isMiniGolf) {
       g_Cameras[0].view.lookAt[AXIS_X] =
           (point[AXIS_X] + (cosf(heading) * PAUSE_CAMERA_RADIUS)) *
@@ -568,7 +569,7 @@ void PlaceShotCamera(void) {
       }
     }
 
-    if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+    if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
       point[AXIS_Y] = lowestGround - NO_IMPACT_POINT_DROP +
           (g_CurrentShot.aimCameraHeight * NO_IMPACT_POINT_HEIGHT_SCALE);
     } else {
@@ -584,7 +585,7 @@ void PlaceShotCamera(void) {
     }
 
     g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-    if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
+    if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
       point[AXIS_X] =
           (cosf(heading) *
               (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) +
@@ -627,7 +628,7 @@ void PlaceShotCamera(void) {
     /* The middle of the ball and the cup is worked out, but the ball is used */
     center[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
     center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-    heading = ((u16)D_800C3078 * BINARY_ANGLE_TO_RADIANS) + M_PI;
+    heading = ((u16)g_AltHeading * BINARY_ANGLE_TO_RADIANS) + M_PI;
     center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] +
         ((g_HoleSetup.cupPosition[AXIS_X] -
              g_CurrentShot.ballPosition[AXIS_X]) *
@@ -679,7 +680,7 @@ void AimDownRange(void) {
   f32 heading;
 
   GetSelectedClub();
-  if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
+  if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
     g_CurrentShot.aimCameraHeight = DOWN_RANGE_GREEN_OFFSET;
     g_CurrentShot.aimCameraDistance = DOWN_RANGE_GREEN_OFFSET;
   } else {
@@ -777,7 +778,7 @@ void StartFreeLook(void) {
   D_800C3070 = 0;
   g_IsSettingImpactPoint = FALSE;
   g_RoundHud.flags = FREE_LOOK_HUD_FLAGS;
-  D_800C307A = g_CurrentShot.unk0;
+  g_FreeLookHeading = g_CurrentShot.unk0;
   SetMenuBackdrop(MENU_BACKDROP_PATTERN);
   g_PauseScreen = PAUSE_SCREEN_UNK4;
   g_RoundHud.isLetterboxShown = FALSE;
@@ -792,7 +793,7 @@ void StartFreeLook(void) {
 
 void UpdateImpactPointMode(void) {
   if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
-      !(D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT)) {
+      !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
     if (!g_IsSettingImpactPoint && D_80227194_ovl_00 == 0) {
       PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
           IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
@@ -812,7 +813,7 @@ void ResetAimCamera(void) {
   g_CurrentShot.aimCameraDistance = AIM_CAMERA_START_DISTANCE;
   g_CurrentShot.aimCameraHeight = AIM_CAMERA_START_HEIGHT;
   D_800C3070 = 0;
-  D_800C3080 = 0;
+  g_ImpactPointLingerFrameCount = 0;
   PlaceAimCamera();
 }
 
@@ -823,9 +824,9 @@ void EaseAimCamera(void) {
   s32 targetDistance;
   s32 targetHeight;
 
-  if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+  if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     targetDistance = AIM_CAMERA_PUTT_DISTANCE;
-  } else if (D_800C3084 & SHOT_UNK3084_APPROACH) {
+  } else if (g_ShotFlags & SHOT_FLAG_APPROACH) {
     targetDistance = g_CurrentShot.unk50 - AIM_CAMERA_APPROACH_BACKOFF;
   } else {
     targetDistance =
@@ -833,9 +834,9 @@ void EaseAimCamera(void) {
         UNITS_PER_YARD;
   }
 
-  if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+  if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     targetHeight = AIM_CAMERA_PUTT_HEIGHT;
-  } else if (D_800C3084 & SHOT_UNK3084_APPROACH) {
+  } else if (g_ShotFlags & SHOT_FLAG_APPROACH) {
     targetHeight = AIM_CAMERA_APPROACH_HEIGHT;
   } else {
     targetHeight = AIM_CAMERA_SHOT_HEIGHT;
@@ -868,7 +869,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", EaseAimCamera);
 /* Raises or lowers the aim camera with the C buttons, in smaller steps for a
  * putt */
 void MoveAimCameraHeightByButtons(void) {
-  if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+  if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     if (g_TurnController.buttons & D_CBUTTONS) {
       g_CurrentShot.aimCameraHeight += AIM_CAMERA_BUTTON_PUTT_STEP;
     } else if (g_TurnController.buttons & U_CBUTTONS) {
@@ -886,9 +887,9 @@ void MoveAimCameraHeightByButtons(void) {
 /* Turns the free-look camera with C-left and C-right */
 void TurnFreeLook(void) {
   if (g_TurnController.buttons & L_CBUTTONS) {
-    D_800C307A -= FREE_LOOK_TURN_STEP;
+    g_FreeLookHeading -= FREE_LOOK_TURN_STEP;
   } else if (g_TurnController.buttons & R_CBUTTONS) {
-    D_800C307A += FREE_LOOK_TURN_STEP;
+    g_FreeLookHeading += FREE_LOOK_TURN_STEP;
   }
 }
 
@@ -897,7 +898,7 @@ void TurnFreeLook(void) {
 void CraneAimCamera(void) {
   s32 stepCount;
 
-  if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+  if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     if (g_CurrentShot.shotMode == PUTT_MODE_SHORT) {
       stepCount = 10;
     } else if (g_CurrentShot.shotMode == PUTT_MODE_MIDDLE) {
@@ -927,7 +928,7 @@ void CraneAimCamera(void) {
 /* Moves the aim camera along the aim line with the C buttons, in smaller steps
  * for a putt */
 void MoveAimCameraDistanceByButtons(void) {
-  if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+  if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     if (g_TurnController.buttons & R_CBUTTONS) {
       g_CurrentShot.aimCameraDistance += AIM_CAMERA_BUTTON_PUTT_STEP;
     } else if (g_TurnController.buttons & L_CBUTTONS) {
@@ -947,7 +948,7 @@ void MoveAimCameraDistanceByButtons(void) {
 void MoveAimCameraDistanceByUpDown(void) {
   s32 stepCount;
 
-  if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+  if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     if (g_CurrentShot.shotMode == PUTT_MODE_SHORT) {
       stepCount = 10;
     } else if (g_CurrentShot.shotMode == PUTT_MODE_MIDDLE) {
@@ -981,7 +982,7 @@ void MoveAimCameraHeight(void) {
 /* Moves the aim camera along the aim line with the stick's Y, in smaller steps
  * for a putt */
 void MoveAimCameraDistance(void) {
-  if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+  if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     if (ABS(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
       g_CurrentShot.aimCameraDistance += g_TurnController.stickY /
           AIM_DISTANCE_STICK_STEP * AIM_CAMERA_PUTT_DISTANCE_STEP;
@@ -995,7 +996,7 @@ void MoveAimCameraDistance(void) {
 }
 
 /*
- * Turns the aim with the stick, or D_800C3078 instead when asked, and the
+ * Turns the aim with the stick, or g_AltHeading instead when asked, and the
  * shot's heading with the D-pad, faster the longer it is held. While the
  * heading holds still, the scene is drawn from a saved frame, through two
  * framebuffers.
@@ -1036,7 +1037,7 @@ void TurnAim(s32 turnsAltHeading) {
       step *= speed;
     }
 
-    D_800C3078 -= step;
+    g_AltHeading -= step;
   }
 
   dpad = g_TurnController.buttons & (L_JPAD | R_JPAD);
@@ -1137,7 +1138,7 @@ s32 UpdateAimControls(void) {
     return FALSE;
   }
 
-  D_800C3074 = 0;
+  g_HasPressedShotButton = 0;
   if (g_TurnController.buttons == AIM_RESET_BUTTONS) {
     g_CurrentShot.unk0 = atan2(g_HoleSetup.cupPosition[AXIS_Z] -
                                  g_CurrentShot.ballPosition[AXIS_Z],
@@ -1151,18 +1152,18 @@ s32 UpdateAimControls(void) {
       case LETTERBOX_STATE_NONE:
         if ((g_TurnController.pressedButtons & A_BUTTON) &&
             IsShotModeChangeDone()) {
-          D_800C3074 = 1;
+          g_HasPressedShotButton = 1;
           ResetAimCamera();
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(
               SOUND_LOOK_DOWN_RANGE, g_NextSoundChannel, LOOK_SOUND_VOLUME);
-          if (D_800C3084 & SHOT_UNK3084_UNK8) {
+          if (g_ShotFlags & SHOT_FLAG_UNK8) {
             g_LetterboxState = LETTERBOX_STATE_UNK3;
             toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                 g_CurrentShot.ballPosition[AXIS_X];
             toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
                 g_CurrentShot.ballPosition[AXIS_Z];
-            D_800C3078 = (atan2(toCup[AXIS_Z], toCup[AXIS_X]) + M_PI) *
+            g_AltHeading = (atan2(toCup[AXIS_Z], toCup[AXIS_X]) + M_PI) *
                 RADIANS_TO_BINARY_ANGLE;
             g_CurrentShot.aimCameraDistance =
                 -sqrtf((toCup[AXIS_X] * toCup[AXIS_X]) +
@@ -1178,7 +1179,7 @@ s32 UpdateAimControls(void) {
           g_LetterboxState = LETTERBOX_STATE_UNK1;
         }
 
-        if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+        if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
           TurnAim(0);
         }
 
@@ -1239,7 +1240,7 @@ s32 UpdateAimControls(void) {
     if (D_80227194_ovl_00 == 0) {
       if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
           g_PauseScreen != PAUSE_SCREEN_UNK4 &&
-          !(D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT)) {
+          !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
         if (g_IsSettingImpactPoint != TRUE) {
           PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
               IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
@@ -1247,15 +1248,15 @@ s32 UpdateAimControls(void) {
         }
 
         g_IsSettingImpactPoint = TRUE;
-        D_800C3080 = 0;
+        g_ImpactPointLingerFrameCount = 0;
       } else {
         StopSound(IMPACT_POINT_SOUND_CHANNEL);
         if (g_IsSettingImpactPoint != FALSE) {
           g_IsSettingImpactPoint = -1;
         }
 
-        if (D_800C3080 < IMPACT_POINT_LINGER_FRAMES) {
-          D_800C3080++;
+        if (g_ImpactPointLingerFrameCount < IMPACT_POINT_LINGER_FRAMES) {
+          g_ImpactPointLingerFrameCount++;
         } else {
           g_IsSettingImpactPoint = FALSE;
         }
@@ -1267,20 +1268,19 @@ s32 UpdateAimControls(void) {
       case LETTERBOX_STATE_UNK5:
         if ((g_TurnController.pressedButtons & A_BUTTON) &&
             IsShotModeChangeDone()) {
-          D_800C3074 = 1;
+          g_HasPressedShotButton = 1;
           ResetAimCamera();
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(SOUND_LOOK_AT_CUP, g_NextSoundChannel, LOOK_SOUND_VOLUME);
-          if ((D_800C3084 &
-                  (SHOT_UNK3084_UNK8 | SHOT_UNK3084_NO_IMPACT_POINT)) ==
-              (SHOT_UNK3084_UNK8 | SHOT_UNK3084_NO_IMPACT_POINT)) {
+          if ((g_ShotFlags & (SHOT_FLAG_UNK8 | SHOT_FLAG_NO_IMPACT_POINT)) ==
+              (SHOT_FLAG_UNK8 | SHOT_FLAG_NO_IMPACT_POINT)) {
             toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                 g_CurrentShot.ballPosition[AXIS_X];
             toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
                 g_CurrentShot.ballPosition[AXIS_Z];
             g_LetterboxState = LETTERBOX_STATE_UNK3;
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
-            D_800C3078 = g_CurrentShot.unk0;
+            g_AltHeading = g_CurrentShot.unk0;
             g_CurrentShot.aimCameraDistance =
                 -sqrtf((toCup[AXIS_X] * toCup[AXIS_X]) +
                     (toCup[AXIS_Z] * toCup[AXIS_Z])) -
@@ -1301,10 +1301,10 @@ s32 UpdateAimControls(void) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           ResetAimCamera();
-          D_800C307C = 0;
+          g_ShotSetupFrameCount = 0;
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
-          D_800C307C = 0;
+          g_ShotSetupFrameCount = 0;
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           ResetAimCamera();
         }
@@ -1315,13 +1315,13 @@ s32 UpdateAimControls(void) {
         D_800C3070 = 1;
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
-          D_800C307C = 0;
+          g_ShotSetupFrameCount = 0;
           D_800C3070 = 0;
           ResetAimCamera();
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
-          D_800C307C = 0;
+          g_ShotSetupFrameCount = 0;
           g_LetterboxState = LETTERBOX_STATE_NONE;
           D_800C3070 = 0;
           ResetAimCamera();
@@ -1332,34 +1332,34 @@ s32 UpdateAimControls(void) {
       case LETTERBOX_STATE_UNK3:
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
-          D_800C307C = 0;
+          g_ShotSetupFrameCount = 0;
           ResetAimCamera();
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
         } else if (g_TurnController.pressedButtons & R_TRIG) {
-          D_800C307C = 0;
+          g_ShotSetupFrameCount = 0;
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           g_LetterboxState = LETTERBOX_STATE_NONE;
           ResetAimCamera();
         }
 
         TurnAim(0);
-        D_800C3078 = g_CurrentShot.unk0;
+        g_AltHeading = g_CurrentShot.unk0;
         break;
       case LETTERBOX_STATE_UNK4:
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
-          D_800C307C = 0;
+          g_ShotSetupFrameCount = 0;
           ResetAimCamera();
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           g_LetterboxState = LETTERBOX_STATE_NONE;
           ResetAimCamera();
-          D_800C307C = 0;
+          g_ShotSetupFrameCount = 0;
         }
 
         TurnAim(0);
-        D_800C3078 = g_CurrentShot.unk0;
+        g_AltHeading = g_CurrentShot.unk0;
         break;
     }
   }
@@ -1368,7 +1368,7 @@ s32 UpdateAimControls(void) {
     g_RoundHud.greenGridState = 0;
   }
 
-  if (D_800C3074 != 1) {
+  if (g_HasPressedShotButton != 1) {
     if (g_TurnController.buttons & AIM_CAMERA_BUTTONS) {
       if (g_LetterboxState == LETTERBOX_STATE_NONE ||
           g_LetterboxState == LETTERBOX_STATE_UNK5 ||
@@ -1406,7 +1406,7 @@ s32 UpdateAimControls(void) {
 
     if (g_PauseScreen != PAUSE_SCREEN_UNK4 &&
         (g_TurnController.pressedButtons & IMPACT_POINT_BUTTONS) &&
-        !(D_800C3084 & SHOT_UNK3084_ON_GREEN)) {
+        !(g_ShotFlags & SHOT_FLAG_ON_GREEN)) {
       SpawnRisingClumps(g_CurrentShot.ballPosition);
     }
   }
@@ -1433,7 +1433,7 @@ s32 UpdateAimControls(void) {
       g_CurrentShot.aimCameraDistance = maxDistance;
     }
   } else {
-    if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
+    if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
       if (g_CurrentShot.aimCameraHeight > GREEN_AIM_CAMERA_MIN_HEIGHT) {
         g_CurrentShot.aimCameraHeight = GREEN_AIM_CAMERA_MIN_HEIGHT;
       }
@@ -1471,31 +1471,31 @@ void UpdateShotFlags(void) {
   s32 surfaceMask = GetSelectedClub()->surfaceMask;
   s8* isMiniGolf;
 
-  D_800C3084 = 0;
+  g_ShotFlags = 0;
   if (surfaceMask & CLUB_SURFACE_GREEN) {
-    D_800C3084 = SHOT_UNK3084_NO_IMPACT_POINT;
+    g_ShotFlags = SHOT_FLAG_NO_IMPACT_POINT;
   }
 
   isMiniGolf = &g_GameState.isMiniGolf;
 
   if (*isMiniGolf) {
-    D_800C3084 |= SHOT_UNK3084_NO_IMPACT_POINT;
+    g_ShotFlags |= SHOT_FLAG_NO_IMPACT_POINT;
   }
 
   if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
-    D_800C3084 |= SHOT_UNK3084_ON_GREEN;
+    g_ShotFlags |= SHOT_FLAG_ON_GREEN;
   }
 
   if (*isMiniGolf) {
-    D_800C3084 |= SHOT_UNK3084_ON_GREEN | SHOT_UNK3084_NO_IMPACT_POINT;
+    g_ShotFlags |= SHOT_FLAG_ON_GREEN | SHOT_FLAG_NO_IMPACT_POINT;
   }
 
   if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
-    D_800C3084 |= SHOT_UNK3084_APPROACH;
+    g_ShotFlags |= SHOT_FLAG_APPROACH;
   }
 
   if (g_CurrentShot.unk50 * SHOT_UNK50_SCALE <= SHOT_UNK8_MAX_UNK50) {
-    D_800C3084 |= SHOT_UNK3084_UNK8;
+    g_ShotFlags |= SHOT_FLAG_UNK8;
   }
 }
 
@@ -2290,7 +2290,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.unk40 = 0;
   g_CurrentShot.unk50 = GetCupDistance(
       x - g_HoleSetup.cupPosition[AXIS_X], z - g_HoleSetup.cupPosition[AXIS_Z]);
-  if (!D_800C3068 || g_GameState.gameMode != GAME_MODE_TRAINING) {
+  if (!g_IsTrainingHeadingKept || g_GameState.gameMode != GAME_MODE_TRAINING) {
     s32 surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
 
     if (g_HolePoints.unk60[0][AXIS_X] == 0 ||
@@ -2318,7 +2318,7 @@ void StartPlayerShot(s32 playerIndex) {
     PickStartingClub(&g_HoleSetup);
   }
 
-  D_800C3068 = FALSE;
+  g_IsTrainingHeadingKept = FALSE;
   if (IsGameFlagSet(GAME_FLAG_AIM_DOWN_RANGE)) {
     AimDownRange();
     g_LetterboxState = LETTERBOX_STATE_UNK1;
@@ -2425,9 +2425,9 @@ void PickNextPlayer(void) {
 
   g_GameState.currentPlayerIndex = nextPlayer;
   g_Players[nextPlayer].unkC = 0;
-  if (D_800C3098) {
+  if (g_IsHudTurnAwayRequested) {
     StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
-    D_800C3098 = 0;
+    g_IsHudTurnAwayRequested = 0;
   }
 }
 #else
@@ -3132,7 +3132,7 @@ void UpdateTurns(void) {
         g_RoundHud.unk12 = 1;
         D_80227150_ovl_00.clubIndex = g_CurrentShot.clubSlot;
         D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
-        D_800C307C = 0;
+        g_ShotSetupFrameCount = 0;
         SetCharacterClub(
             0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot]);
         if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
@@ -3637,7 +3637,7 @@ void UpdateTurns(void) {
           }
 
           if ((D_80227194_ovl_00 != 0 && isReady) ||
-              (D_80227194_ovl_00 == 0 && D_800C3074 == 1)) {
+              (D_80227194_ovl_00 == 0 && g_HasPressedShotButton == 1)) {
             g_ShowsGroundWaves = 0;
             if (g_CurrentShot.shotMode != SHOT_MODE_APPROACH) {
               SkipToAnimationEnd(0);
@@ -3688,13 +3688,13 @@ void UpdateTurns(void) {
           D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
           D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
           PlaceShotCamera();
-          if (D_800C3084 & 1) {
+          if (g_ShotFlags & 1) {
             if (g_LetterboxState == 5 || g_LetterboxState == 0) {
               g_RoundHud.flags = 5;
             } else {
               g_RoundHud.flags = 0x45;
             }
-          } else if (D_800C3084 & 2) {
+          } else if (g_ShotFlags & 2) {
             if (g_LetterboxState == 5 || g_LetterboxState == 0) {
               g_RoundHud.flags = 7;
             } else {
@@ -3729,7 +3729,7 @@ void UpdateTurns(void) {
 
         g_RoundHud.unkF = 0;
         g_RoundHud.unk12 = 0;
-        if (D_800C3084 & 2) {
+        if (g_ShotFlags & 2) {
           g_RoundHud.flags = 0x10;
         } else {
           g_RoundHud.flags = 0x18;
@@ -3810,7 +3810,7 @@ void UpdateTurns(void) {
         ReuseLastCharacterMatrices(0);
         BuildShotPreview(&D_80227150_ovl_00, state);
         areCallsAllowed = FALSE;
-        if (D_800C3084 & 2) {
+        if (g_ShotFlags & 2) {
           g_RoundHud.flags = 0x20;
         } else {
           g_RoundHud.flags = 0x28;
@@ -4497,7 +4497,7 @@ void UpdateTurns(void) {
               ForceStopRumble();
               break;
             case 4:
-              D_800C3068 = 1;
+              g_IsTrainingHeadingKept = 1;
               g_Players[playerIndex] = g_SavedPlayers[playerIndex];
               EndFlightCamera();
               StartHudAnimation(2);
@@ -4563,7 +4563,7 @@ void UpdateTurns(void) {
         CheckRingShotClear(playerIndex);
         if (D_80227170_ovl_00[playerIndex] == 1) {
           StartBanner(-1);
-          D_800C3098 = 1;
+          g_IsHudTurnAwayRequested = 1;
           if (g_GameState.unk31) {
             nextState = 0x14;
           } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||

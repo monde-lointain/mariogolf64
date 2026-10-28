@@ -50,12 +50,12 @@
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
 extern s32 D_800C3070;
-extern s32 D_800C3074;
-extern s16 D_800C3078;
-extern s16 D_800C307A;
-extern s32 D_800C307C;
-extern s32 D_800C3080;
-extern s32 D_800C3084;
+extern s32 g_HasPressedShotButton;
+extern s16 g_AltHeading;
+extern s16 g_FreeLookHeading;
+extern s32 g_ShotSetupFrameCount;
+extern s32 g_ImpactPointLingerFrameCount;
+extern s32 g_ShotFlags;
 extern s32 D_800C3088;
 extern s8 D_800C30A4;
 extern s32 g_PlayExit;
@@ -69,7 +69,7 @@ extern s32 D_80104F90;
 extern u8 D_800FE330;
 extern s8 D_800FBDB8;
 extern s32 D_800C3094;
-extern s8 D_800C3098;
+extern s8 g_IsHudTurnAwayRequested;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 
@@ -101,15 +101,15 @@ s32 func_8005F180(void) {
 void func_8005F1C8(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
   D_800C3070 = 0;
-  D_800C3074 = 0;
-  D_800C3078 = 0;
-  D_800C3084 = 0;
+  g_HasPressedShotButton = 0;
+  g_AltHeading = 0;
+  g_ShotFlags = 0;
   D_800C3088 = 0;
   g_LetterboxState = 0;
   g_IsSettingImpactPoint = 0;
-  D_800C307A = 0;
-  D_800C307C = 0;
-  D_800C3080 = 0;
+  g_FreeLookHeading = 0;
+  g_ShotSetupFrameCount = 0;
+  g_ImpactPointLingerFrameCount = 0;
 }
 
 s32 func_8005F224(void) {
@@ -351,7 +351,7 @@ void PlacePlayersOnTee(void) {
   f32 teeHeight;
 
   D_800C3094 = 0;
-  D_800C3098 = 0;
+  g_IsHudTurnAwayRequested = 0;
   if (g_GameState.unk30 != 2) {
     for (i = 0; i < MAX_PLAYER_COUNT; i++) {
       g_Players[i].unkC = PLAYER_STATE_UNK17;
@@ -679,7 +679,7 @@ extern s32 g_PlayStateFrameCount;
 extern s32 g_PlayFrameCount;
 extern s8 g_IsPlayStateBackedUp;
 extern s32 g_DebugCupIndex;
-extern s8 D_800C3068;
+extern s8 g_IsTrainingHeadingKept;
 void func_80241800();
 void func_80242384();
 s32 func_80241FF0();
@@ -1157,7 +1157,7 @@ void UpdatePlay(void) {
         break;
       case GAME_STATE_FLYOVER:
         g_RoundHud.isHoleIntroTextShown = FALSE;
-        D_800C3068 = 0;
+        g_IsTrainingHeadingKept = 0;
         g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
         g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
         if (StepHoleFlyover() ||

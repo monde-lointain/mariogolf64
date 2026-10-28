@@ -66,8 +66,8 @@ typedef struct ShotLabel {
   /* 0xC */ s32 corner; /* NO_CORNER when the tag is hidden */
 } ShotLabel; /* size = 0x10 */
 
-/* D_800C3084's bit for a shot from the green */
-#define SHOT_UNK3084_ON_GREEN 1
+/* g_ShotFlags's bit for a shot from the green */
+#define SHOT_FLAG_ON_GREEN 1
 
 /* The sign shows the shot's distance, with the target's height below it */
 #define SIGN_WIDTH 40
@@ -147,9 +147,9 @@ extern s8 f_TagOffsetsX[CORNER_COUNT];
 extern s8 f_TagOffsetsY[CORNER_COUNT];
 extern f32 f_OutOfBoundsPulseAngle;
 extern s32 f_PinFlagWaveFrame;
-extern s32 D_800C3084;
-extern s32 D_800C307C; /* Frames, up to PIN_FLAG_HIDE_FRAME, since the shot was
-                          set up */
+extern s32 g_ShotFlags;
+extern s32 g_ShotSetupFrameCount; /* Frames, up to PIN_FLAG_HIDE_FRAME, since
+                          the shot was set up */
 
 void DrawShotLabels(Gfx** displayListHead);
 void DrawShotPreview(CameraMatrices* matrices);
@@ -725,8 +725,8 @@ OPAQUE:
     }
   }
 
-  if (D_800C307C < PIN_FLAG_HIDE_FRAME) {
-    D_800C307C++;
+  if (g_ShotSetupFrameCount < PIN_FLAG_HIDE_FRAME) {
+    g_ShotSetupFrameCount++;
   }
 
   if (g_RoundHud.unk12 == 1) {
@@ -750,14 +750,14 @@ OPAQUE:
           gDPPipeSync(g_DisplayListHead++);
           gDPSetRenderMode(
               g_DisplayListHead++, PIN_FLAG_RENDER_MODE, PIN_FLAG_RENDER_MODE2);
-        } else if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
+        } else if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
           flagImage = PIN_FLAG_GREEN_IMAGE;
-          if (D_800C307C == PIN_FLAG_HIDE_FRAME) {
+          if (g_ShotSetupFrameCount == PIN_FLAG_HIDE_FRAME) {
             flagImage = PIN_FLAG_HIDDEN;
-          } else if (D_800C307C >= PIN_FLAG_FADE_FRAME) {
+          } else if (g_ShotSetupFrameCount >= PIN_FLAG_FADE_FRAME) {
             gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255,
                 255 -
-                    ((D_800C307C - (PIN_FLAG_FADE_FRAME - 1)) *
+                    ((g_ShotSetupFrameCount - (PIN_FLAG_FADE_FRAME - 1)) *
                         PIN_FLAG_FADE_STEP));
             gDPPipeSync(g_DisplayListHead++);
             gDPSetRenderMode(
