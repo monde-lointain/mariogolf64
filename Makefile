@@ -32,7 +32,7 @@ DEFINES     += -DNON_MATCHING
 endif
 
 OPTFLAGS    := -O2
-CFLAGS       = -G0 -mips3 -mgp32 -mfp32 -mno-abicalls -fno-PIC -ffast-math -nostdinc -funsigned-char -w $(OPTFLAGS)
+CFLAGS       = -G0 -mips3 -mgp32 -mfp32 -mno-abicalls -fno-PIC -ffast-math -nostdinc -funsigned-char -w -Wa,--force-n64align $(OPTFLAGS)
 ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
 LDFLAGS     := -T $(LD_SCRIPT) -T undefined_syms.txt -T $(BUILD_DIR)/splat/undefined_syms_auto.txt \
                -T $(BUILD_DIR)/splat/undefined_funcs_auto.txt -Map $(MAP) --no-check-sections
