@@ -20,10 +20,6 @@ extern u16* nuGfxZBuffer;
 
 #define DRAW_BUFFER_COUNT 2
 
-/* Which of DRAW_BUFFER_COUNT sets of per-frame matrices and vertices the frame
- * builds */
-extern s32 g_DrawBufferIndex;
-
 /* The scene light's direction, in binary angles */
 /* Where the ball is, in course units */
 extern s32 g_BallPosition[3];
@@ -201,24 +197,7 @@ extern u8* g_BlendedTextureStillLayer;
 /* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
 extern u8* g_NoiseTexels;
 
-/*
- * The screen row of the horizon in the main view, from its pitch and zoom.
- * The background drawer sets it.
- */
-extern s32 g_HorizonRow;
-
 /* Formatted text on its way to the screen */
 extern char g_PrintBuffer[];
-
-/*
- * Viewports in pairs, one per draw buffer. The first pair covers the
- * screen; the others start over its bottom-right quarter, and UpdateGame
- * fits the second pair to the inset view every frame.
- */
-#define VIEWPORT_FULL_SCREEN 0
-#define VIEWPORT_INSET 2
-#define VIEWPORT_STAFF_ROLL 4
-#define VIEWPORT_COUNT 6
-extern Vp g_Viewports[VIEWPORT_COUNT];
 
 #endif

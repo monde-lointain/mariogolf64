@@ -17,6 +17,7 @@
 #include "debug_text.h"
 #include "framing.h"
 #include "functions.h"
+#include "game.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_display.h"

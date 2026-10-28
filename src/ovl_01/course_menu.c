@@ -7,6 +7,7 @@
 #include "asset.h"
 #include "course.h"
 #include "cpu_projection.h"
+#include "game.h"
 #include "hole_display.h"
 #include "libc.h"
 #include "math_util.h"

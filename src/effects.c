@@ -18,6 +18,7 @@
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "functions.h"
+#include "game.h"
 #include "heap.h"
 #include "libc.h"
 #include "math_util.h"

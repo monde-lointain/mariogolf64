@@ -7,6 +7,7 @@
 #include "hole_triangles.h"
 
 #include "camera.h"
+#include "game.h"
 #include "game_flags.h"
 #include "save.h"
 #include "variables.h"

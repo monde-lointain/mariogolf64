@@ -13,6 +13,7 @@
 #include "cpu_projection.h"
 #include "debug_text.h"
 #include "functions.h"
+#include "game.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_loader.h"

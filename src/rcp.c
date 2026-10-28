@@ -5,6 +5,7 @@
 
 #include "cpu_projection.h"
 #include "functions.h"
+#include "game.h"
 #include "screen.h"
 #include "variables.h"
 

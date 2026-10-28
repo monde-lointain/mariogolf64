@@ -12,6 +12,7 @@
 #include "course.h"
 #include "cpu_projection.h"
 #include "functions.h"
+#include "game.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"

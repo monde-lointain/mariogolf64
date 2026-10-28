@@ -14,6 +14,7 @@
 #include "club.h"
 #include "controller.h"
 #include "functions.h"
+#include "game.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_loader.h"

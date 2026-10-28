@@ -13,6 +13,7 @@
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "effects.h"
+#include "game.h"
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_objects.h"

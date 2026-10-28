@@ -5,6 +5,8 @@
  */
 #include "common.h"
 
+#include "game.h"
+
 #include <lib/libnusys/nusys.h>
 
 #include "billboard.h"

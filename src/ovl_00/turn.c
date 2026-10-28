@@ -21,6 +21,7 @@
 #include "debug_text.h"
 #include "effects.h"
 #include "functions.h"
+#include "game.h"
 #include "game_flags.h"
 #include "golf_balls.h"
 #include "hole_display.h"

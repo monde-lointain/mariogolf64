@@ -11,6 +11,7 @@
 #include "club.h"
 #include "controller.h"
 #include "debug_text.h"
+#include "game.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "libc.h"

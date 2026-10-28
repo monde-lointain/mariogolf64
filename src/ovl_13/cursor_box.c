@@ -4,6 +4,7 @@
 #include "common.h"
 
 #include "asset.h"
+#include "game.h"
 #include "math_util.h"
 #include "screen.h"
 #include "variables.h"

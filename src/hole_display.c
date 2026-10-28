@@ -15,6 +15,7 @@
 #include "cpu_projection.h"
 #include "debug_text.h"
 #include "fireworks.h"
+#include "game.h"
 #include "game_flags.h"
 #include "hole_loader.h"
 #include "libc.h"
