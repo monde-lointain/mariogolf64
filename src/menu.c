@@ -139,7 +139,6 @@ extern u16 D_800C2016;
 extern u16 D_800C2028[1];
 extern u16 D_800C2064[7];
 extern s16 D_800C20D4[2];
-extern u16 D_800C20E0[][12];
 extern u16 D_800C28B0[1];
 
 void SetFramebufferCount(s32 count);
@@ -244,7 +243,8 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_801052BC[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
     if (g_MenuScreen == 5) {
-      size = OpenEncodedAsset(D_800C20E0[g_ChosenPlayerCount][index], &asset);
+      size =
+          OpenEncodedAsset(D_800C20F8[g_ChosenPlayerCount - 1][index], &asset);
     } else {
       size = OpenEncodedAsset(D_800C2064[index], &asset);
     }
@@ -252,7 +252,8 @@ void LoadMenuResources(void) {
     D_801049A0[index] = AllocMemory(size);
     ReadEncodedAsset(D_801049A0[index], &asset);
     if (g_MenuScreen == 5) {
-      size = OpenEncodedAsset(D_800C20E0[g_ChosenPlayerCount][index], &asset);
+      size =
+          OpenEncodedAsset(D_800C20F8[g_ChosenPlayerCount - 1][index], &asset);
     } else {
       size = OpenEncodedAsset(D_800C2064[index], &asset);
     }

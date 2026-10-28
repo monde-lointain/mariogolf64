@@ -246,7 +246,6 @@ extern s8 D_800C1FF0; /* The screen whose assets were last read */
 extern u16 D_800C2028[MENU_SCREEN_COUNT]; /* Each screen's image's asset ID */
 extern u16 D_800C2064[7];
 extern s16 D_800C20D4[2];
-extern u16 D_800C20E0[][12];
 extern void* D_800FBE30[2];
 extern void* D_800FC6A0;
 extern void* D_800FC898;
@@ -725,7 +724,7 @@ void func_801F4C78_ovl_01(void) {
 
       case 5:
         for (index = 0; index != ARRAY_COUNT(D_8012F4B0); index++) {
-          OpenEncodedAsset(D_800C20E0[g_ChosenPlayerCount][index], &asset);
+          OpenEncodedAsset(D_800C20F8[g_ChosenPlayerCount - 1][index], &asset);
           ReadEncodedAsset(D_8012F4B0[index], &asset);
         }
 

@@ -75,6 +75,11 @@ extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
 extern s16 D_800C2278[][COURSE_FILE_COUNT];
 extern void* D_800FBE38[COURSE_FILE_COUNT];
 
+/* Screen 5's images in place of D_800C2064's: a row of asset IDs for each
+ * g_ChosenPlayerCount from 1, of which it reads as many as D_800C2064 has */
+#define PLAYER_COUNT_ASSET_ROW_LENGTH 12
+extern u16 D_800C20F8[][PLAYER_COUNT_ASSET_ROW_LENGTH];
+
 /* The size of a course's tournament trophy images */
 typedef struct TrophySize {
   s8 width;
