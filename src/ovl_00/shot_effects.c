@@ -63,21 +63,6 @@ enum SparkKind {
 /* Counts the frames from the last impact flash, back to 0 after 100 */
 extern s32 f_ImpactFrameCount;
 
-/* Each spark's offset from its burst's point on screen, and its speed */
-extern f32 f_SparkOffsets[SPARK_COUNT][2];
-extern f32 f_SparkVelocities[SPARK_COUNT][2];
-extern f32 f_SparkAngles[SPARK_COUNT];
-/* The frames each spark has left; 0 when unused */
-extern u8 f_SparkLives[SPARK_COUNT];
-extern u8 f_SparkKinds[SPARK_COUNT];
-extern u8 f_SparkBursts[SPARK_COUNT];
-/* Each burst's age in frames, or NO_SPARK_BURST */
-extern s8 f_SparkBurstAges[SPARK_BURST_COUNT];
-extern u8 f_SparkBurstTimers[SPARK_BURST_COUNT];
-extern CoursePoint f_SparkBurstPoints[SPARK_BURST_COUNT];
-extern u8* f_SparkImage;
-extern u8* f_SwingTrailImage;
-
 /* The arguments of StartSwingTrail */
 #define SWING_TRAIL_CLEAR -1
 #define SWING_TRAIL_KIND_UNK1 1
@@ -118,12 +103,28 @@ extern s32 f_SwingTrailAlpha;
 /* A vertex at the origin for each edge of the trail */
 extern Vtx f_SwingTrailVertices[2];
 extern Mtx f_SwingTrailOrigin;
-extern Mtx f_SwingTrailProjections[DRAW_BUFFER_COUNT];
-extern Mtx f_SwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
-extern f32 f_SwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH][3];
-extern f32 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 
 f32 InterpolateHermite(f32 values[], f32 position);
+
+static Mtx f_SwingTrailProjections[DRAW_BUFFER_COUNT];
+static Mtx f_SparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
+/* Each spark's offset from its burst's point on screen, and its speed */
+static f32 f_SparkOffsets[SPARK_COUNT][2];
+static f32 f_SparkVelocities[SPARK_COUNT][2];
+static f32 f_SparkAngles[SPARK_COUNT];
+/* The frames each spark has left; 0 when unused */
+static u8 f_SparkLives[SPARK_COUNT];
+static u8 f_SparkKinds[SPARK_COUNT];
+static u8 f_SparkBursts[SPARK_COUNT];
+/* Each burst's age in frames, or NO_SPARK_BURST */
+static s8 f_SparkBurstAges[SPARK_BURST_COUNT];
+static u8 f_SparkBurstTimers[SPARK_BURST_COUNT];
+static CoursePoint f_SparkBurstPoints[SPARK_BURST_COUNT];
+static u8* f_SparkImage;
+static u8* f_SwingTrailImage;
+static Mtx f_SwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
+static f32 f_SwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH][3];
+static f32 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 
 void ResetShotEffects(void) {
   s32 i;
@@ -311,7 +312,6 @@ void StartFlagstickSparks(CoursePoint point) {
 #define SPARK_MAX_SCREEN_COORD 511
 
 extern Vtx f_SparkVertices[3];
-extern Mtx f_SparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
 
 #ifdef NON_MATCHING
 /*

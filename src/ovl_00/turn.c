@@ -315,17 +315,11 @@ extern f32 D_80223E48_ovl_00; /* A debug tilt of the aim camera, which the C
                                  buttons tune */
 extern Vtx D_80223E60_ovl_00[4]; /* A dash of the shot preview */
 extern Vtx D_80223EB0_ovl_00[4]; /* The putt preview's line, placed on screen */
-extern Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
 extern s32 D_80223EA0_ovl_00; /* How many steps the shot preview simulates */
 extern s32
     D_80223EA4_ovl_00; /* How many of the shot preview's points are shown */
 extern s8 D_80223EA8_ovl_00; /* Whether the shot preview ran to its end */
 extern s32 D_80223EAC_ovl_00; /* Scrolls the shot preview's dots */
-extern Mtx D_802271A0_ovl_00[2]
-                            [SHOT_PREVIEW_MAX_STEPS]; /* The preview's matrices,
-                                                         by draw buffer */
-extern f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS]
-                            [AXIS_COUNT]; /* The preview's points */
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
 extern s32 D_80223FEC_ovl_00; /* Frames since the last ambient sound */
@@ -340,13 +334,11 @@ extern s16
     D_800C3078; /* A heading that TurnAim can turn in place of the shot's */
 extern s32 D_80223E50_ovl_00; /* Frames that the D-pad has turned the aim,
                                  negative to the right */
-extern s32 D_80227194_ovl_00; /* Set while a recorded shot is replayed */
 extern s32
     D_80223E44_ovl_00; /* Frames that a replayed shot's aim has been settled */
 extern CurrentShot D_80104F78; /* The replayed shot */
 extern s32 D_800C3074; /* Set once A has been pressed to take the shot */
 extern s32 D_800C307C;
-extern s32 f_TurnTimerStart; /* Nothing reads it */
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
 extern s32 f_ShotFlightCount;
@@ -360,6 +352,27 @@ void func_8006034C(s8 value);
 s32 func_80060190(s32 strokes);
 s32 HasNoRingsLeft(UnkB8* player);
 void RecordRingShotClear(s32 playerIndex);
+
+static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
+/*
+ * The launch of the shot being taken, which the shot preview and the ball
+ * simulation start from. unkC is how far from the meter's impact mark the swing
+ * was stopped, and clubIndex and shotMode are also the club slot and shot mode
+ * that the golfer was last posed with.
+ */
+static Unk20 D_80227150_ovl_00;
+static s32 D_80227170_ovl_00[MAX_PLAYER_COUNT];
+static f32 D_80227180_ovl_00;
+static f32 D_80227184_ovl_00;
+static s32 D_80227188_ovl_00;
+static s32 D_8022718C_ovl_00;
+static s32 D_80227190_ovl_00;
+static s32 D_80227194_ovl_00; /* Set while a recorded shot is replayed */
+static s32 f_TurnTimerStart; /* Nothing reads it */
+/* The shot preview's matrices, by draw buffer */
+static Mtx D_802271A0_ovl_00[2][SHOT_PREVIEW_MAX_STEPS];
+/* The shot preview's points */
+static f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
 
 /* Not static: the original left these to the linker's common block */
 CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
@@ -2727,19 +2740,6 @@ extern s32 D_8022400C_ovl_00;
 extern f32 D_80224014_ovl_00;
 extern f32 D_80224018_ovl_00;
 extern u32 D_80223E58_ovl_00;
-/*
- * The launch of the shot being taken, which the shot preview and the ball
- * simulation start from. unkC is how far from the meter's impact mark the swing
- * was stopped, and clubIndex and shotMode are also the club slot and shot mode
- * that the golfer was last posed with.
- */
-extern Unk20 D_80227150_ovl_00;
-extern s32 D_80227170_ovl_00[MAX_PLAYER_COUNT];
-extern f32 D_80227180_ovl_00;
-extern f32 D_80227184_ovl_00;
-extern s32 D_80227188_ovl_00;
-extern s32 D_8022718C_ovl_00;
-extern s32 D_80227190_ovl_00;
 extern s32 D_8022B5C0_ovl_00;
 extern s32 D_800B7D9C;
 extern u16 D_80104998;
@@ -2749,7 +2749,6 @@ extern s32 D_800C3094;
 extern s8 g_ShowsGroundWaves;
 extern s32 g_PauseScreen;
 extern s32 g_IsSettingImpactPoint;
-extern f32 D_80227184_ovl_00;
 
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
  * it while Z is held */

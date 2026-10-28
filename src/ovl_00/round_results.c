@@ -176,68 +176,18 @@ extern s32 f_CourseNoticeAssets[];
 extern const char f_NumberFormat[];
 extern const char f_PlaceNumberFormat[];
 
-extern s32 f_UnlockNoticeKind;
-extern s32 f_NoticeStage;
-extern s32 f_NoticeFrameCount;
-extern s32 f_NoticeSwing;
-extern s32 f_NoticeUnk54;
-extern f32 f_NoticeAngle;
-extern s32 f_IsNoticeHeld;
-extern s32 f_NoticeTime;
-extern s32 f_NoticeFaceIndex;
-extern s32 f_NoticeLift;
-extern s32 f_NoticeUnk6C;
-
-extern u8* f_ResultsCourseImage;
-extern u8* f_PortraitImage;
-extern u8* f_PortraitPalette;
-extern u8* f_PlayerPortraitImages[MAX_PLAYER_COUNT];
-extern u8* f_PlayerPortraitPalettes[MAX_PLAYER_COUNT];
-extern u8* f_NameplateImage;
-extern u8* f_NoticeTitleImage;
-extern u8* f_ResultsShineImage;
-extern u8* f_DigitsImage;
-extern u8* f_ResultsBackdropImage;
-extern u8* f_ResultsHandImage;
-extern u8* f_ResultsLabelsImage;
-extern u8* f_ResultsLargeDigitsImage;
-extern u8* f_ResultsCloudImage;
-extern u8* f_ResultsPlacesImage;
-extern u8* f_FinalResultsTitleImage;
-extern u8* D_80225708_ovl_00;
-extern u8* D_80225718_ovl_00;
-extern u8* D_8022571C_ovl_00;
-extern u8* f_TrophyImage;
-extern u8* f_TrophyPalette;
-extern u8* f_MatchStandingWordsImage;
-extern u8* f_NintendoBadgeImage;
-extern u8* f_PlaceDigitsImage;
-extern s32 f_PortraitCharacterIndex;
-extern s32 f_PlayerResults[MAX_PLAYER_COUNT];
-extern s32 f_PlayerPoints[MAX_PLAYER_COUNT];
-extern s32 f_PlayerBetTotals[MAX_PLAYER_COUNT];
-extern s32 f_PlayerRanks[MAX_PLAYER_COUNT];
-extern s32 f_PointsEarned;
-extern s32 f_PointsShown;
-extern s32 f_PortraitAnimations[MAX_PLAYER_COUNT];
-extern s32 f_PortraitFrames[MAX_PLAYER_COUNT];
-extern s32 f_PortraitTimers[MAX_PLAYER_COUNT];
-extern s32 f_HasBets;
 /*
  * Each course's tournament prizes, in course points: first to third
  * place, then up to PRIZE_TOP_TEN, PRIZE_TOP_TWENTY and the rest
  */
 extern s32 f_TournamentPrizes[][TROPHY_PLACE_COUNT + 3];
-extern s32 f_PrizePoints;
-extern s32 f_PrizeShown;
 extern s32 f_BannerState;
 extern s32 f_BannerKind;
 /* The pressing hand shows while the results wait for A */
 extern s32 f_IsAwaitingConfirm;
 extern s32 f_ResultsUnk78;
 extern s32 f_ResultsUnk7C;
-/* The score password of a round of a tournament entered by password */
-extern char f_ScorePassword[];
+
 extern s32 f_BannerX;
 extern s32 f_BannerY;
 extern s32 f_TournamentOpenCourseCount;
@@ -282,6 +232,60 @@ s32 UpdateCoursePointsResults();
 s32 UpdateMatchResults();
 s32 func_8005CEE0(s32 index);
 void RecordComCharacterResult(s32 row, s32 column, s32 isWin);
+
+/* The score password shows as two lines of ten symbols */
+#define SCORE_PASSWORD_LINE_LENGTH 10
+
+static u8* f_ResultsBackdropImage;
+static u8* f_FinalResultsTitleImage;
+static u8* f_ResultsCourseImage;
+static u8* f_PortraitImage;
+static u8* f_PortraitPalette;
+static u8* f_PlayerPortraitImages[MAX_PLAYER_COUNT];
+static u8* f_PlayerPortraitPalettes[MAX_PLAYER_COUNT];
+static u8* f_ResultsCloudImage;
+static u8* f_ResultsLabelsImage;
+static u8* f_ResultsLargeDigitsImage;
+static u8* f_ResultsPlacesImage;
+static u8* D_80225708_ovl_00;
+static u8* f_NameplateImage;
+static u8* f_NoticeTitleImage;
+static u8* f_ResultsShineImage;
+static u8* D_80225718_ovl_00;
+static u8* D_8022571C_ovl_00;
+static u8* f_TrophyImage;
+static u8* f_TrophyPalette;
+static u8* f_ResultsHandImage;
+static u8* f_MatchStandingWordsImage;
+static u8* f_NintendoBadgeImage;
+static u8* f_DigitsImage;
+static u8* f_PlaceDigitsImage;
+static s32 f_UnlockNoticeKind;
+static s32 f_HasBets;
+static s32 f_PortraitCharacterIndex;
+static s32 f_NoticeStage;
+static s32 f_NoticeFrameCount;
+static s32 f_NoticeSwing;
+static s32 f_NoticeUnk54;
+static f32 f_NoticeAngle;
+static s32 f_IsNoticeHeld;
+static s32 f_NoticeTime;
+static s32 f_NoticeFaceIndex;
+static s32 f_NoticeLift;
+static s32 f_NoticeUnk6C;
+/* The score password of a round of a tournament entered by password */
+static char f_ScorePassword[2 * SCORE_PASSWORD_LINE_LENGTH];
+static s32 f_PlayerResults[MAX_PLAYER_COUNT];
+static s32 f_PlayerPoints[MAX_PLAYER_COUNT];
+static s32 f_PlayerBetTotals[MAX_PLAYER_COUNT];
+static s32 f_PlayerRanks[MAX_PLAYER_COUNT];
+static s32 f_PrizePoints;
+static s32 f_PrizeShown;
+static s32 f_PointsEarned;
+static s32 f_PointsShown;
+static s32 f_PortraitAnimations[MAX_PLAYER_COUNT];
+static s32 f_PortraitFrames[MAX_PLAYER_COUNT];
+static s32 f_PortraitTimers[MAX_PLAYER_COUNT];
 
 /* The course points that open the courses up to courseIndex, together */
 s32 SumCoursePointsNeeded(s32 courseIndex) {
@@ -3242,8 +3246,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E10_ovl_00);
 #define CLUB_TOURNAMENT_LABEL_PRIM_COLOR 0xFFFF0000
 #define SCORE_PASSWORD_ENV_COLOR 0x00FF0000
 #define SCORE_PASSWORD_PRIM_COLOR 0xFFFF0000
-/* The score password shows as two lines of ten symbols */
-#define SCORE_PASSWORD_LINE_LENGTH 10
 
 /* The text colour of each text slot, from slot 1 */
 extern u8 f_TextSlotColors[][3];

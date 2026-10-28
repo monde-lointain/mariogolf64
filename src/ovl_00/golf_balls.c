@@ -44,6 +44,10 @@
 #define HEAP_BALL_IMAGES 2
 #define BALL_IMAGE_HEAP_SIZE 0x1800
 
+/* The texture that "PIKA" is written into for Pikachu's ball */
+#define PIKA_TEXTURE_WIDTH 32
+#define PIKA_TEXTURE_HEIGHT 8
+
 /* The ball turns this many degrees as it rolls one course unit */
 #define BALL_ROLL_DEGREES_PER_UNIT 0.09325484f
 #define BALL_MODEL_SCALE 0.05f
@@ -84,20 +88,30 @@ extern s32 f_IsBallAfterimageZoomed;
 /* Set for the few afterimages that fade quickly */
 extern s32 f_IsBallAfterimageFast;
 extern s32 f_BallAfterimageLength;
-extern u8* f_BallShadowImage;
-extern u8* f_RollingBallImage;
-extern u8* f_BallSparkleImage;
-extern u8* f_BallMarkerImage;
-extern u8* f_BallAfterimageImage;
-extern u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE];
-extern u16 f_PikaBallTexture[];
-/* How the ball has turned as it rolled */
-extern Mat4 f_BallRotation;
-extern s32 f_GolfBallUnk100;
-/* The ball's position when last rolled */
-extern s32 f_LastRolledBallPosition[3];
 
 void func_801FD5F0_ovl_00(void) {}
+
+/* Where the ball of the player whose turn it is was last drawn */
+static s32 f_CurrentBallScreenX;
+static s32 f_CurrentBallScreenY;
+static s32 f_CurrentBallDepth;
+static u8* f_BallShadowImage;
+static u8* f_RollingBallImage;
+static u8* f_BallSparkleImage;
+static u8* f_BallMarkerImage;
+static u8* f_BallAfterimageImage;
+
+/* Read by no routine */
+static u8 D_80225830_ovl_00[16];
+
+static u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE];
+/* "PIKA" in 4-bit texels, four to a u16 */
+static u16 f_PikaBallTexture[PIKA_TEXTURE_WIDTH * PIKA_TEXTURE_HEIGHT / 4];
+/* How the ball has turned as it rolled */
+static Mat4 f_BallRotation;
+static s32 f_GolfBallUnk100;
+/* The ball's position when last rolled */
+static s32 f_LastRolledBallPosition[3];
 
 void DrawPikaBallTexture(void) {
   DrawTextIntoTexture("PIKA", 4, f_PikaBallTexture);
@@ -493,10 +507,6 @@ extern Vtx f_PikaBallVertices[];
  * nine unused ones */
 extern s32 f_UnusedBallFrame;
 extern s32 f_BallRollFrame;
-/* Where the ball of the player whose turn it is was last drawn */
-extern s32 f_CurrentBallScreenX;
-extern s32 f_CurrentBallScreenY;
-extern s32 f_CurrentBallDepth;
 
 /* Like G_RM_ZB_XLU_SURF and G_RM_AA_ZB_XLU_SURF, but also updating the depth
  * buffer */
@@ -1098,9 +1108,10 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, SHADE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
         SHADE, PRIMITIVE, 0, TEXEL0, 0);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x00, 0x60);
-    gDPLoadTextureBlock_4b(gfx++, f_PikaBallTexture, G_IM_FMT_IA, 32, 8, 0,
-        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadTextureBlock_4b(gfx++, f_PikaBallTexture, G_IM_FMT_IA,
+        PIKA_TEXTURE_WIDTH, PIKA_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPSetPrimDepth(gfx++, f_CurrentBallDepth - 4, 0);
     if (f_CurrentBallDepth < PIKA_BALL_DEPTH) {

@@ -78,6 +78,9 @@ extern u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
 extern u8* f_ClubPanelImage;
 extern u8* f_ShotModeImage;
 
+static Mtx f_SpanBarTranslation;
+static Mtx f_SpanBarScale;
+
 void UpdateClubPanelDebugValue(void) {
   if (IsGameFlagSet(GAME_FLAG_CLUB_PANEL_DEBUG)) {
     if (g_ControllerStates[DEBUG_CONTROLLER].pressedButtons & U_JPAD) {
@@ -317,8 +320,6 @@ s32 IsShotModeChangeDone(void) {
 extern Vtx f_SpanBarVertices[SPAN_BAR_VERTEX_COUNT];
 extern Gfx f_SpanBarDisplayList[];
 extern f32 f_MarkerPulseAngle;
-extern Mtx f_SpanBarTranslation;
-extern Mtx f_SpanBarScale;
 extern s32 f_ShotPanelOffsetX;
 
 s32 func_8005F224(void);

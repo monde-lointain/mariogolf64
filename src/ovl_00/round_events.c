@@ -122,7 +122,6 @@ extern s32 f_BannerNumber;
 extern s32 f_BannerNumberLetterCount;
 extern Vtx f_BannerLetterVertices[4];
 extern Banner f_Banners[];
-extern Mtx f_BannerMatrices[2];
 extern BannerLetter f_BannerLetters[];
 extern BannerLayout f_BannerLayouts[];
 extern s32 f_IsMovieBufferAllocated;
@@ -138,8 +137,6 @@ extern Mtx f_ContactMatrices[];
 extern s32 f_ContactTrailHead;
 extern f32 f_ContactSpinAngle;
 extern Vtx f_ContactSpinVertices[4];
-extern Mtx f_ContactRibbonMatrices[2];
-extern Mtx f_ContactSpinMatrices[2];
 extern s32 f_CurrentMovie;
 extern s32 f_MovieFrame;
 /* Counts up to MOVIE_TICKS_PER_FRAME between the frames of a Monty Mole movie
@@ -169,7 +166,6 @@ typedef struct LakituVelocity {
 
 extern LakituFlight f_Lakitu;
 extern LakituVelocity f_LakituVelocity;
-extern Mtx f_ReadyGoMatrices[2];
 extern Vtx f_ReadyGoVertices[];
 extern u16 f_LakituMovieFrameAssets[];
 extern s32 f_WindFlyGuyFrame;
@@ -181,7 +177,6 @@ extern s32 f_FlipMessageId;
 extern s32 f_FlipMessageHalfWidth;
 extern s32 f_FlipMessageHalfHeight;
 extern Vtx f_FlipMessageBoardVertices[4];
-extern Mtx f_FlipMessageMatrices[2];
 
 /* ShowFlipMessage's arguments, besides a message to flip in */
 #define FLIP_MESSAGE_RESET (-2)
@@ -360,6 +355,21 @@ void DrawMontyMoleMovie(Gfx** displayListHead);
 void DrawGoombaMovie(Gfx** displayListHead);
 void DrawLakituMovie(Gfx** displayListHead);
 void DrawToadMovie(Gfx** displayListHead);
+
+/* The Fly Guy and its streak are drawn on screen; a point's x and y are in
+ * screen pixels */
+typedef struct FlyGuyPoint {
+  /* 0x0 */ f32 x;
+  /* 0x4 */ f32 y;
+  /* 0x8 */ f32 z;
+} FlyGuyPoint;
+
+static Mtx f_FlipMessageMatrices[2];
+static Mtx f_ReadyGoMatrices[2];
+static Mtx f_ContactRibbonMatrices[2];
+static Mtx f_ContactSpinMatrices[2];
+static FlyGuyPoint f_WindFlyGuyLastPosition;
+static Mtx f_BannerMatrices[2];
 
 void AllocMovieBuffer(void) {
   EncodedAsset unused;
@@ -2734,18 +2744,10 @@ void ShowWindFlyGuy(s32 show) {
   }
 }
 
-/* The Fly Guy and its streak are drawn on screen; a point's x and y are in
- * screen pixels */
-typedef struct FlyGuyPoint {
-  /* 0x0 */ f32 x;
-  /* 0x4 */ f32 y;
-  /* 0x8 */ f32 z;
-} FlyGuyPoint;
-
 extern FlyGuyPoint f_WindFlyGuyPath[];
 /* Where the Fly Guy stays while its streak fades */
 extern FlyGuyPoint f_WindFlyGuyExit;
-extern FlyGuyPoint f_WindFlyGuyLastPosition;
+
 /* The contact matrix that the streak starts from; the streak's matrices form a
  * ring behind it */
 extern s32 f_WindStreakHead;

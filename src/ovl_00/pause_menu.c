@@ -73,11 +73,11 @@ extern s32 f_PauseSelection;
 extern s32 f_PauseLayout;
 extern s32 f_PauseMenuRequest;
 extern s32 f_PauseMenuUnkD678;
-extern u8* f_PauseCursorImage;
-extern u8* f_MenuCloudImage; /* The pause menu's cloud, or the choice box's */
-extern u8* f_PauseArrowsImage;
+static u8* f_PauseCursorImage;
+static u8* f_MenuCloudImage; /* The pause menu's cloud, or the choice box's */
+static u8* f_PauseArrowsImage;
 extern s32 f_PauseArrowsTick;
-extern u8* f_ChoiceBoxCursorImage;
+static u8* f_ChoiceBoxCursorImage;
 
 #define CHOICE_BOX_MAX_OPTIONS 4
 #define CHOICE_BOX_OPEN_SOUND 0x64

@@ -79,8 +79,8 @@ extern s32 f_CheepCheepLeapUnk3C;
 extern s32 f_CheepCheepLeapUnk40;
 extern Vtx f_CheepCheepVertices[4];
 extern Vtx f_MonkeyVertices[8];
-extern u8* f_CheepCheepImages[2];
-extern u8* f_MonkeyImage;
+static u8* f_CheepCheepImages[2];
+static u8* f_MonkeyImage;
 extern HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
 extern Gfx D_800C3FC0[];
 
