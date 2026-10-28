@@ -81,7 +81,7 @@ s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex);
 s32 GetCourseRecordIndex();
 s32 GetHoleRecordIndex(void);
 s32 GetHoleIndexInRecord(void);
-s32 IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex);
-s32 IsParThree(s32 courseRecordIndex, s32 holeIndex);
+Boolean IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex);
+Boolean IsParThree(s32 courseRecordIndex, s32 holeIndex);
 
 #endif

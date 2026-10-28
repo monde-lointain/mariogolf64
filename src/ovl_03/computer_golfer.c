@@ -213,7 +213,7 @@ s32 ChooseClubForDistance(s32 distance);
 
 s32 func_8005F248(s32 value);
 s32 StepTrialShot(void);
-s32 IsTrialShotSafe(void);
+Boolean IsTrialShotSafe(void);
 s32 ChooseShotOffset(void);
 s32 FindClubSlot(s32 unused, s32 clubType);
 s32 PlanRoute(s8* route);
@@ -357,7 +357,7 @@ s32 GetGolferTraitUnk2(void) {
   return f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk2;
 }
 
-s32 IsStrokeLimitReached(void) {
+Boolean IsStrokeLimitReached(void) {
   return g_Players[f_Shot.playerIndex].strokeCount >=
       g_HoleSetup.par + f_HoleTargetToPar - 1;
 }
@@ -1950,7 +1950,7 @@ void ChooseLongShot(
  * Returns whether any point a yard apart on the line from from to to, from
  * from itself, lies off the fairway, semi-rough, green and green edge.
  */
-s32 IsLineOffFairway(CoursePoint from, CoursePoint to) {
+Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
   s32 distance;
   Radians angle;
   s32 step;
@@ -2894,7 +2894,7 @@ s32 RollClubKindChance(s32 chanceSetIndex) {
  * Returns whether more than half of the points a yard apart on the first tenth
  * of the line from from to to lie in water, out of bounds or out of the course.
  */
-s32 IsLineMostlyLost(CoursePoint from, CoursePoint to) {
+Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
   s32 distance;
   Radians angle;
   s32 sampleCount;
@@ -2941,7 +2941,7 @@ s32 IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * surface test.
  */
 #ifdef NON_MATCHING
-s32 IsTrialShotSafe(void) {
+Boolean IsTrialShotSafe(void) {
   u32 kind;
   s32 flags;
 

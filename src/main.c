@@ -158,7 +158,7 @@ void InitFramebuffers(void) {
   nuGfxSetCfb(f_Framebuffers, FRAMEBUFFER_COUNT);
 }
 
-s32 IsGameFlagSet(u32 flag) {
+Boolean IsGameFlagSet(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
     if (f_GameFlagBits[flag >> 3] & (0x80 >> (flag & 7))) {
       return TRUE;

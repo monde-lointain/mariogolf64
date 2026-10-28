@@ -491,7 +491,7 @@ SurfaceInfo* GetBallSurfaceInfo(UnkB8* player) {
       player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
 }
 
-s32 IsDebugBButtonView(void) {
+Boolean IsDebugBButtonView(void) {
   return f_FlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER;
 }
 
@@ -862,7 +862,7 @@ s32 RandomBelow(s32 limit) {
  * Whether a point of the ball's path passes close by the cup, for a shot
  * that lands near it. Distances are in course units.
  */
-s32 IsCupPassPoint(s32 cupDistance, s32 height) {
+Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
   if (cupDistance < CUP_PASS_RADIUS &&
       height > g_HoleSetup.cupPosition[AXIS_Y] - CUP_PASS_MAX_DEPTH &&
       f_LandingCupDistance < CUP_PASS_MAX_LANDING_DISTANCE &&

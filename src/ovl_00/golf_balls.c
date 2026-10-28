@@ -670,7 +670,7 @@ void UpdateGolfBalls(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", UpdateGolfBalls);
 #endif
 
-s32 IsAnyBallInCup(void) {
+Boolean IsAnyBallInCup(void) {
   Boolean isInCup = FALSE;
   s32 i;
 

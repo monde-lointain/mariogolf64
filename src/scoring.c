@@ -39,7 +39,7 @@ s32 GetLastHoleIndex(void) {
   return GetFirstHoleIndex() + GetRoundHoleCount() - 1;
 }
 
-s32 IsOnDrivingRange(void) {
+Boolean IsOnDrivingRange(void) {
   return g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX;
 }
 

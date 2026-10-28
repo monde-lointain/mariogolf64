@@ -132,7 +132,7 @@ void DrawCenteredMediumText(Gfx** displayListHead, s16 x, s16 y, char* text);
 void DrawGlyphGroup(Gfx** displayListHead, s32 group);
 void SetUpPerspectiveTextDrawing(Gfx** displayListHead);
 void RevealTextSlot(s32 slot);
-s32 IsTextSlotRevealed(s32 slot);
+Boolean IsTextSlotRevealed(s32 slot);
 s32 MeasureText(char* text, s32 fontSize, s32 flags);
 void MeasureMessage(
     s32 messageId, s32 fontSize, s32* width, s32* height, s32 slot);

@@ -94,7 +94,7 @@ void SetUpTitleHole(void);
 void UsePrimitiveDepth(Boolean isPrimitiveDepthSet);
 void SetMenuBackdrop(s32 backdrop);
 void StartHudAnimation(s32 animation);
-s32 IsHudAnimationDone(void);
+Boolean IsHudAnimationDone(void);
 void DrawHudAnimation(void);
 void ResetHudScissor(void);
 

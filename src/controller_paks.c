@@ -29,11 +29,11 @@ void AddGameBoyExperience(s32 characterIndex, s32 experience) {
   }
 }
 
-s32 HasGameBoyPak(void) {
+Boolean HasGameBoyPak(void) {
   return g_GameBoyTransfer.hasGameBoyPak;
 }
 
-s32 IsGameBoyCharacterPresent(s32 characterIndex) {
+Boolean IsGameBoyCharacterPresent(s32 characterIndex) {
   return g_GameBoyCharacters[characterIndex].status ==
       GAME_BOY_CHARACTER_STATUS_PRESENT;
 }
@@ -75,7 +75,7 @@ void ClearBootTransmitPending(void) {
   f_IsBootTransmitPending = FALSE;
 }
 
-s32 IsBootTransmitPending(void) {
+Boolean IsBootTransmitPending(void) {
   return f_IsBootTransmitPending;
 }
 

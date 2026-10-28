@@ -837,7 +837,7 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface) {
 }
 
 /* The height is unused */
-s32 IsInWater(s32 x, s32 y, s32 z) {
+Boolean IsInWater(s32 x, s32 y, s32 z) {
   return GetSurface(x, z) == SURFACE_WATER_HAZARD;
 }
 
@@ -1449,7 +1449,7 @@ void PrepareHoleTriangles(void) {
  * Tests whether BuildHole was linked above the first 4 MB of RAM. It
  * is not, so this returns FALSE and the debug scene menu never opens.
  */
-s32 IsOverlayInExpansionMemory(void) {
+Boolean IsOverlayInExpansionMemory(void) {
   return (u32)BuildHole > 0x803FFFFF;
 }
 
@@ -1710,7 +1710,7 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
 
   /* Whether x and z are on the outer side of a triangle's edge from start to
    * end */
-  inline s32 IsOutsideEdge(Vtx * start, Vtx * end) {
+  inline Boolean IsOutsideEdge(Vtx * start, Vtx * end) {
     return (end->v.ob[0] - start->v.ob[0]) * (z - (start->v.ob[2] << 10)) -
         (end->v.ob[2] - start->v.ob[2]) * (x - (start->v.ob[0] << 10)) <
         0;
@@ -1787,7 +1787,7 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
 INCLUDE_ASM("asm/nonmatchings/terrain", FindGroundTriangle);
 #endif
 
-s32 AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
+Boolean AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
   s32 i;
 
   for (i = 0; i < TRIANGLE_CORNER_COUNT; i++) {

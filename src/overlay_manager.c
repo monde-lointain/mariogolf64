@@ -148,7 +148,7 @@ s32 GetOverlayIndex(s32 overlayId) {
   return overlayId & 0xFF;
 }
 
-s32 CanLoadOverlay(s32 overlayId) {
+Boolean CanLoadOverlay(s32 overlayId) {
   s32 overlayIndex = GetOverlayIndex(overlayId);
   u32 otherOverlayIndex;
   s32 moduleIndex;

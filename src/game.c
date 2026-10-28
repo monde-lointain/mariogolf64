@@ -2516,7 +2516,7 @@ void UpdateOverlays(void) {
   }
 }
 
-s32 IsSubModuleLoaded(void) {
+Boolean IsSubModuleLoaded(void) {
   return g_SubModuleState == SUB_MODULE_LOADED;
 }
 

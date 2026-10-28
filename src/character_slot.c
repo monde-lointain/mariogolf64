@@ -2640,7 +2640,7 @@ s32 FreeCharacterSlot(u32 slotIndex) {
 
 /* A slot stays busy for two frames after it was last drawn, while the display
  * list may still use it */
-s32 IsCharacterSlotBusy(u32 slotIndex) {
+Boolean IsCharacterSlotBusy(u32 slotIndex) {
   Boolean isBusy;
 
   if (slotIndex >= CHARACTER_SLOT_COUNT) {
@@ -2657,7 +2657,7 @@ s32 IsCharacterSlotBusy(u32 slotIndex) {
   return isBusy;
 }
 
-s32 IsAnyCharacterSlotBusy(void) {
+Boolean IsAnyCharacterSlotBusy(void) {
   s32 slotIndex;
 
   for (slotIndex = 0; slotIndex < CHARACTER_SLOT_COUNT; slotIndex++) {

@@ -216,7 +216,7 @@ extern s32 D_80105DCC;
 #define CLUB_CHOICE_YES 0
 #define CLUB_CHOICE_NO 1
 
-s32 IsNintendoClubTournament(void);
+Boolean IsNintendoClubTournament(void);
 s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentModeMessage(void);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32);

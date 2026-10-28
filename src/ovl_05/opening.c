@@ -1129,7 +1129,7 @@ extern f32 D_8020AEC0_ovl_05;
 
 void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);
-s32 IsDonkeyKongUnlocked(void);
+Boolean IsDonkeyKongUnlocked(void);
 void func_80206AA4_ovl_05(BallSimulation* simulation);
 void func_8020A488_ovl_05(BallSimulation* simulation, s32 arg1, Unk20* arg2);
 

@@ -147,11 +147,11 @@ typedef struct GameBoyTransfer {
 extern GameBoyTransfer g_GameBoyTransfer;
 
 void AddGameBoyExperience(s32 characterIndex, s32 experience);
-s32 HasGameBoyPak(void);
-s32 IsGameBoyCharacterPresent(s32 characterIndex);
+Boolean HasGameBoyPak(void);
+Boolean IsGameBoyCharacterPresent(s32 characterIndex);
 u8* GetGameBoyCharacterName(s32 characterIndex);
 void ClearBootTransmitPending(void);
-s32 IsBootTransmitPending(void);
+Boolean IsBootTransmitPending(void);
 void ResetGameBoyTransfer(s32 transferMode);
 void ForceStopRumble(void);
 

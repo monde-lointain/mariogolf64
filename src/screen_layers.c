@@ -458,7 +458,7 @@ void StopScreenFade(void) {
 }
 
 /* This is true from the fade's last frame on */
-s32 HasScreenFadeEnded(void) {
+Boolean HasScreenFadeEnded(void) {
   return g_ScreenFadeFramesLeft < 2;
 }
 
@@ -549,7 +549,7 @@ void FreePromptImages(void) {
   FreeMemory(&f_YesNoImage);
 }
 
-s32 IsPromptClosed(void) {
+Boolean IsPromptClosed(void) {
   return f_PromptState == PROMPT_STATE_CLOSED;
 }
 
@@ -809,7 +809,7 @@ INCLUDE_ASM("asm/nonmatchings/screen_layers", MarkHalfTurnCircle);
 #endif
 
 /* The picture can be dismissed with A once its time is up */
-s32 IsHalfTurnDismissed(ControllerState* controller) {
+Boolean IsHalfTurnDismissed(ControllerState* controller) {
   if (f_IsHalfTurnShown && f_HalfTurnState == HALF_TURN_STATE_SHOWING &&
       !(f_HalfTurnTimer < 0 && (controller->pressedButtons & A_BUTTON))) {
     return FALSE;

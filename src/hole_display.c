@@ -3155,6 +3155,6 @@ void ResetHudScissor(void) {
 }
 
 /* Whether the animation that StartHudAnimation started has finished */
-s32 IsHudAnimationDone(void) {
+Boolean IsHudAnimationDone(void) {
   return f_HudAnimationFramesLeft <= 0;
 }

@@ -314,7 +314,7 @@ void UpdateClubPanelImages(void) {
   }
 }
 
-s32 IsShotModeChangeDone(void) {
+Boolean IsShotModeChangeDone(void) {
   return f_ShotModeChangeFrame == 0;
 }
 

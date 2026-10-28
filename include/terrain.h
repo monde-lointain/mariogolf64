@@ -235,7 +235,7 @@ Vtx* GetGroundPoint(u32 column, u32 row);
 Vtx* GetGridVertex(u32 column, u32 row);
 s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point);
 void PrepareHoleTriangles(void);
-s32 IsOverlayInExpansionMemory(void);
+Boolean IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
 s32 GetTerrainCodeColor(s32 code);
 s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane);

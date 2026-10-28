@@ -253,7 +253,7 @@
  * its camera. The debug build sets it when the third presses A */
 #define GAME_FLAG_EDIT_OPENING_CAMERA 0x62
 
-s32 IsGameFlagSet(u32 flag);
+Boolean IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);
 void ToggleGameFlag(u32 flag);

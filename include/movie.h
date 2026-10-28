@@ -30,9 +30,9 @@ enum Movie {
 
 void AllocMovieBuffer(void);
 void FreeMovieBuffer(void);
-s32 IsMovieFinished(void);
+Boolean IsMovieFinished(void);
 void StartMovie(s32 movie);
-s32 IsMoviePastCue(void);
+Boolean IsMoviePastCue(void);
 void DrawMovie(Gfx** displayListHead);
 
 #endif

@@ -1224,7 +1224,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
   }
 }
 
-s32 HasEveryRingShotStar(void) {
+Boolean HasEveryRingShotStar(void) {
   SaveData* save;
   s32 starCount;
   s32 courseIndex;
@@ -1241,7 +1241,7 @@ s32 HasEveryRingShotStar(void) {
   return starCount == RING_SHOT_COURSE_COUNT * RING_SHOT_HOLE_COUNT;
 }
 
-s32 IsDonkeyKongUnlocked(void) {
+Boolean IsDonkeyKongUnlocked(void) {
   SaveData* save;
   s32 starCount;
   s32 courseIndex;
@@ -1289,7 +1289,7 @@ s32 GetRingShotCourseOpenedAtStarCount(void) {
   return 0;
 }
 
-s32 IsMapleUnlocked(void) {
+Boolean IsMapleUnlocked(void) {
   SaveData* save;
   s32 badgeCount;
   s32 courseIndex;
@@ -1307,7 +1307,7 @@ s32 IsMapleUnlocked(void) {
   return badgeCount >= MAPLE_BADGE_COUNT;
 }
 
-s32 IsMetalMarioUnlocked(void) {
+Boolean IsMetalMarioUnlocked(void) {
   SaveData* save;
   s32 badgeCount;
   s32 courseIndex;
@@ -1681,7 +1681,7 @@ s32 GetClubTournamentCourse(void) {
   return D_80105DC2;
 }
 
-s32 IsNintendoClubTournament(void) {
+Boolean IsNintendoClubTournament(void) {
   return D_80105DC4 != 0;
 }
 

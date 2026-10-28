@@ -474,7 +474,7 @@ void RevealTextSlot(s32 slot) {
   g_TextSlots[slot].shownCount = 0xFF;
 }
 
-s32 IsTextSlotRevealed(s32 slot) {
+Boolean IsTextSlotRevealed(s32 slot) {
   TextSlot* textSlot = &g_TextSlots[slot];
 
   /* The operand order is there to match */

@@ -368,7 +368,7 @@ void SetFramebufferCount(s32 count);
 s32 func_8005F30C(s32 x, s32 z);
 void func_8006034C(s8 value);
 s32 func_80060190(s32 strokes);
-s32 HasNoRingsLeft(UnkB8* player);
+Boolean HasNoRingsLeft(UnkB8* player);
 void RecordRingShotClear(s32 playerIndex);
 
 static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
@@ -2068,7 +2068,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", DrawShotPreview);
  * Returns whether the player's hole-out may enter the records: a short one,
  * by one of the main characters, outside mini-golf, in a mode that keeps them
  */
-s32 IsRecordableHoleOut(s32 playerIndex) {
+Boolean IsRecordableHoleOut(s32 playerIndex) {
   if (g_GameState.unk31) {
     return FALSE;
   }
@@ -2114,7 +2114,7 @@ s32 IsRecordableHoleOut(s32 playerIndex) {
   return FALSE;
 }
 
-s32 IsRingShotRound(void) {
+Boolean IsRingShotRound(void) {
   if (!g_GameState.unk31) {
     return g_GameState.gameMode == GAME_MODE_RING_SHOT;
   }
@@ -2179,7 +2179,7 @@ void RecordRingShotHole(s32 playerIndex) {
   }
 }
 
-s32 HasNoRingsLeft(UnkB8* player) {
+Boolean HasNoRingsLeft(UnkB8* player) {
   s32 i;
 
   for (i = 0; i < RING_COUNT; i++) {
@@ -2191,7 +2191,7 @@ s32 HasNoRingsLeft(UnkB8* player) {
   return TRUE;
 }
 
-s32 AreAllRingsPassed(UnkB8* player) {
+Boolean AreAllRingsPassed(UnkB8* player) {
   s32 i;
 
   for (i = 0; i < RING_COUNT; i++) {
@@ -2880,7 +2880,7 @@ void UpdateTurns(void) {
   s32 i;
 
   /* Returns whether the B button is held */
-  s32 IsBButtonHeld(void) {
+  Boolean IsBButtonHeld(void) {
     if (g_MergedController.buttons & B_BUTTON) {
       return TRUE;
     }
@@ -3053,7 +3053,7 @@ void UpdateTurns(void) {
 
   /* Returns whether a shot stopped this far from the impact mark rumbles, as a
    * mishit */
-  s32 DoesImpactRumble(void) {
+  Boolean DoesImpactRumble(void) {
     return GetUnkCEntry(GetSelectedClub(), g_CurrentShot.surface,
         g_CurrentShot.shotMode, D_80227150_ovl_00.unkC)
         ->unk5;

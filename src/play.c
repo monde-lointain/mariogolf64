@@ -714,7 +714,7 @@ void BackUpPlayState(void) {
  * Whether the player has beaten Bowser in a Get Character match, or has
  * won first place in a Boo Valley or Mario's Star tournament
  */
-s32 HasWonFinalChallenge(void) {
+Boolean HasWonFinalChallenge(void) {
   s32 firstHole;
   TournamentStanding* standing;
   s32 i;

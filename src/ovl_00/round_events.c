@@ -1182,7 +1182,7 @@ void DrawFlipMessage(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-s32 IsMovieFinished(void) {
+Boolean IsMovieFinished(void) {
   return f_CurrentMovie == MOVIE_NONE;
 }
 
@@ -1291,7 +1291,7 @@ void StartMovie(s32 movie) {
   }
 }
 
-s32 IsMoviePastCue(void) {
+Boolean IsMoviePastCue(void) {
   return f_MovieFrame >= MOVIE_CUE_FRAME;
 }
 
@@ -2354,7 +2354,7 @@ void DrawToadMovie(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawToadMovie);
 #endif
 
-s32 IsContactEffectShown(void) {
+Boolean IsContactEffectShown(void) {
   return g_ContactEffect != CONTACT_EFFECT_NONE;
 }
 

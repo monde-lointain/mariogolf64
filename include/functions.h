@@ -29,7 +29,7 @@ void EnterDevelopmentDebugger(s32 argument);
 void LoadMenuResources(void);
 void FreeMenuResources(void);
 /* Whether the view mode that the B button picks in debug builds is on */
-s32 IsDebugBButtonView(void);
+Boolean IsDebugBButtonView(void);
 
 /* ovl_00 */
 void func_80216B10_ovl_00(void);

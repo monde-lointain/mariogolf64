@@ -1396,7 +1396,7 @@ INCLUDE_ASM("asm/nonmatchings/reaction", PlaceAtReactionSpot);
 #endif
 
 #ifdef NON_MATCHING
-s32 IsEasedEyeHeightZero(void) {
+Boolean IsEasedEyeHeightZero(void) {
   Boolean isZero = FALSE;
 
   if (fabsf(f_EasedView.eye[AXIS_Y]) == 0.0f) {

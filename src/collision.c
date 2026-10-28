@@ -173,12 +173,12 @@ enum TriangleFacing {
 
 /* Whether a point is off the ground; a negative x or z is too, as an unsigned
  * one is big */
-static inline s32 IsOffGround(s32 x, s32 z) {
+static inline Boolean IsOffGround(s32 x, s32 z) {
   return ((u32)x >= GROUND_WIDTH) || ((u32)z >= GROUND_LENGTH);
 }
 
 /* Whether a point is off the mini-golf ground, in the same way */
-static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
+static inline Boolean IsOffMiniGolfGround(s32 x, s32 z) {
   return ((u32)x >= MINI_GOLF_GROUND_SIZE) || ((u32)z >= MINI_GOLF_GROUND_SIZE);
 }
 

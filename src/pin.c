@@ -327,7 +327,7 @@ void SkipNextPinDraw(void) {
  * Returns whether the pin stands in the cup. During GameState.unk0 6 and 7 it
  * is taken out while the shot is from the green, except in mini-golf.
  */
-s32 IsPinInCup(void) {
+Boolean IsPinInCup(void) {
   if (f_IsPinOut || f_SkipsNextPinDraw) {
     return FALSE;
   }

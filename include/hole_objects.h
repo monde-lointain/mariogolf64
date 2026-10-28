@@ -6,7 +6,7 @@
 void LoadHoleCreatureImages(void);
 void FreeHoleCreatureImages(void);
 f32 GetCameraYaw(void);
-s32 IsMonkeyShown(void);
+Boolean IsMonkeyShown(void);
 void StartMonkeyDrop(f32 cameraYaw);
 void ClearHoleCreatures(void);
 void StartCheepCheepLeap(s32 arg0);

@@ -47,7 +47,7 @@ enum HolingOutStakes {
 s32 GetFirstHoleIndex(void);
 s32 GetRoundHoleCount(void);
 s32 GetLastHoleIndex(void);
-s32 IsOnDrivingRange(void);
+Boolean IsOnDrivingRange(void);
 s32 GetHandicapOffset(s32 courseIndex, s32 holeIndex, s32 handicap);
 s32 GetNetScore(s32 playerIndex);
 void RenumberHoleHandicaps(void);

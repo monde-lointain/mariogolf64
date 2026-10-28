@@ -8,6 +8,6 @@ void ResetBallAfterimage(void);
 void StartFastBallAfterimage(void);
 void ResetBallRotation(void);
 void ResetGolfBalls(void);
-s32 IsAnyBallInCup(void);
+Boolean IsAnyBallInCup(void);
 
 #endif

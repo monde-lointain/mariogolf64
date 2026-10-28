@@ -1442,7 +1442,7 @@ void DecodeCartridgeCharacter(
 void SkipCartridgeSave(u8* unusedData, s32 unusedCartridgeIndex,
     s32 unusedSaveIndex, u8* unusedTitle, s32 unusedUnk34) {}
 
-s32 IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
+Boolean IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
   s32 index;
 
   osSyncPrintf("PHASE a\n");
@@ -1905,7 +1905,7 @@ void DrawOptionsScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
 
 /* Whether a cartridge character is on the list: read in, or being brought over
  */
-static inline s32 IsListed(s32 listing) {
+static inline Boolean IsListed(s32 listing) {
   return listing == LISTING_SHOWN || listing == LISTING_BRINGING;
 }
 

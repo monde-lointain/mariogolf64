@@ -363,7 +363,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", ZoomEditorCamera);
 #endif
 
 /* Returns whether both points have stopped moving */
-s32 AreEditorMovesDone(void) {
+Boolean AreEditorMovesDone(void) {
   if (g_CameraEditor.flags[0] == 0 && g_CameraEditor.flags[1] == 0) {
     return TRUE;
   }
@@ -372,7 +372,7 @@ s32 AreEditorMovesDone(void) {
 }
 
 /* Returns whether neither point has any of the EDITOR_FLAG_* bits in mask */
-s32 AreEditorFlagsClear(s32 mask) {
+Boolean AreEditorFlagsClear(s32 mask) {
   if (!(g_CameraEditor.flags[0] & mask) && !(g_CameraEditor.flags[1] & mask)) {
     return TRUE;
   }

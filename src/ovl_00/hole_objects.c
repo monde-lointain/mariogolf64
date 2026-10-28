@@ -147,7 +147,7 @@ f32 GetCameraYaw(void) {
   return yaw;
 }
 
-s32 IsMonkeyShown(void) {
+Boolean IsMonkeyShown(void) {
   s32 i;
   HoleCreature* creature;
 

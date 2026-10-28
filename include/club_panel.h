@@ -11,7 +11,7 @@ void LoadClubPanelImages(void);
 void FreeClubPanelImages(void);
 void ResetShotModeChange(void);
 void UpdateClubPanelImages(void);
-s32 IsShotModeChangeDone(void);
+Boolean IsShotModeChangeDone(void);
 void DrawClubPanel(Gfx** displayListHead);
 void DrawClubPanelIfShown(Gfx** displayListHead);
 
