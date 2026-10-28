@@ -61,12 +61,20 @@ enum PauseMenuRequest {
 
 #define PAUSE_MENU_SONG_VOLUME 0x60
 
-#define PAUSE_OPTION_KIND_WEATHER 1 /* Shows whether it rains */
-/* Shows the player's grid colour as black or white */
-#define PAUSE_OPTION_KIND_GRID_COLOR 2
-#define PAUSE_OPTION_KIND_WIND_SPEED 3
-#define PAUSE_OPTION_KIND_WIND_DIRECTION 4
-#define PAUSE_OPTION_KIND_LIE 5
+/* What a pause option shows beside its label, and how the cursor points at it
+ */
+enum PauseOptionKind {
+  PAUSE_OPTION_KIND_PLAIN,
+  /* Shows whether it rains */
+  PAUSE_OPTION_KIND_WEATHER,
+  /* Shows the player's grid color as black or white */
+  PAUSE_OPTION_KIND_GRID_COLOR,
+  PAUSE_OPTION_KIND_WIND_SPEED,
+  PAUSE_OPTION_KIND_WIND_DIRECTION,
+  PAUSE_OPTION_KIND_LIE,
+  /* Shows PAUSE_OPTION_FIRST_STROKE_MESSAGE while f_CanGiveUp is clear */
+  PAUSE_OPTION_KIND_GIVE_UP = 7
+};
 
 extern s32 f_IsPauseMenuLoaded;
 extern s32 f_PauseSelection;
@@ -114,7 +122,7 @@ extern char* f_ChoiceBoxLabels[];
 extern s32 f_ChoiceBoxState;
 extern s32 f_ChoiceBoxIndex;
 extern s32 f_ChoiceBoxSelection;
-extern f32 f_ChoiceGlowAngle; /* Cycles the selected label's colour */
+extern f32 f_ChoiceGlowAngle; /* Cycles the selected label's color */
 extern f32 f_ChoiceCursorAngle; /* Bobs the cursor from side to side */
 
 #define CHOICE_BOX_CENTER_X (SCREEN_WIDTH / 2)
@@ -292,14 +300,6 @@ void FreePauseMenu(void) {
 
   SetSongVolume(SOUND_FULL_SCALE);
 }
-
-/* What a pause option shows beside its label, and how the cursor points at it
- */
-enum PauseOptionKind {
-  PAUSE_OPTION_KIND_PLAIN,
-  /* Shows PAUSE_OPTION_FIRST_STROKE_MESSAGE while f_CanGiveUp is clear */
-  PAUSE_OPTION_KIND_GIVE_UP = 7
-};
 
 /* Give Up, which is greyed out while f_CanGiveUp is clear */
 #define PAUSE_OPTION_GIVE_UP 2
