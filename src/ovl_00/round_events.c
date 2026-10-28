@@ -580,10 +580,10 @@ void DrawToadMovie(Gfx** displayListHead);
 void AllocMovieBuffer(void) {
   EncodedAsset unused;
 
-  f_CurrentBanner = -1;
+  f_CurrentBanner = BANNER_NONE;
   f_IsMovieBufferAllocated = TRUE;
   f_MovieBuffer = AllocMemory(MOVIE_BUFFER_SIZE);
-  f_LoadedBanner = -1;
+  f_LoadedBanner = BANNER_NONE;
 }
 
 void FreeMovieBuffer(void) {
@@ -2915,8 +2915,8 @@ void ShowWindFlyGuy(s32 show) {
     ReadEncodedAsset(f_MovieBuffer, &asset);
     OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
     ReadEncodedAsset(f_MovieBuffer + FLY_GUY_IMAGE_SIZE, &asset);
-    f_LoadedBanner = -1;
-    f_CurrentBanner = -1;
+    f_LoadedBanner = BANNER_NONE;
+    f_CurrentBanner = BANNER_NONE;
     ResetPath();
   }
 }
