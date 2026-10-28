@@ -280,25 +280,28 @@
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
-extern s32 D_80223E40_ovl_00; /* Set once the shot preview has been built */
-extern f32 D_80223E48_ovl_00; /* A debug tilt of the aim camera, which the C
+extern s32 f_IsShotPreviewBuilt; /* Set once the shot preview has been built */
+extern f32 f_DebugAimCameraTilt; /* A debug tilt of the aim camera, which the C
                                  buttons tune */
-extern Vtx D_80223E60_ovl_00[4]; /* A dash of the shot preview */
-extern Vtx D_80223EB0_ovl_00[4]; /* The putt preview's line, placed on screen */
-extern s32 D_80223EA0_ovl_00; /* How many steps the shot preview simulates */
+extern Vtx f_ShotPreviewDashVertices[4]; /* A dash of the shot preview */
+extern Vtx f_PuttPreviewLineVertices[4]; /* The putt preview's line, placed on
+                                            screen */
 extern s32
-    D_80223EA4_ovl_00; /* How many of the shot preview's points are shown */
-extern s8 D_80223EA8_ovl_00; /* Whether the shot preview ran to its end */
-extern s32 D_80223EAC_ovl_00; /* Scrolls the shot preview's dots */
+    f_ShotPreviewStepCount; /* How many steps the shot preview simulates */
+extern s32 f_ShownShotPreviewPointCount; /* How many of the shot preview's
+                                            points are shown */
+extern s8 f_HasShotPreviewEnded; /* Whether the shot preview ran to its end */
+extern s32 f_ShotPreviewDotScroll; /* Scrolls the shot preview's dots */
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
-extern s32 D_80223FEC_ovl_00; /* Frames since the last ambient sound */
-/* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
-extern s32 D_80223EF0_ovl_00[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES];
-extern s32 D_80223E50_ovl_00; /* Frames that the D-pad has turned the aim,
-                                 negative to the right */
 extern s32
-    D_80223E44_ovl_00; /* Frames that a replayed shot's aim has been settled */
+    f_AmbientSoundIdleFrameCount; /* Frames since the last ambient sound */
+/* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
+extern s32 f_AmbientSounds[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES];
+extern s32 f_AimTurnFrameCount; /* Frames that the D-pad has turned the aim,
+                                 negative to the right */
+extern s32 f_ReplayAimSettledFrameCount; /* Frames that a replayed shot's aim
+                                            has been settled */
 extern CurrentShot D_80104F78; /* The replayed shot */
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
@@ -440,11 +443,11 @@ void PlaceShotCamera(void) {
 
   if (IsGameFlagSet(GAME_FLAG_TEST_AIM_TILT_AND_MOVIES)) {
     if (g_ControllerStates[0].buttons & L_CBUTTONS) {
-      D_80223E48_ovl_00 -= 1.0f;
+      f_DebugAimCameraTilt -= 1.0f;
     }
 
     if (g_ControllerStates[0].buttons & R_CBUTTONS) {
-      D_80223E48_ovl_00 += 1.0f;
+      f_DebugAimCameraTilt += 1.0f;
     }
   }
 
@@ -597,7 +600,7 @@ void PlaceShotCamera(void) {
       g_Cameras[0].view.lookAt[AXIS_Y] =
           (g_Cameras[0].view.eye[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
           (g_CurrentShot.aimCameraHeight * (tilt * COURSE_TO_WORLD_SCALE)) +
-          (D_80223E48_ovl_00 * AIM_CAMERA_DEBUG_TILT_SCALE);
+          (f_DebugAimCameraTilt * AIM_CAMERA_DEBUG_TILT_SCALE);
     }
 
     g_Cameras[0].view.heading = heading;
@@ -1023,9 +1026,9 @@ void TurnAim(s32 turnsAltHeading) {
 
   dpad = g_TurnController.buttons & (L_JPAD | R_JPAD);
   if (dpad == 0 || dpad == (L_JPAD | R_JPAD)) {
-    D_80223E50_ovl_00 = 0;
+    f_AimTurnFrameCount = 0;
   } else if (dpad & L_JPAD) {
-    s32* dpadFrames = &D_80223E50_ovl_00;
+    s32* dpadFrames = &f_AimTurnFrameCount;
 
     if (*dpadFrames < 0) {
       *dpadFrames = 0;
@@ -1035,7 +1038,7 @@ void TurnAim(s32 turnsAltHeading) {
       *dpadFrames = AIM_DPAD_MAX_FRAMES;
     }
   } else {
-    s32* dpadFrames = &D_80223E50_ovl_00;
+    s32* dpadFrames = &f_AimTurnFrameCount;
 
     if (*dpadFrames > 0) {
       *dpadFrames = 0;
@@ -1046,7 +1049,7 @@ void TurnAim(s32 turnsAltHeading) {
     }
   }
 
-  dpad = D_80223E50_ovl_00;
+  dpad = f_AimTurnFrameCount;
   dpadSpeed = (dpad < 0) ? -dpad : dpad;
   g_CurrentShot.unk0 +=
       dpad * ((dpadSpeed / AIM_DPAD_SPEED_DIVISOR) + AIM_DPAD_BASE_SPEED);
@@ -1104,7 +1107,7 @@ s32 UpdateAimControls(void) {
         SetFramebufferCount(REPLAY_FRAMEBUFFER_COUNT);
       }
 
-      return ++D_80223E44_ovl_00 >= REPLAY_AIM_SETTLE_FRAMES;
+      return ++f_ReplayAimSettledFrameCount >= REPLAY_AIM_SETTLE_FRAMES;
     }
 
     step = headingLeft / REPLAY_AIM_STEP_DIVISOR;
@@ -1764,32 +1767,32 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
     return;
   }
 
-  D_80223E40_ovl_00 = TRUE;
+  f_IsShotPreviewBuilt = TRUE;
   shot.unk0 = g_CurrentShot.unk0;
   shot.clubIndex = g_CurrentShot.clubSlot;
   if (IsGameFlagSet(GAME_FLAG_TUNE_SHOT_PREVIEW)) {
     PrintDebugText("               ", 10, 10);
     if ((g_ControllerStates[0].pressedButtons & U_JPAD) &&
-        D_80223EA0_ovl_00 < SHOT_PREVIEW_MAX_STEPS) {
-      D_80223EA0_ovl_00++;
+        f_ShotPreviewStepCount < SHOT_PREVIEW_MAX_STEPS) {
+      f_ShotPreviewStepCount++;
     }
 
     if ((g_ControllerStates[0].pressedButtons & D_JPAD) &&
-        D_80223EA0_ovl_00 > SHOT_PREVIEW_MIN_STEPS) {
-      D_80223EA0_ovl_00--;
+        f_ShotPreviewStepCount > SHOT_PREVIEW_MIN_STEPS) {
+      f_ShotPreviewStepCount--;
     }
 
     if ((g_ControllerStates[0].buttons & L_JPAD) &&
-        D_80223EA0_ovl_00 < SHOT_PREVIEW_MAX_STEPS) {
-      D_80223EA0_ovl_00++;
+        f_ShotPreviewStepCount < SHOT_PREVIEW_MAX_STEPS) {
+      f_ShotPreviewStepCount++;
     }
 
     if ((g_ControllerStates[0].buttons & R_JPAD) &&
-        D_80223EA0_ovl_00 > SHOT_PREVIEW_MIN_STEPS) {
-      D_80223EA0_ovl_00--;
+        f_ShotPreviewStepCount > SHOT_PREVIEW_MIN_STEPS) {
+      f_ShotPreviewStepCount--;
     }
 
-    sprintf(g_PrintBuffer, "prec:%4d", D_80223EA0_ovl_00);
+    sprintf(g_PrintBuffer, "prec:%4d", f_ShotPreviewStepCount);
     PrintDebugText(g_PrintBuffer, 10, 3);
   }
 
@@ -1817,8 +1820,8 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
   simulation.position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
   simulation.surface = g_CurrentShot.surface;
   LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_UNK5, &shot);
-  D_80223EAC_ovl_00 += SHOT_PREVIEW_SCROLL_STEP;
-  for (step = 0; step < D_80223EA0_ovl_00; step++) {
+  f_ShotPreviewDotScroll += SHOT_PREVIEW_SCROLL_STEP;
+  for (step = 0; step < f_ShotPreviewStepCount; step++) {
     isMiniGolf = &g_GameState.isMiniGolf;
     if (*isMiniGolf && !simulation.unk94) {
       break;
@@ -1858,16 +1861,16 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
     }
   }
 
-  D_80223EA4_ovl_00 = step - 2;
-  if (D_80223EA4_ovl_00 <= 0) {
-    D_80223EA4_ovl_00 = 1;
+  f_ShownShotPreviewPointCount = step - 2;
+  if (f_ShownShotPreviewPointCount <= 0) {
+    f_ShownShotPreviewPointCount = 1;
   }
 
   if (simulation.unk94) {
-    D_80223EA8_ovl_00 = TRUE;
-    D_80223EA4_ovl_00 = step + 1;
+    f_HasShotPreviewEnded = TRUE;
+    f_ShownShotPreviewPointCount = step + 1;
   } else {
-    D_80223EA8_ovl_00 = FALSE;
+    f_HasShotPreviewEnded = FALSE;
   }
 }
 
@@ -1880,7 +1883,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
   ScreenPoint ball;
   ScreenPoint end;
 
-  if (!D_80223E40_ovl_00) {
+  if (!f_IsShotPreviewBuilt) {
     return;
   }
 
@@ -1901,11 +1904,13 @@ void DrawShotPreview(CameraMatrices* matrices) {
       G_IM_FMT_I, G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
       G_TX_NOLOD);
-  gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, D_80223EAC_ovl_00, 0,
-      D_80223EAC_ovl_00 + (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
+  gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, f_ShotPreviewDotScroll,
+      0,
+      f_ShotPreviewDotScroll +
+          (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
       SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC);
   gDPSetEnvColor(g_DisplayListHead++, 0xE0, 0xE0, 0x00, 0x40);
-  if (D_80223EA8_ovl_00) {
+  if (f_HasShotPreviewEnded) {
     gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0x00, 0x00, 0xC8);
   } else {
     gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, 0x80);
@@ -1926,9 +1931,11 @@ void DrawShotPreview(CameraMatrices* matrices) {
       return;
     }
 
-    if (ProjectPoint(D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_X],
-            D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Y],
-            D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Z], &end) >= 0) {
+    if (ProjectPoint(
+            D_80227BA0_ovl_00[f_ShownShotPreviewPointCount - 1][AXIS_X],
+            D_80227BA0_ovl_00[f_ShownShotPreviewPointCount - 1][AXIS_Y],
+            D_80227BA0_ovl_00[f_ShownShotPreviewPointCount - 1][AXIS_Z],
+            &end) >= 0) {
       return;
     }
 
@@ -1952,7 +1959,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
       gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&D_80227110_ovl_00),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(g_DisplayListHead++, D_80223EB0_ovl_00, 4, 0);
+      gSPVertex(g_DisplayListHead++, f_PuttPreviewLineVertices, 4, 0);
       offsetX = dy * scale;
       offsetY = dx * scale;
       gSPModifyVertex(g_DisplayListHead++, 0, G_MWO_POINT_XYSCREEN,
@@ -1987,11 +1994,11 @@ void DrawShotPreview(CameraMatrices* matrices) {
     gSPFogFactor(g_DisplayListHead++, 320, -128);
     gDPSetCombineLERP(g_DisplayListHead++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0,
         SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0);
-    for (step = 0; step < D_80223EA4_ovl_00; step++) {
+    for (step = 0; step < f_ShownShotPreviewPointCount; step++) {
       gSPMatrix(g_DisplayListHead++,
           &D_802271A0_ovl_00[g_DrawBufferIndex][step],
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(g_DisplayListHead++, D_80223E60_ovl_00, 4, 0);
+      gSPVertex(g_DisplayListHead++, f_ShotPreviewDashVertices, 4, 0);
       gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
     }
@@ -2431,11 +2438,11 @@ void ClearPassedRings(UnkB8* player) {
 void PlayAmbientSound(void) {
   s32 choice;
 
-  if (++D_80223FEC_ovl_00 == AMBIENT_SOUND_INTERVAL) {
+  if (++f_AmbientSoundIdleFrameCount == AMBIENT_SOUND_INTERVAL) {
     choice = guRandom() % AMBIENT_SOUND_CHOICES;
-    D_80223FEC_ovl_00 = 0;
-    if (D_80223EF0_ovl_00[GetCourseRecordIndex()][choice] != NO_AMBIENT_SOUND) {
-      PlaySoundWithEffects(D_80223EF0_ovl_00[GetCourseRecordIndex()][choice],
+    f_AmbientSoundIdleFrameCount = 0;
+    if (f_AmbientSounds[GetCourseRecordIndex()][choice] != NO_AMBIENT_SOUND) {
+      PlaySoundWithEffects(f_AmbientSounds[GetCourseRecordIndex()][choice],
           AMBIENT_SOUND_CHANNEL, AMBIENT_SOUND_VOLUME, AMBIENT_SOUND_REVERB,
           guRandom() % SOUND_PAN_RANGE);
     }
@@ -2686,18 +2693,18 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * original's frame.
  */
 #ifdef NON_MATCHING
-extern s8 D_80223FF0_ovl_00;
-extern s8 D_80223FF4_ovl_00;
-extern s8 D_80223FF5_ovl_00;
-extern s8 D_80223FF6_ovl_00;
-extern s8 D_80223FF7_ovl_00;
+extern s8 f_ShouldReplaySavedShot;
+extern s8 f_HasGutsTestRun;
+extern s8 f_GutsTestCharacter;
+extern s8 f_GutsTestMotion;
+extern s8 f_ShouldUpdateReaction;
 extern s32 D_80223FFC_ovl_00;
 extern s32 D_80224000_ovl_00;
 extern s32 D_80224004_ovl_00;
 extern s32 D_80224008_ovl_00;
 extern s32 D_8022400C_ovl_00;
-extern f32 D_80224014_ovl_00;
-extern f32 D_80224018_ovl_00;
+extern f32 f_DebugFramingYaw;
+extern f32 f_DebugFramingPitch;
 extern u32 D_80223E58_ovl_00;
 extern s32 D_800B7D9C;
 extern u16 D_80104998;
@@ -2738,7 +2745,7 @@ static inline void DebugPlaceBall(s32 playerIndex) {
 static inline void DebugTestGutsMotion(void) {
   char* motionName;
   char text[128];
-  switch (D_80223FF6_ovl_00) {
+  switch (f_GutsTestMotion) {
     case 12:
       motionName = "EAGLE ";
       break;
@@ -2756,43 +2763,44 @@ static inline void DebugTestGutsMotion(void) {
       break;
   }
 
-  D_80223FF4_ovl_00 = 1;
+  f_HasGutsTestRun = 1;
   if (g_TurnController.repeatedButtons & L_JPAD) {
-    D_80223FF5_ovl_00--;
+    f_GutsTestCharacter--;
   }
 
   if (g_TurnController.repeatedButtons & R_JPAD) {
-    D_80223FF5_ovl_00++;
+    f_GutsTestCharacter++;
   }
 
   if (g_TurnController.repeatedButtons & U_JPAD) {
-    D_80223FF6_ovl_00--;
+    f_GutsTestMotion--;
   }
 
   if (g_TurnController.repeatedButtons & D_JPAD) {
-    D_80223FF6_ovl_00++;
+    f_GutsTestMotion++;
   }
 
-  if (D_80223FF5_ovl_00 < 0) {
-    D_80223FF5_ovl_00 = CHARACTER_COUNT - 1;
+  if (f_GutsTestCharacter < 0) {
+    f_GutsTestCharacter = CHARACTER_COUNT - 1;
   }
 
-  if (D_80223FF5_ovl_00 >= CHARACTER_COUNT) {
-    D_80223FF5_ovl_00 = 0;
+  if (f_GutsTestCharacter >= CHARACTER_COUNT) {
+    f_GutsTestCharacter = 0;
   }
 
-  if (D_80223FF6_ovl_00 < 12) {
-    D_80223FF6_ovl_00 = 15;
+  if (f_GutsTestMotion < 12) {
+    f_GutsTestMotion = 15;
   }
 
-  if (D_80223FF6_ovl_00 >= 16) {
-    D_80223FF6_ovl_00 = 12;
+  if (f_GutsTestMotion >= 16) {
+    f_GutsTestMotion = 12;
   }
 
-  sprintf(text, "GUTS TEST CH[%2.2d] MOTION %s", D_80223FF5_ovl_00, motionName);
+  sprintf(
+      text, "GUTS TEST CH[%2.2d] MOTION %s", f_GutsTestCharacter, motionName);
   PrintDebugText(text, 3, 3);
   if (!IsCharacterSlotBusy(0)) {
-    LoadCharacter(0, D_80223FF5_ovl_00 + CHARACTER_COUNT, 0);
+    LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, 0);
   }
 
   if (g_TurnController.buttons) {
@@ -2807,10 +2815,10 @@ static inline void DebugTestGutsMotion(void) {
 static inline void FrameBallAndShot(void) {
   Vec3 center;
 
-  D_80224014_ovl_00 += g_ControllerStates[1].stickX * 0.002f;
-  D_80224018_ovl_00 += g_ControllerStates[1].stickY * 0.002f;
+  f_DebugFramingYaw += g_ControllerStates[1].stickX * 0.002f;
+  f_DebugFramingPitch += g_ControllerStates[1].stickY * 0.002f;
   ClearFramedSpheres();
-  SetFramingAngles(D_80224018_ovl_00, D_80224014_ovl_00);
+  SetFramingAngles(f_DebugFramingPitch, f_DebugFramingYaw);
   center[0] = g_BallPosition[0] * COURSE_TO_WORLD_SCALE;
   center[1] = g_BallPosition[1] * COURSE_TO_WORLD_SCALE;
   center[2] = g_BallPosition[2] * COURSE_TO_WORLD_SCALE;
@@ -3027,7 +3035,7 @@ void UpdateTurns(void) {
     PrintCoursePoints();
   }
 
-  D_80223E40_ovl_00 = 0;
+  f_IsShotPreviewBuilt = 0;
   if (!(g_LetterboxState == 0 || g_LetterboxState == 5)) {
     SetScreenEffect(4, 0);
   }
@@ -3070,7 +3078,7 @@ void UpdateTurns(void) {
 
     switch (state) {
       case 0:
-        D_80223FF7_ovl_00 = 0;
+        f_ShouldUpdateReaction = 0;
         UnloadOverlay(GetOverlayOfModule(8));
         f_ShotFlightCount = 0;
         D_80227184_ovl_00 = 127.0f;
@@ -3142,16 +3150,16 @@ void UpdateTurns(void) {
           D_800B7D9C = 0;
           D_80223E58_ovl_00 = 30;
           D_80227194_ovl_00 = 2;
-        } else if (D_80223FF0_ovl_00) {
+        } else if (f_ShouldReplaySavedShot) {
           D_80227194_ovl_00 = 1;
           D_80104F78 = g_SavedShots[playerIndex];
-          D_80223FF0_ovl_00 = 0;
+          f_ShouldReplaySavedShot = 0;
         } else {
           D_80227194_ovl_00 = 0;
         }
 
         D_8022B5C0_ovl_00 = 0;
-        D_80223E44_ovl_00 = 0;
+        f_ReplayAimSettledFrameCount = 0;
         if (!g_GameState.unk31 &&
             (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                 g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
@@ -4346,8 +4354,8 @@ void UpdateTurns(void) {
         ConsiderReactionSpot(g_HoleSetup.teePosition);
         ClearShotEffects(0);
         EndFlightCamera();
-        if (IsGameFlagSet(0x3E) && D_80223FF4_ovl_00) {
-          character = D_80223FF5_ovl_00;
+        if (IsGameFlagSet(0x3E) && f_HasGutsTestRun) {
+          character = f_GutsTestCharacter;
           palette = 0;
         } else {
           character = g_Players[playerIndex].characterIndex;
@@ -4388,9 +4396,9 @@ void UpdateTurns(void) {
 
         StartReaction(0, g_Players[playerIndex].characterIndex, reaction);
         SetCharacterAnimation(0, reaction);
-        if (IsGameFlagSet(0x3E) && D_80223FF4_ovl_00) {
-          SetCharacterAnimation(0, D_80223FF6_ovl_00);
-          StartReaction(0, D_80223FF5_ovl_00, D_80223FF6_ovl_00);
+        if (IsGameFlagSet(0x3E) && f_HasGutsTestRun) {
+          SetCharacterAnimation(0, f_GutsTestMotion);
+          StartReaction(0, f_GutsTestCharacter, f_GutsTestMotion);
         }
 
         D_80224000_ovl_00 =
@@ -4400,7 +4408,7 @@ void UpdateTurns(void) {
         }
 
         PlaceAndViewCharacter(0);
-        D_80223FF7_ovl_00 = 1;
+        f_ShouldUpdateReaction = 1;
         if (g_Players[playerIndex].unk26 == HOLE_STATUS_HOLED_OUT) {
           if (g_Players[playerIndex].strokeCount == 1) {
             CountNotableShot(playerIndex, 7);
@@ -4430,7 +4438,7 @@ void UpdateTurns(void) {
       case 0xC:
         PlaceAndViewCharacter(0);
         areCallsAllowed = FALSE;
-        D_80223FF7_ovl_00 = 1;
+        f_ShouldUpdateReaction = 1;
         if (D_80227170_ovl_00[playerIndex] == D_80224000_ovl_00 - 10) {
           StartBanner(-1);
         }
@@ -4663,7 +4671,7 @@ void UpdateTurns(void) {
           SetCharacterAnimation(0, 0xF);
           PlaySong(7, 0);
           PlaceAndViewCharacter(0);
-          D_80223FF7_ovl_00 = 1;
+          f_ShouldUpdateReaction = 1;
           ShowFlipMessage(0);
           nextState = 0x17;
           D_80227170_ovl_00[playerIndex] = 0;
@@ -4672,7 +4680,7 @@ void UpdateTurns(void) {
         break;
       case 0x17:
         PlaceAndViewCharacter(0);
-        D_80223FF7_ovl_00 = 1;
+        f_ShouldUpdateReaction = 1;
         areCallsAllowed = FALSE;
         if (D_80227170_ovl_00[playerIndex] == 80) {
           ShowFlipMessage(-1);
@@ -4707,7 +4715,7 @@ void UpdateTurns(void) {
   }
 
   AnimateAllCharacters();
-  if (D_80223FF7_ovl_00) {
+  if (f_ShouldUpdateReaction) {
     UpdateReaction(0);
   }
 
