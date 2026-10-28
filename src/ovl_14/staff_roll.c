@@ -296,25 +296,25 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex);
 void DrawStaffRollPainting(Gfx** displayListHead);
 void LoadEffectImages(void);
 
-u8 f_IsPaintingShown = TRUE;
-s32 f_StaffRollFrame = 0;
-s32 f_IsLeavingStaffRoll = FALSE;
-s32 f_TextScrollOffset = 0;
-s32 f_TopLineIndex = 0;
-s32 f_ShownSceneColorIndex = -1;
-s32 f_IsTextScrolling = TRUE;
-s32 f_DebugRestartCount = 0;
+static u8 f_IsPaintingShown = TRUE;
+static s32 f_StaffRollFrame = 0;
+static s32 f_IsLeavingStaffRoll = FALSE;
+static s32 f_TextScrollOffset = 0;
+static s32 f_TopLineIndex = 0;
+static s32 f_ShownSceneColorIndex = -1;
+static s32 f_IsTextScrolling = TRUE;
+static s32 f_DebugRestartCount = 0;
 /* Negative while fading out; zero when not fading */
-s32 f_FadeLength = 0;
-f32 f_CastFramingYaw = 0.0f;
-f32 f_CastFramingPitch = 0.0f;
-s32 f_CastIndex = 0;
-s32 f_IsReactionShown = 0;
-f32 f_UnreadValue = 0.0f;
-s32 f_ViewShrinkStartFrame = NEVER_FRAME;
-s32 f_UnusedWord = 0; /* Unused */
+static s32 f_FadeLength = 0;
+static f32 f_CastFramingYaw = 0.0f;
+static f32 f_CastFramingPitch = 0.0f;
+static s32 f_CastIndex = 0;
+static s32 f_IsReactionShown = 0;
+static f32 f_UnreadValue = 0.0f;
+static s32 f_ViewShrinkStartFrame = NEVER_FRAME;
+static s32 f_UnusedWord = 0; /* Unused */
 /* How far right each character moves the next one */
-u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
+static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
     12,
     12,
     12,

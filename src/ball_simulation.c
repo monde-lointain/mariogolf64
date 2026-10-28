@@ -29,7 +29,7 @@ BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {0};
 
 s8 g_ClubTestMode = CLUB_TEST_NONE;
 
-SurfaceInfo g_SurfaceInfo[SURFACE_COUNT] = {
+static SurfaceInfo g_SurfaceInfo[SURFACE_COUNT] = {
     /* SURFACE_OUT_OF_BOUNDS */
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, 1, 7},
     /* SURFACE_FAIRWAY */
@@ -93,9 +93,9 @@ SurfaceInfo g_SurfaceInfo[SURFACE_COUNT] = {
 };
 
 /* For unkC values below and above the entries of D_800B7C10 */
-Unk6 D_800B7C00 = {-90, -64, -40, -10, 100, 1};
-Unk6 D_800B7C08 = {-80, 64, 30, 10, -5, 1};
-Unk6 D_800B7C10[MAX_LIE_RATING + 1][UNKC_ENTRY_COUNT] = {
+static Unk6 D_800B7C00 = {-90, -64, -40, -10, 100, 1};
+static Unk6 D_800B7C08 = {-80, 64, 30, 10, -5, 1};
+static Unk6 D_800B7C10[MAX_LIE_RATING + 1][UNKC_ENTRY_COUNT] = {
     {
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},

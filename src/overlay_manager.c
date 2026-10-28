@@ -56,7 +56,7 @@ static s8 f_ModuleIdsOfOverlay14[] = {0x16, MODULE_ID_END};
 static s8 f_ModuleIdsOfOverlay15[] = {0x1B, 0x1D, 0x20, MODULE_ID_END};
 static s8 f_ModuleIdsOfOverlay16[] = {0x1F, MODULE_ID_END};
 
-Overlay g_Overlays[OVERLAY_COUNT] = {
+static Overlay g_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(

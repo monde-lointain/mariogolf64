@@ -161,7 +161,7 @@ extern s32 f_AimChangeCount;
 extern const char f_SimFaultText[];
 
 /* The traits of each character, in CHARACTER_* order */
-GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
+static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
     /* Plum */
     {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {0, 2, 2, 2, 2, 2}, 10},
     /* Charlie */
@@ -199,11 +199,11 @@ GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
     /* Joe */
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
 };
-s8 f_ClubKindChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_KIND_COUNT] = {
+static s8 f_ClubKindChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_KIND_COUNT] = {
     {75, 50, 25},
     {75, 25, 50},
 };
-ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT] = {
+static ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT] = {
     {0, 0},
     {0, 16},
     {0, 32},
@@ -213,24 +213,24 @@ ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT] = {
     {0, -48},
     {0, 0},
 };
-s32 f_PlanThreadState = PLAN_THREAD_RUNNING;
+static s32 f_PlanThreadState = PLAN_THREAD_RUNNING;
 /* Read by no routine */
-u32 D_80253C68_ovl_03 = 0xD24CC5E5;
+static u32 D_80253C68_ovl_03 = 0xD24CC5E5;
 /* Whether there is a best evaluation yet */
-s32 f_HasBestEvaluation = FALSE;
+static s32 f_HasBestEvaluation = FALSE;
 /*
  * The upper limits of each approach band, as shares of the cup distance that
  * lie short of the green, for each value of the golfer's unk1 trait
  */
-f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT] = {
+static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT] = {
     {0.2f, 0.15f, 0.1f},
     {0.25f, 0.25f, 0.25f},
     {0.4f, 0.45f, 0.35f},
     {0.6f, 0.7f, 0.5f},
 };
-s32 f_HasUnk3Contact = FALSE;
+static s32 f_HasUnk3Contact = FALSE;
 /* Read by no routine. The 2W and AW share the 3W's and SW's types. */
-ClubName D_80253CA4_ovl_03[] = {
+static ClubName D_80253CA4_ovl_03[] = {
     {"1W", CLUB_TYPE_DRIVER},
     {"3W", CLUB_TYPE_THREE_WOOD},
     {"4W", CLUB_TYPE_FOUR_WOOD},

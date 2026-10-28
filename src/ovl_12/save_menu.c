@@ -286,7 +286,7 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
 
 /* The MODE_ICON_* index by GameState.gameMode; modes that the menu never names
  * hold 0 or 3 */
-s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
+static s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_STROKE,
     0,
     MODE_ICON_MATCH_GAME,
@@ -300,13 +300,13 @@ s8 f_ModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_SKINS_MATCH,
     MODE_ICON_CLUB_SLOTS,
 };
-s32 f_MenuKind = SAVE_MENU_CLOSED;
-s32 f_IsControlsShown = FALSE;
-s32 f_CursorIndex = 0;
-s32 f_StateFrame = 0;
-s32 f_MenuState = SAVE_MENU_STATE_OPENING;
+static s32 f_MenuKind = SAVE_MENU_CLOSED;
+static s32 f_IsControlsShown = FALSE;
+static s32 f_CursorIndex = 0;
+static s32 f_StateFrame = 0;
+static s32 f_MenuState = SAVE_MENU_STATE_OPENING;
 /* Indexed in the order of DrawGameSaveMenu's cases */
-char* f_ModeNames[MODE_NAME_COUNT] = {
+static char* f_ModeNames[MODE_NAME_COUNT] = {
     "Tournament",
     "Get Character",
     "Stroke",
@@ -315,20 +315,20 @@ char* f_ModeNames[MODE_NAME_COUNT] = {
     "Club Slots",
     "Mini-Golf",
 };
-char f_NoSavedGameText[] = "There is no saved data.";
-char f_NoReplayText[] = "There is no replay data.";
-char f_EndGameText[] = "End Game";
-char f_SaveMenuText[] = "Save Menu";
-s32 f_IconImageIndex = 0;
-s32 f_UnusedSaveMenuWord = 0;
-s32 f_ResumedSongId = NO_SONG;
-s16 f_ReplayLabelIds[REPLAY_LABEL_COUNT] = {
+static char f_NoSavedGameText[] = "There is no saved data.";
+static char f_NoReplayText[] = "There is no replay data.";
+static char f_EndGameText[] = "End Game";
+static char f_SaveMenuText[] = "Save Menu";
+static s32 f_IconImageIndex = 0;
+static s32 f_UnusedSaveMenuWord = 0;
+static s32 f_ResumedSongId = NO_SONG;
+static s16 f_ReplayLabelIds[REPLAY_LABEL_COUNT] = {
     0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C};
-s32 f_IconFrameTimer = 0;
-f32 f_PanelWaveAngle = 0.0f;
-f32 f_TitleSwayAngle = 0.0f;
-f32 f_CursorPulseAngle = 0.0f;
-f32 f_ReplayTitleBobAngle = 0.0f;
+static s32 f_IconFrameTimer = 0;
+static f32 f_PanelWaveAngle = 0.0f;
+static f32 f_TitleSwayAngle = 0.0f;
+static f32 f_CursorPulseAngle = 0.0f;
+static f32 f_ReplayTitleBobAngle = 0.0f;
 
 /* Returns the MODE_ICON_* index of a saved game's mode, or NO_MODE_ICON */
 s32 GetModeIconIndex(GameState* state) {

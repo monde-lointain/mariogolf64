@@ -192,50 +192,50 @@ void DrawRipple(Gfx** displayListHead, Effect* effect);
 void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect);
                                      UpdateRain refreshes next */
 
-s32 f_DebrisKind = 0;
-s32 f_NextMatrixIndex = 0;
-Vtx f_UprightQuadVertices[] = {
+static s32 f_DebrisKind = 0;
+static s32 f_NextMatrixIndex = 0;
+static Vtx f_UprightQuadVertices[] = {
     {{{-1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, 0}, 0, {0, 0x400}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 1, 0}, 0, {0x400, 0x400}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, -1, 0}, 0, {0x400, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-Vtx f_SmallFlatQuadVertices[] = {
+static Vtx f_SmallFlatQuadVertices[] = {
     {{{-3, 0, -3}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-3, 0, 3}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{3, 0, 3}, 0, {0x7FF, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{3, 0, -3}, 0, {0, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-Vtx f_RippleVertices[] = {
+static Vtx f_RippleVertices[] = {
     {{{-7, 0, -7}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-7, 0, 7}, 0, {0xFFF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 0, 7}, 0, {0xFFF, 0xFFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 0, -7}, 0, {0, 0xFFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-Vtx f_SpreadingCircleVertices[] = {
+static Vtx f_SpreadingCircleVertices[] = {
     {{{-7, 0, -7}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-7, 0, 7}, 0, {0x1FFF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 0, 7}, 0, {0x1FFF, 0x1FFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 0, -7}, 0, {0, 0x1FFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-s32 f_AreEffectImagesLoaded = FALSE;
-f32 f_UnreferencedValues[] = {
+static s32 f_AreEffectImagesLoaded = FALSE;
+static f32 f_UnreferencedValues[] = {
     1, 2, 3, 10, 11, 12, 13, 14, 20, 21, 22, 25, 30, 1};
-u8 f_PingPongFrameIndices[] = {0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1};
-s32 f_RaindropCount = RAINDROP_COUNT;
-s32 f_RainSplashCount = RAIN_SPLASH_COUNT;
-Vtx f_RainStreakVertices[] = {
+static u8 f_PingPongFrameIndices[] = {0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1};
+static s32 f_RaindropCount = RAINDROP_COUNT;
+static s32 f_RainSplashCount = RAIN_SPLASH_COUNT;
+static Vtx f_RainStreakVertices[] = {
     {{{0, 0, -100}, 0, {0, 0}, {0xAF, 0xAF, 0xBF, 0x1F}}},
     {{{0, -1, -100}, 0, {0, 0}, {0xAF, 0xAF, 0xBF, 0x1F}}},
     {{{48, -1, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
     {{{48, 0, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
 };
-s32 f_Weather = WEATHER_NONE; /* A WEATHER_* value */
-Vec3 f_LastRainEye = {
+static s32 f_Weather = WEATHER_NONE; /* A WEATHER_* value */
+static Vec3 f_LastRainEye = {
     0.0f, 0.0f, 0.0f}; /* The camera's eye on UpdateRain's last frame */
-s32 f_ShownBadgeCount = 0;
-s32 f_IsBadgeCountShown = FALSE;
-s32 f_BadgeCountFrame = 0;
+static s32 f_ShownBadgeCount = 0;
+static s32 f_IsBadgeCountShown = FALSE;
+static s32 f_BadgeCountFrame = 0;
 void ResetRaindrop(Raindrop* drop);
 void StartRain(void);
 

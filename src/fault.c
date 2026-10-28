@@ -40,9 +40,9 @@ void PrintFaultContext(OSThread* thread);
 void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields);
 
 /* Only cleared; nothing in the code reads it */
-s32 f_FaultUnk = 0;
+static s32 f_FaultUnk = 0;
 /* The debug text row of the next line of the fault report */
-s32 f_FaultTextRow = 7;
+static s32 f_FaultTextRow = 7;
 
 /*
  * Does nothing. The fault thread's start-up messages are in the ROM and
@@ -79,7 +79,7 @@ void RunFaultThread(void* arg) {
 }
 
 /* The fields of the cause register, ending with an empty mask */
-RegisterFieldValue f_CauseFields[] = {
+static RegisterFieldValue f_CauseFields[] = {
     {CAUSE_BD, CAUSE_BD, "BD"},
     {CAUSE_IP8, CAUSE_IP8, "IP8"},
     {CAUSE_IP7, CAUSE_IP7, "IP7"},
@@ -112,7 +112,7 @@ RegisterFieldValue f_CauseFields[] = {
 };
 
 /* The fields of the status register */
-RegisterFieldValue f_StatusFields[] = {
+static RegisterFieldValue f_StatusFields[] = {
     {SR_CU3, SR_CU3, "CU3"},
     {SR_CU2, SR_CU2, "CU2"},
     {SR_CU1, SR_CU1, "CU1"},
@@ -147,7 +147,7 @@ RegisterFieldValue f_StatusFields[] = {
 };
 
 /* The fields of the floating-point control and status register */
-RegisterFieldValue f_FloatStatusFields[] = {
+static RegisterFieldValue f_FloatStatusFields[] = {
     {FPCSR_FS, FPCSR_FS, "FS"},
     {FPCSR_C, FPCSR_C, "C"},
     {FPCSR_CE, FPCSR_CE, "Unimplemented operation"},

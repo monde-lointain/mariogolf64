@@ -117,7 +117,7 @@ static ButtonCode f_ButtonCodes[] = {
     {"BBuududdudllrlrrlrBBlr", 0, EnableDebug},
 };
 /* Never read or written */
-s32 g_TitleUnusedWord = 0;
+static s32 g_TitleUnusedWord = 0;
 /* "PRESS START" turns from red to green and back as this goes round */
 static f32 f_PressStartPhase = 0.0f;
 

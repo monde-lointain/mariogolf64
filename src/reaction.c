@@ -95,15 +95,15 @@ typedef struct EasedView {
 } EasedView; /* size = 0x1C */
 
 /* Frames since the reaction began */
-s32 f_ReactionFrame = 0;
-s32 f_UnusedReactionWord = 0; /* Unused; it is there to match */
+static s32 f_ReactionFrame = 0;
+static s32 f_UnusedReactionWord = 0; /* Unused; it is there to match */
 
 /* The third light is set by the framing routines that light the golfer */
-Lights3 f_ReactionLights =
+static Lights3 f_ReactionLights =
     gdSPDefLights3(0x60, 0x60, 0x60, 0xFF, 0xDC, 0xDC, 0x00, 0x88, 0x78, 0xFF,
         0xDC, 0xDC, 0x00, 0x88, 0x78, 0xFF, 0xDC, 0xDC, 0x00, 0x88, 0x78);
 
-s32 f_ReactionChannel = FIRST_REACTION_CHANNEL;
+static s32 f_ReactionChannel = FIRST_REACTION_CHANNEL;
 
 extern s32 f_ReactionCharacter;
 extern s32 f_ReactionAnimation;

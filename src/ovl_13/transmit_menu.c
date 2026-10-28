@@ -1467,26 +1467,26 @@ s32 IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
 
 /* The menu's options, each the offset of its name from TRANSMIT_OPTION_MESSAGES
  */
-s32 f_ModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
+static s32 f_ModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_CHARACTERS,
         TRANSMIT_OPTION_MAIN_MENU},
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_EXPERIENCE, TRANSMIT_OPTION_NONE},
 };
-char* f_UnusedShotTypeNames[] = {"Straight", "Draw", "Fade"};
-char f_UnusedDriveName[8] = "Drive";
-f32 f_StatusPointerAngle = 0.0f;
-s32 f_CharacterArrowFrame = 0;
-f32 f_OptionPointerAngle = 0.0f;
+static char* f_UnusedShotTypeNames[] = {"Straight", "Draw", "Fade"};
+static char f_UnusedDriveName[8] = "Drive";
+static f32 f_StatusPointerAngle = 0.0f;
+static s32 f_CharacterArrowFrame = 0;
+static f32 f_OptionPointerAngle = 0.0f;
 /* The title in the Game Boy cartridge header, then its game code */
-char f_GameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
+static char f_GameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
 /* Begins every save in the Game Boy cartridge RAM */
-char f_CartridgeSaveSignature[16] = "CAMELOT GAMEBOY";
-s32 f_NoticeState = NOTICE_HIDDEN;
-s32 f_NoticeMessage = 0;
-s32 f_NoticeSize = 0;
-s32 f_PressingHandFrame = 0;
-s32 f_UnusedZeros[2] = {0, 0};
-s32 f_StatusHoleOrder[COURSE_HOLE_COUNT] = {
+static char f_CartridgeSaveSignature[16] = "CAMELOT GAMEBOY";
+static s32 f_NoticeState = NOTICE_HIDDEN;
+static s32 f_NoticeMessage = 0;
+static s32 f_NoticeSize = 0;
+static s32 f_PressingHandFrame = 0;
+static s32 f_UnusedZeros[2] = {0, 0};
+static s32 f_StatusHoleOrder[COURSE_HOLE_COUNT] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
 void BringOverCharacter(s32 listedIndex, s32 slot) {

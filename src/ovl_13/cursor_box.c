@@ -17,14 +17,14 @@
 extern Mtx f_CursorBoxProjection;
 extern Mtx f_CursorBoxTranslations[2]; /* One per draw buffer */
 
-void* f_CursorBoxImage = NULL;
-Vtx f_CursorBoxVertices[] = {
+static void* f_CursorBoxImage = NULL;
+static Vtx f_CursorBoxVertices[] = {
     {{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-24, -24, 0}, 0, {0, 0xC00}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{24, -24, 0}, 0, {0xC00, 0xC00}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{24, 24, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
-f32 f_CursorCornerPhases[] = {0.0f, 1.5707964f, 3.1415927f, 4.712389f};
+static f32 f_CursorCornerPhases[] = {0.0f, 1.5707964f, 3.1415927f, 4.712389f};
 
 /* Reads the cursor box image into the given buffer and sizes the quad to it */
 void LoadCursorBox(void* image) {

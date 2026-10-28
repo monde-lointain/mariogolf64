@@ -44,17 +44,17 @@ void AllocSoundEffectBuffer(s32 size);
 void SetAudioEventCallback(AudioEventCallback callback);
 void HandleAudioReset(NUScMsg type, s32 frame);
 
-u8* f_SongBuffer = NULL;
-u8* f_SoundEffectBuffer = NULL;
-u8* f_PointerBank = NULL;
+static u8* f_SongBuffer = NULL;
+static u8* f_SoundEffectBuffer = NULL;
+static u8* f_PointerBank = NULL;
 /* Cleared to stop sending audio tasks to the scheduler */
-u8 f_IsAudioTaskEnabled = TRUE;
+static u8 f_IsAudioTaskEnabled = TRUE;
 /* Counts the pre-NMI and the audio tasks after it */
-u8 f_ResetFrame = 0;
-AudioEventCallback f_AudioEventCallback = NULL;
-musSched f_AudioScheduler = {
+static u8 f_ResetFrame = 0;
+static AudioEventCallback f_AudioEventCallback = NULL;
+static musSched f_AudioScheduler = {
     InstallAudioScheduler, WaitForAudioFrame, RunAudioTask};
-musConfig f_DefaultMusicConfig = {
+static musConfig f_DefaultMusicConfig = {
     0,
     24,
     NULL,

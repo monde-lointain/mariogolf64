@@ -121,12 +121,12 @@ extern const char f_LoseText[];
 /* " ", still in the assembly's rodata */
 extern char D_8024C848_ovl_09[];
 
-s32 f_MatchResultFrameCount = 0;
-u8 f_WinMarkFrames[] = {3, 4, 5, 0, 1, 2, 3, 4, 5, 0};
-char f_CarryOverText[] = "Carry over";
+static s32 f_MatchResultFrameCount = 0;
+static u8 f_WinMarkFrames[] = {3, 4, 5, 0, 1, 2, 3, 4, 5, 0};
+static char f_CarryOverText[] = "Carry over";
 /* The angle the colors of "Win" are at */
-f32 f_WinColorAngle = 0.0f;
-char* f_BetNames[BET_COUNT] = {
+static f32 f_WinColorAngle = 0.0f;
+static char* f_BetNames[BET_COUNT] = {
     D_8024C848_ovl_09,
     D_8024C848_ovl_09,
     D_8024C848_ovl_09,
@@ -136,11 +136,11 @@ char* f_BetNames[BET_COUNT] = {
     D_8024C848_ovl_09,
 };
 /* Read by no routine */
-char D_8024C4EC_ovl_09[] = "Carry";
+static char D_8024C4EC_ovl_09[] = "Carry";
 /* The headings blink between their two images, a frame each this many draws */
-s32 f_BetBlinkFrame = 0;
-s32 f_BetBlinkTime = 0;
-s8 f_BetSubtitleRows[BET_COUNT] = {
+static s32 f_BetBlinkFrame = 0;
+static s32 f_BetBlinkTime = 0;
+static s8 f_BetSubtitleRows[BET_COUNT] = {
     NO_BET_SUBTITLE,
     NO_BET_SUBTITLE,
     BET_SUBTITLE_SCORE,
@@ -150,7 +150,7 @@ s8 f_BetSubtitleRows[BET_COUNT] = {
     NO_BET_SUBTITLE,
 };
 /* The bottom quad faces away, its normal's Z of 0x81 being -127 */
-Vtx f_FlapVertices[FLAP_QUAD_COUNT][QUAD_VERTEX_COUNT] = {
+static Vtx f_FlapVertices[FLAP_QUAD_COUNT][QUAD_VERTEX_COUNT] = {
     {
         {{{-128, 5, 0}, 0, {0, 0}, {0, 0, 127, 0xFF}}},
         {{{-128, -1, 0}, 0, {0, 0x180}, {0, 0, 127, 0xFF}}},
@@ -170,12 +170,12 @@ Vtx f_FlapVertices[FLAP_QUAD_COUNT][QUAD_VERTEX_COUNT] = {
         {{{64, 5, 0}, 0, {0x1FC0, 0}, {0, 0, 127, 0xFF}}},
     },
 };
-Lights1 f_FlapLights =
+static Lights1 f_FlapLights =
     gdSPDefLights1(0xFF, 0xFF, 0xFF, 0x1F, 0x1F, 0x1F, 0, 0, -127);
-f32 f_ArrowPulseAngle = 0.0f;
-f32 f_ScorePulseAngle = 0.0f;
-s32 f_ScoresStyle = SCORES_STYLE_OPAQUE;
-f32 f_BadgeGlowAngle = 0.0f;
+static f32 f_ArrowPulseAngle = 0.0f;
+static f32 f_ScorePulseAngle = 0.0f;
+static s32 f_ScoresStyle = SCORES_STYLE_OPAQUE;
+static f32 f_BadgeGlowAngle = 0.0f;
 
 /* Where DrawMatchResult draws its text */
 #define MATCH_TITLE_X 32
