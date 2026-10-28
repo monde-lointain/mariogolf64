@@ -98,6 +98,7 @@ endif
 
 extract:
 	$(PYTHON) -m splat split $(SPLAT_YAML)
+	$(PYTHON) tools/extract_textures.py
 
 setup: tools extract
 
@@ -161,6 +162,18 @@ $(BUILD_DIR)/%.s.o: %.s
 $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
 	$(OBJCOPY) -I binary -O elf32-tradbigmips -B mips $< $@
+
+# Textures in C data come from PNGs that extract_textures.py writes to
+# assets/SOURCE/, where SOURCE is the path of the C file under src/ that
+# includes them
+TEXTURE_PNGS := $(shell sed 's/\#.*//' textures.txt | awk 'NF { print $$5 }')
+
+$(BUILD_DIR)/assets/%.inc.c: assets/%.png tools/png_to_c.py
+	$(PYTHON) tools/png_to_c.py $< $@
+
+$(foreach png,$(TEXTURE_PNGS),$(eval \
+  $(patsubst assets/%/,$(BUILD_DIR)/src/%.c.o,$(dir $(png))): \
+      $(BUILD_DIR)/$(png:.png=.inc.c)))
 
 # The sources are UTF-8, but the game's strings are Shift-JIS. KMC GCC
 # compiles a Shift-JIS copy, and the line marker keeps its messages

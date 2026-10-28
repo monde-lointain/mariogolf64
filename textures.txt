@@ -1,0 +1,5 @@
+# Textures that C files hold in their data, for tools/extract_textures.py:
+# ROM offset, format, width, height and the PNG that the C file includes
+# as build/assets/.../NAME.FORMAT.inc.c.
+0x91F28 i8     32 32 assets/game/noise_texture.i8.png
+0x92328 rgba16 32 32 assets/game/flame_gradient_texture.rgba16.png
