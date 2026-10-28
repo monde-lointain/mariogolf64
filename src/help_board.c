@@ -27,6 +27,9 @@
 #define HAND_LEFT 70
 /* How far the hand swings right and back */
 #define HAND_SWING 8
+/* A second swing like the hand's, which nothing is drawn with */
+#define UNUSED_SWING 8
+#define UNUSED_SWING_STEP 2
 #define ARROW_COUNT 2
 /* A 16x16 arrow takes four bits a texel */
 #define ARROW_IMAGE_SIZE (ARROW_SIZE * ARROW_SIZE / 2)
@@ -81,8 +84,8 @@ extern s32 f_HandOffset;
 extern s32 f_IsHandReturning;
 extern s32 f_ArrowFrame;
 extern s32 f_ArrowFrameTime;
-extern s32 D_800C42F4;
-extern s32 D_800C42F8;
+extern s32 f_IsUnusedSwingReturning;
+extern s32 f_UnusedSwingOffset;
 extern s32 f_FirstListedTopic;
 extern f32 f_ListColorPhase;
 
@@ -129,8 +132,8 @@ void LoadHelpBoardImage(void* buffer, s32 image) {
   f_IsHandReturning = FALSE;
   f_ArrowFrame = 0;
   f_ArrowFrameTime = 0;
-  D_800C42F4 = 0;
-  D_800C42F8 = 0;
+  f_IsUnusedSwingReturning = FALSE;
+  f_UnusedSwingOffset = 0;
   if (memory->helpTopicIndex < LISTED_TOPIC_COUNT) {
     f_FirstListedTopic = 0;
   } else if (memory->helpTopicIndex + LISTED_TOPIC_COUNT - 1 <
@@ -344,19 +347,19 @@ void DrawHelpBoard(Gfx** displayListHead) {
       f_ArrowFrame ^= 1;
     }
 
-    if (D_800C42F4 == 0) {
-      D_800C42F8 += 2;
-      if (D_800C42F8 == 8) {
-        D_800C42F4 = 1;
+    if (f_IsUnusedSwingReturning == FALSE) {
+      f_UnusedSwingOffset += UNUSED_SWING_STEP;
+      if (f_UnusedSwingOffset == UNUSED_SWING) {
+        f_IsUnusedSwingReturning = TRUE;
       }
-    } else if (D_800C42F4 == 1) {
-      D_800C42F8 -= 2;
-      if (D_800C42F8 == 0) {
-        D_800C42F4 = 0;
+    } else if (f_IsUnusedSwingReturning == TRUE) {
+      f_UnusedSwingOffset -= UNUSED_SWING_STEP;
+      if (f_UnusedSwingOffset == 0) {
+        f_IsUnusedSwingReturning = FALSE;
       }
     } else {
-      D_800C42F8 = 0;
-      D_800C42F4 = 0;
+      f_UnusedSwingOffset = 0;
+      f_IsUnusedSwingReturning = FALSE;
     }
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
