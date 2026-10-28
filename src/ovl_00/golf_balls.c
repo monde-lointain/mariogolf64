@@ -77,7 +77,6 @@ typedef struct BallAfterimage {
 
 extern GolfBall f_GolfBalls[GOLF_BALL_COUNT];
 extern BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH];
-extern f32 f_BallAfterimageOrigin[3];
 /* The point that the next one is written over */
 extern s32 f_BallAfterimageHead;
 extern s32 f_IsBallAfterimageShown;
@@ -185,22 +184,24 @@ void ResetBallAfterimage(void) {
     f_BallAfterimages[i].isInCup = FALSE;
   }
 
-  f_BallAfterimages[0].position[0] =
-      f_GolfBalls[g_GameState.currentPlayerIndex].position[0];
-  f_BallAfterimages[0].position[1] =
-      f_GolfBalls[g_GameState.currentPlayerIndex].position[1];
-  f_BallAfterimages[0].position[2] =
-      f_GolfBalls[g_GameState.currentPlayerIndex].position[2];
-  f_BallAfterimageOrigin[0] =
-      f_GolfBalls[g_GameState.currentPlayerIndex].position[0];
-  f_BallAfterimageOrigin[1] =
-      f_GolfBalls[g_GameState.currentPlayerIndex].position[1];
+  f_BallAfterimages[0].position[AXIS_X] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_X];
+  f_BallAfterimages[0].position[AXIS_Y] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_Y];
+  f_BallAfterimages[0].position[AXIS_Z] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_Z];
+  /* The head's previous point wraps to the last one while the afterimage has
+   * its full length */
+  f_BallAfterimages[AFTERIMAGE_MAX_LENGTH - 1].position[AXIS_X] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_X];
+  f_BallAfterimages[AFTERIMAGE_MAX_LENGTH - 1].position[AXIS_Y] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_Y];
   f_BallAfterimageHead = 0;
   f_IsBallAfterimageShown = FALSE;
   f_BallAfterimageFrameCount = 0;
   f_IsBallAfterimageZoomed = FALSE;
-  f_BallAfterimageOrigin[2] =
-      f_GolfBalls[g_GameState.currentPlayerIndex].position[2];
+  f_BallAfterimages[AFTERIMAGE_MAX_LENGTH - 1].position[AXIS_Z] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[AXIS_Z];
 }
 
 void StartFastBallAfterimage(void) {

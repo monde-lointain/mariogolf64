@@ -2770,7 +2770,6 @@ ResetGolfBalls = 0x801FDA04; // type:func segment:ovl_00
 IsAnyBallInCup = 0x801FE31C; // type:func segment:ovl_00
 f_GolfBalls = 0x80222570; // size:0x1400 segment:ovl_00
 f_BallAfterimages = 0x80223970; // size:0x4B0 segment:ovl_00
-f_BallAfterimageOrigin = 0x80223E0C; // size:0xC segment:ovl_00
 f_BallAfterimageHead = 0x80223E20; // size:0x4 segment:ovl_00
 f_IsBallAfterimageShown = 0x80223E24; // size:0x4 segment:ovl_00
 f_BallAfterimageFrameCount = 0x80223E28; // size:0x4 segment:ovl_00
