@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "asset.h"
+
 /*
  * Indices of the playable characters, in the order of the name table. A
  * character's models are this index plus a multiple of CHARACTER_COUNT.
@@ -31,7 +33,7 @@ enum CharacterId {
 #define CHARACTER_COUNT 18
 
 /* The first of each character's image assets, of which its face is first */
-extern u16 g_CharacterImageAssets[CHARACTER_COUNT];
+extern AssetId g_CharacterImageAssets[CHARACTER_COUNT];
 /* Added to a character's g_CharacterImageAssets entry for the face that menus
  * show */
 #define CHARACTER_FACE_IMAGE_OFFSET 9
@@ -71,7 +73,7 @@ extern s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];
  * set
  */
 #define FACE_ANIMATION_FRAME_COUNT 8
-extern u16 g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
-extern u16 g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
+extern AssetId g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
+extern AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
 
 #endif

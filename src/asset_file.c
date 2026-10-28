@@ -126,7 +126,7 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file) {
   file->cursor += size;
 }
 
-s32 OpenEncodedAsset(u16 assetId, EncodedAsset* asset) {
+s32 OpenEncodedAsset(AssetId assetId, EncodedAsset* asset) {
   u8 rawHeader[0x80];
   u32* header = ALIGN_BUFFER(rawHeader);
 

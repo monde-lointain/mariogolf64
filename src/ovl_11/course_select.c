@@ -157,7 +157,7 @@ enum PlanksState {
 void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY);
 
-static u16 f_StarFrameAssets[STAR_FRAME_COUNT] = {
+static AssetId f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x5BE,
     0x5BF,
     0x5C0,
@@ -174,7 +174,7 @@ static u16 f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x5CB,
     0x5CC,
 };
-static u16 f_EmptyStarFrameAssets[STAR_FRAME_COUNT] = {
+static AssetId f_EmptyStarFrameAssets[STAR_FRAME_COUNT] = {
     0x5E5,
     0x5E6,
     0x5E7,
@@ -193,7 +193,7 @@ static u16 f_EmptyStarFrameAssets[STAR_FRAME_COUNT] = {
 };
 /* "COURSE" badges, numbered for the main courses; read in, but never drawn here
  */
-static u16 f_CourseBadgeAssets[COURSE_INDEX_COUNT] = {
+static AssetId f_CourseBadgeAssets[COURSE_INDEX_COUNT] = {
     0x733,
     0x734,
     0x735,
@@ -209,7 +209,7 @@ static u16 f_CourseBadgeAssets[COURSE_INDEX_COUNT] = {
     0x738,
 };
 /* Each course has five images of turning, the third its front */
-static u16 f_CourseImageAssets[COURSE_INDEX_COUNT] = {
+static AssetId f_CourseImageAssets[COURSE_INDEX_COUNT] = {
     0x835,
     0x83A,
     0x83F,

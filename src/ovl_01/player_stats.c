@@ -273,7 +273,7 @@ void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
   MenuMemory* memory = func_8005AF74();
   s16 iconIndex;
   u8 rowNumber; /* D_801B5634 counts the index tables' rows from 1 */
-  u16 assetId;
+  AssetId assetId;
   void** imageSlot;
 
   switch (bufferKind) {

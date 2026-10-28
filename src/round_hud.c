@@ -442,7 +442,7 @@ void func_80216F8C(void);
 static void* f_SceneryBillboardHeap = NULL;
 static s32 f_ClubNameImageIndex = 0;
 static s32 D_800C5478 = 0;
-u16 g_CharacterImageAssets[CHARACTER_COUNT] = {0x7BC, 0x74C, 0x7A0, 0x73E,
+AssetId g_CharacterImageAssets[CHARACTER_COUNT] = {0x7BC, 0x74C, 0x7A0, 0x73E,
     0x784, 0x7AE, 0x7CA, 0x7D8, 0x768, 0x792, 0x7E6, 0x75A, 0x776, 0x984, 0x7F4,
     0x802, 0x810, 0x81E};
 s16 g_CharacterPaletteAssets[CHARACTER_COUNT] = {0x7B8, 0x748, 0x79C, 0x73A,
@@ -451,7 +451,7 @@ s16 g_CharacterPaletteAssets[CHARACTER_COUNT] = {0x7B8, 0x748, 0x79C, 0x73A,
 static s32 f_ShotPanelOffsetY = 0;
 s32 g_ShotPanelOffsetX = 0;
 /* The first asset of each course record's hole images, one per hole */
-static u16 f_HoleImageAssets[COURSE_RECORD_COUNT] = {
+static AssetId f_HoleImageAssets[COURSE_RECORD_COUNT] = {
     0x420, 0x432, 0x444, 0x468, 0x456, 0x47A, 0x48C, 0x49E, 0x8F0};
 s32 g_MatrixBufferIndex = 0;
 static ArrowShape f_Arrows[ARROW_COUNT] = {
@@ -594,8 +594,8 @@ static Lights1 f_WindArrowLights =
     gdSPDefLights1(0x80, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 80, -80, 73);
 static s32 f_HudOffsetY = INITIAL_HUD_OFFSET_Y;
 /* The name image of each club slot */
-static u16 f_ClubNameAssets[CLUB_SET_SIZE] = {0x4F1, 0x4F2, 0x4F3, 0x4F4, 0x4F5,
-    0x4F6, 0x4F7, 0x4F8, 0x4F9, 0x4FA, 0x4FB, 0x4FC, 0x4FD, 0x4FE};
+static AssetId f_ClubNameAssets[CLUB_SET_SIZE] = {0x4F1, 0x4F2, 0x4F3, 0x4F4,
+    0x4F5, 0x4F6, 0x4F7, 0x4F8, 0x4F9, 0x4FA, 0x4FB, 0x4FC, 0x4FD, 0x4FE};
 static Vtx f_HeavyLongShotVertices[16] = {
     {{{-32, -512, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{-32, 0, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},

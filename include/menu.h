@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+#include "asset.h"
 #include "course.h"
 #include "save.h"
 
@@ -43,7 +44,7 @@ enum MenuScreen {
 /* The screen whose assets func_801F4C78 last read */
 extern s8 g_LoadedMenuScreen;
 /* Each screen's image */
-extern u16 g_MenuScreenImageAssets[MENU_SCREEN_COUNT];
+extern AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT];
 extern s32 g_MenuScreen;
 
 /* The buttons of every controller: those repeating while held, and those just
@@ -52,9 +53,9 @@ extern s32 g_MenuRepeatButtons;
 extern s32 g_MenuPressedButtons;
 
 /* Each course's icon, then mini golf's */
-extern u16 g_CourseIconAssets[];
+extern AssetId g_CourseIconAssets[];
 /* The courses' icons, then the putter tournaments' badges */
-extern u16 g_TournamentIconAssets[];
+extern AssetId g_TournamentIconAssets[];
 /* How many courses the course select offers */
 extern s32 g_MenuCourseCount;
 /* The holes choice's Bet badge cycles its color unless this is set */
@@ -88,7 +89,7 @@ extern MenuChoices g_MenuChoices;
  * files read with them */
 #define COURSE_IMAGE_COUNT 16
 #define COURSE_FILE_COUNT 3
-extern u16 g_CourseWheelImageAssets[][COURSE_IMAGE_COUNT];
+extern AssetId g_CourseWheelImageAssets[][COURSE_IMAGE_COUNT];
 /* Ends a course's images before COURSE_IMAGE_COUNT */
 #define TROPHY_FRAME_END (-1)
 extern s16 g_CourseTrophyFiles[][COURSE_FILE_COUNT];
@@ -98,7 +99,7 @@ extern void* D_800FBE38[COURSE_FILE_COUNT];
  * each g_ChosenPlayerCount from 1, of which it reads as many as
  * g_CourseIconAssets has */
 #define PLAYER_COUNT_ASSET_ROW_LENGTH 12
-extern u16 g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
+extern AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
 
 /* The size of a course's tournament trophy images */
 typedef struct TrophySize {
@@ -117,10 +118,10 @@ extern TrophySize g_TrophySizes[COURSE_COUNT];
  */
 #define MINI_GOLF_TURN_FRAME_COUNT 5
 #define MINI_GOLF_FACING_FRAME 2
-extern u16 g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD *
+extern AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD *
     MINI_GOLF_DISC_IMAGE_COUNT][MINI_GOLF_TURN_FRAME_COUNT];
 /* Each mini-golf course's disc image as it faces the screen */
-extern u16 g_MiniGolfCourseIconAssets[];
+extern AssetId g_MiniGolfCourseIconAssets[];
 /* The file read with each mini-golf course's disc image */
 extern s16 g_MiniGolfDiscFiles[];
 

@@ -3,6 +3,9 @@
 
 #include <ultra64.h>
 
+/* An asset's number in the archive */
+typedef u16 AssetId;
+
 /* An open file of the asset archive in ROM, read from front to back */
 typedef struct AssetFile {
   /* 0x0 */ u32 cursor;
@@ -118,7 +121,7 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 /* Where the asset archive starts in ROM, just after the last song */
 extern u8 g_AssetArchiveRomStart[];
 
-s32 OpenEncodedAsset(u16 assetId, EncodedAsset* asset);
+s32 OpenEncodedAsset(AssetId assetId, EncodedAsset* asset);
 void ReadEncodedAsset(void* buffer, EncodedAsset* asset);
 
 #endif

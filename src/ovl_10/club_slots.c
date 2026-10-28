@@ -224,7 +224,7 @@ static u8 f_ReelStrips[REEL_COUNT][REEL_SYMBOL_COUNT] = {
     {5, 7, 4, 6, 3, 13, 5, 7, 4, 6, 5, 7, 13, 3, 4, 3, 13, 5, 3, 4},
     {10, 12, 13, 9, 11, 8, 13, 10, 13, 12, 9, 11, 13, 9, 13, 13, 12, 11, 8, 13},
 };
-static u16 f_SymbolAssets[SYMBOL_COUNT] = {
+static AssetId f_SymbolAssets[SYMBOL_COUNT] = {
     0x583,
     0x584,
     0x585,

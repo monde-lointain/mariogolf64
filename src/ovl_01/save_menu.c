@@ -107,7 +107,7 @@ void func_80221CC0_ovl_01(void);
 /* The image of each game mode that a saved game can be in */
 typedef struct {
   /* 0x0 */ s16 unk0;
-  /* 0x2 */ u16 assetId;
+  /* 0x2 */ AssetId assetId;
 } SaveMenuModeImage; /* size = 0x4 */
 
 /* The Ring Shot records' text slots */

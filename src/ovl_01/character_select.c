@@ -1181,7 +1181,7 @@ void func_8020B438_ovl_01(void) {
   void* faceImage;
   s32 unused[2];
   void* characterFile;
-  u16 faceAsset;
+  AssetId faceAsset;
 
   OpenEncodedAsset(0x979, &asset);
   ReadEncodedAsset(images, &asset);

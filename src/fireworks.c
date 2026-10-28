@@ -73,7 +73,7 @@ static Vtx f_FireworkParticleVertices[3] = {
  * The shapes, by course record index: outlines of Toad, a Koopa Troopa, a Shy
  * Guy, Yoshi, a Boo, Wario, Mario and Peach
  */
-static u16 f_FireworkShapeAssetIds[8] = {
+static AssetId f_FireworkShapeAssetIds[8] = {
     0x95F, 0x960, 0x961, 0x962, 0x963, 0x964, 0x965, 0x966};
 static f32 f_FireworkHue = 0.0f;
 /* Read by no routine */

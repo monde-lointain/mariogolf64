@@ -181,7 +181,7 @@ void UpdateClubPanelImages(void) {
   EncodedAsset nameAsset;
   EncodedAsset frameAsset;
   Boolean isPutter;
-  u16 assetId;
+  AssetId assetId;
 
   isPutter = GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN;
   if (f_ClubPanelState == CLUB_PANEL_FREED) {

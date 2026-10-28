@@ -30,7 +30,7 @@ extern s32 D_80230E9C_ovl_01;
 extern s32 D_80230EA0_ovl_01;
 /* The images that the window can show, and the buffer that holds the one it
  * shows */
-extern u16 g_MenuWindowImageAssets[15];
+extern AssetId g_MenuWindowImageAssets[15];
 extern void* g_MenuWindowImage;
 
 extern s32 D_80230F68_ovl_01;
