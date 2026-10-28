@@ -128,6 +128,7 @@ enum HalfTurnState {
 #define PROMPT_STATE_CHOSEN 2
 #define PROMPT_STATE_CLOSING 3
 #define PROMPT_STATE_CLOSED_AFTER_CHOICE 4
+#define PROMPT_CHOICE_YES 0
 #define PROMPT_CHOICE_NO 1
 #define NO_PROMPT_RESULT -1
 /* The results of answers that overwrite a save; they get the save's sound */
@@ -136,7 +137,6 @@ enum HalfTurnState {
 #define PROMPT_TEXT_Y 108
 #define PROMPT_TEXT_SLOT 0
 #define SAVE_SOUND_CHANNEL 15
-#define PROMPT_CHOICE_YES 0
 #define PROMPT_FONT_SIZE 12
 #define PROMPT_GROWTH_FRAMES 4
 /* The cloud is 256 by 64; each half is stretched over cloudHeight */
@@ -174,22 +174,54 @@ typedef struct Prompt {
   /* 0x8 */ s32 results[2];
 } Prompt; /* size = 0x10 */
 
-extern s32 f_IsHalfTurnShown;
-extern s32 f_HalfTurnState;
-extern s32 f_HalfTurnTimer;
-extern f32 f_WipeProgress;
-extern s32 f_WipeKind;
-extern s32 f_WipeShapeIds[WIPE_SHAPE_COUNT];
-extern Prompt f_Prompts[];
-extern s32 f_PromptIndex;
-extern s32 f_PromptFrame;
-extern s32 f_PromptState;
-extern s32 f_PromptChoice;
+Gfx g_DecalTextureSetup[] = {
+    gsDPPipeSync(),
+    gsDPPipeSync(),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_TEX_EDGE, G_RM_TEX_EDGE2),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsSPEndDisplayList(),
+};
+static s32 f_IsHalfTurnShown = FALSE;
+static s32 f_HalfTurnState = HALF_TURN_STATE_SHOWING;
+static s32 f_HalfTurnTimer = 9;
+static f32 f_WipeProgress = 0.0f;
+static s32 f_WipeKind = WIPE_NONE;
+/* LoadWipeShape's shape for each course index */
+static s32 f_WipeShapeIds[WIPE_SHAPE_COUNT] = {0x643, 0x645, 0x642, 0x641,
+    0x644, 0x646, 0x90D, 0x90D, 0x90D, 0x90E, 0x90E, 0x90E, DEFAULT_WIPE_SHAPE,
+    0x640};
+/* Read by no routine */
+static s32 D_800C405C = 0x63E;
+s32 g_ScreenFadeDuration = 0;
+s32 g_ScreenFadeFramesLeft = 0;
+s32 g_ScreenFadeKind = FADE_NONE;
+/* OpenPrompt's prompts: a message, the choice it starts on, and each choice's
+ * result */
+static Prompt f_Prompts[] = {
+    {0x2D, PROMPT_CHOICE_NO, {0, 2}}, /* PROMPT_OVERWRITE_GAME */
+    {0x2E, PROMPT_CHOICE_NO, {3, 2}}, /* PROMPT_END_GAME */
+    {0x2D, PROMPT_CHOICE_NO, {1, 2}}, /* PROMPT_OVERWRITE_REPLAY */
+    {0x2F, PROMPT_CHOICE_NO, {6, 5}}, {0x30, PROMPT_CHOICE_NO, {4, 5}},
+    {0x31, PROMPT_CHOICE_NO, {7, 2}}, /* PROMPT_SKIP_REPLAY */
+    {0x32, PROMPT_CHOICE_YES, {8, 9}}, /* PROMPT_BRING_MORE_CHARACTERS */
+    {0x33, PROMPT_CHOICE_NO, {4, 5}}, {0x34, PROMPT_CHOICE_NO, {4, 5}},
+    {0x35, PROMPT_CHOICE_NO, {10, 11}}, /* PROMPT_SCORE_PASSWORD */
+    {0x36, PROMPT_CHOICE_NO, {10, 11}} /* PROMPT_OVERWRITE_RECORDS */
+};
+static s32 f_PromptIndex = 0;
+static s32 f_PromptFrame = 0;
+static s32 f_PromptState = PROMPT_STATE_CLOSED;
+static s32 f_PromptChoice = PROMPT_CHOICE_YES;
+static f32 f_ChoiceBobAngle = 0.0f;
 static void* f_HalfTurnImage;
 static void* f_WipeShapeImage;
 static void* f_PromptCloudImage;
 static void* f_YesNoImage;
-extern f32 f_ChoiceBobAngle;
 
 /*
  * Draws a texture rectangle between pipe syncs, cut where it reaches past
