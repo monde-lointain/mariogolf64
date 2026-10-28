@@ -292,6 +292,8 @@ extern Gfx g_CharacterRenderModeDisplayList[3];
 extern Gfx g_CharacterCombineDisplayList[2];
 extern Gfx g_CharacterHiliteDisplayList[3];
 #define ENV_COLOR_COUNT 10
+/* The RGB that SetCharacterAlpha gives each of the env color display lists */
+extern u8 g_CharacterEnvColors[ENV_COLOR_COUNT][3];
 /* One env color and an end, for each of g_CharacterEnvColors, at the alpha of
  * SetCharacterAlpha */
 extern Gfx g_CharacterEnvColorDisplayLists[ENV_COLOR_COUNT][2];

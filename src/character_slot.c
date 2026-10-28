@@ -44,8 +44,6 @@
 #define SLOT_POSITION_SCALE (1.0f / 1024)
 
 /* The slot's first rotation is taken away from this roll */
-/* Data still in the unsplit data and bss files */
-extern u8 g_CharacterEnvColors[ENV_COLOR_COUNT][3];
 static LookAt f_HiliteLookAts[DRAW_BUFFER_COUNT];
 static Hilite f_Hilites[DRAW_BUFFER_COUNT];
 
