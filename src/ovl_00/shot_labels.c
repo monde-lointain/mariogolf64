@@ -14,6 +14,7 @@
 #include "current_shot.h"
 #include "math_util.h"
 #include "overlay_manager.h"
+#include "play.h"
 #include "round_hud.h"
 #include "save.h"
 #include "screen.h"
@@ -142,8 +143,6 @@ typedef struct ScreenSpot {
   /* 0x4 */ s32 y;
   /* 0x8 */ s32 isHidden; /* SPOT_HIDDEN behind the camera, else SPOT_SHOWN */
 } ScreenSpot; /* size = 0xC */
-
-extern s32 g_LetterboxState; /* The letterbox's state */
 
 extern u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3];
 extern ShotLabel f_ShotLabels[MAX_PLAYER_COUNT];

@@ -31,6 +31,7 @@
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "pin.h"
+#include "play.h"
 #include "reaction.h"
 #include "round_events.h"
 #include "round_hud.h"
@@ -325,7 +326,6 @@ extern s16
     D_800C307A; /* The free-look camera's heading, in binary angle units */
 extern s32 D_800C3080;
 extern s32 D_800C3084;
-extern s32 g_LetterboxState; /* The letterbox's state */
 extern s16
     D_800C3078; /* A heading that TurnAim can turn in place of the shot's */
 extern s32 D_80223E50_ovl_00; /* Frames that the D-pad has turned the aim,

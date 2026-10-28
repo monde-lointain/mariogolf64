@@ -6,6 +6,8 @@
  */
 #include "common.h"
 
+#include "play.h"
+
 #include "camera.h"
 #include "character.h"
 #include "club.h"
@@ -54,7 +56,6 @@ extern s32 D_800C307C;
 extern s32 D_800C3080;
 extern s32 D_800C3084;
 extern s32 D_800C3088;
-extern s32 g_LetterboxState;
 extern s8 D_800C30A4;
 extern s32 g_PlayExit;
 extern s32 g_HoleEndStep;

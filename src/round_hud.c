@@ -32,6 +32,7 @@
 #include "overlay_manager.h"
 #include "pause_menu.h"
 #include "pin.h"
+#include "play.h"
 #include "round_events.h"
 #include "round_stats.h"
 #include "save.h"
@@ -334,8 +335,6 @@ extern Vtx f_LandingPanelVertices[4];
 #define LETTERBOX_GROWTH_STEP 2
 #define LETTERBOX_MAX_HEIGHT 16
 #define LETTERBOX_STATE_UNK5 5
-
-extern s32 g_LetterboxState;
 
 /* Where the hole image sits in front of the perspective camera, at a tenth of
  * its size */
