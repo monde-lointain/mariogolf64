@@ -187,6 +187,8 @@ extern u8 D_802304F4_ovl_01[];
 extern s16 D_80230460_ovl_01[][STATS_INDEX_COLUMN_COUNT];
 /* How many columns of D_8023040C each row uses */
 extern u8 D_802304B4_ovl_01[];
+/* The x of each column of D_8023040C */
+extern s32 D_802304FC_ovl_01[][STATS_INDEX_COLUMN_COUNT];
 extern s32 D_8023BFC0_ovl_01;
 extern s32 D_8023BFC4_ovl_01;
 extern s32 D_8023BFC8_ovl_01;
@@ -264,6 +266,12 @@ void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
 void func_80210C74_ovl_01(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
+void func_80210DF4_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
+void func_80219460_ovl_01(
+    Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
+void func_8021B1E0_ovl_01(
+    Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex);
 
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -507,7 +515,262 @@ void func_80217D20_ovl_01(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217D20_ovl_01);
 #endif
 
+/*
+ * Each bet's column: its icon at the bottom, the stake's amount above it, and
+ * above that a stack of five stake marks, those up to the stake lit
+ */
+#define BET_ICON_TOP 120
+#define CHOSEN_BET_ICON_TOP 124
+#define BET_AMOUNT_OFFSET_X (-4)
+#define BET_AMOUNT_Y 106
+#define STAKE_MARK_SIZE 8
+#define STAKE_MARK_OFFSET_X 8
+#define STAKE_MARK_BOTTOM 102
+#define STAKE_MARK_SPACING 8
+/* The marks of the top two levels are larger, and the top one is raised */
+#define LARGE_STAKE_LEVEL 3
+#define LARGE_STAKE_GROWTH 4
+#define LARGEST_STAKE_LEVEL 4
+#define LARGEST_STAKE_GROWTH 6
+#define LARGEST_STAKE_RAISE 3
+#define STAKE_MARK_COUNT 5
+/*
+ * The banner of D_8023B34C is drawn twice: stretched to 270 columns in
+ * overlapping 20-row strips, then narrowed to 160 columns at its own height
+ */
+#define WIDE_BANNER_LEFT 26
+#define WIDE_BANNER_RIGHT 296
+#define WIDE_BANNER_TOP 180
+#define WIDE_BANNER_RAISE 6
+#define WIDE_BANNER_STRIP_HEIGHT 20
+#define WIDE_BANNER_STRIP_SPACING 16
+#define BET_BANNER_LEFT 80
+#define BET_BANNER_RIGHT 240
+#define BET_BANNER_TOP 152
+/* The chosen bet's label is centred on the banner */
+#define BET_LABEL_CENTER_X 160
+#define BET_LABEL_TOP 156
+
+/*
+ * Draws the bet settings screen: each bet's icon and stake marks shifted right
+ * by slide, and the banner and chosen bet's name moved down by slide (or up,
+ * when isSlideReversed is set). Once the screen has settled it types the
+ * chosen bet's explanation
+ */
+#ifdef NON_MATCHING
+void func_8021826C_ovl_01(
+    Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
+  Gfx* gfx = *displayListHead;
+  MenuMemory* memory = func_8005AF74();
+  s16 columnIndex;
+  s16 stakeLevel;
+  s16 betIndex;
+  s32 markGrowth;
+  s32 markRaise;
+  s32 bannerShift;
+  s16 stripIndex;
+  s32 columnX;
+  u8* icon;
+
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+
+  for (columnIndex = 0; columnIndex != D_802304B4_ovl_01[D_801B5634 - 1];
+      columnIndex++) {
+    betIndex = D_8023040C_ovl_01[D_801B5634 - 1][columnIndex];
+    if (betIndex == -1) {
+      break;
+    }
+
+    if (columnIndex != memory->unkD) {
+      icon = (u8*)D_8023B340_ovl_01 + (betIndex * PLAYER_STATS_ICON_SIZE);
+      gDPLoadTLUT_pal16(gfx++, 0, ((u32)icon + IMAGE_HEADER_SIZE) & ~7);
+      /* Bets without a stake are dimmed */
+      if (memory->unkE[D_80230460_ovl_01[D_801B5634 - 1][columnIndex]] == 0) {
+        gDPSetCombineMode(
+            gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
+      } else {
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      }
+
+      gDPLoadTextureTile_4b(gfx++, ((u32)icon + PALETTED_TEXELS_OFFSET) & ~7,
+          G_IM_FMT_CI, STATS_ICON_SIZE, STATS_ICON_SIZE, 0, 0,
+          STATS_ICON_SIZE - 1, STATS_ICON_SIZE - 1, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(gfx++,
+          (D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide) << 2,
+          BET_ICON_TOP << 2,
+          (D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide +
+              STATS_ICON_SIZE)
+              << 2,
+          (BET_ICON_TOP + STATS_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+
+    func_80210DF4_ovl_01(&gfx,
+        D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide +
+            BET_AMOUNT_OFFSET_X,
+        BET_AMOUNT_Y,
+        (s8)D_802304F4_ovl_01[memory
+                ->unkE[D_80230460_ovl_01[D_801B5634 - 1][columnIndex]]],
+        0);
+  }
+
+  /* The chosen bet's icon is animated */
+  func_80219460_ovl_01(&gfx,
+      D_802304FC_ovl_01[D_801B5634 - 1][memory->unkD] + slide,
+      CHOSEN_BET_ICON_TOP, STATS_ICON_SIZE, TEXEL_STEP_ONE);
+
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPLoadTextureTile_4b(gfx++,
+      ((u32)D_8023B348_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+      STAKE_MARK_SIZE, STAKE_MARK_SIZE, 0, 0, STAKE_MARK_SIZE - 1,
+      STAKE_MARK_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023B348_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPPipeSync(gfx++);
+
+  markGrowth = 0;
+  markRaise = 0;
+  for (stakeLevel = 0; stakeLevel != STAKE_MARK_COUNT; stakeLevel++) {
+    if (stakeLevel == LARGE_STAKE_LEVEL) {
+      markGrowth = LARGE_STAKE_GROWTH;
+      markRaise = 0;
+    }
+
+    if (stakeLevel == LARGEST_STAKE_LEVEL) {
+      markGrowth = LARGEST_STAKE_GROWTH;
+      markRaise = LARGEST_STAKE_RAISE;
+    }
+
+    for (columnIndex = 0; columnIndex != D_802304B4_ovl_01[D_801B5634 - 1];
+        columnIndex++) {
+      /* Marks above the bet's stake are dimmed */
+      if (stakeLevel >=
+          memory->unkE[D_80230460_ovl_01[D_801B5634 - 1][columnIndex]]) {
+        gDPSetCombineMode(
+            gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
+      } else {
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      }
+
+      gDPPipeSync(gfx++);
+
+      columnX = D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide +
+          STAKE_MARK_OFFSET_X;
+      gSPScisTextureRectangle(gfx++, (columnX - (markGrowth >> 1)) << 2,
+          ((STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - markGrowth -
+              (stakeLevel * STAKE_MARK_SPACING) - markRaise)
+              << 2,
+          (columnX + ((markGrowth >> 1) + STAKE_MARK_SIZE)) << 2,
+          (STAKE_MARK_BOTTOM - markRaise - (stakeLevel * STAKE_MARK_SPACING))
+              << 2,
+          G_TX_RENDERTILE, 0, 0,
+          (STAKE_MARK_SIZE << 10) / (markGrowth + STAKE_MARK_SIZE),
+          (STAKE_MARK_SIZE << 10) / (markGrowth + STAKE_MARK_SIZE));
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPLoadTLUT_pal256(gfx++, ((u32)D_8023B34C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+
+  bannerShift = slide;
+  if (isSlideReversed) {
+    bannerShift = -slide;
+  }
+
+  for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    gDPLoadTextureBlock(gfx++,
+        ((u32)D_8023B34C_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
+            ~7,
+        G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
+        0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, WIDE_BANNER_LEFT << 2,
+        (bannerShift +
+            ((stripIndex * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP) -
+            WIDE_BANNER_RAISE)
+            << 2,
+        WIDE_BANNER_RIGHT << 2,
+        (bannerShift +
+            ((stripIndex * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP) -
+            WIDE_BANNER_RAISE + WIDE_BANNER_STRIP_HEIGHT)
+            << 2,
+        G_TX_RENDERTILE, 0, 0,
+        (MENU_BANNER_WIDTH << 10) / (WIDE_BANNER_RIGHT - WIDE_BANNER_LEFT),
+        (MENU_BANNER_STRIP_HEIGHT << 10) / WIDE_BANNER_STRIP_HEIGHT);
+    gDPPipeSync(gfx++);
+  }
+
+  for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    gDPLoadTextureBlock(gfx++,
+        ((u32)D_8023B34C_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
+            ~7,
+        G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
+        0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, BET_BANNER_LEFT << 2,
+        (bannerShift +
+            ((stripIndex * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP))
+            << 2,
+        BET_BANNER_RIGHT << 2,
+        (bannerShift +
+            ((stripIndex * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP) +
+            MENU_BANNER_STRIP_HEIGHT)
+            << 2,
+        G_TX_RENDERTILE, 0, 0,
+        (MENU_BANNER_WIDTH << 10) / (BET_BANNER_RIGHT - BET_BANNER_LEFT),
+        TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+  }
+
+  betIndex = D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD];
+  func_8021B1E0_ovl_01(
+      &gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
+  if (D_802303A0_ovl_01 == 0 && isSettled == TRUE) {
+    SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE, 1, 0,
+        TEXT_FLAG_TYPED, 255, 255, 255, 255);
+    D_802303A0_ovl_01 = 1;
+  }
+
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021826C_ovl_01);
+#endif
 
 void func_80219460_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep) {
