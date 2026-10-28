@@ -95,6 +95,8 @@ typedef struct RoundHud {
 } RoundHud; /* size = 0x8C */
 
 extern RoundHud g_RoundHud;
+/* Which of the two matrix buffers this frame fills */
+extern s32 g_MatrixBufferIndex;
 /* How far the shot panel still has to slide in, down to 0 */
 extern s32 g_ShotPanelOffsetX;
 /* The ball trail's state; DrawBallTrail draws nothing while it is 0 */

@@ -16,6 +16,7 @@
 #include "heap.h"
 #include "hole_display.h"
 #include "math_util.h"
+#include "round_hud.h"
 #include "save.h"
 #include "screen.h"
 #include "screen_layers.h"

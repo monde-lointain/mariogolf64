@@ -14,6 +14,7 @@
 #include "heap.h"
 #include "libc.h"
 #include "math_util.h"
+#include "round_hud.h"
 #include "save.h"
 #include "screen_layers.h"
 #include "sound.h"
