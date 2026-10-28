@@ -323,6 +323,7 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define MENU_UNK89_UNK3 3
 #define MENU_UNK89_UNK4 4
 /* The bet settings screen's phases in D_8022BE88 */
+#define BET_PHASE_OPENING 1
 #define BET_PHASE_CHOOSING 2
 #define BET_PHASE_CANCELLED 3
 #define BET_PHASE_CONFIRMED 4

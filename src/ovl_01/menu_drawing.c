@@ -170,16 +170,117 @@ extern Mat4 D_80231CA0_ovl_01;
 extern Mat4 D_80231CE0_ovl_01;
 extern LookAt D_80231D20_ovl_01[2];
 
+/*
+ * The course select's water plane, D_8022FD48, blends the water image and the
+ * scrolling layer, which scroll different ways, and is fogged white
+ */
+#define WATER_PLANE_DISTANCE 300.0f
+#define WATER_FIELD_OF_VIEW 45.0f
+#define WATER_PERSPECTIVE_SCALE 4.0f
+#define WATER_FOG_START 980
+#define WATER_FOG_END 1050
+#define WATER_BLEND_ALPHA 127
+#define WATER_TEXTURE_SIZE 32
+#define WATER_TEXTURE_MASK 5
+#define WATER_TEXTURE_SHIFT 2
+#define WATER_LAYER_TMEM 0x100
+#define WATER_LAYER_TILE 1
+#define WATER_TILE_SPAN 64
+#define WATER_VERTEX_COUNT 5
+/* The course select's wheel is seen from closer than the other wheels */
+#define COURSE_SELECT_EYE_HEIGHT 50.0f
+#define COURSE_SELECT_EYE_DISTANCE 60.0f
+/* The front course's image bobs, a step of its phase per update, and the
+ * chosen one updates the depth buffer at a fixed depth */
+#define FRONT_COURSE_BOB_PHASE_STEP 0.1f
+#define FRONT_COURSE_BOB_HEIGHT 8.0f
+#define CHOSEN_COURSE_DEPTH 0x7FFF
+/* The course after the last open one is grayed out, with a panel over it
+ * typing the points it needs */
+#define LOCKED_COURSE_SHADE 96
+#define LOCKED_PANEL_LEFT 108
+#define LOCKED_PANEL_TOP 100
+#define LOCKED_PANEL_RIGHT 212
+#define LOCKED_PANEL_BOTTOM 160
+#define LOCKED_COURSE_TEXT_X 111
+#define LOCKED_COURSE_TEXT_Y 116
+#define MESSAGE_POINTS_TO_UNLOCK 0xC2
+/* The course's birdie badge icon and count, centered by its number of digits
+ */
+#define COURSE_BADGE_ICON_X 226
+#define COURSE_BADGE_ICON_Y 200
+#define COURSE_BADGE_COUNT_X 252
+#define COURSE_BADGE_COUNT_Y 208
+/* The holes badges of D_80106100, 24 by 24 CI4 each: the chosen one is lit,
+ * and the Bet badge cycles its color unless D_800C2BD5 is set */
+#define HOLES_BADGE_BET 0
+#define HOLES_BADGE_COUNT 4
+#define HOLES_BADGE_SIZE 24
+#define HOLES_BADGE_IMAGE_SIZE ((HOLES_BADGE_SIZE * HOLES_BADGE_SIZE) / 2)
+#define UNCHOSEN_HOLES_BADGE_SHADE 127
+#define BET_BADGE_COLOR_STEP (M_PI / 18)
+#define BET_BADGE_COLOR_MIDPOINT 127
+#define BET_BADGE_COLOR_SWING 127.0f
+#define BET_BADGE_ENV_DIVISOR 4
+/* func_801FB54C's layers drawn behind the course select, and in front of it
+ * and of screens 20 and 22 */
+#define COURSE_SELECT_BACK_BOARD_KIND 1
+#define COURSE_SELECT_FRONT_BOARD_KIND 10
+/* Screens 20 and 22 slide their pages this far, a step per update */
+#define BET_SLIDE_STEP 32
+#define BET_SLIDE_DISTANCE 512
+
+typedef struct ImageCorner {
+  s16 x;
+  s16 y;
+} ImageCorner;
+
+extern Mtx D_802321F0_ovl_01;
+extern Mtx D_80232230_ovl_01;
+extern Mat4 D_80232270_ovl_01;
+extern Mat4 D_802322B0_ovl_01;
+extern s32 D_8022FD98_ovl_01; /* The water's scroll */
+extern Vtx D_8022FD48_ovl_01[WATER_VERTEX_COUNT];
+extern f32 D_8022FBC0_ovl_01; /* The front course's bob phase */
+extern f32 D_8022FD40_ovl_01; /* The Bet badge's color phase */
+extern f32 D_8022FD44_ovl_01; /* The chosen mini-golf image's center Y */
+extern ImageCorner D_8022FC20_ovl_01[HOLES_BADGE_COUNT];
+/* Each course's trophies' corners, by the number of trophies */
+extern ImageCorner D_8022FC48_ovl_01[COURSE_COUNT][TOURNAMENT_PLACE_COUNT]
+                                    [TOURNAMENT_PLACE_COUNT];
+extern void* D_801F4A20;
+extern void* D_801049A0[][MINI_GOLF_DISC_IMAGE_COUNT];
+extern void* D_801052C4[MINI_GOLF_DISC_IMAGE_COUNT];
+extern u8 D_8022F8DD_ovl_01;
+extern void* D_80106100;
+extern u8 D_800C2BD5;
+extern void* D_800FBDFC[2];
+extern u8 D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers is shown */
+extern TrophySize D_800C20E0[COURSE_COUNT];
+extern u8 D_8022BE89_ovl_01;
+extern s32 D_8022BE84_ovl_01;
+extern s32 D_802322F0_ovl_01;
+extern s32 D_802322F4_ovl_01;
+
+void StartLoadingChosenHole(void);
 void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
 void func_80200A40_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void func_80200EF0_ovl_01(Gfx** displayListHead);
+void func_802047F0_ovl_01(Gfx** displayListHead);
 void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
 void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
     u8 starCount, u8 enlargesChosenHole);
 void func_80210DF4_ovl_01(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
+void func_8021826C_ovl_01(
+    Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled);
+void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
+    u8 reverseVerticalSlide, u8 canShowPrompt);
+s32 func_8021B618_ovl_01(Gfx** displayListHead, u8 slide);
+void func_8021BE88_ovl_01(Gfx** displayListHead);
 void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
+void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY);
 
 /*
  * Draws the mode select of screens 5, 23 and 26: the characters, the modes'
@@ -1170,7 +1271,622 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
   gfx = *displayListHead;
 }
 
+/*
+ * Draws screen 6, the course select, or the bet settings and screen 20's
+ * columns as screens 20 and 22 slide between them. The course select draws
+ * the water plane, then the wheel of the open courses and the next one, or
+ * of the mini-golf disc's images, the front one bobbing. While the holes are
+ * chosen (MAP_CAMERA_MODE_TOP_BYTE is 1) it draws the holes badges;
+ * otherwise the course's birdie badge count and tournament trophies. Then
+ * func_8021B618 slides the stats panel's rows the way D_8022BE89 picks; when
+ * that is 3 or 4, the chosen hole starts loading once they stop.
+ */
+/*
+ * Doesn't match: the original keeps the chosen course on the stack instead
+ * of in a register, and orders the D_8022BE89 switch's branches and the
+ * trophies' loads differently.
+ */
+#ifdef NON_MATCHING
+void func_80202000_ovl_01(Gfx** displayListHead) {
+  Gfx* gfx;
+  u16 perspNorm;
+  u16 wheelPerspNorm;
+  u8 unusedStack[0x10];
+  f32 iconX[COURSE_COUNT];
+  f32 iconY[COURSE_COUNT];
+  f32 iconScale[COURSE_COUNT];
+  u8 unusedStack2[0x18];
+  s32 drawOrder[COURSE_COUNT];
+  s16 places[TOURNAMENT_PLACE_COUNT];
+  SaveData* save;
+  s32 courseCount;
+  s32 choice;
+  s32 spin;
+  s32 texelsOffset;
+  s32 angleStep;
+  s32 index;
+  /* Counts the sort's passes, the strips, the holes (then holds the badge
+   * count's shift), the badges, the places and the trophies */
+  s32 otherIndex;
+  s32 key;
+  s32 slot;
+  s32 halfSize;
+  s32 step;
+  s32 stripTop;
+  s32 stripOffset;
+  f32 angle;
+  f32 wheelX;
+  f32 bob;
+  void* palette;
+  u8* texels;
+  s16 badgeCount;
+  s32 placeCount;
+  s32 red;
+  s32 green;
+  s32 blue;
+  s16 left;
+  s16 top;
+
+  save = GetSaveData();
+  gfx = *displayListHead;
+  if (g_MenuScreen == MENU_SCREEN_UNK6) {
+    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_BACK_BOARD_KIND);
+    guTranslate(&D_802321F0_ovl_01, 0.0f, 0.0f, -WATER_PLANE_DISTANCE);
+    guPerspective(&D_80232230_ovl_01, &perspNorm, WATER_FIELD_OF_VIEW,
+        WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE,
+        WATER_PERSPECTIVE_SCALE);
+    gSPPerspNormalize(gfx++, perspNorm);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gSPFogPosition(gfx++, WATER_FOG_START, WATER_FOG_END);
+    gDPSetFogColor(gfx++, 255, 255, 255, 255);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
+        1, SHADE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, WATER_BLEND_ALPHA);
+    gDPLoadTextureBlock(gfx++,
+        ((u32)D_801F4A20 + COURSE_SELECT_WATER_OFFSET + IMAGE_HEADER_SIZE) & ~7,
+        G_IM_FMT_RGBA, G_IM_SIZ_16b, WATER_TEXTURE_SIZE, WATER_TEXTURE_SIZE, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+        WATER_TEXTURE_MASK, WATER_TEXTURE_MASK, WATER_TEXTURE_SHIFT,
+        WATER_TEXTURE_SHIFT);
+    gDPLoadMultiBlock(gfx++,
+        ((u32)D_801F4A20 + COURSE_SELECT_LAYER_OFFSET + IMAGE_HEADER_SIZE) & ~7,
+        WATER_LAYER_TMEM, WATER_LAYER_TILE, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+        WATER_TEXTURE_SIZE, WATER_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, WATER_TEXTURE_MASK, WATER_TEXTURE_MASK,
+        WATER_TEXTURE_SHIFT, WATER_TEXTURE_SHIFT);
+    gDPPipeSync(gfx++);
+    D_8022FD98_ovl_01++;
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, D_8022FD98_ovl_01, 0,
+        D_8022FD98_ovl_01 + WATER_TILE_SPAN, WATER_TILE_SPAN);
+    gDPSetTileSize(gfx++, WATER_LAYER_TILE, -D_8022FD98_ovl_01,
+        D_8022FD98_ovl_01, -D_8022FD98_ovl_01 + WATER_TILE_SPAN,
+        D_8022FD98_ovl_01 + WATER_TILE_SPAN);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80232230_ovl_01),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_802321F0_ovl_01),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    gSPVertex(gfx++, D_8022FD48_ovl_01, WATER_VERTEX_COUNT, 0);
+    gDPPipeSync(gfx++);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gSP1Triangle(gfx++, 4, 2, 3, 0);
+    gSP1Triangle(gfx++, 0, 2, 4, 0);
+    gDPPipeSync(gfx++);
+    guPerspectiveF(D_80232270_ovl_01, &wheelPerspNorm, WHEEL_FIELD_OF_VIEW,
+        WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
+    guLookAtF(D_802322B0_ovl_01, 0.0f, COURSE_SELECT_EYE_HEIGHT,
+        COURSE_SELECT_EYE_DISTANCE, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    SetCpuProjectionF(D_80232270_ovl_01, D_802322B0_ovl_01, g_Viewports);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    if (g_IsMiniGolf) {
+      choice = g_MenuChoices.unk13;
+      courseCount = MINI_GOLF_DISC_IMAGE_COUNT;
+      angleStep = DEGREES_PER_TURN / MINI_GOLF_DISC_IMAGE_COUNT;
+      texelsOffset = 0;
+      spin = g_MenuChoices.unk15;
+    } else {
+      courseCount = GetOpenCourseCount();
+      courseCount =
+          (courseCount < COURSE_COUNT) ? (courseCount + 1) : COURSE_COUNT;
+
+      choice = D_801323A0.courseChoice;
+      angleStep = DEGREES_PER_TURN / courseCount;
+      spin = D_801323A0.courseSpin;
+      texelsOffset = LARGE_PALETTED_TEXELS_OFFSET;
+    }
+
+    for (index = 0; index != courseCount; index++) {
+      ScreenPoint point;
+
+      angle =
+          -DEGREES_TO_RADIANS((((choice - index) % courseCount) * angleStep) +
+              (spin * DEGREES_PER_SPIN_STEP));
+      wheelX = sinf(angle) * WHEEL_RADIUS_X;
+      if (ProjectPoint(wheelX, 0.0f, cosf(angle) * WHEEL_RADIUS_Z, &point) <
+          0) {
+        iconX[index] = point.x;
+        iconY[index] = point.y - WHEEL_RAISE;
+        iconScale[index] = point.scaleX;
+      }
+    }
+
+    for (otherIndex = 0; otherIndex != courseCount; otherIndex++) {
+      drawOrder[otherIndex] = otherIndex;
+    }
+
+    for (otherIndex = 1; otherIndex != courseCount; otherIndex++) {
+      key = drawOrder[otherIndex];
+      for (index = otherIndex - 1;
+          (index >= 0) && (iconY[drawOrder[index]] > iconY[key]); index--) {
+        drawOrder[index + 1] = drawOrder[index];
+      }
+
+      drawOrder[index + 1] = key;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    D_8022FBC0_ovl_01 += FRONT_COURSE_BOB_PHASE_STEP;
+    for (index = 0; index != courseCount; index++) {
+      slot = drawOrder[index];
+      halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
+      step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
+      if (index == (courseCount - 1)) {
+        bob = sinf(D_8022FBC0_ovl_01) * FRONT_COURSE_BOB_HEIGHT;
+      } else {
+        bob = 0.0f;
+      }
+
+      if (g_IsMiniGolf == TRUE) {
+        palette = D_801052C4[slot];
+        /* Indexed as one row, as that matches the original better */
+        texels =
+            D_801049A0[0]
+                      [(D_8022F8DD_ovl_01 * MINI_GOLF_DISC_IMAGE_COUNT) + slot];
+      } else {
+        palette = (u8*)D_801049A0[0][slot] + IMAGE_HEADER_SIZE;
+        texels = D_801049A0[0][slot];
+      }
+
+      gDPLoadTLUT_pal256(gfx++, (u32)palette & ~7);
+      if (choice == slot) {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(
+            gfx++, G_RM_AA_TEX_EDGE | Z_UPD, G_RM_AA_TEX_EDGE2 | Z_UPD);
+        gDPSetPrimDepth(gfx++, CHOSEN_COURSE_DEPTH, 0);
+      } else {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+      }
+
+      if (!g_IsMiniGolf) {
+        if ((slot == (courseCount - 1)) &&
+            (GetOpenCourseCount() < COURSE_COUNT)) {
+          gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+          gDPSetPrimColor(gfx++, 0, 0, LOCKED_COURSE_SHADE, LOCKED_COURSE_SHADE,
+              LOCKED_COURSE_SHADE, 255);
+        } else {
+          gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        }
+      }
+
+      stripTop = 0;
+      stripOffset = texelsOffset;
+      for (otherIndex = 0; otherIndex != COURSE_ICON_STRIP_COUNT;
+          otherIndex++) {
+        gDPLoadTextureBlock(gfx++, ((u32)texels + stripOffset) & ~7,
+            G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH,
+            COURSE_ICON_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (s32)(iconX[slot] - halfSize) << 2,
+            (s32)((iconY[slot] - halfSize) + stripTop + bob) << 2,
+            (s32)(iconX[slot] + halfSize) << 2,
+            (s32)(iconY[slot] + stripTop + bob) << 2, G_TX_RENDERTILE, 0, 0,
+            step, step);
+        gDPPipeSync(gfx++);
+        stripTop += halfSize;
+        stripOffset += COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT;
+      }
+
+      if ((g_IsMiniGolf == TRUE) && (g_MenuChoices.unk13 == slot)) {
+        if ((spin == 0) || (D_8022FD44_ovl_01 == 0.0f)) {
+          D_8022FD44_ovl_01 = iconY[slot];
+        }
+
+        func_8021CBDC_ovl_01(&gfx, D_8022FD44_ovl_01 + bob);
+      }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    if (MAP_CAMERA_MODE_TOP_BYTE == 0) {
+      badgeCount = 0;
+      for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
+        if (save->unk990
+                .birdieBadgeCounts[D_801323A0.courseChoice][otherIndex]) {
+          badgeCount++;
+        }
+      }
+
+      /* Centers the count by its number of digits */
+      if (badgeCount < 10) {
+        otherIndex = WON_COUNT_DIGIT_WIDTH;
+      }
+
+      if ((badgeCount >= 10) && (badgeCount < 100)) {
+        otherIndex = 0;
+      }
+
+      if (badgeCount >= 100) {
+        otherIndex = -WON_COUNT_DIGIT_WIDTH;
+      }
+
+      func_80207E28_ovl_01(&gfx, D_800FC898, otherIndex + COURSE_BADGE_ICON_X,
+          COURSE_BADGE_ICON_Y);
+    }
+
+    if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetTexturePersp(gfx++, G_TP_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetTextureFilter(gfx++, G_TF_BILERP);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+      gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_80106100 + IMAGE_HEADER_SIZE) & ~7);
+      for (otherIndex = 0; otherIndex != HOLES_BADGE_COUNT; otherIndex++) {
+        if ((otherIndex == HOLES_BADGE_BET) && (D_800C2BD5 != 1)) {
+          gDPPipeSync(gfx++);
+          gDPLoadTextureTile_4b(gfx++,
+              ((u32)D_80106100 + PALETTED_TEXELS_OFFSET +
+                  (otherIndex * HOLES_BADGE_IMAGE_SIZE)) &
+                  ~7,
+              G_IM_FMT_CI, HOLES_BADGE_SIZE, HOLES_BADGE_SIZE, 0, 0,
+              HOLES_BADGE_SIZE - 1, HOLES_BADGE_SIZE - 1, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+          gSPScisTextureRectangle(gfx++, D_8022FC20_ovl_01[otherIndex].x << 2,
+              D_8022FC20_ovl_01[otherIndex].y << 2,
+              (D_8022FC20_ovl_01[otherIndex].x + HOLES_BADGE_SIZE) << 2,
+              (D_8022FC20_ovl_01[otherIndex].y + HOLES_BADGE_SIZE) << 2,
+              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          gDPPipeSync(gfx++);
+          D_8022FD40_ovl_01 += BET_BADGE_COLOR_STEP;
+          red = (s32)(sinf(D_8022FD40_ovl_01) * BET_BADGE_COLOR_SWING) +
+              BET_BADGE_COLOR_MIDPOINT;
+          blue = (s32)(sinf(D_8022FD40_ovl_01 + (M_PI / 2)) *
+                     BET_BADGE_COLOR_SWING) +
+              BET_BADGE_COLOR_MIDPOINT;
+          green =
+              (s32)(sinf(D_8022FD40_ovl_01 + M_PI) * BET_BADGE_COLOR_SWING) +
+              BET_BADGE_COLOR_MIDPOINT;
+          gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 128);
+          gDPSetEnvColor(gfx++, red / BET_BADGE_ENV_DIVISOR,
+              green / BET_BADGE_ENV_DIVISOR, blue / BET_BADGE_ENV_DIVISOR, 255);
+          gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+          gDPPipeSync(gfx++);
+          gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        } else if (g_MenuChoices.unk0 == otherIndex) {
+          gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        } else {
+          gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+          gDPSetPrimColor(gfx++, 0, 0, UNCHOSEN_HOLES_BADGE_SHADE,
+              UNCHOSEN_HOLES_BADGE_SHADE, UNCHOSEN_HOLES_BADGE_SHADE, 255);
+        }
+
+        gDPPipeSync(gfx++);
+        gDPLoadTextureTile_4b(gfx++,
+            ((u32)D_80106100 + PALETTED_TEXELS_OFFSET +
+                (otherIndex * HOLES_BADGE_IMAGE_SIZE)) &
+                ~7,
+            G_IM_FMT_CI, HOLES_BADGE_SIZE, HOLES_BADGE_SIZE, 0, 0,
+            HOLES_BADGE_SIZE - 1, HOLES_BADGE_SIZE - 1, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, D_8022FC20_ovl_01[otherIndex].x << 2,
+            D_8022FC20_ovl_01[otherIndex].y << 2,
+            (D_8022FC20_ovl_01[otherIndex].x + HOLES_BADGE_SIZE) << 2,
+            (D_8022FC20_ovl_01[otherIndex].y + HOLES_BADGE_SIZE) << 2,
+            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+      }
+    }
+
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    if ((MAP_CAMERA_MODE_TOP_BYTE == 0) && !g_IsMiniGolf) {
+      placeCount = 0;
+      for (otherIndex = 0; otherIndex != TOURNAMENT_PLACE_COUNT; otherIndex++) {
+        if (D_80105C38[D_801323A0.courseChoice].hasPlace[otherIndex]) {
+          places[placeCount] = otherIndex;
+          placeCount++;
+        }
+      }
+
+      if (D_801323A0.courseSpin == 0) {
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        for (otherIndex = 0; otherIndex != placeCount; otherIndex++) {
+          gDPLoadTLUT_pal256(gfx++, (u32)D_800FBE38[places[otherIndex]] & ~7);
+          gDPLoadTextureTile(gfx++, (u32)D_800FBDFC[D_8022BE80_ovl_01] & ~7,
+              G_IM_FMT_CI, G_IM_SIZ_8b,
+              D_800C20E0[D_801323A0.courseChoice].width,
+              D_800C20E0[D_801323A0.courseChoice].height, 0, 0,
+              D_800C20E0[D_801323A0.courseChoice].width - 1,
+              D_800C20E0[D_801323A0.courseChoice].height - 1, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+          left = D_8022FC48_ovl_01[D_801323A0.courseChoice][placeCount - 1]
+                                  [otherIndex]
+                                      .x;
+          top = D_8022FC48_ovl_01[D_801323A0.courseChoice][placeCount - 1]
+                                 [otherIndex]
+                                     .y;
+          gSPScisTextureRectangle(gfx++, left << 2, top << 2,
+              (left + D_800C20E0[D_801323A0.courseChoice].width) << 2,
+              (top + D_800C20E0[D_801323A0.courseChoice].height) << 2,
+              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          gDPPipeSync(gfx++);
+        }
+      }
+
+      badgeCount = 0;
+      for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
+        if (save->unk990
+                .birdieBadgeCounts[D_801323A0.courseChoice][otherIndex]) {
+          badgeCount++;
+        }
+      }
+
+      /* Centers the count by its number of digits */
+      if (badgeCount < 10) {
+        otherIndex = WON_COUNT_DIGIT_WIDTH;
+      }
+
+      if ((badgeCount >= 10) && (badgeCount < 100)) {
+        otherIndex = 0;
+      }
+
+      if (badgeCount >= 100) {
+        otherIndex = -WON_COUNT_DIGIT_WIDTH;
+      }
+
+      gDPPipeSync(gfx++);
+      func_80210DF4_ovl_01(&gfx, otherIndex + COURSE_BADGE_COUNT_X,
+          COURSE_BADGE_COUNT_Y, badgeCount, MENU_NUMBER_TIMES);
+      gDPPipeSync(gfx++);
+    }
+
+    func_8021BE88_ovl_01(&gfx);
+    func_802047F0_ovl_01(&gfx);
+    if (!g_IsMiniGolf && (D_801323A0.courseChoice == (courseCount - 1)) &&
+        (GetOpenCourseCount() < COURSE_COUNT)) {
+      gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+      gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+      gDPPipeSync(gfx++);
+      gSPTextureRectangle(gfx++, LOCKED_PANEL_LEFT << 2, LOCKED_PANEL_TOP << 2,
+          LOCKED_PANEL_RIGHT << 2, LOCKED_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0,
+          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+      SetUpGradientTextDrawing(&gfx, TRUE);
+      gDPSetEnvColor(gfx++, 191, 191, 255, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      SetTextSlotValue(
+          GetCoursePointsNeeded(D_801323A0.courseChoice) - save->coursePoints,
+          0, 0);
+      SetTextSlot(LOCKED_COURSE_TEXT_X, LOCKED_COURSE_TEXT_Y,
+          MESSAGE_POINTS_TO_UNLOCK, 1, 0, TEXT_FLAG_UNK20, 255, 255, 255, 255);
+      DrawLargeTextSlot(&gfx, 0);
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+      gDPPipeSync(gfx++);
+      gDPSetTextureFilter(gfx++, G_TF_BILERP);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    }
+
+    switch (D_8022BE89_ovl_01) {
+      case 0:
+        break;
+
+      default:
+        if (func_8021B618_ovl_01(&gfx, STATS_SLIDE_OUT_RIGHT) == 0) {
+          D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
+        }
+
+        break;
+
+      case MENU_UNK89_UNK3:
+        if (func_8021B618_ovl_01(&gfx, STATS_SLIDE_IN_FROM_RIGHT) == 0) {
+          D_8022BE88_ovl_01 = MENU_PHASE_START;
+          D_8022BE89_ovl_01 = 0;
+          StartLoadingChosenHole();
+        }
+
+        break;
+
+      case MENU_UNK89_UNK4:
+        if (func_8021B618_ovl_01(&gfx, STATS_SLIDE_IN_FROM_LEFT) == 0) {
+          D_8022BE88_ovl_01 = MENU_PHASE_START;
+          D_8022BE89_ovl_01 = 0;
+          StartLoadingChosenHole();
+        }
+
+        break;
+    }
+
+    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_BOARD_KIND);
+  }
+
+  if ((g_MenuScreen == MENU_SCREEN_UNK22) ||
+      (g_MenuScreen == MENU_SCREEN_UNK20)) {
+    switch (D_8022BE88_ovl_01) {
+      case BET_PHASE_OPENING:
+        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        D_8023BFD0_ovl_01 += BET_SLIDE_STEP;
+        D_802322F0_ovl_01 += BET_SLIDE_STEP;
+        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+          D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
+          D_8022BE84_ovl_01 = 0;
+          D_802322F0_ovl_01 = 0;
+        }
+
+        break;
+
+      case BET_PHASE_CANCELLED:
+        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        D_802322F0_ovl_01 += BET_SLIDE_STEP;
+        D_8023BFD0_ovl_01 -= BET_SLIDE_STEP;
+        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+          D_8022BE88_ovl_01 = MENU_PHASE_START;
+          D_8022BE84_ovl_01 = 0;
+          D_802322F0_ovl_01 = 0;
+          SetTextSlot(
+              0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        }
+
+        break;
+
+      case BET_PHASE_CONFIRMED:
+        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        D_802322F0_ovl_01 -= BET_SLIDE_STEP;
+        D_802322F4_ovl_01 += BET_SLIDE_STEP;
+        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+          D_8022BE88_ovl_01 = MENU_PHASE_CHOOSING;
+          D_8022BE84_ovl_01 = 0;
+          D_802322F0_ovl_01 = 0;
+          D_802322F4_ovl_01 = 0;
+        }
+
+        break;
+
+      case MENU_PHASE_CANCELLED:
+        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        D_802322F0_ovl_01 += BET_SLIDE_STEP;
+        D_802322F4_ovl_01 += BET_SLIDE_STEP;
+        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+          D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
+          D_8022BE84_ovl_01 = 0;
+          D_802322F0_ovl_01 = 0;
+          D_802322F4_ovl_01 = 0;
+        }
+
+        break;
+
+      case MENU_PHASE_CONFIRMED:
+        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        D_802322F4_ovl_01 -= BET_SLIDE_STEP;
+        D_8023BFD0_ovl_01 += BET_SLIDE_STEP;
+        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+          D_8022BE88_ovl_01 = MENU_PHASE_START;
+          D_8022BE84_ovl_01 = 0;
+          D_802322F4_ovl_01 = 0;
+          D_8023BFD0_ovl_01 = 0;
+        }
+
+        break;
+    }
+
+    func_8021B618_ovl_01(&gfx, STATS_SLIDE_OUT_RIGHT);
+    if ((D_8022BE88_ovl_01 >= BET_PHASE_CHOOSING) &&
+        ((D_8022BE88_ovl_01 != BET_PHASE_CANCELLED) &&
+            (D_8022BE88_ovl_01 != MENU_PHASE_CONFIRMED))) {
+      func_802047F0_ovl_01(&gfx);
+    }
+
+    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_BOARD_KIND);
+    switch (D_8022BE88_ovl_01) {
+      case BET_PHASE_OPENING:
+        func_8021826C_ovl_01(
+            &gfx, BET_SLIDE_DISTANCE - D_802322F0_ovl_01, 0, 0);
+        break;
+
+      case BET_PHASE_CHOOSING:
+        func_8021826C_ovl_01(&gfx, 0, 0, 1);
+        break;
+
+      case BET_PHASE_CANCELLED:
+        func_8021826C_ovl_01(&gfx, D_802322F0_ovl_01, 0, 0);
+        break;
+
+      case BET_PHASE_CONFIRMED:
+        func_8021826C_ovl_01(&gfx, D_802322F0_ovl_01, 1, 0);
+        func_80219BD4_ovl_01(
+            &gfx, BET_SLIDE_DISTANCE - D_802322F4_ovl_01, 0, 0);
+        break;
+
+      case MENU_PHASE_CHOOSING:
+        func_80219BD4_ovl_01(&gfx, 0, 0, 1);
+        break;
+
+      case MENU_PHASE_CANCELLED:
+        func_8021826C_ovl_01(
+            &gfx, D_802322F0_ovl_01 - BET_SLIDE_DISTANCE, 1, 0);
+        func_80219BD4_ovl_01(&gfx, D_802322F4_ovl_01, 0, 0);
+        break;
+
+      case MENU_PHASE_CONFIRMED:
+        func_80219BD4_ovl_01(&gfx, D_802322F4_ovl_01, 1, 0);
+        break;
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_80202000_ovl_01);
+#endif
 
 /*
  * func_802047F0 draws the course select's banners of D_801B60D0: one behind
