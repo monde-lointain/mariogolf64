@@ -133,7 +133,8 @@ enum SpotState {
 typedef struct ScreenSpot {
   /* 0x0 */ s32 x;
   /* 0x4 */ s32 y;
-  /* 0x8 */ s32 isHidden; /* SPOT_HIDDEN behind the camera, else SPOT_SHOWN */
+  /* A SPOT_* value: SPOT_HIDDEN behind the camera, else SPOT_SHOWN */
+  /* 0x8 */ s32 state;
 } ScreenSpot; /* size = 0xC */
 
 static u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3] = {{0xDC, 0x00, 0x00},
@@ -252,11 +253,11 @@ void DrawShotLabels(Gfx** displayListHead) {
             g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
             g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
             &point) < 0) {
-      cup.isHidden = SPOT_SHOWN;
+      cup.state = SPOT_SHOWN;
       cup.x = point.x;
       cup.y = point.y;
     } else {
-      cup.isHidden = SPOT_HIDDEN;
+      cup.state = SPOT_HIDDEN;
     }
 
     for (i = 0; i != g_GameState.playerCount; i++) {
@@ -337,7 +338,7 @@ void DrawShotLabels(Gfx** displayListHead) {
           overlaps = FALSE;
           corner = ((f_ShotLabels[i].corner + tries) % UPPER_CORNER_COUNT) +
               CORNER_UPPER_LEFT;
-          if (cup.isHidden == SPOT_SHOWN &&
+          if (cup.state == SPOT_SHOWN &&
               cup.x - TAG_WIDTH < point.x + f_TagOffsetsX[corner] &&
               point.x + f_TagOffsetsX[corner] < cup.x + TAG_WIDTH &&
               cup.y - TAG_HEIGHT < point.y + f_TagOffsetsY[corner] &&
