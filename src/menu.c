@@ -13,6 +13,7 @@
 #include "character.h"
 #include "club.h"
 #include "course.h"
+#include "fault.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "host_file.h"
@@ -113,10 +114,8 @@ void SetFramebufferCount(s32 count);
 /* The entries of f_RecordCharacters whose records func_8005C674 checks */
 #define RECORD_CHARACTER_COUNT 13
 
-/* An empty string: the retail game keeps no save data on the development host
- */
-extern char D_800D0AC0[];
-#define NO_HOST_FILE_NAME D_800D0AC0
+/* The retail game keeps no save data on the development host */
+#define NO_HOST_FILE_NAME g_EmptyString
 /* The debug imports' names set this bit on each lowercase letter */
 #define LOWERCASE_LETTER_BIT 0x80
 #define MARK_LOWERCASE(letter) ((letter) | LOWERCASE_LETTER_BIT)

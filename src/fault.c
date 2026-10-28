@@ -3,6 +3,8 @@
  */
 #include "common.h"
 
+#include "fault.h"
+
 #include "PR/R4300.h"
 #include "debug_text.h"
 #include "libc.h"
@@ -58,6 +60,9 @@ char f_FaultText[FAULT_TEXT_SIZE];
 static s32 f_FaultUnk = 0;
 /* The debug text row of the next line of the fault report */
 static s32 f_FaultTextRow = 7;
+
+/* Only menu.c reads it, but the target has it first in this file's rodata */
+const char g_EmptyString[] = "";
 
 /*
  * Does nothing. The fault thread's start-up messages are in the ROM and
