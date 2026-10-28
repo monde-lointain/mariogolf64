@@ -24,3 +24,8 @@ rom:0x104DF4 reloc:MIPS_HI16 symbol:D_802306D8_ovl_01 addend:-0x10
 rom:0x104DF8 reloc:MIPS_LO16 symbol:D_802306D8_ovl_01 addend:-0x10
 rom:0x104FB8 reloc:MIPS_HI16 symbol:D_802306D8_ovl_01 addend:-0x10
 rom:0x104FBC reloc:MIPS_LO16 symbol:D_802306D8_ovl_01 addend:-0x10
+// func_802104F0_ovl_01 reads each D_80230100_ovl_01 trophy position's y; name the table, not the field
+rom:0xFA930 reloc:MIPS_HI16 symbol:D_80230100_ovl_01 addend:0x4
+rom:0xFA938 reloc:MIPS_LO16 symbol:D_80230100_ovl_01 addend:0x4
+rom:0xFA9A4 reloc:MIPS_HI16 symbol:D_80230100_ovl_01 addend:0x4
+rom:0xFA9AC reloc:MIPS_LO16 symbol:D_80230100_ovl_01 addend:0x4
