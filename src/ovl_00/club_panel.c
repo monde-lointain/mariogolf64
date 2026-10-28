@@ -39,7 +39,6 @@ enum ClubPanelState {
 #define CLUB_PANEL_BUFFER_SLOT 12
 
 #define CLUB_PANEL_IMAGE_ASSET 0x4FF
-#define CLUB_PANEL_FRAME_ASSET 0x56C
 #define SHOT_MODE_IMAGE_SIZE 0x808
 
 /* The panel's images, in each shot mode */
@@ -107,11 +106,12 @@ void LoadClubPanelImages(void) {
   f_ClubPanelImage =
       AllocMemory(OpenEncodedAsset(CLUB_PANEL_IMAGE_ASSET, &asset));
   ReadEncodedAsset(f_ClubPanelImage, &asset);
+  /* The first shot mode's image sizes the buffers that each mode's fills */
   D_801B5CD0[CLUB_PANEL_BUFFER_SLOT] =
-      AllocMemory(OpenEncodedAsset(CLUB_PANEL_FRAME_ASSET, &asset));
+      AllocMemory(OpenEncodedAsset(PANEL_ASSET_POWER, &asset));
   ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT], &asset);
   D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + 1] =
-      AllocMemory(OpenEncodedAsset(CLUB_PANEL_FRAME_ASSET, &asset));
+      AllocMemory(OpenEncodedAsset(PANEL_ASSET_POWER, &asset));
   ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + 1], &asset);
   f_ShotModeImage = AllocMemory(SHOT_MODE_IMAGE_SIZE);
   f_ShownShotMode = 0xFF;
