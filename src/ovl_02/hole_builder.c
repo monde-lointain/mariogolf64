@@ -202,20 +202,314 @@ typedef struct HoleAssetIds {
   /* 0xC */ u16 attributes;
 } HoleAssetIds; /* size = 0xE */
 
-extern HoleAssetIds f_HoleAssetIds[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT];
+/* A hole's files are seven assets in a row */
+#define HOLE_ASSET_IDS(first) \
+  {(first), (first) + 1, (first) + 2, (first) + 3, (first) + 4, (first) + 5, \
+      (first) + 6}
+
 extern AssetFile f_HoleAsset;
-extern u32 f_PaintSeed;
-extern s32 f_IsCodeMapCleaned;
 extern u8* f_ReadCursor;
 extern u8* f_BuildBuffer;
 extern u8* f_BuildCursor;
 extern s32 g_TerrainCodeBlockCount;
-extern f32 f_HeightStepScales[];
 extern s32 f_PaintLogic;
-extern PaintLogic f_PaintLogics[];
-extern Vec3 g_MiniGolfScale;
-extern s32 f_HolePaintLogics[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT];
-extern s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN];
+
+s32 PaintMainCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintShyGuyDesert(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintYoshisIsland(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintBooValley(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintFirstMiniGolfCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintSecondMiniGolfCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintThirdMiniGolfCourse(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+s32 PaintDrivingRange(
+    s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+
+u32 f_PaintSeed = 0;
+/* The paint logics, which f_HolePaintLogics and GetCoursePaintLogic index */
+PaintLogic f_PaintLogics[] = {
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintShyGuyDesert},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintYoshisIsland},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintBooValley},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0},
+        PaintFirstMiniGolfCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0},
+        PaintSecondMiniGolfCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0},
+        PaintThirdMiniGolfCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0},
+        PaintFirstMiniGolfCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0},
+        PaintSecondMiniGolfCourse},
+    {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0},
+        PaintThirdMiniGolfCourse},
+    {{0, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintDrivingRange},
+};
+s32 f_IsCodeMapCleaned = FALSE;
+/* Indexed by course record, then by hole */
+HoleAssetIds f_HoleAssetIds[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT] = {
+    /* COURSE_RECORD_TOAD_HIGHLANDS */
+    {
+        HOLE_ASSET_IDS(0x0FC),
+        HOLE_ASSET_IDS(0x150),
+        HOLE_ASSET_IDS(0x10A),
+        HOLE_ASSET_IDS(0x165),
+        HOLE_ASSET_IDS(0x00E),
+        HOLE_ASSET_IDS(0x11F),
+        HOLE_ASSET_IDS(0x126),
+        HOLE_ASSET_IDS(0x007),
+        HOLE_ASSET_IDS(0x134),
+        HOLE_ASSET_IDS(0x13B),
+        HOLE_ASSET_IDS(0x142),
+        HOLE_ASSET_IDS(0x149),
+        HOLE_ASSET_IDS(0x103),
+        HOLE_ASSET_IDS(0x157),
+        HOLE_ASSET_IDS(0x15E),
+        HOLE_ASSET_IDS(0x111),
+        HOLE_ASSET_IDS(0x16C),
+        HOLE_ASSET_IDS(0x173),
+    },
+    /* COURSE_RECORD_KOOPA_PARK */
+    {
+        HOLE_ASSET_IDS(0x000),
+        HOLE_ASSET_IDS(0x12D),
+        HOLE_ASSET_IDS(0x118),
+        HOLE_ASSET_IDS(0x015),
+        HOLE_ASSET_IDS(0x01C),
+        HOLE_ASSET_IDS(0x023),
+        HOLE_ASSET_IDS(0x02A),
+        HOLE_ASSET_IDS(0x031),
+        HOLE_ASSET_IDS(0x038),
+        HOLE_ASSET_IDS(0x03F),
+        HOLE_ASSET_IDS(0x046),
+        HOLE_ASSET_IDS(0x04D),
+        HOLE_ASSET_IDS(0x054),
+        HOLE_ASSET_IDS(0x05B),
+        HOLE_ASSET_IDS(0x062),
+        HOLE_ASSET_IDS(0x069),
+        HOLE_ASSET_IDS(0x070),
+        HOLE_ASSET_IDS(0x077),
+    },
+    /* Course record 2 */
+    {
+        HOLE_ASSET_IDS(0x196),
+        HOLE_ASSET_IDS(0x1B2),
+        HOLE_ASSET_IDS(0x1CE),
+        HOLE_ASSET_IDS(0x181),
+        HOLE_ASSET_IDS(0x1AB),
+        HOLE_ASSET_IDS(0x1A4),
+        HOLE_ASSET_IDS(0x1B9),
+        HOLE_ASSET_IDS(0x1F1),
+        HOLE_ASSET_IDS(0x1E3),
+        HOLE_ASSET_IDS(0x19D),
+        HOLE_ASSET_IDS(0x188),
+        HOLE_ASSET_IDS(0x1C0),
+        HOLE_ASSET_IDS(0x1EA),
+        HOLE_ASSET_IDS(0x1D5),
+        HOLE_ASSET_IDS(0x1C7),
+        HOLE_ASSET_IDS(0x18F),
+        HOLE_ASSET_IDS(0x1DC),
+        HOLE_ASSET_IDS(0x17A),
+    },
+    /* COURSE_RECORD_YOSHIS_ISLAND */
+    {
+        HOLE_ASSET_IDS(0x1F8),
+        HOLE_ASSET_IDS(0x1FF),
+        HOLE_ASSET_IDS(0x206),
+        HOLE_ASSET_IDS(0x20D),
+        HOLE_ASSET_IDS(0x214),
+        HOLE_ASSET_IDS(0x21B),
+        HOLE_ASSET_IDS(0x222),
+        HOLE_ASSET_IDS(0x229),
+        HOLE_ASSET_IDS(0x230),
+        HOLE_ASSET_IDS(0x237),
+        HOLE_ASSET_IDS(0x23E),
+        HOLE_ASSET_IDS(0x245),
+        HOLE_ASSET_IDS(0x24C),
+        HOLE_ASSET_IDS(0x253),
+        HOLE_ASSET_IDS(0x25A),
+        HOLE_ASSET_IDS(0x261),
+        HOLE_ASSET_IDS(0x268),
+        HOLE_ASSET_IDS(0x26F),
+    },
+    /* COURSE_RECORD_BOO_VALLEY */
+    {
+        HOLE_ASSET_IDS(0x07E),
+        HOLE_ASSET_IDS(0x085),
+        HOLE_ASSET_IDS(0x08C),
+        HOLE_ASSET_IDS(0x093),
+        HOLE_ASSET_IDS(0x09A),
+        HOLE_ASSET_IDS(0x0A1),
+        HOLE_ASSET_IDS(0x0A8),
+        HOLE_ASSET_IDS(0x0AF),
+        HOLE_ASSET_IDS(0x0B6),
+        HOLE_ASSET_IDS(0x0BD),
+        HOLE_ASSET_IDS(0x0C4),
+        HOLE_ASSET_IDS(0x0CB),
+        HOLE_ASSET_IDS(0x0D2),
+        HOLE_ASSET_IDS(0x0D9),
+        HOLE_ASSET_IDS(0x0E0),
+        HOLE_ASSET_IDS(0x0E7),
+        HOLE_ASSET_IDS(0x0EE),
+        HOLE_ASSET_IDS(0x0F5),
+    },
+    /* COURSE_RECORD_MARIOS_STAR */
+    {
+        HOLE_ASSET_IDS(0x284),
+        HOLE_ASSET_IDS(0x2E6),
+        HOLE_ASSET_IDS(0x2C3),
+        HOLE_ASSET_IDS(0x28B),
+        HOLE_ASSET_IDS(0x2A7),
+        HOLE_ASSET_IDS(0x2CA),
+        HOLE_ASSET_IDS(0x299),
+        HOLE_ASSET_IDS(0x2B5),
+        HOLE_ASSET_IDS(0x27D),
+        HOLE_ASSET_IDS(0x2DF),
+        HOLE_ASSET_IDS(0x276),
+        HOLE_ASSET_IDS(0x2BC),
+        HOLE_ASSET_IDS(0x2A0),
+        HOLE_ASSET_IDS(0x292),
+        HOLE_ASSET_IDS(0x2AE),
+        HOLE_ASSET_IDS(0x2D8),
+        HOLE_ASSET_IDS(0x2D1),
+        HOLE_ASSET_IDS(0x2ED),
+    },
+    /* COURSE_RECORD_LUIGIS_GARDEN */
+    {
+        HOLE_ASSET_IDS(0x2F4),
+        HOLE_ASSET_IDS(0x2FB),
+        HOLE_ASSET_IDS(0x302),
+        HOLE_ASSET_IDS(0x309),
+        HOLE_ASSET_IDS(0x310),
+        HOLE_ASSET_IDS(0x317),
+        HOLE_ASSET_IDS(0x31E),
+        HOLE_ASSET_IDS(0x325),
+        HOLE_ASSET_IDS(0x32C),
+        HOLE_ASSET_IDS(0x333),
+        HOLE_ASSET_IDS(0x33A),
+        HOLE_ASSET_IDS(0x341),
+        HOLE_ASSET_IDS(0x348),
+        HOLE_ASSET_IDS(0x34F),
+        HOLE_ASSET_IDS(0x356),
+        HOLE_ASSET_IDS(0x35D),
+        HOLE_ASSET_IDS(0x364),
+        HOLE_ASSET_IDS(0x36B),
+    },
+    /* COURSE_RECORD_PEACHS_CASTLE */
+    {
+        HOLE_ASSET_IDS(0x372),
+        HOLE_ASSET_IDS(0x379),
+        HOLE_ASSET_IDS(0x380),
+        HOLE_ASSET_IDS(0x387),
+        HOLE_ASSET_IDS(0x38E),
+        HOLE_ASSET_IDS(0x395),
+        HOLE_ASSET_IDS(0x39C),
+        HOLE_ASSET_IDS(0x3A3),
+        HOLE_ASSET_IDS(0x3AA),
+        HOLE_ASSET_IDS(0x3B1),
+        HOLE_ASSET_IDS(0x3B8),
+        HOLE_ASSET_IDS(0x3BF),
+        HOLE_ASSET_IDS(0x3C6),
+        HOLE_ASSET_IDS(0x3CD),
+        HOLE_ASSET_IDS(0x3D4),
+        HOLE_ASSET_IDS(0x3DB),
+        HOLE_ASSET_IDS(0x3E2),
+        HOLE_ASSET_IDS(0x3E9),
+    },
+    /* COURSE_RECORD_DRIVING_RANGE */
+    {
+        HOLE_ASSET_IDS(0x8F5),
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+        {0},
+    },
+};
+Vec3 g_MiniGolfScale = {1.0f, 1.0f, 1.0f};
+/* The paint logic of each host hole, by course and hole numbers from 1 */
+s32 f_HolePaintLogics[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT] = {
+    {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+    {0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+    {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+    {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+};
+/* Read by no routine */
+s32 D_80254F1C_ovl_02 = 0;
+/* The billboard textures that cast no shadow, ending at a negative index */
+s8 f_ShadowlessTextures[] = {0x14, 0x15, 0x16, -1};
+/* Read by no routine */
+s32 D_80254F24_ovl_02[] = {0, 0, 0};
+s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
+    {0, 12, 20, 13, 1},
+    {14, 4, 5, 6, 16},
+    {21, 7, 22, 8, 23},
+    {15, 9, 10, 11, 17},
+    {2, 18, 24, 19, 3},
+};
+/* Read by no routine */
+s32 D_80254F4C_ovl_02 = 0;
+/* There is no step for a count of 0 */
+f32 f_HeightStepScales[HEIGHT_STEP_SCALE_COUNT] = {
+    0.0f,
+    HEIGHT_ROW_STEP_SCALE / 1,
+    HEIGHT_ROW_STEP_SCALE / 2,
+    HEIGHT_ROW_STEP_SCALE / 3,
+    HEIGHT_ROW_STEP_SCALE / 4,
+    HEIGHT_ROW_STEP_SCALE / 5,
+    HEIGHT_ROW_STEP_SCALE / 6,
+    HEIGHT_ROW_STEP_SCALE / 7,
+    HEIGHT_ROW_STEP_SCALE / 8,
+    HEIGHT_ROW_STEP_SCALE / 9,
+    HEIGHT_ROW_STEP_SCALE / 10,
+    HEIGHT_ROW_STEP_SCALE / 11,
+    HEIGHT_ROW_STEP_SCALE / 12,
+    HEIGHT_ROW_STEP_SCALE / 13,
+    HEIGHT_ROW_STEP_SCALE / 14,
+    HEIGHT_ROW_STEP_SCALE / 15,
+    HEIGHT_ROW_STEP_SCALE / 16,
+    HEIGHT_ROW_STEP_SCALE / 17,
+    HEIGHT_ROW_STEP_SCALE / 18,
+    HEIGHT_ROW_STEP_SCALE / 19,
+    HEIGHT_ROW_STEP_SCALE / 20,
+    HEIGHT_ROW_STEP_SCALE / 21,
+    HEIGHT_ROW_STEP_SCALE / 22,
+    HEIGHT_ROW_STEP_SCALE / 23,
+    HEIGHT_ROW_STEP_SCALE / 24,
+    HEIGHT_ROW_STEP_SCALE / 25,
+    HEIGHT_ROW_STEP_SCALE / 26,
+    HEIGHT_ROW_STEP_SCALE / 27,
+    HEIGHT_ROW_STEP_SCALE / 28,
+    HEIGHT_ROW_STEP_SCALE / 29,
+    HEIGHT_ROW_STEP_SCALE / 30,
+    HEIGHT_ROW_STEP_SCALE / 31,
+};
 
 void BuildGroundTileDisplayList(
     s32 column, s32 row, Gfx** gfxCursor, Vtx** vertexCursor);
@@ -2762,8 +3056,6 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 #define SHADOW_DARKENING_SCALE 4
 #define SHADOW_SCALE_FRACTION_BITS 16
 #define SHADOW_SCALE_ONE (1 << SHADOW_SCALE_FRACTION_BITS)
-
-extern s8 f_ShadowlessTextures[];
 
 static inline u16* GetShadowedTexel(u32 column, u32 row) {
   return &g_WorkArea.hole

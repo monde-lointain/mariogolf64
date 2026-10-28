@@ -589,7 +589,7 @@ segments:
     symbol_name_format: $VRAM_$SEG
     subsegments:
       - [0x128580, c, ovl_02/hole_builder]
-      - [0x12F020, data]
+      - [0x12F020, .data, ovl_02/hole_builder]
       - [0x12FD50, .rodata, ovl_02/hole_builder]
       - { start: 0x1300A0, type: bss, vram: 0x80255320 }
 
