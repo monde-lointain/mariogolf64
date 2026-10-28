@@ -116,8 +116,8 @@ extern s32 D_8023019C_ovl_01;
 extern s32 D_802301A0_ovl_01;
 extern s32 D_802301A4_ovl_01;
 extern TableCorner D_80230248_ovl_01[TABLE_LINE_COUNT * 2];
-extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
-extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
+extern u16 g_CharacterFaceAssets[CHARACTER_COUNT];
+extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern Vtx D_802301F0_ovl_01[MENU_CURSOR_VERTEX_COUNT];
 extern f32 D_80230238_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
                                                            corner's colour */
@@ -720,9 +720,9 @@ void func_802177D0_ovl_01(void) {
   GetSaveData();
   for (characterIndex = 0; characterIndex != CHARACTER_COUNT;
       characterIndex++) {
-    OpenEncodedAsset(D_802308A4_ovl_01[characterIndex], &asset);
+    OpenEncodedAsset(g_CharacterFaceAssets[characterIndex], &asset);
     ReadEncodedAsset(D_8012D430[characterIndex], &asset);
-    OpenAssetFile(D_802308C8_ovl_01[characterIndex][0], &file);
+    OpenAssetFile(g_CharacterPaletteFiles[characterIndex][0], &file);
     ReadAssetFile(
         D_8023BFF0_ovl_01[characterIndex], GetAssetFileSize(&file), &file);
   }

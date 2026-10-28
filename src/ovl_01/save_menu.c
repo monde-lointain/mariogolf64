@@ -117,8 +117,8 @@ typedef struct {
 
 extern void* D_801052C4[2];
 extern void* D_8012D430[CHARACTER_COUNT];
-extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
-extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
+extern u16 g_CharacterFaceAssets[CHARACTER_COUNT];
+extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern u8 D_801B70F0[MAXCONTROLLERS];
 
 /* What D_80230B40 holds for a player with no controller, or for the computer */
@@ -816,9 +816,9 @@ void func_80220BB0_ovl_01(void) {
   s32 palette;
 
   for (index = 0; index != CHARACTER_COUNT; index++) {
-    OpenEncodedAsset(D_802308A4_ovl_01[index], &asset);
+    OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
     ReadEncodedAsset(D_8012D430[index], &asset);
-    OpenAssetFile(D_802308C8_ovl_01[index][0], &file);
+    OpenAssetFile(g_CharacterPaletteFiles[index][0], &file);
     ReadAssetFile(D_8023BFF0_ovl_01[index], GetAssetFileSize(&file), &file);
   }
 
@@ -846,7 +846,7 @@ void func_80220BB0_ovl_01(void) {
       character = 0;
     }
 
-    OpenAssetFile(D_802308C8_ovl_01[character][palette], &file);
+    OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
     ReadAssetFile(D_8023E3F0_ovl_01[index], GetAssetFileSize(&file), &file);
   }
 }

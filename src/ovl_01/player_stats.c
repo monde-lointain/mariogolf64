@@ -150,8 +150,8 @@ enum StatsDirection {
 #define PLAYER_OPTION_SLIDE_START -512
 
 extern void* D_8012D430[CHARACTER_COUNT];
-extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
-extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
+extern u16 g_CharacterFaceAssets[CHARACTER_COUNT];
+extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern s32 g_ChosenPlayerCount;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT][MENU_UNKE_COUNT];
@@ -2358,7 +2358,7 @@ void func_8021EF64_ovl_01(void) {
   s32 cell;
 
   for (index = 0; index != CHARACTER_COUNT; index++) {
-    OpenEncodedAsset(D_802308A4_ovl_01[index], &asset);
+    OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
     ReadEncodedAsset(D_8012D430[index], &asset);
   }
 
@@ -2390,7 +2390,7 @@ void func_8021EF64_ovl_01(void) {
       }
 
       D_8023B5E0_ovl_01[row][column] = D_8023BFF0_ovl_01[cell];
-      OpenAssetFile(D_802308C8_ovl_01[character][palette], &file);
+      OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
       ReadAssetFile(
           D_8023B5E0_ovl_01[row][column], GetAssetFileSize(&file), &file);
     }

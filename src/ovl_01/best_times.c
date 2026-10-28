@@ -61,8 +61,8 @@
 #define TIME_SEPARATOR_SPACING 6
 
 extern void* D_8012D430[CHARACTER_COUNT];
-extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
-extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
+extern u16 g_CharacterFaceAssets[CHARACTER_COUNT];
+extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern u8 D_8023BFF0_ovl_01[COURSE_COUNT * BEST_TIME_COUNT]
                            [BEST_TIME_HOLDER_FILE_SIZE];
 extern s32 D_80230130_ovl_01;
@@ -630,7 +630,7 @@ void func_8021585C_ovl_01(void) {
 
   for (characterIndex = 0; characterIndex != CHARACTER_COUNT;
       characterIndex++) {
-    OpenEncodedAsset(D_802308A4_ovl_01[characterIndex], &asset);
+    OpenEncodedAsset(g_CharacterFaceAssets[characterIndex], &asset);
     ReadEncodedAsset(D_8012D430[characterIndex], &asset);
   }
 
@@ -652,7 +652,7 @@ void func_8021585C_ovl_01(void) {
         palette = 0;
       }
 
-      OpenAssetFile(D_802308C8_ovl_01[character][palette], &file);
+      OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
       ReadAssetFile(D_8023BFF0_ovl_01[(courseIndex * BEST_TIME_COUNT) + rank],
           GetAssetFileSize(&file), &file);
     }
