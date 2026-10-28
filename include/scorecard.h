@@ -80,9 +80,11 @@ typedef struct Scorecard {
 extern Scorecard g_Scorecard;
 
 /* Values of Scorecard.placeChange */
-#define PLACE_HELD (-1)
-#define PLACE_ROSE 0
-#define PLACE_FELL 1
+enum PlaceChange {
+  PLACE_HELD = -1,
+  PLACE_ROSE,
+  PLACE_FELL
+};
 
 /* The channel of the tally's sounds, and the volume of the scorecard's */
 #define TALLY_SOUND_CHANNEL 13
@@ -100,9 +102,12 @@ extern Scorecard g_Scorecard;
  * The match result's characters: f_ResultCharactersLoadStep counts up to
  * LOADING, then waits for LoadResultCharacters
  */
-#define RESULT_CHARACTERS_IDLE (-1) /* No characters are loading */
-#define RESULT_CHARACTERS_LOADING 2
-#define RESULT_CHARACTERS_LOADED 3
+enum ResultCharactersState {
+  RESULT_CHARACTERS_IDLE = -1, /* No characters are loading */
+  RESULT_CHARACTERS_LOADING = 2,
+  RESULT_CHARACTERS_LOADED
+};
+
 extern s32 f_ResultCharactersLoadStep;
 s32 LoadResultCharacters(void);
 

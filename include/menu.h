@@ -91,10 +91,12 @@ extern u8 g_MenuImageBuffer[];
 void* GetMenuImageBuffer(void);
 
 /* The states of the menus' popup window, which opens and closes by scaling */
-#define MENU_WINDOW_OPENING 0
-#define MENU_WINDOW_OPEN 1
-#define MENU_WINDOW_CLOSING 2
-#define MENU_WINDOW_CLOSED 3
+enum MenuWindowState {
+  MENU_WINDOW_OPENING,
+  MENU_WINDOW_OPEN,
+  MENU_WINDOW_CLOSING,
+  MENU_WINDOW_CLOSED
+};
 
 void ResetMenuWindow(void);
 void ShowMenuWindow(void);
@@ -240,16 +242,20 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
  * (a plus tinted red, a minus tinted green, or plus-minus for zero), or a red
  * or green tint
  */
-#define MENU_NUMBER_PLAIN 0
-#define MENU_NUMBER_TIMES 1
-#define MENU_NUMBER_SIGNED 2
-#define MENU_NUMBER_RED_TINT 3
-#define MENU_NUMBER_GREEN_TINT 4
+enum MenuNumberStyle {
+  MENU_NUMBER_PLAIN,
+  MENU_NUMBER_TIMES,
+  MENU_NUMBER_SIGNED,
+  MENU_NUMBER_RED_TINT,
+  MENU_NUMBER_GREEN_TINT
+};
 
 /* The signs that func_802123E0 draws */
-#define MENU_SIGN_DASH 0
-#define MENU_SIGN_TIMES 1
-#define MENU_SIGN_CIRCLE 2
+enum MenuSign {
+  MENU_SIGN_DASH,
+  MENU_SIGN_TIMES,
+  MENU_SIGN_CIRCLE
+};
 
 /*
  * The cursor of the character table and the player stats: a quad whose corners
@@ -269,18 +275,22 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define SONG_TITLE 0x27
 
 /* The buffers of func_802218C0, and what it reads into them */
-#define SAVE_GAME_BUFFER_CONTROLLER_ICONS 1
-#define SAVE_GAME_BUFFER_PLAYER_LABELS 2
-#define SAVE_GAME_BUFFER_FIRST_BOARD 3
-#define SAVE_GAME_BUFFER_SECOND_BOARD 4
-#define SAVE_GAME_BUFFER_THIRD_BOARD 5
-#define SAVE_GAME_BUFFER_COURSE 6
-#define SAVE_GAME_BUFFER_CHOSEN_COURSE 7
+enum SaveGameBuffer {
+  SAVE_GAME_BUFFER_CONTROLLER_ICONS = 1,
+  SAVE_GAME_BUFFER_PLAYER_LABELS,
+  SAVE_GAME_BUFFER_FIRST_BOARD,
+  SAVE_GAME_BUFFER_SECOND_BOARD,
+  SAVE_GAME_BUFFER_THIRD_BOARD,
+  SAVE_GAME_BUFFER_COURSE,
+  SAVE_GAME_BUFFER_CHOSEN_COURSE
+};
 
 /* What func_80221EBC reads: each saved game's mode image and a frame, or the
  * chosen game's two */
-#define SAVE_MENU_BUFFER_SLOTS 1
-#define SAVE_MENU_BUFFER_CHOSEN 2
+enum SaveMenuBuffer {
+  SAVE_MENU_BUFFER_SLOTS = 1,
+  SAVE_MENU_BUFFER_CHOSEN
+};
 
 /* The buffer that func_8020B2C4 keeps without reading an image into it */
 #define CHARACTER_SELECT_UNREAD_KIND 10
@@ -292,24 +302,28 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define TABLE_BUFFER_STAR 4
 
 /* The buffers that func_8020E0AC keeps, by the kind its caller gives */
-#define COURSE_BUFFER_FIRST 1
-#define COURSE_BUFFER_SECOND 2
-#define COURSE_BUFFER_LAST 3
+enum CourseBuffer {
+  COURSE_BUFFER_FIRST = 1,
+  COURSE_BUFFER_SECOND,
+  COURSE_BUFFER_LAST
+};
 
 /* The buffers that func_802178B0 fills, and the assets it reads into them */
-#define PLAYER_STATS_BUFFER_ICONS 1
-#define PLAYER_STATS_BUFFER_UNK2 2
-#define PLAYER_STATS_BUFFER_UNK3 3
-#define PLAYER_STATS_BUFFER_UNK4 4
-#define PLAYER_STATS_BUFFER_UNK5 5
-#define PLAYER_STATS_BUFFER_UNK6 6
-#define PLAYER_STATS_BUFFER_UNK7 7
-#define PLAYER_STATS_BUFFER_UNK8 8
-#define PLAYER_STATS_BUFFER_GAME_LABELS 9
-#define PLAYER_STATS_BUFFER_PLAYER_LABELS 10
-#define PLAYER_STATS_BUFFER_BRICK_WALL 11
-#define PLAYER_STATS_BUFFER_UNK12 12
-#define PLAYER_STATS_BUFFER_UNK13 13
+enum PlayerStatsBuffer {
+  PLAYER_STATS_BUFFER_ICONS = 1,
+  PLAYER_STATS_BUFFER_UNK2,
+  PLAYER_STATS_BUFFER_UNK3,
+  PLAYER_STATS_BUFFER_UNK4,
+  PLAYER_STATS_BUFFER_UNK5,
+  PLAYER_STATS_BUFFER_UNK6,
+  PLAYER_STATS_BUFFER_UNK7,
+  PLAYER_STATS_BUFFER_UNK8,
+  PLAYER_STATS_BUFFER_GAME_LABELS,
+  PLAYER_STATS_BUFFER_PLAYER_LABELS,
+  PLAYER_STATS_BUFFER_BRICK_WALL,
+  PLAYER_STATS_BUFFER_UNK12,
+  PLAYER_STATS_BUFFER_UNK13
+};
 
 /* The ways func_8021B618 slides the stats panel's rows */
 #define STATS_SLIDE_CURRENT 0

@@ -61,8 +61,10 @@ typedef struct GameBoyCharacter {
 extern GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT];
 
 /* Where the Game Boy transfer was opened from */
-#define TRANSFER_MODE_AT_BOOT 0
-#define TRANSFER_MODE_FROM_MENU 1
+enum TransferMode {
+  TRANSFER_MODE_AT_BOOT,
+  TRANSFER_MODE_FROM_MENU
+};
 
 /* What the transmit menu shows */
 #define TRANSMIT_SCREEN_OPTIONS 0

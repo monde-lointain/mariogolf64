@@ -68,8 +68,10 @@ extern u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 #define SAVE_OPTION_COUNT 4
 
 /* SAVE_OPTION_GRID_COLOR values */
-#define GRID_COLOR_WHITE 0
-#define GRID_COLOR_BLACK 1
+enum GridColor {
+  GRID_COLOR_WHITE,
+  GRID_COLOR_BLACK
+};
 
 /* Bits of g_OptionBits, each mirroring one of the saved options */
 #define OPTION_BIT_MUSIC_OFF (1 << 0)
@@ -77,10 +79,12 @@ extern u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 #define OPTION_BIT_SIMPLE_CAMERA (1 << 2)
 
 /* Results of reading the save data */
-#define SAVE_READ_NEVER_WRITTEN -2 /* Neither copy has the magic number */
-#define SAVE_READ_FAILED -1
-#define SAVE_READ_FIRST_COPY 1
-#define SAVE_READ_SECOND_COPY 2
+enum SaveReadResult {
+  SAVE_READ_NEVER_WRITTEN = -2, /* Neither copy has the magic number */
+  SAVE_READ_FAILED,
+  SAVE_READ_FIRST_COPY = 1,
+  SAVE_READ_SECOND_COPY
+};
 
 #define COURSE_COUNT 6
 #define COURSE_HOLE_COUNT 18

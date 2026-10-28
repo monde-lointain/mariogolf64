@@ -67,14 +67,17 @@ extern s32 g_SkippedNines;
 #define HUNDREDTHS_PER_SECOND 100
 
 /* Which pause screen is shown over the round */
-#define PAUSE_SCREEN_NONE 0
-#define PAUSE_SCREEN_UNK2 2
-#define PAUSE_SCREEN_UNK4 4
-#define PAUSE_SCREEN_UNK5 5
-#define PAUSE_SCREEN_UNK6 6
-#define PAUSE_SCREEN_SCORECARD 7
-#define PAUSE_SCREEN_UNK8 8
-#define PAUSE_SCREEN_UNK9 9
+enum PauseScreen {
+  PAUSE_SCREEN_NONE,
+  PAUSE_SCREEN_UNK2 = 2,
+  PAUSE_SCREEN_UNK4 = 4,
+  PAUSE_SCREEN_UNK5,
+  PAUSE_SCREEN_UNK6,
+  PAUSE_SCREEN_SCORECARD,
+  PAUSE_SCREEN_UNK8,
+  PAUSE_SCREEN_UNK9
+};
+
 extern s32 g_PauseScreen;
 
 /*

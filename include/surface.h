@@ -43,30 +43,32 @@
  * ratings, and their lie images show the ball sitting worse. Kinds named
  * UNKNN share their surface's name with another kind.
  */
-#define SURFACE_KIND_FAIRWAY 0x0
-#define SURFACE_KIND_FAIRWAY_FAIR_LIE 0x1 /* In a tuft of grass */
-#define SURFACE_KIND_FAIRWAY_POOR_LIE 0x2 /* In a divot */
-#define SURFACE_KIND_ROUGH 0x3
-#define SURFACE_KIND_ROUGH_POOR_LIE 0x4 /* Deeper in the grass */
-#define SURFACE_KIND_BUNKER 0x6
-#define SURFACE_KIND_BUNKER_FAIR_LIE 0x7 /* Half buried */
-#define SURFACE_KIND_BUNKER_POOR_LIE 0x8 /* Mostly buried */
-/* Has BUNKER_POOR_LIE's image, but the default ratings and clubs */
-#define SURFACE_KIND_BUNKER_UNK9 0x9
-#define SURFACE_KIND_WATER_HAZARD 0xA
-#define SURFACE_KIND_GREEN 0xB
-#define SURFACE_KIND_GREEN_EDGE 0xC
-#define SURFACE_KIND_OUT_OF_BOUNDS 0xD
-#define SURFACE_KIND_CART_WAY 0xE
-#define SURFACE_KIND_TEE_GROUND 0xF
-#define SURFACE_KIND_ROCK 0x10
-#define SURFACE_KIND_SEMI_ROUGH 0x11
-#define SURFACE_KIND_BARE_GROUND 0x12
-#define SURFACE_KIND_DEEP_ROUGH 0x13
-#define SURFACE_KIND_BARE_GROUND_UNK20 0x14
-#define SURFACE_KIND_OUT_OF_COURSE 0x15
-#define SURFACE_KIND_TEE_UP 0x16
-#define SURFACE_KIND_WASTE_AREA 0x17
+enum SurfaceKind {
+  SURFACE_KIND_FAIRWAY,
+  SURFACE_KIND_FAIRWAY_FAIR_LIE, /* In a tuft of grass */
+  SURFACE_KIND_FAIRWAY_POOR_LIE, /* In a divot */
+  SURFACE_KIND_ROUGH,
+  SURFACE_KIND_ROUGH_POOR_LIE, /* Deeper in the grass */
+  SURFACE_KIND_BUNKER = 0x6,
+  SURFACE_KIND_BUNKER_FAIR_LIE, /* Half buried */
+  SURFACE_KIND_BUNKER_POOR_LIE, /* Mostly buried */
+  /* Has BUNKER_POOR_LIE's image, but the default ratings and clubs */
+  SURFACE_KIND_BUNKER_UNK9,
+  SURFACE_KIND_WATER_HAZARD,
+  SURFACE_KIND_GREEN,
+  SURFACE_KIND_GREEN_EDGE,
+  SURFACE_KIND_OUT_OF_BOUNDS,
+  SURFACE_KIND_CART_WAY,
+  SURFACE_KIND_TEE_GROUND,
+  SURFACE_KIND_ROCK,
+  SURFACE_KIND_SEMI_ROUGH,
+  SURFACE_KIND_BARE_GROUND,
+  SURFACE_KIND_DEEP_ROUGH,
+  SURFACE_KIND_BARE_GROUND_UNK20,
+  SURFACE_KIND_OUT_OF_COURSE,
+  SURFACE_KIND_TEE_UP,
+  SURFACE_KIND_WASTE_AREA
+};
 
 typedef struct SurfaceInfo {
   /* 0x00 */ s32 kind;

@@ -4,18 +4,22 @@
 #include <ultra64.h>
 
 /* GetMatchStanding's results, from the first player's side */
-#define MATCH_STANDING_DECIDED -1 /* The lead is more than the holes left */
-#define MATCH_STANDING_OPEN 0
-/* The player leads by the holes left */
-#define MATCH_STANDING_PLAYER_DORMIE 1
-#define MATCH_STANDING_OPPONENT_DORMIE 2
-#define MATCH_STANDING_DECIDING_HOLE 3 /* Whoever wins the next hole wins */
+enum MatchStanding {
+  MATCH_STANDING_DECIDED = -1, /* The lead is more than the holes left */
+  MATCH_STANDING_OPEN,
+  /* The player leads by the holes left */
+  MATCH_STANDING_PLAYER_DORMIE,
+  MATCH_STANDING_OPPONENT_DORMIE,
+  MATCH_STANDING_DECIDING_HOLE /* Whoever wins the next hole wins */
+};
 
 /* The side that GetMatchWinner and GetMatchHoleResult return */
-#define MATCH_SIDE_NONE 0
-#define MATCH_SIDE_PLAYER 1
-#define MATCH_SIDE_OPPONENT 2
-#define MATCH_HOLE_HALVED 3
+enum MatchSide {
+  MATCH_SIDE_NONE,
+  MATCH_SIDE_PLAYER,
+  MATCH_SIDE_OPPONENT,
+  MATCH_HOLE_HALVED
+};
 
 /* GetGroupHoleResult's results, and the marks it gives each player */
 #define GROUP_HOLE_OPEN 0
@@ -26,11 +30,13 @@
 #define GROUP_PLAYER_OUT 2
 
 /* What GetHolingOutStakes says the player's next stroke would do if holed */
-#define HOLING_OUT_WINS_HOLE 0
-#define HOLING_OUT_TIES 1
-#define HOLING_OUT_WINS_MATCH 2
-#define HOLING_OUT_STAKES_NONE 3
-#define HOLING_OUT_HALVES_HOLE 4
+enum HolingOutStakes {
+  HOLING_OUT_WINS_HOLE,
+  HOLING_OUT_TIES,
+  HOLING_OUT_WINS_MATCH,
+  HOLING_OUT_STAKES_NONE,
+  HOLING_OUT_HALVES_HOLE
+};
 
 s32 GetFirstHoleIndex(void);
 s32 GetRoundHoleCount(void);

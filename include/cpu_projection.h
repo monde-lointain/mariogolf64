@@ -4,10 +4,13 @@
 #include "common.h"
 
 /* SetTriangleNormal's targets */
-#define NORMAL_ON_FIRST 0
-#define NORMAL_ON_SECOND 1
-#define NORMAL_ON_THIRD 2
-#define NORMAL_ON_ALL 3
+enum NormalPlacement {
+  NORMAL_ON_FIRST,
+  NORMAL_ON_SECOND,
+  NORMAL_ON_THIRD,
+  NORMAL_ON_ALL
+};
+
 /* A vertex normal's largest component */
 #define NORMAL_LENGTH 127.0f
 

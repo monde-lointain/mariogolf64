@@ -62,10 +62,12 @@ typedef struct GroundTile {
 } GroundTile; /* size = 0xA00 */
 
 /* GroundTile.detail, how finely DrawGround draws a tile this frame */
-#define GROUND_DETAIL_HIDDEN (-1)
-#define GROUND_DETAIL_COARSE 0 /* Two triangles between the tile's corners */
-#define GROUND_DETAIL_MEDIUM 1 /* Eight triangles between its grid vertices */
-#define GROUND_DETAIL_FINE 2 /* Its own display list, midpoints and all */
+enum GroundDetail {
+  GROUND_DETAIL_HIDDEN = -1,
+  GROUND_DETAIL_COARSE, /* Two triangles between the tile's corners */
+  GROUND_DETAIL_MEDIUM, /* Eight triangles between its grid vertices */
+  GROUND_DETAIL_FINE /* Its own display list, midpoints and all */
+};
 
 /* The terrain codes that GetTerrainCode reads from the hole */
 #define TERRAIN_CODE_FAIRWAY 0
@@ -165,9 +167,11 @@ typedef struct IntegerPlane {
 #define NO_NEAR_DEPTH (-1000.0f)
 
 /* DrawGround's terrainStyle: the round's view, or one of the map views */
-#define TERRAIN_STYLE_NORMAL 0
-#define TERRAIN_STYLE_MAP 2
-#define TERRAIN_STYLE_TOP_DOWN_MAP 3
+enum TerrainStyle {
+  TERRAIN_STYLE_NORMAL,
+  TERRAIN_STYLE_MAP = 2,
+  TERRAIN_STYLE_TOP_DOWN_MAP
+};
 
 /* The vertex cache slots of a row's three vertex rows, which rotate from row to
  * row */

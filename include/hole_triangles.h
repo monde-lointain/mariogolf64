@@ -17,13 +17,15 @@
 
 /* HoleTriangle.kind's values */
 /* Blended texture, mapped across x and y + z */
-#define HOLE_TRIANGLE_KIND_FLAT 0
-/* Not a triangle; see BuildRingMatrices */
-#define HOLE_TRIANGLE_KIND_RING 1
-/* Blended texture tinted blue, mapped across x + z and y */
-#define HOLE_TRIANGLE_KIND_UPRIGHT 2
-/* Untextured, more opaque the more its edge runs along z */
-#define HOLE_TRIANGLE_KIND_SHADED 3
+enum HoleTriangleKind {
+  HOLE_TRIANGLE_KIND_FLAT,
+  /* Not a triangle; see BuildRingMatrices */
+  HOLE_TRIANGLE_KIND_RING,
+  /* Blended texture tinted blue, mapped across x + z and y */
+  HOLE_TRIANGLE_KIND_UPRIGHT,
+  /* Untextured, more opaque the more its edge runs along z */
+  HOLE_TRIANGLE_KIND_SHADED
+};
 
 typedef struct HoleTriangle {
   /* 0x00 */ u32 kind;

@@ -9,9 +9,11 @@
 #define EDITOR_POINT_COUNT 2
 
 /* The axis along which MoveEditorPoint moves a point furthest */
-#define EDITOR_MOVE_AXIS_X 1
-#define EDITOR_MOVE_AXIS_Y 2
-#define EDITOR_MOVE_AXIS_Z 3
+enum EditorMoveAxis {
+  EDITOR_MOVE_AXIS_X = 1,
+  EDITOR_MOVE_AXIS_Y,
+  EDITOR_MOVE_AXIS_Z
+};
 
 /* The state of the opening's camera editor, starting with the camera it moves
  */

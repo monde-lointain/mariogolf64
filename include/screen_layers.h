@@ -6,10 +6,12 @@
 #include "controller.h"
 
 /* StartWipe's kinds */
-#define WIPE_NONE 0
-#define WIPE_CLOSING 1
-#define WIPE_OPENING 2
-#define WIPE_OPENING_FAST 3
+enum WipeState {
+  WIPE_NONE,
+  WIPE_CLOSING,
+  WIPE_OPENING,
+  WIPE_OPENING_FAST
+};
 
 /* The prompts that OpenPrompt opens */
 #define NO_PROMPT -1
@@ -25,9 +27,11 @@
 #define PROMPT_OVERWRITE_RECORDS 10
 
 /* The screen fade's kinds */
-#define FADE_NONE -1
-#define FADE_OUT 0
-#define FADE_IN 1
+enum FadeDirection {
+  FADE_NONE = -1,
+  FADE_OUT,
+  FADE_IN
+};
 
 extern s32 g_ScreenFadeDuration;
 extern s32 g_ScreenFadeFramesLeft;

@@ -7,15 +7,19 @@
 #include "save.h"
 
 /* The effects over a shot in flight that StartShotEffect starts */
-#define SHOT_EFFECT_NONE (-1)
-#define SHOT_EFFECT_LONG_SHOT 0
-#define SHOT_EFFECT_UNK1 1
+enum ShotEffect {
+  SHOT_EFFECT_NONE = -1,
+  SHOT_EFFECT_LONG_SHOT,
+  SHOT_EFFECT_UNK1
+};
 
 /* The landing reactions that StartLandingReaction starts */
-#define LANDING_REACTION_NONE (-1)
-/* Shows the surface and how far the ball rests from the cup */
-#define LANDING_REACTION_REST 1
-#define LANDING_REACTION_UNK2 2 /* In the water or off the course */
+enum LandingReaction {
+  LANDING_REACTION_NONE = -1,
+  /* Shows the surface and how far the ball rests from the cup */
+  LANDING_REACTION_REST = 1,
+  LANDING_REACTION_UNK2 /* In the water or off the course */
+};
 
 /* RoundHud.ballHeight*Direction values */
 #define HEIGHT_ABOVE 0

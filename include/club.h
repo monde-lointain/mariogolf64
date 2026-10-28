@@ -21,26 +21,31 @@
 #define CLUB_SET_SIZE 14
 #define CLUB_SET_COUNT 18
 #define CLUB_COUNT (CLUB_SET_SIZE * CLUB_SET_COUNT)
-#define CLUB_TYPE_DRIVER 0
-#define CLUB_TYPE_THREE_WOOD 1
-#define CLUB_TYPE_FOUR_WOOD 2
-#define CLUB_TYPE_TWO_IRON 3
-#define CLUB_TYPE_THREE_IRON 4
-#define CLUB_TYPE_FOUR_IRON 5
-#define CLUB_TYPE_FIVE_IRON 6
-#define CLUB_TYPE_SIX_IRON 7
-#define CLUB_TYPE_SEVEN_IRON 8
-#define CLUB_TYPE_EIGHT_IRON 9
-#define CLUB_TYPE_NINE_IRON 10
-#define CLUB_TYPE_PITCHING_WEDGE 11
-#define CLUB_TYPE_SAND_WEDGE 12
-#define CLUB_TYPE_PUTTER 13
+
+enum ClubType {
+  CLUB_TYPE_DRIVER,
+  CLUB_TYPE_THREE_WOOD,
+  CLUB_TYPE_FOUR_WOOD,
+  CLUB_TYPE_TWO_IRON,
+  CLUB_TYPE_THREE_IRON,
+  CLUB_TYPE_FOUR_IRON,
+  CLUB_TYPE_FIVE_IRON,
+  CLUB_TYPE_SIX_IRON,
+  CLUB_TYPE_SEVEN_IRON,
+  CLUB_TYPE_EIGHT_IRON,
+  CLUB_TYPE_NINE_IRON,
+  CLUB_TYPE_PITCHING_WEDGE,
+  CLUB_TYPE_SAND_WEDGE,
+  CLUB_TYPE_PUTTER
+};
 
 /* What a club is, from the clubs' initial data */
-#define CLUB_KIND_WOOD 0 /* 1W, 3W and 4W */
-#define CLUB_KIND_IRON 1 /* 2I to 9I */
-#define CLUB_KIND_WEDGE 2 /* PW and SW */
-#define CLUB_KIND_PUTTER 3
+enum ClubKind {
+  CLUB_KIND_WOOD, /* 1W, 3W and 4W */
+  CLUB_KIND_IRON, /* 2I to 9I */
+  CLUB_KIND_WEDGE, /* PW and SW */
+  CLUB_KIND_PUTTER
+};
 
 /* A player's bag has this many slots; empty ones hold NO_CLUB */
 #define CLUB_SLOT_COUNT 16
@@ -94,9 +99,11 @@ extern Club g_Clubs[CLUB_COUNT];
 
 /* Values of g_ClubTestMode, which tells the ball simulation a test shot is
  * running */
-#define CLUB_TEST_NONE 0
-#define CLUB_TEST_SHOT 1
-#define CLUB_TEST_PUTT 2
+enum ClubTest {
+  CLUB_TEST_NONE,
+  CLUB_TEST_SHOT,
+  CLUB_TEST_PUTT
+};
 
 /* Set while GenerateClub or GetPuttPower test-fires a club */
 extern s8 g_ClubTestMode;

@@ -4,9 +4,11 @@
 #include <ultra64.h>
 
 /* The camera mode that frames the shot from behind the golfer */
-#define CAMERA_MODE_BEHIND_GOLFER 1
-#define CAMERA_MODE_UNK2 2
-#define CAMERA_MODE_UNK8 8
+enum CameraMode {
+  CAMERA_MODE_BEHIND_GOLFER = 1,
+  CAMERA_MODE_UNK2,
+  CAMERA_MODE_UNK8 = 8
+};
 
 /* Camera drawFlags bits */
 #define CAMERA_DRAW_SCENE (1 << 0)
@@ -58,9 +60,11 @@ typedef struct CameraMatrices {
 #define INSET_CAMERA 1
 
 /* InsetView.animation values */
-#define INSET_VIEW_STILL 0
-#define INSET_VIEW_OPENING 1
-#define INSET_VIEW_CLOSING 2
+enum InsetViewState {
+  INSET_VIEW_STILL,
+  INSET_VIEW_OPENING,
+  INSET_VIEW_CLOSING
+};
 
 /* How the inset view opens and closes */
 typedef struct InsetView {

@@ -9,10 +9,12 @@
  * The reaction animations, picked from the strokes against par. The
  * eagle one also follows three under par.
  */
-#define REACTION_ANIMATION_EAGLE 12
-#define REACTION_ANIMATION_BIRDIE 13
-#define REACTION_ANIMATION_PAR 14
-#define REACTION_ANIMATION_BOGEY 15
+enum ReactionAnimation {
+  REACTION_ANIMATION_EAGLE = 12,
+  REACTION_ANIMATION_BIRDIE,
+  REACTION_ANIMATION_PAR,
+  REACTION_ANIMATION_BOGEY
+};
 
 s32 AddReactionLight(Gfx** displayListHead, Lights2* lights);
 void StartReaction(u32 slotIndex, s32 character, s32 animation);

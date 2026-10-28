@@ -9,8 +9,10 @@
 #include "save.h"
 
 /* StartWeather's weathers */
-#define WEATHER_NONE (-1)
-#define WEATHER_RAIN 2
+enum Weather {
+  WEATHER_NONE = -1,
+  WEATHER_RAIN = 2
+};
 
 /* The sound channel the rain plays on */
 #define RAIN_SOUND_CHANNEL 9

@@ -277,12 +277,14 @@ typedef struct CharacterSlot {
 /* CharacterSlot.lighting values: the lights the slot's character is drawn with
  */
 /* Lights that don't follow the scene's light direction */
-#define CHARACTER_LIGHTING_FIXED 0
-/* Lit along the scene's light direction, in the weather's colors */
-#define CHARACTER_LIGHTING_SCENE 1
-/* As above, with AddReactionLight's third light when it adds one */
-#define CHARACTER_LIGHTING_SCENE_THIRD 2
-#define CHARACTER_LIGHTING_BLACK 3
+enum CharacterLighting {
+  CHARACTER_LIGHTING_FIXED,
+  /* Lit along the scene's light direction, in the weather's colors */
+  CHARACTER_LIGHTING_SCENE,
+  /* As above, with AddReactionLight's third light when it adds one */
+  CHARACTER_LIGHTING_SCENE_THIRD,
+  CHARACTER_LIGHTING_BLACK
+};
 
 extern CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT];
 
