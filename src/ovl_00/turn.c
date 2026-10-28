@@ -4103,7 +4103,8 @@ void UpdateTurns(void) {
                 IntLength2D(g_BallPosition[0] - g_HoleSetup.cupPosition[0],
                     g_BallPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
 
-            if (g_TurnBallSimulation.state != 2 || g_GameState.isMiniGolf ||
+            if (g_TurnBallSimulation.state != BALL_STATE_ROLLING ||
+                g_GameState.isMiniGolf ||
                 (GetSurfaceInfo(g_TurnBallSimulation.unkA4)->kind == 0xB &&
                     (s32)distance < (s32)previousDistance)) {
               break;

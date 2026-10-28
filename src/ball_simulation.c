@@ -2319,10 +2319,10 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   simulation->velocity[AXIS_X] = cosf(yawRadians) * speed;
   simulation->velocity[AXIS_Z] = sinf(yawRadians) * speed;
   if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-    simulation->state = 2;
+    simulation->state = BALL_STATE_ROLLING;
     simulation->velocity[AXIS_Y] += PUTT_VELOCITY_Y_OFFSET;
   } else {
-    simulation->state = 1;
+    simulation->state = BALL_STATE_FLYING;
   }
 
   simulation->unk94 = 0;
