@@ -75,6 +75,9 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
  */
 #define ASSET_DRIVER_HEAD_IMAGE 0x4E3
 
+/* Where the asset archive starts in ROM, just after the last song */
+extern u8 g_AssetArchiveRomStart[];
+
 s32 OpenEncodedAsset(u16 assetId, EncodedAsset* asset);
 void ReadEncodedAsset(void* buffer, EncodedAsset* asset);
 

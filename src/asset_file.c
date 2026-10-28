@@ -41,8 +41,6 @@ typedef struct AssetTableEntry {
 } AssetTableEntry;
 
 /* The archive in ROM starts with a table of each asset's AssetTableEntry */
-extern u8 g_AssetArchiveRomStart[];
-
 #define ASSET_TABLE ((AssetTableEntry*)g_AssetArchiveRomStart)
 static AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
 
