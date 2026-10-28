@@ -127,11 +127,13 @@ extern void* D_801F4A20;
 extern s16 D_8022BE8C_ovl_01;
 extern s16 D_8022BE92_ovl_01;
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
-/* The parts of the menu backdrop that func_801FC60C draws */
+/* The parts of the menu backdrop that func_801FC60C and func_801FB54C draw */
 #define MENU_LAYER_UNK1 (1 << 0)
 #define MENU_LAYER_UNK4 (1 << 2)
 #define MENU_LAYER_UNK8 (1 << 3)
 #define MENU_LAYER_UNK10 (1 << 4)
+#define MENU_LAYER_UNK20 (1 << 5)
+#define MENU_LAYER_UNK80 (1 << 7)
 
 /* Values of D_801B60B9, the replay that leaving the menus starts */
 #define REPLAY_KIND_NONE 0
@@ -2470,7 +2472,274 @@ void DrawMenuScreen(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
+/*
+ * On screens 6, 20 and 22 the backdrop shows only its first strips, clamped,
+ * and the last strip's rows repeat its bottom row down to this row
+ */
+#define CLAMPED_BACKDROP_STRIP_COUNT 4
+#define CLAMPED_BACKDROP_LAST_TOP \
+  (BACKDROP_TOP + \
+      ((CLAMPED_BACKDROP_STRIP_COUNT - 1) * BACKDROP_STRIP_ROW_COUNT * \
+          BACKDROP_SCALE))
+#define CLAMPED_BACKDROP_BOTTOM 162
+
+/*
+ * The 256 texel wide board in D_800FF420's buffer, each strip of rows
+ * stretched to the strips' spacing
+ */
+#define BOARD_WIDTH 256
+#define BOARD_STRIP_HEIGHT 8
+#define BOARD_STRIP_COUNT 20
+#define BOARD_STRIP_SPACING 9
+#define BOARD_LEFT 32
+#define BOARD_TOP 44
+/* MENU_LAYER_UNK80 reads the buffer as NARROW_BOARD_WIDTH texels wide */
+#define TALL_NARROW_BOARD_LEFT 16
+
+/*
+ * On some screens the banner bobs with the menu's items; the game adds the
+ * first and takes the second, so it sits 4 to 14 rows lower
+ */
+#define BANNER_BOB_LOWERING 13.0f
+#define BANNER_BOB_RAISING 4.0f
+
+/* Doesn't match: the game keeps 0xFD500000 in a register and spills
+ * 0x073DB06C where this spills the other way, and it reads g_MenuScreen for
+ * MENU_LAYER_UNK20 where this drops the read */
+/* Draws the chosen layers of the menu's backdrop: the course backdrop, the
+ * board and the banner */
+#ifdef NON_MATCHING
+void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
+  Gfx* gfx = *displayListHead;
+  s32 stripIndex;
+  s32 shownRowCount;
+  s32 stripTop;
+  s32 bobOffset;
+  u8* image;
+
+  /* The menu memory goes unused */
+  func_8005AF74();
+
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPLoadTLUT_pal256(gfx++, ((u32)D_801F4A20 + IMAGE_HEADER_SIZE) & ~7);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+
+  if (layers & MENU_LAYER_UNK1) {
+    if (g_MenuScreen == MENU_SCREEN_UNK6 || g_MenuScreen == MENU_SCREEN_UNK22 ||
+        g_MenuScreen == MENU_SCREEN_UNK20) {
+      for (stripIndex = 0; stripIndex != CLAMPED_BACKDROP_STRIP_COUNT;
+          stripIndex++) {
+        if (stripIndex == 0) {
+          gDPLoadTextureBlock(gfx++,
+              ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+              G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
+              BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+
+          gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
+              BACKDROP_FIRST_TOP << 2,
+              (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
+              (BACKDROP_FIRST_TOP +
+                  ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE))
+                  << 2,
+              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
+              TEXEL_STEP_ONE / BACKDROP_SCALE);
+        } else {
+          gDPPipeSync(gfx++);
+          gDPLoadTextureBlock(gfx++,
+              ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET +
+                  (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)) &
+                  ~7,
+              G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
+              BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
+              G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
+              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+
+          if (stripIndex == CLAMPED_BACKDROP_STRIP_COUNT - 1) {
+            gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
+                CLAMPED_BACKDROP_LAST_TOP << 2,
+                (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
+                CLAMPED_BACKDROP_BOTTOM << 2, G_TX_RENDERTILE, 0,
+                BACKDROP_SECOND_ROW_START, TEXEL_STEP_ONE / BACKDROP_SCALE,
+                TEXEL_STEP_ONE / BACKDROP_SCALE);
+          } else {
+            stripTop = BACKDROP_TOP +
+                (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
+            gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
+                (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
+                (stripTop + (BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE)) << 2,
+                G_TX_RENDERTILE, 0, BACKDROP_SECOND_ROW_START,
+                TEXEL_STEP_ONE / BACKDROP_SCALE,
+                TEXEL_STEP_ONE / BACKDROP_SCALE);
+          }
+        }
+      }
+    } else {
+      for (stripIndex = 0; stripIndex != BACKDROP_STRIP_COUNT; stripIndex++) {
+        /* The image ends in a strip of one row */
+        shownRowCount = (stripIndex != BACKDROP_STRIP_COUNT - 1)
+            ? BACKDROP_STRIP_ROW_COUNT
+            : 1;
+
+        if (stripIndex == 0) {
+          /* The first strip has no row above it, so it shows its first row
+           * too */
+          gDPLoadTextureBlock(gfx++,
+              ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+              G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
+              BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+
+          gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
+              BACKDROP_FIRST_TOP << 2,
+              (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
+              (BACKDROP_FIRST_TOP +
+                  ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE))
+                  << 2,
+              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
+              TEXEL_STEP_ONE / BACKDROP_SCALE);
+        } else {
+          gDPPipeSync(gfx++);
+          gDPLoadTextureBlock(gfx++,
+              ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET +
+                  (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)) &
+                  ~7,
+              G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
+              shownRowCount + BACKDROP_SEAM_ROW_COUNT, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+
+          stripTop = BACKDROP_TOP +
+              (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
+          gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
+              (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
+              (BACKDROP_TOP +
+                  (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE) +
+                  (shownRowCount * BACKDROP_SCALE))
+                  << 2,
+              G_TX_RENDERTILE, 0, BACKDROP_SECOND_ROW_START,
+              TEXEL_STEP_ONE / BACKDROP_SCALE, TEXEL_STEP_ONE / BACKDROP_SCALE);
+        }
+      }
+    }
+  }
+
+  if (layers & MENU_LAYER_UNK4) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(
+        gfx++, ((u32)D_800FF420[D_8022BE92_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+
+    for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
+      gDPLoadTextureBlock(gfx++,
+          ((u32)D_800FF420[D_8022BE92_ovl_01] + LARGE_PALETTED_TEXELS_OFFSET +
+              (stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT)) &
+              ~7,
+          G_IM_FMT_CI, G_IM_SIZ_8b, BOARD_WIDTH, BOARD_STRIP_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+
+      stripTop = BOARD_TOP + (stripIndex * BOARD_STRIP_SPACING);
+      gSPScisTextureRectangle(gfx++, BOARD_LEFT << 2, stripTop << 2,
+          (BOARD_LEFT + BOARD_WIDTH) << 2,
+          (stripTop + BOARD_STRIP_SPACING) << 2, G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, (BOARD_STRIP_HEIGHT << 10) / BOARD_STRIP_SPACING);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  if (layers & MENU_LAYER_UNK80) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(
+        gfx++, ((u32)D_800FF420[D_8022BE92_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+
+    for (stripIndex = 0; stripIndex != NARROW_BOARD_STRIP_COUNT; stripIndex++) {
+      gDPLoadTextureBlock(gfx++,
+          ((u32)D_800FF420[D_8022BE92_ovl_01] + LARGE_PALETTED_TEXELS_OFFSET +
+              (stripIndex * NARROW_BOARD_WIDTH * NARROW_BOARD_STRIP_HEIGHT)) &
+              ~7,
+          G_IM_FMT_CI, G_IM_SIZ_8b, NARROW_BOARD_WIDTH,
+          NARROW_BOARD_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+
+      stripTop = BOARD_TOP + (stripIndex * BOARD_STRIP_SPACING);
+      gSPScisTextureRectangle(gfx++, TALL_NARROW_BOARD_LEFT << 2, stripTop << 2,
+          (TALL_NARROW_BOARD_LEFT + NARROW_BOARD_WIDTH) << 2,
+          (stripTop + BOARD_STRIP_SPACING) << 2, G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE,
+          (NARROW_BOARD_STRIP_HEIGHT << 10) / BOARD_STRIP_SPACING);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  bobOffset = 0;
+  if (g_MenuScreen == MENU_SCREEN_TITLE ||
+      g_MenuScreen == MENU_SCREEN_OPTIONS || g_MenuScreen == MENU_SCREEN_MAIN ||
+      g_MenuScreen == MENU_SCREEN_MAIN_WITHOUT_TRANSMIT ||
+      g_MenuScreen == MENU_SCREEN_CLUBHOUSE) {
+    bobOffset = (f_MenuBobOffset + BANNER_BOB_LOWERING) - BANNER_BOB_RAISING;
+  }
+
+  if (layers & MENU_LAYER_UNK8) {
+    image = D_801052BC[D_8022BE8C_ovl_01];
+    gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+
+    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+      gDPLoadTextureBlock(gfx++,
+          ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+              (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
+              ~7,
+          G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+
+      stripTop = bobOffset + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
+      gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2,
+          (stripTop + MENU_BANNER_TOP) << 2,
+          (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
+          (stripTop + MENU_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT) << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  /* The game reads g_MenuScreen for this layer but draws nothing */
+  if (layers & MENU_LAYER_UNK20) {
+    switch (g_MenuScreen) {}
+  }
+
+  gDPPipeSync(gfx++);
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FB54C_ovl_01);
+#endif
 
 void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers) {
   Gfx* gfx = *displayListHead;
