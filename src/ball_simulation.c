@@ -177,6 +177,8 @@ static Unk6 D_800B7C10[MAX_LIE_RATING + 1][UNKC_ENTRY_COUNT] = {
 };
 
 s32 D_800B7D9C = 0;
+/* Read by no routine */
+static s32 D_800B7DA0[4] = {0};
 
 SurfaceInfo* GetSurfaceInfo(s32 surface) {
   if ((u32)surface >= SURFACE_COUNT) {
