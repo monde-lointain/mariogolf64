@@ -74,17 +74,17 @@ extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
 #define SOUND_TEST_SOUND_NAME_LENGTH 24
 
 /* Whether the options screen's erase window is up */
-extern u8 g_IsEraseWindowUp;
+extern u8 f_IsEraseWindowUp;
 /* The sound test's sound, song and settings */
-extern s32 g_SoundTestSound;
-extern s32 g_SoundTestSong;
-extern s32 g_SoundTestSoundReverb;
-extern s32 g_SoundTestSongReverb;
-extern f32 g_SoundTestSoundFrequency;
-extern f32 g_SoundTestSongFrequency;
-extern s32 g_SoundTestSongTempo;
-extern char g_SoundTestSongNames[][SOUND_TEST_SONG_NAME_LENGTH];
-extern char g_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH];
+extern s32 f_SoundTestSound;
+extern s32 f_SoundTestSong;
+extern s32 f_SoundTestSoundReverb;
+extern s32 f_SoundTestSongReverb;
+extern f32 f_SoundTestSoundFrequency;
+extern f32 f_SoundTestSongFrequency;
+extern s32 f_SoundTestSongTempo;
+extern char f_SoundTestSongNames[][SOUND_TEST_SONG_NAME_LENGTH];
+extern char f_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH];
 
 /*
  * The menus set the top byte of g_MapCamera's view mode. Reading it as a
