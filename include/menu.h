@@ -162,6 +162,17 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define FACE_NAME_OFFSET_X 24
 #define FACE_NAME_OFFSET_Y 12
 
+/*
+ * How DrawMenuNumber marks a number: with nothing, a cross before it, its sign
+ * (a plus tinted red, a minus tinted green, or plus-minus for zero), or a red
+ * or green tint
+ */
+#define MENU_NUMBER_PLAIN 0
+#define MENU_NUMBER_TIMES 1
+#define MENU_NUMBER_SIGNED 2
+#define MENU_NUMBER_RED_TINT 3
+#define MENU_NUMBER_GREEN_TINT 4
+
 /* The signs that func_802123E0 draws */
 #define MENU_SIGN_DASH 0
 #define MENU_SIGN_TIMES 1

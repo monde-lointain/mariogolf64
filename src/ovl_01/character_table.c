@@ -61,8 +61,6 @@ void func_8005C674(s32 arg0, s32 arg1);
 #define TABLE_POPUP_SIGN_X 48
 #define TABLE_POPUP_SIGN_Y 12
 #define TABLE_POPUP_WINS_Y 36
-#define MENU_NUMBER_UNK3 3
-#define MENU_NUMBER_UNK4 4
 
 /* The characters that func_8021730C shows on the table, the first ones being
  * those of the character grid */
@@ -619,7 +617,7 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
   }
 
   func_80210DF4_ovl_01(&gfx, D_80230190_ovl_01 + index,
-      D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, rowWins, MENU_NUMBER_UNK3);
+      D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, rowWins, MENU_NUMBER_RED_TINT);
   if (columnWins < 10) {
     index = 80;
   } else if (columnWins >= 10 && columnWins < 100) {
@@ -631,7 +629,8 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
   }
 
   func_80210DF4_ovl_01(&gfx, D_80230190_ovl_01 + index,
-      D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, columnWins, MENU_NUMBER_UNK4);
+      D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, columnWins,
+      MENU_NUMBER_GREEN_TINT);
   func_802123E0_ovl_01(&gfx, D_80230190_ovl_01 + TABLE_POPUP_SIGN_X,
       D_80230194_ovl_01 + TABLE_POPUP_SIGN_Y, MENU_SIGN_TIMES);
   gDPPipeSync(gfx++);

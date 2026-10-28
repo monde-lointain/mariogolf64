@@ -70,7 +70,6 @@
 #define STATS_ONE_DIGIT_X 144
 #define STATS_UNIT_X 178
 #define STATS_UNIT_OFFSET_Y 4
-#define MENU_NUMBER_UNK2 2
 /* The 16x16 CI4 glyphs of asset 0x689 in D_8023A82C; two of them spell "OFF" */
 #define MENU_GLYPH_SIZE 16
 #define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
@@ -659,23 +658,23 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
     case STAT_ROUND_COUNT:
       func_80210D94_ovl_01(&gfx, STATS_ROUND_COUNT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].roundCount, 0);
+          D_80105C38[courseIndex].roundCount, MENU_NUMBER_PLAIN);
       break;
     case STAT_BEST_SCORE:
       bestScore = D_80105C38[courseIndex].bestScore;
       if (bestScore >= -9 && bestScore <= 9) {
         func_80210DF4_ovl_01(&gfx, STATS_ONE_DIGIT_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
-            MENU_NUMBER_UNK2);
+            MENU_NUMBER_SIGNED);
       } else if ((bestScore >= 10 && bestScore <= 99) ||
           (bestScore >= -99 && bestScore <= -10)) {
         func_80210DF4_ovl_01(&gfx, STATS_TWO_DIGIT_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
-            MENU_NUMBER_UNK2);
+            MENU_NUMBER_SIGNED);
       } else {
         func_80210D34_ovl_01(&gfx, STATS_VALUE_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
-            MENU_NUMBER_UNK2);
+            MENU_NUMBER_SIGNED);
       }
 
       break;
