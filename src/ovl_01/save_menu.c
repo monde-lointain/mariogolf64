@@ -2228,11 +2228,6 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225358_ovl_01);
 #endif
 
-#define CONTROLLER_ICON_SIZE 32
-#define CONTROLLER_ICON_IMAGE_SIZE (CONTROLLER_ICON_SIZE * CONTROLLER_ICON_SIZE)
-#define PLAYER_LABEL_OFFSET_X 8
-#define PLAYER_LABEL_OFFSET_Y 25
-
 /* Where a saved game's screen puts each player's controller icon and label, by
  * the player count */
 extern s32 D_80230DE8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2];

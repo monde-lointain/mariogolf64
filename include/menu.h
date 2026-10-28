@@ -126,6 +126,11 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
 #define PLAYER_LABEL_IMAGE_SIZE (PLAYER_LABEL_WIDTH * PLAYER_LABEL_HEIGHT / 2)
 #define PLAYER_LABEL_COMPUTER_FIRST 4
 #define PLAYER_LABEL_COM 8
+/* Where a player's label goes below their 32 by 32 controller icon */
+#define PLAYER_LABEL_OFFSET_X 8
+#define PLAYER_LABEL_OFFSET_Y 25
+#define CONTROLLER_ICON_SIZE 32
+#define CONTROLLER_ICON_IMAGE_SIZE (CONTROLLER_ICON_SIZE * CONTROLLER_ICON_SIZE)
 
 /* The menus' character models */
 /* Baby Mario stands higher to look as tall as the others */
