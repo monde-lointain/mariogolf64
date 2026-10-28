@@ -169,7 +169,6 @@
 #define BUTTONS_ASSET 0x971
 #define START_ASSET 0x590
 #define LOGO_ASSET 0x95A
-#define SHINE_ASSET 0x6A4
 
 typedef struct ClubSlots {
   /* 0x00 */ s32 reelPositions[REEL_COUNT]; /* Indices into f_ReelStrips */
@@ -307,7 +306,7 @@ void LoadClubSlots(void) {
   f_StarCount = 0;
   OpenEncodedAsset(LOGO_ASSET, &asset);
   ReadEncodedAsset(f_LogoImage, &asset);
-  OpenEncodedAsset(SHINE_ASSET, &asset);
+  OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset);
   ReadEncodedAsset(f_ShineImage, &asset);
   f_Slots->reelPositions[0] = guRandom() % REEL_SYMBOL_COUNT;
   f_Slots->reelPositions[1] = guRandom() % REEL_SYMBOL_COUNT;

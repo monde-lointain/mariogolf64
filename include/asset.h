@@ -61,8 +61,11 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define LARGE_PALETTED_TEXELS_OFFSET \
   (IMAGE_HEADER_SIZE + (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
 
-/* The asset that more than one menu loads */
+/* The assets that more than one overlay loads */
 #define ASSET_PLAYER_LABELS 0x5E3 /* 1P to 4P, 1C to 4C and Com */
+/* A 64x64 I8 gradient, which the opening and the club slots sweep across
+ * their logos and the round results draw too */
+#define ASSET_SHINE_IMAGE 0x6A4
 
 s32 OpenEncodedAsset(u16 assetId, EncodedAsset* asset);
 void ReadEncodedAsset(void* buffer, EncodedAsset* asset);

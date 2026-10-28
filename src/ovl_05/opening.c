@@ -142,8 +142,6 @@ extern f32 f_LookAtEaseRate;
 #define ASSET_LOGO_MARIO_IMAGE 0x94B
 /* A 64x192 CI8 image of three golf balls */
 #define ASSET_LOGO_BALL_IMAGES 0x94E
-/* A 64x64 I8 gradient that sweeps across the logo */
-#define ASSET_LOGO_SHINE_IMAGE 0x6A4
 
 /* "MARIO GOLF" */
 #define LOGO_LETTER_COUNT 9
@@ -4207,7 +4205,7 @@ void LoadOpeningLogo(void) {
   ReadEncodedAsset(f_LogoMarioImage, &asset);
   OpenEncodedAsset(ASSET_LOGO_BALL_IMAGES, &asset);
   ReadEncodedAsset(f_LogoBallImages, &asset);
-  OpenEncodedAsset(ASSET_LOGO_SHINE_IMAGE, &asset);
+  OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset);
   ReadEncodedAsset(f_LogoShineImage, &asset);
 }
 

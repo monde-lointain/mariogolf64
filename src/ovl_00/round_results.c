@@ -113,7 +113,6 @@
 #define LARGE_DIGITS_IMAGE_ASSET 0x689
 #define NOTICE_CLOUD_ASSET 0x70B
 #define NOTICE_TITLE_ASSET 0x55F
-#define SHINE_ASSET 0x6A4
 #define RESULTS_UNK72C_IMAGE_ASSET 0x72C
 #define RESULTS_UNK72D_PALETTE_ASSET 0x72D
 #define PLACES_IMAGE_ASSET 0x688
@@ -419,7 +418,8 @@ void LoadRoundResults(void) {
     f_NoticeTitleImage =
         AllocMemory(OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset));
     ReadEncodedAsset(f_NoticeTitleImage, &asset);
-    f_ResultsShineImage = AllocMemory(OpenEncodedAsset(SHINE_ASSET, &asset));
+    f_ResultsShineImage =
+        AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
     ReadEncodedAsset(f_ResultsShineImage, &asset);
     D_80225718_ovl_00 =
         AllocMemory(OpenEncodedAsset(RESULTS_UNK72C_IMAGE_ASSET, &asset));
@@ -703,7 +703,8 @@ void LoadUnlockNotice(s32 unlock) {
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_COURSE;
   }
 
-  f_ResultsShineImage = AllocMemory(OpenEncodedAsset(SHINE_ASSET, &asset));
+  f_ResultsShineImage =
+      AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
   ReadEncodedAsset(f_ResultsShineImage, &asset);
   if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
     f_NoticeTitleImage =
