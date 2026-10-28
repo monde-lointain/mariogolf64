@@ -838,11 +838,9 @@ void FreeScenery(void) {
 /*
  * Updates the shot panel for a new shot: the ball's height above the cup and
  * distance from it, the lie's image, and the scores that the game mode shows.
- * The target addresses g_GameState.holeIndex from g_GameState.playerCount's
- * base, as if the two were fields of one struct.
  */
-#ifdef NON_MATCHING
 void StartShotPanel(void) {
+  u8 unusedStack[0x20];
   EncodedAsset asset;
   s32 height;
   s32 playerIndex;
@@ -936,9 +934,6 @@ void StartShotPanel(void) {
   ResetShotModeChange();
   LoadContactImages(&g_Players[g_RoundHud.unk87]);
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", StartShotPanel);
-#endif
 
 /*
  * Allocates and loads what the HUD draws for the whole round. The buffers of
@@ -4159,10 +4154,8 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleIntroImages);
 
 /*
  * Draws the course's name and the hole's number, or in the timed modes a
- * stopwatch, before the hole starts. The target reloads g_GameState.courseIndex
- * for each color, which it matches when declared volatile.
+ * stopwatch, before the hole starts.
  */
-#ifdef NON_MATCHING
 void DrawHoleIntroText(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 hundredths;
@@ -4215,9 +4208,6 @@ void DrawHoleIntroText(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleIntroText);
-#endif
 
 /* Switches to the other matrix buffer, which the RSP is not reading */
 void SwapMatrixBuffers(void) {
