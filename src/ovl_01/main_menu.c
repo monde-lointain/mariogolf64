@@ -574,7 +574,7 @@ void func_801F70F0_ovl_01(void) {
       }
 
       memory->modeChoice = 0;
-      memory->unkC = 0;
+      memory->modeSpin = 0;
       memory->unkD = 0;
       for (index = 0; index != MENU_UNKE_COUNT; index++) {
         memory->unkE[index] = 0;
