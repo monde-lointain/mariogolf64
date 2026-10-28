@@ -43,9 +43,49 @@
 /* D_800E12B0 is a square of random bytes this many on a side */
 #define RANDOM_GRID_SIZE 32
 
-/* A fog color and the range over which the fog thickens */
 /* How far above the tee a ball starts on the main courses */
 #define TEE_HEIGHT 307.2f
+
+/* f_HoleEndStep, the step of the sequence between holes */
+enum HoleEndStep {
+  HOLE_END_STEP_START,
+  /* Frees the character slot, then loads the next hole */
+  HOLE_END_STEP_FREE_SLOT,
+  HOLE_END_STEP_SCORECARD,
+  HOLE_END_STEP_WIPE_OUT,
+  HOLE_END_STEP_LOAD_NEXT_HOLE,
+  HOLE_END_STEP_UNK5,
+  HOLE_END_STEP_RING_SHOT_FREE_SLOT,
+  HOLE_END_STEP_RING_SHOT_RESULTS,
+  HOLE_END_STEP_PROMPT,
+  HOLE_END_STEP_QUIT,
+  HOLE_END_STEP_FINAL_RESULTS,
+  HOLE_END_STEP_LOAD_SCORECARD,
+  HOLE_END_STEP_LOAD_RING_SHOT,
+  HOLE_END_STEP_DONKEY_KONG_NOTICE,
+  HOLE_END_STEP_UNLOCK_NOTICE,
+  HOLE_END_STEP_STAFF_ROLL,
+  HOLE_END_STEP_RING_SHOT_COURSE_NOTICE
+};
+
+/* f_PlayExit, the menu that play returns to once the hole ends */
+enum PlayExit {
+  PLAY_EXIT_NONE, /* Plays on to the next hole */
+  PLAY_EXIT_UNK1,
+  PLAY_EXIT_UNK2,
+  PLAY_EXIT_UNK3,
+  PLAY_EXIT_UNK4,
+  PLAY_EXIT_RING_SHOT,
+  PLAY_EXIT_QUIT,
+  PLAY_EXIT_ROUND_OVER
+};
+
+/* f_HoleResultsKind, the results that the scorecard shows between holes */
+#define HOLE_RESULTS_STROKE 0
+#define HOLE_RESULTS_MATCH 1
+#define HOLE_RESULTS_SKINS 2
+#define HOLE_RESULTS_TOURNAMENT 3
+#define HOLE_RESULTS_SPEED_GOLF 4
 
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
@@ -704,47 +744,6 @@ void func_8005DD78(void);
 void func_8005DDAC(void);
 
 #ifdef NON_MATCHING
-/* f_HoleEndStep, the step of the sequence between holes */
-enum HoleEndStep {
-  HOLE_END_STEP_START,
-  /* Frees the character slot, then loads the next hole */
-  HOLE_END_STEP_FREE_SLOT,
-  HOLE_END_STEP_SCORECARD,
-  HOLE_END_STEP_WIPE_OUT,
-  HOLE_END_STEP_LOAD_NEXT_HOLE,
-  HOLE_END_STEP_UNK5,
-  HOLE_END_STEP_RING_SHOT_FREE_SLOT,
-  HOLE_END_STEP_RING_SHOT_RESULTS,
-  HOLE_END_STEP_PROMPT,
-  HOLE_END_STEP_QUIT,
-  HOLE_END_STEP_FINAL_RESULTS,
-  HOLE_END_STEP_LOAD_SCORECARD,
-  HOLE_END_STEP_LOAD_RING_SHOT,
-  HOLE_END_STEP_DONKEY_KONG_NOTICE,
-  HOLE_END_STEP_UNLOCK_NOTICE,
-  HOLE_END_STEP_STAFF_ROLL,
-  HOLE_END_STEP_RING_SHOT_COURSE_NOTICE
-};
-
-/* f_PlayExit, the menu that play returns to once the hole ends */
-enum PlayExit {
-  PLAY_EXIT_NONE, /* Plays on to the next hole */
-  PLAY_EXIT_UNK1,
-  PLAY_EXIT_UNK2,
-  PLAY_EXIT_UNK3,
-  PLAY_EXIT_UNK4,
-  PLAY_EXIT_RING_SHOT,
-  PLAY_EXIT_QUIT,
-  PLAY_EXIT_ROUND_OVER
-};
-
-/* f_HoleResultsKind, the results that the scorecard shows between holes */
-#define HOLE_RESULTS_STROKE 0
-#define HOLE_RESULTS_MATCH 1
-#define HOLE_RESULTS_SKINS 2
-#define HOLE_RESULTS_TOURNAMENT 3
-#define HOLE_RESULTS_SPEED_GOLF 4
-
 /* The choices that the Training and Ring Shot menus return */
 enum HoleMenuChoice {
   HOLE_MENU_NONE,
