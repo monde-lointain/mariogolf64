@@ -7,9 +7,12 @@
 
 /* How far the selected club hits: a power shot, a normal shot or an approach
  * shot */
-#define SHOT_MODE_POWER 0
-#define SHOT_MODE_NORMAL 1
-#define SHOT_MODE_APPROACH 2
+enum ShotMode {
+  SHOT_MODE_POWER,
+  SHOT_MODE_NORMAL,
+  SHOT_MODE_APPROACH
+};
+
 #define SHOT_MODE_COUNT 3
 
 /* The putter's shot modes are long, middle and short putts */

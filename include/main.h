@@ -5,9 +5,11 @@
 
 /* Values of g_FrameStepState, with which the second controller pauses
    the game (L on the control pad) and steps it a frame at a time */
-#define FRAME_STEP_RUNNING 0
-#define FRAME_STEP_ONE_FRAME 1
-#define FRAME_STEP_PAUSED 2
+enum FrameStep {
+  FRAME_STEP_RUNNING,
+  FRAME_STEP_ONE_FRAME,
+  FRAME_STEP_PAUSED
+};
 
 extern s8 g_IsDebugEnabled;
 extern s32 g_HasExpansionPak;

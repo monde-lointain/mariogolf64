@@ -4,33 +4,36 @@
 #include "common.h"
 
 /* The screens that the menu overlay shows, which g_MenuScreen picks */
-#define MENU_SCREEN_TITLE 0
-#define MENU_SCREEN_CHARACTER_SELECT 1
-#define MENU_SCREEN_MAIN 2
-#define MENU_SCREEN_SAVED_GAMES 3
-#define MENU_SCREEN_OPTIONS 4
-#define MENU_SCREEN_UNK5 5
-#define MENU_SCREEN_UNK6 6
-#define MENU_SCREEN_BEST_TIMES 7
-#define MENU_SCREEN_CLUBHOUSE 9
-#define MENU_SCREEN_COURSE_STATS 11
-#define MENU_SCREEN_UNK12 12
-#define MENU_SCREEN_RING_SHOT_RECORDS 13
-#define MENU_SCREEN_BIRDIE_BADGES 14
-#define MENU_SCREEN_CHARACTER_TABLE 15
-#define MENU_SCREEN_UNK16 16
-#define MENU_SCREEN_HELP 17
-/* Loads what the chosen game needs and leaves the menu */
-#define MENU_SCREEN_EXIT 19
-#define MENU_SCREEN_UNK20 20
-#define MENU_SCREEN_UNK22 22
-#define MENU_SCREEN_UNK23 23
-#define MENU_SCREEN_UNK24 24
-#define MENU_SCREEN_UNK26 26
-/* A tournament entered with a code */
-#define MENU_SCREEN_CLUB_TOURNAMENT 27
-/* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
-#define MENU_SCREEN_MAIN_WITHOUT_TRANSMIT 28
+enum MenuScreen {
+  MENU_SCREEN_TITLE,
+  MENU_SCREEN_CHARACTER_SELECT,
+  MENU_SCREEN_MAIN,
+  MENU_SCREEN_SAVED_GAMES,
+  MENU_SCREEN_OPTIONS,
+  MENU_SCREEN_UNK5,
+  MENU_SCREEN_UNK6,
+  MENU_SCREEN_BEST_TIMES,
+  MENU_SCREEN_CLUBHOUSE = 9,
+  MENU_SCREEN_COURSE_STATS = 11,
+  MENU_SCREEN_UNK12,
+  MENU_SCREEN_RING_SHOT_RECORDS,
+  MENU_SCREEN_BIRDIE_BADGES,
+  MENU_SCREEN_CHARACTER_TABLE,
+  MENU_SCREEN_UNK16,
+  MENU_SCREEN_HELP,
+  /* Loads what the chosen game needs and leaves the menu */
+  MENU_SCREEN_EXIT = 19,
+  MENU_SCREEN_UNK20,
+  MENU_SCREEN_UNK22 = 22,
+  MENU_SCREEN_UNK23,
+  MENU_SCREEN_UNK24,
+  MENU_SCREEN_UNK26 = 26,
+  /* A tournament entered with a code */
+  MENU_SCREEN_CLUB_TOURNAMENT,
+  /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
+  MENU_SCREEN_MAIN_WITHOUT_TRANSMIT
+};
+
 #define MENU_SCREEN_COUNT 29
 extern s32 g_MenuScreen;
 

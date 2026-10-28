@@ -6,8 +6,11 @@
 /* The globals that game.c, the game's frame, shares */
 
 /* Values of g_FramePacingMode, which the second controller's Start cycles */
-#define PACING_MODE_NORMAL 0
-#define PACING_MODE_PERFORMANCE_METER 1 /* The other modes print debug text */
+enum PacingMode {
+  PACING_MODE_NORMAL,
+  PACING_MODE_PERFORMANCE_METER /* The other modes print debug text */
+};
+
 #define PACING_MODE_COUNT 4
 extern s8 g_FramePacingMode;
 
@@ -26,9 +29,12 @@ extern s32 g_HorizonRow;
  * screen; the others start over its bottom-right quarter, and UpdateGame
  * fits the second pair to the inset view every frame.
  */
-#define VIEWPORT_FULL_SCREEN 0
-#define VIEWPORT_INSET 2
-#define VIEWPORT_STAFF_ROLL 4
+enum ViewportKind {
+  VIEWPORT_FULL_SCREEN,
+  VIEWPORT_INSET = 2,
+  VIEWPORT_STAFF_ROLL = 4
+};
+
 #define VIEWPORT_COUNT 6
 extern Vp g_Viewports[VIEWPORT_COUNT];
 
