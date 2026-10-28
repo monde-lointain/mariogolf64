@@ -18,8 +18,10 @@
 #define CRC16_REFLECTED_POLYNOMIAL 0x8408
 #define CRC16_INITIAL_VALUE 0xFFFF
 
-extern s32 f_RandomSeed;
-extern f32 f_ZeroDivisor;
+static s32 f_RandomSeed = 0;
+static f32 f_ZeroDivisor = 0.0f;
+/* Read by no routine */
+static s32 D_800C3FB8[2] = {0};
 
 /* Halves the components until they are small enough, and doubles the length
  * back */
