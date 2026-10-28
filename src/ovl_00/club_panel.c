@@ -50,6 +50,21 @@ enum ClubPanelState {
 #define PANEL_ASSET_PUTT_MIDDLE 0x571
 #define PANEL_ASSET_PUTT_SHORT 0x572
 
+/*
+ * f_ShownShotMode, f_PanelShotMode and f_PanelIsPutter until the panel is
+ * drawn: it matches no shot mode, so the first update loads the images
+ */
+#define PANEL_NOT_SHOWN 0xFF
+#define INITIAL_CLUB_PANEL_DEBUG_VALUE (-2)
+
+/* The bar that shows the lie's span below the gauge */
+#define SPAN_BAR_X 38.0f
+#define SPAN_BAR_Y -103.0f
+#define SPAN_BAR_Z -100.0f
+#define SPAN_BAR_SCALE_PER_SPAN 0.032857146f
+#define SPAN_BAR_THICKNESS 0.1f
+#define SPAN_BAR_VERTEX_COUNT 8
+
 /* The shot mode's name */
 #define SHOT_MODE_ASSET_POWER 0x52F
 #define SHOT_MODE_ASSET_NORMAL 0x52D
@@ -60,23 +75,51 @@ extern u8* D_801B5CD0[];
 
 /* The shot mode last shown in the name, and the one that the panel last
  * finished changing to */
-extern u8 f_ShownShotMode;
-extern u8 f_PanelShotMode;
-extern u8 f_PanelIsPutter;
+static u8 f_ShownShotMode = PANEL_NOT_SHOWN;
+static u8 f_PanelShotMode = PANEL_NOT_SHOWN;
+static u8 f_PanelIsPutter = PANEL_NOT_SHOWN;
 /* The frame of the shot mode change, or 0 while it is not changing */
-extern u8 f_ShotModeChangeFrame;
-extern s32 f_ClubPanelUnk24;
+static u8 f_ShotModeChangeFrame = 0;
+static s32 f_ClubPanelUnk24 = 0;
 /* Which of the two panel buffers is loaded next */
-extern s32 f_PanelBufferIndex;
-extern s32 f_ClubPanelState;
-extern s32 f_ClubPanelDebugValue;
+static s32 f_PanelBufferIndex = 0;
+static s32 f_ClubPanelState = CLUB_PANEL_FREED;
+static Vtx f_SpanBarVertices[SPAN_BAR_VERTEX_COUNT] = {
+    {{{-70, 10, -2}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-70, -10, -2}, 0, {0, 0x100}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-10, 10, -2}, 0, {0x400, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-10, -10, -2}, 0, {0x400, 0x100}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{10, 10, -2}, 0, {0x400, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{10, -10, -2}, 0, {0x400, 0x100}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{70, 10, -2}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{70, -10, -2}, 0, {0x800, 0x100}, {0xFF, 0x00, 0x00, 0xFF}}}};
+static Gfx f_SpanBarDisplayList[] = {
+    gsSP2Triangles(0, 1, 3, 0, 0, 3, 2, 0),
+    gsSP2Triangles(2, 3, 5, 0, 2, 5, 4, 0),
+    gsSP2Triangles(4, 5, 7, 0, 4, 7, 6, 0),
+    gsSPEndDisplayList(),
+};
+static s32 f_ClubPanelDebugValue = INITIAL_CLUB_PANEL_DEBUG_VALUE;
 /* The frames of each change of shot mode, by the mode and the one changed from
  */
-extern u16 f_ApproachToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
-extern u16 f_PowerToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
-extern u16 f_NormalToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
-extern u16 f_PowerToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
-extern u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
+static u16 f_ApproachToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
+    0x578, 0x577, 0x576, PANEL_ASSET_NORMAL};
+static u16 f_PowerToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
+    0x573, 0x574, 0x575, PANEL_ASSET_NORMAL};
+static u16 f_NormalToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
+    0x576, 0x577, 0x578, PANEL_ASSET_APPROACH};
+static u16 f_PowerToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
+    0x57B, 0x57A, 0x579, PANEL_ASSET_APPROACH};
+/* From the normal shot mode, but shown for every change to power */
+static u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
+    0x575, 0x574, 0x573, PANEL_ASSET_POWER};
+/*
+ * Read by no routine. f_PowerToApproachFrames reversed, then the power
+ * image
+ */
+static u16 f_ApproachToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
+    0x579, 0x57A, 0x57B, PANEL_ASSET_POWER};
+static f32 f_MarkerPulseAngle = 0.0f;
 
 static Mtx f_SpanBarTranslation;
 static Mtx f_SpanBarScale;
@@ -114,9 +157,9 @@ void LoadClubPanelImages(void) {
       AllocMemory(OpenEncodedAsset(PANEL_ASSET_POWER, &asset));
   ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + 1], &asset);
   f_ShotModeImage = AllocMemory(SHOT_MODE_IMAGE_SIZE);
-  f_ShownShotMode = 0xFF;
-  f_PanelShotMode = 0xFF;
-  f_PanelIsPutter = 0xFF;
+  f_ShownShotMode = PANEL_NOT_SHOWN;
+  f_PanelShotMode = PANEL_NOT_SHOWN;
+  f_PanelIsPutter = PANEL_NOT_SHOWN;
   f_ClubPanelState = CLUB_PANEL_LOADED;
 }
 
@@ -305,21 +348,9 @@ s32 IsShotModeChangeDone(void) {
 #define GAUGE_TICK_IMAGE_WIDTH 16
 #define GAUGE_TICK_IMAGE_HEIGHT 12
 
-/* The bar that shows the lie's span below the gauge */
-#define SPAN_BAR_X 38.0f
-#define SPAN_BAR_Y -103.0f
-#define SPAN_BAR_Z -100.0f
-#define SPAN_BAR_SCALE_PER_SPAN 0.032857146f
-#define SPAN_BAR_THICKNESS 0.1f
-#define SPAN_BAR_VERTEX_COUNT 8
-
 /* The markers pulse at a twelfth of a turn per frame */
 #define MARKER_PULSE_STEP (M_PI / 6)
 #define MARKER_PULSE_LEVEL 100.0
-
-extern Vtx f_SpanBarVertices[SPAN_BAR_VERTEX_COUNT];
-extern Gfx f_SpanBarDisplayList[];
-extern f32 f_MarkerPulseAngle;
 
 s32 func_8005F224(void);
 
