@@ -180,6 +180,7 @@
 #define GAME_FLAG_UNK56 0x56
 #define GAME_FLAG_UNK60 0x60
 #define GAME_FLAG_UNK64 0x64
+#define GAME_FLAG_UNK67 0x67
 #define GAME_FLAG_UNK69 0x69
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66

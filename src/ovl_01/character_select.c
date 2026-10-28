@@ -6,15 +6,24 @@
 #include "common.h"
 
 #include "asset.h"
+#include "camera.h"
 #include "character.h"
 #include "club.h"
 #include "controller.h"
+#include "debug_text.h"
 #include "game_flags.h"
+#include "hole_display.h"
+#include "libc.h"
+#include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"
+#include "password.h"
 #include "save.h"
 #include "screen.h"
+#include "screen_layers.h"
+#include "sound.h"
 #include "text.h"
+#include "transfer_pak.h"
 #include "variables.h"
 
 /* func_80209568 lets the cursor stop on slots below this only when asked to */
@@ -139,6 +148,7 @@ extern s32 g_ChosenPlayerCount;
 extern u8 D_8022FF00_ovl_01;
 extern s8 D_8022FF07_ovl_01;
 extern s8 D_8022FF08_ovl_01;
+extern s8 D_8022FF09_ovl_01;
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 /* Each player's tag offset from their cursor's grid cell, as x and y */
 extern s8 D_8022FFCC_ovl_01[MAX_PLAYER_COUNT][2];
@@ -444,7 +454,667 @@ s32 func_80209BE0_ovl_01(void) {
   return STICK_DIAGONAL_NONE;
 }
 
+/* The text slots that the character select writes, the prompt's first */
+#define CHARACTER_SELECT_TEXT_SLOT_COUNT 4
+#define PROMPT_TEXT_SLOT 0
+
+/* The palettes that the C buttons choose, which the A button wears and which
+ * the faces preview while held */
+#define UP_C_PALETTE 0
+#define LEFT_C_PALETTE 1
+#define DOWN_C_PALETTE 2
+#define RIGHT_C_PALETTE 3
+#define NO_PALETTE (-1)
+
+/* A player's controller before the player chooses */
+#define UNCHOSEN_CONTROLLER (-1)
+
+#define Z_OR_L_BUTTONS (Z_TRIG | L_TRIG)
+
+/* The chosen character's voice plays on its player's channel */
+#define FIRST_CHARACTER_SOUND_CHANNEL 4
+#define CHOSEN_VOICE 24
+#define OTHER_CHOSEN_VOICE 26
+#define CHOSEN_VOICE_PAN 127
+
+#define MAP_CAMERA_TOP_BYTE_UNK2 2
+
+/* Where pressing up blanks a line of debug text */
+#define BLANKED_DEBUG_TEXT_COLUMN 15
+#define BLANKED_DEBUG_TEXT_ROW 10
+
+/* R leaves a player without a controller only among this many players */
+#define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
+
+/* D_800C200C's value for a player without an imported character */
+#define NO_IMPORTED_COLUMN (-1)
+
+#define BITS_PER_BYTE 8
+
+extern s8 D_800C1FF8[MAX_PLAYER_COUNT];
+extern s16 D_800C200C[MAX_PLAYER_COUNT];
+extern s8 D_800FBE08[MAX_PLAYER_COUNT];
+extern s32 D_8012F480[MAX_PLAYER_COUNT];
+extern s8 D_801B5634;
+extern s32 D_801B60B4;
+extern u8 D_801B60C4;
+extern u8 D_8022FF03_ovl_01;
+extern s8 g_IsClubTournament;
+extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
+
+s32 GetClubTournamentCourse(void);
+
+/*
+ * Runs the character select for the players from firstPlayerIndex up to
+ * playerCount, one at a time: the D-Pad moves the current player's cursor, A
+ * chooses the character with the palette of a held C button, and B goes back
+ * a player or leaves the screen. Holding R as A is pressed leaves the player
+ * without a controller. Holding a C button previews its palette in
+ * D_8022FF09, and holding R, or Z or L, sets D_8022FF07 or D_8022FF08. Once a
+ * club tournament's choice is made, the closing wipe ends the menus and
+ * D_801B60B4, which RankTournament takes, gets the tournament code.
+ */
+
+/*
+ * Doesn't match: the original sign-extends the cursor's column and row as
+ * soon as it loads them, and schedules the face's reload differently.
+ */
+#ifdef NON_MATCHING
+s32 func_80209D50_ovl_01(
+    s32 firstPlayerIndex, s32 playerCount, s32 canChooseMarked) {
+  EncodedAsset asset;
+  AssetFile file;
+  s32 sameCharacterPlayers[MAX_PLAYER_COUNT];
+  MenuMemory* memory = func_8005AF74();
+  s32 playerIndex;
+  s32 index;
+  s32 otherIndex;
+  s16 sameCharacterCount;
+  s32 character; /* The cursor's grid mark, then the character it is */
+  s16 gridMark;
+  s32 controllerIndex;
+  u16 button;
+  s32 palette;
+  s8 column;
+  u16 slot; /* The cursor's row, then the face's slot */
+  u16 faceCharacter;
+  void* faceImage;
+  u16(*faceAssets)[8];
+  s32 channel;
+
+  if (IsHudAnimationDone() != TRUE) {
+    return;
+  }
+
+  if (GetWipeKind() != WIPE_NONE) {
+    for (index = 0; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+      SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+    }
+
+    if (GetWipeProgress() == 0) {
+      g_MenuScreen = MENU_SCREEN_EXIT;
+      D_801B60B4 = (g_TournamentCode[0] << (2 * BITS_PER_BYTE)) |
+          (g_TournamentCode[1] << BITS_PER_BYTE) | g_TournamentCode[2];
+    }
+
+    return;
+  }
+
+  playerIndex = D_801B7070;
+  if (g_MenuRepeatButtons == (U_JPAD | L_JPAD)) {
+    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    if (func_80209894_ovl_01(
+            playerIndex, STICK_DIAGONAL_UP_LEFT, (u8)canChooseMarked) == 0) {
+      for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      }
+    }
+
+    return 0;
+  }
+
+  if (g_MenuRepeatButtons == (U_JPAD | R_JPAD)) {
+    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    if (func_80209894_ovl_01(
+            playerIndex, STICK_DIAGONAL_UP_RIGHT, (u8)canChooseMarked) == 0) {
+      for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      }
+    }
+
+    return 0;
+  }
+
+  if (g_MenuRepeatButtons == (D_JPAD | L_JPAD)) {
+    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    if (func_80209894_ovl_01(
+            playerIndex, STICK_DIAGONAL_DOWN_LEFT, (u8)canChooseMarked) == 0) {
+      for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      }
+    }
+
+    return 0;
+  }
+
+  if (g_MenuRepeatButtons == (D_JPAD | R_JPAD)) {
+    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    if (func_80209894_ovl_01(
+            playerIndex, STICK_DIAGONAL_DOWN_RIGHT, (u8)canChooseMarked) == 0) {
+      for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      }
+    }
+
+    return 0;
+  }
+
+  if (g_MenuRepeatButtons & U_JPAD) {
+    PrintDebugText(
+        "          ", BLANKED_DEBUG_TEXT_COLUMN, BLANKED_DEBUG_TEXT_ROW);
+    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    if (func_80209568_ovl_01(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked) ==
+        0) {
+      for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      }
+    }
+
+    return 0;
+  }
+
+  if (g_MenuRepeatButtons & D_JPAD) {
+    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    if (func_80209568_ovl_01(
+            playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked) == 0) {
+      for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      }
+    }
+
+    return 0;
+  }
+
+  if (g_MenuRepeatButtons & L_JPAD) {
+    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    if (func_80209568_ovl_01(
+            playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked) == 0) {
+      for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      }
+    }
+
+    return 0;
+  }
+
+  if (g_MenuRepeatButtons & R_JPAD) {
+    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    if (func_80209568_ovl_01(
+            playerIndex, GRID_MOVE_RIGHT, (u8)canChooseMarked) == 0) {
+      for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      }
+    }
+
+    return 0;
+  }
+
+  if (g_MenuPressedButtons & A_BUTTON) {
+    for (index = 0; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+      SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+    }
+
+    character = g_CharacterGrid[memory->characterRows[playerIndex]]
+                               [memory->characterColumns[playerIndex]];
+    if (((u8)canChooseMarked == TRUE) & (character < CHOOSABLE_MARK_LIMIT)) {
+      character += MARKED_CHARACTER_OFFSET;
+    }
+
+    character = D_8022FF50_ovl_01[character];
+    if (character >= FIRST_IMPORTED_CHARACTER) {
+      /* Only one player may choose each imported character */
+      if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen ==
+          TRUE) {
+        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        D_8022FF00_ovl_01 = FALSE;
+        return;
+      }
+
+      index = character - FIRST_IMPORTED_CHARACTER;
+      character = g_ImportedCharacters[index].character;
+      g_ImportedCharacters[index].isChosen = TRUE;
+      D_801B60C4 = TRUE;
+      D_800C200C[playerIndex] = memory->characterColumns[playerIndex];
+      if (D_800C200C[playerIndex] < 0) {
+        D_800C200C[playerIndex] = 0;
+      }
+
+      if (D_800C200C[playerIndex] >= IMPORTED_CHARACTER_COUNT) {
+        D_800C200C[playerIndex] = IMPORTED_CHARACTER_COUNT - 1;
+      }
+    }
+
+    /* The first controller to have pressed A takes the player, unless R
+     * leaves the player without one; the last player only when another player
+     * has one */
+    for (controllerIndex = 0; controllerIndex != g_ControllerCount;
+        controllerIndex++) {
+      button = g_MenuControllerData[controllerIndex].button;
+      if (button & A_BUTTON) {
+        if ((u8)canChooseMarked == FALSE) {
+          if (((button & R_TRIG) != 0) &
+                  (playerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) &&
+              character < FIRST_IMPORTED_CHARACTER) {
+            if (g_ChosenPlayerCount - 1 == playerIndex &&
+                !IsGameFlagSet(GAME_FLAG_UNK67)) {
+              for (otherIndex = 0; otherIndex != playerIndex; otherIndex++) {
+                if (D_800C1FF4[otherIndex] != NO_CONTROLLER_INDEX) {
+                  break;
+                }
+              }
+
+              if (otherIndex == playerIndex) {
+                D_800C1FF4[playerIndex] = controllerIndex;
+              } else {
+                D_800C1FF4[playerIndex] = NO_CONTROLLER_INDEX;
+              }
+            } else {
+              D_800C1FF4[playerIndex] = NO_CONTROLLER_INDEX;
+            }
+          } else {
+            D_800C1FF4[playerIndex] = controllerIndex;
+          }
+        } else {
+          D_800C1FF4[playerIndex] = NO_CONTROLLER_INDEX;
+        }
+
+        D_800C1FF8[playerIndex] = controllerIndex;
+        SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, TEXT_FLAG_TYPED, 255,
+            255, 255, 255);
+        D_8022FF00_ovl_01 = FALSE;
+        break;
+      }
+    }
+
+    D_8012F480[playerIndex] = character;
+    g_Players[playerIndex].characterIndex = character;
+    if (g_MenuRepeatButtons & Z_OR_L_BUTTONS) {
+      if (character < FIRST_IMPORTED_CHARACTER) {
+        D_800FBE08[playerIndex] = TRUE;
+      }
+    }
+
+    if (character >= FIRST_IMPORTED_CHARACTER) {
+      D_800FBE08[playerIndex] =
+          g_GameBoyCharacters[memory->characterColumns[playerIndex]].unk1A;
+    }
+
+    if (g_MenuRepeatButtons & U_CBUTTONS) {
+      palette = UP_C_PALETTE;
+    } else if (g_MenuRepeatButtons & D_CBUTTONS) {
+      palette = DOWN_C_PALETTE;
+    } else if (g_MenuRepeatButtons & L_CBUTTONS) {
+      palette = LEFT_C_PALETTE;
+    } else if (g_MenuRepeatButtons & R_CBUTTONS) {
+      palette = RIGHT_C_PALETTE;
+    } else {
+      palette = UP_C_PALETTE;
+    }
+
+    /* A palette that an earlier player of the same character wears gives way
+     * to the first one that none of them does */
+    sameCharacterCount = 0;
+    for (index = 0; index != playerIndex; index++) {
+      if ((s8)g_Players[index].characterIndex ==
+          (s8)g_Players[playerIndex].characterIndex) {
+        sameCharacterPlayers[sameCharacterCount] = index;
+        sameCharacterCount++;
+      }
+    }
+
+    for (index = 0; index != sameCharacterCount; index++) {
+      if ((s8)g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
+        break;
+      }
+    }
+
+    if (index == sameCharacterCount) {
+      g_Players[playerIndex].paletteIndex = palette;
+    } else {
+      for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {
+        for (otherIndex = 0; otherIndex != sameCharacterCount; otherIndex++) {
+          if ((s8)g_Players[sameCharacterPlayers[otherIndex]].paletteIndex ==
+              index) {
+            break;
+          }
+        }
+
+        if (otherIndex == sameCharacterCount) {
+          g_Players[playerIndex].paletteIndex = index;
+          break;
+        }
+      }
+
+      if (index == CHARACTER_PALETTE_COUNT) {
+        g_Players[playerIndex].paletteIndex = 0;
+      }
+    }
+
+    /* Put back the first frame of the chosen face */
+    column = memory->characterColumns[playerIndex];
+    slot = memory->characterRows[playerIndex];
+    playerIndex++;
+    D_8022FF04_ovl_01 = 0;
+    D_8022FF06_ovl_01 = 0;
+    D_8022FF05_ovl_01 ^= 1;
+    if (playerIndex != playerCount) {
+      gridMark = g_CharacterGrid[(s16)slot][(s16)column];
+      faceCharacter = g_CharacterGrid[(s16)slot][(s16)column];
+      if (gridMark < CHOOSABLE_MARK_LIMIT) {
+        slot = faceCharacter + MARKED_CHARACTER_OFFSET;
+        faceCharacter = slot;
+      } else {
+        slot = faceCharacter;
+        if (gridMark >= FIRST_IMPORTED_CHARACTER) {
+          faceCharacter =
+              g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER]
+                  .character;
+        }
+      }
+
+      faceImage = D_8012D430[(s16)slot];
+      if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+        faceAssets = D_800C2780;
+      } else {
+        faceAssets = D_800C2650;
+      }
+
+      OpenEncodedAsset(
+          faceAssets[(s16)faceCharacter][D_8022FF04_ovl_01], &asset);
+      ReadEncodedAsset(faceImage, &asset);
+      OpenAssetFile(D_800C2590[(s16)faceCharacter][0], &file);
+      ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
+    }
+
+    if (playerIndex == playerCount) {
+      if ((u8)canChooseMarked == FALSE) {
+        if (g_MenuScreen == MENU_SCREEN_UNK24) {
+          LoadWipeShape(GetClubTournamentCourse());
+          StartWipe(WIPE_CLOSING);
+        } else {
+          StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+          g_MenuScreen = MENU_SCREEN_UNK5;
+        }
+      } else {
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_800FF4C0 = 1;
+        MAP_CAMERA_MODE_TOP_BYTE = MAP_CAMERA_TOP_BYTE_UNK2;
+        D_801B5634 = 0;
+      }
+
+      SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, TEXT_FLAG_TYPED, 255,
+          255, 255, 255);
+      D_8022FF00_ovl_01 = FALSE;
+      FreeAllCharacterSlots();
+      D_8022FF03_ovl_01 = 0;
+      D_8022FF04_ovl_01 = 0;
+      D_8022FF05_ovl_01 = 0;
+      D_8022FF06_ovl_01 = 0;
+    }
+
+    D_8022FF09_ovl_01 = NO_PALETTE;
+    D_801B7070 = playerIndex;
+    D_8022FF07_ovl_01 = FALSE;
+    D_8022FF08_ovl_01 = FALSE;
+    if (playerIndex == 1) {
+      channel = FIRST_CHARACTER_SOUND_CHANNEL;
+    } else if (playerIndex == 2) {
+      channel = FIRST_CHARACTER_SOUND_CHANNEL + 1;
+    } else if (playerIndex == 3) {
+      channel = FIRST_CHARACTER_SOUND_CHANNEL + 2;
+    } else if (playerIndex == 4) {
+      channel = FIRST_CHARACTER_SOUND_CHANNEL + 3;
+    } else {
+      channel = MENU_SOUND_CHANNEL;
+    }
+
+    if (rand() & 1) {
+      PlayCharacterSound(character, channel - FIRST_CHARACTER_SOUND_CHANNEL,
+          CHOSEN_VOICE, MENU_VOLUME_FULL, CHOSEN_VOICE_PAN);
+    } else {
+      PlayCharacterSound(character, channel - FIRST_CHARACTER_SOUND_CHANNEL,
+          OTHER_CHOSEN_VOICE, MENU_VOLUME_FULL, CHOSEN_VOICE_PAN);
+    }
+
+    return 0;
+  }
+
+  if (g_MenuPressedButtons & B_BUTTON) {
+    for (index = 0; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+      SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+    }
+
+    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+    column = memory->characterColumns[playerIndex];
+    slot = memory->characterRows[playerIndex];
+    if (playerIndex == firstPlayerIndex) {
+      StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+      if (g_MenuScreen != MENU_SCREEN_UNK16) {
+        memory->modeChoice = 0;
+      }
+
+      if ((u8)canChooseMarked == FALSE) {
+        if (g_MenuScreen == MENU_SCREEN_UNK24) {
+          g_IsClubTournament = FALSE;
+          g_MenuScreen = MENU_SCREEN_CLUB_TOURNAMENT;
+        } else {
+          g_MenuScreen = MENU_SCREEN_TITLE;
+        }
+      } else {
+        g_MenuScreen = MENU_SCREEN_UNK5;
+      }
+
+      D_800C1FF8[playerIndex] = UNCHOSEN_CONTROLLER;
+      D_800C1FF4[playerIndex] = UNCHOSEN_CONTROLLER;
+      gridMark = g_CharacterGrid[memory->characterRows[playerIndex]]
+                                [memory->characterColumns[playerIndex]];
+      if (gridMark >= FIRST_IMPORTED_CHARACTER) {
+        g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen =
+            FALSE;
+        D_800C200C[playerIndex] = NO_IMPORTED_COLUMN;
+      }
+
+      SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, TEXT_FLAG_TYPED, 255,
+          255, 255, 255);
+      D_8022FF00_ovl_01 = FALSE;
+      D_8022FF04_ovl_01 = 0;
+      D_8022FF05_ovl_01 = 0;
+      D_8022FF06_ovl_01 = 0;
+      /* Bring back the Game Boy characters that func_80209500 hid */
+      if ((u8)canChooseMarked == TRUE) {
+        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0] = D_8022FF1C_ovl_01[0];
+        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1] = D_8022FF1C_ovl_01[1];
+        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][2] = D_8022FF1C_ovl_01[2];
+        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][3] = D_8022FF1C_ovl_01[3];
+      }
+    } else {
+      g_Players[playerIndex].unk22 = 0;
+      playerIndex--;
+      D_8022FF04_ovl_01 = 0;
+      D_8022FF06_ovl_01 = 0;
+      D_8022FF05_ovl_01 ^= 1;
+      D_800C1FF8[playerIndex] = UNCHOSEN_CONTROLLER;
+      D_800C1FF4[playerIndex] = UNCHOSEN_CONTROLLER;
+      gridMark = g_CharacterGrid[memory->characterRows[playerIndex]]
+                                [memory->characterColumns[playerIndex]];
+      if (gridMark >= FIRST_IMPORTED_CHARACTER) {
+        g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen =
+            FALSE;
+        D_800C200C[playerIndex] = NO_IMPORTED_COLUMN;
+      }
+
+      SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, TEXT_FLAG_TYPED, 255,
+          255, 255, 255);
+      D_8022FF00_ovl_01 = FALSE;
+    }
+
+    /* Put back the first frame of the face the cursor left */
+    gridMark = g_CharacterGrid[(s16)slot][(s16)column];
+    faceCharacter = g_CharacterGrid[(s16)slot][(s16)column];
+    if (gridMark < CHOOSABLE_MARK_LIMIT) {
+      slot = faceCharacter + MARKED_CHARACTER_OFFSET;
+      faceCharacter = slot;
+    } else {
+      slot = faceCharacter;
+      if (gridMark >= FIRST_IMPORTED_CHARACTER) {
+        faceCharacter =
+            g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
+      }
+    }
+
+    faceImage = D_8012D430[(s16)slot];
+    if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+      faceAssets = D_800C2780;
+    } else {
+      faceAssets = D_800C2650;
+    }
+
+    OpenEncodedAsset(faceAssets[(s16)faceCharacter][D_8022FF04_ovl_01], &asset);
+    ReadEncodedAsset(faceImage, &asset);
+    OpenAssetFile(D_800C2590[(s16)faceCharacter][0], &file);
+    ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
+    D_801B7070 = playerIndex;
+    D_8022FF07_ovl_01 = FALSE;
+    D_8022FF08_ovl_01 = FALSE;
+    D_8022FF09_ovl_01 = NO_PALETTE;
+    return 0;
+  }
+
+  button = g_ControllerStates[3].buttons |
+      (g_ControllerStates[2].buttons |
+          (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons));
+  if (button & U_CBUTTONS) {
+    palette = UP_C_PALETTE;
+  } else if (button & D_CBUTTONS) {
+    palette = DOWN_C_PALETTE;
+  } else if (button & L_CBUTTONS) {
+    palette = LEFT_C_PALETTE;
+  } else if (button & R_CBUTTONS) {
+    palette = RIGHT_C_PALETTE;
+  } else {
+    palette = NO_PALETTE;
+  }
+
+  if (palette != NO_PALETTE) {
+    column = memory->characterColumns[playerIndex];
+    character = g_CharacterGrid[memory->characterRows[playerIndex]][column];
+    if (((u8)canChooseMarked == TRUE) & (character < CHOOSABLE_MARK_LIMIT)) {
+      character += MARKED_CHARACTER_OFFSET;
+    }
+
+    character = D_8022FF50_ovl_01[character];
+    if (character >= FIRST_IMPORTED_CHARACTER) {
+      if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen ==
+          TRUE) {
+        return;
+      }
+
+      character =
+          g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].character;
+      D_800C200C[playerIndex] = column;
+      if (column < 0) {
+        D_800C200C[playerIndex] = 0;
+      }
+
+      if (D_800C200C[playerIndex] >= IMPORTED_CHARACTER_COUNT) {
+        D_800C200C[playerIndex] = IMPORTED_CHARACTER_COUNT - 1;
+      }
+    }
+
+    /* The preview gives way as the A button's palette does */
+    sameCharacterCount = 0;
+    for (index = 0; index != playerIndex; index++) {
+      if ((s8)g_Players[index].characterIndex == character) {
+        sameCharacterPlayers[sameCharacterCount] = index;
+        sameCharacterCount++;
+      }
+    }
+
+    for (index = 0; index != sameCharacterCount; index++) {
+      if ((s8)g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
+        break;
+      }
+    }
+
+    if (index == sameCharacterCount) {
+      D_8022FF09_ovl_01 = palette;
+    } else {
+      for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {
+        for (otherIndex = 0; otherIndex != sameCharacterCount; otherIndex++) {
+          if ((s8)g_Players[sameCharacterPlayers[otherIndex]].paletteIndex ==
+              index) {
+            break;
+          }
+        }
+
+        if (otherIndex == sameCharacterCount) {
+          D_8022FF09_ovl_01 = index;
+          break;
+        }
+      }
+
+      if (index == CHARACTER_PALETTE_COUNT) {
+        D_8022FF09_ovl_01 = 0;
+      }
+    }
+  } else {
+    D_8022FF09_ovl_01 = NO_PALETTE;
+  }
+
+  /* Set only where A with R would leave the player without a controller */
+  if (((g_ControllerStates[3].buttons |
+           (g_ControllerStates[2].buttons |
+               (g_ControllerStates[0].buttons |
+                   g_ControllerStates[1].buttons))) &
+          R_TRIG) &&
+      memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW &&
+      (u8)canChooseMarked == FALSE) {
+    if (g_ChosenPlayerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) {
+      if (D_801B7070 == g_ChosenPlayerCount - 1) {
+        for (index = 0; index != D_801B7070; index++) {
+          if (D_800C1FF4[index] != NO_CONTROLLER_INDEX) {
+            break;
+          }
+        }
+
+        if (index < g_ChosenPlayerCount - 1) {
+          D_8022FF07_ovl_01 = TRUE;
+        }
+      } else {
+        D_8022FF07_ovl_01 = TRUE;
+      }
+    }
+  } else {
+    D_8022FF07_ovl_01 = FALSE;
+  }
+
+  if (((g_ControllerStates[3].buttons |
+           (g_ControllerStates[2].buttons |
+               (g_ControllerStates[0].buttons |
+                   g_ControllerStates[1].buttons))) &
+          Z_OR_L_BUTTONS) &&
+      memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW) {
+    D_8022FF08_ovl_01 = TRUE;
+    return 0;
+  }
+
+  D_8022FF08_ovl_01 = FALSE;
+  return 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209D50_ovl_01);
+#endif
 
 void func_8020B2C4_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -678,7 +1348,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B590_ovl_01);
 #define FACE_FRAME_DURATION 4
 #define FACE_FRAME_COUNT 8
 
-extern s8 D_8022FF09_ovl_01;
 extern s16 D_8022FFC6_ovl_01;
 extern s16 D_8022FFC8_ovl_01;
 
