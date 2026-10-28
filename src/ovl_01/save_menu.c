@@ -8,15 +8,19 @@
 #include "asset.h"
 #include "character.h"
 #include "character_slot.h"
+#include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
 #include "game_flags.h"
 #include "hole_display.h"
+#include "hole_loader.h"
 #include "libc.h"
+#include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "round_hud.h"
+#include "round_stats.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -181,6 +185,8 @@ extern void** D_8023B680_ovl_01;
 extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
 extern void** D_8023BD70_ovl_01;
 extern void** D_8023BD74_ovl_01;
+/* The mode icon of each save menu mode, mini golf last */
+extern s32 D_80230BB0_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern s8 D_8022F8C5_ovl_01;
@@ -856,7 +862,275 @@ void func_80222038_ovl_01(void* buffer, u8 bufferIndex) {
   }
 }
 
+/* The saved-games screen's text slots */
+#define SAVED_GAME_TEXT_SLOT_COUNT 4
+/* How many updates the boards take to turn to the next saved game */
+#define SAVED_GAME_TURN_FRAMES 7
+
+/* The saved game the boards show */
+#define CHOSEN_GAME (save->savedGames[memory->savedGameIndex])
+/*
+ * Reads the chosen saved game's mode icon, then its course image into the
+ * course buffer not on screen, which then becomes the one on screen
+ */
+#define LOAD_CHOSEN_GAME_IMAGES() \
+  OpenEncodedAsset( \
+      g_ModeIconAnimations[( \
+          u8)D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]]] \
+                          [D_8022F8C0_ovl_01], \
+      &asset); \
+  ReadEncodedAsset(D_8023BD74_ovl_01[D_8022F8C4_ovl_01], &asset); \
+  if (CHOSEN_GAME.isValid) { \
+    if (!CHOSEN_GAME.state.isMiniGolf) { \
+      OpenEncodedAsset(D_800C2064[CHOSEN_GAME.state.courseIndex], &asset); \
+      ReadEncodedAsset((&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01 ^ 1], &asset); \
+    } else { \
+      miniGolfIndex = CHOSEN_GAME.state.courseIndex - MINI_GOLF_COURSE_INDEX; \
+      OpenEncodedAsset(D_800C208C[miniGolfIndex], &asset); \
+      ReadEncodedAsset((&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01 ^ 1], &asset); \
+      OpenAssetFile(D_800C20D4[miniGolfIndex], &file); \
+      ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file); \
+    } \
+\
+    D_80230B4E_ovl_01 ^= 1; \
+  }
+
+/*
+ * Handles the saved-games screen's buttons. The left and right buttons turn
+ * the boards to another saved game. On a game with a mode, each A press gives
+ * the next human player the controller that pressed it (all of them get
+ * controller 1 when only one is plugged in); once every human has one, A
+ * closes the wipe to continue the game. B steps back through the players,
+ * then leaves for the title screen. A press while the boards turn finishes
+ * the turn instead.
+ *
+ * Doesn't match: the original merges the two mini golf course loads and
+ * keeps both other course loads, where this merges the other course loads;
+ * it also counts the controller loops through the controller table's address.
+ */
+#ifdef NON_MATCHING
+void func_8022209C_ovl_01(void) {
+  MenuMemory* memory = func_8005AF74();
+  SaveData* save = GetSaveData();
+  EncodedAsset asset;
+  AssetFile file;
+  u8 unusedStack[0xB0];
+  s32 slot;
+  s32 controller;
+  s32 humanIndex;
+  s32 miniGolfIndex;
+
+  if (GetWipeKind() != WIPE_NONE) {
+    for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+      SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    }
+
+    if (GetWipeProgress() == 0) {
+      StopLoaderThread();
+      FreeAllCharacterSlots();
+      D_800FE334 = 0;
+      for (slot = 1; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      }
+
+      g_MenuScreen = MENU_SCREEN_EXIT;
+      for (slot = 0; slot != MAX_PLAYER_COUNT; slot++) {
+        D_800C1FF4[slot] = D_80230B40_ovl_01[slot];
+      }
+
+      func_801F6A38_ovl_01();
+      ResumeBets();
+    }
+  } else if (IsHudAnimationDone() == TRUE) {
+    if (D_80230B4D_ovl_01) {
+      if (g_MenuPressedButtons & A_BUTTON) {
+        if (memory->savedGameTurn != 0) {
+          memory->savedGameTurn = 0;
+          return;
+        }
+
+        FreeAllCharacterSlots();
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        LoadWipeShape(
+            save->savedGames[memory->savedGameIndex].state.courseIndex);
+        StartWipe(WIPE_CLOSING);
+        func_80222F2C_ovl_01();
+        for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+
+        D_80230B4D_ovl_01 = FALSE;
+        return;
+      }
+
+      if (g_MenuPressedButtons & B_BUTTON) {
+        if (memory->savedGameTurn != 0) {
+          memory->savedGameTurn = 0;
+        }
+
+        D_80230B4D_ovl_01 = FALSE;
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+
+        if (D_80230B4A_ovl_01 == 1 || g_ControllerCount == 1) {
+          D_80230B48_ovl_01 = 0;
+          for (slot = 0; slot != D_80230B4A_ovl_01; slot++) {
+            D_80230B40_ovl_01[D_8023BDA4_ovl_01[slot]] = NO_CONTROLLER;
+          }
+
+          for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+            SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          }
+
+          D_80230B4C_ovl_01 = FALSE;
+          return;
+        }
+
+        D_80230B48_ovl_01--;
+        D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] = NO_CONTROLLER;
+      }
+    } else if (g_MenuPressedButtons & A_BUTTON) {
+      if (memory->savedGameTurn != 0) {
+        PlaySound(D_80230B50_ovl_01[memory->savedGameIndex] != -1
+                ? SOUND_CONFIRM
+                : SOUND_MENU_BLOCKED,
+            MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        memory->savedGameTurn = 0;
+        return;
+      }
+
+      if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        if (!D_80230B4C_ovl_01) {
+          D_80230B4C_ovl_01 = TRUE;
+          if (D_80230B4A_ovl_01 == 1) {
+            for (controller = 0; controller != g_ControllerCount;
+                controller++) {
+              if (g_MenuControllerData[controller].button & A_BUTTON) {
+                D_80230B4D_ovl_01 = TRUE;
+                D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] =
+                    controller;
+                D_80230B48_ovl_01++;
+                for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+                  SetTextSlot(
+                      0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                }
+
+                break;
+              }
+            }
+          } else if (g_ControllerCount == 1) {
+            for (humanIndex = D_80230B48_ovl_01;
+                humanIndex != D_80230B4A_ovl_01; humanIndex++) {
+              D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] = 0;
+              D_80230B48_ovl_01++;
+            }
+
+            D_80230B4D_ovl_01 = TRUE;
+            for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+              SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            }
+          }
+
+          for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+            SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          }
+
+          return;
+        }
+
+        for (controller = 0; controller != g_ControllerCount; controller++) {
+          if (g_MenuControllerData[controller].button & A_BUTTON) {
+            D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] =
+                controller;
+            D_80230B48_ovl_01++;
+            break;
+          }
+        }
+
+        if (D_80230B48_ovl_01 == D_80230B4A_ovl_01) {
+          D_80230B4D_ovl_01 = TRUE;
+          for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+            SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          }
+        }
+      } else {
+        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      }
+    } else if (g_MenuPressedButtons & B_BUTTON) {
+      PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+      if (memory->savedGameTurn != 0) {
+        memory->savedGameTurn = 0;
+      }
+
+      if (D_80230B48_ovl_01 <= 0) {
+        StartHudAnimation(HUD_ANIMATION_FADE_OUT);
+        for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+
+        g_MenuScreen = MENU_SCREEN_TITLE;
+        StopLoaderThread();
+        FreeAllCharacterSlots();
+        D_800FE334 = 0;
+      }
+
+      D_80230B48_ovl_01--;
+      D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] = NO_CONTROLLER;
+      if (D_80230B48_ovl_01 <= 0) {
+        D_80230B4C_ovl_01 = FALSE;
+        for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+      }
+    } else if (memory->savedGameTurn == 0) {
+      if (g_MenuRepeatButtons & L_JPAD) {
+        for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        memory->savedGameIndex--;
+        if (memory->savedGameIndex < 0) {
+          memory->savedGameIndex = SAVED_GAME_COUNT - 1;
+        }
+
+        memory->savedGameTurn = SAVED_GAME_TURN_FRAMES;
+        D_8022F8C0_ovl_01 = 0;
+        func_80221CC0_ovl_01();
+        LOAD_CHOSEN_GAME_IMAGES();
+      } else if (g_MenuRepeatButtons & R_JPAD) {
+        for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
+          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        memory->savedGameIndex++;
+        if (memory->savedGameIndex >= SAVED_GAME_COUNT) {
+          memory->savedGameIndex = 0;
+        }
+
+        memory->savedGameTurn = -SAVED_GAME_TURN_FRAMES;
+        func_80221CC0_ovl_01();
+        D_8022F8C0_ovl_01 = 0;
+        LOAD_CHOSEN_GAME_IMAGES();
+      }
+    } else {
+      if (memory->savedGameTurn < 0) {
+        memory->savedGameTurn++;
+      }
+
+      if (memory->savedGameTurn > 0) {
+        memory->savedGameTurn--;
+      }
+    }
+  }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8022209C_ovl_01);
+#endif
 
 s32 func_80222C94_ovl_01(void) {
   SaveData* save = GetSaveData();
@@ -973,8 +1247,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802230C0_ovl_01);
 #define MODE_ICON_OFFSET_X 8
 #define MODE_ICON_OFFSET_Y 14
 
-/* The mode icon of each save menu mode, mini golf last */
-extern s32 D_80230BB0_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
 extern s32 D_8023BDAC_ovl_01;
 extern s32 D_8023BDB0_ovl_01;
 

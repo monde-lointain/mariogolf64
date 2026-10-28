@@ -60,7 +60,9 @@ typedef struct MenuMemory {
                                                           character shown */
   /* 0x42 */ s8 ringShotReplaySlot; /* The Ring Shot replay chosen */
   /* 0x43 */ s8 savedGameIndex;
-  /* 0x44 */ u8 unk44[0x46 - 0x44];
+  /* 0x44 */ s8 savedGameTurn; /* Updates left of the saved games' boards
+                                 turning, negative when turning right */
+  /* 0x45 */ u8 unk45;
   /* 0x46 */ u8 unk46;
   /* 0x47 */ s8
       codeKeyColumn; /* The club tournament code keyboard's chosen key */

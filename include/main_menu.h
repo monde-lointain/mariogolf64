@@ -72,6 +72,7 @@ extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 extern const char D_80231514_ovl_01[];
 
 s32 GetOpenCourseCount(void);
+void func_801F6A38_ovl_01(void);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32);
 void func_801FE4D0_ovl_01(Gfx** displayListHead);
 void func_80201574_ovl_01(Gfx** displayListHead);
