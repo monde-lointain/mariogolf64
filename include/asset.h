@@ -69,6 +69,11 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 /* The buffers that the opening and the club slots read it into, 0x208 bytes
  * longer than its 0x1008 */
 #define SHINE_IMAGE_BUFFER_SIZE 0x1210
+/*
+ * The first of the club head images, one for each club type in order,
+ * which the clubs' data names and the round HUD draws
+ */
+#define ASSET_DRIVER_HEAD_IMAGE 0x4E3
 
 s32 OpenEncodedAsset(u16 assetId, EncodedAsset* asset);
 void ReadEncodedAsset(void* buffer, EncodedAsset* asset);
