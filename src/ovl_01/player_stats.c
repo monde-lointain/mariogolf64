@@ -126,12 +126,6 @@
  * offsets, and D_802307A8 holds where each slide after the first sends them
  */
 #define STATS_SLIDE_ROW_COUNT 9
-#define STATS_SLIDE_CURRENT 0
-#define STATS_SLIDE_OUT_RIGHT 1
-#define STATS_SLIDE_OUT_LEFT 2
-#define STATS_SLIDE_IN_FROM_RIGHT 3
-#define STATS_SLIDE_IN_FROM_LEFT 4
-#define STATS_SLIDE_COUNT 5
 /*
  * func_8021B87C draws the 152x117 brick wall behind the stats in one strip
  * per row, each stretched across the screen; D_80230760 holds each row's
@@ -140,18 +134,6 @@
 #define STATS_WALL_IMAGE_WIDTH 152
 #define STATS_WALL_STRIP_HEIGHT 13
 #define STATS_WALL_ROW_HEIGHT 27
-
-/* The phases of the screen 20 handler, which D_8022BE88 holds */
-#define MENU_PHASE_START 0
-#define MENU_PHASE_CHOOSING 5
-#define MENU_PHASE_CANCELLED 6
-#define MENU_PHASE_CONFIRMED 7
-#define MENU_UNK89_UNK3 3
-#define MENU_UNK89_UNK4 4
-/* The bet settings screen's phases in D_8022BE88 */
-#define BET_PHASE_CHOOSING 2
-#define BET_PHASE_CANCELLED 3
-#define BET_PHASE_CONFIRMED 4
 /* Each bet's stake is one of these levels, which D_802304F4 turns into an
  * amount */
 #define BET_STAKE_LEVEL_COUNT 6
