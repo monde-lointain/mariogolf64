@@ -2145,6 +2145,7 @@ ShowHalfTurn = 0x8006C3E8; // type:func
 HideHalfTurn = 0x8006C450; // type:func
 IsHalfTurnDismissed = 0x8006C8CC; // type:func
 DrawHalfTurn = 0x8006C918; // type:func
+g_DecalTextureSetup = 0x800C3FC0; // size:0x50
 f_IsHalfTurnShown = 0x800C4010; // size:0x4
 f_HalfTurnState = 0x800C4014; // size:0x4
 f_HalfTurnTimer = 0x800C4018; // size:0x4

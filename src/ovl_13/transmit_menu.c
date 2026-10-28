@@ -471,7 +471,7 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
     GameBoyTransfer* transfer);
 void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer);
 void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top);
-extern Gfx D_800C3FC0[];
+extern Gfx g_DecalTextureSetup[];
 
 s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file);
 s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId* header, NUContPakFile* file);
@@ -2016,7 +2016,7 @@ void DrawBringCharactersScreen(
     }
   }
 
-  gSPDisplayList(displayList++, D_800C3FC0);
+  gSPDisplayList(displayList++, g_DecalTextureSetup);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_RGBA16);
   gDPPipeSync(displayList++);
@@ -2276,7 +2276,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   }
 
   DrawNotice(&displayList);
-  gSPDisplayList(displayList++, D_800C3FC0);
+  gSPDisplayList(displayList++, g_DecalTextureSetup);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_RGBA16);
   gDPPipeSync(displayList++);

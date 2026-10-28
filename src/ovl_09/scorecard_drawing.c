@@ -426,7 +426,7 @@ void DrawStandingsPage(Gfx** displayListHead) {
     }
   }
 
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -673,7 +673,7 @@ void DrawMatchPage(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
     if (canDraw == TRUE && winsNeeded - wins[i] == 1 &&
         winsNeeded - wins[i ^ 1] >= 2) {
@@ -989,7 +989,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
     }
   }
 
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   for (i = 0; i != g_GameState.playerCount; i++) {
@@ -1119,7 +1119,7 @@ void DrawBetsPage(Gfx** displayListHead) {
     f_BetBlinkFrame ^= 1;
   }
 
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -1621,7 +1621,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   s32 texelStart;
   s32 texelStep;
 
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -1920,7 +1920,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
         i++, top += LEADERBOARD_ROW_SPACING) {
       if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId ==
           PLAYER_CONTESTANT) {
-        gSPDisplayList(gfx++, D_800C3FC0);
+        gSPDisplayList(gfx++, g_DecalTextureSetup);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         DrawSmallFace(
@@ -2469,7 +2469,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
   /* The labels over the totals */
   gDPPipeSync(gfx++);
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPPipeSync(gfx++);

@@ -171,7 +171,7 @@ static u8* f_SpeckleImage;
 static u8* f_SplashImage;
 static u8* f_StarImage;
 static u8* f_DropletImage;
-extern Gfx D_800C3FC0[];
+extern Gfx g_DecalTextureSetup[];
 
 void DrawEffectShadow(Gfx** displayListHead, Effect* effect);
 void DrawDrop(
@@ -2650,7 +2650,7 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
 
   gfx = *displayListHead;
   if (f_IsBadgeCountShown) {
-    gSPDisplayList(gfx++, D_800C3FC0);
+    gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);

@@ -86,7 +86,7 @@ static u8* f_MonkeyImage;
 
 /* Not static: the original left it to the linker's common block */
 HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
-extern Gfx D_800C3FC0[];
+extern Gfx g_DecalTextureSetup[];
 
 void SpawnRipple(CoursePoint position);
 
@@ -276,7 +276,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
   s32 wasUnderwater;
 
   IsGameFlagSet(GAME_FLAG_UNK5F);
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   gDPPipeSync(gfx++);

@@ -111,7 +111,7 @@ enum ResultCharactersState {
 extern s32 f_ResultCharactersLoadStep;
 s32 LoadResultCharacters(void);
 
-extern Gfx D_800C3FC0[];
+extern Gfx g_DecalTextureSetup[];
 
 void DrawMatchResult(Gfx** displayListHead);
 void DrawStandingsPage(Gfx** displayListHead);

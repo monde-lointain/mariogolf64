@@ -199,7 +199,7 @@ extern TrophyAssets f_TrophyAssets[];
 #define MATCH_RANK_WON 100
 #define MATCH_RANK_LOST 101
 
-extern Gfx D_800C3FC0[];
+extern Gfx g_DecalTextureSetup[];
 /* The digit font draws '#' as a plus-minus sign, for an even score */
 extern const char f_EvenScoreFormat[];
 extern const char f_ScoreFormat[];
@@ -1299,7 +1299,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   s32 centreX;
   s32 i;
 
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -1524,7 +1524,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   }
 
   pop = sinf(angle);
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -1981,7 +1981,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
         ReadEncodedAsset(f_TrophyImage, &asset);
       }
 
-      gSPDisplayList(gfx++, D_800C3FC0);
+      gSPDisplayList(gfx++, g_DecalTextureSetup);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPPipeSync(gfx++);
@@ -3457,7 +3457,7 @@ void DrawRoundResults(Gfx** displayListHead) {
     return;
   }
 
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -3546,7 +3546,7 @@ void DrawRoundResults(Gfx** displayListHead) {
         FINAL_RESULTS_TITLE_Y;
     left = titleX < 0.0f ? titleX + 0.5f : titleX - 0.5f;
     top = titleY < 0.0f ? titleY + 0.5f : titleY - 0.5f;
-    gSPDisplayList(gfx++, D_800C3FC0);
+    gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);

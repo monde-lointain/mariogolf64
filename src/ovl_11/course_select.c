@@ -157,7 +157,7 @@ enum PlanksState {
 void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY);
 
-extern Gfx D_800C3FC0[];
+extern Gfx g_DecalTextureSetup[];
 
 static u16 f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x5BE,
@@ -813,7 +813,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
 
   if (f_LoadedScreen == COURSE_SELECT_HOLES) {
     gDPPipeSync(gfx++);
-    gSPDisplayList(gfx++, D_800C3FC0);
+    gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     gDPPipeSync(gfx++);

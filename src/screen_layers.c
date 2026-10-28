@@ -190,7 +190,7 @@ static void* f_WipeShapeImage;
 static void* f_PromptCloudImage;
 static void* f_YesNoImage;
 extern f32 f_ChoiceBobAngle;
-extern Gfx D_800C3FC0[];
+extern Gfx g_DecalTextureSetup[];
 
 /*
  * Draws a texture rectangle between pipe syncs, cut where it reaches past
@@ -851,7 +851,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
     PrintDebugText(g_PrintBuffer, HALF_TURN_DEBUG_COLUMN, HALF_TURN_DEBUG_ROW);
   }
 
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);

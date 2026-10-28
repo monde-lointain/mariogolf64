@@ -1304,7 +1304,7 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   s32 loadHeight;
   s32 top;
 
-  gSPDisplayList(gfx++, D_800C3FC0);
+  gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
