@@ -19,30 +19,31 @@
  * in the hole_editor overlay, and the hole-editor names below follow the
  * menu's labels until those routines are decompiled.
  */
-#define SCENE_MAP_OVERVIEW 0 /* Moves the camera over the miniature map */
-#define SCENE_HEIGHTS 1
-#define SCENE_GROUND_CAMERA 2 /* Flies the camera just above the ground */
-#define SCENE_TREES 3
-#define SCENE_PIN 5
-#define SCENE_PLAY_HOLE 7 /* Picks the conditions and starts a hole */
-#define SCENE_FLAG_PANEL 8
-#define SCENE_UNK9 9 /* A top-down map scene */
-#define SCENE_UNK10 10 /* A top-down map scene */
-#define SCENE_UNK11 11
-#define SCENE_PLAY_UNK12 12 /* Updates like SCENE_PLAY_HOLE */
-#define SCENE_PLAY_UNK13 13 /* Updates like SCENE_PLAY_HOLE */
-#define SCENE_MENU 14
-#define SCENE_OPENING 19 /* The opening movie */
-#define SCENE_TITLE_SCREEN 21
-#define SCENE_TRIANGLES 15
-#define SCENE_RINGS 16
-#define SCENE_BOOT_LOGOS 27
-#define SCENE_WALLS 28
-#define SCENE_TRANSMIT 29 /* Trades data with Mario Golf for Game Boy */
-#define SCENE_STAFF_ROLL 30
-
-/* The current scene while UpdateOverlays swaps the scene's modules */
-#define SCENE_SWAPPING_MODULES 0x19
+enum Scene {
+  SCENE_MAP_OVERVIEW = 0, /* Moves the camera over the miniature map */
+  SCENE_HEIGHTS = 1,
+  SCENE_GROUND_CAMERA = 2, /* Flies the camera just above the ground */
+  SCENE_TREES = 3,
+  SCENE_PIN = 5,
+  SCENE_PLAY_HOLE = 7, /* Picks the conditions and starts a hole */
+  SCENE_FLAG_PANEL = 8,
+  SCENE_UNK9 = 9, /* A top-down map scene */
+  SCENE_UNK10 = 10, /* A top-down map scene */
+  SCENE_UNK11 = 11,
+  SCENE_PLAY_UNK12 = 12, /* Updates like SCENE_PLAY_HOLE */
+  SCENE_PLAY_UNK13 = 13, /* Updates like SCENE_PLAY_HOLE */
+  SCENE_MENU = 14,
+  SCENE_TRIANGLES = 15,
+  SCENE_RINGS = 16,
+  SCENE_OPENING = 19, /* The opening movie */
+  SCENE_TITLE_SCREEN = 21,
+  /* The current scene while UpdateOverlays swaps the scene's modules */
+  SCENE_SWAPPING_MODULES = 25,
+  SCENE_BOOT_LOGOS = 27,
+  SCENE_WALLS = 28,
+  SCENE_TRANSMIT = 29, /* Trades data with Mario Golf for Game Boy */
+  SCENE_STAFF_ROLL = 30
+};
 
 /* g_SubModuleState values */
 enum SubModuleState {
@@ -59,51 +60,48 @@ extern s32 g_SubModuleId;
 extern s32 g_PendingSubModuleId;
 extern s32 g_SubModuleState;
 
+/* The game's modes, as GameState.gameMode holds them */
 /*
- * The modes that the save menu names for a saved game. Mini-Golf is not one
- * of them; GameState.isMiniGolf marks it.
+ * The game's modes. The save menu names Stroke, Match Game, Get Character,
+ * Skins Match and Club Slots for a saved game; Mini-Golf is not a mode, as
+ * GameState.isMiniGolf marks it.
  */
-#define GAME_MODE_STROKE 0
-#define GAME_MODE_MATCH_GAME 2
-#define GAME_MODE_GET_CHARACTER 4
-#define GAME_MODE_SKINS_MATCH 10
-#define GAME_MODE_CLUB_SLOTS 11
-
-/*
- * The mode in which AddBirdieBadge counts badges and RecordTournamentPlace
- * reads the 30 contestants; the walkthrough's Tournament is the one mode
- * with birdie badges and 30 contestants
- */
-#define GAME_MODE_TOURNAMENT 5
-/* The mode whose holes GetCourseRecordIndex takes from f_RingShotHoles */
-#define GAME_MODE_RING_SHOT 9
-/* Set by the staff roll for the hole its cast plays */
-#define GAME_MODE_STAFF_ROLL 13
-
-/* Modes whose hole bets SettleHoleBets settles like Stroke's */
-#define GAME_MODE_UNK1 1
-#define GAME_MODE_UNK6 6
-
-/*
- * The walkthrough's Speed Golf: the HUD shows g_GameState.stopwatchFrameCount
- * in this mode, and its scorecard page shows each hole's time and the round's
- * score. EndHoleFlyover skips its call for a strong wind in it.
- */
-#define GAME_MODE_SPEED_GOLF 7
-
-/* A mode in which SetUpPlayers sets up the players from a record */
-#define GAME_MODE_UNK8 8
-
-/*
- * The walkthrough's Training: it has dry holes, cup positions taken in
- * turn and, for the computer golfer, a planned score of par on each hole.
- * Like Ring Shot it earns no Course Points, and its pause menu has
- * layouts for the driving range and mini golf.
- */
-#define GAME_MODE_TRAINING 3
-
-/* A mode in which every hole is built from the same hole assets */
-#define GAME_MODE_UNK12 12
+enum GameMode {
+  GAME_MODE_STROKE = 0,
+  GAME_MODE_UNK1 = 1, /* SettleHoleBets settles its bets like Stroke's */
+  GAME_MODE_MATCH_GAME = 2,
+  /*
+   * The walkthrough's Training: it has dry holes, cup positions taken in
+   * turn and, for the computer golfer, a planned score of par on each hole.
+   * Like Ring Shot it earns no Course Points, and its pause menu has
+   * layouts for the driving range and mini golf.
+   */
+  GAME_MODE_TRAINING = 3,
+  GAME_MODE_GET_CHARACTER = 4,
+  /*
+   * The mode in which AddBirdieBadge counts badges and RecordTournamentPlace
+   * reads the 30 contestants; the walkthrough's Tournament is the one mode
+   * with birdie badges and 30 contestants
+   */
+  GAME_MODE_TOURNAMENT = 5,
+  GAME_MODE_UNK6 = 6, /* SettleHoleBets settles its bets like Stroke's */
+  /*
+   * The walkthrough's Speed Golf: the HUD shows g_GameState.stopwatchFrameCount
+   * in this mode, and its scorecard page shows each hole's time and the round's
+   * score. EndHoleFlyover skips its call for a strong wind in it.
+   */
+  GAME_MODE_SPEED_GOLF = 7,
+  /* A mode in which SetUpPlayers sets up the players from a record */
+  GAME_MODE_UNK8 = 8,
+  /* The mode whose holes GetCourseRecordIndex takes from f_RingShotHoles */
+  GAME_MODE_RING_SHOT = 9,
+  GAME_MODE_SKINS_MATCH = 10,
+  GAME_MODE_CLUB_SLOTS = 11,
+  /* A mode in which every hole is built from the same hole assets */
+  GAME_MODE_UNK12 = 12,
+  /* Set by the staff roll for the hole its cast plays */
+  GAME_MODE_STAFF_ROLL = 13
+};
 
 /*
  * The scene that last led to the title screen. The title screen fades in from
