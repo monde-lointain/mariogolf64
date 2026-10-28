@@ -194,7 +194,7 @@ extern ArrowShape f_Arrows[ARROW_COUNT];
 #define SHOT_OFFSET_MARKER_Y 174
 
 extern s32 f_ShotPanelOffsetY;
-extern s32 f_ShotPanelOffsetX;
+extern s32 g_ShotPanelOffsetX;
 extern s32 f_ShotOffsetMarkerFrame;
 
 /* The images that a hole's intro shows for the bets and the match standing */
@@ -951,7 +951,7 @@ void StartShotPanel(void) {
     }
   }
 
-  f_ShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
+  g_ShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
   ResetShotModeChange();
   LoadContactImages(&g_Players[g_RoundHud.unk87]);
 }
@@ -2335,7 +2335,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
       g_RoundHud.isWindIndicatorShown &&
       GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN &&
       g_IsCupViewShown == 0) {
-    DrawWindIndicator(&gfx, f_ShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
+    DrawWindIndicator(&gfx, g_ShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
         SHOT_PANEL_WIND_INDICATOR_Y);
   }
 
@@ -2370,7 +2370,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     rotation[AXIS_X] = 0;
     rotation[AXIS_Y] = 0;
     rotation[AXIS_Z] = -clubHeadAngle * SHOT_PANEL_ICON_TILT;
-    translation[AXIS_X] = CLUB_HEAD_ICON_X - f_ShotPanelOffsetX;
+    translation[AXIS_X] = CLUB_HEAD_ICON_X - g_ShotPanelOffsetX;
     translation[AXIS_Y] = CLUB_HEAD_ICON_Y - f_HudOffsetY;
     translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
     BuildRotationMatrix(matrix, rotation, translation);
@@ -2415,7 +2415,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     rotation[AXIS_Y] = 0;
     rotation[AXIS_Z] = lieAngle * SHOT_PANEL_ICON_TILT;
     if (g_RoundHud.isLieIconShown) {
-      translation[AXIS_X] = f_ShotPanelOffsetX + LIE_ICON_X;
+      translation[AXIS_X] = g_ShotPanelOffsetX + LIE_ICON_X;
       translation[AXIS_Y] = LIE_ICON_Y - f_HudOffsetY;
       translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
     } else if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
@@ -3011,12 +3011,12 @@ void DrawShotOffsetMarker(void) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(g_DisplayListHead++);
   gSPScisTextureRectangle(g_DisplayListHead++,
-      (f_ShotOffsetMarkerXs[0] + (f_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X))
+      (f_ShotOffsetMarkerXs[0] + (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X))
           << 2,
       (f_ShotOffsetMarkerYs[0] + (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y) +
           f_HudOffsetY)
           << 2,
-      (f_ShotOffsetMarkerXs[0] + (f_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X) +
+      (f_ShotOffsetMarkerXs[0] + (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X) +
           SHOT_OFFSET_MARKER_SIZE)
           << 2,
       (f_ShotOffsetMarkerYs[0] +
@@ -3453,8 +3453,8 @@ void DrawRoundHud(CameraView* view) {
   club = GetClub(
       g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
   hasHandicap = FALSE;
-  if (f_ShotPanelOffsetX > 0) {
-    f_ShotPanelOffsetX -= SHOT_PANEL_SLIDE_STEP;
+  if (g_ShotPanelOffsetX > 0) {
+    g_ShotPanelOffsetX -= SHOT_PANEL_SLIDE_STEP;
   }
 
   WaveHoleFlag();
@@ -3470,7 +3470,7 @@ void DrawRoundHud(CameraView* view) {
 
   /* The faces move out of the letterbox's way */
   scoreboardX = (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) +
-      (SCOREBOARD_X + f_ShotPanelOffsetX);
+      (SCOREBOARD_X + g_ShotPanelOffsetX);
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (g_Players[i].handicap > 0) {
       hasHandicap = TRUE;
@@ -3578,8 +3578,8 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (PIN_FLAG_X - f_ShotPanelOffsetX) << 2, PIN_FLAG_Y << 2,
-        (PIN_FLAG_X + PIN_FLAG_WIDTH - f_ShotPanelOffsetX) << 2,
+        (PIN_FLAG_X - g_ShotPanelOffsetX) << 2, PIN_FLAG_Y << 2,
+        (PIN_FLAG_X + PIN_FLAG_WIDTH - g_ShotPanelOffsetX) << 2,
         (PIN_FLAG_Y + PIN_FLAG_HEIGHT) << 2, G_TX_RENDERTILE,
         (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) * (PIN_FLAG_WIDTH << 5),
         PIN_FLAG_IMAGE_T << 5, 1 << 10, 1 << 10);
@@ -3593,8 +3593,8 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (SHOT_PANEL_LABEL_X - f_ShotPanelOffsetX) << 2, REST_LABEL_Y << 2,
-        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - f_ShotPanelOffsetX) << 2,
+        (SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX) << 2, REST_LABEL_Y << 2,
+        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
         (REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
@@ -3613,8 +3613,8 @@ void DrawRoundHud(CameraView* view) {
 
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (SHOT_PANEL_LABEL_X - f_ShotPanelOffsetX) << 2, HEIGHT_LABEL_Y << 2,
-        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - f_ShotPanelOffsetX) << 2,
+        (SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX) << 2, HEIGHT_LABEL_Y << 2,
+        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
         (HEIGHT_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
@@ -3637,8 +3637,8 @@ void DrawRoundHud(CameraView* view) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(g_DisplayListHead++,
-          (RING_ICON_X - f_ShotPanelOffsetX) << 2, RING_ICON_Y << 2,
-          (RING_ICON_X + RING_IMAGE_SIZE - f_ShotPanelOffsetX) << 2,
+          (RING_ICON_X - g_ShotPanelOffsetX) << 2, RING_ICON_Y << 2,
+          (RING_ICON_X + RING_IMAGE_SIZE - g_ShotPanelOffsetX) << 2,
           (RING_ICON_Y + RING_IMAGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
           1 << 10);
       gDPPipeSync(g_DisplayListHead++);
@@ -3660,7 +3660,7 @@ void DrawRoundHud(CameraView* view) {
         (s16)g_CourseRecords[GetCourseRecordIndex()]
             .holes[GetHoleRecordIndex()]
             .yardages[0]);
-    DrawDistanceText(&g_DisplayListHead, HOLE_YARDAGE_X - f_ShotPanelOffsetX,
+    DrawDistanceText(&g_DisplayListHead, HOLE_YARDAGE_X - g_ShotPanelOffsetX,
         HOLE_YARDAGE_Y, g_PrintBuffer);
   }
 
@@ -3675,7 +3675,7 @@ void DrawRoundHud(CameraView* view) {
       }
 
       sprintf(g_PrintBuffer, "%d", ringCount);
-      DrawDistanceText(&g_DisplayListHead, RING_COUNT_X - f_ShotPanelOffsetX,
+      DrawDistanceText(&g_DisplayListHead, RING_COUNT_X - g_ShotPanelOffsetX,
           RING_COUNT_Y, g_PrintBuffer);
     }
 
@@ -3694,19 +3694,19 @@ void DrawRoundHud(CameraView* view) {
       sprintf(g_PrintBuffer, "%3d.%02df", hundredths / HUNDREDTHS_PER_UNIT,
           hundredths % HUNDREDTHS_PER_UNIT);
       DrawDistanceText(&g_DisplayListHead,
-          SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX, REST_LABEL_Y,
+          SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, REST_LABEL_Y,
           g_PrintBuffer);
       if (g_RoundHud.ballHeightMetersDirection != HEIGHT_LEVEL) {
         sprintf(g_PrintBuffer, "%6.2ff", fabsf(g_RoundHud.ballHeightFeet));
         DrawDistanceText(&g_DisplayListHead,
-            SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX, HEIGHT_LABEL_Y,
+            SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, HEIGHT_LABEL_Y,
             g_PrintBuffer);
       }
     } else {
       sprintf(g_PrintBuffer, "%3dy",
           (s32)(g_RoundHud.cupDistance * YARDS_PER_UNIT));
       DrawDistanceText(&g_DisplayListHead,
-          SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX, REST_LABEL_Y,
+          SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, REST_LABEL_Y,
           g_PrintBuffer);
       if (g_RoundHud.ballHeightYardsDirection != HEIGHT_LEVEL) {
         height = g_RoundHud.ballHeightYards;
@@ -3716,7 +3716,7 @@ void DrawRoundHud(CameraView* view) {
 
         sprintf(g_PrintBuffer, "%3dy", height);
         DrawDistanceText(&g_DisplayListHead,
-            SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX, HEIGHT_LABEL_Y,
+            SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, HEIGHT_LABEL_Y,
             g_PrintBuffer);
       }
     }
@@ -3745,9 +3745,9 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (CLUB_PANEL_X - f_ShotPanelOffsetX) << 2,
+        (CLUB_PANEL_X - g_ShotPanelOffsetX) << 2,
         (f_HudOffsetY + CLUB_PANEL_Y) << 2,
-        (CLUB_PANEL_X + CLUB_PANEL_WIDTH - f_ShotPanelOffsetX) << 2,
+        (CLUB_PANEL_X + CLUB_PANEL_WIDTH - g_ShotPanelOffsetX) << 2,
         (f_HudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT) << 2, G_TX_RENDERTILE,
         0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
@@ -3761,9 +3761,9 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (CLUB_NAME_X - f_ShotPanelOffsetX) << 2,
+        (CLUB_NAME_X - g_ShotPanelOffsetX) << 2,
         (f_HudOffsetY + CLUB_NAME_Y) << 2,
-        (CLUB_NAME_X + CLUB_NAME_WIDTH - f_ShotPanelOffsetX) << 2,
+        (CLUB_NAME_X + CLUB_NAME_WIDTH - g_ShotPanelOffsetX) << 2,
         (f_HudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT) << 2, G_TX_RENDERTILE,
         0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
@@ -3779,8 +3779,8 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (PAR_IMAGE_X - f_ShotPanelOffsetX) << 2, PAR_IMAGE_Y << 2,
-        (PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - f_ShotPanelOffsetX) << 2,
+        (PAR_IMAGE_X - g_ShotPanelOffsetX) << 2, PAR_IMAGE_Y << 2,
+        (PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
         (PAR_IMAGE_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
@@ -3799,7 +3799,7 @@ void DrawRoundHud(CameraView* view) {
     surface = GetSurfaceInfo(g_CurrentShot.surface);
     GetSurfacePercentRange(surface, GetSelectedClub(), percentRange);
     sprintf(g_PrintBuffer, "%3d-%3d", percentRange[0], percentRange[1]);
-    DrawShadowedText(&g_DisplayListHead, f_ShotPanelOffsetX + LIE_PERCENT_X,
+    DrawShadowedText(&g_DisplayListHead, g_ShotPanelOffsetX + LIE_PERCENT_X,
         f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
   }
 
@@ -3813,14 +3813,14 @@ void DrawRoundHud(CameraView* view) {
       sprintf(g_PrintBuffer, "%3dy", GetSelectedShotDistance());
     }
 
-    DrawShadowedText(&g_DisplayListHead, CLUB_DISTANCE_X - f_ShotPanelOffsetX,
+    DrawShadowedText(&g_DisplayListHead, CLUB_DISTANCE_X - g_ShotPanelOffsetX,
         f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
     if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
         !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN) &&
         g_IsModuleAlive[MODULE_UNK25] && IsShotModeChangeDone() &&
         player->unk28 != -1) {
       sprintf(g_PrintBuffer, "%d", player->unk28);
-      DrawShadowedText(&g_DisplayListHead, UNK28_TEXT_X - f_ShotPanelOffsetX,
+      DrawShadowedText(&g_DisplayListHead, UNK28_TEXT_X - g_ShotPanelOffsetX,
           f_HudOffsetY + UNK28_TEXT_Y, g_PrintBuffer);
     }
   }
@@ -3948,7 +3948,7 @@ void DrawRoundHud(CameraView* view) {
     totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
     sprintf(g_PrintBuffer, D_800D1C84, totalSeconds / SECONDS_PER_MINUTE,
         totalSeconds % SECONDS_PER_MINUTE, hundredths);
-    DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - f_ShotPanelOffsetX,
+    DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - g_ShotPanelOffsetX,
         PANEL_STOPWATCH_Y, g_PrintBuffer);
   }
 

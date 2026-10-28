@@ -320,7 +320,7 @@ s32 IsShotModeChangeDone(void) {
 extern Vtx f_SpanBarVertices[SPAN_BAR_VERTEX_COUNT];
 extern Gfx f_SpanBarDisplayList[];
 extern f32 f_MarkerPulseAngle;
-extern s32 f_ShotPanelOffsetX;
+extern s32 g_ShotPanelOffsetX;
 
 s32 func_8005F224(void);
 
@@ -398,9 +398,9 @@ void DrawClubPanel(Gfx** displayListHead) {
     for (tick = 1; tick != GAUGE_TICKS_PER_GROUP; tick++) {
       x = (firstTick + tick) * GAUGE_TICK_SPACING;
       gSPTextureRectangle(gfx++, (GAUGE_FULL_X + x) << 2,
-          (GAUGE_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+          (GAUGE_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
           (GAUGE_FULL_X + GAUGE_TICK_WIDTH + x) << 2,
-          (GAUGE_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+          (GAUGE_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
           G_TX_RENDERTILE, 0, 0, 0x400, 0x600);
     }
   }
@@ -408,29 +408,29 @@ void DrawClubPanel(Gfx** displayListHead) {
   for (tick = 0; tick != GAUGE_EXTRA_TICK_COUNT; tick++) {
     x = (firstTick + tick) * GAUGE_TICK_SPACING;
     gSPTextureRectangle(gfx++, (GAUGE_FULL_X + x) << 2,
-        (GAUGE_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+        (GAUGE_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         (GAUGE_FULL_X + GAUGE_TICK_WIDTH + x) << 2,
-        (GAUGE_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+        (GAUGE_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE, 0, 0, 0x400, 0x600);
   }
 
   for (tick = 0; tick < GAUGE_END_TICK_COUNT; tick++) {
     gSPTextureRectangle(gfx++, (GAUGE_FULL_X + tick * GAUGE_LENGTH) << 2,
-        (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+        (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         (GAUGE_FULL_X + tick * GAUGE_LENGTH + GAUGE_TICK_WIDTH) << 2,
-        (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+        (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
   }
 
   for (tick = 1; tick <= GAUGE_MEDIUM_TICK_COUNT; tick++) {
     gSPTextureRectangle(gfx++,
         (GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING) << 2,
-        (GAUGE_MEDIUM_TICK_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX)
+        (GAUGE_MEDIUM_TICK_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX)
             << 2,
         (GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING +
             GAUGE_TICK_WIDTH)
             << 2,
-        (GAUGE_MEDIUM_TICK_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX)
+        (GAUGE_MEDIUM_TICK_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX)
             << 2,
         G_TX_RENDERTILE, 0, 0, 0x400, 0xC00);
   }
@@ -458,9 +458,9 @@ void DrawClubPanel(Gfx** displayListHead) {
     gSPTextureRectangle(gfx++,
         (GAUGE_EMPTY_X - f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE)
             << 2,
-        (GAUGE_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+        (GAUGE_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH) << 2,
-        (GAUGE_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+        (GAUGE_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE,
         ((((GAUGE_MAX_VALUE * 5) - (f_ClubPanelUnk24 * 5)) << 6) /
             (GAUGE_MAX_VALUE * 5))
@@ -482,9 +482,9 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, GAUGE_EMPTY_X << 2,
-      (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+      (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
       (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH) << 2,
-      (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+      (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
       G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
   if (isPutter) {
     markerOffset = f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE;
@@ -519,9 +519,9 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0,
       0, 0, 1, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, 0, 1);
   gSPTextureRectangle(gfx++, (GAUGE_EMPTY_X - markerOffset) << 2,
-      (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+      (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
       (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset) << 2,
-      (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+      (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
       G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
   gDPPipeSync(gfx++);
   if (playerState != PLAYER_STATE_UNK2 && playerState != PLAYER_STATE_UNK4 &&
@@ -536,9 +536,9 @@ void DrawClubPanel(Gfx** displayListHead) {
 
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, (GAUGE_EMPTY_X - markerOffset) << 2,
-        (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+        (GAUGE_MARKER_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset) << 2,
-        (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
+        (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
     gDPPipeSync(gfx++);
   }
@@ -551,7 +551,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   if (span != 0) {
     guTranslate(&f_SpanBarTranslation, SPAN_BAR_X,
-        SPAN_BAR_Y - f_ShotPanelOffsetX - f_ClubPanelDebugValue, SPAN_BAR_Z);
+        SPAN_BAR_Y - g_ShotPanelOffsetX - f_ClubPanelDebugValue, SPAN_BAR_Z);
     guScale(&f_SpanBarScale, span * SPAN_BAR_SCALE_PER_SPAN, SPAN_BAR_THICKNESS,
         SPAN_BAR_THICKNESS);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
