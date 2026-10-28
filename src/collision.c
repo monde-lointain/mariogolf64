@@ -225,13 +225,13 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
       (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
 
 /* The hit masks, and which mask each billboard texture has */
-extern s8 g_BillboardMasks[BILLBOARD_MASK_COUNT]
+extern s8 f_BillboardMasks[BILLBOARD_MASK_COUNT]
                           [BILLBOARD_MASK_SIZE * BILLBOARD_MASK_SIZE];
-extern u8 g_BillboardMaskIndices[BILLBOARD_MASK_INDEX_COUNT];
+extern u8 f_BillboardMaskIndices[BILLBOARD_MASK_INDEX_COUNT];
 
 /* The hit mask cell of a billboard texture */
 static inline s8 GetBillboardMaskCell(s32 textureIndex, s32 row, s32 column) {
-  return g_BillboardMasks[g_BillboardMaskIndices[textureIndex &
+  return f_BillboardMasks[f_BillboardMaskIndices[textureIndex &
       (BILLBOARD_MASK_INDEX_COUNT - 1)]][(row * BILLBOARD_MASK_SIZE) | column];
 }
 

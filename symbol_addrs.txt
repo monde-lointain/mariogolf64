@@ -2203,8 +2203,8 @@ MoveBallToCupEdge = 0x8003A3DC; // type:func
 GetTriangleFacing = 0x8003ABA0; // type:func
 GetTrianglePlaneCopy = 0x8003AC80; // type:func
 GetBillboardSolidity = 0x8003DE80; // type:func
-g_BillboardMasks = 0x800B7DB0; // size:0x2900
-g_BillboardMaskIndices = 0x800BA6B0; // size:0x40
+f_BillboardMasks = 0x800B7DB0; // size:0x2900
+f_BillboardMaskIndices = 0x800BA6B0; // size:0x40
 // Fields of D_800BA9D8 under the names that the unmatched asm reads them
 // by: cupPosition's y and z, and teePosition's x, y and z
 g_CupPositionY = 0x800BA9DC; // size:0x4
