@@ -75,7 +75,9 @@
 #define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
 #define MENU_GLYPH_TIMES 0
 #define MENU_GLYPH_FIRST_DIGIT 1
+#define MENU_GLYPH_PLUS 12
 #define MENU_GLYPH_MINUS 13
+#define MENU_GLYPH_PLUS_MINUS 14
 #define MENU_GLYPH_CIRCLE 15
 #define OFF_FIRST_GLYPH 16
 #define OFF_GLYPH_COUNT 2
@@ -170,7 +172,7 @@ void func_80210DF4_ovl_01(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4);
 void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 arg4, u8 style);
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
 
 void func_8020E010_ovl_01(void** buffers) {
   EncodedAsset asset;
@@ -1083,7 +1085,248 @@ void func_80210DF4_ovl_01(
   *displayListHead = gfx;
 }
 
+/* DrawMenuNumber's sixth argument: the field it right-aligns the number in */
+#define NUMBER_FIELD_TWO_NARROW 0
+#define NUMBER_FIELD_ONE 1
+#define NUMBER_FIELD_TWO 2
+#define NUMBER_FIELD_THREE 3
+#define NUMBER_FIELD_FOUR 4
+#define NUMBER_FIELD_NONE 5
+#define NARROW_DIGIT_SPACING 12
+#define MENU_NUMBER_DIGIT_LIMIT 4
+#define MENU_NUMBER_LIMIT 9999
+/* The smallest number of each length */
+#define TWO_DIGIT_FIRST DECIMAL_BASE
+#define THREE_DIGIT_FIRST (TWO_DIGIT_FIRST * DECIMAL_BASE)
+#define FOUR_DIGIT_FIRST (THREE_DIGIT_FIRST * DECIMAL_BASE)
+
+/*
+ * Draws a number of up to four digits with the glyphs of asset 0x689, marked
+ * as the mark argument says and right-aligned in a field. The field's shift
+ * depends only on the field, so a number two or three digits long in a wider
+ * field moves as far right as a one-digit one. Numbers past four digits draw
+ * nothing.
+ *
+ * Doesn't match: the original keeps the digit count in a register through the
+ * digit loop and sign-extends the index separately for each use, where GCC
+ * reloads the count from the stack each pass and reuses one extended copy.
+ */
+#ifdef NON_MATCHING
+void DrawMenuNumber(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field) {
+  Gfx* gfx = *displayListHead;
+  s16 digits[MENU_NUMBER_DIGIT_LIMIT];
+  u16 digitCount = 0;
+  s32 shift;
+  s32 spacing;
+  s16 index; /* The mark's glyph, then the digit being drawn */
+
+  if (value > MENU_NUMBER_LIMIT) {
+    return;
+  }
+
+  if (value < -MENU_NUMBER_LIMIT) {
+    return;
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  shift = 0;
+  if (mark != MENU_NUMBER_PLAIN) {
+    switch (mark) {
+      case MENU_NUMBER_SIGNED:
+        if (value > 0) {
+          index = MENU_GLYPH_PLUS;
+          gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, 0xFF);
+        } else if (value < 0) {
+          index = MENU_GLYPH_MINUS;
+          gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+          gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, 0xFF);
+        } else {
+          index = MENU_GLYPH_PLUS_MINUS;
+        }
+        break;
+      case MENU_NUMBER_RED_TINT:
+        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, 0xFF);
+        index = MENU_GLYPH_TIMES;
+        break;
+      case MENU_NUMBER_GREEN_TINT:
+        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, 0xFF);
+        index = MENU_GLYPH_TIMES;
+        break;
+      case MENU_NUMBER_TIMES:
+      default:
+        index = MENU_GLYPH_TIMES;
+        break;
+    }
+
+    if (mark != MENU_NUMBER_RED_TINT && mark != MENU_NUMBER_GREEN_TINT) {
+      gDPLoadTextureBlock_4b(gfx++,
+          ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+              (index * MENU_GLYPH_IMAGE_SIZE)) &
+              ~7,
+          G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(gfx++, x << 2, y << 2, (x + MENU_GLYPH_SIZE) << 2,
+          (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+      shift = MENU_GLYPH_SIZE;
+    }
+  }
+
+  if (value >= 0 && value < TWO_DIGIT_FIRST) {
+    digitCount = 1;
+    if (field == NUMBER_FIELD_TWO) {
+      shift += MENU_GLYPH_SIZE;
+    }
+
+    if (field == NUMBER_FIELD_THREE) {
+      shift += 2 * MENU_GLYPH_SIZE;
+    }
+
+    if (field == NUMBER_FIELD_FOUR) {
+      shift += 3 * MENU_GLYPH_SIZE;
+    }
+
+    if (field == NUMBER_FIELD_TWO_NARROW) {
+      shift += NARROW_DIGIT_SPACING;
+    }
+
+    digits[0] = value % DECIMAL_BASE;
+  }
+
+  if (value >= TWO_DIGIT_FIRST && value < THREE_DIGIT_FIRST) {
+    digitCount = 2;
+    if (field == NUMBER_FIELD_THREE) {
+      shift += 2 * MENU_GLYPH_SIZE;
+    }
+
+    if (field == NUMBER_FIELD_FOUR) {
+      shift += 3 * MENU_GLYPH_SIZE;
+    }
+
+    digits[0] = value / DECIMAL_BASE;
+    digits[1] = value % DECIMAL_BASE;
+  }
+
+  if (value >= THREE_DIGIT_FIRST && value < FOUR_DIGIT_FIRST) {
+    digitCount = 3;
+    if (field == NUMBER_FIELD_FOUR) {
+      shift += 3 * MENU_GLYPH_SIZE;
+    }
+
+    digits[0] = value / THREE_DIGIT_FIRST;
+    digits[1] = (value % THREE_DIGIT_FIRST) / DECIMAL_BASE;
+    digits[2] = (value % THREE_DIGIT_FIRST) % DECIMAL_BASE;
+  }
+
+  if (value >= FOUR_DIGIT_FIRST && value <= MENU_NUMBER_LIMIT) {
+    digitCount = 4;
+    digits[0] = value / FOUR_DIGIT_FIRST;
+    digits[1] = (value % FOUR_DIGIT_FIRST) / THREE_DIGIT_FIRST;
+    digits[2] = ((value % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) / DECIMAL_BASE;
+    digits[3] = ((value % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) % DECIMAL_BASE;
+  }
+
+  if (value < 0 && value > -TWO_DIGIT_FIRST) {
+    digitCount = 1;
+    if (field == NUMBER_FIELD_TWO) {
+      shift += MENU_GLYPH_SIZE;
+    }
+
+    if (field == NUMBER_FIELD_THREE) {
+      shift += 2 * MENU_GLYPH_SIZE;
+    }
+
+    if (field == NUMBER_FIELD_FOUR) {
+      shift += 3 * MENU_GLYPH_SIZE;
+    }
+
+    if (field == NUMBER_FIELD_TWO_NARROW) {
+      shift += NARROW_DIGIT_SPACING;
+    }
+
+    digits[0] = -value % DECIMAL_BASE;
+  }
+
+  if (value <= -TWO_DIGIT_FIRST && value > -THREE_DIGIT_FIRST) {
+    digitCount = 2;
+    if (field == NUMBER_FIELD_THREE) {
+      shift += 2 * MENU_GLYPH_SIZE;
+    }
+
+    if (field == NUMBER_FIELD_FOUR) {
+      shift += 3 * MENU_GLYPH_SIZE;
+    }
+
+    digits[0] = -value / DECIMAL_BASE;
+    digits[1] = -value % DECIMAL_BASE;
+  }
+
+  if (value <= -THREE_DIGIT_FIRST && value > -FOUR_DIGIT_FIRST) {
+    digitCount = 3;
+    if (field == NUMBER_FIELD_FOUR) {
+      shift += 3 * MENU_GLYPH_SIZE;
+    }
+
+    digits[0] = -value / THREE_DIGIT_FIRST;
+    digits[1] = (-value % THREE_DIGIT_FIRST) / DECIMAL_BASE;
+    digits[2] = (-value % THREE_DIGIT_FIRST) % DECIMAL_BASE;
+  }
+
+  if (value <= -FOUR_DIGIT_FIRST && value >= -MENU_NUMBER_LIMIT) {
+    digitCount = 4;
+    digits[0] = -value / FOUR_DIGIT_FIRST;
+    digits[1] = (-value % FOUR_DIGIT_FIRST) / THREE_DIGIT_FIRST;
+    digits[2] =
+        ((-value % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) / DECIMAL_BASE;
+    digits[3] =
+        ((-value % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) % DECIMAL_BASE;
+  }
+
+  spacing = MENU_GLYPH_SIZE;
+  if (field == NUMBER_FIELD_TWO_NARROW) {
+    spacing = NARROW_DIGIT_SPACING;
+  }
+
+  for (index = 0; index != digitCount; index++) {
+    gDPLoadTextureBlock_4b(gfx++,
+        ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+            ((digits[index] + MENU_GLYPH_FIRST_DIGIT) *
+                MENU_GLYPH_IMAGE_SIZE)) &
+            ~7,
+        G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (x + shift + (index * spacing)) << 2, y << 2,
+        (x + shift + (index * spacing) + MENU_GLYPH_SIZE) << 2,
+        (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+  }
+
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
+#endif
 
 /* func_80211A5C writes a figure to one decimal place, its whole part lined up
  * on the right */
