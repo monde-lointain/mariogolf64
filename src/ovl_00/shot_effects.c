@@ -63,9 +63,6 @@ enum ClearKind {
 #define SHARED_EFFECT_SECOND_IMAGE_ASSET 0x969
 #define SHARED_EFFECT_SECOND_IMAGE_OFFSET 0x648
 
-/* Counts the frames from the last impact flash, back to 0 after 100 */
-extern s32 f_ImpactFrameCount;
-
 /* The arguments of StartSwingTrail */
 enum SwingTrailKind {
   SWING_TRAIL_CLEAR = -1,
@@ -96,18 +93,47 @@ enum SwingTrailState {
 /* The S coordinate across the whole trail, in 10.5 fixed point */
 #define SWING_TRAIL_TEXTURE_LENGTH 0x800
 
-extern s32 f_SwingTrailPathLength;
-extern s32 f_SwingTrailSampleCount;
+/*
+ * An identity matrix in Mtx's fixed point: the integer halves, two to a word,
+ * then the fractions
+ */
+/* clang-format off */
+#define IDENTITY_MTX \
+  {{{0x10000, 0, 1, 0}, \
+    {0, 0x10000, 0, 1}, \
+    {0, 0, 0, 0}, \
+    {0, 0, 0, 0}}}
+/* clang-format on */
+
+#define SPARK_IMAGE_SIZE 32
+#define SPARK_DRAG 0.98f
+#define SPARK_MODEL_Z -100.0f
+#define SPARK_MODEL_SCALE 0.1f
+/* Texture rectangles beyond these screen coordinates would overflow */
+#define SPARK_MAX_SCREEN_COORD 511
+
+/* Counts the frames from the last impact flash, back to 0 after 100 */
+static s32 f_ImpactFrameCount = 0;
+static Vtx f_SparkVertices[3] = {
+    {{{0, 160, 0}, 0, {0, 0}, {0xFF, 0x40, 0x00, 0xFF}}},
+    {{{-12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}},
+    {{{12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}}};
+/* Read by no routine */
+static s32 D_80224898_ovl_00[2] = {0};
+static s32 f_SwingTrailPathLength = 0;
+static s32 f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES;
 /* The ring of matrices that f_SwingTrailHead turns backwards through */
-extern s32 f_SwingTrailHead;
-extern s32 f_SwingTrailKind;
-extern s32 f_SwingTrailPathIndex;
-extern s32 f_SwingTrailLength;
-extern s32 f_SwingTrailState;
-extern s32 f_SwingTrailAlpha;
+static s32 f_SwingTrailHead = 0;
+static s32 f_SwingTrailKind = 0;
+static s32 f_SwingTrailPathIndex = 0;
+static s32 f_SwingTrailLength = 0;
+static s32 f_SwingTrailState = SWING_TRAIL_NONE;
+static s32 f_SwingTrailAlpha = SWING_TRAIL_FULL_ALPHA;
 /* A vertex at the origin for each edge of the trail */
-extern Vtx f_SwingTrailVertices[2];
-extern Mtx f_SwingTrailOrigin;
+static Vtx f_SwingTrailVertices[2] = {
+    {{{0, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x00}}},
+    {{{0, 0, 0}, 0, {0, 0}, {0xC8, 0xDC, 0xC8, 0xBF}}}};
+static Mtx f_SwingTrailOrigin = IDENTITY_MTX;
 
 f32 InterpolateHermite(f32 values[], f32 position);
 
@@ -309,14 +335,6 @@ void StartFlagstickSparks(CoursePoint point) {
  * the half size */
 #define SPARK_TEXTURE_STEP_SCALE 2048.0f
 #define SPARK_NO_TEXTURE_STEP 0xFFFF
-#define SPARK_IMAGE_SIZE 32
-#define SPARK_DRAG 0.98f
-#define SPARK_MODEL_Z -100.0f
-#define SPARK_MODEL_SCALE 0.1f
-/* Texture rectangles beyond these screen coordinates would overflow */
-#define SPARK_MAX_SCREEN_COORD 511
-
-extern Vtx f_SparkVertices[3];
 
 #ifdef NON_MATCHING
 /*
