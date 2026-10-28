@@ -121,28 +121,6 @@ typedef struct PauseOption {
   /* 0x4 */ u16 kind;
 } PauseOption; /* size = 0x6 */
 
-extern s32 f_IsPauseMenuLoaded;
-extern s32 f_PauseSelection;
-extern s32 f_PauseLayout;
-extern s32 f_PauseMenuRequest;
-extern PauseOption f_PauseOptions[];
-extern s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
-extern char* f_PauseValueTexts[];
-extern f32 f_PauseGlowAngle;
-extern f32 f_PauseCursorAngle;
-
-static u8* f_PauseCursorImage;
-static u8* f_MenuCloudImage; /* The pause menu's cloud, or the choice box's */
-static u8* f_PauseArrowsImage;
-extern s32 f_PauseArrowsTick;
-static u8* f_ChoiceBoxCursorImage;
-
-/*
- * Set while the player has taken a stroke on the hole, as UpdateTurns asks
- * for the menu. Not static: the original left it to the linker's common block.
- */
-s32 f_CanGiveUp;
-
 #define CHOICE_BOX_MAX_OPTIONS 4
 #define CHOICE_BOX_OPEN_SOUND 0x64
 #define CHOICE_BOX_CLOSE_SOUND 0x65
@@ -158,22 +136,29 @@ enum ChoiceBoxState {
   CHOICE_BOX_CLOSING
 };
 
+/* The labels of f_ChoiceBoxLabels, which the choice boxes list */
+enum ChoiceLabel {
+  /* "Yes" and "No", which no choice box lists */
+  CHOICE_LABEL_YES,
+  CHOICE_LABEL_NO,
+  CHOICE_LABEL_CONTINUE,
+  CHOICE_LABEL_MULLIGAN,
+  CHOICE_LABEL_HOLE_OUT,
+  CHOICE_LABEL_START_OVER,
+  /* "Hole Out" again, for Ring Shot */
+  CHOICE_LABEL_RING_SHOT_HOLE_OUT,
+  CHOICE_LABEL_RETURN_TO_MENU
+};
+
 typedef struct ChoiceBox {
   /* 0x00 */ s32 optionCount;
   /* 0x04 */ s32 halfWidth; /* Widened to fit the longest label */
   /* 0x08 */ s32 isVertical;
-  /* 0x0C */ u8
-      labels[CHOICE_BOX_MAX_OPTIONS]; /* Indexes into f_ChoiceBoxLabels */
+  /* CHOICE_LABEL_* values */
+  /* 0x0C */ u8 labels[CHOICE_BOX_MAX_OPTIONS];
+  /* CHOICE_RESULT_* values, by label */
   /* 0x10 */ u8 results[CHOICE_BOX_MAX_OPTIONS];
 } ChoiceBox; /* size = 0x14 */
-
-extern ChoiceBox f_ChoiceBoxes[];
-extern char* f_ChoiceBoxLabels[];
-extern s32 f_ChoiceBoxState;
-extern s32 f_ChoiceBoxIndex;
-extern s32 f_ChoiceBoxSelection;
-extern f32 f_ChoiceGlowAngle; /* Cycles the selected label's color */
-extern f32 f_ChoiceCursorAngle; /* Bobs the cursor from side to side */
 
 #define CHOICE_BOX_CENTER_X (SCREEN_WIDTH / 2)
 #define CHOICE_BOX_MARGIN 32
@@ -195,9 +180,134 @@ extern f32 f_ChoiceCursorAngle; /* Bobs the cursor from side to side */
 #define COLOR_WAVE_MIDDLE 127
 #define COLOR_WAVE_AMPLITUDE 127.0f
 
-extern s8 f_PauseLayoutOptionCounts[];
 /* Written once the menu is drawn and cleared by its input, but never read */
-extern s32 f_PauseMenuDrawnMarker;
+static s32 f_PauseMenuDrawnMarker = 0;
+static s32 f_PauseSelection = 0;
+
+/* clang-format off */
+static ChoiceBox f_ChoiceBoxes[] = {
+  /* CHOICE_BOX_ID_TRAINING_SHOT */
+  { 3, 36, TRUE,
+    { CHOICE_LABEL_CONTINUE, CHOICE_LABEL_MULLIGAN, CHOICE_LABEL_HOLE_OUT },
+    { CHOICE_RESULT_CONTINUE, CHOICE_RESULT_MULLIGAN, CHOICE_RESULT_HOLE_OUT } },
+  /* CHOICE_BOX_ID_TRAINING_HOLE_END */
+  { 3, 42, TRUE,
+    { CHOICE_LABEL_CONTINUE, CHOICE_LABEL_MULLIGAN, CHOICE_LABEL_RETURN_TO_MENU },
+    { CHOICE_RESULT_HOLE_OUT, CHOICE_RESULT_MULLIGAN, CHOICE_RESULT_RETURN_TO_MENU } },
+  /* CHOICE_BOX_ID_RING_SHOT */
+  { 3, 66, TRUE,
+    { CHOICE_LABEL_START_OVER, CHOICE_LABEL_RING_SHOT_HOLE_OUT, CHOICE_LABEL_RETURN_TO_MENU },
+    { CHOICE_RESULT_START_OVER, CHOICE_RESULT_RING_SHOT_HOLE_OUT, CHOICE_RESULT_RETURN_TO_MENU } },
+  /* CHOICE_BOX_ID_DRIVING_RANGE */
+  { 2, 36, TRUE,
+    { CHOICE_LABEL_MULLIGAN, CHOICE_LABEL_HOLE_OUT },
+    { CHOICE_RESULT_MULLIGAN, CHOICE_RESULT_HOLE_OUT } }
+};
+/* clang-format on */
+
+static char* f_ChoiceBoxLabels[] = {"Yes", "No", "Continue", "Mulligan",
+    "Hole Out", "Start Over", "Hole Out", "Return to Menu"};
+
+/* clang-format off */
+static PauseOption f_PauseOptions[] = {
+  { PAUSE_MESSAGE_COURSE_VIEW, PAUSE_ACTION_FREE_LOOK, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_SCORE_CARD, PAUSE_ACTION_SCORECARD, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_GIVE_UP, PAUSE_ACTION_GIVE_UP, PAUSE_OPTION_KIND_GIVE_UP },
+  { PAUSE_MESSAGE_SAVE_AND_QUIT, PAUSE_ACTION_SAVE_AND_QUIT, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_QUIT_GAME, PAUSE_ACTION_QUIT_GAME, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_RETURN_TO_MENU, PAUSE_ACTION_RETURN_TO_MENU, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_HOLE_OUT, PAUSE_ACTION_HOLE_OUT, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_CHANGE_WIND_DIRECTION, PAUSE_ACTION_CHANGE_WIND_DIRECTION, PAUSE_OPTION_KIND_WIND_DIRECTION },
+  { PAUSE_MESSAGE_CHANGE_WIND_SPEED, PAUSE_ACTION_CHANGE_WIND_SPEED, PAUSE_OPTION_KIND_WIND_SPEED },
+  { PAUSE_MESSAGE_START_OVER, PAUSE_ACTION_START_OVER, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_CHANGE_WEATHER, PAUSE_ACTION_CHANGE_WEATHER, PAUSE_OPTION_KIND_WEATHER },
+  { PAUSE_MESSAGE_CHANGE_TERRAIN, PAUSE_ACTION_CHANGE_TERRAIN, PAUSE_OPTION_KIND_LIE },
+  { PAUSE_MESSAGE_GRID_COLOR, PAUSE_ACTION_GRID_COLOR, PAUSE_OPTION_KIND_GRID_COLOR },
+  { PAUSE_MESSAGE_CONTROLS, PAUSE_ACTION_CONTROLS, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_QUIT_GAME, PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME, PAUSE_OPTION_KIND_PLAIN },
+  { PAUSE_MESSAGE_QUIT_GAME, PAUSE_ACTION_QUIT_UNK3B_GAME, PAUSE_OPTION_KIND_PLAIN }
+};
+/* clang-format on */
+
+static char* f_PauseValueTexts[] = {"Clear", "Rain", "Black", "White"};
+
+/*
+ * The options of each PAUSE_LAYOUT_*, as f_PauseOptions indices. An option's
+ * index is its action, so the indices are written as actions.
+ */
+/* clang-format off */
+static s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS] = {
+  /* PAUSE_LAYOUT_SPEED_GOLF */
+  { PAUSE_ACTION_FREE_LOOK, PAUSE_ACTION_SCORECARD, PAUSE_ACTION_GRID_COLOR,
+    PAUSE_ACTION_CONTROLS, PAUSE_ACTION_QUIT_GAME },
+  /* PAUSE_LAYOUT_RING_SHOT */
+  { PAUSE_ACTION_START_OVER, PAUSE_ACTION_HOLE_OUT, PAUSE_ACTION_FREE_LOOK,
+    PAUSE_ACTION_GRID_COLOR, PAUSE_ACTION_CONTROLS, PAUSE_ACTION_RETURN_TO_MENU },
+  /* PAUSE_LAYOUT_TRAINING */
+  { PAUSE_ACTION_START_OVER, PAUSE_ACTION_HOLE_OUT, PAUSE_ACTION_FREE_LOOK,
+    PAUSE_ACTION_CHANGE_WIND_DIRECTION, PAUSE_ACTION_CHANGE_WIND_SPEED,
+    PAUSE_ACTION_CHANGE_WEATHER, PAUSE_ACTION_GRID_COLOR, PAUSE_ACTION_CONTROLS,
+    PAUSE_ACTION_RETURN_TO_MENU },
+  /* PAUSE_LAYOUT_TRAINING_MINI_GOLF */
+  { PAUSE_ACTION_START_OVER, PAUSE_ACTION_HOLE_OUT, PAUSE_ACTION_FREE_LOOK,
+    PAUSE_ACTION_CHANGE_WEATHER, PAUSE_ACTION_GRID_COLOR, PAUSE_ACTION_CONTROLS,
+    PAUSE_ACTION_RETURN_TO_MENU },
+  /* PAUSE_LAYOUT_DRIVING_RANGE */
+  { PAUSE_ACTION_HOLE_OUT, PAUSE_ACTION_FREE_LOOK, PAUSE_ACTION_CHANGE_TERRAIN,
+    PAUSE_ACTION_CHANGE_WIND_DIRECTION, PAUSE_ACTION_CHANGE_WIND_SPEED,
+    PAUSE_ACTION_CHANGE_WEATHER, PAUSE_ACTION_GRID_COLOR, PAUSE_ACTION_CONTROLS,
+    PAUSE_ACTION_RETURN_TO_MENU },
+  /* PAUSE_LAYOUT_VERSUS */
+  { PAUSE_ACTION_FREE_LOOK, PAUSE_ACTION_SCORECARD, PAUSE_ACTION_GRID_COLOR,
+    PAUSE_ACTION_CONTROLS, PAUSE_ACTION_GIVE_UP, PAUSE_ACTION_SAVE_AND_QUIT },
+  /* PAUSE_LAYOUT_STROKE */
+  { PAUSE_ACTION_FREE_LOOK, PAUSE_ACTION_SCORECARD, PAUSE_ACTION_GRID_COLOR,
+    PAUSE_ACTION_CONTROLS, PAUSE_ACTION_GIVE_UP, PAUSE_ACTION_SAVE_AND_QUIT },
+  /* PAUSE_LAYOUT_BROUGHT_OVER_SPEED_GOLF */
+  { PAUSE_ACTION_FREE_LOOK, PAUSE_ACTION_SCORECARD, PAUSE_ACTION_GRID_COLOR,
+    PAUSE_ACTION_CONTROLS, PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME },
+  /* PAUSE_LAYOUT_BROUGHT_OVER */
+  { PAUSE_ACTION_FREE_LOOK, PAUSE_ACTION_SCORECARD, PAUSE_ACTION_GRID_COLOR,
+    PAUSE_ACTION_CONTROLS, PAUSE_ACTION_GIVE_UP,
+    PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME },
+  /* PAUSE_LAYOUT_UNK3B_SPEED_GOLF */
+  { PAUSE_ACTION_FREE_LOOK, PAUSE_ACTION_SCORECARD, PAUSE_ACTION_GRID_COLOR,
+    PAUSE_ACTION_CONTROLS, PAUSE_ACTION_QUIT_UNK3B_GAME },
+  /* PAUSE_LAYOUT_UNK3B */
+  { PAUSE_ACTION_FREE_LOOK, PAUSE_ACTION_SCORECARD, PAUSE_ACTION_GRID_COLOR,
+    PAUSE_ACTION_CONTROLS, PAUSE_ACTION_GIVE_UP, PAUSE_ACTION_QUIT_UNK3B_GAME }
+};
+/* clang-format on */
+
+/* The number of options in each PAUSE_LAYOUT_* */
+static s8 f_PauseLayoutOptionCounts[] = {5, 6, 9, 7, 9, 6, 6, 5, 6, 5, 6};
+
+static s32 f_PauseLayout = PAUSE_LAYOUT_NONE;
+static s32 f_IsPauseMenuLoaded = FALSE;
+static s32 f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
+static s32 f_PauseArrowsTick = 0;
+static f32 f_PauseGlowAngle = 0.0f;
+static f32 f_PauseCursorAngle = 0.0f;
+static s32 f_ChoiceBoxState = CHOICE_BOX_CLOSED;
+/* Read by no routine */
+static s32 D_80224A94_ovl_00 = 0;
+static s32 f_ChoiceBoxIndex = CHOICE_BOX_CLOSED;
+static s32 f_ChoiceBoxSelection = 0;
+/* Cycles the selected label's color */
+static f32 f_ChoiceGlowAngle = 0.0f;
+/* Bobs the cursor from side to side */
+static f32 f_ChoiceCursorAngle = 0.0f;
+
+static u8* f_PauseCursorImage;
+static u8* f_MenuCloudImage; /* The pause menu's cloud, or the choice box's */
+static u8* f_PauseArrowsImage;
+static u8* f_ChoiceBoxCursorImage;
+
+/*
+ * Set while the player has taken a stroke on the hole, as UpdateTurns asks
+ * for the menu. Not static: the original left it to the linker's common block.
+ */
+s32 f_CanGiveUp;
 
 void SetFramebufferCount(s32 count);
 
@@ -238,28 +348,6 @@ void RequestPauseMenu(s32 canGiveUp, s32 isClosing) {
       isClosing == FALSE ? PAUSE_MENU_REQUEST_LOAD : PAUSE_MENU_REQUEST_FREE;
   f_CanGiveUp = canGiveUp;
 }
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225440_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225450_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_8022545C_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225468_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225474_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225480_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225484_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225488_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225490_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225498_ovl_00);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_802254A0_ovl_00);
 
 void LoadPauseMenu(void) {
   EncodedAsset asset;

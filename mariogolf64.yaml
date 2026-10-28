@@ -586,7 +586,7 @@ segments:
       - [0xDD320, .data, ovl_00/hole_objects]
       - [0xDD410, .data, ovl_00/round_events]
       - [0xDDB60, .data, ovl_00/shot_effects]
-      - [0xDDC20, data]
+      - [0xDDC20, .data, ovl_00/pause_menu]
       - [0xDDDB0, .data, ovl_00/shot_labels]
       - [0xDDE10, .data, ovl_00/hole_intro]
       - [0xDDE20, .data, ovl_00/club_panel]
