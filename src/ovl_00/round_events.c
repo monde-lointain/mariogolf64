@@ -97,7 +97,7 @@ typedef struct Banner {
   /* 0x4 */ s8 letterCount;
   /* 0x5 */ u8 letterWidth;
   /* 0x6 */ u8 letterHeight;
-  /* 0x7 */ s8 animation;
+  /* 0x7 */ s8 animation; /* A BANNER_ANIMATION_* value */
 } Banner; /* size = 0x8 */
 
 /* Where a letter of the shown banner is, and its matrix in each matrix buffer
@@ -117,6 +117,18 @@ typedef struct BannerLetter {
 enum BannerLayoutMode {
   BANNER_LAYOUT_LEFT,
   BANNER_LAYOUT_FIRST_LETTER
+};
+
+/* How a banner comes in */
+enum BannerAnimation {
+  /* Shrinks onto the screen while fading in, then leaves */
+  BANNER_ANIMATION_ZOOM,
+  /* Grows while turning once */
+  BANNER_ANIMATION_SPIN,
+  /* Slides in from the right and wobbles, then leaves */
+  BANNER_ANIMATION_SLIDE,
+  /* Like BANNER_ANIMATION_ZOOM, but larger and stays */
+  BANNER_ANIMATION_ZOOM_STAY
 };
 
 typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_MAX_LETTERS];
@@ -541,17 +553,6 @@ void func_8020EEEC_ovl_00(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-
-/* How a banner comes in, as its Banner.animation */
-/* Shrinks onto the screen while fading in, then leaves */
-enum BannerAnimation {
-  BANNER_ANIMATION_ZOOM,
-  BANNER_ANIMATION_SPIN, /* Grows while turning once */
-  /* Slides in from the right and wobbles, then leaves */
-  BANNER_ANIMATION_SLIDE,
-  /* Like BANNER_ANIMATION_ZOOM, but larger and stays */
-  BANNER_ANIMATION_ZOOM_STAY
-};
 
 /* The debug flag that lets the D-Pad pick a banner and start it */
 #define GAME_FLAG_TEST_BANNERS 0x6D
