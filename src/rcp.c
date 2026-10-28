@@ -25,8 +25,8 @@ void AppendRcpInit(s32 viewportIndex, Gfx** displayListHead) {
   gSPSegment(gfx++, 0, 0);
   gSPViewport(gfx++, &g_Viewports[viewportIndex]);
   SetCpuProjection(NULL, NULL, &g_Viewports[viewportIndex]);
-  gSPDisplayList(gfx++, f_RdpInitList);
   gSPDisplayList(gfx++, f_RspInitList);
+  gSPDisplayList(gfx++, f_RdpInitList);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
