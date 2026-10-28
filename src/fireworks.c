@@ -62,15 +62,21 @@ typedef struct Firework {
   /* 0x28 */ FireworkShape* shape;
 } Firework; /* size = 0x2C */
 
-extern s32 f_FireworkCount;
-extern s32 f_FireworkState;
-extern Vtx f_FireworkParticleVertices[3];
+static s32 f_FireworkCount = 0;
+static s32 f_FireworkState = 0;
+static Vtx f_FireworkParticleVertices[3] = {
+    {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0x7F}}},
+    {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}},
+    {{{10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}}};
 /*
  * The shapes, by course record index: outlines of Toad, a Koopa Troopa, a Shy
  * Guy, Yoshi, a Boo, Wario, Mario and Peach
  */
-extern u16 f_FireworkShapeAssetIds[8];
-extern f32 f_FireworkHue;
+static u16 f_FireworkShapeAssetIds[8] = {
+    0x95F, 0x960, 0x961, 0x962, 0x963, 0x964, 0x965, 0x966};
+static f32 f_FireworkHue = 0.0f;
+/* Read by no routine */
+static u8 D_800C46AC[0xC04] = {0};
 
 /* Not static: the original left these to the linker's common block */
 FireworkShape* f_FireworkShape;
