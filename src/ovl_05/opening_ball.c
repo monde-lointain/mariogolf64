@@ -27,6 +27,9 @@
  */
 #define OTHER_CHARACTER_MODEL_KIND CHARACTER_MODEL_KIND_COUNT
 
+/* The clubs that the opening's golfers swing */
+#define OPENING_CLUB_COUNT 2
+
 /*
  * The absolute value as a statement expression, as StepBallSimulation has it,
  * which compiles to a compare and branch
@@ -37,31 +40,118 @@
     (absValue < 0.0f) ? -absValue : absValue; \
   })
 
-/* The surface table's names, in half-width katakana. KMC emitted the table's
- * strings from its last entry to its first, and stored each name once. */
-const char D_8020C190_ovl_05[] = "ﾚｯﾄﾞ";
-const char D_8020C198_ovl_05[] = "ﾌﾞﾙｰ";
-const char D_8020C1A0_ovl_05[] = "ｸﾞﾘｰﾝ";
-const char D_8020C1A8_ovl_05[] = "TEE UP";
-const char D_8020C1B0_ovl_05[] = "ｱｳﾄ ｵﾌﾞ ｺｰｽ";
-const char D_8020C1BC_ovl_05[] = "            ";
-const char D_8020C1CC_ovl_05[] = "ｳｴｽﾄｴﾘｱ";
-const char D_8020C1D4_ovl_05[] = "ﾃﾞｨｰﾌﾟﾗﾌ";
-const char D_8020C1E0_ovl_05[] = "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ";
-const char D_8020C1EC_ovl_05[] = "ｾﾐﾗﾌ";
-const char D_8020C1F4_ovl_05[] = "ｸﾞﾘｰﾝ ｴｯｼﾞ";
-const char D_8020C200_ovl_05[] = "ﾛｯｸ";
-const char D_8020C204_ovl_05[] = "ﾃｨｰｸﾞﾗｳﾝﾄﾞ";
-const char D_8020C210_ovl_05[] = "ｶｰﾄｳｪｲ";
-const char D_8020C218_ovl_05[] = "ｳｫｰﾀｰﾊｻﾞｰﾄﾞ";
-const char D_8020C224_ovl_05[] = "ｵﾝ ｸﾞﾘｰﾝ";
-const char D_8020C230_ovl_05[] = "ﾊﾞﾝｶｰ";
-const char D_8020C238_ovl_05[] = "ﾗﾌ";
-const char D_8020C23C_ovl_05[] = "ﾌｪｱｳｪｲ";
-const char D_8020C244_ovl_05[] = "O.B.";
+/* The opening's copy of g_ClubTestMode */
+static s8 D_8020B560_ovl_05 = CLUB_TEST_NONE;
 
-/* The opening's own copy of f_SurfaceInfo */
-extern SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT];
+/* The opening's own copy of f_SurfaceInfo, which names the surfaces in
+ * half-width katakana and differs from it in eight entries' values */
+static SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT] = {
+    /* SURFACE_OUT_OF_BOUNDS */
+    {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, 1, 7},
+    /* SURFACE_FAIRWAY */
+    {SURFACE_KIND_FAIRWAY, "ﾌｪｱｳｪｲ", 98, 100, 5, 960, 400, 0x501, 0, 0},
+    /* SURFACE_ROUGH */
+    {SURFACE_KIND_ROUGH, "ﾗﾌ", 80, 90, 30, 600, 200, 0x508, 1, 1},
+    /* SURFACE_BUNKER */
+    {SURFACE_KIND_BUNKER, "ﾊﾞﾝｶｰ", 70, 85, 30, 600, 0, 0x504, 0, 2},
+    /* SURFACE_GREEN */
+    {SURFACE_KIND_GREEN, "ｵﾝ ｸﾞﾘｰﾝ", 100, 100, 0, 972, 500, 0x50A, 0, 6},
+    /* SURFACE_WATER_HAZARD */
+    {SURFACE_KIND_WATER_HAZARD, "ｳｫｰﾀｰﾊｻﾞｰﾄﾞ", 100, 100, 0, 0, 0, 0x50C, 2, 3},
+    /* SURFACE_CART_WAY */
+    {SURFACE_KIND_CART_WAY, "ｶｰﾄｳｪｲ", 80, 100, 10, 975, 890, 0x50B, 0, 4},
+    /* SURFACE_TEE_GROUND */
+    {SURFACE_KIND_TEE_GROUND, "ﾃｨｰｸﾞﾗｳﾝﾄﾞ", 98, 100, 10, 930, 500, 0x501, 0, 8},
+    /* SURFACE_ROCK */
+    {SURFACE_KIND_ROCK, "ﾛｯｸ", 80, 90, 30, 930, 900, 0x50D, 0, 9},
+    /* SURFACE_GREEN_EDGE */
+    {SURFACE_KIND_GREEN_EDGE, "ｸﾞﾘｰﾝ ｴｯｼﾞ", 98, 100, 10, 966, 400, 0x501, 0, 0},
+    /* SURFACE_SEMI_ROUGH */
+    {SURFACE_KIND_SEMI_ROUGH, "ｾﾐﾗﾌ", 90, 98, 30, 930, 500, 0x507, 0, 0},
+    /* SURFACE_BARE_GROUND */
+    {SURFACE_KIND_BARE_GROUND, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C, 0, 1},
+    /* SURFACE_DEEP_ROUGH */
+    {SURFACE_KIND_DEEP_ROUGH, "ﾃﾞｨｰﾌﾟﾗﾌ", 50, 80, 30, 430, 100, 0x509, 2, 5},
+    /* SURFACE_BARE_GROUND_UNK13 */
+    {SURFACE_KIND_BARE_GROUND_UNK20, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C,
+        0, 1},
+    /* SURFACE_WASTE_AREA */
+    {SURFACE_KIND_WASTE_AREA, "ｳｴｽﾄｴﾘｱ", 50, 80, 30, 430, 100, 0x8F1, 1, 5},
+    /* SURFACE_UNK15 */
+    {SURFACE_KIND_ROCK, "            ", 98, 100, 40, 930, 500, 0x500, 0, 9},
+    /* SURFACE_BUNKER_FAIR_LIE */
+    {SURFACE_KIND_BUNKER_FAIR_LIE, "ﾊﾞﾝｶｰ", 50, 70, 30, 600, 0, 0x505, 1, 2},
+    /* SURFACE_BUNKER_POOR_LIE */
+    {SURFACE_KIND_BUNKER_POOR_LIE, "ﾊﾞﾝｶｰ", 40, 60, 30, 600, 0, 0x506, 1, 2},
+    /* SURFACE_BUNKER_UNK18 */
+    {SURFACE_KIND_BUNKER_UNK9, "ﾊﾞﾝｶｰ", 40, 60, 40, 600, 0, 0x506, 1, 2},
+    /* SURFACE_FAIRWAY_FAIR_LIE */
+    {SURFACE_KIND_FAIRWAY_FAIR_LIE, "ﾌｪｱｳｪｲ", 94, 98, 7, 950, 380, 0x502, 0, 0},
+    /* SURFACE_FAIRWAY_POOR_LIE */
+    {SURFACE_KIND_FAIRWAY_POOR_LIE, "ﾌｪｱｳｪｲ", 90, 94, 7, 950, 380, 0x503, 0, 0},
+    /* SURFACE_ROUGH_POOR_LIE */
+    {SURFACE_KIND_ROUGH_POOR_LIE, "ﾗﾌ", 70, 85, 30, 600, 200, 0x509, 1, 5},
+    /* SURFACE_OUT_OF_COURSE */
+    {SURFACE_KIND_OUT_OF_COURSE, "ｱｳﾄ ｵﾌﾞ ｺｰｽ", 100, 100, 0, 0, 0, 0x500, 2, 7},
+    /* SURFACE_TEE_UP */
+    {SURFACE_KIND_TEE_UP, "TEE UP", 98, 100, 10, 930, 500, 0x500, 0, 8},
+    /* SURFACE_MINI_GOLF_GREEN */
+    {SURFACE_KIND_GREEN, "ｸﾞﾘｰﾝ", 100, 100, 0, 972, 500, 0x8F2, 0, 6},
+    /* SURFACE_MINI_GOLF_FAIRWAY */
+    {SURFACE_KIND_FAIRWAY, "ﾌﾞﾙｰ", 98, 100, 5, 960, 400, 0x8F3, 0, 0},
+    /* SURFACE_MINI_GOLF_CART_WAY */
+    {SURFACE_KIND_CART_WAY, "ﾚｯﾄﾞ", 80, 100, 10, 980, 890, 0x8F4, 0, 4}};
+
+/* The debug text row, of SPEED_TEXT_ROW_COUNT, that the next ball speed goes in
+ */
+static s32 D_8020B858_ovl_05 = 0;
+/* The opening's copies of D_800B7C00 and D_800B7C08, which its copy of
+ * GetUnkCEntry doesn't read */
+static Unk6 D_8020B85C_ovl_05 = {-90, -64, -40, -10, 100, 1};
+static Unk6 D_8020B864_ovl_05 = {-80, 64, 30, 10, -5, 1};
+/* The opening's copy of D_800B7C10 */
+static Unk6 D_8020B86C_ovl_05[MAX_LIE_RATING + 1][UNKC_ENTRY_COUNT] = {
+    {{-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
+        {-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
+        {-90, -64, -40, -10, 100, 1}, {0, 0, 0, 0, 0, 0},
+        {-80, 64, 30, 10, -5, 1}, {-80, 64, 30, 10, -5, 1},
+        {-80, 64, 30, 10, -5, 1}, {-80, 64, 30, 10, -5, 1},
+        {-80, 64, 30, 10, -5, 1}},
+    {{-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
+        {-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
+        {-4, -2, 1, -5, 5, 0}, {0, 0, 0, 0, 0, 0}, {-8, 2, -1, 5, 4, 0},
+        {-80, 64, 30, 10, -5, 1}, {-80, 64, 30, 10, -5, 1},
+        {-80, 64, 30, 10, -5, 1}, {-80, 64, 30, 10, -5, 1}},
+    {{-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
+        {-90, -64, -40, -10, 100, 1}, {-8, -8, 2, -10, 15, 0},
+        {-4, -2, 1, -5, 5, 0}, {0, 0, 0, 0, 0, 0}, {-8, 2, -1, 5, 4, 0},
+        {-12, 8, -2, 10, 4, 0}, {-80, 64, 30, 10, -5, 1},
+        {-80, 64, 30, 10, -5, 1}, {-80, 64, 30, 10, -5, 1}},
+    {{-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
+        {-8, -8, 2, -10, 15, 0}, {-4, -2, 1, -5, 5, 0}, {-2, -1, 0, -3, 3, 0},
+        {0, 0, 0, 0, 0, 0}, {-4, 1, 0, 3, 2, 0}, {-8, 2, -1, 5, 4, 0},
+        {-12, 8, -2, 10, 4, 0}, {-80, 64, 30, 10, -5, 1},
+        {-80, 64, 30, 10, -5, 1}},
+    {{-90, -64, -40, -10, 100, 1}, {-8, -8, 2, -10, 15, 0},
+        {-4, -2, 1, -5, 5, 0}, {-2, -1, 0, -3, 3, 0}, {-1, 0, 0, -2, 1, 0},
+        {0, 0, 0, 0, 0, 0}, {-2, 0, 0, 2, 1, 0}, {-4, 1, 0, 3, 2, 0},
+        {-8, 2, -1, 5, 4, 0}, {-12, 8, -2, 10, 4, 0}, {-80, 64, 30, 10, -5, 1}},
+    {{-8, -8, 2, -10, 15, 0}, {-4, -2, 1, -5, 5, 0}, {-2, -1, 0, -3, 3, 0},
+        {-1, 0, 0, -2, 1, 0}, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0}, {-2, 0, 0, 2, 1, 0}, {-4, 1, 0, 3, 2, 0},
+        {-8, 2, -1, 5, 4, 0}, {-12, 8, -2, 10, 4, 0}}};
+
+/* The opening's clubs: two drivers that differ only in pitch */
+static Club D_8020B9F8_ovl_05[OPENING_CLUB_COUNT] = {
+    {0, "1W", 0, {0}, DRIVER_SURFACES, 208, -15, 0, 11, 120, CLUB_TYPE_DRIVER,
+        {97608, 84651, 19335}, CLUB_KIND_WOOD, 0, {0, 0, 0},
+        ASSET_DRIVER_HEAD_IMAGE, 0, {0}},
+    {0, "1W", 0, {0}, DRIVER_SURFACES, 208, -23, 0, 11, 120, CLUB_TYPE_DRIVER,
+        {97608, 84651, 19335}, CLUB_KIND_WOOD, 0, {0, 0, 0},
+        ASSET_DRIVER_HEAD_IMAGE, 0, {0}}};
+
+/* func_8020A488_ovl_05 counts each launch here, and nothing else reads it */
+static s32 D_8020BA60_ovl_05 = 0;
 
 /* The opening's copies of the collision triangle and fraction that
  * StepBallSimulation keeps on its stack */
@@ -114,12 +204,6 @@ static void ResetBallSimulations(void) {
     g_BallSimulations[index].state = BALL_STATE_FLYING;
   }
 }
-
-/* The opening's copy of g_ClubTestMode */
-extern s8 D_8020B560_ovl_05;
-/* The debug text row, of SPEED_TEXT_ROW_COUNT, that the next ball speed goes in
- */
-extern s32 D_8020B858_ovl_05;
 
 #define SPEED_TEXT_ROW_COUNT 8
 #define SPEED_TEXT_FIRST_ROW 8
@@ -1530,11 +1614,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206A50_ovl_05);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
 #endif
-
-/* The opening's copies of D_800B7C10 and of the launch count, and its clubs */
-extern Unk6 D_8020B86C_ovl_05[MAX_LIE_RATING + 1][UNKC_ENTRY_COUNT];
-extern Club D_8020B9F8_ovl_05[];
-extern s32 D_8020BA60_ovl_05;
 
 #ifdef NON_MATCHING
 /*

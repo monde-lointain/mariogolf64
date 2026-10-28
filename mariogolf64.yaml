@@ -713,6 +713,7 @@ segments:
       - [0x145A30, c, ovl_05/opening_camera_editor]
       - [0x148D00, c, ovl_05/opening_ball]
       - [0x14D2C0, data]
+      - [0x14DBE0, .data, ovl_05/opening_ball]
       - [0x14E0F0, .rodata, ovl_05/opening]
       - [0x14E710, .rodata, ovl_05/opening_camera_editor]
       - [0x14E810, .rodata, ovl_05/opening_ball]
