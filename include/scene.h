@@ -73,7 +73,7 @@ extern s32 g_SubModuleState;
  * with birdie badges and 30 contestants
  */
 #define GAME_MODE_TOURNAMENT 5
-/* The mode whose holes GetCourseRecordIndex takes from g_RingShotHoles */
+/* The mode whose holes GetCourseRecordIndex takes from f_RingShotHoles */
 #define GAME_MODE_RING_SHOT 9
 /* Set by the staff roll for the hole its cast plays */
 #define GAME_MODE_STAFF_ROLL 13

@@ -15,7 +15,7 @@
 #define DEFAULT_HOLE_RADIUS 200
 #define MINI_GOLF_HOLE_RADIUS 30
 
-extern RingShotHole g_RingShotHoles[RING_SHOT_COURSE_COUNT]
+extern RingShotHole f_RingShotHoles[RING_SHOT_COURSE_COUNT]
                                    [RING_SHOT_HOLE_COUNT];
 
 /*
@@ -134,7 +134,7 @@ s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex) {
 
 s32 GetCourseRecordIndex(void) {
   if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-    return g_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
+    return f_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
         .courseRecordIndex;
   }
 
@@ -154,7 +154,7 @@ s32 GetCourseRecordIndex(void) {
 
 s32 GetHoleRecordIndex(void) {
   if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-    return g_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
+    return f_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
         .holeIndex;
   }
 
