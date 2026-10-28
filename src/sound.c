@@ -9,6 +9,7 @@
 
 #include <PR/libmus.h>
 
+#include "asset.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "functions.h"
@@ -56,6 +57,8 @@
 #define SONG_CHANGE_STOP 2
 /* Frames from a switch's request to the old song's stop */
 #define SONG_SWITCH_DELAY 2
+/* A character sound delay that has run out, its sound played */
+#define PLAYED_DELAY (-1)
 
 typedef struct QueuedCharacterSound {
   /* 0x00 */ s32 character;
@@ -80,28 +83,153 @@ extern u8 g_SoundWaveBankRomStart[];
 extern u8 g_SoundEffectBankRomStart[];
 extern u8 g_SoundEffectBankRomEnd[];
 
-extern s32 f_SongHandle;
-extern s32 f_SoundHandles[SOUND_CHANNEL_COUNT];
-extern u32 f_SoundFadeFrameCounts[SOUND_CHANNEL_COUNT];
-extern f32 f_SoundVolumes[SOUND_CHANNEL_COUNT];
+s32 g_NextSoundChannel = 0;
+static s32 f_SongHandle = NO_HANDLE;
+/* Read by no routine */
+static s32 D_800C0E68 = -1;
+/* Only the first handle starts as NO_HANDLE */
+static s32 f_SoundHandles[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
+static u32 f_SoundFadeFrameCounts[SOUND_CHANNEL_COUNT] = {0};
+static f32 f_SoundVolumes[SOUND_CHANNEL_COUNT] = {0.0f};
 /* Written with the handles but never read */
-extern s32 f_SongHandleCopy;
-extern s32 f_SoundHandleCopies[SOUND_CHANNEL_COUNT];
-extern s32 f_EchoingSoundIds[ECHOING_SOUND_COUNT];
+static s32 f_SongHandleCopy = NO_HANDLE;
+static s32 f_SoundHandleCopies[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
+static s32 f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {0x7B, 0x7C, 0x7D, 0x7E,
+    0x7F, 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A,
+    0x8B, 0x8C, 0x8D, 0x8E, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97,
+    0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D};
 /* Frames from a character sound's request until it plays, by kind and character
  */
-extern u16 f_CharacterSoundDelays[CHARACTER_SOUND_KIND_COUNT][CHARACTER_COUNT];
-extern s32 f_PreviewSoundDelays[CHARACTER_COUNT];
-extern QueuedCharacterSound
-    f_QueuedCharacterSounds[QUEUED_CHARACTER_SOUND_COUNT];
+static u16 f_CharacterSoundDelays[CHARACTER_SOUND_KIND_COUNT][CHARACTER_COUNT] =
+    {
+        {4, 3, 4, 4, 4, 6, 4, 3, 4, 4, 7, 6, 6, 4, 4, 4, 1, 4},
+};
+static s32 f_PreviewSoundDelays[CHARACTER_COUNT] = {PLAYED_DELAY, PLAYED_DELAY,
+    PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY,
+    PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY,
+    PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY,
+    PLAYED_DELAY};
+static QueuedCharacterSound
+    f_QueuedCharacterSounds[QUEUED_CHARACTER_SOUND_COUNT] = {
+        {0, PLAYED_DELAY, 0, 0, 0},
+        {0, PLAYED_DELAY, 0, 0, 0},
+        {0, PLAYED_DELAY, 0, 0, 0},
+        {0, PLAYED_DELAY, 0, 0, 0},
+};
 /* The index in each character's sound table of each kind of sound */
-extern u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT];
-extern s32 f_DelayEditorCharacter;
-extern s32 f_DelayEditorKind;
-extern SongChange f_PendingSongChange;
-extern s32 f_SongId;
+static u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT] = {
+    32, 30, 6, 8, 10, 12, 14};
+static s32 f_DelayEditorCharacter = 0;
+static s32 f_DelayEditorKind = 0;
+static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};
+static s32 f_SongId = NO_SONG;
 /* The start and end of each song in the ROM, in turn */
-extern u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2];
+static u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2] = {
+    (u32)g_SoundEffectBankRomEnd,
+    0xD9FB20,
+    0xD9FB20,
+    0xDA0640,
+    0xDA0640,
+    0xDA0D70,
+    0xDA0D70,
+    0xDA1900,
+    0xDA1900,
+    0xDA2000,
+    0xDA2000,
+    0xDA2620,
+    0xDA2620,
+    0xDA3590,
+    0xDA3590,
+    0xDA4040,
+    0xDA4040,
+    0xDA50A0,
+    0xDA50A0,
+    0xDA73E0,
+    0xDA73E0,
+    0xDA8A40,
+    0xDA8A40,
+    0xDA9E40,
+    0xDA9E40,
+    0xDB2070,
+    0xDB2070,
+    0xDB9A00,
+    0xDB9A00,
+    0xDBC0D0,
+    0xDBC0D0,
+    0xDBDC40,
+    0xDBDC40,
+    0xDBF230,
+    0xDBF230,
+    0xDC3010,
+    0xDC3010,
+    0xDC6E50,
+    0xDC6E50,
+    0xDCCC90,
+    0xDCCC90,
+    0xDCE3C0,
+    0xDCE3C0,
+    0xDD0B10,
+    0xDD0B10,
+    0xDD16A0,
+    0xDD16A0,
+    0xDD24E0,
+    0xDD24E0,
+    0xDD35C0,
+    0xDD35C0,
+    0xDD4320,
+    0xDD4320,
+    0xDD5240,
+    0xDD5240,
+    0xDD6390,
+    0xDD6390,
+    0xDD7550,
+    0xDD7550,
+    0xDE1280,
+    0xDE1280,
+    0xDE76A0,
+    0xDE76A0,
+    0xDF1030,
+    0xDF1030,
+    0xDF6A00,
+    0xDF6A00,
+    0xDFC1F0,
+    0xDFC1F0,
+    0xE03170,
+    0xE03170,
+    0xE08660,
+    0xE08660,
+    0xE0D6F0,
+    0xE0D6F0,
+    0xE14780,
+    0xE14780,
+    0xE1CCD0,
+    0xE1CCD0,
+    0xE210F0,
+    0xE210F0,
+    0xE25410,
+    0xE25410,
+    0xE2B6B0,
+    0xE2B6B0,
+    0xE2CF90,
+    0xE2CF90,
+    0xE2D7A0,
+    0xE2D7A0,
+    0xE329E0,
+    0xE329E0,
+    0xE33210,
+    0xE33210,
+    0xE33F40,
+    0xE33F40,
+    0xE37E40,
+    0xE37E40,
+    0xE3FCD0,
+    0xE3FCD0,
+    0xE470C0,
+    0xE470C0,
+    (u32)g_AssetArchiveRomStart,
+};
+/* Read by no routine */
+static s32 D_800C1348[10] = {5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
 static u32 f_LastAudioFrame;
 
 musHandle StartSoundEffect(s32 soundId);
