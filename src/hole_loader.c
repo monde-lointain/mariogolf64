@@ -122,17 +122,18 @@ typedef struct LzStream {
 /* How ShrinkMiniGolfHole scales a course down to mini-golf size, by axis */
 extern Vec3 g_MiniGolfScale;
 extern OSPiHandle* nuPiCartHandle;
-extern s32 f_HoleSeed;
+static s32 f_HoleSeed = 0;
+static s32 f_CycledCupIndex = 0;
 /*
  * hole_loader.h declares this without volatile, as the files that only read
  * it were compiled; the loader thread waits on it, so here it is volatile
  */
-extern volatile s32 g_HasLoaderFinished;
+volatile s32 g_HasLoaderFinished = TRUE;
+/* Read by no routine */
+static s32 D_800C3FAC = 0;
 static OSThread f_LoaderThread;
 extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
-extern s32 f_CycledCupIndex;
-/* The cup index after the chosen one; nothing reads it */
 extern HoleSetup D_80105F40;
 /* menu.c declares this as Unk68[MAX_PLAYER_COUNT]; only its first bytes are
  * copied here */
