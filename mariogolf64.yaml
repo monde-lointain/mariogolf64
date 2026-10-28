@@ -637,7 +637,7 @@ segments:
       - [0x11ADF0, .data, ovl_01/tournament_menu]
       - [0x11B110, .rodata, ovl_01/main_menu]
       - [0x11B730, .rodata, ovl_01/character_select]
-      - [0x11B800, .rodata, ovl_01/course_menu]
+      - [0x11B790, .rodata, ovl_01/course_menu]
       - [0x11B870, .rodata, ovl_01/best_times]
       - [0x11B880, .rodata, ovl_01/character_table]
       - [0x11B920, .rodata, ovl_01/player_stats]

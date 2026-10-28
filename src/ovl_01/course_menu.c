@@ -154,6 +154,18 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
 
+/* The stats' names, which D_802300B4 points to */
+const char D_80231810_ovl_01[] = "Sand Saves";
+const char D_8023181C_ovl_01[] = "Par Ons";
+const char D_80231824_ovl_01[] = "Par Saves";
+const char D_80231830_ovl_01[] = "Avg. Putt";
+const char D_8023183C_ovl_01[] = "On Fairway";
+const char D_80231848_ovl_01[] = "Avg. Drive";
+const char D_80231854_ovl_01[] = "Best Drive";
+const char D_80231860_ovl_01[] = "Average";
+const char D_80231868_ovl_01[] = "Best Score";
+const char D_80231874_ovl_01[] = "Round";
+
 static Mat4 D_8023A790_ovl_01;
 static Mat4 D_8023A7D0_ovl_01;
 static void* D_8023A810_ovl_01;

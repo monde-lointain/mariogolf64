@@ -1887,14 +1887,3 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
       (labelRow * CURVE_LABEL_HEIGHT) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
-
-const char D_80231810_ovl_01[] = "Sand Saves";
-const char D_8023181C_ovl_01[] = "Par Ons";
-const char D_80231824_ovl_01[] = "Par Saves";
-const char D_80231830_ovl_01[] = "Avg. Putt";
-const char D_8023183C_ovl_01[] = "On Fairway";
-const char D_80231848_ovl_01[] = "Avg. Drive";
-const char D_80231854_ovl_01[] = "Best Drive";
-const char D_80231860_ovl_01[] = "Average";
-const char D_80231868_ovl_01[] = "Best Score";
-const char D_80231874_ovl_01[] = "Round";
