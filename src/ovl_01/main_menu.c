@@ -159,8 +159,6 @@ extern s32 D_801B609C;
 extern s32 D_800FBD40[];
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_8022BE2C_ovl_01;
-extern s32 D_8022BE30_ovl_01[MAX_PLAYER_COUNT]; /* Each player count's mode
-                                                  count */
 extern s16 D_800C200C[MAX_PLAYER_COUNT];
 extern void* D_8010526C[2];
 extern s32 D_801B60B4;
@@ -818,13 +816,6 @@ void func_801F7CD0_ovl_01(void) {
 /* The mode select's wheel, turned like the course select's */
 #define MODE_SELECT_TURN 90
 #define MODE_SELECT_SPIN_SPEED 18
-
-/* Divides a turn among the player count's modes, keeping it whole should a
- * count be zero */
-#define SPREAD_OVER_MODES(amount) \
-  (D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] != 0 \
-          ? (amount) / D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] \
-          : (amount))
 
 /* The chosen mode's message, below the wheel */
 #define MODE_TEXT_X 40

@@ -10,6 +10,15 @@
 #define MODE_CHOICE_LIMIT 12
 
 extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
+extern s32 D_8022BE30_ovl_01[MAX_PLAYER_COUNT]; /* Each player count's mode
+                                                  count */
+
+/* Divides a turn among the player count's modes, keeping it whole should a
+ * count be zero */
+#define SPREAD_OVER_MODES(amount) \
+  (D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] != 0 \
+          ? (amount) / D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] \
+          : (amount))
 
 /* The choices of both main menus; the one without Transmit stops at its options
  */
