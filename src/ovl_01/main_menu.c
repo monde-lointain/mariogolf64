@@ -8,6 +8,8 @@
 
 #include "main_menu.h"
 
+#include <PR/libmus.h>
+
 #include "asset.h"
 #include "billboard.h"
 #include "camera.h"
@@ -153,6 +155,19 @@ extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern s8 D_801B60B9;
 extern u8 D_801323E6;
+extern u8 g_OptionBits;
+/* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
+extern u8 g_SoundOptionBits;
+/* Whether the options screen's erase window is up */
+extern u8 D_8022BE95_ovl_01;
+/* The sound test's sound, song and settings */
+extern s32 D_8022BEA0_ovl_01;
+extern s32 D_8022BEA4_ovl_01;
+extern s32 D_8022BEA8_ovl_01;
+extern s32 D_8022BEAC_ovl_01;
+extern f32 D_8022BEB0_ovl_01;
+extern f32 D_8022BEB4_ovl_01;
+extern s32 D_8022BEB8_ovl_01;
 extern s32 D_8022BE18_ovl_01;
 extern s32 D_801B609C;
 extern s32 D_800FBD40[];
@@ -1443,7 +1458,403 @@ void func_801FA1B8_ovl_01(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FA20C_ovl_01);
+/* The options screen's choices; game flag 0x55 adds the sound test's */
+#define OPTIONS_CHOICE_UNK0 0
+#define OPTIONS_CHOICE_MONO 1
+#define OPTIONS_CHOICE_UNK2 2
+#define OPTIONS_CHOICE_ERASE_SAVE_DATA 3
+#define OPTIONS_CHOICE_COUNT 4
+#define OPTIONS_CHOICE_SONG 4
+#define OPTIONS_CHOICE_SONG_REVERB 5
+#define OPTIONS_CHOICE_SONG_FREQUENCY 6
+#define OPTIONS_CHOICE_SONG_TEMPO 7
+#define OPTIONS_CHOICE_SOUND 8
+#define OPTIONS_CHOICE_SOUND_REVERB 9
+#define OPTIONS_CHOICE_SOUND_FREQUENCY 10
+#define OPTIONS_SOUND_TEST_CHOICE_COUNT 21
+#define OPTIONS_TEXT_SLOT_COUNT 11
+#define SOUND_OPTION_TOGGLED 0x6F
+#define SOUND_ERASE_WINDOW_OPENED 0x4A
+#define SOUND_SAVE_DATA_ERASED 0x4B
+#define SOUND_ERASE_DECLINED 0x49
+#define ERASE_DECLINED_SOUND_CHANNEL 13
+/* MenuMemory.eraseChoice values, which left and right toggle */
+#define ERASE_CHOICE_YES 0
+#define ERASE_CHOICE_NO 1
+#define ERASE_CHOICE_COUNT 2
+/* The sound test's limits; C left and right step its numbers by ten */
+#define SOUND_TEST_COARSE_STEP 10
+#define SOUND_TEST_LAST_SOUND 0x214
+#define SOUND_TEST_MAX_REVERB 0x7F
+#define SOUND_TEST_MAX_TEMPO 0xFF
+#define SOUND_TEST_FREQUENCY_FINE_STEP 0.1f
+#define SOUND_TEST_FREQUENCY_COARSE_STEP 1.0f
+#define SOUND_TEST_FREQUENCY_LIMIT 12.0f
+
+/*
+ * Handles the options screen's buttons. Up and down choose an option, left
+ * and right toggle it, and B saves the options and returns to the main menu.
+ * A on the erase choice opens a yes or no window, which erases the save data
+ * on yes. With game flag 0x55 set, the choices go on to a sound test whose
+ * song, sound and their settings left, right and the C buttons change and A
+ * plays.
+ */
+void func_801FA20C_ovl_01(void) {
+  SaveData* save = GetSaveData();
+  MenuMemory* memory = func_8005AF74();
+  s32 windowState;
+  s32 slot;
+  u8* optionBits;
+
+  if (IsHudAnimationDone() != TRUE) {
+    return;
+  }
+
+  if (D_8022BE95_ovl_01) {
+    windowState = IsMenuWindowClosed();
+    for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
+      SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    }
+
+    if (windowState == -1) {
+      return;
+    }
+
+    if (windowState == TRUE) {
+      D_8022BE95_ovl_01 = FALSE;
+      for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      }
+
+      return;
+    }
+
+    if (g_MenuPressedButtons & A_BUTTON) {
+      if (memory->eraseChoice == ERASE_CHOICE_YES) {
+        PlaySound(SOUND_SAVE_DATA_ERASED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        ResetSaveData();
+        memory->unk45 = 0;
+        g_SoundOptionBits = 0;
+        MusSetStereo(TRUE);
+      } else {
+        PlaySound(SOUND_ERASE_DECLINED, ERASE_DECLINED_SOUND_CHANNEL,
+            MENU_VOLUME_SOFT);
+      }
+
+      CloseMenuWindow();
+      for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      }
+    } else if (g_MenuPressedButtons & B_BUTTON) {
+      PlaySound(SOUND_ERASE_DECLINED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+      CloseMenuWindow();
+      for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      }
+    } else if (g_MenuRepeatButtons & L_JPAD) {
+      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      memory->eraseChoice--;
+      if (memory->eraseChoice < 0) {
+        memory->eraseChoice = ERASE_CHOICE_COUNT - 1;
+      }
+    } else if (g_MenuRepeatButtons & R_JPAD) {
+      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+      memory->eraseChoice++;
+      if (memory->eraseChoice >= ERASE_CHOICE_COUNT) {
+        memory->eraseChoice = 0;
+      }
+    }
+  } else if (g_MenuPressedButtons & A_BUTTON) {
+    switch (g_MenuChoices.optionsChoice) {
+      case OPTIONS_CHOICE_UNK0:
+      case OPTIONS_CHOICE_MONO:
+      case OPTIONS_CHOICE_UNK2:
+        break;
+      case OPTIONS_CHOICE_ERASE_SAVE_DATA:
+        PlaySound(
+            SOUND_ERASE_WINDOW_OPENED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        D_8022BE95_ovl_01 = TRUE;
+        memory->eraseChoice = ERASE_CHOICE_NO;
+        ResetMenuWindow();
+        break;
+      case OPTIONS_CHOICE_SONG:
+      case OPTIONS_CHOICE_SONG_REVERB:
+      case OPTIONS_CHOICE_SONG_FREQUENCY:
+      case OPTIONS_CHOICE_SONG_TEMPO:
+        if (D_8022BEA4_ovl_01 == NO_SONG) {
+          RequestSongStop();
+        } else {
+          PlaySong(D_8022BEA4_ovl_01, SONG_FLAG_RESTART);
+        }
+
+        break;
+      case OPTIONS_CHOICE_SOUND:
+      case OPTIONS_CHOICE_SOUND_REVERB:
+      case OPTIONS_CHOICE_SOUND_FREQUENCY:
+        RequestSongStop();
+        PlaySound(D_8022BEA0_ovl_01, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        SetSoundReverb(MENU_SOUND_CHANNEL, D_8022BEA8_ovl_01);
+        SetSoundFrequencyOffset(MENU_SOUND_CHANNEL, D_8022BEB0_ovl_01);
+        break;
+    }
+  } else if (g_MenuPressedButtons & B_BUTTON) {
+    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+    TransferSaveData(save, TRUE);
+    if (D_801323E6) {
+      g_MenuScreen = MENU_SCREEN_MAIN;
+    } else {
+      g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
+    }
+
+    PlaySong(SONG_TITLE, 0);
+  } else {
+    if (g_MenuRepeatButtons & U_JPAD) {
+      g_MenuChoices.optionsChoice--;
+      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    } else if (g_MenuRepeatButtons & D_JPAD) {
+      g_MenuChoices.optionsChoice++;
+      PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    }
+
+    if (IsGameFlagSet(GAME_FLAG_UNK55)) {
+      if (g_MenuChoices.optionsChoice >= OPTIONS_SOUND_TEST_CHOICE_COUNT) {
+        g_MenuChoices.optionsChoice = 0;
+      }
+
+      if (g_MenuChoices.optionsChoice < 0) {
+        g_MenuChoices.optionsChoice = OPTIONS_SOUND_TEST_CHOICE_COUNT - 1;
+      }
+    } else {
+      if (g_MenuChoices.optionsChoice >= OPTIONS_CHOICE_COUNT) {
+        g_MenuChoices.optionsChoice = 0;
+      }
+
+      if (g_MenuChoices.optionsChoice < 0) {
+        g_MenuChoices.optionsChoice = OPTIONS_CHOICE_COUNT - 1;
+      }
+    }
+
+    switch (g_MenuChoices.optionsChoice) {
+      case OPTIONS_CHOICE_UNK0:
+        if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
+          PlaySound(
+              SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          optionBits = &g_OptionBits;
+          *optionBits ^= OPTION_BIT_UNK0;
+        }
+
+        break;
+      case OPTIONS_CHOICE_MONO:
+        if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
+          PlaySound(
+              SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          optionBits = &g_OptionBits;
+          *optionBits ^= OPTION_BIT_MONO;
+          g_SoundOptionBits = *optionBits;
+          if (*optionBits & OPTION_BIT_MONO) {
+            MusSetStereo(FALSE);
+          } else {
+            MusSetStereo(TRUE);
+          }
+        }
+
+        break;
+      case OPTIONS_CHOICE_UNK2:
+        if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
+          PlaySound(
+              SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+          optionBits = &g_OptionBits;
+          *optionBits ^= OPTION_BIT_UNK3;
+        }
+
+        break;
+      case OPTIONS_CHOICE_SONG:
+        if (g_MenuRepeatButtons & L_JPAD) {
+          D_8022BEA4_ovl_01--;
+        }
+
+        if (g_MenuRepeatButtons & R_JPAD) {
+          D_8022BEA4_ovl_01++;
+        }
+
+        if (g_MenuRepeatButtons & L_CBUTTONS) {
+          D_8022BEA4_ovl_01 -= SOUND_TEST_COARSE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & R_CBUTTONS) {
+          D_8022BEA4_ovl_01 += SOUND_TEST_COARSE_STEP;
+        }
+
+        if (D_8022BEA4_ovl_01 < NO_SONG) {
+          D_8022BEA4_ovl_01 = NO_SONG;
+        }
+
+        break;
+      case OPTIONS_CHOICE_SONG_REVERB:
+        if (g_MenuRepeatButtons & L_JPAD) {
+          D_8022BEAC_ovl_01--;
+        }
+
+        if (g_MenuRepeatButtons & R_JPAD) {
+          D_8022BEAC_ovl_01++;
+        }
+
+        if (g_MenuRepeatButtons & L_CBUTTONS) {
+          D_8022BEAC_ovl_01 -= SOUND_TEST_COARSE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & R_CBUTTONS) {
+          D_8022BEAC_ovl_01 += SOUND_TEST_COARSE_STEP;
+        }
+
+        if (D_8022BEAC_ovl_01 < 0) {
+          D_8022BEAC_ovl_01 = 0;
+        }
+
+        if (D_8022BEAC_ovl_01 > SOUND_TEST_MAX_REVERB) {
+          D_8022BEAC_ovl_01 = SOUND_TEST_MAX_REVERB;
+        }
+
+        break;
+      case OPTIONS_CHOICE_SONG_FREQUENCY:
+        if (g_MenuRepeatButtons & L_JPAD) {
+          D_8022BEB4_ovl_01 -= SOUND_TEST_FREQUENCY_FINE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & R_JPAD) {
+          D_8022BEB4_ovl_01 += SOUND_TEST_FREQUENCY_FINE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & L_CBUTTONS) {
+          D_8022BEB4_ovl_01 -= SOUND_TEST_FREQUENCY_COARSE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & R_CBUTTONS) {
+          D_8022BEB4_ovl_01 += SOUND_TEST_FREQUENCY_COARSE_STEP;
+        }
+
+        if (D_8022BEB4_ovl_01 < -SOUND_TEST_FREQUENCY_LIMIT) {
+          D_8022BEB4_ovl_01 = -SOUND_TEST_FREQUENCY_LIMIT;
+        }
+
+        if (D_8022BEB4_ovl_01 > SOUND_TEST_FREQUENCY_LIMIT) {
+          D_8022BEB4_ovl_01 = SOUND_TEST_FREQUENCY_LIMIT;
+        }
+
+        break;
+      case OPTIONS_CHOICE_SONG_TEMPO:
+        if ((g_MenuRepeatButtons & L_JPAD) && D_8022BEB8_ovl_01 > 0) {
+          D_8022BEB8_ovl_01--;
+        }
+
+        if ((g_MenuRepeatButtons & R_JPAD) &&
+            D_8022BEB8_ovl_01 <= SOUND_TEST_MAX_TEMPO) {
+          D_8022BEB8_ovl_01++;
+        }
+
+        if ((g_MenuRepeatButtons & L_CBUTTONS) && D_8022BEB8_ovl_01 > 0) {
+          D_8022BEB8_ovl_01 -= SOUND_TEST_COARSE_STEP;
+        }
+
+        if ((g_MenuRepeatButtons & R_CBUTTONS) &&
+            D_8022BEB8_ovl_01 <= SOUND_TEST_MAX_TEMPO) {
+          D_8022BEB8_ovl_01 += SOUND_TEST_COARSE_STEP;
+        }
+
+        if (D_8022BEB8_ovl_01 < 0) {
+          D_8022BEB8_ovl_01 = 0;
+        }
+
+        if (D_8022BEB8_ovl_01 > SOUND_TEST_MAX_TEMPO) {
+          D_8022BEB8_ovl_01 = SOUND_TEST_MAX_TEMPO;
+        }
+
+        break;
+      case OPTIONS_CHOICE_SOUND:
+        if (g_MenuRepeatButtons & L_JPAD) {
+          D_8022BEA0_ovl_01--;
+        }
+
+        if (g_MenuRepeatButtons & R_JPAD) {
+          D_8022BEA0_ovl_01++;
+        }
+
+        if (g_MenuRepeatButtons & L_CBUTTONS) {
+          D_8022BEA0_ovl_01 -= SOUND_TEST_COARSE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & R_CBUTTONS) {
+          D_8022BEA0_ovl_01 += SOUND_TEST_COARSE_STEP;
+        }
+
+        if (D_8022BEA0_ovl_01 < 0) {
+          D_8022BEA0_ovl_01 = 0;
+        }
+
+        if (D_8022BEA0_ovl_01 > SOUND_TEST_LAST_SOUND) {
+          D_8022BEA0_ovl_01 = SOUND_TEST_LAST_SOUND;
+        }
+
+        break;
+      case OPTIONS_CHOICE_SOUND_REVERB:
+        if (g_MenuRepeatButtons & L_JPAD) {
+          D_8022BEA8_ovl_01--;
+        }
+
+        if (g_MenuRepeatButtons & R_JPAD) {
+          D_8022BEA8_ovl_01++;
+        }
+
+        if (g_MenuRepeatButtons & L_CBUTTONS) {
+          D_8022BEA8_ovl_01 -= SOUND_TEST_COARSE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & R_CBUTTONS) {
+          D_8022BEA8_ovl_01 += SOUND_TEST_COARSE_STEP;
+        }
+
+        if (D_8022BEA8_ovl_01 < 0) {
+          D_8022BEA8_ovl_01 = 0;
+        }
+
+        if (D_8022BEA8_ovl_01 > SOUND_TEST_MAX_REVERB) {
+          D_8022BEA8_ovl_01 = SOUND_TEST_MAX_REVERB;
+        }
+
+        break;
+      case OPTIONS_CHOICE_SOUND_FREQUENCY:
+        if (g_MenuRepeatButtons & L_JPAD) {
+          D_8022BEB0_ovl_01 -= SOUND_TEST_FREQUENCY_FINE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & R_JPAD) {
+          D_8022BEB0_ovl_01 += SOUND_TEST_FREQUENCY_FINE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & L_CBUTTONS) {
+          D_8022BEB0_ovl_01 -= SOUND_TEST_FREQUENCY_COARSE_STEP;
+        }
+
+        if (g_MenuRepeatButtons & R_CBUTTONS) {
+          D_8022BEB0_ovl_01 += SOUND_TEST_FREQUENCY_COARSE_STEP;
+        }
+
+        if (D_8022BEB0_ovl_01 < -SOUND_TEST_FREQUENCY_LIMIT) {
+          D_8022BEB0_ovl_01 = -SOUND_TEST_FREQUENCY_LIMIT;
+        }
+
+        if (D_8022BEB0_ovl_01 > SOUND_TEST_FREQUENCY_LIMIT) {
+          D_8022BEB0_ovl_01 = SOUND_TEST_FREQUENCY_LIMIT;
+        }
+
+        break;
+    }
+  }
+
+  SetSongReverb(D_8022BEAC_ovl_01);
+  SetSongTempo(D_8022BEB8_ovl_01);
+  SetSongFrequencyOffset(D_8022BEB4_ovl_01);
+}
 
 void func_801FADBC_ovl_01(void) {
   if (IsHudAnimationDone() != TRUE) {

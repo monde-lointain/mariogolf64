@@ -29,7 +29,8 @@ typedef struct MenuMemory {
                                  next one still shut */
   /* 0x17 */ s8
       courseSpin; /* How far the courses still have to turn to reach it */
-  /* 0x18 */ u8 unk18[0x20 - 0x18];
+  /* 0x18 */ u8 unk18[0x1F - 0x18];
+  /* 0x1F */ s8 eraseChoice; /* The erase window's yes or no */
   /* 0x20 */ s8 helpTopicIndex;
   /* 0x21 */ u8 unk21[0x29 - 0x21];
   /* 0x29 */ s8 unk29;

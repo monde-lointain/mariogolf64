@@ -54,7 +54,8 @@ typedef struct MenuChoices {
   /* 0x03 */ s8 mainChoice;
   /* 0x04 */ s8 mainChoiceWithoutTransmit;
   /* 0x05 */ s8 clubhouseChoice;
-  /* 0x06 */ s8 unk6[0xD];
+  /* 0x06 */ s8 optionsChoice;
+  /* 0x07 */ s8 unk7[0x13 - 0x7];
   /* 0x13 */ s8 unk13;
   /* 0x14 */ s8 unk14;
   /* 0x15 */ s8 unk15;
