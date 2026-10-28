@@ -116,6 +116,8 @@ static s8 f_IsHeapReady = FALSE;
 static u8* f_HeapStart = NULL;
 static u8* f_HeapEnd = NULL;
 static u16 f_DrawOrder[BILLBOARD_COUNT] = {0};
+/* Read by no routine */
+static s8 D_800B6670[2] = {1, 1};
 
 s32 GetGroundHeight(s32 x, s32 z);
 

@@ -350,7 +350,6 @@ segments:
       - [0x8F250, textbin, rsp_text]
       - [0x91310, .data, overlay_manager]
       - [0x91600, .data, billboard]
-      - [0x91A70, data]
       - [0x91A80, .data, ../lib/libnusys/nugfxinit_ex2]
       - [0x91B80, .data, ../lib/libnusys/nusched]
       - [0x91BA0, .data, ../lib/libnusys/nugfxsetcfb]
