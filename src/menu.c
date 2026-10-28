@@ -1794,7 +1794,7 @@ void func_8005DDAC(void) {
 }
 
 s8 func_8005DE00(void) {
-  return GetSaveData()->options[SAVE_OPTION_UNK0];
+  return GetSaveData()->options[SAVE_OPTION_MUSIC_OFF];
 }
 
 s8 func_8005DE20(void) {
@@ -1802,7 +1802,7 @@ s8 func_8005DE20(void) {
 }
 
 s8 func_8005DE40(void) {
-  return GetSaveData()->options[SAVE_OPTION_UNK3];
+  return GetSaveData()->options[SAVE_OPTION_SIMPLE_CAMERA];
 }
 
 void WriteSaveData(void) {
@@ -1820,8 +1820,8 @@ void SyncSaveOptions(SaveData* save, s32 isWrite, s32 readResult) {
     bits = &g_OptionBits;
     *bits = 0;
     if (readResult > 0) {
-      if (options[SAVE_OPTION_UNK0]) {
-        *bits = OPTION_BIT_UNK0;
+      if (options[SAVE_OPTION_MUSIC_OFF]) {
+        *bits = OPTION_BIT_MUSIC_OFF;
       }
 
       if (options[SAVE_OPTION_MONO]) {
@@ -1829,15 +1829,15 @@ void SyncSaveOptions(SaveData* save, s32 isWrite, s32 readResult) {
         g_SoundOptionBits = *bits;
       }
 
-      if (options[SAVE_OPTION_UNK3]) {
-        *bits |= OPTION_BIT_UNK3;
+      if (options[SAVE_OPTION_SIMPLE_CAMERA]) {
+        *bits |= OPTION_BIT_SIMPLE_CAMERA;
       }
     }
   } else {
-    if (g_OptionBits & OPTION_BIT_UNK0) {
-      options[SAVE_OPTION_UNK0] = TRUE;
+    if (g_OptionBits & OPTION_BIT_MUSIC_OFF) {
+      options[SAVE_OPTION_MUSIC_OFF] = TRUE;
     } else {
-      options[SAVE_OPTION_UNK0] = FALSE;
+      options[SAVE_OPTION_MUSIC_OFF] = FALSE;
     }
 
     if (g_OptionBits & OPTION_BIT_MONO) {
@@ -1846,10 +1846,10 @@ void SyncSaveOptions(SaveData* save, s32 isWrite, s32 readResult) {
       options[SAVE_OPTION_MONO] = FALSE;
     }
 
-    if (g_OptionBits & OPTION_BIT_UNK3) {
-      options[SAVE_OPTION_UNK3] = TRUE;
+    if (g_OptionBits & OPTION_BIT_SIMPLE_CAMERA) {
+      options[SAVE_OPTION_SIMPLE_CAMERA] = TRUE;
     } else {
-      options[SAVE_OPTION_UNK3] = FALSE;
+      options[SAVE_OPTION_SIMPLE_CAMERA] = FALSE;
     }
   }
 }

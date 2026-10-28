@@ -1935,9 +1935,9 @@ void func_801FA20C_ovl_01(void) {
     }
   } else if (g_MenuPressedButtons & A_BUTTON) {
     switch (g_MenuChoices.optionsChoice) {
-      case OPTIONS_CHOICE_UNK0:
+      case OPTIONS_CHOICE_MUSIC:
       case OPTIONS_CHOICE_MONO:
-      case OPTIONS_CHOICE_UNK2:
+      case OPTIONS_CHOICE_CAMERA:
         break;
       case OPTIONS_CHOICE_ERASE_SAVE_DATA:
         PlaySound(
@@ -2004,12 +2004,12 @@ void func_801FA20C_ovl_01(void) {
     }
 
     switch (g_MenuChoices.optionsChoice) {
-      case OPTIONS_CHOICE_UNK0:
+      case OPTIONS_CHOICE_MUSIC:
         if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
           PlaySound(
               SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           optionBits = &g_OptionBits;
-          *optionBits ^= OPTION_BIT_UNK0;
+          *optionBits ^= OPTION_BIT_MUSIC_OFF;
         }
 
         break;
@@ -2028,12 +2028,12 @@ void func_801FA20C_ovl_01(void) {
         }
 
         break;
-      case OPTIONS_CHOICE_UNK2:
+      case OPTIONS_CHOICE_CAMERA:
         if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
           PlaySound(
               SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           optionBits = &g_OptionBits;
-          *optionBits ^= OPTION_BIT_UNK3;
+          *optionBits ^= OPTION_BIT_SIMPLE_CAMERA;
         }
 
         break;

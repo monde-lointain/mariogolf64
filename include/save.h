@@ -59,11 +59,12 @@ extern u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 #define MODE0_PLAYER_COUNT 4
 
 /* Indices of SaveData's options */
-#define SAVE_OPTION_UNK0 0
+#define SAVE_OPTION_MUSIC_OFF 0 /* The options screen's MUSIC set to OFF */
 #define SAVE_OPTION_MONO 1 /* Plays the sound in mono instead of stereo */
 /* Copied into each player's UnkB8.gridColor */
 #define SAVE_OPTION_GRID_COLOR 2
-#define SAVE_OPTION_UNK3 3
+/* The options screen's CAMERA set to SIMPLE instead of DYNAMIC */
+#define SAVE_OPTION_SIMPLE_CAMERA 3
 #define SAVE_OPTION_COUNT 4
 
 /* SAVE_OPTION_GRID_COLOR values */
@@ -71,9 +72,9 @@ extern u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 #define GRID_COLOR_BLACK 1
 
 /* Bits of g_OptionBits, each mirroring one of the saved options */
-#define OPTION_BIT_UNK0 (1 << 0)
+#define OPTION_BIT_MUSIC_OFF (1 << 0)
 #define OPTION_BIT_MONO (1 << 1)
-#define OPTION_BIT_UNK3 (1 << 2)
+#define OPTION_BIT_SIMPLE_CAMERA (1 << 2)
 
 /* Results of reading the save data */
 #define SAVE_READ_NEVER_WRITTEN -2 /* Neither copy has the magic number */
