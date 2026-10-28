@@ -51,6 +51,15 @@
 #define PIKA_TEXTURE_WIDTH 32
 #define PIKA_TEXTURE_HEIGHT 8
 
+/*
+ * A model that no routine draws. Rendered from its vertices, it is a round
+ * white body with stubby arms and a tail, eyes and a fanged mouth: a Boo
+ */
+#define BOO_TEXTURE_WIDTH 48
+#define BOO_TEXTURE_HEIGHT 42
+/* The textures wrap at 64 texels, the power of two above both sizes */
+#define BOO_TEXTURE_MASK 6
+
 /* The ball turns this many degrees as it rolls one course unit */
 #define BALL_ROLL_DEGREES_PER_UNIT 0.09325484f
 #define BALL_MODEL_SCALE 0.05f
@@ -75,17 +84,226 @@ typedef struct BallAfterimage {
   /* 0x10 */ s32 isInCup;
 } BallAfterimage; /* size = 0x14 */
 
-extern GolfBall f_GolfBalls[GOLF_BALL_COUNT];
-extern BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH];
+/* Read by no routine */
+static Gfx D_8021FE60_ovl_00[] = {gsSPEndDisplayList()};
+static u16 f_BooMouthTexture[] = {
+#include "assets/ovl_00/golf_balls/boo_mouth_texture.rgba16.inc.c"
+};
+/* Read by no routine */
+static Gfx D_80220E28_ovl_00[] = {gsSPEndDisplayList()};
+static u16 f_BooEyeTexture[] = {
+#include "assets/ovl_00/golf_balls/boo_eye_texture.rgba16.inc.c"
+};
+static Vtx f_BooEyeVertices[] = {
+    {{{-146, 40, -96}, 0, {0xD80, 0x940}, {0xB9, 0x25, 0x62, 0xFF}}},
+    {{{0, 35, -56}, 0, {0x120, 0x940}, {0x00, 0x0B, 0x7E, 0xFF}}},
+    {{{0, 148, -107}, 0, {0x1E0, 0x80}, {0x00, 0x4E, 0x63, 0xFF}}},
+    {{{-103, 155, -142}, 0, {0xC60, -0x1A0}, {0xC8, 0x5F, 0x3D, 0xFF}}},
+    {{{148, 40, -96}, 0, {0xD80, 0x940}, {0x47, 0x25, 0x61, 0xFF}}},
+    {{{0, 35, -56}, 0, {0x120, 0x960}, {0x00, 0x0B, 0x7E, 0xFF}}},
+    {{{104, 155, -142}, 0, {0xC60, -0x1A0}, {0x38, 0x5F, 0x3D, 0xFF}}}};
+static Gfx f_BooEyeDisplayList[] = {
+    gsDPPipeSync(),
+    gsDPPipeSync(),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsSPClearGeometryMode(
+        G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_SHADING_SMOOTH),
+    gsSPSetGeometryMode(G_ZBUFFER | G_CULL_FRONT),
+    gsDPPipeSync(),
+    gsDPSetTextureFilter(G_TF_BILERP),
+    gsDPPipeSync(),
+    gsDPSetColorDither(G_CD_BAYER),
+    gsDPPipeSync(),
+    gsDPSetAlphaDither(G_AD_NOTPATTERN),
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsDPPipeSync(),
+    gsDPSetDepthSource(G_ZS_PIXEL),
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetTextureLUT(G_TT_NONE),
+    gsDPLoadTextureBlock(f_BooEyeTexture, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+        BOO_TEXTURE_WIDTH, BOO_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP, BOO_TEXTURE_MASK, BOO_TEXTURE_MASK,
+        G_TX_NOLOD, G_TX_NOLOD),
+    gsSPSetGeometryMode(G_SHADE | G_LIGHTING | G_SHADING_SMOOTH),
+    gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, ENVIRONMENT, 0, TEXEL0, 0, TEXEL0,
+        0, SHADE, 0, ENVIRONMENT, 0, TEXEL0, 0),
+    gsSPVertex(f_BooEyeVertices, 7, 0),
+    gsDPSetPrimColor(0, 0, 0xFF, 0xFF, 0xFF, 0xFF),
+    gsSP2Triangles(0, 1, 2, 0, 0, 2, 3, 0),
+    gsSP2Triangles(4, 2, 5, 0, 6, 2, 4, 0),
+    gsSPEndDisplayList(),
+};
+static Vtx f_BooMouthVertices[] = {
+    {{{0, -144, -101}, 0, {0x5A0, 0x9C0}, {0x00, 0xBB, 0x6A, 0xFF}}},
+    {{{104, -155, -142}, 0, {0xB80, 0x9C0}, {0x42, 0xA7, 0x3D, 0xFF}}},
+    {{{148, 40, -96}, 0, {0xC60, 0x80}, {0x47, 0x25, 0x61, 0xFF}}},
+    {{{0, -144, -101}, 0, {0x5A0, 0x9E0}, {0x00, 0xBB, 0x6A, 0xFF}}},
+    {{{-146, 40, -96}, 0, {-0xA0, 0x80}, {0xB9, 0x25, 0x62, 0xFF}}},
+    {{{-103, -155, -142}, 0, {0, 0x9E0}, {0xBF, 0xA7, 0x3D, 0xFF}}},
+    {{{0, 35, -56}, 0, {0x5A0, 0x100}, {0x00, 0x0B, 0x7E, 0xFF}}}};
+static Gfx f_BooMouthDisplayList[] = {
+    gsDPPipeSync(),
+    gsDPPipeSync(),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsSPClearGeometryMode(
+        G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_SHADING_SMOOTH),
+    gsSPSetGeometryMode(G_ZBUFFER | G_CULL_FRONT),
+    gsDPPipeSync(),
+    gsDPSetTextureFilter(G_TF_BILERP),
+    gsDPPipeSync(),
+    gsDPSetColorDither(G_CD_BAYER),
+    gsDPPipeSync(),
+    gsDPSetAlphaDither(G_AD_NOTPATTERN),
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsDPPipeSync(),
+    gsDPSetDepthSource(G_ZS_PIXEL),
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetTextureLUT(G_TT_NONE),
+    gsDPLoadTextureBlock(f_BooMouthTexture, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+        BOO_TEXTURE_WIDTH, BOO_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP, BOO_TEXTURE_MASK, BOO_TEXTURE_MASK,
+        G_TX_NOLOD, G_TX_NOLOD),
+    gsSPSetGeometryMode(G_SHADE | G_LIGHTING | G_SHADING_SMOOTH),
+    gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, ENVIRONMENT, 0, TEXEL0, 0, TEXEL0,
+        0, SHADE, 0, ENVIRONMENT, 0, TEXEL0, 0),
+    gsSPVertex(f_BooMouthVertices, 7, 0),
+    gsDPSetPrimColor(0, 0, 0xFF, 0xFF, 0xFF, 0xFF),
+    gsSP2Triangles(0, 1, 2, 0, 3, 4, 5, 0),
+    gsSP2Triangles(6, 4, 3, 0, 0, 2, 6, 0),
+    gsSPEndDisplayList(),
+};
+static Vtx f_BooBodyVertices[] = {
+    {{{100, -120, -345}, 0, {0, 0}, {0x5A, 0xC8, 0xBB, 0xFF}}},
+    {{{148, -136, -267}, 0, {0, 0}, {0x52, 0xAE, 0xCE, 0xFF}}},
+    {{{0, -201, -251}, 0, {0, 0}, {0x00, 0x82, 0xF1, 0xFF}}},
+    {{{193, 24, -267}, 0, {0, 0}, {0x69, 0x1A, 0xBF, 0xFF}}},
+    {{{130, 0, -390}, 0, {0, 0}, {0x5F, 0x03, 0xAC, 0xFF}}},
+    {{{148, 155, -267}, 0, {0, 0}, {0x65, 0x4B, 0xF5, 0xFF}}},
+    {{{104, 155, -345}, 0, {0, 0}, {0x3D, 0x4E, 0xB2, 0xFF}}},
+    {{{0, 217, -247}, 0, {0, 0}, {0x00, 0x7E, 0x00, 0xFF}}},
+    {{{0, -43, -571}, 0, {0, 0}, {0x00, 0xC2, 0x92, 0xFF}}},
+    {{{104, 155, -142}, 0, {0, 0}, {0x38, 0x5F, 0x3D, 0xFF}}},
+    {{{0, 0, -455}, 0, {0, 0}, {0x0A, 0x20, 0x86, 0xFF}}},
+    {{{0, 155, -390}, 0, {0, 0}, {0xF4, 0x51, 0xA0, 0xFF}}},
+    {{{-98, -120, -345}, 0, {0, 0}, {0xAE, 0xC2, 0xB7, 0xFF}}},
+    {{{-129, 0, -390}, 0, {0, 0}, {0xAA, 0xFE, 0xA4, 0xFF}}},
+    {{{-103, 155, -345}, 0, {0, 0}, {0xB7, 0x4D, 0xBC, 0xFF}}},
+    {{{-146, -136, -267}, 0, {0, 0}, {0xAA, 0xB3, 0xCD, 0xFF}}},
+    {{{-192, 24, -267}, 0, {0, 0}, {0x9A, 0x2A, 0xC3, 0xFF}}},
+    {{{-146, 155, -267}, 0, {0, 0}, {0xA0, 0x52, 0x00, 0xFF}}},
+    {{{-103, -155, -142}, 0, {0, 0}, {0xBF, 0xA7, 0x3D, 0xFF}}},
+    {{{-283, 42, -238}, 0, {0, 0}, {0x83, 0xFE, 0xED, 0xFF}}},
+    {{{-146, 40, -96}, 0, {0, 0}, {0xB9, 0x25, 0x62, 0xFF}}},
+    {{{-103, 155, -142}, 0, {0, 0}, {0xC8, 0x5F, 0x3D, 0xFF}}},
+    {{{0, -144, -101}, 0, {0, 0}, {0x00, 0xBB, 0x6A, 0xFF}}},
+    {{{0, 148, -107}, 0, {0, 0}, {0x00, 0x4E, 0x63, 0xFF}}},
+    {{{104, -155, -142}, 0, {0, 0}, {0x42, 0xA7, 0x3D, 0xFF}}},
+    {{{276, 42, -238}, 0, {0, 0}, {0x7D, 0xFF, 0xEE, 0xFF}}},
+    {{{148, 40, -96}, 0, {0, 0}, {0x47, 0x25, 0x61, 0xFF}}}};
+static Gfx f_BooBodyDisplayList[] = {
+    gsDPPipeSync(),
+    gsDPPipeSync(),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsSPClearGeometryMode(
+        G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_SHADING_SMOOTH),
+    gsSPSetGeometryMode(G_ZBUFFER | G_CULL_FRONT),
+    gsDPPipeSync(),
+    gsDPSetTextureFilter(G_TF_BILERP),
+    gsDPPipeSync(),
+    gsDPSetColorDither(G_CD_BAYER),
+    gsDPPipeSync(),
+    gsDPSetAlphaDither(G_AD_NOTPATTERN),
+    gsDPPipeSync(),
+    gsDPSetAlphaCompare(G_AC_NONE),
+    gsDPPipeSync(),
+    gsDPSetDepthSource(G_ZS_PIXEL),
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
+    gsSPSetGeometryMode(G_SHADE | G_LIGHTING | G_SHADING_SMOOTH),
+    gsDPSetCombineLERP(PRIMITIVE, 0, SHADE, 0, ENVIRONMENT, 0, SHADE, 0,
+        PRIMITIVE, 0, SHADE, 0, ENVIRONMENT, 0, SHADE, 0),
+    gsSPVertex(f_BooBodyVertices, 27, 0),
+    gsDPSetPrimColor(0, 0, 0xFE, 0xFE, 0xFE, 0xFF),
+    gsSP2Triangles(0, 1, 2, 0, 0, 3, 1, 0),
+    gsSP2Triangles(4, 3, 0, 0, 4, 5, 3, 0),
+    gsSP2Triangles(6, 5, 4, 0, 6, 7, 5, 0),
+    gsSP2Triangles(8, 0, 2, 0, 5, 7, 9, 0),
+    gsSP2Triangles(10, 6, 4, 0, 11, 6, 10, 0),
+    gsSP2Triangles(11, 7, 6, 0, 12, 8, 2, 0),
+    gsSP2Triangles(12, 10, 8, 0, 13, 10, 12, 0),
+    gsSP2Triangles(13, 11, 10, 0, 14, 11, 13, 0),
+    gsSP2Triangles(14, 7, 11, 0, 15, 12, 2, 0),
+    gsSP2Triangles(15, 13, 12, 0, 16, 13, 15, 0),
+    gsSP2Triangles(16, 14, 13, 0, 17, 14, 16, 0),
+    gsSP2Triangles(17, 7, 14, 0, 18, 15, 2, 0),
+    gsSP2Triangles(19, 16, 15, 0, 20, 16, 19, 0),
+    gsSP2Triangles(20, 17, 16, 0, 21, 17, 20, 0),
+    gsSP2Triangles(21, 7, 17, 0, 22, 18, 2, 0),
+    gsSP2Triangles(0, 8, 10, 0, 0, 10, 4, 0),
+    gsSP2Triangles(23, 7, 21, 0, 24, 22, 2, 0),
+    gsSP2Triangles(9, 7, 23, 0, 1, 24, 2, 0),
+    gsSP2Triangles(25, 26, 24, 0, 3, 26, 25, 0),
+    gsSP2Triangles(26, 5, 9, 0, 26, 3, 5, 0),
+    gsSP2Triangles(20, 19, 18, 0, 18, 19, 15, 0),
+    gsSP2Triangles(3, 25, 1, 0, 1, 25, 24, 0),
+    gsSPEndDisplayList(),
+};
+/* Read by no routine */
+static Gfx f_BooDisplayList[] = {
+    gsSPDisplayList(f_BooEyeDisplayList),
+    gsSPDisplayList(f_BooMouthDisplayList),
+    gsSPDisplayList(f_BooBodyDisplayList),
+    gsDPPipeSync(),
+    gsSPEndDisplayList(),
+};
+/* Read by no routine */
+static s32 D_80222428_ovl_00[2] = {0};
+/* Read by no routine */
+static Vtx D_80222430_ovl_00[] = {
+    {{{-7, 0, 0}, 0, {0, 0x7E0}, {0x00, 0xFF, 0x00, 0xFF}}},
+    {{{7, 0, 0}, 0, {0x800, 0x7E0}, {0x00, 0x00, 0x00, 0xFF}}},
+    {{{7, -14, 0}, 0, {0x800, 0}, {0x00, 0x00, 0xFF, 0x00}}},
+    {{{-7, -14, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x00}}}};
+static Vtx f_PikaBallVertices[] = {
+    {{{-2, -1, -5}, 0, {0, 0x200}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{2, -1, -5}, 0, {0x800, 0x200}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-2, 1, -5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{2, 1, -5}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-5, -1, -2}, 0, {0x800, 0x200}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{-5, 1, -2}, 0, {0x800, 0}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{-5, -1, 2}, 0, {0, 0x200}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{-5, 1, 2}, 0, {0, 0}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{5, -1, -2}, 0, {0x800, 0x200}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{5, 1, -2}, 0, {0x800, 0}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{5, -1, 2}, 0, {0, 0x200}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{5, 1, 2}, 0, {0, 0}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{-2, -1, 5}, 0, {0, 0x200}, {0xFF, 0x80, 0x00, 0xFF}}},
+    {{{2, -1, 5}, 0, {0x800, 0x200}, {0xFF, 0x80, 0x00, 0xFF}}},
+    {{{-2, 1, 5}, 0, {0, 0}, {0xFF, 0x80, 0x00, 0xFF}}},
+    {{{2, 1, 5}, 0, {0x800, 0}, {0xFF, 0x80, 0x00, 0xFF}}}};
+static GolfBall f_GolfBalls[GOLF_BALL_COUNT] = {0};
+static BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH] = {0};
 /* The point that the next one is written over */
-extern s32 f_BallAfterimageHead;
-extern s32 f_IsBallAfterimageShown;
-extern s32 f_BallAfterimageFrameCount;
+static s32 f_BallAfterimageHead = 0;
+static s32 f_IsBallAfterimageShown = FALSE;
+static s32 f_BallAfterimageFrameCount = 0;
 /* Whether the points are scaled for the close view of the cup */
-extern s32 f_IsBallAfterimageZoomed;
+static s32 f_IsBallAfterimageZoomed = FALSE;
 /* Set for the few afterimages that fade quickly */
-extern s32 f_IsBallAfterimageFast;
-extern s32 f_BallAfterimageLength;
+static s32 f_IsBallAfterimageFast = FALSE;
+static s32 f_BallAfterimageLength = AFTERIMAGE_MAX_LENGTH;
+/* f_BallRollFrame cycles through BALL_ROLL_FRAME_COUNT frames, this through
+ * nine unused ones */
+static s32 f_UnusedBallFrame = 0;
+static s32 f_BallRollFrame = 0;
 
 void func_801FD5F0_ovl_00(void) {}
 
@@ -505,12 +723,6 @@ enum BallSprite {
 /* The pika balls are drawn as models only while the current ball is nearer than
  * this */
 #define PIKA_BALL_DEPTH 20000
-
-extern Vtx f_PikaBallVertices[];
-/* f_BallRollFrame cycles through BALL_ROLL_FRAME_COUNT frames, this through
- * nine unused ones */
-extern s32 f_UnusedBallFrame;
-extern s32 f_BallRollFrame;
 
 /* Like G_RM_ZB_XLU_SURF and G_RM_AA_ZB_XLU_SURF, but also updating the depth
  * buffer */
