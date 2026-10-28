@@ -91,14 +91,8 @@ enum SceneryState {
 #define ASSET_PAR_FOUR_IMAGE 0x566
 #define ASSET_PAR_FIVE_IMAGE 0x567
 
-/* The first asset of each course record's hole images, one per hole */
-extern u16 f_HoleImageAssets[COURSE_RECORD_COUNT];
-
 #define HOLE_IMAGE_WIDTH 48
 #define HOLE_IMAGE_HEIGHT 42
-
-/* Set while the overlay of the course selection is loaded for the hole */
-extern s32 f_IsCourseSelectLoaded;
 
 /*
  * The hole's flag, which shows the hole image, is a grid of vertices. pin.c
@@ -144,13 +138,10 @@ extern s32 f_IsCourseSelectLoaded;
 #define HOLE_FLAG_BULGE_ROW_SCALE 10.0f
 #define HOLE_FLAG_FIRST_PULLED_COLUMN 2
 #define HOLE_FLAG_DEPTH_PER_PULL 4
-extern f32 f_HoleFlagWavePhase;
 
 /* The near and far planes of the screen's orthographic projection */
 #define SCREEN_ORTHO_NEAR 1.0f
 #define SCREEN_ORTHO_FAR 1000.0f
-
-extern s32 D_800C5478;
 
 /*
  * A solid arrow: a triangular head on a rectangular shaft, from -160 to 160
@@ -169,8 +160,6 @@ typedef struct ArrowShape {
   /* 0x000 */ Vtx body[ARROW_VERTEX_COUNT];
   /* 0x0E0 */ Vtx outline[ARROW_VERTEX_COUNT];
 } ArrowShape; /* size = 0x1C0 */
-
-extern ArrowShape f_Arrows[ARROW_COUNT];
 
 /*
  * The marker of the current shot's offset, with the positions it had in the
@@ -192,9 +181,6 @@ extern ArrowShape f_Arrows[ARROW_COUNT];
 #define SHOT_OFFSET_MARKER_STILL_FRAME SHOT_OFFSET_MARKER_FRAME_COUNT
 #define SHOT_OFFSET_MARKER_X 264
 #define SHOT_OFFSET_MARKER_Y 174
-
-extern s32 f_ShotPanelOffsetY;
-extern s32 f_ShotOffsetMarkerFrame;
 
 /* The images that a hole's intro shows for the bets and the match standing */
 #define ASSET_LONGEST_DRIVE_IMAGE 0x554
@@ -224,11 +210,8 @@ extern s32 f_ShotOffsetMarkerFrame;
 #define MATCH_IMAGE_X ((SCREEN_WIDTH - MATCH_IMAGE_WIDTH) / 2)
 #define MATCH_IMAGE_Y 140
 
-extern s32 f_LoadedHoleIntroImages;
-
 /* How many of the ball's recent positions its trail is drawn through */
 #define BALL_TRAIL_LENGTH 128
-extern s32 f_BallTrailHead; /* The latest position */
 
 /*
  * The scrolling of the wind arrow's texture, a step for every
@@ -260,12 +243,6 @@ extern s32 f_BallTrailHead; /* The latest position */
 #define COLOR_TEST_TEXT_ROW 5
 /* Columns from one channel's value to the next */
 #define COLOR_TEST_COLUMN_WIDTH 5
-extern s32 f_TestColors[COLOR_TEST_COLOR_COUNT][COLOR_TEST_CHANNEL_COUNT];
-extern s32 f_TestTextX;
-extern s32 f_TestTextY;
-extern s32 f_TestChannelIndex;
-extern s32 f_TestColorIndex;
-extern s32 f_IsTestGradientShown;
 /* "Sample" in half-width katakana, then "ABCDEFG" */
 extern char f_ColorTestSampleText[];
 /* Printed over a cursor to erase it */
@@ -273,7 +250,6 @@ extern char f_BlankText[];
 
 #define HUD_OFFSET_TEXT_COLUMN 20
 #define HUD_OFFSET_TEXT_ROW 6
-extern s32 f_HudOffsetY;
 
 /* How long the shot camera waits after the ball lands, in frames */
 #define LANDING_WAIT_FRAME_COUNT 40
@@ -298,9 +274,6 @@ enum LandingGlyphGroup {
   LANDING_GLYPH_GROUP_SECOND
 };
 
-extern s32 f_LandingReaction;
-extern s32 f_LandingReactionFrame;
-
 /* The reaction stops counting its frames here */
 #define LANDING_REACTION_FRAME_COUNT 30
 #define LANDING_NAME_GLYPH_Y 8
@@ -319,7 +292,6 @@ extern s32 f_LandingReactionFrame;
 #define LANDING_PANEL_Z (-100.0f)
 #define LANDING_PANEL_PIVOT_X 72.0f
 #define LANDING_PANEL_PIVOT_Y (-20.0f)
-extern Vtx f_LandingPanelVertices[4];
 
 #define RING_TEXTURE_OUTER_RADIUS 62
 
@@ -348,9 +320,6 @@ extern Vtx f_LandingPanelVertices[4];
 #define LONG_SHOT_HEAVY_SOUND_VOLUME 0x60
 #define LONG_SHOT_SOUND_REVERB 30
 
-extern f32 f_ShotEffectTime;
-extern s32 f_ShotEffect;
-
 /*
  * The loaded texture of distance glyphs: the digits, then the units and the
  * decimal point, all DISTANCE_GLYPH_HEIGHT high
@@ -364,13 +333,7 @@ extern s32 f_ShotEffect;
 #define DISTANCE_POINT_S 112
 #define DISTANCE_POINT_WIDTH 4
 
-extern void* f_SceneryBillboardHeap;
 extern void* g_ShadowTexture;
-/* The image asset of the club's head that the HUD shows, loaded into
- * f_ClubHeadImage */
-extern s32 f_ClubHeadImageAsset;
-/* The image asset of the lie that the HUD shows, loaded into f_LieImage */
-extern s32 f_LieImageAsset;
 
 #define ANIMATED_ICON_LABEL_COUNT 3
 
@@ -382,14 +345,11 @@ extern s32 f_LieImageAsset;
 #define WIND_INDICATOR_TILT 0.3f
 #define WIND_INDICATOR_SCALE -0.07f
 #define WIND_INDICATOR_FACING_DEGREES 180.0
-extern Lights1 f_WindArrowLights;
 
 /*
  * The wind speed display's icon pulses around these half sizes, and is wider
  * for two-digit speeds. Its texture is WIND_ICON_TEXTURE_WIDTH by HEIGHT.
  */
-extern f32 f_WindIconPulseAngle;
-
 #define WIND_ICON_PULSE_STEP (M_PI / 18)
 #define WIND_SPEED_TO_METERS_SCALE 3600
 #define WIND_SPEED_TO_METERS_DIVISOR 104857600
@@ -435,13 +395,8 @@ extern f32 f_WindIconPulseAngle;
 #define WIND_TEXT_ENV_GREEN 0x20
 #define WIND_TEXT_ENV_BLUE 0x7F
 extern Gfx D_80222400[];
-/* The quad that each segment of the ball trail, and of the green grid, moves
- * into place on the screen */
-extern Vtx f_BallTrailVertices[4];
-extern s32 f_ClubNameImageIndex;
 
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
-extern s32 f_SceneryState;
 
 /* Heights in meters or feet nearer zero than this */
 #define LEVEL_HEIGHT 0.01f
@@ -468,6 +423,275 @@ void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
 void func_80216EDC(void);
 void func_80216F8C(void);
+
+/* The asset loaded into an image's buffer, before any is */
+#define NO_IMAGE_ASSET (-1)
+/* f_LandingReactionFrame before the first landing reaction */
+#define NO_LANDING_REACTION_FRAME (-1)
+/* The HUD sits this far above its layout until the debug option moves it */
+#define INITIAL_HUD_OFFSET_Y (-2)
+/* The green grid's alpha while it shows */
+#define GREEN_GRID_ALPHA 0x7F
+/* The long shot effect's vertex groups, and the heavy long shot's frames */
+#define LONG_SHOT_GROUP_COUNT 4
+#define HEAVY_LONG_SHOT_FRAME_COUNT 6
+/* The icon cycles through ANIMATED_ICON_FRAME_COUNT images, a new one every few
+ * frames */
+#define ANIMATED_ICON_FRAME_COUNT 8
+
+static void* f_SceneryBillboardHeap = NULL;
+static s32 f_ClubNameImageIndex = 0;
+static s32 D_800C5478 = 0;
+u16 g_CharacterImageAssets[CHARACTER_COUNT] = {0x7BC, 0x74C, 0x7A0, 0x73E,
+    0x784, 0x7AE, 0x7CA, 0x7D8, 0x768, 0x792, 0x7E6, 0x75A, 0x776, 0x984, 0x7F4,
+    0x802, 0x810, 0x81E};
+s16 g_CharacterPaletteAssets[CHARACTER_COUNT] = {0x7B8, 0x748, 0x79C, 0x73A,
+    0x780, 0x7AA, 0x7C6, 0x7D4, 0x764, 0x78E, 0x7E2, 0x756, 0x772, 0x980, 0x7F0,
+    0x7FE, 0x80C, 0x81A};
+static s32 f_ShotPanelOffsetY = 0;
+s32 g_ShotPanelOffsetX = 0;
+/* The first asset of each course record's hole images, one per hole */
+static u16 f_HoleImageAssets[COURSE_RECORD_COUNT] = {
+    0x420, 0x432, 0x444, 0x468, 0x456, 0x47A, 0x48C, 0x49E, 0x8F0};
+s32 g_MatrixBufferIndex = 0;
+static ArrowShape f_Arrows[ARROW_COUNT] = {
+    {{{{{0, -160, 40}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0x80}}},
+         {{{-160, 0, 40}, 0, {0, 0x200}, {0x36, 0x36, 0x36, 0x80}}},
+         {{{160, 0, 40}, 0, {0, 0x200}, {0x36, 0x36, 0x36, 0x80}}},
+         {{{-60, 0, 40}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}},
+         {{{-60, 160, 40}, 0, {0, 0x400}, {0x2F, 0x2F, 0x2F, 0x80}}},
+         {{{60, 160, 40}, 0, {0, 0x400}, {0x20, 0x20, 0x20, 0x80}}},
+         {{{60, 0, 40}, 0, {0, 0x200}, {0x7F, 0x7F, 0x7F, 0x80}}},
+         {{{0, -160, -40}, 0, {0, 0}, {0x10, 0x10, 0x10, 0x80}}},
+         {{{-160, 0, -40}, 0, {0, 0x200}, {0x00, 0x00, 0x00, 0x80}}},
+         {{{160, 0, -40}, 0, {0, 0x200}, {0x40, 0x40, 0x40, 0x80}}},
+         {{{-60, 0, -40}, 0, {0, 0x200}, {0x10, 0x10, 0x10, 0x80}}},
+         {{{-60, 160, -40}, 0, {0, 0x400}, {0x00, 0x00, 0x00, 0x80}}},
+         {{{60, 160, -40}, 0, {0, 0x400}, {0x48, 0x48, 0x48, 0x80}}},
+         {{{60, 0, -40}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}}},
+        {{{{0, -188, 60}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0x80}}},
+            {{{-188, 20, 60}, 0, {0, 0x200}, {0x36, 0x36, 0x36, 0x80}}},
+            {{{188, 20, 60}, 0, {0, 0x200}, {0x36, 0x36, 0x36, 0x80}}},
+            {{{-80, 20, 60}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}},
+            {{{-80, 180, 60}, 0, {0, 0x400}, {0x2F, 0x2F, 0x2F, 0x80}}},
+            {{{80, 180, 60}, 0, {0, 0x400}, {0x20, 0x20, 0x20, 0x80}}},
+            {{{80, 20, 60}, 0, {0, 0x200}, {0x7F, 0x7F, 0x7F, 0x80}}},
+            {{{0, -180, -60}, 0, {0, 0}, {0x10, 0x10, 0x10, 0x80}}},
+            {{{-188, 20, -60}, 0, {0, 0x200}, {0x00, 0x00, 0x00, 0x80}}},
+            {{{188, 20, -60}, 0, {0, 0x200}, {0x40, 0x40, 0x40, 0x80}}},
+            {{{-80, 20, -60}, 0, {0, 0x200}, {0x10, 0x10, 0x10, 0x80}}},
+            {{{-80, 180, -60}, 0, {0, 0x400}, {0x00, 0x00, 0x00, 0x80}}},
+            {{{80, 180, -60}, 0, {0, 0x400}, {0x48, 0x48, 0x48, 0x80}}},
+            {{{80, 20, -60}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}}}},
+    {{{{{0, -160, 40}, 0, {0, 0x40}, {0x7F, 0x7F, 0x7F, 0x80}}},
+         {{{-160, 0, 40}, 0, {0, 0x240}, {0x36, 0x36, 0x36, 0x80}}},
+         {{{160, 0, 40}, 0, {0, 0x240}, {0x36, 0x36, 0x36, 0x80}}},
+         {{{-60, 0, 40}, 0, {0, 0x240}, {0x20, 0x20, 0x20, 0x80}}},
+         {{{-60, 160, 40}, 0, {0, 0x440}, {0x2F, 0x2F, 0x2F, 0x80}}},
+         {{{60, 160, 40}, 0, {0, 0x440}, {0x20, 0x20, 0x20, 0x80}}},
+         {{{60, 0, 40}, 0, {0, 0x240}, {0x7F, 0x7F, 0x7F, 0x80}}},
+         {{{0, -160, -40}, 0, {0, 0x40}, {0x10, 0x10, 0x10, 0x80}}},
+         {{{-160, 0, -40}, 0, {0, 0x240}, {0x00, 0x00, 0x00, 0x80}}},
+         {{{160, 0, -40}, 0, {0, 0x240}, {0x40, 0x40, 0x40, 0x80}}},
+         {{{-60, 0, -40}, 0, {0, 0x240}, {0x10, 0x10, 0x10, 0x80}}},
+         {{{-60, 160, -40}, 0, {0, 0x440}, {0x00, 0x00, 0x00, 0x80}}},
+         {{{60, 160, -40}, 0, {0, 0x440}, {0x48, 0x48, 0x48, 0x80}}},
+         {{{60, 0, -40}, 0, {0, 0x240}, {0x20, 0x20, 0x20, 0x80}}}},
+        {{{{0, -188, 60}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0x80}}},
+            {{{-188, 20, 60}, 0, {0, 0x200}, {0x36, 0x36, 0x36, 0x80}}},
+            {{{188, 20, 60}, 0, {0, 0x200}, {0x36, 0x36, 0x36, 0x80}}},
+            {{{-80, 20, 60}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}},
+            {{{-80, 180, 60}, 0, {0, 0x400}, {0x2F, 0x2F, 0x2F, 0x80}}},
+            {{{80, 180, 60}, 0, {0, 0x400}, {0x20, 0x20, 0x20, 0x80}}},
+            {{{80, 20, 60}, 0, {0, 0x200}, {0x7F, 0x7F, 0x7F, 0x80}}},
+            {{{0, -180, -60}, 0, {0, 0}, {0x10, 0x10, 0x10, 0x80}}},
+            {{{-188, 20, -60}, 0, {0, 0x200}, {0x00, 0x00, 0x00, 0x80}}},
+            {{{188, 20, -60}, 0, {0, 0x200}, {0x40, 0x40, 0x40, 0x80}}},
+            {{{-80, 20, -60}, 0, {0, 0x200}, {0x10, 0x10, 0x10, 0x80}}},
+            {{{-80, 180, -60}, 0, {0, 0x400}, {0x00, 0x00, 0x00, 0x80}}},
+            {{{80, 180, -60}, 0, {0, 0x400}, {0x48, 0x48, 0x48, 0x80}}},
+            {{{80, 20, -60}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}}}}};
+static Vtx f_ClubHeadIconVertices[4] = {
+    {{{-16, 16, 0}, 0, {-0x1, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-16, -16, 0}, 0, {-0x1, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{16, -16, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{16, 16, 0}, 0, {0x7FF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static Vtx f_LieIconVertices[8] = {
+    {{{-24, 24, 0}, 0, {-0x1, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-24, 0, 0}, 0, {-0x1, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{24, 0, 0}, 0, {0xBFF, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{24, 24, 0}, 0, {0xBFF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-24, 0, 0}, 0, {-0x1, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-24, -24, 0}, 0, {-0x1, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{24, -24, 0}, 0, {0xBFF, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{24, 0, 0}, 0, {0xBFF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/*
+ * Read by no routine. Two display lists of the same triangles, over vertices
+ * 0 to 13 and then 14 to 27, where an ArrowShape has its body and its outline
+ */
+static Gfx D_800C5928[] = {
+    gsSP2Triangles(10, 13, 12, 0, 10, 12, 11, 0),
+    gsSP2Triangles(3, 1, 8, 0, 3, 8, 10, 0),
+    gsSP2Triangles(13, 9, 2, 0, 13, 2, 6, 0),
+    gsSP2Triangles(4, 3, 10, 0, 4, 10, 11, 0),
+    gsSP2Triangles(12, 13, 6, 0, 12, 6, 5, 0),
+    gsSP2Triangles(5, 4, 11, 0, 5, 11, 12, 0),
+    gsSP2Triangles(6, 3, 4, 0, 6, 4, 5, 0),
+    gsSP2Triangles(1, 0, 7, 0, 1, 7, 8, 0),
+    gsSP2Triangles(9, 7, 0, 0, 9, 0, 2, 0),
+    gsSP2Triangles(0, 1, 2, 0, 7, 9, 8, 0),
+    gsSPEndDisplayList(),
+    gsSP2Triangles(24, 27, 26, 0, 24, 26, 25, 0),
+    gsSP2Triangles(17, 15, 22, 0, 17, 22, 24, 0),
+    gsSP2Triangles(27, 23, 16, 0, 27, 16, 20, 0),
+    gsSP2Triangles(18, 17, 24, 0, 18, 24, 25, 0),
+    gsSP2Triangles(26, 27, 20, 0, 26, 20, 19, 0),
+    gsSP2Triangles(19, 18, 25, 0, 19, 25, 26, 0),
+    gsSP2Triangles(20, 17, 18, 0, 20, 18, 19, 0),
+    gsSP2Triangles(15, 14, 21, 0, 15, 21, 22, 0),
+    gsSP2Triangles(23, 21, 14, 0, 23, 14, 16, 0),
+    gsSP2Triangles(14, 15, 16, 0, 21, 23, 22, 0),
+    gsSPEndDisplayList(),
+};
+/* The image asset of the club's head that the HUD shows, loaded into
+ * f_ClubHeadImage */
+static s32 f_ClubHeadImageAsset = NO_IMAGE_ASSET;
+/* The image asset of the lie that the HUD shows, loaded into f_LieImage */
+static s32 f_LieImageAsset = NO_IMAGE_ASSET;
+static s32 f_SceneryState = SCENERY_UNLOADED;
+/* Set while the overlay of the course selection is loaded for the hole */
+static s32 f_IsCourseSelectLoaded = FALSE;
+/* Read by no routine */
+static Gfx D_800C59E8[] = {
+    gsDPNoOp(),
+    gsSPEndDisplayList(),
+};
+static u8 f_InsetFrameTexture[] = {
+#include "assets/round_hud/inset_frame_texture.i4.inc.c"
+};
+static s32 f_LandingReaction = LANDING_REACTION_NONE;
+static s32 f_LandingReactionFrame = NO_LANDING_REACTION_FRAME;
+static Vtx f_LandingPanelVertices[4] = {
+    {{{-72, 20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-72, -20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{72, -20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{72, 20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static s32 f_GreenGridAlpha = GREEN_GRID_ALPHA;
+/* The quad that each segment of the ball trail, and of the green grid, moves
+ * into place on the screen */
+static Vtx f_BallTrailVertices[4] = {
+    {{{0, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
+    {{{0, -1, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
+    {{{48, -1, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
+    {{{48, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}}};
+/* Read by no routine */
+static s32 D_800C5AA0 = 0;
+static f32 f_GreenGridScroll = 0.0f;
+static s32 f_BallTrailHead = 0; /* The latest position */
+s32 D_800C5AAC = 0;
+static f32 f_WindIconPulseAngle = 0.0f;
+static Lights1 f_WindArrowLights =
+    gdSPDefLights1(0x80, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 80, -80, 73);
+static s32 f_HudOffsetY = INITIAL_HUD_OFFSET_Y;
+/* The name image of each club slot */
+static u16 f_ClubNameAssets[CLUB_SET_SIZE] = {0x4F1, 0x4F2, 0x4F3, 0x4F4, 0x4F5,
+    0x4F6, 0x4F7, 0x4F8, 0x4F9, 0x4FA, 0x4FB, 0x4FC, 0x4FD, 0x4FE};
+static Vtx f_HeavyLongShotVertices[16] = {
+    {{{-32, -512, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-32, 0, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{32, 0, 0}, 0, {0xC00, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{32, -512, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-256, 32, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-256, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{0, -32, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{0, 32, 0}, 0, {0xC00, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-32, 512, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-32, 0, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{32, 0, 0}, 0, {0xC00, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{32, 512, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{512, 32, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{512, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{0, -32, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{0, 32, 0}, 0, {0xC00, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}}};
+/* Four groups of eight vertices, each three pairs of triangles */
+static Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8] = {
+    {{{-3, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-2, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
+    {{{2, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
+    {{{3, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-1, -96, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
+    {{{1, -96, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
+    {{{0, -192, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
+    {{{0, -192, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
+    {{{3, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{2, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
+    {{{-2, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
+    {{{-3, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{1, 96, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
+    {{{-1, 96, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
+    {{{0, 192, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
+    {{{0, 192, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
+    {{{0, -3, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{32, -2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
+    {{{32, 2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
+    {{{0, 3, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{96, -1, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
+    {{{96, 1, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
+    {{{192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
+    {{{192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
+    {{{0, 3, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-32, 2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
+    {{{-32, -2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0x60}}},
+    {{{0, -3, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{-96, 1, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
+    {{{-96, -1, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
+    {{{-192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
+    {{{-192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}}};
+static f32 f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
+static s32 f_ShotEffect = SHOT_EFFECT_LONG_SHOT;
+static s32 f_HeavyLongShotFrameAssets[HEAVY_LONG_SHOT_FRAME_COUNT] = {
+    0x6A7, 0x6A8, 0x6A9, 0x6AA, 0x6AB, 0x6AC};
+static s32 f_HeavyLongShotFrame = 1;
+static s32 f_HeavyLongShotFrameTimer = 0;
+/* The two frame buffers in g_SharedEffectImages, each loaded in turn and both
+ * drawn */
+static s32 f_HeavyLongShotBufferIndex = 0;
+/* Read by no routine */
+static s32 D_800C5E1C = 0;
+static f32 f_HoleFlagWavePhase = 0.0f;
+static s32 f_ShotOffsetMarkerFrame = 0;
+static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] = {
+    0x648, 0x649, 0x64A, 0x64B, 0x64C, 0x64B, 0x64A, 0x649};
+static s32 f_AnimatedIconFrameTime = 0;
+static s32 f_AnimatedIconFrame = 0;
+/* Read by no routine */
+static s32 D_800C5E50[4] = {0, 1, 2, 1};
+static s32 f_AnimatedIconImageIndex = 0;
+static f32 f_AnimatedIconX = 0.0f;
+static f32 f_AnimatedIconY = 0.0f;
+static s32 f_TestColors[COLOR_TEST_COLOR_COUNT][COLOR_TEST_CHANNEL_COUNT] = {
+    {COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX},
+    {COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX}};
+static s32 f_TestTextX = SCREEN_WIDTH / 2;
+static s32 f_TestTextY = SCREEN_HEIGHT / 2;
+static s32 f_TestChannelIndex = 0;
+static s32 f_TestColorIndex = 0;
+static s32 f_IsTestGradientShown = FALSE;
+/* Read by no routine */
+static s32 D_800C5E98 = 0;
+/* The HUD's letterbox height, which DrawLetterbox grows each frame */
+static s32 f_LetterboxHeight = 0;
+static s32 f_PinFlagTime = 0;
+static s32 f_RingFrame = 0;
+static s32 f_RingFrameTime = 0;
+/* Read by no routine */
+static Gfx D_800C5EB0[] = {
+    gsSPEndDisplayList(),
+};
+static u16 f_WhiteDistancePalette[] = {
+#include "assets/round_hud/white_distance_palette.rgba16.inc.c"
+};
+static s32 f_LoadedHoleIntroImages = 0;
 
 /* Not static: the original left it to the linker's common block */
 Mtx D_80105278;
@@ -747,13 +971,13 @@ void LoadSceneryImages(void) {
   ReadEncodedAsset(g_ShotPreviewDashImage, &asset);
   g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
   ReadEncodedAsset(g_ShadowTexture, &asset);
-  f_ClubHeadImageAsset = -1;
+  f_ClubHeadImageAsset = NO_IMAGE_ASSET;
   f_ClubHeadImage =
       AllocMemory(OpenEncodedAsset(ASSET_DRIVER_HEAD_IMAGE, &asset));
   ReadEncodedAsset(f_ClubHeadImage, &asset);
   f_ClubNameImages[0] = AllocMemory(SCENERY_BUFFER_A_SIZE);
   f_ClubNameImages[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
-  f_LieImageAsset = -1;
+  f_LieImageAsset = NO_IMAGE_ASSET;
   f_LieImage = AllocMemory(LIE_IMAGE_SIZE);
   f_AnimatedIconImages[0] =
       AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_648, &asset));
@@ -1027,7 +1251,6 @@ void FreeRoundHudTextures(void) {
 #define INSET_FRAME_SIDE_HALF_WIDTH 2
 #define INSET_FRAME_BORDER_OUTSIDE 1
 #define INSET_FRAME_BORDER_INSIDE 2
-extern u8 f_InsetFrameTexture[];
 
 /* Draws the frame around the inset view */
 void DrawInsetViewFrame(void) {
@@ -1370,7 +1593,6 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GREEN_GRID_MAX_SLOPE 255
 #define GREEN_GRID_LINE_HALF_WIDTH 4.5f
 #define GREEN_GRID_DEPTH_BIAS 15.0f
-#define GREEN_GRID_ALPHA 0x7F
 #define GREEN_GRID_DIM_ALPHA 0x3F
 #define GREEN_GRID_FADE_STEP 8
 #define GREEN_GRID_FADE_END_ALPHA 0x48
@@ -1387,9 +1609,6 @@ typedef struct GridScreenPoint {
   /* 0x08 */ s32 isVisible;
   /* 0x0C */ s32 depth;
 } GridScreenPoint; /* size = 0x10 */
-
-extern s32 f_GreenGridAlpha;
-extern f32 f_GreenGridScroll;
 
 #ifdef NON_MATCHING
 /*
@@ -2285,11 +2504,6 @@ void AdjustHudOffset(void) {
 #define LIE_IMAGE_HALF_HEIGHT 24
 #define LIE_IMAGE_HALF_SIZE (LIE_IMAGE_WIDTH * LIE_IMAGE_HALF_HEIGHT * 2)
 
-extern Vtx f_ClubHeadIconVertices[4];
-extern Vtx f_LieIconVertices[8];
-/* The name image of each club slot */
-extern u16 f_ClubNameAssets[];
-
 /*
  * Draws the shot panel's wind indicator, club head and lie, or the wind
  * and lie panels beside the pause menu while it sets them
@@ -2622,25 +2836,13 @@ void StartShotEffect(s32 effect) {
 /* The heavy long shot of the Wario and Game Boy ball 7 contact styles, an
  * animation that flickers round */
 #define HEAVY_LONG_SHOT_SCALE 0.4f
-#define HEAVY_LONG_SHOT_FRAME_COUNT 6
 #define HEAVY_LONG_SHOT_FRAME_TICKS 4
 #define HEAVY_LONG_SHOT_FRAMES_OFFSET 0x970
 #define HEAVY_LONG_SHOT_FRAME_SIZE 0xC08
 #define HEAVY_LONG_SHOT_FRAME_WIDTH 48
 #define HEAVY_LONG_SHOT_FRAME_HEIGHT 128
 #define HEAVY_LONG_SHOT_ALPHA 191
-#define LONG_SHOT_GROUP_COUNT 4
 #define HEAVY_LONG_SHOT_QUAD_COUNT 2
-
-/* Four groups of eight vertices, each three pairs of triangles */
-extern Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8];
-extern Vtx f_HeavyLongShotVertices[16];
-extern s32 f_HeavyLongShotFrameAssets[HEAVY_LONG_SHOT_FRAME_COUNT];
-extern s32 f_HeavyLongShotFrame;
-extern s32 f_HeavyLongShotFrameTimer;
-/* The two frame buffers in g_SharedEffectImages, each loaded in turn and both
- * drawn */
-extern s32 f_HeavyLongShotBufferIndex;
 
 /* Draws the effect that StartShotEffect started at the ball, until its time
  * runs out */
@@ -3027,9 +3229,7 @@ void DrawShotOffsetMarker(void) {
 INCLUDE_ASM("asm/nonmatchings/round_hud", DrawShotOffsetMarker);
 #endif
 
-/* The icon cycles through ANIMATED_ICON_FRAME_COUNT images, a new one every few
- * frames */
-#define ANIMATED_ICON_FRAME_COUNT 8
+/* A new image of the icon every ANIMATED_ICON_FRAME_LENGTH frames */
 #define ANIMATED_ICON_FRAME_LENGTH 4
 #define ANIMATED_ICON_SIZE 32
 /* The icon eases a fifth of the way toward its place each frame */
@@ -3043,12 +3243,6 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawShotOffsetMarker);
 #define ANIMATED_ICON_LABEL_UNK0 0
 #define ANIMATED_ICON_LABEL_UNK1 1
 #define ANIMATED_ICON_LABEL_UNK2 2
-extern u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT];
-extern s32 f_AnimatedIconFrameTime;
-extern s32 f_AnimatedIconFrame;
-extern s32 f_AnimatedIconImageIndex;
-extern f32 f_AnimatedIconX;
-extern f32 f_AnimatedIconY;
 
 /*
  * Draws an animated icon that eases into place, with a label beside it that
@@ -3312,9 +3506,6 @@ void DrawColorTest(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* The HUD's letterbox height, which DrawLetterbox grows each frame */
-extern s32 f_LetterboxHeight;
-
 /* The shot panel slides in from the left by this much a frame */
 #define SHOT_PANEL_SLIDE_STEP 4
 /*
@@ -3346,8 +3537,6 @@ extern s32 f_LetterboxHeight;
 #define SMALL_FACE_STEP ((1 << 10) * 3 / 2)
 /* The pin flag beside the distance to the cup waves through four frames side by
  * side */
-extern s32 f_PinFlagTime;
-
 #define PIN_FLAG_TIME_COUNT 16
 #define PIN_FLAG_FRAME_LENGTH 4
 #define PIN_FLAG_IMAGE_SIZE 32
@@ -3365,9 +3554,6 @@ extern s32 f_PinFlagTime;
 #define HEIGHT_LABEL_Y 80
 #define SHOT_PANEL_DISTANCE_X 64
 /* In Ring Shot, a spinning ring beside the count of rings still to pass */
-extern s32 f_RingFrame;
-extern s32 f_RingFrameTime;
-
 #define RING_FRAME_COUNT 3
 #define RING_FRAME_LENGTH 6
 #define RING_IMAGE_SIZE 32
@@ -3377,7 +3563,6 @@ extern s32 f_RingFrameTime;
 #define RING_COUNT_X 46
 #define RING_COUNT_Y 112
 #define DISTANCE_FONT_WIDTH 128
-extern u16 f_WhiteDistancePalette[];
 
 #define HOLE_YARDAGE_X 60
 #define HOLE_YARDAGE_Y 56
