@@ -276,6 +276,59 @@ void LoadOpeningBall(s32 imageIndex, s32 slot);
 /* The opening's sparks, which fan out from a point and slow down */
 #define SPARK_COUNT 20
 
+/* Which of a pair of sounds is playing, or none */
+typedef enum AmbientSoundChoice {
+  AMBIENT_SOUND_NONE,
+  AMBIENT_SOUND_FIRST,
+  AMBIENT_SOUND_SECOND
+} AmbientSoundChoice;
+
+/* What the sparks are doing */
+typedef enum SparksState {
+  SPARKS_HIDDEN,
+  SPARKS_STARTING, /* Set elsewhere to start the sparks */
+  SPARKS_FLYING
+} SparksState;
+
+/* What the title logo as a whole is doing */
+typedef enum LogoState {
+  LOGO_DROPPING_LETTERS,
+  LOGO_CLUB_STARTING, /* The last letter has been dropped */
+  LOGO_CLUB_CIRCLING, /* Spiralling in to the letters, spinning */
+  LOGO_CLUB_SPINNING, /* In place, until it turns upright */
+  LOGO_SHINING,
+  LOGO_SHRINK_STARTING,
+  LOGO_SHRINKING,
+  LOGO_SHRUNK
+} LogoState;
+
+/* How the screen fade behind the logo follows the logo */
+typedef enum LogoFadeStage {
+  LOGO_FADE_NONE,
+  LOGO_FADE_GRAYING, /* Starts as the first letter is dropped */
+  LOGO_FADE_GRAY, /* Until the shine starts */
+  LOGO_FADE_WHITENING,
+  LOGO_FADE_WHITE, /* Until the logo shrinks */
+  LOGO_FADE_LOGO_OUT
+} LogoFadeStage;
+
+/*
+ * The shine's frames. Counting starts after the first, so the first shown
+ * frame is never the limit.
+ */
+#define LOGO_SHINE_FIRST_FRAME 20
+#define LOGO_SHINE_FIRST_SHOWN_FRAME 4
+#define LOGO_SHINE_LAST_SHOWN_FRAME 36
+#define LOGO_SHINE_LAST_FRAME 64
+
+/* The club's image is drawn in six strips */
+#define LOGO_CLUB_STRIP_COUNT 6
+
+#define SHOT_BALL_OPAQUE_ALPHA 255
+
+/* A 64x64 CI8 image of a plain golf ball */
+#define ASSET_SHOT_BALL_IMAGE 0x939
+
 static s32 f_CueSlotIndex;
 static CoursePoint D_8020C404_ovl_05;
 
@@ -445,13 +498,6 @@ void PlayLogoClubSound(void) {
 #define AMBIENT_SOUND_CHANCE 80
 /* The random sound picks from four choices, two of which are silence */
 #define RANDOM_SOUND_CHOICE_MASK 3
-
-/* Which of a pair of sounds is playing, or none */
-typedef enum AmbientSoundChoice {
-  AMBIENT_SOUND_NONE,
-  AMBIENT_SOUND_FIRST,
-  AMBIENT_SOUND_SECOND
-} AmbientSoundChoice;
 
 extern s32 f_AlternatingSoundTimer;
 extern s32 f_RepeatingSoundTimer;
@@ -1103,13 +1149,6 @@ s32 UpdateOpeningCharacters(void) {
 #define LOGO_BALL_MARIO_FRAMES_LEFT 98
 
 #define LOGO_BALL_SLOT 1
-
-/* What the sparks are doing */
-typedef enum SparksState {
-  SPARKS_HIDDEN,
-  SPARKS_STARTING, /* Set elsewhere to start the sparks */
-  SPARKS_FLYING
-} SparksState;
 
 /* The frames since the opening started, after which it ends itself */
 extern s32 f_OpeningFrameCount;
@@ -3953,9 +3992,6 @@ void DrawOpeningBurst(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningBurst);
 #endif
 
-/* A 64x64 CI8 image of a plain golf ball */
-#define ASSET_SHOT_BALL_IMAGE 0x939
-
 /* Loads the image of the ball that the opening's shot sends flying */
 void LoadOpeningShotBall(void) {
   EncodedAsset asset;
@@ -3982,7 +4018,6 @@ void LoadOpeningShotBall(void) {
 #define SHOT_BALL_DOT_SIZE 3
 /* How much alpha the dot loses for each unit of camera distance */
 #define SHOT_BALL_FADE_RATE 0.04
-#define SHOT_BALL_OPAQUE_ALPHA 255
 /* The shadow's scale for each step of f_ShotBallScale */
 #define SHOT_BALL_SHADOW_SCALE 0.5
 
@@ -4246,28 +4281,6 @@ void LoadOpeningLogo(void) {
   ReadEncodedAsset(f_LogoShineImage, &asset);
 }
 
-/* What the title logo as a whole is doing */
-typedef enum LogoState {
-  LOGO_DROPPING_LETTERS,
-  LOGO_CLUB_STARTING, /* The last letter has been dropped */
-  LOGO_CLUB_CIRCLING, /* Spiralling in to the letters, spinning */
-  LOGO_CLUB_SPINNING, /* In place, until it turns upright */
-  LOGO_SHINING,
-  LOGO_SHRINK_STARTING,
-  LOGO_SHRINKING,
-  LOGO_SHRUNK
-} LogoState;
-
-/* How the screen fade behind the logo follows the logo */
-typedef enum LogoFadeStage {
-  LOGO_FADE_NONE,
-  LOGO_FADE_GRAYING, /* Starts as the first letter is dropped */
-  LOGO_FADE_GRAY, /* Until the shine starts */
-  LOGO_FADE_WHITENING,
-  LOGO_FADE_WHITE, /* Until the logo shrinks */
-  LOGO_FADE_LOGO_OUT
-} LogoFadeStage;
-
 /* The gray the screen fades to while the letters fall */
 #define LOGO_FADE_GRAY_LEVEL 128
 /* The fade's frames left when graying stops, and whitening's length */
@@ -4313,14 +4326,6 @@ typedef enum LogoFadeStage {
 /* The original's single-precision approximation of pi / 180 */
 #define LOGO_DEGREES_TO_RADIANS 0.017453294f
 
-/*
- * The shine's frames. Counting starts after the first, so the first shown
- * frame is never the limit.
- */
-#define LOGO_SHINE_FIRST_FRAME 20
-#define LOGO_SHINE_FIRST_SHOWN_FRAME 4
-#define LOGO_SHINE_LAST_SHOWN_FRAME 36
-#define LOGO_SHINE_LAST_FRAME 64
 /* Where the shine's image starts on the frame given */
 #define LOGO_SHINE_ORIGIN_TEXEL 64
 #define LOGO_SHINE_ORIGIN_FRAME 16
@@ -4388,8 +4393,6 @@ extern f32 f_LogoClubWobbleAngle;
 /* The top and bottom halves of a letter */
 extern Vtx f_LogoLetterVertices[2][4];
 
-/* The club's image is drawn in six strips */
-#define LOGO_CLUB_STRIP_COUNT 6
 extern Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][4];
 
 /*
