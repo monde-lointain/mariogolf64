@@ -61,10 +61,6 @@
 extern s32 D_80230A90_ovl_01;
 extern s32 D_80230A94_ovl_01;
 extern s32 D_80230A98_ovl_01;
-extern void* D_8023B670_ovl_01;
-extern void* D_8023B674_ovl_01;
-extern void* D_8023B678_ovl_01;
-extern void* D_8023B67C_ovl_01;
 
 /* The slots that the save menu steps through, which hold -1 when empty */
 #define SAVE_MENU_SLOT_COUNT 5
@@ -127,13 +123,6 @@ extern u16 D_800C2064[];
 extern u16 D_800C208C[];
 extern s16 D_800C20D4[];
 extern void* D_801052C4[2];
-extern void* D_8023BD80_ovl_01;
-extern void* D_8023BD84_ovl_01;
-extern void* D_8023BD8C_ovl_01;
-extern void* D_8023BD90_ovl_01;
-extern void* D_8023BD98_ovl_01;
-extern void* D_8023BD9C_ovl_01;
-extern void* D_8023BDA0_ovl_01;
 extern u8 D_80230B4E_ovl_01;
 extern void* D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
@@ -148,10 +137,7 @@ extern u8 D_801B70F0[MAXCONTROLLERS];
 extern s32
     D_8023BFC0_ovl_01[MAX_PLAYER_COUNT]; /* Frames until each character fidgets,
                                             or -1 while it does */
-extern f32 D_8023BD20_ovl_01[MAX_PLAYER_COUNT]; /* Each character's scale */
-extern Mtx D_8023BCE0_ovl_01;
-extern LookAt D_8023BD30_ovl_01[2];
-extern Mtx D_8023BAE0_ovl_01[MAX_PLAYER_COUNT][2];
+
 extern f32 D_80230D18_ovl_01[3];
 extern Vec3 D_80230D28_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 extern s16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
@@ -163,20 +149,13 @@ extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern s32 D_80230B88_ovl_01[SAVE_MENU_MODE_COUNT];
 extern SaveMenuModeImage D_80230B5C_ovl_01[];
-extern void** D_8023B680_ovl_01;
-extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
-extern void** D_8023BD70_ovl_01;
-extern void** D_8023BD74_ovl_01;
 /* The mode icon of each save menu mode, mini golf last */
 extern s32 D_80230BB0_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern s8 D_8022F8C5_ovl_01;
-extern void* D_8023BD78_ovl_01;
-extern s16 D_8023BDA4_ovl_01[MAX_PLAYER_COUNT];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
 extern u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][SAVE_MENU_FILE_SIZE];
-extern void* D_8023BD7C_ovl_01;
 extern u8 D_801052E8;
 extern s32 D_800FE334;
 
@@ -198,6 +177,49 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
     s32 top, u8 showsCourseWord);
 void func_802213C8_ovl_01(
     Gfx** displayListHead, s32 imageIndex, s32 left, s32 top);
+
+static void* D_8023B670_ovl_01;
+static void* D_8023B674_ovl_01;
+static void* D_8023B678_ovl_01;
+static void* D_8023B67C_ovl_01;
+static void** D_8023B680_ovl_01;
+static s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
+
+/* Read by no routine */
+static u8 D_8023B690_ovl_01[0x3D0];
+
+static Mat4 D_8023BA60_ovl_01;
+static Mat4 D_8023BAA0_ovl_01;
+static Mtx D_8023BAE0_ovl_01[MAX_PLAYER_COUNT][2];
+static Mtx D_8023BCE0_ovl_01;
+static f32 D_8023BD20_ovl_01[MAX_PLAYER_COUNT]; /* Each character's scale */
+static LookAt D_8023BD30_ovl_01[2];
+static void** D_8023BD70_ovl_01;
+static void** D_8023BD74_ovl_01;
+static void* D_8023BD78_ovl_01;
+static void* D_8023BD7C_ovl_01;
+static void* D_8023BD80_ovl_01;
+static void* D_8023BD84_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023BD88_ovl_01[0x4];
+
+static void* D_8023BD8C_ovl_01;
+static void* D_8023BD90_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023BD94_ovl_01[0x4];
+
+static void* D_8023BD98_ovl_01;
+static void* D_8023BD9C_ovl_01;
+static void* D_8023BDA0_ovl_01;
+static s16 D_8023BDA4_ovl_01[MAX_PLAYER_COUNT];
+static s32 D_8023BDAC_ovl_01;
+static s32 D_8023BDB0_ovl_01;
+
+/* Read by no routine; 2 objects, as one would be aligned past its start */
+static u8 D_8023BDB4_ovl_01[0x4];
+static u8 D_8023BDB8_ovl_01[0x88];
 
 void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -1646,10 +1668,6 @@ extern f32 D_80230C34_ovl_01;
 /* How far left of the label's place each row of the game modes' image is drawn
  */
 extern s32 D_80230CEC_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
-extern Mat4 D_8023BA60_ovl_01;
-extern Mat4 D_8023BAA0_ovl_01;
-extern s32 D_8023BDAC_ovl_01;
-extern s32 D_8023BDB0_ovl_01;
 
 void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
 void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);

@@ -65,17 +65,11 @@ extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern u8 D_8023BFF0_ovl_01[COURSE_COUNT * BEST_TIME_COUNT]
                            [BEST_TIME_HOLDER_FILE_SIZE];
-extern void** D_8023AA40_ovl_01;
 extern s32 D_80230130_ovl_01;
 extern s32 D_80230134_ovl_01;
 extern s32 D_80230138_ovl_01;
-extern void* D_8023AA44_ovl_01;
 extern s32 D_8023013C_ovl_01[CHARACTER_COUNT];
 extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
-
-extern void* D_8023AA48_ovl_01;
-extern void* D_8023AA4C_ovl_01;
-extern void* D_8023AA50_ovl_01;
 
 s32 GetOpenCourseCount(void);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);
@@ -91,6 +85,18 @@ void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
 void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place);
 void func_8021508C_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 frameCount);
+
+static Mat4 D_8023A9C0_ovl_01;
+static Mat4 D_8023AA00_ovl_01;
+static void** D_8023AA40_ovl_01;
+static void* D_8023AA44_ovl_01;
+static void* D_8023AA48_ovl_01;
+static void* D_8023AA4C_ovl_01;
+static void* D_8023AA50_ovl_01;
+
+/* Read by no routine; 2 objects, as one would be aligned past its start */
+static u8 D_8023AA54_ovl_01[0x4];
+static u8 D_8023AA58_ovl_01[0x88];
 
 void func_80213390_ovl_01(void** buffers) {
   EncodedAsset asset;
@@ -219,9 +225,6 @@ void func_80213558_ovl_01(void) {
 #define BEST_TIMES_PANEL_TOP 138
 #define BEST_TIMES_PANEL_RIGHT 302
 #define BEST_TIMES_PANEL_BOTTOM 230
-
-extern Mat4 D_8023A9C0_ovl_01;
-extern Mat4 D_8023AA00_ovl_01;
 
 /*
  * Doesn't match: for the holder's face the original loads the course with lbu,

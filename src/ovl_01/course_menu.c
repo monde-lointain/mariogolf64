@@ -141,15 +141,6 @@ extern TrophyPosition D_80230100_ovl_01[COURSE_COUNT];
 extern const char* D_802300B4_ovl_01[STATS_COUNT];
 extern const char D_802318A8_ovl_01[];
 extern const char D_802318AC_ovl_01[];
-extern void* D_8023A810_ovl_01;
-extern void** D_8023A814_ovl_01;
-extern void** D_8023A818_ovl_01;
-extern void** D_8023A81C_ovl_01;
-extern void** D_8023A820_ovl_01;
-extern void* D_8023A824_ovl_01;
-extern void* D_8023A828_ovl_01;
-extern void* D_8023A82C_ovl_01;
-extern void* D_8023A830_ovl_01;
 
 s32 GetOpenCourseCount(void);
 void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row);
@@ -163,6 +154,22 @@ void func_80210DF4_ovl_01(
 void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
+
+static Mat4 D_8023A790_ovl_01;
+static Mat4 D_8023A7D0_ovl_01;
+static void* D_8023A810_ovl_01;
+static void** D_8023A814_ovl_01;
+static void** D_8023A818_ovl_01;
+static void** D_8023A81C_ovl_01;
+static void** D_8023A820_ovl_01;
+static void* D_8023A824_ovl_01;
+static void* D_8023A828_ovl_01;
+static void* D_8023A82C_ovl_01;
+static void* D_8023A830_ovl_01;
+
+/* Read by no routine; 2 objects, as one would be aligned past its start */
+static u8 D_8023A834_ovl_01[0x4];
+static u8 D_8023A838_ovl_01[0x188];
 
 void func_8020E010_ovl_01(void** buffers) {
   EncodedAsset asset;
@@ -365,8 +372,6 @@ void func_8020E390_ovl_01(void) {
 #define COURSE_BOARD_KIND 11
 #define COURSE_TOTALS_IMAGE COURSE_COUNT
 
-extern Mat4 D_8023A790_ovl_01;
-extern Mat4 D_8023A7D0_ovl_01;
 extern f32 D_802300DC_ovl_01;
 
 /*

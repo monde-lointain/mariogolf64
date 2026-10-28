@@ -168,10 +168,6 @@ extern s8 D_80230FAC_ovl_01[CODE_KEYBOARD_ROW_COUNT]
 extern Vtx D_80231138_ovl_01[MENU_CURSOR_VERTEX_COUNT];
 extern f32 D_80231180_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
                                                            corner's colour */
-extern Mtx D_8023BE40_ovl_01;
-extern Mtx D_8023BE80_ovl_01;
-extern Mtx D_8023BEC0_ovl_01;
-extern Mtx D_8023BF80_ovl_01;
 
 /* Where the prompt's two messages are drawn */
 #define CLUB_CODE_PROMPT_X 56
@@ -254,6 +250,15 @@ s32 func_8022B5E0_ovl_01(void);
 
 /* Not static: the original left it to the linker's common block */
 s8 D_80105DBC[7];
+
+static Mtx D_8023BE40_ovl_01;
+static Mtx D_8023BE80_ovl_01;
+static Mtx D_8023BEC0_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023BF00_ovl_01[0x80];
+
+static Mtx D_8023BF80_ovl_01;
 
 void ResetMenuWindow(void) {
   g_MenuWindowState = MENU_WINDOW_OPENING;

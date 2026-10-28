@@ -116,20 +116,9 @@ extern s8 D_8022FF04_ovl_01;
 extern u8 D_8022FF05_ovl_01;
 extern u8 D_8022FF06_ovl_01;
 extern s32 D_8022FF2C_ovl_01[];
-extern void* D_8023A568_ovl_01;
-extern void* D_8023A570_ovl_01;
-extern void* D_8023A574_ovl_01;
-extern void* D_8023A578_ovl_01;
-extern void* D_8023A57C_ovl_01;
-extern void* D_8023A580_ovl_01;
-extern void* D_8023A584_ovl_01;
 extern Vtx D_80230038_ovl_01[MENU_CURSOR_VERTEX_COUNT];
 extern f32 D_80230080_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
                                                            corner's colour */
-extern Mtx D_8023A3A0_ovl_01;
-extern Mtx D_8023A3E0_ovl_01[2];
-extern Mtx D_8023A460_ovl_01[2];
-extern Mtx D_8023A4E0_ovl_01[2];
 extern s32 D_8022FF1C_ovl_01[4];
 extern s32 D_8022FF50_ovl_01[];
 extern char D_800C2A00[][IMPORTED_CHARACTER_NAME_LENGTH];
@@ -160,6 +149,29 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode);
 void func_8020D338_ovl_01();
 void func_8020D734_ovl_01();
 void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet);
+
+static Mtx D_8023A3A0_ovl_01;
+static Mtx D_8023A3E0_ovl_01[2];
+static Mtx D_8023A460_ovl_01[2];
+static Mtx D_8023A4E0_ovl_01[2];
+
+/* Read by no routine */
+static u8 D_8023A560_ovl_01[0x8];
+
+static void* D_8023A568_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023A56C_ovl_01[0x4];
+
+static void* D_8023A570_ovl_01;
+static void* D_8023A574_ovl_01;
+static void* D_8023A578_ovl_01;
+static void* D_8023A57C_ovl_01;
+static void* D_8023A580_ovl_01;
+static void* D_8023A584_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023A588_ovl_01[0x208];
 
 void func_80209500_ovl_01(void) {
   s32 firstSlot = g_CharacterGrid[2][0];

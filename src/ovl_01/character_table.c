@@ -120,18 +120,9 @@ extern s32 D_802301A4_ovl_01;
 extern TableCorner D_80230248_ovl_01[TABLE_LINE_COUNT * 2];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
-extern void* D_8023AC64_ovl_01;
 extern Vtx D_802301F0_ovl_01[MENU_CURSOR_VERTEX_COUNT];
 extern f32 D_80230238_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
                                                            corner's colour */
-extern Mtx D_8023AAE0_ovl_01;
-extern Mtx D_8023AB20_ovl_01;
-extern Mtx D_8023AB60_ovl_01;
-extern Mtx D_8023AC20_ovl_01;
-extern void* D_8023AC68_ovl_01;
-extern void* D_8023AC6C_ovl_01;
-extern void* D_8023AC70_ovl_01;
-extern s32 D_8023AC78_ovl_01[CHARACTER_COUNT];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_SCENE_FILE_SIZE];
 extern s32 D_802301A8_ovl_01[CHARACTER_COUNT]; /* The character in each place of
                                                   the table */
@@ -152,6 +143,24 @@ void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y);
 void func_802169CC_ovl_01(Gfx** displayListHead);
 void func_80216C14_ovl_01(Gfx** displayListHead);
 void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top);
+
+static Mtx D_8023AAE0_ovl_01;
+static Mtx D_8023AB20_ovl_01;
+static Mtx D_8023AB60_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023ABA0_ovl_01[0x80];
+
+static Mtx D_8023AC20_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023AC60_ovl_01[0x4];
+
+static void* D_8023AC64_ovl_01;
+static void* D_8023AC68_ovl_01;
+static void* D_8023AC6C_ovl_01;
+static void* D_8023AC70_ovl_01;
+static s32 D_8023AC78_ovl_01[CHARACTER_COUNT];
 
 void func_802159C0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;

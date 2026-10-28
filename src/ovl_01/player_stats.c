@@ -165,21 +165,11 @@ extern s32 D_802304FC_ovl_01[][STATS_INDEX_COLUMN_COUNT];
 extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 extern s8 D_801B70F0[MAXCONTROLLERS];
 extern s8 D_802309C4_ovl_01[][2];
-extern void** D_8023B630_ovl_01;
-extern void* D_8023B634_ovl_01;
-extern void* D_8023B638_ovl_01;
 extern Vtx D_802309F0_ovl_01[MENU_CURSOR_VERTEX_COUNT];
 extern f32 D_80230A38_ovl_01[MENU_CURSOR_VERTEX_COUNT];
-extern Mtx D_8023B410_ovl_01;
-extern Mtx D_8023B450_ovl_01;
-extern Mtx D_8023B490_ovl_01;
-extern Mtx D_8023B550_ovl_01;
-extern u8* D_8023B63C_ovl_01;
 extern s32 D_80230A48_ovl_01[CHARACTER_COUNT];
 extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 extern const char D_802319E0_ovl_01[];
-extern void* D_8023B5E0_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
-extern s16 D_8023B640_ovl_01[][STATS_GRID_COLUMN_COUNT];
 extern s32 D_80230718_ovl_01[STATS_SLIDE_ROW_COUNT];
 extern s32 D_8023073C_ovl_01[STATS_SLIDE_ROW_COUNT];
 extern s32 D_80230760_ovl_01[STATS_SLIDE_ROW_COUNT];
@@ -192,23 +182,8 @@ extern u8 D_802303A1_ovl_01;
 extern s16 D_802303A6_ovl_01;
 extern s16 D_802303A8_ovl_01;
 extern s32 D_8023BFD0_ovl_01;
-extern void* D_8023B340_ovl_01;
-extern void* D_8023B344_ovl_01;
-extern void* D_8023B348_ovl_01;
-extern void* D_8023B34C_ovl_01;
-/* The two frames of the stats icon that func_80219460 animates */
-extern void* D_8023B350_ovl_01[STATS_ICON_FRAME_COUNT];
-extern void* D_8023B358_ovl_01;
-extern void* D_8023B35C_ovl_01;
-extern Mtx D_8023B040_ovl_01[PAGE_ARROW_COUNT];
-extern Mtx D_8023B0C0_ovl_01[PAGE_ARROW_COUNT];
-extern Mtx D_8023B140_ovl_01[PAGE_ARROW_COUNT];
-extern Mtx D_8023B2C0_ovl_01[PAGE_ARROW_COUNT];
+
 extern Vtx D_80230840_ovl_01[TURNED_ARROW_VERTEX_COUNT];
-extern void* D_8023B360_ovl_01;
-extern void* D_8023B364_ovl_01;
-extern void* D_8023B368_ovl_01;
-extern void* D_8023B36C_ovl_01;
 extern u32 D_802303AC_ovl_01[PLAYER_STATS_ICON_COUNT];
 extern u32 D_802303CC_ovl_01[][2];
 extern s16 D_8023040C_ovl_01[][STATS_INDEX_COLUMN_COUNT];
@@ -241,6 +216,56 @@ void func_80219460_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
 void func_8021B1E0_ovl_01(
     Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex);
+
+static Mtx D_8023ACC0_ovl_01[MAX_PLAYER_COUNT][2];
+static Mtx D_8023AEC0_ovl_01;
+static LookAt D_8023AF00_ovl_01[2];
+
+/* Read by no routine */
+static u8 D_8023AF40_ovl_01[0x100];
+
+static Mtx D_8023B040_ovl_01[PAGE_ARROW_COUNT];
+static Mtx D_8023B0C0_ovl_01[PAGE_ARROW_COUNT];
+static Mtx D_8023B140_ovl_01[PAGE_ARROW_COUNT];
+
+/* Read by no routine */
+static u8 D_8023B1C0_ovl_01[0x100];
+
+static Mtx D_8023B2C0_ovl_01[PAGE_ARROW_COUNT];
+static void* D_8023B340_ovl_01;
+static void* D_8023B344_ovl_01;
+static void* D_8023B348_ovl_01;
+static void* D_8023B34C_ovl_01;
+/* The two frames of the stats icon that func_80219460 animates */
+static void* D_8023B350_ovl_01[STATS_ICON_FRAME_COUNT];
+static void* D_8023B358_ovl_01;
+static void* D_8023B35C_ovl_01;
+static void* D_8023B360_ovl_01;
+static void* D_8023B364_ovl_01;
+static void* D_8023B368_ovl_01;
+static void* D_8023B36C_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023B370_ovl_01[0xA0];
+
+static Mtx D_8023B410_ovl_01;
+static Mtx D_8023B450_ovl_01;
+static Mtx D_8023B490_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023B4D0_ovl_01[0x80];
+
+static Mtx D_8023B550_ovl_01;
+
+/* Read by no routine */
+static u8 D_8023B590_ovl_01[0x50];
+
+static void* D_8023B5E0_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
+static void** D_8023B630_ovl_01;
+static void* D_8023B634_ovl_01;
+static void* D_8023B638_ovl_01;
+static u8* D_8023B63C_ovl_01;
+static s16 D_8023B640_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -914,9 +939,6 @@ extern f32 D_80230608_ovl_01[MAX_PLAYER_COUNT];
 extern f32 D_80230618_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][3];
 /* The left of each player's column, by the player count */
 extern s32 D_802306C8_ovl_01[][MAX_PLAYER_COUNT];
-extern Mtx D_8023ACC0_ovl_01[MAX_PLAYER_COUNT][2];
-extern Mtx D_8023AEC0_ovl_01;
-extern LookAt D_8023AF00_ovl_01[2];
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 
 void func_80210CD4_ovl_01(
