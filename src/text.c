@@ -185,14 +185,51 @@ typedef struct GlyphSprite {
 #define SMALL_FONT_MOVED_CODE 0xB0
 #define SMALL_FONT_MOVED_GLYPH 0x70
 
+/* A byte holds this many character codes */
+#define CHAR_CODE_COUNT 256
+
+/* The width of each character of the large font, by character code */
+static u8 f_LargeFontWidths[CHAR_CODE_COUNT] = {12, 12, 12, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    12, 6, 12, 6, 12, 5, 6, 7, 10, 8, 12, 10, 6, 6, 6, 12, 10, 6, 10, 6, 12, 8,
+    6, 8, 7, 8, 7, 7, 9, 7, 7, 6, 6, 7, 10, 7, 7, 12, 11, 10, 8, 9, 8, 6, 10, 9,
+    4, 9, 7, 7, 12, 10, 12, 9, 11, 9, 7, 9, 11, 12, 12, 10, 9, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0, 9, 7, 7,
+    9, 9, 8, 8, 8, 4, 5, 8, 4, 8, 8, 8, 6, 9, 6, 6, 6, 9, 9, 12, 9, 10, 7, 0, 0,
+    0, 0, 0};
 /* The quads glyph sprites are drawn with, centred on the sprite */
-extern Vtx f_LargeGlyphVertices[4];
-extern Vtx f_LargeGlyphTopVertices[4];
-extern Vtx f_LargeGlyphBottomVertices[4];
-extern Vtx f_MediumGlyphVertices[4];
-extern Vtx f_SmallGlyphVertices[4];
-/* The width of each character of the large font */
-extern u8 f_LargeFontWidths[];
+static Vtx f_LargeGlyphVertices[4] = {
+    {{{0, 6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{0, -6, 0}, 0, {0, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{12, -6, 0}, 0, {0x2FF, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{12, 6, 0}, 0, {0x2FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static Vtx f_LargeGlyphTopVertices[4] = {
+    {{{0, 6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{0, 0, 0}, 0, {0, 0x17F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{12, 0, 0}, 0, {0x2FF, 0x17F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{12, 6, 0}, 0, {0x2FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static Vtx f_LargeGlyphBottomVertices[4] = {
+    {{{0, 0, 0}, 0, {0, 0x180}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{0, -6, 0}, 0, {0, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{12, -6, 0}, 0, {0x2FF, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{12, 0, 0}, 0, {0x2FF, 0x180}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static Vtx f_MediumGlyphVertices[4] = {
+    {{{0, 5, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{0, -5, 0}, 0, {0, 0x27F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{10, -5, 0}, 0, {0x27F, 0x27F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{10, 5, 0}, 0, {0x27F, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* The fourth vertex is 6 above the middle, though the others are 4 from it */
+static Vtx f_SmallGlyphVertices[4] = {
+    {{{0, 4, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{0, -4, 0}, 0, {0, 0x1FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{8, -4, 0}, 0, {0x1FF, 0x1FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{8, 6, 0}, 0, {0x1FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
 
 void DrawMediumTextSlot(Gfx** displayListHead, s32 slot);
 void ClearGlyphSprites(void);
