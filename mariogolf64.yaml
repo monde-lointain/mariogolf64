@@ -629,7 +629,7 @@ segments:
       - [0x128580, c, ovl_02/hole_builder]
       - [0x12F020, .data, ovl_02/hole_builder]
       - [0x12FD50, .rodata, ovl_02/hole_builder]
-      - { start: 0x1300A0, type: bss, vram: 0x80255320 }
+      - { start: 0x1300A0, type: .bss, vram: 0x80255320, name: ovl_02/hole_builder }
 
   - name: ovl_03
     type: code
@@ -642,7 +642,7 @@ segments:
       - [0x1300A0, c, ovl_03/computer_golfer]
       - [0x1363F0, .data, ovl_03/computer_golfer]
       - [0x1365D0, .rodata, ovl_03/computer_golfer]
-      - { start: 0x136BA0, type: bss, vram: 0x80254300 }
+      - { start: 0x136BA0, type: .bss, vram: 0x80254300, name: ovl_03/computer_golfer }
 
   - name: ovl_04
     type: code
@@ -689,7 +689,8 @@ segments:
       - [0x14F960, .data, ovl_06/title_screen]
       - [0x14F9A0, .data, ovl_06/unlocks]
       - [0x14FA10, .rodata, ovl_06/title_screen]
-      - { start: 0x14FB50, type: bss, vram: 0x801F5B10 }
+      - { start: 0x14FB50, type: bss, vram: 0x801F5B10, name: bss_801F5B10 }
+      - { type: .bss, vram: 0x801F5B30, name: ovl_06/title_screen }
 
   - name: ovl_07
     type: code
@@ -703,7 +704,8 @@ segments:
       - [0x14FB60, c, ovl_07/boot_logos]
       - [0x150890, .data, ovl_07/boot_logos]
       - [0x1508A0, .rodata, ovl_07/boot_logos]
-      - { start: 0x1508D0, type: bss, vram: 0x801F57B0 }
+      - { start: 0x1508D0, type: bss, vram: 0x801F57B0, name: bss_801F57B0 }
+      - { type: .bss, vram: 0x801F57D0, name: ovl_07/boot_logos }
 
   - name: ovl_08
     type: code
@@ -731,7 +733,7 @@ segments:
       - [0x15B640, .data, ovl_09/scorecard_drawing]
       - [0x15B780, .rodata, ovl_09/scorecard]
       - [0x15B940, .rodata, ovl_09/scorecard_drawing]
-      - { start: 0x15BB50, type: bss, vram: 0x8024C9C0 }
+      - { start: 0x15BB50, type: .bss, vram: 0x8024C9C0, name: ovl_09/scorecard_drawing }
 
   - name: ovl_10
     type: code
@@ -744,7 +746,7 @@ segments:
       - [0x15BB50, c, ovl_10/club_slots]
       - [0x15F160, .data, ovl_10/club_slots]
       - [0x15F210, .rodata, ovl_10/club_slots]
-      - { start: 0x15F250, type: bss, vram: 0x80244F00 }
+      - { start: 0x15F250, type: .bss, vram: 0x80244F00, name: ovl_10/club_slots }
 
   - name: ovl_11
     type: code
@@ -757,7 +759,8 @@ segments:
       - [0x15F250, c, ovl_11/course_select]
       - [0x161870, .data, ovl_11/course_select]
       - [0x161940, .rodata, ovl_11/course_select]
-      - { start: 0x1619A0, type: bss, vram: 0x80243F50 }
+      - { start: 0x1619A0, type: .bss, vram: 0x80243F50, name: ovl_11/course_select }
+      - { type: bss, vram: 0x80243FC0, name: bss_80243FC0 }
 
   - name: ovl_12
     type: code
@@ -770,7 +773,7 @@ segments:
       - [0x1619A0, c, ovl_12/save_menu]
       - [0x165970, .data, ovl_12/save_menu]
       - [0x165A30, .rodata, ovl_12/save_menu]
-      - { start: 0x165BC0, type: bss, vram: 0x80245A20 }
+      - { start: 0x165BC0, type: .bss, vram: 0x80245A20, name: ovl_12/save_menu }
 
   - name: ovl_13
     type: code
@@ -801,7 +804,8 @@ segments:
       - [0x16D660, c, ovl_14/staff_roll]
       - [0x1715C0, .data, ovl_14/staff_roll]
       - [0x171700, .rodata, ovl_14/staff_roll]
-      - { start: 0x171770, type: bss, vram: 0x801F8B50 }
+      - { start: 0x171770, type: bss, vram: 0x801F8B50, name: bss_801F8B50 }
+      - { type: .bss, vram: 0x801F8B60, name: ovl_14/staff_roll }
 
   - name: build_date
     type: bin

@@ -98,10 +98,6 @@ typedef struct ButtonCode {
 #define GAME_FLAG_UNK44 0x44
 #define GAME_FLAG_UNK65 0x65
 
-extern TitleImage f_TitleImage;
-extern JapaneseLogo f_JapaneseLogo;
-extern PressStartText f_PressStartText;
-
 void func_8005DC50(void);
 
 void OnUnlockCodeEntered(void);
@@ -120,6 +116,18 @@ static ButtonCode f_ButtonCodes[] = {
 static s32 f_TitleUnusedWord = 0;
 /* "PRESS START" turns from red to green and back as this goes round */
 static f32 f_PressStartPhase = 0.0f;
+
+static TitleImage f_TitleImage;
+/* Read by no routine; two objects, as one would be aligned to 16 bytes */
+static u8 D_80216F38_ovl_06[8];
+static u8 D_80216F40_ovl_06[0x9800];
+
+static JapaneseLogo f_JapaneseLogo;
+
+/* Read by no routine */
+static u8 D_8022BB48_ovl_06[8];
+
+static PressStartText f_PressStartText;
 
 void OnUnlockCodeEntered(void) {
   UnlockEverything();

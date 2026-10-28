@@ -252,16 +252,6 @@
  */
 extern Unk800BA9D8 D_80105F40;
 
-extern s32 f_SlideOffsets[4];
-extern void* f_CharacterFiles[CHARACTER_IMAGE_COUNT];
-extern void* f_CharacterImages[CHARACTER_IMAGE_COUNT];
-extern void* f_PanelImage;
-extern void* f_ModeIconImages[SAVED_GAME_COUNT][2];
-extern void* f_ReplayLabelImages[REPLAY_LABEL_COUNT];
-extern void* f_CourseNumbersImage;
-extern void* f_SaveMenuTitleImage;
-extern s32 f_IconFrames[SAVED_GAME_COUNT];
-
 void func_8005B28C(s32 recordIndex, Unk68* record);
 void func_8005D0D8(void);
 void SetTextSlot(
@@ -329,6 +319,18 @@ static f32 f_PanelWaveAngle = 0.0f;
 static f32 f_TitleSwayAngle = 0.0f;
 static f32 f_CursorPulseAngle = 0.0f;
 static f32 f_ReplayTitleBobAngle = 0.0f;
+
+static s32 f_SlideOffsets[4];
+/* Read by no routine */
+static u8 D_80245A30_ovl_12[8];
+static void* f_CharacterFiles[CHARACTER_IMAGE_COUNT];
+static void* f_CharacterImages[CHARACTER_IMAGE_COUNT];
+static void* f_ModeIconImages[SAVED_GAME_COUNT][2];
+static void* f_PanelImage;
+static void* f_ReplayLabelImages[REPLAY_LABEL_COUNT];
+static void* f_CourseNumbersImage;
+static void* f_SaveMenuTitleImage;
+static s32 f_IconFrames[SAVED_GAME_COUNT];
 
 /* Returns the MODE_ICON_* index of a saved game's mode, or NO_MODE_ICON */
 s32 GetModeIconIndex(GameState* state) {

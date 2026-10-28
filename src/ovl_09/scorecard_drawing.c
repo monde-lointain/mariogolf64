@@ -103,7 +103,6 @@
 #define SCORES_STYLE_OPAQUE 2
 #define SCORES_STYLE_TINTED 3
 
-extern Mtx f_ResultCharacterMatrices[MATCH_PLAYER_COUNT];
 /* "Hole %d" in half-width katakana */
 extern const char f_HoleNumberFormat[];
 /* Formats that more than one page shares */
@@ -220,6 +219,10 @@ void DrawSmallFace(
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
+
+static Mtx f_ResultCharacterMatrices[MATCH_PLAYER_COUNT];
+/* A turning flap's matrix, one for each draw buffer */
+static Mtx f_FlapMatrices[LEADERBOARD_ROW_COUNT][2];
 
 /* Draws a place, from 0 for first, as the left and right halves of its image */
 void DrawPlace(Gfx** displayListHead, s32 left, s32 top, s32 place) {
@@ -1593,9 +1596,6 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
 #define ROSE_ARROW_HALF_SIZE 12.0f
 #define FELL_ARROW_PULSE_STEP 0.4f
 #define ROSE_ARROW_PULSE_STEP 0.3f
-
-/* A turning flap's matrix, one for each draw buffer */
-extern Mtx f_FlapMatrices[LEADERBOARD_ROW_COUNT][2];
 
 /*
  * Draws the tournament leaderboard's page. Rows flip over in turn to show the

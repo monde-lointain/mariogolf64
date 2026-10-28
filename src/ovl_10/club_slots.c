@@ -144,6 +144,9 @@
 #define SHINE_DELAY 5
 #define SHINE_START_TIME 16
 #define SHINE_SPEED 18
+/* The buffers the logo and shine images are read into */
+#define LOGO_IMAGE_BUFFER_SIZE 0x4A20
+#define SHINE_IMAGE_BUFFER_SIZE 0x1210
 
 /* The first fourteen characters have their own club sets; the others use the
  * sets after them */
@@ -197,12 +200,6 @@ void DrawClubSlotsLogo(
 extern u16 D_800C2650[][FACE_FRAME_COUNT];
 extern u16 D_800C2780[][FACE_FRAME_COUNT];
 /* The faces of the players and their palettes */
-
-extern Mtx f_ReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
-extern Mtx f_ShadeMatrix;
-extern ClubSlots* f_Slots;
-extern u8 f_LogoImage[];
-extern u8 f_ShineImage[];
 
 static s32 f_ClubSlotsState = CLUB_SLOTS_DONE;
 static u8 f_FaceBufferIndex = 0;
@@ -262,6 +259,12 @@ static s32 f_ShineTime = 0;
 static f32 f_LogoBobAngle = 0.0f;
 static f32 f_LogoBob = 0.0f;
 static s32 f_LogoUnusedWord = 0; /* Only ever cleared */
+
+static Mtx f_ReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_ShadeMatrix;
+static ClubSlots* f_Slots;
+static u8 f_LogoImage[LOGO_IMAGE_BUFFER_SIZE];
+static u8 f_ShineImage[SHINE_IMAGE_BUFFER_SIZE];
 
 void LoadClubSlots(void) {
   EncodedAsset asset;

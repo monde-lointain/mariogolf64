@@ -90,35 +90,16 @@ typedef struct ClubName {
   /* 0x4 */ s32 clubType;
 } ClubName; /* size = 0x8 */
 
-extern OSThread f_PlanThread;
-extern CurrentShot f_PlannedShot;
-
 /* The directions from the ball, in BINARY_ANGLE_TURN / DIRECTION_SECTOR_COUNT
  * sectors */
 #define DIRECTION_SECTOR_COUNT 256
 #define DIRECTION_SECTOR_SHIFT 8
-/* The direction sectors in which no target is chosen */
-extern s8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
-extern u8 f_PlanThreadStack[PLAN_THREAD_STACK_SIZE];
-/* f_HoleStrokeTarget less the hole's par */
-extern s32 f_HoleTargetToPar;
-/* The strokes the golfer aims to take on the hole */
-extern s32 f_HoleStrokeTarget;
-/* Where the planned shot aims */
-extern CoursePoint f_PlanTarget;
 
 /* The route points and the tee, as PlanRoute gathers them */
 typedef struct RouteCoordinates {
   /* 0x00 */ s32 x[ROUTE_POINT_COUNT + 1];
   /* 0x24 */ s32 z[ROUTE_POINT_COUNT + 1];
 } RouteCoordinates; /* size = 0x48 */
-
-extern RouteCoordinates f_Route;
-/* The route points nearest the cup first, as PlanRoute orders them */
-extern s8 f_RouteOrder[ROUTE_POINT_COUNT];
-extern s32 f_RouteOrderCount;
-/* How far PlanShot has got with the shot */
-extern s8 f_PlanStage;
 
 #define PLAN_STAGE_UNSTARTED 0
 #define PLAN_STAGE_STARTED 1
@@ -127,35 +108,7 @@ extern s8 f_PlanStage;
 #define PLAN_STAGE_UNK4 4
 #define PLAN_STAGE_LEVEL_FINISHED 5
 #define PLAN_STAGE_TRIAL_RUNNING 6
-extern s8 f_IsClubUsable[CLUB_SLOT_COUNT];
-/* The size of the golfer's club set */
-extern s32 f_ClubCount;
 
-extern CurrentShot f_Shot;
-
-/* Where the shot to try starts, as PlanShot sets it up */
-extern CurrentShot f_TrialShot;
-extern Unk20* f_TrialLaunch;
-extern BallSimulation f_TrialSimulation;
-extern s32 f_TrialStepCount;
-/* The SHOT_OFFSET_* that PlanShot chose for the shot */
-extern s32 f_ShotOffset;
-/* How much worse than ideal an evaluation may be for the trial to be taken */
-extern s32 f_AcceptableEvaluation;
-/* How many times PlanShot has changed the club or carry */
-extern s32 f_TrialLevel;
-/* Whether the trial ended out of bounds, off the course or in water */
-extern s32 f_IsTrialLost;
-/* The count of trials at this level */
-extern s32 f_TrialIndex;
-/* Set when the trial asks PlanShot for a longer or a shorter club */
-extern s32 f_NeedsLongerClub;
-extern s32 f_NeedsShorterClub;
-/* Set when the trial is good enough to take */
-extern s32 f_IsTrialAccepted;
-/* The best evaluation so far */
-extern s32 f_BestEvaluation;
-extern s32 f_AimChangeCount;
 /* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
  * copy */
 extern const char f_SimFaultText[];
@@ -266,6 +219,92 @@ void PlanClubAndTarget(CoursePoint target);
 void ChooseLongShot(
     s32 unused, s32* clubType, s32* targetX, s32* targetZ, s32* shotMode);
 s32 ChooseHoleStrokeTarget(void);
+
+static OSThread f_PlanThread;
+static CurrentShot f_PlannedShot;
+/* The direction sectors in which no target is chosen */
+static s8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
+/* Read by no routine */
+static u8 D_80254608_ovl_03[8];
+static Unk20* f_TrialLaunch;
+static Unk20 f_TrialLaunchValues;
+/* The best evaluation so far */
+static s32 f_BestEvaluation;
+static s32 f_AimChangeCount;
+static u8 f_PlanThreadStack[PLAN_THREAD_STACK_SIZE];
+/* Read by no routine */
+static u8 D_8025A640_ovl_03[8192];
+/* f_HoleStrokeTarget less the hole's par */
+static s32 f_HoleTargetToPar;
+/* The strokes the golfer aims to take on the hole */
+static s32 f_HoleStrokeTarget;
+/* Whether f_TrialShot holds a copy of f_Shot yet */
+static s32 f_HasTrialShot;
+/* Where the planned shot aims */
+static CoursePoint f_PlanTarget;
+/* PlanShot clears these, and nothing in the overlay reads them */
+static s32 f_Unk658;
+/* The route points nearest the cup first, as PlanRoute orders them */
+static s8 f_RouteOrder[ROUTE_POINT_COUNT];
+/* Read by no routine */
+static u8 D_8025C664_ovl_03[4];
+/* Whether the trial's club is one for the green */
+static s32 f_IsPutting;
+/* How much worse than ideal an evaluation may be for the trial to be taken */
+static s32 f_AcceptableEvaluation;
+/* How many times PlanShot has changed the club or carry */
+static s32 f_TrialLevel;
+static s32 f_RouteOrderCount;
+static CoursePoint f_LandingPosition;
+static RouteCoordinates f_Route;
+/* Where the shot to try starts, as PlanShot sets it up */
+static CurrentShot f_TrialShot;
+static s8 f_IsClubUsable[CLUB_SLOT_COUNT];
+/* Whether the flying trial ball has come down on the ground yet, and where it
+ * first did */
+static s32 f_HasLanded;
+/* The carry that the landing target is chosen for, and what the club's carry is
+ * scaled by for it */
+static s32 f_TargetCarry;
+/* The size of the golfer's club set */
+static s32 f_ClubCount;
+/* The count of trials to take at the level */
+static s32 f_LevelTrialCount;
+/* The SHOT_OFFSET_* that PlanShot chose for the shot */
+static s32 f_ShotOffset;
+static s32 f_TrialStepCount;
+/* Set when the trial is good enough to take */
+static s32 f_IsTrialAccepted;
+static BallSimulation f_TrialSimulation;
+/* Whether the trial ended out of bounds, off the course or in water */
+static s32 f_IsTrialLost;
+/* Set when the level needs a new landing target */
+static s32 f_NeedsNewTarget;
+/* The nearest that a putt has come to the target */
+static s32 f_ClosestTargetDistance;
+/* Read by no routine */
+static u8 D_8025C81C_ovl_03[4];
+static f32 f_CarryScale;
+/* The count of trials at this level */
+static s32 f_TrialIndex;
+/* Set when the trial asks PlanShot for a longer or a shorter club */
+static s32 f_NeedsLongerClub;
+/* The trial's evaluation; lower is better */
+static s32 f_TrialEvaluation;
+/* Read by no routine */
+static u8 D_8025C830_ovl_03[4];
+/* Where the trial's ball rests, or for a putt where it passes nearest the
+ * target */
+static CoursePoint f_TrialEndPoint;
+static s8 f_Unk840;
+/* The count of trials that ended with the ball lost */
+static s32 f_LostTrialCount;
+/* How far PlanShot has got with the shot */
+static s8 f_PlanStage;
+static s32 f_NeedsShorterClub;
+/* Read by no routine */
+static u8 D_8025C850_ovl_03[8];
+static CurrentShot f_Shot;
 
 void RestartShotPlan(void) {
   f_PlanStage = PLAN_STAGE_UNSTARTED;
@@ -385,36 +424,6 @@ s32 GetSideSlope(void) {
 
   return sideSlope;
 }
-
-/* Whether the trial's club is one for the green */
-extern s32 f_IsPutting;
-/* Whether the flying trial ball has come down on the ground yet, and where it
- * first did */
-extern s32 f_HasLanded;
-extern CoursePoint f_LandingPosition;
-/* The nearest that a putt has come to the target */
-extern s32 f_ClosestTargetDistance;
-/* The trial's evaluation; lower is better */
-extern s32 f_TrialEvaluation;
-/* Where the trial's ball rests, or for a putt where it passes nearest the
- * target */
-extern CoursePoint f_TrialEndPoint;
-/* Whether f_TrialShot holds a copy of f_Shot yet */
-extern s32 f_HasTrialShot;
-/* Set when the level needs a new landing target */
-extern s32 f_NeedsNewTarget;
-/* The carry that the landing target is chosen for, and what the club's carry is
- * scaled by for it */
-extern s32 f_TargetCarry;
-extern f32 f_CarryScale;
-/* The count of trials to take at the level */
-extern s32 f_LevelTrialCount;
-/* The count of trials that ended with the ball lost */
-extern s32 f_LostTrialCount;
-/* PlanShot clears these, and nothing in the overlay reads them */
-extern s32 f_Unk658;
-extern s8 f_Unk840;
-extern Unk20 f_TrialLaunchValues;
 
 s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 

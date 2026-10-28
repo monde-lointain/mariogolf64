@@ -210,12 +210,7 @@ typedef struct HoleAssetIds {
 /* g_GameState.isMiniGolf under a symbol of its own, which BuildHole needs to
  * match */
 extern s8 g_IsMiniGolf;
-extern AssetFile f_HoleAsset;
-extern u8* f_ReadCursor;
-extern u8* f_BuildBuffer;
-extern u8* f_BuildCursor;
 extern s32 g_TerrainCodeBlockCount;
-extern s32 f_PaintLogic;
 
 s32 PaintMainCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
@@ -527,6 +522,21 @@ void ShadeGroundTiles(void);
 void CastBillboardShadows(void);
 void MoveRingsToEnd(void);
 void FillRandomGrid(s32 range, s32 base);
+
+static s32 f_PaintLogic;
+
+/* Read by no routine */
+static u8 D_80255324_ovl_02[12];
+
+static u8* f_ReadCursor;
+static AssetFile f_HoleAsset;
+
+/* Read by no routine; two objects, as one would be aligned to 16 bytes */
+static u8 D_80255348_ovl_02[8];
+static u8 D_80255350_ovl_02[0x8000];
+
+static u8* f_BuildBuffer;
+static u8* f_BuildCursor;
 
 /* Copies bytes from the read cursor and advances it past them */
 static inline void ReadFileBytes(void* destination, s32 size) {

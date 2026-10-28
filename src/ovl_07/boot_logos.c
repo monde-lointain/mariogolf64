@@ -95,10 +95,6 @@ typedef struct N64Logo {
 #define NINTENDO_LOGO_ASSET 0x6F6
 #define N64_LOGO_ASSET 0x97F
 
-extern CamelotLogo f_CamelotLogo;
-extern NintendoLogo f_NintendoLogo;
-extern N64Logo f_N64Logo;
-
 /* The frames since the stage began */
 static s32 f_BootLogoFrame = 0;
 static s32 f_BootLogoStage = BOOT_LOGO_N64;
@@ -106,6 +102,10 @@ static s32 f_BootLogoStage = BOOT_LOGO_N64;
 static s32 f_BootLogoUnusedWord = 0;
 /* Whether SetUpTitleHole has reset g_GameState during the Camelot logo */
 static s32 f_HasResetGameState = FALSE;
+
+static CamelotLogo f_CamelotLogo;
+static NintendoLogo f_NintendoLogo;
+static N64Logo f_N64Logo;
 
 void LoadBootLogos(void) {
   EncodedAsset asset;

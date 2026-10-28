@@ -277,17 +277,6 @@ typedef struct StaffRollEasedView {
 extern u8 g_StaffTextRomStart[];
 extern u8* g_ShadowTexture;
 
-extern StaffRollImage f_StaffRollImage;
-extern StaffText* f_StaffText;
-extern u8* f_StaffFont;
-extern void* f_BillboardHeap;
-extern u8* f_CastBuffers[CAST_BUFFER_CAPACITY];
-extern StaffRollEasedView f_StaffRollEasedView;
-extern s32 f_CastOrder[CAST_MEMBER_COUNT];
-extern s32 f_FadeFramesLeft;
-extern s32 f_CastSlot; /* The slot of the character shown, 0 or 1 */
-extern CoursePoint f_NearCupPoint;
-
 void AssignCharacterBuffers(void);
 void SetFramebufferCount(s32 count);
 void FreeEffectImages(void);
@@ -571,6 +560,19 @@ static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
     0,
     0,
 };
+
+static s32 f_CastSlot; /* The slot of the character shown, 0 or 1 */
+static CoursePoint f_NearCupPoint;
+/* Read by no routine */
+static u8 D_801F8B70_ovl_14[16];
+static StaffRollImage f_StaffRollImage;
+static StaffText* f_StaffText;
+static u8* f_StaffFont;
+static void* f_BillboardHeap;
+static u8* f_CastBuffers[CAST_BUFFER_CAPACITY];
+static StaffRollEasedView f_StaffRollEasedView;
+static s32 f_CastOrder[CAST_MEMBER_COUNT];
+static s32 f_FadeFramesLeft;
 
 /* The kind of model the cast is loaded as, from the first player's paletteIndex
  */

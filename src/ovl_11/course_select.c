@@ -160,17 +160,6 @@ extern Gfx D_800C3FC0[];
 extern s32 g_CourseNameEnvColors[];
 extern s32 g_CourseNamePrimColors[];
 
-extern u8* f_BoardImage; /* The name plate or the hole sign */
-extern u8* f_CourseBadges[COURSE_INDEX_COUNT];
-extern u8* f_CourseImage;
-extern u16* f_CourseImagePalette;
-extern u8* f_ArrowsImage;
-extern u8* f_StarImages[STAR_IMAGE_COUNT];
-extern u8* f_EmptyStarImages[STAR_IMAGE_COUNT];
-extern u8* f_PlanksImage;
-extern s32 f_PressedButtons;
-extern u32 f_RepeatedButtons;
-
 static u16 f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x5BE,
     0x5BF,
@@ -257,6 +246,17 @@ static s32 f_CourseTurnFrames[COURSE_TURN_FRAME_COUNT] = {
     2, 3, 4, COURSE_IMAGE_BLANK, 0, 1, 2};
 static s32 f_PlankSlide = 0;
 static s32 f_PlankMotion = PLANKS_SHUT;
+
+static u8* f_BoardImage; /* The name plate or the hole sign */
+static u8* f_CourseBadges[COURSE_INDEX_COUNT];
+static u8* f_CourseImage;
+static u16* f_CourseImagePalette;
+static u8* f_ArrowsImage;
+static u8* f_StarImages[STAR_IMAGE_COUNT];
+static u8* f_EmptyStarImages[STAR_IMAGE_COUNT];
+static u8* f_PlanksImage;
+static s32 f_PressedButtons;
+static u32 f_RepeatedButtons;
 
 s32 CountOpenRingShotCourses(void) {
   SaveData* save = GetSaveData();
