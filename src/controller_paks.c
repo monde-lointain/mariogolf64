@@ -9,9 +9,12 @@
 #include "controller.h"
 #include "transfer_pak.h"
 
+s32 g_HasBroughtOverCharacter = FALSE;
 /* Set until the boot logos, finding a Game Boy Pak, have once gone to the Game
  * Boy Pak transfer module */
-extern s32 f_IsBootTransmitPending;
+static s32 f_IsBootTransmitPending = TRUE;
+/* Read by no routine */
+static s32 D_800C42D8[2] = {0};
 
 /* Not static: the original left it to the linker's common block */
 s32 f_HasRumblePak[MAXCONTROLLERS];
