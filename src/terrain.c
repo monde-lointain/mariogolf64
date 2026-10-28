@@ -99,6 +99,18 @@ typedef struct MapOverviewControls {
 #define WATER_BIAS 0x266
 #define LOWERED_WATER_BIAS (-0x600)
 
+/* f_TerrainColors' entries, named for the terrain codes drawn in them */
+#define TERRAIN_COLOR_FAIRWAY 0
+#define TERRAIN_COLOR_GREEN 1
+#define TERRAIN_COLOR_BUNKER 2
+#define TERRAIN_COLOR_ROUGH 3
+#define TERRAIN_COLOR_UNK3 4
+#define TERRAIN_COLOR_OUT_OF_BOUNDS 5
+#define TERRAIN_COLOR_CART_WAY 6
+#define TERRAIN_COLOR_UNK7 7
+#define TERRAIN_COLOR_TEE_GROUND 8
+#define TERRAIN_COLOR_ROCK 9
+#define TERRAIN_COLOR_DEEP_ROUGH 10
 #define TERRAIN_COLOR_COUNT 11
 
 extern u16 g_TerrainCodeColors[];
@@ -139,19 +151,19 @@ s32 g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
 s32 g_SubModuleId = MODULE_SCORECARD;
 s32 g_PendingSubModuleId = MODULE_SCORECARD;
 s32 g_SubModuleState = SUB_MODULE_UNLOADED;
-/* RGBA16 components, by the index that GetTerrainCodeColor gives */
+/* RGBA16 components */
 static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
-    {0x05, 0x19, 0x00, 1}, /* TERRAIN_CODE_FAIRWAY */
-    {0x05, 0x1E, 0x05, 1}, /* TERRAIN_CODE_GREEN */
-    {0x1C, 0x1C, 0x1C, 1}, /* TERRAIN_CODE_BUNKER */
-    {0x00, 0x10, 0x00, 1}, /* TERRAIN_CODE_ROUGH */
-    {0x00, 0x00, 0x1F, 0}, /* TERRAIN_CODE_UNK3 */
-    {0x0F, 0x08, 0x00, 1}, /* TERRAIN_CODE_OUT_OF_BOUNDS */
-    {0x0F, 0x0F, 0x0F, 1}, /* TERRAIN_CODE_CART_WAY */
-    {0x08, 0x16, 0x00, 1}, /* No terrain code's */
-    {0x1F, 0x16, 0x00, 1}, /* TERRAIN_CODE_TEE_GROUND */
-    {0x05, 0x05, 0x05, 1}, /* TERRAIN_CODE_ROCK */
-    {0x00, 0x1F, 0x1F, 1}, /* TERRAIN_CODE_DEEP_ROUGH */
+    {0x05, 0x19, 0x00, 1}, /* TERRAIN_COLOR_FAIRWAY */
+    {0x05, 0x1E, 0x05, 1}, /* TERRAIN_COLOR_GREEN */
+    {0x1C, 0x1C, 0x1C, 1}, /* TERRAIN_COLOR_BUNKER */
+    {0x00, 0x10, 0x00, 1}, /* TERRAIN_COLOR_ROUGH */
+    {0x00, 0x00, 0x1F, 0}, /* TERRAIN_COLOR_UNK3 */
+    {0x0F, 0x08, 0x00, 1}, /* TERRAIN_COLOR_OUT_OF_BOUNDS */
+    {0x0F, 0x0F, 0x0F, 1}, /* TERRAIN_COLOR_CART_WAY */
+    {0x08, 0x16, 0x00, 1}, /* TERRAIN_COLOR_UNK7 */
+    {0x1F, 0x16, 0x00, 1}, /* TERRAIN_COLOR_TEE_GROUND */
+    {0x05, 0x05, 0x05, 1}, /* TERRAIN_COLOR_ROCK */
+    {0x00, 0x1F, 0x1F, 1}, /* TERRAIN_COLOR_DEEP_ROUGH */
 };
 static MapOverviewControls f_MapOverviewControls = {
     0, 0, 0, MAP_OVERVIEW_ADJUSTMENT_START, FALSE};
@@ -299,38 +311,38 @@ s32 FindNearestTerrainColor(s32 color) {
 
 /* Returns a terrain code's colour as RGBA16 */
 s32 GetTerrainCodeColor(s32 code) {
-  s32 colorIndex = 0;
+  s32 colorIndex = TERRAIN_COLOR_FAIRWAY;
 
   switch (code) {
     case TERRAIN_CODE_FAIRWAY:
-      colorIndex = 0;
+      colorIndex = TERRAIN_COLOR_FAIRWAY;
       break;
     case TERRAIN_CODE_GREEN:
-      colorIndex = 1;
+      colorIndex = TERRAIN_COLOR_GREEN;
       break;
     case TERRAIN_CODE_BUNKER:
-      colorIndex = 2;
+      colorIndex = TERRAIN_COLOR_BUNKER;
       break;
     case TERRAIN_CODE_ROUGH:
-      colorIndex = 3;
+      colorIndex = TERRAIN_COLOR_ROUGH;
       break;
     case TERRAIN_CODE_UNK3:
-      colorIndex = 4;
+      colorIndex = TERRAIN_COLOR_UNK3;
       break;
     case TERRAIN_CODE_OUT_OF_BOUNDS:
-      colorIndex = 5;
+      colorIndex = TERRAIN_COLOR_OUT_OF_BOUNDS;
       break;
     case TERRAIN_CODE_CART_WAY:
-      colorIndex = 6;
+      colorIndex = TERRAIN_COLOR_CART_WAY;
       break;
     case TERRAIN_CODE_TEE_GROUND:
-      colorIndex = 8;
+      colorIndex = TERRAIN_COLOR_TEE_GROUND;
       break;
     case TERRAIN_CODE_ROCK:
-      colorIndex = 9;
+      colorIndex = TERRAIN_COLOR_ROCK;
       break;
     case TERRAIN_CODE_DEEP_ROUGH:
-      colorIndex = 10;
+      colorIndex = TERRAIN_COLOR_DEEP_ROUGH;
       break;
   }
 
