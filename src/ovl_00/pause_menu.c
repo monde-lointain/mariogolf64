@@ -76,6 +76,14 @@ enum PauseOptionKind {
   PAUSE_OPTION_KIND_GIVE_UP = 7
 };
 
+/* The texts of f_PauseValueTexts, which the weather and grid color show */
+enum PauseValueText {
+  PAUSE_VALUE_TEXT_CLEAR,
+  PAUSE_VALUE_TEXT_RAIN,
+  PAUSE_VALUE_TEXT_BLACK,
+  PAUSE_VALUE_TEXT_WHITE
+};
+
 /* Give Up, which is greyed out while f_CanGiveUp is clear */
 #define PAUSE_OPTION_GIVE_UP 2
 
@@ -119,10 +127,7 @@ extern s32 f_PauseLayout;
 extern s32 f_PauseMenuRequest;
 extern PauseOption f_PauseOptions[];
 extern s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
-extern char* f_ClearText;
-extern char* f_RainText;
-extern char* f_BlackText;
-extern char* f_WhiteText;
+extern char* f_PauseValueTexts[];
 extern f32 f_PauseGlowAngle;
 extern f32 f_PauseCursorAngle;
 
@@ -888,13 +893,15 @@ void DrawPauseMenu(Gfx** displayListHead) {
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
       DrawLargeText(&gfx, PAUSE_VALUE_X, y,
           (s8)g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_BLACK
-              ? f_BlackText
-              : f_WhiteText);
+              ? f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK]
+              : f_PauseValueTexts[PAUSE_VALUE_TEXT_WHITE]);
     }
 
     if (kind == PAUSE_OPTION_KIND_WEATHER) {
       DrawLargeText(&gfx, PAUSE_VALUE_X, y,
-          g_HoleSetup.conditions.isRaining == TRUE ? f_RainText : f_ClearText);
+          g_HoleSetup.conditions.isRaining == TRUE
+              ? f_PauseValueTexts[PAUSE_VALUE_TEXT_RAIN]
+              : f_PauseValueTexts[PAUSE_VALUE_TEXT_CLEAR]);
     }
   }
 
