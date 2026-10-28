@@ -43,14 +43,16 @@
 
 /* Game Boy balls 1 to 4 copy a character's contact effect, and 5 to 7 have
  * their own */
-#define GAME_BOY_BALL_TYPE_PLAIN 0
-#define GAME_BOY_BALL_TYPE_MARIO 1
-#define GAME_BOY_BALL_TYPE_BOWSER 2
-#define GAME_BOY_BALL_TYPE_WARIO 3
-#define GAME_BOY_BALL_TYPE_HEAVY_HITTER 4
-#define GAME_BOY_BALL_TYPE_5 5
-#define GAME_BOY_BALL_TYPE_6 6
-#define GAME_BOY_BALL_TYPE_7 7
+enum GameBoyBallType {
+  GAME_BOY_BALL_TYPE_PLAIN,
+  GAME_BOY_BALL_TYPE_MARIO,
+  GAME_BOY_BALL_TYPE_BOWSER,
+  GAME_BOY_BALL_TYPE_WARIO,
+  GAME_BOY_BALL_TYPE_HEAVY_HITTER,
+  GAME_BOY_BALL_TYPE_5,
+  GAME_BOY_BALL_TYPE_6,
+  GAME_BOY_BALL_TYPE_7
+};
 
 /* Where the contact effect's images go in g_SharedEffectImages, and their
  * assets */
@@ -112,8 +114,11 @@ typedef struct BannerLetter {
  * A banner's left edge (BANNER_LAYOUT_LEFT), then where each letter sits from
  * it (BANNER_LAYOUT_FIRST_LETTER onwards)
  */
-#define BANNER_LAYOUT_LEFT 0
-#define BANNER_LAYOUT_FIRST_LETTER 1
+enum BannerLayoutMode {
+  BANNER_LAYOUT_LEFT,
+  BANNER_LAYOUT_FIRST_LETTER
+};
+
 typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_MAX_LETTERS];
 
 /* Frames since the banner started, or BANNER_FRAME_NONE */
@@ -553,12 +558,14 @@ void func_8020EEEC_ovl_00(Gfx** displayListHead) {
 
 /* How a banner comes in, as its Banner.animation */
 /* Shrinks onto the screen while fading in, then leaves */
-#define BANNER_ANIMATION_ZOOM 0
-#define BANNER_ANIMATION_SPIN 1 /* Grows while turning once */
-/* Slides in from the right and wobbles, then leaves */
-#define BANNER_ANIMATION_SLIDE 2
-/* Like BANNER_ANIMATION_ZOOM, but larger and stays */
-#define BANNER_ANIMATION_ZOOM_STAY 3
+enum BannerAnimation {
+  BANNER_ANIMATION_ZOOM,
+  BANNER_ANIMATION_SPIN, /* Grows while turning once */
+  /* Slides in from the right and wobbles, then leaves */
+  BANNER_ANIMATION_SLIDE,
+  /* Like BANNER_ANIMATION_ZOOM, but larger and stays */
+  BANNER_ANIMATION_ZOOM_STAY
+};
 
 /* The debug flag that lets the D-Pad pick a banner and start it */
 #define GAME_FLAG_TEST_BANNERS 0x6D

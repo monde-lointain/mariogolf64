@@ -1038,14 +1038,16 @@ void BuildDynamicTextures(Gfx** displayListHead) {
  * screens are still known only by number.
  */
 /* A module's screen, with the course in the inset view */
-#define DRAW_MODE_INSET_SCREEN 0
-#define DRAW_MODE_COURSE 1
-#define DRAW_MODE_MAP_PERSPECTIVE 3
-#define DRAW_MODE_MAP_ISOMETRIC 4
-#define DRAW_MODE_MAP_MINIATURE 5
-#define DRAW_MODE_MAP_TOP_DOWN 6
-#define DRAW_MODE_NOTHING 13
-#define DRAW_MODE_BLANK 14
+enum DrawMode {
+  DRAW_MODE_INSET_SCREEN,
+  DRAW_MODE_COURSE,
+  DRAW_MODE_MAP_PERSPECTIVE = 3,
+  DRAW_MODE_MAP_ISOMETRIC,
+  DRAW_MODE_MAP_MINIATURE,
+  DRAW_MODE_MAP_TOP_DOWN,
+  DRAW_MODE_NOTHING = 13,
+  DRAW_MODE_BLANK
+};
 
 /* The map cameras' views, in world units */
 #define MAP_NEAR_CLIP 10.0f

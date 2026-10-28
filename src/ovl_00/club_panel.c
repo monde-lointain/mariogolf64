@@ -25,8 +25,10 @@
 #define DEBUG_VALUE_ROW 5
 
 /* f_ClubPanelState values */
-#define CLUB_PANEL_FREED -1
-#define CLUB_PANEL_LOADED 1
+enum ClubPanelState {
+  CLUB_PANEL_FREED = -1,
+  CLUB_PANEL_LOADED = 1
+};
 
 /* The frames of a shot mode change; the last frame shows the new mode */
 #define SHOT_MODE_CHANGE_FRAME_COUNT 4

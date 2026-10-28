@@ -65,9 +65,11 @@ enum SparkKind {
 extern s32 f_ImpactFrameCount;
 
 /* The arguments of StartSwingTrail */
-#define SWING_TRAIL_CLEAR -1
-#define SWING_TRAIL_KIND_UNK1 1
-#define SWING_TRAIL_KIND_UNK2 2
+enum SwingTrailKind {
+  SWING_TRAIL_CLEAR = -1,
+  SWING_TRAIL_KIND_UNK1 = 1,
+  SWING_TRAIL_KIND_UNK2
+};
 
 enum SwingTrailState {
   SWING_TRAIL_NONE,

@@ -194,10 +194,12 @@ static const char f_UnusedFloatFormat[] = "            %f";
 
 /* Values of f_PendingResultSound, which plays when D_800BE620 reaches
  * RESULT_SOUND_STAGE */
-#define RESULT_SOUND_NONE 0
-#define RESULT_SOUND_UNK1 1 /* Plays FLIGHT_SOUND_UNK17 */
-#define RESULT_SOUND_UNK2 2 /* Plays FLIGHT_SOUND_UNK67 */
-#define RESULT_SOUND_STAGE 15
+enum ResultSound {
+  RESULT_SOUND_NONE,
+  RESULT_SOUND_UNK1, /* Plays FLIGHT_SOUND_UNK17 */
+  RESULT_SOUND_UNK2, /* Plays FLIGHT_SOUND_UNK67 */
+  RESULT_SOUND_STAGE = 15
+};
 
 /* The flyover's field of view, in degrees, and the inset view's rectangle */
 #define FLYOVER_FIELD_OF_VIEW 80.0f

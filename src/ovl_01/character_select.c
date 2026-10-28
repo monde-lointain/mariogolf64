@@ -31,10 +31,12 @@
 #define CHOOSABLE_MARK_LIMIT (-20)
 
 /* The directions that func_80209568 moves a player's cursor through the grid */
-#define GRID_MOVE_UP 1
-#define GRID_MOVE_DOWN 2
-#define GRID_MOVE_LEFT 3
-#define GRID_MOVE_RIGHT 4
+enum GridMove {
+  GRID_MOVE_UP = 1,
+  GRID_MOVE_DOWN,
+  GRID_MOVE_LEFT,
+  GRID_MOVE_RIGHT
+};
 
 /* The diagonals of any controller's stick that func_80209BE0 reports, each once
  * per hold of four frames */

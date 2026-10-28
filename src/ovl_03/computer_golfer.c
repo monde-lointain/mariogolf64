@@ -63,10 +63,12 @@ typedef struct GolferTraits {
 } GolferTraits; /* size = 0xE */
 
 /* GolferTraits.windPlay values */
-#define WIND_PLAY_HEAD_WINDS 0 /* Offsets shots for head winds */
-/* Offsets shots for the strongest winds either way */
-#define WIND_PLAY_STRONG_WINDS 1
-#define WIND_PLAY_FOLLOWING_WINDS 2 /* Offsets shots for following winds */
+enum WindPlay {
+  WIND_PLAY_HEAD_WINDS, /* Offsets shots for head winds */
+  /* Offsets shots for the strongest winds either way */
+  WIND_PLAY_STRONG_WINDS,
+  WIND_PLAY_FOLLOWING_WINDS /* Offsets shots for following winds */
+};
 
 /* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
 typedef struct ShotOffset {
@@ -1595,10 +1597,12 @@ s32 PlanRoute(s8* route) {
 
 /* How good a place to land each surface kind is, from LANDING_NONE to
  * LANDING_BEST */
-#define LANDING_NONE 0
-#define LANDING_POOR 5
-#define LANDING_FAIR 7
-#define LANDING_BEST 8
+enum LandingRating {
+  LANDING_NONE,
+  LANDING_POOR = 5,
+  LANDING_FAIR = 7,
+  LANDING_BEST
+};
 
 s32 GetLandingRating(u32 surfaceKind) {
   s32 rating;
@@ -2713,8 +2717,10 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
       g_HoleSetup.conditions.windSpeed < (limit))
 
 /* f_ClubKindChances rows */
-#define CLUB_CHANCE_SET_FOLLOWING_WIND 0
-#define CLUB_CHANCE_SET_HEAD_WIND 1
+enum ClubChanceSet {
+  CLUB_CHANCE_SET_FOLLOWING_WIND,
+  CLUB_CHANCE_SET_HEAD_WIND
+};
 
 /*
  * Chooses the offset to give the planned shot, from the lie, the golfer's

@@ -20,15 +20,20 @@
 #include "sound.h"
 #include "text.h"
 #include "variables.h"
+
 /* f_LoadedScreen values */
-#define COURSE_SELECT_UNLOADED 0
-#define COURSE_SELECT_RING_SHOT 1
-#define COURSE_SELECT_HOLES 2
+enum CourseSelectState {
+  COURSE_SELECT_UNLOADED,
+  COURSE_SELECT_RING_SHOT,
+  COURSE_SELECT_HOLES
+};
 
 /* What UpdateRingShotSelect and UpdateHoleSelect return */
-#define SELECT_IDLE 0
-#define SELECT_MOVED 1
-#define SELECT_BACK 2
+enum SelectResult {
+  SELECT_IDLE,
+  SELECT_MOVED,
+  SELECT_BACK
+};
 
 /* f_PressedDirection values */
 #define DIRECTION_UP 1
@@ -37,9 +42,11 @@
 #define DIRECTION_RIGHT 8
 
 /* f_PlankMotion values */
-#define PLANKS_SHUT -1
-#define PLANKS_CLOSING 0
-#define PLANKS_OPENING 1
+enum PlanksState {
+  PLANKS_SHUT = -1,
+  PLANKS_CLOSING,
+  PLANKS_OPENING
+};
 
 #define SOUND_MENU_MOVE 0x5C
 #define MENU_SOUND_CHANNEL 15

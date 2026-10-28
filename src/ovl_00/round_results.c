@@ -32,20 +32,26 @@
 #define CLOSE_ROUND_RESULTS -1
 
 /* f_ResultsState values */
-#define RESULTS_SLIDING_IN 0
-#define RESULTS_SHOWN 1
-#define RESULTS_CLOSING 2 /* Saves and frees them */
+enum ResultsState {
+  RESULTS_SLIDING_IN,
+  RESULTS_SHOWN,
+  RESULTS_CLOSING /* Saves and frees them */
+};
 
 /* LoadUnlockNotice's unlocks */
-#define UNLOCK_NOTICE_DONKEY_KONG 0
-#define UNLOCK_NOTICE_PEACH 1
-#define UNLOCK_NOTICE_METAL_MARIO 2
-#define UNLOCK_NOTICE_COURSES 3 /* The first of the courses' unlocks */
+enum UnlockNotice {
+  UNLOCK_NOTICE_DONKEY_KONG,
+  UNLOCK_NOTICE_PEACH,
+  UNLOCK_NOTICE_METAL_MARIO,
+  UNLOCK_NOTICE_COURSES /* The first of the courses' unlocks */
+};
 
 /* f_UnlockNoticeKind values */
-#define UNLOCK_NOTICE_KIND_NONE 0
-#define UNLOCK_NOTICE_KIND_COURSE 1
-#define UNLOCK_NOTICE_KIND_CHARACTER 2
+enum UnlockNoticeKind {
+  UNLOCK_NOTICE_KIND_NONE,
+  UNLOCK_NOTICE_KIND_COURSE,
+  UNLOCK_NOTICE_KIND_CHARACTER
+};
 
 #define RESULTS_DIGIT_WIDTH 8
 #define RESULTS_DIGIT_HEIGHT 12
@@ -58,8 +64,10 @@
 #define CONFIRM_SOUND_CHANNEL 15
 #define CONFIRM_SOUND_VOLUME 100
 
-#define PORTRAIT_ANIMATION_UNK1 1
-#define PORTRAIT_ANIMATION_UNK4 4
+enum PortraitAnimation {
+  PORTRAIT_ANIMATION_UNK1 = 1,
+  PORTRAIT_ANIMATION_UNK4 = 4
+};
 
 /*
  * The course notice drops in on a half sine swing, NOTICE_SWING_STEP an
@@ -1754,16 +1762,21 @@ extern s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT];
 extern s32 f_TrophyShineFrame;
 extern s32 f_TrophyFrame;
 
-#define BANNER_KIND_TOURNAMENT_PLACE 1
-#define BANNER_KIND_UNK2 2
-#define BANNER_KIND_POINTS 3
-#define BANNER_KIND_UNK4 4
-#define BANNER_KIND_UNK5 5
+enum BannerKind {
+  BANNER_KIND_TOURNAMENT_PLACE = 1,
+  BANNER_KIND_UNK2,
+  BANNER_KIND_POINTS,
+  BANNER_KIND_UNK4,
+  BANNER_KIND_UNK5
+};
 
-#define BANNER_SLIDING_IN 0
-#define BANNER_SHOWN 1
-#define BANNER_HIDDEN 3
-#define BANNER_SLIDING_OUT 4
+enum BannerState {
+  BANNER_SLIDING_IN,
+  BANNER_SHOWN,
+  BANNER_HIDDEN = 3,
+  BANNER_SLIDING_OUT
+};
+
 /* Off the screen's left */
 #define BANNER_GONE_X (-SCREEN_WIDTH)
 #define BANNER_SLIDE_OUT_SPEED 4

@@ -190,10 +190,13 @@ extern s32 f_BackdropFadeLevel;
 #define SPIRAL_FADING_TILE_COUNT 4
 #define SPIRAL_OPAQUE_ALPHA 255
 #define SPIRAL_ALPHA_STEP (SPIRAL_OPAQUE_ALPHA / (SPIRAL_FADING_TILE_COUNT + 1))
-#define SPIRAL_RIGHT 0
-#define SPIRAL_DOWN 1
-#define SPIRAL_LEFT 2
-#define SPIRAL_UP 3
+
+enum SpiralDirection {
+  SPIRAL_RIGHT,
+  SPIRAL_DOWN,
+  SPIRAL_LEFT,
+  SPIRAL_UP
+};
 
 /*
  * The frame's tiles turn over and fly apart towards the camera as the

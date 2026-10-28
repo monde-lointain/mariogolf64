@@ -128,29 +128,33 @@ typedef struct ShotDebris {
   /* 0x14 */ s32 unk14;
 } ShotDebris; /* size = 0x18 */
 
-#define EFFECT_KIND_NONE (-1)
-#define EFFECT_KIND_UNK0 0
-#define EFFECT_KIND_UNK1 1
-#define EFFECT_KIND_UNK2 2
-#define EFFECT_KIND_UNK3 3
-#define EFFECT_KIND_UNK4 4
-#define EFFECT_KIND_DROP 5 /* Drawn with f_DropImage */
-#define EFFECT_KIND_DIVOT 6 /* Drawn with f_DivotImage */
-#define EFFECT_KIND_DIVOT_MARK 7 /* Drawn with f_DivotImage's last frame */
-#define EFFECT_KIND_SPARKLE 8
-#define EFFECT_KIND_RIPPLE 0xC
-#define EFFECT_KIND_UNKE 0xE
-#define EFFECT_KIND_SPREADING_CIRCLE 0x13 /* Drawn with f_ArcImage */
-#define EFFECT_KIND_RISING_CLUMP 0x10 /* Drawn with f_ClumpImage */
-#define EFFECT_KIND_TEAR 0x14
+enum EffectKind {
+  EFFECT_KIND_NONE = -1,
+  EFFECT_KIND_UNK0,
+  EFFECT_KIND_UNK1,
+  EFFECT_KIND_UNK2,
+  EFFECT_KIND_UNK3,
+  EFFECT_KIND_UNK4,
+  EFFECT_KIND_DROP, /* Drawn with f_DropImage */
+  EFFECT_KIND_DIVOT, /* Drawn with f_DivotImage */
+  EFFECT_KIND_DIVOT_MARK, /* Drawn with f_DivotImage's last frame */
+  EFFECT_KIND_SPARKLE,
+  EFFECT_KIND_RIPPLE = 0xC,
+  EFFECT_KIND_UNKE = 0xE,
+  EFFECT_KIND_SPREADING_CIRCLE = 0x13, /* Drawn with f_ArcImage */
+  EFFECT_KIND_RISING_CLUMP = 0x10, /* Drawn with f_ClumpImage */
+  EFFECT_KIND_TEAR = 0x14
+};
 
 /* The debris that the ball's lie gives, chosen by its surface kind */
-#define DEBRIS_KIND_NONE 0
-#define DEBRIS_KIND_TEE_UP 1
-#define DEBRIS_KIND_GRASS 2 /* Fairway, tee ground and semi-rough */
-#define DEBRIS_KIND_DUST 3 /* Bunker and bare ground */
-#define DEBRIS_KIND_ROUGH 4
-#define DEBRIS_KIND_BURIED 6 /* Bunker lies with the ball sunk in the sand */
+enum DebrisKind {
+  DEBRIS_KIND_NONE,
+  DEBRIS_KIND_TEE_UP,
+  DEBRIS_KIND_GRASS, /* Fairway, tee ground and semi-rough */
+  DEBRIS_KIND_DUST, /* Bunker and bare ground */
+  DEBRIS_KIND_ROUGH,
+  DEBRIS_KIND_BURIED = 6 /* Bunker lies with the ball sunk in the sand */
+};
 
 static Mtx f_RainModelViewMatrix;
 

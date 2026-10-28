@@ -63,12 +63,16 @@
 #define SEND_STATUS_WRITING 12
 
 /* The answers to PROMPT_BRING_MORE_CHARACTERS */
-#define BRING_MORE_CHARACTERS_YES 8
-#define BRING_MORE_CHARACTERS_NO 9
+enum BringMoreCharactersAnswer {
+  BRING_MORE_CHARACTERS_YES = 8,
+  BRING_MORE_CHARACTERS_NO
+};
 
 /* The answers to PROMPT_OVERWRITE_RECORDS */
-#define OVERWRITE_RECORDS_YES 10
-#define OVERWRITE_RECORDS_NO 11
+enum OverwriteRecordsAnswer {
+  OVERWRITE_RECORDS_YES = 10,
+  OVERWRITE_RECORDS_NO
+};
 
 /* screenStep values on the Send Experience screen */
 #define SEND_EXPERIENCE_CHOOSING 0
@@ -136,9 +140,11 @@
 #define CURVE_SEGMENT_COUNT 9 /* From a fade of 4 to a draw of 4 */
 
 /* The rows of the shot types image */
-#define SHOT_TYPE_STRAIGHT 0
-#define SHOT_TYPE_DRAW 1
-#define SHOT_TYPE_FADE 2
+enum ShotType {
+  SHOT_TYPE_STRAIGHT,
+  SHOT_TYPE_DRAW,
+  SHOT_TYPE_FADE
+};
 
 /* The faces of the characters brought over, along the bottom */
 #define FACES_LEFT 24
@@ -148,9 +154,11 @@
 #define FACE_CURSOR_MARGIN 9
 
 /* Where a cartridge character is on the Bring Characters list */
-#define LISTING_NONE 0
-#define LISTING_SHOWN 1
-#define LISTING_BRINGING 2 /* Moving to its slot */
+enum ListingState {
+  LISTING_NONE,
+  LISTING_SHOWN,
+  LISTING_BRINGING /* Moving to its slot */
+};
 
 /* The listed cartridge characters on the Bring Characters screen, each above
  * its controller */
@@ -343,9 +351,11 @@ typedef struct StatusData {
 
 /* What was wrong with the character's cartridge, reported when it was the only
  * one found */
-#define CARTRIDGE_FAULT_NONE 0
-#define CARTRIDGE_FAULT_UNINITIALIZED 1 /* Its save lacks the signature */
-#define CARTRIDGE_FAULT_CORRUPTED 2
+enum CartridgeFault {
+  CARTRIDGE_FAULT_NONE,
+  CARTRIDGE_FAULT_UNINITIALIZED, /* Its save lacks the signature */
+  CARTRIDGE_FAULT_CORRUPTED
+};
 
 /* How far ReadCartridgeCharacters has checked a save */
 #define NOT_CHECKED 0
@@ -356,21 +366,27 @@ typedef struct StatusData {
 #define RECORD_PRESENT 1 /* The first byte of a record in use */
 
 /* What CheckStatusCartridge found */
-#define STATUS_CHECK_NO_STATUS 0
-#define STATUS_CHECK_FAILED 1 /* With the cause in transferResult */
-#define STATUS_CHECK_HAS_STATUS 2
-#define STATUS_CHECK_READ_FAILED 3 /* With the error in transferResult */
+enum StatusCheck {
+  STATUS_CHECK_NO_STATUS,
+  STATUS_CHECK_FAILED, /* With the cause in transferResult */
+  STATUS_CHECK_HAS_STATUS,
+  STATUS_CHECK_READ_FAILED /* With the error in transferResult */
+};
 
 /* What WriteStatusToCartridge did */
-#define STATUS_WRITE_DONE 0
-#define STATUS_WRITE_PAK_ERROR 1 /* With the error in transferResult */
-#define STATUS_WRITE_FAILED 2 /* With the cause in transferResult */
+enum StatusWriteResult {
+  STATUS_WRITE_DONE,
+  STATUS_WRITE_PAK_ERROR, /* With the error in transferResult */
+  STATUS_WRITE_FAILED /* With the cause in transferResult */
+};
 
 /* What WriteExperienceToCartridge did */
-#define EXPERIENCE_WRITE_DONE 0
-#define EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE 1
-#define EXPERIENCE_WRITE_FAILED 2 /* With the cause in transferResult */
-#define EXPERIENCE_WRITE_PAK_ERROR 3 /* With the error in transferResult */
+enum ExperienceWriteResult {
+  EXPERIENCE_WRITE_DONE,
+  EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE,
+  EXPERIENCE_WRITE_FAILED, /* With the cause in transferResult */
+  EXPERIENCE_WRITE_PAK_ERROR /* With the error in transferResult */
+};
 
 #define WOOD_PANEL_ASSET 0x8FD
 #define COURSE_SCENE_ASSET 0x51E

@@ -29,14 +29,17 @@
 #include "text.h"
 #include "tournament.h"
 #include "variables.h"
+
 /* f_ScorecardState values */
-#define SCORECARD_OPENING 0 /* Sliding in */
-#define SCORECARD_CLOSING 1 /* Sliding out */
-#define SCORECARD_SHOWN 2 /* The player can turn its pages */
-#define SCORECARD_TALLYING 3 /* Counting skins before it is shown */
-#define SCORECARD_CLOSED 4
-#define SCORECARD_MATCH_RESULT 5 /* DrawMatchResult shows who won the hole */
-#define SCORECARD_UNK6 6
+enum ScorecardState {
+  SCORECARD_OPENING, /* Sliding in */
+  SCORECARD_CLOSING, /* Sliding out */
+  SCORECARD_SHOWN, /* The player can turn its pages */
+  SCORECARD_TALLYING, /* Counting skins before it is shown */
+  SCORECARD_CLOSED,
+  SCORECARD_MATCH_RESULT, /* DrawMatchResult shows who won the hole */
+  SCORECARD_UNK6
+};
 
 /* The layouts that SetScorecardLayout picks for the game modes */
 #define SCORECARD_LAYOUT_STROKE 0

@@ -113,10 +113,13 @@
     HALF_TURN_PAIR(centerColumn - (column), centerRow + (row) + 1) operation; \
     HALF_TURN_PAIR(centerColumn - (column), centerRow - (row) + 1) operation; \
   } while (0)
-#define HALF_TURN_STATE_SHOWING 0
-#define HALF_TURN_STATE_UNK1 1
-#define HALF_TURN_STATE_LEAVING 2
-#define HALF_TURN_STATE_DONE 3
+
+enum HalfTurnState {
+  HALF_TURN_STATE_SHOWING,
+  HALF_TURN_STATE_UNK1,
+  HALF_TURN_STATE_LEAVING,
+  HALF_TURN_STATE_DONE
+};
 
 /* The fade's opacity runs over this many steps */
 #define FADE_ALPHA_RANGE 256

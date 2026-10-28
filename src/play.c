@@ -752,14 +752,16 @@ void func_8005DDAC(void);
 #define HOLE_END_STEP_RING_SHOT_COURSE_NOTICE 16
 
 /* g_PlayExit, the menu that play returns to once the hole ends */
-#define PLAY_EXIT_NONE 0 /* Plays on to the next hole */
-#define PLAY_EXIT_UNK1 1
-#define PLAY_EXIT_UNK2 2
-#define PLAY_EXIT_UNK3 3
-#define PLAY_EXIT_UNK4 4
-#define PLAY_EXIT_RING_SHOT 5
-#define PLAY_EXIT_QUIT 6
-#define PLAY_EXIT_ROUND_OVER 7
+enum PlayExit {
+  PLAY_EXIT_NONE, /* Plays on to the next hole */
+  PLAY_EXIT_UNK1,
+  PLAY_EXIT_UNK2,
+  PLAY_EXIT_UNK3,
+  PLAY_EXIT_UNK4,
+  PLAY_EXIT_RING_SHOT,
+  PLAY_EXIT_QUIT,
+  PLAY_EXIT_ROUND_OVER
+};
 
 /* g_HoleResultsKind, the results that the scorecard shows between holes */
 #define HOLE_RESULTS_STROKE 0
@@ -769,9 +771,11 @@ void func_8005DDAC(void);
 #define HOLE_RESULTS_SPEED_GOLF 4
 
 /* The choices that the Training and Ring Shot menus return */
-#define HOLE_MENU_NONE 0
-#define HOLE_MENU_RELOAD 1
-#define HOLE_MENU_QUIT 2
+enum HoleMenuChoice {
+  HOLE_MENU_NONE,
+  HOLE_MENU_RELOAD,
+  HOLE_MENU_QUIT
+};
 
 /* What the Ring Shot results return */
 #define RING_SHOT_RESULTS_DONE 1
@@ -780,9 +784,11 @@ void func_8005DDAC(void);
 #define RING_SHOT_RESULTS_MODE_UNK2 2
 
 /* The results of the prompt that the Ring Shot results open */
-#define PROMPT_RESULT_UNK1 1
-#define PROMPT_RESULT_UNK2 2
-#define PROMPT_RESULT_UNK7 7
+enum PromptResult {
+  PROMPT_RESULT_UNK1 = 1,
+  PROMPT_RESULT_UNK2,
+  PROMPT_RESULT_UNK7 = 7
+};
 
 /* The notices shown when the hole unlocks something */
 #define UNLOCK_NOTICE_DONKEY_KONG 0

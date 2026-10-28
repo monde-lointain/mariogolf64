@@ -117,10 +117,12 @@
 #define STATS_CURSOR_LEFT_X 6
 #define STATS_CURSOR_TOP_Y 30
 
-#define STATS_DIRECTION_LEFT 0
-#define STATS_DIRECTION_RIGHT 1
-#define STATS_DIRECTION_UP 2
-#define STATS_DIRECTION_DOWN 3
+enum StatsDirection {
+  STATS_DIRECTION_LEFT,
+  STATS_DIRECTION_RIGHT,
+  STATS_DIRECTION_UP,
+  STATS_DIRECTION_DOWN
+};
 
 /*
  * The rows of the stats panel slide across together: D_80230784 holds their

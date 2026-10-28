@@ -39,9 +39,11 @@
 #define FULL_SONG_VOLUME 0x7F
 
 /* Values of f_PauseMenuRequest, which the pause menu's drawing carries out */
-#define PAUSE_MENU_REQUEST_FREE (-1)
-#define PAUSE_MENU_REQUEST_NONE 0
-#define PAUSE_MENU_REQUEST_LOAD 1
+enum PauseMenuRequest {
+  PAUSE_MENU_REQUEST_FREE = -1,
+  PAUSE_MENU_REQUEST_NONE,
+  PAUSE_MENU_REQUEST_LOAD
+};
 
 /* The pause menu's option lists, which the game mode picks */
 #define PAUSE_LAYOUT_NONE (-1) /* For a record being played back */
@@ -92,10 +94,12 @@ s32 f_PauseMenuUnkD678;
 #define MENU_SOUND_VOLUME 100
 
 /* Values of f_ChoiceBoxState */
-#define CHOICE_BOX_CLOSED (-1)
-#define CHOICE_BOX_CHOOSING 0
-#define CHOICE_BOX_CHOSEN 1 /* Waits a frame before the box closes */
-#define CHOICE_BOX_CLOSING 2
+enum ChoiceBoxState {
+  CHOICE_BOX_CLOSED = -1,
+  CHOICE_BOX_CHOOSING,
+  CHOICE_BOX_CHOSEN, /* Waits a frame before the box closes */
+  CHOICE_BOX_CLOSING
+};
 
 typedef struct ChoiceBox {
   /* 0x00 */ s32 optionCount;
@@ -293,9 +297,11 @@ void FreePauseMenu(void) {
 
 /* What a pause option shows beside its label, and how the cursor points at it
  */
-#define PAUSE_OPTION_KIND_PLAIN 0
-/* Shows another label while f_PauseMenuUnkD678 is clear */
-#define PAUSE_OPTION_KIND_UNKD678 7
+enum PauseOptionKind {
+  PAUSE_OPTION_KIND_PLAIN,
+  /* Shows another label while f_PauseMenuUnkD678 is clear */
+  PAUSE_OPTION_KIND_UNKD678 = 7
+};
 
 /* The option that is greyed out while f_PauseMenuUnkD678 is clear */
 #define PAUSE_OPTION_UNKD678 2
@@ -321,25 +327,29 @@ extern f32 f_PauseGlowAngle;
 extern f32 f_PauseCursorAngle;
 
 /* What choosing a pause option does, as its PauseOption.action */
-#define PAUSE_ACTION_FREE_LOOK 0
-#define PAUSE_ACTION_SCORECARD 1
-/* Only while debugging or with f_PauseMenuUnkD678 set */
-#define PAUSE_ACTION_UNKD678 2
-#define PAUSE_ACTION_UNK3 3
-#define PAUSE_ACTION_UNK4 4
-#define PAUSE_ACTION_UNK6 6
-#define PAUSE_ACTION_RETRY_HOLE 9
-#define PAUSE_ACTION_UNK13 13
-#define PAUSE_ACTION_UNK14 14
-#define PAUSE_ACTION_UNK15 15
-/* UpdatePauseMenu's result while no option is chosen */
-#define PAUSE_ACTION_NONE (-1)
+enum PauseAction {
+  PAUSE_ACTION_FREE_LOOK,
+  PAUSE_ACTION_SCORECARD,
+  /* Only while debugging or with f_PauseMenuUnkD678 set */
+  PAUSE_ACTION_UNKD678,
+  PAUSE_ACTION_UNK3,
+  PAUSE_ACTION_UNK4,
+  PAUSE_ACTION_UNK6 = 6,
+  PAUSE_ACTION_RETRY_HOLE = 9,
+  PAUSE_ACTION_UNK13 = 13,
+  PAUSE_ACTION_UNK14,
+  PAUSE_ACTION_UNK15,
+  /* UpdatePauseMenu's result while no option is chosen */
+  PAUSE_ACTION_NONE = -1
+};
 
 /* The prompts that some options open */
-#define PROMPT_UNK3 3
-#define PROMPT_UNK4 4
-#define PROMPT_UNK7 7
-#define PROMPT_UNK8 8
+enum PromptId {
+  PROMPT_UNK3 = 3,
+  PROMPT_UNK4,
+  PROMPT_UNK7 = 7,
+  PROMPT_UNK8
+};
 
 #define SOUND_MENU_MOVE 0x5C
 #define SOUND_RING_SHOT_RETRY 0x8E

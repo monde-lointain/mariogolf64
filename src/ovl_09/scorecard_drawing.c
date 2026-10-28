@@ -98,10 +98,12 @@
 
 /* The page's four looks. No code changes f_ScoresStyle, so the page keeps
  * SCORES_STYLE_OPAQUE. */
-#define SCORES_STYLE_YELLOW 0
-#define SCORES_STYLE_FADED 1
-#define SCORES_STYLE_OPAQUE 2
-#define SCORES_STYLE_TINTED 3
+enum ScoresStyle {
+  SCORES_STYLE_YELLOW,
+  SCORES_STYLE_FADED,
+  SCORES_STYLE_OPAQUE,
+  SCORES_STYLE_TINTED
+};
 
 /* "Hole %d" in half-width katakana */
 extern const char f_HoleNumberFormat[];

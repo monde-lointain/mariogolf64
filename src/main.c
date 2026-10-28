@@ -48,9 +48,11 @@
 #define BUILD_DATE_LENGTH_MAX 63
 
 /* Character slots that get a buffer in g_WorkArea */
-#define CHARACTER_SLOT_PARTNER 1
-#define CHARACTER_SLOT_CADDIE 2
-#define CHARACTER_SLOT_GOLFER 3
+enum CharacterSlotRole {
+  CHARACTER_SLOT_PARTNER = 1,
+  CHARACTER_SLOT_CADDIE,
+  CHARACTER_SLOT_GOLFER
+};
 
 /* Iterations of the busy loop between two reports of RunHeartbeatLoop */
 #define HEARTBEAT_LOOP_COUNT 100000000
@@ -62,9 +64,12 @@
 /* Values of f_DebugHaltState. Holding HALT_BUTTONS on the first controller
    while halting is allowed halts the game and hands the console over to
    the development debugger. */
-#define HALT_STATE_DISALLOWED 0
-#define HALT_STATE_ALLOWED 1
-#define HALT_STATE_HALTED 2
+enum HaltState {
+  HALT_STATE_DISALLOWED,
+  HALT_STATE_ALLOWED,
+  HALT_STATE_HALTED
+};
+
 #define HALT_BUTTONS (A_BUTTON | B_BUTTON | L_TRIG | R_TRIG)
 
 /* Graphics tasks that may wait for the RDP before a frame is skipped,

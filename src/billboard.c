@@ -683,8 +683,10 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawFadingBillboards);
  * routines remain from that, but send their commands nowhere.
  */
 
-#define HOST_COMMAND_WRITE_FILE 10
-#define HOST_COMMAND_READ_FILE 11
+enum HostCommand {
+  HOST_COMMAND_WRITE_FILE = 10,
+  HOST_COMMAND_READ_FILE
+};
 
 s32 WriteHostFile(char* fileName, u32 size) {
   u32* command;

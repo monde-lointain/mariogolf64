@@ -52,9 +52,11 @@
 
 /* The games that func_80222CDC continues from the save's mode tables, by the
  * save menu's slot */
-#define SAVE_MENU_GAME_TOURNAMENT 0
-#define SAVE_MENU_GAME_GET_CHARACTER 1
-#define SAVE_MENU_GAME_STROKE 2
+enum SaveMenuGame {
+  SAVE_MENU_GAME_TOURNAMENT,
+  SAVE_MENU_GAME_GET_CHARACTER,
+  SAVE_MENU_GAME_STROKE
+};
 
 /* The image listing the game modes, in orange */
 #define ASSET_MENU_GAME_MODES 0x528

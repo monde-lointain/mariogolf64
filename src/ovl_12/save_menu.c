@@ -23,18 +23,22 @@
 #include "variables.h"
 
 /* What OpenSaveMenu lists, and f_MenuKind */
-#define SAVE_MENU_CLOSED 0
-#define SAVE_MENU_GAMES 1
-#define SAVE_MENU_REPLAYS 2
+enum SaveMenuList {
+  SAVE_MENU_CLOSED,
+  SAVE_MENU_GAMES,
+  SAVE_MENU_REPLAYS
+};
 
 /* f_MenuState values */
-#define SAVE_MENU_STATE_OPENING 0 /* The rows slide in */
-#define SAVE_MENU_STATE_CHOOSING 1
-#define SAVE_MENU_STATE_BACKING_OUT 2 /* The rows slide out */
-#define SAVE_MENU_STATE_BACKED_OUT 3
-#define SAVE_MENU_STATE_SAVED 4 /* Waits before leaving */
-/* The rows slide out, and the menu closes */
-#define SAVE_MENU_STATE_LEAVING 5
+enum SaveMenuState {
+  SAVE_MENU_STATE_OPENING, /* The rows slide in */
+  SAVE_MENU_STATE_CHOOSING,
+  SAVE_MENU_STATE_BACKING_OUT, /* The rows slide out */
+  SAVE_MENU_STATE_BACKED_OUT,
+  SAVE_MENU_STATE_SAVED, /* Waits before leaving */
+  /* The rows slide out, and the menu closes */
+  SAVE_MENU_STATE_LEAVING
+};
 
 /* The frames that each frame of the chosen icon shows for */
 #define ICON_FRAME_PERIOD 5
@@ -96,9 +100,11 @@
 #define NO_TEXT -1
 
 /* What UpdateReplaySaveMenu returns */
-#define REPLAY_MENU_OPEN 0
-#define REPLAY_MENU_CLOSED 1
-#define REPLAY_MENU_PROMPTING 2
+enum ReplayMenuState {
+  REPLAY_MENU_OPEN,
+  REPLAY_MENU_CLOSED,
+  REPLAY_MENU_PROMPTING
+};
 
 /* The rows below the saved games and the replay records */
 #define END_GAME_ROW SAVED_GAME_COUNT
@@ -167,14 +173,17 @@
 #define LUIGIS_GARDEN_COURSE_INDEX MINI_GOLF_COURSE_INDEX
 #define PEACHS_CASTLE_COURSE_INDEX \
   (MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD)
+
 /* Indices of f_ModeNames */
-#define MODE_NAME_TOURNAMENT 0
-#define MODE_NAME_GET_CHARACTER 1
-#define MODE_NAME_STROKE 2
-#define MODE_NAME_MATCH_GAME 3
-#define MODE_NAME_SKINS_MATCH 4
-#define MODE_NAME_CLUB_SLOTS 5
-#define MODE_NAME_MINI_GOLF 6
+enum ModeName {
+  MODE_NAME_TOURNAMENT,
+  MODE_NAME_GET_CHARACTER,
+  MODE_NAME_STROKE,
+  MODE_NAME_MATCH_GAME,
+  MODE_NAME_SKINS_MATCH,
+  MODE_NAME_CLUB_SLOTS,
+  MODE_NAME_MINI_GOLF
+};
 
 /* The replay menu's rows: the records, then Hole Out */
 #define REPLAY_ROW_COUNT (SAVE_RECORD_COUNT + 1)

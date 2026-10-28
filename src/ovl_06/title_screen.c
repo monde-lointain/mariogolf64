@@ -24,9 +24,11 @@
 #include "variables.h"
 
 /* f_TitleStage values */
-#define TITLE_SHOWING 0
-#define TITLE_SWAPPING_MODULES 1
-#define TITLE_GOING_TO_LOGOS 2
+enum TitleState {
+  TITLE_SHOWING,
+  TITLE_SWAPPING_MODULES,
+  TITLE_GOING_TO_LOGOS
+};
 
 /* After this many frames, the title screen goes back to the logos */
 #define TITLE_IDLE_FRAME_COUNT 630

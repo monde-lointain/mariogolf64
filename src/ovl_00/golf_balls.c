@@ -483,17 +483,21 @@ s32 IsAnyBallInCup(void) {
 #define SMALL_BALL_TEXTURE_SIZE 8
 
 /* How a ball sits in its surface, from SurfaceInfo.unk14 */
-#define BALL_BURIED -1
-#define BALL_HALF_SUNK 0
-#define BALL_EXPOSED 1
+enum BallLie {
+  BALL_BURIED = -1,
+  BALL_HALF_SUNK,
+  BALL_EXPOSED
+};
 
 /* How each ball was drawn, which decides whether it gets a shadow */
-#define BALL_SPRITE_FULL 0
-#define BALL_SPRITE_SMALL 1
-#define BALL_SPRITE_DOT 2
-#define BALL_SPRITE_FAR_DOT 3
-#define BALL_SPRITE_DOT_SHADOWED 4
-#define BALL_SPRITE_FAR_DOT_SHADOWED 5
+enum BallSprite {
+  BALL_SPRITE_FULL,
+  BALL_SPRITE_SMALL,
+  BALL_SPRITE_DOT,
+  BALL_SPRITE_FAR_DOT,
+  BALL_SPRITE_DOT_SHADOWED,
+  BALL_SPRITE_FAR_DOT_SHADOWED
+};
 
 /* Balls nearer than this are not drawn */
 #define BALL_NEAREST_DEPTH (-5)

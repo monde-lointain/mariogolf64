@@ -29,11 +29,13 @@
 #define LETTERBOX_STATE_UNK5 5
 
 /* The players whose balls are tagged */
-#define SHOT_LABELS_NONE -1
-/* From the overhead camera, every player's ball */
-#define SHOT_LABELS_OVERHEAD 0
-/* While a player takes their shot, the other balls in play */
-#define SHOT_LABELS_OTHER_BALLS 1
+enum ShotLabels {
+  SHOT_LABELS_NONE = -1,
+  /* From the overhead camera, every player's ball */
+  SHOT_LABELS_OVERHEAD,
+  /* While a player takes their shot, the other balls in play */
+  SHOT_LABELS_OTHER_BALLS
+};
 
 /* The corners of the ball that a tag sits off, clockwise from the lower right
  */
@@ -131,8 +133,10 @@ typedef struct ShotLabel {
   AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
       GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 
-#define SPOT_HIDDEN -1
-#define SPOT_SHOWN 0
+enum SpotState {
+  SPOT_HIDDEN = -1,
+  SPOT_SHOWN
+};
 
 /* Where a point is on the screen */
 typedef struct ScreenSpot {

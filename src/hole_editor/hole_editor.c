@@ -160,10 +160,13 @@
 
 /* func_80402428's triangle editor */
 /* What a frame did, kept in f_LastTriangleEditKind */
-#define TRIANGLE_EDIT_NONE 0
-#define TRIANGLE_EDIT_MOVE 1
-#define TRIANGLE_EDIT_SELECT 2
-#define TRIANGLE_EDIT_KIND 4
+enum TriangleEdit {
+  TRIANGLE_EDIT_NONE,
+  TRIANGLE_EDIT_MOVE,
+  TRIANGLE_EDIT_SELECT,
+  TRIANGLE_EDIT_KIND = 4
+};
+
 /* The last RING_COUNT triangles hold the rings, which func_80402E1C edits */
 #define FIRST_RING_TRIANGLE (HOLE_TRIANGLE_COUNT - RING_COUNT)
 #define HOLE_TRIANGLE_KIND_COUNT 4

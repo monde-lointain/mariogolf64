@@ -48,10 +48,12 @@
 #include "variables.h"
 
 /* f_SceneryState values */
-#define SCENERY_UNLOADED 0
-#define SCENERY_BILLBOARDS_READY 1 /* The billboard heap is set up */
-/* The images of the hole's scenery are loaded too */
-#define SCENERY_LOADED 2
+enum SceneryState {
+  SCENERY_UNLOADED,
+  SCENERY_BILLBOARDS_READY, /* The billboard heap is set up */
+  /* The images of the hole's scenery are loaded too */
+  SCENERY_LOADED
+};
 
 /* Bytes of the billboard manager's heap */
 #define BILLBOARD_HEAP_SIZE 0x7118
@@ -295,8 +297,10 @@ extern s32 f_HudOffsetY;
 #define MOVIE_INSET_UNKC 101
 
 /* The text of the landing reaction, in two glyph groups */
-#define LANDING_GLYPH_GROUP_FIRST 0
-#define LANDING_GLYPH_GROUP_SECOND 1
+enum LandingGlyphGroup {
+  LANDING_GLYPH_GROUP_FIRST,
+  LANDING_GLYPH_GROUP_SECOND
+};
 
 extern s32 f_LandingReaction;
 extern s32 f_LandingReactionFrame;

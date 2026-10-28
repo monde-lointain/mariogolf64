@@ -102,9 +102,12 @@ extern void* D_80230F54_ovl_01;
 #define CLUB_TOURNAMENT_CODE_LENGTH 8
 
 extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
+
 /* What the club tournament code prompt shows */
-#define CLUB_CODE_STATE_ENTERING 0
-#define CLUB_CODE_STATE_INCORRECT 1
+enum ClubCodeState {
+  CLUB_CODE_STATE_ENTERING,
+  CLUB_CODE_STATE_INCORRECT
+};
 
 /* "Please enter a code.", which "The code entered is incorrect." follows */
 #define MESSAGE_ENTER_CODE 0x165
@@ -132,9 +135,11 @@ extern s8 D_80230FAC_ovl_01[CODE_KEYBOARD_ROW_COUNT]
                            [CODE_KEYBOARD_COLUMN_COUNT];
 
 /* What func_80228C00 is doing, in D_80230F70 */
-#define CLUB_CODE_PHASE_TYPING 0
-#define CLUB_CODE_PHASE_DETAILS 1
-#define CLUB_CODE_PHASE_INCORRECT 2
+enum ClubCodePhase {
+  CLUB_CODE_PHASE_TYPING,
+  CLUB_CODE_PHASE_DETAILS,
+  CLUB_CODE_PHASE_INCORRECT
+};
 
 /* A tournament code's first byte: the tournament's name, and whether Nintendo
  * holds it */
@@ -150,9 +155,11 @@ extern s8 D_80230FAC_ovl_01[CODE_KEYBOARD_ROW_COUNT]
 #define SOUND_CODE_INCORRECT 0x63
 
 /* What func_8022B46C reports after a key is pressed */
-#define CODE_KEY_RESULT_TOO_SHORT -1
-#define CODE_KEY_RESULT_TYPING 0
-#define CODE_KEY_RESULT_DONE 1
+enum CodeKeyResult {
+  CODE_KEY_RESULT_TOO_SHORT = -1,
+  CODE_KEY_RESULT_TYPING,
+  CODE_KEY_RESULT_DONE
+};
 
 /* Where the entered code is drawn, and the value of its characters not yet
  * entered */

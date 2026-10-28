@@ -726,15 +726,17 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
  * The opening's own models, as indices into g_OtherCharacterModels. Each is
  * placed on the tee as the name logo of its character is shown.
  */
-#define OPENING_MODEL_MARIO 3
-#define OPENING_MODEL_YOSHI 9
-#define OPENING_MODEL_BABY_MARIO 10
-#define OPENING_MODEL_DONKEY_KONG 11
-#define OPENING_MODEL_PLUM 12
-#define OPENING_MODEL_PEACH 13
-#define OPENING_MODEL_LUIGI 14
-/* Shown without a name logo */
-#define OPENING_MODEL_UNK16 16
+enum OpeningModel {
+  OPENING_MODEL_MARIO = 3,
+  OPENING_MODEL_YOSHI = 9,
+  OPENING_MODEL_BABY_MARIO,
+  OPENING_MODEL_DONKEY_KONG,
+  OPENING_MODEL_PLUM,
+  OPENING_MODEL_PEACH,
+  OPENING_MODEL_LUIGI,
+  /* Shown without a name logo */
+  OPENING_MODEL_UNK16 = 16
+};
 
 s32 func_80206680_ovl_05(u32 slotIndex, s32 character);
 

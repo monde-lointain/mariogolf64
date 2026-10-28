@@ -134,10 +134,12 @@
 #define PATH_DEBUG_CLEAR_ROW 3
 
 /* Which plane a triangle faces most, as GetTriangleFacing returns it */
-#define TRIANGLE_FACING_NONE -1
-#define TRIANGLE_FACING_UP 0
-#define TRIANGLE_FACING_X 1
-#define TRIANGLE_FACING_Z 2
+enum TriangleFacing {
+  TRIANGLE_FACING_NONE = -1,
+  TRIANGLE_FACING_UP,
+  TRIANGLE_FACING_X,
+  TRIANGLE_FACING_Z
+};
 
 /*
  * How far a point is from a plane's front, in course units. It is a
