@@ -188,8 +188,8 @@ extern ArrowShape f_Arrows[ARROW_COUNT];
 #define SHOT_OFFSET_MAX_RADIUS 56.0f
 #define SHOT_OFFSET_UNITS_PER_PIXEL 4
 
-extern s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT + 1];
-extern s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
+extern s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT];
+extern s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT];
 
 /*
  * The marker is an animated 16x16 image, drawn at an offset from the shot
