@@ -31,12 +31,16 @@ void func_8005C674(s32 arg0, s32 arg1);
 #define TABLE_STAR_WIDTH 24
 #define TABLE_STAR_HEIGHT 20
 
-/* Where the table's popup goes, and the cursor places that move it */
-#define TABLE_POPUP_TOP_LEFT 0
-#define TABLE_POPUP_TOP_RIGHT 1
-#define TABLE_POPUP_BOTTOM_LEFT 2
-#define TABLE_POPUP_BOTTOM_RIGHT 3
+/* The corner of the screen where the table's popup goes */
+enum TablePopupCorner {
+  TABLE_POPUP_TOP_LEFT,
+  TABLE_POPUP_TOP_RIGHT,
+  TABLE_POPUP_BOTTOM_LEFT,
+  TABLE_POPUP_BOTTOM_RIGHT
+};
+
 #define TABLE_POPUP_CORNER_COUNT 4
+/* Where the popup goes, and the cursor places that move it */
 #define TABLE_POPUP_LEFT_X 68
 #define TABLE_POPUP_RIGHT_X 164
 #define TABLE_POPUP_TOP_Y 84
