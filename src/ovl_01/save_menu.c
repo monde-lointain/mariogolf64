@@ -155,7 +155,6 @@ extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern s8 D_8022F8C5_ovl_01;
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
-extern u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][SAVE_MENU_FILE_SIZE];
 extern u8 D_801052E8;
 extern s32 D_800FE334;
 
@@ -220,6 +219,9 @@ static s32 D_8023BDB0_ovl_01;
 /* Read by no routine; 2 objects, as one would be aligned past its start */
 static u8 D_8023BDB4_ovl_01[0x4];
 static u8 D_8023BDB8_ovl_01[0x88];
+
+/* Not static: the original left it to the linker's common block */
+u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][SAVE_MENU_FILE_SIZE];
 
 void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;

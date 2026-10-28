@@ -375,6 +375,7 @@ static Mtx D_802271A0_ovl_00[2][SHOT_PREVIEW_MAX_STEPS];
 static f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
 
 /* Not static: the original left these to the linker's common block */
+s32 D_8022B5C0_ovl_00;
 CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
 UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT];
 Unk20 g_PreviousBallSurfaceInfo;
@@ -2740,7 +2741,6 @@ extern s32 D_8022400C_ovl_00;
 extern f32 D_80224014_ovl_00;
 extern f32 D_80224018_ovl_00;
 extern u32 D_80223E58_ovl_00;
-extern s32 D_8022B5C0_ovl_00;
 extern s32 D_800B7D9C;
 extern u16 D_80104998;
 extern u16 D_80104994;

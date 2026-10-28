@@ -62,6 +62,9 @@
 
 /* A banner's letters, each an image drawn on its own square */
 #define BANNER_MAX_LETTERS 11
+/* f_BannerLetters has room for one letter fewer: the eleventh of banner 17,
+ * the only banner that long, would fall on f_ContactMatrices */
+#define BANNER_LETTER_SLOT_COUNT 10
 
 /*
  * The caption and a copy of it slide in from either side until they meet
@@ -122,10 +125,8 @@ extern s32 f_BannerNumber;
 extern s32 f_BannerNumberLetterCount;
 extern Vtx f_BannerLetterVertices[4];
 extern Banner f_Banners[];
-extern BannerLetter f_BannerLetters[];
 extern BannerLayout f_BannerLayouts[];
 extern s32 f_IsMovieBufferAllocated;
-extern u8* f_MovieBuffer;
 /* The contact effect's quad spans from vertex 0 to vertex 1 */
 extern Vtx f_ContactVertices[2];
 extern s32 f_IsContactEffectFading;
@@ -133,7 +134,6 @@ extern s32 f_ContactStyle;
 /* The texture coordinates of the quad's far corner, in S10.5 */
 extern s32 f_ContactTextureS;
 extern s32 f_ContactTextureT;
-extern Mtx f_ContactMatrices[];
 extern s32 f_ContactTrailHead;
 extern f32 f_ContactSpinAngle;
 extern Vtx f_ContactSpinVertices[4];
@@ -164,8 +164,6 @@ typedef struct LakituVelocity {
   /* 0x4 */ f32 y;
 } LakituVelocity;
 
-extern LakituFlight f_Lakitu;
-extern LakituVelocity f_LakituVelocity;
 extern Vtx f_ReadyGoVertices[];
 extern u16 f_LakituMovieFrameAssets[];
 extern s32 f_WindFlyGuyFrame;
@@ -370,6 +368,13 @@ static Mtx f_ContactRibbonMatrices[2];
 static Mtx f_ContactSpinMatrices[2];
 static FlyGuyPoint f_WindFlyGuyLastPosition;
 static Mtx f_BannerMatrices[2];
+
+/* Not static: the original left these to the linker's common block */
+BannerLetter f_BannerLetters[BANNER_LETTER_SLOT_COUNT];
+u8* f_MovieBuffer;
+Mtx f_ContactMatrices[CONTACT_MATRIX_COUNT];
+LakituFlight f_Lakitu;
+LakituVelocity f_LakituVelocity;
 
 void AllocMovieBuffer(void) {
   EncodedAsset unused;

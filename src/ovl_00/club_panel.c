@@ -75,11 +75,13 @@ extern u16 f_PowerToNormalFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
 extern u16 f_NormalToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
 extern u16 f_PowerToApproachFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
 extern u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT];
-extern u8* f_ClubPanelImage;
-extern u8* f_ShotModeImage;
 
 static Mtx f_SpanBarTranslation;
 static Mtx f_SpanBarScale;
+
+/* Not static: the original left these to the linker's common block */
+u8* f_ClubPanelImage;
+u8* f_ShotModeImage;
 
 void UpdateClubPanelDebugValue(void) {
   if (IsGameFlagSet(GAME_FLAG_CLUB_PANEL_DEBUG)) {

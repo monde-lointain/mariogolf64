@@ -15,6 +15,9 @@
 #include "surface.h"
 #include "variables.h"
 
+/* Not static: the original left it to the linker's common block */
+SimulatedShot g_SimulatedShot;
+
 /* Simulates the shot from the ball's position and records its path */
 void SimulateShot(Unk20* shot) {
   BallSimulation simulationState;

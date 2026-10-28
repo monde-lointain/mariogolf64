@@ -21,11 +21,13 @@
 
 /* The editor's menu choice, an EditorChoice */
 extern s32 f_EditorChoice;
-extern f32 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT][3];
 extern s32 f_IsSnapshotSaved[SNAPSHOT_COUNT];
 extern s32 f_SnapshotIndex;
 /* Whether the second controller moves the eye rather than the look-at point */
 extern s32 f_IsSecondPadOnEye;
+
+/* Not static: the original left it to the linker's common block */
+f32 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT][3];
 
 /* Starts the editor with its eye at (0, -100, 100) looking at the origin, and
  * its moves stopped */

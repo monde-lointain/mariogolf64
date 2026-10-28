@@ -109,8 +109,6 @@ extern void* D_801B69EC;
 extern s32 D_801B7070;
 extern s32 D_8022FFA0_ovl_01;
 extern s32 D_8022FFA4_ovl_01;
-extern s32 D_8023BFD4_ovl_01;
-extern s32 D_8023BFD8_ovl_01;
 extern u8 D_8022FF01_ovl_01;
 extern s8 D_8022FF04_ovl_01;
 extern u8 D_8022FF05_ovl_01;
@@ -172,6 +170,10 @@ static void* D_8023A584_ovl_01;
 
 /* Read by no routine */
 static u8 D_8023A588_ovl_01[0x208];
+
+/* Not static: the original left these to the linker's common block */
+s32 D_8023BFD4_ovl_01;
+s32 D_8023BFD8_ovl_01;
 
 void func_80209500_ovl_01(void) {
   s32 firstSlot = g_CharacterGrid[2][0];

@@ -101,16 +101,12 @@ extern s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT];
 extern f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT];
 extern s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
 
-/*
- * The cue that the opening's script has given for setting up its characters,
- * from 0 to OPENING_CUE_COUNT - 1, or one of the values below
- */
-extern s32 f_OpeningCue;
-
+/* f_OpeningCue's values: the cues, then the states past them */
 #define OPENING_CUE_COUNT 29
 #define OPENING_CUE_INVALID 29
 #define OPENING_CUES_FINISHED 30
 #define OPENING_CUE_DONE 31
+
 extern u8* g_ShadowTexture;
 extern s32 f_LakituScreenPoint[2];
 /* The sizes of Lakitu's image and his trail's, with header and palette */
@@ -210,7 +206,6 @@ typedef enum LogoLetterState {
 } LogoLetterState;
 
 extern s32 f_OpeningShotDashCount;
-extern BallSimulation f_OpeningShotSimulation;
 
 /* f_OpeningShotDashCount's starting value, and the most it can be */
 #define OPENING_SHOT_MAX_DASH_COUNT 200
@@ -396,6 +391,15 @@ static u8 D_80225A00_ovl_05[4];
 static void* f_OpeningBillboardHeap;
 static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
                                     [OPENING_SHOT_MAX_DASH_COUNT];
+
+/* Not static: the original left these to the linker's common block */
+/*
+ * The cue that the opening's script has given for setting up its characters,
+ * from 0 to OPENING_CUE_COUNT - 1, or OPENING_CUE_INVALID,
+ * OPENING_CUES_FINISHED or OPENING_CUE_DONE
+ */
+s32 f_OpeningCue;
+BallSimulation f_OpeningShotSimulation;
 
 /* Moves f_OpeningSoundChannel on to the next of the rotating channels */
 void AdvanceOpeningSoundChannel(void) {
