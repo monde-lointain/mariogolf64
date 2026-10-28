@@ -63,10 +63,6 @@
 extern void* D_8012D430[CHARACTER_COUNT];
 extern u8 D_8023BFF0_ovl_01[COURSE_COUNT * BEST_TIME_COUNT]
                            [BEST_TIME_HOLDER_FILE_SIZE];
-extern s32 D_80230130_ovl_01;
-extern s32 D_80230134_ovl_01;
-extern s32 D_80230138_ovl_01;
-extern s32 D_8023013C_ovl_01[CHARACTER_COUNT];
 extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 
 s32 GetOpenCourseCount(void);
@@ -83,6 +79,14 @@ void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
 void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place);
 void func_8021508C_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 frameCount);
+
+static s32 D_80230130_ovl_01 = 0;
+static s32 D_80230134_ovl_01 = 0;
+static s32 D_80230138_ovl_01 = 0;
+/* Where each character's face is in D_8023AA44's image, and its name in
+ * D_8022BF70 */
+static s32 D_8023013C_ovl_01[CHARACTER_COUNT] = {
+    0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 
 static Mat4 D_8023A9C0_ovl_01;
 static Mat4 D_8023AA00_ovl_01;
