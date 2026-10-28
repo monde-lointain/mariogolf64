@@ -43,7 +43,6 @@
 /* The heap that the ball images are loaded into, and its size */
 #define HEAP_BALL_IMAGES 2
 #define BALL_IMAGE_HEAP_SIZE 0x1800
-#define BALL_IMAGE_COUNT 5
 
 /* The ball turns this many degrees as it rolls one course unit */
 #define BALL_ROLL_DEGREES_PER_UNIT 0.09325484f
@@ -85,7 +84,11 @@ extern s32 f_IsBallAfterimageZoomed;
 /* Set for the few afterimages that fade quickly */
 extern s32 f_IsBallAfterimageFast;
 extern s32 f_BallAfterimageLength;
-extern u8* f_BallImages[BALL_IMAGE_COUNT];
+extern u8* f_BallShadowImage;
+extern u8* f_RollingBallImage;
+extern u8* f_BallSparkleImage;
+extern u8* f_BallMarkerImage;
+extern u8* f_BallAfterimageImage;
 extern u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE];
 extern u16 f_PikaBallTexture[];
 /* How the ball has turned as it rolled */
@@ -106,21 +109,21 @@ void LoadGolfBallImages(void) {
   ResetHeap(HEAP_BALL_IMAGES);
   AddHeapRegion(HEAP_BALL_IMAGES, f_BallImageHeap,
       f_BallImageHeap + BALL_IMAGE_HEAP_SIZE);
-  f_BallImages[0] =
+  f_BallShadowImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C7, &asset));
-  ReadEncodedAsset(f_BallImages[0], &asset);
-  f_BallImages[1] =
+  ReadEncodedAsset(f_BallShadowImage, &asset);
+  f_RollingBallImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C8, &asset));
-  ReadEncodedAsset(f_BallImages[1], &asset);
-  f_BallImages[2] =
+  ReadEncodedAsset(f_RollingBallImage, &asset);
+  f_BallSparkleImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4DA, &asset));
-  ReadEncodedAsset(f_BallImages[2], &asset);
-  f_BallImages[3] =
+  ReadEncodedAsset(f_BallSparkleImage, &asset);
+  f_BallMarkerImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C6, &asset));
-  ReadEncodedAsset(f_BallImages[3], &asset);
-  f_BallImages[4] =
+  ReadEncodedAsset(f_BallMarkerImage, &asset);
+  f_BallAfterimageImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x6BB, &asset));
-  ReadEncodedAsset(f_BallImages[4], &asset);
+  ReadEncodedAsset(f_BallAfterimageImage, &asset);
   osSyncPrintf("HEAP_BALLTEX LEFT%d\n", GetHeapFreeSize(HEAP_BALL_IMAGES));
   DrawPikaBallTexture();
   ResetGolfBalls();
@@ -449,12 +452,6 @@ s32 IsAnyBallInCup(void) {
   return isInCup;
 }
 
-/* The images in f_BallImages */
-#define BALL_IMAGE_SHADOW 0
-#define BALL_IMAGE_ROLLING 1
-#define BALL_IMAGE_SPARKLE 2
-#define BALL_IMAGE_MARKER 3
-#define BALL_IMAGE_AFTERIMAGE 4
 /* The rolling ball turns through this many frames, each shown for four draws */
 #define BALL_ROLL_FRAME_COUNT 16
 #define BALL_ROLL_FRAME_SIZE 0x400
@@ -573,36 +570,32 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     f_BallRollFrame = (f_BallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
     f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
     gDPLoadTextureBlock(gfx++,
-        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_ROLLING] +
+        TEXTURE_ADDRESS(f_RollingBallImage +
             ((f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE) + IMAGE_HEADER_SIZE)),
         G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
         G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock(gfx++,
-        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_ROLLING] + IMAGE_HEADER_SIZE),
-        0x80, BALL_TILE_STILL, G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE,
+        TEXTURE_ADDRESS(f_RollingBallImage + IMAGE_HEADER_SIZE), 0x80,
+        BALL_TILE_STILL, G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE,
         BALL_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_SPARKLE] + IMAGE_HEADER_SIZE),
-        0x100, BALL_TILE_SHADOW, G_IM_FMT_I, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP,
+        TEXTURE_ADDRESS(f_BallSparkleImage + IMAGE_HEADER_SIZE), 0x100,
+        BALL_TILE_SHADOW, G_IM_FMT_I, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_MARKER] + IMAGE_HEADER_SIZE),
-        0x140, BALL_TILE_MARKER, G_IM_FMT_I, 16, 16, 0,
-        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
-        G_TX_NOLOD, G_TX_NOLOD);
+        TEXTURE_ADDRESS(f_BallMarkerImage + IMAGE_HEADER_SIZE), 0x140,
+        BALL_TILE_MARKER, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_SHADOW] + IMAGE_HEADER_SIZE),
-        0x150, BALL_TILE_SMALL, G_IM_FMT_I, 16, 16, 0,
-        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
-        G_TX_NOLOD, G_TX_NOLOD);
+        TEXTURE_ADDRESS(f_BallShadowImage + IMAGE_HEADER_SIZE), 0x150,
+        BALL_TILE_SMALL, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TEXTURE_ADDRESS(
-            f_BallImages[BALL_IMAGE_AFTERIMAGE] + IMAGE_HEADER_SIZE),
-        0x190, BALL_TILE_AFTERIMAGE, G_IM_FMT_I, 16, 64, 0,
-        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
-        G_TX_NOLOD, G_TX_NOLOD);
+        TEXTURE_ADDRESS(f_BallAfterimageImage + IMAGE_HEADER_SIZE), 0x190,
+        BALL_TILE_AFTERIMAGE, G_IM_FMT_I, 16, 64, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     gDPPipeSync(gfx++);
