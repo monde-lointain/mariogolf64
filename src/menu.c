@@ -686,7 +686,7 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
     }
 
     game->state = g_GameState;
-    game->unk8 = g_HoleSetup;
+    game->hole = g_HoleSetup;
     if (!hasIllegalState) {
       game->isValid = TRUE;
       return 0;
@@ -710,7 +710,7 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
     g_GameState = game->state;
     g_GameState.unk0 = 1;
     SetGameFlag(GAME_FLAG_UNK1E);
-    g_HoleSetup = game->unk8;
+    g_HoleSetup = game->hole;
   }
 
   g_GameState.unk30 = 2;
@@ -763,7 +763,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
       game->state.saveCount++;
     }
 
-    game->unk8 = g_HoleSetup;
+    game->hole = g_HoleSetup;
     game->roundStats = g_RoundStats;
     if (hasIllegalState) {
       return -1;
@@ -785,7 +785,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
       g_GameState = game->state;
       g_GameState.unk0 = 1;
       SetGameFlag(GAME_FLAG_UNK1E);
-      g_HoleSetup = game->unk8;
+      g_HoleSetup = game->hole;
       g_RoundStats = game->roundStats;
     }
 

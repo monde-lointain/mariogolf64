@@ -271,7 +271,7 @@ typedef struct UnkE98 {
 typedef struct SavedGame {
   /* 0x00 */ s32 isValid;
   /* 0x04 */ u8 unk4[4];
-  /* 0x08 */ HoleSetup unk8;
+  /* 0x08 */ HoleSetup hole;
   /* 0x3C */ GameState state;
   /* 0x80 */ RoundStats roundStats;
   /* 0x9C */ u8 unk9C[4];
