@@ -162,6 +162,12 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define FACE_NAME_OFFSET_X 24
 #define FACE_NAME_OFFSET_Y 12
 
+/* The arrows that func_80212FEC draws, by the order of their images */
+#define MENU_ARROW_UP 0
+#define MENU_ARROW_DOWN 1
+#define MENU_ARROW_RIGHT 2
+#define MENU_ARROW_LEFT 3
+
 /*
  * The wheel that func_8020E898 and func_80213748 turn the open courses' 64 by
  * 64 images on, seen from above, with the blinking arrows either side

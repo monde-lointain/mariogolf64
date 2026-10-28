@@ -105,12 +105,7 @@ typedef struct TableCorner {
 #define TABLE_FIRST_DASH_Y 88
 #define TABLE_CURSOR_X 74
 #define TABLE_CURSOR_Y 93
-/* The arrows that show the table goes on past the screen, as func_80212FEC
- * numbers them */
-#define TABLE_ARROW_UP 0
-#define TABLE_ARROW_DOWN 1
-#define TABLE_ARROW_RIGHT 2
-#define TABLE_ARROW_LEFT 3
+/* Where the arrows that show the table goes on past the screen sit */
 #define TABLE_ROW_ARROW_X 40
 #define TABLE_UP_ARROW_Y 88
 #define TABLE_DOWN_ARROW_Y 222
@@ -385,23 +380,23 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
   } while (shownRow != TABLE_SHOWN_ROW_COUNT);
   if (memory->tableFirstRow > 0) {
     func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01,
-        TABLE_ARROW_UP, TABLE_ROW_ARROW_X, TABLE_UP_ARROW_Y);
+        MENU_ARROW_UP, TABLE_ROW_ARROW_X, TABLE_UP_ARROW_Y);
   }
 
   if (memory->tableFirstRow < TABLE_ROW_COUNT - TABLE_SHOWN_ROW_COUNT) {
     func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01,
-        TABLE_ARROW_DOWN, TABLE_ROW_ARROW_X, TABLE_DOWN_ARROW_Y);
+        MENU_ARROW_DOWN, TABLE_ROW_ARROW_X, TABLE_DOWN_ARROW_Y);
   }
 
   if (memory->tableFirstColumn > 0) {
     func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01,
-        TABLE_ARROW_LEFT, TABLE_LEFT_ARROW_X, TABLE_COLUMN_ARROW_Y);
+        MENU_ARROW_LEFT, TABLE_LEFT_ARROW_X, TABLE_COLUMN_ARROW_Y);
   }
 
   if (memory->tableFirstColumn <
       TABLE_COLUMN_COUNT - TABLE_SHOWN_COLUMN_COUNT) {
     func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01,
-        TABLE_ARROW_RIGHT, TABLE_RIGHT_ARROW_X, TABLE_COLUMN_ARROW_Y);
+        MENU_ARROW_RIGHT, TABLE_RIGHT_ARROW_X, TABLE_COLUMN_ARROW_Y);
   }
 
   D_802301A0_ovl_01++;
