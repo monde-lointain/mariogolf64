@@ -325,36 +325,6 @@ extern char* f_WhiteText;
 extern f32 f_PauseGlowAngle;
 extern f32 f_PauseCursorAngle;
 
-/*
- * What choosing a pause option does, as its PauseOption.action. Each option's
- * action is its own index, and is named for the option's label.
- */
-enum PauseAction {
-  /* "Course View" */
-  PAUSE_ACTION_FREE_LOOK,
-  PAUSE_ACTION_SCORECARD,
-  /* Only while debugging or with f_CanGiveUp set */
-  PAUSE_ACTION_GIVE_UP,
-  PAUSE_ACTION_SAVE_AND_QUIT,
-  PAUSE_ACTION_QUIT_GAME,
-  PAUSE_ACTION_RETURN_TO_MENU,
-  PAUSE_ACTION_HOLE_OUT,
-  PAUSE_ACTION_CHANGE_WIND_DIRECTION,
-  PAUSE_ACTION_CHANGE_WIND_SPEED,
-  PAUSE_ACTION_START_OVER,
-  PAUSE_ACTION_CHANGE_WEATHER,
-  /* "Change Terrain", which changes the lie */
-  PAUSE_ACTION_CHANGE_TERRAIN,
-  PAUSE_ACTION_GRID_COLOR,
-  PAUSE_ACTION_CONTROLS,
-  /* "Quit Game" in the PAUSE_LAYOUT_BROUGHT_OVER layouts */
-  PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME,
-  /* "Quit Game" in the PAUSE_LAYOUT_UNK3B layouts */
-  PAUSE_ACTION_QUIT_UNK3B_GAME,
-  /* UpdatePauseMenu's result while no option is chosen */
-  PAUSE_ACTION_NONE = -1
-};
-
 /* The prompts that some options open */
 enum PromptId {
   PROMPT_UNK3 = 3,

@@ -3430,10 +3430,10 @@ void UpdateTurns(void) {
         if (g_PauseScreen == 1) {
           s32 choice = UpdatePauseMenu(&g_TurnController);
 
-          if (choice == 5) {
+          if (choice == PAUSE_ACTION_RETURN_TO_MENU) {
             RequestPauseMenu(0, -1);
             func_80060358();
-          } else if (choice == 9) {
+          } else if (choice == PAUSE_ACTION_START_OVER) {
             RequestPauseMenu(0, -1);
             ResumeRound();
             TakePinOut();
@@ -3441,7 +3441,7 @@ void UpdateTurns(void) {
             PlacePlayersOnTee();
             SetFramebufferCount(3);
             nextState = 0x11;
-          } else if (choice == 6) {
+          } else if (choice == PAUSE_ACTION_HOLE_OUT) {
             RequestPauseMenu(0, -1);
             nextState = 0x14;
             EndFlightCamera();
