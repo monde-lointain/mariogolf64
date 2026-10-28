@@ -126,7 +126,10 @@ extern void* D_801052BC[2];
 extern void* D_801F4A20;
 extern s16 D_8022BE8C_ovl_01;
 extern s16 D_8022BE92_ovl_01;
-extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
+/* The menus' camera orbit's updates */
+extern s32 D_8022F8E0_ovl_01;
+/* Each player's sound pan, by the player count */
+extern u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 /* The parts of the menu backdrop that func_801FC60C and func_801FB54C draw */
 #define MENU_LAYER_UNK1 (1 << 0)
 #define MENU_LAYER_UNK4 (1 << 2)
@@ -350,7 +353,7 @@ void func_801F6A38_ovl_01(void) {
 
   for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
     g_Players[playerIndex].soundPan =
-        D_8022F8E0_ovl_01[g_PlayerCount][playerIndex];
+        D_8022F8E4_ovl_01[g_PlayerCount - 1][playerIndex];
   }
 }
 #else
