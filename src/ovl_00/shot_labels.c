@@ -257,9 +257,9 @@ void DrawShotLabels(Gfx** displayListHead) {
   f_ShotLabelPlayers = players;
   if (players != SHOT_LABELS_NONE) {
     /* This projects the cup with its x for all three coordinates */
-    if (ProjectPoint(D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-            D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-            D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+    if (ProjectPoint(g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
             &point) < 0) {
       cup.isHidden = SPOT_SHOWN;
       cup.x = point.x;
@@ -735,12 +735,13 @@ OPAQUE:
   }
 
   if (g_RoundHud.unk12 == 1) {
-    position[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    position[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
-      position[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      position[AXIS_Y] =
+          g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     } else {
-      position[AXIS_Y] = (D_800BA9D8.cupPosition[AXIS_Y] - PIN_FLAG_DROP) *
+      position[AXIS_Y] = (g_HoleSetup.cupPosition[AXIS_Y] - PIN_FLAG_DROP) *
           COURSE_TO_WORLD_SCALE;
     }
 

@@ -250,7 +250,7 @@
  * records as signed, though UnkB8 and Unk68 keep them unsigned; the casts
  * are there to match.
  */
-extern Unk800BA9D8 D_80105F40;
+extern HoleSetup D_80105F40;
 
 void func_8005B28C(s32 recordIndex, Unk68* record);
 void func_8005D0D8(void);

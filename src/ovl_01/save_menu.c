@@ -1545,7 +1545,7 @@ s32 func_80222CDC_ovl_01(void) {
   g_GameState = game->state;
   g_GameState.unk0 = 1;
   SetGameFlag(GAME_FLAG_UNK1E);
-  D_800BA9D8 = game->unk8;
+  g_HoleSetup = game->unk8;
   g_GameState.unk30 = 2;
   return 0;
 }

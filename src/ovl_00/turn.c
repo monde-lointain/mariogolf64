@@ -516,8 +516,8 @@ void PlaceShotCamera(void) {
     } else {
       point[AXIS_X] = MINI_GOLF_CENTER_X;
       point[AXIS_Z] = MINI_GOLF_CENTER_Z;
-      point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y] +
-          ((D_800BA9D8.cupPosition[AXIS_Y] - D_800BA9D8.teePosition[AXIS_Y]) *
+      point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y] +
+          ((g_HoleSetup.cupPosition[AXIS_Y] - g_HoleSetup.teePosition[AXIS_Y]) *
               0.5f);
       g_Cameras[0].view.lookAt[AXIS_X] =
           (point[AXIS_X] + (cosf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
@@ -648,15 +648,17 @@ void PlaceShotCamera(void) {
     KeepAimCameraOnCourse();
 
     /* The middle of the ball and the cup is worked out, but the ball is used */
-    center[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y];
+    center[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
     center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     heading = ((u16)D_800C3078 * BINARY_ANGLE_TO_RADIANS) + M_PI;
     center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] +
-        ((D_800BA9D8.cupPosition[AXIS_X] - g_CurrentShot.ballPosition[AXIS_X]) *
+        ((g_HoleSetup.cupPosition[AXIS_X] -
+             g_CurrentShot.ballPosition[AXIS_X]) *
             0.5f);
     center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] +
-        ((D_800BA9D8.cupPosition[AXIS_Z] - g_CurrentShot.ballPosition[AXIS_Z]) *
+        ((g_HoleSetup.cupPosition[AXIS_Z] -
+             g_CurrentShot.ballPosition[AXIS_Z]) *
             0.5f);
     center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     point[AXIS_X] =
@@ -1160,9 +1162,9 @@ s32 UpdateAimControls(void) {
 
   D_800C3074 = 0;
   if (g_TurnController.buttons == AIM_RESET_BUTTONS) {
-    g_CurrentShot.unk0 = atan2(D_800BA9D8.cupPosition[AXIS_Z] -
+    g_CurrentShot.unk0 = atan2(g_HoleSetup.cupPosition[AXIS_Z] -
                                  g_CurrentShot.ballPosition[AXIS_Z],
-                             D_800BA9D8.cupPosition[AXIS_X] -
+                             g_HoleSetup.cupPosition[AXIS_X] -
                                  g_CurrentShot.ballPosition[AXIS_X]) *
         RADIANS_TO_BINARY_ANGLE;
   }
@@ -1179,9 +1181,9 @@ s32 UpdateAimControls(void) {
               SOUND_LOOK_DOWN_RANGE, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           if (D_800C3084 & SHOT_UNK3084_UNK8) {
             D_800C308C = LETTERBOX_STATE_UNK3;
-            toCup[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] -
+            toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                 g_CurrentShot.ballPosition[AXIS_X];
-            toCup[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z] -
+            toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
                 g_CurrentShot.ballPosition[AXIS_Z];
             D_800C3078 = (atan2(toCup[AXIS_Z], toCup[AXIS_X]) + M_PI) *
                 RADIANS_TO_BINARY_ANGLE;
@@ -1295,9 +1297,9 @@ s32 UpdateAimControls(void) {
           if ((D_800C3084 &
                   (SHOT_UNK3084_UNK8 | SHOT_UNK3084_NO_IMPACT_POINT)) ==
               (SHOT_UNK3084_UNK8 | SHOT_UNK3084_NO_IMPACT_POINT)) {
-            toCup[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] -
+            toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                 g_CurrentShot.ballPosition[AXIS_X];
-            toCup[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z] -
+            toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
                 g_CurrentShot.ballPosition[AXIS_Z];
             D_800C308C = LETTERBOX_STATE_UNK3;
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
@@ -1539,7 +1541,7 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
  * enough lie, and preferring those that reach.
  */
 #ifdef NON_MATCHING
-void PickStartingClub(Unk800BA9D8* hole) {
+void PickStartingClub(HoleSetup* hole) {
   s8 isUsable[CLUB_SLOT_COUNT];
   s32 clubCount;
   s32 cupDistance;
@@ -2121,7 +2123,7 @@ void RecordHoleOut(s32 playerIndex) {
     record->paletteIndex = g_Players[playerIndex].paletteIndex;
     record->strokeCount = g_Players[playerIndex].strokeCount;
     record->unk40 = g_Players[playerIndex].unk88;
-    record->hole = D_800BA9D8;
+    record->hole = g_HoleSetup;
     record->shots[shotIndex].heading = g_CurrentShot.unk0;
     record->shots[shotIndex].unk2 = g_CurrentShot.unk4;
     record->shots[shotIndex].unk3 = g_CurrentShot.unk8;
@@ -2148,7 +2150,7 @@ void RecordRingShotHole(s32 playerIndex) {
     record->paletteIndex = g_Players[playerIndex].paletteIndex;
     record->strokeCount = g_Players[playerIndex].strokeCount;
     record->unk3C = g_Players[playerIndex].unk88;
-    record->hole = D_800BA9D8;
+    record->hole = g_HoleSetup;
     record->shots[shotIndex].heading = g_CurrentShot.unk0;
     record->shots[shotIndex].unk2 = g_CurrentShot.unk4;
     record->shots[shotIndex].unk3 = g_CurrentShot.unk8;
@@ -2311,15 +2313,15 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.unk54 = player->unk28;
   g_CurrentShot.unk40 = 0;
   g_CurrentShot.unk50 = GetCupDistance(
-      x - D_800BA9D8.cupPosition[AXIS_X], z - D_800BA9D8.cupPosition[AXIS_Z]);
+      x - g_HoleSetup.cupPosition[AXIS_X], z - g_HoleSetup.cupPosition[AXIS_Z]);
   if (!D_800C3068 || g_GameState.gameMode != GAME_MODE_TRAINING) {
     s32 surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
 
     if (g_HolePoints.unk60[0][AXIS_X] == 0 ||
         g_HolePoints.unk60[0][AXIS_Z] == 0) {
-      g_HolePoints.unk60[0][AXIS_X] = D_800BA9D8.cupPosition[AXIS_X];
-      g_HolePoints.unk60[0][AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y];
-      g_HolePoints.unk60[0][AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
+      g_HolePoints.unk60[0][AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
+      g_HolePoints.unk60[0][AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
+      g_HolePoints.unk60[0][AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
     }
 
     if (g_HolePar != 3 &&
@@ -2329,15 +2331,15 @@ void StartPlayerShot(s32 playerIndex) {
       target[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
       target[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
     } else {
-      target[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X];
-      target[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y];
-      target[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
+      target[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
+      target[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
+      target[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
     }
 
     g_CurrentShot.unk0 = atan2(target[AXIS_Z] - player->ballPosition[AXIS_Z],
                              target[AXIS_X] - player->ballPosition[AXIS_X]) *
         RADIANS_TO_BINARY_ANGLE;
-    PickStartingClub(&D_800BA9D8);
+    PickStartingClub(&g_HoleSetup);
   }
 
   D_800C3068 = FALSE;
@@ -2422,8 +2424,8 @@ void PickNextPlayer(void) {
       }
 
       distance = IntLength2D(
-          D_800BA9D8.cupPosition[AXIS_X] - g_Players[i].ballPosition[AXIS_X],
-          D_800BA9D8.cupPosition[AXIS_Z] - g_Players[i].ballPosition[AXIS_Z]);
+          g_HoleSetup.cupPosition[AXIS_X] - g_Players[i].ballPosition[AXIS_X],
+          g_HoleSetup.cupPosition[AXIS_Z] - g_Players[i].ballPosition[AXIS_Z]);
     }
 
     if (priority > bestPriority) {
@@ -2519,8 +2521,9 @@ void MeasureTeeShot(s32 playerIndex) {
       distance = 0;
     } else if (info->kind == SURFACE_KIND_GREEN) {
       distance = GetCupDistance(
-          D_800BA9D8.cupPosition[AXIS_X] - g_SimulatedShot.endPosition[AXIS_X],
-          D_800BA9D8.cupPosition[AXIS_Z] - g_SimulatedShot.endPosition[AXIS_Z]);
+          g_HoleSetup.cupPosition[AXIS_X] - g_SimulatedShot.endPosition[AXIS_X],
+          g_HoleSetup.cupPosition[AXIS_Z] -
+              g_SimulatedShot.endPosition[AXIS_Z]);
     }
 
     g_Players[playerIndex].pinDistance = distance;
@@ -3149,8 +3152,8 @@ void UpdateTurns(void) {
         UpdateShotFlags();
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
         g_CurrentShot.unk50 =
-            GetCupDistance(g_BallPosition[0] - D_800BA9D8.cupPosition[0],
-                g_BallPosition[2] - D_800BA9D8.cupPosition[AXIS_Z]);
+            GetCupDistance(g_BallPosition[0] - g_HoleSetup.cupPosition[0],
+                g_BallPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
         g_RoundHud.greenGridState = 1;
         g_RoundHud.unkF = 1;
         g_RoundHud.unk12 = 1;
@@ -4089,13 +4092,13 @@ void UpdateTurns(void) {
 
         if (g_MergedController.buttons & (Z_TRIG | L_TRIG)) {
           u32 previousDistance =
-              IntLength2D(previousPosition[0] - D_800BA9D8.cupPosition[0],
-                  previousPosition[2] - D_800BA9D8.cupPosition[AXIS_Z]);
+              IntLength2D(previousPosition[0] - g_HoleSetup.cupPosition[0],
+                  previousPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
 
           for (i = 0; i < 4; i++) {
             u32 distance =
-                IntLength2D(g_BallPosition[0] - D_800BA9D8.cupPosition[0],
-                    g_BallPosition[2] - D_800BA9D8.cupPosition[AXIS_Z]);
+                IntLength2D(g_BallPosition[0] - g_HoleSetup.cupPosition[0],
+                    g_BallPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
 
             if (g_TurnBallSimulation.isRunning != 2 || g_GameState.isMiniGolf ||
                 (GetSurfaceInfo(g_TurnBallSimulation.unkA4)->kind == 0xB &&
@@ -4382,8 +4385,8 @@ void UpdateTurns(void) {
 
         ClearReactionSpot();
         ConsiderReactionSpot(g_CurrentShot.ballPosition);
-        ConsiderReactionSpot(D_800BA9D8.cupPosition);
-        ConsiderReactionSpot(D_800BA9D8.teePosition);
+        ConsiderReactionSpot(g_HoleSetup.cupPosition);
+        ConsiderReactionSpot(g_HoleSetup.teePosition);
         ClearShotEffects(0);
         EndFlightCamera();
         if (IsGameFlagSet(0x3E) && D_80223FF4_ovl_00) {
@@ -4695,8 +4698,8 @@ void UpdateTurns(void) {
           LoadCharacter(0, g_Players[i].characterIndex + CHARACTER_COUNT,
               g_Players[i].paletteIndex);
           ConsiderReactionSpot(g_Players[i].ballPosition);
-          ConsiderReactionSpot(D_800BA9D8.cupPosition);
-          ConsiderReactionSpot(D_800BA9D8.teePosition);
+          ConsiderReactionSpot(g_HoleSetup.cupPosition);
+          ConsiderReactionSpot(g_HoleSetup.teePosition);
           SetCharacterLighting(0, 1);
           memset(&g_RoundHud, 0, sizeof(g_RoundHud));
           StartReaction(0, g_Players[i].characterIndex, 0xF);

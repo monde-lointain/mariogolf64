@@ -160,9 +160,9 @@ void StartMonkeyDrop(f32 cameraYaw) {
       creature->isFacingBack = FALSE;
       creature->frameCount = 0;
       creature->velocity[1] = 0;
-      creature->position[0] = D_800BA9D8.cupPosition[0];
-      creature->position[1] = D_800BA9D8.cupPosition[1] - MONKEY_DROP_HEIGHT;
-      creature->position[2] = D_800BA9D8.cupPosition[2];
+      creature->position[0] = g_HoleSetup.cupPosition[0];
+      creature->position[1] = g_HoleSetup.cupPosition[1] - MONKEY_DROP_HEIGHT;
+      creature->position[2] = g_HoleSetup.cupPosition[2];
       creature->yaw = -cameraYaw + M_PI;
       translation[0] = creature->position[0] * COURSE_TO_WORLD_SCALE;
       translation[1] = creature->position[1] * COURSE_TO_WORLD_SCALE;
@@ -391,8 +391,8 @@ void DrawHoleCreatures(Gfx** displayListHead) {
           break;
       }
 
-      if (creature->position[1] > D_800BA9D8.cupPosition[AXIS_Y]) {
-        creature->position[1] = D_800BA9D8.cupPosition[AXIS_Y];
+      if (creature->position[1] > g_HoleSetup.cupPosition[AXIS_Y]) {
+        creature->position[1] = g_HoleSetup.cupPosition[AXIS_Y];
       }
 
       if (creature->frameCount >= MONKEY_LIFETIME) {

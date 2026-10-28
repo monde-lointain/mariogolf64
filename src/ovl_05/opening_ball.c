@@ -440,17 +440,18 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         s32 cupOffsetX =
-            simulation->position[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X];
+            simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
 
         if (ABS(cupOffsetX) < 0xC00) {
           s32 cupOffsetZ =
-              simulation->position[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z];
+              simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
 
           if (ABS(cupOffsetZ) < 0xC00) {
             s32 cupDistance = IntLength2D(cupOffsetX, cupOffsetZ);
 
             if (simulation->isRunning != BALL_STATE_IN_CUP &&
-                simulation->position[AXIS_Y] - D_800BA9D8.cupPosition[AXIS_Y] >=
+                simulation->position[AXIS_Y] -
+                        g_HoleSetup.cupPosition[AXIS_Y] >=
                     -0x2FF &&
                 (f32)cupDistance < 1228.8f) {
               f32 speed = (s32)IntLength2D(
@@ -473,7 +474,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
             if (simulation->isRunning == BALL_STATE_ROLLING &&
                 (f32)ABS(simulation->position[AXIS_Y] -
-                    D_800BA9D8.cupPosition[AXIS_Y]) < 614.4f) {
+                    g_HoleSetup.cupPosition[AXIS_Y]) < 614.4f) {
               if ((f32)cupDistance < 1996.7999f &&
                   (f32)cupDistance >= 1075.2f) {
                 f32 toCup[3];
@@ -490,9 +491,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                 }
 
                 toCup[AXIS_Y] = 0.0f;
-                toCup[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] -
+                toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                     simulation->position[AXIS_X];
-                toCup[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z] -
+                toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
                     simulation->position[AXIS_Z];
                 guNormalize(&toCup[AXIS_X], &toCup[AXIS_Y], &toCup[AXIS_Z]);
                 direction[AXIS_X] = simulation->velocity[AXIS_X];
@@ -525,9 +526,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
               }
 
               if ((f32)cupDistance > 1228.8f &&
-                  (f32)IntLength2D(startX - D_800BA9D8.cupPosition[AXIS_X],
-                      startZ - D_800BA9D8.cupPosition[AXIS_Z]) < 1228.8f &&
-                  (f32)ABS(startY - D_800BA9D8.cupPosition[AXIS_Y]) < 307.2f) {
+                  (f32)IntLength2D(startX - g_HoleSetup.cupPosition[AXIS_X],
+                      startZ - g_HoleSetup.cupPosition[AXIS_Z]) < 1228.8f &&
+                  (f32)ABS(startY - g_HoleSetup.cupPosition[AXIS_Y]) < 307.2f) {
                 s32 speed = IntLength2D(
                     simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
 
@@ -591,8 +592,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           simulation->velocity[AXIS_X], 0.0f, simulation->velocity[AXIS_Z]);
       simulation->surface = SURFACE_GREEN;
       cupDistance = (s32)IntLength2D(
-          simulation->position[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-          simulation->position[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+          simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+          simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
       if (cupDistance >= 1228.8f) {
         f32 toCupX;
         f32 toCupY;
@@ -601,8 +602,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         f32 scale;
 
         toCupY = 0.0f;
-        toCupX = D_800BA9D8.cupPosition[AXIS_X] - simulation->position[AXIS_X];
-        toCupZ = D_800BA9D8.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
+        toCupX = g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
+        toCupZ = g_HoleSetup.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
         guNormalize(&toCupX, &toCupY, &toCupZ);
         push = ((toCupX * simulation->velocity[AXIS_X]) +
                    (toCupY * simulation->velocity[AXIS_Y]) +
@@ -616,22 +617,22 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         simulation->velocity[AXIS_Z] =
             simulation->velocity[AXIS_Z] - (toCupZ * push);
         simulation->position[AXIS_X] =
-            ((simulation->position[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X]) *
+            ((simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X]) *
                 scale) +
-            D_800BA9D8.cupPosition[AXIS_X];
+            g_HoleSetup.cupPosition[AXIS_X];
         simulation->position[AXIS_Z] =
-            ((simulation->position[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]) *
+            ((simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]) *
                 scale) +
-            D_800BA9D8.cupPosition[AXIS_Z];
+            g_HoleSetup.cupPosition[AXIS_Z];
       }
 
       if (simulation->position[AXIS_Y] <
-              D_800BA9D8.cupPosition[AXIS_Y] + 768.0f &&
+              g_HoleSetup.cupPosition[AXIS_Y] + 768.0f &&
           simulation->velocity[AXIS_Y] < -711.168f) {
         s32 toCupX =
-            D_800BA9D8.cupPosition[AXIS_X] - simulation->position[AXIS_X];
+            g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
         s32 toCupZ =
-            D_800BA9D8.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
+            g_HoleSetup.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
 
         if ((toCupX | toCupZ) != 0) {
           u32 scale = (u32)ABS(simulation->velocity[AXIS_Y]) /
@@ -640,14 +641,14 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           simulation->velocity[AXIS_X] = toCupX * scale;
           simulation->velocity[AXIS_Z] = toCupZ * scale;
           simulation->position[AXIS_Y] =
-              D_800BA9D8.cupPosition[AXIS_Y] + 768.0f;
+              g_HoleSetup.cupPosition[AXIS_Y] + 768.0f;
         }
 
         simulation->velocity[AXIS_Y] = ABS(simulation->velocity[AXIS_Y]);
       }
 
       if (simulation->position[AXIS_Y] >=
-          D_800BA9D8.cupPosition[AXIS_Y] + 0xC00) {
+          g_HoleSetup.cupPosition[AXIS_Y] + 0xC00) {
         simulation->velocity[AXIS_Y] =
             (f32)(-simulation->velocity[AXIS_Y] / 2) + 131.0f;
         /* The chained assignment is there to match */
@@ -657,7 +658,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           simulation->isRunning = BALL_STATE_STOPPED;
         }
 
-        simulation->position[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] + 0xC00;
+        simulation->position[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y] + 0xC00;
       } else {
         simulation->velocity[AXIS_Y] = simulation->velocity[AXIS_Y] + 131.0f;
       }
@@ -1429,11 +1430,11 @@ SETTLE:
           floor += 0x1200;
         } else if (state == BALL_STATE_ROLLING) {
           s32 cupOffsetX =
-              simulation->position[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X];
+              simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
 
           if (ABS(cupOffsetX) < 0xC00) {
             s32 cupOffsetZ =
-                simulation->position[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z];
+                simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
 
             if (ABS(cupOffsetZ) < 0xC00) {
               f32 cupDistance = (s32)IntLength2D(cupOffsetX, cupOffsetZ);

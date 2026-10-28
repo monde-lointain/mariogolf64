@@ -279,15 +279,15 @@ void UpdateGolfBalls(void) {
         if (g_IsCupViewShown == TRUE) {
           ball->position[0] =
               (simulation->position[0] -
-                  (f32)(D_800BA9D8.cupPosition[0] - simulation->position[0])) *
+                  (f32)(g_HoleSetup.cupPosition[0] - simulation->position[0])) *
               COURSE_TO_WORLD_SCALE;
           ball->position[1] =
               (simulation->position[1] -
-                  (f32)(D_800BA9D8.cupPosition[1] - simulation->position[1])) *
+                  (f32)(g_HoleSetup.cupPosition[1] - simulation->position[1])) *
               COURSE_TO_WORLD_SCALE;
           ball->position[2] =
               (simulation->position[2] -
-                  (f32)(D_800BA9D8.cupPosition[2] - simulation->position[2])) *
+                  (f32)(g_HoleSetup.cupPosition[2] - simulation->position[2])) *
               COURSE_TO_WORLD_SCALE;
         } else {
           ball->position[0] = simulation->position[0] * COURSE_TO_WORLD_SCALE;
@@ -303,8 +303,8 @@ void UpdateGolfBalls(void) {
           ball->isInCup = TRUE;
         }
 
-        if (GetCupDistance(simulation->position[0] - D_800BA9D8.cupPosition[0],
-                simulation->position[2] - D_800BA9D8.cupPosition[2]) == 0 ||
+        if (GetCupDistance(simulation->position[0] - g_HoleSetup.cupPosition[0],
+                simulation->position[2] - g_HoleSetup.cupPosition[2]) == 0 ||
             simulation->isRunning == BALL_STATE_IN_CUP ||
             simulation->unkA0 != 0) {
           ball->isInCup = TRUE;
@@ -349,11 +349,11 @@ void UpdateGolfBalls(void) {
             coursePosition[1] = afterimage->position[1] * 1024.0f;
             coursePosition[2] = afterimage->position[2] * 1024.0f;
             afterimage->position[0] += afterimage->position[0] -
-                (D_800BA9D8.cupPosition[0] * COURSE_TO_WORLD_SCALE);
+                (g_HoleSetup.cupPosition[0] * COURSE_TO_WORLD_SCALE);
             afterimage->position[1] += afterimage->position[1] -
-                (D_800BA9D8.cupPosition[1] * COURSE_TO_WORLD_SCALE);
+                (g_HoleSetup.cupPosition[1] * COURSE_TO_WORLD_SCALE);
             afterimage->position[2] += afterimage->position[2] -
-                (D_800BA9D8.cupPosition[2] * COURSE_TO_WORLD_SCALE);
+                (g_HoleSetup.cupPosition[2] * COURSE_TO_WORLD_SCALE);
           }
         }
       }
@@ -364,15 +364,15 @@ void UpdateGolfBalls(void) {
         if (afterimage->alpha != AFTERIMAGE_UNUSED) {
           afterimage->position[0] -=
               (afterimage->position[0] -
-                  (D_800BA9D8.cupPosition[0] * COURSE_TO_WORLD_SCALE)) *
+                  (g_HoleSetup.cupPosition[0] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
           afterimage->position[1] -=
               (afterimage->position[1] -
-                  (D_800BA9D8.cupPosition[1] * COURSE_TO_WORLD_SCALE)) *
+                  (g_HoleSetup.cupPosition[1] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
           afterimage->position[2] -=
               (afterimage->position[2] -
-                  (D_800BA9D8.cupPosition[2] * COURSE_TO_WORLD_SCALE)) *
+                  (g_HoleSetup.cupPosition[2] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
         }
       }

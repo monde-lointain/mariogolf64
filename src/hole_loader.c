@@ -141,10 +141,10 @@ extern u32 g_GroundDrawFrame;
 extern s32 f_CycledCupIndex;
 /* The cup index after the chosen one; nothing reads it */
 extern s8 f_NextCupIndex;
-extern Unk800BA9D8 D_80105F40;
+extern HoleSetup D_80105F40;
 /* menu.c declares this as Unk68[MAX_PLAYER_COUNT]; only its first bytes are
  * copied here */
-extern Unk800BA9D8 D_800FEDD8;
+extern HoleSetup D_800FEDD8;
 
 void func_8005F1C8(void);
 void PlacePlayersOnTee(void);
@@ -770,9 +770,9 @@ s32 ChooseHoleConditions(void) {
   if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
       g_GameState.unk31 != 0) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      D_800BA9D8 = D_80105F40;
+      g_HoleSetup = D_80105F40;
     } else {
-      D_800BA9D8 = D_800FEDD8;
+      g_HoleSetup = D_800FEDD8;
     }
 
     return;
@@ -890,25 +890,25 @@ s32 ChooseHoleConditions(void) {
 
   /* Holes leave unused cup positions at zero, so skip to one that is set */
   for (;;) {
-    D_800BA9D8.cupPosition[AXIS_X] =
+    g_HoleSetup.cupPosition[AXIS_X] =
         g_HolePoints.cupPositions[cupIndex][AXIS_X];
-    D_800BA9D8.cupPosition[AXIS_Y] =
+    g_HoleSetup.cupPosition[AXIS_Y] =
         g_HolePoints.cupPositions[cupIndex][AXIS_Y];
-    D_800BA9D8.cupPosition[AXIS_Z] =
+    g_HoleSetup.cupPosition[AXIS_Z] =
         g_HolePoints.cupPositions[cupIndex][AXIS_Z];
-    D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
-    D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
-    D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
+    g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
+    g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
+    g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
     attemptCount++;
     cupIndex = (cupIndex + 1) & (CUP_POSITION_COUNT - 1);
     if (attemptCount >= MAX_CUP_ATTEMPT_COUNT) {
       break;
     }
 
-    if (D_800BA9D8.cupPosition[AXIS_X] != 0 &&
-        D_800BA9D8.cupPosition[AXIS_Z] != 0 &&
-        D_800BA9D8.teePosition[AXIS_X] != 0 &&
-        D_800BA9D8.teePosition[AXIS_Z] != 0) {
+    if (g_HoleSetup.cupPosition[AXIS_X] != 0 &&
+        g_HoleSetup.cupPosition[AXIS_Z] != 0 &&
+        g_HoleSetup.teePosition[AXIS_X] != 0 &&
+        g_HoleSetup.teePosition[AXIS_Z] != 0) {
       break;
     }
   }
@@ -923,8 +923,8 @@ s32 ChooseHoleConditions(void) {
 void InitHoleState(void) {
   s32 index;
 
-  D_800BA9D8.cupPosition[AXIS_Y] = GetGroundHeight(
-      D_800BA9D8.cupPosition[AXIS_X], D_800BA9D8.cupPosition[AXIS_Z]);
+  g_HoleSetup.cupPosition[AXIS_Y] = GetGroundHeight(
+      g_HoleSetup.cupPosition[AXIS_X], g_HoleSetup.cupPosition[AXIS_Z]);
   if (IsGameFlagSet(GAME_FLAG_HALT_HOLE_LOADER)) {
     while (TRUE) {
     }

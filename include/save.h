@@ -168,14 +168,18 @@ typedef struct GameState {
       carriedPots[CARRIED_POT_COUNT]; /* The pots that tied holes carry over */
 } GameState; /* size = 0x44 */
 
-typedef struct Unk800BA9D8 {
+/*
+ * The hole being played: where its cup and tee are and how it plays. The
+ * records keep a copy, and a saved game keeps one to resume the hole.
+ */
+typedef struct HoleSetup {
   /* 0x00 */ CoursePoint cupPosition;
   /* 0x0C */ CoursePoint teePosition; /* Where each player starts the hole */
   /* 0x18 */ HoleConditions conditions; /* g_HoleConditions */
   /* 0x2C */ s8 par; /* g_HolePar */
   /* 0x2D */ s8 nextCupIndex; /* f_NextCupIndex */
   /* 0x2E */ u8 unk2E[0x34 - 0x2E];
-} Unk800BA9D8; /* size = 0x34 */
+} HoleSetup; /* size = 0x34 */
 
 /* A shot as a record keeps it, from the CurrentShot it was played with */
 typedef struct RecordedShot {
@@ -190,7 +194,7 @@ typedef struct RecordedShot {
 
 /* A hole that a player finished in few strokes, kept to be replayed */
 typedef struct PlayRecord {
-  /* 0x00 */ Unk800BA9D8 hole;
+  /* 0x00 */ HoleSetup hole;
   /* 0x34 */ s32 gameMode;
   /* 0x38 */ s8 courseIndex;
   /* 0x39 */ s8 holeIndex;
@@ -208,7 +212,7 @@ typedef struct PlayRecord {
 
 /* A Ring Shot hole as a player played it, kept to be replayed */
 typedef struct RingShotRecord {
-  /* 0x00 */ Unk800BA9D8 hole;
+  /* 0x00 */ HoleSetup hole;
   /* 0x34 */ s8 courseIndex;
   /* 0x35 */ s8 holeIndex;
   /* 0x36 */ u8 scoreKind; /* What func_80060190 returns for the strokes */
@@ -222,7 +226,7 @@ typedef struct RingShotRecord {
   /* 0x60 */ u8 unk60[0x68 - 0x60];
 } RingShotRecord; /* size = 0x68 */
 
-extern Unk800BA9D8 D_800BA9D8;
+extern HoleSetup g_HoleSetup;
 
 /* The current round's statistics, for the course's records */
 typedef struct RoundStats {
@@ -267,7 +271,7 @@ typedef struct UnkE98 {
 typedef struct SavedGame {
   /* 0x00 */ s32 isValid;
   /* 0x04 */ u8 unk4[4];
-  /* 0x08 */ Unk800BA9D8 unk8;
+  /* 0x08 */ HoleSetup unk8;
   /* 0x3C */ GameState state;
   /* 0x80 */ RoundStats roundStats;
   /* 0x9C */ u8 unk9C[4];

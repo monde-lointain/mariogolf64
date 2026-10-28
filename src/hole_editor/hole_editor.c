@@ -1143,9 +1143,9 @@ void func_80400FBC_hole_editor(void) {
               ->name,
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
       if (f_PinTeeIndex == 0) {
-        D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
-        D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
-        D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
+        g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
+        g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
+        g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
       }
     }
 
@@ -1164,9 +1164,9 @@ void func_80400FBC_hole_editor(void) {
               ->name,
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
       if (f_PinTeeIndex == 0) {
-        D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
-        D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
-        D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
+        g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
+        g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
+        g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
       }
     }
 
@@ -2242,7 +2242,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80403A04_hole_edito
 
 /*
  * Sets the billboards and the hole's points back on the ground, and
- * copies the first cup and tee positions to D_800BA9D8. The billboards'
+ * copies the first cup and tee positions to g_HoleSetup. The billboards'
  * first height comes from their x and z unscaled. The translation each
  * billboard builds goes unused, and PlaceBillboards places them all again
  * for each one.
@@ -2280,12 +2280,12 @@ void func_804045C0_hole_editor(void) {
     }
   }
 
-  D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
-  D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
-  D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
-  D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
-  D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
-  D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
+  g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
+  g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
+  g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
+  g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
+  g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
+  g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
   for (i = 0; i < ROUTE_POINT_COUNT; i++) {
     if (g_HolePoints.unk60[i][AXIS_X] != 0 &&
         g_HolePoints.unk60[i][AXIS_Z] != 0) {

@@ -662,14 +662,14 @@ void StartFlightCamera(s32 earlierFlightCount) {
       -atan2((f32)(f_ShotEndPosition[AXIS_X] - f_ShotStartPosition[AXIS_X]),
           (f32)(f_ShotEndPosition[AXIS_Z] - f_ShotStartPosition[AXIS_Z]));
   f_EndYawFromCup =
-      -atan2((f32)(f_ShotEndPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X]),
-          (f32)(f_ShotEndPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]));
+      -atan2((f32)(f_ShotEndPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X]),
+          (f32)(f_ShotEndPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]));
   f_StartYawFromCup = -atan2(
-      (f32)(f_ShotStartPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X]),
-      (f32)(f_ShotStartPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]));
+      (f32)(f_ShotStartPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X]),
+      (f32)(f_ShotStartPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]));
   D_800BE644 = GetCupDistance(
-      f_ShotStartPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-      f_ShotStartPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+      f_ShotStartPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+      f_ShotStartPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
   D_800BE640 =
       IntLength3D(f_ShotStartPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
           f_ShotStartPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
@@ -678,18 +678,18 @@ void StartFlightCamera(s32 earlierFlightCount) {
     D_800BE640 = MIN_SHOT_LENGTH;
   }
 
-  f_LandingCupDistance =
-      GetCupDistance(f_ShotEndPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-          f_ShotEndPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+  f_LandingCupDistance = GetCupDistance(
+      f_ShotEndPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+      f_ShotEndPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
   D_800BE658 = 0;
 
   /* The != tests are there to match */
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
     if (i < g_SimulatedShot.stepCount &&
         IsCupPassPoint(IntLength2D(g_SimulatedShot.path[i][AXIS_X] -
-                               D_800BA9D8.cupPosition[AXIS_X],
+                               g_HoleSetup.cupPosition[AXIS_X],
                            g_SimulatedShot.path[i][AXIS_Z] -
-                               D_800BA9D8.cupPosition[AXIS_Z]),
+                               g_HoleSetup.cupPosition[AXIS_Z]),
             g_SimulatedShot.path[i][AXIS_Y])) {
       D_800BE658 |= 2;
     }
@@ -852,7 +852,7 @@ s32 RandomBelow(s32 limit) {
  */
 s32 IsCupPassPoint(s32 cupDistance, s32 height) {
   if (cupDistance < CUP_PASS_RADIUS &&
-      height > D_800BA9D8.cupPosition[AXIS_Y] - CUP_PASS_MAX_DEPTH &&
+      height > g_HoleSetup.cupPosition[AXIS_Y] - CUP_PASS_MAX_DEPTH &&
       f_LandingCupDistance < CUP_PASS_MAX_LANDING_DISTANCE &&
       (f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_UNK2)) {
     return TRUE;
@@ -1659,21 +1659,21 @@ s32 StepHoleFlyover(void) {
   }
 
   offset[AXIS_X] =
-      D_800BA9D8.teePosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X];
+      g_HoleSetup.teePosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
   offset[AXIS_Y] =
-      D_800BA9D8.teePosition[AXIS_Y] - D_800BA9D8.cupPosition[AXIS_Y];
+      g_HoleSetup.teePosition[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y];
   offset[AXIS_Z] =
-      D_800BA9D8.teePosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z];
+      g_HoleSetup.teePosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
   g_InsetView.unk8 = 100;
   g_InsetView.unkC = 101;
   g_Cameras[0].view.lookAt[AXIS_X] =
-      (D_800BA9D8.cupPosition[AXIS_X] + (offset[AXIS_X] * approach)) *
+      (g_HoleSetup.cupPosition[AXIS_X] + (offset[AXIS_X] * approach)) *
       COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.lookAt[AXIS_Y] =
-      (D_800BA9D8.cupPosition[AXIS_Y] + (offset[AXIS_Y] * approach)) *
+      (g_HoleSetup.cupPosition[AXIS_Y] + (offset[AXIS_Y] * approach)) *
       COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.lookAt[AXIS_Z] =
-      (D_800BA9D8.cupPosition[AXIS_Z] + (offset[AXIS_Z] * approach)) *
+      (g_HoleSetup.cupPosition[AXIS_Z] + (offset[AXIS_Z] * approach)) *
       COURSE_TO_WORLD_SCALE;
   yaw = atan2(offset[AXIS_X], offset[AXIS_Z]) + (halfTurns * M_PI);
   holeRadius = GetHoleRadius(GetCourseRecordIndex(), GetHoleRecordIndex());
@@ -1691,15 +1691,15 @@ s32 StepHoleFlyover(void) {
   height = ((holeRadius / 2) + (approach * FLYOVER_HEIGHT_APPROACH)) *
       FLYOVER_HEIGHT_SCALE;
   g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] =
-      D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.eye[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y] - height;
   g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] +
       (offset[AXIS_Z] * COURSE_TO_WORLD_SCALE);
   g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] =
-      (D_800BA9D8.cupPosition[AXIS_Y] - FLYOVER_INSET_LOOK_AT_DROP) *
+      (g_HoleSetup.cupPosition[AXIS_Y] - FLYOVER_INSET_LOOK_AT_DROP) *
       COURSE_TO_WORLD_SCALE;
   g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] =
-      D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+      g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   offset[AXIS_X] = sinf(yaw) * FLYOVER_INSET_DISTANCE;
   offset[AXIS_Z] = cosf(yaw) * FLYOVER_INSET_DISTANCE;
   g_Cameras[INSET_CAMERA].view.eye[AXIS_X] =
@@ -1852,11 +1852,11 @@ void PlaceFlightCamera(s32 step) {
       ClearFramedSpheres();
       SetFramingAngles(CUP_FRAMING_PITCH, -f_StartYawFromCup - (M_PI / 6));
       cupSphere[AXIS_X] =
-          (f32)D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+          (f32)g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
       cupSphere[AXIS_Z] =
-          (f32)D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+          (f32)g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       cupSphere[AXIS_Y] =
-          (f32)(D_800BA9D8.cupPosition[AXIS_Y] - CUP_FRAMING_RISE) *
+          (f32)(g_HoleSetup.cupPosition[AXIS_Y] - CUP_FRAMING_RISE) *
           COURSE_TO_WORLD_SCALE;
       AddFramedSphere(cupSphere, CUP_FRAMING_RADIUS);
       cupSphere[AXIS_X] =
@@ -1864,7 +1864,7 @@ void PlaceFlightCamera(s32 step) {
       cupSphere[AXIS_Z] =
           (f32)g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       cupSphere[AXIS_Y] =
-          (f32)(D_800BA9D8.cupPosition[AXIS_Y] - CUP_FRAMING_RISE) *
+          (f32)(g_HoleSetup.cupPosition[AXIS_Y] - CUP_FRAMING_RISE) *
           COURSE_TO_WORLD_SCALE;
       AddFramedSphere(cupSphere, CUP_FRAMING_RADIUS);
       FrameSpheres(CUP_FRAMING_DEPTH_OFFSET);
@@ -2931,13 +2931,13 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     f_FlightBallPosition[AXIS_Z] = g_SimulatedShot.path[step][AXIS_Z];
   }
 
-  f_BallCupDistance =
-      IntLength3D(f_FlightBallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-          f_FlightBallPosition[AXIS_Y] - D_800BA9D8.cupPosition[AXIS_Y],
-          f_FlightBallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
-  f_BallCupGroundDistance =
-      IntLength2D(f_FlightBallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
-          f_FlightBallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+  f_BallCupDistance = IntLength3D(
+      f_FlightBallPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+      f_FlightBallPosition[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y],
+      f_FlightBallPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
+  f_BallCupGroundDistance = IntLength2D(
+      f_FlightBallPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+      f_FlightBallPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
   if (g_SimulatedShot.unk2E08) {
     switch (D_800DAF50) {
       case 1:
@@ -3034,9 +3034,9 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
   aheadStep = step + CUP_PASS_LOOKAHEAD_STEP_COUNT;
   if (aheadStep <= g_SimulatedShot.stepCount &&
       IsCupPassPoint(IntLength2D(g_SimulatedShot.path[aheadStep][AXIS_X] -
-                             D_800BA9D8.cupPosition[AXIS_X],
+                             g_HoleSetup.cupPosition[AXIS_X],
                          g_SimulatedShot.path[aheadStep][AXIS_Z] -
-                             D_800BA9D8.cupPosition[AXIS_Z]),
+                             g_HoleSetup.cupPosition[AXIS_Z]),
           g_SimulatedShot.path[aheadStep][AXIS_Y])) {
     D_800BE658 |= 2;
   }
@@ -3175,12 +3175,12 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
       g_InsetView.step = 0;
       g_Cameras[INSET_CAMERA].view.drawFlags = 0;
       g_Cameras[0].view.lookAt[AXIS_X] =
-          (f32)D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+          (f32)g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Y] =
-          ((f32)D_800BA9D8.cupPosition[AXIS_Y] - CUP_LOOK_AT_DEPTH) *
+          ((f32)g_HoleSetup.cupPosition[AXIS_Y] - CUP_LOOK_AT_DEPTH) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Z] =
-          (f32)D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+          (f32)g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X] +
           (sinf(D_800BE684) * CUP_CLOSE_VIEW_DISTANCE);
       g_Cameras[0].view.eye[AXIS_Y] =
@@ -3204,16 +3204,16 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
       g_InsetView.step = 0;
       g_Cameras[INSET_CAMERA].view.drawFlags = 0;
       g_Cameras[0].view.lookAt[AXIS_X] =
-          (f32)D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+          (f32)g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Y] =
-          (f32)D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+          (f32)g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Z] =
-          (f32)D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+          (f32)g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       point[AXIS_X] = (-sinf(f_CameraYaw) * CUP_VIEW_DISTANCE) +
-          D_800BA9D8.cupPosition[AXIS_X];
-      point[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] - CUP_VIEW_HEIGHT;
+          g_HoleSetup.cupPosition[AXIS_X];
+      point[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y] - CUP_VIEW_HEIGHT;
       point[AXIS_Z] = (cosf(f_CameraYaw) * CUP_VIEW_DISTANCE) +
-          D_800BA9D8.cupPosition[AXIS_Z];
+          g_HoleSetup.cupPosition[AXIS_Z];
       g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;

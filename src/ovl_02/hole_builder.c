@@ -2307,12 +2307,12 @@ void ScaleMiniGolfHole(void) {
     }
   }
 
-  D_800BA9D8.teePosition[AXIS_X] *= g_MiniGolfScale[AXIS_X];
-  D_800BA9D8.teePosition[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
-  D_800BA9D8.teePosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
-  D_800BA9D8.cupPosition[AXIS_X] *= g_MiniGolfScale[AXIS_X];
-  D_800BA9D8.cupPosition[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
-  D_800BA9D8.cupPosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
+  g_HoleSetup.teePosition[AXIS_X] *= g_MiniGolfScale[AXIS_X];
+  g_HoleSetup.teePosition[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
+  g_HoleSetup.teePosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
+  g_HoleSetup.cupPosition[AXIS_X] *= g_MiniGolfScale[AXIS_X];
+  g_HoleSetup.cupPosition[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
+  g_HoleSetup.cupPosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
 }
 
 /* Returns the paint logic that a course's terrain is painted with */
@@ -2404,7 +2404,7 @@ void BuildHole(s32 course, s32 hole) {
         OpenAssetFile(f_HoleAssetIds[course][hole].unk6, &asset);
       }
 
-      ReadAssetFile(&D_800BA9D8, GetAssetFileSize(&asset), &asset);
+      ReadAssetFile(&g_HoleSetup, GetAssetFileSize(&asset), &asset);
     }
 
     if (g_GameState.gameMode == GAME_MODE_UNK12) {
@@ -2548,12 +2548,12 @@ void ClearHolePoints(void) {
   s32 i;
 
   if (!g_GameState.unk30) {
-    D_800BA9D8.cupPosition[AXIS_X] = 0;
-    D_800BA9D8.cupPosition[AXIS_Y] = 0;
-    D_800BA9D8.cupPosition[AXIS_Z] = 0;
-    D_800BA9D8.teePosition[AXIS_X] = 0;
-    D_800BA9D8.teePosition[AXIS_Y] = 0;
-    D_800BA9D8.teePosition[AXIS_Z] = 0;
+    g_HoleSetup.cupPosition[AXIS_X] = 0;
+    g_HoleSetup.cupPosition[AXIS_Y] = 0;
+    g_HoleSetup.cupPosition[AXIS_Z] = 0;
+    g_HoleSetup.teePosition[AXIS_X] = 0;
+    g_HoleSetup.teePosition[AXIS_Y] = 0;
+    g_HoleSetup.teePosition[AXIS_Z] = 0;
   }
 
   for (i = 0; i < CUP_POSITION_COUNT; i++) {

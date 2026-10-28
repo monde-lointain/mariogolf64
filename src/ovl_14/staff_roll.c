@@ -677,12 +677,12 @@ void LoadStaffRoll(void) {
   g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
   g_LightPitch = STAFF_ROLL_LIGHT_PITCH;
   g_LightYaw = STAFF_ROLL_LIGHT_YAW;
-  D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
-  D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
-  D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
-  D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
-  D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
-  D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
+  g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
+  g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
+  g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
+  g_HoleSetup.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
+  g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
+  g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
   SetGameFlag(GAME_FLAG_HOLE_LOADED);
   g_GameState.playerCount = 1;
   StopLoaderThread();
@@ -916,8 +916,9 @@ void RunStaffRollTimeline(s32 frame) {
   if (frame == 0) {
     SetGameFlag(GAME_FLAG_UNK9A);
     StopFade();
-    f_NearCupPoint[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] + NEAR_CUP_DISTANCE;
-    f_NearCupPoint[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
+    f_NearCupPoint[AXIS_X] =
+        g_HoleSetup.cupPosition[AXIS_X] + NEAR_CUP_DISTANCE;
+    f_NearCupPoint[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
     f_NearCupPoint[AXIS_Y] =
         GetGroundHeight(f_NearCupPoint[AXIS_X], f_NearCupPoint[AXIS_Z]);
     ClearEffects();
@@ -934,9 +935,9 @@ void RunStaffRollTimeline(s32 frame) {
     SetCharacterLighting(0, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(0, TEE_CLUB);
     SetStanceAnimation(0, TEE_CLUB, SHOT_MODE_NORMAL);
-    point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
-    point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
-    point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
+    point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
+    point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
+    point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
     PlaceCharacter(0, point, GOLFER_HEADING);
     f_CastSlot = 0;
   }
@@ -965,9 +966,9 @@ void RunStaffRollTimeline(s32 frame) {
     AdvanceAnimation(slot,
         GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
             CAST_SWING_LEAD_FRAMES);
-    point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
-    point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
-    point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
+    point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
+    point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
+    point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
     f_CastSlot = slot;
   }
@@ -993,12 +994,12 @@ void RunStaffRollTimeline(s32 frame) {
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
-    ConsiderReactionSpot(D_800BA9D8.teePosition);
+    ConsiderReactionSpot(g_HoleSetup.teePosition);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
     f_IsReactionShown = TRUE;
-    point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
-    point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
-    point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
+    point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
+    point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
+    point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
     PlaceCharacter(
         slot, point, DEGREES_TO_RADIANS(-(f_CastIndex * CAST_YAW_STEP)));
     f_CastSlot = slot;
@@ -1258,9 +1259,9 @@ void RunStaffRollTimeline(s32 frame) {
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
         ANIMATION_EVENT_UNK6);
-    point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
-    point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
-    point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
+    point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
+    point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
+    point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
     f_CastSlot = slot;
   }
@@ -1279,12 +1280,12 @@ void RunStaffRollTimeline(s32 frame) {
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
-    ConsiderReactionSpot(D_800BA9D8.teePosition);
+    ConsiderReactionSpot(g_HoleSetup.teePosition);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
     f_IsReactionShown = TRUE;
-    point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
-    point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
-    point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
+    point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
+    point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
+    point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
     f_CastSlot = slot;
   }
