@@ -76,10 +76,35 @@ enum PauseOptionKind {
   PAUSE_OPTION_KIND_GIVE_UP = 7
 };
 
+/* Give Up, which is greyed out while f_CanGiveUp is clear */
+#define PAUSE_OPTION_GIVE_UP 2
+
+#define PAUSE_LAYOUT_MAX_OPTIONS 9
+#define PAUSE_OPTION_MESSAGE_BASE 0x77
+/* "Can't give up on 1st stroke." */
+#define PAUSE_OPTION_FIRST_STROKE_MESSAGE 0xE
+
+typedef struct PauseOption {
+  /* Its label, counted from PAUSE_OPTION_MESSAGE_BASE */
+  /* 0x0 */ s16 message;
+  /* A PAUSE_ACTION_* value, done when the option is chosen */
+  /* 0x2 */ s16 action;
+  /* A PAUSE_OPTION_KIND_* value */
+  /* 0x4 */ u16 kind;
+} PauseOption; /* size = 0x6 */
+
 extern s32 f_IsPauseMenuLoaded;
 extern s32 f_PauseSelection;
 extern s32 f_PauseLayout;
 extern s32 f_PauseMenuRequest;
+extern PauseOption f_PauseOptions[];
+extern s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
+extern char* f_ClearText;
+extern char* f_RainText;
+extern char* f_BlackText;
+extern char* f_WhiteText;
+extern f32 f_PauseGlowAngle;
+extern f32 f_PauseCursorAngle;
 
 static u8* f_PauseCursorImage;
 static u8* f_MenuCloudImage; /* The pause menu's cloud, or the choice box's */
@@ -300,30 +325,6 @@ void FreePauseMenu(void) {
 
   SetSongVolume(SOUND_FULL_SCALE);
 }
-
-/* Give Up, which is greyed out while f_CanGiveUp is clear */
-#define PAUSE_OPTION_GIVE_UP 2
-
-#define PAUSE_LAYOUT_MAX_OPTIONS 9
-#define PAUSE_OPTION_MESSAGE_BASE 0x77
-/* "Can't give up on 1st stroke." */
-#define PAUSE_OPTION_FIRST_STROKE_MESSAGE 0xE
-
-typedef struct PauseOption {
-  /* 0x0 */ s16 message; /* Counted from PAUSE_OPTION_MESSAGE_BASE */
-  /* 0x2 */ s16
-      action; /* A PAUSE_ACTION_* value, done when the option is chosen */
-  /* 0x4 */ u16 kind;
-} PauseOption; /* size = 0x6 */
-
-extern PauseOption f_PauseOptions[];
-extern s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
-extern char* f_ClearText;
-extern char* f_RainText;
-extern char* f_BlackText;
-extern char* f_WhiteText;
-extern f32 f_PauseGlowAngle;
-extern f32 f_PauseCursorAngle;
 
 /* The prompts that some options open */
 enum PromptId {
