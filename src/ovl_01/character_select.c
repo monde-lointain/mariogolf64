@@ -102,6 +102,10 @@ enum GridMove {
 #define DRIVE_DISTANCE_X 246
 #define DRIVE_DISTANCE_Y 200
 
+/* The buffer kinds that D_8022FF2C has an image for: func_8020B2C4 reads
+ * those of kinds 1, 2 and 5 to 8 */
+#define CHARACTER_SELECT_IMAGE_KIND_COUNT 9
+
 /* The palettes that the C buttons choose, which the A button wears and which
  * the faces preview while held */
 enum CButtonPalette {
@@ -115,18 +119,6 @@ enum CButtonPalette {
 extern void* D_80105B78[CHARACTER_COUNT];
 extern void* D_8012D430[CHARACTER_COUNT];
 extern void* D_801B69EC;
-extern s32 D_8022FFA0_ovl_01;
-extern s32 D_8022FFA4_ovl_01;
-extern u8 D_8022FF01_ovl_01;
-extern s8 D_8022FF04_ovl_01;
-extern u8 D_8022FF05_ovl_01;
-extern u8 D_8022FF06_ovl_01;
-extern s32 D_8022FF2C_ovl_01[];
-extern Vtx D_80230038_ovl_01[MENU_CURSOR_VERTEX_COUNT];
-extern f32 D_80230080_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
-                                                           corner's colour */
-extern s32 D_8022FF1C_ovl_01[4];
-extern s32 D_8022FF50_ovl_01[];
 
 /* Where the character cursor's translation is measured from, so that it is
  * placed by its corner */
@@ -135,14 +127,6 @@ extern s32 D_8022FF50_ovl_01[];
 /* Moves the cursor by half a pixel so that its edges sit on pixel centres */
 #define HALF_PIXEL 0.5f
 
-extern u8 D_8022FF00_ovl_01;
-extern s8 D_8022FF07_ovl_01;
-extern s8 D_8022FF08_ovl_01;
-extern s8 D_8022FF09_ovl_01;
-/* Each player's tag offset from their cursor's grid cell, as x and y */
-extern s8 D_8022FFCC_ovl_01[MAX_PLAYER_COUNT][2];
-/* The tags' x when lined up, by the player count less one */
-extern s32 D_8022FFD4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 void func_801FC754_ovl_01(Gfx** displayListHead);
 void func_801FD7B0_ovl_01(Gfx** displayListHead);
 void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
@@ -152,6 +136,62 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode);
 void func_8020D338_ovl_01();
 void func_8020D734_ovl_01();
 void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet);
+
+static u8 D_8022FF00_ovl_01 = FALSE;
+static u8 D_8022FF01_ovl_01 = FALSE;
+/* Read by no routine */
+static u8 D_8022FF02_ovl_01 = 0;
+static u8 D_8022FF03_ovl_01 = 0;
+static s8 D_8022FF04_ovl_01 = 0;
+static u8 D_8022FF05_ovl_01 = 0;
+static u8 D_8022FF06_ovl_01 = 0;
+static s8 D_8022FF07_ovl_01 = FALSE;
+static s8 D_8022FF08_ovl_01 = FALSE;
+/* A CButtonPalette value */
+static s8 D_8022FF09_ovl_01 = NO_PALETTE;
+/* Read by no routine */
+static s32 D_8022FF0C_ovl_01[4] = {-1, -1, -1, -1};
+/* The Game Boy row's slots, which func_80209500 saves here and func_80209D50
+ * puts back */
+static s32 D_8022FF1C_ovl_01[GAME_BOY_CHARACTER_COUNT] = {
+    EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT};
+static s32 D_8022FF2C_ovl_01[CHARACTER_SELECT_IMAGE_KIND_COUNT] = {
+    0x08E8, 0x05E3, 0x08EF, 0x050F, 0x0521, 0x06EF, 0x05FF, 0x0600, 0x08EE};
+static s32 D_8022FF50_ovl_01[CHARACTER_COUNT] = {
+    0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
+/* Read by no routine */
+static u8 D_8022FF98_ovl_01[8] = {
+    0x71, 0x76, 0x81, 0x6C, 0x9D, 0x00, 0x00, 0x00};
+static s32 D_8022FFA0_ovl_01 = 0;
+static s32 D_8022FFA4_ovl_01 = 0;
+/* Read by no routine */
+static char D_8022FFA8_ovl_01[3][10] = {"Straight", "Draw", "Fade"};
+static s16 D_8022FFC6_ovl_01 = 0;
+static s16 D_8022FFC8_ovl_01 = 0;
+/* Read by no routine */
+static s16 D_8022FFCA_ovl_01 = 0;
+/* Each player's tag offset from their cursor's grid cell, as x and y */
+static s8 D_8022FFCC_ovl_01[MAX_PLAYER_COUNT][2] = {
+    {0, 0}, {16, 0}, {0, 24}, {16, 24}};
+/* The tags' x when lined up, by the player count less one */
+static s32 D_8022FFD4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+    {102, -26, -26, -26}, {22, 182, -26, -26}, {38, 102, 166, 230},
+    {6, 70, 134, 198}};
+/* Read by no routine; the last 16 values of player_stats.c's D_80230960 */
+static s16 D_80230014_ovl_01[16] = {
+    1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
+static Vtx D_80230038_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+    {{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-24, -24, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
+    {{{24, -24, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
+/* Read by no routine */
+static s32 D_80230078_ovl_01[2] = {0, 0};
+/* The phase of each corner's color */
+static f32 D_80230080_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+    0.0f, 2.0f, 4.0f, 6.0f};
+/* Read by no routine */
+static s32 D_80230090_ovl_01[4] = {0, 0, 0, 0};
 
 static Mtx D_8023A3A0_ovl_01;
 static Mtx D_8023A3E0_ovl_01[2];
@@ -492,7 +532,6 @@ s32 func_80209BE0_ovl_01(void) {
 
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s8 D_801B5634;
-extern u8 D_8022FF03_ovl_01;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 
 s32 GetClubTournamentCourse(void);
@@ -1341,9 +1380,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B590_ovl_01);
 #define HIDDEN_MARK_LIMIT (-10)
 /* The faces' animation steps a frame every four draws, through eight frames */
 #define FACE_FRAME_DURATION 4
-
-extern s16 D_8022FFC6_ovl_01;
-extern s16 D_8022FFC8_ovl_01;
 
 /*
  * Doesn't match: the original keeps row in a temporary register and spills the
