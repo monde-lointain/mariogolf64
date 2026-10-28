@@ -9,10 +9,6 @@ rspbootTextEnd = 0x800B3F20;
    0x80000000 for code in KSEG0. */
 EnterDevelopmentDebugger = 0x80000000;
 
-/* Overlay 0 reads the z of g_SimulatedShot's end position under this name,
-   which splat keeps even though the struct covers the address */
-D_8024DD34_ovl_04 = g_SimulatedShot + 0x14;
-
 /* DrawPressingHand reads this g_GameBoyTransfer field as a scalar */
 g_PressingHandImage = g_GameBoyTransfer + 0x40;
 
