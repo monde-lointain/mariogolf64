@@ -814,7 +814,7 @@ void StartFreeLook(void) {
   g_CurrentShot.aimCameraDistance = FREE_LOOK_START_DISTANCE;
   g_LetterboxState = LETTERBOX_STATE_UNK1;
   D_800C3070 = 0;
-  g_ImpactPointState = FALSE;
+  g_ImpactPointState = IMPACT_POINT_OFF;
   g_RoundHud.flags = FREE_LOOK_HUD_FLAGS;
   g_FreeLookHeading = g_CurrentShot.unk0;
   SetMenuBackdrop(MENU_BACKDROP_PATTERN);
@@ -832,16 +832,16 @@ void StartFreeLook(void) {
 void UpdateImpactPointMode(void) {
   if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
       !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
-    if (!g_ImpactPointState && D_80227194_ovl_00 == 0) {
+    if (g_ImpactPointState == IMPACT_POINT_OFF && D_80227194_ovl_00 == 0) {
       PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
           IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
           IMPACT_POINT_SOUND_PAN);
     }
 
-    g_ImpactPointState = TRUE;
+    g_ImpactPointState = IMPACT_POINT_SETTING;
   } else {
     StopSound(IMPACT_POINT_SOUND_CHANNEL);
-    g_ImpactPointState = FALSE;
+    g_ImpactPointState = IMPACT_POINT_OFF;
   }
 }
 
@@ -1048,7 +1048,7 @@ void TurnAim(s32 turnsAltHeading) {
   s32 dpad;
   s32 dpadSpeed;
 
-  if (g_ImpactPointState) {
+  if (g_ImpactPointState != IMPACT_POINT_OFF) {
     return;
   }
 
@@ -1270,33 +1270,33 @@ s32 UpdateAimControls(void) {
     }
 
     if (g_LetterboxState == LETTERBOX_STATE_NONE) {
-      g_ImpactPointState = TRUE;
+      g_ImpactPointState = IMPACT_POINT_SETTING;
     } else {
-      g_ImpactPointState = FALSE;
+      g_ImpactPointState = IMPACT_POINT_OFF;
     }
   } else {
     if (D_80227194_ovl_00 == 0) {
       if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
           g_PauseScreen != PAUSE_SCREEN_UNK4 &&
           !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
-        if (g_ImpactPointState != TRUE) {
+        if (g_ImpactPointState != IMPACT_POINT_SETTING) {
           PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
               IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
               IMPACT_POINT_SOUND_PAN);
         }
 
-        g_ImpactPointState = TRUE;
+        g_ImpactPointState = IMPACT_POINT_SETTING;
         g_ImpactPointLingerFrameCount = 0;
       } else {
         StopSound(IMPACT_POINT_SOUND_CHANNEL);
-        if (g_ImpactPointState != FALSE) {
-          g_ImpactPointState = -1;
+        if (g_ImpactPointState != IMPACT_POINT_OFF) {
+          g_ImpactPointState = IMPACT_POINT_LINGERING;
         }
 
         if (g_ImpactPointLingerFrameCount < IMPACT_POINT_LINGER_FRAMES) {
           g_ImpactPointLingerFrameCount++;
         } else {
-          g_ImpactPointState = FALSE;
+          g_ImpactPointState = IMPACT_POINT_OFF;
         }
       }
     }
@@ -3616,7 +3616,7 @@ void UpdateTurns(void) {
           if (D_80227194_ovl_00 == 1) {
             isReady = StepToClubChoice(&D_80104F78);
           } else {
-            if (!g_ImpactPointState) {
+            if (g_ImpactPointState == IMPACT_POINT_OFF) {
               HandleClubInput();
             }
 
@@ -3693,7 +3693,7 @@ void UpdateTurns(void) {
             g_RoundHud.unk84[1] = 0;
           }
 
-          if (g_ImpactPointState == 1) {
+          if (g_ImpactPointState == IMPACT_POINT_SETTING) {
             if (D_80227194_ovl_00 == 0) {
               g_CurrentShot.unk14 = GetTurnStickX();
               g_CurrentShot.unk18 = GetTurnStickY();
@@ -3701,7 +3701,7 @@ void UpdateTurns(void) {
               g_CurrentShot.unk14 = 0;
               g_CurrentShot.unk18 = 0;
             }
-          } else if (g_ImpactPointState == 0) {
+          } else if (g_ImpactPointState == IMPACT_POINT_OFF) {
             g_CurrentShot.unk14 = 0;
             g_CurrentShot.unk18 = 0;
           }
@@ -3736,7 +3736,7 @@ void UpdateTurns(void) {
               g_RoundHud.flags = 0x47;
             }
 
-            if (g_ImpactPointState == 1) {
+            if (g_ImpactPointState == IMPACT_POINT_SETTING) {
               g_RoundHud.flags = (g_RoundHud.flags | 8) & ~2;
             }
           }

@@ -27,8 +27,18 @@ typedef struct CurrentShot {
   /* 0x54 */ s8 unk54;
 } CurrentShot; /* size = 0x58 */
 
+/*
+ * Whether the impact point is being set. Holding Z or L sets it with the stick,
+ * rather than aiming; once they are let go, it lingers for a few frames.
+ */
+enum ImpactPointState {
+  IMPACT_POINT_LINGERING = -1,
+  IMPACT_POINT_OFF,
+  IMPACT_POINT_SETTING
+};
+
 extern CurrentShot g_CurrentShot;
-/* Holding Z or L sets the impact point with the stick, rather than aiming */
+/* An IMPACT_POINT_* value */
 extern s32 g_ImpactPointState;
 
 #endif
