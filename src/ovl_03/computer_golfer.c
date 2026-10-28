@@ -355,7 +355,7 @@ s32 GetGolferTraitUnk2(void) {
 
 s32 IsStrokeLimitReached(void) {
   return g_Players[f_Shot.playerIndex].strokeCount >=
-      g_HolePar + f_HoleTargetToPar - 1;
+      g_HoleSetup.par + f_HoleTargetToPar - 1;
 }
 
 /* Course units, of which there are 1024 to a world unit */
@@ -576,7 +576,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
           f_TargetCarry = GetShotWorldDistance(
               GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
               f_Shot.shotMode);
-          if (g_HoleConditions.isRaining == TRUE) {
+          if (g_HoleSetup.conditions.isRaining == TRUE) {
             f_TargetCarry = f_TargetCarry * RAINY_CARRY_SCALE;
           }
 
@@ -596,7 +596,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
           targetDistance =
               IntLength2D(f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X],
                   f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]);
-          if (g_HoleConditions.isRaining == TRUE) {
+          if (g_HoleSetup.conditions.isRaining == TRUE) {
             targetDistance = (s32)(targetDistance * RAINY_DISTANCE_SCALE);
           }
           while (TRUE) {
@@ -634,7 +634,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
             f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z] &&
             GetSurfaceInfo(f_Shot.surface)->kind != SURFACE_KIND_GREEN) {
           strokesOver = g_Players[f_Shot.playerIndex].strokeCount -
-              (g_HolePar + f_HoleTargetToPar - 2);
+              (g_HoleSetup.par + f_HoleTargetToPar - 2);
           if (strokesOver <= 0) {
             missDistance = IntLength2D(g_HoleSetup.cupPosition[AXIS_X] -
                                    f_Shot.ballPosition[AXIS_X],
@@ -692,7 +692,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
           f_Shot.shotMode);
       distance = IntLength2D(f_Shot.ballPosition[AXIS_X] - f_PlanTarget[AXIS_X],
           f_Shot.ballPosition[AXIS_Z] - f_PlanTarget[AXIS_Z]);
-      if (g_HoleConditions.isRaining == TRUE) {
+      if (g_HoleSetup.conditions.isRaining == TRUE) {
         distance = (s32)(distance * RAINY_DISTANCE_SCALE);
       }
 
@@ -838,7 +838,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
       (s32)IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - f_PlanTarget[AXIS_X],
           g_HoleSetup.cupPosition[AXIS_Z] - f_PlanTarget[AXIS_Z])) {
     strokes = g_Players[f_Shot.playerIndex].strokeCount;
-    par = g_HolePar;
+    par = g_HoleSetup.par;
     mishit = 0;
     if (GetSurfaceInfo(f_TrialShot.surface)->kind != SURFACE_KIND_GREEN &&
         strokes < par + f_HoleTargetToPar - 1) {
@@ -940,13 +940,15 @@ s32 PlanCupDistance(s32 unused) {
   cupX = g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X];
   cupZ = g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z];
   length = sqrtf((cupX * cupX) + (cupZ * cupZ));
-  windAngle = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+  windAngle = g_HoleSetup.conditions.windDirection * WIND_DIRECTION_TO_RADIANS;
   if (length >= WIND_ALLOWANCE_MIN_DISTANCE) {
     inverseLength = 1.0f / length;
     cupX *= inverseLength;
     cupZ *= inverseLength;
-    windX = cosf(windAngle) * g_HoleConditions.windSpeed * WIND_SPEED_SCALE;
-    windZ = sinf(windAngle) * g_HoleConditions.windSpeed * WIND_SPEED_SCALE;
+    windX =
+        cosf(windAngle) * g_HoleSetup.conditions.windSpeed * WIND_SPEED_SCALE;
+    windZ =
+        sinf(windAngle) * g_HoleSetup.conditions.windSpeed * WIND_SPEED_SCALE;
     windFollow = (cupX * windX) + (cupZ * windZ);
     osSyncPrintf("WindFollow%f\n", windFollow);
 
@@ -994,13 +996,13 @@ void PlanClubAndTarget(CoursePoint target) {
   clubType = CLUB_TYPE_DRIVER;
   kind = GetSurfaceInfo(f_Shot.surface)->kind;
   f_HoleStrokeTarget = ChooseHoleStrokeTarget();
-  f_HoleTargetToPar = f_HoleStrokeTarget - g_HolePar;
+  f_HoleTargetToPar = f_HoleStrokeTarget - g_HoleSetup.par;
   switch (kind) {
     case SURFACE_KIND_GREEN:
     case SURFACE_KIND_GREEN_EDGE:
       rest = GetBallCupDistance();
       osSyncPrintf("rest = %d\n", rest);
-      if (g_HoleConditions.isRaining == TRUE) {
+      if (g_HoleSetup.conditions.isRaining == TRUE) {
         rest = rest * RAINY_PUTT_DISTANCE_SCALE;
       }
 
@@ -1223,7 +1225,7 @@ s32 ChooseHoleStrokeTarget(void) {
   }
 
   if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-    return g_HolePar;
+    return g_HoleSetup.par;
   }
 
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
@@ -2353,7 +2355,7 @@ s32 StepTrialShot(void) {
       }
 
       if (g_Players[f_Shot.playerIndex].strokeCount + 1 <
-              g_HolePar + f_HoleTargetToPar &&
+              g_HoleSetup.par + f_HoleTargetToPar &&
           f_HoleTargetToPar > 0 &&
           IntLength2D(f_Shot.ballPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
               f_Shot.ballPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]) >
@@ -2413,7 +2415,7 @@ EVALUATE:
     }
 
     if (f_TrialIndex != 0) {
-      par = g_HolePar;
+      par = g_HoleSetup.par;
       strokes = g_Players[f_Shot.playerIndex].strokeCount;
       if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
           SURFACE_KIND_GREEN) {
@@ -2666,7 +2668,7 @@ s32 ChooseClubForDistance(s32 distance) {
 
     club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
     carry = GetShotWorldDistance(club, SHOT_MODE_NORMAL);
-    if (g_HoleConditions.isRaining == TRUE &&
+    if (g_HoleSetup.conditions.isRaining == TRUE &&
         f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk1 <
             2) {
       carry = carry * RAINY_DISTANCE_FRACTION;
@@ -2709,8 +2711,8 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
 /* It is a macro, as an inline function compiles differently from the original
  */
 #define IsWindSpeedInRange(lowest, limit) \
-  (g_HoleConditions.windSpeed >= (lowest) && \
-      g_HoleConditions.windSpeed < (limit))
+  (g_HoleSetup.conditions.windSpeed >= (lowest) && \
+      g_HoleSetup.conditions.windSpeed < (limit))
 
 /* f_ClubKindChances rows */
 #define CLUB_CHANCE_SET_FOLLOWING_WIND 0
@@ -2767,7 +2769,7 @@ s32 ChooseShotOffset(void) {
   }
 
   aimYaw = (u16)f_Shot.unk0;
-  windDirection = g_HoleConditions.windDirection;
+  windDirection = g_HoleSetup.conditions.windDirection;
   osSyncPrintf("skSCAI.angy = %ld\n", aimYaw);
   osSyncPrintf("wind_ang = %ld\n", windDirection);
   if (GetAngleDifference(windDirection, aimYaw) < FOLLOWING_WIND_ANGLE) {
@@ -2781,7 +2783,7 @@ s32 ChooseShotOffset(void) {
         if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
           return SHOT_OFFSET_MINUS_MEDIUM;
         }
-      } else if (g_HoleConditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
+      } else if (g_HoleSetup.conditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
         if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
           return SHOT_OFFSET_MINUS_LARGE;
         }
@@ -2791,7 +2793,7 @@ s32 ChooseShotOffset(void) {
         if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
           return SHOT_OFFSET_MINUS_SMALL;
         }
-      } else if (g_HoleConditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
+      } else if (g_HoleSetup.conditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
         if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
           return SHOT_OFFSET_MINUS_MEDIUM;
         }
@@ -2808,7 +2810,7 @@ s32 ChooseShotOffset(void) {
         if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
           return SHOT_OFFSET_PLUS_MEDIUM;
         }
-      } else if (g_HoleConditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
+      } else if (g_HoleSetup.conditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
         if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
           return SHOT_OFFSET_PLUS_LARGE;
         }
@@ -2818,7 +2820,7 @@ s32 ChooseShotOffset(void) {
         if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
           return SHOT_OFFSET_PLUS_SMALL;
         }
-      } else if (g_HoleConditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
+      } else if (g_HoleSetup.conditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
         if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
           return SHOT_OFFSET_PLUS_MEDIUM;
         }

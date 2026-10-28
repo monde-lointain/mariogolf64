@@ -991,7 +991,8 @@ void PlayFlightSounds(s32 step) {
   s32* isPlayed;
   s32* isStillPlayed;
 
-  scoreToPar = g_Players[g_CurrentShot.playerIndex].strokeCount - g_HolePar;
+  scoreToPar =
+      g_Players[g_CurrentShot.playerIndex].strokeCount - g_HoleSetup.par;
   shownRingCount = 0;
   if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     player = &g_Players[g_RoundHud.unk87];
@@ -1037,11 +1038,12 @@ void PlayFlightSounds(s32 step) {
         !g_SimulatedShot.unk2E0C && !g_SimulatedShot.unk2E08 &&
         g_SimulatedShot.endsOnGreen &&
         f_EndSurfaceInfo->kind == SURFACE_KIND_GREEN) {
-      if (g_HolePar > g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
+      if (g_HoleSetup.par >
+          g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
         (*greenSoundCount)++;
         PlaySound(
             FLIGHT_SOUND_UNK75, FLIGHT_SOUND_CHANNEL_UNKB, GREEN_SOUND_VOLUME);
-      } else if (g_HolePar >
+      } else if (g_HoleSetup.par >
               g_Players[g_CurrentShot.playerIndex].strokeCount + 2 &&
           f_LandingCupDistance < GREEN_SOUND_MAX_DISTANCE) {
         (*greenSoundCount)++;
@@ -1080,7 +1082,7 @@ void PlayFlightSounds(s32 step) {
       if (f_LandingCupDistance < CLOSE_LANDING_DISTANCE &&
           D_800BE644 > LONG_PUTT_MIN_DISTANCE &&
           !(f_PassedPathFlags & (PATH_FLAG_UNK4 | PATH_FLAG_UNK8)) &&
-          g_HolePar > g_Players[g_CurrentShot.playerIndex].strokeCount) {
+          g_HoleSetup.par > g_Players[g_CurrentShot.playerIndex].strokeCount) {
         StartBanner(BANNER_NICE_TOUCH);
         PlaySound(FLIGHT_SOUND_CALL_NICE_TOUCH, FLIGHT_SOUND_CHANNEL_UNK3,
             FLIGHT_SOUND_VOLUME);
@@ -1098,14 +1100,15 @@ void PlayFlightSounds(s32 step) {
           FLIGHT_SOUND_VOLUME);
       f_PendingResultSound = RESULT_SOUND_UNK2;
     } else if (g_SimulatedShot.endsOnGreen) {
-      if (g_HolePar - 3 >= g_Players[g_CurrentShot.playerIndex].strokeCount) {
+      if (g_HoleSetup.par - 3 >=
+          g_Players[g_CurrentShot.playerIndex].strokeCount) {
         CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_GREAT);
         StartBanner(BANNER_GREAT);
         PlaySound(FLIGHT_SOUND_CALL_GREAT, FLIGHT_SOUND_CHANNEL_UNK3,
             FLIGHT_SOUND_VOLUME);
         QueueOnlookerSounds(2);
         f_PendingResultSound = RESULT_SOUND_UNK2;
-      } else if (g_HolePar - 2 ==
+      } else if (g_HoleSetup.par - 2 ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         if (f_LandingCupDistance <= CLOSE_LANDING_DISTANCE) {
           CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_EXCELLENT);
@@ -1131,7 +1134,7 @@ void PlayFlightSounds(s32 step) {
           PlaySound(FLIGHT_SOUND_CALL_NICE_ON, FLIGHT_SOUND_CHANNEL_UNK3,
               FLIGHT_SOUND_VOLUME);
         }
-      } else if (g_HolePar - 1 ==
+      } else if (g_HoleSetup.par - 1 ==
               g_Players[g_CurrentShot.playerIndex].strokeCount &&
           (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
               g_SimulatedShot.unk2E0C) &&
@@ -1211,15 +1214,15 @@ void PlayFlightSounds(s32 step) {
       if (g_Players[g_CurrentShot.playerIndex].strokeCount == 1) {
         PlaySound(
             FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME);
-      } else if (g_HolePar - 3 ==
+      } else if (g_HoleSetup.par - 3 ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF,
             FLIGHT_SOUND_VOLUME_UNK64);
-      } else if (g_HolePar - 2 ==
+      } else if (g_HoleSetup.par - 2 ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF,
             FLIGHT_SOUND_VOLUME_UNK50);
-      } else if (g_HolePar - 1 ==
+      } else if (g_HoleSetup.par - 1 ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(FLIGHT_SOUND_UNK74, FLIGHT_SOUND_CHANNEL_UNKF,
             FLIGHT_SOUND_VOLUME_UNK60);
@@ -1233,7 +1236,8 @@ void PlayFlightSounds(s32 step) {
             D_800BE640 * YARDS_PER_UNIT &&
         (info = GetSurfaceInfo(g_BallSurface), IsFairwayKind(info->kind)) &&
         !g_GameState.isMiniGolf && D_800BE644 > f_LandingCupDistance &&
-        g_HolePar - 3 >= g_Players[g_CurrentShot.playerIndex].strokeCount) {
+        g_HoleSetup.par - 3 >=
+            g_Players[g_CurrentShot.playerIndex].strokeCount) {
       *isStillPlayed = TRUE;
       PlaySound(
           FLIGHT_SOUND_UNK75, FLIGHT_SOUND_CHANNEL_UNKB, FAIRWAY_SOUND_VOLUME);
@@ -1613,7 +1617,8 @@ void EndHoleFlyover(void) {
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
   if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF && !g_GameState.isMiniGolf) {
     if (IsGameFlagSet(GAME_FLAG_UNK48) ||
-        g_HoleConditions.windSpeed / WIND_SPEED_UNIT >= STRONG_WIND_SPEED) {
+        g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT >=
+            STRONG_WIND_SPEED) {
       ShowWindFlyGuy(TRUE);
     }
   }

@@ -12,6 +12,7 @@
 #include "game.h"
 #include "main.h"
 #include "math_util.h"
+#include "save.h"
 #include "variables.h"
 
 /* How many frames a drawn slot stays busy */
@@ -72,7 +73,7 @@ void SetCharacterAlpha(s32 alpha) {
   }
 
   gfx = g_CharacterCombineDisplayList;
-  if (g_HoleConditions.isRaining) {
+  if (g_HoleSetup.conditions.isRaining) {
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, ENVIRONMENT, 0, SHADE, 0,
         PRIMITIVE, 0, SHADE, 0, ENVIRONMENT, 0, SHADE, 0);
   } else {
@@ -92,8 +93,8 @@ void SetCharacterHilite(CameraMatrices* matrices) {
   f32 lightYaw;
   Gfx* gfx;
 
-  lightPitch = g_LightPitch * BINARY_ANGLE_TO_RADIANS;
-  lightYaw = g_LightYaw * BINARY_ANGLE_TO_RADIANS;
+  lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+  lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
   lightDirection[0] =
       -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
   lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;

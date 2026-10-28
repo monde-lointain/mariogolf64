@@ -17,6 +17,7 @@
 #include "libc.h"
 #include "math_util.h"
 #include "reaction.h"
+#include "save.h"
 #include "shot_effects.h"
 #include "surface.h"
 #include "terrain.h"
@@ -1215,7 +1216,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
       friction = info->unkC * 0.001f;
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
-          g_HoleConditions.isRaining == TRUE) {
+          g_HoleSetup.conditions.isRaining == TRUE) {
         friction *= 0.993f;
       }
 

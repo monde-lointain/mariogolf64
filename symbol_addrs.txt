@@ -779,8 +779,6 @@ g_IsMiniGolf = 0x801B60C2; // size:0x1
 g_IsClubTournament = 0x801B60C3; // size:0x1
 g_BillboardLightColor = 0x800CA100; // size:0xC
 g_BillboardEnvColor = 0x800CA10C; // size:0xC
-g_LightYaw = 0x800BAA00; // size:0x2
-g_LightPitch = 0x800BAA02; // size:0x2
 SetFramebufferCount = 0x800292FC; // type:func
 g_DepthBuffer = 0x800B67A0; // size:0x4
 nuGfxCfb = 0x801B7110; // size:0x4
@@ -1130,7 +1128,6 @@ f_UpdateStartTime = 0x800B773C; // size:0x4
 f_UpdateEndTime = 0x800B7740; // size:0x4
 f_DebugMenuValues = 0x800B7758; // size:0xC
 f_DebugMenuValueIndex = 0x800B7764; // size:0x4
-g_HoleConditions = 0x800BA9F0; // size:0x14
 g_PrintBuffer = 0x80105118;
 atan = 0x800B2EC8; // type:func
 atan2 = 0x800B2FE0; // type:func
@@ -1735,8 +1732,6 @@ ChooseConditionsAndInitHole = 0x80069CE4; // type:func
 RunLoaderThread = 0x80069D08; // type:func
 g_HolePoints = 0x80105E10; // size:0x120
 f_CycledCupIndex = 0x800C3FA4; // size:0x4
-g_HolePar = 0x800BAA04; // size:0x1
-f_NextCupIndex = 0x800BAA05; // size:0x1
 f_HoleSeed = 0x800C3FA0; // size:0x4
 g_HasLoaderFinished = 0x800C3FA8; // size:0x4
 f_LoaderThread = 0x800E1A50; // size:0x1B0
@@ -2206,13 +2201,17 @@ GetBillboardSolidity = 0x8003DE80; // type:func
 f_BillboardMasks = 0x800B7DB0; // size:0x2900
 f_BillboardMaskIndices = 0x800BA6B0; // size:0x40
 g_HoleSetup = 0x800BA9D8; // size:0x34
-// Fields of g_HoleSetup under the names that the unmatched asm reads them
-// by: cupPosition's y and z, and teePosition's x, y and z
+// Fields of g_HoleSetup under the names that the unmatched asm
+// reads them by
 g_CupPositionY = 0x800BA9DC; // size:0x4
 g_CupPositionZ = 0x800BA9E0; // size:0x4
 g_TeePositionX = 0x800BA9E4; // size:0x4
 g_TeePositionY = 0x800BA9E8; // size:0x4
 g_TeePositionZ = 0x800BA9EC; // size:0x4
+g_HoleConditions = 0x800BA9F0; // size:0x14
+g_LightYaw = 0x800BAA00; // size:0x2
+g_LightPitch = 0x800BAA02; // size:0x2
+g_HolePar = 0x800BAA04; // size:0x1
 FindBillboardHit = 0x8003A078; // type:func
 FindPinHit = 0x8003A4EC; // type:func
 FindRingHit = 0x8003D8EC; // type:func

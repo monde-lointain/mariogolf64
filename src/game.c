@@ -2320,8 +2320,8 @@ void UpdateGame(void) {
 
   if (g_Scene == SCENE_OPENING) {
     StepNoiseTexture();
-    g_SkyState.viewedWindAngles[0] =
-        VIEWED_WIND_ANGLE(g_HoleConditions.windDirection, &g_Cameras[0].view);
+    g_SkyState.viewedWindAngles[0] = VIEWED_WIND_ANGLE(
+        g_HoleSetup.conditions.windDirection, &g_Cameras[0].view);
     if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
       g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
     }
@@ -2363,7 +2363,7 @@ void UpdateGame(void) {
     UpdateInsetView();
     UpdateEffects();
     UpdatePlay();
-    windDirection = &g_HoleConditions.windDirection;
+    windDirection = &g_HoleSetup.conditions.windDirection;
     g_SkyState.viewedWindAngles[0] =
         VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[0].view);
     g_SkyState.viewedWindAngles[1] =

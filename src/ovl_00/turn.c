@@ -2216,7 +2216,7 @@ void RecordRingShotClear(s32 playerIndex) {
  * passed */
 void CheckRingShotClear(s32 playerIndex) {
   if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
-      g_Players[playerIndex].strokeCount <= g_HolePar &&
+      g_Players[playerIndex].strokeCount <= g_HoleSetup.par &&
       (s8)g_Players[playerIndex].unk1E[0] == 0 &&
       HasNoRingsLeft(&g_Players[playerIndex])) {
     RecordRingShotClear(playerIndex);
@@ -2324,7 +2324,7 @@ void StartPlayerShot(s32 playerIndex) {
       g_HolePoints.unk60[0][AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
     }
 
-    if (g_HolePar != 3 &&
+    if (g_HoleSetup.par != 3 &&
         (surfaceKind == SURFACE_KIND_TEE_UP ||
             surfaceKind == SURFACE_KIND_TEE_GROUND)) {
       target[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
@@ -2624,7 +2624,7 @@ void PlayWaitingPlayersCalls(void) {
 /* Plays the jingle for how the player finished the hole */
 void PlayHoleOutSong(s32 playerIndex) {
   s32 strokeCount = g_Players[playerIndex].strokeCount;
-  s32 scoreToPar = strokeCount - g_HolePar;
+  s32 scoreToPar = strokeCount - g_HoleSetup.par;
 
   if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
     PlaySong(SONG_HOLE_WON, 0);
@@ -2664,7 +2664,7 @@ void PlayHoleOutSong(s32 playerIndex) {
 
 void ShowHoleOutBanner(s32 playerIndex) {
   s8 strokeCount = g_Players[playerIndex].strokeCount;
-  s32 scoreToPar = strokeCount - g_HolePar;
+  s32 scoreToPar = strokeCount - g_HoleSetup.par;
   s32 banner = BANNER_NONE;
 
   if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
@@ -3009,10 +3009,11 @@ void UpdateTurns(void) {
               g_Players[playerIndex].handicap);
       g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
     } else {
-      g_Players[playerIndex].strokeCount = g_HolePar * GIVE_UP_PAR_MULTIPLE;
+      g_Players[playerIndex].strokeCount =
+          g_HoleSetup.par * GIVE_UP_PAR_MULTIPLE;
       g_Players[playerIndex]
           .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-          .strokes = g_HolePar * GIVE_UP_PAR_MULTIPLE;
+          .strokes = g_HoleSetup.par * GIVE_UP_PAR_MULTIPLE;
       g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
     }
 
@@ -3242,7 +3243,7 @@ void UpdateTurns(void) {
             } else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF &&
                 g_GameState.gameMode != GAME_MODE_RING_SHOT) {
               s32 scoreToPar =
-                  g_Players[playerIndex].strokeCount - (g_HolePar - 1);
+                  g_Players[playerIndex].strokeCount - (g_HoleSetup.par - 1);
 
               if (scoreToPar > 0) {
                 PlaySong(0xF, 0x11);
@@ -4218,8 +4219,9 @@ void UpdateTurns(void) {
               if (g_Players[playerIndex].strokeCount >= 100) {
                 g_Players[playerIndex].strokeCount = 99;
               }
-            } else if (g_Players[playerIndex].strokeCount > g_HolePar * 3) {
-              g_Players[playerIndex].strokeCount = g_HolePar * 3;
+            } else if (g_Players[playerIndex].strokeCount >
+                g_HoleSetup.par * 3) {
+              g_Players[playerIndex].strokeCount = g_HoleSetup.par * 3;
             }
 
             if ((s8)player->ballSurface != 0x17) {
@@ -4238,8 +4240,9 @@ void UpdateTurns(void) {
               if (g_Players[playerIndex].strokeCount >= 100) {
                 g_Players[playerIndex].strokeCount = 99;
               }
-            } else if (g_Players[playerIndex].strokeCount > g_HolePar * 3) {
-              g_Players[playerIndex].strokeCount = g_HolePar * 3;
+            } else if (g_Players[playerIndex].strokeCount >
+                g_HoleSetup.par * 3) {
+              g_Players[playerIndex].strokeCount = g_HoleSetup.par * 3;
             }
           } else {
             player->ballPosition[0] = g_BallPosition[0];
@@ -4284,7 +4287,7 @@ void UpdateTurns(void) {
               nextState = 0xB;
             } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
               nextState = 0xB;
-              if (g_Players[playerIndex].strokeCount < g_HolePar) {
+              if (g_Players[playerIndex].strokeCount < g_HoleSetup.par) {
                 EndFlightCamera();
                 StartHudAnimation(2);
                 nextState = 0x10;
@@ -4295,7 +4298,7 @@ void UpdateTurns(void) {
             } else if (!g_GameState.unk31 &&
                 (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                     g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
-              if (g_Players[playerIndex].strokeCount >= g_HolePar * 3 ||
+              if (g_Players[playerIndex].strokeCount >= g_HoleSetup.par * 3 ||
                   GetMatchHoleResult(0, 1)) {
                 nextState = 0xB;
                 GiveUpHole(playerIndex);
@@ -4309,7 +4312,7 @@ void UpdateTurns(void) {
                     g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
               s8 results[MAX_PLAYER_COUNT];
 
-              if (g_Players[playerIndex].strokeCount >= g_HolePar * 3) {
+              if (g_Players[playerIndex].strokeCount >= g_HoleSetup.par * 3) {
                 g_Players[playerIndex]
                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                     .strokes = 0;
@@ -4328,10 +4331,11 @@ void UpdateTurns(void) {
                 StartHudAnimation(2);
                 nextState = 0x10;
               }
-            } else if (g_Players[playerIndex].strokeCount >= g_HolePar * 3) {
+            } else if (g_Players[playerIndex].strokeCount >=
+                g_HoleSetup.par * 3) {
               g_Players[playerIndex]
                   .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                  .strokes = g_HolePar * 3;
+                  .strokes = g_HoleSetup.par * 3;
               g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
               nextState = 0xB;
               if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
@@ -4379,7 +4383,7 @@ void UpdateTurns(void) {
           break;
         }
 
-        if (g_HoleConditions.sceneColorIndex == 0xB) {
+        if (g_HoleSetup.conditions.sceneColorIndex == 0xB) {
           StartFireworks();
         }
 
@@ -4412,7 +4416,7 @@ void UpdateTurns(void) {
         } else if (g_Players[playerIndex].strokeCount == 1) {
           reaction = 0xC;
         } else {
-          switch (g_Players[playerIndex].strokeCount - g_HolePar) {
+          switch (g_Players[playerIndex].strokeCount - g_HoleSetup.par) {
             case -3:
             case -2:
               reaction = 0xC;
@@ -4448,7 +4452,7 @@ void UpdateTurns(void) {
           if (g_Players[playerIndex].strokeCount == 1) {
             CountNotableShot(playerIndex, 7);
           } else {
-            switch (g_Players[playerIndex].strokeCount - g_HolePar) {
+            switch (g_Players[playerIndex].strokeCount - g_HoleSetup.par) {
               case -3:
                 CountNotableShot(playerIndex, 8);
                 break;
@@ -4462,7 +4466,7 @@ void UpdateTurns(void) {
           }
         }
 
-        if (g_Players[playerIndex].strokeCount - g_HolePar < 0) {
+        if (g_Players[playerIndex].strokeCount - g_HoleSetup.par < 0) {
           ReportBirdieBadgeCount();
         }
 
@@ -4478,7 +4482,7 @@ void UpdateTurns(void) {
           StartBanner(-1);
         }
 
-        if (g_HoleConditions.sceneColorIndex == 0xB) {
+        if (g_HoleSetup.conditions.sceneColorIndex == 0xB) {
           D_80224000_ovl_00 = 160;
         }
 

@@ -352,8 +352,8 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetEnvColor(gfx++, envColor[0], envColor[1], envColor[2], 0x20);
 
-  lightPitch = g_LightPitch * BINARY_ANGLE_TO_RADIANS;
-  lightYaw = g_LightYaw * BINARY_ANGLE_TO_RADIANS;
+  lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+  lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
   viewDir[0] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
   viewDir[1] = 0.0f;
   viewDir[2] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];

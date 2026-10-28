@@ -67,7 +67,6 @@ extern s32 g_CourseIndex;
 extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];
 extern char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE];
 /* The par of the hole being played */
-extern s8 g_HolePar;
 
 s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex);
 /*

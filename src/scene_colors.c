@@ -5,6 +5,7 @@
 #include "common.h"
 
 #include "functions.h"
+#include "save.h"
 #include "variables.h"
 
 /* Each half of g_ShadedVertices is two quads; the second takes the derived
@@ -30,7 +31,7 @@ static u8 D_800E1C1D;
 
 /*
  * Sets the shaded quads of g_ShadedVertices and two color globals from
- * the colors of the g_SkyColors entry that g_HoleConditions selects
+ * the colors of the g_SkyColors entry that g_HoleSetup.conditions selects
  */
 void DeriveSceneColors(void) {
   SkyColors* entry;
@@ -42,8 +43,8 @@ void DeriveSceneColors(void) {
 
   /* This steps through the table a course of colors at a time, unlike
    * BlendSkyColors */
-  entry = g_SkyColors[(g_HoleConditions.isRaining * 3) +
-      g_HoleConditions.sceneColorIndex];
+  entry = g_SkyColors[(g_HoleSetup.conditions.isRaining * 3) +
+      g_HoleSetup.conditions.sceneColorIndex];
   for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
     for (channelIndex = 0; channelIndex != RGB_CHANNEL_COUNT; channelIndex++) {
       g_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =

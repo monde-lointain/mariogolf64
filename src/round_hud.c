@@ -684,7 +684,7 @@ void StartHoleIntro(void) {
 
   EndWeather();
   StartWeather(WEATHER_RAIN);
-  if (g_HoleConditions.isRaining == TRUE) {
+  if (g_HoleSetup.conditions.isRaining == TRUE) {
     PlaySound(RAIN_SOUND, RAIN_SOUND_CHANNEL, RAIN_SOUND_START_VOLUME);
     g_RainSoundVolume = RAIN_SOUND_START_VOLUME;
   } else {
@@ -1137,7 +1137,8 @@ void DrawInsetViewFrame(void) {
 
 /* Scrolls the wind arrow's texture along it, faster in stronger wind */
 void ScrollWindArrow(void) {
-  s32 step = g_HoleConditions.windSpeed / WIND_SPEED_PER_ARROW_SCROLL_STEP;
+  s32 step =
+      g_HoleSetup.conditions.windSpeed / WIND_SPEED_PER_ARROW_SCROLL_STEP;
   s32 i;
 
   for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
@@ -2071,7 +2072,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   }
 
   f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
-  speed = (u32)g_HoleConditions.windSpeed * WIND_SPEED_TO_METERS_SCALE /
+  speed = (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE /
       WIND_SPEED_TO_METERS_DIVISOR;
   if (speed >= WIND_SPEED_TWO_DIGITS) {
     halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
@@ -2347,7 +2348,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
             PAUSE_PANEL_ARROWS_GAP);
       }
     }
-  } else if (g_HoleConditions.windSpeed != 0 &&
+  } else if (g_HoleSetup.conditions.windSpeed != 0 &&
       g_RoundHud.isWindIndicatorShown &&
       GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN &&
       g_IsCupViewShown == 0) {
@@ -2852,7 +2853,7 @@ void WaveHoleFlag(void) {
   f32 bulge;
 
   ScrollWindArrow();
-  windSpeed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT;
+  windSpeed = g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT;
   factor = HOLE_FLAG_SKEW;
   otherFactor = factor;
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {

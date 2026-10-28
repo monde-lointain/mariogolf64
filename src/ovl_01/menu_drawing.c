@@ -327,8 +327,8 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   s32 courseIndex;
   s32 holeIndex;
 
-  g_LightYaw = MODE_SELECT_LIGHT_YAW;
-  g_LightPitch = MODE_SELECT_LIGHT_PITCH;
+  g_HoleSetup.conditions.lightYaw = MODE_SELECT_LIGHT_YAW;
+  g_HoleSetup.conditions.lightPitch = MODE_SELECT_LIGHT_PITCH;
   func_801FC60C_ovl_01(&gfx, MODE_SELECT_BOARD_KIND);
   guPerspectiveF(D_80231CA0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
       WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);

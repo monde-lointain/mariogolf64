@@ -531,7 +531,7 @@ void RecordHoleStats(void) {
   GetSaveData();
   stats = &g_RoundStats;
   if (g_Players[0].unk9C) {
-    if (g_Players[0].strokeCount <= g_HolePar) {
+    if (g_Players[0].strokeCount <= g_HoleSetup.par) {
       stats->unk0++;
     } else {
       g_RoundStats.unk4++;

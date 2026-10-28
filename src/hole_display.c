@@ -232,13 +232,13 @@ void SetUpTitleHole(void) {
   g_GameState.courseIndex = TITLE_COURSE_INDEX;
   g_GameState.unk14 = 0;
   g_GameState.gameMode = GAME_MODE_UNK12;
-  g_HoleConditions.isRaining = FALSE;
-  g_HoleConditions.windSpeed =
+  g_HoleSetup.conditions.isRaining = FALSE;
+  g_HoleSetup.conditions.windSpeed =
       (rand() & TITLE_WIND_SPEED_MASK) * TITLE_WIND_SPEED_STEP;
-  g_HoleConditions.windDirection = rand();
-  g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
-  g_LightPitch = TITLE_LIGHT_PITCH;
-  g_LightYaw = TITLE_LIGHT_YAW;
+  g_HoleSetup.conditions.windDirection = rand();
+  g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
+  g_HoleSetup.conditions.lightPitch = TITLE_LIGHT_PITCH;
+  g_HoleSetup.conditions.lightYaw = TITLE_LIGHT_YAW;
   SetGameFlag(GAME_FLAG_UNK7);
   g_GameState.playerCount = 1;
   StopLoaderThread();
@@ -333,7 +333,7 @@ void DrawLensFlare(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SkyColors* colors =
       &g_SkyColors[GetCourseRecordIndex()]
-                  [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                  [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                       f_SkyColorTimeIndex];
   f32 edgeDistanceX;
   f32 edgeDistanceY;
@@ -450,10 +450,10 @@ void BlendSkyColors(void) {
   }
 
   from = &g_SkyColors[GetCourseRecordIndex()]
-                     [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                     [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                          f_SkyTimeIndex];
   to = &g_SkyColors[GetCourseRecordIndex()]
-                   [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                   [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                        f_SkyTimeIndex + 1];
   for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
     for (channel = 0; channel != 3; channel++) {
@@ -492,8 +492,9 @@ void BlendSkyColors(void) {
  * blend between times of day that BlendSkyColors steps through, and
  * g_SkyImage and g_CourseSkyImage, recolored to match
  *
- * Doesn't match: the target keeps &g_HoleConditions.isRaining in a register
- * across the three GetCourseRecordIndex calls, and allocates other registers.
+ * Doesn't match: the target keeps &g_HoleSetup.conditions.isRaining in a
+ * register across the three GetCourseRecordIndex calls, and allocates other
+ * registers.
  */
 #ifdef NON_MATCHING
 void InitSkyColors(void) {
@@ -519,27 +520,29 @@ void InitSkyColors(void) {
     return start * (1.0f - fraction) + end * fraction;
   }
 
-  f_SkyColorTimeIndex = f_SceneSkyColorTimes[g_HoleConditions.sceneColorIndex];
-  f_SkyTimeIndex = f_SceneSkyBlendTimes[g_HoleConditions.sceneColorIndex];
-  f_SkyBlendStep = f_SceneSkyBlendPercents[g_HoleConditions.sceneColorIndex] *
+  f_SkyColorTimeIndex =
+      f_SceneSkyColorTimes[g_HoleSetup.conditions.sceneColorIndex];
+  f_SkyTimeIndex = f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex];
+  f_SkyBlendStep =
+      f_SceneSkyBlendPercents[g_HoleSetup.conditions.sceneColorIndex] *
       SKY_PERCENT_TO_STEPS;
   f_SkyBlendStepCount =
-      f_SceneSkyBlendPercents[g_HoleConditions.sceneColorIndex + 1] *
+      f_SceneSkyBlendPercents[g_HoleSetup.conditions.sceneColorIndex + 1] *
       SKY_PERCENT_TO_STEPS;
   if (f_SkyBlendStepCount == 0 &&
-      f_SceneSkyBlendTimes[g_HoleConditions.sceneColorIndex] !=
-          f_SceneSkyBlendTimes[g_HoleConditions.sceneColorIndex + 1]) {
+      f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex] !=
+          f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex + 1]) {
     f_SkyBlendStepCount = SKY_BLEND_STEP_COUNT;
   }
 
   colors = &g_SkyColors[GetCourseRecordIndex()]
-                       [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                       [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                            f_SkyColorTimeIndex];
   from = &g_SkyColors[GetCourseRecordIndex()]
-                     [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                     [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                          f_SkyTimeIndex];
   to = &g_SkyColors[GetCourseRecordIndex()]
-                   [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                   [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                        f_SkyTimeIndex + 1];
   g_SkyState.scrollX = 0.0f;
   g_SkyState.scrollY = 0.0f;
@@ -709,7 +712,7 @@ s32 UpdateSkyEditor(void) {
       f_SkyEditorRow + SKY_EDITOR_ERASE_ROW);
   f_EditedSkyColors =
       &g_SkyColors[GetCourseRecordIndex()]
-                  [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                  [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                       f_SkyColorTimeIndex];
   if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons &
           (L_JPAD | L_CBUTTONS)) &&
@@ -1056,20 +1059,20 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
 
   if (IsGameFlagSet(GAME_FLAG_CYCLE_SKY_CONDITIONS)) {
     if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
-      g_HoleConditions.isRaining =
-          (u32)(g_HoleConditions.isRaining + 1) % SKY_DEBUG_CYCLE_LENGTH;
+      g_HoleSetup.conditions.isRaining =
+          (u32)(g_HoleSetup.conditions.isRaining + 1) % SKY_DEBUG_CYCLE_LENGTH;
       InitSkyColors();
     }
 
     if (g_ControllerStates[0].pressedButtons & D_CBUTTONS) {
-      g_HoleConditions.sceneColorIndex =
-          (g_HoleConditions.sceneColorIndex + 1) % SKY_DEBUG_CYCLE_LENGTH;
+      g_HoleSetup.conditions.sceneColorIndex =
+          (g_HoleSetup.conditions.sceneColorIndex + 1) % SKY_DEBUG_CYCLE_LENGTH;
       InitSkyColors();
     }
   }
 
   clippedHeight = 0;
-  scroll = -(f32)(g_HoleConditions.windSpeed / WIND_SPEED_UNIT) *
+  scroll = -(f32)(g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT) *
       SKY_SCROLL_PER_WIND_SPEED;
   if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
     g_SkyState.scrollY += scroll;
@@ -1263,7 +1266,8 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   /* Unlike the other lookups of g_SkyColors, this steps by three times, not
    * SKY_TIME_COUNT, in the rain */
   colors = &g_SkyColors[GetCourseRecordIndex()]
-                       [(g_HoleConditions.isRaining * 3) + f_SkyColorTimeIndex];
+                       [(g_HoleSetup.conditions.isRaining * 3) +
+                           f_SkyColorTimeIndex];
   translation[0] = 0.0f;
   translation[1] = 0.0f;
   rotation[0] = 0.0f;
@@ -1325,7 +1329,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   if (colors->hasLensFlare == TRUE) {
     angle = -g_SkyState.yaws[cameraIndex] - SUN_YAW_OFFSET -
-        (g_LightYaw * LIGHT_YAW_TO_RADIANS);
+        (g_HoleSetup.conditions.lightYaw * LIGHT_YAW_TO_RADIANS);
     if (angle > 2 * M_PI) {
       angle -= 2 * M_PI;
     }

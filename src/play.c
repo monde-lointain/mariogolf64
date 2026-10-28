@@ -567,7 +567,7 @@ void func_80060128(s32 index) {
 }
 
 s32 func_80060190(s32 strokes) {
-  s32 toPar = strokes - g_HolePar;
+  s32 toPar = strokes - g_HoleSetup.par;
 
   if (strokes == 1) {
     return 0x80;
@@ -1231,7 +1231,7 @@ void UpdatePlay(void) {
           if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
               g_Players[0].unk26 == TRUE) {
             RecordHoleStats();
-            if (g_Players[0].strokeCount < g_HolePar) {
+            if (g_Players[0].strokeCount < g_HoleSetup.par) {
               AddBirdieBadge();
             }
           }

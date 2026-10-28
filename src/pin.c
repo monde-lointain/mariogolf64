@@ -693,7 +693,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
   }
 
   if (!isPinOut) {
-    if (g_HoleConditions.windSpeed != 0) {
+    if (g_HoleSetup.conditions.windSpeed != 0) {
       f_FlagWavePhase += DEGREES_TO_RADIANS(FLAG_WAVE_STEP_DEGREES);
       if (f_FlagWavePhase > 2 * M_PI) {
         f_FlagWavePhase -= 2 * M_PI;
@@ -703,7 +703,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
         f_FlagWavePhase += 2 * M_PI;
       }
 
-      wave = (((g_HoleConditions.windSpeed / FLAG_WIND_SPEED_UNIT) *
+      wave = (((g_HoleSetup.conditions.windSpeed / FLAG_WIND_SPEED_UNIT) *
                   FLAG_WAVE_PER_WIND) +
                  MIN_FLAG_WAVE) *
           sinf(f_FlagWavePhase);
@@ -724,7 +724,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     flagTranslation[AXIS_Z] =
         g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     flagRotation[AXIS_Y] =
-        wave - (g_HoleConditions.windDirection * BINARY_ANGLE_TO_RADIANS);
+        wave - (g_HoleSetup.conditions.windDirection * BINARY_ANGLE_TO_RADIANS);
     BuildTransformMatrix(flagMatrix, flagRotation, flagTranslation, flagScale);
     ConvertMatrixToFixed(flagMatrix, &f_FlagMatrices[g_DrawBufferIndex]);
     gDPPipeSync(g_DisplayListHead++);

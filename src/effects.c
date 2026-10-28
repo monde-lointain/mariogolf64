@@ -1334,9 +1334,9 @@ void UpdateEffects(void) {
   s32 index;
   Effect* effect;
 
-  direction = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
-  speed =
-      g_HoleConditions.windSpeed / WIND_SPEED_UNIT * EFFECT_PUSH_PER_WIND_SPEED;
+  direction = g_HoleSetup.conditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+  speed = g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT *
+      EFFECT_PUSH_PER_WIND_SPEED;
   windPushX = cosf(direction) * speed;
   windPushZ = sinf(direction) * speed;
   for (index = 0; index != EFFECT_COUNT; index++) {
@@ -2243,9 +2243,9 @@ void StartRain(void) {
   s32 index;
 
   f_GroundCheckDropIndex = 0;
-  direction = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
-  speed =
-      g_HoleConditions.windSpeed / WIND_SPEED_UNIT * RAIN_DRIFT_PER_WIND_SPEED;
+  direction = g_HoleSetup.conditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+  speed = g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT *
+      RAIN_DRIFT_PER_WIND_SPEED;
   f_RainDriftX = cosf(direction) * speed;
   f_RainDriftZ = sinf(direction) * speed;
   f_RainVelocity[AXIS_Y] = RAIN_FALL_SPEED;
@@ -2289,14 +2289,15 @@ void UpdateRain(void) {
   Raindrop* drop;
   RainSplash* splash;
 
-  if (g_HoleConditions.isRaining == TRUE && f_Weather == WEATHER_RAIN) {
+  if (g_HoleSetup.conditions.isRaining == TRUE && f_Weather == WEATHER_RAIN) {
     if (g_RainSoundVolume > RAIN_SOUND_STEADY_VOLUME) {
       g_RainSoundVolume -= RAIN_SOUND_FADE_STEP;
     }
 
     SetSoundVolume(RAIN_SOUND_CHANNEL, g_RainSoundVolume);
-    direction = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
-    speed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT *
+    direction =
+        g_HoleSetup.conditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+    speed = g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT *
         RAIN_DRIFT_PER_WIND_SPEED;
     f_RainDriftX = cosf(direction) * speed;
     f_RainDriftZ = sinf(direction) * speed;
@@ -2427,7 +2428,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 splashStep;
   s32 textureStep;
 
-  if (g_HoleConditions.isRaining == TRUE &&
+  if (g_HoleSetup.conditions.isRaining == TRUE &&
       f_Weather == WEATHER_RAIN
 
       /* Comparing with FALSE is there to match */

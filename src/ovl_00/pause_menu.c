@@ -633,42 +633,42 @@ s32 UpdatePauseMenu(ControllerState* controller) {
     }
   } else if (kind == PAUSE_OPTION_KIND_WIND_DIRECTION) {
     g_RoundHud.areWindDirectionArrowsShown = 1;
-    g_HoleConditions.windDirection +=
+    g_HoleSetup.conditions.windDirection +=
         controller->stickX * PAUSE_WIND_TURN_PER_STICK;
     if (controller->stickX == 0) {
       if (controller->buttons & L_JPAD) {
-        g_HoleConditions.windDirection -= PAUSE_WIND_TURN_STEP;
+        g_HoleSetup.conditions.windDirection -= PAUSE_WIND_TURN_STEP;
       }
 
       if (controller->buttons & R_JPAD) {
-        g_HoleConditions.windDirection += PAUSE_WIND_TURN_STEP;
+        g_HoleSetup.conditions.windDirection += PAUSE_WIND_TURN_STEP;
       }
     }
   } else if (kind == PAUSE_OPTION_KIND_WIND_SPEED) {
     g_RoundHud.areWindSpeedArrowsShown = 1;
     if ((controller->repeatedButtons & L_JPAD) &&
-        g_HoleConditions.windSpeed > 0) {
-      g_HoleConditions.windSpeed -= PAUSE_WIND_SPEED_STEP;
+        g_HoleSetup.conditions.windSpeed > 0) {
+      g_HoleSetup.conditions.windSpeed -= PAUSE_WIND_SPEED_STEP;
       PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
 
     if ((controller->repeatedButtons & R_JPAD) &&
-        g_HoleConditions.windSpeed <= PAUSE_WIND_SPEED_RAISE_LIMIT) {
-      if (g_HoleConditions.windSpeed < PAUSE_WIND_SPEED_FIRST_STEP) {
-        g_HoleConditions.windSpeed += PAUSE_WIND_SPEED_FIRST_STEP;
+        g_HoleSetup.conditions.windSpeed <= PAUSE_WIND_SPEED_RAISE_LIMIT) {
+      if (g_HoleSetup.conditions.windSpeed < PAUSE_WIND_SPEED_FIRST_STEP) {
+        g_HoleSetup.conditions.windSpeed += PAUSE_WIND_SPEED_FIRST_STEP;
       } else {
-        g_HoleConditions.windSpeed += PAUSE_WIND_SPEED_STEP;
+        g_HoleSetup.conditions.windSpeed += PAUSE_WIND_SPEED_STEP;
       }
 
       PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
 
-    if (g_HoleConditions.windSpeed <= PAUSE_WIND_SPEED_CALM) {
-      g_HoleConditions.windSpeed = 0;
+    if (g_HoleSetup.conditions.windSpeed <= PAUSE_WIND_SPEED_CALM) {
+      g_HoleSetup.conditions.windSpeed = 0;
     }
 
-    if (g_HoleConditions.windSpeed > PAUSE_WIND_SPEED_MAX) {
-      g_HoleConditions.windSpeed = PAUSE_WIND_SPEED_MAX;
+    if (g_HoleSetup.conditions.windSpeed > PAUSE_WIND_SPEED_MAX) {
+      g_HoleSetup.conditions.windSpeed = PAUSE_WIND_SPEED_MAX;
     }
   } else if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
     if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
@@ -684,12 +684,12 @@ s32 UpdatePauseMenu(ControllerState* controller) {
   } else if (kind == PAUSE_OPTION_KIND_WEATHER) {
     if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
       PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-      if (g_HoleConditions.isRaining == TRUE) {
+      if (g_HoleSetup.conditions.isRaining == TRUE) {
         StopSound(RAIN_SOUND_CHANNEL);
-        g_HoleConditions.isRaining = FALSE;
+        g_HoleSetup.conditions.isRaining = FALSE;
       } else {
         PlaySound(RAIN_SOUND, RAIN_SOUND_CHANNEL, RAIN_SOUND_START_VOLUME);
-        g_HoleConditions.isRaining = TRUE;
+        g_HoleSetup.conditions.isRaining = TRUE;
         g_RainSoundVolume = RAIN_SOUND_START_VOLUME;
       }
     }
@@ -886,7 +886,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
 
     if (kind == PAUSE_OPTION_KIND_WEATHER) {
       DrawLargeText(&gfx, PAUSE_VALUE_X, y,
-          g_HoleConditions.isRaining == TRUE ? f_RainText : f_ClearText);
+          g_HoleSetup.conditions.isRaining == TRUE ? f_RainText : f_ClearText);
     }
   }
 

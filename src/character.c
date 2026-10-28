@@ -1664,7 +1664,7 @@ void SetCharacterLights(void) {
   f32 lightPitch;
   f32 lightYaw;
 
-  switch (g_HoleConditions.sceneColorIndex) {
+  switch (g_HoleSetup.conditions.sceneColorIndex) {
     case SCENE_COLOR_INDEX_ROUND_LATE:
     case SCENE_COLOR_INDEX_ROUND_END:
       ambientColor[0] = LATE_AMBIENT_LEVEL;
@@ -1684,8 +1684,8 @@ void SetCharacterLights(void) {
       break;
   }
 
-  lightPitch = g_LightPitch * BINARY_ANGLE_TO_RADIANS;
-  lightYaw = g_LightYaw * BINARY_ANGLE_TO_RADIANS;
+  lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+  lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
   lightDirection[0] =
       -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
   lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
@@ -1739,7 +1739,7 @@ void DrawCharacter(u32 slotIndex) {
           break;
         default:
         case CHARACTER_LIGHTING_SCENE:
-          if (g_HoleConditions.isRaining) {
+          if (g_HoleSetup.conditions.isRaining) {
             gSPSetLights2(gfx++, f_RainLights[g_DrawBufferIndex]);
             SAVE_LIGHTS(f_RainLights[g_DrawBufferIndex]);
           } else {
@@ -1749,7 +1749,8 @@ void DrawCharacter(u32 slotIndex) {
 
           break;
         case CHARACTER_LIGHTING_SCENE_THIRD:
-          lights = g_HoleConditions.isRaining ? f_RainLights : f_DryLights;
+          lights =
+              g_HoleSetup.conditions.isRaining ? f_RainLights : f_DryLights;
           if (!AddReactionLight(&gfx, &lights[g_DrawBufferIndex])) {
             gSPSetLights2(gfx++, lights[g_DrawBufferIndex]);
             SAVE_LIGHTS(lights[g_DrawBufferIndex]);

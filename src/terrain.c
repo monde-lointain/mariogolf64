@@ -21,6 +21,7 @@
 #include "libc.h"
 #include "main.h"
 #include "round_hud.h"
+#include "save.h"
 #include "scene.h"
 #include "sound.h"
 #include "surface.h"
@@ -1550,8 +1551,8 @@ void UpdateDebugScenes(void) {
     }
 
     if (g_MenuControllerData[0].trigger & U_CBUTTONS) {
-      g_LightPitch = 0x3000;
-      g_LightYaw = 0x2000;
+      g_HoleSetup.conditions.lightPitch = 0x3000;
+      g_HoleSetup.conditions.lightYaw = 0x2000;
       func_80253234(1);
     }
 

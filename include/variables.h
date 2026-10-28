@@ -25,8 +25,6 @@ extern u16* nuGfxZBuffer;
 extern s32 g_BallPosition[3];
 /* The SURFACE_* that the ball is on */
 extern s8 g_BallSurface;
-extern u16 g_LightYaw;
-extern u16 g_LightPitch;
 
 /* A 45-degree perspective projection for the screen effects */
 extern Mtx g_ScreenEffectProjection;
@@ -45,8 +43,8 @@ typedef struct HoleConditions {
   /* 0x08 */ s32 isRaining; /* Shortens shots and changes the scene's colors */
   /* 0x0C */ u32
       sceneColorIndex; /* With isRaining, picks DeriveSceneColors' colors */
-  /* 0x10 */ u16 lightYaw; /* g_LightYaw */
-  /* 0x12 */ u16 lightPitch; /* g_LightPitch */
+  /* 0x10 */ u16 lightYaw;
+  /* 0x12 */ u16 lightPitch;
 } HoleConditions; /* size = 0x14 */
 
 typedef struct Fog {
@@ -141,8 +139,6 @@ extern u8* g_CourseSkyImage;
 
 /* HoleConditions.windSpeed is fixed point, with this as one unit */
 #define WIND_SPEED_UNIT 0x10000
-
-extern HoleConditions g_HoleConditions;
 
 /* What UpdateSky works out about the main and inset cameras, for drawing the
  * sky */

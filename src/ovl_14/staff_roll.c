@@ -670,13 +670,13 @@ void LoadStaffRoll(void) {
   g_GameState.holeIndex = STAFF_ROLL_HOLE_INDEX;
   g_GameState.unk14 = 0;
   g_GameState.gameMode = GAME_MODE_STAFF_ROLL;
-  g_HoleConditions.isRaining = FALSE;
-  g_HoleConditions.windSpeed =
+  g_HoleSetup.conditions.isRaining = FALSE;
+  g_HoleSetup.conditions.windSpeed =
       (rand() & STAFF_ROLL_WIND_STEP_MASK) * STAFF_ROLL_WIND_STEP;
-  g_HoleConditions.windDirection = rand();
-  g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
-  g_LightPitch = STAFF_ROLL_LIGHT_PITCH;
-  g_LightYaw = STAFF_ROLL_LIGHT_YAW;
+  g_HoleSetup.conditions.windDirection = rand();
+  g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
+  g_HoleSetup.conditions.lightPitch = STAFF_ROLL_LIGHT_PITCH;
+  g_HoleSetup.conditions.lightYaw = STAFF_ROLL_LIGHT_YAW;
   g_HoleSetup.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
   g_HoleSetup.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
   g_HoleSetup.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
@@ -927,7 +927,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastFramingPitch = 0.0f;
     f_IsReactionShown = FALSE;
     f_CastIndex = 0;
-    g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
+    g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
     FreeAllCharacterSlots();
     ResetStaffRollEase();
     f_CastSlot = 0;
@@ -1018,7 +1018,7 @@ void RunStaffRollTimeline(s32 frame) {
       frame == 850) {
     ClearEffects();
     PickFramingPitch();
-    g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_UNK8;
+    g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_UNK8;
     f_CastFramingYaw = ((f_CastIndex - SHOTS_PER_STAGE) * CAST_YAW_STEP) *
         DEGREES_TO_RADIANS_F;
     FreeCharacterSlot(f_CastSlot);
@@ -1095,7 +1095,7 @@ void RunStaffRollTimeline(s32 frame) {
       frame == 1500) {
     ClearEffects();
     PickFramingPitch();
-    g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
+    g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
     f_CastFramingYaw = ((f_CastIndex - (2 * SHOTS_PER_STAGE)) * CAST_YAW_STEP) *
         DEGREES_TO_RADIANS_F;
     FreeCharacterSlot(f_CastSlot);
@@ -1174,7 +1174,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastFramingYaw = ((f_CastIndex - PUTT_YAW_OFFSET) * CAST_YAW_STEP) *
         DEGREES_TO_RADIANS_F;
     PickFramingPitch();
-    g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
+    g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
     f_UnreadValue = 15.0f;
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
@@ -1438,9 +1438,9 @@ void RunStaffRollTimeline(s32 frame) {
 
   TakePinOut();
   UpdateEffects();
-  if (f_ShownSceneColorIndex != g_HoleConditions.sceneColorIndex) {
+  if (f_ShownSceneColorIndex != g_HoleSetup.conditions.sceneColorIndex) {
     InitSkyColors();
-    f_ShownSceneColorIndex = g_HoleConditions.sceneColorIndex;
+    f_ShownSceneColorIndex = g_HoleSetup.conditions.sceneColorIndex;
   }
 
   g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
@@ -1574,8 +1574,8 @@ void UpdateStaffRoll(void) {
     sprintf(g_PrintBuffer, "MAX:%d    ", lineCount);
     PrintDebugText(g_PrintBuffer, LINE_COUNT_TEXT_COLUMN, LINE_COUNT_TEXT_ROW);
     StepNoiseTexture();
-    g_SkyState.viewedWindAngles[0] =
-        VIEWED_WIND_ANGLE(g_HoleConditions.windDirection, &g_Cameras[0].view);
+    g_SkyState.viewedWindAngles[0] = VIEWED_WIND_ANGLE(
+        g_HoleSetup.conditions.windDirection, &g_Cameras[0].view);
     if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
       g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
     }

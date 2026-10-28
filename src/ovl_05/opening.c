@@ -24,6 +24,7 @@
 #include "main.h"
 #include "math_util.h"
 #include "round_hud.h"
+#include "save.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -1834,10 +1835,10 @@ void UpdateOpening(void) {
           MoveEditorPoint(0, 2702.606f, -279.683f, 2250.851f, 0x32);
           f_OpeningSceneFramesLeft = 0x5A;
           f_OpeningCue = 0xE;
-          g_LightPitch = 0x1000;
+          g_HoleSetup.conditions.lightPitch = 0x1000;
 
           /* Stored as a signed value, as the original does */
-          *(s16*)&g_LightYaw = -0x7800;
+          *(s16*)&g_HoleSetup.conditions.lightYaw = -0x7800;
           f_OpeningScene++;
         }
 
@@ -1941,8 +1942,8 @@ void UpdateOpening(void) {
           f_OpeningScene++;
           PlaySound(0x60, f_OpeningSoundChannel, 0x3C);
           AdvanceOpeningSoundChannel();
-          g_LightPitch = 0x1000;
-          g_LightYaw = 0x6800;
+          g_HoleSetup.conditions.lightPitch = 0x1000;
+          g_HoleSetup.conditions.lightYaw = 0x6800;
           if (f_IsDonkeyKongShown) {
             LoadOpeningBall(1, 1);
           } else {

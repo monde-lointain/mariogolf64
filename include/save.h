@@ -175,9 +175,9 @@ typedef struct GameState {
 typedef struct HoleSetup {
   /* 0x00 */ CoursePoint cupPosition;
   /* 0x0C */ CoursePoint teePosition; /* Where each player starts the hole */
-  /* 0x18 */ HoleConditions conditions; /* g_HoleConditions */
-  /* 0x2C */ s8 par; /* g_HolePar */
-  /* 0x2D */ s8 nextCupIndex; /* f_NextCupIndex */
+  /* 0x18 */ HoleConditions conditions;
+  /* 0x2C */ s8 par;
+  /* 0x2D */ s8 nextCupIndex;
   /* 0x2E */ u8 unk2E[0x34 - 0x2E];
 } HoleSetup; /* size = 0x34 */
 

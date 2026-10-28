@@ -140,7 +140,6 @@ extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
 extern s32 f_CycledCupIndex;
 /* The cup index after the chosen one; nothing reads it */
-extern s8 f_NextCupIndex;
 extern HoleSetup D_80105F40;
 /* menu.c declares this as Unk68[MAX_PLAYER_COUNT]; only its first bytes are
  * copied here */
@@ -731,7 +730,7 @@ void PrepareHoleScene(void) {
   s32 unk;
 
   D_800BB0E8 = 1;
-  switch (g_HoleConditions.sceneColorIndex) {
+  switch (g_HoleSetup.conditions.sceneColorIndex) {
     case SCENE_COLOR_INDEX_ROUND_START:
       unk = 2;
       break;
@@ -788,41 +787,42 @@ s32 ChooseHoleConditions(void) {
     if (g_GameState.holeIndex != 0 &&
         g_GameState.gameMode != GAME_MODE_TRAINING && !g_GameState.isMiniGolf) {
       if ((rand() & RAIN_DRAW_MASK) < DRY_DRAW_COUNT) {
-        g_HoleConditions.isRaining = FALSE;
+        g_HoleSetup.conditions.isRaining = FALSE;
       } else {
-        g_HoleConditions.isRaining = TRUE;
+        g_HoleSetup.conditions.isRaining = TRUE;
       }
 
       if (g_GameState.courseIndex == COURSE_SHY_GUY_DESERT &&
           (rand() & RAIN_DRAW_MASK) < DRY_DRAW_COUNT) {
-        g_HoleConditions.isRaining = FALSE;
+        g_HoleSetup.conditions.isRaining = FALSE;
       }
     } else {
-      g_HoleConditions.isRaining = FALSE;
+      g_HoleSetup.conditions.isRaining = FALSE;
     }
 
     /* The first hole always has some wind */
     do {
-      g_HoleConditions.windSpeed =
+      g_HoleSetup.conditions.windSpeed =
           (rand() & WIND_SPEED_STEP_MASK) * WIND_SPEED_STEP;
-      if (g_HoleConditions.windSpeed < MIN_WIND_SPEED) {
-        g_HoleConditions.windSpeed = 0;
+      if (g_HoleSetup.conditions.windSpeed < MIN_WIND_SPEED) {
+        g_HoleSetup.conditions.windSpeed = 0;
       }
-    } while (g_GameState.holeIndex == 0 && g_HoleConditions.windSpeed == 0);
-    g_HoleConditions.windDirection = rand() * 2;
+    } while (
+        g_GameState.holeIndex == 0 && g_HoleSetup.conditions.windSpeed == 0);
+    g_HoleSetup.conditions.windDirection = rand() * 2;
     if (g_GameState.isMiniGolf) {
-      g_HoleConditions.windSpeed = 0;
+      g_HoleSetup.conditions.windSpeed = 0;
     }
 
-    g_HoleConditions.lightPitch = HOLE_LIGHT_PITCH;
+    g_HoleSetup.conditions.lightPitch = HOLE_LIGHT_PITCH;
     if (g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX) {
-      g_HoleConditions.windDirection = DRIVING_RANGE_WIND_DIRECTION;
-      g_HoleConditions.windSpeed = 0;
-      g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
-      g_HoleConditions.lightYaw = rand() * 4;
+      g_HoleSetup.conditions.windDirection = DRIVING_RANGE_WIND_DIRECTION;
+      g_HoleSetup.conditions.windSpeed = 0;
+      g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
+      g_HoleSetup.conditions.lightYaw = rand() * 4;
     } else {
       if (g_GameState.holeIndex == 0) {
-        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
+        g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
       } else {
         s32 firstHoleIndex = GetFirstHoleIndex();
         s32 colorIndex = (g_GameState.holeIndex - firstHoleIndex) *
@@ -832,31 +832,31 @@ s32 ChooseHoleConditions(void) {
           colorIndex = SCENE_COLOR_INDEX_ROUND_END;
         }
 
-        g_HoleConditions.sceneColorIndex = colorIndex;
-        g_HoleConditions.lightYaw +=
+        g_HoleSetup.conditions.sceneColorIndex = colorIndex;
+        g_HoleSetup.conditions.lightYaw +=
             g_GameState.holeIndex * LIGHT_YAW_STEP_PER_HOLE;
       }
 
       if (g_GameState.isMiniGolf) {
-        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
+        g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
       }
 
       if (g_GameState.isSuddenDeath) {
-        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_SUDDEN_DEATH;
+        g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_SUDDEN_DEATH;
       }
     }
 
     courseRecordIndex = GetCourseRecordIndex();
-    g_HolePar =
+    g_HoleSetup.par =
         g_CourseRecords[courseRecordIndex].holes[GetHoleRecordIndex()].par;
     if (IsGameFlagSet(GAME_FLAG_UNK7C)) {
-      g_HoleConditions.isRaining = FALSE;
-      g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
+      g_HoleSetup.conditions.isRaining = FALSE;
+      g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
     }
 
     if (IsGameFlagSet(GAME_FLAG_UNK7D)) {
-      g_HoleConditions.isRaining = FALSE;
-      g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
+      g_HoleSetup.conditions.isRaining = FALSE;
+      g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
     }
   }
 
@@ -913,7 +913,7 @@ s32 ChooseHoleConditions(void) {
     }
   }
 
-  f_NextCupIndex = cupIndex;
+  g_HoleSetup.nextCupIndex = cupIndex;
 }
 
 /*

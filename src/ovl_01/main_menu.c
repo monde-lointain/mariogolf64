@@ -398,13 +398,13 @@ void StartLoadingChosenHole(void) {
   }
 
   g_GameState.unk14 = 0;
-  g_HoleConditions.isRaining = FALSE;
-  g_HoleConditions.windSpeed =
+  g_HoleSetup.conditions.isRaining = FALSE;
+  g_HoleSetup.conditions.windSpeed =
       (rand() & CHOSEN_HOLE_WIND_SPEED_MASK) * CHOSEN_HOLE_WIND_SPEED_STEP;
-  g_HoleConditions.windDirection = rand();
-  g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
-  g_LightPitch = CHOSEN_HOLE_LIGHT_PITCH;
-  g_LightYaw = CHOSEN_HOLE_LIGHT_YAW;
+  g_HoleSetup.conditions.windDirection = rand();
+  g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
+  g_HoleSetup.conditions.lightPitch = CHOSEN_HOLE_LIGHT_PITCH;
+  g_HoleSetup.conditions.lightYaw = CHOSEN_HOLE_LIGHT_YAW;
   SetGameFlag(GAME_FLAG_HOLE_LOADED);
   g_GameState.playerCount = 1;
   StopLoaderThread();

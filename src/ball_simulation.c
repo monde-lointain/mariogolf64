@@ -1704,7 +1704,7 @@ TAKE_OFF:
 
       friction = info->unkC * 0.001f;
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
-          g_HoleConditions.isRaining == TRUE) {
+          g_HoleSetup.conditions.isRaining == TRUE) {
         friction *= 0.993f;
       }
 
@@ -2288,7 +2288,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
                               (club->spin * 0.5f)) *
           speed * 0.0078125f;
       speed = speed * launchScale;
-      if (g_HoleConditions.isRaining == TRUE) {
+      if (g_HoleSetup.conditions.isRaining == TRUE) {
         speed = speed * 0.95f;
       }
     } else {
@@ -2299,7 +2299,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       speed = 0;
     }
 
-    if (g_HoleConditions.isRaining == TRUE) {
+    if (g_HoleSetup.conditions.isRaining == TRUE) {
       simulation->unk34 = simulation->unk34 * 0.6f;
       simulation->unk38 = simulation->unk38 * 0.95f;
     }
@@ -2335,12 +2335,12 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
 
   windScale = 0.0078125f; /* The local is there to match */
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    windAngle = g_HoleConditions.windDirection * BINARY_ANGLE_TO_RADIANS;
+    windAngle = g_HoleSetup.conditions.windDirection * BINARY_ANGLE_TO_RADIANS;
     simulation->windVelocityX =
-        cosf(windAngle) * g_HoleConditions.windSpeed * windScale;
+        cosf(windAngle) * g_HoleSetup.conditions.windSpeed * windScale;
     simulation->windVelocityZ =
-        sinf(windAngle) * g_HoleConditions.windSpeed * windScale;
-    if (g_HoleConditions.isRaining != TRUE) {
+        sinf(windAngle) * g_HoleSetup.conditions.windSpeed * windScale;
+    if (g_HoleSetup.conditions.isRaining != TRUE) {
       along = ((simulation->windVelocityX * cosf(yawRadians)) +
                   (simulation->windVelocityZ * sinf(yawRadians))) *
           0.3f;

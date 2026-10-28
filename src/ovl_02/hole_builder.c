@@ -3134,8 +3134,8 @@ void CastBillboardShadows(void) {
   f32 viewY;
 
   lastTextureIndex = -1;
-  lightYaw = g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
-  lightPitch = g_HoleConditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+  lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
+  lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
 
   /* solidityCells is there to match */
   solidityCells = solidities[0];
@@ -3335,10 +3335,11 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
     return (to - from) * fraction + from;
   }
 
-  if (g_HoleConditions.sceneColorIndex == SCENE_COLOR_INDEX_SUDDEN_DEATH) {
-    keyIndexes[0] = g_HoleConditions.sceneColorIndex;
+  if (g_HoleSetup.conditions.sceneColorIndex ==
+      SCENE_COLOR_INDEX_SUDDEN_DEATH) {
+    keyIndexes[0] = g_HoleSetup.conditions.sceneColorIndex;
     keyIndexes[1] = keyIndexes[0];
-  } else if ((s32)g_HoleConditions.sceneColorIndex >=
+  } else if ((s32)g_HoleSetup.conditions.sceneColorIndex >=
       SCENE_COLOR_INDEX_DRIVING_RANGE) {
     keyIndexes[0] = SCENE_COLOR_INDEX_DRIVING_RANGE;
     keyIndexes[1] = SCENE_COLOR_INDEX_ROUND_END;
@@ -3388,7 +3389,8 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
   if (keyIndexes[1] == keyIndexes[0]) {
     fraction = 0.0f;
   } else {
-    fraction = (f32)((s32)g_HoleConditions.sceneColorIndex - keyIndexes[0]) /
+    fraction =
+        (f32)((s32)g_HoleSetup.conditions.sceneColorIndex - keyIndexes[0]) /
         (f32)(keyIndexes[1] - keyIndexes[0]);
   }
 
@@ -3514,7 +3516,7 @@ void ShadeGroundTiles(void) {
   GetGroundLightColors(&light, &shade);
   shade.green <<= TEXEL_GREEN_SHIFT;
   shade.blue <<= TEXEL_BLUE_SHIFT;
-  pitch = g_HoleConditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+  pitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
 
   /* The light's pitch is unused */
   cosf(pitch);
@@ -3536,9 +3538,10 @@ void ShadeGroundTiles(void) {
   }
 
   lightColumnOffset =
-      cosf(g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS) *
+      cosf(g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS) *
       LIGHT_OFFSET_LENGTH;
-  lightRowOffset = sinf(g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS) *
+  lightRowOffset =
+      sinf(g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS) *
       LIGHT_OFFSET_LENGTH;
   osSyncPrintf("LightXd%d Zd%d\n", lightColumnOffset, lightRowOffset);
   for (row = 1 - HEIGHT_BAND_ROW_COUNT; row < MAP_ROW_COUNT; row++) {
