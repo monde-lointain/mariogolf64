@@ -12,6 +12,17 @@
 #define HOLE_WINNER_HALVED (-1) /* Nobody won the last hole outright */
 #define HOLE_WINNER_UNSET (-2) /* What SetScorecardLayout starts it as */
 
+/* g_ScorecardState values */
+enum ScorecardState {
+  SCORECARD_OPENING, /* Sliding in */
+  SCORECARD_CLOSING, /* Sliding out */
+  SCORECARD_SHOWN, /* The player can turn its pages */
+  SCORECARD_TALLYING, /* Counting skins before it is shown */
+  SCORECARD_CLOSED,
+  SCORECARD_MATCH_RESULT, /* DrawMatchResult shows who won the hole */
+  SCORECARD_UNK6
+};
+
 typedef struct ScorecardContent {
   /* 0x00 */ f32 rowFlipAngles[LEADERBOARD_ROW_COUNT];
   /* 0x28 */ s8 isRowFlipping[LEADERBOARD_ROW_COUNT];
@@ -78,7 +89,7 @@ typedef struct Scorecard {
 
 /* The scorecard overlay's state, which TallySkins also keeps its skins in */
 extern Scorecard g_Scorecard;
-/* A SCORECARD_* state of scorecard.c */
+/* A SCORECARD_* value */
 extern s32 g_ScorecardState;
 
 /* Values of Scorecard.placeChange */
