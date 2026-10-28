@@ -51,6 +51,7 @@ enum BannerKind {
 
 /* f_BannerState values */
 enum BannerState {
+  BANNER_UNSET = -1, /* Until the results first load */
   BANNER_SLIDING_IN,
   BANNER_SHOWN,
   BANNER_HIDDEN = 3,
@@ -75,7 +76,8 @@ enum UnlockNoticeKind {
 #define RESULTS_DIGIT_WIDTH 8
 #define RESULTS_DIGIT_HEIGHT 12
 
-/* f_TallySpeed while A is held */
+/* f_TallySpeed normally, and while A is held */
+#define NORMAL_TALLY_SPEED 1
 #define FAST_TALLY_SPEED 10
 #define CONFIRM_SOUND_CHANNEL 15
 #define CONFIRM_SOUND_VOLUME 100
@@ -175,43 +177,8 @@ enum PortraitAnimation {
 #define FOUR_DIGIT_BET_SHIFT -16
 #define FOUR_DIGIT_BET_MIN 999
 #define FOUR_DIGIT_BET_MAX 9999
-extern s32 f_AreResultsLoaded;
-extern s32 f_ResultsState;
-extern s32 f_ResultsSlide;
-extern s32 f_ResultsTop;
-extern s32 f_TallySpeed;
-extern s32 f_TallySoundCount;
-extern f32 f_CoursePointRates[];
-extern s32 f_OpenCourseCount;
-extern s32 f_PointsToNextCourse;
-extern s32 f_CourseNoticeAssets[];
 extern const char f_NumberFormat[];
 extern const char f_PlaceNumberFormat[];
-
-/*
- * Each course's tournament prizes, in course points: first to third
- * place, then up to PRIZE_TOP_TEN, PRIZE_TOP_TWENTY and the rest
- */
-extern s32 f_TournamentPrizes[][TROPHY_PLACE_COUNT + 3];
-extern s32 f_BannerState;
-extern s32 f_BannerKind;
-/* The pressing hand shows while the results wait for A */
-extern s32 f_IsAwaitingConfirm;
-extern s32 f_ResultsUnk78;
-extern s32 f_ResultsUnk7C;
-
-extern s32 f_BannerX;
-extern s32 f_BannerY;
-extern s32 f_TournamentOpenCourseCount;
-
-/* The images of the trophy a course's tournament gives its top three */
-typedef struct TrophyAssets {
-  /* 0x0 */ s32 palette; /* For first place; second and third follow */
-  /* 0x4 */ s32 image;
-  /* 0x8 */ s32 frameCount; /* Of image, as the trophy turns */
-} TrophyAssets; /* size = 0xC */
-
-extern TrophyAssets f_TrophyAssets[];
 
 /* f_PlayerRanks of a match's players */
 #define MATCH_RANK_WON 100
@@ -245,6 +212,71 @@ void RecordComCharacterResult(s32 row, s32 column, s32 isWin);
 
 /* The score password shows as two lines of ten symbols */
 #define SCORE_PASSWORD_LINE_LENGTH 10
+
+/* The images of the trophy a course's tournament gives its top three */
+typedef struct TrophyAssets {
+  /* 0x0 */ s32 palette; /* For first place; second and third follow */
+  /* 0x4 */ s32 image;
+  /* 0x8 */ s32 frameCount; /* Of image, as the trophy turns */
+} TrophyAssets; /* size = 0xC */
+
+/* Each course's trophy image's sizes, indexed by these */
+#define TROPHY_WIDTH 0
+#define TROPHY_PART_HEIGHTS 1 /* TROPHY_PART_COUNT of them */
+#define TROPHY_SHINE_HEIGHT 3
+#define TROPHY_SIZE_COUNT 4
+
+/* An unread pointer to one of this file's strings */
+extern char D_80224E10_ovl_00[];
+
+static s32 f_AreResultsLoaded = FALSE;
+static s32 f_ResultsState = RESULTS_SLIDING_IN;
+static s32 f_ResultsUnk78 = 0;
+static s32 f_ResultsUnk7C = 0;
+static s32 f_ResultsSlide = SCREEN_WIDTH;
+static s32 f_ResultsTop = 0;
+static s32 f_TallySpeed = NORMAL_TALLY_SPEED;
+/* The pressing hand shows while the results wait for A */
+static s32 f_IsAwaitingConfirm = FALSE;
+/*
+ * Each course's tournament prizes, in course points: first to third
+ * place, then up to PRIZE_TOP_TEN, PRIZE_TOP_TWENTY and the rest
+ */
+static s32 f_TournamentPrizes[COURSE_COUNT][TROPHY_PLACE_COUNT + 3] = {
+    {50, 25, 12, 8, 5, 3}, {200, 100, 50, 20, 10, 6},
+    {600, 300, 150, 75, 35, 17}, {1200, 600, 300, 100, 50, 25},
+    {2000, 1000, 500, 200, 100, 50}, {2000, 1000, 500, 200, 100, 50}};
+static f32 f_CoursePointRates[] = {
+    1.0f, 1.5f, 2.0f, 2.5f, 3.5f, 3.5f, 1.0f, 1.0f};
+static s32 f_OpenCourseCount = 1;
+static s32 f_TournamentOpenCourseCount = 1;
+static s32 f_PointsToNextCourse = 0;
+static TrophyAssets f_TrophyAssets[COURSE_COUNT] = {{0x88A, 0x88D, 16},
+    {0x8AF, 0x8B2, 16}, {0x877, 0x87A, 16}, {0x8D5, 0x8D8, 16},
+    {0x8C2, 0x8C5, 16}, {0x89D, 0x8A0, 15}};
+static s32 f_BannerState = BANNER_UNSET;
+static s32 f_BannerKind = BANNER_KIND_NONE;
+static s32 f_BannerX = SCREEN_WIDTH;
+static s32 f_BannerY = 0;
+static s32 f_CourseNoticeAssets[] = {0x96C, 0x96D, 0x96E, 0x96F, 0x970};
+static s32 f_TallySoundCount = 0;
+/* Read by no routine */
+static s32 D_8021FDBC_ovl_00[6] = {0, 1, 2, 3, 2, 1};
+static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {{40, 24, 24, 38},
+    {40, 40, 11, 40}, {40, 40, 11, 50}, {32, 32, 32, 64}, {48, 22, 20, 21},
+    {36, 40, 11, 40}};
+static s32 f_TrophyShineFrame = 0;
+static s32 f_TrophyFrame = 0;
+static s32 f_DebugUnlockCharacter = 0;
+/* Read by no routine */
+static void* D_8021FE40_ovl_00[2] = {NULL, D_80224E10_ovl_00};
+/* The text colour of each text slot, from slot 1 */
+static u8 f_TextSlotColors[][3] = {{0xFF, 0xFF, 0xFF}, {0x7F, 0xBF, 0xFF},
+    {0x7F, 0xBF, 0xFF}, {0x7F, 0xFF, 0x4B}, {0xFF, 0x7F, 0x9F}};
+/* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a
+ * frame */
+static s32 f_HandFrame = 0;
+static f32 f_TitleBobAngle = 0.0f;
 
 static u8* f_ResultsBackdropImage;
 static u8* f_FinalResultsTitleImage;
@@ -381,7 +413,7 @@ void LoadRoundResults(void) {
   f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
   f_BannerState = BANNER_HIDDEN;
   f_BannerKind = BANNER_KIND_NONE;
-  f_TallySpeed = 1;
+  f_TallySpeed = NORMAL_TALLY_SPEED;
   f_IsAwaitingConfirm = 0;
   if (IsGameFlagSet(GAME_FLAG_ADD_500_POINTS)) {
     g_Players[0].points += 500;
@@ -1753,16 +1785,6 @@ void SetResultsBanner(s32 state, s32 kind) {
 /* The trophy is drawn in two parts, as each must fit in texture memory */
 #define TROPHY_PART_COUNT 2
 
-/* Each course's trophy image's sizes, indexed by these */
-#define TROPHY_WIDTH 0
-#define TROPHY_PART_HEIGHTS 1 /* TROPHY_PART_COUNT of them */
-#define TROPHY_SHINE_HEIGHT 3
-#define TROPHY_SIZE_COUNT 4
-
-extern s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT];
-extern s32 f_TrophyShineFrame;
-extern s32 f_TrophyFrame;
-
 /* Off the screen's left */
 #define BANNER_GONE_X (-SCREEN_WIDTH)
 #define BANNER_SLIDE_OUT_SPEED 4
@@ -2235,7 +2257,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           if (controller->buttons & A_BUTTON) {
             PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
                 CONFIRM_SOUND_VOLUME);
-            f_TallySpeed = 1;
+            f_TallySpeed = NORMAL_TALLY_SPEED;
             f_IsAwaitingConfirm = FALSE;
             f_ResultsUnk78 = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
           }
@@ -2564,8 +2586,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 #define MATCH_STEP_START_TALLY 10
 #define CHARACTER_NOTICE_TITLE_ASSET 0x560
 #define CHARACTER_NOTICE_WAIT_FRAMES 8
-
-extern s32 f_DebugUnlockCharacter;
 
 /*
  * Counts the earned course points into the save, then in Get Character
@@ -3252,9 +3272,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E10_ovl_00);
 #define SCORE_PASSWORD_ENV_COLOR 0x00FF0000
 #define SCORE_PASSWORD_PRIM_COLOR 0xFFFF0000
 
-/* The text colour of each text slot, from slot 1 */
-extern u8 f_TextSlotColors[][3];
-
 #ifdef NON_MATCHING
 /* The results of a club tournament: its course, number, name and mode, the
  * score and the password to send in */
@@ -3434,11 +3451,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
 #define PORTRAIT_ANIMATION_FRAME_COUNT 5
 #define PORTRAIT_ANIMATION_REST 0
 #define NO_PORTRAIT_FRAME (-1)
-
-/* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a
- * frame */
-extern s32 f_HandFrame;
-extern f32 f_TitleBobAngle;
 
 #ifdef NON_MATCHING
 /* The results card, its game mode's results, the bobbing title and the players'
