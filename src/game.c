@@ -217,6 +217,17 @@ static u8 D_800DAC30[16];
 
 #define RESET_FADE_ALPHA 0x40
 
+/*
+ * Over the fly-over's last frames the fade rises, and the scene spins away
+ * if no fade color is set; once the fly-over has ended, the fade lifts
+ */
+#define FLYOVER_FADE_FRAME_COUNT 15
+#define FLYOVER_FADE_START_FRAME \
+  (HOLE_FLYOVER_FRAME_COUNT - FLYOVER_FADE_FRAME_COUNT)
+#define FLYOVER_FADE_ALPHA_STEP 16
+#define FLYOVER_FADE_LIFT_ALPHA_STEP 32
+#define FLYOVER_SPIN_FRAME_COUNT 30
+
 /* The scenes are still known only by number */
 
 /*
@@ -1959,13 +1970,14 @@ s32 DrawGame(void) {
   gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
   gDPPipeSync(g_DisplayListHead++);
 
-  if (g_HoleFlyoverFrame > 0xAA) {
-    f_FadeAlpha = (g_HoleFlyoverFrame - 0xAA) * 16;
+  if (g_HoleFlyoverFrame > FLYOVER_FADE_START_FRAME) {
+    f_FadeAlpha = (g_HoleFlyoverFrame - FLYOVER_FADE_START_FRAME) *
+        FLYOVER_FADE_ALPHA_STEP;
     if (f_FadeColor == FADE_COLOR_NONE) {
-      SetScreenEffect(SCREEN_EFFECT_SPIN, 30);
+      SetScreenEffect(SCREEN_EFFECT_SPIN, FLYOVER_SPIN_FRAME_COUNT);
     }
-  } else if (g_HoleFlyoverFrame == -1) {
-    f_FadeAlpha -= 32;
+  } else if (g_HoleFlyoverFrame == HOLE_FLYOVER_ENDED) {
+    f_FadeAlpha -= FLYOVER_FADE_LIFT_ALPHA_STEP;
     if (f_FadeAlpha < 0) {
       f_FadeAlpha = 0;
       g_HoleFlyoverFrame = 0;
