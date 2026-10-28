@@ -77,6 +77,8 @@ enum GridColor {
 #define OPTION_BIT_MUSIC_OFF (1 << 0)
 #define OPTION_BIT_MONO (1 << 1)
 #define OPTION_BIT_SIMPLE_CAMERA (1 << 2)
+/* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
+extern u8 g_SoundOptionBits;
 
 /* Results of reading the save data */
 enum SaveReadResult {

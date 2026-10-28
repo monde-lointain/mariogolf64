@@ -118,7 +118,6 @@ extern f32 D_80230080_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
                                                            corner's colour */
 extern s32 D_8022FF1C_ovl_01[4];
 extern s32 D_8022FF50_ovl_01[];
-extern char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH];
 
 /* Where the character cursor's translation is measured from, so that it is
  * placed by its corner */
@@ -132,7 +131,6 @@ extern u8 D_8022FF00_ovl_01;
 extern s8 D_8022FF07_ovl_01;
 extern s8 D_8022FF08_ovl_01;
 extern s8 D_8022FF09_ovl_01;
-extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
 /* Each player's tag offset from their cursor's grid cell, as x and y */
 extern s8 D_8022FFCC_ovl_01[MAX_PLAYER_COUNT][2];
 /* The tags' x when lined up, by the player count less one */
@@ -495,8 +493,6 @@ s32 func_80209BE0_ovl_01(void) {
 
 #define BITS_PER_BYTE 8
 
-extern s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT];
-extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern s8 D_801B5634;

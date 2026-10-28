@@ -128,8 +128,6 @@ typedef struct TrophyPosition {
   u32 y;
 } TrophyPosition;
 
-extern u16 g_CourseIconAssets[];
-extern TrophySize g_TrophySizes[COURSE_COUNT];
 extern s16 D_802300A0_ovl_01;
 extern s16 D_802300A2_ovl_01;
 extern s16 D_802300A4_ovl_01; /* Which of D_8023A814's buffers holds the course

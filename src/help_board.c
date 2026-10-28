@@ -11,6 +11,7 @@
 #include "asset.h"
 #include "hole_display.h"
 #include "math_util.h"
+#include "menu.h"
 #include "menu_memory.h"
 #include "screen.h"
 #include "text.h"
@@ -68,7 +69,6 @@
 #define TOPIC_PAGE_Y 105
 #define LISTED_TOPIC_COUNT 5
 
-extern s32 g_MenuRepeatButtons;
 extern s32 D_800FE334;
 extern s32 g_MenuScreen;
 static void* f_HandImages;

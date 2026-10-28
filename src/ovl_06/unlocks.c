@@ -7,6 +7,7 @@
 #include "unlocks.h"
 
 #include "controller.h"
+#include "menu.h"
 #include "save.h"
 #include "sound.h"
 #include "sram.h"
@@ -24,10 +25,6 @@
 #define UNUSED_CODE_LENGTH 13
 /* Nothing has been held in that place of the sequence yet */
 #define NO_BUTTONS (-1)
-
-/* ovl_01 sets this to the held buttons of each player's menu reading, ORed
- * together */
-extern s32 g_MenuRepeatButtons;
 
 void func_8005C674(s32, s32);
 

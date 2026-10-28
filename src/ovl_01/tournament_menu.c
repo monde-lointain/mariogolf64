@@ -34,7 +34,6 @@ extern u16 g_MenuWindowImageAssets[15];
 extern void* g_MenuWindowImage;
 
 extern s32 D_80230F68_ovl_01;
-extern u16 g_TournamentIconAssets[];
 extern void* D_80230E70_ovl_01;
 extern void* D_80230E74_ovl_01;
 extern void* D_80230E78_ovl_01;
@@ -187,7 +186,6 @@ extern s32 D_80105DC4;
 extern s32 D_80231134_ovl_01; /* The tournament code byte being edited */
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC8;
-extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
 extern s32 D_801B7070;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 s32 GetClubTournamentCourse(void);

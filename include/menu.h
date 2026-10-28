@@ -3,6 +3,9 @@
 
 #include "common.h"
 
+#include "course.h"
+#include "save.h"
+
 /* The screens that the menu overlay shows, which g_MenuScreen picks */
 enum MenuScreen {
   MENU_SCREEN_TITLE,
@@ -37,12 +40,25 @@ enum MenuScreen {
 #define MENU_SCREEN_COUNT 29
 /* g_LoadedMenuScreen's value before any screen's assets are read */
 #define NO_MENU_SCREEN (-1)
+/* The screen whose assets func_801F4C78 last read */
+extern s8 g_LoadedMenuScreen;
+/* Each screen's image */
+extern u16 g_MenuScreenImageAssets[MENU_SCREEN_COUNT];
 extern s32 g_MenuScreen;
 
 /* The buttons of every controller: those repeating while held, and those just
  * pressed */
 extern s32 g_MenuRepeatButtons;
 extern s32 g_MenuPressedButtons;
+
+/* Each course's icon, then mini golf's */
+extern u16 g_CourseIconAssets[];
+/* The courses' icons, then the putter tournaments' badges */
+extern u16 g_TournamentIconAssets[];
+/* How many courses the course select offers */
+extern s32 g_MenuCourseCount;
+/* The holes choice's Bet badge cycles its color unless this is set */
+extern u8 D_800C2BD5;
 
 /* The menus' sound channel, and how loud each of their sounds plays */
 #define MENU_SOUND_CHANNEL 15
@@ -90,6 +106,24 @@ typedef struct TrophySize {
   s8 width;
   s8 height;
 } TrophySize;
+
+extern TrophySize g_TrophySizes[COURSE_COUNT];
+
+/* The mini-golf disc's images in each of D_801049A0's buffers */
+#define MINI_GOLF_DISC_IMAGE_COUNT 2
+/*
+ * The disc's frames as it turns from one course to the next, each two images,
+ * read into the buffers of D_801049A0 not shown; the courses face the screen at
+ * the middle frame
+ */
+#define MINI_GOLF_TURN_FRAME_COUNT 5
+#define MINI_GOLF_FACING_FRAME 2
+extern u16 g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD *
+    MINI_GOLF_DISC_IMAGE_COUNT][MINI_GOLF_TURN_FRAME_COUNT];
+/* Each mini-golf course's disc image as it faces the screen */
+extern u16 g_MiniGolfCourseIconAssets[];
+/* The file read with each mini-golf course's disc image */
+extern s16 g_MiniGolfDiscFiles[];
 
 /* An image buffer of the menu overlay */
 extern u8 g_MenuImageBuffer[];
@@ -143,6 +177,9 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
 /* g_ImportedCharacterColumns's value for a player without an imported character
  */
 #define NO_IMPORTED_COLUMN (-1)
+extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
+extern s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT];
+extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 
 /* The 1P to 4P, 1C to 4C and Com labels, 16 by 8 each */
 #define PLAYER_LABEL_WIDTH 16
@@ -185,11 +222,14 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
 #define MODE_ICON_CLUB_SLOTS 10
 #define NO_MODE_ICON -1
 #define MODE_ICON_COUNT 11
+/* The table holds three rows past the last icon, copies of rows 2, 2 and 5 */
+#define MODE_ICON_ANIMATION_COUNT 14
 /* Each icon's frames are asset ids, ended by END_OF_ICON_FRAMES */
 #define MODE_ICON_FRAME_COUNT 27
 #define END_OF_ICON_FRAMES -1
 
-extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
+extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT]
+                               [MODE_ICON_FRAME_COUNT];
 
 /*
  * The menu banners, 256 color images such as asset 0x521, drawn in strips

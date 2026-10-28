@@ -57,6 +57,9 @@ typedef struct ImportedCharacter {
 
 extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 
+/* The names of the characters before the imported ones */
+extern char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH];
+
 /* Each character's face palette file in each of the character's colour schemes
  */
 extern s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];

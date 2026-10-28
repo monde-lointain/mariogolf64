@@ -122,10 +122,6 @@ typedef struct {
 /* The furthest a course's list of characters scrolls */
 #define RING_SHOT_LAST_FIRST_CHARACTER 14
 
-extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
-extern u16 g_CourseIconAssets[];
-extern u16 g_MiniGolfCourseIconAssets[];
-extern s16 g_MiniGolfDiscFiles[];
 extern void* D_801052C4[2];
 extern u8 D_80230B4E_ovl_01;
 extern void* D_8012D430[CHARACTER_COUNT];

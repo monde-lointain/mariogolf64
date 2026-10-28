@@ -47,8 +47,6 @@
 
 /* Mirrors of the save data's options */
 extern u8 g_OptionBits;
-/* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
-extern u8 g_SoundOptionBits;
 
 extern SaveCopyLocation f_SaveCopyLocations[];
 /* The course points needed in total to open each course */
@@ -73,9 +71,6 @@ extern s16 f_DebugImportedSideSpins[IMPORTED_CHARACTER_COUNT];
 extern u8 f_DebugImportedNames[IMPORTED_CHARACTER_COUNT]
                               [IMPORTED_CHARACTER_NAME_LENGTH];
 
-extern s8 g_LoadedMenuScreen;
-extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
-extern s32 g_MenuCourseCount;
 extern s8 D_800C2BD4;
 extern s16 D_800FBD40;
 extern s8 D_800FBDB9;
@@ -88,7 +83,6 @@ extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
 extern s8 D_801B5634;
-extern s8 D_800C2BD5;
 extern s8 D_801052E8;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC4;
@@ -127,9 +121,6 @@ extern void* D_800FBE30[2];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
 extern u16 f_MenuLabelAssets[];
-extern u16 g_MenuScreenImageAssets[1];
-extern u16 g_CourseIconAssets[7];
-extern s16 g_MiniGolfDiscFiles[2];
 extern u16 f_ToadImageAssets[1];
 
 void SetFramebufferCount(s32 count);

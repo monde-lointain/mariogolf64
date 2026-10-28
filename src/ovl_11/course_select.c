@@ -163,8 +163,6 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY);
 
 extern Gfx D_800C3FC0[];
-extern s32 g_CourseNameEnvColors[];
-extern s32 g_CourseNamePrimColors[];
 
 static u16 f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x5BE,

@@ -125,7 +125,6 @@ extern f32 f_MenuBobPhase;
 #define BACKDROP_FIRST_TOP 8
 #define BACKDROP_TOP 10
 
-extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
 extern void* D_800FF420[2];
 extern s32 D_801051F0;
 extern void* D_801052BC[2];
@@ -158,13 +157,10 @@ extern u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern u8 g_OptionBits;
-/* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
-extern u8 g_SoundOptionBits;
 extern s32 D_8022BE18_ovl_01;
 extern s32 D_800FBD40[];
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_8022BE2C_ovl_01;
-extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 extern void* D_8010526C[2];
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
@@ -190,12 +186,9 @@ extern s32 D_8022F8F4_ovl_01[];
 
 /*
  * The mini-golf course select. A record's three courses lie on a disc that
- * turns from one to the next through five frames, each two images, read
- * into the buffers of D_801049A0 not shown; the courses face the screen at
- * the middle frame. Changing record slides the screen across instead.
+ * turns from one to the next through MINI_GOLF_TURN_FRAME_COUNT frames.
+ * Changing record slides the screen across instead.
  */
-#define MINI_GOLF_TURN_FRAME_COUNT 5
-#define MINI_GOLF_FACING_FRAME 2
 #define MINI_GOLF_TURN_FRAME_DURATION 2
 /* D_8022F8DC values */
 #define MINI_GOLF_TURN_NONE 0
@@ -210,11 +203,7 @@ extern s32 D_8022F8F4_ovl_01[];
 /* D_8022BE88's value once the popup opened with C-up has finished */
 #define MENU_PHASE_UNK2 2
 
-extern u16 g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD *
-    MINI_GOLF_DISC_IMAGE_COUNT][MINI_GOLF_TURN_FRAME_COUNT];
 extern void* D_801049A0[][MINI_GOLF_DISC_IMAGE_COUNT];
-extern s32 g_MenuCourseCount;
-extern u8 D_800C2BD5;
 extern s32 D_8022F8D4_ovl_01; /* The disc's frame */
 extern s32 D_8022F8D8_ovl_01; /* The calls that it has shown */
 extern u8 D_8022F8DC_ovl_01; /* Which way it turns */
@@ -235,11 +224,6 @@ extern u8
     D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers shows the course */
 
 /* What func_801F4C78 reads as the menu screen changes */
-extern s8 g_LoadedMenuScreen; /* The screen whose assets were last read */
-extern u16 g_MenuScreenImageAssets[MENU_SCREEN_COUNT]; /* Each screen's image's
-                                                          asset ID */
-extern u16 g_CourseIconAssets[7];
-extern s16 g_MiniGolfDiscFiles[2];
 extern void* D_800FBE30[2];
 extern void* D_800FC6A0;
 extern void* D_800FC898;

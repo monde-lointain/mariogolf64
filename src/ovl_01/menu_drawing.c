@@ -156,8 +156,6 @@ extern const char D_8023176C_ovl_01[];
 #define WON_COUNT_Y 72
 #define WON_COUNT_DIGIT_WIDTH 16
 
-extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
-extern s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT];
 extern void* D_800FC898;
 extern void* D_800FF180[2];
 extern void* D_8012F4B0[7];
@@ -254,10 +252,8 @@ extern void* D_801049A0[][MINI_GOLF_DISC_IMAGE_COUNT];
 extern void* D_801052C4[MINI_GOLF_DISC_IMAGE_COUNT];
 extern u8 D_8022F8DD_ovl_01;
 extern void* D_80106100;
-extern u8 D_800C2BD5;
 extern void* D_800FBDFC[2];
 extern u8 D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers is shown */
-extern TrophySize g_TrophySizes[COURSE_COUNT];
 extern u8 D_8022BE89_ovl_01;
 extern s32 D_8022BE84_ovl_01;
 extern s32 D_802322F0_ovl_01;
@@ -1911,8 +1907,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_80202000_ovl_01);
 #define HOLES_CHOICE_TEXT_SLOT 1
 
 extern char* D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT];
-extern s32 g_CourseNameEnvColors[];
-extern s32 g_CourseNamePrimColors[];
 
 /*
  * Doesn't match: the original sets the text drawing's argument before the

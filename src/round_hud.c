@@ -454,10 +454,6 @@ extern s32 f_SceneryState;
 /* On the tee ground, the shot panel sits this much higher */
 #define TEE_GROUND_PANEL_OFFSET_Y -3
 #define SHOT_PANEL_START_OFFSET_X 64
-/* The colors of each course's name, which gradients from the first to the
- * second */
-extern s32 g_CourseNameEnvColors[];
-extern s32 g_CourseNamePrimColors[];
 /* "%02d:%02d:%02d", which DrawRoundHud also uses */
 extern char D_800D1C84[];
 

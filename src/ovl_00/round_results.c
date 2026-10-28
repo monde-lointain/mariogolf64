@@ -16,6 +16,7 @@
 #include "game_flags.h"
 #include "heap.h"
 #include "main.h"
+#include "menu.h"
 #include "password.h"
 #include "round_hud.h"
 #include "save.h"
@@ -194,7 +195,6 @@ extern s32 f_ResultsUnk7C;
 extern s32 f_BannerX;
 extern s32 f_BannerY;
 extern s32 f_TournamentOpenCourseCount;
-extern u16 g_TournamentIconAssets[];
 
 /* The images of the trophy a course's tournament gives its top three */
 typedef struct TrophyAssets {

@@ -150,7 +150,6 @@ enum StatsDirection {
 #define PLAYER_OPTION_COUNT 37
 #define PLAYER_OPTION_SLIDE_START -512
 
-extern u16 g_CourseIconAssets[];
 extern void* D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
@@ -942,7 +941,6 @@ extern f32 D_80230608_ovl_01[MAX_PLAYER_COUNT];
 extern f32 D_80230618_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][3];
 /* The left of each player's column, by the player count */
 extern s32 D_802306C8_ovl_01[][MAX_PLAYER_COUNT];
-extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
 
 void func_80210CD4_ovl_01(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);

@@ -74,7 +74,6 @@ typedef struct SongChange {
   /* 0x0C */ s32 delay;
 } SongChange; /* size = 0x10 */
 
-extern u8 g_SoundOptionBits;
 extern u8 g_SoundPointerBankRomStart[];
 extern u8 g_SoundPointerBankRomEnd[];
 extern u8 g_SoundWaveBankRomStart[];
