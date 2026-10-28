@@ -93,18 +93,6 @@ enum SwingTrailState {
 /* The S coordinate across the whole trail, in 10.5 fixed point */
 #define SWING_TRAIL_TEXTURE_LENGTH 0x800
 
-/*
- * An identity matrix in Mtx's fixed point: the integer halves, two to a word,
- * then the fractions
- */
-/* clang-format off */
-#define IDENTITY_MTX \
-  {{{0x10000, 0, 1, 0}, \
-    {0, 0x10000, 0, 1}, \
-    {0, 0, 0, 0}, \
-    {0, 0, 0, 0}}}
-/* clang-format on */
-
 #define SPARK_IMAGE_SIZE 32
 #define SPARK_DRAG 0.98f
 #define SPARK_MODEL_Z -100.0f

@@ -16,6 +16,18 @@
 #define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))
 
+/*
+ * An identity matrix in Mtx's fixed point: the integer halves, two to a word,
+ * then the fractions
+ */
+/* clang-format off */
+#define IDENTITY_MTX \
+  {{{0x10000, 0, 1, 0}, \
+    {0, 0x10000, 0, 1}, \
+    {0, 0, 0, 0}, \
+    {0, 0, 0, 0}}}
+/* clang-format on */
+
 u32 IntLength3D(s32 x, s32 y, s32 z);
 u32 IntLength2D(s32 x, s32 y);
 void SetRandomSeed(s32 seed);
