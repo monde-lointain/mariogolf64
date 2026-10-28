@@ -4,7 +4,9 @@
  */
 #include "common.h"
 
-#include "text.h"
+/* Keeps text.h from declaring SetTextSlot with the int colors its callers pass
+ */
+#define DEFINES_SET_TEXT_SLOT
 
 #include "asset.h"
 #include "current_shot.h"
@@ -16,6 +18,7 @@
 #include "scene.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "text.h"
 #include "variables.h"
 
 /* The messages and their character codes */

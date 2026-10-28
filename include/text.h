@@ -111,8 +111,13 @@ void PlaceGlyphGroup(
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex);
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex);
 void SetTextName(char* name);
+/* SetTextSlot reads only each color's low byte, but its callers pass the
+ * colors as ints without narrowing them. text.c, which defines it with u8
+ * colors, skips this declaration. */
+#ifndef DEFINES_SET_TEXT_SLOT
 void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
-    u8 red, u8 green, u8 blue, u8 alpha);
+    s32 red, s32 green, s32 blue, s32 alpha);
+#endif
 void SetUpTextDrawing(Gfx** displayListHead);
 void SetTextColor(Gfx** displayListHead, s32 red, s32 green, s32 blue);
 void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient);
