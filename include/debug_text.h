@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+/*
+ * The framebuffer that DrawMessageCharacter last drew a message into, which
+ * the main loop keeps on screen once set
+ */
+extern u16* g_MessageFramebuffer;
+
 void SetUpDebugTextDrawing(Gfx** displayListHead);
 void DrawTextIntoTexture(s8* text, s32 length, u16* texture);
 void PrintMessage(s8* text, u32 column, u32 row);

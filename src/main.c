@@ -13,6 +13,7 @@
 #include "character_slot.h"
 #include "club.h"
 #include "controller.h"
+#include "debug_text.h"
 #include "functions.h"
 #include "game.h"
 #include "game_flags.h"
@@ -111,7 +112,6 @@ static s32 f_FramesThisSecond = 0;
 s8 g_FrameStepState = FRAME_STEP_RUNNING;
 volatile s32 g_FrameCount = 0;
 static s32 f_IsOddRetrace = FALSE;
-extern u16* g_MessageFramebuffer;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 extern char g_SaveBuildDate[];
 
