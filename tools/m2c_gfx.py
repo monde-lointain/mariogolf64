@@ -12,15 +12,17 @@ gfxdis only recognises the macros that expand to several commands, such as
 gDPLoadTextureTile, gDPLoadTLUT_pal256 and gSPTextureRectangle, when it is
 given the whole run of commands, so each chain is decoded as one run. Words
 computed at run time get placeholders: an opcode found in the expression,
-with the constant bits OR'd into it for the operands. Each macro is printed with the expressions of
-its computed words, and a texture rectangle whose coordinates are clamped
-at zero is marked as gSPScisTextureRectangle.
+with the constant bits OR'd into it for the operands. Each macro is printed
+with the expressions of its computed words, and a texture rectangle whose
+coordinates are clamped at zero is marked as gSPScisTextureRectangle.
 """
 
 import re
 import subprocess
 import sys
 from collections import defaultdict
+from pathlib import Path
+from typing import NamedTuple
 
 GFXDIS = "gfxdis.f3dex2"
 STEP_RE = re.compile(r"^\s*(\w+) = (\w+)(?: ([+-]) (0x[0-9A-Fa-f]+|\d+))?;")
@@ -34,43 +36,61 @@ OFFSET_RE = re.compile(r"^\s*/\* ([0-9A-Fa-f]+): \*/ (.*)$")
 # MAX(x, 0) compiles to x & (~x >> 31), which m2c prints with this shift
 CLAMP_RE = re.compile(r">> 0x1F")
 
+WORD_MASK = 0xFFFFFFFF
+WORD_SIZE = 4
+COMMAND_SIZE = 8
+COMMAND_ALIGNMENT_MASK = ~(COMMAND_SIZE - 1)
+OPCODE_SHIFT = 24
+# Opcodes from here up are the RDP's and the RSP's other commands; below are
+# G_VTX to G_TRI2 and the other F3DEX2 geometry commands
+FIRST_HIGH_OPCODE_WORD = 0xC0000000
+GEOMETRY_OPCODES = range(0x01, 0x08)
+# A root needs at least this many stores to be a display list
+MIN_STORE_COUNT = 2
 
-def parse_constant(text):
+
+class Command(NamedTuple):
+    """One display-list command, as its two words."""
+
+    offset: int
+    word0: int | None
+    word1: int
+    dynamic: list[str]
+
+
+def parse_constant(text: str) -> int | None:
+    """Return the value of a constant expression, or None if it isn't one."""
     match = CONSTANT_RE.match(text.strip())
     if not match:
         return None
     value = match.group(1)
-    return 0 if value == "NULL" else int(value, 0) & 0xFFFFFFFF
+    return 0 if value == "NULL" else int(value, 0) & WORD_MASK
 
 
-def find_opcode(text):
-    """Returns the constant holding a command's opcode in a computed word."""
-    for digits in HEX_RE.findall(text):
-        value = int(digits, 16)
-        if value >= 0xC0000000 or (value >> 24) in (
-            0x01,
-            0x02,
-            0x03,
-            0x04,
-            0x05,
-            0x06,
-            0x07,
+def find_opcode(text: str) -> int | None:
+    """Return the constant holding a command's opcode in a computed word."""
+    for match in HEX_RE.finditer(text):
+        value = int(match.group(1), 16)
+        if (
+            value >= FIRST_HIGH_OPCODE_WORD
+            or (value >> OPCODE_SHIFT) in GEOMETRY_OPCODES
         ):
-            return value & 0xFF000000 | value & 0x00FFFFFF
+            return value
     return None
 
 
-def or_constant(text):
-    """Returns the constant bits OR'd into a computed word, or 0."""
+def find_or_constant(text: str) -> int:
+    """Return the constant bits OR'd into a computed word, or 0."""
     match = OR_RE.search(text)
     return int(match.group(1), 16) if match else 0
 
 
-def collect_stores(lines):
-    root_of = {}
-    offset_of = {}
-    value_of = {}
-    stores = defaultdict(dict)
+def collect_stores(lines: list[str]) -> dict[str, dict[int, str]]:
+    """Return each pointer chain's stores, by offset from its root."""
+    root_of: dict[str, str] = {}
+    offset_of: dict[str, int] = {}
+    value_of: dict[str, str] = {}
+    stores: defaultdict[str, dict[int, str]] = defaultdict(dict)
     for line in lines:
         match = ASSIGN_RE.match(line)
         if match and parse_constant(match.group(2)) is not None:
@@ -90,7 +110,9 @@ def collect_stores(lines):
             continue
         match = STORE_RE.match(line)
         if match:
-            name, field, value = match.group(1), int(match.group(2), 16), match.group(3)
+            name = match.group(1)
+            field = int(match.group(2), 16)
+            value = match.group(3)
         else:
             match = DEREF_STORE_RE.match(line)
             if not match:
@@ -101,32 +123,34 @@ def collect_stores(lines):
     return stores
 
 
-def build_commands(stores):
-    """Returns [(offset, word0, word1, dynamic expressions)] in offset order."""
-    commands = []
-    for slot in sorted({offset & ~7 for offset in stores}):
-        first, second = stores.get(slot), stores.get(slot + 4)
+def build_commands(stores: dict[int, str]) -> list[Command]:
+    """Return the commands of a chain's stores, in offset order."""
+    commands: list[Command] = []
+    for slot in sorted({offset & COMMAND_ALIGNMENT_MASK for offset in stores}):
+        first = stores.get(slot)
+        second = stores.get(slot + WORD_SIZE)
         word0 = parse_constant(first) if first else None
         word1 = parse_constant(second) if second else None
-        dynamic = []
+        dynamic: list[str] = []
         if word0 is None:
             word0 = find_opcode(first) if first else None
             dynamic.append(f"w0={first}")
         if word1 is None:
-            word1 = or_constant(second) if second else 0
+            word1 = find_or_constant(second) if second else 0
             dynamic.append(f"w1={second}")
-        commands.append((slot, word0, word1, dynamic))
+        commands.append(Command(slot, word0, word1, dynamic))
     return commands
 
 
-def decode_run(run):
-    words = []
-    for _, word0, word1, _ in run:
-        words += [f"{word0:08X}", f"{word1:08X}"]
+def decode_run(run: list[Command]) -> list[tuple[int, str]]:
+    """Return gfxdis's macros for a run of commands, by offset in the run."""
+    words: list[str] = []
+    for command in run:
+        words += [f"{command.word0:08X}", f"{command.word1:08X}"]
     result = subprocess.run(
-        [GFXDIS, "-i", "-p", "-w", *words], capture_output=True, text=True
+        [GFXDIS, "-i", "-p", "-w", *words], capture_output=True, text=True, check=False
     )
-    decoded = []
+    decoded: list[tuple[int, str]] = []
     for line in result.stdout.splitlines():
         match = OFFSET_RE.match(line)
         if match:
@@ -134,45 +158,54 @@ def decode_run(run):
     return decoded
 
 
-def print_run(run):
+def print_run(run: list[Command]) -> None:
+    """Print a run's macros, each with the expressions of its computed words."""
     decoded = decode_run(run)
     for index, (start, text) in enumerate(decoded):
-        end = decoded[index + 1][0] if index + 1 < len(decoded) else len(run) * 8
+        end = (
+            decoded[index + 1][0]
+            if index + 1 < len(decoded)
+            else len(run) * COMMAND_SIZE
+        )
         dynamic = [
-            expr for command in run[start // 8 : end // 8] for expr in command[3]
+            expression
+            for command in run[start // COMMAND_SIZE : end // COMMAND_SIZE]
+            for expression in command.dynamic
         ]
+        shown = text
         if "TextureRectangle" in text and any(
-            CLAMP_RE.search(expr) for expr in dynamic
+            CLAMP_RE.search(expression) for expression in dynamic
         ):
-            text = text.replace("gsSPTextureRectangle", "gsSPScisTextureRectangle")
-        print(f"  {run[0][0] + start:#05x} {text}")
-        for expr in dynamic:
-            print(f"          {expr}")
+            shown = text.replace("gsSPTextureRectangle", "gsSPScisTextureRectangle")
+        print(f"  {run[0].offset + start:#05x} {shown}")
+        for expression in dynamic:
+            print(f"          {expression}")
 
 
-def print_root(root, commands):
+def print_root(root: str, commands: list[Command]) -> None:
+    """Print a chain's commands, decoding each unbroken run together."""
     print(f"== {root}")
-    run = []
+    run: list[Command] = []
     for command in commands:
-        if run and command[0] != run[-1][0] + 8:
+        if run and command.offset != run[-1].offset + COMMAND_SIZE:
             print_run(run)
             run = []
-        if command[1] is None:
+        if command.word0 is None:
             if run:
                 print_run(run)
                 run = []
-            print(f"  {command[0]:#05x} ? {' '.join(command[3])}")
+            print(f"  {command.offset:#05x} ? {' '.join(command.dynamic)}")
         else:
             run.append(command)
     if run:
         print_run(run)
 
 
-def main():
-    with open(sys.argv[1]) as m2c_file:
-        stores = collect_stores(m2c_file.read().splitlines())
+def main() -> None:
+    """Print the display lists of the m2c output named."""
+    stores = collect_stores(Path(sys.argv[1]).read_text().splitlines())
     for root, root_stores in stores.items():
-        if len(root_stores) >= 2:
+        if len(root_stores) >= MIN_STORE_COUNT:
             print_root(root, build_commands(root_stores))
 
 
