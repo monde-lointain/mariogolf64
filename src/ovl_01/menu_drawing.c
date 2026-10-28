@@ -113,7 +113,493 @@ extern const char D_8023176C_ovl_01[];
  */
 #define MENU_PHASE_UNK7 7
 
+/*
+ * The mode select's boards turn on a circle like the saved games' boards,
+ * wider for a single player; the chosen one shows its animated mode icon once
+ * it stops turning
+ */
+#define MODE_SELECT_BOARD_KIND 0x1B
+#define MODE_SELECT_LIGHT_YAW 0
+#define MODE_SELECT_LIGHT_PITCH 0x3000
+#define MODE_BOARD_EYE_HEIGHT 70.0f
+#define MODE_BOARD_EYE_DISTANCE 60.0f
+#define MODE_BOARD_RADIUS_X 48.0f
+#define SINGLE_PLAYER_MODE_BOARD_RADIUS_X 64.0f
+#define MODE_BOARD_RADIUS_Z 40.0f
+#define MODE_BOARD_HALF_SIZE 32.0f
+/* The boards not chosen are darkened */
+#define UNCHOSEN_MODE_BOARD_SHADE 127
+/* The bob that a board past the last would have, a step of its phase per
+ * update */
+#define MODE_BOARD_BOB_PHASE_STEP 0.1f
+#define MODE_BOARD_BOB_HEIGHT 8.0f
+/* The strips of D_801B60D0 below the boards, drawn wider for a single player */
+#define MODE_BANNER_TOP 152
+#define MODE_BANNER_LEFT 80
+#define MODE_BANNER_SHOWN_WIDTH 160
+#define SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH 180
+/* The rows of the modes' label image, 192 by 20 CI4 each */
+#define MODE_LABEL_WIDTH 192
+#define MODE_LABEL_HEIGHT 20
+#define MODE_LABEL_IMAGE_SIZE ((MODE_LABEL_WIDTH * MODE_LABEL_HEIGHT) / 2)
+#define MODE_LABEL_X 160
+#define SINGLE_PLAYER_MODE_LABEL_X 170
+#define MODE_LABEL_TOP 156
+#define MODE_ARROW_GAP 64
+#define MODE_ARROW_Y 124
+/* A single player's Tournament shows the birdie badges won, and Ring Shot the
+ * stars won, centered by the count's number of digits */
+#define WON_COUNT_ICON_X 224
+#define WON_COUNT_ICON_Y 64
+#define WON_COUNT_X 250
+#define WON_COUNT_Y 72
+#define WON_COUNT_DIGIT_WIDTH 16
+
+extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+extern s8 D_800C1FF8[MAX_PLAYER_COUNT];
+extern void* D_800FC898;
+extern void* D_800FF180[2];
+extern void* D_8012F4B0[7];
+extern f32 D_8022F978_ovl_01;
+/* Where each player's controller icon and label go, by the player count */
+extern s32 D_8022F97C_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2];
+/* How far left of the label's place each row of the modes' label image is
+ * drawn */
+extern s32 D_8022FA28_ovl_01[MODE_ICON_COUNT];
+extern Mat4 D_80231CA0_ovl_01;
+extern Mat4 D_80231CE0_ovl_01;
+extern LookAt D_80231D20_ovl_01[2];
+
+void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
+void func_80200A40_ovl_01(
+    Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
+void func_80200EF0_ovl_01(Gfx** displayListHead);
+void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
+void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
+    u8 starCount, u8 enlargesChosenHole);
+void func_80210DF4_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
+void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
+
+/*
+ * Draws the mode select of screens 5, 23 and 26: the characters, the modes'
+ * boards turning on their circle, the chosen mode's label, each player's
+ * controller icon and label, and for a single player the birdie badges or
+ * stars won.
+ */
+/* Doesn't match: the boards' strips and the mode label schedule their
+ * address loads differently */
+#ifdef NON_MATCHING
+void func_801FE4D0_ovl_01(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  u16 perspNorm;
+  /* Sized like the course wheel's */
+  f32 boardX[WHEEL_SLOT_LIMIT];
+  f32 boardY[WHEEL_SLOT_LIMIT];
+  f32 boardScale[WHEEL_SLOT_LIMIT];
+  s32 unusedSlots[WHEEL_SLOT_LIMIT];
+  s32 drawOrder[WHEEL_SLOT_LIMIT];
+  s32 position[2];
+  SaveData* save = GetSaveData();
+  s16 badgeCount = 0;
+  s16 starCount;
+  s32 modeCount;
+  s32 index;
+  s32 otherIndex;
+  s32 key;
+  f32 radiusX;
+  s32 angleStep;
+  f32 angle;
+  f32 circleX;
+  /* A board's turns from the chosen one, then the slot of the board drawn */
+  s32 slot;
+  s32 halfSize;
+  s32 step;
+  f32 bob;
+  u8 areCharactersDrawn;
+  s32 labelIndex;
+  s32 labelX;
+  s32* labelOffset;
+  void* image;
+  s32 countShift;
+  s32 courseIndex;
+  s32 holeIndex;
+
+  g_LightYaw = MODE_SELECT_LIGHT_YAW;
+  g_LightPitch = MODE_SELECT_LIGHT_PITCH;
+  func_801FC60C_ovl_01(&gfx, MODE_SELECT_BOARD_KIND);
+  guPerspectiveF(D_80231CA0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
+      WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
+  guLookAtReflectF(D_80231CE0_ovl_01, &D_80231D20_ovl_01[g_DrawBufferIndex],
+      0.0f, MODE_BOARD_EYE_HEIGHT, MODE_BOARD_EYE_DISTANCE, 0.0f, 0.0f, 0.0f,
+      0.0f, 1.0f, 0.0f);
+  gSPLookAt(gfx++, &D_80231D20_ovl_01[g_DrawBufferIndex]);
+  SetCpuProjectionF(D_80231CA0_ovl_01, D_80231CE0_ovl_01, g_Viewports);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+
+  modeCount = D_8022BE30_ovl_01[g_ChosenPlayerCount - 1];
+  for (index = 0; index != modeCount; index++) {
+    ScreenPoint point;
+
+    radiusX = MODE_BOARD_RADIUS_X;
+    if (g_ChosenPlayerCount == 1) {
+      radiusX = SINGLE_PLAYER_MODE_BOARD_RADIUS_X;
+    }
+
+    slot = (D_801323A0.modeChoice - index) % modeCount;
+    if (modeCount != 0) {
+      angleStep = DEGREES_PER_TURN / modeCount;
+    } else {
+      angleStep = DEGREES_PER_TURN;
+    }
+
+    angle = -DEGREES_TO_RADIANS(
+        (slot * angleStep) + (D_801323A0.modeSpin * DEGREES_PER_SPIN_STEP));
+    circleX = sinf(angle) * radiusX;
+    if (ProjectPoint(circleX, 0.0f, cosf(angle) * MODE_BOARD_RADIUS_Z, &point) <
+        0) {
+      boardX[index] = point.x;
+      boardY[index] = point.y - WHEEL_RAISE;
+      boardScale[index] = point.scaleX;
+    }
+  }
+
+  for (otherIndex = 0; otherIndex != modeCount; otherIndex++) {
+    drawOrder[otherIndex] = otherIndex;
+  }
+
+  /* Draw the farthest boards first, so the nearer ones cover them */
+  for (otherIndex = 1; otherIndex != modeCount; otherIndex++) {
+    key = drawOrder[otherIndex];
+    for (index = otherIndex - 1;
+        (index >= 0) && (boardY[drawOrder[index]] > boardY[key]); index--) {
+      drawOrder[index + 1] = drawOrder[index];
+    }
+
+    drawOrder[index + 1] = key;
+  }
+
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PRIM);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
+  areCharactersDrawn = FALSE;
+  D_8022F978_ovl_01 += MODE_BOARD_BOB_PHASE_STEP;
+  for (index = 0; index != modeCount; index++) {
+    slot = drawOrder[index];
+    halfSize = boardScale[slot] * MODE_BOARD_HALF_SIZE;
+    step = (f32)(MODE_ICON_STRIP_HEIGHT << 10) / halfSize;
+    /* The loop stops before modeCount, so no board bobs */
+    if (index == modeCount) {
+      bob = sinf(D_8022F978_ovl_01) * MODE_BOARD_BOB_HEIGHT;
+    } else {
+      bob = 0.0f;
+    }
+
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_8012F4B0[slot] + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    if ((D_801323A0.modeChoice == slot) && (D_801323A0.modeSpin == 0)) {
+      if (!areCharactersDrawn) {
+        func_80200EF0_ovl_01(&gfx);
+        areCharactersDrawn = TRUE;
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+      }
+
+      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      func_80200A40_ovl_01(&gfx, boardX[slot] - halfSize,
+          boardY[slot] - halfSize + bob, halfSize, step);
+    } else {
+      if (D_801323A0.modeChoice == slot) {
+        /* The characters go behind the chosen board, and change the state */
+        if (!areCharactersDrawn) {
+          func_80200EF0_ovl_01(&gfx);
+          gDPPipeSync(gfx++);
+          gDPPipeSync(gfx++);
+          gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+          gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+          gDPPipeSync(gfx++);
+          gDPSetTexturePersp(gfx++, G_TP_NONE);
+          gDPPipeSync(gfx++);
+          gDPSetTextureFilter(gfx++, G_TF_BILERP);
+          gDPPipeSync(gfx++);
+          gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+          gDPPipeSync(gfx++);
+          gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+          gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+          gDPLoadTLUT_pal256(
+              gfx++, ((u32)D_8012F4B0[slot] + IMAGE_HEADER_SIZE) & ~7);
+          areCharactersDrawn = TRUE;
+        }
+      } else {
+        gDPSetCombineMode(
+            gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, UNCHOSEN_MODE_BOARD_SHADE,
+            UNCHOSEN_MODE_BOARD_SHADE, UNCHOSEN_MODE_BOARD_SHADE, 255);
+      }
+
+      for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT; otherIndex++) {
+        gDPLoadTextureBlock(gfx++,
+            ((u32)D_8012F4B0[slot] + LARGE_PALETTED_TEXELS_OFFSET +
+                (otherIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)) &
+                ~7,
+            G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
+            0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (s32)(boardX[slot] - halfSize) << 2,
+            (s32)(boardY[slot] - halfSize + (otherIndex * halfSize) + bob) << 2,
+            (s32)(boardX[slot] + halfSize) << 2,
+            (s32)(boardY[slot] + (otherIndex * halfSize) + bob) << 2,
+            G_TX_RENDERTILE, 0, 0, step, step);
+        gDPPipeSync(gfx++);
+      }
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  BuildDynamicTextures(&gfx);
+
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+
+  gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
+  if (g_ChosenPlayerCount == 1) {
+    for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
+      gDPLoadTextureBlock(gfx++,
+          ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
+              (index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
+              ~7,
+          G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(gfx++, MODE_BANNER_LEFT << 2,
+          (MODE_BANNER_TOP + (index * MENU_BANNER_STRIP_HEIGHT)) << 2,
+          (MODE_BANNER_LEFT + SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH) << 2,
+          (MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
+              (index * MENU_BANNER_STRIP_HEIGHT))
+              << 2,
+          G_TX_RENDERTILE, 0, 0,
+          (MENU_BANNER_WIDTH << 10) / SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH,
+          TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+  } else {
+    for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
+      gDPLoadTextureBlock(gfx++,
+          ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
+              (index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
+              ~7,
+          G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(gfx++, MODE_BANNER_LEFT << 2,
+          (MODE_BANNER_TOP + (index * MENU_BANNER_STRIP_HEIGHT)) << 2,
+          (MODE_BANNER_LEFT + MODE_BANNER_SHOWN_WIDTH) << 2,
+          (MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
+              (index * MENU_BANNER_STRIP_HEIGHT))
+              << 2,
+          G_TX_RENDERTILE, 0, 0,
+          (MENU_BANNER_WIDTH << 10) / MODE_BANNER_SHOWN_WIDTH, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+  labelIndex =
+      D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+  gDPLoadTextureBlock_4b(gfx++,
+      ((u32)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET +
+          (labelIndex * MODE_LABEL_IMAGE_SIZE)) &
+          ~7,
+      G_IM_FMT_CI, MODE_LABEL_WIDTH, MODE_LABEL_HEIGHT, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPPipeSync(gfx++);
+
+  labelOffset = &D_8022FA28_ovl_01[labelIndex];
+  labelX =
+      (g_ChosenPlayerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
+  gSPScisTextureRectangle(gfx++, (labelX - *labelOffset) << 2,
+      MODE_LABEL_TOP << 2, (labelX - *labelOffset + MODE_LABEL_WIDTH) << 2,
+      (MODE_LABEL_TOP + MODE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  gDPPipeSync(gfx++);
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
+  image = D_800FF180[0];
+  gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+  for (index = 0; index != g_ChosenPlayerCount; index++) {
+    if (D_800C1FF4[index] != NO_CONTROLLER_INDEX) {
+      position[0] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
+      position[1] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
+      gDPLoadTextureBlock(gfx++,
+          ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+              (D_800C1FF8[index] * CONTROLLER_ICON_IMAGE_SIZE)) &
+              ~7,
+          G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(gfx++, position[0] << 2, position[1] << 2,
+          (position[0] + CONTROLLER_ICON_SIZE) << 2,
+          (position[1] + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  image = D_800FF180[1];
+  gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+  for (index = 0; index != g_ChosenPlayerCount; index++) {
+    position[0] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
+    position[1] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
+    if (D_800C1FF4[index] == NO_CONTROLLER_INDEX) {
+      gDPLoadTextureBlock_4b(gfx++,
+          ((u32)image + PALETTED_TEXELS_OFFSET +
+              ((index + PLAYER_LABEL_COMPUTER_FIRST) *
+                  PLAYER_LABEL_IMAGE_SIZE)) &
+              ~7,
+          G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    } else {
+      gDPLoadTextureBlock_4b(gfx++,
+          ((u32)image + PALETTED_TEXELS_OFFSET +
+              (index * PLAYER_LABEL_IMAGE_SIZE)) &
+              ~7,
+          G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    }
+
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (position[0] + PLAYER_LABEL_OFFSET_X) << 2,
+        (position[1] + PLAYER_LABEL_OFFSET_Y) << 2,
+        (position[0] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH) << 2,
+        (position[1] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT) << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+  }
+
+  func_8021C200_ovl_01(&gfx, MODE_ARROW_GAP, MODE_ARROW_Y);
+
+  if ((g_ChosenPlayerCount == 1) &&
+      (D_8022BEBC_ovl_01[0][D_801323A0.modeChoice] == MODE_ICON_TOURNAMENT)) {
+    badgeCount = 0;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+      for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+        if (save->unk990.birdieBadgeCounts[courseIndex][holeIndex] > 0) {
+          badgeCount++;
+        }
+      }
+    }
+
+    countShift = 0;
+    if (badgeCount < 10) {
+      countShift = WON_COUNT_DIGIT_WIDTH;
+    }
+
+    if ((badgeCount >= 10) && (badgeCount < 100)) {
+      countShift = 0;
+    }
+
+    if (badgeCount >= 100) {
+      countShift = -WON_COUNT_DIGIT_WIDTH;
+    }
+
+    func_80207E28_ovl_01(
+        &gfx, D_800FC898, WON_COUNT_ICON_X + countShift, WON_COUNT_ICON_Y);
+    gDPPipeSync(gfx++);
+    func_80210DF4_ovl_01(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
+        badgeCount, MENU_NUMBER_TIMES);
+    gDPPipeSync(gfx++);
+  }
+
+  if ((g_ChosenPlayerCount == 1) &&
+      (D_8022BEBC_ovl_01[0][D_801323A0.modeChoice] == MODE_ICON_RING_SHOT)) {
+    starCount = 0;
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT;
+        courseIndex++) {
+      for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+        if (save->hasRingShotStar[courseIndex][holeIndex] > 0) {
+          starCount++;
+        }
+      }
+    }
+
+    countShift = 0;
+    if (starCount < 10) {
+      countShift = WON_COUNT_DIGIT_WIDTH;
+    }
+
+    /* This tests the badge count, which is zero here, for the star count */
+    if ((starCount >= 10) && (badgeCount < 100)) {
+      countShift = 0;
+    }
+
+    if (starCount >= 100) {
+      countShift = -WON_COUNT_DIGIT_WIDTH;
+    }
+
+    func_802081E8_ovl_01(
+        &gfx, WON_COUNT_ICON_X + countShift, WON_COUNT_ICON_Y, 1, FALSE);
+    gDPPipeSync(gfx++);
+    func_80210DF4_ovl_01(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y, starCount,
+        MENU_NUMBER_TIMES);
+    gDPPipeSync(gfx++);
+  }
+
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_801FE4D0_ovl_01);
+#endif
 
 /* Nothing calls this */
 void func_802004A0_ovl_01(Gfx** displayListHead) {
@@ -1696,7 +2182,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_802081E8_ovl_01);
 #define SILVER_STAR_TILE 1
 
 extern s32 D_8022F884_ovl_01[STAR_FRAME_COUNT]; /* The silver star's frames */
-extern void* D_800FF180[2];
 
 void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
   EncodedAsset asset;
