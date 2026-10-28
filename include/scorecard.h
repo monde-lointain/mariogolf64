@@ -78,6 +78,8 @@ typedef struct Scorecard {
 
 /* The scorecard overlay's state, which TallySkins also keeps its skins in */
 extern Scorecard g_Scorecard;
+/* A SCORECARD_* state of scorecard.c */
+extern s32 g_ScorecardState;
 
 /* Values of Scorecard.placeChange */
 enum PlaceChange {

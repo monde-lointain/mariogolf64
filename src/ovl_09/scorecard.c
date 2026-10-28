@@ -90,8 +90,6 @@ enum ScorecardState {
 #define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
 #define THREE_PAGE_COUNT 3
 
-extern s32 g_ScorecardState;
-
 void SetFramebufferCount(s32 count);
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page);
 
