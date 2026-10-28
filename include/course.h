@@ -18,8 +18,8 @@
 #define COURSE_RECORD_DRIVING_RANGE 8
 
 /*
- * g_CourseIndex numbers the main courses from 0, then the mini-golf ones,
- * which share a record three at a time, from MINI_GOLF_COURSE_INDEX. From
+ * GameState.courseIndex numbers the main courses from 0, then the mini-golf
+ * ones, which share a record three at a time, from MINI_GOLF_COURSE_INDEX. From
  * DRIVING_RANGE_COURSE_INDEX on, courses use the driving range's record.
  */
 #define MINI_GOLF_COURSE_INDEX 6
@@ -59,8 +59,11 @@ typedef struct RingShotHole {
   /* 0x1 */ u8 holeIndex;
 } RingShotHole; /* size = 0x2 */
 
+/*
+ * g_GameState.courseIndex under a symbol of its own, which the routines
+ * that read the field alone need to match
+ */
 extern s32 g_CourseIndex;
-extern s32 g_HoleIndex;
 extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];
 extern char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE];
 /* The par of the hole being played */

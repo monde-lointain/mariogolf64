@@ -72,7 +72,6 @@ extern s32 D_80104F88;
 extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern u8 D_800FE330;
-extern s32 D_801B60B4;
 extern s8 D_800FBDB8;
 extern s32 D_800C3094;
 extern s8 D_800C3098;
@@ -232,9 +231,9 @@ void SetUpPlayers(void) {
   s32 hole;
   s32 slot;
 
-  if (g_Scene == SCENE_PLAY_UNK13 || g_GameMode == GAME_MODE_UNK8 ||
+  if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
       g_GameState.unk31) {
-    if (g_GameMode == GAME_MODE_RING_SHOT) {
+    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       g_Players[0].unk1E[0] = 0;
       g_Players[0].teeOrder = 0;
       g_Players[0].characterIndex = D_80105F40->characterIndex;
@@ -372,13 +371,13 @@ void PlacePlayersOnTee(void) {
         g_Players[i].ringStates[ring] = 0;
       }
 
-      if (g_GameMode == GAME_MODE_RING_SHOT) {
+      if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
         g_Players[i].unk28 = 1;
       }
     }
   }
 
-  if (g_GameMode == GAME_MODE_RING_SHOT) {
+  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     InitRings();
   }
 }
@@ -403,17 +402,17 @@ void PlayContestMovies(void) {
     }
 
     if (!g_GameState.unk31 && i == g_GameState.playerCount) {
-      if (IsMarkedParFive(g_CourseIndex, g_HoleIndex) &&
+      if (IsMarkedParFive(g_GameState.courseIndex, g_GameState.holeIndex) &&
           GetContestWinner() != NO_CONTEST_WINNER) {
         StartMovie(MOVIE_LONGEST_DRIVE);
       }
 
-      if (IsParThree(g_CourseIndex, g_HoleIndex) &&
+      if (IsParThree(g_GameState.courseIndex, g_GameState.holeIndex) &&
           GetContestWinner() != NO_CONTEST_WINNER) {
         StartMovie(MOVIE_NEAREST_PIN);
       }
 
-      if (g_GameMode == GAME_MODE_TOURNAMENT && RecordDrive()) {
+      if (g_GameState.gameMode == GAME_MODE_TOURNAMENT && RecordDrive()) {
         StartMovie(MOVIE_DRIVE_RECORD);
       }
 
@@ -434,8 +433,8 @@ s32 func_8005FCB8(void) {
   }
 
   if (!g_GameState.unk31) {
-    if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-        g_GameMode == GAME_MODE_CLUB_SLOTS) {
+    if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+        g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
       if (!GetGroupHoleResult(NULL)) {
         return FALSE;
       }
@@ -450,8 +449,8 @@ s32 func_8005FCB8(void) {
       return i == g_GameState.playerCount;
     }
 
-    if (g_GameMode == GAME_MODE_MATCH_GAME ||
-        g_GameMode == GAME_MODE_GET_CHARACTER) {
+    if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+        g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
       if (!GetMatchHoleResult(0, 1)) {
         return FALSE;
       }
@@ -506,8 +505,8 @@ void SetNextTeeOrder(void) {
   s32 j;
 
   if (!g_GameState.unk31 &&
-      (g_GameMode == GAME_MODE_SKINS_MATCH ||
-          g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+      (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+          g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
     if (GetGroupHoleResult(results) != GROUP_HOLE_WON) {
       for (i = 0; i < g_GameState.playerCount; i++) {
         orders[i] = g_Players[i].teeOrder;
@@ -575,7 +574,7 @@ s32 func_80060190(s32 strokes) {
     case -1:
       return 0x83;
     case 0:
-      if (g_GameMode == GAME_MODE_RING_SHOT) {
+      if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
         return 0x84;
       }
 
@@ -588,9 +587,9 @@ s32 func_80060190(s32 strokes) {
 /* Sets play up to replay a super shot record */
 void LoadSuperShotReplay(PlayRecord* record) {
   D_800FEDD8[0] = *record;
-  g_GameMode = record->gameMode;
-  g_CourseIndex = record->courseIndex;
-  g_HoleIndex = record->holeIndex;
+  g_GameState.gameMode = record->gameMode;
+  g_GameState.courseIndex = record->courseIndex;
+  g_GameState.holeIndex = record->holeIndex;
   D_800FE330 = record->strokeCount;
   SetUpPlayers();
   osSyncPrintf("SetSuperShotReplay\n");
@@ -599,9 +598,9 @@ void LoadSuperShotReplay(PlayRecord* record) {
 /* Sets play up for the Ring Shot hole of a record */
 void LoadRingShotRecord(RingShotRecord* record) {
   D_80105F40[0] = *record;
-  g_GameMode = GAME_MODE_RING_SHOT;
-  g_CourseIndex = record->courseIndex;
-  g_HoleIndex = record->holeIndex;
+  g_GameState.gameMode = GAME_MODE_RING_SHOT;
+  g_GameState.courseIndex = record->courseIndex;
+  g_GameState.holeIndex = record->holeIndex;
   D_800FE330 = record->strokeCount;
   SetUpPlayers();
 }
@@ -644,18 +643,19 @@ s32 HasWonFinalChallenge(void) {
   TournamentStanding* standing;
   s32 i;
 
-  if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+  if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     if (GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER) {
       if ((s8)g_Players[1].characterIndex == CHARACTER_BOWSER) {
         return TRUE;
       }
     }
-  } else if (g_GameMode == GAME_MODE_TOURNAMENT) {
-    if (g_CourseIndex == COURSE_RECORD_BOO_VALLEY ||
-        g_CourseIndex == COURSE_RECORD_MARIOS_STAR) {
+  } else if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
+    if (g_GameState.courseIndex == COURSE_RECORD_BOO_VALLEY ||
+        g_GameState.courseIndex == COURSE_RECORD_MARIOS_STAR) {
       firstHole = GetFirstHoleIndex();
       RankTournament(COURSE_HOLE_COUNT, 0,
-          GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0), D_801B60B4);
+          GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0),
+          g_GameState.unk2C);
       for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
         standing = &g_TournamentStandings[i];
         if (standing->contestantId == PLAYER_CONTESTANT &&
@@ -681,7 +681,6 @@ extern s8 g_WasMetalMarioUnlocked;
 extern s8 g_HadEveryRingShotStar;
 extern s8 g_RingShotCourseOpenedAtStart;
 extern s8 D_800C3068;
-extern s32 g_IsSuddenDeath;
 void func_80241800();
 void func_80242384();
 s32 func_80241FF0();
@@ -814,10 +813,10 @@ void func_8005DDAC(void);
 #define AUTO_ADVANCE_FRAMES 10
 #define AUTO_ADVANCE_RESULTS_FRAMES 90
 
-/* Whether the round has played its last hole, once g_HoleIndex has moved past
- * it */
+/* Whether the round has played its last hole, once g_GameState.holeIndex has
+ * moved past it */
 #define HAS_PLAYED_LAST_HOLE() \
-  (g_HoleIndex == GetFirstHoleIndex() + GetRoundHoleCount())
+  (g_GameState.holeIndex == GetFirstHoleIndex() + GetRoundHoleCount())
 #define IS_A_PRESSED() (g_MergedController.pressedButtons & A_BUTTON)
 /* Whether the Ring Shot hole has just earned the last star, which rolls the
  * staff */
@@ -874,7 +873,7 @@ void UpdatePlay(void) {
   g_MergedController.heldButtons = 0;
   g_MergedController.pressedButtons = 0;
   g_MergedController.repeatedButtons = 0;
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if (g_Players[i].controllerIndex < MAXCONTROLLERS) {
       g_MergedController.buttons |=
           g_ControllerStates[g_Players[i].controllerIndex].buttons;
@@ -927,7 +926,7 @@ void UpdatePlay(void) {
           g_GameState.unk0 = GAME_STATE_HOLE_INTRO;
           func_801FDA04();
           SetGameFlag(GAME_FLAG_HOLE_LOADED);
-          if (g_GameMode == GAME_MODE_RING_SHOT) {
+          if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
             if (GetWipeKind() == WIPE_CLOSING) {
               StartWipe(WIPE_OPENING_FAST);
             }
@@ -943,11 +942,11 @@ void UpdatePlay(void) {
           g_PlayStateFrameCount = 0;
         } else {
           g_PlayStateFrameCount++;
-          if (g_GameMode == GAME_MODE_TRAINING) {
+          if (g_GameState.gameMode == GAME_MODE_TRAINING) {
             if (g_IsModuleAlive[MODULE_UNK21] &&
                 func_80241FF0(g_MergedController.pressedButtons,
                     g_MergedController.repeatedButtons) == HOLE_MENU_RELOAD) {
-              LoadWipeShape(g_CourseIndex);
+              LoadWipeShape(g_GameState.courseIndex);
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               if (GetWipeProgress() == WIPE_OPEN_PROGRESS) {
                 StartWipe(WIPE_CLOSING);
@@ -956,12 +955,12 @@ void UpdatePlay(void) {
               g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
               repeat = TRUE;
             }
-          } else if (g_GameMode == GAME_MODE_RING_SHOT && !g_GameState.unk31 &&
-              g_IsModuleAlive[MODULE_UNK21]) {
+          } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
+              !g_GameState.unk31 && g_IsModuleAlive[MODULE_UNK21]) {
             result = func_80241DF0(g_MergedController.pressedButtons,
                 g_MergedController.repeatedButtons);
             if (result == HOLE_MENU_RELOAD) {
-              LoadWipeShape(g_CourseIndex);
+              LoadWipeShape(g_GameState.courseIndex);
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               func_80242384(FALSE);
               g_GameState.unk0 = result;
@@ -974,7 +973,7 @@ void UpdatePlay(void) {
       case GAME_STATE_HOLE_INTRO:
         g_IsPlayStateBackedUp = 0;
         nuGfxDisplayOn();
-        if (g_GameMode == GAME_MODE_TRAINING) {
+        if (g_GameState.gameMode == GAME_MODE_TRAINING) {
           if (g_IsModuleAlive[MODULE_UNK21]) {
             result = func_80241FF0(g_MergedController.pressedButtons,
                 g_MergedController.repeatedButtons);
@@ -983,7 +982,7 @@ void UpdatePlay(void) {
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 StartWipe(WIPE_CLOSING);
                 repeat = TRUE;
-                LoadWipeShape(g_CourseIndex);
+                LoadWipeShape(g_GameState.courseIndex);
                 g_GameState.unk0 = result;
                 break;
               case HOLE_MENU_QUIT:
@@ -1003,7 +1002,8 @@ void UpdatePlay(void) {
                 break;
             }
           }
-        } else if (g_GameMode == GAME_MODE_RING_SHOT && !g_GameState.unk31) {
+        } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
+            !g_GameState.unk31) {
           if (g_IsModuleAlive[MODULE_UNK21]) {
             result = func_80241DF0(g_MergedController.pressedButtons,
                 g_MergedController.repeatedButtons);
@@ -1013,7 +1013,7 @@ void UpdatePlay(void) {
                 func_80242384(FALSE);
                 g_GameState.unk0 = result;
                 repeat = TRUE;
-                LoadWipeShape(g_CourseIndex);
+                LoadWipeShape(g_GameState.courseIndex);
                 break;
               case HOLE_MENU_QUIT:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
@@ -1033,7 +1033,7 @@ void UpdatePlay(void) {
                 break;
             }
           }
-        } else if (g_GameMode == GAME_MODE_CLUB_SLOTS) {
+        } else if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
           if (g_IsModuleAlive[MODULE_UNK26] &&
               (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
                   IS_A_PRESSED())) {
@@ -1048,7 +1048,7 @@ void UpdatePlay(void) {
         } else if (g_GameState.unk31) {
           if (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
               IS_A_PRESSED()) {
-            if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+            if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
               StartHoleFlyover();
               EndHoleIntro();
               g_GameState.unk0 = GAME_STATE_UNK6;
@@ -1064,7 +1064,7 @@ void UpdatePlay(void) {
             (g_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IS_A_PRESSED() ||
                 (func_8005F180() &&
                     g_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
-          if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+          if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
             StartHoleFlyover();
             EndHoleIntro();
             g_GameState.unk0 = GAME_STATE_UNK6;
@@ -1156,7 +1156,8 @@ void UpdatePlay(void) {
       case GAME_STATE_SLOTS:
         if (func_8024216C() == TRUE) {
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-          if (g_GameMode == GAME_MODE_CLUB_SLOTS && !g_GameState.unk30) {
+          if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS &&
+              !g_GameState.unk30) {
             func_80241EE8();
           }
 
@@ -1224,7 +1225,7 @@ void UpdatePlay(void) {
           UnloadOverlay(GetOverlayOfModule(MODULE_UNK8));
           SetNextTeeOrder();
           UpdateContest(TRUE);
-          if (g_GameMode == GAME_MODE_TOURNAMENT &&
+          if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
               g_Players[0].unk26 == TRUE) {
             RecordHoleStats();
             if (g_Players[0].strokeCount < g_HolePar) {
@@ -1233,8 +1234,8 @@ void UpdatePlay(void) {
           }
 
           if (!g_GameState.unk31 &&
-              (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                  g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+              (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+                  g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
             s8 results[MAX_PLAYER_COUNT];
 
             if (GetGroupHoleResult(results) != TRUE) {
@@ -1268,12 +1269,13 @@ void UpdatePlay(void) {
               g_Players[i].unk26 = 0;
             }
 
-            if (g_GameMode == GAME_MODE_TRAINING) {
+            if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               if (g_PlayExit == PLAY_EXIT_NONE) {
-                g_HoleIndex = (g_HoleIndex + 1) % COURSE_HOLE_COUNT;
+                g_GameState.holeIndex =
+                    (g_GameState.holeIndex + 1) % COURSE_HOLE_COUNT;
               }
             } else {
-              g_HoleIndex++;
+              g_GameState.holeIndex++;
             }
 
             if (g_GameState.gameMode == GAME_MODE_UNK8 || g_GameState.unk31) {
@@ -1291,7 +1293,7 @@ void UpdatePlay(void) {
               SetMenuBackdrop(MENU_BACKDROP_STILL);
             } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
               if (g_PlayExit == PLAY_EXIT_NONE) {
-                g_HoleIndex %= RING_SHOT_HOLE_COUNT;
+                g_GameState.holeIndex %= RING_SHOT_HOLE_COUNT;
                 func_8005D1E4();
               }
 
@@ -1402,7 +1404,7 @@ DIM_BACKDROP:
                 g_PlayExit = PLAY_EXIT_ROUND_OVER;
               } else if (HAS_PLAYED_LAST_HOLE()) {
                 if (IsGameFlagSet(GAME_FLAG_REPEAT_ROUND)) {
-                  g_HoleIndex = GetFirstHoleIndex();
+                  g_GameState.holeIndex = GetFirstHoleIndex();
                 } else {
                   g_PlayExit = PLAY_EXIT_ROUND_OVER;
                 }
@@ -1476,7 +1478,8 @@ DIM_BACKDROP:
               g_HoleEndStep = HOLE_END_STEP_SCORECARD;
               g_RoundHud.unk2 = 0;
               func_8024407C();
-              func_80241800(GetCourseRecordIndex(g_CourseIndex), g_HoleIndex);
+              func_80241800(GetCourseRecordIndex(g_GameState.courseIndex),
+                  g_GameState.holeIndex);
               func_80242334(0);
               if (g_PlayExit == PLAY_EXIT_NONE) {
                 StartLoaderThread();
@@ -1487,7 +1490,8 @@ DIM_BACKDROP:
           case HOLE_END_STEP_LOAD_SCORECARD:
             if (IsSubModuleLoaded()) {
               g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
-              func_80241800(GetCourseRecordIndex(g_CourseIndex), g_HoleIndex);
+              func_80241800(GetCourseRecordIndex(g_GameState.courseIndex),
+                  g_GameState.holeIndex);
               func_80242334(g_HoleResultsKind);
             }
 
@@ -1500,11 +1504,11 @@ DIM_BACKDROP:
 
             if (g_PlayExit == PLAY_EXIT_NONE) {
               if (!g_GameState.unk31 &&
-                  (g_GameMode == GAME_MODE_MATCH_GAME ||
-                      g_GameMode == GAME_MODE_GET_CHARACTER) &&
+                  (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+                      g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
                   HAS_PLAYED_LAST_HOLE()) {
-                g_HoleIndex = GetFirstHoleIndex();
-                g_IsSuddenDeath = TRUE;
+                g_GameState.holeIndex = GetFirstHoleIndex();
+                g_GameState.isSuddenDeath = TRUE;
               }
 
               StartLoaderThread();
@@ -1603,8 +1607,8 @@ DIM_BACKDROP:
                 g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
                 func_80242074();
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
-                if (g_GameMode == GAME_MODE_TOURNAMENT &&
-                    g_HoleIndex == TOURNAMENT_HALF_TURN_HOLE) {
+                if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
+                    g_GameState.holeIndex == TOURNAMENT_HALF_TURN_HOLE) {
                   ShowHalfTurn();
                 } else {
                   StartWipe(WIPE_CLOSING);
@@ -1707,7 +1711,7 @@ DIM_BACKDROP:
               SetScreenEffect(SCREEN_EFFECT_NONE, 0);
               StartHoleIntro();
               StartHoleCamerasAndSong();
-              if (g_GameMode == GAME_MODE_RING_SHOT) {
+              if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
                 func_80242384(TRUE);
               }
 

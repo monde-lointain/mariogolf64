@@ -1724,7 +1724,7 @@ void OpenControlsScreen(void) {
   EncodedAsset encodedAsset;
   void* picture;
 
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     picture = AllocMemory(
         OpenEncodedAsset(MINI_GOLF_CONTROLS_PICTURE, &encodedAsset));
     f_PanelImage = picture;

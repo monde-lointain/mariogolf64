@@ -132,48 +132,50 @@ s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex) {
 }
 
 s32 GetCourseRecordIndex(void) {
-  if (g_GameMode == GAME_MODE_RING_SHOT) {
-    return g_RingShotHoles[g_CourseIndex][g_HoleIndex].courseRecordIndex;
+  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+    return g_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
+        .courseRecordIndex;
   }
 
-  if (g_IsMiniGolf) {
-    return (((g_CourseIndex - MINI_GOLF_COURSE_INDEX) /
+  if (g_GameState.isMiniGolf) {
+    return (((g_GameState.courseIndex - MINI_GOLF_COURSE_INDEX) /
                 MINI_GOLF_COURSES_PER_RECORD) &
                1) |
         COURSE_RECORD_LUIGIS_GARDEN;
   }
 
-  if (g_CourseIndex >= DRIVING_RANGE_COURSE_INDEX) {
+  if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
     return COURSE_RECORD_DRIVING_RANGE;
   }
 
-  return g_CourseIndex;
+  return g_GameState.courseIndex;
 }
 
 s32 GetHoleRecordIndex(void) {
-  if (g_GameMode == GAME_MODE_RING_SHOT) {
-    return g_RingShotHoles[g_CourseIndex][g_HoleIndex].holeIndex;
+  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+    return g_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
+        .holeIndex;
   }
 
-  if (g_CourseIndex >= DRIVING_RANGE_COURSE_INDEX) {
+  if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
     return 0;
   }
 
-  return g_HoleIndex;
+  return g_GameState.holeIndex;
 }
 
 /* GetHoleRecordIndex as if outside Ring Shot */
 s32 GetHoleIndexInRecord(void) {
-  if (g_CourseIndex >= DRIVING_RANGE_COURSE_INDEX) {
+  if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
     return 0;
   }
 
-  return g_HoleIndex;
+  return g_GameState.holeIndex;
 }
 
 /* With g_IsDebugEnabled set, the first hole counts too */
 s32 IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex) {
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     return FALSE;
   }
 
@@ -186,7 +188,7 @@ s32 IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex) {
 }
 
 s32 IsParThree(s32 courseRecordIndex, s32 holeIndex) {
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     return FALSE;
   }
 

@@ -92,7 +92,6 @@ extern s8 f_SceneSkyBlendPercents[];
 extern s32 f_SkyHorizonColor[RGB_CHANNEL_COUNT];
 extern s32 f_CourseSkyImageAssets[];
 
-extern s32 D_801B609C;
 extern s32 f_IsPrimitiveDepthSet;
 extern s32 f_MenuBackdrop;
 extern s32 f_HudAnimationFramesLeft;
@@ -227,10 +226,10 @@ void SetFramebufferCount(s32 count);
 /* Sets up a single-player game of the hole behind the title screen */
 void SetUpTitleHole(void) {
   memset(&g_GameState, 0, sizeof(GameState));
-  g_HoleIndex = TITLE_HOLE_INDEX;
-  g_CourseIndex = TITLE_COURSE_INDEX;
-  D_801B609C = 0;
-  g_GameMode = GAME_MODE_UNK12;
+  g_GameState.holeIndex = TITLE_HOLE_INDEX;
+  g_GameState.courseIndex = TITLE_COURSE_INDEX;
+  g_GameState.unk14 = 0;
+  g_GameState.gameMode = GAME_MODE_UNK12;
   g_HoleConditions.isRaining = FALSE;
   g_HoleConditions.windSpeed =
       (rand() & TITLE_WIND_SPEED_MASK) * TITLE_WIND_SPEED_STEP;
@@ -239,7 +238,7 @@ void SetUpTitleHole(void) {
   g_LightPitch = TITLE_LIGHT_PITCH;
   g_LightYaw = TITLE_LIGHT_YAW;
   SetGameFlag(GAME_FLAG_UNK7);
-  g_PlayerCount = 1;
+  g_GameState.playerCount = 1;
   StopLoaderThread();
   StartLoaderThread();
   SetFramebufferCount(TITLE_FRAMEBUFFER_COUNT);

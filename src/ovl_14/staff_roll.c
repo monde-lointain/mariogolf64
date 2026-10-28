@@ -276,7 +276,6 @@ typedef struct StaffRollEasedView {
 
 extern u8 g_StaffTextRomStart[];
 extern u8* g_ShadowTexture;
-extern s32 D_801B609C;
 
 extern StaffRollImage f_StaffRollImage;
 extern StaffText* f_StaffText;
@@ -663,10 +662,10 @@ void LoadStaffRoll(void) {
   f_BillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
   InitBillboardManager(f_BillboardHeap, BILLBOARD_HEAP_SIZE);
   memset(&g_GameState, 0, sizeof(g_GameState));
-  g_CourseIndex = COURSE_YOSHIS_ISLAND;
-  g_HoleIndex = STAFF_ROLL_HOLE_INDEX;
-  D_801B609C = 0;
-  g_GameMode = GAME_MODE_STAFF_ROLL;
+  g_GameState.courseIndex = COURSE_YOSHIS_ISLAND;
+  g_GameState.holeIndex = STAFF_ROLL_HOLE_INDEX;
+  g_GameState.unk14 = 0;
+  g_GameState.gameMode = GAME_MODE_STAFF_ROLL;
   g_HoleConditions.isRaining = FALSE;
   g_HoleConditions.windSpeed =
       (rand() & STAFF_ROLL_WIND_STEP_MASK) * STAFF_ROLL_WIND_STEP;
@@ -681,7 +680,7 @@ void LoadStaffRoll(void) {
   D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
   D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
   SetGameFlag(GAME_FLAG_HOLE_LOADED);
-  g_PlayerCount = 1;
+  g_GameState.playerCount = 1;
   StopLoaderThread();
   StartLoaderThread();
   SetFramebufferCount(STAFF_ROLL_FRAMEBUFFER_COUNT);

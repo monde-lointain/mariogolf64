@@ -768,7 +768,7 @@ void DrawMatchPage(Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     DrawScorecardFace(&gfx, g_Scorecard.x + MATCH_FACE_LEFT,
         MATCH_FACE_TOP + (i * MATCH_ROW_SPACING), i);
   }
@@ -1279,7 +1279,7 @@ void DrawBetsPage(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     DrawSmallFace(&gfx, g_Scorecard.x + BET_FACE_LEFT,
         BET_FACE_TOP + (i * GRID_ROW_HEIGHT), i, TRUE);
   }
@@ -1370,7 +1370,7 @@ void DrawBetsPage(Gfx** displayListHead) {
   }
 
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     total = 0;
     column = 0;
     for (j = 0, left = 0; j != BET_COUNT; j++) {
@@ -1995,10 +1995,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * hole numbers, a row of pars and a row for each player
  */
 #define IS_MATCH_PLAY_MODE() \
-  (g_GameMode == GAME_MODE_MATCH_GAME || \
-      g_GameMode == GAME_MODE_GET_CHARACTER || \
-      g_GameMode == GAME_MODE_SKINS_MATCH || \
-      g_GameMode == GAME_MODE_CLUB_SLOTS)
+  (g_GameState.gameMode == GAME_MODE_MATCH_GAME || \
+      g_GameState.gameMode == GAME_MODE_GET_CHARACTER || \
+      g_GameState.gameMode == GAME_MODE_SKINS_MATCH || \
+      g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)
 #define FRONT_NINE_TOP 57
 #define BACK_NINE_TOP 137
 /* Columns 0 to 7 of scoresPanelImage fill a panel, and columns 10 to 17 edge it
@@ -2343,15 +2343,15 @@ void DrawScoresPage(Gfx** displayListHead) {
     }
   }
 
-  if (g_PlayerCount == 2 && !IS_MATCH_PLAY_MODE()) {
-    for (i = 0; i != g_PlayerCount; i++) {
+  if (g_GameState.playerCount == 2 && !IS_MATCH_PLAY_MODE()) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
         handicapStrokes[i * 2][hole] = GetHandicapOffset(
             GetCourseRecordIndex(), hole, g_Players[i].handicap);
       }
     }
   } else {
-    for (i = 0; i != g_PlayerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
         handicapStrokes[i][hole] = GetHandicapOffset(
             GetCourseRecordIndex(), hole, g_Players[i].handicap);
@@ -2545,7 +2545,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  switch (g_PlayerCount) {
+  switch (g_GameState.playerCount) {
     case 2:
       if (IS_MATCH_PLAY_MODE()) {
         rowSpacing = PLAYER_ROW_SPACING;
@@ -2584,7 +2584,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     case 3:
     case 4:
       rowSpacing = PLAYER_ROW_SPACING;
-      for (i = 0; i != g_PlayerCount; i++) {
+      for (i = 0; i != g_GameState.playerCount; i++) {
         LoadLargePalette(&gfx, g_PlayerFacePalettes[i]);
         LoadTextureBlock(&gfx, g_PlayerFaceImages[i], G_IM_FMT_CI, G_IM_SIZ_8b,
             FACE_SIZE, SMALL_FACE_HEIGHT, 0, G_TX_MIRROR, 0, MIRRORED_FACE_MASK,
@@ -2631,14 +2631,14 @@ void DrawScoresPage(Gfx** displayListHead) {
   isBadgesShown = FALSE;
   isOverShown = FALSE;
   isPuttsShown = FALSE;
-  if (g_PlayerCount == 1) {
+  if (g_GameState.playerCount == 1) {
     isOverShown = TRUE;
-    isBadgesShown = g_GameMode == GAME_MODE_TOURNAMENT;
-    isPuttsShown = !g_IsMiniGolf;
+    isBadgesShown = g_GameState.gameMode == GAME_MODE_TOURNAMENT;
+    isPuttsShown = !g_GameState.isMiniGolf;
   }
 
-  if (g_PlayerCount == 2 && !IS_MATCH_PLAY_MODE()) {
-    if (g_IsMiniGolf) {
+  if (g_GameState.playerCount == 2 && !IS_MATCH_PLAY_MODE()) {
+    if (g_GameState.isMiniGolf) {
       isOverShown = TRUE;
     } else {
       isPuttsShown = TRUE;
@@ -2647,7 +2647,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if (!(g_SkippedNines & FRONT_NINE_SKIPPED)) {
       extraTop = EXTRA_ROW_TOP;
       if (isPuttsShown) {
@@ -2740,14 +2740,14 @@ void DrawScoresPage(Gfx** displayListHead) {
   }
 
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     standing = 0;
     colorIndex = PAR_COLOR;
     backTotal = 0;
     frontTotal = 0;
     shownHoleCount = g_Scorecard.content.holeIndex;
-    if (g_GameMode == GAME_MODE_MATCH_GAME ||
-        g_GameMode == GAME_MODE_GET_CHARACTER) {
+    if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+        g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
       /* A hole shows once both players have finished it */
       if (g_Players[i].unk26 != 0) {
         shownHoleCount =
@@ -2800,8 +2800,8 @@ void DrawScoresPage(Gfx** displayListHead) {
             backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
             g_PrintBuffer);
       }
-    } else if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-        g_GameMode == GAME_MODE_CLUB_SLOTS) {
+    } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+        g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
       /* Strokes here count the skins won on the hole */
       SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
       for (hole = firstHole; hole != shownHoleCount; hole++) {
@@ -3122,7 +3122,7 @@ void DrawBetTallies(Gfx** displayListHead) {
   LoadSmallPalette(&gfx, 0, g_Scorecard.digitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx, g_Scorecard.digitsImage + PALETTED_TEXELS_OFFSET,
       G_IM_FMT_CI, DIGIT_GLYPH_SIZE, DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-  for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
+  for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     total = 0;
     column = BET_TALLY_LEFT;
     for (betIndex = 0; betIndex != BET_COUNT; betIndex++) {

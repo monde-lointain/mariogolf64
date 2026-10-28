@@ -109,7 +109,6 @@ extern u8 f_Unk14Values[9];
 extern s8 f_StockCurves[CLUB_SET_COUNT];
 extern Unk20 f_PutterTestShot;
 extern s32 f_ClubChoiceDelay;
-extern s8 g_IsMiniGolf;
 
 /*
  * Each set's clubs' parameters for each shot mode. WriteClubParameters
@@ -678,7 +677,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->unk0 = 70;
     }
 
-    g_IsMiniGolf = FALSE;
+    g_GameState.isMiniGolf = FALSE;
     GenerateClub((setIndex * CLUB_SET_SIZE) + type);
   }
 }
@@ -880,7 +879,7 @@ s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo* info) {
     return CLUB_SURFACE_ALL;
   }
 
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     return CLUB_SURFACE_GREEN;
   }
 

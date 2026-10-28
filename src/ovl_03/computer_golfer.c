@@ -103,7 +103,6 @@ extern u8 f_PlanThreadStackEnd[];
 extern s32 f_HoleTargetToPar;
 /* The strokes the golfer aims to take on the hole */
 extern s32 f_HoleStrokeTarget;
-extern s32 D_801B60B4;
 /* Where the planned shot aims */
 extern CoursePoint f_PlanTarget;
 
@@ -1213,11 +1212,11 @@ s32 ChooseHoleStrokeTarget(void) {
     return 0;
   }
 
-  if (g_GameMode == GAME_MODE_TRAINING) {
+  if (g_GameState.gameMode == GAME_MODE_TRAINING) {
     return g_HolePar;
   }
 
-  if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+  if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     lossCount = GetSaveData()
                     ->unk990
                     .unkAF0[(s8)g_Players[0].characterIndex]
@@ -1229,7 +1228,7 @@ s32 ChooseHoleStrokeTarget(void) {
                          [(s8)g_Players[f_Shot.playerIndex].characterIndex]
                   .unk1;
     if ((winBits & WIN_COUNT_MASK) < (lossCount & WIN_COUNT_MASK)) {
-      luckyBonus = D_801B60B4 & 3;
+      luckyBonus = g_GameState.unk2C & 3;
     }
 
     osSyncPrintf("win%d lose%d lucky%d\n", winBits, lossCount, luckyBonus);
@@ -1238,7 +1237,7 @@ s32 ChooseHoleStrokeTarget(void) {
   targetScore = luckyBonus +
       f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unkD +
       f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex]
-          .targetScores[g_CourseIndex];
+          .targetScores[g_GameState.courseIndex];
   osSyncPrintf(
       "Char Index = %d\n", (s8)g_Players[f_Shot.playerIndex].characterIndex);
   osSyncPrintf("TargetScore = %d\n", targetScore);
@@ -1442,8 +1441,8 @@ s32 ChooseHoleStrokeTarget(void) {
   }
 
   if (g_GameState.betRates[BET_UNK4] > 0 ||
-      g_GameMode == GAME_MODE_SKINS_MATCH ||
-      g_GameMode == GAME_MODE_CLUB_SLOTS) {
+      g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+      g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
     targetLeftToPar = 0;
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
       if (holes[index] < g_GameState.holeIndex) {
@@ -1474,12 +1473,13 @@ s32 ChooseHoleStrokeTarget(void) {
   osSyncPrintf("\n");
   osSyncPrintf("OS => ");
   for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-    osSyncPrintf(" %d", (s8)g_CourseRecords[g_CourseIndex].holes[index].par);
+    osSyncPrintf(
+        " %d", (s8)g_CourseRecords[g_GameState.courseIndex].holes[index].par);
   }
 
   osSyncPrintf("\n");
   for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-    if (holes[index] == g_HoleIndex) {
+    if (holes[index] == g_GameState.holeIndex) {
       /* The comma is in the original's string */
       osSyncPrintf("++ %d\n,", strokes[index]);
       return strokes[index];
@@ -1487,7 +1487,7 @@ s32 ChooseHoleStrokeTarget(void) {
   }
 
   /* Reads past the holes; the original has it */
-  return (s8)g_CourseRecords[g_CourseIndex].holes[index].par;
+  return (s8)g_CourseRecords[g_GameState.courseIndex].holes[index].par;
 }
 
 #define NO_ROUTE_POINT (-1)
@@ -1591,7 +1591,7 @@ s32 PlanRoute(s8* route) {
 s32 GetLandingRating(u32 surfaceKind) {
   s32 rating;
 
-  if (g_CourseIndex == COURSE_MARIOS_STAR) {
+  if (g_GameState.courseIndex == COURSE_MARIOS_STAR) {
     if (surfaceKind == SURFACE_KIND_ROCK) {
       return LANDING_FAIR;
     }

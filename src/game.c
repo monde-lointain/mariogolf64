@@ -1488,7 +1488,7 @@ s32 DrawGame(void) {
             SetCharacterHilite(matrices);
             ConvertMatrixToFixed(matrices->viewingF, &matrices->viewing);
             target = courseView->lookAt;
-            if (g_IsMiniGolf) {
+            if (g_GameState.isMiniGolf) {
               billboardRise =
                   (courseView->lookAt[1] - courseView->eye[1]) * 0.125f;
             } else {
@@ -2446,7 +2446,7 @@ s32 IsSubModuleLoaded(void) {
 /* The game modes are still known only by number */
 void RequestSubModule(void) {
   g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case 3:
     case 9:
       g_PendingSubModuleId = SUB_MODULE_ALTERNATE;

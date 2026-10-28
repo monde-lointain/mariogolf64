@@ -158,7 +158,7 @@ void UpdateClubPanelImages(void) {
           OpenEncodedAsset(PANEL_ASSET_NORMAL, &panelAsset);
           break;
         case SHOT_MODE_POWER:
-          if (g_GameMode == GAME_MODE_TRAINING) {
+          if (g_GameState.gameMode == GAME_MODE_TRAINING) {
             OpenEncodedAsset(PANEL_ASSET_POWER_UNK3, &panelAsset);
           } else {
             OpenEncodedAsset(PANEL_ASSET_POWER, &panelAsset);
@@ -213,7 +213,7 @@ void UpdateClubPanelImages(void) {
             OpenEncodedAsset(PANEL_ASSET_NORMAL, &frameAsset);
             break;
           case SHOT_MODE_POWER:
-            if (g_GameMode == GAME_MODE_TRAINING) {
+            if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               OpenEncodedAsset(PANEL_ASSET_POWER_UNK3, &frameAsset);
             } else {
               OpenEncodedAsset(PANEL_ASSET_POWER, &frameAsset);

@@ -19,6 +19,7 @@
 #include "libc.h"
 #include "math_util.h"
 #include "pin.h"
+#include "save.h"
 #include "scene.h"
 #include "sound.h"
 
@@ -114,8 +115,6 @@ extern CoursePoint f_ReactionSpot;
 extern s32 f_ReactionSpotRoughness;
 extern s8 f_HasReactionSpot;
 
-extern s32 g_IsSuddenDeath;
-
 s32 GetAnimationFrameCount(u32 slotIndex, s32 id);
 void FrameMarioReaction(u32 slotIndex, CameraView* view);
 void FrameWarioReaction(u32 slotIndex, CameraView* view);
@@ -139,7 +138,7 @@ void SpawnTear(u32 slotIndex, s32 pointId, f32 heading);
  */
 #define IsReactionViewLow() \
   (IsGameFlagSet(GAME_FLAG_UNK7F) || \
-      ((g_Scene != SCENE_STAFF_ROLL) && (g_IsSuddenDeath == 1)))
+      ((g_Scene != SCENE_STAFF_ROLL) && (g_GameState.isSuddenDeath == 1)))
 
 /*
  * Whether a spot this rough should become the reaction spot: it does when

@@ -493,10 +493,7 @@ extern s16 D_800C200C[MAX_PLAYER_COUNT];
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern s8 D_801B5634;
-extern s32 D_801B60B4;
-extern u8 D_801B60C4;
 extern u8 D_8022FF03_ovl_01;
-extern s8 g_IsClubTournament;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 
 s32 GetClubTournamentCourse(void);
@@ -509,7 +506,7 @@ s32 GetClubTournamentCourse(void);
  * without a controller. Holding a C button previews its palette in
  * D_8022FF09, and holding R, or Z or L, sets D_8022FF07 or D_8022FF08. Once a
  * club tournament's choice is made, the closing wipe ends the menus and
- * D_801B60B4, which RankTournament takes, gets the tournament code.
+ * g_GameState.unk2C, which RankTournament takes, gets the tournament code.
  */
 
 /*
@@ -550,7 +547,7 @@ s32 func_80209D50_ovl_01(
 
     if (GetWipeProgress() == 0) {
       g_MenuScreen = MENU_SCREEN_EXIT;
-      D_801B60B4 = (g_TournamentCode[0] << (2 * BITS_PER_BYTE)) |
+      g_GameState.unk2C = (g_TournamentCode[0] << (2 * BITS_PER_BYTE)) |
           (g_TournamentCode[1] << BITS_PER_BYTE) | g_TournamentCode[2];
     }
 
@@ -680,7 +677,7 @@ s32 func_80209D50_ovl_01(
       index = character - FIRST_IMPORTED_CHARACTER;
       character = g_ImportedCharacters[index].character;
       g_ImportedCharacters[index].isChosen = TRUE;
-      D_801B60C4 = TRUE;
+      g_GameState.unk3C = TRUE;
       D_800C200C[playerIndex] = memory->characterColumns[playerIndex];
       if (D_800C200C[playerIndex] < 0) {
         D_800C200C[playerIndex] = 0;
@@ -903,7 +900,7 @@ s32 func_80209D50_ovl_01(
 
       if ((u8)canChooseMarked == FALSE) {
         if (g_MenuScreen == MENU_SCREEN_UNK24) {
-          g_IsClubTournament = FALSE;
+          g_GameState.isClubTournament = FALSE;
           g_MenuScreen = MENU_SCREEN_CLUB_TOURNAMENT;
         } else {
           g_MenuScreen = MENU_SCREEN_TITLE;

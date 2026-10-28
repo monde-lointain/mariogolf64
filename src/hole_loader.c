@@ -51,7 +51,7 @@
 #define LIGHT_YAW_STEP_PER_HOLE 0x5000
 #define HOLE_LIGHT_PITCH 0x3000
 
-/* A g_GameMode value whose purpose is not yet known */
+/* A g_GameState.gameMode value whose purpose is not yet known */
 #define GAME_MODE_UNK13 13
 
 /* GetHoleRandom's generator, a linear congruential one */
@@ -138,9 +138,6 @@ extern OSThread f_LoaderThread;
 extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
 extern s8 D_80104B6D;
-extern s8 D_801B60B8;
-extern s32 g_IsSuddenDeath;
-extern s32 D_801B60B4;
 extern s32 f_CycledCupIndex;
 /* The cup index after the chosen one; nothing reads it */
 extern s8 f_NextCupIndex;
@@ -630,7 +627,7 @@ void ShrinkMiniGolfHolePoints(void) {
   s32 axis;
   s32 index;
 
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     g_MiniGolfScale[AXIS_X] = 1.0f / MINI_GOLF_SHRINK_X;
     g_MiniGolfScale[AXIS_Y] = 1.0f / MINI_GOLF_SHRINK_Y;
     g_MiniGolfScale[AXIS_Z] = 1.0f / MINI_GOLF_SHRINK_Z;
@@ -651,8 +648,8 @@ void ShrinkMiniGolfHolePoints(void) {
 /* Reads the current hole's asset files, then shrinks its points for mini-golf
  */
 void LoadHole(void) {
-  osSyncPrintf(
-      "putter%d:course%d:hole%d\n", g_IsMiniGolf, g_CourseIndex, g_HoleIndex);
+  osSyncPrintf("putter%d:course%d:hole%d\n", g_GameState.isMiniGolf,
+      g_GameState.courseIndex, g_GameState.holeIndex);
   BuildHole(GetCourseRecordIndex(), GetHoleRecordIndex());
   ShrinkMiniGolfHolePoints();
 }
@@ -679,7 +676,7 @@ void ShrinkMiniGolfHole(void) {
   s32 vertexIndex;
   Vtx* vertex;
 
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     g_MiniGolfScale[AXIS_X] = 1.0f / MINI_GOLF_SHRINK_X;
     g_MiniGolfScale[AXIS_Y] = 1.0f / MINI_GOLF_SHRINK_Y;
     g_MiniGolfScale[AXIS_Z] = 1.0f / MINI_GOLF_SHRINK_Z;
@@ -767,9 +764,9 @@ s32 ChooseHoleConditions(void) {
   s32 courseRecordIndex;
 
   D_80104B6D = -1;
-  if (g_Scene == SCENE_PLAY_UNK13 || g_GameMode == GAME_MODE_UNK8 ||
+  if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
       g_GameState.unk31 != 0) {
-    if (g_GameMode == GAME_MODE_RING_SHOT) {
+    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       D_800BA9D8 = D_80105F40;
     } else {
       D_800BA9D8 = D_800FEDD8;
@@ -778,14 +775,15 @@ s32 ChooseHoleConditions(void) {
     return;
   }
 
-  if (D_801B60B8 != 0) {
+  if (g_GameState.unk30 != 0) {
     return;
   }
 
-  if (g_GameMode != GAME_MODE_UNK12 && g_GameMode != GAME_MODE_UNK13) {
+  if (g_GameState.gameMode != GAME_MODE_UNK12 &&
+      g_GameState.gameMode != GAME_MODE_UNK13) {
     /* The first hole, mini-golf and GAME_MODE_TRAINING stay dry */
-    if (g_GameState.holeIndex != 0 && g_GameMode != GAME_MODE_TRAINING &&
-        !g_GameState.isMiniGolf) {
+    if (g_GameState.holeIndex != 0 &&
+        g_GameState.gameMode != GAME_MODE_TRAINING && !g_GameState.isMiniGolf) {
       if ((rand() & RAIN_DRAW_MASK) < DRY_DRAW_COUNT) {
         g_HoleConditions.isRaining = FALSE;
       } else {
@@ -836,11 +834,11 @@ s32 ChooseHoleConditions(void) {
             g_GameState.holeIndex * LIGHT_YAW_STEP_PER_HOLE;
       }
 
-      if (g_IsMiniGolf) {
+      if (g_GameState.isMiniGolf) {
         g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
       }
 
-      if (g_IsSuddenDeath) {
+      if (g_GameState.isSuddenDeath) {
         g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_SUDDEN_DEATH;
       }
     }
@@ -859,21 +857,22 @@ s32 ChooseHoleConditions(void) {
     }
   }
 
-  if (D_801B60B8 != 0) {
+  if (g_GameState.unk30 != 0) {
     return;
   }
 
   attemptCount = 0;
-  if (g_GameMode == GAME_MODE_RING_SHOT) {
+  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     cupIndex = 0;
-  } else if (g_IsMiniGolf) {
-    cupIndex =
-        (g_CourseIndex - MINI_GOLF_COURSE_INDEX) % MINI_GOLF_COURSES_PER_RECORD;
-  } else if (g_GameMode == GAME_MODE_TRAINING) {
+  } else if (g_GameState.isMiniGolf) {
+    cupIndex = (g_GameState.courseIndex - MINI_GOLF_COURSE_INDEX) %
+        MINI_GOLF_COURSES_PER_RECORD;
+  } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
     cupIndex = f_CycledCupIndex++ & (CUP_POSITION_COUNT - 1);
   } else {
     /* The cups are drawn three, three, two and one times in nine */
-    random = (u32)GetHoleRandom(D_801B60B4, g_HoleIndex) >> CUP_DRAW_SHIFT;
+    random = (u32)GetHoleRandom(g_GameState.unk2C, g_GameState.holeIndex) >>
+        CUP_DRAW_SHIFT;
     random %= CUP_DRAW_COUNT;
     if (random < CUP_DRAW_FIRST_END) {
       cupIndex = 0;
@@ -973,7 +972,7 @@ void RunLoaderThread(void) {
       osSyncPrintf("Wow! Polychar is alive\n");
     }
 
-    if (IsGameFlagSet(GAME_FLAG_UNK51) && g_HoleIndex == 0) {
+    if (IsGameFlagSet(GAME_FLAG_UNK51) && g_GameState.holeIndex == 0) {
       SetGameFlag(GAME_FLAG_UNK12);
     } else {
       ClearGameFlag(GAME_FLAG_UNK12);
@@ -997,7 +996,7 @@ void RunLoaderThread(void) {
     }
 
     if (courseRecordIndex == COURSE_RECORD_KOOPA_PARK &&
-        g_HoleIndex == KOOPA_PARK_UNK69_HOLE_INDEX) {
+        g_GameState.holeIndex == KOOPA_PARK_UNK69_HOLE_INDEX) {
       SetGameFlag(GAME_FLAG_UNK69);
     } else {
       ClearGameFlag(GAME_FLAG_UNK69);

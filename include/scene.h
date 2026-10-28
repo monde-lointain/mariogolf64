@@ -112,9 +112,6 @@ extern s32 g_SubModuleState;
 /* A mode in which every hole is built from the same hole assets */
 #define GAME_MODE_UNK12 12
 
-/* The kind of game the player chose, such as a tournament or a match */
-extern u32 g_GameMode;
-
 /*
  * The scene that last led to the title screen. The title screen fades in from
  * white after the opening and from black otherwise.

@@ -40,14 +40,14 @@ s32 GetLastHoleIndex(void) {
 }
 
 s32 IsOnDrivingRange(void) {
-  return g_CourseIndex == DRIVING_RANGE_COURSE_INDEX;
+  return g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX;
 }
 
 /*
  * The strokes that a handicap takes off a score on the hole: one for each
  * full 18, and one more on the holes whose handicap is within the rest.
  * GetCourseRecordIndex ignores the courseIndex passed to it and reads
- * g_CourseIndex.
+ * g_GameState.courseIndex.
  */
 s32 GetHandicapOffset(s32 courseIndex, s32 holeIndex, s32 handicap) {
   return (-handicap / COURSE_HOLE_COUNT) -
@@ -61,8 +61,8 @@ s32 GetHandicapOffset(s32 courseIndex, s32 holeIndex, s32 handicap) {
  * compare */
 s32 GetNetScore(s32 playerIndex) {
   return g_Players[playerIndex].strokeCount +
-      GetHandicapOffset(
-          g_CourseIndex, g_HoleIndex, g_Players[playerIndex].handicap);
+      GetHandicapOffset(g_GameState.courseIndex, g_GameState.holeIndex,
+          g_Players[playerIndex].handicap);
 }
 
 /* Numbers each course's holes from 1 to 18, keeping the handicaps' order */
@@ -87,7 +87,8 @@ void RenumberHoleHandicaps(void) {
   }
 }
 
-/* Compares the holes before g_HoleIndex by strokes, without handicaps */
+/* Compares the holes before g_GameState.holeIndex by strokes, without handicaps
+ */
 s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
   s32 holesAfterCurrent;
   s32 lead;
@@ -99,7 +100,7 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
     return MATCH_STANDING_DECIDING_HOLE;
   }
 
-  holesAfterCurrent = holesAfterCurrent - g_HoleIndex - 1;
+  holesAfterCurrent = holesAfterCurrent - g_GameState.holeIndex - 1;
   for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex;
       holeIndex++) {
     if (g_Players[playerIndex].holes[holeIndex].strokes <
@@ -131,8 +132,8 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
 }
 
 /*
- * Compares the holes before g_HoleIndex by net score. With isSuddenDeath set,
- * the first hole that either player wins decides.
+ * Compares the holes before g_GameState.holeIndex by net score. With
+ * isSuddenDeath set, the first hole that either player wins decides.
  */
 s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
   s32 endHoleIndex;
@@ -165,7 +166,7 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
     return MATCH_SIDE_NONE;
   }
 
-  holesAfterCurrent = endHoleIndex - g_HoleIndex - 1;
+  holesAfterCurrent = endHoleIndex - g_GameState.holeIndex - 1;
   for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex;
       holeIndex++) {
     playerScore = g_Players[playerIndex].holes[holeIndex].strokes +
@@ -345,7 +346,7 @@ s32 GetHolingOutStakes(s32 playerIndex) {
   s32 otherIndex;
 
   stakes = HOLING_OUT_STAKES_NONE;
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case 2:
     case 4:
       opponentIndex = playerIndex ^ 1;

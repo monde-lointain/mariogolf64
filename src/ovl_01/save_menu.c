@@ -161,7 +161,6 @@ extern u8 D_80230B4C_ovl_01;
 extern u8 D_80230B4D_ovl_01;
 extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
-extern s8 D_801B60B8;
 extern s32 D_80230B88_ovl_01[SAVE_MENU_MODE_COUNT];
 extern SaveMenuModeImage D_80230B5C_ovl_01[];
 extern void** D_8023B680_ovl_01;
@@ -180,7 +179,6 @@ extern u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][SAVE_MENU_FILE_SIZE];
 extern void* D_8023BD7C_ovl_01;
 extern u8 D_801052E8;
 extern s32 D_800FE334;
-extern s8 D_801B60B9;
 
 s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward);
 s16 func_80220DF8_ovl_01(void);
@@ -266,7 +264,7 @@ void func_8021F79C_ovl_01(void) {
         }
 
         g_MenuScreen = MENU_SCREEN_EXIT;
-        D_801B60B9 = 2;
+        g_GameState.unk31 = 2;
         SetGameFlag(GAME_FLAG_UNK1E);
       }
     } else if (GetWipeKind() == WIPE_NONE || D_801052E8 != 1) {
@@ -1523,7 +1521,7 @@ s32 func_80222CDC_ovl_01(void) {
   g_GameState.unk0 = 1;
   SetGameFlag(GAME_FLAG_UNK1E);
   D_800BA9D8 = game->unk8;
-  D_801B60B8 = 2;
+  g_GameState.unk30 = 2;
   return 0;
 }
 

@@ -101,7 +101,7 @@
 #define PRIZE_TOP_TEN 10
 #define PRIZE_TOP_TWENTY 20
 
-/* The results' images. g_IsClubTournament swaps in another set. */
+/* The results' images. g_GameState.isClubTournament swaps in another set. */
 #define RESULTS_BACKDROP_ASSET 0x6A0
 #define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
 #define NINTENDO_BADGE_ASSET 0x949
@@ -242,7 +242,6 @@ extern s32 f_BannerX;
 extern s32 f_BannerY;
 extern s32 f_TournamentOpenCourseCount;
 extern u16 D_800C2074[];
-extern s32 D_801B60B4;
 
 /* The images of the trophy a course's tournament gives its top three */
 typedef struct TrophyAssets {
@@ -327,7 +326,7 @@ void OpenRoundResults(s32 request) {
       f_PointsToNextCourse = \
           GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints; \
       f_PointsEarned = 0; \
-      for (i_ = 0; i_ != g_PlayerCount; i_++) { \
+      for (i_ = 0; i_ != g_GameState.playerCount; i_++) { \
         if (f_PlayerPoints[i_] >= 0) { \
           counted_++; \
           f_PointsEarned += f_PlayerPoints[i_]; \
@@ -378,10 +377,10 @@ void LoadRoundResults(void) {
     g_Players[0].points += 9999;
   }
 
-  f_ResultsBackdropImage = AllocMemory(
-      OpenEncodedAsset(g_IsClubTournament ? CLUB_TOURNAMENT_BACKDROP_ASSET
-                                          : RESULTS_BACKDROP_ASSET,
-          &asset));
+  f_ResultsBackdropImage = AllocMemory(OpenEncodedAsset(
+      g_GameState.isClubTournament ? CLUB_TOURNAMENT_BACKDROP_ASSET
+                                   : RESULTS_BACKDROP_ASSET,
+      &asset));
   ReadEncodedAsset(f_ResultsBackdropImage, &asset);
   f_ResultsHandImage =
       AllocMemory(OpenEncodedAsset(PRESSING_HAND_ASSET, &asset));
@@ -391,7 +390,7 @@ void LoadRoundResults(void) {
   f_PlaceDigitsImage =
       AllocMemory(OpenEncodedAsset(PLACE_DIGITS_ASSET, &asset));
   ReadEncodedAsset(f_PlaceDigitsImage, &asset);
-  if (g_IsClubTournament) {
+  if (g_GameState.isClubTournament) {
     f_NintendoBadgeImage =
         AllocMemory(OpenEncodedAsset(NINTENDO_BADGE_ASSET, &asset));
     ReadEncodedAsset(f_NintendoBadgeImage, &asset);
@@ -427,7 +426,7 @@ void LoadRoundResults(void) {
     ReadAssetFile(D_8022571C_ovl_00, size, &file);
   }
 
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     f_PlayerPortraitImages[i] = AllocMemory(OpenEncodedAsset(
         g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &asset));
     ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
@@ -445,9 +444,9 @@ void LoadRoundResults(void) {
     }
   }
 
-  if (!g_IsClubTournament) {
-    if (g_GameMode == GAME_MODE_MATCH_GAME ||
-        g_GameMode == GAME_MODE_GET_CHARACTER) {
+  if (!g_GameState.isClubTournament) {
+    if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+        g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
       f_ResultsPlacesImage =
           AllocMemory(OpenEncodedAsset(MATCH_PLACES_IMAGE_ASSET, &asset));
       ReadEncodedAsset(f_ResultsPlacesImage, &asset);
@@ -474,30 +473,30 @@ void LoadRoundResults(void) {
     }
   }
 
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     f_PortraitAnimations[i] = 0;
     f_PortraitFrames[i] = -1;
     f_PortraitTimers[i] = 0;
   }
 
-  if (g_IsClubTournament) {
-    for (i = 0; i != g_PlayerCount; i++) {
+  if (g_GameState.isClubTournament) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       f_PlayerResults[i] =
           GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
     }
   } else {
-    switch (g_GameMode) {
+    switch (g_GameState.gameMode) {
       case GAME_MODE_STROKE:
       case GAME_MODE_SPEED_GOLF:
-        for (i = 0; i != g_PlayerCount; i++) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
           f_PlayerResults[i] =
               GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
         }
 
-        for (i = 0; i != g_PlayerCount; i++) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
           rank = &f_PlayerRanks[i];
           *rank = 0;
-          for (j = 0; j != g_PlayerCount; j++) {
+          for (j = 0; j != g_GameState.playerCount; j++) {
             if (i != j && f_PlayerResults[j] < f_PlayerResults[i]) {
               (*rank)++;
             }
@@ -510,7 +509,7 @@ void LoadRoundResults(void) {
       case GAME_MODE_GET_CHARACTER:
         f_PlayerResults[1] = 0;
         f_PlayerResults[0] = 0;
-        for (i = GetFirstHoleIndex(); i != g_HoleIndex; i++) {
+        for (i = GetFirstHoleIndex(); i != g_GameState.holeIndex; i++) {
           if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
             f_PlayerResults[0]++;
             f_PlayerResults[1]--;
@@ -549,14 +548,14 @@ void LoadRoundResults(void) {
       case GAME_MODE_SKINS_MATCH:
       case GAME_MODE_CLUB_SLOTS:
         TallySkins(GetFirstHoleIndex() + GetRoundHoleCount());
-        for (i = 0; i != g_PlayerCount; i++) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
           f_PlayerResults[i] = g_RoundHud.skinsTotals[i];
         }
 
-        for (i = 0; i != g_PlayerCount; i++) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
           rank = &f_PlayerRanks[i];
           *rank = 0;
-          for (j = 0; j != g_PlayerCount; j++) {
+          for (j = 0; j != g_GameState.playerCount; j++) {
             if (i != j && f_PlayerResults[i] < f_PlayerResults[j]) {
               (*rank)++;
             }
@@ -571,7 +570,8 @@ void LoadRoundResults(void) {
         ReadEncodedAsset(D_80225708_ovl_00, &asset);
         f_PlayerResults[0] =
             GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
-        RankTournament(COURSE_HOLE_COUNT, 0, f_PlayerResults[0], D_801B60B4);
+        RankTournament(
+            COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.unk2C);
         for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
           if (g_TournamentStandings[i].contestantId == -1) {
             f_PlayerRanks[0] = g_TournamentStandings[i].place & PLACE_MASK;
@@ -581,31 +581,33 @@ void LoadRoundResults(void) {
 
         if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
           f_PrizePoints =
-              f_TournamentPrizes[g_CourseIndex][f_PlayerRanks[0] - 1];
+              f_TournamentPrizes[g_GameState.courseIndex][f_PlayerRanks[0] - 1];
         } else if (f_PlayerRanks[0] <= PRIZE_TOP_TEN) {
-          f_PrizePoints = f_TournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT];
+          f_PrizePoints =
+              f_TournamentPrizes[g_GameState.courseIndex][TROPHY_PLACE_COUNT];
         } else if (f_PlayerRanks[0] <= PRIZE_TOP_TWENTY) {
-          f_PrizePoints =
-              f_TournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT + 1];
+          f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex]
+                                            [TROPHY_PLACE_COUNT + 1];
         } else {
-          f_PrizePoints =
-              f_TournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT + 2];
+          f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex]
+                                            [TROPHY_PLACE_COUNT + 2];
         }
 
         f_PrizeShown = f_PrizePoints;
         if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-          f_TrophyImage = AllocMemory(
-              OpenEncodedAsset(f_TrophyAssets[g_CourseIndex].image, &asset));
+          f_TrophyImage = AllocMemory(OpenEncodedAsset(
+              f_TrophyAssets[g_GameState.courseIndex].image, &asset));
           ReadEncodedAsset(f_TrophyImage, &asset);
-          OpenAssetFile(
-              f_TrophyAssets[g_CourseIndex].palette + f_PlayerRanks[0] - 1,
+          OpenAssetFile(f_TrophyAssets[g_GameState.courseIndex].palette +
+                  f_PlayerRanks[0] - 1,
               &file);
           size = GetAssetFileSize(&file);
           f_TrophyPalette = AllocMemory(size);
           ReadAssetFile(f_TrophyPalette, size, &file);
         }
 
-        f_PointsEarned = f_PlayerPoints[0] * f_CoursePointRates[g_CourseIndex];
+        f_PointsEarned =
+            f_PlayerPoints[0] * f_CoursePointRates[g_GameState.courseIndex];
         f_PointsShown = f_PointsEarned;
         f_OpenCourseCount = CountOpenCourses(save->coursePoints);
         f_TournamentOpenCourseCount = f_OpenCourseCount;
@@ -625,7 +627,7 @@ void LoadRoundResults(void) {
     }
   }
 
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if ((s8)g_Players[i].characterIndex >= CHARACTER_KID &&
         f_PlayerPoints[i] > 0) {
       AddGameBoyExperience(
@@ -633,7 +635,7 @@ void LoadRoundResults(void) {
     }
   }
 
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case GAME_MODE_STROKE:
       PlaySong(RESULTS_SONG, 0);
       break;
@@ -817,7 +819,7 @@ void FreeRoundResults(void) {
     FreeMemory(&f_ResultsHandImage);
     FreeMemory(&f_DigitsImage);
     FreeMemory(&f_PlaceDigitsImage);
-    if (g_IsClubTournament) {
+    if (g_GameState.isClubTournament) {
       FreeMemory(&f_NintendoBadgeImage);
       FreeMemory(&f_ResultsCourseImage);
     } else {
@@ -832,14 +834,14 @@ void FreeRoundResults(void) {
       FreeMemory(&D_8022571C_ovl_00);
     }
 
-    for (i = 0; i != g_PlayerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       FreeMemory(&f_PlayerPortraitImages[i]);
       FreeMemory(&f_PlayerPortraitPalettes[i]);
     }
 
-    if (!g_IsClubTournament) {
-      if (g_GameMode == GAME_MODE_MATCH_GAME ||
-          g_GameMode == GAME_MODE_GET_CHARACTER) {
+    if (!g_GameState.isClubTournament) {
+      if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+          g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
         FreeMemory(&f_ResultsPlacesImage);
         FreeMemory(&D_80225708_ovl_00);
         FreeMemory(&f_NameplateImage);
@@ -848,7 +850,7 @@ void FreeRoundResults(void) {
         FreeMemory(&f_ResultsPlacesImage);
       }
 
-      switch (g_GameMode) {
+      switch (g_GameState.gameMode) {
         case GAME_MODE_STROKE:
         case GAME_MODE_UNK1:
         case GAME_MODE_TRAINING:
@@ -1683,10 +1685,10 @@ s32 UpdateRoundResults(void) {
       f_ResultsSlide += -f_ResultsSlide / 2;
       break;
     case RESULTS_SHOWN:
-      if (g_IsClubTournament) {
+      if (g_GameState.isClubTournament) {
         isDone = ShowScorePassword();
       } else {
-        switch (g_GameMode) {
+        switch (g_GameState.gameMode) {
           case GAME_MODE_STROKE:
           case GAME_MODE_UNK6:
           case GAME_MODE_SPEED_GOLF:
@@ -1960,7 +1962,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
       BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
   DrawLargeTextSlot(&gfx, BANNER_TEXT_SLOT);
   if (f_BannerKind == BANNER_KIND_TOURNAMENT_PLACE) {
-    course = g_CourseIndex;
+    course = g_GameState.courseIndex;
     if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
       f_TrophyShineFrame = (f_TrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
       if (f_TallySpeed == FAST_TALLY_SPEED ||
@@ -2152,7 +2154,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
 
       switch (f_ResultsUnk78) {
         case TOURNAMENT_STEP_START:
-          record = &GetSaveData()->unkE98[g_CourseIndex];
+          record = &GetSaveData()->unkE98[g_GameState.courseIndex];
           f_ResultsUnk78 = TOURNAMENT_STEP_SHOWN;
           if (record->roundCount <= 0 ||
               record->bestScore >= f_PlayerResults[0]) {
@@ -2419,7 +2421,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
     case UNLOCK_NOTICE_KIND_NONE:
       if (f_OpenCourseCount < COURSE_COUNT &&
           f_PointsToNextCourse + f_PointsEarned == 0) {
-        for (i = 0; i != g_PlayerCount; i++) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
           StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
         }
 
@@ -2450,9 +2452,9 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
             f_ResultsUnk78 = POINTS_STEP_WAITING;
           }
 
-          for (i = 0; i != g_PlayerCount; i++) {
+          for (i = 0; i != g_GameState.playerCount; i++) {
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
-            for (j = 0; j != g_PlayerCount; j++) {
+            for (j = 0; j != g_GameState.playerCount; j++) {
               if (i != j && f_PlayerRanks[j] < f_PlayerRanks[i]) {
                 StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, i);
               }
@@ -2577,7 +2579,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
     case UNLOCK_NOTICE_KIND_NONE:
       if (f_OpenCourseCount < COURSE_COUNT &&
           f_PointsToNextCourse + f_PointsEarned == 0) {
-        for (i = 0; i != g_PlayerCount; i++) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
           StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
         }
 
@@ -2676,7 +2678,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
         case MATCH_STEP_RECORD_RESULT:
           f_ResultsUnk78 = MATCH_STEP_WAITING;
           f_ResultsUnk7C = 0;
-          if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+          if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
             /* Beating a still locked opponent unlocks them, except those that
              * other feats unlock */
             if (f_PlayerRanks[0] == MATCH_RANK_WON &&
@@ -2907,7 +2909,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
   s32 betShift = FOUR_DIGIT_BET_SHIFT;
   s32 i;
 
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
       betShift = 0;
     }
@@ -2928,8 +2930,8 @@ void DrawPlayersResults(Gfx** displayListHead) {
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_BETS);
     DrawResultsLabel(&gfx, f_ResultsSlide + 248,
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
-    for (i = 0; i != g_PlayerCount; i++) {
-      if (g_PlayerCount >= 2) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
+      if (g_GameState.playerCount >= 2) {
         DrawPlaceIcon(&gfx, f_ResultsSlide + 18,
             f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
             f_PlayerRanks[i]);
@@ -2944,8 +2946,8 @@ void DrawPlayersResults(Gfx** displayListHead) {
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
     DrawResultsLabel(&gfx, f_ResultsSlide + 234,
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
-    for (i = 0; i != g_PlayerCount; i++) {
-      if (g_PlayerCount >= 2) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
+      if (g_GameState.playerCount >= 2) {
         DrawRank(&gfx, f_ResultsSlide + 32,
             f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
             f_PlayerRanks[i]);
@@ -2962,9 +2964,9 @@ void DrawPlayersResults(Gfx** displayListHead) {
       f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   if (f_HasBets) {
-    for (i = 0; i != g_PlayerCount; i++) {
-      if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-          g_GameMode == GAME_MODE_CLUB_SLOTS) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
+      if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+          g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
       } else if (f_PlayerResults[i] == 0) {
         sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
@@ -2990,9 +2992,9 @@ void DrawPlayersResults(Gfx** displayListHead) {
           g_PrintBuffer);
     }
   } else {
-    for (i = 0; i != g_PlayerCount; i++) {
-      if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-          g_GameMode == GAME_MODE_CLUB_SLOTS) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
+      if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+          g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
       } else if (f_PlayerResults[i] == 0) {
         sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
@@ -3063,7 +3065,7 @@ void DrawMatchResults(Gfx** displayListHead) {
   s32 holeCount;
   s32 i;
 
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
       betShift = 0;
     }
@@ -3103,7 +3105,7 @@ void DrawMatchResults(Gfx** displayListHead) {
   LoadNibbleTextureBlock(&gfx,
       f_MatchStandingWordsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       STANDING_WORDS_SIZE, STANDING_WORDS_SIZE, 0, 0, 0, 0, 0, 0, 0);
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_PlayerResults[i] > 0) {
       if (f_PlayerResults[i] < 10) {
         standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
@@ -3119,7 +3121,7 @@ void DrawMatchResults(Gfx** displayListHead) {
     }
   }
 
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_PlayerResults[i] > 0) {
       standingRow = STANDING_WORD_UP_ROW;
     } else if (f_PlayerResults[i] < 0) {
@@ -3149,7 +3151,7 @@ void DrawMatchResults(Gfx** displayListHead) {
   LoadNibbleTextureBlock(&gfx,
       f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_HasBets) {
       /* An even match draws only the word */
       if (f_PlayerResults[0] != 0) {
@@ -3457,7 +3459,7 @@ void DrawRoundResults(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   LoadLargePalette(&gfx, f_ResultsBackdropImage + IMAGE_HEADER_SIZE);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  if (g_IsClubTournament) {
+  if (g_GameState.isClubTournament) {
     for (i = 0; i != CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx,
           f_ResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
@@ -3505,10 +3507,10 @@ void DrawRoundResults(Gfx** displayListHead) {
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
-  if (g_IsClubTournament) {
+  if (g_GameState.isClubTournament) {
     DrawClubTournamentResults(&gfx);
   } else {
-    switch (g_GameMode) {
+    switch (g_GameState.gameMode) {
       case GAME_MODE_SPEED_GOLF:
         DrawSpeedGolfResults(&gfx);
         break;
@@ -3532,7 +3534,7 @@ void DrawRoundResults(Gfx** displayListHead) {
     }
   }
 
-  if (!g_IsClubTournament) {
+  if (!g_GameState.isClubTournament) {
     titleX = (cosf(f_TitleBobAngle * 0.5f) * FINAL_RESULTS_TITLE_BOB) +
         FINAL_RESULTS_TITLE_X;
     titleY = (sinf(f_TitleBobAngle) * FINAL_RESULTS_TITLE_BOB) +
@@ -3572,7 +3574,7 @@ void DrawRoundResults(Gfx** displayListHead) {
     }
   }
 
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     AssetFile file;
     s32 unused[4];
 

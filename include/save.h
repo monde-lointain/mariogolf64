@@ -137,12 +137,13 @@ typedef struct Unk68 {
 
 /*
  * The current game's settings and place, which a saved game keeps for it
- * to be continued with. Code that reads one field alone also names some
- * of them on their own, such as g_GameMode, g_CourseIndex and g_HoleIndex.
+ * to be continued with. A few routines only match when they read a field
+ * under a symbol of its own, such as g_GameMode, g_CourseIndex and
+ * g_HoleIndex.
  */
 typedef struct GameState {
   /* 0x00 */ s32 unk0;
-  /* 0x04 */ u32 gameMode;
+  /* 0x04 */ u32 gameMode; /* A GAME_MODE_* value */
   /* 0x08 */ s32 playerCount;
   /* 0x0C */ s32 courseIndex;
   /* 0x10 */ s32 holeIndex;
@@ -158,8 +159,9 @@ typedef struct GameState {
   /* 0x31 */ s8 unk31;
   /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth */
   /* 0x39 */ u8 unk39;
-  /* 0x3A */ s8 isMiniGolf;
-  /* 0x3B */ s8 isClubTournament;
+  /* 0x3A */ s8 isMiniGolf; /* Keeps billboards near the course's edge, and
+                               tilts them less */
+  /* 0x3B */ s8 isClubTournament; /* Entered with a tournament code */
   /* 0x3C */ u8 unk3C;
   /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
   /* 0x3E */ s16

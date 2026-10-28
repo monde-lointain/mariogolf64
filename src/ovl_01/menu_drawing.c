@@ -1407,7 +1407,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
-    if (g_IsMiniGolf) {
+    if (g_GameState.isMiniGolf) {
       choice = g_MenuChoices.unk13;
       courseCount = MINI_GOLF_DISC_IMAGE_COUNT;
       angleStep = DEGREES_PER_TURN / MINI_GOLF_DISC_IMAGE_COUNT;
@@ -1467,7 +1467,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         bob = 0.0f;
       }
 
-      if (g_IsMiniGolf == TRUE) {
+      if (g_GameState.isMiniGolf == TRUE) {
         palette = D_801052C4[slot];
         /* Indexed as one row, as that matches the original better */
         texels =
@@ -1489,7 +1489,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
       }
 
-      if (!g_IsMiniGolf) {
+      if (!g_GameState.isMiniGolf) {
         if ((slot == (courseCount - 1)) &&
             (GetOpenCourseCount() < COURSE_COUNT)) {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -1520,7 +1520,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         stripOffset += COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT;
       }
 
-      if ((g_IsMiniGolf == TRUE) && (g_MenuChoices.unk13 == slot)) {
+      if ((g_GameState.isMiniGolf == TRUE) && (g_MenuChoices.unk13 == slot)) {
         if ((spin == 0) || (D_8022FD44_ovl_01 == 0.0f)) {
           D_8022FD44_ovl_01 = iconY[slot];
         }
@@ -1629,7 +1629,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    if ((MAP_CAMERA_MODE_TOP_BYTE == 0) && !g_IsMiniGolf) {
+    if ((MAP_CAMERA_MODE_TOP_BYTE == 0) && !g_GameState.isMiniGolf) {
       placeCount = 0;
       for (otherIndex = 0; otherIndex != TOURNAMENT_PLACE_COUNT; otherIndex++) {
         if (D_80105C38[D_801323A0.courseChoice].hasPlace[otherIndex]) {
@@ -1703,7 +1703,8 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
 
     func_8021BE88_ovl_01(&gfx);
     func_802047F0_ovl_01(&gfx);
-    if (!g_IsMiniGolf && (D_801323A0.courseChoice == (courseCount - 1)) &&
+    if (!g_GameState.isMiniGolf &&
+        (D_801323A0.courseChoice == (courseCount - 1)) &&
         (GetOpenCourseCount() < COURSE_COUNT)) {
       gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
       gDPPipeSync(gfx++);
@@ -1979,7 +1980,7 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  if (!g_IsMiniGolf) {
+  if (!g_GameState.isMiniGolf) {
     if (D_800FF4C0 == 1) {
       sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.courseChoice + 1,
           g_CourseRecords[D_801323A0.courseChoice].name);
@@ -1993,7 +1994,7 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
   }
 
   SetUpGradientTextDrawing(&gfx, 0);
-  if (g_IsMiniGolf == TRUE) {
+  if (g_GameState.isMiniGolf == TRUE) {
     stripIndex = g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX;
   } else {
     stripIndex = D_801323A0.courseChoice;

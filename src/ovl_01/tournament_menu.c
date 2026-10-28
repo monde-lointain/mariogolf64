@@ -189,7 +189,6 @@ extern s32 D_80231134_ovl_01; /* The tournament code byte being edited */
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC8;
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
-extern s32 D_801B60B4;
 extern s32 D_801B7070;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 s32 GetClubTournamentCourse(void);
@@ -1245,8 +1244,8 @@ void func_80229278_ovl_01(void) {
     }
 
     if (GetWipeProgress() == 0) {
-      D_801B60B4 = (g_TournamentCode[0] << 16) | (g_TournamentCode[1] << 8) |
-          g_TournamentCode[2];
+      g_GameState.unk2C = (g_TournamentCode[0] << 16) |
+          (g_TournamentCode[1] << 8) | g_TournamentCode[2];
       StartLoadingChosenHole();
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
@@ -1278,7 +1277,7 @@ void func_80229278_ovl_01(void) {
     PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     if (D_80230F80_ovl_01 == CLUB_CHOICE_YES) {
       PlaySound(SOUND_ENTER_TOURNAMENT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      g_IsClubTournament = TRUE;
+      g_GameState.isClubTournament = TRUE;
       g_ChosenPlayerCount = 1;
       if (func_8022BDB0_ovl_01()) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
@@ -1294,7 +1293,7 @@ void func_80229278_ovl_01(void) {
 
         StartLoadingChosenHole();
         D_801B7070 = 1;
-        g_PlayerCount = 1;
+        g_GameState.playerCount = 1;
         buttons = g_ControllerStates[0].buttons |
             g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
             g_ControllerStates[3].buttons;

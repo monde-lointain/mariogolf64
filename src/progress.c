@@ -17,14 +17,11 @@
 /* Any place past third, which no flag records */
 #define PLACE_UNPLACED 4
 
-extern s8 D_801B60C5;
-extern s32 D_801B60B4;
-
 void ShowBirdieBadgeCount(s32 badgeCount);
 
 /*
  * Counts a win or a loss in unkAF0[row][column], and saves. A win also sets
- * the top bit unless D_801B60C5 is set, and prints "Win Com Chara".
+ * the top bit unless g_GameState.saveCount is set, and prints "Win Com Chara".
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, s32 isWin) {
@@ -42,7 +39,7 @@ void RecordComCharacterResult(s32 row, s32 column, s32 isWin) {
     }
 
     value = count | (value & UNKAF0_FLAG);
-    if (!D_801B60C5) {
+    if (!g_GameState.saveCount) {
       value |= UNKAF0_FLAG;
     }
 
@@ -67,11 +64,13 @@ void AddBirdieBadge(void) {
   Unk990* unk990;
 
   unk990 = &GetSaveData()->unk990;
-  if (g_GameMode == GAME_MODE_TOURNAMENT) {
-    unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex]++;
-    if (unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex] >
-        MAX_SAVED_COUNT) {
-      unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex] = MAX_SAVED_COUNT;
+  if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
+    unk990->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex]++;
+    if (unk990->birdieBadgeCounts[g_GameState.courseIndex]
+                                 [g_GameState.holeIndex] > MAX_SAVED_COUNT) {
+      unk990
+          ->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] =
+          MAX_SAVED_COUNT;
     }
 
     TransferSaveData(GetSaveData(), TRUE);
@@ -89,8 +88,9 @@ void ReportBirdieBadgeCount(void) {
   s32 holeIndex;
 
   unk990 = &GetSaveData()->unk990;
-  if (g_GameMode == GAME_MODE_TOURNAMENT &&
-      unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex] == 0) {
+  if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
+      unk990->birdieBadgeCounts[g_GameState.courseIndex]
+                               [g_GameState.holeIndex] == 0) {
     badgeCount = 0;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
       for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
@@ -114,11 +114,11 @@ void RecordTournamentPlace(void) {
   s32 index;
   TournamentStanding* standing;
 
-  stats = &GetSaveData()->unkE98[g_CourseIndex];
+  stats = &GetSaveData()->unkE98[g_GameState.courseIndex];
   hasPlace = FALSE;
-  if (g_GameMode == GAME_MODE_TOURNAMENT) {
+  if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     RankTournament(GetLastHoleIndex() + 1, 0,
-        GetNetScoreToPar(GetLastHoleIndex() + 1, 0), D_801B60B4);
+        GetNetScoreToPar(GetLastHoleIndex() + 1, 0), g_GameState.unk2C);
     place = PLACE_UNPLACED;
     for (index = 0; index != TOURNAMENT_CONTESTANT_COUNT; index++) {
       standing = &g_TournamentStandings[index];

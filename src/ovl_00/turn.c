@@ -307,8 +307,6 @@ extern s8
     D_800C3068; /* Keeps the last heading for the next shot, in Training */
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
-/* g_GameState.currentPlayerIndex, under a symbol of its own */
-extern s32 D_801B60A8;
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
 extern s8 D_800C3098; /* Asks for the HUD to turn away when the next player is
                          picked */
@@ -389,7 +387,7 @@ void KeepAimCameraOnCourse(void) {
   f32 offset;
   f32 overshoot;
 
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     maxX = AIM_CAMERA_MINI_GOLF_MAX_X;
     maxZ = AIM_CAMERA_MINI_GOLF_MAX_Z;
   } else {
@@ -429,7 +427,7 @@ void KeepAimCameraOnCourse(void) {
         (fabsf(offset) - overshoot) / fabsf(offset);
   }
 
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     if (oldDistance < g_CurrentShot.aimCameraDistance) {
       if (g_TurnController.buttons & D_CBUTTONS) {
         g_CurrentShot.aimCameraDistance += AIM_CAMERA_MINI_GOLF_PUSH_STEP;
@@ -482,7 +480,7 @@ void PlaceShotCamera(void) {
     point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     point[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     heading = (u16)D_800C307A * BINARY_ANGLE_TO_RADIANS;
-    if (!g_IsMiniGolf) {
+    if (!g_GameState.isMiniGolf) {
       g_Cameras[0].view.lookAt[AXIS_X] =
           (point[AXIS_X] + (cosf(heading) * PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
@@ -1485,7 +1483,7 @@ void UpdateShotFlags(void) {
     D_800C3084 = SHOT_UNK3084_NO_IMPACT_POINT;
   }
 
-  isMiniGolf = &g_IsMiniGolf;
+  isMiniGolf = &g_GameState.isMiniGolf;
 
   if (*isMiniGolf) {
     D_800C3084 |= SHOT_UNK3084_NO_IMPACT_POINT;
@@ -1542,7 +1540,7 @@ void PickStartingClub(Unk800BA9D8* hole) {
   cupDistance = GetCupDistance(
       g_CurrentShot.ballPosition[AXIS_X] - hole->cupPosition[AXIS_X],
       g_CurrentShot.ballPosition[AXIS_Z] - hole->cupPosition[AXIS_Z]);
-  if (g_IsMiniGolf ||
+  if (g_GameState.isMiniGolf ||
       GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
     for (slot = 0; slot < clubCount; slot++) {
       if (!isUsable[slot]) {
@@ -1667,16 +1665,16 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
   u8* count;
 
   if ((s8)g_Players[playerIndex].unk1E[0] != 0 || g_GameState.unk31 ||
-      g_GameMode == GAME_MODE_TRAINING) {
+      g_GameState.gameMode == GAME_MODE_TRAINING) {
     return;
   }
 
-  if (g_GameMode == GAME_MODE_RING_SHOT ||
+  if (g_GameState.gameMode == GAME_MODE_RING_SHOT ||
       f_ShotFlightCount >= MAX_COUNTED_FLIGHT_COUNT) {
     return;
   }
 
-  if (g_IsMiniGolf && shotKind != SHOT_KIND_HOLE_IN_ONE) {
+  if (g_GameState.isMiniGolf && shotKind != SHOT_KIND_HOLE_IN_ONE) {
     return;
   }
 
@@ -1705,7 +1703,7 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
       points = 4;
       break;
     case SHOT_KIND_HOLE_IN_ONE:
-      if (g_IsMiniGolf) {
+      if (g_GameState.isMiniGolf) {
         points = 10;
       } else {
         points = 20;
@@ -1741,7 +1739,7 @@ s32 TallyCoursePoints(void) {
   s32 points;
   s32 total = 0;
 
-  for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
+  for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
     points = 0;
     for (shotKind = 0; shotKind < SHOT_KIND_COUNT; shotKind++) {
       points += GetShotKindPoints(playerIndex, shotKind);
@@ -1761,7 +1759,7 @@ void PrintCoursePoints(void) {
   s32 shotKind;
   s32 points;
 
-  for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
+  for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
     points = 0;
     for (shotKind = 0; shotKind < SHOT_KIND_COUNT; shotKind++) {
       points += GetShotKindPoints(playerIndex, shotKind);
@@ -1847,7 +1845,7 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
   LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_UNK5, &shot);
   D_80223EAC_ovl_00 += SHOT_PREVIEW_SCROLL_STEP;
   for (step = 0; step < D_80223EA0_ovl_00; step++) {
-    isMiniGolf = &g_IsMiniGolf;
+    isMiniGolf = &g_GameState.isMiniGolf;
     if (*isMiniGolf && !simulation.unk94) {
       break;
     }
@@ -2045,7 +2043,7 @@ s32 IsRecordableHoleOut(s32 playerIndex) {
       return FALSE;
     }
 
-    if (g_GameMode == GAME_MODE_TRAINING) {
+    if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       return FALSE;
     }
   }
@@ -2058,11 +2056,11 @@ s32 IsRecordableHoleOut(s32 playerIndex) {
     return FALSE;
   }
 
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     return FALSE;
   }
 
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case GAME_MODE_STROKE:
     case GAME_MODE_UNK1:
     case GAME_MODE_TRAINING:
@@ -2083,7 +2081,7 @@ s32 IsRecordableHoleOut(s32 playerIndex) {
 
 s32 IsRingShotRound(void) {
   if (!g_GameState.unk31) {
-    return g_GameMode == GAME_MODE_RING_SHOT;
+    return g_GameState.gameMode == GAME_MODE_RING_SHOT;
   }
 
   return FALSE;
@@ -2127,8 +2125,8 @@ void RecordRingShotHole(s32 playerIndex) {
   if (shotIndex < RING_SHOT_RECORD_MAX_STROKES) {
     RingShotRecord* record = &D_80105F40[playerIndex];
 
-    record->courseIndex = g_CourseIndex;
-    record->holeIndex = g_HoleIndex;
+    record->courseIndex = g_GameState.courseIndex;
+    record->holeIndex = g_GameState.holeIndex;
     record->scoreKind = func_80060190(g_Players[playerIndex].strokeCount);
     record->characterIndex = g_Players[playerIndex].characterIndex;
     record->unk38 = g_Players[playerIndex].unk22;
@@ -2171,7 +2169,9 @@ s32 AreAllRingsPassed(UnkB8* player) {
 }
 
 void RecordRingShotClear(s32 playerIndex) {
-  s8* count = &GetSaveData()->hasRingShotStar[g_CourseIndex][g_HoleIndex];
+  s8* count =
+      &GetSaveData()
+           ->hasRingShotStar[g_GameState.courseIndex][g_GameState.holeIndex];
 
   (*count)++;
   if (*count < 0) {
@@ -2181,8 +2181,9 @@ void RecordRingShotClear(s32 playerIndex) {
   }
 
   if ((s8)g_Players[playerIndex].characterIndex < SAVE_UNK1344_ENTRY_COUNT) {
-    count = &GetSaveData()->unk1344[g_CourseIndex][g_HoleIndex]
-                                   [(s8)g_Players[playerIndex].characterIndex];
+    count =
+        &GetSaveData()->unk1344[g_GameState.courseIndex][g_GameState.holeIndex]
+                               [(s8)g_Players[playerIndex].characterIndex];
     (*count)++;
     if (*count < 0) {
       *count = 0;
@@ -2197,7 +2198,7 @@ void RecordRingShotClear(s32 playerIndex) {
 /* Saves a Ring Shot hole as cleared once it is holed within par with every ring
  * passed */
 void CheckRingShotClear(s32 playerIndex) {
-  if (g_GameMode == GAME_MODE_RING_SHOT &&
+  if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
       g_Players[playerIndex].strokeCount <= g_HolePar &&
       (s8)g_Players[playerIndex].unk1E[0] == 0 &&
       HasNoRingsLeft(&g_Players[playerIndex])) {
@@ -2296,7 +2297,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.unk40 = 0;
   g_CurrentShot.unk50 = GetCupDistance(
       x - D_800BA9D8.cupPosition[AXIS_X], z - D_800BA9D8.cupPosition[AXIS_Z]);
-  if (!D_800C3068 || g_GameMode != GAME_MODE_TRAINING) {
+  if (!D_800C3068 || g_GameState.gameMode != GAME_MODE_TRAINING) {
     s32 surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
 
     if (g_HolePoints.unk60[0][AXIS_X] == 0 ||
@@ -2374,7 +2375,8 @@ void PickNextPlayer(void) {
     return;
   }
 
-  for (finishedCount = 0; finishedCount < g_PlayerCount; finishedCount++) {
+  for (finishedCount = 0; finishedCount < g_GameState.playerCount;
+      finishedCount++) {
     if (g_Players[finishedCount].unkC != PLAYER_STATE_UNK11 &&
         g_Players[finishedCount].unkC != PLAYER_STATE_UNK14) {
       break;
@@ -2382,14 +2384,14 @@ void PickNextPlayer(void) {
   }
 
   bestDistance = -1;
-  if (finishedCount != g_PlayerCount) {
+  if (finishedCount != g_GameState.playerCount) {
     return;
   }
 
   bestPriority = 0;
   bestTeeOrder = 0x7FFFFFFF;
   nextPlayer = 0;
-  for (i = 0; i < g_PlayerCount; i++) {
+  for (i = 0; i < g_GameState.playerCount; i++) {
     priority = LIE_PRIORITY_TEE;
     if (g_Players[i].unk26 != 0) {
       continue;
@@ -2428,7 +2430,7 @@ void PickNextPlayer(void) {
     }
   }
 
-  D_801B60A8 = nextPlayer;
+  g_GameState.currentPlayerIndex = nextPlayer;
   g_Players[nextPlayer].unkC = 0;
   if (D_800C3098) {
     StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
@@ -2527,7 +2529,7 @@ void SkipUnmeasuredDistances(s32 playerIndex) {
  * if every player has a controller of their own
  */
 void StartTurnRumble(s32 playerIndex) {
-  if (D_801051F0 == TRUE && g_PlayerCount >= 2) {
+  if (D_801051F0 == TRUE && g_GameState.playerCount >= 2) {
     s32 controllerIndex = g_Players[playerIndex].controllerIndex;
 
     EndRumbleForceStop();
@@ -2557,7 +2559,7 @@ void PlayWaitingPlayersCalls(void) {
   u16 pressed;
 
   if (D_801051F0 == TRUE) {
-    for (i = 0; i < g_PlayerCount; i++) {
+    for (i = 0; i < g_GameState.playerCount; i++) {
       if ((g_Players[i].unkC == PLAYER_STATE_UNK11) |
           (g_Players[i].unkC == PLAYER_STATE_UNK14)) {
         controllerIndex = g_Players[i].controllerIndex;
@@ -2606,9 +2608,9 @@ void PlayHoleOutSong(s32 playerIndex) {
   s32 strokeCount = g_Players[playerIndex].strokeCount;
   s32 scoreToPar = strokeCount - g_HolePar;
 
-  if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+  if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
     PlaySong(SONG_HOLE_WON, 0);
-  } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+  } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     if (AreAllRingsPassed(&g_Players[playerIndex])) {
       PlaySong(SONG_HOLE_WON, 0);
     } else {
@@ -2647,11 +2649,11 @@ void ShowHoleOutBanner(s32 playerIndex) {
   s32 scoreToPar = strokeCount - g_HolePar;
   s32 banner = BANNER_NONE;
 
-  if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+  if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
     StartBanner(BANNER_FINISH);
     PlaySound(
         HOLE_OUT_CALL_FINISH, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
-  } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+  } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     if (AreAllRingsPassed(&g_Players[playerIndex])) {
       StartBanner(BANNER_COMPLETE);
       PlaySound(
@@ -2749,7 +2751,6 @@ extern s32 D_800C3094;
 extern s8 g_ShowsGroundWaves;
 extern s32 g_PauseScreen;
 extern s32 g_IsSettingImpactPoint;
-extern s8 D_801B60B9;
 extern f32 D_80227184_ovl_00;
 
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -2757,8 +2758,8 @@ extern f32 D_80227184_ovl_00;
 static inline void DebugPlaceBall(s32 playerIndex) {
   char text[128];
 
-  D_80227188_ovl_00 = g_CourseIndex;
-  D_8022718C_ovl_00 = g_HoleIndex;
+  D_80227188_ovl_00 = g_GameState.courseIndex;
+  D_8022718C_ovl_00 = g_GameState.holeIndex;
   SetGameFlag(0x9F);
   sprintf(text, "X:%X Y:%X Z:%X  Attr%d             ",
       g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[1],
@@ -2964,7 +2965,7 @@ void UpdateTurns(void) {
     if (D_80223FF8_ovl_00 < 2) {
       g_Players[playerIndex].stopwatchFrameCount++;
       g_GameState.stopwatchFrameCount++;
-      g_HoleTimeFrames[g_HoleIndex]++;
+      g_HoleTimeFrames[g_GameState.holeIndex]++;
       if (g_Players[playerIndex].stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
         g_Players[playerIndex].stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
       }
@@ -2973,8 +2974,8 @@ void UpdateTurns(void) {
         g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
       }
 
-      if (g_HoleTimeFrames[g_HoleIndex] > STOPWATCH_MAX_FRAMES) {
-        g_HoleTimeFrames[g_HoleIndex] = STOPWATCH_MAX_FRAMES;
+      if (g_HoleTimeFrames[g_GameState.holeIndex] > STOPWATCH_MAX_FRAMES) {
+        g_HoleTimeFrames[g_GameState.holeIndex] = STOPWATCH_MAX_FRAMES;
       }
     }
   }
@@ -2989,25 +2990,27 @@ void UpdateTurns(void) {
     s32 opponentIndex;
 
     if (!g_GameState.unk31 &&
-        (g_GameMode == GAME_MODE_MATCH_GAME ||
-            g_GameMode == GAME_MODE_GET_CHARACTER) &&
+        (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+            g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
         g_Players[playerIndex ^ 1].unk26 == HOLE_STATUS_HOLED_OUT) {
-      g_Players[playerIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes =
-          g_Players[playerIndex ^ 1]
-              .holes[g_HoleIndex % COURSE_HOLE_COUNT]
-              .strokes +
+      g_Players[playerIndex]
+          .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+          .strokes = g_Players[playerIndex ^ 1]
+                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                         .strokes +
           1;
       g_Players[playerIndex].strokeCount =
           g_Players[playerIndex]
-              .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+              .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
               .strokes -
-          GetHandicapOffset(
-              g_CourseIndex, g_HoleIndex, g_Players[playerIndex].handicap);
+          GetHandicapOffset(g_GameState.courseIndex, g_GameState.holeIndex,
+              g_Players[playerIndex].handicap);
       g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
     } else {
       g_Players[playerIndex].strokeCount = g_HolePar * GIVE_UP_PAR_MULTIPLE;
-      g_Players[playerIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes =
-          g_HolePar * GIVE_UP_PAR_MULTIPLE;
+      g_Players[playerIndex]
+          .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+          .strokes = g_HolePar * GIVE_UP_PAR_MULTIPLE;
       g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
     }
 
@@ -3015,21 +3018,21 @@ void UpdateTurns(void) {
     UpdateContest(FALSE);
     if (!g_GameState.unk31) {
       opponentIndex = playerIndex ^ 1;
-      if (g_GameMode == GAME_MODE_MATCH_GAME ||
-          g_GameMode == GAME_MODE_GET_CHARACTER) {
+      if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+          g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
         g_Players[opponentIndex].unk26 = HOLE_STATUS_HOLED_OUT;
         g_Players[opponentIndex]
-            .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+            .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
             .strokes = g_Players[playerIndex]
-                           .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                           .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                            .strokes -
             1;
         g_Players[opponentIndex].strokeCount =
             g_Players[opponentIndex]
-                .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                 .strokes -
-            GetHandicapOffset(
-                g_CourseIndex, g_HoleIndex, g_Players[opponentIndex].handicap);
+            GetHandicapOffset(g_GameState.courseIndex, g_GameState.holeIndex,
+                g_Players[opponentIndex].handicap);
         SkipUnmeasuredDistances(opponentIndex);
       }
     }
@@ -3077,14 +3080,14 @@ void UpdateTurns(void) {
   }
 
   if (IsGameFlagSet(0x2C)) {
-    for (i = 0; i < g_PlayerCount; i++) {
+    for (i = 0; i < g_GameState.playerCount; i++) {
       PrintDebugPaddedHex(g_Players[i].unkC, 2, i + 10);
     }
   }
 
   PlayAmbientSound();
   PickNextPlayer();
-  for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
+  for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
     s32 controllerIndex = g_Players[playerIndex].controllerIndex;
 
     state = g_Players[playerIndex].unkC;
@@ -3107,7 +3110,7 @@ void UpdateTurns(void) {
       TickStopwatches();
     }
 
-    if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+    if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
       g_RoundHud.stopwatchFrameCount =
           g_Players[playerIndex].stopwatchFrameCount;
     }
@@ -3170,8 +3173,8 @@ void UpdateTurns(void) {
 
         PlaceCharacterForShot(0);
         UpdateGolferTranslucency();
-        if (D_801B60B9) {
-          if (g_GameMode == GAME_MODE_RING_SHOT) {
+        if (g_GameState.unk31) {
+          if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
             func_80060128(g_Players[playerIndex].strokeCount);
           } else {
             func_800600C0(g_Players[playerIndex].strokeCount);
@@ -3196,16 +3199,16 @@ void UpdateTurns(void) {
 
         D_8022B5C0_ovl_00 = 0;
         D_80223E44_ovl_00 = 0;
-        if (!D_801B60B9 &&
-            (g_GameMode == GAME_MODE_MATCH_GAME ||
-                g_GameMode == GAME_MODE_GET_CHARACTER)) {
-          s32 scoreToPar = GetNetScoreToPar(g_HoleIndex, playerIndex);
+        if (!g_GameState.unk31 &&
+            (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+                g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
+          s32 scoreToPar = GetNetScoreToPar(g_GameState.holeIndex, playerIndex);
 
-          g_RoundHud.skinsTotals[playerIndex] =
-              scoreToPar - GetNetScoreToPar(g_HoleIndex, playerIndex ^ 1);
+          g_RoundHud.skinsTotals[playerIndex] = scoreToPar -
+              GetNetScoreToPar(g_GameState.holeIndex, playerIndex ^ 1);
         } else {
           g_RoundHud.skinsTotals[playerIndex] =
-              GetNetScoreToPar(g_HoleIndex, playerIndex);
+              GetNetScoreToPar(g_GameState.holeIndex, playerIndex);
         }
 
         switch (GetHolingOutStakes(playerIndex)) {
@@ -3228,14 +3231,14 @@ void UpdateTurns(void) {
         {
           s32 song = 0x1F;
 
-          if (D_801B60B9) {
+          if (g_GameState.unk31) {
             PlaySong(song, 0x11);
           } else if (GetSurfaceInfo(g_CurrentShot.surface)->kind == 0xB) {
             song = 0x2C;
-            if (g_IsMiniGolf) {
+            if (g_GameState.isMiniGolf) {
               PlaySong(song, 0x11);
-            } else if (g_GameMode != GAME_MODE_SPEED_GOLF &&
-                g_GameMode != GAME_MODE_RING_SHOT) {
+            } else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF &&
+                g_GameState.gameMode != GAME_MODE_RING_SHOT) {
               s32 scoreToPar =
                   g_Players[playerIndex].strokeCount - (g_HolePar - 1);
 
@@ -3245,13 +3248,15 @@ void UpdateTurns(void) {
               } else if (scoreToPar < -2) {
                 PlaySong(0x10, 0x11);
                 osSyncPrintf("EAGLE\n");
-                if (GetHolingOutStakes(playerIndex) == 3 && !g_IsMiniGolf) {
+                if (GetHolingOutStakes(playerIndex) == 3 &&
+                    !g_GameState.isMiniGolf) {
                   StartMovie(6);
                 }
               } else if (scoreToPar < -1) {
                 PlaySong(0x10, 0x11);
                 osSyncPrintf("EAGLE\n");
-                if (GetHolingOutStakes(playerIndex) == 3 && !g_IsMiniGolf) {
+                if (GetHolingOutStakes(playerIndex) == 3 &&
+                    !g_GameState.isMiniGolf) {
                   StartMovie(7);
                 }
               } else if (scoreToPar == 0) {
@@ -3260,16 +3265,17 @@ void UpdateTurns(void) {
               } else {
                 PlaySong(0x10, 0x11);
                 osSyncPrintf("BIRDIE\n");
-                if (GetHolingOutStakes(playerIndex) == 3 && !g_IsMiniGolf) {
+                if (GetHolingOutStakes(playerIndex) == 3 &&
+                    !g_GameState.isMiniGolf) {
                   StartMovie(8);
                 }
               }
             }
           } else {
             song = 0x2C;
-            if (!g_IsMiniGolf) {
-              if (g_GameMode == GAME_MODE_TOURNAMENT) {
-                switch (g_CourseIndex) {
+            if (!g_GameState.isMiniGolf) {
+              if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
+                switch (g_GameState.courseIndex) {
                   case 0:
                     song = 0x20;
                     break;
@@ -3290,20 +3296,20 @@ void UpdateTurns(void) {
                     song = 0x24;
                     break;
                 }
-              } else if (g_GameMode == GAME_MODE_TRAINING) {
+              } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
                 song = 0x15;
-              } else if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+              } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
                 song = 0x26;
-              } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+              } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
                 song = 0x1E;
-              } else if (GetLastHoleIndex() == g_HoleIndex &&
-                  g_PlayerCount != 1) {
+              } else if (GetLastHoleIndex() == g_GameState.holeIndex &&
+                  g_GameState.playerCount != 1) {
                 song = 0x14;
-              } else if ((g_GameMode == GAME_MODE_MATCH_GAME ||
-                             g_GameMode == GAME_MODE_GET_CHARACTER) &&
+              } else if ((g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+                             g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
                   GetMatchStanding(0, 1) != 0) {
                 song = 0x14;
-              } else if (g_PlayerCount == 4 &&
+              } else if (g_GameState.playerCount == 4 &&
                   (g_Players[0].characterIndex == 10 ||
                       g_Players[0].characterIndex == 11) &&
                   (g_Players[1].characterIndex == 10 ||
@@ -3314,7 +3320,7 @@ void UpdateTurns(void) {
                       g_Players[3].characterIndex == 11)) {
                 song = 0x28;
               } else {
-                switch (g_CourseIndex) {
+                switch (g_GameState.courseIndex) {
                   case 0:
                     song = 0xC;
                     break;
@@ -3346,14 +3352,14 @@ void UpdateTurns(void) {
         nextState = 0x15;
         if (!D_800C3094) {
           nextState = 2;
-          if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+          if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
             nextState = 1;
             StartHoleIntroCamera();
             func_8005F1C8();
           }
         }
 
-        StartTurnRumble(D_801B60A8);
+        StartTurnRumble(g_GameState.currentPlayerIndex);
         break;
       case 0x15:
         D_80227154_ovl_00 = g_CurrentShot.clubSlot;
@@ -3376,7 +3382,7 @@ void UpdateTurns(void) {
 
         break;
       case 1:
-        if (g_HoleIndex == GetFirstHoleIndex()) {
+        if (g_GameState.holeIndex == GetFirstHoleIndex()) {
           UpdateHoleIntroCamera();
         }
 
@@ -3443,16 +3449,16 @@ void UpdateTurns(void) {
         } else if (g_PauseScreen == 7) {
           if (g_IsModuleAlive[5]) {
             g_PauseScreen = 2;
-            OpenScorecard(g_CourseIndex, g_HoleIndex);
-            if (g_GameMode == GAME_MODE_TOURNAMENT) {
+            OpenScorecard(g_GameState.courseIndex, g_GameState.holeIndex);
+            if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
               SetScorecardLayout(3);
-            } else if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+            } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
               SetScorecardLayout(4);
-            } else if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                g_GameMode == GAME_MODE_CLUB_SLOTS) {
+            } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+                g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
               SetScorecardLayout(2);
-            } else if (g_GameMode == GAME_MODE_MATCH_GAME ||
-                g_GameMode == GAME_MODE_GET_CHARACTER) {
+            } else if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+                g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
               SetScorecardLayout(1);
             } else {
               SetScorecardLayout(0);
@@ -3560,7 +3566,7 @@ void UpdateTurns(void) {
           isReady = TRUE;
           tempo = 0x7F;
           if (GetSurfaceInfo(g_CurrentShot.surface)->kind == 0xB &&
-              !g_IsMiniGolf) {
+              !g_GameState.isMiniGolf) {
             D_80227184_ovl_00 += 0.04f;
             if (D_80227184_ovl_00 > 155.0f) {
               D_80227184_ovl_00 = 155.0f;
@@ -4090,7 +4096,7 @@ void UpdateTurns(void) {
                 IntLength2D(g_BallPosition[0] - D_800BA9D8.cupPosition[0],
                     g_BallPosition[2] - D_800BA9D8.cupPosition[AXIS_Z]);
 
-            if (g_TurnBallSimulation.isRunning != 2 || g_IsMiniGolf ||
+            if (g_TurnBallSimulation.isRunning != 2 || g_GameState.isMiniGolf ||
                 (GetSurfaceInfo(g_TurnBallSimulation.unkA4)->kind == 0xB &&
                     (s32)distance < (s32)previousDistance)) {
               break;
@@ -4204,7 +4210,7 @@ void UpdateTurns(void) {
           if ((surfaceInfo->kind == 0xD || surfaceInfo->kind == 0x15) &&
               !IsGameFlagSet(0x45)) {
             g_Players[playerIndex].strokeCount++;
-            if (g_GameMode == GAME_MODE_TRAINING) {
+            if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               if (g_Players[playerIndex].strokeCount >= 100) {
                 g_Players[playerIndex].strokeCount = 99;
               }
@@ -4224,7 +4230,7 @@ void UpdateTurns(void) {
             player->ballSurface =
                 GetSurface(player->ballPosition[0], player->ballPosition[2]);
             g_Players[playerIndex].strokeCount++;
-            if (g_GameMode == GAME_MODE_TRAINING) {
+            if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               if (g_Players[playerIndex].strokeCount >= 100) {
                 g_Players[playerIndex].strokeCount = 99;
               }
@@ -4247,44 +4253,44 @@ void UpdateTurns(void) {
           if (g_TurnBallSimulation.unkA0) {
             g_Players[playerIndex].unk26 = HOLE_STATUS_HOLED_OUT;
             g_Players[playerIndex]
-                .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                 .strokes = g_Players[playerIndex].strokeCount;
-            if (!D_801B60B9 &&
-                ((g_GameMode == GAME_MODE_MATCH_GAME ||
-                     g_GameMode == GAME_MODE_GET_CHARACTER) ||
-                    (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                        g_GameMode == GAME_MODE_CLUB_SLOTS))) {
+            if (!g_GameState.unk31 &&
+                ((g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+                     g_GameState.gameMode == GAME_MODE_GET_CHARACTER) ||
+                    (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+                        g_GameState.gameMode == GAME_MODE_CLUB_SLOTS))) {
               g_Players[playerIndex]
-                  .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                  .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                   .strokes +=
-                  GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
-                      g_HoleIndex, g_Players[playerIndex].handicap);
+                  GetHandicapOffset(GetCourseRecordIndex(g_GameState.gameMode),
+                      g_GameState.holeIndex, g_Players[playerIndex].handicap);
             }
 
             nextState = 0xB;
             g_Players[playerIndex]
-                .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                 .putts = g_Players[playerIndex].unk24;
             FreeCharacterAndReactionLight(0);
           } else {
             FreeCharacterAndReactionLight(0);
             StartBanner(-1);
-            if (D_801B60B9 &&
+            if (g_GameState.unk31 &&
                 g_Players[playerIndex].strokeCount >= D_800FE330) {
               nextState = 0xB;
-            } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+            } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
               nextState = 0xB;
               if (g_Players[playerIndex].strokeCount < g_HolePar) {
                 EndFlightCamera();
                 StartHudAnimation(2);
                 nextState = 0x10;
               }
-            } else if (g_GameMode == GAME_MODE_TRAINING) {
+            } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               nextState = 0xF;
-              OpenChoiceBox(g_CourseIndex == 0xC ? 3 : 0);
-            } else if (!D_801B60B9 &&
-                (g_GameMode == GAME_MODE_MATCH_GAME ||
-                    g_GameMode == GAME_MODE_GET_CHARACTER)) {
+              OpenChoiceBox(g_GameState.courseIndex == 0xC ? 3 : 0);
+            } else if (!g_GameState.unk31 &&
+                (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+                    g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
               if (g_Players[playerIndex].strokeCount >= g_HolePar * 3 ||
                   GetMatchHoleResult(0, 1)) {
                 nextState = 0xB;
@@ -4294,14 +4300,14 @@ void UpdateTurns(void) {
                 StartHudAnimation(2);
                 nextState = 0x10;
               }
-            } else if (!D_801B60B9 &&
-                (g_GameMode == GAME_MODE_SKINS_MATCH ||
-                    g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+            } else if (!g_GameState.unk31 &&
+                (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+                    g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
               s8 results[MAX_PLAYER_COUNT];
 
               if (g_Players[playerIndex].strokeCount >= g_HolePar * 3) {
                 g_Players[playerIndex]
-                    .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                    .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                     .strokes = 0;
                 g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
               }
@@ -4309,7 +4315,7 @@ void UpdateTurns(void) {
               if (GetGroupHoleResult(results) || results[playerIndex] == 2) {
                 g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
                 g_Players[playerIndex]
-                    .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                    .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                     .strokes = 0;
                 g_Players[playerIndex].strokeCount = 0;
                 nextState = 0xB;
@@ -4320,14 +4326,14 @@ void UpdateTurns(void) {
               }
             } else if (g_Players[playerIndex].strokeCount >= g_HolePar * 3) {
               g_Players[playerIndex]
-                  .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                  .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                   .strokes = g_HolePar * 3;
               g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
               nextState = 0xB;
-              if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+              if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
                 g_Players[playerIndex].stopwatchFrameCount += 18000;
                 g_GameState.stopwatchFrameCount += 18000;
-                g_HoleTimeFrames[g_HoleIndex] += 18000;
+                g_HoleTimeFrames[g_GameState.holeIndex] += 18000;
                 if (g_Players[playerIndex].stopwatchFrameCount >
                     STOPWATCH_MAX_FRAMES) {
                   g_Players[playerIndex].stopwatchFrameCount =
@@ -4338,8 +4344,10 @@ void UpdateTurns(void) {
                   g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
                 }
 
-                if (g_HoleTimeFrames[g_HoleIndex] > STOPWATCH_MAX_FRAMES) {
-                  g_HoleTimeFrames[g_HoleIndex] = STOPWATCH_MAX_FRAMES;
+                if (g_HoleTimeFrames[g_GameState.holeIndex] >
+                    STOPWATCH_MAX_FRAMES) {
+                  g_HoleTimeFrames[g_GameState.holeIndex] =
+                      STOPWATCH_MAX_FRAMES;
                 }
 
                 nextState = 0xB;
@@ -4391,7 +4399,7 @@ void UpdateTurns(void) {
         if (!g_TurnBallSimulation.unkA0) {
           PlaySong(7, 0);
           reaction = 0xF;
-        } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+        } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
           reaction = 0xF;
           if (HasNoRingsLeft(&g_Players[playerIndex])) {
             func_8006034C(1);
@@ -4472,14 +4480,14 @@ void UpdateTurns(void) {
 
         if (D_80227170_ovl_00[playerIndex] >= D_80224000_ovl_00) {
           StopFireworks();
-          if (g_GameMode == GAME_MODE_TRAINING) {
+          if (g_GameState.gameMode == GAME_MODE_TRAINING) {
             nextState = 0xF;
-            if (g_CourseIndex == 0xC) {
+            if (g_GameState.courseIndex == 0xC) {
               OpenChoiceBox(3);
             } else {
               OpenChoiceBox(1);
             }
-          } else if (g_GameMode == GAME_MODE_RING_SHOT &&
+          } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
               (!g_TurnBallSimulation.unkA0 ||
                   !HasNoRingsLeft(&g_Players[playerIndex]))) {
             nextState = 0xF;
@@ -4493,7 +4501,7 @@ void UpdateTurns(void) {
 
         break;
       case 0xF:
-        if (g_GameMode == GAME_MODE_TRAINING) {
+        if (g_GameState.gameMode == GAME_MODE_TRAINING) {
           if (IsGameFlagSet(0x3E) && g_Players[playerIndex].unk26 != 0) {
             DebugTestGutsMotion();
           }
@@ -4573,15 +4581,15 @@ void UpdateTurns(void) {
         if (D_80227170_ovl_00[playerIndex] == 1) {
           StartBanner(-1);
           D_800C3098 = 1;
-          if (D_801B60B9) {
+          if (g_GameState.unk31) {
             nextState = 0x14;
-          } else if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-              g_GameMode == GAME_MODE_CLUB_SLOTS) {
+          } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+              g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
             s8 results[MAX_PLAYER_COUNT];
             s32 isAnyOut = FALSE;
             s32 isHoleOver = GetGroupHoleResult(results);
 
-            for (i = 0; i < g_PlayerCount; i++) {
+            for (i = 0; i < g_GameState.playerCount; i++) {
               if (results[i] == 2 && g_Players[i].unk26 == 0) {
                 g_Players[i].unk26 = 2;
                 isAnyOut = TRUE;
@@ -4591,55 +4599,64 @@ void UpdateTurns(void) {
             nextState = (!isHoleOver && isAnyOut) ? 0x16 : 0x14;
           } else {
             nextState = 0x14;
-            if (g_GameMode == GAME_MODE_MATCH_GAME ||
-                g_GameMode == GAME_MODE_GET_CHARACTER) {
+            if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+                g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
               s32 result;
 
-              GetHandicapOffset(
-                  g_CourseIndex, g_HoleIndex, g_Players[playerIndex].handicap);
-              GetHandicapOffset(g_CourseIndex, g_HoleIndex,
+              GetHandicapOffset(g_GameState.courseIndex, g_GameState.holeIndex,
+                  g_Players[playerIndex].handicap);
+              GetHandicapOffset(g_GameState.courseIndex, g_GameState.holeIndex,
                   g_Players[playerIndex ^ 1].handicap);
               result = GetMatchHoleResult(playerIndex, playerIndex ^ 1);
               osSyncPrintf("CheckHoltOutMatch %d\n", result);
               if (result == 1) {
                 g_Players[playerIndex ^ 1]
-                    .holes[g_HoleIndex % COURSE_HOLE_COUNT]
-                    .strokes = g_Players[playerIndex]
-                                   .holes[g_HoleIndex % COURSE_HOLE_COUNT]
-                                   .strokes +
+                    .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                    .strokes =
+                    g_Players[playerIndex]
+                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                        .strokes +
                     1;
                 g_Players[playerIndex ^ 1].strokeCount =
                     g_Players[playerIndex ^ 1]
-                        .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                         .strokes -
-                    GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
-                        g_HoleIndex, g_Players[playerIndex ^ 1].handicap);
+                    GetHandicapOffset(
+                        GetCourseRecordIndex(g_GameState.gameMode),
+                        g_GameState.holeIndex,
+                        g_Players[playerIndex ^ 1].handicap);
                 g_Players[playerIndex ^ 1].unk26 = HOLE_STATUS_OUT;
               } else if (result == 2) {
                 g_Players[playerIndex ^ 1]
-                    .holes[g_HoleIndex % COURSE_HOLE_COUNT]
-                    .strokes = g_Players[playerIndex]
-                                   .holes[g_HoleIndex % COURSE_HOLE_COUNT]
-                                   .strokes -
+                    .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                    .strokes =
+                    g_Players[playerIndex]
+                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                        .strokes -
                     1;
                 g_Players[playerIndex ^ 1].strokeCount =
                     g_Players[playerIndex ^ 1]
-                        .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                         .strokes -
-                    GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
-                        g_HoleIndex, g_Players[playerIndex ^ 1].handicap);
+                    GetHandicapOffset(
+                        GetCourseRecordIndex(g_GameState.gameMode),
+                        g_GameState.holeIndex,
+                        g_Players[playerIndex ^ 1].handicap);
               } else if (result == 3 && g_Players[playerIndex ^ 1].unk26 == 0) {
                 g_Players[playerIndex ^ 1]
-                    .holes[g_HoleIndex % COURSE_HOLE_COUNT]
-                    .strokes = g_Players[playerIndex]
-                                   .holes[g_HoleIndex % COURSE_HOLE_COUNT]
-                                   .strokes;
+                    .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                    .strokes =
+                    g_Players[playerIndex]
+                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                        .strokes;
                 g_Players[playerIndex ^ 1].strokeCount =
                     g_Players[playerIndex ^ 1]
-                        .holes[g_HoleIndex % COURSE_HOLE_COUNT]
+                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                         .strokes -
-                    GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
-                        g_HoleIndex, g_Players[playerIndex ^ 1].handicap);
+                    GetHandicapOffset(
+                        GetCourseRecordIndex(g_GameState.gameMode),
+                        g_GameState.holeIndex,
+                        g_Players[playerIndex ^ 1].handicap);
                 g_Players[playerIndex ^ 1].unk26 = HOLE_STATUS_OUT;
               }
             }
@@ -4648,13 +4665,13 @@ void UpdateTurns(void) {
 
         break;
       case 0x16:
-        for (i = 0; i < g_PlayerCount; i++) {
+        for (i = 0; i < g_GameState.playerCount; i++) {
           if (g_Players[i].unk26 == 2) {
             break;
           }
         }
 
-        if (i == g_PlayerCount) {
+        if (i == g_GameState.playerCount) {
           nextState = 0x14;
           break;
         }
@@ -4664,7 +4681,7 @@ void UpdateTurns(void) {
           break;
         }
 
-        for (i = 0; i < g_PlayerCount; i++) {
+        for (i = 0; i < g_GameState.playerCount; i++) {
           if (g_Players[i].unk26 == 2) {
             g_Players[i].unk26 = HOLE_STATUS_OUT;
             break;
@@ -4672,7 +4689,7 @@ void UpdateTurns(void) {
         }
 
         nextState = 0x14;
-        if (i != g_PlayerCount) {
+        if (i != g_GameState.playerCount) {
           ClearReactionSpot();
           LoadCharacter(0, g_Players[i].characterIndex + CHARACTER_COUNT,
               g_Players[i].paletteIndex);
@@ -4722,7 +4739,8 @@ void UpdateTurns(void) {
 
   MarkNearbyGroundTiles(
       g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]);
-  GetBallSurfaceInfo(&g_Players[D_801B60A8], &D_80227150_ovl_00);
+  GetBallSurfaceInfo(
+      &g_Players[g_GameState.currentPlayerIndex], &D_80227150_ovl_00);
   if (areCallsAllowed) {
     PlayWaitingPlayersCalls();
   }

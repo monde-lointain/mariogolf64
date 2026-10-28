@@ -17,6 +17,7 @@
 #include "host_file.h"
 #include "libc.h"
 #include "math_util.h"
+#include "save.h"
 #include "variables.h"
 
 /* Textures of this type are read from the asset archive when first drawn */
@@ -128,7 +129,7 @@ const s32 g_BillboardEnvColor[3] = {128, 64, 32};
  * differently from the original.
  */
 #define IsNearCourseEdge(x, z) \
-  (!g_IsMiniGolf && \
+  (!g_GameState.isMiniGolf && \
       (((x) <= COURSE_EDGE_MIN_X) || ((z) <= COURSE_EDGE_MIN_Z) || \
           ((x) >= COURSE_EDGE_MAX_X) || ((z) >= COURSE_EDGE_MAX_Z)))
 

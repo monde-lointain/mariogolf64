@@ -67,7 +67,7 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
   for (index = firstIndex; index < endIndex; index++) {
     shape = index % 3;
     swing = index % 10;
-    if (g_CourseIndex < 2) {
+    if (g_GameState.courseIndex < 2) {
       swing = 13 - swing;
       if (swing >= 10) {
         swing = 9;
@@ -81,14 +81,14 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
       holesPlayed = COURSE_HOLE_COUNT;
     }
 
-    finalScore =
-        f_ContestantProfiles[index - 1].baseScore - (g_CourseIndex * 2);
+    finalScore = f_ContestantProfiles[index - 1].baseScore -
+        (g_GameState.courseIndex * 2);
     jitter = ((NextTournamentRandom() >> 28) & 5) - 2;
     otherJitter = ((NextTournamentRandom() >> 28) & 5) - 2;
     finalScore += (jitter + otherJitter) / 2;
     if (holesPlayed == COURSE_HOLE_COUNT &&
-        finalScore <= -(g_CourseIndex * 2) + 1) {
-      finalScore = -(g_CourseIndex * 2) + 1;
+        finalScore <= -(g_GameState.courseIndex * 2) + 1) {
+      finalScore = -(g_GameState.courseIndex * 2) + 1;
     }
 
     if (finalScore < -SCORE_LIMIT) {
@@ -192,7 +192,7 @@ void NameContestants(void) {
   nameOffset = TOURNAMENT_CONTESTANT_COUNT - 2;
   hasSkipped = FALSE;
   nameIndex = &g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 2];
-  lastName = ((g_CourseIndex + 1) * NAMES_PER_COURSE) - 2;
+  lastName = ((g_GameState.courseIndex + 1) * NAMES_PER_COURSE) - 2;
   for (index = TOURNAMENT_CONTESTANT_COUNT - 2; index >= 0;
       index--, nameIndex--) {
     if (!hasSkipped &&

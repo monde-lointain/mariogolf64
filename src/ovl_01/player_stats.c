@@ -222,7 +222,6 @@ extern s16 D_802303A4_ovl_01;
 extern u8 D_802308A0_ovl_01;
 extern s8 D_801052E8;
 extern s32 D_800FE334;
-extern s8 D_801B60B9;
 extern u8 D_801B9410;
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 
@@ -1724,7 +1723,7 @@ void func_8021D0B8_ovl_01(void) {
       if (GetWipeProgress() == 0) {
         g_MenuScreen = MENU_SCREEN_EXIT;
         D_800FE334 = 0;
-        D_801B60B9 = 1;
+        g_GameState.unk31 = 1;
         SetGameFlag(GAME_FLAG_UNK1E);
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);

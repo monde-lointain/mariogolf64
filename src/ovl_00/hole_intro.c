@@ -12,6 +12,7 @@
 #include "libc.h"
 #include "math_util.h"
 #include "movie.h"
+#include "save.h"
 #include "scoring.h"
 #include "sound.h"
 #include "variables.h"
@@ -46,6 +47,9 @@
 #define INTRO_FRAME_TEXT_COLUMN 20
 #define INTRO_FRAME_TEXT_ROW 2
 
+/* g_GameState.holeIndex under a symbol of its own, which
+ * UpdateHoleIntroCamera needs to match */
+extern s32 g_HoleIndex;
 extern s32 f_IntroFrame;
 /* How far in front of the ball the camera is; negative when behind it */
 extern f32 f_IntroCameraDistance;
@@ -67,7 +71,7 @@ void StartHoleIntroCamera(void) {
   (*lookAt)[AXIS_Y] =
       (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * scale;
   (*lookAt)[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * scale;
-  if (g_HoleIndex == GetFirstHoleIndex()) {
+  if (g_GameState.holeIndex == GetFirstHoleIndex()) {
     heading = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
   } else {
     heading =

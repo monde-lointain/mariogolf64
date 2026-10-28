@@ -62,7 +62,7 @@ void SimulateShot(Unk20* shot) {
       g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
                                 ->unk5;
   LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
-  g_SimulatedShot.unk2E08 = g_IsMiniGolf ||
+  g_SimulatedShot.unk2E08 = g_GameState.isMiniGolf ||
       GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
   step = 0;
   while (simulation->isRunning) {

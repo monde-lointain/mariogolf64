@@ -73,9 +73,6 @@ typedef struct BallAfterimage {
   /* 0x10 */ s32 isInCup;
 } BallAfterimage; /* size = 0x14 */
 
-/* g_GameState.currentPlayerIndex, under a symbol of its own */
-extern s32 D_801B60A8;
-
 extern GolfBall f_GolfBalls[GOLF_BALL_COUNT];
 extern BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH];
 extern f32 f_BallAfterimageOrigin[3];
@@ -232,7 +229,7 @@ void UpdateGolfBalls(void) {
 
   currentIndex = 0;
   if (g_GameState.unk0 == GAME_STATE_UNK6) {
-    currentIndex = D_801B60A8;
+    currentIndex = g_GameState.currentPlayerIndex;
   }
 
   for (i = 0, player = g_Players, ball = f_GolfBalls;
@@ -245,7 +242,7 @@ void UpdateGolfBalls(void) {
       ball->state = BALL_STATE_STOPPED;
       if (GetSurfaceInfo((s8)player->ballSurface)->kind == SURFACE_KIND_GREEN) {
         ball->markerPlayerIndex = i;
-      } else if (g_IsMiniGolf) {
+      } else if (g_GameState.isMiniGolf) {
         ball->markerPlayerIndex = i;
       } else {
         ball->markerPlayerIndex = BALL_NO_MARKER;
@@ -303,7 +300,7 @@ void UpdateGolfBalls(void) {
         markerPlayerIndex = BALL_NO_MARKER;
         if (currentIndex != simulation->playerIndex &&
             (GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN ||
-                g_IsMiniGolf)) {
+                g_GameState.isMiniGolf)) {
           markerPlayerIndex = simulation->playerIndex;
         }
 
@@ -710,7 +707,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
             }
 
             primDepth &= ~3;
-            if (D_801B60A8 == i) {
+            if (g_GameState.currentPlayerIndex == i) {
               isCurrentBallAboveGround = isAboveGround;
               f_CurrentBallDepth = primDepth;
               f_CurrentBallScreenX = ballPoint.x;

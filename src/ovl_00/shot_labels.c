@@ -268,7 +268,7 @@ void DrawShotLabels(Gfx** displayListHead) {
       cup.isHidden = SPOT_HIDDEN;
     }
 
-    for (i = 0; i != g_PlayerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       label = &f_ShotLabels[i];
       if (players == SHOT_LABELS_OTHER_BALLS &&
           (g_CurrentShot.playerIndex == i || g_Players[i].strokeCount == 0)) {
@@ -423,7 +423,7 @@ NEXT:;
         G_TX_MIRROR | G_TX_WRAP, 4, 3, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    for (i = 0; i != g_PlayerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         gDPSetPrimColor(gfx++, 0, 0, f_PlayerTagColors[i][0],
@@ -440,7 +440,7 @@ NEXT:;
     gDPLoadTLUT_pal16(
         gfx++, 0, ((u32)g_PlayerTagImages + IMAGE_HEADER_SIZE) & ~7);
     gDPPipeSync(gfx++);
-    for (i = 0; i != g_PlayerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         DrawPlayerTag(f_ShotLabels[i].x, f_ShotLabels[i].y,
@@ -460,7 +460,7 @@ NEXT:;
         ((u32)g_LeaderLineImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
         TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 3, G_TX_NOLOD, G_TX_NOLOD);
-    for (i = 0; i != g_PlayerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         gDPSetPrimColor(gfx++, 0, 0, f_PlayerTagColors[i][0],
@@ -479,7 +479,7 @@ NEXT:;
     gDPLoadTLUT_pal16(
         gfx++, 0, ((u32)g_PlayerTagImages + IMAGE_HEADER_SIZE) & ~7);
     gDPPipeSync(gfx++);
-    for (i = 0; i != g_PlayerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         DrawPlayerTag(f_ShotLabels[i].x, f_ShotLabels[i].y,

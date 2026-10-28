@@ -342,8 +342,8 @@ void LoadCourseSelect(s32 isHoleSelect) {
 
   f_CourseTurnIndex = 0;
   f_CourseTurnStep = 0;
-  f_ShownCourse = g_CourseIndex;
-  f_NextCourse = g_CourseIndex;
+  f_ShownCourse = g_GameState.courseIndex;
+  f_NextCourse = g_GameState.courseIndex;
   for (i = 0; i != COURSE_INDEX_COUNT; i++) {
     f_CourseBadges[i] =
         AllocMemory(OpenEncodedAsset(f_CourseBadgeAssets[i], &asset));
@@ -351,7 +351,8 @@ void LoadCourseSelect(s32 isHoleSelect) {
   }
 
   f_CourseImage = AllocMemory(OpenEncodedAsset(
-      f_CourseImageAssets[g_CourseIndex] + COURSE_IMAGE_FRONT, &asset));
+      f_CourseImageAssets[g_GameState.courseIndex] + COURSE_IMAGE_FRONT,
+      &asset));
   ReadEncodedAsset(f_CourseImage, &asset);
   OpenAssetFile(COURSE_IMAGE_PALETTE_ASSET, &file);
   size = GetAssetFileSize(&file);
@@ -488,9 +489,9 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     memory->holeIndex = 0;
   }
 
-  g_HoleIndex = memory->holeIndex;
-  g_CourseIndex = memory->courseIndex;
-  f_NextCourse = g_CourseIndex;
+  g_GameState.holeIndex = memory->holeIndex;
+  g_GameState.courseIndex = memory->courseIndex;
+  f_NextCourse = g_GameState.courseIndex;
   return result;
 }
 
@@ -545,9 +546,9 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
           COURSE_INDEX_COUNT;
       if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
           g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
-        g_IsMiniGolf = TRUE;
+        g_GameState.isMiniGolf = TRUE;
       } else {
-        g_IsMiniGolf = FALSE;
+        g_GameState.isMiniGolf = FALSE;
       }
 
       if (g_GameState.courseIndex > openCourseCount - 1 &&
@@ -571,9 +572,9 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
 
       if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
           g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
-        g_IsMiniGolf = TRUE;
+        g_GameState.isMiniGolf = TRUE;
       } else {
-        g_IsMiniGolf = FALSE;
+        g_GameState.isMiniGolf = FALSE;
       }
 
       result = SELECT_MOVED;
@@ -923,7 +924,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     SetUpGradientTextDrawing(&gfx, 0);
     SetTextColor(&gfx, 255, 255, 255);
-    colorIndex = g_CourseIndex;
+    colorIndex = g_GameState.courseIndex;
     if (colorIndex >= MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
       colorIndex -= MINI_GOLF_COURSES_PER_RECORD;
     }
@@ -933,7 +934,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
         g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
         g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);
     if (!IsOnDrivingRange()) {
-      sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
+      sprintf(g_PrintBuffer, "Hole %d", g_GameState.holeIndex + 1);
       DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - f_SlideOffset,
           g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
           g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);

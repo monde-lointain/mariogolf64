@@ -285,7 +285,7 @@ s32 IsPinInCup(void) {
 
   if (g_GameState.unk0 == GAME_STATE_UNK6 ||
       g_GameState.unk0 == GAME_STATE_UNK7) {
-    if (g_IsMiniGolf) {
+    if (g_GameState.isMiniGolf) {
       return TRUE;
     }
 

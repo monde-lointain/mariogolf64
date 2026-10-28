@@ -144,9 +144,6 @@ void SetScorecardState(s32 state);
 #define PAGE_TITLES_ROW_COUNT 5
 #define PAGE_TITLE_COUNT 3
 
-extern s32 g_IsSuddenDeath;
-extern s32 D_801B60B4;
-
 /* Read by no routine */
 static s32 D_8024C450_ovl_09[] = {0, 1, 2, 3, 5, 10};
 static u16 f_PageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT] = {
@@ -195,7 +192,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
 
   g_Scorecard.content.courseIndex = courseIndex;
   g_Scorecard.content.holeIndex = holeIndex;
-  g_Scorecard.content.isSuddenDeath = g_IsSuddenDeath;
+  g_Scorecard.content.isSuddenDeath = g_GameState.isSuddenDeath;
   osSyncPrintf("SP Address = %x\n", stackPointer);
   g_Scorecard.tableImage =
       AllocMemory(OpenEncodedAsset(TABLE_IMAGE_ASSET, &asset));
@@ -226,7 +223,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
     }
   }
 
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     g_Scorecard.faceImages[i] = AllocMemory(OpenEncodedAsset(
         g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &asset));
     ReadEncodedAsset(g_Scorecard.faceImages[i], &asset);
@@ -242,7 +239,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
   g_Scorecard.faceTime = 0;
   g_Scorecard.faceFrame = 0;
 
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case GAME_MODE_SPEED_GOLF:
       g_Scorecard.pageCount = 2;
       pageTitlesRow = PAGE_TITLES_SPEED_GOLF;
@@ -254,7 +251,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
     case GAME_MODE_UNK8:
     case GAME_MODE_RING_SHOT:
       /* The bets get a page of their own */
-      if (g_PlayerCount == 1) {
+      if (g_GameState.playerCount == 1) {
         pageTitlesRow = PAGE_TITLES_SOLO;
         if (g_Scorecard.hasBets == TRUE) {
           g_Scorecard.pageCount = 2;
@@ -329,11 +326,11 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
       pageTitlesRow = PAGE_TITLES_TOURNAMENT;
       if (shownHoleCount > 0) {
         if (g_Scorecard.content.holeIndex == 1) {
-          RankTournament(shownHoleCount - 1, 0, 0, D_801B60B4);
+          RankTournament(shownHoleCount - 1, 0, 0, g_GameState.unk2C);
         } else {
           RankTournament(shownHoleCount - 1, 0,
               GetNetScoreToPar(g_Scorecard.content.holeIndex - 1, 0),
-              D_801B60B4);
+              g_GameState.unk2C);
         }
 
         oldPlace = -1;
@@ -347,7 +344,8 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
         }
 
         RankTournament(shownHoleCount, 0,
-            GetNetScoreToPar(g_Scorecard.content.holeIndex, 0), D_801B60B4);
+            GetNetScoreToPar(g_Scorecard.content.holeIndex, 0),
+            g_GameState.unk2C);
         for (standingIndex = 0, standing = g_TournamentStandings;
             standingIndex != TOURNAMENT_CONTESTANT_COUNT;
             standingIndex++, standing++) {
@@ -366,7 +364,8 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
         }
       } else {
         RankTournament(shownHoleCount, 0,
-            GetNetScoreToPar(g_Scorecard.content.holeIndex, 0), D_801B60B4);
+            GetNetScoreToPar(g_Scorecard.content.holeIndex, 0),
+            g_GameState.unk2C);
         g_Scorecard.placeChange = PLACE_HELD;
       }
 
@@ -439,7 +438,7 @@ void FreeScorecard(void) {
     FreeMemory(&g_Scorecard.pageTitleImages[1]);
     FreeMemory(&g_Scorecard.pageTitleImages[0]);
     FreeMemory(&g_Scorecard.gridImage);
-    switch (g_GameMode) {
+    switch (g_GameState.gameMode) {
       case GAME_MODE_STROKE:
       case GAME_MODE_UNK1:
       case GAME_MODE_TRAINING:
@@ -478,7 +477,7 @@ void FreeScorecard(void) {
     FreeMemory(&g_Scorecard.scoresPanelImage);
     FreeMemory(&g_Scorecard.unk14);
     FreeMemory(&g_Scorecard.tableImage);
-    for (i = 0; i != g_PlayerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       FreeMemory(&g_Scorecard.faceImages[i]);
       FreeMemory(&g_Scorecard.facePalettes[i]);
     }
@@ -520,7 +519,7 @@ void StartScorecardTally(s32 layout) {
       break;
     case SCORECARD_LAYOUT_MATCH:
       holeIndex = g_Scorecard.content.holeIndex - 1;
-      if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+      if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
         if (g_Players[0].holes[holeIndex].strokes <
             g_Players[1].holes[holeIndex].strokes) {
           song = SONG_HOLE_WON;
@@ -559,7 +558,7 @@ HALVED:
       break;
     case SCORECARD_LAYOUT_SKINS:
       g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;
-      for (i = 0; i != g_PlayerCount; i++) {
+      for (i = 0; i != g_GameState.playerCount; i++) {
         if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes !=
             0) {
           g_Scorecard.holeWinnerIndex = i;
@@ -652,7 +651,7 @@ HALVED:
   }
 
   g_RoundHud.scorecardPage = 0;
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case GAME_MODE_UNK1:
     case GAME_MODE_TRAINING:
     case GAME_MODE_TOURNAMENT:
@@ -686,7 +685,7 @@ HALVED:
 
         if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes -
                 (s8)course->holes[g_Scorecard.content.holeIndex - 1].par +
-                GetHandicapOffset(g_CourseIndex,
+                GetHandicapOffset(g_GameState.courseIndex,
                     g_Scorecard.content.holeIndex - 1, g_Players[i].handicap) <=
             0) {
           g_Scorecard.content.faceImageOffsets[i] = 0;
@@ -774,7 +773,7 @@ void SetScorecardLayout(s32 layout) {
   }
 
   g_RoundHud.scorecardPage = 0;
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case GAME_MODE_UNK1:
     case GAME_MODE_TRAINING:
     case GAME_MODE_TOURNAMENT:
@@ -968,7 +967,7 @@ void AnimateScorecard(void) {
         g_Scorecard.faceFrame++;
         g_Scorecard.unkBC ^= 1;
         if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {
-          for (i = 0; i != g_PlayerCount; i++) {
+          for (i = 0; i != g_GameState.playerCount; i++) {
             OpenEncodedAsset(
                 g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
                     g_Scorecard.faceFrame +
@@ -1071,7 +1070,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
       return;
     }
 
-    switch (g_GameMode) {
+    switch (g_GameState.gameMode) {
       case GAME_MODE_STROKE:
       case GAME_MODE_UNK1:
       case GAME_MODE_MATCH_GAME:
@@ -1099,7 +1098,7 @@ s32 UpdateShownScorecard(u16 buttons) {
     return FALSE;
   }
 
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case GAME_MODE_STROKE:
     case GAME_MODE_UNK1:
     case GAME_MODE_MATCH_GAME:
@@ -1202,7 +1201,7 @@ void DrawScorecard(Gfx** displayListHead) {
         }
       }
 
-      switch (g_GameMode) {
+      switch (g_GameState.gameMode) {
         case GAME_MODE_TOURNAMENT:
           if (g_RoundHud.scorecardPage == 0) {
             DrawLeaderboardPage(&gfx);
@@ -1249,7 +1248,7 @@ void DrawScorecard(Gfx** displayListHead) {
         case GAME_MODE_UNK6:
         case GAME_MODE_UNK8:
         case GAME_MODE_RING_SHOT:
-          if (g_PlayerCount == 1) {
+          if (g_GameState.playerCount == 1) {
             if (g_RoundHud.scorecardPage == 0) {
               DrawScoresPage(&gfx);
             } else {
@@ -1425,7 +1424,7 @@ s32 LoadResultCharacters(void) {
   LoadCharacter(1, (s8)g_Players[1].characterIndex + CHARACTER_COUNT,
       (s8)g_Players[1].paletteIndex);
   song = SONG_MATCH_RESULT;
-  if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+  if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     if (g_Players[0].holes[holeIndex].strokes <
         g_Players[1].holes[holeIndex].strokes) {
       song = SONG_HOLE_WON;

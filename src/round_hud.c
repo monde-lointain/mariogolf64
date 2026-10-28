@@ -241,7 +241,6 @@ extern void* f_ShotOffsetMarkerImage;
 extern s32 f_LoadedHoleIntroImages;
 extern void* f_HoleContestImage;
 extern void* f_MatchStandingImage;
-extern s32 g_IsSuddenDeath;
 
 /* The ball's recent world positions, which its trail is drawn through */
 #define BALL_TRAIL_LENGTH 128
@@ -495,7 +494,6 @@ extern s32 f_SceneryState;
 /* On the tee ground, the shot panel sits this much higher */
 #define TEE_GROUND_PANEL_OFFSET_Y -3
 #define SHOT_PANEL_START_OFFSET_X 64
-extern s8 D_801B60B9;
 /* The colors of each course's name, which gradients from the first to the
  * second */
 extern s32 g_CourseNameEnvColors[];
@@ -627,12 +625,12 @@ void LoadPlayerFace(s32 playerIndex, s32 character, s32 paletteIndex) {
 /* Frees the previous hole's mode images and loads the scenery images if they
  * are not loaded */
 void EndHoleIntro(void) {
-  if (g_GameMode == GAME_MODE_RING_SHOT) {
+  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     if (f_IsCourseSelectLoaded == TRUE) {
       f_IsCourseSelectLoaded = FALSE;
       FreeCourseSelect();
     }
-  } else if (g_GameMode == GAME_MODE_TRAINING) {
+  } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
     if (f_IsCourseSelectLoaded == TRUE) {
       f_IsCourseSelectLoaded = FALSE;
       FreeCourseSelect();
@@ -683,12 +681,12 @@ void StartHoleIntro(void) {
     FreeSceneryImages();
   }
 
-  if (g_GameMode == GAME_MODE_RING_SHOT) {
+  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     if (f_IsCourseSelectLoaded == FALSE) {
       f_IsCourseSelectLoaded = TRUE;
       LoadCourseSelect(0);
     }
-  } else if (g_GameMode == GAME_MODE_TRAINING) {
+  } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
     if (f_IsCourseSelectLoaded == FALSE) {
       f_IsCourseSelectLoaded = TRUE;
       LoadCourseSelect(1);
@@ -840,8 +838,8 @@ void FreeScenery(void) {
 /*
  * Updates the shot panel for a new shot: the ball's height above the cup and
  * distance from it, the lie's image, and the scores that the game mode shows.
- * The target addresses g_HoleIndex from g_PlayerCount's base, as if the two
- * were fields of one struct.
+ * The target addresses g_GameState.holeIndex from g_GameState.playerCount's
+ * base, as if the two were fields of one struct.
  */
 #ifdef NON_MATCHING
 void StartShotPanel(void) {
@@ -897,24 +895,25 @@ void StartShotPanel(void) {
     ReadEncodedAsset(f_LieImage, &asset);
   }
 
-  if (D_801B60B9) {
+  if (g_GameState.unk31) {
     g_RoundHud.skinsTotals[0] = 0;
   } else {
-    switch (g_GameMode) {
+    switch (g_GameState.gameMode) {
       case GAME_MODE_STROKE:
       case GAME_MODE_UNK1:
       case GAME_MODE_TOURNAMENT:
       case GAME_MODE_SPEED_GOLF:
-        for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
+        for (playerIndex = 0; playerIndex < g_GameState.playerCount;
+            playerIndex++) {
           g_RoundHud.skinsTotals[playerIndex] =
-              GetNetScoreToPar(g_HoleIndex, playerIndex);
+              GetNetScoreToPar(g_GameState.holeIndex, playerIndex);
         }
 
         break;
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_GET_CHARACTER:
         g_RoundHud.skinsTotals[0] = 0;
-        for (holeIndex = 0; holeIndex != g_HoleIndex; holeIndex++) {
+        for (holeIndex = 0; holeIndex != g_GameState.holeIndex; holeIndex++) {
           if (g_Players[0].holes[holeIndex].strokes <
               g_Players[1].holes[holeIndex].strokes) {
             g_RoundHud.skinsTotals[0]--;
@@ -1213,7 +1212,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
           g_BallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
           g_BallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
       /* Mini golf and the green measure in feet */
-      if (g_IsMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
+      if (g_GameState.isMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
         hundredths =
             distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
         sprintf(g_PrintBuffer, "%2d.%02d%c REST",
@@ -3486,7 +3485,7 @@ void DrawRoundHud(CameraView* view) {
   /* The faces move out of the letterbox's way */
   scoreboardX = (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) +
       (SCOREBOARD_X + f_ShotPanelOffsetX);
-  for (i = 0; i != g_PlayerCount; i++) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
     if (g_Players[i].handicap > 0) {
       hasHandicap = TRUE;
       scoreboardX -= SCOREBOARD_HANDICAP_SHIFT;
@@ -3670,7 +3669,7 @@ void DrawRoundHud(CameraView* view) {
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   if (g_RoundHud.unk8 && !g_IsCupViewShown && !IsOnDrivingRange() &&
-      !g_IsMiniGolf) {
+      !g_GameState.isMiniGolf) {
     sprintf(g_PrintBuffer, "%3dy",
         (s16)g_CourseRecords[GetCourseRecordIndex()]
             .holes[GetHoleRecordIndex()]
@@ -3858,7 +3857,7 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
-    for (i = 0; i < g_PlayerCount; i++) {
+    for (i = 0; i < g_GameState.playerCount; i++) {
       SetTextColor(&g_DisplayListHead, 255, 255, 255);
       sprintf(g_PrintBuffer, "%d", g_Players[i].strokeCount);
       DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
@@ -3867,17 +3866,17 @@ void DrawRoundHud(CameraView* view) {
         DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_COLON_X,
             SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), ":");
         sprintf(g_PrintBuffer, "%2d",
-            GetHandicapOffset(
-                GetCourseRecordIndex(), g_HoleIndex, g_Players[i].handicap));
+            GetHandicapOffset(GetCourseRecordIndex(), g_GameState.holeIndex,
+                g_Players[i].handicap));
         DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_X,
             SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
       }
 
       SetTextColor(&g_DisplayListHead, 255, 230, 0);
-      if (D_801B60B9 != 0) {
+      if (g_GameState.unk31 != 0) {
         sprintf(g_PrintBuffer, f_BlankText);
       } else {
-        switch (g_GameMode) {
+        switch (g_GameState.gameMode) {
           case GAME_MODE_STROKE:
           case GAME_MODE_UNK1:
           case GAME_MODE_TOURNAMENT:
@@ -3916,7 +3915,7 @@ void DrawRoundHud(CameraView* view) {
           SCOREBOARD_SCORE_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
       SetTextColor(&g_DisplayListHead, 255, 255, 255);
       if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
-          IsMarkedParFive(GetCourseRecordIndex(), g_HoleIndex)) {
+          IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) {
         contestDistance = g_Players[i].driveDistance;
         if (contestDistance != UNMEASURED_DISTANCE) {
           if (contestDistance == UNCOUNTED_DISTANCE) {
@@ -3933,7 +3932,7 @@ void DrawRoundHud(CameraView* view) {
       }
 
       if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
-          IsParThree(GetCourseRecordIndex(), g_HoleIndex)) {
+          IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex)) {
         contestDistance = g_Players[i].pinDistance;
         if (contestDistance != UNMEASURED_DISTANCE) {
           if (contestDistance == UNCOUNTED_DISTANCE) {
@@ -3955,7 +3954,7 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_RoundHud.unkD && !IsOnDrivingRange() &&
-      g_GameMode == GAME_MODE_SPEED_GOLF && D_801B60B9 == 0) {
+      g_GameState.gameMode == GAME_MODE_SPEED_GOLF && g_GameState.unk31 == 0) {
     hundredths = (s32)(g_GameState.stopwatchFrameCount *
                      ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
         HUNDREDTHS_PER_SECOND;
@@ -4029,22 +4028,22 @@ void LoadHoleIntroImages(void) {
 
   f_LoadedHoleIntroImages = 0;
   if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
-      IsMarkedParFive(g_CourseIndex, g_HoleIndex)) {
+      IsMarkedParFive(g_GameState.courseIndex, g_GameState.holeIndex)) {
     f_HoleContestImage =
         AllocMemory(OpenEncodedAsset(ASSET_LONGEST_DRIVE_IMAGE, &asset));
     ReadEncodedAsset(f_HoleContestImage, &asset);
     f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
   } else if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
-      IsParThree(g_CourseIndex, g_HoleIndex)) {
+      IsParThree(g_GameState.courseIndex, g_GameState.holeIndex)) {
     f_HoleContestImage =
         AllocMemory(OpenEncodedAsset(ASSET_NEAREST_PIN_IMAGE, &asset));
     ReadEncodedAsset(f_HoleContestImage, &asset);
     f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
   }
 
-  if (g_GameMode == GAME_MODE_MATCH_GAME ||
-      g_GameMode == GAME_MODE_GET_CHARACTER) {
-    if (g_IsSuddenDeath) {
+  if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+      g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+    if (g_GameState.isSuddenDeath) {
       f_MatchStandingImage =
           AllocMemory(OpenEncodedAsset(ASSET_SUDDEN_DEATH_IMAGE, &asset));
       ReadEncodedAsset(f_MatchStandingImage, &asset);
@@ -4088,7 +4087,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
   s32 strip;
 
   if (g_RoundHud.isHoleIntroTextShown == 1) {
-    if (g_GameMode == GAME_MODE_RING_SHOT) {
+    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       if (g_IsModuleAlive[MODULE_UNK21]) {
         func_802427E8(&gfx);
       }
@@ -4102,9 +4101,9 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
           gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       if ((g_GameState.betRates[BET_LONGEST_DRIVE] > 0 &&
-              IsMarkedParFive(GetCourseRecordIndex(), g_HoleIndex)) ||
+              IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) ||
           (g_GameState.betRates[BET_NEAREST_PIN] > 0 &&
-              IsParThree(GetCourseRecordIndex(), g_HoleIndex))) {
+              IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex))) {
         gDPLoadTLUT_pal256(
             gfx++, (u32)f_HoleContestImage + IMAGE_HEADER_SIZE & ~7);
         for (strip = 0; strip != CONTEST_IMAGE_STRIP_COUNT; strip++) {
@@ -4126,8 +4125,8 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
         }
       }
 
-      if ((g_GameMode == GAME_MODE_MATCH_GAME ||
-              g_GameMode == GAME_MODE_GET_CHARACTER) &&
+      if ((g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+              g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
           (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
         gDPLoadTLUT_pal256(
             gfx++, (u32)f_MatchStandingImage + IMAGE_HEADER_SIZE & ~7);
@@ -4160,8 +4159,8 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleIntroImages);
 
 /*
  * Draws the course's name and the hole's number, or in the timed modes a
- * stopwatch, before the hole starts. The target reloads g_CourseIndex for
- * each color, which it matches when declared volatile.
+ * stopwatch, before the hole starts. The target reloads g_GameState.courseIndex
+ * for each color, which it matches when declared volatile.
  */
 #ifdef NON_MATCHING
 void DrawHoleIntroText(Gfx** displayListHead) {
@@ -4172,16 +4171,17 @@ void DrawHoleIntroText(Gfx** displayListHead) {
   s32 totalSeconds;
 
   if (g_RoundHud.isHoleIntroTextShown == 1) {
-    if (g_GameMode == GAME_MODE_CLUB_SLOTS) {
+    if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
       if (g_IsModuleAlive[MODULE_UNK26] && func_80242418()) {
         func_80242424(&gfx);
       }
-    } else if (g_GameMode == GAME_MODE_RING_SHOT) {
-    } else if (g_GameMode == GAME_MODE_TRAINING) {
+    } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+    } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       if (g_IsModuleAlive[MODULE_UNK21]) {
         func_80242D40(&gfx);
       }
-    } else if (g_GameMode == GAME_MODE_SPEED_GOLF && D_801B60B9 == 0) {
+    } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
+        g_GameState.unk31 == 0) {
       hundredths = (s32)(g_GameState.stopwatchFrameCount *
                        ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
           HUNDREDTHS_PER_SECOND;
@@ -4201,12 +4201,12 @@ void DrawHoleIntroText(Gfx** displayListHead) {
       sprintf(
           g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
       DrawLargeTextWithShadow(&gfx, HOLE_TITLE_X, COURSE_NAME_Y, g_PrintBuffer,
-          g_CourseNameEnvColors[g_CourseIndex],
-          g_CourseNamePrimColors[g_CourseIndex], TEXT_FLAG_CENTERED);
-      sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
+          g_CourseNameEnvColors[g_GameState.courseIndex],
+          g_CourseNamePrimColors[g_GameState.courseIndex], TEXT_FLAG_CENTERED);
+      sprintf(g_PrintBuffer, "Hole %d", g_GameState.holeIndex + 1);
       DrawLargeTextWithShadow(&gfx, HOLE_TITLE_X, HOLE_NUMBER_Y, g_PrintBuffer,
-          g_CourseNameEnvColors[g_CourseIndex],
-          g_CourseNamePrimColors[g_CourseIndex], TEXT_FLAG_CENTERED);
+          g_CourseNameEnvColors[g_GameState.courseIndex],
+          g_CourseNamePrimColors[g_GameState.courseIndex], TEXT_FLAG_CENTERED);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       gDPSetCycleType(gfx++, G_CYC_1CYCLE);

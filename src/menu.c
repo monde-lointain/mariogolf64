@@ -94,7 +94,6 @@ extern s16 D_800FE33C;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
-extern s8 D_801B60B8;
 extern u8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_800C2BD5;
@@ -629,7 +628,7 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
   s32 index;
 
   playerCount = 0;
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case 0:
     case 6:
     case 10:
@@ -711,7 +710,7 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
     D_800BA9D8 = game->unk8;
   }
 
-  D_801B60B8 = 2;
+  g_GameState.unk30 = 2;
   osSyncPrintf("Go Continue\n");
   return 0;
 }
@@ -787,7 +786,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
       g_RoundStats = game->roundStats;
     }
 
-    D_801B60B8 = 2;
+    g_GameState.unk30 = 2;
     osSyncPrintf("Go Continue\n");
   }
 
@@ -1365,8 +1364,8 @@ void func_8005D1E4(void) {
   u8* unk;
 
   unk = func_8005AF74();
-  unk[0x2E] = g_HoleIndex;
-  unk[0x2F] = g_CourseIndex;
+  unk[0x2E] = g_GameState.holeIndex;
+  unk[0x2F] = g_GameState.courseIndex;
 }
 
 s32 GetClubTournamentGameMode(void) {
@@ -1684,7 +1683,7 @@ void func_8005DAD4(void) {
 }
 
 void func_8005DAFC(void) {
-  switch (g_GameMode) {
+  switch (g_GameState.gameMode) {
     case 5:
       D_800FF4C0 = 2;
       g_MapCamera[0x4C] = 0;

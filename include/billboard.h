@@ -43,13 +43,4 @@ s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down);
 extern Billboard g_Billboards[BILLBOARD_COUNT];
 extern BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT];
 
-/*
- * g_GameState.isMiniGolf, read on its own. Mini-golf keeps billboards near
- * the course's edge, and tilts them less.
- */
-extern s8 g_IsMiniGolf;
-/* g_GameState.unk3B[0], read on its own: the round is a club tournament entered
- * with a code */
-extern s8 g_IsClubTournament;
-
 #endif

@@ -628,8 +628,8 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
         case MESSAGE_CODE_SCORE:
           score = (s16)g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
           isPrinted = TRUE;
-          if (g_GameMode == GAME_MODE_MATCH_GAME ||
-              g_GameMode == GAME_MODE_GET_CHARACTER) {
+          if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+              g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
             if (score == 0) {
               sprintf(g_PrintBuffer, g_MatchScoreEvenText);
             } else if (score < 0) {
@@ -637,8 +637,8 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
             } else {
               sprintf(g_PrintBuffer, g_MatchScoreDownFormat, score);
             }
-          } else if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-              g_GameMode == GAME_MODE_CLUB_SLOTS) {
+          } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+              g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
             sprintf(g_PrintBuffer, g_SkinsScoreFormat, score);
           } else if (score == 0) {
             sprintf(g_PrintBuffer, g_ParScoreEvenText);
@@ -889,8 +889,8 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
         case MESSAGE_CODE_SCORE:
           score = (s16)g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
           isPrinted = TRUE;
-          if (g_GameMode == GAME_MODE_MATCH_GAME ||
-              g_GameMode == GAME_MODE_GET_CHARACTER) {
+          if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+              g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
             if (score == 0) {
               sprintf(g_PrintBuffer, g_MatchScoreEvenText);
             } else if (score < 0) {
@@ -898,8 +898,8 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
             } else {
               sprintf(g_PrintBuffer, g_MatchScoreDownFormat, score);
             }
-          } else if (g_GameMode == GAME_MODE_SKINS_MATCH ||
-              g_GameMode == GAME_MODE_CLUB_SLOTS) {
+          } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+              g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
             sprintf(g_PrintBuffer, g_SkinsScoreFormat, score);
           } else if (score == 0) {
             sprintf(g_PrintBuffer, g_ParScoreEvenText);

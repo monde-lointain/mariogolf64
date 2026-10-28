@@ -284,12 +284,13 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           }
         }
 
-        if (g_IsMiniGolf) {
+        if (g_GameState.isMiniGolf) {
           contact = FindMiniGolfGroundHit(simulation, startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
               simulation->position[AXIS_Z], &D_8022BE10_ovl_05,
               &D_8022BE28_ovl_05);
-          if (g_IsMiniGolf && simulation->isRunning == BALL_STATE_ROLLING) {
+          if (g_GameState.isMiniGolf &&
+              simulation->isRunning == BALL_STATE_ROLLING) {
             s32 putterContact = FindMiniGolfGroundHit(simulation, startX,
                 startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y] - 0x20C,
@@ -367,7 +368,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       f32 pinFraction;
       s32 pinHit;
 
-      if (g_IsMiniGolf
+      if (g_GameState.isMiniGolf
               ? g_Players[simulation->playerIndex].strokeCount == 1
               : GetSurfaceInfo(simulation->unkA2)->kind != SURFACE_KIND_GREEN) {
         pinHit =
@@ -692,7 +693,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
-        (g_IsMiniGolf || IsGameFlagSet(GAME_FLAG_WALL_HITS)) &&
+        (g_GameState.isMiniGolf || IsGameFlagSet(GAME_FLAG_WALL_HITS)) &&
         FindWallHit(startX, startY, startZ, simulation->position[AXIS_X],
             simulation->position[AXIS_Y], simulation->position[AXIS_Z],
             &D_8022BE10_ovl_05, &D_8022BE28_ovl_05) == TRUE &&
@@ -1042,7 +1043,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           keep = 1.0f;
         }
 
-        if (simulation->unk98 < 2 && !g_IsMiniGolf) {
+        if (simulation->unk98 < 2 && !g_GameState.isMiniGolf) {
           keep *= 0.25;
           osSyncPrintf("Ouch! %d, %d\n", startY, simulation->position[AXIS_Y]);
         }
@@ -1129,7 +1130,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         GetTrianglePlane(&triangle, &plane);
       } else {
         GetTrianglePlane(&triangle, &plane);
-        if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST && g_IsMiniGolf) {
+        if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
+            g_GameState.isMiniGolf) {
           f32 pressing = (plane.normal[AXIS_X] * simulation->velocity[AXIS_X]) +
               (plane.normal[AXIS_Y] * simulation->velocity[AXIS_Y]) +
               (plane.normal[AXIS_Z] * simulation->velocity[AXIS_Z]);
@@ -1159,7 +1161,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         switch (simulation->surface) {
           case SURFACE_FAIRWAY:
-            if (!g_IsMiniGolf) {
+            if (!g_GameState.isMiniGolf) {
               f32 lie = GetStepNoise();
 
               if (lie < 0.25f) {
@@ -1242,7 +1244,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           (simulation->velocity[AXIS_X] * friction);
       simulation->velocity[AXIS_Z] = (slopeZ * friction * 0.4f) +
           (simulation->velocity[AXIS_Z] * friction);
-      if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST && g_IsMiniGolf) {
+      if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
+          g_GameState.isMiniGolf) {
         if (groundHeight - startY < simulation->velocity[AXIS_Y]) {
           simulation->velocity[AXIS_Y] = groundHeight - startY + 0x20C;
         } else {

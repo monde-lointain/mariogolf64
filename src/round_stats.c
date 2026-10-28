@@ -53,7 +53,7 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
   CourseRecord* course = &g_CourseRecords[GetCourseRecordIndex()];
   s32 hole;
 
-  if (g_HoleIndex == endHole) {
+  if (g_GameState.holeIndex == endHole) {
     endHole += g_Players[playerIndex].unk26 != 0;
   }
 
@@ -61,7 +61,8 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
     /* The par's cast is there to match */
     score += g_Players[playerIndex].holes[hole].strokes -
         (s8)course->holes[hole].par +
-        GetHandicapOffset(g_CourseIndex, hole, g_Players[playerIndex].handicap);
+        GetHandicapOffset(
+            g_GameState.courseIndex, hole, g_Players[playerIndex].handicap);
   }
 
   return score;
@@ -326,9 +327,9 @@ void UpdateContest(s32 isHoleOver) {
  * moving.
  */
 void RecordCourseRound(void) {
-  UnkE98* record = &GetSaveData()->unkE98[g_CourseIndex];
+  UnkE98* record = &GetSaveData()->unkE98[g_GameState.courseIndex];
   RoundStats* stats = &g_RoundStats;
-  CourseRecord* course = &g_CourseRecords[g_CourseIndex];
+  CourseRecord* course = &g_CourseRecords[g_GameState.courseIndex];
   s32 isAtRoundLimit;
   s32 hole;
   s64 score;
@@ -501,7 +502,8 @@ void StartRoundStats(void) {
   g_RoundStats.averagedDriveCount = 0;
 
   /* The pointer arithmetic is there to match */
-  g_RoundStats.longestDrive = (save->unkE98 + g_CourseIndex)->longestDrive;
+  g_RoundStats.longestDrive =
+      (save->unkE98 + g_GameState.courseIndex)->longestDrive;
   g_RoundStats.averagedDriveTotal = 0;
   g_RoundStats.isDriveAveraged = FALSE;
 }
@@ -517,7 +519,8 @@ void RestartRoundStats(void) {
   g_RoundStats.averagedDriveCount = 0;
 
   /* The pointer arithmetic is there to match */
-  g_RoundStats.longestDrive = (save->unkE98 + g_CourseIndex)->longestDrive;
+  g_RoundStats.longestDrive =
+      (save->unkE98 + g_GameState.courseIndex)->longestDrive;
   g_RoundStats.isDriveAveraged = FALSE;
 }
 

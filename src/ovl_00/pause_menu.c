@@ -54,7 +54,7 @@
 /* The layouts used while D_800C42D0 is set */
 #define PAUSE_LAYOUT_UNK42D0_SPEED_GOLF 7
 #define PAUSE_LAYOUT_UNK42D0 8
-/* The layouts used while g_IsClubTournament is set */
+/* The layouts used while g_GameState.isClubTournament is set */
 #define PAUSE_LAYOUT_UNK3B_SPEED_GOLF 9
 #define PAUSE_LAYOUT_UNK3B 10
 
@@ -201,19 +201,19 @@ void LoadPauseMenu(void) {
   if (!f_IsPauseMenuLoaded) {
     f_IsPauseMenuLoaded = TRUE;
     f_PauseSelection = 0;
-    if (g_IsClubTournament) {
-      if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+    if (g_GameState.isClubTournament) {
+      if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
         f_PauseLayout = PAUSE_LAYOUT_UNK3B_SPEED_GOLF;
       } else {
         f_PauseLayout = PAUSE_LAYOUT_UNK3B;
       }
     } else if (D_800C42D0) {
-      if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+      if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
         f_PauseLayout = PAUSE_LAYOUT_UNK42D0_SPEED_GOLF;
-      } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+      } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
         f_PauseLayout = PAUSE_LAYOUT_RING_SHOT;
-      } else if (g_GameMode == GAME_MODE_TRAINING) {
-        if (g_IsMiniGolf == TRUE) {
+      } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
+        if (g_GameState.isMiniGolf == TRUE) {
           f_PauseLayout = PAUSE_LAYOUT_TRAINING_MINI_GOLF;
         } else if (GetCourseRecordIndex() == COURSE_RECORD_DRIVING_RANGE) {
           f_PauseLayout = PAUSE_LAYOUT_DRIVING_RANGE;
@@ -224,12 +224,12 @@ void LoadPauseMenu(void) {
         f_PauseLayout = PAUSE_LAYOUT_UNK42D0;
       }
     } else {
-      switch (g_GameMode) {
+      switch (g_GameState.gameMode) {
         case GAME_MODE_SPEED_GOLF:
           f_PauseLayout = PAUSE_LAYOUT_SPEED_GOLF;
           break;
         case GAME_MODE_TRAINING:
-          if (g_IsMiniGolf == TRUE) {
+          if (g_GameState.isMiniGolf == TRUE) {
             f_PauseLayout = PAUSE_LAYOUT_TRAINING_MINI_GOLF;
           } else if (GetCourseRecordIndex() == COURSE_RECORD_DRIVING_RANGE) {
             f_PauseLayout = PAUSE_LAYOUT_DRIVING_RANGE;
@@ -454,7 +454,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         StartFreeLook();
         break;
       case PAUSE_ACTION_RETRY_HOLE:
-        if (g_GameMode == GAME_MODE_RING_SHOT) {
+        if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
           PlaySound(SOUND_RING_SHOT_RETRY, RING_SHOT_RETRY_SOUND_CHANNEL,
               RING_SHOT_RETRY_SOUND_VOLUME);
         }

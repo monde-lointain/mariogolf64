@@ -76,6 +76,9 @@
 #define MENU_BOB_HEIGHT 5.0f
 
 /* The bobbing of the menus' items: its phase, and the offset that it gives */
+/* g_GameState.gameMode under a symbol of its own, which func_801F6B28_ovl_01
+ * needs to match */
+extern u32 g_GameMode;
 extern f32 f_MenuBobOffset;
 extern f32 f_MenuBobPhase;
 
@@ -144,7 +147,7 @@ extern u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 #define MENU_LAYER_UNK20 (1 << 5)
 #define MENU_LAYER_UNK80 (1 << 7)
 
-/* Values of D_801B60B9, the replay that leaving the menus starts */
+/* Values of g_GameState.unk31, the replay that leaving the menus starts */
 #define REPLAY_KIND_NONE 0
 #define REPLAY_KIND_RING_SHOT 2
 #define GAME_STATE_UNK13 13
@@ -158,19 +161,16 @@ extern u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 
 extern s8 D_801052E8;
 extern s32 D_800FE334;
-extern s8 D_801B60B9;
 extern u8 D_801323E6;
 extern u8 g_OptionBits;
 /* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
 extern u8 g_SoundOptionBits;
 extern s32 D_8022BE18_ovl_01;
-extern s32 D_801B609C;
 extern s32 D_800FBD40[];
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_8022BE2C_ovl_01;
 extern s16 D_800C200C[MAX_PLAYER_COUNT];
 extern void* D_8010526C[2];
-extern s32 D_801B60B4;
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern s8 D_8022F8C5_ovl_01;
@@ -180,9 +180,6 @@ extern s32 D_8022BE84_ovl_01;
 extern u8 D_8022BE89_ovl_01;
 extern s32 D_802322F0_ovl_01;
 extern s32 D_802322F4_ovl_01;
-extern s8 D_801B60B8;
-extern s32 g_IsSuddenDeath;
-extern s32 D_801B60A8;
 extern s32 D_800C42D0;
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
@@ -261,7 +258,6 @@ extern void* D_80106100;
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
 extern s8 D_801323D0;
-extern s8 D_801B60C5;
 extern u8 D_801B70F0[MAXCONTROLLERS];
 extern void* D_801B93E0[5];
 extern s32 D_8022BE08_ovl_01;
@@ -379,27 +375,27 @@ void StartLoadingChosenHole(void) {
   D_800FE334 = 1;
   if (g_MenuScreen == MENU_SCREEN_UNK23 ||
       g_MenuScreen == MENU_SCREEN_RING_SHOT_RECORDS) {
-    g_CourseIndex = g_MenuChoices.courseIndex;
-    g_HoleIndex = g_MenuChoices.holeIndex;
+    g_GameState.courseIndex = g_MenuChoices.courseIndex;
+    g_GameState.holeIndex = g_MenuChoices.holeIndex;
   } else if (g_MenuScreen == MENU_SCREEN_CLUB_TOURNAMENT) {
-    g_CourseIndex = GetClubTournamentCourse();
-    g_IsMiniGolf = g_CourseIndex >= MINI_GOLF_COURSE_INDEX;
-    g_HoleIndex = 0;
-  } else if (g_GameMode == GAME_MODE_TRAINING) {
-    g_CourseIndex = 0;
-    g_HoleIndex = 0;
+    g_GameState.courseIndex = GetClubTournamentCourse();
+    g_GameState.isMiniGolf = g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX;
+    g_GameState.holeIndex = 0;
+  } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
+    g_GameState.courseIndex = 0;
+    g_GameState.holeIndex = 0;
   } else {
-    if (g_IsMiniGolf) {
-      g_CourseIndex = g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
+    if (g_GameState.isMiniGolf) {
+      g_GameState.courseIndex = g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
           (g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD);
     } else {
-      g_CourseIndex = D_801323A0.courseChoice;
+      g_GameState.courseIndex = D_801323A0.courseChoice;
     }
 
-    g_HoleIndex = GetFirstHoleIndex();
+    g_GameState.holeIndex = GetFirstHoleIndex();
   }
 
-  D_801B609C = 0;
+  g_GameState.unk14 = 0;
   g_HoleConditions.isRaining = FALSE;
   g_HoleConditions.windSpeed =
       (rand() & CHOSEN_HOLE_WIND_SPEED_MASK) * CHOSEN_HOLE_WIND_SPEED_STEP;
@@ -408,13 +404,13 @@ void StartLoadingChosenHole(void) {
   g_LightPitch = CHOSEN_HOLE_LIGHT_PITCH;
   g_LightYaw = CHOSEN_HOLE_LIGHT_YAW;
   SetGameFlag(GAME_FLAG_HOLE_LOADED);
-  g_PlayerCount = 1;
+  g_GameState.playerCount = 1;
   StopLoaderThread();
   StartLoaderThread();
 }
 
 s32 GetChosenCourseIndex(void) {
-  if (g_IsMiniGolf) {
+  if (g_GameState.isMiniGolf) {
     return g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
         (g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD);
   }
@@ -487,12 +483,12 @@ void func_801F4C78_ovl_01(void) {
   }
 
   if (g_MenuScreen == 6) {
-    if ((GetChosenCourseIndex() != g_CourseIndex) || !D_800FE334) {
+    if ((GetChosenCourseIndex() != g_GameState.courseIndex) || !D_800FE334) {
       StartLoadingChosenHole();
     }
   } else if (g_MenuScreen == MENU_SCREEN_UNK23) {
-    if ((g_HoleIndex != g_MenuChoices.holeIndex) ||
-        (g_CourseIndex != g_MenuChoices.courseIndex) || !D_800FE334) {
+    if ((g_GameState.holeIndex != g_MenuChoices.holeIndex) ||
+        (g_GameState.courseIndex != g_MenuChoices.courseIndex) || !D_800FE334) {
       StartLoadingChosenHole();
     }
   }
@@ -532,7 +528,7 @@ void func_801F4C78_ovl_01(void) {
   switch (g_MenuScreen) {
     case MENU_SCREEN_TITLE:
       memset(&g_GameState, -1, sizeof(GameState));
-      g_IsClubTournament = FALSE;
+      g_GameState.isClubTournament = FALSE;
       func_801F70F0_ovl_01();
       break;
 
@@ -586,7 +582,7 @@ void func_801F4C78_ovl_01(void) {
       break;
 
     case 6:
-      if (!g_IsMiniGolf) {
+      if (!g_GameState.isMiniGolf) {
         func_801F8BAC_ovl_01();
       } else {
         func_801F93D8_ovl_01();
@@ -920,7 +916,7 @@ void func_801F4C78_ovl_01(void) {
         break;
 
       case 6:
-        if (g_IsMiniGolf) {
+        if (g_GameState.isMiniGolf) {
           for (index = 0; index != MINI_GOLF_DISC_IMAGE_COUNT; index++) {
             OpenEncodedAsset(
                 D_800C2098[(g_MenuChoices.unk14 * MINI_GOLF_DISC_IMAGE_COUNT) +
@@ -1077,18 +1073,18 @@ void func_801F4C78_ovl_01(void) {
 
   if (g_MenuScreen == MENU_SCREEN_EXIT) {
     TransferSaveData(save, TRUE);
-    if (g_GameMode == GAME_MODE_TRAINING) {
+    if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       g_MenuScreen = 6;
     } else {
       g_MenuScreen = 18;
     }
 
-    if (D_801B60B8) {
+    if (g_GameState.unk30) {
       InitPlay(PLAY_KIND_WITHOUT_HOLE_DISPLAY);
       InitRoundHud();
       osSyncPrintf("ContPhase2\n");
     } else {
-      D_801B60C5 = FALSE;
+      g_GameState.saveCount = FALSE;
       InitPlay(PLAY_KIND_WITHOUT_HOLE_DISPLAY);
       func_801F6B28_ovl_01();
       InitRoundHud();
@@ -1118,8 +1114,8 @@ void func_801F6A38_ovl_01(void) {
   s32 otherIndex;
 
   D_801051F0 = TRUE;
-  for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
-    for (otherIndex = 0; otherIndex != g_PlayerCount; otherIndex++) {
+  for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+    for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
       if (playerIndex != otherIndex &&
           D_800C1FF4[playerIndex] != NO_CONTROLLER_INDEX &&
           D_800C1FF4[otherIndex] != NO_CONTROLLER_INDEX &&
@@ -1129,9 +1125,9 @@ void func_801F6A38_ovl_01(void) {
     }
   }
 
-  for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
+  for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     g_Players[playerIndex].soundPan =
-        D_8022F8E4_ovl_01[g_PlayerCount - 1][playerIndex];
+        D_8022F8E4_ovl_01[g_GameState.playerCount - 1][playerIndex];
   }
 }
 #else
@@ -1154,8 +1150,8 @@ void func_801F6B28_ovl_01(void) {
   s32 column;
 
   memset(&g_RoundHud, 0, sizeof(g_RoundHud));
-  if (D_801B60B9 != REPLAY_KIND_NONE) {
-    if (D_801B60B9 == REPLAY_KIND_RING_SHOT) {
+  if (g_GameState.unk31 != REPLAY_KIND_NONE) {
+    if (g_GameState.unk31 == REPLAY_KIND_RING_SHOT) {
       LoadRingShotRecord(
           (RingShotRecord*)&save->unk1DF0[memory->ringShotReplaySlot]);
     } else {
@@ -1163,8 +1159,8 @@ void func_801F6B28_ovl_01(void) {
           (PlayRecord*)&save->rankedRecords[func_8021E468_ovl_01()]);
     }
 
-    D_801B609C = 0;
-    g_PlayerCount = 1;
+    g_GameState.unk14 = 0;
+    g_GameState.playerCount = 1;
     g_GameState.unk0 = 0;
     return;
   }
@@ -1172,9 +1168,9 @@ void func_801F6B28_ovl_01(void) {
   StartBets();
   if (func_8022BDD0_ovl_01()) {
     g_SkippedNines = 0;
-    g_CourseIndex = GetClubTournamentCourse();
-    g_GameMode = GetClubTournamentGameMode();
-    g_IsMiniGolf = g_CourseIndex >= MINI_GOLF_COURSE_INDEX;
+    g_GameState.courseIndex = GetClubTournamentCourse();
+    g_GameState.gameMode = GetClubTournamentGameMode();
+    g_GameState.isMiniGolf = g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX;
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
       D_801B60BA[index] = -1;
     }
@@ -1191,7 +1187,7 @@ void func_801F6B28_ovl_01(void) {
     if (g_GameMode == GAME_MODE_RING_SHOT) {
       g_CourseIndex = g_MenuChoices.courseIndex;
     } else if (g_GameMode == GAME_MODE_TRAINING) {
-      g_CourseIndex = 0;
+      g_GameState.courseIndex = 0;
     } else {
       g_CourseIndex = GetChosenCourseIndex();
     }
@@ -1225,19 +1221,19 @@ void func_801F6B28_ovl_01(void) {
     }
   }
 
-  D_801B609C = 0;
-  g_PlayerCount = g_ChosenPlayerCount;
-  if (g_GameMode == GAME_MODE_GET_CHARACTER) {
-    g_PlayerCount = 2;
+  g_GameState.unk14 = 0;
+  g_GameState.playerCount = g_ChosenPlayerCount;
+  if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+    g_GameState.playerCount = 2;
   }
 
   g_GameState.unk0 = GAME_STATE_UNK13;
   func_801F6A38_ovl_01();
-  if (g_GameMode == GAME_MODE_TOURNAMENT) {
+  if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     StartRoundStats();
   }
 
-  for (index = 0; index != g_PlayerCount; index++) {
+  for (index = 0; index != g_GameState.playerCount; index++) {
     player = &g_Players[index];
     player->handicap = D_8023BFDC_ovl_01[index];
     player->unk22 = D_800FBE08[index];
@@ -1284,7 +1280,7 @@ void func_801F6B28_ovl_01(void) {
       player->clubs[slot] = NO_CLUB;
     }
 
-    if (g_GameMode == GAME_MODE_TRAINING) {
+    if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       player->unk28 = PLAYER_UNK28_TRAINING;
     } else if (g_SkippedNines == BACK_NINE_SKIPPED ||
         g_SkippedNines == FRONT_NINE_SKIPPED) {
@@ -1296,7 +1292,7 @@ void func_801F6B28_ovl_01(void) {
     LoadPlayerFace(index, (s8)player->characterIndex, (s8)player->paletteIndex);
   }
 
-  if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+  if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     g_Players[1].unk1E[0] = 1;
     g_Players[1].controllerIndex = MAXCONTROLLERS;
   }
@@ -1317,11 +1313,11 @@ void func_801F70F0_ovl_01(void) {
   D_8023BFD0_ovl_01 = 0;
   D_802322F0_ovl_01 = 0;
   D_802322F4_ovl_01 = 0;
-  D_801B60B8 = 0;
-  g_IsSuddenDeath = 0;
-  g_IsMiniGolf = FALSE;
-  D_801B60B9 = 0;
-  D_801B60A8 = 0;
+  g_GameState.unk30 = 0;
+  g_GameState.isSuddenDeath = 0;
+  g_GameState.isMiniGolf = FALSE;
+  g_GameState.unk31 = 0;
+  g_GameState.currentPlayerIndex = 0;
   if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
     if (GetWipeProgress() == 0) {
       g_Scene = SCENE_SWAPPING_MODULES;
@@ -1664,14 +1660,14 @@ void func_801F7D28_ovl_01(void) {
     D_8023BFD0_ovl_01 = 0;
     D_802322F0_ovl_01 = 0;
     D_802322F4_ovl_01 = 0;
-    g_IsMiniGolf = FALSE;
+    g_GameState.isMiniGolf = FALSE;
     mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
-    D_801B60B4 = rand();
+    g_GameState.unk2C = rand();
     switch (mode) {
       case MODE_ICON_TOURNAMENT:
         PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_GameMode = GAME_MODE_TOURNAMENT;
+        g_GameState.gameMode = GAME_MODE_TOURNAMENT;
         g_MenuScreen = MENU_SCREEN_UNK6;
         D_800FF4C0 = 2;
         MAP_CAMERA_MODE_TOP_BYTE = 0;
@@ -1681,8 +1677,8 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_GET_CHARACTER:
         PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_GameMode = GAME_MODE_GET_CHARACTER;
-        g_PlayerCount = 2;
+        g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
+        g_GameState.playerCount = 2;
         g_MenuScreen = MENU_SCREEN_UNK16;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
@@ -1703,7 +1699,7 @@ void func_801F7D28_ovl_01(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_UNK6;
         g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
-        g_GameMode = GAME_MODE_STROKE;
+        g_GameState.gameMode = GAME_MODE_STROKE;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
@@ -1729,7 +1725,7 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_MATCH_GAME:
         PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_GameMode = GAME_MODE_MATCH_GAME;
+        g_GameState.gameMode = GAME_MODE_MATCH_GAME;
         g_MenuScreen = MENU_SCREEN_UNK6;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
@@ -1740,7 +1736,7 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_SKINS_MATCH:
         PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_GameMode = GAME_MODE_SKINS_MATCH;
+        g_GameState.gameMode = GAME_MODE_SKINS_MATCH;
         g_MenuScreen = MENU_SCREEN_UNK6;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
@@ -1751,7 +1747,7 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_SPEED_GOLF:
         PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_GameMode = GAME_MODE_SPEED_GOLF;
+        g_GameState.gameMode = GAME_MODE_SPEED_GOLF;
         g_MenuScreen = MENU_SCREEN_UNK6;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
@@ -1776,8 +1772,8 @@ void func_801F7D28_ovl_01(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_UNK6;
         g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
-        g_GameMode = GAME_MODE_STROKE;
-        g_IsMiniGolf = TRUE;
+        g_GameState.gameMode = GAME_MODE_STROKE;
+        g_GameState.isMiniGolf = TRUE;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
@@ -1803,7 +1799,7 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_TRAINING:
         PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-        g_GameMode = GAME_MODE_TRAINING;
+        g_GameState.gameMode = GAME_MODE_TRAINING;
         g_SkippedNines = 0;
         StartLoadingChosenHole();
         g_MenuScreen = MENU_SCREEN_UNK26;
@@ -1816,7 +1812,7 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_UNK9:
         PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_GameMode = GAME_MODE_UNK1;
+        g_GameState.gameMode = GAME_MODE_UNK1;
         g_MenuScreen = MENU_SCREEN_UNK6;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
@@ -1827,7 +1823,7 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_RING_SHOT:
         PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-        g_GameMode = GAME_MODE_RING_SHOT;
+        g_GameState.gameMode = GAME_MODE_RING_SHOT;
         g_MenuScreen = MENU_SCREEN_UNK23;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
@@ -1849,7 +1845,7 @@ void func_801F7D28_ovl_01(void) {
 
         PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_GameMode = GAME_MODE_CLUB_SLOTS;
+        g_GameState.gameMode = GAME_MODE_CLUB_SLOTS;
         g_MenuScreen = MENU_SCREEN_UNK6;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
@@ -2323,7 +2319,7 @@ void func_801F93D8_ovl_01(void) {
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
     g_MenuChoices.unk15 = 0;
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
-    g_IsMiniGolf = FALSE;
+    g_GameState.isMiniGolf = FALSE;
     g_MenuScreen = MENU_SCREEN_UNK5;
     MAP_CAMERA_MODE_TOP_BYTE = 0;
     D_800FE334 = 0;
@@ -2404,7 +2400,7 @@ void func_801F9BCC_ovl_01(void) {
     if (g_MenuPressedButtons & A_BUTTON) {
       PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_MenuScreen = MENU_SCREEN_EXIT;
-      g_GameMode = GAME_MODE_STROKE;
+      g_GameState.gameMode = GAME_MODE_STROKE;
       SaveOrContinueGameByMode(TRUE);
       return;
     }
@@ -2434,8 +2430,8 @@ void func_801F9C58_ovl_01(void) {
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_HELP;
           if (IsGameFlagSet(GAME_FLAG_UNK56)) {
-            g_GameMode = GAME_MODE_GET_CHARACTER;
-            g_PlayerCount = 2;
+            g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
+            g_GameState.playerCount = 2;
             D_800FF4C0 = 1;
             MAP_CAMERA_MODE_TOP_BYTE = 2;
             D_801B5634 = 0;
@@ -2491,8 +2487,8 @@ void func_801F9E38_ovl_01(void) {
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_HELP;
           if (IsGameFlagSet(GAME_FLAG_UNK56)) {
-            g_GameMode = GAME_MODE_GET_CHARACTER;
-            g_PlayerCount = 2;
+            g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
+            g_GameState.playerCount = 2;
             D_800FF4C0 = 1;
             MAP_CAMERA_MODE_TOP_BYTE = 2;
             D_801B5634 = 0;
@@ -3066,7 +3062,7 @@ void func_801FAFEC_ovl_01(void) {
     PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     g_MenuScreen = MENU_SCREEN_EXIT;
     D_800FE334 = 0;
-    D_801B60B9 = 2;
+    g_GameState.unk31 = 2;
     return;
   }
 

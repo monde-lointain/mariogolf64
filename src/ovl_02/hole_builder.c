@@ -207,6 +207,9 @@ typedef struct HoleAssetIds {
   {(first), (first) + 1, (first) + 2, (first) + 3, (first) + 4, (first) + 5, \
       (first) + 6}
 
+/* g_GameState.isMiniGolf under a symbol of its own, which BuildHole needs to
+ * match */
+extern s8 g_IsMiniGolf;
 extern AssetFile f_HoleAsset;
 extern u8* f_ReadCursor;
 extern u8* f_BuildBuffer;
@@ -2385,7 +2388,7 @@ void BuildHole(s32 course, s32 hole) {
     OpenHoleAsset(course, hole, HOLE_ASSET_TREES);
     ReadBillboards();
     if (!g_GameState.unk30 && g_Scene != SCENE_STAFF_ROLL) {
-      if (g_GameMode == GAME_MODE_UNK12) {
+      if (g_GameState.gameMode == GAME_MODE_UNK12) {
         OpenAssetFile(UNK12_UNK6_ASSET, &asset);
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].unk6, &asset);
@@ -2394,7 +2397,7 @@ void BuildHole(s32 course, s32 hole) {
       ReadAssetFile(&D_800BA9D8, GetAssetFileSize(&asset), &asset);
     }
 
-    if (g_GameMode == GAME_MODE_UNK12) {
+    if (g_GameState.gameMode == GAME_MODE_UNK12) {
       OpenAssetFile(UNK12_POINTS_ASSET, &asset);
     } else {
       OpenAssetFile(f_HoleAssetIds[course][hole].points, &asset);
@@ -2979,7 +2982,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
   f_ReadCursor = HOLE_FILE_BUFFER;
   switch (kind) {
     case HOLE_ASSET_VERTICES:
-      if (g_GameMode == GAME_MODE_UNK12) {
+      if (g_GameState.gameMode == GAME_MODE_UNK12) {
         OpenAssetFile(UNK12_VERTICES_ASSET, &f_HoleAsset);
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].vertices, &f_HoleAsset);
@@ -2987,7 +2990,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 
       break;
     case HOLE_ASSET_MIDPOINTS:
-      if (g_GameMode == GAME_MODE_UNK12) {
+      if (g_GameState.gameMode == GAME_MODE_UNK12) {
         OpenAssetFile(UNK12_MIDPOINTS_ASSET, &f_HoleAsset);
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].midpoints, &f_HoleAsset);
@@ -2995,7 +2998,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 
       break;
     case HOLE_ASSET_TREES:
-      if (g_GameMode == GAME_MODE_UNK12) {
+      if (g_GameState.gameMode == GAME_MODE_UNK12) {
         OpenAssetFile(UNK12_TREES_ASSET, &f_HoleAsset);
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].trees, &f_HoleAsset);
@@ -3003,7 +3006,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 
       break;
     case HOLE_ASSET_TRIANGLES:
-      if (g_GameMode == GAME_MODE_UNK12) {
+      if (g_GameState.gameMode == GAME_MODE_UNK12) {
         OpenAssetFile(UNK12_TRIANGLES_ASSET, &f_HoleAsset);
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].triangles, &f_HoleAsset);
@@ -3011,7 +3014,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 
       break;
     case HOLE_ASSET_ATTRIBUTES:
-      if (g_GameMode == GAME_MODE_UNK12) {
+      if (g_GameState.gameMode == GAME_MODE_UNK12) {
         OpenAssetFile(UNK12_ATTRIBUTES_ASSET, &f_HoleAsset);
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].attributes, &f_HoleAsset);

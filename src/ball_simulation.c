@@ -405,7 +405,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         s32 hitsBillboard;
         s32 holeHit;
 
-        if (g_GameMode == GAME_MODE_RING_SHOT &&
+        if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
             (simulation->purpose == LAUNCH_PURPOSE_STROKE ||
                 simulation->purpose == LAUNCH_PURPOSE_TRIAL) &&
             FindRingHit(startX, startY, startZ, simulation->position[AXIS_X],
@@ -432,11 +432,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->unkB4 = 0;
         }
 
-        if (g_IsMiniGolf) {
+        if (g_GameState.isMiniGolf) {
           contact = FindMiniGolfGroundHit(simulation, startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
               simulation->position[AXIS_Z], &hit, &hitFraction);
-          if (g_IsMiniGolf && simulation->isRunning == BALL_STATE_ROLLING) {
+          if (g_GameState.isMiniGolf &&
+              simulation->isRunning == BALL_STATE_ROLLING) {
             hitsBillboard = FindMiniGolfGroundHit(simulation, startX, startY,
                 startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y] - 0x20C,
@@ -519,7 +520,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       f32 pinFraction;
       s32 pinHit;
 
-      if (g_IsMiniGolf ||
+      if (g_GameState.isMiniGolf ||
           GetSurfaceInfo(simulation->unkA2)->kind != SURFACE_KIND_GREEN) {
         pinHit =
             FindPinHit(startX, startY, startZ, simulation->position[AXIS_X],
@@ -917,7 +918,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
-        (g_IsMiniGolf || IsGameFlagSet(GAME_FLAG_WALL_HITS))) {
+        (g_GameState.isMiniGolf || IsGameFlagSet(GAME_FLAG_WALL_HITS))) {
       CoursePoint hitPosition;
       f32 reflected[3];
       PlaneTriangle wall;
@@ -1241,7 +1242,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       substepCount += (fraction < 0.4f) & (substepCount == 1);
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
-          speed >= 711.168f && !g_IsMiniGolf) {
+          speed >= 711.168f && !g_GameState.isMiniGolf) {
         f32 side[3];
 
         side[AXIS_Y] = 0.0f;
@@ -1435,7 +1436,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           break;
       }
 
-      if (g_IsMiniGolf) {
+      if (g_GameState.isMiniGolf) {
         spin = 0.0f;
       }
 
@@ -1484,7 +1485,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           keep = 0.1f;
         }
 
-        if (simulation->unk98 < 2 && !g_IsMiniGolf) {
+        if (simulation->unk98 < 2 && !g_GameState.isMiniGolf) {
           keep *= 0.25;
         }
 
@@ -1585,13 +1586,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               (plane.normal[AXIS_Y] * velocity[AXIS_Y]) +
               (plane.normal[AXIS_Z] * velocity[AXIS_Z]);
 
-          if ((g_IsMiniGolf && pressing >= 655.0f) || pressing >= 7111.68f) {
+          if ((g_GameState.isMiniGolf && pressing >= 655.0f) ||
+              pressing >= 7111.68f) {
             f32 along[3];
             f32 damping;
 
             osSyncPrintf("Jump\n");
             damping = 1.0f;
-            if (!g_IsMiniGolf) {
+            if (!g_GameState.isMiniGolf) {
               damping = 0.1f;
             }
 
@@ -1613,7 +1615,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           }
         }
 
-        if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST && !g_IsMiniGolf &&
+        if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
+            !g_GameState.isMiniGolf &&
             fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >= 711.168f) {
           f32 tilt = (GetStepNoise() - 0.5f) * 0.5f;
 
@@ -1627,7 +1630,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         switch (simulation->surface) {
           case SURFACE_FAIRWAY:
-            if (!g_IsMiniGolf) {
+            if (!g_GameState.isMiniGolf) {
               f32 lie = GetStepNoise();
 
               if (lie < 0.25f) {
@@ -1654,7 +1657,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         groundHeight = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        if (!g_IsMiniGolf &&
+        if (!g_GameState.isMiniGolf &&
             groundHeight < simulation->position[AXIS_Y] - 0x1200) {
           simulation->position[AXIS_X] = startX;
           simulation->position[AXIS_Y] = startY;
@@ -1749,7 +1752,8 @@ TAKE_OFF:
           (slopeX * friction * 0.4f) + (velocity[AXIS_X] * friction);
       velocity[AXIS_Z] =
           (slopeZ * friction * 0.4f) + (velocity[AXIS_Z] * friction);
-      if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST && g_IsMiniGolf) {
+      if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
+          g_GameState.isMiniGolf) {
         if ((f32)(groundHeight - startY) < velocity[AXIS_Y]) {
           velocity[AXIS_Y] = groundHeight - startY + 0x20C;
         } else {
@@ -2221,7 +2225,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   }
 
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    if ((club->surfaceMask & CLUB_SURFACE_GREEN) && !g_IsMiniGolf) {
+    if ((club->surfaceMask & CLUB_SURFACE_GREEN) && !g_GameState.isMiniGolf) {
       pitch += (u16)GetAimSlopeAngle(&g_Players[shot->unk18], shot) *
           BINARY_ANGLE_TO_RADIANS;
     } else {
