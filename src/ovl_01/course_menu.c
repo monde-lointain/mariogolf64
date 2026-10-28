@@ -80,6 +80,7 @@
 #define OFF_FIRST_GLYPH 16
 #define OFF_GLYPH_COUNT 2
 #define MENU_GLYPH_POINT 18
+#define DECIMAL_BASE 10
 
 /* The arrows beside the statistics that show there are more rows above or below
  */
@@ -1089,7 +1090,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
 #define DECIMAL_WHOLE_LIMIT 999
 #define DECIMAL_DIGIT_LIMIT 6
 #define HUNDREDTHS_PER_UNIT 100.0f
-#define DECIMAL_BASE 10
 /* The point is drawn half a glyph back, over the right half of the last whole
  * digit */
 #define DECIMAL_POINT_OFFSET (MENU_GLYPH_SIZE / 2)
