@@ -37,6 +37,29 @@
     (absValue < 0.0f) ? -absValue : absValue; \
   })
 
+/* The surface table's names, in half-width katakana. KMC emitted the table's
+ * strings from its last entry to its first, and stored each name once. */
+const char D_8020C190_ovl_05[] = "ﾚｯﾄﾞ";
+const char D_8020C198_ovl_05[] = "ﾌﾞﾙｰ";
+const char D_8020C1A0_ovl_05[] = "ｸﾞﾘｰﾝ";
+const char D_8020C1A8_ovl_05[] = "TEE UP";
+const char D_8020C1B0_ovl_05[] = "ｱｳﾄ ｵﾌﾞ ｺｰｽ";
+const char D_8020C1BC_ovl_05[] = "            ";
+const char D_8020C1CC_ovl_05[] = "ｳｴｽﾄｴﾘｱ";
+const char D_8020C1D4_ovl_05[] = "ﾃﾞｨｰﾌﾟﾗﾌ";
+const char D_8020C1E0_ovl_05[] = "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ";
+const char D_8020C1EC_ovl_05[] = "ｾﾐﾗﾌ";
+const char D_8020C1F4_ovl_05[] = "ｸﾞﾘｰﾝ ｴｯｼﾞ";
+const char D_8020C200_ovl_05[] = "ﾛｯｸ";
+const char D_8020C204_ovl_05[] = "ﾃｨｰｸﾞﾗｳﾝﾄﾞ";
+const char D_8020C210_ovl_05[] = "ｶｰﾄｳｪｲ";
+const char D_8020C218_ovl_05[] = "ｳｫｰﾀｰﾊｻﾞｰﾄﾞ";
+const char D_8020C224_ovl_05[] = "ｵﾝ ｸﾞﾘｰﾝ";
+const char D_8020C230_ovl_05[] = "ﾊﾞﾝｶｰ";
+const char D_8020C238_ovl_05[] = "ﾗﾌ";
+const char D_8020C23C_ovl_05[] = "ﾌｪｱｳｪｲ";
+const char D_8020C244_ovl_05[] = "O.B.";
+
 /* The opening's own copy of f_SurfaceInfo */
 extern SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT];
 
