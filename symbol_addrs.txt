@@ -895,6 +895,7 @@ DrawChalkboard = 0x80070BCC; // type:func
 g_GameBoyCharacters = 0x800FF1E8; // size:0x230
 f_RainCenter = 0x800FF418; // size:0x8
 g_GameBoyTransfer = 0x800FE450; // size:0x848
+g_HasBroughtOverCharacter = 0x800C42D0; // size:0x4
 f_IsBootTransmitPending = 0x800C42D4;
 f_HasRumblePak = 0x8012D3B0; // size:0x10
 f_HandImages = 0x800E1C20;

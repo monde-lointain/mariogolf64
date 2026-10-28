@@ -678,7 +678,7 @@ extern s32 g_PlayStateFrameCount;
 extern s32 g_PlayFrameCount;
 extern s8 g_IsPlayStateBackedUp;
 extern s32 g_DebugCupIndex;
-extern s32 D_800C42D0;
+extern s32 g_HasBroughtOverCharacter;
 extern s8 D_800C3068;
 void func_80241800();
 void func_80242384();
@@ -1293,7 +1293,7 @@ void UpdatePlay(void) {
                   func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
                       UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
                   nextStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
-                } else if (D_800C42D0) {
+                } else if (g_HasBroughtOverCharacter) {
                   nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
                 } else {
                   g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
@@ -1415,7 +1415,7 @@ DIM_BACKDROP:
                 func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
                     UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
                 g_HoleEndStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
-              } else if (D_800C42D0) {
+              } else if (g_HasBroughtOverCharacter) {
                 g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
               } else {
                 g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
@@ -1428,7 +1428,7 @@ DIM_BACKDROP:
           case HOLE_END_STEP_RING_SHOT_COURSE_NOTICE:
             if (func_801F5F2C()) {
               func_801F5E9C();
-              if (D_800C42D0) {
+              if (g_HasBroughtOverCharacter) {
                 g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
               } else {
                 g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
@@ -1519,7 +1519,7 @@ DIM_BACKDROP:
 
             if (g_PlayExit == PLAY_EXIT_NONE) {
               StartLoaderThread();
-              if (D_800C30A4 && !D_800C42D0) {
+              if (D_800C30A4 && !g_HasBroughtOverCharacter) {
                 g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
               } else {
                 StartWipe(WIPE_CLOSING);

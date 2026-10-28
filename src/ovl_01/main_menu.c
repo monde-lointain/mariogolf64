@@ -171,7 +171,7 @@ extern s32 D_8022BE84_ovl_01;
 extern u8 D_8022BE89_ovl_01;
 extern s32 D_802322F0_ovl_01;
 extern s32 D_802322F4_ovl_01;
-extern s32 D_800C42D0;
+extern s32 g_HasBroughtOverCharacter;
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
@@ -1347,7 +1347,7 @@ void func_801F70F0_ovl_01(void) {
         D_800FBD40[index + 2] = 0;
       }
     } else if (titleChoice == TITLE_CHOICE_SAVED_GAMES) {
-      if (D_800C42D0) {
+      if (g_HasBroughtOverCharacter) {
         D_801B9410 = 0;
         LoadWipeShape(TRANSMIT_WIPE_SHAPE);
         StartWipe(WIPE_CLOSING);
@@ -3721,8 +3721,8 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
 #define TITLE_LABEL_FIRST_PLAYER_COUNT 1
 #define TITLE_LABEL_FIRST_OTHER_CHOICE 4
 #define TITLE_LABEL_SAVED_GAMES 5
-/* While D_800C42D0 is set the saved games' row leads to Transmit, and this
- * label takes its place */
+/* While g_HasBroughtOverCharacter is set the saved games' row leads to
+ * Transmit, and this label takes its place */
 #define TITLE_LABEL_TRANSMIT 7
 /* A plain-text menu under the board: "MAIN MENU", "1P GAME" to "3P GAME" and
  * three figures */
@@ -3790,7 +3790,8 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
       continue;
     }
     {
-      if (labelIndex == TITLE_LABEL_SAVED_GAMES && D_800C42D0 == TRUE) {
+      if (labelIndex == TITLE_LABEL_SAVED_GAMES &&
+          g_HasBroughtOverCharacter == TRUE) {
         labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
       } else {
         labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
@@ -3825,7 +3826,8 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
         (labelIndex ==
                 D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE &&
             D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
-      if (labelIndex == TITLE_LABEL_SAVED_GAMES && D_800C42D0 == TRUE) {
+      if (labelIndex == TITLE_LABEL_SAVED_GAMES &&
+          g_HasBroughtOverCharacter == TRUE) {
         labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
       } else {
         labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;

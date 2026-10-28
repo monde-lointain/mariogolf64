@@ -50,9 +50,9 @@ enum PauseMenuRequest {
 /* Match Game, Get Character, Skins Match and Club Slots */
 #define PAUSE_LAYOUT_VERSUS 5
 #define PAUSE_LAYOUT_STROKE 6 /* Stroke, Tournament and the modes like them */
-/* The layouts used while D_800C42D0 is set */
-#define PAUSE_LAYOUT_UNK42D0_SPEED_GOLF 7
-#define PAUSE_LAYOUT_UNK42D0 8
+/* The layouts used while g_HasBroughtOverCharacter is set */
+#define PAUSE_LAYOUT_BROUGHT_OVER_SPEED_GOLF 7
+#define PAUSE_LAYOUT_BROUGHT_OVER 8
 /* The layouts used while g_GameState.isClubTournament is set */
 #define PAUSE_LAYOUT_UNK3B_SPEED_GOLF 9
 #define PAUSE_LAYOUT_UNK3B 10
@@ -66,7 +66,8 @@ enum PauseMenuRequest {
 #define PAUSE_OPTION_KIND_WIND_DIRECTION 4
 #define PAUSE_OPTION_KIND_LIE 5
 
-extern s32 D_800C42D0; /* Set once a Game Boy character has been brought over */
+extern s32 g_HasBroughtOverCharacter; /* Set once a Game Boy character has been
+                                         brought over */
 extern s32 f_IsPauseMenuLoaded;
 extern s32 f_PauseSelection;
 extern s32 f_PauseLayout;
@@ -211,9 +212,9 @@ void LoadPauseMenu(void) {
       } else {
         f_PauseLayout = PAUSE_LAYOUT_UNK3B;
       }
-    } else if (D_800C42D0) {
+    } else if (g_HasBroughtOverCharacter) {
       if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-        f_PauseLayout = PAUSE_LAYOUT_UNK42D0_SPEED_GOLF;
+        f_PauseLayout = PAUSE_LAYOUT_BROUGHT_OVER_SPEED_GOLF;
       } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
         f_PauseLayout = PAUSE_LAYOUT_RING_SHOT;
       } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
@@ -225,7 +226,7 @@ void LoadPauseMenu(void) {
           f_PauseLayout = PAUSE_LAYOUT_TRAINING;
         }
       } else {
-        f_PauseLayout = PAUSE_LAYOUT_UNK42D0;
+        f_PauseLayout = PAUSE_LAYOUT_BROUGHT_OVER;
       }
     } else {
       switch (g_GameState.gameMode) {
