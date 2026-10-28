@@ -28,12 +28,12 @@ enum EditorChoice {
   EDITOR_CHOICE_COUNT
 };
 
+static Boolean f_IsSnapshotSaved[SNAPSHOT_COUNT] = {0};
 /* The editor's menu choice, an EditorChoice */
-extern s32 f_EditorChoice;
-extern Boolean f_IsSnapshotSaved[SNAPSHOT_COUNT];
-extern s32 f_SnapshotIndex;
+static s32 f_EditorChoice = EDITOR_CHOICE_SLIDE;
+static s32 f_SnapshotIndex = 0;
 /* Whether the second controller moves the eye rather than the look-at point */
-extern Boolean f_IsSecondPadOnEye;
+static Boolean f_IsSecondPadOnEye = FALSE;
 
 /* Not static: the original left it to the linker's common block */
 f32 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT][3];
