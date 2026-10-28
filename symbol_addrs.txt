@@ -3485,6 +3485,7 @@ AreEditorFlagsClear = 0x80203DE8; // type:func segment:ovl_05
 UpdateCameraEditor = 0x80203F70; // type:func segment:ovl_05
 EditOpeningCamera = 0x80204EA8; // type:func segment:ovl_05
 StopEditorMoves = 0x80203E14; // type:func segment:ovl_05
+ShiftEditorCamera = 0x802065FC; // type:func segment:ovl_05
 f_EditorChoice = 0x8020B550; // type:s32 size:0x4 segment:ovl_05
 f_IsSnapshotSaved = 0x8020B4D0; // type:s32 size:0x80 segment:ovl_05
 f_SnapshotIndex = 0x8020B554; // type:s32 size:0x4 segment:ovl_05

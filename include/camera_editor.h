@@ -82,6 +82,7 @@ void TiltEditorCamera(s32 index, f32 angle, s32 frameCount);
 void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount);
 s32 AreEditorMovesDone(void);
 void StopEditorMoves(void);
+void ShiftEditorCamera(Vec3 offset);
 void UpdateCameraEditor(void);
 void EditOpeningCamera(void);
 

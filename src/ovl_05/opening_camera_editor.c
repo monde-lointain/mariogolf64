@@ -815,7 +815,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", EditOpeningCamera);
 
 /* Moves the whole camera by offset */
-void func_802065FC_ovl_05(Vec3 offset) {
+void ShiftEditorCamera(Vec3 offset) {
   g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] += offset[0];
   g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[1];
   g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] += offset[2];
