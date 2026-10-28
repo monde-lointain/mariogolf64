@@ -116,6 +116,11 @@ extern s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT]
 extern f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT];
 /* How many of the work area's terrain code blocks hole_builder.c has used */
 extern s32 g_TerrainCodeBlockCount;
+/*
+ * Set before some ground height queries and around PrepareHoleScene's
+ * scene set-up, but read by no routine
+ */
+extern s32 D_800BB0E8;
 
 /*
  * The vertices of a ground tile's edge or middle-line midpoints go through a

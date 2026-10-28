@@ -125,7 +125,6 @@ typedef struct LzStream {
 /* How ShrinkMiniGolfHole scales a course down to mini-golf size, by axis */
 extern Vec3 g_MiniGolfScale;
 extern OSPiHandle* nuPiCartHandle;
-extern s32 D_800BB0E8;
 extern s32 f_HoleSeed;
 /*
  * hole_loader.h declares this without volatile, as the files that only read

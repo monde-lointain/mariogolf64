@@ -42,6 +42,7 @@
 #include "shot_effects.h"
 #include "sound.h"
 #include "surface.h"
+#include "terrain.h"
 #include "text.h"
 #include "variables.h"
 
@@ -1399,7 +1400,6 @@ typedef struct GridScreenPoint {
   /* 0x0C */ s32 depth;
 } GridScreenPoint; /* size = 0x10 */
 
-extern s32 D_800BB0E8;
 extern s32 f_GreenGridAlpha;
 extern f32 f_GreenGridScroll;
 
