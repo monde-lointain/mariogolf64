@@ -44,13 +44,78 @@ typedef struct BillboardTexture {
   /* 0xC */ u16* pixels;
 } BillboardTexture; /* size = 0x10 */
 
-extern BillboardTexture f_BillboardTextures[BILLBOARD_TEXTURE_COUNT];
-extern Vtx f_BillboardVertices[][SHAPE_VERTEX_COUNT];
-extern s32 f_LoadedTextureIndex;
-extern s8 f_IsHeapReady;
-extern u8* f_HeapStart;
-extern u8* f_HeapEnd;
-extern u16 f_DrawOrder[BILLBOARD_COUNT];
+/* The size of every billboard texture, in texels */
+#define BILLBOARD_TEXTURE_WIDTH 32
+#define BILLBOARD_TEXTURE_HEIGHT 64
+
+/* A texture read from an asset when first drawn */
+#define BILLBOARD_TEXTURE(assetId) \
+  {(assetId), TEXTURE_LOADED_ON_DEMAND, BILLBOARD_TEXTURE_WIDTH, \
+      BILLBOARD_TEXTURE_HEIGHT, NULL}
+
+static Vtx f_BillboardVertices[][SHAPE_VERTEX_COUNT] = {
+    {{{{-1, 0, 0}, 0, {0, 4096}, {0x96, 0x96, 0x96, 0xFF}}},
+        {{{1, 0, 0}, 0, {8192, 4096}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{1, -1, 0}, 0, {8192, 0}, {0xFF, 0xFF, 0xFF, 0x00}}},
+        {{{-1, -1, 0}, 0, {0, 0}, {0x96, 0x96, 0x96, 0x00}}},
+        {{{-1, 0, 0}, 0, {0, 4096}, {0x3F, 0x3F, 0x7F, 0xFF}}},
+        {{{1, 0, 0}, 0, {8192, 4096}, {0x7F, 0x7F, 0xBF, 0xFF}}},
+        {{{1, 1, 0}, 0, {8192, 0}, {0x7F, 0x7F, 0xBF, 0x00}}},
+        {{{-1, 1, 0}, 0, {0, 0}, {0x3F, 0x3F, 0x7F, 0x00}}}},
+};
+static s32 f_LoadedTextureIndex = NO_TEXTURE_LOADED;
+static BillboardTexture f_BillboardTextures[BILLBOARD_TEXTURE_COUNT] = {
+    BILLBOARD_TEXTURE(0x3F7),
+    BILLBOARD_TEXTURE(0x3F8),
+    BILLBOARD_TEXTURE(0x3F9),
+    BILLBOARD_TEXTURE(0x3FA),
+    BILLBOARD_TEXTURE(0x3FB),
+    BILLBOARD_TEXTURE(0x3FC),
+    BILLBOARD_TEXTURE(0x3FD),
+    BILLBOARD_TEXTURE(0x3FE),
+    BILLBOARD_TEXTURE(0x3FF),
+    BILLBOARD_TEXTURE(0x400),
+    BILLBOARD_TEXTURE(0x401),
+    BILLBOARD_TEXTURE(0x402),
+    BILLBOARD_TEXTURE(0x403),
+    BILLBOARD_TEXTURE(0x404),
+    BILLBOARD_TEXTURE(0x405),
+    BILLBOARD_TEXTURE(0x406),
+    BILLBOARD_TEXTURE(0x407),
+    BILLBOARD_TEXTURE(0x407), /* Again, where 0x408 would follow */
+    BILLBOARD_TEXTURE(0x409),
+    BILLBOARD_TEXTURE(0x40A),
+    BILLBOARD_TEXTURE(0x40B),
+    BILLBOARD_TEXTURE(0x40C),
+    BILLBOARD_TEXTURE(0x40D),
+    BILLBOARD_TEXTURE(0x40E),
+    BILLBOARD_TEXTURE(0x40F),
+    BILLBOARD_TEXTURE(0x410),
+    BILLBOARD_TEXTURE(0x411),
+    BILLBOARD_TEXTURE(0x412),
+    BILLBOARD_TEXTURE(0x413),
+    BILLBOARD_TEXTURE(0x414),
+    BILLBOARD_TEXTURE(0x415),
+    BILLBOARD_TEXTURE(0x416),
+    BILLBOARD_TEXTURE(0x417),
+    BILLBOARD_TEXTURE(0x418),
+    BILLBOARD_TEXTURE(0x419),
+    BILLBOARD_TEXTURE(0x41A),
+    BILLBOARD_TEXTURE(0x41B),
+    BILLBOARD_TEXTURE(0x41C),
+    BILLBOARD_TEXTURE(0x41D),
+    BILLBOARD_TEXTURE(0x41E),
+    BILLBOARD_TEXTURE(0x41F),
+    BILLBOARD_TEXTURE(0x90F),
+    BILLBOARD_TEXTURE(0x910),
+    BILLBOARD_TEXTURE(0x911),
+    BILLBOARD_TEXTURE(0x912),
+    BILLBOARD_TEXTURE(0x913),
+};
+static s8 f_IsHeapReady = FALSE;
+static u8* f_HeapStart = NULL;
+static u8* f_HeapEnd = NULL;
+static u16 f_DrawOrder[BILLBOARD_COUNT] = {0};
 
 s32 GetGroundHeight(s32 x, s32 z);
 
