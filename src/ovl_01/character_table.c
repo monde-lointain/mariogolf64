@@ -113,22 +113,7 @@ typedef struct TableCorner {
 #define TABLE_ARROW_BLINK_FRAMES 4
 
 extern void* D_8012D430[CHARACTER_COUNT];
-extern s32 D_80230190_ovl_01;
-extern s32 D_80230194_ovl_01;
-extern s32 D_80230198_ovl_01;
-extern s32 D_8023019C_ovl_01;
-extern s32 D_802301A0_ovl_01;
-extern s32 D_802301A4_ovl_01;
-extern TableCorner D_80230248_ovl_01[TABLE_LINE_COUNT * 2];
-extern Vtx D_802301F0_ovl_01[MENU_CURSOR_VERTEX_COUNT];
-extern f32 D_80230238_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
-                                                           corner's colour */
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_SCENE_FILE_SIZE];
-extern s32 D_802301A8_ovl_01[CHARACTER_COUNT]; /* The character in each place of
-                                                  the table */
-/* Which of the cursor's shown cells each popup corner would cover */
-extern u8 D_80230310_ovl_01[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
-                           [TABLE_SHOWN_COLUMN_COUNT];
 /* func_8021F124 takes an s16 character, but this file calls it without
  * narrowing the argument */
 void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
@@ -143,6 +128,79 @@ void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y);
 void func_802169CC_ovl_01(Gfx** displayListHead);
 void func_80216C14_ovl_01(Gfx** displayListHead);
 void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top);
+
+static s32 D_80230190_ovl_01 = TABLE_POPUP_LEFT_X;
+static s32 D_80230194_ovl_01 = TABLE_POPUP_TOP_Y;
+/* A TABLE_POPUP_* corner */
+static s32 D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
+static s32 D_8023019C_ovl_01 = 0;
+static s32 D_802301A0_ovl_01 = 0;
+static s32 D_802301A4_ovl_01 = 0;
+/* The character in each place of the table */
+static s32 D_802301A8_ovl_01[CHARACTER_COUNT] = {
+    0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
+static Vtx D_802301F0_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+    {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
+    {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
+/* Read by no routine */
+static s32 D_80230230_ovl_01[2] = {0, 0};
+/* The phase of each corner's color */
+static f32 D_80230238_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+    0.0f, 2.0f, 4.0f, 6.0f};
+// clang-format off
+static TableCorner D_80230248_ovl_01[TABLE_LINE_COUNT * 2] = {
+  { 24, 80 }, { 300, 81 },
+  { 24, 110 }, { 300, 111 },
+  { 24, 140 }, { 300, 141 },
+  { 24, 170 }, { 300, 171 },
+  { 24, 200 }, { 300, 201 },
+  { 56, 52 }, { 57, 228 },
+  { 91, 52 }, { 92, 228 },
+  { 126, 52 }, { 127, 228 },
+  { 161, 52 }, { 162, 228 },
+  { 196, 52 }, { 197, 228 },
+  { 231, 52 }, { 232, 228 },
+  { 266, 52 }, { 267, 228 }
+};
+// clang-format on
+/* Read by no routine */
+static s32 D_80230308_ovl_01[2] = {64, 84};
+/* Which of the cursor's shown cells each popup corner would cover */
+// clang-format off
+static u8 D_80230310_ovl_01[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
+                           [TABLE_SHOWN_COLUMN_COUNT] = {
+  {
+    { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE },
+    { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE }
+  },
+  {
+    { FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE },
+    { FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE }
+  },
+  {
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE },
+    { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE }
+  },
+  {
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
+    { FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE },
+    { FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE }
+  }
+};
+// clang-format on
 
 static Mtx D_8023AAE0_ovl_01;
 static Mtx D_8023AB20_ovl_01;
