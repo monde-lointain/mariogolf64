@@ -142,12 +142,12 @@ typedef struct Unk68 {
  */
 typedef struct GameState {
   /* 0x00 */ s32 unk0;
-  /* 0x04 */ s32 gameMode;
+  /* 0x04 */ u32 gameMode;
   /* 0x08 */ s32 playerCount;
   /* 0x0C */ s32 courseIndex;
   /* 0x10 */ s32 holeIndex;
   /* 0x14 */ s32 unk14;
-  /* 0x18 */ s32 unk18;
+  /* 0x18 */ s32 isSuddenDeath;
   /* 0x1C */ s32 unk1C;
   /* 0x20 */ s32 unk20;
   /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
@@ -159,7 +159,8 @@ typedef struct GameState {
   /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth */
   /* 0x39 */ u8 unk39;
   /* 0x3A */ s8 isMiniGolf;
-  /* 0x3B */ u8 unk3B[0x3D - 0x3B];
+  /* 0x3B */ s8 isClubTournament;
+  /* 0x3C */ u8 unk3C;
   /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
   /* 0x3E */ s16
       carriedPots[CARRIED_POT_COUNT]; /* The pots that tied holes carry over */

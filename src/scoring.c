@@ -95,7 +95,7 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
 
   lead = 0;
   holesAfterCurrent = GetFirstHoleIndex() + GetRoundHoleCount();
-  if (g_GameState.unk18) {
+  if (g_GameState.isSuddenDeath) {
     return MATCH_STANDING_DECIDING_HOLE;
   }
 
@@ -131,8 +131,8 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
 }
 
 /*
- * Compares the holes before g_HoleIndex by net score. With unk18 set, the
- * first hole that either player wins decides.
+ * Compares the holes before g_HoleIndex by net score. With isSuddenDeath set,
+ * the first hole that either player wins decides.
  */
 s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
   s32 endHoleIndex;
@@ -144,7 +144,7 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
 
   endHoleIndex = GetFirstHoleIndex() + GetRoundHoleCount();
   lead = 0;
-  if (g_GameState.unk18) {
+  if (g_GameState.isSuddenDeath) {
     for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex;
         holeIndex++) {
       playerScore = g_Players[playerIndex].holes[holeIndex].strokes +
