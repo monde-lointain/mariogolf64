@@ -31,6 +31,9 @@ enum HoleCreatureKind {
 };
 
 #define CHEEP_CHEEP_ASSET 0x6E0
+/* A Cheep Cheep's images as it turns; CHEEP_CHEEP_ASSET is the middle one */
+#define CHEEP_CHEEP_FIRST_VIEW_ASSET 0x6DE
+#define CHEEP_CHEEP_VIEW_COUNT 5
 #define GOLD_CHEEP_CHEEP_ASSET 0x6E5
 #define MONKEY_ASSET 0x6F0 /* The first of its frames */
 #define MONKEY_FRAME_COUNT 4
@@ -75,13 +78,33 @@ typedef struct HoleCreature {
   /* 0xA7 */ u8 state;
 } HoleCreature; /* size = 0xA8 */
 
-extern u16 f_MonkeyFrameAssets[MONKEY_FRAME_COUNT];
-extern s32 f_AreCheepCheepsLeaping;
-extern s32 f_CheepCheepLeapUnk38;
-extern s32 f_CheepCheepLeapUnk3C;
-extern s32 f_CheepCheepLeapUnk40;
-extern Vtx f_CheepCheepVertices[4];
-extern Vtx f_MonkeyVertices[8];
+/* Read by no routine */
+static u16 f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] = {
+    CHEEP_CHEEP_FIRST_VIEW_ASSET, CHEEP_CHEEP_FIRST_VIEW_ASSET + 1,
+    CHEEP_CHEEP_FIRST_VIEW_ASSET + 2, CHEEP_CHEEP_FIRST_VIEW_ASSET + 3,
+    CHEEP_CHEEP_FIRST_VIEW_ASSET + 4};
+static u16 f_MonkeyFrameAssets[MONKEY_FRAME_COUNT] = {
+    MONKEY_ASSET, MONKEY_ASSET + 1, MONKEY_ASSET + 2, MONKEY_ASSET + 3};
+static s32 f_AreCheepCheepsLeaping = FALSE;
+static s32 f_CheepCheepLeapUnk38 = 0;
+static s32 f_CheepCheepLeapUnk3C = 0;
+static s32 f_CheepCheepLeapUnk40 = 0;
+/* Read by no routine */
+static s32 D_80224044_ovl_00 = 0;
+static Vtx f_CheepCheepVertices[4] = {
+    {{{-7, -7, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-7, 7, 0}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{7, 7, 0}, 0, {0x7C0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{7, -7, 0}, 0, {0x7C0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+static Vtx f_MonkeyVertices[8] = {
+    {{{-10, -12, 0}, 0, {0xFC0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-10, -6, 0}, 0, {0xFC0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, -6, 0}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-10, -6, 0}, 0, {0xFC0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-10, 0, 0}, 0, {0xFC0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, 0, 0}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{1, -6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
 
 static u8* f_CheepCheepImages[2];
 static u8* f_MonkeyImage;
