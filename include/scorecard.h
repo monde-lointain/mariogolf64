@@ -63,7 +63,7 @@ typedef struct Scorecard {
   /* 0xC4 */ s32 x; /* The scorecard's offset from its place on the screen */
   /* 0xC8 */ s32 y;
   /* 0xCC */ s32 unkCC;
-  /* 0xD0 */ s32 stateTime; /* Frames since f_ScorecardState changed */
+  /* 0xD0 */ s32 stateTime; /* Frames since g_ScorecardState changed */
   /* 0xD4 */ s32
       isTallied; /* The last hole's result is already on the scorecard */
   /* 0xD8 */ s32 holeWinnerIndex; /* The player who won the last hole, or a

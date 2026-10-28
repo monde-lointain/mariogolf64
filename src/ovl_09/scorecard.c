@@ -30,7 +30,7 @@
 #include "tournament.h"
 #include "variables.h"
 
-/* f_ScorecardState values */
+/* g_ScorecardState values */
 enum ScorecardState {
   SCORECARD_OPENING, /* Sliding in */
   SCORECARD_CLOSING, /* Sliding out */
@@ -90,7 +90,7 @@ enum ScorecardState {
 #define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
 #define THREE_PAGE_COUNT 3
 
-extern s32 f_ScorecardState;
+extern s32 g_ScorecardState;
 
 void SetFramebufferCount(s32 count);
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page);
@@ -411,8 +411,8 @@ void FreeScorecard(void) {
   s32 i;
   s32 imageIndex;
 
-  if (f_ScorecardState != SCORECARD_CLOSED) {
-    f_ScorecardState = SCORECARD_CLOSED;
+  if (g_ScorecardState != SCORECARD_CLOSED) {
+    g_ScorecardState = SCORECARD_CLOSED;
     g_RoundHud.scorecardPage = NO_SCORECARD_PAGE;
     g_RoundHud.unk1 = 0;
     g_RoundHud.unk3 = 0;
@@ -871,7 +871,7 @@ void SetScorecardState(s32 state) {
     g_Scorecard.y = 0;
   }
 
-  f_ScorecardState = state;
+  g_ScorecardState = state;
   g_Scorecard.stateTime = 0;
 }
 
@@ -882,10 +882,10 @@ void AnimateScorecard(void) {
   s32 i;
   s32 slideSpeed;
 
-  switch (f_ScorecardState) {
+  switch (g_ScorecardState) {
     case SCORECARD_TALLYING:
       if (TallyScorecardSkins()) {
-        f_ScorecardState = SCORECARD_SHOWN;
+        g_ScorecardState = SCORECARD_SHOWN;
       }
 
       g_Scorecard.stateTime++;
@@ -895,9 +895,9 @@ void AnimateScorecard(void) {
       if (g_Scorecard.stateTime == SCORECARD_OPEN_TIME) {
         g_Scorecard.stateTime = 0;
         if (g_Scorecard.isTallied) {
-          f_ScorecardState = SCORECARD_SHOWN;
+          g_ScorecardState = SCORECARD_SHOWN;
         } else {
-          f_ScorecardState = SCORECARD_TALLYING;
+          g_ScorecardState = SCORECARD_TALLYING;
         }
       }
 
@@ -1055,7 +1055,7 @@ void ScrollLeaderboard(u16 buttons) {
 
 void UpdateScorecard(u16 buttons, u16 pressedButtons) {
   AnimateScorecard();
-  if (f_ScorecardState == SCORECARD_SHOWN) {
+  if (g_ScorecardState == SCORECARD_SHOWN) {
     if (pressedButtons & (A_BUTTON | B_BUTTON)) {
       SetScorecardState(SCORECARD_CLOSING);
       return;
@@ -1085,7 +1085,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
 
 s32 UpdateShownScorecard(u16 buttons) {
   AnimateScorecard();
-  if (f_ScorecardState != SCORECARD_SHOWN) {
+  if (g_ScorecardState != SCORECARD_SHOWN) {
     return FALSE;
   }
 
@@ -1162,10 +1162,10 @@ void DrawScorecard(Gfx** displayListHead) {
   s32 i;
   s32 dropY;
 
-  if (f_ScorecardState == SCORECARD_MATCH_RESULT) {
+  if (g_ScorecardState == SCORECARD_MATCH_RESULT) {
     DrawMatchResult(&gfx);
-  } else if (f_ScorecardState != SCORECARD_UNK6) {
-    if (f_ScorecardState != SCORECARD_CLOSED) {
+  } else if (g_ScorecardState != SCORECARD_UNK6) {
+    if (g_ScorecardState != SCORECARD_CLOSED) {
       DrawScorecardTable(&gfx, g_Scorecard.pageCount, g_RoundHud.scorecardPage);
       gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
       for (i = 0; i != g_Scorecard.pageCount; i++) {
