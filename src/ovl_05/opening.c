@@ -89,7 +89,8 @@ extern s32 f_LogoClubPosition[3];
 extern f32 f_LogoClubOrbitRadius;
 extern s32 f_IsLogoClubSwinging;
 extern s32 f_AreAmbientSoundsOn;
-extern u8 D_80212830_ovl_05[];
+/* The impact lines' image, and later the burst's */
+extern u8 f_OpeningEffectImage[];
 extern u8 f_ShotBallImage[];
 
 /* The steps that a name logo's animation starts each phase at */
@@ -3469,7 +3470,7 @@ void LoadOpeningImpactLines(void) {
   EncodedAsset asset;
 
   OpenEncodedAsset(ASSET_IMPACT_LINES_IMAGE, &asset);
-  ReadEncodedAsset(D_80212830_ovl_05, &asset);
+  ReadEncodedAsset(f_OpeningEffectImage, &asset);
 }
 
 extern s32 f_ImpactLinesFrame;
@@ -3533,7 +3534,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
-          gfx++, (u32)(D_80212830_ovl_05 + IMAGE_HEADER_SIZE) & ~7);
+          gfx++, (u32)(f_OpeningEffectImage + IMAGE_HEADER_SIZE) & ~7);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
@@ -3543,11 +3544,11 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       for (stripIndex = 0; stripIndex != IMPACT_LINES_STRIP_COUNT;
           stripIndex++) {
         bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
-        gDPLoadTextureBlock(gfx++, (u32)(D_80212830_ovl_05 + texelOffset) & ~7,
-            G_IM_FMT_I, G_IM_SIZ_8b, IMPACT_LINES_SIZE,
-            IMPACT_LINES_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++,
+            (u32)(f_OpeningEffectImage + texelOffset) & ~7, G_IM_FMT_I,
+            G_IM_SIZ_8b, IMPACT_LINES_SIZE, IMPACT_LINES_STRIP_HEIGHT, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++, IMPACT_LINES_LEFT << 2,
             (bottom - IMPACT_LINES_STRIP_HEIGHT) << 2,
@@ -3809,7 +3810,7 @@ void LoadOpeningBurst(void) {
   EncodedAsset asset;
 
   OpenEncodedAsset(ASSET_BURST_IMAGE, &asset);
-  ReadEncodedAsset(D_80212830_ovl_05, &asset);
+  ReadEncodedAsset(f_OpeningEffectImage, &asset);
 }
 
 /* The burst's corners on the screen, in pixels */
@@ -3857,10 +3858,10 @@ void DrawOpeningBurst(Gfx** displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, D_80212830_ovl_05 + IMAGE_HEADER_SIZE);
+    gDPLoadTLUT_pal16(gfx++, 0, f_OpeningEffectImage + IMAGE_HEADER_SIZE);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
-    gDPLoadTextureBlock_4b(gfx++, D_80212830_ovl_05 + PALETTED_TEXELS_OFFSET,
+    gDPLoadTextureBlock_4b(gfx++, f_OpeningEffectImage + PALETTED_TEXELS_OFFSET,
         G_IM_FMT_CI, BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
