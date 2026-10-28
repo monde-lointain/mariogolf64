@@ -144,9 +144,8 @@
 #define SHINE_DELAY 5
 #define SHINE_START_TIME 16
 #define SHINE_SPEED 18
-/* The buffers the logo and shine images are read into */
+/* The buffer the logo image is read into */
 #define LOGO_IMAGE_BUFFER_SIZE 0x4A20
-#define SHINE_IMAGE_BUFFER_SIZE 0x1210
 
 /* The first fourteen characters have their own club sets; the others use the
  * sets after them */

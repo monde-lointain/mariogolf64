@@ -66,6 +66,9 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 /* A 64x64 I8 gradient, which the opening and the club slots sweep across
  * their logos and the round results draw too */
 #define ASSET_SHINE_IMAGE 0x6A4
+/* The buffers that the opening and the club slots read it into, 0x208 bytes
+ * longer than its 0x1008 */
+#define SHINE_IMAGE_BUFFER_SIZE 0x1210
 
 s32 OpenEncodedAsset(u16 assetId, EncodedAsset* asset);
 void ReadEncodedAsset(void* buffer, EncodedAsset* asset);
