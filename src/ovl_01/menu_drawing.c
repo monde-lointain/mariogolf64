@@ -20,6 +20,8 @@
 #include "menu.h"
 #include "save.h"
 #include "screen.h"
+#include "screen_layers.h"
+#include "sound.h"
 #include "text.h"
 #include "variables.h"
 
@@ -1078,7 +1080,473 @@ void func_80206A2C_ovl_01(Gfx** displayListHead) {
 const char D_802316EC_ovl_01[] = "Peach's Castle";
 const char D_802316FC_ovl_01[] = "Luigi's Garden";
 
+#define OPTIONS_BOARD_KIND 0xB9
+
+/*
+ * The menu image buffer holds the options screen's Mario at its start, then
+ * two frames of four 16 by 16 arrows, then Mario's shadow
+ */
+#define OPTIONS_ARROWS_OFFSET 0x3408
+#define OPTIONS_SHADOW_OFFSET 0x3830
+#define MARIO_WIDTH 100
+#define MARIO_HEIGHT 128
+#define MARIO_STRIP_HEIGHT 16
+#define MARIO_STRIP_COUNT 8
+#define MARIO_LEFT 208
+#define MARIO_TOP 88
+#define MARIO_SHADOW_WIDTH 104
+#define MARIO_SHADOW_HEIGHT 64
+#define MARIO_SHADOW_LEFT 214
+#define MARIO_SHADOW_TOP 168
+#define MARIO_SHADOW_ALPHA 159
+
+/* Each option's row is this far below the last */
+#define OPTION_ROW_SPACING 30
+
+/*
+ * The toggled options' values sit on banners of D_801B60D0, squeezed to 120
+ * columns and 8 rows a strip. Their strips are placed from row 62 and drawn 20
+ * rows lower. The chosen one's moves 2 columns left above a shadow 3 rows
+ * lower.
+ */
+#define VALUE_BANNER_LEFT 136
+#define VALUE_BANNER_WIDTH 120
+#define VALUE_BANNER_ROW_TOP 62
+#define VALUE_BANNER_OFFSET_Y 20
+#define VALUE_BANNER_STRIP_HEIGHT 8
+#define CHOSEN_BANNER_SHIFT 2
+#define BANNER_SHADOW_DROP 3
+#define BANNER_SHADOW_COLOR 31
+#define BANNER_SHADOW_ALPHA 159
+#define DIMMED_COLOR 191
+
+/*
+ * The options' labels, plain in D_801B5CD0 and lit in D_8012D420. Each label
+ * is followed in its image by the option's two values, so the labels lie 60
+ * rows apart; the lit values come from their own image
+ */
+#define OPTION_LABEL_WIDTH 128
+#define OPTION_LABEL_HEIGHT 20
+#define OPTION_LABEL_IMAGE_SIZE (OPTION_LABEL_WIDTH * OPTION_LABEL_HEIGHT / 2)
+#define OPTION_LABEL_SPACING (OPTION_LABEL_IMAGE_SIZE * 3)
+#define OPTION_LABEL_LEFT 32
+#define OPTION_LABEL_TOP 84
+#define OPTION_VALUES_OFFSET 0x3228
+#define OPTION_VALUE_LEFT 142
+#define OPTION_TOGGLE_COUNT OPTIONS_CHOICE_ERASE_SAVE_DATA
+
+/*
+ * The arrows either side of the chosen toggle switch frames every 5 updates.
+ * The left arrow is the fourth of a frame, the right one the third
+ */
+#define ARROW_SIZE 16
+#define ARROW_FRAME_HEIGHT (ARROW_SIZE * 4)
+#define ARROW_FRAME_SIZE (ARROW_SIZE * ARROW_FRAME_HEIGHT / 2)
+#define ARROW_TIMER_PERIOD 10
+#define ARROW_FRAME_DURATION 5
+#define LEFT_ARROW_ROW (ARROW_SIZE * 3)
+#define RIGHT_ARROW_ROW (ARROW_SIZE * 2)
+#define LEFT_ARROW_LEFT 125
+#define RIGHT_ARROW_LEFT 247
+#define ARROW_TOP 86
+#define ARROW_SHADOW_OFFSET_X 1
+#define ARROW_SHADOW_OFFSET_Y 3
+#define ARROW_PASS_COUNT 2
+
+/* The sound test's lines, a song column and a sound column */
+#define SONG_TEST_X 32
+#define SOUND_TEST_X 168
+#define TEST_NUMBER_Y 152
+#define TEST_NAME_Y 162
+#define SONG_NAME_X 94
+#define SOUND_NAME_X 230
+#define TEST_REVERB_Y 176
+#define TEST_PITCH_Y 184
+#define TEST_TEMPO_Y 192
+/* The chosen line is yellow */
+#define CHOSEN_TEXT_BLUE 0
+
+/* The erase window, and its question in text slot 10 */
+#define ERASE_WINDOW_WIDTH 240
+#define ERASE_WINDOW_HEIGHT 160
+#define ERASE_WINDOW_CENTER_X 160
+#define ERASE_WINDOW_CENTER_Y 120
+#define NO_OK_TEXT -1
+#define ERASE_MESSAGE 0xC9
+#define ERASE_MESSAGE_X 160
+#define ERASE_MESSAGE_Y 106
+#define ERASE_MESSAGE_SLOT 10
+#define ERASE_MESSAGE_RED 95
+#define ERASE_MESSAGE_GREEN 63
+#define ERASE_MESSAGE_BLUE 255
+#define ERASE_MESSAGE_PALETTE_RED 255
+#define ERASE_MESSAGE_PALETTE_GREEN 127
+#define ERASE_MESSAGE_PALETTE_BLUE 127
+
+extern u8 g_OptionBits;
+extern s32 D_8022FEFC_ovl_01;
+
+void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
+    s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton);
+
+/*
+ * Draws the options screen: Mario and his shadow, each option's label, the
+ * toggles' values on their banners with arrows beside the chosen one, the
+ * sound test's lines when game flag 0x55 is set, and the erase window while it
+ * is up
+ */
+/*
+ * Doesn't match: the original adds each value banner strip's row in both
+ * branches without masking it to a byte
+ */
+#ifdef NON_MATCHING
+void func_80206A68_ovl_01(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  MenuMemory* memory = func_8005AF74();
+  u8* mario = GetMenuImageBuffer();
+  u8* arrows = (u8*)GetMenuImageBuffer() + OPTIONS_ARROWS_OFFSET;
+  u8* shadow = GetMenuImageBuffer();
+  /* Counts the options' rows, then the arrows' passes */
+  s32 loopIndex;
+  s32 stripIndex;
+  u8 stripTop;
+  s32 valueOffset;
+  s32 shiftX;
+  s32 shiftY;
+  s32 rowTop;
+  s32 frameIndex;
+
+  func_801FB54C_ovl_01(&gfx, OPTIONS_BOARD_KIND);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, MARIO_SHADOW_ALPHA);
+  gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
+      PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+  gDPLoadTextureTile_4b(gfx++,
+      ((u32)shadow + OPTIONS_SHADOW_OFFSET + IMAGE_HEADER_SIZE) & ~7,
+      G_IM_FMT_I, MARIO_SHADOW_WIDTH, MARIO_SHADOW_HEIGHT, 0, 0,
+      MARIO_SHADOW_WIDTH - 1, MARIO_SHADOW_HEIGHT - 1, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  DrawTextureRect(&gfx, MARIO_SHADOW_LEFT << 2, MARIO_SHADOW_TOP << 2,
+      (MARIO_SHADOW_LEFT + MARIO_SHADOW_WIDTH) << 2,
+      (MARIO_SHADOW_TOP + MARIO_SHADOW_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  LoadLargePalette(&gfx, mario + IMAGE_HEADER_SIZE);
+  for (stripIndex = 0; stripIndex != MARIO_STRIP_COUNT; stripIndex++) {
+    gDPLoadTextureTile(gfx++, ((u32)mario + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+        G_IM_FMT_CI, G_IM_SIZ_8b, MARIO_WIDTH, MARIO_HEIGHT, 0,
+        stripIndex * MARIO_STRIP_HEIGHT, MARIO_WIDTH - 1,
+        (stripIndex * MARIO_STRIP_HEIGHT) + (MARIO_STRIP_HEIGHT - 1), 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    DrawTextureRect(&gfx, MARIO_LEFT << 2,
+        (MARIO_TOP + (stripIndex * MARIO_STRIP_HEIGHT)) << 2,
+        (MARIO_LEFT + MARIO_WIDTH) << 2,
+        (MARIO_TOP + MARIO_STRIP_HEIGHT + (stripIndex * MARIO_STRIP_HEIGHT))
+            << 2,
+        G_TX_RENDERTILE, 0, (stripIndex * MARIO_STRIP_HEIGHT) << 5,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  }
+
+  gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
+  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, DIMMED_COLOR);
+  for (loopIndex = 0; loopIndex != OPTION_TOGGLE_COUNT; loopIndex++) {
+    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+      LoadTextureBlock(&gfx,
+          (u8*)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
+              (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
+          G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
+          0, 0, 0, 0, 0, 0, 0);
+      if (g_MenuChoices.optionsChoice == loopIndex) {
+        stripTop = (loopIndex * OPTION_ROW_SPACING) +
+            ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
+        gDPSetPrimColor(gfx++, 0, 0, BANNER_SHADOW_COLOR, BANNER_SHADOW_COLOR,
+            BANNER_SHADOW_COLOR, BANNER_SHADOW_ALPHA);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
+            0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+        DrawTextureRect(&gfx, VALUE_BANNER_LEFT << 2,
+            (stripTop + VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP) << 2,
+            (VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH) << 2,
+            (stripTop + VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP +
+                VALUE_BANNER_STRIP_HEIGHT)
+                << 2,
+            G_TX_RENDERTILE, 0, 0,
+            (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
+            (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        DrawTextureRect(&gfx, (VALUE_BANNER_LEFT - CHOSEN_BANNER_SHIFT) << 2,
+            (stripTop + VALUE_BANNER_OFFSET_Y) << 2,
+            (VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH - CHOSEN_BANNER_SHIFT) << 2,
+            (stripTop + VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT) << 2,
+            G_TX_RENDERTILE, 0, 0,
+            (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
+            (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
+      } else {
+        stripTop = (loopIndex * OPTION_ROW_SPACING) +
+            ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
+        gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0,
+            PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0);
+        gDPSetPrimColor(
+            gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
+        DrawTextureRect(&gfx, VALUE_BANNER_LEFT << 2,
+            (stripTop + VALUE_BANNER_OFFSET_Y) << 2,
+            (VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH) << 2,
+            (stripTop + VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT) << 2,
+            G_TX_RENDERTILE, 0, 0,
+            (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
+            (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
+      }
+    }
+  }
+
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+  for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
+    if (g_MenuChoices.optionsChoice != loopIndex) {
+      LoadNibbleTextureBlock(&gfx,
+          (u8*)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET +
+              (loopIndex * OPTION_LABEL_SPACING),
+          G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0,
+          0, 0);
+      DrawTextureRect(&gfx, OPTION_LABEL_LEFT << 2,
+          (OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)) << 2,
+          (OPTION_LABEL_LEFT + OPTION_LABEL_WIDTH) << 2,
+          (OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
+              (loopIndex * OPTION_ROW_SPACING))
+              << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+  }
+
+  LoadSmallPalette(
+      &gfx, 0, (u8*)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE);
+  for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
+    if (g_MenuChoices.optionsChoice == loopIndex) {
+      LoadNibbleTextureBlock(&gfx,
+          (u8*)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET +
+              (loopIndex * OPTION_LABEL_SPACING),
+          G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0,
+          0, 0);
+      gDPPipeSync(gfx++);
+      DrawTextureRect(&gfx, OPTION_LABEL_LEFT << 2,
+          (OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)) << 2,
+          (OPTION_LABEL_LEFT + OPTION_LABEL_WIDTH) << 2,
+          (OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
+              (loopIndex * OPTION_ROW_SPACING))
+              << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+  }
+
+  gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0, PRIMITIVE,
+      0, TEXEL0, 0, 0, 0, 0, TEXEL0);
+  gDPLoadTLUT_pal16(gfx++, 0,
+      ((u32)D_8012D420[D_8022BE8E_ovl_01] + OPTION_VALUES_OFFSET +
+          IMAGE_HEADER_SIZE) &
+          ~7);
+  for (loopIndex = 0; loopIndex != OPTION_TOGGLE_COUNT; loopIndex++) {
+    /* Each toggle has two values, the second shown while its bit is set */
+    valueOffset = loopIndex * 2 * OPTION_LABEL_IMAGE_SIZE;
+    switch (loopIndex) {
+      case OPTIONS_CHOICE_MUSIC:
+        if (g_OptionBits & OPTION_BIT_MUSIC_OFF) {
+          valueOffset += OPTION_LABEL_IMAGE_SIZE;
+        }
+
+        break;
+      case OPTIONS_CHOICE_MONO:
+        if (g_OptionBits & OPTION_BIT_MONO) {
+          valueOffset += OPTION_LABEL_IMAGE_SIZE;
+        }
+
+        break;
+      case OPTIONS_CHOICE_CAMERA:
+        if (g_OptionBits & OPTION_BIT_SIMPLE_CAMERA) {
+          valueOffset += OPTION_LABEL_IMAGE_SIZE;
+        }
+
+        break;
+    }
+
+    LoadNibbleTextureBlock(&gfx,
+        (u8*)D_8012D420[D_8022BE8E_ovl_01] + OPTION_VALUES_OFFSET +
+            PALETTED_TEXELS_OFFSET + valueOffset,
+        G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0, 0,
+        0);
+    if (g_MenuChoices.optionsChoice == loopIndex) {
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    } else {
+      gDPSetPrimColor(
+          gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
+    }
+
+    DrawTextureRect(&gfx, OPTION_VALUE_LEFT << 2,
+        (OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)) << 2,
+        (OPTION_VALUE_LEFT + OPTION_LABEL_WIDTH) << 2,
+        (OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
+            (loopIndex * OPTION_ROW_SPACING))
+            << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  }
+
+  gDPLoadTLUT_pal16(gfx++, 0, ((u32)arrows + IMAGE_HEADER_SIZE) & ~7);
+  if (g_MenuChoices.optionsChoice != OPTIONS_CHOICE_ERASE_SAVE_DATA) {
+    D_8022FEFC_ovl_01 = (D_8022FEFC_ovl_01 + 1) % ARROW_TIMER_PERIOD;
+    frameIndex = D_8022FEFC_ovl_01 < ARROW_FRAME_DURATION;
+    LoadNibbleTextureBlock(&gfx,
+        arrows + PALETTED_TEXELS_OFFSET + (frameIndex * ARROW_FRAME_SIZE),
+        G_IM_FMT_CI, ARROW_SIZE, ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    /* The first pass draws the arrows' shadows */
+    for (loopIndex = 0; loopIndex != ARROW_PASS_COUNT; loopIndex++) {
+      shiftX = 0;
+      if (loopIndex == 0) {
+        shiftX = ARROW_SHADOW_OFFSET_X;
+        shiftY = ARROW_SHADOW_OFFSET_Y;
+        gDPSetPrimColor(gfx++, 0, 0, BANNER_SHADOW_COLOR, BANNER_SHADOW_COLOR,
+            BANNER_SHADOW_COLOR, BANNER_SHADOW_ALPHA);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
+            0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+      } else {
+        shiftY = 0;
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      }
+
+      rowTop = g_MenuChoices.optionsChoice * OPTION_ROW_SPACING;
+      DrawTextureRect(&gfx, (LEFT_ARROW_LEFT + shiftX) << 2,
+          (rowTop + ARROW_TOP + shiftY) << 2,
+          (LEFT_ARROW_LEFT + ARROW_SIZE + shiftX) << 2,
+          (rowTop + ARROW_TOP + ARROW_SIZE + shiftY) << 2, G_TX_RENDERTILE, 0,
+          LEFT_ARROW_ROW << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      rowTop = g_MenuChoices.optionsChoice * OPTION_ROW_SPACING;
+      DrawTextureRect(&gfx, (RIGHT_ARROW_LEFT + shiftX) << 2,
+          (rowTop + ARROW_TOP + shiftY) << 2,
+          (RIGHT_ARROW_LEFT + ARROW_SIZE + shiftX) << 2,
+          (rowTop + ARROW_TOP + ARROW_SIZE + shiftY) << 2, G_TX_RENDERTILE, 0,
+          RIGHT_ARROW_ROW << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+  }
+
+  if (IsGameFlagSet(GAME_FLAG_UNK55)) {
+    BeginShadowedText(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SONG) {
+      SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
+    } else {
+      SetTextColor(&gfx, 255, 255, 255);
+    }
+
+    if (g_SoundTestSong == NO_SONG) {
+      /* The original passes the song, though STOP prints no number */
+      sprintf(g_PrintBuffer, "BGM TEST : STOP", g_SoundTestSong);
+      DrawShadowedText(&gfx, SONG_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
+    } else {
+      sprintf(g_PrintBuffer, "BGM TEST : %2d", g_SoundTestSong);
+      DrawShadowedText(&gfx, SONG_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
+      sprintf(g_PrintBuffer, D_80231514_ovl_01,
+          g_SoundTestSongNames[g_SoundTestSong]);
+      DrawShadowedText(&gfx, SONG_NAME_X, TEST_NAME_Y, g_PrintBuffer);
+    }
+
+    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SONG_REVERB) {
+      SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
+    } else {
+      SetTextColor(&gfx, 255, 255, 255);
+    }
+
+    sprintf(g_PrintBuffer, " REVERB: %3d", g_SoundTestSongReverb);
+    DrawShadowedText(&gfx, SONG_TEST_X, TEST_REVERB_Y, g_PrintBuffer);
+    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SONG_FREQUENCY) {
+      SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
+    } else {
+      SetTextColor(&gfx, 255, 255, 255);
+    }
+
+    sprintf(g_PrintBuffer, " PICH  : %3.1f", g_SoundTestSongFrequency);
+    DrawShadowedText(&gfx, SONG_TEST_X, TEST_PITCH_Y, g_PrintBuffer);
+    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SONG_TEMPO) {
+      SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
+    } else {
+      SetTextColor(&gfx, 255, 255, 255);
+    }
+
+    sprintf(g_PrintBuffer, " TEMPO : %3d", g_SoundTestSongTempo);
+    DrawShadowedText(&gfx, SONG_TEST_X, TEST_TEMPO_Y, g_PrintBuffer);
+    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SOUND) {
+      SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
+    } else {
+      SetTextColor(&gfx, 255, 255, 255);
+    }
+
+    sprintf(g_PrintBuffer, "SE TEST : %3d", g_SoundTestSound);
+    DrawShadowedText(&gfx, SOUND_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
+    sprintf(g_PrintBuffer, D_80231514_ovl_01,
+        g_SoundTestSoundNames[g_SoundTestSound]);
+    DrawShadowedText(&gfx, SOUND_NAME_X, TEST_NAME_Y, g_PrintBuffer);
+    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SOUND_REVERB) {
+      SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
+    } else {
+      SetTextColor(&gfx, 255, 255, 255);
+    }
+
+    sprintf(g_PrintBuffer, " REVERB: %3d", g_SoundTestSoundReverb);
+    DrawShadowedText(&gfx, SOUND_TEST_X, TEST_REVERB_Y, g_PrintBuffer);
+    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SOUND_FREQUENCY) {
+      SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
+    } else {
+      SetTextColor(&gfx, 255, 255, 255);
+    }
+
+    sprintf(g_PrintBuffer, " PICH  : %3.1f", g_SoundTestSoundFrequency);
+    DrawShadowedText(&gfx, SOUND_TEST_X, TEST_PITCH_Y, g_PrintBuffer);
+  }
+
+  if (D_800FBDB9 == LABEL_GROWING) {
+    D_800FE33C += CHOSEN_LABEL_GROWTH_STEP;
+  }
+
+  if (D_800FBDB9 == LABEL_SHRINKING) {
+    D_800FE33C -= CHOSEN_LABEL_GROWTH_STEP;
+  }
+
+  if (D_800FE33C > CHOSEN_LABEL_GROWTH_LIMIT) {
+    D_800FBDB9 = LABEL_SHRINKING;
+  }
+
+  if (D_800FE33C < 0) {
+    D_800FBDB9 = LABEL_GROWING;
+  }
+
+  if (g_IsEraseWindowUp == TRUE) {
+    func_80226A58_ovl_01(&gfx, ERASE_WINDOW_WIDTH, ERASE_WINDOW_HEIGHT,
+        ERASE_WINDOW_CENTER_X, ERASE_WINDOW_CENTER_Y, NO_OK_TEXT,
+        memory->eraseChoice);
+    if (IsMenuWindowOpen()) {
+      SetTextPaletteColor(ERASE_MESSAGE_PALETTE_RED,
+          ERASE_MESSAGE_PALETTE_GREEN, ERASE_MESSAGE_PALETTE_BLUE, 0);
+      SetTextSlot(ERASE_MESSAGE_X, ERASE_MESSAGE_Y, ERASE_MESSAGE, 1,
+          ERASE_MESSAGE_SLOT, TEXT_FLAG_CENTERED, ERASE_MESSAGE_RED,
+          ERASE_MESSAGE_GREEN, ERASE_MESSAGE_BLUE, 255);
+    } else {
+      SetTextSlot(0, 0, NO_MESSAGE, 1, ERASE_MESSAGE_SLOT, TEXT_FLAG_TYPED, 255,
+          255, 255, 255);
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_80206A68_ovl_01);
+#endif
 
 void func_80207D08_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
