@@ -45,9 +45,11 @@
 #define SCENE_SWAPPING_MODULES 0x19
 
 /* g_SubModuleState values */
-#define SUB_MODULE_LOADED 0
-#define SUB_MODULE_SWAP_PENDING 1
-#define SUB_MODULE_UNLOADED (-1)
+enum SubModuleState {
+  SUB_MODULE_LOADED,
+  SUB_MODULE_SWAP_PENDING,
+  SUB_MODULE_UNLOADED = -1
+};
 
 extern s32 g_Scene;
 extern s32 g_NextScene;

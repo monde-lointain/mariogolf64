@@ -132,12 +132,14 @@ typedef struct AnimationEvent {
 #define END_OF_ANIMATION_EVENTS -1
 
 /* AnimationEvent kinds */
-#define ANIMATION_EVENT_LOOP_START 0
-/* Jumps back to the loop start when the slot is looping */
-#define ANIMATION_EVENT_LOOP_END 1
-#define ANIMATION_EVENT_UNK6 6
-/* Starts the TextureAnimation that value names */
-#define ANIMATION_EVENT_TEXTURE_ANIMATION 0xFE
+enum AnimationEventKind {
+  ANIMATION_EVENT_LOOP_START,
+  /* Jumps back to the loop start when the slot is looping */
+  ANIMATION_EVENT_LOOP_END,
+  ANIMATION_EVENT_UNK6 = 6,
+  /* Starts the TextureAnimation that value names */
+  ANIMATION_EVENT_TEXTURE_ANIMATION = 0xFE
+};
 
 /* What an AnimationEvent does, as gathered for its frame */
 typedef struct AnimationEventAction {
@@ -151,8 +153,10 @@ typedef struct AnimationEventAction {
 /* Values of an ANIMATION_EVENT_TEXTURE_ANIMATION event that do something else
  * instead */
 /* Starts playing RANDOM_TEXTURE_ANIMATION now and then */
-#define TEXTURE_ANIMATION_EVENT_START_RANDOM 0
-#define TEXTURE_ANIMATION_EVENT_STOP_RANDOM 2
+enum TextureAnimationEvent {
+  TEXTURE_ANIMATION_EVENT_START_RANDOM,
+  TEXTURE_ANIMATION_EVENT_STOP_RANDOM = 2
+};
 
 /* A span of a model's joint keyframes, played as one animation */
 typedef struct CharacterAnimation {

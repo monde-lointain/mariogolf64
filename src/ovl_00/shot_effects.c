@@ -49,8 +49,10 @@ enum SparkKind {
 #define IMPACT_FLASH_FULL_LEVEL 255
 
 /* The ways that ClearShotEffects ends the round's effects */
-#define CLEAR_KIND_ROUND_END 1
-#define CLEAR_KIND_HOLE_END 2
+enum ClearKind {
+  CLEAR_KIND_ROUND_END = 1,
+  CLEAR_KIND_HOLE_END
+};
 
 #define SOUND_CHANNEL_COUNT 16
 

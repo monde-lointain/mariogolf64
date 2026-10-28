@@ -53,10 +53,13 @@
 #define INSET_VIEW_STEP_COUNT 8
 
 /* Values of f_FadeColor */
-#define FADE_COLOR_NONE 0
-#define FADE_COLOR_WHITE 1
-#define FADE_COLOR_NOISE 2
-#define FADE_COLOR_BLACK 3
+enum FadeColor {
+  FADE_COLOR_NONE,
+  FADE_COLOR_WHITE,
+  FADE_COLOR_NOISE,
+  FADE_COLOR_BLACK
+};
+
 #define FADE_NOISE_GREY 0xBF
 
 /* Values a debug menu edits; nothing reads them */

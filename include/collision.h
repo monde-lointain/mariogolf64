@@ -9,9 +9,11 @@
 #include "functions.h"
 
 /* What FindPinHit returns */
-#define PIN_HIT_NONE 0
-#define PIN_HIT_FLAGSTICK 1
-#define PIN_HIT_FLAG 2
+enum PinHit {
+  PIN_HIT_NONE,
+  PIN_HIT_FLAGSTICK,
+  PIN_HIT_FLAG
+};
 
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
     s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle* hit,

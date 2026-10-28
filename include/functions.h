@@ -58,10 +58,13 @@ void UnloadStaffRoll(void);
 
 /* RCP setup, in the file at 0xDCE0 */
 /* Clears the depth buffer and keeps the frame */
-#define BUFFER_CLEAR_DEPTH_ONLY 0
-/* Also fills the frame black, a line at a time */
-#define BUFFER_CLEAR_BY_LINE 1
-#define BUFFER_CLEAR_WHOLE 2 /* Also fills the frame black at once */
+enum BufferClear {
+  BUFFER_CLEAR_DEPTH_ONLY,
+  /* Also fills the frame black, a line at a time */
+  BUFFER_CLEAR_BY_LINE,
+  BUFFER_CLEAR_WHOLE /* Also fills the frame black at once */
+};
+
 void AppendRcpInit(s32 viewportIndex, Gfx** displayListHead);
 void AppendBufferClear(s32 clearMode, Gfx** displayListHead);
 void InitRcp(s32 viewportIndex);

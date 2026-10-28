@@ -58,8 +58,10 @@ enum CharacterSlotRole {
 #define HEARTBEAT_LOOP_COUNT 100000000
 
 /* Values of g_MainLoopState */
-#define MAIN_LOOP_START 0
-#define MAIN_LOOP_RUNNING (-1)
+enum MainLoopState {
+  MAIN_LOOP_START,
+  MAIN_LOOP_RUNNING = -1
+};
 
 /* Values of f_DebugHaltState. Holding HALT_BUTTONS on the first controller
    while halting is allowed halts the game and hands the console over to

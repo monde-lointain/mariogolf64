@@ -2350,13 +2350,18 @@ s32 UpdateTournamentResults(ControllerState* controller) {
 }
 
 /* The steps of ShowScorePassword, in f_ResultsUnk78 */
-#define SCORE_PASSWORD_STEP_START 0
-#define SCORE_PASSWORD_STEP_SHOWN 1
-#define SCORE_PASSWORD_STEP_ASKING 2
-#define SCORE_PASSWORD_STEP_DONE 3
+enum ScorePasswordStep {
+  SCORE_PASSWORD_STEP_START,
+  SCORE_PASSWORD_STEP_SHOWN,
+  SCORE_PASSWORD_STEP_ASKING,
+  SCORE_PASSWORD_STEP_DONE
+};
+
 /* UpdatePrompt's results for PROMPT_SCORE_PASSWORD */
-#define SCORE_PASSWORD_PROMPT_YES 10
-#define SCORE_PASSWORD_PROMPT_NO 11
+enum ScorePasswordAnswer {
+  SCORE_PASSWORD_PROMPT_YES = 10,
+  SCORE_PASSWORD_PROMPT_NO
+};
 
 /* Shows the round's score password until the player says they have it. Returns
  * TRUE then. */
@@ -2409,13 +2414,15 @@ s32 ShowScorePassword(ControllerState* controller) {
 }
 
 /* f_ResultsUnk78 values while UpdateCoursePointsResults runs */
-#define POINTS_STEP_SHOWN 0
-#define POINTS_STEP_SLIDING_IN_TALLY 1
-#define POINTS_STEP_TALLIED 2
-#define POINTS_STEP_SLIDING_OUT_TALLY 3
-#define POINTS_STEP_WAITING 4
-#define POINTS_STEP_TALLYING 5
-#define POINTS_STEP_START_TALLY 6
+enum PointsStep {
+  POINTS_STEP_SHOWN,
+  POINTS_STEP_SLIDING_IN_TALLY,
+  POINTS_STEP_TALLIED,
+  POINTS_STEP_SLIDING_OUT_TALLY,
+  POINTS_STEP_WAITING,
+  POINTS_STEP_TALLYING,
+  POINTS_STEP_START_TALLY
+};
 
 #ifdef NON_MATCHING
 /*

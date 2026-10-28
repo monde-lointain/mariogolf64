@@ -971,12 +971,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802104F0_ovl_01);
 #endif
 
 /* DrawMenuNumber's sixth argument: the field it right-aligns the number in */
-#define NUMBER_FIELD_TWO_NARROW 0
-#define NUMBER_FIELD_ONE 1
-#define NUMBER_FIELD_TWO 2
-#define NUMBER_FIELD_THREE 3
-#define NUMBER_FIELD_FOUR 4
-#define NUMBER_FIELD_NONE 5
+enum NumberField {
+  NUMBER_FIELD_TWO_NARROW,
+  NUMBER_FIELD_ONE,
+  NUMBER_FIELD_TWO,
+  NUMBER_FIELD_THREE,
+  NUMBER_FIELD_FOUR,
+  NUMBER_FIELD_NONE
+};
 
 void func_80210C18_ovl_01(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {

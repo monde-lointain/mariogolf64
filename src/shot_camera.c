@@ -188,9 +188,11 @@ static const char f_UnusedFloatFormat[] = "            %f";
 #define SOUND_FADE_FRAME_COUNT 120
 
 /* f_EndReaction values: how the others reacted as the ball neared its end */
-#define END_REACTION_NONE 0
-#define END_REACTION_ONLOOKERS 1
-#define END_REACTION_UNK2 2
+enum EndReaction {
+  END_REACTION_NONE,
+  END_REACTION_ONLOOKERS,
+  END_REACTION_UNK2
+};
 
 /* Values of f_PendingResultSound, which plays when D_800BE620 reaches
  * RESULT_SOUND_STAGE */

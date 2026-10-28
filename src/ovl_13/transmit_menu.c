@@ -28,11 +28,15 @@
 
 /* f_ModeOptions entries, counted from the message naming each */
 #define TRANSMIT_OPTION_MESSAGES 0x13F
-#define TRANSMIT_OPTION_NONE -1
-#define TRANSMIT_OPTION_STATUS 0
-#define TRANSMIT_OPTION_EXPERIENCE 1
-#define TRANSMIT_OPTION_CHARACTERS 2
-#define TRANSMIT_OPTION_MAIN_MENU 3
+
+enum TransmitOption {
+  TRANSMIT_OPTION_NONE = -1,
+  TRANSMIT_OPTION_STATUS,
+  TRANSMIT_OPTION_EXPERIENCE,
+  TRANSMIT_OPTION_CHARACTERS,
+  TRANSMIT_OPTION_MAIN_MENU
+};
+
 /* The hint below each option, counted the same way */
 #define TRANSMIT_OPTION_HINTS 0x143
 
@@ -51,16 +55,18 @@
 #define BRINGING_FRAME_COUNT 16
 
 /* screenStep values on the Send Status screen */
-#define SEND_STATUS_SHOWING_ERROR 0 /* Or the cancelled pak check, closing */
-#define SEND_STATUS_CHOOSING 1
-#define SEND_STATUS_READY 3
-#define SEND_STATUS_CHECKING 4
-#define SEND_STATUS_SENT 5
-#define SEND_STATUS_ASKING 8 /* Whether to overwrite the cartridge's status */
-#define SEND_STATUS_STARTING 9
-#define SEND_STATUS_CONFIRMING 10 /* Asking the player to start a pak check */
-#define SEND_STATUS_TAGGING 11
-#define SEND_STATUS_WRITING 12
+enum SendStatusStep {
+  SEND_STATUS_SHOWING_ERROR, /* Or the cancelled pak check, closing */
+  SEND_STATUS_CHOOSING,
+  SEND_STATUS_READY = 3,
+  SEND_STATUS_CHECKING,
+  SEND_STATUS_SENT,
+  SEND_STATUS_ASKING = 8, /* Whether to overwrite the cartridge's status */
+  SEND_STATUS_STARTING,
+  SEND_STATUS_CONFIRMING, /* Asking the player to start a pak check */
+  SEND_STATUS_TAGGING,
+  SEND_STATUS_WRITING
+};
 
 /* The answers to PROMPT_BRING_MORE_CHARACTERS */
 enum BringMoreCharactersAnswer {
@@ -75,14 +81,16 @@ enum OverwriteRecordsAnswer {
 };
 
 /* screenStep values on the Send Experience screen */
-#define SEND_EXPERIENCE_CHOOSING 0
-#define SEND_EXPERIENCE_SENT 3
-#define SEND_EXPERIENCE_WRITING 4
-#define SEND_EXPERIENCE_FAILED 8
-#define SEND_EXPERIENCE_DONE 9
-/* Asking the player to start a pak check */
-#define SEND_EXPERIENCE_CONFIRMING 10
-#define SEND_EXPERIENCE_NOTHING_TO_SEND 11
+enum SendExperienceStep {
+  SEND_EXPERIENCE_CHOOSING,
+  SEND_EXPERIENCE_SENT = 3,
+  SEND_EXPERIENCE_WRITING,
+  SEND_EXPERIENCE_FAILED = 8,
+  SEND_EXPERIENCE_DONE,
+  /* Asking the player to start a pak check */
+  SEND_EXPERIENCE_CONFIRMING,
+  SEND_EXPERIENCE_NOTHING_TO_SEND
+};
 
 /* f_NoticeState: the notice cloud grows, shows its message, then shrinks */
 #define NOTICE_HIDDEN 0

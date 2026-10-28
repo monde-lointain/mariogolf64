@@ -24,11 +24,13 @@
 #include "variables.h"
 
 /* f_BootLogoStage values */
-#define BOOT_LOGO_N64 0
-#define BOOT_LOGO_NINTENDO 1
-#define BOOT_LOGO_CAMELOT 2
-#define BOOT_LOGO_LEAVING_NINTENDO 3
-#define BOOT_LOGO_LEAVING_CAMELOT 4
+enum BootLogo {
+  BOOT_LOGO_N64,
+  BOOT_LOGO_NINTENDO,
+  BOOT_LOGO_CAMELOT,
+  BOOT_LOGO_LEAVING_NINTENDO,
+  BOOT_LOGO_LEAVING_CAMELOT
+};
 
 /* The frames that the first two logos stay for */
 #define LOGO_FRAME_COUNT 40

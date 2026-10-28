@@ -22,9 +22,11 @@ enum LandingReaction {
 };
 
 /* RoundHud.ballHeight*Direction values */
-#define HEIGHT_ABOVE 0
-#define HEIGHT_BELOW 1
-#define HEIGHT_LEVEL 2
+enum HeightComparison {
+  HEIGHT_ABOVE,
+  HEIGHT_BELOW,
+  HEIGHT_LEVEL
+};
 
 /* RoundHud.scorecardPage while the scorecard is closed */
 #define NO_SCORECARD_PAGE (-1)

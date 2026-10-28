@@ -19,11 +19,13 @@
 #define STEP_FLAG_CUP_PULL 0x80
 
 /* Values of a BallSimulation's isRunning */
-#define BALL_STATE_STOPPED 0
-#define BALL_STATE_FLYING 1
-#define BALL_STATE_ROLLING 2
-#define BALL_STATE_IN_CUP 3
-#define BALL_STATE_IN_WATER 4
+enum BallState {
+  BALL_STATE_STOPPED,
+  BALL_STATE_FLYING,
+  BALL_STATE_ROLLING,
+  BALL_STATE_IN_CUP,
+  BALL_STATE_IN_WATER
+};
 
 #define BALL_SIMULATION_COUNT 1
 
@@ -69,11 +71,13 @@ typedef struct Unk20 {
 #define PUTT_VELOCITY_Y_OFFSET 0x106
 
 /* What LaunchBallSimulation is called for */
-#define LAUNCH_PURPOSE_STROKE 0
-#define LAUNCH_PURPOSE_CLUB_TEST 1
-#define LAUNCH_PURPOSE_TRIAL 2
-#define LAUNCH_PURPOSE_UNK3 3
-#define LAUNCH_PURPOSE_UNK5 5
+enum LaunchPurpose {
+  LAUNCH_PURPOSE_STROKE,
+  LAUNCH_PURPOSE_CLUB_TEST,
+  LAUNCH_PURPOSE_TRIAL,
+  LAUNCH_PURPOSE_UNK3,
+  LAUNCH_PURPOSE_UNK5 = 5
+};
 
 typedef struct BallSimulation {
   /* 0x00 */ s32 startPosition[3];

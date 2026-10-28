@@ -103,13 +103,15 @@ typedef struct RouteCoordinates {
   /* 0x24 */ s32 z[ROUTE_POINT_COUNT + 1];
 } RouteCoordinates; /* size = 0x48 */
 
-#define PLAN_STAGE_UNSTARTED 0
-#define PLAN_STAGE_STARTED 1
-#define PLAN_STAGE_TARGET_CHOSEN 2
-#define PLAN_STAGE_TRIAL_TAKEN 3
-#define PLAN_STAGE_UNK4 4
-#define PLAN_STAGE_LEVEL_FINISHED 5
-#define PLAN_STAGE_TRIAL_RUNNING 6
+enum PlanStage {
+  PLAN_STAGE_UNSTARTED,
+  PLAN_STAGE_STARTED,
+  PLAN_STAGE_TARGET_CHOSEN,
+  PLAN_STAGE_TRIAL_TAKEN,
+  PLAN_STAGE_UNK4,
+  PLAN_STAGE_LEVEL_FINISHED,
+  PLAN_STAGE_TRIAL_RUNNING
+};
 
 /* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
  * copy */

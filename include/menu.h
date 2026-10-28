@@ -204,10 +204,12 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define FACE_NAME_OFFSET_Y 12
 
 /* The arrows that func_80212FEC draws, by the order of their images */
-#define MENU_ARROW_UP 0
-#define MENU_ARROW_DOWN 1
-#define MENU_ARROW_RIGHT 2
-#define MENU_ARROW_LEFT 3
+enum MenuArrow {
+  MENU_ARROW_UP,
+  MENU_ARROW_DOWN,
+  MENU_ARROW_RIGHT,
+  MENU_ARROW_LEFT
+};
 
 /*
  * The wheel that func_8020E898 and func_80213748 turn the open courses' 64 by
@@ -296,10 +298,12 @@ enum SaveMenuBuffer {
 #define CHARACTER_SELECT_UNREAD_KIND 10
 
 /* The buffers that func_802159C0 keeps, by the kind its caller gives */
-#define TABLE_BUFFER_CURSOR 1
-#define TABLE_BUFFER_UNREAD 2
-#define TABLE_BUFFER_ARROWS 3
-#define TABLE_BUFFER_STAR 4
+enum TableBuffer {
+  TABLE_BUFFER_CURSOR = 1,
+  TABLE_BUFFER_UNREAD,
+  TABLE_BUFFER_ARROWS,
+  TABLE_BUFFER_STAR
+};
 
 /* The buffers that func_8020E0AC keeps, by the kind its caller gives */
 enum CourseBuffer {
