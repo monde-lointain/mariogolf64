@@ -646,7 +646,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 f32 direction[3];
                 f32 alignment;
                 f32 depth;
-                f32 angle;
+                Radians angle;
                 f32 pull;
 
                 if (printsDebugText) {
@@ -2090,14 +2090,14 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   s16 crossSlope;
   s32 crossSlopeSize;
   s32 yaw;
-  f32 pitch;
-  f32 yawRadians;
+  Radians pitch;
+  Radians yawRadians;
   f32 launchScale;
   f32 blend;
-  f32 slopePitch;
+  Radians slopePitch;
   f32 curve;
   f32 spinBase;
-  f32 windAngle;
+  Radians windAngle;
   f32 windScale;
   f32 along; /* Reusing it for the pitch below is there to match */
   s32 index;

@@ -1705,7 +1705,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
   s32 index;
   s32 otherIndex;
   s32 key;
-  f32 angle;
+  Radians angle;
   f32 circleX;
   s32 slot;
   s32 halfSize;

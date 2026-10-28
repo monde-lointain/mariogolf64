@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "game.h"
 #include "game_flags.h"
+#include "math_util.h"
 #include "play.h"
 #include "save.h"
 #include "shot_camera.h"
@@ -81,7 +82,7 @@ static s8 f_DimsTranslucentTriangles = FALSE;
 static s32 D_800C3104 = 0;
 static s32 f_HasTestRing = FALSE;
 static s32 f_TextureScroll = 0;
-static f32 f_RingAngle = 0.0f;
+static Degrees f_RingAngle = 0.0f;
 /* Read by no routine */
 static s32 D_800C3114 = 0;
 static Lights1 f_RingLights =
@@ -286,7 +287,7 @@ void DrawRings(
   s32 side;
   s32 nextSection;
   s32 alpha;
-  f32 angle;
+  Radians angle;
   f32 turn;
 
   gDPPipeSync(gfx++);
@@ -424,7 +425,7 @@ static void BuildRingVertices(void) {
   Vtx* vertex;
   Boolean isOuter;
   Boolean isRaised;
-  f32 angle;
+  Radians angle;
   f32 offsetX;
   f32 offsetY;
   f32 offsetZ;

@@ -1680,7 +1680,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   s32 unused[16];
   Vec3 rotation;
   Vec3 translation;
-  f32 angle;
+  Radians angle;
 
   UpdateSky(&g_Cameras[cameraIndex].view, cameraIndex);
 
@@ -2695,7 +2695,7 @@ void DrawTileAnimation(void) {
   Vec3 rotation;
   Vec3 translation;
   Mat4 matrix;
-  f32 angle;
+  Radians angle;
   f32 unusedSine;
   f32 unusedCosine;
   s32 progress;

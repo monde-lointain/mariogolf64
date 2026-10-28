@@ -402,7 +402,7 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   s32 statsCourse;
   s32 spin;
   s32 angleStep;
-  f32 angle;
+  Radians angle;
   f32 wheelX;
   s32 image;
   s32 slot;

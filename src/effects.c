@@ -465,7 +465,7 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
  * Throws a tear from a character's point toward heading, and up; Baby
  * Mario's bogey reaction throws them from points 3 and 4
  */
-void SpawnTear(u32 slotIndex, s32 pointId, f32 heading) {
+void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
   Vec3 translation; /* Unused; it is there to match */
   Vec3 rotation; /* Unused; it is there to match */
   Vec3 scale; /* Unused; it is there to match */
@@ -627,7 +627,7 @@ void LaunchDrop(CoursePoint point) {
   /* Of the horizontal speed above the slowest */
   s32 speedOffset;
   f32 speed;
-  f32 heading;
+  Radians heading;
 
   f_SpawnGroundHeight = (f32)GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
   for (index = 0; index < EFFECT_COUNT; index++) {
@@ -928,7 +928,8 @@ void SpawnRisingClumps(CoursePoint unusedPoint) {
  * debris that the debris kind gives. The amount of debris grows with
  * -sin(pitch). The nested spawners share the count and index.
  */
-void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
+void SpawnShotDebris(
+    CoursePoint point, Radians pitch, Radians yaw, s32 launchSpeed) {
   Vec3 translation;
   Vec3 rotation;
   Vec3 scale;
@@ -952,7 +953,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
   Effect* divotMarkEffect;
   s32 headingIndex;
   f32 speed;
-  f32 heading;
+  Radians heading;
 
   /* Spawns up to debrisCount slow-rising, slow-fading pieces of debris */
   s32 SpawnLowDebris(s32 slotCount, s32 debrisCount, s32 kind) {
@@ -1961,7 +1962,7 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
   s32 halfSize;
   s32 textureStep;
   s32 spinStep;
-  f32 angle;
+  Radians angle;
 
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);

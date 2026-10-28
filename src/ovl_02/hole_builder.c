@@ -3098,8 +3098,8 @@ void CastBillboardShadows(void) {
   u8 solidities[SOLIDITY_ROW_LENGTH][SOLIDITY_ROW_LENGTH];
   u8* solidityCells;
   Vec3 rowPoint;
-  f32 lightYaw;
-  f32 lightPitch;
+  Radians lightYaw;
+  Radians lightPitch;
   s32 lastTextureIndex;
   s32 index;
   s32 listIndex;
@@ -3473,7 +3473,7 @@ void ShadeGroundTiles(void) {
   s8 isFadeUnlimited;
   s8 isFadeDisabled;
   s16(*heightRows)[MAP_COLUMN_COUNT];
-  f32 pitch;
+  Radians pitch;
   s32 lightColumnOffset;
   s32 lightRowOffset;
   s32 slope;

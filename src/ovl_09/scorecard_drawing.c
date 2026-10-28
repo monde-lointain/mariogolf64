@@ -126,7 +126,7 @@ static s32 f_MatchResultFrameCount = 0;
 static u8 f_WinMarkFrames[] = {3, 4, 5, 0, 1, 2, 3, 4, 5, 0};
 static char f_CarryOverText[] = "Carry over";
 /* The angle the colors of "Win" are at */
-static f32 f_WinColorAngle = 0.0f;
+static Radians f_WinColorAngle = 0.0f;
 static char* f_BetNames[BET_COUNT] = {
     D_8024C848_ovl_09,
     D_8024C848_ovl_09,
@@ -173,10 +173,10 @@ static Vtx f_FlapVertices[FLAP_QUAD_COUNT][QUAD_VERTEX_COUNT] = {
 };
 static Lights1 f_FlapLights =
     gdSPDefLights1(0xFF, 0xFF, 0xFF, 0x1F, 0x1F, 0x1F, 0, 0, -127);
-static f32 f_ArrowPulseAngle = 0.0f;
-static f32 f_ScorePulseAngle = 0.0f;
+static Radians f_ArrowPulseAngle = 0.0f;
+static Radians f_ScorePulseAngle = 0.0f;
 static s32 f_ScoresStyle = SCORES_STYLE_OPAQUE;
-static f32 f_BadgeGlowAngle = 0.0f;
+static Radians f_BadgeGlowAngle = 0.0f;
 
 /* Where DrawMatchResult draws its text */
 #define MATCH_TITLE_X 32

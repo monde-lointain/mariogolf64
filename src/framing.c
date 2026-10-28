@@ -33,8 +33,8 @@
 static f32 f_FramedSphereCenters[FRAMED_SPHERE_CAPACITY][3];
 static f32 f_FramedSphereRadii[FRAMED_SPHERE_CAPACITY];
 static s32 f_FramedSphereCount;
-static f32 f_FramingPitch;
-static f32 f_FramingYaw;
+static Radians f_FramingPitch;
+static Radians f_FramingYaw;
 static Mat4 f_FramingRotation;
 
 void TransformPoint(Mat4 mf, Vec3 point, Vec3 result);
@@ -78,7 +78,7 @@ void AddFramedSphere(Vec3 center, f32 radius) {
 
 /* Sets the direction, in radians, from which FrameSpheres looks */
 #ifdef NON_MATCHING
-void SetFramingAngles(f32 pitch, f32 yaw) {
+void SetFramingAngles(Radians pitch, Radians yaw) {
   Mat4 pitchRotation;
   Mat4 yawRotation;
 
@@ -120,17 +120,17 @@ void FrameSpheres(f32 depthOffset) {
   Mat4 yawRotation;
   Mat4 orientation;
   f32 horizontalEyeZ;
-  f32 rightAngle;
-  f32 leftAngle;
-  f32 topAngle;
-  f32 bottomAngle;
+  Degrees rightAngle;
+  Degrees leftAngle;
+  Degrees topAngle;
+  Degrees bottomAngle;
   f32 minZ;
   f32 maxZ;
   f32 minX;
   f32 maxX;
   f32 minY;
   f32 maxY;
-  f32 angle;
+  Radians angle;
   f32 distance;
   f32 eyeX;
   f32 eyeY;

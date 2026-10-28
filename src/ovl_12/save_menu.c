@@ -314,10 +314,10 @@ static s32 f_ResumedSongId = NO_SONG;
 static s16 f_ReplayLabelIds[REPLAY_LABEL_COUNT] = {
     0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C};
 static s32 f_IconFrameTimer = 0;
-static f32 f_PanelWaveAngle = 0.0f;
-static f32 f_TitleSwayAngle = 0.0f;
-static f32 f_CursorPulseAngle = 0.0f;
-static f32 f_ReplayTitleBobAngle = 0.0f;
+static Radians f_PanelWaveAngle = 0.0f;
+static Radians f_TitleSwayAngle = 0.0f;
+static Radians f_CursorPulseAngle = 0.0f;
+static Radians f_ReplayTitleBobAngle = 0.0f;
 
 static s32 f_SlideOffsets[4];
 /* Read by no routine */

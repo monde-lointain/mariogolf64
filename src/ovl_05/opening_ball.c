@@ -482,7 +482,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                 f32 direction[3];
                 f32 alignment;
                 f32 depth;
-                f32 angle;
+                Radians angle;
                 f32 pull;
 
                 isNearCup = TRUE;
@@ -1530,8 +1530,8 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   s32 speed;
   s32 sideSign;
   s32 rumbles;
-  f32 pitch;
-  f32 yawRadians;
+  Radians pitch;
+  Radians yawRadians;
   f32 blend;
   f32 spinBase;
   f32 spinLoss;

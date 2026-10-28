@@ -6,6 +6,7 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "math_util.h"
 #include "save.h"
 
 /* StartWeather's weathers */
@@ -25,7 +26,8 @@ extern f32 g_RainSoundVolume;
 
 void PrepareShotEffects(BallSimulation* simulation);
 void SpawnImpactEffects(BallSimulation* simulation);
-void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed);
+void SpawnShotDebris(
+    CoursePoint point, Radians pitch, Radians yaw, s32 launchSpeed);
 void StartPlayerRumble(UnkB8* player);
 void StartRingPassRumble(UnkB8* player);
 void LoadEffectImages(void);

@@ -58,7 +58,7 @@ static f32 f_IntroCameraHeight = 0.0f;
 /* Places the camera for the start of the hole intro */
 void StartHoleIntroCamera(void) {
   Vec3* lookAt = &g_Cameras[1].view.lookAt;
-  f32 heading;
+  Radians heading;
   f32 offsetX;
   f32 scale = COURSE_TO_WORLD_SCALE;
 
@@ -91,7 +91,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/hole_intro", StartHoleIntroCamera);
  * over. */
 s32 UpdateHoleIntroCamera(void) {
   Vec3 offset;
-  f32 heading;
+  Radians heading;
 
   if (f_IntroFrame < INTRO_FRAME_COUNT_MAX) {
     f_IntroFrame++;

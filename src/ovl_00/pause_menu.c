@@ -16,6 +16,7 @@
 #include "heap.h"
 #include "hole_display.h"
 #include "main.h"
+#include "math_util.h"
 #include "overlay_manager.h"
 #include "play.h"
 #include "round_hud.h"
@@ -286,17 +287,17 @@ static s32 f_PauseLayout = PAUSE_LAYOUT_NONE;
 static s32 f_IsPauseMenuLoaded = FALSE;
 static s32 f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
 static s32 f_PauseArrowsTick = 0;
-static f32 f_PauseGlowAngle = 0.0f;
-static f32 f_PauseCursorAngle = 0.0f;
+static Radians f_PauseGlowAngle = 0.0f;
+static Radians f_PauseCursorAngle = 0.0f;
 static s32 f_ChoiceBoxState = CHOICE_BOX_CLOSED;
 /* Read by no routine */
 static s32 D_80224A94_ovl_00 = 0;
 static s32 f_ChoiceBoxIndex = CHOICE_BOX_CLOSED;
 static s32 f_ChoiceBoxSelection = 0;
 /* Cycles the selected label's color */
-static f32 f_ChoiceGlowAngle = 0.0f;
+static Radians f_ChoiceGlowAngle = 0.0f;
 /* Bobs the cursor from side to side */
-static f32 f_ChoiceCursorAngle = 0.0f;
+static Radians f_ChoiceCursorAngle = 0.0f;
 
 static u8* f_PauseCursorImage;
 static u8* f_MenuCloudImage; /* The pause menu's cloud, or the choice box's */

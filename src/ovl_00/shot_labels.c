@@ -145,7 +145,7 @@ static s32 f_ShotLabelPlayers = SHOT_LABELS_NONE;
 /* Where a tag's centre sits from the ball at each corner */
 static s8 f_TagOffsetsX[CORNER_COUNT] = {22, -22, -22, 22};
 static s8 f_TagOffsetsY[CORNER_COUNT] = {12, 12, -12, -12};
-static f32 f_OutOfBoundsPulseAngle = 0.0f;
+static Radians f_OutOfBoundsPulseAngle = 0.0f;
 static s32 f_PinFlagWaveFrame = 0;
 
 void DrawShotLabels(Gfx** displayListHead);

@@ -14,6 +14,7 @@
 #include "debug_text.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "math_util.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -119,7 +120,7 @@ static u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
  */
 static u16 f_ApproachToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
     0x579, 0x57A, 0x57B, PANEL_ASSET_POWER};
-static f32 f_MarkerPulseAngle = 0.0f;
+static Radians f_MarkerPulseAngle = 0.0f;
 
 static Mtx f_SpanBarTranslation;
 static Mtx f_SpanBarScale;

@@ -1417,7 +1417,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
   f32 progress;
   f32 remaining;
   f32 dot;
-  f32 angle;
+  Radians angle;
   f32 nextWeight;
   f32 spanWeight;
   f32 sinAngle;
@@ -1831,8 +1831,8 @@ void SetCharacterLights(void) {
   u8 ambientColor[3];
   u8 lightColor[3];
   s8 lightDirection[3];
-  f32 lightPitch;
-  f32 lightYaw;
+  Radians lightPitch;
+  Radians lightYaw;
 
   switch (g_HoleSetup.conditions.sceneColorIndex) {
     case SCENE_COLOR_INDEX_ROUND_LATE:

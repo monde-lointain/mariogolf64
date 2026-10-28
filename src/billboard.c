@@ -334,8 +334,8 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   Vec3 viewDir;
   Vec3 lightDir;
   Vec3 unusedVector;
-  f32 lightPitch;
-  f32 lightYaw;
+  Radians lightPitch;
+  Radians lightYaw;
   f32 alignment;
   f32 lightHeight;
   f32 leftAlignment;

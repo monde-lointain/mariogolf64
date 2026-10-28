@@ -788,7 +788,7 @@ void DrawBanner(Gfx** displayListHead) {
   Mat4 matrix;
   s32 alpha;
   f32 letterScale;
-  f32 angle;
+  Radians angle;
   f32 slide;
   f32 wobbleDepth;
   s32 i;
@@ -1115,7 +1115,7 @@ void DrawFlipMessage(Gfx** displayListHead) {
   Mat4 matrix;
   Mat4 hingeMatrix;
   Gfx* gfx = *displayListHead;
-  f32 angle;
+  Radians angle;
   f32 size;
 
   if (f_FlipMessageFrame != FLIP_MESSAGE_FRAME_NONE) {
@@ -1625,7 +1625,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
   s32 bottom;
   s32 copyTop;
   s32 i;
-  f32 angle;
+  Radians angle;
   f32 fade;
   f32 alpha;
 
@@ -1739,7 +1739,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
   s32 bottom;
   s32 copyTop;
   s32 i;
-  f32 angle;
+  Radians angle;
   f32 fade;
   f32 alpha;
 
@@ -2013,7 +2013,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 width;
   s32 stripCount;
-  f32 angle;
+  Radians angle;
   s32 halfWidth;
   s32 stripHeight;
   s32 i;

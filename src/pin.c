@@ -208,7 +208,7 @@ s32 GetCupDistance(s32 x, s32 z) {
 void BuildPinShadow(void) {
   s32 points[PIN_SHADOW_VERTEX_COUNT][AXIS_COUNT];
   s32 i;
-  f32 heading =
+  Radians heading =
       (g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
 
   for (i = 0; i != PIN_SHADOW_ROW_COUNT; i++) {
@@ -294,7 +294,7 @@ void SetPinMatrix(s32 cameraIndex) {
   Vec3 rotation;
   Vec3 scale;
   Mat4 matrix;
-  f32 heading =
+  Radians heading =
       atan2((g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) -
               g_Cameras[0].view.eye[AXIS_X],
           (g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
@@ -363,7 +363,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
   Vec3 flagScale;
   Mat4 flagMatrix;
   f32 cupHalfHeight;
-  f32 heading;
+  Radians heading;
   f32 footOffsetX;
   f32 footOffsetZ;
   f32 cupScreenScale;

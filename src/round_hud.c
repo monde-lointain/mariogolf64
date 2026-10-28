@@ -589,7 +589,7 @@ static s32 D_800C5AA0 = 0;
 static f32 f_GreenGridScroll = 0.0f;
 static s32 f_BallTrailHead = 0; /* The latest position */
 s32 D_800C5AAC = 0;
-static f32 f_WindIconPulseAngle = 0.0f;
+static Radians f_WindIconPulseAngle = 0.0f;
 static Lights1 f_WindArrowLights =
     gdSPDefLights1(0x80, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 80, -80, 73);
 static s32 f_HudOffsetY = INITIAL_HUD_OFFSET_Y;
@@ -1436,7 +1436,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
   SurfaceInfo* surface;
   s32 distance;
   s32 hundredths;
-  f32 angle;
+  Radians angle;
   f32 size;
 
   if (f_LandingReaction != LANDING_REACTION_NONE) {
@@ -1673,8 +1673,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 red;
   s32 green;
   s32 blue;
-  f32 yaw;
-  f32 sideAngle;
+  Radians yaw;
+  Radians sideAngle;
   f32 rowShift;
   f32 columnSpacing;
   f32 rowSpacing;
@@ -2516,8 +2516,8 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
   s32 unused[18];
   Gfx* gfx;
   Club* club;
-  f32 clubHeadAngle;
-  f32 lieAngle;
+  Radians clubHeadAngle;
+  Radians lieAngle;
 
   gfx = *displayListHead;
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),

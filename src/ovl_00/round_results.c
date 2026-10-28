@@ -16,6 +16,7 @@
 #include "game_flags.h"
 #include "heap.h"
 #include "main.h"
+#include "math_util.h"
 #include "menu.h"
 #include "password.h"
 #include "round_hud.h"
@@ -276,7 +277,7 @@ static u8 f_TextSlotColors[][3] = {{0xFF, 0xFF, 0xFF}, {0x7F, 0xBF, 0xFF},
 /* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a
  * frame */
 static s32 f_HandFrame = 0;
-static f32 f_TitleBobAngle = 0.0f;
+static Radians f_TitleBobAngle = 0.0f;
 
 static u8* f_ResultsBackdropImage;
 static u8* f_FinalResultsTitleImage;
@@ -309,7 +310,7 @@ static s32 f_NoticeStage;
 static s32 f_NoticeFrameCount;
 static s32 f_NoticeSwing;
 static s32 f_NoticeUnk54;
-static f32 f_NoticeAngle;
+static Radians f_NoticeAngle;
 static s32 f_IsNoticeHeld;
 static s32 f_NoticeTime;
 static s32 f_NoticeFaceIndex;
@@ -1555,7 +1556,7 @@ void UpdateCharacterResultsNotice(void) {
  * pop open, then a shine sweeps the title */
 void DrawCharacterResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  f32 angle;
+  Radians angle;
   f32 pop;
   s32 size;
   s32 step;

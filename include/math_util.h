@@ -12,6 +12,10 @@
 /* Converts radians to binary angles */
 #define RADIANS_TO_BINARY_ANGLE (32768.0 / (f32)M_PI)
 
+/* Angles as floats: sinf and atan2f work in radians, guRotate in degrees */
+typedef f32 Radians;
+typedef f32 Degrees;
+
 /* The radians to degrees factor of rotations */
 #define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))

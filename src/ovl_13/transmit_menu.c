@@ -1477,9 +1477,9 @@ static s32 f_ModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
 };
 static char* f_UnusedShotTypeNames[] = {"Straight", "Draw", "Fade"};
 static char f_UnusedDriveName[8] = "Drive";
-static f32 f_StatusPointerAngle = 0.0f;
+static Radians f_StatusPointerAngle = 0.0f;
 static s32 f_CharacterArrowFrame = 0;
-static f32 f_OptionPointerAngle = 0.0f;
+static Radians f_OptionPointerAngle = 0.0f;
 /* The title in the Game Boy cartridge header, then its game code */
 static char f_GameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
 /* Begins every save in the Game Boy cartridge RAM */

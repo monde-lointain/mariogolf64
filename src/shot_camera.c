@@ -87,7 +87,7 @@ static s32 D_800BE644 = 0;
 static s32 D_800BE648 = 0;
 static s32 D_800BE64C = 0;
 static s32 D_800BE650 = 0;
-static f32 f_CameraYaw = 0.0f;
+static Radians f_CameraYaw = 0.0f;
 static s32 D_800BE658 = 0;
 static f32 D_800BE65C = 0.0f;
 static s32 f_CupViewHoldCount = 0;
@@ -112,7 +112,7 @@ static s32 f_IsBehindViewFar = FALSE;
 static s32 f_SideViewCount = 0;
 static s32 f_IsApexViewFar = FALSE;
 static s32 f_IsTrailViewClose = FALSE;
-static f32 f_CircleAngle = 0.0f;
+static Radians f_CircleAngle = 0.0f;
 /* Read by no routine */
 static u8 D_800BE6B8[8] = {0};
 /* The displacement scale at each midpoint displacement level */
@@ -294,7 +294,7 @@ static CoursePoint f_FlightBallPosition;
 static CoursePoint f_ShotEndPosition;
 static CoursePoint f_ShotStartPosition;
 static f32 f_ShotFlightYaw;
-static f32 f_FlaggedStepYaw;
+static Radians f_FlaggedStepYaw;
 static f32 f_EndYawFromCup;
 static f32 f_StartYawFromCup;
 static s32 D_800DAF20;
@@ -331,7 +331,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
   UnkB8* player;
   s16 aimYaw;
   f32 distance;
-  f32 angle;
+  Radians angle;
   f32 reach;
   f32 slope;
   s32 ballHeight;
@@ -397,7 +397,7 @@ s16 GetCrossSlopeAngle(UnkB8* player, Unk20* shot) {
   s32 sampleDistance;
   s16 aimYaw;
   s32 yaw;
-  f32 angle;
+  Radians angle;
   s32 height;
   s32 rise;
 
@@ -449,7 +449,7 @@ s16 GetCrossSlopeAngle(UnkB8* player, Unk20* shot) {
  * it.
  */
 s16 GetAimSlopeAngle(UnkB8* player, Unk20* shot) {
-  f32 angle;
+  Radians angle;
   f32 step[2]; /* On x, then z */
   s32 aheadHeight;
   s32 behindHeight;
@@ -587,7 +587,7 @@ void EndFlightCamera(void) {
 void StartFlightCamera(s32 earlierFlightCount) {
   CoursePoint probe;
   s32 i;
-  f32 yaw;
+  Radians yaw;
   f32 degrees;
 
   D_800BE624 = earlierFlightCount;
@@ -1423,7 +1423,7 @@ void PlaceCameraAroundShotEnd(void) {
   f32 height;
   f64 yawScale; /* Holding the scale in yawScale is there to match */
   f32 distance;
-  f32 yaw;
+  Radians yaw;
 
   if (g_SimulatedShot.unk2E08) {
     height = RandomBelow(D_800BE640 * UNK2E08_HEIGHT_SPREAD_FRACTION) +
@@ -1633,7 +1633,7 @@ s32 StepHoleFlyover(void) {
   f32 halfTurns;
   f32 widening;
   f32 approach;
-  f32 yaw;
+  Radians yaw;
   f32 distance;
   f32 height;
   s32 holeRadius;
@@ -1832,16 +1832,16 @@ void PlaceFlightCamera(s32 step) {
   Vec3 cupSphere;
   Vec3 pathSphere;
   Vec3 position;
-  f32 yaw;
+  Radians yaw;
   f32 distance;
-  f32 sideYaw;
-  f32 circleYaw;
+  Radians sideYaw;
+  Radians circleYaw;
   f32 height;
   f32 easeFraction;
   f32 sideDistance;
   f32 delta;
   f32 riseDistance;
-  f32 angle;
+  Radians angle;
   s32 index;
   s32 lowestHeight;
 
@@ -3320,9 +3320,9 @@ void GetViewSidePoints(CoursePoint center, CoursePoint plusQuarterPoint,
     CoursePoint minusQuarterPoint) {
   f32 offsetX;
   f32 offsetZ;
-  f32 yaw;
-  f32 plusQuarterAngle;
-  f32 minusQuarterAngle;
+  Radians yaw;
+  Radians plusQuarterAngle;
+  Radians minusQuarterAngle;
 
   offsetX = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
   offsetZ = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];

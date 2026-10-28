@@ -494,8 +494,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
   s32 shortestReach;
   s32 targetDistance;
   s32 missDistance;
-  f32 missAngle;
-  f32 aimAngle;
+  Radians missAngle;
+  Radians aimAngle;
   f32 missX;
   f32 missZ;
   f32 along;
@@ -932,7 +932,7 @@ s32 PlanCupDistance(s32 unused) {
   f32 cupX;
   f32 cupZ;
   f32 length;
-  f32 windAngle;
+  Radians windAngle;
   f32 inverseLength;
   f32 windFollow;
   f32 windX;
@@ -1706,7 +1706,7 @@ void ChooseLandingTarget(
   Boolean isFound;
   s32 startX;
   s32 startZ;
-  f32 angle;
+  Radians angle;
   f32 cosAngle;
   f32 sinAngle;
   f32 along;
@@ -1952,7 +1952,7 @@ void ChooseLongShot(
  */
 s32 IsLineOffFairway(CoursePoint from, CoursePoint to) {
   s32 distance;
-  f32 angle;
+  Radians angle;
   s32 step;
   f32 stepLength;
   s32 x;
@@ -1985,7 +1985,7 @@ s32 IsLineOffFairway(CoursePoint from, CoursePoint to) {
  */
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
   s32 distance;
-  f32 angle;
+  Radians angle;
   s32 step;
   f32 stepLength;
   s32 x;
@@ -2037,7 +2037,7 @@ s32 GetGreenEdgeDistance(CoursePoint from, CoursePoint to) {
  */
 void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
   s32 distance;
-  f32 angle;
+  Radians angle;
   s32 peakHeight;
   s32 step;
   f32 stepLength;
@@ -2896,7 +2896,7 @@ s32 RollClubKindChance(s32 chanceSetIndex) {
  */
 s32 IsLineMostlyLost(CoursePoint from, CoursePoint to) {
   s32 distance;
-  f32 angle;
+  Radians angle;
   s32 sampleCount;
   s32 step;
   s32 lostCount;

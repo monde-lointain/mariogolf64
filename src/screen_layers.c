@@ -217,7 +217,7 @@ static s32 f_PromptIndex = 0;
 static s32 f_PromptFrame = 0;
 static s32 f_PromptState = PROMPT_STATE_CLOSED;
 static s32 f_PromptChoice = PROMPT_CHOICE_YES;
-static f32 f_ChoiceBobAngle = 0.0f;
+static Radians f_ChoiceBobAngle = 0.0f;
 static void* f_HalfTurnImage;
 static void* f_WipeShapeImage;
 static void* f_PromptCloudImage;

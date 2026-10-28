@@ -1742,7 +1742,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
   Vec3 direction;
   s32 contactX;
   s32 contactZ;
-  f32 angle;
+  Radians angle;
   f32 bounceSpeed;
   s32 unused[2];
 

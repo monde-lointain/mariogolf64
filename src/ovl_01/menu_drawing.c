@@ -307,7 +307,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   s32 key;
   f32 radiusX;
   s32 angleStep;
-  f32 angle;
+  Radians angle;
   f32 circleX;
   /* A board's turns from the chosen one, then the slot of the board drawn */
   s32 slot;
@@ -1312,7 +1312,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
   s32 step;
   s32 stripTop;
   s32 stripOffset;
-  f32 angle;
+  Radians angle;
   f32 wheelX;
   f32 bob;
   void* palette;

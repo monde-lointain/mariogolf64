@@ -140,7 +140,7 @@ void FrameSherryReaction(u32 slotIndex, CameraView* view);
 void FrameKidReaction(u32 slotIndex, CameraView* view);
 void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId);
 void SpawnSpreadingCircle(u32 slotIndex, s32 pointId);
-void SpawnTear(u32 slotIndex, s32 pointId, f32 heading);
+void SpawnTear(u32 slotIndex, s32 pointId, Radians heading);
 
 /*
  * Whether the reaction views drop the eye and raise what they look at.
@@ -789,7 +789,7 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 eastward;
   f32 southward;
-  f32 heading;
+  Radians heading;
   f32 highestHeight;
 
   GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
@@ -1291,7 +1291,7 @@ s32 ConsiderReactionSpot(CoursePoint point) {
   roughness = 0;
   for (ring = 1; ring <= SPOT_RING_COUNT; ring++) {
     for (sample = 0; sample < SPOT_SAMPLES_PER_RING; sample++) {
-      f32 angle = sample * SPOT_SAMPLE_ANGLE;
+      Radians angle = sample * SPOT_SAMPLE_ANGLE;
       f32 offsetX = cosf(angle) * ring * SPOT_RING_SPACING;
       f32 offsetZ = sinf(angle) * ring * SPOT_RING_SPACING;
       s32 difference =
@@ -1350,10 +1350,10 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   f32 ahead[AXIS_COUNT];
   CoursePoint spot;
   u8 unusedBuffer[0x80]; /* Unused; it is there to match */
-  f32 heading =
+  Radians heading =
       ((g_CurrentShot.unk0 + QUARTER_BINARY_TURN) & BINARY_ANGLE_MASK) *
       BINARY_ANGLE_TO_RADIANS;
-  f32 pitch;
+  Radians pitch;
   f32 distance;
   s32 i;
   f32 cosine;

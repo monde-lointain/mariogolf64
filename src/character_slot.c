@@ -87,8 +87,8 @@ void SetCharacterAlpha(s32 alpha) {
 void SetCharacterHilite(CameraMatrices* matrices) {
   f32 lookAtMatrix[4][4];
   f32 lightDirection[3];
-  f32 lightPitch;
-  f32 lightYaw;
+  Radians lightPitch;
+  Radians lightYaw;
   Gfx* gfx;
 
   lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
@@ -2347,7 +2347,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
   f32 progress;
   f32 remaining;
   f32 dot;
-  f32 angle;
+  Radians angle;
   f32 nextWeight;
   f32 spanWeight;
   f32 sinAngle;

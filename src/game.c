@@ -25,6 +25,7 @@
 #include "hole_triangles.h"
 #include "libc.h"
 #include "main.h"
+#include "math_util.h"
 #include "movie.h"
 #include "overlay_manager.h"
 #include "performance_meter.h"
@@ -95,7 +96,7 @@ static s32 f_ScreenEffectFrameCount = 0;
 static u16* f_SavedFrameBuffer = (u16*)MAIN_REGION_END;
 /* Set when the effects stop, never read */
 static s32 f_UnreadEffectSetting = 0;
-static f32 f_SpinAngle = 0.0f; /* In radians */
+static Radians f_SpinAngle = 0.0f; /* In radians */
 
 /* Read by no routine */
 static Gfx f_UnreadPaletteLoads[] = {
@@ -650,7 +651,7 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   Vec3 rotation;
   Vec3 scale;
   Gfx* gfx = *displayListHead;
-  f32 angleStep;
+  Radians angleStep;
   Vtx* vertex;
   s32 rowIndex;
 

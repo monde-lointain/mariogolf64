@@ -414,7 +414,7 @@ void KeepAimCameraOnCourse(void) {
   s32 minCoord;
   s32 maxX;
   s32 maxZ;
-  f32 heading;
+  Radians heading;
   f32 offset;
   f32 overshoot;
 
@@ -493,7 +493,7 @@ void func_8004C6A8(void);
 void PlaceShotCamera(void) {
   Vec3 point;
   CoursePoint center;
-  f32 heading;
+  Radians heading;
 
   if (IsGameFlagSet(GAME_FLAG_TEST_AIM_TILT_AND_MOVIES)) {
     if (g_ControllerStates[0].buttons & L_CBUTTONS) {
@@ -715,7 +715,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceShotCamera);
  */
 void AimDownRange(void) {
   Vec3 lookAt;
-  f32 heading;
+  Radians heading;
 
   GetSelectedClub();
   if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
@@ -764,7 +764,7 @@ void AimDownRange(void) {
 #ifdef NON_MATCHING
 void PlaceAimCamera(void) {
   Vec3 eye;
-  f32 heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+  Radians heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
 
   eye[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_X];
@@ -4772,7 +4772,7 @@ void UpdateTurns(void) {
 
   if (g_RoundHud.unkF) {
     s32 distance = GetSelectedShotDistance();
-    f32 angle = (u16)g_CurrentShot.unk0 * 0.0000958738f;
+    Radians angle = (u16)g_CurrentShot.unk0 * 0.0000958738f;
     f32 cosine;
     f32 scale;
     f32 length;

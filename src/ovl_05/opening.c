@@ -4382,7 +4382,7 @@ extern s32 f_LogoFadeStage;
 extern s32 f_LogoFadeFramesLeft; /* Starts at 63 */
 extern f32 f_LogoClubScale[2]; /* Across, then up */
 /* In degrees */
-extern f32 f_LogoClubAngle;
+extern Degrees f_LogoClubAngle;
 extern f32 f_LogoClubOrbitAngle;
 extern f32 f_LogoClubUnusedAngle; /* Its sine is never used */
 extern f32 f_LogoClubWobbleAngle;
@@ -4410,7 +4410,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   s32 pad[6];
   s32 i;
   s32 j;
-  f32 angle;
+  Radians angle;
   f32 wobble;
 
   switch (f_LogoFadeStage) {

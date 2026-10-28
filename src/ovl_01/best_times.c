@@ -252,7 +252,7 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
   s32 bestTimesCourse;
   s32 spin;
   s32 angleStep;
-  f32 angle;
+  Radians angle;
   f32 wheelX;
   s32 slot;
   s32 halfSize;

@@ -1576,7 +1576,7 @@ void func_8021C67C_ovl_01(Gfx** displayListHead, s32 spacing, s32 y) {
   Gfx* gfx = *displayListHead;
   s32 arrowIndex;
   s32 x;
-  f32 angle;
+  Degrees angle;
 
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
