@@ -197,6 +197,11 @@ $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)
 	VR4300MUL=ON $(CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
+# The game's own variants of libultra objects, built the same way
+$(BUILD_DIR)/src/libultra/%.c.o: src/libultra/%.c
+	@mkdir -p $(dir $@)
+	VR4300MUL=ON $(CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.s.o: $(ULTRALIB_DIR)/%.s
 	@mkdir -p $(dir $@)
 	$(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
