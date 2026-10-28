@@ -104,9 +104,9 @@ static f32 D_800BE684 = 0.0f;
 static s32 f_EndReaction = 0;
 /* How many frames the flight camera waits after the ball's path ends */
 static s32 f_LandingWaitFrameCount = 0;
-static s32 D_800BE690 = 1;
+static s32 D_800BE690 = TRUE;
 s32 g_HoleFlyoverFrame = 0;
-s32 D_800BE698 = 1;
+s32 D_800BE698 = TRUE;
 s32 g_IsCupViewShown = FALSE;
 static s32 f_NextCameraPickIndex = 0;
 static s32 f_IsBehindViewFar = FALSE;
