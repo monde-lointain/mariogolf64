@@ -49,6 +49,9 @@ typedef struct Unk6 {
   /* 0x5 */ s8 unk5;
 } Unk6; /* size = 0x6 */
 
+/* The largest launch power a club can give */
+#define MAX_LAUNCH_POWER 256
+
 typedef struct Unk20 {
   /* 0x00 */ s16 unk0;
   /* 0x04 */ s32 clubIndex;

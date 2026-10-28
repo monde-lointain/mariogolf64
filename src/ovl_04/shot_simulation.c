@@ -57,7 +57,8 @@ void SimulateShot(Unk20* shot) {
   hasUnk40Flag = FALSE;
   g_SimulatedShot.unk2E0C =
       GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
-  g_SimulatedShot.unk2E14 = shot->unkC == 0 && shot->power >= 0x100 &&
+  g_SimulatedShot.unk2E14 = shot->unkC == 0 &&
+      shot->power >= MAX_LAUNCH_POWER &&
       !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
   g_SimulatedShot.unk2E42 = GetUnkCEntry(
       GetClub(

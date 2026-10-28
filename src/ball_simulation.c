@@ -2256,7 +2256,8 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     slopeSpin = curve;
     yaw = shot->unk0 + (crossSlope / 2) +
         (sideSign *
-            ((club->deflection[shot->shotMode] * shot->power / 256) +
+            ((club->deflection[shot->shotMode] * shot->power /
+                 MAX_LAUNCH_POWER) +
                 (entry->unk1 * club->unk0)));
     yawRadians = (u16)yaw * BINARY_ANGLE_TO_RADIANS;
   }

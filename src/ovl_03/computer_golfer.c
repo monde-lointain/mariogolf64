@@ -2190,8 +2190,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
 #define APPROACH_TOLERANCE_SCALE 0.0065104165f
 #define LONG_PUTT_DISTANCE 0x7800
 #define PUTT_DRIFT_LIMIT 0xF000
-/* The largest launch power a club can give */
-#define MAX_LAUNCH_POWER 256
 #define AIM_CHANGE_STEP 0x400
 #define EXCLUDED_SECTOR_COUNT 9
 

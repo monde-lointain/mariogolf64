@@ -1836,7 +1836,7 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
 
   if (swingPhase == SWING_PHASE_UNK2 || swingPhase == SWING_PHASE_UNK4 ||
       swingPhase == SWING_PHASE_UNK3) {
-    shot.power = 0x100;
+    shot.power = MAX_LAUNCH_POWER;
   } else {
     shot.power = swing->power;
   }
@@ -3803,7 +3803,7 @@ void UpdateTurns(void) {
             sound = SOUND_IMPACT_OFF_MARK;
           } else {
             nextState = 5;
-            if (D_80227150_ovl_00.power == 0x100) {
+            if (D_80227150_ovl_00.power == MAX_LAUNCH_POWER) {
               StartShotEffect(1);
               sound = SOUND_IMPACT_ON_MARK;
             } else {
@@ -3881,7 +3881,7 @@ void UpdateTurns(void) {
           nextState = 6;
           if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
               (D_80227150_ovl_00.unkC != 0 ||
-                  D_80227150_ovl_00.power < 0x100)) {
+                  D_80227150_ovl_00.power < MAX_LAUNCH_POWER)) {
             if (g_Players[playerIndex].unk28 > 0) {
               g_Players[playerIndex].unk28--;
             }
@@ -3909,7 +3909,7 @@ void UpdateTurns(void) {
             (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
           g_CurrentShot.unk8 = g_CurrentShot.unk40;
           if (g_TurnController.pressedButtons & B_BUTTON) {
-            D_80227150_ovl_00.power = 0x100;
+            D_80227150_ovl_00.power = MAX_LAUNCH_POWER;
           }
 
           D_80227150_ovl_00.unkC = 0;
@@ -4052,7 +4052,8 @@ void UpdateTurns(void) {
 
           LaunchBallSimulation(&g_TurnBallSimulation, 0, &D_80227150_ovl_00);
           nextState = 9;
-          if (D_80227150_ovl_00.unkC == 0 && D_80227150_ovl_00.power >= 0x100 &&
+          if (D_80227150_ovl_00.unkC == 0 &&
+              D_80227150_ovl_00.power >= MAX_LAUNCH_POWER &&
               !(GetClub(D_80227150_ovl_00.clubIndex)->surfaceMask &
                   CLUB_SURFACE_GREEN) &&
               RateShotLength() == 1) {

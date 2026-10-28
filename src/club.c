@@ -48,8 +48,6 @@
 
 /* f_PutterPowers has a power for each 1/30 of each shot mode's reach */
 #define PUTT_STEP_COUNT 30
-/* GetPuttPower's fraction is out of this */
-#define PUTT_FRACTION_ONE 256
 /* A generated putt is aimed this many world units past its target */
 #define PUTT_OVERSHOOT 0x600
 #define PUTT_TEST_SURFACE 4
@@ -483,7 +481,7 @@ void WriteClubParameters(void) {
     AppendText("{");
     for (step = 1; step <= PUTT_STEP_COUNT; step++) {
       sprintf(line, "%d,\n",
-          GetPuttPower((step * PUTT_FRACTION_ONE) / PUTT_STEP_COUNT, index));
+          GetPuttPower((step * MAX_LAUNCH_POWER) / PUTT_STEP_COUNT, index));
       AppendText(line);
     }
 
@@ -730,7 +728,7 @@ void InitClubs(void) {
 
 /*
  * Returns the putter power for a putt of the fraction, out of
- * PUTT_FRACTION_ONE, of the shot mode's reach. With GAME_FLAG_GENERATE_CLUBS
+ * MAX_LAUNCH_POWER, of the shot mode's reach. With GAME_FLAG_GENERATE_CLUBS
  * set, it is found by test-firing the first set's putter instead.
  * InterpolatePuttPower is a nested function, a GNU C extension.
  */
@@ -756,7 +754,7 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
   }
 
   if (!IsGameFlagSet(GAME_FLAG_GENERATE_CLUBS)) {
-    index = fraction * PUTT_STEP_COUNT / PUTT_FRACTION_ONE;
+    index = fraction * PUTT_STEP_COUNT / MAX_LAUNCH_POWER;
     if (index > PUTT_STEP_COUNT) {
       index = PUTT_STEP_COUNT;
     }
@@ -780,7 +778,7 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
   tryIndex = 0;
   g_ClubTestMode = CLUB_TEST_PUTT;
   targetDistance =
-      (s32)(reach * (UNITS_PER_FOOT / PUTT_FRACTION_ONE) * fraction) +
+      (s32)(reach * (UNITS_PER_FOOT / MAX_LAUNCH_POWER) * fraction) +
       PUTT_OVERSHOOT;
   putter->power[shotMode] = (s32)(reach * 130.048f) / 3;
   for (; tryIndex < MAX_PUTT_TRY_COUNT; tryIndex++) {
