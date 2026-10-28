@@ -21,7 +21,7 @@ typedef struct MenuMemory {
   /* 0x07 */ s8 characterRows[MAX_PLAYER_COUNT]; /* And row */
   /* 0x0B */ s8 modeChoice; /* The mode select cursor's place in the player
                                count's modes */
-  /* 0x0C */ u8 modeSpin; /* How far the modes still have to turn to reach it */
+  /* 0x0C */ s8 modeSpin; /* How far the modes still have to turn to reach it */
   /* 0x0D */ s8 unkD;
   /* 0x0E */ s8
       unkE[MENU_UNKE_COUNT]; /* Set from one of func_80217B88's presets */
