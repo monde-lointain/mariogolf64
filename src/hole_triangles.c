@@ -75,11 +75,16 @@ typedef struct RingCorners {
  */
 #define KEEP_RING_STATES 2
 
-extern s8 f_DimsTranslucentTriangles;
-extern s32 f_HasTestRing;
-extern s32 f_TextureScroll;
-extern f32 f_RingAngle;
-extern Lights1 f_RingLights;
+static s8 f_DimsTranslucentTriangles = FALSE;
+/* Read by no routine */
+static s32 D_800C3104 = 0;
+static s32 f_HasTestRing = FALSE;
+static s32 f_TextureScroll = 0;
+static f32 f_RingAngle = 0.0f;
+/* Read by no routine */
+static s32 D_800C3114 = 0;
+static Lights1 f_RingLights =
+    gdSPDefLights1(0x7F, 0x7F, 0x7F, 0xFF, 0xFF, 0xFF, -73, 73, 73);
 static Mtx f_RingSpinMatrices[2];
 static Vtx f_RingVertices[RING_VERTEX_COUNT];
 extern u8* g_BlendedTextureScrollingLayer;

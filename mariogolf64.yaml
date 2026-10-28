@@ -376,6 +376,8 @@ segments:
       - [0x9E010, .data, fault]
       - [0x9E3F0, .data, music]
       - [0x9E460, data]
+      - [0x9E500, .data, hole_triangles]
+      - [0x9E530, data]
       - [0xA06B0, .data, effects]
       - [0xA0870, data]
       - [0xA27A0, .data, reaction]
