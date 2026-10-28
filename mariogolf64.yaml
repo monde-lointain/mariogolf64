@@ -577,7 +577,7 @@ segments:
     symbol_name_format: $VRAM_$SEG
     subsegments:
       - [0x11BA50, c, hole_editor/hole_editor]
-      - [0x127FD0, data]
+      - [0x127FD0, .data, hole_editor/hole_editor]
       - [0x128250, .rodata, hole_editor/hole_editor]
 
   - name: ovl_02

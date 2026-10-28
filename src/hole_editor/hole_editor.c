@@ -151,6 +151,8 @@
 #define PITCH_STICK_SPEED (1.0f / 180)
 #define EDITOR_PITCH_MIN (-80 * 3.1416 / 180)
 #define EDITOR_CAMERA_DISTANCE 2000.0
+/* The cameras start an eighth of a turn down and around */
+#define EDITOR_CAMERA_START_ANGLE (3.1416f / 4)
 #define METERS_PER_HEIGHT_UNIT (1.0f / 15)
 #define HEIGHT_TEXT_COLUMN 25
 #define HEIGHT_TEXT_ROW 3
@@ -295,6 +297,30 @@
 #define CORNER_CAPTURE_WIDTH 64
 #define CORNER_CAPTURE_HEIGHT 128
 #define CAPTURE_BYTES_PER_PIXEL 3
+#define CORNER_CAPTURE_SIZE \
+  (CAPTURE_HEADER_SIZE + \
+      (CORNER_CAPTURE_WIDTH * CORNER_CAPTURE_HEIGHT * \
+          CAPTURE_BYTES_PER_PIXEL))
+/* A BMP header's fields are little-endian */
+#define LITTLE_ENDIAN_16(value) ((value) & 0xFF), (((value) >> 8) & 0xFF)
+#define LITTLE_ENDIAN_32(value) \
+  LITTLE_ENDIAN_16(value), LITTLE_ENDIAN_16((value) >> 16)
+#define BMP_INFO_HEADER_SIZE 40
+#define BMP_PLANE_COUNT 1
+#define CAPTURE_BITS_PER_PIXEL 24
+#define BMP_NO_COMPRESSION 0
+#define CAPTURE_PIXELS_PER_METER_X 3790
+#define CAPTURE_PIXELS_PER_METER_Y 3780
+#define BMP_HEADER(fileSize, width, height, imageSize) \
+  {'B', 'M', LITTLE_ENDIAN_32(fileSize), LITTLE_ENDIAN_32(0), \
+      LITTLE_ENDIAN_32(CAPTURE_HEADER_SIZE), \
+      LITTLE_ENDIAN_32(BMP_INFO_HEADER_SIZE), LITTLE_ENDIAN_32(width), \
+      LITTLE_ENDIAN_32(height), LITTLE_ENDIAN_16(BMP_PLANE_COUNT), \
+      LITTLE_ENDIAN_16(CAPTURE_BITS_PER_PIXEL), \
+      LITTLE_ENDIAN_32(BMP_NO_COMPRESSION), LITTLE_ENDIAN_32(imageSize), \
+      LITTLE_ENDIAN_32(CAPTURE_PIXELS_PER_METER_X), \
+      LITTLE_ENDIAN_32(CAPTURE_PIXELS_PER_METER_Y), LITTLE_ENDIAN_32(0), \
+      LITTLE_ENDIAN_32(0)}
 /* The size of a whole-screen capture */
 /* The map capture covers every ground tile's texels, inside their borders */
 #define MAP_CAPTURE_WIDTH (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
@@ -331,7 +357,6 @@ extern u8 D_80451A60[];
  * z-y plane */
 #define POLE_QUAD_COUNT 2
 #define POLE_QUAD_VERTEX_COUNT 4
-extern Vtx f_PoleVertices[POLE_QUAD_COUNT][POLE_QUAD_VERTEX_COUNT];
 extern Mtx D_8040CC98;
 
 /* func_80407D64's 32x32 IA8 wave pattern */
@@ -352,8 +377,6 @@ extern u8 D_80491A60[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 #define EDITOR_GROUND_LIST_LENGTH 15000
 extern Gfx f_EditorGroundDisplayLists[DRAW_BUFFER_COUNT]
                                      [EDITOR_GROUND_LIST_LENGTH];
-extern s32 f_EditorClipRatio;
-extern s32 f_EditorGroundTimingRow;
 
 /* An I8 texture as large as DrawGround's noise, all white */
 #define WHITE_TEXTURE_SIZE 32
@@ -383,7 +406,6 @@ extern u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE];
 #define FINE_TILE_POINT_SPAN (FINE_TILE_CELL_SPAN + 1)
 #define FINE_TILE_BUILT_VERTEX_COUNT 17
 #define TILE_TRIANGLE_COUNT (FINE_TILE_CELL_SPAN * FINE_TILE_CELL_SPAN * 2)
-extern s8 f_FineTilePointSlots[FINE_TILE_POINT_SPAN][FINE_TILE_POINT_SPAN];
 
 /*
  * A tile's place in the tile size coordinates, in quarter texels, and the
@@ -534,54 +556,74 @@ void BuildAllTileMidpoints(void);
 s32 CrossProductXZ(
     s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
 void MarkBillboardsOnMap(void);
-extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
-extern s32 f_ScreenCaptureNumber;
+u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
+    {0x80, 0x00, 0x84, 0x01, 0x88},
+    {0x02, 0x08, 0x09, 0x0A, 0x03},
+    {0x81, 0x0B, 0x85, 0x0C, 0x89},
+    {0x04, 0x0D, 0x0E, 0x0F, 0x05},
+    {0x82, 0x06, 0x86, 0x07, 0x8A},
+};
+/* func_80400FBC's cursor */
+s32 f_HolePointCursor[2] = {0, 0}; /* x, z */
+/* Read by no routine */
+s32 D_8040C5A4_hole_editor = -1;
 /* The cell that scene 9's cursor is on */
-extern s32 f_CellCursorColumn;
-extern s32 f_CellCursorRow;
+s32 f_CellCursorColumn = 0;
+s32 f_CellCursorRow = 0;
 /* The ground point that scene 10's cursor is on, starting at scene 9's cell */
-extern s32 f_PointCursorColumn;
-extern s32 f_PointCursorRow;
-extern s32 D_8040C5B8_hole_editor;
-extern s32 D_8040C5BC_hole_editor;
+s32 f_PointCursorColumn = 0;
+s32 f_PointCursorRow = 0;
+s32 D_8040C5B8_hole_editor = 0;
+s32 D_8040C5BC_hole_editor = 0;
 /* func_80400FBC's state */
-extern s32 f_HolePointCursor[2]; /* x, z */
-extern f32 f_HolePointCameraPitch;
-extern f32 f_HolePointCameraHeading;
-extern s32 f_HolePointCameraHeadingAngle;
-extern s32 f_HolePointEditMode;
-extern s32 f_PinTeeIndex;
-extern s32 f_MesonPointIndex;
-extern s32 f_RoutePointIndex;
+f32 f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
+f32 f_HolePointCameraHeading = EDITOR_CAMERA_START_ANGLE;
+/* Read by no routine */
+s32 D_8040C5C8_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+s32 f_HolePointCameraHeadingAngle = 0;
+s32 f_HolePointEditMode = -1;
+s32 f_PinTeeIndex = 0;
+s32 f_MesonPointIndex = 0;
+s32 f_RoutePointIndex = 0;
 
 /* func_80402428's state */
-extern f32 f_TriangleCameraPitch; /* In radians */
-extern f32
-    f_TriangleCameraHeading; /* In radians, from f_TriangleCameraHeadingAngle */
-extern s32 f_TriangleCameraHeadingAngle;
-extern s32 f_EditedTriangleIndex;
-extern s32 f_EditedCornerIndex;
-extern s32 f_SavedCornerIndex;
-extern s32 f_LastTriangleEditKind; /* A TRIANGLE_EDIT_* */
+f32 f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+/* In radians, from f_TriangleCameraHeadingAngle */
+f32 f_TriangleCameraHeading = EDITOR_CAMERA_START_ANGLE;
+/* Read by no routine */
+s32 D_8040C5E8_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+s32 f_TriangleCameraHeadingAngle = 0;
+s32 f_EditedTriangleIndex = 0;
+s32 f_EditedCornerIndex = 0;
+s32 f_SavedCornerIndex = 0;
+s32 f_LastTriangleEditKind = 0; /* A TRIANGLE_EDIT_* */
 extern CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 
 /* func_80402E1C's state */
-extern f32 f_RingCameraPitch; /* In radians */
-extern f32 f_RingCameraHeading; /* In radians, from f_RingCameraHeadingAngle */
-extern s32 f_RingCameraHeadingAngle;
-extern s32 f_RingTriangleIndex;
-extern s32 f_RingCornerIndex; /* Always 0 */
-extern s32 f_LastRingEditKind; /* A TRIANGLE_EDIT_* */
+f32 f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+/* In radians, from f_RingCameraHeadingAngle */
+f32 f_RingCameraHeading = EDITOR_CAMERA_START_ANGLE;
+/* Read by no routine */
+s32 D_8040C608_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+s32 f_RingCameraHeadingAngle = 0;
+s32 f_RingTriangleIndex = 0x9D;
+s32 f_RingCornerIndex = 0; /* Always 0 */
+/* Read by no routine */
+s32 D_8040C618_hole_editor = 0;
+s32 f_LastRingEditKind = 0; /* A TRIANGLE_EDIT_* */
 
 /* func_80403A04's state */
-extern f32 f_WallCameraPitch; /* In radians */
-extern f32 f_WallCameraHeading; /* In radians, from f_WallCameraHeadingAngle */
-extern s32 f_WallCameraHeadingAngle;
-extern s32 f_FirstWallTriangle;
-extern s32 f_WallTriangleIndex; /* The first of the wall's two triangles */
-extern s32 f_WallCornerIndex;
-extern s32 f_SavedWallCornerIndex;
-extern s32 f_LastWallEditKind; /* A TRIANGLE_EDIT_* */
+f32 f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+/* In radians, from f_WallCameraHeadingAngle */
+f32 f_WallCameraHeading = EDITOR_CAMERA_START_ANGLE;
+/* Read by no routine */
+s32 D_8040C628_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+s32 f_WallCameraHeadingAngle = 0;
+s32 f_FirstWallTriangle = 0x19;
+s32 f_WallTriangleIndex = 0x19; /* The first of the wall's two triangles */
+s32 f_WallCornerIndex = 0;
+s32 f_SavedWallCornerIndex = 0;
+s32 f_LastWallEditKind = 0; /* A TRIANGLE_EDIT_* */
 extern CoursePoint f_SavedWallCorners[SAVED_CORNER_COUNT];
 
 void func_80405AF4_hole_editor(s32 column, s32 row);
@@ -600,17 +642,21 @@ typedef struct TriangleSlope {
 extern TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 
 /* func_80404B84's state */
-extern s32 f_HeightCursorColumn;
-extern s32 f_HeightCursorRow;
-extern f32 f_HeightCameraPitch; /* In radians */
-extern f32
-    f_HeightCameraHeading; /* In radians, from f_HeightCameraHeadingAngle */
-extern s32 f_HeightCameraHeadingAngle;
-extern s32 f_LastSetHeight; /* The height C-up or C-down last set */
-extern s32 f_ShowsGroundWaves; /* Copied to g_ShowsGroundWaves */
-extern s32 f_CLeftPickedHeight; /* Heights picked up by the second editor pad */
-extern s32 f_CUpPickedHeight;
-extern s32 f_LastHeightEditKind; /* The last frame's HEIGHT_EDIT_* */
+s32 f_HeightCursorColumn = 0;
+s32 f_HeightCursorRow = 0;
+/* Read by no routine */
+s32 D_8040C64C_hole_editor[] = {6, 0};
+f32 f_HeightCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+/* In radians, from f_HeightCameraHeadingAngle */
+f32 f_HeightCameraHeading = EDITOR_CAMERA_START_ANGLE;
+/* Read by no routine */
+s32 D_8040C65C_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+s32 f_HeightCameraHeadingAngle = 0;
+s32 f_LastSetHeight = 0; /* The height C-up or C-down last set */
+s32 f_ShowsGroundWaves = TRUE; /* Copied to g_ShowsGroundWaves */
+s32 f_CLeftPickedHeight = 0; /* Heights picked up by the second editor pad */
+s32 f_CUpPickedHeight = 0;
+s32 f_LastHeightEditKind = 0; /* The last frame's HEIGHT_EDIT_* */
 
 extern s8 g_ShowsGroundWaves;
 
@@ -621,23 +667,62 @@ extern s8 g_ShowsGroundWaves;
 s32 SetGroundPointHeightAndShade();
 
 /* func_80406818's menu */
-extern s32 f_IsSavingHoleFiles;
-extern s32 f_HoleFileStep; /* A HOLE_FILE_STEP_* */
-extern s32 f_HoleFileHoleNumber; /* From 1 */
-extern s32 f_HoleFileCourseNumber; /* From 1 */
-extern s32 f_HoleFilePromptFrames;
+/* Read by no routine */
+s32 D_8040C678_hole_editor = 1;
+s32 f_IsSavingHoleFiles = FALSE;
+s32 f_HoleFileStep = 0; /* A HOLE_FILE_STEP_* */
+s32 f_HoleFileHoleNumber = 1; /* From 1 */
+s32 f_HoleFileCourseNumber = 1; /* From 1 */
+s32 f_HoleFilePromptFrames = 0;
 
 /* func_80406C3C's state */
-extern f32 f_TreeCameraPitch; /* In radians */
-extern f32 f_TreeCameraHeading; /* In radians, from f_TreeCameraHeadingAngle */
-extern s32 f_TreeCameraHeadingAngle;
-extern s32 f_EditedTreeIndex;
-extern s32 f_LastTreeEditKind; /* A TRIANGLE_EDIT_*; nothing reads it */
+f32 f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+/* In radians, from f_TreeCameraHeadingAngle */
+f32 f_TreeCameraHeading = EDITOR_CAMERA_START_ANGLE;
+/* Read by no routine */
+s32 D_8040C698_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+s32 f_TreeCameraHeadingAngle = 0;
+s32 f_EditedTreeIndex = 0;
+s32 f_LastTreeEditKind = 0; /* A TRIANGLE_EDIT_*; nothing reads it */
 
-extern s32 f_MapCaptureNumber;
-extern u8 f_MapCaptureHeader[CAPTURE_HEADER_SIZE];
-extern u8 f_ScreenCaptureHeader[CAPTURE_HEADER_SIZE];
-extern u8 f_CornerCaptureHeader[CAPTURE_HEADER_SIZE];
+s32 f_EditorClipRatio = 1;
+/* Read by no routine */
+s32 D_8040C6AC_hole_editor = 0;
+s8 f_FineTilePointSlots[FINE_TILE_POINT_SPAN][FINE_TILE_POINT_SPAN] = {
+    {0, 5, 7, 10, 20},
+    {1, 12, 13, 14, 21},
+    {2, 15, 8, 16, 22},
+    {3, 17, 18, 19, 23},
+    {4, 6, 9, 11, 24},
+};
+s32 f_EditorGroundTimingRow = 0;
+
+s32 f_MapCaptureNumber = 0;
+/* The map's header gives its own width and height but a screen capture's
+ * sizes */
+u8 f_MapCaptureHeader[CAPTURE_HEADER_SIZE] =
+    BMP_HEADER(SCREEN_CAPTURE_SIZE, MAP_CAPTURE_WIDTH, MAP_CAPTURE_HEIGHT,
+        SCREEN_CAPTURE_SIZE - CAPTURE_HEADER_SIZE);
+s32 f_ScreenCaptureNumber = 0;
+u8 f_ScreenCaptureHeader[CAPTURE_HEADER_SIZE] = BMP_HEADER(SCREEN_CAPTURE_SIZE,
+    SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_CAPTURE_SIZE - CAPTURE_HEADER_SIZE);
+u8 f_CornerCaptureHeader[CAPTURE_HEADER_SIZE] =
+    BMP_HEADER(CORNER_CAPTURE_SIZE, CORNER_CAPTURE_WIDTH, CORNER_CAPTURE_HEIGHT,
+        CORNER_CAPTURE_SIZE - CAPTURE_HEADER_SIZE);
+Vtx f_PoleVertices[POLE_QUAD_COUNT][POLE_QUAD_VERTEX_COUNT] = {
+    {
+        {{{-8, -560, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{8, -560, 0}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{-8, 0, 0}, 0, {0, 0x800}, {0x00, 0x00, 0xFF, 0xFF}}},
+        {{{8, 0, 0}, 0, {0x800, 0x800}, {0x00, 0x00, 0xFF, 0xFF}}},
+    },
+    {
+        {{{0, -560, -8}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{0, -560, 8}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{0, 0, -8}, 0, {0, 0x800}, {0x00, 0x00, 0xFF, 0xFF}}},
+        {{{0, 0, 8}, 0, {0x800, 0x800}, {0x00, 0x00, 0xFF, 0xFF}}},
+    },
+};
 
 void* func_80400000_hole_editor(void) {
   return D_80451A60;
