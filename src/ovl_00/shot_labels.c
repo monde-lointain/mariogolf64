@@ -136,14 +136,16 @@ typedef struct ScreenSpot {
   /* 0x8 */ s32 isHidden; /* SPOT_HIDDEN behind the camera, else SPOT_SHOWN */
 } ScreenSpot; /* size = 0xC */
 
-extern u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3];
-extern ShotLabel f_ShotLabels[MAX_PLAYER_COUNT];
-extern s32 f_ShotLabelPlayers;
+static u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3] = {{0xDC, 0x00, 0x00},
+    {0x00, 0x00, 0xDC}, {0xF0, 0x7F, 0x00}, {0x00, 0x7F, 0x00}};
+static ShotLabel f_ShotLabels[MAX_PLAYER_COUNT] = {{0, 0, 0, NO_CORNER},
+    {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}};
+static s32 f_ShotLabelPlayers = SHOT_LABELS_NONE;
 /* Where a tag's centre sits from the ball at each corner */
-extern s8 f_TagOffsetsX[CORNER_COUNT];
-extern s8 f_TagOffsetsY[CORNER_COUNT];
-extern f32 f_OutOfBoundsPulseAngle;
-extern s32 f_PinFlagWaveFrame;
+static s8 f_TagOffsetsX[CORNER_COUNT] = {22, -22, -22, 22};
+static s8 f_TagOffsetsY[CORNER_COUNT] = {12, 12, -12, -12};
+static f32 f_OutOfBoundsPulseAngle = 0.0f;
+static s32 f_PinFlagWaveFrame = 0;
 
 void DrawShotLabels(Gfx** displayListHead);
 void DrawShotPreview(CameraMatrices* matrices);
