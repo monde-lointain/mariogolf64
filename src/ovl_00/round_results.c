@@ -208,7 +208,7 @@ s32 ShowScorePassword();
 s32 UpdateCoursePointsResults();
 s32 UpdateMatchResults();
 s32 func_8005CEE0(s32 index);
-void RecordComCharacterResult(s32 row, s32 column, s32 isWin);
+void RecordComCharacterResult(s32 row, s32 column, Boolean isWin);
 
 /* The score password shows as two lines of ten symbols */
 #define SCORE_PASSWORD_LINE_LENGTH 10
@@ -1238,7 +1238,7 @@ void DrawResultsLabel(Gfx** displayListHead, s32 x, s32 y, s32 label) {
  * mirrored wrap flips it
  */
 void DrawPlayerPortrait(
-    Gfx** displayListHead, s32 x, s32 y, s32 playerIndex, s32 isMirrored) {
+    Gfx** displayListHead, s32 x, s32 y, s32 playerIndex, Boolean isMirrored) {
   Gfx* gfx = *displayListHead;
 
   LoadLargePalette(&gfx, f_PlayerPortraitPalettes[playerIndex]);
@@ -1717,7 +1717,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCharacterResultsNotice)
 
 /* Returns TRUE once the results have been saved and freed */
 s32 UpdateRoundResults(void) {
-  s32 isDone;
+  Boolean isDone;
 
   switch (f_ResultsState) {
     case RESULTS_SLIDING_IN:
@@ -3280,7 +3280,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   s32 width;
   s32 height;
   s32 gameMode;
-  s32 isNintendo;
+  Boolean isNintendo;
   s32 detailsTop;
   s32 lineHeight;
   s32 seconds;

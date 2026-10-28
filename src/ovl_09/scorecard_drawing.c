@@ -207,8 +207,8 @@ void DrawScorecardFace(
   *displayListHead = gfx;
 }
 
-void DrawSmallFace(
-    Gfx** displayListHead, s32 left, s32 top, s32 playerIndex, s32 isMirrored) {
+void DrawSmallFace(Gfx** displayListHead, s32 left, s32 top, s32 playerIndex,
+    Boolean isMirrored) {
   Gfx* gfx = *displayListHead;
 
   LoadLargePalette(&gfx, g_PlayerFacePalettes[playerIndex]);
@@ -565,7 +565,7 @@ void DrawMatchPage(Gfx** displayListHead) {
   Gfx** head;
   s32 winsNeeded;
   s32 rowOffset;
-  s32 canDraw = FALSE;
+  Boolean canDraw = FALSE;
   s32 halvedCount;
   s32 countEnd;
   s32 holeIndex;
@@ -2130,9 +2130,9 @@ void DrawScoresPage(Gfx** displayListHead) {
   s32 pulseBlue;
   s32 cellAlpha;
   s32 rowSpacing;
-  s32 isPuttsShown;
-  s32 isOverShown;
-  s32 isBadgesShown;
+  Boolean isPuttsShown;
+  Boolean isOverShown;
+  Boolean isBadgesShown;
   s32 frontPar = 0;
   s32 backPar = 0;
   s32 shownHoleCount;

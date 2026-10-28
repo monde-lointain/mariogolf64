@@ -515,7 +515,7 @@ s32 GetClubTournamentCourse(void);
  */
 #ifdef NON_MATCHING
 s32 func_80209D50_ovl_01(
-    s32 firstPlayerIndex, s32 playerCount, s32 canChooseMarked) {
+    s32 firstPlayerIndex, s32 playerCount, Boolean canChooseMarked) {
   EncodedAsset asset;
   AssetFile file;
   s32 sameCharacterPlayers[MAX_PLAYER_COUNT];

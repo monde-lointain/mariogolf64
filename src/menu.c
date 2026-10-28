@@ -138,7 +138,7 @@ s32 GetClubTournamentCourse(void);
 void func_8005D9A0(void);
 s32 ReadSaveCopies(SaveData* save, u8 isInSram);
 s32 WriteSaveCopies(SaveData* save, u8 isInSram);
-void SyncSaveOptions(SaveData* save, s32 isWrite, s32 readResult);
+void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult);
 
 s8 g_LoadedMenuScreen = NO_MENU_SCREEN;
 s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT] = {UNCHOSEN_CONTROLLER,
@@ -910,12 +910,12 @@ void InsertRankedRecord(Unk68* record) {
   osSyncPrintf("\n");
 }
 
-s32 SaveOrContinueGameByMode(s32 isContinuing) {
+s32 SaveOrContinueGameByMode(Boolean isContinuing) {
   UnkB8* players;
   Unk68* records;
   SavedGame* game;
   s32 playerCount;
-  s32 hasIllegalState;
+  Boolean hasIllegalState;
   s32 index;
 
   playerCount = 0;
@@ -1008,11 +1008,11 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
 
 #define MAX_SAVE_COUNT 99
 
-s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
+s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
   UnkB8* players;
   SavedGame* game;
   s32 playerCount;
-  s32 hasIllegalState;
+  Boolean hasIllegalState;
   s32 index;
 
   playerCount = MAX_PLAYER_COUNT; /* The limit, until the count is known */
@@ -1533,7 +1533,7 @@ s32 func_8005CEE0(s32 index) {
  * valid */
 void InvalidateBrokenSavedGames(void) {
   SaveData* save;
-  s32 isInvalid[SAVED_GAME_COUNT];
+  Boolean isInvalid[SAVED_GAME_COUNT];
   s32 index;
   s32 entryIndex;
   SavedGame* unk;
@@ -1602,7 +1602,7 @@ void InvalidateBrokenSavedGames(void) {
 #ifdef NON_MATCHING
 void func_8005D0D8(void) {
   SaveData* save;
-  s32 isInvalid[SAVE_RECORD_COUNT];
+  Boolean isInvalid[SAVE_RECORD_COUNT];
   s32 recordIndex;
   Unk68* record;
   s32 kind;
@@ -1781,7 +1781,7 @@ void ComputeRoundStatistics(void) {
   f32 reciprocal;
   s32 sum;
   s32 courseIndex;
-  s32 hasPlayedCourse;
+  Boolean hasPlayedCourse;
   f32 sum8;
   f32 sum18;
   f32 sum1C;
@@ -2103,7 +2103,7 @@ void WriteSaveData(void) {
 
 /* Copies the options between the save data and g_OptionBits, in the direction
  * of the transfer */
-void SyncSaveOptions(SaveData* save, s32 isWrite, s32 readResult) {
+void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult) {
   u8* bits;
   s8* options;
 

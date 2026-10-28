@@ -23,8 +23,8 @@ void SimulateShot(Unk20* shot) {
   BallSimulation simulationState;
   BallSimulation* simulation;
   s32 step;
-  s32 hasGroundHit;
-  s32 hasUnk40Flag;
+  Boolean hasGroundHit;
+  Boolean hasUnk40Flag;
   s32 flags;
   s32 unkA7Kind;
   u8 isUnk2E41;

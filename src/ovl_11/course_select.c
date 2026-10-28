@@ -294,7 +294,7 @@ s32 CountOpenRingShotCourses(void) {
   return 1;
 }
 
-void LoadCourseSelect(s32 isHoleSelect) {
+void LoadCourseSelect(Boolean isHoleSelect) {
   EncodedAsset asset;
   AssetFile file;
   s32 i;

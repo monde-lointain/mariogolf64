@@ -1283,7 +1283,7 @@ s32 ConsiderReactionSpot(CoursePoint point) {
   s32 ring;
   s32 height;
   s32 sample;
-  s32 isNearBillboard;
+  Boolean isNearBillboard;
   s32 i;
   Billboard* billboard;
 
@@ -1397,7 +1397,7 @@ INCLUDE_ASM("asm/nonmatchings/reaction", PlaceAtReactionSpot);
 
 #ifdef NON_MATCHING
 s32 IsEasedEyeHeightZero(void) {
-  s32 isZero = FALSE;
+  Boolean isZero = FALSE;
 
   if (fabsf(f_EasedView.eye[AXIS_Y]) == 0.0f) {
     isZero = TRUE;

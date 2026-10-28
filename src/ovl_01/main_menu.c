@@ -312,7 +312,7 @@ s32 func_8022BDD0_ovl_01(void);
 s32 func_8021E468_ovl_01(void);
 void LoadRingShotRecord(RingShotRecord* record);
 void LoadSuperShotReplay(PlayRecord* record);
-s32 SaveOrContinueGameByMode(s32 isContinuing);
+s32 SaveOrContinueGameByMode(Boolean isContinuing);
 s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber);
 void func_80217B88_ovl_01(s32 requestedPreset);
 void func_80228B60_ovl_01(void);
@@ -1559,7 +1559,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
 }
 
 void func_801F7CD0_ovl_01(void) {
-  s32 isDone = IsHudAnimationDone();
+  Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE && func_801F7660_ovl_01(1, 2) == -1) {
     D_801B7070 = isDone;
@@ -1610,7 +1610,7 @@ void func_801F7CD0_ovl_01(void) {
 #ifdef NON_MATCHING
 void func_801F7D28_ovl_01(void) {
   EncodedAsset asset;
-  s32 isDone = IsHudAnimationDone();
+  Boolean isDone = IsHudAnimationDone();
   s32 direction;
   s32 step;
   s32 index;
@@ -1954,7 +1954,7 @@ void func_801F8BAC_ovl_01(void) {
   /* The open courses, and then those on the wheel */
   s32 courseCount = GetOpenCourseCount();
   s32 openCourseCount;
-  s32 isDone;
+  Boolean isDone;
   s32 index;
   s32 direction;
   s32 step;
@@ -2142,7 +2142,7 @@ void func_801F8BAC_ovl_01(void) {
 void func_801F93D8_ovl_01(void) {
   EncodedAsset asset;
   s32 unused[4];
-  s32 isDone;
+  Boolean isDone;
   s32 course;
   s32 direction;
   s32 step;
@@ -2403,7 +2403,7 @@ void func_801F9BCC_ovl_01(void) {
 }
 
 void func_801F9C58_ovl_01(void) {
-  s32 isDone = IsHudAnimationDone();
+  Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
@@ -2465,7 +2465,7 @@ void func_801F9C58_ovl_01(void) {
 }
 
 void func_801F9E38_ovl_01(void) {
-  s32 isDone = IsHudAnimationDone();
+  Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
@@ -2524,7 +2524,7 @@ void func_801F9E38_ovl_01(void) {
 }
 
 void func_801F9FF8_ovl_01(void) {
-  s32 isDone = IsHudAnimationDone();
+  Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {

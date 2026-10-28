@@ -1703,7 +1703,7 @@ void ChooseLandingTarget(
   s32 endZ;
   s32 endRating;
   s32 sideCount;
-  s32 isFound;
+  Boolean isFound;
   s32 startX;
   s32 startZ;
   f32 angle;
@@ -1718,7 +1718,7 @@ void ChooseLandingTarget(
   s32 height;
   s32 flatDistance;
   s32 cupDistance;
-  s32 isPoorlySurrounded;
+  Boolean isPoorlySurrounded;
   s32 column;
   s32 row;
 

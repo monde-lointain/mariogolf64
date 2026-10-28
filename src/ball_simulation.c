@@ -246,9 +246,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   s32 startZ;
   s32 contact;
   s32 hitsHoleTriangle;
-  s32 isNearCup;
+  Boolean isNearCup;
   s32 rollSpeed;
-  s32 isSteep;
+  Boolean isSteep;
 
   void PlayStrokeImpactSound(s32 sound, f32 fullSpeed, f32 speed) {
     s32 volume = speed * 127.0f / fullSpeed;
@@ -1899,7 +1899,7 @@ ROLLED:
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-      s32 isOutside = simulation->position[AXIS_Z] > 0x7ED400;
+      Boolean isOutside = simulation->position[AXIS_Z] > 0x7ED400;
 
       if (simulation->position[AXIS_Z] <= 0x12BFF) {
         isOutside = TRUE;

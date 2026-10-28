@@ -270,7 +270,7 @@ void func_8020E390_ovl_01(void) {
   AssetFile file;
   MenuMemory* memory = func_8005AF74();
   s32 courseCount = GetOpenCourseCount();
-  s32 isDone;
+  Boolean isDone;
   s32 index;
   s32 direction;
   s32 step;
@@ -811,8 +811,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020FEF8_ovl_01);
 #ifdef NON_MATCHING
 void func_80210190_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  s32 hasRowsAbove = D_802300A0_ovl_01 > 0;
-  s32 hasRowsBelow = D_802300A0_ovl_01 + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
+  Boolean hasRowsAbove = D_802300A0_ovl_01 > 0;
+  Boolean hasRowsBelow =
+      D_802300A0_ovl_01 + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
   s16 arrowCount = hasRowsAbove;
   s32 firstArrow;
   s16 arrowIndex;

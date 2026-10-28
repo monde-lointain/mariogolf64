@@ -180,7 +180,7 @@ void UpdateClubPanelImages(void) {
   EncodedAsset panelAsset;
   EncodedAsset nameAsset;
   EncodedAsset frameAsset;
-  s32 isPutter;
+  Boolean isPutter;
   u16 assetId;
 
   isPutter = GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN;
@@ -358,7 +358,7 @@ s32 func_8005F224(void);
 void DrawClubPanel(Gfx** displayListHead) {
   s32 span;
   Gfx* gfx;
-  s32 isPutter;
+  Boolean isPutter;
   s32 value;
   s32 playerState;
   s32 group;

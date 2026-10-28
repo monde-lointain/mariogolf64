@@ -34,7 +34,7 @@ void ResumeBets(void);
 s32 GetContestWinner(void);
 void SetContestWinner(s32 playerIndex);
 void ClearContestWinner(void);
-void UpdateContest(s32 isHoleOver);
+void UpdateContest(Boolean isHoleOver);
 void StartRoundStats(void);
 void RestartRoundStats(void);
 void RecordHoleStats(void);

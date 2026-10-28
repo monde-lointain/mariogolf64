@@ -15,7 +15,7 @@ void PrintMessage(s8* text, u32 column, u32 row);
 void DrawMessageCharacter(s8 character, u32 column, u32 row);
 void ClearDebugText(void);
 void DrawDebugText(Gfx** displayListHead);
-void SetDebugTextHighlight(s32 isHighlighted);
+void SetDebugTextHighlight(Boolean isHighlighted);
 void PutDebugText(s8* text, s32 column, s32 row);
 void PrintDebugText(char* text, s32 column, s32 row);
 void PrintDebugHex(u32 value, s32 column, s32 row);

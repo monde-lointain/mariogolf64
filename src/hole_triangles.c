@@ -422,8 +422,8 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawRings);
 static void BuildRingVertices(void) {
   s32 index;
   Vtx* vertex;
-  s32 isOuter;
-  s32 isRaised;
+  Boolean isOuter;
+  Boolean isRaised;
   f32 angle;
   f32 offsetX;
   f32 offsetY;

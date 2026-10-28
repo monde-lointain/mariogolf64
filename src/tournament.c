@@ -384,7 +384,7 @@ u8 RankTournament(
 void NameContestants(void) {
   s32 index;
   s32 nameOffset;
-  s32 hasSkipped;
+  Boolean hasSkipped;
   s32 lastName;
   s16* nameIndex;
   u32 isFirstName;

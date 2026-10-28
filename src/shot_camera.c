@@ -501,7 +501,7 @@ s32 IsDebugBButtonView(void) {
  *
  * SwapCameraPicks is a nested function, a GNU C extension.
  */
-s32 NextCameraPick(s32 isDealing) {
+s32 NextCameraPick(Boolean isDealing) {
   s32 index;
   s32 pick;
 
@@ -2869,7 +2869,7 @@ extern s8 D_80104B68;
  * it is over. The START button clears g_RoundHud.isWindIndicatorShown through
  * g_RoundHud.unkD and g_RoundHud.unk13.
  */
-s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
+s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   f32 point[3];
   s32 step;
   s32 volume;
@@ -3367,7 +3367,7 @@ void func_8004C6B8(void) {}
  * rather than $f0.
  */
 #ifdef NON_MATCHING
-void BuildSpotTexels(u8* texels, s32 isSoft) {
+void BuildSpotTexels(u8* texels, Boolean isSoft) {
   s32 row;
   s32 column;
   s32 texelIndex;

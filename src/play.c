@@ -144,7 +144,7 @@ static s32 f_GroundTimingRow = 0;
 
 static u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 
-s32 SaveOrContinueGameByMode(s32 isContinuing);
+s32 SaveOrContinueGameByMode(Boolean isContinuing);
 void func_80407D64(void);
 void FillRandomGrid(s32 range, s32 base);
 void SetUpPlayers(void);
@@ -501,7 +501,7 @@ void PlayContestMovies(void) {
 
 #ifdef NON_MATCHING
 s32 func_8005FCB8(void) {
-  s32 isDone = FALSE;
+  Boolean isDone = FALSE;
   s32 i;
 
   if (D_800FBDB8 == 60) {

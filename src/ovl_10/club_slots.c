@@ -534,7 +534,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   Vec3 scale;
   EncodedAsset asset;
   Gfx* gfx;
-  s32 isStripLoaded;
+  Boolean isStripLoaded;
   s32 reelIndex;
   s32 quadIndex;
   s32 symbolIndex;

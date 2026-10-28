@@ -369,7 +369,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
   f32 cupScreenScale;
   f32 stickScreenScale;
   f32 wave;
-  s32 isPinOut;
+  Boolean isPinOut;
   s32 cupDepth;
   s32 primDepth;
   s32 shade;

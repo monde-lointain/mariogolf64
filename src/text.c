@@ -492,12 +492,12 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
   s32 i;
   s32 start;
   s32 length;
-  s32 isIconLoaded;
+  Boolean isIconLoaded;
   s32 x;
   s32 y;
   s32 advance;
   s32 code;
-  s32 isPrinted;
+  Boolean isPrinted;
   s32 iconOffset;
   s32 score;
   s32 index;
@@ -787,12 +787,12 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
   s32 i;
   s32 start;
   s32 length;
-  s32 isIconLoaded;
+  Boolean isIconLoaded;
   s32 x;
   s32 y;
   s32 advance;
   s32 code;
-  s32 isPrinted;
+  Boolean isPrinted;
   s32 iconOffset;
   s32 score;
   s32 index;
@@ -1931,7 +1931,7 @@ s32 PlaceMessageGlyphGroup(
 void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
   Gfx* gfx = *displayListHead;
   s32 i;
-  s32 isIconLoaded;
+  Boolean isIconLoaded;
   s32 iconOffset;
   u32 code;
   s32 fontSize;

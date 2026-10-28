@@ -21,7 +21,7 @@ s32 GetHeapLargestFreeSize(s32 heapIndex);
 void* AllocFromHeap(s32 heapIndex, s32 size);
 void FreeFromHeap(s32 heapIndex, void* pointerToBlock);
 
-void InitHeapRegions(s32 hasExpansionPak);
+void InitHeapRegions(Boolean hasExpansionPak);
 u32 GetFreeMemorySize(void);
 u32 FindLargestFreeMemorySize(void);
 void* AllocMemory(u32 size);

@@ -1576,7 +1576,7 @@ s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 fromZ = startZ >> COURSE_UNIT_SHIFT;
   s32 toZ = endZ >> COURSE_UNIT_SHIFT;
   s32 toY = endY >> COURSE_UNIT_SHIFT;
-  s32 isHit = FALSE;
+  Boolean isHit = FALSE;
   s32 deltaZ = toZ - fromZ;
   Billboard* billboard;
   s32 startSide;
@@ -1734,7 +1734,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
   f32 height;
   s32 hitX;
   s32 hitZ;
-  s32 isFlagHit;
+  Boolean isFlagHit;
   s32 distance;
   s32 speed;
   f32 chordSquared;
@@ -2803,7 +2803,7 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
   s32 x;
   s32 y;
   s32 z;
-  s32 isPushed;
+  Boolean isPushed;
   s32 lowestX;
   s32 highestX;
   s32 lowestY;

@@ -322,7 +322,7 @@ static s32 ReadPasswordSymbols(u8* symbols, char* password, s32 symbolCount) {
   for (i = 0; i < symbolCount; i++) {
     for (symbol = 0; symbol < PASSWORD_SYMBOL_COUNT; symbol++) {
       char* characters = f_PasswordAlphabet[symbol];
-      s32 isFound = FALSE;
+      Boolean isFound = FALSE;
 
       for (characterIndex = 0; characters[characterIndex] != '\0';
           characterIndex++) {

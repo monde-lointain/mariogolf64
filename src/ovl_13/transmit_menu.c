@@ -1696,7 +1696,7 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
 void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   GameBoyCharacter* character = g_GameBoyCharacters;
   Gfx* displayList = *displayListHead;
-  s32 isCharacterShown = FALSE;
+  Boolean isCharacterShown = FALSE;
   s32 message;
 
   SetUpTextDrawing(&displayList);
@@ -2328,7 +2328,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
   s32 fault = CARTRIDGE_FAULT_NONE;
   s32 controller;
   s32 result;
-  s32 isSignatureWrong;
+  Boolean isSignatureWrong;
   s32 index;
   s32 saveIndex;
   s32 recordOffset;
@@ -2554,7 +2554,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
   /* The transfer pointer is there to match */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   u8 save[CARTRIDGE_SAVE_SIZE];
-  s32 isSignatureWrong;
+  Boolean isSignatureWrong;
   s32 index;
   s32 result;
   s32 readResult;
@@ -2758,13 +2758,13 @@ s32 ReadCartridgeCharacters(void) {
   s32 result;
   s32 attempt;
   s32 index;
-  s32 isSignatureWrong;
+  Boolean isSignatureWrong;
   s32 storedSum;
   s32 dataAddress;
   s32 dataSize;
   s32 sum; /* Of the save, then of the character data; sharing it is there to
               match */
-  s32 isAlreadyBrought;
+  Boolean isAlreadyBrought;
   s32 slot;
 
   if (transfer->unk7A0 == 0) {
@@ -3016,7 +3016,7 @@ s32 OpenGameBoyPakWithRetries(
  * cartridge header, then tells whether the cartridge is Mario Golf's.
  */
 s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
-  s32 isMarioGolf = TRUE;
+  Boolean isMarioGolf = TRUE;
   s32 index;
   u8 status;
 
@@ -3157,12 +3157,12 @@ s32 TagCartridges(void) {
   NUContPakFile file;
   u8 tag[CARTRIDGE_TAG_SIZE];
   u8 status;
-  s32 isAnyTagged = FALSE;
-  s32 wasNoCartridge = FALSE;
-  s32 wasNoPak = FALSE;
-  s32 wasOtherPak = FALSE;
-  s32 wasWrongCartridge = FALSE;
-  s32 wasCartridgePulled = FALSE;
+  Boolean isAnyTagged = FALSE;
+  Boolean wasNoCartridge = FALSE;
+  Boolean wasNoPak = FALSE;
+  Boolean wasOtherPak = FALSE;
+  Boolean wasWrongCartridge = FALSE;
+  Boolean wasCartridgePulled = FALSE;
   s32 controller;
   s32 index;
   s32 result;

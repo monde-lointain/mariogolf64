@@ -91,7 +91,7 @@ extern void* g_BackdropPatternImage;
 extern s32 g_CapturedSliceCount;
 
 void SetUpTitleHole(void);
-void UsePrimitiveDepth(s32 isPrimitiveDepthSet);
+void UsePrimitiveDepth(Boolean isPrimitiveDepthSet);
 void SetMenuBackdrop(s32 backdrop);
 void StartHudAnimation(s32 animation);
 s32 IsHudAnimationDone(void);

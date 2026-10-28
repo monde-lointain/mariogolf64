@@ -256,7 +256,7 @@ s32 GetGroupHoleResult(s8* playerResults) {
   s32 bestScore;
   s32 bestPlayerIndex;
   s32 tieCount;
-  s32 isDecided;
+  Boolean isDecided;
   s32 outCount;
   s32 playerIndex;
 
@@ -341,7 +341,7 @@ s32 GetGroupHoleResult(s8* playerResults) {
 s32 GetHolingOutStakes(s32 playerIndex) {
   s32 stakes;
   s32 opponentIndex;
-  s32 hasAnyFinished;
+  Boolean hasAnyFinished;
   s32 bestScore;
   s32 otherIndex;
 

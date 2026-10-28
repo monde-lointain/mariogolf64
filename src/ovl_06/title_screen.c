@@ -163,7 +163,7 @@ void ResetButtonCodes(void) {
 void UpdateButtonCodes(void) {
   u32 codeIndex;
   s32 progress;
-  s32 isMatched;
+  Boolean isMatched;
 
   for (codeIndex = 0; codeIndex < ARRAY_COUNT(f_ButtonCodes); codeIndex++) {
     progress = f_ButtonCodes[codeIndex].progress;

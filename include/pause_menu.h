@@ -67,7 +67,7 @@ extern f32 g_LiePanelPosition[2];
 extern f32 g_WindPanelPosition[2];
 
 void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap);
-void RequestPauseMenu(s32 canGiveUp, s32 isClosing);
+void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing);
 s32 UpdatePauseMenu(ControllerState* controller);
 void OpenChoiceBox(s32 choiceBoxIndex);
 s32 UpdateChoiceBox(ControllerState* controller);

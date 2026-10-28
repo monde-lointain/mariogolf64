@@ -24,7 +24,7 @@ void ShowBirdieBadgeCount(s32 badgeCount);
  * the top bit unless g_GameState.saveCount is set, and prints "Win Com Chara".
  */
 #ifdef NON_MATCHING
-void RecordComCharacterResult(s32 row, s32 column, s32 isWin) {
+void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
   Unk990* unk990;
   u8 count;
   u8 value;
@@ -109,7 +109,7 @@ void ReportBirdieBadgeCount(void) {
 void RecordTournamentPlace(void) {
   UnkE98* stats;
   s32* placeFlag;
-  s32 hasPlace;
+  Boolean hasPlace;
   s32 place;
   s32 index;
   TournamentStanding* standing;

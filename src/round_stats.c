@@ -83,7 +83,7 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
 #ifdef NON_MATCHING
 void TallySkins(s32 endHole) {
   s32 player;
-  s32 isAnyUnk26Clear;
+  Boolean isAnyUnk26Clear;
   s32 hole;
   s32 winner;
   s32 skins;
@@ -278,7 +278,7 @@ void ClearContestWinner(void) {
  * Settles the hole's contest once every player's distance is measured.
  * When the hole is over, the distances still unmeasured stop counting
  */
-void UpdateContest(s32 isHoleOver) {
+void UpdateContest(Boolean isHoleOver) {
   s32 holeIndex = g_GameState.holeIndex;
   s32 player;
   s32 measuredCount;
@@ -336,7 +336,7 @@ void RecordCourseRound(void) {
   UnkE98* record = &GetSaveData()->unkE98[g_GameState.courseIndex];
   RoundStats* stats = &g_RoundStats;
   CourseRecord* course = &g_CourseRecords[g_GameState.courseIndex];
-  s32 isAtRoundLimit;
+  Boolean isAtRoundLimit;
   s32 hole;
   s64 score;
   s64 total;

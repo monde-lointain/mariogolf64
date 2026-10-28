@@ -35,6 +35,9 @@ typedef s32 CoursePoint[AXIS_COUNT];
 /* A 4 by 4 matrix of floats, indexed by row and then column */
 typedef f32 Mat4[4][4];
 
+/* Zero is false, and any other value true, as C tests it */
+typedef s32 Boolean;
+
 #define ARRAY_COUNT(array) (s32)(sizeof(array) / sizeof((array)[0]))
 
 /* The magnitude of an integer. The game's code evaluates the value once,

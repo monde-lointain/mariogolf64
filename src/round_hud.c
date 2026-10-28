@@ -1606,7 +1606,7 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 typedef struct GridScreenPoint {
   /* 0x00 */ s32 x; /* In quarter pixels */
   /* 0x04 */ s32 y;
-  /* 0x08 */ s32 isVisible;
+  /* 0x08 */ Boolean isVisible;
   /* 0x0C */ s32 depth;
 } GridScreenPoint; /* size = 0x10 */
 
@@ -1668,7 +1668,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 rowStart;
   s32 point;
   s32 rowPosition;
-  s32 isUnscrolledRow;
+  Boolean isUnscrolledRow;
   s32 neighbor;
   s32 red;
   s32 green;
@@ -2686,7 +2686,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
  * registers differently.
  */
 #ifdef NON_MATCHING
-void DrawHoleFlag(s32 isBackDrawn) {
+void DrawHoleFlag(Boolean isBackDrawn) {
   s32 row;
   s32 column;
   s32 index;
@@ -3618,7 +3618,7 @@ void func_80217F54(Gfx** displayListHead);
 void DrawRoundHud(CameraView* view) {
   s32 percentRange[2];
   Club* club;
-  s32 hasHandicap;
+  Boolean hasHandicap;
   s32 scoreboardX;
   s32 i;
   s32 ringCount;

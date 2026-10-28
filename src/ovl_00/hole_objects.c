@@ -297,7 +297,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
   EncodedAsset asset;
   f32 horizontalSpeed;
   f32 horizontalSpeedSquared;
-  s32 wasUnderwater;
+  Boolean wasUnderwater;
 
   IsGameFlagSet(GAME_FLAG_UNK5F);
   gSPDisplayList(gfx++, g_DecalTextureSetup);

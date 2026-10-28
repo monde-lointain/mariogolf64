@@ -167,7 +167,7 @@ s32 DecodeLzChunk(LzStream* stream) {
   u16* repeat;
   u16 evenWord;
   u16 oddWord;
-  s32 hasMoreInput;
+  Boolean hasMoreInput;
 
   if (stream->flags & LZ_STREAM_FLAG_FIRST) {
     input = stream->input;
@@ -285,7 +285,7 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
   s32 length;
   s32 index;
   u16 word;
-  s32 hasMoreInput;
+  Boolean hasMoreInput;
 
   auto inline void ApplyPatchCommand(u16 command);
 

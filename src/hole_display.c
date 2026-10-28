@@ -1112,7 +1112,7 @@ static SkyColors* f_EditedSkyColors;
  */
 s32 UpdateSkyEditor(void) {
   EncodedAsset asset;
-  s32 isImageChanged;
+  Boolean isImageChanged;
   s32 index; /* Counts the vertex groups, then the palette colors */
   s32 channel;
   u16 color;
@@ -1640,7 +1640,7 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
 }
 
 /* Sets whether the course's drawing gives its primitives a fixed depth */
-void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {
+void UsePrimitiveDepth(Boolean isPrimitiveDepthSet) {
   f_IsPrimitiveDepthSet = isPrimitiveDepthSet;
 }
 
@@ -1881,7 +1881,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
  * camera's yaw and pitch */
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   Gfx* gfx;
-  s32 isNibbleImage;
+  Boolean isNibbleImage;
   s32 centreShift;
   s32 yawOffset;
   s32 y;
@@ -2226,7 +2226,7 @@ void HandleFrameBufferSwap(void) {}
 void DrawFadeAnimation(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u32* frame = f_CapturedFrame;
-  s32 isTileSet;
+  Boolean isTileSet;
   s32 strip;
   s32 row;
   s32 height;

@@ -447,10 +447,10 @@ void StopEditorMoves(void) {
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
   /* Whether a point carries the other, and later whether one is a pivot */
-  s32 hasLeader = FALSE;
-  s32 hasMoved = FALSE;
+  Boolean hasLeader = FALSE;
+  Boolean hasMoved = FALSE;
   s32 index;
-  s32 isDone;
+  Boolean isDone;
   f32 x;
   f32 y;
   f32 z; /* Also the distance before a zoom */

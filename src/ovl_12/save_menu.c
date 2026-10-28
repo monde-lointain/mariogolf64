@@ -256,7 +256,7 @@ void func_8005D0D8(void);
 void SetTextSlot(
     s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void InvalidateBrokenSavedGames(void);
-s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing);
+s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
 void func_80060358(void);
 void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
@@ -562,7 +562,7 @@ void CloseSaveMenu(void) {
  * icon has two images, read into in turn.
  */
 #ifdef NON_MATCHING
-void AnimateModeIcons(s32 isImmediate) {
+void AnimateModeIcons(Boolean isImmediate) {
   EncodedAsset encodedAsset;
   SaveData* save;
   SavedGame* game;

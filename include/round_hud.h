@@ -145,6 +145,6 @@ extern void* g_ShotPreviewDashImage;
 
 void StartLandingReaction(s32 reaction);
 void StartShotEffect(s32 effect);
-void DrawHoleFlag(s32 isBackDrawn);
+void DrawHoleFlag(Boolean isBackDrawn);
 
 #endif

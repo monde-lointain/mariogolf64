@@ -472,7 +472,7 @@ void DrawTiledImageEffect(Gfx** displayListHead, CameraView* view) {
  * strip of the frame between each pair of rows of vertices
  */
 void DrawSpinMesh(Gfx** displayListHead) {
-  s32 isTileSetUp = FALSE;
+  Boolean isTileSetUp = FALSE;
   Gfx* gfx = *displayListHead;
   s32 texelPairOffset = SCREEN_BORDER * SCREEN_WIDTH / 2;
   s32 batchIndex;
@@ -1111,7 +1111,7 @@ void func_801FB198(Gfx** displayListHead);
 void DrawRoundResults(Gfx** displayListHead);
 void func_801FD578(Gfx** displayListHead);
 void DrawGolfBalls(CameraMatrices* matrices);
-void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn);
+void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn);
 void DrawBanner(Gfx** displayListHead);
 void DrawFlipMessage(Gfx** displayListHead);
 void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices);
@@ -1135,12 +1135,12 @@ void func_8040C360(CameraMatrices* matrices, Gfx** displayListHead);
 #ifdef NON_MATCHING
 /* Returns the frame count, which the caller ignores */
 s32 DrawGame(void) {
-  s32 usesFloatMatrices;
+  Boolean usesFloatMatrices;
   CameraMatrices* matrices;
   u16 mapPerspNorm;
   u16 insetPerspNorm;
   u16 perspNorm;
-  s32 drawsScene;
+  Boolean drawsScene;
   s32 terrainStyle;
   u32 drawMode;
   s32 viewIndex;

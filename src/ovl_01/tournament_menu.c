@@ -1063,7 +1063,7 @@ void func_80228C00_ovl_01(void) {
   MenuMemory* memory = func_8005AF74();
   s32 index;
   s32 result;
-  s32 isInvalid;
+  Boolean isInvalid;
   TournamentRules* rules;
   char debugText[128];
 
@@ -1236,7 +1236,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80228C00_ovl_01);
 #endif
 
 void func_80229278_ovl_01(void) {
-  s32 isHudAnimationDone;
+  Boolean isHudAnimationDone;
   s32 index;
   u16 buttons;
   s32 pressedButtons;
@@ -1803,7 +1803,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B46C_ovl_01);
 #endif
 
 s32 func_8022B5E0_ovl_01(void) {
-  s32 isEmpty = TRUE;
+  Boolean isEmpty = TRUE;
 
   if (D_80230F68_ovl_01 > 0) {
     if (D_80230F68_ovl_01 == 8) {

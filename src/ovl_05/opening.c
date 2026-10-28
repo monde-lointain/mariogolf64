@@ -256,7 +256,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead);
 void DrawLakitu(Gfx** displayListHead);
 void DrawOpeningBurst(Gfx** displayListHead);
 void DrawOpeningShotBall(Gfx** displayListHead);
-void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn);
+void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn);
 void DrawOpeningSparks(Gfx** displayListHead);
 
 /* The script plays most of its sounds on the next of these channels in turn,
@@ -4405,7 +4405,7 @@ extern Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][4];
  * into their relocations.
  */
 #ifdef NON_MATCHING
-void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
+void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   Gfx* gfx = *displayListHead;
   s32 pad[6];
   s32 i;

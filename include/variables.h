@@ -38,7 +38,8 @@ extern Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 typedef struct HoleConditions {
   /* 0x00 */ s32 windSpeed; /* As the ball's flight feels it */
   /* 0x04 */ u16 windDirection; /* A full turn is 0x10000 */
-  /* 0x08 */ s32 isRaining; /* Shortens shots and changes the scene's colors */
+  /* Shortens shots and changes the scene's colors */
+  /* 0x08 */ Boolean isRaining;
   /* 0x0C */ u32
       sceneColorIndex; /* With isRaining, picks DeriveSceneColors' colors */
   /* 0x10 */ u16 lightYaw;

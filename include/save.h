@@ -172,7 +172,7 @@ typedef struct GameState {
   /* 0x0C */ s32 courseIndex;
   /* 0x10 */ s32 holeIndex;
   /* 0x14 */ s32 unk14;
-  /* 0x18 */ s32 isSuddenDeath;
+  /* 0x18 */ Boolean isSuddenDeath;
   /* 0x1C */ s32 unk1C;
   /* 0x20 */ s32 currentPlayerIndex;
   /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
@@ -260,7 +260,8 @@ typedef struct RoundStats {
   /* 0x0C */ s32 longestDrive; /* Starts as the course's record */
   /* 0x10 */ s32 averagedDriveTotal;
   /* 0x14 */ s32 averagedDriveCount;
-  /* 0x18 */ s32 isDriveAveraged; /* Whether the drive was hit with the 1W */
+  /* Whether the drive was hit with the 1W */
+  /* 0x18 */ Boolean isDriveAveraged;
 } RoundStats; /* size = 0x1C */
 
 /* Indices of UnkE98.hasPlace */
@@ -284,8 +285,8 @@ typedef struct UnkE98 {
       parOnCount; /* Holes whose green was reached with two strokes to spare */
   /* 0x28 */ s32 unk28; /* The sum of RoundStats.unk0 */
   /* 0x2C */ s32 unk2C; /* The sum of RoundStats.unk4 */
-  /* 0x30 */ s32
-      hasPlace[TOURNAMENT_PLACE_COUNT]; /* In a tournament on the course */
+  /* In a tournament on the course */
+  /* 0x30 */ Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
   /* 0x3C */ s16
       characterBestScores[CHARACTER_COUNT]; /* bestScore, by character */
   /* 0x60 */ u8 hasCharacterBestScore[CHARACTER_COUNT];
@@ -293,7 +294,7 @@ typedef struct UnkE98 {
 } UnkE98; /* size = 0x74 */
 
 typedef struct SavedGame {
-  /* 0x00 */ s32 isValid;
+  /* 0x00 */ Boolean isValid;
   /* 0x04 */ u8 unk4[4];
   /* 0x08 */ HoleSetup hole;
   /* 0x3C */ GameState state;
@@ -471,7 +472,7 @@ typedef struct Unk80105C38 {
   /* 0x20 */ f32 parSavePercent;
   /* 0x24 */ f32 parOnPercent;
   /* 0x28 */ f32 sandSavePercent;
-  /* 0x2C */ s32 hasPlace[TOURNAMENT_PLACE_COUNT];
+  /* 0x2C */ Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
 } Unk80105C38; /* size = 0x38 */
 
 extern Unk80105C38 D_80105C38[COURSE_COUNT + 1];

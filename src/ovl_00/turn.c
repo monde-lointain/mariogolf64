@@ -2876,7 +2876,7 @@ void UpdateTurns(void) {
   s32 playerIndex;
   s32 state;
   s32 nextState;
-  s32 areCallsAllowed;
+  Boolean areCallsAllowed;
   s32 i;
 
   /* Returns whether the B button is held */
@@ -3549,7 +3549,7 @@ void UpdateTurns(void) {
           D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
           BuildShotPreview(&D_80227150_ovl_00, state);
         } else if (g_PauseScreen == 0) {
-          s32 isReady;
+          Boolean isReady;
           s32 tempo;
           s32 replayKind;
 
@@ -4066,7 +4066,7 @@ void UpdateTurns(void) {
           break;
         }
       case 9: {
-        s32 isCameraDone;
+        Boolean isCameraDone;
         s32 previousPosition[3];
 
         if (D_80224000_ovl_00 + 10 == D_80227170_ovl_00[playerIndex]) {
@@ -4166,7 +4166,8 @@ void UpdateTurns(void) {
         break;
       }
       case 10: {
-        s32 isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
+        Boolean isCameraDone =
+            UpdateFlightCamera(TRUE, g_TurnController.buttons);
 
         if (g_TurnBallSimulation.unkA0) {
           if (GetEndReaction() == 1) {
@@ -4599,7 +4600,7 @@ void UpdateTurns(void) {
           } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
               g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
             s8 results[MAX_PLAYER_COUNT];
-            s32 isAnyOut = FALSE;
+            Boolean isAnyOut = FALSE;
             s32 isHoleOver = GetGroupHoleResult(results);
 
             for (i = 0; i < g_GameState.playerCount; i++) {

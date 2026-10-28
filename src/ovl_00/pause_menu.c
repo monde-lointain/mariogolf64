@@ -153,7 +153,7 @@ enum ChoiceLabel {
 typedef struct ChoiceBox {
   /* 0x00 */ s32 optionCount;
   /* 0x04 */ s32 halfWidth; /* Widened to fit the longest label */
-  /* 0x08 */ s32 isVertical;
+  /* 0x08 */ Boolean isVertical;
   /* CHOICE_LABEL_* values */
   /* 0x0C */ u8 labels[CHOICE_BOX_MAX_OPTIONS];
   /* CHOICE_RESULT_* values, by label */
@@ -343,7 +343,7 @@ void ResumeRound(void) {
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
 }
 
-void RequestPauseMenu(s32 canGiveUp, s32 isClosing) {
+void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing) {
   f_PauseMenuRequest =
       isClosing == FALSE ? PAUSE_MENU_REQUEST_LOAD : PAUSE_MENU_REQUEST_FREE;
   f_CanGiveUp = canGiveUp;
@@ -498,7 +498,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
   s32 action;
   u16 kind;
   s32 lie;
-  s32 hasLieChanged;
+  Boolean hasLieChanged;
   s32 surface;
 
   if (controller->repeatedButtons & A_BUTTON) {

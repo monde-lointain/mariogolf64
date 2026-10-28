@@ -488,7 +488,7 @@ static const s32 f_BallDistances[CHARACTER_COUNT][BALL_DISTANCE_COUNT] = {
  * GetVectorLength is an unused nested function, a GNU C extension.
  */
 #ifdef NON_MATCHING
-s32 GetBallDistance(u32 slotIndex, s32 club, s32 isClubKind, s32 shotMode) {
+s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubKind, s32 shotMode) {
   f32 position[3];
   char text[DEBUG_LINE_SIZE];
   s32 distance;
@@ -956,7 +956,7 @@ static const char f_UnusedReadRomFormat[] =
 static const char f_UnusedCompleteText[] = "complete\n";
 
 void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
-  s32 isPatched = FALSE;
+  Boolean isPatched = FALSE;
   CharacterSlot* slot = &g_CharacterSlots[slotIndex];
   JointAnimation* joint;
   CharacterAnimation* animation;
@@ -1312,7 +1312,7 @@ void AnimateCharacter(u32 slotIndex) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   s32 i = 0;
   s32 actionCount;
-  s32 hasLooped;
+  Boolean hasLooped;
 
   if (slot != NULL) {
     hasLooped = FALSE;
@@ -1702,7 +1702,7 @@ void AnimateCharacterInSameCopy(u32 slotIndex) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   s32 i = 0;
   s32 actionCount;
-  s32 hasLooped;
+  Boolean hasLooped;
 
   if (slot != NULL) {
     hasLooped = FALSE;

@@ -191,7 +191,7 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
  * calls pass a static chain that it saves but never uses.
  */
 #ifdef NON_MATCHING
-void InitHeapRegions(s32 hasExpansionPak) {
+void InitHeapRegions(Boolean hasExpansionPak) {
   void AddMemoryRegion(void* start, void* end) {
     MemoryBlock* block = start;
     u32 size = (u8*)end - (u8*)start;

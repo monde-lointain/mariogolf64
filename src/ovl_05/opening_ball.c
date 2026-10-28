@@ -192,7 +192,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
   s32 printsDebugText;
   s32 substep;
   s32 substepCount;
-  s32 isNearCup;
+  Boolean isNearCup;
   s32 rollSpeed;
 
   printsDebugText = IsGameFlagSet(GAME_FLAG_LOG_VERTICAL_VELOCITY);
@@ -1108,7 +1108,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       s32 slopeX;
       s32 slopeZ;
       f32 friction;
-      s32 isSteep;
+      Boolean isSteep;
 
       rollSpeed = GetLength2D(
           simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
@@ -1393,7 +1393,7 @@ ROLLED:
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-      s32 isOutside = simulation->position[AXIS_Z] > 0x7ED400;
+      Boolean isOutside = simulation->position[AXIS_Z] > 0x7ED400;
 
       if (simulation->position[AXIS_Z] <= 0x12BFF) {
         isOutside = TRUE;

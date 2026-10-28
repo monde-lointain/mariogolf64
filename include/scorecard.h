@@ -31,7 +31,7 @@ typedef struct ScorecardContent {
                                                         first face image */
   /* 0x48 */ s32 courseIndex;
   /* 0x4C */ s32 holeIndex;
-  /* 0x50 */ s32 isSuddenDeath; /* The page shows SUDDEN DEATH */
+  /* 0x50 */ Boolean isSuddenDeath; /* The page shows SUDDEN DEATH */
 } ScorecardContent; /* size = 0x54 */
 
 typedef struct Scorecard {
@@ -75,13 +75,13 @@ typedef struct Scorecard {
   /* 0xC8 */ s32 y;
   /* 0xCC */ s32 unkCC;
   /* 0xD0 */ s32 stateTime; /* Frames since g_ScorecardState changed */
-  /* 0xD4 */ s32
-      isTallied; /* The last hole's result is already on the scorecard */
+  /* The last hole's result is already on the scorecard */
+  /* 0xD4 */ Boolean isTallied;
   /* 0xD8 */ s32 holeWinnerIndex; /* The player who won the last hole, or a
                                      HOLE_WINNER_* value */
   /* 0xDC */ s32 layout;
   /* 0xE0 */ s32 pageCount;
-  /* 0xE4 */ s32 hasBets;
+  /* 0xE4 */ Boolean hasBets;
   /* 0xE8 */ SkinsCarryover skinsCarryover;
   /* 0xEB */ u8 unkEB[5];
   /* 0xF0 */ ScorecardContent content;

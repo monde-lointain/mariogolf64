@@ -81,7 +81,7 @@ typedef struct GolfBall {
 typedef struct BallAfterimage {
   /* 0x00 */ f32 position[3];
   /* 0x0C */ s32 alpha; /* Or AFTERIMAGE_UNUSED */
-  /* 0x10 */ s32 isInCup;
+  /* 0x10 */ Boolean isInCup;
 } BallAfterimage; /* size = 0x14 */
 
 /* Read by no routine */
@@ -672,7 +672,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", UpdateGolfBalls);
 #endif
 
 s32 IsAnyBallInCup(void) {
-  s32 isInCup = FALSE;
+  Boolean isInCup = FALSE;
   s32 i;
 
   for (i = 0; i != GOLF_BALL_COUNT; i++) {
@@ -754,15 +754,15 @@ void DrawGolfBalls(CameraMatrices* matrices) {
   ScreenPoint ballPoint;
   ScreenPoint shadowPoint;
   s32 i;
-  s32 isCurrentBallAboveGround = FALSE;
+  Boolean isCurrentBallAboveGround = FALSE;
   GolfBall* ball;
   BallAfterimage* afterimage;
   SurfaceInfo* surface;
   s32 groundHeight;
   s32 spriteKind;
-  s32 isAboveGround;
+  Boolean isAboveGround;
   s32 exposure;
-  s32 isAboveCup;
+  Boolean isAboveCup;
   s32 ballDepth;
   s32 shadowDepth;
   s32 primDepth;

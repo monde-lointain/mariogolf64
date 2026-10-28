@@ -557,7 +557,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   Gfx* gfx = g_DisplayListHead;
   s32 lightColor[3] = {255, 220, 160};
   s32 envColor[3] = {128, 64, 32};
-  s32 hasTranslucentMode;
+  Boolean hasTranslucentMode;
   s32 ballDepth;
   s32 orderIndex;
   s32 billboardIndex;

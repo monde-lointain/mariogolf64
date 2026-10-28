@@ -71,7 +71,7 @@ typedef struct MapOverviewControls {
   /* 0x04 */ s32 cameraZ;
   /* 0x08 */ s32 selectionIndex; /* A and B cycle it */
   /* 0x0C */ s32 adjustment; /* L and R step it */
-  /* 0x10 */ s32 isToggled; /* Z flips it */
+  /* 0x10 */ Boolean isToggled; /* Z flips it */
 } MapOverviewControls; /* size = 0x14 */
 
 /*

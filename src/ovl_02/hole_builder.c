@@ -1542,7 +1542,7 @@ s32 PaintFirstMiniGolfCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
-  s32 isOtherNearest;
+  Boolean isOtherNearest;
   s32 random;
 
   switch (code) {
@@ -1594,7 +1594,7 @@ s32 PaintSecondMiniGolfCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
-  s32 isOtherNearest;
+  Boolean isOtherNearest;
   s32 random;
 
   switch (code) {
@@ -3103,8 +3103,8 @@ void CastBillboardShadows(void) {
   s32 lastTextureIndex;
   s32 index;
   s32 listIndex;
-  s32 hasShadowStarted;
-  s32 isRowInWidth;
+  Boolean hasShadowStarted;
+  Boolean isRowInWidth;
   s32 row;
   s32 column;
   s32 rowEnd;
@@ -3482,7 +3482,7 @@ void ShadeGroundTiles(void) {
   s32 bandRow;
   s32 column;
   s32 count;
-  s32 isMapEdge;
+  Boolean isMapEdge;
   s32 trailingColumn;
   s32 leadingColumn;
   s16* heights;

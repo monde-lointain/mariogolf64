@@ -108,7 +108,7 @@ typedef struct GameBoyTransfer {
   /* 0x04C */ void* noticeCloudImage;
   /* 0x050 */ void* accessingImage;
   /* 0x054 */ void* shotTypesImage;
-  /* 0x058 */ s32 hasGameBoyPak;
+  /* 0x058 */ Boolean hasGameBoyPak;
   /* 0x05C */ s32 screen; /* TRANSMIT_SCREEN_* */
   /* 0x060 */ s32 transferMode;
   /* 0x064 */ s32 optionIndex;
@@ -139,9 +139,9 @@ typedef struct GameBoyTransfer {
   /* 0x7E8 */ s32 taggedCartridgeCount;
   /* 0x7EC */ s32 taggedControllers[MAXCONTROLLERS];
   /* 0x7FC */ u8 cartridgeTags[MAXCONTROLLERS][CARTRIDGE_TAG_SIZE];
-  /* 0x83C */ s32 isCancelled;
+  /* 0x83C */ Boolean isCancelled;
   /* 0x840 */ s32 pressingHandPosition; /* 0 hides the hand */
-  /* 0x844 */ s32 isAccessing;
+  /* 0x844 */ Boolean isAccessing;
 } GameBoyTransfer; /* size = 0x848 */
 
 extern GameBoyTransfer g_GameBoyTransfer;

@@ -1045,7 +1045,7 @@ void func_80400FBC_hole_editor(void) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
   s32 stepX;
   s32 stepZ;
-  s32 isStepping;
+  Boolean isStepping;
   f64 cameraDistance;
 
   sprintf(text, "X:%d Z:%d             ", f_HolePointCursor[0],
@@ -1966,7 +1966,7 @@ void func_80403A04_hole_editor(void) {
   f32 stepZ;
   f32 moveY; /* The scaled y step; stepY itself would compile differently */
   s32 editKind;
-  s32 isDropping;
+  Boolean isDropping;
   s32 corner;
   f64 cameraDistance; /* As a literal, GCC would fold it into the angles before
                          the zoom */
@@ -3860,7 +3860,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
   s32 vertexColumn;
   s32 pointColumn;
   s32 pointRow;
-  s32 isMirrored;
+  Boolean isMirrored;
   s32 mirroredS;
   s32 st;
   s32* offsets;
@@ -4206,7 +4206,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
           /* The maps tell each tile from its neighbors by color */
           if (terrainStyle == TERRAIN_STYLE_MAP ||
               terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) {
-            s32 isOdd = (row + k) & 1;
+            Boolean isOdd = (row + k) & 1;
 
             gDPSetEnvColor(gfx++, isOdd * 0xFF, 0, 0xFF - (isOdd * 0xFF), 0xFF);
           }

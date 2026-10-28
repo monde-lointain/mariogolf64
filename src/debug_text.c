@@ -267,7 +267,7 @@ void DrawDebugText(Gfx** displayListHead) {
 }
 
 /* Highlights the next text put in the grid */
-void SetDebugTextHighlight(s32 isHighlighted) {
+void SetDebugTextHighlight(Boolean isHighlighted) {
   if (isHighlighted) {
     f_DebugTextHighlight = HIGHLIGHT_BIT;
   } else {
