@@ -70,17 +70,56 @@
       (f32)(f_FlightBallPosition[AXIS_Z] - LANDING_RADIUS) < \
           (f32)f_ShotEndPosition[AXIS_Z])
 
-extern s32 D_800BE620;
-extern s32 D_800BE624;
-extern s32 D_800BE650;
-extern f32 D_800BE65C;
-extern s8 f_PendingResultSound;
-extern s32 D_800BE67C;
-extern s32 D_800BE680;
-extern f32 D_800BE684;
 /* The grid that DisplaceNoiseSquare builds */
 extern s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
-extern s8 f_IsNoiseResetPending;
+
+static s32 D_800BE620 = 0;
+static s32 D_800BE624 = 0;
+static s32 D_800BE628 = 0;
+static s32 f_FlightCameraKind = 0;
+static s32 D_800BE630 = 0;
+static s32 f_BallCupDistance = 0;
+static s32 f_BallCupGroundDistance = 0;
+static s32 f_LandingCupDistance = 0;
+static s32 D_800BE640 = 0;
+static s32 D_800BE644 = 0;
+static s32 D_800BE648 = 0;
+static s32 D_800BE64C = 0;
+static s32 D_800BE650 = 0;
+static f32 f_CameraYaw = 0.0f;
+static s32 D_800BE658 = 0;
+static f32 D_800BE65C = 0.0f;
+static s32 f_CupViewHoldCount = 0;
+static s32 f_FlightCameraFlags = 0;
+/* Read by no routine */
+static u8 D_800BE668[8] = {0};
+static s8 f_PendingResultSound = 0;
+static s32 D_800BE674 = 0;
+static s32 D_800BE678 = 0;
+static s32 D_800BE67C = 0;
+static s32 D_800BE680 = 0;
+static f32 D_800BE684 = 0.0f;
+static s32 f_EndReaction = 0;
+/* How many frames the flight camera waits after the ball's path ends */
+static s32 f_LandingWaitFrameCount = 0;
+static s32 D_800BE690 = 1;
+s32 g_HoleFlyoverFrame = 0;
+s32 D_800BE698 = 1;
+s32 g_IsCupViewShown = FALSE;
+static s32 f_NextCameraPickIndex = 0;
+static s32 f_IsBehindViewFar = FALSE;
+static s32 f_SideViewCount = 0;
+static s32 f_IsApexViewFar = FALSE;
+static s32 f_IsTrailViewClose = FALSE;
+static f32 f_CircleAngle = 0.0f;
+/* Read by no routine */
+static u8 D_800BE6B8[8] = {0};
+/* The displacement scale at each midpoint displacement level */
+static s16 f_NoiseRoughness[] = {0x80, 0x60, 0x40, 0x20, 8, 4, 4, 2};
+static s16 f_NoiseGridIndex = 0;
+static s32 f_NoiseBlendStep = 0;
+static s8 f_IsNoiseResetPending = TRUE;
+static s8 f_NoiseRow = 0;
 
 /* menu.c returns an s8, but the original calls it without truncating, as if
  * undeclared */
@@ -248,22 +287,8 @@ static const char f_UnusedFloatFormat[] = "            %f";
 #define CUP_PASS_MAX_DEPTH 0x1A400
 #define CUP_PASS_MAX_LANDING_DISTANCE 0x4B000
 
-extern s32 D_800BE698;
 extern s32 D_800C5AAC;
-extern s32 D_800BE640;
-extern s32 D_800BE644;
-extern s32 D_800BE648;
 extern SimulatedShot g_SimulatedShot;
-extern s32 f_CupViewHoldCount;
-extern s32 g_HoleFlyoverFrame;
-extern s32 f_EndReaction;
-/* How many frames the flight camera waits after the ball's path ends */
-extern s32 f_LandingWaitFrameCount;
-extern s32 f_LandingCupDistance;
-extern s32 f_FlightCameraFlags;
-extern f32 f_CameraYaw;
-extern s32 f_FlightCameraKind;
-extern s32 f_NextCameraPickIndex;
 static s8 f_CameraPicks[CAMERA_PICK_COUNT];
 static CoursePoint f_FlightBallPosition;
 static CoursePoint f_ShotEndPosition;
@@ -281,12 +306,6 @@ static s32 D_800DAF44;
 static s8 f_PassedPathFlags;
 static SurfaceInfo* f_EndSurfaceInfo;
 static s32 D_800DAF50;
-extern s32 D_800BE628;
-extern s32 D_800BE630;
-extern s32 D_800BE64C;
-extern s32 D_800BE658;
-extern s32 D_800BE674;
-extern s32 D_800BE690;
 
 /* How far the golfer stands along the shot's yaw from the ball */
 #define STANCE_AIM_OFFSET -921.60004f
@@ -556,8 +575,6 @@ void EndFlightCamera(void) {
 #define GROUND_PROBE_ANGLE_STEP (M_PI / 4)
 #define GROUND_PROBE_DISTANCE 30720.0f
 #define GROUND_PROBE_MAX_RISE 4608.0f
-
-extern s32 D_800BE678;
 
 /*
  * Starts the flight camera for the simulated shot. It resets the flight state,
@@ -1731,12 +1748,6 @@ void AimCameraYaw(void) {
   }
 }
 
-extern s32 f_IsBehindViewFar;
-extern s32 f_SideViewCount;
-extern s32 f_IsApexViewFar;
-extern s32 f_IsTrailViewClose;
-extern f32 f_CircleAngle;
-
 void PlaceAimCamera(void);
 
 /* PlaceFlightCamera's distances are in course units unless they say otherwise;
@@ -2868,8 +2879,6 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 /* Keeps the eye from sitting straight above the point it looks at */
 #define LOOK_AT_NUDGE 0.1f
 
-extern s32 f_BallCupDistance;
-extern s32 f_BallCupGroundDistance;
 extern s8 D_80104B68;
 
 /*
@@ -3486,12 +3495,6 @@ void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius) {
 #define NOISE_BLEND_STEP_MASK 0x7F
 #define NOISE_INTENSITY_SHIFT 13
 #define NOISE_MAX_INTENSITY 0xFF
-
-/* The displacement scale at each midpoint displacement level */
-extern s16 f_NoiseRoughness[];
-extern s16 f_NoiseGridIndex;
-extern s32 f_NoiseBlendStep;
-extern s8 f_NoiseRow;
 
 /* Not static: the original left it to the linker's common block */
 /* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
