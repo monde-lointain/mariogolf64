@@ -375,7 +375,7 @@ segments:
       - [0x9D3F0, .data, menu]
       - [0x9E010, .data, fault]
       - [0x9E3F0, .data, music]
-      - [0x9E460, data]
+      - [0x9E460, .data, play]
       - [0x9E500, .data, hole_triangles]
       - [0x9E530, .data, character_sound]
       - [0x9EA00, .data, tournament]

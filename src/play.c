@@ -91,11 +91,6 @@ enum HoleResultsKind {
 
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
-extern s32 D_800C3088;
-extern s8 D_800C30A4;
-extern s32 f_PlayExit;
-extern s32 f_HoleEndStep;
-static u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 extern s16 D_80104F78;
 extern s32 D_80104F7C;
 extern s32 D_80104F80;
@@ -105,6 +100,49 @@ extern u8 D_800FE330;
 extern s8 D_800FBDB8;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
+
+/* Read by no routine */
+static s32 D_800C3060[2] = {0};
+s8 g_IsTrainingHeadingKept = FALSE;
+s32 g_PauseScreen = PAUSE_SCREEN_NONE;
+s32 D_800C3070 = 0;
+s32 g_HasPressedShotButton = FALSE;
+s16 g_AltHeading = 0;
+s16 g_FreeLookHeading = 0;
+s32 g_ShotSetupFrameCount = 0;
+s32 g_ImpactPointLingerFrameCount = 0;
+s32 g_ShotFlags = 0;
+static s32 D_800C3088 = 0;
+s32 g_LetterboxState = LETTERBOX_STATE_NONE;
+s32 g_IsSettingImpactPoint = FALSE;
+s32 D_800C3094 = TRUE;
+s8 g_IsHudTurnAwayRequested = FALSE;
+/* Read by no routine */
+static s32 D_800C309C[2] = {0};
+static s8 D_800C30A4 = FALSE;
+static s32 f_PlayExit = PLAY_EXIT_NONE;
+static s32 f_HoleEndStep = HOLE_END_STEP_START;
+static s32 f_HoleResultsKind = HOLE_RESULTS_STROKE;
+static s32 f_PlayStateFrameCount = 0;
+static s32 f_PlayFrameCount = 0;
+static s8 f_IsPlayStateBackedUp = FALSE;
+static s32 f_DebugCupIndex = 0;
+/* Read by no routine */
+static s32 D_800C30C4[3] = {0};
+/* Read by no routine */
+static s8 D_800C30D0 = 0;
+s8 g_ShowsGroundWaves = FALSE;
+f32 g_GroundFarthestDepth = 0.0f;
+f32 g_GroundNearDepthEighth = 0.0f;
+/* The clip ratio, which the second controller's A button cycles under
+ * GAME_FLAG_CYCLE_CLIP_RATIO */
+static s32 f_GroundClipRatio = 1;
+/* Read by no routine; holds each of 0 to 24 once */
+static u8 D_800C30E0[25] = {0, 5, 7, 10, 20, 1, 12, 13, 14, 21, 2, 15, 8, 16,
+    22, 3, 17, 18, 19, 23, 4, 6, 9, 11, 24};
+static s32 f_GroundTimingRow = 0;
+
+static u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 
 s32 SaveOrContinueGameByMode(s32 isContinuing);
 void func_80407D64(void);
@@ -707,11 +745,6 @@ s32 HasWonFinalChallenge(void) {
   return FALSE;
 }
 
-extern s32 f_HoleResultsKind;
-extern s32 f_PlayStateFrameCount;
-extern s32 f_PlayFrameCount;
-extern s8 f_IsPlayStateBackedUp;
-extern s32 f_DebugCupIndex;
 void func_80241800();
 void func_80242384();
 s32 func_80241FF0();
@@ -1897,8 +1930,6 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
       G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, RANDOM_GRID_SIZE, \
       RANDOM_GRID_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
-extern s32 f_GroundClipRatio;
-extern s32 f_GroundTimingRow;
 extern u32 g_GroundDrawFrame;
 void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
 
