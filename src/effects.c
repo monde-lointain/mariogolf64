@@ -171,7 +171,6 @@ static u8* f_SpeckleImage;
 static u8* f_SplashImage;
 static u8* f_StarImage;
 static u8* f_DropletImage;
-extern Gfx g_DecalTextureSetup[];
 
 void DrawEffectShadow(Gfx** displayListHead, Effect* effect);
 void DrawDrop(

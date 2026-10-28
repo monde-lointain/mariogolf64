@@ -39,6 +39,8 @@ extern s32 g_ScreenFadeKind;
 extern s32 g_ScreenFadeRed;
 extern s32 g_ScreenFadeGreen;
 extern s32 g_ScreenFadeBlue;
+/* Draws textures with their own colors, cut at their alpha */
+extern Gfx g_DecalTextureSetup[];
 
 void DrawTextureRect(Gfx** displayListHead, s32 xl, s32 yl, s32 xh, s32 yh,
     s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);

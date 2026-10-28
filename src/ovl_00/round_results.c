@@ -199,7 +199,6 @@ extern TrophyAssets f_TrophyAssets[];
 #define MATCH_RANK_WON 100
 #define MATCH_RANK_LOST 101
 
-extern Gfx g_DecalTextureSetup[];
 /* The digit font draws '#' as a plus-minus sign, for an even score */
 extern const char f_EvenScoreFormat[];
 extern const char f_ScoreFormat[];

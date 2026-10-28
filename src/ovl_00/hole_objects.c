@@ -15,6 +15,7 @@
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "terrain.h"
 #include "variables.h"
@@ -86,7 +87,6 @@ static u8* f_MonkeyImage;
 
 /* Not static: the original left it to the linker's common block */
 HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
-extern Gfx g_DecalTextureSetup[];
 
 void SpawnRipple(CoursePoint position);
 

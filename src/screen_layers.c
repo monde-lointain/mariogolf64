@@ -190,7 +190,6 @@ static void* f_WipeShapeImage;
 static void* f_PromptCloudImage;
 static void* f_YesNoImage;
 extern f32 f_ChoiceBobAngle;
-extern Gfx g_DecalTextureSetup[];
 
 /*
  * Draws a texture rectangle between pipe syncs, cut where it reaches past
