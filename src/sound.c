@@ -10,6 +10,7 @@
 #include <PR/libmus.h>
 
 #include "asset.h"
+#include "character.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "functions.h"
@@ -35,7 +36,6 @@
 #define ECHOING_SOUND_COUNT 34
 
 /* Character sounds, which play after a delay set for each character */
-#define CHARACTER_COUNT 18
 #define CHARACTER_SOUND_KIND_COUNT 7
 #define QUEUED_CHARACTER_SOUND_COUNT 4
 #define MAX_CHARACTER_SOUND_DELAY 60

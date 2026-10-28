@@ -4,9 +4,9 @@
  */
 #include "common.h"
 
+#include "character.h"
 #include "sound.h"
 
-#define CHARACTER_COUNT 18
 /* Each character's sounds are pairs of a sound ID and the volume it plays at */
 #define CHARACTER_SOUND_VALUE_COUNT 34
 

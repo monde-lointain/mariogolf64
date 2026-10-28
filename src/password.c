@@ -8,6 +8,7 @@
 
 #include "password.h"
 
+#include "character.h"
 #include "libc.h"
 
 #define PASSWORD_SYMBOL_COUNT 28
@@ -26,7 +27,6 @@
 #define SCORE_PASSWORD_BIAS 56
 #define SCORE_RANGE 200
 #define TIME_RANGE 108000
-#define PASSWORD_CHARACTER_COUNT 18
 #define PASSWORD_GAME_BOY_LEVEL_LIMIT 100
 /* A random number in this range pads the score's number */
 #define SCORE_NOISE_RANGE 4600
@@ -409,7 +409,7 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
 
   report = *source;
 
-  if (clamped->characterIndex >= PASSWORD_CHARACTER_COUNT) {
+  if (clamped->characterIndex >= CHARACTER_COUNT) {
     clamped->characterIndex = 0;
   }
 
@@ -442,8 +442,7 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
   }
 
   number = (clamped->characterIndex * SCORE_RANGE) + (s16)clamped->score +
-      ((rand() % SCORE_NOISE_RANGE) *
-          (PASSWORD_CHARACTER_COUNT * SCORE_RANGE)) +
+      ((rand() % SCORE_NOISE_RANGE) * (CHARACTER_COUNT * SCORE_RANGE)) +
       SCORE_NUMBER_SALT;
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
