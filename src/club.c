@@ -73,14 +73,6 @@
  */
 #define LIE_RATING_LENGTH CLUB_TYPE_PUTTER
 
-/* The surfaces each club type can be used on */
-#define DRIVER_SURFACES \
-  (~(CLUB_SURFACE_GREEN | CLUB_SURFACE_ROUGH | CLUB_SURFACE_BUNKER | \
-      CLUB_SURFACE_FAIRWAY | CLUB_SURFACE_SEMI_ROUGH))
-#define FAIRWAY_WOOD_SURFACES \
-  (~(CLUB_SURFACE_GREEN | CLUB_SURFACE_ROUGH | CLUB_SURFACE_BUNKER))
-#define IRON_SURFACES (~CLUB_SURFACE_GREEN)
-
 /* A stock club, whose power and deflection GenerateClub fills in */
 #define CLUB_ENTRY(type, name, kind, surfaceMask, unk0, distance, pitch, \
     unk10, spin, unk14, sideSpin) \

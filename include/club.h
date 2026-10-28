@@ -64,6 +64,14 @@ enum ClubKind {
 #define CLUB_SURFACE_SEMI_ROUGH 0x20
 #define CLUB_SURFACE_ALL (-1)
 
+/* The surfaces each club type can be used on */
+#define DRIVER_SURFACES \
+  (~(CLUB_SURFACE_GREEN | CLUB_SURFACE_ROUGH | CLUB_SURFACE_BUNKER | \
+      CLUB_SURFACE_FAIRWAY | CLUB_SURFACE_SEMI_ROUGH))
+#define FAIRWAY_WOOD_SURFACES \
+  (~(CLUB_SURFACE_GREEN | CLUB_SURFACE_ROUGH | CLUB_SURFACE_BUNKER))
+#define IRON_SURFACES (~CLUB_SURFACE_GREEN)
+
 /* GetLieRating's ratings run from 1 to this */
 #define MAX_LIE_RATING 5
 
