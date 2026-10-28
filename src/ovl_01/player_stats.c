@@ -107,8 +107,9 @@
 #define STATS_UP_ARROW_OFFSET (-52)
 #define STATS_DOWN_ARROW_OFFSET 36
 
-/* The directions that func_8021E340 moves the cursor in, which index D_802309C4
- */
+/* The bytes of each of D_80230984's record labels, such as "Birdie" */
+#define RECORD_LABEL_SIZE 16
+
 /* func_8021E97C puts the cursor on the stats grid's chosen cell, measured from
  * the screen's centre */
 #define STATS_CURSOR_COLUMN_WIDTH 34
@@ -116,6 +117,8 @@
 #define STATS_CURSOR_LEFT_X 6
 #define STATS_CURSOR_TOP_Y 30
 
+/* The directions that func_8021E340 moves the cursor in, which index D_802309C4
+ */
 enum StatsDirection {
   STATS_DIRECTION_LEFT,
   STATS_DIRECTION_RIGHT,
@@ -1827,7 +1830,6 @@ void func_8021D0B8_ovl_01(void) {
 #define RECORD_PLACE_X 124
 #define RECORD_PLACE_Y 64
 #define RECORD_LABEL_X 32
-#define RECORD_LABEL_SIZE 16
 #define RECORD_COURSE_IMAGE_WIDTH 64
 #define RECORD_COURSE_STRIP_HEIGHT 32
 #define RECORD_COURSE_STRIP_COUNT 2
