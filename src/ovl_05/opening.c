@@ -100,9 +100,7 @@ extern OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT];
 extern s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT];
 extern f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT];
 extern s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
-/* The buffers of character slots 1 and 2 */
-extern u8* f_OpeningCharacterBuffers[2];
-extern void* f_OpeningBillboardHeap;
+
 /*
  * The cue that the opening's script has given for setting up its characters,
  * from 0 to OPENING_CUE_COUNT - 1, or one of the values below
@@ -115,14 +113,11 @@ extern s32 f_OpeningCue;
 #define OPENING_CUE_DONE 31
 extern u8* g_ShadowTexture;
 extern s32 f_LakituScreenPoint[2];
-/* A 32x32 CI8 image with its header and palette */
-extern u8 f_LakituImage[];
-/* A 48x128 I4 image with its header */
-extern u8 f_LakituTrailImage[];
+/* The sizes of Lakitu's image and his trail's, with header and palette */
+#define LAKITU_IMAGE_BUFFER_SIZE 0x608
+#define LAKITU_TRAIL_IMAGE_BUFFER_SIZE 0xC08
 
 #define LAKITU_TRAIL_SEGMENT_COUNT 40
-extern Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
-extern f32 f_LakituTrailStart[2];
 
 extern s32 f_OpeningFrameParity;
 extern s32 f_IsLookAtMarkerShown;
@@ -142,6 +137,11 @@ extern f32 f_LookAtEaseRate;
 #define ASSET_LOGO_MARIO_IMAGE 0x94B
 /* A 64x192 CI8 image of three golf balls */
 #define ASSET_LOGO_BALL_IMAGES 0x94E
+/* The sizes of those images, with their headers and palettes */
+#define LOGO_LETTER_IMAGES_BUFFER_SIZE 0x5308
+#define LOGO_CLUB_IMAGE_BUFFER_SIZE 0x3058
+#define LOGO_MARIO_IMAGE_BUFFER_SIZE 0x448
+#define LOGO_BALL_IMAGES_BUFFER_SIZE 0x3208
 
 /* "MARIO GOLF" */
 #define LOGO_LETTER_COUNT 9
@@ -209,25 +209,11 @@ typedef enum LogoLetterState {
   LOGO_LETTER_LANDED = 9
 } LogoLetterState;
 
-extern u8 f_LogoLetterImages[];
-extern u8 f_LogoClubImage[];
-extern u8 f_LogoMarioImage[];
-extern u8 f_LogoBallImages[];
-extern u8 f_LogoShineImage[];
-extern LogoLetter f_LogoLetters[LOGO_LETTER_COUNT];
-extern s32 f_LogoLetterStates[LOGO_LETTER_COUNT];
-extern f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT]; /* Down, in pixels a frame */
-extern f32 f_LogoLetterScales[LOGO_LETTER_COUNT][2]; /* Across, then up */
-/* Frames left in a letter's squashing, squashed or stretching state */
-extern s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];
-
 extern s32 f_OpeningShotDashCount;
 extern BallSimulation f_OpeningShotSimulation;
 
 /* f_OpeningShotDashCount's starting value, and the most it can be */
 #define OPENING_SHOT_MAX_DASH_COUNT 200
-extern Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
-                                    [OPENING_SHOT_MAX_DASH_COUNT];
 
 /*
  * The opening's shot path is drawn as the turn's shot preview is, but
@@ -254,11 +240,10 @@ extern s32 f_OpeningSceneFramesLeft;
  * the screen
  */
 extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
-extern Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
 extern s32 f_AreImpactLinesShown;
 extern s32 f_ShotBallScale;
 extern s32 f_OpeningSparksState;
-extern Vec3 f_OpeningSparksOrigin;
+
 /*
  * Set once the title logo starts forming. The opening can no longer be skipped
  * after that, and it ends without the confirm sound.
@@ -297,6 +282,7 @@ void LoadOpeningBall(s32 imageIndex, s32 slot);
 
 static s32 f_CueSlotIndex;
 static CoursePoint D_8020C404_ovl_05;
+
 /* Read by no routine */
 static u8 D_8020C410_ovl_05[0x80];
 static Mtx f_LookAtMarkerTranslation;
@@ -373,6 +359,43 @@ static s32 f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
 static u8 f_OpeningEffectImage[OPENING_EFFECT_IMAGE_SIZE];
 static u8 f_ShotBallImage[OPENING_BALL_IMAGE_SIZE];
 static u8 f_OpeningBallImages[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
+
+static Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
+static f32 D_80217078_ovl_05;
+
+/* Read by no routine; 2 objects, as one would be aligned past its start */
+static u8 D_8021707C_ovl_05[0x4];
+static u8 D_80217080_ovl_05[0x10];
+
+static u8 f_LogoBallImages[LOGO_BALL_IMAGES_BUFFER_SIZE];
+/* A 32x32 CI8 image with its header and palette */
+static u8 f_LakituImage[LAKITU_IMAGE_BUFFER_SIZE];
+/* A 48x128 I4 image with its header */
+static u8 f_LakituTrailImage[LAKITU_TRAIL_IMAGE_BUFFER_SIZE];
+static Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
+static f32 f_LakituTrailStart[2];
+/* Read by no routine */
+static u8 D_8021BEC8_ovl_05[24];
+static u8 f_LogoMarioImage[LOGO_MARIO_IMAGE_BUFFER_SIZE];
+static u8 f_LogoLetterImages[LOGO_LETTER_IMAGES_BUFFER_SIZE];
+static u8 f_LogoClubImage[LOGO_CLUB_IMAGE_BUFFER_SIZE];
+static LogoLetter f_LogoLetters[LOGO_LETTER_COUNT];
+static s32 f_LogoLetterStates[LOGO_LETTER_COUNT];
+static f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT]; /* Down, in pixels a frame */
+static f32 f_LogoLetterScales[LOGO_LETTER_COUNT][2]; /* Across, then up */
+/* Frames left in a letter's squashing, squashed or stretching state */
+static s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];
+static u8 f_LogoShineImage[SHINE_IMAGE_BUFFER_SIZE];
+static Vec3 f_OpeningSparksOrigin;
+/* Read by no routine */
+static u8 D_802259EC_ovl_05[12];
+/* The buffers of character slots 1 and 2 */
+static u8* f_OpeningCharacterBuffers[2];
+/* Read by no routine */
+static u8 D_80225A00_ovl_05[4];
+static void* f_OpeningBillboardHeap;
+static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
+                                    [OPENING_SHOT_MAX_DASH_COUNT];
 
 /* Moves f_OpeningSoundChannel on to the next of the rotating channels */
 void AdvanceOpeningSoundChannel(void) {
@@ -1101,7 +1124,6 @@ extern f32 D_8020AEC0_ovl_05;
 
 /* The first channel after the rotating ones */
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
-extern f32 D_80217078_ovl_05;
 
 void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);

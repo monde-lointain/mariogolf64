@@ -683,7 +683,8 @@ segments:
       - [0x14E8D0, .rodata, ovl_05/opening_ball]
       - { start: 0x14EA70, type: bss, vram: 0x8020C3F0, name: bss_8020C3F0 }
       - { type: .bss, vram: 0x8020C400, name: ovl_05/opening }
-      - { type: bss, vram: 0x80217060, name: bss_80217060 }
+      - { type: .bss, vram: 0x8022BE10, name: ovl_05/opening_ball }
+      - { type: bss, vram: 0x8022BE30, name: bss_8022BE30 }
 
   - name: ovl_06
     type: code

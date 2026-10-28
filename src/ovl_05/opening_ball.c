@@ -39,6 +39,11 @@
 /* The opening's own copy of f_SurfaceInfo */
 extern SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT];
 
+/* The opening's copies of the collision triangle and fraction that
+ * StepBallSimulation keeps on its stack */
+static PlaneTriangle D_8022BE10_ovl_05;
+static f32 D_8022BE28_ovl_05;
+
 /* Loads one of the other characters into the slot with its birdie animation, or
  * frees a busy slot first */
 s32 func_80206680_ovl_05(u32 slotIndex, s32 character) {
@@ -86,10 +91,6 @@ static void ResetBallSimulations(void) {
   }
 }
 
-/* The opening's copies of the collision triangle and fraction that
- * StepBallSimulation keeps on its stack */
-extern PlaneTriangle D_8022BE10_ovl_05;
-extern f32 D_8022BE28_ovl_05;
 /* The opening's copy of g_ClubTestMode */
 extern s8 D_8020B560_ovl_05;
 /* The debug text row, of SPEED_TEXT_ROW_COUNT, that the next ball speed goes in
