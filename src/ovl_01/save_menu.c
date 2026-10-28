@@ -114,6 +114,8 @@ typedef struct {
 #define RING_SHOT_TEXT_SLOT_COUNT 6
 /* The row after the courses, for the saved Ring Shot replays */
 #define RING_SHOT_REPLAY_ROW RING_SHOT_COURSE_COUNT
+/* The courses' rows and the replays' */
+#define RING_SHOT_ROW_COUNT (RING_SHOT_REPLAY_ROW + 1)
 /* The furthest a course's list of characters scrolls */
 #define RING_SHOT_LAST_FIRST_CHARACTER 14
 
@@ -399,7 +401,6 @@ void func_8021F79C_ovl_01(void) {
 #define RING_SHOT_STRIP_RIGHT 298
 #define RING_SHOT_STRIP_TOP 204
 #define RING_SHOT_STRIP_SPACING 8
-#define RING_SHOT_ROW_COUNT (RING_SHOT_REPLAY_ROW + 1)
 /* Each row's icon is drawn this many times over in the same place */
 #define RING_SHOT_ICON_DRAW_COUNT 3
 #define RING_SHOT_FIRST_ICON_X 22
