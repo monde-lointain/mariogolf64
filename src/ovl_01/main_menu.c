@@ -47,9 +47,6 @@
 #define CHOSEN_HOLE_LIGHT_PITCH 0x1000
 #define CHOSEN_HOLE_LIGHT_YAW 0x2000
 
-/* The module that the menus draw as */
-#define MODULE_MENU 2
-
 /* InitPlay's kind that loads no game state and skips PrepareHoleDisplay, as
  * the menus have set them up already */
 #define PLAY_KIND_WITHOUT_HOLE_DISPLAY 3
@@ -1099,8 +1096,8 @@ void func_801F4C78_ovl_01(void) {
     } else {
       g_Scene = SCENE_SWAPPING_MODULES;
       g_NextScene = SCENE_PLAY_UNK12;
-      g_SceneModuleToUnload = SCENE_MODULE_MENU;
-      g_SceneModuleToLoad = SCENE_MODULE_PLAY;
+      g_SceneModuleToUnload = MODULE_MENU;
+      g_SceneModuleToLoad = MODULE_PLAY;
       RequestSubModule();
     }
   }
@@ -1323,9 +1320,9 @@ void func_801F70F0_ovl_01(void) {
   if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
     if (GetWipeProgress() == 0) {
       g_Scene = SCENE_SWAPPING_MODULES;
-      g_SceneModuleToUnload = SCENE_MODULE_MENU;
+      g_SceneModuleToUnload = MODULE_MENU;
       g_NextScene = SCENE_TRANSMIT;
-      g_SceneModuleToLoad = SCENE_MODULE_TRANSMIT;
+      g_SceneModuleToLoad = MODULE_TRANSMIT;
       ResetGameBoyTransfer(TRANSFER_MODE_FROM_MENU);
       StartWipe(WIPE_OPENING);
     }
@@ -1410,8 +1407,8 @@ void func_801F70F0_ovl_01(void) {
     StartHudAnimation(HUD_ANIMATION_SPIRAL);
     g_Scene = SCENE_SWAPPING_MODULES;
     g_NextScene = SCENE_TITLE_SCREEN;
-    g_SceneModuleToUnload = SCENE_MODULE_MENU;
-    g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
+    g_SceneModuleToUnload = MODULE_MENU;
+    g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
     PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
     SetTextSlot(
         SCREEN_WIDTH / 2, TITLE_SCREEN_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);

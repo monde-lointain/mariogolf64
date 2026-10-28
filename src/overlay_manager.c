@@ -29,33 +29,38 @@
 
 static s8 f_UnusedModuleIds[] = {0x00, MODULE_ID_END};
 static s8 f_ModuleIdsOfOverlays00To02[] = {
-    0x0F,
-    0x09,
-    0x01,
-    0x0A,
-    0x0B,
-    0x11,
-    0x12,
-    0x14,
-    0x17,
-    0x18,
-    0x19,
+    MODULE_UNK15,
+    MODULE_UNK9,
+    MODULE_UNK1,
+    MODULE_PLAY,
+    MODULE_UNK11,
+    MODULE_UNK17,
+    MODULE_UNK18,
+    MODULE_PAUSE_MENU,
+    MODULE_UNK23,
+    MODULE_UNK24,
+    MODULE_UNK25,
     MODULE_ID_END,
 };
-static s8 f_ModuleIdsOfOverlay03[] = {0x02, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay04[] = {0x06, 0x1C, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay05[] = {0x07, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay06[] = {0x08, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay07[] = {0x03, 0x10, 0x13, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay08[] = {0x04, 0x1E, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay09[] = {0x0C, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay10[] = {0x0D, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay11[] = {0x05, 0x0E, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay12[] = {0x1A, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay13[] = {0x15, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay14[] = {0x16, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay15[] = {0x1B, 0x1D, 0x20, MODULE_ID_END};
-static s8 f_ModuleIdsOfOverlay16[] = {0x1F, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay03[] = {MODULE_MENU, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay04[] = {
+    MODULE_HOLE_BUILDER, MODULE_UNK28, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay05[] = {MODULE_COMPUTER_GOLFER, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay06[] = {MODULE_SHOT_SIMULATION, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay07[] = {
+    MODULE_OPENING, MODULE_UNK16, MODULE_UNK19, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay08[] = {
+    MODULE_TITLE_SCREEN, MODULE_UNK30, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay09[] = {MODULE_BOOT_LOGOS, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay10[] = {MODULE_CONFIRM_WAIT, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay11[] = {
+    MODULE_SCORECARD, MODULE_UNK14, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay12[] = {MODULE_CLUB_SLOTS, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay13[] = {MODULE_COURSE_SELECT, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay14[] = {MODULE_SAVE_MENU, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay15[] = {
+    MODULE_TRANSMIT, MODULE_UNK29, MODULE_UNK32, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay16[] = {MODULE_STAFF_ROLL, MODULE_ID_END};
 
 static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),

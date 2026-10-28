@@ -71,7 +71,6 @@ typedef struct ShotLabel {
 
 /* D_800C3084's bit for a shot from the green */
 #define SHOT_UNK3084_ON_GREEN 1
-#define MODULE_UNK10 10
 
 /* The sign shows the shot's distance, with the target's height below it */
 #define SIGN_WIDTH 40
@@ -836,7 +835,7 @@ OPAQUE:
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gDPPipeSync(g_DisplayListHead++);
-  if (g_IsModuleAlive[MODULE_UNK10] || ReportModuleNotAlive(MODULE_UNK10)) {
+  if (g_IsModuleAlive[MODULE_PLAY] || ReportModuleNotAlive(MODULE_PLAY)) {
     DrawShotPreview(matrices);
   }
 }

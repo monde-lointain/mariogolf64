@@ -20,8 +20,42 @@
 #define OVERLAY_ID_BASE 0x100
 #define MODULE_ID_END (-1)
 
-/* The module that holds the golf balls' afterimages */
-#define MODULE_UNK1 1
+/*
+ * Module IDs. A named module is named for the overlay that f_Overlays puts
+ * it in or for the code that checks it; the rest are known only by number.
+ */
+#define MODULE_UNK1 0x01 /* Holds the golf balls' afterimages */
+#define MODULE_MENU 0x02
+#define MODULE_OPENING 0x03
+#define MODULE_TITLE_SCREEN 0x04
+#define MODULE_SCORECARD 0x05
+#define MODULE_HOLE_BUILDER 0x06
+#define MODULE_COMPUTER_GOLFER 0x07
+#define MODULE_SHOT_SIMULATION 0x08
+#define MODULE_UNK9 0x09
+#define MODULE_PLAY 0x0A
+#define MODULE_UNK11 0x0B
+#define MODULE_BOOT_LOGOS 0x0C
+#define MODULE_CONFIRM_WAIT 0x0D
+#define MODULE_UNK14 0x0E
+#define MODULE_UNK15 0x0F
+#define MODULE_UNK16 0x10
+#define MODULE_UNK17 0x11
+#define MODULE_UNK18 0x12
+#define MODULE_UNK19 0x13
+#define MODULE_PAUSE_MENU 0x14
+#define MODULE_COURSE_SELECT 0x15
+#define MODULE_SAVE_MENU 0x16
+#define MODULE_UNK23 0x17
+#define MODULE_UNK24 0x18
+#define MODULE_UNK25 0x19
+#define MODULE_CLUB_SLOTS 0x1A
+#define MODULE_TRANSMIT 0x1B
+#define MODULE_UNK28 0x1C
+#define MODULE_UNK29 0x1D
+#define MODULE_UNK30 0x1E
+#define MODULE_STAFF_ROLL 0x1F
+#define MODULE_UNK32 0x20
 
 typedef struct Overlay {
   /* 0x00 */ s8 isLoaded;

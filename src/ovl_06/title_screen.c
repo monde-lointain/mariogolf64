@@ -14,6 +14,7 @@
 #include "hole_display.h"
 #include "main.h"
 #include "math_util.h"
+#include "overlay_manager.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -323,8 +324,8 @@ void UpdateTitleScreen(void) {
           StartHudAnimation(HUD_ANIMATION_SPIRAL);
           g_Scene = SCENE_SWAPPING_MODULES;
           g_NextScene = 14;
-          g_SceneModuleToUnload = SCENE_MODULE_TITLE_SCREEN;
-          g_SceneModuleToLoad = SCENE_MODULE_MENU;
+          g_SceneModuleToUnload = MODULE_TITLE_SCREEN;
+          g_SceneModuleToLoad = MODULE_MENU;
           f_TitleFrame = 0;
           f_TitleStage = TITLE_SWAPPING_MODULES;
           PlaySound(0x5D, 0xF, 0x7F);
@@ -339,8 +340,8 @@ void UpdateTitleScreen(void) {
       if (HasScreenFadeEnded()) {
         g_Scene = SCENE_SWAPPING_MODULES;
         g_NextScene = 27;
-        g_SceneModuleToUnload = SCENE_MODULE_TITLE_SCREEN;
-        g_SceneModuleToLoad = SCENE_MODULE_BOOT_LOGOS;
+        g_SceneModuleToUnload = MODULE_TITLE_SCREEN;
+        g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
         f_TitleFrame = 0;
       }
 

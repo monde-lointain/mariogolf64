@@ -13,6 +13,7 @@
 #include "host_file.h"
 #include "libc.h"
 #include "math_util.h"
+#include "overlay_manager.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -1337,9 +1338,9 @@ void UpdateTransmitMenu(void) {
       if (GetWipeProgress() == 0) {
         StartWipe(WIPE_OPENING);
         g_Scene = SCENE_SWAPPING_MODULES;
-        g_SceneModuleToUnload = SCENE_MODULE_TRANSMIT;
+        g_SceneModuleToUnload = MODULE_TRANSMIT;
         g_NextScene = SCENE_TITLE_SCREEN;
-        g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
+        g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
       }
 
       break;
@@ -1348,9 +1349,9 @@ void UpdateTransmitMenu(void) {
         StartWipe(WIPE_OPENING);
         func_8005DC50();
         g_Scene = SCENE_SWAPPING_MODULES;
-        g_SceneModuleToUnload = SCENE_MODULE_TRANSMIT;
+        g_SceneModuleToUnload = MODULE_TRANSMIT;
         g_NextScene = SCENE_MENU;
-        g_SceneModuleToLoad = SCENE_MODULE_MENU;
+        g_SceneModuleToLoad = MODULE_MENU;
       }
 
       break;

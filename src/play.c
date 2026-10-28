@@ -790,14 +790,6 @@ void func_8005DDAC(void);
 #define UNLOCK_NOTICE_METAL_MARIO 2
 #define UNLOCK_NOTICE_RING_SHOT_COURSE_BASE 2 /* Plus the course's index */
 
-#define MODULE_UNK6 6
-#define MODULE_UNK8 8
-#define MODULE_UNK10 10
-#define MODULE_UNK21 21
-#define MODULE_UNK26 26
-#define SUB_MODULE_SCORECARD 0x05
-#define SUB_MODULE_UNK22 0x16
-
 #define WIPE_CLOSED_PROGRESS 0
 #define WIPE_OPEN_PROGRESS 20
 #define ROUND_FRAMEBUFFER_COUNT 3
@@ -945,7 +937,7 @@ void UpdatePlay(void) {
         } else {
           g_PlayStateFrameCount++;
           if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-            if (g_IsModuleAlive[MODULE_UNK21] &&
+            if (g_IsModuleAlive[MODULE_COURSE_SELECT] &&
                 func_80241FF0(g_MergedController.pressedButtons,
                     g_MergedController.repeatedButtons) == HOLE_MENU_RELOAD) {
               LoadWipeShape(g_GameState.courseIndex);
@@ -958,7 +950,7 @@ void UpdatePlay(void) {
               repeat = TRUE;
             }
           } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
-              !g_GameState.unk31 && g_IsModuleAlive[MODULE_UNK21]) {
+              !g_GameState.unk31 && g_IsModuleAlive[MODULE_COURSE_SELECT]) {
             result = func_80241DF0(g_MergedController.pressedButtons,
                 g_MergedController.repeatedButtons);
             if (result == HOLE_MENU_RELOAD) {
@@ -976,7 +968,7 @@ void UpdatePlay(void) {
         g_IsPlayStateBackedUp = 0;
         nuGfxDisplayOn();
         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-          if (g_IsModuleAlive[MODULE_UNK21]) {
+          if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
             result = func_80241FF0(g_MergedController.pressedButtons,
                 g_MergedController.repeatedButtons);
             switch (result) {
@@ -1006,7 +998,7 @@ void UpdatePlay(void) {
           }
         } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
             !g_GameState.unk31) {
-          if (g_IsModuleAlive[MODULE_UNK21]) {
+          if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
             result = func_80241DF0(g_MergedController.pressedButtons,
                 g_MergedController.repeatedButtons);
             switch (result) {
@@ -1036,7 +1028,7 @@ void UpdatePlay(void) {
             }
           }
         } else if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-          if (g_IsModuleAlive[MODULE_UNK26] &&
+          if (g_IsModuleAlive[MODULE_CLUB_SLOTS] &&
               (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
                   IS_A_PRESSED())) {
             if (!g_GameState.unk30) {
@@ -1191,7 +1183,7 @@ void UpdatePlay(void) {
         g_PlayStateFrameCount++;
         break;
       case GAME_STATE_UNK6:
-        UnloadOverlay(GetOverlayOfModule(MODULE_UNK6));
+        UnloadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
       case GAME_STATE_UNK11:
         if (!g_IsPlayStateBackedUp) {
           D_800FBDB8 = 0;
@@ -1208,8 +1200,7 @@ void UpdatePlay(void) {
         g_GameState.unk30 = 0;
         g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
         g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
-        if (g_IsModuleAlive[MODULE_UNK10] ||
-            ReportModuleNotAlive(MODULE_UNK10)) {
+        if (g_IsModuleAlive[MODULE_PLAY] || ReportModuleNotAlive(MODULE_PLAY)) {
           UpdateTurns();
         }
 
@@ -1225,7 +1216,7 @@ void UpdatePlay(void) {
         }
 
         if (g_GameState.unk0 == GAME_STATE_HOLE_END) {
-          UnloadOverlay(GetOverlayOfModule(MODULE_UNK8));
+          UnloadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
           SetNextTeeOrder();
           UpdateContest(TRUE);
           if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
@@ -1318,7 +1309,7 @@ void UpdatePlay(void) {
                 } else {
                   g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                   g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                  g_PendingSubModuleId = SUB_MODULE_UNK22;
+                  g_PendingSubModuleId = MODULE_SAVE_MENU;
                   goto DIM_BACKDROP;
                 }
 
@@ -1336,7 +1327,7 @@ DIM_BACKDROP:
               }
             } else if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              g_PendingSubModuleId = MODULE_SCORECARD;
               g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
               g_HoleResultsKind = HOLE_RESULTS_TOURNAMENT;
@@ -1358,7 +1349,7 @@ DIM_BACKDROP:
             } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
               g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              g_PendingSubModuleId = MODULE_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
               g_HoleResultsKind = HOLE_RESULTS_SPEED_GOLF;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
@@ -1379,7 +1370,7 @@ DIM_BACKDROP:
                 g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
               g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              g_PendingSubModuleId = MODULE_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
               g_HoleResultsKind = HOLE_RESULTS_MATCH;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
@@ -1390,7 +1381,7 @@ DIM_BACKDROP:
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
               g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              g_PendingSubModuleId = MODULE_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
               g_HoleResultsKind = HOLE_RESULTS_SKINS;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
@@ -1400,7 +1391,7 @@ DIM_BACKDROP:
             } else {
               g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              g_PendingSubModuleId = MODULE_SCORECARD;
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
               g_HoleResultsKind = HOLE_RESULTS_STROKE;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE)) {
@@ -1440,7 +1431,7 @@ DIM_BACKDROP:
               } else {
                 g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                 g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                g_PendingSubModuleId = SUB_MODULE_UNK22;
+                g_PendingSubModuleId = MODULE_SAVE_MENU;
               }
             }
 
@@ -1453,7 +1444,7 @@ DIM_BACKDROP:
               } else {
                 g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                 g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                g_PendingSubModuleId = SUB_MODULE_UNK22;
+                g_PendingSubModuleId = MODULE_SAVE_MENU;
               }
             }
 
@@ -1644,8 +1635,8 @@ DIM_BACKDROP:
               func_80216B74(TRUE);
               g_Scene = SCENE_SWAPPING_MODULES;
               g_NextScene = SCENE_STAFF_ROLL;
-              g_SceneModuleToUnload = SCENE_MODULE_PLAY;
-              g_SceneModuleToLoad = SCENE_MODULE_STAFF_ROLL;
+              g_SceneModuleToUnload = MODULE_PLAY;
+              g_SceneModuleToLoad = MODULE_STAFF_ROLL;
               UnloadSubModule();
               func_8005DC50();
               StopLoaderThread();
@@ -1668,8 +1659,8 @@ DIM_BACKDROP:
                 func_80216B74(TRUE);
                 g_Scene = SCENE_SWAPPING_MODULES;
                 g_NextScene = SCENE_MENU;
-                g_SceneModuleToUnload = SCENE_MODULE_PLAY;
-                g_SceneModuleToLoad = SCENE_MODULE_MENU;
+                g_SceneModuleToUnload = MODULE_PLAY;
+                g_SceneModuleToLoad = MODULE_MENU;
                 UnloadSubModule();
                 switch (g_PlayExit) {
                   case PLAY_EXIT_QUIT:

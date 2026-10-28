@@ -23,6 +23,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "overlay_manager.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -2540,8 +2541,8 @@ void UpdateOpening(void) {
           g_TitleScreenEntrance = TITLE_ENTRANCE_FROM_OPENING;
           g_Scene = SCENE_SWAPPING_MODULES;
           g_NextScene = SCENE_TITLE_SCREEN;
-          g_SceneModuleToUnload = SCENE_MODULE_OPENING;
-          g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
+          g_SceneModuleToUnload = MODULE_OPENING;
+          g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
           ClearDebugText();
           StopWipe();
           FreeAllCharacterSlots();

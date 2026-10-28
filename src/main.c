@@ -46,10 +46,6 @@
 /* The longest build date that fits g_RomBuildDate with its terminator */
 #define BUILD_DATE_LENGTH_MAX 63
 
-/* Modules whose overlays are loaded at boot and stay loaded */
-#define RESIDENT_MODULE_ID 0x0C
-#define STARTUP_MODULE_ID 0x06
-
 /* Character slots that get a buffer in g_WorkArea */
 #define CHARACTER_SLOT_PARTNER 1
 #define CHARACTER_SLOT_CADDIE 2
@@ -268,8 +264,8 @@ void mainproc(void* arg) {
   InitAssetFiles();
   ClearAllGameFlags();
   InitOverlayManager();
-  LoadOverlay(GetOverlayOfModule(RESIDENT_MODULE_ID));
-  LoadOverlay(GetOverlayOfModule(STARTUP_MODULE_ID));
+  LoadOverlay(GetOverlayOfModule(MODULE_BOOT_LOGOS));
+  LoadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
   osSyncPrintf("S-InitSRAM\n");
   InitSaveData();
   osSyncPrintf("E-InitSRAM\n");

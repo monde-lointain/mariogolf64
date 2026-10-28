@@ -91,8 +91,6 @@
 #define ASSET_PAR_FOUR_IMAGE 0x566
 #define ASSET_PAR_FIVE_IMAGE 0x567
 
-#define MODULE_UNK25 25
-
 /* The first asset of each course record's hole images, one per hole */
 extern u16 f_HoleImageAssets[COURSE_RECORD_COUNT];
 
@@ -385,7 +383,6 @@ extern s32 f_LieImageAsset;
  * The wind indicator is a model in module 9, lit by f_WindArrowLights. It
  * sits in front of the camera, tilted to its pitch and turned to the wind.
  */
-#define MODULE_UNK9 9
 #define WIND_INDICATOR_DEPTH -300.0f
 #define WIND_INDICATOR_TILT 0.3f
 #define WIND_INDICATOR_SCALE -0.07f
@@ -468,8 +465,6 @@ void func_80242424(Gfx** displayListHead);
 void func_80242D40(Gfx** displayListHead);
 void func_802427E8(Gfx** displayListHead);
 
-#define MODULE_UNK21 21
-#define MODULE_UNK26 26
 #define STOPWATCH_X 168
 #define STOPWATCH_Y 176
 #define STOPWATCH_ENV_COLOR 0xFFFF0000
@@ -2278,7 +2273,6 @@ void AdjustHudOffset(void) {
   }
 }
 
-#define MODULE_PAUSE_MENU 20
 /* Where the shot panel's wind indicator sits, unless the shot is on the green,
  * where the wind doesn't count */
 #define SHOT_PANEL_WIND_INDICATOR_X 100.0f
@@ -3426,7 +3420,6 @@ extern u16 f_WhiteDistancePalette[];
 #define MIRROR_TEXTURE_SIZE_LOG2 5
 #define MIRROR_TEXTURE_X 32
 #define MIRROR_TEXTURE_Y 122
-#define MODULE_UNK18 18
 /* A debugging aid that shows the texture the mirror effects draw */
 #define GAME_FLAG_SHOW_MIRROR_TEXTURE 0x70
 /* The shadowed font draws "ft" for this character */
@@ -4091,7 +4084,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
 
   if (g_RoundHud.isHoleIntroTextShown == 1) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      if (g_IsModuleAlive[MODULE_UNK21]) {
+      if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
         func_802427E8(&gfx);
       }
     } else {
@@ -4173,12 +4166,12 @@ void DrawHoleIntroText(Gfx** displayListHead) {
 
   if (g_RoundHud.isHoleIntroTextShown == 1) {
     if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-      if (g_IsModuleAlive[MODULE_UNK26] && func_80242418()) {
+      if (g_IsModuleAlive[MODULE_CLUB_SLOTS] && func_80242418()) {
         func_80242424(&gfx);
       }
     } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-      if (g_IsModuleAlive[MODULE_UNK21]) {
+      if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
         func_80242D40(&gfx);
       }
     } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&

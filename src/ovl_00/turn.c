@@ -256,8 +256,6 @@
 #define AIM_CAMERA_MIN_DISTANCE (-0xBB800)
 #define AIM_CAMERA_MAX_DISTANCE 0x8CA000
 #define AIM_VIEW_TOGGLE_COUNT 2
-/* Draws the shot preview in the RDP's time */
-#define MODULE_UNK10 10
 /* Half the putt preview line's width, in screen pixels */
 #define PUTT_PREVIEW_HALF_WIDTH 10.0f
 /* Hides the shot preview */
@@ -1927,7 +1925,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
     return;
   }
 
-  g_ModuleRdpRequestFrames[MODULE_UNK10] = g_FrameCount;
+  g_ModuleRdpRequestFrames[MODULE_PLAY] = g_FrameCount;
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);

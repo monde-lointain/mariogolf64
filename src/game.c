@@ -41,11 +41,6 @@
 #include "variables.h"
 #include "work_area.h"
 
-/* Sub-modules that RequestSubModule loads for some game modes */
-#define SUB_MODULE_DEFAULT 0x05
-#define SUB_MODULE_ALTERNATE 0x15
-#define SUB_MODULE_SPECIAL 0x1A
-
 /* Sounds that the inset view plays as it opens and closes */
 #define SOUND_INSET_VIEW_OPEN 0x64
 #define SOUND_INSET_VIEW_CLOSE 0x65
@@ -2518,13 +2513,13 @@ void RequestSubModule(void) {
   switch (g_GameState.gameMode) {
     case 3:
     case 9:
-      g_PendingSubModuleId = SUB_MODULE_ALTERNATE;
+      g_PendingSubModuleId = MODULE_COURSE_SELECT;
       break;
     case 11:
-      g_PendingSubModuleId = SUB_MODULE_SPECIAL;
+      g_PendingSubModuleId = MODULE_CLUB_SLOTS;
       break;
     default:
-      g_PendingSubModuleId = SUB_MODULE_DEFAULT;
+      g_PendingSubModuleId = MODULE_SCORECARD;
       break;
   }
 }

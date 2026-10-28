@@ -14,6 +14,7 @@
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "main.h"
+#include "overlay_manager.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -143,23 +144,23 @@ void LeaveBootLogos(void) {
   if (HasGameBoyPak() && IsBootTransmitPending()) {
     ClearBootTransmitPending();
     g_Scene = SCENE_SWAPPING_MODULES;
-    g_SceneModuleToUnload = SCENE_MODULE_BOOT_LOGOS;
+    g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
     g_NextScene = 29;
-    g_SceneModuleToLoad = SCENE_MODULE_TRANSMIT;
+    g_SceneModuleToLoad = MODULE_TRANSMIT;
     ResetGameBoyTransfer(0);
     StartWipe(WIPE_OPENING);
   } else if (f_HasResetGameState && g_HasLoaderFinished == 1 &&
       g_ControllerCount != 0) {
     g_Scene = SCENE_SWAPPING_MODULES;
-    g_SceneModuleToUnload = SCENE_MODULE_BOOT_LOGOS;
+    g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
     g_NextScene = SCENE_OPENING;
-    g_SceneModuleToLoad = SCENE_MODULE_OPENING;
+    g_SceneModuleToLoad = MODULE_OPENING;
   } else {
     StopLoaderThread();
     g_Scene = SCENE_SWAPPING_MODULES;
-    g_SceneModuleToUnload = SCENE_MODULE_BOOT_LOGOS;
+    g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
     g_NextScene = 21;
-    g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
+    g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
   }
 
   /* The position goes unused with NO_MESSAGE */

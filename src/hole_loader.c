@@ -74,9 +74,6 @@
 
 #define LOADER_THREAD_ID 10
 #define LOADER_THREAD_PRIORITY 20
-/* StartLoaderThread unloads one module and loads the other */
-#define LOADER_REPLACED_MODULE_ID 8
-#define LOADER_MODULE_ID 6
 
 /* The Koopa Park hole that sets GAME_FLAG_UNK69 */
 #define KOOPA_PARK_UNK69_HOLE_INDEX 7
@@ -1032,8 +1029,8 @@ void ResetLoaderThread(void) {
 }
 
 void StartLoaderThread(void) {
-  UnloadOverlay(GetOverlayOfModule(LOADER_REPLACED_MODULE_ID));
-  LoadOverlay(GetOverlayOfModule(LOADER_MODULE_ID));
+  UnloadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
+  LoadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
   osCreateThread(&f_LoaderThread, LOADER_THREAD_ID,
       (void (*)(void*))RunLoaderThread, NULL, D_8025D350,
       LOADER_THREAD_PRIORITY);

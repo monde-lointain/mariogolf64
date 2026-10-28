@@ -16,6 +16,7 @@
 #include "heap.h"
 #include "hole_display.h"
 #include "main.h"
+#include "overlay_manager.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -340,9 +341,6 @@ extern f32 f_PauseCursorAngle;
 #define PROMPT_UNK7 7
 #define PROMPT_UNK8 8
 
-#define PAUSE_SUB_MODULE_SCORECARD 0x05
-#define PAUSE_SUB_MODULE_UNK16 0x16
-
 #define SOUND_MENU_MOVE 0x5C
 #define SOUND_RING_SHOT_RETRY 0x8E
 #define RING_SHOT_RETRY_SOUND_CHANNEL 3
@@ -428,14 +426,14 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK8;
         g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-        g_PendingSubModuleId = PAUSE_SUB_MODULE_UNK16;
+        g_PendingSubModuleId = MODULE_SAVE_MENU;
         break;
       case PAUSE_ACTION_UNK13:
         PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK9;
         g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-        g_PendingSubModuleId = PAUSE_SUB_MODULE_UNK16;
+        g_PendingSubModuleId = MODULE_SAVE_MENU;
         break;
       case PAUSE_ACTION_UNKD678:
         if (g_IsDebugEnabled || f_PauseMenuUnkD678) {
@@ -450,7 +448,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_SCORECARD;
         g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-        g_PendingSubModuleId = PAUSE_SUB_MODULE_SCORECARD;
+        g_PendingSubModuleId = MODULE_SCORECARD;
         break;
       case PAUSE_ACTION_FREE_LOOK:
         RequestPauseMenu(0, -1);
