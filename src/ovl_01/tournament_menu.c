@@ -225,8 +225,9 @@ s32 IsNintendoClubTournament(void);
 s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentModeMessage(void);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32);
-void func_8022747C_ovl_01(
-    Gfx** displayListHead, s32, s32, s32, s32, s32, s32, s32);
+void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
+    s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton,
+    s32 windowStyle);
 void func_802296C4_ovl_01(
     Gfx** displayListHead, s32 centerX, s32 top, s32 number);
 /*
@@ -617,7 +618,335 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226A58_ovl_01);
 #endif
 
+/*
+ * func_8022747C adds to that window the Nintendo badge of D_80230E78 near its
+ * top, the course image of D_80230E7C at its lower left and the picture of
+ * g_MenuWindowImage, coloured by the palette in D_80230E84, at its lower right
+ */
+#define NINTENDO_BADGE_WIDTH 144
+#define NINTENDO_BADGE_STRIP_HEIGHT 10
+#define NINTENDO_BADGE_STRIP_COUNT 2
+#define NINTENDO_BADGE_OFFSET 26.0f
+#define COURSE_IMAGE_WIDTH 64
+#define COURSE_IMAGE_STRIP_HEIGHT 32
+#define COURSE_IMAGE_STRIP_COUNT 2
+#define WINDOW_PICTURE_SIZE 32
+/* How far the course image and picture sit in from the window's sides and up
+ * from its bottom */
+#define WINDOW_IMAGE_OFFSET_X 40.0f
+#define WINDOW_IMAGE_OFFSET_Y 50.0f
+
+/*
+ * Draws the club tournament's details window: the cloud window, its Yes and No
+ * buttons with the chosen one pulsing, the Nintendo badge for a Nintendo
+ * tournament, the course image, the picture and the OK text once the window is
+ * open. The window grows and shrinks as func_80226A58's does.
+ */
+/*
+ * Doesn't match: as in func_80226A58, GCC hoists the window's edges out of the
+ * strip loop where the original works them out in the loop from centerX on the
+ * stack, and it schedules the course image's position differently
+ */
+#ifdef NON_MATCHING
+void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
+    s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton,
+    s32 windowStyle) {
+  Gfx* gfx = *displayListHead;
+  f32 windowWidth;
+  f32 windowHalfHeight;
+  f32 buttonWidth;
+  f32 buttonHeight;
+  f32 badgeWidth;
+  f32 badgeStripHeight;
+  f32 courseWidth;
+  f32 courseStripHeight;
+  f32 pictureWidth;
+  f32 pictureHeight;
+  s32 halfWidth;
+  s32 halfHeight;
+  s32 buttonHalfWidth;
+  s32 buttonHalfHeight;
+  s32 badgeHalfWidth;
+  s32 badgeStripRows;
+  s32 courseHalfWidth;
+  s32 courseStripRows;
+  s32 pictureHalfWidth;
+  s32 pictureHalfHeight;
+  s32 windowTop;
+  s16 index;
+  s32 buttonX;
+  s32 buttonY;
+  s32 pulse;
+  s32 growth;
+  s32 badgeTop;
+  s32 courseLeft;
+  s32 courseTop;
+  s32 pictureX;
+  s32 pictureY;
+
+  func_8005AF74();
+  switch (g_MenuWindowState) {
+    case MENU_WINDOW_OPENING:
+      g_MenuWindowScaleX += MENU_WINDOW_SCALE_STEP;
+      g_MenuWindowScaleY += MENU_WINDOW_SCALE_STEP;
+      if (g_MenuWindowScaleX > 1.0f) {
+        g_MenuWindowScaleX = 1.0f;
+      }
+
+      if (g_MenuWindowScaleY > 1.0f) {
+        g_MenuWindowScaleY = 1.0f;
+      }
+
+      windowWidth = width * g_MenuWindowScaleX;
+      windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
+      buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
+      buttonHeight = g_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
+      badgeWidth = g_MenuWindowScaleX * NINTENDO_BADGE_WIDTH;
+      badgeStripHeight = g_MenuWindowScaleY * NINTENDO_BADGE_STRIP_HEIGHT;
+      courseWidth = g_MenuWindowScaleX * COURSE_IMAGE_WIDTH;
+      courseStripHeight = g_MenuWindowScaleY * COURSE_IMAGE_STRIP_HEIGHT;
+      pictureWidth = g_MenuWindowScaleX * WINDOW_PICTURE_SIZE;
+      pictureHeight = g_MenuWindowScaleY * WINDOW_PICTURE_SIZE;
+      if (g_MenuWindowScaleX == 1.0f && g_MenuWindowScaleY == 1.0f) {
+        g_MenuWindowState = MENU_WINDOW_OPEN;
+      }
+
+      break;
+    case MENU_WINDOW_OPEN:
+      windowWidth = width;
+      windowHalfHeight = height / 2;
+      buttonWidth = YES_NO_BUTTON_SHOWN_WIDTH;
+      buttonHeight = YES_NO_BUTTON_SHOWN_HEIGHT;
+      badgeWidth = NINTENDO_BADGE_WIDTH;
+      badgeStripHeight = NINTENDO_BADGE_STRIP_HEIGHT;
+      courseWidth = COURSE_IMAGE_WIDTH;
+      courseStripHeight = COURSE_IMAGE_STRIP_HEIGHT;
+      pictureWidth = WINDOW_PICTURE_SIZE;
+      pictureHeight = WINDOW_PICTURE_SIZE;
+      break;
+    case MENU_WINDOW_CLOSING:
+      g_MenuWindowScaleX -= MENU_WINDOW_SCALE_STEP;
+      g_MenuWindowScaleY -= MENU_WINDOW_SCALE_STEP;
+      if (g_MenuWindowScaleX < MENU_WINDOW_SCALE_STEP) {
+        g_MenuWindowScaleX = MENU_WINDOW_CLOSED_SCALE;
+      }
+
+      if (g_MenuWindowScaleY < MENU_WINDOW_SCALE_STEP) {
+        g_MenuWindowScaleY = MENU_WINDOW_CLOSED_SCALE;
+      }
+
+      windowWidth = width * g_MenuWindowScaleX;
+      windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
+      buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
+      buttonHeight = g_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
+      badgeWidth = g_MenuWindowScaleX * NINTENDO_BADGE_WIDTH;
+      badgeStripHeight = g_MenuWindowScaleY * NINTENDO_BADGE_STRIP_HEIGHT;
+      courseWidth = g_MenuWindowScaleX * COURSE_IMAGE_WIDTH;
+      courseStripHeight = g_MenuWindowScaleY * COURSE_IMAGE_STRIP_HEIGHT;
+      pictureWidth = g_MenuWindowScaleX * WINDOW_PICTURE_SIZE;
+      pictureHeight = g_MenuWindowScaleY * WINDOW_PICTURE_SIZE;
+      if (g_MenuWindowScaleX <= MENU_WINDOW_CLOSED_SCALE &&
+          g_MenuWindowScaleY <= MENU_WINDOW_CLOSED_SCALE) {
+        g_MenuWindowState = MENU_WINDOW_CLOSED;
+      }
+
+      break;
+    default:
+      return;
+  }
+
+  halfWidth = (s32)windowWidth / 2;
+  halfHeight = windowHalfHeight;
+  buttonHalfWidth = (s32)buttonWidth / 2;
+  buttonHalfHeight = (s32)buttonHeight / 2;
+  badgeHalfWidth = (s32)badgeWidth / 2;
+  badgeStripRows = badgeStripHeight;
+  courseHalfWidth = (s32)courseWidth / 2;
+  courseStripRows = courseStripHeight;
+  pictureHalfWidth = (s32)pictureWidth / 2;
+  pictureHalfHeight = (s32)pictureHeight / 2;
+
+  halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
+  halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
+  buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
+  buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
+  badgeHalfWidth = (badgeHalfWidth <= 0) ? 1 : badgeHalfWidth;
+  badgeStripRows = (badgeStripRows <= 0) ? 1 : badgeStripRows;
+  courseHalfWidth = (courseHalfWidth <= 0) ? 1 : courseHalfWidth;
+  courseStripRows = (courseStripRows <= 0) ? 1 : courseStripRows;
+  pictureHalfWidth = (pictureHalfWidth <= 0) ? 1 : pictureHalfWidth;
+  pictureHalfHeight = (pictureHalfHeight <= 0) ? 1 : pictureHalfHeight;
+
+  windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;
+  windowHalfHeight = (windowHalfHeight <= 0.0f) ? 1.0f : windowHalfHeight;
+  buttonWidth = (buttonWidth <= 0.0f) ? 1.0f : buttonWidth;
+  buttonHeight = (buttonHeight <= 0.0f) ? 1.0f : buttonHeight;
+  badgeWidth = (badgeWidth <= 0.0f) ? 1.0f : badgeWidth;
+  badgeStripHeight = (badgeStripHeight <= 0.0f) ? 1.0f : badgeStripHeight;
+  courseWidth = (courseWidth <= 0.0f) ? 1.0f : courseWidth;
+  courseStripHeight = (courseStripHeight <= 0.0f) ? 1.0f : courseStripHeight;
+  pictureWidth = (pictureWidth <= 0.0f) ? 1.0f : pictureWidth;
+  pictureHeight = (pictureHeight <= 0.0f) ? 1.0f : pictureHeight;
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetEnvColor(gfx++, 191, 191, 191, 255);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+  gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+  for (index = 0, windowTop = centerY - halfHeight;
+      index != MENU_WINDOW_STRIP_COUNT; index++) {
+    LoadNibbleTextureBlock(&gfx,
+        (u8*)D_80230E70_ovl_01 + IMAGE_HEADER_SIZE +
+            (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
+        G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
+        0, 0, 0, 0);
+    DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
+        (windowTop + (index * halfHeight)) << 2, (centerX + halfWidth) << 2,
+        (windowTop + (index * halfHeight) + halfHeight) << 2, G_TX_RENDERTILE,
+        0, 0, (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
+        (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
+    gDPPipeSync(gfx++);
+  }
+
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  LoadLargePalette(&gfx, (u8*)D_80230E74_ovl_01 + IMAGE_HEADER_SIZE);
+  for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
+    LoadTextureBlock(&gfx,
+        (u8*)D_80230E74_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
+        G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
+        0, 0, 0, 0, 0, 0);
+    if (index == 0) {
+      buttonX = centerX - (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
+    } else {
+      buttonX = centerX + (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
+    }
+
+    buttonY = centerY + windowHalfHeight -
+        (s32)(g_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
+    growth = 0;
+    if (index == chosenButton) {
+      pulse = D_80230E9C_ovl_01;
+      growth = pulse / 2;
+    } else {
+      pulse = 0;
+    }
+
+    DrawTextureRect(&gfx, (buttonX - buttonHalfWidth - growth) << 2,
+        (buttonY - buttonHalfHeight - growth) << 2,
+        (buttonX + buttonHalfWidth + growth) << 2,
+        (buttonY + buttonHalfHeight + growth) << 2, G_TX_RENDERTILE, 0, 0,
+        (YES_NO_BUTTON_WIDTH << 10) / (s32)(buttonWidth + pulse),
+        (YES_NO_BUTTON_HEIGHT << 10) / (s32)(buttonHeight + pulse));
+    gDPPipeSync(gfx++);
+  }
+
+  if (D_80230EA0_ovl_01 == YES_NO_PULSE_GROWING) {
+    D_80230E9C_ovl_01 += YES_NO_PULSE_STEP;
+  }
+
+  if (D_80230EA0_ovl_01 == YES_NO_PULSE_SHRINKING) {
+    D_80230E9C_ovl_01 -= YES_NO_PULSE_STEP;
+  }
+
+  if (D_80230E9C_ovl_01 == YES_NO_PULSE_LIMIT) {
+    D_80230EA0_ovl_01 = YES_NO_PULSE_SHRINKING;
+  }
+
+  if (D_80230E9C_ovl_01 == 0) {
+    D_80230EA0_ovl_01 = YES_NO_PULSE_GROWING;
+  }
+
+  if (windowStyle == CLUB_WINDOW_STYLE_NINTENDO ||
+      windowStyle == (CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO)) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadLargePalette(&gfx, (u8*)D_80230E78_ovl_01 + IMAGE_HEADER_SIZE);
+    badgeTop = (s32)(centerY - windowHalfHeight +
+                   (s32)(g_MenuWindowScaleY * NINTENDO_BADGE_OFFSET)) -
+        badgeStripRows;
+    for (index = 0; index != NINTENDO_BADGE_STRIP_COUNT; index++) {
+      LoadTextureBlock(&gfx,
+          (u8*)D_80230E78_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+              (index * NINTENDO_BADGE_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
+          G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_WIDTH,
+          NINTENDO_BADGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      gDPPipeSync(gfx++);
+      DrawTextureRect(&gfx, (centerX - badgeHalfWidth) << 2,
+          (badgeTop + (index * badgeStripRows)) << 2,
+          (centerX + badgeHalfWidth) << 2,
+          (badgeTop + (index * badgeStripRows) + badgeStripRows) << 2,
+          G_TX_RENDERTILE, 0, 0, (NINTENDO_BADGE_WIDTH << 10) / (s32)badgeWidth,
+          (NINTENDO_BADGE_STRIP_HEIGHT << 10) / (s32)badgeStripHeight);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  courseTop = (s32)(centerY + windowHalfHeight -
+                  (s32)(g_MenuWindowScaleY * WINDOW_IMAGE_OFFSET_Y)) -
+      courseStripRows;
+  courseLeft = centerX - (windowWidth * 0.5f) +
+      (s32)(g_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
+  LoadLargePalette(&gfx, (u8*)D_80230E7C_ovl_01 + IMAGE_HEADER_SIZE);
+  for (index = 0; index != COURSE_IMAGE_STRIP_COUNT; index++) {
+    LoadTextureBlock(&gfx,
+        (u8*)D_80230E7C_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (index * COURSE_IMAGE_WIDTH * COURSE_IMAGE_STRIP_HEIGHT),
+        G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT,
+        0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, (courseLeft - courseHalfWidth) << 2,
+        (courseTop + (index * courseStripRows)) << 2,
+        (courseLeft + courseHalfWidth) << 2,
+        (courseTop + (index * courseStripRows) + courseStripRows) << 2,
+        G_TX_RENDERTILE, 0, 0, (COURSE_IMAGE_WIDTH << 10) / (s32)courseWidth,
+        (COURSE_IMAGE_STRIP_HEIGHT << 10) / (s32)courseStripHeight);
+    gDPPipeSync(gfx++);
+  }
+
+  pictureX = centerX + (windowWidth * 0.5f) -
+      (s32)(g_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
+  /* The original adds the scale here where it multiplies everywhere else */
+  pictureY = centerY + windowHalfHeight -
+      (s32)(g_MenuWindowScaleY + WINDOW_IMAGE_OFFSET_Y);
+
+  LoadLargePalette(&gfx, D_80230E84_ovl_01);
+  LoadTextureBlock(&gfx, g_MenuWindowImage, G_IM_FMT_CI, G_IM_SIZ_8b,
+      WINDOW_PICTURE_SIZE, WINDOW_PICTURE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+  DrawTextureRect(&gfx, (pictureX - pictureHalfWidth) << 2,
+      (pictureY - pictureHalfHeight) << 2, (pictureX + pictureHalfWidth) << 2,
+      (pictureY + pictureHalfHeight) << 2, G_TX_RENDERTILE, 0, 0,
+      (WINDOW_PICTURE_SIZE << 10) / (s32)pictureWidth,
+      (WINDOW_PICTURE_SIZE << 10) / (s32)pictureHeight);
+  gDPPipeSync(gfx++);
+
+  if (IsMenuWindowOpen()) {
+    SetTextSlot(centerX + OK_TEXT_OFFSET_X, buttonY - OK_TEXT_OFFSET_Y,
+        MESSAGE_OK, 1, OK_TEXT_SLOT, TEXT_FLAG_CENTERED, OK_TEXT_RED,
+        OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
+  }
+
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022747C_ovl_01);
+#endif
 
 /* Doesn't match: the original keeps the strip height constant in a saved
  * register instead of the step's numerator */
