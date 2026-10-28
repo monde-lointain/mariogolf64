@@ -204,9 +204,6 @@ static const char f_UnusedFloatFormat[] = "            %f";
 #define FLYOVER_INSET_CENTER_X 160
 #define FLYOVER_INSET_CENTER_Y 112
 #define FLYOVER_INSET_SIZE 128
-/* g_HoleFlyoverFrame's value once the flyover is over, while the screen fades
- * back */
-#define HOLE_FLYOVER_ENDED (-1)
 /* The text slots that the hole's introduction shows */
 #define INTRO_TEXT_SLOT_UNK0 0
 #define INTRO_TEXT_SLOT_UNK1 1
@@ -248,7 +245,6 @@ static const char f_UnusedFloatFormat[] = "            %f";
 #define FLYOVER_MAX_HALF_TURNS 2.0f
 #define FLYOVER_INSET_OPEN_FRAME 94
 #define FLYOVER_INSET_CLOSE_FRAME 162
-#define HOLE_FLYOVER_FRAME_COUNT 185
 /* How the flyover's distance from the cup, and height above it, follow the
  * hole's radius */
 #define FLYOVER_RADIUS_APPROACH 15.0f
