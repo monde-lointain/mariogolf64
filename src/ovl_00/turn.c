@@ -307,8 +307,8 @@ extern s8
     D_800C3068; /* Keeps the last heading for the next shot, in Training */
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
-extern s32 D_801B60A8; /* g_GameState.unk20, the current player, under a symbol
-                          of its own */
+/* g_GameState.currentPlayerIndex, under a symbol of its own */
+extern s32 D_801B60A8;
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
 extern s8 D_800C3098; /* Asks for the HUD to turn away when the next player is
                          picked */
@@ -2561,7 +2561,8 @@ void PlayWaitingPlayersCalls(void) {
       if ((g_Players[i].unkC == PLAYER_STATE_UNK11) |
           (g_Players[i].unkC == PLAYER_STATE_UNK14)) {
         controllerIndex = g_Players[i].controllerIndex;
-        if (controllerIndex == g_Players[g_GameState.unk20].controllerIndex) {
+        if (controllerIndex ==
+            g_Players[g_GameState.currentPlayerIndex].controllerIndex) {
           continue;
         }
 

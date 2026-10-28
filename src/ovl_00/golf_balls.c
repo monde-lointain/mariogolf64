@@ -73,7 +73,7 @@ typedef struct BallAfterimage {
   /* 0x10 */ s32 isInCup;
 } BallAfterimage; /* size = 0x14 */
 
-/* g_GameState.unk20, under a symbol of its own */
+/* g_GameState.currentPlayerIndex, under a symbol of its own */
 extern s32 D_801B60A8;
 
 extern GolfBall f_GolfBalls[GOLF_BALL_COUNT];
@@ -172,16 +172,22 @@ void ResetBallAfterimage(void) {
     f_BallAfterimages[i].isInCup = FALSE;
   }
 
-  f_BallAfterimages[0].position[0] = f_GolfBalls[g_GameState.unk20].position[0];
-  f_BallAfterimages[0].position[1] = f_GolfBalls[g_GameState.unk20].position[1];
-  f_BallAfterimages[0].position[2] = f_GolfBalls[g_GameState.unk20].position[2];
-  f_BallAfterimageOrigin[0] = f_GolfBalls[g_GameState.unk20].position[0];
-  f_BallAfterimageOrigin[1] = f_GolfBalls[g_GameState.unk20].position[1];
+  f_BallAfterimages[0].position[0] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[0];
+  f_BallAfterimages[0].position[1] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[1];
+  f_BallAfterimages[0].position[2] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[2];
+  f_BallAfterimageOrigin[0] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[0];
+  f_BallAfterimageOrigin[1] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[1];
   f_BallAfterimageHead = 0;
   f_IsBallAfterimageShown = FALSE;
   f_BallAfterimageFrameCount = 0;
   f_IsBallAfterimageZoomed = FALSE;
-  f_BallAfterimageOrigin[2] = f_GolfBalls[g_GameState.unk20].position[2];
+  f_BallAfterimageOrigin[2] =
+      f_GolfBalls[g_GameState.currentPlayerIndex].position[2];
 }
 
 void StartFastBallAfterimage(void) {

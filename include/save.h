@@ -149,7 +149,7 @@ typedef struct GameState {
   /* 0x14 */ s32 unk14;
   /* 0x18 */ s32 isSuddenDeath;
   /* 0x1C */ s32 unk1C;
-  /* 0x20 */ s32 unk20;
+  /* 0x20 */ s32 currentPlayerIndex;
   /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
   /* 0x28 */ s32
       stopwatchFrameCount; /* The time the stopwatch modes show, in frames */

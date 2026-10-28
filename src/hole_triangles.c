@@ -335,7 +335,7 @@ void DrawRings(
     }
 
     if (f_HoleTriangles[triangleIndex].kind == HOLE_TRIANGLE_KIND_RING) {
-      state = g_Players[g_GameState.unk20].ringStates[ringIndex];
+      state = g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex];
       if (state > RING_STATE_NONE) {
         if (state != RING_STATE_SHOWN) {
           if (state < RING_STATE_FADED) {
@@ -367,7 +367,8 @@ void DrawRings(
             alpha = 0;
           }
 
-          g_Players[g_GameState.unk20].ringStates[ringIndex] = state;
+          g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex] =
+              state;
           gDPPipeSync(gfx++);
           gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
         } else {
