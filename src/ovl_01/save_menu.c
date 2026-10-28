@@ -56,10 +56,6 @@ enum SaveMenuGame {
   SAVE_MENU_GAME_STROKE
 };
 
-extern s32 D_80230A90_ovl_01;
-extern s32 D_80230A94_ovl_01;
-extern s32 D_80230A98_ovl_01;
-
 /* The slots that the save menu steps through, which hold -1 when empty */
 #define SAVE_MENU_SLOT_COUNT 5
 
@@ -120,7 +116,6 @@ typedef struct {
 #define RING_SHOT_LAST_FIRST_CHARACTER 14
 
 extern void* D_801052C4[2];
-extern u8 D_80230B4E_ovl_01;
 extern void* D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
@@ -134,19 +129,7 @@ extern s32
     D_8023BFC0_ovl_01[MAX_PLAYER_COUNT]; /* Frames until each character fidgets,
                                             or -1 while it does */
 
-extern f32 D_80230D18_ovl_01[3];
-extern Vec3 D_80230D28_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
-extern s16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
-extern s16 D_80230B48_ovl_01;
-extern s16 D_80230B4A_ovl_01;
-extern u8 D_80230B4C_ovl_01;
-extern u8 D_80230B4D_ovl_01;
-extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
-extern s32 D_80230B88_ovl_01[SAVE_MENU_MODE_COUNT];
-extern SaveMenuModeImage D_80230B5C_ovl_01[];
-/* The mode icon of each save menu mode, mini golf last */
-extern s32 D_80230BB0_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern s8 D_8022F8C5_ovl_01;
@@ -172,6 +155,93 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
     s32 top, u8 showsCourseWord);
 void func_802213C8_ovl_01(
     Gfx** displayListHead, s32 imageIndex, s32 left, s32 top);
+
+static s32 D_80230A90_ovl_01 = 0;
+static s32 D_80230A94_ovl_01 = 0;
+static s32 D_80230A98_ovl_01 = 0;
+/* Read by no routine */
+static s32 D_80230A9C_ovl_01 = 0;
+/* The order that the Ring Shot records list the characters in */
+static u8 D_80230AA0_ovl_01[SAVE_UNK1344_ENTRY_COUNT] = {
+    0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
+/* Read by no routine */
+static s32 D_80230AB4_ovl_01[11] = {0x000000FF, 0x00FF00FF, 0x000000FF,
+    0x00FF00FF, 0x00000000, 0x000000FF, 0x000000FF, 0x000000FF, 0x00000000,
+    0x00FF00FF, 0x00FF0000};
+static f32 D_80230AE0_ovl_01 = 0.0f;
+/* Each open course count's icon positions, of which only being nonzero, for
+ * a shown icon, is read */
+static s16 D_80230AE4_ovl_01[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT] = {
+    {164, 0, 0, 0, 0, 0, 122}, {102, 144, 0, 0, 0, 0, 186},
+    {78, 120, 162, 0, 0, 0, 204}, {60, 102, 144, 186, 0, 0, 226},
+    {42, 84, 126, 168, 210, 0, 252}, {22, 60, 102, 144, 186, 228, 268}};
+/* Read by no routine */
+static s32 D_80230B38_ovl_01[2] = {0, 0};
+static s16 D_80230B40_ovl_01[MAX_PLAYER_COUNT] = {
+    NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER};
+static s16 D_80230B48_ovl_01 = 0;
+static s16 D_80230B4A_ovl_01 = MAX_PLAYER_COUNT;
+static u8 D_80230B4C_ovl_01 = 0;
+static u8 D_80230B4D_ovl_01 = 0;
+static u8 D_80230B4E_ovl_01 = 0;
+static s32 D_80230B50_ovl_01[SAVED_GAME_COUNT] = {-1, -1, -1};
+static SaveMenuModeImage D_80230B5C_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1] = {
+    {0, 0x0623}, {0, 0x0629}, {0, 0x0599}, {0, 0x05AF}, {0, 0x0631},
+    {0, 0x0665}, {0, 0x05B7}, {0, 0x05DD}, {0, 0x065E}, {0, 0x0599},
+    {0, 0x06FC}};
+/* The game mode of each save menu mode that has an image */
+static s32 D_80230B88_ovl_01[SAVE_MENU_MODE_COUNT] = {GAME_MODE_TOURNAMENT,
+    GAME_MODE_GET_CHARACTER, GAME_MODE_STROKE, GAME_MODE_SPEED_GOLF,
+    GAME_MODE_MATCH_GAME, GAME_MODE_CLUB_SLOTS, GAME_MODE_RING_SHOT,
+    GAME_MODE_TRAINING, GAME_MODE_SKINS_MATCH, GAME_MODE_UNK1};
+/* The mode icon of each save menu mode, mini golf last */
+static s32 D_80230BB0_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1] = {
+    MODE_ICON_TOURNAMENT, MODE_ICON_GET_CHARACTER, MODE_ICON_STROKE,
+    MODE_ICON_SPEED_GOLF, MODE_ICON_MATCH_GAME, MODE_ICON_CLUB_SLOTS,
+    MODE_ICON_RING_SHOT, MODE_ICON_TRAINING, MODE_ICON_SKINS_MATCH,
+    MODE_ICON_UNK9, MODE_ICON_MINI_GOLF};
+/* Read by no routine */
+static s32 D_80230BDC_ovl_01[4] = {0, 0, 0, 0};
+/* Read by no routine; the values of main_menu.c's D_8022F8F4 */
+static s32 D_80230BEC_ovl_01[18] = {
+    0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
+static f32 D_80230C34_ovl_01 = 0.0f;
+/* Read by no routine; the values of D_80230DE8 */
+static s32 D_80230C38_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
+    {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
+    {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
+/* Read by no routine; the values of main_menu.c's D_8022F9FC */
+static s32 D_80230CB8_ovl_01[11] = {
+    110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
+/* Read by no routine */
+static char D_80230CE4_ovl_01[] = "Hole";
+/* How far left of the label's place each row of the game modes' image is drawn
+ */
+static s32 D_80230CEC_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1] = {
+    85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
+static f32 D_80230D18_ovl_01[3] = {0.0f, 0.0f, 0.0f};
+/* Read by no routine */
+static s32 D_80230D24_ovl_01 = 0;
+static Vec3 D_80230D28_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+    {{-84.0f, -43.0f, -1000.0f}, {64.0f, 0.0f, -1000.0f},
+        {64.0f, 0.0f, -1000.0f}, {64.0f, 0.0f, -1000.0f}},
+    {{-106.0f, -32.0f, -1000.0f}, {106.0f, -32.0f, -1000.0f},
+        {-106.0f, -52.0f, -1000.0f}, {106.0f, -52.0f, -1000.0f}},
+    {{-106.0f, -52.0f, -1000.0f}, {-76.0f, -8.0f, -1700.0f},
+        {76.0f, -8.0f, -1700.0f}, {106.0f, -52.0f, -1000.0f}},
+    {{-106.0f, -52.0f, -1000.0f}, {-76.0f, -8.0f, -1700.0f},
+        {76.0f, -8.0f, -1700.0f}, {106.0f, -52.0f, -1000.0f}}};
+/* Where a saved game's screen puts each player's controller icon and label, by
+ * the player count */
+static s32 D_80230DE8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
+    {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
+    {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
+/* Read by no routine */
+static s32 D_80230E68_ovl_01[2] = {0, 0};
 
 static void* D_8023B670_ovl_01;
 static void* D_8023B674_ovl_01;
@@ -453,13 +523,6 @@ void func_8021F79C_ovl_01(void) {
 #define REPLAY_HUE_MIDDLE 127
 #define REPLAY_HUE_SWING 127.0f
 #define REPLAY_GLOW_DIVISOR 4
-
-/* The order that the Ring Shot records list the characters in */
-extern u8 D_80230AA0_ovl_01[SAVE_UNK1344_ENTRY_COUNT];
-/* Each open course count's icon positions, of which only being nonzero, for
- * a shown icon, is read */
-extern s16 D_80230AE4_ovl_01[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT];
-extern f32 D_80230AE0_ovl_01;
 
 /* Doesn't match: the original gives several values other saved registers,
  * and keeps memory on the stack */
@@ -1664,11 +1727,6 @@ const char D_80231A3C_ovl_01[] = "%s";
 #define EMPTY_GAME_TEXT_Y 186
 #define MESSAGE_EMPTY_SAVED_GAME 0x26
 
-extern f32 D_80230C34_ovl_01;
-/* How far left of the label's place each row of the game modes' image is drawn
- */
-extern s32 D_80230CEC_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
-
 void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
 void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
 void func_80224AFC_ovl_01(
@@ -2231,10 +2289,6 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225358_ovl_01);
 #endif
-
-/* Where a saved game's screen puts each player's controller icon and label, by
- * the player count */
-extern s32 D_80230DE8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2];
 
 void func_80225960_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
