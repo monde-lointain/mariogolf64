@@ -139,9 +139,6 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define REPLAY_KIND_NONE 0
 #define REPLAY_KIND_RING_SHOT 2
 #define GAME_STATE_UNK13 13
-/* The character select row of the Game Boy characters, whose column is the
- * character's index */
-#define GAME_BOY_CHARACTER_ROW 2
 #define PLAYER_UNK28_TRAINING (-1)
 #define PLAYER_UNK28_NINE_HOLES 3
 #define PLAYER_UNK28_EIGHTEEN_HOLES 6

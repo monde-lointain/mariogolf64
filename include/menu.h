@@ -97,6 +97,9 @@ void LoadMenuWindowImage(s32 imageIndex);
 #define CHARACTER_GRID_COLUMN_COUNT 7
 /* The rows of the grid that hold the characters to choose from */
 #define CHARACTER_CHOICE_ROW_COUNT 2
+/* The character select row of the Game Boy characters, whose column is the
+ * character's index */
+#define GAME_BOY_CHARACTER_ROW 2
 
 /*
  * The first empty slot gets a negative mark: the id of the character that
