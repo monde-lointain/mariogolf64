@@ -158,15 +158,15 @@ extern u8 g_OptionBits;
 /* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
 extern u8 g_SoundOptionBits;
 /* Whether the options screen's erase window is up */
-extern u8 D_8022BE95_ovl_01;
+extern u8 g_IsEraseWindowUp;
 /* The sound test's sound, song and settings */
-extern s32 D_8022BEA0_ovl_01;
-extern s32 D_8022BEA4_ovl_01;
-extern s32 D_8022BEA8_ovl_01;
-extern s32 D_8022BEAC_ovl_01;
-extern f32 D_8022BEB0_ovl_01;
-extern f32 D_8022BEB4_ovl_01;
-extern s32 D_8022BEB8_ovl_01;
+extern s32 g_SoundTestSound;
+extern s32 g_SoundTestSong;
+extern s32 g_SoundTestSoundReverb;
+extern s32 g_SoundTestSongReverb;
+extern f32 g_SoundTestSoundFrequency;
+extern f32 g_SoundTestSongFrequency;
+extern s32 g_SoundTestSongTempo;
 extern s32 D_8022BE18_ovl_01;
 extern s32 D_801B609C;
 extern s32 D_800FBD40[];
@@ -1903,7 +1903,7 @@ void func_801FA20C_ovl_01(void) {
     return;
   }
 
-  if (D_8022BE95_ovl_01) {
+  if (g_IsEraseWindowUp) {
     windowState = IsMenuWindowClosed();
     for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
       SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -1914,7 +1914,7 @@ void func_801FA20C_ovl_01(void) {
     }
 
     if (windowState == TRUE) {
-      D_8022BE95_ovl_01 = FALSE;
+      g_IsEraseWindowUp = FALSE;
       for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
         SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       }
@@ -1966,7 +1966,7 @@ void func_801FA20C_ovl_01(void) {
       case OPTIONS_CHOICE_ERASE_SAVE_DATA:
         PlaySound(
             SOUND_ERASE_WINDOW_OPENED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        D_8022BE95_ovl_01 = TRUE;
+        g_IsEraseWindowUp = TRUE;
         memory->eraseChoice = ERASE_CHOICE_NO;
         ResetMenuWindow();
         break;
@@ -1974,10 +1974,10 @@ void func_801FA20C_ovl_01(void) {
       case OPTIONS_CHOICE_SONG_REVERB:
       case OPTIONS_CHOICE_SONG_FREQUENCY:
       case OPTIONS_CHOICE_SONG_TEMPO:
-        if (D_8022BEA4_ovl_01 == NO_SONG) {
+        if (g_SoundTestSong == NO_SONG) {
           RequestSongStop();
         } else {
-          PlaySong(D_8022BEA4_ovl_01, SONG_FLAG_RESTART);
+          PlaySong(g_SoundTestSong, SONG_FLAG_RESTART);
         }
 
         break;
@@ -1985,9 +1985,9 @@ void func_801FA20C_ovl_01(void) {
       case OPTIONS_CHOICE_SOUND_REVERB:
       case OPTIONS_CHOICE_SOUND_FREQUENCY:
         RequestSongStop();
-        PlaySound(D_8022BEA0_ovl_01, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        SetSoundReverb(MENU_SOUND_CHANNEL, D_8022BEA8_ovl_01);
-        SetSoundFrequencyOffset(MENU_SOUND_CHANNEL, D_8022BEB0_ovl_01);
+        PlaySound(g_SoundTestSound, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        SetSoundReverb(MENU_SOUND_CHANNEL, g_SoundTestSoundReverb);
+        SetSoundFrequencyOffset(MENU_SOUND_CHANNEL, g_SoundTestSoundFrequency);
         break;
     }
   } else if (g_MenuPressedButtons & B_BUTTON) {
@@ -2063,190 +2063,190 @@ void func_801FA20C_ovl_01(void) {
         break;
       case OPTIONS_CHOICE_SONG:
         if (g_MenuRepeatButtons & L_JPAD) {
-          D_8022BEA4_ovl_01--;
+          g_SoundTestSong--;
         }
 
         if (g_MenuRepeatButtons & R_JPAD) {
-          D_8022BEA4_ovl_01++;
+          g_SoundTestSong++;
         }
 
         if (g_MenuRepeatButtons & L_CBUTTONS) {
-          D_8022BEA4_ovl_01 -= SOUND_TEST_COARSE_STEP;
+          g_SoundTestSong -= SOUND_TEST_COARSE_STEP;
         }
 
         if (g_MenuRepeatButtons & R_CBUTTONS) {
-          D_8022BEA4_ovl_01 += SOUND_TEST_COARSE_STEP;
+          g_SoundTestSong += SOUND_TEST_COARSE_STEP;
         }
 
-        if (D_8022BEA4_ovl_01 < NO_SONG) {
-          D_8022BEA4_ovl_01 = NO_SONG;
+        if (g_SoundTestSong < NO_SONG) {
+          g_SoundTestSong = NO_SONG;
         }
 
         break;
       case OPTIONS_CHOICE_SONG_REVERB:
         if (g_MenuRepeatButtons & L_JPAD) {
-          D_8022BEAC_ovl_01--;
+          g_SoundTestSongReverb--;
         }
 
         if (g_MenuRepeatButtons & R_JPAD) {
-          D_8022BEAC_ovl_01++;
+          g_SoundTestSongReverb++;
         }
 
         if (g_MenuRepeatButtons & L_CBUTTONS) {
-          D_8022BEAC_ovl_01 -= SOUND_TEST_COARSE_STEP;
+          g_SoundTestSongReverb -= SOUND_TEST_COARSE_STEP;
         }
 
         if (g_MenuRepeatButtons & R_CBUTTONS) {
-          D_8022BEAC_ovl_01 += SOUND_TEST_COARSE_STEP;
+          g_SoundTestSongReverb += SOUND_TEST_COARSE_STEP;
         }
 
-        if (D_8022BEAC_ovl_01 < 0) {
-          D_8022BEAC_ovl_01 = 0;
+        if (g_SoundTestSongReverb < 0) {
+          g_SoundTestSongReverb = 0;
         }
 
-        if (D_8022BEAC_ovl_01 > SOUND_TEST_MAX_REVERB) {
-          D_8022BEAC_ovl_01 = SOUND_TEST_MAX_REVERB;
+        if (g_SoundTestSongReverb > SOUND_TEST_MAX_REVERB) {
+          g_SoundTestSongReverb = SOUND_TEST_MAX_REVERB;
         }
 
         break;
       case OPTIONS_CHOICE_SONG_FREQUENCY:
         if (g_MenuRepeatButtons & L_JPAD) {
-          D_8022BEB4_ovl_01 -= SOUND_TEST_FREQUENCY_FINE_STEP;
+          g_SoundTestSongFrequency -= SOUND_TEST_FREQUENCY_FINE_STEP;
         }
 
         if (g_MenuRepeatButtons & R_JPAD) {
-          D_8022BEB4_ovl_01 += SOUND_TEST_FREQUENCY_FINE_STEP;
+          g_SoundTestSongFrequency += SOUND_TEST_FREQUENCY_FINE_STEP;
         }
 
         if (g_MenuRepeatButtons & L_CBUTTONS) {
-          D_8022BEB4_ovl_01 -= SOUND_TEST_FREQUENCY_COARSE_STEP;
+          g_SoundTestSongFrequency -= SOUND_TEST_FREQUENCY_COARSE_STEP;
         }
 
         if (g_MenuRepeatButtons & R_CBUTTONS) {
-          D_8022BEB4_ovl_01 += SOUND_TEST_FREQUENCY_COARSE_STEP;
+          g_SoundTestSongFrequency += SOUND_TEST_FREQUENCY_COARSE_STEP;
         }
 
-        if (D_8022BEB4_ovl_01 < -SOUND_TEST_FREQUENCY_LIMIT) {
-          D_8022BEB4_ovl_01 = -SOUND_TEST_FREQUENCY_LIMIT;
+        if (g_SoundTestSongFrequency < -SOUND_TEST_FREQUENCY_LIMIT) {
+          g_SoundTestSongFrequency = -SOUND_TEST_FREQUENCY_LIMIT;
         }
 
-        if (D_8022BEB4_ovl_01 > SOUND_TEST_FREQUENCY_LIMIT) {
-          D_8022BEB4_ovl_01 = SOUND_TEST_FREQUENCY_LIMIT;
+        if (g_SoundTestSongFrequency > SOUND_TEST_FREQUENCY_LIMIT) {
+          g_SoundTestSongFrequency = SOUND_TEST_FREQUENCY_LIMIT;
         }
 
         break;
       case OPTIONS_CHOICE_SONG_TEMPO:
-        if ((g_MenuRepeatButtons & L_JPAD) && D_8022BEB8_ovl_01 > 0) {
-          D_8022BEB8_ovl_01--;
+        if ((g_MenuRepeatButtons & L_JPAD) && g_SoundTestSongTempo > 0) {
+          g_SoundTestSongTempo--;
         }
 
         if ((g_MenuRepeatButtons & R_JPAD) &&
-            D_8022BEB8_ovl_01 <= SOUND_TEST_MAX_TEMPO) {
-          D_8022BEB8_ovl_01++;
+            g_SoundTestSongTempo <= SOUND_TEST_MAX_TEMPO) {
+          g_SoundTestSongTempo++;
         }
 
-        if ((g_MenuRepeatButtons & L_CBUTTONS) && D_8022BEB8_ovl_01 > 0) {
-          D_8022BEB8_ovl_01 -= SOUND_TEST_COARSE_STEP;
+        if ((g_MenuRepeatButtons & L_CBUTTONS) && g_SoundTestSongTempo > 0) {
+          g_SoundTestSongTempo -= SOUND_TEST_COARSE_STEP;
         }
 
         if ((g_MenuRepeatButtons & R_CBUTTONS) &&
-            D_8022BEB8_ovl_01 <= SOUND_TEST_MAX_TEMPO) {
-          D_8022BEB8_ovl_01 += SOUND_TEST_COARSE_STEP;
+            g_SoundTestSongTempo <= SOUND_TEST_MAX_TEMPO) {
+          g_SoundTestSongTempo += SOUND_TEST_COARSE_STEP;
         }
 
-        if (D_8022BEB8_ovl_01 < 0) {
-          D_8022BEB8_ovl_01 = 0;
+        if (g_SoundTestSongTempo < 0) {
+          g_SoundTestSongTempo = 0;
         }
 
-        if (D_8022BEB8_ovl_01 > SOUND_TEST_MAX_TEMPO) {
-          D_8022BEB8_ovl_01 = SOUND_TEST_MAX_TEMPO;
+        if (g_SoundTestSongTempo > SOUND_TEST_MAX_TEMPO) {
+          g_SoundTestSongTempo = SOUND_TEST_MAX_TEMPO;
         }
 
         break;
       case OPTIONS_CHOICE_SOUND:
         if (g_MenuRepeatButtons & L_JPAD) {
-          D_8022BEA0_ovl_01--;
+          g_SoundTestSound--;
         }
 
         if (g_MenuRepeatButtons & R_JPAD) {
-          D_8022BEA0_ovl_01++;
+          g_SoundTestSound++;
         }
 
         if (g_MenuRepeatButtons & L_CBUTTONS) {
-          D_8022BEA0_ovl_01 -= SOUND_TEST_COARSE_STEP;
+          g_SoundTestSound -= SOUND_TEST_COARSE_STEP;
         }
 
         if (g_MenuRepeatButtons & R_CBUTTONS) {
-          D_8022BEA0_ovl_01 += SOUND_TEST_COARSE_STEP;
+          g_SoundTestSound += SOUND_TEST_COARSE_STEP;
         }
 
-        if (D_8022BEA0_ovl_01 < 0) {
-          D_8022BEA0_ovl_01 = 0;
+        if (g_SoundTestSound < 0) {
+          g_SoundTestSound = 0;
         }
 
-        if (D_8022BEA0_ovl_01 > SOUND_TEST_LAST_SOUND) {
-          D_8022BEA0_ovl_01 = SOUND_TEST_LAST_SOUND;
+        if (g_SoundTestSound > SOUND_TEST_LAST_SOUND) {
+          g_SoundTestSound = SOUND_TEST_LAST_SOUND;
         }
 
         break;
       case OPTIONS_CHOICE_SOUND_REVERB:
         if (g_MenuRepeatButtons & L_JPAD) {
-          D_8022BEA8_ovl_01--;
+          g_SoundTestSoundReverb--;
         }
 
         if (g_MenuRepeatButtons & R_JPAD) {
-          D_8022BEA8_ovl_01++;
+          g_SoundTestSoundReverb++;
         }
 
         if (g_MenuRepeatButtons & L_CBUTTONS) {
-          D_8022BEA8_ovl_01 -= SOUND_TEST_COARSE_STEP;
+          g_SoundTestSoundReverb -= SOUND_TEST_COARSE_STEP;
         }
 
         if (g_MenuRepeatButtons & R_CBUTTONS) {
-          D_8022BEA8_ovl_01 += SOUND_TEST_COARSE_STEP;
+          g_SoundTestSoundReverb += SOUND_TEST_COARSE_STEP;
         }
 
-        if (D_8022BEA8_ovl_01 < 0) {
-          D_8022BEA8_ovl_01 = 0;
+        if (g_SoundTestSoundReverb < 0) {
+          g_SoundTestSoundReverb = 0;
         }
 
-        if (D_8022BEA8_ovl_01 > SOUND_TEST_MAX_REVERB) {
-          D_8022BEA8_ovl_01 = SOUND_TEST_MAX_REVERB;
+        if (g_SoundTestSoundReverb > SOUND_TEST_MAX_REVERB) {
+          g_SoundTestSoundReverb = SOUND_TEST_MAX_REVERB;
         }
 
         break;
       case OPTIONS_CHOICE_SOUND_FREQUENCY:
         if (g_MenuRepeatButtons & L_JPAD) {
-          D_8022BEB0_ovl_01 -= SOUND_TEST_FREQUENCY_FINE_STEP;
+          g_SoundTestSoundFrequency -= SOUND_TEST_FREQUENCY_FINE_STEP;
         }
 
         if (g_MenuRepeatButtons & R_JPAD) {
-          D_8022BEB0_ovl_01 += SOUND_TEST_FREQUENCY_FINE_STEP;
+          g_SoundTestSoundFrequency += SOUND_TEST_FREQUENCY_FINE_STEP;
         }
 
         if (g_MenuRepeatButtons & L_CBUTTONS) {
-          D_8022BEB0_ovl_01 -= SOUND_TEST_FREQUENCY_COARSE_STEP;
+          g_SoundTestSoundFrequency -= SOUND_TEST_FREQUENCY_COARSE_STEP;
         }
 
         if (g_MenuRepeatButtons & R_CBUTTONS) {
-          D_8022BEB0_ovl_01 += SOUND_TEST_FREQUENCY_COARSE_STEP;
+          g_SoundTestSoundFrequency += SOUND_TEST_FREQUENCY_COARSE_STEP;
         }
 
-        if (D_8022BEB0_ovl_01 < -SOUND_TEST_FREQUENCY_LIMIT) {
-          D_8022BEB0_ovl_01 = -SOUND_TEST_FREQUENCY_LIMIT;
+        if (g_SoundTestSoundFrequency < -SOUND_TEST_FREQUENCY_LIMIT) {
+          g_SoundTestSoundFrequency = -SOUND_TEST_FREQUENCY_LIMIT;
         }
 
-        if (D_8022BEB0_ovl_01 > SOUND_TEST_FREQUENCY_LIMIT) {
-          D_8022BEB0_ovl_01 = SOUND_TEST_FREQUENCY_LIMIT;
+        if (g_SoundTestSoundFrequency > SOUND_TEST_FREQUENCY_LIMIT) {
+          g_SoundTestSoundFrequency = SOUND_TEST_FREQUENCY_LIMIT;
         }
 
         break;
     }
   }
 
-  SetSongReverb(D_8022BEAC_ovl_01);
-  SetSongTempo(D_8022BEB8_ovl_01);
-  SetSongFrequencyOffset(D_8022BEB4_ovl_01);
+  SetSongReverb(g_SoundTestSongReverb);
+  SetSongTempo(g_SoundTestSongTempo);
+  SetSongFrequencyOffset(g_SoundTestSongFrequency);
 }
 
 void func_801FADBC_ovl_01(void) {
