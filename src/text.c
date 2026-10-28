@@ -192,7 +192,7 @@ extern Vtx f_LargeGlyphBottomVertices[4];
 extern Vtx f_MediumGlyphVertices[4];
 extern Vtx f_SmallGlyphVertices[4];
 /* The width of each character of the large font */
-extern u8 g_LargeFontWidths[];
+extern u8 f_LargeFontWidths[];
 
 void DrawMediumTextSlot(Gfx** displayListHead, s32 slot);
 void ClearGlyphSprites(void);
@@ -528,7 +528,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
         gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_LARGE) << 2,
             (y + FONT_SIZE_LARGE) << 2, G_TX_RENDERTILE, glyphLeft << 5,
             glyphTop << 5, 1 << 10, 1 << 10);
-        x += g_LargeFontWidths[code];
+        x += f_LargeFontWidths[code];
       }
 
       gDPPipeSync(gfx++);
@@ -690,7 +690,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
                 (x + FONT_SIZE_LARGE) << 2, (y + FONT_SIZE_LARGE) << 2,
                 G_TX_RENDERTILE, characterLeft << 5, characterTop << 5, 1 << 10,
                 1 << 10);
-            x += g_LargeFontWidths[(u8)g_PrintBuffer[index]];
+            x += f_LargeFontWidths[(u8)g_PrintBuffer[index]];
           }
         }
       }
@@ -1057,7 +1057,7 @@ s32 MeasureText(char* text, s32 fontSize, s32 flags) {
             break;
           default:
             if (flags & MEASURE_TEXT_PROPORTIONAL) {
-              width += g_LargeFontWidths[code];
+              width += f_LargeFontWidths[code];
             } else {
               width += FONT_SIZE_LARGE;
             }
@@ -1124,7 +1124,7 @@ void MeasureMessage(
       if (code < CHARACTER_CODE_MARK_FIRST ||
           code >= CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
         if (fontSize == FONT_SIZE_LARGE) {
-          lineWidths[line] += g_LargeFontWidths[code];
+          lineWidths[line] += f_LargeFontWidths[code];
         } else {
           lineWidths[line] += fontSize;
         }
@@ -1289,7 +1289,7 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
     character = *text;
     if (character == ' ') {
       text++;
-      x += g_LargeFontWidths[' '];
+      x += f_LargeFontWidths[' '];
     } else {
       left = x;
       top = y;
@@ -1336,7 +1336,7 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           (left + FONT_SIZE_LARGE) << 2, (top + FONT_SIZE_LARGE) << 2,
           G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
       text++;
-      x += g_LargeFontWidths[code];
+      x += f_LargeFontWidths[code];
     }
   }
 
@@ -1759,7 +1759,7 @@ void PlaceGlyphGroup(
             if (flags & TEXT_FLAG_FIXED_WIDTH) {
               advance += FONT_SIZE_LARGE;
             } else {
-              advance += g_LargeFontWidths[text[placedCount]];
+              advance += f_LargeFontWidths[text[placedCount]];
             }
           } else {
             advance += fontSize;
@@ -1832,7 +1832,7 @@ s32 PlaceMessageGlyphGroup(
               0);
         } else {
           guTranslate(&g_GlyphSprites[i].matrix, advance - width + x, y, 0);
-          advance += g_LargeFontWidths[code];
+          advance += f_LargeFontWidths[code];
         }
 
         g_GlyphSprites[i].code = code;
