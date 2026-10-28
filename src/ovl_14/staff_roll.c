@@ -95,8 +95,6 @@
 #define FIRST_TOP_LINE_INDEX (-10)
 #define DEBUG_SKIPPED_FRAMES 100
 
-#define STAFF_SONG 0x31
-#define CLOSING_SONG 0x32
 #define EARLIER_SONG_FADE_FRAMES 40
 #define STAFF_SONG_FADE_FRAMES 200
 
@@ -1509,7 +1507,7 @@ void UpdateStaffRoll(void) {
     }
 
     if (f_StaffRollFrame == STAFF_SONG_FRAME) {
-      PlaySong(STAFF_SONG, SONG_FLAG_RESTART);
+      PlaySong(SONG_STAFF_ROLL, SONG_FLAG_RESTART);
     }
 
     if (f_StaffRollFrame == STAFF_SONG_END_FRAME) {
@@ -1528,7 +1526,7 @@ void UpdateStaffRoll(void) {
     }
 
     if (f_StaffRollFrame == CLOSING_FRAME) {
-      PlaySong(CLOSING_SONG, SONG_FLAG_RESTART);
+      PlaySong(SONG_CLOSING, SONG_FLAG_RESTART);
     }
 
     if ((pressedButtons & (A_BUTTON | START_BUTTON)) &&

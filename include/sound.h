@@ -17,19 +17,42 @@
 #define SOUND_MENU_BLOCKED 0x63
 
 /*
- * The songs for a hole's result. Stroke play picks one by the score against
- * par. Get Character plays the one for how the first player did, and match
- * games and skins matches play SONG_HOLE_WON for any hole that somebody won.
+ * The songs that PlaySong plays. SONG_HOLE_* are a hole's result: Stroke play
+ * picks one by the score against par, Get Character plays the one for how the
+ * first player did, and match games and skins matches play SONG_HOLE_WON for
+ * any hole that somebody won. SONG_ROUND_* play through a hole.
  */
-#define SONG_HOLE_OUT_EAGLE 0 /* Also for an albatross */
-#define SONG_HOLE_OUT_BIRDIE 1 /* Also for a hole-in-one */
-#define SONG_HOLE_OUT_PAR 2
-#define SONG_HOLE_OUT_BOGEY 4
-#define SONG_HOLE_OUT_OVER_BOGEY 5
-#define SONG_HOLE_WON 6
-#define SONG_HOLE_LOST 7
-#define SONG_HOLE_HALVED 8
-#define SONG_MATCH_RESULT 10
+enum Song {
+  SONG_HOLE_OUT_EAGLE, /* Also for an albatross */
+  SONG_HOLE_OUT_BIRDIE, /* Also for a hole-in-one */
+  SONG_HOLE_OUT_PAR,
+  SONG_RESULTS, /* The round results' song, outside tournaments */
+  SONG_HOLE_OUT_BOGEY,
+  SONG_HOLE_OUT_OVER_BOGEY,
+  SONG_HOLE_WON,
+  SONG_HOLE_LOST,
+  SONG_HOLE_HALVED,
+  SONG_MATCH_RESULT = 10,
+  SONG_ROUND_TOURNAMENT,
+  SONG_ROUND_FINAL = 20, /* A hole that can decide the round */
+  SONG_TRANSMIT_MENU = 22,
+  /* The controls screen's song; the main menu also plays it as it enters
+   * MENU_SCREEN_UNK22 */
+  SONG_CONTROLS,
+  SONG_ROUND_UNK24,
+  SONG_ROUND_MATCH,
+  SONG_ROUND_UNK26,
+  SONG_ROUND_COURSE,
+  SONG_ROUND_RING_SHOT = 29,
+  SONG_ROUND_UNK31 = 31,
+  SONG_TOURNAMENT_RESULTS = 37,
+  SONG_TITLE = 39, /* The title screen's song */
+  SONG_ROUND_CLUB_SLOTS = 43,
+  SONG_ROUND_MINI_GOLF = 45,
+  SONG_ROUND_SKINS_MATCH,
+  SONG_STAFF_ROLL = 49,
+  SONG_CLOSING
+};
 
 /* PlaySong's flags */
 /* Passed by some callers, but PlaySong never tests it */

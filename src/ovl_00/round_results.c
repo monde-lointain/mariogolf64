@@ -99,9 +99,6 @@ enum PortraitAnimation {
 
 #define PORTRAIT_SIZE 32
 
-#define RESULTS_SONG 3
-#define TOURNAMENT_RESULTS_SONG 0x25
-
 /* Course points are clamped there rather than overflow */
 #define MAX_COURSE_POINTS 0x7FFFFFFF
 
@@ -650,23 +647,23 @@ void LoadRoundResults(void) {
 
   switch (g_GameState.gameMode) {
     case GAME_MODE_STROKE:
-      PlaySong(RESULTS_SONG, 0);
+      PlaySong(SONG_RESULTS, 0);
       break;
     case GAME_MODE_SPEED_GOLF:
-      PlaySong(RESULTS_SONG, 0);
+      PlaySong(SONG_RESULTS, 0);
       break;
     case GAME_MODE_MATCH_GAME:
-      PlaySong(RESULTS_SONG, 0);
+      PlaySong(SONG_RESULTS, 0);
       break;
     case GAME_MODE_GET_CHARACTER:
-      PlaySong(RESULTS_SONG, 0);
+      PlaySong(SONG_RESULTS, 0);
       break;
     case GAME_MODE_SKINS_MATCH:
     case GAME_MODE_CLUB_SLOTS:
-      PlaySong(RESULTS_SONG, 0);
+      PlaySong(SONG_RESULTS, 0);
       break;
     case GAME_MODE_TOURNAMENT:
-      PlaySong(TOURNAMENT_RESULTS_SONG, 0);
+      PlaySong(SONG_TOURNAMENT_RESULTS, 0);
       break;
   }
 }

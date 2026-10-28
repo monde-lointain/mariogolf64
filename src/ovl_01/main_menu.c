@@ -210,7 +210,6 @@ extern s32 D_8022F8F4_ovl_01[];
 #define HOLES_CHOICE_ALL 3
 /* D_8022BE88's value once the popup opened with C-up has finished */
 #define MENU_PHASE_UNK2 2
-#define SONG_UNK17 0x17
 #define SOUND_UNK6A 0x6A
 #define SOUND_HOLES_CHOSEN 0x45
 
@@ -1985,7 +1984,7 @@ void func_801F8BAC_ovl_01(void) {
   }
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_UNK2) {
-    PlaySong(SONG_UNK17, 0);
+    PlaySong(SONG_CONTROLS, 0);
     g_MenuScreen = MENU_SCREEN_UNK22;
     D_8022BE88_ovl_01 = 1;
     D_8022BE89_ovl_01 = 0;
@@ -2269,7 +2268,7 @@ void func_801F93D8_ovl_01(void) {
   }
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_UNK2) {
-    PlaySong(SONG_UNK17, 0);
+    PlaySong(SONG_CONTROLS, 0);
     g_MenuScreen = MENU_SCREEN_UNK22;
     D_8022BE88_ovl_01 = 1;
     D_8022BE89_ovl_01 = 0;

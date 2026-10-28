@@ -276,9 +276,6 @@ enum MenuSign {
 #define MENU_CURSOR_Z -100.0f
 #define MENU_CURSOR_SCALE_Y 0.87f
 
-/* The title screen's song */
-#define SONG_TITLE 0x27
-
 /* The buffers of func_802218C0, and what it reads into them */
 enum SaveGameBuffer {
   SAVE_GAME_BUFFER_CONTROLLER_ICONS = 1,

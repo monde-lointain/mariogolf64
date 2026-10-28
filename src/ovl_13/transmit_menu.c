@@ -412,7 +412,6 @@ enum ExperienceWriteResult {
 #define STAT_LABELS_ASSET 0x978
 
 #define FIRST_GAME_BOY_GOLFER CHARACTER_KID
-#define TRANSMIT_MENU_SONG 0x16
 
 #define SOUND_MENU_MOVE 0x5C
 #define SOUND_MENU_CONFIRM 0x5D
@@ -587,7 +586,7 @@ void LoadTransmitMenu(void) {
         g_GameBoyTransfer.facePalettes[index] = AllocMemory(size), size, &file);
   }
 
-  PlaySong(TRANSMIT_MENU_SONG, 0);
+  PlaySong(SONG_TRANSMIT_MENU, 0);
   LoadCursorBox(g_GameBoyTransfer.cursorBoxImage);
   nuContRmbForceStop();
 }

@@ -1519,19 +1519,6 @@ void PlaceCameraAroundShotEnd(void) {
   SnapLookAtPoint();
 }
 
-/* The songs of the holes */
-#define HOLE_SONG_TOURNAMENT 0x0B
-#define HOLE_SONG_FINAL 0x14 /* A hole that can decide the round */
-#define HOLE_SONG_UNK18 0x18
-#define HOLE_SONG_MATCH 0x19
-#define HOLE_SONG_UNK1A 0x1A
-#define HOLE_SONG_COURSE 0x1B
-#define HOLE_SONG_RING_SHOT 0x1D
-#define HOLE_SONG_UNK1F 0x1F
-#define HOLE_SONG_CLUB_SLOTS 0x2B
-#define HOLE_SONG_MINI_GOLF 0x2D
-#define HOLE_SONG_SKINS_MATCH 0x2E
-
 /* Resets the cameras for the start of a hole, and plays the game mode's song */
 void StartHoleCamerasAndSong(void) {
   SetMenuBackdrop(MENU_BACKDROP_NONE);
@@ -1545,47 +1532,47 @@ void StartHoleCamerasAndSong(void) {
   g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
   g_Cameras[1].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
   if (g_GameState.unk31) {
-    PlaySong(HOLE_SONG_UNK1F, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+    PlaySong(SONG_ROUND_UNK31, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
     return;
   }
 
   switch (g_GameState.gameMode) {
     case GAME_MODE_TRAINING:
-      PlaySong(HOLE_SONG_UNK1A, SONG_FLAG_UNREAD);
+      PlaySong(SONG_ROUND_UNK26, SONG_FLAG_UNREAD);
       break;
     case GAME_MODE_MATCH_GAME:
     case GAME_MODE_GET_CHARACTER:
       if (GetMatchStanding(0, 1) != MATCH_STANDING_OPEN) {
-        PlaySong(HOLE_SONG_FINAL, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_FINAL, SONG_FLAG_UNREAD);
       } else {
-        PlaySong(HOLE_SONG_MATCH, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_MATCH, SONG_FLAG_UNREAD);
       }
 
       break;
     case GAME_MODE_SKINS_MATCH:
       if (GetLastHoleIndex() == g_GameState.holeIndex) {
-        PlaySong(HOLE_SONG_FINAL, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_FINAL, SONG_FLAG_UNREAD);
       } else {
-        PlaySong(HOLE_SONG_SKINS_MATCH, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_SKINS_MATCH, SONG_FLAG_UNREAD);
       }
 
       break;
     case GAME_MODE_TOURNAMENT:
-      PlaySong(HOLE_SONG_TOURNAMENT, SONG_FLAG_UNREAD);
+      PlaySong(SONG_ROUND_TOURNAMENT, SONG_FLAG_UNREAD);
       break;
     case GAME_MODE_SPEED_GOLF:
-      PlaySong(HOLE_SONG_UNK18, SONG_FLAG_UNREAD);
+      PlaySong(SONG_ROUND_UNK24, SONG_FLAG_UNREAD);
       break;
     case GAME_MODE_RING_SHOT:
-      PlaySong(HOLE_SONG_RING_SHOT, SONG_FLAG_UNREAD);
+      PlaySong(SONG_ROUND_RING_SHOT, SONG_FLAG_UNREAD);
       g_RoundHud.unk8 = 0;
       g_RoundHud.unkB = 0;
       break;
     case GAME_MODE_CLUB_SLOTS:
       if (GetLastHoleIndex() == g_GameState.holeIndex) {
-        PlaySong(HOLE_SONG_FINAL, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_FINAL, SONG_FLAG_UNREAD);
       } else {
-        PlaySong(HOLE_SONG_CLUB_SLOTS, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_CLUB_SLOTS, SONG_FLAG_UNREAD);
       }
 
       break;
@@ -1593,11 +1580,11 @@ void StartHoleCamerasAndSong(void) {
     default:
       if (g_GameState.holeIndex == GetLastHoleIndex() &&
           g_GameState.playerCount != 1) {
-        PlaySong(HOLE_SONG_FINAL, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_FINAL, SONG_FLAG_UNREAD);
       } else if (g_GameState.isMiniGolf) {
-        PlaySong(HOLE_SONG_MINI_GOLF, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_MINI_GOLF, SONG_FLAG_UNREAD);
       } else {
-        PlaySong(HOLE_SONG_COURSE, SONG_FLAG_UNREAD);
+        PlaySong(SONG_ROUND_COURSE, SONG_FLAG_UNREAD);
       }
 
       break;

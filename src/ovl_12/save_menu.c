@@ -55,7 +55,6 @@ enum SaveMenuState {
 /* The picture is loaded into texture memory a few rows at a time */
 #define CONTROLS_STRIP_HEIGHT 7
 #define CONTROLS_STRIP_COUNT 32
-#define CONTROLS_SONG 0x17
 
 #define SOUND_CONTROLS_OPEN 0x72
 #define SOUND_CONTROLS_CLOSE 0x73
@@ -1749,7 +1748,7 @@ void OpenControlsScreen(void) {
   f_IsControlsShown = TRUE;
   f_StateFrame = 0;
   f_ResumedSongId = GetSongId();
-  PlaySong(CONTROLS_SONG, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+  PlaySong(SONG_CONTROLS, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
 }
 
 void CloseControlsScreen(void) {
