@@ -22,16 +22,16 @@
 #include "text.h"
 #include "variables.h"
 
-extern s32 g_MenuWindowState;
+extern s32 f_MenuWindowState;
 /* How far the window has opened across and down, from 0 to 1 */
-extern f32 g_MenuWindowScaleX;
-extern f32 g_MenuWindowScaleY;
+extern f32 f_MenuWindowScaleX;
+extern f32 f_MenuWindowScaleY;
 extern s32 D_80230E9C_ovl_01;
 extern s32 D_80230EA0_ovl_01;
 /* The images that the window can show, and the buffer that holds the one it
  * shows */
-extern AssetId g_MenuWindowImageAssets[15];
-extern void* g_MenuWindowImage;
+extern AssetId f_MenuWindowImageAssets[15];
+extern void* f_MenuWindowImage;
 
 extern s32 D_80230F68_ovl_01;
 extern void* D_80230E70_ovl_01;
@@ -263,9 +263,9 @@ static u8 D_8023BF00_ovl_01[0x80];
 static Mtx D_8023BF80_ovl_01;
 
 void ResetMenuWindow(void) {
-  g_MenuWindowState = MENU_WINDOW_OPENING;
-  g_MenuWindowScaleX = 0.0f;
-  g_MenuWindowScaleY = 0.0f;
+  f_MenuWindowState = MENU_WINDOW_OPENING;
+  f_MenuWindowScaleX = 0.0f;
+  f_MenuWindowScaleY = 0.0f;
   D_80230E9C_ovl_01 = 0;
   D_80230EA0_ovl_01 = 0;
 }
@@ -273,22 +273,22 @@ void ResetMenuWindow(void) {
 void ShowMenuWindow(void) {
   D_80230E9C_ovl_01 = 0;
   D_80230EA0_ovl_01 = 0;
-  g_MenuWindowState = MENU_WINDOW_OPEN;
-  g_MenuWindowScaleX = 1.0f;
-  g_MenuWindowScaleY = 1.0f;
+  f_MenuWindowState = MENU_WINDOW_OPEN;
+  f_MenuWindowScaleX = 1.0f;
+  f_MenuWindowScaleY = 1.0f;
 }
 
 void CloseMenuWindow(void) {
-  g_MenuWindowState = MENU_WINDOW_CLOSING;
+  f_MenuWindowState = MENU_WINDOW_CLOSING;
 }
 
 s32 IsMenuWindowOpen(void) {
   s32 check;
 
-  if (g_MenuWindowState == MENU_WINDOW_OPENING) {
+  if (f_MenuWindowState == MENU_WINDOW_OPENING) {
     check = MENU_WINDOW_CHECK_MOVING;
   } else {
-    check = g_MenuWindowState == MENU_WINDOW_OPEN;
+    check = f_MenuWindowState == MENU_WINDOW_OPEN;
   }
 
   return check;
@@ -297,10 +297,10 @@ s32 IsMenuWindowOpen(void) {
 s32 IsMenuWindowClosed(void) {
   s32 check;
 
-  if (g_MenuWindowState == MENU_WINDOW_CLOSING) {
+  if (f_MenuWindowState == MENU_WINDOW_CLOSING) {
     check = MENU_WINDOW_CHECK_MOVING;
   } else {
-    check = g_MenuWindowState == MENU_WINDOW_CLOSED;
+    check = f_MenuWindowState == MENU_WINDOW_CLOSED;
   }
 
   return check;
@@ -333,11 +333,11 @@ void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
       ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
       break;
     case 5:
-      g_MenuWindowImage = buffer;
+      f_MenuWindowImage = buffer;
       OpenEncodedAsset(
-          g_MenuWindowImageAssets[ARRAY_COUNT(g_MenuWindowImageAssets) - 1],
+          f_MenuWindowImageAssets[ARRAY_COUNT(f_MenuWindowImageAssets) - 1],
           &asset);
-      ReadEncodedAsset(g_MenuWindowImage, &asset);
+      ReadEncodedAsset(f_MenuWindowImage, &asset);
       break;
     case 6:
       D_80230E84_ovl_01 = buffer;
@@ -373,12 +373,12 @@ void LoadMenuWindowImage(s32 imageIndex) {
     imageIndex = 0;
   }
 
-  if (imageIndex >= ARRAY_COUNT(g_MenuWindowImageAssets)) {
-    imageIndex = ARRAY_COUNT(g_MenuWindowImageAssets) - 1;
+  if (imageIndex >= ARRAY_COUNT(f_MenuWindowImageAssets)) {
+    imageIndex = ARRAY_COUNT(f_MenuWindowImageAssets) - 1;
   }
 
-  OpenEncodedAsset(g_MenuWindowImageAssets[imageIndex], &asset);
-  ReadEncodedAsset(g_MenuWindowImage, &asset);
+  OpenEncodedAsset(f_MenuWindowImageAssets[imageIndex], &asset);
+  ReadEncodedAsset(f_MenuWindowImage, &asset);
 }
 
 void func_802269AC_ovl_01(s32 row, s32 column) {
@@ -468,24 +468,24 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   s32 growth;
 
   func_8005AF74();
-  switch (g_MenuWindowState) {
+  switch (f_MenuWindowState) {
     case MENU_WINDOW_OPENING:
-      g_MenuWindowScaleX += MENU_WINDOW_SCALE_STEP;
-      g_MenuWindowScaleY += MENU_WINDOW_SCALE_STEP;
-      if (g_MenuWindowScaleX > 1.0f) {
-        g_MenuWindowScaleX = 1.0f;
+      f_MenuWindowScaleX += MENU_WINDOW_SCALE_STEP;
+      f_MenuWindowScaleY += MENU_WINDOW_SCALE_STEP;
+      if (f_MenuWindowScaleX > 1.0f) {
+        f_MenuWindowScaleX = 1.0f;
       }
 
-      if (g_MenuWindowScaleY > 1.0f) {
-        g_MenuWindowScaleY = 1.0f;
+      if (f_MenuWindowScaleY > 1.0f) {
+        f_MenuWindowScaleY = 1.0f;
       }
 
-      windowWidth = width * g_MenuWindowScaleX;
-      windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
-      buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
-      buttonHeight = g_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
-      if (g_MenuWindowScaleX == 1.0f && g_MenuWindowScaleY == 1.0f) {
-        g_MenuWindowState = MENU_WINDOW_OPEN;
+      windowWidth = width * f_MenuWindowScaleX;
+      windowHalfHeight = (height / 2) * f_MenuWindowScaleY;
+      buttonWidth = f_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
+      buttonHeight = f_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
+      if (f_MenuWindowScaleX == 1.0f && f_MenuWindowScaleY == 1.0f) {
+        f_MenuWindowState = MENU_WINDOW_OPEN;
       }
 
       break;
@@ -496,23 +496,23 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
       buttonHeight = YES_NO_BUTTON_SHOWN_HEIGHT;
       break;
     case MENU_WINDOW_CLOSING:
-      g_MenuWindowScaleX -= MENU_WINDOW_SCALE_STEP;
-      g_MenuWindowScaleY -= MENU_WINDOW_SCALE_STEP;
-      if (g_MenuWindowScaleX < MENU_WINDOW_SCALE_STEP) {
-        g_MenuWindowScaleX = MENU_WINDOW_CLOSED_SCALE;
+      f_MenuWindowScaleX -= MENU_WINDOW_SCALE_STEP;
+      f_MenuWindowScaleY -= MENU_WINDOW_SCALE_STEP;
+      if (f_MenuWindowScaleX < MENU_WINDOW_SCALE_STEP) {
+        f_MenuWindowScaleX = MENU_WINDOW_CLOSED_SCALE;
       }
 
-      if (g_MenuWindowScaleY < MENU_WINDOW_SCALE_STEP) {
-        g_MenuWindowScaleY = MENU_WINDOW_CLOSED_SCALE;
+      if (f_MenuWindowScaleY < MENU_WINDOW_SCALE_STEP) {
+        f_MenuWindowScaleY = MENU_WINDOW_CLOSED_SCALE;
       }
 
-      windowWidth = width * g_MenuWindowScaleX;
-      windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
-      buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
-      buttonHeight = g_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
-      if (g_MenuWindowScaleX <= MENU_WINDOW_CLOSED_SCALE &&
-          g_MenuWindowScaleY <= MENU_WINDOW_CLOSED_SCALE) {
-        g_MenuWindowState = MENU_WINDOW_CLOSED;
+      windowWidth = width * f_MenuWindowScaleX;
+      windowHalfHeight = (height / 2) * f_MenuWindowScaleY;
+      buttonWidth = f_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
+      buttonHeight = f_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
+      if (f_MenuWindowScaleX <= MENU_WINDOW_CLOSED_SCALE &&
+          f_MenuWindowScaleY <= MENU_WINDOW_CLOSED_SCALE) {
+        f_MenuWindowState = MENU_WINDOW_CLOSED;
       }
 
       break;
@@ -574,13 +574,13 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
         G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
     if (index == 0) {
-      buttonX = centerX - (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
+      buttonX = centerX - (s32)(f_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     } else {
-      buttonX = centerX + (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
+      buttonX = centerX + (s32)(f_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     }
 
     buttonY = centerY + windowHalfHeight -
-        (s32)(g_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
+        (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
     growth = 0;
     if (index == chosenButton) {
       pulse = D_80230E9C_ovl_01;
@@ -629,7 +629,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226A58_ovl_01);
 /*
  * func_8022747C adds to that window the Nintendo badge of D_80230E78 near its
  * top, the course image of D_80230E7C at its lower left and the picture of
- * g_MenuWindowImage, coloured by the palette in D_80230E84, at its lower right
+ * f_MenuWindowImage, coloured by the palette in D_80230E84, at its lower right
  */
 #define NINTENDO_BADGE_WIDTH 144
 #define NINTENDO_BADGE_STRIP_HEIGHT 10
@@ -693,30 +693,30 @@ void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   s32 pictureY;
 
   func_8005AF74();
-  switch (g_MenuWindowState) {
+  switch (f_MenuWindowState) {
     case MENU_WINDOW_OPENING:
-      g_MenuWindowScaleX += MENU_WINDOW_SCALE_STEP;
-      g_MenuWindowScaleY += MENU_WINDOW_SCALE_STEP;
-      if (g_MenuWindowScaleX > 1.0f) {
-        g_MenuWindowScaleX = 1.0f;
+      f_MenuWindowScaleX += MENU_WINDOW_SCALE_STEP;
+      f_MenuWindowScaleY += MENU_WINDOW_SCALE_STEP;
+      if (f_MenuWindowScaleX > 1.0f) {
+        f_MenuWindowScaleX = 1.0f;
       }
 
-      if (g_MenuWindowScaleY > 1.0f) {
-        g_MenuWindowScaleY = 1.0f;
+      if (f_MenuWindowScaleY > 1.0f) {
+        f_MenuWindowScaleY = 1.0f;
       }
 
-      windowWidth = width * g_MenuWindowScaleX;
-      windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
-      buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
-      buttonHeight = g_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
-      badgeWidth = g_MenuWindowScaleX * NINTENDO_BADGE_WIDTH;
-      badgeStripHeight = g_MenuWindowScaleY * NINTENDO_BADGE_STRIP_HEIGHT;
-      courseWidth = g_MenuWindowScaleX * COURSE_IMAGE_WIDTH;
-      courseStripHeight = g_MenuWindowScaleY * COURSE_IMAGE_STRIP_HEIGHT;
-      pictureWidth = g_MenuWindowScaleX * WINDOW_PICTURE_SIZE;
-      pictureHeight = g_MenuWindowScaleY * WINDOW_PICTURE_SIZE;
-      if (g_MenuWindowScaleX == 1.0f && g_MenuWindowScaleY == 1.0f) {
-        g_MenuWindowState = MENU_WINDOW_OPEN;
+      windowWidth = width * f_MenuWindowScaleX;
+      windowHalfHeight = (height / 2) * f_MenuWindowScaleY;
+      buttonWidth = f_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
+      buttonHeight = f_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
+      badgeWidth = f_MenuWindowScaleX * NINTENDO_BADGE_WIDTH;
+      badgeStripHeight = f_MenuWindowScaleY * NINTENDO_BADGE_STRIP_HEIGHT;
+      courseWidth = f_MenuWindowScaleX * COURSE_IMAGE_WIDTH;
+      courseStripHeight = f_MenuWindowScaleY * COURSE_IMAGE_STRIP_HEIGHT;
+      pictureWidth = f_MenuWindowScaleX * WINDOW_PICTURE_SIZE;
+      pictureHeight = f_MenuWindowScaleY * WINDOW_PICTURE_SIZE;
+      if (f_MenuWindowScaleX == 1.0f && f_MenuWindowScaleY == 1.0f) {
+        f_MenuWindowState = MENU_WINDOW_OPEN;
       }
 
       break;
@@ -733,29 +733,29 @@ void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
       pictureHeight = WINDOW_PICTURE_SIZE;
       break;
     case MENU_WINDOW_CLOSING:
-      g_MenuWindowScaleX -= MENU_WINDOW_SCALE_STEP;
-      g_MenuWindowScaleY -= MENU_WINDOW_SCALE_STEP;
-      if (g_MenuWindowScaleX < MENU_WINDOW_SCALE_STEP) {
-        g_MenuWindowScaleX = MENU_WINDOW_CLOSED_SCALE;
+      f_MenuWindowScaleX -= MENU_WINDOW_SCALE_STEP;
+      f_MenuWindowScaleY -= MENU_WINDOW_SCALE_STEP;
+      if (f_MenuWindowScaleX < MENU_WINDOW_SCALE_STEP) {
+        f_MenuWindowScaleX = MENU_WINDOW_CLOSED_SCALE;
       }
 
-      if (g_MenuWindowScaleY < MENU_WINDOW_SCALE_STEP) {
-        g_MenuWindowScaleY = MENU_WINDOW_CLOSED_SCALE;
+      if (f_MenuWindowScaleY < MENU_WINDOW_SCALE_STEP) {
+        f_MenuWindowScaleY = MENU_WINDOW_CLOSED_SCALE;
       }
 
-      windowWidth = width * g_MenuWindowScaleX;
-      windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
-      buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
-      buttonHeight = g_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
-      badgeWidth = g_MenuWindowScaleX * NINTENDO_BADGE_WIDTH;
-      badgeStripHeight = g_MenuWindowScaleY * NINTENDO_BADGE_STRIP_HEIGHT;
-      courseWidth = g_MenuWindowScaleX * COURSE_IMAGE_WIDTH;
-      courseStripHeight = g_MenuWindowScaleY * COURSE_IMAGE_STRIP_HEIGHT;
-      pictureWidth = g_MenuWindowScaleX * WINDOW_PICTURE_SIZE;
-      pictureHeight = g_MenuWindowScaleY * WINDOW_PICTURE_SIZE;
-      if (g_MenuWindowScaleX <= MENU_WINDOW_CLOSED_SCALE &&
-          g_MenuWindowScaleY <= MENU_WINDOW_CLOSED_SCALE) {
-        g_MenuWindowState = MENU_WINDOW_CLOSED;
+      windowWidth = width * f_MenuWindowScaleX;
+      windowHalfHeight = (height / 2) * f_MenuWindowScaleY;
+      buttonWidth = f_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
+      buttonHeight = f_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
+      badgeWidth = f_MenuWindowScaleX * NINTENDO_BADGE_WIDTH;
+      badgeStripHeight = f_MenuWindowScaleY * NINTENDO_BADGE_STRIP_HEIGHT;
+      courseWidth = f_MenuWindowScaleX * COURSE_IMAGE_WIDTH;
+      courseStripHeight = f_MenuWindowScaleY * COURSE_IMAGE_STRIP_HEIGHT;
+      pictureWidth = f_MenuWindowScaleX * WINDOW_PICTURE_SIZE;
+      pictureHeight = f_MenuWindowScaleY * WINDOW_PICTURE_SIZE;
+      if (f_MenuWindowScaleX <= MENU_WINDOW_CLOSED_SCALE &&
+          f_MenuWindowScaleY <= MENU_WINDOW_CLOSED_SCALE) {
+        f_MenuWindowState = MENU_WINDOW_CLOSED;
       }
 
       break;
@@ -836,13 +836,13 @@ void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
         G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
     if (index == 0) {
-      buttonX = centerX - (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
+      buttonX = centerX - (s32)(f_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     } else {
-      buttonX = centerX + (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
+      buttonX = centerX + (s32)(f_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     }
 
     buttonY = centerY + windowHalfHeight -
-        (s32)(g_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
+        (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
     growth = 0;
     if (index == chosenButton) {
       pulse = D_80230E9C_ovl_01;
@@ -888,7 +888,7 @@ void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadLargePalette(&gfx, (u8*)D_80230E78_ovl_01 + IMAGE_HEADER_SIZE);
     badgeTop = (s32)(centerY - windowHalfHeight +
-                   (s32)(g_MenuWindowScaleY * NINTENDO_BADGE_OFFSET)) -
+                   (s32)(f_MenuWindowScaleY * NINTENDO_BADGE_OFFSET)) -
         badgeStripRows;
     for (index = 0; index != NINTENDO_BADGE_STRIP_COUNT; index++) {
       LoadTextureBlock(&gfx,
@@ -908,10 +908,10 @@ void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   }
 
   courseTop = (s32)(centerY + windowHalfHeight -
-                  (s32)(g_MenuWindowScaleY * WINDOW_IMAGE_OFFSET_Y)) -
+                  (s32)(f_MenuWindowScaleY * WINDOW_IMAGE_OFFSET_Y)) -
       courseStripRows;
   courseLeft = centerX - (windowWidth * 0.5f) +
-      (s32)(g_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
+      (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
   LoadLargePalette(&gfx, (u8*)D_80230E7C_ovl_01 + IMAGE_HEADER_SIZE);
   for (index = 0; index != COURSE_IMAGE_STRIP_COUNT; index++) {
     LoadTextureBlock(&gfx,
@@ -929,13 +929,13 @@ void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   }
 
   pictureX = centerX + (windowWidth * 0.5f) -
-      (s32)(g_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
+      (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
   /* The original adds the scale here where it multiplies everywhere else */
   pictureY = centerY + windowHalfHeight -
-      (s32)(g_MenuWindowScaleY + WINDOW_IMAGE_OFFSET_Y);
+      (s32)(f_MenuWindowScaleY + WINDOW_IMAGE_OFFSET_Y);
 
   LoadLargePalette(&gfx, D_80230E84_ovl_01);
-  LoadTextureBlock(&gfx, g_MenuWindowImage, G_IM_FMT_CI, G_IM_SIZ_8b,
+  LoadTextureBlock(&gfx, f_MenuWindowImage, G_IM_FMT_CI, G_IM_SIZ_8b,
       WINDOW_PICTURE_SIZE, WINDOW_PICTURE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&gfx, (pictureX - pictureHalfWidth) << 2,
       (pictureY - pictureHalfHeight) << 2, (pictureX + pictureHalfWidth) << 2,
