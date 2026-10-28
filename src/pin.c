@@ -128,13 +128,13 @@ extern s8 f_IsPinOut;
 /* Set by SkipNextPinDraw and cleared by the draw it skips */
 extern s8 f_SkipsNextPinDraw;
 
-extern u8* f_SmallCupTexture;
-extern u8* f_CupTexture;
-extern u8* f_FlagstickTexture;
-extern u8* f_PinShadowTexture;
-extern Mtx f_PinMatrices[][DRAW_BUFFER_COUNT];
-extern Mtx f_PinShadowMatrix;
-extern Mtx f_FlagMatrices[DRAW_BUFFER_COUNT];
+static Mtx f_PinShadowMatrix;
+static Mtx f_FlagMatrices[DRAW_BUFFER_COUNT];
+static u8* f_SmallCupTexture;
+static u8* f_CupTexture;
+static u8* f_FlagstickTexture;
+static u8* f_PinShadowTexture;
+static Mtx f_PinMatrices[CAMERA_COUNT][DRAW_BUFFER_COUNT];
 extern Vtx f_PinVertices[PIN_VERTEX_COUNT];
 extern Vtx f_LargePinVertices[PIN_VERTEX_COUNT];
 extern f32 f_FlagWavePhase;

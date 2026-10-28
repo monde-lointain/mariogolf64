@@ -131,13 +131,13 @@ typedef struct MessageTable {
 /* Where the glyph and message files are in the ROM */
 extern u8 g_GlyphFileRomStart[];
 extern u8 g_MessageFileRomStart[];
-extern void* g_SmallFontImage;
-extern void* g_MediumFontImage;
-extern void* g_LargeFontImage;
-extern void* g_TextIconImage;
-extern void* g_TextGradientImages[2];
-extern void* g_MessageGlyphs;
-extern MessageTable* g_Messages;
+static void* g_SmallFontImage;
+static void* g_MediumFontImage;
+static void* g_LargeFontImage;
+static void* g_TextGradientImages[2];
+static void* g_MessageGlyphs;
+static MessageTable* g_Messages;
+static void* g_TextIconImage;
 
 /*
  * A glyph drawn with its own matrix, so text can be moved a glyph at a

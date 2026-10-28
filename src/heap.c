@@ -46,8 +46,8 @@ typedef struct Heap {
                                      last allocation */
 } Heap; /* size = 0x18 */
 
-extern Heap f_Heaps[HEAP_COUNT];
-extern Heap f_Memory;
+static Heap f_Heaps[HEAP_COUNT];
+static Heap f_Memory;
 
 void AddHeapRegion(s32 heapIndex, void* start, void* end) {
   MemoryBlock* block = start;

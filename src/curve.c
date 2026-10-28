@@ -12,13 +12,13 @@
 
 extern s32 f_PathPointIndex;
 extern s32 f_PathStepIndex;
-extern f32 f_PathPosition[AXIS_COUNT];
-extern f32
-    f_PathSegment[2][AXIS_COUNT]; /* The start and end of the target's line */
-extern f32 f_PathProgress;
-extern f32 f_PathProgressStep;
-extern f32 f_PathStepsPerSegment;
-extern f32 f_PathCatchUp;
+static f32 f_PathPosition[AXIS_COUNT];
+/* The start and end of the target's line */
+static f32 f_PathSegment[2][AXIS_COUNT];
+static f32 f_PathProgress;
+static f32 f_PathProgressStep;
+static f32 f_PathStepsPerSegment;
+static f32 f_PathCatchUp;
 
 void ResetPath(void) {
   f_PathStepIndex = 0;

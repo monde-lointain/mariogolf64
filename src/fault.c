@@ -24,6 +24,8 @@
 /* The room the report's line buffer has before the next common variable */
 #define FAULT_TEXT_SIZE 0x80
 
+#define FAULT_THREAD_STACK_SIZE 0x2000
+
 /* A value of a bit field of a register, and the text that describes it */
 typedef struct RegisterFieldValue {
   u32 mask;
@@ -31,9 +33,19 @@ typedef struct RegisterFieldValue {
   char* text;
 } RegisterFieldValue;
 
-extern OSMesgQueue f_FaultMessageQueue;
-extern OSThread* f_FaultedThread;
-extern s32 f_FaultThreadUnk;
+static OSThread* f_FaultedThread;
+static s32 f_FaultThreadUnk;
+
+/*
+ * The fault thread and its stack. No routine reads them, as the thread's
+ * creation was compiled out, but the bss here holds exactly an OSThread and
+ * then an 8 KB stack.
+ */
+static OSThread f_FaultThread;
+static u8 f_FaultThreadStack[FAULT_THREAD_STACK_SIZE];
+
+/* Never created, as its creation was compiled out with the fault thread's */
+static OSMesgQueue f_FaultMessageQueue;
 
 OSThread* __osGetCurrFaultedThread(void);
 void RunFaultThread(void* arg);

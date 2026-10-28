@@ -210,7 +210,6 @@ extern s32 f_BackdropFadeLevel;
 #define TILE_ANIMATION_SPEED_Z 2
 #define TILE_ANIMATION_UNUSED_ANGLE_OFFSET 0.2f
 #define TILE_VERTEX_COUNT 4
-extern Mtx f_TileMatrices[2][FRAME_TILE_COUNT];
 extern Vtx f_TileVertices[TILE_VERTEX_COUNT];
 extern Vtx f_LastColumnTileVertices[TILE_VERTEX_COUNT];
 
@@ -677,7 +676,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", InitSkyColors);
 
 extern s32 f_SkyEditorColumn;
 extern s32 f_SkyEditorRow;
-extern SkyColors* f_EditedSkyColors;
+static SkyColors* f_EditedSkyColors;
 
 /*
  * While GAME_FLAG_SKY_EDITOR is set, lets controller 2 edit the current sky
@@ -1237,7 +1236,12 @@ void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {
 #define SUN_GLOW_MASK 6
 #define SUN_MASK_TMEM 0x100
 #define LIGHT_YAW_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
-extern Mtx f_SkyModelMatrix;
+static Mtx f_SkyModelMatrix;
+
+/* Read by no routine */
+static u8 D_800E39C8[0x88];
+
+static Mtx f_TileMatrices[2][FRAME_TILE_COUNT];
 
 /*
  * Draws the sky dome around the camera and, when the scene has one, the sun.
@@ -2371,7 +2375,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTileAnimation);
 /* The lower rows' texture coordinates stop a quarter texel short, in 10.5 fixed
  * point */
 #define LOWER_TILE_TEXCOORD_INSET 8
-extern Mtx f_TurnAwayMatrices[2];
+static Mtx f_TurnAwayMatrices[2];
 
 /*
  * Draws HUD_ANIMATION_TURN_AWAY.

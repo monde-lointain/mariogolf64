@@ -197,9 +197,12 @@ extern s32 f_IsMatrixSetupPending;
 extern s32 f_DrawParity;
 /* The characters are drawn at this scale; the rotations are set up but never
  * drawn */
-extern Mtx f_ModelScaleMatrix;
-extern Mtx f_RollMatrix;
-extern Mtx f_HeadingMatrix;
+static Mtx f_ModelScaleMatrix;
+static Mtx f_RollMatrix;
+static Mtx f_HeadingMatrix;
+
+/* Read by no routine */
+static u8 D_800DEA30[120];
 /* Segment branch tables to the render modes; the opaque ones, and the
  * translucent ones */
 extern Gfx f_OpaqueRenderModes[];
@@ -218,9 +221,9 @@ extern Gfx f_BackCulling[];
 /* Written elsewhere */
 extern s32 D_800BE698;
 /* Each slot's matrices, for each draw buffer */
-extern Mtx f_ModelMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
-extern Mtx f_ShadowMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
-extern Mtx f_ShadowProjections[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_ModelMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_ShadowMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_ShadowProjections[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 /* A square, textured with g_ShadowTexture, laid on the ground plane by
  * f_ShadowMatrices */
 extern Vtx f_ShadowVertices[4];

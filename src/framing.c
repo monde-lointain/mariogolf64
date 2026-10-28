@@ -30,12 +30,12 @@
 /* The starting z bounds, also added to the eye's distance */
 #define Z_MARGIN 10.0f
 
-extern f32 f_FramedSphereCenters[FRAMED_SPHERE_CAPACITY][3];
-extern f32 f_FramedSphereRadii[FRAMED_SPHERE_CAPACITY];
-extern s32 f_FramedSphereCount;
-extern f32 f_FramingPitch;
-extern f32 f_FramingYaw;
-extern Mat4 f_FramingRotation;
+static f32 f_FramedSphereCenters[FRAMED_SPHERE_CAPACITY][3];
+static f32 f_FramedSphereRadii[FRAMED_SPHERE_CAPACITY];
+static s32 f_FramedSphereCount;
+static f32 f_FramingPitch;
+static f32 f_FramingYaw;
+static Mat4 f_FramingRotation;
 
 void TransformPoint(Mat4 mf, Vec3 point, Vec3 result);
 float fabsf(float x);

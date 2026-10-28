@@ -151,21 +151,22 @@ typedef struct ShotDebris {
 #define DEBRIS_KIND_ROUGH 4
 #define DEBRIS_KIND_BURIED 6 /* Bunker lies with the ball sunk in the sand */
 
+static Mtx f_RainModelViewMatrix;
+
 /* Each holds an image asset: a header, then texels */
-extern u8* f_RippleImage;
-extern u8* f_ArcImage;
-extern u8* f_DropImage;
-extern u8* f_DivotImage;
-extern u8* f_PlumeImage;
-extern u8* f_CloudImage;
-extern u8* f_ClumpImage;
-extern u8* f_DebrisImage;
-extern u8* f_SpeckleImage;
-extern u8* f_SplashImage;
-extern u8* f_StarImage;
-extern u8* f_DropletImage;
+static u8* f_RippleImage;
+static u8* f_ArcImage;
+static u8* f_DropImage;
+static u8* f_DivotImage;
+static u8* f_PlumeImage;
+static u8* f_CloudImage;
+static u8* f_ClumpImage;
+static u8* f_DebrisImage;
+static u8* f_SpeckleImage;
+static u8* f_SplashImage;
+static u8* f_StarImage;
+static u8* f_DropletImage;
 extern Gfx D_800C3FC0[];
-extern Mtx f_RainModelViewMatrix;
 
 void DrawEffectShadow(Gfx** displayListHead, Effect* effect);
 void DrawDrop(

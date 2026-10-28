@@ -19,14 +19,14 @@
 extern Vtx g_TexturePlaneVertices[6];
 extern Vtx g_ShadedVertices[2][2 * QUAD_VERTEX_COUNT];
 extern s32 f_PlaneTextureScroll;
-extern s32 D_800E1C10;
-extern s32 D_800E1C14;
-extern u8 D_800E1C18;
-extern u8 D_800E1C19;
-extern u8 D_800E1C1A;
-extern u8 D_800E1C1B;
-extern u8 D_800E1C1C;
-extern u8 D_800E1C1D;
+static s32 D_800E1C10;
+static s32 D_800E1C14;
+static u8 D_800E1C18;
+static u8 D_800E1C19;
+static u8 D_800E1C1A;
+static u8 D_800E1C1B;
+static u8 D_800E1C1C;
+static u8 D_800E1C1D;
 
 /*
  * Sets the shaded quads of g_ShadedVertices and two color globals from

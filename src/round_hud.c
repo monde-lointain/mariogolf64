@@ -94,11 +94,9 @@
 
 /* The first asset of each course record's hole images, one per hole */
 extern u16 f_HoleImageAssets[COURSE_RECORD_COUNT];
-extern void* f_HoleImage;
 
 #define HOLE_IMAGE_WIDTH 48
 #define HOLE_IMAGE_HEIGHT 42
-extern void* f_ParImage;
 
 /* Set while the overlay of the course selection is loaded for the hole */
 extern s32 f_IsCourseSelectLoaded;
@@ -153,10 +151,6 @@ extern f32 f_HoleFlagWavePhase;
 #define SCREEN_ORTHO_NEAR 1.0f
 #define SCREEN_ORTHO_FAR 1000.0f
 
-extern Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT]
-                             [HOLE_FLAG_VERTEX_COUNT];
-/* s8 because WaveHoleFlag loads them as signed bytes when it spreads them */
-extern s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 extern s32 D_800C5478;
 
 /*
@@ -188,9 +182,6 @@ extern ArrowShape f_Arrows[ARROW_COUNT];
 #define SHOT_OFFSET_MAX_RADIUS 56.0f
 #define SHOT_OFFSET_UNITS_PER_PIXEL 4
 
-extern s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT];
-extern s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT];
-
 /*
  * The marker is an animated 16x16 image, drawn at an offset from the shot
  * panel. Its asset holds the frames of the animation, then a still frame.
@@ -206,8 +197,6 @@ extern s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT];
 extern s32 f_ShotPanelOffsetY;
 extern s32 f_ShotPanelOffsetX;
 extern s32 f_ShotOffsetMarkerFrame;
-extern s32 f_ShotOffsetMarkerTexelOffset;
-extern void* f_ShotOffsetMarkerImage;
 
 /* The images that a hole's intro shows for the bets and the match standing */
 #define ASSET_LONGEST_DRIVE_IMAGE 0x554
@@ -238,12 +227,9 @@ extern void* f_ShotOffsetMarkerImage;
 #define MATCH_IMAGE_Y 140
 
 extern s32 f_LoadedHoleIntroImages;
-extern void* f_HoleContestImage;
-extern void* f_MatchStandingImage;
 
-/* The ball's recent world positions, which its trail is drawn through */
+/* How many of the ball's recent positions its trail is drawn through */
 #define BALL_TRAIL_LENGTH 128
-extern f32 f_BallTrail[BALL_TRAIL_LENGTH][3];
 extern s32 f_BallTrailHead; /* The latest position */
 
 /*
@@ -334,15 +320,11 @@ extern s32 f_LandingReactionFrame;
 #define LANDING_PANEL_PIVOT_X 72.0f
 #define LANDING_PANEL_PIVOT_Y (-20.0f)
 extern Vtx f_LandingPanelVertices[4];
-extern Mtx f_LandingPanelMatrices[MATRIX_BUFFER_COUNT];
 
 #define RING_TEXTURE_OUTER_RADIUS 62
 
 /* The HUD keeps this far in from the edges of the screen */
 #define HUD_MARGIN 8
-
-extern void* f_DistanceFont;
-extern s32 D_800E21BC;
 
 /* The black bars that grow over the top and bottom of the HUD's area */
 #define LETTERBOX_GROWTH_STEP 2
@@ -357,8 +339,6 @@ extern s32 D_800C308C;
 #define HOLE_IMAGE_MODEL_Y 180.0f
 #define HOLE_IMAGE_MODEL_Z (-500.0f)
 #define HOLE_IMAGE_MODEL_SCALE 0.1f
-
-extern Mtx f_HoleImageMatrix;
 
 /*
  * StartShotEffect's long shot effect, which DrawShotEffect draws, plays a
@@ -391,31 +371,14 @@ extern s32 f_ShotEffect;
 #define DISTANCE_POINT_WIDTH 4
 
 extern void* f_SceneryBillboardHeap;
-extern void* f_WindIconImage;
 extern void* g_ShadowTexture;
 /* The image asset of the club's head that the HUD shows, loaded into
  * f_ClubHeadImage */
 extern s32 f_ClubHeadImageAsset;
-extern void* f_ClubHeadImage;
-/* The selected club's name image, loaded into each buffer in turn as
- * f_ClubNameImageIndex alternates */
-extern void* f_ClubNameImages[2];
 /* The image asset of the lie that the HUD shows, loaded into f_LieImage */
 extern s32 f_LieImageAsset;
-extern void* f_LieImage;
 
 #define ANIMATED_ICON_LABEL_COUNT 3
-/* The images of the animated icon and its labels; see DrawAnimatedIcon */
-extern void* f_AnimatedIconImages[];
-extern void* f_AnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
-
-extern void* f_WindSpeedFont;
-extern void* f_RingImages;
-extern void* f_RestLabelImage;
-extern void* f_FlatLabelImage;
-extern void* f_DownLabelImage;
-extern void* f_UpLabelImage;
-extern void* D_800E2178;
 
 /*
  * The wind indicator is a model in module 9, lit by f_WindArrowLights. It
@@ -478,7 +441,6 @@ extern f32 f_WindIconPulseAngle;
 #define WIND_TEXT_ENV_RED 0x00
 #define WIND_TEXT_ENV_GREEN 0x20
 #define WIND_TEXT_ENV_BLUE 0x7F
-extern Mtx f_WindIndicatorMatrices[2];
 extern Gfx D_80222400[];
 /* The quad that each segment of the ball trail, and of the green grid, moves
  * into place on the screen */
@@ -522,6 +484,75 @@ void func_80216F8C(void);
 
 /* Not static: the original left it to the linker's common block */
 Mtx D_80105278;
+
+/*
+ * The grid drawn over the ground around a shot's target, as
+ * GREEN_GRID_COLUMN_COUNT columns of points that run along the aim. Each point
+ * is tinted by how far it is above or below the target, and the grid's lines
+ * scroll towards the target while it shows.
+ */
+#define GREEN_GRID_COLUMN_COUNT 8
+#define GREEN_GRID_MAX_ROW_COUNT 32
+#define GREEN_GRID_POINT_COUNT \
+  (GREEN_GRID_MAX_ROW_COUNT * GREEN_GRID_COLUMN_COUNT)
+
+/* A point of the ball's trail on the screen, in quarter pixels */
+typedef struct TrailPoint {
+  /* 0x00 */ s32 x;
+  /* 0x04 */ s32 y;
+  /* 0x08 */ s32 depth;
+} TrailPoint; /* size = 0x0C */
+
+static Mtx f_LandingPanelMatrices[MATRIX_BUFFER_COUNT];
+static Mtx f_GreenGridMatrix;
+static Mtx f_BallTrailMatrix;
+static Mtx f_WindIndicatorMatrices[2];
+static Mtx f_ClubHeadIconMatrices[2];
+static Mtx f_LieIconMatrices[2];
+static Mtx f_HoleImageMatrix;
+static Mtx f_ShotEffectMatrices[2];
+static Vec3 f_ShotEffectTranslation;
+static Vec3 f_ShotEffectScale;
+static Vec3 f_ShotEffectRotation;
+static s32 f_ShotOffsetMarkerTexelOffset;
+static void* f_LieImage;
+
+/* Read by no routine */
+static u8 D_800E213C[4];
+
+static void* f_ClubHeadImage;
+/* The selected club's name image, loaded into each buffer in turn as
+ * f_ClubNameImageIndex alternates */
+static void* f_ClubNameImages[2];
+/* The images of the animated icon's labels and of the icon; see
+ * DrawAnimatedIcon */
+static void* f_AnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
+static void* f_AnimatedIconImages[2];
+static void* f_DistanceFont;
+static void* f_WindSpeedFont;
+static void* f_RingImages;
+static void* f_RestLabelImage;
+static void* f_FlatLabelImage;
+static void* f_DownLabelImage;
+static void* D_800E2178;
+static void* f_UpLabelImage;
+static void* f_ParImage;
+static void* f_ShotOffsetMarkerImage;
+static void* f_WindIconImage;
+static s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT];
+static s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT];
+static s32 D_800E21BC;
+static void* f_HoleImage;
+static Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT]
+                             [HOLE_FLAG_VERTEX_COUNT];
+/* s8 because WaveHoleFlag loads them as signed bytes when it spreads them */
+static s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
+static s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
+static TrailPoint f_BallTrailPoints[BALL_TRAIL_LENGTH];
+/* The ball's recent world positions, which its trail is drawn through */
+static f32 f_BallTrail[BALL_TRAIL_LENGTH][3];
+static void* f_HoleContestImage;
+static void* f_MatchStandingImage;
 
 /* Sets up what the hole's drawing needs before its first frame */
 void PrepareHoleDisplay(void) {
@@ -1329,16 +1360,6 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
   return (red << 24) | (green << 16) | (blue << 8) | (alpha & 0xFF);
 }
 
-/*
- * The grid drawn over the ground around a shot's target, as
- * GREEN_GRID_COLUMN_COUNT columns of points that run along the aim. Each point
- * is tinted by how far it is above or below the target, and the grid's lines
- * scroll towards the target while it shows.
- */
-#define GREEN_GRID_COLUMN_COUNT 8
-#define GREEN_GRID_MAX_ROW_COUNT 32
-#define GREEN_GRID_POINT_COUNT \
-  (GREEN_GRID_MAX_ROW_COUNT * GREEN_GRID_COLUMN_COUNT)
 #define GREEN_GRID_SHORT_ROW_COUNT 8 /* For the longest putt */
 #define GREEN_GRID_LANDING_ROW_COUNT 16
 /* With GREEN_GRID_MAX_ROW_COUNT rows, only every other row is sampled, up to
@@ -1384,8 +1405,6 @@ typedef struct GridScreenPoint {
 extern s32 D_800BB0E8;
 extern s32 f_GreenGridAlpha;
 extern f32 f_GreenGridScroll;
-extern Mtx f_GreenGridMatrix;
-extern s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
 
 #ifdef NON_MATCHING
 /*
@@ -1860,16 +1879,7 @@ void ResetBallTrail(void) {
   ((BALL_TRAIL_ALPHA - ((segment) / BALL_TRAIL_SEGMENTS_PER_FADE)) | \
       BALL_TRAIL_COLOR)
 
-/* A point of the ball's trail on the screen, in quarter pixels */
-typedef struct TrailPoint {
-  /* 0x00 */ s32 x;
-  /* 0x04 */ s32 y;
-  /* 0x08 */ s32 depth;
-} TrailPoint; /* size = 0x0C */
-
 extern s32 D_800C5AAC;
-extern TrailPoint f_BallTrailPoints[BALL_TRAIL_LENGTH];
-extern Mtx f_BallTrailMatrix;
 
 /*
  * Draws the ball's trail through its recent positions as screen-space quads
@@ -2295,8 +2305,6 @@ void AdjustHudOffset(void) {
 
 extern Vtx f_ClubHeadIconVertices[4];
 extern Vtx f_LieIconVertices[8];
-extern Mtx f_ClubHeadIconMatrices[2];
-extern Mtx f_LieIconMatrices[2];
 /* The name image of each club slot */
 extern u16 f_ClubNameAssets[];
 
@@ -2642,10 +2650,6 @@ void StartShotEffect(s32 effect) {
 #define LONG_SHOT_GROUP_COUNT 4
 #define HEAVY_LONG_SHOT_QUAD_COUNT 2
 
-extern Mtx f_ShotEffectMatrices[2];
-extern Vec3 f_ShotEffectTranslation;
-extern Vec3 f_ShotEffectScale;
-extern Vec3 f_ShotEffectRotation;
 /* Four groups of eight vertices, each three pairs of triangles */
 extern Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8];
 extern Vtx f_HeavyLongShotVertices[16];

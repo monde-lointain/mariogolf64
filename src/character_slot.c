@@ -43,8 +43,8 @@
 /* The slot's first rotation is taken away from this roll */
 /* Data still in the unsplit data and bss files */
 extern u8 f_EnvColors[ENV_COLOR_COUNT][3];
-extern LookAt f_HiliteLookAts[DRAW_BUFFER_COUNT];
-extern Hilite f_Hilites[DRAW_BUFFER_COUNT];
+static LookAt f_HiliteLookAts[DRAW_BUFFER_COUNT];
+static Hilite f_Hilites[DRAW_BUFFER_COUNT];
 
 /* Sets the characters' alpha, drawing them translucent below 0xFF, and their
  * combiner for the weather */

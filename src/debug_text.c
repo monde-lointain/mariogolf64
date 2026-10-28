@@ -45,9 +45,9 @@ extern u16 f_DebugFont[];
 extern s8 f_DebugTextHighlight;
 extern s32 f_DebugLogShownLineCount;
 extern u16* g_MessageFramebuffer;
-extern u8 f_DebugText[TEXT_ROW_COUNT * TEXT_COLUMN_COUNT];
-extern u8 f_DebugLog[LOG_LINE_COUNT * TEXT_COLUMN_COUNT];
-extern s32 f_DebugLogCursor;
+static u8 f_DebugText[TEXT_ROW_COUNT * TEXT_COLUMN_COUNT];
+static u8 f_DebugLog[LOG_LINE_COUNT * TEXT_COLUMN_COUNT];
+static s32 f_DebugLogCursor;
 
 void SetUpDebugTextDrawing(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

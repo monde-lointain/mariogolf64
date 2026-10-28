@@ -77,12 +77,6 @@ extern s8 f_PendingResultSound;
 extern s32 D_800BE67C;
 extern s32 D_800BE680;
 extern f32 D_800BE684;
-extern CoursePoint f_ShotStartPosition;
-extern f32 f_EndYawFromCup;
-extern f32 f_StartYawFromCup;
-extern s32 f_GreenSoundCount;
-extern s32 f_IsLandingSoundPlayed;
-extern s8 f_PassedPathFlags;
 /* The grid that DisplaceNoiseSquare builds */
 extern s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
 extern s8 f_IsNoiseResetPending;
@@ -258,7 +252,6 @@ extern s32 D_800C5AAC;
 extern s32 D_800BE640;
 extern s32 D_800BE644;
 extern s32 D_800BE648;
-extern SurfaceInfo* f_EndSurfaceInfo;
 extern SimulatedShot g_SimulatedShot;
 extern s32 f_CupViewHoldCount;
 extern s32 g_HoleFlyoverFrame;
@@ -270,19 +263,29 @@ extern s32 f_FlightCameraFlags;
 extern f32 f_CameraYaw;
 extern s32 f_FlightCameraKind;
 extern s32 f_NextCameraPickIndex;
-extern s8 f_CameraPicks[CAMERA_PICK_COUNT];
-extern CoursePoint f_FlightBallPosition;
-extern CoursePoint f_ShotEndPosition;
-extern f32 f_ShotFlightYaw;
-extern s32 D_800DAF50;
+static s8 f_CameraPicks[CAMERA_PICK_COUNT];
+static CoursePoint f_FlightBallPosition;
+static CoursePoint f_ShotEndPosition;
+static CoursePoint f_ShotStartPosition;
+static f32 f_ShotFlightYaw;
+static f32 f_FlaggedStepYaw;
+static f32 f_EndYawFromCup;
+static f32 f_StartYawFromCup;
+static s32 D_800DAF20;
+static Vec3 f_CameraPosition;
+static Vec3 f_LookAtPoint;
+static s32 f_GreenSoundCount;
+static s32 f_IsLandingSoundPlayed;
+static s32 D_800DAF44;
+static s8 f_PassedPathFlags;
+static SurfaceInfo* f_EndSurfaceInfo;
+static s32 D_800DAF50;
 extern s32 D_800BE628;
 extern s32 D_800BE630;
 extern s32 D_800BE64C;
 extern s32 D_800BE658;
 extern s32 D_800BE674;
 extern s32 D_800BE690;
-extern Vec3 f_CameraPosition;
-extern Vec3 f_LookAtPoint;
 
 /* How far the golfer stands along the shot's yaw from the ball */
 #define STANCE_AIM_OFFSET -921.60004f
@@ -554,8 +557,6 @@ void EndFlightCamera(void) {
 #define GROUND_PROBE_MAX_RISE 4608.0f
 
 extern s32 D_800BE678;
-extern s32 D_800DAF20;
-extern s32 D_800DAF44;
 
 /*
  * Starts the flight camera for the simulated shot. It resets the flight state,
@@ -1729,7 +1730,6 @@ extern s32 f_SideViewCount;
 extern s32 f_IsApexViewFar;
 extern s32 f_IsTrailViewClose;
 extern f32 f_CircleAngle;
-extern f32 f_FlaggedStepYaw;
 
 void PlaceAimCamera(void);
 

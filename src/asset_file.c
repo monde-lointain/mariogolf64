@@ -44,7 +44,7 @@ typedef struct AssetTableEntry {
 extern u8 g_AssetArchiveRomStart[];
 
 #define ASSET_TABLE ((AssetTableEntry*)g_AssetArchiveRomStart)
-extern AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
+static AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
 
 void DecodeByteRuns(u8* buffer, EncodedAsset* asset);
 void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset);

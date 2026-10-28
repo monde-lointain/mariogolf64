@@ -15,16 +15,16 @@
 /* Screen coordinates are clamped to this either side of the centre */
 #define SCREEN_COORDINATE_LIMIT 0x400
 
-extern Mat4 g_CpuProjectionMatrix;
-extern Mat4 g_CpuViewingMatrix;
+static Mat4 g_CpuProjectionMatrix;
+static Mat4 g_CpuViewingMatrix;
 /* What a unit at a view depth of one spans on the screen */
-extern f32 g_CpuScreenScaleX;
-extern f32 g_CpuScreenScaleY;
-extern s32 g_CpuViewportCenterX;
-extern s32 g_CpuViewportCenterY;
+static f32 g_CpuScreenScaleX;
+static f32 g_CpuScreenScaleY;
+static s32 g_CpuViewportCenterX;
+static s32 g_CpuViewportCenterY;
 /* The viewport's size over the screen's */
-extern f32 g_CpuViewportWidthRatio;
-extern f32 g_CpuViewportHeightRatio;
+static f32 g_CpuViewportWidthRatio;
+static f32 g_CpuViewportHeightRatio;
 
 void SetCpuProjection(Mtx* projection, Mtx* viewing, Vp* viewport) {
   f32 reciprocal;

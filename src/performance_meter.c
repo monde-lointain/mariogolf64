@@ -27,6 +27,8 @@
 #define READOUT_X 264
 #define READOUT_TOP_Y 2
 #define READOUT_LINE_HEIGHT 8
+/* Room for the longest readout's digits and terminator */
+#define READOUT_TEXT_CAPACITY 32
 
 #define DIGIT_WIDTH 5
 #define DIGIT_HEIGHT 8
@@ -62,13 +64,13 @@ extern u32 f_RdpPipeBarMaximum;
 extern u32 f_RdpPipeBarAverage;
 extern u32 f_RdpTmemBarMaximum;
 extern u32 f_RdpTmemBarAverage;
-extern Mtx f_MeterProjectionMatrix;
-extern Mtx f_MeterViewMatrix;
-extern Mtx f_MeterIdentityMatrix;
-extern Mtx f_MeterScaleMatrix;
-extern Mtx f_MeterTranslationMatrix;
-extern Gfx f_MeterDisplayLists[2][512];
-extern char f_ReadoutText[];
+static Mtx f_MeterProjectionMatrix;
+static Mtx f_MeterViewMatrix;
+static Mtx f_MeterIdentityMatrix;
+static Mtx f_MeterScaleMatrix;
+static Mtx f_MeterTranslationMatrix;
+static Gfx f_MeterDisplayLists[2][512];
+static char f_ReadoutText[READOUT_TEXT_CAPACITY];
 
 /* Draws text made of digits and spaces into *gfxP at the pixel x, y */
 static void DrawDigits(Gfx** gfxP, u16 x, u16 y, char* text) {

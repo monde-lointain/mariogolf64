@@ -134,7 +134,7 @@ extern s32 f_HoleSeed;
  * it were compiled; the loader thread waits on it, so here it is volatile
  */
 extern volatile s32 g_HasLoaderFinished;
-extern OSThread f_LoaderThread;
+static OSThread f_LoaderThread;
 extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
 extern s32 f_CycledCupIndex;

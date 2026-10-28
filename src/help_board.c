@@ -71,10 +71,10 @@
 extern s32 g_MenuRepeatButtons;
 extern s32 D_800FE334;
 extern s32 g_MenuScreen;
-extern void* f_HandImages;
-extern void* f_ArrowImages;
-extern void* f_UnusedImage;
-extern void* f_ChalkboardImage;
+static void* f_HandImages;
+static void* f_ArrowImages;
+static void* f_UnusedImage;
+static void* f_ChalkboardImage;
 /* The open topic, counted from 1, or 0 while the list shows */
 extern s8 f_OpenTopic;
 extern s8 f_TopicPage;

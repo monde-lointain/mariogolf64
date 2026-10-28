@@ -486,7 +486,35 @@ segments:
       - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/nusched }
       - { type: .bss, vram: 0x800D8980, name: ../lib/libnusys/nugfxtaskmgr }
       - { type: .bss, vram: 0x800DAB60, name: game }
-      - { type: bss, vram: 0x800DAC40, name: bss_800DAC40 }
+      - { type: .bss, vram: 0x800DAC40, name: pin }
+      - { type: bss, vram: 0x800DAE10, name: bss_800DAE10 }
+      - { type: .bss, vram: 0x800DAED0, name: terrain }
+      - { type: .bss, vram: 0x800DAEE0, name: shot_camera }
+      - { type: .bss, vram: 0x800DAF60, name: debug_text }
+      - { type: .bss, vram: 0x800DC6E0, name: heap }
+      - { type: .bss, vram: 0x800DC740, name: performance_meter }
+      - { type: .bss, vram: 0x800DE8A0, name: asset_file }
+      - { type: bss, vram: 0x800DE8C0, name: bss_800DE8C0 }
+      - { type: .bss, vram: 0x800DE900, name: sound }
+      - { type: .bss, vram: 0x800DE910, name: character_slot }
+      - { type: .bss, vram: 0x800DE970, name: character }
+      - { type: .bss, vram: 0x800DF0B0, name: fault }
+      - { type: .bss, vram: 0x800E1290, name: music }
+      - { type: .bss, vram: 0x800E12B0, name: play }
+      - { type: .bss, vram: 0x800E16B0, name: cpu_projection }
+      - { type: bss, vram: 0x800E1750, name: bss_800E1750 }
+      - { type: .bss, vram: 0x800E17D0, name: hole_triangles }
+      - { type: .bss, vram: 0x800E1A50, name: hole_loader }
+      - { type: .bss, vram: 0x800E1C00, name: screen_layers }
+      - { type: .bss, vram: 0x800E1C10, name: scene_colors }
+      - { type: .bss, vram: 0x800E1C20, name: help_board }
+      - { type: .bss, vram: 0x800E1C30, name: text }
+      - { type: .bss, vram: 0x800E1C50, name: framing }
+      - { type: .bss, vram: 0x800E1D20, name: curve }
+      - { type: .bss, vram: 0x800E1D60, name: effects }
+      - { type: .bss, vram: 0x800E1DD0, name: round_hud }
+      - { type: .bss, vram: 0x800E3980, name: hole_display }
+      - { type: .bss, vram: 0x800E4C50, name: reaction }
       - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/nuboot }
       - { type: .bss, vram: 0x800E7030, name: ../lib/libmus/src/player }
       - { type: .bss, vram: 0x800E70A0, name: ../lib/libmus/src/aud_dma }

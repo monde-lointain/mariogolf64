@@ -189,10 +189,10 @@ extern s32 f_PromptIndex;
 extern s32 f_PromptFrame;
 extern s32 f_PromptState;
 extern s32 f_PromptChoice;
-extern void* f_HalfTurnImage;
-extern void* f_WipeShapeImage;
-extern void* f_PromptCloudImage;
-extern void* f_YesNoImage;
+static void* f_HalfTurnImage;
+static void* f_WipeShapeImage;
+static void* f_PromptCloudImage;
+static void* f_YesNoImage;
 extern f32 f_ChoiceBobAngle;
 extern Gfx D_800C3FC0[];
 

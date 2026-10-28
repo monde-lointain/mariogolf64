@@ -62,7 +62,7 @@ extern s32 D_800C308C;
 extern s8 D_800C30A4;
 extern s32 g_PlayExit;
 extern s32 g_HoleEndStep;
-extern u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
+static u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 extern s16 D_80104F78;
 extern s32 D_80104F7C;
 extern s32 D_80104F80;

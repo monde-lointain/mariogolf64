@@ -105,7 +105,7 @@ extern s32 f_IsSceneMenuOpen;
 extern AnimatedBox f_SceneMenuBox;
 extern s32 f_SceneMenuScenes[SCENE_MENU_LENGTH];
 extern s32 f_IsFirstDebugUpdate;
-extern s32 f_SceneMenuSelection;
+static s32 f_SceneMenuSelection;
 extern s8 g_ShowsGroundWaves;
 
 void func_8005D9A0(void);

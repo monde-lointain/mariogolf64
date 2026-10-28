@@ -106,14 +106,26 @@ static Lights3 f_ReactionLights =
 
 static s32 f_ReactionChannel = FIRST_REACTION_CHANNEL;
 
-extern s32 f_ReactionCharacter;
-extern s32 f_ReactionAnimation;
-extern s32 f_ReactionFrameCount;
-extern s32 f_HasReactionLight;
-extern EasedView f_EasedView;
-extern CoursePoint f_ReactionSpot;
-extern s32 f_ReactionSpotRoughness;
-extern s8 f_HasReactionSpot;
+static s32 f_ReactionCharacter;
+static s32 f_ReactionAnimation;
+static s32 f_ReactionFrameCount;
+static s32 f_HasReactionLight;
+
+/* Read by no routine */
+static u8 D_800E4C60[24];
+
+static EasedView f_EasedView;
+
+/* Read by no routine */
+static u8 D_800E4C94[4];
+
+static CoursePoint f_ReactionSpot;
+static s32 f_ReactionSpotRoughness;
+
+/* Read by no routine */
+static u8 D_800E4CA8[32];
+
+static s8 f_HasReactionSpot;
 
 s32 GetAnimationFrameCount(u32 slotIndex, s32 id);
 void FrameMarioReaction(u32 slotIndex, CameraView* view);

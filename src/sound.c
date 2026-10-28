@@ -102,7 +102,7 @@ extern SongChange f_PendingSongChange;
 extern s32 f_SongId;
 /* The start and end of each song in the ROM, in turn */
 extern u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2];
-extern u32 f_LastAudioFrame;
+static u32 f_LastAudioFrame;
 
 musHandle StartSoundEffect(s32 soundId);
 musHandle StartLoadedSong(void);
