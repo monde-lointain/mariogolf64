@@ -72,7 +72,7 @@ enum PauseOptionKind {
   PAUSE_OPTION_KIND_WIND_SPEED,
   PAUSE_OPTION_KIND_WIND_DIRECTION,
   PAUSE_OPTION_KIND_LIE,
-  /* Shows PAUSE_OPTION_FIRST_STROKE_MESSAGE while f_CanGiveUp is clear */
+  /* Shows PAUSE_MESSAGE_FIRST_STROKE while f_CanGiveUp is clear */
   PAUSE_OPTION_KIND_GIVE_UP = 7
 };
 
@@ -81,11 +81,31 @@ enum PauseOptionKind {
 
 #define PAUSE_LAYOUT_MAX_OPTIONS 9
 #define PAUSE_OPTION_MESSAGE_BASE 0x77
-/* "Can't give up on 1st stroke." */
-#define PAUSE_OPTION_FIRST_STROKE_MESSAGE 0xE
+
+/* The pause menu's messages, counted from PAUSE_OPTION_MESSAGE_BASE */
+enum PauseMessage {
+  PAUSE_MESSAGE_COURSE_VIEW,
+  PAUSE_MESSAGE_SCORE_CARD,
+  PAUSE_MESSAGE_GIVE_UP,
+  PAUSE_MESSAGE_SAVE_AND_QUIT,
+  PAUSE_MESSAGE_QUIT_GAME,
+  PAUSE_MESSAGE_RETURN_TO_MENU,
+  PAUSE_MESSAGE_HOLE_OUT,
+  PAUSE_MESSAGE_CHANGE_WIND_DIRECTION,
+  PAUSE_MESSAGE_CHANGE_WIND_SPEED,
+  PAUSE_MESSAGE_START_OVER,
+  PAUSE_MESSAGE_CHANGE_WEATHER,
+  PAUSE_MESSAGE_CHANGE_TERRAIN,
+  PAUSE_MESSAGE_GRID_COLOR,
+  PAUSE_MESSAGE_CONTROLS,
+  /* "Can't give up on 1st stroke." */
+  PAUSE_MESSAGE_FIRST_STROKE,
+  /* "Basic Controls", which no option shows */
+  PAUSE_MESSAGE_BASIC_CONTROLS
+};
 
 typedef struct PauseOption {
-  /* Its label, counted from PAUSE_OPTION_MESSAGE_BASE */
+  /* Its label, a PAUSE_MESSAGE_* value */
   /* 0x0 */ s16 message;
   /* A PAUSE_ACTION_* value, done when the option is chosen */
   /* 0x2 */ s16 action;
@@ -857,7 +877,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
     if (f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind ==
         PAUSE_OPTION_KIND_GIVE_UP) {
       if (!f_CanGiveUp) {
-        message = PAUSE_OPTION_FIRST_STROKE_MESSAGE;
+        message = PAUSE_MESSAGE_FIRST_STROKE;
       }
     }
 
