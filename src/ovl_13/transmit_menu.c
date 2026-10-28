@@ -420,10 +420,6 @@ s32 WriteExperienceToCartridge(s32 characterIndex);
 void SetNoticeState(s32 state, s32 message);
 s32 GetNoticeState(void);
 
-/* The buttons of every controller together, which any player may use on the
- * menu */
-extern ControllerState f_TransmitController;
-
 extern s32 D_800C42D0;
 
 /* Results of opening and accessing the Game Boy cartridges, after the notice
@@ -467,6 +463,10 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file);
 s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId* header, NUContPakFile* file);
 
 s32 RoundedWholePart(f32 value);
+
+/* The buttons of every controller together, which any player may use on the
+ * menu */
+static ControllerState f_TransmitController;
 
 /* Debug code that writes the cartridge RAM of controller 1's Game Boy cartridge
  * to the host */

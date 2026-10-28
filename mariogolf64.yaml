@@ -790,7 +790,9 @@ segments:
       - [0x16CD70, .data, ovl_13/cursor_box]
       - [0x16CDD0, .rodata, ovl_13/transmit_menu]
       - [0x16D640, .rodata, ovl_13/cursor_box]
-      - { start: 0x16D650, type: bss, vram: 0x801FC4C0 }
+      - { start: 0x16D650, type: bss, vram: 0x801FC4C0, name: bss_801FC4C0 }
+      - { type: .bss, vram: 0x801FC500, name: ovl_13/cursor_box }
+      - { type: .bss, vram: 0x801FC5C0, name: ovl_13/transmit_menu }
 
   - name: ovl_14
     type: code

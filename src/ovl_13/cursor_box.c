@@ -14,9 +14,6 @@
  * give */
 #define CURSOR_BOX_HALF_SIZE 24
 
-extern Mtx f_CursorBoxProjection;
-extern Mtx f_CursorBoxTranslations[2]; /* One per draw buffer */
-
 static void* f_CursorBoxImage = NULL;
 static Vtx f_CursorBoxVertices[] = {
     {{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -25,6 +22,9 @@ static Vtx f_CursorBoxVertices[] = {
     {{{24, 24, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
 static f32 f_CursorCornerPhases[] = {0.0f, 1.5707964f, 3.1415927f, 4.712389f};
+
+static Mtx f_CursorBoxProjection;
+static Mtx f_CursorBoxTranslations[2]; /* One per draw buffer */
 
 /* Reads the cursor box image into the given buffer and sizes the quad to it */
 void LoadCursorBox(void* image) {
