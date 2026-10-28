@@ -19,6 +19,8 @@
 #define LOG_LINE_COUNT 120
 /* The log is shown above this many rows at the bottom of the grid */
 #define LOG_BOTTOM_MARGIN 3
+/* How many of the log's last lines are shown */
+#define LOG_SHOWN_LINE_COUNT 10
 
 #define GLYPH_SIZE 8
 #define GLYPHS_PER_FONT_ROW 32
@@ -42,10 +44,17 @@
 
 #define HEX_DIGIT_COUNT 8
 
-extern u16 f_DebugFont[];
-extern s8 f_DebugTextHighlight;
-extern s32 f_DebugLogShownLineCount;
-extern u16* g_MessageFramebuffer;
+/*
+ * Its 0x1800 bytes are twice the font's 4-bit texels, and the second half
+ * is zero
+ */
+static u16 f_DebugFont[FONT_WIDTH * FONT_HEIGHT / 2] = {
+#include "assets/debug_text/debug_font.ia4.inc.c"
+};
+u16* g_MessageFramebuffer = NULL;
+static s8 f_DebugTextHighlight = 0;
+static s32 f_DebugLogShownLineCount = LOG_SHOWN_LINE_COUNT;
+
 static u8 f_DebugText[TEXT_ROW_COUNT * TEXT_COLUMN_COUNT];
 static u8 f_DebugLog[LOG_LINE_COUNT * TEXT_COLUMN_COUNT];
 static s32 f_DebugLogCursor;

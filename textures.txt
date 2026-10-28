@@ -3,3 +3,4 @@
 # as build/assets/.../NAME.FORMAT.inc.c.
 0x91F28 i8     32 32 assets/game/noise_texture.i8.png
 0x92328 rgba16 32 32 assets/game/flame_gradient_texture.rgba16.png
+0x99AE0 ia4   256 24 assets/debug_text/debug_font.ia4.png
