@@ -129,14 +129,6 @@
 #define STATS_DIRECTION_UP 2
 #define STATS_DIRECTION_DOWN 3
 
-/* The presets of func_80217B88; two of them have a variant that four players
- * take instead */
-#define MENU_UNKE_PRESET_COUNT 7
-#define MENU_UNKE_PRESET_FIRST 0
-#define MENU_UNKE_PRESET_FIRST_FOUR_PLAYER 1
-#define MENU_UNKE_PRESET_SECOND 5
-#define MENU_UNKE_PRESET_SECOND_FOUR_PLAYER 6
-
 /*
  * The rows of the stats panel slide across together: D_80230784 holds their
  * offsets, and D_802307A8 holds where each slide after the first sends them

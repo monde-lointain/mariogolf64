@@ -133,9 +133,6 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define MENU_LAYER_UNK8 (1 << 3)
 #define MENU_LAYER_UNK10 (1 << 4)
 
-/* Past func_80217B88's presets, so that it clears the values instead */
-#define MENU_UNKE_PRESET_NONE 10
-
 /* Values of D_801B60B9, the replay that leaving the menus starts */
 #define REPLAY_KIND_NONE 0
 #define REPLAY_KIND_RING_SHOT 2
