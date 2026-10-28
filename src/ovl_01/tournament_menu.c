@@ -22,44 +22,15 @@
 #include "text.h"
 #include "variables.h"
 
-extern s32 f_MenuWindowState;
-/* How far the window has opened across and down, from 0 to 1 */
-extern f32 f_MenuWindowScaleX;
-extern f32 f_MenuWindowScaleY;
-extern s32 D_80230E9C_ovl_01;
-extern s32 D_80230EA0_ovl_01;
-/* The images that the window can show, and the buffer that holds the one it
- * shows */
-extern AssetId f_MenuWindowImageAssets[15];
-extern void* f_MenuWindowImage;
-
-extern s32 D_80230F68_ovl_01;
-extern void* D_80230E70_ovl_01;
-extern void* D_80230E74_ovl_01;
-extern void* D_80230E78_ovl_01;
-extern void* D_80230E7C_ovl_01;
-extern void* D_80230E84_ovl_01;
-/* The table of images that func_802269AC picks from */
 /* The intensity image of D_80230E70 that func_802287EC draws, in two strips */
 #define TOURNAMENT_BANNER_WIDTH 256
 #define TOURNAMENT_BANNER_STRIP_HEIGHT 32
 #define TOURNAMENT_BANNER_STRIP_COUNT 2
 
+/* The table of images that func_802269AC picks from */
 #define TOURNAMENT_IMAGE_ROW_COUNT 15
 #define TOURNAMENT_IMAGE_COLUMN_COUNT 4
 
-extern s16 D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT]
-                            [TOURNAMENT_IMAGE_COLUMN_COUNT];
-extern u8 D_80230F40_ovl_01;
-extern s32 D_80230F5C_ovl_01;
-extern s32 D_80230F60_ovl_01;
-extern s32 D_80230F64_ovl_01;
-extern s32 D_80230F70_ovl_01;
-extern s32 D_80230F74_ovl_01;
-extern s32 D_80230F78_ovl_01;
-extern s32 D_80230F7C_ovl_01;
-extern u8 D_80230F80_ovl_01;
-extern void* D_80230F44_ovl_01;
 /* func_8022A43C stretches the menu banner of D_80230F44 into the two panels
  * behind the code screen */
 #define CODE_UPPER_PANEL_LEFT 28
@@ -70,7 +41,6 @@ extern void* D_80230F44_ovl_01;
 #define CODE_LOWER_PANEL_TOP 160
 #define CODE_LOWER_PANEL_WIDTH 280
 #define CODE_LOWER_PANEL_STRIP_HEIGHT 20
-extern void* D_80230F48_ovl_01;
 /* The "CODE ENTRY" bar of D_80230F48 that func_8022A090 draws, in 8-row strips
  */
 #define CODE_ENTRY_BAR_WIDTH 256
@@ -78,9 +48,6 @@ extern void* D_80230F48_ovl_01;
 #define CODE_ENTRY_BAR_STRIP_COUNT 4
 #define CODE_ENTRY_BAR_LEFT 32
 #define CODE_ENTRY_BAR_TOP 140
-extern void* D_80230F4C_ovl_01;
-extern void* D_80230F50_ovl_01;
-extern void* D_80230F54_ovl_01;
 /*
  * func_8022A8F4 points at the chosen key with the 24x24 hand of
  * ASSET_POINTING_HAND in D_80230F50, which sways a pixel to the right each
@@ -99,8 +66,6 @@ extern void* D_80230F54_ovl_01;
  */
 #define CLUB_TOURNAMENT_CODE_COUNT 36
 #define CLUB_TOURNAMENT_CODE_LENGTH 8
-
-extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
 
 /* What the club tournament code prompt shows */
 enum ClubCodeState {
@@ -130,8 +95,6 @@ enum ClubCodeState {
 #define CODE_GLYPH_FIRST_X 40
 #define CODE_GLYPH_FIRST_Y 62
 #define CODE_GLYPH_NONE -1
-extern s8 D_80230FAC_ovl_01[CODE_KEYBOARD_ROW_COUNT]
-                           [CODE_KEYBOARD_COLUMN_COUNT];
 
 /* What func_80228C00 is doing, in D_80230F70 */
 enum ClubCodePhase {
@@ -168,22 +131,13 @@ enum CodeKeyResult {
 #define CODE_CURSOR_FIRST_X -42
 #define CODE_CURSOR_Y -50.0f
 #define CODE_CURSOR_SCALE 0.6f
-extern Vtx D_80231138_ovl_01[MENU_CURSOR_VERTEX_COUNT];
-extern f32 D_80231180_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
-                                                           corner's colour */
 
 /* Where the prompt's two messages are drawn */
 #define CLUB_CODE_PROMPT_X 56
 #define CLUB_CODE_INCORRECT_X 24
 #define CLUB_CODE_MESSAGE_Y 180
 
-extern s32 D_80230F6C_ovl_01;
-extern u8 D_80230F84_ovl_01[CODE_KEYBOARD_ROW_COUNT]
-                           [CODE_KEYBOARD_COLUMN_COUNT];
-extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT]
-                           [CLUB_TOURNAMENT_CODE_LENGTH];
 extern s32 D_80105DC4;
-extern s32 D_80231134_ovl_01; /* The tournament code byte being edited */
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC8;
 extern s32 D_801B7070;
@@ -214,6 +168,147 @@ extern s32 D_80105DCC;
 /* The window's choice in D_80230F80, which left and right toggle */
 #define CLUB_CHOICE_YES 0
 #define CLUB_CHOICE_NO 1
+
+static void* D_80230E70_ovl_01 = NULL;
+static void* D_80230E74_ovl_01 = NULL;
+static void* D_80230E78_ovl_01 = NULL;
+static void* D_80230E7C_ovl_01 = NULL;
+/* The buffer that holds the image the window shows */
+static void* f_MenuWindowImage = NULL;
+static void* D_80230E84_ovl_01 = NULL;
+/* A MENU_WINDOW_* value */
+static s32 f_MenuWindowState = MENU_WINDOW_OPENING;
+/* How far the window has opened across and down, from 0 to 1 */
+static f32 f_MenuWindowScaleX = 0.0f;
+static f32 f_MenuWindowScaleY = 0.0f;
+/* Read by no routine */
+static s32 D_80230E94_ovl_01[2] = {0, 0};
+static s32 D_80230E9C_ovl_01 = 0;
+static s32 D_80230EA0_ovl_01 = 0;
+/* The images that the window can show */
+static AssetId f_MenuWindowImageAssets[15] = {0x07C0, 0x0750, 0x07A4, 0x0742,
+    0x0788, 0x07B2, 0x07CE, 0x07D8, 0x076C, 0x0796, 0x07EA, 0x075E, 0x077A,
+    0x0988, 0x0958};
+/* The image files that func_802269AC picks from, by row and column */
+// clang-format off
+static s16 D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT]
+                            [TOURNAMENT_IMAGE_COLUMN_COUNT] = {
+  { 0x07B8, 0x07B9, 0x07BA, 0x07BB },
+  { 0x0748, 0x0749, 0x074A, 0x074B },
+  { 0x079C, 0x079D, 0x079E, 0x079F },
+  { 0x073A, 0x073B, 0x073C, 0x073D },
+  { 0x0780, 0x0781, 0x0782, 0x0783 },
+  { 0x07AA, 0x07AB, 0x07AC, 0x07AD },
+  { 0x07C6, 0x07C7, 0x07C8, 0x07C9 },
+  { 0x07D4, 0x07D5, 0x07D6, 0x07D7 },
+  { 0x0764, 0x0765, 0x0766, 0x0767 },
+  { 0x078E, 0x078F, 0x0790, 0x0791 },
+  { 0x07E2, 0x07E3, 0x07E4, 0x07E5 },
+  { 0x0756, 0x0757, 0x0758, 0x0759 },
+  { 0x0772, 0x0773, 0x0774, 0x0775 },
+  { 0x0980, 0x0981, 0x0982, 0x0983 },
+  { 0x0957, 0x0957, 0x0957, 0x0957 }
+};
+// clang-format on
+/* Read by no routine */
+static s32 D_80230F3C_ovl_01 = 0;
+static u8 D_80230F40_ovl_01 = 0;
+static void* D_80230F44_ovl_01 = NULL;
+static void* D_80230F48_ovl_01 = NULL;
+static void* D_80230F4C_ovl_01 = NULL;
+static void* D_80230F50_ovl_01 = NULL;
+static void* D_80230F54_ovl_01 = NULL;
+/* Read by no routine */
+static s32 D_80230F58_ovl_01 = 0;
+static s32 D_80230F5C_ovl_01 = 0;
+static s32 D_80230F60_ovl_01 = 0;
+static s32 D_80230F64_ovl_01 = 0;
+static s32 D_80230F68_ovl_01 = 0;
+/* A CLUB_CODE_STATE_* value */
+static s32 D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
+/* A CLUB_CODE_PHASE_* value */
+static s32 D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
+static s32 D_80230F74_ovl_01 = 0;
+static s32 D_80230F78_ovl_01 = 0;
+static s32 D_80230F7C_ovl_01 = 0;
+/* A CLUB_CHOICE_* value */
+static u8 D_80230F80_ovl_01 = CLUB_CHOICE_YES;
+/* The keyboard's keys */
+static u8
+    D_80230F84_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
+        {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'},
+        {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'},
+        {'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'},
+        {'U', 'V', 'W', 'X', 'Y', 'Z', CODE_KEY_BLANK, CODE_KEY_BLANK,
+            CODE_KEY_BACK, CODE_KEY_END}};
+/* Each key's glyph */
+static s8
+    D_80230FAC_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+        {10, 11, 12, 13, 14, 15, 16, 17, 18, 19},
+        {20, 21, 22, 23, 24, 25, 26, 27, 28, 29},
+        {30, 31, 32, 33, 34, 35, CODE_GLYPH_NONE, CODE_GLYPH_NONE, 36, 37}};
+/* The code entered so far */
+static u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH] = {CLUB_CODE_NO_CHAR,
+    CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR,
+    CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR};
+/* The codes, each padded with CLUB_CODE_NO_CHAR */
+// clang-format off
+static u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT]
+                           [CLUB_TOURNAMENT_CODE_LENGTH] = {
+  { '0', '0', '0', '0', '0', '0', '0', '0' },
+  { 'K', 'O', 'D', 'E', 'R', 'A', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR },
+  { 'T', 'A', 'K', 'A', 'M', 'A', 'T', 'U' },
+  { 'K', 'A', 'O', 'R', 'U', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR },
+  { 'M', 'U', 'R', 'A', 'I', 'S', 'H', 'I' },
+  { 'N', 'O', 'R', 'I', 'O', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR },
+  { '6', '6', '6', '6', '6', '6', '6', '6' },
+  { '7', '7', '7', '7', '7', '7', '7', '7' },
+  { '8', '8', '8', '8', '8', '8', '8', '8' },
+  { '9', '9', '9', '9', '9', '9', '9', '9' },
+  { 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A' },
+  { 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B' },
+  { 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C' },
+  { 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D' },
+  { 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E' },
+  { 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
+  { 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G' },
+  { 'H', 'H', 'H', 'H', 'H', 'H', 'H', 'H' },
+  { 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I' },
+  { 'J', 'J', 'J', 'J', 'J', 'J', 'J', 'J' },
+  { 'K', 'K', 'K', 'K', 'K', 'K', 'K', 'K' },
+  { 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L' },
+  { 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M' },
+  { 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N' },
+  { 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O' },
+  { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' },
+  { 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q' },
+  { 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R' },
+  { 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S' },
+  { 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T' },
+  { 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U' },
+  { 'V', 'V', 'V', 'V', 'V', 'V', 'V', 'V' },
+  { 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W' },
+  { 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X' },
+  { 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y' },
+  { 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z' }
+};
+// clang-format on
+/* Read by no routine; the first 14 values of main_menu.c's D_8022F8F4 */
+static s32 D_802310FC_ovl_01[14] = {
+    0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13};
+/* The tournament code byte being edited */
+static s32 D_80231134_ovl_01 = 0;
+static Vtx D_80231138_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+    {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
+    {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
+/* Read by no routine */
+static s32 D_80231178_ovl_01[2] = {0, 0};
+/* The phase of each corner's color */
+static f32 D_80231180_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+    0.0f, 2.0f, 4.0f, 6.0f};
 
 Boolean IsNintendoClubTournament(void);
 s32 GetClubTournamentCourseTitleMessage(void);
