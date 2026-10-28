@@ -1006,7 +1006,7 @@ extern s8 f_NeedsIdentityMatrix;
 extern CameraMatrices f_CameraMatrices[2 * 2];
 /* The next free vertex of the frame's vertex buffer */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
-extern s32 f_HasThreeFrameBuffers;
+extern s32 g_HasThreeFrameBuffers;
 extern s32 f_FadeAlpha;
 extern s32 f_FadeColor;
 /* Toggled by a debug button; nothing reads it */
@@ -2020,7 +2020,7 @@ s32 DrawGame(void) {
 
   if (IsGameFlagSet(1)) {
     PrintDebugText(
-        !f_HasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
+        !g_HasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
     sprintf(g_PrintBuffer, "%2d draw/sec", g_FramesPerSecond);
     PrintDebugText(g_PrintBuffer, 3, 5);
   }

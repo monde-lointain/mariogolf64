@@ -53,7 +53,7 @@
 #define MAIN_LOOP_START 0
 #define MAIN_LOOP_RUNNING (-1)
 
-/* Values of g_DebugHaltState. Holding HALT_BUTTONS on the first controller
+/* Values of f_DebugHaltState. Holding HALT_BUTTONS on the first controller
    while halting is allowed halts the game and hands the console over to
    the development debugger. */
 #define HALT_STATE_ALLOWED 1
@@ -86,7 +86,7 @@
 /* A ControllerState counts the stick as pressing a direction past this */
 #define STATE_STICK_DIRECTION_MIN 30
 
-extern volatile u8 g_DebugHaltState;
+extern volatile u8 f_DebugHaltState;
 extern u16* f_Framebuffers[FRAMEBUFFER_COUNT];
 extern s32 f_RetraceCount;
 extern s32 f_FramesThisSecond;
@@ -289,7 +289,7 @@ void mainproc(void* arg) {
         osViSwapBuffer(g_MessageFramebuffer);
       }
 
-      if (g_DebugHaltState == HALT_STATE_HALTED) {
+      if (f_DebugHaltState == HALT_STATE_HALTED) {
         EnterDevelopmentDebugger(100);
       }
     }
@@ -517,13 +517,13 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
       UpdateAudio();
       if (g_FrameStepState < FRAME_STEP_PAUSED) {
         ReadControllers();
-        if (g_DebugHaltState != HALT_STATE_HALTED) {
+        if (f_DebugHaltState != HALT_STATE_HALTED) {
           UpdateGame();
           DrawGame();
           UpdateOverlays();
-          if (g_DebugHaltState == HALT_STATE_ALLOWED &&
+          if (f_DebugHaltState == HALT_STATE_ALLOWED &&
               (g_MenuControllerData[0].button & HALT_BUTTONS) == HALT_BUTTONS) {
-            g_DebugHaltState = HALT_STATE_HALTED;
+            f_DebugHaltState = HALT_STATE_HALTED;
           }
         }
 
