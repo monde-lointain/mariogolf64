@@ -75,6 +75,12 @@ extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
 extern s16 D_800C2278[][COURSE_FILE_COUNT];
 extern void* D_800FBE38[COURSE_FILE_COUNT];
 
+/* The size of a course's tournament trophy images */
+typedef struct TrophySize {
+  s8 width;
+  s8 height;
+} TrophySize;
+
 /* An image buffer of the menu overlay */
 extern u8 g_MenuImageBuffer[];
 void* GetMenuImageBuffer(void);

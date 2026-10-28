@@ -123,11 +123,6 @@
 #define MESSAGE_POINTS_TO_NEXT_COURSE 0x163
 #define MESSAGE_ALL_COURSES_OPEN 0x164
 
-typedef struct TrophySize {
-  s8 width;
-  s8 height;
-} TrophySize;
-
 typedef struct TrophyPosition {
   s32 x;
   u32 y;
