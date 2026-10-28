@@ -157,16 +157,6 @@ extern u8 D_801323E6;
 extern u8 g_OptionBits;
 /* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
 extern u8 g_SoundOptionBits;
-/* Whether the options screen's erase window is up */
-extern u8 g_IsEraseWindowUp;
-/* The sound test's sound, song and settings */
-extern s32 g_SoundTestSound;
-extern s32 g_SoundTestSong;
-extern s32 g_SoundTestSoundReverb;
-extern s32 g_SoundTestSongReverb;
-extern f32 g_SoundTestSoundFrequency;
-extern f32 g_SoundTestSongFrequency;
-extern s32 g_SoundTestSongTempo;
 extern s32 D_8022BE18_ovl_01;
 extern s32 D_801B609C;
 extern s32 D_800FBD40[];
@@ -1851,20 +1841,6 @@ void func_801FA1B8_ovl_01(void) {
   }
 }
 
-/* The options screen's choices; game flag 0x55 adds the sound test's */
-#define OPTIONS_CHOICE_UNK0 0
-#define OPTIONS_CHOICE_MONO 1
-#define OPTIONS_CHOICE_UNK2 2
-#define OPTIONS_CHOICE_ERASE_SAVE_DATA 3
-#define OPTIONS_CHOICE_COUNT 4
-#define OPTIONS_CHOICE_SONG 4
-#define OPTIONS_CHOICE_SONG_REVERB 5
-#define OPTIONS_CHOICE_SONG_FREQUENCY 6
-#define OPTIONS_CHOICE_SONG_TEMPO 7
-#define OPTIONS_CHOICE_SOUND 8
-#define OPTIONS_CHOICE_SOUND_REVERB 9
-#define OPTIONS_CHOICE_SOUND_FREQUENCY 10
-#define OPTIONS_SOUND_TEST_CHOICE_COUNT 21
 #define OPTIONS_TEXT_SLOT_COUNT 11
 #define SOUND_OPTION_TOGGLED 0x6F
 #define SOUND_ERASE_WINDOW_OPENED 0x4A

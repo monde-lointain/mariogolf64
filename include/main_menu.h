@@ -32,6 +32,32 @@ extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
 
 extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
 
+/* The options screen's choices; game flag 0x55 adds the sound test's */
+#define OPTIONS_CHOICE_UNK0 0
+#define OPTIONS_CHOICE_MONO 1
+#define OPTIONS_CHOICE_UNK2 2
+#define OPTIONS_CHOICE_ERASE_SAVE_DATA 3
+#define OPTIONS_CHOICE_COUNT 4
+#define OPTIONS_CHOICE_SONG 4
+#define OPTIONS_CHOICE_SONG_REVERB 5
+#define OPTIONS_CHOICE_SONG_FREQUENCY 6
+#define OPTIONS_CHOICE_SONG_TEMPO 7
+#define OPTIONS_CHOICE_SOUND 8
+#define OPTIONS_CHOICE_SOUND_REVERB 9
+#define OPTIONS_CHOICE_SOUND_FREQUENCY 10
+#define OPTIONS_SOUND_TEST_CHOICE_COUNT 21
+
+/* Whether the options screen's erase window is up */
+extern u8 g_IsEraseWindowUp;
+/* The sound test's sound, song and settings */
+extern s32 g_SoundTestSound;
+extern s32 g_SoundTestSong;
+extern s32 g_SoundTestSoundReverb;
+extern s32 g_SoundTestSongReverb;
+extern f32 g_SoundTestSoundFrequency;
+extern f32 g_SoundTestSongFrequency;
+extern s32 g_SoundTestSongTempo;
+
 /*
  * The menus set the top byte of g_MapCamera's view mode. Reading it as a
  * byte of the field rather than of the whole camera lets the compiler move
