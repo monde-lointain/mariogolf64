@@ -388,7 +388,7 @@ segments:
       - [0x9FA60, .data, fireworks]
       - [0xA06B0, .data, effects]
       - [0xA0870, .data, round_hud]
-      - [0xA12E0, data]
+      - [0xA12E0, .data, hole_display]
       - [0xA27A0, .data, reaction]
       - [0xA27F0, .data, password]
       - [0xA2AB0, .data, ../lib/libmus/src/player]
