@@ -23,6 +23,7 @@
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
+#include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "overlay_manager.h"
@@ -34,6 +35,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "sram.h"
 #include "text.h"
 #include "transfer_pak.h"
 #include "variables.h"
@@ -46,6 +48,10 @@
 
 /* The module that the menus draw as */
 #define MODULE_MENU 2
+
+/* InitPlay's kind that loads no game state and skips PrepareHoleDisplay, as
+ * the menus have set them up already */
+#define PLAY_KIND_WITHOUT_HOLE_DISPLAY 3
 
 /* The title screen's rows, which func_801F70F0 moves between */
 #define TITLE_CHOICE_NEW_GAME 0
@@ -240,6 +246,95 @@ extern void* D_800FBDFC[2];
 extern u8
     D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers shows the course */
 
+/* What func_801F4C78 reads as the menu screen changes */
+extern s8 D_800C1FF0; /* The screen whose assets were last read */
+extern u16 D_800C2028[MENU_SCREEN_COUNT]; /* Each screen's image's asset ID */
+extern u16 D_800C2064[7];
+extern s16 D_800C20D4[2];
+extern u16 D_800C20E0[][12];
+extern void* D_800FBE30[2];
+extern void* D_800FC6A0;
+extern void* D_800FC898;
+extern void* D_800FF180[2];
+extern void* D_800FF4C4[2];
+extern void* D_801052C4[2];
+extern void* D_80106100;
+extern void* D_8012D3AC;
+extern void* D_8012F4B0[7];
+extern s8 D_801323D0;
+extern s8 D_801B60C5;
+extern u8 D_801B70F0[MAXCONTROLLERS];
+extern void* D_801B93E0[5];
+extern s32 D_8022BE08_ovl_01;
+extern s16 D_8022BE8A_ovl_01;
+extern u8 D_8022BE94_ovl_01;
+extern s32 D_8022F848_ovl_01[]; /* The star's frames */
+extern u8 D_8022F8CC_ovl_01;
+extern u8 D_8022F8CE_ovl_01;
+extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
+
+void InitPlay(s32 kind);
+/* Defined as returning s8, but their callers here use the whole register */
+s32 func_8005DE00(void);
+s32 func_8005DE20(void);
+s32 func_8005DE40(void);
+void func_8005C674(s32 arg0, s32 arg1);
+void func_8005D334(void);
+void func_801F6B20_ovl_01(void);
+void func_801F6B28_ovl_01(void);
+void func_801F70F0_ovl_01(void);
+void func_801F7CD0_ovl_01(void);
+void func_801F7D28_ovl_01(void);
+void func_801F8BAC_ovl_01(void);
+void func_801F93D8_ovl_01(void);
+void func_801F9C58_ovl_01(void);
+void func_801F9E38_ovl_01(void);
+void func_801F9FF8_ovl_01(void);
+void func_801FA20C_ovl_01(void);
+void func_801FADBC_ovl_01(void);
+void LeaveMenuWithWipe(void);
+void LeaveMenuWithCourseWipe(void);
+void func_801FB11C_ovl_01(void);
+void func_801FB15C_ovl_01(void);
+void func_80209500_ovl_01(void);
+void func_8020B2C4_ovl_01(void* buffer, s16 bufferKind);
+void func_8020B3CC_ovl_01(void);
+void func_8020B438_ovl_01(void);
+void func_8020E010_ovl_01(void** buffers);
+void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind);
+void func_8020E26C_ovl_01(void* buffer, s16 bufferKind);
+void func_8020E390_ovl_01(void);
+void func_80213390_ovl_01(void** buffers);
+void func_8021342C_ovl_01(void* buffer);
+void func_80213464_ovl_01(void* buffer, s16 bufferKind);
+void func_80213558_ovl_01(void);
+void func_8021585C_ovl_01(void);
+void func_802159C0_ovl_01(void* buffer, s16 bufferKind);
+void func_80215B84_ovl_01(void);
+void func_8021730C_ovl_01(void);
+void func_802177D0_ovl_01(void);
+void func_802178B0_ovl_01(void* buffer, s16 bufferKind);
+void func_80217D20_ovl_01(void);
+/* Defined without parameters, though func_801F4C78 passes it two */
+s32 func_80219948_ovl_01();
+void func_8021CF10_ovl_01(void** buffers);
+void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind);
+void func_8021D0B8_ovl_01(void);
+void func_8021E01C_ovl_01(void);
+void func_8021EF64_ovl_01(void);
+void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind);
+void func_8021F6E0_ovl_01(void** buffers);
+void func_8021F79C_ovl_01(void);
+void func_80220A30_ovl_01(void);
+void func_80220BB0_ovl_01(void);
+void func_80221B20_ovl_01(void);
+void func_802218C0_ovl_01(void* buffer, u8 bufferKind);
+void func_80221EBC_ovl_01(void** buffers, u8 bufferKind);
+void func_80222038_ovl_01(void* buffer, u8 bufferIndex);
+void func_8022209C_ovl_01(void);
+void func_802267B0_ovl_01(void* buffer, s16 bufferKind);
+void func_80228A80_ovl_01(void* buffer, s32 bufferKind);
+void func_80228C00_ovl_01(void);
 s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
 s32 func_8022BDC4_ovl_01(void);
@@ -328,7 +423,690 @@ s32 GetChosenCourseIndex(void) {
   return D_801323A0.courseChoice;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F4C78_ovl_01);
+/*
+ * The inset camera circles above the middle of the tee and the cup, a turn
+ * every 256 updates, while the menus show
+ */
+#define ORBIT_ANGLE_PER_UPDATE 0x100
+#define ORBIT_RADIUS 3000.0f
+#define ORBIT_EYE_OFFSET_Y (-3000.0f)
+/* Halves the sum of two course positions, and turns it into world units */
+#define MIDPOINT_TO_WORLD_SCALE (0.5f / WORLD_TO_COURSE_SCALE)
+
+/* The labels' images, lit and dimmed, that each screen reads as it opens */
+#define ASSET_TITLE_LABELS 0x52B /* Players, One to Four, ... Transmit */
+#define ASSET_TITLE_LABELS_DIM 0x52C
+#define ASSET_MAIN_LABELS 0x523 /* Status, How to Play, Code Entry, Options */
+#define ASSET_MAIN_LABELS_DIM 0x524
+#define ASSET_CLUBHOUSE_LABELS 0x525 /* Tournament, ... Speed Golf */
+#define ASSET_CLUBHOUSE_LABELS_DIM 0x526
+#define ASSET_OPTIONS_LABELS 0x529 /* Music, ... Erase Data */
+#define ASSET_OPTIONS_LABELS_DIM 0x52A
+#define ASSET_OPTION_VALUES 0x97C /* On, ... Simple, in green */
+/* The other images that the screens read */
+#define ASSET_WIDE_BOARD 0x520 /* A wooden board, 256 by 160 */
+#define ASSET_SQUARE_BOARD 0x591 /* A wooden board, 160 by 160 */
+#define ASSET_OPTIONS_MARIO 0x97D
+#define ASSET_OPTIONS_ARROWS 0x720
+#define ASSET_OPTIONS_SHADOW 0x97E
+#define ASSET_COURSE_SCENE 0x51E
+#define ASSET_SKY 0x51F
+#define ASSET_WATER 0x4D8
+#define ASSET_BLENDED_TEXTURE_SCROLLING_LAYER 0x4D7
+#define ASSET_HOLES_BADGES 0x65D /* Bet, Front 9, Back 9 and 18 */
+#define ASSET_SPINNING_BADGE 0x663
+#define ASSET_CONTROLLER_ICONS 0x63D
+#define ASSET_MENU_GAME_MODES 0x528
+#define ASSET_PLACE_DIGITS 0x98E
+/* Where the course select's images follow the sky in D_801F4A20 */
+#define COURSE_SELECT_WATER_OFFSET 0x1E88
+#define COURSE_SELECT_LAYER_OFFSET 0x2E90
+#define COURSE_SELECT_IMAGE_COUNT 6
+
+/*
+ * The menus' update: gathers every controller's buttons, starts loading the
+ * chosen hole behind screens 6 and 23, circles the inset camera, and runs the
+ * current screen. When the screen changes, reads the images that the new one
+ * draws. The exit screen saves and starts play, swapping to the play module
+ * unless GAME_FLAG_UNK2E is set.
+ */
+void func_801F4C78_ovl_01(void) {
+  AssetFile file;
+  Vec3 center;
+  Vec3 eye;
+  EncodedAsset asset;
+  SaveData* save;
+  s32 index;
+  u8* imageBuffer;
+  void* tournamentImage;
+  u8* optionBits;
+  u8 iconIndex;
+
+  save = GetSaveData();
+  func_8005AF74();
+  g_MenuRepeatButtons = 0;
+  g_MenuPressedButtons = 0;
+  for (index = 0; index != g_ControllerCount; index++) {
+    g_MenuRepeatButtons |= g_MenuControllerData[index].button;
+    g_MenuPressedButtons |= g_MenuControllerData[index].trigger;
+  }
+
+  if (g_MenuScreen == 6) {
+    if ((GetChosenCourseIndex() != g_CourseIndex) || !D_800FE334) {
+      StartLoadingChosenHole();
+    }
+  } else if (g_MenuScreen == MENU_SCREEN_UNK23) {
+    if ((g_HoleIndex != g_MenuChoices.holeIndex) ||
+        (g_CourseIndex != g_MenuChoices.courseIndex) || !D_800FE334) {
+      StartLoadingChosenHole();
+    }
+  }
+
+  D_8022F8E0_ovl_01++;
+  center[AXIS_X] = (D_800BA9D8.cupPosition[AXIS_X] + g_TeePositionX) *
+      MIDPOINT_TO_WORLD_SCALE;
+  center[AXIS_Y] = (g_CupPositionY + g_TeePositionY) * MIDPOINT_TO_WORLD_SCALE;
+  center[AXIS_Z] = (g_CupPositionZ + g_TeePositionZ) * MIDPOINT_TO_WORLD_SCALE;
+  eye[AXIS_X] =
+      (cosf(((D_8022F8E0_ovl_01 * ORBIT_ANGLE_PER_UPDATE) & BINARY_ANGLE_MASK) *
+           BINARY_ANGLE_TO_RADIANS) *
+          ORBIT_RADIUS) +
+      center[AXIS_X];
+  eye[AXIS_Y] = center[AXIS_Y] + ORBIT_EYE_OFFSET_Y;
+  eye[AXIS_Z] =
+      (sinf(((D_8022F8E0_ovl_01 * ORBIT_ANGLE_PER_UPDATE) & BINARY_ANGLE_MASK) *
+           BINARY_ANGLE_TO_RADIANS) *
+          ORBIT_RADIUS) +
+      center[AXIS_Z];
+  g_Cameras[INSET_CAMERA].view.eye[AXIS_X] = eye[AXIS_X];
+  g_Cameras[INSET_CAMERA].view.eye[AXIS_Y] = eye[AXIS_Y];
+  g_Cameras[INSET_CAMERA].view.eye[AXIS_Z] = eye[AXIS_Z];
+  g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] = center[AXIS_X];
+  g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] = center[AXIS_Y];
+  g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] = center[AXIS_Z];
+  SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+  D_8022BE08_ovl_01 = 0;
+  g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
+  g_Cameras[INSET_CAMERA].view.drawFlags = 0;
+  g_InsetView.animation = INSET_VIEW_OPENING;
+  switch (g_MenuScreen) {
+    case MENU_SCREEN_TITLE:
+      memset(&g_GameState, -1, sizeof(GameState));
+      g_IsClubTournament = FALSE;
+      func_801F70F0_ovl_01();
+      break;
+
+    case 5:
+      func_801F7D28_ovl_01();
+      break;
+
+    case MENU_SCREEN_CHARACTER_SELECT:
+      func_80209D50_ovl_01(0, g_ChosenPlayerCount, FALSE);
+      break;
+
+    case MENU_SCREEN_UNK24:
+      func_80209D50_ovl_01(0, 1, FALSE);
+      break;
+
+    case MENU_SCREEN_UNK16:
+      func_80209D50_ovl_01(1, 2, TRUE);
+      break;
+
+    case MENU_SCREEN_SAVED_GAMES:
+      func_8022209C_ovl_01();
+      break;
+
+    case MENU_SCREEN_MAIN:
+      func_801F9C58_ovl_01();
+      break;
+
+    case MENU_SCREEN_MAIN_WITHOUT_TRANSMIT:
+      func_801F9E38_ovl_01();
+      break;
+
+    case MENU_SCREEN_CLUB_TOURNAMENT:
+      func_80228C00_ovl_01();
+      break;
+
+    case MENU_SCREEN_CLUBHOUSE:
+      func_801F9FF8_ovl_01();
+      break;
+
+    case MENU_SCREEN_OPTIONS:
+      func_801FA20C_ovl_01();
+      break;
+
+    case MENU_SCREEN_HELP:
+      if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+        func_801F7CD0_ovl_01();
+      } else {
+        UpdateHelpBoard();
+      }
+
+      break;
+
+    case 6:
+      if (!g_IsMiniGolf) {
+        func_801F8BAC_ovl_01();
+      } else {
+        func_801F93D8_ovl_01();
+      }
+
+      break;
+
+    case 8:
+      func_801FADBC_ovl_01();
+      break;
+
+    case MENU_SCREEN_UNK20:
+      func_80219948_ovl_01(1, g_ChosenPlayerCount);
+      break;
+
+    case MENU_SCREEN_UNK22:
+      func_80217D20_ovl_01();
+      break;
+
+    case 18:
+      func_801FB15C_ovl_01();
+      break;
+
+    case MENU_SCREEN_UNK12:
+      func_8021D0B8_ovl_01();
+      break;
+
+    case MENU_SCREEN_RING_SHOT_RECORDS:
+      func_8021F79C_ovl_01();
+      break;
+
+    case MENU_SCREEN_COURSE_STATS:
+      func_8020E390_ovl_01();
+      break;
+
+    case MENU_SCREEN_BEST_TIMES:
+      func_80213558_ovl_01();
+      break;
+
+    case MENU_SCREEN_BIRDIE_BADGES:
+      func_801FB11C_ovl_01();
+      break;
+
+    case MENU_SCREEN_CHARACTER_TABLE:
+      func_80215B84_ovl_01();
+      break;
+
+    case MENU_SCREEN_UNK23:
+      LeaveMenuWithCourseWipe();
+      break;
+
+    case MENU_SCREEN_UNK26:
+      LeaveMenuWithWipe();
+      break;
+  }
+
+  if (D_800C1FF0 != g_MenuScreen) {
+    D_800C1FF0 = g_MenuScreen;
+    if (g_MenuScreen < MENU_SCREEN_COUNT) {
+      D_8022BE8C_ovl_01 ^= 1;
+      OpenEncodedAsset(D_800C2028[g_MenuScreen], &asset);
+      ReadEncodedAsset(D_801052BC[D_8022BE8C_ovl_01], &asset);
+    }
+
+    switch (g_MenuScreen) {
+      case MENU_SCREEN_OPTIONS:
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_OPTIONS_LABELS, &asset);
+        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_OPTIONS_LABELS_DIM, &asset);
+        ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_OPTION_VALUES, &asset);
+        ReadEncodedAsset(
+            (u8*)D_8012D420[D_8022BE8E_ovl_01] + OPTION_VALUES_OFFSET, &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
+        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        func_802267B0_ovl_01(D_800FC6A0, 1);
+        func_802267B0_ovl_01(D_800FBE30[0], 2);
+        imageBuffer = GetMenuImageBuffer();
+        OpenEncodedAsset(ASSET_OPTIONS_MARIO, &asset);
+        ReadEncodedAsset(imageBuffer, &asset);
+        OpenEncodedAsset(ASSET_OPTIONS_ARROWS, &asset);
+        ReadEncodedAsset(imageBuffer + OPTIONS_ARROWS_OFFSET, &asset);
+        OpenEncodedAsset(ASSET_OPTIONS_SHADOW, &asset);
+        ReadEncodedAsset(imageBuffer + OPTIONS_SHADOW_OFFSET, &asset);
+        InitSram();
+        TransferSaveData(save, FALSE);
+        optionBits = &g_OptionBits;
+        *optionBits = 0;
+        if (func_8005DE00()) {
+          *optionBits |= OPTION_BIT_MUSIC_OFF;
+        }
+
+        if (func_8005DE20()) {
+          *optionBits |= OPTION_BIT_MONO;
+        }
+
+        if (func_8005DE40()) {
+          *optionBits |= OPTION_BIT_SIMPLE_CAMERA;
+        }
+
+        break;
+
+      case MENU_SCREEN_TITLE:
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
+        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
+        ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
+        ReadEncodedAsset(D_801F4A20, &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
+        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        D_800C200C[0] = -1;
+        D_800C200C[1] = -1;
+        D_800C200C[2] = -1;
+        D_800C200C[3] = -1;
+        func_8005D334();
+        break;
+
+      case 18:
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
+        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
+        ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
+        ReadEncodedAsset(D_801F4A20, &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
+        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        break;
+
+      case 5:
+        for (index = 0; index != ARRAY_COUNT(D_8012F4B0); index++) {
+          OpenEncodedAsset(D_800C20E0[g_ChosenPlayerCount][index], &asset);
+          ReadEncodedAsset(D_8012F4B0[index], &asset);
+        }
+
+        OpenEncodedAsset(ASSET_CONTROLLER_ICONS, &asset);
+        ReadEncodedAsset(D_800FF180[0], &asset);
+        OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset);
+        ReadEncodedAsset(D_800FF180[1], &asset);
+        D_8022BE90_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
+        ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
+        ReadEncodedAsset(D_801F4A20, &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
+        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        iconIndex =
+            D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+        D_8022F8C0_ovl_01 = 0;
+        D_8022F8C4_ovl_01 = 0;
+        D_8022F8C5_ovl_01 = 0;
+        OpenEncodedAsset(g_ModeIconAnimations[iconIndex][0], &asset);
+        ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
+        func_802178B0_ovl_01(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK13);
+        D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
+        D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
+        D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
+        D_8023BFC0_ovl_01[3] = guRandom() % FIDGET_DELAY_RANGE;
+        for (index = 0; index != MAXCONTROLLERS; index++) {
+          D_801B70F0[index] = FALSE;
+        }
+
+        OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
+        ReadEncodedAsset(D_800FC898, &asset);
+        func_8020E26C_ovl_01(D_800FBE30[1], 6);
+        D_8022F8C8_ovl_01 = 0;
+        D_8022F8CC_ovl_01 = 0;
+        D_8022F8CD_ovl_01 = 0;
+        OpenEncodedAsset(D_8022F848_ovl_01[D_8022F8C0_ovl_01], &asset);
+        ReadEncodedAsset(D_801B93E0[0], &asset);
+        break;
+
+      case MENU_SCREEN_CHARACTER_SELECT:
+      case MENU_SCREEN_UNK24:
+        func_8005C674(g_ChosenPlayerCount, 0);
+        D_8022BE92_ovl_01 ^= 1;
+        func_8020B2C4_ovl_01(D_800FF420[D_8022BE92_ovl_01], 2);
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01], 1);
+        func_8020B2C4_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 5);
+        func_8020B2C4_ovl_01(D_801B60D0, CHARACTER_SELECT_UNREAD_KIND);
+        func_8020B2C4_ovl_01(D_800FBE30[0], 8);
+        func_8020B438_ovl_01();
+        break;
+
+      case MENU_SCREEN_UNK16:
+        func_8005C674(1, 0);
+        func_80209500_ovl_01();
+        OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
+        ReadEncodedAsset(D_801F4A20, &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        func_8020B2C4_ovl_01(D_800FF420[D_8022BE92_ovl_01], 2);
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01], 1);
+        func_8020B2C4_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 5);
+        func_8020B2C4_ovl_01(D_801B60D0, CHARACTER_SELECT_UNREAD_KIND);
+        func_8020B2C4_ovl_01(D_800FBE30[0], 8);
+        func_8020B438_ovl_01();
+        func_8020B3CC_ovl_01();
+        break;
+
+      case MENU_SCREEN_SAVED_GAMES:
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
+        ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
+        ReadEncodedAsset(D_801F4A20, &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        func_802178B0_ovl_01(
+            D_800FF420[D_8022BE92_ovl_01], PLAYER_STATS_BUFFER_UNK12);
+        D_8022F8C0_ovl_01 = 0;
+        D_8022F8C4_ovl_01 = 0;
+        D_8022F8C5_ovl_01 = 0;
+        func_80221B20_ovl_01();
+        func_80221EBC_ovl_01(D_801049A0[0], SAVE_MENU_BUFFER_SLOTS);
+        func_80221EBC_ovl_01(D_8010526C, SAVE_MENU_BUFFER_CHOSEN);
+        func_80222038_ovl_01(D_801B60D0, 1);
+        func_80222038_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 2);
+        func_802218C0_ovl_01(D_800FF180[0], SAVE_GAME_BUFFER_CONTROLLER_ICONS);
+        func_802218C0_ovl_01(D_800FF180[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
+        func_802218C0_ovl_01(D_800FBE30[0], SAVE_GAME_BUFFER_FIRST_BOARD);
+        func_802218C0_ovl_01(D_800FBE30[1], SAVE_GAME_BUFFER_SECOND_BOARD);
+        func_802218C0_ovl_01(D_800FC6A0, SAVE_GAME_BUFFER_THIRD_BOARD);
+        func_802218C0_ovl_01(
+            D_8012D420[D_8022BE8E_ovl_01], SAVE_GAME_BUFFER_COURSE);
+        func_802218C0_ovl_01(D_800FF4C4[0], SAVE_GAME_BUFFER_CHOSEN_COURSE);
+        D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
+        D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
+        D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
+        D_8023BFC0_ovl_01[3] = guRandom() % FIDGET_DELAY_RANGE;
+        for (index = 0; index != MAXCONTROLLERS; index++) {
+          D_801B70F0[index] = FALSE;
+        }
+
+        break;
+
+      case MENU_SCREEN_MAIN:
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_MAIN_LABELS, &asset);
+        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_MAIN_LABELS_DIM, &asset);
+        ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
+        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        break;
+
+      case MENU_SCREEN_MAIN_WITHOUT_TRANSMIT:
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_MAIN_LABELS, &asset);
+        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_MAIN_LABELS_DIM, &asset);
+        ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
+        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        break;
+
+      case MENU_SCREEN_CLUB_TOURNAMENT:
+        D_8022BE92_ovl_01 ^= 1;
+        D_8022BE8E_ovl_01 ^= 1;
+        tournamentImage = GetMenuImageBuffer();
+        OpenEncodedAsset(ASSET_PLACE_DIGITS, &asset);
+        ReadEncodedAsset(tournamentImage, &asset);
+        func_80228A80_ovl_01(D_801B60D0, 1);
+        func_80228A80_ovl_01(D_800FF420[D_8022BE92_ovl_01], 2);
+        func_80228A80_ovl_01(D_8012D420[D_8022BE8E_ovl_01], 3);
+        func_80228A80_ovl_01(D_800FBE30[0], 4);
+        func_80228A80_ovl_01(D_800FBE30[1], 5);
+        func_802267B0_ovl_01(D_800FC6A0, 1);
+        func_802267B0_ovl_01(D_801049A0[0][0], 2);
+        func_802267B0_ovl_01(D_801049A0[0][1], 3);
+        func_802267B0_ovl_01(D_801049A0[1][0], 4);
+        func_802267B0_ovl_01(D_801049A0[1][1], 5);
+        func_802267B0_ovl_01(D_801049A0[2][0], 6);
+        break;
+
+      case MENU_SCREEN_HELP:
+        if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+          D_8022BE8E_ovl_01 ^= 1;
+          D_8022BE90_ovl_01 ^= 1;
+          OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
+          ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+          OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
+          ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+          OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
+          ReadEncodedAsset(D_801F4A20, &asset);
+          D_8022BE92_ovl_01 ^= 1;
+          OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
+          ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+          D_8022F8C0_ovl_01 = 0;
+          D_8022F8C4_ovl_01 = 0;
+          D_8022F8C5_ovl_01 = 0;
+          D_8022BE94_ovl_01 = 0;
+        } else {
+          LoadHelpBoardImage(D_801049A0[0][0], HELP_BOARD_IMAGE_HAND);
+          LoadHelpBoardImage(D_801B93E0[1], HELP_BOARD_IMAGE_ARROWS);
+          D_8022BE92_ovl_01 ^= 1;
+          LoadHelpBoardImage(
+              D_800FF420[D_8022BE92_ovl_01], HELP_BOARD_IMAGE_CHALKBOARD);
+          D_8022F8CE_ovl_01 = 0;
+        }
+
+        break;
+
+      case MENU_SCREEN_CLUBHOUSE:
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_CLUBHOUSE_LABELS, &asset);
+        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        OpenEncodedAsset(ASSET_CLUBHOUSE_LABELS_DIM, &asset);
+        ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
+        D_8022BE92_ovl_01 ^= 1;
+        OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
+        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        break;
+
+      case 6:
+        if (g_IsMiniGolf) {
+          for (index = 0; index != MINI_GOLF_DISC_IMAGE_COUNT; index++) {
+            OpenEncodedAsset(
+                D_800C2098[(g_MenuChoices.unk14 * MINI_GOLF_DISC_IMAGE_COUNT) +
+                    index][MINI_GOLF_FACING_FRAME],
+                &asset);
+            ReadEncodedAsset(D_801049A0[0][index], &asset);
+            OpenEncodedAsset(
+                D_800C2098[(g_MenuChoices.unk14 * MINI_GOLF_DISC_IMAGE_COUNT) +
+                    index][MINI_GOLF_FACING_FRAME],
+                &asset);
+            ReadEncodedAsset(D_801049A0[1][index], &asset);
+          }
+
+          for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
+            OpenAssetFile(D_800C20D4[(g_MenuChoices.unk14 * 2) + index], &file);
+            ReadAssetFile(D_801052C4[index], GetAssetFileSize(&file), &file);
+          }
+        } else {
+          for (index = 0; index != 6; index++) {
+            OpenEncodedAsset(D_800C2064[index], &asset);
+            ReadEncodedAsset(D_801049A0[0][index], &asset);
+          }
+        }
+
+        OpenEncodedAsset(ASSET_SKY, &asset);
+        ReadEncodedAsset(D_801F4A20, &asset);
+        OpenEncodedAsset(ASSET_WATER, &asset);
+        ReadEncodedAsset((u8*)D_801F4A20 + COURSE_SELECT_WATER_OFFSET, &asset);
+        OpenEncodedAsset(ASSET_BLENDED_TEXTURE_SCROLLING_LAYER, &asset);
+        ReadEncodedAsset((u8*)D_801F4A20 + COURSE_SELECT_LAYER_OFFSET, &asset);
+        D_8022BE80_ovl_01 = 0;
+        OpenEncodedAsset(D_800C21B8[D_801323A0.courseChoice][0], &asset);
+        ReadEncodedAsset(D_800FBDFC[0], &asset);
+        OpenEncodedAsset(D_800C21B8[D_801323A0.courseChoice][0], &asset);
+        ReadEncodedAsset(D_800FBDFC[1], &asset);
+        for (index = 0; index != COURSE_FILE_COUNT; index++) {
+          OpenAssetFile(D_800C2278[D_801323A0.courseChoice][index], &file);
+          ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+        }
+
+        OpenEncodedAsset(ASSET_HOLES_BADGES, &asset);
+        ReadEncodedAsset(D_80106100, &asset);
+        OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
+        ReadEncodedAsset(D_800FC898, &asset);
+        D_8022BE90_ovl_01 ^= 1;
+        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
+        D_8022F8C8_ovl_01 = 0;
+        D_8022F8CC_ovl_01 = 0;
+        D_8022F8CD_ovl_01 = 0;
+        D_8022BE8A_ovl_01 = 0;
+        D_8022BE92_ovl_01 ^= 1;
+        func_802178B0_ovl_01(
+            D_800FF420[D_8022BE92_ovl_01], PLAYER_STATS_BUFFER_ICONS);
+        func_802178B0_ovl_01(D_801B93E0[0], PLAYER_STATS_BUFFER_UNK2);
+        func_802178B0_ovl_01(D_801B60D0, PLAYER_STATS_BUFFER_UNK3);
+        func_802178B0_ovl_01(D_8010526C[0], PLAYER_STATS_BUFFER_UNK4);
+        func_802178B0_ovl_01(D_8010526C[1], PLAYER_STATS_BUFFER_UNK5);
+        func_802178B0_ovl_01(D_801B93E0[1], PLAYER_STATS_BUFFER_UNK7);
+        func_802178B0_ovl_01(D_800FF180[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
+        func_802178B0_ovl_01(D_800FF180[1], PLAYER_STATS_BUFFER_UNK8);
+        D_8022BE8E_ovl_01 ^= 1;
+        func_802178B0_ovl_01(
+            D_8012D420[D_8022BE8E_ovl_01], PLAYER_STATS_BUFFER_GAME_LABELS);
+        func_802178B0_ovl_01(D_8012D3AC, PLAYER_STATS_BUFFER_BRICK_WALL);
+        func_802178B0_ovl_01(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK12);
+        ComputeRoundStatistics();
+        D_8022F8D4_ovl_01 = MINI_GOLF_FACING_FRAME;
+        D_8022F8D8_ovl_01 = 0;
+        D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
+        D_8022F8DD_ovl_01 = 0;
+        break;
+
+      case MENU_SCREEN_COURSE_STATS:
+        D_8022F8CD_ovl_01 = 0;
+        D_8022F8C8_ovl_01 = 0;
+        if (g_IsDebugEnabled) {
+          func_80221B20_ovl_01();
+        }
+
+        func_8020E010_ovl_01(D_801049A0[0]);
+        func_8020E0AC_ovl_01(D_800FF4C4, COURSE_BUFFER_FIRST);
+        func_8020E26C_ovl_01(D_800FC898, 2);
+        func_8020E26C_ovl_01(D_801B60D0, 3);
+        func_8020E26C_ovl_01(D_8010526C[0], 4);
+        func_8020E26C_ovl_01(D_800FF180[0], 5);
+        D_8022BE90_ovl_01 ^= 1;
+        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
+        func_8020E26C_ovl_01(D_800FBE30[0], 7);
+        ComputeRoundStatistics();
+        D_801323D0 = GetOpenCourseCount();
+        break;
+
+      case MENU_SCREEN_BEST_TIMES:
+        func_80221B20_ovl_01();
+        func_80213390_ovl_01(D_801049A0[0]);
+        func_80213464_ovl_01(NULL, 1);
+        D_8022BE90_ovl_01 ^= 1;
+        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
+        func_80213464_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 2);
+        func_8020E26C_ovl_01(D_801B60D0, 3);
+        D_8022BE92_ovl_01 ^= 1;
+        func_80213464_ovl_01(D_800FF420[D_8022BE92_ovl_01], 3);
+        func_80213464_ovl_01(D_800FBE30[0], 4);
+        func_8021585C_ovl_01();
+        break;
+
+      case MENU_SCREEN_CHARACTER_TABLE:
+        func_80221B20_ovl_01();
+        func_80213464_ovl_01(NULL, 1);
+        D_8022BE90_ovl_01 ^= 1;
+        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
+        D_8022BE90_ovl_01 ^= 1;
+        func_802159C0_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], TABLE_BUFFER_CURSOR);
+        func_802159C0_ovl_01(D_801B60D0, TABLE_BUFFER_UNREAD);
+        func_8021730C_ovl_01();
+        func_802159C0_ovl_01(D_800FBE30[0], TABLE_BUFFER_ARROWS);
+        func_802159C0_ovl_01(D_800FBE30[1], TABLE_BUFFER_STAR);
+        func_802177D0_ovl_01();
+        break;
+
+      case MENU_SCREEN_UNK12:
+        func_80221B20_ovl_01();
+        func_8021CF10_ovl_01(D_801049A0[0]);
+        D_8022BE92_ovl_01 ^= 1;
+        func_8021342C_ovl_01(D_800FF420[D_8022BE92_ovl_01]);
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE8E_ovl_01], 6);
+        func_8021CFAC_ovl_01(D_8012D420[D_8022BE90_ovl_01], 2);
+        func_8021CFAC_ovl_01(D_801B60D0, 1);
+        func_8021CFAC_ovl_01(D_800FBE30[0], 3);
+        func_8021E01C_ovl_01();
+        func_8021EF64_ovl_01();
+        break;
+
+      case MENU_SCREEN_RING_SHOT_RECORDS:
+        func_80221B20_ovl_01();
+        D_8022BE92_ovl_01 ^= 1;
+        func_8021342C_ovl_01(D_800FF420[D_8022BE92_ovl_01]);
+        D_8022BE8E_ovl_01 ^= 1;
+        D_8022BE90_ovl_01 ^= 1;
+        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
+        func_8021F5F0_ovl_01(D_801B60D0, 1);
+        func_8021F5F0_ovl_01(D_8012D420[D_8022BE8E_ovl_01], 2);
+        func_8021F5F0_ovl_01(D_8010526C[0], 3);
+        func_8021F6E0_ovl_01(D_801049A0[0]);
+        func_8021F5F0_ovl_01(D_800FBE30[0], 4);
+        func_80220A30_ovl_01();
+        func_80220BB0_ovl_01();
+        break;
+    }
+  }
+
+  if (g_MenuScreen == MENU_SCREEN_EXIT) {
+    TransferSaveData(save, TRUE);
+    if (g_GameMode == GAME_MODE_TRAINING) {
+      g_MenuScreen = 6;
+    } else {
+      g_MenuScreen = 18;
+    }
+
+    if (D_801B60B8) {
+      InitPlay(PLAY_KIND_WITHOUT_HOLE_DISPLAY);
+      InitRoundHud();
+      osSyncPrintf("ContPhase2\n");
+    } else {
+      D_801B60C5 = FALSE;
+      InitPlay(PLAY_KIND_WITHOUT_HOLE_DISPLAY);
+      func_801F6B28_ovl_01();
+      InitRoundHud();
+    }
+
+    SetGameFlag(GAME_FLAG_HOLE_LOADED);
+    if (IsGameFlagSet(GAME_FLAG_UNK2E)) {
+      LoadMenuResources();
+      func_801F6B20_ovl_01();
+    } else {
+      g_Scene = SCENE_SWAPPING_MODULES;
+      g_NextScene = SCENE_PLAY_UNK12;
+      g_SceneModuleToUnload = SCENE_MODULE_MENU;
+      g_SceneModuleToLoad = SCENE_MODULE_PLAY;
+      RequestSubModule();
+    }
+  }
+}
 
 /*
  * Doesn't match: the original reloads g_PlayerCount for each pass of the
