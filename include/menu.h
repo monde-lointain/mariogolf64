@@ -256,4 +256,47 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 /* The title screen's song */
 #define SONG_TITLE 0x27
 
+/* The buffers of func_802218C0, and what it reads into them */
+#define SAVE_GAME_BUFFER_CONTROLLER_ICONS 1
+#define SAVE_GAME_BUFFER_PLAYER_LABELS 2
+#define SAVE_GAME_BUFFER_FIRST_BOARD 3
+#define SAVE_GAME_BUFFER_SECOND_BOARD 4
+#define SAVE_GAME_BUFFER_THIRD_BOARD 5
+#define SAVE_GAME_BUFFER_COURSE 6
+#define SAVE_GAME_BUFFER_CHOSEN_COURSE 7
+
+/* What func_80221EBC reads: each saved game's mode image and a frame, or the
+ * chosen game's two */
+#define SAVE_MENU_BUFFER_SLOTS 1
+#define SAVE_MENU_BUFFER_CHOSEN 2
+
+/* The buffer that func_8020B2C4 keeps without reading an image into it */
+#define CHARACTER_SELECT_UNREAD_KIND 10
+
+/* The buffers that func_802159C0 keeps, by the kind its caller gives */
+#define TABLE_BUFFER_CURSOR 1
+#define TABLE_BUFFER_UNREAD 2
+#define TABLE_BUFFER_ARROWS 3
+#define TABLE_BUFFER_STAR 4
+
+/* The buffers that func_8020E0AC keeps, by the kind its caller gives */
+#define COURSE_BUFFER_FIRST 1
+#define COURSE_BUFFER_SECOND 2
+#define COURSE_BUFFER_LAST 3
+
+/* The buffers that func_802178B0 fills, and the assets it reads into them */
+#define PLAYER_STATS_BUFFER_ICONS 1
+#define PLAYER_STATS_BUFFER_UNK2 2
+#define PLAYER_STATS_BUFFER_UNK3 3
+#define PLAYER_STATS_BUFFER_UNK4 4
+#define PLAYER_STATS_BUFFER_UNK5 5
+#define PLAYER_STATS_BUFFER_UNK6 6
+#define PLAYER_STATS_BUFFER_UNK7 7
+#define PLAYER_STATS_BUFFER_UNK8 8
+#define PLAYER_STATS_BUFFER_GAME_LABELS 9
+#define PLAYER_STATS_BUFFER_PLAYER_LABELS 10
+#define PLAYER_STATS_BUFFER_BRICK_WALL 11
+#define PLAYER_STATS_BUFFER_UNK12 12
+#define PLAYER_STATS_BUFFER_UNK13 13
+
 #endif

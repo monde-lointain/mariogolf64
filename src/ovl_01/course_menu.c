@@ -21,11 +21,6 @@
 /* The images of D_800C2064 that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
 
-/* The buffers that func_8020E0AC keeps, by the kind its caller gives */
-#define COURSE_BUFFER_FIRST 1
-#define COURSE_BUFFER_SECOND 2
-#define COURSE_BUFFER_LAST 3
-
 /* func_8020E0AC reads the chosen course's first image into two buffers, and its
  * three files */
 #define COURSE_IMAGE_COPY_COUNT 2

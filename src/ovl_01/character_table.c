@@ -22,11 +22,7 @@ void func_8005C674(s32 arg0, s32 arg1);
 #define TABLE_ROW_COUNT 18
 #define TABLE_SHOWN_ROW_COUNT 5
 
-/* The buffers that func_802159C0 keeps, by the kind its caller gives */
-#define TABLE_BUFFER_CURSOR 1
-#define TABLE_BUFFER_UNREAD 2
-#define TABLE_BUFFER_ARROWS 3
-#define TABLE_BUFFER_STAR 4
+/* The images that func_802159C0 reads into the buffers it keeps */
 #define ASSET_TABLE_CURSOR 0x6EF
 #define ASSET_TABLE_ARROWS 0x94A
 #define ASSET_TABLE_STAR 0x5BE

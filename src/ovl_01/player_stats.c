@@ -54,20 +54,7 @@
 /* func_8021E01C lists each kind's records in rows one longer than the grid */
 #define STATS_KIND_LIST_SIZE (STATS_GRID_COLUMN_COUNT + 1)
 
-/* The buffers that func_802178B0 fills, and the assets it reads into them */
-#define PLAYER_STATS_BUFFER_ICONS 1
-#define PLAYER_STATS_BUFFER_UNK2 2
-#define PLAYER_STATS_BUFFER_UNK3 3
-#define PLAYER_STATS_BUFFER_UNK4 4
-#define PLAYER_STATS_BUFFER_UNK5 5
-#define PLAYER_STATS_BUFFER_UNK6 6
-#define PLAYER_STATS_BUFFER_UNK7 7
-#define PLAYER_STATS_BUFFER_UNK8 8
-#define PLAYER_STATS_BUFFER_GAME_LABELS 9
-#define PLAYER_STATS_BUFFER_PLAYER_LABELS 10
-#define PLAYER_STATS_BUFFER_BRICK_WALL 11
-#define PLAYER_STATS_BUFFER_UNK12 12
-#define PLAYER_STATS_BUFFER_UNK13 13
+/* What func_802178B0 reads into the buffers it fills */
 #define PLAYER_STATS_ICON_COUNT 8
 #define PLAYER_STATS_ICON_SIZE 0x218
 #define ASSET_PLAYER_STATS_UNK2 0x671

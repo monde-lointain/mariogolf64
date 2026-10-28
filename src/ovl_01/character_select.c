@@ -99,9 +99,6 @@
 #define DRIVE_DISTANCE_X 246
 #define DRIVE_DISTANCE_Y 200
 
-/* The buffer that func_8020B2C4 keeps without reading an image into it */
-#define CHARACTER_SELECT_UNREAD_KIND 10
-
 /* The characters' faces, the first set of them shown with GAME_FLAG_UNK64 set
  */
 extern u16 D_800C2650[][8];

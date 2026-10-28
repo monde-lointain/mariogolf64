@@ -31,15 +31,6 @@
 #include "text.h"
 #include "variables.h"
 
-/* The buffers of func_802218C0, and what it reads into them */
-#define SAVE_GAME_BUFFER_CONTROLLER_ICONS 1
-#define SAVE_GAME_BUFFER_PLAYER_LABELS 2
-#define SAVE_GAME_BUFFER_FIRST_BOARD 3
-#define SAVE_GAME_BUFFER_SECOND_BOARD 4
-#define SAVE_GAME_BUFFER_THIRD_BOARD 5
-#define SAVE_GAME_BUFFER_COURSE 6
-#define SAVE_GAME_BUFFER_CHOSEN_COURSE 7
-
 /*
  * The saved game's 64 by 64 course image, shrunk in two strips; func_80226190
  * draws one with its own palette, func_8022644C one without
@@ -103,10 +94,7 @@ void func_80221CC0_ovl_01(void);
 /* The Ring Shot stars that each level of func_8022181C takes */
 #define RING_SHOT_STARS_PER_LEVEL 4
 
-/* What func_80221EBC reads: each saved game's mode image and a frame, or the
- * chosen game's two */
-#define SAVE_MENU_BUFFER_SLOTS 1
-#define SAVE_MENU_BUFFER_CHOSEN 2
+/* What func_80221EBC reads for the chosen game, and the saved games' frame */
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
 #define ASSET_SAVE_MENU_FRAME 0x70D
 /*
