@@ -939,7 +939,7 @@ extern f32 D_802305F4_ovl_01[2];
 extern f32 D_80230608_ovl_01[MAX_PLAYER_COUNT];
 extern f32 D_80230618_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][3];
 /* The left of each player's column, by the player count */
-extern s32 D_802306C8_ovl_01[][MAX_PLAYER_COUNT];
+extern s32 D_802306D8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 
 void func_80210CD4_ovl_01(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
@@ -1132,9 +1132,10 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          (D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] + slide) << 2,
+          (D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] + slide)
+              << 2,
           (OPTION_COLUMN_TOP + (stripIndex * OPTION_COLUMN_STRIP_HEIGHT)) << 2,
-          (D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] + slide +
+          (D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] + slide +
               OPTION_COLUMN_WIDTH)
               << 2,
           (OPTION_COLUMN_TOP + (stripIndex * OPTION_COLUMN_STRIP_HEIGHT) +
@@ -1159,11 +1160,11 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
-        (D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] +
+        (D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
             (slide + OPTION_LABEL_OFFSET_X))
             << 2,
         OPTION_LABEL_TOP << 2,
-        (D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] +
+        (D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
             (slide + OPTION_LABEL_OFFSET_X) + PLAYER_LABEL_WIDTH)
             << 2,
         (OPTION_LABEL_TOP + PLAYER_LABEL_HEIGHT) << 2, OPTION_LABEL_TILE, 0, 0,
@@ -1230,10 +1231,11 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
 
     /* The left arrow starts at the right edge of its mirrored image */
     gSPScisTextureRectangle(gfx++,
-        (D_802306C8_ovl_01[g_ChosenPlayerCount][memory->unk29] + arrowX + slide)
+        (D_802306D8_ovl_01[g_ChosenPlayerCount - 1][memory->unk29] + arrowX +
+            slide)
             << 2,
         (offsetY + OPTION_COLUMN_TOP + arrowY) << 2,
-        (D_802306C8_ovl_01[g_ChosenPlayerCount][memory->unk29] + arrowX +
+        (D_802306D8_ovl_01[g_ChosenPlayerCount - 1][memory->unk29] + arrowX +
             slide + STATS_ARROW_SIZE)
             << 2,
         (offsetY + OPTION_COLUMN_TOP + arrowY + STATS_ARROW_SIZE) << 2,
@@ -1245,7 +1247,7 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
 
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
     func_80210CD4_ovl_01(&gfx,
-        D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] +
+        D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
             (slide + OPTION_NUMBER_OFFSET_X),
         OPTION_NUMBER_Y, D_8023BFDC_ovl_01[columnIndex], MENU_NUMBER_PLAIN);
   }
