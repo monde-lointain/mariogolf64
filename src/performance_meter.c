@@ -9,6 +9,7 @@
 #include <lib/libnusys/nusys.h>
 
 #include "heap.h"
+#include "screen.h"
 
 /* A frame of time is this wide on the meter, in the meter's own units */
 #define FRAME_WIDTH 280
@@ -34,36 +35,183 @@
 #define DIGIT_HEIGHT 8
 #define DIGIT_SPACING 6
 
-extern Vtx f_FrameVertices[];
-extern Vtx f_CpuBarVertices[];
-extern Vtx f_AudioBarVertices[];
-extern Vtx f_RspBarVertices[];
-extern Vtx f_RdpBarVertices[];
-extern Vtx f_RdpCommandBarVertices[];
-extern Vtx f_RdpPipeBarVertices[];
-extern Vtx f_RdpTmemBarVertices[];
-extern Vp f_MeterViewport;
-extern Gfx f_InitRcpDisplayList[];
-extern Gfx f_FrameDisplayList[];
-extern f32 f_FrameScales[];
-extern u32 f_MeterDisplayListIndex;
-extern u8 f_DigitTexture[];
+/* A bar's quad, from its top and bottom edges, depth and the RGB of its left
+ * and right ends; the bar's drawing sets its ends' x each frame */
+#define BAR_QUAD(topY, bottomY, z, leftRed, leftGreen, leftBlue, rightRed, \
+    rightGreen, rightBlue) \
+  {{{0, topY, z}, 0, {0, 0}, {leftRed, leftGreen, leftBlue, 0xFF}}}, \
+      {{{0, topY, z}, 0, {0, 0}, {rightRed, rightGreen, rightBlue, 0xFF}}}, \
+      {{{0, bottomY, z}, 0, {0, 0}, {rightRed, rightGreen, rightBlue, 0xFF}}}, \
+  { \
+    { \
+      {0, bottomY, z}, 0, {0, 0}, {leftRed, leftGreen, leftBlue, 0xFF} \
+    } \
+  }
+#define CPU_BAR_QUAD BAR_QUAD(22, 20, -1, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0xFF)
+#define AUDIO_BAR_QUAD BAR_QUAD(19, 17, -1, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0xFF)
+#define RSP_BAR_QUAD BAR_QUAD(16, 14, 0, 0xFF, 0xFF, 0x00, 0xFF, 0x00, 0x00)
+#define RDP_BAR_QUAD BAR_QUAD(13, 11, 0, 0x00, 0xFF, 0x00, 0xFF, 0xFF, 0xFF)
+#define RDP_COMMAND_BAR_QUAD \
+  BAR_QUAD(10, 8, 0, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00)
+#define RDP_PIPE_BAR_QUAD BAR_QUAD(7, 5, 0, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00)
+#define RDP_TMEM_BAR_QUAD BAR_QUAD(4, 2, 0, 0x80, 0x00, 0xFF, 0x80, 0xFF, 0x00)
+
+/*
+ * The meter's background, which DrawPerformanceMeter widens to the frames
+ * it spans, then a row of FRAME_WIDTH cells, one drawn for each of them
+ */
+static Vtx f_FrameVertices[] = {
+    {{{0, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{1962, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{1962, 24, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{0, 24, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
+    {{{1, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x40, 0x80}}},
+    {{{281, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x40, 0x80}}},
+    {{{281, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x40, 0x80}}},
+    {{{1, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x40, 0x80}}},
+    {{{281, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{561, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{561, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{281, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{561, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{841, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{841, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{561, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{841, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{1121, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{1121, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{841, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{1121, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{1401, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{1401, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{1121, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{1401, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{1681, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{1681, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{1401, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0xC0}}},
+    {{{1681, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{1961, -2, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{1961, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+    {{{1681, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
+};
+static Vtx f_CpuBarVertices[] = {
+    CPU_BAR_QUAD,
+};
+static Vtx f_AudioBarVertices[] = {
+    AUDIO_BAR_QUAD,
+    AUDIO_BAR_QUAD,
+    AUDIO_BAR_QUAD,
+    AUDIO_BAR_QUAD,
+};
+static Vtx f_RspBarVertices[] = {
+    RSP_BAR_QUAD,
+    RSP_BAR_QUAD,
+    RSP_BAR_QUAD,
+    RSP_BAR_QUAD,
+    RSP_BAR_QUAD,
+    RSP_BAR_QUAD,
+    RSP_BAR_QUAD,
+    RSP_BAR_QUAD,
+};
+static Vtx f_RdpBarVertices[] = {
+    RDP_BAR_QUAD,
+    RDP_BAR_QUAD,
+    RDP_BAR_QUAD,
+    RDP_BAR_QUAD,
+    RDP_BAR_QUAD,
+    RDP_BAR_QUAD,
+    RDP_BAR_QUAD,
+    RDP_BAR_QUAD,
+};
+static Vtx f_RdpCommandBarVertices[] = {
+    RDP_COMMAND_BAR_QUAD,
+    RDP_COMMAND_BAR_QUAD,
+    RDP_COMMAND_BAR_QUAD,
+    RDP_COMMAND_BAR_QUAD,
+    RDP_COMMAND_BAR_QUAD,
+    RDP_COMMAND_BAR_QUAD,
+    RDP_COMMAND_BAR_QUAD,
+    RDP_COMMAND_BAR_QUAD,
+};
+static Vtx f_RdpPipeBarVertices[] = {
+    RDP_PIPE_BAR_QUAD,
+    RDP_PIPE_BAR_QUAD,
+    RDP_PIPE_BAR_QUAD,
+    RDP_PIPE_BAR_QUAD,
+    RDP_PIPE_BAR_QUAD,
+    RDP_PIPE_BAR_QUAD,
+    RDP_PIPE_BAR_QUAD,
+    RDP_PIPE_BAR_QUAD,
+};
+static Vtx f_RdpTmemBarVertices[] = {
+    RDP_TMEM_BAR_QUAD,
+    RDP_TMEM_BAR_QUAD,
+    RDP_TMEM_BAR_QUAD,
+    RDP_TMEM_BAR_QUAD,
+    RDP_TMEM_BAR_QUAD,
+    RDP_TMEM_BAR_QUAD,
+    RDP_TMEM_BAR_QUAD,
+    RDP_TMEM_BAR_QUAD,
+};
+/* Scaled to the screen each time the meter is drawn */
+static Vp f_MeterViewport = {{
+    {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0},
+    {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0},
+}};
+static Gfx f_InitRcpDisplayList[] = {
+    gsSPSegment(0x00, 0x00000000),
+    gsSPGeometryMode(~0, 0),
+    gsSPSetGeometryMode(G_SHADE | G_SHADING_SMOOTH),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsDPPipeSync(),
+    gsDPPipeSync(),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsDPPipeSync(),
+    gsDPPipelineMode(G_PM_NPRIMITIVE),
+    gsDPPipeSync(),
+    gsDPSetColorDither(G_CD_BAYER),
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_XLU_SURF, G_RM_XLU_SURF2),
+    gsDPSetCombineMode(G_CC_SHADE, G_CC_SHADE),
+    gsDPPipeSync(),
+    gsSPEndDisplayList(),
+    gsSPEndDisplayList(),
+    gsSPEndDisplayList(),
+};
+/* Draws the background; DrawPerformanceMeter draws the frame cells */
+static Gfx f_FrameDisplayList[] = {
+    gsSPVertex(f_FrameVertices, ARRAY_COUNT(f_FrameVertices), 0),
+    gsSP2Triangles(0, 1, 2, 0, 2, 3, 0, 0),
+    gsSPEndDisplayList(),
+};
+/* The meter's horizontal scale, by how many frames past the first it spans */
+static f32 f_FrameScales[MAX_EXTRA_FRAME_COUNT + 1] = {
+    1.0f, 0.5f, 0.3333f, 0.25f, 0.2f, 0.16667f};
+static u32 f_MeterDisplayListIndex = 0;
+/* Read by no routine */
+static Gfx D_800C0D08[] = {
+    gsSPEndDisplayList(),
+};
+/* The digits, each DIGIT_WIDTH wide, in a 64x8 IA4 texture */
+static u16 f_DigitTexture[] = {
+#include "assets/performance_meter/digit_texture.ia4.inc.c"
+};
+static u32 f_DigitDrawCount = 0;
+static u32 f_CpuBarMaximum = 0;
+static u32 f_CpuBarAverage = 0;
+static u32 f_AudioBarMaximum = 0;
+static u32 f_AudioBarAverage = 0;
+static u32 f_RspBarMaximum = 0;
+static u32 f_RspBarAverage = 0;
+static u32 f_RdpBarMaximum = 0;
+static u32 f_RdpBarAverage = 0;
+static u32 f_RdpCommandBarMaximum = 0;
+static u32 f_RdpCommandBarAverage = 0;
+static u32 f_RdpPipeBarMaximum = 0;
+static u32 f_RdpPipeBarAverage = 0;
+static u32 f_RdpTmemBarMaximum = 0;
+static u32 f_RdpTmemBarAverage = 0;
 /* Counts the digit strings drawn, modulo 1024; nothing else reads it */
-extern u32 f_DigitDrawCount;
-extern u32 f_CpuBarMaximum;
-extern u32 f_CpuBarAverage;
-extern u32 f_AudioBarMaximum;
-extern u32 f_AudioBarAverage;
-extern u32 f_RspBarMaximum;
-extern u32 f_RspBarAverage;
-extern u32 f_RdpBarMaximum;
-extern u32 f_RdpBarAverage;
-extern u32 f_RdpCommandBarMaximum;
-extern u32 f_RdpCommandBarAverage;
-extern u32 f_RdpPipeBarMaximum;
-extern u32 f_RdpPipeBarAverage;
-extern u32 f_RdpTmemBarMaximum;
-extern u32 f_RdpTmemBarAverage;
 static Mtx f_MeterProjectionMatrix;
 static Mtx f_MeterViewMatrix;
 static Mtx f_MeterIdentityMatrix;
