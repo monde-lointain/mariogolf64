@@ -167,11 +167,11 @@ extern LookAt D_8023BD30_ovl_01[2];
 extern Mtx D_8023BAE0_ovl_01[MAX_PLAYER_COUNT][2];
 extern f32 D_80230D18_ovl_01[3];
 extern Vec3 D_80230D28_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
-extern u16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
+extern s16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
 extern s16 D_80230B48_ovl_01;
 extern s16 D_80230B4A_ovl_01;
 extern u8 D_80230B4C_ovl_01;
-extern s8 D_80230B4D_ovl_01;
+extern u8 D_80230B4D_ovl_01;
 extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern s8 D_801B60B8;
@@ -924,7 +924,7 @@ s32 func_80222F2C_ovl_01(void) {
   UnkB8* savedPlayer;
   s32 playerIndex;
   s32 character;
-  s32 controller;
+  u16 controller;
 
   if (D_80230B50_ovl_01[memory->savedGameIndex] == -1) {
     return -1;
@@ -1222,7 +1222,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   image = D_8023BD80_ovl_01;
   gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    if ((s16)D_80230B40_ovl_01[playerIndex] != NO_CONTROLLER) {
+    if (D_80230B40_ovl_01[playerIndex] != NO_CONTROLLER) {
       position[0] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
       position[1] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
       controller = D_80230B40_ovl_01[playerIndex];
@@ -1250,7 +1250,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     position[0] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
     position[1] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
-    if ((s16)D_80230B40_ovl_01[playerIndex] == COMPUTER_CONTROLLER) {
+    if (D_80230B40_ovl_01[playerIndex] == COMPUTER_CONTROLLER) {
       if (save->savedGames[memory->savedGameIndex].state.gameMode ==
           GAME_MODE_GET_CHARACTER) {
         labelIndex = PLAYER_LABEL_COM;
