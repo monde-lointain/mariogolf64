@@ -15,60 +15,60 @@
 /* Screen coordinates are clamped to this either side of the centre */
 #define SCREEN_COORDINATE_LIMIT 0x400
 
-static Mat4 g_CpuProjectionMatrix;
-static Mat4 g_CpuViewingMatrix;
+static Mat4 f_CpuProjectionMatrix;
+static Mat4 f_CpuViewingMatrix;
 /* What a unit at a view depth of one spans on the screen */
-static f32 g_CpuScreenScaleX;
-static f32 g_CpuScreenScaleY;
-static s32 g_CpuViewportCenterX;
-static s32 g_CpuViewportCenterY;
+static f32 f_CpuScreenScaleX;
+static f32 f_CpuScreenScaleY;
+static s32 f_CpuViewportCenterX;
+static s32 f_CpuViewportCenterY;
 /* The viewport's size over the screen's */
-static f32 g_CpuViewportWidthRatio;
-static f32 g_CpuViewportHeightRatio;
+static f32 f_CpuViewportWidthRatio;
+static f32 f_CpuViewportHeightRatio;
 
 void SetCpuProjection(Mtx* projection, Mtx* viewing, Vp* viewport) {
   f32 reciprocal;
 
   if (projection != NULL) {
-    guMtxL2F(g_CpuProjectionMatrix, projection);
+    guMtxL2F(f_CpuProjectionMatrix, projection);
   }
 
   if (viewing != NULL) {
-    guMtxL2F(g_CpuViewingMatrix, viewing);
+    guMtxL2F(f_CpuViewingMatrix, viewing);
   }
 
   if (viewport != NULL) {
-    g_CpuViewportWidthRatio =
+    f_CpuViewportWidthRatio =
         (viewport->vp.vscale[0] >> 1) * (1.0f / SCREEN_WIDTH);
-    g_CpuViewportHeightRatio =
+    f_CpuViewportHeightRatio =
         (viewport->vp.vscale[1] >> 1) * (1.0f / SCREEN_HEIGHT);
-    g_CpuViewportCenterX = viewport->vp.vtrans[0] >> 2;
-    g_CpuViewportCenterY = viewport->vp.vtrans[1] >> 2;
+    f_CpuViewportCenterX = viewport->vp.vtrans[0] >> 2;
+    f_CpuViewportCenterY = viewport->vp.vtrans[1] >> 2;
   }
 
-  if ((s32)g_CpuProjectionMatrix[3][0] != 0) {
-    reciprocal = 1.0f / g_CpuProjectionMatrix[3][3];
-    g_CpuProjectionMatrix[0][0] *= reciprocal;
-    g_CpuProjectionMatrix[0][1] *= reciprocal;
-    g_CpuProjectionMatrix[0][2] *= reciprocal;
-    g_CpuProjectionMatrix[0][3] *= reciprocal;
-    g_CpuProjectionMatrix[1][0] *= reciprocal;
-    g_CpuProjectionMatrix[1][1] *= reciprocal;
-    g_CpuProjectionMatrix[1][2] *= reciprocal;
-    g_CpuProjectionMatrix[1][3] *= reciprocal;
-    g_CpuProjectionMatrix[2][0] *= reciprocal;
-    g_CpuProjectionMatrix[2][1] *= reciprocal;
-    g_CpuProjectionMatrix[2][2] *= reciprocal;
-    g_CpuProjectionMatrix[2][3] *= reciprocal;
-    g_CpuProjectionMatrix[3][0] *= reciprocal;
-    g_CpuProjectionMatrix[3][1] *= reciprocal;
-    g_CpuProjectionMatrix[3][2] *= reciprocal;
-    g_CpuProjectionMatrix[3][3] *= reciprocal;
-    g_CpuScreenScaleX = 1.0f;
-    g_CpuScreenScaleY = -1.0f;
+  if ((s32)f_CpuProjectionMatrix[3][0] != 0) {
+    reciprocal = 1.0f / f_CpuProjectionMatrix[3][3];
+    f_CpuProjectionMatrix[0][0] *= reciprocal;
+    f_CpuProjectionMatrix[0][1] *= reciprocal;
+    f_CpuProjectionMatrix[0][2] *= reciprocal;
+    f_CpuProjectionMatrix[0][3] *= reciprocal;
+    f_CpuProjectionMatrix[1][0] *= reciprocal;
+    f_CpuProjectionMatrix[1][1] *= reciprocal;
+    f_CpuProjectionMatrix[1][2] *= reciprocal;
+    f_CpuProjectionMatrix[1][3] *= reciprocal;
+    f_CpuProjectionMatrix[2][0] *= reciprocal;
+    f_CpuProjectionMatrix[2][1] *= reciprocal;
+    f_CpuProjectionMatrix[2][2] *= reciprocal;
+    f_CpuProjectionMatrix[2][3] *= reciprocal;
+    f_CpuProjectionMatrix[3][0] *= reciprocal;
+    f_CpuProjectionMatrix[3][1] *= reciprocal;
+    f_CpuProjectionMatrix[3][2] *= reciprocal;
+    f_CpuProjectionMatrix[3][3] *= reciprocal;
+    f_CpuScreenScaleX = 1.0f;
+    f_CpuScreenScaleY = -1.0f;
   } else {
-    g_CpuScreenScaleX = g_CpuProjectionMatrix[0][0] * -(SCREEN_WIDTH / 2.0f);
-    g_CpuScreenScaleY = g_CpuProjectionMatrix[1][1] * (SCREEN_HEIGHT / 2.0f);
+    f_CpuScreenScaleX = f_CpuProjectionMatrix[0][0] * -(SCREEN_WIDTH / 2.0f);
+    f_CpuScreenScaleY = f_CpuProjectionMatrix[1][1] * (SCREEN_HEIGHT / 2.0f);
   }
 }
 
@@ -79,48 +79,48 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
 
   for (row = 0; row != 4; row++) {
     for (column = 0; column != 4; column++) {
-      g_CpuProjectionMatrix[row][column] = projection[row][column];
-      g_CpuViewingMatrix[row][column] = viewing[row][column];
+      f_CpuProjectionMatrix[row][column] = projection[row][column];
+      f_CpuViewingMatrix[row][column] = viewing[row][column];
     }
   }
 
   if (viewport != NULL) {
-    g_CpuViewportWidthRatio =
+    f_CpuViewportWidthRatio =
         (viewport->vp.vscale[0] >> 1) * (1.0f / SCREEN_WIDTH);
-    g_CpuViewportHeightRatio =
+    f_CpuViewportHeightRatio =
         (viewport->vp.vscale[1] >> 1) * (1.0f / SCREEN_HEIGHT);
-    g_CpuViewportCenterX = viewport->vp.vtrans[0] >> 2;
-    g_CpuViewportCenterY = viewport->vp.vtrans[1] >> 2;
+    f_CpuViewportCenterX = viewport->vp.vtrans[0] >> 2;
+    f_CpuViewportCenterY = viewport->vp.vtrans[1] >> 2;
   }
 
-  if ((s32)g_CpuProjectionMatrix[3][0] != 0) {
-    reciprocal = 1.0f / g_CpuProjectionMatrix[3][3];
-    g_CpuProjectionMatrix[0][0] *= reciprocal;
-    g_CpuProjectionMatrix[0][1] *= reciprocal;
-    g_CpuProjectionMatrix[0][2] *= reciprocal;
-    g_CpuProjectionMatrix[0][3] *= reciprocal;
-    g_CpuProjectionMatrix[1][0] *= reciprocal;
-    g_CpuProjectionMatrix[1][1] *= reciprocal;
-    g_CpuProjectionMatrix[1][2] *= reciprocal;
-    g_CpuProjectionMatrix[1][3] *= reciprocal;
-    g_CpuProjectionMatrix[2][0] *= reciprocal;
-    g_CpuProjectionMatrix[2][1] *= reciprocal;
-    g_CpuProjectionMatrix[2][2] *= reciprocal;
-    g_CpuProjectionMatrix[2][3] *= reciprocal;
-    g_CpuProjectionMatrix[3][0] *= reciprocal;
-    g_CpuProjectionMatrix[3][1] *= reciprocal;
-    g_CpuProjectionMatrix[3][2] *= reciprocal;
-    g_CpuProjectionMatrix[3][3] *= reciprocal;
-    g_CpuScreenScaleX = 1.0f;
-    g_CpuScreenScaleY = -1.0f;
+  if ((s32)f_CpuProjectionMatrix[3][0] != 0) {
+    reciprocal = 1.0f / f_CpuProjectionMatrix[3][3];
+    f_CpuProjectionMatrix[0][0] *= reciprocal;
+    f_CpuProjectionMatrix[0][1] *= reciprocal;
+    f_CpuProjectionMatrix[0][2] *= reciprocal;
+    f_CpuProjectionMatrix[0][3] *= reciprocal;
+    f_CpuProjectionMatrix[1][0] *= reciprocal;
+    f_CpuProjectionMatrix[1][1] *= reciprocal;
+    f_CpuProjectionMatrix[1][2] *= reciprocal;
+    f_CpuProjectionMatrix[1][3] *= reciprocal;
+    f_CpuProjectionMatrix[2][0] *= reciprocal;
+    f_CpuProjectionMatrix[2][1] *= reciprocal;
+    f_CpuProjectionMatrix[2][2] *= reciprocal;
+    f_CpuProjectionMatrix[2][3] *= reciprocal;
+    f_CpuProjectionMatrix[3][0] *= reciprocal;
+    f_CpuProjectionMatrix[3][1] *= reciprocal;
+    f_CpuProjectionMatrix[3][2] *= reciprocal;
+    f_CpuProjectionMatrix[3][3] *= reciprocal;
+    f_CpuScreenScaleX = 1.0f;
+    f_CpuScreenScaleY = -1.0f;
   } else {
     /* Overwritten at once; the stores are kept to match */
-    g_CpuScreenScaleX = -g_CpuViewportCenterX * g_CpuProjectionMatrix[0][0];
-    g_CpuScreenScaleY = g_CpuViewportCenterY * g_CpuProjectionMatrix[1][1];
-    g_CpuScreenScaleX = g_CpuProjectionMatrix[0][0] * (SCREEN_WIDTH / 2.0f) /
-        g_CpuProjectionMatrix[2][3];
-    g_CpuScreenScaleY = g_CpuProjectionMatrix[1][1] * -(SCREEN_HEIGHT / 2.0f) /
-        g_CpuProjectionMatrix[2][3];
+    f_CpuScreenScaleX = -f_CpuViewportCenterX * f_CpuProjectionMatrix[0][0];
+    f_CpuScreenScaleY = f_CpuViewportCenterY * f_CpuProjectionMatrix[1][1];
+    f_CpuScreenScaleX = f_CpuProjectionMatrix[0][0] * (SCREEN_WIDTH / 2.0f) /
+        f_CpuProjectionMatrix[2][3];
+    f_CpuScreenScaleY = f_CpuProjectionMatrix[1][1] * -(SCREEN_HEIGHT / 2.0f) /
+        f_CpuProjectionMatrix[2][3];
   }
 }
 
@@ -136,33 +136,33 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
   f32 viewY;
   f32 perspective;
 
-  depth = (g_CpuViewingMatrix[0][2] * x) + (g_CpuViewingMatrix[1][2] * y) +
-      (g_CpuViewingMatrix[2][2] * z) + g_CpuViewingMatrix[3][2] - radius;
+  depth = (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
+      (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2] - radius;
   if ((s32)depth >= 0) {
     return 0;
   }
 
-  viewX = (g_CpuViewingMatrix[0][0] * x) + (g_CpuViewingMatrix[1][0] * y) +
-      (g_CpuViewingMatrix[2][0] * z) + g_CpuViewingMatrix[3][0];
-  if ((s32)g_CpuProjectionMatrix[3][3] == 1) {
+  viewX = (f_CpuViewingMatrix[0][0] * x) + (f_CpuViewingMatrix[1][0] * y) +
+      (f_CpuViewingMatrix[2][0] * z) + f_CpuViewingMatrix[3][0];
+  if ((s32)f_CpuProjectionMatrix[3][3] == 1) {
     perspective = 1.0f;
   } else {
     perspective = 1.0f / depth;
   }
 
-  if ((viewX > 0.0f) ? g_CpuViewportCenterX <
-              g_CpuScreenScaleX * (viewX - radius) * perspective
-                     : g_CpuScreenScaleX * (viewX + radius) * perspective <
-              -g_CpuViewportCenterX) {
+  if ((viewX > 0.0f) ? f_CpuViewportCenterX <
+              f_CpuScreenScaleX * (viewX - radius) * perspective
+                     : f_CpuScreenScaleX * (viewX + radius) * perspective <
+              -f_CpuViewportCenterX) {
     return 1;
   }
 
-  viewY = (g_CpuViewingMatrix[0][1] * x) + (g_CpuViewingMatrix[1][1] * y) +
-      (g_CpuViewingMatrix[2][1] * z) + g_CpuViewingMatrix[3][1];
-  if ((viewY > 0.0f) ? g_CpuScreenScaleY * (viewY - radius) * perspective <
-              -g_CpuViewportCenterY
-                     : g_CpuViewportCenterY <
-              g_CpuScreenScaleY * (viewY + radius) * perspective) {
+  viewY = (f_CpuViewingMatrix[0][1] * x) + (f_CpuViewingMatrix[1][1] * y) +
+      (f_CpuViewingMatrix[2][1] * z) + f_CpuViewingMatrix[3][1];
+  if ((viewY > 0.0f) ? f_CpuScreenScaleY * (viewY - radius) * perspective <
+              -f_CpuViewportCenterY
+                     : f_CpuViewportCenterY <
+              f_CpuScreenScaleY * (viewY + radius) * perspective) {
     return 2;
   }
 
@@ -174,8 +174,8 @@ INCLUDE_ASM("asm/nonmatchings/cpu_projection", GetSphereVisibility);
 #endif
 
 s32 GetViewDepth(f32 x, f32 y, f32 z) {
-  return (g_CpuViewingMatrix[0][2] * x) + (g_CpuViewingMatrix[1][2] * y) +
-      (g_CpuViewingMatrix[2][2] * z) + g_CpuViewingMatrix[3][2];
+  return (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
+      (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
 }
 
 /* Returns the view depth, which is negative when the point is in front of the
@@ -188,22 +188,22 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
   f32 perspective;
   s32 depth;
 
-  guMtxXFMF(g_CpuViewingMatrix, x, y, z, &viewX, &viewY, &viewZ);
+  guMtxXFMF(f_CpuViewingMatrix, x, y, z, &viewX, &viewY, &viewZ);
   if ((s32)viewZ >= 0) {
     return viewZ;
   }
 
   perspective = 1.0f / viewZ;
-  point->scaleX = g_CpuScreenScaleX * perspective;
-  point->scaleY = g_CpuScreenScaleY * perspective;
-  if ((s32)g_CpuProjectionMatrix[3][3] == 1) {
-    point->x = (s32)viewX + g_CpuViewportCenterX;
-    point->y = (s32)-viewY + g_CpuViewportCenterY;
+  point->scaleX = f_CpuScreenScaleX * perspective;
+  point->scaleY = f_CpuScreenScaleY * perspective;
+  if ((s32)f_CpuProjectionMatrix[3][3] == 1) {
+    point->x = (s32)viewX + f_CpuViewportCenterX;
+    point->y = (s32)-viewY + f_CpuViewportCenterY;
   } else {
-    point->x = (s32)(point->scaleX * viewX * g_CpuViewportWidthRatio) +
-        g_CpuViewportCenterX;
-    point->y = (s32)(point->scaleY * viewY * g_CpuViewportHeightRatio) +
-        g_CpuViewportCenterY;
+    point->x = (s32)(point->scaleX * viewX * f_CpuViewportWidthRatio) +
+        f_CpuViewportCenterX;
+    point->y = (s32)(point->scaleY * viewY * f_CpuViewportHeightRatio) +
+        f_CpuViewportCenterY;
   }
 
   if (point->x < -SCREEN_COORDINATE_LIMIT) {
@@ -223,12 +223,12 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
   }
 
   depth =
-      ((-g_CpuProjectionMatrix[2][2] - (g_CpuProjectionMatrix[3][2] / viewZ)) *
+      ((-f_CpuProjectionMatrix[2][2] - (f_CpuProjectionMatrix[3][2] / viewZ)) *
           SCREEN_DEPTH_SCALE) +
       SCREEN_DEPTH_SCALE;
   point->depth = depth;
-  point->depthStep = fabsf(((((g_CpuProjectionMatrix[2][2] * (viewZ - 1.0f)) +
-                                 g_CpuProjectionMatrix[3][2]) /
+  point->depthStep = fabsf(((((f_CpuProjectionMatrix[2][2] * (viewZ - 1.0f)) +
+                                 f_CpuProjectionMatrix[3][2]) /
                                 (1.0f - viewZ)) *
                                SCREEN_DEPTH_SCALE) +
       SCREEN_DEPTH_SCALE - depth);
@@ -250,21 +250,21 @@ s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint* point) {
   f32 viewY;
   f32 perspective;
 
-  depth = (g_CpuViewingMatrix[0][2] * x) + (g_CpuViewingMatrix[1][2] * y) +
-      (g_CpuViewingMatrix[2][2] * z) + g_CpuViewingMatrix[3][2];
+  depth = (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
+      (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
   if ((s32)depth == 0) {
     return 0;
   }
 
-  viewX = (g_CpuViewingMatrix[0][0] * x) + (g_CpuViewingMatrix[2][0] * z) +
-      g_CpuViewingMatrix[3][0];
-  viewY = (g_CpuViewingMatrix[0][1] * x) + (g_CpuViewingMatrix[1][1] * y) +
-      (g_CpuViewingMatrix[2][1] * z) + g_CpuViewingMatrix[3][1];
+  viewX = (f_CpuViewingMatrix[0][0] * x) + (f_CpuViewingMatrix[2][0] * z) +
+      f_CpuViewingMatrix[3][0];
+  viewY = (f_CpuViewingMatrix[0][1] * x) + (f_CpuViewingMatrix[1][1] * y) +
+      (f_CpuViewingMatrix[2][1] * z) + f_CpuViewingMatrix[3][1];
   perspective = 1.0f / depth;
-  point->scaleX = g_CpuScreenScaleX * perspective;
-  point->scaleY = g_CpuScreenScaleY * perspective;
-  point->x = (s32)(point->scaleX * viewX) + g_CpuViewportCenterX;
-  point->y = (s32)(point->scaleY * viewY) + g_CpuViewportCenterY;
+  point->scaleX = f_CpuScreenScaleX * perspective;
+  point->scaleY = f_CpuScreenScaleY * perspective;
+  point->x = (s32)(point->scaleX * viewX) + f_CpuViewportCenterX;
+  point->y = (s32)(point->scaleY * viewY) + f_CpuViewportCenterY;
   if (point->x < -SCREEN_COORDINATE_LIMIT) {
     point->x = -SCREEN_COORDINATE_LIMIT;
   }

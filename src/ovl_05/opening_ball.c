@@ -36,7 +36,7 @@
     (absValue < 0.0f) ? -absValue : absValue; \
   })
 
-/* The opening's own copy of g_SurfaceInfo */
+/* The opening's own copy of f_SurfaceInfo */
 extern SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT];
 
 /* Loads one of the other characters into the slot with its birdie animation, or

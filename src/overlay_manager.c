@@ -56,7 +56,7 @@ static s8 f_ModuleIdsOfOverlay14[] = {0x16, MODULE_ID_END};
 static s8 f_ModuleIdsOfOverlay15[] = {0x1B, 0x1D, 0x20, MODULE_ID_END};
 static s8 f_ModuleIdsOfOverlay16[] = {0x1F, MODULE_ID_END};
 
-static Overlay g_Overlays[OVERLAY_COUNT] = {
+static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(
@@ -109,8 +109,8 @@ void InitOverlayManager(void) {
     g_ModuleRdpRequestFrames[i] = RDP_REQUEST_FRAME_NEVER;
   }
 
-  for (i = 0; i < sizeof(g_Overlays) / sizeof(g_Overlays[0]); i++) {
-    moduleIds = g_Overlays[i].moduleIds;
+  for (i = 0; i < sizeof(f_Overlays) / sizeof(f_Overlays[0]); i++) {
+    moduleIds = f_Overlays[i].moduleIds;
     moduleIndex = 0;
     while (moduleIds[moduleIndex] != MODULE_ID_END) {
       if (f_OverlayIndexOfModule[moduleIds[moduleIndex]] != -1 &&
@@ -148,7 +148,7 @@ s32 CanLoadOverlay(s32 overlayId) {
   s32 moduleIndex;
   s8* moduleIds;
 
-  if (g_Overlays[overlayIndex].isLoaded) {
+  if (f_Overlays[overlayIndex].isLoaded) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
       osSyncPrintf("Already Loaded\n");
     }
@@ -162,17 +162,17 @@ s32 CanLoadOverlay(s32 overlayId) {
       continue;
     }
 
-    if ((u32)g_Overlays[otherOverlayIndex].vramStart >
-        (u32)g_Overlays[overlayIndex].bssEnd) {
+    if ((u32)f_Overlays[otherOverlayIndex].vramStart >
+        (u32)f_Overlays[overlayIndex].bssEnd) {
       continue;
     }
 
-    if ((u32)g_Overlays[otherOverlayIndex].bssEnd <
-        (u32)g_Overlays[overlayIndex].vramStart) {
+    if ((u32)f_Overlays[otherOverlayIndex].bssEnd <
+        (u32)f_Overlays[overlayIndex].vramStart) {
       continue;
     }
 
-    if (g_Overlays[otherOverlayIndex].isLoaded) {
+    if (f_Overlays[otherOverlayIndex].isLoaded) {
       if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Conflicting %d m.s. and other moduleset[%x] is alive\n",
             overlayIndex, otherOverlayIndex);
@@ -181,7 +181,7 @@ s32 CanLoadOverlay(s32 overlayId) {
       return FALSE;
     }
 
-    moduleIds = g_Overlays[otherOverlayIndex].moduleIds;
+    moduleIds = f_Overlays[otherOverlayIndex].moduleIds;
     moduleIndex = 0;
     while (moduleIds[moduleIndex] != MODULE_ID_END) {
       if ((u32)(g_FrameCount -
@@ -214,7 +214,7 @@ s32 LoadOverlay(s32 overlayId) {
       osSyncPrintf("Load ModuleSet %x (absolute No.)\n", overlayId);
     }
 
-    overlay = &g_Overlays[overlayId];
+    overlay = &f_Overlays[overlayId];
     moduleIds = overlay->moduleIds;
     osWritebackDCacheAll();
     nuPiReadRom(overlay->romStart, overlay->vramStart,
@@ -252,7 +252,7 @@ void UnloadOverlay(s32 overlayId) {
   s8* moduleIds;
 
   overlayId = GetOverlayIndex(overlayId);
-  overlay = &g_Overlays[overlayId];
+  overlay = &f_Overlays[overlayId];
   if (overlay->isLoaded) {
     if (overlay->onUnload != NULL) {
       overlay->onUnload();

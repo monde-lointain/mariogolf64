@@ -103,7 +103,7 @@ extern N64Logo f_N64Logo;
 static s32 f_BootLogoFrame = 0;
 static s32 f_BootLogoStage = BOOT_LOGO_N64;
 /* Never read or written */
-static s32 g_BootLogoUnusedWord = 0;
+static s32 f_BootLogoUnusedWord = 0;
 /* Whether SetUpTitleHole has reset g_GameState during the Camelot logo */
 static s32 f_HasResetGameState = FALSE;
 

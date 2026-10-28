@@ -243,7 +243,7 @@ static u8 f_StarBufferIndex = 0;
 static s8 f_StarFrameTime = 0;
 static s32 f_CourseArrowFrameTime = 0;
 /* Never read or written */
-static s32 g_CourseSelectUnusedWord = 0;
+static s32 f_CourseSelectUnusedWord = 0;
 static s32 f_LoadedScreen = COURSE_SELECT_UNLOADED;
 static s32 f_SlideOffset = 0;
 /* While the course image turns, it turns from f_ShownCourse to f_NextCourse */

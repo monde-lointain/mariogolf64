@@ -29,7 +29,7 @@ BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {0};
 
 s8 g_ClubTestMode = CLUB_TEST_NONE;
 
-static SurfaceInfo g_SurfaceInfo[SURFACE_COUNT] = {
+static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
     /* SURFACE_OUT_OF_BOUNDS */
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, 1, 7},
     /* SURFACE_FAIRWAY */
@@ -183,7 +183,7 @@ SurfaceInfo* GetSurfaceInfo(s32 surface) {
     surface = SURFACE_OUT_OF_BOUNDS;
   }
 
-  return &g_SurfaceInfo[surface];
+  return &f_SurfaceInfo[surface];
 }
 
 void ResetBallSimulations(void) {
@@ -1562,7 +1562,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       isSteep = FALSE;
       rollSpeed = speed;
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
-        info = &g_SurfaceInfo[SURFACE_GREEN];
+        info = &f_SurfaceInfo[SURFACE_GREEN];
         triangle.corners[AXIS_X][0] = 0;
         triangle.corners[AXIS_X][1] = 0x100;
         triangle.corners[AXIS_X][2] = 0;
@@ -1573,7 +1573,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         triangle.corners[AXIS_Z][1] = 0;
         triangle.corners[AXIS_Z][2] = 0x100;
         if (g_ClubTestMode == CLUB_TEST_SHOT) {
-          info = &g_SurfaceInfo[SURFACE_FAIRWAY];
+          info = &f_SurfaceInfo[SURFACE_FAIRWAY];
         }
 
         groundHeight = 0;
