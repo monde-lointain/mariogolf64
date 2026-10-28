@@ -21,13 +21,19 @@ enum MatchSide {
   MATCH_HOLE_HALVED
 };
 
-/* GetGroupHoleResult's results, and the marks it gives each player */
-#define GROUP_HOLE_OPEN 0
-#define GROUP_HOLE_WON 1
-#define GROUP_HOLE_NO_WINNER 2
-#define GROUP_PLAYER_CONTENDING 0
-#define GROUP_PLAYER_WINNER 1
-#define GROUP_PLAYER_OUT 2
+/* GetGroupHoleResult's results */
+enum GroupHoleResult {
+  GROUP_HOLE_OPEN,
+  GROUP_HOLE_WON,
+  GROUP_HOLE_NO_WINNER
+};
+
+/* The marks GetGroupHoleResult gives each player */
+enum GroupPlayerMark {
+  GROUP_PLAYER_CONTENDING,
+  GROUP_PLAYER_WINNER,
+  GROUP_PLAYER_OUT
+};
 
 /* What GetHolingOutStakes says the player's next stroke would do if holed */
 enum HolingOutStakes {
