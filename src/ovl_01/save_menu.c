@@ -147,6 +147,10 @@ extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern u8 D_801B70F0[MAXCONTROLLERS];
 
+/* What D_80230B40 holds for a player with no controller, or for the computer */
+#define NO_CONTROLLER -1
+#define COMPUTER_CONTROLLER MAXCONTROLLERS
+
 /* How func_80225358 views a saved game's characters */
 #define SAVED_CHARACTERS_NEAR 1.0f
 #define SAVED_CHARACTERS_FAR 3000.0f
@@ -1181,9 +1185,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225358_ovl_01);
 
 #define CONTROLLER_ICON_SIZE 32
 #define CONTROLLER_ICON_IMAGE_SIZE (CONTROLLER_ICON_SIZE * CONTROLLER_ICON_SIZE)
-/* What D_80230B40 holds for a player with no controller, or for the computer */
-#define NO_CONTROLLER -1
-#define COMPUTER_CONTROLLER MAXCONTROLLERS
 /* The 1P to 4P, 1C to 4C and Com labels, 16 by 8 each */
 #define PLAYER_LABEL_WIDTH 16
 #define PLAYER_LABEL_HEIGHT 8
