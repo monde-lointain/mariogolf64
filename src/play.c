@@ -54,7 +54,7 @@ extern s32 D_800C307C;
 extern s32 D_800C3080;
 extern s32 D_800C3084;
 extern s32 D_800C3088;
-extern s32 D_800C308C;
+extern s32 g_LetterboxState;
 extern s8 D_800C30A4;
 extern s32 g_PlayExit;
 extern s32 g_HoleEndStep;
@@ -103,7 +103,7 @@ void func_8005F1C8(void) {
   D_800C3078 = 0;
   D_800C3084 = 0;
   D_800C3088 = 0;
-  D_800C308C = 0;
+  g_LetterboxState = 0;
   g_IsSettingImpactPoint = 0;
   D_800C307A = 0;
   D_800C307C = 0;

@@ -143,7 +143,7 @@ typedef struct ScreenSpot {
   /* 0x8 */ s32 isHidden; /* SPOT_HIDDEN behind the camera, else SPOT_SHOWN */
 } ScreenSpot; /* size = 0xC */
 
-extern s32 D_800C308C; /* The letterbox's state */
+extern s32 g_LetterboxState; /* The letterbox's state */
 
 extern u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3];
 extern ShotLabel f_ShotLabels[MAX_PLAYER_COUNT];
@@ -244,8 +244,8 @@ void DrawShotLabels(Gfx** displayListHead) {
       g_CurrentShot.playerIndex >= 0 &&
       g_CurrentShot.playerIndex < MAX_PLAYER_COUNT &&
       g_Players[g_CurrentShot.playerIndex].unkC == PLAYER_STATE_UNK2 &&
-      (D_800C308C != LETTERBOX_STATE_NONE &
-          D_800C308C != LETTERBOX_STATE_UNK5)) {
+      (g_LetterboxState != LETTERBOX_STATE_NONE &
+          g_LetterboxState != LETTERBOX_STATE_UNK5)) {
     players = SHOT_LABELS_OTHER_BALLS;
   }
 
@@ -635,8 +635,8 @@ OPAQUE:
         sprintf(g_PrintBuffer + DISTANCE_TEXT_OFFSET, "%2dy", distance);
       }
 
-      if (D_800C308C != LETTERBOX_STATE_UNK3 &&
-          D_800C308C != LETTERBOX_STATE_UNK4) {
+      if (g_LetterboxState != LETTERBOX_STATE_UNK3 &&
+          g_LetterboxState != LETTERBOX_STATE_UNK4) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
         gDPPipeSync(g_DisplayListHead++);
@@ -668,8 +668,8 @@ OPAQUE:
         sprintf(g_PrintBuffer, "FLAT");
       }
 
-      if (D_800C308C != LETTERBOX_STATE_UNK3 &&
-          D_800C308C != LETTERBOX_STATE_UNK4) {
+      if (g_LetterboxState != LETTERBOX_STATE_UNK3 &&
+          g_LetterboxState != LETTERBOX_STATE_UNK4) {
         DrawCenteredShadowedText(&g_DisplayListHead, point.x,
             point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
       }

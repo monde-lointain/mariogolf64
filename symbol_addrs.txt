@@ -2694,6 +2694,7 @@ f_ResultsUnk7C = 0x8021FC7C; // size:0x4 segment:ovl_00
 f_BannerX = 0x8021FD9C; // size:0x4 segment:ovl_00
 f_BannerY = 0x8021FDA0; // size:0x4 segment:ovl_00
 g_TurnController = 0x801B55CC; // size:0xE
+g_LetterboxState = 0x800C308C; // size:0x4
 g_IsSettingImpactPoint = 0x800C3090; // size:0x4
 UpdateImpactPointMode = 0x80203E58; // type:func segment:ovl_00
 GetStanceAnimation = 0x80207250; // type:func segment:ovl_00 allow_duplicated:True

@@ -335,7 +335,7 @@ extern Vtx f_LandingPanelVertices[4];
 #define LETTERBOX_MAX_HEIGHT 16
 #define LETTERBOX_STATE_UNK5 5
 
-extern s32 D_800C308C;
+extern s32 g_LetterboxState;
 
 /* Where the hole image sits in front of the perspective camera, at a tenth of
  * its size */
@@ -3068,7 +3068,7 @@ extern f32 f_AnimatedIconY;
 
 /*
  * Draws an animated icon that eases into place, with a label beside it that
- * depends on D_800C308C. Each new frame of the icon is read into the same
+ * depends on g_LetterboxState. Each new frame of the icon is read into the same
  * image.
  */
 void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
@@ -3119,9 +3119,9 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
         ((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
-    if (D_800C308C == 1) {
+    if (g_LetterboxState == 1) {
       label = ANIMATED_ICON_LABEL_UNK1;
-    } else if (D_800C308C == 2) {
+    } else if (g_LetterboxState == 2) {
       label = ANIMATED_ICON_LABEL_UNK0;
     } else {
       label = ANIMATED_ICON_LABEL_UNK2;
@@ -3155,7 +3155,7 @@ s32 DrawLetterbox(Gfx** gfxP, s32 height) {
   Gfx* gfx = *gfxP;
 
   if (g_RoundHud.isLetterboxShown) {
-    if (D_800C308C != 0 & D_800C308C != LETTERBOX_STATE_UNK5) {
+    if (g_LetterboxState != 0 & g_LetterboxState != LETTERBOX_STATE_UNK5) {
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(
@@ -3798,7 +3798,7 @@ void DrawRoundHud(CameraView* view) {
     gDPPipeSync(g_DisplayListHead++);
   }
 
-  if ((D_800C308C != 0 & D_800C308C != LETTERBOX_STATE_UNK5) &&
+  if ((g_LetterboxState != 0 & g_LetterboxState != LETTERBOX_STATE_UNK5) &&
       g_RoundHud.isLetterboxShown) {
     DrawAnimatedIcon(&g_DisplayListHead, f_LetterboxHeight);
   }
