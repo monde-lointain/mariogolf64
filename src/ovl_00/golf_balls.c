@@ -57,10 +57,6 @@
 /* The ball's radius in course units, at a pin scale of one */
 #define BALL_RADIUS 0x600
 
-/* The game states that play a single ball, rather than one for each player */
-#define GAME_STATE_UNK6 6
-#define GAME_STATE_UNK11 11
-
 typedef struct GolfBall {
   /* 0x00 */ Mtx matrices[DRAW_BUFFER_COUNT];
   /* 0x80 */ SurfaceInfo* surface;

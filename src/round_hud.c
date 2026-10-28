@@ -1389,8 +1389,6 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GREEN_GRID_FADE_STEP 8
 #define GREEN_GRID_FADE_END_ALPHA 0x48
 #define GAME_FLAG_HIDE_GREEN_GRID 0x79
-#define GAME_STATE_UNK6 6
-#define GAME_STATE_UNK11 11
 /* g_RoundHud.greenGridState values */
 #define GREEN_GRID_HIDDEN 0
 #define GREEN_GRID_SHOWN 1 /* Samples the ground and scrolls */

@@ -148,7 +148,6 @@ extern u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 /* Values of g_GameState.unk31, the replay that leaving the menus starts */
 #define REPLAY_KIND_NONE 0
 #define REPLAY_KIND_RING_SHOT 2
-#define GAME_STATE_UNK13 13
 #define PLAYER_UNK28_TRAINING (-1)
 #define PLAYER_UNK28_NINE_HOLES 3
 #define PLAYER_UNK28_EIGHTEEN_HOLES 6
@@ -1226,7 +1225,7 @@ void func_801F6B28_ovl_01(void) {
     g_GameState.playerCount = 2;
   }
 
-  g_GameState.unk0 = GAME_STATE_UNK13;
+  g_GameState.unk0 = GAME_STATE_RELOAD_HOLE;
   func_801F6A38_ovl_01();
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     StartRoundStats();

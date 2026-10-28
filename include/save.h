@@ -139,6 +139,24 @@ typedef struct Unk68 {
 #define CARRIED_POT_HOLE 2
 #define CARRIED_POT_COUNT 3
 
+/* GameState.unk0's values, the step that UpdatePlay is on */
+enum GameStateStep {
+  GAME_STATE_START,
+  GAME_STATE_LOAD_HOLE,
+  GAME_STATE_WAIT_FOR_HOLE,
+  GAME_STATE_HOLE_INTRO,
+  GAME_STATE_FLYOVER,
+  GAME_STATE_UNK5,
+  /* Taking turns. It and GAME_STATE_UNK11 play a single ball, rather than one
+   * for each player */
+  GAME_STATE_UNK6,
+  GAME_STATE_HOLE_END,
+  GAME_STATE_SLOTS, /* Spinning the club slots before the hole */
+  GAME_STATE_UNK11 = 11,
+  GAME_STATE_END_INTRO,
+  GAME_STATE_RELOAD_HOLE
+};
+
 /*
  * The current game's settings and place, which a saved game keeps for it
  * to be continued with. A few routines only match when they read a field
@@ -146,7 +164,7 @@ typedef struct Unk68 {
  * g_HoleIndex.
  */
 typedef struct GameState {
-  /* 0x00 */ s32 unk0;
+  /* 0x00 */ s32 unk0; /* A GAME_STATE_* value */
   /* 0x04 */ u32 gameMode; /* A GAME_MODE_* value */
   /* 0x08 */ s32 playerCount;
   /* 0x0C */ s32 courseIndex;

@@ -120,10 +120,6 @@
 /* Prim depths are kept to multiples of 4 */
 #define PRIM_DEPTH_MASK (~3)
 
-/* GameState.unk0 values */
-#define GAME_STATE_UNK6 6
-#define GAME_STATE_UNK7 7
-
 s32 g_PinVertexScale = PIN_VERTEX_SCALE;
 
 /* Read by no routine */
@@ -337,7 +333,7 @@ s32 IsPinInCup(void) {
   }
 
   if (g_GameState.unk0 == GAME_STATE_UNK6 ||
-      g_GameState.unk0 == GAME_STATE_UNK7) {
+      g_GameState.unk0 == GAME_STATE_HOLE_END) {
     if (g_GameState.isMiniGolf) {
       return TRUE;
     }

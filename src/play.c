@@ -717,20 +717,6 @@ void func_8005DD78(void);
 void func_8005DDAC(void);
 
 #ifdef NON_MATCHING
-/* g_GameState.unk0, the step that UpdatePlay is on */
-#define GAME_STATE_START 0
-#define GAME_STATE_LOAD_HOLE 1
-#define GAME_STATE_WAIT_FOR_HOLE 2
-#define GAME_STATE_HOLE_INTRO 3
-#define GAME_STATE_FLYOVER 4
-#define GAME_STATE_UNK5 5
-#define GAME_STATE_UNK6 6 /* Taking turns */
-#define GAME_STATE_HOLE_END 7
-#define GAME_STATE_SLOTS 8 /* Spinning the club slots before the hole */
-#define GAME_STATE_UNK11 11
-#define GAME_STATE_END_INTRO 12
-#define GAME_STATE_RELOAD_HOLE 13
-
 /* g_HoleEndStep, the step of the sequence between holes */
 enum HoleEndStep {
   HOLE_END_STEP_START,
