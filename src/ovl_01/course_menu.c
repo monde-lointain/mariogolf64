@@ -75,10 +75,12 @@
 #define MENU_GLYPH_SIZE 16
 #define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
 #define MENU_GLYPH_TIMES 0
+#define MENU_GLYPH_FIRST_DIGIT 1
 #define MENU_GLYPH_MINUS 13
 #define MENU_GLYPH_CIRCLE 15
 #define OFF_FIRST_GLYPH 16
 #define OFF_GLYPH_COUNT 2
+#define MENU_GLYPH_POINT 18
 
 /* The arrows beside the statistics that show there are more rows above or below
  */
@@ -1085,8 +1087,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
 
 /* func_80211A5C writes a figure to one decimal place, its whole part lined up
  * on the right */
-#define MENU_GLYPH_FIRST_DIGIT 1
-#define MENU_GLYPH_POINT 18
 #define DECIMAL_WHOLE_LIMIT 999
 #define DECIMAL_DIGIT_LIMIT 6
 #define HUNDREDTHS_PER_UNIT 100.0f
