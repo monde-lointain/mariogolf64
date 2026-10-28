@@ -12,11 +12,23 @@
 #define MAX_DEPTH 0x3FFF
 
 /* Set up the RDP and the RSP for a frame */
-extern Gfx f_RdpInitList[];
-extern Gfx f_RspInitList[];
+static Gfx f_RdpInitList[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_OPA_SURF, G_RM_OPA_SURF2),
+    gsDPSetCombineMode(G_CC_SHADE, G_CC_SHADE),
+    gsDPPipeSync(),
+    gsDPSetColorDither(G_CD_MAGICSQ),
+    gsSPEndDisplayList(),
+};
+static Gfx f_RspInitList[] = {
+    gsSPLoadGeometryMode(0),
+    gsSPSetGeometryMode(G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH),
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
 
 /* The red, green and blue FillScreen fills with, 8 bits each */
-extern s32 f_FillColor[3];
+static s32 f_FillColor[3] = {0};
 
 void AppendRcpInit(s32 viewportIndex, Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

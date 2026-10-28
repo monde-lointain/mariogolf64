@@ -357,6 +357,7 @@ segments:
       - [0x91BB0, .data, ../lib/libnusys/nugfxtaskmgr]
       - [0x91BC0, .data, main]
       - [0x91C00, data]
+      - [0x92BF0, .data, rcp]
       - [0x92C50, .data, ball_simulation]
       - [0x931A0, data]
       - [0x9E010, .data, fault]
