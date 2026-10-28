@@ -50,7 +50,6 @@ extern void* D_80230E84_ovl_01;
 
 extern s16 D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT]
                             [TOURNAMENT_IMAGE_COLUMN_COUNT];
-extern s16 D_80230F34_ovl_01;
 extern u8 D_80230F40_ovl_01;
 extern s32 D_80230F5C_ovl_01;
 extern s32 D_80230F60_ovl_01;
@@ -341,7 +340,8 @@ void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 6:
       D_80230E84_ovl_01 = buffer;
-      OpenAssetFile(D_80230F34_ovl_01, &file);
+      OpenAssetFile(
+          D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT - 1][0], &file);
       ReadAssetFile(D_80230E84_ovl_01, (s16)GetAssetFileSize(&file), &file);
       break;
   }
