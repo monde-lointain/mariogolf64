@@ -227,6 +227,7 @@ enum TerrainStyle {
   }
 
 extern Vtx* g_VertexListHead;
+extern s8 g_ShowsGroundWaves;
 extern f32 g_GroundFarthestDepth;
 extern f32 g_GroundNearDepthEighth;
 

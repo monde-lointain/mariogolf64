@@ -43,6 +43,7 @@
 #include "shot_simulation.h"
 #include "sound.h"
 #include "surface.h"
+#include "terrain.h"
 #include "variables.h"
 
 /* The loop played while the stick sets the impact point */
@@ -55,12 +56,6 @@
 /* The buttons that hold the impact point mode */
 #define IMPACT_POINT_BUTTONS (Z_TRIG | L_TRIG)
 
-/* g_ShotFlags's bits, which UpdateShotFlags sets for the shot being set up */
-#define SHOT_FLAG_ON_GREEN 1
-#define SHOT_FLAG_NO_IMPACT_POINT 2 /* For a putter, or in mini golf */
-#define SHOT_FLAG_APPROACH 4
-/* Set while g_CurrentShot.unk50 is at most SHOT_UNK8_MAX_UNK50 */
-#define SHOT_FLAG_UNK8 8
 #define SHOT_UNK50_SCALE (1.0f / 1536)
 #define SHOT_UNK8_MAX_UNK50 600.0f
 
@@ -282,14 +277,9 @@
 /* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
-extern s32 D_800C3070;
-extern s8 g_IsTrainingHeadingKept; /* Keeps the last heading for the next shot,
-                                      in Training */
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
-extern s8 g_IsHudTurnAwayRequested; /* Asks for the HUD to turn away when the
-                         next player is picked */
 extern s32 D_80223E40_ovl_00; /* Set once the shot preview has been built */
 extern f32 D_80223E48_ovl_00; /* A debug tilt of the aim camera, which the C
                                  buttons tune */
@@ -305,20 +295,11 @@ extern RingShotRecord D_80105F40[];
 extern s32 D_80223FEC_ovl_00; /* Frames since the last ambient sound */
 /* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
 extern s32 D_80223EF0_ovl_00[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES];
-extern s16 g_FreeLookHeading; /* The free-look camera's heading, in binary angle
-                                 units */
-extern s32 g_ImpactPointLingerFrameCount;
-extern s32 g_ShotFlags;
-extern s16
-    g_AltHeading; /* A heading that TurnAim can turn in place of the shot's */
 extern s32 D_80223E50_ovl_00; /* Frames that the D-pad has turned the aim,
                                  negative to the right */
 extern s32
     D_80223E44_ovl_00; /* Frames that a replayed shot's aim has been settled */
 extern CurrentShot D_80104F78; /* The replayed shot */
-extern s32
-    g_HasPressedShotButton; /* Set once A has been pressed to take the shot */
-extern s32 g_ShotSetupFrameCount;
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
 extern s32 f_ShotFlightCount;
@@ -2722,8 +2703,6 @@ extern s32 D_800B7D9C;
 extern u16 D_80104998;
 extern u16 D_80104994;
 extern u8 D_800FE330;
-extern s32 D_800C3094;
-extern s8 g_ShowsGroundWaves;
 extern s32 g_PauseScreen;
 extern s32 g_IsSettingImpactPoint;
 

@@ -66,9 +66,6 @@ typedef struct ShotLabel {
   /* 0xC */ s32 corner; /* NO_CORNER when the tag is hidden */
 } ShotLabel; /* size = 0x10 */
 
-/* g_ShotFlags's bit for a shot from the green */
-#define SHOT_FLAG_ON_GREEN 1
-
 /* The sign shows the shot's distance, with the target's height below it */
 #define SIGN_WIDTH 40
 #define SIGN_HEIGHT 24
@@ -147,9 +144,6 @@ extern s8 f_TagOffsetsX[CORNER_COUNT];
 extern s8 f_TagOffsetsY[CORNER_COUNT];
 extern f32 f_OutOfBoundsPulseAngle;
 extern s32 f_PinFlagWaveFrame;
-extern s32 g_ShotFlags;
-extern s32 g_ShotSetupFrameCount; /* Frames, up to PIN_FLAG_HIDE_FRAME, since
-                          the shot was set up */
 
 void DrawShotLabels(Gfx** displayListHead);
 void DrawShotPreview(CameraMatrices* matrices);

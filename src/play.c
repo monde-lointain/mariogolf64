@@ -49,13 +49,6 @@
 
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
-extern s32 D_800C3070;
-extern s32 g_HasPressedShotButton;
-extern s16 g_AltHeading;
-extern s16 g_FreeLookHeading;
-extern s32 g_ShotSetupFrameCount;
-extern s32 g_ImpactPointLingerFrameCount;
-extern s32 g_ShotFlags;
 extern s32 D_800C3088;
 extern s8 D_800C30A4;
 extern s32 f_PlayExit;
@@ -68,8 +61,6 @@ extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern u8 D_800FE330;
 extern s8 D_800FBDB8;
-extern s32 D_800C3094;
-extern s8 g_IsHudTurnAwayRequested;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 
@@ -679,7 +670,6 @@ extern s32 f_PlayStateFrameCount;
 extern s32 f_PlayFrameCount;
 extern s8 f_IsPlayStateBackedUp;
 extern s32 f_DebugCupIndex;
-extern s8 g_IsTrainingHeadingKept;
 void func_80241800();
 void func_80242384();
 s32 func_80241FF0();

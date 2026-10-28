@@ -663,8 +663,6 @@ static s32 f_CLeftPickedHeight =
 static s32 f_CUpPickedHeight = 0;
 static s32 f_LastHeightEditKind = 0; /* The last frame's HEIGHT_EDIT_* */
 
-extern s8 g_ShowsGroundWaves;
-
 /*
  * Declared without a prototype, as func_804077B0 passes it a float height,
  * which goes as a double

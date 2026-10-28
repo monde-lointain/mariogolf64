@@ -119,7 +119,6 @@ enum TerrainColorIndex {
 extern u16 g_TerrainCodeColors[];
 extern char g_RomBuildDate[];
 extern char g_SaveBuildDate[];
-extern s8 g_ShowsGroundWaves;
 
 /*
  * Each grid point's slot among its tile's midpoints, by its row and column
