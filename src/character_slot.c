@@ -45,7 +45,7 @@
 
 /* The slot's first rotation is taken away from this roll */
 /* Data still in the unsplit data and bss files */
-extern u8 f_EnvColors[ENV_COLOR_COUNT][3];
+extern u8 g_CharacterEnvColors[ENV_COLOR_COUNT][3];
 static LookAt f_HiliteLookAts[DRAW_BUFFER_COUNT];
 static Hilite f_Hilites[DRAW_BUFFER_COUNT];
 
@@ -57,8 +57,8 @@ void SetCharacterAlpha(s32 alpha) {
 
   gfx = &g_CharacterEnvColorDisplayLists[0][0];
   for (i = 0; i != ENV_COLOR_COUNT; i++) {
-    gDPSetEnvColor(
-        gfx++, f_EnvColors[i][0], f_EnvColors[i][1], f_EnvColors[i][2], alpha);
+    gDPSetEnvColor(gfx++, g_CharacterEnvColors[i][0],
+        g_CharacterEnvColors[i][1], g_CharacterEnvColors[i][2], alpha);
     gSPEndDisplayList(gfx++);
   }
 
