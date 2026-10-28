@@ -134,6 +134,13 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
 #define MENU_ANIMATION_FIDGET 17
 /* The most frames a character stands before it fidgets again */
 #define FIDGET_DELAY_RANGE 128
+/* The orthographic projection that the menus view their characters with, and
+ * the eye of the LookAt that guLookAtReflectF builds for them */
+#define MENU_CHARACTERS_NEAR 1.0f
+#define MENU_CHARACTERS_FAR 3000.0f
+#define MENU_CHARACTERS_ORTHO_SCALE 10.0f
+#define MENU_CHARACTERS_EYE_Y 70.0f
+#define MENU_CHARACTERS_EYE_Z 60.0f
 
 /* Indices of the game-mode icon animations in g_ModeIconAnimations */
 #define MODE_ICON_TOURNAMENT 0

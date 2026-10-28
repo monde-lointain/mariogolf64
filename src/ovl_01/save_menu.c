@@ -155,13 +155,6 @@ extern u8 D_801B70F0[MAXCONTROLLERS];
 #define NO_CONTROLLER -1
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
-/* How func_80225358 views a saved game's characters */
-#define SAVED_CHARACTERS_NEAR 1.0f
-#define SAVED_CHARACTERS_FAR 3000.0f
-#define SAVED_CHARACTERS_ORTHO_SCALE 10.0f
-#define SAVED_CHARACTERS_EYE_Y 70.0f
-#define SAVED_CHARACTERS_EYE_Z 60.0f
-
 extern s32
     D_8023BFC0_ovl_01[MAX_PLAYER_COUNT]; /* Frames until each character fidgets,
                                             or -1 while it does */
@@ -1730,10 +1723,10 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
   }
 
   guOrtho(&D_8023BCE0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
-      -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, SAVED_CHARACTERS_NEAR,
-      SAVED_CHARACTERS_FAR, SAVED_CHARACTERS_ORTHO_SCALE);
+      -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CHARACTERS_NEAR,
+      MENU_CHARACTERS_FAR, MENU_CHARACTERS_ORTHO_SCALE);
   guLookAtReflectF(viewing, &D_8023BD30_ovl_01[g_DrawBufferIndex], 0.0f,
-      SAVED_CHARACTERS_EYE_Y, SAVED_CHARACTERS_EYE_Z, 0.0f, 0.0f, 0.0f, 0.0f,
+      MENU_CHARACTERS_EYE_Y, MENU_CHARACTERS_EYE_Z, 0.0f, 0.0f, 0.0f, 0.0f,
       1.0f, 0.0f);
   gSPLookAt(gfx++, &D_8023BD30_ovl_01[g_DrawBufferIndex]);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
