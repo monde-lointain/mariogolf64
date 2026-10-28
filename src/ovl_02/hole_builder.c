@@ -214,7 +214,7 @@ extern f32 f_HeightStepScales[];
 extern s32 f_PaintLogic;
 extern PaintLogic f_PaintLogics[];
 extern Vec3 g_MiniGolfScale;
-extern s32 f_HolePaintLogics[][COURSE_HOLE_COUNT];
+extern s32 f_HolePaintLogics[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT];
 extern s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN];
 
 void BuildGroundTileDisplayList(
@@ -2064,7 +2064,7 @@ void BuildHole(s32 course, s32 hole) {
 
     FillRandomGrid(0x40, 0xD2);
   } else if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
-    f_PaintLogic = f_HolePaintLogics[course][hole - 1];
+    f_PaintLogic = f_HolePaintLogics[course - 1][hole - 1];
     if (IsGameFlagSet(GAME_FLAG_UNK6A)) {
       f_PaintLogic++;
     }
