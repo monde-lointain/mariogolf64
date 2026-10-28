@@ -89,9 +89,6 @@ extern s32 f_LogoClubPosition[3];
 extern f32 f_LogoClubOrbitRadius;
 extern s32 f_IsLogoClubSwinging;
 extern s32 f_AreAmbientSoundsOn;
-/* The impact lines' image, and later the burst's */
-extern u8 f_OpeningEffectImage[];
-extern u8 f_ShotBallImage[];
 
 /* The steps that a name logo's animation starts each phase at */
 #define NAME_LOGO_UNFOLD 0 /* Widens over 8 frames */
@@ -100,14 +97,9 @@ extern u8 f_ShotBallImage[];
 #define NAME_LOGO_STILL 30
 
 extern OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT];
-extern u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
-extern s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
-extern s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
-extern s32 f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
 extern s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT];
 extern f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT];
 extern s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
-extern u8 f_OpeningBallImages[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
 /* The buffers of character slots 1 and 2 */
 extern u8* f_OpeningCharacterBuffers[2];
 extern void* f_OpeningBillboardHeap;
@@ -136,8 +128,6 @@ extern s32 f_OpeningFrameParity;
 extern s32 f_IsLookAtMarkerShown;
 extern f32 g_LookAtMarkerScale;
 extern Vtx f_LookAtMarkerVertices[6][4];
-extern Mtx f_LookAtMarkerTranslation;
-extern Mtx f_LookAtMarkerScaling;
 
 extern s32 f_IsLakituFlying;
 extern s32 f_LakituAngle;
@@ -299,6 +289,92 @@ void LoadLakitu(void);
 void LoadOpeningImpactLines(void);
 void EaseOpeningLookAt(void);
 void LoadOpeningBall(s32 imageIndex, s32 slot);
+
+/* The larger of the images in f_OpeningEffectImage, the 64x64 CI8 impact
+ * lines with their header and palette */
+#define OPENING_EFFECT_IMAGE_SIZE 0x1208
+
+/* The opening's sparks, which fan out from a point and slow down */
+#define SPARK_COUNT 20
+
+static s32 f_CueSlotIndex;
+static CoursePoint D_8020C404_ovl_05;
+/* Read by no routine */
+static u8 D_8020C410_ovl_05[0x80];
+static Mtx f_LookAtMarkerTranslation;
+static Mtx f_LookAtMarkerScaling;
+static Mtx f_OpeningBallMatrices[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_OpeningBallScaleMatrices[OPENING_BALL_SLOT_COUNT];
+static Mtx f_OpeningBallShadowMatrices[OPENING_BALL_SLOT_COUNT]
+                                      [DRAW_BUFFER_COUNT];
+static Vec3 f_LogoBallLastPosition;
+static Mtx f_LogoBallMarioTranslations[DRAW_BUFFER_COUNT];
+static Mtx f_LogoBallMarioRolls[DRAW_BUFFER_COUNT];
+static Mtx f_LogoBallMarioScale;
+static Mtx f_LogoBallMarioOffset;
+/* Read by no routine */
+static u8 D_8020C920_ovl_05[16];
+static Mat4 f_LogoBallRoll;
+/* Read by no routine */
+static u8 D_8020C970_ovl_05[4];
+/* The current projected ball's position and rectangle on the screen */
+static Vec3 f_ProjectedBallPosition;
+static s32 f_ProjectedBallLeft;
+static s32 f_ProjectedBallTop;
+static s32 f_ProjectedBallRight;
+static s32 f_ProjectedBallBottom;
+static s32 f_ProjectedBallTexelStep;
+static Vec3 f_ProjectedLogoBallLastPosition;
+static Mtx f_ProjectedShadowMatrices[DRAW_BUFFER_COUNT]
+                                    [OPENING_BALL_SLOT_COUNT];
+static Mtx f_ProjectedShadowScaleMatrices[OPENING_BALL_SLOT_COUNT];
+static Mtx f_ProjectedLogoBallMarioTranslations[DRAW_BUFFER_COUNT];
+static Mtx f_ProjectedLogoBallMarioRolls[DRAW_BUFFER_COUNT];
+static Mtx f_ProjectedLogoBallMarioScale;
+static Mtx f_ProjectedLogoBallMarioOffset;
+/* Read by no routine */
+static u8 D_8020CCA0_ovl_05[16];
+static Mat4 f_ProjectedLogoBallRoll;
+/* 1 when the ball's size is odd, for the pixel that halving it loses */
+static s32 f_ProjectedBallExtraPixel;
+static Vec3 f_ShotBallPosition;
+/* Read by no routine */
+static u8 D_8020CD00_ovl_05[8];
+static Mtx f_ShotBallShadowTranslation;
+static Mtx f_ShotBallShadowScaling;
+static Mtx f_LogoLetterTranslations[LOGO_LETTER_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_LogoLetterScalings[LOGO_LETTER_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_LogoClubTranslations[DRAW_BUFFER_COUNT];
+static Mtx f_LogoClubScalings[DRAW_BUFFER_COUNT];
+static Mtx f_LogoClubRotations[DRAW_BUFFER_COUNT];
+/* Read by no routine */
+static u8 D_8020D810_ovl_05[8];
+/* While the logo shrinks, each frame's moves, in pixels */
+static s32 f_LogoLetterSteps[LOGO_LETTER_COUNT];
+static s32 f_LogoLetterRises[2]; /* Up; the other letters', then the L's */
+static f32 f_LogoScaleStep;
+static s32 f_LogoClubStepX;
+static s32 f_LogoClubStepY;
+static f32 f_OpeningSparkPositions[SPARK_COUNT][2];
+static f32 f_OpeningSparkAngles[SPARK_COUNT];
+static f32 f_OpeningSparkVelocities[SPARK_COUNT][2];
+static f32 f_OpeningSparkScale;
+static s32 f_OpeningSparkFramesLeft;
+static Mtx f_OpeningSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
+/*
+ * The channels of two sounds that keep playing into the title screen: Donkey
+ * Kong's, when he is shown, and the one the last scene starts
+ */
+static s32 f_DonkeyKongSoundChannel;
+static s32 f_ClosingSoundChannel;
+static u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
+static s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
+static s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
+static s32 f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
+/* The impact lines' image, and later the burst's */
+static u8 f_OpeningEffectImage[OPENING_EFFECT_IMAGE_SIZE];
+static u8 f_ShotBallImage[OPENING_BALL_IMAGE_SIZE];
+static u8 f_OpeningBallImages[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
 
 /* Moves f_OpeningSoundChannel on to the next of the rotating channels */
 void AdvanceOpeningSoundChannel(void) {
@@ -635,7 +711,6 @@ s32 func_80206680_ovl_05(u32 slotIndex, s32 character);
 
 /* Written but never read */
 extern s32 f_LastPlacedSlotIndex;
-extern s32 f_CueSlotIndex;
 
 /* Places the cue slot's character, leaving the point's height unset */
 #define PLACE_CUE_CHARACTER(point, x, z, heading) \
@@ -1025,13 +1100,6 @@ extern Unk20 D_8020AE18_ovl_05;
 extern s32 D_8020AE44_ovl_05;
 extern f32 D_8020AEBC_ovl_05;
 extern f32 D_8020AEC0_ovl_05;
-extern CoursePoint D_8020C404_ovl_05;
-/*
- * The channels of two sounds that keep playing into the title screen: Donkey
- * Kong's, when he is shown, and the one the last scene starts
- */
-extern s32 f_DonkeyKongSoundChannel;
-extern s32 f_ClosingSoundChannel;
 
 /* The first channel after the rotating ones */
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
@@ -2851,48 +2919,21 @@ void LoadOpeningBall(s32 ballIndex, s32 slot) {
 
 extern Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][4];
 extern Vtx f_OpeningBallShadowVertices[4];
-extern Mtx f_OpeningBallMatrices[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
-extern Mtx f_OpeningBallScaleMatrices[OPENING_BALL_SLOT_COUNT];
-extern Mtx f_OpeningBallShadowMatrices[OPENING_BALL_SLOT_COUNT]
-                                      [DRAW_BUFFER_COUNT];
 
 /* The logo ball's roll, from its position's change each frame */
 extern s32 f_ShouldResetLogoBallRoll;
-extern Mat4 f_LogoBallRoll;
+
 extern s32 f_HasLogoBallLastPosition;
-extern Vec3 f_LogoBallLastPosition;
 extern s32 f_LogoBallFrameIndex;
 extern Vtx f_LogoBallMarioVertices[4];
-extern Mtx f_LogoBallMarioTranslations[DRAW_BUFFER_COUNT];
-extern Mtx f_LogoBallMarioRolls[DRAW_BUFFER_COUNT];
-extern Mtx f_LogoBallMarioScale;
-extern Mtx f_LogoBallMarioOffset;
 
-/* The current projected ball's position and rectangle on the screen */
-extern Vec3 f_ProjectedBallPosition;
-extern s32 f_ProjectedBallLeft;
-extern s32 f_ProjectedBallTop;
-extern s32 f_ProjectedBallRight;
-extern s32 f_ProjectedBallBottom;
-extern s32 f_ProjectedBallTexelStep;
-/* 1 when the ball's size is odd, for the pixel that halving it loses */
-extern s32 f_ProjectedBallExtraPixel;
 extern Vtx f_ProjectedShadowVertices[4];
-extern Mtx f_ProjectedShadowMatrices[DRAW_BUFFER_COUNT]
-                                    [OPENING_BALL_SLOT_COUNT];
-extern Mtx f_ProjectedShadowScaleMatrices[OPENING_BALL_SLOT_COUNT];
 
 /* The same as the logo ball's roll, kept apart for the projected logo ball */
 extern s32 f_ShouldResetProjectedLogoBallRoll;
-extern Mat4 f_ProjectedLogoBallRoll;
 extern s32 f_HasProjectedLogoBallLastPosition;
-extern Vec3 f_ProjectedLogoBallLastPosition;
 extern s32 f_ProjectedLogoBallFrameIndex;
 extern Vtx f_ProjectedLogoBallMarioVertices[4];
-extern Mtx f_ProjectedLogoBallMarioTranslations[DRAW_BUFFER_COUNT];
-extern Mtx f_ProjectedLogoBallMarioRolls[DRAW_BUFFER_COUNT];
-extern Mtx f_ProjectedLogoBallMarioScale;
-extern Mtx f_ProjectedLogoBallMarioOffset;
 
 #ifdef NON_MATCHING
 /*
@@ -3912,9 +3953,6 @@ void LoadOpeningShotBall(void) {
 
 extern s32 f_ShotBallAlpha;
 extern Vtx f_ShotBallShadowVertices[4];
-extern Vec3 f_ShotBallPosition;
-extern Mtx f_ShotBallShadowTranslation;
-extern Mtx f_ShotBallShadowScaling;
 
 #ifdef NON_MATCHING
 /*
@@ -4318,17 +4356,6 @@ extern Vtx f_LogoLetterVertices[2][4];
 /* The club's image is drawn in six strips */
 #define LOGO_CLUB_STRIP_COUNT 6
 extern Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][4];
-extern Mtx f_LogoLetterTranslations[LOGO_LETTER_COUNT][DRAW_BUFFER_COUNT];
-extern Mtx f_LogoLetterScalings[LOGO_LETTER_COUNT][DRAW_BUFFER_COUNT];
-extern Mtx f_LogoClubTranslations[DRAW_BUFFER_COUNT];
-extern Mtx f_LogoClubScalings[DRAW_BUFFER_COUNT];
-extern Mtx f_LogoClubRotations[DRAW_BUFFER_COUNT];
-/* While the logo shrinks, each frame's moves, in pixels */
-extern s32 f_LogoLetterSteps[LOGO_LETTER_COUNT];
-extern s32 f_LogoLetterRises[2]; /* Up; the other letters', then the L's */
-extern f32 f_LogoScaleStep;
-extern s32 f_LogoClubStepX;
-extern s32 f_LogoClubStepY;
 
 /*
  * Drives the title logo: Lakitu drops the letters, which bounce into place,
@@ -4882,8 +4909,8 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
 #endif
 
-/* The opening's sparks, which fan out from a point and slow down */
-#define SPARK_COUNT 20
+/* The sparks fan out from a point and slow down over SPARK_FRAME_COUNT
+ * frames */
 #define SPARK_FRAME_COUNT 10
 /* The spark scale is this divided by the origin's depth */
 #define SPARK_SCALE_DEPTH 48.0f
@@ -4899,12 +4926,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
 #define SPARK_DEPTH -100.0f
 
 extern Vtx f_OpeningSparkVertices[3];
-extern f32 f_OpeningSparkPositions[SPARK_COUNT][2];
-extern f32 f_OpeningSparkAngles[SPARK_COUNT];
-extern f32 f_OpeningSparkVelocities[SPARK_COUNT][2];
-extern f32 f_OpeningSparkScale;
-extern s32 f_OpeningSparkFramesLeft;
-extern Mtx f_OpeningSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
 
 #ifdef NON_MATCHING
 /*
