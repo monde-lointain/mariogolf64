@@ -194,7 +194,6 @@ extern ArrowShape f_Arrows[ARROW_COUNT];
 #define SHOT_OFFSET_MARKER_Y 174
 
 extern s32 f_ShotPanelOffsetY;
-extern s32 g_ShotPanelOffsetX;
 extern s32 f_ShotOffsetMarkerFrame;
 
 /* The images that a hole's intro shows for the bets and the match standing */
@@ -1864,8 +1863,6 @@ void ResetBallTrail(void) {
 #define BALL_TRAIL_SEGMENT_COLOR(segment) \
   ((BALL_TRAIL_ALPHA - ((segment) / BALL_TRAIL_SEGMENTS_PER_FADE)) | \
       BALL_TRAIL_COLOR)
-
-extern s32 D_800C5AAC;
 
 /*
  * Draws the ball's trail through its recent positions as screen-space quads

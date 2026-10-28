@@ -320,7 +320,6 @@ s32 IsShotModeChangeDone(void) {
 extern Vtx f_SpanBarVertices[SPAN_BAR_VERTEX_COUNT];
 extern Gfx f_SpanBarDisplayList[];
 extern f32 f_MarkerPulseAngle;
-extern s32 g_ShotPanelOffsetX;
 
 s32 func_8005F224(void);
 

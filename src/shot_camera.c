@@ -288,7 +288,6 @@ enum ResultSound {
 #define CUP_PASS_MAX_DEPTH 0x1A400
 #define CUP_PASS_MAX_LANDING_DISTANCE 0x4B000
 
-extern s32 D_800C5AAC;
 extern SimulatedShot g_SimulatedShot;
 static s8 f_CameraPicks[CAMERA_PICK_COUNT];
 static CoursePoint f_FlightBallPosition;
