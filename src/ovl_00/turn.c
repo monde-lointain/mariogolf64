@@ -163,6 +163,7 @@
 #define SHOT_PREVIEW_MIN_STEPS 2
 #define SHOT_PREVIEW_MAX_STEPS 20
 #define SHOT_PREVIEW_SCROLL_STEP 8
+#define INITIAL_SHOT_PREVIEW_STEP_COUNT 10
 #define AIM_CAMERA_DEBUG_TILT_SCALE 30.0f
 /* The pause screen's camera circles the ball at this distance, and rises this
  * far above it */
@@ -278,34 +279,86 @@
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
 extern s32 D_801051F0; /* Set unless two players share a controller */
-extern s32 D_80223FF8_ovl_00;
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
-extern s32 f_IsShotPreviewBuilt; /* Set once the shot preview has been built */
-extern f32 f_DebugAimCameraTilt; /* A debug tilt of the aim camera, which the C
-                                 buttons tune */
-extern Vtx f_ShotPreviewDashVertices[4]; /* A dash of the shot preview */
-extern Vtx f_PuttPreviewLineVertices[4]; /* The putt preview's line, placed on
-                                            screen */
-extern s32
-    f_ShotPreviewStepCount; /* How many steps the shot preview simulates */
-extern s32 f_ShownShotPreviewPointCount; /* How many of the shot preview's
-                                            points are shown */
-extern s8 f_HasShotPreviewEnded; /* Whether the shot preview ran to its end */
-extern s32 f_ShotPreviewDotScroll; /* Scrolls the shot preview's dots */
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
-extern s32
-    f_AmbientSoundIdleFrameCount; /* Frames since the last ambient sound */
-/* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
-extern s32 f_AmbientSounds[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES];
-extern s32 f_AimTurnFrameCount; /* Frames that the D-pad has turned the aim,
-                                 negative to the right */
-extern s32 f_ReplayAimSettledFrameCount; /* Frames that a replayed shot's aim
-                                            has been settled */
 extern CurrentShot D_80104F78; /* The replayed shot */
+/* Set once the shot preview has been built */
+static s32 f_IsShotPreviewBuilt = FALSE;
+/* Frames that a replayed shot's aim has been settled */
+static s32 f_ReplayAimSettledFrameCount = 0;
+/* A debug tilt of the aim camera, which the C buttons tune */
+static f32 f_DebugAimCameraTilt = 0.0f;
+/* Read by no routine */
+static s32 D_80223E4C_ovl_00 = 0;
+/* Frames that the D-pad has turned the aim, negative to the right */
+static s32 f_AimTurnFrameCount = 0;
+/* Read by no routine */
+static s32 D_80223E54_ovl_00 = 0;
+static u32 D_80223E58_ovl_00 = 10;
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
-extern s32 f_ShotFlightCount;
+static s32 f_ShotFlightCount = 0;
+/* A dash of the shot preview */
+static Vtx f_ShotPreviewDashVertices[4] = {
+    {{{-1, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
+    {{{1, 0, 0}, 0, {0, 0x800}, {0x00, 0x00, 0x00, 0xFF}}},
+    {{{1, 0, -1}, 0, {0x800, 0x800}, {0x00, 0x00, 0xFF, 0x00}}},
+    {{{-1, 0, -1}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0x00}}}};
+/* How many steps the shot preview simulates */
+static s32 f_ShotPreviewStepCount = INITIAL_SHOT_PREVIEW_STEP_COUNT;
+/* How many of the shot preview's points are shown */
+static s32 f_ShownShotPreviewPointCount = INITIAL_SHOT_PREVIEW_STEP_COUNT;
+/* Whether the shot preview ran to its end */
+static s8 f_HasShotPreviewEnded = FALSE;
+/* Scrolls the shot preview's dots */
+static s32 f_ShotPreviewDotScroll = 0;
+/* The putt preview's line, placed on screen */
+static Vtx f_PuttPreviewLineVertices[4] = {
+    {{{0, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{0, -1, -100}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{48, -1, -100}, 0, {0x17C0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{48, 0, -100}, 0, {0x17C0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
+static s32 f_AmbientSounds[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES] = {
+    {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
+    {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
+    {NO_AMBIENT_SOUND, NO_AMBIENT_SOUND, NO_AMBIENT_SOUND, NO_AMBIENT_SOUND,
+        NO_AMBIENT_SOUND, NO_AMBIENT_SOUND, NO_AMBIENT_SOUND},
+    {0x1E, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8},
+    {NO_AMBIENT_SOUND, NO_AMBIENT_SOUND, NO_AMBIENT_SOUND, NO_AMBIENT_SOUND,
+        NO_AMBIENT_SOUND, NO_AMBIENT_SOUND, NO_AMBIENT_SOUND},
+    {0x1A, 0x1B, 0x2B, 0x18, 0x1A, 0x1B, 0x2B},
+    {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
+    {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
+    {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND}};
+/* Frames since the last ambient sound */
+static s32 f_AmbientSoundIdleFrameCount = 0;
+/* No routine sets it; while it is set, the next turn replays the player's
+ * saved shot */
+static s8 f_ShouldReplaySavedShot = FALSE;
+/* Read by no routine */
+static s8 D_80223FF1_ovl_00 = 0;
+static s8 D_80223FF2_ovl_00 = 0;
+static s8 D_80223FF3_ovl_00 = 0;
+/* The debug guts test's state, character and motion */
+static s8 f_HasGutsTestRun = FALSE;
+static s8 f_GutsTestCharacter = 0;
+static s8 f_GutsTestMotion = 0;
+static s8 f_ShouldUpdateReaction = FALSE;
+static s32 D_80223FF8_ovl_00 = 0;
+static s32 D_80223FFC_ovl_00 = 0;
+static s32 D_80224000_ovl_00 = 0;
+static s32 D_80224004_ovl_00 = 0;
+static s32 D_80224008_ovl_00 = 0;
+static s32 D_8022400C_ovl_00 = 0;
+/* Read by no routine */
+static s32 D_80224010_ovl_00 = 0;
+/* The angles of FrameBallAndShot's camera */
+static f32 f_DebugFramingYaw = 0.0f;
+static f32 f_DebugFramingPitch = 0.0f;
+/* Read by no routine */
+static s32 D_8022401C_ovl_00 = 0;
 
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
@@ -2693,19 +2746,6 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * original's frame.
  */
 #ifdef NON_MATCHING
-extern s8 f_ShouldReplaySavedShot;
-extern s8 f_HasGutsTestRun;
-extern s8 f_GutsTestCharacter;
-extern s8 f_GutsTestMotion;
-extern s8 f_ShouldUpdateReaction;
-extern s32 D_80223FFC_ovl_00;
-extern s32 D_80224000_ovl_00;
-extern s32 D_80224004_ovl_00;
-extern s32 D_80224008_ovl_00;
-extern s32 D_8022400C_ovl_00;
-extern f32 f_DebugFramingYaw;
-extern f32 f_DebugFramingPitch;
-extern u32 D_80223E58_ovl_00;
 extern s32 D_800B7D9C;
 extern u16 D_80104998;
 extern u16 D_80104994;
