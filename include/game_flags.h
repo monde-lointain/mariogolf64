@@ -173,6 +173,10 @@
 /* Shows the staff roll after the hole even if the final challenge is not won */
 #define GAME_FLAG_SHOW_STAFF_ROLL 0x65
 
+/* Keeps the menus, as the exit screen leaves them, from swapping to the play
+ * module; they read their resources again instead */
+#define GAME_FLAG_UNK2E 0x2E
+
 /* Flags that the hole loader reads or sets, whose purpose is not yet known */
 #define GAME_FLAG_UNK11 0x11
 #define GAME_FLAG_UNK12 0x12

@@ -31,6 +31,7 @@
 #define MENU_SCREEN_CLUB_TOURNAMENT 27
 /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
 #define MENU_SCREEN_MAIN_WITHOUT_TRANSMIT 28
+#define MENU_SCREEN_COUNT 29
 extern s32 g_MenuScreen;
 
 /* The buttons of every controller: those repeating while held, and those just
