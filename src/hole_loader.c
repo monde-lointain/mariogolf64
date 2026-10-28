@@ -52,9 +52,6 @@
 #define LIGHT_YAW_STEP_PER_HOLE 0x5000
 #define HOLE_LIGHT_PITCH 0x3000
 
-/* A g_GameState.gameMode value whose purpose is not yet known */
-#define GAME_MODE_UNK13 13
-
 /* GetHoleRandom's generator, a linear congruential one */
 #define HOLE_RANDOM_MULTIPLIER 0x5D588B65
 #define HOLE_RANDOM_INCREMENT 1
@@ -778,7 +775,7 @@ s32 ChooseHoleConditions(void) {
   }
 
   if (g_GameState.gameMode != GAME_MODE_UNK12 &&
-      g_GameState.gameMode != GAME_MODE_UNK13) {
+      g_GameState.gameMode != GAME_MODE_STAFF_ROLL) {
     /* The first hole, mini-golf and GAME_MODE_TRAINING stay dry */
     if (g_GameState.holeIndex != 0 &&
         g_GameState.gameMode != GAME_MODE_TRAINING && !g_GameState.isMiniGolf) {
