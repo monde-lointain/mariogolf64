@@ -6,6 +6,7 @@
 
 #include "functions.h"
 #include "game.h"
+#include "hole_display.h"
 #include "save.h"
 #include "variables.h"
 
