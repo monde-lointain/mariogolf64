@@ -485,7 +485,8 @@ segments:
       - { start: 0xADD30, type: .bss, vram: 0x800D2930, name: overlay_manager }
       - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/nusched }
       - { type: .bss, vram: 0x800D8980, name: ../lib/libnusys/nugfxtaskmgr }
-      - { type: bss, vram: 0x800DAB60, name: bss_800DAB60 }
+      - { type: .bss, vram: 0x800DAB60, name: game }
+      - { type: bss, vram: 0x800DAC40, name: bss_800DAC40 }
       - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/nuboot }
       - { type: .bss, vram: 0x800E7030, name: ../lib/libmus/src/player }
       - { type: .bss, vram: 0x800E70A0, name: ../lib/libmus/src/aud_dma }

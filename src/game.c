@@ -60,14 +60,20 @@ extern s32 f_InsetViewHeight;
 void DrawSpinEffect(Gfx** displayListHead, CameraView* view);
 void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view);
 
+/* Resets the model view before each view's menu backdrop and scene */
+static Mtx f_IdentityMatrix;
+
 /*
  * The spin effect's mesh and its rotation, one per draw buffer. Each draw
  * buffer's vertices start one vertex after the other's, so most are shared,
  * and f_SpinVertices runs on over f_SpinMatrices, so a frame's vertex updates
  * overwrite parts of the matrices.
  */
-extern Vtx f_SpinVertices[];
-extern Mtx f_SpinMatrices[];
+static Vtx f_SpinVertices[1];
+static Mtx f_SpinMatrices[DRAW_BUFFER_COUNT];
+
+/* Read by no routine */
+static u8 D_800DAC30[16];
 
 extern f32 f_SpinAngle; /* In radians */
 
@@ -996,7 +1002,6 @@ void BuildDynamicTextures(Gfx** displayListHead) {
 extern u32 f_DrawStartTime;
 extern f32 f_MapFieldOfView; /* In degrees */
 extern s8 f_NeedsIdentityMatrix;
-extern Mtx f_IdentityMatrix;
 /* Indexed by view, then by draw buffer */
 extern CameraMatrices f_CameraMatrices[2 * 2];
 /* The next free vertex of the frame's vertex buffer */
