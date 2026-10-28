@@ -29,3 +29,20 @@ rom:0xFA930 reloc:MIPS_HI16 symbol:D_80230100_ovl_01 addend:0x4
 rom:0xFA938 reloc:MIPS_LO16 symbol:D_80230100_ovl_01 addend:0x4
 rom:0xFA9A4 reloc:MIPS_HI16 symbol:D_80230100_ovl_01 addend:0x4
 rom:0xFA9AC reloc:MIPS_LO16 symbol:D_80230100_ovl_01 addend:0x4
+// func_80209D50_ovl_01 reads D_8022FF1C_ovl_01[1] to [3]; name the table, not its words
+rom:0xF4BB0 reloc:MIPS_HI16 symbol:D_8022FF1C_ovl_01 addend:0x4
+rom:0xF4BB4 reloc:MIPS_LO16 symbol:D_8022FF1C_ovl_01 addend:0x4
+rom:0xF4BB8 reloc:MIPS_HI16 symbol:D_8022FF1C_ovl_01 addend:0x8
+rom:0xF4BBC reloc:MIPS_LO16 symbol:D_8022FF1C_ovl_01 addend:0x8
+rom:0xF4BC0 reloc:MIPS_HI16 symbol:D_8022FF1C_ovl_01 addend:0xC
+rom:0xF4BC4 reloc:MIPS_LO16 symbol:D_8022FF1C_ovl_01 addend:0xC
+// func_8020C6D8_ovl_01 reads D_8022FFD4_ovl_01's row for the tag count less one; name the table, not the place a row before it
+rom:0xF67B8 reloc:MIPS_HI16 symbol:D_8022FFD4_ovl_01 addend:-0x10
+rom:0xF67BC reloc:MIPS_LO16 symbol:D_8022FFD4_ovl_01 addend:-0x10
+// func_8020CD20_ovl_01 writes each D_80230038_ovl_01 vertex's red, green and blue; name the table, not the bytes inside it
+rom:0xF6D98 reloc:MIPS_HI16 symbol:D_80230038_ovl_01 addend:0xC
+rom:0xF6DA0 reloc:MIPS_LO16 symbol:D_80230038_ovl_01 addend:0xC
+rom:0xF6DA4 reloc:MIPS_HI16 symbol:D_80230038_ovl_01 addend:0xE
+rom:0xF6DAC reloc:MIPS_LO16 symbol:D_80230038_ovl_01 addend:0xE
+rom:0xF6DC0 reloc:MIPS_HI16 symbol:D_80230038_ovl_01 addend:0xD
+rom:0xF6DC8 reloc:MIPS_LO16 symbol:D_80230038_ovl_01 addend:0xD
