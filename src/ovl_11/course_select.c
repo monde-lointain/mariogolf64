@@ -57,14 +57,10 @@ enum PlanksState {
   (((courseCount) - 1) * STARS_PER_OPENED_COURSE)
 
 /* The asset IDs of the images */
-#define NAME_PLATE_ASSET 0x521
 #define HOLE_SIGN_ASSET 0x739
 #define PLANKS_ASSET 0x8ED
-#define ARROWS_ASSET 0x71E
 #define COURSE_IMAGE_PALETTE_ASSET 0x876
 #define BLANK_COURSE_IMAGE_ASSET 0x834
-/* The first images of the stars' spins */
-#define SPINNING_STAR_ASSET 0x5BE
 #define SPINNING_EMPTY_STAR_ASSET 0x5E5
 
 /* The stars spin through this many frames, each shown for STAR_FRAME_TIME
@@ -315,16 +311,16 @@ void LoadCourseSelect(s32 isHoleSelect) {
   f_PressedDirection = 0;
   if (!isHoleSelect) {
     f_LoadedScreen = COURSE_SELECT_RING_SHOT;
-    f_BoardImage = AllocMemory(OpenEncodedAsset(NAME_PLATE_ASSET, &asset));
+    f_BoardImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
     ReadEncodedAsset(f_BoardImage, &asset);
     f_StarImages[0] =
-        AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_SPINNING_STAR, &asset));
     ReadEncodedAsset(f_StarImages[0], &asset);
     f_StarImages[1] =
-        AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_SPINNING_STAR, &asset));
     ReadEncodedAsset(f_StarImages[1], &asset);
     f_StarImages[STILL_STAR_IMAGE] =
-        AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_SPINNING_STAR, &asset));
     ReadEncodedAsset(f_StarImages[STILL_STAR_IMAGE], &asset);
     f_EmptyStarImages[0] =
         AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
@@ -362,7 +358,8 @@ void LoadCourseSelect(s32 isHoleSelect) {
   size = GetAssetFileSize(&file);
   f_CourseImagePalette = AllocMemory(size);
   ReadAssetFile(f_CourseImagePalette, size, &file);
-  f_ArrowsImage = AllocMemory(OpenEncodedAsset(ARROWS_ASSET, &asset));
+  f_ArrowsImage =
+      AllocMemory(OpenEncodedAsset(ASSET_GREEN_ARROWS_COPY, &asset));
   ReadEncodedAsset(f_ArrowsImage, &asset);
   f_StarFrameIndex = 0;
   f_StarBufferIndex = 0;

@@ -43,8 +43,6 @@
 #define COURSE_THUMBNAIL_TOP 182
 #define COURSE_THUMBNAIL_SHOWN_WIDTH 52
 #define COURSE_THUMBNAIL_SHOWN_HEIGHT 18
-/* Controllers numbered 1 to 4, 32 by 32 each */
-#define ASSET_CONTROLLER_ICONS 0x63D
 /* The wooden boards numbered 1 to 3, one for each saved game, 64 by 64 each */
 #define ASSET_FIRST_GAME_BOARD 0x82A
 #define ASSET_SECOND_GAME_BOARD 0x82B
@@ -57,9 +55,6 @@ enum SaveMenuGame {
   SAVE_MENU_GAME_GET_CHARACTER,
   SAVE_MENU_GAME_STROKE
 };
-
-/* The image listing the game modes, in orange */
-#define ASSET_MENU_GAME_MODES 0x528
 
 extern s32 D_80230A90_ovl_01;
 extern s32 D_80230A94_ovl_01;
@@ -242,7 +237,7 @@ void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 4:
       D_8023B67C_ovl_01 = buffer;
-      OpenEncodedAsset(0x720, &asset);
+      OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023B67C_ovl_01, &asset);
       D_80230A90_ovl_01 = 0;
       D_80230A94_ovl_01 = 0;

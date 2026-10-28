@@ -59,7 +59,6 @@
 #define PLAYER_STATS_ICON_COUNT 8
 #define PLAYER_STATS_ICON_SIZE 0x218
 #define ASSET_PLAYER_STATS_UNK2 0x671
-#define ASSET_PLAYER_STATS_UNK7 0x720
 #define ASSET_PLAYER_STATS_UNK8 0x6C4
 #define ASSET_PLAYER_STATS_GAME_LABELS 0x6E8
 #define GAME_LABEL_WIDTH 128
@@ -319,7 +318,7 @@ void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case PLAYER_STATS_BUFFER_UNK7:
       D_8023B358_ovl_01 = buffer;
-      OpenEncodedAsset(ASSET_PLAYER_STATS_UNK7, &asset);
+      OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023B358_ovl_01, &asset);
       break;
     case PLAYER_STATS_BUFFER_UNK8:
@@ -1713,7 +1712,7 @@ void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 2:
       D_8023B638_ovl_01 = buffer;
-      OpenEncodedAsset(0x6EF, &asset);
+      OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
       ReadEncodedAsset(D_8023B638_ovl_01, &asset);
       break;
     case 3:

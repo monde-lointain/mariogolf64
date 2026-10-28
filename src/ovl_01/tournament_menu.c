@@ -83,8 +83,9 @@ extern void* D_80230F4C_ovl_01;
 extern void* D_80230F50_ovl_01;
 extern void* D_80230F54_ovl_01;
 /*
- * func_8022A8F4 points at the chosen key with the 24x24 hand of asset 0x70F
- * in D_80230F50, which sways a pixel to the right each frame and back
+ * func_8022A8F4 points at the chosen key with the 24x24 hand of
+ * ASSET_POINTING_HAND in D_80230F50, which sways a pixel to the right each
+ * frame and back
  */
 #define CODE_HAND_SIZE 24
 #define CODE_HAND_FIRST_X 16
@@ -226,7 +227,8 @@ void func_802296C4_ovl_01(
     Gfx** displayListHead, s32 centerX, s32 top, s32 number);
 /*
  * func_802296C4 writes the club tournament's number as an ordinal from the
- * 24x24 glyphs of asset 0x98E: the digits, then "st", "nd", "rd" and "th"
+ * 24x24 glyphs of ASSET_PLACE_DIGITS: the digits, then "st", "nd", "rd" and
+ * "th"
  */
 #define ORDINAL_GLYPH_SIZE 24
 #define ORDINAL_GLYPH_COUNT 14
@@ -312,7 +314,7 @@ void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
   switch (bufferKind) {
     case 1:
       D_80230E70_ovl_01 = buffer;
-      OpenEncodedAsset(0x70B, &asset);
+      OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset);
       ReadEncodedAsset(D_80230E70_ovl_01, &asset);
       break;
     case 2:
@@ -1002,7 +1004,7 @@ void func_80228A80_ovl_01(void* buffer, s32 bufferKind) {
   switch (bufferKind) {
     case 1:
       D_80230F44_ovl_01 = buffer;
-      OpenEncodedAsset(0x521, &asset);
+      OpenEncodedAsset(ASSET_NAME_PLATE, &asset);
       ReadEncodedAsset(D_80230F44_ovl_01, &asset);
       break;
     case 2:
@@ -1017,12 +1019,12 @@ void func_80228A80_ovl_01(void* buffer, s32 bufferKind) {
       break;
     case 4:
       D_80230F50_ovl_01 = buffer;
-      OpenEncodedAsset(0x70F, &asset);
+      OpenEncodedAsset(ASSET_POINTING_HAND, &asset);
       ReadEncodedAsset(D_80230F50_ovl_01, &asset);
       break;
     case 5:
       D_80230F54_ovl_01 = buffer;
-      OpenEncodedAsset(0x6EF, &asset);
+      OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
       ReadEncodedAsset(D_80230F54_ovl_01, &asset);
       break;
   }

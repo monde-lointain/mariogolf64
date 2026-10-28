@@ -22,10 +22,8 @@ void func_8005C674(s32 arg0, s32 arg1);
 #define TABLE_ROW_COUNT 18
 #define TABLE_SHOWN_ROW_COUNT 5
 
-/* The images that func_802159C0 reads into the buffers it keeps */
-#define ASSET_TABLE_CURSOR 0x6EF
+/* func_802159C0 reads this beside ASSET_CURSOR_BOX and ASSET_SPINNING_STAR */
 #define ASSET_TABLE_ARROWS 0x94A
-#define ASSET_TABLE_STAR 0x5BE
 
 /* func_80217464 squeezes the star's image to fit a table cell */
 #define TABLE_STAR_IMAGE_WIDTH 32
@@ -171,7 +169,7 @@ void func_802159C0_ovl_01(void* buffer, s16 bufferKind) {
   switch (bufferKind) {
     case TABLE_BUFFER_CURSOR:
       D_8023AC64_ovl_01 = buffer;
-      OpenEncodedAsset(ASSET_TABLE_CURSOR, &asset);
+      OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
       ReadEncodedAsset(D_8023AC64_ovl_01, &asset);
       break;
     case TABLE_BUFFER_UNREAD:
@@ -187,7 +185,7 @@ void func_802159C0_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case TABLE_BUFFER_STAR:
       D_8023AC70_ovl_01 = buffer;
-      OpenEncodedAsset(ASSET_TABLE_STAR, &asset);
+      OpenEncodedAsset(ASSET_SPINNING_STAR, &asset);
       ReadEncodedAsset(D_8023AC70_ovl_01, &asset);
       break;
   }

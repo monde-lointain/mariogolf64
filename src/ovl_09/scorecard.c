@@ -103,11 +103,8 @@ void SetScorecardState(s32 state);
 #define PLACE_ARROW_IMAGE_ASSET 0x682
 #define UNK14_IMAGE_ASSET 0x690
 #define SCORES_PANEL_IMAGE_ASSET 0x691
-#define DIGITS_IMAGE_ASSET 0x689
 #define BET_SUBTITLES_IMAGE_ASSET 0x97A
-#define LABELS_IMAGE_ASSET 0x68A
 #define TOTAL_LABELS_IMAGE_ASSET 0x693
-#define PLACES_IMAGE_ASSET 0x688
 #define MATCH_PANEL_IMAGE_ASSET 0x68E
 #define WIN_MARK_IMAGE_ASSET 0x68C
 #define WINS_NEEDED_IMAGE_ASSET 0x68D
@@ -199,13 +196,13 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
       AllocMemory(OpenEncodedAsset(SCORES_PANEL_IMAGE_ASSET, &asset));
   ReadEncodedAsset(g_Scorecard.scoresPanelImage, &asset);
   g_Scorecard.digitsImage =
-      AllocMemory(OpenEncodedAsset(DIGITS_IMAGE_ASSET, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset));
   ReadEncodedAsset(g_Scorecard.digitsImage, &asset);
   g_Scorecard.betSubtitlesImage =
       AllocMemory(OpenEncodedAsset(BET_SUBTITLES_IMAGE_ASSET, &asset));
   ReadEncodedAsset(g_Scorecard.betSubtitlesImage, &asset);
   g_Scorecard.labelsImage =
-      AllocMemory(OpenEncodedAsset(LABELS_IMAGE_ASSET, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_SCORE_LABELS, &asset));
   ReadEncodedAsset(g_Scorecard.labelsImage, &asset);
   g_Scorecard.totalLabelsImage =
       AllocMemory(OpenEncodedAsset(TOTAL_LABELS_IMAGE_ASSET, &asset));
@@ -264,7 +261,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
       }
 
       g_Scorecard.placesImage =
-          AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
+          AllocMemory(OpenEncodedAsset(ASSET_PLACES, &asset));
       ReadEncodedAsset(g_Scorecard.placesImage, &asset);
       break;
     case GAME_MODE_MATCH_GAME:
@@ -300,7 +297,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
       }
 
       g_Scorecard.placesImage =
-          AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
+          AllocMemory(OpenEncodedAsset(ASSET_PLACES, &asset));
       ReadEncodedAsset(g_Scorecard.placesImage, &asset);
       g_Scorecard.winMarkImage =
           AllocMemory(OpenEncodedAsset(SKIN_ICON_IMAGE_ASSET, &asset));

@@ -421,17 +421,10 @@ s32 GetChosenCourseIndex(void) {
 #define ASSET_WIDE_BOARD 0x520 /* A wooden board, 256 by 160 */
 #define ASSET_SQUARE_BOARD 0x591 /* A wooden board, 160 by 160 */
 #define ASSET_OPTIONS_MARIO 0x97D
-#define ASSET_OPTIONS_ARROWS 0x720
 #define ASSET_OPTIONS_SHADOW 0x97E
-#define ASSET_COURSE_SCENE 0x51E
 #define ASSET_SKY 0x51F
 #define ASSET_WATER 0x4D8
-#define ASSET_BLENDED_TEXTURE_SCROLLING_LAYER 0x4D7
 #define ASSET_HOLES_BADGES 0x65D /* Bet, Front 9, Back 9 and 18 */
-#define ASSET_SPINNING_BADGE 0x663
-#define ASSET_CONTROLLER_ICONS 0x63D
-#define ASSET_MENU_GAME_MODES 0x528
-#define ASSET_PLACE_DIGITS 0x98E
 
 /*
  * The menus' update: gathers every controller's buttons, starts loading the
@@ -645,7 +638,7 @@ void func_801F4C78_ovl_01(void) {
         imageBuffer = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_OPTIONS_MARIO, &asset);
         ReadEncodedAsset(imageBuffer, &asset);
-        OpenEncodedAsset(ASSET_OPTIONS_ARROWS, &asset);
+        OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
         ReadEncodedAsset(imageBuffer + OPTIONS_ARROWS_OFFSET, &asset);
         OpenEncodedAsset(ASSET_OPTIONS_SHADOW, &asset);
         ReadEncodedAsset(imageBuffer + OPTIONS_SHADOW_OFFSET, &asset);
@@ -3598,7 +3591,7 @@ void func_801FCB74_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Nothing in the menu calls this; menu.c loads its image, asset 0x521 */
+/* Nothing in the menu calls this; menu.c loads its image, ASSET_NAME_PLATE */
 void func_801FCEF8_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;

@@ -32,7 +32,7 @@
 #define BEST_TIMES_SPIN_SPEED 18
 
 /*
- * Asset 0x688 holds 32 by 32 frames of the digits 1 to 4, then the
+ * ASSET_PLACES holds 32 by 32 frames of the digits 1 to 4, then the
  * suffixes ST, ND, RD and TH, each drawn at 24 by 24
  */
 #define PLACE_LABEL_FRAME_SIZE 32
@@ -132,12 +132,12 @@ void func_80213464_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 3:
       D_8023AA4C_ovl_01 = buffer;
-      OpenEncodedAsset(0x688, &asset);
+      OpenEncodedAsset(ASSET_PLACES, &asset);
       ReadEncodedAsset(D_8023AA4C_ovl_01, &asset);
       break;
     case 4:
       D_8023AA50_ovl_01 = buffer;
-      OpenEncodedAsset(0x720, &asset);
+      OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023AA50_ovl_01, &asset);
       D_80230130_ovl_01 = 0;
       D_80230134_ovl_01 = 0;

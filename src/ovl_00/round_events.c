@@ -37,7 +37,6 @@
 #define MOVIE_CUE_FRAME 12
 
 #define FLY_GUY_IMAGE_ASSET 0x6CF
-#define WIND_STREAK_IMAGE_ASSET 0x6AF
 /* With its header; the wind streak follows it */
 #define FLY_GUY_IMAGE_SIZE 0x808
 
@@ -1168,8 +1167,6 @@ void DrawMovie(Gfx** displayListHead) {
 #define WINNER_PALETTE_OFFSET 0x2788
 #define WINNER_FACE_OFFSET 0x2988
 #define WINNER_PLAQUE_OFFSET 0x2D88
-/* A wooden plaque behind the winner's face */
-#define WINNER_PLAQUE_ASSET 0x832
 #define WINNER_FACE_SIZE 32
 #define WINNER_PLAQUE_SIZE 48
 /* The plaque shows this much more than the face on each side */
@@ -1294,7 +1291,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
                                .characterIndex],
           &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
-      OpenEncodedAsset(WINNER_PLAQUE_ASSET, &asset);
+      OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_PLAQUE_OFFSET, &asset);
     }
   } else if (f_MovieDrawCount < CONTEST_FLASH_END_DRAW) {
@@ -2733,7 +2730,7 @@ void ShowWindFlyGuy(s32 show) {
     f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
     OpenEncodedAsset(FLY_GUY_IMAGE_ASSET, &asset);
     ReadEncodedAsset(f_MovieBuffer, &asset);
-    OpenEncodedAsset(WIND_STREAK_IMAGE_ASSET, &asset);
+    OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
     ReadEncodedAsset(f_MovieBuffer + FLY_GUY_IMAGE_SIZE, &asset);
     f_LoadedBanner = -1;
     f_CurrentBanner = -1;

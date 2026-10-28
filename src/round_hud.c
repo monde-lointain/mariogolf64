@@ -68,13 +68,9 @@ enum SceneryState {
  * until their users are decompiled */
 #define ASSET_PIN_FLAG_IMAGES 0x541
 #define ASSET_WIND_ICON_IMAGE 0x5A4
-#define ASSET_PLAYER_TAG_IMAGES 0x5E3
 #define ASSET_LEADER_LINE_IMAGE 0x972
 #define ASSET_BACKDROP_PATTERN_IMAGE 0x93C
 #define ASSET_SHOT_PREVIEW_DASH_IMAGE 0x4DB
-#define ASSET_SHADOW_TEXTURE 0x4C3
-#define ASSET_ROUND_IMAGE_722 0x722
-#define ASSET_BLENDED_TEXTURE_SCROLLING_LAYER 0x4D7
 #define ASSET_BLENDED_TEXTURE_STILL_LAYER 0x4D9
 #define ASSET_ROUND_IMAGE_648 0x648
 #define ASSET_ROUND_IMAGE_563 0x563
@@ -740,7 +736,7 @@ void LoadSceneryImages(void) {
       AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
   ReadEncodedAsset(f_WindIconImage, &asset);
   g_PlayerTagImages =
-      AllocMemory(OpenEncodedAsset(ASSET_PLAYER_TAG_IMAGES, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset));
   ReadEncodedAsset(g_PlayerTagImages, &asset);
   g_LeaderLineImage =
       AllocMemory(OpenEncodedAsset(ASSET_LEADER_LINE_IMAGE, &asset));
@@ -981,7 +977,7 @@ void LoadRoundHud(void) {
   ReadEncodedAsset(f_HoleImage, &asset);
   f_ParImage = AllocMemory(OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset));
   ReadEncodedAsset(f_ParImage, &asset);
-  f_DistanceFont = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_722, &asset));
+  f_DistanceFont = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_DIGITS, &asset));
   ReadEncodedAsset(f_DistanceFont, &asset);
   g_RingTexels = AllocMemory(RING_TEXTURE_SIZE * RING_TEXTURE_SIZE);
   BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE,

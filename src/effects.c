@@ -2609,9 +2609,6 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
   }
 }
 
-#define SPINNING_BADGE_IMAGE_ASSET 0x663
-#define COUNT_GLYPHS_IMAGE_ASSET 0x689
-
 /*
  * Starts showing the birdie badge count, which func_8007FEAC draws. Its
  * spinning badge and digit images borrow the cloud and clump images' memory.
@@ -2622,9 +2619,9 @@ void ShowBirdieBadgeCount(s32 badgeCount) {
   f_ShownBadgeCount = badgeCount;
   f_IsBadgeCountShown = TRUE;
   f_BadgeCountFrame = 0;
-  OpenEncodedAsset(SPINNING_BADGE_IMAGE_ASSET, &asset);
+  OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
   ReadEncodedAsset(f_CloudImage, &asset);
-  OpenEncodedAsset(COUNT_GLYPHS_IMAGE_ASSET, &asset);
+  OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset);
   ReadEncodedAsset(f_ClumpImage, &asset);
 }
 

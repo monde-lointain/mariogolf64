@@ -9,7 +9,6 @@
 #include "screen.h"
 #include "variables.h"
 
-#define CURSOR_BOX_ASSET 0x6EF
 #define CURSOR_BOX_CORNER_COUNT 4
 /* Half the size of the box the cursor frames, whose top-left corner the callers
  * give */
@@ -36,7 +35,7 @@ void LoadCursorBox(void* image) {
   s32 height;
 
   f_CursorBoxImage = image;
-  OpenEncodedAsset(CURSOR_BOX_ASSET, &asset);
+  OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
   ReadEncodedAsset(f_CursorBoxImage, &asset);
   width = (((u8*)f_CursorBoxImage)[2] << 8) | ((u8*)f_CursorBoxImage)[3];
   height = (((u8*)f_CursorBoxImage)[4] << 8) | ((u8*)f_CursorBoxImage)[5];

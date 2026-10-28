@@ -39,7 +39,6 @@
 /* The size of the heap that the opening's billboards are allocated from */
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 
-#define ASSET_SHADOW_TEXTURE 0x4C3
 /* The shadow texture is 32x32 I8 */
 #define SHADOW_TEXTURE_SIZE 32
 
@@ -3634,7 +3633,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningImpactLines);
 #endif
 
 #define ASSET_LAKITU_IMAGE 0x64B
-#define ASSET_LAKITU_TRAIL_IMAGE 0x6AF
 
 /* Loads Lakitu's images and gathers his trail behind him */
 void LoadLakitu(void) {
@@ -3644,7 +3642,7 @@ void LoadLakitu(void) {
 
   OpenEncodedAsset(ASSET_LAKITU_IMAGE, &asset);
   ReadEncodedAsset(f_LakituImage, &asset);
-  OpenEncodedAsset(ASSET_LAKITU_TRAIL_IMAGE, &asset);
+  OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
   ReadEncodedAsset(f_LakituTrailImage, &asset);
 
   /* The game places the trail twice over */

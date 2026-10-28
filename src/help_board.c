@@ -16,8 +16,6 @@
 #include "screen.h"
 #include "text.h"
 
-#define ASSET_HELP_BOARD_HAND 0x70F
-#define ASSET_HELP_BOARD_ARROWS 0x720
 #define ASSET_HELP_BOARD_CHALKBOARD 0x833
 
 /* The help board lists its topics, the play modes and the record terms, this
@@ -109,12 +107,12 @@ void LoadHelpBoardImage(void* buffer, s32 image) {
   switch (image) {
     case HELP_BOARD_IMAGE_HAND:
       f_HandImages = buffer;
-      OpenEncodedAsset(ASSET_HELP_BOARD_HAND, &asset);
+      OpenEncodedAsset(ASSET_POINTING_HAND, &asset);
       ReadEncodedAsset(f_HandImages, &asset);
       break;
     case HELP_BOARD_IMAGE_ARROWS:
       f_ArrowImages = buffer;
-      OpenEncodedAsset(ASSET_HELP_BOARD_ARROWS, &asset);
+      OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(f_ArrowImages, &asset);
       break;
     case HELP_BOARD_IMAGE_CHALKBOARD:

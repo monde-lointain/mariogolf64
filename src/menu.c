@@ -493,7 +493,7 @@ void LoadMenuResources(void) {
     return;
   }
 
-  D_801F4A20 = AllocMemory(OpenEncodedAsset(0x51E, &asset));
+  D_801F4A20 = AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
   ReadEncodedAsset(D_801F4A20, &asset);
   D_8012D3AC = AllocMemory(OpenEncodedAsset(0x721, &asset));
   ReadEncodedAsset(D_8012D3AC, &asset);
@@ -501,7 +501,7 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_800FF420[0], &asset);
   D_800FF420[1] = AllocMemory(OpenEncodedAsset(0x520, &asset));
   ReadEncodedAsset(D_800FF420[1], &asset);
-  D_801B60D0 = AllocMemory(OpenEncodedAsset(0x521, &asset));
+  D_801B60D0 = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
   ReadEncodedAsset(D_801B60D0, &asset);
   D_8012D420[0] = AllocMemory(0x70A8);
   D_801B5CD0[0] = AllocMemory(0x70A8);
@@ -512,9 +512,9 @@ void LoadMenuResources(void) {
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(D_8012D424, &asset);
   if (g_MenuScreen == 5) {
-    OpenEncodedAsset(0x528, &asset);
+    OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
     ReadEncodedAsset(D_801B5CD0[0], &asset);
-    OpenEncodedAsset(0x528, &asset);
+    OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
     ReadEncodedAsset(D_801B5CD0[1], &asset);
   } else {
     OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
@@ -570,7 +570,8 @@ void LoadMenuResources(void) {
   }
 
   for (index = 0; index != ARRAY_COUNT(D_801B93E0); index++) {
-    D_801B93E0[index] = AllocMemory(OpenEncodedAsset(0x720, &asset));
+    D_801B93E0[index] =
+        AllocMemory(OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset));
     ReadEncodedAsset(D_801B93E0[index], &asset);
   }
 
@@ -582,7 +583,7 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_8010526C[0], &asset);
   D_80106100 = AllocMemory(OpenEncodedAsset(0x65D, &asset));
   ReadEncodedAsset(D_80106100, &asset);
-  D_800FC898 = AllocMemory(OpenEncodedAsset(0x663, &asset));
+  D_800FC898 = AllocMemory(OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset));
   ReadEncodedAsset(D_800FC898, &asset);
   for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {
     D_8012D430[index] =

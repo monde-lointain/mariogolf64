@@ -110,20 +110,12 @@ enum PortraitAnimation {
 #define RESULTS_BACKDROP_ASSET 0x6A0
 #define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
 #define NINTENDO_BADGE_ASSET 0x949
-#define PRESSING_HAND_ASSET 0x8EB
-#define RESULTS_DIGITS_ASSET 0x722
-#define PLACE_DIGITS_ASSET 0x98E
 #define FINAL_RESULTS_TITLE_ASSET 0x69F
-#define LABELS_IMAGE_ASSET 0x68A
-#define LARGE_DIGITS_IMAGE_ASSET 0x689
-#define NOTICE_CLOUD_ASSET 0x70B
 #define NOTICE_TITLE_ASSET 0x55F
 #define RESULTS_UNK72C_IMAGE_ASSET 0x72C
 #define RESULTS_UNK72D_PALETTE_ASSET 0x72D
-#define PLACES_IMAGE_ASSET 0x688
 #define MATCH_PLACES_IMAGE_ASSET 0x6A2
 #define MATCH_UNK6A3_ASSET 0x6A3
-#define NAMEPLATE_ASSET 0x832
 /* The words UP, DOWN and EVEN, stacked, for match play standings */
 #define MATCH_STANDING_WORDS_ASSET 0x8FE
 #define TOURNAMENT_UNK6A1_ASSET 0x6A1
@@ -390,12 +382,12 @@ void LoadRoundResults(void) {
       &asset));
   ReadEncodedAsset(f_ResultsBackdropImage, &asset);
   f_ResultsHandImage =
-      AllocMemory(OpenEncodedAsset(PRESSING_HAND_ASSET, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_PRESSING_HAND, &asset));
   ReadEncodedAsset(f_ResultsHandImage, &asset);
-  f_DigitsImage = AllocMemory(OpenEncodedAsset(RESULTS_DIGITS_ASSET, &asset));
+  f_DigitsImage = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_DIGITS, &asset));
   ReadEncodedAsset(f_DigitsImage, &asset);
   f_PlaceDigitsImage =
-      AllocMemory(OpenEncodedAsset(PLACE_DIGITS_ASSET, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_PLACE_DIGITS, &asset));
   ReadEncodedAsset(f_PlaceDigitsImage, &asset);
   if (g_GameState.isClubTournament) {
     f_NintendoBadgeImage =
@@ -409,13 +401,13 @@ void LoadRoundResults(void) {
         AllocMemory(OpenEncodedAsset(FINAL_RESULTS_TITLE_ASSET, &asset));
     ReadEncodedAsset(f_FinalResultsTitleImage, &asset);
     f_ResultsLabelsImage =
-        AllocMemory(OpenEncodedAsset(LABELS_IMAGE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_SCORE_LABELS, &asset));
     ReadEncodedAsset(f_ResultsLabelsImage, &asset);
     f_ResultsLargeDigitsImage =
-        AllocMemory(OpenEncodedAsset(LARGE_DIGITS_IMAGE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset));
     ReadEncodedAsset(f_ResultsLargeDigitsImage, &asset);
     f_ResultsCloudImage =
-        AllocMemory(OpenEncodedAsset(NOTICE_CLOUD_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset));
     ReadEncodedAsset(f_ResultsCloudImage, &asset);
     f_ResultsCourseImage =
         AllocMemory(OpenEncodedAsset(g_TournamentIconAssets[0], &asset));
@@ -462,7 +454,8 @@ void LoadRoundResults(void) {
       D_80225708_ovl_00 =
           AllocMemory(OpenEncodedAsset(MATCH_UNK6A3_ASSET, &asset));
       ReadEncodedAsset(D_80225708_ovl_00, &asset);
-      f_NameplateImage = AllocMemory(OpenEncodedAsset(NAMEPLATE_ASSET, &asset));
+      f_NameplateImage =
+          AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
       ReadEncodedAsset(f_NameplateImage, &asset);
       f_MatchStandingWordsImage =
           AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
@@ -470,7 +463,7 @@ void LoadRoundResults(void) {
       f_PortraitCharacterIndex = (s8)g_Players[1].characterIndex;
     } else {
       f_ResultsPlacesImage =
-          AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
+          AllocMemory(OpenEncodedAsset(ASSET_PLACES, &asset));
       ReadEncodedAsset(f_ResultsPlacesImage, &asset);
     }
   }
@@ -723,7 +716,8 @@ void LoadUnlockNotice(s32 unlock) {
   if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
     f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(0x560, &asset));
     ReadEncodedAsset(f_NoticeTitleImage, &asset);
-    f_NameplateImage = AllocMemory(OpenEncodedAsset(NAMEPLATE_ASSET, &asset));
+    f_NameplateImage =
+        AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
     ReadEncodedAsset(f_NameplateImage, &asset);
     f_PortraitImage = AllocMemory(OpenEncodedAsset(
         g_CharacterImageAssets[f_PortraitCharacterIndex], &asset));

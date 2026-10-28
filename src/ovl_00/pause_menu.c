@@ -28,10 +28,6 @@
 #include "turn.h"
 #include "variables.h"
 
-#define PAUSE_CURSOR_IMAGE_ASSET 0x70F /* A pointing glove and two tees */
-/* The wide cloud behind the pause menu */
-#define PAUSE_CLOUD_IMAGE_ASSET 0x70B
-#define PAUSE_ARROWS_IMAGE_ASSET 0x71E
 /* The small cloud behind a choice box */
 #define CHOICE_BOX_CLOUD_IMAGE_ASSET 0x71F
 
@@ -269,16 +265,15 @@ void LoadPauseMenu(void) {
     }
 
     f_PauseCursorImage =
-        AllocMemory(OpenEncodedAsset(PAUSE_CURSOR_IMAGE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_POINTING_HAND, &asset));
     ReadEncodedAsset(f_PauseCursorImage, &asset);
-    f_MenuCloudImage =
-        AllocMemory(OpenEncodedAsset(PAUSE_CLOUD_IMAGE_ASSET, &asset));
+    f_MenuCloudImage = AllocMemory(OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset));
     ReadEncodedAsset(f_MenuCloudImage, &asset);
     g_WindPanelPosition[AXIS_X] = SCREEN_WIDTH;
     g_WindPanelPosition[AXIS_Y] = SCREEN_HEIGHT;
     g_LiePanelPosition[AXIS_X] = SCREEN_HEIGHT;
     f_PauseArrowsImage =
-        AllocMemory(OpenEncodedAsset(PAUSE_ARROWS_IMAGE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_GREEN_ARROWS_COPY, &asset));
     ReadEncodedAsset(f_PauseArrowsImage, &asset);
     SetSongVolume(PAUSE_MENU_SONG_VOLUME);
   }
@@ -959,7 +954,7 @@ void LoadChoiceBoxImages(void) {
   EncodedAsset asset;
 
   f_ChoiceBoxCursorImage =
-      AllocMemory(OpenEncodedAsset(PAUSE_CURSOR_IMAGE_ASSET, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_POINTING_HAND, &asset));
   ReadEncodedAsset(f_ChoiceBoxCursorImage, &asset);
   f_MenuCloudImage =
       AllocMemory(OpenEncodedAsset(CHOICE_BOX_CLOUD_IMAGE_ASSET, &asset));

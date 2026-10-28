@@ -397,17 +397,12 @@ enum ExperienceWriteResult {
 };
 
 #define WOOD_PANEL_ASSET 0x8FD
-#define COURSE_SCENE_ASSET 0x51E
-#define POINTER_ASSET 0x70F
-#define ARROWS_ASSET 0x720
 #define CONTROLLER_ICONS_ASSET 0x900
 #define TITLE_ASSET 0x93F
 #define CURSOR_BOX_ASSET 0x5F7
 #define CURVE_SEGMENTS_ASSET 0x8EE
-#define PRESSING_HAND_ASSET 0x8EB
 #define STAT_BARS_ASSET 0x95D
 #define SHOT_TYPES_ASSET 0x979
-#define NOTICE_CLOUD_ASSET 0x70B
 #define ACCESSING_ASSET 0x96B
 #define STAT_LABELS_ASSET 0x978
 
@@ -531,13 +526,13 @@ void LoadTransmitMenu(void) {
                        AllocMemory(OpenEncodedAsset(WOOD_PANEL_ASSET, &asset)),
       &asset);
   ReadEncodedAsset(g_GameBoyTransfer.courseSceneImage = AllocMemory(
-                       OpenEncodedAsset(COURSE_SCENE_ASSET, &asset)),
+                       OpenEncodedAsset(ASSET_COURSE_SCENE, &asset)),
       &asset);
-  ReadEncodedAsset(g_GameBoyTransfer.pointerImage =
-                       AllocMemory(OpenEncodedAsset(POINTER_ASSET, &asset)),
+  ReadEncodedAsset(g_GameBoyTransfer.pointerImage = AllocMemory(
+                       OpenEncodedAsset(ASSET_POINTING_HAND, &asset)),
       &asset);
-  ReadEncodedAsset(g_GameBoyTransfer.arrowsImage =
-                       AllocMemory(OpenEncodedAsset(ARROWS_ASSET, &asset)),
+  ReadEncodedAsset(g_GameBoyTransfer.arrowsImage = AllocMemory(
+                       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset)),
       &asset);
   ReadEncodedAsset(g_GameBoyTransfer.controllerIconsImage = AllocMemory(
                        OpenEncodedAsset(CONTROLLER_ICONS_ASSET, &asset)),
@@ -552,7 +547,7 @@ void LoadTransmitMenu(void) {
                        OpenEncodedAsset(CURVE_SEGMENTS_ASSET, &asset)),
       &asset);
   ReadEncodedAsset(g_GameBoyTransfer.pressingHandImage = AllocMemory(
-                       OpenEncodedAsset(PRESSING_HAND_ASSET, &asset)),
+                       OpenEncodedAsset(ASSET_PRESSING_HAND, &asset)),
       &asset);
   ReadEncodedAsset(g_GameBoyTransfer.statBarsImage =
                        AllocMemory(OpenEncodedAsset(STAT_BARS_ASSET, &asset)),
@@ -560,8 +555,8 @@ void LoadTransmitMenu(void) {
   ReadEncodedAsset(g_GameBoyTransfer.shotTypesImage =
                        AllocMemory(OpenEncodedAsset(SHOT_TYPES_ASSET, &asset)),
       &asset);
-  ReadEncodedAsset(g_GameBoyTransfer.noticeCloudImage = AllocMemory(
-                       OpenEncodedAsset(NOTICE_CLOUD_ASSET, &asset)),
+  ReadEncodedAsset(g_GameBoyTransfer.noticeCloudImage =
+                       AllocMemory(OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset)),
       &asset);
   ReadEncodedAsset(g_GameBoyTransfer.accessingImage =
                        AllocMemory(OpenEncodedAsset(ACCESSING_ASSET, &asset)),

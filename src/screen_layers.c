@@ -122,7 +122,6 @@ enum HalfTurnState {
 /* The fade's opacity runs over this many steps */
 #define FADE_ALPHA_RANGE 256
 
-#define PROMPT_CLOUD_IMAGE 0x70B
 #define YES_NO_MESSAGE 0x70C
 #define PROMPT_STATE_CLOSED -1
 #define PROMPT_STATE_OPENING 0
@@ -509,8 +508,7 @@ INCLUDE_ASM("asm/nonmatchings/screen_layers", DrawScreenFade);
 void LoadPromptImages(void) {
   EncodedAsset asset;
 
-  f_PromptCloudImage =
-      AllocMemory(OpenEncodedAsset(PROMPT_CLOUD_IMAGE, &asset));
+  f_PromptCloudImage = AllocMemory(OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset));
   ReadEncodedAsset(f_PromptCloudImage, &asset);
   f_YesNoImage = AllocMemory(OpenEncodedAsset(YES_NO_MESSAGE, &asset));
   ReadEncodedAsset(f_YesNoImage, &asset);

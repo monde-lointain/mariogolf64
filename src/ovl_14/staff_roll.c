@@ -48,7 +48,6 @@
 
 #define PAINTING_ASSET 0x959
 #define STAFF_FONT_ASSET 0x94C
-#define SHADOW_TEXTURE_ASSET 0x4C3
 /* Big enough for the painting and for the closing picture read over it later */
 #define STAFF_ROLL_IMAGE_SIZE 0x2AC00
 #define BILLBOARD_HEAP_SIZE 0x7038
@@ -660,7 +659,7 @@ void LoadStaffRoll(void) {
   f_StaffText = AllocMemory(textSize);
   nuPiReadRom((u32)g_StaffTextRomStart, f_StaffText, textSize);
   g_ShadowTexture =
-      AllocMemory(OpenEncodedAsset(SHADOW_TEXTURE_ASSET, &shadowAsset));
+      AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &shadowAsset));
   ReadEncodedAsset(g_ShadowTexture, &shadowAsset);
   f_BillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
   InitBillboardManager(f_BillboardHeap, BILLBOARD_HEAP_SIZE);

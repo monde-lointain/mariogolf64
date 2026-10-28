@@ -66,7 +66,8 @@
 #define STATS_ONE_DIGIT_X 144
 #define STATS_UNIT_X 178
 #define STATS_UNIT_OFFSET_Y 4
-/* The 16x16 CI4 glyphs of asset 0x689 in D_8023A82C; two of them spell "OFF" */
+/* The 16x16 CI4 glyphs of ASSET_LARGE_DIGITS in D_8023A82C; two of them spell
+ * "OFF" */
 #define MENU_GLYPH_SIZE 16
 #define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
 #define MENU_GLYPH_TIMES 0
@@ -236,12 +237,12 @@ void func_8020E26C_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 3:
       D_8023A824_ovl_01 = buffer;
-      OpenEncodedAsset(0x521, &asset);
+      OpenEncodedAsset(ASSET_NAME_PLATE, &asset);
       ReadEncodedAsset(D_8023A824_ovl_01, &asset);
       break;
     case 4:
       D_8023A810_ovl_01 = buffer;
-      OpenEncodedAsset(0x663, &asset);
+      OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
       ReadEncodedAsset(D_8023A810_ovl_01, &asset);
       break;
     case 5:
@@ -251,12 +252,12 @@ void func_8020E26C_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 6:
       D_8023A82C_ovl_01 = buffer;
-      OpenEncodedAsset(0x689, &asset);
+      OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset);
       ReadEncodedAsset(D_8023A82C_ovl_01, &asset);
       break;
     case 7:
       D_8023A830_ovl_01 = buffer;
-      OpenEncodedAsset(0x720, &asset);
+      OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023A830_ovl_01, &asset);
       D_802300A8_ovl_01 = 0;
       D_802300AC_ovl_01 = 0;
@@ -1081,11 +1082,11 @@ void func_80210DF4_ovl_01(
 #define FOUR_DIGIT_FIRST (THREE_DIGIT_FIRST * DECIMAL_BASE)
 
 /*
- * Draws a number of up to four digits with the glyphs of asset 0x689, marked
- * as the mark argument says and right-aligned in a field. The field's shift
- * depends only on the field, so a number two or three digits long in a wider
- * field moves as far right as a one-digit one. Numbers past four digits draw
- * nothing.
+ * Draws a number of up to four digits with the glyphs of ASSET_LARGE_DIGITS,
+ * marked as the mark argument says and right-aligned in a field. The field's
+ * shift depends only on the field, so a number two or three digits long in a
+ * wider field moves as far right as a one-digit one. Numbers past four digits
+ * draw nothing.
  *
  * Doesn't match: the original keeps the digit count in a register through the
  * digit loop and sign-extends the index separately for each use, where GCC
