@@ -29,6 +29,10 @@
 /* Vertices per billboard shape, of which the first four form its quad */
 #define SHAPE_VERTEX_COUNT 8
 
+/* f_LoadedTextureIndex while no texture is loaded, so that the next billboard
+ * drawn loads its own */
+#define NO_TEXTURE_LOADED (-1)
+
 /* Room for the file name in a host command, including padding */
 #define HOST_FILE_NAME_SIZE_MAX 0x100
 
@@ -371,7 +375,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
 
   SortBillboardsByDepth();
 
-  f_LoadedTextureIndex = -1;
+  f_LoadedTextureIndex = NO_TEXTURE_LOADED;
   gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, 0xFF);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
@@ -530,7 +534,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     ballDepth = VIEW_DEPTH_BALL_HIDDEN;
   }
 
-  f_LoadedTextureIndex = -1;
+  f_LoadedTextureIndex = NO_TEXTURE_LOADED;
   gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, 0xFF);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
