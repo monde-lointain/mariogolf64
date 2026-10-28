@@ -325,19 +325,32 @@ extern char* f_WhiteText;
 extern f32 f_PauseGlowAngle;
 extern f32 f_PauseCursorAngle;
 
-/* What choosing a pause option does, as its PauseOption.action */
+/*
+ * What choosing a pause option does, as its PauseOption.action. Each option's
+ * action is its own index, and is named for the option's label.
+ */
 enum PauseAction {
+  /* "Course View" */
   PAUSE_ACTION_FREE_LOOK,
   PAUSE_ACTION_SCORECARD,
   /* Only while debugging or with f_CanGiveUp set */
   PAUSE_ACTION_GIVE_UP,
-  PAUSE_ACTION_UNK3,
-  PAUSE_ACTION_UNK4,
-  PAUSE_ACTION_UNK6 = 6,
-  PAUSE_ACTION_RETRY_HOLE = 9,
-  PAUSE_ACTION_UNK13 = 13,
-  PAUSE_ACTION_UNK14,
-  PAUSE_ACTION_UNK15,
+  PAUSE_ACTION_SAVE_AND_QUIT,
+  PAUSE_ACTION_QUIT_GAME,
+  PAUSE_ACTION_RETURN_TO_MENU,
+  PAUSE_ACTION_HOLE_OUT,
+  PAUSE_ACTION_CHANGE_WIND_DIRECTION,
+  PAUSE_ACTION_CHANGE_WIND_SPEED,
+  PAUSE_ACTION_START_OVER,
+  PAUSE_ACTION_CHANGE_WEATHER,
+  /* "Change Terrain", which changes the lie */
+  PAUSE_ACTION_CHANGE_TERRAIN,
+  PAUSE_ACTION_GRID_COLOR,
+  PAUSE_ACTION_CONTROLS,
+  /* "Quit Game" in the PAUSE_LAYOUT_BROUGHT_OVER layouts */
+  PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME,
+  /* "Quit Game" in the PAUSE_LAYOUT_UNK3B layouts */
+  PAUSE_ACTION_QUIT_UNK3B_GAME,
   /* UpdatePauseMenu's result while no option is chosen */
   PAUSE_ACTION_NONE = -1
 };
@@ -409,32 +422,32 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
             .action;
     switch (action) {
-      case PAUSE_ACTION_UNK4:
+      case PAUSE_ACTION_QUIT_GAME:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
         OpenPrompt(PROMPT_UNK4);
         break;
-      case PAUSE_ACTION_UNK14:
+      case PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
         OpenPrompt(PROMPT_UNK7);
         break;
-      case PAUSE_ACTION_UNK15:
+      case PAUSE_ACTION_QUIT_UNK3B_GAME:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
         OpenPrompt(PROMPT_UNK8);
         break;
-      case PAUSE_ACTION_UNK3:
+      case PAUSE_ACTION_SAVE_AND_QUIT:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK8;
         g_SubModuleState = SUB_MODULE_SWAP_PENDING;
         g_PendingSubModuleId = MODULE_SAVE_MENU;
         break;
-      case PAUSE_ACTION_UNK13:
+      case PAUSE_ACTION_CONTROLS:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK9;
@@ -461,12 +474,12 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         StartFreeLook();
         break;
-      case PAUSE_ACTION_RETRY_HOLE:
+      case PAUSE_ACTION_START_OVER:
         if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
           PlaySound(SOUND_RING_SHOT_RETRY, RING_SHOT_RETRY_SOUND_CHANNEL,
               SOUND_FULL_SCALE);
         }
-      case PAUSE_ACTION_UNK6:
+      case PAUSE_ACTION_HOLE_OUT:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         break;
     }
