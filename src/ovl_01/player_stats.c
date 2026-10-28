@@ -557,6 +557,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217D20_ovl_01);
  * when isSlideReversed is set). Once the screen has settled it types the
  * chosen bet's explanation
  */
+/*
+ * Doesn't match: the original keeps its D_801B5634 loads in other registers
+ * and schedules the stake marks' coordinates differently
+ */
 #ifdef NON_MATCHING
 void func_8021826C_ovl_01(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
