@@ -82,7 +82,6 @@ typedef struct TopicPageTable {
 } TopicPageTable; /* size = 0x1D */
 
 extern s32 D_800FE334;
-extern s32 g_MenuScreen;
 static void* f_HandImages;
 static void* f_ArrowImages;
 static void* f_UnusedImage;

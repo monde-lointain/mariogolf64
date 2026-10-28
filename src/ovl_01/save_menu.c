@@ -122,7 +122,6 @@ extern u8 D_80230B4E_ovl_01;
 extern void* D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
-extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern u8 D_801B70F0[MAXCONTROLLERS];
 
 /* What D_80230B40 holds for a player with no controller, or for the computer */

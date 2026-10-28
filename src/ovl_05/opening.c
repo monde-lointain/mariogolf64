@@ -120,7 +120,6 @@ extern s32 f_LakituScreenPoint[2];
 
 extern s32 f_OpeningFrameParity;
 extern Boolean f_IsLookAtMarkerShown;
-extern f32 g_LookAtMarkerScale;
 extern Vtx f_LookAtMarkerVertices[6][4];
 
 extern Boolean f_IsLakituFlying;

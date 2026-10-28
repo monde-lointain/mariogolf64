@@ -89,8 +89,6 @@ static Lights1 f_RingLights =
     gdSPDefLights1(0x7F, 0x7F, 0x7F, 0xFF, 0xFF, 0xFF, -73, 73, 73);
 static Mtx f_RingSpinMatrices[2];
 static Vtx f_RingVertices[RING_VERTEX_COUNT];
-extern u8* g_BlendedTextureScrollingLayer;
-extern u8* g_BlendedTextureStillLayer;
 
 void SpawnSparkle(s32* position);
 static void AddTestRing(void);

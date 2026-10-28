@@ -116,7 +116,6 @@ enum TerrainColorIndex {
 
 #define TERRAIN_COLOR_COUNT 11
 
-extern u16 g_TerrainCodeColors[];
 extern char g_RomBuildDate[];
 extern char g_SaveBuildDate[];
 

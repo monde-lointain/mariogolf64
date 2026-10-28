@@ -105,7 +105,6 @@ enum GridMove {
 extern void* D_80105B78[CHARACTER_COUNT];
 extern void* D_8012D430[CHARACTER_COUNT];
 extern void* D_801B69EC;
-extern s32 D_801B7070;
 extern s32 D_8022FFA0_ovl_01;
 extern s32 D_8022FFA4_ovl_01;
 extern u8 D_8022FF01_ovl_01;
@@ -126,7 +125,6 @@ extern s32 D_8022FF50_ovl_01[];
 /* Moves the cursor by half a pixel so that its edges sit on pixel centres */
 #define HALF_PIXEL 0.5f
 
-extern s32 g_ChosenPlayerCount;
 extern u8 D_8022FF00_ovl_01;
 extern s8 D_8022FF07_ovl_01;
 extern s8 D_8022FF08_ovl_01;
@@ -491,7 +489,6 @@ s32 func_80209BE0_ovl_01(void) {
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
-extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern s8 D_801B5634;
 extern u8 D_8022FF03_ovl_01;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
