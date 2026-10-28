@@ -171,15 +171,15 @@ s32 D_8023BFD4_ovl_01;
 s32 D_8023BFD8_ovl_01;
 
 void func_80209500_ovl_01(void) {
-  s32 firstSlot = g_CharacterGrid[2][0];
-  s32 secondSlot = g_CharacterGrid[2][1];
-  s32 thirdSlot = g_CharacterGrid[2][2];
-  s32 fourthSlot = g_CharacterGrid[2][3];
+  s32 firstSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0];
+  s32 secondSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1];
+  s32 thirdSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][2];
+  s32 fourthSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][3];
 
-  g_CharacterGrid[2][0] = -1;
-  g_CharacterGrid[2][1] = -1;
-  g_CharacterGrid[2][2] = -1;
-  g_CharacterGrid[2][3] = -1;
+  g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0] = EMPTY_GRID_SLOT;
+  g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1] = EMPTY_GRID_SLOT;
+  g_CharacterGrid[GAME_BOY_CHARACTER_ROW][2] = EMPTY_GRID_SLOT;
+  g_CharacterGrid[GAME_BOY_CHARACTER_ROW][3] = EMPTY_GRID_SLOT;
   D_8022FF1C_ovl_01[0] = firstSlot;
   D_8022FF1C_ovl_01[1] = secondSlot;
   D_8022FF1C_ovl_01[2] = thirdSlot;
