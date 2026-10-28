@@ -30,7 +30,13 @@
 
 /* ChooseShotOffset's results, indices into f_ShotOffsets */
 #define SHOT_OFFSET_NONE 0
+#define SHOT_OFFSET_PLUS_SMALL 1
+#define SHOT_OFFSET_PLUS_MEDIUM 2
+#define SHOT_OFFSET_PLUS_LARGE 3
+#define SHOT_OFFSET_MINUS_SMALL 4
+#define SHOT_OFFSET_MINUS_MEDIUM 5
 #define SHOT_OFFSET_MINUS_LARGE 6
+#define SHOT_OFFSET_COUNT 8
 /* The evaluation of a lost ball, and the one that the best starts at */
 #define LOST_BALL_EVALUATION 0x10000000
 #define SHOT_UNK4_MAX 30
@@ -61,8 +67,28 @@ typedef struct GolferTraits {
 #define WIND_PLAY_STRONG_WINDS 1
 #define WIND_PLAY_FOLLOWING_WINDS 2 /* Offsets shots for following winds */
 
-extern GolferTraits f_GolferTraits[CHARACTER_COUNT];
-extern s32 f_PlanThreadState;
+/* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
+typedef struct ShotOffset {
+  /* 0x0 */ s8 unk14; /* Becomes f_Shot.unk14 */
+  /* 0x1 */ s8 unk18; /* Becomes f_Shot.unk18 */
+} ShotOffset; /* size = 0x2 */
+
+#define APPROACH_BAND_COUNT 4
+#define APPROACH_STYLE_COUNT 3
+#define APPROACH_STYLE_UNK1 1
+#define APPROACH_STYLE_UNK2 2
+
+/* The rows of f_ClubKindChances */
+#define CLUB_CHANCE_SET_COUNT 2
+/* Woods, irons and the other clubs */
+#define CLUB_CHANCE_KIND_COUNT 3
+
+/* A club's name in the table that no routine reads */
+typedef struct ClubName {
+  /* 0x0 */ char name[4];
+  /* 0x4 */ s32 clubType;
+} ClubName; /* size = 0x8 */
+
 extern OSThread f_PlanThread;
 extern CurrentShot f_PlannedShot;
 
@@ -105,11 +131,6 @@ extern s8 f_IsClubUsable[CLUB_SLOT_COUNT];
 /* The size of the golfer's club set */
 extern s32 f_ClubCount;
 
-/* The rows of f_ClubKindChances */
-#define CLUB_CHANCE_SET_COUNT 2
-/* Woods, irons and the other clubs */
-#define CLUB_CHANCE_KIND_COUNT 3
-extern s8 f_ClubKindChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_KIND_COUNT];
 extern CurrentShot f_Shot;
 
 /* Where the shot to try starts, as PlanShot sets it up */
@@ -132,13 +153,101 @@ extern s32 f_NeedsLongerClub;
 extern s32 f_NeedsShorterClub;
 /* Set when the trial is good enough to take */
 extern s32 f_IsTrialAccepted;
-/* The best evaluation so far, and whether there is one */
+/* The best evaluation so far */
 extern s32 f_BestEvaluation;
-extern s32 f_HasBestEvaluation;
 extern s32 f_AimChangeCount;
 /* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
  * copy */
 extern const char f_SimFaultText[];
+
+/* The traits of each character, in CHARACTER_* order */
+GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
+    /* Plum */
+    {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {0, 2, 2, 2, 2, 2}, 10},
+    /* Charlie */
+    {2, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 2, 2, 2, 2, 2}, 8},
+    /* Peach */
+    {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {-2, 0, 0, 2, 0, 2}, -3},
+    /* Baby Mario */
+    {1, 1, 1, 12, 1, WIND_PLAY_FOLLOWING_WINDS, 1, {0, 2, 2, 2, 2, 2}, 4},
+    /* Luigi */
+    {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 2, 2, 2, 2, 2}, 2},
+    /* Yoshi */
+    {0, 0, 0, 6, 1, WIND_PLAY_STRONG_WINDS, 1, {0, 2, 2, 2, 2, 2}, 6},
+    /* Sonny */
+    {2, 2, 2, 12, 2, WIND_PLAY_FOLLOWING_WINDS, 2, {0, 0, 0, 2, 2, 2}, -2},
+    /* Wario */
+    {1, 1, 2, 12, 0, WIND_PLAY_STRONG_WINDS, 2, {-2, 0, 0, 0, 0, 2}, -4},
+    /* Harry */
+    {2, 2, 1, 12, 1, WIND_PLAY_FOLLOWING_WINDS, 1, {-2, -2, 0, 2, 0, 0}, -6},
+    /* Mario */
+    {0, 1, 0, 6, 2, WIND_PLAY_STRONG_WINDS, 1, {-2, -2, -2, 0, 2, 0}, -9},
+    /* Maple */
+    {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 2, -2, 2, 2}, 0},
+    /* Donkey Kong */
+    {0, 0, 1, 12, 1, WIND_PLAY_HEAD_WINDS, 2, {-2, -2, 0, 2, 2, 0}, -11},
+    /* Bowser */
+    {0, 2, 2, 12, 2, WIND_PLAY_FOLLOWING_WINDS, 2, {-2, 2, -2, 2, -2, 0}, -12},
+    /* Metal Mario */
+    {0, 2, 2, 12, 2, WIND_PLAY_FOLLOWING_WINDS, 2, {-2, -2, -2, 2, -2, 0}, -16},
+    /* Kid */
+    {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
+    /* Sherry */
+    {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
+    /* Azalea */
+    {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
+    /* Joe */
+    {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
+};
+s8 f_ClubKindChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_KIND_COUNT] = {
+    {75, 50, 25},
+    {75, 25, 50},
+};
+ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT] = {
+    {0, 0},
+    {0, 16},
+    {0, 32},
+    {0, 48},
+    {0, -16},
+    {0, -32},
+    {0, -48},
+    {0, 0},
+};
+s32 f_PlanThreadState = PLAN_THREAD_RUNNING;
+/* Read by no routine */
+u32 D_80253C68_ovl_03 = 0xD24CC5E5;
+/* Whether there is a best evaluation yet */
+s32 f_HasBestEvaluation = FALSE;
+/*
+ * The upper limits of each approach band, as shares of the cup distance that
+ * lie short of the green, for each value of the golfer's unk1 trait
+ */
+f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT] = {
+    {0.2f, 0.15f, 0.1f},
+    {0.25f, 0.25f, 0.25f},
+    {0.4f, 0.45f, 0.35f},
+    {0.6f, 0.7f, 0.5f},
+};
+s32 f_HasUnk3Contact = FALSE;
+/* Read by no routine. The 2W and AW share the 3W's and SW's types. */
+ClubName D_80253CA4_ovl_03[] = {
+    {"1W", CLUB_TYPE_DRIVER},
+    {"3W", CLUB_TYPE_THREE_WOOD},
+    {"4W", CLUB_TYPE_FOUR_WOOD},
+    {"2I", CLUB_TYPE_TWO_IRON},
+    {"3I", CLUB_TYPE_THREE_IRON},
+    {"4I", CLUB_TYPE_FOUR_IRON},
+    {"5I", CLUB_TYPE_FIVE_IRON},
+    {"6I", CLUB_TYPE_SIX_IRON},
+    {"7I", CLUB_TYPE_SEVEN_IRON},
+    {"8I", CLUB_TYPE_EIGHT_IRON},
+    {"9I", CLUB_TYPE_NINE_IRON},
+    {"PW", CLUB_TYPE_PITCHING_WEDGE},
+    {"SW", CLUB_TYPE_SAND_WEDGE},
+    {"PT", CLUB_TYPE_PUTTER},
+    {"AW", CLUB_TYPE_SAND_WEDGE},
+    {"2W", CLUB_TYPE_THREE_WOOD},
+};
 
 s32 PlanShot(CurrentShot* plannedShot);
 s32 PlanCupDistance(s32 arg0);
@@ -276,21 +385,6 @@ s32 GetSideSlope(void) {
   return sideSlope;
 }
 
-#define SHOT_OFFSET_PLUS_SMALL 1
-#define SHOT_OFFSET_PLUS_MEDIUM 2
-#define SHOT_OFFSET_PLUS_LARGE 3
-#define SHOT_OFFSET_MINUS_SMALL 4
-#define SHOT_OFFSET_MINUS_MEDIUM 5
-
-/* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
-typedef struct ShotOffset {
-  /* 0x0 */ s8 unk14; /* Becomes f_Shot.unk14 */
-  /* 0x1 */ s8 unk18; /* Becomes f_Shot.unk18 */
-} ShotOffset; /* size = 0x2 */
-
-#define SHOT_OFFSET_COUNT 8
-
-extern ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT];
 /* Whether the trial's club is one for the green */
 extern s32 f_IsPutting;
 /* Whether the flying trial ball has come down on the ground yet, and where it
@@ -304,7 +398,6 @@ extern s32 f_TrialEvaluation;
 /* Where the trial's ball rests, or for a putt where it passes nearest the
  * target */
 extern CoursePoint f_TrialEndPoint;
-extern s32 f_HasUnk3Contact;
 /* Whether f_TrialShot holds a copy of f_Shot yet */
 extern s32 f_HasTrialShot;
 /* Set when the level needs a new landing target */
@@ -1954,17 +2047,6 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
     }
   }
 }
-
-#define APPROACH_BAND_COUNT 4
-#define APPROACH_STYLE_COUNT 3
-#define APPROACH_STYLE_UNK1 1
-#define APPROACH_STYLE_UNK2 2
-
-/*
- * The upper limits of each approach band, as shares of the cup distance that
- * lie short of the green, for each value of the golfer's unk1 trait
- */
-extern f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT];
 
 /*
  * Aims at the cup and returns the type of club to approach it with. The club
