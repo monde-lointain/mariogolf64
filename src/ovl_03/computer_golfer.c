@@ -25,6 +25,7 @@
 #define PLAN_THREAD_FINISHED 2
 #define PLAN_THREAD_ID 11
 #define PLAN_THREAD_PRIORITY 20
+#define PLAN_THREAD_STACK_SIZE 0x6000
 /* PlanShot's result while it has more to do */
 #define PLAN_UNFINISHED (-1)
 
@@ -98,7 +99,7 @@ extern CurrentShot f_PlannedShot;
 #define DIRECTION_SECTOR_SHIFT 8
 /* The direction sectors in which no target is chosen */
 extern s8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
-extern u8 f_PlanThreadStackEnd[];
+extern u8 f_PlanThreadStack[PLAN_THREAD_STACK_SIZE];
 /* f_HoleStrokeTarget less the hole's par */
 extern s32 f_HoleTargetToPar;
 /* The strokes the golfer aims to take on the hole */
@@ -277,7 +278,7 @@ void StartShotPlan(void) {
   RestartShotPlan();
   f_PlanThreadState = PLAN_THREAD_RUNNING;
   osCreateThread(&f_PlanThread, PLAN_THREAD_ID, RunShotPlan, NULL,
-      f_PlanThreadStackEnd, PLAN_THREAD_PRIORITY);
+      f_PlanThreadStack + PLAN_THREAD_STACK_SIZE, PLAN_THREAD_PRIORITY);
   osStartThread(&f_PlanThread);
 }
 
