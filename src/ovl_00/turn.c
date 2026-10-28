@@ -814,7 +814,7 @@ void StartFreeLook(void) {
   g_CurrentShot.aimCameraDistance = FREE_LOOK_START_DISTANCE;
   g_LetterboxState = LETTERBOX_STATE_UNK1;
   D_800C3070 = 0;
-  g_IsSettingImpactPoint = FALSE;
+  g_ImpactPointState = FALSE;
   g_RoundHud.flags = FREE_LOOK_HUD_FLAGS;
   g_FreeLookHeading = g_CurrentShot.unk0;
   SetMenuBackdrop(MENU_BACKDROP_PATTERN);
@@ -832,16 +832,16 @@ void StartFreeLook(void) {
 void UpdateImpactPointMode(void) {
   if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
       !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
-    if (!g_IsSettingImpactPoint && D_80227194_ovl_00 == 0) {
+    if (!g_ImpactPointState && D_80227194_ovl_00 == 0) {
       PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
           IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
           IMPACT_POINT_SOUND_PAN);
     }
 
-    g_IsSettingImpactPoint = TRUE;
+    g_ImpactPointState = TRUE;
   } else {
     StopSound(IMPACT_POINT_SOUND_CHANNEL);
-    g_IsSettingImpactPoint = FALSE;
+    g_ImpactPointState = FALSE;
   }
 }
 
@@ -1048,7 +1048,7 @@ void TurnAim(s32 turnsAltHeading) {
   s32 dpad;
   s32 dpadSpeed;
 
-  if (g_IsSettingImpactPoint) {
+  if (g_ImpactPointState) {
     return;
   }
 
@@ -1270,33 +1270,33 @@ s32 UpdateAimControls(void) {
     }
 
     if (g_LetterboxState == LETTERBOX_STATE_NONE) {
-      g_IsSettingImpactPoint = TRUE;
+      g_ImpactPointState = TRUE;
     } else {
-      g_IsSettingImpactPoint = FALSE;
+      g_ImpactPointState = FALSE;
     }
   } else {
     if (D_80227194_ovl_00 == 0) {
       if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
           g_PauseScreen != PAUSE_SCREEN_UNK4 &&
           !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
-        if (g_IsSettingImpactPoint != TRUE) {
+        if (g_ImpactPointState != TRUE) {
           PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
               IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
               IMPACT_POINT_SOUND_PAN);
         }
 
-        g_IsSettingImpactPoint = TRUE;
+        g_ImpactPointState = TRUE;
         g_ImpactPointLingerFrameCount = 0;
       } else {
         StopSound(IMPACT_POINT_SOUND_CHANNEL);
-        if (g_IsSettingImpactPoint != FALSE) {
-          g_IsSettingImpactPoint = -1;
+        if (g_ImpactPointState != FALSE) {
+          g_ImpactPointState = -1;
         }
 
         if (g_ImpactPointLingerFrameCount < IMPACT_POINT_LINGER_FRAMES) {
           g_ImpactPointLingerFrameCount++;
         } else {
-          g_IsSettingImpactPoint = FALSE;
+          g_ImpactPointState = FALSE;
         }
       }
     }
@@ -2751,7 +2751,7 @@ extern s32 D_800B7D9C;
 extern u16 D_80104998;
 extern u16 D_80104994;
 extern u8 D_800FE330;
-extern s32 g_IsSettingImpactPoint;
+extern s32 g_ImpactPointState;
 
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
  * it while Z is held */
@@ -3616,7 +3616,7 @@ void UpdateTurns(void) {
           if (D_80227194_ovl_00 == 1) {
             isReady = StepToClubChoice(&D_80104F78);
           } else {
-            if (!g_IsSettingImpactPoint) {
+            if (!g_ImpactPointState) {
               HandleClubInput();
             }
 
@@ -3693,7 +3693,7 @@ void UpdateTurns(void) {
             g_RoundHud.unk84[1] = 0;
           }
 
-          if (g_IsSettingImpactPoint == 1) {
+          if (g_ImpactPointState == 1) {
             if (D_80227194_ovl_00 == 0) {
               g_CurrentShot.unk14 = GetTurnStickX();
               g_CurrentShot.unk18 = GetTurnStickY();
@@ -3701,7 +3701,7 @@ void UpdateTurns(void) {
               g_CurrentShot.unk14 = 0;
               g_CurrentShot.unk18 = 0;
             }
-          } else if (g_IsSettingImpactPoint == 0) {
+          } else if (g_ImpactPointState == 0) {
             g_CurrentShot.unk14 = 0;
             g_CurrentShot.unk18 = 0;
           }
@@ -3736,7 +3736,7 @@ void UpdateTurns(void) {
               g_RoundHud.flags = 0x47;
             }
 
-            if (g_IsSettingImpactPoint == 1) {
+            if (g_ImpactPointState == 1) {
               g_RoundHud.flags = (g_RoundHud.flags | 8) & ~2;
             }
           }

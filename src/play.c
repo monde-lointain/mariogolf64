@@ -114,7 +114,7 @@ s32 g_ImpactPointLingerFrameCount = 0;
 s32 g_ShotFlags = 0;
 static s32 D_800C3088 = 0;
 s32 g_LetterboxState = LETTERBOX_STATE_NONE;
-s32 g_IsSettingImpactPoint = FALSE;
+s32 g_ImpactPointState = FALSE;
 s32 D_800C3094 = TRUE;
 s8 g_IsHudTurnAwayRequested = FALSE;
 /* Read by no routine */
@@ -177,7 +177,7 @@ void func_8005F1C8(void) {
   g_ShotFlags = 0;
   D_800C3088 = 0;
   g_LetterboxState = 0;
-  g_IsSettingImpactPoint = 0;
+  g_ImpactPointState = 0;
   g_FreeLookHeading = 0;
   g_ShotSetupFrameCount = 0;
   g_ImpactPointLingerFrameCount = 0;
