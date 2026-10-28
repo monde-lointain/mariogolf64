@@ -80,7 +80,6 @@ extern f32 f_RingAngle;
 extern Lights1 f_RingLights;
 extern Mtx f_RingSpinMatrices[2];
 extern Vtx f_RingVertices[RING_VERTEX_COUNT];
-extern Mtx f_RingMatrices[];
 extern s32 g_IsCupViewShown;
 extern u8* g_BlendedTextureScrollingLayer;
 extern u8* g_BlendedTextureStillLayer;
@@ -88,6 +87,9 @@ extern u8* g_BlendedTextureStillLayer;
 void SpawnSparkle(s32* position);
 static void AddTestRing(void);
 static s32 BuildRingMatrices(void);
+
+/* Not static: the original left it to the linker's common block */
+Mtx f_RingMatrices[RING_COUNT];
 
 /* Makes the shaded triangles more see-through for the next frame */
 void DimNextTranslucentTriangles(void) {

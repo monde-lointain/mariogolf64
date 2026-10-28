@@ -1,4 +1,5 @@
-extern int f_RandomState;
+/* Not static: the original left it to the linker's common block */
+int f_RandomState;
 
 /*
  * The usual linear congruential generator, except that it takes the

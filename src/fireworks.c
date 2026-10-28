@@ -71,8 +71,10 @@ extern Vtx f_FireworkParticleVertices[3];
  */
 extern u16 f_FireworkShapeAssetIds[8];
 extern f32 f_FireworkHue;
-extern FireworkShape* f_FireworkShape;
-extern Firework f_Fireworks[FIREWORK_CAPACITY];
+
+/* Not static: the original left these to the linker's common block */
+FireworkShape* f_FireworkShape;
+Firework f_Fireworks[FIREWORK_CAPACITY];
 
 /* Makes the first firework launch in 70 frames */
 void StartFireworks(void) {

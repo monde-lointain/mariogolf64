@@ -210,6 +210,9 @@ extern s32 f_HasUnloadedSubModule;
 #define VI_FEATURES \
   (OS_VI_GAMMA_OFF | OS_VI_GAMMA_DITHER_ON | OS_VI_DITHER_FILTER_ON)
 
+/* Not static: the original left it to the linker's common block */
+s32 g_PerspectiveNormalization;
+
 void StartGame(void) {
   g_MapCamera.view.eye[0] = 0.0f;
   g_MapCamera.view.eye[1] = 0.0f;
@@ -996,7 +999,6 @@ extern s8 f_NeedsIdentityMatrix;
 extern Mtx f_IdentityMatrix;
 /* Indexed by view, then by draw buffer */
 extern CameraMatrices f_CameraMatrices[2 * 2];
-extern s32 g_PerspectiveNormalization;
 /* The next free vertex of the frame's vertex buffer */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
 extern s32 f_HasThreeFrameBuffers;

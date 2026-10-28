@@ -12,7 +12,9 @@
 /* Set until the boot logos, finding a Game Boy Pak, have once gone to the Game
  * Boy Pak transfer module */
 extern s32 f_IsBootTransmitPending;
-extern s32 f_HasRumblePak[MAXCONTROLLERS];
+
+/* Not static: the original left it to the linker's common block */
+s32 f_HasRumblePak[MAXCONTROLLERS];
 
 /* Adds experience that a Game Boy character earned, up to what the Game Boy
  * Color version holds */

@@ -45,10 +45,12 @@ extern u8 g_AssetArchiveRomStart[];
 
 #define ASSET_TABLE ((AssetTableEntry*)g_AssetArchiveRomStart)
 extern AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
-extern s32 f_LastOpenedAssetId;
 
 void DecodeByteRuns(u8* buffer, EncodedAsset* asset);
 void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset);
+
+/* Not static: the original left it to the linker's common block */
+s32 f_LastOpenedAssetId;
 
 void InitAssetFiles(void) {
   s32 index;

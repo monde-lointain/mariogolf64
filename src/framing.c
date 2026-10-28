@@ -36,12 +36,14 @@ extern s32 f_FramedSphereCount;
 extern f32 f_FramingPitch;
 extern f32 f_FramingYaw;
 extern Mat4 f_FramingRotation;
-extern Vec3 f_FramedEye;
-extern Vec3 f_FramedLookAt;
 
 void TransformPoint(Mat4 mf, Vec3 point, Vec3 result);
 float fabsf(float x);
 double tan(double x);
+
+/* Not static: the original left these to the linker's common block */
+Vec3 f_FramedEye;
+Vec3 f_FramedLookAt;
 
 void GetFramedView(Vec3 eye, Vec3 lookAt) {
   eye[0] = f_FramedEye[0];

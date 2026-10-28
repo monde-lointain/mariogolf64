@@ -161,7 +161,6 @@ extern u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 
 extern s8 D_801052E8;
 extern s32 D_800FE334;
-extern u8 D_801323E6;
 extern u8 g_OptionBits;
 /* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
 extern u8 g_SoundOptionBits;
@@ -354,6 +353,9 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead);
 void func_8021FC5C_ovl_01(Gfx** displayListHead);
 void func_802230C0_ovl_01(Gfx** displayListHead);
 void func_80229CB0_ovl_01(Gfx** displayListHead);
+
+/* Not static: the original left it to the linker's common block */
+u8 D_801323E6;
 
 void* GetMenuImageBuffer(void) {
   return g_MenuImageBuffer;

@@ -21,6 +21,9 @@
 #define FAULT_TEXT_COLUMN 0
 #define FIELD_TEXT_COLUMN 3
 
+/* The room the report's line buffer has before the next common variable */
+#define FAULT_TEXT_SIZE 0x80
+
 /* A value of a bit field of a register, and the text that describes it */
 typedef struct RegisterFieldValue {
   u32 mask;
@@ -31,13 +34,15 @@ typedef struct RegisterFieldValue {
 extern OSMesgQueue f_FaultMessageQueue;
 extern OSThread* f_FaultedThread;
 extern s32 f_FaultThreadUnk;
-extern char f_FaultText[];
 
 OSThread* __osGetCurrFaultedThread(void);
 void RunFaultThread(void* arg);
 void PrintFaultText(void);
 void PrintFaultContext(OSThread* thread);
 void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields);
+
+/* Not static: the original left it to the linker's common block */
+char f_FaultText[FAULT_TEXT_SIZE];
 
 /* Only cleared; nothing in the code reads it */
 static s32 f_FaultUnk = 0;

@@ -183,7 +183,6 @@ extern u8 D_80230F84_ovl_01[CODE_KEYBOARD_ROW_COUNT]
                            [CODE_KEYBOARD_COLUMN_COUNT];
 extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT]
                            [CLUB_TOURNAMENT_CODE_LENGTH];
-extern s8 D_80105DBC[7];
 extern s32 D_80105DC4;
 extern s32 D_80231134_ovl_01; /* The tournament code byte being edited */
 extern s32 g_ChosenPlayerCount;
@@ -252,6 +251,9 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead);
 s32 func_8022BDC4_ovl_01(void);
 s32 func_8022B46C_ovl_01(void);
 s32 func_8022B5E0_ovl_01(void);
+
+/* Not static: the original left it to the linker's common block */
+s8 D_80105DBC[7];
 
 void ResetMenuWindow(void) {
   g_MenuWindowState = MENU_WINDOW_OPENING;

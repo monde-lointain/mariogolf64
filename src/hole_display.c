@@ -149,8 +149,6 @@ extern u32* f_CapturedFrame;
 extern Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT];
 extern s32 f_IsFrameCapturePending;
 extern s32 f_HudAnimationFrame;
-/* The frame buffer of the last frame, kept for the next frame's captures */
-extern u16* f_LastFrameBuffer;
 
 /*
  * The plain backdrop copies the last frame, inside a border, into
@@ -222,6 +220,10 @@ void DrawSliceAnimation(void);
 void DrawSpiralAnimation(Gfx** displayListHead);
 
 void SetFramebufferCount(s32 count);
+
+/* Not static: the original left it to the linker's common block */
+/* The frame buffer of the last frame, kept for the next frame's captures */
+u16* f_LastFrameBuffer;
 
 /* Sets up a single-player game of the hole behind the title screen */
 void SetUpTitleHole(void) {

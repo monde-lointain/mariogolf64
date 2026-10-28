@@ -26,10 +26,7 @@ typedef void (*AudioEventCallback)(NUScMsg type, s32 frame);
 #define RETRACE_QUEUE_SIZE 2
 #define TASK_DONE_QUEUE_SIZE 1
 
-extern NUScTask f_AudioTask;
-extern OSMesgQueue f_TaskDoneQueue;
 extern OSMesg f_TaskDoneMessages[TASK_DONE_QUEUE_SIZE];
-extern OSMesgQueue f_RetraceQueue;
 extern OSMesg f_RetraceMessages[RETRACE_QUEUE_SIZE];
 extern NUScClient f_AudioClient;
 extern long long int n_aspMainTextStart[];
@@ -43,6 +40,11 @@ void AllocSongBuffer(s32 size);
 void AllocSoundEffectBuffer(s32 size);
 void SetAudioEventCallback(AudioEventCallback callback);
 void HandleAudioReset(NUScMsg type, s32 frame);
+
+/* Not static: the original left these to the linker's common block */
+NUScTask f_AudioTask;
+OSMesgQueue f_TaskDoneQueue;
+OSMesgQueue f_RetraceQueue;
 
 static u8* f_SongBuffer = NULL;
 static u8* f_SoundEffectBuffer = NULL;

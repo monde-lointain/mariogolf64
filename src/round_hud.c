@@ -158,7 +158,6 @@ extern Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT]
 /* s8 because WaveHoleFlag loads them as signed bytes when it spreads them */
 extern s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 extern s32 D_800C5478;
-extern Mtx D_80105278;
 
 /*
  * A solid arrow: a triangular head on a rectangular shaft, from -160 to 160
@@ -520,6 +519,9 @@ void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
 void func_80216EDC(void);
 void func_80216F8C(void);
+
+/* Not static: the original left it to the linker's common block */
+Mtx D_80105278;
 
 /* Sets up what the hole's drawing needs before its first frame */
 void PrepareHoleDisplay(void) {

@@ -91,13 +91,15 @@ extern u16* f_Framebuffers[FRAMEBUFFER_COUNT];
 extern s32 f_RetraceCount;
 extern s32 f_FramesThisSecond;
 extern s32 f_IsOddRetrace;
-extern volatile s32 g_MainLoopState;
-extern u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
 extern u16* g_MessageFramebuffer;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 extern char g_SaveBuildDate[];
 
 void HandleGfxRetrace(s32 pendingTaskCount);
+
+/* Not static: the original left these to the linker's common block */
+volatile s32 g_MainLoopState;
+u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
 
 void ReportFailedAssertion(
     const char* expression, const char* fileName, s32 lineNumber) {

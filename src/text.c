@@ -138,11 +138,6 @@ extern void* g_TextIconImage;
 extern void* g_TextGradientImages[2];
 extern void* g_MessageGlyphs;
 extern MessageTable* g_Messages;
-/* The index of the first character code in the message table, in halfwords */
-extern s32 g_MessageCodesStart;
-extern TextSlot g_TextSlots[TEXT_SLOT_COUNT];
-extern u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
-extern char g_TextName[TEXT_NAME_SIZE];
 
 /*
  * A glyph drawn with its own matrix, so text can be moved a glyph at a
@@ -158,6 +153,8 @@ typedef struct GlyphSprite {
 
 #define GLYPH_SPRITE_COUNT 300
 #define NO_GLYPH_GROUP (-1)
+/* The scorecard's leaderboard uses all of them */
+#define GLYPH_GROUP_COUNT 20
 /* The texel row where a large glyph's bottom part starts */
 #define LARGE_GLYPH_PART_ROW 7
 /*
@@ -189,15 +186,12 @@ typedef struct GlyphSprite {
 #define SMALL_FONT_MOVED_CODE 0xB0
 #define SMALL_FONT_MOVED_GLYPH 0x70
 
-extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 /* The quads glyph sprites are drawn with, centred on the sprite */
 extern Vtx f_LargeGlyphVertices[4];
 extern Vtx f_LargeGlyphTopVertices[4];
 extern Vtx f_LargeGlyphBottomVertices[4];
 extern Vtx f_MediumGlyphVertices[4];
 extern Vtx f_SmallGlyphVertices[4];
-/* How many glyphs each group has */
-extern u8 g_GlyphGroupSizes[];
 /* The width of each character of the large font */
 extern u8 g_LargeFontWidths[];
 
@@ -206,6 +200,16 @@ void ClearGlyphSprites(void);
 void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
 void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
 s32 GetTextLength(char* text);
+
+/* Not static: the original left these to the linker's common block */
+/* The index of the first character code in the message table, in halfwords */
+s32 g_MessageCodesStart;
+TextSlot g_TextSlots[TEXT_SLOT_COUNT];
+u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
+char g_TextName[TEXT_NAME_SIZE];
+GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
+/* How many glyphs each group has */
+u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
 
 const char g_TextStringFormat[] = "%s";
 const char g_TextNumberFormat[] = "%d";

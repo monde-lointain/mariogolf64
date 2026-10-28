@@ -96,6 +96,10 @@ s32 StepHoleFlyover(void);
 void EaseLookAtBelowBall(f32 drop);
 void EaseLookAtPoint(f32 yaw);
 
+/* Not static: the original left it to the linker's common block */
+/* The step of the simulated path that the ball's flight has reached */
+s32 g_BallFlightStep;
+
 /* Unused; the original has it */
 static const char f_UnusedFloatFormat[] = "            %f";
 
@@ -255,8 +259,6 @@ extern s32 D_800BE640;
 extern s32 D_800BE644;
 extern s32 D_800BE648;
 extern SurfaceInfo* f_EndSurfaceInfo;
-/* The step of the simulated path that the ball's flight has reached */
-extern s32 g_BallFlightStep;
 extern SimulatedShot g_SimulatedShot;
 extern s32 f_CupViewHoldCount;
 extern s32 g_HoleFlyoverFrame;
@@ -3479,14 +3481,16 @@ void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius) {
 #define NOISE_INTENSITY_SHIFT 13
 #define NOISE_MAX_INTENSITY 0xFF
 
-/* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
- * texture blends */
-extern s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
 /* The displacement scale at each midpoint displacement level */
 extern s16 f_NoiseRoughness[];
 extern s16 f_NoiseGridIndex;
 extern s32 f_NoiseBlendStep;
 extern s8 f_NoiseRow;
+
+/* Not static: the original left it to the linker's common block */
+/* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
+ * texture blends */
+s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
 
 static inline s32 RandomNoiseDisplacement(void) {
   return (rand() & NOISE_DISPLACEMENT_MASK) - NOISE_DISPLACEMENT_BIAS;

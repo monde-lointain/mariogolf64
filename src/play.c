@@ -62,22 +62,16 @@ extern s32 D_800C308C;
 extern s8 D_800C30A4;
 extern s32 g_PlayExit;
 extern s32 g_HoleEndStep;
-extern u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
 extern u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 extern s16 D_80104F78;
 extern s32 D_80104F7C;
 extern s32 D_80104F80;
-extern s32 D_80104F84;
-extern s32 D_80104F88;
 extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern u8 D_800FE330;
 extern s8 D_800FBDB8;
 extern s32 D_800C3094;
 extern s8 D_800C3098;
-extern PlayRecord D_800FED40[];
-extern s8 D_800FEE10;
-extern s8 D_800FEE11;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 
@@ -88,6 +82,19 @@ void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
 void LoadSuperShotReplay(PlayRecord* record);
+
+/* Not static: the original left these to the linker's common block */
+u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
+s32 D_80104F84;
+s32 D_80104F88;
+PlayRecord D_800FED40;
+s8 D_800FEE10;
+s8 D_800FEE11;
+s8 g_WasDonkeyKongUnlocked;
+s8 g_WasMapleUnlocked;
+s8 g_WasMetalMarioUnlocked;
+s8 g_HadEveryRingShotStar;
+s8 g_RingShotCourseOpenedAtStart;
 
 s32 func_8005F180(void) {
   return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B);
@@ -309,7 +316,7 @@ void InitPlay(s32 kind) {
   } else if (kind == 0) {
     func_8005F4AC();
   } else if (kind == 2) {
-    LoadSuperShotReplay(D_800FED40);
+    LoadSuperShotReplay(&D_800FED40);
     g_GameState.unk14 = 0;
     g_GameState.playerCount = 1;
     g_GameState.unk0 = 0;
@@ -675,11 +682,6 @@ extern s32 g_PlayFrameCount;
 extern s8 g_IsPlayStateBackedUp;
 extern s32 g_DebugCupIndex;
 extern s32 D_800C42D0;
-extern s8 g_WasDonkeyKongUnlocked;
-extern s8 g_WasMapleUnlocked;
-extern s8 g_WasMetalMarioUnlocked;
-extern s8 g_HadEveryRingShotStar;
-extern s8 g_RingShotCourseOpenedAtStart;
 extern s8 D_800C3068;
 void func_80241800();
 void func_80242384();

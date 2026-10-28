@@ -367,6 +367,11 @@ s32 func_80060190(s32 strokes);
 s32 HasNoRingsLeft(UnkB8* player);
 void RecordRingShotClear(s32 playerIndex);
 
+/* Not static: the original left these to the linker's common block */
+CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
+UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT];
+Unk20 g_PreviousBallSurfaceInfo;
+
 /* Lets the Rumble Paks run again after nuContRmbForceStop */
 void EndRumbleForceStop(void) {
   nuSiSendMesg(NU_CONT_RMB_FORCESTOPEND_MSG, NULL);
@@ -2740,9 +2745,6 @@ extern s32 D_80227188_ovl_00;
 extern s32 D_8022718C_ovl_00;
 extern s32 D_80227190_ovl_00;
 extern s32 D_8022B5C0_ovl_00;
-extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
-extern UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT];
-extern Unk20 g_PreviousBallSurfaceInfo;
 extern s32 D_800B7D9C;
 extern u16 D_80104998;
 extern u16 D_80104994;

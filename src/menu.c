@@ -99,24 +99,16 @@ extern s8 D_801B5634;
 extern s8 D_800C2BD5;
 extern s8 D_801052E8;
 extern s32 g_ChosenPlayerCount;
-extern s8 D_80105DC1;
-extern s8 D_80105DC2;
 extern s32 D_80105DC4;
 extern s32 D_80105DC8;
 extern s32 D_80105DCC;
 /* The code of the tournament whose password was entered */
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 extern s32 D_8012F480;
-extern s32 D_8012F484;
-extern s32 D_8012F488;
-extern s32 D_8012F48C;
 extern u8 D_801323A0[0x49];
 extern s8 D_801323D0;
 extern s32 D_801B7070;
 extern s8 D_801B70F0;
-extern s8 D_801B70F1;
-extern s8 D_801B70F2;
-extern s8 D_801B70F3;
 extern s16 D_801B71CC;
 extern s8 D_801B9410;
 extern u8 g_MapCamera[];
@@ -142,7 +134,6 @@ extern void* D_80105B78[18];
 extern void* D_800FBE30[2];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
-extern void* D_8012D424; /* D_8012D420[1], named apart to match */
 extern u16 D_800C2014[1];
 extern u16 D_800C2016;
 extern u16 D_800C2028[1];
@@ -168,8 +159,6 @@ extern s16 D_800C293C[CHARACTER_CHOICE_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 extern s16 D_800C2968[13];
 extern s16 g_StartingCharacterGrid[CHARACTER_GRID_ROW_COUNT]
                                   [CHARACTER_GRID_COLUMN_COUNT];
-extern void* D_80105BB0[4];
-extern void* D_8012D468[4];
 
 void func_8005CA48(void);
 
@@ -187,6 +176,19 @@ void func_8005D9A0(void);
 s32 ReadSaveCopies(SaveData* save, u8 isInSram);
 s32 WriteSaveCopies(SaveData* save, u8 isInSram);
 void SyncSaveOptions(SaveData* save, s32 isWrite, s32 readResult);
+
+/* Not static: the original left these to the linker's common block */
+s8 D_80105DC1;
+s8 D_80105DC2;
+s32 D_8012F484;
+s32 D_8012F488;
+s32 D_8012F48C;
+s8 D_801B70F1;
+s8 D_801B70F2;
+s8 D_801B70F3;
+void* D_8012D424; /* D_8012D420[1], named apart to match */
+void* D_80105BB0[4];
+void* D_8012D468[4];
 
 /*
  * Allocates and reads the menu's assets, then reads the save. Overlay 3

@@ -137,7 +137,6 @@ extern volatile s32 g_HasLoaderFinished;
 extern OSThread f_LoaderThread;
 extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
-extern s8 D_80104B6D;
 extern s32 f_CycledCupIndex;
 /* The cup index after the chosen one; nothing reads it */
 extern s8 f_NextCupIndex;
@@ -152,6 +151,9 @@ void func_80253234(s32);
 void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
 s32 ChooseHoleConditions(void);
+
+/* Not static: the original left it to the linker's common block */
+s8 D_80104B6D;
 
 /*
  * Decodes the compressed words from stream->input to stream->inputEnd onto
