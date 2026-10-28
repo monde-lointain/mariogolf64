@@ -168,8 +168,6 @@
 #define BET_HELP_X 36
 #define BET_HELP_Y 186
 #define BET_HELP_MESSAGE 0x15
-/* The random numbers chosen on starting the bets lie below this */
-#define RANDOM_SEED_RANGE 128
 
 /* Each player's choice on screen 20, and where the screen's slide starts */
 #define PLAYER_OPTION_COUNT 37
@@ -189,10 +187,8 @@ extern s16 D_80230460_ovl_01[][STATS_INDEX_COLUMN_COUNT];
 extern u8 D_802304B4_ovl_01[];
 /* The x of each column of D_8023040C */
 extern s32 D_802304FC_ovl_01[][STATS_INDEX_COLUMN_COUNT];
-extern s32 D_8023BFC0_ovl_01;
-extern s32 D_8023BFC4_ovl_01;
-extern s32 D_8023BFC8_ovl_01;
-extern s32 D_8023BFCC_ovl_01;
+/* Updates until each character fidgets, or -1 while it does */
+extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 extern s8 D_801B70F0[MAXCONTROLLERS];
 extern s8 D_802309C4_ovl_01[][2];
 extern void** D_8023B630_ovl_01;
@@ -425,10 +421,10 @@ void func_80217D20_ovl_01(void) {
 
   if (g_MenuPressedButtons & A_BUTTON) {
     PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-    D_8023BFC0_ovl_01 = guRandom() % RANDOM_SEED_RANGE;
-    D_8023BFC4_ovl_01 = guRandom() % RANDOM_SEED_RANGE;
-    D_8023BFC8_ovl_01 = guRandom() % RANDOM_SEED_RANGE;
-    D_8023BFCC_ovl_01 = guRandom() % RANDOM_SEED_RANGE;
+    D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
+    D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
+    D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
+    D_8023BFC0_ovl_01[3] = guRandom() % FIDGET_DELAY_RANGE;
     for (index = 0; index != MAXCONTROLLERS; index++) {
       D_801B70F0[index] = 0;
     }
