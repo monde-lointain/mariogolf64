@@ -202,6 +202,21 @@ extern s8 D_801B60B9;
 s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward);
 s16 func_80220DF8_ovl_01(void);
 s32 func_8022181C_ovl_01(void);
+void func_80210C74_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
+void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
+void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
+    s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
+void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
+    s32 direction, s32 centerX, s32 centerY);
+/* func_8021F124 takes a u8 drawMode, but this file calls it without narrowing
+ * the argument */
+void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
+    s32 left, s32 top, s16 character, s32 drawMode);
+void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
+    s32 top, u8 showsCourseWord);
+void func_802213C8_ovl_01(
+    Gfx** displayListHead, s32 imageIndex, s32 left, s32 top);
 
 void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -362,7 +377,344 @@ void func_8021F79C_ovl_01(void) {
   }
 }
 
+/*
+ * func_8021FC5C draws the Ring Shot records. A row of icons, one for each open
+ * course and one for the saved replays, sits above a shaded panel, with the
+ * blinking arrows around the chosen one. For a course the panel shows each
+ * hole's number over a column of four characters from ringShotFirstCharacters
+ * on, crossed out and darkened where the hole's unk1344 entry for them is 0,
+ * with arrows where the list scrolls further. For the replays it shows each
+ * slot's character face, course and a message for its course and hole, or
+ * dashes where it is empty, and the chosen slot's message glows in shifting
+ * colors. Message 0x1E plus the row is shown below the panel.
+ */
+#define RING_SHOT_BOARD_KIND 11
+#define RING_SHOT_PANEL_LEFT 24
+#define RING_SHOT_PANEL_TOP 70
+#define RING_SHOT_PANEL_RIGHT 302
+#define RING_SHOT_PANEL_BOTTOM 202
+#define RING_SHOT_STRIP_WIDTH 200
+#define RING_SHOT_STRIP_HEIGHT 10
+#define RING_SHOT_STRIP_COUNT 3
+#define RING_SHOT_STRIP_LEFT 28
+#define RING_SHOT_STRIP_RIGHT 298
+#define RING_SHOT_STRIP_TOP 204
+#define RING_SHOT_STRIP_SPACING 8
+#define RING_SHOT_ROW_COUNT (RING_SHOT_REPLAY_ROW + 1)
+/* Each row's icon is drawn this many times over in the same place */
+#define RING_SHOT_ICON_DRAW_COUNT 3
+#define RING_SHOT_FIRST_ICON_X 22
+#define RING_SHOT_REPLAY_ICON_X 268
+#define RING_SHOT_ICON_SPACING 42
+#define RING_SHOT_ICON_OFFSET_X 18
+#define RING_SHOT_ICON_TOP 48
+#define RING_SHOT_CHOSEN_ICON_DROP 8
+#define RING_SHOT_ARROW_WIDTH 20
+#define RING_SHOT_FIRST_ARROW_X 40
+#define RING_SHOT_REPLAY_ARROW_X 284
+#define RING_SHOT_ARROW_OFFSET_X 36
+#define RING_SHOT_ARROW_Y 60
+#define RING_SHOT_COLUMN_SPACING 42
+#define RING_SHOT_HOLE_NUMBER_X 48
+#define RING_SHOT_HOLE_NUMBER_Y 76
+#define RING_SHOT_SHOWN_CHARACTER_COUNT 4
+#define RING_SHOT_FACE_X 46
+#define RING_SHOT_FACE_Y 94
+#define RING_SHOT_FACE_SPACING 26
+#define RING_SHOT_CROSS_X 52
+#define RING_SHOT_CROSS_Y 100
+/* The scroll arrows are drawn in this many columns */
+#define RING_SHOT_SCROLL_COLUMN_COUNT 1
+#define RING_SHOT_SCROLL_ARROW_X 36
+#define RING_SHOT_UP_ARROW_Y 100
+#define RING_SHOT_DOWN_ARROW_Y 190
+#define RING_SHOT_SLOT_SPACING 25
+#define RING_SHOT_REPLAY_FACE_X 44
+#define RING_SHOT_REPLAY_FACE_Y 74
+#define RING_SHOT_REPLAY_COURSE_X 76
+#define RING_SHOT_REPLAY_COURSE_Y 82
+#define RING_SHOT_EMPTY_DASH_COUNT 13
+#define RING_SHOT_EMPTY_DASH_X 52
+#define RING_SHOT_EMPTY_DASH_SPACING 18
+#define RING_SHOT_EMPTY_DASH_Y 80
+#define RING_SHOT_SLOT_NUMBER_X 26
+#define RING_SHOT_SLOT_NUMBER_Y 82
+#define RING_SHOT_TITLE_X 36
+#define RING_SHOT_TITLE_Y 211
+#define MESSAGE_FIRST_RING_SHOT_TITLE 0x1E
+#define RING_SHOT_REPLAY_TEXT_X 124
+#define RING_SHOT_REPLAY_TEXT_Y 84
+#define MESSAGE_FIRST_RING_SHOT_HOLE 0x4B
+#define RING_SHOT_TEXT_FONT 1
+#define RING_SHOT_REPLAY_TEXT_FONT 2
+/* The chosen replay's colors run around a circle of hues, a step per update,
+ * with its glow a quarter as bright */
+#define REPLAY_HUE_STEP DEGREES_TO_RADIANS(5)
+#define REPLAY_HUE_MIDDLE 127
+#define REPLAY_HUE_SWING 127.0f
+#define REPLAY_GLOW_DIVISOR 4
+
+/* The order that the Ring Shot records list the characters in */
+extern u8 D_80230AA0_ovl_01[SAVE_UNK1344_ENTRY_COUNT];
+/* Each open course count's icon positions, of which only being nonzero, for
+ * a shown icon, is read */
+extern s16 D_80230AE4_ovl_01[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT];
+extern f32 D_80230AE0_ovl_01;
+
+/* Doesn't match: the original gives several values other saved registers,
+ * and keeps memory on the stack */
+#ifdef NON_MATCHING
+void func_8021FC5C_ovl_01(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  /* Counts the strips, holds each face's draw mode and counts the replay
+   * slots, as the original's shared register needs */
+  s16 index = 0;
+  SaveData* save = GetSaveData();
+  MenuMemory* memory = func_8005AF74();
+  s32 openCourseCount = func_8022181C_ovl_01();
+  s16 row;
+  s16 column;
+  /* Counts the faces shown in a column, or an empty slot's dashes */
+  s16 itemIndex;
+  s16 listIndex;
+  s16 drawIndex;
+  s16 drop;
+  s32 character;
+  s8 replayCharacter;
+  s32 red;
+  s32 green;
+  s32 blue;
+  s32 redSwing;
+  s32 greenSwing;
+  s32 blueSwing;
+  s16 replayCourse;
+  s16 replayHole;
+
+  func_801FB54C_ovl_01(&gfx, RING_SHOT_BOARD_KIND);
+
+  gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+  gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+  gDPPipeSync(gfx++);
+  gSPTextureRectangle(gfx++, RING_SHOT_PANEL_LEFT << 2,
+      RING_SHOT_PANEL_TOP << 2, RING_SHOT_PANEL_RIGHT << 2,
+      RING_SHOT_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
+  gDPPipeSync(gfx++);
+
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPLoadTLUT_pal256(gfx++, ((u32)D_8023B670_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  do {
+    gDPLoadTextureBlock(gfx++,
+        ((u32)D_8023B670_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (index * RING_SHOT_STRIP_WIDTH * RING_SHOT_STRIP_HEIGHT)) &
+            ~7,
+        G_IM_FMT_CI, G_IM_SIZ_8b, RING_SHOT_STRIP_WIDTH, RING_SHOT_STRIP_HEIGHT,
+        0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, RING_SHOT_STRIP_LEFT << 2,
+        (RING_SHOT_STRIP_TOP + (index * RING_SHOT_STRIP_SPACING)) << 2,
+        RING_SHOT_STRIP_RIGHT << 2,
+        (RING_SHOT_STRIP_TOP + RING_SHOT_STRIP_SPACING +
+            (index * RING_SHOT_STRIP_SPACING))
+            << 2,
+        G_TX_RENDERTILE, 0, 0,
+        (RING_SHOT_STRIP_WIDTH << 10) /
+            (RING_SHOT_STRIP_RIGHT - RING_SHOT_STRIP_LEFT),
+        (RING_SHOT_STRIP_HEIGHT << 10) / RING_SHOT_STRIP_SPACING);
+    gDPPipeSync(gfx++);
+    index++;
+  } while (index != RING_SHOT_STRIP_COUNT);
+
+  if (openCourseCount <= 0) {
+    openCourseCount = 1;
+  }
+
+  if (openCourseCount > RING_SHOT_COURSE_COUNT) {
+    openCourseCount = RING_SHOT_COURSE_COUNT;
+  }
+
+  for (row = 0; row != RING_SHOT_ROW_COUNT; row++) {
+    drop = (row == memory->ringShotRow) * RING_SHOT_CHOSEN_ICON_DROP;
+    if ((row < openCourseCount) || (row == RING_SHOT_REPLAY_ROW)) {
+      if (D_80230AE4_ovl_01[openCourseCount - 1][row] != 0) {
+        for (drawIndex = 0; drawIndex != RING_SHOT_ICON_DRAW_COUNT;
+            drawIndex++) {
+          if (row == 0) {
+            func_802213C8_ovl_01(
+                &gfx, 0, RING_SHOT_FIRST_ICON_X, RING_SHOT_ICON_TOP + drop);
+          } else if (row == RING_SHOT_REPLAY_ROW) {
+            func_802213C8_ovl_01(&gfx, RING_SHOT_REPLAY_ROW,
+                RING_SHOT_REPLAY_ICON_X, RING_SHOT_ICON_TOP + drop);
+          } else {
+            func_802213C8_ovl_01(&gfx, row,
+                (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ICON_OFFSET_X,
+                RING_SHOT_ICON_TOP + drop);
+          }
+
+          gDPPipeSync(gfx++);
+        }
+      }
+    }
+
+    if (row == memory->ringShotRow) {
+      if (row == 0) {
+        func_80212C54_ovl_01(&gfx, D_8023B67C_ovl_01, &D_80230A90_ovl_01,
+            &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH, RING_SHOT_FIRST_ARROW_X,
+            RING_SHOT_ARROW_Y);
+      } else if (row == RING_SHOT_REPLAY_ROW) {
+        func_80212C54_ovl_01(&gfx, D_8023B67C_ovl_01, &D_80230A90_ovl_01,
+            &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH, RING_SHOT_REPLAY_ARROW_X,
+            RING_SHOT_ARROW_Y);
+      } else {
+        func_80212C54_ovl_01(&gfx, D_8023B67C_ovl_01, &D_80230A90_ovl_01,
+            &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH,
+            (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ARROW_OFFSET_X,
+            RING_SHOT_ARROW_Y);
+      }
+    }
+  }
+
+  if (memory->ringShotRow != RING_SHOT_REPLAY_ROW) {
+    for (column = 0; column != RING_SHOT_HOLE_COUNT; column++) {
+      func_80210C74_ovl_01(&gfx,
+          RING_SHOT_HOLE_NUMBER_X + (column * RING_SHOT_COLUMN_SPACING),
+          RING_SHOT_HOLE_NUMBER_Y, column + 1, MENU_NUMBER_PLAIN);
+
+      row = memory->ringShotRow;
+      listIndex = memory->ringShotFirstCharacters[row];
+      for (itemIndex = 0; itemIndex != RING_SHOT_SHOWN_CHARACTER_COUNT;
+          itemIndex++) {
+        character = D_80230AA0_ovl_01[listIndex];
+        index = FACE_PLAIN;
+        if (save->unk1344[row][column][character] == 0) {
+          index = FACE_DARKENED;
+        }
+
+        func_8021F124_ovl_01(&gfx, D_8012D430[character],
+            D_8023BFF0_ovl_01[character],
+            RING_SHOT_FACE_X + (column * RING_SHOT_COLUMN_SPACING),
+            RING_SHOT_FACE_Y + (itemIndex * RING_SHOT_FACE_SPACING), character,
+            index);
+        if (index == FACE_DARKENED) {
+          func_802123E0_ovl_01(&gfx,
+              RING_SHOT_CROSS_X + (column * RING_SHOT_COLUMN_SPACING),
+              RING_SHOT_CROSS_Y + (itemIndex * RING_SHOT_FACE_SPACING),
+              MENU_SIGN_TIMES);
+        }
+
+        listIndex++;
+      }
+    }
+
+    for (column = 0; column != RING_SHOT_SCROLL_COLUMN_COUNT; column++) {
+      if (memory->ringShotFirstCharacters[memory->ringShotRow] > 0) {
+        func_80212FEC_ovl_01(&gfx, D_8023B67C_ovl_01, D_80230A90_ovl_01,
+            MENU_ARROW_UP,
+            RING_SHOT_SCROLL_ARROW_X + (column * RING_SHOT_COLUMN_SPACING),
+            RING_SHOT_UP_ARROW_Y);
+      }
+
+      if (memory->ringShotFirstCharacters[memory->ringShotRow] <
+          RING_SHOT_LAST_FIRST_CHARACTER) {
+        func_80212FEC_ovl_01(&gfx, D_8023B67C_ovl_01, D_80230A90_ovl_01,
+            MENU_ARROW_DOWN,
+            RING_SHOT_SCROLL_ARROW_X + (column * RING_SHOT_COLUMN_SPACING),
+            RING_SHOT_DOWN_ARROW_Y);
+      }
+    }
+  } else {
+    for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
+      if (D_8023B684_ovl_01[index] != -1) {
+        replayCharacter = save->unk1DF0[D_8023B684_ovl_01[index]].unk37;
+        func_8021F124_ovl_01(&gfx, D_8012D430[replayCharacter],
+            D_8023E3F0_ovl_01[index], RING_SHOT_REPLAY_FACE_X,
+            RING_SHOT_REPLAY_FACE_Y + (index * RING_SHOT_SLOT_SPACING),
+            replayCharacter, FACE_PLAIN);
+        func_80220E34_ovl_01(&gfx,
+            (s8)save->unk1DF0[D_8023B684_ovl_01[index]].unk34,
+            RING_SHOT_REPLAY_COURSE_X,
+            RING_SHOT_REPLAY_COURSE_Y + (index * RING_SHOT_SLOT_SPACING), TRUE);
+      } else {
+        for (itemIndex = 0; itemIndex != RING_SHOT_EMPTY_DASH_COUNT;
+            itemIndex++) {
+          func_802123E0_ovl_01(&gfx,
+              RING_SHOT_EMPTY_DASH_X +
+                  (itemIndex * RING_SHOT_EMPTY_DASH_SPACING),
+              RING_SHOT_EMPTY_DASH_Y + (index * RING_SHOT_SLOT_SPACING),
+              MENU_SIGN_DASH);
+        }
+      }
+
+      func_80210C74_ovl_01(&gfx, RING_SHOT_SLOT_NUMBER_X,
+          RING_SHOT_SLOT_NUMBER_Y + (index * RING_SHOT_SLOT_SPACING), index + 1,
+          MENU_NUMBER_PLAIN);
+    }
+  }
+
+  SetUpTextDrawing(&gfx);
+  SetTextColor(&gfx, 255, 255, 255);
+  SetTextSlot(RING_SHOT_TITLE_X, RING_SHOT_TITLE_Y,
+      MESSAGE_FIRST_RING_SHOT_TITLE + memory->ringShotRow, RING_SHOT_TEXT_FONT,
+      0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+  if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
+    for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
+      if (D_8023B684_ovl_01[index] != -1) {
+        D_80230AE0_ovl_01 += REPLAY_HUE_STEP;
+
+        redSwing = sinf(D_80230AE0_ovl_01) * REPLAY_HUE_SWING;
+        blueSwing = sinf(D_80230AE0_ovl_01 + (M_PI / 2)) * REPLAY_HUE_SWING;
+        red = redSwing + REPLAY_HUE_MIDDLE;
+        blue = blueSwing + REPLAY_HUE_MIDDLE;
+        greenSwing = sinf(D_80230AE0_ovl_01 + M_PI) * REPLAY_HUE_SWING;
+        green = greenSwing + REPLAY_HUE_MIDDLE;
+        if (index == memory->ringShotReplaySlot) {
+          gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 255);
+          gDPSetEnvColor(gfx++, red / REPLAY_GLOW_DIVISOR,
+              green / REPLAY_GLOW_DIVISOR, blue / REPLAY_GLOW_DIVISOR, 255);
+        } else {
+          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+          gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+        }
+
+        replayCourse = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].unk34;
+        replayHole = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].unk35;
+        if (index == memory->ringShotReplaySlot) {
+          SetTextSlot(RING_SHOT_REPLAY_TEXT_X,
+              RING_SHOT_REPLAY_TEXT_Y + (index * RING_SHOT_SLOT_SPACING),
+              ((replayCourse * RING_SHOT_HOLE_COUNT) +
+                  MESSAGE_FIRST_RING_SHOT_HOLE) +
+                  replayHole,
+              RING_SHOT_REPLAY_TEXT_FONT, index + 1, 0, red, green, blue, 255);
+        } else {
+          SetTextSlot(RING_SHOT_REPLAY_TEXT_X,
+              RING_SHOT_REPLAY_TEXT_Y + (index * RING_SHOT_SLOT_SPACING),
+              ((replayCourse * RING_SHOT_HOLE_COUNT) +
+                  MESSAGE_FIRST_RING_SHOT_HOLE) +
+                  replayHole,
+              RING_SHOT_REPLAY_TEXT_FONT, index + 1, 0, 255, 255, 255, 255);
+        }
+      }
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021FC5C_ovl_01);
+#endif
 
 void func_80220A30_ovl_01(void) {
   SaveData* save = GetSaveData();
