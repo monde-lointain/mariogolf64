@@ -7,9 +7,6 @@
 /* The splines have this many segments, between one more knots */
 #define SPLINE_SEGMENT_COUNT 10
 
-/* The X, Y and Z of a point */
-#define AXIS_COUNT 3
-
 extern s32 f_PathPointIndex;
 extern s32 f_PathStepIndex;
 static f32 f_PathPosition[AXIS_COUNT];

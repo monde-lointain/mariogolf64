@@ -491,8 +491,6 @@ s32 func_80209BE0_ovl_01(void) {
 /* R leaves a player without a controller only among this many players */
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
-#define BITS_PER_BYTE 8
-
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern s8 D_801B5634;

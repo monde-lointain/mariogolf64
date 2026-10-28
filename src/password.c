@@ -11,7 +11,6 @@
 #include "libc.h"
 
 #define PASSWORD_SYMBOL_COUNT 28
-#define BITS_PER_BYTE 8
 
 /* Symbols that hold a number of up to three bytes, in base 28 */
 #define NUMBER_SYMBOL_COUNT 5

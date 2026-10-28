@@ -5,13 +5,15 @@
 
 #include "include_asm.h"
 
-/* A point or direction in 3D space */
-typedef f32 Vec3[3];
+#define BITS_PER_BYTE 8
+
 /* Indices of a point's coordinates; y is up */
 #define AXIS_X 0
 #define AXIS_Y 1
 #define AXIS_Z 2
 #define AXIS_COUNT 3
+/* A point or direction in 3D space */
+typedef f32 Vec3[AXIS_COUNT];
 
 /*
  * A point on the course as the game's logic keeps it, in fixed point:
