@@ -147,32 +147,9 @@
 void AdvanceTextureAnimations(
     u32 slotIndex, s32 unused, s32 frameLastDigit, s32 frame);
 
-/* Set to the model buffer of the slot last set up or animated */
-extern void* D_800C1DF4;
-/* The animation LoadCharacter starts */
-extern s32 D_800C1DF0;
-
 /* How a slot starts out when LoadCharacter loads it */
 #define LOADED_ALPHA 0x60
 #define LOADED_RANDOM_TEXTURE_ANIMATION_DELAY 27
-
-/* For CHARACTER_LIGHTING_FIXED and CHARACTER_LIGHTING_BLACK */
-extern Lights2 f_FixedLights;
-extern Lights2 f_BlackLights;
-/* SetCharacterLights' lights, in colors for rain that never change */
-extern Lights2 f_RainLights[DRAW_BUFFER_COUNT];
-/* SetCharacterLights' lights, in dry weather colors that change near the end of
- * the round */
-extern Lights2 f_DryLights[DRAW_BUFFER_COUNT];
-/*
- * The ambient and first light last drawn with, used instead during the impact
- * flash; DrawCharacterAndShadow then sets their second light to the flash level
- */
-extern Lights2 f_SavedLights[DRAW_BUFFER_COUNT];
-/* The direction of each set's second light, across the main camera's view */
-extern s32 f_SecondLightDirectionX;
-extern s32 f_SecondLightDirectionY;
-extern s32 f_SecondLightDirectionZ;
 
 /* SetCharacterLights' dry colors near the end of the round */
 #define LATE_AMBIENT_LEVEL 120
@@ -193,10 +170,6 @@ extern s32 f_SecondLightDirectionZ;
 #define RAIN_LIGHT_BLUE 120
 #define RAIN_SECOND_LIGHT_LEVEL 150
 
-/* Set until the first draw sets up the matrices */
-extern s32 f_IsMatrixSetupPending;
-/* Flips between 0 and 1 on each draw */
-extern s32 f_DrawParity;
 /* The characters are drawn at this scale; the rotations are set up but never
  * drawn */
 static Mtx f_ModelScaleMatrix;
@@ -205,34 +178,32 @@ static Mtx f_HeadingMatrix;
 
 /* Read by no routine */
 static u8 D_800DEA30[120];
-/* Segment branch tables to the render modes; the opaque ones, and the
- * translucent ones */
-extern Gfx f_OpaqueRenderModes[];
-extern Gfx f_TranslucentRenderModes[];
-/* Segment tables that clear or set face culling; front-face culling, and
- * back-face culling */
-extern Gfx f_FrontCulling[];
-extern Gfx f_BackCulling[];
 
 #define MODEL_SCALE 0.01f
 #define HALF_TURN_DEGREES 180
 #define FULL_TURN_DEGREES 360
 #define BLEND_ALPHA 0x80
 #define OPAQUE_ALPHA 0xFF
+/* The models' translucent mode: like G_RM_ZB_XLU_SURF, but updating the
+ * depth buffer */
+#define MODEL_RENDER_MODE_TRANSLUCENT (G_RM_ZB_XLU_SURF | Z_UPD)
+#define MODEL_RENDER_MODE_TRANSLUCENT2 (G_RM_ZB_XLU_SURF2 | Z_UPD)
 
 /* Written elsewhere */
 /* Each slot's matrices, for each draw buffer */
 static Mtx f_ModelMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadowMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadowProjections[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
-/* A square, textured with g_ShadowTexture, laid on the ground plane by
- * f_ShadowMatrices */
-extern Vtx f_ShadowVertices[4];
 /* A header, then the 32 by 32 intensity texture of shadows */
 extern u8* g_ShadowTexture;
 
 #define SHADOW_TEXTURE_SIZE 32
 #define SHADOW_TEXTURE_SIZE_LOG2 5
+/* Half a side of the shadow's square, in model units */
+#define SHADOW_QUAD_HALF_SIZE 1500
+/* The square's texture coordinates, in s10.5, span the texture and the mirror
+ * image its tile wraps to */
+#define SHADOW_QUAD_TEXEL_SPAN ((SHADOW_TEXTURE_SIZE * 2) << 5)
 #define SHADOW_TEXTURE_PIXELS(texture) (((u32)(texture) + 8) & ~7)
 /* The camera index DrawCharacterAndShadow always draws for */
 #define CAMERA_UNK2 2
@@ -282,6 +253,205 @@ extern u8* g_ShadowTexture;
 /* The source lines of pcsub.c that ReportFailedAssertion reports */
 #define BALL_DISTANCE_SOURCE_ASSERT_LINE 1525
 #define TEXTURE_ANIMATION_ASSERT_LINE 1956
+
+s32 g_ImpactFlashState = IMPACT_FLASH_NONE;
+s32 g_ImpactFlashLevel = 0;
+/* The render modes that f_OpaqueRenderModes branches to */
+static Gfx f_SurfaceRenderMode[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
+    gsSPEndDisplayList(),
+};
+static Gfx f_BlendedRenderMode[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(
+        MODEL_RENDER_MODE_TRANSLUCENT, MODEL_RENDER_MODE_TRANSLUCENT2),
+    gsSPEndDisplayList(),
+};
+static Gfx f_DecalRenderMode[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2),
+    gsSPEndDisplayList(),
+};
+static Gfx f_TextureEdgeRenderMode[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2),
+    gsSPEndDisplayList(),
+};
+/* The render modes that f_TranslucentRenderModes branches to, all blended */
+static Gfx f_TranslucentSurfaceRenderMode[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(
+        MODEL_RENDER_MODE_TRANSLUCENT, MODEL_RENDER_MODE_TRANSLUCENT2),
+    gsSPEndDisplayList(),
+};
+static Gfx f_TranslucentBlendedRenderMode[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(
+        MODEL_RENDER_MODE_TRANSLUCENT, MODEL_RENDER_MODE_TRANSLUCENT2),
+    gsSPEndDisplayList(),
+};
+static Gfx f_TranslucentDecalRenderMode[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(
+        MODEL_RENDER_MODE_TRANSLUCENT, MODEL_RENDER_MODE_TRANSLUCENT2),
+    gsSPEndDisplayList(),
+};
+static Gfx f_TranslucentTextureEdgeRenderMode[] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(
+        MODEL_RENDER_MODE_TRANSLUCENT, MODEL_RENDER_MODE_TRANSLUCENT2),
+    gsSPEndDisplayList(),
+    gsSPEndDisplayList(),
+};
+/* Segment branch tables to the render modes; the opaque ones, and the
+ * translucent ones */
+static Gfx f_OpaqueRenderModes[] = {
+    gsSPBranchList(f_SurfaceRenderMode),
+    gsSPBranchList(f_DecalRenderMode),
+    gsSPBranchList(f_TextureEdgeRenderMode),
+    gsSPBranchList(f_BlendedRenderMode),
+    gsSPEndDisplayList(),
+};
+static Gfx f_TranslucentRenderModes[] = {
+    gsSPBranchList(f_TranslucentSurfaceRenderMode),
+    gsSPBranchList(f_TranslucentDecalRenderMode),
+    gsSPBranchList(f_TranslucentTextureEdgeRenderMode),
+    gsSPBranchList(f_TranslucentBlendedRenderMode),
+    gsSPEndDisplayList(),
+};
+/* Segment tables that clear or set face culling; front-face culling, and
+ * back-face culling */
+static Gfx f_FrontCulling[] = {
+    gsSPClearGeometryMode(G_CULL_FRONT),
+    gsSPEndDisplayList(),
+    gsSPSetGeometryMode(G_CULL_FRONT),
+    gsSPEndDisplayList(),
+    gsSPEndDisplayList(),
+};
+static Gfx f_BackCulling[] = {
+    gsSPClearGeometryMode(G_CULL_BACK),
+    gsSPEndDisplayList(),
+    gsSPSetGeometryMode(G_CULL_BACK),
+    gsSPEndDisplayList(),
+};
+Gfx g_CharacterRenderModeDisplayList[3] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_PASS, G_RM_AA_ZB_OPA_SURF2),
+    gsSPEndDisplayList(),
+};
+Gfx g_CharacterCombineDisplayList[2] = {
+    gsDPSetCombineLERP(PRIMITIVE, 0, SHADE, 0, ENVIRONMENT, 0, SHADE, 0,
+        ENVIRONMENT, COMBINED, TEXEL0, COMBINED, 0, 0, 0, COMBINED),
+    gsSPEndDisplayList(),
+};
+/* Starts like g_CharacterRenderModeDisplayList, until SetCharacterHilite
+ * fills it */
+Gfx g_CharacterHiliteDisplayList[3] = {
+    gsDPPipeSync(),
+    gsDPSetRenderMode(G_RM_PASS, G_RM_AA_ZB_OPA_SURF2),
+    gsSPEndDisplayList(),
+};
+/* Read by no routine */
+static Gfx D_800C1D18[] = {
+    gsSPEndDisplayList(),
+    gsSPEndDisplayList(),
+};
+u8 g_CharacterEnvColors[ENV_COLOR_COUNT][3] = {
+    {0x80, 0x40, 0x1E},
+    {0xFF, 0xFF, 0xFF},
+    {0xFF, 0xFF, 0x7F},
+    {0xC8, 0xC8, 0xDC},
+    {0x00, 0xDC, 0x00},
+    {0xFF, 0x7F, 0x7F},
+    {0xFF, 0xC8, 0x40},
+    {0xFF, 0xFF, 0xFF},
+    {0xFF, 0xFA, 0xE6},
+    {0x40, 0x9F, 0xFF},
+};
+Gfx g_CharacterEnvColorDisplayLists[ENV_COLOR_COUNT][2] = {
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+    {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
+};
+/* Read by no routine */
+static s32 D_800C1DE8 = 1;
+s32 g_CharacterModelIndex = 1;
+/* The animation LoadCharacter starts */
+static s32 D_800C1DF0 = 0;
+/* Set to the model buffer of the slot last set up or animated */
+static void* D_800C1DF4 = NULL;
+/* Read by no routine */
+static Gfx D_800C1DF8[] = {
+    gsSPEndDisplayList(),
+};
+/* For CHARACTER_LIGHTING_FIXED and CHARACTER_LIGHTING_BLACK */
+static Lights2 f_FixedLights = gdSPDefLights2(0x6E, 0x6E, 0x6E, 0x9B, 0x78,
+    0x78, 0, 100, 100, 0x96, 0x96, 0x96, 120, 0, 0);
+static Lights2 f_BlackLights =
+    gdSPDefLights2(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+/* SetCharacterLights' lights, in colors for rain that never change */
+static Lights2 f_RainLights[DRAW_BUFFER_COUNT] = {
+    gdSPDefLights2(0x64, 0x64, 0x64, 0x9B, 0x78, 0x78, 0, -80, 80, 0x96, 0x96,
+        0x96, 80, -80, 0),
+    gdSPDefLights2(0x64, 0x64, 0x64, 0x9B, 0x78, 0x78, 0, -80, 80, 0x96, 0x96,
+        0x96, 80, -80, 0),
+};
+/* SetCharacterLights' lights, in dry weather colors that change near the end of
+ * the round */
+static Lights2 f_DryLights[DRAW_BUFFER_COUNT] = {
+    gdSPDefLights2(0x64, 0x64, 0x64, 0x9B, 0x78, 0x78, 0, -120, 120, 0x96, 0x96,
+        0x96, 120, -120, 0),
+    gdSPDefLights2(0x64, 0x64, 0x64, 0x9B, 0x78, 0x78, 0, -120, 120, 0x96, 0x96,
+        0x96, 120, -120, 0),
+};
+/* Read by no routine */
+static Lights2 D_800C1EF0[DRAW_BUFFER_COUNT] = {
+    gdSPDefLights2(0x64, 0x64, 0x64, 0x9B, 0x78, 0x78, 0, -120, 20, 0x96, 0x96,
+        0x96, 20, -120, 0),
+    gdSPDefLights2(0x78, 0x5A, 0x5A, 0xB9, 0x78, 0x78, 0, -120, 120, 0xB4, 0x96,
+        0x96, 120, -120, 0),
+};
+/*
+ * The ambient and first light last drawn with, used instead during the impact
+ * flash; DrawCharacterAndShadow then sets their second light to the flash level
+ */
+static Lights2 f_SavedLights[DRAW_BUFFER_COUNT] = {
+    gdSPDefLights2(0x20, 0x20, 0x20, 0xFF, 0xDC, 0xDC, 0, -127, 0, 0xFF, 0xDC,
+        0xDC, 126, 0, 1),
+    gdSPDefLights2(0x20, 0x20, 0x20, 0xFF, 0xDC, 0xDC, 0, -127, 0, 0xFF, 0xDC,
+        0xDC, 126, 0, 1),
+};
+/* The direction of each set's second light, across the main camera's view */
+static s32 f_SecondLightDirectionX = 0;
+static s32 f_SecondLightDirectionY = 0;
+static s32 f_SecondLightDirectionZ = 0;
+/* Set until the first draw sets up the matrices */
+static s32 f_IsMatrixSetupPending = TRUE;
+/* Flips between 0 and 1 on each draw */
+static s32 f_DrawParity = 0;
+/* Read by no routine */
+static s32 D_800C1FA4 = 0;
+/* A square, textured with g_ShadowTexture, laid on the ground plane by
+ * f_ShadowMatrices */
+static Vtx f_ShadowVertices[4] = {
+    {{{-SHADOW_QUAD_HALF_SIZE, SHADOW_QUAD_HALF_SIZE, 0}, 0,
+        {SHADOW_QUAD_TEXEL_SPAN, SHADOW_QUAD_TEXEL_SPAN},
+        {0x96, 0x96, 0x96, 0xFF}}},
+    {{{SHADOW_QUAD_HALF_SIZE, SHADOW_QUAD_HALF_SIZE, 0}, 0,
+        {0, SHADOW_QUAD_TEXEL_SPAN}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{SHADOW_QUAD_HALF_SIZE, -SHADOW_QUAD_HALF_SIZE, 0}, 0, {0, 0},
+        {0xFF, 0xFF, 0xFF, 0x00}}},
+    {{{-SHADOW_QUAD_HALF_SIZE, -SHADOW_QUAD_HALF_SIZE, 0}, 0,
+        {SHADOW_QUAD_TEXEL_SPAN, 0}, {0x96, 0x96, 0x96, 0x00}}},
+};
 
 /*
  * How far to the side of the ball each playable character stands, in course
