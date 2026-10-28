@@ -7,10 +7,15 @@
 
 #include "asset.h"
 #include "character.h"
+#include "character_slot.h"
 #include "course.h"
+#include "cpu_projection.h"
+#include "functions.h"
 #include "game_flags.h"
 #include "hole_display.h"
+#include "hole_loader.h"
 #include "libc.h"
+#include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
@@ -883,7 +888,408 @@ s32 func_80219948_ovl_01(void) {
   }
 }
 
+/* The 200x30 CI8 banner along screen 20's foot, drawn in strips of 10 rows,
+ * each stretched across the screen */
+#define OPTION_BANNER_WIDTH 200
+#define OPTION_BANNER_STRIP_HEIGHT 10
+#define OPTION_BANNER_STRIP_COUNT 3
+#define OPTION_BANNER_STRIP_SIZE \
+  (OPTION_BANNER_WIDTH * OPTION_BANNER_STRIP_HEIGHT)
+#define OPTION_BANNER_LEFT 26
+#define OPTION_BANNER_RIGHT 296
+#define OPTION_BANNER_TOP 190
+#define OPTION_BANNER_STEP_X \
+  ((OPTION_BANNER_WIDTH << 10) / (OPTION_BANNER_RIGHT - OPTION_BANNER_LEFT))
+
+/* Each player's 64x44 CI4 column, drawn in strips of 22 rows, with the
+ * player's label and choice on it */
+#define OPTION_COLUMN_WIDTH 64
+#define OPTION_COLUMN_STRIP_HEIGHT 22
+#define OPTION_COLUMN_STRIP_COUNT 2
+#define OPTION_COLUMN_STRIP_SIZE \
+  (OPTION_COLUMN_WIDTH * OPTION_COLUMN_STRIP_HEIGHT / 2)
+#define OPTION_COLUMN_TOP 150
+/* The columns of the players other than the chosen one are dimmed */
+#define UNCHOSEN_COLUMN_SHADE 200
+#define OPTION_LABEL_OFFSET_X 4
+#define OPTION_LABEL_TOP 154
+#define OPTION_LABEL_TMEM 0x80
+#define OPTION_LABEL_TILE 1
+#define OPTION_LABEL_PALETTE 1
+#define OPTION_NUMBER_OFFSET_X 16
+#define OPTION_NUMBER_Y 166
+
+/* The arrows around the chosen column, each pushed outward while its D-Pad
+ * button is held. The left arrow is the right one's image mirrored. */
+#define OPTION_ARROW_UP 0
+#define OPTION_ARROW_DOWN 1
+#define OPTION_ARROW_RIGHT 2
+#define OPTION_ARROW_LEFT 3
+#define OPTION_ARROW_COUNT 4
+#define OPTION_ARROW_MASK 4
+#define OPTION_ARROW_PUSH 6
+#define OPTION_ARROW_MIDDLE_X 24
+#define OPTION_ARROW_MIDDLE_Y 15
+#define OPTION_ARROW_UP_Y 0
+#define OPTION_ARROW_DOWN_Y 30
+#define OPTION_ARROW_RIGHT_X 48
+#define OPTION_ARROW_LEFT_X (-1)
+
+/* The prompt, which names the chosen player */
+#define OPTION_PROMPT_X 36
+#define OPTION_PROMPT_Y 200
+#define OPTION_PROMPT_MESSAGE 0x1D
+
+/* The view of the players' characters */
+extern f32 D_802305F4_ovl_01[2];
+extern f32 D_80230608_ovl_01[MAX_PLAYER_COUNT];
+extern f32 D_80230618_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][3];
+/* The left of each player's column, by the player count */
+extern s32 D_802306C8_ovl_01[][MAX_PLAYER_COUNT];
+extern Mtx D_8023ACC0_ovl_01[MAX_PLAYER_COUNT][2];
+extern Mtx D_8023AEC0_ovl_01;
+extern LookAt D_8023AF00_ovl_01[2];
+extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+
+void func_80210CD4_ovl_01(
+    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
+
+/*
+ * Draws screen 20: the players' characters, a column for each player with
+ * the player's label and D_8023BFDC value, the banner below them, and the
+ * arrows around the column of the player that memory->unk29 picks. All but
+ * the banner slide across by slide, and the banner and arrows down by it, or
+ * up when reverseVerticalSlide is set. With canShowPrompt set, the prompt
+ * naming that player is typed once each time D_802303A1 is cleared.
+ */
+/*
+ * Doesn't match: the original adds the label's offset to the slide, and the
+ * columns' top to the vertical slide, once before their loops, and adds the
+ * texel offset to the blink frame's offset before the arrow's.
+ */
+#ifdef NON_MATCHING
+void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
+    u8 reverseVerticalSlide, u8 canShowPrompt) {
+  Gfx* gfx = *displayListHead;
+  MenuMemory* memory = func_8005AF74();
+  u16 playerIndex;
+  s32 columnIndex;
+  s32 stripIndex;
+  s32 arrowIndex;
+  s32 labelIndex;
+  s32 offsetY;
+  s32 arrowX = 0;
+  s32 arrowY = 0;
+  Vec3 translation;
+  Vec3 rotation;
+  Vec3 scale;
+  u8 unusedStack[0x30];
+  Mat4 transform;
+
+  BuildDynamicTextures(&gfx);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+  gDPPipeSync(gfx++);
+  guOrtho(&D_8023AEC0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
+      -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CHARACTERS_NEAR,
+      MENU_CHARACTERS_FAR, MENU_CHARACTERS_ORTHO_SCALE);
+  {
+    Mat4 viewing;
+
+    guLookAtReflectF(viewing, &D_8023AF00_ovl_01[g_DrawBufferIndex], 0.0f,
+        MENU_CHARACTERS_EYE_Y, MENU_CHARACTERS_EYE_Z, 0.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f);
+  }
+
+  gSPLookAt(gfx++, &D_8023AF00_ovl_01[g_DrawBufferIndex]);
+  for (playerIndex = 0; playerIndex != g_ChosenPlayerCount; playerIndex++) {
+    if (D_8023BFC0_ovl_01[playerIndex] > 0) {
+      D_8023BFC0_ovl_01[playerIndex]--;
+    }
+
+    if (D_8023BFC0_ovl_01[playerIndex] == 0) {
+      D_8023BFC0_ovl_01[playerIndex] = -1;
+      SetAnimationLooping(playerIndex, FALSE);
+      SetNextAnimation(playerIndex, MENU_ANIMATION_FIDGET);
+    }
+
+    if (D_8023BFC0_ovl_01[playerIndex] == -1) {
+      if (GetAnimationEndFrame(playerIndex, MENU_ANIMATION_FIDGET) ==
+          GetAnimationFrame(playerIndex)) {
+        SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
+        SetAnimationLooping(playerIndex, TRUE);
+        D_8023BFC0_ovl_01[playerIndex] = guRandom() % FIDGET_DELAY_RANGE;
+      }
+    }
+
+    if ((u8)D_801B70F0[playerIndex] == FALSE) {
+      if (IsCharacterSlotBusy(playerIndex)) {
+        FreeCharacterSlot(playerIndex);
+      } else {
+        LoadCharacter(playerIndex,
+            (s8)g_Players[playerIndex].characterIndex + CHARACTER_COUNT,
+            (s8)g_Players[playerIndex].paletteIndex);
+        D_801B70F0[playerIndex] = TRUE;
+        SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
+        SetAnimationSpeed(playerIndex, 1.0f);
+      }
+    }
+
+    rotation[0] = DEGREES_TO_RADIANS(D_802305F4_ovl_01[0]);
+    rotation[1] = DEGREES_TO_RADIANS(D_802305F4_ovl_01[1]);
+    rotation[2] = 0.0f;
+    translation[0] =
+        D_80230618_ovl_01[g_ChosenPlayerCount - 1][playerIndex][0] + slide;
+    translation[1] = D_80230618_ovl_01[g_ChosenPlayerCount - 1][playerIndex][1];
+    translation[2] = D_80230618_ovl_01[g_ChosenPlayerCount - 1][playerIndex][2];
+    scale[0] = D_80230608_ovl_01[playerIndex];
+    scale[1] = D_80230608_ovl_01[playerIndex];
+    scale[2] = D_80230608_ovl_01[playerIndex];
+
+    BuildTransformMatrix(transform, rotation, translation, scale);
+    ConvertMatrixToFixed(
+        transform, &D_8023ACC0_ovl_01[playerIndex][g_DrawBufferIndex]);
+
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023AEC0_ovl_01),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++,
+        OS_K0_TO_PHYSICAL(&D_8023ACC0_ovl_01[playerIndex][g_DrawBufferIndex]),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+
+    /* DrawCharacter draws through g_DisplayListHead */
+    g_DisplayListHead = gfx;
+    StopLoaderThread();
+    DrawCharacter(playerIndex);
+    *displayListHead = g_DisplayListHead;
+    gfx = *displayListHead;
+    AnimateCharacter(playerIndex);
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPLoadTLUT_pal256(gfx++, ((u32)D_8023B34C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  offsetY = slide;
+  if (reverseVerticalSlide) {
+    offsetY = -slide;
+  }
+
+  for (stripIndex = 0; stripIndex != OPTION_BANNER_STRIP_COUNT; stripIndex++) {
+    gDPLoadTextureBlock(gfx++,
+        ((u32)D_8023B34C_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (stripIndex * OPTION_BANNER_STRIP_SIZE)) &
+            ~7,
+        G_IM_FMT_CI, G_IM_SIZ_8b, OPTION_BANNER_WIDTH,
+        OPTION_BANNER_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
+    gSPScisTextureRectangle(gfx++, OPTION_BANNER_LEFT << 2,
+        (offsetY + OPTION_BANNER_TOP +
+            (stripIndex * OPTION_BANNER_STRIP_HEIGHT))
+            << 2,
+        OPTION_BANNER_RIGHT << 2,
+        (offsetY + OPTION_BANNER_TOP +
+            (stripIndex * OPTION_BANNER_STRIP_HEIGHT) +
+            OPTION_BANNER_STRIP_HEIGHT)
+            << 2,
+        G_TX_RENDERTILE, 0, 0, OPTION_BANNER_STEP_X, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+  }
+
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023B360_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(gfx++, OPTION_LABEL_PALETTE,
+      ((u32)D_8023B368_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
+    if (columnIndex == memory->unk29) {
+      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    } else {
+      gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+      gDPSetPrimColor(gfx++, 0, 0, UNCHOSEN_COLUMN_SHADE, UNCHOSEN_COLUMN_SHADE,
+          UNCHOSEN_COLUMN_SHADE, 255);
+    }
+
+    for (stripIndex = 0; stripIndex != OPTION_COLUMN_STRIP_COUNT;
+        stripIndex++) {
+      gDPLoadTextureBlock_4b(gfx++,
+          ((u32)D_8023B360_ovl_01 + PALETTED_TEXELS_OFFSET +
+              (stripIndex * OPTION_COLUMN_STRIP_SIZE)) &
+              ~7,
+          G_IM_FMT_CI, OPTION_COLUMN_WIDTH, OPTION_COLUMN_STRIP_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(gfx++,
+          (D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] + slide) << 2,
+          (OPTION_COLUMN_TOP + (stripIndex * OPTION_COLUMN_STRIP_HEIGHT)) << 2,
+          (D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] + slide +
+              OPTION_COLUMN_WIDTH)
+              << 2,
+          (OPTION_COLUMN_TOP + (stripIndex * OPTION_COLUMN_STRIP_HEIGHT) +
+              OPTION_COLUMN_STRIP_HEIGHT)
+              << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+
+    labelIndex = columnIndex;
+    if (D_800C1FF4[columnIndex] == NO_CONTROLLER_INDEX) {
+      labelIndex = columnIndex + PLAYER_LABEL_COMPUTER_FIRST;
+    }
+
+    gDPLoadMultiBlock_4b(gfx++,
+        ((u32)D_8023B368_ovl_01 + (labelIndex * PLAYER_LABEL_IMAGE_SIZE) +
+            PALETTED_TEXELS_OFFSET) &
+            ~7,
+        OPTION_LABEL_TMEM, OPTION_LABEL_TILE, G_IM_FMT_CI, PLAYER_LABEL_WIDTH,
+        PLAYER_LABEL_HEIGHT, OPTION_LABEL_PALETTE, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++,
+        (D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] +
+            (slide + OPTION_LABEL_OFFSET_X))
+            << 2,
+        OPTION_LABEL_TOP << 2,
+        (D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] +
+            (slide + OPTION_LABEL_OFFSET_X) + PLAYER_LABEL_WIDTH)
+            << 2,
+        (OPTION_LABEL_TOP + PLAYER_LABEL_HEIGHT) << 2, OPTION_LABEL_TILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+  }
+
+  D_802303A4_ovl_01++;
+  if (D_802303A4_ovl_01 == STATS_ARROW_BLINK_FRAME_COUNT) {
+    D_802303A4_ovl_01 = 0;
+    D_802303A2_ovl_01 ^= 1;
+  }
+
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, ((u32)D_8023B358_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  for (arrowIndex = 0; arrowIndex != OPTION_ARROW_COUNT; arrowIndex++) {
+    if (arrowIndex == OPTION_ARROW_LEFT) {
+      gDPLoadTextureTile_4b(gfx++,
+          ((u32)D_8023B358_ovl_01 +
+              ((D_802303A2_ovl_01 * STATS_ARROW_BLINK_STRIDE) +
+                  PALETTED_TEXELS_OFFSET +
+                  (OPTION_ARROW_RIGHT * STATS_ARROW_IMAGE_SIZE))) &
+              ~7,
+          G_IM_FMT_CI, STATS_ARROW_SIZE, STATS_ARROW_SIZE, 0, 0,
+          STATS_ARROW_SIZE - 1, STATS_ARROW_SIZE - 1, 0,
+          G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, OPTION_ARROW_MASK,
+          OPTION_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD);
+    } else {
+      gDPLoadTextureTile_4b(gfx++,
+          ((u32)D_8023B358_ovl_01 +
+              ((D_802303A2_ovl_01 * STATS_ARROW_BLINK_STRIDE) +
+                  PALETTED_TEXELS_OFFSET +
+                  (arrowIndex * STATS_ARROW_IMAGE_SIZE))) &
+              ~7,
+          G_IM_FMT_CI, STATS_ARROW_SIZE, STATS_ARROW_SIZE, 0, 0,
+          STATS_ARROW_SIZE - 1, STATS_ARROW_SIZE - 1, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    }
+
+    gDPPipeSync(gfx++);
+    if (arrowIndex == OPTION_ARROW_UP) {
+      arrowX = OPTION_ARROW_MIDDLE_X;
+      arrowY = (g_MenuRepeatButtons & U_JPAD)
+          ? (OPTION_ARROW_UP_Y - OPTION_ARROW_PUSH)
+          : OPTION_ARROW_UP_Y;
+    } else if (arrowIndex == OPTION_ARROW_DOWN) {
+      arrowX = OPTION_ARROW_MIDDLE_X;
+      arrowY = (g_MenuRepeatButtons & D_JPAD)
+          ? (OPTION_ARROW_DOWN_Y + OPTION_ARROW_PUSH)
+          : OPTION_ARROW_DOWN_Y;
+    } else if (arrowIndex == OPTION_ARROW_RIGHT) {
+      arrowY = OPTION_ARROW_MIDDLE_Y;
+      arrowX = (g_MenuRepeatButtons & R_JPAD)
+          ? (OPTION_ARROW_RIGHT_X + OPTION_ARROW_PUSH)
+          : OPTION_ARROW_RIGHT_X;
+    } else if (arrowIndex == OPTION_ARROW_LEFT) {
+      arrowY = OPTION_ARROW_MIDDLE_Y;
+      arrowX = (g_MenuRepeatButtons & L_JPAD)
+          ? (OPTION_ARROW_LEFT_X - OPTION_ARROW_PUSH)
+          : OPTION_ARROW_LEFT_X;
+    }
+
+    /* The left arrow starts at the right edge of its mirrored image */
+    gSPScisTextureRectangle(gfx++,
+        (D_802306C8_ovl_01[g_ChosenPlayerCount][memory->unk29] + arrowX + slide)
+            << 2,
+        (offsetY + OPTION_COLUMN_TOP + arrowY) << 2,
+        (D_802306C8_ovl_01[g_ChosenPlayerCount][memory->unk29] + arrowX +
+            slide + STATS_ARROW_SIZE)
+            << 2,
+        (offsetY + OPTION_COLUMN_TOP + arrowY + STATS_ARROW_SIZE) << 2,
+        G_TX_RENDERTILE,
+        (arrowIndex == OPTION_ARROW_LEFT) ? (STATS_ARROW_SIZE << 5) : 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+  }
+
+  for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
+    func_80210CD4_ovl_01(&gfx,
+        D_802306C8_ovl_01[g_ChosenPlayerCount][columnIndex] +
+            (slide + OPTION_NUMBER_OFFSET_X),
+        OPTION_NUMBER_Y, D_8023BFDC_ovl_01[columnIndex], MENU_NUMBER_PLAIN);
+  }
+
+  if ((D_802303A1_ovl_01 == FALSE) & (canShowPrompt == TRUE)) {
+    SetTextSlotValue(memory->unk29 + 1, 0, 0);
+
+    /* The prompt names the player in the player's own colour */
+    if (memory->unk29 == 0) {
+      SetTextPaletteColor(255, 127, 127, 0);
+    }
+
+    if (memory->unk29 == 1) {
+      SetTextPaletteColor(0, 255, 255, 0);
+    }
+
+    if (memory->unk29 == 2) {
+      SetTextPaletteColor(255, 255, 0, 0);
+    }
+
+    if (memory->unk29 == 3) {
+      SetTextPaletteColor(63, 255, 63, 0);
+    }
+
+    SetTextSlot(OPTION_PROMPT_X, OPTION_PROMPT_Y, OPTION_PROMPT_MESSAGE, 1, 0,
+        TEXT_FLAG_TYPED, 255, 255, 255, 255);
+    D_802303A1_ovl_01 = TRUE;
+  }
+
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219BD4_ovl_01);
+#endif
 
 void func_8021B1E0_ovl_01(
     Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex) {
