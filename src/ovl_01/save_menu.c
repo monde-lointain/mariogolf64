@@ -11,6 +11,7 @@
 #include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
+#include "functions.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"
@@ -28,6 +29,7 @@
 #include "sound.h"
 #include "sram.h"
 #include "text.h"
+#include "variables.h"
 
 /* The image listing the game modes, in orange */
 /* The buffers of func_802218C0, and what it reads into them */
@@ -1576,7 +1578,8 @@ s32 func_80222F2C_ovl_01(void) {
 
 const char D_80231A3C_ovl_01[] = "%s";
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802230C0_ovl_01);
+/* The backdrop layers that func_801FC60C draws behind the saved games */
+#define SAVED_GAMES_BOARD_KIND 0x1B
 
 /* The numbered boards of D_8023BD98, 64 by 64 CI8 images loaded in two strips
  */
@@ -1592,8 +1595,433 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802230C0_ovl_01);
 #define MODE_ICON_OFFSET_X 8
 #define MODE_ICON_OFFSET_Y 14
 
+/*
+ * The boards stand on a circle, seen from above, that each update of
+ * MenuMemory.savedGameTurn turns by a step. They are projected like the
+ * course wheel, from a nearer eye.
+ */
+#define BOARD_EYE_HEIGHT 70.0f
+#define BOARD_EYE_DISTANCE 60.0f
+#define BOARD_RADIUS_X 48.0f
+#define BOARD_RADIUS_Z 40.0f
+#define BOARD_TURN_STEP_DEGREES 15
+#define GAME_BOARD_HALF_SIZE 32.0f
+/* The mode icons on the boards not chosen are smaller, and lower */
+#define MODE_ICON_HALF_SIZE 24.0f
+#define MODE_ICON_DROP 4
+/* The boards not chosen, and the chosen one while it turns, are darkened */
+#define UNCHOSEN_BOARD_SHADE 127
+/* The bob that a fourth board would have, a step of its phase per update */
+#define BOARD_BOB_PHASE_STEP 0.1f
+#define BOARD_BOB_HEIGHT 8.0f
+/* The 200 by 10 strips of D_8023BD78, drawn narrower by the player count */
+#define SAVED_GAME_STRIP_WIDTH 200
+#define SAVED_GAME_STRIP_HEIGHT 10
+#define SAVED_GAME_STRIP_COUNT 3
+#define SAVED_GAME_STRIP_TOP 152
+#define SAVED_GAME_STRIP_LEFT 80
+#define SAVED_GAME_TWO_PLAYER_STRIP_LEFT 70
+#define SAVED_GAME_STRIP_SHOWN_WIDTH 160
+#define SAVED_GAME_FEW_PLAYER_STRIP_SHOWN_WIDTH 180
+#define SAVED_GAME_ARROW_GAP 80
+#define SAVED_GAME_ARROW_Y 124
+/* The rows of the game modes' image, 192 by 20 CI4 each */
+#define GAME_MODE_LABEL_WIDTH 192
+#define GAME_MODE_LABEL_HEIGHT 20
+#define GAME_MODE_LABEL_IMAGE_SIZE \
+  ((GAME_MODE_LABEL_WIDTH * GAME_MODE_LABEL_HEIGHT) / 2)
+#define GAME_MODE_LABEL_X 160
+#define SINGLE_PLAYER_GAME_MODE_LABEL_X 170
+#define GAME_MODE_LABEL_TOP 156
+#define SAVED_GAME_COURSE_X 110
+#define SAVED_GAME_COURSE_Y 187
+/* A tournament shows a message of each course in place of its name */
+#define MESSAGE_FIRST_TOURNAMENT_COURSE 0x6F
+/* Mini golf courses from this one use Peach's Castle's name */
+#define FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE \
+  (MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD)
+/* Shows the slot's first value, here the saved hole's number */
+#define SAVED_GAME_HOLE_X 180
+#define SAVED_GAME_HOLE_Y 203
+#define MESSAGE_SAVED_GAME_HOLE 0x76
+/* Shown while the next human player is given a controller, then once every
+ * human has one */
+#define CONTROLLER_PROMPT_X 70
+#define CONTINUE_PROMPT_X 54
+#define PROMPT_Y 184
+#define MESSAGE_CONTROLLER_PROMPT 0x37
+#define MESSAGE_CONTINUE_PROMPT 0x38
+/* Shown when the chosen saved game is empty */
+#define EMPTY_GAME_TEXT_X 100
+#define EMPTY_GAME_TEXT_Y 186
+#define MESSAGE_EMPTY_SAVED_GAME 0x26
+
+extern f32 D_80230C34_ovl_01;
+/* How far left of the label's place each row of the game modes' image is drawn
+ */
+extern s32 D_80230CEC_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
+extern Mat4 D_8023BA60_ovl_01;
+extern Mat4 D_8023BAA0_ovl_01;
 extern s32 D_8023BDAC_ovl_01;
 extern s32 D_8023BDB0_ovl_01;
+
+void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
+void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
+void func_80224AFC_ovl_01(
+    Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
+void func_80225358_ovl_01(Gfx** displayListHead);
+void func_80225960_ovl_01(Gfx** displayListHead);
+void func_80226190_ovl_01(Gfx** displayListHead);
+void func_8022644C_ovl_01(Gfx** displayListHead);
+
+/*
+ * Draws the saved-games screen: the characters, the three numbered boards
+ * turning on their circle with each game's mode icon, the chosen game's mode,
+ * course and hole, and the prompt for giving out the controllers.
+ */
+/*
+ * Doesn't match: the original keeps the menu memory pointer on the stack
+ * and the mode icons' texel step in a saved register, and doesn't keep
+ * the degrees-to-radians factor in a register.
+ */
+#ifdef NON_MATCHING
+void func_802230C0_ovl_01(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  u16 perspNorm;
+  /* Sized like the course wheel's, of which the boards use three */
+  f32 boardX[COURSE_COUNT];
+  f32 boardY[COURSE_COUNT];
+  f32 boardScale[COURSE_COUNT];
+  s32 unusedSlots[COURSE_COUNT];
+  s32 drawOrder[COURSE_COUNT];
+  u8 unusedStack[8];
+  SaveData* save = GetSaveData();
+  MenuMemory* memory = func_8005AF74();
+  s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
+  s32 index;
+  s32 otherIndex;
+  s32 key;
+  f32 angle;
+  f32 circleX;
+  s32 slot;
+  s32 halfSize;
+  s32 step;
+  s32 iconHalfSize;
+  s32 iconStep;
+  f32 bob;
+  s32 stripLeft;
+  s32 stripShownWidth;
+  s32 gameIndex;
+  s32 courseIndex;
+  s32 holeIndex;
+  s32* chosenMode;
+  s32* labelOffset;
+  s32 labelX;
+  f32 radiusX;
+  s32 boardDegrees;
+
+  func_801FC60C_ovl_01(&gfx, SAVED_GAMES_BOARD_KIND);
+  BuildDynamicTextures(&gfx);
+  func_80225358_ovl_01(&gfx);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  func_80225960_ovl_01(&gfx);
+
+  guPerspectiveF(D_8023BA60_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
+      WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
+  guLookAtF(D_8023BAA0_ovl_01, 0.0f, BOARD_EYE_HEIGHT, BOARD_EYE_DISTANCE, 0.0f,
+      0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+  SetCpuProjectionF(D_8023BA60_ovl_01, D_8023BAA0_ovl_01, g_Viewports);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+
+  radiusX = BOARD_RADIUS_X;
+  boardDegrees = DEGREES_PER_TURN / SAVED_GAME_COUNT;
+  for (index = 0; index != SAVED_GAME_COUNT; index++) {
+    ScreenPoint point;
+
+    angle = -DEGREES_TO_RADIANS(
+        (((memory->savedGameIndex - index) % SAVED_GAME_COUNT) * boardDegrees) +
+        (memory->savedGameTurn * BOARD_TURN_STEP_DEGREES));
+    circleX = sinf(angle) * radiusX;
+    if (ProjectPoint(circleX, 0.0f, cosf(angle) * BOARD_RADIUS_Z, &point) < 0) {
+      boardX[index] = point.x;
+      boardY[index] = point.y - WHEEL_RAISE;
+      boardScale[index] = point.scaleX;
+    }
+  }
+
+  for (otherIndex = 0; otherIndex != SAVED_GAME_COUNT; otherIndex++) {
+    drawOrder[otherIndex] = otherIndex;
+  }
+
+  /* Draw the farthest boards first, so the nearer ones cover them */
+  for (otherIndex = 1; otherIndex != SAVED_GAME_COUNT; otherIndex++) {
+    key = drawOrder[otherIndex];
+    for (index = otherIndex - 1;
+        index >= 0 && boardY[drawOrder[index]] > boardY[key]; index--) {
+      drawOrder[index + 1] = drawOrder[index];
+    }
+
+    drawOrder[index + 1] = key;
+  }
+
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PRIM);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
+  D_80230C34_ovl_01 += BOARD_BOB_PHASE_STEP;
+  for (index = 0; index != SAVED_GAME_COUNT; index++) {
+    slot = drawOrder[index];
+    iconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
+    halfSize = boardScale[slot] * GAME_BOARD_HALF_SIZE;
+    D_8023BDB0_ovl_01 = iconHalfSize;
+    iconStep = (f32)(MODE_ICON_STRIP_HEIGHT << 10) / iconHalfSize;
+    D_8023BDAC_ovl_01 = iconStep;
+    step = (f32)(GAME_BOARD_STRIP_HEIGHT << 10) / halfSize;
+    /* The loop stops before SAVED_GAME_COUNT, so no board bobs */
+    if (index == SAVED_GAME_COUNT) {
+      bob = sinf(D_80230C34_ovl_01) * BOARD_BOB_HEIGHT;
+    } else {
+      bob = 0.0f;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    if ((memory->savedGameIndex != slot) || (memory->savedGameTurn != 0)) {
+      if (memory->savedGameIndex == slot) {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      } else {
+        gDPSetCombineMode(
+            gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, UNCHOSEN_BOARD_SHADE, UNCHOSEN_BOARD_SHADE,
+            UNCHOSEN_BOARD_SHADE, 255);
+      }
+
+      gDPLoadTLUT_pal256(
+          gfx++, ((u32)(&D_8023BD98_ovl_01)[slot] + IMAGE_HEADER_SIZE) & ~7);
+      for (otherIndex = 0; otherIndex != GAME_BOARD_STRIP_COUNT; otherIndex++) {
+        gDPLoadTextureBlock(gfx++,
+            ((u32)(&D_8023BD98_ovl_01)[slot] + LARGE_PALETTED_TEXELS_OFFSET +
+                (otherIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)) &
+                ~7,
+            G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT,
+            0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (s32)(boardX[slot] - halfSize) << 2,
+            (s32)(boardY[slot] - halfSize + (otherIndex * halfSize) + bob) << 2,
+            (s32)(boardX[slot] + halfSize) << 2,
+            (s32)(boardY[slot] + (otherIndex * halfSize) + bob) << 2,
+            G_TX_RENDERTILE, 0, 0, step, step);
+        gDPPipeSync(gfx++);
+      }
+
+      if (D_80230B50_ovl_01[slot] != -1) {
+        gDPLoadTLUT_pal256(
+            gfx++, ((u32)D_8023BD70_ovl_01[slot] + IMAGE_HEADER_SIZE) & ~7);
+        for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT;
+            otherIndex++) {
+          gDPLoadTextureBlock(gfx++,
+              ((u32)D_8023BD70_ovl_01[slot] + LARGE_PALETTED_TEXELS_OFFSET +
+                  (otherIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)) &
+                  ~7,
+              G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
+              0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+          gSPScisTextureRectangle(gfx++,
+              (s32)(boardX[slot] - iconHalfSize) << 2,
+              ((s32)(boardY[slot] - iconHalfSize + (otherIndex * iconHalfSize) +
+                   bob) +
+                  MODE_ICON_DROP)
+                  << 2,
+              (s32)(boardX[slot] + iconHalfSize) << 2,
+              ((s32)(boardY[slot] + (otherIndex * iconHalfSize) + bob) +
+                  MODE_ICON_DROP)
+                  << 2,
+              G_TX_RENDERTILE, 0, 0, iconStep, iconStep);
+          gDPPipeSync(gfx++);
+        }
+      }
+    } else {
+      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      func_80224AFC_ovl_01(&gfx, boardX[slot] - halfSize,
+          boardY[slot] - halfSize + bob, halfSize, step);
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+
+  gDPLoadTLUT_pal256(gfx++, ((u32)D_8023BD78_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  for (index = 0; index != SAVED_GAME_STRIP_COUNT; index++) {
+    if (playerCount == 1) {
+      stripLeft = SAVED_GAME_STRIP_LEFT;
+      stripShownWidth = SAVED_GAME_FEW_PLAYER_STRIP_SHOWN_WIDTH;
+    } else if (playerCount == 2) {
+      stripLeft = SAVED_GAME_TWO_PLAYER_STRIP_LEFT;
+      stripShownWidth = SAVED_GAME_FEW_PLAYER_STRIP_SHOWN_WIDTH;
+    } else {
+      stripLeft = SAVED_GAME_STRIP_LEFT;
+      stripShownWidth = SAVED_GAME_STRIP_SHOWN_WIDTH;
+    }
+
+    gDPLoadTextureBlock(gfx++,
+        ((u32)D_8023BD78_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (index * SAVED_GAME_STRIP_WIDTH * SAVED_GAME_STRIP_HEIGHT)) &
+            ~7,
+        G_IM_FMT_CI, G_IM_SIZ_8b, SAVED_GAME_STRIP_WIDTH,
+        SAVED_GAME_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, stripLeft << 2,
+        (SAVED_GAME_STRIP_TOP + (index * SAVED_GAME_STRIP_HEIGHT)) << 2,
+        (stripLeft + stripShownWidth) << 2,
+        (SAVED_GAME_STRIP_TOP + SAVED_GAME_STRIP_HEIGHT +
+            (index * SAVED_GAME_STRIP_HEIGHT))
+            << 2,
+        G_TX_RENDERTILE, 0, 0, (SAVED_GAME_STRIP_WIDTH << 10) / stripShownWidth,
+        TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+  }
+
+  func_8021C200_ovl_01(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
+  chosenMode = &D_80230B50_ovl_01[memory->savedGameIndex];
+  if (*chosenMode != -1) {
+    labelOffset = &D_80230CEC_ovl_01[D_80230BB0_ovl_01[*chosenMode]];
+    gDPLoadTLUT_pal16(
+        gfx++, 0, ((u32)D_8023BD7C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureBlock_4b(gfx++,
+        ((u32)D_8023BD7C_ovl_01 + PALETTED_TEXELS_OFFSET +
+            (D_80230BB0_ovl_01[*chosenMode] * GAME_MODE_LABEL_IMAGE_SIZE)) &
+            ~7,
+        G_IM_FMT_CI, GAME_MODE_LABEL_WIDTH, GAME_MODE_LABEL_HEIGHT, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    labelX = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X
+                                : GAME_MODE_LABEL_X;
+    gSPScisTextureRectangle(gfx++, (labelX - *labelOffset) << 2,
+        GAME_MODE_LABEL_TOP << 2,
+        (labelX - *labelOffset + GAME_MODE_LABEL_WIDTH) << 2,
+        (GAME_MODE_LABEL_TOP + GAME_MODE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+  }
+
+  if (func_80222C94_ovl_01() != 0) {
+    SetTextSlot(EMPTY_GAME_TEXT_X, EMPTY_GAME_TEXT_Y, MESSAGE_EMPTY_SAVED_GAME,
+        1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+  } else if (!D_80230B4C_ovl_01) {
+    gameIndex = memory->savedGameIndex;
+    if (gameIndex < 0) {
+      gameIndex = 0;
+    }
+
+    if (gameIndex >= SAVED_GAME_COUNT) {
+      gameIndex = SAVED_GAME_COUNT - 1;
+    }
+
+    if (save->savedGames[gameIndex].isValid) {
+      if (!save->savedGames[gameIndex].state.isMiniGolf) {
+        func_80226190_ovl_01(&gfx);
+      } else {
+        func_8022644C_ovl_01(&gfx);
+      }
+    }
+
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    courseIndex = CHOSEN_GAME.state.courseIndex;
+    holeIndex = CHOSEN_GAME.state.holeIndex;
+    if (CHOSEN_GAME.state.gameMode == GAME_MODE_TOURNAMENT) {
+      SetTextSlot(SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y,
+          MESSAGE_FIRST_TOURNAMENT_COURSE + courseIndex, 1, 0, 0, 0xFF, 0xFF,
+          0xFF, 0xFF);
+    } else {
+      if (CHOSEN_GAME.state.isMiniGolf == TRUE) {
+        courseIndex = (courseIndex >= FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE)
+            ? COURSE_RECORD_PEACHS_CASTLE
+            : COURSE_RECORD_LUIGIS_GARDEN;
+      }
+
+      sprintf(
+          g_PrintBuffer, D_80231A3C_ovl_01, g_CourseRecords[courseIndex].name);
+      DrawLargeText(
+          &gfx, SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y, g_PrintBuffer);
+    }
+
+    SetTextSlotValue(holeIndex + 1, 1, 0);
+    SetTextSlot(SAVED_GAME_HOLE_X, SAVED_GAME_HOLE_Y, MESSAGE_SAVED_GAME_HOLE,
+        1, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+  } else if (GetWipeKind() == 0) {
+    if (D_80230B4D_ovl_01) {
+      SetTextSlot(CONTINUE_PROMPT_X, PROMPT_Y, MESSAGE_CONTINUE_PROMPT, 1, 0, 1,
+          0xFF, 0xFF, 0xFF, 0xFF);
+    } else {
+      SetTextSlotValue(D_8023BDA4_ovl_01[D_80230B48_ovl_01] + 1, 0, 0);
+
+      /* The prompt names the player in the player's own colour */
+      if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 0) {
+        SetTextPaletteColor(255, 127, 127, 0);
+      }
+
+      if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 1) {
+        SetTextPaletteColor(0, 255, 255, 0);
+      }
+
+      if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 2) {
+        SetTextPaletteColor(255, 255, 0, 0);
+      }
+
+      if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 3) {
+        SetTextPaletteColor(63, 255, 63, 0);
+      }
+
+      SetTextSlot(CONTROLLER_PROMPT_X, PROMPT_Y, MESSAGE_CONTROLLER_PROMPT, 1,
+          0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+      for (index = 1; index != SAVED_GAME_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      }
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802230C0_ovl_01);
+#endif
 
 void func_80224AFC_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
