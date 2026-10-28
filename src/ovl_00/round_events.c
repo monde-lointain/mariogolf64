@@ -19,6 +19,7 @@
 #include "math_util.h"
 #include "movie.h"
 #include "pin.h"
+#include "play.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"

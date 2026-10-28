@@ -14,6 +14,7 @@
 #include "hole_display.h"
 #include "math_util.h"
 #include "menu.h"
+#include "play.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"

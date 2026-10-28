@@ -2703,7 +2703,6 @@ extern s32 D_800B7D9C;
 extern u16 D_80104998;
 extern u16 D_80104994;
 extern u8 D_800FE330;
-extern s32 g_PauseScreen;
 extern s32 g_IsSettingImpactPoint;
 
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves

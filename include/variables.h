@@ -66,20 +66,6 @@ extern s32 g_SkippedNines;
 #define SECONDS_PER_MINUTE 60
 #define HUNDREDTHS_PER_SECOND 100
 
-/* Which pause screen is shown over the round */
-enum PauseScreen {
-  PAUSE_SCREEN_NONE,
-  PAUSE_SCREEN_UNK2 = 2,
-  PAUSE_SCREEN_UNK4 = 4,
-  PAUSE_SCREEN_UNK5,
-  PAUSE_SCREEN_UNK6,
-  PAUSE_SCREEN_SCORECARD,
-  PAUSE_SCREEN_UNK8,
-  PAUSE_SCREEN_UNK9
-};
-
-extern s32 g_PauseScreen;
-
 /*
  * The scene's colors at one time of day. The sky's two colors go to its
  * vertices; DeriveSceneColors also derives other colors from them.

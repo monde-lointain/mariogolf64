@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "game.h"
 #include "game_flags.h"
+#include "play.h"
 #include "save.h"
 #include "shot_camera.h"
 #include "variables.h"

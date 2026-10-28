@@ -10,6 +10,18 @@
 /* Set while g_CurrentShot.unk50 is at most turn.c's SHOT_UNK8_MAX_UNK50 */
 #define SHOT_FLAG_UNK8 8
 
+/* Which pause screen is shown over the round */
+enum PauseScreen {
+  PAUSE_SCREEN_NONE,
+  PAUSE_SCREEN_UNK2 = 2,
+  PAUSE_SCREEN_UNK4 = 4,
+  PAUSE_SCREEN_UNK5,
+  PAUSE_SCREEN_UNK6,
+  PAUSE_SCREEN_SCORECARD,
+  PAUSE_SCREEN_UNK8,
+  PAUSE_SCREEN_UNK9
+};
+
 /* g_LetterboxState's values */
 enum LetterboxState {
   LETTERBOX_STATE_NONE,
@@ -25,6 +37,8 @@ enum LetterboxState {
  * HUD's area: the turn steps it and the round HUD draws the bars from it
  */
 extern s32 g_LetterboxState;
+/* A PAUSE_SCREEN_* value */
+extern s32 g_PauseScreen;
 
 /* Keeps the last heading for the next shot, in Training */
 extern s8 g_IsTrainingHeadingKept;

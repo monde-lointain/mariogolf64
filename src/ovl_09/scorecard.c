@@ -17,6 +17,7 @@
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "math_util.h"
+#include "play.h"
 #include "reaction.h"
 #include "round_hud.h"
 #include "round_stats.h"

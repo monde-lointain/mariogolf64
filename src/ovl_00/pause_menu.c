@@ -17,6 +17,7 @@
 #include "hole_display.h"
 #include "main.h"
 #include "overlay_manager.h"
+#include "play.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"

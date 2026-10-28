@@ -29,6 +29,7 @@
 #include "overlay_manager.h"
 #include "performance_meter.h"
 #include "pin.h"
+#include "play.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
