@@ -104,11 +104,13 @@ enum GridMove {
 
 /* The palettes that the C buttons choose, which the A button wears and which
  * the faces preview while held */
-#define UP_C_PALETTE 0
-#define LEFT_C_PALETTE 1
-#define DOWN_C_PALETTE 2
-#define RIGHT_C_PALETTE 3
-#define NO_PALETTE (-1)
+enum CButtonPalette {
+  NO_PALETTE = -1,
+  UP_C_PALETTE,
+  LEFT_C_PALETTE,
+  DOWN_C_PALETTE,
+  RIGHT_C_PALETTE
+};
 
 extern void* D_80105B78[CHARACTER_COUNT];
 extern void* D_8012D430[CHARACTER_COUNT];
