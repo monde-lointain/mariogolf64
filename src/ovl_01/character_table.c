@@ -104,7 +104,7 @@ typedef struct TableCorner {
 #define TABLE_FIRST_STAR_Y 85
 #define TABLE_FIRST_SIGN_X 67
 #define TABLE_FIRST_SIGN_Y 86
-#define TABLE_FIRST_PLUS_Y 88
+#define TABLE_FIRST_DASH_Y 88
 #define TABLE_CURSOR_X 74
 #define TABLE_CURSOR_Y 93
 /* The arrows that show the table goes on past the screen, as func_80212FEC
@@ -371,12 +371,12 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
         func_802123E0_ovl_01(&gfx,
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_SIGN_X,
             (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_SIGN_Y,
-            MENU_SIGN_PLUS_MINUS);
+            MENU_SIGN_CIRCLE);
       } else {
         func_802123E0_ovl_01(&gfx,
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_SIGN_X,
-            (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_PLUS_Y,
-            MENU_SIGN_PLUS);
+            (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_DASH_Y,
+            MENU_SIGN_DASH);
       }
 
       shownColumn++;

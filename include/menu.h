@@ -163,9 +163,9 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 #define FACE_NAME_OFFSET_Y 12
 
 /* The signs that func_802123E0 draws */
-#define MENU_SIGN_PLUS 0
+#define MENU_SIGN_DASH 0
 #define MENU_SIGN_TIMES 1
-#define MENU_SIGN_PLUS_MINUS 2
+#define MENU_SIGN_CIRCLE 2
 
 /*
  * The cursor of the character table and the player stats: a quad whose corners

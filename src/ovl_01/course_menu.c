@@ -75,8 +75,8 @@
 #define MENU_GLYPH_SIZE 16
 #define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
 #define MENU_GLYPH_TIMES 0
-#define MENU_GLYPH_PLUS 13
-#define MENU_GLYPH_PLUS_MINUS 15
+#define MENU_GLYPH_MINUS 13
+#define MENU_GLYPH_CIRCLE 15
 #define OFF_FIRST_GLYPH 16
 #define OFF_GLYPH_COUNT 2
 
@@ -1220,13 +1220,13 @@ void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
   s32 glyphIndex = MENU_GLYPH_TIMES;
 
   switch (sign) {
-    case MENU_SIGN_PLUS:
-      glyphIndex = MENU_GLYPH_PLUS;
+    case MENU_SIGN_DASH:
+      glyphIndex = MENU_GLYPH_MINUS;
       break;
     case MENU_SIGN_TIMES:
       break;
-    case MENU_SIGN_PLUS_MINUS:
-      glyphIndex = MENU_GLYPH_PLUS_MINUS;
+    case MENU_SIGN_CIRCLE:
+      glyphIndex = MENU_GLYPH_CIRCLE;
       break;
   }
 
