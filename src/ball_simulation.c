@@ -414,7 +414,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             g_Players[simulation->playerIndex].ringStates[hit.unk0] ==
                 RING_STATE_SHOWN &&
             simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-          PlaySound(0x62, 0xE, 0x7F);
+          PlaySound(0x62, 0xE, SOUND_FULL_SCALE);
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             g_Players[simulation->playerIndex].ringStates[hit.unk0] =
                 RING_STATE_PASSED;
@@ -536,7 +536,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               startZ + (pinFraction * velocity[AXIS_Z]);
           if (pinHit == PIN_HIT_FLAG) {
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-              PlaySound(0xF, g_NextSoundChannel, 0x7F);
+              PlaySound(0xF, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
 
             simulation->unkB0 = 1;
@@ -865,7 +865,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         if (simulation->unkA8[0] == 1) {
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            PlaySound(0x12, g_NextSoundChannel, 0x7F);
+            PlaySound(0x12, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           simulation->unkA8[0] = 2;
@@ -1084,7 +1084,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            PlaySound(5, g_NextSoundChannel, 0x7F);
+            PlaySound(5, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -1093,7 +1093,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_FAIRWAY_POOR_LIE:
         case SURFACE_KIND_SEMI_ROUGH:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            PlaySound(2, g_NextSoundChannel, 0x7F);
+            PlaySound(2, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -1102,7 +1102,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case 5:
         case SURFACE_KIND_DEEP_ROUGH:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            PlaySound(3, g_NextSoundChannel, 0x7F);
+            PlaySound(3, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -1112,13 +1112,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_BUNKER_UNK9:
         case SURFACE_KIND_BARE_GROUND:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            PlaySound(4, g_NextSoundChannel, 0x7F);
+            PlaySound(4, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
         case SURFACE_KIND_WATER_HAZARD:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            PlaySound(9, g_NextSoundChannel, 0x7F);
+            PlaySound(9, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -1127,7 +1127,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_TEE_GROUND:
         case SURFACE_KIND_ROCK:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            PlaySound(SOUND_CONTACT_PLAIN, g_NextSoundChannel, 0x7F);
+            PlaySound(
+                SOUND_CONTACT_PLAIN, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -2002,7 +2003,7 @@ NEXT:
   simulation->velocity[AXIS_Z] = velocity[AXIS_Z];
   if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
     if (simulation->isRunning == BALL_STATE_ROLLING && !simulation->unkA8[1]) {
-      PlaySound(0x14, ROLL_SOUND_CHANNEL, 0x7F);
+      PlaySound(0x14, ROLL_SOUND_CHANNEL, SOUND_FULL_SCALE);
       simulation->unkA8[1] = TRUE;
     } else if (simulation->unkA8[1]) {
       if (simulation->isRunning != BALL_STATE_ROLLING) {

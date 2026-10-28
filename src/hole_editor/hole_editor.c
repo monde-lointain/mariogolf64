@@ -36,7 +36,6 @@
 #define EDGE_WEIGHT_MAX 16
 
 #define EDITOR_SOUND_CHANNEL 15
-#define EDITOR_SOUND_VOLUME 127
 /* WORLD_TO_COURSE_SCALE as a shift */
 #define WORLD_TO_COURSE_SHIFT 10
 
@@ -1139,7 +1138,7 @@ void func_80400FBC_hole_editor(void) {
       g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
               g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z]);
-      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_X],
               g_HolePoints.cupPositions[f_PinTeeIndex][AXIS_Z])
@@ -1160,7 +1159,7 @@ void func_80400FBC_hole_editor(void) {
       g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
               g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z]);
-      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.teePositions[f_PinTeeIndex][AXIS_X],
               g_HolePoints.teePositions[f_PinTeeIndex][AXIS_Z])
@@ -1232,7 +1231,7 @@ void func_80400FBC_hole_editor(void) {
       g_HolePoints.unk60[f_MesonPointIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.unk60[f_MesonPointIndex][AXIS_X],
               g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z]);
-      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.unk60[f_MesonPointIndex][AXIS_X],
               g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z])
@@ -1288,7 +1287,7 @@ void func_80400FBC_hole_editor(void) {
       g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Y] =
           GetGroundHeight(g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
               g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z]);
-      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
       PrintDebugText(
           GetSurfaceInfoAt(g_HolePoints.routePoints[f_RoutePointIndex][AXIS_X],
               g_HolePoints.routePoints[f_RoutePointIndex][AXIS_Z])
@@ -2145,12 +2144,12 @@ void func_80403A04_hole_editor(void) {
 
   if (f_WallTriangleIndex < f_FirstWallTriangle) {
     f_WallTriangleIndex = f_FirstWallTriangle;
-    PlaySound(WALL_LIMIT_SOUND, WALL_LIMIT_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    PlaySound(WALL_LIMIT_SOUND, WALL_LIMIT_SOUND_CHANNEL, SOUND_FULL_SCALE);
   }
 
   if (f_WallTriangleIndex >= FIRST_RING_TRIANGLE) {
     f_WallTriangleIndex -= WALL_TRIANGLE_COUNT;
-    PlaySound(WALL_LIMIT_SOUND, WALL_LIMIT_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    PlaySound(WALL_LIMIT_SOUND, WALL_LIMIT_SOUND_CHANNEL, SOUND_FULL_SCALE);
   }
 
   /* Both of the wall's triangles are kept shaded */
@@ -2256,7 +2255,7 @@ void func_804045C0_hole_editor(void) {
   s32 height;
   s32 i;
 
-  PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+  PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
   for (i = 0; i < BILLBOARD_COUNT; i++) {
     if (!g_Billboards[i].isNearCourseEdge) {
       g_Billboards[i].y =

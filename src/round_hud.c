@@ -348,7 +348,6 @@ extern Vtx f_LandingPanelVertices[4];
 #define LONG_SHOT_SOUND_VOLUME 0x40
 #define LONG_SHOT_HEAVY_SOUND_VOLUME 0x60
 #define LONG_SHOT_SOUND_REVERB 30
-#define LONG_SHOT_SOUND_PAN 127
 
 extern f32 f_ShotEffectTime;
 extern s32 f_ShotEffect;
@@ -2605,11 +2604,11 @@ void StartShotEffect(s32 effect) {
     if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 &
         contactStyle != CONTACT_STYLE_WARIO) {
       PlaySoundWithEffects(SOUND_LONG_SHOT, LONG_SHOT_SOUND_CHANNEL,
-          LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB, LONG_SHOT_SOUND_PAN);
+          LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB, SOUND_FULL_SCALE);
     } else {
       PlaySoundWithEffects(SOUND_LONG_SHOT_HEAVY, LONG_SHOT_SOUND_CHANNEL,
           LONG_SHOT_HEAVY_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB,
-          LONG_SHOT_SOUND_PAN);
+          SOUND_FULL_SCALE);
     }
   }
 

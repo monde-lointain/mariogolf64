@@ -155,7 +155,7 @@ void func_80213558_ovl_01(void) {
   if (IsHudAnimationDone() == TRUE) {
     if (g_MenuPressedButtons & B_BUTTON) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-      PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+      PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
       return;

@@ -243,11 +243,11 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
       timer = f_Fireworks[fireworkIndex].timer + 1;
       f_Fireworks[fireworkIndex].timer = timer;
       if (timer == FIREWORK_SOUND_FRAME) {
-        PlaySound(0x31, 8, 0x7F);
+        PlaySound(0x31, 8, SOUND_FULL_SCALE);
       } else if (timer == FIREWORK_LAUNCH_FRAME) {
         f_Fireworks[fireworkIndex].timer = 0;
         LaunchFirework(&f_Fireworks[fireworkIndex], fireworkIndex);
-        PlaySound(0x32, 8, 0x7F);
+        PlaySound(0x32, 8, SOUND_FULL_SCALE);
       }
     }
   }

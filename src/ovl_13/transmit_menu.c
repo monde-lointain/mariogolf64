@@ -408,8 +408,6 @@ enum ExperienceWriteResult {
 
 #define FIRST_GAME_BOY_GOLFER CHARACTER_KID
 
-#define MENU_SOUND_VOLUME 127
-
 /* WriteExperienceToCartridge and WriteStatusToCartridge share one copy of this
  */
 extern const char f_WriteSumFormat[];
@@ -630,8 +628,7 @@ void UpdateBringCharacters(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(
-                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -668,13 +665,12 @@ void UpdateBringCharacters(void) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(
-                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -726,29 +722,29 @@ void UpdateBringCharacters(void) {
       break;
     case BRING_CHOOSING_SLOT:
       if (f_TransmitController.pressedButtons & A_BUTTON) {
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->listingStates[transfer
                 ->listedCharacters[transfer->listedCharacterIndex]] =
             LISTING_BRINGING;
         transfer->screenStep = BRING_BRINGING;
         transfer->bringingFrame = 0;
       } else if (f_TransmitController.pressedButtons & B_BUTTON) {
-        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->screenStep = BRING_CHOOSING;
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
           transfer->characterIndex > 0) {
         transfer->characterIndex--;
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
           transfer->characterIndex < GAME_BOY_GOLFER_COUNT - 1) {
         transfer->characterIndex++;
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       }
 
       break;
     case BRING_CHOOSING:
       if (f_TransmitController.pressedButtons & A_BUTTON) {
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         if (transfer->characterCount == GAME_BOY_GOLFER_COUNT) {
           transfer->screenStep = BRING_CHOOSING_SLOT;
         } else {
@@ -760,7 +756,7 @@ void UpdateBringCharacters(void) {
           transfer->bringingFrame = 0;
         }
       } else if (f_TransmitController.pressedButtons & B_BUTTON) {
-        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
           transfer->listedCharacterIndex > 0) {
@@ -769,7 +765,7 @@ void UpdateBringCharacters(void) {
           transfer->unk7B8--;
         }
 
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
           transfer->listedCharacterIndex < transfer->listedCharacterCount - 1) {
         transfer->listedCharacterIndex++;
@@ -777,7 +773,7 @@ void UpdateBringCharacters(void) {
           transfer->unk7B8++;
         }
 
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       }
 
       break;
@@ -785,7 +781,7 @@ void UpdateBringCharacters(void) {
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
       if (f_TransmitController.pressedButtons & A_BUTTON) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         if (transfer->characterCount != GAME_BOY_GOLFER_COUNT) {
           OpenPrompt(PROMPT_BRING_MORE_CHARACTERS);
           transfer->screenStep = BRING_ASKING;
@@ -892,8 +888,7 @@ void UpdateSendStatus(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(
-                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -931,13 +926,12 @@ void UpdateSendStatus(void) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(
-                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -958,18 +952,18 @@ void UpdateSendStatus(void) {
       break;
     case SEND_STATUS_CHOOSING:
       if (f_TransmitController.pressedButtons & A_BUTTON) {
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->screenStep = SEND_STATUS_READY;
       } else if (f_TransmitController.pressedButtons & B_BUTTON) {
-        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
           transfer->chosenCartridgeIndex > 0) {
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->chosenCartridgeIndex--;
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
           transfer->chosenCartridgeIndex < transfer->taggedCartridgeCount - 1) {
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->chosenCartridgeIndex++;
       }
 
@@ -979,11 +973,11 @@ void UpdateSendStatus(void) {
       if (f_TransmitController.pressedButtons & A_BUTTON) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
         transfer->isAccessing = TRUE;
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->screenStep = SEND_STATUS_CHECKING;
       } else if (f_TransmitController.pressedButtons & B_BUTTON) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->screenStep = SEND_STATUS_CHOOSING;
       }
 
@@ -1043,7 +1037,7 @@ void UpdateSendStatus(void) {
     case SEND_STATUS_SENT:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
       if (f_TransmitController.pressedButtons & A_BUTTON) {
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
       }
@@ -1078,8 +1072,7 @@ void UpdateSendExperience(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(
-                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -1091,23 +1084,23 @@ void UpdateSendExperience(void) {
         if (g_GameBoyCharacters[transfer->characterIndex].experience == 0) {
           transfer->screenStep = SEND_EXPERIENCE_NOTHING_TO_SEND;
           SetNoticeState(NOTICE_OPENING, NO_EXPERIENCE_MESSAGE);
-          PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, MENU_SOUND_VOLUME);
+          PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, SOUND_FULL_SCALE);
         } else {
           transfer->screenStep = SEND_EXPERIENCE_CONFIRMING;
           SetNoticeState(NOTICE_OPENING, PAK_CHECK_MESSAGE);
-          PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+          PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         }
       } else if (f_TransmitController.pressedButtons & B_BUTTON) {
-        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
           transfer->characterIndex > 0) {
         transfer->characterIndex--;
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
           transfer->characterIndex < transfer->characterCount - 1) {
         transfer->characterIndex++;
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       }
 
       break;
@@ -1132,13 +1125,12 @@ void UpdateSendExperience(void) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(
-                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -1171,7 +1163,7 @@ void UpdateSendExperience(void) {
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
       if (f_TransmitController.pressedButtons & A_BUTTON) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         transfer->screenStep = SEND_EXPERIENCE_DONE;
       }
 
@@ -1192,8 +1184,7 @@ void UpdateSendExperience(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(
-                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;
@@ -1256,7 +1247,7 @@ void UpdateTransmitMenu(void) {
       }
 
       if (f_TransmitController.pressedButtons & A_BUTTON) {
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
         if (transfer->optionIndex == 0) {
           transfer->screen = TRANSMIT_SCREEN_SEND_STATUS;
           transfer->screenStep = SEND_STATUS_STARTING;
@@ -1301,7 +1292,7 @@ void UpdateTransmitMenu(void) {
           transfer->optionIndex ^= 1;
         }
 
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       } else if (f_TransmitController.repeatedButtons & D_JPAD) {
         if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
           transfer->optionIndex = (transfer->optionIndex + 4) % 3;
@@ -1309,7 +1300,7 @@ void UpdateTransmitMenu(void) {
           transfer->optionIndex ^= 1;
         }
 
-        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       }
 
       break;
@@ -1341,8 +1332,7 @@ void UpdateTransmitMenu(void) {
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
-            PlaySound(
-                SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;

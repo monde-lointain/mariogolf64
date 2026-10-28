@@ -24,7 +24,7 @@ void WaitForConfirmButton(void) {
     g_NextScene = 27;
     g_SceneModuleToUnload = 0x0D;
     g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
-    PlaySound(0x5D, 0xF, 0x7F);
+    PlaySound(0x5D, 0xF, SOUND_FULL_SCALE);
 
     /* The position goes unused with NO_MESSAGE */
     SetTextSlot(160, 114, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);

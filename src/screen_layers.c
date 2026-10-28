@@ -26,7 +26,6 @@
 #define WIPE_SOUND_CHANNEL 2
 #define WIPE_SOUND_VOLUME 0x28
 #define WIPE_SOUND_REVERB 0x14
-#define WIPE_SOUND_PAN 0x7F
 /* The shape grows by this many pixels with each step of progress */
 #define WIPE_SHAPE_GROWTH 38.0f
 #define WIPE_SHAPE_TEXELS 64
@@ -327,13 +326,13 @@ void StartWipe(s32 kind) {
       case WIPE_CLOSING:
         f_WipeProgress = WIPE_CLOSE_START_PROGRESS;
         PlaySoundWithEffects(SOUND_PROMPT_OPEN, WIPE_SOUND_CHANNEL,
-            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
+            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, SOUND_FULL_SCALE);
         break;
       case WIPE_OPENING:
       case WIPE_OPENING_FAST:
         f_WipeProgress = WIPE_OPEN_START_PROGRESS;
         PlaySoundWithEffects(SOUND_PROMPT_CLOSE, WIPE_SOUND_CHANNEL,
-            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
+            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, SOUND_FULL_SCALE);
         break;
     }
   }
@@ -813,7 +812,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
 
       if (f_HalfTurnTimer == HALF_TURN_SHOW_SOUND_RADIUS) {
         PlaySoundWithEffects(SOUND_PROMPT_CLOSE, WIPE_SOUND_CHANNEL,
-            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
+            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, SOUND_FULL_SCALE);
       }
     } else if (f_HalfTurnTimer > -HALF_TURN_WAIT_FRAMES) {
       f_HalfTurnTimer--;
@@ -834,7 +833,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
 
       if (f_HalfTurnTimer == HALF_TURN_HIDE_SOUND_RADIUS) {
         PlaySoundWithEffects(SOUND_PROMPT_OPEN, WIPE_SOUND_CHANNEL,
-            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
+            WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, SOUND_FULL_SCALE);
       }
     } else {
       f_HalfTurnState = HALF_TURN_STATE_DONE;

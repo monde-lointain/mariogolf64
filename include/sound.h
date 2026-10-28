@@ -7,6 +7,12 @@
 #define SOUND_CHANNEL_COUNT 16
 
 /*
+ * The largest volume or pan scale: libmus keeps a sound's own value at 0x80,
+ * and nearly all of it at this
+ */
+#define SOUND_FULL_SCALE 0x7F
+
+/*
  * The sound effects that PlaySound and PlaySoundWithEffects play. Many play
  * in more than one place; each is named for one use, and the comments name
  * the others.

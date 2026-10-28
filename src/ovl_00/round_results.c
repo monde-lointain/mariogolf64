@@ -57,7 +57,6 @@ enum UnlockNoticeKind {
 #define RESULTS_DIGIT_WIDTH 8
 #define RESULTS_DIGIT_HEIGHT 12
 
-#define TALLY_DONE_SOUND_VOLUME 127
 /* f_TallySpeed while A is held */
 #define FAST_TALLY_SPEED 10
 #define CONFIRM_SOUND_CHANNEL 15
@@ -137,7 +136,6 @@ enum PortraitAnimation {
 #define NOTICE_SHINE_SOUND 0x43
 #define NOTICE_SHINE_SOUND_CHANNEL 14
 #define NOTICE_SHINE_SOUND_VOLUME 63
-#define NOTICE_SOUND_PAN_CENTRE 127
 #define RESULTS_LABEL_SCORE 2
 #define RESULTS_LABEL_POINTS 5
 #define MESSAGE_POINTS_TO_NEXT_COURSE 0x46
@@ -893,7 +891,7 @@ void StartPortraitAnimation(s32 animation, s32 playerIndex) {
 void PlayTallySound(void) {
   f_TallySoundCount++;
   if (f_TallySpeed != 1 || !(f_TallySoundCount & 3)) {
-    PlaySound(SOUND_TICK, g_NextSoundChannel, 0x7F);
+    PlaySound(SOUND_TICK, g_NextSoundChannel, SOUND_FULL_SCALE);
   }
 }
 
@@ -1286,7 +1284,6 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_PAN_RANGE 126
 #define NOTICE_CHEER_SOUND 0x9D
 #define NOTICE_CHEER_SOUND_CHANNEL 3
-#define NOTICE_CHEER_SOUND_VOLUME 127
 #define NOTICE_SOUND_PAN_RIGHT 255
 
 #ifdef NON_MATCHING
@@ -1396,14 +1393,13 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
       G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   if (f_NoticeFrameCount == NOTICE_SHINE_START) {
     PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL,
-        NOTICE_SHINE_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_CENTRE);
+        NOTICE_SHINE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
   }
 
   if (f_NoticeFrameCount == 2) {
     PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL,
         NOTICE_SWING_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_RIGHT);
-    PlaySound(NOTICE_CHEER_SOUND, NOTICE_CHEER_SOUND_CHANNEL,
-        NOTICE_CHEER_SOUND_VOLUME);
+    PlaySound(NOTICE_CHEER_SOUND, NOTICE_CHEER_SOUND_CHANNEL, SOUND_FULL_SCALE);
   }
 
   /* The swing sound follows the notice across the screen */
@@ -1504,7 +1500,6 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CHARACTER_VOICE_FRAME 14
 #define NOTICE_CHARACTER_VOICE_SLOT 1
 #define NOTICE_CHARACTER_VOICE 20
-#define NOTICE_CHARACTER_VOICE_VOLUME 127
 
 #ifdef NON_MATCHING
 /* The notice that a character has been beaten: their nameplate, face and title
@@ -1630,18 +1625,17 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
       PlayCharacterSound(f_PortraitCharacterIndex, NOTICE_CHARACTER_VOICE_SLOT,
-          NOTICE_CHARACTER_VOICE, NOTICE_CHARACTER_VOICE_VOLUME,
-          NOTICE_SOUND_PAN_CENTRE);
+          NOTICE_CHARACTER_VOICE, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
     }
 
     if (f_NoticeTime == NOTICE_SHINE_START) {
       PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL,
-          NOTICE_SHINE_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_CENTRE);
+          NOTICE_SHINE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
     }
 
     if (f_NoticeTime == 2) {
       PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL,
-          NOTICE_SWING_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_CENTRE);
+          NOTICE_SWING_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
     }
 
     if (f_NoticeTime >= NOTICE_SHINE_START) {
@@ -2167,7 +2161,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           if (record->roundCount <= 0 ||
               record->bestScore >= f_PlayerResults[0]) {
             PlaySound(SOUND_NEW_BEST_SCORE, NEW_BEST_SCORE_SOUND_CHANNEL,
-                TALLY_DONE_SOUND_VOLUME);
+                SOUND_FULL_SCALE);
           }
 
           f_IsAwaitingConfirm = TRUE;
@@ -2188,7 +2182,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             if (f_PlayerRanks[0] == 1) {
               StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
               PlayCharacterSound((s8)g_Players[0].characterIndex, 0,
-                  CHARACTER_SOUND_WIN, TALLY_DONE_SOUND_VOLUME, WIN_SOUND_PAN);
+                  CHARACTER_SOUND_WIN, SOUND_FULL_SCALE, WIN_SOUND_PAN);
             }
           }
 
@@ -2209,8 +2203,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
               *points = 0;
               f_ResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
               if (f_TournamentOpenCourseCount < COURSE_COUNT) {
-                PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel,
-                    TALLY_DONE_SOUND_VOLUME);
+                PlaySound(
+                    SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
               }
 
               break;
@@ -2228,8 +2222,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
               *points = 0;
               f_IsAwaitingConfirm = TRUE;
               if (f_TournamentOpenCourseCount < COURSE_COUNT) {
-                PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel,
-                    TALLY_DONE_SOUND_VOLUME);
+                PlaySound(
+                    SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
               }
             }
           }
@@ -2298,8 +2292,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           }
 
           if (f_PointsEarned == 0) {
-            PlaySound(
-                SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
             f_ResultsUnk78 = TOURNAMENT_STEP_POINTS_TALLIED;
             f_IsAwaitingConfirm = TRUE;
           }
@@ -2514,8 +2507,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
 
           if (f_PointsEarned == 0) {
             f_ResultsUnk7C = 0;
-            PlaySound(
-                SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
             f_ResultsUnk78 = POINTS_STEP_TALLIED;
             f_IsAwaitingConfirm = TRUE;
           }
@@ -2671,8 +2663,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
 
           if (f_PointsEarned == 0) {
             f_ResultsUnk78 = MATCH_STEP_TALLIED;
-            PlaySound(
-                SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
           break;

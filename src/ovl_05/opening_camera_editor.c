@@ -839,7 +839,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
 #define SECOND_EDITOR_PAD 2
 
 #define EDITOR_SOUND_CHANNEL 15
-#define EDITOR_SOUND_VOLUME 127
 #define EDITOR_CHOICE_SOUND 8
 #define SNAPSHOT_CURSOR_SOUND 0x5B
 #define SNAPSHOT_SAVE_SOUND 0x62
@@ -970,7 +969,7 @@ void EditOpeningCamera(void) {
   PrintDebugText(
       ">", EDITOR_MENU_COLUMN, EDITOR_MENU_FIRST_ROW + f_EditorChoice);
   if (g_ControllerStates[EDITOR_PAD].pressedButtons & D_JPAD) {
-    PlaySound(EDITOR_CHOICE_SOUND, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    PlaySound(EDITOR_CHOICE_SOUND, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
     f_EditorChoice++;
     if (f_EditorChoice >= EDITOR_CHOICE_COUNT) {
       f_EditorChoice = 0;
@@ -978,7 +977,7 @@ void EditOpeningCamera(void) {
   }
 
   if (g_ControllerStates[EDITOR_PAD].pressedButtons & U_JPAD) {
-    PlaySound(EDITOR_CHOICE_SOUND, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    PlaySound(EDITOR_CHOICE_SOUND, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
     f_EditorChoice--;
     if (f_EditorChoice < 0) {
       f_EditorChoice = EDITOR_CHOICE_COUNT - 1;
@@ -1238,7 +1237,7 @@ void EditOpeningCamera(void) {
   /* The control pad chooses a snapshot while the stick is at rest */
   if ((g_ControllerStates[EDITOR_PAD].repeatedButtons & R_JPAD) &&
       *(u16*)&g_ControllerStates[EDITOR_PAD].stickX == 0) {
-    PlaySound(SNAPSHOT_CURSOR_SOUND, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    PlaySound(SNAPSHOT_CURSOR_SOUND, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
     f_SnapshotIndex++;
     if (f_SnapshotIndex >= SNAPSHOT_COUNT) {
       f_SnapshotIndex = 0;
@@ -1247,7 +1246,7 @@ void EditOpeningCamera(void) {
 
   if ((g_ControllerStates[EDITOR_PAD].repeatedButtons & L_JPAD) &&
       *(u16*)&g_ControllerStates[EDITOR_PAD].stickX == 0) {
-    PlaySound(SNAPSHOT_CURSOR_SOUND, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    PlaySound(SNAPSHOT_CURSOR_SOUND, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
     f_SnapshotIndex--;
     if (f_SnapshotIndex < 0) {
       f_SnapshotIndex = SNAPSHOT_COUNT - 1;
@@ -1259,9 +1258,9 @@ void EditOpeningCamera(void) {
   if (g_ControllerStates[EDITOR_PAD].pressedButtons & A_BUTTON) {
     if (f_IsSnapshotSaved[f_SnapshotIndex] &&
         !(g_ControllerStates[EDITOR_PAD].buttons & START_BUTTON)) {
-      PlaySound(SOUND_MENU_BLOCKED, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_BLOCKED, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else {
-      PlaySound(SNAPSHOT_SAVE_SOUND, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SNAPSHOT_SAVE_SOUND, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
       f_IsSnapshotSaved[f_SnapshotIndex] = TRUE;
       f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_LOOK_AT][0] =
           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0];
@@ -1281,7 +1280,7 @@ void EditOpeningCamera(void) {
   if ((g_ControllerStates[EDITOR_PAD].pressedButtons & B_BUTTON) &&
       !(g_ControllerStates[EDITOR_PAD].buttons & START_BUTTON)) {
     if (f_IsSnapshotSaved[f_SnapshotIndex]) {
-      PlaySound(SNAPSHOT_LOAD_SOUND, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SNAPSHOT_LOAD_SOUND, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] =
           f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_LOOK_AT][0];
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] =
@@ -1295,17 +1294,17 @@ void EditOpeningCamera(void) {
       g_CameraEditor.points[EDITOR_POINT_EYE][2] =
           f_CameraSnapshots[f_SnapshotIndex][SNAPSHOT_EYE][2];
     } else {
-      PlaySound(SOUND_MENU_BLOCKED, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_BLOCKED, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
   }
 
   if ((g_ControllerStates[EDITOR_PAD].buttons & START_BUTTON) &&
       (g_ControllerStates[EDITOR_PAD].pressedButtons & B_BUTTON)) {
     if (f_IsSnapshotSaved[f_SnapshotIndex]) {
-      PlaySound(SNAPSHOT_LOAD_SOUND, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SNAPSHOT_LOAD_SOUND, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
       f_IsSnapshotSaved[f_SnapshotIndex] = FALSE;
     } else {
-      PlaySound(SOUND_MENU_BLOCKED, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_BLOCKED, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
   }
 

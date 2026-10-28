@@ -56,7 +56,6 @@ enum HoleCreatureKind {
 #define MONKEY_SOUND 0x2C
 #define SOUND_CHANNEL 15
 #define SPLASH_SOUND_VOLUME 0x5A
-#define MONKEY_SOUND_VOLUME 0x7F
 
 /* The monkey is drawn as two halves, each loaded as one texture */
 #define MONKEY_HALF_IMAGE_SIZE 0x1000
@@ -389,7 +388,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         case MONKEY_LAST_FRAME:
           OpenEncodedAsset(f_MonkeyFrameAssets[3], &asset);
           ReadEncodedAsset(f_MonkeyImage, &asset);
-          PlaySound(MONKEY_SOUND, SOUND_CHANNEL, MONKEY_SOUND_VOLUME);
+          PlaySound(MONKEY_SOUND, SOUND_CHANNEL, SOUND_FULL_SCALE);
           break;
       }
 

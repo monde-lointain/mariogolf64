@@ -301,7 +301,7 @@ void func_8021F79C_ovl_01(void) {
         }
       } else if (g_MenuPressedButtons & B_BUTTON) {
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
         for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
@@ -1324,7 +1324,7 @@ void func_8022209C_ovl_01(void) {
         }
 
         D_80230B4D_ovl_01 = FALSE;
-        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
@@ -1415,7 +1415,7 @@ void func_8022209C_ovl_01(void) {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       }
     } else if (g_MenuPressedButtons & B_BUTTON) {
-      PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+      PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       if (memory->savedGameTurn != 0) {
         memory->savedGameTurn = 0;
       }
@@ -1461,7 +1461,7 @@ void func_8022209C_ovl_01(void) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
 
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         memory->savedGameIndex++;
         if (memory->savedGameIndex >= SAVED_GAME_COUNT) {
           memory->savedGameIndex = 0;

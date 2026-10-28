@@ -445,7 +445,7 @@ void func_80217D20_ovl_01(void) {
   }
 
   if (g_MenuPressedButtons & B_BUTTON) {
-    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     D_8022BE88_ovl_01 = BET_PHASE_CANCELLED;
     D_802303A0_ovl_01 = 0;
     SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
@@ -823,7 +823,7 @@ s32 func_80219948_ovl_01(void) {
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_CHOOSING) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
       D_8023BFD0_ovl_01 = PLAYER_OPTION_SLIDE_START;
       D_802303A1_ovl_01 = 0;
@@ -832,7 +832,7 @@ s32 func_80219948_ovl_01(void) {
     }
 
     if (g_MenuPressedButtons & B_BUTTON) {
-      PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+      PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       g_MenuScreen = MENU_SCREEN_UNK22;
       SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
       D_802303A1_ovl_01 = 0;
@@ -1765,7 +1765,7 @@ void func_8021D0B8_ovl_01(void) {
         }
       } else if (g_MenuPressedButtons & B_BUTTON) {
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {

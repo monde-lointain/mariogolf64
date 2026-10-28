@@ -44,7 +44,6 @@
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E
-#define INSET_VIEW_SOUND_PAN 0x7F
 
 /* Steps that the inset view takes to open or close fully */
 #define INSET_VIEW_STEP_COUNT 8
@@ -2557,8 +2556,7 @@ void UpdateInsetView(void) {
   if (*animation == INSET_VIEW_OPENING) {
     if (g_InsetView.step == 1) {
       PlaySoundWithEffects(SOUND_PROMPT_OPEN, g_NextSoundChannel,
-          INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
-          INSET_VIEW_SOUND_PAN);
+          INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB, SOUND_FULL_SCALE);
     }
 
     g_Cameras[INSET_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
@@ -2570,8 +2568,7 @@ void UpdateInsetView(void) {
   } else if (*animation == INSET_VIEW_CLOSING) {
     if (g_InsetView.step == INSET_VIEW_STEP_COUNT - 1) {
       PlaySoundWithEffects(SOUND_PROMPT_CLOSE, g_NextSoundChannel,
-          INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
-          INSET_VIEW_SOUND_PAN);
+          INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB, SOUND_FULL_SCALE);
     }
 
     g_InsetView.step--;

@@ -30,7 +30,6 @@
 /* Reaction sounds take turns on the channels from the first up to the last */
 #define FIRST_REACTION_CHANNEL 4
 #define LAST_REACTION_CHANNEL 7
-#define REACTION_SOUND_VOLUME 0x7F
 #define NO_REACTION_SOUND -1
 
 /* Course units in a world unit */
@@ -255,7 +254,7 @@ void TurnOffReactionLight(void) {
 /* Plays the sound if this is the frame after the given one */
 void CueReactionSound(s32 frame, s32 soundId) {
   if (soundId != NO_REACTION_SOUND && f_ReactionFrame - 1 == frame) {
-    PlaySound(soundId, f_ReactionChannel, REACTION_SOUND_VOLUME);
+    PlaySound(soundId, f_ReactionChannel, SOUND_FULL_SCALE);
     f_ReactionChannel++;
     if (f_ReactionChannel > LAST_REACTION_CHANNEL) {
       f_ReactionChannel = FIRST_REACTION_CHANNEL;

@@ -1322,7 +1322,7 @@ s32 UpdateDebugSceneMenu(void) {
     f_IsSceneMenuOpen = FALSE;
     f_SceneMenuBox.state = BOX_CLOSING;
     f_SceneMenuBox.frameIndex = 0;
-    PlaySound(0x5F, 15, 127);
+    PlaySound(0x5F, 15, SOUND_FULL_SCALE);
     return;
   }
 
@@ -1346,13 +1346,13 @@ s32 UpdateDebugSceneMenu(void) {
   if (g_MenuControllerData[0].button & U_JPAD) {
     selectedIndex = (selectedIndex + SCENE_MENU_LENGTH - 1) % SCENE_MENU_LENGTH;
     f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
-    PlaySound(0x5C, 15, 127);
+    PlaySound(0x5C, 15, SOUND_FULL_SCALE);
   }
 
   if (g_MenuControllerData[0].button & D_JPAD) {
     selectedIndex = (selectedIndex + SCENE_MENU_LENGTH + 1) % SCENE_MENU_LENGTH;
     f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
-    PlaySound(0x5C, 15, 127);
+    PlaySound(0x5C, 15, SOUND_FULL_SCALE);
   }
 
   if (g_MenuControllerData[0].button & A_BUTTON) {
@@ -1361,7 +1361,7 @@ s32 UpdateDebugSceneMenu(void) {
     f_SceneMenuBox.state = BOX_CLOSING;
     f_SceneMenuBox.frameIndex = 0;
     g_Scene = f_SceneMenuSelection;
-    PlaySound(0x5D, 15, 127);
+    PlaySound(0x5D, 15, SOUND_FULL_SCALE);
     if (f_SceneMenuSelection == SCENE_MENU) {
       func_8005D9A0();
     } else {
@@ -1517,7 +1517,7 @@ void UpdateDebugScenes(void) {
       f_SceneMenuBox.state = BOX_OPENING;
       f_SceneMenuBox.frameIndex = 0;
       QueueAnimatedBox(&f_SceneMenuBox);
-      PlaySound(0x66, 15, 127);
+      PlaySound(0x66, 15, SOUND_FULL_SCALE);
       MarkBillboardsOnMap();
       return;
     }

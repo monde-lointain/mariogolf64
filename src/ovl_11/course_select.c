@@ -49,7 +49,6 @@ enum PlanksState {
 };
 
 #define MENU_SOUND_CHANNEL 15
-#define MENU_SOUND_VOLUME 127
 
 /* Each four stars open one more Ring Shot course */
 #define STARS_PER_OPENED_COURSE 4
@@ -446,7 +445,7 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     if (pressedButtons & B_BUTTON) {
       result = SELECT_BACK;
     } else if ((repeatedButtons & U_JPAD) && openCourseCount >= 2) {
-      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       result = SELECT_MOVED;
       memory->holeIndex = 0;
       memory->courseIndex--;
@@ -454,7 +453,7 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
       f_CourseTurnIndex = 1;
       f_PressedDirection = DIRECTION_UP;
     } else if ((repeatedButtons & D_JPAD) && openCourseCount >= 2) {
-      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       result = SELECT_MOVED;
       memory->holeIndex = 0;
       memory->courseIndex++;
@@ -462,12 +461,12 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
       f_CourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
       f_PressedDirection = DIRECTION_DOWN;
     } else if (repeatedButtons & L_JPAD) {
-      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       result = SELECT_MOVED;
       memory->holeIndex--;
       f_PressedDirection = DIRECTION_LEFT;
     } else if (repeatedButtons & R_JPAD) {
-      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       result = SELECT_MOVED;
       memory->holeIndex++;
       f_PressedDirection = DIRECTION_RIGHT;
@@ -524,24 +523,24 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
   if (f_CourseTurnStep == 0) {
     if (repeatedButtons & L_JPAD) {
       if (!IsOnDrivingRange()) {
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         result = SELECT_MOVED;
         f_PressedDirection = DIRECTION_LEFT;
         g_GameState.holeIndex--;
       } else {
-        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       }
     } else if (repeatedButtons & R_JPAD) {
       if (IsOnDrivingRange()) {
-        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       } else {
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         result = SELECT_MOVED;
         f_PressedDirection = DIRECTION_RIGHT;
         g_GameState.holeIndex++;
       }
     } else if (repeatedButtons & U_JPAD) {
-      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       g_GameState.courseIndex =
           (g_GameState.courseIndex + COURSE_INDEX_COUNT - 1) %
           COURSE_INDEX_COUNT;
@@ -562,7 +561,7 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
       f_CourseTurnStep = 1;
       f_CourseTurnIndex = 1;
     } else if (repeatedButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       g_GameState.courseIndex =
           (g_GameState.courseIndex + COURSE_INDEX_COUNT + 1) %
           COURSE_INDEX_COUNT;

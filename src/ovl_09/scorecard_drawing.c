@@ -493,7 +493,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_TotalFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat);
 
-#define MATCH_SOUND_PAN 0x7F
 /* SetTextSlot messages */
 #define WINS_NEEDED_MESSAGE 1 /* Shows SetTextSlotValue's count */
 /* Shown instead of a count of one when the match can be drawn */
@@ -616,7 +615,7 @@ void DrawMatchPage(Gfx** displayListHead) {
       g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED &&
       (halvedCount & 1) == ((GetRoundHoleCount() - 1) & 1)) {
     PlaySoundWithEffects(SOUND_LOOK_BACK, TALLY_SOUND_CHANNEL,
-        SCORECARD_SOUND_VOLUME, 0, MATCH_SOUND_PAN);
+        SCORECARD_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
   }
 
   /* An even count of holes to share out can end level */

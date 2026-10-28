@@ -14,6 +14,7 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "screen.h"
+#include "sound.h"
 #include "text.h"
 
 #define ASSET_HELP_BOARD_CHALKBOARD 0x833
@@ -208,7 +209,7 @@ void UpdateHelpBoard(void) {
       RevealTextSlot(HELP_TEXT_SLOT_PAGE);
     }
   } else if (g_MenuRepeatButtons & B_BUTTON) {
-    PlaySound(0x5F, 0xF, 0x7F);
+    PlaySound(0x5F, 0xF, SOUND_FULL_SCALE);
     if (f_OpenTopic <= 0) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       if (memory->unk46 == 0) {

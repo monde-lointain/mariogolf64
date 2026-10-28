@@ -64,7 +64,6 @@ extern u8 D_800C2BD5;
 #define MENU_SOUND_CHANNEL 15
 #define MENU_VOLUME_SOFT 80
 #define MENU_VOLUME_MEDIUM 100
-#define MENU_VOLUME_FULL 127
 
 /* The choices that the menus remember */
 typedef struct MenuChoices {

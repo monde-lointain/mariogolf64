@@ -216,7 +216,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define CONTACT_DROP_PER_PIN_SCALE 0.3f
 #define CONTACT_SOUND_CHANNEL 2
 #define CONTACT_STYLE_SOUND_CHANNEL 15
-#define CONTACT_SOUND_VOLUME 127
 #define CONTACT_PUTT_Y -2
 /* The banner that shows "+N", which BANNER_STROKES_OVER_PAR + N starts */
 #define BANNER_OVER_PAR_NUMBER (BANNER_STROKES_OVER_PAR + 1)
@@ -261,7 +260,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define TOAD_SWING_LEFT_FRAME 8
 #define TOAD_SWING_RIGHT_FRAME 2
 #define FLAG_SWISH_SOUND_CHANNEL 15
-#define FLAG_SWISH_SOUND_VOLUME 127
 #define FLAG_SWISH_LEFT_PAN 16
 #define FLAG_SWISH_RIGHT_PAN 239
 #define FLAG_SWISH_PITCH 12.0f
@@ -297,7 +295,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define LAKITU_RED_LIGHT_DRAW 50
 #define LAKITU_SECOND_RED_LIGHT_DRAW 80
 #define LAKITU_GO_LIGHT_DRAW 110
-#define START_LIGHT_SOUND_VOLUME 127
 #define ASSET_MONTY_MOLE_MOVIE_PALETTE 0x914
 #define ASSET_GOOMBA_MOVIE_PALETTE 0x91F
 #define ASSET_DRIVE_RECORD_TEXT 0x55E
@@ -316,7 +313,6 @@ extern Vtx f_FlipMessageBoardVertices[4];
 #define MOVIE_SOUND_CHANNEL 2
 #define MOVIE_SOUND_VOLUME 100
 #define MOVIE_SOUND_REVERB 10
-#define MOVIE_SOUND_PAN 127
 
 #define MONTY_MOLE_FRAME_COUNT 17
 /* Each frame is drawn in strips, as a frame is too big to load at once */
@@ -1200,15 +1196,12 @@ void DrawMovie(Gfx** displayListHead) {
 #define CONTEST_CHEER_DRAW 26
 #define CHARACTER_SOUND_LONGEST_DRIVE 16
 #define CHARACTER_SOUND_NEAREST_PIN 18
-#define CHARACTER_SOUND_VOLUME 127
-#define CHARACTER_SOUND_PAN 127
 /* The face appears and vanishes over these frames, counted from
  * CONTEST_MEET_DRAW */
 #define WINNER_FIRST_FRAME 1
 #define WINNER_LAST_FRAME 32
 #define WINNER_SOUND_VOLUME 63
 #define WINNER_SOUND_REVERB 30
-#define WINNER_SOUND_PAN 127
 /* The face's later frames, which g_CharacterImageAssets lists after its first
  */
 #define WINNER_BLINK_FRAME 8
@@ -1256,12 +1249,12 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
   if (f_MovieDrawCount == CONTEST_CHEER_DRAW) {
     if (f_CurrentMovie == MOVIE_LONGEST_DRIVE) {
       PlayCharacterSound((s8)g_Players[GetContestWinner()].characterIndex,
-          GetContestWinner(), CHARACTER_SOUND_LONGEST_DRIVE,
-          CHARACTER_SOUND_VOLUME, CHARACTER_SOUND_PAN);
+          GetContestWinner(), CHARACTER_SOUND_LONGEST_DRIVE, SOUND_FULL_SCALE,
+          SOUND_FULL_SCALE);
     } else {
       PlayCharacterSound((s8)g_Players[GetContestWinner()].characterIndex,
-          GetContestWinner(), CHARACTER_SOUND_NEAREST_PIN,
-          CHARACTER_SOUND_VOLUME, CHARACTER_SOUND_PAN);
+          GetContestWinner(), CHARACTER_SOUND_NEAREST_PIN, SOUND_FULL_SCALE,
+          SOUND_FULL_SCALE);
     }
   }
 
@@ -1368,12 +1361,12 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
 
     if (frame == WINNER_FIRST_FRAME) {
       PlaySoundWithEffects(SOUND_READY, g_NextSoundChannel, WINNER_SOUND_VOLUME,
-          WINNER_SOUND_REVERB, WINNER_SOUND_PAN);
+          WINNER_SOUND_REVERB, SOUND_FULL_SCALE);
     }
 
     if (frame == WINNER_SHRINK_FRAME) {
       PlaySoundWithEffects(SOUND_GO, g_NextSoundChannel, WINNER_SOUND_VOLUME,
-          WINNER_SOUND_REVERB, WINNER_SOUND_PAN);
+          WINNER_SOUND_REVERB, SOUND_FULL_SCALE);
     }
 
     if (frame >= WINNER_SHRINK_FRAME) {
@@ -1446,7 +1439,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
       f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1];
   if (f_MovieDrawCount == CAPTION_MEET_DRAW + 1) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, CAPTION_SOUND_CHANNEL,
-        CAPTION_SOUND_VOLUME, 0, MOVIE_SOUND_PAN);
+        CAPTION_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
   }
 
   stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
@@ -1567,7 +1560,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
       ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
   if (f_MovieDrawCount == CAPTION_MEET_DRAW + 1) {
     PlaySoundWithEffects(SOUND_CAPTION_MEET, CAPTION_SOUND_CHANNEL,
-        CAPTION_SOUND_VOLUME, 0, MOVIE_SOUND_PAN);
+        CAPTION_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
   }
 
   if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
@@ -1683,12 +1676,12 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
   alpha = 255;
   if (f_MovieDrawCount == READY_SOUND_DRAW) {
     PlaySoundWithEffects(SOUND_READY, g_NextSoundChannel, READY_GO_SOUND_VOLUME,
-        READY_GO_SOUND_REVERB, MOVIE_SOUND_PAN);
+        READY_GO_SOUND_REVERB, SOUND_FULL_SCALE);
   }
 
   if (f_MovieDrawCount == GO_GROW_DRAW) {
     PlaySoundWithEffects(SOUND_GO, g_NextSoundChannel, READY_GO_SOUND_VOLUME,
-        READY_GO_SOUND_REVERB, MOVIE_SOUND_PAN);
+        READY_GO_SOUND_REVERB, SOUND_FULL_SCALE);
   }
 
   scale[0] = 1.0f;
@@ -1840,7 +1833,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
       stripHeight;
   if (f_MovieDrawCount == SHRINKING_IMAGE_SOUND_DRAW) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, SHRINKING_IMAGE_SOUND_CHANNEL,
-        SHRINKING_IMAGE_SOUND_VOLUME, 0, MOVIE_SOUND_PAN);
+        SHRINKING_IMAGE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
   }
 
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
@@ -1908,7 +1901,7 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
 
   if (f_MovieDrawCount == 1) {
     PlaySoundWithEffects(SOUND_GOOMBA, MOVIE_SOUND_CHANNEL, MOVIE_SOUND_VOLUME,
-        MOVIE_SOUND_REVERB, MOVIE_SOUND_PAN);
+        MOVIE_SOUND_REVERB, SOUND_FULL_SCALE);
   }
 
   gSPDisplayList(gfx++, f_MovieSetupDisplayList);
@@ -1957,7 +1950,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
 
   if (f_MovieDrawCount == 1) {
     PlaySoundWithEffects(SOUND_GOOMBA, MOVIE_SOUND_CHANNEL, MOVIE_SOUND_VOLUME,
-        MOVIE_SOUND_REVERB, MOVIE_SOUND_PAN);
+        MOVIE_SOUND_REVERB, SOUND_FULL_SCALE);
   }
 
   gSPDisplayList(gfx++, f_MovieSetupDisplayList);
@@ -2005,18 +1998,15 @@ void DrawLakituMovie(Gfx** displayListHead) {
   s32 offset;
 
   if (f_MovieDrawCount == LAKITU_RED_LIGHT_DRAW) {
-    PlaySound(
-        SOUND_START_LIGHT_RED, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
+    PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, SOUND_FULL_SCALE);
   }
 
   if (f_MovieDrawCount == LAKITU_SECOND_RED_LIGHT_DRAW) {
-    PlaySound(
-        SOUND_START_LIGHT_RED, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
+    PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, SOUND_FULL_SCALE);
   }
 
   if (f_MovieDrawCount == LAKITU_GO_LIGHT_DRAW) {
-    PlaySound(
-        SOUND_START_LIGHT_GO, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
+    PlaySound(SOUND_START_LIGHT_GO, g_NextSoundChannel, SOUND_FULL_SCALE);
   }
 
   if (f_MovieDrawCount < LAKITU_ARRIVE_DRAW) {
@@ -2106,13 +2096,13 @@ void DrawToadMovie(Gfx** displayListHead) {
     f_MovieFrame = (f_MovieFrame + 1) % TOAD_FRAME_COUNT;
     if (f_MovieFrame == TOAD_SWING_LEFT_FRAME) {
       PlaySoundWithEffects(SOUND_FLAG_SWISH, FLAG_SWISH_SOUND_CHANNEL,
-          FLAG_SWISH_SOUND_VOLUME, MOVIE_SOUND_REVERB, FLAG_SWISH_LEFT_PAN);
+          SOUND_FULL_SCALE, MOVIE_SOUND_REVERB, FLAG_SWISH_LEFT_PAN);
       SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
     }
 
     if (f_MovieFrame == TOAD_SWING_RIGHT_FRAME) {
       PlaySoundWithEffects(SOUND_FLAG_SWISH, FLAG_SWISH_SOUND_CHANNEL,
-          FLAG_SWISH_SOUND_VOLUME, MOVIE_SOUND_REVERB, FLAG_SWISH_RIGHT_PAN);
+          SOUND_FULL_SCALE, MOVIE_SOUND_REVERB, FLAG_SWISH_RIGHT_PAN);
       SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
     }
 
@@ -2125,7 +2115,7 @@ void DrawToadMovie(Gfx** displayListHead) {
 
   if (f_MovieDrawCount == OUT_OF_BOUNDS_SOUND_DRAW) {
     PlaySoundWithEffects(SOUND_OUT_OF_BOUNDS, OUT_OF_BOUNDS_SOUND_CHANNEL,
-        MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB, MOVIE_SOUND_PAN);
+        MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB, SOUND_FULL_SCALE);
   }
 
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
@@ -2274,8 +2264,7 @@ void StartContactEffect(s32 effect) {
       f_ContactVertices[1].v.ob[0] = 20;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0xD6;
-      PlaySound(
-          SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+      PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_SHOT) {
       f_ContactVertices[0].v.ob[0] = -10;
       f_ContactVertices[1].v.ob[0] = 10;
@@ -2295,43 +2284,41 @@ void StartContactEffect(s32 effect) {
       f_ContactVertices[1].v.ob[0] = 120;
       f_ContactTextureS = 0x5FF;
       f_ContactTextureT = 0x7FF;
-      PlaySound(SOUND_CONTACT_WARIO, CONTACT_STYLE_SOUND_CHANNEL,
-          CONTACT_SOUND_VOLUME);
+      PlaySound(
+          SOUND_CONTACT_WARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
       f_ContactVertices[0].v.ob[0] = -60;
       f_ContactVertices[1].v.ob[0] = 60;
       f_ContactTextureS = 0x7FF;
       f_ContactTextureT = 0;
       PlaySound(SOUND_CONTACT_HEAVY_HITTER, CONTACT_STYLE_SOUND_CHANNEL,
-          CONTACT_SOUND_VOLUME);
+          SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
       f_ContactVertices[0].v.ob[0] = -20;
       f_ContactVertices[1].v.ob[0] = 20;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0x54;
-      PlaySound(SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL,
-          CONTACT_SOUND_VOLUME);
+      PlaySound(
+          SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
       f_ContactVertices[0].v.ob[0] = -160;
       f_ContactVertices[1].v.ob[0] = 160;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0x2A;
-      PlaySound(SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL,
-          CONTACT_SOUND_VOLUME);
+      PlaySound(
+          SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
       f_ContactVertices[0].v.ob[0] = -30;
       f_ContactVertices[1].v.ob[0] = 30;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0x2A;
-      PlaySound(
-          SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+      PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else {
       f_ContactVertices[0].v.ob[0] = -20;
       f_ContactVertices[1].v.ob[0] = 20;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0x2A;
-      PlaySound(
-          SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+      PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
   }
 }

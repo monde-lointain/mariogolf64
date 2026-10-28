@@ -59,7 +59,6 @@ enum SaveMenuState {
 #define MENU_SOUND_CHANNEL 15
 #define MENU_SOUND_VOLUME 0x64
 #define MENU_SOUND_REVERB 0x14
-#define CONTROLS_SOUND_PAN 0x7F
 
 /* The frames that a slide takes, and the frame of its sound */
 #define SLIDE_FRAMES 14
@@ -77,7 +76,6 @@ enum SaveMenuState {
 /* Albatross, Hole in One, Eagle, Birdie, Par and Chip In */
 #define REPLAY_LABEL_COUNT 6
 
-#define FULL_SONG_VOLUME 0x7F
 /* How loud the song plays behind the saved games */
 #define SAVE_MENU_SONG_VOLUME 0x60
 #define SAVE_MENU_SOUND_PAN 0xFF
@@ -528,7 +526,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", OpenSaveMenu);
 void CloseSaveMenu(void) {
   s32 index;
 
-  SetSongVolume(FULL_SONG_VOLUME);
+  SetSongVolume(SOUND_FULL_SCALE);
   FreeMemory(&f_PanelImage);
   FreeMemory(&f_SaveMenuTitleImage);
   if (f_MenuKind == SAVE_MENU_GAMES) {
@@ -1807,7 +1805,7 @@ void UpdateControlsScreen(ControllerState* controller) {
 
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_CONTROLS_OPEN, g_NextSoundChannel,
-            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, CONTROLS_SOUND_PAN);
+            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, SOUND_FULL_SCALE);
       }
 
       if (f_StateFrame == SLIDE_FRAMES) {
@@ -1832,7 +1830,7 @@ void UpdateControlsScreen(ControllerState* controller) {
 
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_CONTROLS_CLOSE, g_NextSoundChannel,
-            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, CONTROLS_SOUND_PAN);
+            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, SOUND_FULL_SCALE);
       }
 
       if (f_StateFrame == SLIDE_FRAMES) {

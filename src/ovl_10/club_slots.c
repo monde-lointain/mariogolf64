@@ -154,7 +154,6 @@
 #define CONTROLLER_INDEX_UNK4 4
 
 #define REEL_CLICK_CHANNEL 13
-#define CLUB_SLOTS_SOUND_VOLUME 127
 /* Each stopping reel's sound pans this much further right */
 #define REEL_STOP_PAN_STEP 127
 
@@ -359,7 +358,7 @@ void LoadClubSlots(void) {
   f_Slots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
   f_Slots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
   f_Slots->shadeVertices[6].v.cn[3] = SHADE_ALPHA;
-  PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+  PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
 }
 
 void FreeClubSlots(void) {
@@ -435,7 +434,7 @@ void GiveSlotClubs(s32 playerIndex) {
       player->clubs[slot] = (clubSet * CLUB_SET_SIZE) + slot;
     }
 
-    PlaySound(SOUND_THREE_STARS, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+    PlaySound(SOUND_THREE_STARS, g_NextSoundChannel, SOUND_FULL_SCALE);
   }
 }
 
@@ -469,8 +468,7 @@ s32 UpdateClubSlots(void) {
       if (++f_StateTime == CLUB_SLOTS_STATE_TIME) {
         f_StateTime = 0;
         f_ClubSlotsState = CLUB_SLOTS_SPEEDING;
-        PlaySound(
-            SOUND_PROMPT_OPEN, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+        PlaySound(SOUND_PROMPT_OPEN, g_NextSoundChannel, SOUND_FULL_SCALE);
       }
 
       break;
@@ -494,8 +492,7 @@ s32 UpdateClubSlots(void) {
         if (IsReelStopping(controllerIndex, player)) {
           f_StopWaitTime = 0;
           PlaySoundWithEffects(SOUND_REEL_STOP, g_NextSoundChannel,
-              CLUB_SLOTS_SOUND_VOLUME, 0,
-              f_Slots->pressCount++ * REEL_STOP_PAN_STEP);
+              SOUND_FULL_SCALE, 0, f_Slots->pressCount++ * REEL_STOP_PAN_STEP);
         }
       } else if (f_Slots->stoppedReelCount == REEL_COUNT) {
         f_ClubSlotsState = CLUB_SLOTS_STOPPED;
@@ -514,8 +511,7 @@ s32 UpdateClubSlots(void) {
           f_Slots->stoppedSymbols[0] = NO_SYMBOL;
           f_Slots->stoppedSymbols[1] = NO_SYMBOL;
           f_Slots->stoppedSymbols[2] = NO_SYMBOL;
-          PlaySound(
-              SOUND_TALLY_DONE, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+          PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
         }
       }
 
@@ -642,7 +638,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   f_TickTime %= REEL_TICK_TIME;
   if (f_Slots->stoppedReelCount < REEL_COUNT && f_TickTime == 0) {
-    PlaySound(SOUND_TICK, REEL_CLICK_CHANNEL, CLUB_SLOTS_SOUND_VOLUME);
+    PlaySound(SOUND_TICK, REEL_CLICK_CHANNEL, SOUND_FULL_SCALE);
   }
 
   rotation[0] = 0;

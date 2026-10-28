@@ -24,6 +24,7 @@
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "sound.h"
 #include "variables.h"
 
 /*
@@ -134,7 +135,6 @@ extern s32 f_HudAnimation;
 #define SLICE_STRIP_HEIGHT (SLICE_HEIGHT / SLICE_STRIP_COUNT)
 #define SLICE_STRIP_WORD_COUNT (SLICE_STRIP_HEIGHT * SLICE_WIDTH / 2)
 #define SLICE_SOUND_CHANNEL 13
-#define SLICE_SOUND_VOLUME 127
 
 /* The corners of the tiles, for each of two frames */
 #define TILE_GRID_ROW_COUNT 8
@@ -2668,7 +2668,7 @@ void DrawSliceAnimation(void) {
   frame = SLICE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
   sliceCount = (frame / SLICE_FRAME_COUNT) + 1;
   if (frame % SLICE_FRAME_COUNT == 0) {
-    PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SLICE_SOUND_VOLUME);
+    PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SOUND_FULL_SCALE);
   }
 
   sliceY = 0;

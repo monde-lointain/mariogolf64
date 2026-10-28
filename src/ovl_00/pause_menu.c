@@ -32,7 +32,6 @@
 #define CHOICE_BOX_CLOUD_IMAGE_ASSET 0x71F
 
 #define ROUND_FRAMEBUFFER_COUNT 3
-#define FULL_SONG_VOLUME 0x7F
 
 /* Values of f_PauseMenuRequest, which the pause menu's drawing carries out */
 enum PauseMenuRequest {
@@ -287,7 +286,7 @@ void FreePauseMenu(void) {
     FreeMemory(&f_PauseArrowsImage);
   }
 
-  SetSongVolume(FULL_SONG_VOLUME);
+  SetSongVolume(SOUND_FULL_SCALE);
 }
 
 /* What a pause option shows beside its label, and how the cursor points at it
@@ -347,7 +346,6 @@ enum PromptId {
 };
 
 #define RING_SHOT_RETRY_SOUND_CHANNEL 3
-#define RING_SHOT_RETRY_SOUND_VOLUME 0x7F
 
 /* Where the panels of the wind and of the lie slide to while their option is
  * selected */
@@ -461,7 +459,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       case PAUSE_ACTION_RETRY_HOLE:
         if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
           PlaySound(SOUND_RING_SHOT_RETRY, RING_SHOT_RETRY_SOUND_CHANNEL,
-              RING_SHOT_RETRY_SOUND_VOLUME);
+              SOUND_FULL_SCALE);
         }
       case PAUSE_ACTION_UNK6:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);

@@ -79,7 +79,6 @@
 #define HOLE_OUT_CALL_COMPLETE 0x96
 #define HOLE_OUT_CALL_BOGEY 0x98
 #define HOLE_OUT_CALL_CHANNEL 3
-#define HOLE_OUT_CALL_VOLUME 0x7F
 /* How far the control pad tilts the stick, as GetTurnStickX and GetTurnStickY
  * read it */
 #define DPAD_STICK_TILT 40
@@ -135,7 +134,6 @@
 #define CALL_OUT_SOUND_C_DOWN 10
 #define CALL_OUT_SOUND_C_LEFT 12
 #define CALL_OUT_SOUND_C_RIGHT 14
-#define CALL_OUT_VOLUME 0x7F
 /* Every AMBIENT_SOUND_INTERVAL frames, one of the course's ambient sounds may
  * play */
 #define AMBIENT_SOUND_INTERVAL 240
@@ -2571,28 +2569,28 @@ void PlayWaitingPlayersCalls(void) {
         pressed = g_ControllerStates[controllerIndex].pressedButtons;
         if (pressed & U_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_UP, CALL_OUT_VOLUME, g_Players[i].soundPan);
+              CALL_OUT_SOUND_UP, SOUND_FULL_SCALE, g_Players[i].soundPan);
         } else if (pressed & D_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_DOWN, CALL_OUT_VOLUME, g_Players[i].soundPan);
+              CALL_OUT_SOUND_DOWN, SOUND_FULL_SCALE, g_Players[i].soundPan);
         } else if (pressed & L_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_LEFT, CALL_OUT_VOLUME, g_Players[i].soundPan);
+              CALL_OUT_SOUND_LEFT, SOUND_FULL_SCALE, g_Players[i].soundPan);
         } else if (pressed & R_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_RIGHT, CALL_OUT_VOLUME, g_Players[i].soundPan);
+              CALL_OUT_SOUND_RIGHT, SOUND_FULL_SCALE, g_Players[i].soundPan);
         } else if (pressed & U_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_C_UP, CALL_OUT_VOLUME, g_Players[i].soundPan);
+              CALL_OUT_SOUND_C_UP, SOUND_FULL_SCALE, g_Players[i].soundPan);
         } else if (pressed & D_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_C_DOWN, CALL_OUT_VOLUME, g_Players[i].soundPan);
+              CALL_OUT_SOUND_C_DOWN, SOUND_FULL_SCALE, g_Players[i].soundPan);
         } else if (pressed & L_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_C_LEFT, CALL_OUT_VOLUME, g_Players[i].soundPan);
+              CALL_OUT_SOUND_C_LEFT, SOUND_FULL_SCALE, g_Players[i].soundPan);
         } else if (pressed & R_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_C_RIGHT, CALL_OUT_VOLUME, g_Players[i].soundPan);
+              CALL_OUT_SOUND_C_RIGHT, SOUND_FULL_SCALE, g_Players[i].soundPan);
         }
       }
     }
@@ -2647,44 +2645,40 @@ void ShowHoleOutBanner(s32 playerIndex) {
 
   if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
     StartBanner(BANNER_FINISH);
-    PlaySound(
-        HOLE_OUT_CALL_FINISH, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+    PlaySound(HOLE_OUT_CALL_FINISH, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
   } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     if (AreAllRingsPassed(&g_Players[playerIndex])) {
       StartBanner(BANNER_COMPLETE);
       PlaySound(
-          HOLE_OUT_CALL_COMPLETE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+          HOLE_OUT_CALL_COMPLETE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
     }
   } else if (strokeCount == 1) {
     banner = BANNER_HOLE_IN_ONE;
     PlaySound(
-        HOLE_OUT_CALL_HOLE_IN_ONE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+        HOLE_OUT_CALL_HOLE_IN_ONE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
   } else {
     switch (scoreToPar) {
       case -1:
         banner = BANNER_BIRDIE;
         PlaySound(
-            HOLE_OUT_CALL_BIRDIE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+            HOLE_OUT_CALL_BIRDIE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case -2:
         banner = BANNER_EAGLE;
-        PlaySound(
-            HOLE_OUT_CALL_EAGLE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+        PlaySound(HOLE_OUT_CALL_EAGLE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case -3:
         banner = BANNER_ALBATROSS;
-        PlaySound(HOLE_OUT_CALL_ALBATROSS, HOLE_OUT_CALL_CHANNEL,
-            HOLE_OUT_CALL_VOLUME);
+        PlaySound(
+            HOLE_OUT_CALL_ALBATROSS, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case 0:
         banner = BANNER_PAR;
-        PlaySound(
-            HOLE_OUT_CALL_PAR, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+        PlaySound(HOLE_OUT_CALL_PAR, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case 1:
         banner = BANNER_BOGEY;
-        PlaySound(
-            HOLE_OUT_CALL_BOGEY, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+        PlaySound(HOLE_OUT_CALL_BOGEY, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case 2:
         banner = BANNER_STROKES_OVER_PAR + 2;
@@ -3389,7 +3383,7 @@ void UpdateTurns(void) {
               (g_TurnController.buttons & START_BUTTON)) {
             ForceStopRumble();
             StopSound(8);
-            PlaySound(0x66, 2, 0x7F);
+            PlaySound(0x66, 2, SOUND_FULL_SCALE);
             g_PauseScreen = 1;
             SetMenuBackdrop(2);
             RequestPauseMenu(g_Players[playerIndex].strokeCount != 0, 0);
@@ -3398,7 +3392,7 @@ void UpdateTurns(void) {
         } else if (g_PauseScreen == 1 && D_80227194_ovl_00 == 0 &&
             (g_TurnController.pressedButtons & (START_BUTTON | B_BUTTON))) {
           ForceStopRumble();
-          PlaySound(0x66, 2, 0x7F);
+          PlaySound(0x66, 2, SOUND_FULL_SCALE);
           RequestPauseMenu(0, -1);
           g_PauseScreen = 0;
           SetMenuBackdrop(-1);
@@ -4534,7 +4528,7 @@ void UpdateTurns(void) {
           switch (UpdateChoiceBox(&g_TurnController)) {
             case 5:
               EndFlightCamera();
-              PlaySound(0x8E, 3, 0x7F);
+              PlaySound(0x8E, 3, SOUND_FULL_SCALE);
               SkipNextPinDraw();
               PlacePlayersOnTee();
               nextState = 0x11;

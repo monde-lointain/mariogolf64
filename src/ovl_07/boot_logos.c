@@ -196,7 +196,7 @@ void UpdateBootLogos(void) {
       f_BootLogoFrame++;
       pressedButtons = 0;
       if (f_BootLogoFrame == NINTENDO_SOUND_FRAME) {
-        PlaySound(0x62, 0xF, 0x7F);
+        PlaySound(0x62, 0xF, SOUND_FULL_SCALE);
       }
 
       for (controllerIndex = 0; controllerIndex != g_ControllerCount;

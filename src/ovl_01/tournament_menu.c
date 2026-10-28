@@ -1175,7 +1175,7 @@ void func_80228C00_ovl_01(void) {
       D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
     }
   } else if (g_MenuRepeatButtons & B_BUTTON) {
-    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
 
     /* B first deletes the code's characters, and leaves only once the code is
      * empty */
@@ -1333,7 +1333,7 @@ void func_80229278_ovl_01(void) {
       }
     }
   } else if (pressedButtons & B_BUTTON) {
-    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     D_80230F80_ovl_01 = CLUB_CHOICE_YES;
     D_80230F70_ovl_01 = FALSE;
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {

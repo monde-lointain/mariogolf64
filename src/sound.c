@@ -23,9 +23,6 @@
 #define SOUND_COUNT 0x215
 /* Song IDs above this play the last song */
 #define LAST_SONG_ID 50
-/* The largest volume or pan scale, which keeps nearly all of the sound's own
- * value */
-#define FULL_SCALE 0x7F
 /* The echo in libmus's list of effects */
 #define ECHO_EFFECT_INDEX 5
 /* libmus's master volume for songs */
@@ -254,7 +251,7 @@ void PlaySound(s32 soundId, s32 channel, s32 volume) {
         f_SoundHandleCopies[channel] = *handle;
         MusHandleSetVolume(*handle, volume);
         MusHandleSetFreqOffset(*handle, 0.0f);
-        MusHandleSetPan(*handle, FULL_SCALE);
+        MusHandleSetPan(*handle, SOUND_FULL_SCALE);
       }
 
       if (g_NextSoundChannel == channel) {
@@ -443,7 +440,8 @@ static void UpdateCharacterSounds(void) {
   for (index = 0; index != CHARACTER_COUNT; index++) {
     if (f_PreviewSoundDelays[index] == 0) {
       PlayCharacterSound(index, index % QUEUED_CHARACTER_SOUND_COUNT,
-          f_CharacterSoundIndexes[f_DelayEditorKind], FULL_SCALE, FULL_SCALE);
+          f_CharacterSoundIndexes[f_DelayEditorKind], SOUND_FULL_SCALE,
+          SOUND_FULL_SCALE);
     }
 
     if (f_PreviewSoundDelays[index] >= 0) {

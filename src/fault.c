@@ -12,7 +12,6 @@
 #define FAULT_MESSAGE 0x10
 
 #define FAULT_SOUND_CHANNEL 11
-#define FAULT_SOUND_VOLUME 127
 
 /* Debug text rows and columns of the fault report */
 #define FAULT_TITLE_ROW 5
@@ -88,7 +87,7 @@ void RunFaultThread(void* arg) {
     osSyncPrintf("\n=> fltproc - got a flt msg.\n");
     f_FaultedThread = __osGetCurrFaultedThread();
     if (f_FaultedThread != NULL) {
-      PlaySound(SOUND_CONTACT_WARIO, FAULT_SOUND_CHANNEL, FAULT_SOUND_VOLUME);
+      PlaySound(SOUND_CONTACT_WARIO, FAULT_SOUND_CHANNEL, SOUND_FULL_SCALE);
       PrintFaultContext(f_FaultedThread);
     }
   }
