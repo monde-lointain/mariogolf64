@@ -68,6 +68,10 @@
 #define ASSET_PLAYER_STATS_UNK12 0x828
 #define ASSET_PLAYER_STATS_UNK13 0x829
 #define STATS_INDEX_COLUMN_COUNT 6
+/* D_801B5634 counts the index tables' rows from 1; columns past a row's count
+ * in D_802304B4 hold STATS_INDEX_UNUSED */
+#define STATS_INDEX_ROW_COUNT 7
+#define STATS_INDEX_UNUSED -1
 /* The stats icons are 24x24, and func_80219460 shows each of their two frames
  * for 4 video frames */
 #define STATS_ICON_SIZE 24
@@ -126,6 +130,8 @@ enum StatsDirection {
   STATS_DIRECTION_DOWN
 };
 
+#define STATS_DIRECTION_COUNT 4
+
 /*
  * The rows of the stats panel slide across together: D_80230784 holds their
  * offsets, and D_802307A8 holds where each slide after the first sends them
@@ -142,6 +148,8 @@ enum StatsDirection {
 /* Each bet's stake is one of these levels, which D_802304F4 turns into an
  * amount */
 #define BET_STAKE_LEVEL_COUNT 6
+/* What unkE holds for a bet that func_80217B88's preset leaves out */
+#define NO_BET -1
 /* Where func_80217D20 types the chosen bet's explanation, and its first message
  */
 #define BET_HELP_X 36
@@ -155,48 +163,19 @@ enum StatsDirection {
 extern void* D_8012D430[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
-extern u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT][MENU_UNKE_COUNT];
-extern u8 D_802304F4_ovl_01[];
-/* Which of unkE's bets each column of D_8023040C sets */
-extern s16 D_80230460_ovl_01[][STATS_INDEX_COLUMN_COUNT];
-/* How many columns of D_8023040C each row uses */
-extern u8 D_802304B4_ovl_01[];
-/* The x of each column of D_8023040C */
-extern s32 D_802304FC_ovl_01[][STATS_INDEX_COLUMN_COUNT];
 /* Updates until each character fidgets, or -1 while it does */
 extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 extern s8 D_801B70F0[MAXCONTROLLERS];
-extern s8 D_802309C4_ovl_01[][2];
-extern Vtx D_802309F0_ovl_01[MENU_CURSOR_VERTEX_COUNT];
-extern f32 D_80230A38_ovl_01[MENU_CURSOR_VERTEX_COUNT];
-extern s32 D_80230A48_ovl_01[CHARACTER_COUNT];
 extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 extern const char D_802319E0_ovl_01[];
-extern s32 D_80230718_ovl_01[STATS_SLIDE_ROW_COUNT];
-extern s32 D_8023073C_ovl_01[STATS_SLIDE_ROW_COUNT];
-extern s32 D_80230760_ovl_01[STATS_SLIDE_ROW_COUNT];
-extern s32 D_80230784_ovl_01[STATS_SLIDE_ROW_COUNT];
-extern s32 D_802307A8_ovl_01[STATS_SLIDE_COUNT - 1][STATS_SLIDE_ROW_COUNT];
-extern u8 D_80230838_ovl_01;
 extern u8 D_8022BE88_ovl_01;
 extern u8 D_8022BE89_ovl_01;
-extern u8 D_802303A1_ovl_01;
-extern s16 D_802303A6_ovl_01;
-extern s16 D_802303A8_ovl_01;
 extern s32 D_8023BFD0_ovl_01;
 
-extern Vtx D_80230840_ovl_01[TURNED_ARROW_VERTEX_COUNT];
-extern u32 D_802303AC_ovl_01[PLAYER_STATS_ICON_COUNT];
-extern u32 D_802303CC_ovl_01[][2];
-extern s16 D_8023040C_ovl_01[][STATS_INDEX_COLUMN_COUNT];
 extern u8 D_801B5634;
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern s8 D_8022F8C5_ovl_01;
-extern u8 D_802303A0_ovl_01;
-extern s16 D_802303A2_ovl_01;
-extern s16 D_802303A4_ovl_01;
-extern u8 D_802308A0_ovl_01;
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern u8 D_801B9410;
@@ -218,6 +197,200 @@ void func_80219460_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
 void func_8021B1E0_ovl_01(
     Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex);
+
+static u8 D_802303A0_ovl_01 = 0;
+static u8 D_802303A1_ovl_01 = FALSE;
+static s16 D_802303A2_ovl_01 = 0;
+static s16 D_802303A4_ovl_01 = 0;
+static s16 D_802303A6_ovl_01 = 0;
+static s16 D_802303A8_ovl_01 = 0;
+static u32 D_802303AC_ovl_01[PLAYER_STATS_ICON_COUNT] = {
+    0x0674, 0x0678, 0x067A, 0x067E, 0x0680, 0x067C, 0x0676, 0x0672};
+// clang-format off
+static u32 D_802303CC_ovl_01[PLAYER_STATS_ICON_COUNT]
+                             [STATS_ICON_FRAME_COUNT] = {
+  { 0x0674, 0x0675 },
+  { 0x0678, 0x0679 },
+  { 0x067A, 0x067B },
+  { 0x067E, 0x067F },
+  { 0x0680, 0x0681 },
+  { 0x067C, 0x067D },
+  { 0x0676, 0x0677 },
+  { 0x0672, 0x0673 }
+};
+// clang-format on
+// clang-format off
+static s16 D_8023040C_ovl_01[STATS_INDEX_ROW_COUNT]
+                             [STATS_INDEX_COLUMN_COUNT] = {
+  { 0, 1, 2, 3, 5, STATS_INDEX_UNUSED },
+  { 0, 1, 2, 3, 5, 7 },
+  { 0, 1, 6, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
+  { 0, 1, 5, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
+  { 0, 1, 5, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
+  { 2, 3, 5, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
+  { 2, 3, 5, 7, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED }
+};
+// clang-format on
+// clang-format off
+/* Which of unkE's bets each column of D_8023040C sets */
+static s16 D_80230460_ovl_01[STATS_INDEX_ROW_COUNT]
+                             [STATS_INDEX_COLUMN_COUNT] = {
+  { 0, 1, 2, 3, 4, STATS_INDEX_UNUSED },
+  { 0, 1, 2, 3, 4, 6 },
+  { 0, 1, 5, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
+  { 0, 1, 4, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
+  { 0, 1, 4, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
+  { 2, 3, 4, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
+  { 2, 3, 4, 6, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED }
+};
+// clang-format on
+/* How many columns of D_8023040C each row uses */
+static u8 D_802304B4_ovl_01[STATS_INDEX_ROW_COUNT] = {5, 6, 3, 3, 3, 3, 4};
+// clang-format off
+static u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT]
+                            [MENU_UNKE_COUNT] = {
+  { 4, 4, 1, 0, 0, NO_BET, NO_BET, NO_BET },
+  { 4, 4, 0, 0, 0, NO_BET, 0, NO_BET },
+  { 4, 4, NO_BET, NO_BET, NO_BET, 1, NO_BET, NO_BET },
+  { 4, 4, NO_BET, NO_BET, 1, NO_BET, NO_BET, NO_BET },
+  { 4, 4, NO_BET, NO_BET, 1, NO_BET, NO_BET, NO_BET },
+  { NO_BET, NO_BET, 1, 0, 0, NO_BET, NO_BET, NO_BET },
+  { NO_BET, NO_BET, 0, 0, 0, NO_BET, 0, NO_BET }
+};
+// clang-format on
+static u8 D_802304F4_ovl_01[BET_STAKE_LEVEL_COUNT] = {0, 1, 2, 3, 5, 10};
+// clang-format off
+/* The x of each column of D_8023040C */
+static s32 D_802304FC_ovl_01[STATS_INDEX_ROW_COUNT]
+                             [STATS_INDEX_COLUMN_COUNT] = {
+  { 68, 108, 148, 188, 228, 228 },
+  { 48, 88, 128, 168, 208, 248 },
+  { 114, 148, 184, 216, 256, 256 },
+  { 114, 148, 184, 216, 256, 256 },
+  { 114, 148, 184, 144, 144, 144 },
+  { 114, 148, 184, 216, 256, 256 },
+  { 87, 127, 167, 207, 228, 228 }
+};
+// clang-format on
+/* Read by no routine */
+static char D_802305A4_ovl_01[8][10] = {
+    "ﾄﾞﾗｺﾝ", "ﾆｱﾋﾟﾝ", "ｽｺｱ", "ﾀﾃ", "ﾖｺ", "ｽｷﾝｽﾞ", "ﾏｯﾁ", "ﾀﾞﾌﾞﾙｽ"};
+/* The view of the players' characters */
+static f32 D_802305F4_ovl_01[2] = {0.0f, 0.0f};
+/* Read by no routine */
+static s32 D_802305FC_ovl_01[3] = {0, 0, 0};
+static f32 D_80230608_ovl_01[MAX_PLAYER_COUNT] = {4.2f, 4.0f, 4.2f, 4.0f};
+// clang-format off
+static Vec3 D_80230618_ovl_01[MAX_PLAYER_COUNT]
+                              [MAX_PLAYER_COUNT] = {
+  {
+    { 0.0f, -44.0f, -1000.0f },
+    { 64.0f, -44.0f, -1500.0f },
+    { 64.0f, -44.0f, -1000.0f },
+    { 64.0f, -44.0f, -1500.0f }
+  },
+  {
+    { -64.0f, -44.0f, -1500.0f },
+    { 64.0f, -44.0f, -1000.0f },
+    { 64.0f, -44.0f, -1500.0f },
+    { 64.0f, -44.0f, -1000.0f }
+  },
+  {
+    { -96.0f, -44.0f, -1500.0f },
+    { 0.0f, -54.0f, -1000.0f },
+    { 96.0f, -44.0f, -1500.0f },
+    { 96.0f, -44.0f, -1000.0f }
+  },
+  {
+    { -96.0f, -44.0f, -1500.0f },
+    { -32.0f, -54.0f, -1000.0f },
+    { 32.0f, -44.0f, -1500.0f },
+    { 96.0f, -54.0f, -1000.0f }
+  }
+};
+// clang-format on
+/* The left of each player's column, by the player count */
+static s32 D_802306D8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+    {128, 0, 0, 0}, {96, 160, 0, 0}, {64, 128, 192, 0}, {32, 96, 160, 224}};
+static s32 D_80230718_ovl_01[STATS_SLIDE_ROW_COUNT] = {
+    0, 2, 4, 6, 8, 10, 12, 14, 16};
+static s32 D_8023073C_ovl_01[STATS_SLIDE_ROW_COUNT] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0};
+static s32 D_80230760_ovl_01[STATS_SLIDE_ROW_COUNT] = {
+    64, 64, 64, 64, 64, 64, 64, 64, 64};
+static s32 D_80230784_ovl_01[STATS_SLIDE_ROW_COUNT] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0};
+// clang-format off
+static s32 D_802307A8_ovl_01[STATS_SLIDE_COUNT - 1]
+                             [STATS_SLIDE_ROW_COUNT] = {
+  { 320, 320, 320, 320, 320, 320, 320, 320, 320 },
+  { -320, -320, -320, -320, -320, -320, -320, -320, -320 },
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+};
+// clang-format on
+static u8 D_80230838_ovl_01 = 0;
+static Vtx D_80230840_ovl_01[TURNED_ARROW_VERTEX_COUNT] = {
+    {{{-16, 16, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-16, -16, 0}, 0, {0, 2048}, {0x00, 0xFF, 0x00, 0xFF}}},
+    {{{16, -16, 0}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{16, 16, 0}, 0, {2048, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
+/* Read by no routine */
+static s32 D_80230880_ovl_01[2] = {0, 0};
+/* Read by no routine; the values of D_80230A38 */
+static f32 D_80230888_ovl_01[4] = {0.0f, 2.0f, 4.0f, 6.0f};
+/* Read by no routine */
+static s32 D_80230898_ovl_01[2] = {0, 0};
+static u8 D_802308A0_ovl_01 = 0;
+AssetId g_CharacterFaceAssets[CHARACTER_COUNT] = {0x07C5, 0x0755, 0x07A9,
+    0x0747, 0x078D, 0x07B7, 0x07D3, 0x07E1, 0x0771, 0x079B, 0x07EF, 0x0763,
+    0x077F, 0x098D, 0x07FD, 0x080B, 0x0819, 0x0827};
+// clang-format off
+s16 g_CharacterPaletteFiles[CHARACTER_COUNT]
+                            [CHARACTER_PALETTE_COUNT] = {
+  { 0x07B8, 0x07B9, 0x07BA, 0x07BB },
+  { 0x0748, 0x0749, 0x074A, 0x074B },
+  { 0x079C, 0x079D, 0x079E, 0x079F },
+  { 0x073A, 0x073B, 0x073C, 0x073D },
+  { 0x0780, 0x0781, 0x0782, 0x0783 },
+  { 0x07AA, 0x07AB, 0x07AC, 0x07AD },
+  { 0x07C6, 0x07C7, 0x07C8, 0x07C9 },
+  { 0x07D4, 0x07D5, 0x07D6, 0x07D7 },
+  { 0x0764, 0x0765, 0x0766, 0x0767 },
+  { 0x078E, 0x078F, 0x0790, 0x0791 },
+  { 0x07E2, 0x07E3, 0x07E4, 0x07E5 },
+  { 0x0756, 0x0757, 0x0758, 0x0759 },
+  { 0x0772, 0x0773, 0x0774, 0x0775 },
+  { 0x0980, 0x0981, 0x0982, 0x0983 },
+  { 0x07F0, 0x07F1, 0x07F2, 0x07F3 },
+  { 0x07FE, 0x07FF, 0x0800, 0x0801 },
+  { 0x080C, 0x080D, 0x080E, 0x080F },
+  { 0x081A, 0x081B, 0x081C, 0x081D }
+};
+// clang-format on
+/* Read by no routine; a row like the six that follow the characters' rows of
+ * g_CharacterFacePaletteFiles */
+static s16 D_80230958_ovl_01[4] = {0x078E, 0x078E, 0x078E, 0x078E};
+/* Read by no routine */
+static s16 D_80230960_ovl_01[18] = {
+    0, 0, 1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
+static char D_80230984_ovl_01[STATS_GRID_ROW_COUNT][RECORD_LABEL_SIZE] = {
+    "Birdie", "Eagle", "Albatross", "Hole-in-One"};
+static s8 D_802309C4_ovl_01[STATS_DIRECTION_COUNT][2] = {
+    {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+/* Read by no routine */
+static s32 D_802309CC_ovl_01[8] = {64, 12, 48, 12, 80, 12, 96, 12};
+static Vtx D_802309F0_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+    {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
+    {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
+    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
+/* Read by no routine */
+static s32 D_80230A30_ovl_01[2] = {0, 0};
+static f32 D_80230A38_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+    0.0f, 2.0f, 4.0f, 6.0f};
+static s32 D_80230A48_ovl_01[CHARACTER_COUNT] = {
+    0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 
 static Mtx D_8023ACC0_ovl_01[MAX_PLAYER_COUNT][2];
 static Mtx D_8023AEC0_ovl_01;
@@ -385,7 +558,7 @@ void func_80217B88_ovl_01(s32 requestedPreset) {
     }
   } else {
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
-      memory->unkE[index] = -1;
+      memory->unkE[index] = NO_BET;
       D_801B60BA[index] = -1;
     }
   }
@@ -435,7 +608,7 @@ void func_80217D20_ovl_01(void) {
     D_802303A0_ovl_01 = 0;
     SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
-      if (memory->unkE[index] != -1) {
+      if (memory->unkE[index] != NO_BET) {
         D_801B60BA[index] = D_802304F4_ovl_01[memory->unkE[index]];
       } else {
         D_801B60BA[index] = -1;
@@ -451,7 +624,7 @@ void func_80217D20_ovl_01(void) {
     D_802303A0_ovl_01 = 0;
     SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
-      if (memory->unkE[index] != -1) {
+      if (memory->unkE[index] != NO_BET) {
         D_801B60BA[index] = D_802304F4_ovl_01[memory->unkE[index]];
       } else {
         D_801B60BA[index] = -1;
@@ -934,13 +1107,6 @@ s32 func_80219948_ovl_01(void) {
 #define OPTION_PROMPT_X 36
 #define OPTION_PROMPT_Y 200
 #define OPTION_PROMPT_MESSAGE 0x1D
-
-/* The view of the players' characters */
-extern f32 D_802305F4_ovl_01[2];
-extern f32 D_80230608_ovl_01[MAX_PLAYER_COUNT];
-extern f32 D_80230618_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][3];
-/* The left of each player's column, by the player count */
-extern s32 D_802306D8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 
 void func_80210CD4_ovl_01(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
@@ -1845,8 +2011,6 @@ void func_8021D0B8_ovl_01(void) {
 #define NO_RECORDS_X 160
 #define NO_RECORDS_Y 192
 #define MESSAGE_NO_RECORDS 0x16E
-
-extern char D_80230984_ovl_01[STATS_GRID_ROW_COUNT][RECORD_LABEL_SIZE];
 
 /*
  * Doesn't match: the original works out the chosen cell's address again after

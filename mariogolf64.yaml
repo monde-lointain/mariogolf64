@@ -630,6 +630,7 @@ segments:
       - [0x109570, c, ovl_01/save_menu]
       - [0x110670, c, ovl_01/tournament_menu]
       - [0x115D80, data]
+      - [0x11A320, .data, ovl_01/player_stats]
       - [0x11AA10, .data, ovl_01/save_menu]
       - [0x11ADF0, .data, ovl_01/tournament_menu]
       - [0x11B110, .rodata, ovl_01/main_menu]
