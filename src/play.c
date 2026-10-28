@@ -81,11 +81,13 @@ enum PlayExit {
 };
 
 /* f_HoleResultsKind, the results that the scorecard shows between holes */
-#define HOLE_RESULTS_STROKE 0
-#define HOLE_RESULTS_MATCH 1
-#define HOLE_RESULTS_SKINS 2
-#define HOLE_RESULTS_TOURNAMENT 3
-#define HOLE_RESULTS_SPEED_GOLF 4
+enum HoleResultsKind {
+  HOLE_RESULTS_STROKE,
+  HOLE_RESULTS_MATCH,
+  HOLE_RESULTS_SKINS,
+  HOLE_RESULTS_TOURNAMENT,
+  HOLE_RESULTS_SPEED_GOLF
+};
 
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
