@@ -79,8 +79,11 @@ static u8* f_PauseArrowsImage;
 extern s32 f_PauseArrowsTick;
 static u8* f_ChoiceBoxCursorImage;
 
-/* Not static: the original left it to the linker's common block */
-s32 f_PauseMenuUnkD678;
+/*
+ * Set while the player has taken a stroke on the hole, as UpdateTurns asks
+ * for the menu. Not static: the original left it to the linker's common block.
+ */
+s32 f_CanGiveUp;
 
 #define CHOICE_BOX_MAX_OPTIONS 4
 #define CHOICE_BOX_OPEN_SOUND 0x64
@@ -172,10 +175,10 @@ void ResumeRound(void) {
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
 }
 
-void RequestPauseMenu(s32 unkD678, s32 isClosing) {
+void RequestPauseMenu(s32 canGiveUp, s32 isClosing) {
   f_PauseMenuRequest =
       isClosing == FALSE ? PAUSE_MENU_REQUEST_LOAD : PAUSE_MENU_REQUEST_FREE;
-  f_PauseMenuUnkD678 = unkD678;
+  f_CanGiveUp = canGiveUp;
 }
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225440_ovl_00);
@@ -294,16 +297,17 @@ void FreePauseMenu(void) {
  */
 enum PauseOptionKind {
   PAUSE_OPTION_KIND_PLAIN,
-  /* Shows another label while f_PauseMenuUnkD678 is clear */
-  PAUSE_OPTION_KIND_UNKD678 = 7
+  /* Shows PAUSE_OPTION_FIRST_STROKE_MESSAGE while f_CanGiveUp is clear */
+  PAUSE_OPTION_KIND_GIVE_UP = 7
 };
 
-/* The option that is greyed out while f_PauseMenuUnkD678 is clear */
-#define PAUSE_OPTION_UNKD678 2
+/* Give Up, which is greyed out while f_CanGiveUp is clear */
+#define PAUSE_OPTION_GIVE_UP 2
 
 #define PAUSE_LAYOUT_MAX_OPTIONS 9
 #define PAUSE_OPTION_MESSAGE_BASE 0x77
-#define PAUSE_OPTION_UNKD678_OFF_MESSAGE 0xE
+/* "Can't give up on 1st stroke." */
+#define PAUSE_OPTION_FIRST_STROKE_MESSAGE 0xE
 
 typedef struct PauseOption {
   /* 0x0 */ s16 message; /* Counted from PAUSE_OPTION_MESSAGE_BASE */
@@ -325,8 +329,8 @@ extern f32 f_PauseCursorAngle;
 enum PauseAction {
   PAUSE_ACTION_FREE_LOOK,
   PAUSE_ACTION_SCORECARD,
-  /* Only while debugging or with f_PauseMenuUnkD678 set */
-  PAUSE_ACTION_UNKD678,
+  /* Only while debugging or with f_CanGiveUp set */
+  PAUSE_ACTION_GIVE_UP,
   PAUSE_ACTION_UNK3,
   PAUSE_ACTION_UNK4,
   PAUSE_ACTION_UNK6 = 6,
@@ -437,8 +441,8 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         g_SubModuleState = SUB_MODULE_SWAP_PENDING;
         g_PendingSubModuleId = MODULE_SAVE_MENU;
         break;
-      case PAUSE_ACTION_UNKD678:
-        if (g_IsDebugEnabled || f_PauseMenuUnkD678) {
+      case PAUSE_ACTION_GIVE_UP:
+        if (g_IsDebugEnabled || f_CanGiveUp) {
           PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           RequestPauseMenu(0, -1);
           g_PauseScreen = PAUSE_SCREEN_UNK6;
@@ -867,9 +871,9 @@ void DrawPauseMenu(Gfx** displayListHead) {
     }
 
     if (f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind ==
-        PAUSE_OPTION_KIND_UNKD678) {
-      if (!f_PauseMenuUnkD678) {
-        message = PAUSE_OPTION_UNKD678_OFF_MESSAGE;
+        PAUSE_OPTION_KIND_GIVE_UP) {
+      if (!f_CanGiveUp) {
+        message = PAUSE_OPTION_FIRST_STROKE_MESSAGE;
       }
     }
 
@@ -909,8 +913,8 @@ void DrawPauseMenu(Gfx** displayListHead) {
       PAUSE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);
   if (f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection] ==
-          PAUSE_OPTION_UNKD678 &&
-      !f_PauseMenuUnkD678) {
+          PAUSE_OPTION_GIVE_UP &&
+      !f_CanGiveUp) {
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
         TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0);
     gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
