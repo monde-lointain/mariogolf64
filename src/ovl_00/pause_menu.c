@@ -25,6 +25,7 @@
 #include "sound.h"
 #include "surface.h"
 #include "text.h"
+#include "transfer_pak.h"
 #include "turn.h"
 #include "variables.h"
 
@@ -66,8 +67,6 @@ enum PauseMenuRequest {
 #define PAUSE_OPTION_KIND_WIND_DIRECTION 4
 #define PAUSE_OPTION_KIND_LIE 5
 
-extern s32 g_HasBroughtOverCharacter; /* Set once a Game Boy character has been
-                                         brought over */
 extern s32 f_IsPauseMenuLoaded;
 extern s32 f_PauseSelection;
 extern s32 f_PauseLayout;

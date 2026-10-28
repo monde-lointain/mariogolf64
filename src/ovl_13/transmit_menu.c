@@ -434,8 +434,6 @@ s32 WriteExperienceToCartridge(s32 characterIndex);
 void SetNoticeState(s32 state, s32 message);
 s32 GetNoticeState(void);
 
-extern s32 g_HasBroughtOverCharacter;
-
 /* Results of opening and accessing the Game Boy cartridges, after the notice
  * each shows */
 /* ReadCartridgeCharacters has more saves to read */

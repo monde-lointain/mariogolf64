@@ -36,6 +36,7 @@
 #include "surface.h"
 #include "terrain.h"
 #include "tournament.h"
+#include "transfer_pak.h"
 #include "variables.h"
 #include "work_area.h"
 
@@ -678,7 +679,6 @@ extern s32 g_PlayStateFrameCount;
 extern s32 g_PlayFrameCount;
 extern s8 g_IsPlayStateBackedUp;
 extern s32 g_DebugCupIndex;
-extern s32 g_HasBroughtOverCharacter;
 extern s8 D_800C3068;
 void func_80241800();
 void func_80242384();

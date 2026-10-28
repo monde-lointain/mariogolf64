@@ -59,6 +59,8 @@ typedef struct GameBoyCharacter {
 } GameBoyCharacter; /* size = 0x8C */
 
 extern GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT];
+/* Set once a Game Boy character has been brought over */
+extern s32 g_HasBroughtOverCharacter;
 
 /* Where the Game Boy transfer was opened from */
 enum TransferMode {

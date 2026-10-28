@@ -171,7 +171,6 @@ extern s32 D_8022BE84_ovl_01;
 extern u8 D_8022BE89_ovl_01;
 extern s32 D_802322F0_ovl_01;
 extern s32 D_802322F4_ovl_01;
-extern s32 g_HasBroughtOverCharacter;
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
