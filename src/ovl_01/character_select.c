@@ -104,8 +104,8 @@ enum GridMove {
 
 /* The characters' faces, the first set of them shown with GAME_FLAG_UNK64 set
  */
-extern u16 D_800C2650[][8];
-extern u16 D_800C2780[][8];
+extern u16 g_FaceAnimationAssets[][8];
+extern u16 g_AlternateFaceAnimationAssets[][8];
 extern void* D_80105B78[CHARACTER_COUNT];
 extern void* D_8012D430[CHARACTER_COUNT];
 extern void* D_801B69EC;
@@ -122,7 +122,7 @@ extern f32 D_80230080_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each
                                                            corner's colour */
 extern s32 D_8022FF1C_ovl_01[4];
 extern s32 D_8022FF50_ovl_01[];
-extern char D_800C2A00[][IMPORTED_CHARACTER_NAME_LENGTH];
+extern char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH];
 
 /* Where the character cursor's translation is measured from, so that it is
  * placed by its corner */
@@ -136,7 +136,7 @@ extern u8 D_8022FF00_ovl_01;
 extern s8 D_8022FF07_ovl_01;
 extern s8 D_8022FF08_ovl_01;
 extern s8 D_8022FF09_ovl_01;
-extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
 /* Each player's tag offset from their cursor's grid cell, as x and y */
 extern s8 D_8022FFCC_ovl_01[MAX_PLAYER_COUNT][2];
 /* The tags' x when lined up, by the player count less one */
@@ -273,14 +273,14 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
 
     faceImage = D_8012D430[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-      faceAssets = D_800C2780;
+      faceAssets = g_AlternateFaceAnimationAssets;
     } else {
-      faceAssets = D_800C2650;
+      faceAssets = g_FaceAnimationAssets;
     }
 
     OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
     ReadEncodedAsset(faceImage, &asset);
-    OpenAssetFile(D_800C2590[(s16)character][0], &file);
+    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], (s16)GetAssetFileSize(&file), &file);
   }
 
@@ -395,14 +395,14 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
 
     faceImage = D_8012D430[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-      faceAssets = D_800C2780;
+      faceAssets = g_AlternateFaceAnimationAssets;
     } else {
-      faceAssets = D_800C2650;
+      faceAssets = g_FaceAnimationAssets;
     }
 
     OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
     ReadEncodedAsset(faceImage, &asset);
-    OpenAssetFile(D_800C2590[(s16)character][0], &file);
+    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
   }
 
@@ -500,13 +500,14 @@ s32 func_80209BE0_ovl_01(void) {
 /* R leaves a player without a controller only among this many players */
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
-/* D_800C200C's value for a player without an imported character */
+/* g_ImportedCharacterColumns's value for a player without an imported character
+ */
 #define NO_IMPORTED_COLUMN (-1)
 
 #define BITS_PER_BYTE 8
 
-extern s8 D_800C1FF8[MAX_PLAYER_COUNT];
-extern s16 D_800C200C[MAX_PLAYER_COUNT];
+extern s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT];
+extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern s8 D_801B5634;
@@ -695,13 +696,14 @@ s32 func_80209D50_ovl_01(
       character = g_ImportedCharacters[index].character;
       g_ImportedCharacters[index].isChosen = TRUE;
       g_GameState.unk3C = TRUE;
-      D_800C200C[playerIndex] = memory->characterColumns[playerIndex];
-      if (D_800C200C[playerIndex] < 0) {
-        D_800C200C[playerIndex] = 0;
+      g_ImportedCharacterColumns[playerIndex] =
+          memory->characterColumns[playerIndex];
+      if (g_ImportedCharacterColumns[playerIndex] < 0) {
+        g_ImportedCharacterColumns[playerIndex] = 0;
       }
 
-      if (D_800C200C[playerIndex] >= IMPORTED_CHARACTER_COUNT) {
-        D_800C200C[playerIndex] = IMPORTED_CHARACTER_COUNT - 1;
+      if (g_ImportedCharacterColumns[playerIndex] >= IMPORTED_CHARACTER_COUNT) {
+        g_ImportedCharacterColumns[playerIndex] = IMPORTED_CHARACTER_COUNT - 1;
       }
     }
 
@@ -719,27 +721,28 @@ s32 func_80209D50_ovl_01(
             if (g_ChosenPlayerCount - 1 == playerIndex &&
                 !IsGameFlagSet(GAME_FLAG_UNK67)) {
               for (otherIndex = 0; otherIndex != playerIndex; otherIndex++) {
-                if (D_800C1FF4[otherIndex] != NO_CONTROLLER_INDEX) {
+                if (g_PlayerControllerIndices[otherIndex] !=
+                    NO_CONTROLLER_INDEX) {
                   break;
                 }
               }
 
               if (otherIndex == playerIndex) {
-                D_800C1FF4[playerIndex] = controllerIndex;
+                g_PlayerControllerIndices[playerIndex] = controllerIndex;
               } else {
-                D_800C1FF4[playerIndex] = NO_CONTROLLER_INDEX;
+                g_PlayerControllerIndices[playerIndex] = NO_CONTROLLER_INDEX;
               }
             } else {
-              D_800C1FF4[playerIndex] = NO_CONTROLLER_INDEX;
+              g_PlayerControllerIndices[playerIndex] = NO_CONTROLLER_INDEX;
             }
           } else {
-            D_800C1FF4[playerIndex] = controllerIndex;
+            g_PlayerControllerIndices[playerIndex] = controllerIndex;
           }
         } else {
-          D_800C1FF4[playerIndex] = NO_CONTROLLER_INDEX;
+          g_PlayerControllerIndices[playerIndex] = NO_CONTROLLER_INDEX;
         }
 
-        D_800C1FF8[playerIndex] = controllerIndex;
+        g_ChoosingControllerIndices[playerIndex] = controllerIndex;
         SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, TEXT_FLAG_TYPED, 255,
             255, 255, 255);
         D_8022FF00_ovl_01 = FALSE;
@@ -835,15 +838,15 @@ s32 func_80209D50_ovl_01(
 
       faceImage = D_8012D430[(s16)slot];
       if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-        faceAssets = D_800C2780;
+        faceAssets = g_AlternateFaceAnimationAssets;
       } else {
-        faceAssets = D_800C2650;
+        faceAssets = g_FaceAnimationAssets;
       }
 
       OpenEncodedAsset(
           faceAssets[(s16)faceCharacter][D_8022FF04_ovl_01], &asset);
       ReadEncodedAsset(faceImage, &asset);
-      OpenAssetFile(D_800C2590[(s16)faceCharacter][0], &file);
+      OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
       ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
     }
 
@@ -926,14 +929,14 @@ s32 func_80209D50_ovl_01(
         g_MenuScreen = MENU_SCREEN_UNK5;
       }
 
-      D_800C1FF8[playerIndex] = UNCHOSEN_CONTROLLER;
-      D_800C1FF4[playerIndex] = UNCHOSEN_CONTROLLER;
+      g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
+      g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
       gridMark = g_CharacterGrid[memory->characterRows[playerIndex]]
                                 [memory->characterColumns[playerIndex]];
       if (gridMark >= FIRST_IMPORTED_CHARACTER) {
         g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen =
             FALSE;
-        D_800C200C[playerIndex] = NO_IMPORTED_COLUMN;
+        g_ImportedCharacterColumns[playerIndex] = NO_IMPORTED_COLUMN;
       }
 
       SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, TEXT_FLAG_TYPED, 255,
@@ -955,14 +958,14 @@ s32 func_80209D50_ovl_01(
       D_8022FF04_ovl_01 = 0;
       D_8022FF06_ovl_01 = 0;
       D_8022FF05_ovl_01 ^= 1;
-      D_800C1FF8[playerIndex] = UNCHOSEN_CONTROLLER;
-      D_800C1FF4[playerIndex] = UNCHOSEN_CONTROLLER;
+      g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
+      g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
       gridMark = g_CharacterGrid[memory->characterRows[playerIndex]]
                                 [memory->characterColumns[playerIndex]];
       if (gridMark >= FIRST_IMPORTED_CHARACTER) {
         g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen =
             FALSE;
-        D_800C200C[playerIndex] = NO_IMPORTED_COLUMN;
+        g_ImportedCharacterColumns[playerIndex] = NO_IMPORTED_COLUMN;
       }
 
       SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, TEXT_FLAG_TYPED, 255,
@@ -986,14 +989,14 @@ s32 func_80209D50_ovl_01(
 
     faceImage = D_8012D430[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-      faceAssets = D_800C2780;
+      faceAssets = g_AlternateFaceAnimationAssets;
     } else {
-      faceAssets = D_800C2650;
+      faceAssets = g_FaceAnimationAssets;
     }
 
     OpenEncodedAsset(faceAssets[(s16)faceCharacter][D_8022FF04_ovl_01], &asset);
     ReadEncodedAsset(faceImage, &asset);
-    OpenAssetFile(D_800C2590[(s16)faceCharacter][0], &file);
+    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
     D_801B7070 = playerIndex;
     D_8022FF07_ovl_01 = FALSE;
@@ -1033,13 +1036,13 @@ s32 func_80209D50_ovl_01(
 
       character =
           g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].character;
-      D_800C200C[playerIndex] = column;
+      g_ImportedCharacterColumns[playerIndex] = column;
       if (column < 0) {
-        D_800C200C[playerIndex] = 0;
+        g_ImportedCharacterColumns[playerIndex] = 0;
       }
 
-      if (D_800C200C[playerIndex] >= IMPORTED_CHARACTER_COUNT) {
-        D_800C200C[playerIndex] = IMPORTED_CHARACTER_COUNT - 1;
+      if (g_ImportedCharacterColumns[playerIndex] >= IMPORTED_CHARACTER_COUNT) {
+        g_ImportedCharacterColumns[playerIndex] = IMPORTED_CHARACTER_COUNT - 1;
       }
     }
 
@@ -1094,7 +1097,7 @@ s32 func_80209D50_ovl_01(
     if (g_ChosenPlayerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) {
       if (D_801B7070 == g_ChosenPlayerCount - 1) {
         for (index = 0; index != D_801B7070; index++) {
-          if (D_800C1FF4[index] != NO_CONTROLLER_INDEX) {
+          if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
             break;
           }
         }
@@ -1216,14 +1219,14 @@ void func_8020B438_ovl_01(void) {
     }
 
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-      faceAsset = D_800C2780[character][0];
+      faceAsset = g_AlternateFaceAnimationAssets[character][0];
     } else {
-      faceAsset = D_800C2650[character][0];
+      faceAsset = g_FaceAnimationAssets[character][0];
     }
 
     OpenEncodedAsset(faceAsset, &asset);
     ReadEncodedAsset(faceImage, &asset);
-    OpenAssetFile(D_800C2590[character][0], &file);
+    OpenAssetFile(g_CharacterFacePaletteFiles[character][0], &file);
     ReadAssetFile(characterFile, GetAssetFileSize(&file), &file);
   }
 }
@@ -1298,7 +1301,7 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   func_8020DB30_ovl_01(&gfx, *character);
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  SetTextName(D_800C2A00[choiceIndex]);
+  SetTextName(g_CharacterNames[choiceIndex]);
   SetTextSlot(CHARACTER_NAME_X, CHARACTER_NAME_Y,
       MESSAGE_FIRST_CHARACTER_NAME + choiceIndex, 1, 1, TEXT_FLAG_CENTERED, 255,
       255, 255, 255);
@@ -1463,24 +1466,24 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
     faceImage = D_8012D430[(s16)slot];
     facePalette = D_80105B78[(s16)slot];
     if (D_8022FF09_ovl_01 == 0) {
-      OpenAssetFile(D_800C2590[(s16)character][0], &file);
+      OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
     } else if (D_8022FF09_ovl_01 == 1) {
-      OpenAssetFile(D_800C2590[(s16)character][1], &file);
+      OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][1], &file);
     } else if (D_8022FF09_ovl_01 == 2) {
-      OpenAssetFile(D_800C2590[(s16)character][2], &file);
+      OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][2], &file);
     } else if (D_8022FF09_ovl_01 == 3) {
-      OpenAssetFile(D_800C2590[(s16)character][3], &file);
+      OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][3], &file);
     } else {
-      OpenAssetFile(
-          D_800C2590[(s16)character][(s16)func_8020C2D8_ovl_01((s16)character)],
+      OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][(
+                        s16)func_8020C2D8_ovl_01((s16)character)],
           &file);
     }
 
     ReadAssetFile(facePalette, (s16)GetAssetFileSize(&file), &file);
     if (!IsGameFlagSet(GAME_FLAG_UNK64)) {
-      faceAssets = D_800C2650;
+      faceAssets = g_FaceAnimationAssets;
     } else {
-      faceAssets = D_800C2780;
+      faceAssets = g_AlternateFaceAnimationAssets;
     }
 
     OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
@@ -1647,7 +1650,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    } else if (D_800C1FF4[playerIndex] == NO_CONTROLLER_INDEX) {
+    } else if (g_PlayerControllerIndices[playerIndex] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
           PLAYER_TAG_TEXELS((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
               COMPUTER_TAG_TEXELS_OFFSET),

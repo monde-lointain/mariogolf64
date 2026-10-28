@@ -34,7 +34,7 @@ extern u16 g_MenuWindowImageAssets[15];
 extern void* g_MenuWindowImage;
 
 extern s32 D_80230F68_ovl_01;
-extern u16 D_800C2074[];
+extern u16 g_TournamentIconAssets[];
 extern void* D_80230E70_ovl_01;
 extern void* D_80230E74_ovl_01;
 extern void* D_80230E78_ovl_01;
@@ -187,7 +187,7 @@ extern s32 D_80105DC4;
 extern s32 D_80231134_ovl_01; /* The tournament code byte being edited */
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC8;
-extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
 extern s32 D_801B7070;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 s32 GetClubTournamentCourse(void);
@@ -329,7 +329,7 @@ void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 4:
       D_80230E7C_ovl_01 = buffer;
-      OpenEncodedAsset(D_800C2074[0], &asset);
+      OpenEncodedAsset(g_TournamentIconAssets[0], &asset);
       ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
       break;
     case 5:
@@ -362,7 +362,7 @@ void func_80226904_ovl_01(s32 imageIndex) {
     imageIndex = 9;
   }
 
-  OpenEncodedAsset(D_800C2074[imageIndex], &asset);
+  OpenEncodedAsset(g_TournamentIconAssets[imageIndex], &asset);
   ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
 }
 
@@ -1295,7 +1295,7 @@ void func_80229278_ovl_01(void) {
       } else {
         for (index = 0; index != g_ControllerCount; index++) {
           if (g_MenuControllerData[index].button & A_BUTTON) {
-            D_800C1FF4[0] = index;
+            g_PlayerControllerIndices[0] = index;
             break;
           }
         }

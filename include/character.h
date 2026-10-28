@@ -59,6 +59,6 @@ extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 
 /* Each character's face palette file in each of the character's colour schemes
  */
-extern s16 D_800C2590[][CHARACTER_PALETTE_COUNT];
+extern s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];
 
 #endif

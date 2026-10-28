@@ -156,8 +156,8 @@ extern const char D_8023176C_ovl_01[];
 #define WON_COUNT_Y 72
 #define WON_COUNT_DIGIT_WIDTH 16
 
-extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
-extern s8 D_800C1FF8[MAX_PLAYER_COUNT];
+extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
+extern s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT];
 extern void* D_800FC898;
 extern void* D_800FF180[2];
 extern void* D_8012F4B0[7];
@@ -257,7 +257,7 @@ extern void* D_80106100;
 extern u8 D_800C2BD5;
 extern void* D_800FBDFC[2];
 extern u8 D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers is shown */
-extern TrophySize D_800C20E0[COURSE_COUNT];
+extern TrophySize g_TrophySizes[COURSE_COUNT];
 extern u8 D_8022BE89_ovl_01;
 extern s32 D_8022BE84_ovl_01;
 extern s32 D_802322F0_ovl_01;
@@ -577,12 +577,13 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   image = D_800FF180[0];
   gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   for (index = 0; index != g_ChosenPlayerCount; index++) {
-    if (D_800C1FF4[index] != NO_CONTROLLER_INDEX) {
+    if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
       position[0] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
       position[1] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
       gDPLoadTextureBlock(gfx++,
           ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-              (D_800C1FF8[index] * CONTROLLER_ICON_IMAGE_SIZE)) &
+              (g_ChoosingControllerIndices[index] *
+                  CONTROLLER_ICON_IMAGE_SIZE)) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -601,7 +602,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     position[0] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
     position[1] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
-    if (D_800C1FF4[index] == NO_CONTROLLER_INDEX) {
+    if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)image + PALETTED_TEXELS_OFFSET +
               ((index + PLAYER_LABEL_COMPUTER_FIRST) *
@@ -1654,10 +1655,10 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
           gDPLoadTLUT_pal256(gfx++, (u32)D_800FBE38[places[otherIndex]] & ~7);
           gDPLoadTextureTile(gfx++, (u32)D_800FBDFC[D_8022BE80_ovl_01] & ~7,
               G_IM_FMT_CI, G_IM_SIZ_8b,
-              D_800C20E0[D_801323A0.courseChoice].width,
-              D_800C20E0[D_801323A0.courseChoice].height, 0, 0,
-              D_800C20E0[D_801323A0.courseChoice].width - 1,
-              D_800C20E0[D_801323A0.courseChoice].height - 1, 0,
+              g_TrophySizes[D_801323A0.courseChoice].width,
+              g_TrophySizes[D_801323A0.courseChoice].height, 0, 0,
+              g_TrophySizes[D_801323A0.courseChoice].width - 1,
+              g_TrophySizes[D_801323A0.courseChoice].height - 1, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
@@ -1668,8 +1669,8 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
                                  [otherIndex]
                                      .y;
           gSPScisTextureRectangle(gfx++, left << 2, top << 2,
-              (left + D_800C20E0[D_801323A0.courseChoice].width) << 2,
-              (top + D_800C20E0[D_801323A0.courseChoice].height) << 2,
+              (left + g_TrophySizes[D_801323A0.courseChoice].width) << 2,
+              (top + g_TrophySizes[D_801323A0.courseChoice].height) << 2,
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }

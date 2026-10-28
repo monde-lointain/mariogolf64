@@ -190,8 +190,8 @@ void DrawClubSlotsLogo(
 
 /* The faces of the characters, by row of f_CharacterFaceRows, after three stars
  * and after fewer */
-extern u16 D_800C2650[][FACE_FRAME_COUNT];
-extern u16 D_800C2780[][FACE_FRAME_COUNT];
+extern u16 g_FaceAnimationAssets[][FACE_FRAME_COUNT];
+extern u16 g_AlternateFaceAnimationAssets[][FACE_FRAME_COUNT];
 /* The faces of the players and their palettes */
 
 static s32 f_ClubSlotsState = CLUB_SLOTS_DONE;
@@ -201,7 +201,8 @@ static u8 f_FaceFrameTime = 0;
 static u8 f_FaceHoldCount = 0;
 static u8 f_IsShowingResult = FALSE;
 static s16 f_StarCount = 0;
-/* The rows of D_800C2650 and D_800C2780 by character */
+/* The rows of g_FaceAnimationAssets and g_AlternateFaceAnimationAssets by
+ * character */
 static s16 f_CharacterFaceRows[CLUB_SET_COUNT] = {
     0,
     1,
@@ -285,10 +286,10 @@ void LoadClubSlots(void) {
   for (index = 0; index != g_GameState.playerCount; index++) {
     row = f_CharacterFaceRows[(s8)g_Players[index].characterIndex];
     f_Slots->faceImages[index][0] =
-        AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
+        AllocMemory(OpenEncodedAsset(g_FaceAnimationAssets[row][0], &asset));
     ReadEncodedAsset(f_Slots->faceImages[index][0], &asset);
     f_Slots->faceImages[index][1] =
-        AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
+        AllocMemory(OpenEncodedAsset(g_FaceAnimationAssets[row][0], &asset));
     ReadEncodedAsset(f_Slots->faceImages[index][1], &asset);
   }
 
@@ -906,13 +907,17 @@ void DrawClubSlots(Gfx** displayListHead) {
             row =
                 f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
             if (f_StarCount == REEL_COUNT) {
-              OpenEncodedAsset(D_800C2650[row][FACE_LAST_FRAME], &asset);
+              OpenEncodedAsset(
+                  g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
               ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
-              OpenEncodedAsset(D_800C2650[row][FACE_LAST_FRAME], &asset);
+              OpenEncodedAsset(
+                  g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
             } else {
-              OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
+              OpenEncodedAsset(
+                  g_AlternateFaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
               ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
-              OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
+              OpenEncodedAsset(
+                  g_AlternateFaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
             }
 
             ReadEncodedAsset(f_Slots->faceImages[playerIndex][1], &asset);
@@ -930,8 +935,9 @@ void DrawClubSlots(Gfx** displayListHead) {
         } else {
           row = f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
           OpenEncodedAsset(
-              ((f_StarCount == REEL_COUNT) ? D_800C2650
-                                           : D_800C2780)[row][f_FaceFrameIndex],
+              ((f_StarCount == REEL_COUNT)
+                      ? g_FaceAnimationAssets
+                      : g_AlternateFaceAnimationAssets)[row][f_FaceFrameIndex],
               &asset);
           ReadEncodedAsset(
               f_Slots->faceImages[playerIndex][f_FaceBufferIndex ^ 1], &asset);

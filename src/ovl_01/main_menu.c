@@ -125,7 +125,7 @@ extern f32 f_MenuBobPhase;
 #define BACKDROP_FIRST_TOP 8
 #define BACKDROP_TOP 10
 
-extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
 extern void* D_800FF420[2];
 extern s32 D_801051F0;
 extern void* D_801052BC[2];
@@ -164,7 +164,7 @@ extern s32 D_8022BE18_ovl_01;
 extern s32 D_800FBD40[];
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_8022BE2C_ovl_01;
-extern s16 D_800C200C[MAX_PLAYER_COUNT];
+extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 extern void* D_8010526C[2];
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
@@ -210,10 +210,10 @@ extern s32 D_8022F8F4_ovl_01[];
 /* D_8022BE88's value once the popup opened with C-up has finished */
 #define MENU_PHASE_UNK2 2
 
-extern u16 D_800C2098[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_IMAGE_COUNT]
-                     [MINI_GOLF_TURN_FRAME_COUNT];
+extern u16 g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD *
+    MINI_GOLF_DISC_IMAGE_COUNT][MINI_GOLF_TURN_FRAME_COUNT];
 extern void* D_801049A0[][MINI_GOLF_DISC_IMAGE_COUNT];
-extern s32 D_800C2BD0;
+extern s32 g_MenuCourseCount;
 extern u8 D_800C2BD5;
 extern s32 D_8022F8D4_ovl_01; /* The disc's frame */
 extern s32 D_8022F8D8_ovl_01; /* The calls that it has shown */
@@ -235,10 +235,11 @@ extern u8
     D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers shows the course */
 
 /* What func_801F4C78 reads as the menu screen changes */
-extern s8 D_800C1FF0; /* The screen whose assets were last read */
-extern u16 D_800C2028[MENU_SCREEN_COUNT]; /* Each screen's image's asset ID */
-extern u16 D_800C2064[7];
-extern s16 D_800C20D4[2];
+extern s8 g_LoadedMenuScreen; /* The screen whose assets were last read */
+extern u16 g_MenuScreenImageAssets[MENU_SCREEN_COUNT]; /* Each screen's image's
+                                                          asset ID */
+extern u16 g_CourseIconAssets[7];
+extern s16 g_MiniGolfDiscFiles[2];
 extern void* D_800FBE30[2];
 extern void* D_800FC6A0;
 extern void* D_800FC898;
@@ -633,11 +634,11 @@ void func_801F4C78_ovl_01(void) {
       break;
   }
 
-  if (D_800C1FF0 != g_MenuScreen) {
-    D_800C1FF0 = g_MenuScreen;
+  if (g_LoadedMenuScreen != g_MenuScreen) {
+    g_LoadedMenuScreen = g_MenuScreen;
     if (g_MenuScreen < MENU_SCREEN_COUNT) {
       D_8022BE8C_ovl_01 ^= 1;
-      OpenEncodedAsset(D_800C2028[g_MenuScreen], &asset);
+      OpenEncodedAsset(g_MenuScreenImageAssets[g_MenuScreen], &asset);
       ReadEncodedAsset(D_801052BC[D_8022BE8C_ovl_01], &asset);
     }
 
@@ -694,10 +695,10 @@ void func_801F4C78_ovl_01(void) {
         D_8022BE92_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
-        D_800C200C[0] = -1;
-        D_800C200C[1] = -1;
-        D_800C200C[2] = -1;
-        D_800C200C[3] = -1;
+        g_ImportedCharacterColumns[0] = -1;
+        g_ImportedCharacterColumns[1] = -1;
+        g_ImportedCharacterColumns[2] = -1;
+        g_ImportedCharacterColumns[3] = -1;
         func_8005D334();
         break;
 
@@ -717,7 +718,8 @@ void func_801F4C78_ovl_01(void) {
 
       case 5:
         for (index = 0; index != ARRAY_COUNT(D_8012F4B0); index++) {
-          OpenEncodedAsset(D_800C20F8[g_ChosenPlayerCount - 1][index], &asset);
+          OpenEncodedAsset(
+              g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
           ReadEncodedAsset(D_8012F4B0[index], &asset);
         }
 
@@ -913,24 +915,27 @@ void func_801F4C78_ovl_01(void) {
         if (g_GameState.isMiniGolf) {
           for (index = 0; index != MINI_GOLF_DISC_IMAGE_COUNT; index++) {
             OpenEncodedAsset(
-                D_800C2098[(g_MenuChoices.unk14 * MINI_GOLF_DISC_IMAGE_COUNT) +
+                g_MiniGolfDiscFrameAssets[(g_MenuChoices.unk14 *
+                                              MINI_GOLF_DISC_IMAGE_COUNT) +
                     index][MINI_GOLF_FACING_FRAME],
                 &asset);
             ReadEncodedAsset(D_801049A0[0][index], &asset);
             OpenEncodedAsset(
-                D_800C2098[(g_MenuChoices.unk14 * MINI_GOLF_DISC_IMAGE_COUNT) +
+                g_MiniGolfDiscFrameAssets[(g_MenuChoices.unk14 *
+                                              MINI_GOLF_DISC_IMAGE_COUNT) +
                     index][MINI_GOLF_FACING_FRAME],
                 &asset);
             ReadEncodedAsset(D_801049A0[1][index], &asset);
           }
 
           for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
-            OpenAssetFile(D_800C20D4[(g_MenuChoices.unk14 * 2) + index], &file);
+            OpenAssetFile(
+                g_MiniGolfDiscFiles[(g_MenuChoices.unk14 * 2) + index], &file);
             ReadAssetFile(D_801052C4[index], GetAssetFileSize(&file), &file);
           }
         } else {
           for (index = 0; index != 6; index++) {
-            OpenEncodedAsset(D_800C2064[index], &asset);
+            OpenEncodedAsset(g_CourseIconAssets[index], &asset);
             ReadEncodedAsset(D_801049A0[0][index], &asset);
           }
         }
@@ -942,12 +947,15 @@ void func_801F4C78_ovl_01(void) {
         OpenEncodedAsset(ASSET_BLENDED_TEXTURE_SCROLLING_LAYER, &asset);
         ReadEncodedAsset((u8*)D_801F4A20 + COURSE_SELECT_LAYER_OFFSET, &asset);
         D_8022BE80_ovl_01 = 0;
-        OpenEncodedAsset(D_800C21B8[D_801323A0.courseChoice][0], &asset);
+        OpenEncodedAsset(
+            g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
         ReadEncodedAsset(D_800FBDFC[0], &asset);
-        OpenEncodedAsset(D_800C21B8[D_801323A0.courseChoice][0], &asset);
+        OpenEncodedAsset(
+            g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
         ReadEncodedAsset(D_800FBDFC[1], &asset);
         for (index = 0; index != COURSE_FILE_COUNT; index++) {
-          OpenAssetFile(D_800C2278[D_801323A0.courseChoice][index], &file);
+          OpenAssetFile(
+              g_CourseTrophyFiles[D_801323A0.courseChoice][index], &file);
           ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
         }
 
@@ -1111,9 +1119,10 @@ void func_801F6A38_ovl_01(void) {
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
       if (playerIndex != otherIndex &&
-          D_800C1FF4[playerIndex] != NO_CONTROLLER_INDEX &&
-          D_800C1FF4[otherIndex] != NO_CONTROLLER_INDEX &&
-          D_800C1FF4[playerIndex] == D_800C1FF4[otherIndex]) {
+          g_PlayerControllerIndices[playerIndex] != NO_CONTROLLER_INDEX &&
+          g_PlayerControllerIndices[otherIndex] != NO_CONTROLLER_INDEX &&
+          g_PlayerControllerIndices[playerIndex] ==
+              g_PlayerControllerIndices[otherIndex]) {
         D_801051F0 = FALSE;
       }
     }
@@ -1232,7 +1241,7 @@ void func_801F6B28_ovl_01(void) {
     player->handicap = D_8023BFDC_ovl_01[index];
     player->unk22 = D_800FBE08[index];
     player->characterIndex = D_8012F480[index];
-    player->controllerIndex = D_800C1FF4[index];
+    player->controllerIndex = g_PlayerControllerIndices[index];
     sprintf(player->name, D_80231514_ovl_01,
         D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
     if (D_8012F480[index] >= CHARACTER_KID) {
@@ -1752,7 +1761,7 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_MINI_GOLF:
         /* Mini golf needs every player on a controller */
         for (index = 0; index != g_ChosenPlayerCount; index++) {
-          if (D_800C1FF4[index] == NO_CONTROLLER_INDEX) {
+          if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
             break;
           }
         }
@@ -1827,7 +1836,7 @@ void func_801F7D28_ovl_01(void) {
       case MODE_ICON_CLUB_SLOTS:
         /* The club slots need every player on a controller too */
         for (index = 0; index != g_ChosenPlayerCount; index++) {
-          if (D_800C1FF4[index] == NO_CONTROLLER_INDEX) {
+          if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
             break;
           }
         }
@@ -1876,12 +1885,12 @@ void func_801F7D28_ovl_01(void) {
     D_801B7070--;
     D_800FBE08[D_801B7070] = 0;
     D_800FBD40[D_8012F480[D_801B7070] + 2] = 0;
-    D_800C1FF4[D_801B7070] = 0;
+    g_PlayerControllerIndices[D_801B7070] = 0;
     slot = g_CharacterGrid[D_801323A0.characterRows[D_801B7070]]
                           [D_801323A0.characterColumns[D_801B7070]];
     if (slot >= FIRST_IMPORTED_CHARACTER) {
       g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].isChosen = 0;
-      D_800C200C[D_801B7070] = -1;
+      g_ImportedCharacterColumns[D_801B7070] = -1;
     }
 
     StopLoaderThread();
@@ -1941,7 +1950,7 @@ void func_801F7D28_ovl_01(void) {
 
   mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
   for (index = 0; index != g_ChosenPlayerCount; index++) {
-    if (D_800C1FF4[index] == NO_CONTROLLER_INDEX) {
+    if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
       break;
     }
   }
@@ -2008,10 +2017,12 @@ void func_801F8BAC_ovl_01(void) {
   if (g_MenuPressedButtons & A_BUTTON) {
     if (D_801323A0.courseSpin != 0) {
       D_801323A0.courseSpin = 0;
-      OpenEncodedAsset(D_800C21B8[D_801323A0.courseChoice][0], &asset);
+      OpenEncodedAsset(
+          g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
       ReadEncodedAsset(D_800FBDFC[D_8022BE80_ovl_01 ^ 1], &asset);
       for (index = 0; index != COURSE_FILE_COUNT; index++) {
-        OpenAssetFile(D_800C2278[D_801323A0.courseChoice][index], &file);
+        OpenAssetFile(
+            g_CourseTrophyFiles[D_801323A0.courseChoice][index], &file);
         ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
       }
 
@@ -2019,7 +2030,7 @@ void func_801F8BAC_ovl_01(void) {
       return;
     }
 
-    if (D_801323A0.courseChoice < D_800C2BD0) {
+    if (D_801323A0.courseChoice < g_MenuCourseCount) {
       openCourseCount = GetOpenCourseCount();
       if (openCourseCount < COURSE_COUNT &&
           openCourseCount == D_801323A0.courseChoice) {
@@ -2133,10 +2144,12 @@ void func_801F8BAC_ovl_01(void) {
     }
 
     if (D_801323A0.courseSpin == 0) {
-      OpenEncodedAsset(D_800C21B8[D_801323A0.courseChoice][0], &asset);
+      OpenEncodedAsset(
+          g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
       ReadEncodedAsset(D_800FBDFC[D_8022BE80_ovl_01 ^ 1], &asset);
       for (index = 0; index != COURSE_FILE_COUNT; index++) {
-        OpenAssetFile(D_800C2278[D_801323A0.courseChoice][index], &file);
+        OpenAssetFile(
+            g_CourseTrophyFiles[D_801323A0.courseChoice][index], &file);
         ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
       }
 
@@ -2181,23 +2194,27 @@ void func_801F93D8_ovl_01(void) {
               course = MINI_GOLF_COURSES_PER_RECORD - 1;
             }
 
-            OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT]
-                                       [D_8022F8D4_ovl_01],
+            OpenEncodedAsset(g_MiniGolfDiscFrameAssets[course *
+                                 MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][0], &asset);
-            OpenEncodedAsset(D_800C2098[(course * MINI_GOLF_DISC_IMAGE_COUNT) +
-                                 1][D_8022F8D4_ovl_01],
+            OpenEncodedAsset(
+                g_MiniGolfDiscFrameAssets[(course *
+                                              MINI_GOLF_DISC_IMAGE_COUNT) +
+                    1][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
             course = g_MenuChoices.unk14;
             buffers = D_801049A0;
-            OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT]
-                                       [D_8022F8D4_ovl_01],
+            OpenEncodedAsset(g_MiniGolfDiscFrameAssets[course *
+                                 MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
-            OpenEncodedAsset(D_800C2098[(course * MINI_GOLF_DISC_IMAGE_COUNT) +
-                                 1][D_8022F8D4_ovl_01],
+            OpenEncodedAsset(
+                g_MiniGolfDiscFrameAssets[(course *
+                                              MINI_GOLF_DISC_IMAGE_COUNT) +
+                    1][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           }
@@ -2227,23 +2244,27 @@ void func_801F93D8_ovl_01(void) {
               course = 0;
             }
 
-            OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT]
-                                       [D_8022F8D4_ovl_01],
+            OpenEncodedAsset(g_MiniGolfDiscFrameAssets[course *
+                                 MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][0], &asset);
-            OpenEncodedAsset(D_800C2098[(course * MINI_GOLF_DISC_IMAGE_COUNT) +
-                                 1][D_8022F8D4_ovl_01],
+            OpenEncodedAsset(
+                g_MiniGolfDiscFrameAssets[(course *
+                                              MINI_GOLF_DISC_IMAGE_COUNT) +
+                    1][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
             course = g_MenuChoices.unk14;
             buffers = D_801049A0;
-            OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT]
-                                       [D_8022F8D4_ovl_01],
+            OpenEncodedAsset(g_MiniGolfDiscFrameAssets[course *
+                                 MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
-            OpenEncodedAsset(D_800C2098[(course * MINI_GOLF_DISC_IMAGE_COUNT) +
-                                 1][D_8022F8D4_ovl_01],
+            OpenEncodedAsset(
+                g_MiniGolfDiscFrameAssets[(course *
+                                              MINI_GOLF_DISC_IMAGE_COUNT) +
+                    1][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           }
@@ -2295,7 +2316,7 @@ void func_801F93D8_ovl_01(void) {
       return;
     }
 
-    if (g_MenuChoices.unk13 < D_800C2BD0) {
+    if (g_MenuChoices.unk13 < g_MenuCourseCount) {
       D_801B9410 = 0;
       FreeAllCharacterSlots();
       LoadWipeShape(g_MenuChoices.unk14 +

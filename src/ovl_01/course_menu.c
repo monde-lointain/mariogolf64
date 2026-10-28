@@ -19,7 +19,7 @@
 #include "text.h"
 #include "variables.h"
 
-/* The images of D_800C2064 that the course menu reads */
+/* The images of g_CourseIconAssets that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
 
 /* func_8020E0AC reads the chosen course's first image into two buffers, and its
@@ -129,8 +129,8 @@ typedef struct TrophyPosition {
   u32 y;
 } TrophyPosition;
 
-extern u16 D_800C2064[];
-extern TrophySize D_800C20E0[COURSE_COUNT];
+extern u16 g_CourseIconAssets[];
+extern TrophySize g_TrophySizes[COURSE_COUNT];
 extern s16 D_802300A0_ovl_01;
 extern s16 D_802300A2_ovl_01;
 extern s16 D_802300A4_ovl_01; /* Which of D_8023A814's buffers holds the course
@@ -179,7 +179,7 @@ void func_8020E010_ovl_01(void** buffers) {
 
   D_8023A820_ovl_01 = buffers;
   for (imageIndex = 0; imageIndex != COURSE_MENU_IMAGE_COUNT; imageIndex++) {
-    OpenEncodedAsset(D_800C2064[imageIndex], &asset);
+    OpenEncodedAsset(g_CourseIconAssets[imageIndex], &asset);
     ReadEncodedAsset(D_8023A820_ovl_01[imageIndex], &asset);
   }
 }
@@ -213,12 +213,13 @@ void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind) {
 
   if (memory->statsCourse != COURSE_COUNT) {
     for (index = 0; index != COURSE_IMAGE_COPY_COUNT; index++) {
-      OpenEncodedAsset(D_800C21B8[memory->statsCourse][0], &asset);
+      OpenEncodedAsset(
+          g_CourseWheelImageAssets[memory->statsCourse][0], &asset);
       ReadEncodedAsset(buffers[index], &asset);
     }
 
     for (index = 0; index != COURSE_FILE_COUNT; index++) {
-      OpenAssetFile(D_800C2278[memory->statsCourse][index], &file);
+      OpenAssetFile(g_CourseTrophyFiles[memory->statsCourse][index], &file);
       ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
     }
   }
@@ -310,10 +311,12 @@ void func_8020E390_ovl_01(void) {
           D_802300A6_ovl_01 = 0;
           D_802300A2_ovl_01 = 0;
           D_802300A4_ovl_01 ^= 1;
-          OpenEncodedAsset(D_800C21B8[memory->statsCourse][0], &asset);
+          OpenEncodedAsset(
+              g_CourseWheelImageAssets[memory->statsCourse][0], &asset);
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
           for (index = 0; index != COURSE_FILE_COUNT; index++) {
-            OpenAssetFile(D_800C2278[memory->statsCourse][index], &file);
+            OpenAssetFile(
+                g_CourseTrophyFiles[memory->statsCourse][index], &file);
             ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
           }
         }
@@ -331,10 +334,12 @@ void func_8020E390_ovl_01(void) {
           D_802300A6_ovl_01 = 0;
           D_802300A2_ovl_01 = 0;
           D_802300A4_ovl_01 ^= 1;
-          OpenEncodedAsset(D_800C21B8[memory->statsCourse][0], &asset);
+          OpenEncodedAsset(
+              g_CourseWheelImageAssets[memory->statsCourse][0], &asset);
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
           for (index = 0; index != COURSE_FILE_COUNT; index++) {
-            OpenAssetFile(D_800C2278[memory->statsCourse][index], &file);
+            OpenAssetFile(
+                g_CourseTrophyFiles[memory->statsCourse][index], &file);
             ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
           }
         }
@@ -922,10 +927,10 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
         texels = D_8023A814_ovl_01[D_802300A4_ovl_01];
         gDPLoadTLUT_pal256(gfx++, (u32)palette & ~7);
         gDPLoadTextureTile(gfx++, (u32)texels & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
-            D_800C20E0[memory->statsCourse].width,
-            D_800C20E0[memory->statsCourse].height, 0, 0,
-            D_800C20E0[memory->statsCourse].width - 1,
-            D_800C20E0[memory->statsCourse].height - 1, 0,
+            g_TrophySizes[memory->statsCourse].width,
+            g_TrophySizes[memory->statsCourse].height, 0, 0,
+            g_TrophySizes[memory->statsCourse].width - 1,
+            g_TrophySizes[memory->statsCourse].height - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
@@ -933,10 +938,10 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
         gSPScisTextureRectangle(gfx++,
             (D_80230100_ovl_01[memory->statsCourse].x + left) << 2,
             D_80230100_ovl_01[memory->statsCourse].y << 2,
-            (D_800C20E0[memory->statsCourse].width +
+            (g_TrophySizes[memory->statsCourse].width +
                 D_80230100_ovl_01[memory->statsCourse].x + left)
                 << 2,
-            (D_800C20E0[memory->statsCourse].height +
+            (g_TrophySizes[memory->statsCourse].height +
                 D_80230100_ovl_01[memory->statsCourse].y)
                 << 2,
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -948,7 +953,8 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
     if (D_802300A6_ovl_01 >= TROPHY_FRAME_DELAY) {
       D_802300A6_ovl_01 = 0;
       D_802300A2_ovl_01++;
-      if ((s16)D_800C21B8[memory->statsCourse][D_802300A2_ovl_01] ==
+      if ((s16)g_CourseWheelImageAssets[memory->statsCourse]
+                                       [D_802300A2_ovl_01] ==
           TROPHY_FRAME_END) {
         D_802300A2_ovl_01 = 0;
       }
@@ -959,7 +965,8 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
 
       D_802300A4_ovl_01 ^= 1;
       OpenEncodedAsset(
-          D_800C21B8[memory->statsCourse][D_802300A2_ovl_01], &asset);
+          g_CourseWheelImageAssets[memory->statsCourse][D_802300A2_ovl_01],
+          &asset);
       ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
     }
   }

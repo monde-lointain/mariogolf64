@@ -71,7 +71,8 @@ extern s32 D_80230A98_ovl_01;
 /* The most bytes of each palette file that func_80220BB0 keeps */
 #define SAVE_MENU_FILE_SIZE 0x200
 
-/* The images of D_800C2064 that func_8021F6E0 reads, before one of its own */
+/* The images of g_CourseIconAssets that func_8021F6E0 reads, before one of its
+ * own */
 #define SAVE_MENU_IMAGE_COUNT 6
 /* The 64x64 CI8 icons of D_8023B680, which func_802213C8 shrinks to 32x24 in
  * two strips */
@@ -121,10 +122,10 @@ typedef struct {
 /* The furthest a course's list of characters scrolls */
 #define RING_SHOT_LAST_FIRST_CHARACTER 14
 
-extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
-extern u16 D_800C2064[];
-extern u16 D_800C208C[];
-extern s16 D_800C20D4[];
+extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
+extern u16 g_CourseIconAssets[];
+extern u16 g_MiniGolfCourseIconAssets[];
+extern s16 g_MiniGolfDiscFiles[];
 extern void* D_801052C4[2];
 extern u8 D_80230B4E_ovl_01;
 extern void* D_8012D430[CHARACTER_COUNT];
@@ -260,7 +261,7 @@ void func_8021F6E0_ovl_01(void** buffers) {
 
   D_8023B680_ovl_01 = buffers;
   for (imageIndex = 0; imageIndex != SAVE_MENU_IMAGE_COUNT; imageIndex++) {
-    OpenEncodedAsset(D_800C2064[imageIndex], &asset);
+    OpenEncodedAsset(g_CourseIconAssets[imageIndex], &asset);
     ReadEncodedAsset(D_8023B680_ovl_01[imageIndex], &asset);
   }
 
@@ -1014,14 +1015,15 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
 
       if (!save->savedGames[gameIndex].state.isMiniGolf) {
         OpenEncodedAsset(
-            D_800C2064[save->savedGames[gameIndex].state.courseIndex], &asset);
+            g_CourseIconAssets[save->savedGames[gameIndex].state.courseIndex],
+            &asset);
         ReadEncodedAsset(*bufferSlot, &asset);
       } else {
         miniGolfIndex = save->savedGames[gameIndex].state.courseIndex -
             MINI_GOLF_COURSE_INDEX;
-        OpenEncodedAsset(D_800C208C[miniGolfIndex], &asset);
+        OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
         ReadEncodedAsset(*bufferSlot, &asset);
-        OpenAssetFile(D_800C20D4[miniGolfIndex], &file);
+        OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file);
         ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
       }
 
@@ -1044,14 +1046,15 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
 
       if (!save->savedGames[gameIndex].state.isMiniGolf) {
         OpenEncodedAsset(
-            D_800C2064[save->savedGames[gameIndex].state.courseIndex], &asset);
+            g_CourseIconAssets[save->savedGames[gameIndex].state.courseIndex],
+            &asset);
         ReadEncodedAsset(*bufferSlot, &asset);
       } else {
         miniGolfIndex = save->savedGames[gameIndex].state.courseIndex -
             MINI_GOLF_COURSE_INDEX;
-        OpenEncodedAsset(D_800C208C[miniGolfIndex], &asset);
+        OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
         ReadEncodedAsset(*bufferSlot, &asset);
-        OpenAssetFile(D_800C20D4[miniGolfIndex], &file);
+        OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file);
         ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
       }
 
@@ -1242,13 +1245,14 @@ void func_80222038_ovl_01(void* buffer, u8 bufferIndex) {
   ReadEncodedAsset(D_8023BD74_ovl_01[D_8022F8C4_ovl_01], &asset); \
   if (CHOSEN_GAME.isValid) { \
     if (!CHOSEN_GAME.state.isMiniGolf) { \
-      OpenEncodedAsset(D_800C2064[CHOSEN_GAME.state.courseIndex], &asset); \
+      OpenEncodedAsset( \
+          g_CourseIconAssets[CHOSEN_GAME.state.courseIndex], &asset); \
       ReadEncodedAsset((&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01 ^ 1], &asset); \
     } else { \
       miniGolfIndex = CHOSEN_GAME.state.courseIndex - MINI_GOLF_COURSE_INDEX; \
-      OpenEncodedAsset(D_800C208C[miniGolfIndex], &asset); \
+      OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset); \
       ReadEncodedAsset((&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01 ^ 1], &asset); \
-      OpenAssetFile(D_800C20D4[miniGolfIndex], &file); \
+      OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file); \
       ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file); \
     } \
 \
@@ -1295,7 +1299,7 @@ void func_8022209C_ovl_01(void) {
 
       g_MenuScreen = MENU_SCREEN_EXIT;
       for (slot = 0; slot != MAX_PLAYER_COUNT; slot++) {
-        D_800C1FF4[slot] = D_80230B40_ovl_01[slot];
+        g_PlayerControllerIndices[slot] = D_80230B40_ovl_01[slot];
       }
 
       func_801F6A38_ovl_01();
@@ -1571,7 +1575,7 @@ s32 func_80222F2C_ovl_01(void) {
   savedPlayer = save->savedPlayers[memory->savedGameIndex];
   for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
     controller = D_80230B40_ovl_01[playerIndex];
-    D_800C1FF4[playerIndex] = controller;
+    g_PlayerControllerIndices[playerIndex] = controller;
     g_Players[playerIndex].controllerIndex = controller;
     sprintf(g_Players[playerIndex].name, D_80231A3C_ovl_01, savedPlayer->name);
     character = (s8)savedPlayer->characterIndex;

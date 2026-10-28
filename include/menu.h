@@ -71,14 +71,15 @@ extern MenuChoices g_MenuChoices;
  * files read with them */
 #define COURSE_IMAGE_COUNT 16
 #define COURSE_FILE_COUNT 3
-extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
-extern s16 D_800C2278[][COURSE_FILE_COUNT];
+extern u16 g_CourseWheelImageAssets[][COURSE_IMAGE_COUNT];
+extern s16 g_CourseTrophyFiles[][COURSE_FILE_COUNT];
 extern void* D_800FBE38[COURSE_FILE_COUNT];
 
-/* Screen 5's images in place of D_800C2064's: a row of asset IDs for each
- * g_ChosenPlayerCount from 1, of which it reads as many as D_800C2064 has */
+/* Screen 5's images in place of g_CourseIconAssets's: a row of asset IDs for
+ * each g_ChosenPlayerCount from 1, of which it reads as many as
+ * g_CourseIconAssets has */
 #define PLAYER_COUNT_ASSET_ROW_LENGTH 12
-extern u16 D_800C20F8[][PLAYER_COUNT_ASSET_ROW_LENGTH];
+extern u16 g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
 
 /* The size of a course's tournament trophy images */
 typedef struct TrophySize {
@@ -117,7 +118,7 @@ void LoadMenuWindowImage(s32 imageIndex);
 
 /*
  * The first empty slot gets a negative mark: the id of the character that
- * slot holds in g_EveryCharacterGrid, less this offset. In Get Character,
+ * slot holds in f_EveryCharacterGrid, less this offset. In Get Character,
  * func_80200EF0 shows that character as the rival.
  */
 #define MARKED_CHARACTER_OFFSET 50
@@ -129,8 +130,8 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
                           [CHARACTER_GRID_COLUMN_COUNT];
 
 /*
- * D_800C1FF4 holds this for a player with no controller of their own. The
- * computer plays them, and they never clash with the others.
+ * g_PlayerControllerIndices holds this for a player with no controller of their
+ * own. The computer plays them, and they never clash with the others.
  */
 #define NO_CONTROLLER_INDEX 4
 

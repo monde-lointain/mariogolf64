@@ -20,7 +20,7 @@
 #include "variables.h"
 #include "work_area.h"
 
-/* The images of D_800C2064 that func_80213390 reads */
+/* The images of g_CourseIconAssets that func_80213390 reads */
 #define BEST_TIMES_IMAGE_COUNT 6
 
 /* The bytes kept of each best time holder's palette file */
@@ -60,7 +60,7 @@
 #define TIME_SEPARATOR_SHIFT_LEFT 4
 #define TIME_SEPARATOR_SPACING 6
 
-extern u16 D_800C2064[];
+extern u16 g_CourseIconAssets[];
 extern void* D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
@@ -106,7 +106,7 @@ void func_80213390_ovl_01(void** buffers) {
 
   D_8023AA40_ovl_01 = buffers;
   for (imageIndex = 0; imageIndex != BEST_TIMES_IMAGE_COUNT; imageIndex++) {
-    OpenEncodedAsset(D_800C2064[imageIndex], &asset);
+    OpenEncodedAsset(g_CourseIconAssets[imageIndex], &asset);
     ReadEncodedAsset(D_8023AA40_ovl_01[imageIndex], &asset);
   }
 }

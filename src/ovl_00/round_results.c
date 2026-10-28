@@ -194,7 +194,7 @@ extern s32 f_ResultsUnk7C;
 extern s32 f_BannerX;
 extern s32 f_BannerY;
 extern s32 f_TournamentOpenCourseCount;
-extern u16 D_800C2074[];
+extern u16 g_TournamentIconAssets[];
 
 /* The images of the trophy a course's tournament gives its top three */
 typedef struct TrophyAssets {
@@ -401,8 +401,8 @@ void LoadRoundResults(void) {
     f_NintendoBadgeImage =
         AllocMemory(OpenEncodedAsset(NINTENDO_BADGE_ASSET, &asset));
     ReadEncodedAsset(f_NintendoBadgeImage, &asset);
-    f_ResultsCourseImage = AllocMemory(
-        OpenEncodedAsset(D_800C2074[GetClubTournamentCourse()], &asset));
+    f_ResultsCourseImage = AllocMemory(OpenEncodedAsset(
+        g_TournamentIconAssets[GetClubTournamentCourse()], &asset));
     ReadEncodedAsset(f_ResultsCourseImage, &asset);
   } else {
     f_FinalResultsTitleImage =
@@ -417,7 +417,8 @@ void LoadRoundResults(void) {
     f_ResultsCloudImage =
         AllocMemory(OpenEncodedAsset(NOTICE_CLOUD_ASSET, &asset));
     ReadEncodedAsset(f_ResultsCloudImage, &asset);
-    f_ResultsCourseImage = AllocMemory(OpenEncodedAsset(D_800C2074[0], &asset));
+    f_ResultsCourseImage =
+        AllocMemory(OpenEncodedAsset(g_TournamentIconAssets[0], &asset));
     ReadEncodedAsset(f_ResultsCourseImage, &asset);
     f_NoticeTitleImage =
         AllocMemory(OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset));
@@ -2158,7 +2159,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           f_PointsToNextCourse + f_PrizePoints + f_PointsEarned == 0) {
         StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(D_800C2074[f_OpenCourseCount], &asset);
+        OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
         OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
@@ -2447,7 +2448,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
         }
 
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(D_800C2074[f_OpenCourseCount], &asset);
+        OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
         OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
@@ -2605,7 +2606,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
         }
 
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(D_800C2074[f_OpenCourseCount], &asset);
+        OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
         OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
         ReadEncodedAsset(f_NoticeTitleImage, &asset);

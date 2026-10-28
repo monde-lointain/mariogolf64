@@ -50,9 +50,9 @@ extern u8 g_OptionBits;
 /* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
 extern u8 g_SoundOptionBits;
 
-extern SaveCopyLocation g_SaveCopyLocations[];
+extern SaveCopyLocation f_SaveCopyLocations[];
 /* The course points needed in total to open each course */
-extern s32 g_CoursePointsNeeded[COURSE_COUNT];
+extern s32 f_CoursePointsNeeded[COURSE_COUNT];
 extern char g_RomBuildDate[];
 
 typedef struct Unk800C2B90 {
@@ -62,21 +62,20 @@ typedef struct Unk800C2B90 {
   /* 0x6 */ s16 row;
 } Unk800C2B90; /* size = 0x8 */
 
-extern Unk800C2B90 D_800C2B90[IMPORTED_CHARACTER_COUNT];
-extern s8 D_800C2AA8[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
+extern Unk800C2B90 f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT];
+extern s8 f_ImportedCharacterNames[IMPORTED_CHARACTER_COUNT]
+                                  [IMPORTED_CHARACTER_NAME_LENGTH];
 /* The imported characters that debug flag 0x54 adds */
-extern s16 D_800C2B40[IMPORTED_CHARACTER_COUNT];
-extern s16 D_800C2B48[IMPORTED_CHARACTER_COUNT];
-extern s16 D_800C2B50[IMPORTED_CHARACTER_COUNT];
-extern s16 D_800C2B58[IMPORTED_CHARACTER_COUNT];
-extern u8 D_800C2B60[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
+extern s16 f_DebugImportedCharacters[IMPORTED_CHARACTER_COUNT];
+extern s16 f_DebugImportedDistances[IMPORTED_CHARACTER_COUNT];
+extern s16 f_DebugImportedSpins[IMPORTED_CHARACTER_COUNT];
+extern s16 f_DebugImportedSideSpins[IMPORTED_CHARACTER_COUNT];
+extern u8 f_DebugImportedNames[IMPORTED_CHARACTER_COUNT]
+                              [IMPORTED_CHARACTER_NAME_LENGTH];
 
-extern s8 D_800C1FF0;
-extern s8 D_800C1FF4;
-extern s8 D_800C1FF5;
-extern s8 D_800C1FF6;
-extern s8 D_800C1FF7;
-extern s32 D_800C2BD0;
+extern s8 g_LoadedMenuScreen;
+extern s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT];
+extern s32 g_MenuCourseCount;
 extern s8 D_800C2BD4;
 extern s16 D_800FBD40;
 extern s8 D_800FBDB9;
@@ -127,16 +126,15 @@ extern void* D_80105B78[18];
 extern void* D_800FBE30[2];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
-extern u16 D_800C2014[1];
-extern u16 D_800C2016;
-extern u16 D_800C2028[1];
-extern u16 D_800C2064[7];
-extern s16 D_800C20D4[2];
-extern u16 D_800C28B0[1];
+extern u16 f_MenuLabelAssets[];
+extern u16 g_MenuScreenImageAssets[1];
+extern u16 g_CourseIconAssets[7];
+extern s16 g_MiniGolfDiscFiles[2];
+extern u16 f_ToadImageAssets[1];
 
 void SetFramebufferCount(s32 count);
 
-/* D_800C29B8 lists slots in id order up to this count */
+/* f_SlotCells lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
 
 typedef struct Unk800C2650 {
@@ -144,12 +142,13 @@ typedef struct Unk800C2650 {
   /* 0x2 */ u8 unk2[0xE];
 } Unk800C2650; /* size = 0x10 */
 
-extern Unk800C2650 D_800C2650[];
-extern s16 g_EveryCharacterGrid[CHARACTER_CHOICE_ROW_COUNT]
+extern Unk800C2650 g_FaceAnimationAssets[];
+extern s16 f_EveryCharacterGrid[CHARACTER_CHOICE_ROW_COUNT]
                                [CHARACTER_GRID_COLUMN_COUNT];
-extern s16 D_800C293C[CHARACTER_CHOICE_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
-extern s16 D_800C2968[13];
-extern s16 g_StartingCharacterGrid[CHARACTER_GRID_ROW_COUNT]
+extern s16 f_RecordGrid[CHARACTER_CHOICE_ROW_COUNT]
+                       [CHARACTER_GRID_COLUMN_COUNT];
+extern s16 f_RecordCharacters[13];
+extern s16 f_StartingCharacterGrid[CHARACTER_GRID_ROW_COUNT]
                                   [CHARACTER_GRID_COLUMN_COUNT];
 
 void func_8005CA48(void);
@@ -159,8 +158,8 @@ typedef struct Unk800C29B8 {
   /* 0x2 */ s16 row;
 } Unk800C29B8; /* size = 0x4 */
 
-extern Unk800C29B8 D_800C29B8[];
-extern s16 D_800C2BB0[15];
+extern Unk800C29B8 f_SlotCells[];
+extern s16 f_CharacterSlots[15];
 
 void* func_8005AF74(void);
 s32 GetClubTournamentCourse(void);
@@ -195,7 +194,7 @@ void LoadMenuResources(void) {
   s32 size;
 
   save = GetSaveData();
-  if (D_800C1FF0 != -1) {
+  if (g_LoadedMenuScreen != -1) {
     osSyncPrintf("menu const error");
     return;
   }
@@ -214,9 +213,9 @@ void LoadMenuResources(void) {
   D_801B5CD0[0] = AllocMemory(0x70A8);
   D_8012D424 = AllocMemory(0x70A8);
   D_801B5CD0[1] = AllocMemory(0x70A8);
-  OpenEncodedAsset(*D_800C2014, &asset);
+  OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(D_8012D420[0], &asset);
-  OpenEncodedAsset(*D_800C2014, &asset);
+  OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(D_8012D424, &asset);
   if (g_MenuScreen == 5) {
     OpenEncodedAsset(0x528, &asset);
@@ -224,31 +223,33 @@ void LoadMenuResources(void) {
     OpenEncodedAsset(0x528, &asset);
     ReadEncodedAsset(D_801B5CD0[1], &asset);
   } else {
-    OpenEncodedAsset(D_800C2016, &asset);
+    OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
     ReadEncodedAsset(D_801B5CD0[0], &asset);
-    OpenEncodedAsset(D_800C2016, &asset);
+    OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
     ReadEncodedAsset(D_801B5CD0[1], &asset);
   }
 
-  D_801052BC[0] = AllocMemory(OpenEncodedAsset(*D_800C2028, &asset));
+  D_801052BC[0] =
+      AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
   ReadEncodedAsset(D_801052BC[0], &asset);
-  D_801052BC[1] = AllocMemory(OpenEncodedAsset(*D_800C2028, &asset));
+  D_801052BC[1] =
+      AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
   ReadEncodedAsset(D_801052BC[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
     if (g_MenuScreen == 5) {
-      size =
-          OpenEncodedAsset(D_800C20F8[g_ChosenPlayerCount - 1][index], &asset);
+      size = OpenEncodedAsset(
+          g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
     } else {
-      size = OpenEncodedAsset(D_800C2064[index], &asset);
+      size = OpenEncodedAsset(g_CourseIconAssets[index], &asset);
     }
 
     D_801049A0[index] = AllocMemory(size);
     ReadEncodedAsset(D_801049A0[index], &asset);
     if (g_MenuScreen == 5) {
-      size =
-          OpenEncodedAsset(D_800C20F8[g_ChosenPlayerCount - 1][index], &asset);
+      size = OpenEncodedAsset(
+          g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
     } else {
-      size = OpenEncodedAsset(D_800C2064[index], &asset);
+      size = OpenEncodedAsset(g_CourseIconAssets[index], &asset);
     }
 
     D_8012F4B0[index] = AllocMemory(size);
@@ -256,20 +257,20 @@ void LoadMenuResources(void) {
   }
 
   for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
-    OpenAssetFile(D_800C20D4[index], &file);
+    OpenAssetFile(g_MiniGolfDiscFiles[index], &file);
     size = GetAssetFileSize(&file);
     D_801052C4[index] = AllocMemory(size);
     ReadAssetFile(D_801052C4[index], size, &file);
   }
 
-  OpenEncodedAsset(D_800C21B8[0][0], &asset);
+  OpenEncodedAsset(g_CourseWheelImageAssets[0][0], &asset);
   D_800FBDFC[0] = AllocMemory(0xFA0);
   ReadEncodedAsset(D_800FBDFC[0], &asset);
-  OpenEncodedAsset(D_800C21B8[0][0], &asset);
+  OpenEncodedAsset(g_CourseWheelImageAssets[0][0], &asset);
   D_800FBDFC[1] = AllocMemory(0xFA0);
   ReadEncodedAsset(D_800FBDFC[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
-    OpenEncodedAsset(D_800C21B8[0][0], &asset);
+    OpenEncodedAsset(g_CourseWheelImageAssets[0][0], &asset);
     D_800FF4C4[index] = AllocMemory(0x125C);
     ReadEncodedAsset(D_800FF4C4[index], &asset);
   }
@@ -290,28 +291,28 @@ void LoadMenuResources(void) {
   D_800FC898 = AllocMemory(OpenEncodedAsset(0x663, &asset));
   ReadEncodedAsset(D_800FC898, &asset);
   for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {
-    D_8012D430[index] =
-        AllocMemory(OpenEncodedAsset(D_800C2650[index].assetId, &asset));
+    D_8012D430[index] = AllocMemory(
+        OpenEncodedAsset(g_FaceAnimationAssets[index].assetId, &asset));
     ReadEncodedAsset(D_8012D430[index], &asset);
   }
 
   for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
-    OpenAssetFile(D_800C2590[index][0], &file);
+    OpenAssetFile(g_CharacterFacePaletteFiles[index][0], &file);
     size = GetAssetFileSize(&file);
     D_80105B78[index] = AllocMemory(size);
     ReadAssetFile(D_80105B78[index], size, &file);
   }
 
   for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
-    OpenAssetFile(D_800C2278[0][index], &file);
+    OpenAssetFile(g_CourseTrophyFiles[0][index], &file);
     size = GetAssetFileSize(&file);
     D_800FBE38[index] = AllocMemory(size);
     ReadAssetFile(D_800FBE38[index], size, &file);
   }
 
-  D_800FBE30[0] = AllocMemory(OpenEncodedAsset(*D_800C28B0, &asset) * 2);
+  D_800FBE30[0] = AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
   ReadEncodedAsset(D_800FBE30[0], &asset);
-  D_800FBE30[1] = AllocMemory(OpenEncodedAsset(*D_800C28B0, &asset) * 2);
+  D_800FBE30[1] = AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
   ReadEncodedAsset(D_800FBE30[1], &asset);
   D_800FC6A0 = AllocMemory(OpenEncodedAsset(0x6F7, &asset) * 2);
   ReadEncodedAsset(D_800FC6A0, &asset);
@@ -329,7 +330,7 @@ void LoadMenuResources(void) {
 void FreeMenuResources(void) {
   s32 index;
 
-  D_800C1FF0 = -1;
+  g_LoadedMenuScreen = -1;
   FreeMemory(&D_801F4A20);
   FreeMemory(&D_8012D3AC);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
@@ -420,7 +421,7 @@ s32 CountOpenCourses(s32 coursePoints) {
   s32 courseIndex;
 
   for (courseIndex = COURSE_COUNT - 1; courseIndex != 0; courseIndex--) {
-    if (coursePoints >= g_CoursePointsNeeded[courseIndex]) {
+    if (coursePoints >= f_CoursePointsNeeded[courseIndex]) {
       break;
     }
   }
@@ -429,7 +430,7 @@ s32 CountOpenCourses(s32 coursePoints) {
 }
 
 s32 GetCoursePointsNeeded(s32 courseIndex) {
-  return g_CoursePointsNeeded[courseIndex];
+  return f_CoursePointsNeeded[courseIndex];
 }
 
 s32 GetRecordPriority(Unk68* record) {
@@ -1043,14 +1044,14 @@ void func_8005C674(s32 arg0, s32 arg1) {
   save = GetSaveData();
   for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
     for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
-      g_CharacterGrid[row][column] = g_StartingCharacterGrid[row][column];
+      g_CharacterGrid[row][column] = f_StartingCharacterGrid[row][column];
     }
   }
 
   if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
     for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
       for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
-        g_CharacterGrid[row][column] = g_EveryCharacterGrid[row][column];
+        g_CharacterGrid[row][column] = f_EveryCharacterGrid[row][column];
       }
     }
 
@@ -1061,12 +1062,12 @@ void func_8005C674(s32 arg0, s32 arg1) {
   if (arg0 >= 2) {
     for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
       for (column = 0; column != 5; column++) {
-        g_CharacterGrid[row][column] = g_EveryCharacterGrid[row][column];
+        g_CharacterGrid[row][column] = f_EveryCharacterGrid[row][column];
       }
     }
   }
 
-  for (index = 0; index != ARRAY_COUNT(D_800C2968); index++) {
+  for (index = 0; index != ARRAY_COUNT(f_RecordCharacters); index++) {
     recordIndex = 0;
     arg0 = 0;
     for (; recordIndex != SAVE_UNKAF0_ROW_COUNT; recordIndex++) {
@@ -1079,8 +1080,8 @@ void func_8005C674(s32 arg0, s32 arg1) {
     if (arg0 > 0) {
       for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
         for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
-          if (D_800C293C[row][column] == index) {
-            g_CharacterGrid[row][column] = D_800C2968[index];
+          if (f_RecordGrid[row][column] == index) {
+            g_CharacterGrid[row][column] = f_RecordCharacters[index];
           }
         }
       }
@@ -1101,8 +1102,8 @@ void func_8005C674(s32 arg0, s32 arg1) {
 
   func_8005CA48();
   for (index = 0; index != MARKABLE_CHARACTER_COUNT; index++) {
-    row = D_800C29B8[index].row;
-    column = D_800C29B8[index].column;
+    row = f_SlotCells[index].row;
+    column = f_SlotCells[index].column;
     if (g_CharacterGrid[row][column] < 0) {
       g_CharacterGrid[row][column] = index - MARKED_CHARACTER_OFFSET;
       break;
@@ -1120,9 +1121,9 @@ void func_8005C674(s32 arg0, s32 arg1) {
       recordIndex = g_CharacterGrid[2][index];
       if (recordIndex >= 0) {
         arg0 = g_ImportedCharacters[index].character;
-        OpenEncodedAsset(D_800C2650[arg0].assetId, &asset);
+        OpenEncodedAsset(g_FaceAnimationAssets[arg0].assetId, &asset);
         ReadEncodedAsset(D_8012D468[index], &asset);
-        OpenAssetFile(D_800C2590[arg0][0], &file);
+        OpenAssetFile(g_CharacterFacePaletteFiles[arg0][0], &file);
         ReadAssetFile(D_80105BB0[index], GetAssetFileSize(&file), &file);
       }
     }
@@ -1148,7 +1149,7 @@ void func_8005CA48(void) {
 
   for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
     for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
-      D_800C2AA8[index][count] = 0;
+      f_ImportedCharacterNames[index][count] = 0;
     }
   }
 
@@ -1171,7 +1172,7 @@ void func_8005CA48(void) {
 
     for (index = 0; index != count; index++) {
       if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
-        name = D_800C2B60[index];
+        name = f_DebugImportedNames[index];
       } else {
         name = g_GameBoyCharacters[index].name;
       }
@@ -1179,23 +1180,25 @@ void func_8005CA48(void) {
       for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH;
           byteIndex++) {
         letter = *name++;
-        D_800C2AA8[index][byteIndex] = letter;
+        f_ImportedCharacterNames[index][byteIndex] = letter;
         g_ImportedCharacters[index].name[byteIndex] = letter;
       }
 
-      g_CharacterGrid[D_800C2B90[index].row][D_800C2B90[index].column] =
-          FIRST_IMPORTED_CHARACTER + index;
+      g_CharacterGrid[f_ImportedCharacterCells[index].row]
+                     [f_ImportedCharacterCells[index].column] =
+                         FIRST_IMPORTED_CHARACTER + index;
       if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
-        g_ImportedCharacters[index].character = D_800C2B40[index];
-        g_ImportedCharacters[index].unk2 = D_800C2B48[index];
-        g_ImportedCharacters[index].unk4 = D_800C2B50[index];
-        g_ImportedCharacters[index].unk6 = D_800C2B58[index];
+        g_ImportedCharacters[index].character =
+            f_DebugImportedCharacters[index];
+        g_ImportedCharacters[index].unk2 = f_DebugImportedDistances[index];
+        g_ImportedCharacters[index].unk4 = f_DebugImportedSpins[index];
+        g_ImportedCharacters[index].unk6 = f_DebugImportedSideSpins[index];
         g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance =
-            D_800C2B48[index];
+            f_DebugImportedDistances[index];
         g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin =
-            D_800C2B50[index];
+            f_DebugImportedSpins[index];
         g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].sideSpin =
-            D_800C2B58[index];
+            f_DebugImportedSideSpins[index];
       } else {
         g_ImportedCharacters[index].character =
             g_GameBoyCharacters[index].character + FIRST_IMPORTED_CHARACTER;
@@ -1221,14 +1224,14 @@ s32 func_8005CEE0(s32 index) {
     return -1;
   }
 
-  if (index >= ARRAY_COUNT(D_800C2BB0)) {
+  if (index >= ARRAY_COUNT(f_CharacterSlots)) {
     return -1;
   }
 
   func_8005C674(1, 1);
-  slot = D_800C2BB0[index];
-  row = D_800C29B8[slot].row;
-  column = D_800C29B8[slot].column;
+  slot = f_CharacterSlots[index];
+  row = f_SlotCells[slot].row;
+  column = f_SlotCells[slot].column;
   return g_CharacterGrid[row][column] < 0 ? -1 : 0;
 }
 
@@ -1639,7 +1642,7 @@ void ComputeRoundStatistics(void) {
 void func_8005D9A0(void) {
   s8 index;
 
-  D_800C2BD0 = 6;
+  g_MenuCourseCount = 6;
   D_800FE334 = 0;
   g_MenuScreen = 0;
   g_ChosenPlayerCount = 0;
@@ -1739,10 +1742,10 @@ void func_8005DC50(void) {
   g_ImportedCharacters[1].isChosen = 0;
   g_ImportedCharacters[2].isChosen = 0;
   g_ImportedCharacters[3].isChosen = 0;
-  D_800C1FF4 = -1;
-  D_800C1FF5 = -1;
-  D_800C1FF6 = -1;
-  D_800C1FF7 = -1;
+  g_PlayerControllerIndices[0] = -1;
+  g_PlayerControllerIndices[1] = -1;
+  g_PlayerControllerIndices[2] = -1;
+  g_PlayerControllerIndices[3] = -1;
   g_MenuScreen = 0;
 }
 
@@ -1881,21 +1884,21 @@ s32 ReadSaveCopies(SaveData* save, u8 isInSram) {
   unmarkedCount = 0;
   for (copyIndex = 0; copyIndex < SAVE_COPY_COUNT; copyIndex++) {
     if (!isInSram) {
-      if (ReadHostFile(g_SaveCopyLocations[copyIndex].dataFileName, &size) !=
+      if (ReadHostFile(f_SaveCopyLocations[copyIndex].dataFileName, &size) !=
               HOST_FILE_OK ||
           size != sizeof(SaveData)) {
         continue;
       }
 
-      if (ReadHostFile(g_SaveCopyLocations[copyIndex].checkFileName, &size) !=
+      if (ReadHostFile(f_SaveCopyLocations[copyIndex].checkFileName, &size) !=
               HOST_FILE_OK ||
           size != sizeof(SaveCheck)) {
         continue;
       }
     } else {
-      nuPiReadSram(g_SaveCopyLocations[copyIndex].dataSramAddress, save,
+      nuPiReadSram(f_SaveCopyLocations[copyIndex].dataSramAddress, save,
           sizeof(SaveData));
-      nuPiReadSram(g_SaveCopyLocations[copyIndex].checkSramAddress, check,
+      nuPiReadSram(f_SaveCopyLocations[copyIndex].checkSramAddress, check,
           sizeof(SaveCheck));
     }
 
@@ -1941,15 +1944,15 @@ s32 WriteSaveCopies(SaveData* save, u8 isInSram) {
     check->key = rand();
     check->keyedCrc = check->key ^ crc;
     if (!isInSram) {
-      if (WriteHostFile(g_SaveCopyLocations[copyIndex].dataFileName,
+      if (WriteHostFile(f_SaveCopyLocations[copyIndex].dataFileName,
               sizeof(SaveData)) == HOST_FILE_OK) {
         WriteHostFile(
-            g_SaveCopyLocations[copyIndex].checkFileName, sizeof(SaveCheck));
+            f_SaveCopyLocations[copyIndex].checkFileName, sizeof(SaveCheck));
       }
     } else {
-      nuPiWriteSram(g_SaveCopyLocations[copyIndex].dataSramAddress, save,
+      nuPiWriteSram(f_SaveCopyLocations[copyIndex].dataSramAddress, save,
           sizeof(SaveData));
-      nuPiWriteSram(g_SaveCopyLocations[copyIndex].checkSramAddress, check,
+      nuPiWriteSram(f_SaveCopyLocations[copyIndex].checkSramAddress, check,
           sizeof(SaveCheck));
     }
   }
