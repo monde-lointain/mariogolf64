@@ -210,7 +210,6 @@ typedef struct HoleAssetIds {
 /* g_GameState.isMiniGolf under a symbol of its own, which BuildHole needs to
  * match */
 extern s8 g_IsMiniGolf;
-extern s32 g_TerrainCodeBlockCount;
 
 s32 PaintMainCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);

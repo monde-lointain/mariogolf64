@@ -114,6 +114,8 @@ extern s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT]
 /* Each ground tile's height range, which also serves as the radius of its
  * bounding sphere */
 extern f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT];
+/* How many of the work area's terrain code blocks hole_builder.c has used */
+extern s32 g_TerrainCodeBlockCount;
 
 /*
  * The vertices of a ground tile's edge or middle-line midpoints go through a

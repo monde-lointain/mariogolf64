@@ -20,6 +20,7 @@
 #include "hole_builder.h"
 #include "libc.h"
 #include "main.h"
+#include "overlay_manager.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -32,10 +33,16 @@
  * SCENE_MENU_TOP_ROW */
 #define SCENE_MENU_LENGTH 16
 #define SCENE_MENU_TOP_ROW 5
+/* The scene menu's box, in screen pixels */
+#define SCENE_MENU_BOX_LEFT 72
+#define SCENE_MENU_BOX_TOP 32
+#define SCENE_MENU_BOX_RIGHT 152
+#define SCENE_MENU_BOX_BOTTOM 152
 
 /* The limits of SCENE_MAP_OVERVIEW's controls */
 #define MAP_OVERVIEW_ADJUSTMENT_MIN 5
 #define MAP_OVERVIEW_ADJUSTMENT_MAX 0x200
+#define MAP_OVERVIEW_ADJUSTMENT_START 10
 #define MAP_OVERVIEW_SELECTION_COUNT 7
 #define MAP_OVERVIEW_CAMERA_STEP 8
 #define MAP_OVERVIEW_ADJUSTMENT_STEP 2
@@ -92,23 +99,96 @@ typedef struct MapOverviewControls {
 #define WATER_BIAS 0x266
 #define LOWERED_WATER_BIAS (-0x600)
 
-extern u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8];
-extern TerrainColor f_TerrainColors[11];
+#define TERRAIN_COLOR_COUNT 11
+
 extern u16 g_TerrainCodeColors[];
-extern s8 f_CellSearchOffsets[4];
-extern s32 f_FlagPanelFirstRow;
-extern s32 f_FlagPanelColumn;
-extern s32 f_FlagPanelRow;
 extern char g_RomBuildDate[];
 extern char g_SaveBuildDate[];
-extern s32 f_SceneBeforeFlags;
-extern MapOverviewControls f_MapOverviewControls;
-extern s32 f_IsSceneMenuOpen;
-extern AnimatedBox f_SceneMenuBox;
-extern s32 f_SceneMenuScenes[SCENE_MENU_LENGTH];
-extern s32 f_IsFirstDebugUpdate;
-static s32 f_SceneMenuSelection;
 extern s8 g_ShowsGroundWaves;
+
+/*
+ * Each grid point's slot among its tile's midpoints, by its row and column
+ * within the tile. The points with the top bit set are grid vertices, which
+ * GetGridVertex returns instead.
+ */
+static u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8] = {
+    {0x80, 0x00, 0x84, 0x01, 0x88},
+    {0x02, 0x08, 0x09, 0x0A, 0x03},
+    {0x81, 0x0B, 0x85, 0x0C, 0x89},
+    {0x04, 0x0D, 0x0E, 0x0F, 0x05},
+    {0x82, 0x06, 0x86, 0x07, 0x8A},
+};
+HoleSetup g_HoleSetup = {
+    {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 2},
+    {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 8},
+};
+f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT] = {0};
+s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT]
+                      [TERRAIN_CODE_CELL_COLUMN_COUNT] = {0};
+s32 g_TerrainCodeBlockCount = -1;
+
+/* Read by no routine */
+static u8 D_800BB010[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+s32 g_Scene = SCENE_FLAG_PANEL;
+s32 g_NextScene = SCENE_SWAPPING_MODULES;
+static s32 f_SceneBeforeFlags = SCENE_BOOT_LOGOS;
+s32 g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
+s32 g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
+s32 g_SubModuleId = MODULE_SCORECARD;
+s32 g_PendingSubModuleId = MODULE_SCORECARD;
+s32 g_SubModuleState = SUB_MODULE_UNLOADED;
+/* RGBA16 components, by the index that GetTerrainCodeColor gives */
+static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
+    {0x05, 0x19, 0x00, 1}, /* TERRAIN_CODE_FAIRWAY */
+    {0x05, 0x1E, 0x05, 1}, /* TERRAIN_CODE_GREEN */
+    {0x1C, 0x1C, 0x1C, 1}, /* TERRAIN_CODE_BUNKER */
+    {0x00, 0x10, 0x00, 1}, /* TERRAIN_CODE_ROUGH */
+    {0x00, 0x00, 0x1F, 0}, /* TERRAIN_CODE_UNK3 */
+    {0x0F, 0x08, 0x00, 1}, /* TERRAIN_CODE_OUT_OF_BOUNDS */
+    {0x0F, 0x0F, 0x0F, 1}, /* TERRAIN_CODE_CART_WAY */
+    {0x08, 0x16, 0x00, 1}, /* No terrain code's */
+    {0x1F, 0x16, 0x00, 1}, /* TERRAIN_CODE_TEE_GROUND */
+    {0x05, 0x05, 0x05, 1}, /* TERRAIN_CODE_ROCK */
+    {0x00, 0x1F, 0x1F, 1}, /* TERRAIN_CODE_DEEP_ROUGH */
+};
+static MapOverviewControls f_MapOverviewControls = {
+    0, 0, 0, MAP_OVERVIEW_ADJUSTMENT_START, FALSE};
+static s32 f_FlagPanelFirstRow = 0;
+static s32 f_FlagPanelColumn = 0;
+static s32 f_FlagPanelRow = 0;
+static s32 f_IsSceneMenuOpen = FALSE;
+static AnimatedBox f_SceneMenuBox = {SCENE_MENU_BOX_LEFT, SCENE_MENU_BOX_TOP,
+    SCENE_MENU_BOX_RIGHT, SCENE_MENU_BOX_BOTTOM, 0x00, 0x00, 0x00, 0x9F,
+    BOX_CLOSED, 0};
+static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
+    SCENE_PLAY_HOLE,
+    SCENE_GROUND_CAMERA,
+    SCENE_HEIGHTS,
+    SCENE_UNK9,
+    SCENE_UNK10,
+    SCENE_TRIANGLES,
+    SCENE_TREES,
+    SCENE_PIN,
+    SCENE_FLAG_PANEL,
+    SCENE_MENU,
+    SCENE_MAP_OVERVIEW,
+    SCENE_UNK11,
+    SCENE_PLAY_UNK12,
+    SCENE_PLAY_UNK13,
+    SCENE_RINGS,
+    SCENE_WALLS,
+};
+static s32 f_IsFirstDebugUpdate = TRUE;
+s32 D_800BB0E8 = 0;
+/*
+ * The order in which to search a point's cells: its own, the next, the one
+ * before (3 being -1 in four), then the one across
+ */
+static s8 f_CellSearchOffsets[4] = {0, 1, 3, 2};
+
+static s32 f_SceneMenuSelection;
 
 void func_8005D9A0(void);
 void InitPlay(s32);
@@ -195,7 +275,7 @@ s32 FindNearestTerrainColor(s32 color) {
   s32 blue;
   s32 distance;
 
-  for (i = 0; i < 11; i++) {
+  for (i = 0; i < TERRAIN_COLOR_COUNT; i++) {
     red = colorRed - f_TerrainColors[i].red;
     if (red < 0) {
       red = -red;
