@@ -4296,7 +4296,8 @@ void UpdateTurns(void) {
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               nextState = 0xF;
-              OpenChoiceBox(g_GameState.courseIndex == 0xC
+              OpenChoiceBox(
+                  g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX
                       ? CHOICE_BOX_ID_DRIVING_RANGE
                       : CHOICE_BOX_ID_TRAINING_SHOT);
             } else if (!g_GameState.unk31 &&
@@ -4494,7 +4495,7 @@ void UpdateTurns(void) {
           StopFireworks();
           if (g_GameState.gameMode == GAME_MODE_TRAINING) {
             nextState = 0xF;
-            if (g_GameState.courseIndex == 0xC) {
+            if (g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX) {
               OpenChoiceBox(CHOICE_BOX_ID_DRIVING_RANGE);
             } else {
               OpenChoiceBox(CHOICE_BOX_ID_TRAINING_HOLE_END);
