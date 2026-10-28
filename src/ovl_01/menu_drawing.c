@@ -1565,12 +1565,7 @@ const char D_802316FC_ovl_01[] = "Luigi's Garden";
 
 #define OPTIONS_BOARD_KIND 0xB9
 
-/*
- * The menu image buffer holds the options screen's Mario at its start, then
- * two frames of four 16 by 16 arrows, then Mario's shadow
- */
-#define OPTIONS_ARROWS_OFFSET 0x3408
-#define OPTIONS_SHADOW_OFFSET 0x3830
+/* The options screen's Mario and his shadow, in the menu image buffer */
 #define MARIO_WIDTH 100
 #define MARIO_HEIGHT 128
 #define MARIO_STRIP_HEIGHT 16
@@ -1614,7 +1609,6 @@ const char D_802316FC_ovl_01[] = "Luigi's Garden";
 #define OPTION_LABEL_SPACING (OPTION_LABEL_IMAGE_SIZE * 3)
 #define OPTION_LABEL_LEFT 32
 #define OPTION_LABEL_TOP 84
-#define OPTION_VALUES_OFFSET 0x3228
 #define OPTION_VALUE_LEFT 142
 #define OPTION_TOGGLE_COUNT OPTIONS_CHOICE_ERASE_SAVE_DATA
 

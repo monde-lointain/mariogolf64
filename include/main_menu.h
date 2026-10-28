@@ -56,6 +56,15 @@ extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
 #define OPTIONS_CHOICE_SOUND_FREQUENCY 10
 #define OPTIONS_SOUND_TEST_CHOICE_COUNT 21
 
+/*
+ * The menu image buffer holds the options screen's Mario at its start, then
+ * two frames of four 16 by 16 arrows, then Mario's shadow
+ */
+#define OPTIONS_ARROWS_OFFSET 0x3408
+#define OPTIONS_SHADOW_OFFSET 0x3830
+/* Where the options' lit values follow their lit labels in D_8012D420 */
+#define OPTION_VALUES_OFFSET 0x3228
+
 /* The sound test's song and sound file names, which it prints */
 #define SOUND_TEST_SONG_NAME_LENGTH 12
 #define SOUND_TEST_SOUND_NAME_LENGTH 24
