@@ -217,8 +217,8 @@ static void* D_8023A584_ovl_01;
 static u8 D_8023A588_ovl_01[0x208];
 
 /* Not static: the original left these to the linker's common block */
-s32 D_8023BFD4_ovl_01;
-s32 D_8023BFD8_ovl_01;
+s32 f_PreviousStickX;
+s32 f_PreviousStickY;
 
 void func_80209500_ovl_01(void) {
   s32 firstSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0];
@@ -463,31 +463,31 @@ s32 func_80209BE0_ovl_01(void) {
   anyStick = g_ControllerStates[3].stickX |
       (g_ControllerStates[2].stickX |
           (g_ControllerStates[0].stickX | g_ControllerStates[1].stickX));
-  stickX = D_8023BFD4_ovl_01 ^ anyStick;
+  stickX = f_PreviousStickX ^ anyStick;
   stickX &= anyStick;
-  if (D_8023BFD4_ovl_01 == stickX) {
+  if (f_PreviousStickX == stickX) {
     D_8022FFA0_ovl_01++;
     if (D_8022FFA0_ovl_01 >= STICK_HOLD_FRAME_COUNT) {
       D_8022FFA0_ovl_01 = 0;
-      D_8023BFD4_ovl_01 = 0;
+      f_PreviousStickX = 0;
     }
   } else {
-    D_8023BFD4_ovl_01 = stickX;
+    f_PreviousStickX = stickX;
   }
 
   anyStick = g_ControllerStates[3].stickY |
       (g_ControllerStates[2].stickY |
           (g_ControllerStates[0].stickY | g_ControllerStates[1].stickY));
-  stickY = D_8023BFD8_ovl_01 ^ anyStick;
+  stickY = f_PreviousStickY ^ anyStick;
   stickY &= anyStick;
-  if (D_8023BFD8_ovl_01 == stickY) {
+  if (f_PreviousStickY == stickY) {
     D_8022FFA4_ovl_01++;
     if (D_8022FFA4_ovl_01 >= STICK_HOLD_FRAME_COUNT) {
       D_8022FFA4_ovl_01 = 0;
-      D_8023BFD8_ovl_01 = 0;
+      f_PreviousStickY = 0;
     }
   } else {
-    D_8023BFD8_ovl_01 = stickY;
+    f_PreviousStickY = stickY;
   }
 
   if (stickX < -STICK_DIAGONAL_THRESHOLD && stickY > STICK_DIAGONAL_THRESHOLD) {
