@@ -26,6 +26,8 @@ typedef s32 CoursePoint[AXIS_COUNT];
 /* Scale between course units and world units */
 #define WORLD_TO_COURSE_SCALE 1024.0f
 #define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
+/* WORLD_TO_COURSE_SCALE as a shift */
+#define WORLD_TO_COURSE_SHIFT 10
 
 /* Course point units in a yard, a foot and a meter */
 #define UNITS_PER_YARD 14045.184f

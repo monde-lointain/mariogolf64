@@ -1543,6 +1543,9 @@ Boolean IsOverlayInExpansionMemory(void) {
   return (u32)BuildHole > BASE_RDRAM_END - 1;
 }
 
+/* A map texel's span in world units, which billboards are placed in */
+#define GROUND_TEXEL_WORLD_SIZE (GROUND_TEXEL_SIZE >> WORLD_TO_COURSE_SHIFT)
+
 /* Marks each billboard on the map image in red */
 void MarkBillboardsOnMap(void) {
   s32 i;
@@ -1552,8 +1555,8 @@ void MarkBillboardsOnMap(void) {
 
   for (i = 0; i < BILLBOARD_COUNT; i++) {
     if (g_Billboards[i].textureIndex >= 0) {
-      column = g_Billboards[i].x / 16;
-      row = g_Billboards[i].z / 16;
+      column = g_Billboards[i].x / GROUND_TEXEL_WORLD_SIZE;
+      row = g_Billboards[i].z / GROUND_TEXEL_WORLD_SIZE;
       MAP_TEXEL(column, row) = color;
     }
   }

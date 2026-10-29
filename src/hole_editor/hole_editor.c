@@ -35,9 +35,6 @@
  * second */
 #define EDGE_WEIGHT_MAX 16
 
-/* WORLD_TO_COURSE_SCALE as a shift */
-#define WORLD_TO_COURSE_SHIFT 10
-
 /* func_804079B8 goes over the ground in two halves of 8 by 16 blocks */
 #define SLOPE_HALF_COUNT 2
 #define SLOPE_BLOCK_COLUMN_COUNT 8

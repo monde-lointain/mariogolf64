@@ -42,7 +42,6 @@
 #define SPOT_SAMPLE_ANGLE 0.3926991f /* A sixteenth of a turn */
 /* A spot this near a billboard's edge, in course units, counts as rough */
 #define SPOT_BILLBOARD_CLEARANCE 0x12C00
-#define BILLBOARD_UNIT_SHIFT 10
 #define NEAR_BILLBOARD_ROUGHNESS 0x465000
 /*
  * A new spot replaces the last only if it is less than half as rough, and
@@ -1382,9 +1381,9 @@ s32 ConsiderReactionSpot(CoursePoint point) {
     for (i = 0; i < BILLBOARD_COUNT; i++) {
       billboard = &g_Billboards[i];
       if ((s32)IntLength2D(
-              (billboard->x << BILLBOARD_UNIT_SHIFT) - point[AXIS_X],
-              (billboard->z << BILLBOARD_UNIT_SHIFT) - point[AXIS_Z]) -
-              (billboard->width << BILLBOARD_UNIT_SHIFT) <
+              (billboard->x << WORLD_TO_COURSE_SHIFT) - point[AXIS_X],
+              (billboard->z << WORLD_TO_COURSE_SHIFT) - point[AXIS_Z]) -
+              (billboard->width << WORLD_TO_COURSE_SHIFT) <
           SPOT_BILLBOARD_CLEARANCE) {
         isNearBillboard = TRUE;
       }
