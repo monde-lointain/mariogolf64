@@ -3451,7 +3451,7 @@ void UpdateTurns(void) {
               g_TurnController.pressedButtons == START_BUTTON &&
               (g_TurnController.buttons & START_BUTTON)) {
             ForceStopRumble();
-            StopSound(8);
+            StopSound(IMPACT_POINT_SOUND_CHANNEL);
             PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
             g_PauseScreen = PAUSE_SCREEN_PAUSE_MENU;
             SetMenuBackdrop(MENU_BACKDROP_DIMMING);
@@ -3947,7 +3947,7 @@ void UpdateTurns(void) {
           }
 
           PlayImpactClickSound();
-          StopSound(8);
+          StopSound(IMPACT_POINT_SOUND_CHANNEL);
           nextState = PLAYER_STATE_STARTING_SWING;
           if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
               (D_80227150_ovl_00.unkC != 0 ||
@@ -3992,7 +3992,7 @@ void UpdateTurns(void) {
           }
 
           PlayImpactClickSound();
-          StopSound(8);
+          StopSound(IMPACT_POINT_SOUND_CHANNEL);
           nextState = PLAYER_STATE_STARTING_SWING;
           if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
