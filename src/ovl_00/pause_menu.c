@@ -883,9 +883,9 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
 /* The tee frames follow the glove in the cursor image */
 #define PAUSE_TEES_T (PAUSE_CURSOR_SIZE << 5)
 
-#ifdef NON_MATCHING
 /* Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
  * while it is loaded */
+#ifdef NON_MATCHING
 void DrawPauseMenu(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 cloudMiddle;

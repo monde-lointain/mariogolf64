@@ -2960,7 +2960,6 @@ void LoadNameLogo(s32 logoIndex, s32 slot) {
 #define NAME_LOGO_STRIP_ROWS 8
 #define NAME_LOGO_STRIP_ROWS_SHIFT 3
 
-#ifdef NON_MATCHING
 /*
  * Draws the shown name logos in four strips each. Until a logo flips back up,
  * its strips are drawn in reverse order with their rows mirrored, which turns
@@ -2969,6 +2968,7 @@ void LoadNameLogo(s32 logoIndex, s32 slot) {
  * Differs from the original only in stack slots: the pointers of the second
  * and third commands swap slots, as in the opening's sparks.
  */
+#ifdef NON_MATCHING
 void DrawNameLogos(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 xEdges[2]; /* Left and right */
@@ -3180,7 +3180,6 @@ void LoadOpeningBall(s32 ballIndex, s32 slot) {
 /* The balls other than the logo ball are drawn this many pixels lower */
 #define PROJECTED_BALL_DROP 2
 
-#ifdef NON_MATCHING
 /*
  * Draws the balls in the opening's ball slots, each with a shadow on the
  * ground. Normally a ball is a billboard in the scene, drawn in strips. While
@@ -3191,6 +3190,7 @@ void LoadOpeningBall(s32 ballIndex, s32 slot) {
  * Differs from the original only in stack slot choices: two pairs of spilled
  * display list pointers swap slots before the Mario image is drawn.
  */
+#ifdef NON_MATCHING
 void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
   Vec3 movement;
   Mat4 turn;
@@ -4185,7 +4185,6 @@ void LoadOpeningShotBall(void) {
 /* The shadow's scale for each step of f_ShotBallScale */
 #define SHOT_BALL_SHADOW_SCALE 0.5
 
-#ifdef NON_MATCHING
 /*
  * Draws the opening's ball while f_ShotBallScale is set: a shadow on the
  * ground below the look-at point, then the ball image above the point in
@@ -4196,6 +4195,7 @@ void LoadOpeningShotBall(void) {
  * pairs of spilled display list pointers swap slots, and the far branch
  * uses other registers.
  */
+#ifdef NON_MATCHING
 void DrawOpeningShotBall(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   ScreenPoint ballPoint;
@@ -5103,7 +5103,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
 /* The depth the sparks are drawn at under the screen's projection */
 #define SPARK_DEPTH -100.0f
 
-#ifdef NON_MATCHING
 /*
  * Draws sparks flying out from a point once f_OpeningSparksState is set to
  * SPARKS_STARTING. The point is projected to the screen, and the sparks
@@ -5112,6 +5111,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
  * The only difference from the original is that the display list
  * pointers spilled after the first and second commands swap stack slots.
  */
+#ifdef NON_MATCHING
 void DrawOpeningSparks(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   ScreenPoint origin;

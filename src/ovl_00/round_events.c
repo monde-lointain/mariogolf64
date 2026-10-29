@@ -1056,12 +1056,12 @@ void DrawBanner(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-#ifdef NON_MATCHING
 /*
  * Flips a message in on a board in the middle of the screen, sized to fit it.
  * FLIP_MESSAGE_LEAVE flips the board back out, and FLIP_MESSAGE_RESET takes it
  * away at once.
  */
+#ifdef NON_MATCHING
 void ShowFlipMessage(s32 messageId) {
   s32 halfSize;
   s32 halfWidth;
@@ -1408,9 +1408,9 @@ void DrawMovie(Gfx** displayListHead) {
 #define WINNER_BLINK_FRAME 8
 #define WINNER_FACE_FRAME_COUNT 4
 
-#ifdef NON_MATCHING
 /* The caption of a longest drive or nearest pin contest, then its winner's face
  */
+#ifdef NON_MATCHING
 void DrawContestWinnerMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
@@ -2011,9 +2011,9 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-#ifdef NON_MATCHING
 /* Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
  * to its own size */
+#ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 width;
@@ -2183,9 +2183,9 @@ void DrawGoombaMovie(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-#ifdef NON_MATCHING
 /* Lakitu flies in, counts down to the start on its starting light, then flies
  * off */
+#ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
   EncodedAsset asset;
   Gfx* gfx = *displayListHead;
@@ -2284,8 +2284,8 @@ void DrawLakituMovie(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawLakituMovie);
 #endif
 
-#ifdef NON_MATCHING
 /* Toad waves the out of bounds flag in the inset view */
+#ifdef NON_MATCHING
 void DrawToadMovie(Gfx** displayListHead) {
   EncodedAsset asset;
   Gfx* gfx = *displayListHead;
@@ -2959,9 +2959,9 @@ void ShowWindFlyGuy(s32 show) {
 #define WIND_FLY_GUY_SOUND_CHANNEL 10
 #define WIND_FLY_GUY_SOUND_VOLUME 63
 
-#ifdef NON_MATCHING
 /* The Fly Guy that warns of a strong wind, flying across the screen and
  * trailing a streak of wind */
+#ifdef NON_MATCHING
 void DrawWindFlyGuy(Gfx** displayListHead) {
   EncodedAsset asset;
   FlyGuyPoint position;

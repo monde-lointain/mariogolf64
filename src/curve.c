@@ -27,7 +27,6 @@ void ResetPath(void) {
   f_PathPointIndex = 0;
 }
 
-#ifdef NON_MATCHING
 /*
  * Moves position toward a target that runs along the lines between the
  * points, from the second point to the last, and returns 1 once it has
@@ -38,6 +37,7 @@ void ResetPath(void) {
  * steps per line, which are also its denominator; other paces keep the
  * last path's.
  */
+#ifdef NON_MATCHING
 s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
     f32 position[AXIS_COUNT]) {
   s32 nextPointIndex;

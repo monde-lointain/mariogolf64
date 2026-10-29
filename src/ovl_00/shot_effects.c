@@ -328,12 +328,12 @@ void StartFlagstickSparks(CoursePoint point) {
 #define SPARK_TEXTURE_STEP_SCALE 2048.0f
 #define SPARK_NO_TEXTURE_STEP 0xFFFF
 
-#ifdef NON_MATCHING
 /*
  * Moves the sparks and draws them at their bursts' points on screen, the
  * flagstick's as sprites and the impact's as triangles, and steps the impact
  * flash that lights the golfer
  */
+#ifdef NON_MATCHING
 void DrawSparks(Gfx** displayListHead) {
   Vec3 rotation;
   Vec3 translation;

@@ -325,13 +325,13 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
   *gfxPtr = gfx;
 }
 
-#ifdef NON_MATCHING
 /*
  * Draws the billboards. Those far from the camera are drawn first, from
  * the nearest to the farthest; DrawFadingBillboards draws the close ones
  * that need to stay see-through. Here, the close ones are only drawn when
  * they stay opaque.
  */
+#ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   Gfx* gfx = g_DisplayListHead;
   BillboardColor lightColor = g_BillboardLightColor;

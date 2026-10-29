@@ -215,7 +215,6 @@ static void ResetBallSimulations(void) {
 typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
     s32 endY, s32 endZ, s32* cell, f32* fraction, BallSimulation* simulation);
 
-#ifdef NON_MATCHING
 /*
  * The opening's copy of StepBallSimulation, which moves the ball through one
  * step. Unlike main's copy it works on the simulation's integer velocity
@@ -230,6 +229,7 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * the register it had and the floating-point registers are allocated
  * differently.
  */
+#ifdef NON_MATCHING
 s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
   PlaneTriangle triangle;
 
@@ -1615,7 +1615,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206A50_ovl_05);
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
 #endif
 
-#ifdef NON_MATCHING
 /*
  * A cut-down copy of LaunchBallSimulation. It always takes the club test's
  * entry, picks a lie blend of 0, leaves out the slopes, rain and wind, and
@@ -1624,6 +1623,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
  * Nonmatching: GCC schedules the block that sets the spin differently, which
  * moves the unk40 and unk38 stores and swaps two float registers there.
  */
+#ifdef NON_MATCHING
 s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   s32 percentRange[2];
   Club* club;

@@ -53,8 +53,8 @@ static f32 f_IntroCameraDistance = 0.0f;
 /* How far above the ball the camera is; negative values are above */
 static f32 f_IntroCameraHeight = 0.0f;
 
-#ifdef NON_MATCHING
 /* Places the camera for the start of the hole intro */
+#ifdef NON_MATCHING
 void StartHoleIntroCamera(void) {
   Vec3* lookAt = &g_Cameras[1].view.lookAt;
   Radians heading;

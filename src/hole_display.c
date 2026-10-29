@@ -1876,9 +1876,9 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
 #define FULL_VIEW_WIDTH (SCREEN_WIDTH - (2 * SCREEN_BORDER))
 #define FULL_VIEW_HEIGHT (SCREEN_HEIGHT - (2 * SCREEN_BORDER))
 
-#ifdef NON_MATCHING
 /* Draws the sky and, below it, the course's backdrop in strips that follow the
  * camera's yaw and pitch */
+#ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   Gfx* gfx;
   Boolean isNibbleImage;

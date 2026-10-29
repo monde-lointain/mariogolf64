@@ -1133,8 +1133,8 @@ void func_8040C360(CameraMatrices* matrices, Gfx** displayListHead);
       (view).scissorY, (view).scissorX + (view).scissorWidth, \
       (view).scissorY + (view).scissorHeight)
 
-#ifdef NON_MATCHING
 /* Returns the frame count, which the caller ignores */
+#ifdef NON_MATCHING
 s32 DrawGame(void) {
   Boolean usesFloatMatrices;
   CameraMatrices* matrices;

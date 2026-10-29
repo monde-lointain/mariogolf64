@@ -1012,8 +1012,8 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
         TEXEL_STEP_ONE); \
   }
 
-#ifdef NON_MATCHING
 /* Draws place, as in "21st", centred on x */
+#ifdef NON_MATCHING
 void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   Gfx* gfx = *displayListHead;
   char* c;
@@ -1111,11 +1111,11 @@ void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
 #define PLACE_SUFFIX_ICON_FIRST 4
 #define RANK_BANNER_X_OFFSET (-12)
 
-#ifdef NON_MATCHING
 /*
  * Draws the place icon for a rank. With RANK_AS_PLACE, places past 3rd
  * are written as digits followed by a suffix.
  */
+#ifdef NON_MATCHING
 void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
   Gfx* gfx = *displayListHead;
   s32 suffix;
@@ -1338,9 +1338,9 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_CHEER_SOUND_CHANNEL 3
 #define NOTICE_SOUND_PAN_RIGHT 255
 
-#ifdef NON_MATCHING
 /* The notice that a course has opened: its picture and title swing in, then a
  * shine sweeps the title */
+#ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 size;
@@ -1553,9 +1553,9 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CHARACTER_VOICE_SLOT 1
 #define NOTICE_CHARACTER_VOICE 20
 
-#ifdef NON_MATCHING
 /* The notice that a character has been beaten: their nameplate, face and title
  * pop open, then a shine sweeps the title */
+#ifdef NON_MATCHING
 void DrawCharacterResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   Radians angle;
@@ -1844,9 +1844,9 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define TROPHY_SHINE_SPEED 16
 #define TROPHY_SHINE_DSDX 0x800
 
-#ifdef NON_MATCHING
 /* Draws the banner of a round's result, and the trophy above a top three
  * tournament place */
+#ifdef NON_MATCHING
 void DrawResultsBanner(Gfx** displayListHead) {
   Gfx* gfx;
   s32 i;
@@ -2434,11 +2434,11 @@ enum PointsStep {
   POINTS_STEP_START_TALLY
 };
 
-#ifdef NON_MATCHING
 /*
  * Counts the earned course points into the save, showing a notice when they
  * open a course, then returns TRUE once A is pressed
  */
+#ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {
   EncodedAsset asset;
   s32 i;
@@ -3081,9 +3081,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 #define STANDING_ONE_DIGIT_DOWN_SHIFT -20
 #define STANDING_TWO_DIGIT_DOWN_SHIFT -12
 
-#ifdef NON_MATCHING
 /* The match play results of two players: place, portrait, holes up or down, any
  * bets and Course Points */
+#ifdef NON_MATCHING
 void DrawMatchResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 unused[4];
@@ -3271,9 +3271,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E10_ovl_00);
 #define SCORE_PASSWORD_ENV_COLOR 0x00FF0000
 #define SCORE_PASSWORD_PRIM_COLOR 0xFFFF0000
 
-#ifdef NON_MATCHING
 /* The results of a club tournament: its course, number, name and mode, the
  * score and the password to send in */
+#ifdef NON_MATCHING
 void DrawClubTournamentResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 width;
@@ -3451,9 +3451,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
 #define PORTRAIT_ANIMATION_REST 0
 #define NO_PORTRAIT_FRAME (-1)
 
-#ifdef NON_MATCHING
 /* The results card, its game mode's results, the bobbing title and the players'
  * portraits */
+#ifdef NON_MATCHING
 void DrawRoundResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   f32 titleX;
