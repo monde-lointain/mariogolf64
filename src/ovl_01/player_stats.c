@@ -152,7 +152,7 @@ enum StatsDirection {
 /* Each bet's stake is one of these levels, which D_802304F4 turns into an
  * amount */
 #define BET_STAKE_LEVEL_COUNT 6
-/* What unkE holds for a bet that func_80217B88's preset leaves out */
+/* What unkE holds for a bet that ApplyBetPreset's preset leaves out */
 #define NO_BET -1
 /* Where UpdateBetSettings types the chosen bet's explanation, and its first
  * message
@@ -530,7 +530,11 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
   D_802303A1_ovl_01 = 0;
 }
 
-void func_80217B88_ovl_01(s32 requestedPreset) {
+/*
+ * Sets each bet's stake level and rate from the mode's preset, or none, and
+ * resets the handicaps
+ */
+void ApplyBetPreset(s32 requestedPreset) {
   s8 presetIndex = requestedPreset;
   MenuMemory* memory = func_8005AF74();
   s16 index;

@@ -5,11 +5,11 @@
 
 #include "save.h"
 
-/* The values of unkE, which func_80217B88 also turns into GameState's
+/* The values of unkE, which ApplyBetPreset also turns into GameState's
  * betRates */
 #define MENU_UNKE_COUNT 8
 
-/* The presets of func_80217B88; two of them have a variant that four players
+/* The presets of ApplyBetPreset; two of them have a variant that four players
  * take instead */
 #define MENU_UNKE_PRESET_COUNT 7
 #define MENU_UNKE_PRESET_STROKE 0
@@ -19,7 +19,7 @@
 #define MENU_UNKE_PRESET_CLUB_SLOTS 4
 #define MENU_UNKE_PRESET_MINI_GOLF 5
 #define MENU_UNKE_PRESET_MINI_GOLF_FOUR_PLAYER 6
-/* Past func_80217B88's presets, so that it clears the values instead */
+/* Past ApplyBetPreset's presets, so that it clears the values instead */
 #define MENU_UNKE_PRESET_NONE 10
 
 /* What holesChoice holds once the C buttons choose the holes to play */
@@ -45,7 +45,7 @@ typedef struct MenuMemory {
   /* 0x0C */ s8 modeSpin; /* How far the modes still have to turn to reach it */
   /* 0x0D */ s8 unkD;
   /* 0x0E */ s8
-      unkE[MENU_UNKE_COUNT]; /* Set from one of func_80217B88's presets */
+      unkE[MENU_UNKE_COUNT]; /* Set from one of ApplyBetPreset's presets */
   /* 0x16 */ s8 courseChoice; /* The course select's course: an open one, or the
                                  next one still shut */
   /* 0x17 */ s8

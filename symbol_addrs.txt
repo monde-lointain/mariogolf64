@@ -3353,6 +3353,7 @@ DrawPageArrows = 0x8021BE88; // type:func segment:ovl_01
 DrawCenteredPageArrows = 0x8021C200; // type:func segment:ovl_01
 DrawTurnedPageArrows = 0x8021C67C; // type:func segment:ovl_01
 DrawUpDownArrows = 0x8021CBDC; // type:func segment:ovl_01
+ApplyBetPreset = 0x80217B88; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01

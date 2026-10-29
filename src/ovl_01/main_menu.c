@@ -401,7 +401,7 @@ void LoadRingShotRecord(RingShotRecord* record);
 void LoadBestShotReplay(PlayRecord* record);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
 s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber);
-void func_80217B88_ovl_01(s32 requestedPreset);
+void ApplyBetPreset(s32 requestedPreset);
 void func_80228B60_ovl_01(void);
 void DrawMenuScenery(Gfx** displayListHead);
 void DrawNarrowMenuBoard(Gfx** displayListHead);
@@ -2207,7 +2207,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 2;
         MAP_CAMERA_MODE_TOP_BYTE = 0;
         D_801B5634 = 0;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        ApplyBetPreset(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_GET_CHARACTER:
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -2218,7 +2218,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        ApplyBetPreset(MENU_UNKE_PRESET_NONE);
         for (index = 0; index != MAX_PLAYER_COUNT; index++) {
           g_ChosenHandicaps[index] = 0;
         }
@@ -2243,7 +2243,7 @@ void UpdateModeSelect(void) {
           D_801B5634 = 1;
         }
 
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_STROKE);
+        ApplyBetPreset(MENU_UNKE_PRESET_STROKE);
         if (g_ChosenPlayerCount == 1) {
           for (index = 0; index != MAX_PLAYER_COUNT; index++) {
             g_ChosenHandicaps[index] = 0;
@@ -2266,7 +2266,7 @@ void UpdateModeSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 3;
         D_801323A0.holesChoice = HOLES_CHOICE_ALL;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_MATCH_GAME);
+        ApplyBetPreset(MENU_UNKE_PRESET_MATCH_GAME);
         break;
       case MODE_ICON_SKINS_MATCH:
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -2277,7 +2277,7 @@ void UpdateModeSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 4;
         D_801323A0.holesChoice = HOLES_CHOICE_ALL;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_SKINS_MATCH);
+        ApplyBetPreset(MENU_UNKE_PRESET_SKINS_MATCH);
         break;
       case MODE_ICON_SPEED_GOLF:
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -2288,7 +2288,7 @@ void UpdateModeSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
         D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        ApplyBetPreset(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_MINI_GOLF:
         /* Mini golf needs every player on a controller */
@@ -2317,7 +2317,7 @@ void UpdateModeSelect(void) {
           D_801B5634 = 6;
         }
 
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_MINI_GOLF);
+        ApplyBetPreset(MENU_UNKE_PRESET_MINI_GOLF);
         if (g_ChosenPlayerCount == 1) {
           for (index = 0; index != MAX_PLAYER_COUNT; index++) {
             g_ChosenHandicaps[index] = 0;
@@ -2342,7 +2342,7 @@ void UpdateModeSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
         D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        ApplyBetPreset(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_UNK9:
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -2353,7 +2353,7 @@ void UpdateModeSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
         D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        ApplyBetPreset(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_RING_SHOT:
         PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -2363,7 +2363,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+        ApplyBetPreset(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_CLUB_SLOTS:
         /* The club slots need every player on a controller too */
@@ -2386,7 +2386,7 @@ void UpdateModeSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 5;
         D_801323A0.holesChoice = HOLES_CHOICE_ALL;
-        func_80217B88_ovl_01(MENU_UNKE_PRESET_CLUB_SLOTS);
+        ApplyBetPreset(MENU_UNKE_PRESET_CLUB_SLOTS);
         break;
     }
 
@@ -2989,7 +2989,7 @@ void UpdateMainMenu(void) {
             D_800FF4C0 = 1;
             MAP_CAMERA_MODE_TOP_BYTE = 2;
             D_801B5634 = 0;
-            func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+            ApplyBetPreset(MENU_UNKE_PRESET_NONE);
           }
 
           break;
@@ -3046,7 +3046,7 @@ void UpdateMainMenuWithoutTransmit(void) {
             D_800FF4C0 = 1;
             MAP_CAMERA_MODE_TOP_BYTE = 2;
             D_801B5634 = 0;
-            func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+            ApplyBetPreset(MENU_UNKE_PRESET_NONE);
           }
 
           break;
