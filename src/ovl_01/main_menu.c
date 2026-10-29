@@ -134,6 +134,16 @@
  * five slots */
 #define MENU_CHARACTER_LAYOUT_COUNT 4
 #define MENU_CHARACTER_SLOT_COUNT 5
+/*
+ * Their models' scales: a player alone stands largest, beside the rival or not,
+ * and of three or four the two at the back stand slightly smaller
+ */
+#define MENU_CHARACTER_SOLO_SCALE 5.0f
+#define MENU_RIVAL_SCALE 4.0f
+#define MENU_CHARACTER_PAIR_SCALE 4.0f
+#define MENU_CHARACTER_FRONT_SCALE 3.5f
+#define MENU_CHARACTER_BACK_SCALE 3.4f
+#define MENU_CHARACTER_DEFAULT_SCALE 4.0f
 /* The course select's water plane's vertices */
 #define WATER_VERTEX_COUNT 5
 /* The holes badges of D_80106100, 24 by 24 CI4 each */
@@ -5151,24 +5161,26 @@ void func_80200EF0_ovl_01(Gfx** displayListHead) {
   characterCount += (rival >= 0);
   switch (characterCount) {
     case 1:
-      f_MenuCharacterScales[0] = 5.0f;
+      f_MenuCharacterScales[0] = MENU_CHARACTER_SOLO_SCALE;
       break;
     case 2:
-      f_MenuCharacterScales[0] = (rival >= 0) ? 5.0f : 4.0f;
-      f_MenuCharacterScales[1] = 4.0f;
+      f_MenuCharacterScales[0] =
+          (rival >= 0) ? MENU_CHARACTER_SOLO_SCALE : MENU_CHARACTER_PAIR_SCALE;
+      f_MenuCharacterScales[1] =
+          (rival >= 0) ? MENU_RIVAL_SCALE : MENU_CHARACTER_PAIR_SCALE;
       break;
     case 3:
     case 4:
-      f_MenuCharacterScales[0] = 3.5f;
-      f_MenuCharacterScales[1] = 3.4f;
-      f_MenuCharacterScales[2] = 3.4f;
-      f_MenuCharacterScales[3] = 3.5f;
+      f_MenuCharacterScales[0] = MENU_CHARACTER_FRONT_SCALE;
+      f_MenuCharacterScales[1] = MENU_CHARACTER_BACK_SCALE;
+      f_MenuCharacterScales[2] = MENU_CHARACTER_BACK_SCALE;
+      f_MenuCharacterScales[3] = MENU_CHARACTER_FRONT_SCALE;
       break;
     default:
-      f_MenuCharacterScales[0] = 4.0f;
-      f_MenuCharacterScales[1] = 4.0f;
-      f_MenuCharacterScales[2] = 4.0f;
-      f_MenuCharacterScales[3] = 4.0f;
+      f_MenuCharacterScales[0] = MENU_CHARACTER_DEFAULT_SCALE;
+      f_MenuCharacterScales[1] = MENU_CHARACTER_DEFAULT_SCALE;
+      f_MenuCharacterScales[2] = MENU_CHARACTER_DEFAULT_SCALE;
+      f_MenuCharacterScales[3] = MENU_CHARACTER_DEFAULT_SCALE;
       break;
   }
 
