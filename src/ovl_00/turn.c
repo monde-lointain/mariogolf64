@@ -2896,12 +2896,12 @@ static inline void DebugTestGutsMotion(void) {
     f_GutsTestCharacter = 0;
   }
 
-  if (f_GutsTestMotion < 12) {
-    f_GutsTestMotion = 15;
+  if (f_GutsTestMotion < REACTION_ANIMATION_EAGLE) {
+    f_GutsTestMotion = REACTION_ANIMATION_BOGEY;
   }
 
-  if (f_GutsTestMotion >= 16) {
-    f_GutsTestMotion = 12;
+  if (f_GutsTestMotion > REACTION_ANIMATION_BOGEY) {
+    f_GutsTestMotion = REACTION_ANIMATION_EAGLE;
   }
 
   sprintf(
@@ -2927,13 +2927,16 @@ static inline void FrameBallAndShot(void) {
   f_DebugFramingPitch += g_ControllerStates[1].stickY * 0.002f;
   ClearFramedSpheres();
   SetFramingAngles(f_DebugFramingPitch, f_DebugFramingYaw);
-  center[0] = g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-  center[1] = g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-  center[2] = g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+  center[AXIS_X] =
+      g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+  center[AXIS_Y] =
+      g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+  center[AXIS_Z] =
+      g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   AddFramedSphere(center, 7.5f);
-  center[0] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-  center[1] = g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-  center[2] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+  center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+  center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+  center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   AddFramedSphere(center, 7.5f);
   FrameSpheres(0);
   GetFramedView(g_Cameras[0].view.eye, g_Cameras[0].view.lookAt);
