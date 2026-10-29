@@ -344,9 +344,6 @@ s32 func_8022BDC4_ovl_01(void);
 s32 func_8022B46C_ovl_01(void);
 s32 func_8022B5E0_ovl_01(void);
 
-/* Not static: the original left it to the linker's common block */
-s8 D_80105DBC[7];
-
 static Mtx D_8023BE40_ovl_01;
 static Mtx D_8023BE80_ovl_01;
 static Mtx D_8023BEC0_ovl_01;
@@ -1242,7 +1239,7 @@ void func_80228C00_ovl_01(void) {
         D_80105DC4 = g_TournamentCode[0] >> CLUB_CODE_NINTENDO_SHIFT;
         D_80105DC8 = D_80230F74_ovl_01;
         rules = GetTournamentRules(g_TournamentCode[1]);
-        *(TournamentRules*)&D_80105DBC[4] = *rules;
+        D_80105DC0 = *rules;
         D_80105DCC = g_TournamentCode[2] + 1;
         osSyncPrintf("bkTour %x, %x, %x\n", g_TournamentCode[0],
             g_TournamentCode[1], g_TournamentCode[2]);
@@ -2064,11 +2061,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B7E0_ovl_01);
 #endif
 
 s32 func_8022BDB0_ovl_01(void) {
-  return D_80105DBC[4] == -1;
+  return D_80105DC0.characterIndex == -1;
 }
 
 s32 func_8022BDC4_ovl_01(void) {
-  return D_80105DBC[4];
+  return D_80105DC0.characterIndex;
 }
 
 s32 func_8022BDD0_ovl_01(void) {

@@ -462,8 +462,6 @@ static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
 static s32 D_800C2C00[4] = {0};
 
 /* Not static: the original left these to the linker's common block */
-s8 D_80105DC1;
-s8 D_80105DC2;
 s32 D_8012F484;
 s32 D_8012F488;
 s32 D_8012F48C;
@@ -1664,7 +1662,7 @@ void func_8005D1E4(void) {
 s32 GetClubTournamentGameMode(void) {
   s32 value;
 
-  switch (D_80105DC1) {
+  switch (D_80105DC0.isSpeedGolf) {
     case 0:
     default:
       value = 0;
@@ -1678,7 +1676,7 @@ s32 GetClubTournamentGameMode(void) {
 }
 
 s32 GetClubTournamentCourse(void) {
-  return D_80105DC2;
+  return D_80105DC0.courseIndex;
 }
 
 Boolean IsNintendoClubTournament(void) {
@@ -1729,7 +1727,7 @@ void CopyTournamentCode(u8* destination) {
 s32 GetClubTournamentModeMessage(void) {
   s32 value;
 
-  switch (D_80105DC1) {
+  switch (D_80105DC0.isSpeedGolf) {
     case 0:
     default:
       value = 0x9E;
@@ -1745,13 +1743,13 @@ s32 GetClubTournamentModeMessage(void) {
 s32 GetClubTournamentCourseTitleMessage(void) {
   s32 value;
 
-  if (D_80105DC2 >= 6) {
+  if (D_80105DC0.courseIndex >= 6) {
     value = 0xC7;
-    if (D_80105DC2 >= 9) {
+    if (D_80105DC0.courseIndex >= 9) {
       value = 0xC8;
     }
   } else {
-    value = D_80105DC2 + 0x1EB;
+    value = D_80105DC0.courseIndex + 0x1EB;
   }
 
   return value;
