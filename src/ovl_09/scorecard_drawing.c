@@ -2213,7 +2213,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   gDPPipeSync(gfx++);
-  if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+  if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
     DrawTextureRect(&gfx, (g_Scorecard.x + LABEL_PANEL_LEFT) << 2,
         (g_Scorecard.y + LABEL_PANEL_TOP) << 2,
         (g_Scorecard.x + LABEL_PANEL_RIGHT) << 2,
@@ -2221,7 +2221,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
 
-  if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+  if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
     DrawTextureRect(&gfx, (g_Scorecard.x + LABEL_PANEL_LEFT) << 2,
         (g_Scorecard.y + LABEL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + LABEL_PANEL_RIGHT) << 2,
@@ -2231,7 +2231,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   }
 
   if (IS_MATCH_PLAY_MODE()) {
-    if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+    if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       DrawTextureRect(&gfx, (g_Scorecard.x + TOTAL_PANEL_LEFT) << 2,
           (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
           (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
@@ -2244,13 +2244,13 @@ void DrawScoresPage(Gfx** displayListHead) {
           (g_Scorecard.y + TOTAL_PANEL_BOTTOM) << 2, G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
-  } else if (g_GameState.holeSelection & FRONT_NINE_SKIPPED) {
+  } else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + TOTAL_PANEL_LEFT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM + NINE_SPACING) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  } else if (g_GameState.holeSelection & BACK_NINE_SKIPPED) {
+  } else if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + TOTAL_PANEL_LEFT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP) << 2,
         (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
@@ -2271,7 +2271,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_EDGE_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
-  if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+  if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
     DrawTextureRect(&gfx, (g_Scorecard.x + LABEL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + LABEL_PANEL_TOP) << 2,
         (g_Scorecard.x + LABEL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
@@ -2280,7 +2280,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
 
-  if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+  if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
     DrawTextureRect(&gfx, (g_Scorecard.x + LABEL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + LABEL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + LABEL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
@@ -2291,7 +2291,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   }
 
   if (IS_MATCH_PLAY_MODE()) {
-    if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+    if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       DrawTextureRect(&gfx, (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
           (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
           (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
@@ -2306,14 +2306,14 @@ void DrawScoresPage(Gfx** displayListHead) {
           PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
-  } else if (g_GameState.holeSelection & FRONT_NINE_SKIPPED) {
+  } else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM + NINE_SPACING) << 2,
         G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
         0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  } else if (g_GameState.holeSelection & BACK_NINE_SKIPPED) {
+  } else if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP) << 2,
         (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
@@ -2371,7 +2371,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
       gDPPipeSync(gfx++);
       if (j & 1) {
-        if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+        if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           DrawTextureRect(&gfx,
               (g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT) << 2,
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP) << 2,
@@ -2382,7 +2382,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               TEXEL_STEP_ONE);
         }
 
-        if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+        if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawTextureRect(&gfx,
               (g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT) << 2,
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + NINE_SPACING)
@@ -2408,7 +2408,8 @@ void DrawScoresPage(Gfx** displayListHead) {
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   gDPPipeSync(gfx++);
   if (!IS_MATCH_PLAY_MODE() &&
-      !(g_GameState.holeSelection & (FRONT_NINE_SKIPPED | BACK_NINE_SKIPPED))) {
+      !(g_GameState.holeSelection &
+          (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     DrawTextureRect(&gfx, (g_Scorecard.x + NET_PANEL_LEFT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + NET_PANEL_RIGHT) << 2,
@@ -2421,7 +2422,8 @@ void DrawScoresPage(Gfx** displayListHead) {
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   gDPPipeSync(gfx++);
   if (!IS_MATCH_PLAY_MODE() &&
-      !(g_GameState.holeSelection & (FRONT_NINE_SKIPPED | BACK_NINE_SKIPPED))) {
+      !(g_GameState.holeSelection &
+          (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     DrawTextureRect(&gfx, (g_Scorecard.x + NET_PANEL_RIGHT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + NET_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
@@ -2439,7 +2441,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
     for (j = 0; j != HOLES_PER_NINE; j++) {
       if (!(j & 1)) {
-        if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+        if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           DrawTextureRect(&gfx,
               (g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT) << 2,
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP) << 2,
@@ -2450,7 +2452,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               TEXEL_STEP_ONE);
         }
 
-        if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+        if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawTextureRect(&gfx,
               (g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT) << 2,
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + NINE_SPACING)
@@ -2480,7 +2482,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       TOTAL_LABEL_WIDTH, TOTAL_LABELS_IMAGE_HEIGHT, 0, G_TX_MIRROR, 0, 5, 0, 0,
       0);
   if (IS_MATCH_PLAY_MODE()) {
-    if (g_GameState.holeSelection & BACK_NINE_SKIPPED) {
+    if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
       DrawTextureRect(&gfx, (g_Scorecard.x + ROUND_LABEL_LEFT) << 2,
           (g_Scorecard.y + TOTAL_LABEL_TOP) << 2,
           (g_Scorecard.x + ROUND_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
@@ -2498,7 +2500,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           ROUND_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
-  } else if (g_GameState.holeSelection & BACK_NINE_SKIPPED) {
+  } else if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + ROUND_LABEL_LEFT) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP) << 2,
         (g_Scorecard.x + ROUND_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
@@ -2506,7 +2508,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0,
         ROUND_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  } else if (g_GameState.holeSelection & FRONT_NINE_SKIPPED) {
+  } else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + ROUND_LABEL_LEFT) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + ROUND_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
@@ -2555,7 +2557,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         secondRow = 2;
       }
 
-      if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+      if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
         DrawSmallFace(&gfx, g_Scorecard.x + SCORES_FACE_LEFT,
             frontTop + PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y, 0,
             TRUE);
@@ -2567,7 +2569,7 @@ void DrawScoresPage(Gfx** displayListHead) {
             1, TRUE);
       }
 
-      if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+      if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
         DrawSmallFace(&gfx, g_Scorecard.x + SCORES_FACE_LEFT,
             backTop + PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y, 0,
             TRUE);
@@ -2589,7 +2591,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         LoadTextureBlock(&gfx, g_PlayerFaceImages[i], G_IM_FMT_CI, G_IM_SIZ_8b,
             FACE_SIZE, SMALL_FACE_HEIGHT, 0, G_TX_MIRROR, 0, MIRRORED_FACE_MASK,
             0, 0, 0);
-        if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+        if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           DrawSmallFace(&gfx,
               g_Scorecard.x + SCORES_FACE_LEFT +
                   ((i & 1) * SCORES_FACE_STAGGER),
@@ -2598,7 +2600,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               i, TRUE);
         }
 
-        if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+        if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawSmallFace(&gfx,
               g_Scorecard.x + SCORES_FACE_LEFT +
                   ((i & 1) * SCORES_FACE_STAGGER),
@@ -2614,14 +2616,14 @@ void DrawScoresPage(Gfx** displayListHead) {
   SetTextColor(&gfx, 0xBF, 0xFF, 0x7F);
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 0xFF, 0xBF, 0);
-  if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+  if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
     DrawLargeText(
         &gfx, g_Scorecard.x + HEADING_LEFT, frontTop + g_Scorecard.y, "NO.");
     DrawLargeText(&gfx, g_Scorecard.x + HEADING_LEFT,
         frontTop + PAR_ROW_TOP + g_Scorecard.y, "PAR");
   }
 
-  if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+  if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
     DrawLargeText(
         &gfx, g_Scorecard.x + HEADING_LEFT, backTop + g_Scorecard.y, "NO.");
     DrawLargeText(&gfx, g_Scorecard.x + HEADING_LEFT,
@@ -2648,7 +2650,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
   for (i = 0; i != g_GameState.playerCount; i++) {
-    if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+    if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
       extraTop = EXTRA_ROW_TOP;
       if (isPuttsShown) {
         DrawSmallText(&gfx, g_Scorecard.x + PUTTS_LABEL_LEFT,
@@ -2669,7 +2671,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       }
     }
 
-    if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+    if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       extraTop = EXTRA_ROW_TOP;
       if (isPuttsShown) {
         DrawSmallText(&gfx, g_Scorecard.x + PUTTS_LABEL_LEFT,
@@ -2694,14 +2696,14 @@ void DrawScoresPage(Gfx** displayListHead) {
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 0xFF, 0xFF, 0);
   for (j = 0; j != HOLES_PER_NINE; j++) {
-    if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+    if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
       sprintf(g_PrintBuffer, f_TwoDigitFormat, j + 1);
       DrawCondensedShadowedText(&gfx,
           g_Scorecard.x + (j * CELL_WIDTH) + HOLE_NUMBERS_LEFT,
           frontTop + HOLE_NUMBERS_TOP + g_Scorecard.y, g_PrintBuffer);
     }
 
-    if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+    if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       sprintf(g_PrintBuffer, f_TwoDigitFormat, j + HOLES_PER_NINE + 1);
       DrawCondensedShadowedText(&gfx,
           g_Scorecard.x + (j * CELL_WIDTH) + BACK_HOLE_NUMBERS_LEFT,
@@ -2711,7 +2713,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
   for (j = 0; j != HOLES_PER_NINE; j++) {
-    if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+    if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
       frontPar += (s8)course->holes[j].par;
       sprintf(g_PrintBuffer, f_DecimalFormat, (s8)course->holes[j].par);
       DrawCondensedShadowedText(&gfx,
@@ -2719,7 +2721,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           frontTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
     }
 
-    if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+    if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       backPar += (s8)course->holes[j + HOLES_PER_NINE].par;
       sprintf(g_PrintBuffer, f_DecimalFormat,
           (s8)course->holes[j + HOLES_PER_NINE].par);
@@ -2730,7 +2732,8 @@ void DrawScoresPage(Gfx** displayListHead) {
   }
 
   if (!IS_MATCH_PLAY_MODE() &&
-      !(g_GameState.holeSelection & (FRONT_NINE_SKIPPED | BACK_NINE_SKIPPED))) {
+      !(g_GameState.holeSelection &
+          (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     sprintf(g_PrintBuffer, "%3d", frontPar);
     DrawShadowedText(&gfx, g_Scorecard.x + FRONT_PAR_TOTAL_LEFT,
         frontTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
@@ -2791,7 +2794,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, "%2dDOWN", -standing);
       }
 
-      if (g_GameState.holeSelection & BACK_NINE_SKIPPED) {
+      if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
         DrawShadowedText(&gfx, g_Scorecard.x + MATCH_STANDING_LEFT,
             frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
             g_PrintBuffer);
@@ -2840,7 +2843,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       }
 
       sprintf(g_PrintBuffer, "%2dP", standing);
-      if (g_GameState.holeSelection & BACK_NINE_SKIPPED) {
+      if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
         DrawShadowedText(&gfx, g_Scorecard.x + SKINS_TOTAL_LEFT,
             frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
             g_PrintBuffer);
@@ -2970,7 +2973,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       }
 
       if (!(g_GameState.holeSelection &
-              (FRONT_NINE_SKIPPED | BACK_NINE_SKIPPED))) {
+              (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
         if (shownHoleCount > 0) {
           sprintf(g_PrintBuffer, "%3d", frontTotal);
           DrawCondensedShadowedText(&gfx, g_Scorecard.x + FRONT_TOTAL_LEFT,
@@ -2993,11 +2996,11 @@ void DrawScoresPage(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, f_ScoreToParFormat, overPar);
       }
 
-      if (g_GameState.holeSelection & BACK_NINE_SKIPPED) {
+      if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
         DrawShadowedText(&gfx, g_Scorecard.x + NET_SCORE_LEFT,
             frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
             g_PrintBuffer);
-      } else if (g_GameState.holeSelection & FRONT_NINE_SKIPPED) {
+      } else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
         DrawShadowedText(&gfx, g_Scorecard.x + NET_SCORE_LEFT,
             backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
             g_PrintBuffer);
@@ -3014,7 +3017,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   sprintf(g_PrintBuffer, "%c", HANDICAP_STROKE_CODE);
   for (i = 0; i != SCORE_ROW_COUNT; i++) {
     for (j = 0; j != HOLES_PER_NINE; j++) {
-      if (!(g_GameState.holeSelection & FRONT_NINE_SKIPPED)) {
+      if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
         if (handicapStrokes[i][j] < 0) {
           DrawShadowedText(&gfx,
               g_Scorecard.x + (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT,
@@ -3032,7 +3035,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         }
       }
 
-      if (!(g_GameState.holeSelection & BACK_NINE_SKIPPED)) {
+      if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
         if (handicapStrokes[i][j + HOLES_PER_NINE] < 0) {
           DrawShadowedText(&gfx,
               g_Scorecard.x + (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT,

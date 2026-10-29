@@ -1610,7 +1610,7 @@ void func_801F6B28_ovl_01(void) {
   s32 index;
   s32 slot;
   s32 clubSet;
-  s32* skippedNines;
+  s32* holeSelection;
   s32 row;
   s32 column;
 
@@ -1632,7 +1632,7 @@ void func_801F6B28_ovl_01(void) {
 
   StartBets();
   if (func_8022BDD0_ovl_01()) {
-    g_GameState.holeSelection = 0;
+    g_GameState.holeSelection = HOLE_SELECTION_ALL;
     g_GameState.courseIndex = GetClubTournamentCourse();
     g_GameState.gameMode = GetClubTournamentGameMode();
     g_GameState.isMiniGolf = g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX;
@@ -1664,26 +1664,26 @@ void func_801F6B28_ovl_01(void) {
         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
       /* Through a pointer, as the original keeps the address in a register for
        * every store */
-      skippedNines = &g_GameState.holeSelection;
-      *skippedNines = D_8022BE1C_ovl_01;
+      holeSelection = &g_GameState.holeSelection;
+      *holeSelection = D_8022BE1C_ovl_01;
       if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
         switch (D_801323A0.unk18) {
           case 0:
-            *skippedNines = 0;
+            *holeSelection = HOLE_SELECTION_ALL;
             break;
           case 1:
-            *skippedNines = BACK_NINE_SKIPPED;
+            *holeSelection = HOLE_SELECTION_FRONT_NINE;
             break;
           case 2:
-            *skippedNines = FRONT_NINE_SKIPPED;
+            *holeSelection = HOLE_SELECTION_BACK_NINE;
             break;
           case 3:
-            *skippedNines = 0;
+            *holeSelection = HOLE_SELECTION_ALL;
             break;
         }
       }
     } else {
-      g_GameState.holeSelection = 0;
+      g_GameState.holeSelection = HOLE_SELECTION_ALL;
     }
   }
 
@@ -1748,8 +1748,8 @@ void func_801F6B28_ovl_01(void) {
 
     if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       player->unk28 = PLAYER_UNK28_TRAINING;
-    } else if (g_GameState.holeSelection == BACK_NINE_SKIPPED ||
-        g_GameState.holeSelection == FRONT_NINE_SKIPPED) {
+    } else if (g_GameState.holeSelection == HOLE_SELECTION_FRONT_NINE ||
+        g_GameState.holeSelection == HOLE_SELECTION_BACK_NINE) {
       player->unk28 = PLAYER_UNK28_NINE_HOLES;
     } else {
       player->unk28 = PLAYER_UNK28_EIGHTEEN_HOLES;
@@ -2265,7 +2265,7 @@ void func_801F7D28_ovl_01(void) {
         PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         g_GameState.gameMode = GAME_MODE_TRAINING;
-        g_GameState.holeSelection = 0;
+        g_GameState.holeSelection = HOLE_SELECTION_ALL;
         StartLoadingChosenHole();
         g_MenuScreen = MENU_SCREEN_UNK26;
         D_800FF4C0 = 1;
@@ -2320,7 +2320,7 @@ void func_801F7D28_ovl_01(void) {
         break;
     }
 
-    g_GameState.holeSelection = 0;
+    g_GameState.holeSelection = HOLE_SELECTION_ALL;
 
     /* Training's hole is already loading */
     if (g_MenuScreen != MENU_SCREEN_UNK26) {
@@ -2574,19 +2574,19 @@ void func_801F8BAC_ovl_01(void) {
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_ALL;
-      g_GameState.holeSelection = 0;
+      g_GameState.holeSelection = HOLE_SELECTION_ALL;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
-      g_GameState.holeSelection = BACK_NINE_SKIPPED;
+      g_GameState.holeSelection = HOLE_SELECTION_FRONT_NINE;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_BACK_NINE;
-      g_GameState.holeSelection = FRONT_NINE_SKIPPED;
+      g_GameState.holeSelection = HOLE_SELECTION_BACK_NINE;
       StartLoadingChosenHole();
     }
   }
@@ -2840,19 +2840,19 @@ void func_801F93D8_ovl_01(void) {
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_ALL;
-      g_GameState.holeSelection = 0;
+      g_GameState.holeSelection = HOLE_SELECTION_ALL;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
-      g_GameState.holeSelection = BACK_NINE_SKIPPED;
+      g_GameState.holeSelection = HOLE_SELECTION_FRONT_NINE;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_BACK_NINE;
-      g_GameState.holeSelection = FRONT_NINE_SKIPPED;
+      g_GameState.holeSelection = HOLE_SELECTION_BACK_NINE;
       StartLoadingChosenHole();
     }
   }

@@ -42,10 +42,6 @@ typedef struct HoleConditions {
   /* 0x12 */ u16 lightPitch;
 } HoleConditions; /* size = 0x14 */
 
-/* GameState.holeSelection's bits, by the nine that the round leaves out */
-#define FRONT_NINE_SKIPPED 0x2
-#define BACK_NINE_SKIPPED 0x4
-
 /* The game counts time in frames */
 #define FRAMES_PER_SECOND 30
 #define SECONDS_PER_MINUTE 60
