@@ -157,8 +157,6 @@ u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
 s32 D_80104F84;
 s32 D_80104F88;
 PlayRecord D_800FED40;
-s8 D_800FEE10;
-s8 D_800FEE11;
 s8 g_WasDonkeyKongUnlocked;
 s8 g_WasMapleUnlocked;
 s8 g_WasMetalMarioUnlocked;
@@ -390,8 +388,8 @@ void InitPlay(s32 kind) {
     g_GameState.playerCount = 1;
     g_GameState.unk0 = 0;
     g_GameState.gameMode = GAME_MODE_STROKE;
-    g_GameState.courseIndex = D_800FEE10;
-    g_GameState.holeIndex = D_800FEE11;
+    g_GameState.courseIndex = D_800FEDD8[0].courseIndex;
+    g_GameState.holeIndex = D_800FEDD8[0].holeIndex;
   }
 
   RenumberHoleHandicaps();
