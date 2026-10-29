@@ -5,8 +5,8 @@
 
 #include "save.h"
 
-/* The values of unkE, which func_80217B88 also turns into the settings of
- * D_801B60BA */
+/* The values of unkE, which func_80217B88 also turns into GameState's
+ * betRates */
 #define MENU_UNKE_COUNT 8
 
 /* The presets of func_80217B88; two of them have a variant that four players

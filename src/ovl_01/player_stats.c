@@ -159,7 +159,6 @@ enum StatsDirection {
 
 extern void* D_8012D430[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
-extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern s8 D_801B70F0[MAXCONTROLLERS];
 extern const char D_802319E0_ovl_01[];
 
@@ -542,12 +541,12 @@ void func_80217B88_ovl_01(s32 requestedPreset) {
 
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
       memory->unkE[index] = D_802304BC_ovl_01[presetIndex][index];
-      D_801B60BA[index] = D_802304F4_ovl_01[memory->unkE[index]];
+      g_GameState.betRates[index] = D_802304F4_ovl_01[memory->unkE[index]];
     }
   } else {
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
       memory->unkE[index] = NO_BET;
-      D_801B60BA[index] = -1;
+      g_GameState.betRates[index] = -1;
     }
   }
 
@@ -597,9 +596,9 @@ void func_80217D20_ovl_01(void) {
     SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
       if (memory->unkE[index] != NO_BET) {
-        D_801B60BA[index] = D_802304F4_ovl_01[memory->unkE[index]];
+        g_GameState.betRates[index] = D_802304F4_ovl_01[memory->unkE[index]];
       } else {
-        D_801B60BA[index] = -1;
+        g_GameState.betRates[index] = -1;
       }
     }
 
@@ -613,9 +612,9 @@ void func_80217D20_ovl_01(void) {
     SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
       if (memory->unkE[index] != NO_BET) {
-        D_801B60BA[index] = D_802304F4_ovl_01[memory->unkE[index]];
+        g_GameState.betRates[index] = D_802304F4_ovl_01[memory->unkE[index]];
       } else {
-        D_801B60BA[index] = -1;
+        g_GameState.betRates[index] = -1;
       }
     }
 

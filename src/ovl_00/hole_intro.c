@@ -47,7 +47,6 @@
 
 /* g_GameState.holeIndex under a symbol of its own, which
  * UpdateHoleIntroCamera needs to match */
-extern s32 g_HoleIndex;
 static s32 f_IntroFrame = 0;
 /* How far in front of the ball the camera is; negative when behind it */
 static f32 f_IntroCameraDistance = 0.0f;
@@ -97,7 +96,7 @@ s32 UpdateHoleIntroCamera(void) {
     f_IntroFrame++;
   }
 
-  if (g_HoleIndex == GetFirstHoleIndex()) {
+  if (g_GameState.holeIndex == GetFirstHoleIndex()) {
     if (f_IntroFrame < FIRST_HOLE_INTRO_FRAMES) {
       f_IntroCameraDistance = FIRST_HOLE_INTRO_START_DISTANCE -
           (f_IntroFrame *
@@ -158,7 +157,7 @@ s32 UpdateHoleIntroCamera(void) {
       g_Cameras[1].view.lookAt[AXIS_X] + offset[AXIS_X];
   g_Cameras[0].view.eye[AXIS_Z] =
       g_Cameras[1].view.lookAt[AXIS_Z] + offset[AXIS_Z];
-  if (g_HoleIndex == GetFirstHoleIndex()) {
+  if (g_GameState.holeIndex == GetFirstHoleIndex()) {
     if (f_IntroFrame == FIRST_HOLE_INTRO_MOVIE_FRAME) {
       StartMovie(MOVIE_LAKITU);
     }

@@ -42,8 +42,7 @@ typedef struct HoleConditions {
   /* 0x12 */ u16 lightPitch;
 } HoleConditions; /* size = 0x14 */
 
-/* Which nines the round leaves out, as *_NINE_SKIPPED flags */
-extern s32 g_SkippedNines;
+/* GameState.holeSelection's bits, by the nine that the round leaves out */
 #define FRONT_NINE_SKIPPED 0x2
 #define BACK_NINE_SKIPPED 0x4
 

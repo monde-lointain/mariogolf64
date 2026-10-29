@@ -64,11 +64,6 @@ typedef struct RingShotHole {
   /* 0x1 */ u8 holeIndex;
 } RingShotHole; /* size = 0x2 */
 
-/*
- * g_GameState.courseIndex under a symbol of its own, which the routines
- * that read the field alone need to match
- */
-extern s32 g_CourseIndex;
 extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];
 extern char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE];
 /* The par of the hole being played */

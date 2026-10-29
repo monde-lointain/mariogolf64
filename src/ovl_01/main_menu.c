@@ -199,7 +199,6 @@ typedef struct ImageCorner {
 /* The bobbing of the menus' items: its phase, and the offset that it gives */
 /* g_GameState.gameMode under a symbol of its own, which func_801F6B28_ovl_01
  * needs to match */
-extern u32 g_GameMode;
 
 /* Where func_801FD7B0 and func_801FCEF8 draw the banners of D_801052BC and
  * D_801B60D0 */
@@ -280,7 +279,6 @@ extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
 extern u8 D_801B9410;
 extern s8 D_801B5634;
-extern s8 D_801B60BA[MENU_UNKE_COUNT];
 
 /*
  * The mini-golf course select. A record's three courses lie on a disc that
@@ -1571,8 +1569,8 @@ void func_801F4C78_ovl_01(void) {
 }
 
 /*
- * Doesn't match: the original reloads g_PlayerCount for each pass of the
- * outer loop, where this keeps it in a register.
+ * Doesn't match: the original reloads g_GameState.playerCount for each pass of
+ * the outer loop, where this keeps it in a register.
  */
 #ifdef NON_MATCHING
 void func_801F6A38_ovl_01(void) {
@@ -1634,12 +1632,12 @@ void func_801F6B28_ovl_01(void) {
 
   StartBets();
   if (func_8022BDD0_ovl_01()) {
-    g_SkippedNines = 0;
+    g_GameState.holeSelection = 0;
     g_GameState.courseIndex = GetClubTournamentCourse();
     g_GameState.gameMode = GetClubTournamentGameMode();
     g_GameState.isMiniGolf = g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX;
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
-      D_801B60BA[index] = -1;
+      g_GameState.betRates[index] = -1;
     }
 
     for (index = 0; index != MAX_PLAYER_COUNT; index++) {
@@ -1651,21 +1649,22 @@ void func_801F6B28_ovl_01(void) {
       D_800FBE08[0] = 0;
     }
   } else {
-    if (g_GameMode == GAME_MODE_RING_SHOT) {
-      g_CourseIndex = D_801323A0.courseIndex;
-    } else if (g_GameMode == GAME_MODE_TRAINING) {
+    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+      g_GameState.courseIndex = D_801323A0.courseIndex;
+    } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       g_GameState.courseIndex = 0;
     } else {
-      g_CourseIndex = GetChosenCourseIndex();
+      g_GameState.courseIndex = GetChosenCourseIndex();
     }
 
-    if (g_GameMode == GAME_MODE_STROKE || g_GameMode == GAME_MODE_MATCH_GAME ||
-        g_GameMode == GAME_MODE_RING_SHOT ||
-        g_GameMode == GAME_MODE_SKINS_MATCH ||
-        g_GameMode == GAME_MODE_CLUB_SLOTS) {
+    if (g_GameState.gameMode == GAME_MODE_STROKE ||
+        g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+        g_GameState.gameMode == GAME_MODE_RING_SHOT ||
+        g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+        g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
       /* Through a pointer, as the original keeps the address in a register for
        * every store */
-      skippedNines = &g_SkippedNines;
+      skippedNines = &g_GameState.holeSelection;
       *skippedNines = D_8022BE1C_ovl_01;
       if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
         switch (D_801323A0.unk18) {
@@ -1684,7 +1683,7 @@ void func_801F6B28_ovl_01(void) {
         }
       }
     } else {
-      g_SkippedNines = 0;
+      g_GameState.holeSelection = 0;
     }
   }
 
@@ -1749,8 +1748,8 @@ void func_801F6B28_ovl_01(void) {
 
     if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       player->unk28 = PLAYER_UNK28_TRAINING;
-    } else if (g_SkippedNines == BACK_NINE_SKIPPED ||
-        g_SkippedNines == FRONT_NINE_SKIPPED) {
+    } else if (g_GameState.holeSelection == BACK_NINE_SKIPPED ||
+        g_GameState.holeSelection == FRONT_NINE_SKIPPED) {
       player->unk28 = PLAYER_UNK28_NINE_HOLES;
     } else {
       player->unk28 = PLAYER_UNK28_EIGHTEEN_HOLES;
@@ -2091,8 +2090,8 @@ void func_801F7CD0_ovl_01(void) {
  */
 /*
  * Doesn't match: the stroke and mini golf cases load their 1 and store
- * g_GameMode in another order, the B button's path loads D_8012F480 and
- * g_CharacterGrid in another order, and the spin's slowing keeps the spin
+ * g_GameState.gameMode in another order, the B button's path loads D_8012F480
+ * and g_CharacterGrid in another order, and the spin's slowing keeps the spin
  * in a register where the original reads it again after the step.
  */
 #ifdef NON_MATCHING
@@ -2156,7 +2155,7 @@ void func_801F7D28_ovl_01(void) {
 
         /* The last setting is left as it was */
         for (index = 0; index != MENU_UNKE_COUNT - 1; index++) {
-          D_801B60BA[index] = -1;
+          g_GameState.betRates[index] = -1;
         }
 
         break;
@@ -2181,7 +2180,7 @@ void func_801F7D28_ovl_01(void) {
           }
 
           for (index = 0; index != MENU_UNKE_COUNT - 1; index++) {
-            D_801B60BA[index] = -1;
+            g_GameState.betRates[index] = -1;
           }
 
           D_800C2BD5 = 1;
@@ -2255,7 +2254,7 @@ void func_801F7D28_ovl_01(void) {
           }
 
           for (index = 0; index != MENU_UNKE_COUNT - 1; index++) {
-            D_801B60BA[index] = -1;
+            g_GameState.betRates[index] = -1;
           }
 
           D_800C2BD5 = 1;
@@ -2266,7 +2265,7 @@ void func_801F7D28_ovl_01(void) {
         PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         g_GameState.gameMode = GAME_MODE_TRAINING;
-        g_SkippedNines = 0;
+        g_GameState.holeSelection = 0;
         StartLoadingChosenHole();
         g_MenuScreen = MENU_SCREEN_UNK26;
         D_800FF4C0 = 1;
@@ -2321,7 +2320,7 @@ void func_801F7D28_ovl_01(void) {
         break;
     }
 
-    g_SkippedNines = 0;
+    g_GameState.holeSelection = 0;
 
     /* Training's hole is already loading */
     if (g_MenuScreen != MENU_SCREEN_UNK26) {
@@ -2575,19 +2574,19 @@ void func_801F8BAC_ovl_01(void) {
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_ALL;
-      g_SkippedNines = 0;
+      g_GameState.holeSelection = 0;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
-      g_SkippedNines = BACK_NINE_SKIPPED;
+      g_GameState.holeSelection = BACK_NINE_SKIPPED;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_BACK_NINE;
-      g_SkippedNines = FRONT_NINE_SKIPPED;
+      g_GameState.holeSelection = FRONT_NINE_SKIPPED;
       StartLoadingChosenHole();
     }
   }
@@ -2841,19 +2840,19 @@ void func_801F93D8_ovl_01(void) {
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_ALL;
-      g_SkippedNines = 0;
+      g_GameState.holeSelection = 0;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
-      g_SkippedNines = BACK_NINE_SKIPPED;
+      g_GameState.holeSelection = BACK_NINE_SKIPPED;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_801323A0.unk18 = HOLES_CHOICE_BACK_NINE;
-      g_SkippedNines = FRONT_NINE_SKIPPED;
+      g_GameState.holeSelection = FRONT_NINE_SKIPPED;
       StartLoadingChosenHole();
     }
   }

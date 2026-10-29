@@ -162,9 +162,7 @@ enum GameStateStep {
 
 /*
  * The current game's settings and place, which a saved game keeps for it
- * to be continued with. A few routines only match when they read a field
- * under a symbol of its own, such as g_GameMode, g_CourseIndex and
- * g_HoleIndex.
+ * to be continued with.
  */
 typedef struct GameState {
   /* 0x00 */ s32 unk0; /* A GAME_STATE_* value */
@@ -182,7 +180,8 @@ typedef struct GameState {
   /* 0x2C */ s32 unk2C;
   /* 0x30 */ s8 unk30;
   /* 0x31 */ s8 unk31;
-  /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth */
+  /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth; the
+                                        menus also set one past the end */
   /* 0x39 */ u8 unk39;
   /* 0x3A */ s8 isMiniGolf; /* Keeps billboards near the course's edge, and
                                tilts them less */

@@ -209,7 +209,6 @@ typedef struct HoleAssetIds {
 
 /* g_GameState.isMiniGolf under a symbol of its own, which BuildHole needs to
  * match */
-extern s8 g_IsMiniGolf;
 
 s32 PaintMainCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
@@ -2363,9 +2362,9 @@ void BuildHole(s32 course, s32 hole) {
     FillRandomGrid(0x60, 0xBE);
   }
 
-  if (g_IsMiniGolf) {
-    f_PaintLogic = g_CourseIndex;
-    if (g_CourseIndex > LAST_MINI_GOLF_PAINT_LOGIC) {
+  if (g_GameState.isMiniGolf) {
+    f_PaintLogic = g_GameState.courseIndex;
+    if (g_GameState.courseIndex > LAST_MINI_GOLF_PAINT_LOGIC) {
       f_PaintLogic = LAST_MINI_GOLF_PAINT_LOGIC;
     }
 
