@@ -1124,9 +1124,12 @@ void InitTerrainTextures(void) {
     tile->detail = GROUND_DETAIL_MEDIUM;
     tile->midpointBlockIndex = -1;
     tile->unk990 = 0;
-    for (texelRow = 0; texelRow < 32; texelRow++) {
-      for (texelColumn = 0; texelColumn < 32; texelColumn++) {
-        tile->texels[0][(texelRow * 32) + texelColumn] = 0x7C1;
+    /* Fills the image's first texels as if its rows were unpadded */
+    for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
+      for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN;
+          texelColumn++) {
+        tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn] =
+            0x7C1;
       }
     }
   }
