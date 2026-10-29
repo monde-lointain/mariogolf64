@@ -356,7 +356,7 @@ void func_8020B438_ovl_01(void);
 void func_8020E010_ovl_01(void** buffers);
 void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind);
 void func_8020E26C_ovl_01(void* buffer, s16 bufferKind);
-void func_8020E390_ovl_01(void);
+void UpdateCourseStats(void);
 void func_80213390_ovl_01(void** buffers);
 void func_8021342C_ovl_01(void* buffer);
 void func_80213464_ovl_01(void* buffer, s16 bufferKind);
@@ -405,7 +405,7 @@ void DrawLargeMenuBanner(Gfx** displayListHead);
 void DrawMenuBanner(Gfx** displayListHead);
 void DrawMenuTitleScreen(Gfx** displayListHead);
 void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
-void func_8020E898_ovl_01(Gfx** displayListHead);
+void DrawCourseStats(Gfx** displayListHead);
 void func_80213748_ovl_01(Gfx** displayListHead);
 void func_80215DC4_ovl_01(Gfx** displayListHead);
 void func_8021D3AC_ovl_01(Gfx** displayListHead);
@@ -1078,7 +1078,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_COURSE_STATS:
-      func_8020E390_ovl_01();
+      UpdateCourseStats();
       break;
 
     case MENU_SCREEN_BEST_TIMES:
@@ -3707,7 +3707,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       DrawRingShotRecords(&gfx);
       break;
     case MENU_SCREEN_COURSE_STATS:
-      func_8020E898_ovl_01(&gfx);
+      DrawCourseStats(&gfx);
       break;
     case MENU_SCREEN_BEST_TIMES:
       func_80213748_ovl_01(&gfx);

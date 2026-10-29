@@ -41,7 +41,7 @@
 
 /* The course's statistics: the panel behind them, and the rows of it that show
  */
-/* How far func_8020E390 turns the course wheel for each move, and how fast */
+/* How far UpdateCourseStats turns the course wheel each move, and how fast */
 #define STATS_TURN 90
 #define STATS_SPIN_SPEED 18
 
@@ -283,7 +283,7 @@ void func_8020E26C_ovl_01(void* buffer, s16 bufferKind) {
   }
 }
 
-void func_8020E390_ovl_01(void) {
+void UpdateCourseStats(void) {
   EncodedAsset asset;
   AssetFile file;
   MenuMemory* memory = func_8005AF74();
@@ -390,7 +390,7 @@ void func_8020E390_ovl_01(void) {
   }
 }
 
-/* func_8020E898 turns a totals image on the wheel of menu.h after the open
+/* DrawCourseStats turns a totals image on the wheel of menu.h after the open
  * courses' images */
 #define COURSE_TOTALS_IMAGE COURSE_COUNT
 
@@ -401,7 +401,7 @@ void func_8020E390_ovl_01(void) {
  * copy but swaps two registers and the sum's operands.
  */
 #ifdef NON_MATCHING
-void func_8020E898_ovl_01(Gfx** displayListHead) {
+void DrawCourseStats(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u16 perspNorm;
   f32 iconX[WHEEL_SLOT_LIMIT];
@@ -533,7 +533,7 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E898_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawCourseStats);
 #endif
 
 void func_8020F2D0_ovl_01(
