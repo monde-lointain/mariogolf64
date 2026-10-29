@@ -300,6 +300,12 @@
 #define PREPARED_SHOT_MIN_AIM_FRAMES 30
 /* The latest frame of a skipped swing animation at which its impact comes */
 #define SKIPPED_SWING_IMPACT_FRAME 15
+/* The f_SwingCount of a shot's first replay */
+#define FIRST_REPLAY_SWING_COUNT 2
+/* Whether the swing is a replay of the shot, which leaves the stopwatches */
+#define IsReplayingShot() (f_SwingCount >= FIRST_REPLAY_SWING_COUNT)
+/* A replay can itself be replayed in flight from this frame of its swing */
+#define REPLAY_MIN_SWING_FRAMES 40
 /*
  * A putt's power, scaled to a short putt's by about how many times a short
  * putt's reach the long and middle putts have, picks its swing: the middle
@@ -399,8 +405,10 @@ static s8 f_HasGutsTestRun = FALSE;
 static s8 f_GutsTestCharacter = 0;
 static s8 f_GutsTestMotion = 0;
 static s8 f_ShouldUpdateReaction = FALSE;
-static s32 D_80223FF8_ovl_00 = 0;
-static s32 D_80223FFC_ovl_00 = 0;
+/* The swings since aiming: the shot's, then one for each replay of it */
+static s32 f_SwingCount = 0;
+/* Whether B was held for a replay of the shot */
+static Boolean f_IsReplayRequested = FALSE;
 /* The f_StateFrameCounts count at which the state acts: a swing's impact, or
  * a reaction's end */
 static s32 f_StateEventFrame = 0;
@@ -445,8 +453,9 @@ static f32 f_PuttSwingSpeed;
 static f32 f_GreenSongTempo;
 static s32 D_80227188_ovl_00;
 static s32 D_8022718C_ovl_00;
-/* The frames of the swing animation skipped so that, when D_80223FF8_ovl_00 is
- * 3, the impact comes at most SKIPPED_SWING_IMPACT_FRAME frames in */
+/* The frames that replays after the first skip of the swing animation, found on
+ * the second, so that the impact comes at most SKIPPED_SWING_IMPACT_FRAME
+ * frames in */
 static s32 f_SkippedSwingFrames;
 static s32 f_ShotSource; /* A SHOT_SOURCE_* value */
 static s32 f_TurnTimerStart; /* Nothing reads it */
@@ -3091,7 +3100,7 @@ void UpdateTurns(void) {
   /* Advances the player's, the round's and the hole's stopwatches by a frame,
    * up to their limit */
   void TickStopwatches(void) {
-    if (D_80223FF8_ovl_00 < 2) {
+    if (!IsReplayingShot()) {
       g_Players[playerIndex].stopwatchFrameCount++;
       g_GameState.stopwatchFrameCount++;
       g_HoleTimeFrames[g_GameState.holeIndex]++;
@@ -3530,7 +3539,7 @@ void UpdateTurns(void) {
 
         break;
       case PLAYER_STATE_AIMING:
-        D_80223FF8_ovl_00 = 0;
+        f_SwingCount = 0;
         UpdateShotFlags();
         f_AimFrameCount++;
         if (g_PauseScreen == PAUSE_SCREEN_NONE) {
@@ -3768,7 +3777,7 @@ void UpdateTurns(void) {
                   GetSwingAnimation(0,
                       g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
                       g_CurrentShot.shotMode)),
-              6);
+              ANIMATION_EVENT_IMPACT);
           f_IsSwingAnimationStarted = FALSE;
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
             DebugPlaceBall(playerIndex);
@@ -4098,7 +4107,7 @@ void UpdateTurns(void) {
         EndRumbleForceStop();
         ReuseLastCharacterMatrices(0);
         g_RoundHud.flags = HUD_FLAG_SWINGING;
-        D_80223FF8_ovl_00++;
+        f_SwingCount++;
         g_SavedShots[playerIndex] = g_CurrentShot;
         SetCharacterTranslucent(0, FALSE);
         SetFramebufferCount(TRIPLE_BUFFERING);
@@ -4147,13 +4156,13 @@ void UpdateTurns(void) {
               }
             }
 
-            if (D_80223FF8_ovl_00 < 2) {
+            if (!IsReplayingShot()) {
               f_StateEventFrame = GetAnimationEventFrame(0,
                   GetAnimationIndex(0,
                       GetSwingAnimation(0,
                           g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
                           shotMode)),
-                  6);
+                  ANIMATION_EVENT_IMPACT);
             }
           } else {
             shotMode = g_CurrentShot.shotMode;
@@ -4164,8 +4173,8 @@ void UpdateTurns(void) {
                   g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
                   shotMode));
           SetPlaysRandomTextureAnimation(0, 0);
-          if (D_80223FF8_ovl_00 >= 3) {
-            if (D_80223FF8_ovl_00 == 3) {
+          if (f_SwingCount > FIRST_REPLAY_SWING_COUNT) {
+            if (f_SwingCount == FIRST_REPLAY_SWING_COUNT + 1) {
               if (f_StateEventFrame > SKIPPED_SWING_IMPACT_FRAME) {
                 f_SkippedSwingFrames =
                     f_StateEventFrame - SKIPPED_SWING_IMPACT_FRAME;
@@ -4183,7 +4192,7 @@ void UpdateTurns(void) {
         SetAnimationSpeed(0, 1.0f);
         nextState = PLAYER_STATE_SWINGING;
         StartFlightCamera(f_ShotFlightCount++);
-        D_80223FFC_ovl_00 = 0;
+        f_IsReplayRequested = FALSE;
         break;
       }
       case PLAYER_STATE_SWINGING:
@@ -4209,7 +4218,7 @@ void UpdateTurns(void) {
             (IsGameFlagSet(GAME_FLAG_FAST_FLIGHT) &&
                 f_StateFrameCounts[playerIndex] >= 4)) {
           if (IsBButtonHeld()) {
-            D_80223FFC_ovl_00 = 1;
+            f_IsReplayRequested = TRUE;
           }
 
           if (g_IsModuleAlive[MODULE_GOLF_BALLS] ||
@@ -4250,11 +4259,12 @@ void UpdateTurns(void) {
         }
 
         if (IsBButtonHeld()) {
-          D_80223FFC_ovl_00 = 1;
+          f_IsReplayRequested = TRUE;
         }
 
-        if (D_80223FF8_ovl_00 >= 2 && f_StateFrameCounts[playerIndex] >= 40 &&
-            D_80223FFC_ovl_00) {
+        if (IsReplayingShot() &&
+            f_StateFrameCounts[playerIndex] >= REPLAY_MIN_SWING_FRAMES &&
+            f_IsReplayRequested) {
           nextState = PLAYER_STATE_STARTING_SWING;
         }
 
@@ -4283,7 +4293,7 @@ void UpdateTurns(void) {
           }
         }
 
-        if (D_80223FF8_ovl_00 >= 2 || g_IsDebugEnabled) {
+        if (IsReplayingShot() || g_IsDebugEnabled) {
           if (g_IsDebugEnabled) {
             if ((g_MergedController.buttons & (Z_TRIG | L_TRIG)) &&
                 !isCameraDone) {
@@ -4365,10 +4375,10 @@ void UpdateTurns(void) {
         }
 
         if (IsBButtonHeld()) {
-          D_80223FFC_ovl_00 = 1;
+          f_IsReplayRequested = TRUE;
         }
 
-        if (D_80223FFC_ovl_00) {
+        if (f_IsReplayRequested) {
           nextState = PLAYER_STATE_STARTING_SWING;
           StartLandingReaction(-1);
           StartBanner(-1);
