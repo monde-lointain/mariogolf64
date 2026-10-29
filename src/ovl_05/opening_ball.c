@@ -105,14 +105,14 @@ static SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT] = {
 /* The debug text row, of SPEED_TEXT_ROW_COUNT, that the next ball speed goes in
  */
 static s32 D_8020B858_ovl_05 = 0;
-/* The opening's copies of D_800B7C00 and D_800B7C08, which its copy of
- * GetImpactTimingEntry doesn't read */
-static ImpactEffect D_8020B85C_ovl_05 = {-90, -64, -40, -10, 100, 1};
-static ImpactEffect D_8020B864_ovl_05 = {-80, 64, 30, 10, -5, 1};
-/* The opening's copy of D_800B7C10 */
+/* The opening's copies of f_EarlyImpactEffect and f_LateImpactEffect, which its
+ * copy of GetImpactTimingEntry doesn't read */
+static ImpactEffect f_OpeningEarlyImpactEffect = {-90, -64, -40, -10, 100, 1};
+static ImpactEffect f_OpeningLateImpactEffect = {-80, 64, 30, 10, -5, 1};
+/* The opening's copy of f_ImpactEffects */
 // clang-format off
 static ImpactEffect
-    D_8020B86C_ovl_05[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
+    f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {{-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1}, {0, 0, 0, 0, 0, 0},
@@ -1670,8 +1670,8 @@ s32 func_8020A488_ovl_05(
   }
 
   club = &D_8020B9F8_ovl_05[shot->clubIndex];
-  entry = &D_8020B86C_ovl_05[0][IMPACT_TIMING_ENTRY_LIMIT];
-  rumbles = D_8020B86C_ovl_05[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
+  entry = &f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
+  rumbles = f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
   if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
       simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     speed = GetPuttPower(shot->power, shot->shotMode);

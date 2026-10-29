@@ -92,12 +92,12 @@ static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
     {SURFACE_KIND_CART_WAY, "RED", 80, 100, 10, 980, 800, 0x8F4, 0, 4},
 };
 
-/* For impactTiming values below and above the entries of D_800B7C10 */
-static ImpactEffect D_800B7C00 = {-90, -64, -40, -10, 100, 1};
-static ImpactEffect D_800B7C08 = {-80, 64, 30, 10, -5, 1};
+/* For impactTiming values below and above the entries of f_ImpactEffects */
+static ImpactEffect f_EarlyImpactEffect = {-90, -64, -40, -10, 100, 1};
+static ImpactEffect f_LateImpactEffect = {-80, 64, 30, 10, -5, 1};
 // clang-format off
 static ImpactEffect
-    D_800B7C10[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
+    f_ImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
@@ -2060,14 +2060,14 @@ ImpactEffect* GetImpactTimingEntry(
   }
 
   if (impactTiming < -IMPACT_TIMING_ENTRY_LIMIT) {
-    return &D_800B7C00;
+    return &f_EarlyImpactEffect;
   }
 
   if (impactTiming <= IMPACT_TIMING_ENTRY_LIMIT) {
-    return &D_800B7C10[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
+    return &f_ImpactEffects[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
   }
 
-  return &D_800B7C08;
+  return &f_LateImpactEffect;
 }
 
 SignedBinaryAngle GetCrossSlopeAngle(UnkB8* player, ShotLaunch* shot);
@@ -2161,8 +2161,8 @@ s32 LaunchBallSimulation(
   }
 
   if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
-    entry = &D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT];
-    rumbles = D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
+    entry = &f_ImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
+    rumbles = f_ImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
   } else {
     /* The same as GetImpactTimingEntry; writing it out is there to match */
     s32 row = GetLieRating(club, simulation->surface, shot->shotMode) - 1;
@@ -2176,11 +2176,11 @@ s32 LaunchBallSimulation(
     }
 
     if (impactTiming < -IMPACT_TIMING_ENTRY_LIMIT) {
-      entry = &D_800B7C00;
+      entry = &f_EarlyImpactEffect;
     } else if (impactTiming > IMPACT_TIMING_ENTRY_LIMIT) {
-      entry = &D_800B7C08;
+      entry = &f_LateImpactEffect;
     } else {
-      entry = &D_800B7C10[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
+      entry = &f_ImpactEffects[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
     }
 
     rumbles = entry->rumbles;
