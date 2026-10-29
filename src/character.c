@@ -133,8 +133,8 @@
 #define WEDGE_DISPLAY_LIST_CHOICE 2
 #define PUTTER_DISPLAY_LIST_CHOICE 3
 
-/* The animation whose ANIMATION_EVENT_UNK6 frame GetUnk6EventFrame returns */
-#define UNK6_EVENT_ANIMATION_INDEX 2
+/* The animation whose impact frame GetImpactEventFrame returns */
+#define IMPACT_EVENT_ANIMATION_INDEX 2
 
 /*
  * How far PlaceAndViewCharacter puts the camera from the character, and how
@@ -770,9 +770,9 @@ s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, s32 kind) {
 }
 
 /* Unreferenced */
-s32 GetUnk6EventFrame(u32 slotIndex) {
+s32 GetImpactEventFrame(u32 slotIndex) {
   return GetAnimationEventFrame(
-      slotIndex, UNK6_EVENT_ANIMATION_INDEX, ANIMATION_EVENT_UNK6);
+      slotIndex, IMPACT_EVENT_ANIMATION_INDEX, ANIMATION_EVENT_IMPACT);
 }
 
 /* Gives each of the slot's animated triangles its default texture */

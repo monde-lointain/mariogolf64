@@ -199,7 +199,7 @@
 #define TEE_CLUB 0
 #define FAIRWAY_CLUB 3
 #define APPROACH_CLUB 8
-/* How many frames before its ANIMATION_EVENT_UNK6 frame a swing is joined */
+/* How many frames before its ANIMATION_EVENT_IMPACT frame a swing is joined */
 #define CAST_SWING_LEAD_FRAMES 15
 #define FINAL_PUTT_LEAD_FRAMES 10
 /* Degrees between the framing yaws of a stage's shots, and between its
@@ -829,7 +829,7 @@ s32 GetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
 
 /*
  * The second of the club kind's animations, or the third for an approach
- * shot; the timeline skips to just before its ANIMATION_EVENT_UNK6 frame
+ * shot; the timeline skips to just before its ANIMATION_EVENT_IMPACT frame
  */
 s32 GetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
   s32 animation;
@@ -990,7 +990,7 @@ void RunStaffRollTimeline(s32 frame) {
     swingAnimation = GetAnimationIndex(
         slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL));
     AdvanceAnimation(slot,
-        GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+        GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
             CAST_SWING_LEAD_FRAMES);
     point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
     point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
@@ -1017,7 +1017,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HoleSetup.teePosition);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
@@ -1059,7 +1059,7 @@ void RunStaffRollTimeline(s32 frame) {
       swingAnimation = GetAnimationIndex(
           slot, GetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL));
       AdvanceAnimation(slot,
-          GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+          GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
               CAST_SWING_LEAD_FRAMES);
     }
 
@@ -1092,7 +1092,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HolePoints.unk60[0]);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
@@ -1134,7 +1134,7 @@ void RunStaffRollTimeline(s32 frame) {
       swingAnimation = GetAnimationIndex(
           slot, GetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL));
       AdvanceAnimation(slot,
-          GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+          GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
               CAST_SWING_LEAD_FRAMES);
     }
 
@@ -1167,7 +1167,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HolePoints.unk60[1]);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
@@ -1210,7 +1210,7 @@ void RunStaffRollTimeline(s32 frame) {
       swingAnimation = GetAnimationIndex(
           slot, GetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL));
       AdvanceAnimation(slot,
-          GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+          GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
               CAST_SWING_LEAD_FRAMES);
     }
 
@@ -1243,7 +1243,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     ClearReactionSpot();
     ConsiderReactionSpot(f_NearCupPoint);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_EAGLE);
@@ -1277,7 +1277,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     point[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
     point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
     point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
@@ -1297,7 +1297,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HoleSetup.teePosition);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
@@ -1324,7 +1324,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     point[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
     point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
@@ -1344,7 +1344,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HolePoints.unk60[0]);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
@@ -1371,7 +1371,7 @@ void RunStaffRollTimeline(s32 frame) {
     swingAnimation = GetAnimationIndex(
         slot, GetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL));
     AdvanceAnimation(slot,
-        GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+        GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
             (2 * CAST_SWING_LEAD_FRAMES));
     point[AXIS_X] = g_HolePoints.unk60[1][AXIS_X];
     point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
@@ -1392,7 +1392,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HolePoints.unk60[1]);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
@@ -1418,7 +1418,7 @@ void RunStaffRollTimeline(s32 frame) {
     swingAnimation = GetAnimationIndex(
         slot, GetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL));
     AdvanceAnimation(slot,
-        GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+        GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_IMPACT) -
             FINAL_PUTT_LEAD_FRAMES);
     point[AXIS_X] = f_NearCupPoint[AXIS_X];
     point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
@@ -1439,7 +1439,7 @@ void RunStaffRollTimeline(s32 frame) {
     GetAnimationEventFrame(slot,
         GetAnimationIndex(
             slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
-        ANIMATION_EVENT_UNK6);
+        ANIMATION_EVENT_IMPACT);
     ClearReactionSpot();
     ConsiderReactionSpot(f_NearCupPoint);
     StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_EAGLE);

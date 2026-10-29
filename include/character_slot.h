@@ -137,7 +137,8 @@ enum AnimationEventKind {
   ANIMATION_EVENT_LOOP_START,
   /* Jumps back to the loop start when the slot is looping */
   ANIMATION_EVENT_LOOP_END,
-  ANIMATION_EVENT_UNK6 = 6,
+  /* Where a swing strikes the ball; UpdateTurns launches it then */
+  ANIMATION_EVENT_IMPACT = 6,
   /* Starts the TextureAnimation that value names */
   ANIMATION_EVENT_TEXTURE_ANIMATION = 0xFE
 };
