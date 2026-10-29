@@ -267,6 +267,21 @@
 #define AIM_CAMERA_CRANE_BACK_HEIGHT (-0x96000)
 /* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
+/* How UpdateTurns polls the computer golfer's plan: at most this many
+ * times as the aim is prepared, then this many times a frame of aiming */
+#define PLAN_PREPARING_POLL_COUNT 100
+#define PLAN_AIMING_POLL_COUNT 400
+/* The time budget of each poll while the aim is prepared, and of the
+ * first frame of aiming; the budget then grows by a factor each frame,
+ * up to the most */
+#define PLAN_PREPARING_TIME_BUDGET 10
+#define PLAN_START_TIME_BUDGET 30
+#define PLAN_TIME_BUDGET_GROWTH 1.05f
+#define PLAN_MAX_TIME_BUDGET 0x800
+/* Replaced by PLAN_START_TIME_BUDGET before it is read */
+#define INITIAL_PLAN_TIME_BUDGET 10
+/* A prepared shot waits this many frames of aiming before it is played */
+#define PREPARED_SHOT_MIN_AIM_FRAMES 30
 
 /* Where the current turn's shot comes from, as f_ShotSource records */
 enum ShotSource {
@@ -293,7 +308,7 @@ static s32 D_80223E4C_ovl_00 = 0;
 static s32 f_AimTurnFrameCount = 0;
 /* Read by no routine */
 static s32 D_80223E54_ovl_00 = 0;
-static u32 f_PlanTimeBudget = 10;
+static u32 f_PlanTimeBudget = INITIAL_PLAN_TIME_BUDGET;
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
 static s32 f_ShotFlightCount = 0;
@@ -3205,7 +3220,7 @@ void UpdateTurns(void) {
           LoadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           StartShotPlan();
           D_800B7D9C = 0;
-          f_PlanTimeBudget = 30;
+          f_PlanTimeBudget = PLAN_START_TIME_BUDGET;
           f_ShotSource = SHOT_SOURCE_PLANNING;
         } else if (f_ShouldReplaySavedShot) {
           f_ShotSource = SHOT_SOURCE_PREPARED;
@@ -3391,12 +3406,14 @@ void UpdateTurns(void) {
         D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
         if (f_ShotSource == SHOT_SOURCE_PLANNING) {
           StartTurnTimer();
-          for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING && i < 100; i++) {
+          for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
+              i < PLAN_PREPARING_POLL_COUNT;
+              i++) {
             f_ShotSource =
                 (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED)
                 ? SHOT_SOURCE_PREPARED
                 : SHOT_SOURCE_PLANNING;
-            if (!HasPlanTime(10)) {
+            if (!HasPlanTime(PLAN_PREPARING_TIME_BUDGET)) {
               break;
             }
           }
@@ -3620,7 +3637,9 @@ void UpdateTurns(void) {
             }
 
             StartTurnTimer();
-            for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING && i < 400; i++) {
+            for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
+                i < PLAN_AIMING_POLL_COUNT;
+                i++) {
               f_ShotSource =
                   (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED)
                   ? SHOT_SOURCE_PREPARED
@@ -3630,9 +3649,9 @@ void UpdateTurns(void) {
               }
             }
 
-            f_PlanTimeBudget *= 1.05f;
-            if (f_PlanTimeBudget > 0x800) {
-              f_PlanTimeBudget = 0x800;
+            f_PlanTimeBudget *= PLAN_TIME_BUDGET_GROWTH;
+            if (f_PlanTimeBudget > PLAN_MAX_TIME_BUDGET) {
+              f_PlanTimeBudget = PLAN_MAX_TIME_BUDGET;
             }
 
             if (f_ShotSource == SHOT_SOURCE_PLANNING) {
@@ -3640,7 +3659,8 @@ void UpdateTurns(void) {
             }
           }
 
-          if (shotSource != SHOT_SOURCE_PLAYER && f_AimFrameCount < 30) {
+          if (shotSource != SHOT_SOURCE_PLAYER &&
+              f_AimFrameCount < PREPARED_SHOT_MIN_AIM_FRAMES) {
             break;
           }
 
