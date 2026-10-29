@@ -81,7 +81,7 @@ extern const char D_80231A3C_ovl_01[];
 
 void ResetSavedGameControllers(void);
 
-/* The Ring Shot stars that each level of func_8022181C takes */
+/* The Ring Shot stars that each level of GetOpenRingShotCourseCount takes */
 #define RING_SHOT_STARS_PER_LEVEL 4
 
 /* What func_80221EBC reads for the chosen game, and the saved games' frame */
@@ -124,9 +124,9 @@ extern void* D_8012D430[CHARACTER_COUNT];
 extern u8 D_801052E8;
 extern s32 D_800FE334;
 
-s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward);
-s16 func_80220DF8_ovl_01(void);
-s32 func_8022181C_ovl_01(void);
+s16 FindNextReplaySlot(s8 startSlot, u8 isForward);
+s16 GetChosenReplaySlot(void);
+s32 GetOpenRingShotCourseCount(void);
 void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
@@ -329,7 +329,7 @@ void LoadRingShotCourseIcons(void** buffers) {
 void UpdateRingShotRecords(void) {
   MenuMemory* memory = func_8005AF74();
   SaveData* save = GetSaveData();
-  s32 openCourseCount = func_8022181C_ovl_01();
+  s32 openCourseCount = GetOpenRingShotCourseCount();
   s32 index;
   s32 movedSlot;
 
@@ -356,7 +356,7 @@ void UpdateRingShotRecords(void) {
     } else if (GetWipeKind() == WIPE_NONE || D_801052E8 != 1) {
       if (g_MenuPressedButtons & A_BUTTON) {
         if (memory->ringShotRow == RING_SHOT_REPLAY_ROW &&
-            func_80220DF8_ovl_01() != -1) {
+            GetChosenReplaySlot() != -1) {
           PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           index = memory->ringShotReplaySlot;
           memory->holeIndex =
@@ -414,7 +414,7 @@ void UpdateRingShotRecords(void) {
         index = memory->ringShotRow;
         if (index == RING_SHOT_REPLAY_ROW) {
           if (memory->ringShotReplaySlot > 0) {
-            movedSlot = func_80220D68_ovl_01(memory->ringShotReplaySlot, FALSE);
+            movedSlot = FindNextReplaySlot(memory->ringShotReplaySlot, FALSE);
             if (movedSlot != -1) {
               memory->ringShotReplaySlot = movedSlot;
             }
@@ -431,7 +431,7 @@ void UpdateRingShotRecords(void) {
         index = memory->ringShotRow;
         if (index == RING_SHOT_REPLAY_ROW) {
           if (memory->ringShotReplaySlot < SAVE_MENU_SLOT_COUNT - 1) {
-            movedSlot = func_80220D68_ovl_01(memory->ringShotReplaySlot, TRUE);
+            movedSlot = FindNextReplaySlot(memory->ringShotReplaySlot, TRUE);
             if (movedSlot != -1) {
               memory->ringShotReplaySlot = movedSlot;
             }
@@ -534,7 +534,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
   s16 index = 0;
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
-  s32 openCourseCount = func_8022181C_ovl_01();
+  s32 openCourseCount = GetOpenRingShotCourseCount();
   s16 row;
   s16 column;
   /* Counts the faces shown in a column, or an empty slot's dashes */
@@ -780,7 +780,12 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawRingShotRecords);
 #endif
 
-void func_80220A30_ovl_01(void) {
+/*
+ * Reads the save data from SRAM and lists the Ring Shot records that hold a
+ * recording, moving the chosen replay onto the last of them if its own is
+ * empty.
+ */
+void ReadRingShotReplays(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   s8 slot;
@@ -792,7 +797,7 @@ void func_80220A30_ovl_01(void) {
   }
 
   for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
-    if ((s16)func_80220E28_ovl_01(&save->ringShotRecords[slot])) {
+    if ((s16)IsRingShotRecorded(&save->ringShotRecords[slot])) {
       D_8023B684_ovl_01[slot] = slot;
     } else {
       D_8023B684_ovl_01[slot] = -1;
@@ -808,7 +813,11 @@ void func_80220A30_ovl_01(void) {
   }
 }
 
-void func_80220BB0_ovl_01(void) {
+/*
+ * Reads every character's face and first palette, then the palette of each
+ * recorded Ring Shot record's character, clamped to the known ones.
+ */
+void LoadRingShotRecordFaces(void) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save = GetSaveData();
@@ -854,7 +863,11 @@ void func_80220BB0_ovl_01(void) {
   }
 }
 
-s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward) {
+/*
+ * Returns the next slot after startSlot, going forward or back and wrapping,
+ * that holds a replay, or -1 if none does
+ */
+s16 FindNextReplaySlot(s8 startSlot, u8 isForward) {
   s32 slot = startSlot;
   s32 step;
   s32 tryCount;
@@ -892,11 +905,13 @@ s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward) {
   return slot;
 }
 
-s16 func_80220DF8_ovl_01(void) {
+/* Returns the chosen replay's record, or -1 if it holds no recording */
+s16 GetChosenReplaySlot(void) {
   return D_8023B684_ovl_01[func_8005AF74()->ringShotReplaySlot];
 }
 
-s32 func_80220E28_ovl_01(RingShotRecord* record) {
+/* Tells whether the record holds a recording of the shots */
+s32 IsRingShotRecorded(RingShotRecord* record) {
   return (u8)record->scoreKind >> 7;
 }
 
@@ -977,7 +992,9 @@ void func_802213C8_ovl_01(
   *displayListHead = gfx;
 }
 
-s32 func_8022181C_ovl_01(void) {
+/* Returns how many Ring Shot courses are open: one more for each level of the
+ * stars won */
+s32 GetOpenRingShotCourseCount(void) {
   SaveData* save = GetSaveData();
   s32 starCount = 0;
   CourseIndex courseIndex;

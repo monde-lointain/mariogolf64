@@ -382,8 +382,8 @@ void func_8021EF64_ovl_01(void);
 void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind);
 void LoadRingShotCourseIcons(void** buffers);
 void UpdateRingShotRecords(void);
-void func_80220A30_ovl_01(void);
-void func_80220BB0_ovl_01(void);
+void ReadRingShotReplays(void);
+void LoadRingShotRecordFaces(void);
 void ReadSavedGames(void);
 void LoadSaveGameBuffer(void* buffer, u8 bufferKind);
 void func_80221EBC_ovl_01(void** buffers, u8 bufferKind);
@@ -1573,8 +1573,8 @@ void UpdateMenus(void) {
         LoadRingShotCourseIcons(D_801049A0[0]);
         LoadRingShotRecordBuffer(
             D_800FBE30[0], RING_SHOT_RECORD_BUFFER_GREEN_ARROWS);
-        func_80220A30_ovl_01();
-        func_80220BB0_ovl_01();
+        ReadRingShotReplays();
+        LoadRingShotRecordFaces();
         break;
     }
   }
