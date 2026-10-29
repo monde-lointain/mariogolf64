@@ -186,6 +186,8 @@ static u8* f_CupTexture;
 static u8* f_FlagstickTexture;
 static u8* f_PinShadowTexture;
 static Mtx f_PinMatrices[CAMERA_COUNT][DRAW_BUFFER_COUNT];
+/* Read by no routine */
+static u8 D_800DAE10[0xC0];
 
 /*
  * Returns the length of (x, z), less CUP_DISTANCE_OFFSET but at least 0.

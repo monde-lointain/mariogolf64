@@ -43,6 +43,8 @@ typedef struct AssetTableEntry {
 /* The archive in ROM starts with a table of each asset's AssetTableEntry */
 #define ASSET_TABLE ((AssetTableEntry*)g_AssetArchiveRomStart)
 static AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
+/* Read by no routine */
+static u8 D_800DE8C0[0x40];
 
 void DecodeByteRuns(u8* buffer, EncodedAsset* asset);
 void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset);

@@ -25,6 +25,8 @@ static s32 f_CpuViewportCenterY;
 /* The viewport's size over the screen's */
 static f32 f_CpuViewportWidthRatio;
 static f32 f_CpuViewportHeightRatio;
+/* Read by no routine */
+static u8 D_800E1750[0x80];
 
 void SetCpuProjection(Mtx* projection, Mtx* viewing, Vp* viewport) {
   f32 reciprocal;
