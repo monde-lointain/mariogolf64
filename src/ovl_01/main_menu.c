@@ -323,7 +323,7 @@ void func_80202000_ovl_01(Gfx** displayListHead);
 void func_80205038_ovl_01(Gfx** displayListHead);
 void func_802058B8_ovl_01(Gfx** displayListHead);
 void func_80206180_ovl_01(Gfx** displayListHead);
-void func_80206A68_ovl_01(Gfx** displayListHead);
+void DrawOptionsScreen(Gfx** displayListHead);
 void func_80207D08_ovl_01(Gfx** displayListHead);
 void func_80207E18_ovl_01(Gfx** displayListHead);
 void DrawBirdieBadgeLabel(Gfx** displayListHead);
@@ -343,7 +343,7 @@ void func_801F93D8_ovl_01(void);
 void func_801F9C58_ovl_01(void);
 void func_801F9E38_ovl_01(void);
 void func_801F9FF8_ovl_01(void);
-void func_801FA20C_ovl_01(void);
+void UpdateOptionsScreen(void);
 void func_801FADBC_ovl_01(void);
 void LeaveMenuWithWipe(void);
 void LeaveMenuWithCourseWipe(void);
@@ -1032,7 +1032,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_OPTIONS:
-      func_801FA20C_ovl_01();
+      UpdateOptionsScreen();
       break;
 
     case MENU_SCREEN_HELP:
@@ -3148,7 +3148,7 @@ void func_801FA1B8_ovl_01(void) {
  * song, sound and their settings left, right and the C buttons change and A
  * plays.
  */
-void func_801FA20C_ovl_01(void) {
+void UpdateOptionsScreen(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   s32 closedCheck;
@@ -3679,7 +3679,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       func_80206180_ovl_01(&gfx);
       break;
     case MENU_SCREEN_OPTIONS:
-      func_80206A68_ovl_01(&gfx);
+      DrawOptionsScreen(&gfx);
       break;
     case MENU_SCREEN_HELP:
       if (IsGameFlagSet(GAME_FLAG_UNK56)) {
@@ -6684,7 +6684,7 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
  * branches without masking it to a byte
  */
 #ifdef NON_MATCHING
-void func_80206A68_ovl_01(Gfx** displayListHead) {
+void DrawOptionsScreen(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = func_8005AF74();
   u8* mario = GetMenuImageBuffer();
@@ -7033,7 +7033,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80206A68_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawOptionsScreen);
 #endif
 
 void func_80207D08_ovl_01(Gfx** displayListHead) {
