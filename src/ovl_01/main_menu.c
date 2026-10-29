@@ -258,7 +258,7 @@ typedef struct ImageCorner {
 #define BACKDROP_TOP 10
 
 extern void* g_MenuBoardImages[2];
-extern s32 D_801051F0;
+extern s32 g_HasOwnControllers;
 extern void* g_MenuTitleImages[2];
 extern const char D_80231514_ovl_01[];
 
@@ -1618,7 +1618,7 @@ void func_801F6A38_ovl_01(void) {
   s32 playerIndex;
   s32 otherIndex;
 
-  D_801051F0 = TRUE;
+  g_HasOwnControllers = TRUE;
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {
       if (playerIndex != otherIndex &&
@@ -1626,7 +1626,7 @@ void func_801F6A38_ovl_01(void) {
           g_PlayerControllerIndices[otherIndex] != NO_CONTROLLER_INDEX &&
           g_PlayerControllerIndices[playerIndex] ==
               g_PlayerControllerIndices[otherIndex]) {
-        D_801051F0 = FALSE;
+        g_HasOwnControllers = FALSE;
       }
     }
   }

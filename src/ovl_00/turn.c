@@ -368,7 +368,7 @@ enum ShotSource {
   SHOT_SOURCE_PLANNING
 };
 
-extern s32 D_801051F0; /* Set unless two players share a controller */
+extern s32 g_HasOwnControllers; /* Set unless two players share a controller */
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
 extern CurrentShot D_80104F78; /* The replayed shot */
 /* Set once the shot preview has been built */
@@ -2699,7 +2699,7 @@ void SkipUnmeasuredDistances(s32 playerIndex) {
  * if every player has a controller of their own
  */
 void StartTurnRumble(s32 playerIndex) {
-  if (D_801051F0 == TRUE && g_GameState.playerCount >= 2) {
+  if (g_HasOwnControllers == TRUE && g_GameState.playerCount >= 2) {
     s32 controllerIndex = g_Players[playerIndex].controllerIndex;
 
     EndRumbleForceStop();
@@ -2729,7 +2729,7 @@ void PlayWaitingPlayersCalls(void) {
   s32 controllerIndex;
   u16 pressed;
 
-  if (D_801051F0 == TRUE) {
+  if (g_HasOwnControllers == TRUE) {
     for (i = 0; i < g_GameState.playerCount; i++) {
       if ((g_Players[i].state == PLAYER_STATE_WAITING) |
           (g_Players[i].state == PLAYER_STATE_HOLE_DONE)) {

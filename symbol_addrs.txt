@@ -3692,6 +3692,7 @@ D_800FBE30 = 0x800FBE30; // size:0x8
 D_800FF180 = 0x800FF180; // size:0x8
 g_MenuBoardImages = 0x800FF420; // size:0x8
 D_8010526C = 0x8010526C; // size:0x8
+g_HasOwnControllers = 0x801051F0; // size:0x4
 g_MenuTitleImages = 0x801052BC; // size:0x8
 D_80105F40 = 0x80105F40; // size:0x1A0
 D_8012D420 = 0x8012D420; // size:0x8
