@@ -472,7 +472,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
   void** imageSlot;
 
   switch (bufferKind) {
-    case PLAYER_STATS_BUFFER_ICONS:
+    case PLAYER_STATS_BUFFER_BET_ICONS:
       D_8023B340_ovl_01 = buffer;
       for (iconIndex = 0; iconIndex != BET_ICON_COUNT; iconIndex++) {
         OpenEncodedAsset(D_802303AC_ovl_01[iconIndex], &asset);
@@ -489,7 +489,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
     case PLAYER_STATS_BUFFER_NAME_PLATE:
       f_StatsNamePlate = buffer;
       break;
-    case PLAYER_STATS_BUFFER_UNK4:
+    case PLAYER_STATS_BUFFER_BET_ICON_FIRST_FRAME:
       rowNumber = D_801B5634;
       imageSlot = &D_8023B350_ovl_01[0];
       *imageSlot = buffer;
@@ -498,7 +498,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
-    case PLAYER_STATS_BUFFER_UNK5:
+    case PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME:
       rowNumber = D_801B5634;
       imageSlot = &D_8023B350_ovl_01[1];
       *imageSlot = buffer;

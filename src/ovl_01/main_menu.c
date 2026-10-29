@@ -1467,11 +1467,13 @@ void UpdateMenus(void) {
         D_8022BE8A_ovl_01 = 0;
         f_MenuBoardImageIndex ^= 1;
         LoadPlayerStatsBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
-            PLAYER_STATS_BUFFER_ICONS);
+            PLAYER_STATS_BUFFER_BET_ICONS);
         LoadPlayerStatsBuffer(D_801B93E0[0], PLAYER_STATS_BUFFER_STAKE_MARK);
         LoadPlayerStatsBuffer(g_NamePlateImage, PLAYER_STATS_BUFFER_NAME_PLATE);
-        LoadPlayerStatsBuffer(D_8010526C[0], PLAYER_STATS_BUFFER_UNK4);
-        LoadPlayerStatsBuffer(D_8010526C[1], PLAYER_STATS_BUFFER_UNK5);
+        LoadPlayerStatsBuffer(
+            D_8010526C[0], PLAYER_STATS_BUFFER_BET_ICON_FIRST_FRAME);
+        LoadPlayerStatsBuffer(
+            D_8010526C[1], PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME);
         LoadPlayerStatsBuffer(D_801B93E0[1], PLAYER_STATS_BUFFER_GREEN_ARROWS);
         LoadPlayerStatsBuffer(D_800FF180[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
         LoadPlayerStatsBuffer(
