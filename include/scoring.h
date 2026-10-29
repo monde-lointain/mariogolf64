@@ -48,6 +48,10 @@ enum ScoreToPar {
   SCORE_TO_PAR_TRIPLE_BOGEY
 };
 
+/* Whether a score to par lies from best to worst, both included */
+#define IsScoreToParWithin(score, best, worst) \
+  ((score) >= (best) && (score) <= (worst))
+
 /* What GetHolingOutStakes says the player's next stroke would do if holed */
 enum HolingOutStakes {
   HOLING_OUT_WINS_HOLE,
