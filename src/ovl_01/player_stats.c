@@ -214,12 +214,15 @@ void DrawBetIcon(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
 void DrawBetLabel(Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex);
 
-static u8 D_802303A0_ovl_01 = 0;
-static u8 D_802303A1_ovl_01 = FALSE;
-static s16 D_802303A2_ovl_01 = 0;
-static s16 D_802303A4_ovl_01 = 0;
-static s16 D_802303A6_ovl_01 = 0;
-static s16 D_802303A8_ovl_01 = 0;
+/* Set once the chosen bet's help or the handicap prompt has been typed */
+static u8 f_IsBetHelpShown = 0;
+static u8 f_IsHandicapPromptShown = FALSE;
+/* The blinking green arrows' frame and its time shown */
+static s16 f_GreenArrowFrame = 0;
+static s16 f_GreenArrowTimer = 0;
+/* The page arrows' animation frame and its time shown */
+static s16 f_PageArrowFrame = 0;
+static s16 f_PageArrowTimer = 0;
 /* Each bet icon's first frame, read for the bet settings' rows */
 static u32 f_BetIconAssets[BET_ICON_COUNT] = {
     0x0674, 0x0678, 0x067A, 0x067E, 0x0680, 0x067C, 0x0676, 0x0672};
@@ -565,8 +568,8 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
   g_AnimatedIconFrameTime = 0;
   g_AnimatedIconFrameIndex = 0;
   g_AnimatedIconBufferIndex = 0;
-  D_802303A0_ovl_01 = 0;
-  D_802303A1_ovl_01 = 0;
+  f_IsBetHelpShown = 0;
+  f_IsHandicapPromptShown = 0;
 }
 
 /*
@@ -645,7 +648,7 @@ void UpdateBetSettings(void) {
     D_8022BE88_ovl_01 = BET_PHASE_CONFIRMED;
     FreeAllCharacterSlots();
     g_MenuScreen = MENU_SCREEN_HANDICAPS;
-    D_802303A0_ovl_01 = 0;
+    f_IsBetHelpShown = 0;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
@@ -663,7 +666,7 @@ void UpdateBetSettings(void) {
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     D_8022BE88_ovl_01 = BET_PHASE_CANCELED;
-    D_802303A0_ovl_01 = 0;
+    f_IsBetHelpShown = 0;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
@@ -968,10 +971,10 @@ void DrawBetSettings(
 
   betIndex = D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD];
   DrawBetLabel(&gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
-  if (D_802303A0_ovl_01 == 0 && isSettled == TRUE) {
+  if (f_IsBetHelpShown == 0 && isSettled == TRUE) {
     SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
-    D_802303A0_ovl_01 = 1;
+    f_IsBetHelpShown = 1;
   }
 
   *displayListHead = gfx;
@@ -1041,7 +1044,7 @@ s32 UpdateHandicaps(void) {
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
       D_8023BFD0_ovl_01 = HANDICAP_SLIDE_START;
-      D_802303A1_ovl_01 = 0;
+      f_IsHandicapPromptShown = 0;
       D_8022BE88_ovl_01 = MENU_PHASE_CONFIRMED;
       return;
     }
@@ -1051,7 +1054,7 @@ s32 UpdateHandicaps(void) {
       g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
-      D_802303A1_ovl_01 = 0;
+      f_IsHandicapPromptShown = 0;
       D_8022BE88_ovl_01 = MENU_PHASE_CANCELED;
       return;
     }
@@ -1063,7 +1066,7 @@ s32 UpdateHandicaps(void) {
         memory->unk29 = g_ChosenPlayerCount - 1;
       }
 
-      D_802303A1_ovl_01 = 0;
+      f_IsHandicapPromptShown = 0;
       return;
     }
 
@@ -1074,7 +1077,7 @@ s32 UpdateHandicaps(void) {
         memory->unk29 = 0;
       }
 
-      D_802303A1_ovl_01 = 0;
+      f_IsHandicapPromptShown = 0;
       return;
     }
 
@@ -1155,7 +1158,8 @@ void DrawTwoDigitMenuNumber(
  * arrows around the column of the player that memory->unk29 picks. All but
  * the banner slide across by slide, and the banner and arrows down by it, or
  * up when reverseVerticalSlide is set. With canShowPrompt set, the prompt
- * naming that player is typed once each time D_802303A1 is cleared.
+ * naming that player is typed once each time f_IsHandicapPromptShown is
+ * cleared.
  */
 /*
  * Doesn't match: the original adds the label's offset to the slide, and the
@@ -1378,10 +1382,10 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     gDPPipeSync(gfx++);
   }
 
-  D_802303A4_ovl_01++;
-  if (D_802303A4_ovl_01 == STATS_ARROW_BLINK_FRAME_COUNT) {
-    D_802303A4_ovl_01 = 0;
-    D_802303A2_ovl_01 ^= 1;
+  f_GreenArrowTimer++;
+  if (f_GreenArrowTimer == STATS_ARROW_BLINK_FRAME_COUNT) {
+    f_GreenArrowTimer = 0;
+    f_GreenArrowFrame ^= 1;
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1390,7 +1394,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     if (arrowIndex == MENU_ARROW_LEFT) {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)f_StatsGreenArrows +
-              ((D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE) +
+              ((f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE) +
                   PALETTED_TEXELS_OFFSET +
                   (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE))),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
@@ -1400,7 +1404,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     } else {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)f_StatsGreenArrows +
-              ((D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE) +
+              ((f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE) +
                   PALETTED_TEXELS_OFFSET +
                   (arrowIndex * GREEN_ARROW_IMAGE_SIZE))),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
@@ -1456,7 +1460,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
         HANDICAP_NUMBER_Y, g_ChosenHandicaps[columnIndex], MENU_NUMBER_PLAIN);
   }
 
-  if ((D_802303A1_ovl_01 == FALSE) & (canShowPrompt == TRUE)) {
+  if ((f_IsHandicapPromptShown == FALSE) & (canShowPrompt == TRUE)) {
     SetTextSlotValue(memory->unk29 + 1, 0, 0);
 
     /* The prompt names the player in the player's own color */
@@ -1478,7 +1482,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
     SetTextSlot(HANDICAP_PROMPT_X, HANDICAP_PROMPT_Y, HANDICAP_PROMPT_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
-    D_802303A1_ovl_01 = TRUE;
+    f_IsHandicapPromptShown = TRUE;
   }
 
   *displayListHead = gfx;
@@ -1667,14 +1671,14 @@ void DrawPageArrows(Gfx** displayListHead) {
   s32 left;
   s32 unused[4];
 
-  D_802303A8_ovl_01++;
-  if (D_802303A8_ovl_01 >= PAGE_ARROW_FRAME_DURATION) {
-    D_802303A6_ovl_01++;
-    if (D_802303A6_ovl_01 >= PAGE_ARROW_FRAME_COUNT) {
-      D_802303A6_ovl_01 = 0;
+  f_PageArrowTimer++;
+  if (f_PageArrowTimer >= PAGE_ARROW_FRAME_DURATION) {
+    f_PageArrowFrame++;
+    if (f_PageArrowFrame >= PAGE_ARROW_FRAME_COUNT) {
+      f_PageArrowFrame = 0;
     }
 
-    D_802303A8_ovl_01 = 0;
+    f_PageArrowTimer = 0;
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1685,7 +1689,7 @@ void DrawPageArrows(Gfx** displayListHead) {
       /* The right arrow is the left one's image, mirrored */
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress(ImageTexels(f_PageArrows) +
-              D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE),
+              f_PageArrowFrame * PAGE_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0, G_TX_MIRROR | G_TX_WRAP,
           G_TX_MIRROR | G_TX_WRAP, PAGE_ARROW_MASK, PAGE_ARROW_MASK, G_TX_NOLOD,
@@ -1694,7 +1698,7 @@ void DrawPageArrows(Gfx** displayListHead) {
     } else {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress(ImageTexels(f_PageArrows) +
-              D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE),
+              f_PageArrowFrame * PAGE_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1730,14 +1734,14 @@ void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
   s32 arrowIndex;
   s32 left;
 
-  D_802303A8_ovl_01++;
-  if (D_802303A8_ovl_01 >= PAGE_ARROW_FRAME_DURATION) {
-    D_802303A6_ovl_01++;
-    if (D_802303A6_ovl_01 >= PAGE_ARROW_FRAME_COUNT) {
-      D_802303A6_ovl_01 = 0;
+  f_PageArrowTimer++;
+  if (f_PageArrowTimer >= PAGE_ARROW_FRAME_DURATION) {
+    f_PageArrowFrame++;
+    if (f_PageArrowFrame >= PAGE_ARROW_FRAME_COUNT) {
+      f_PageArrowFrame = 0;
     }
 
-    D_802303A8_ovl_01 = 0;
+    f_PageArrowTimer = 0;
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1748,7 +1752,7 @@ void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
       /* The right arrow is the left one's image, mirrored */
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress(ImageTexels(f_PageArrows) +
-              D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE),
+              f_PageArrowFrame * PAGE_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0, G_TX_MIRROR | G_TX_WRAP,
           G_TX_MIRROR | G_TX_WRAP, PAGE_ARROW_MASK, PAGE_ARROW_MASK, G_TX_NOLOD,
@@ -1757,7 +1761,7 @@ void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
     } else {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress(ImageTexels(f_PageArrows) +
-              D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE),
+              f_PageArrowFrame * PAGE_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1824,7 +1828,7 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PageArrows)));
     gDPLoadTextureTile_4b(gfx++,
         TextureAddress(ImageTexels(f_PageArrows) +
-            (D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE)),
+            (f_PageArrowFrame * PAGE_ARROW_IMAGE_SIZE)),
         G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
         PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -1859,10 +1863,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
   s32 offsetY = 0;
   s32 arrowIndex;
 
-  D_802303A4_ovl_01++;
-  if (D_802303A4_ovl_01 == STATS_ARROW_BLINK_FRAME_COUNT) {
-    D_802303A4_ovl_01 = 0;
-    D_802303A2_ovl_01 ^= 1;
+  f_GreenArrowTimer++;
+  if (f_GreenArrowTimer == STATS_ARROW_BLINK_FRAME_COUNT) {
+    f_GreenArrowTimer = 0;
+    f_GreenArrowFrame ^= 1;
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1870,7 +1874,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
   for (arrowIndex = 0; arrowIndex != STATS_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
         TextureAddress(ImageTexels(f_StatsGreenArrows) +
-            (D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE +
+            (f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE +
                 arrowIndex * GREEN_ARROW_IMAGE_SIZE)),
         G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
         GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
