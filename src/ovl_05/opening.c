@@ -369,20 +369,20 @@ static s32 D_8020ADB0_ovl_05 = 0;
  */
 static u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT] = {FALSE, FALSE};
 /* The opening's shots, each starting with its yaw as a binary angle */
-static Unk20 D_8020ADB8_ovl_05 = {
+static ShotLaunch D_8020ADB8_ovl_05 = {
     -0x3400, 0, 280, 0, 40, -15, 0, SHOT_MODE_NORMAL};
-static Unk20 D_8020ADD8_ovl_05 = {
+static ShotLaunch D_8020ADD8_ovl_05 = {
     -0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-static Unk20 D_8020ADF8_ovl_05 = {
+static ShotLaunch D_8020ADF8_ovl_05 = {
     -0x2300, 0, 240, 0, 0, 20, 0, SHOT_MODE_NORMAL};
-static Unk20 D_8020AE18_ovl_05 = {
+static ShotLaunch D_8020AE18_ovl_05 = {
     -0x2B00, 1, 400, 0, -180, -720, 0, SHOT_MODE_NORMAL};
 static s32 f_OpeningSparksState = SPARKS_HIDDEN;
 f32 g_LookAtMarkerScale = 1.0f;
 static Boolean f_IsLookAtMarkerShown = FALSE;
 static s32 D_8020AE44_ovl_05 = 0;
 /* Read by no routine; the same as D_8020ADD8_ovl_05 */
-static Unk20 D_8020AE48_ovl_05 = {
+static ShotLaunch D_8020AE48_ovl_05 = {
     -0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static Vtx f_OpeningShotDashVertices[4] = {
     {{{-15, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
@@ -1357,7 +1357,8 @@ void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);
 Boolean IsDonkeyKongUnlocked(void);
 void func_80206AA4_ovl_05(BallSimulation* simulation);
-void func_8020A488_ovl_05(BallSimulation* simulation, s32 arg1, Unk20* arg2);
+void func_8020A488_ovl_05(
+    BallSimulation* simulation, s32 arg1, ShotLaunch* arg2);
 
 /* Fades the screen to white when a button skips the rest of the opening */
 #define OPENING_SCENE_SKIPPED 998

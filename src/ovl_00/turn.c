@@ -405,7 +405,7 @@ static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
  * the swing was stopped, and clubIndex and shotMode are also the club slot and
  * shot mode that the golfer was last posed with.
  */
-static Unk20 D_80227150_ovl_00;
+static ShotLaunch D_80227150_ovl_00;
 static s32 D_80227170_ovl_00[MAX_PLAYER_COUNT];
 static f32 D_80227180_ovl_00;
 static f32 D_80227184_ovl_00;
@@ -425,7 +425,7 @@ s32 f_AimFrameCount;
 /* Defined in main_bss.c, at their addresses in the original */
 extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
 extern UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT];
-extern Unk20 g_PreviousBallSurfaceInfo;
+extern ShotLaunch g_PreviousBallSurfaceInfo;
 
 /* Lets the Rumble Paks run again after nuContRmbForceStop */
 void EndRumbleForceStop(void) {
@@ -1866,9 +1866,9 @@ void PrintCoursePoints(void) {
   ((state) == PLAYER_STATE_AIMING || (state) == PLAYER_STATE_SETTING_POWER || \
       (state) == PLAYER_STATE_SETTING_IMPACT || (state) == PLAYER_STATE_UNK3)
 
-void BuildShotPreview(Unk20* swing, s32 playerState) {
+void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
   BallSimulation simulation;
-  Unk20 shot;
+  ShotLaunch shot;
   CoursePoint start;
   f32 dash[4][4];
   f32 align[4][4];

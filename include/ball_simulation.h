@@ -38,7 +38,7 @@ enum BallState {
 #define RESET_BALL_SPEED_MASK 0x3FF
 #define RESET_BALL_VELOCITY_Y (-100)
 
-/* Unk20 impactTiming values from -IMPACT_TIMING_ENTRY_LIMIT to
+/* ShotLaunch impactTiming values from -IMPACT_TIMING_ENTRY_LIMIT to
  * IMPACT_TIMING_ENTRY_LIMIT have an Unk6 per lie rating */
 #define IMPACT_TIMING_ENTRY_LIMIT 5
 #define IMPACT_TIMING_ENTRY_COUNT ((IMPACT_TIMING_ENTRY_LIMIT * 2) + 1)
@@ -73,7 +73,8 @@ typedef struct Unk6 {
 /* The largest launch power a club can give */
 #define MAX_LAUNCH_POWER 256
 
-typedef struct Unk20 {
+/* How a shot is launched: the swing that the ball simulation starts from */
+typedef struct ShotLaunch {
   /* 0x00 */ SignedBinaryAngle heading;
   /* 0x04 */ s32 clubIndex;
   /* 0x08 */ s32 power; /* Out of MAX_LAUNCH_POWER */
@@ -82,7 +83,7 @@ typedef struct Unk20 {
   /* 0x14 */ s32 offsetY;
   /* 0x18 */ s32 playerIndex;
   /* 0x1C */ s32 shotMode;
-} Unk20; /* size = 0x20 */
+} ShotLaunch; /* size = 0x20 */
 
 #define UNKA8_COUNT 8
 
@@ -151,6 +152,7 @@ extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 void ResetBallSimulations(void);
 Unk6* GetUnkCEntry(Club* club, Surface surface, s32 shotMode, s32 impactTiming);
 s32 StepBallSimulation(BallSimulation* simulation);
-s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot);
+s32 LaunchBallSimulation(
+    BallSimulation* simulation, s32 purpose, ShotLaunch* shot);
 
 #endif

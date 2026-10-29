@@ -2067,15 +2067,16 @@ Unk6* GetUnkCEntry(
   return &D_800B7C08;
 }
 
-SignedBinaryAngle GetCrossSlopeAngle(UnkB8* player, Unk20* shot);
+SignedBinaryAngle GetCrossSlopeAngle(UnkB8* player, ShotLaunch* shot);
 /* It returns a SignedBinaryAngle; declaring it s32 here is there to match */
-s32 GetAimSlopeAngle(UnkB8* player, Unk20* shot);
+s32 GetAimSlopeAngle(UnkB8* player, ShotLaunch* shot);
 
 /*
  * Sets the simulation's start, velocity and wind from the shot.
  * Only a stroke spawns debris, starts rumble and prints the launch values.
  */
-s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
+s32 LaunchBallSimulation(
+    BallSimulation* simulation, s32 purpose, ShotLaunch* shot) {
   s32 percentRange[2];
   Club* club;
   Unk6* entry;

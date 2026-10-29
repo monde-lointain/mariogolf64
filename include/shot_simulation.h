@@ -29,7 +29,7 @@ typedef struct SimulatedShot {
   /* 0x2E10 */ Boolean endsInCup;
   /* 0x2E14 */ s32 unk2E14;
   /* 0x2E18 */ s32 unk2E18;
-  /* 0x2E1C */ Unk20 shot;
+  /* 0x2E1C */ ShotLaunch shot;
   /* 0x2E3C */ s32 flagHitStep; /* The step that hits the flag, or NO_STEP */
   /* 0x2E40 */ s8 endSurface; /* A SURFACE_* value */
   /* 0x2E41 */ s8 unk2E41;
@@ -38,6 +38,6 @@ typedef struct SimulatedShot {
 
 extern SimulatedShot g_SimulatedShot;
 
-void SimulateShot(Unk20* shot);
+void SimulateShot(ShotLaunch* shot);
 
 #endif

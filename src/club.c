@@ -643,14 +643,14 @@ Club g_Clubs[CLUB_COUNT] = {
 static Club f_NoClub = {80, "0000", 0, {0}, 0, 230, -11, 0, 14, 100,
     CLUB_TYPE_DRIVER, {0, 0, 0}, CLUB_KIND_WOOD, 0, {0, 0, 0},
     ASSET_DRIVER_HEAD_IMAGE, 0, {0}};
-static Unk20 f_ClubTestShot = {
+static ShotLaunch f_ClubTestShot = {
     STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 /* A generated club's unk14, by its set's unk1E from -4 to 4 */
 static u8 f_Unk14Values[9] = {30, 50, 70, 80, 100, 115, 120, 145, 170};
 /* Each stock club set's curve, from -4, the strongest fade, to 4 */
 static s8 f_StockCurves[CLUB_SET_COUNT] = {
     0, -1, 0, 1, -2, 0, 2, -3, 2, 3, 0, -3, 3, 3, 0, 0, 0, 0};
-static Unk20 f_PutterTestShot = {
+static ShotLaunch f_PutterTestShot = {
     STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static s32 f_ClubChoiceDelay = CLUB_CHOICE_STEP_DELAY;
 

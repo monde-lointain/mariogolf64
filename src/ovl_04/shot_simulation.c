@@ -21,7 +21,7 @@ static u8 D_8024DD10_ovl_04[0x10];
 SimulatedShot g_SimulatedShot;
 
 /* Simulates the shot from the ball's position and records its path */
-void SimulateShot(Unk20* shot) {
+void SimulateShot(ShotLaunch* shot) {
   BallSimulation simulationState;
   BallSimulation* simulation;
   s32 step;

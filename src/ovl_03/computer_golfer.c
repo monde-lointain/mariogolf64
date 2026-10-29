@@ -231,8 +231,8 @@ static CurrentShot f_PlannedShot;
 static s8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
 /* Read by no routine */
 static u8 D_80254608_ovl_03[8];
-static Unk20* f_TrialLaunch;
-static Unk20 f_TrialLaunchValues;
+static ShotLaunch* f_TrialLaunch;
+static ShotLaunch f_TrialLaunchValues;
 /* The best evaluation so far */
 static s32 f_BestEvaluation;
 static s32 f_AimChangeCount;

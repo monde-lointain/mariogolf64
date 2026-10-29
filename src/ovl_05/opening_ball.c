@@ -1618,7 +1618,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
  * moves the unk40 and unk38 stores and swaps two float registers there.
  */
 #ifdef NON_MATCHING
-s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
+s32 func_8020A488_ovl_05(
+    BallSimulation* simulation, s32 purpose, ShotLaunch* shot) {
   s32 percentRange[2];
   Club* club;
   Unk6* entry;
