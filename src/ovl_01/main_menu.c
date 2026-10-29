@@ -320,8 +320,8 @@ void InitPlay(s32 kind);
 void DrawModeSelect(Gfx** displayListHead);
 void func_80201574_ovl_01(Gfx** displayListHead);
 void func_80202000_ovl_01(Gfx** displayListHead);
-void func_80205038_ovl_01(Gfx** displayListHead);
-void func_802058B8_ovl_01(Gfx** displayListHead);
+void DrawMainMenu(Gfx** displayListHead);
+void DrawMainMenuWithoutTransmit(Gfx** displayListHead);
 void func_80206180_ovl_01(Gfx** displayListHead);
 void DrawOptionsScreen(Gfx** displayListHead);
 void func_80207D08_ovl_01(Gfx** displayListHead);
@@ -340,8 +340,8 @@ void func_801F7CD0_ovl_01(void);
 void UpdateModeSelect(void);
 void func_801F8BAC_ovl_01(void);
 void func_801F93D8_ovl_01(void);
-void func_801F9C58_ovl_01(void);
-void func_801F9E38_ovl_01(void);
+void UpdateMainMenu(void);
+void UpdateMainMenuWithoutTransmit(void);
 void func_801F9FF8_ovl_01(void);
 void UpdateOptionsScreen(void);
 void func_801FADBC_ovl_01(void);
@@ -1016,11 +1016,11 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_MAIN:
-      func_801F9C58_ovl_01();
+      UpdateMainMenu();
       break;
 
     case MENU_SCREEN_MAIN_WITHOUT_TRANSMIT:
-      func_801F9E38_ovl_01();
+      UpdateMainMenuWithoutTransmit();
       break;
 
     case MENU_SCREEN_CLUB_TOURNAMENT:
@@ -2931,7 +2931,7 @@ void func_801F9BCC_ovl_01(void) {
   }
 }
 
-void func_801F9C58_ovl_01(void) {
+void UpdateMainMenu(void) {
   Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE) {
@@ -2993,7 +2993,7 @@ void func_801F9C58_ovl_01(void) {
   }
 }
 
-void func_801F9E38_ovl_01(void) {
+void UpdateMainMenuWithoutTransmit(void) {
   Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE) {
@@ -3667,10 +3667,10 @@ void DrawMenuScreen(Gfx** displayListHead) {
       func_802230C0_ovl_01(&gfx);
       break;
     case MENU_SCREEN_MAIN:
-      func_80205038_ovl_01(&gfx);
+      DrawMainMenu(&gfx);
       break;
     case MENU_SCREEN_MAIN_WITHOUT_TRANSMIT:
-      func_802058B8_ovl_01(&gfx);
+      DrawMainMenuWithoutTransmit(&gfx);
       break;
     case MENU_SCREEN_CLUB_TOURNAMENT:
       func_80229CB0_ovl_01(&gfx);
@@ -6342,7 +6342,7 @@ void DrawContinueLabel(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_80205038_ovl_01(Gfx** displayListHead) {
+void DrawMainMenu(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 choiceIndex;
 
@@ -6411,7 +6411,7 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_802058B8_ovl_01(Gfx** displayListHead) {
+void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 choiceIndex;
   s32 labelOffset;
