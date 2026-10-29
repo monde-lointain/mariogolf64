@@ -90,7 +90,6 @@ extern void* D_801052C4[2];
 extern void* D_800FF420[2];
 extern void* D_801B60D0;
 extern void* D_8012D420[2];
-extern void* D_801B5CD0[2];
 extern void* D_801052BC[2];
 extern void* D_800FBDFC[2];
 extern void* D_800FF4C4[2];

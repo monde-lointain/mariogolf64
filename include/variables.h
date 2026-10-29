@@ -126,4 +126,11 @@ extern u8* g_NoiseTexels;
 /* Formatted text on its way to the screen */
 extern char g_PrintBuffer[];
 
+/*
+ * Loaded images: the menus load their title labels into the first two, and
+ * the club panel uses the last two as its buffers
+ */
+#define IMAGE_SLOT_COUNT 14
+extern void* D_801B5CD0[IMAGE_SLOT_COUNT];
+
 #endif

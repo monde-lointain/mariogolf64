@@ -72,7 +72,6 @@ enum ClubPanelState {
 #define SHOT_MODE_ASSET_APPROACH 0x52E
 
 /* Image buffers shared with the menus */
-extern u8* D_801B5CD0[];
 
 /* The shot mode last shown in the name, and the one that the panel last
  * finished changing to */

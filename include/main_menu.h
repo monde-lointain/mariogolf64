@@ -14,7 +14,6 @@
 #define MAP_CAMERA_MODE_TOP_BYTE (*(u8*)&g_MapCamera.view.mode)
 
 extern void* D_8012D420[2];
-extern void* D_801B5CD0[2];
 extern s16 D_800FE33C;
 extern u8 D_800FBDB9;
 
