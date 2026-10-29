@@ -1690,7 +1690,7 @@ void func_801F6B28_ovl_01(void) {
       holeSelection = &g_GameState.holeSelection;
       *holeSelection = D_8022BE1C_ovl_01;
       if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
-        switch (D_801323A0.unk18) {
+        switch (D_801323A0.holesChoice) {
           case HOLES_CHOICE_UNK0:
             *holeSelection = HOLE_SELECTION_ALL;
             break;
@@ -2184,7 +2184,7 @@ void func_801F7D28_ovl_01(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_UNK6;
-        D_801323A0.unk18 = HOLES_CHOICE_ALL;
+        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
@@ -2216,7 +2216,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 3;
-        D_801323A0.unk18 = HOLES_CHOICE_ALL;
+        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_MATCH_GAME);
         break;
       case MODE_ICON_SKINS_MATCH:
@@ -2227,7 +2227,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 4;
-        D_801323A0.unk18 = HOLES_CHOICE_ALL;
+        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_SKINS_MATCH);
         break;
       case MODE_ICON_SPEED_GOLF:
@@ -2238,7 +2238,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
-        D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
+        D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_MINI_GOLF:
@@ -2257,7 +2257,7 @@ void func_801F7D28_ovl_01(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_UNK6;
-        D_801323A0.unk18 = HOLES_CHOICE_ALL;
+        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         g_GameState.isMiniGolf = TRUE;
         D_800FF4C0 = 1;
@@ -2292,7 +2292,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
-        D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
+        D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_UNK9:
@@ -2303,7 +2303,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
-        D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
+        D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_RING_SHOT:
@@ -2336,7 +2336,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 5;
-        D_801323A0.unk18 = HOLES_CHOICE_ALL;
+        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_CLUB_SLOTS);
         break;
     }
@@ -2601,19 +2601,19 @@ void func_801F8BAC_ovl_01(void) {
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.unk18 = HOLES_CHOICE_ALL;
+      D_801323A0.holesChoice = HOLES_CHOICE_ALL;
       g_GameState.holeSelection = HOLE_SELECTION_ALL;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
+      D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
       g_GameState.holeSelection = HOLE_SELECTION_FRONT_NINE;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.unk18 = HOLES_CHOICE_BACK_NINE;
+      D_801323A0.holesChoice = HOLES_CHOICE_BACK_NINE;
       g_GameState.holeSelection = HOLE_SELECTION_BACK_NINE;
       StartLoadingChosenHole();
     }
@@ -2867,19 +2867,19 @@ void func_801F93D8_ovl_01(void) {
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.unk18 = HOLES_CHOICE_ALL;
+      D_801323A0.holesChoice = HOLES_CHOICE_ALL;
       g_GameState.holeSelection = HOLE_SELECTION_ALL;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
+      D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
       g_GameState.holeSelection = HOLE_SELECTION_FRONT_NINE;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.unk18 = HOLES_CHOICE_BACK_NINE;
+      D_801323A0.holesChoice = HOLES_CHOICE_BACK_NINE;
       g_GameState.holeSelection = HOLE_SELECTION_BACK_NINE;
       StartLoadingChosenHole();
     }
@@ -5883,7 +5883,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           gDPPipeSync(gfx++);
           gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-        } else if (D_801323A0.unk18 == otherIndex) {
+        } else if (D_801323A0.holesChoice == otherIndex) {
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         } else {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -6296,9 +6296,9 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     SetTextSlot(SCREEN_WIDTH / 2, slide + HOLES_CHOICE_Y,
-        D_801323A0.unk18 + HOLES_CHOICE_MESSAGE_BASE, TEXT_SLOT_LARGE_FONT,
-        HOLES_CHOICE_TEXT_SLOT, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255,
-        255, 255);
+        D_801323A0.holesChoice + HOLES_CHOICE_MESSAGE_BASE,
+        TEXT_SLOT_LARGE_FONT, HOLES_CHOICE_TEXT_SLOT,
+        TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, HOLES_CHOICE_TEXT_SLOT);
   }
 

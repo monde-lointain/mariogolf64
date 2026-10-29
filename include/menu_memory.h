@@ -22,7 +22,7 @@
 /* Past func_80217B88's presets, so that it clears the values instead */
 #define MENU_UNKE_PRESET_NONE 10
 
-/* What unk18 holds once the C buttons choose the holes to play */
+/* What holesChoice holds once the C buttons choose the holes to play */
 enum HolesChoice {
   HOLES_CHOICE_UNK0,
   HOLES_CHOICE_FRONT_NINE,
@@ -50,7 +50,7 @@ typedef struct MenuMemory {
                                  next one still shut */
   /* 0x17 */ s8
       courseSpin; /* How far the courses still have to turn to reach it */
-  /* 0x18 */ s8 unk18;
+  /* 0x18 */ s8 holesChoice; /* HOLES_CHOICE_* */
   /* 0x19 */ s8 unk19;
   /* 0x1A */ s8 unk1A;
   /* 0x1B */ s8 mainChoice;
