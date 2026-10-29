@@ -557,8 +557,6 @@ segments:
       - { type: .bss, vram: 0x800FAA10, name: ../lib/ultralib/src/io/vimgr }
       - { type: .bss, vram: 0x800FBC30, name: ../lib/ultralib/src/io/motor }
       - { type: bss, vram: 0x800FBD30, name: bss_800FBD30 }
-      # The commons that Makefile allocates for main's objects together
-      - { type: o, vram: 0x801F43D0, name: main_commons, section: .main_commons }
 
   - name: ovl_00
     type: code

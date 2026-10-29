@@ -453,9 +453,6 @@ static Vtx f_ShadowVertices[4] = {
         {SHADOW_QUAD_TEXEL_SPAN, 0}, {0x96, 0x96, 0x96, 0x00}}},
 };
 
-/* Not static: the original left it to the linker's common block */
-CharacterSlot g_ResidentCharacterSlotList[CHARACTER_SLOT_COUNT];
-
 /*
  * How far to the side of the ball each playable character stands, in course
  * units, for each club kind and then for an approach shot with a wood.

@@ -51,17 +51,6 @@ RUN_CC_CHECK   ?= 0
 # Every object the linker script asks for
 O_FILES := $(shell test -f $(LD_SCRIPT) && grep -oE '$(BUILD_DIR)/[A-Za-z0-9_./-]+\.o' $(LD_SCRIPT) | sort -u)
 
-# The original main segment was one relocatable whose commons were allocated
-# together, in the order of binutils 2.6's 4051-bucket symbol table, unlike
-# the per-object COMMON of the final link. Combining main's objects with ld -r
-# and then allocating the result's commons alone keeps the table at its
-# starting 4051 buckets, as it has too few symbols to grow.
-# bss_800FBD30's labels still define the commons that come before the C ones.
-MAIN_COMMONS     := $(BUILD_DIR)/main_commons.o
-MAIN_RELOCATABLE := $(BUILD_DIR)/main.r.o
-MAIN_O_FILES     := $(shell test -f $(LD_SCRIPT) && sed -n '/^    \.main 0x/,/main_BSS_END/p' $(LD_SCRIPT) | \
-                    grep -oE '$(BUILD_DIR)/[A-Za-z0-9_./-]+\.o' | grep -v '$(MAIN_COMMONS)' | awk '!seen[$$0]++')
-
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
 # game's copy was compiled with signed chars
 ULTRALIB_DIR      := lib/ultralib
@@ -160,8 +149,7 @@ $(KMC_DIR)/as:
 	wget -q -O - https://github.com/decompals/mips-binutils-2.6/releases/latest/download/binutils-2.6-linux.tar.gz | tar xz -C $(KMC_DIR)
 
 clean:
-	rm -rf $(BUILD_DIR)/asm $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF) \
-	       $(MAIN_COMMONS) $(MAIN_RELOCATABLE)
+	rm -rf $(BUILD_DIR)/asm $(BUILD_DIR)/src $(BUILD_DIR)/assets $(BUILD_DIR)/lib $(ROM) $(ELF)
 
 distclean:
 	rm -rf $(BUILD_DIR) asm assets
@@ -171,10 +159,6 @@ $(ROM): $(ELF)
 
 $(ELF): $(O_FILES) $(LD_SCRIPT) undefined_syms.txt
 	$(LD) $(LDFLAGS) -o $@
-
-$(MAIN_COMMONS): $(MAIN_O_FILES) main_commons.ld
-	$(LD) -r -G 0 -o $(MAIN_RELOCATABLE) $(MAIN_O_FILES)
-	$(LD) -r -d -G 0 -T main_commons.ld -o $@ $(MAIN_RELOCATABLE)
 
 $(BUILD_DIR)/%.s.o: %.s
 	@mkdir -p $(dir $@)

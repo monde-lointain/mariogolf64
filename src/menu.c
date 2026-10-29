@@ -452,9 +452,6 @@ static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
 /* Read by no routine */
 static s32 D_800C2C00[4] = {0};
 
-/* Not static: the original left it to the linker's common block */
-void* g_MenuCourseSceneryAsset;
-
 /*
  * Allocates and reads the menu's assets, then reads the save. Overlay 3
  * calls this as it loads.
