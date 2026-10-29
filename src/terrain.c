@@ -53,15 +53,23 @@
 /* The stick moves the camera one step for each STICK_STEP_SIZE of tilt */
 #define STICK_STEP_SIZE 32
 
+/* The tile column or row holding a ground point column or row */
+#define PointTile(point) ((point) / GROUND_TILE_POINT_SPAN)
+/* A ground point column or row's slot within its tile */
+#define PointSlot(point) ((point) & (GROUND_TILE_POINT_SPAN - 1))
+/* The index in g_WorkArea.hole.tiles of a tile column and row */
+#define TileIndex(tileColumn, tileRow) \
+  (((tileRow) * GROUND_TILE_COLUMN_COUNT) + (tileColumn))
+
 /*
  * Whether a midpoint on a tile's first row, or first column, is also kept
  * by the tile before it. They are macros, as inline functions compile
  * differently from the original.
  */
 #define IsSharedWithPreviousTileRow(column, row) \
-  (((column) & 1) && !((row) & 3) && ((row) / 4 > 0))
+  (((column) & 1) && !PointSlot(row) && (PointTile(row) > 0))
 #define IsSharedWithPreviousTileColumn(column, row) \
-  (((row) & 1) && !((column) & 3) && ((column) / 4 > 0))
+  (((row) & 1) && !PointSlot(column) && (PointTile(column) > 0))
 
 /*
  * What SCENE_MAP_OVERVIEW's controls change. Only the camera position is
@@ -986,23 +994,23 @@ Vtx* GetGroundPoint(u32 column, u32 row) {
   s32 slotColumn;
 
   if ((column | row) & 1) {
-    tileRow = row >> 2;
-    if (row == 64) {
-      tileRow = 15;
-      slotRow = 4;
+    tileRow = PointTile(row);
+    if (row == GROUND_POINT_ROW_COUNT - 1) {
+      tileRow = GROUND_TILE_ROW_COUNT - 1;
+      slotRow = GROUND_TILE_POINT_SPAN;
     } else {
-      slotRow = row & 3;
+      slotRow = PointSlot(row);
     }
 
-    if (column == 32) {
-      tileColumn = 7;
-      slotColumn = 4;
+    if (column == GROUND_POINT_COLUMN_COUNT - 1) {
+      tileColumn = GROUND_TILE_COLUMN_COUNT - 1;
+      slotColumn = GROUND_TILE_POINT_SPAN;
     } else {
-      tileColumn = column >> 2;
-      slotColumn = column & 3;
+      tileColumn = PointTile(column);
+      slotColumn = PointSlot(column);
     }
 
-    return &g_WorkArea.hole.midpoints[(tileRow * 8) + tileColumn]
+    return &g_WorkArea.hole.midpoints[TileIndex(tileColumn, tileRow)]
                                      [f_PointSlots[slotRow][slotColumn]];
   }
 
@@ -1024,32 +1032,35 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
   Vtx* midpoints;
 
   if ((column | row) & 1) {
-    if (row < 64 && column < 32) {
-      tileIndex = ((row / 4) * 8) + (column / 4);
+    if (row < GROUND_POINT_ROW_COUNT - 1 &&
+        column < GROUND_POINT_COLUMN_COUNT - 1) {
+      tileIndex = TileIndex(PointTile(column), PointTile(row));
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint = &midpoints[f_PointSlots[row & 3][column & 3]];
+        midpoint = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
         midpoint->v = *point;
       }
     }
 
     if (IsSharedWithPreviousTileRow(column, row)) {
-      tileIndex = (((row / 4) - 1) * 8) + (column / 4);
+      tileIndex = TileIndex(PointTile(column), PointTile(row) - 1);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint = &midpoints[f_PointSlots[4][column & 3]];
+        midpoint =
+            &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
         midpoint->v = *point;
       }
     }
 
     if (IsSharedWithPreviousTileColumn(column, row)) {
-      tileIndex = ((row / 4) * 8) + ((column / 4) - 1);
+      tileIndex = TileIndex(PointTile(column) - 1, PointTile(row));
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint = &midpoints[f_PointSlots[row & 3][4]];
+        midpoint =
+            &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
         midpoint->v = *point;
       }
     }
@@ -1067,12 +1078,13 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
   Vtx* midpoints;
 
   if ((column | row) & 1) {
-    if (row < 64 && column < 32) {
-      tileIndex = ((row / 4) * 8) + (column / 4);
+    if (row < GROUND_POINT_ROW_COUNT - 1 &&
+        column < GROUND_POINT_COLUMN_COUNT - 1) {
+      tileIndex = TileIndex(PointTile(column), PointTile(row));
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point = &midpoints[f_PointSlots[row & 3][column & 3]];
+        point = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
         point->v.ob[1] = height;
 
         /* The chained assignment is there to match */
@@ -1081,11 +1093,12 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
     }
 
     if (IsSharedWithPreviousTileRow(column, row)) {
-      tileIndex = (((row / 4) - 1) * 8) + (column / 4);
+      tileIndex = TileIndex(PointTile(column), PointTile(row) - 1);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point = &midpoints[f_PointSlots[4][column & 3]];
+        point =
+            &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
         point->v.ob[1] = height;
 
         /* The chained assignment is there to match */
@@ -1094,11 +1107,12 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
     }
 
     if (IsSharedWithPreviousTileColumn(column, row)) {
-      tileIndex = ((row / 4) * 8) + ((column / 4) - 1);
+      tileIndex = TileIndex(PointTile(column) - 1, PointTile(row));
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point = &midpoints[f_PointSlots[row & 3][4]];
+        point =
+            &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
         point->v.ob[1] = height;
 
         /* The chained assignment is there to match */
