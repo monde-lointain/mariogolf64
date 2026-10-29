@@ -78,7 +78,6 @@ extern s32 D_801B7070;
 extern s16 D_801B71CC;
 extern s8 D_801B9410;
 extern u8 g_MapCamera[];
-extern void* g_MenuCourseSceneryAsset;
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
 extern void* D_801049A0[7];

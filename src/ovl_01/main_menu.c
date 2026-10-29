@@ -250,7 +250,6 @@ typedef struct ImageCorner {
 extern void* D_800FF420[2];
 extern s32 D_801051F0;
 extern void* D_801052BC[2];
-extern void* g_MenuCourseSceneryAsset;
 extern const char D_80231514_ovl_01[];
 /* The parts of the menu backdrop that func_801FC60C and func_801FB54C draw */
 #define MENU_LAYER_UNK1 (1 << 0)

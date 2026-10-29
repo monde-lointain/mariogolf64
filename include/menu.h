@@ -76,6 +76,8 @@ extern AssetId g_CourseWheelImageAssets[][COURSE_IMAGE_COUNT];
 #define TROPHY_FRAME_END (-1)
 extern s16 g_CourseTrophyFiles[][COURSE_FILE_COUNT];
 extern void* D_800FBE38[COURSE_FILE_COUNT];
+/* The menus' ASSET_COURSE_SCENE: the sky and the course select's backdrops */
+extern void* g_MenuCourseSceneryAsset;
 
 /* Screen 5's images in place of g_CourseIconAssets's: a row of asset IDs for
  * each g_ChosenPlayerCount from 1, of which it reads as many as
