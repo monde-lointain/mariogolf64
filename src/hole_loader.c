@@ -29,6 +29,12 @@
 
 /* ChooseHoleConditions gives up on finding a set cup position after these */
 #define MAX_CUP_ATTEMPT_COUNT 120
+/* Whether the hole has both its cup and its tee set */
+#define AreCupAndTeeSet() \
+  (g_HoleSetup.cupPosition[AXIS_X] != 0 && \
+      g_HoleSetup.cupPosition[AXIS_Z] != 0 && \
+      g_HoleSetup.teePosition[AXIS_X] != 0 && \
+      g_HoleSetup.teePosition[AXIS_Z] != 0)
 /*
  * A hole's cup is drawn from (GetHoleRandom() >> CUP_DRAW_SHIFT) %
  * CUP_DRAW_COUNT; a draw below an end picks that end's cup
@@ -893,10 +899,7 @@ s32 ChooseHoleConditions(void) {
       break;
     }
 
-    if (g_HoleSetup.cupPosition[AXIS_X] != 0 &&
-        g_HoleSetup.cupPosition[AXIS_Z] != 0 &&
-        g_HoleSetup.teePosition[AXIS_X] != 0 &&
-        g_HoleSetup.teePosition[AXIS_Z] != 0) {
+    if (AreCupAndTeeSet()) {
       break;
     }
   }

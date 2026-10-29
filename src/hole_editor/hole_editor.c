@@ -210,6 +210,10 @@ enum TriangleEdit {
 /* A billboard from 1 to these limits in x and z is taken */
 #define TREE_X_LIMIT 0x1000
 #define TREE_Z_LIMIT 0x2000
+/* Whether a billboard is free, outside the limits that taken ones are in */
+#define IsFreeBillboard(billboard) \
+  ((billboard).x <= 0 || (billboard).x >= TREE_X_LIMIT || \
+      (billboard).z <= 0 || (billboard).z >= TREE_Z_LIMIT)
 #define COPIED_TREE_OFFSET 0x100 /* In x */
 
 /* func_80407F08's hex dump */
@@ -2817,13 +2821,17 @@ s32 func_80405870_hole_editor(s32 column, s32 row, s32 endColumn, s32 endRow) {
  * Toggles the unk992 bit of one cell of the ground. The cells are
  * GROUND_TILE_POINT_SPAN a side in each tile.
  */
+/* Whether a ground point is off the ground tiles */
+#define IsOffGroundPoints(column, row) \
+  ((column) < 0 || \
+      (column) >= GROUND_TILE_COLUMN_COUNT * GROUND_TILE_POINT_SPAN || \
+      (row) >= GROUND_TILE_ROW_COUNT * GROUND_TILE_POINT_SPAN || (row) < 0)
+
 void func_80405AF4_hole_editor(s32 column, s32 row) {
   s32 tileIndex;
   s32 cellBits;
 
-  if (column < 0 ||
-      column >= GROUND_TILE_COLUMN_COUNT * GROUND_TILE_POINT_SPAN ||
-      row >= GROUND_TILE_ROW_COUNT * GROUND_TILE_POINT_SPAN || row < 0) {
+  if (IsOffGroundPoints(column, row)) {
     return;
   }
 
@@ -3445,8 +3453,7 @@ void func_80406C3C_hole_editor(void) {
   i = 0;
   if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
     for (; i < BILLBOARD_COUNT; i++) {
-      if (g_Billboards[i].x <= 0 || g_Billboards[i].x >= TREE_X_LIMIT ||
-          g_Billboards[i].z <= 0 || g_Billboards[i].z >= TREE_Z_LIMIT) {
+      if (IsFreeBillboard(g_Billboards[i])) {
         break;
       }
     }
