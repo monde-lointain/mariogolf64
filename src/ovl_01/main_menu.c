@@ -7198,9 +7198,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawSpinningStars);
 #endif
 
 /*
- * func_8020879C draws the course's Ring Shot holes as stars on a hexagon
- * around a center, gold where the hole's star was won and silver where not,
- * with the chosen hole larger. Nothing calls it.
+ * DrawMenuRingShotStars draws the course's Ring Shot holes as stars on a
+ * hexagon around a center, gold where the hole's star was won and silver where
+ * not, with the chosen hole larger. Nothing calls it.
  */
 #define RING_SHOT_STAR_RADIUS 56
 #define RING_SHOT_STAR_WIDTH 32
@@ -7213,7 +7213,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawSpinningStars);
 #define SILVER_STAR_TMEM 128
 #define SILVER_STAR_TILE 1
 
-void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
+void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
   EncodedAsset asset;
   SaveData* save = GetSaveData();
   Gfx* gfx = *displayListHead;
