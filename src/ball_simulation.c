@@ -1078,7 +1078,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         if (simulation->surface == SURFACE_GREEN ||
             simulation->surface == SURFACE_GREEN_EDGE) {
-          plane.normal[AXIS_Y] = (plane.normal[AXIS_Y] * 0.5f) + 0.5f;
+          plane.normal[AXIS_Y] =
+              (plane.normal[AXIS_Y] * (1.0f - GREEN_TRIANGLE_LEVELING)) +
+              GREEN_TRIANGLE_LEVELING;
           guNormalize(&plane.normal[AXIS_X], &plane.normal[AXIS_Y],
               &plane.normal[AXIS_Z]);
         }

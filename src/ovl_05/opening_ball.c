@@ -249,6 +249,14 @@ static void ResetBallSimulations(void) {
 #define OPENING_FOLIAGE_RISE_SCALE 1.2f
 #define OPENING_WALL_BACK_OFF 614.4f
 #define OPENING_WALL_HIT_STEP_SHARE 0.99f
+/*
+ * A ball skips off the water only when it hits it faster than this and
+ * its speed along the ground, at this ratio, is more than its impact's; a
+ * bounce in the first steps keeps a quarter of its speed
+ */
+#define OPENING_MIN_SKIP_IMPACT_SPEED KilometersPerHour(10)
+#define OPENING_SKIP_SPEED_RATIO 0.5f
+#define OPENING_EARLY_BOUNCE_STEP_COUNT 3
 
 /*
  * The opening calls FindBillboardHit with a ninth argument, the simulation,
@@ -964,7 +972,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           startY + (fraction * simulation->velocity[AXIS_Y]);
       simulation->position[AXIS_Z] =
           startZ + (fraction * simulation->velocity[AXIS_Z]);
-      substepCount += (fraction < 0.4f) & (substepCount == 1);
+      substepCount += (fraction < EARLY_HIT_FRACTION) & (substepCount == 1);
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->surface = SURFACE_FAIRWAY;
       } else {
@@ -975,7 +983,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         if (simulation->surface == SURFACE_GREEN ||
             simulation->surface == SURFACE_GREEN_EDGE) {
-          plane.normal[AXIS_Y] = (plane.normal[AXIS_Y] * 0.5f) + 0.5f;
+          plane.normal[AXIS_Y] =
+              (plane.normal[AXIS_Y] * (1.0f - GREEN_TRIANGLE_LEVELING)) +
+              GREEN_TRIANGLE_LEVELING;
           guNormalize(&plane.normal[AXIS_X], &plane.normal[AXIS_Y],
               &plane.normal[AXIS_Z]);
         }
@@ -995,9 +1005,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       if (simulation->surface == SURFACE_BUNKER) {
         s32 burial = 0;
 
-        if (impactSpeed >= 9956.353f) {
+        if (impactSpeed >= POOR_LIE_BUNKER_SPEED) {
           burial = 2;
-        } else if (impactSpeed >= KilometersPerHour(50)) {
+        } else if (impactSpeed >= FAIR_LIE_BUNKER_SPEED) {
           burial = 1;
         }
 
@@ -1017,10 +1027,10 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         }
       } else if (simulation->surface == SURFACE_WATER_HAZARD) {
         if (simulation->state == BALL_STATE_ROLLING ||
-            impactSpeed <= KilometersPerHour(10) ||
+            impactSpeed <= OPENING_MIN_SKIP_IMPACT_SPEED ||
             GetLength2D(
                 simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]) *
-                    0.5f <=
+                    OPENING_SKIP_SPEED_RATIO <=
                 impactSpeed) {
           simulation->state = BALL_STATE_IN_WATER;
           /* The chained assignment is there to match */
@@ -1028,13 +1038,17 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         }
       }
 
-      softness = 1000 - GetSurfaceInfo(simulation->surface)->bounciness;
-      keep = (1000.0f - (softness * (steepness * 0.1f) * steepness)) * 0.001f;
-      if (simulation->stepCount < 3) {
-        keep *= 0.25;
+      softness =
+          THOUSANDTHS_PER_ONE - GetSurfaceInfo(simulation->surface)->bounciness;
+      keep = ((f32)THOUSANDTHS_PER_ONE -
+                 (softness * (steepness * SOFTNESS_SPEED_LOSS_SCALE) *
+                     steepness)) *
+          ONE_PER_THOUSANDTH;
+      if (simulation->stepCount < OPENING_EARLY_BOUNCE_STEP_COUNT) {
+        keep *= EARLY_BOUNCE_SPEED_SCALE;
       }
 
-      bounce = 1.0f - (softness * steepness * 0.001f);
+      bounce = 1.0f - (softness * steepness * ONE_PER_THOUSANDTH);
       push = (bounce + 1.0f) * impactSpeed;
       bounced[AXIS_X] =
           simulation->velocity[AXIS_X] - (plane.normal[AXIS_X] * push);
@@ -1055,16 +1069,18 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] +
             ((spinVelocityX - simulation->velocity[AXIS_X]) * grip *
-                AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f);
+                AbsoluteValueExpression(plane.normal[AXIS_Y]) *
+                TRIANGLE_SPIN_GRIP);
         simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
             ((spinVelocityZ - simulation->velocity[AXIS_Z]) * grip *
-                AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f);
-        spinVelocityX = spinVelocityX * 0.9f;
-        spinVelocityZ = spinVelocityZ * 0.9f;
-        spinVelocityX =
-            spinVelocityX + ((previousVelocityX - spinVelocityX) * 0.25f);
-        spinVelocityZ =
-            spinVelocityZ + ((previousVelocityZ - spinVelocityZ) * 0.25f);
+                AbsoluteValueExpression(plane.normal[AXIS_Y]) *
+                TRIANGLE_SPIN_GRIP);
+        spinVelocityX = spinVelocityX * BOUNCE_SPIN_DECAY;
+        spinVelocityZ = spinVelocityZ * BOUNCE_SPIN_DECAY;
+        spinVelocityX = spinVelocityX +
+            ((previousVelocityX - spinVelocityX) * TRIANGLE_SPIN_FOLLOW);
+        spinVelocityZ = spinVelocityZ +
+            ((previousVelocityZ - spinVelocityZ) * TRIANGLE_SPIN_FOLLOW);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
         BuildLiftRotation();

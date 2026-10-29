@@ -171,6 +171,8 @@
  * a second substep
  */
 #define EARLY_HIT_FRACTION 0.4f
+/* On the green, a hole triangle's normal is taken halfway to straight up */
+#define GREEN_TRIANGLE_LEVELING 0.5f
 /*
  * On a bounce, the ball's velocity moves toward its spin's, by this share
  * times the ground's flatness and, unless the ball starts rolling, the
