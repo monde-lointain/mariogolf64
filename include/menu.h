@@ -44,7 +44,7 @@ enum MenuScreen {
 #define MENU_SCREEN_COUNT 29
 /* g_LoadedMenuScreen's value before any screen's assets are read */
 #define NO_MENU_SCREEN (-1)
-/* The screen whose assets func_801F4C78 last read */
+/* The screen whose assets UpdateMenus last read */
 extern s8 g_LoadedMenuScreen;
 /* Each screen's image */
 extern AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT];

@@ -308,7 +308,7 @@ extern void* D_801049A0[][MINI_GOLF_DISC_IMAGE_COUNT];
 
 extern void* D_800FBDFC[2];
 
-/* What func_801F4C78 reads as the menu screen changes */
+/* What UpdateMenus reads as the menu screen changes */
 extern void* D_800FBE30[2];
 extern void* D_800FC6A0;
 extern void* D_800FC898;
@@ -372,7 +372,7 @@ void func_8021730C_ovl_01(void);
 void func_802177D0_ovl_01(void);
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind);
 void func_80217D20_ovl_01(void);
-/* Defined without parameters, though func_801F4C78 passes it two */
+/* Defined without parameters, though UpdateMenus passes it two */
 s32 func_80219948_ovl_01();
 void func_8021CF10_ovl_01(void** buffers);
 void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind);
@@ -917,7 +917,7 @@ s32 GetChosenCourseIndex(void) {
  * draws. The exit screen saves and starts play, swapping to the play module
  * unless GAME_FLAG_UNK2E is set.
  */
-void func_801F4C78_ovl_01(void) {
+void UpdateMenus(void) {
   AssetFile file;
   Vec3 center;
   Vec3 eye;

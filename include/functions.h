@@ -138,7 +138,7 @@ void UpdatePlay(void);
 
 /* Scene modules' update routines, in overlays */
 void func_801F4A40(void);
-void func_801F4C78(void);
+void UpdateMenus(void);
 void UpdateTitleScreen(void);
 void UpdateBootLogos(void);
 void func_801F5F1C(void);

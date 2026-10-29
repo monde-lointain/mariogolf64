@@ -2467,7 +2467,7 @@ void UpdateGame(void) {
     g_Cameras[INSET_CAMERA].view.scissorY = LARGE_INSET_VIEW_CENTER_Y -
         (g_InsetView.step * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2));
     g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
-    func_801F4C78();
+    UpdateMenus();
     if (IsGameFlagSet(GAME_FLAG_DEBUG_MENU_VALUES)) {
       sprintf(g_PrintBuffer, "%3d", f_DebugMenuValues[0]);
       PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW);
