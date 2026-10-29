@@ -649,10 +649,10 @@ static s32 f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {0x05E5, 0x05E6,
 s32 D_8022F8C0_ovl_01 = 0;
 u8 D_8022F8C4_ovl_01 = 0;
 s8 D_8022F8C5_ovl_01 = 0;
-static s32 D_8022F8C8_ovl_01 = 0;
+static s32 f_SpinningStarFrameIndex = 0;
 /* Which of D_801B93E0's buffers holds the star frame shown */
-static u8 D_8022F8CC_ovl_01 = 0;
-static s8 D_8022F8CD_ovl_01 = 0;
+static u8 f_SpinningStarBufferIndex = 0;
+static s8 f_SpinningStarFrameTime = 0;
 static u8 D_8022F8CE_ovl_01 = 0;
 /* Read by no routine */
 static s32 D_8022F8D0_ovl_01 = 0;
@@ -1212,9 +1212,9 @@ void func_801F4C78_ovl_01(void) {
         OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
         ReadEncodedAsset(D_800FC898, &asset);
         func_8020E26C_ovl_01(D_800FBE30[1], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        D_8022F8C8_ovl_01 = 0;
-        D_8022F8CC_ovl_01 = 0;
-        D_8022F8CD_ovl_01 = 0;
+        f_SpinningStarFrameIndex = 0;
+        f_SpinningStarBufferIndex = 0;
+        f_SpinningStarFrameTime = 0;
         OpenEncodedAsset(f_MenuStarFrameAssets[D_8022F8C0_ovl_01], &asset);
         ReadEncodedAsset(D_801B93E0[0], &asset);
         break;
@@ -1439,9 +1439,9 @@ void func_801F4C78_ovl_01(void) {
         D_8022BE90_ovl_01 ^= 1;
         func_8020E26C_ovl_01(
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        D_8022F8C8_ovl_01 = 0;
-        D_8022F8CC_ovl_01 = 0;
-        D_8022F8CD_ovl_01 = 0;
+        f_SpinningStarFrameIndex = 0;
+        f_SpinningStarBufferIndex = 0;
+        f_SpinningStarFrameTime = 0;
         D_8022BE8A_ovl_01 = 0;
         D_8022BE92_ovl_01 ^= 1;
         func_802178B0_ovl_01(
@@ -1466,8 +1466,8 @@ void func_801F4C78_ovl_01(void) {
         break;
 
       case MENU_SCREEN_COURSE_STATS:
-        D_8022F8CD_ovl_01 = 0;
-        D_8022F8C8_ovl_01 = 0;
+        f_SpinningStarFrameTime = 0;
+        f_SpinningStarFrameIndex = 0;
         if (g_IsDebugEnabled) {
           func_80221B20_ovl_01();
         }
@@ -2393,8 +2393,8 @@ void func_801F7D28_ovl_01(void) {
       if (g_ChosenPlayerCount == 1) {
         D_8022F8C5_ovl_01 = 0;
         D_8022F8C0_ovl_01 = 0;
-        D_8022F8CD_ovl_01 = 0;
-        D_8022F8C8_ovl_01 = 0;
+        f_SpinningStarFrameTime = 0;
+        f_SpinningStarFrameIndex = 0;
       }
     } else if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -2407,8 +2407,8 @@ void func_801F7D28_ovl_01(void) {
       if (g_ChosenPlayerCount == 1) {
         D_8022F8C5_ovl_01 = 0;
         D_8022F8C0_ovl_01 = 0;
-        D_8022F8CD_ovl_01 = 0;
-        D_8022F8C8_ovl_01 = 0;
+        f_SpinningStarFrameTime = 0;
+        f_SpinningStarFrameIndex = 0;
       }
     }
   }
@@ -7052,8 +7052,8 @@ void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y) {
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   gDPPipeSync(gfx++);
   gDPLoadTextureTile_4b(gfx++,
-      TextureAddress(
-          ImageTexels(image) + (D_8022F8C8_ovl_01 * ANIMATED_ICON_IMAGE_SIZE)),
+      TextureAddress(ImageTexels(image) +
+          (f_SpinningStarFrameIndex * ANIMATED_ICON_IMAGE_SIZE)),
       G_IM_FMT_CI, ANIMATED_ICON_SIZE, ANIMATED_ICON_SIZE, 0, 0,
       ANIMATED_ICON_SIZE - 1, ANIMATED_ICON_SIZE - 1, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -7064,12 +7064,12 @@ void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y) {
       QuarterPixels(y + ANIMATED_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
-  D_8022F8CD_ovl_01++;
-  if (D_8022F8CD_ovl_01 == ANIMATED_ICON_FRAME_DURATION) {
-    D_8022F8CD_ovl_01 = 0;
-    D_8022F8C8_ovl_01++;
-    if (D_8022F8C8_ovl_01 >= ANIMATED_ICON_FRAME_COUNT) {
-      D_8022F8C8_ovl_01 = 0;
+  f_SpinningStarFrameTime++;
+  if (f_SpinningStarFrameTime == ANIMATED_ICON_FRAME_DURATION) {
+    f_SpinningStarFrameTime = 0;
+    f_SpinningStarFrameIndex++;
+    if (f_SpinningStarFrameIndex >= ANIMATED_ICON_FRAME_COUNT) {
+      f_SpinningStarFrameIndex = 0;
     }
   }
 
@@ -7085,7 +7085,7 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     u8 enlargesChosenHole) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
-  void* image = D_801B93E0[D_8022F8CC_ovl_01];
+  void* image = D_801B93E0[f_SpinningStarBufferIndex];
   u8 starIndex = 0;
   s32 growWidth = 0;
   s32 growHeight;
@@ -7127,17 +7127,17 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     gDPPipeSync(gfx++);
   }
 
-  D_8022F8CD_ovl_01++;
-  if (D_8022F8CD_ovl_01 == ANIMATED_ICON_FRAME_DURATION) {
-    D_8022F8CD_ovl_01 = 0;
-    D_8022F8C8_ovl_01++;
-    if (D_8022F8C8_ovl_01 >= STAR_FRAME_COUNT) {
-      D_8022F8C8_ovl_01 = 0;
+  f_SpinningStarFrameTime++;
+  if (f_SpinningStarFrameTime == ANIMATED_ICON_FRAME_DURATION) {
+    f_SpinningStarFrameTime = 0;
+    f_SpinningStarFrameIndex++;
+    if (f_SpinningStarFrameIndex >= STAR_FRAME_COUNT) {
+      f_SpinningStarFrameIndex = 0;
     }
 
-    D_8022F8CC_ovl_01 = D_8022F8CC_ovl_01 == 0;
-    OpenEncodedAsset(f_MenuStarFrameAssets[D_8022F8C8_ovl_01], &asset);
-    ReadEncodedAsset(D_801B93E0[D_8022F8CC_ovl_01], &asset);
+    f_SpinningStarBufferIndex = f_SpinningStarBufferIndex == 0;
+    OpenEncodedAsset(f_MenuStarFrameAssets[f_SpinningStarFrameIndex], &asset);
+    ReadEncodedAsset(D_801B93E0[f_SpinningStarBufferIndex], &asset);
   }
 
   *displayListHead = gfx;
