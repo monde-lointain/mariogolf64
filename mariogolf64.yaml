@@ -857,6 +857,7 @@ segments:
     type: code
     start: 0x171770
     vram: 0xB0171770
+    exclusive_ram_id: build_date
     subsegments:
       - [0x171770, hasm, build_date]
 
