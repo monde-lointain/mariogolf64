@@ -34,6 +34,9 @@
  * SCENE_MENU_TOP_ROW */
 #define SCENE_MENU_LENGTH 16
 #define SCENE_MENU_TOP_ROW 5
+/* The text columns of the menu's cursor and of its scenes' labels */
+#define SCENE_MENU_CURSOR_COLUMN 10
+#define SCENE_MENU_LABEL_COLUMN 12
 /* The scene menu's box, in screen pixels */
 #define SCENE_MENU_BOX_LEFT 72
 #define SCENE_MENU_BOX_TOP 32
@@ -1410,12 +1413,14 @@ s32 UpdateDebugSceneMenu(void) {
   for (i = 0, row = SCENE_MENU_TOP_ROW; i < SCENE_MENU_LENGTH; i++, row++) {
     if (i == selectedIndex) {
       SetDebugTextHighlight(TRUE);
-      PrintDebugText("->", 10, selectedIndex + SCENE_MENU_TOP_ROW);
+      PrintDebugText(
+          "->", SCENE_MENU_CURSOR_COLUMN, selectedIndex + SCENE_MENU_TOP_ROW);
     } else {
-      PrintDebugText("  ", 10, row);
+      PrintDebugText("  ", SCENE_MENU_CURSOR_COLUMN, row);
     }
 
-    PrintDebugText(GetDebugSceneLabel(f_SceneMenuScenes[i]), 12, row);
+    PrintDebugText(
+        GetDebugSceneLabel(f_SceneMenuScenes[i]), SCENE_MENU_LABEL_COLUMN, row);
   }
 
   if (g_MenuControllerData[0].button & U_JPAD) {
