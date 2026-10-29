@@ -4478,7 +4478,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 #define RIVAL_SLOT 1
 #define RIVAL_SPIN_STEP 10.0f
 
-/* func_80208F8C draws a frame of the waving Toad (assets 0x710 onward), 48x51
+/* DrawWavingToad draws a frame of the waving Toad (assets 0x710 onward), 48x51
  * CI8, in two strips */
 #define TOAD_WIDTH 48
 #define TOAD_STRIP_HEIGHT 30
@@ -7285,7 +7285,7 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
   *displayListHead = gfx;
 }
 
-void func_80208F8C_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
+void DrawWavingToad(Gfx** displayListHead, s32 left, s32 top) {
   Gfx* gfx = *displayListHead;
   s16 stripIndex;
   s32 rowCount;
