@@ -557,7 +557,6 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
  * can see through them, from the farthest to the nearest. Those farther
  * than the ball stay opaque.
  */
-#ifdef NON_MATCHING
 void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   Gfx* gfx = g_DisplayListHead;
   BillboardColor lightColor = g_BillboardLightColor;
@@ -613,6 +612,10 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPPipeSync(gfx++);
+
+  /* The blended mode set here is not the translucent surface mode that the
+   * loop switches to */
+  hasTranslucentMode = FALSE;
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A,
       Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
           GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA));
@@ -620,7 +623,6 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
 
-  hasTranslucentMode = FALSE;
   for (orderIndex = BILLBOARD_COUNT - 1; orderIndex >= 0; orderIndex--) {
     billboardIndex = f_DrawOrder[orderIndex];
     if (g_Billboards[billboardIndex].isNearCourseEdge) {
@@ -681,9 +683,6 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   g_DisplayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/billboard", DrawFadingBillboards);
-#endif
 
 /*
  * Development hardware could pass files to the host computer. These two
