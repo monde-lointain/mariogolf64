@@ -642,13 +642,13 @@ s32 GetRecordedScoreKind(s32 strokes) {
   }
 
   switch (toPar) {
-    case -3:
+    case SCORE_TO_PAR_ALBATROSS:
       return SCORE_KIND_RECORDED | SCORE_KIND_ALBATROSS;
-    case -2:
+    case SCORE_TO_PAR_EAGLE:
       return SCORE_KIND_RECORDED | SCORE_KIND_EAGLE;
-    case -1:
+    case SCORE_TO_PAR_BIRDIE:
       return SCORE_KIND_RECORDED | SCORE_KIND_BIRDIE;
-    case 0:
+    case SCORE_TO_PAR_PAR:
       if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
         return SCORE_KIND_RECORDED | SCORE_KIND_PAR;
       }
