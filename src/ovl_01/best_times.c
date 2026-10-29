@@ -68,9 +68,9 @@ void func_8020F2D0_ovl_01(
 void DrawNarrowTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
-void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
+void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
-void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
+void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
 void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place);
 void func_8021508C_ovl_01(
@@ -354,7 +354,7 @@ void DrawBestTimes(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   if (courseCount >= 2) {
-    func_80212C54_ovl_01(&gfx, D_8023AA50_ovl_01, &D_80230130_ovl_01,
+    DrawBlinkingSideArrows(&gfx, D_8023AA50_ovl_01, &D_80230130_ovl_01,
         &D_80230134_ovl_01, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
   }
 
@@ -392,7 +392,7 @@ void DrawBestTimes(Gfx** displayListHead) {
       gDPSetTextureFilter(gfx++, G_TF_BILERP);
       character = save->unkE08[memory->bestTimesCourse][otherIndex];
       holderPalettes = D_8023BFF0_ovl_01;
-      func_8021F124_ovl_01(&gfx, D_8012D430[character],
+      DrawCharacterFace(&gfx, D_8012D430[character],
           holderPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) +
               otherIndex],
           BEST_TIME_FACE_X,

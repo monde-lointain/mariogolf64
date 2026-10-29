@@ -106,8 +106,8 @@
 #define STATS_UP_ARROW_TOP 144
 #define STATS_DOWN_ARROW_TOP 216
 
-/* The blinking arrows that func_80212C54 draws either side of a box, from the
- * third image on */
+/* The blinking arrows that DrawBlinkingSideArrows draws either side of a box,
+ * from the third image on */
 #define SIDE_ARROW_COUNT 2
 #define SIDE_ARROW_RIGHT 0
 #define SIDE_ARROW_LEFT 1
@@ -521,7 +521,7 @@ void DrawCourseStats(Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  func_80212C54_ovl_01(&gfx, D_8023A830_ovl_01, &D_802300A8_ovl_01,
+  DrawBlinkingSideArrows(&gfx, D_8023A830_ovl_01, &D_802300A8_ovl_01,
       &D_802300AC_ovl_01, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
   image = (memory->statsCourse == courseCount) ? COURSE_TOTALS_IMAGE
                                                : memory->statsCourse;
@@ -1540,12 +1540,16 @@ void func_80212858_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
 }
 
 /*
+ * Draws the green left and right arrows either side of a width centered on a
+ * point, switching their blink frame every SIDE_ARROW_BLINK_FRAME_COUNT calls
+ */
+/*
  * Doesn't match: the original spills displayListHead to its argument slot,
  * keeps the arrow top in a register only for the lower edge, and needs one
  * stack slot fewer.
  */
 #ifdef NON_MATCHING
-void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
+void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     s32* blinkTimer, s32 width, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 left = 0;
@@ -1590,7 +1594,7 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212C54_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawBlinkingSideArrows);
 #endif
 
 /*
@@ -1598,7 +1602,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212C54_ovl_01);
  * a point. The header size is held in a local, as the matching code needs:
  * with the constant, GCC folds the texels' offset differently.
  */
-void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
+void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 top;

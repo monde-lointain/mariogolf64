@@ -44,7 +44,8 @@
 /* They are the ASSET_JAPANESE_*_LABEL score labels */
 #define SCORE_LABEL_COUNT 4
 
-/* func_8021F124 writes names beside the faces of these first characters only */
+/* DrawCharacterFace writes names beside the faces of these first characters
+ * only */
 #define NAMED_CHARACTER_COUNT 14
 
 /* The grid of stats that the cursor moves over, and the value of its empty
@@ -177,7 +178,7 @@ void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide);
 
 s16 func_8021E468_ovl_01(void);
 void func_8021E97C_ovl_01(Gfx** displayListHead);
-void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
+void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
 void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
@@ -2045,7 +2046,7 @@ void DrawBestShots(Gfx** displayListHead) {
       if (D_8023B640_ovl_01[row][column] != STATS_CELL_EMPTY) {
         character = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]]
                         .characterIndex;
-        func_8021F124_ovl_01(&gfx, D_8012D430[character],
+        DrawCharacterFace(&gfx, D_8012D430[character],
             D_8023B5E0_ovl_01[row][column],
             RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
             RECORD_FACE_Y + (row * STATS_CURSOR_ROW_HEIGHT), character,
@@ -2531,7 +2532,11 @@ void func_8021EF64_ovl_01(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021EF64_ovl_01);
 #endif
 
-void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
+/*
+ * Draws a character's face from texels and a palette at (left, top), darkened
+ * or with the character's name on it as drawMode asks
+ */
+void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode) {
   Gfx* gfx = *displayListHead;
 

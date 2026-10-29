@@ -111,14 +111,14 @@ typedef struct TableCorner {
 #define TABLE_ARROW_BLINK_FRAMES 4
 
 extern void* D_8012D430[CHARACTER_COUNT];
-/* func_8021F124 takes an s16 character, but this file calls it without
+/* DrawCharacterFace takes an s16 character, but this file calls it without
  * narrowing the argument */
-void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
+void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, CharacterId character, u8 drawMode);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
-void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
+void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
 void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y);
 void func_802169CC_ovl_01(Gfx** displayListHead);
@@ -391,7 +391,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
       drawMode = FACE_PLAIN;
     }
 
-    func_8021F124_ovl_01(&gfx, D_8012D430[rowCharacter],
+    DrawCharacterFace(&gfx, D_8012D430[rowCharacter],
         D_8023BFF0_ovl_01[rowCharacter], TABLE_ROW_FACE_X,
         (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_ROW_FACE_Y, rowCharacter,
         drawMode);
@@ -405,7 +405,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
       }
 
       if (shownRow == 0) {
-        func_8021F124_ovl_01(&gfx, D_8012D430[columnCharacter],
+        DrawCharacterFace(&gfx, D_8012D430[columnCharacter],
             D_8023BFF0_ovl_01[columnCharacter],
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
             TABLE_COLUMN_FACE_Y, columnCharacter, drawMode);
@@ -447,24 +447,24 @@ void DrawCharacterTable(Gfx** displayListHead) {
     shownRow++;
   } while (shownRow != TABLE_SHOWN_ROW_COUNT);
   if (memory->tableFirstRow > 0) {
-    func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01,
-        MENU_ARROW_UP, TABLE_ROW_ARROW_X, TABLE_UP_ARROW_Y);
+    DrawGreenArrow(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, MENU_ARROW_UP,
+        TABLE_ROW_ARROW_X, TABLE_UP_ARROW_Y);
   }
 
   if (memory->tableFirstRow < TABLE_ROW_COUNT - TABLE_SHOWN_ROW_COUNT) {
-    func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01,
-        MENU_ARROW_DOWN, TABLE_ROW_ARROW_X, TABLE_DOWN_ARROW_Y);
+    DrawGreenArrow(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, MENU_ARROW_DOWN,
+        TABLE_ROW_ARROW_X, TABLE_DOWN_ARROW_Y);
   }
 
   if (memory->tableFirstColumn > 0) {
-    func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01,
-        MENU_ARROW_LEFT, TABLE_LEFT_ARROW_X, TABLE_COLUMN_ARROW_Y);
+    DrawGreenArrow(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, MENU_ARROW_LEFT,
+        TABLE_LEFT_ARROW_X, TABLE_COLUMN_ARROW_Y);
   }
 
   if (memory->tableFirstColumn <
       TABLE_COLUMN_COUNT - TABLE_SHOWN_COLUMN_COUNT) {
-    func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01,
-        MENU_ARROW_RIGHT, TABLE_RIGHT_ARROW_X, TABLE_COLUMN_ARROW_Y);
+    DrawGreenArrow(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, MENU_ARROW_RIGHT,
+        TABLE_RIGHT_ARROW_X, TABLE_COLUMN_ARROW_Y);
   }
 
   D_802301A0_ovl_01++;
@@ -655,7 +655,7 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
     faceMode = FACE_PLAIN;
   }
 
-  func_8021F124_ovl_01(&gfx, D_8012D430[rowCharacter],
+  DrawCharacterFace(&gfx, D_8012D430[rowCharacter],
       D_8023BFF0_ovl_01[rowCharacter],
       D_80230190_ovl_01 + TABLE_POPUP_ROW_FACE_X,
       D_80230194_ovl_01 + TABLE_POPUP_FACE_Y, rowCharacter, faceMode);
@@ -665,7 +665,7 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
     faceMode = FACE_PLAIN;
   }
 
-  func_8021F124_ovl_01(&gfx, D_8012D430[columnCharacter],
+  DrawCharacterFace(&gfx, D_8012D430[columnCharacter],
       D_8023BFF0_ovl_01[columnCharacter],
       D_80230190_ovl_01 + TABLE_POPUP_COLUMN_FACE_X,
       D_80230194_ovl_01 + TABLE_POPUP_FACE_Y, columnCharacter, faceMode);

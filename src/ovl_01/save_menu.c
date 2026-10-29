@@ -133,13 +133,13 @@ s32 GetOpenRingShotCourseCount(void);
 void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
-void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
+void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
-void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
+void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
-/* func_8021F124 takes a u8 drawMode, but this file calls it without narrowing
- * the argument */
-void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
+/* DrawCharacterFace takes a u8 drawMode, but this file calls it without
+ * narrowing the argument */
+void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, s32 drawMode);
 void DrawCourseLabel(Gfx** displayListHead, s32 courseIndex, s32 left, s32 top,
     u8 showsCourseWord);
@@ -636,15 +636,15 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
     if (row == memory->ringShotRow) {
       if (row == 0) {
-        func_80212C54_ovl_01(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
+        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
             &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH, RING_SHOT_FIRST_ARROW_X,
             RING_SHOT_ARROW_Y);
       } else if (row == RING_SHOT_REPLAY_ROW) {
-        func_80212C54_ovl_01(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
+        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
             &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH, RING_SHOT_REPLAY_ARROW_X,
             RING_SHOT_ARROW_Y);
       } else {
-        func_80212C54_ovl_01(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
+        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
             &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH,
             (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ARROW_OFFSET_X,
             RING_SHOT_ARROW_Y);
@@ -668,7 +668,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
           index = FACE_DARKENED;
         }
 
-        func_8021F124_ovl_01(&gfx, D_8012D430[character],
+        DrawCharacterFace(&gfx, D_8012D430[character],
             D_8023BFF0_ovl_01[character],
             RING_SHOT_FACE_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_FACE_Y + (itemIndex * RING_SHOT_FACE_SPACING), character,
@@ -686,7 +686,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
     for (column = 0; column != RING_SHOT_SCROLL_COLUMN_COUNT; column++) {
       if (memory->ringShotFirstCharacters[memory->ringShotRow] > 0) {
-        func_80212FEC_ovl_01(&gfx, f_RingShotGreenArrows, D_80230A90_ovl_01,
+        DrawGreenArrow(&gfx, f_RingShotGreenArrows, D_80230A90_ovl_01,
             MENU_ARROW_UP,
             RING_SHOT_SCROLL_ARROW_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_UP_ARROW_Y);
@@ -694,7 +694,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
       if (memory->ringShotFirstCharacters[memory->ringShotRow] <
           RING_SHOT_LAST_FIRST_CHARACTER) {
-        func_80212FEC_ovl_01(&gfx, f_RingShotGreenArrows, D_80230A90_ovl_01,
+        DrawGreenArrow(&gfx, f_RingShotGreenArrows, D_80230A90_ovl_01,
             MENU_ARROW_DOWN,
             RING_SHOT_SCROLL_ARROW_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_DOWN_ARROW_Y);
@@ -705,7 +705,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
       if (f_RecordedReplaySlots[index] != -1) {
         replayCharacter =
             save->ringShotRecords[f_RecordedReplaySlots[index]].characterIndex;
-        func_8021F124_ovl_01(&gfx, D_8012D430[replayCharacter],
+        DrawCharacterFace(&gfx, D_8012D430[replayCharacter],
             D_8023E3F0_ovl_01[index], RING_SHOT_REPLAY_FACE_X,
             RING_SHOT_REPLAY_FACE_Y + (index * RING_SHOT_SLOT_SPACING),
             replayCharacter, FACE_PLAIN);
