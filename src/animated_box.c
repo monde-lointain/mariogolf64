@@ -17,8 +17,8 @@
 
 static s32 f_QueuedBoxCount = 0;
 
-/* Not static: the original left it to the linker's common block */
-AnimatedBox* f_QueuedBoxes[QUEUED_BOX_CAPACITY];
+/* Defined in main_bss.c, at its address in the original */
+extern AnimatedBox* f_QueuedBoxes[QUEUED_BOX_CAPACITY];
 
 static void DrawAnimatedBox(Gfx** gfxHead, AnimatedBox* box) {
   Gfx* gfx;

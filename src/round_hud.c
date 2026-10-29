@@ -694,8 +694,8 @@ static u16 f_WhiteDistancePalette[] = {
 };
 static s32 f_LoadedHoleIntroImages = 0;
 
-/* Not static: the original left it to the linker's common block */
-Mtx D_80105278;
+/* Defined in main_bss.c, at its address in the original */
+extern Mtx D_80105278;
 
 /*
  * The grid drawn over the ground around a shot's target, as

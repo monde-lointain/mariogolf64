@@ -131,9 +131,9 @@ s32 StepHoleFlyover(void);
 void EaseLookAtBelowBall(f32 drop);
 void EaseLookAtPoint(f32 yaw);
 
-/* Not static: the original left it to the linker's common block */
+/* Defined in main_bss.c, at its address in the original */
 /* The step of the simulated path that the ball's flight has reached */
-s32 g_BallFlightStep;
+extern s32 g_BallFlightStep;
 
 /* Unused; the original has it */
 static const char f_UnusedFloatFormat[] = "            %f";
@@ -3474,10 +3474,10 @@ void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius) {
 #define NOISE_INTENSITY_SHIFT 13
 #define NOISE_MAX_INTENSITY 0xFF
 
-/* Not static: the original left it to the linker's common block */
+/* Defined in main_bss.c, at its address in the original */
 /* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
  * texture blends */
-s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
+extern s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
 
 static inline s32 RandomNoiseDisplacement(void) {
   return (rand() & NOISE_DISPLACEMENT_MASK) - NOISE_DISPLACEMENT_BIAS;

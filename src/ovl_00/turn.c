@@ -390,11 +390,13 @@ static Mtx D_802271A0_ovl_00[2][SHOT_PREVIEW_MAX_STEPS];
 /* The shot preview's points */
 static f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
 
-/* Not static: the original left these to the linker's common block */
+/* Not static: the original left it to the linker's common block */
 s32 D_8022B5C0_ovl_00;
-CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
-UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT];
-Unk20 g_PreviousBallSurfaceInfo;
+
+/* Defined in main_bss.c, at their addresses in the original */
+extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
+extern UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT];
+extern Unk20 g_PreviousBallSurfaceInfo;
 
 /* Lets the Rumble Paks run again after nuContRmbForceStop */
 void EndRumbleForceStop(void) {

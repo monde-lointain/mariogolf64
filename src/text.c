@@ -228,15 +228,15 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
 void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
 s32 GetTextLength(char* text);
 
-/* Not static: the original left these to the linker's common block */
+/* Defined in main_bss.c, at their addresses in the original */
 /* The index of the first character code in the message table, in halfwords */
-s32 g_MessageCodesStart;
-TextSlot g_TextSlots[TEXT_SLOT_COUNT];
-u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
-char g_TextName[TEXT_NAME_SIZE];
-GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
+extern s32 g_MessageCodesStart;
+extern TextSlot g_TextSlots[TEXT_SLOT_COUNT];
+extern u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
+extern char g_TextName[TEXT_NAME_SIZE];
+extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 /* How many glyphs each group has */
-u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
+extern u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
 
 const char g_TextStringFormat[] = "%s";
 const char g_TextNumberFormat[] = "%d";

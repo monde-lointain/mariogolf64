@@ -305,8 +305,8 @@ static u8 D_800DAC30[16];
 #define VI_FEATURES \
   (OS_VI_GAMMA_OFF | OS_VI_GAMMA_DITHER_ON | OS_VI_DITHER_FILTER_ON)
 
-/* Not static: the original left it to the linker's common block */
-s32 g_PerspectiveNormalization;
+/* Defined in main_bss.c, at its address in the original */
+extern s32 g_PerspectiveNormalization;
 
 void StartGame(void) {
   g_MapCamera.view.eye[0] = 0.0f;

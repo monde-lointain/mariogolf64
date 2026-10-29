@@ -94,8 +94,8 @@ void SpawnSparkle(s32* position);
 static void AddTestRing(void);
 static s32 BuildRingMatrices(void);
 
-/* Not static: the original left it to the linker's common block */
-Mtx f_RingMatrices[RING_COUNT];
+/* Defined in main_bss.c, at its address in the original */
+extern Mtx f_RingMatrices[RING_COUNT];
 
 /* Makes the shaded triangles more see-through for the next frame */
 void DimNextTranslucentTriangles(void) {

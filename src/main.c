@@ -119,9 +119,9 @@ static Boolean f_IsOddRetrace = FALSE;
 
 void HandleGfxRetrace(s32 pendingTaskCount);
 
-/* Not static: the original left these to the linker's common block */
-volatile s32 g_MainLoopState;
-u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
+/* Defined in main_bss.c, at their addresses in the original */
+extern volatile s32 g_MainLoopState;
+extern u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
 
 void ReportFailedAssertion(
     const char* expression, const char* fileName, s32 lineNumber) {

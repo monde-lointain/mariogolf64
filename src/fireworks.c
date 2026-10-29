@@ -65,9 +65,9 @@ static f32 f_FireworkHue = 0.0f;
 /* Read by no routine */
 static u8 D_800C46AC[0xC04] = {0};
 
-/* Not static: the original left these to the linker's common block */
-FireworkShape* f_FireworkShape;
-Firework f_Fireworks[FIREWORK_CAPACITY];
+/* Defined in main_bss.c, at their addresses in the original */
+extern FireworkShape* f_FireworkShape;
+extern Firework f_Fireworks[FIREWORK_CAPACITY];
 
 /* Makes the first firework launch in 70 frames */
 void StartFireworks(void) {

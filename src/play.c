@@ -146,14 +146,14 @@ void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
 void LoadSuperShotReplay(PlayRecord* record);
 
-/* Not static: the original left these to the linker's common block */
-u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
-PlayRecord D_800FED40;
-s8 g_WasDonkeyKongUnlocked;
-s8 g_WasMapleUnlocked;
-s8 g_WasMetalMarioUnlocked;
-s8 g_HadEveryRingShotStar;
-s8 g_RingShotCourseOpenedAtStart;
+/* Defined in main_bss.c, at their addresses in the original */
+extern u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
+extern PlayRecord D_800FED40;
+extern s8 g_WasDonkeyKongUnlocked;
+extern s8 g_WasMapleUnlocked;
+extern s8 g_WasMetalMarioUnlocked;
+extern s8 g_HadEveryRingShotStar;
+extern s8 g_RingShotCourseOpenedAtStart;
 
 s32 func_8005F180(void) {
   return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B);

@@ -149,25 +149,25 @@ void DrawDivotMark(Gfx** displayListHead);
 void DrawRipple(Gfx** displayListHead, Effect* effect);
 void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect);
 
-/* Not static: the original left these to the linker's common block */
-Effect f_Effects[EFFECT_COUNT];
-Mtx f_EffectMatrices[EFFECT_COUNT];
-Mtx f_DropMatrices[DRAW_BUFFER_COUNT];
-Mtx f_DivotMarkMatrix;
-ShotDebris f_ShotDebris;
-s32 f_SpawnGroundHeight;
-u8* f_RainSplashImage;
-Raindrop* f_Raindrops;
-RainSplash* f_RainSplashes;
+/* Defined in main_bss.c, at their addresses in the original */
+extern Effect f_Effects[EFFECT_COUNT];
+extern Mtx f_EffectMatrices[EFFECT_COUNT];
+extern Mtx f_DropMatrices[DRAW_BUFFER_COUNT];
+extern Mtx f_DivotMarkMatrix;
+extern ShotDebris f_ShotDebris;
+extern s32 f_SpawnGroundHeight;
+extern u8* f_RainSplashImage;
+extern Raindrop* f_Raindrops;
+extern RainSplash* f_RainSplashes;
 /* The x and z that the rain falls around, RAIN_CENTER_DISTANCE ahead of the
  * camera */
-s32 f_RainCenter[2];
+extern s32 f_RainCenter[2];
 /* How far the wind blows the rain sideways for each unit it falls */
-f32 f_RainDriftX;
-f32 f_RainDriftZ;
-Vec3 f_RainVelocity; /* Per frame */
+extern f32 f_RainDriftX;
+extern f32 f_RainDriftZ;
+extern Vec3 f_RainVelocity; /* Per frame */
 /* The raindrop whose ground height UpdateRain refreshes next */
-s32 f_GroundCheckDropIndex;
+extern s32 f_GroundCheckDropIndex;
 
 static s32 f_DebrisKind = 0;
 static s32 f_NextMatrixIndex = 0;

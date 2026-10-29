@@ -49,8 +49,8 @@ static u8 D_800DE8C0[0x40];
 void DecodeByteRuns(u8* buffer, EncodedAsset* asset);
 void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset);
 
-/* Not static: the original left it to the linker's common block */
-s32 f_LastOpenedAssetId;
+/* Defined in main_bss.c, at its address in the original */
+extern s32 f_LastOpenedAssetId;
 
 void InitAssetFiles(void) {
   s32 index;

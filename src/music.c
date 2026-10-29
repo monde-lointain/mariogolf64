@@ -41,10 +41,10 @@ void AllocSoundEffectBuffer(s32 size);
 void SetAudioEventCallback(AudioEventCallback callback);
 void HandleAudioReset(NUScMsg type, s32 frame);
 
-/* Not static: the original left these to the linker's common block */
-NUScTask f_AudioTask;
-OSMesgQueue f_TaskDoneQueue;
-OSMesgQueue f_RetraceQueue;
+/* Defined in main_bss.c, at their addresses in the original */
+extern NUScTask f_AudioTask;
+extern OSMesgQueue f_TaskDoneQueue;
+extern OSMesgQueue f_RetraceQueue;
 
 static u8* f_SongBuffer = NULL;
 static u8* f_SoundEffectBuffer = NULL;
