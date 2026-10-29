@@ -42,19 +42,6 @@
 /* With its header; the wind streak follows it */
 #define FLY_GUY_IMAGE_SIZE 0x808
 
-/* Game Boy balls 1 to 4 copy a character's contact effect, and 5 to 7 have
- * their own */
-enum GameBoyBallType {
-  GAME_BOY_BALL_TYPE_PLAIN,
-  GAME_BOY_BALL_TYPE_MARIO,
-  GAME_BOY_BALL_TYPE_BOWSER,
-  GAME_BOY_BALL_TYPE_WARIO,
-  GAME_BOY_BALL_TYPE_HEAVY_HITTER,
-  GAME_BOY_BALL_TYPE_5,
-  GAME_BOY_BALL_TYPE_6,
-  GAME_BOY_BALL_TYPE_7
-};
-
 /* Where the contact effect's images go in g_SharedEffectImages, and their
  * assets */
 #define CONTACT_IMAGE_OFFSET 0x970

@@ -31,6 +31,19 @@ typedef struct GameBoyCharacterUnk3C {
   /* 0x5 */ u8 unk5;
 } GameBoyCharacterUnk3C; /* size = 0x6 */
 
+/* Game Boy balls 1 to 4 copy a character's contact effect, and 5 to 7 have
+ * their own */
+enum GameBoyBallType {
+  GAME_BOY_BALL_TYPE_PLAIN,
+  GAME_BOY_BALL_TYPE_MARIO,
+  GAME_BOY_BALL_TYPE_BOWSER,
+  GAME_BOY_BALL_TYPE_WARIO,
+  GAME_BOY_BALL_TYPE_HEAVY_HITTER,
+  GAME_BOY_BALL_TYPE_5,
+  GAME_BOY_BALL_TYPE_6,
+  GAME_BOY_BALL_TYPE_7
+};
+
 /* A character from the Game Boy Color version's save, read through the Transfer
  * Pak */
 typedef struct GameBoyCharacter {
@@ -46,7 +59,7 @@ typedef struct GameBoyCharacter {
       shotCurve; /* Positive for a draw, negative for a fade, 0 for straight */
   /* 0x1E */ u8 unk1E;
   /* 0x1F */ u8 mishitResistance; /* As ClubSetStats' */
-  /* 0x20 */ s8 ballType;
+  /* 0x20 */ s8 ballType; /* A GameBoyBallType */
   /* 0x24 */ s32 unk24;
   /* 0x28 */ s32 experience;
   /* 0x2C */ s16 driveDistance; /* Shown beside "Drive:" */
