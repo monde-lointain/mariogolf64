@@ -8,6 +8,7 @@
 
 #include "course.h"
 #include "libc.h"
+#include "math_util.h"
 #include "save.h"
 
 /* Standing 0 is the player's, so the computer contestants start at 1 */
@@ -16,8 +17,6 @@
 /* A computer contestant's final score stays within this many strokes of par */
 #define SCORE_LIMIT 18
 #define COURSE_HOLE_COUNT 18
-
-#define RANDOM_MULTIPLIER 0x5D588B65
 
 /* Half a sine wave over a round */
 #define RADIANS_PER_HOLE ((f64)(3.1416f / COURSE_HOLE_COUNT))
@@ -240,7 +239,7 @@ void SeedTournamentRandom(s32 seed) {
 }
 
 u32 NextTournamentRandom(void) {
-  return f_TournamentSeed = (f_TournamentSeed * RANDOM_MULTIPLIER) + 1;
+  return f_TournamentSeed = NextRandomSeed(f_TournamentSeed);
 }
 
 /*

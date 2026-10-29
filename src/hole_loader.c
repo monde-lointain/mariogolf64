@@ -17,6 +17,7 @@
 #include "hole_builder.h"
 #include "libc.h"
 #include "main.h"
+#include "math_util.h"
 #include "overlay_manager.h"
 #include "round_hud.h"
 #include "save.h"
@@ -58,10 +59,6 @@
 /* The light turns this far, in binary angles, from each hole to the next */
 #define LIGHT_YAW_STEP_PER_HOLE 0x5000
 #define HOLE_LIGHT_PITCH 0x3000
-
-/* GetHoleRandom's generator, a linear congruential one */
-#define HOLE_RANDOM_MULTIPLIER 0x5D588B65
-#define HOLE_RANDOM_INCREMENT 1
 
 /* A mini-golf course is a main course's hole shrunk by these, by axis */
 #define MINI_GOLF_SHRINK_X 4
@@ -616,8 +613,7 @@ s32 GetHoleRandom(s32 seed, s32 holeIndex) {
   }
 
   s32 NextHoleRandom(void) {
-    return f_HoleSeed =
-               f_HoleSeed * HOLE_RANDOM_MULTIPLIER + HOLE_RANDOM_INCREMENT;
+    return f_HoleSeed = NextRandomSeed(f_HoleSeed);
   }
 
   SetHoleSeed(holeIndex);

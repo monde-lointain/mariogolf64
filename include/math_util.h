@@ -14,6 +14,10 @@
 /* Converts radians to binary angles */
 #define RADIANS_TO_BINARY_ANGLE (32768.0 / (f32)M_PI)
 
+/* The linear congruential step that the game's random generators share */
+#define RANDOM_MULTIPLIER 0x5D588B65
+#define NextRandomSeed(seed) (((seed) * RANDOM_MULTIPLIER) + 1)
+
 /* Angles as floats: sinf and atan2f work in radians, guRotate in degrees */
 typedef f32 Radians;
 typedef f32 Degrees;

@@ -71,7 +71,7 @@ void SetRandomSeed(s32 seed) {
 }
 
 s32 NextRandom(void) {
-  return f_RandomSeed = (f_RandomSeed * 0x5D588B65) + 1;
+  return f_RandomSeed = NextRandomSeed(f_RandomSeed);
 }
 
 f32 Length2D(f32 x, f32 y) {
