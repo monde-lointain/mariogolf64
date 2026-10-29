@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+#include "math_util.h"
 #include "round_stats.h"
 #include "save.h"
 
@@ -33,7 +34,7 @@ enum ScorecardState {
 };
 
 typedef struct ScorecardContent {
-  /* 0x00 */ f32 rowFlipAngles[LEADERBOARD_ROW_COUNT];
+  /* 0x00 */ Radians rowFlipAngles[LEADERBOARD_ROW_COUNT];
   /* 0x28 */ s8 isRowFlipping[LEADERBOARD_ROW_COUNT];
   /* 0x34 */ s32 flipTime;
   /* 0x38 */ s32 faceImageOffsets[MAX_PLAYER_COUNT]; /* Added to each player's

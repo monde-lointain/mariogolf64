@@ -293,8 +293,8 @@ static Boolean f_IsTextScrolling = TRUE;
 static s32 f_DebugRestartCount = 0;
 /* Negative while fading out; zero when not fading */
 static s32 f_FadeLength = 0;
-static f32 f_CastFramingYaw = 0.0f;
-static f32 f_CastFramingPitch = 0.0f;
+static Radians f_CastFramingYaw = 0.0f;
+static Radians f_CastFramingPitch = 0.0f;
 static s32 f_CastIndex = 0;
 static Boolean f_IsReactionShown = 0;
 static f32 f_UnreadValue = 0.0f;
@@ -845,14 +845,14 @@ void SetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
  * down if none did. It stops early if the first pitch does. The final
  * ground height is read, but not used.
  */
-void BisectFramingPitch(f32 pitch, f32 yaw, f32 depthOffset) {
+void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
   Vec3 eye;
   Vec3 lookAt;
   CoursePoint point;
   u8 unusedBuffer[0x10]; /* Unused; it is there to match */
-  f32 buriedPitch = -QUARTER_TURN_RADIANS;
+  Radians buriedPitch = -QUARTER_TURN_RADIANS;
   s32 step = 0;
-  f32 clearPitch = pitch;
+  Radians clearPitch = pitch;
 
   for (; step < PITCH_STEP_COUNT; step++) {
     SetFramingAngles(pitch, yaw);

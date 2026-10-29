@@ -170,8 +170,8 @@ typedef struct ClubSlots {
   /* 0x0C */ s32
       stoppedSymbols[REEL_COUNT]; /* NO_SYMBOL until the reel stops */
   /* 0x18 */ s32 stoppedReelCount;
-  /* 0x1C */ f32 reelAngles[REEL_COUNT]; /* How far each reel has turned toward
-                                            its next symbol */
+  /* 0x1C */ Radians reelAngles[REEL_COUNT]; /* How far each reel has turned
+                                            toward its next symbol */
   /* 0x28 */ f32 reelSpeeds[REEL_COUNT];
   /* 0x34 */ s32 pressCount; /* The reels told to stop */
   /* 0x38 */ s32 playerIndex; /* The player spinning */

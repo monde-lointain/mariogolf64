@@ -528,7 +528,7 @@ static s32 f_ContactTextureT = 0;
 /* Read by no routine */
 static Mtx D_80224710_ovl_00 = IDENTITY_MTX;
 static s32 f_ContactTrailHead = 0;
-static f32 f_ContactSpinAngle = 0.0f;
+static Degrees f_ContactSpinAngle = 0.0f;
 /*
  * StepAlongPath flies the Fly Guy through the first
  * WIND_FLY_GUY_PATH_POINT_COUNT points; the last two are read by no routine

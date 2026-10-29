@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#include "math_util.h"
+
 /* The points of the camera that the editor moves */
 #define EDITOR_POINT_EYE 0
 #define EDITOR_POINT_LOOK_AT 1
@@ -20,9 +22,8 @@ enum EditorMoveAxis {
 typedef struct CameraEditor {
   /* 0x00 */ Vec3
       points[EDITOR_POINT_COUNT]; /* The eye, then the look-at point */
-  /* 0x18 */ f32
-      heading; /* In radians, of the look direction across the ground */
-  /* 0x1C */ f32 pitch; /* In radians, of the look direction above the ground */
+  /* 0x18 */ Radians heading; /* Of the look direction across the ground */
+  /* 0x1C */ Radians pitch; /* Of the look direction above the ground */
   /* 0x20 */ f32 distance; /* From the eye to the look-at point */
   /* 0x24 */ f32 fieldOfView; /* In degrees */
   /* 0x28 */ Vec3 targets[EDITOR_POINT_COUNT]; /* Where MoveEditorPoint moves
@@ -46,8 +47,8 @@ typedef struct CameraEditor {
   /* 0x98 */ f32
       pointBrakingDistances[EDITOR_POINT_COUNT]; /* Within which a moving point
                                                     starts braking */
-  /* 0xA0 */ f32 tiltBrakingAngle; /* Within which a tilt starts braking */
-  /* 0xA4 */ f32 turnBrakingAngle; /* Within which a turn starts braking */
+  /* 0xA0 */ Radians tiltBrakingAngle; /* Within which a tilt starts braking */
+  /* 0xA4 */ Radians turnBrakingAngle; /* Within which a turn starts braking */
   /* 0xA8 */ f32 zoomBrakingDistance; /* Within which a zoom starts braking */
   /* 0xAC */ s32 flags[EDITOR_POINT_COUNT]; /* EDITOR_FLAG_* bits */
   /* 0xB4 */ s32 moveAxes[EDITOR_POINT_COUNT]; /* EDITOR_MOVE_AXIS_*, along
@@ -79,8 +80,8 @@ void PlaceEditorCamera(
 void MeasureEditorCamera(void);
 void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
 void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
-void TurnEditorCamera(s32 index, f32 angle, s32 frameCount);
-void TiltEditorCamera(s32 index, f32 angle, s32 frameCount);
+void TurnEditorCamera(s32 index, Radians angle, s32 frameCount);
+void TiltEditorCamera(s32 index, Radians angle, s32 frameCount);
 void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount);
 Boolean AreEditorMovesDone(void);
 void StopEditorMoves(void);

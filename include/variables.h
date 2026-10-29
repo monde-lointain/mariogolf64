@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "math_util.h"
+
 /* Globals whose defining file is not decompiled yet */
 
 /* libmus plays silence instead of the audio while this is set */
@@ -83,8 +85,8 @@ typedef struct SkyState {
   /* 0x08 */ f32 screenHeights[SKY_VIEW_COUNT]; /* SCREEN_HEIGHT once UpdateSky
                                                    sets them */
   /* 0x10 */ f32 lookAtLevels[SKY_VIEW_COUNT];
-  /* 0x18 */ f32 pitches[SKY_VIEW_COUNT]; /* In radians */
-  /* 0x20 */ f32 yaws[SKY_VIEW_COUNT];
+  /* 0x18 */ Radians pitches[SKY_VIEW_COUNT];
+  /* 0x20 */ Radians yaws[SKY_VIEW_COUNT];
   /* 0x28 */ f32
       scrollX; /* How far the sky's texture has scrolled with the wind */
   /* 0x2C */ f32 scrollY;

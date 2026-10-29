@@ -3,11 +3,13 @@
 
 #include <ultra64.h>
 
+#include "math_util.h"
+
 void LoadHoleCreatureImages(void);
 void FreeHoleCreatureImages(void);
-f32 GetCameraYaw(void);
+Radians GetCameraYaw(void);
 Boolean IsMonkeyShown(void);
-void StartMonkeyDrop(f32 cameraYaw);
+void StartMonkeyDrop(Radians cameraYaw);
 void ClearHoleCreatures(void);
 void StartCheepCheepLeap(s32 arg0);
 void DrawHoleCreatures(Gfx** displayListHead);

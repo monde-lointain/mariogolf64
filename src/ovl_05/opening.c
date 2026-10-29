@@ -491,12 +491,12 @@ static s32 f_LogoFadeFramesLeft = LOGO_FADE_FIRST_FRAMES_LEFT;
 static f32 f_LogoClubScale[2] = {1.0f, 1.0f};
 /* In degrees */
 static Degrees f_LogoClubAngle = LOGO_CLUB_START_ANGLE;
-static f32 f_LogoClubOrbitAngle = LOGO_CLUB_START_ORBIT_ANGLE;
+static Degrees f_LogoClubOrbitAngle = LOGO_CLUB_START_ORBIT_ANGLE;
 /* Read by no routine */
 static f32 D_8020B290_ovl_05 = 0.0f;
 /* Its sine is never used */
-static f32 f_LogoClubUnusedAngle = LOGO_CLUB_START_UNUSED_ANGLE;
-static f32 f_LogoClubWobbleAngle = 0.0f;
+static Degrees f_LogoClubUnusedAngle = LOGO_CLUB_START_UNUSED_ANGLE;
+static Degrees f_LogoClubWobbleAngle = 0.0f;
 /* The top and bottom halves of a letter */
 static Vtx f_LogoLetterVertices[2][4] = {
     {{{{-24, 48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -599,7 +599,7 @@ static f32 f_LogoScaleStep;
 static s32 f_LogoClubStepX;
 static s32 f_LogoClubStepY;
 static f32 f_OpeningSparkPositions[SPARK_COUNT][2];
-static f32 f_OpeningSparkAngles[SPARK_COUNT];
+static Radians f_OpeningSparkAngles[SPARK_COUNT];
 static f32 f_OpeningSparkVelocities[SPARK_COUNT][2];
 static f32 f_OpeningSparkScale;
 static s32 f_OpeningSparkFramesLeft;
@@ -4104,7 +4104,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawLakitu);
 #define LAKITU_LOOP_RADIUS_Y 16.0
 
 void MoveLakitu(void) {
-  f32 angle;
+  Radians angle;
 
   if (f_IsLakituFlying) {
     angle = DEGREES_TO_RADIANS(f_LakituAngle);

@@ -129,7 +129,7 @@ void ChooseFlightCameraKind(void);
 void PlaceFlightCamera(s32 step);
 s32 StepHoleFlyover(void);
 void EaseLookAtBelowBall(f32 drop);
-void EaseLookAtPoint(f32 yaw);
+void EaseLookAtPoint(Radians yaw);
 
 /* Defined in main_bss.c, at its address in the original */
 /* The step of the simulated path that the ball's flight has reached */
@@ -292,10 +292,10 @@ static s8 f_CameraPicks[CAMERA_PICK_COUNT];
 static CoursePoint f_FlightBallPosition;
 static CoursePoint f_ShotEndPosition;
 static CoursePoint f_ShotStartPosition;
-static f32 f_ShotFlightYaw;
+static Radians f_ShotFlightYaw;
 static Radians f_FlaggedStepYaw;
-static f32 f_EndYawFromCup;
-static f32 f_StartYawFromCup;
+static Radians f_EndYawFromCup;
+static Radians f_StartYawFromCup;
 static s32 D_800DAF20;
 static Vec3 f_CameraPosition;
 static Vec3 f_LookAtPoint;
@@ -1306,7 +1306,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtBelowBall);
  * ball's loads first.
  */
 #ifdef NON_MATCHING
-void EaseLookAtPoint(f32 yaw) {
+void EaseLookAtPoint(Radians yaw) {
   f_LookAtPoint[AXIS_X] +=
       ((f_FlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) -
           f_LookAtPoint[AXIS_X]) *

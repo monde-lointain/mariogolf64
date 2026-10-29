@@ -1427,7 +1427,7 @@ s32 UpdateSkyEditor(void) {
  * editor is open.
  */
 void UpdateSky(CameraView* view, s32 viewIndex) {
-  f32* pitches;
+  Radians* pitches;
   f32 pitchScale; /* Narrower fields of view move the horizon further for each
                      radian of pitch */
   Vec3 direction;

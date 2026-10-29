@@ -579,8 +579,8 @@ static s32 f_PointCursorRow = 0;
 static s32 D_8040C5B8_hole_editor = 0;
 static s32 D_8040C5BC_hole_editor = 0;
 /* func_80400FBC's state */
-static f32 f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
-static f32 f_HolePointCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
+static Radians f_HolePointCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
 static s32 D_8040C5C8_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_HolePointCameraHeadingAngle = 0;
@@ -590,9 +590,9 @@ static s32 f_MesonPointIndex = 0;
 static s32 f_RoutePointIndex = 0;
 
 /* func_80402428's state */
-static f32 f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+static Radians f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TriangleCameraHeadingAngle */
-static f32 f_TriangleCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_TriangleCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
 static s32 D_8040C5E8_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_TriangleCameraHeadingAngle = 0;
@@ -603,9 +603,9 @@ static s32 f_LastTriangleEditKind = 0; /* A TRIANGLE_EDIT_* */
 extern CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 
 /* func_80402E1C's state */
-static f32 f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_RingCameraHeadingAngle */
-static f32 f_RingCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_RingCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
 static s32 D_8040C608_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_RingCameraHeadingAngle = 0;
@@ -616,9 +616,9 @@ static s32 D_8040C618_hole_editor = 0;
 static s32 f_LastRingEditKind = 0; /* A TRIANGLE_EDIT_* */
 
 /* func_80403A04's state */
-static f32 f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_WallCameraHeadingAngle */
-static f32 f_WallCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_WallCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
 static s32 D_8040C628_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_WallCameraHeadingAngle = 0;
@@ -650,9 +650,9 @@ static s32 f_HeightCursorColumn = 0;
 static s32 f_HeightCursorRow = 0;
 /* Read by no routine */
 static s32 D_8040C64C_hole_editor[] = {6, 0};
-static f32 f_HeightCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+static Radians f_HeightCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_HeightCameraHeadingAngle */
-static f32 f_HeightCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_HeightCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
 static s32 D_8040C65C_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_HeightCameraHeadingAngle = 0;
@@ -679,9 +679,9 @@ static s32 f_HoleFileCourseNumber = 1; /* From 1 */
 static s32 f_HoleFilePromptFrames = 0;
 
 /* func_80406C3C's state */
-static f32 f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE; /* In radians */
+static Radians f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TreeCameraHeadingAngle */
-static f32 f_TreeCameraHeading = EDITOR_CAMERA_START_ANGLE;
+static Radians f_TreeCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
 static s32 D_8040C698_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_TreeCameraHeadingAngle = 0;

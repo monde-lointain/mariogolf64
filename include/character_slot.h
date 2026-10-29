@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
+#include "math_util.h"
 
 #define CHARACTER_MODEL_KIND_COUNT 4
 #define CHARACTER_MODELS_PER_KIND 36
@@ -354,7 +355,7 @@ void AdvanceAnimation(u32 slotIndex, s32 frameCount);
 void SetCharacterLighting(u32 slotIndex, s32 value);
 void AnimateAllCharacters(void);
 void PlaceAndViewCharacter(u32 slotIndex);
-void PlaceCharacter(u32 slotIndex, CoursePoint point, f32 heading);
+void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading);
 void DrawCharacter(u32 slotIndex);
 void DrawCharacterAndShadow(
     CameraMatrices* matrices, s32 cameraIndex, s32 slotIndex);

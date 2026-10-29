@@ -69,8 +69,8 @@ typedef struct HoleCreature {
   /* 0x80 */ CoursePoint position;
   /* 0x8C */ f32 velocity[AXIS_COUNT];
   /* 0x98 */ s32 groundHeight;
-  /* 0x9C */ f32 yaw;
-  /* 0xA0 */ f32 pitch;
+  /* 0x9C */ Radians yaw;
+  /* 0xA0 */ Radians pitch;
   /* 0xA4 */ u8 frameCount;
   /* 0xA5 */ u8 isFacingBack;
   /* 0xA6 */ u8 isGold;
@@ -134,7 +134,7 @@ void FreeHoleCreatureImages(void) {
 }
 
 /* The yaw the camera looks along, or 0 when it looks straight up or down */
-f32 GetCameraYaw(void) {
+Radians GetCameraYaw(void) {
   f32 x = g_Cameras->view.lookAt[0] - g_Cameras->view.eye[0];
   Radians yaw = 0.0f;
   f32 z = g_Cameras->view.lookAt[2] - g_Cameras->view.eye[2];
@@ -161,7 +161,7 @@ Boolean IsMonkeyShown(void) {
 }
 
 /* Drops the monkey onto the cup, facing away from cameraYaw */
-void StartMonkeyDrop(f32 cameraYaw) {
+void StartMonkeyDrop(Radians cameraYaw) {
   EncodedAsset asset;
   Vec3 translation;
   Vec3 rotation;

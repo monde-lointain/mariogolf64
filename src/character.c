@@ -2036,7 +2036,7 @@ void PlaceAndViewCharacter(u32 slotIndex) {
 
 /* Stands the character in the slot on the ground at the point, facing the
  * heading, at full size */
-void PlaceCharacter(u32 slotIndex, CoursePoint point, f32 heading) {
+void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
 
   if (slot != NULL) {

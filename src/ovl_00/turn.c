@@ -365,8 +365,8 @@ static s32 D_8022400C_ovl_00 = 0;
 /* Read by no routine */
 static s32 D_80224010_ovl_00 = 0;
 /* The angles of FrameBallAndShot's camera */
-static f32 f_DebugFramingYaw = 0.0f;
-static f32 f_DebugFramingPitch = 0.0f;
+static Radians f_DebugFramingYaw = 0.0f;
+static Radians f_DebugFramingPitch = 0.0f;
 /* Read by no routine */
 static s32 D_8022401C_ovl_00 = 0;
 

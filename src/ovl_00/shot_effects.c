@@ -115,7 +115,7 @@ static Mtx f_SparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
 /* Each spark's offset from its burst's point on screen, and its speed */
 static f32 f_SparkOffsets[SPARK_COUNT][2];
 static f32 f_SparkVelocities[SPARK_COUNT][2];
-static f32 f_SparkAngles[SPARK_COUNT];
+static Radians f_SparkAngles[SPARK_COUNT];
 /* The frames each spark has left; 0 when unused */
 static u8 f_SparkLives[SPARK_COUNT];
 static u8 f_SparkKinds[SPARK_COUNT];

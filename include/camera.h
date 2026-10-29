@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "math_util.h"
+
 /* The camera mode that frames the shot from behind the golfer */
 enum CameraMode {
   CAMERA_MODE_BEHIND_GOLFER = 1,
@@ -18,7 +20,7 @@ enum CameraMode {
 typedef struct CameraView {
   /* 0x00 */ Vec3 eye;
   /* 0x0C */ Vec3 lookAt;
-  /* 0x18 */ f32 heading; /* In radians; the map camera turns by it */
+  /* 0x18 */ Radians heading; /* The map camera turns by it */
   /* 0x1C */ s32 scissorX;
   /* 0x20 */ s32 scissorY;
   /* 0x24 */ s32 scissorWidth;
