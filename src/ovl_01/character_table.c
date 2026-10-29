@@ -81,9 +81,6 @@ typedef struct TableCorner {
   /* 0x4 */ s32 y;
 } TableCorner; /* size = 0x8 */
 
-/* The most bytes of each character's file that func_802177D0 keeps */
-#define MENU_SCENE_FILE_SIZE 0x200
-
 /* func_80215DC4 draws the table over a dimmed panel, with a face beside each
  * shown row and above each column */
 #define TABLE_BOARD_KIND 11
@@ -113,7 +110,6 @@ typedef struct TableCorner {
 #define TABLE_ARROW_BLINK_FRAMES 4
 
 extern void* D_8012D430[CHARACTER_COUNT];
-extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_SCENE_FILE_SIZE];
 /* func_8021F124 takes an s16 character, but this file calls it without
  * narrowing the argument */
 void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,

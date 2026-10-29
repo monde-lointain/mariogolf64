@@ -41,10 +41,6 @@
 /* func_8021F124 writes names beside the faces of these first characters only */
 #define NAMED_CHARACTER_COUNT 14
 
-/* The most bytes of each ranked record holder's palette file that func_8021EF64
- * keeps */
-#define PLAYER_STATS_FILE_SIZE 0x200
-
 /* The grid of stats that the cursor moves over, and the value of its empty
  * cells */
 #define STATS_GRID_COLUMN_COUNT 5
@@ -173,8 +169,6 @@ extern s32 D_800FE334;
 extern u8 D_801B9410;
 
 void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide);
-extern u8 D_8023BFF0_ovl_01[STATS_GRID_ROW_COUNT * STATS_GRID_COLUMN_COUNT]
-                           [PLAYER_STATS_FILE_SIZE];
 
 s16 func_8021E468_ovl_01(void);
 void func_8021E97C_ovl_01(Gfx** displayListHead);

@@ -59,9 +59,6 @@ enum SaveMenuGame {
 /* The slots that the save menu steps through, which hold -1 when empty */
 #define SAVE_MENU_SLOT_COUNT 5
 
-/* The most bytes of each palette file that func_80220BB0 keeps */
-#define SAVE_MENU_FILE_SIZE 0x200
-
 /* The images of g_CourseIconAssets that func_8021F6E0 reads, before one of its
  * own */
 #define SAVE_MENU_IMAGE_COUNT 6
@@ -124,7 +121,6 @@ extern u8 D_801B70F0[MAXCONTROLLERS];
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
-extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
 extern u8 D_801052E8;
 extern s32 D_800FE334;
 
@@ -278,7 +274,7 @@ static u8 D_8023BDB4_ovl_01[0x4];
 static u8 D_8023BDB8_ovl_01[0x88];
 
 /* Not static: the original left it to the linker's common block */
-u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][SAVE_MENU_FILE_SIZE];
+u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][MENU_PALETTE_FILE_SIZE];
 
 void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;

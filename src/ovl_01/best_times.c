@@ -24,9 +24,6 @@
 /* The images of g_CourseIconAssets that func_80213390 reads */
 #define BEST_TIMES_IMAGE_COUNT 6
 
-/* The bytes kept of each best time holder's palette file */
-#define BEST_TIME_HOLDER_FILE_SIZE 0x200
-
 /* The best times' courses turn this far in all between one course and the next,
  * and this fast */
 #define BEST_TIMES_TURN 90
@@ -62,8 +59,6 @@
 #define TIME_SEPARATOR_SPACING 6
 
 extern void* D_8012D430[CHARACTER_COUNT];
-extern u8 D_8023BFF0_ovl_01[COURSE_COUNT * BEST_TIME_COUNT]
-                           [BEST_TIME_HOLDER_FILE_SIZE];
 
 s32 GetOpenCourseCount(void);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);
@@ -262,7 +257,7 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
   s32 time;
   s16 character;
   s16 dashIndex;
-  u8(*holderPalettes)[BEST_TIME_HOLDER_FILE_SIZE];
+  u8(*holderPalettes)[MENU_PALETTE_FILE_SIZE];
 
   func_801FB54C_ovl_01(&gfx, BEST_TIMES_BOARD_KIND);
   guPerspectiveF(D_8023A9C0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
