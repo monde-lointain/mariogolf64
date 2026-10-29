@@ -437,7 +437,7 @@ void PlacePlayersOnTee(void) {
 
       g_Players[i].driveDistance = UNMEASURED_DISTANCE;
       g_Players[i].pinDistance = UNMEASURED_DISTANCE;
-      g_Players[i].unk9C = 0;
+      g_Players[i].hasBeenInBunker = FALSE;
       for (ring = RING_COUNT - 1; ring >= 0; ring--) {
         g_Players[i].ringStates[ring] = 0;
       }

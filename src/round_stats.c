@@ -354,8 +354,8 @@ void RecordCourseRound(void) {
     record->puttTotal = 0;
     record->parOrBetterCount = 0;
     record->parOnCount = 0;
-    record->unk28 = 0;
-    record->unk2C = 0;
+    record->sandSaveCount = 0;
+    record->missedSandSaveCount = 0;
   }
 
   isAtRoundLimit = FALSE;
@@ -481,18 +481,18 @@ void RecordCourseRound(void) {
     }
   }
 
-  sum = record->unk28 + stats->unk0;
+  sum = record->sandSaveCount + stats->sandSaveCount;
   if (sum > RECORD_TOTAL_LIMIT) {
-    record->unk28 = RECORD_TOTAL_LIMIT;
+    record->sandSaveCount = RECORD_TOTAL_LIMIT;
   } else {
-    record->unk28 = sum;
+    record->sandSaveCount = sum;
   }
 
-  sum = record->unk2C + stats->unk4;
+  sum = record->missedSandSaveCount + stats->missedSandSaveCount;
   if (sum > RECORD_TOTAL_LIMIT) {
-    record->unk2C = RECORD_TOTAL_LIMIT;
+    record->missedSandSaveCount = RECORD_TOTAL_LIMIT;
   } else {
-    record->unk2C = sum;
+    record->missedSandSaveCount = sum;
   }
 
   WriteSaveData();
@@ -502,8 +502,8 @@ void StartRoundStats(void) {
   SaveData* save;
 
   save = GetSaveData();
-  g_RoundStats.unk0 = 0;
-  g_RoundStats.unk4 = 0;
+  g_RoundStats.sandSaveCount = 0;
+  g_RoundStats.missedSandSaveCount = 0;
   g_RoundStats.measuredDriveCount = 0;
   g_RoundStats.averagedDriveCount = 0;
 
@@ -519,8 +519,8 @@ void RestartRoundStats(void) {
   SaveData* save;
 
   save = GetSaveData();
-  g_RoundStats.unk0 = 0;
-  g_RoundStats.unk4 = 0;
+  g_RoundStats.sandSaveCount = 0;
+  g_RoundStats.missedSandSaveCount = 0;
   g_RoundStats.measuredDriveCount = 0;
   g_RoundStats.averagedDriveCount = 0;
 
@@ -536,11 +536,11 @@ void RecordHoleStats(void) {
 
   GetSaveData();
   stats = &g_RoundStats;
-  if (g_Players[0].unk9C) {
+  if (g_Players[0].hasBeenInBunker) {
     if (g_Players[0].strokeCount <= g_HoleSetup.par) {
-      stats->unk0++;
+      stats->sandSaveCount++;
     } else {
-      g_RoundStats.unk4++;
+      g_RoundStats.missedSandSaveCount++;
     }
   }
 

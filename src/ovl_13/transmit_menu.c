@@ -3471,12 +3471,12 @@ void BuildStatusData(u8* status) {
             entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND));
         course->parOnRate = RoundedWholePart(
             entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND));
-        sum = entry->unk28 + entry->unk2C;
+        sum = entry->sandSaveCount + entry->missedSandSaveCount;
         if (sum == 0) {
           course->unkC = 0;
         } else {
           course->unkC =
-              RoundedWholePart(((f32)entry->unk28 / (f32)sum) * 100.0f);
+              RoundedWholePart(((f32)entry->sandSaveCount / (f32)sum) * 100.0f);
         }
 
         course->places = 0;

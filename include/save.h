@@ -275,8 +275,9 @@ extern RingShotRecord D_80105F40[MAX_PLAYER_COUNT];
 
 /* The current round's statistics, for the course's records */
 typedef struct RoundStats {
-  /* 0x00 */ s32 unk0;
-  /* 0x04 */ s32 unk4;
+  /* Holes played from a bunker in par or fewer strokes, and in more */
+  /* 0x00 */ s32 sandSaveCount;
+  /* 0x04 */ s32 missedSandSaveCount;
   /* 0x08 */ s32 measuredDriveCount;
   /* 0x0C */ s32 longestDrive; /* Starts as the course's record */
   /* 0x10 */ s32 averagedDriveTotal;
@@ -304,8 +305,9 @@ typedef struct UnkE98 {
   /* 0x20 */ s32 parOrBetterCount; /* Holes played in par or fewer strokes */
   /* 0x24 */ s32
       parOnCount; /* Holes whose green was reached with two strokes to spare */
-  /* 0x28 */ s32 unk28; /* The sum of RoundStats.unk0 */
-  /* 0x2C */ s32 unk2C; /* The sum of RoundStats.unk4 */
+  /* 0x28 */ s32 sandSaveCount; /* The sum of RoundStats.sandSaveCount */
+  /* 0x2C */ s32
+      missedSandSaveCount; /* The sum of RoundStats.missedSandSaveCount */
   /* In a tournament on the course */
   /* 0x30 */ Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
   /* 0x3C */ s16
@@ -431,7 +433,7 @@ typedef struct UnkB8 {
   /* 0x8D */ u8 unk8D;
   /* 0x8E */ s16
       betTallies[BET_COUNT]; /* What the player has won on each BET_* bet */
-  /* 0x9C */ s8 unk9C;
+  /* 0x9C */ s8 hasBeenInBunker; /* On the hole being played */
   /* 0x9D */ u8 unk9D[3];
   /* 0xA0 */ s32
       lastDriveDistance; /* The driveDistance that RecordDrive took */

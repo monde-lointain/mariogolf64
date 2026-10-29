@@ -4348,7 +4348,7 @@ void UpdateTurns(void) {
                   surfaceInfo->kind == SURFACE_KIND_BUNKER_FAIR_LIE) ||
               (surfaceInfo->kind == SURFACE_KIND_BUNKER_POOR_LIE ||
                   surfaceInfo->kind == SURFACE_KIND_BUNKER_UNK9)) {
-            player->unk9C = 1;
+            player->hasBeenInBunker = TRUE;
           }
 
           D_80227170_ovl_00[playerIndex] = 0;

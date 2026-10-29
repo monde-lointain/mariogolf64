@@ -1779,8 +1779,8 @@ void ComputeRoundStatistics(void) {
   f32 sum1C;
   f32 sum20;
   f32 sum24;
-  f32 sum28;
-  f32 sum28And2C;
+  f32 sandSaveSum;
+  f32 sandSaveChanceSum;
   f32 sum10;
   s32 sum14;
   f32 zero;
@@ -1819,12 +1819,12 @@ void ComputeRoundStatistics(void) {
           entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
       D_80105C38[courseIndex].parOnPercent =
           entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
-      sum = entry->unk28 + entry->unk2C;
+      sum = entry->sandSaveCount + entry->missedSandSaveCount;
       if (sum <= 0) {
         D_80105C38[courseIndex].sandSavePercent = 0.0f;
       } else {
         D_80105C38[courseIndex].sandSavePercent =
-            ((f32)entry->unk28 / (f32)sum) * 100.0f;
+            ((f32)entry->sandSaveCount / (f32)sum) * 100.0f;
       }
 
       D_80105C38[courseIndex].hasPlace[THIRD_PLACE_INDEX] =
@@ -1879,8 +1879,8 @@ void ComputeRoundStatistics(void) {
   }
 
   sum14 = 0;
-  sum28 = 0.0f;
-  sum28And2C = 0.0f;
+  sandSaveSum = 0.0f;
+  sandSaveChanceSum = 0.0f;
   sum20 = 0.0f;
   sum18 = 0.0f;
   sum24 = 0.0f;
@@ -1896,18 +1896,19 @@ void ComputeRoundStatistics(void) {
       sum20 += entry->parOrBetterCount;
       sum24 += entry->parOnCount;
       sum8 += entry->strokeTotal;
-      sum28 += entry->unk28;
-      sum28And2C += entry->unk28 + entry->unk2C;
+      sandSaveSum += entry->sandSaveCount;
+      sandSaveChanceSum += entry->sandSaveCount + entry->missedSandSaveCount;
       sum14 += entry->averagedDriveCount;
       sum10 += entry->averageDrive * UNK_SCALE * entry->averagedDriveCount;
     }
   }
 
   if (D_80105C38[COURSE_COUNT].roundCount > 0.0f) {
-    if (sum28And2C <= 0.0f) {
+    if (sandSaveChanceSum <= 0.0f) {
       D_80105C38[COURSE_COUNT].sandSavePercent = 0.0f;
     } else {
-      D_80105C38[COURSE_COUNT].sandSavePercent = (sum28 / sum28And2C) * 100.0f;
+      D_80105C38[COURSE_COUNT].sandSavePercent =
+          (sandSaveSum / sandSaveChanceSum) * 100.0f;
     }
 
     holeCount = D_80105C38[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
