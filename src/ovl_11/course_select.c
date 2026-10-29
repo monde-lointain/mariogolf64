@@ -498,9 +498,9 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
 /*
  * Up and down change the course among those open and the mini-golf
  * courses, left and right the hole. Returns SELECT_MOVED, SELECT_BACK for
- * B, or SELECT_IDLE.
+ * B, or SELECT_IDLE. A leaves the selection as it stands, and its return
+ * shares the end's so that it returns result rather than a constant.
  */
-#ifdef NON_MATCHING
 s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
   s32 result = SELECT_IDLE;
   s32 openCourseCount;
@@ -512,94 +512,88 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
   }
 
   f_PressedDirection = 0;
-  if (pressedButtons & A_BUTTON) {
-    return result;
-  }
-
-  if (pressedButtons & B_BUTTON) {
-    return SELECT_BACK;
-  }
-
-  if (f_CourseTurnStep == 0) {
-    if (repeatedButtons & L_JPAD) {
-      if (!IsOnDrivingRange()) {
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-        result = SELECT_MOVED;
-        f_PressedDirection = DIRECTION_LEFT;
-        g_GameState.holeIndex--;
-      } else {
-        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      }
-    } else if (repeatedButtons & R_JPAD) {
-      if (IsOnDrivingRange()) {
-        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      } else {
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-        result = SELECT_MOVED;
-        f_PressedDirection = DIRECTION_RIGHT;
-        g_GameState.holeIndex++;
-      }
-    } else if (repeatedButtons & U_JPAD) {
-      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      g_GameState.courseIndex =
-          (g_GameState.courseIndex + COURSE_INDEX_COUNT - 1) %
-          COURSE_INDEX_COUNT;
-      if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
-          g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
-        g_GameState.isMiniGolf = TRUE;
-      } else {
-        g_GameState.isMiniGolf = FALSE;
-      }
-
-      if (g_GameState.courseIndex > openCourseCount - 1 &&
-          g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
-        g_GameState.courseIndex = openCourseCount - 1;
-      }
-
-      result = SELECT_MOVED;
-      f_PressedDirection = DIRECTION_UP;
-      f_CourseTurnStep = 1;
-      f_CourseTurnIndex = 1;
-    } else if (repeatedButtons & D_JPAD) {
-      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      g_GameState.courseIndex =
-          (g_GameState.courseIndex + COURSE_INDEX_COUNT + 1) %
-          COURSE_INDEX_COUNT;
-      if (g_GameState.courseIndex > openCourseCount - 1 &&
-          g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
-        g_GameState.courseIndex = MINI_GOLF_COURSE_INDEX;
-      }
-
-      if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
-          g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
-        g_GameState.isMiniGolf = TRUE;
-      } else {
-        g_GameState.isMiniGolf = FALSE;
-      }
-
-      result = SELECT_MOVED;
-      f_PressedDirection = DIRECTION_DOWN;
-      f_CourseTurnStep = -1;
-      f_CourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
+  if (!(pressedButtons & A_BUTTON)) {
+    if (pressedButtons & B_BUTTON) {
+      return SELECT_BACK;
     }
-  }
 
-  g_GameState.courseIndex =
-      (g_GameState.courseIndex + COURSE_INDEX_COUNT) % COURSE_INDEX_COUNT;
-  f_NextCourse = g_GameState.courseIndex;
-  if (IsOnDrivingRange()) {
-    g_GameState.holeIndex = 0;
-  } else {
-    g_GameState.holeIndex =
-        (g_GameState.holeIndex + COURSE_HOLE_COUNT) % COURSE_HOLE_COUNT;
+    if (f_CourseTurnStep == 0) {
+      if (repeatedButtons & L_JPAD) {
+        if (!IsOnDrivingRange()) {
+          PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+          result = SELECT_MOVED;
+          f_PressedDirection = DIRECTION_LEFT;
+          g_GameState.holeIndex--;
+        } else {
+          PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        }
+      } else if (repeatedButtons & R_JPAD) {
+        if (IsOnDrivingRange()) {
+          PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        } else {
+          PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+          result = SELECT_MOVED;
+          f_PressedDirection = DIRECTION_RIGHT;
+          g_GameState.holeIndex++;
+        }
+      } else if (repeatedButtons & U_JPAD) {
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        g_GameState.courseIndex =
+            (g_GameState.courseIndex + COURSE_INDEX_COUNT - 1) %
+            COURSE_INDEX_COUNT;
+        if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
+            g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
+          g_GameState.isMiniGolf = TRUE;
+        } else {
+          g_GameState.isMiniGolf = FALSE;
+        }
+
+        if (g_GameState.courseIndex > openCourseCount - 1 &&
+            g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
+          g_GameState.courseIndex = openCourseCount - 1;
+        }
+
+        result = SELECT_MOVED;
+        f_PressedDirection = DIRECTION_UP;
+        f_CourseTurnStep = 1;
+        f_CourseTurnIndex = 1;
+      } else if (repeatedButtons & D_JPAD) {
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        g_GameState.courseIndex =
+            (g_GameState.courseIndex + COURSE_INDEX_COUNT + 1) %
+            COURSE_INDEX_COUNT;
+        if (g_GameState.courseIndex > openCourseCount - 1 &&
+            g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
+          g_GameState.courseIndex = MINI_GOLF_COURSE_INDEX;
+        }
+
+        if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
+            g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
+          g_GameState.isMiniGolf = TRUE;
+        } else {
+          g_GameState.isMiniGolf = FALSE;
+        }
+
+        result = SELECT_MOVED;
+        f_PressedDirection = DIRECTION_DOWN;
+        f_CourseTurnStep = -1;
+        f_CourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
+      }
+    }
+
+    g_GameState.courseIndex =
+        (g_GameState.courseIndex + COURSE_INDEX_COUNT) % COURSE_INDEX_COUNT;
+    f_NextCourse = g_GameState.courseIndex;
+    if (IsOnDrivingRange()) {
+      g_GameState.holeIndex = 0;
+    } else {
+      g_GameState.holeIndex =
+          (g_GameState.holeIndex + COURSE_HOLE_COUNT) % COURSE_HOLE_COUNT;
+    }
   }
 
   return result;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", UpdateHoleSelect);
-#endif
 
 Boolean ArePlanksOpen(void) {
   return f_PlankSlide == 0;
