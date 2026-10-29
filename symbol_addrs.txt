@@ -1401,6 +1401,7 @@ g_CharacterPaletteAssets = 0x800C54A0; // size:0x24
 f_FireworkShape = 0x800FE338; // size:0x4
 f_Fireworks = 0x80105140; // size:0xB0
 g_MatrixBufferIndex = 0x800C54E0; // size:0x4
+g_BetSet = 0x801B5634; // size:0x1
 g_ScreenOrthoMatrix = 0x801B5638; // size:0x40
 GetFramedView = 0x80076500; // type:func
 ClearFramedSpheres = 0x8007654C; // type:func

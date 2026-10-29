@@ -68,7 +68,7 @@ extern s16 D_800FE33C;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
-extern s8 D_801B5634;
+extern s8 g_BetSet;
 extern s8 D_801052E8;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC4;
@@ -1993,15 +1993,15 @@ void func_8005DAFC(void) {
     case GAME_MODE_TOURNAMENT:
       D_800FF4C0 = 2;
       g_MapCamera[0x4C] = 0;
-      D_801B5634 = 0;
+      g_BetSet = 0;
       break;
     case GAME_MODE_STROKE:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
       if (g_ChosenPlayerCount == 4) {
-        D_801B5634 = 2;
+        g_BetSet = 2;
       } else {
-        D_801B5634 = 1;
+        g_BetSet = 1;
       }
 
       D_800C2BD5 = 1;
@@ -2009,12 +2009,12 @@ void func_8005DAFC(void) {
     case GAME_MODE_MATCH_GAME:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
-      D_801B5634 = 3;
+      g_BetSet = 3;
       break;
     case GAME_MODE_SKINS_MATCH:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
-      D_801B5634 = 4;
+      g_BetSet = 4;
       break;
     case GAME_MODE_TRAINING:
     case GAME_MODE_GET_CHARACTER:
@@ -2023,12 +2023,12 @@ void func_8005DAFC(void) {
     case GAME_MODE_RING_SHOT:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 2;
-      D_801B5634 = 0;
+      g_BetSet = 0;
       break;
     case GAME_MODE_CLUB_SLOTS:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
-      D_801B5634 = 5;
+      g_BetSet = 5;
       break;
   }
 

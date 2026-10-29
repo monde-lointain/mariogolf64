@@ -534,7 +534,7 @@ s32 func_80209BE0_ovl_01(void) {
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
-extern s8 D_801B5634;
+extern s8 g_BetSet;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 
 s32 GetClubTournamentCourse(void);
@@ -897,7 +897,7 @@ s32 UpdateCharacterSelect(
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = MAP_CAMERA_TOP_BYTE_UNK2;
-        D_801B5634 = 0;
+        g_BetSet = 0;
       }
 
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
