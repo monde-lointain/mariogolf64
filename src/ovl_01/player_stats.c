@@ -98,7 +98,7 @@ enum GatheredBestShots {
  * in D_802304B4 hold STATS_INDEX_UNUSED */
 #define STATS_INDEX_ROW_COUNT 7
 #define STATS_INDEX_UNUSED -1
-/* The stats icons are 24x24, and func_80219460 shows each of their two frames
+/* The stats icons are 24x24, and DrawBetIcon shows each of their two frames
  * for 4 video frames */
 #define STATS_ICON_SIZE 24
 #define STATS_ICON_FRAME_COUNT 2
@@ -209,10 +209,9 @@ void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_80219460_ovl_01(
+void DrawBetIcon(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
-void func_8021B1E0_ovl_01(
-    Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex);
+void DrawBetLabel(Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex);
 
 static u8 D_802303A0_ovl_01 = 0;
 static u8 D_802303A1_ovl_01 = FALSE;
@@ -428,7 +427,7 @@ static void* D_8023B340_ovl_01;
 static void* D_8023B344_ovl_01;
 static void* f_StakeMark;
 static void* f_StatsNamePlate;
-/* The two frames of the stats icon that func_80219460 animates */
+/* The two frames of the stats icon that DrawBetIcon animates */
 static void* D_8023B350_ovl_01[STATS_ICON_FRAME_COUNT];
 static void* f_StatsGreenArrows;
 static void* f_PageArrows;
@@ -833,8 +832,7 @@ void DrawBetSettings(
   }
 
   /* The chosen bet's icon is animated */
-  func_80219460_ovl_01(&gfx,
-      D_802304FC_ovl_01[D_801B5634 - 1][memory->unkD] + slide,
+  DrawBetIcon(&gfx, D_802304FC_ovl_01[D_801B5634 - 1][memory->unkD] + slide,
       CHOSEN_BET_ICON_TOP, STATS_ICON_SIZE, TEXEL_STEP_ONE);
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -954,8 +952,7 @@ void DrawBetSettings(
   }
 
   betIndex = D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD];
-  func_8021B1E0_ovl_01(
-      &gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
+  DrawBetLabel(&gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
   if (D_802303A0_ovl_01 == 0 && isSettled == TRUE) {
     SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
@@ -968,7 +965,11 @@ void DrawBetSettings(
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBetSettings);
 #endif
 
-void func_80219460_ovl_01(
+/*
+ * Draws the chosen bet's icon size pixels square at (left, top), and reads its
+ * next frame once the current one has shown long enough
+ */
+void DrawBetIcon(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = func_8005AF74();
@@ -1465,8 +1466,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawHandicaps);
 #endif
 
-void func_8021B1E0_ovl_01(
-    Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex) {
+/* Draws a bet's name centered on centerX */
+void DrawBetLabel(Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
