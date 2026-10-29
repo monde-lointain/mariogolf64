@@ -87,9 +87,9 @@ typedef struct ShotLabel {
 #define MAX_TINT_YARDS 25
 #define TINT_PER_YARD 10
 #define TEXT_SHADOW_ALPHA 127
-/* The surfaces under the target that warn that it is out of bounds */
-#define SURFACE_KIND_UNK13 13
-#define SURFACE_KIND_UNK21 21
+/* Whether the surface kind under the target warns that it is out of bounds */
+#define IsOutOfBoundsKind(kind) \
+  ((kind) == SURFACE_KIND_OUT_OF_BOUNDS || (kind) == SURFACE_KIND_OUT_OF_COURSE)
 #define OUT_OF_BOUNDS_GREEN 95
 #define OUT_OF_BOUNDS_GREEN_SWING 45
 #define OUT_OF_BOUNDS_PULSE_STEP (M_PI / 6)
@@ -669,8 +669,7 @@ OPAQUE:
             point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
       }
 
-      if (surfaceKind == SURFACE_KIND_UNK13 ||
-          surfaceKind == SURFACE_KIND_UNK21) {
+      if (IsOutOfBoundsKind(surfaceKind)) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
             outOfBoundsGreen + OUT_OF_BOUNDS_GREEN, 0, 255);
@@ -706,8 +705,7 @@ OPAQUE:
 
       DrawCenteredShadowedText(&g_DisplayListHead, point.x,
           point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
-      if (surfaceKind == SURFACE_KIND_UNK13 ||
-          surfaceKind == SURFACE_KIND_UNK21) {
+      if (IsOutOfBoundsKind(surfaceKind)) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
             outOfBoundsGreen + OUT_OF_BOUNDS_GREEN, 0, TEXT_SHADOW_ALPHA);
