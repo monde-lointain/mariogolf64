@@ -31,11 +31,24 @@ enum HeightComparison {
 /* RoundHud.scorecardPage while the scorecard is closed */
 #define NO_SCORECARD_PAGE (-1)
 
-/* RoundHud.flags */
+/* RoundHud.flags, which UpdateTurns sets for each step of a shot */
+/* Read by no routine; set while aiming */
+#define HUD_FLAG_AIMING 0x1
+/* Lights the club head icon fully, otherwise it is dimmed */
+#define HUD_FLAG_LIGHT_CLUB_HEAD 0x2
+/* Read by no routine; set while aiming on the green, without an impact
+ * point, or away from LETTERBOX_STATE_NONE and LETTERBOX_STATE_UNK5 */
+#define HUD_FLAG_UNK4 0x4
 /* Animates the shot offset marker */
 #define HUD_FLAG_ANIMATE_OFFSET_MARKER 0x8
+/* Read by no routine; set while the power is set */
+#define HUD_FLAG_SETTING_POWER 0x10
+/* Read by no routine; set while the impact is set */
+#define HUD_FLAG_SETTING_IMPACT 0x20
 /* Set in free look, so the course shows through */
 #define HUD_FLAG_TRANSLUCENT_GAUGE 0x40
+/* Read by no routine; set as the swing starts */
+#define HUD_FLAG_SWINGING 0x80
 
 /* The HUD's state for a round, which FreeScenery clears */
 typedef struct RoundHud {

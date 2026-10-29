@@ -2498,9 +2498,6 @@ void AdjustHudOffset(void) {
 #define SHOT_PANEL_ICON_Z -300.0f
 /* The icons tilt by half of their angle */
 #define SHOT_PANEL_ICON_TILT 0.5f
-/* RoundHud.flags bits that light the club head icon fully, otherwise it is
- * dimmed */
-#define HUD_FLAG_LIGHT_CLUB_HEAD 0x2
 #define SHOT_PANEL_ICON_DIM 191
 #define CLUB_HEAD_IMAGE_SIZE 32
 /* The lie image is two halves, each its own texture on its own quad */

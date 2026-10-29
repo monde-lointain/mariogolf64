@@ -111,7 +111,6 @@
  */
 #define FREE_LOOK_START_DISTANCE (-0x12C00)
 #define FREE_LOOK_TURN_STEP 200
-#define FREE_LOOK_HUD_FLAGS 0x47
 /* A shorter pulse than the shots' rumble in effects.c */
 #define TURN_RUMBLE_FREQUENCY 0x100
 #define TURN_RUMBLE_FRAME_COUNT 8
@@ -803,7 +802,8 @@ void StartFreeLook(void) {
   g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
   D_800C3070 = 0;
   g_ImpactPointState = IMPACT_POINT_OFF;
-  g_RoundHud.flags = FREE_LOOK_HUD_FLAGS;
+  g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
+      HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
   g_FreeLookHeading = g_CurrentShot.unk0;
   SetMenuBackdrop(MENU_BACKDROP_PATTERN);
   g_PauseScreen = PAUSE_SCREEN_FREE_LOOK;
@@ -3731,28 +3731,35 @@ void UpdateTurns(void) {
           if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
             if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
                 g_LetterboxState == LETTERBOX_STATE_NONE) {
-              g_RoundHud.flags = 5;
+              g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_UNK4;
             } else {
-              g_RoundHud.flags = 0x45;
+              g_RoundHud.flags =
+                  HUD_FLAG_AIMING | HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
             }
           } else if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
             if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
                 g_LetterboxState == LETTERBOX_STATE_NONE) {
-              g_RoundHud.flags = 7;
+              g_RoundHud.flags =
+                  HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD | HUD_FLAG_UNK4;
             } else {
-              g_RoundHud.flags = 0x47;
+              g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
+                  HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
             }
           } else {
             if (g_LetterboxState == LETTERBOX_STATE_UNK5) {
-              g_RoundHud.flags = 9;
+              g_RoundHud.flags =
+                  HUD_FLAG_AIMING | HUD_FLAG_ANIMATE_OFFSET_MARKER;
             } else if (g_LetterboxState == LETTERBOX_STATE_NONE) {
-              g_RoundHud.flags = 3;
+              g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD;
             } else {
-              g_RoundHud.flags = 0x47;
+              g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
+                  HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
             }
 
             if (g_ImpactPointState == IMPACT_POINT_SETTING) {
-              g_RoundHud.flags = (g_RoundHud.flags | 8) & ~2;
+              g_RoundHud.flags =
+                  (g_RoundHud.flags | HUD_FLAG_ANIMATE_OFFSET_MARKER) &
+                  ~HUD_FLAG_LIGHT_CLUB_HEAD;
             }
           }
 
@@ -3772,9 +3779,10 @@ void UpdateTurns(void) {
         g_RoundHud.unkF = 0;
         g_RoundHud.unk12 = 0;
         if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
-          g_RoundHud.flags = 0x10;
+          g_RoundHud.flags = HUD_FLAG_SETTING_POWER;
         } else {
-          g_RoundHud.flags = 0x18;
+          g_RoundHud.flags =
+              HUD_FLAG_SETTING_POWER | HUD_FLAG_ANIMATE_OFFSET_MARKER;
         }
 
         if (D_80227194_ovl_00 == 0) {
@@ -3854,9 +3862,10 @@ void UpdateTurns(void) {
         BuildShotPreview(&D_80227150_ovl_00, state);
         areCallsAllowed = FALSE;
         if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
-          g_RoundHud.flags = 0x20;
+          g_RoundHud.flags = HUD_FLAG_SETTING_IMPACT;
         } else {
-          g_RoundHud.flags = 0x28;
+          g_RoundHud.flags =
+              HUD_FLAG_SETTING_IMPACT | HUD_FLAG_ANIMATE_OFFSET_MARKER;
         }
 
         if (D_80227194_ovl_00 == 0) {
@@ -3953,7 +3962,7 @@ void UpdateTurns(void) {
 
         EndRumbleForceStop();
         ReuseLastCharacterMatrices(0);
-        g_RoundHud.flags = 0x80;
+        g_RoundHud.flags = HUD_FLAG_SWINGING;
         D_80223FF8_ovl_00++;
         g_SavedShots[playerIndex] = g_CurrentShot;
         SetCharacterTranslucent(0, FALSE);
