@@ -347,7 +347,7 @@ void UpdateOptionsScreen(void);
 void func_801FADBC_ovl_01(void);
 void LeaveMenuWithWipe(void);
 void LeaveMenuWithCourseWipe(void);
-void func_801FB11C_ovl_01(void);
+void UpdateBirdieBadges(void);
 void func_801FB15C_ovl_01(void);
 void func_80209500_ovl_01(void);
 void func_8020B2C4_ovl_01(void* buffer, s16 bufferKind);
@@ -1086,7 +1086,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_BIRDIE_BADGES:
-      func_801FB11C_ovl_01();
+      UpdateBirdieBadges();
       break;
 
     case MENU_SCREEN_CHARACTER_TABLE:
@@ -3611,7 +3611,7 @@ void func_801FAFEC_ovl_01(void) {
   }
 }
 
-void func_801FB11C_ovl_01(void) {
+void UpdateBirdieBadges(void) {
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     g_MenuScreen = MENU_SCREEN_MAIN;
