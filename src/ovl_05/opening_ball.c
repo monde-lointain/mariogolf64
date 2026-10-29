@@ -1524,17 +1524,18 @@ ROLLED:
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-      Boolean isOutside = simulation->position[AXIS_Z] > 0x7ED400;
+      Boolean isOutside =
+          simulation->position[AXIS_Z] > GROUND_LENGTH - COURSE_EDGE_MARGIN;
 
-      if (simulation->position[AXIS_Z] <= 0x12BFF) {
+      if (simulation->position[AXIS_Z] < COURSE_EDGE_MARGIN) {
         isOutside = TRUE;
       }
 
-      if (simulation->position[AXIS_X] > 0x3ED400) {
+      if (simulation->position[AXIS_X] > GROUND_WIDTH - COURSE_EDGE_MARGIN) {
         isOutside = TRUE;
       }
 
-      if (simulation->position[AXIS_X] <= 0x12BFF) {
+      if (simulation->position[AXIS_X] < COURSE_EDGE_MARGIN) {
         isOutside = TRUE;
       }
 

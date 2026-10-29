@@ -19,6 +19,9 @@ typedef f32 BallSpeed;
  * rounded to this many meters per second
  */
 #define METERS_PER_SECOND_PER_KILOMETER_PER_HOUR 0.2778
+/* A ball within 5 m of the ground's edges is outside the course */
+#define COURSE_EDGE_MARGIN 0x12C00
+
 /* In the cup the ball falls at half gravity */
 #define CUP_GRAVITY (GRAVITY / 2)
 
