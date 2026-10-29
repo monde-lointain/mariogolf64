@@ -356,7 +356,7 @@ static Vtx D_80230840_ovl_01[TURNED_ARROW_VERTEX_COUNT] = {
     {{{16, 16, 0}, 0, {2048, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
 static s32 D_80230880_ovl_01[2] = {0, 0};
-/* Read by no routine; the values of D_80230A38 */
+/* Read by no routine; the values of f_BestShotsCursorPhases */
 static f32 D_80230888_ovl_01[4] = {0.0f, 2.0f, 4.0f, 6.0f};
 /* Read by no routine */
 static s32 D_80230898_ovl_01[2] = {0, 0};
@@ -399,14 +399,16 @@ static s8 D_802309C4_ovl_01[STATS_DIRECTION_COUNT][2] = {
     {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 /* Read by no routine */
 static s32 D_802309CC_ovl_01[8] = {64, 12, 48, 12, 80, 12, 96, 12};
-static Vtx D_802309F0_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+/* The Best Shots cursor's corners, whose colors DrawBestShotsCursor cycles */
+static Vtx f_BestShotsCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
 static s32 D_80230A30_ovl_01[2] = {0, 0};
-static f32 D_80230A38_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+/* The angle, in radians, of each corner's color cycle */
+static f32 f_BestShotsCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
 static s32 D_80230A48_ovl_01[CHARACTER_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
@@ -443,14 +445,15 @@ static void* f_BrickWall;
 /* Read by no routine */
 static u8 D_8023B370_ovl_01[0xA0];
 
-static Mtx D_8023B410_ovl_01;
-static Mtx D_8023B450_ovl_01;
-static Mtx D_8023B490_ovl_01;
+/* The camera and placement that DrawBestShotsCursor draws the cursor with */
+static Mtx f_BestShotsCursorProjection;
+static Mtx f_BestShotsCursorTranslation;
+static Mtx f_BestShotsCursorRotation;
 
 /* Read by no routine */
 static u8 D_8023B4D0_ovl_01[0x80];
 
-static Mtx D_8023B550_ovl_01;
+static Mtx f_BestShotsCursorScale;
 
 /* Read by no routine */
 static u8 D_8023B590_ovl_01[0x50];
@@ -2488,31 +2491,31 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
 
   for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT;
       vertexIndex++) {
-    D_80230A38_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
-    red =
-        (s32)(sinf(D_80230A38_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
+    f_BestShotsCursorPhases[vertexIndex] += MENU_CURSOR_PHASE_STEP;
+    red = (s32)(sinf(f_BestShotsCursorPhases[vertexIndex]) *
+              MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    blue = (s32)(sinf(D_80230A38_ovl_01[vertexIndex] + (M_PI / 2)) *
+    blue = (s32)(sinf(f_BestShotsCursorPhases[vertexIndex] + (M_PI / 2)) *
                MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    green = (s32)(sinf(D_80230A38_ovl_01[vertexIndex] + M_PI) *
+    green = (s32)(sinf(f_BestShotsCursorPhases[vertexIndex] + M_PI) *
                 MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    D_802309F0_ovl_01[vertexIndex].v.cn[0] = red;
-    D_802309F0_ovl_01[vertexIndex].v.cn[2] = blue;
-    D_802309F0_ovl_01[vertexIndex].v.cn[1] = green;
+    f_BestShotsCursorVertices[vertexIndex].v.cn[0] = red;
+    f_BestShotsCursorVertices[vertexIndex].v.cn[2] = blue;
+    f_BestShotsCursorVertices[vertexIndex].v.cn[1] = green;
   }
 
-  guOrtho(&D_8023B410_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
+  guOrtho(&f_BestShotsCursorProjection, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
-  guTranslate(&D_8023B450_ovl_01,
+  guTranslate(&f_BestShotsCursorTranslation,
       (memory->bestShotColumn * STATS_CURSOR_COLUMN_WIDTH) +
           STATS_CURSOR_LEFT_X,
       STATS_CURSOR_TOP_Y - (memory->bestShotRow * STATS_CURSOR_ROW_HEIGHT),
       MENU_CURSOR_Z);
-  guRotate(&D_8023B490_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
-  guScale(&D_8023B550_ovl_01, 1.0f, MENU_CURSOR_SCALE_Y, 1.0f);
+  guRotate(&f_BestShotsCursorRotation, 0.0f, 0.0f, 1.0f, 0.0f);
+  guScale(&f_BestShotsCursorScale, 1.0f, MENU_CURSOR_SCALE_Y, 1.0f);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
@@ -2532,16 +2535,16 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B410_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BestShotsCursorProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B450_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BestShotsCursorTranslation),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B490_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BestShotsCursorRotation),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B550_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BestShotsCursorScale),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
-  gSPVertex(gfx++, D_802309F0_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
+  gSPVertex(gfx++, f_BestShotsCursorVertices, MENU_CURSOR_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
