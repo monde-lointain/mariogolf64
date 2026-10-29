@@ -1857,7 +1857,7 @@ void func_800628C4(void) {
       point = GetGroundPoint(column, row)->v;
       offset = GetMirroredOffset(point.ob[0]);
       if (offset != 512) {
-        point.tc[0] = offset << 5;
+        point.tc[0] = TexelCoordinate(offset);
       } else {
         point.tc[0] = 0x4000;
       }
@@ -1865,7 +1865,7 @@ void func_800628C4(void) {
       point.tc[0] += 0x100;
       offset = GetMirroredOffset(point.ob[2]);
       if (offset != 512) {
-        point.tc[1] = offset << 5;
+        point.tc[1] = TexelCoordinate(offset);
       } else {
         point.tc[1] = 0x4000;
       }

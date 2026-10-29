@@ -17,6 +17,8 @@
 
 /* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
 #define TEXEL_STEP_ONE (1 << 10)
+/* A texel position, as texture coordinates take it in 10.5 fixed point */
+#define TexelCoordinate(texel) ((texel) << 5)
 
 /* SetScreenEffect's effects */
 enum ScreenEffect {

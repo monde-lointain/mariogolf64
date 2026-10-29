@@ -1598,7 +1598,7 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
   DrawTextureRect(&gfx, LABEL_LEFT << 2, LABEL_TOP << 2,
       (LABEL_LEFT + LABEL_SHOWN_WIDTH) << 2,
       (LABEL_TOP + LABEL_IMAGE_HEIGHT) << 2, G_TX_RENDERTILE,
-      LABEL_SHOWN_WIDTH << 5, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      TexelCoordinate(LABEL_SHOWN_WIDTH), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 
@@ -1930,6 +1930,7 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
   DrawTextureRect(&gfx, CURVE_LABEL_LEFT << 2, CURVE_LABEL_TOP << 2,
       (CURVE_LABEL_LEFT + CURVE_LABEL_WIDTH) << 2,
       (CURVE_LABEL_TOP + CURVE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-      (labelRow * CURVE_LABEL_HEIGHT) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      TexelCoordinate(labelRow * CURVE_LABEL_HEIGHT), TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }

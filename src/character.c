@@ -22,6 +22,7 @@
 #include "main.h"
 #include "math_util.h"
 #include "save.h"
+#include "screen.h"
 #include "shot_camera.h"
 #include "shot_effects.h"
 #include "variables.h"
@@ -202,7 +203,7 @@ extern u8* g_ShadowTexture;
 #define SHADOW_QUAD_HALF_SIZE 1500
 /* The square's texture coordinates, in s10.5, span the texture and the mirror
  * image its tile wraps to */
-#define SHADOW_QUAD_TEXEL_SPAN ((SHADOW_TEXTURE_SIZE * 2) << 5)
+#define SHADOW_QUAD_TEXEL_SPAN (TexelCoordinate(SHADOW_TEXTURE_SIZE * 2))
 #define ShadowTexturePixels(texture) (TextureAddress((u32)(texture) + 8))
 /* The camera index DrawCharacterAndShadow always draws for */
 #define CAMERA_UNK2 2

@@ -108,7 +108,8 @@
 #define LARGE_FLAGSTICK_PRIM_DEPTH 0x4027
 
 /* Texture coordinates in texels, packed as s10.5 */
-#define SmallCupTexcoords(s, t) ((((s) << 5) << 16) | ((t) << 5))
+#define SmallCupTexcoords(s, t) \
+  (((TexelCoordinate(s)) << 16) | (TexelCoordinate(t)))
 /* Packs screen coordinates in pixels into the quarter pixels of a vertex's
  * G_MWO_POINT_XYSCREEN word */
 #define ScreenXY(x, y) \

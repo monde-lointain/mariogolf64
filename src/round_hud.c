@@ -1334,7 +1334,8 @@ void DrawInsetViewFrame(void) {
         (g_Cameras[INSET_CAMERA].view.scissorY +
             g_Cameras[INSET_CAMERA].view.scissorHeight)
             << 2,
-        G_TX_RENDERTILE, INSET_FRAME_SIDE_TEXEL << 5, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0, 1 << 10,
+        1 << 10);
     gSPTextureRectangle(g_DisplayListHead++,
         (g_Cameras[INSET_CAMERA].view.scissorX +
             g_Cameras[INSET_CAMERA].view.scissorWidth -
@@ -1348,7 +1349,8 @@ void DrawInsetViewFrame(void) {
         (g_Cameras[INSET_CAMERA].view.scissorY +
             g_Cameras[INSET_CAMERA].view.scissorHeight)
             << 2,
-        G_TX_RENDERTILE, INSET_FRAME_SIDE_TEXEL << 5, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0, 1 << 10,
+        1 << 10);
   }
 
   gDPPipeSync(g_DisplayListHead++);
@@ -2281,7 +2283,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
       gSPScisTextureRectangle(gfx++, (textX + offsetX) << 2,
           (textY - WIND_TEXT_RAISE) << 2, (textX + offsetX + glyphWidth) << 2,
           (textY - WIND_TEXT_RAISE + WIND_FONT_HEIGHT) << 2, G_TX_RENDERTILE,
-          glyphS << 5, 0, 1 << 10, 1 << 10);
+          TexelCoordinate(glyphS), 0, 1 << 10, 1 << 10);
     }
   }
 
@@ -3411,8 +3413,8 @@ void DrawDistanceText(Gfx** gfxP, s32 x, s32 y, char* text) {
     }
 
     gSPTextureRectangle(gfx++, x << 2, y << 2, (x + width) << 2,
-        (y + DISTANCE_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE, glyphS << 5, 0,
-        1 << 10, 1 << 10);
+        (y + DISTANCE_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE,
+        TexelCoordinate(glyphS), 0, 1 << 10, 1 << 10);
     x += width;
   }
 
@@ -3773,8 +3775,9 @@ void DrawRoundHud(CameraView* view) {
         (PIN_FLAG_X - g_ShotPanelOffsetX) << 2, PIN_FLAG_Y << 2,
         (PIN_FLAG_X + PIN_FLAG_WIDTH - g_ShotPanelOffsetX) << 2,
         (PIN_FLAG_Y + PIN_FLAG_HEIGHT) << 2, G_TX_RENDERTILE,
-        (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) * (PIN_FLAG_WIDTH << 5),
-        PIN_FLAG_IMAGE_T << 5, 1 << 10, 1 << 10);
+        (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) *
+            (TexelCoordinate(PIN_FLAG_WIDTH)),
+        TexelCoordinate(PIN_FLAG_IMAGE_T), 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(
         g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RestLabelImage)));

@@ -11,6 +11,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "main.h"
+#include "screen.h"
 #include "text.h"
 #include "variables.h"
 
@@ -258,8 +259,8 @@ void DrawDebugText(Gfx** displayListHead) {
       gSPTextureRectangle(gfx++, (column * GLYPH_SIZE) << 2,
           (row * GLYPH_SIZE) << 2, ((column * GLYPH_SIZE) + GLYPH_SIZE) << 2,
           ((row * GLYPH_SIZE) + GLYPH_SIZE) << 2, G_TX_RENDERTILE,
-          ((glyph & 0x1F) * GLYPH_SIZE) << 5, ((glyph >> 5) * GLYPH_SIZE) << 5,
-          1 << 10, 1 << 10);
+          TexelCoordinate((glyph & 0x1F) * GLYPH_SIZE),
+          TexelCoordinate((glyph >> 5) * GLYPH_SIZE), 1 << 10, 1 << 10);
     }
   }
 

@@ -240,7 +240,7 @@ typedef struct ImageCorner {
 #define BACKDROP_WIDTH 152
 #define BACKDROP_SCALE 2
 #define BACKDROP_SEAM_ROW_COUNT 2
-#define BACKDROP_SECOND_ROW_START (1 << 5)
+#define BACKDROP_SECOND_ROW_START (TexelCoordinate(1))
 #define BACKDROP_STRIP_ROW_COUNT 11
 #define BACKDROP_STRIP_COUNT 11
 #define BACKDROP_LEFT 8
@@ -6675,7 +6675,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
         (MARIO_LEFT + MARIO_WIDTH) << 2,
         (MARIO_TOP + MARIO_STRIP_HEIGHT + (stripIndex * MARIO_STRIP_HEIGHT))
             << 2,
-        G_TX_RENDERTILE, 0, (stripIndex * MARIO_STRIP_HEIGHT) << 5,
+        G_TX_RENDERTILE, 0, TexelCoordinate(stripIndex * MARIO_STRIP_HEIGHT),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -6847,13 +6847,13 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
           (rowTop + ARROW_TOP + shiftY) << 2,
           (LEFT_ARROW_LEFT + ARROW_SIZE + shiftX) << 2,
           (rowTop + ARROW_TOP + ARROW_SIZE + shiftY) << 2, G_TX_RENDERTILE, 0,
-          LEFT_ARROW_ROW << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          TexelCoordinate(LEFT_ARROW_ROW), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
       DrawTextureRect(&gfx, (RIGHT_ARROW_LEFT + shiftX) << 2,
           (rowTop + ARROW_TOP + shiftY) << 2,
           (RIGHT_ARROW_LEFT + ARROW_SIZE + shiftX) << 2,
           (rowTop + ARROW_TOP + ARROW_SIZE + shiftY) << 2, G_TX_RENDERTILE, 0,
-          RIGHT_ARROW_ROW << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          TexelCoordinate(RIGHT_ARROW_ROW), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 

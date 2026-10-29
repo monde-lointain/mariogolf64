@@ -3075,7 +3075,8 @@ void DrawNameLogos(Gfx** displayListHead) {
           gSPScisTextureRectangle(gfx++, xEdges[0] << 2,
               yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip] << 2, xEdges[1] << 2,
               yEdges[NAME_LOGO_STRIP_COUNT - strip] << 2, G_TX_RENDERTILE, 0,
-              NAME_LOGO_STRIP_ROWS << 5, (SLOT_LOGO.width << 10) / drawnWidth,
+              TexelCoordinate(NAME_LOGO_STRIP_ROWS),
+              (SLOT_LOGO.width << 10) / drawnWidth,
               (SLOT_LOGO.height << 8) / drawnHeight);
         } else {
           s32 drawnWidth;
@@ -3926,8 +3927,9 @@ void LoadLakitu(void) {
 #define LAKITU_TRAIL_DRAWN_SEGMENT_COUNT 31
 #define LAKITU_TRAIL_ROWS_PER_SEGMENT 8
 /* Texture coordinates, in 10.5, of the trail's right edge and of a segment */
-#define LAKITU_TRAIL_RIGHT_S ((LAKITU_TRAIL_IMAGE_WIDTH << 5) - 1)
-#define LakituTrailT(segment) (((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT) << 5)
+#define LAKITU_TRAIL_RIGHT_S ((TexelCoordinate(LAKITU_TRAIL_IMAGE_WIDTH)) - 1)
+#define LakituTrailT(segment) \
+  (TexelCoordinate((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT))
 /* First vertex buffer slot of a segment in the second batch */
 #define LakituTrailSecondBatchSlot(segment) \
   (((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2) - \
@@ -3979,7 +3981,8 @@ void DrawLakitu(Gfx** displayListHead) {
         (f_LakituScreenPoint[1] - (LAKITU_DRAWN_SIZE / 2)) << 2,
         (f_LakituScreenPoint[0] + (LAKITU_DRAWN_SIZE / 2)) << 2,
         (f_LakituScreenPoint[1] + (LAKITU_DRAWN_SIZE / 2)) << 2,
-        G_TX_RENDERTILE, LAKITU_IMAGE_SIZE << 5, 0, LAKITU_SCALE, LAKITU_SCALE);
+        G_TX_RENDERTILE, TexelCoordinate(LAKITU_IMAGE_SIZE), 0, LAKITU_SCALE,
+        LAKITU_SCALE);
     gDPPipeSync(gfx++);
     rotation[0] = 0.0f;
     rotation[1] = 0.0f;
@@ -4913,9 +4916,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
         f_LogoShineFrame < LOGO_SHINE_LAST_SHOWN_FRAME) {
       gSPTextureRectangle(gfx++, LOGO_SHINE_LEFT << 2, LOGO_SHINE_TOP << 2,
           LOGO_SHINE_RIGHT << 2, LOGO_SHINE_BOTTOM << 2, G_TX_RENDERTILE,
-          (LOGO_SHINE_ORIGIN_TEXEL -
-              (f_LogoShineFrame - LOGO_SHINE_ORIGIN_FRAME) * LOGO_SHINE_SPEED)
-              << 5,
+          TexelCoordinate(LOGO_SHINE_ORIGIN_TEXEL -
+              (f_LogoShineFrame - LOGO_SHINE_ORIGIN_FRAME) * LOGO_SHINE_SPEED),
           0, LOGO_SHINE_TEXEL_STEP, LOGO_SHINE_TEXEL_STEP);
       gDPPipeSync(gfx++);
     }

@@ -1477,8 +1477,8 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
             (COURSE_TOP + (index * REPLAY_ROW_SPACING) + COURSE_NUMBERS_HEIGHT)
                 << 2,
-            G_TX_RENDERTILE, COURSE_WORD_TEXEL_LEFT << 5, 0, TEXEL_STEP_ONE,
-            TEXEL_STEP_ONE);
+            G_TX_RENDERTILE, TexelCoordinate(COURSE_WORD_TEXEL_LEFT), 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         DrawTextureRect(&gfx,
             (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
             (COURSE_TOP + (index * REPLAY_ROW_SPACING)) << 2,
@@ -1488,7 +1488,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             (COURSE_TOP + (index * REPLAY_ROW_SPACING) + COURSE_NUMBERS_HEIGHT)
                 << 2,
             G_TX_RENDERTILE,
-            ((s8)record->courseIndex * COURSE_DIGIT_WIDTH) << 5, 0,
+            TexelCoordinate((s8)record->courseIndex * COURSE_DIGIT_WIDTH), 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         switch (record->scoreKind & SCORE_KIND_MASK) {
           case SCORE_KIND_ALBATROSS:

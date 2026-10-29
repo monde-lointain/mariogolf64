@@ -3129,7 +3129,7 @@ void DrawBetTallies(Gfx** displayListHead) {
               (BET_TALLY_TOP + DIGIT_GLYPH_SIZE +
                   (playerIndex * BET_TALLY_ROW_SPACING))
                   << 2,
-              G_TX_RENDERTILE, 0, GetDigitGlyphTop(*text++) << 5,
+              G_TX_RENDERTILE, 0, TexelCoordinate(GetDigitGlyphTop(*text++)),
               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
       }
@@ -3147,8 +3147,8 @@ void DrawBetTallies(Gfx** displayListHead) {
           (BET_TALLY_TOP + DIGIT_GLYPH_SIZE +
               (playerIndex * BET_TALLY_ROW_SPACING))
               << 2,
-          G_TX_RENDERTILE, 0, GetDigitGlyphTop(*text++) << 5, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, TexelCoordinate(GetDigitGlyphTop(*text++)),
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 

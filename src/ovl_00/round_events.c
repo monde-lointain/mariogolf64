@@ -1855,7 +1855,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawPuttCaption);
 #define GO_STRIP_HEIGHT 14
 #define READY_GO_LAST_STRIP_HEIGHT 8
 /* Texture coordinates are in 10.5 fixed point */
-#define TexelCoord(texels) ((texels) << 5)
+#define TexelCoord(texels) (TexelCoordinate(texels))
 
 void DrawReadyGoMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

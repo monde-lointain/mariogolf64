@@ -248,7 +248,8 @@ static void DrawDigits(Gfx** gfxP, u16 x, u16 y, char* text) {
     if (character != ' ') {
       gSPTextureRectangle(gfx++, x << 2, y << 2, (x + DIGIT_WIDTH) << 2,
           (y + DIGIT_HEIGHT) << 2, G_TX_RENDERTILE,
-          ((character - '0') & 0xF) * DIGIT_WIDTH << 5, 0, 1 << 10, 1 << 10);
+          TexelCoordinate(((character - '0') & 0xF) * DIGIT_WIDTH), 0, 1 << 10,
+          1 << 10);
     }
   }
 

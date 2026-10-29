@@ -19,6 +19,7 @@
 #include "math_util.h"
 #include "save.h"
 #include "scene.h"
+#include "screen.h"
 #include "terrain.h"
 #include "variables.h"
 #include "work_area.h"
@@ -2950,7 +2951,7 @@ void ReadVertexX(s16* coord, s32 flags) {
       break;
     case 2:
       ReadFileBytes(coord, 1);
-      *coord = ((u16)*coord >> 8) << 5;
+      *coord = TexelCoordinate((u16)*coord >> 8);
       break;
     case 3:
       ReadFileBytes(coord, 1);
@@ -3002,7 +3003,7 @@ void ReadVertexZ(s16* coord, s32 flags) {
       break;
     case 2:
       ReadFileBytes(coord, 1);
-      *coord = ((u16)*coord >> 8) << 5;
+      *coord = TexelCoordinate((u16)*coord >> 8);
       break;
     case 3:
       ReadFileBytes(coord, 1);

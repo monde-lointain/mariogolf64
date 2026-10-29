@@ -963,7 +963,8 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
       gSPScisTextureRectangle(gfx++, (x + offset) << 2, y << 2,
           (x + offset + RESULTS_DIGIT_WIDTH) << 2,
           (y + RESULTS_DIGIT_HEIGHT) << 2, G_TX_RENDERTILE,
-          (ch - '0') * RESULTS_DIGIT_WIDTH << 5, 0, 1 << 10, 1 << 10);
+          TexelCoordinate((ch - '0') * RESULTS_DIGIT_WIDTH), 0, 1 << 10,
+          1 << 10);
       /* The empty do-while is there to match */
       do {
       } while (0);
@@ -1000,8 +1001,8 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
     gSPScisTextureRectangle(gfx++, (x) << 2, (y) << 2, \
         ((x) + PLACE_GLYPH_SIZE) << 2, ((y) + PLACE_GLYPH_SIZE) << 2, \
-        G_TX_RENDERTILE, 0, ((glyph) * PLACE_GLYPH_SIZE) << 5, TEXEL_STEP_ONE, \
-        TEXEL_STEP_ONE); \
+        G_TX_RENDERTILE, 0, TexelCoordinate((glyph) * PLACE_GLYPH_SIZE), \
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE); \
   }
 
 /* Draws place, as in "21st", centered on x */
@@ -1163,7 +1164,8 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         DrawTextureRect(&gfx, (x + digitX) * 4, (y + PLACE_DIGIT_Y) * 4,
             (x + digitX + PLACE_DIGIT_WIDTH) * 4,
             (y + PLACE_DIGIT_Y + PLACE_DIGIT_WIDTH) * 4, G_TX_RENDERTILE, 0,
-            (digit * PLACE_DIGIT_WIDTH) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            TexelCoordinate(digit * PLACE_DIGIT_WIDTH), TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE);
       }
     } else {
       DrawPlaceIcon(&gfx, x, y, rank);
@@ -1241,7 +1243,8 @@ void DrawPlayerPortrait(
       5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, x * 4, y * 4, (x + PORTRAIT_SIZE) * 4,
       (y + PORTRAIT_SIZE) * 4, G_TX_RENDERTILE,
-      isMirrored * (PORTRAIT_SIZE << 5), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      isMirrored * (TexelCoordinate(PORTRAIT_SIZE)), 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 
@@ -1470,9 +1473,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
           (f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
           (lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE)) * 4,
           G_TX_RENDERTILE,
-          (NOTICE_SHINE_SIZE -
-              ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP))
-              << 5,
+          TexelCoordinate(NOTICE_SHINE_SIZE -
+              ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)),
           0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
     }
   }
@@ -1690,9 +1692,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
                 NOTICE_CHARACTER_SHINE_HEIGHT) *
                 4,
             G_TX_RENDERTILE,
-            (NOTICE_SHINE_SIZE -
-                ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP))
-                << 5,
+            TexelCoordinate(NOTICE_SHINE_SIZE -
+                ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)),
             0, NOTICE_CHARACTER_SHINE_DSDX, NOTICE_CHARACTER_SHINE_DTDY);
       }
     }
@@ -2103,10 +2104,9 @@ void DrawResultsBanner(Gfx** displayListHead) {
                   f_TrophySizes[course][TROPHY_SHINE_HEIGHT]) *
                   4,
               G_TX_RENDERTILE,
-              (NOTICE_SHINE_SIZE -
+              TexelCoordinate(NOTICE_SHINE_SIZE -
                   ((f_TrophyShineFrame - TROPHY_SHINE_START) *
-                      TROPHY_SHINE_SPEED))
-                  << 5,
+                      TROPHY_SHINE_SPEED)),
               0, TROPHY_SHINE_DSDX, TEXEL_STEP_ONE);
         }
       }
@@ -3151,14 +3151,16 @@ void DrawMatchResults(Gfx** displayListHead) {
           (standingShift[i] + 80 + STANDING_WORD_WIDTH + f_ResultsSlide) << 2,
           (f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT)
               << 2,
-          G_TX_RENDERTILE, 0, standingRow << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     } else {
       DrawTextureRect(&gfx, (standingShift[i] + 96 + f_ResultsSlide) << 2,
           (f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT)) << 2,
           (standingShift[i] + 96 + STANDING_WORD_WIDTH + f_ResultsSlide) << 2,
           (f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT)
               << 2,
-          G_TX_RENDERTILE, 0, standingRow << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
 

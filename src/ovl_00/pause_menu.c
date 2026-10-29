@@ -806,8 +806,8 @@ s32 UpdatePauseMenu(ControllerState* controller) {
   (PAUSE_ARROW_SIZE * PAUSE_ARROWS_FRAME_HEIGHT / 2)
 #define PAUSE_ARROWS_TICKS_PER_FRAME 4
 #define PAUSE_ARROWS_TICK_COUNT (PAUSE_ARROWS_TICKS_PER_FRAME * 2)
-#define PAUSE_LEFT_ARROW_T ((PAUSE_ARROW_SIZE * 3) << 5)
-#define PAUSE_RIGHT_ARROW_T ((PAUSE_ARROW_SIZE * 2) << 5)
+#define PAUSE_LEFT_ARROW_T (TexelCoordinate(PAUSE_ARROW_SIZE * 3))
+#define PAUSE_RIGHT_ARROW_T (TexelCoordinate(PAUSE_ARROW_SIZE * 2))
 
 /* Draws a pair of flashing arrows centered on (x, y), with their centers gap
  * pixels apart */
@@ -871,7 +871,7 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
 /* The tee leans the other way once the glove's sway passes this */
 #define PAUSE_TEE_LEAN_SWAY 5
 /* The tee frames follow the glove in the cursor image */
-#define PAUSE_TEES_T (PAUSE_CURSOR_SIZE << 5)
+#define PAUSE_TEES_T (TexelCoordinate(PAUSE_CURSOR_SIZE))
 
 /* Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
  * while it is loaded */
@@ -1024,7 +1024,8 @@ void DrawPauseMenu(Gfx** displayListHead) {
             PAUSE_CURSOR_SIZE) *
             4,
         G_TX_RENDERTILE, 0,
-        PAUSE_TEES_T + (teeFrame * (PAUSE_CURSOR_SIZE << 5)), 1 << 10, 1 << 10);
+        PAUSE_TEES_T + (teeFrame * (TexelCoordinate(PAUSE_CURSOR_SIZE))),
+        1 << 10, 1 << 10);
   } else {
     DrawTextureRect(&gfx, (PAUSE_TEE_X - sway) * 4,
         ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4) * 4,

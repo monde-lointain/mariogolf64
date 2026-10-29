@@ -1491,7 +1491,7 @@ void func_802296C4_ovl_01(
       gSPScisTextureRectangle(gfx++, (left + width) << 2, top << 2,
           (left + width + ORDINAL_GLYPH_SIZE) << 2,
           (top + ORDINAL_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,
-          ((glyph - '0') * ORDINAL_GLYPH_SIZE) << 5, TEXEL_STEP_ONE,
+          TexelCoordinate((glyph - '0') * ORDINAL_GLYPH_SIZE), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
     }
   }
@@ -1525,7 +1525,7 @@ void func_802296C4_ovl_01(
   gSPScisTextureRectangle(gfx++, (left + width) << 2, top << 2,
       (left + width + ORDINAL_GLYPH_SIZE) << 2, (top + ORDINAL_GLYPH_SIZE) << 2,
       G_TX_RENDERTILE, 0,
-      ((suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE) << 5,
+      TexelCoordinate((suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE),
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }

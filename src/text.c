@@ -16,6 +16,7 @@
 #include "round_hud.h"
 #include "round_stats.h"
 #include "scene.h"
+#include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
 #include "text.h"
@@ -588,11 +589,13 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
             (y - LARGE_TEXT_MARK_RISE) << 2,
             (x - LARGE_TEXT_MARK_BACKSPACE + FONT_SIZE_LARGE) << 2,
             (y - LARGE_TEXT_MARK_RISE + FONT_SIZE_LARGE) << 2, G_TX_RENDERTILE,
-            glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+            TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), 1 << 10,
+            1 << 10);
       } else {
         gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_LARGE) << 2,
-            (y + FONT_SIZE_LARGE) << 2, G_TX_RENDERTILE, glyphLeft << 5,
-            glyphTop << 5, 1 << 10, 1 << 10);
+            (y + FONT_SIZE_LARGE) << 2, G_TX_RENDERTILE,
+            TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), 1 << 10,
+            1 << 10);
         x += f_LargeFontWidths[code];
       }
 
@@ -746,13 +749,13 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
                 (y - LARGE_TEXT_MARK_RISE) << 2,
                 (x - LARGE_TEXT_MARK_BACKSPACE + FONT_SIZE_LARGE) << 2,
                 (y - LARGE_TEXT_MARK_RISE + FONT_SIZE_LARGE) << 2,
-                G_TX_RENDERTILE, characterLeft << 5, characterTop << 5, 1 << 10,
-                1 << 10);
+                G_TX_RENDERTILE, TexelCoordinate(characterLeft),
+                TexelCoordinate(characterTop), 1 << 10, 1 << 10);
           } else {
             gSPTextureRectangle(gfx++, x << 2, y << 2,
                 (x + FONT_SIZE_LARGE) << 2, (y + FONT_SIZE_LARGE) << 2,
-                G_TX_RENDERTILE, characterLeft << 5, characterTop << 5, 1 << 10,
-                1 << 10);
+                G_TX_RENDERTILE, TexelCoordinate(characterLeft),
+                TexelCoordinate(characterTop), 1 << 10, 1 << 10);
             x += f_LargeFontWidths[(u8)g_PrintBuffer[index]];
           }
         }
@@ -876,11 +879,13 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
             (y - SLOT_MARK_RISE) << 2,
             (x - SLOT_MARK_BACKSPACE + FONT_SIZE_MEDIUM) << 2,
             (y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE,
-            glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+            TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), 1 << 10,
+            1 << 10);
       } else {
         gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_MEDIUM) << 2,
-            (y + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE, glyphLeft << 5,
-            glyphTop << 5, 1 << 10, 1 << 10);
+            (y + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE,
+            TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), 1 << 10,
+            1 << 10);
         x += advance;
       }
 
@@ -1003,12 +1008,13 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
             gSPTextureRectangle(gfx++, (x - (FONT_SIZE_MEDIUM / 2)) << 2,
                 (y - SLOT_MARK_RISE) << 2, (x + (FONT_SIZE_MEDIUM / 2)) << 2,
                 (y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE,
-                characterLeft << 5, characterTop << 5, 1 << 10, 1 << 10);
+                TexelCoordinate(characterLeft), TexelCoordinate(characterTop),
+                1 << 10, 1 << 10);
           } else {
             gSPTextureRectangle(gfx++, x << 2, y << 2,
                 (x + FONT_SIZE_MEDIUM) << 2, (y + FONT_SIZE_MEDIUM) << 2,
-                G_TX_RENDERTILE, characterLeft << 5, characterTop << 5, 1 << 10,
-                1 << 10);
+                G_TX_RENDERTILE, TexelCoordinate(characterLeft),
+                TexelCoordinate(characterTop), 1 << 10, 1 << 10);
             x += advance;
           }
         }
@@ -1319,7 +1325,8 @@ void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, left << 2, top << 2,
           (left + FONT_SIZE_LARGE) << 2, (top + FONT_SIZE_LARGE) << 2,
-          G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
+          TexelCoordinate(glyphTop), 1 << 10, 1 << 10);
       x += FONT_SIZE_LARGE;
       text++;
     }
@@ -1392,7 +1399,8 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, left << 2, top << 2,
           (left + FONT_SIZE_LARGE) << 2, (top + FONT_SIZE_LARGE) << 2,
-          G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
+          TexelCoordinate(glyphTop), 1 << 10, 1 << 10);
       text++;
       x += f_LargeFontWidths[code];
     }
@@ -1467,7 +1475,8 @@ void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, left << 2, top << 2,
           (left + FONT_SIZE_MEDIUM) << 2, (top + FONT_SIZE_MEDIUM) << 2,
-          G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
+          TexelCoordinate(glyphTop), 1 << 10, 1 << 10);
       text++;
       x += FONT_SIZE_MEDIUM;
     }
@@ -1540,7 +1549,8 @@ void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, left << 2, top << 2,
           (left + FONT_SIZE_SMALL) << 2, (top + FONT_SIZE_SMALL) << 2,
-          G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
+          TexelCoordinate(glyphTop), 1 << 10, 1 << 10);
       text++;
       x += FONT_SIZE_SMALL;
     }
@@ -1651,8 +1661,9 @@ void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
     glyphLeft = GetShadowedGlyphLeft(code);
     glyphTop = GetShadowedGlyphTop(code);
     gSPTextureRectangle(gfx++, x << 2, y << 2, (x + SHADOWED_GLYPH_SIZE) << 2,
-        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE, glyphLeft << 5,
-        glyphTop << 5, 1 << 10, 1 << 10);
+        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE,
+        TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), 1 << 10,
+        1 << 10);
     if (*text == '.') {
       x += SHADOWED_POINT_INSET + SHADOWED_POINT_WIDTH;
     } else {
@@ -1707,8 +1718,10 @@ void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   while ((code = *text) != '\0') {
     glyphLeft = (code - NARROW_GLYPH_FIRST) * SHADOWED_GLYPH_SIZE;
     gSPTextureRectangle(gfx++, x << 2, y << 2, (x + NARROW_GLYPH_SIZE) << 2,
-        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE, glyphLeft << 5,
-        (NARROW_GLYPH_ROW * SHADOWED_GLYPH_SIZE) << 5, 1 << 10, 1 << 10);
+        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE,
+        TexelCoordinate(glyphLeft),
+        TexelCoordinate(NARROW_GLYPH_ROW * SHADOWED_GLYPH_SIZE), 1 << 10,
+        1 << 10);
     text++;
     x += NARROW_GLYPH_WIDTH;
   }
@@ -1730,8 +1743,9 @@ void DrawCondensedShadowedText(
     glyphLeft = GetShadowedGlyphLeft(code);
     glyphTop = GetShadowedGlyphTop(code);
     gSPTextureRectangle(gfx++, x << 2, y << 2, (x + SHADOWED_GLYPH_SIZE) << 2,
-        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE, glyphLeft << 5,
-        glyphTop << 5, 1 << 10, 1 << 10);
+        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE,
+        TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), 1 << 10,
+        1 << 10);
     text++;
     x += CONDENSED_GLYPH_WIDTH;
   }
@@ -1935,7 +1949,7 @@ s32 PlaceMessageGlyphGroup(
  * Packs texel coordinates into a vertex's texture coordinates. It is a
  * macro, as an inline function compiles differently from the original.
  */
-#define PackTextureCoords(s, t) (((s) << 21) | ((t) << 5))
+#define PackTextureCoords(s, t) (((s) << 21) | (TexelCoordinate(t)))
 
 /*
  * Draws the sprites of a group of glyphs. The fonts are four-bit images
@@ -2171,7 +2185,7 @@ void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text) {
   for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
     DrawTextureRect(&gfx, x << 2, y << 2, (x + DIGIT_GLYPH_SIZE) << 2,
         (y + DIGIT_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,
-        GetDigitGlyphTop(text[index]) << 5, 1 << 10, 1 << 10);
+        TexelCoordinate(GetDigitGlyphTop(text[index])), 1 << 10, 1 << 10);
     x += DIGIT_GLYPH_WIDTH;
   }
 

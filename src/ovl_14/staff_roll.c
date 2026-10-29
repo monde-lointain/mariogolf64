@@ -1870,13 +1870,13 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
             (top - OVERLAID_CHARACTER_SHIFT_Y) << 2,
             (left + OVERLAID_CHARACTER_SHIFT_X) << 2,
             (top - OVERLAID_CHARACTER_SHIFT_Y + STAFF_GLYPH_HEIGHT) << 2,
-            G_TX_RENDERTILE, (glyphLeft) << 5, (glyphTop) << 5, TEXEL_STEP_ONE,
-            TEXEL_STEP_ONE);
+            G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
+            TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       } else {
         gSPTextureRectangle(gfx++, left << 2, top << 2,
             (left + STAFF_GLYPH_WIDTH) << 2, (top + STAFF_GLYPH_HEIGHT) << 2,
-            G_TX_RENDERTILE, (glyphLeft) << 5, (glyphTop) << 5, TEXEL_STEP_ONE,
-            TEXEL_STEP_ONE);
+            G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
+            TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         left += f_StaffGlyphAdvances[character];
       }
     }

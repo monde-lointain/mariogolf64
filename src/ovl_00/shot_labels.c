@@ -196,20 +196,21 @@ void DrawShotLabels(Gfx** displayListHead) {
       case CORNER_LOWER_LEFT:
         gSPScisTextureRectangle(gfx++, (x + LEADER_LINE_NEAR_X) << 2,
             (y - LEADER_LINE_FAR_Y) << 2, (x + LEADER_LINE_FAR_X) << 2,
-            (y - LEADER_LINE_NEAR_Y) << 2, G_TX_RENDERTILE, TAG_WIDTH << 5, 0,
-            1 << 10, 1 << 10);
+            (y - LEADER_LINE_NEAR_Y) << 2, G_TX_RENDERTILE,
+            TexelCoordinate(TAG_WIDTH), 0, 1 << 10, 1 << 10);
         break;
       case CORNER_UPPER_LEFT:
         gSPScisTextureRectangle(gfx++, (x + LEADER_LINE_NEAR_X) << 2,
             (y + LEADER_LINE_NEAR_Y) << 2, (x + LEADER_LINE_FAR_X) << 2,
-            (y + LEADER_LINE_FAR_Y) << 2, G_TX_RENDERTILE, TAG_WIDTH << 5,
-            TAG_HEIGHT << 5, 1 << 10, 1 << 10);
+            (y + LEADER_LINE_FAR_Y) << 2, G_TX_RENDERTILE,
+            TexelCoordinate(TAG_WIDTH), TexelCoordinate(TAG_HEIGHT), 1 << 10,
+            1 << 10);
         break;
       case CORNER_UPPER_RIGHT:
         gSPScisTextureRectangle(gfx++, (x - LEADER_LINE_FAR_X) << 2,
             (y + LEADER_LINE_NEAR_Y) << 2, (x - LEADER_LINE_NEAR_X) << 2,
-            (y + LEADER_LINE_FAR_Y) << 2, G_TX_RENDERTILE, 0, TAG_HEIGHT << 5,
-            1 << 10, 1 << 10);
+            (y + LEADER_LINE_FAR_Y) << 2, G_TX_RENDERTILE, 0,
+            TexelCoordinate(TAG_HEIGHT), 1 << 10, 1 << 10);
         break;
     }
 
@@ -596,7 +597,7 @@ OPAQUE:
           (point.x - (SIGN_WIDTH / 2)) << 2,
           (point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT) << 2,
           (point.x + (SIGN_WIDTH / 2)) << 2, point.y << 2, G_TX_RENDERTILE, 0,
-          SIGN_BOARD_HEIGHT << 5, 1 << 10, 1 << 10);
+          TexelCoordinate(SIGN_BOARD_HEIGHT), 1 << 10, 1 << 10);
       gDPPipeSync(g_DisplayListHead++);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
@@ -796,8 +797,8 @@ OPAQUE:
               (point.x - PIN_FLAG_LEFT) << 2,
               (point.y - PIN_FLAG_IMAGE_HEIGHT) << 2,
               (point.x + PIN_FLAG_RIGHT) << 2, point.y << 2, G_TX_RENDERTILE,
-              (f_PinFlagWaveFrame / PIN_FLAG_WAVE_TICKS * PIN_FLAG_FRAME_WIDTH)
-                  << 5,
+              TexelCoordinate(f_PinFlagWaveFrame / PIN_FLAG_WAVE_TICKS *
+                  PIN_FLAG_FRAME_WIDTH),
               0, 1 << 10, 1 << 10);
           gDPPipeSync(g_DisplayListHead++);
         }

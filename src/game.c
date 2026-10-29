@@ -471,8 +471,8 @@ void DrawTiledImageEffect(Gfx** displayListHead, CameraView* view) {
           (SCREEN_BORDER + (copyIndex * TILED_IMAGE_COPY_SPACING) + stripTop +
               TILED_IMAGE_STRIP_SCREEN_HEIGHT)
               << 2,
-          G_TX_RENDERTILE, TILED_IMAGE_LEFT << 5, 0, TILED_IMAGE_SCALE,
-          TILED_IMAGE_SCALE);
+          G_TX_RENDERTILE, TexelCoordinate(TILED_IMAGE_LEFT), 0,
+          TILED_IMAGE_SCALE, TILED_IMAGE_SCALE);
     }
   }
 
@@ -546,9 +546,10 @@ void DrawSpinMesh(Gfx** displayListHead) {
       gSPModifyVertex(gfx++, (stripIndex * 2) + 1, G_MWO_POINT_ST,
           (SCREEN_WIDTH - SCREEN_BORDER) << 21);
       gSPModifyVertex(gfx++, (stripIndex * 2) + 2, G_MWO_POINT_ST,
-          (SCREEN_BORDER << 21) + (stripHeight << 5));
+          (SCREEN_BORDER << 21) + (TexelCoordinate(stripHeight)));
       gSPModifyVertex(gfx++, (stripIndex * 2) + 3, G_MWO_POINT_ST,
-          ((SCREEN_WIDTH - SCREEN_BORDER) << 21) + (stripHeight << 5));
+          ((SCREEN_WIDTH - SCREEN_BORDER) << 21) +
+              (TexelCoordinate(stripHeight)));
       gSP2Triangles(gfx++, stripIndex * 2, (stripIndex * 2) + 2,
           (stripIndex * 2) + 1, 0, (stripIndex * 2) + 1, (stripIndex * 2) + 2,
           (stripIndex * 2) + 3, 0);
@@ -611,8 +612,8 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
         ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
             1)
             << 2,
-        G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10,
-        1 << 10);
+        G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
+        TexelCoordinate(SCREEN_BORDER), 4 << 10, 1 << 10);
     gDPPipeSync(gfx++);
   }
 
@@ -638,8 +639,8 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
         ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
             1)
             << 2,
-        G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10,
-        1 << 10);
+        G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
+        TexelCoordinate(SCREEN_BORDER), 4 << 10, 1 << 10);
     gDPPipeSync(gfx++);
   }
 
@@ -851,9 +852,10 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
             ((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH) << 2,
             (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset + 1) << 2,
             G_TX_RENDERTILE,
-            (MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)) << 5,
-            (sourceTop + HORIZON_FIRST_ROW + (rowIndex * HORIZON_ROW_SPACING))
-                << 5,
+            TexelCoordinate(
+                MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
+            TexelCoordinate(sourceTop + HORIZON_FIRST_ROW +
+                (rowIndex * HORIZON_ROW_SPACING)),
             1 << 10, 1 << 10);
       }
     }
@@ -877,8 +879,9 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
     gSPScisTextureRectangle(gfx++, 0,
         (DYNAMIC_TEXTURE_SIZE - destOffset - rowCount) << 2,
         DYNAMIC_TEXTURE_SIZE << 2, (DYNAMIC_TEXTURE_SIZE - destOffset) << 2,
-        G_TX_RENDERTILE, 0, (DYNAMIC_TEXTURE_SIZE - destOffset - rowCount) << 5,
-        1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0,
+        TexelCoordinate(DYNAMIC_TEXTURE_SIZE - destOffset - rowCount), 1 << 10,
+        1 << 10);
   }
 
   gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
@@ -978,9 +981,10 @@ void BuildDynamicTextures(Gfx** displayListHead) {
           (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex) << 2,
           ((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH) << 2,
           (DYNAMIC_TEXTURE_SIZE - rowIndex) << 2, G_TX_RENDERTILE,
-          (MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)) << 5,
-          (MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING)) << 5, 1 << 10,
-          1 << 10);
+          TexelCoordinate(
+              MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
+          TexelCoordinate(MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING)),
+          1 << 10, 1 << 10);
     }
   }
 
@@ -2269,8 +2273,8 @@ void CopyPreviousFrame(Gfx** displayListHead) {
         ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
             1)
             << 2,
-        G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10,
-        1 << 10);
+        G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
+        TexelCoordinate(SCREEN_BORDER), 4 << 10, 1 << 10);
     gDPPipeSync(gfx++);
   }
 

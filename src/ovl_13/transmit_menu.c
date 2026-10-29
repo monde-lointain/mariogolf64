@@ -1613,7 +1613,8 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   DrawTextureRect(&displayList, SHOT_TYPE_LEFT << 2, SHOT_TYPE_TOP << 2,
       (SHOT_TYPE_LEFT + SHOT_TYPE_WIDTH) << 2,
       (SHOT_TYPE_TOP + SHOT_TYPE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-      (segmentCurve * SHOT_TYPE_HEIGHT) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      TexelCoordinate(segmentCurve * SHOT_TYPE_HEIGHT), TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   LoadSmallPalette(&displayList, 0, ImageBody(transfer->statLabelsImage));
   LoadNibbleTextureBlock(&displayList, ImageTexels(transfer->statLabelsImage),
       G_IM_FMT_CI, STAT_LABELS_WIDTH, STAT_LABELS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -1667,7 +1668,8 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
         CURVE_BAR_TOP << 2,
         (CURVE_BAR_LEFT + ((segment + 1) * CURVE_SEGMENT_WIDTH)) << 2,
         (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-        (segment * CURVE_SEGMENT_WIDTH) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        TexelCoordinate(segment * CURVE_SEGMENT_WIDTH), TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
   }
 
   *displayListHead = displayList;
@@ -1802,7 +1804,8 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
             CONTROLLER_ICON_SIZE)
             << 2,
         (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
-        (transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE) << 5,
+        TexelCoordinate(
+            transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     slot++;
   }
@@ -1924,9 +1927,8 @@ void DrawBringCharactersScreen(
               CONTROLLER_ICON_SIZE)
               << 2,
           (LISTED_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
-          (transfer->listedCharacters[index] / CARTRIDGE_SAVE_COUNT *
-              CONTROLLER_ICON_SIZE)
-              << 5,
+          TexelCoordinate(transfer->listedCharacters[index] /
+              CARTRIDGE_SAVE_COUNT * CONTROLLER_ICON_SIZE),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       shownCount++;
       if (shownCount == SHOWN_LISTED_COUNT) {
@@ -2005,7 +2007,7 @@ void DrawBringCharactersScreen(
     if (transfer->unk7B8 > 0) {
       DrawTextureRect(&displayList, LEFT_ARROW_LEFT << 2, ARROWS_TOP << 2,
           (LEFT_ARROW_LEFT + ARROW_SIZE) << 2, (ARROWS_TOP + ARROW_SIZE) << 2,
-          G_TX_RENDERTILE, 0, LEFT_ARROW_ROW << 5, TEXEL_STEP_ONE,
+          G_TX_RENDERTILE, 0, TexelCoordinate(LEFT_ARROW_ROW), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
     }
 
@@ -2013,7 +2015,7 @@ void DrawBringCharactersScreen(
         transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
       DrawTextureRect(&displayList, RIGHT_ARROW_LEFT << 2, ARROWS_TOP << 2,
           (RIGHT_ARROW_LEFT + ARROW_SIZE) << 2, (ARROWS_TOP + ARROW_SIZE) << 2,
-          G_TX_RENDERTILE, 0, RIGHT_ARROW_ROW << 5, TEXEL_STEP_ONE,
+          G_TX_RENDERTILE, 0, TexelCoordinate(RIGHT_ARROW_ROW), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
     }
   }
@@ -2062,7 +2064,8 @@ void DrawSendExperienceScreen(
             CONTROLLER_ICON_SIZE)
             << 2,
         (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
-        (transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE) << 5,
+        TexelCoordinate(
+            transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     slot++;
   }
@@ -2133,7 +2136,8 @@ void DrawTransmitMenu(Gfx** displayListHead) {
           (COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2) +
               (rowCount * 2))
               << 2,
-          G_TX_RENDERTILE, 0, 1 << 5, TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
+          G_TX_RENDERTILE, 0, TexelCoordinate(1), TEXEL_STEP_ONE / 2,
+          TEXEL_STEP_ONE / 2);
     }
   }
 

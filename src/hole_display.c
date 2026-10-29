@@ -2006,14 +2006,15 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         gSPTextureRectangle(gfx++, SCREEN_BORDER << 2,
             (SCREEN_BORDER + clip + y) << 2,
             (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2, bottom << 2,
-            G_TX_RENDERTILE, yawOffset, clip << 5, 4 << 10, TEXEL_STEP_ONE);
+            G_TX_RENDERTILE, yawOffset, TexelCoordinate(clip), 4 << 10,
+            TEXEL_STEP_ONE);
       } else {
         /* The last strip stretches to the bottom of the screen */
         gSPTextureRectangle(gfx++, SCREEN_BORDER << 2,
             (SCREEN_BORDER + clip + y) << 2,
             (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
             (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, yawOffset,
-            clip << 5, 4 << 10, TEXEL_STEP_ONE);
+            TexelCoordinate(clip), 4 << 10, TEXEL_STEP_ONE);
         break;
       }
     }
@@ -2269,8 +2270,8 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
               (BACKDROP_RIGHT + 1) << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
-              G_TX_RENDERTILE, BACKDROP_BORDER << 5, BACKDROP_BORDER << 5,
-              1 << 10, 1 << 10);
+              G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
+              TexelCoordinate(BACKDROP_BORDER), 1 << 10, 1 << 10);
           source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
         }
 
@@ -2296,15 +2297,15 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               f_HudAnimationFramesLeft << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
               G_TX_RENDERTILE,
-              ((SCREEN_WIDTH / 2) - f_HudAnimationFramesLeft) << 5, 0, 1 << 10,
-              1 << 10);
+              TexelCoordinate((SCREEN_WIDTH / 2) - f_HudAnimationFramesLeft), 0,
+              1 << 10, 1 << 10);
           gSPScisTextureRectangle(gfx++,
               (SCREEN_WIDTH - f_HudAnimationFramesLeft) << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
               (BACKDROP_RIGHT + 1) << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
-              G_TX_RENDERTILE, (FADE_FRAME_WIDTH / 2) << 5, 0, 1 << 10,
-              1 << 10);
+              G_TX_RENDERTILE, TexelCoordinate(FADE_FRAME_WIDTH / 2), 0,
+              1 << 10, 1 << 10);
           gDPPipeSync(gfx++);
         }
 
@@ -2447,8 +2448,8 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
           ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
               SPIRAL_TILE_HEIGHT)
               << 2,
-          G_TX_RENDERTILE, (tileColumn * SPIRAL_TILE_WIDTH) << 5,
-          (tileRow * SPIRAL_TILE_HEIGHT) << 5, 1 << 10, 1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
+          TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), 1 << 10, 1 << 10);
       gDPPipeSync(gfx++);
       StepSpiral();
     }
@@ -2483,8 +2484,8 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
           ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
               SPIRAL_TILE_HEIGHT)
               << 2,
-          G_TX_RENDERTILE, (tileColumn * SPIRAL_TILE_WIDTH) << 5,
-          (tileRow * SPIRAL_TILE_HEIGHT) << 5, 1 << 10, 1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
+          TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), 1 << 10, 1 << 10);
       gDPPipeSync(gfx++);
       StepSpiral();
     }
@@ -2559,8 +2560,8 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
           BACKDROP_RIGHT << 2,
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height - 1) << 2,
-          G_TX_RENDERTILE, BACKDROP_BORDER << 5, BACKDROP_BORDER << 5,
-          COPY_MODE_DSDX, 1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
+          TexelCoordinate(BACKDROP_BORDER), COPY_MODE_DSDX, 1 << 10);
       gDPPipeSync(gfx++);
       source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
     }
@@ -2623,8 +2624,8 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, BACKDROP_BORDER << 2,
         (SCREEN_WIDTH - BACKDROP_BORDER) << 2,
         (SCREEN_HEIGHT - BACKDROP_BORDER) << 2, G_TX_RENDERTILE,
-        f_BackdropPatternScroll << 5, f_BackdropPatternScroll << 5, 1 << 10,
-        1 << 10);
+        TexelCoordinate(f_BackdropPatternScroll),
+        TexelCoordinate(f_BackdropPatternScroll), 1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -2654,8 +2655,8 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
           (BACKDROP_RIGHT + 1) << 2,
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
-          G_TX_RENDERTILE, BACKDROP_BORDER << 5, BACKDROP_BORDER << 5, 1 << 10,
-          1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
+          TexelCoordinate(BACKDROP_BORDER), 1 << 10, 1 << 10);
       gDPPipeSync(gfx++);
     }
   } else {
@@ -2675,8 +2676,8 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
           (BACKDROP_RIGHT + 1) << 2,
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
-          G_TX_RENDERTILE, BACKDROP_BORDER << 5, BACKDROP_BORDER << 5, 1 << 10,
-          1 << 10);
+          G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
+          TexelCoordinate(BACKDROP_BORDER), 1 << 10, 1 << 10);
       gDPPipeSync(gfx++);
     }
   }
@@ -2860,10 +2861,10 @@ void DrawTurnAwayAnimation(void) {
         vertex = (row * TILE_GRID_COLUMN_COUNT) + column;
         gSPModifyVertex(g_DisplayListHead++, vertex, G_MWO_POINT_ST, 0);
         gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT,
-            G_MWO_POINT_ST, FRAME_TILE_ROWS << 5);
+            G_MWO_POINT_ST, TexelCoordinate(FRAME_TILE_ROWS));
         gSPModifyVertex(g_DisplayListHead++,
             vertex + TILE_GRID_COLUMN_COUNT + 1, G_MWO_POINT_ST,
-            (width << 21) + (FRAME_TILE_ROWS << 5));
+            (width << 21) + (TexelCoordinate(FRAME_TILE_ROWS)));
         gSPModifyVertex(
             g_DisplayListHead++, vertex + 1, G_MWO_POINT_ST, width << 21);
         gDPPipeSync(g_DisplayListHead++);
@@ -2911,13 +2912,15 @@ void DrawTurnAwayAnimation(void) {
         gDPPipeSync(g_DisplayListHead++);
         gSPModifyVertex(g_DisplayListHead++, vertex, G_MWO_POINT_ST, 0);
         gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT,
-            G_MWO_POINT_ST, (FRAME_TILE_ROWS << 5) - LOWER_TILE_TEXCOORD_INSET);
+            G_MWO_POINT_ST,
+            (TexelCoordinate(FRAME_TILE_ROWS)) - LOWER_TILE_TEXCOORD_INSET);
         gSPModifyVertex(g_DisplayListHead++,
             vertex + TILE_GRID_COLUMN_COUNT + 1, G_MWO_POINT_ST,
-            (((width << 5) - LOWER_TILE_TEXCOORD_INSET) << 16) +
-                ((FRAME_TILE_ROWS << 5) - LOWER_TILE_TEXCOORD_INSET));
+            (((TexelCoordinate(width)) - LOWER_TILE_TEXCOORD_INSET) << 16) +
+                ((TexelCoordinate(FRAME_TILE_ROWS)) -
+                    LOWER_TILE_TEXCOORD_INSET));
         gSPModifyVertex(g_DisplayListHead++, vertex + 1, G_MWO_POINT_ST,
-            ((width << 5) - LOWER_TILE_TEXCOORD_INSET) << 16);
+            ((TexelCoordinate(width)) - LOWER_TILE_TEXCOORD_INSET) << 16);
         gSP2Triangles(g_DisplayListHead++, vertex,
             vertex + TILE_GRID_COLUMN_COUNT,
             vertex + TILE_GRID_COLUMN_COUNT + 1, 0, vertex,

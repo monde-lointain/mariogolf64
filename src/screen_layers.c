@@ -448,7 +448,7 @@ void DrawWipe(Gfx** displayListHead) {
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   } else {
-    texelOffset = (shapeOffset * WIPE_SHAPE_TEXELS << 5) / shapeSize;
+    texelOffset = TexelCoordinate(shapeOffset * WIPE_SHAPE_TEXELS) / shapeSize;
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_WipeShapeImage)),
         G_IM_FMT_I, WIPE_SHAPE_TEXELS, WIPE_SHAPE_TEXELS, 0,

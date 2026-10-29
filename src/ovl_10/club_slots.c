@@ -86,7 +86,7 @@
 #define SYMBOL_SIZE 32
 #define SYMBOL_IMAGE_SIZE (IMAGE_HEADER_SIZE + (SYMBOL_SIZE * SYMBOL_SIZE * 2))
 /* The texture coordinate of a symbol's last texel */
-#define SYMBOL_ST_END ((SYMBOL_SIZE << 5) - 1)
+#define SYMBOL_ST_END ((TexelCoordinate(SYMBOL_SIZE)) - 1)
 
 /* The slot machine, 304 by 224 texels drawn in strips 6 high, the last one 2 */
 #define MACHINE_WIDTH 304
@@ -862,7 +862,7 @@ void DrawClubSlots(Gfx** displayListHead) {
           (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
               (stripIndex * startStripHeight) + startStripHeight)
               << 2,
-          G_TX_RENDERTILE, 0, 1 << 5, dsdx, dtdy);
+          G_TX_RENDERTILE, 0, TexelCoordinate(1), dsdx, dtdy);
     }
   }
 
@@ -1120,7 +1120,8 @@ void DrawClubSlotsLogo(
         (s32)((centerY - shineHalfHeight) + f_LogoBob) << 2,
         (s32)(centerX + shineHalfWidth) << 2,
         (s32)(centerY + shineHalfHeight + f_LogoBob) << 2, G_TX_RENDERTILE,
-        (SHINE_SIZE - ((shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED)) << 5,
+        TexelCoordinate(
+            SHINE_SIZE - ((shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED)),
         0, (s32)shineDsdx, (s32)shineDtdy);
   }
 

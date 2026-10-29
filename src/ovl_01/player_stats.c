@@ -1388,8 +1388,9 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
             << 2,
         (offsetY + OPTION_COLUMN_TOP + arrowY + STATS_ARROW_SIZE) << 2,
         G_TX_RENDERTILE,
-        (arrowIndex == OPTION_ARROW_LEFT) ? (STATS_ARROW_SIZE << 5) : 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (arrowIndex == OPTION_ARROW_LEFT) ? (TexelCoordinate(STATS_ARROW_SIZE))
+                                          : 0,
+        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 

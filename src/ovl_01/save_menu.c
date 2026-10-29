@@ -916,7 +916,8 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
     gSPScisTextureRectangle(gfx++, (left + COURSE_WORD_OFFSET_X) << 2, top << 2,
         (left + COURSE_WORD_OFFSET_X + COURSE_WORD_WIDTH) << 2,
         (top + COURSE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE,
-        (COURSE_DIGIT_WIDTH * COURSE_COUNT) << 5, 0, 1 << 10, 1 << 10);
+        TexelCoordinate(COURSE_DIGIT_WIDTH * COURSE_COUNT), 0, 1 << 10,
+        1 << 10);
     gDPPipeSync(gfx++);
   }
 
@@ -924,7 +925,7 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
   gSPScisTextureRectangle(gfx++, (left + COURSE_DIGIT_OFFSET_X) << 2, top << 2,
       (left + COURSE_DIGIT_OFFSET_X + COURSE_DIGIT_WIDTH) << 2,
       (top + COURSE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE,
-      (courseIndex * COURSE_DIGIT_WIDTH) << 5, 0, 1 << 10, 1 << 10);
+      TexelCoordinate(courseIndex * COURSE_DIGIT_WIDTH), 0, 1 << 10, 1 << 10);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }

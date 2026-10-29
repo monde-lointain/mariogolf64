@@ -18,6 +18,7 @@
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
+#include "screen.h"
 #include "variables.h"
 
 /* Shows the debug value, which the second controller's D-pad changes */
@@ -492,9 +493,9 @@ void DrawClubPanel(Gfx** displayListHead) {
         (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH) << 2,
         (GAUGE_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE,
-        ((((GAUGE_MAX_VALUE * 5) - (f_ClubPanelUnk24 * 5)) << 6) /
-            (GAUGE_MAX_VALUE * 5))
-            << 5,
+        TexelCoordinate(
+            (((GAUGE_MAX_VALUE * 5) - (f_ClubPanelUnk24 * 5)) << 6) /
+            (GAUGE_MAX_VALUE * 5)),
         0, 0x1B4, 0x800);
   }
 

@@ -689,11 +689,12 @@ void DrawPlanks(Gfx** displayListHead) {
     bottom = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT) + stripHeight)
         << 2;
     DrawTextureRect(&gfx, SCREEN_BORDER << 2, top, slide << 2, bottom,
-        G_TX_RENDERTILE, (PLANKS_MIDDLE - slide) << 5, 1 << 5, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, TexelCoordinate(PLANKS_MIDDLE - slide),
+        TexelCoordinate(1), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     DrawTextureRect(&gfx, (SCREEN_WIDTH - slide) << 2, top,
         (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom, G_TX_RENDERTILE,
-        (PLANKS_WIDTH / 2) << 5, 1 << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        TexelCoordinate(PLANKS_WIDTH / 2), TexelCoordinate(1), TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
   }
 
   *displayListHead = gfx;
@@ -767,7 +768,8 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           (f_PressedDirection == DIRECTION_DOWN ? push + 208 : push + 204) << 2,
           (ARROW_LEFT + ARROW_SIZE) << 2,
           (f_PressedDirection == DIRECTION_DOWN ? push + 224 : push + 220) << 2,
-          G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, TexelCoordinate(ARROW_SIZE), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
 
@@ -894,22 +896,23 @@ void DrawHoleSelect(Gfx** displayListHead) {
                 ? push + 228 + f_SlideOffset
                 : push + 228 + f_SlideOffset + ARROW_STEP)
             << 2,
-        G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, 0, TexelCoordinate(ARROW_SIZE), TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     if (!IsOnDrivingRange()) {
       DrawTextureRect(&gfx,
           (f_PressedDirection == DIRECTION_LEFT ? 100 : 104) << 2,
           (44 - f_SlideOffset) << 2,
           (f_PressedDirection == DIRECTION_LEFT ? 116 : 120) << 2,
-          (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0, 3 * ARROW_SIZE << 5,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0,
+          TexelCoordinate(3 * ARROW_SIZE), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx,
           (f_PressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2,
           (44 - f_SlideOffset) << 2,
           (f_PressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2,
-          (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0, 2 * ARROW_SIZE << 5,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0,
+          TexelCoordinate(2 * ARROW_SIZE), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
 
