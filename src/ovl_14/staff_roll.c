@@ -145,7 +145,8 @@
 /*
  * The cast's timeline; its frames count from TIMELINE_START_FRAME. Only
  * each stage's first frames are named; the later shots and reactions
- * keep literal frames, since names would only repeat the numbers.
+ * keep literal frames in the tests below, since names would only
+ * repeat the numbers.
  */
 #define FIRST_SWING_FRAME 60
 #define VIEW_SHRINK_FRAME 150 /* Also the tee's second shot */
@@ -166,6 +167,32 @@
 #define FINALE_FRAME 2630 /* The last of the cast takes all four shots */
 #define LAST_FADE_OUT_FRAME 3360
 #define NEVER_FRAME 0x100000
+
+/* Whether the cast's next member swings, or reacts, on a frame */
+#define IsTeeShotFrame(frame) \
+  ((frame) == VIEW_SHRINK_FRAME || (frame) == 190 || (frame) == 240)
+#define IsTeeReactionFrame(frame) \
+  ((frame) == TEE_REACTIONS_FRAME || (frame) == 360 || (frame) == 420 || \
+      (frame) == 480)
+#define IsFairwayShotFrame(frame) \
+  ((frame) == FAIRWAY_SHOTS_FRAME || (frame) == 770 || (frame) == 810 || \
+      (frame) == 850)
+#define IsFairwayReactionFrame(frame) \
+  ((frame) == FAIRWAY_REACTIONS_FRAME || (frame) == 1000 || (frame) == 1060 || \
+      (frame) == 1120)
+#define IsApproachShotFrame(frame) \
+  ((frame) == APPROACH_SHOTS_FRAME || (frame) == 1420 || (frame) == 1460 || \
+      (frame) == 1500)
+#define IsApproachReactionFrame(frame) \
+  ((frame) == APPROACH_REACTIONS_FRAME || (frame) == 1680 || \
+      (frame) == 1760 || (frame) == 1840)
+#define IsPuttShotFrame(frame) \
+  ((frame) == PUTT_SHOTS_FRAME || (frame) == 2060 || (frame) == 2100 || \
+      (frame) == 2150)
+#define IsPuttReactionFrame(frame) \
+  ((frame) == PUTT_REACTIONS_FRAME || (frame) == 2300 || (frame) == 2400 || \
+      (frame) == 2500)
+
 #define CAST_FADE_FRAMES 40
 #define LAST_FADE_FRAMES 80
 #define SHOTS_PER_STAGE 4
@@ -950,7 +977,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_ViewShrinkStartFrame = frame;
   }
 
-  if (frame == VIEW_SHRINK_FRAME || frame == 190 || frame == 240) {
+  if (IsTeeShotFrame(frame)) {
     PickFramingPitch();
     f_CastFramingYaw = (f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
     FreeCharacterSlot(f_CastSlot);
@@ -972,8 +999,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastSlot = slot;
   }
 
-  if (frame == TEE_REACTIONS_FRAME || frame == 360 || frame == 420 ||
-      frame == 480) {
+  if (IsTeeReactionFrame(frame)) {
     ClearEffects();
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
@@ -1013,8 +1039,7 @@ void RunStaffRollTimeline(s32 frame) {
     StartFadeIn(CAST_FADE_FRAMES);
   }
 
-  if (frame == FAIRWAY_SHOTS_FRAME || frame == 770 || frame == 810 ||
-      frame == 850) {
+  if (IsFairwayShotFrame(frame)) {
     ClearEffects();
     PickFramingPitch();
     g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_UNK8;
@@ -1049,8 +1074,7 @@ void RunStaffRollTimeline(s32 frame) {
     SetSwingAnimation(f_CastSlot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
   }
 
-  if (frame == FAIRWAY_REACTIONS_FRAME || frame == 1000 || frame == 1060 ||
-      frame == 1120) {
+  if (IsFairwayReactionFrame(frame)) {
     ClearEffects();
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
@@ -1090,8 +1114,7 @@ void RunStaffRollTimeline(s32 frame) {
     StartFadeIn(CAST_FADE_FRAMES);
   }
 
-  if (frame == APPROACH_SHOTS_FRAME || frame == 1420 || frame == 1460 ||
-      frame == 1500) {
+  if (IsApproachShotFrame(frame)) {
     ClearEffects();
     PickFramingPitch();
     g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
@@ -1126,8 +1149,7 @@ void RunStaffRollTimeline(s32 frame) {
     SetSwingAnimation(f_CastSlot, APPROACH_CLUB, SHOT_MODE_NORMAL);
   }
 
-  if (frame == APPROACH_REACTIONS_FRAME || frame == 1680 || frame == 1760 ||
-      frame == 1840) {
+  if (IsApproachReactionFrame(frame)) {
     ClearEffects();
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
@@ -1167,8 +1189,7 @@ void RunStaffRollTimeline(s32 frame) {
     StartFadeIn(CAST_FADE_FRAMES);
   }
 
-  if (frame == PUTT_SHOTS_FRAME || frame == 2060 || frame == 2100 ||
-      frame == 2150) {
+  if (IsPuttShotFrame(frame)) {
     ClearEffects();
     f_CastFramingYaw = ((f_CastIndex - PUTT_YAW_OFFSET) * CAST_YAW_STEP) *
         DEGREES_TO_RADIANS_F;
@@ -1204,8 +1225,7 @@ void RunStaffRollTimeline(s32 frame) {
     SetSwingAnimation(f_CastSlot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
   }
 
-  if (frame == PUTT_REACTIONS_FRAME || frame == 2300 || frame == 2400 ||
-      frame == 2500) {
+  if (IsPuttReactionFrame(frame)) {
     ClearEffects();
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
