@@ -120,16 +120,6 @@
 /* A shorter pulse than the shots' rumble in effects.c */
 #define TURN_RUMBLE_FREQUENCY 0x100
 #define TURN_RUMBLE_FRAME_COUNT 8
-/* The character sound that each button plays; the D-pad and C buttons give
- * eight calls */
-#define CALL_OUT_SOUND_UP 0
-#define CALL_OUT_SOUND_DOWN 2
-#define CALL_OUT_SOUND_LEFT 4
-#define CALL_OUT_SOUND_RIGHT 6
-#define CALL_OUT_SOUND_C_UP 8
-#define CALL_OUT_SOUND_C_DOWN 10
-#define CALL_OUT_SOUND_C_LEFT 12
-#define CALL_OUT_SOUND_C_RIGHT 14
 /* Every AMBIENT_SOUND_INTERVAL frames, one of the course's ambient sounds may
  * play */
 #define AMBIENT_SOUND_INTERVAL 240
@@ -2613,28 +2603,36 @@ void PlayWaitingPlayersCalls(void) {
         pressed = g_ControllerStates[controllerIndex].pressedButtons;
         if (pressed & U_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_UP, SOUND_FULL_SCALE, g_Players[i].soundPan);
+              CHARACTER_SOUND_CALL_OUT_UP, SOUND_FULL_SCALE,
+              g_Players[i].soundPan);
         } else if (pressed & D_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_DOWN, SOUND_FULL_SCALE, g_Players[i].soundPan);
+              CHARACTER_SOUND_CALL_OUT_DOWN, SOUND_FULL_SCALE,
+              g_Players[i].soundPan);
         } else if (pressed & L_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_LEFT, SOUND_FULL_SCALE, g_Players[i].soundPan);
+              CHARACTER_SOUND_CALL_OUT_LEFT, SOUND_FULL_SCALE,
+              g_Players[i].soundPan);
         } else if (pressed & R_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_RIGHT, SOUND_FULL_SCALE, g_Players[i].soundPan);
+              CHARACTER_SOUND_CALL_OUT_RIGHT, SOUND_FULL_SCALE,
+              g_Players[i].soundPan);
         } else if (pressed & U_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_C_UP, SOUND_FULL_SCALE, g_Players[i].soundPan);
+              CHARACTER_SOUND_CALL_OUT_C_UP, SOUND_FULL_SCALE,
+              g_Players[i].soundPan);
         } else if (pressed & D_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_C_DOWN, SOUND_FULL_SCALE, g_Players[i].soundPan);
+              CHARACTER_SOUND_CALL_OUT_C_DOWN, SOUND_FULL_SCALE,
+              g_Players[i].soundPan);
         } else if (pressed & L_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_C_LEFT, SOUND_FULL_SCALE, g_Players[i].soundPan);
+              CHARACTER_SOUND_CALL_OUT_C_LEFT, SOUND_FULL_SCALE,
+              g_Players[i].soundPan);
         } else if (pressed & R_CBUTTONS) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
-              CALL_OUT_SOUND_C_RIGHT, SOUND_FULL_SCALE, g_Players[i].soundPan);
+              CHARACTER_SOUND_CALL_OUT_C_RIGHT, SOUND_FULL_SCALE,
+              g_Players[i].soundPan);
         }
       }
     }

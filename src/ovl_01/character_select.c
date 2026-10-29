@@ -518,8 +518,6 @@ s32 func_80209BE0_ovl_01(void) {
 
 /* The chosen character's voice plays on its player's channel */
 #define FIRST_CHARACTER_SOUND_CHANNEL 4
-#define CHOSEN_VOICE 24
-#define OTHER_CHOSEN_VOICE 26
 
 #define MAP_CAMERA_TOP_BYTE_UNK2 2
 
@@ -915,10 +913,10 @@ s32 func_80209D50_ovl_01(
 
     if (rand() & 1) {
       PlayCharacterSound(character, channel - FIRST_CHARACTER_SOUND_CHANNEL,
-          CHOSEN_VOICE, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
+          CHARACTER_SOUND_CHOSEN, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
     } else {
       PlayCharacterSound(character, channel - FIRST_CHARACTER_SOUND_CHANNEL,
-          OTHER_CHOSEN_VOICE, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
+          CHARACTER_SOUND_OTHER_CHOSEN, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
     }
 
     return 0;

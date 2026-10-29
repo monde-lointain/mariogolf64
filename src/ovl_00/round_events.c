@@ -1395,8 +1395,6 @@ void DrawMovie(Gfx** displayListHead) {
 #define CONTEST_IMAGE_STRIPS_ABOVE_CENTER 4
 /* The winner cheers as the caption meets */
 #define CONTEST_CHEER_DRAW 26
-#define CHARACTER_SOUND_LONGEST_DRIVE 16
-#define CHARACTER_SOUND_NEAREST_PIN 18
 /* The face appears and vanishes over these frames, counted from
  * CONTEST_MEET_DRAW */
 #define WINNER_FIRST_FRAME 1

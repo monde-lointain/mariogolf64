@@ -1552,7 +1552,6 @@ void UpdateCharacterResultsNotice(void) {
   ((NOTICE_SHINE_SIZE << 10) / NOTICE_CHARACTER_SHINE_HEIGHT)
 #define NOTICE_CHARACTER_VOICE_FRAME 14
 #define NOTICE_CHARACTER_VOICE_SLOT 1
-#define NOTICE_CHARACTER_VOICE 20
 
 /* The notice that a character has been beaten: their nameplate, face and title
  * pop open, then a shine sweeps the title */
@@ -1678,7 +1677,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
       PlayCharacterSound(f_PortraitCharacterIndex, NOTICE_CHARACTER_VOICE_SLOT,
-          NOTICE_CHARACTER_VOICE, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
+          CHARACTER_SOUND_NOTICE, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
     }
 
     if (f_NoticeTime == NOTICE_SHINE_START) {
@@ -2151,7 +2150,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawResultsBanner);
 #define TOURNAMENT_STEP_WAITING 10
 #define TOURNAMENT_STEP_SHOWN 11
 #define NEW_BEST_SCORE_SOUND_CHANNEL 3
-#define CHARACTER_SOUND_WIN 0x1C
 #define WIN_SOUND_PAN 32
 
 /*

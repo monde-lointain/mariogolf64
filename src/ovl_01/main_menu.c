@@ -1933,8 +1933,6 @@ void func_801F75EC_ovl_01(void) {
  * func_801F7660 moves the character cursor past the characters marked as taken,
  * and plays the voice of the one chosen. Nothing reads arg0.
  */
-#define CHOSEN_CHARACTER_VOICE 24
-
 s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
   if (D_8022BE28_ovl_01 != 0) {
     while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
@@ -1987,7 +1985,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
   } else if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
     if ((g_MenuPressedButtons & (A_BUTTON | R_TRIG)) &&
         D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 0) {
-      PlayCharacterSound(D_801323A0.unk2, 0, CHOSEN_CHARACTER_VOICE,
+      PlayCharacterSound(D_801323A0.unk2, 0, CHARACTER_SOUND_CHOSEN,
           MENU_VOLUME_SOFT, SOUND_FULL_SCALE);
       D_8022BE2C_ovl_01 = 1;
       SetAnimationSpeed(0, 1.0f);

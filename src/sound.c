@@ -36,7 +36,6 @@
 #define ECHOING_SOUND_COUNT 34
 
 /* Character sounds, which play after a delay set for each character */
-#define CHARACTER_SOUND_KIND_COUNT 7
 #define QUEUED_CHARACTER_SOUND_COUNT 4
 #define MAX_CHARACTER_SOUND_DELAY 60
 
@@ -112,7 +111,10 @@ static QueuedCharacterSound
 };
 /* The index in each character's sound table of each kind of sound */
 static u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT] = {
-    32, 30, 6, 8, 10, 12, 14};
+    CHARACTER_SOUND_FULL_SHOT, CHARACTER_SOUND_EXCELLENT,
+    CHARACTER_SOUND_CALL_OUT_RIGHT, CHARACTER_SOUND_CALL_OUT_C_UP,
+    CHARACTER_SOUND_CALL_OUT_C_DOWN, CHARACTER_SOUND_CALL_OUT_C_LEFT,
+    CHARACTER_SOUND_CALL_OUT_C_RIGHT};
 static s32 f_DelayEditorCharacter = 0;
 static s32 f_DelayEditorKind = 0;
 static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};

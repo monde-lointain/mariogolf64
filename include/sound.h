@@ -149,6 +149,56 @@ enum Song {
 /* libmus scales a song's own tempo by SetSongTempo's value over this */
 #define NORMAL_SONG_TEMPO 0x80
 
+/*
+ * Where each sound starts in a character's table of sound ID and volume
+ * pairs. The call-outs are what other players' buttons make their characters
+ * say during a shot; five of them are also the onlookers' reactions that
+ * QueueCharacterSound plays.
+ */
+enum CharacterSound {
+  CHARACTER_SOUND_CALL_OUT_UP = 0,
+  CHARACTER_SOUND_CALL_OUT_DOWN = 2,
+  CHARACTER_SOUND_CALL_OUT_LEFT = 4,
+  /* Also CHARACTER_SOUND_KIND_GREAT's sound */
+  CHARACTER_SOUND_CALL_OUT_RIGHT = 6,
+  /* Also CHARACTER_SOUND_KIND_UNK3's sound */
+  CHARACTER_SOUND_CALL_OUT_C_UP = 8,
+  /* Also CHARACTER_SOUND_KIND_OUT_OF_COURSE's sound */
+  CHARACTER_SOUND_CALL_OUT_C_DOWN = 10,
+  /* Also CHARACTER_SOUND_KIND_TROUBLE's sound */
+  CHARACTER_SOUND_CALL_OUT_C_LEFT = 12,
+  /* Also CHARACTER_SOUND_KIND_BUNKER's sound */
+  CHARACTER_SOUND_CALL_OUT_C_RIGHT = 14,
+  CHARACTER_SOUND_LONGEST_DRIVE = 16,
+  CHARACTER_SOUND_NEAREST_PIN = 18,
+  CHARACTER_SOUND_NOTICE = 20, /* As an unlock notice's portrait appears */
+  CHARACTER_SOUND_CHOSEN = 24,
+  /* The character select screen plays this or CHARACTER_SOUND_CHOSEN */
+  CHARACTER_SOUND_OTHER_CHOSEN = 26,
+  CHARACTER_SOUND_WIN = 28,
+  CHARACTER_SOUND_EXCELLENT = 30,
+  CHARACTER_SOUND_FULL_SHOT = 32
+};
+
+/*
+ * The other players' reactions to a shot that QueueCharacterSound plays, each
+ * after a delay set for the kind and character
+ */
+enum CharacterSoundKind {
+  CHARACTER_SOUND_KIND_FULL_SHOT,
+  CHARACTER_SOUND_KIND_EXCELLENT, /* Also a flag shot */
+  CHARACTER_SOUND_KIND_GREAT, /* Also a chip-in */
+  CHARACTER_SOUND_KIND_UNK3,
+  CHARACTER_SOUND_KIND_OUT_OF_COURSE,
+  /*
+   * A landing in a water hazard, out of bounds or out of course, and a step
+   * of the flight when unk2E42 is set
+   */
+  CHARACTER_SOUND_KIND_TROUBLE,
+  CHARACTER_SOUND_KIND_BUNKER, /* Also a landing in deep rough */
+  CHARACTER_SOUND_KIND_COUNT
+};
+
 /* The audio channel for the next sound effect, alternating between two */
 extern s32 g_NextSoundChannel;
 

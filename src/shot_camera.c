@@ -1014,7 +1014,7 @@ void PlayFlightSounds(s32 step) {
 
   f_PassedPathFlags |= g_SimulatedShot.pathFlags[step];
   if (step == FULL_SHOT_REACTION_STEP && RateShotLength() == SHOT_LENGTH_FULL) {
-    QueueOnlookerSounds(0);
+    QueueOnlookerSounds(CHARACTER_SOUND_KIND_FULL_SHOT);
   }
 
   if (step == SHOT_RESULT_STEP) {
@@ -1022,7 +1022,7 @@ void PlayFlightSounds(s32 step) {
         !g_GameState.isMiniGolf) {
       PlaySound(FLIGHT_SOUND_OUT_OF_COURSE, FLIGHT_SOUND_CHANNEL_UNK3,
           SOUND_FULL_SCALE);
-      QueueOnlookerSounds(4);
+      QueueOnlookerSounds(CHARACTER_SOUND_KIND_OUT_OF_COURSE);
     } else if (RateShotLength() == SHOT_LENGTH_FULL) {
       PlaySoundWithEffects(FLIGHT_SOUND_FULL_SHOT, FLIGHT_SOUND_CHANNEL_UNK3,
           SOUND_FULL_SCALE, FULL_SHOT_REVERB,
@@ -1036,8 +1036,9 @@ void PlayFlightSounds(s32 step) {
       PlaySound(
           FLIGHT_SOUND_UNK97, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
       if (i != g_CurrentShot.playerIndex) {
-        QueueCharacterSound((s8)g_Players[i].characterIndex, i, 5,
-            SOUND_FULL_SCALE, g_Players[i].soundPan);
+        QueueCharacterSound((s8)g_Players[i].characterIndex, i,
+            CHARACTER_SOUND_KIND_TROUBLE, SOUND_FULL_SCALE,
+            g_Players[i].soundPan);
       }
     }
   }
@@ -1117,7 +1118,7 @@ void PlayFlightSounds(s32 step) {
         StartBanner(BANNER_GREAT);
         PlaySound(FLIGHT_SOUND_CALL_GREAT, FLIGHT_SOUND_CHANNEL_UNK3,
             SOUND_FULL_SCALE);
-        QueueOnlookerSounds(2);
+        QueueOnlookerSounds(CHARACTER_SOUND_KIND_GREAT);
         f_PendingResultSound = RESULT_SOUND_UNK2;
       } else if (g_HoleSetup.par - 2 ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
@@ -1126,7 +1127,7 @@ void PlayFlightSounds(s32 step) {
           StartBanner(BANNER_EXCELLENT);
           PlaySound(FLIGHT_SOUND_CALL_EXCELLENT, FLIGHT_SOUND_CHANNEL_UNK3,
               SOUND_FULL_SCALE);
-          QueueOnlookerSounds(1);
+          QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
           f_PendingResultSound = RESULT_SOUND_UNK1;
         } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
             g_SimulatedShot.unk2E0C) {
@@ -1165,7 +1166,7 @@ void PlayFlightSounds(s32 step) {
       StartBanner(BANNER_FLAG_SHOT);
       PlaySound(FLIGHT_SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_UNK3,
           SOUND_FULL_SCALE);
-      QueueOnlookerSounds(1);
+      QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
       f_EndReaction = END_REACTION_ONLOOKERS;
       f_PendingResultSound = RESULT_SOUND_UNK2;
@@ -1179,7 +1180,7 @@ void PlayFlightSounds(s32 step) {
       StartBanner(BANNER_CHIP_IN);
       PlaySound(FLIGHT_SOUND_CALL_CHIP_IN, FLIGHT_SOUND_CHANNEL_UNK3,
           SOUND_FULL_SCALE);
-      QueueOnlookerSounds(2);
+      QueueOnlookerSounds(CHARACTER_SOUND_KIND_GREAT);
       f_EndReaction = END_REACTION_ONLOOKERS;
     }
   }
@@ -1263,11 +1264,11 @@ void PlayFlightSounds(s32 step) {
       f_IsLandingSoundPlayed = TRUE;
       PlaySound(FLIGHT_SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
           SOUND_FULL_SCALE);
-      QueueOnlookerSounds(6);
+      QueueOnlookerSounds(CHARACTER_SOUND_KIND_BUNKER);
     } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_DEEP_ROUGH) {
       PlaySound(FLIGHT_SOUND_DEEP_ROUGH_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
           SOUND_FULL_SCALE);
-      QueueOnlookerSounds(6);
+      QueueOnlookerSounds(CHARACTER_SOUND_KIND_BUNKER);
     } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WASTE_AREA) {
       PlaySound(FLIGHT_SOUND_WASTE_AREA_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
           SOUND_FULL_SCALE);
@@ -1277,7 +1278,7 @@ void PlayFlightSounds(s32 step) {
       f_IsLandingSoundPlayed = TRUE;
       PlaySound(FLIGHT_SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
           SOUND_FULL_SCALE);
-      QueueOnlookerSounds(5);
+      QueueOnlookerSounds(CHARACTER_SOUND_KIND_TROUBLE);
     }
   }
 }
