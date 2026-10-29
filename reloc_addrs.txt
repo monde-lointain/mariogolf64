@@ -29,7 +29,7 @@ rom:0xFA930 reloc:MIPS_HI16 symbol:D_80230100_ovl_01 addend:0x4
 rom:0xFA938 reloc:MIPS_LO16 symbol:D_80230100_ovl_01 addend:0x4
 rom:0xFA9A4 reloc:MIPS_HI16 symbol:D_80230100_ovl_01 addend:0x4
 rom:0xFA9AC reloc:MIPS_LO16 symbol:D_80230100_ovl_01 addend:0x4
-// func_80209D50_ovl_01 reads D_8022FF1C_ovl_01[1] to [3]; name the table, not its words
+// UpdateCharacterSelect reads D_8022FF1C_ovl_01[1] to [3]; name the table, not its words
 rom:0xF4BB0 reloc:MIPS_HI16 symbol:D_8022FF1C_ovl_01 addend:0x4
 rom:0xF4BB4 reloc:MIPS_LO16 symbol:D_8022FF1C_ovl_01 addend:0x4
 rom:0xF4BB8 reloc:MIPS_HI16 symbol:D_8022FF1C_ovl_01 addend:0x8

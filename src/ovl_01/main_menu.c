@@ -404,7 +404,7 @@ void DrawNarrowMenuBoard(Gfx** displayListHead);
 void DrawLargeMenuBanner(Gfx** displayListHead);
 void DrawMenuBanner(Gfx** displayListHead);
 void DrawMenuTitleScreen(Gfx** displayListHead);
-void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
+void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer);
 void DrawCourseStats(Gfx** displayListHead);
 void DrawBestTimes(Gfx** displayListHead);
 void DrawCharacterTable(Gfx** displayListHead);
@@ -1000,15 +1000,15 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_CHARACTER_SELECT:
-      func_80209D50_ovl_01(0, g_ChosenPlayerCount, FALSE);
+      UpdateCharacterSelect(0, g_ChosenPlayerCount, FALSE);
       break;
 
     case MENU_SCREEN_UNK24:
-      func_80209D50_ovl_01(0, 1, FALSE);
+      UpdateCharacterSelect(0, 1, FALSE);
       break;
 
     case MENU_SCREEN_UNK16:
-      func_80209D50_ovl_01(1, 2, TRUE);
+      UpdateCharacterSelect(1, 2, TRUE);
       break;
 
     case MENU_SCREEN_SAVED_GAMES:
@@ -3658,10 +3658,10 @@ void DrawMenuScreen(Gfx** displayListHead) {
       break;
     case MENU_SCREEN_CHARACTER_SELECT:
     case MENU_SCREEN_UNK24:
-      func_8020B590_ovl_01(&gfx, 0);
+      DrawCharacterSelect(&gfx, 0);
       break;
     case MENU_SCREEN_UNK16:
-      func_8020B590_ovl_01(&gfx, 1);
+      DrawCharacterSelect(&gfx, 1);
       break;
     case MENU_SCREEN_SAVED_GAMES:
       DrawSavedGames(&gfx);

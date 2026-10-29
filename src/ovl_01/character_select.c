@@ -91,7 +91,7 @@ enum GridMove {
 #define LEFTY_ICON_LEFT 18
 #define LEFTY_ICON_OFFSET (BUTTON_ICON_WIDTH * BUTTON_ICON_HEIGHT / 2)
 
-/* What func_8020B590 writes below the board */
+/* What DrawCharacterSelect writes below the board */
 #define MESSAGE_CHOOSE_PLAYER_CHARACTER 0x12
 #define MESSAGE_CHOOSE_CHARACTER 0x14
 #define MESSAGE_FIRST_CHARACTER_NAME 0xA9
@@ -151,8 +151,8 @@ static s8 D_8022FF08_ovl_01 = FALSE;
 static s8 D_8022FF09_ovl_01 = NO_PALETTE;
 /* Read by no routine */
 static s32 D_8022FF0C_ovl_01[4] = {-1, -1, -1, -1};
-/* The Game Boy row's slots, which func_80209500 saves here and func_80209D50
- * puts back */
+/* The Game Boy row's slots, which func_80209500 saves here and
+ * UpdateCharacterSelect puts back */
 static s32 D_8022FF1C_ovl_01[GAME_BOY_CHARACTER_COUNT] = {
     EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT};
 static s32 D_8022FF2C_ovl_01[CHARACTER_SELECT_IMAGE_KIND_COUNT] = {
@@ -552,7 +552,7 @@ s32 GetClubTournamentCourse(void);
  * soon as it loads them, and schedules the face's reload differently.
  */
 #ifdef NON_MATCHING
-s32 func_80209D50_ovl_01(
+s32 UpdateCharacterSelect(
     s32 firstPlayerIndex, s32 playerCount, Boolean canChooseMarked) {
   EncodedAsset asset;
   AssetFile file;
@@ -1158,7 +1158,7 @@ s32 func_80209D50_ovl_01(
   return 0;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209D50_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", UpdateCharacterSelect);
 #endif
 
 void func_8020B2C4_ovl_01(void* buffer, s16 bufferKind) {
@@ -1272,7 +1272,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B438_ovl_01);
  * number before the field offset.
  */
 #ifdef NON_MATCHING
-void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
+void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   Gfx* gfx = *displayListHead;
   s32 playerNumber;
   s16 column;
@@ -1377,7 +1377,7 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B590_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawCharacterSelect);
 #endif
 
 /* func_8020BA08 draws each grid cell's 32 by 32 face, its row and column 40
