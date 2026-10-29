@@ -22,6 +22,14 @@
 /* Past func_80217B88's presets, so that it clears the values instead */
 #define MENU_UNKE_PRESET_NONE 10
 
+/* What unk18 holds once the C buttons choose the holes to play */
+enum HolesChoice {
+  HOLES_CHOICE_UNK0,
+  HOLES_CHOICE_FRONT_NINE,
+  HOLES_CHOICE_BACK_NINE,
+  HOLES_CHOICE_ALL
+};
+
 /* What the menus keep between visits, such as the last choices made */
 typedef struct MenuMemory {
   /* 0x00 */ s8

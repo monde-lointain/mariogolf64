@@ -291,10 +291,6 @@ extern s8 D_801B5634;
 #define MINI_GOLF_TURN_TO_NEXT 2
 #define MINI_GOLF_RECORD_SLIDE 45
 #define MINI_GOLF_RECORD_SLIDE_STEP 9
-/* What D_801323A0.unk18 holds once the C buttons choose the holes to play */
-#define HOLES_CHOICE_FRONT_NINE 1
-#define HOLES_CHOICE_BACK_NINE 2
-#define HOLES_CHOICE_ALL 3
 /* D_8022BE88's value once the popup opened with C-up has finished */
 #define MENU_PHASE_UNK2 2
 
