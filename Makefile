@@ -196,6 +196,10 @@ endif
 	{ echo '# 1 "$<"'; $(ICONV) $<; } > $(BUILD_DIR)/$*.sjis.c
 	$(CC) -c $(CFLAGS) -I$(dir $<) $(INCLUDES) $(DEFINES) -o $@ $(BUILD_DIR)/$*.sjis.c
 
+# main_bss.c defines libmus's bss objects too, whose types only its sources
+# declare
+$(BUILD_DIR)/src/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src
+
 # KMC GCC reads VR4300MUL from the environment to work around the VR4300
 # multiplication bug, as ultralib's build does
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c

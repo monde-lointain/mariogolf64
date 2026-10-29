@@ -556,7 +556,7 @@ segments:
       - { type: .bss, vram: 0x800FAA00, name: ../lib/ultralib/src/io/siacs }
       - { type: .bss, vram: 0x800FAA10, name: ../lib/ultralib/src/io/vimgr }
       - { type: .bss, vram: 0x800FBC30, name: ../lib/ultralib/src/io/motor }
-      - { type: bss, vram: 0x800FBD30, name: bss_800FBD30 }
+      - { type: .bss, vram: 0x800FBD30, name: main_bss }
 
   - name: ovl_00
     type: code
