@@ -2009,7 +2009,7 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
   f_ShotPreviewDotScroll += SHOT_PREVIEW_SCROLL_STEP;
   for (step = 0; step < f_ShotPreviewStepCount; step++) {
     isMiniGolf = &g_GameState.isMiniGolf;
-    if (*isMiniGolf && !simulation.unk94) {
+    if (*isMiniGolf && !simulation.bounceCount) {
       break;
     }
 
@@ -2042,7 +2042,7 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
     }
 
     guMtxF2L(dash, &D_802271A0_ovl_00[g_DrawBufferIndex][step]);
-    if (!*isMiniGolf && simulation.unk94) {
+    if (!*isMiniGolf && simulation.bounceCount) {
       break;
     }
   }
@@ -2052,7 +2052,7 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
     f_ShownShotPreviewPointCount = 1;
   }
 
-  if (simulation.unk94) {
+  if (simulation.bounceCount) {
     f_HasShotPreviewEnded = TRUE;
     f_ShownShotPreviewPointCount = step + 1;
   } else {

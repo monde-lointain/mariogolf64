@@ -788,7 +788,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
     if (contact == STEP_FLAG_BILLBOARD_HIT &&
         simulation->state == BALL_STATE_FLYING) {
-      simulation->unk94++;
+      simulation->bounceCount++;
       simulation->spinSpeed /= 2;
       simulation->lastBounceStep = simulation->stepCount;
       simulation->sideSpin /= 2;
@@ -902,7 +902,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       f32 push;
       f32 keep;
 
-      simulation->unk94++;
+      simulation->bounceCount++;
       GetTrianglePlane(&triangle, &plane);
       simulation->position[AXIS_X] =
           startX + (fraction * simulation->velocity[AXIS_X]);
@@ -915,8 +915,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         simulation->surface = SURFACE_FAIRWAY;
       } else {
         simulation->surface = SURFACE_WATER_HAZARD;
-        if (simulation->unk94 == 1) {
-          simulation->unkA7 = simulation->surface;
+        if (simulation->bounceCount == 1) {
+          simulation->firstBounceSurface = simulation->surface;
         }
 
         if (simulation->surface == SURFACE_GREEN ||
@@ -1030,7 +1030,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       f32 spin;
       f32 restitution;
 
-      simulation->unk94++;
+      simulation->bounceCount++;
       GetTrianglePlane(&triangle, &plane);
       GetLength3D(simulation->velocity[AXIS_X], simulation->velocity[AXIS_Y],
           simulation->velocity[AXIS_Z]);
@@ -1046,8 +1046,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       } else {
         simulation->surface = GetSurface(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        if (simulation->unk94 == 1) {
-          simulation->unkA7 = simulation->surface;
+        if (simulation->bounceCount == 1) {
+          simulation->firstBounceSurface = simulation->surface;
         }
 
         if (simulation->surface == SURFACE_GREEN ||
@@ -1685,7 +1685,7 @@ s32 func_8020A488_ovl_05(
   simulation->dropPosition[AXIS_Z] = simulation->position[AXIS_Z];
   simulation->startPosition[AXIS_Z] = simulation->dropPosition[AXIS_Z];
   simulation->unkA2 = simulation->surface;
-  simulation->unkA7 = simulation->unkA2;
+  simulation->firstBounceSurface = simulation->unkA2;
   simulation->hasEnteredWater = 0;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     simulation->playerIndex = shot->playerIndex;
@@ -1769,7 +1769,7 @@ s32 func_8020A488_ovl_05(
     simulation->state = BALL_STATE_FLYING;
   }
 
-  simulation->unk94 = 0;
+  simulation->bounceCount = 0;
   simulation->stepCount = 0;
   simulation->lastBounceStep = -2;
   simulation->isHoledOut = 0;

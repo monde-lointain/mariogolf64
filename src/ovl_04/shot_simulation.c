@@ -28,7 +28,7 @@ void SimulateShot(ShotLaunch* shot) {
   Boolean hasGroundHit;
   Boolean hasUnk40Flag;
   s32 flags;
-  s32 unkA7Kind;
+  s32 firstBounceKind;
   u8 isUnk2E41;
 
   simulation = &simulationState;
@@ -149,13 +149,13 @@ void SimulateShot(ShotLaunch* shot) {
 
   g_SimulatedShot.unk2E41 = isUnk2E41;
   osSyncPrintf("\nWaterCut%d\n", isUnk2E41);
-  unkA7Kind = GetSurfaceInfo(simulation->unkA7)->kind;
-  if ((unkA7Kind == SURFACE_KIND_OUT_OF_BOUNDS) |
-      (unkA7Kind == SURFACE_KIND_OUT_OF_COURSE)) {
+  firstBounceKind = GetSurfaceInfo(simulation->firstBounceSurface)->kind;
+  if ((firstBounceKind == SURFACE_KIND_OUT_OF_BOUNDS) |
+      (firstBounceKind == SURFACE_KIND_OUT_OF_COURSE)) {
     g_SimulatedShot.unk2E00 = TRUE;
   } else {
     g_SimulatedShot.unk2E00 = FALSE;
   }
 
-  g_SimulatedShot.unk2E18 = simulation->unkA7;
+  g_SimulatedShot.unk2E18 = simulation->firstBounceSurface;
 }

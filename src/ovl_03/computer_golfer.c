@@ -2228,7 +2228,7 @@ s32 StepTrialShot(void) {
   s32 ballState;
   s32 stepFlags;
   s32 velocityY;
-  s32 unk94;
+  s32 bounceCount;
   s32 targetMiss;
   s32 heightMiss;
   SurfaceInfo* surfaceInfo;
@@ -2292,7 +2292,7 @@ s32 StepTrialShot(void) {
   if (ballState) {
     do {
       velocityY = f_TrialSimulation.velocity[AXIS_Y];
-      unk94 = f_TrialSimulation.unk94;
+      bounceCount = f_TrialSimulation.bounceCount;
       f_TrialStepCount++;
       flags = StepBallSimulation(&f_TrialSimulation);
       stepFlags = flags;
@@ -2306,7 +2306,7 @@ s32 StepTrialShot(void) {
         break;
       }
 
-      if (unk94 == 0 && (flags & 3) && velocityY < 0 &&
+      if (bounceCount == 0 && (flags & 3) && velocityY < 0 &&
           ballState == BALL_STATE_FLYING) {
         if (f_HasBestEvaluation || f_TrialLevel < 2) {
           break;

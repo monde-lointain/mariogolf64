@@ -779,7 +779,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
                 pinVelocity, &pinFraction, simulation->hasHitFlag, simulation);
         if (pinHit && !(simulation->unkB1 & 8)) {
-          simulation->unk94++;
+          simulation->bounceCount++;
           simulation->position[AXIS_X] =
               startX + (pinFraction * velocity[AXIS_X]);
           simulation->position[AXIS_Y] =
@@ -1156,7 +1156,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
     if (contact == STEP_FLAG_BILLBOARD_HIT &&
         simulation->state == BALL_STATE_FLYING) {
-      simulation->unk94++;
+      simulation->bounceCount++;
       simulation->position[AXIS_X] = startX + (fraction * velocity[AXIS_X]);
       simulation->position[AXIS_Y] = startY + (fraction * velocity[AXIS_Y]);
       simulation->position[AXIS_Z] = startZ + (fraction * velocity[AXIS_Z]);
@@ -1308,7 +1308,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       f32 push;
       f32 keep;
 
-      simulation->unk94++;
+      simulation->bounceCount++;
       GetTrianglePlane(&triangle, &plane);
       simulation->position[AXIS_X] =
           startX + (fraction * (velocity[AXIS_X] * TRIANGLE_HIT_STEP_SHARE));
@@ -1321,8 +1321,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->surface = SURFACE_FAIRWAY;
       } else {
         simulation->surface = SURFACE_WATER_HAZARD;
-        if (simulation->unk94 == 1) {
-          simulation->unkA7 = simulation->surface;
+        if (simulation->bounceCount == 1) {
+          simulation->firstBounceSurface = simulation->surface;
         }
 
         if (simulation->surface == SURFACE_GREEN ||
@@ -1475,7 +1475,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       f32 spin;
       f32 restitution;
 
-      simulation->unk94++;
+      simulation->bounceCount++;
       speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
           (velocity[AXIS_Y] * velocity[AXIS_Y]) +
           (velocity[AXIS_Z] * velocity[AXIS_Z]));
@@ -1547,8 +1547,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       } else {
         simulation->surface = GetSurface(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        if (simulation->unk94 == 1) {
-          simulation->unkA7 = simulation->surface;
+        if (simulation->bounceCount == 1) {
+          simulation->firstBounceSurface = simulation->surface;
         }
       }
 
@@ -2436,7 +2436,7 @@ s32 LaunchBallSimulation(
   simulation->dropPosition[AXIS_Z] = simulation->position[AXIS_Z];
   simulation->startPosition[AXIS_Z] = simulation->dropPosition[AXIS_Z];
   simulation->unkA2 = surface;
-  simulation->unkA7 = surface;
+  simulation->firstBounceSurface = surface;
   simulation->hasEnteredWater = 0;
   simulation->unkA6 = 0;
   simulation->unkB4 = 0;
@@ -2627,7 +2627,7 @@ s32 LaunchBallSimulation(
     simulation->state = BALL_STATE_FLYING;
   }
 
-  simulation->unk94 = 0;
+  simulation->bounceCount = 0;
   simulation->stepCount = 0;
   simulation->lastBounceStep = -2;
   simulation->isHoledOut = 0;

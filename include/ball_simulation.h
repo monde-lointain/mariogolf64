@@ -172,7 +172,8 @@ typedef struct BallSimulation {
   /* 0x88 */ f32 windVelocityZ;
   /* 0x8C */ s32 state; /* A BALL_STATE_* value */
   /* 0x90 */ s32 purpose;
-  /* 0x94 */ s32 unk94;
+  /* Hits on the ground, hole triangles and billboards */
+  /* 0x94 */ s32 bounceCount;
   /* 0x98 */ s32 stepCount;
   /* The step of the ball's last bounce, or -2 before any */
   /* 0x9C */ s32 lastBounceStep;
@@ -183,7 +184,9 @@ typedef struct BallSimulation {
   /* 0xA4 */ u8 unkA4; /* A SURFACE_* value */
   /* 0xA5 */ s8 playerIndex;
   /* 0xA6 */ s8 unkA6;
-  /* 0xA7 */ s8 unkA7;
+  /* The SURFACE_* of the first bounce, if on the ground; at first, where
+     the ball started */
+  /* 0xA7 */ s8 firstBounceSurface;
   /* 0xA8 */ s8 unkA8[UNKA8_COUNT];
   /* Keeps the flag from being hit twice */
   /* 0xB0 */ s8 hasHitFlag;
