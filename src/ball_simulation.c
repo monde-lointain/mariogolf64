@@ -309,6 +309,15 @@ void ResetBallSimulations(void) {
 #define WATER_STOP_DEPTH 0xB400
 /* The water keeps this much of the ball's velocity each frame */
 #define WATER_DRAG 0.7f
+
+/*
+ * 30 cm: off mini golf, a rolling ball that finds the ground this far above
+ * it goes back to where it was and takes off with this much of its velocity
+ */
+#define BURIED_BALL_DEPTH 0x1200
+#define BURIED_BALL_SPEED_SCALE 0.1f
+/* 2 cm: a rolling ball this far above the ground takes off */
+#define TAKE_OFF_HEIGHT 307.2f
 /*
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
@@ -1799,18 +1808,18 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         groundHeight = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         if (!g_GameState.isMiniGolf &&
-            groundHeight < simulation->position[AXIS_Y] - 0x1200) {
+            groundHeight < simulation->position[AXIS_Y] - BURIED_BALL_DEPTH) {
           simulation->position[AXIS_X] = startX;
           simulation->position[AXIS_Y] = startY;
           simulation->position[AXIS_Z] = startZ;
-          velocity[AXIS_X] *= 0.1f;
-          velocity[AXIS_Y] *= 0.1f;
-          velocity[AXIS_Z] *= 0.1f;
+          velocity[AXIS_X] *= BURIED_BALL_SPEED_SCALE;
+          velocity[AXIS_Y] *= BURIED_BALL_SPEED_SCALE;
+          velocity[AXIS_Z] *= BURIED_BALL_SPEED_SCALE;
           simulation->state = BALL_STATE_FLYING;
           goto TAKE_OFF;
         }
 
-        if (simulation->position[AXIS_Y] + 307.2f < groundHeight) {
+        if (simulation->position[AXIS_Y] + TAKE_OFF_HEIGHT < groundHeight) {
           simulation->state = BALL_STATE_FLYING;
 
 TAKE_OFF:
