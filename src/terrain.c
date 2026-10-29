@@ -586,12 +586,12 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     }
   }
 
-  column = x / 16384;
-  row = z / 16384;
-  fractionX = x & 0x3FFF;
-  stepColumn = (fractionX < 0x2000) ? -1 : 1;
-  fractionZ = z & 0x3FFF;
-  stepRow = (fractionZ < 0x2000) ? -1 : 1;
+  column = x / GROUND_TEXEL_SIZE;
+  row = z / GROUND_TEXEL_SIZE;
+  fractionX = x & (GROUND_TEXEL_SIZE - 1);
+  stepColumn = (fractionX < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
+  fractionZ = z & (GROUND_TEXEL_SIZE - 1);
+  stepRow = (fractionZ < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
   for (i = 0; i < 4; i++) {
     switch (GetTerrainCode((i & 1) ? column + stepColumn : column,
         (i & 2) ? row + stepRow : row)) {
@@ -671,31 +671,37 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     return surface;
   }
 
-  distanceX = Abs(0x2000 - fractionX);
-  distanceZ = Abs(0x2000 - fractionZ);
+  distanceX = Abs(GROUND_TEXEL_SIZE / 2 - fractionX);
+  distanceZ = Abs(GROUND_TEXEL_SIZE / 2 - fractionZ);
   if (((stepColumn + 1) ^ (stepRow + 1)) == 0) {
     weights[0] = weights[0] *
-        (3.7252903e-9f *
-            ((f32)(0x4000 - distanceX) * (f32)(0x4000 - distanceZ)));
+        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+            ((f32)(GROUND_TEXEL_SIZE - distanceX) *
+                (f32)(GROUND_TEXEL_SIZE - distanceZ)));
     weights[1] = weights[1] *
-        (3.7252903e-9f * ((f32)distanceX * (f32)(0x4000 - distanceZ)));
-    weights[2] = weights[2] * (6.1035156e-5f * (f32)distanceZ);
+        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+            ((f32)distanceX * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
+    weights[2] = weights[2] * ((1.0f / GROUND_TEXEL_SIZE) * (f32)distanceZ);
   } else if (distanceX < distanceZ) {
     surfaces[1] = surfaces[3];
     weights[0] = weights[0] *
-        (3.7252903e-9f *
-            ((f32)(0x4000 - distanceZ) * (f32)(0x4000 - distanceX)));
+        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+            ((f32)(GROUND_TEXEL_SIZE - distanceZ) *
+                (f32)(GROUND_TEXEL_SIZE - distanceX)));
     weights[2] = weights[2] *
-        (3.7252903e-9f * ((f32)distanceZ * (f32)(0x4000 - distanceX)));
-    weights[1] = weights[3] * (f32)distanceX * 6.1035156e-5f;
+        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+            ((f32)distanceZ * (f32)(GROUND_TEXEL_SIZE - distanceX)));
+    weights[1] = weights[3] * (f32)distanceX * (1.0f / GROUND_TEXEL_SIZE);
   } else {
     surfaces[2] = surfaces[3];
     weights[0] = weights[0] *
-        (3.7252903e-9f *
-            ((f32)(0x4000 - distanceX) * (f32)(0x4000 - distanceZ)));
+        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+            ((f32)(GROUND_TEXEL_SIZE - distanceX) *
+                (f32)(GROUND_TEXEL_SIZE - distanceZ)));
     weights[1] = weights[1] *
-        (3.7252903e-9f * ((f32)distanceX * (f32)(0x4000 - distanceZ)));
-    weights[2] = weights[3] * (f32)distanceZ * 6.1035156e-5f;
+        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+            ((f32)distanceX * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
+    weights[2] = weights[3] * (f32)distanceZ * (1.0f / GROUND_TEXEL_SIZE);
   }
 
   if (surfaces[0] == surfaces[1]) {
@@ -751,8 +757,8 @@ u16 GetMapColor(s32 x, s32 z) {
     return 0;
   }
 
-  column = x / 16384;
-  row = z / 16384;
+  column = x / GROUND_TEXEL_SIZE;
+  row = z / GROUND_TEXEL_SIZE;
   return MAP_TEXEL(column, row) | 1;
 }
 

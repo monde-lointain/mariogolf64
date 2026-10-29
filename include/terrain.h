@@ -43,6 +43,7 @@
 #define GROUND_TILE_TEXEL_ROW_COUNT 34
 #define GROUND_TILE_TEXEL_ROW_LENGTH 36
 #define GROUND_TEXEL_SHIFT 14
+#define GROUND_TEXEL_SIZE (1 << GROUND_TEXEL_SHIFT)
 
 typedef struct TerrainColor {
   /* 0x0 */ s8 red;
