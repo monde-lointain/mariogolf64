@@ -281,6 +281,21 @@ static void ResetBallSimulations(void) {
 #define OPENING_ROLL_JUMP_SPEED KilometersPerHour(10)
 #define OPENING_MIN_SLOW_ROLL_SLOPE_SCALE 0.0625f
 #define OPENING_SLOW_ROLL_SLOPE_SCALE_PER_SPEED 0.0030517578f
+/*
+ * Its flight: the lift, like the curve, is weighted by how near the air
+ * speed is to the spin's, at this scale, and falls off by this much per
+ * ratio away from it; it is the spin times OPENING_LIFT_SPIN_SCALE times
+ * OPENING_LIFT_PER_SPIN, at most 1/OPENING_MAX_LIFT_SPEED_RATIO of the air
+ * speed. The spin decays more slowly than main's, and the wind grows with
+ * the height half as fast.
+ */
+#define OPENING_SPIN_SPEED_SCALE 8.0f
+#define OPENING_SPIN_MISMATCH_FALLOFF 0.8f
+#define OPENING_LIFT_SPIN_SCALE 10
+#define OPENING_LIFT_PER_SPIN 0.0061035156f
+#define OPENING_MAX_LIFT_SPEED_RATIO 200.0f
+#define OPENING_SPIN_DECAY 0.995f
+#define OPENING_WIND_SCALE_PER_HEIGHT (1.0f / (160 * UNITS_PER_YARD))
 
 /*
  * The opening calls FindBillboardHit with a ninth argument, the simulation,
@@ -1551,29 +1566,34 @@ ROLLED:
           simulation->velocity[AXIS_Z] - simulation->windVelocityZ;
       airSpeed =
           GetLength3D(relative[AXIS_X], relative[AXIS_Y], relative[AXIS_Z]);
-      drag = (sqrtf(airSpeed * 0.0140613755f) * 0.0011f) + 0.004f;
+      drag =
+          (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) +
+          MIN_AIR_DRAG;
       sideSpin = simulation->sideSpin;
-      sideSpinMagnitude = AbsoluteValueExpression(sideSpin * 8.0f);
+      sideSpinMagnitude =
+          AbsoluteValueExpression(sideSpin * SIDE_SPIN_SPEED_SCALE);
       horizontalSpeed = GetLength2D(relative[AXIS_X], relative[AXIS_Z]);
       ratio = 0.0f;
       if (sideSpinMagnitude != 0.0f) {
         ratio = horizontalSpeed / sideSpinMagnitude;
       }
 
-      weight = 1.0f - (AbsoluteValueExpression(ratio - 1.0f) * 0.8f);
+      weight = 1.0f -
+          (AbsoluteValueExpression(ratio - 1.0f) * SIDE_SPIN_MISMATCH_FALLOFF);
       if (weight < 0.0f) {
         weight = 0.0f;
       }
 
-      curve = sideSpin * (weight * 0.038146973f);
-      if (horizontalSpeed < AbsoluteValueExpression(curve) * 100.0f) {
-        curve = horizontalSpeed * 0.01f;
+      curve = sideSpin * (weight * CURVE_PER_SIDE_SPIN);
+      if (horizontalSpeed <
+          AbsoluteValueExpression(curve) * MAX_CURVE_SPEED_RATIO) {
+        curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
         if (simulation->sideSpin < 0) {
           curve = -curve;
         }
       }
 
-      if (horizontalSpeed > KilometersPerHour(10)) {
+      if (horizontalSpeed > MIN_CURVE_SPEED) {
         f32 scale = (1.0f / horizontalSpeed) * curve;
 
         simulation->velocity[AXIS_X] =
@@ -1582,25 +1602,30 @@ ROLLED:
             simulation->velocity[AXIS_Z] + (relative[AXIS_X] * scale);
       }
 
-      simulation->sideSpin = simulation->sideSpin * 0.995f;
-      spinMagnitude = AbsoluteValueExpression(simulation->spinSpeed * 8.0f);
+      simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;
+      spinMagnitude = AbsoluteValueExpression(
+          simulation->spinSpeed * OPENING_SPIN_SPEED_SCALE);
       ratio = 0.0f;
       if (spinMagnitude != 0.0f) {
         ratio = airSpeed / spinMagnitude;
       }
 
-      weight = 1.0f - (AbsoluteValueExpression(ratio - 1.0f) * 0.8f);
+      weight = 1.0f -
+          (AbsoluteValueExpression(ratio - 1.0f) *
+              OPENING_SPIN_MISMATCH_FALLOFF);
       if (weight < 0.0f) {
         weight = 0.0f;
       }
 
-      lift = (simulation->spinSpeed * 10) * (weight * 0.0061035156f);
-      if (simulation->spinSpeed != 0 && airSpeed > KilometersPerHour(1)) {
+      lift = (simulation->spinSpeed * OPENING_LIFT_SPIN_SCALE) *
+          (weight * OPENING_LIFT_PER_SPIN);
+      if (simulation->spinSpeed != 0 && airSpeed > MIN_LIFT_AIR_SPEED) {
         guMtxXFMF(simulation->liftRotation, relative[AXIS_X], relative[AXIS_Y],
             relative[AXIS_Z], &turned[AXIS_X], &turned[AXIS_Y],
             &turned[AXIS_Z]);
-        if (airSpeed < AbsoluteValueExpression(lift) * 200.0f) {
-          lift = airSpeed * 0.005f;
+        if (airSpeed <
+            AbsoluteValueExpression(lift) * OPENING_MAX_LIFT_SPEED_RATIO) {
+          lift = airSpeed * (1.0f / OPENING_MAX_LIFT_SPEED_RATIO);
         }
 
         ScaleToLength(lift, &turned[AXIS_X], &turned[AXIS_Y], &turned[AXIS_Z]);
@@ -1608,17 +1633,17 @@ ROLLED:
             simulation->velocity[AXIS_X] + turned[AXIS_X];
         simulation->velocity[AXIS_Y] =
             simulation->velocity[AXIS_Y] + turned[AXIS_Y];
-        simulation->spinSpeed = simulation->spinSpeed * 0.995f;
+        simulation->spinSpeed = simulation->spinSpeed * OPENING_SPIN_DECAY;
         simulation->velocity[AXIS_Z] =
             simulation->velocity[AXIS_Z] + turned[AXIS_Z];
       }
 
       height = simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y];
       if (height <= 0.0f) {
-        windX = simulation->windVelocityX * 0.5f;
-        windZ = simulation->windVelocityZ * 0.5f;
+        windX = simulation->windVelocityX * LOW_WIND_SCALE;
+        windZ = simulation->windVelocityZ * LOW_WIND_SCALE;
       } else {
-        f32 scale = (height * 0.00000044499237f) + 0.5f;
+        f32 scale = (height * OPENING_WIND_SCALE_PER_HEIGHT) + LOW_WIND_SCALE;
 
         windX = simulation->windVelocityX * scale;
         windZ = simulation->windVelocityZ * scale;
@@ -1669,26 +1694,29 @@ SETTLE:
         floor = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         if (state == BALL_STATE_IN_CUP || simulation->isHoledOut) {
-          floor += 0x1200;
+          floor += IN_CUP_FLOOR_DEPTH;
         } else if (state == BALL_STATE_ROLLING) {
           s32 cupOffsetX =
               simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
 
-          if (Abs(cupOffsetX) < 0xC00) {
+          if (Abs(cupOffsetX) < CUP_FLOOR_SEARCH_SPAN) {
             s32 cupOffsetZ =
                 simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
 
-            if (Abs(cupOffsetZ) < 0xC00) {
+            if (Abs(cupOffsetZ) < CUP_FLOOR_SEARCH_SPAN) {
               f32 cupDistance = (s32)IntLength2D(cupOffsetX, cupOffsetZ);
 
-              if (cupDistance < 614.4f) {
-                floor += 0xC00;
-              } else if (cupDistance < 1843.2001f) {
-                f32 rimDistance = 1843.2001f - cupDistance;
-                f32 rest = 377487.38f - (rimDistance * rimDistance);
+              if (cupDistance < CUP_DROP_RADIUS) {
+                floor += CUP_DEPTH;
+              } else if (cupDistance < CUP_RIM_OUTER_RADIUS) {
+                f32 rimDistance = CUP_RIM_OUTER_RADIUS - cupDistance;
+                f32 rest = (CUP_RIM_CURVE_RADIUS * CUP_RIM_CURVE_RADIUS) -
+                    (rimDistance * rimDistance);
 
                 if (rest > 0.0f) {
-                  floor = floor + ((614.4f - sqrtf(rest)) * 0.5f);
+                  floor = floor +
+                      ((CUP_RIM_CURVE_RADIUS - sqrtf(rest)) *
+                          CUP_RIM_SINK_SCALE);
                 }
               }
             }
@@ -1700,8 +1728,8 @@ SETTLE:
         simulation->position[AXIS_Y] = floor;
       }
 
-      if (simulation->position[AXIS_Y] < -0x465000) {
-        simulation->position[AXIS_Y] = -0x465000;
+      if (simulation->position[AXIS_Y] < -MAX_BALL_ALTITUDE) {
+        simulation->position[AXIS_Y] = -MAX_BALL_ALTITUDE;
       }
 
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
