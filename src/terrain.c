@@ -24,6 +24,7 @@
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
+#include "screen.h"
 #include "sound.h"
 #include "surface.h"
 #include "variables.h"
@@ -276,9 +277,9 @@ INCLUDE_ASM("asm/nonmatchings/terrain", GetTerrainCode);
 s32 FindNearestTerrainColor(s32 color) {
   s32 nearestDistance = 1000000;
   s32 nearestIndex = 0;
-  s32 colorRed = (color >> 11) & 0x1F;
-  s32 colorGreen = (color >> 6) & 0x1F;
-  s32 colorBlue = (color >> 1) & 0x1F;
+  s32 colorRed = (color >> RGBA16_RED_SHIFT) & RGBA16_CHANNEL_MASK;
+  s32 colorGreen = (color >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
+  s32 colorBlue = (color >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
   s32 i;
   s32 red;
   s32 green;
@@ -344,9 +345,9 @@ s32 GetTerrainCodeColor(s32 code) {
       break;
   }
 
-  return (f_TerrainColors[colorIndex].red << 11) |
-      (f_TerrainColors[colorIndex].green << 6) |
-      (f_TerrainColors[colorIndex].blue << 1) |
+  return (f_TerrainColors[colorIndex].red << RGBA16_RED_SHIFT) |
+      (f_TerrainColors[colorIndex].green << RGBA16_GREEN_SHIFT) |
+      (f_TerrainColors[colorIndex].blue << RGBA16_BLUE_SHIFT) |
       f_TerrainColors[colorIndex].alpha;
 }
 
@@ -818,21 +819,23 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
   }
 
   if (code >= 0) {
-    groundRed = groundColor >> 11;
-    groundGreen = (groundColor >> 6) & 0x1F;
+    groundRed = groundColor >> RGBA16_RED_SHIFT;
+    groundGreen = (groundColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
     surfaceColor = g_TerrainCodeColors[code];
 
     /* The original assigns the surface's blue to the ground's and never sets
      * surfaceBlue. */
-    groundBlue = (surfaceColor >> 1) & 0x1F;
-    surfaceRed = surfaceColor >> 11;
-    surfaceGreen = (surfaceColor >> 6) & 0x1F;
+    groundBlue = (surfaceColor >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
+    surfaceRed = surfaceColor >> RGBA16_RED_SHIFT;
+    surfaceGreen = (surfaceColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
     osSyncPrintf("c1(%d,%d,%d) c2(%d,%d,%d)\n", groundRed, groundGreen,
         groundBlue, surfaceRed, surfaceGreen, surfaceBlue);
     groundRed = (groundRed + surfaceRed) >> 1;
     groundGreen = (groundGreen + surfaceGreen) >> 1;
     groundBlue = (groundBlue + surfaceBlue) / 2;
-    return (groundRed << 11) | (groundGreen << 6) | (groundBlue << 1) | 1;
+    return (groundRed << RGBA16_RED_SHIFT) |
+        (groundGreen << RGBA16_GREEN_SHIFT) |
+        (groundBlue << RGBA16_BLUE_SHIFT) | 1;
   }
 
   return groundColor;

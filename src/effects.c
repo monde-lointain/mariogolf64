@@ -1807,9 +1807,11 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
       }
 
       gDPPipeSync(gfx++);
-      red = (color >> 11) << 3;
-      green = ((color >> 6) & 0x1F) << 3;
-      blue = ((color >> 1) & 0x1F) << 3;
+      red = (color >> RGBA16_RED_SHIFT) << RGBA16_CHANNEL_WIDEN_SHIFT;
+      green = ((color >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK)
+          << RGBA16_CHANNEL_WIDEN_SHIFT;
+      blue = ((color >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK)
+          << RGBA16_CHANNEL_WIDEN_SHIFT;
       if (effect->kind == EFFECT_KIND_UNK0 ||
           effect->kind == EFFECT_KIND_UNK1) {
         red += PUFF_LIGHTENING;

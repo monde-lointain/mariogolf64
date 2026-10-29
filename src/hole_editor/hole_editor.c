@@ -340,13 +340,6 @@ enum TriangleEdit {
 #define SCREEN_CAPTURE_SIZE \
   (CAPTURE_HEADER_SIZE + \
       (SCREEN_WIDTH * SCREEN_HEIGHT * CAPTURE_BYTES_PER_PIXEL))
-/* Where the 5-bit channels sit in an RGBA16 pixel, and the shift that widens
- * one to 8 bits */
-#define RGBA16_RED_SHIFT 11
-#define RGBA16_GREEN_SHIFT 6
-#define RGBA16_BLUE_SHIFT 1
-#define RGBA16_CHANNEL_MASK 0x1F
-#define RGBA16_CHANNEL_WIDEN_SHIFT 3
 /* Adds to a cached KSEG0 address to read the same memory uncached through KSEG1
  */
 #define KSEG1_OFFSET 0x20000000

@@ -24,6 +24,14 @@
 #define ScreenPointWord(x, y) (((x) << 16) + (y))
 #define TexcoordWord(s, t) (((s) << 16) + (t))
 
+/* Where the 5-bit channels sit in an RGBA16 pixel, and the shift that widens
+ * one to 8 bits */
+#define RGBA16_RED_SHIFT 11
+#define RGBA16_GREEN_SHIFT 6
+#define RGBA16_BLUE_SHIFT 1
+#define RGBA16_CHANNEL_MASK 0x1F
+#define RGBA16_CHANNEL_WIDEN_SHIFT 3
+
 /* SetScreenEffect's effects */
 enum ScreenEffect {
   SCREEN_EFFECT_SPIN, /* Spins the saved frame away */
