@@ -385,6 +385,28 @@ void ResetBallSimulations(void) {
  * steps after its last bounce stops
  */
 #define OFF_GREEN_STOP_STEPS 90
+
+/*
+ * Landing. The surface's friction is scaled up with the landing speed, from
+ * a base, and varied by up to a tenth with noise. On the green and fairway
+ * the share of the ball's speed along the ground that it loses comes from
+ * the friction, within limits; elsewhere it is fixed.
+ */
+#define LANDING_NOISE_SCALE 0.1f
+#define LANDING_FRICTION_BASE 0.3f
+#define GREEN_LANDING_FRICTION_BASE 0.6f
+#define GREEN_LANDING_FRICTION_PER_SPEED (2.4f / KilometersPerHour(100))
+#define MAX_GREEN_LANDING_FRICTION 0.8f
+#define MIN_GREEN_LANDING_FRICTION 0.05f
+#define FAIRWAY_LANDING_FRICTION_PER_SPEED (1.6f / KilometersPerHour(100))
+#define OTHER_LANDING_FRICTION_PER_SPEED (1.0f / KilometersPerHour(100))
+#define MAX_GRASS_LANDING_SPIN 0.01f
+#define MIN_GRASS_LANDING_SPIN -0.2f
+#define BUNKER_LANDING_SPIN 0.7f
+#define ROUGH_LANDING_SPIN 0.4f
+#define OTHER_LANDING_SPIN 0.2f
+/* The most of its speed into the ground that a landing ball bounces back */
+#define MAX_RESTITUTION 1.5f
 /*
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
@@ -1574,16 +1596,17 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
           friction *=
-              ((fabsf(impactSpeed + (impactSpeed * GetPositionNoise() * 0.1f)) *
-                   0.0001687365f) +
-                  0.6f);
-          if (friction > 0.8f) {
-            friction = 0.8f;
+              ((fabsf(impactSpeed +
+                    (impactSpeed * GetPositionNoise() * LANDING_NOISE_SCALE)) *
+                   GREEN_LANDING_FRICTION_PER_SPEED) +
+                  GREEN_LANDING_FRICTION_BASE);
+          if (friction > MAX_GREEN_LANDING_FRICTION) {
+            friction = MAX_GREEN_LANDING_FRICTION;
           }
 
-          friction -= GetStepNoise() * 0.1f;
-          if (friction < 0.05f) {
-            friction = 0.05f;
+          friction -= GetStepNoise() * LANDING_NOISE_SCALE;
+          if (friction < MIN_GREEN_LANDING_FRICTION) {
+            friction = MIN_GREEN_LANDING_FRICTION;
           }
 
           spin = 1.0f -
@@ -1591,12 +1614,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                    (impactSpeed * (1.0f - friction) * impactSpeed *
                        (1.0f - friction))) /
                   (speed * slide));
-          if (spin > 0.01f) {
-            spin = 0.01f;
+          if (spin > MAX_GRASS_LANDING_SPIN) {
+            spin = MAX_GRASS_LANDING_SPIN;
           }
 
-          if (spin < -0.2f) {
-            spin = -0.2f;
+          if (spin < MIN_GRASS_LANDING_SPIN) {
+            spin = MIN_GRASS_LANDING_SPIN;
           }
 
           break;
@@ -1605,9 +1628,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_FAIRWAY_POOR_LIE:
         case SURFACE_KIND_SEMI_ROUGH:
           friction *=
-              ((fabsf(impactSpeed + (impactSpeed * GetPositionNoise() * 0.1f)) *
-                   0.000112491f) +
-                  0.3f);
+              ((fabsf(impactSpeed +
+                    (impactSpeed * GetPositionNoise() * LANDING_NOISE_SCALE)) *
+                   FAIRWAY_LANDING_FRICTION_PER_SPEED) +
+                  LANDING_FRICTION_BASE);
           if (friction > 1.0f) {
             friction = 1.0f;
           }
@@ -1617,36 +1641,36 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                    (impactSpeed * (1.0f - friction) * impactSpeed *
                        (1.0f - friction))) /
                   (speed * slide));
-          if (spin > 0.01f) {
-            spin = 0.01f;
+          if (spin > MAX_GRASS_LANDING_SPIN) {
+            spin = MAX_GRASS_LANDING_SPIN;
           }
 
-          if (spin < -0.2f) {
-            spin = -0.2f;
+          if (spin < MIN_GRASS_LANDING_SPIN) {
+            spin = MIN_GRASS_LANDING_SPIN;
           }
 
           break;
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
         case SURFACE_KIND_BUNKER_POOR_LIE:
-          friction *=
-              ((fabsf(impactSpeed) * (1.0f / KilometersPerHour(100))) + 0.3f);
-          spin = 0.7f;
-          friction += friction * GetPositionNoise() * 0.1f;
+          friction *= ((fabsf(impactSpeed) * OTHER_LANDING_FRICTION_PER_SPEED) +
+              LANDING_FRICTION_BASE);
+          spin = BUNKER_LANDING_SPIN;
+          friction += friction * GetPositionNoise() * LANDING_NOISE_SCALE;
           break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROUGH_POOR_LIE:
         case 5:
-          friction *=
-              ((fabsf(impactSpeed) * (1.0f / KilometersPerHour(100))) + 0.3f);
-          spin = 0.4f;
-          friction += friction * GetPositionNoise() * 0.1f;
+          friction *= ((fabsf(impactSpeed) * OTHER_LANDING_FRICTION_PER_SPEED) +
+              LANDING_FRICTION_BASE);
+          spin = ROUGH_LANDING_SPIN;
+          friction += friction * GetPositionNoise() * LANDING_NOISE_SCALE;
           break;
         default:
-          friction *=
-              ((fabsf(impactSpeed) * (1.0f / KilometersPerHour(100))) + 0.3f);
-          spin = 0.2f;
-          friction += friction * GetPositionNoise() * 0.1f;
+          friction *= ((fabsf(impactSpeed) * OTHER_LANDING_FRICTION_PER_SPEED) +
+              LANDING_FRICTION_BASE);
+          spin = OTHER_LANDING_SPIN;
+          friction += friction * GetPositionNoise() * LANDING_NOISE_SCALE;
           break;
       }
 
@@ -1657,8 +1681,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       restitution = 1.0f - friction;
       if (restitution < 0.0f) {
         restitution = 0.0f;
-      } else if (restitution > 1.5f) {
-        restitution = 1.5f;
+      } else if (restitution > MAX_RESTITUTION) {
+        restitution = MAX_RESTITUTION;
       }
 
       if (simulation->state != BALL_STATE_ROLLING &&
