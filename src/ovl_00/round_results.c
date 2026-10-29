@@ -1076,9 +1076,9 @@ void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
               LARGE_PALETTED_TEXELS_OFFSET),
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0, 0,
       0, 0);
-  DrawTextureRect(&gfx, x * 4, y * 4, (x + PLACE_ICON_SIZE) * 4,
-      (y + PLACE_ICON_SIZE) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
+      QuarterPixels(x + PLACE_ICON_SIZE), QuarterPixels(y + PLACE_ICON_SIZE),
+      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 
@@ -1141,10 +1141,11 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
                 (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
         G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0,
         0, 0, 0);
-    DrawTextureRect(&gfx, (x + PLACE_DIGIT_WIDTH) * 4, y * 4,
-        (x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE) * 4,
-        (y + PLACE_ICON_SIZE) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(x + PLACE_DIGIT_WIDTH),
+        QuarterPixels(y),
+        QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
+        QuarterPixels(y + PLACE_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     if (rank >= RANK_FOURTH) {
       sprintf(g_PrintBuffer, f_PlaceNumberFormat, rank + 1);
       LoadSmallPalette(&gfx, 0, ImageBody(D_80225708_ovl_00));
@@ -1162,11 +1163,12 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
             digit * PLACE_DIGIT_WIDTH + PLACE_DIGIT_WIDTH - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        DrawTextureRect(&gfx, (x + digitX) * 4, (y + PLACE_DIGIT_Y) * 4,
-            (x + digitX + PLACE_DIGIT_WIDTH) * 4,
-            (y + PLACE_DIGIT_Y + PLACE_DIGIT_WIDTH) * 4, G_TX_RENDERTILE, 0,
-            TexelCoordinate(digit * PLACE_DIGIT_WIDTH), TEXEL_STEP_ONE,
-            TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, QuarterPixels(x + digitX),
+            QuarterPixels(y + PLACE_DIGIT_Y),
+            QuarterPixels(x + digitX + PLACE_DIGIT_WIDTH),
+            QuarterPixels(y + PLACE_DIGIT_Y + PLACE_DIGIT_WIDTH),
+            G_TX_RENDERTILE, 0, TexelCoordinate(digit * PLACE_DIGIT_WIDTH),
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
     } else {
       DrawPlaceIcon(&gfx, x, y, rank);
@@ -1183,10 +1185,11 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         i != RANK_BANNER_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx, image + offset, G_IM_FMT_CI, G_IM_SIZ_8b,
           RANK_BANNER_WIDTH, RANK_BANNER_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&gfx, (x + RANK_BANNER_X_OFFSET) * 4, stripY * 4,
-          (x + RANK_BANNER_X_OFFSET + RANK_BANNER_WIDTH) * 4,
-          (stripY + RANK_BANNER_STRIP_HEIGHT) * 4, G_TX_RENDERTILE, 0, 0,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      DrawTextureRect(&gfx, QuarterPixels(x + RANK_BANNER_X_OFFSET),
+          QuarterPixels(stripY),
+          QuarterPixels(x + RANK_BANNER_X_OFFSET + RANK_BANNER_WIDTH),
+          QuarterPixels(stripY + RANK_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
+          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       stripY += RANK_BANNER_STRIP_HEIGHT;
       offset += RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT;
     }
@@ -1199,10 +1202,11 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
                 (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
         G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0,
         0, 0, 0);
-    DrawTextureRect(&gfx, (x + PLACE_DIGIT_WIDTH) * 4, y * 4,
-        (x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE) * 4,
-        (y + PLACE_ICON_SIZE) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(x + PLACE_DIGIT_WIDTH),
+        QuarterPixels(y),
+        QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
+        QuarterPixels(y + PLACE_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     DrawPlaceIcon(&gfx, x, y, rank);
   }
 
@@ -1224,9 +1228,10 @@ void DrawResultsLabel(Gfx** displayListHead, s32 x, s32 y, s32 label) {
       RESULTS_LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
-  DrawTextureRect(&gfx, x * 4, y * 4, (x + RESULTS_LABEL_WIDTH) * 4,
-      (y + RESULTS_LABEL_HEIGHT) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
+      QuarterPixels(x + RESULTS_LABEL_WIDTH),
+      QuarterPixels(y + RESULTS_LABEL_HEIGHT), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 
@@ -1242,10 +1247,10 @@ void DrawPlayerPortrait(
   LoadTextureBlock(&gfx, f_PlayerPortraitImages[playerIndex], G_IM_FMT_CI,
       G_IM_SIZ_8b, PORTRAIT_SIZE, PORTRAIT_SIZE, 0, G_TX_MIRROR, G_TX_NOMIRROR,
       5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  DrawTextureRect(&gfx, x * 4, y * 4, (x + PORTRAIT_SIZE) * 4,
-      (y + PORTRAIT_SIZE) * 4, G_TX_RENDERTILE,
-      isMirrored * TexelCoordinate(PORTRAIT_SIZE), 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
+      QuarterPixels(x + PORTRAIT_SIZE), QuarterPixels(y + PORTRAIT_SIZE),
+      G_TX_RENDERTILE, isMirrored * TexelCoordinate(PORTRAIT_SIZE), 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 
@@ -1374,9 +1379,10 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     top = (i * size) + NOTICE_COURSE_CENTER_Y - size;
     centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
-    DrawTextureRect(&gfx, (centerX - size) * 4, (top + f_NoticeUnk54) * 4,
-        (size + centerX) * 4, (top + size + f_NoticeUnk54) * 4, G_TX_RENDERTILE,
-        0, 0, step, step);
+    DrawTextureRect(&gfx, QuarterPixels(centerX - size),
+        QuarterPixels(top + f_NoticeUnk54), QuarterPixels(size + centerX),
+        QuarterPixels(top + size + f_NoticeUnk54), G_TX_RENDERTILE, 0, 0, step,
+        step);
   }
 
   LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
@@ -1389,10 +1395,11 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     top = lift + NOTICE_TITLE_TOP + (i * NOTICE_TITLE_STRIP_HEIGHT);
-    DrawTextureRect(&gfx, (f_NoticeSwing + NOTICE_TITLE_LEFT) * 4,
-        (top + f_NoticeUnk54) * 4,
-        (f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
-        (top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4,
+    DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
+        QuarterPixels(top + f_NoticeUnk54),
+        QuarterPixels(
+            f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
+        QuarterPixels(top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -1416,10 +1423,11 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     top = lift + NOTICE_TITLE_TOP + (i * NOTICE_TITLE_STRIP_HEIGHT);
-    DrawTextureRect(&gfx, (f_NoticeSwing + NOTICE_TITLE_LEFT) * 4,
-        (top + f_NoticeUnk54) * 4,
-        (f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
-        (top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4,
+    DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
+        QuarterPixels(top + f_NoticeUnk54),
+        QuarterPixels(
+            f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
+        QuarterPixels(top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -1469,10 +1477,12 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   lift -= (s32)NOTICE_TITLE_LIFT;
   if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
     if (f_NoticeFrameCount < NOTICE_SHINE_END) {
-      DrawTextureRect(&gfx, (f_NoticeSwing + NOTICE_TITLE_LEFT) * 4,
-          (lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP)) * 4,
-          (f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
-          (lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE)) * 4,
+      DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
+          QuarterPixels(lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP)),
+          QuarterPixels(
+              f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
+          QuarterPixels(
+              lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE)),
           G_TX_RENDERTILE,
           TexelCoordinate(NOTICE_SHINE_SIZE -
               ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)),
@@ -1583,9 +1593,9 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     step = ((NOTICE_NAMEPLATE_SIZE / 2) << 10) / size;
     centerX = f_NoticeLift + NOTICE_CENTER_X;
     centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
-    DrawTextureRect(&gfx, (centerX - size) * 4, (centerY - size) * 4,
-        (size + centerX) * 4, (size + centerY) * 4, G_TX_RENDERTILE, 0, 0, step,
-        step);
+    DrawTextureRect(&gfx, QuarterPixels(centerX - size),
+        QuarterPixels(centerY - size), QuarterPixels(size + centerX),
+        QuarterPixels(size + centerY), G_TX_RENDERTILE, 0, 0, step, step);
   }
 
   size = pop * NOTICE_PORTRAIT_POP_SIZE;
@@ -1596,9 +1606,9 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     step = ((NOTICE_PORTRAIT_SIZE / 2) << 10) / size;
     centerX = f_NoticeLift + NOTICE_CENTER_X;
     centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
-    DrawTextureRect(&gfx, (centerX - size) * 4, (centerY - size) * 4,
-        (size + centerX) * 4, (size + centerY) * 4, G_TX_RENDERTILE, 0, 0, step,
-        step);
+    DrawTextureRect(&gfx, QuarterPixels(centerX - size),
+        QuarterPixels(centerY - size), QuarterPixels(size + centerX),
+        QuarterPixels(size + centerY), G_TX_RENDERTILE, 0, 0, step, step);
   }
 
   gDPPipeSync(gfx++);
@@ -1616,10 +1626,11 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
       top = NOTICE_CHARACTER_TITLE_TOP -
           (height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + (i * height);
       /* This pass mirrors the slide, unlike the depth pass and the shine */
-      DrawTextureRect(&gfx, (NOTICE_CENTER_X - (f_NoticeLift + width)) * 4,
-          (top + f_NoticeUnk6C) * 4,
-          (width - (f_NoticeLift - NOTICE_CENTER_X)) * 4,
-          (top + height + f_NoticeUnk6C) * 4,
+      DrawTextureRect(&gfx,
+          QuarterPixels(NOTICE_CENTER_X - (f_NoticeLift + width)),
+          QuarterPixels(top + f_NoticeUnk6C),
+          QuarterPixels(width - (f_NoticeLift - NOTICE_CENTER_X)),
+          QuarterPixels(top + height + f_NoticeUnk6C),
 
           G_TX_RENDERTILE, 0, 0,
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
@@ -1646,9 +1657,9 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
       top = NOTICE_CHARACTER_TITLE_TOP -
           (height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + (i * height);
       centerX = f_NoticeLift + NOTICE_CENTER_X;
-      DrawTextureRect(&gfx, (centerX - width) * 4, (top + f_NoticeUnk6C) * 4,
-          (width + centerX) * 4, (top + height + f_NoticeUnk6C) * 4,
-          G_TX_RENDERTILE, 0, 0,
+      DrawTextureRect(&gfx, QuarterPixels(centerX - width),
+          QuarterPixels(top + f_NoticeUnk6C), QuarterPixels(width + centerX),
+          QuarterPixels(top + height + f_NoticeUnk6C), G_TX_RENDERTILE, 0, 0,
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
     }
@@ -1684,8 +1695,9 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
 
     if (f_NoticeTime >= NOTICE_SHINE_START) {
       if (f_NoticeTime < NOTICE_SHINE_END) {
-        DrawTextureRect(&gfx, (f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT) * 4,
-            (f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP) * 4,
+        DrawTextureRect(&gfx,
+            QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT),
+            QuarterPixels(f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP),
             (f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT +
                 NOTICE_CHARACTER_TITLE_WIDTH) *
                 4,
@@ -1958,18 +1970,19 @@ void DrawResultsBanner(Gfx** displayListHead) {
         G_IM_FMT_I, BANNER_CLOUD_WIDTH, BANNER_CLOUD_HEIGHT, 0, G_TX_CLAMP,
         G_TX_CLAMP, 0, 0, 0, 0);
     if (f_BannerKind == BANNER_KIND_POINTS) {
-      DrawTextureRect(&gfx, (f_BannerX + BANNER_CLOUD_LEFT) * 4,
+      DrawTextureRect(&gfx, QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
           (f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT)) *
               4,
-          (f_BannerX + BANNER_CLOUD_RIGHT) * 4,
+          QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
           (f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT) +
               TALL_BANNER_CLOUD_HEIGHT) *
               4,
           G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TALL_BANNER_CLOUD_DTDY);
     } else {
-      DrawTextureRect(&gfx, (f_BannerX + BANNER_CLOUD_LEFT) * 4,
-          (f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT)) * 4,
-          (f_BannerX + BANNER_CLOUD_RIGHT) * 4,
+      DrawTextureRect(&gfx, QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
+          QuarterPixels(
+              f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT)),
+          QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
           (f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT) +
               BANNER_CLOUD_HEIGHT) *
               4,
@@ -2020,7 +2033,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
             (TROPHY_CENTER_X + f_BannerX -
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                 4,
-            (top + TROPHY_BOTTOM) * 4,
+            QuarterPixels(top + TROPHY_BOTTOM),
             (TROPHY_CENTER_X + f_BannerX +
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                 4,
@@ -2057,7 +2070,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
             (TROPHY_CENTER_X + f_BannerX -
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                 4,
-            (top + TROPHY_BOTTOM) * 4,
+            QuarterPixels(top + TROPHY_BOTTOM),
             (TROPHY_CENTER_X + f_BannerX +
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                 4,
@@ -2097,7 +2110,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
               (TROPHY_CENTER_X + f_BannerX -
                   (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                   4,
-              (TROPHY_BOTTOM - top) * 4,
+              QuarterPixels(TROPHY_BOTTOM - top),
               (TROPHY_CENTER_X + f_BannerX +
                   (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                   4,
@@ -3289,9 +3302,10 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
                 CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
         CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-    DrawTextureRect(&gfx, (f_ResultsSlide + 28) * 4,
-        ((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + (f_ResultsTop + 104)) * 4,
-        (f_ResultsSlide + 28 + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH) * 4,
+    DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 28),
+        QuarterPixels(
+            (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + (f_ResultsTop + 104)),
+        QuarterPixels(f_ResultsSlide + 28 + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH),
         ((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) +
             (f_ResultsTop + 104 + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT)) *
             4,
@@ -3309,9 +3323,9 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
               (i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_STRIP_WIDTH,
           NINTENDO_BADGE_STRIP_HEIGHT, 0, G_TX_MIRROR, 0, 0, 0, 0, 0);
-      DrawTextureRect(&gfx, (f_ResultsSlide + 88) * 4,
-          (f_ResultsTop + 54 + (i * NINTENDO_BADGE_STRIP_HEIGHT)) * 4,
-          (f_ResultsSlide + 88 + NINTENDO_BADGE_STRIP_WIDTH) * 4,
+      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 88),
+          QuarterPixels(f_ResultsTop + 54 + (i * NINTENDO_BADGE_STRIP_HEIGHT)),
+          QuarterPixels(f_ResultsSlide + 88 + NINTENDO_BADGE_STRIP_WIDTH),
           (f_ResultsTop + 54 + (i * NINTENDO_BADGE_STRIP_HEIGHT) +
               NINTENDO_BADGE_STRIP_HEIGHT) *
               4,
@@ -3473,10 +3487,10 @@ void DrawRoundResults(Gfx** displayListHead) {
                   CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
           CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&gfx, (f_ResultsSlide + 16) * 4,
+      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 16),
           (f_ResultsTop + ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + 8)) *
               4,
-          (f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH) * 4,
+          QuarterPixels(f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH),
           (f_ResultsTop +
               ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + 8 +
                   CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT)) *
@@ -3490,9 +3504,9 @@ void DrawRoundResults(Gfx** displayListHead) {
               (i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH, BACKDROP_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&gfx, (f_ResultsSlide + 16) * 4,
-          ((i * BACKDROP_STRIP_HEIGHT) + 24 + f_ResultsTop) * 4,
-          (f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH) * 4,
+      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 16),
+          QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + 24 + f_ResultsTop),
+          QuarterPixels(f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH),
           ((i * BACKDROP_STRIP_HEIGHT) + 24 + BACKDROP_STRIP_HEIGHT +
               f_ResultsTop) *
               4,
@@ -3507,9 +3521,10 @@ void DrawRoundResults(Gfx** displayListHead) {
         LargeImageTexels(f_ResultsHandImage) +
             (f_HandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE),
         G_IM_FMT_CI, G_IM_SIZ_8b, HAND_SIZE, HAND_SIZE, 0, 0, 0, 0, 0, 0, 0);
-    DrawTextureRect(&gfx, (f_ResultsSlide + 272) * 4, (f_ResultsTop + 192) * 4,
-        (f_ResultsSlide + 272 + HAND_SIZE) * 4,
-        (f_ResultsTop + 192 + HAND_SIZE) * 4, G_TX_RENDERTILE, 0, 0,
+    DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 272),
+        QuarterPixels(f_ResultsTop + 192),
+        QuarterPixels(f_ResultsSlide + 272 + HAND_SIZE),
+        QuarterPixels(f_ResultsTop + 192 + HAND_SIZE), G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -3570,9 +3585,10 @@ void DrawRoundResults(Gfx** displayListHead) {
                   FINAL_RESULTS_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, FINAL_RESULTS_TITLE_WIDTH,
           FINAL_RESULTS_TITLE_LOADED_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-      gSPTextureRectangle(gfx++, (left - f_ResultsSlide) * 4,
-          (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top) * 4,
-          (right - f_ResultsSlide) * 4,
+      gSPTextureRectangle(gfx++, QuarterPixels(left - f_ResultsSlide),
+          QuarterPixels(
+              i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top),
+          QuarterPixels(right - f_ResultsSlide),
           (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight + f_ResultsTop +
               top) *
               4,

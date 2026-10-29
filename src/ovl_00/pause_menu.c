@@ -926,15 +926,15 @@ void DrawPauseMenu(Gfx** displayListHead) {
       PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, G_TX_CLAMP,
       G_TX_CLAMP, 0, 0, 0, 0);
   cloudMiddle = (labelsHeight + PAUSE_CLOUD_TOP) * 4;
-  DrawTextureRect(&gfx, PAUSE_CLOUD_LEFT * 4, PAUSE_CLOUD_TOP * 4,
-      PAUSE_CLOUD_RIGHT * 4, cloudMiddle, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  DrawTextureRect(&gfx, QuarterPixels(PAUSE_CLOUD_LEFT),
+      QuarterPixels(PAUSE_CLOUD_TOP), QuarterPixels(PAUSE_CLOUD_RIGHT),
+      cloudMiddle, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   LoadNibbleTextureBlock(&gfx,
       ImageBody(f_MenuCloudImage) + PAUSE_CLOUD_PART_SIZE, G_IM_FMT_I,
       PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-  DrawTextureRect(&gfx, PAUSE_CLOUD_LEFT * 4, cloudMiddle,
-      PAUSE_CLOUD_RIGHT * 4,
-      (labelsHeight + PAUSE_CLOUD_TOP + PAUSE_CLOUD_PART_HEIGHT) * 4,
+  DrawTextureRect(&gfx, QuarterPixels(PAUSE_CLOUD_LEFT), cloudMiddle,
+      QuarterPixels(PAUSE_CLOUD_RIGHT),
+      QuarterPixels(labelsHeight + PAUSE_CLOUD_TOP + PAUSE_CLOUD_PART_HEIGHT),
       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -1017,9 +1017,10 @@ void DrawPauseMenu(Gfx** displayListHead) {
       f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
           .kind;
   if (IsValueOptionKind(selectedKind)) {
-    DrawTextureRect(&gfx, PAUSE_TEE_X * 4,
-        ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8) * 4,
-        PAUSE_CURSOR_RIGHT * 4,
+    DrawTextureRect(&gfx, QuarterPixels(PAUSE_TEE_X),
+        QuarterPixels(
+            (f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8),
+        QuarterPixels(PAUSE_CURSOR_RIGHT),
         ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8 +
             PAUSE_CURSOR_SIZE) *
             4,
@@ -1027,9 +1028,10 @@ void DrawPauseMenu(Gfx** displayListHead) {
         PAUSE_TEES_T + (teeFrame * TexelCoordinate(PAUSE_CURSOR_SIZE)),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   } else {
-    DrawTextureRect(&gfx, (PAUSE_TEE_X - sway) * 4,
-        ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4) * 4,
-        (PAUSE_CURSOR_RIGHT - sway) * 4,
+    DrawTextureRect(&gfx, QuarterPixels(PAUSE_TEE_X - sway),
+        QuarterPixels(
+            (f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4),
+        QuarterPixels(PAUSE_CURSOR_RIGHT - sway),
         ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4 +
             PAUSE_CURSOR_SIZE) *
             4,

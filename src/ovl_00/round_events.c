@@ -3089,11 +3089,12 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   LoadTextureBlock(&gfx, ImageBody(f_MovieBuffer), G_IM_FMT_RGBA, G_IM_SIZ_16b,
       FLY_GUY_IMAGE_WIDTH, FLY_GUY_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-  DrawTextureRect(&gfx, ((s32)position.x - (FLY_GUY_IMAGE_WIDTH / 2)) * 4,
-      ((s32)position.y - (FLY_GUY_IMAGE_HEIGHT / 2)) * 4,
-      ((s32)position.x + (FLY_GUY_IMAGE_WIDTH / 2)) * 4,
-      ((s32)position.y + (FLY_GUY_IMAGE_HEIGHT / 2)) * 4, G_TX_RENDERTILE, 0, 0,
-      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  DrawTextureRect(&gfx,
+      QuarterPixels((s32)position.x - (FLY_GUY_IMAGE_WIDTH / 2)),
+      QuarterPixels((s32)position.y - (FLY_GUY_IMAGE_HEIGHT / 2)),
+      QuarterPixels((s32)position.x + (FLY_GUY_IMAGE_WIDTH / 2)),
+      QuarterPixels((s32)position.y + (FLY_GUY_IMAGE_HEIGHT / 2)),
+      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }

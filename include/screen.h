@@ -14,6 +14,8 @@
 
 /* Screen coordinates in display lists are in quarter pixels */
 #define QUARTER_PIXELS_PER_PIXEL 4
+/* A screen position in pixels, in the quarter pixels display lists take */
+#define QuarterPixels(pixels) ((pixels) * QUARTER_PIXELS_PER_PIXEL)
 
 /* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
 #define TEXEL_STEP_ONE (1 << 10)
