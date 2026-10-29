@@ -318,6 +318,15 @@ void ResetBallSimulations(void) {
 #define BURIED_BALL_SPEED_SCALE 0.1f
 /* 2 cm: a rolling ball this far above the ground takes off */
 #define TAKE_OFF_HEIGHT 307.2f
+
+/*
+ * The rolling sound's volume is its full scale at 100 km/h, times one more
+ * than the frames rolled, up to ROLL_VOLUME_RAMP_FRAMES, and no more than
+ * MAX_ROLL_VOLUME
+ */
+#define ROLL_VOLUME_PER_SPEED (SOUND_FULL_SCALE / KilometersPerHour(100))
+#define ROLL_VOLUME_RAMP_FRAMES 5
+#define MAX_ROLL_VOLUME 0x37
 /*
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
@@ -2165,15 +2174,15 @@ NEXT:
         s32 rollFrames = (u16)simulation->rollFrameCount;
         SoundVolume volume;
 
-        if (rollFrames > 5) {
-          rollFrames = 5;
+        if (rollFrames > ROLL_VOLUME_RAMP_FRAMES) {
+          rollFrames = ROLL_VOLUME_RAMP_FRAMES;
         }
 
         volume = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                      (velocity[AXIS_Z] * velocity[AXIS_Z])) *
-            0.008928973f * (rollFrames + 1);
-        if (volume > 0x37) {
-          volume = 0x37;
+            ROLL_VOLUME_PER_SPEED * (rollFrames + 1);
+        if (volume > MAX_ROLL_VOLUME) {
+          volume = MAX_ROLL_VOLUME;
         }
 
         SetSoundVolume(ROLL_SOUND_CHANNEL, volume & ~(volume >> 31));
