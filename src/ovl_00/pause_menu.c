@@ -861,8 +861,7 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
 #define PAUSE_LABEL_X 80
 #define PAUSE_LABELS_TOP 48
 #define PAUSE_LABEL_SPACING 18
-#define PAUSE_LABEL_FONT 1
-#define PAUSE_LABEL_FLAGS 0x20
+#define PAUSE_LABEL_FLAGS TEXT_FLAG_UNK20
 #define PAUSE_VALUE_X 212
 #define PAUSE_RED_WAVE_MIDDLE 95
 #define PAUSE_RED_WAVE_AMPLITUDE 95.0f
@@ -978,7 +977,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
     }
 
     SetTextSlot(PAUSE_LABEL_X, y, message + PAUSE_OPTION_MESSAGE_BASE,
-        PAUSE_LABEL_FONT, i, PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
+        TEXT_SLOT_LARGE_FONT, i, PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
     gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
     DrawLargeTextSlot(&gfx, i);
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {

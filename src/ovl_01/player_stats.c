@@ -589,7 +589,8 @@ void func_80217D20_ovl_01(void) {
     FreeAllCharacterSlots();
     g_MenuScreen = MENU_SCREEN_UNK20;
     D_802303A0_ovl_01 = 0;
-    SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+    SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
+        255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
       if (memory->unkE[index] != NO_BET) {
         g_GameState.betRates[index] = D_802304F4_ovl_01[memory->unkE[index]];
@@ -605,7 +606,8 @@ void func_80217D20_ovl_01(void) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     D_8022BE88_ovl_01 = BET_PHASE_CANCELED;
     D_802303A0_ovl_01 = 0;
-    SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+    SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
+        255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
       if (memory->unkE[index] != NO_BET) {
         g_GameState.betRates[index] = D_802304F4_ovl_01[memory->unkE[index]];
@@ -637,8 +639,8 @@ void func_80217D20_ovl_01(void) {
     }
 
     SetTextSlot(BET_HELP_X, BET_HELP_Y,
-        D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD] + BET_HELP_MESSAGE, 1,
-        0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD] + BET_HELP_MESSAGE,
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
         D_802303CC_ovl_01[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]]
                          [D_8022F8C0_ovl_01],
@@ -653,8 +655,8 @@ void func_80217D20_ovl_01(void) {
     }
 
     SetTextSlot(BET_HELP_X, BET_HELP_Y,
-        D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD] + BET_HELP_MESSAGE, 1,
-        0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD] + BET_HELP_MESSAGE,
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
         D_802303CC_ovl_01[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]]
                          [D_8022F8C0_ovl_01],
@@ -917,8 +919,8 @@ void func_8021826C_ovl_01(
   func_8021B1E0_ovl_01(
       &gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
   if (D_802303A0_ovl_01 == 0 && isSettled == TRUE) {
-    SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE, 1, 0,
-        TEXT_FLAG_TYPED, 255, 255, 255, 255);
+    SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE,
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     D_802303A0_ovl_01 = 1;
   }
 
@@ -981,7 +983,8 @@ s32 func_80219948_ovl_01(void) {
   if (D_8022BE88_ovl_01 == MENU_PHASE_CHOOSING) {
     if (g_MenuPressedButtons & A_BUTTON) {
       PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
+          0xFF, 0xFF, 0xFF, 0xFF);
       D_8023BFD0_ovl_01 = PLAYER_OPTION_SLIDE_START;
       D_802303A1_ovl_01 = 0;
       D_8022BE88_ovl_01 = MENU_PHASE_CONFIRMED;
@@ -991,7 +994,8 @@ s32 func_80219948_ovl_01(void) {
     if (g_MenuPressedButtons & B_BUTTON) {
       PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       g_MenuScreen = MENU_SCREEN_UNK22;
-      SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
+          0xFF, 0xFF, 0xFF, 0xFF);
       D_802303A1_ovl_01 = 0;
       D_8022BE88_ovl_01 = MENU_PHASE_CANCELED;
       return;
@@ -1422,8 +1426,8 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
       SetTextPaletteColor(63, 255, 63, 0);
     }
 
-    SetTextSlot(OPTION_PROMPT_X, OPTION_PROMPT_Y, OPTION_PROMPT_MESSAGE, 1, 0,
-        TEXT_FLAG_TYPED, 255, 255, 255, 255);
+    SetTextSlot(OPTION_PROMPT_X, OPTION_PROMPT_Y, OPTION_PROMPT_MESSAGE,
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     D_802303A1_ovl_01 = TRUE;
   }
 
@@ -1900,7 +1904,8 @@ void func_8021D0B8_ovl_01(void) {
         g_GameState.unk31 = 1;
         SetGameFlag(GAME_FLAG_UNK1E);
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
       }
     } else if (GetWipeKind() == WIPE_NONE || D_801B9410 != 1) {
@@ -1921,7 +1926,8 @@ void func_8021D0B8_ovl_01(void) {
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
       } else if (g_MenuRepeatButtons & U_JPAD) {
         moved = func_8021E340_ovl_01(
@@ -2152,13 +2158,13 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead) {
                 .holeIndex +
             1,
         1, 0);
-    SetTextSlot(RECORD_DETAIL_X, RECORD_DETAIL_Y, MESSAGE_RECORD_DETAIL, 1, 1,
-        0, 255, 255, 255, 255);
+    SetTextSlot(RECORD_DETAIL_X, RECORD_DETAIL_Y, MESSAGE_RECORD_DETAIL,
+        TEXT_SLOT_LARGE_FONT, 1, 0, 255, 255, 255, 255);
   }
 
   if (D_802308A0_ovl_01 == 0) {
-    SetTextSlot(NO_RECORDS_X, NO_RECORDS_Y, MESSAGE_NO_RECORDS, 1, 0,
-        TEXT_FLAG_CENTERED, 255, 255, 255, 255);
+    SetTextSlot(NO_RECORDS_X, NO_RECORDS_Y, MESSAGE_NO_RECORDS,
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_CENTERED, 255, 255, 255, 255);
   }
 
   *displayListHead = gfx;

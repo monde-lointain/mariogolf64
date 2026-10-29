@@ -21,6 +21,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "text_format.h"
 #include "variables.h"
 
 /* What OpenSaveMenu lists, and f_MenuKind */
@@ -534,11 +535,16 @@ void CloseSaveMenu(void) {
   }
 
   f_MenuKind = SAVE_MENU_CLOSED;
-  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 0, 0, 0, 0, 0, 0);
-  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 1, 0, 0, 0, 0, 0);
-  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 2, 0, 0, 0, 0, 0);
-  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 3, 0, 0, 0, 0, 0);
-  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 4, 0, 0, 0, 0, 0);
+  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, TEXT_SLOT_LARGE_FONT,
+      0, 0, 0, 0, 0, 0);
+  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, TEXT_SLOT_LARGE_FONT,
+      1, 0, 0, 0, 0, 0);
+  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, TEXT_SLOT_LARGE_FONT,
+      2, 0, 0, 0, 0, 0);
+  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, TEXT_SLOT_LARGE_FONT,
+      3, 0, 0, 0, 0, 0);
+  SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, TEXT_SLOT_LARGE_FONT,
+      4, 0, 0, 0, 0, 0);
 }
 
 /*
@@ -1690,8 +1696,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         SetUpTextDrawing(&gfx);
         SetTextSlot(rowOffsets[index] + HOLE_TEXT_LEFT,
             HOLE_TEXT_TOP + (index * REPLAY_ROW_SPACING),
-            text + RING_SHOT_TEXT_FIRST_IMAGE, 1,
-            FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF, 0xFF, 0xFF);
+            text + RING_SHOT_TEXT_FIRST_IMAGE, TEXT_SLOT_LARGE_FONT,
+            FIRST_RECORD_TEXT_SLOT + index, TEXT_FLAG_UNK20, 0xFF, 0xFF, 0xFF,
+            0xFF);
         DrawLargeTextSlot(&gfx, FIRST_RECORD_TEXT_SLOT + index);
       }
     }

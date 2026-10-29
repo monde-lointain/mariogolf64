@@ -2832,8 +2832,8 @@ void UpdateOpening(void) {
                 SOUND_FULL_SCALE);
           }
 
-          SetTextSlot(
-              CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
+          SetTextSlot(CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE,
+              TEXT_SLOT_LARGE_FONT, 0, 0, 0, 0, 0, 0);
           return;
         }
 

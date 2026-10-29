@@ -708,8 +708,8 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
 
   if (okTextShown != NO_OK_TEXT && IsMenuWindowOpen()) {
     SetTextSlot(centerX + OK_TEXT_OFFSET_X, buttonY - OK_TEXT_OFFSET_Y,
-        MESSAGE_OK, 1, OK_TEXT_SLOT, TEXT_FLAG_CENTERED, OK_TEXT_RED,
-        OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
+        MESSAGE_OK, TEXT_SLOT_LARGE_FONT, OK_TEXT_SLOT, TEXT_FLAG_CENTERED,
+        OK_TEXT_RED, OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
   }
 
   *displayListHead = gfx;
@@ -1038,8 +1038,8 @@ void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
 
   if (IsMenuWindowOpen()) {
     SetTextSlot(centerX + OK_TEXT_OFFSET_X, buttonY - OK_TEXT_OFFSET_Y,
-        MESSAGE_OK, 1, OK_TEXT_SLOT, TEXT_FLAG_CENTERED, OK_TEXT_RED,
-        OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
+        MESSAGE_OK, TEXT_SLOT_LARGE_FONT, OK_TEXT_SLOT, TEXT_FLAG_CENTERED,
+        OK_TEXT_RED, OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
   }
 
   *displayListHead = gfx;
@@ -1277,7 +1277,8 @@ void func_80228C00_ovl_01(void) {
       D_80230F40_ovl_01 = FALSE;
       D_80105DC4 = FALSE;
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+            255, 255);
       }
     }
   } else if (g_MenuRepeatButtons & U_JPAD) {
@@ -1341,7 +1342,8 @@ void func_80229278_ovl_01(void) {
 
   if (GetWipeKind() != WIPE_NONE) {
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      SetTextSlot(
+          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
     }
 
     if (GetWipeProgress() == 0) {
@@ -1365,7 +1367,8 @@ void func_80229278_ovl_01(void) {
   if (IsMenuWindowClosed()) {
     D_80230F80_ovl_01 = CLUB_CHOICE_NO;
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      SetTextSlot(
+          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
     }
 
     D_80230F70_ovl_01 = FALSE;
@@ -1414,14 +1417,16 @@ void func_80229278_ovl_01(void) {
       }
 
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+            255, 255);
       }
     } else {
       PlaySound(SOUND_READY, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       func_80228B60_ovl_01();
       CloseMenuWindow();
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+            255, 255);
       }
     }
   } else if (pressedButtons & B_BUTTON) {
@@ -1429,7 +1434,8 @@ void func_80229278_ovl_01(void) {
     D_80230F80_ovl_01 = CLUB_CHOICE_YES;
     D_80230F70_ovl_01 = FALSE;
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+      SetTextSlot(
+          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
     }
   } else if ((pressedButtons & L_JPAD) || ((u16)pressedButtons & R_JPAD)) {
     /* The cast above stops the compiler from merging the two tests, which the
@@ -1600,13 +1606,14 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
       MeasureMessage(
           GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width, &height, 0);
       SetTextSlot(CLUB_TEXT_X, CLUB_NAME_Y,
-          D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME, 1, CLUB_NAME_SLOT,
-          TEXT_FLAG_CENTERED, 95, 63, 255, 255);
+          D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME, TEXT_SLOT_LARGE_FONT,
+          CLUB_NAME_SLOT, TEXT_FLAG_CENTERED, 95, 63, 255, 255);
       SetTextSlot(CLUB_TEXT_X, CLUB_COURSE_Y,
-          GetClubTournamentCourseTitleMessage(), 1, CLUB_COURSE_SLOT,
-          TEXT_FLAG_CENTERED, 43, 255, 75, 255);
-      SetTextSlot(CLUB_TEXT_X, CLUB_MODE_Y, GetClubTournamentModeMessage(), 1,
-          CLUB_MODE_SLOT, TEXT_FLAG_CENTERED, 255, 63, 127, 255);
+          GetClubTournamentCourseTitleMessage(), TEXT_SLOT_LARGE_FONT,
+          CLUB_COURSE_SLOT, TEXT_FLAG_CENTERED, 43, 255, 75, 255);
+      SetTextSlot(CLUB_TEXT_X, CLUB_MODE_Y, GetClubTournamentModeMessage(),
+          TEXT_SLOT_LARGE_FONT, CLUB_MODE_SLOT, TEXT_FLAG_CENTERED, 255, 63,
+          127, 255);
     }
   }
 
@@ -1941,8 +1948,8 @@ void func_8022B668_ovl_01(Gfx** displayListHead) {
   if (messageOffset >= 0) {
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
-    SetTextSlot(x, CLUB_CODE_MESSAGE_Y, MESSAGE_ENTER_CODE + messageOffset, 1,
-        0, flags, 255, 255, 255, 255);
+    SetTextSlot(x, CLUB_CODE_MESSAGE_Y, MESSAGE_ENTER_CODE + messageOffset,
+        TEXT_SLOT_LARGE_FONT, 0, flags, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, 0);
   }
 

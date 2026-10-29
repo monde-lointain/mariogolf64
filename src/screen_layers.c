@@ -576,8 +576,9 @@ s32 UpdatePrompt(ControllerState* controller) {
   Prompt* prompt = &f_Prompts[f_PromptIndex];
 
   if (f_PromptState == PROMPT_STATE_CHOOSING) {
-    SetTextSlot(PROMPT_TEXT_X, PROMPT_TEXT_Y, prompt->messageId, 1,
-        PROMPT_TEXT_SLOT, 0x10, 0x5F, 0x3F, 0xFF, 0xFF);
+    SetTextSlot(PROMPT_TEXT_X, PROMPT_TEXT_Y, prompt->messageId,
+        TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT, TEXT_FLAG_CENTERED, 0x5F, 0x3F,
+        0xFF, 0xFF);
     if (controller->pressedButtons == A_BUTTON) {
       f_PromptState = PROMPT_STATE_CHOSEN;
       if (prompt->results[f_PromptChoice] >= 0 &&
@@ -605,7 +606,8 @@ s32 UpdatePrompt(ControllerState* controller) {
   } else if (f_PromptState == PROMPT_STATE_CHOSEN) {
     f_PromptState = PROMPT_STATE_CLOSING;
     PlaySound(SOUND_PROMPT_CLOSE, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
-    SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, 1, 0, 0, 0, 0);
+    SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
+        TEXT_FLAG_TYPED, 0, 0, 0, 0);
   } else if (f_PromptState == PROMPT_STATE_CLOSED_AFTER_CHOICE) {
     f_PromptState = PROMPT_STATE_CLOSED;
     FreePromptImages();

@@ -169,12 +169,12 @@ void LeaveBootLogos(void) {
   }
 
   /* The position goes unused with NO_MESSAGE */
-  SetTextSlot(160, 114, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
-  SetTextSlot(160, 114, NO_MESSAGE, 1, 1, 0, 0, 0, 0, 0);
-  SetTextSlot(160, 114, NO_MESSAGE, 1, 2, 0, 0, 0, 0, 0);
-  SetTextSlot(160, 114, NO_MESSAGE, 1, 3, 0, 0, 0, 0, 0);
-  SetTextSlot(160, 114, NO_MESSAGE, 1, 4, 0, 0, 0, 0, 0);
-  SetTextSlot(160, 114, NO_MESSAGE, 1, 5, 0, 0, 0, 0, 0);
+  SetTextSlot(160, 114, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, 0, 0, 0, 0, 0);
+  SetTextSlot(160, 114, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 1, 0, 0, 0, 0, 0);
+  SetTextSlot(160, 114, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 2, 0, 0, 0, 0, 0);
+  SetTextSlot(160, 114, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 3, 0, 0, 0, 0, 0);
+  SetTextSlot(160, 114, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 4, 0, 0, 0, 0, 0);
+  SetTextSlot(160, 114, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 5, 0, 0, 0, 0, 0);
 }
 
 /*

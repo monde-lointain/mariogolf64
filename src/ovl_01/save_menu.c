@@ -336,7 +336,8 @@ void func_8021F79C_ovl_01(void) {
     if (GetWipeKind() != WIPE_NONE && D_801052E8 == 0) {
       if (GetWipeProgress() == 0) {
         for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
 
         g_MenuScreen = MENU_SCREEN_EXIT;
@@ -364,11 +365,13 @@ void func_8021F79C_ovl_01(void) {
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
         for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, index, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index,
+              TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
         for (index = 1; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
 
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -383,7 +386,8 @@ void func_8021F79C_ovl_01(void) {
         }
       } else if (g_MenuRepeatButtons & R_JPAD) {
         for (index = 1; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
 
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -503,7 +507,7 @@ void func_8021F79C_ovl_01(void) {
 #define RING_SHOT_REPLAY_TEXT_X 124
 #define RING_SHOT_REPLAY_TEXT_Y 84
 #define MESSAGE_FIRST_RING_SHOT_HOLE 0x4B
-#define RING_SHOT_TEXT_FONT 1
+/* Another size that draws in the large font, as TEXT_SLOT_LARGE_FONT does */
 #define RING_SHOT_REPLAY_TEXT_FONT 2
 /* The chosen replay's colors run around a circle of hues, a step per update,
  * with its glow a quarter as bright */
@@ -718,7 +722,7 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   SetTextSlot(RING_SHOT_TITLE_X, RING_SHOT_TITLE_Y,
-      MESSAGE_FIRST_RING_SHOT_TITLE + memory->ringShotRow, RING_SHOT_TEXT_FONT,
+      MESSAGE_FIRST_RING_SHOT_TITLE + memory->ringShotRow, TEXT_SLOT_LARGE_FONT,
       0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
   if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
@@ -1333,7 +1337,8 @@ void func_8022209C_ovl_01(void) {
 
   if (GetWipeKind() != WIPE_NONE) {
     for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-      SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF, 0xFF,
+          0xFF, 0xFF);
     }
 
     if (GetWipeProgress() == 0) {
@@ -1341,7 +1346,8 @@ void func_8022209C_ovl_01(void) {
       FreeAllCharacterSlots();
       D_800FE334 = 0;
       for (slot = 1; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-        SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF, 0xFF,
+            0xFF, 0xFF);
       }
 
       g_MenuScreen = MENU_SCREEN_EXIT;
@@ -1367,7 +1373,8 @@ void func_8022209C_ovl_01(void) {
         StartWipe(WIPE_CLOSING);
         func_80222F2C_ovl_01();
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
 
         D_80230B4D_ovl_01 = FALSE;
@@ -1382,7 +1389,8 @@ void func_8022209C_ovl_01(void) {
         D_80230B4D_ovl_01 = FALSE;
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
 
         if (D_80230B4A_ovl_01 == 1 || g_ControllerCount == 1) {
@@ -1392,7 +1400,8 @@ void func_8022209C_ovl_01(void) {
           }
 
           for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-            SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+                0xFF, 0xFF, 0xFF);
           }
 
           D_80230B4C_ovl_01 = FALSE;
@@ -1425,8 +1434,8 @@ void func_8022209C_ovl_01(void) {
                     controller;
                 D_80230B48_ovl_01++;
                 for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-                  SetTextSlot(
-                      0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0,
+                      0xFF, 0xFF, 0xFF, 0xFF);
                 }
 
                 break;
@@ -1441,12 +1450,14 @@ void func_8022209C_ovl_01(void) {
 
             D_80230B4D_ovl_01 = TRUE;
             for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-              SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+              SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+                  0xFF, 0xFF, 0xFF);
             }
           }
 
           for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-            SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+                0xFF, 0xFF, 0xFF);
           }
 
           return;
@@ -1464,7 +1475,8 @@ void func_8022209C_ovl_01(void) {
         if (D_80230B48_ovl_01 == D_80230B4A_ovl_01) {
           D_80230B4D_ovl_01 = TRUE;
           for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-            SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+                0xFF, 0xFF, 0xFF);
           }
         }
       } else {
@@ -1479,7 +1491,8 @@ void func_8022209C_ovl_01(void) {
       if (D_80230B48_ovl_01 <= 0) {
         StartHudAnimation(HUD_ANIMATION_FADE_OUT);
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
 
         g_MenuScreen = MENU_SCREEN_TITLE;
@@ -1493,13 +1506,15 @@ void func_8022209C_ovl_01(void) {
       if (D_80230B48_ovl_01 <= 0) {
         D_80230B4C_ovl_01 = FALSE;
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
       }
     } else if (memory->savedGameTurn == 0) {
       if (g_MenuRepeatButtons & L_JPAD) {
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
 
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -1514,7 +1529,8 @@ void func_8022209C_ovl_01(void) {
         LOAD_CHOSEN_GAME_IMAGES();
       } else if (g_MenuRepeatButtons & R_JPAD) {
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
-          SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
+              0xFF, 0xFF, 0xFF);
         }
 
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -1996,7 +2012,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
 
   if (func_80222C94_ovl_01() != 0) {
     SetTextSlot(EMPTY_GAME_TEXT_X, EMPTY_GAME_TEXT_Y, MESSAGE_EMPTY_SAVED_GAME,
-        1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
   } else if (!D_80230B4C_ovl_01) {
     gameIndex = memory->savedGameIndex;
     if (gameIndex < 0) {
@@ -2021,8 +2037,8 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
     holeIndex = CHOSEN_GAME.state.holeIndex;
     if (CHOSEN_GAME.state.gameMode == GAME_MODE_TOURNAMENT) {
       SetTextSlot(SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y,
-          MESSAGE_FIRST_TOURNAMENT_COURSE + courseIndex, 1, 0, 0, 0xFF, 0xFF,
-          0xFF, 0xFF);
+          MESSAGE_FIRST_TOURNAMENT_COURSE + courseIndex, TEXT_SLOT_LARGE_FONT,
+          0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
     } else {
       if (CHOSEN_GAME.state.isMiniGolf == TRUE) {
         courseIndex = (courseIndex >= FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE)
@@ -2038,11 +2054,11 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
 
     SetTextSlotValue(holeIndex + 1, 1, 0);
     SetTextSlot(SAVED_GAME_HOLE_X, SAVED_GAME_HOLE_Y, MESSAGE_SAVED_GAME_HOLE,
-        1, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        TEXT_SLOT_LARGE_FONT, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF);
   } else if (GetWipeKind() == 0) {
     if (D_80230B4D_ovl_01) {
-      SetTextSlot(CONTINUE_PROMPT_X, PROMPT_Y, MESSAGE_CONTINUE_PROMPT, 1, 0, 1,
-          0xFF, 0xFF, 0xFF, 0xFF);
+      SetTextSlot(CONTINUE_PROMPT_X, PROMPT_Y, MESSAGE_CONTINUE_PROMPT,
+          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
     } else {
       SetTextSlotValue(D_8023BDA4_ovl_01[D_80230B48_ovl_01] + 1, 0, 0);
 
@@ -2063,10 +2079,11 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
         SetTextPaletteColor(63, 255, 63, 0);
       }
 
-      SetTextSlot(CONTROLLER_PROMPT_X, PROMPT_Y, MESSAGE_CONTROLLER_PROMPT, 1,
-          0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+      SetTextSlot(CONTROLLER_PROMPT_X, PROMPT_Y, MESSAGE_CONTROLLER_PROMPT,
+          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
       for (index = 1; index != SAVED_GAME_TEXT_SLOT_COUNT; index++) {
-        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
+            0xFF, 0xFF, 0xFF);
       }
     }
   }

@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "text_format.h"
+
 /*
  * The game draws its messages in text slots. A message is a run of
  * character codes from the message table; some codes are controls, such
@@ -22,19 +24,6 @@
 /* Given this as its message, SetTextSlot clears the slot */
 #define NO_MESSAGE (-1)
 
-/* Flags of a text slot */
-/* The message appears one code more each time the slot is drawn */
-#define TEXT_FLAG_TYPED 0x01
-/* A typed message plays a sound every few codes */
-#define TEXT_FLAG_TYPING_SOUND 0x02
-#define TEXT_FLAG_CENTERED 0x10
-/* DrawTextSlots skips a slot with this flag */
-#define TEXT_FLAG_UNK20 0x20
-/* Widens the advance of the fonts drawn in text slots */
-#define TEXT_FLAG_WIDE_SPACING 0x40
-/* Each glyph of the large font takes the same width */
-#define TEXT_FLAG_FIXED_WIDTH 0x80
-
 /* The shadowed font's glyphs share one image */
 #define SHADOWED_FONT_IMAGE_WIDTH 256
 #define SHADOWED_FONT_IMAGE_HEIGHT 32
@@ -42,11 +31,6 @@
 /* The characters that the fonts draw as the symbols for yards and feet */
 #define YARDS_GLYPH 0xF9
 #define FEET_GLYPH 0xFB
-
-/* The font size, in pixels, of the font whose characters differ in width */
-#define FONT_SIZE_LARGE 12
-#define FONT_SIZE_MEDIUM 10
-#define FONT_SIZE_SMALL 8
 
 /* MeasureText flag: use each character's own width rather than the font size */
 #define MEASURE_TEXT_PROPORTIONAL 0x02

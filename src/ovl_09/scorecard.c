@@ -463,8 +463,10 @@ void FreeScorecard(void) {
       FreeMemory(&g_Scorecard.facePalettes[i]);
     }
 
-    SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0, 0, 0, 0);
-    SetTextSlot(0, 0, NO_MESSAGE, 1, 1, 1, 0, 0, 0, 0);
+    SetTextSlot(
+        0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0, 0, 0, 0);
+    SetTextSlot(
+        0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 1, TEXT_FLAG_TYPED, 0, 0, 0, 0);
   }
 
   ForceStopRumble();
@@ -1210,8 +1212,10 @@ void DrawScorecard(Gfx** displayListHead) {
           break;
         case GAME_MODE_MATCH_GAME:
         case GAME_MODE_GET_CHARACTER:
-          SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0, 0, 0, 0);
-          SetTextSlot(0, 0, NO_MESSAGE, 1, 1, 1, 0, 0, 0, 0);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0,
+              TEXT_FLAG_TYPED, 0, 0, 0, 0);
+          SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 1,
+              TEXT_FLAG_TYPED, 0, 0, 0, 0);
           if (g_RoundHud.scorecardPage == 0) {
             DrawMatchPage(&gfx);
           } else if (g_RoundHud.scorecardPage == 1) {

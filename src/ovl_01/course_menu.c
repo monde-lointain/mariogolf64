@@ -298,7 +298,8 @@ void func_8020E390_ovl_01(void) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-      SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
+          255, 255, 255, 255);
       g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
       return;
     }
@@ -306,8 +307,8 @@ void func_8020E390_ovl_01(void) {
     if (memory->statsSpin == 0) {
       if (g_MenuRepeatButtons & R_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        SetTextSlot(
-            0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
+            255, 255, 255, 255);
         memory->statsCourse++;
         if (memory->statsCourse > courseCount) {
           memory->statsCourse = 0;
@@ -329,8 +330,8 @@ void func_8020E390_ovl_01(void) {
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        SetTextSlot(
-            0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
+            255, 255, 255, 255);
         memory->statsCourse--;
         if (memory->statsCourse < 0) {
           memory->statsCourse = courseCount;
@@ -902,10 +903,12 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
       SetTextSlotValue(
           GetCoursePointsNeeded(openCourseCount) - save->coursePoints, 0, 0);
       SetTextSlot(POINTS_NEEDED_X, POINTS_NEEDED_Y,
-          MESSAGE_POINTS_TO_NEXT_COURSE, 1, 0, 0, 255, 255, 255, 255);
+          MESSAGE_POINTS_TO_NEXT_COURSE, TEXT_SLOT_LARGE_FONT, 0, 0, 255, 255,
+          255, 255);
     } else {
       SetTextSlot(ALL_COURSES_OPEN_X, ALL_COURSES_OPEN_Y,
-          MESSAGE_ALL_COURSES_OPEN, 1, 0, 0, 255, 255, 255, 255);
+          MESSAGE_ALL_COURSES_OPEN, TEXT_SLOT_LARGE_FONT, 0, 0, 255, 255, 255,
+          255);
     }
   } else {
     gDPPipeSync(gfx++);

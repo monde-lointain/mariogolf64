@@ -1595,8 +1595,10 @@ void StartHoleFlyover(void) {
   g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[INSET_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[0].view.fieldOfView = FLYOVER_FIELD_OF_VIEW;
-  SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK0, 0, 0, 0, 0, 0);
-  SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);
+  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK0, 0,
+      0, 0, 0, 0);
+  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK1, 0,
+      0, 0, 0, 0);
   SetInsetViewRect(FLYOVER_INSET_CENTER_X, FLYOVER_INSET_CENTER_Y,
       FLYOVER_INSET_SIZE, FLYOVER_INSET_SIZE);
   StepHoleFlyover();
@@ -1604,8 +1606,10 @@ void StartHoleFlyover(void) {
 
 void ClearHoleIntroText(void) {
   g_RoundHud.isHoleIntroTextShown = 0;
-  SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK0, 0, 0, 0, 0, 0);
-  SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);
+  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK0, 0,
+      0, 0, 0, 0);
+  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK1, 0,
+      0, 0, 0, 0);
 }
 
 /* Ends the hole flyover; the screen fades back, and a strong wind brings the

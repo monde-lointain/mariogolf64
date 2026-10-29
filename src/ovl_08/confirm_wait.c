@@ -30,7 +30,7 @@ void WaitForConfirmButton(void) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
 
     /* The position goes unused with NO_MESSAGE */
-    SetTextSlot(160, 114, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
+    SetTextSlot(160, 114, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, 0, 0, 0, 0, 0);
   }
 }
 

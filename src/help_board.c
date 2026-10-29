@@ -165,7 +165,8 @@ static inline void ClearHelpText(void) {
   s32 index;
 
   for (index = 0; index != HELP_TEXT_SLOT_COUNT; index++) {
-    SetTextSlot(0, 0, NO_MESSAGE, 1, index, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+    SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, TEXT_FLAG_TYPED,
+        0xFF, 0xFF, 0xFF, 0xFF);
   }
 }
 
@@ -178,17 +179,19 @@ static inline void SetHelpTextColors(void) {
 
 /* Shows the open topic's title and its current page */
 static inline void ShowTopicPage(void) {
-  SetTextSlot(
-      0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_TITLE, 1, 0xFF, 0xFF, 0xFF, 0xFF);
-  SetTextSlot(
-      0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_PAGE, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, HELP_TEXT_SLOT_TITLE,
+      TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, HELP_TEXT_SLOT_PAGE,
+      TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
   SetHelpTextColors();
   SetTextSlot(TOPIC_TITLE_X, TOPIC_TITLE_Y, f_TopicTitleMessages[f_OpenTopic],
-      1, HELP_TEXT_SLOT_TITLE, 2, 0xFF, 0xFF, 0xFF, 0xFF);
+      TEXT_SLOT_LARGE_FONT, HELP_TEXT_SLOT_TITLE, TEXT_FLAG_TYPING_SOUND, 0xFF,
+      0xFF, 0xFF, 0xFF);
   SetHelpTextColors();
   SetTextSlot(TOPIC_PAGE_X, TOPIC_PAGE_Y,
-      f_TopicTitleMessages[f_OpenTopic] + f_TopicPage, 1, HELP_TEXT_SLOT_PAGE,
-      3, 0xFF, 0xFF, 0xFF, 0xFF);
+      f_TopicTitleMessages[f_OpenTopic] + f_TopicPage, TEXT_SLOT_LARGE_FONT,
+      HELP_TEXT_SLOT_PAGE, TEXT_FLAG_TYPED | TEXT_FLAG_TYPING_SOUND, 0xFF, 0xFF,
+      0xFF, 0xFF);
 }
 
 /* Opens and pages through topics with A, closes them or leaves with B, and
@@ -415,13 +418,13 @@ void DrawHelpBoard(Gfx** displayListHead) {
       if (topic == memory->helpTopicIndex) {
         SetTextSlot(LIST_LEFT,
             f_HelpListLayout.top + (index * f_HelpListLayout.rowSpacing),
-            f_TopicTitleMessages[0] + topic, 1, index, 0x10, red, green, blue,
-            0xFF);
+            f_TopicTitleMessages[0] + topic, TEXT_SLOT_LARGE_FONT, index,
+            TEXT_FLAG_CENTERED, red, green, blue, 0xFF);
       } else {
         SetTextSlot(LIST_LEFT,
             f_HelpListLayout.top + (index * f_HelpListLayout.rowSpacing),
-            f_TopicTitleMessages[f_OpenTopic] + topic, 1, index, 0x10, 0xFF,
-            0xFF, 0xFF, 0xFF);
+            f_TopicTitleMessages[f_OpenTopic] + topic, TEXT_SLOT_LARGE_FONT,
+            index, TEXT_FLAG_CENTERED, 0xFF, 0xFF, 0xFF, 0xFF);
       }
     }
   }

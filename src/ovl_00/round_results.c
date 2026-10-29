@@ -162,7 +162,6 @@ enum PortraitAnimation {
 #define MESSAGE_POINTS_TO_NEXT_COURSE 0x46
 #define MESSAGE_ALL_COURSES_OPEN 0x47
 #define RESULTS_TEXT_SLOT 0
-#define RESULTS_TEXT_FONT 1
 #define RESULTS_TEXT_RED 230
 #define RESULTS_TEXT_GREEN 230
 #define RESULTS_TEXT_BLUE 255
@@ -1800,7 +1799,6 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define MESSAGE_POINTS_EARNED 0x1F3
 
 #define BANNER_TEXT_SLOT 1
-#define BANNER_TEXT_FONT 1
 #define BANNER_TEXT_RED 32
 #define BANNER_TEXT_GREEN 64
 #define BANNER_TEXT_BLUE 255
@@ -1890,7 +1888,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
     case BANNER_KIND_POINTS:
       SetTextSlotValue(f_PointsShown, BANNER_TEXT_SLOT, 0);
       SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-          MESSAGE_POINTS_EARNED, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
+          MESSAGE_POINTS_EARNED, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
           TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
           BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       break;
@@ -1901,9 +1899,9 @@ void DrawResultsBanner(Gfx** displayListHead) {
         if (place < TROPHY_PLACE_COUNT) {
           SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 0);
           SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
-              rank + MESSAGE_TROPHY_PRIZE, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
-              TEXT_FLAG_UNK20, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
-              BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
+              rank + MESSAGE_TROPHY_PRIZE, TEXT_SLOT_LARGE_FONT,
+              BANNER_TEXT_SLOT, TEXT_FLAG_UNK20, BANNER_TEXT_RED,
+              BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
         } else {
           if (rank < PLACE_TWENTY_FIRST || rank > PLACE_TWENTY_THIRD) {
             sprintf(g_PrintBuffer, "%dth", rank);
@@ -1918,19 +1916,19 @@ void DrawResultsBanner(Gfx** displayListHead) {
           SetTextName(g_PrintBuffer);
           SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 1);
           SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
-              MESSAGE_PLACE_PRIZE, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
+              MESSAGE_PLACE_PRIZE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
               TEXT_FLAG_UNK20, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
               BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
         }
       } else if (place < TROPHY_PLACE_COUNT) {
         SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-            rank + MESSAGE_TROPHY_PLACE, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
+            rank + MESSAGE_TROPHY_PLACE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
             TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
             BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       } else {
         SetTextSlotValue(rank, BANNER_TEXT_SLOT, 0);
         SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-            MESSAGE_PLACE, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
+            MESSAGE_PLACE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
             TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
             BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       }
@@ -1938,7 +1936,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
       break;
     case BANNER_KIND_UNK5:
       SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-          MESSAGE_UNK48, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
+          MESSAGE_UNK48, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
           TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
           BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       break;
@@ -2822,15 +2820,15 @@ void DrawTournamentResults(Gfx** displayListHead) {
       &gfx, f_ResultsSlide + 232, f_ResultsTop + 60, RESULTS_LABEL_POINTS);
   if (f_OpenCourseCount == COURSE_COUNT) {
     SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 192,
-        MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
+        MESSAGE_ALL_COURSES_OPEN, TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0,
         RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   } else {
     DrawResultsNumber(&gfx, f_ResultsSlide + 29, POINTS_TOTAL_Y,
         f_PointsToNextCourse + f_PrizePoints + f_PointsEarned);
     SetTextSlot(f_ResultsSlide + 64, f_ResultsTop + 200,
-        MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
-        RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
+        MESSAGE_POINTS_TO_NEXT_COURSE, TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT,
+        0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   }
 
@@ -2881,15 +2879,15 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
       &gfx, f_ResultsSlide + 232, f_ResultsTop + 56, RESULTS_LABEL_POINTS);
   if (f_OpenCourseCount == COURSE_COUNT) {
     SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 192,
-        MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
+        MESSAGE_ALL_COURSES_OPEN, TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0,
         RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   } else {
     DrawResultsNumber(&gfx, f_ResultsSlide + 29, POINTS_TOTAL_Y,
         f_PointsToNextCourse + f_PrizePoints + f_PointsEarned);
     SetTextSlot(f_ResultsSlide + 64, f_ResultsTop + 200,
-        MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
-        RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
+        MESSAGE_POINTS_TO_NEXT_COURSE, TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT,
+        0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   }
 
@@ -3049,15 +3047,15 @@ void DrawPlayersResults(Gfx** displayListHead) {
 
   if (f_OpenCourseCount == COURSE_COUNT) {
     SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 200,
-        MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
+        MESSAGE_ALL_COURSES_OPEN, TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0,
         RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   } else {
     DrawResultsNumber(&gfx, f_ResultsSlide + 29, POINTS_TOTAL_Y,
         f_PointsToNextCourse + f_PointsEarned);
     SetTextSlot(f_ResultsSlide + 64, f_ResultsTop + 200,
-        MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
-        RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
+        MESSAGE_POINTS_TO_NEXT_COURSE, TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT,
+        0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   }
 
@@ -3228,15 +3226,15 @@ void DrawMatchResults(Gfx** displayListHead) {
 
   if (f_OpenCourseCount == COURSE_COUNT) {
     SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 204,
-        MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
+        MESSAGE_ALL_COURSES_OPEN, TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0,
         RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   } else {
     DrawResultsNumber(&gfx, f_ResultsSlide + 29, POINTS_TOTAL_Y,
         f_PointsToNextCourse + f_PointsEarned);
     SetTextSlot(f_ResultsSlide + 64, f_ResultsTop + 200,
-        MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
-        RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
+        MESSAGE_POINTS_TO_NEXT_COURSE, TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT,
+        0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   }
 
@@ -3344,17 +3342,17 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   MeasureMessage(
       GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width, &height, 0);
   SetTextSlot(f_ResultsSlide + 160, f_ResultsTop + detailsTop + lineHeight + 8,
-      GetClubTournamentNameMessage(), RESULTS_TEXT_FONT,
+      GetClubTournamentNameMessage(), TEXT_SLOT_LARGE_FONT,
       CLUB_TOURNAMENT_NAME_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 127, 191, 255,
       255);
   SetTextSlot(f_ResultsSlide + 160,
       f_ResultsTop + detailsTop + (lineHeight * 2) + 8,
-      GetClubTournamentCourseTitleMessage(), RESULTS_TEXT_FONT,
+      GetClubTournamentCourseTitleMessage(), TEXT_SLOT_LARGE_FONT,
       CLUB_TOURNAMENT_COURSE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 43, 255, 75,
       255);
   SetTextSlot(f_ResultsSlide + 160,
       f_ResultsTop + detailsTop + (lineHeight * 3) + 8,
-      GetClubTournamentModeMessage(), RESULTS_TEXT_FONT,
+      GetClubTournamentModeMessage(), TEXT_SLOT_LARGE_FONT,
       CLUB_TOURNAMENT_MODE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 255, 63, 127, 255);
   for (i = CLUB_TOURNAMENT_NAME_SLOT; i != CLUB_TOURNAMENT_MODE_SLOT + 1; i++) {
     gDPSetPrimColor(gfx++, 0, 0, f_TextSlotColors[i - 1][0],

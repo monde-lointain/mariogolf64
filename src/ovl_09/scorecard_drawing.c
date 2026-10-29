@@ -679,14 +679,17 @@ void DrawMatchPage(Gfx** displayListHead) {
         winsNeeded - wins[i ^ 1] >= 2) {
       SetTextSlot(g_Scorecard.x + WINS_NEEDED_LEFT,
           (i * MATCH_ROW_SPACING) + g_Scorecard.y + WINS_NEEDED_TOP,
-          LAST_WIN_NEEDED_MESSAGE, 1, i, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          LAST_WIN_NEEDED_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF, 0xFF,
+          0xFF);
     } else if (winsNeeded != wins[i] && winsNeeded != wins[i ^ 1]) {
       SetTextSlotValue(winsNeeded - wins[i], i, 0);
       SetTextSlot(g_Scorecard.x + WINS_NEEDED_LEFT,
           (i * MATCH_ROW_SPACING) + g_Scorecard.y + WINS_NEEDED_TOP,
-          WINS_NEEDED_MESSAGE, 1, i, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          WINS_NEEDED_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF, 0xFF,
+          0xFF);
     } else {
-      SetTextSlot(0, 0, NO_MESSAGE, 1, i, 1, 0, 0, 0, 0);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, TEXT_FLAG_TYPED, 0,
+          0, 0, 0);
     }
   }
 

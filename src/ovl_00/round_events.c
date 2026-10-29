@@ -155,7 +155,6 @@ typedef struct LakituVelocity {
 #define FLIP_MESSAGE_TEXT_SLOT 0
 #define FLIP_MESSAGE_X 160
 #define FLIP_MESSAGE_Y 114
-#define FLIP_MESSAGE_FONT 1
 /* How far the board reaches past the message on each side */
 #define FLIP_MESSAGE_BOARD_MARGIN_X 6
 #define FLIP_MESSAGE_BOARD_MARGIN_Y 14
@@ -1104,7 +1103,7 @@ void ShowFlipMessage(s32 messageId) {
   f_FlipMessageBoardVertices[2].v.ob[1] =
       -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
   SetTextSlot(FLIP_MESSAGE_X, FLIP_MESSAGE_Y, f_FlipMessageId,
-      FLIP_MESSAGE_FONT, FLIP_MESSAGE_TEXT_SLOT,
+      TEXT_SLOT_LARGE_FONT, FLIP_MESSAGE_TEXT_SLOT,
       TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 127, 255, 127, 255);
 }
 #else
