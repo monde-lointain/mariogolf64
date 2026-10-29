@@ -322,7 +322,7 @@ void func_80201574_ovl_01(Gfx** displayListHead);
 void func_80202000_ovl_01(Gfx** displayListHead);
 void DrawMainMenu(Gfx** displayListHead);
 void DrawMainMenuWithoutTransmit(Gfx** displayListHead);
-void func_80206180_ovl_01(Gfx** displayListHead);
+void DrawClubhouse(Gfx** displayListHead);
 void DrawOptionsScreen(Gfx** displayListHead);
 void func_80207D08_ovl_01(Gfx** displayListHead);
 void func_80207E18_ovl_01(Gfx** displayListHead);
@@ -342,7 +342,7 @@ void func_801F8BAC_ovl_01(void);
 void func_801F93D8_ovl_01(void);
 void UpdateMainMenu(void);
 void UpdateMainMenuWithoutTransmit(void);
-void func_801F9FF8_ovl_01(void);
+void UpdateClubhouse(void);
 void UpdateOptionsScreen(void);
 void func_801FADBC_ovl_01(void);
 void LeaveMenuWithWipe(void);
@@ -1028,7 +1028,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_CLUBHOUSE:
-      func_801F9FF8_ovl_01();
+      UpdateClubhouse();
       break;
 
     case MENU_SCREEN_OPTIONS:
@@ -3052,7 +3052,7 @@ void UpdateMainMenuWithoutTransmit(void) {
   }
 }
 
-void func_801F9FF8_ovl_01(void) {
+void UpdateClubhouse(void) {
   Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE) {
@@ -3676,7 +3676,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       func_80229CB0_ovl_01(&gfx);
       break;
     case MENU_SCREEN_CLUBHOUSE:
-      func_80206180_ovl_01(&gfx);
+      DrawClubhouse(&gfx);
       break;
     case MENU_SCREEN_OPTIONS:
       DrawOptionsScreen(&gfx);
@@ -6498,7 +6498,7 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
 #define ROOM_LABEL_HEIGHT 20
 #define ROOM_LABEL_IMAGE_SIZE (ROOM_LABEL_WIDTH * ROOM_LABEL_HEIGHT / 2)
 
-void func_80206180_ovl_01(Gfx** displayListHead) {
+void DrawClubhouse(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 choiceIndex;
   s32 labelOffset;
