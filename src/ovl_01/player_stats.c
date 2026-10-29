@@ -971,7 +971,7 @@ void func_80219460_ovl_01(
 
 /* Returns nothing, but is declared to return a value, which leaves v0 live at
  * its end */
-s32 func_80219948_ovl_01(void) {
+s32 UpdateHandicaps(void) {
   MenuMemory* memory = func_8005AF74();
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
@@ -1108,8 +1108,8 @@ void DrawTwoDigitMenuNumber(
  * texel offset to the blink frame's offset before the arrow's.
  */
 #ifdef NON_MATCHING
-void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
-    u8 reverseVerticalSlide, u8 canShowPrompt) {
+void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
+    u8 canShowPrompt) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = func_8005AF74();
   u16 playerIndex;
@@ -1420,7 +1420,7 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219BD4_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawHandicaps);
 #endif
 
 void func_8021B1E0_ovl_01(

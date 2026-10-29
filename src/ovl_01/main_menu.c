@@ -373,7 +373,7 @@ void func_802177D0_ovl_01(void);
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind);
 void UpdateBetSettings(void);
 /* Defined without parameters, though UpdateMenus passes it two */
-s32 func_80219948_ovl_01();
+s32 UpdateHandicaps();
 void func_8021CF10_ovl_01(void** buffers);
 void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind);
 void UpdateBestShots(void);
@@ -1063,7 +1063,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_HANDICAPS:
-      func_80219948_ovl_01(1, g_ChosenPlayerCount);
+      UpdateHandicaps(1, g_ChosenPlayerCount);
       break;
 
     case MENU_SCREEN_BET_SETTINGS:
@@ -4604,8 +4604,8 @@ void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawBetSettings(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled);
-void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
-    u8 reverseVerticalSlide, u8 canShowPrompt);
+void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
+    u8 canShowPrompt);
 s32 func_8021B618_ovl_01(Gfx** displayListHead, u8 slide);
 void func_8021BE88_ovl_01(Gfx** displayListHead);
 void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
@@ -6182,21 +6182,20 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
       case BET_PHASE_CONFIRMED:
         DrawBetSettings(&gfx, D_802322F0_ovl_01, 1, 0);
-        func_80219BD4_ovl_01(
-            &gfx, BET_SLIDE_DISTANCE - D_802322F4_ovl_01, 0, 0);
+        DrawHandicaps(&gfx, BET_SLIDE_DISTANCE - D_802322F4_ovl_01, 0, 0);
         break;
 
       case MENU_PHASE_CHOOSING:
-        func_80219BD4_ovl_01(&gfx, 0, 0, 1);
+        DrawHandicaps(&gfx, 0, 0, 1);
         break;
 
       case MENU_PHASE_CANCELED:
         DrawBetSettings(&gfx, D_802322F0_ovl_01 - BET_SLIDE_DISTANCE, 1, 0);
-        func_80219BD4_ovl_01(&gfx, D_802322F4_ovl_01, 0, 0);
+        DrawHandicaps(&gfx, D_802322F4_ovl_01, 0, 0);
         break;
 
       case MENU_PHASE_CONFIRMED:
-        func_80219BD4_ovl_01(&gfx, D_802322F4_ovl_01, 1, 0);
+        DrawHandicaps(&gfx, D_802322F4_ovl_01, 1, 0);
         break;
     }
   }
