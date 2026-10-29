@@ -1191,13 +1191,13 @@ s32 DrawGame(void) {
   }
 
   f_DrawStartTime = OS_CYCLES_TO_USEC(osGetTime());
-  if (IsGameFlagSet(0x28)) {
+  if (IsGameFlagSet(GAME_FLAG_SHOW_AUDIO_CPU_USE)) {
     PrintDebugPaddedHex(_mus_cpu_last, 20, 10);
     PrintDebugPaddedHex(_mus_cpu_worst, 20, 11);
     MusPrintDmaUsage();
   }
 
-  if (IsGameFlagSet(0x29)) {
+  if (IsGameFlagSet(GAME_FLAG_AUDIO_TEST)) {
     PrintDebugPaddedHex(__MusIntMemRemaining(), 20, 10);
     trigger = &g_ControllerData[1].trigger;
     if (*trigger & B_BUTTON) {
@@ -1242,7 +1242,7 @@ s32 DrawGame(void) {
       drawMode = 10;
       break;
     case 30:
-      drawMode = IsGameFlagSet(0x9A) ? DRAW_MODE_COURSE : 11;
+      drawMode = IsGameFlagSet(GAME_FLAG_UNK9A) ? DRAW_MODE_COURSE : 11;
       break;
     case 29:
       drawMode = 12;
@@ -1635,7 +1635,7 @@ s32 DrawGame(void) {
                     f_ScreenEffectFrameCount != 1) &&
                 g_PauseScreen != PAUSE_SCREEN_UNK4) {
               UsePrimitiveDepth(0);
-              if (!IsGameFlagSet(0x15)) {
+              if (!IsGameFlagSet(GAME_FLAG_HIDE_BACKDROP)) {
                 DrawBackdrop(&g_DisplayListHead, &g_Cameras[0].view, 0);
               }
 
@@ -1749,7 +1749,7 @@ s32 DrawGame(void) {
             gDPPipeSync(g_DisplayListHead++);
           } else {
             SetSceneFog(&g_DisplayListHead);
-            if (!IsGameFlagSet(6)) {
+            if (!IsGameFlagSet(GAME_FLAG_SKIP_GROUND_DRAWING)) {
               DrawGround(matrices, terrainStyle);
             }
 
@@ -1784,7 +1784,7 @@ s32 DrawGame(void) {
             DrawOpening(matrices, &g_DisplayListHead);
             DrawEffects(matrices, &g_DisplayListHead);
           } else {
-            if (!IsGameFlagSet(0x17)) {
+            if (!IsGameFlagSet(GAME_FLAG_HIDE_PIN)) {
               DrawPin(matrices, &camera->view, viewIndex);
             }
 
@@ -1805,11 +1805,12 @@ s32 DrawGame(void) {
             if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
               mode = g_Cameras[viewIndex].mode;
               if (mode != 8 && mode != 2) {
-                if (!IsGameFlagSet(0x18) && g_IsModuleAlive[1]) {
+                if (!IsGameFlagSet(GAME_FLAG_HIDE_GOLF_BALLS) &&
+                    g_IsModuleAlive[1]) {
                   DrawGolfBalls(matrices);
                 }
 
-                if (!IsGameFlagSet(0x19)) {
+                if (!IsGameFlagSet(GAME_FLAG_HIDE_CHARACTERS)) {
                   for (playerIndex = 0; playerIndex < 4; playerIndex++) {
                     DrawCharacterAndShadow(matrices, viewIndex, playerIndex);
                     if (g_Scene != 30) {
@@ -1827,7 +1828,7 @@ s32 DrawGame(void) {
             }
 
             if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
-              if (g_IsModuleAlive[23] && !IsGameFlagSet(0x2D)) {
+              if (g_IsModuleAlive[23] && !IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
                 DrawAimGuides(matrices);
               }
 
@@ -1885,7 +1886,7 @@ s32 DrawGame(void) {
         SetSceneFog(&g_DisplayListHead);
         DrawGround(matrices, terrainStyle);
         DrawBillboards(matrices, viewIndex);
-        if (!IsGameFlagSet(0x17)) {
+        if (!IsGameFlagSet(GAME_FLAG_HIDE_PIN)) {
           DrawPin(matrices, &camera->view, viewIndex);
         }
 
@@ -1894,7 +1895,7 @@ s32 DrawGame(void) {
         SET_CAMERA_SCISSOR(g_Cameras[0].view);
       }
     } else if (drawsScene && IsOverlayInExpansionMemory()) {
-      if (!IsGameFlagSet(6)) {
+      if (!IsGameFlagSet(GAME_FLAG_SKIP_GROUND_DRAWING)) {
         DrawGround(matrices, terrainStyle);
       }
 
@@ -1909,7 +1910,8 @@ s32 DrawGame(void) {
         DrawGolfBalls(matrices);
       }
 
-      if (IsGameFlagSet(0x50) && g_Scene != SCENE_FLAG_PANEL) {
+      if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE) &&
+          g_Scene != SCENE_FLAG_PANEL) {
         func_8040C360(matrices, &g_DisplayListHead);
       }
     }
@@ -1929,8 +1931,8 @@ s32 DrawGame(void) {
       DrawPauseMenu(&g_DisplayListHead);
     }
 
-    if (g_HasLoaderFinished == 1 && !IsGameFlagSet(0x13) &&
-        !IsGameFlagSet(0x2D)) {
+    if (g_HasLoaderFinished == 1 && !IsGameFlagSet(GAME_FLAG_HIDE_ROUND_HUD) &&
+        !IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
       DrawRoundHud(&g_Cameras[0].view);
     }
 
@@ -2016,7 +2018,7 @@ s32 DrawGame(void) {
     g_FrameStepState = FRAME_STEP_PAUSED;
   }
 
-  if (IsGameFlagSet(0x2F)) {
+  if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {
     if (g_ControllerStates[1].buttons & D_CBUTTONS) {
       SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
     }
@@ -2088,27 +2090,28 @@ s32 DrawGame(void) {
     DrawStaffRoll(&g_DisplayListHead);
   }
 
-  if (IsGameFlagSet(1)) {
+  if (IsGameFlagSet(GAME_FLAG_SHOW_FRAME_RATE)) {
     PrintDebugText(
         !g_HasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
     sprintf(g_PrintBuffer, "%2d draw/sec", g_FramesPerSecond);
     PrintDebugText(g_PrintBuffer, 3, 5);
   }
 
-  if (IsGameFlagSet(0x39)) {
+  if (IsGameFlagSet(GAME_FLAG_SHOW_DEBUG_LOG)) {
     ShowDebugLog();
   }
 
   DrawDebugText(&g_DisplayListHead);
-  if (IsGameFlagSet(0x1B) && (g_ControllerData[1].trigger & Z_TRIG)) {
-    if (IsGameFlagSet(0x1D)) {
-      ClearGameFlag(0x1D);
+  if (IsGameFlagSet(GAME_FLAG_DEBUG_TEXT_BUTTON) &&
+      (g_ControllerData[1].trigger & Z_TRIG)) {
+    if (IsGameFlagSet(GAME_FLAG_HIDE_DEBUG_TEXT)) {
+      ClearGameFlag(GAME_FLAG_HIDE_DEBUG_TEXT);
     } else {
-      SetGameFlag(0x1D);
+      SetGameFlag(GAME_FLAG_HIDE_DEBUG_TEXT);
     }
   }
 
-  if (IsGameFlagSet(0x2F)) {
+  if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {
     if (g_ControllerStates[1].pressedButtons & Z_TRIG) {
       func_8040C124();
     }

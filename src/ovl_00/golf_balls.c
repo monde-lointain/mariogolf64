@@ -1237,7 +1237,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
       }
     }
 
-    if (IsGameFlagSet(0x4C)) {
+    if (IsGameFlagSet(GAME_FLAG_SHOW_ROUTE_POINTS)) {
       for (i = 0; i != ROUTE_POINT_COUNT; i++) {
         afterimage = &f_BallAfterimages[i];
         shadowDepth =

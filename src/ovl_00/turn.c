@@ -2757,13 +2757,13 @@ static inline void DebugPlaceBall(s32 playerIndex) {
 
   D_80227188_ovl_00 = g_GameState.courseIndex;
   D_8022718C_ovl_00 = g_GameState.holeIndex;
-  SetGameFlag(0x9F);
+  SetGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
   sprintf(text, "X:%X Y:%X Z:%X  Attr%d             ",
       g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[1],
       g_CurrentShot.ballPosition[2],
       GetSurface(g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]));
   PrintDebugText(text, 3, 6);
-  ClearGameFlag(0x9F);
+  ClearGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
   if (g_ControllerData[1].button & Z_TRIG) {
     g_CurrentShot.ballPosition[0] += g_ControllerStates[1].stickX *
         ((ABS(g_ControllerStates[1].stickX) * 2) + 1);
@@ -3069,7 +3069,7 @@ void UpdateTurns(void) {
   }
 
   areCallsAllowed = TRUE;
-  if (IsGameFlagSet(0x68)) {
+  if (IsGameFlagSet(GAME_FLAG_SHOW_COURSE_POINTS)) {
     PrintCoursePoints();
   }
 
@@ -3078,7 +3078,7 @@ void UpdateTurns(void) {
     SetScreenEffect(4, 0);
   }
 
-  if (IsGameFlagSet(0x2C)) {
+  if (IsGameFlagSet(GAME_FLAG_SHOW_PLAYER_UNKC)) {
     for (i = 0; i < g_GameState.playerCount; i++) {
       PrintDebugPaddedHex(g_Players[i].unkC, 2, i + 10);
     }
@@ -3139,7 +3139,7 @@ void UpdateTurns(void) {
         }
 
         SetCharacterLighting(0, 1);
-        ClearGameFlag(0xF);
+        ClearGameFlag(GAME_FLAG_FAST_FLIGHT);
         StartPlayerShot(playerIndex);
         D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
         g_RoundHud.clubHeadTilt =
@@ -3180,8 +3180,8 @@ void UpdateTurns(void) {
           }
 
           D_80227194_ovl_00 = 1;
-        } else if (IsGameFlagSet(0x32) || g_Players[playerIndex].unk1E[0] ||
-            IsGameFlagSet(0x9B)) {
+        } else if (IsGameFlagSet(GAME_FLAG_UNK32) ||
+            g_Players[playerIndex].unk1E[0] || IsGameFlagSet(GAME_FLAG_UNK9B)) {
           g_Players[playerIndex].unk1E[1] = -9;
           LoadOverlay(GetOverlayOfModule(7));
           ListOffsetsByDistance();
@@ -3572,7 +3572,7 @@ void UpdateTurns(void) {
               D_80227184_ovl_00 = 155.0f;
             }
 
-            if (IsGameFlagSet(0x2A)) {
+            if (IsGameFlagSet(GAME_FLAG_SHOW_SWING_TEMPO)) {
               sprintf(g_PrintBuffer, "tempo:%5.2f", D_80227184_ovl_00);
               PrintDebugText(g_PrintBuffer, 10, 10);
             }
@@ -3629,7 +3629,7 @@ void UpdateTurns(void) {
                       g_CurrentShot.shotMode)),
               6);
           D_80224004_ovl_00 = 0;
-          if (IsGameFlagSet(0x47)) {
+          if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
             DebugPlaceBall(playerIndex);
           }
 
@@ -3705,7 +3705,7 @@ void UpdateTurns(void) {
           }
 
           g_CurrentShot.unk40 = 0;
-          if (IsGameFlagSet(0x32)) {
+          if (IsGameFlagSet(GAME_FLAG_UNK32)) {
             g_CurrentShot.unk40 = D_80104F78.unk4;
           }
 
@@ -3951,8 +3951,8 @@ void UpdateTurns(void) {
           RecordRingShotHole(playerIndex);
         }
 
-        if (IsGameFlagSet(0x32)) {
-          SetGameFlag(0xF);
+        if (IsGameFlagSet(GAME_FLAG_UNK32)) {
+          SetGameFlag(GAME_FLAG_FAST_FLIGHT);
         }
 
         D_8022400C_ovl_00 = 0;
@@ -4041,7 +4041,8 @@ void UpdateTurns(void) {
 
         if (D_80227170_ovl_00[playerIndex] >=
                 D_80224000_ovl_00 + D_8022400C_ovl_00 ||
-            (IsGameFlagSet(0xF) && D_80227170_ovl_00[playerIndex] >= 4)) {
+            (IsGameFlagSet(GAME_FLAG_FAST_FLIGHT) &&
+                D_80227170_ovl_00[playerIndex] >= 4)) {
           if (IsBButtonHeld()) {
             D_80223FFC_ovl_00 = 1;
           }
@@ -4124,7 +4125,7 @@ void UpdateTurns(void) {
               isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
             }
 
-            if (IsGameFlagSet(0xF) ||
+            if (IsGameFlagSet(GAME_FLAG_FAST_FLIGHT) ||
                 (g_TurnController.buttons & (Z_TRIG | L_TRIG))) {
               for (i = 0; i < 3; i++) {
                 if (!isCameraDone) {
@@ -4138,7 +4139,7 @@ void UpdateTurns(void) {
 
               if (g_IsDebugEnabled &&
                   (g_TurnController.pressedButtons & (Z_TRIG | L_TRIG))) {
-                ToggleGameFlag(0xF);
+                ToggleGameFlag(GAME_FLAG_FAST_FLIGHT);
               }
             }
           }
@@ -4216,7 +4217,7 @@ void UpdateTurns(void) {
           func_80207660_ovl_00(player);
           ClearPassedRings(player);
           if ((surfaceInfo->kind == 0xD || surfaceInfo->kind == 0x15) &&
-              !IsGameFlagSet(0x45)) {
+              !IsGameFlagSet(GAME_FLAG_NO_OUT_OF_BOUNDS_PENALTY)) {
             g_Players[playerIndex].strokeCount++;
             if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               if (g_Players[playerIndex].strokeCount >= 100) {
@@ -4368,7 +4369,7 @@ void UpdateTurns(void) {
               }
             } else {
               EndFlightCamera();
-              if (!IsGameFlagSet(0x32)) {
+              if (!IsGameFlagSet(GAME_FLAG_UNK32)) {
                 StartHudAnimation(2);
               }
 
@@ -4399,7 +4400,7 @@ void UpdateTurns(void) {
         ConsiderReactionSpot(g_HoleSetup.teePosition);
         ClearShotEffects(0);
         EndFlightCamera();
-        if (IsGameFlagSet(0x3E) && f_HasGutsTestRun) {
+        if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasGutsTestRun) {
           character = f_GutsTestCharacter;
           palette = 0;
         } else {
@@ -4441,14 +4442,14 @@ void UpdateTurns(void) {
 
         StartReaction(0, g_Players[playerIndex].characterIndex, reaction);
         SetCharacterAnimation(0, reaction);
-        if (IsGameFlagSet(0x3E) && f_HasGutsTestRun) {
+        if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasGutsTestRun) {
           SetCharacterAnimation(0, f_GutsTestMotion);
           StartReaction(0, f_GutsTestCharacter, f_GutsTestMotion);
         }
 
         D_80224000_ovl_00 =
             GetCurrentAnimationEndFrame(0) - GetAnimationFrame(0) + 10;
-        if (IsGameFlagSet(0x32)) {
+        if (IsGameFlagSet(GAME_FLAG_UNK32)) {
           D_80224000_ovl_00 = 15;
         }
 
@@ -4516,7 +4517,8 @@ void UpdateTurns(void) {
         break;
       case 0xF:
         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-          if (IsGameFlagSet(0x3E) && g_Players[playerIndex].unk26 != 0) {
+          if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) &&
+              g_Players[playerIndex].unk26 != 0) {
             DebugTestGutsMotion();
           }
 
@@ -4544,7 +4546,7 @@ void UpdateTurns(void) {
               nextState = 0x14;
               EndFlightCamera();
               FreeCharacterAndReactionLight(0);
-              if (IsGameFlagSet(0x3E)) {
+              if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME)) {
                 nextState = 0xB;
               }
 
@@ -4765,7 +4767,7 @@ void UpdateTurns(void) {
     UpdateReaction(0);
   }
 
-  if (IsGameFlagSet(0x4A)) {
+  if (IsGameFlagSet(GAME_FLAG_FRAME_BALL_AND_SHOT)) {
     FrameBallAndShot();
   }
 

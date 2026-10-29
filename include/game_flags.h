@@ -34,8 +34,10 @@
  */
 #define GAME_FLAG_CYCLE_SKY_CONDITIONS 0x20
 
-/* Lets controller 2 edit the sky colors and fog, and draws the fog from
- * g_DebugFog */
+/*
+ * Lets controller 2 edit the sky colors and fog, and draws the fog from
+ * g_DebugFog. It also hides the aim guides and the round HUD.
+ */
 #define GAME_FLAG_SKY_EDITOR 0x2D
 
 /* Hides the billboards */
@@ -100,7 +102,11 @@
 /* Lets the player with the fewest strokes play next, instead of the farthest
  * from the cup */
 #define GAME_FLAG_FEWEST_STROKES_FIRST 0x3F
-/* Draws through two or three framebuffers at random, while aiming */
+/*
+ * Draws through two or three framebuffers at random, while aiming. It also
+ * prints the water probe's ratio as GetMiniGolfSurface tests for water;
+ * the ball position readout sets it around its GetSurface call to show that.
+ */
 #define GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT 0x9F
 /* Cuts every round to two holes */
 #define GAME_FLAG_TWO_HOLE_ROUNDS 0x3D
@@ -151,7 +157,10 @@
  * texture scales */
 #define GAME_FLAG_TEST_GROUND_TEXTURE 0x27
 
-/* Logs the detail of each fine row of ground tiles */
+/*
+ * Logs the detail of each fine row of ground tiles, and has the rumble
+ * manager removed on leaving the flag panel
+ */
 #define GAME_FLAG_LOG_GROUND_ROWS 0x9E
 
 /* Cleared while the loader thread loads a hole, and set once it is done */
@@ -216,11 +225,20 @@
 /* Keeps the staff roll from shuffling its cast */
 #define GAME_FLAG_UNK99 0x99
 
-/* Set by the staff roll's timeline as it starts */
+/*
+ * Set by the staff roll's timeline as it starts; it has scene 30 draw in
+ * DRAW_MODE_COURSE
+ */
 #define GAME_FLAG_UNK9A 0x9A
 
-/* Flags that Club Slots reads, whose purpose is not yet known */
+/*
+ * Flags that Club Slots reads, whose purpose is not yet known. In a turn, it
+ * or UNK9B makes the shot the computer golfer's, and UNK32 also takes the
+ * shot's unk40 from D_80104F78, turns on FAST_FLIGHT, skips a HUD animation
+ * and shortens the wait after the reaction.
+ */
 #define GAME_FLAG_UNK32 0x32
+#define GAME_FLAG_UNK9B 0x9B
 #define GAME_FLAG_UNK55 0x55
 
 /* Makes ChooseHoleStrokeTarget plan no strokes for each hole; its purpose is
@@ -258,5 +276,68 @@ void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);
 void ToggleGameFlag(u32 flag);
 void ClearAllGameFlags(void);
+
+/* Prints the framebuffer count and the frames drawn each second */
+#define GAME_FLAG_SHOW_FRAME_RATE 0x01
+/* Keeps the frame from calling DrawGround; HIDE_GROUND makes it return */
+#define GAME_FLAG_SKIP_GROUND_DRAWING 0x06
+/*
+ * Steps the flight three times a frame. Each shot clears it, and the shot's
+ * player's Z or L toggles it.
+ */
+#define GAME_FLAG_FAST_FLIGHT 0x0F
+
+/* Keep the frame from drawing these */
+#define GAME_FLAG_HIDE_ROUND_HUD 0x13
+#define GAME_FLAG_HIDE_BACKDROP 0x15
+#define GAME_FLAG_HIDE_PIN 0x17
+#define GAME_FLAG_HIDE_GOLF_BALLS 0x18
+#define GAME_FLAG_HIDE_CHARACTERS 0x19
+
+/* Prints the name of the surface under the shot's unk44 */
+#define GAME_FLAG_SHOW_SURFACE_NAME 0x1A
+/* Lets controller 2's Z toggle HIDE_DEBUG_TEXT */
+#define GAME_FLAG_DEBUG_TEXT_BUTTON 0x1B
+/* Prints libmus's last and worst CPU use, and its DMA use */
+#define GAME_FLAG_SHOW_AUDIO_CPU_USE 0x28
+/*
+ * Prints libmus's free memory, and lets controller 2's B stop the song and
+ * its A play three sounds
+ */
+#define GAME_FLAG_AUDIO_TEST 0x29
+/* Prints the swing's tempo */
+#define GAME_FLAG_SHOW_SWING_TEMPO 0x2A
+/* Prints each player's unkC */
+#define GAME_FLAG_SHOW_PLAYER_UNKC 0x2C
+/* Shows the debug log */
+#define GAME_FLAG_SHOW_DEBUG_LOG 0x39
+/* Keeps a ball out of bounds or out of course from costing a stroke */
+#define GAME_FLAG_NO_OUT_OF_BOUNDS_PENALTY 0x45
+/* Lets controller 2's stick turn a camera framing the ball and its shot */
+#define GAME_FLAG_FRAME_BALL_AND_SHOT 0x4A
+/* Draws the ball's afterimages at the hole's route points */
+#define GAME_FLAG_SHOW_ROUTE_POINTS 0x4C
+/* Prints each player's Course Points */
+#define GAME_FLAG_SHOW_COURSE_POINTS 0x68
+
+/*
+ * InitPlay's second kind of round reads these as two-bit numbers, the first
+ * flag of each the high bit: the round's kind, which picks Stroke, Training,
+ * or Skins Match with three players, and Stroke's extra players
+ */
+#define GAME_FLAG_ROUND_KIND_HIGH_BIT 0x33
+#define GAME_FLAG_ROUND_KIND_LOW_BIT 0x34
+#define GAME_FLAG_EXTRA_PLAYERS_HIGH_BIT 0x30
+#define GAME_FLAG_EXTRA_PLAYERS_LOW_BIT 0x31
+/* Has InitPlay's first kind of round play Ring Shot instead of Stroke */
+#define GAME_FLAG_INIT_RING_SHOT 0x35
+
+/* Read as a five-bit number, from the high bit down, by func_800603A8, which
+ * nothing calls */
+#define GAME_FLAG_UNK82 0x82
+#define GAME_FLAG_UNK83 0x83
+#define GAME_FLAG_UNK84 0x84
+#define GAME_FLAG_UNK85 0x85
+#define GAME_FLAG_UNK86 0x86
 
 #endif

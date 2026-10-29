@@ -156,7 +156,7 @@ extern s8 g_HadEveryRingShotStar;
 extern s8 g_RingShotCourseOpenedAtStart;
 
 s32 func_8005F180(void) {
-  return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B);
+  return IsGameFlagSet(GAME_FLAG_UNK32) || IsGameFlagSet(GAME_FLAG_UNK9B);
 }
 
 void func_8005F1C8(void) {
@@ -228,13 +228,15 @@ s32 func_8005F30C(s32 x, s32 z) {
 }
 
 void func_8005F360(void) {
-  switch ((IsGameFlagSet(0x33) * 2) + IsGameFlagSet(0x34)) {
+  switch ((IsGameFlagSet(GAME_FLAG_ROUND_KIND_HIGH_BIT) * 2) +
+      IsGameFlagSet(GAME_FLAG_ROUND_KIND_LOW_BIT)) {
     case 0:
       g_GameState.courseIndex = 0;
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
       g_GameState.playerCount =
-          (IsGameFlagSet(0x30) * 2) + IsGameFlagSet(0x31) + 1;
+          (IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_HIGH_BIT) * 2) +
+          IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_LOW_BIT) + 1;
       g_GameState.unk0 = 0;
       g_GameState.gameMode = 0;
       break;
@@ -273,7 +275,7 @@ void func_8005F4AC(void) {
   g_GameState.holeIndex = 0;
   g_GameState.unk14 = 0;
   g_GameState.unk0 = 11;
-  if (IsGameFlagSet(0x35)) {
+  if (IsGameFlagSet(GAME_FLAG_INIT_RING_SHOT)) {
     g_GameState.gameMode = 9;
   } else {
     g_GameState.gameMode = 0;
@@ -389,7 +391,9 @@ void InitPlay(s32 kind) {
     SetUpPlayers();
   }
 
-  if ((IsGameFlagSet(0x33) * 2) + IsGameFlagSet(0x34) == 2) {
+  if ((IsGameFlagSet(GAME_FLAG_ROUND_KIND_HIGH_BIT) * 2) +
+          IsGameFlagSet(GAME_FLAG_ROUND_KIND_LOW_BIT) ==
+      2) {
     g_Players[1].unk1E[0] = 1;
   }
 
@@ -689,9 +693,10 @@ void func_80060358(void) {
 }
 
 s32 func_800603A8(void) {
-  return (IsGameFlagSet(0x82) << 4) | (IsGameFlagSet(0x83) << 3) |
-      (IsGameFlagSet(0x84) << 2) | (IsGameFlagSet(0x85) << 1) |
-      IsGameFlagSet(0x86);
+  return (IsGameFlagSet(GAME_FLAG_UNK82) << 4) |
+      (IsGameFlagSet(GAME_FLAG_UNK83) << 3) |
+      (IsGameFlagSet(GAME_FLAG_UNK84) << 2) |
+      (IsGameFlagSet(GAME_FLAG_UNK85) << 1) | IsGameFlagSet(GAME_FLAG_UNK86);
 }
 
 /* Copies the game state and players to D_801B55F0 and D_8012D0C8 */
@@ -1847,7 +1852,7 @@ void func_800628C4(void) {
   s32 column;
   s32 offset;
 
-  ClearGameFlag(7);
+  ClearGameFlag(GAME_FLAG_HOLE_LOADED);
   for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
     for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
       point = GetGroundPoint(column, row)->v;

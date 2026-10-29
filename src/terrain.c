@@ -434,7 +434,7 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
       waterBias = LOWERED_WATER_BIAS;
     }
 
-    if (IsGameFlagSet(0x9F)) {
+    if (IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
       char text[0x80];
 
       sprintf(text, "ratio %f,%x", fraction,
@@ -1491,7 +1491,7 @@ void UpdateDebugScenes(void) {
     return;
   }
 
-  if (IsGameFlagSet(0x1A)) {
+  if (IsGameFlagSet(GAME_FLAG_SHOW_SURFACE_NAME)) {
     PrintDebugText(GetSurfaceInfoAt(
                        g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z])
                        ->name,
@@ -1521,7 +1521,7 @@ void UpdateDebugScenes(void) {
       ClearDebugText();
       g_Scene = f_SceneBeforeFlags;
       InitClubs();
-      if (IsGameFlagSet(0x9E)) {
+      if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
         nuContRmbMgrRemove();
       }
     } else {
