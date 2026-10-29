@@ -1414,7 +1414,7 @@ void DecodeCartridgeCharacter(
   } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_3)) {
     character->ballType = GAME_BOY_BALL_TYPE_WARIO;
   } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_4)) {
-    character->ballType = GAME_BOY_BALL_TYPE_HEAVY_HITTER;
+    character->ballType = GAME_BOY_BALL_TYPE_RAINBOW;
   } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_5)) {
     character->ballType = GAME_BOY_BALL_TYPE_5;
   } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_6)) {

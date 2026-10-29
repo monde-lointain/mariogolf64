@@ -50,7 +50,7 @@
 #define BOWSER_CONTACT_IMAGE_ASSET 0x6AE
 #define WARIO_CONTACT_IMAGE_ASSET 0x6A7
 #define WARIO_CONTACT_SECOND_IMAGE_ASSET 0x6A8
-#define HEAVY_HITTER_CONTACT_IMAGE_ASSET 0x6A6
+#define RAINBOW_CONTACT_IMAGE_ASSET 0x6A6
 
 /* A banner's letters, each an image drawn on its own square */
 #define BANNER_MAX_LETTERS 11
@@ -2374,8 +2374,8 @@ s32 GetContactStyle(Player* player) {
         return CONTACT_STYLE_BOWSER;
       case GAME_BOY_BALL_TYPE_WARIO:
         return CONTACT_STYLE_WARIO;
-      case GAME_BOY_BALL_TYPE_HEAVY_HITTER:
-        return CONTACT_STYLE_HEAVY_HITTER;
+      case GAME_BOY_BALL_TYPE_RAINBOW:
+        return CONTACT_STYLE_RAINBOW;
       case GAME_BOY_BALL_TYPE_5:
         return CONTACT_STYLE_GAME_BOY_BALL_5;
       case GAME_BOY_BALL_TYPE_6:
@@ -2392,7 +2392,7 @@ s32 GetContactStyle(Player* player) {
   }
 
   if (character == CHARACTER_YOSHI || character == CHARACTER_DONKEY_KONG) {
-    return CONTACT_STYLE_HEAVY_HITTER;
+    return CONTACT_STYLE_RAINBOW;
   }
 
   if (character == CHARACTER_BOWSER) {
@@ -2472,13 +2472,13 @@ void StartContactEffect(s32 effect) {
       f_ContactTextureT = 0x7FF;
       PlaySound(
           SOUND_CONTACT_WARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    } else if (f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
+    } else if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
       f_ContactVertices[0].v.ob[AXIS_X] = -60;
       f_ContactVertices[1].v.ob[AXIS_X] = 60;
       f_ContactTextureS = 0x7FF;
       f_ContactTextureT = 0;
-      PlaySound(SOUND_CONTACT_HEAVY_HITTER, CONTACT_STYLE_SOUND_CHANNEL,
-          SOUND_FULL_SCALE);
+      PlaySound(
+          SOUND_CONTACT_RAINBOW, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
       f_ContactVertices[0].v.ob[AXIS_X] = -20;
       f_ContactVertices[1].v.ob[AXIS_X] = 20;
@@ -2522,8 +2522,8 @@ void LoadContactImages(Player* player) {
       ReadEncodedAsset(
           g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET, &asset);
       break;
-    case CONTACT_STYLE_HEAVY_HITTER:
-      OpenEncodedAsset(HEAVY_HITTER_CONTACT_IMAGE_ASSET, &asset);
+    case CONTACT_STYLE_RAINBOW:
+      OpenEncodedAsset(RAINBOW_CONTACT_IMAGE_ASSET, &asset);
       ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
       break;
     case CONTACT_STYLE_MARIO:
@@ -2655,7 +2655,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     }
   } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
     alpha = CONTACT_WARIO_ALPHA - g_ContactEffect;
-  } else if (f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
+  } else if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
     if (g_ContactEffect < CONTACT_HOLD_AGE) {
       alpha = CONTACT_CHARACTER_ALPHA;
     } else {
@@ -2754,9 +2754,9 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
   }
 
-  /* Bowser's and the heavy hitters' images have their own colors */
+  /* Bowser's image and the rainbow have their own colors */
   if (f_ContactStyle == CONTACT_STYLE_BOWSER ||
-      f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
+      f_ContactStyle == CONTACT_STYLE_RAINBOW) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
         TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
   } else {
@@ -2765,7 +2765,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
         PRIMITIVE, 0, TEXEL0, 0);
   }
 
-  if (f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
+  if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,

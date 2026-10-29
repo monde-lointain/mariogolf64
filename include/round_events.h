@@ -32,7 +32,7 @@ enum ContactStyle {
   CONTACT_STYLE_MARIO, /* For Mario, Baby Mario and Metal Mario */
   CONTACT_STYLE_BOWSER,
   CONTACT_STYLE_WARIO,
-  CONTACT_STYLE_HEAVY_HITTER, /* For Yoshi and Donkey Kong */
+  CONTACT_STYLE_RAINBOW, /* Yoshi's and Donkey Kong's rainbow trail */
   CONTACT_STYLE_PLAIN,
   /* The styles that every character shares */
   CONTACT_STYLE_POWER_IRON,

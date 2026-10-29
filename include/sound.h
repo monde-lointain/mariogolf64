@@ -87,7 +87,7 @@ enum Sound {
   SOUND_GOOMBA = 0x2A, /* Also the Monty Mole's and in the opening */
   SOUND_MONKEY = 0x2C,
   SOUND_CONTACT_MARIO = 0x2E, /* Also Bowser's */
-  SOUND_CONTACT_HEAVY_HITTER,
+  SOUND_CONTACT_RAINBOW,
   SOUND_CONTACT_WARIO, /* Also played when the game halts on a fault */
   /* Played a second before a firework launches */
   SOUND_FIREWORK_LEAD_IN,
