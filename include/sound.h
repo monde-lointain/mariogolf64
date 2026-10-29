@@ -23,11 +23,13 @@
  * the others.
  */
 enum Sound {
-  SOUND_LAND_FAIRWAY = 2, /* Also for the semi-rough */
+  SOUND_LAND_FAIRWAY = 2, /* Also for the semi-rough and in the opening */
   SOUND_LAND_ROUGH,
   SOUND_LAND_SAND, /* Bunkers and bare ground */
-  SOUND_LAND_GREEN,
+  SOUND_LAND_GREEN, /* Also played in the opening */
   SOUND_LAND_WATER = 9,
+  /* Played four times in the opening, each lower in pitch */
+  SOUND_UNK11 = 0xB,
   SOUND_HIT_FLAGSTICK = 0xE,
   SOUND_HIT_FLAG,
   SOUND_HIT_CUP_WALL,
@@ -35,23 +37,32 @@ enum Sound {
   SOUND_HIT_CUP_BOTTOM,
   /* For a ball that comes into the cup slowly enough to stay */
   SOUND_CUP_IN,
-  SOUND_ROLL = 0x14,
-  SOUND_FLAG_SWISH = 0x1F,
+  SOUND_ROLL = 0x14, /* Also played in the opening */
+  SOUND_FLAG_SWISH = 0x1F, /* Also played in the opening */
   SOUND_TICK, /* A tally's tick and each click of the club slots' reels */
   SOUND_REEL_STOP,
   /* Also the club slots' turn and a sound of the scorecard */
   SOUND_TALLY_DONE,
   SOUND_START_LIGHT_RED,
   SOUND_START_LIGHT_GO,
-  SOUND_WIND_FLY_GUY = 0x28,
-  SOUND_GOOMBA = 0x2A, /* Also the Monty Mole's */
+  /*
+   * SOUND_UNK39 and SOUND_UNK77 play in bursts as the opening's Lakitu
+   * flies; SOUND_UNK77 also with the opening's Yoshi or Donkey Kong
+   */
+  SOUND_UNK39 = 0x27,
+  SOUND_WIND_FLY_GUY, /* Also played in the opening */
+  SOUND_GOOMBA = 0x2A, /* Also the Monty Mole's and in the opening */
   SOUND_CONTACT_MARIO = 0x2E, /* Also Bowser's */
   SOUND_CONTACT_HEAVY_HITTER,
   SOUND_CONTACT_WARIO, /* Also played when the game halts on a fault */
   /* Played a second before a firework launches */
   SOUND_FIREWORK_LEAD_IN,
   SOUND_FIREWORK_LAUNCH,
-  SOUND_YOSHI_EAGLE_SECOND_EFFECT = 0x35, /* Also played in the opening */
+  /* As the opening's burst appears */
+  SOUND_BURST = 0x34,
+  SOUND_YOSHI_EAGLE_SECOND_EFFECT, /* Also played in the opening */
+  /* In the opening, before SOUND_UNK321 or SOUND_UNK338 */
+  SOUND_UNK54,
   SOUND_METAL_MARIO_EAGLE_EFFECT = 0x38,
   SOUND_WARIO_BOGEY_EFFECT,
   /* With each spreading circle of Bowser's bogey reaction */
@@ -83,18 +94,23 @@ enum Sound {
    */
   SOUND_GO,
   SOUND_CAPTION_MEET, /* Also played when the save data is erased */
+  SOUND_UNK77 = 0x4D,
+  /* In the opening, in steps across the pan */
+  SOUND_UNK78,
   /* Over and over in her reactions and the opening */
-  SOUND_YOSHI_REPEATED = 0x4F,
-  SOUND_MENU_START,
+  SOUND_YOSHI_REPEATED,
+  SOUND_MENU_START, /* Also played in the opening */
   /* A ball being struck by a plain club or bouncing on hard ground */
   SOUND_CONTACT_PLAIN,
   SOUND_ENTER_TOURNAMENT = 0x54,
-  SOUND_UNK90 = 0x5A,
+  /* As each of the opening's shots launches its sparks */
+  SOUND_SHOT_SPARKS = 0x59,
+  SOUND_UNK90,
   SOUND_LOOK_DOWN_RANGE, /* Also played when a scorecard row flips */
   SOUND_MENU_MOVE, /* Also the prompts' cursor and the scorecard's pages */
   SOUND_MENU_CONFIRM, /* The sound of confirming a choice */
   SOUND_MENU_CANCEL = 0x5F,
-  SOUND_LOOK_AT_CUP,
+  SOUND_LOOK_AT_CUP, /* Also played in the opening */
   SOUND_LOOK_BACK, /* Also a sound of the scorecard */
   /*
    * The swing meter's click for an impact on the mark; also a ring passed
@@ -129,7 +145,7 @@ enum Sound {
   SOUND_CONTROLS_CLOSE,
   /* SOUND_UNK118, SOUND_UNK135 and SOUND_UNK400 are the audio test's */
   SOUND_UNK118 = 0x76,
-  SOUND_OUT_OF_BOUNDS,
+  SOUND_OUT_OF_BOUNDS, /* Also played in the opening */
   SOUND_UNK135 = 0x87,
   SOUND_RING_SHOT_RETRY = 0x8E,
   SOUND_HOLE_INTRO,
@@ -139,9 +155,12 @@ enum Sound {
   SOUND_AZALEA_PAR = 0xAE,
   SOUND_AZALEA_BOGEY = 0xB1,
   SOUND_AZALEA_BIRDIE,
-  SOUND_BABY_MARIO_EAGLE = 0xC6,
+  /* Also with the opening's Yoshi */
+  SOUND_BABY_MARIO_CALL_OUT_DOWN = 0xC3,
+  SOUND_BABY_MARIO_CALL_OUT_C_DOWN = 0xC5,
+  SOUND_BABY_MARIO_EAGLE,
   SOUND_BABY_MARIO_PAR = 0xC9, /* Also the start of his birdie */
-  SOUND_BABY_MARIO_BIRDIE,
+  SOUND_BABY_MARIO_BIRDIE, /* Also played in the opening */
   SOUND_BABY_MARIO_BOGEY,
   SOUND_CHARLIE_EAGLE,
   SOUND_CHARLIE_PAR = 0xD6,
@@ -169,27 +188,62 @@ enum Sound {
   SOUND_BOWSER_PAR = 0x138,
   SOUND_LUIGI_BIRDIE = 0x13F,
   SOUND_LUIGI_BOGEY,
+  /*
+   * With the opening's Donkey Kong where SOUND_UNK338 plays with Yoshi,
+   * and as the opening's burst appears
+   */
+  SOUND_UNK321,
+  /*
+   * SOUND_UNK326, SOUND_UNK374, SOUND_UNK406 and SOUND_UNK430 fall among
+   * Luigi's, Mario's, Peach's and Plum's voice sounds; the opening plays
+   * them in threes
+   */
+  SOUND_UNK326 = 0x146,
+  /* Also Luigi's full-shot sound */
+  SOUND_LUIGI_CALL_OUT_UP,
+  SOUND_LUIGI_CALL_OUT_RIGHT,
   SOUND_LUIGI_PAR = 0x14E,
   SOUND_LUIGI_EAGLE = 0x150,
+  SOUND_UNK338 = 0x152,
   SOUND_MAPLE_BOGEY = 0x159,
   SOUND_MAPLE_EAGLE = 0x15D,
   SOUND_MAPLE_BIRDIE = 0x168,
   SOUND_MAPLE_PAR,
   SOUND_METAL_MARIO_BIRDIE = 0x173,
+  SOUND_UNK374 = 0x176,
+  /* Also Mario's and Metal Mario's full-shot sound */
+  SOUND_MARIO_CALL_OUT_UP,
   SOUND_METAL_MARIO_BOGEY = 0x17F,
   SOUND_METAL_MARIO_EAGLE,
   SOUND_METAL_MARIO_PAR = 0x182,
   /* The opening's ambient sounds */
   SOUND_AMBIENT_ALTERNATING_FIRST = 0x184,
   SOUND_AMBIENT_ALTERNATING_SECOND,
-  SOUND_AMBIENT_REPEATING = 0x18B,
+  /*
+   * SOUND_UNK391 and SOUND_UNK417 play with the opening's Yoshi, where
+   * SOUND_UNK392 and SOUND_UNK418 play with its Donkey Kong
+   */
+  SOUND_UNK391 = 0x187,
+  SOUND_UNK392,
+  /* SOUND_UNK393 and SOUND_UNK394 each play once in the opening */
+  SOUND_UNK393,
+  SOUND_UNK394,
+  SOUND_AMBIENT_REPEATING,
   SOUND_PEACH_PAR = 0x18E,
   SOUND_UNK400 = 0x190, /* Also one of Peach's voice sounds */
   SOUND_PEACH_BIRDIE = 0x194,
+  SOUND_UNK406 = 0x196,
+  /* Also Peach's full-shot sound */
+  SOUND_PEACH_CALL_OUT_UP,
   SOUND_PEACH_BOGEY = 0x19F,
   SOUND_PEACH_EAGLE,
-  SOUND_AMBIENT_RANDOM_FIRST = 0x1A3, /* Also Plum's par reaction */
+  SOUND_UNK417,
+  SOUND_UNK418,
+  SOUND_AMBIENT_RANDOM_FIRST, /* Also Plum's par reaction */
   SOUND_PLUM_EAGLE = 0x1AC,
+  SOUND_UNK430 = 0x1AE,
+  /* Also Plum's full-shot sound */
+  SOUND_PLUM_CALL_OUT_UP,
   SOUND_PLUM_BOGEY = 0x1B7,
   SOUND_PLUM_BIRDIE = 0x1B9,
   SOUND_AMBIENT_RANDOM_SECOND,
@@ -208,7 +262,11 @@ enum Sound {
   SOUND_YOSHI_EAGLE,
   SOUND_YOSHI_BOGEY = 0x206,
   SOUND_YOSHI_BIRDIE = 0x208,
-  SOUND_YOSHI_PAR
+  SOUND_YOSHI_PAR,
+  /* Also Yoshi's excellent-shot sound */
+  SOUND_YOSHI_CALL_OUT_LEFT = 0x20B,
+  /* As the opening's Lakitu flies off at its close */
+  SOUND_OPENING_CLOSE = 0x211
 };
 
 /*
