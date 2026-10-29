@@ -199,8 +199,19 @@ static void ResetBallSimulations(void) {
   }
 }
 
+/*
+ * Where the debug text shows the ball's state, height and speeds; the speeds
+ * scroll through SPEED_TEXT_ROW_COUNT rows, blanking the row after the newest
+ */
+#define STATE_TEXT_COLUMN 2
+#define STATE_TEXT_ROW 0xF
+#define HEIGHT_TEXT_COLUMN 1
+#define HEIGHT_TEXT_ROW 0xF
+#define SPEED_TEXT_COLUMN 3
+#define SPEED_TEXT_CLEAR_COLUMN 7
 #define SPEED_TEXT_ROW_COUNT 8
 #define SPEED_TEXT_FIRST_ROW 8
+#define DEBUG_TEXT_SIZE 128
 /*
  * The speed display turns speeds into kilometers per hour with this: 3.6
  * kilometers per hour per meter per second over
@@ -292,8 +303,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         (1.0f / NOISE_BYTE_MIDPOINT);
   }
 
-  char speedText[128];
-  char heightText[128];
+  char speedText[DEBUG_TEXT_SIZE];
+  char heightText[DEBUG_TEXT_SIZE];
   f32 fraction;
   s32 startX;
   s32 startY;
@@ -313,7 +324,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
   isNearCup = FALSE;
   fraction = 1.0f;
   if (printsDebugText) {
-    PrintDebugPaddedHex(simulation->state, 2, 0xF);
+    PrintDebugPaddedHex(simulation->state, STATE_TEXT_COLUMN, STATE_TEXT_ROW);
   }
 
   substep = 0;
@@ -330,9 +341,10 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           (s32)IntLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]) *
               SPEED_TEXT_KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
-      PrintDebugText(speedText, 3, D_8020B858_ovl_05 + SPEED_TEXT_FIRST_ROW);
+      PrintDebugText(speedText, SPEED_TEXT_COLUMN,
+          D_8020B858_ovl_05 + SPEED_TEXT_FIRST_ROW);
       D_8020B858_ovl_05 = (D_8020B858_ovl_05 + 1) % SPEED_TEXT_ROW_COUNT;
-      PrintDebugText("                            ", 7,
+      PrintDebugText("                            ", SPEED_TEXT_CLEAR_COLUMN,
           D_8020B858_ovl_05 + SPEED_TEXT_FIRST_ROW);
     }
 
@@ -341,7 +353,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         sprintf(heightText, "Height %fYd   ",
             (simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y]) *
                 YARDS_PER_UNIT);
-        PrintDebugText(heightText, 1, 0xF);
+        PrintDebugText(heightText, HEIGHT_TEXT_COLUMN, HEIGHT_TEXT_ROW);
       }
     }
 
@@ -473,7 +485,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
       flags |= contact;
       if (printsDebugText) {
-        PrintDebugPaddedHex(contact, 2, 6);
+        PrintDebugPaddedHex(
+            contact, CONTACT_DEBUG_TEXT_COLUMN, CONTACT_DEBUG_TEXT_ROW);
         osSyncPrintf("col%d\n", contact);
       }
     }
@@ -576,7 +589,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                   (f32)simulation->velocity[AXIS_Y] >= -KilometersPerHour(5)) {
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
-                  PrintDebugText("CUPIN!", 0x14, 0xA);
+                  PrintDebugText(
+                      "CUPIN!", CUP_DEBUG_TEXT_COLUMN, CUP_DEBUG_TEXT_ROW);
                 }
 
                 simulation->state = BALL_STATE_IN_CUP;
@@ -602,7 +616,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                 isNearCup = TRUE;
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
-                  PrintDebugText("KURU!", 0x14, 0xA);
+                  PrintDebugText(
+                      "KURU!", CUP_DEBUG_TEXT_COLUMN, CUP_DEBUG_TEXT_ROW);
                 }
 
                 toCup[AXIS_Y] = 0.0f;
@@ -1782,33 +1797,34 @@ s32 func_8020A488_ovl_05(
 
     if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
         IsGameFlagSet(GAME_FLAG_SHOW_LAUNCH_VALUES)) {
-      char text[128];
+      char text[LAUNCH_VALUE_TEXT_SIZE];
 
       sprintf(text, "ANGLEY = %3.3d/360",
           (s32)(yawRadians * (f32)RADIANS_TO_DEGREES));
-      PrintDebugText(text, 3, 6);
+      PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_YAW);
       sprintf(
           text, "ANGLEX = %3.3d/360", (s32)(pitch * (f32)RADIANS_TO_DEGREES));
-      PrintDebugText(text, 3, 7);
+      PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_PITCH);
       sprintf(text, "Velocity = %fm/s     ",
           speed * (1.0f / SPEED_UNITS_PER_METER_PER_SECOND));
-      PrintDebugText(text, 3, 8);
+      PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPEED);
       sprintf(text, "SpinY = %d", simulation->sideSpin);
-      PrintDebugText(text, 3, 9);
+      PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SIDE_SPIN);
       sprintf(text, "SpinX = %d", simulation->spinSpeed);
-      PrintDebugText(text, 3, 10);
+      PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPIN);
       sprintf(text, "SpinVel = %fRPM      ",
           simulation->spinSpeed * RPM_PER_SPIN_SPEED_UNIT);
-      PrintDebugText(text, 3, 11);
+      PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPIN_RPM);
       sprintf(text, "SpinAngle = %3.3d/360",
           (s32)(simulation->spinHeading * (f32)RADIANS_TO_DEGREES));
-      PrintDebugText(text, 3, 12);
+      PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPIN_HEADING);
       sprintf(text, "SpinVelX = %fkm/h      ",
           simulation->spinSpeed * KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
-      PrintDebugText(text, 3, 13);
+      PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPIN_SPEED);
       sprintf(text, "SpinVelY = %fkm/h      ",
           simulation->sideSpin * KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
-      PrintDebugText(text, 3, 14);
+      PrintDebugText(
+          text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SIDE_SPIN_SPEED);
     }
   }
 
