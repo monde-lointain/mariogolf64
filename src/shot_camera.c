@@ -1505,7 +1505,7 @@ void StartHoleCamerasAndSong(void) {
   g_HoleFlyoverFrame = 0;
   g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
   g_Cameras[1].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
-  if (g_GameState.replayKind) {
+  if (g_GameState.replayKind != REPLAY_KIND_NONE) {
     PlaySong(SONG_ROUND_UNK31, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
     return;
   }

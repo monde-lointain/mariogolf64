@@ -2055,10 +2055,11 @@ void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect) {
   *displayListHead = gfx;
 }
 
-/* Rumbles the player's controller briefly if it has a Rumble Pak, unless
- * g_GameState.replayKind is set */
+/* Rumbles the player's controller briefly if it has a Rumble Pak, unless a
+ * replay is playing */
 void StartPlayerRumble(UnkB8* player) {
-  if (player->controllerIndex < MAXCONTROLLERS && !g_GameState.replayKind) {
+  if (player->controllerIndex < MAXCONTROLLERS &&
+      g_GameState.replayKind == REPLAY_KIND_NONE) {
     switch (nuContRmbCheck(g_PlayerControllerPorts[player->controllerIndex])) {
       case 0:
         nuContRmbStart(g_PlayerControllerPorts[player->controllerIndex],
@@ -2076,7 +2077,8 @@ void StartPlayerRumble(UnkB8* player) {
 /* The same as StartPlayerRumble; the ball simulation calls it when the ball
  * passes a ring */
 void StartRingPassRumble(UnkB8* player) {
-  if (player->controllerIndex < MAXCONTROLLERS && !g_GameState.replayKind) {
+  if (player->controllerIndex < MAXCONTROLLERS &&
+      g_GameState.replayKind == REPLAY_KIND_NONE) {
     switch (nuContRmbCheck(g_PlayerControllerPorts[player->controllerIndex])) {
       case 0:
         nuContRmbStart(g_PlayerControllerPorts[player->controllerIndex],

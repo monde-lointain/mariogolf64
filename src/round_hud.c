@@ -1137,7 +1137,7 @@ void StartShotPanel(void) {
     ReadEncodedAsset(f_LieImage, &asset);
   }
 
-  if (g_GameState.replayKind) {
+  if (g_GameState.replayKind != REPLAY_KIND_NONE) {
     g_RoundHud.skinsTotals[0] = 0;
   } else {
     switch (g_GameState.gameMode) {
