@@ -978,7 +978,6 @@ INCLUDE_ASM("asm/nonmatchings/club", GetShotWorldDistance);
  * then hands WriteHostFile the name clubpara.c and the text's size.
  * AppendText is a nested function, a GNU C extension.
  */
-#ifdef NON_MATCHING
 void WriteClubParameters(void) {
   char line[CLUB_SOURCE_LINE_SIZE];
   char* cursor;
@@ -986,6 +985,7 @@ void WriteClubParameters(void) {
   char* source;
   s32 index;
   s32 step;
+  Club* club;
 
   void AppendText(char* text) {
     char character;
@@ -1014,10 +1014,10 @@ void WriteClubParameters(void) {
       "static const CPARA cp[MAXCLUB] = {\n");
   AppendText(line);
   for (index = 0; index < CLUB_COUNT; index++) {
-    sprintf(line, "{{%d, %d, %d}, {%d, %d, %d}},\n", g_Clubs[index].power[0],
-        g_Clubs[index].power[1], g_Clubs[index].power[2],
-        g_Clubs[index].deflection[0], g_Clubs[index].deflection[1],
-        g_Clubs[index].deflection[2]);
+    club = &g_Clubs[index];
+    sprintf(line, "{{%d, %d, %d}, {%d, %d, %d}},\n", club->power[0],
+        club->power[1], club->power[2], club->deflection[0],
+        club->deflection[1], club->deflection[2]);
     AppendText(line);
   }
 
@@ -1045,10 +1045,6 @@ void WriteClubParameters(void) {
   WriteHostFile(line, cursor - source);
   FreeMemory(&source);
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/club", AppendText);
-INCLUDE_ASM("asm/nonmatchings/club", WriteClubParameters);
-#endif
 
 /*
  * Test-fires the club in each shot mode until its power carries it the
