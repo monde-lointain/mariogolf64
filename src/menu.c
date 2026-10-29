@@ -1972,7 +1972,7 @@ void func_8005D9A0(void) {
     D_800FBE08[index] = 0;
   }
 
-  D_801323A0.unk18 = 3;
+  D_801323A0.unk18 = HOLES_CHOICE_ALL;
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
   D_801323A0.statsCourse = 6;
   D_801052E8 = 0;

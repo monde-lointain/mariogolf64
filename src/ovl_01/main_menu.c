@@ -1691,16 +1691,16 @@ void func_801F6B28_ovl_01(void) {
       *holeSelection = D_8022BE1C_ovl_01;
       if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
         switch (D_801323A0.unk18) {
-          case 0:
+          case HOLES_CHOICE_UNK0:
             *holeSelection = HOLE_SELECTION_ALL;
             break;
-          case 1:
+          case HOLES_CHOICE_FRONT_NINE:
             *holeSelection = HOLE_SELECTION_FRONT_NINE;
             break;
-          case 2:
+          case HOLES_CHOICE_BACK_NINE:
             *holeSelection = HOLE_SELECTION_BACK_NINE;
             break;
-          case 3:
+          case HOLES_CHOICE_ALL:
             *holeSelection = HOLE_SELECTION_ALL;
             break;
         }
