@@ -645,8 +645,12 @@ static Club f_NoClub = {80, "0000", 0, {0}, 0, 230, -11, 0, 14, 100,
     ASSET_DRIVER_HEAD_IMAGE, 0, {0}};
 static ShotLaunch f_ClubTestShot = {
     STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-/* A generated club's unk14, by its set's unk1E from -4 to 4 */
-static u8 f_Unk14Values[9] = {30, 50, 70, 80, 100, 115, 120, 145, 170};
+/* A generated club's unk14, by its set's unk1E from -MAX_SET_UNK1E to
+ * MAX_SET_UNK1E; other unk1E values give DEFAULT_CLUB_UNK14 */
+#define MAX_SET_UNK1E 4
+#define DEFAULT_CLUB_UNK14 100
+static u8 f_Unk14Values[(MAX_SET_UNK1E * 2) + 1] = {
+    30, 50, 70, 80, 100, 115, 120, 145, 170};
 /* Each stock club set's curve, from -4, the strongest fade, to 4 */
 static s8 f_StockCurves[CLUB_SET_COUNT] = {
     0, -1, 0, 1, -2, 0, 2, -3, 2, 3, 0, -3, 3, 3, 0, 0, 0, 0};
@@ -1164,6 +1168,19 @@ INCLUDE_ASM("asm/nonmatchings/club", InterpolatePower);
 INCLUDE_ASM("asm/nonmatchings/club", GenerateClub);
 #endif
 
+/* GenerateClubSet's limits on a club's stats; distances are in yards */
+#define MAX_CLUB_DISTANCE 400
+#define FLATTEST_CLUB_PITCH (-7)
+#define STEEPEST_CLUB_PITCH (-45)
+#define MAX_CLUB_SIDE_SPIN 100
+#define MAX_CLUB_CURVE 4
+/* Each point of a set's mishitResistance takes MISHIT_SCALE_PER_RESISTANCE
+ * from BASE_MISHIT_SCALE */
+#define BASE_MISHIT_SCALE 110
+#define MISHIT_SCALE_PER_RESISTANCE 9
+#define MIN_MISHIT_SCALE 70
+#define MAX_MISHIT_SCALE 145
+
 /* Builds the set's clubs from the stats, then generates their parameters */
 void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
   s32 type;
@@ -1172,52 +1189,55 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
   for (type = 0; type < CLUB_SET_SIZE; type++) {
     club = GetClub((setIndex * CLUB_SET_SIZE) + type);
     club->distance = stats->clubs[type].distance;
-    if (club->distance > 400) {
-      club->distance = 400;
+    if (club->distance > MAX_CLUB_DISTANCE) {
+      club->distance = MAX_CLUB_DISTANCE;
     }
 
     osSyncPrintf("TargetDist %d\n", club->distance);
-    club->pitch = -((stats->clubs[type].pitch * 360 / 0x10000) + stats->pitch);
+    club->pitch =
+        -((stats->clubs[type].pitch * DEGREES_PER_TURN / BINARY_ANGLE_TURN) +
+            stats->pitch);
     osSyncPrintf("Xang %d\n", club->pitch);
-    if (club->pitch > -7) {
-      club->pitch = -7;
+    if (club->pitch > FLATTEST_CLUB_PITCH) {
+      club->pitch = FLATTEST_CLUB_PITCH;
     }
 
-    if (club->pitch < -45) {
-      club->pitch = -45;
+    if (club->pitch < STEEPEST_CLUB_PITCH) {
+      club->pitch = STEEPEST_CLUB_PITCH;
     }
 
     club->sideSpin = stats->clubs[type].unk5;
-    if (club->sideSpin > 100) {
-      club->sideSpin = 100;
+    if (club->sideSpin > MAX_CLUB_SIDE_SPIN) {
+      club->sideSpin = MAX_CLUB_SIDE_SPIN;
     }
 
-    if (club->sideSpin < -100) {
-      club->sideSpin = -100;
+    if (club->sideSpin < -MAX_CLUB_SIDE_SPIN) {
+      club->sideSpin = -MAX_CLUB_SIDE_SPIN;
     }
 
-    if ((u8)(stats->unk1E + 4) >= ARRAY_COUNT(f_Unk14Values)) {
-      club->unk14 = 100;
+    if ((u8)(stats->unk1E + MAX_SET_UNK1E) >= ARRAY_COUNT(f_Unk14Values)) {
+      club->unk14 = DEFAULT_CLUB_UNK14;
     } else {
-      club->unk14 = f_Unk14Values[stats->unk1E + 4];
+      club->unk14 = f_Unk14Values[stats->unk1E + MAX_SET_UNK1E];
     }
 
-    club->mishitScale = 110 - (stats->mishitResistance * 9);
+    club->mishitScale = BASE_MISHIT_SCALE -
+        (stats->mishitResistance * MISHIT_SCALE_PER_RESISTANCE);
     club->curve = stats->curve;
-    if (club->curve < -4) {
-      club->curve = -4;
+    if (club->curve < -MAX_CLUB_CURVE) {
+      club->curve = -MAX_CLUB_CURVE;
     }
 
-    if (club->curve > 4) {
-      club->curve = 4;
+    if (club->curve > MAX_CLUB_CURVE) {
+      club->curve = MAX_CLUB_CURVE;
     }
 
-    if (club->mishitScale > 145) {
-      club->mishitScale = 145;
+    if (club->mishitScale > MAX_MISHIT_SCALE) {
+      club->mishitScale = MAX_MISHIT_SCALE;
     }
 
-    if (club->mishitScale < 70) {
-      club->mishitScale = 70;
+    if (club->mishitScale < MIN_MISHIT_SCALE) {
+      club->mishitScale = MIN_MISHIT_SCALE;
     }
 
     g_GameState.isMiniGolf = FALSE;
