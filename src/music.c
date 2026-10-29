@@ -148,7 +148,7 @@ void StartMusicPlayer(musConfig* config) {
   f_AudioTask.msg = NULL;
   f_AudioTask.list.t.ucode_boot = (u64*)rspbootTextStart;
   f_AudioTask.list.t.ucode_boot_size =
-      (u8*)n_aspMainTextStart - (u8*)rspbootTextStart;
+      BytesBetween(rspbootTextStart, n_aspMainTextStart);
   f_AudioTask.list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
   f_AudioTask.list.t.dram_stack = NULL;
   f_AudioTask.list.t.dram_stack_size = 0;

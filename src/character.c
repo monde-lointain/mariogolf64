@@ -1016,8 +1016,8 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
 
     slot->frameData[0] = OS_PHYSICAL_TO_K0(
         osVirtualToPhysical((void*)slot->model->frameDataStart));
-    slot->frameData[1] = (u8*)slot->frameData[0] + frameDataSize;
-    slot->frameData[2] = (u8*)slot->frameData[1] + frameDataSize;
+    slot->frameData[1] = AddressPast(slot->frameData[0], frameDataSize);
+    slot->frameData[2] = AddressPast(slot->frameData[1], frameDataSize);
     memcpy(slot->frameData[1], slot->frameData[0], frameDataSize);
     memcpy(slot->frameData[2], slot->frameData[0], frameDataSize);
     g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
@@ -1791,8 +1791,7 @@ s32 GetCharacterBufferSize(void) {
 
 void SetCharacterBuffer(s32 slotIndex, u8* buffer) {
   /* Aligned for SetMultiTlb */
-  u32 alignedBuffer =
-      ((u32)buffer + SMALLEST_PAGE_SIZE - 1) & ~(SMALLEST_PAGE_SIZE - 1);
+  u32 alignedBuffer = RoundUpTo((u32)buffer, SMALLEST_PAGE_SIZE);
   s32 warningCount;
   s32 i;
 
@@ -1806,7 +1805,8 @@ void SetCharacterBuffer(s32 slotIndex, u8* buffer) {
     g_CharacterSlots[slotIndex].modelBuffer = (void*)alignedBuffer;
     for (i = 0; i < FRAME_DATA_COPY_COUNT; i++) {
       g_CharacterSlots[slotIndex].frameData[i] =
-          (u8*)g_CharacterSlots[slotIndex].modelBuffer + FRAME_DATA_OFFSET +
+          AddressPast(
+              g_CharacterSlots[slotIndex].modelBuffer, FRAME_DATA_OFFSET) +
           (i * FRAME_DATA_COPY_SIZE);
     }
   }

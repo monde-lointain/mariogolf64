@@ -4059,7 +4059,7 @@ void BuildGroundTileDisplayList(
   /* The midpoints inside the tile, then those on its edges */
   gSPVertex(gfx++, &midpoints[8], 8, 4);
   gSPVertex(gfx++, SegmentedVertex(1, &midpoints[0]), 2, 12);
-  coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)midpoints;
+  coarseOffsets[segmentIndex++] = BytesBetween(midpoints, vertex);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
       &GetGridVertex((column * 2) + 1, row * 2)->v, &vertex++->v);
   SetTileVertexMidpoint(&GetGridVertex((column * 2) + 1, row * 2)->v,
@@ -4068,20 +4068,20 @@ void BuildGroundTileDisplayList(
   gSPVertex(gfx++, SegmentedVertex(2, &midpoints[4]), 1, 15);
   gSPVertex(gfx++, SegmentedVertex(3, &midpoints[3]), 1, 16);
   gSPVertex(gfx++, SegmentedVertex(3, &midpoints[5]), 1, 17);
-  coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 2);
+  coarseOffsets[segmentIndex++] = BytesBetween(&midpoints[2], vertex);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
       &GetGridVertex(column * 2, (row * 2) + 1)->v, &vertex[0].v);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, (row * 2) + 1)->v,
       &GetGridVertex(column * 2, (row * 2) + 2)->v, &vertex[2].v);
   vertex++;
-  coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 3);
+  coarseOffsets[segmentIndex++] = BytesBetween(&midpoints[3], vertex);
   SetTileVertexMidpoint(&GetGridVertex((column * 2) + 2, row * 2)->v,
       &GetGridVertex((column * 2) + 2, (row * 2) + 1)->v, &vertex[0].v);
   SetTileVertexMidpoint(&GetGridVertex((column * 2) + 2, (row * 2) + 1)->v,
       &GetGridVertex((column * 2) + 2, (row * 2) + 2)->v, &vertex[2].v);
   vertex += 3;
   gSPVertex(gfx++, SegmentedVertex(4, &midpoints[6]), 2, 18);
-  coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 6);
+  coarseOffsets[segmentIndex++] = BytesBetween(&midpoints[6], vertex);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, (row * 2) + 2)->v,
       &GetGridVertex((column * 2) + 1, (row * 2) + 2)->v, &vertex++->v);
   SetTileVertexMidpoint(&GetGridVertex((column * 2) + 1, (row * 2) + 2)->v,

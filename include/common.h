@@ -51,6 +51,14 @@ typedef s32 Boolean;
     (absValue < 0) ? -absValue : absValue; \
   })
 
+/* The bytes from start up to end, which may point at different types */
+#define BytesBetween(start, end) ((u8*)(end) - (u8*)(start))
+/* The address byteCount bytes past pointer, whatever it points at */
+#define AddressPast(pointer, byteCount) ((u8*)(pointer) + (byteCount))
+/* value rounded up to a multiple of alignment, which is a power of two */
+#define RoundUpTo(value, alignment) \
+  (((value) + (alignment) - 1) & ~((alignment) - 1))
+
 /* The RDP loads textures from 8-byte boundaries */
 #define TextureAddress(address) ((u32)(address) & ~7)
 /* The RDP draws into color and depth images from 8-byte boundaries too */

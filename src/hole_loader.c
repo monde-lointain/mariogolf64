@@ -256,7 +256,7 @@ s32 DecodeLzChunk(LzStream* stream) {
 
       reference = *input++;
       if (reference == 0) {
-        return (u8*)output - (u8*)stream->outputStart;
+        return BytesBetween(stream->outputStart, output);
       }
 
       source = output - (reference >> LZ_REFERENCE_DISTANCE_SHIFT);
@@ -396,7 +396,7 @@ DECODE:
 
       /* The u16 casts are redundant, but they are needed to match */
       if ((u16)reference == 0) {
-        return (u8*)output - (u8*)stream->outputStart;
+        return BytesBetween(stream->outputStart, output);
       }
 
       length = reference & 0x1F;

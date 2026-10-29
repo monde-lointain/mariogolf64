@@ -166,7 +166,8 @@ void DestroyBillboardManager(void) {
   osSyncPrintf("DestBillMan\n");
   for (offset = 0; offset < sizeof(f_BillboardTextures);
       offset += sizeof(BillboardTexture)) {
-    ((BillboardTexture*)((u8*)f_BillboardTextures + offset))->pixels = NULL;
+    ((BillboardTexture*)AddressPast(f_BillboardTextures, offset))->pixels =
+        NULL;
   }
 
   ResetHeap(HEAP_BILLBOARD);
@@ -177,7 +178,7 @@ void InitBillboardManager(void* heapStart, s32 heapSize) {
   u8* heapEnd;
 
   osSyncPrintf("InitBillMan\n");
-  heapEnd = (u8*)heapStart + heapSize;
+  heapEnd = AddressPast(heapStart, heapSize);
   DestroyBillboardManager();
   f_HeapStart = heapStart;
   f_HeapEnd = heapEnd;

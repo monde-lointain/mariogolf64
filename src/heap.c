@@ -38,13 +38,9 @@ typedef struct MemoryBlock {
 
 /* Allocations round each block, header included, up to a multiple of this */
 #define BLOCK_ALIGNMENT 8
-#define RoundUpToBlockAlignment(size) \
-  (((size) + BLOCK_ALIGNMENT - 1) & ~(BLOCK_ALIGNMENT - 1))
 
-/* The bytes from start up to end */
-#define RegionSize(start, end) ((u8*)(end) - (u8*)(start))
 /* The block that starts offset bytes into block */
-#define BlockAt(block, offset) ((MemoryBlock*)((u8*)(block) + (offset)))
+#define BlockAt(block, offset) ((MemoryBlock*)AddressPast((block), (offset)))
 /* Whether second starts where first ends, so that freeing can merge them */
 #define IsBlockFollowedBy(first, second) \
   (BlockAt((first), (first)->size) == (second))
@@ -65,7 +61,7 @@ static Heap f_Memory;
 
 void AddHeapRegion(s32 heapIndex, void* start, void* end) {
   MemoryBlock* block = start;
-  u32 size = RegionSize(start, end);
+  u32 size = BytesBetween(start, end);
 
   block->size = size;
   f_Heaps[heapIndex].freeSize += size;
@@ -114,7 +110,7 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
   mask = osSetIntMask(OS_IM_NONE);
 
   /* The size is reused for the block's, to match */
-  size = RoundUpToBlockAlignment(size + sizeof(MemoryBlock));
+  size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
   bestSize = NO_BLOCK_SIZE;
   block = heap->sentinel.next;
   bestBlock = NULL;
@@ -209,7 +205,7 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
 void InitHeapRegions(Boolean hasExpansionPak) {
   void AddMemoryRegion(void* start, void* end) {
     MemoryBlock* block = start;
-    u32 size = RegionSize(start, end);
+    u32 size = BytesBetween(start, end);
 
     block->size = size;
     block->tag = BLOCK_FREE;
@@ -273,7 +269,7 @@ void* AllocMemory(u32 size) {
   mask = osSetIntMask(OS_IM_NONE);
 
   /* The size is reused for the block's, to match */
-  size = RoundUpToBlockAlignment(size + sizeof(MemoryBlock));
+  size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
   bestSize = NO_BLOCK_SIZE;
   bestBlock = NULL;
   block = f_Memory.sentinel.next;

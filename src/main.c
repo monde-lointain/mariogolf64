@@ -244,7 +244,7 @@ void mainproc(void* arg) {
   s32 portIndex;
 
   osAiSetFrequency(AUDIO_FREQUENCY);
-  bzero(main_BSS_END, (u8*)BASE_RDRAM_END - main_BSS_END);
+  bzero(main_BSS_END, BytesBetween(main_BSS_END, BASE_RDRAM_END));
   osWritebackDCacheAll();
   DisableFloatExceptions();
   RunBootHook();
