@@ -2084,6 +2084,13 @@ void DrawSendExperienceScreen(
   *displayListHead = displayList;
 }
 
+/* Whether DrawTransmitMenu shows the transfer mode's options on a screen */
+#define AreOptionsShown(screen) \
+  ((screen) == TRANSMIT_SCREEN_OPTIONS || \
+      (screen) == TRANSMIT_SCREEN_LEAVING || \
+      (screen) == TRANSMIT_SCREEN_UNK6 || \
+      (screen) == TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT)
+
 void DrawTransmitMenu(Gfx** displayListHead) {
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   Gfx* displayList = *displayListHead;
@@ -2226,10 +2233,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
 
   SetUpTextDrawing(&displayList);
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
-  if (transfer->screen == TRANSMIT_SCREEN_OPTIONS ||
-      transfer->screen == TRANSMIT_SCREEN_LEAVING ||
-      transfer->screen == TRANSMIT_SCREEN_UNK6 ||
-      transfer->screen == TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT) {
+  if (AreOptionsShown(transfer->screen)) {
     for (index = 0; index != MODE_OPTION_COUNT; index++) {
       option = f_ModeOptions[transfer->transferMode][index];
       if (option != TRANSMIT_OPTION_NONE) {

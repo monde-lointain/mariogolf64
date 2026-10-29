@@ -2486,6 +2486,14 @@ void AdjustHudOffset(void) {
  * where the wind doesn't count */
 #define SHOT_PANEL_WIND_INDICATOR_X 100.0f
 #define SHOT_PANEL_WIND_INDICATOR_Y 76.0f
+/*
+ * Whether the shot panel shows the wind indicator: while there is wind and
+ * the indicator isn't hidden, off the green and outside the cup view
+ */
+#define IsWindIndicatorDrawn() \
+  (g_HoleSetup.conditions.windSpeed != 0 && g_RoundHud.isWindIndicatorShown && \
+      GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && \
+      !g_IsCupViewShown)
 /* The arrows beside a pause menu panel; they take screen coordinates, while the
  * panels sit in the centered view */
 #define PAUSE_PANEL_ARROWS_GAP 64
@@ -2543,10 +2551,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
             PAUSE_PANEL_ARROWS_GAP);
       }
     }
-  } else if (g_HoleSetup.conditions.windSpeed != 0 &&
-      g_RoundHud.isWindIndicatorShown &&
-      GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN &&
-      !g_IsCupViewShown) {
+  } else if (IsWindIndicatorDrawn()) {
     DrawWindIndicator(&gfx, g_ShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
         SHOT_PANEL_WIND_INDICATOR_Y);
   }
