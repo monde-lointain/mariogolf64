@@ -1288,6 +1288,17 @@ void SpawnShotDebris(
 #define IsPastSpawnGround(effect) \
   ((f32)f_SpawnGroundHeight < \
       (effect)->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)
+/* Whether an effect kind fades faster past the spawn ground height */
+#define IsFadedPastGround(kind) \
+  ((kind) != EFFECT_KIND_RIPPLE && (kind) != EFFECT_KIND_SPREADING_CIRCLE && \
+      (kind) != EFFECT_KIND_SPARKLE && (kind) != EFFECT_KIND_TEAR)
+/*
+ * Whether fading or shrinking away removes an effect kind, which it does not
+ * for divot marks, drops, divots or tears
+ */
+#define IsRemovedWhenFaded(kind) \
+  ((kind) != EFFECT_KIND_DIVOT_MARK && (kind) != EFFECT_KIND_DROP && \
+      (kind) != EFFECT_KIND_DIVOT && (kind) != EFFECT_KIND_TEAR)
 
 /*
  * Moves, fades, spins and animates every effect for a frame, and removes those
@@ -1318,10 +1329,7 @@ void UpdateEffects(void) {
       continue;
     }
 
-    if (IsPastSpawnGround(effect) && effect->kind != EFFECT_KIND_RIPPLE &&
-        effect->kind != EFFECT_KIND_SPREADING_CIRCLE &&
-        effect->kind != EFFECT_KIND_SPARKLE &&
-        effect->kind != EFFECT_KIND_TEAR) {
+    if (IsPastSpawnGround(effect) && IsFadedPastGround(effect->kind)) {
       if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
         effect->alpha = 0.0f;
       } else {
@@ -1468,12 +1476,8 @@ void UpdateEffects(void) {
       ConvertMatrixToFixed(matrix, &f_EffectMatrices[effect->matrixIndex]);
     }
 
-    /* Fading or shrinking away does not remove divot marks, drops, divots or
-     * tears */
     if ((effect->alpha <= 0.0f || effect->scale < 1.0f) &&
-        effect->kind != EFFECT_KIND_DIVOT_MARK &&
-        effect->kind != EFFECT_KIND_DROP && effect->kind != EFFECT_KIND_DIVOT &&
-        effect->kind != EFFECT_KIND_TEAR) {
+        IsRemovedWhenFaded(effect->kind)) {
       effect->kind = EFFECT_KIND_NONE;
       effect->alpha = 0.0f;
     }
