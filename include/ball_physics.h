@@ -124,10 +124,10 @@
 #define PIN_HIT_RISE_SCALE 0.5f
 #define PIN_HIT_STEP_SHARE 1.3f
 /*
- * About 3.4 cm: in mini golf, a rolling ball also looks for the ground this
- * far below its path
+ * About 3.4 cm: in mini golf, a rolling ball also looks for the ground along
+ * a path whose end is raised this much, so it finds ground it rolls up onto
  */
-#define MINI_GOLF_ROLL_PROBE_DEPTH 0x20C
+#define MINI_GOLF_ROLL_PROBE_RISE 0x20C
 /* Where the debug text shows what the ball's path hit */
 #define CONTACT_DEBUG_TEXT_COLUMN 2
 #define CONTACT_DEBUG_TEXT_ROW 6

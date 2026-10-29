@@ -439,7 +439,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               simulation->state == BALL_STATE_ROLLING) {
             hitsBillboard = FindMiniGolfGroundHit(simulation, startX, startY,
                 startZ, simulation->position[AXIS_X],
-                simulation->position[AXIS_Y] - MINI_GOLF_ROLL_PROBE_DEPTH,
+                simulation->position[AXIS_Y] - MINI_GOLF_ROLL_PROBE_RISE,
                 simulation->position[AXIS_Z], &triangle, &fraction);
             if (hitsBillboard && (contact == 0 || fraction < hitFraction)) {
               contact = hitsBillboard;
