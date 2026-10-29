@@ -66,6 +66,12 @@
 /* The pull keeps this much of the ball's speed each frame */
 #define CUP_PULL_DRAG 0.93f
 /*
+ * The ball's direction gets this vertical part before it is measured against
+ * the way to the cup, so a slower ball counts as less aligned and feels more
+ * of the pull
+ */
+#define CUP_PULL_DIRECTION_TILT 2096.0f
+/*
  * A rolling ball leaving the pull's zone heading out within about 53 degrees
  * of straight away lips out: it keeps the share of its speed along the ground
  * that its speed is of LIP_OUT_FULL_SPEED (14 cm a frame), and turns the rest
@@ -73,6 +79,8 @@
  * never reaches THROUGH_CUP_ALIGNMENT, so "Through Cup" is never printed.
  */
 #define MIN_LIP_OUT_ALIGNMENT 0.6f
+/* A ball that lips out spins at this share of its speed along the ground */
+#define LIP_OUT_SPIN_SCALE 0.5f
 #define LIP_OUT_FULL_SPEED 2150.4f
 #define LIP_OUT_EXTRA_RISE 0.1f
 #define THROUGH_CUP_ALIGNMENT 17203.2f

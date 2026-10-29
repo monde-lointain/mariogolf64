@@ -665,7 +665,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                     simulation->position[AXIS_Z];
                 guNormalize(&toCup[AXIS_X], &toCup[AXIS_Y], &toCup[AXIS_Z]);
                 direction[AXIS_X] = velocity[AXIS_X];
-                direction[AXIS_Y] = 2096.0f;
+                direction[AXIS_Y] = CUP_PULL_DIRECTION_TILT;
                 direction[AXIS_Z] = velocity[AXIS_Z];
                 guNormalize(
                     &direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
@@ -747,7 +747,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 simulation->spinHeading =
                     atan2(velocity[AXIS_Z], velocity[AXIS_X]);
                 simulation->spinSpeed =
-                    IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]) * 0.5f;
+                    IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]) *
+                    LIP_OUT_SPIN_SCALE;
                 BuildLiftRotation();
                 contact = 0;
                 flags |= STEP_FLAG_LIPPED_OUT;

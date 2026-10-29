@@ -221,6 +221,23 @@ static void ResetBallSimulations(void) {
 #define SPEED_TEXT_KILOMETERS_PER_HOUR_PER_SPEED_UNIT 0.0070312503f
 
 /*
+ * Where the opening's copy of StepBallSimulation differs from main's: its
+ * lift turns a full quarter turn; it tests only within 20 cm of the cup; a
+ * ball that drops in plays the cup-in sound only below 1.75 cm a frame and
+ * falling no faster than 5 km/h; its pull's direction tilts four times as
+ * much; a ball crossing the cup's edge within 2 cm of its height and slower
+ * than 28 cm a frame lips out; and a ball in the water stops 5 m down
+ */
+#define OPENING_LIFT_ANGLE_DEGREES 90.0f
+#define OPENING_CUP_SEARCH_SPAN 0xC00
+#define OPENING_MAX_CUP_IN_SOUND_SPEED 268.8f
+#define OPENING_MAX_CUP_IN_SOUND_FALL_SPEED KilometersPerHour(5)
+#define OPENING_CUP_PULL_DIRECTION_TILT 8384.0f
+#define OPENING_MAX_LIP_OUT_HEIGHT 307.2f
+#define OPENING_MAX_LIP_OUT_SPEED 4300.8f
+#define OPENING_WATER_STOP_DEPTH 0x12C00
+
+/*
  * The opening calls FindBillboardHit with a ninth argument, the simulation,
  * which FindBillboardHit does not read
  */
@@ -285,7 +302,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       axisZ = cosf(simulation->spinHeading) * simulation->spinSpeed;
       axisX = sinf(simulation->spinHeading) * simulation->spinSpeed;
       if (simulation->spinSpeed < 0) {
-        simulation->spinHeading += 3.1415927f;
+        simulation->spinHeading += (f32)M_PI;
         simulation->spinSpeed = -simulation->spinSpeed;
       }
     } else {
@@ -293,7 +310,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       axisX = 0.0f;
     }
 
-    guRotateF(simulation->liftRotation, 90.0f, -axisX, 0.0f, axisZ);
+    guRotateF(simulation->liftRotation, OPENING_LIFT_ANGLE_DEGREES, -axisX,
+        0.0f, axisZ);
   }
 
   f32 GetPositionNoise(void) {
@@ -420,7 +438,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
               simulation->state == BALL_STATE_ROLLING) {
             s32 putterContact = FindMiniGolfGroundHit(simulation, startX,
                 startY, startZ, simulation->position[AXIS_X],
-                simulation->position[AXIS_Y] - 0x20C,
+                simulation->position[AXIS_Y] - MINI_GOLF_ROLL_PROBE_RISE,
                 simulation->position[AXIS_Z], &triangle, &fraction);
 
             if (putterContact && fraction < D_8022BE28_ovl_05) {
@@ -439,7 +457,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         hitsBillboard = FALSE;
         if (simulation->state == BALL_STATE_FLYING) {
-          if (simulation->lastBounceStep + 2 < simulation->stepCount) {
+          if (simulation->lastBounceStep + BILLBOARD_HIT_BOUNCE_GAP <
+              simulation->stepCount) {
             hitsBillboard = ((BillboardHitFinder)FindBillboardHit)(startX,
                 startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
@@ -536,7 +555,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             simulation->velocity[AXIS_Y] =
                 -GetLength2D(simulation->velocity[AXIS_X],
                     simulation->velocity[AXIS_Z]) *
-                0.5f;
+                PIN_HIT_RISE_SCALE;
             contact = 0;
             simulation->spinHeading =
                 atan2(pinVelocity[AXIS_Z], pinVelocity[AXIS_X]);
@@ -544,11 +563,11 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                 IntLength2D(pinVelocity[AXIS_X], pinVelocity[AXIS_Z]);
           } else {
             simulation->velocity[AXIS_Y] = pinVelocity[AXIS_Y];
-            simulation->spinSpeed = simulation->spinSpeed * 0.3f;
+            simulation->spinSpeed = simulation->spinSpeed * PIN_HIT_SPIN_KEPT;
           }
 
           {
-            f32 rest = 1.3f - pinFraction;
+            f32 rest = PIN_HIT_STEP_SHARE - pinFraction;
 
             simulation->velocity[AXIS_X] = pinVelocity[AXIS_X];
             simulation->velocity[AXIS_Z] = pinVelocity[AXIS_Z];
@@ -570,23 +589,23 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         s32 cupOffsetX =
             simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
 
-        if (Abs(cupOffsetX) < 0xC00) {
+        if (Abs(cupOffsetX) < OPENING_CUP_SEARCH_SPAN) {
           s32 cupOffsetZ =
               simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
 
-          if (Abs(cupOffsetZ) < 0xC00) {
+          if (Abs(cupOffsetZ) < OPENING_CUP_SEARCH_SPAN) {
             s32 cupDistance = IntLength2D(cupOffsetX, cupOffsetZ);
 
             if (simulation->state != BALL_STATE_IN_CUP &&
                 simulation->position[AXIS_Y] -
                         g_HoleSetup.cupPosition[AXIS_Y] >=
-                    -0x2FF &&
-                (f32)cupDistance < 1228.8f) {
+                    -MAX_CUP_ENTRY_HEIGHT &&
+                (f32)cupDistance < CUP_RADIUS) {
               BallSpeed speed = (s32)IntLength2D(
                   simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
 
-              if (speed < 1075.2f &&
-                  (f32)simulation->velocity[AXIS_Y] >= -KilometersPerHour(5)) {
+              if (speed < MAX_CUP_IN_SPEED &&
+                  (f32)simulation->velocity[AXIS_Y] >= -MAX_CUP_IN_RISE_SPEED) {
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
                   PrintDebugText(
@@ -594,8 +613,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                 }
 
                 simulation->state = BALL_STATE_IN_CUP;
-                if (speed < 268.8f &&
-                    (f32)simulation->velocity[AXIS_Y] <= KilometersPerHour(5)) {
+                if (speed < OPENING_MAX_CUP_IN_SOUND_SPEED &&
+                    (f32)simulation->velocity[AXIS_Y] <=
+                        OPENING_MAX_CUP_IN_SOUND_FALL_SPEED) {
                   simulation->unkA8[0] = 1;
                 }
               }
@@ -603,9 +623,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
             if (simulation->state == BALL_STATE_ROLLING &&
                 (f32)Abs(simulation->position[AXIS_Y] -
-                    g_HoleSetup.cupPosition[AXIS_Y]) < 614.4f) {
-              if ((f32)cupDistance < 1996.7999f &&
-                  (f32)cupDistance >= 1075.2f) {
+                    g_HoleSetup.cupPosition[AXIS_Y]) < CUP_PULL_MAX_HEIGHT) {
+              if ((f32)cupDistance < CUP_PULL_OUTER_RADIUS &&
+                  (f32)cupDistance >= CUP_PULL_INNER_RADIUS) {
                 f32 toCup[3];
                 f32 direction[3];
                 f32 alignment;
@@ -627,7 +647,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                     simulation->position[AXIS_Z];
                 guNormalize(&toCup[AXIS_X], &toCup[AXIS_Y], &toCup[AXIS_Z]);
                 direction[AXIS_X] = simulation->velocity[AXIS_X];
-                direction[AXIS_Y] = 8384.0f;
+                direction[AXIS_Y] = OPENING_CUP_PULL_DIRECTION_TILT;
                 direction[AXIS_Z] = simulation->velocity[AXIS_Z];
                 guNormalize(
                     &direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
@@ -637,34 +657,37 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                   alignment = 0.0f;
                 }
 
-                depth = 1996.7999f - (f32)cupDistance;
+                depth = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
                 angle = atan2(toCup[AXIS_Z], toCup[AXIS_X]);
-                if (depth > 614.4f) {
-                  depth = 614.4f;
+                if (depth > CUP_PULL_DEPTH_RANGE) {
+                  depth = CUP_PULL_DEPTH_RANGE;
                 }
 
-                pull = ((sinf(depth * 0.005113269f) * 307.2f) + 46.079998f) *
+                pull = ((sinf(depth * ((f32)M_PI / CUP_PULL_DEPTH_RANGE)) *
+                            CUP_PULL_RISE) +
+                           MIN_CUP_PULL) *
                     (1.0f - alignment);
                 simulation->velocity[AXIS_X] =
-                    simulation->velocity[AXIS_X] * 0.93f;
+                    simulation->velocity[AXIS_X] * CUP_PULL_DRAG;
                 simulation->velocity[AXIS_Z] =
-                    simulation->velocity[AXIS_Z] * 0.93f;
+                    simulation->velocity[AXIS_Z] * CUP_PULL_DRAG;
                 simulation->velocity[AXIS_X] =
                     simulation->velocity[AXIS_X] + (cosf(angle) * pull);
                 simulation->velocity[AXIS_Z] =
                     simulation->velocity[AXIS_Z] + (sinf(angle) * pull);
               }
 
-              if ((f32)cupDistance > 1228.8f &&
+              if ((f32)cupDistance > CUP_RADIUS &&
                   (f32)IntLength2D(startX - g_HoleSetup.cupPosition[AXIS_X],
-                      startZ - g_HoleSetup.cupPosition[AXIS_Z]) < 1228.8f &&
-                  (f32)Abs(startY - g_HoleSetup.cupPosition[AXIS_Y]) < 307.2f) {
+                      startZ - g_HoleSetup.cupPosition[AXIS_Z]) < CUP_RADIUS &&
+                  (f32)Abs(startY - g_HoleSetup.cupPosition[AXIS_Y]) <
+                      OPENING_MAX_LIP_OUT_HEIGHT) {
                 s32 speed = IntLength2D(
                     simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
 
-                if ((f32)speed < 4300.8f &&
+                if ((f32)speed < OPENING_MAX_LIP_OUT_SPEED &&
                     simulation->state == BALL_STATE_ROLLING) {
-                  f32 keep = speed * 0.0004650298f;
+                  f32 keep = speed * (1.0f / LIP_OUT_FULL_SPEED);
                   BallSpeed fallSpeed;
 
                   if (keep < 0.0f) {
@@ -687,7 +710,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                   simulation->spinSpeed =
                       IntLength2D(simulation->velocity[AXIS_X],
                           simulation->velocity[AXIS_Z]) *
-                      0.5f;
+                      LIP_OUT_SPIN_SCALE;
                   flags |= STEP_FLAG_LIPPED_OUT;
                   contact = 0;
                   BuildLiftRotation();
@@ -701,13 +724,13 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
     if (simulation->state == BALL_STATE_IN_WATER) {
       simulation->hasEnteredWater = TRUE;
-      simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] * 0.7f;
-      simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] * 0.7f;
+      simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] * WATER_DRAG;
+      simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] * WATER_DRAG;
       simulation->velocity[AXIS_Y] =
-          (simulation->velocity[AXIS_Y] + (s32)GRAVITY) * 0.7f;
+          (simulation->velocity[AXIS_Y] + (s32)GRAVITY) * WATER_DRAG;
       if (GetGroundOrWaterHeight(
               simulation->position[AXIS_X], simulation->position[AXIS_Z]) +
-                  0x12C00 <
+                  OPENING_WATER_STOP_DEPTH <
               simulation->position[AXIS_Y] ||
           simulation->position[AXIS_Y] >=
               GetGroundHeight(
