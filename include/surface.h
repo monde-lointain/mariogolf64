@@ -54,7 +54,9 @@ enum SurfaceKind {
   SURFACE_KIND_FAIRWAY_POOR_LIE, /* In a divot */
   SURFACE_KIND_ROUGH,
   SURFACE_KIND_ROUGH_POOR_LIE, /* Deeper in the grass */
-  SURFACE_KIND_BUNKER = 0x6,
+  /* No surface has it, but the code treats it as rough */
+  SURFACE_KIND_ROUGH_UNK5,
+  SURFACE_KIND_BUNKER,
   SURFACE_KIND_BUNKER_FAIR_LIE, /* Half buried */
   SURFACE_KIND_BUNKER_POOR_LIE, /* Mostly buried */
   /* Has BUNKER_POOR_LIE's image, but the default ratings and clubs */

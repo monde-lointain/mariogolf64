@@ -1641,7 +1641,7 @@ s32 GetLandingRating(u32 surfaceKind) {
       break;
     case SURFACE_KIND_ROUGH:
     case SURFACE_KIND_ROUGH_POOR_LIE:
-    case 5:
+    case SURFACE_KIND_ROUGH_UNK5:
     case SURFACE_KIND_CART_WAY:
     case SURFACE_KIND_ROCK:
     case SURFACE_KIND_BARE_GROUND:
