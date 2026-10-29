@@ -1993,15 +1993,15 @@ void func_8005DAFC(void) {
     case GAME_MODE_TOURNAMENT:
       D_800FF4C0 = 2;
       g_MapCamera[0x4C] = 0;
-      g_BetSet = 0;
+      g_BetSet = BET_SET_NONE;
       break;
     case GAME_MODE_STROKE:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
       if (g_ChosenPlayerCount == 4) {
-        g_BetSet = 2;
+        g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
       } else {
-        g_BetSet = 1;
+        g_BetSet = BET_SET_STROKE;
       }
 
       D_800C2BD5 = 1;
@@ -2009,12 +2009,12 @@ void func_8005DAFC(void) {
     case GAME_MODE_MATCH_GAME:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
-      g_BetSet = 3;
+      g_BetSet = BET_SET_MATCH_GAME;
       break;
     case GAME_MODE_SKINS_MATCH:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
-      g_BetSet = 4;
+      g_BetSet = BET_SET_SKINS_MATCH;
       break;
     case GAME_MODE_TRAINING:
     case GAME_MODE_GET_CHARACTER:
@@ -2023,12 +2023,12 @@ void func_8005DAFC(void) {
     case GAME_MODE_RING_SHOT:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 2;
-      g_BetSet = 0;
+      g_BetSet = BET_SET_NONE;
       break;
     case GAME_MODE_CLUB_SLOTS:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
-      g_BetSet = 5;
+      g_BetSet = BET_SET_CLUB_SLOTS;
       break;
   }
 

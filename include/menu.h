@@ -462,6 +462,18 @@ enum PlayerStatsBuffer {
   PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS
 };
 
+/* The sets of bets that a game's mode and player count offer, as g_BetSet */
+enum BetSet {
+  BET_SET_NONE,
+  BET_SET_STROKE,
+  BET_SET_STROKE_FOUR_PLAYER,
+  BET_SET_MATCH_GAME,
+  BET_SET_SKINS_MATCH,
+  BET_SET_CLUB_SLOTS,
+  BET_SET_MINI_GOLF,
+  BET_SET_MINI_GOLF_FOUR_PLAYER
+};
+
 /* The ways SlideBrickWall slides the stats panel's rows */
 #define STATS_SLIDE_CURRENT 0
 #define STATS_SLIDE_OUT_RIGHT 1

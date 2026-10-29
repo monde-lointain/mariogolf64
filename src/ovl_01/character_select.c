@@ -897,7 +897,7 @@ s32 UpdateCharacterSelect(
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = MAP_CAMERA_TOP_BYTE_UNK2;
-        g_BetSet = 0;
+        g_BetSet = BET_SET_NONE;
       }
 
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,

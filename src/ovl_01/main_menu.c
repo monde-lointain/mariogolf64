@@ -2211,7 +2211,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 2;
         MAP_CAMERA_MODE_TOP_BYTE = 0;
-        g_BetSet = 0;
+        g_BetSet = BET_SET_NONE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
       case MODE_ICON_GET_CHARACTER:
@@ -2222,7 +2222,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_OPPONENT_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
-        g_BetSet = 0;
+        g_BetSet = BET_SET_NONE;
         ApplyBetPreset(BET_PRESET_NONE);
         for (index = 0; index != MAX_PLAYER_COUNT; index++) {
           g_ChosenHandicaps[index] = 0;
@@ -2243,9 +2243,9 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
-          g_BetSet = 2;
+          g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
         } else {
-          g_BetSet = 1;
+          g_BetSet = BET_SET_STROKE;
         }
 
         ApplyBetPreset(BET_PRESET_STROKE);
@@ -2269,7 +2269,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
-        g_BetSet = 3;
+        g_BetSet = BET_SET_MATCH_GAME;
         D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         ApplyBetPreset(BET_PRESET_MATCH_GAME);
         break;
@@ -2280,7 +2280,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
-        g_BetSet = 4;
+        g_BetSet = BET_SET_SKINS_MATCH;
         D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         ApplyBetPreset(BET_PRESET_SKINS_MATCH);
         break;
@@ -2291,7 +2291,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
-        g_BetSet = 0;
+        g_BetSet = BET_SET_NONE;
         D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
@@ -2317,9 +2317,9 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
-          g_BetSet = 7;
+          g_BetSet = BET_SET_MINI_GOLF_FOUR_PLAYER;
         } else {
-          g_BetSet = 6;
+          g_BetSet = BET_SET_MINI_GOLF;
         }
 
         ApplyBetPreset(BET_PRESET_MINI_GOLF);
@@ -2345,7 +2345,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_TRAINING_EXIT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
-        g_BetSet = 0;
+        g_BetSet = BET_SET_NONE;
         D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
@@ -2356,7 +2356,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
-        g_BetSet = 0;
+        g_BetSet = BET_SET_NONE;
         D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
@@ -2367,7 +2367,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
-        g_BetSet = 0;
+        g_BetSet = BET_SET_NONE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
       case MODE_ICON_CLUB_SLOTS:
@@ -2389,7 +2389,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
-        g_BetSet = 5;
+        g_BetSet = BET_SET_CLUB_SLOTS;
         D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         ApplyBetPreset(BET_PRESET_CLUB_SLOTS);
         break;
@@ -2993,7 +2993,7 @@ void UpdateMainMenu(void) {
             g_GameState.playerCount = 2;
             D_800FF4C0 = 1;
             MAP_CAMERA_MODE_TOP_BYTE = 2;
-            g_BetSet = 0;
+            g_BetSet = BET_SET_NONE;
             ApplyBetPreset(BET_PRESET_NONE);
           }
 
@@ -3050,7 +3050,7 @@ void UpdateMainMenuWithoutTransmit(void) {
             g_GameState.playerCount = 2;
             D_800FF4C0 = 1;
             MAP_CAMERA_MODE_TOP_BYTE = 2;
-            g_BetSet = 0;
+            g_BetSet = BET_SET_NONE;
             ApplyBetPreset(BET_PRESET_NONE);
           }
 
