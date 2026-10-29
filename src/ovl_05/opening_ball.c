@@ -287,7 +287,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       axisX = 0.0f;
     }
 
-    guRotateF(simulation->unk44, 90.0f, -axisX, 0.0f, axisZ);
+    guRotateF(simulation->liftRotation, 90.0f, -axisX, 0.0f, axisZ);
   }
 
   f32 GetPositionNoise(void) {
@@ -1488,7 +1488,7 @@ ROLLED:
 
       lift = (simulation->spinSpeed * 10) * (weight * 0.0061035156f);
       if (simulation->spinSpeed != 0 && airSpeed > KilometersPerHour(1)) {
-        guMtxXFMF(simulation->unk44, relative[AXIS_X], relative[AXIS_Y],
+        guMtxXFMF(simulation->liftRotation, relative[AXIS_X], relative[AXIS_Y],
             relative[AXIS_Z], &turned[AXIS_X], &turned[AXIS_Y],
             &turned[AXIS_Z]);
         if (airSpeed < AbsoluteValueExpression(lift) * 200.0f) {

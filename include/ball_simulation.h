@@ -167,7 +167,8 @@ typedef struct BallSimulation {
   /* 0x38 */ s32 sideSpin;
   /* 0x3C */ Radians spinHeading; /* Launching sets it to the yaw */
   /* 0x40 */ f32 unk40;
-  /* 0x44 */ u8 unk44[0x84 - 0x44];
+  /* Turns the ball's velocity through the air into its lift's direction */
+  /* 0x44 */ Mat4 liftRotation;
   /* 0x84 */ f32 windVelocityX;
   /* 0x88 */ f32 windVelocityZ;
   /* 0x8C */ s32 state; /* A BALL_STATE_* value */

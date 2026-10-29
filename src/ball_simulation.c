@@ -602,7 +602,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       axisX = 0.0f;
     }
 
-    guRotateF(simulation->unk44, 88.0f, -axisX, 0.0f, axisZ);
+    guRotateF(simulation->liftRotation, 88.0f, -axisX, 0.0f, axisZ);
   }
 
   void PlayBillboardHitSound(BillboardCell cell, s32 speed) {
@@ -2232,9 +2232,9 @@ ROLLED:
           f32 turned[3];
           f32 scale;
 
-          guMtxXFMF(simulation->unk44, relative[AXIS_X], relative[AXIS_Y],
-              relative[AXIS_Z], &turned[AXIS_X], &turned[AXIS_Y],
-              &turned[AXIS_Z]);
+          guMtxXFMF(simulation->liftRotation, relative[AXIS_X],
+              relative[AXIS_Y], relative[AXIS_Z], &turned[AXIS_X],
+              &turned[AXIS_Y], &turned[AXIS_Z]);
           if (airSpeed < fabsf(lift) * MAX_LIFT_SPEED_RATIO) {
             lift = airSpeed * (1.0f / MAX_LIFT_SPEED_RATIO);
           }
