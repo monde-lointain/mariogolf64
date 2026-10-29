@@ -1314,8 +1314,8 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
 
   f_PutterTestShot.clubIndex = CLUB_TYPE_PUTTER;
   f_PutterTestShot.shotMode = shotMode;
-  reach = GetShotDistance(&g_Clubs[CLUB_TYPE_PUTTER], shotMode);
   putter = &g_Clubs[CLUB_TYPE_PUTTER];
+  reach = GetShotDistance(putter, shotMode);
   shortDistance = 0;
   shortPower = 0;
   longDistance = 0;
