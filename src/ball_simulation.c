@@ -267,6 +267,16 @@ void ResetBallSimulations(void) {
 /* Where the debug text shows that a ball drops in or is pulled */
 #define CUP_DEBUG_TEXT_COLUMN 0x14
 #define CUP_DEBUG_TEXT_ROW 0xA
+/*
+ * The cup's sounds grow louder with the ball's speed, to their loudest at
+ * 1 km/h, which is slower than any speed that plays them
+ */
+#define CUP_SOUND_VOLUME_PER_SPEED \
+  ((SOUND_FULL_SCALE - 1) / KilometersPerHour(1))
+/* The flagstick's sound grows ten times as fast, written to fewer places */
+#define FLAGSTICK_SOUND_VOLUME_PER_SPEED 8.858665f
+/* The wall's and flagstick's sounds play no louder than this */
+#define MAX_KNOCK_VOLUME (SOUND_FULL_SCALE - 1)
 
 /* Gravity pulls a rolling ball down a slope by up to this */
 #define SLOPE_ACCELERATION (GRAVITY * 3 / 4)
@@ -617,10 +627,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 (velocity[AXIS_Z] * velocity[AXIS_Z]));
 
             if (speed > KilometersPerHour(1)) {
-              SoundVolume volume = speed * 8.858665f;
+              SoundVolume volume = speed * FLAGSTICK_SOUND_VOLUME_PER_SPEED;
 
-              if (volume >= 127) {
-                volume = 126;
+              if (volume >= SOUND_FULL_SCALE) {
+                volume = MAX_KNOCK_VOLUME;
               }
 
               if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -887,10 +897,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 scale) +
             g_HoleSetup.cupPosition[AXIS_Z];
         if (speed >= KilometersPerHour(5)) {
-          SoundVolume volume = speed * 0.88586664f;
+          SoundVolume volume = speed * CUP_SOUND_VOLUME_PER_SPEED;
 
-          if (volume >= 127) {
-            volume = 126;
+          if (volume >= SOUND_FULL_SCALE) {
+            volume = MAX_KNOCK_VOLUME;
           }
 
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -940,7 +950,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->unkA8[0] = 2;
         } else if (simulation->unkA8[0] == 0) {
           if (fallSpeed >= KilometersPerHour(2)) {
-            SoundVolume volume = fallSpeed * 0.88586664f;
+            SoundVolume volume = fallSpeed * CUP_SOUND_VOLUME_PER_SPEED;
 
             if (volume > SOUND_FULL_SCALE) {
               volume = SOUND_FULL_SCALE;
