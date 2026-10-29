@@ -267,6 +267,20 @@ void ResetBallSimulations(void) {
 /* Where the debug text shows that a ball drops in or is pulled */
 #define CUP_DEBUG_TEXT_COLUMN 0x14
 #define CUP_DEBUG_TEXT_ROW 0xA
+/* 20 cm: the depth of the cup's floor below the cup's position */
+#define CUP_DEPTH 0xC00
+/*
+ * 5 cm: a ball in the cup that rises faster than 5 km/h above this depth is
+ * held to it and sent toward the cup's middle
+ */
+#define CUP_CEILING_DEPTH 768.0f
+/*
+ * The wall takes this much of the ball's speed toward it: all of it, and
+ * half again back
+ */
+#define CUP_WALL_REFLECTION 1.5f
+/* The floor sends a ball back up at this much of its falling speed */
+#define CUP_FLOOR_BOUNCE 0.5f
 /*
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
@@ -883,7 +897,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         guNormalize(&toCupX, &toCupY, &toCupZ);
         push = ((toCupX * velocity[AXIS_X]) + (toCupY * velocity[AXIS_Y]) +
                    (toCupZ * velocity[AXIS_Z])) *
-            1.5f;
+            CUP_WALL_REFLECTION;
         scale = CUP_WALL_REBOUND_RADIUS / cupDistance;
         velocity[AXIS_X] -= toCupX * push;
         velocity[AXIS_Y] -= toCupY * push;
@@ -910,7 +924,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       }
 
       if (simulation->position[AXIS_Y] <
-              g_HoleSetup.cupPosition[AXIS_Y] + 768.0f &&
+              g_HoleSetup.cupPosition[AXIS_Y] + CUP_CEILING_DEPTH &&
           velocity[AXIS_Y] < -KilometersPerHour(5)) {
         s32 toCupX =
             g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
@@ -924,19 +938,19 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           velocity[AXIS_X] = toCupX * scale;
           velocity[AXIS_Z] = toCupZ * scale;
           simulation->position[AXIS_Y] =
-              g_HoleSetup.cupPosition[AXIS_Y] + 768.0f;
+              g_HoleSetup.cupPosition[AXIS_Y] + CUP_CEILING_DEPTH;
         }
 
         velocity[AXIS_Y] = AbsoluteValueExpression(velocity[AXIS_Y]);
       }
 
       if (simulation->position[AXIS_Y] >=
-          g_HoleSetup.cupPosition[AXIS_Y] + 0xC00) {
+          g_HoleSetup.cupPosition[AXIS_Y] + CUP_DEPTH) {
         BallSpeed fallSpeed = velocity[AXIS_Y];
 
         /* The chained assignment is there to match */
         velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
-        velocity[AXIS_Y] = (-fallSpeed * 0.5f) + CUP_GRAVITY;
+        velocity[AXIS_Y] = (-fallSpeed * CUP_FLOOR_BOUNCE) + CUP_GRAVITY;
         if (velocity[AXIS_Y] > 0.0f) {
           simulation->isHoledOut = 1;
           simulation->state = BALL_STATE_STOPPED;
@@ -962,7 +976,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           }
         }
 
-        simulation->position[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y] + 0xC00;
+        simulation->position[AXIS_Y] =
+            g_HoleSetup.cupPosition[AXIS_Y] + CUP_DEPTH;
       } else {
         velocity[AXIS_Y] += CUP_GRAVITY;
       }
