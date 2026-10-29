@@ -1593,16 +1593,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212C54_ovl_01);
 #endif
 
 /*
- * Doesn't match: the original adds PALETTED_TEXELS_OFFSET to the blink offset
- * before shifting the direction, rather than after.
+ * Draws one of the four side arrow images, in either blink state, centered on
+ * a point. The header size is held in a local, as the matching code needs:
+ * with the constant, GCC folds the texels' offset differently.
  */
-#ifdef NON_MATCHING
 void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 top;
   s32 left;
   void* texels;
+  s32 headerSize = IMAGE_HEADER_SIZE;
 
   if (blinkFrame < 0) {
     blinkFrame = 0;
@@ -1621,12 +1622,13 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + headerSize) & ~7);
   gDPLoadTextureTile_4b(gfx++,
       ((u32)image +
           (direction * SIDE_ARROW_IMAGE_SIZE +
               (blinkFrame * SIDE_ARROW_BLINK_STRIDE +
-                  PALETTED_TEXELS_OFFSET))) &
+                  (headerSize +
+                      SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)))) &
           ~7,
       G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0, SIDE_ARROW_SIZE - 1,
       SIDE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1642,6 +1644,3 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212FEC_ovl_01);
-#endif
