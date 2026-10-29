@@ -33,8 +33,9 @@
 #include "variables.h"
 
 /*
- * The saved game's 64 by 64 course image, shrunk in two strips; func_80226190
- * draws one with its own palette, func_8022644C one without
+ * The saved game's 64 by 64 course image, shrunk in two strips;
+ * DrawSavedCourseImage draws one with its own palette, DrawSavedMiniGolfImage
+ * one without
  */
 #define COURSE_THUMBNAIL_WIDTH 64
 #define COURSE_THUMBNAIL_STRIP_HEIGHT 32
@@ -1799,10 +1800,10 @@ const char D_80231A3C_ovl_01[] = "%s";
 void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
 void func_80224AFC_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
-void func_80225358_ovl_01(Gfx** displayListHead);
-void func_80225960_ovl_01(Gfx** displayListHead);
-void func_80226190_ovl_01(Gfx** displayListHead);
-void func_8022644C_ovl_01(Gfx** displayListHead);
+void DrawSavedGolfers(Gfx** displayListHead);
+void DrawPlayerControllers(Gfx** displayListHead);
+void DrawSavedCourseImage(Gfx** displayListHead);
+void DrawSavedMiniGolfImage(Gfx** displayListHead);
 
 /*
  * Draws the saved-games screen: the characters, the three numbered boards
@@ -1852,12 +1853,12 @@ void DrawSavedGames(Gfx** displayListHead) {
 
   DrawLargeBannerBackdropLayers(&gfx, SAVED_GAMES_BACKDROP_LAYERS);
   BuildDynamicTextures(&gfx);
-  func_80225358_ovl_01(&gfx);
+  DrawSavedGolfers(&gfx);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-  func_80225960_ovl_01(&gfx);
+  DrawPlayerControllers(&gfx);
 
   guPerspectiveF(D_8023BA60_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
@@ -2078,9 +2079,9 @@ void DrawSavedGames(Gfx** displayListHead) {
 
     if (save->savedGames[gameIndex].isValid) {
       if (!save->savedGames[gameIndex].state.isMiniGolf) {
-        func_80226190_ovl_01(&gfx);
+        DrawSavedCourseImage(&gfx);
       } else {
-        func_8022644C_ovl_01(&gfx);
+        DrawSavedMiniGolfImage(&gfx);
       }
     }
 
@@ -2232,7 +2233,7 @@ void func_80224AFC_ovl_01(
  * timer runs out, plays the fidget animation once before waiting a random
  * while again.
  */
-void func_80225358_ovl_01(Gfx** displayListHead) {
+void DrawSavedGolfers(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
@@ -2348,7 +2349,11 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
   }
 }
 
-void func_80225960_ovl_01(Gfx** displayListHead) {
+/*
+ * Draws the chosen saved game's players' controller icons, once each has
+ * pressed A on one, and their player or computer labels.
+ */
+void DrawPlayerControllers(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
@@ -2438,7 +2443,8 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_80226190_ovl_01(Gfx** displayListHead) {
+/* Draws the chosen saved game's course image, shrunk to a thumbnail */
+void DrawSavedCourseImage(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripTop;
@@ -2475,7 +2481,8 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8022644C_ovl_01(Gfx** displayListHead) {
+/* Draws the chosen saved mini golf game's course image with its own palette */
+void DrawSavedMiniGolfImage(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripTop;
