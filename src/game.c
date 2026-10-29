@@ -830,8 +830,8 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
       osVirtualToPhysical(g_MirrorTexture) & ~7);
   gDPPipeSync(gfx++);
   if (g_Cameras[1].view.drawFlags != CAMERA_DRAW_SCENE &&
-      g_PauseScreen != PAUSE_SCREEN_UNK4 && sourceTop <= HORIZON_STRIP_BOTTOM &&
-      destOffset < DYNAMIC_TEXTURE_SIZE) {
+      g_PauseScreen != PAUSE_SCREEN_FREE_LOOK &&
+      sourceTop <= HORIZON_STRIP_BOTTOM && destOffset < DYNAMIC_TEXTURE_SIZE) {
     for (rowIndex = 0; rowIndex != rowCount; rowIndex++) {
       for (blockIndex = 0; blockIndex != MIRROR_BLOCK_COUNT; blockIndex++) {
         gDPLoadTextureTile(gfx++, frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
@@ -1530,7 +1530,8 @@ s32 DrawGame(void) {
 
         break;
       case DRAW_MODE_COURSE:
-        if (g_MenuBackdropStyle != 0 && g_PauseScreen != PAUSE_SCREEN_UNK4) {
+        if (g_MenuBackdropStyle != 0 &&
+            g_PauseScreen != PAUSE_SCREEN_FREE_LOOK) {
           ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
         } else if (g_HasLoaderFinished == 0) {
           if (viewIndex == 0) {
@@ -1646,7 +1647,7 @@ s32 DrawGame(void) {
                         (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) ||
                     g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME ||
                     f_ScreenEffectFrameCount != 1) &&
-                g_PauseScreen != PAUSE_SCREEN_UNK4) {
+                g_PauseScreen != PAUSE_SCREEN_FREE_LOOK) {
               UsePrimitiveDepth(0);
               if (!IsGameFlagSet(GAME_FLAG_HIDE_BACKDROP)) {
                 DrawBackdrop(&g_DisplayListHead, &g_Cameras[0].view, 0);
@@ -1751,7 +1752,8 @@ s32 DrawGame(void) {
 
     if (drawMode == DRAW_MODE_COURSE) {
       if (g_HasLoaderFinished == 1 &&
-          (g_MenuBackdropStyle == 0 || g_PauseScreen == PAUSE_SCREEN_UNK4)) {
+          (g_MenuBackdropStyle == 0 ||
+              g_PauseScreen == PAUSE_SCREEN_FREE_LOOK)) {
         if (g_Cameras[viewIndex].view.drawFlags != 0) {
           if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&
               f_ScreenEffectFrameCount == 1) {
@@ -1865,7 +1867,7 @@ s32 DrawGame(void) {
                 }
               }
 
-              if (g_PauseScreen != PAUSE_SCREEN_UNK4) {
+              if (g_PauseScreen != PAUSE_SCREEN_FREE_LOOK) {
                 if (viewIndex == 0) {
                   DrawLensFlare(&g_DisplayListHead);
                 }
@@ -1962,7 +1964,7 @@ s32 DrawGame(void) {
     }
 
     DrawHoleIntroImages(&g_DisplayListHead);
-    if (g_IsModuleAlive[5]) {
+    if (g_IsModuleAlive[MODULE_SCORECARD]) {
       DrawScorecard(&g_DisplayListHead);
     }
 
@@ -1972,7 +1974,7 @@ s32 DrawGame(void) {
     }
 
     DrawHalfTurn(&g_DisplayListHead);
-    if (g_IsModuleAlive[22]) {
+    if (g_IsModuleAlive[MODULE_SAVE_MENU]) {
       DrawGameSaveMenu(&g_DisplayListHead);
       DrawReplaySaveMenu(&g_DisplayListHead);
       DrawControlsScreen(&g_DisplayListHead);

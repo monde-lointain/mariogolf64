@@ -13,13 +13,20 @@
 /* Which pause screen is shown over the round */
 enum PauseScreen {
   PAUSE_SCREEN_NONE,
-  PAUSE_SCREEN_UNK2 = 2,
-  PAUSE_SCREEN_UNK4 = 4,
-  PAUSE_SCREEN_UNK5,
-  PAUSE_SCREEN_UNK6,
+  PAUSE_SCREEN_PAUSE_MENU,
   PAUSE_SCREEN_SCORECARD,
-  PAUSE_SCREEN_UNK8,
-  PAUSE_SCREEN_UNK9
+  /* Does nothing; nothing sets it */
+  PAUSE_SCREEN_UNK3,
+  PAUSE_SCREEN_FREE_LOOK,
+  PAUSE_SCREEN_SAVE_MENU,
+  PAUSE_SCREEN_PROMPT,
+  /* Waits for MODULE_SCORECARD, then opens the scorecard */
+  PAUSE_SCREEN_LOADING_SCORECARD,
+  /* Waits for MODULE_SAVE_MENU, then opens the save menu */
+  PAUSE_SCREEN_LOADING_SAVE_MENU,
+  /* Waits for MODULE_SAVE_MENU, then opens the controls screen */
+  PAUSE_SCREEN_LOADING_CONTROLS,
+  PAUSE_SCREEN_CONTROLS
 };
 
 /* g_LetterboxState's values */

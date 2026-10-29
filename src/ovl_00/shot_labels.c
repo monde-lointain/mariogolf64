@@ -557,8 +557,8 @@ void DrawAimGuides(CameraMatrices* matrices) {
         tintYards = -MAX_TINT_YARDS;
       }
 
-      /* The sign fades with distance, except on PAUSE_SCREEN_UNK4 */
-      if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+      /* The sign fades with distance, except on PAUSE_SCREEN_FREE_LOOK */
+      if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
         goto OPAQUE;
       }
 
@@ -733,7 +733,7 @@ OPAQUE:
   if (g_RoundHud.unk12 == 1) {
     position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
     position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+    if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
       position[AXIS_Y] =
           g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     } else {
@@ -745,7 +745,7 @@ OPAQUE:
             position[AXIS_X], position[AXIS_Y], position[AXIS_Z], &point) < 0) {
       flagImage = PIN_FLAG_IMAGE;
       if (point.y < SCREEN_HEIGHT) {
-        if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+        if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
           gDPSetCombineMode(
               g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           gDPPipeSync(g_DisplayListHead++);

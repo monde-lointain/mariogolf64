@@ -1147,7 +1147,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       if (controller->pressedButtons & A_BUTTON) {
         if (f_CursorIndex >= 0 && f_CursorIndex < SAVED_GAME_COUNT) {
           if (save->savedGames[f_CursorIndex].isValid) {
-            g_PauseScreen = PAUSE_SCREEN_UNK6;
+            g_PauseScreen = PAUSE_SCREEN_PROMPT;
             OpenPrompt(PROMPT_OVERWRITE_GAME);
             PlaySound(
                 SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -1156,7 +1156,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
             PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           }
         } else {
-          g_PauseScreen = PAUSE_SCREEN_UNK6;
+          g_PauseScreen = PAUSE_SCREEN_PROMPT;
           OpenPrompt(PROMPT_END_GAME);
         }
 
@@ -1289,7 +1289,7 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
           /* The pointer arithmetic is there to match */
           if ((save->ringShotRecords + f_CursorIndex)->scoreKind &
               SCORE_KIND_RECORDED) {
-            g_PauseScreen = PAUSE_SCREEN_UNK6;
+            g_PauseScreen = PAUSE_SCREEN_PROMPT;
             OpenPrompt(PROMPT_OVERWRITE_REPLAY);
             PlaySound(
                 SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -1299,7 +1299,7 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
           SaveReplayToSlot();
           PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         } else {
-          g_PauseScreen = PAUSE_SCREEN_UNK6;
+          g_PauseScreen = PAUSE_SCREEN_PROMPT;
           OpenPrompt(PROMPT_SKIP_REPLAY);
           return REPLAY_MENU_PROMPTING;
         }

@@ -65,7 +65,7 @@ typedef struct RingCorners {
 #define RING_SPARKLE_TURN ((f32)M_PI / 64) /* Radians each frame */
 #define POSITION_SCALE 1024.0f
 
-/* The rings' colors, apart from under PAUSE_SCREEN_UNK4 */
+/* The rings' colors, apart from under PAUSE_SCREEN_FREE_LOOK */
 #define RING_RED 0xFF
 #define RING_GREEN 0xF0
 #define RING_BLUE 0x40
@@ -317,7 +317,7 @@ void DrawRings(
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
       G_TX_NOLOD);
   gSPTexture(gfx++, 0x07C0, 0x07C0, 0, G_TX_RENDERTILE, G_ON);
-  if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+  if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
     gDPSetCombineLERP(gfx++, PRIMITIVE, TEXEL0, ENV_ALPHA, TEXEL0, 0, 0, 0,
         PRIMITIVE, PRIMITIVE, TEXEL0, ENV_ALPHA, TEXEL0, 0, 0, 0, PRIMITIVE);
     red = RING_MODE_FOUR_RED;

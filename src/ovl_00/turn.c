@@ -486,7 +486,7 @@ void PlaceShotCamera(void) {
     }
   }
 
-  if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+  if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
     g_Cameras[0].mode = CAMERA_MODE_UNK2;
     point[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
@@ -799,7 +799,7 @@ void StartFreeLook(void) {
   g_RoundHud.flags = FREE_LOOK_HUD_FLAGS;
   g_FreeLookHeading = g_CurrentShot.unk0;
   SetMenuBackdrop(MENU_BACKDROP_PATTERN);
-  g_PauseScreen = PAUSE_SCREEN_UNK4;
+  g_PauseScreen = PAUSE_SCREEN_FREE_LOOK;
   g_RoundHud.isLetterboxShown = FALSE;
   g_RoundHud.unkC = 0;
   if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
@@ -1258,7 +1258,7 @@ s32 UpdateAimControls(void) {
   } else {
     if (D_80227194_ovl_00 == 0) {
       if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
-          g_PauseScreen != PAUSE_SCREEN_UNK4 &&
+          g_PauseScreen != PAUSE_SCREEN_FREE_LOOK &&
           !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
         if (g_ImpactPointState != IMPACT_POINT_SETTING) {
           PlaySoundWithEffects(SOUND_IMPACT_POINT, IMPACT_POINT_SOUND_CHANNEL,
@@ -1414,7 +1414,7 @@ s32 UpdateAimControls(void) {
     if (D_800C3070 == 1) {
       EaseAimCamera();
     } else {
-      if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+      if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
         TurnFreeLook();
       } else {
         CraneAimCamera();
@@ -1423,7 +1423,7 @@ s32 UpdateAimControls(void) {
       MoveAimCameraDistanceByUpDown();
     }
 
-    if (g_PauseScreen != PAUSE_SCREEN_UNK4 &&
+    if (g_PauseScreen != PAUSE_SCREEN_FREE_LOOK &&
         (g_TurnController.pressedButtons & IMPACT_POINT_BUTTONS) &&
         !(g_ShotFlags & SHOT_FLAG_ON_GREEN)) {
       SpawnRisingClumps(g_CurrentShot.ballPosition);
@@ -1952,7 +1952,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
   }
 
   gDPPipeSync(g_DisplayListHead++);
-  if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+  if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
     f32 dx;
     f32 dy;
     f32 scale;
@@ -3096,7 +3096,8 @@ void UpdateTurns(void) {
             state == PLAYER_STATE_STARTING_SWING ||
             state == PLAYER_STATE_SWINGING ||
             state == PLAYER_STATE_BALL_IN_FLIGHT) &&
-        (g_PauseScreen == 0 || g_PauseScreen == 4)) {
+        (g_PauseScreen == PAUSE_SCREEN_NONE ||
+            g_PauseScreen == PAUSE_SCREEN_FREE_LOOK)) {
       TickStopwatches();
     }
 
@@ -3398,30 +3399,31 @@ void UpdateTurns(void) {
         D_80223FF8_ovl_00 = 0;
         UpdateShotFlags();
         D_8022B5C0_ovl_00++;
-        if (g_PauseScreen == 0) {
+        if (g_PauseScreen == PAUSE_SCREEN_NONE) {
           if (D_80227194_ovl_00 == 0 &&
               g_TurnController.pressedButtons == START_BUTTON &&
               (g_TurnController.buttons & START_BUTTON)) {
             ForceStopRumble();
             StopSound(8);
             PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
-            g_PauseScreen = 1;
+            g_PauseScreen = PAUSE_SCREEN_PAUSE_MENU;
             SetMenuBackdrop(2);
             RequestPauseMenu(g_Players[playerIndex].strokeCount != 0, 0);
             HideRoundHud();
           }
-        } else if (g_PauseScreen == 1 && D_80227194_ovl_00 == 0 &&
+        } else if (g_PauseScreen == PAUSE_SCREEN_PAUSE_MENU &&
+            D_80227194_ovl_00 == 0 &&
             (g_TurnController.pressedButtons & (START_BUTTON | B_BUTTON))) {
           ForceStopRumble();
           PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
           RequestPauseMenu(0, -1);
-          g_PauseScreen = 0;
+          g_PauseScreen = PAUSE_SCREEN_NONE;
           SetMenuBackdrop(-1);
           ResumeRound();
           break;
         }
 
-        if (g_PauseScreen == 1) {
+        if (g_PauseScreen == PAUSE_SCREEN_PAUSE_MENU) {
           s32 choice = UpdatePauseMenu(&g_TurnController);
 
           if (choice == PAUSE_ACTION_RETURN_TO_MENU) {
@@ -3442,9 +3444,9 @@ void UpdateTurns(void) {
             ClearShotEffects(1);
             FreeCharacterAndReactionLight(0);
           }
-        } else if (g_PauseScreen == 7) {
-          if (g_IsModuleAlive[5]) {
-            g_PauseScreen = 2;
+        } else if (g_PauseScreen == PAUSE_SCREEN_LOADING_SCORECARD) {
+          if (g_IsModuleAlive[MODULE_SCORECARD]) {
+            g_PauseScreen = PAUSE_SCREEN_SCORECARD;
             OpenScorecard(g_GameState.courseIndex, g_GameState.holeIndex);
             if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
               SetScorecardLayout(3);
@@ -3460,25 +3462,25 @@ void UpdateTurns(void) {
               SetScorecardLayout(0);
             }
           }
-        } else if (g_PauseScreen == 2) {
+        } else if (g_PauseScreen == PAUSE_SCREEN_SCORECARD) {
           UpdateScorecard(g_MergedController.repeatedButtons,
               g_MergedController.pressedButtons);
-        } else if (g_PauseScreen == 8) {
-          if (g_IsModuleAlive[0x16]) {
-            g_PauseScreen = 5;
+        } else if (g_PauseScreen == PAUSE_SCREEN_LOADING_SAVE_MENU) {
+          if (g_IsModuleAlive[MODULE_SAVE_MENU]) {
+            g_PauseScreen = PAUSE_SCREEN_SAVE_MENU;
             OpenSaveMenu(1);
           }
-        } else if (g_PauseScreen == 9) {
-          if (g_IsModuleAlive[0x16]) {
-            g_PauseScreen = 10;
+        } else if (g_PauseScreen == PAUSE_SCREEN_LOADING_CONTROLS) {
+          if (g_IsModuleAlive[MODULE_SAVE_MENU]) {
+            g_PauseScreen = PAUSE_SCREEN_CONTROLS;
             OpenControlsScreen();
           }
-        } else if (g_PauseScreen == 10) {
+        } else if (g_PauseScreen == PAUSE_SCREEN_CONTROLS) {
           UpdateControlsScreen(&g_TurnController);
-        } else if (g_PauseScreen == 5) {
+        } else if (g_PauseScreen == PAUSE_SCREEN_SAVE_MENU) {
           UpdateGameSaveMenu(&g_TurnController);
-        } else if (g_PauseScreen == 3) {
-        } else if (g_PauseScreen == 6) {
+        } else if (g_PauseScreen == PAUSE_SCREEN_UNK3) {
+        } else if (g_PauseScreen == PAUSE_SCREEN_PROMPT) {
           switch (UpdatePrompt(&g_TurnController)) {
             case PROMPT_RESULT_GIVE_UP_HOLE:
               D_800C3094 = 1;
@@ -3488,34 +3490,34 @@ void UpdateTurns(void) {
               GiveUpHole(playerIndex);
               break;
             case PROMPT_RESULT_RESUME:
-              g_PauseScreen = 0;
+              g_PauseScreen = PAUSE_SCREEN_NONE;
               SetMenuBackdrop(-1);
               ResumeRound();
               break;
             case PROMPT_RESULT_SAVE_REPLAY:
               SaveReplayToSlot();
               CloseSaveMenu();
-              g_PauseScreen = 0;
+              g_PauseScreen = PAUSE_SCREEN_NONE;
               func_80060358();
               break;
             case PROMPT_RESULT_SAVE_GAME:
               SaveGameToSlot();
-              g_PauseScreen = 5;
+              g_PauseScreen = PAUSE_SCREEN_SAVE_MENU;
               break;
             case PROMPT_RESULT_END_GAME:
               LeaveGameSaveMenu();
             case PROMPT_RESULT_STAY_IN_SAVE_MENU:
-              g_PauseScreen = 5;
+              g_PauseScreen = PAUSE_SCREEN_SAVE_MENU;
               break;
             case PROMPT_RESULT_QUIT_GAME:
-              g_PauseScreen = 0;
+              g_PauseScreen = PAUSE_SCREEN_NONE;
               ResumeRound();
               func_80060358();
               break;
           }
-        } else if (g_PauseScreen == 4) {
+        } else if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
           if (g_TurnController.pressedButtons & (A_BUTTON | R_TRIG)) {
-            g_PauseScreen = 0;
+            g_PauseScreen = PAUSE_SCREEN_NONE;
             SetMenuBackdrop(-1);
             SetFramebufferCount(3);
             SetScreenEffect(4, 0);
@@ -3543,7 +3545,7 @@ void UpdateTurns(void) {
           D_80227150_ovl_00.unk14 = 0;
           D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
           BuildShotPreview(&D_80227150_ovl_00, state);
-        } else if (g_PauseScreen == 0) {
+        } else if (g_PauseScreen == PAUSE_SCREEN_NONE) {
           Boolean isReady;
           s32 tempo;
           s32 replayKind;

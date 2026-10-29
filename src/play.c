@@ -1421,7 +1421,7 @@ DIM_BACKDROP:
               g_RoundHud.unkD = 0;
             }
 
-            g_PauseScreen = PAUSE_SCREEN_UNK2;
+            g_PauseScreen = PAUSE_SCREEN_SCORECARD;
             break;
           case HOLE_END_STEP_DONKEY_KONG_NOTICE:
             if (func_801F5F2C()) {
@@ -1472,7 +1472,7 @@ DIM_BACKDROP:
                 (func_8005F180() &&
                     f_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
               SetMenuBackdrop(MENU_BACKDROP_STILL);
-              g_PauseScreen = PAUSE_SCREEN_UNK2;
+              g_PauseScreen = PAUSE_SCREEN_SCORECARD;
               func_8020FAE8(-2);
               f_HoleEndStep = HOLE_END_STEP_SCORECARD;
               g_RoundHud.unk2 = 0;
@@ -1583,7 +1583,7 @@ DIM_BACKDROP:
                 OpenPrompt(NO_PROMPT);
                 break;
               case PROMPT_RESULT_STAY_IN_SAVE_MENU:
-                g_PauseScreen = PAUSE_SCREEN_UNK5;
+                g_PauseScreen = PAUSE_SCREEN_SAVE_MENU;
                 OpenPrompt(NO_PROMPT);
                 f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
                 break;

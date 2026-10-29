@@ -1891,7 +1891,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_GreenGridMatrix),
       G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
-  if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+  if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
     f_GreenGridAlpha = GREEN_GRID_DIM_ALPHA;
   } else if (g_RoundHud.greenGridState != GREEN_GRID_FADING) {
     f_GreenGridAlpha = GREEN_GRID_ALPHA;
