@@ -142,15 +142,16 @@ static CharacterId D_802301A8_ovl_01[CHARACTER_COUNT] = {CHARACTER_PLUM,
     CHARACTER_MARIO, CHARACTER_MAPLE, CHARACTER_DONKEY_KONG, CHARACTER_BOWSER,
     CHARACTER_METAL_MARIO, CHARACTER_KID, CHARACTER_SHERRY, CHARACTER_AZALEA,
     CHARACTER_JOE};
-static Vtx D_802301F0_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+/* The table cursor's corners, whose colors DrawTableCursor cycles */
+static Vtx f_TableCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
 static s32 D_80230230_ovl_01[2] = {0, 0};
-/* The phase of each corner's color */
-static f32 D_80230238_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+/* The angle, in radians, of each corner's color cycle */
+static f32 f_TableCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
 // clang-format off
 static TableCorner D_80230248_ovl_01[TABLE_LINE_COUNT * 2] = {
@@ -205,19 +206,20 @@ static u8 D_80230310_ovl_01[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
 };
 // clang-format on
 
-static Mtx D_8023AAE0_ovl_01;
-static Mtx D_8023AB20_ovl_01;
-static Mtx D_8023AB60_ovl_01;
+/* The camera and placement that DrawTableCursor draws the cursor with */
+static Mtx f_TableCursorProjection;
+static Mtx f_TableCursorTranslation;
+static Mtx f_TableCursorRotation;
 
 /* Read by no routine */
 static u8 D_8023ABA0_ovl_01[0x80];
 
-static Mtx D_8023AC20_ovl_01;
+static Mtx f_TableCursorScale;
 
 /* Read by no routine */
 static u8 D_8023AC60_ovl_01[0x4];
 
-static void* D_8023AC64_ovl_01;
+static void* f_TableCursorBox;
 static void* D_8023AC68_ovl_01;
 static void* D_8023AC6C_ovl_01;
 static void* D_8023AC70_ovl_01;
@@ -231,9 +233,9 @@ void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
 
   switch (bufferKind) {
     case TABLE_BUFFER_CURSOR:
-      D_8023AC64_ovl_01 = buffer;
+      f_TableCursorBox = buffer;
       OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
-      ReadEncodedAsset(D_8023AC64_ovl_01, &asset);
+      ReadEncodedAsset(f_TableCursorBox, &asset);
       break;
     case TABLE_BUFFER_UNREAD:
       D_8023AC68_ovl_01 = buffer;
@@ -496,33 +498,33 @@ void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
 
   for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT;
       vertexIndex++) {
-    D_80230238_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
-    red =
-        (s32)(sinf(D_80230238_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
+    f_TableCursorPhases[vertexIndex] += MENU_CURSOR_PHASE_STEP;
+    red = (s32)(sinf(f_TableCursorPhases[vertexIndex]) *
+              MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    blue = (s32)(sinf(D_80230238_ovl_01[vertexIndex] + (M_PI / 2)) *
+    blue = (s32)(sinf(f_TableCursorPhases[vertexIndex] + (M_PI / 2)) *
                MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    green = (s32)(sinf(D_80230238_ovl_01[vertexIndex] + M_PI) *
+    green = (s32)(sinf(f_TableCursorPhases[vertexIndex] + M_PI) *
                 MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    D_802301F0_ovl_01[vertexIndex].v.cn[0] = red;
-    D_802301F0_ovl_01[vertexIndex].v.cn[2] = blue;
-    D_802301F0_ovl_01[vertexIndex].v.cn[1] = green;
+    f_TableCursorVertices[vertexIndex].v.cn[0] = red;
+    f_TableCursorVertices[vertexIndex].v.cn[2] = blue;
+    f_TableCursorVertices[vertexIndex].v.cn[1] = green;
   }
 
-  guOrtho(&D_8023AAE0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
+  guOrtho(&f_TableCursorProjection, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
-  guTranslate(&D_8023AB20_ovl_01,
+  guTranslate(&f_TableCursorTranslation,
       x - ((SCREEN_WIDTH / 2) - (MENU_CURSOR_SIZE / 2)),
       ((SCREEN_HEIGHT / 2) - (MENU_CURSOR_SIZE / 2)) - y, MENU_CURSOR_Z);
-  guRotate(&D_8023AB60_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
-  guScale(&D_8023AC20_ovl_01, 1.0f, MENU_CURSOR_SCALE_Y, 1.0f);
+  guRotate(&f_TableCursorRotation, 0.0f, 0.0f, 1.0f, 0.0f);
+  guScale(&f_TableCursorScale, 1.0f, MENU_CURSOR_SCALE_Y, 1.0f);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(D_8023AC64_ovl_01)),
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_TableCursorBox)),
       G_IM_FMT_IA, MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -538,16 +540,16 @@ void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023AAE0_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TableCursorProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023AB20_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TableCursorTranslation),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023AB60_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TableCursorRotation),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023AC20_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TableCursorScale),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
-  gSPVertex(gfx++, D_802301F0_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
+  gSPVertex(gfx++, f_TableCursorVertices, MENU_CURSOR_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
