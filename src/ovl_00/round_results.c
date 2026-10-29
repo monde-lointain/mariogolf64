@@ -151,10 +151,8 @@ enum PortraitAnimation {
  * the title's letters */
 #define NOTICE_TITLE_DEPTH 0x3FFF
 #define NOTICE_SHINE_DEPTH 0x4027
-#define NOTICE_SWING_SOUND 0x69
 #define NOTICE_SWING_SOUND_CHANNEL 13
 #define NOTICE_SWING_SOUND_VOLUME 95
-#define NOTICE_SHINE_SOUND 0x43
 #define NOTICE_SHINE_SOUND_CHANNEL 14
 #define NOTICE_SHINE_SOUND_VOLUME 63
 #define RESULTS_LABEL_SCORE 2
@@ -1334,7 +1332,6 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_PAN_END 60
 #define NOTICE_PAN_MAX 255
 #define NOTICE_PAN_RANGE 126
-#define NOTICE_CHEER_SOUND 0x9D
 #define NOTICE_CHEER_SOUND_CHANNEL 3
 #define NOTICE_SOUND_PAN_RIGHT 255
 
@@ -1444,14 +1441,15 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   LoadTextureBlock(&gfx, f_ResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
       G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   if (f_NoticeFrameCount == NOTICE_SHINE_START) {
-    PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL,
+    PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, NOTICE_SHINE_SOUND_CHANNEL,
         NOTICE_SHINE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
   }
 
   if (f_NoticeFrameCount == 2) {
-    PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL,
+    PlaySoundWithEffects(SOUND_UNLOCK_EVERYTHING, NOTICE_SWING_SOUND_CHANNEL,
         NOTICE_SWING_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_RIGHT);
-    PlaySound(NOTICE_CHEER_SOUND, NOTICE_CHEER_SOUND_CHANNEL, SOUND_FULL_SCALE);
+    PlaySound(SOUND_COURSE_NOTICE_CHEER, NOTICE_CHEER_SOUND_CHANNEL,
+        SOUND_FULL_SCALE);
   }
 
   /* The swing sound follows the notice across the screen */
@@ -1680,12 +1678,12 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     }
 
     if (f_NoticeTime == NOTICE_SHINE_START) {
-      PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL,
+      PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, NOTICE_SHINE_SOUND_CHANNEL,
           NOTICE_SHINE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
     }
 
     if (f_NoticeTime == 2) {
-      PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL,
+      PlaySoundWithEffects(SOUND_UNLOCK_EVERYTHING, NOTICE_SWING_SOUND_CHANNEL,
           NOTICE_SWING_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
     }
 
@@ -2094,7 +2092,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
           G_IM_FMT_I, G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0,
           0, 0, 0, 0, 0);
       if (f_TrophyShineFrame == TROPHY_SHINE_SOUND_FRAME) {
-        PlaySoundWithEffects(NOTICE_SHINE_SOUND, TROPHY_SHINE_SOUND_CHANNEL,
+        PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, TROPHY_SHINE_SOUND_CHANNEL,
             TROPHY_SHINE_SOUND_VOLUME, TROPHY_SHINE_SOUND_REVERB,
             TROPHY_SHINE_SOUND_PAN);
       }

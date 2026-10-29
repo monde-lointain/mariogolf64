@@ -47,8 +47,6 @@
 #include "terrain.h"
 #include "variables.h"
 
-/* The loop played while the stick sets the impact point */
-#define IMPACT_POINT_SOUND 0x26
 #define IMPACT_POINT_SOUND_CHANNEL 8
 #define IMPACT_POINT_SOUND_VOLUME 60
 #define IMPACT_POINT_SOUND_REVERB 20
@@ -65,15 +63,6 @@
 #define SHOT_KIND_MAX_COUNT 0xFF
 #define MAX_RING_SHOT_CLEAR_COUNT 99
 
-/* The voice that reads out the hole-out banners */
-#define HOLE_OUT_CALL_HOLE_IN_ONE 0x84
-#define HOLE_OUT_CALL_ALBATROSS 0x85
-#define HOLE_OUT_CALL_EAGLE 0x86
-#define HOLE_OUT_CALL_BIRDIE 0x87
-#define HOLE_OUT_CALL_PAR 0x88
-#define HOLE_OUT_CALL_FINISH 0x90
-#define HOLE_OUT_CALL_COMPLETE 0x96
-#define HOLE_OUT_CALL_BOGEY 0x98
 #define HOLE_OUT_CALL_CHANNEL 3
 /* How far the control pad tilts the stick, as GetTurnStickX and GetTurnStickY
  * read it */
@@ -823,7 +812,7 @@ void UpdateImpactPointMode(void) {
   if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
       !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
     if (g_ImpactPointState == IMPACT_POINT_OFF && D_80227194_ovl_00 == 0) {
-      PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
+      PlaySoundWithEffects(SOUND_IMPACT_POINT, IMPACT_POINT_SOUND_CHANNEL,
           IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
           IMPACT_POINT_SOUND_PAN);
     }
@@ -1270,7 +1259,7 @@ s32 UpdateAimControls(void) {
           g_PauseScreen != PAUSE_SCREEN_UNK4 &&
           !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
         if (g_ImpactPointState != IMPACT_POINT_SETTING) {
-          PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL,
+          PlaySoundWithEffects(SOUND_IMPACT_POINT, IMPACT_POINT_SOUND_CHANNEL,
               IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
               IMPACT_POINT_SOUND_PAN);
         }
@@ -2687,40 +2676,37 @@ void ShowHoleOutBanner(s32 playerIndex) {
 
   if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
     StartBanner(BANNER_FINISH);
-    PlaySound(HOLE_OUT_CALL_FINISH, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
+    PlaySound(SOUND_CALL_FINISH, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
   } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     if (AreAllRingsPassed(&g_Players[playerIndex])) {
       StartBanner(BANNER_COMPLETE);
-      PlaySound(
-          HOLE_OUT_CALL_COMPLETE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
+      PlaySound(SOUND_CALL_COMPLETE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
     }
   } else if (strokeCount == 1) {
     banner = BANNER_HOLE_IN_ONE;
-    PlaySound(
-        HOLE_OUT_CALL_HOLE_IN_ONE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
+    PlaySound(SOUND_CALL_HOLE_IN_ONE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
   } else {
     switch (scoreToPar) {
       case -1:
         banner = BANNER_BIRDIE;
-        PlaySound(
-            HOLE_OUT_CALL_BIRDIE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
+        PlaySound(SOUND_CALL_BIRDIE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case -2:
         banner = BANNER_EAGLE;
-        PlaySound(HOLE_OUT_CALL_EAGLE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
+        PlaySound(SOUND_CALL_EAGLE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case -3:
         banner = BANNER_ALBATROSS;
         PlaySound(
-            HOLE_OUT_CALL_ALBATROSS, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
+            SOUND_CALL_ALBATROSS, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case 0:
         banner = BANNER_PAR;
-        PlaySound(HOLE_OUT_CALL_PAR, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
+        PlaySound(SOUND_CALL_PAR, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case 1:
         banner = BANNER_BOGEY;
-        PlaySound(HOLE_OUT_CALL_BOGEY, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
+        PlaySound(SOUND_CALL_BOGEY, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
       case 2:
         banner = BANNER_STROKES_OVER_PAR + 2;

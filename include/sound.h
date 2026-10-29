@@ -27,7 +27,9 @@ enum Sound {
   SOUND_LAND_ROUGH,
   SOUND_LAND_SAND, /* Bunkers and bare ground */
   SOUND_LAND_GREEN, /* Also played in the opening */
-  SOUND_LAND_WATER = 9,
+  /* Hole objects' splash; also the opening camera editor's choice sound */
+  SOUND_SPLASH = 8,
+  SOUND_LAND_WATER,
   /* Played four times in the opening, each lower in pitch */
   SOUND_UNK11 = 0xB,
   SOUND_HIT_FLAGSTICK = 0xE,
@@ -38,6 +40,8 @@ enum Sound {
   /* For a ball that comes into the cup slowly enough to stay */
   SOUND_CUP_IN,
   SOUND_ROLL = 0x14, /* Also played in the opening */
+  /* SOUND_UNK23, SOUND_UNK151 and SOUND_UNK155 play in a shot's flight */
+  SOUND_UNK23 = 0x17,
   SOUND_FLAG_SWISH = 0x1F, /* Also played in the opening */
   SOUND_TICK, /* A tally's tick and each click of the club slots' reels */
   SOUND_REEL_STOP,
@@ -45,13 +49,16 @@ enum Sound {
   SOUND_TALLY_DONE,
   SOUND_START_LIGHT_RED,
   SOUND_START_LIGHT_GO,
+  /* The loop played while the stick sets the impact point */
+  SOUND_IMPACT_POINT = 0x26,
   /*
    * SOUND_UNK39 and SOUND_UNK77 play in bursts as the opening's Lakitu
    * flies; SOUND_UNK77 also with the opening's Yoshi or Donkey Kong
    */
-  SOUND_UNK39 = 0x27,
+  SOUND_UNK39,
   SOUND_WIND_FLY_GUY, /* Also played in the opening */
   SOUND_GOOMBA = 0x2A, /* Also the Monty Mole's and in the opening */
+  SOUND_MONKEY = 0x2C,
   SOUND_CONTACT_MARIO = 0x2E, /* Also Bowser's */
   SOUND_CONTACT_HEAVY_HITTER,
   SOUND_CONTACT_WARIO, /* Also played when the game halts on a fault */
@@ -77,11 +84,14 @@ enum Sound {
   /* Over and over in his reactions and the opening */
   SOUND_DONKEY_KONG_REPEATED = 0x41,
   SOUND_DONKEY_KONG_EAGLE_EFFECT,
+  /* Also the shine across a course notice's title or a trophy */
   SOUND_SHRINKING_IMAGE,
   SOUND_BANNER,
   SOUND_SLICE, /* Also played when the holes of a round are chosen */
+  /* The opening camera editor's, on loading or deleting a snapshot */
+  SOUND_SNAPSHOT_LOAD,
   /* The scorecard and the save menu opening and closing */
-  SOUND_PANEL_OPEN = 0x47,
+  SOUND_PANEL_OPEN,
   SOUND_PANEL_CLOSE,
   /*
    * Also played when a contest's winner appears, an erasure is declined and
@@ -99,22 +109,41 @@ enum Sound {
   SOUND_UNK78,
   /* Over and over in her reactions and the opening */
   SOUND_YOSHI_REPEATED,
-  SOUND_MENU_START, /* Also played in the opening */
+  /*
+   * Also played in the opening, and as a wood meets the ball off a tee or
+   * on some power shots
+   */
+  SOUND_MENU_START,
   /* A ball being struck by a plain club or bouncing on hard ground */
   SOUND_CONTACT_PLAIN,
-  SOUND_ENTER_TOURNAMENT = 0x54,
-  /* As each of the opening's shots launches its sparks */
+  /* The rest of the sounds of a club meeting the ball */
+  SOUND_CONTACT_WOOD,
+  SOUND_CONTACT_IRON_TEE,
+  SOUND_ENTER_TOURNAMENT, /* Also an iron meeting the ball */
+  SOUND_CONTACT_IRON_BUNKER = 0x56,
+  SOUND_CONTACT_PUTTER,
+  /*
+   * As each of the opening's shots launches its sparks; also early in a
+   * long shot's flight, where SOUND_UNK90 plays later in it
+   */
   SOUND_SHOT_SPARKS = 0x59,
   SOUND_UNK90,
-  SOUND_LOOK_DOWN_RANGE, /* Also played when a scorecard row flips */
+  /*
+   * Also played when a scorecard row flips, the club changes, and the opening
+   * camera editor's snapshot cursor moves
+   */
+  SOUND_LOOK_DOWN_RANGE,
   SOUND_MENU_MOVE, /* Also the prompts' cursor and the scorecard's pages */
   SOUND_MENU_CONFIRM, /* The sound of confirming a choice */
-  SOUND_MENU_CANCEL = 0x5F,
+  /* Played when B can't switch to a power shot */
+  SOUND_POWER_SHOT_REFUSED,
+  SOUND_MENU_CANCEL,
   SOUND_LOOK_AT_CUP, /* Also played in the opening */
   SOUND_LOOK_BACK, /* Also a sound of the scorecard */
   /*
    * The swing meter's click for an impact on the mark; also a ring passed
-   * through and the Nintendo logo's sound
+   * through, the Nintendo logo's sound and the opening camera editor's
+   * snapshot save
    */
   SOUND_IMPACT_ON_MARK,
   /*
@@ -130,8 +159,8 @@ enum Sound {
   /* Also the inset view closing, a wipe opening and the aim camera rising */
   SOUND_PROMPT_CLOSE,
   SOUND_PAUSE, /* Also the debug scene menu's opening */
-  SOUND_THREE_STARS, /* Also a sound of the scorecard */
-  SOUND_UNLOCK_EVERYTHING = 0x69,
+  SOUND_THREE_STARS, /* Also a sound of the scorecard and of a shot's result */
+  SOUND_UNLOCK_EVERYTHING = 0x69, /* Also as a course notice swings in */
   SOUND_UNK106,
   SOUND_SKIN_COUNTED,
   SOUND_TEXT_TYPING,
@@ -143,14 +172,43 @@ enum Sound {
   SOUND_CONTROLS_OPEN,
   /* Also played when the main menu shows the transmit option */
   SOUND_CONTROLS_CLOSE,
-  /* SOUND_UNK118, SOUND_UNK135 and SOUND_UNK400 are the audio test's */
-  SOUND_UNK118 = 0x76,
+  /*
+   * SOUND_UNK116 to SOUND_UNK118 play in a shot's flight; SOUND_UNK118,
+   * SOUND_CALL_BIRDIE and SOUND_UNK400 also play in the audio test
+   */
+  SOUND_UNK116,
+  SOUND_UNK117,
+  SOUND_UNK118,
   SOUND_OUT_OF_BOUNDS, /* Also played in the opening */
-  SOUND_UNK135 = 0x87,
+  SOUND_FULL_SHOT = 0x7B,
+  SOUND_TROUBLE_LANDING, /* In a bunker, water or out of play */
+  /* The SOUND_CALL_* are the voice that reads out the banner of their name */
+  SOUND_CALL_EXCELLENT = 0x7E,
+  SOUND_CALL_GREAT,
+  SOUND_CALL_NICE_ON,
+  SOUND_CALL_NICE_APPROACH,
+  SOUND_CALL_NICE_TOUCH,
+  SOUND_OUT_OF_COURSE,
+  SOUND_CALL_HOLE_IN_ONE,
+  SOUND_CALL_ALBATROSS,
+  SOUND_CALL_EAGLE,
+  SOUND_CALL_BIRDIE,
+  SOUND_CALL_PAR,
   SOUND_RING_SHOT_RETRY = 0x8E,
   SOUND_HOLE_INTRO,
-  SOUND_UNK154 = 0x9A,
-  SOUND_NEW_BEST_SCORE = 0x9C,
+  SOUND_CALL_FINISH,
+  SOUND_CALL_FLAG_SHOT,
+  SOUND_CALL_CHIP_IN,
+  SOUND_CALL_PIN_SHOT,
+  SOUND_CALL_COMPLETE = 0x96,
+  SOUND_UNK151,
+  SOUND_CALL_BOGEY,
+  SOUND_DEEP_ROUGH_LANDING,
+  SOUND_WASTE_AREA_LANDING,
+  SOUND_UNK155,
+  SOUND_NEW_BEST_SCORE,
+  /* As a course notice swings in */
+  SOUND_COURSE_NOTICE_CHEER,
   SOUND_AZALEA_EAGLE = 0xA7,
   SOUND_AZALEA_PAR = 0xAE,
   SOUND_AZALEA_BOGEY = 0xB1,

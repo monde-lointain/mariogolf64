@@ -62,9 +62,6 @@
 /* Frames between the steps StepToClubChoice takes */
 #define CLUB_CHOICE_STEP_DELAY 3
 
-#define CLUB_CHANGE_SOUND 0x5B
-/* Played when B can't switch to a power shot */
-#define POWER_SHOT_REFUSED_SOUND 0x5E
 #define CLUB_SOUND_CHANNEL 0xF
 
 /*
@@ -1640,7 +1637,7 @@ s32 StepToClubChoice(ClubChoice* choice) {
   }
 
   if (g_CurrentShot.shotMode != choice->shotMode) {
-    PlaySound(CLUB_CHANGE_SOUND, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
+    PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
     hasStepped = TRUE;
     g_CurrentShot.shotMode = choice->shotMode;
   }
@@ -1650,7 +1647,7 @@ s32 StepToClubChoice(ClubChoice* choice) {
   }
 
   if (g_CurrentShot.clubSlot < choice->clubSlot) {
-    PlaySound(CLUB_CHANGE_SOUND, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
+    PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
     for (slot = g_CurrentShot.clubSlot + 1; slot < CLUB_SLOT_COUNT; slot++) {
       if (g_Players[g_CurrentShot.playerIndex].clubs[slot] != NO_CLUB &&
           (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[slot]]
@@ -1666,7 +1663,7 @@ s32 StepToClubChoice(ClubChoice* choice) {
       g_CurrentShot.clubSlot = choice->clubSlot;
     }
   } else if (choice->clubSlot < g_CurrentShot.clubSlot) {
-    PlaySound(CLUB_CHANGE_SOUND, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
+    PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
     for (slot = g_CurrentShot.clubSlot - 1; slot >= 0; slot--) {
       if (g_Players[g_CurrentShot.playerIndex].clubs[slot] != NO_CLUB &&
           (g_Clubs[g_Players[g_CurrentShot.playerIndex].clubs[slot]]
@@ -1704,7 +1701,8 @@ void HandleClubInput(void) {
                     .surfaceMask &
                 GetCurrentSurfaceClubMask(FALSE))) {
           g_CurrentShot.clubSlot = slot;
-          PlaySound(CLUB_CHANGE_SOUND, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
+          PlaySound(
+              SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
           return;
         }
       }
@@ -1715,7 +1713,8 @@ void HandleClubInput(void) {
                     .surfaceMask &
                 GetCurrentSurfaceClubMask(FALSE))) {
           g_CurrentShot.clubSlot = slot;
-          PlaySound(CLUB_CHANGE_SOUND, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
+          PlaySound(
+              SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
           return;
         }
       }
@@ -1758,23 +1757,23 @@ void HandleShotModeInput(void) {
         g_CurrentShot.shotMode = PUTT_MODE_MIDDLE;
       }
 
-      sound = CLUB_CHANGE_SOUND;
+      sound = SOUND_LOOK_DOWN_RANGE;
       PlaySound(sound, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (IsFartherThan(cupDistance, APPROACH_SHOT_DISTANCE)) {
       if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
-        sound = POWER_SHOT_REFUSED_SOUND;
+        sound = SOUND_POWER_SHOT_REFUSED;
         if (g_CurrentShot.unk54) {
           g_CurrentShot.shotMode = SHOT_MODE_POWER;
-          sound = CLUB_CHANGE_SOUND;
+          sound = SOUND_LOOK_DOWN_RANGE;
         }
       } else {
         g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
-        sound = CLUB_CHANGE_SOUND;
+        sound = SOUND_LOOK_DOWN_RANGE;
       }
 
       PlaySound(sound, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else {
-      PlaySound(CLUB_CHANGE_SOUND, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
+      PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
       if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
         g_CurrentShot.shotMode = SHOT_MODE_APPROACH;
       } else {

@@ -270,7 +270,7 @@ void PlaySound(s32 soundId, s32 channel, s32 volume) {
       }
 
       if (index < ECHOING_SOUND_COUNT) {
-        if (f_EchoingSoundIds[index] == SOUND_UNK154) {
+        if (f_EchoingSoundIds[index] == SOUND_WASTE_AREA_LANDING) {
           SetSoundReverb(channel, NO_REVERB);
         } else {
           SetSoundReverb(channel, ECHO_REVERB);
@@ -328,7 +328,7 @@ void PlaySoundWithEffects(
       }
 
       if (index < ECHOING_SOUND_COUNT) {
-        if (f_EchoingSoundIds[index] == SOUND_UNK154) {
+        if (f_EchoingSoundIds[index] == SOUND_WASTE_AREA_LANDING) {
           SetSoundReverb(channel, NO_REVERB);
         } else {
           SetSoundReverb(channel, ECHO_REVERB);

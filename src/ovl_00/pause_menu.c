@@ -123,10 +123,6 @@ typedef struct PauseOption {
 } PauseOption; /* size = 0x6 */
 
 #define CHOICE_BOX_MAX_OPTIONS 4
-#define CHOICE_BOX_OPEN_SOUND 0x64
-#define CHOICE_BOX_CLOSE_SOUND 0x65
-#define CHOICE_BOX_MOVE_SOUND 0x5C
-#define CHOICE_BOX_CHOOSE_SOUND 0x5D
 #define MENU_SOUND_VOLUME 100
 
 /* Values of f_ChoiceBoxState */
@@ -1077,12 +1073,12 @@ void OpenChoiceBox(s32 choiceBoxIndex) {
   if (choiceBoxIndex == CHOICE_BOX_CLOSED) {
     f_ChoiceBoxState = choiceBoxIndex;
     FreeChoiceBoxImages();
-    PlaySound(CHOICE_BOX_CLOSE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
+    PlaySound(SOUND_PROMPT_CLOSE, g_NextSoundChannel, MENU_SOUND_VOLUME);
   } else {
     f_ChoiceBoxSelection = 0;
     f_ChoiceBoxState = CHOICE_BOX_CHOOSING;
     LoadChoiceBoxImages();
-    PlaySound(CHOICE_BOX_OPEN_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
+    PlaySound(SOUND_PROMPT_OPEN, g_NextSoundChannel, MENU_SOUND_VOLUME);
   }
 }
 
@@ -1104,8 +1100,7 @@ s32 UpdateChoiceBox(ControllerState* controller) {
       return box->results[f_ChoiceBoxSelection];
     case CHOICE_BOX_CHOOSING:
       if (controller->pressedButtons == A_BUTTON) {
-        PlaySound(
-            CHOICE_BOX_CHOOSE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         f_ChoiceBoxState = CHOICE_BOX_CHOSEN;
         return CHOICE_RESULT_NONE;
       }
@@ -1113,25 +1108,21 @@ s32 UpdateChoiceBox(ControllerState* controller) {
       if (!box->isVertical) {
         if (controller->repeatedButtons & L_JPAD) {
           f_ChoiceBoxSelection--;
-          PlaySound(
-              CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
+          PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
         }
 
         if (controller->repeatedButtons & R_JPAD) {
           f_ChoiceBoxSelection++;
-          PlaySound(
-              CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
+          PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
         }
       } else {
         if (controller->repeatedButtons & U_JPAD) {
-          PlaySound(
-              CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
+          PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
           f_ChoiceBoxSelection--;
         }
 
         if (controller->repeatedButtons & D_JPAD) {
-          PlaySound(
-              CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
+          PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
           f_ChoiceBoxSelection++;
         }
       }
