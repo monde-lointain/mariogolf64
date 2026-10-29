@@ -2070,7 +2070,7 @@ INCLUDE_ASM("asm/nonmatchings/ball_simulation", StepBallSimulation);
 
 /* Returns the ImpactEffect entry for the club's lie rating and impactTiming */
 ImpactEffect* GetImpactTimingEntry(
-    Club* club, Surface surface, s32 shotMode, s32 impactTiming) {
+    Club* club, Surface surface, ShotMode shotMode, s32 impactTiming) {
   s32 row;
 
   row = GetLieRating(club, surface, shotMode) - 1;

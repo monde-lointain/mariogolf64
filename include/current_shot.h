@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "club.h"
 #include "math_util.h"
 #include "surface.h"
 
@@ -11,7 +12,7 @@ typedef struct CurrentShot {
   /* 0x00 */ SignedBinaryAngle heading;
   /* 0x04 */ s32 powerGaugeFrame; /* The gaugeFrame at which power is set */
   /* 0x08 */ s32 impactGaugeFrame; /* The gaugeFrame at which impact is set */
-  /* 0x0C */ s32 shotMode;
+  /* 0x0C */ ShotMode shotMode;
   /* 0x10 */ s32 clubSlot; /* Index into the player's clubs */
   /* 0x14 */ s32 offsetX; /* The shot offset that the stick sets */
   /* 0x18 */ s32 offsetY;

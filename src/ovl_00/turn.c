@@ -2380,7 +2380,7 @@ void CheckRingShotClear(s32 playerIndex) {
  * roll overlay has its own copies of these four routines, with the same
  * names, so these are static to link beside them.
  */
-static s32 GetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+static s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
   s32 animation;
 
   switch (GetCharacterClubKind(slotIndex, club)) {
@@ -2406,7 +2406,7 @@ static s32 GetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
 
 /* The second of the club kind's animations, or the third for an approach shot
  */
-static s32 GetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+static s32 GetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
   s32 animation;
 
   switch (GetCharacterClubKind(slotIndex, club)) {
@@ -2430,12 +2430,12 @@ static s32 GetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
   return animation + (shotMode == SHOT_MODE_APPROACH);
 }
 
-static void SetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+static void SetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
   SetCharacterAnimation(
       slotIndex, GetStanceAnimation(slotIndex, club, shotMode));
 }
 
-static void SetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+static void SetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
   SetCharacterAnimation(
       slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
 }
@@ -4131,7 +4131,7 @@ void UpdateTurns(void) {
 
         break;
       case PLAYER_STATE_STARTING_SWING: {
-        s32 shotMode;
+        ShotMode shotMode;
 
         EndRumbleForceStop();
         ReuseLastCharacterMatrices(0);

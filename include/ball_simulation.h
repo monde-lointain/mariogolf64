@@ -98,7 +98,7 @@ typedef struct ShotLaunch {
   /* 0x10 */ s32 offsetX; /* CurrentShot's offsetX and offsetY */
   /* 0x14 */ s32 offsetY;
   /* 0x18 */ s32 playerIndex;
-  /* 0x1C */ s32 shotMode;
+  /* 0x1C */ ShotMode shotMode;
 } ShotLaunch; /* size = 0x20 */
 
 #define UNKA8_COUNT 8
@@ -167,7 +167,7 @@ extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 
 void ResetBallSimulations(void);
 ImpactEffect* GetImpactTimingEntry(
-    Club* club, Surface surface, s32 shotMode, s32 impactTiming);
+    Club* club, Surface surface, ShotMode shotMode, s32 impactTiming);
 s32 StepBallSimulation(BallSimulation* simulation);
 s32 LaunchBallSimulation(
     BallSimulation* simulation, s32 purpose, ShotLaunch* shot);

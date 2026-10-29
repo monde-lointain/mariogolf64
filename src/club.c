@@ -99,7 +99,7 @@ typedef struct ClubSetStats {
 /* A selection for StepToClubChoice to move to */
 typedef struct ClubChoice {
   /* 0x00 */ u8 unk0[0xC];
-  /* 0x0C */ s32 shotMode;
+  /* 0x0C */ ShotMode shotMode;
   /* 0x10 */ s32 clubSlot;
 } ClubChoice;
 
@@ -960,7 +960,7 @@ s32 GetShotDistance(Club* club, u32 shotMode) {
 
 /* Returns the club's reach in the shot mode, in world units */
 #ifdef NON_MATCHING
-s32 GetShotWorldDistance(Club* club, s32 shotMode) {
+s32 GetShotWorldDistance(Club* club, ShotMode shotMode) {
   s32 distance = GetShotDistance(club, shotMode);
   f32 unitsPerStep = UNITS_PER_YARD;
 
@@ -1057,7 +1057,7 @@ void WriteClubParameters(void) {
 void GenerateClub(s32 clubIndex) {
   BallSimulation simulation;
   Club* club;
-  s32 shotMode;
+  ShotMode shotMode;
   s32 targetDistance;
   s32 distance;
   s32 shortDistance;
@@ -1298,7 +1298,7 @@ void InitClubs(void) {
  * InterpolatePuttPower is a nested function, a GNU C extension.
  */
 #ifdef NON_MATCHING
-s32 GetPuttPower(s32 fraction, s32 shotMode) {
+s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
   BallSimulation simulation;
   Club* putter;
   s32 targetDistance;
@@ -1409,7 +1409,7 @@ INCLUDE_ASM("asm/nonmatchings/club", InterpolatePuttPower);
 INCLUDE_ASM("asm/nonmatchings/club", GetPuttPower);
 #endif
 
-s32 GetClubPower(Club* club, s32 shotMode) {
+s32 GetClubPower(Club* club, ShotMode shotMode) {
   return club->power[shotMode];
 }
 
@@ -1533,7 +1533,7 @@ static const char f_DefaultLieRatings[LIE_RATING_LENGTH + 1] = "3333333333333";
  * of surface has a digit for each club type, with its own digits for an
  * approach shot.
  */
-s32 GetLieRating(Club* club, Surface surface, s32 shotMode) {
+s32 GetLieRating(Club* club, Surface surface, ShotMode shotMode) {
   const char* ratings;
   const char* approachRatings;
   s32 rating;
@@ -1619,7 +1619,7 @@ s32 GetLieRating(Club* club, Surface surface, s32 shotMode) {
 
 /* Sets span[0] to 2 * rating - 1 and span[1] to rating - 1; both are 0 for the
  * putter */
-void GetLieSpan(Club* club, Surface surface, s32* span, s32 shotMode) {
+void GetLieSpan(Club* club, Surface surface, s32* span, ShotMode shotMode) {
   s32 rating = GetLieRating(club, surface, shotMode);
 
   if (rating > 0) {

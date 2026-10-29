@@ -800,7 +800,7 @@ void EaseStaffRollView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
 }
 
 /* The first of the club kind's animations; shotMode is unused */
-s32 GetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
   s32 animation;
 
   switch (GetCharacterClubKind(slotIndex, club)) {
@@ -828,7 +828,7 @@ s32 GetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
  * The second of the club kind's animations, or the third for an approach
  * shot; the timeline skips to just before its ANIMATION_EVENT_IMPACT frame
  */
-s32 GetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+s32 GetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
   s32 animation;
 
   switch (GetCharacterClubKind(slotIndex, club)) {
@@ -852,12 +852,12 @@ s32 GetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
   return animation + (shotMode == SHOT_MODE_APPROACH);
 }
 
-void SetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+void SetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
   SetCharacterAnimation(
       slotIndex, GetStanceAnimation(slotIndex, club, shotMode));
 }
 
-void SetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+void SetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
   SetCharacterAnimation(
       slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
 }

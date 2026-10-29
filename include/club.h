@@ -14,6 +14,8 @@ enum ShotMode {
   SHOT_MODE_APPROACH
 };
 
+typedef s32 ShotMode;
+
 #define SHOT_MODE_COUNT 3
 
 /* The putter's shot modes are long, middle and short putts */
@@ -123,19 +125,19 @@ extern s8 g_ClubTestMode;
 
 const ClubParameters* GetClubParameters(s32 clubIndex);
 s32 GetShotDistance(Club* club, u32 shotMode);
-s32 GetShotWorldDistance(Club* club, s32 shotMode);
+s32 GetShotWorldDistance(Club* club, ShotMode shotMode);
 void GenerateClub(s32 clubIndex);
 void InitClubs(void);
-s32 GetPuttPower(s32 fraction, s32 shotMode);
-s32 GetClubPower(Club* club, s32 shotMode);
+s32 GetPuttPower(s32 fraction, ShotMode shotMode);
+s32 GetClubPower(Club* club, ShotMode shotMode);
 Club* GetClub(u32 clubIndex);
 Club* GetSelectedClub(void);
 s32 GetSelectedShotDistance(void);
 s32 GetSelectedShotWorldDistance(void);
 s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds);
-s32 GetLieRating(Club* club, Surface surface, s32 shotMode);
+s32 GetLieRating(Club* club, Surface surface, ShotMode shotMode);
 void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range);
-void GetLieSpan(Club* club, Surface surface, s32* span, s32 shotMode);
+void GetLieSpan(Club* club, Surface surface, s32* span, ShotMode shotMode);
 void HandleClubInput(void);
 void HandleShotModeInput(void);
 

@@ -487,7 +487,8 @@ static const s32 f_BallDistances[CHARACTER_COUNT][BALL_DISTANCE_COUNT] = {
  * GetVectorLength is an unused nested function, a GNU C extension.
  */
 #ifdef NON_MATCHING
-s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubKind, s32 shotMode) {
+s32 GetBallDistance(
+    u32 slotIndex, s32 club, Boolean isClubKind, ShotMode shotMode) {
   f32 position[3];
   char text[DEBUG_LINE_SIZE];
   s32 distance;

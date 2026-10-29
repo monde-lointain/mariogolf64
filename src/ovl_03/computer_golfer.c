@@ -222,7 +222,7 @@ void ChooseLandingTarget(
     s32 x, s32 z, s32 distance, s32* targetX, s32* targetZ);
 void PlanClubAndTarget(CoursePoint target);
 void ChooseLongShot(
-    s32 unused, s32* clubType, s32* targetX, s32* targetZ, s32* shotMode);
+    s32 unused, s32* clubType, s32* targetX, s32* targetZ, ShotMode* shotMode);
 s32 ChooseHoleStrokeTarget(void);
 
 static OSThread f_PlanThread;
@@ -499,7 +499,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
   s32 clubType;
   s32 targetX;
   s32 targetZ;
-  s32 shotMode;
+  ShotMode shotMode;
   s32 index;
   s32 strokesOver;
   s32 distance;
@@ -1001,7 +1001,7 @@ void PlanClubAndTarget(CoursePoint target) {
   s32 targetX;
   s32 targetZ;
   s32 clubType;
-  s32 shotMode;
+  ShotMode shotMode;
   u32 kind;
   s32 rest;
   s32 slot;
@@ -1927,9 +1927,9 @@ void ChooseLandingTarget(
  * carry covers PlanCupDistance, in the shot mode for the player's stroke count
  */
 void ChooseLongShot(
-    s32 unused, s32* clubType, s32* targetX, s32* targetZ, s32* shotMode) {
+    s32 unused, s32* clubType, s32* targetX, s32* targetZ, ShotMode* shotMode) {
   s32 pad[44]; /* Unused; it is there to match */
-  s32 shotModes[STROKE_SHOT_MODE_COUNT];
+  ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
   s32 index;
   s32 one; /* one is there to match */
   s32 strokeCount;
