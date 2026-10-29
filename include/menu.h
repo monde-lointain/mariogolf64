@@ -270,7 +270,6 @@ enum MenuArrow {
  * 64 images on, seen from above, with the blinking arrows either side
  */
 #define WHEEL_FIELD_OF_VIEW 120.0f
-#define WHEEL_ASPECT_RATIO (4.0f / 3.0f)
 #define WHEEL_NEAR_PLANE 10.0f
 #define WHEEL_FAR_PLANE 30000.0f
 #define WHEEL_EYE_HEIGHT 80.0f

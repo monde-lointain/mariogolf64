@@ -830,10 +830,10 @@ void InitRoundHud(void) {
   guOrtho(&g_ScreenOrthoMatrix, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
       -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, SCREEN_ORTHO_NEAR,
       SCREEN_ORTHO_FAR, 1.0f);
-  guPerspective(&D_80105278, &g_ScreenEffectPerspNorm, 10.0f, 4.0f / 3.0f,
-      10.0f, 30000.0f, 1.0f);
+  guPerspective(&D_80105278, &g_ScreenEffectPerspNorm, 10.0f,
+      SCREEN_ASPECT_RATIO, 10.0f, 30000.0f, 1.0f);
   guPerspective(&g_ScreenEffectProjection, &g_ScreenEffectPerspNorm, 45.0f,
-      4.0f / 3.0f, 10.0f, 8000.0f, 1.0f);
+      SCREEN_ASPECT_RATIO, 10.0f, 8000.0f, 1.0f);
   g_SkyState.viewedWindAngles[0] = 0.0f;
   g_SkyState.horizonLevels[0] = 0.0f;
   g_SkyState.lookAtLevels[0] = 0.0f;

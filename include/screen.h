@@ -6,6 +6,8 @@
 /* Screen sizes, in pixels */
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
+/* The perspectives that fill the screen take its width over its height */
+#define SCREEN_ASPECT_RATIO (4.0f / 3.0f)
 
 /* The border around the main camera's scissor rectangle, in pixels */
 #define SCREEN_BORDER 8

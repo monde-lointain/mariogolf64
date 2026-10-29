@@ -4623,7 +4623,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   g_HoleSetup.conditions.lightPitch = MODE_SELECT_LIGHT_PITCH;
   func_801FC60C_ovl_01(&gfx, MODE_SELECT_BOARD_KIND);
   guPerspectiveF(D_80231CA0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
-      WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
+      SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
   guLookAtReflectF(D_80231CE0_ovl_01, &D_80231D20_ovl_01[g_DrawBufferIndex],
       0.0f, MODE_BOARD_EYE_HEIGHT, MODE_BOARD_EYE_DISTANCE, 0.0f, 0.0f, 0.0f,
       0.0f, 1.0f, 0.0f);
@@ -5608,7 +5608,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     func_801FB54C_ovl_01(&gfx, COURSE_SELECT_BACK_BOARD_KIND);
     guTranslate(&D_802321F0_ovl_01, 0.0f, 0.0f, -WATER_PLANE_DISTANCE);
     guPerspective(&D_80232230_ovl_01, &perspNorm, WATER_FIELD_OF_VIEW,
-        WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE,
+        SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE,
         WATER_PERSPECTIVE_SCALE);
     gSPPerspNormalize(gfx++, perspNorm);
     gDPPipeSync(gfx++);
@@ -5670,7 +5670,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     gSP1Triangle(gfx++, 0, 2, 4, 0);
     gDPPipeSync(gfx++);
     guPerspectiveF(D_80232270_ovl_01, &wheelPerspNorm, WHEEL_FIELD_OF_VIEW,
-        WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
+        SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
     guLookAtF(D_802322B0_ovl_01, 0.0f, COURSE_SELECT_EYE_HEIGHT,
         COURSE_SELECT_EYE_DISTANCE, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
     SetCpuProjectionF(D_80232270_ovl_01, D_802322B0_ovl_01, g_Viewports);

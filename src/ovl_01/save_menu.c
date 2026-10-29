@@ -1801,7 +1801,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
   func_80225960_ovl_01(&gfx);
 
   guPerspectiveF(D_8023BA60_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
-      WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
+      SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
   guLookAtF(D_8023BAA0_ovl_01, 0.0f, BOARD_EYE_HEIGHT, BOARD_EYE_DISTANCE, 0.0f,
       0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
   SetCpuProjectionF(D_8023BA60_ovl_01, D_8023BAA0_ovl_01, g_Viewports);

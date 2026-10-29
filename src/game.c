@@ -1078,8 +1078,6 @@ enum DrawMode {
 #define MAP_TOP_DOWN_TILT 50.0f
 #define MAP_MINIATURE_SCALE 0.07f
 
-#define ASPECT_RATIO (4.0f / 3.0f)
-
 /* The course camera's clip planes, in world units */
 #define COURSE_NEAR_CLIP 10.0f
 #define COURSE_FAR_CLIP 32000.0f
@@ -1342,7 +1340,7 @@ s32 DrawGame(void) {
             -(g_MapCamera.view.lookAt[2] - g_MapCamera.view.eye[2]));
         terrainStyle = TERRAIN_STYLE_MAP;
         guPerspective(&matrices->perspective, &mapPerspNorm, f_MapFieldOfView,
-            ASPECT_RATIO, MAP_NEAR_CLIP, MAP_FAR_CLIP, 1.0f);
+            SCREEN_ASPECT_RATIO, MAP_NEAR_CLIP, MAP_FAR_CLIP, 1.0f);
         gSPPerspNormalize(g_DisplayListHead++, mapPerspNorm);
         guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
         LoadProjection();
@@ -1505,7 +1503,7 @@ s32 DrawGame(void) {
           guPerspectiveF(matrices->perspectiveF, &insetPerspNorm,
               g_Cameras[viewIndex].view.fieldOfView,
 
-              ASPECT_RATIO, MAP_NEAR_CLIP, MAP_FAR_CLIP, 1.0f);
+              SCREEN_ASPECT_RATIO, MAP_NEAR_CLIP, MAP_FAR_CLIP, 1.0f);
           ConvertMatrixToFixed(matrices->perspectiveF, &matrices->perspective);
           guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
           guLookAtF(matrices->viewingF, camera->view.eye[0],
@@ -1568,8 +1566,8 @@ s32 DrawGame(void) {
             }
 
             guPerspectiveF(matrices->perspectiveF, &perspNorm,
-                g_Cameras[viewIndex].view.fieldOfView, ASPECT_RATIO, -nearZ,
-                farClip, 1.0f);
+                g_Cameras[viewIndex].view.fieldOfView, SCREEN_ASPECT_RATIO,
+                -nearZ, farClip, 1.0f);
             ConvertMatrixToFixed(
                 matrices->perspectiveF, &matrices->perspective);
             g_PerspectiveNormalization = perspNorm;
