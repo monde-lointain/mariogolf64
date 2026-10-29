@@ -41,9 +41,34 @@
 /* Grid texture coordinates: four per unit, starting one texel in */
 #define GRID_TEXTURE_SCALE 4
 #define GRID_TEXTURE_BORDER TexelCoordinate(1)
-/* Vertex flags in the hole's vertex file */
+/*
+ * Vertex flags in the hole's vertex file: a VertexEncoding for each
+ * coordinate, and whether x or z repeats the last vertex's
+ */
+#define VERTEX_FLAG_X_ENCODING 0x3
+#define VERTEX_FLAG_Y_ENCODING 0xC
+#define VERTEX_FLAG_Y_ENCODING_SHIFT 2
+#define VERTEX_FLAG_Z_ENCODING 0x30
+#define VERTEX_FLAG_Z_ENCODING_SHIFT 4
 #define VERTEX_FLAG_SAME_X 0x40
 #define VERTEX_FLAG_SAME_Z 0x80
+
+/*
+ * How a coordinate is stored in the vertex file: as two bytes, or as one byte
+ * taken whole, or scaled up by a fine or a coarse shift. A one-byte
+ * coordinate is read into the high byte and shifted down.
+ */
+enum VertexEncoding {
+  VERTEX_ENCODING_TWO_BYTES,
+  VERTEX_ENCODING_BYTE,
+  VERTEX_ENCODING_FINE_BYTE,
+  VERTEX_ENCODING_COARSE_BYTE
+};
+
+#define VERTEX_FINE_HORIZONTAL_SHIFT 5
+#define VERTEX_COARSE_HORIZONTAL_SHIFT 6
+#define VERTEX_FINE_HEIGHT_SHIFT 1
+#define VERTEX_COARSE_HEIGHT_SHIFT 2
 /* Flags that end a list of vertices */
 #define VERTEX_LIST_END 9
 /* The size cleared billboards are given */
@@ -2991,20 +3016,20 @@ void ReadTileMidpoints(void) {
  */
 void ReadVertexX(s16* coord, s32 flags) {
   *coord = 0;
-  switch (flags & 3) {
-    case 1:
+  switch (flags & VERTEX_FLAG_X_ENCODING) {
+    case VERTEX_ENCODING_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = (u16)*coord >> 8;
+      *coord = (u16)*coord >> BITS_PER_BYTE;
       break;
-    case 2:
+    case VERTEX_ENCODING_FINE_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = TexelCoordinate((u16)*coord >> 8);
+      *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_FINE_HORIZONTAL_SHIFT;
       break;
-    case 3:
+    case VERTEX_ENCODING_COARSE_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = ((u16)*coord >> 8) << 6;
+      *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_COARSE_HORIZONTAL_SHIFT;
       break;
-    case 0:
+    case VERTEX_ENCODING_TWO_BYTES:
       ReadFileBytes(coord, 2);
       break;
   }
@@ -3017,20 +3042,21 @@ void ReadVertexX(s16* coord, s32 flags) {
 void ReadVertexY(s16* coord, s32 flags) {
   *coord = 0;
   /* The u8 cast is there to match */
-  switch ((u8)(flags & 0xC) >> 2) {
-    case 1:
+  switch (
+      (u8)(flags & VERTEX_FLAG_Y_ENCODING) >> VERTEX_FLAG_Y_ENCODING_SHIFT) {
+    case VERTEX_ENCODING_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = (u16)*coord >> 8;
+      *coord = (u16)*coord >> BITS_PER_BYTE;
       break;
-    case 2:
+    case VERTEX_ENCODING_FINE_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = ((u16)*coord >> 8) << 1;
+      *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_FINE_HEIGHT_SHIFT;
       break;
-    case 3:
+    case VERTEX_ENCODING_COARSE_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = ((u16)*coord >> 8) << 2;
+      *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_COARSE_HEIGHT_SHIFT;
       break;
-    case 0:
+    case VERTEX_ENCODING_TWO_BYTES:
       ReadFileBytes(coord, 2);
       break;
   }
@@ -3043,20 +3069,21 @@ void ReadVertexY(s16* coord, s32 flags) {
 void ReadVertexZ(s16* coord, s32 flags) {
   *coord = 0;
   /* The u8 cast is there to match */
-  switch ((u8)(flags & 0x30) >> 4) {
-    case 1:
+  switch (
+      (u8)(flags & VERTEX_FLAG_Z_ENCODING) >> VERTEX_FLAG_Z_ENCODING_SHIFT) {
+    case VERTEX_ENCODING_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = (u16)*coord >> 8;
+      *coord = (u16)*coord >> BITS_PER_BYTE;
       break;
-    case 2:
+    case VERTEX_ENCODING_FINE_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = TexelCoordinate((u16)*coord >> 8);
+      *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_FINE_HORIZONTAL_SHIFT;
       break;
-    case 3:
+    case VERTEX_ENCODING_COARSE_BYTE:
       ReadFileBytes(coord, 1);
-      *coord = ((u16)*coord >> 8) << 6;
+      *coord = ((u16)*coord >> BITS_PER_BYTE) << VERTEX_COARSE_HORIZONTAL_SHIFT;
       break;
-    case 0:
+    case VERTEX_ENCODING_TWO_BYTES:
       ReadFileBytes(coord, 2);
       break;
   }
