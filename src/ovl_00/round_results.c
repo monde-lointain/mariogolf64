@@ -141,6 +141,18 @@ enum PortraitAnimation {
 #define PRIZE_TOP_TEN 10
 #define PRIZE_TOP_TWENTY 20
 
+/* The columns of f_TournamentPrizes: a prize for each trophy place, then one
+ * for each wider bracket of places */
+enum PrizeBracket {
+  PRIZE_BRACKET_FIRST,
+  PRIZE_BRACKET_SECOND,
+  PRIZE_BRACKET_THIRD,
+  PRIZE_BRACKET_TOP_TEN,
+  PRIZE_BRACKET_TOP_TWENTY,
+  PRIZE_BRACKET_REST,
+  PRIZE_BRACKET_COUNT
+};
+
 /* The results' images. g_GameState.isClubTournament swaps in another set. */
 #define RESULTS_BACKDROP_ASSET 0x6A0
 #define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
@@ -267,7 +279,7 @@ static Boolean f_IsAwaitingConfirm = FALSE;
  * Each course's tournament prizes, in course points: first to third
  * place, then up to PRIZE_TOP_TEN, PRIZE_TOP_TWENTY and the rest
  */
-static s32 f_TournamentPrizes[COURSE_COUNT][TROPHY_PLACE_COUNT + 3] = {
+static s32 f_TournamentPrizes[COURSE_COUNT][PRIZE_BRACKET_COUNT] = {
     {50, 25, 12, 8, 5, 3}, {200, 100, 50, 20, 10, 6},
     {600, 300, 150, 75, 35, 17}, {1200, 600, 300, 100, 50, 25},
     {2000, 1000, 500, 200, 100, 50}, {2000, 1000, 500, 200, 100, 50}};
@@ -657,14 +669,14 @@ void LoadRoundResults(void) {
           f_PrizePoints =
               f_TournamentPrizes[g_GameState.courseIndex][f_PlayerRanks[0] - 1];
         } else if (f_PlayerRanks[0] <= PRIZE_TOP_TEN) {
-          f_PrizePoints =
-              f_TournamentPrizes[g_GameState.courseIndex][TROPHY_PLACE_COUNT];
+          f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex]
+                                            [PRIZE_BRACKET_TOP_TEN];
         } else if (f_PlayerRanks[0] <= PRIZE_TOP_TWENTY) {
           f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex]
-                                            [TROPHY_PLACE_COUNT + 1];
+                                            [PRIZE_BRACKET_TOP_TWENTY];
         } else {
-          f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex]
-                                            [TROPHY_PLACE_COUNT + 2];
+          f_PrizePoints =
+              f_TournamentPrizes[g_GameState.courseIndex][PRIZE_BRACKET_REST];
         }
 
         f_PrizeShown = f_PrizePoints;
