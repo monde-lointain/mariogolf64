@@ -357,11 +357,11 @@ void func_80209500_ovl_01(void);
 void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind);
 void func_8020B3CC_ovl_01(void);
 void func_8020B438_ovl_01(void);
-void func_8020E010_ovl_01(void** buffers);
+void LoadCourseStatsIcons(void** buffers);
 void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind);
 void LoadCourseMenuBuffer(void* buffer, s16 bufferKind);
 void UpdateCourseStats(void);
-void func_80213390_ovl_01(void** buffers);
+void LoadBestTimesCourseIcons(void** buffers);
 void func_8021342C_ovl_01(void* buffer);
 void LoadBestTimesBuffer(void* buffer, s16 bufferKind);
 void UpdateBestTimes(void);
@@ -374,13 +374,13 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind);
 void UpdateBetSettings(void);
 /* Defined without parameters, though UpdateMenus passes it two */
 s32 UpdateHandicaps();
-void func_8021CF10_ovl_01(void** buffers);
+void LoadBestShotsCourseIcons(void** buffers);
 void LoadScoreLabelBuffer(void* buffer, s16 bufferKind);
 void UpdateBestShots(void);
 void func_8021E01C_ovl_01(void);
 void func_8021EF64_ovl_01(void);
 void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind);
-void func_8021F6E0_ovl_01(void** buffers);
+void LoadRingShotCourseIcons(void** buffers);
 void UpdateRingShotRecords(void);
 void func_80220A30_ovl_01(void);
 void func_80220BB0_ovl_01(void);
@@ -1491,7 +1491,7 @@ void UpdateMenus(void) {
           func_80221B20_ovl_01();
         }
 
-        func_8020E010_ovl_01(D_801049A0[0]);
+        LoadCourseStatsIcons(D_801049A0[0]);
         func_8020E0AC_ovl_01(D_800FF4C4, COURSE_BUFFER_FIRST);
         LoadCourseMenuBuffer(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
         LoadCourseMenuBuffer(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
@@ -1508,7 +1508,7 @@ void UpdateMenus(void) {
 
       case MENU_SCREEN_BEST_TIMES:
         func_80221B20_ovl_01();
-        func_80213390_ovl_01(D_801049A0[0]);
+        LoadBestTimesCourseIcons(D_801049A0[0]);
         LoadBestTimesBuffer(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
         D_8022BE90_ovl_01 ^= 1;
         LoadCourseMenuBuffer(
@@ -1541,7 +1541,7 @@ void UpdateMenus(void) {
 
       case MENU_SCREEN_BEST_SHOTS:
         func_80221B20_ovl_01();
-        func_8021CF10_ovl_01(D_801049A0[0]);
+        LoadBestShotsCourseIcons(D_801049A0[0]);
         f_MenuBoardImageIndex ^= 1;
         func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
         D_8022BE8E_ovl_01 ^= 1;
@@ -1570,7 +1570,7 @@ void UpdateMenus(void) {
             D_8012D420[D_8022BE8E_ovl_01], RING_SHOT_RECORD_BUFFER_RAINBOW_BOX);
         LoadRingShotRecordBuffer(
             D_8010526C[0], RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS);
-        func_8021F6E0_ovl_01(D_801049A0[0]);
+        LoadRingShotCourseIcons(D_801049A0[0]);
         LoadRingShotRecordBuffer(
             D_800FBE30[0], RING_SHOT_RECORD_BUFFER_GREEN_ARROWS);
         func_80220A30_ovl_01();

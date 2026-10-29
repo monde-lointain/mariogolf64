@@ -24,7 +24,7 @@
 /* Each character's face, 32 by 24, one above another */
 #define ASSET_CHARACTER_FACE_STRIP 0x8E9
 
-/* The images of g_CourseIconAssets that func_80213390 reads */
+/* The images of g_CourseIconAssets that LoadBestTimesCourseIcons reads */
 #define BEST_TIMES_IMAGE_COUNT 6
 
 /* The best times' courses turn this far in all between one course and the next,
@@ -96,7 +96,8 @@ static void* D_8023AA50_ovl_01;
 static u8 D_8023AA54_ovl_01[0x4];
 static u8 D_8023AA58_ovl_01[0x88];
 
-void func_80213390_ovl_01(void** buffers) {
+/* Reads every course's icon into the Best Times screen's buffers */
+void LoadBestTimesCourseIcons(void** buffers) {
   EncodedAsset asset;
 
   s16 imageIndex;

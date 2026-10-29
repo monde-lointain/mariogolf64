@@ -59,8 +59,8 @@ enum SaveMenuGame {
 /* The slots that the save menu steps through, which hold -1 when empty */
 #define SAVE_MENU_SLOT_COUNT 5
 
-/* The images of g_CourseIconAssets that func_8021F6E0 reads, before one of its
- * own */
+/* The images of g_CourseIconAssets that LoadRingShotCourseIcons reads, before
+ * one of its own */
 #define SAVE_MENU_IMAGE_COUNT 6
 /* The 64x64 CI8 icons of D_8023B680, which func_802213C8 shrinks to 32x24 in
  * two strips */
@@ -303,7 +303,9 @@ void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind) {
   }
 }
 
-void func_8021F6E0_ovl_01(void** buffers) {
+/* Reads every course's icon, then a movie camera icon, into the Ring Shot
+ * records' buffers */
+void LoadRingShotCourseIcons(void** buffers) {
   EncodedAsset asset;
   s16 imageIndex;
 

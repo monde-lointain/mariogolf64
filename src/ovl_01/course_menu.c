@@ -188,7 +188,8 @@ static void* D_8023A830_ovl_01;
 static u8 D_8023A834_ovl_01[0x4];
 static u8 D_8023A838_ovl_01[0x188];
 
-void func_8020E010_ovl_01(void** buffers) {
+/* Reads every course's icon into the course stats' buffers */
+void LoadCourseStatsIcons(void** buffers) {
   EncodedAsset asset;
   s32 unused[4];
   s16 imageIndex;

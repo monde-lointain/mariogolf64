@@ -34,7 +34,7 @@
 #define ASSET_JAPANESE_EAGLE_LABEL 0x82F
 #define ASSET_JAPANESE_HOLE_IN_ONE_LABEL 0x830
 
-/* The images of g_CourseIconAssets that func_8021CF10 reads */
+/* The images of g_CourseIconAssets that LoadBestShotsCourseIcons reads */
 #define PLAYER_STATS_IMAGE_COUNT 6
 
 /* The bytes of each of the four images that LoadScoreLabelBuffer reads into one
@@ -1828,7 +1828,8 @@ void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021CBDC_ovl_01);
 #endif
 
-void func_8021CF10_ovl_01(void** buffers) {
+/* Reads every course's icon into the Best Shots screen's buffers */
+void LoadBestShotsCourseIcons(void** buffers) {
   EncodedAsset asset;
   s16 imageIndex;
 
