@@ -1616,11 +1616,9 @@ void func_801F6B28_ovl_01(void) {
   memset(&g_RoundHud, 0, sizeof(g_RoundHud));
   if (g_GameState.unk31 != REPLAY_KIND_NONE) {
     if (g_GameState.unk31 == REPLAY_KIND_RING_SHOT) {
-      LoadRingShotRecord(
-          (RingShotRecord*)&save->unk1DF0[memory->ringShotReplaySlot]);
+      LoadRingShotRecord(&save->unk1DF0[memory->ringShotReplaySlot]);
     } else {
-      LoadSuperShotReplay(
-          (PlayRecord*)&save->rankedRecords[func_8021E468_ovl_01()]);
+      LoadSuperShotReplay(&save->rankedRecords[func_8021E468_ovl_01()]);
     }
 
     g_GameState.unk14 = 0;
