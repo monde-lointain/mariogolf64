@@ -39,6 +39,9 @@ enum Surface {
   SURFACE_COUNT
 };
 
+/* An enum Surface value; fields kept narrower say so in comments */
+typedef s32 Surface;
+
 /*
  * Kinds that group the surfaces; several surfaces share one. A surface's
  * plain kind is its best lie; its FAIR_LIE and POOR_LIE kinds get lower lie
@@ -72,8 +75,11 @@ enum SurfaceKind {
   SURFACE_KIND_WASTE_AREA
 };
 
+/* An enum SurfaceKind value */
+typedef s32 SurfaceKind;
+
 typedef struct SurfaceInfo {
-  /* 0x00 */ s32 kind;
+  /* 0x00 */ SurfaceKind kind;
   /* 0x04 */ char* name; /* As the lie is shown */
   /* 0x08 */ s8 minPercent;
   /* 0x09 */ s8 maxPercent;
@@ -86,7 +92,7 @@ typedef struct SurfaceInfo {
   /* 0x18 */ s32 unk18;
 } SurfaceInfo; /* size = 0x1C */
 
-SurfaceInfo* GetSurfaceInfo(s32 surface);
+SurfaceInfo* GetSurfaceInfo(Surface surface);
 SurfaceInfo* GetSurfaceInfoAt(s32 x, s32 z);
 
 #endif

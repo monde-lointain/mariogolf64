@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "math_util.h"
+#include "surface.h"
 
 /* The state of the shot being set up by the player whose turn it is */
 typedef struct CurrentShot {
@@ -15,7 +16,7 @@ typedef struct CurrentShot {
   /* 0x14 */ s32 unk14;
   /* 0x18 */ s32 unk18;
   /* 0x1C */ CoursePoint ballPosition;
-  /* 0x28 */ s32 surface;
+  /* 0x28 */ Surface surface;
   /* 0x2C */ s32 playerIndex;
   /* 0x30 */ s32 controllerIndex;
   /* 0x34 */ s32 aimCameraDistance; /* From the ball along the aim, so negative

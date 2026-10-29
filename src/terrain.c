@@ -402,7 +402,7 @@ void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range) {
  * Mini-golf's GetSurface. It weighs the four nearest codes like
  * FindSurface but returns the first.
  */
-s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
+Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
   s8 surfaces[4];
   f32 weights[4];
   PlaneTriangle hit;
@@ -416,7 +416,7 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
   s32 stepColumn;
   s32 stepRow;
   f32 weight;
-  s32 surface;
+  Surface surface;
 
   shiftedX = x;
   shiftedZ = z;
@@ -538,7 +538,7 @@ f32 ConvertToFloat(s32 value) {
  * otherwise the heaviest of the four nearest codes' surfaces
  */
 #ifdef NON_MATCHING
-s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
+Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
   s8 surfaces[4];
   f32 weights[4];
   PlaneTriangle hit;
@@ -554,7 +554,7 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
   s32 distanceX;
   s32 distanceZ;
   f32 weight;
-  s32 surface;
+  Surface surface;
   s32 bestIndex;
   f32 bestWeight;
 
@@ -729,7 +729,7 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
 INCLUDE_ASM("asm/nonmatchings/terrain", FindSurface);
 #endif
 
-s32 GetSurface(s32 x, s32 z) {
+Surface GetSurface(s32 x, s32 z) {
   return FindSurface(x, z, FALSE);
 }
 
@@ -758,7 +758,7 @@ u16 GetMapColor(s32 x, s32 z) {
 
 /* Returns the map color at a point, averaged with the color of the terrain
  * code for a surface */
-s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface) {
+s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
   u16 groundColor = GetMapColor(x, z);
   s32 code = -1;
   s32 groundRed;

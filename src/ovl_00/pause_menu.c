@@ -487,7 +487,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
   u16 kind;
   s32 lie;
   Boolean hasLieChanged;
-  s32 surface;
+  Surface surface;
 
   if (controller->repeatedButtons & A_BUTTON) {
     action =

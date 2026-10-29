@@ -180,7 +180,7 @@ s32 D_800B7D9C = 0;
 /* Read by no routine */
 static s32 D_800B7DA0[4] = {0};
 
-SurfaceInfo* GetSurfaceInfo(s32 surface) {
+SurfaceInfo* GetSurfaceInfo(Surface surface) {
   if ((u32)surface >= SURFACE_COUNT) {
     surface = SURFACE_OUT_OF_BOUNDS;
   }
@@ -1973,7 +1973,7 @@ SETTLE:
       }
 
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-        s32 kind;
+        SurfaceKind kind;
         PlaneTriangle ground;
         TrianglePlane plane;
 
@@ -2049,7 +2049,7 @@ INCLUDE_ASM("asm/nonmatchings/ball_simulation", StepBallSimulation);
 #endif
 
 /* Returns the Unk6 entry for the club's lie rating and unkC */
-Unk6* GetUnkCEntry(Club* club, s32 surface, s32 shotMode, s32 unkC) {
+Unk6* GetUnkCEntry(Club* club, Surface surface, s32 shotMode, s32 unkC) {
   s32 row;
 
   row = GetLieRating(club, surface, shotMode) - 1;

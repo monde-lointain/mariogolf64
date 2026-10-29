@@ -100,9 +100,9 @@ typedef struct BallSimulation {
   /* 0x9C */ s32 unk9C;
   /* 0xA0 */ s8 unkA0;
   /* 0xA1 */ s8 unkA1;
-  /* 0xA2 */ s8 unkA2;
+  /* 0xA2 */ s8 unkA2; /* A SURFACE_* value */
   /* 0xA3 */ s8 surface; /* The SURFACE_* that the ball is on */
-  /* 0xA4 */ u8 unkA4;
+  /* 0xA4 */ u8 unkA4; /* A SURFACE_* value */
   /* 0xA5 */ s8 playerIndex;
   /* 0xA6 */ s8 unkA6;
   /* 0xA7 */ s8 unkA7;
@@ -125,7 +125,7 @@ typedef struct BallSimulation {
 extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 
 void ResetBallSimulations(void);
-Unk6* GetUnkCEntry(Club* club, s32 surface, s32 shotMode, s32 unkC);
+Unk6* GetUnkCEntry(Club* club, Surface surface, s32 shotMode, s32 unkC);
 s32 StepBallSimulation(BallSimulation* simulation);
 s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot);
 

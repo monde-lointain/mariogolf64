@@ -1413,7 +1413,7 @@ s32 GetSelectedShotWorldDistance(void) {
  */
 #ifdef NON_MATCHING
 s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo* info) {
-  s32 kind = info->kind;
+  SurfaceKind kind = info->kind;
 
   if (IsGameFlagSet(GAME_FLAG_ANY_CLUB_ANYWHERE)) {
     return CLUB_SURFACE_ALL;
@@ -1509,7 +1509,7 @@ static const char f_DefaultLieRatings[LIE_RATING_LENGTH + 1] = "3333333333333";
  * of surface has a digit for each club type, with its own digits for an
  * approach shot.
  */
-s32 GetLieRating(Club* club, s32 surface, s32 shotMode) {
+s32 GetLieRating(Club* club, Surface surface, s32 shotMode) {
   const char* ratings;
   const char* approachRatings;
   s32 rating;
@@ -1595,7 +1595,7 @@ s32 GetLieRating(Club* club, s32 surface, s32 shotMode) {
 
 /* Sets span[0] to 2 * rating - 1 and span[1] to rating - 1; both are 0 for the
  * putter */
-void GetLieSpan(Club* club, s32 surface, s32* span, s32 shotMode) {
+void GetLieSpan(Club* club, Surface surface, s32* span, s32 shotMode) {
   s32 rating = GetLieRating(club, surface, shotMode);
 
   if (rating > 0) {

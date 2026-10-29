@@ -179,7 +179,7 @@ s32 func_80206680_ovl_05(u32 slotIndex, s32 character) {
  */
 
 /* The opening's copy of GetSurfaceInfo, which reads its own surface table */
-static SurfaceInfo* GetSurfaceInfo(s32 surface) {
+static SurfaceInfo* GetSurfaceInfo(Surface surface) {
   if ((u32)surface >= SURFACE_COUNT) {
     surface = SURFACE_OUT_OF_BOUNDS;
   }
@@ -1570,7 +1570,7 @@ SETTLE:
       }
 
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-        s32 kind;
+        SurfaceKind kind;
         PlaneTriangle ground;
         TrianglePlane plane;
 

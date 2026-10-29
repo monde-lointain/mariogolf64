@@ -2354,7 +2354,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.cupDistance = GetCupDistance(
       x - g_HoleSetup.cupPosition[AXIS_X], z - g_HoleSetup.cupPosition[AXIS_Z]);
   if (!g_IsTrainingHeadingKept || g_GameState.gameMode != GAME_MODE_TRAINING) {
-    s32 surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
+    SurfaceKind surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
 
     if (g_HolePoints.unk60[0][AXIS_X] == 0 ||
         g_HolePoints.unk60[0][AXIS_Z] == 0) {

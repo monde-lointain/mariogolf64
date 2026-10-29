@@ -511,7 +511,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
   s32 tintYards;
   s32 distance;
   s32 flagImage;
-  s32 surfaceKind;
+  SurfaceKind surfaceKind;
   Club* club;
   s32 outOfBoundsGreen;
 
