@@ -162,15 +162,11 @@ enum StatsDirection {
 
 #define STATS_DIRECTION_COUNT 4
 
-/*
- * The rows of the stats panel slide across together: D_80230784 holds their
- * offsets, and D_802307A8 holds where each slide after the first sends them
- */
+/* The rows of the brick wall behind the stats, which slide across together */
 #define STATS_SLIDE_ROW_COUNT 9
 /*
  * DrawBrickWallRows draws the 152x117 brick wall behind the stats in one strip
- * per row, each stretched across the screen; D_80230760 holds each row's
- * slide speed
+ * per row, each stretched across the screen
  */
 #define STATS_WALL_IMAGE_WIDTH 152
 #define STATS_WALL_STRIP_HEIGHT 13
@@ -336,16 +332,21 @@ static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT]
 /* The left of each player's column, by the player count */
 static s32 f_HandicapColumnLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {128, 0, 0, 0}, {96, 160, 0, 0}, {64, 128, 192, 0}, {32, 96, 160, 224}};
-static s32 D_80230718_ovl_01[STATS_SLIDE_ROW_COUNT] = {
+/* The frames each brick wall row waits before it moves, from a slide's start */
+static s32 f_BrickRowStartDelays[STATS_SLIDE_ROW_COUNT] = {
     0, 2, 4, 6, 8, 10, 12, 14, 16};
-static s32 D_8023073C_ovl_01[STATS_SLIDE_ROW_COUNT] = {
+/* The frames each row has still to wait */
+static s32 f_BrickRowDelays[STATS_SLIDE_ROW_COUNT] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0};
-static s32 D_80230760_ovl_01[STATS_SLIDE_ROW_COUNT] = {
+/* How far each row moves a frame */
+static s32 f_BrickRowSpeeds[STATS_SLIDE_ROW_COUNT] = {
     64, 64, 64, 64, 64, 64, 64, 64, 64};
-static s32 D_80230784_ovl_01[STATS_SLIDE_ROW_COUNT] = {
+/* How far across the screen each row is drawn */
+static s32 f_BrickRowOffsets[STATS_SLIDE_ROW_COUNT] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0};
+/* Where each slide but STATS_SLIDE_CURRENT starts the rows */
 // clang-format off
-static s32 D_802307A8_ovl_01[STATS_SLIDE_COUNT - 1]
+static s32 f_BrickSlideStartOffsets[STATS_SLIDE_COUNT - 1]
                              [STATS_SLIDE_ROW_COUNT] = {
   { 320, 320, 320, 320, 320, 320, 320, 320, 320 },
   { -320, -320, -320, -320, -320, -320, -320, -320, -320 },
@@ -353,7 +354,8 @@ static s32 D_802307A8_ovl_01[STATS_SLIDE_COUNT - 1]
   { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 // clang-format on
-static u8 D_80230838_ovl_01 = 0;
+/* The slide that the rows were last started on */
+static u8 f_BrickWallSlide = 0;
 /* The corners of each page arrow that DrawTurnedPageArrows tilts */
 static Vtx f_TurnedArrowVertices[TURNED_ARROW_VERTEX_COUNT] = {
     {{{-16, 16, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -1537,51 +1539,51 @@ s32 SlideBrickWall(Gfx** displayListHead, u8 slide) {
     return -1;
   }
 
-  offset = D_802307A8_ovl_01[slide - 1][0];
-  first = D_80230784_ovl_01[0];
+  offset = f_BrickSlideStartOffsets[slide - 1][0];
+  first = f_BrickRowOffsets[0];
   for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
-    if (D_80230784_ovl_01[index] != offset &&
-        first != D_80230784_ovl_01[index]) {
+    if (f_BrickRowOffsets[index] != offset &&
+        first != f_BrickRowOffsets[index]) {
       break;
     }
   }
 
-  if (index == STATS_SLIDE_ROW_COUNT && D_80230838_ovl_01 != slide) {
-    D_80230838_ovl_01 = slide;
+  if (index == STATS_SLIDE_ROW_COUNT && f_BrickWallSlide != slide) {
+    f_BrickWallSlide = slide;
     switch (slide) {
       case STATS_SLIDE_OUT_RIGHT:
         for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
-          D_80230784_ovl_01[rowIndex] =
-              D_802307A8_ovl_01[STATS_SLIDE_OUT_RIGHT - 1][rowIndex];
-          D_8023073C_ovl_01[rowIndex] = D_80230718_ovl_01[rowIndex];
+          f_BrickRowOffsets[rowIndex] =
+              f_BrickSlideStartOffsets[STATS_SLIDE_OUT_RIGHT - 1][rowIndex];
+          f_BrickRowDelays[rowIndex] = f_BrickRowStartDelays[rowIndex];
         }
 
         break;
       case STATS_SLIDE_OUT_LEFT:
         for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
-          D_80230784_ovl_01[rowIndex] =
-              D_802307A8_ovl_01[STATS_SLIDE_OUT_LEFT - 1][rowIndex];
-          D_8023073C_ovl_01[rowIndex] = D_80230718_ovl_01[rowIndex];
+          f_BrickRowOffsets[rowIndex] =
+              f_BrickSlideStartOffsets[STATS_SLIDE_OUT_LEFT - 1][rowIndex];
+          f_BrickRowDelays[rowIndex] = f_BrickRowStartDelays[rowIndex];
         }
 
         break;
       case STATS_SLIDE_IN_FROM_RIGHT:
       case STATS_SLIDE_IN_FROM_LEFT:
         for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
-          D_80230784_ovl_01[rowIndex] =
-              D_802307A8_ovl_01[D_80230838_ovl_01 - 1][rowIndex];
-          D_8023073C_ovl_01[rowIndex] = D_80230718_ovl_01[rowIndex];
+          f_BrickRowOffsets[rowIndex] =
+              f_BrickSlideStartOffsets[f_BrickWallSlide - 1][rowIndex];
+          f_BrickRowDelays[rowIndex] = f_BrickRowStartDelays[rowIndex];
         }
 
         break;
     }
   }
 
-  DrawBrickWallRows(&gfx, D_80230838_ovl_01);
+  DrawBrickWallRows(&gfx, f_BrickWallSlide);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
   for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
-    if ((offset = D_80230784_ovl_01[0]) != D_80230784_ovl_01[index]) {
+    if ((offset = f_BrickRowOffsets[0]) != f_BrickRowOffsets[index]) {
       break;
     }
   }
@@ -1614,44 +1616,44 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    if (D_8023073C_ovl_01[rowIndex] > 0) {
-      D_8023073C_ovl_01[rowIndex]--;
+    if (f_BrickRowDelays[rowIndex] > 0) {
+      f_BrickRowDelays[rowIndex]--;
     } else {
       switch (slide) {
         case STATS_SLIDE_OUT_RIGHT:
-          D_80230784_ovl_01[rowIndex] -= D_80230760_ovl_01[rowIndex];
-          if (D_80230784_ovl_01[rowIndex] <= 0) {
-            D_80230784_ovl_01[rowIndex] = 0;
+          f_BrickRowOffsets[rowIndex] -= f_BrickRowSpeeds[rowIndex];
+          if (f_BrickRowOffsets[rowIndex] <= 0) {
+            f_BrickRowOffsets[rowIndex] = 0;
           }
 
           break;
         case STATS_SLIDE_OUT_LEFT:
-          D_80230784_ovl_01[rowIndex] += D_80230760_ovl_01[rowIndex];
-          if (D_80230784_ovl_01[rowIndex] > 0) {
-            D_80230784_ovl_01[rowIndex] = 0;
+          f_BrickRowOffsets[rowIndex] += f_BrickRowSpeeds[rowIndex];
+          if (f_BrickRowOffsets[rowIndex] > 0) {
+            f_BrickRowOffsets[rowIndex] = 0;
           }
 
           break;
         case STATS_SLIDE_IN_FROM_RIGHT:
-          D_80230784_ovl_01[rowIndex] += D_80230760_ovl_01[rowIndex];
-          if (D_80230784_ovl_01[rowIndex] > SCREEN_WIDTH) {
-            D_80230784_ovl_01[rowIndex] = SCREEN_WIDTH;
+          f_BrickRowOffsets[rowIndex] += f_BrickRowSpeeds[rowIndex];
+          if (f_BrickRowOffsets[rowIndex] > SCREEN_WIDTH) {
+            f_BrickRowOffsets[rowIndex] = SCREEN_WIDTH;
           }
 
           break;
         case STATS_SLIDE_IN_FROM_LEFT:
-          D_80230784_ovl_01[rowIndex] -= D_80230760_ovl_01[rowIndex];
-          if (D_80230784_ovl_01[rowIndex] < -SCREEN_WIDTH) {
-            D_80230784_ovl_01[rowIndex] = -SCREEN_WIDTH;
+          f_BrickRowOffsets[rowIndex] -= f_BrickRowSpeeds[rowIndex];
+          if (f_BrickRowOffsets[rowIndex] < -SCREEN_WIDTH) {
+            f_BrickRowOffsets[rowIndex] = -SCREEN_WIDTH;
           }
 
           break;
       }
     }
 
-    gSPScisTextureRectangle(gfx++, QuarterPixels(D_80230784_ovl_01[rowIndex]),
+    gSPScisTextureRectangle(gfx++, QuarterPixels(f_BrickRowOffsets[rowIndex]),
         QuarterPixels(rowIndex * STATS_WALL_ROW_HEIGHT),
-        QuarterPixels(D_80230784_ovl_01[rowIndex] + SCREEN_WIDTH),
+        QuarterPixels(f_BrickRowOffsets[rowIndex] + SCREEN_WIDTH),
         QuarterPixels(
             (rowIndex * STATS_WALL_ROW_HEIGHT) + STATS_WALL_ROW_HEIGHT),
         G_TX_RENDERTILE, 0, 0, (STATS_WALL_IMAGE_WIDTH << 10) / SCREEN_WIDTH,
