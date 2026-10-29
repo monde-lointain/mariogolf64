@@ -462,7 +462,7 @@ enum PlayerStatsBuffer {
   PLAYER_STATS_BUFFER_UNK13
 };
 
-/* The ways func_8021B618 slides the stats panel's rows */
+/* The ways SlideBrickWall slides the stats panel's rows */
 #define STATS_SLIDE_CURRENT 0
 #define STATS_SLIDE_OUT_RIGHT 1
 #define STATS_SLIDE_OUT_LEFT 2

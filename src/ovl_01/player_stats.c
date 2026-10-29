@@ -143,7 +143,7 @@ enum StatsDirection {
  */
 #define STATS_SLIDE_ROW_COUNT 9
 /*
- * func_8021B87C draws the 152x117 brick wall behind the stats in one strip
+ * DrawBrickWallRows draws the 152x117 brick wall behind the stats in one strip
  * per row, each stretched across the screen; D_80230760 holds each row's
  * slide speed
  */
@@ -175,7 +175,7 @@ extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern u8 D_801B9410;
 
-void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide);
+void DrawBrickWallRows(Gfx** displayListHead, u8 slide);
 
 s16 GetChosenBestShot(void);
 void func_8021E97C_ovl_01(Gfx** displayListHead);
@@ -1458,7 +1458,11 @@ void func_8021B1E0_ovl_01(
   *displayListHead = gfx;
 }
 
-s32 func_8021B618_ovl_01(Gfx** displayListHead, u8 slide) {
+/*
+ * Starts the brick wall's rows on slide once the last slide has ended, then
+ * draws them; returns whether the rows have yet to line up
+ */
+s32 SlideBrickWall(Gfx** displayListHead, u8 slide) {
   Gfx* gfx = *displayListHead;
   s32 index;
   s32 rowIndex;
@@ -1509,7 +1513,7 @@ s32 func_8021B618_ovl_01(Gfx** displayListHead, u8 slide) {
     }
   }
 
-  func_8021B87C_ovl_01(&gfx, D_80230838_ovl_01);
+  DrawBrickWallRows(&gfx, D_80230838_ovl_01);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
   for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
@@ -1521,7 +1525,9 @@ s32 func_8021B618_ovl_01(Gfx** displayListHead, u8 slide) {
   return index != STATS_SLIDE_ROW_COUNT;
 }
 
-void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide) {
+/* Moves each brick wall row whose delay has run out a step along slide, and
+ * draws the rows */
+void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
   Gfx* gfx = *displayListHead;
   s32 rowIndex;
   s32 stripHeight = STATS_WALL_STRIP_HEIGHT;

@@ -4636,7 +4636,7 @@ void DrawBetSettings(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled);
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     u8 canShowPrompt);
-s32 func_8021B618_ovl_01(Gfx** displayListHead, u8 slide);
+s32 SlideBrickWall(Gfx** displayListHead, u8 slide);
 void func_8021BE88_ovl_01(Gfx** displayListHead);
 void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
 void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY);
@@ -5628,7 +5628,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
  * mini-golf disc's images, the front one bobbing. While the holes are
  * chosen (MAP_CAMERA_MODE_TOP_BYTE is 1) it draws the holes badges;
  * otherwise the course's birdie badge count and tournament trophies. Then
- * func_8021B618 slides the stats panel's rows the way D_8022BE89 picks; when
+ * SlideBrickWall slides the stats panel's rows the way D_8022BE89 picks; when
  * that is 3 or 4, the chosen hole starts loading once they stop.
  */
 /*
@@ -6100,14 +6100,14 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
 
       default:
-        if (func_8021B618_ovl_01(&gfx, STATS_SLIDE_OUT_RIGHT) == 0) {
+        if (SlideBrickWall(&gfx, STATS_SLIDE_OUT_RIGHT) == 0) {
           D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
         }
 
         break;
 
       case MENU_UNK89_UNK3:
-        if (func_8021B618_ovl_01(&gfx, STATS_SLIDE_IN_FROM_RIGHT) == 0) {
+        if (SlideBrickWall(&gfx, STATS_SLIDE_IN_FROM_RIGHT) == 0) {
           D_8022BE88_ovl_01 = MENU_PHASE_START;
           D_8022BE89_ovl_01 = 0;
           StartLoadingChosenHole();
@@ -6116,7 +6116,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
 
       case MENU_UNK89_UNK4:
-        if (func_8021B618_ovl_01(&gfx, STATS_SLIDE_IN_FROM_LEFT) == 0) {
+        if (SlideBrickWall(&gfx, STATS_SLIDE_IN_FROM_LEFT) == 0) {
           D_8022BE88_ovl_01 = MENU_PHASE_START;
           D_8022BE89_ovl_01 = 0;
           StartLoadingChosenHole();
@@ -6197,7 +6197,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
     }
 
-    func_8021B618_ovl_01(&gfx, STATS_SLIDE_OUT_RIGHT);
+    SlideBrickWall(&gfx, STATS_SLIDE_OUT_RIGHT);
     if ((D_8022BE88_ovl_01 >= BET_PHASE_CHOOSING) &&
         ((D_8022BE88_ovl_01 != BET_PHASE_CANCELED) &&
             (D_8022BE88_ovl_01 != MENU_PHASE_CONFIRMED))) {
