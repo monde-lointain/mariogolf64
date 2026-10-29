@@ -219,7 +219,7 @@ static u8 D_800DAC30[16];
 #define SPIN_MESH_HALF_WIDTH (((SCREEN_WIDTH / 2) - SCREEN_BORDER) * 10)
 #define SPIN_MESH_SCALE 0.1f
 #define SPIN_MESH_DISTANCE -290.0f
-#define IS_LAST_SPIN_STRIP(batchIndex, stripIndex) \
+#define IsLastSpinStrip(batchIndex, stripIndex) \
   (((batchIndex) == SPIN_BATCH_COUNT - 1) & \
       ((stripIndex) == SPIN_LAST_BATCH_STRIP_COUNT - 1))
 
@@ -510,7 +510,7 @@ void DrawSpinMesh(Gfx** displayListHead) {
 
     for (stripIndex = 0; stripIndex != (SPIN_BATCH_VERTEX_COUNT / 2) - 1;
         stripIndex++) {
-      isLastStrip = IS_LAST_SPIN_STRIP(batchIndex, stripIndex);
+      isLastStrip = IsLastSpinStrip(batchIndex, stripIndex);
       stripHeight = isLastStrip ? SAVED_FRAME_LAST_STRIP_HEIGHT
                                 : SAVED_FRAME_STRIP_HEIGHT;
       if (!isTileSetUp) {
@@ -537,7 +537,7 @@ void DrawSpinMesh(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       /* The original tests again here; the build depends on it */
-      isLastStrip = IS_LAST_SPIN_STRIP(batchIndex, stripIndex);
+      isLastStrip = IsLastSpinStrip(batchIndex, stripIndex);
       stripHeight = isLastStrip ? SAVED_FRAME_LAST_STRIP_HEIGHT
                                 : SAVED_FRAME_STRIP_HEIGHT;
       gSPModifyVertex(

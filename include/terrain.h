@@ -214,7 +214,7 @@ enum TerrainStyle {
 
 /* Whether a fine tile's neighbor makes it snap the vertices of their shared
  * edge's middle */
-#define IS_COARSE(tileIndex) \
+#define IsCoarse(tileIndex) \
   (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
 
 /* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */

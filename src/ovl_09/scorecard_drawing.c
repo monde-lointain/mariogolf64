@@ -1997,7 +1997,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * The scores page: the front nine above the back nine, each with a row of
  * hole numbers, a row of pars and a row for each player
  */
-#define IS_MATCH_PLAY_MODE() \
+#define IsMatchPlayMode() \
   (g_GameState.gameMode == GAME_MODE_MATCH_GAME || \
       g_GameState.gameMode == GAME_MODE_GET_CHARACTER || \
       g_GameState.gameMode == GAME_MODE_SKINS_MATCH || \
@@ -2232,7 +2232,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
 
-  if (IS_MATCH_PLAY_MODE()) {
+  if (IsMatchPlayMode()) {
     if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       DrawTextureRect(&gfx, (g_Scorecard.x + TOTAL_PANEL_LEFT) << 2,
           (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
@@ -2292,7 +2292,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
 
-  if (IS_MATCH_PLAY_MODE()) {
+  if (IsMatchPlayMode()) {
     if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       DrawTextureRect(&gfx, (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
           (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
@@ -2345,7 +2345,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     }
   }
 
-  if (g_GameState.playerCount == 2 && !IS_MATCH_PLAY_MODE()) {
+  if (g_GameState.playerCount == 2 && !IsMatchPlayMode()) {
     for (i = 0; i != g_GameState.playerCount; i++) {
       for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
         handicapStrokes[i * 2][hole] = GetHandicapOffset(
@@ -2409,7 +2409,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   gDPPipeSync(gfx++);
-  if (!IS_MATCH_PLAY_MODE() &&
+  if (!IsMatchPlayMode() &&
       !(g_GameState.holeSelection &
           (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     DrawTextureRect(&gfx, (g_Scorecard.x + NET_PANEL_LEFT) << 2,
@@ -2423,7 +2423,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_EDGE_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   gDPPipeSync(gfx++);
-  if (!IS_MATCH_PLAY_MODE() &&
+  if (!IsMatchPlayMode() &&
       !(g_GameState.holeSelection &
           (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     DrawTextureRect(&gfx, (g_Scorecard.x + NET_PANEL_RIGHT) << 2,
@@ -2483,7 +2483,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       g_Scorecard.totalLabelsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       TOTAL_LABEL_WIDTH, TOTAL_LABELS_IMAGE_HEIGHT, 0, G_TX_MIRROR, 0, 5, 0, 0,
       0);
-  if (IS_MATCH_PLAY_MODE()) {
+  if (IsMatchPlayMode()) {
     if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
       DrawTextureRect(&gfx, (g_Scorecard.x + ROUND_LABEL_LEFT) << 2,
           (g_Scorecard.y + TOTAL_LABEL_TOP) << 2,
@@ -2551,7 +2551,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   switch (g_GameState.playerCount) {
     case 2:
-      if (IS_MATCH_PLAY_MODE()) {
+      if (IsMatchPlayMode()) {
         rowSpacing = PLAYER_ROW_SPACING;
         secondRow = 1;
       } else {
@@ -2641,7 +2641,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     isPuttsShown = !g_GameState.isMiniGolf;
   }
 
-  if (g_GameState.playerCount == 2 && !IS_MATCH_PLAY_MODE()) {
+  if (g_GameState.playerCount == 2 && !IsMatchPlayMode()) {
     if (g_GameState.isMiniGolf) {
       isOverShown = TRUE;
     } else {
@@ -2733,7 +2733,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     }
   }
 
-  if (!IS_MATCH_PLAY_MODE() &&
+  if (!IsMatchPlayMode() &&
       !(g_GameState.holeSelection &
           (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     sprintf(g_PrintBuffer, "%3d", frontPar);

@@ -10,7 +10,7 @@
  * magnitude */
 #define INT_LENGTH_COMPONENT_LIMIT 0x20000000
 /* Whether -INT_LENGTH_COMPONENT_LIMIT <= value < INT_LENGTH_COMPONENT_LIMIT */
-#define IS_SMALL_COMPONENT(value) \
+#define IsSmallComponent(value) \
   ((u32)(value) - INT_LENGTH_COMPONENT_LIMIT >= \
       (u32)(-2 * INT_LENGTH_COMPONENT_LIMIT))
 
@@ -30,9 +30,9 @@ u32 IntLength3D(s32 x, s32 y, s32 z) {
 
   shiftCount = 0;
   while (TRUE) {
-    if (IS_SMALL_COMPONENT(x)) {
-      if (IS_SMALL_COMPONENT(y)) {
-        if (IS_SMALL_COMPONENT(z)) {
+    if (IsSmallComponent(x)) {
+      if (IsSmallComponent(y)) {
+        if (IsSmallComponent(z)) {
           break;
         }
       }
@@ -52,8 +52,8 @@ u32 IntLength2D(s32 x, s32 y) {
 
   shiftCount = 0;
   while (TRUE) {
-    if (IS_SMALL_COMPONENT(x)) {
-      if (IS_SMALL_COMPONENT(y)) {
+    if (IsSmallComponent(x)) {
+      if (IsSmallComponent(y)) {
         break;
       }
     }

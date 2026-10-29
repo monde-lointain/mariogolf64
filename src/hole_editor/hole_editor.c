@@ -478,7 +478,7 @@ enum EditorCombineMode {
 
 /* Whether a fine tile's neighbor makes it snap the vertices of their shared
  * edge; unlike DrawGround's test, a hidden neighbor counts */
-#define IS_NOT_FINE(tileIndex) \
+#define IsNotFine(tileIndex) \
   (g_WorkArea.hole.tiles[tileIndex].detail < GROUND_DETAIL_FINE)
 
 /* Loads the wave texture where DrawGround loads its noise texture */
@@ -4219,8 +4219,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
             if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
               if (tileColumn != 0) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
-                    IS_COARSE(tileIndex - 1);
-                snapsEdge[current][TILE_EDGE_LEFT] = IS_NOT_FINE(tileIndex - 1);
+                    IsCoarse(tileIndex - 1);
+                snapsEdge[current][TILE_EDGE_LEFT] = IsNotFine(tileIndex - 1);
               } else {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] = FALSE;
                 snapsEdge[current][TILE_EDGE_LEFT] = FALSE;
@@ -4228,9 +4228,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
 
               if (row != 0) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] =
-                    IS_COARSE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+                    IsCoarse(tileIndex - GROUND_TILE_COLUMN_COUNT);
                 snapsEdge[current][TILE_EDGE_TOP] =
-                    IS_NOT_FINE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+                    IsNotFine(tileIndex - GROUND_TILE_COLUMN_COUNT);
               } else {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] = FALSE;
                 snapsEdge[current][TILE_EDGE_TOP] = FALSE;
@@ -4238,9 +4238,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
 
               if (row != GROUND_TILE_ROW_COUNT - 1) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
-                    IS_COARSE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+                    IsCoarse(tileIndex + GROUND_TILE_COLUMN_COUNT);
                 snapsEdge[current][TILE_EDGE_BOTTOM] =
-                    IS_NOT_FINE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+                    IsNotFine(tileIndex + GROUND_TILE_COLUMN_COUNT);
               } else {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] = FALSE;
                 snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
@@ -4248,9 +4248,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
 
               if (tileColumn != GROUND_TILE_COLUMN_COUNT - 1) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
-                    IS_COARSE(tileIndex + 1);
-                snapsEdge[current][TILE_EDGE_RIGHT] =
-                    IS_NOT_FINE(tileIndex + 1);
+                    IsCoarse(tileIndex + 1);
+                snapsEdge[current][TILE_EDGE_RIGHT] = IsNotFine(tileIndex + 1);
               } else {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
                 snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;

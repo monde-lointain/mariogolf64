@@ -812,12 +812,12 @@ enum HoleMenuChoice {
 
 /* Whether the round has played its last hole, once g_GameState.holeIndex has
  * moved past it */
-#define HAS_PLAYED_LAST_HOLE() \
+#define HasPlayedLastHole() \
   (g_GameState.holeIndex == GetFirstHoleIndex() + GetRoundHoleCount())
-#define IS_A_PRESSED() (g_MergedController.pressedButtons & A_BUTTON)
+#define IsAButtonPressed() (g_MergedController.pressedButtons & A_BUTTON)
 /* Whether the Ring Shot hole has just earned the last star, which rolls the
  * staff */
-#define IS_STAFF_ROLL_DUE_AFTER_RING_SHOT() \
+#define IsStaffRollDueAfterRingShot() \
   ((HasEveryRingShotStar() && !g_HadEveryRingShotStar) || \
       IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL))
 
@@ -993,7 +993,8 @@ void UpdatePlay(void) {
                 ClearHoleIntroText();
                 break;
               case HOLE_MENU_NONE:
-                if (GetWipeProgress() == WIPE_OPEN_PROGRESS && IS_A_PRESSED()) {
+                if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
+                    IsAButtonPressed()) {
                   g_GameState.step = GAME_STATE_END_INTRO;
                   StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
                 }
@@ -1025,7 +1026,8 @@ void UpdatePlay(void) {
                 break;
               case HOLE_MENU_NONE:
                 if (func_80242374() &&
-                    GetWipeProgress() == WIPE_OPEN_PROGRESS && IS_A_PRESSED()) {
+                    GetWipeProgress() == WIPE_OPEN_PROGRESS &&
+                    IsAButtonPressed()) {
                   g_GameState.step = GAME_STATE_END_INTRO;
                   StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
                 }
@@ -1036,7 +1038,7 @@ void UpdatePlay(void) {
         } else if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
           if (g_IsModuleAlive[MODULE_CLUB_SLOTS] &&
               (f_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
-                  IS_A_PRESSED())) {
+                  IsAButtonPressed())) {
             if (!g_GameState.unk30) {
               g_GameState.step = GAME_STATE_SLOTS;
               func_80241800();
@@ -1047,7 +1049,7 @@ void UpdatePlay(void) {
           }
         } else if (g_GameState.replayKind != REPLAY_KIND_NONE) {
           if (f_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
-              IS_A_PRESSED()) {
+              IsAButtonPressed()) {
             if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
               StartHoleFlyover();
               EndHoleIntro();
@@ -1061,7 +1063,7 @@ void UpdatePlay(void) {
             }
           }
         } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
-            (f_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IS_A_PRESSED() ||
+            (f_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IsAButtonPressed() ||
                 (func_8005F180() &&
                     f_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
           if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
@@ -1178,7 +1180,7 @@ void UpdatePlay(void) {
         g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
         g_Cameras[1].mode = CAMERA_MODE_BEHIND_GOLFER;
         if (StepHoleFlyover() ||
-            (IsHudAnimationDone() && (IS_A_PRESSED() || func_8005F180()))) {
+            (IsHudAnimationDone() && (IsAButtonPressed() || func_8005F180()))) {
           g_GameState.step = GAME_STATE_UNK6;
           EndHoleFlyover();
         }
@@ -1348,7 +1350,7 @@ DIM_BACKDROP:
                 func_801F5C24(UNLOCK_NOTICE_METAL_MARIO);
                 f_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
               } else if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
-                  HAS_PLAYED_LAST_HOLE()) {
+                  HasPlayedLastHole()) {
                 RecordCourseRound();
                 RecordTournamentPlace();
                 f_PlayExit = PLAY_EXIT_ROUND_OVER;
@@ -1360,7 +1362,7 @@ DIM_BACKDROP:
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
               f_HoleResultsKind = HOLE_RESULTS_SPEED_GOLF;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
-                  HAS_PLAYED_LAST_HOLE()) {
+                  HasPlayedLastHole()) {
                 f_PlayExit = PLAY_EXIT_ROUND_OVER;
                 InsertBestTime(g_GameState.courseIndex,
                     g_GameState.stopwatchFrameCount,
@@ -1391,7 +1393,7 @@ DIM_BACKDROP:
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
               f_HoleResultsKind = HOLE_RESULTS_SKINS;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
-                  HAS_PLAYED_LAST_HOLE()) {
+                  HasPlayedLastHole()) {
                 f_PlayExit = PLAY_EXIT_ROUND_OVER;
               }
             } else {
@@ -1402,7 +1404,7 @@ DIM_BACKDROP:
               f_HoleResultsKind = HOLE_RESULTS_STROKE;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE)) {
                 f_PlayExit = PLAY_EXIT_ROUND_OVER;
-              } else if (HAS_PLAYED_LAST_HOLE()) {
+              } else if (HasPlayedLastHole()) {
                 if (IsGameFlagSet(GAME_FLAG_REPEAT_ROUND)) {
                   g_GameState.holeIndex = GetFirstHoleIndex();
                 } else {
@@ -1460,7 +1462,7 @@ DIM_BACKDROP:
               func_801F5E9C();
               f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
-                  HAS_PLAYED_LAST_HOLE()) {
+                  HasPlayedLastHole()) {
                 RecordCourseRound();
                 RecordTournamentPlace();
                 f_PlayExit = PLAY_EXIT_ROUND_OVER;
@@ -1469,7 +1471,7 @@ DIM_BACKDROP:
 
             break;
           case HOLE_END_STEP_UNK5:
-            if (IS_A_PRESSED() ||
+            if (IsAButtonPressed() ||
                 (func_8005F180() &&
                     f_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
               SetMenuBackdrop(MENU_BACKDROP_STILL);
@@ -1505,7 +1507,7 @@ DIM_BACKDROP:
             if (f_PlayExit == PLAY_EXIT_NONE) {
               if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                   IsOneOnOneMatchMode(g_GameState.gameMode) &&
-                  HAS_PLAYED_LAST_HOLE()) {
+                  HasPlayedLastHole()) {
                 g_GameState.holeIndex = GetFirstHoleIndex();
                 g_GameState.isSuddenDeath = TRUE;
               }
@@ -1539,7 +1541,7 @@ DIM_BACKDROP:
                 f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
               } else {
                 StartWipe(WIPE_CLOSING);
-                if (IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()) {
+                if (IsStaffRollDueAfterRingShot()) {
                   f_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
                 } else {
                   f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
@@ -1556,7 +1558,7 @@ DIM_BACKDROP:
                 &g_ControllerStates[g_CurrentShot.controllerIndex])) {
               case RING_SHOT_RESULTS_DONE:
                 StartWipe(WIPE_CLOSING);
-                if (IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()) {
+                if (IsStaffRollDueAfterRingShot()) {
                   f_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
                 } else {
                   f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
@@ -1592,7 +1594,7 @@ DIM_BACKDROP:
             break;
           case HOLE_END_STEP_SCORECARD:
             if (func_802436C8(g_MergedController.repeatedButtons) &&
-                (IS_A_PRESSED() ||
+                (IsAButtonPressed() ||
                     (func_8005F180() &&
                         f_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
                         f_PlayExit != PLAY_EXIT_ROUND_OVER))) {
@@ -1876,7 +1878,7 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 
 #ifdef NON_MATCHING
 /* Whether the neighbor makes it snap the edge's midpoints */
-#define IS_COARSER_THAN_FINE(tileIndex) \
+#define IsCoarserThanFine(tileIndex) \
   (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
       g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
 
@@ -2197,9 +2199,9 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
             if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
               if (tileColumn != 0) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
-                    IS_COARSE(tileIndex - 1);
+                    IsCoarse(tileIndex - 1);
                 snapsEdge[current][TILE_EDGE_LEFT] =
-                    IS_COARSER_THAN_FINE(tileIndex - 1);
+                    IsCoarserThanFine(tileIndex - 1);
               } else {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] = FALSE;
                 snapsEdge[current][TILE_EDGE_LEFT] = FALSE;
@@ -2207,9 +2209,9 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
 
               if (row != 0) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] =
-                    IS_COARSE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+                    IsCoarse(tileIndex - GROUND_TILE_COLUMN_COUNT);
                 snapsEdge[current][TILE_EDGE_TOP] =
-                    IS_COARSER_THAN_FINE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+                    IsCoarserThanFine(tileIndex - GROUND_TILE_COLUMN_COUNT);
               } else {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] = FALSE;
                 snapsEdge[current][TILE_EDGE_TOP] = FALSE;
@@ -2217,9 +2219,9 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
 
               if (row != GROUND_TILE_ROW_COUNT - 1) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
-                    IS_COARSE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+                    IsCoarse(tileIndex + GROUND_TILE_COLUMN_COUNT);
                 snapsEdge[current][TILE_EDGE_BOTTOM] =
-                    IS_COARSER_THAN_FINE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+                    IsCoarserThanFine(tileIndex + GROUND_TILE_COLUMN_COUNT);
               } else {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] = FALSE;
                 snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
@@ -2227,9 +2229,9 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
 
               if (tileColumn != GROUND_TILE_COLUMN_COUNT - 1) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
-                    IS_COARSE(tileIndex + 1);
+                    IsCoarse(tileIndex + 1);
                 snapsEdge[current][TILE_EDGE_RIGHT] =
-                    IS_COARSER_THAN_FINE(tileIndex + 1);
+                    IsCoarserThanFine(tileIndex + 1);
               } else {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
                 snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
