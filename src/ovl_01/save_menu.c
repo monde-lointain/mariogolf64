@@ -239,7 +239,8 @@ static void* D_8023B674_ovl_01;
 static void* D_8023B678_ovl_01;
 static void* D_8023B67C_ovl_01;
 static void** D_8023B680_ovl_01;
-static s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
+/* Each Ring Shot record's slot if it holds a recording, or -1 */
+static s16 f_RecordedReplaySlots[SAVE_MENU_SLOT_COUNT];
 
 /* Read by no routine */
 static u8 D_8023B690_ovl_01[0x3D0];
@@ -360,9 +361,9 @@ void UpdateRingShotRecords(void) {
           PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           index = memory->ringShotReplaySlot;
           memory->holeIndex =
-              save->ringShotRecords[D_8023B684_ovl_01[index]].holeIndex;
+              save->ringShotRecords[f_RecordedReplaySlots[index]].holeIndex;
           memory->courseIndex =
-              save->ringShotRecords[D_8023B684_ovl_01[index]].courseIndex;
+              save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex;
           D_800FE334 = 0;
           LoadWipeShape((s8)save->ringShotRecords[index].courseIndex);
           StartWipe(WIPE_CLOSING);
@@ -697,15 +698,15 @@ void DrawRingShotRecords(Gfx** displayListHead) {
     }
   } else {
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
-      if (D_8023B684_ovl_01[index] != -1) {
+      if (f_RecordedReplaySlots[index] != -1) {
         replayCharacter =
-            save->ringShotRecords[D_8023B684_ovl_01[index]].characterIndex;
+            save->ringShotRecords[f_RecordedReplaySlots[index]].characterIndex;
         func_8021F124_ovl_01(&gfx, D_8012D430[replayCharacter],
             D_8023E3F0_ovl_01[index], RING_SHOT_REPLAY_FACE_X,
             RING_SHOT_REPLAY_FACE_Y + (index * RING_SHOT_SLOT_SPACING),
             replayCharacter, FACE_PLAIN);
         func_80220E34_ovl_01(&gfx,
-            (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].courseIndex,
+            (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex,
             RING_SHOT_REPLAY_COURSE_X,
             RING_SHOT_REPLAY_COURSE_Y + (index * RING_SHOT_SLOT_SPACING), TRUE);
       } else {
@@ -732,7 +733,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
       0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
   if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
-      if (D_8023B684_ovl_01[index] != -1) {
+      if (f_RecordedReplaySlots[index] != -1) {
         D_80230AE0_ovl_01 += REPLAY_HUE_STEP;
 
         redSwing = sinf(D_80230AE0_ovl_01) * REPLAY_HUE_SWING;
@@ -751,9 +752,9 @@ void DrawRingShotRecords(Gfx** displayListHead) {
         }
 
         replayCourse =
-            (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].courseIndex;
+            (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex;
         replayHole =
-            (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].holeIndex;
+            (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].holeIndex;
         if (index == memory->ringShotReplaySlot) {
           SetTextSlot(RING_SHOT_REPLAY_TEXT_X,
               RING_SHOT_REPLAY_TEXT_Y + (index * RING_SHOT_SLOT_SPACING),
@@ -793,20 +794,20 @@ void ReadRingShotReplays(void) {
   InitSram();
   TransferSaveData(save, FALSE);
   for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
-    D_8023B684_ovl_01[slot] = -1;
+    f_RecordedReplaySlots[slot] = -1;
   }
 
   for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
     if ((s16)IsRingShotRecorded(&save->ringShotRecords[slot])) {
-      D_8023B684_ovl_01[slot] = slot;
+      f_RecordedReplaySlots[slot] = slot;
     } else {
-      D_8023B684_ovl_01[slot] = -1;
+      f_RecordedReplaySlots[slot] = -1;
     }
   }
 
-  if (D_8023B684_ovl_01[memory->ringShotReplaySlot] == -1) {
+  if (f_RecordedReplaySlots[memory->ringShotReplaySlot] == -1) {
     for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
-      if (D_8023B684_ovl_01[slot] != -1) {
+      if (f_RecordedReplaySlots[slot] != -1) {
         memory->ringShotReplaySlot = slot;
       }
     }
@@ -833,11 +834,11 @@ void LoadRingShotRecordFaces(void) {
   }
 
   for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
-    if (D_8023B684_ovl_01[index] != -1) {
-      character =
-          (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].characterIndex;
+    if (f_RecordedReplaySlots[index] != -1) {
+      character = (s8)save->ringShotRecords[f_RecordedReplaySlots[index]]
+                      .characterIndex;
       palette =
-          (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].paletteIndex;
+          (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].paletteIndex;
       if (character < 0) {
         character = 0;
       }
@@ -891,7 +892,7 @@ s16 FindNextReplaySlot(s8 startSlot, u8 isForward) {
       slot = SAVE_MENU_SLOT_COUNT - 1;
     }
 
-    if (D_8023B684_ovl_01[slot] != -1) {
+    if (f_RecordedReplaySlots[slot] != -1) {
       break;
     }
 
@@ -907,7 +908,7 @@ s16 FindNextReplaySlot(s8 startSlot, u8 isForward) {
 
 /* Returns the chosen replay's record, or -1 if it holds no recording */
 s16 GetChosenReplaySlot(void) {
-  return D_8023B684_ovl_01[func_8005AF74()->ringShotReplaySlot];
+  return f_RecordedReplaySlots[func_8005AF74()->ringShotReplaySlot];
 }
 
 /* Tells whether the record holds a recording of the shots */
