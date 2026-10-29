@@ -945,19 +945,19 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
     game->isValid = FALSE;
     for (index = 0; index < playerCount; index++) {
       players[index] = g_Players[index];
-      switch (players[index].unkC) {
-        case PLAYER_STATE_UNK0:
-        case PLAYER_STATE_UNK2:
+      switch (players[index].state) {
+        case PLAYER_STATE_STARTING_TURN:
+        case PLAYER_STATE_AIMING:
         case PLAYER_STATE_UNK3:
-        case PLAYER_STATE_UNK21:
-          players[index].unkC = PLAYER_STATE_UNK0;
+        case PLAYER_STATE_PREPARING_AIM:
+          players[index].state = PLAYER_STATE_STARTING_TURN;
           break;
         default:
           osSyncPrintf("Illegal PlayerState\n");
           hasIllegalState = TRUE;
           break;
-        case PLAYER_STATE_UNK17:
-        case PLAYER_STATE_UNK20:
+        case PLAYER_STATE_WAITING:
+        case PLAYER_STATE_HOLE_DONE:
           break;
       }
 
@@ -1020,19 +1020,19 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
     game->isValid = FALSE;
     for (index = 0; index < playerCount; index++) {
       players[index] = D_8012D0C8[index];
-      switch (players[index].unkC) {
-        case PLAYER_STATE_UNK0:
-        case PLAYER_STATE_UNK2:
+      switch (players[index].state) {
+        case PLAYER_STATE_STARTING_TURN:
+        case PLAYER_STATE_AIMING:
         case PLAYER_STATE_UNK3:
-        case PLAYER_STATE_UNK21:
-          players[index].unkC = PLAYER_STATE_UNK0;
+        case PLAYER_STATE_PREPARING_AIM:
+          players[index].state = PLAYER_STATE_STARTING_TURN;
           break;
         default:
           osSyncPrintf("Illegal PlayerState\n");
           hasIllegalState = TRUE;
           break;
-        case PLAYER_STATE_UNK17:
-        case PLAYER_STATE_UNK20:
+        case PLAYER_STATE_WAITING:
+        case PLAYER_STATE_HOLE_DONE:
           break;
       }
     }

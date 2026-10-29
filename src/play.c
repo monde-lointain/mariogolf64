@@ -419,7 +419,7 @@ void PlacePlayersOnTee(void) {
   g_IsHudTurnAwayRequested = 0;
   if (g_GameState.unk30 != 2) {
     for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-      g_Players[i].unkC = PLAYER_STATE_UNK17;
+      g_Players[i].state = PLAYER_STATE_WAITING;
       g_Players[i].ballPosition[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
       teeHeight = g_HoleSetup.teePosition[AXIS_Y];
       g_Players[i].ballPosition[AXIS_Y] =
@@ -465,8 +465,8 @@ void PlayContestMovies(void) {
         break;
       }
 
-      if (g_Players[i].unkC != PLAYER_STATE_UNK17 &&
-          g_Players[i].unkC != PLAYER_STATE_UNK20) {
+      if (g_Players[i].state != PLAYER_STATE_WAITING &&
+          g_Players[i].state != PLAYER_STATE_HOLE_DONE) {
         break;
       }
     }
@@ -510,8 +510,8 @@ s32 func_8005FCB8(void) {
       }
 
       for (i = 0; i < g_GameState.playerCount; i++) {
-        if (g_Players[i].unkC != PLAYER_STATE_UNK20 &&
-            g_Players[i].unkC != PLAYER_STATE_UNK17) {
+        if (g_Players[i].state != PLAYER_STATE_HOLE_DONE &&
+            g_Players[i].state != PLAYER_STATE_WAITING) {
           break;
         }
       }
@@ -526,8 +526,8 @@ s32 func_8005FCB8(void) {
       }
 
       for (i = 0; i < g_GameState.playerCount; i++) {
-        if (g_Players[i].unkC != PLAYER_STATE_UNK20 &&
-            g_Players[i].unkC != PLAYER_STATE_UNK17) {
+        if (g_Players[i].state != PLAYER_STATE_HOLE_DONE &&
+            g_Players[i].state != PLAYER_STATE_WAITING) {
           break;
         }
       }
@@ -537,7 +537,7 @@ s32 func_8005FCB8(void) {
   }
 
   for (i = 0; i < g_GameState.playerCount; i++) {
-    if (g_Players[i].unkC != PLAYER_STATE_UNK20) {
+    if (g_Players[i].state != PLAYER_STATE_HOLE_DONE) {
       break;
     }
   }

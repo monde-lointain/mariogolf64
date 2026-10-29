@@ -2393,8 +2393,8 @@ void PickNextPlayer(void) {
 
   for (finishedCount = 0; finishedCount < g_GameState.playerCount;
       finishedCount++) {
-    if (g_Players[finishedCount].unkC != PLAYER_STATE_UNK17 &&
-        g_Players[finishedCount].unkC != PLAYER_STATE_UNK20) {
+    if (g_Players[finishedCount].state != PLAYER_STATE_WAITING &&
+        g_Players[finishedCount].state != PLAYER_STATE_HOLE_DONE) {
       break;
     }
   }
@@ -2447,7 +2447,7 @@ void PickNextPlayer(void) {
   }
 
   g_GameState.currentPlayerIndex = nextPlayer;
-  g_Players[nextPlayer].unkC = 0;
+  g_Players[nextPlayer].state = PLAYER_STATE_STARTING_TURN;
   if (g_IsHudTurnAwayRequested) {
     StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
     g_IsHudTurnAwayRequested = 0;
@@ -2577,8 +2577,8 @@ void PlayWaitingPlayersCalls(void) {
 
   if (D_801051F0 == TRUE) {
     for (i = 0; i < g_GameState.playerCount; i++) {
-      if ((g_Players[i].unkC == PLAYER_STATE_UNK17) |
-          (g_Players[i].unkC == PLAYER_STATE_UNK20)) {
+      if ((g_Players[i].state == PLAYER_STATE_WAITING) |
+          (g_Players[i].state == PLAYER_STATE_HOLE_DONE)) {
         controllerIndex = g_Players[i].controllerIndex;
         if (controllerIndex ==
             g_Players[g_GameState.currentPlayerIndex].controllerIndex) {
@@ -3066,7 +3066,7 @@ void UpdateTurns(void) {
 
   if (IsGameFlagSet(GAME_FLAG_SHOW_PLAYER_UNKC)) {
     for (i = 0; i < g_GameState.playerCount; i++) {
-      PrintDebugPaddedHex(g_Players[i].unkC, 2, i + 10);
+      PrintDebugPaddedHex(g_Players[i].state, 2, i + 10);
     }
   }
 
@@ -3075,7 +3075,7 @@ void UpdateTurns(void) {
   for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
     s32 controllerIndex = g_Players[playerIndex].controllerIndex;
 
-    state = g_Players[playerIndex].unkC;
+    state = g_Players[playerIndex].state;
     if (controllerIndex < MAXCONTROLLERS) {
       g_TurnController = g_ControllerStates[controllerIndex];
     } else {
@@ -3089,8 +3089,11 @@ void UpdateTurns(void) {
     D_80227170_ovl_00[playerIndex]++;
     nextState = state;
     D_80227150_ovl_00.unk18 = playerIndex;
-    if ((state == 2 || state == 4 || state == 5 || state == 6 || state == 8 ||
-            state == 9) &&
+    if ((state == PLAYER_STATE_AIMING || state == PLAYER_STATE_SETTING_POWER ||
+            state == PLAYER_STATE_SETTING_IMPACT ||
+            state == PLAYER_STATE_STARTING_SWING ||
+            state == PLAYER_STATE_SWINGING ||
+            state == PLAYER_STATE_BALL_IN_FLIGHT) &&
         (g_PauseScreen == 0 || g_PauseScreen == 4)) {
       TickStopwatches();
     }
@@ -3101,7 +3104,7 @@ void UpdateTurns(void) {
     }
 
     switch (state) {
-      case 0:
+      case PLAYER_STATE_STARTING_TURN:
         f_ShouldUpdateReaction = 0;
         UnloadOverlay(GetOverlayOfModule(8));
         f_ShotFlightCount = 0;
@@ -3334,11 +3337,11 @@ void UpdateTurns(void) {
         }
 
         StartShotPanel();
-        nextState = 0x15;
+        nextState = PLAYER_STATE_PREPARING_AIM;
         if (!D_800C3094) {
-          nextState = 2;
+          nextState = PLAYER_STATE_AIMING;
           if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-            nextState = 1;
+            nextState = PLAYER_STATE_HOLE_INTRO;
             StartHoleIntroCamera();
             func_8005F1C8();
           }
@@ -3346,7 +3349,7 @@ void UpdateTurns(void) {
 
         StartTurnRumble(g_GameState.currentPlayerIndex);
         break;
-      case 0x15:
+      case PLAYER_STATE_PREPARING_AIM:
         D_80227150_ovl_00.clubIndex = g_CurrentShot.clubSlot;
         D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
         D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
@@ -3360,19 +3363,19 @@ void UpdateTurns(void) {
           }
         }
 
-        nextState = 0x15;
+        nextState = PLAYER_STATE_PREPARING_AIM;
         if (IsHudAnimationDone()) {
-          nextState = 2;
+          nextState = PLAYER_STATE_AIMING;
         }
 
         break;
-      case 1:
+      case PLAYER_STATE_HOLE_INTRO:
         if (g_GameState.holeIndex == GetFirstHoleIndex()) {
           UpdateHoleIntroCamera();
         }
 
         if (UpdateHoleIntroCamera()) {
-          nextState = 2;
+          nextState = PLAYER_STATE_AIMING;
         }
 
         TurnAim(0);
@@ -3383,7 +3386,7 @@ void UpdateTurns(void) {
         }
 
         break;
-      case 2:
+      case PLAYER_STATE_AIMING:
         D_80223FF8_ovl_00 = 0;
         UpdateShotFlags();
         D_8022B5C0_ovl_00++;
@@ -3423,10 +3426,10 @@ void UpdateTurns(void) {
             ClearShotEffects(1);
             PlacePlayersOnTee();
             SetFramebufferCount(3);
-            nextState = 0x11;
+            nextState = PLAYER_STATE_WAITING;
           } else if (choice == PAUSE_ACTION_HOLE_OUT) {
             RequestPauseMenu(0, -1);
-            nextState = 0x14;
+            nextState = PLAYER_STATE_HOLE_DONE;
             EndFlightCamera();
             ClearShotEffects(1);
             FreeCharacterAndReactionLight(0);
@@ -3473,7 +3476,7 @@ void UpdateTurns(void) {
               D_800C3094 = 1;
               SetMenuBackdrop(-1);
               ResumeRound();
-              nextState = 0xB;
+              nextState = PLAYER_STATE_STARTING_REACTION;
               GiveUpHole(playerIndex);
               break;
             case 5:
@@ -3660,7 +3663,7 @@ void UpdateTurns(void) {
             PlaySound(
                 SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
             SetFramebufferCount(2);
-            nextState = 4;
+            nextState = PLAYER_STATE_SETTING_POWER;
             if (g_ScreenEffect != 3) {
               SetScreenEffect(3, 2);
             }
@@ -3729,7 +3732,7 @@ void UpdateTurns(void) {
         }
 
         break;
-      case 4:
+      case PLAYER_STATE_SETTING_POWER:
         UpdateImpactPointMode();
         ReuseLastCharacterMatrices(0);
         BuildShotPreview(&D_80227150_ovl_00, state);
@@ -3781,14 +3784,14 @@ void UpdateTurns(void) {
             D_80227150_ovl_00.unkC = 0;
             D_80227150_ovl_00.unk10 = 0;
             D_80227150_ovl_00.unk14 = 0;
-            nextState = 6;
+            nextState = PLAYER_STATE_STARTING_SWING;
             if (g_ScreenEffect == 3) {
               SetScreenEffect(4, 0);
             }
 
             sound = SOUND_IMPACT_OFF_MARK;
           } else {
-            nextState = 5;
+            nextState = PLAYER_STATE_SETTING_IMPACT;
             if (D_80227150_ovl_00.power == MAX_LAUNCH_POWER) {
               StartShotEffect(1);
               sound = SOUND_IMPACT_ON_MARK;
@@ -3802,7 +3805,7 @@ void UpdateTurns(void) {
             (D_80227194_ovl_00 == 0 &&
                 (g_TurnController.pressedButtons & B_BUTTON))) {
           UpdateGolferTranslucency();
-          nextState = 2;
+          nextState = PLAYER_STATE_AIMING;
           ResetShotModeChange();
           PlaySound(
               SOUND_MENU_BLOCKED, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
@@ -3816,7 +3819,7 @@ void UpdateTurns(void) {
 
         g_CurrentShot.unk40++;
         break;
-      case 5:
+      case PLAYER_STATE_SETTING_IMPACT:
         UpdateImpactPointMode();
         ReuseLastCharacterMatrices(0);
         BuildShotPreview(&D_80227150_ovl_00, state);
@@ -3864,7 +3867,7 @@ void UpdateTurns(void) {
 
           PlayImpactClickSound();
           StopSound(8);
-          nextState = 6;
+          nextState = PLAYER_STATE_STARTING_SWING;
           if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
               (D_80227150_ovl_00.unkC != 0 ||
                   D_80227150_ovl_00.power < MAX_LAUNCH_POWER)) {
@@ -3909,14 +3912,14 @@ void UpdateTurns(void) {
 
           PlayImpactClickSound();
           StopSound(8);
-          nextState = 6;
+          nextState = PLAYER_STATE_STARTING_SWING;
           if (g_ScreenEffect == 3) {
             SetScreenEffect(4, 0);
           }
         }
 
         break;
-      case 6: {
+      case PLAYER_STATE_STARTING_SWING: {
         s32 shotMode;
 
         EndRumbleForceStop();
@@ -4002,12 +4005,12 @@ void UpdateTurns(void) {
 
         D_80224004_ovl_00 = 0;
         SetAnimationSpeed(0, 1.0f);
-        nextState = 8;
+        nextState = PLAYER_STATE_SWINGING;
         StartFlightCamera(f_ShotFlightCount++);
         D_80223FFC_ovl_00 = 0;
         break;
       }
-      case 8:
+      case PLAYER_STATE_SWINGING:
         if (D_80227170_ovl_00[playerIndex] == D_80224000_ovl_00 - 3 &&
             GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])
                     ->kind == 0) {
@@ -4038,7 +4041,7 @@ void UpdateTurns(void) {
           }
 
           LaunchBallSimulation(&g_TurnBallSimulation, 0, &D_80227150_ovl_00);
-          nextState = 9;
+          nextState = PLAYER_STATE_BALL_IN_FLIGHT;
           if (D_80227150_ovl_00.unkC == 0 &&
               D_80227150_ovl_00.power >= MAX_LAUNCH_POWER &&
               !(GetClub(D_80227150_ovl_00.clubIndex)->surfaceMask &
@@ -4050,7 +4053,7 @@ void UpdateTurns(void) {
           UpdateFlightCamera(FALSE, g_TurnController.buttons);
           break;
         }
-      case 9: {
+      case PLAYER_STATE_BALL_IN_FLIGHT: {
         Boolean isCameraDone;
         s32 previousPosition[3];
 
@@ -4075,7 +4078,7 @@ void UpdateTurns(void) {
 
         if (D_80223FF8_ovl_00 >= 2 && D_80227170_ovl_00[playerIndex] >= 40 &&
             D_80223FFC_ovl_00) {
-          nextState = 6;
+          nextState = PLAYER_STATE_STARTING_SWING;
         }
 
         if (g_MergedController.buttons & (Z_TRIG | L_TRIG)) {
@@ -4144,7 +4147,7 @@ void UpdateTurns(void) {
 
         if (!g_TurnBallSimulation.state) {
           ClearShotEffects(0);
-          nextState = 10;
+          nextState = PLAYER_STATE_BALL_AT_REST;
           D_800C3094 = 1;
           D_80227170_ovl_00[playerIndex] = 0;
           ForceStopRumble();
@@ -4152,7 +4155,7 @@ void UpdateTurns(void) {
 
         break;
       }
-      case 10: {
+      case PLAYER_STATE_BALL_AT_REST: {
         Boolean isCameraDone =
             UpdateFlightCamera(TRUE, g_TurnController.buttons);
 
@@ -4188,7 +4191,7 @@ void UpdateTurns(void) {
         }
 
         if (D_80223FFC_ovl_00) {
-          nextState = 6;
+          nextState = PLAYER_STATE_STARTING_SWING;
           StartLandingReaction(-1);
           StartBanner(-1);
         } else if (isCameraDone) {
@@ -4264,7 +4267,7 @@ void UpdateTurns(void) {
                       g_GameState.holeIndex, g_Players[playerIndex].handicap);
             }
 
-            nextState = 0xB;
+            nextState = PLAYER_STATE_STARTING_REACTION;
             g_Players[playerIndex]
                 .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                 .putts = g_Players[playerIndex].unk24;
@@ -4274,16 +4277,16 @@ void UpdateTurns(void) {
             StartBanner(-1);
             if (g_GameState.unk31 &&
                 g_Players[playerIndex].strokeCount >= D_800FE330) {
-              nextState = 0xB;
+              nextState = PLAYER_STATE_STARTING_REACTION;
             } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-              nextState = 0xB;
+              nextState = PLAYER_STATE_STARTING_REACTION;
               if (g_Players[playerIndex].strokeCount < g_HoleSetup.par) {
                 EndFlightCamera();
                 StartHudAnimation(2);
-                nextState = 0x10;
+                nextState = PLAYER_STATE_ENDING_TURN;
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-              nextState = 0xF;
+              nextState = PLAYER_STATE_CHOOSING;
               OpenChoiceBox(
                   g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX
                       ? CHOICE_BOX_ID_DRIVING_RANGE
@@ -4293,12 +4296,12 @@ void UpdateTurns(void) {
                     g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
               if (g_Players[playerIndex].strokeCount >= g_HoleSetup.par * 3 ||
                   GetMatchHoleResult(0, 1)) {
-                nextState = 0xB;
+                nextState = PLAYER_STATE_STARTING_REACTION;
                 GiveUpHole(playerIndex);
               } else {
                 EndFlightCamera();
                 StartHudAnimation(2);
-                nextState = 0x10;
+                nextState = PLAYER_STATE_ENDING_TURN;
               }
             } else if (!g_GameState.unk31 &&
                 (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
@@ -4318,11 +4321,11 @@ void UpdateTurns(void) {
                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                     .strokes = 0;
                 g_Players[playerIndex].strokeCount = 0;
-                nextState = 0xB;
+                nextState = PLAYER_STATE_STARTING_REACTION;
               } else {
                 EndFlightCamera();
                 StartHudAnimation(2);
-                nextState = 0x10;
+                nextState = PLAYER_STATE_ENDING_TURN;
               }
             } else if (g_Players[playerIndex].strokeCount >=
                 g_HoleSetup.par * 3) {
@@ -4330,7 +4333,7 @@ void UpdateTurns(void) {
                   .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                   .strokes = g_HoleSetup.par * 3;
               g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
-              nextState = 0xB;
+              nextState = PLAYER_STATE_STARTING_REACTION;
               if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
                 g_Players[playerIndex].stopwatchFrameCount += 18000;
                 g_GameState.stopwatchFrameCount += 18000;
@@ -4351,7 +4354,7 @@ void UpdateTurns(void) {
                       STOPWATCH_MAX_FRAMES;
                 }
 
-                nextState = 0xB;
+                nextState = PLAYER_STATE_STARTING_REACTION;
               }
             } else {
               EndFlightCamera();
@@ -4359,14 +4362,14 @@ void UpdateTurns(void) {
                 StartHudAnimation(2);
               }
 
-              nextState = 0x10;
+              nextState = PLAYER_STATE_ENDING_TURN;
             }
           }
         }
 
         break;
       }
-      case 0xB: {
+      case PLAYER_STATE_STARTING_REACTION: {
         s32 character;
         s32 palette;
         s32 reaction;
@@ -4463,11 +4466,11 @@ void UpdateTurns(void) {
           ReportBirdieBadgeCount();
         }
 
-        nextState = 0xC;
+        nextState = PLAYER_STATE_REACTING;
         D_80227170_ovl_00[playerIndex] = 0;
         break;
       }
-      case 0xC:
+      case PLAYER_STATE_REACTING:
         PlaceAndViewCharacter(0);
         areCallsAllowed = FALSE;
         f_ShouldUpdateReaction = 1;
@@ -4482,7 +4485,7 @@ void UpdateTurns(void) {
         if (D_80227170_ovl_00[playerIndex] >= D_80224000_ovl_00) {
           StopFireworks();
           if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-            nextState = 0xF;
+            nextState = PLAYER_STATE_CHOOSING;
             if (g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX) {
               OpenChoiceBox(CHOICE_BOX_ID_DRIVING_RANGE);
             } else {
@@ -4491,17 +4494,17 @@ void UpdateTurns(void) {
           } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
               (!g_TurnBallSimulation.unkA0 ||
                   !HasNoRingsLeft(&g_Players[playerIndex]))) {
-            nextState = 0xF;
+            nextState = PLAYER_STATE_CHOOSING;
             OpenChoiceBox(CHOICE_BOX_ID_RING_SHOT);
           } else {
-            nextState = 0x12;
+            nextState = PLAYER_STATE_FINISHING_HOLE;
           }
 
           D_80227170_ovl_00[playerIndex] = 0;
         }
 
         break;
-      case 0xF:
+      case PLAYER_STATE_CHOOSING:
         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
           if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) &&
               g_Players[playerIndex].unk26 != 0) {
@@ -4512,7 +4515,7 @@ void UpdateTurns(void) {
             case CHOICE_RESULT_CONTINUE:
               EndFlightCamera();
               StartHudAnimation(2);
-              nextState = 0x11;
+              nextState = PLAYER_STATE_WAITING;
               ForceStopRumble();
               break;
             case CHOICE_RESULT_MULLIGAN:
@@ -4520,7 +4523,7 @@ void UpdateTurns(void) {
               g_Players[playerIndex] = g_SavedPlayers[playerIndex];
               EndFlightCamera();
               StartHudAnimation(2);
-              nextState = 0x11;
+              nextState = PLAYER_STATE_WAITING;
               ForceStopRumble();
               break;
             case CHOICE_RESULT_HOLE_OUT:
@@ -4529,11 +4532,11 @@ void UpdateTurns(void) {
                 InsertRankedRecord(&D_800FEDD8[playerIndex]);
               }
 
-              nextState = 0x14;
+              nextState = PLAYER_STATE_HOLE_DONE;
               EndFlightCamera();
               FreeCharacterAndReactionLight(0);
               if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME)) {
-                nextState = 0xB;
+                nextState = PLAYER_STATE_STARTING_REACTION;
               }
 
               ForceStopRumble();
@@ -4551,11 +4554,11 @@ void UpdateTurns(void) {
                   SOUND_FULL_SCALE);
               SkipNextPinDraw();
               PlacePlayersOnTee();
-              nextState = 0x11;
+              nextState = PLAYER_STATE_WAITING;
               ForceStopRumble();
               break;
             case CHOICE_RESULT_RING_SHOT_HOLE_OUT:
-              nextState = 0x14;
+              nextState = PLAYER_STATE_HOLE_DONE;
               EndFlightCamera();
               FreeCharacterAndReactionLight(0);
               ForceStopRumble();
@@ -4568,13 +4571,13 @@ void UpdateTurns(void) {
         }
 
         break;
-      case 0x10:
-        nextState = 0x11;
+      case PLAYER_STATE_ENDING_TURN:
+        nextState = PLAYER_STATE_WAITING;
         break;
-      case 0x11:
-      case 0x14:
+      case PLAYER_STATE_WAITING:
+      case PLAYER_STATE_HOLE_DONE:
         break;
-      case 0x12:
+      case PLAYER_STATE_FINISHING_HOLE:
         if (IsRecordableHoleOut(playerIndex) &&
             g_Players[playerIndex].unk26 == HOLE_STATUS_HOLED_OUT) {
           InsertRankedRecord(&D_800FEDD8[playerIndex]);
@@ -4585,7 +4588,7 @@ void UpdateTurns(void) {
           StartBanner(-1);
           g_IsHudTurnAwayRequested = 1;
           if (g_GameState.unk31) {
-            nextState = 0x14;
+            nextState = PLAYER_STATE_HOLE_DONE;
           } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
               g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
             s8 results[MAX_PLAYER_COUNT];
@@ -4599,10 +4602,11 @@ void UpdateTurns(void) {
               }
             }
 
-            nextState =
-                (holeResult == GROUP_HOLE_OPEN && isAnyOut) ? 0x16 : 0x14;
+            nextState = (holeResult == GROUP_HOLE_OPEN && isAnyOut)
+                ? PLAYER_STATE_FINDING_OUT_PLAYER
+                : PLAYER_STATE_HOLE_DONE;
           } else {
-            nextState = 0x14;
+            nextState = PLAYER_STATE_HOLE_DONE;
             if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                 g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
               s32 result;
@@ -4668,7 +4672,7 @@ void UpdateTurns(void) {
         }
 
         break;
-      case 0x16:
+      case PLAYER_STATE_FINDING_OUT_PLAYER:
         for (i = 0; i < g_GameState.playerCount; i++) {
           if (g_Players[i].unk26 == 2) {
             break;
@@ -4676,7 +4680,7 @@ void UpdateTurns(void) {
         }
 
         if (i == g_GameState.playerCount) {
-          nextState = 0x14;
+          nextState = PLAYER_STATE_HOLE_DONE;
           break;
         }
 
@@ -4692,7 +4696,7 @@ void UpdateTurns(void) {
           }
         }
 
-        nextState = 0x14;
+        nextState = PLAYER_STATE_HOLE_DONE;
         if (i != g_GameState.playerCount) {
           ClearReactionSpot();
           LoadCharacter(0, g_Players[i].characterIndex + CHARACTER_COUNT,
@@ -4708,12 +4712,12 @@ void UpdateTurns(void) {
           PlaceAndViewCharacter(0);
           f_ShouldUpdateReaction = 1;
           ShowFlipMessage(0);
-          nextState = 0x17;
+          nextState = PLAYER_STATE_SHOWING_OUT_PLAYER;
           D_80227170_ovl_00[playerIndex] = 0;
         }
 
         break;
-      case 0x17:
+      case PLAYER_STATE_SHOWING_OUT_PLAYER:
         PlaceAndViewCharacter(0);
         f_ShouldUpdateReaction = 1;
         areCallsAllowed = FALSE;
@@ -4723,7 +4727,7 @@ void UpdateTurns(void) {
 
         if (D_80227170_ovl_00[playerIndex] == 90) {
           StartBanner(-1);
-          nextState = 0x16;
+          nextState = PLAYER_STATE_FINDING_OUT_PLAYER;
           ClearDebugText();
           D_80227170_ovl_00[playerIndex] = 0;
         }
@@ -4732,11 +4736,11 @@ void UpdateTurns(void) {
       default:
         SetDebugTextHighlight(1);
         PrintDebugText("P-S-ERR", 20, 2);
-        nextState = 2;
+        nextState = PLAYER_STATE_AIMING;
         break;
     }
 
-    g_Players[playerIndex].unkC = nextState;
+    g_Players[playerIndex].state = nextState;
     g_BallSimulations[0] = g_TurnBallSimulation;
     g_PreviousBallSurfaceInfo = D_80227150_ovl_00;
   }

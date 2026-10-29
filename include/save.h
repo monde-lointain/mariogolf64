@@ -323,29 +323,56 @@ typedef struct PlayerHole {
 #define PLAYER_UNKAA_COUNT 12
 
 /*
- * UnkB8.unkC's values, which the game's messages call the PlayerState. A
- * saved game may hold only these; it keeps PLAYER_STATE_UNK17 and
- * PLAYER_STATE_UNK20 and restarts the others as PLAYER_STATE_UNK0.
+ * UnkB8.state's values, which the game's messages call the PlayerState. A
+ * saved game keeps PLAYER_STATE_WAITING and PLAYER_STATE_HOLE_DONE, restarts
+ * STARTING_TURN, AIMING, UNK3 and PREPARING_AIM as STARTING_TURN, and calls
+ * the rest illegal.
  */
 enum PlayerState {
-  PLAYER_STATE_UNK0,
-  PLAYER_STATE_UNK2 = 2, /* Hides the gauge's markers */
+  /* Sets the turn up */
+  PLAYER_STATE_STARTING_TURN,
+  /* Shows the hole on its first turn */
+  PLAYER_STATE_HOLE_INTRO,
+  /* Hides the gauge's markers */
+  PLAYER_STATE_AIMING,
+  /* Never set */
   PLAYER_STATE_UNK3,
-  PLAYER_STATE_UNK4, /* Hides the gauge's markers */
-  PLAYER_STATE_UNK5, /* Hides the gauge's markers */
+  /* Hides the gauge's markers */
+  PLAYER_STATE_SETTING_POWER,
+  /* Hides the gauge's markers */
+  PLAYER_STATE_SETTING_IMPACT,
+  PLAYER_STATE_STARTING_SWING,
+  /* Swings until the ball is launched */
+  PLAYER_STATE_SWINGING = 8,
+  PLAYER_STATE_BALL_IN_FLIGHT,
+  /* Judges where the ball came to rest */
+  PLAYER_STATE_BALL_AT_REST,
+  /* Starts the character's reaction to ending the hole */
+  PLAYER_STATE_STARTING_REACTION,
+  PLAYER_STATE_REACTING,
+  /* Asks what to do next, in training and the ring shot */
+  PLAYER_STATE_CHOOSING = 15,
+  PLAYER_STATE_ENDING_TURN,
   /*
    * PlayContestMovies waits for every player to be in this state or
-   * PLAYER_STATE_UNK20. Players in either may make their characters call
+   * PLAYER_STATE_HOLE_DONE. Players in either may make their characters call
    * out during another player's turn.
    */
-  PLAYER_STATE_UNK17 = 17,
-  PLAYER_STATE_UNK20 = 20,
-  PLAYER_STATE_UNK21
+  PLAYER_STATE_WAITING,
+  /* Records the hole and shows its banner */
+  PLAYER_STATE_FINISHING_HOLE,
+  PLAYER_STATE_HOLE_DONE = 20,
+  /* Waits for a replayed shot and the HUD before aiming */
+  PLAYER_STATE_PREPARING_AIM,
+  /* Picks the next player who went out on the hole */
+  PLAYER_STATE_FINDING_OUT_PLAYER,
+  /* Shows that player losing */
+  PLAYER_STATE_SHOWING_OUT_PLAYER
 };
 
 typedef struct UnkB8 {
   /* 0x00 */ char name[PLAYER_NAME_SIZE];
-  /* 0x0C */ s32 unkC; /* A PLAYER_STATE_* value */
+  /* 0x0C */ s32 state; /* A PLAYER_STATE_* value */
   /* 0x10 */ CoursePoint ballPosition;
   /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
   /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */

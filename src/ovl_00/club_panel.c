@@ -374,7 +374,7 @@ void DrawClubPanel(Gfx** displayListHead) {
 
   gfx = *displayListHead;
   isPutter = GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN;
-  playerState = g_Players[g_CurrentShot.playerIndex].unkC;
+  playerState = g_Players[g_CurrentShot.playerIndex].state;
   GetLieSpan(
       GetClub(
           g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
@@ -478,13 +478,14 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPLoadTextureBlock(gfx++, ((u32)f_ShotModeImage + IMAGE_HEADER_SIZE) & ~7,
       G_IM_FMT_RGBA, G_IM_SIZ_16b, fillWidth, GAUGE_FILL_IMAGE_HEIGHT, 0,
       G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
-  if (playerState != PLAYER_STATE_UNK2 && playerState == PLAYER_STATE_UNK4) {
+  if (playerState != PLAYER_STATE_AIMING &&
+      playerState == PLAYER_STATE_SETTING_POWER) {
     f_ClubPanelUnk24 = value;
   }
 
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  if (playerState != PLAYER_STATE_UNK2) {
+  if (playerState != PLAYER_STATE_AIMING) {
     gSPTextureRectangle(gfx++,
         (GAUGE_EMPTY_X - f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE)
             << 2,
@@ -526,8 +527,9 @@ void DrawClubPanel(Gfx** displayListHead) {
   pulse = (sinf(f_MarkerPulseAngle) * MARKER_PULSE_LEVEL) + MARKER_PULSE_LEVEL;
   gDPPipeSync(gfx++);
   gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
-  if (playerState == PLAYER_STATE_UNK2 || playerState == PLAYER_STATE_UNK4 ||
-      playerState == PLAYER_STATE_UNK5 || isPutter) {
+  if (playerState == PLAYER_STATE_AIMING ||
+      playerState == PLAYER_STATE_SETTING_POWER ||
+      playerState == PLAYER_STATE_SETTING_IMPACT || isPutter) {
     gDPSetEnvColor(gfx++, 0, 0, 0, 255);
   } else if (value == 0) {
     gDPSetEnvColor(gfx++, pulse, pulse, pulse, 255);
@@ -554,8 +556,8 @@ void DrawClubPanel(Gfx** displayListHead) {
       (GAUGE_MARKER_BOTTOM + f_ClubPanelDebugValue + g_ShotPanelOffsetX) << 2,
       G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
   gDPPipeSync(gfx++);
-  if (playerState != PLAYER_STATE_UNK2 && playerState != PLAYER_STATE_UNK4 &&
-      !isPutter) {
+  if (playerState != PLAYER_STATE_AIMING &&
+      playerState != PLAYER_STATE_SETTING_POWER && !isPutter) {
     gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
     markerOffset = f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE;
     if (f_ClubPanelUnk24 == GAUGE_MAX_VALUE) {

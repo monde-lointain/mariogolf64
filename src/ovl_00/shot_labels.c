@@ -238,7 +238,7 @@ void DrawShotLabels(Gfx** displayListHead) {
   } else if (g_GameState.unk0 == GAME_STATE_UNK6 &&
       g_CurrentShot.playerIndex >= 0 &&
       g_CurrentShot.playerIndex < MAX_PLAYER_COUNT &&
-      g_Players[g_CurrentShot.playerIndex].unkC == PLAYER_STATE_UNK2 &&
+      g_Players[g_CurrentShot.playerIndex].state == PLAYER_STATE_AIMING &&
       (g_LetterboxState != LETTERBOX_STATE_NONE &
           g_LetterboxState != LETTERBOX_STATE_UNK5)) {
     players = SHOT_LABELS_OTHER_BALLS;
