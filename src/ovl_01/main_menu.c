@@ -130,8 +130,8 @@
 #define STAR_FRAME_COUNT 15
 #define MAX_STAR_COUNT 6
 #define CHOSEN_STAR_GROWTH 8
-/* func_80200EF0 places the characters by a layout, chosen by their count, of
- * five slots */
+/* DrawMenuCharacters places the characters by a layout, chosen by their count,
+ * of five slots */
 #define MENU_CHARACTER_LAYOUT_COUNT 4
 #define MENU_CHARACTER_SLOT_COUNT 5
 /*
@@ -4432,8 +4432,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
 #define MODE_ICON_LEFT 168
 #define MODE_ICON_TOP 96
 
-/* func_80200EF0 draws the players' characters, and in Get Character the rival
- * as a spinning silhouette */
+/* DrawMenuCharacters draws the players' characters, and in Get Character the
+ * rival as a spinning silhouette */
 #define NO_RIVAL -1
 #define RIVAL_SLOT 1
 #define RIVAL_SPIN_STEP 10.0f
@@ -4563,7 +4563,7 @@ extern const char D_8023176C_ovl_01[];
 void StartLoadingChosenHole(void);
 void func_80200A40_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
-void func_80200EF0_ovl_01(Gfx** displayListHead);
+void DrawMenuCharacters(Gfx** displayListHead);
 void DrawCourseSelectBanners(Gfx** displayListHead);
 void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
 void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
@@ -4710,7 +4710,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     if ((D_801323A0.modeChoice == slot) && (D_801323A0.modeSpin == 0)) {
       if (!areCharactersDrawn) {
-        func_80200EF0_ovl_01(&gfx);
+        DrawMenuCharacters(&gfx);
         areCharactersDrawn = TRUE;
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
@@ -4733,7 +4733,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
       if (D_801323A0.modeChoice == slot) {
         /* The characters go behind the chosen board, and change the state */
         if (!areCharactersDrawn) {
-          func_80200EF0_ovl_01(&gfx);
+          DrawMenuCharacters(&gfx);
           gDPPipeSync(gfx++);
           gDPPipeSync(gfx++);
           gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -5120,7 +5120,7 @@ void func_80200A40_ovl_01(
  * SetCharacterLighting with its first argument, and this leaves it empty.
  */
 #ifdef NON_MATCHING
-void func_80200EF0_ovl_01(Gfx** displayListHead) {
+void DrawMenuCharacters(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 rival = NO_RIVAL;
   MenuMemory* memory;
@@ -5268,7 +5268,7 @@ void func_80200EF0_ovl_01(Gfx** displayListHead) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80200EF0_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuCharacters);
 #endif
 
 /*

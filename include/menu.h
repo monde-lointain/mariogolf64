@@ -152,7 +152,7 @@ void LoadMenuWindowImage(s32 imageIndex);
 /*
  * The first empty slot gets a negative mark: the id of the character that
  * slot holds in f_EveryCharacterGrid, less this offset. In Get Character,
- * func_80200EF0 shows that character as the rival.
+ * DrawMenuCharacters shows that character as the rival.
  */
 #define MARKED_CHARACTER_OFFSET 50
 /* A slot of the grid that holds no character */
