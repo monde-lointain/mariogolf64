@@ -152,7 +152,7 @@ enum StatsDirection {
 /* Each bet's stake is one of these levels, which D_802304F4 turns into an
  * amount */
 #define BET_STAKE_LEVEL_COUNT 6
-/* What unkE holds for a bet that ApplyBetPreset's preset leaves out */
+/* The betStakeLevels value of a bet that ApplyBetPreset's preset leaves out */
 #define NO_BET -1
 /* Where UpdateBetSettings types the chosen bet's explanation, and its first
  * message
@@ -223,7 +223,7 @@ static s16 D_8023040C_ovl_01[STATS_INDEX_ROW_COUNT]
 };
 // clang-format on
 // clang-format off
-/* Which of unkE's bets each column of D_8023040C sets */
+/* Which of betStakeLevels' bets each column of D_8023040C sets */
 static s16 D_80230460_ovl_01[STATS_INDEX_ROW_COUNT]
                              [STATS_INDEX_COLUMN_COUNT] = {
   { 0, 1, 2, 3, 4, STATS_INDEX_UNUSED },
@@ -551,12 +551,13 @@ void ApplyBetPreset(s32 requestedPreset) {
     }
 
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
-      memory->unkE[index] = D_802304BC_ovl_01[presetIndex][index];
-      g_GameState.betRates[index] = D_802304F4_ovl_01[memory->unkE[index]];
+      memory->betStakeLevels[index] = D_802304BC_ovl_01[presetIndex][index];
+      g_GameState.betRates[index] =
+          D_802304F4_ovl_01[memory->betStakeLevels[index]];
     }
   } else {
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
-      memory->unkE[index] = NO_BET;
+      memory->betStakeLevels[index] = NO_BET;
       g_GameState.betRates[index] = -1;
     }
   }
@@ -607,8 +608,9 @@ void UpdateBetSettings(void) {
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
-      if (memory->unkE[index] != NO_BET) {
-        g_GameState.betRates[index] = D_802304F4_ovl_01[memory->unkE[index]];
+      if (memory->betStakeLevels[index] != NO_BET) {
+        g_GameState.betRates[index] =
+            D_802304F4_ovl_01[memory->betStakeLevels[index]];
       } else {
         g_GameState.betRates[index] = -1;
       }
@@ -624,8 +626,9 @@ void UpdateBetSettings(void) {
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
-      if (memory->unkE[index] != NO_BET) {
-        g_GameState.betRates[index] = D_802304F4_ovl_01[memory->unkE[index]];
+      if (memory->betStakeLevels[index] != NO_BET) {
+        g_GameState.betRates[index] =
+            D_802304F4_ovl_01[memory->betStakeLevels[index]];
       } else {
         g_GameState.betRates[index] = -1;
       }
@@ -637,14 +640,14 @@ void UpdateBetSettings(void) {
   if (g_MenuRepeatButtons & U_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     index = D_80230460_ovl_01[D_801B5634 - 1][memory->unkD];
-    if (memory->unkE[index] < BET_STAKE_LEVEL_COUNT - 1) {
-      memory->unkE[index]++;
+    if (memory->betStakeLevels[index] < BET_STAKE_LEVEL_COUNT - 1) {
+      memory->betStakeLevels[index]++;
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     index = D_80230460_ovl_01[D_801B5634 - 1][memory->unkD];
-    if (memory->unkE[index] > 0) {
-      memory->unkE[index]--;
+    if (memory->betStakeLevels[index] > 0) {
+      memory->betStakeLevels[index]--;
     }
   } else if (g_MenuRepeatButtons & L_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -766,7 +769,8 @@ void DrawBetSettings(
       icon = ImageAt(D_8023B340_ovl_01, betIndex * PLAYER_STATS_ICON_SIZE);
       gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
       /* Bets without a stake are dimmed */
-      if (memory->unkE[D_80230460_ovl_01[D_801B5634 - 1][columnIndex]] == 0) {
+      if (memory->betStakeLevels[D_80230460_ovl_01[D_801B5634 - 1]
+                                                  [columnIndex]] == 0) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
@@ -794,8 +798,8 @@ void DrawBetSettings(
         D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide +
             BET_AMOUNT_OFFSET_X,
         BET_AMOUNT_Y,
-        (s8)D_802304F4_ovl_01[memory
-                ->unkE[D_80230460_ovl_01[D_801B5634 - 1][columnIndex]]],
+        (s8)D_802304F4_ovl_01[memory->betStakeLevels
+                [D_80230460_ovl_01[D_801B5634 - 1][columnIndex]]],
         0);
   }
 
@@ -835,8 +839,8 @@ void DrawBetSettings(
     for (columnIndex = 0; columnIndex != D_802304B4_ovl_01[D_801B5634 - 1];
         columnIndex++) {
       /* Marks above the bet's stake are dimmed */
-      if (stakeLevel >=
-          memory->unkE[D_80230460_ovl_01[D_801B5634 - 1][columnIndex]]) {
+      if (stakeLevel >= memory->betStakeLevels[D_80230460_ovl_01[D_801B5634 -
+                            1][columnIndex]]) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);

@@ -5,8 +5,8 @@
 
 #include "save.h"
 
-/* The values of unkE, which ApplyBetPreset also turns into GameState's
- * betRates */
+/* The values of betStakeLevels, which ApplyBetPreset also turns into
+ * GameState's betRates */
 #define MENU_UNKE_COUNT 8
 
 /* The presets of ApplyBetPreset; two of them have a variant that four players
@@ -44,8 +44,8 @@ typedef struct MenuMemory {
                                count's modes */
   /* 0x0C */ s8 modeSpin; /* How far the modes still have to turn to reach it */
   /* 0x0D */ s8 unkD;
-  /* 0x0E */ s8
-      unkE[MENU_UNKE_COUNT]; /* Set from one of ApplyBetPreset's presets */
+  /* 0x0E */ s8 betStakeLevels[MENU_UNKE_COUNT]; /* Set from one of
+                                                    ApplyBetPreset's presets */
   /* 0x16 */ s8 courseChoice; /* The course select's course: an open one, or the
                                  next one still shut */
   /* 0x17 */ s8

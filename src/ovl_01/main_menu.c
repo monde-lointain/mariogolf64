@@ -1870,7 +1870,7 @@ void UpdateMenuTitleScreen(void) {
       memory->modeSpin = 0;
       memory->unkD = 0;
       for (index = 0; index != MENU_UNKE_COUNT; index++) {
-        memory->unkE[index] = 0;
+        memory->betStakeLevels[index] = 0;
       }
 
       memory->courseChoice = 0;
