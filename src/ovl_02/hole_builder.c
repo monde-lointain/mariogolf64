@@ -121,12 +121,27 @@ enum VertexEncoding {
 /* The texels in a tile's border: one before its texels and three after */
 #define TILE_BORDER_BEFORE 1
 /*
+ * The paint routines give terrain nearer than this many cells to other
+ * terrain a border's color
+ */
+#define TERRAIN_BORDER_DISTANCE 2
+/*
+ * The paint patterns' sizes in texels, each a power of two: greens are
+ * checkered, fairways striped with stripes offset by half their width, and
+ * the mini golf greens checkered in wide, deep checks
+ */
+#define GREEN_CHECK_SIZE 2
+#define FAIRWAY_STRIPE_WIDTH 4
+#define FAIRWAY_STRIPE_OFFSET (FAIRWAY_STRIPE_WIDTH / 2)
+#define MINI_GOLF_CHECK_WIDTH 4
+#define MINI_GOLF_CHECK_DEPTH 8
+/*
  * Whether a green cell lies within one cell of other terrain. It is a macro,
  * as an inline function compiles differently from the original.
  */
 #define IsGreenEdge(code, nearestCode, nearestDistance) \
   ((code) == TERRAIN_CODE_GREEN && (code) != (nearestCode) && \
-      (nearestDistance) < 2)
+      (nearestDistance) < TERRAIN_BORDER_DISTANCE)
 
 /*
  * Indices of f_PaintLogics. They follow GameState.courseIndex's numbering,
@@ -1004,11 +1019,12 @@ s32 PaintMainCourse(
       paintedCode = TERRAIN_CODE_ROCK;
       break;
     case TERRAIN_CODE_FAIRWAY:
-      if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
+      if (nearestDistance >= TERRAIN_BORDER_DISTANCE ||
+          nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-        if ((x + 2) & 4) {
+        if ((x + FAIRWAY_STRIPE_OFFSET) & FAIRWAY_STRIPE_WIDTH) {
           color = (((fairwayRandom & 3) + 9) << RGBA16_RED_SHIFT) | 0x4C4;
         } else {
           color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x584;
@@ -1049,11 +1065,12 @@ s32 PaintMainCourse(
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x2587;
         paintedCode = TERRAIN_CODE_GREEN_EDGE;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 2) {
-          color = (x & 2) ? 0x2F84 : 0x4580;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & GREEN_CHECK_SIZE) {
+          color = (x & GREEN_CHECK_SIZE) ? 0x2F84 : 0x4580;
         } else {
-          color = (x & 2) ? 0x3E42 : 0x3704;
+          color = (x & GREEN_CHECK_SIZE) ? 0x3E42 : 0x3704;
         }
 
         paintedCode = TERRAIN_CODE_GREEN;
@@ -1108,11 +1125,12 @@ s32 PaintPaleRoughCourse(
       paintedCode = TERRAIN_CODE_ROCK;
       break;
     case TERRAIN_CODE_FAIRWAY:
-      if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
+      if (nearestDistance >= TERRAIN_BORDER_DISTANCE ||
+          nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-        if ((x + 2) & 4) {
+        if ((x + FAIRWAY_STRIPE_OFFSET) & FAIRWAY_STRIPE_WIDTH) {
           color = (((fairwayRandom & 3) + 14) << RGBA16_RED_SHIFT) | 0x4CE;
         } else {
           color = ((fairwayRandom & 3) << RGBA16_RED_SHIFT) | 0x658E;
@@ -1142,7 +1160,8 @@ s32 PaintPaleRoughCourse(
       paintedCode = TERRAIN_CODE_BUNKER;
       break;
     case TERRAIN_CODE_UNK3:
-      if (nearestCode == TERRAIN_CODE_UNK3 || nearestDistance >= 2) {
+      if (nearestCode == TERRAIN_CODE_UNK3 ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
         color = 0x3E;
         paintedCode = TERRAIN_CODE_UNK3;
       } else {
@@ -1161,11 +1180,12 @@ s32 PaintPaleRoughCourse(
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x2587;
         paintedCode = TERRAIN_CODE_GREEN_EDGE;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 2) {
-          color = (x & 2) ? 0x2F84 : 0x4680;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & GREEN_CHECK_SIZE) {
+          color = (x & GREEN_CHECK_SIZE) ? 0x2F84 : 0x4680;
         } else {
-          color = (x & 2) ? 0x3F02 : 0x3704;
+          color = (x & GREEN_CHECK_SIZE) ? 0x3F02 : 0x3704;
         }
 
         paintedCode = TERRAIN_CODE_GREEN;
@@ -1223,11 +1243,12 @@ s32 PaintShyGuyDesert(
       paintedCode = TERRAIN_CODE_ROCK;
       break;
     case TERRAIN_CODE_FAIRWAY:
-      if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
+      if (nearestDistance >= TERRAIN_BORDER_DISTANCE ||
+          nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-        if ((x + 2) & 4) {
+        if ((x + FAIRWAY_STRIPE_OFFSET) & FAIRWAY_STRIPE_WIDTH) {
           color = (((fairwayRandom & 3) + 19) << RGBA16_RED_SHIFT) | 0x688;
         } else {
           color = (((fairwayRandom & 3) + 14) << RGBA16_RED_SHIFT) | 0x5C6;
@@ -1268,11 +1289,12 @@ s32 PaintShyGuyDesert(
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x7E4B;
         paintedCode = TERRAIN_CODE_GREEN_EDGE;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 2) {
-          color = (x & 2) ? 0x7E4A : 0x7746;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & GREEN_CHECK_SIZE) {
+          color = (x & GREEN_CHECK_SIZE) ? 0x7E4A : 0x7746;
         } else {
-          color = (x & 2) ? 0x8E88 : 0x8606;
+          color = (x & GREEN_CHECK_SIZE) ? 0x8E88 : 0x8606;
         }
 
         paintedCode = TERRAIN_CODE_GREEN;
@@ -1324,11 +1346,12 @@ s32 PaintBooValley(
       paintedCode = TERRAIN_CODE_ROCK;
       break;
     case TERRAIN_CODE_FAIRWAY:
-      if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
+      if (nearestDistance >= TERRAIN_BORDER_DISTANCE ||
+          nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-        if ((x + 2) & 4) {
+        if ((x + FAIRWAY_STRIPE_OFFSET) & FAIRWAY_STRIPE_WIDTH) {
           color = (((fairwayRandom & 3) + 9) << RGBA16_RED_SHIFT) | 0x4C4;
         } else {
           color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x584;
@@ -1369,11 +1392,12 @@ s32 PaintBooValley(
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x2587;
         paintedCode = TERRAIN_CODE_GREEN_EDGE;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 2) {
-          color = (x & 2) ? 0x2F84 : 0x4580;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & GREEN_CHECK_SIZE) {
+          color = (x & GREEN_CHECK_SIZE) ? 0x2F84 : 0x4580;
         } else {
-          color = (x & 2) ? 0x3E42 : 0x3704;
+          color = (x & GREEN_CHECK_SIZE) ? 0x3E42 : 0x3704;
         }
 
         paintedCode = TERRAIN_CODE_GREEN;
@@ -1424,11 +1448,12 @@ s32 PaintYoshisIsland(
       paintedCode = TERRAIN_CODE_ROCK;
       break;
     case TERRAIN_CODE_FAIRWAY:
-      if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
+      if (nearestDistance >= TERRAIN_BORDER_DISTANCE ||
+          nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-        if ((x + 2) & 4) {
+        if ((x + FAIRWAY_STRIPE_OFFSET) & FAIRWAY_STRIPE_WIDTH) {
           color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x4D4;
         } else {
           color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x590;
@@ -1469,11 +1494,12 @@ s32 PaintYoshisIsland(
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x3C04;
         paintedCode = TERRAIN_CODE_GREEN_EDGE;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 2) {
-          color = (x & 2) ? 0x2E04 : 0x4480;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & GREEN_CHECK_SIZE) {
+          color = (x & GREEN_CHECK_SIZE) ? 0x2E04 : 0x4480;
         } else {
-          color = (x & 2) ? 0x3CC2 : 0x3584;
+          color = (x & GREEN_CHECK_SIZE) ? 0x3CC2 : 0x3584;
         }
 
         paintedCode = TERRAIN_CODE_GREEN;
@@ -1527,11 +1553,12 @@ s32 PaintUnlistedCourse(
       paintedCode = TERRAIN_CODE_ROCK;
       break;
     case TERRAIN_CODE_FAIRWAY:
-      if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
+      if (nearestDistance >= TERRAIN_BORDER_DISTANCE ||
+          nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> PAINT_RANDOM_SHIFT;
-        if ((x + 2) & 4) {
+        if ((x + FAIRWAY_STRIPE_OFFSET) & FAIRWAY_STRIPE_WIDTH) {
           color = (((fairwayRandom & 3) + 9) << RGBA16_RED_SHIFT) | 0x4C4;
         } else {
           color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x584;
@@ -1572,11 +1599,12 @@ s32 PaintUnlistedCourse(
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x2587;
         paintedCode = TERRAIN_CODE_GREEN_EDGE;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 2) {
-          color = (x & 2) ? 0x2F84 : 0x4580;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & GREEN_CHECK_SIZE) {
+          color = (x & GREEN_CHECK_SIZE) ? 0x2F84 : 0x4580;
         } else {
-          color = (x & 2) ? 0x3E42 : 0x3704;
+          color = (x & GREEN_CHECK_SIZE) ? 0x3E42 : 0x3704;
         }
 
         paintedCode = TERRAIN_CODE_GREEN;
@@ -1632,14 +1660,15 @@ s32 PaintFirstMiniGolfCourse(
     case TERRAIN_CODE_GREEN:
       /* The assignment in the test is there to match */
       if ((isOtherNearest = nearestCode != TERRAIN_CODE_GREEN) &&
-          nearestDistance < 2) {
+          nearestDistance < TERRAIN_BORDER_DISTANCE) {
         color = 0x650B;
         paintedCode = TERRAIN_CODE_GREEN;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 8) {
-          color = (x & 4) ? 0xCE72 : 0x650B;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & MINI_GOLF_CHECK_DEPTH) {
+          color = (x & MINI_GOLF_CHECK_WIDTH) ? 0xCE72 : 0x650B;
         } else {
-          color = (x & 4) ? 0x650B : 0xCE72;
+          color = (x & MINI_GOLF_CHECK_WIDTH) ? 0x650B : 0xCE72;
         }
 
         paintedCode = TERRAIN_CODE_GREEN;
@@ -1685,14 +1714,15 @@ s32 PaintSecondMiniGolfCourse(
     case TERRAIN_CODE_GREEN:
       /* The assignment in the test is there to match */
       if ((isOtherNearest = nearestCode != TERRAIN_CODE_GREEN) &&
-          nearestDistance < 2) {
+          nearestDistance < TERRAIN_BORDER_DISTANCE) {
         color = 0x4C73;
         paintedCode = TERRAIN_CODE_FAIRWAY;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 8) {
-          color = (x & 4) ? 0x4C72 : 0xBEB4;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & MINI_GOLF_CHECK_DEPTH) {
+          color = (x & MINI_GOLF_CHECK_WIDTH) ? 0x4C72 : 0xBEB4;
         } else {
-          color = (x & 4) ? 0xBEB4 : 0x4C72;
+          color = (x & MINI_GOLF_CHECK_WIDTH) ? 0xBEB4 : 0x4C72;
         }
 
         paintedCode = TERRAIN_CODE_FAIRWAY;
@@ -1735,14 +1765,15 @@ s32 PaintThirdMiniGolfCourse(
           ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
-      if (nearestCode != TERRAIN_CODE_GREEN && nearestDistance < 2) {
+      if (nearestCode != TERRAIN_CODE_GREEN &&
+          nearestDistance < TERRAIN_BORDER_DISTANCE) {
         color = 0xDC61;
         paintedCode = TERRAIN_CODE_CART_WAY;
       } else {
-        if (z & 8) {
-          color = (x & 4) ? 0xDC60 : 0xCE72;
+        if (z & MINI_GOLF_CHECK_DEPTH) {
+          color = (x & MINI_GOLF_CHECK_WIDTH) ? 0xDC60 : 0xCE72;
         } else {
-          color = (x & 4) ? 0xCE72 : 0xDC60;
+          color = (x & MINI_GOLF_CHECK_WIDTH) ? 0xCE72 : 0xDC60;
         }
 
         paintedCode = TERRAIN_CODE_CART_WAY;
@@ -1786,7 +1817,8 @@ s32 PaintDrivingRange(
       paintedCode = TERRAIN_CODE_ROCK;
       break;
     case TERRAIN_CODE_FAIRWAY:
-      color = ((x + 2) & 4) ? 0x5CC4 : 0x4584;
+      color = ((x + FAIRWAY_STRIPE_OFFSET) & FAIRWAY_STRIPE_WIDTH) ? 0x5CC4
+                                                                   : 0x4584;
       paintedCode = TERRAIN_CODE_FAIRWAY;
       break;
     case TERRAIN_CODE_ROUGH:
@@ -1817,11 +1849,12 @@ s32 PaintDrivingRange(
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x2587;
         paintedCode = TERRAIN_CODE_GREEN_EDGE;
-      } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
-        if (z & 2) {
-          color = (x & 2) ? 0x2F84 : 0x4580;
+      } else if (nearestCode == TERRAIN_CODE_GREEN ||
+          nearestDistance >= TERRAIN_BORDER_DISTANCE) {
+        if (z & GREEN_CHECK_SIZE) {
+          color = (x & GREEN_CHECK_SIZE) ? 0x2F84 : 0x4580;
         } else {
-          color = (x & 2) ? 0x3E42 : 0x3704;
+          color = (x & GREEN_CHECK_SIZE) ? 0x3E42 : 0x3704;
         }
 
         paintedCode = TERRAIN_CODE_GREEN;
