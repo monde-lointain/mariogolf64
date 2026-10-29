@@ -2061,7 +2061,7 @@ void func_8005DCDC(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_MenuScreen = MENU_SCREEN_UNK23;
+  g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
 }
 
 void func_8005DD10(void) {

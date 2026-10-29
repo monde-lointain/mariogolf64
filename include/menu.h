@@ -33,10 +33,12 @@ enum MenuScreen {
   MENU_SCREEN_EXIT = 19,
   MENU_SCREEN_HANDICAPS,
   MENU_SCREEN_BET_SETTINGS = 22,
-  MENU_SCREEN_UNK23,
+  /* Leaves the menu for Ring Shot with a wipe of the chosen course's shape */
+  MENU_SCREEN_RING_SHOT_EXIT,
   /* The one player's character select for a Club Tournament */
   MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT,
-  MENU_SCREEN_UNK26 = 26,
+  /* Leaves the menu for Training, whose hole is already loading */
+  MENU_SCREEN_TRAINING_EXIT = 26,
   /* A tournament entered with a code */
   MENU_SCREEN_CLUB_TOURNAMENT,
   /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */

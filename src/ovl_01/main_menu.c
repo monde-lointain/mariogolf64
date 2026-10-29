@@ -842,7 +842,7 @@ void StartLoadingChosenHole(void) {
     slotIndex++;
   } while (slotIndex != CHARACTER_SLOT_COUNT);
   D_800FE334 = 1;
-  if (g_MenuScreen == MENU_SCREEN_UNK23 ||
+  if (g_MenuScreen == MENU_SCREEN_RING_SHOT_EXIT ||
       g_MenuScreen == MENU_SCREEN_RING_SHOT_RECORDS) {
     g_GameState.courseIndex = D_801323A0.courseIndex;
     g_GameState.holeIndex = D_801323A0.holeIndex;
@@ -954,7 +954,7 @@ void UpdateMenus(void) {
     if ((GetChosenCourseIndex() != g_GameState.courseIndex) || !D_800FE334) {
       StartLoadingChosenHole();
     }
-  } else if (g_MenuScreen == MENU_SCREEN_UNK23) {
+  } else if (g_MenuScreen == MENU_SCREEN_RING_SHOT_EXIT) {
     if ((g_GameState.holeIndex != D_801323A0.holeIndex) ||
         (g_GameState.courseIndex != D_801323A0.courseIndex) || !D_800FE334) {
       StartLoadingChosenHole();
@@ -1098,11 +1098,11 @@ void UpdateMenus(void) {
       UpdateCharacterTable();
       break;
 
-    case MENU_SCREEN_UNK23:
+    case MENU_SCREEN_RING_SHOT_EXIT:
       LeaveMenuWithCourseWipe();
       break;
 
-    case MENU_SCREEN_UNK26:
+    case MENU_SCREEN_TRAINING_EXIT:
       LeaveMenuWithWipe();
       break;
   }
@@ -2307,7 +2307,7 @@ void UpdateModeSelect(void) {
         g_GameState.gameMode = GAME_MODE_TRAINING;
         g_GameState.holeSelection = HOLE_SELECTION_ALL;
         StartLoadingChosenHole();
-        g_MenuScreen = MENU_SCREEN_UNK26;
+        g_MenuScreen = MENU_SCREEN_TRAINING_EXIT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
@@ -2329,7 +2329,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         g_GameState.gameMode = GAME_MODE_RING_SHOT;
-        g_MenuScreen = MENU_SCREEN_UNK23;
+        g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
@@ -2363,7 +2363,7 @@ void UpdateModeSelect(void) {
     g_GameState.holeSelection = HOLE_SELECTION_ALL;
 
     /* Training's hole is already loading */
-    if (g_MenuScreen != MENU_SCREEN_UNK26) {
+    if (g_MenuScreen != MENU_SCREEN_TRAINING_EXIT) {
       StopLoaderThread();
     }
 
@@ -3724,8 +3724,8 @@ void DrawMenuScreen(Gfx** displayListHead) {
       DrawCharacterTable(&gfx);
       break;
     case MENU_SCREEN_MODE_SELECT:
-    case MENU_SCREEN_UNK23:
-    case MENU_SCREEN_UNK26:
+    case MENU_SCREEN_RING_SHOT_EXIT:
+    case MENU_SCREEN_TRAINING_EXIT:
       DrawModeSelect(&gfx);
       break;
   }
