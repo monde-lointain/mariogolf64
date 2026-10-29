@@ -2516,6 +2516,64 @@ SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot);
 /* It returns a SignedBinaryAngle; declaring it s32 here is there to match */
 s32 GetAimSlopeAngle(Player* player, ShotLaunch* shot);
 
+/*
+ * The launch speed is the club's power, scaled in 256ths by the impact's
+ * speedChange, in 128ths, and by the shot's power, then by the lie's
+ * percent. A test shot takes 99% of it, written in half percents.
+ */
+#define LAUNCH_SCALE_ONE 0x100
+#define SPEED_CHANGE_UNITS 128
+#define ONE_PER_PERCENT (1.0f / 100)
+#define CLUB_TEST_SPEED_HALF_PERCENTS 198
+#define HALF_PERCENTS_PER_ONE 200
+/* A launch is at least this fast */
+#define MIN_LAUNCH_SPEED 10
+/*
+ * Off the putter, the impact point's offsetY raises the pitch by the club's
+ * offsetPitch degrees per this much, and scales the speed by the cosine of
+ * the pitch less offsetPitch, less LAUNCH_SCALE_COSINE_BASE, twice as much
+ * for a wood
+ */
+#define OFFSET_Y_PER_PITCH_STEP 32
+#define LAUNCH_SCALE_COSINE_BASE 0.86f
+#define LAUNCH_SCALE_PER_OFFSET 0.008300781f
+#define WOOD_LAUNCH_SCALE_FACTOR 2.0f
+/*
+ * Outside mini golf a putt takes the aim's slope into its pitch; other shots
+ * take a quarter of it, slowing with it. Off the putter, half the cross
+ * slope turns the yaw, and the root of a quarter of it adds side spin.
+ */
+#define AIM_SLOPE_PITCH_DIVISOR 4
+#define CROSS_SLOPE_YAW_DIVISOR 2
+#define CROSS_SLOPE_SPIN_SCALE 0.25f
+/*
+ * The spins grow with the speed. The side spin is the club's, doubled, plus
+ * the mishit's and the impact point's; the back spin rises with offsetY
+ * from less half the club's spin.
+ */
+#define SIDE_SPIN_PER_SPEED 0.00078125f
+#define SPIN_PER_SPEED 0.0078125f
+#define CLUB_SIDE_SPIN_SCALE 2
+#define MISHIT_SIDE_SPIN_DIVISOR 64
+#define OFFSET_SIDE_SPIN_PER_MISHIT 0.0078125f
+#define CLUB_SPIN_BASE_SCALE 0.5f
+#define CLUB_TEST_SPIN_OFFSET 25.0f
+#define CLUB_TEST_SPIN_PER_OFFSET 0.006f
+#define STROKE_SPIN_SCALE 0.8f
+#define STROKE_SPIN_OFFSET 10.0f
+#define STROKE_SPIN_PER_OFFSET 0.004f
+/* The rain slows the launch and takes some of its spins */
+#define RAIN_LAUNCH_SPEED_SCALE 0.95f
+#define RAIN_SPIN_SCALE 0.6f
+#define RAIN_SIDE_SPIN_SCALE 0.95f
+#define UNK40_SPIN_SCALE 0.4f
+/*
+ * The wind's speed becomes its velocity at this scale. Out of the rain, the
+ * wind loses this share of its part along the shot's heading.
+ */
+#define WIND_SPEED_TO_VELOCITY 0.0078125f
+#define WIND_ALONG_SHOT_CUT 0.3f
+
 /* The rows of the launch values that GAME_FLAG_SHOW_LAUNCH_VALUES prints */
 enum LaunchValueRow {
   LAUNCH_VALUE_ROW_YAW = 6,
@@ -2649,10 +2707,14 @@ s32 LaunchBallSimulation(
     speed = GetPuttPower(shot->power, shot->shotMode);
   } else {
     speed = GetClubPower(club, shot->shotMode);
-    speed =
-        speed * (shot->power * ((entry->speedChange * 2) + 0x100) / 256) / 256;
+    speed = speed *
+        (shot->power *
+            ((entry->speedChange * (LAUNCH_SCALE_ONE / SPEED_CHANGE_UNITS)) +
+                LAUNCH_SCALE_ONE) /
+            LAUNCH_SCALE_ONE) /
+        MAX_LAUNCH_POWER;
     if (speed <= 0) {
-      speed = 10;
+      speed = MIN_LAUNCH_SPEED;
     }
   }
 
@@ -2662,11 +2724,12 @@ s32 LaunchBallSimulation(
     blend = PickLieBlend();
     GetSurfacePercentRange(info, club, percentRange);
     speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) *
-        speed * 0.01f;
+        speed * ONE_PER_PERCENT;
   } else {
-    s32 percent = 198; /* The local is there to match */
+    /* The local is there to match */
+    s32 percent = CLUB_TEST_SPEED_HALF_PERCENTS;
 
-    speed = speed * percent / 200;
+    speed = speed * percent / HALF_PERCENTS_PER_ONE;
   }
 
   pitch = (club->pitch + entry->pitchChange) * DEGREES_TO_RADIANS;
@@ -2677,11 +2740,13 @@ s32 LaunchBallSimulation(
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
     sinf(pitch); /* The original has it */
     along = pitch - (club->offsetPitch * DEGREES_TO_RADIANS);
-    pitch += (f32)club->offsetPitch * shot->offsetY * 0.00054541545f;
+    pitch += (f32)club->offsetPitch * shot->offsetY *
+        (DEGREES_TO_RADIANS / OFFSET_Y_PER_PITCH_STEP);
     sinf(pitch); /* The original has it */
-    launchScale = (cosf(along) - 0.86f) * shot->offsetY * 0.008300781f;
+    launchScale = (cosf(along) - LAUNCH_SCALE_COSINE_BASE) * shot->offsetY *
+        LAUNCH_SCALE_PER_OFFSET;
     if (club->kind == CLUB_KIND_WOOD) {
-      launchScale *= 2.0f;
+      launchScale *= WOOD_LAUNCH_SCALE_FACTOR;
     }
 
     launchScale += 1.0f;
@@ -2692,8 +2757,8 @@ s32 LaunchBallSimulation(
       pitch += (u16)GetAimSlopeAngle(&g_Players[shot->playerIndex], shot) *
           BINARY_ANGLE_TO_RADIANS;
     } else {
-      slopePitch =
-          (u16)(GetAimSlopeAngle(&g_Players[shot->playerIndex], shot) / 4) *
+      slopePitch = (u16)(GetAimSlopeAngle(&g_Players[shot->playerIndex], shot) /
+                       AIM_SLOPE_PITCH_DIVISOR) *
           BINARY_ANGLE_TO_RADIANS;
       pitch += slopePitch;
       speed = speed * (1.0f - sinf(slopePitch));
@@ -2710,14 +2775,14 @@ s32 LaunchBallSimulation(
       crossSlopeSize = -crossSlope;
     }
 
-    curve = sqrtf(crossSlopeSize * 0.25f);
+    curve = sqrtf(crossSlopeSize * CROSS_SLOPE_SPIN_SCALE);
     sideSign = g_Players[shot->playerIndex].unk22 ? -1 : 1;
     if (crossSlope < 0) {
       curve = -curve;
     }
 
     slopeSpin = curve;
-    yaw = shot->heading + (crossSlope / 2) +
+    yaw = shot->heading + (crossSlope / CROSS_SLOPE_YAW_DIVISOR) +
         (sideSign *
             ((club->deflection[shot->shotMode] * shot->power /
                  MAX_LAUNCH_POWER) +
@@ -2727,12 +2792,14 @@ s32 LaunchBallSimulation(
 
   if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
     simulation->sideSpin =
-        (sideSign * (club->sideSpin * 2) * speed) * 0.00078125f;
+        (sideSign * (club->sideSpin * CLUB_SIDE_SPIN_SCALE) * speed) *
+        SIDE_SPIN_PER_SPEED;
     simulation->unk40 = 0.0f;
-    spinBase = club->spin * 0.5f;
-    simulation->spinSpeed =
-        (((spinBase + 25.0f) * 0.006f * shot->offsetY) - spinBase) *
-        (speed / launchScale) * 0.0078125f;
+    spinBase = club->spin * CLUB_SPIN_BASE_SCALE;
+    simulation->spinSpeed = (((spinBase + CLUB_TEST_SPIN_OFFSET) *
+                                 CLUB_TEST_SPIN_PER_OFFSET * shot->offsetY) -
+                                spinBase) *
+        (speed / launchScale) * SPIN_PER_SPEED;
     simulation->spinHeading = yawRadians;
     if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
       speed = speed * launchScale;
@@ -2744,18 +2811,21 @@ s32 LaunchBallSimulation(
   } else {
     GetSurfaceInfo(simulation->unkA2); /* The original has it */
     simulation->sideSpin =
-        (((sideSign * entry->sideSpinChange * club->mishitScale) / 64) +
-            (shot->offsetX * (club->mishitScale * 0.0078125f)) + slopeSpin +
-            (sideSign * 2 * club->sideSpin)) *
-        (speed * launchScale * launchScale) * 0.00078125f;
+        (((sideSign * entry->sideSpinChange * club->mishitScale) /
+             MISHIT_SIDE_SPIN_DIVISOR) +
+            (shot->offsetX *
+                (club->mishitScale * OFFSET_SIDE_SPIN_PER_MISHIT)) +
+            slopeSpin + (sideSign * CLUB_SIDE_SPIN_SCALE * club->sideSpin)) *
+        (speed * launchScale * launchScale) * SIDE_SPIN_PER_SPEED;
     if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
-      simulation->spinSpeed = ((((club->spin * 0.8f) + 10.0f) * 0.004f *
-                                   (entry->spinChange + shot->offsetY)) -
-                                  (club->spin * 0.5f)) *
-          speed * 0.0078125f;
+      simulation->spinSpeed =
+          ((((club->spin * STROKE_SPIN_SCALE) + STROKE_SPIN_OFFSET) *
+               STROKE_SPIN_PER_OFFSET * (entry->spinChange + shot->offsetY)) -
+              (club->spin * CLUB_SPIN_BASE_SCALE)) *
+          speed * SPIN_PER_SPEED;
       speed = speed * launchScale;
       if (g_HoleSetup.conditions.isRaining == TRUE) {
-        speed = speed * 0.95f;
+        speed = speed * RAIN_LAUNCH_SPEED_SCALE;
       }
     } else {
       simulation->spinSpeed = speed;
@@ -2766,17 +2836,18 @@ s32 LaunchBallSimulation(
     }
 
     if (g_HoleSetup.conditions.isRaining == TRUE) {
-      simulation->spinSpeed = simulation->spinSpeed * 0.6f;
-      simulation->sideSpin = simulation->sideSpin * 0.95f;
+      simulation->spinSpeed = simulation->spinSpeed * RAIN_SPIN_SCALE;
+      simulation->sideSpin = simulation->sideSpin * RAIN_SIDE_SPIN_SCALE;
     }
 
     simulation->unk40 =
-        IntLength2D(simulation->spinSpeed, simulation->sideSpin) * 0.4f;
+        IntLength2D(simulation->spinSpeed, simulation->sideSpin) *
+        UNK40_SPIN_SCALE;
     simulation->spinHeading = yawRadians;
   }
 
   if (speed <= 0) {
-    speed = 10;
+    speed = MIN_LAUNCH_SPEED;
   }
 
   simulation->velocity[AXIS_Y] = sinf(pitch) * speed;
@@ -2799,7 +2870,8 @@ s32 LaunchBallSimulation(
     simulation->unkA8[index] = 0;
   }
 
-  windScale = 0.0078125f; /* The local is there to match */
+  /* The local is there to match */
+  windScale = WIND_SPEED_TO_VELOCITY;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     windAngle = g_HoleSetup.conditions.windDirection * BINARY_ANGLE_TO_RADIANS;
     simulation->windVelocityX =
@@ -2809,7 +2881,7 @@ s32 LaunchBallSimulation(
     if (g_HoleSetup.conditions.isRaining != TRUE) {
       along = ((simulation->windVelocityX * cosf(yawRadians)) +
                   (simulation->windVelocityZ * sinf(yawRadians))) *
-          0.3f;
+          WIND_ALONG_SHOT_CUT;
       simulation->windVelocityX += -cosf(yawRadians) * along;
       simulation->windVelocityZ += -sinf(yawRadians) * along;
     }
