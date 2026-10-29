@@ -782,7 +782,7 @@ void DrawClubSlots(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     DrawTextureRect(&gfx, SCREEN_BORDER << 2, top << 2,
         (SCREEN_BORDER + MACHINE_WIDTH - 1) << 2, (top + stripHeight - 1) << 2,
-        G_TX_RENDERTILE, 0, 0, 4 * TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, 0, 0, COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -809,7 +809,7 @@ void DrawClubSlots(Gfx** displayListHead) {
           (BUTTON_TOP + BUTTON_STRIP_HEIGHT - 1 +
               (stripIndex * BUTTON_STRIP_HEIGHT))
               << 2,
-          G_TX_RENDERTILE, 0, 0, 4 * TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, 0, COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
   }

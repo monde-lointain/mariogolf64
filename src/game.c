@@ -613,7 +613,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
             1)
             << 2,
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
-        TexelCoordinate(SCREEN_BORDER), 4 << 10, TEXEL_STEP_ONE);
+        TexelCoordinate(SCREEN_BORDER), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -640,7 +640,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
             1)
             << 2,
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
-        TexelCoordinate(SCREEN_BORDER), 4 << 10, TEXEL_STEP_ONE);
+        TexelCoordinate(SCREEN_BORDER), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -2279,7 +2279,7 @@ void CopyPreviousFrame(Gfx** displayListHead) {
             1)
             << 2,
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
-        TexelCoordinate(SCREEN_BORDER), 4 << 10, TEXEL_STEP_ONE);
+        TexelCoordinate(SCREEN_BORDER), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 

@@ -17,6 +17,12 @@
 
 /* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
 #define TEXEL_STEP_ONE (1 << 10)
+/*
+ * Copy mode writes four 16-bit texels a cycle, so its texture rectangles step
+ * this many texels a pixel
+ */
+#define COPY_MODE_TEXELS_PER_CYCLE 4
+#define COPY_MODE_TEXEL_STEP (COPY_MODE_TEXELS_PER_CYCLE * TEXEL_STEP_ONE)
 /* A texel position, as texture coordinates take it in 10.5 fixed point */
 #define TexelCoordinate(texel) ((texel) << 5)
 /* The words gSPModifyVertex takes for a point's screen position, x and y in

@@ -156,7 +156,6 @@ enum SkyImageKind {
       ((strip) != BACKDROP_STRIP_COUNT - 1 \
               ? BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT \
               : 0))
-#define COPY_MODE_DSDX (4 << 10) /* Copy mode writes four texels a cycle */
 #define BACKDROP_START_FADE_LEVEL 255
 /* Each frame the fade level steps down until it is at most
  * BACKDROP_LAST_FADE_LEVEL */
@@ -2001,15 +2000,15 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         gSPTextureRectangle(gfx++, SCREEN_BORDER << 2,
             (SCREEN_BORDER + clip + y) << 2,
             (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2, bottom << 2,
-            G_TX_RENDERTILE, yawOffset, TexelCoordinate(clip), 4 << 10,
-            TEXEL_STEP_ONE);
+            G_TX_RENDERTILE, yawOffset, TexelCoordinate(clip),
+            COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
       } else {
         /* The last strip stretches to the bottom of the screen */
         gSPTextureRectangle(gfx++, SCREEN_BORDER << 2,
             (SCREEN_BORDER + clip + y) << 2,
             (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
             (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, yawOffset,
-            TexelCoordinate(clip), 4 << 10, TEXEL_STEP_ONE);
+            TexelCoordinate(clip), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
         break;
       }
     }
@@ -2558,7 +2557,8 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
           BACKDROP_RIGHT << 2,
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height - 1) << 2,
           G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-          TexelCoordinate(BACKDROP_BORDER), COPY_MODE_DSDX, TEXEL_STEP_ONE);
+          TexelCoordinate(BACKDROP_BORDER), COPY_MODE_TEXEL_STEP,
+          TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
     }
