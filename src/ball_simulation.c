@@ -226,9 +226,9 @@ void ResetBallSimulations(void) {
 #define MIN_HIT_SOUND_VOLUME 10
 /* The speeds of the ball's hits whose sounds play at SOUND_FULL_SCALE: most
  * hits, a wall's and a lip-out's */
-#define FULL_VOLUME_HIT_SPEED 2844.672f
-#define FULL_VOLUME_WALL_HIT_SPEED 1422.336f
-#define FULL_VOLUME_LIP_OUT_SPEED 711.168f
+#define FULL_VOLUME_HIT_SPEED KilometersPerHour(20)
+#define FULL_VOLUME_WALL_HIT_SPEED KilometersPerHour(10)
+#define FULL_VOLUME_LIP_OUT_SPEED KilometersPerHour(5)
 
 /*
  * Moves the simulated ball through one step, with a second substep when the
@@ -573,7 +573,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             f32 speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                 (velocity[AXIS_Z] * velocity[AXIS_Z]));
 
-            if (speed > 142.2336f) {
+            if (speed > KilometersPerHour(1)) {
               SoundVolume volume = speed * 8.858665f;
 
               if (volume >= 127) {
@@ -637,7 +637,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 (f32)cupDistance < 1228.8f) {
               s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
-              if (speed < 1075.2f && velocity[AXIS_Y] >= -711.168f) {
+              if (speed < 1075.2f &&
+                  velocity[AXIS_Y] >= -KilometersPerHour(5)) {
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
                   PrintDebugText("CUPIN!", 0x14, 0xA);
@@ -833,7 +834,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             ((simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]) *
                 scale) +
             g_HoleSetup.cupPosition[AXIS_Z];
-        if (speed >= 711.168f) {
+        if (speed >= KilometersPerHour(5)) {
           SoundVolume volume = speed * 0.88586664f;
 
           if (volume >= 127) {
@@ -848,7 +849,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       if (simulation->position[AXIS_Y] <
               g_HoleSetup.cupPosition[AXIS_Y] + 768.0f &&
-          velocity[AXIS_Y] < -711.168f) {
+          velocity[AXIS_Y] < -KilometersPerHour(5)) {
         s32 toCupX =
             g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
         s32 toCupZ =
@@ -886,7 +887,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
           simulation->unkA8[0] = 2;
         } else if (simulation->unkA8[0] == 0) {
-          if (fallSpeed >= 284.4672f) {
+          if (fallSpeed >= KilometersPerHour(2)) {
             SoundVolume volume = fallSpeed * 0.88586664f;
 
             if (volume > SOUND_FULL_SCALE) {
@@ -1157,8 +1158,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       if (simulation->surface == SURFACE_WATER_HAZARD &&
           (simulation->state == BALL_STATE_ROLLING ||
-              fabsf(impactSpeed) >= 14223.36f ||
-              fabsf(impactSpeed) <= 426.7008f ||
+              fabsf(impactSpeed) >= KilometersPerHour(100) ||
+              fabsf(impactSpeed) <= KilometersPerHour(3) ||
               sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                   (velocity[AXIS_Z] * velocity[AXIS_Z])) *
                       0.4f <=
@@ -1259,13 +1260,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       substepCount += (fraction < 0.4f) & (substepCount == 1);
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
-          speed >= 711.168f && !g_GameState.isMiniGolf) {
+          speed >= KilometersPerHour(5) && !g_GameState.isMiniGolf) {
         f32 side[3];
 
         side[AXIS_Y] = 0.0f;
         side[AXIS_X] = velocity[AXIS_X];
         side[AXIS_Z] = velocity[AXIS_Z];
-        if (fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >= 711.168f) {
+        if (fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >=
+            KilometersPerHour(5)) {
           f32 tilt = (GetStepNoise() - 0.5f) * 0.1f;
 
           if (tilt < 0.0f) {
@@ -1355,7 +1357,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         if (impactSpeed >= 9956.353f) {
           burial = 2;
-        } else if (impactSpeed >= 7111.68f) {
+        } else if (impactSpeed >= KilometersPerHour(50)) {
           burial = 1;
         }
 
@@ -1376,7 +1378,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       } else if (info->kind == SURFACE_KIND_OUT_OF_COURSE ||
           ((info->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
                info->kind == SURFACE_KIND_WATER_HAZARD) &&
-              impactSpeed < 1422.336f)) {
+              impactSpeed < KilometersPerHour(10))) {
         simulation->state = BALL_STATE_STOPPED;
       }
 
@@ -1439,19 +1441,22 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
         case SURFACE_KIND_BUNKER_POOR_LIE:
-          friction *= ((fabsf(impactSpeed) * 0.00007030687f) + 0.3f);
+          friction *=
+              ((fabsf(impactSpeed) * (1.0f / KilometersPerHour(100))) + 0.3f);
           spin = 0.7f;
           friction += friction * GetPositionNoise() * 0.1f;
           break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROUGH_POOR_LIE:
         case 5:
-          friction *= ((fabsf(impactSpeed) * 0.00007030687f) + 0.3f);
+          friction *=
+              ((fabsf(impactSpeed) * (1.0f / KilometersPerHour(100))) + 0.3f);
           spin = 0.4f;
           friction += friction * GetPositionNoise() * 0.1f;
           break;
         default:
-          friction *= ((fabsf(impactSpeed) * 0.00007030687f) + 0.3f);
+          friction *=
+              ((fabsf(impactSpeed) * (1.0f / KilometersPerHour(100))) + 0.3f);
           spin = 0.2f;
           friction += friction * GetPositionNoise() * 0.1f;
           break;
@@ -1468,7 +1473,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         restitution = 1.5f;
       }
 
-      if (simulation->state != BALL_STATE_ROLLING && impactSpeed < 7111.68f &&
+      if (simulation->state != BALL_STATE_ROLLING &&
+          impactSpeed < KilometersPerHour(50) &&
           simulation->unk98 - 1 == simulation->unk9C) {
         s32 unk34X;
         s32 unk34Z;
@@ -1607,7 +1613,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               (plane.normal[AXIS_Z] * velocity[AXIS_Z]);
 
           if ((g_GameState.isMiniGolf && pressing >= 655.0f) ||
-              pressing >= 7111.68f) {
+              pressing >= KilometersPerHour(50)) {
             f32 along[3];
             f32 damping;
 
@@ -1637,11 +1643,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
             !g_GameState.isMiniGolf &&
-            fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >= 711.168f) {
+            fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >=
+                KilometersPerHour(5)) {
           f32 tilt = (GetStepNoise() - 0.5f) * 0.5f;
 
-          plane.normal[AXIS_X] -= velocity[AXIS_Z] * 0.00035153437f * tilt;
-          plane.normal[AXIS_Z] += velocity[AXIS_X] * 0.00035153437f * tilt;
+          plane.normal[AXIS_X] -=
+              velocity[AXIS_Z] * (1.0f / KilometersPerHour(20)) * tilt;
+          plane.normal[AXIS_Z] +=
+              velocity[AXIS_X] * (1.0f / KilometersPerHour(20)) * tilt;
           guNormalize(&plane.normal[AXIS_X], &plane.normal[AXIS_Y],
               &plane.normal[AXIS_Z]);
         }
@@ -1808,7 +1817,8 @@ TAKE_OFF:
           simulation->unk9C + 90 < simulation->unk98 &&
           sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
               (velocity[AXIS_Y] * velocity[AXIS_Y]) +
-              (velocity[AXIS_Z] * velocity[AXIS_Z])) < (f64)284.4672f) {
+              (velocity[AXIS_Z] * velocity[AXIS_Z])) <
+              (f64)KilometersPerHour(2)) {
         simulation->state = BALL_STATE_STOPPED;
       }
     }
@@ -1863,7 +1873,7 @@ ROLLED:
           }
         }
 
-        if (horizontalSpeed > 1422.336f) {
+        if (horizontalSpeed > KilometersPerHour(10)) {
           f32 scale = (1.0f / horizontalSpeed) * curve;
 
           velocity[AXIS_X] += -relative[AXIS_Z] * scale;
@@ -1872,7 +1882,7 @@ ROLLED:
 
         simulation->unk38 = simulation->unk38 * 0.995f;
         lift = simulation->unk34 * 0.045776367f;
-        if (simulation->unk34 != 0 && airSpeed > 142.2336f) {
+        if (simulation->unk34 != 0 && airSpeed > KilometersPerHour(1)) {
           f32 turned[3];
           f32 scale;
 
@@ -2386,7 +2396,8 @@ s32 LaunchBallSimulation(
       PrintDebugText(text, 3, 6);
       sprintf(text, "ANGLEX = %3.3d/360", (s32)(pitch * 57.295776f));
       PrintDebugText(text, 3, 7);
-      sprintf(text, "Velocity = %fm/s     ", speed * 0.001953125f);
+      sprintf(text, "Velocity = %fm/s     ",
+          speed * (1.0f / SPEED_UNITS_PER_METER_PER_SECOND));
       PrintDebugText(text, 3, 8);
       sprintf(text, "SpinY = %d", simulation->unk38);
       PrintDebugText(text, 3, 9);

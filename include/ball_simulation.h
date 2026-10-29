@@ -5,6 +5,21 @@
 
 #include "club.h"
 #include "math_util.h"
+#include "variables.h"
+
+/* The ball moves its speed in course units each frame */
+typedef f32 BallSpeed;
+
+/* A meter per second in speed units, as the debug display shows speeds */
+#define SPEED_UNITS_PER_METER_PER_SECOND (UNITS_PER_METER / FRAMES_PER_SECOND)
+/*
+ * The tuning speeds are whole kilometers per hour, with a kilometer per hour
+ * rounded to this many meters per second
+ */
+#define METERS_PER_SECOND_PER_KILOMETER_PER_HOUR 0.2778
+#define KilometersPerHour(kmh) \
+  ((BallSpeed)((kmh) * METERS_PER_SECOND_PER_KILOMETER_PER_HOUR * \
+      SPEED_UNITS_PER_METER_PER_SECOND))
 
 /* A simulation still going after this many steps is given up on */
 #define MAX_STEP_COUNT 1801

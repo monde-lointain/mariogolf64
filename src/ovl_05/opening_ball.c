@@ -570,7 +570,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                   simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
 
               if (speed < 1075.2f &&
-                  (f32)simulation->velocity[AXIS_Y] >= -711.168f) {
+                  (f32)simulation->velocity[AXIS_Y] >= -KilometersPerHour(5)) {
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
                   PrintDebugText("CUPIN!", 0x14, 0xA);
@@ -578,7 +578,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
                 simulation->state = BALL_STATE_IN_CUP;
                 if (speed < 268.8f &&
-                    (f32)simulation->velocity[AXIS_Y] <= 711.168f) {
+                    (f32)simulation->velocity[AXIS_Y] <= KilometersPerHour(5)) {
                   simulation->unkA8[0] = 1;
                 }
               }
@@ -740,7 +740,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
       if (simulation->position[AXIS_Y] <
               g_HoleSetup.cupPosition[AXIS_Y] + 768.0f &&
-          simulation->velocity[AXIS_Y] < -711.168f) {
+          simulation->velocity[AXIS_Y] < -KilometersPerHour(5)) {
         s32 toCupX =
             g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
         s32 toCupZ =
@@ -933,7 +933,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         if (impactSpeed >= 9956.353f) {
           burial = 2;
-        } else if (impactSpeed >= 7111.68f) {
+        } else if (impactSpeed >= KilometersPerHour(50)) {
           burial = 1;
         }
 
@@ -953,7 +953,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         }
       } else if (simulation->surface == SURFACE_WATER_HAZARD) {
         if (simulation->state == BALL_STATE_ROLLING ||
-            impactSpeed <= 1422.336f ||
+            impactSpeed <= KilometersPerHour(10) ||
             GetLength2D(
                 simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]) *
                     0.5f <=
@@ -1061,7 +1061,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         if (impactSpeed >= 9956.353f) {
           burial = 2;
-        } else if (impactSpeed >= 7111.68f) {
+        } else if (impactSpeed >= KilometersPerHour(50)) {
           burial = 1;
         }
 
@@ -1080,7 +1080,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             break;
         }
       } else if (simulation->surface == SURFACE_WATER_HAZARD) {
-        if (impactSpeed >= 2844.672f) {
+        if (impactSpeed >= KilometersPerHour(20)) {
           simulation->state = BALL_STATE_STOPPED;
           simulation->position[AXIS_Y] = GetGroundHeight(
               simulation->position[AXIS_X], simulation->position[AXIS_Z]);
@@ -1094,12 +1094,14 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
               ((impactSpeed + (impactSpeed * GetPositionNoise() * 0.1f)) *
                   0.000112491f) +
               0.5f;
-          spin = ((impactSpeed * steepness) - 1422.336f) * 0.000035153436f;
+          spin = ((impactSpeed * steepness) - KilometersPerHour(10)) *
+              (1.0f / KilometersPerHour(200));
           break;
         default:
-          friction *= (impactSpeed * 0.00007030687f) + 0.3f;
+          friction *= (impactSpeed * (1.0f / KilometersPerHour(100))) + 0.3f;
           friction += friction * GetPositionNoise() * 0.1f;
-          spin = ((impactSpeed * steepness) - 1422.336f) * 0.000035153436f;
+          spin = ((impactSpeed * steepness) - KilometersPerHour(10)) *
+              (1.0f / KilometersPerHour(200));
           break;
       }
 
@@ -1114,7 +1116,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         restitution = 1.5f;
       }
 
-      if (simulation->state != BALL_STATE_ROLLING && impactSpeed < 7111.68f &&
+      if (simulation->state != BALL_STATE_ROLLING &&
+          impactSpeed < KilometersPerHour(50) &&
           simulation->unk98 - 1 == simulation->unk9C) {
         s32 unk34X;
         s32 unk34Z;
@@ -1249,7 +1252,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
               (plane.normal[AXIS_Y] * simulation->velocity[AXIS_Y]) +
               (plane.normal[AXIS_Z] * simulation->velocity[AXIS_Z]);
 
-          if (pressing >= 1422.336f) {
+          if (pressing >= KilometersPerHour(10)) {
             f32 along[3];
 
             along[AXIS_X] = simulation->velocity[AXIS_X] -
@@ -1388,7 +1391,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           simulation->unk9C + 90 < simulation->unk98 &&
           GetLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y],
-              simulation->velocity[AXIS_Z]) < (f64)284.4672f) {
+              simulation->velocity[AXIS_Z]) < (f64)KilometersPerHour(2)) {
         simulation->state = BALL_STATE_STOPPED;
       }
     }
@@ -1443,7 +1446,7 @@ ROLLED:
         }
       }
 
-      if (horizontalSpeed > 1422.336f) {
+      if (horizontalSpeed > KilometersPerHour(10)) {
         f32 scale = (1.0f / horizontalSpeed) * curve;
 
         simulation->velocity[AXIS_X] =
@@ -1465,7 +1468,7 @@ ROLLED:
       }
 
       lift = (simulation->unk34 * 10) * (weight * 0.0061035156f);
-      if (simulation->unk34 != 0 && airSpeed > 142.2336f) {
+      if (simulation->unk34 != 0 && airSpeed > KilometersPerHour(1)) {
         guMtxXFMF(simulation->unk44, relative[AXIS_X], relative[AXIS_Y],
             relative[AXIS_Z], &turned[AXIS_X], &turned[AXIS_Y],
             &turned[AXIS_Z]);
@@ -1736,9 +1739,9 @@ s32 func_8020A488_ovl_05(
   simulation->velocity[AXIS_X] = cosf(yawRadians) * speed;
   simulation->velocity[AXIS_Z] = sinf(yawRadians) * speed;
   osSyncPrintf("SVX%f, SVY%f, SVZ%f\n",
-      simulation->velocity[AXIS_X] * 0.00007030687f,
-      simulation->velocity[AXIS_Y] * 0.00007030687f,
-      simulation->velocity[AXIS_Z] * 0.00007030687f);
+      simulation->velocity[AXIS_X] * (1.0f / KilometersPerHour(100)),
+      simulation->velocity[AXIS_Y] * (1.0f / KilometersPerHour(100)),
+      simulation->velocity[AXIS_Z] * (1.0f / KilometersPerHour(100)));
   if (club->surfaceMask & CLUB_SURFACE_GREEN) {
     simulation->state = BALL_STATE_ROLLING;
     simulation->velocity[AXIS_Y] += PUTT_VELOCITY_Y_OFFSET;
@@ -1770,7 +1773,8 @@ s32 func_8020A488_ovl_05(
       PrintDebugText(text, 3, 6);
       sprintf(text, "ANGLEX = %3.3d/360", (s32)(pitch * 57.295776f));
       PrintDebugText(text, 3, 7);
-      sprintf(text, "Velocity = %fm/s     ", speed * 0.001953125f);
+      sprintf(text, "Velocity = %fm/s     ",
+          speed * (1.0f / SPEED_UNITS_PER_METER_PER_SECOND));
       PrintDebugText(text, 3, 8);
       sprintf(text, "SpinY = %d", simulation->unk38);
       PrintDebugText(text, 3, 9);
