@@ -2222,7 +2222,7 @@ void DrawBestShots(Gfx** displayListHead) {
         TEXT_SLOT_LARGE_FONT, 1, 0, 255, 255, 255, 255);
   }
 
-  if (f_HasBestShots == 0) {
+  if (!f_HasBestShots) {
     SetTextSlot(NO_RECORDS_X, NO_RECORDS_Y, MESSAGE_NO_RECORDS,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_CENTERED, 255, 255, 255, 255);
   }
@@ -2380,7 +2380,7 @@ void ReadBestShots(void) {
       }
     }
 
-    if (f_HasBestShots != 0) {
+    if (f_HasBestShots) {
       break;
     }
   }
