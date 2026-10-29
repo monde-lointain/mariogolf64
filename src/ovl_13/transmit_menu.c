@@ -760,16 +760,17 @@ void UpdateBringCharacters(void) {
       } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
           transfer->listedCharacterIndex > 0) {
         transfer->listedCharacterIndex--;
-        if (transfer->listedCharacterIndex < transfer->unk7B8) {
-          transfer->unk7B8--;
+        if (transfer->listedCharacterIndex < transfer->firstShownListedIndex) {
+          transfer->firstShownListedIndex--;
         }
 
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
           transfer->listedCharacterIndex < transfer->listedCharacterCount - 1) {
         transfer->listedCharacterIndex++;
-        if (transfer->unk7B8 + 5 < transfer->listedCharacterIndex) {
-          transfer->unk7B8++;
+        if (transfer->firstShownListedIndex + 5 <
+            transfer->listedCharacterIndex) {
+          transfer->firstShownListedIndex++;
         }
 
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -1523,7 +1524,7 @@ void BringOverCharacter(s32 listedIndex, s32 slot) {
 void ResetBringCharacters(void) {
   g_GameBoyTransfer.listedCharacterIndex = 0;
   g_GameBoyTransfer.characterIndex = 0;
-  g_GameBoyTransfer.unk7B8 = 0;
+  g_GameBoyTransfer.firstShownListedIndex = 0;
   g_GameBoyTransfer.isCanceled = FALSE;
 }
 
@@ -1951,7 +1952,8 @@ void DrawBringCharactersScreen(
       CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0,
       0, 0, 0);
   shownCount = 0;
-  for (index = transfer->unk7B8; index != CARTRIDGE_CHARACTER_COUNT; index++) {
+  for (index = transfer->firstShownListedIndex;
+      index != CARTRIDGE_CHARACTER_COUNT; index++) {
     if (transfer->cartridgeCharacters[transfer->listedCharacters[index]]
                 .status == GAME_BOY_CHARACTER_STATUS_PRESENT &&
         IsListed(transfer->listingStates[transfer->listedCharacters[index]])) {
@@ -1983,7 +1985,8 @@ void DrawBringCharactersScreen(
       QuarterPixels(CURVE_BAR_TOP + CURVE_BAR_HEIGHT), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   shownCount = 0;
-  for (index = transfer->unk7B8; index != CARTRIDGE_CHARACTER_COUNT; index++) {
+  for (index = transfer->firstShownListedIndex;
+      index != CARTRIDGE_CHARACTER_COUNT; index++) {
     listed = transfer->listedCharacters[index];
     if (transfer->cartridgeCharacters[listed].status ==
             GAME_BOY_CHARACTER_STATUS_PRESENT &&
@@ -2016,7 +2019,8 @@ void DrawBringCharactersScreen(
     if (transfer->screenStep == BRING_CHOOSING) {
       DrawCursorBox(&displayList,
           LISTED_FACES_LEFT - BRING_CURSOR_MARGIN +
-              ((transfer->listedCharacterIndex - transfer->unk7B8) *
+              ((transfer->listedCharacterIndex -
+                   transfer->firstShownListedIndex) *
                   LISTED_FACE_SPACING),
           LISTED_FACES_TOP - BRING_CURSOR_MARGIN);
     } else if (transfer->screenStep == BRING_CHOOSING_SLOT) {
@@ -2041,7 +2045,7 @@ void DrawBringCharactersScreen(
         G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0,
         0, 0);
     gDPPipeSync(displayList++);
-    if (transfer->unk7B8 > 0) {
+    if (transfer->firstShownListedIndex > 0) {
       DrawTextureRect(&displayList, QuarterPixels(LEFT_ARROW_LEFT),
           QuarterPixels(ARROWS_TOP),
           QuarterPixels(LEFT_ARROW_LEFT + GREEN_ARROW_SIZE),
@@ -2050,7 +2054,7 @@ void DrawBringCharactersScreen(
           TEXEL_STEP_ONE);
     }
 
-    if (transfer->unk7B8 <
+    if (transfer->firstShownListedIndex <
         transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
       DrawTextureRect(&displayList, QuarterPixels(RIGHT_ARROW_LEFT),
           QuarterPixels(ARROWS_TOP),

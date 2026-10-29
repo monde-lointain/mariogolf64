@@ -138,7 +138,7 @@ typedef struct GameBoyTransfer {
   /* 0x7AC */ s32 bringingFrame;
   /* 0x7B0 */ s32 listedCharacterIndex;
   /* 0x7B4 */ s32 characterIndex; /* Into g_GameBoyCharacters */
-  /* 0x7B8 */ s32 unk7B8;
+  /* 0x7B8 */ s32 firstShownListedIndex; /* The list scrolls to show it first */
   /* 0x7BC */ s32 unk7BC;
   /* 0x7C0 */ s32 unk7C0;
   /* 0x7C4 */ s32 unk7C4;
