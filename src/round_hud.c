@@ -1569,7 +1569,7 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
     red = green;
   }
 
-  return (red << 24) | (green << 16) | (blue << 8) | (alpha & 0xFF);
+  return RgbaColor(red, green, blue, alpha & 0xFF);
 }
 
 #define GREEN_GRID_SHORT_ROW_COUNT 8 /* For the longest putt */
@@ -1934,9 +1934,9 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
               ((screenPoints[point].x + (s32)dy) << 16) +
                   (screenPoints[point].y - (s32)dx));
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
-              (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
+              RgbaColor(red, green, blue, f_GreenGridAlpha));
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
-              (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
+              RgbaColor(red, green, blue, f_GreenGridAlpha));
           if (screenPoints[point - 1].isVisible == TRUE) {
             gDPPipeSync(gfx++);
             if (screenPoints[point].depth < screenPoints[point - 1].depth) {
@@ -1955,9 +1955,9 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
               ((screenPoints[point].x + (s32)dy) << 16) +
                   (screenPoints[point].y - (s32)dx));
           gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
-              (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
+              RgbaColor(red, green, blue, f_GreenGridAlpha));
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
-              (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
+              RgbaColor(red, green, blue, f_GreenGridAlpha));
           if (column != 0 && screenPoints[point - 1].isVisible == TRUE) {
             gDPPipeSync(gfx++);
             if (screenPoints[point].depth < screenPoints[point - 1].depth) {
@@ -2006,14 +2006,14 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         dy *= scale;
         SetGreenGridTint(slopes[point]);
         gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
-            (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
+            RgbaColor(red, green, blue, f_GreenGridAlpha));
         gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
-            (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
+            RgbaColor(red, green, blue, f_GreenGridAlpha));
         SetGreenGridTint(slopes[point + columnCount]);
         gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
-            (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
+            RgbaColor(red, green, blue, f_GreenGridAlpha));
         gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
-            (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
+            RgbaColor(red, green, blue, f_GreenGridAlpha));
         gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
             (screenPoints[point].x << 16) + screenPoints[point].y);
         gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,

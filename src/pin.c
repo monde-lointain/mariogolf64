@@ -604,7 +604,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
         shade = MAX_CUP_SHADE;
       }
 
-      color = (shade << 24) | (shade << 16) | (shade << 8) | CUP_SHADE_ALPHA;
+      color = RgbaColor(shade, shade, shade, CUP_SHADE_ALPHA);
       gSPModifyVertex(g_DisplayListHead++, 2, G_MWO_POINT_RGBA, color);
       gSPModifyVertex(g_DisplayListHead++, 3, G_MWO_POINT_RGBA, color);
       stickScreenScale = cup.scaleX;
