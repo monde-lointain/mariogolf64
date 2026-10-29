@@ -849,7 +849,7 @@ void func_804002C0_hole_editor(void) {
       points[0] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
       points[1] = points[0];
       points[0].ob[AXIS_Z] -= POINT_MOVE_STEP;
-      points[0].tc[1] -= POINT_TEXTURE_STEP;
+      points[0].tc[TEXTURE_AXIS_T] -= POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[0]);
       if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
@@ -862,7 +862,7 @@ void func_804002C0_hole_editor(void) {
       points[1] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
       points[2] = points[1];
       points[1].ob[AXIS_Z] += POINT_MOVE_STEP;
-      points[1].tc[1] += POINT_TEXTURE_STEP;
+      points[1].tc[TEXTURE_AXIS_T] += POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[1]);
       if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
@@ -875,7 +875,7 @@ void func_804002C0_hole_editor(void) {
       points[2] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
       points[3] = points[2];
       points[2].ob[AXIS_X] -= POINT_MOVE_STEP;
-      points[2].tc[0] -= POINT_TEXTURE_STEP;
+      points[2].tc[TEXTURE_AXIS_S] -= POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[2]);
       if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
@@ -888,7 +888,7 @@ void func_804002C0_hole_editor(void) {
       points[3] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
       points[4] = points[3];
       points[3].ob[AXIS_X] += POINT_MOVE_STEP;
-      points[3].tc[0] += POINT_TEXTURE_STEP;
+      points[3].tc[TEXTURE_AXIS_S] += POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[3]);
       if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
@@ -900,7 +900,7 @@ void func_804002C0_hole_editor(void) {
         (f_PointCursorRow & TILE_POINT_MASK)) {
       points[0] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
       points[1] = points[0];
-      points[0].tc[1] -= POINT_TEXTURE_STEP;
+      points[0].tc[TEXTURE_AXIS_T] -= POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[0]);
       if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
@@ -912,7 +912,7 @@ void func_804002C0_hole_editor(void) {
         (f_PointCursorRow & TILE_POINT_MASK)) {
       points[1] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
       points[2] = points[1];
-      points[1].tc[1] += POINT_TEXTURE_STEP;
+      points[1].tc[TEXTURE_AXIS_T] += POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[1]);
       if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
@@ -924,7 +924,7 @@ void func_804002C0_hole_editor(void) {
         (f_PointCursorColumn & TILE_POINT_MASK)) {
       points[2] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
       points[3] = points[2];
-      points[2].tc[0] -= POINT_TEXTURE_STEP;
+      points[2].tc[TEXTURE_AXIS_S] -= POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[2]);
       if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
@@ -936,7 +936,7 @@ void func_804002C0_hole_editor(void) {
         (f_PointCursorColumn & TILE_POINT_MASK)) {
       points[3] = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow)->v;
       points[4] = points[3];
-      points[3].tc[0] += POINT_TEXTURE_STEP;
+      points[3].tc[TEXTURE_AXIS_S] += POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[3]);
       if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
@@ -1832,8 +1832,12 @@ void func_80402E1C_hole_editor(void) {
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.ob[AXIS_Y] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.ob[AXIS_Z] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.flag = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.tc[0] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.tc[1] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .vertices[0]
+        .v.tc[TEXTURE_AXIS_S] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .vertices[0]
+        .v.tc[TEXTURE_AXIS_T] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.cn[0] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.cn[1] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.cn[2] = 0;
@@ -1842,8 +1846,12 @@ void func_80402E1C_hole_editor(void) {
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[1].v.ob[AXIS_Y] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[1].v.ob[AXIS_Z] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[1].v.flag = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[1].v.tc[0] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[1].v.tc[1] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .vertices[1]
+        .v.tc[TEXTURE_AXIS_S] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .vertices[1]
+        .v.tc[TEXTURE_AXIS_T] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[1].v.cn[0] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[1].v.cn[1] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[1].v.cn[2] = 0;
@@ -1852,8 +1860,12 @@ void func_80402E1C_hole_editor(void) {
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.ob[AXIS_Y] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.ob[AXIS_Z] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.flag = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.tc[0] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.tc[1] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .vertices[2]
+        .v.tc[TEXTURE_AXIS_S] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .vertices[2]
+        .v.tc[TEXTURE_AXIS_T] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.cn[0] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.cn[1] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.cn[2] = 0;
@@ -2851,8 +2863,9 @@ void func_80405B80_hole_editor(Vtx* vertices, s32 column, s32 row, s32 weight) {
     vertex->v.ob[AXIS_X] = ((ends[0]->v.ob[AXIS_X] * firstWeight) +
                                (ends[1]->v.ob[AXIS_X] * weight)) /
         EDGE_WEIGHT_MAX;
-    vertex->v.tc[0] =
-        ((ends[0]->v.tc[0] * firstWeight) + (ends[1]->v.tc[0] * weight)) /
+    vertex->v.tc[TEXTURE_AXIS_S] =
+        ((ends[0]->v.tc[TEXTURE_AXIS_S] * firstWeight) +
+            (ends[1]->v.tc[TEXTURE_AXIS_S] * weight)) /
         EDGE_WEIGHT_MAX;
   }
 }
@@ -2873,8 +2886,9 @@ void func_80405C94_hole_editor(Vtx* vertices, s32 column, s32 row, s32 weight) {
     vertex->v.ob[AXIS_Z] = ((ends[0]->v.ob[AXIS_Z] * firstWeight) +
                                (ends[1]->v.ob[AXIS_Z] * weight)) /
         EDGE_WEIGHT_MAX;
-    vertex->v.tc[1] =
-        ((ends[0]->v.tc[1] * firstWeight) + (ends[1]->v.tc[1] * weight)) /
+    vertex->v.tc[TEXTURE_AXIS_T] =
+        ((ends[0]->v.tc[TEXTURE_AXIS_T] * firstWeight) +
+            (ends[1]->v.tc[TEXTURE_AXIS_T] * weight)) /
         EDGE_WEIGHT_MAX;
   }
 }
@@ -3872,8 +3886,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
     midpoint->ob[AXIS_Y] = (first->ob[AXIS_Y] + second->ob[AXIS_Y]) / 2;
     midpoint->ob[AXIS_Z] = (first->ob[AXIS_Z] + second->ob[AXIS_Z]) / 2;
     midpoint->flag = 0;
-    midpoint->tc[0] = (first->tc[0] + second->tc[0]) / 2;
-    midpoint->tc[1] = (first->tc[1] + second->tc[1]) / 2;
+    midpoint->tc[TEXTURE_AXIS_S] =
+        (first->tc[TEXTURE_AXIS_S] + second->tc[TEXTURE_AXIS_S]) / 2;
+    midpoint->tc[TEXTURE_AXIS_T] =
+        (first->tc[TEXTURE_AXIS_T] + second->tc[TEXTURE_AXIS_T]) / 2;
     midpoint->cn[0] = (first->cn[0] + second->cn[0]) / 2;
     midpoint->cn[1] = (first->cn[1] + second->cn[1]) / 2;
     midpoint->cn[2] = (first->cn[2] + second->cn[2]) / 2;
@@ -4379,13 +4395,16 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
                                       GAME_FLAG_TEST_GROUND_TEXTURE)) {
                                 gDPSetTileSize(gfx++, 1, MIRRORED_TEST_FIRST_S,
                                     0, MIRRORED_TEST_LAST_S, TEST_TILE_SIZE);
-                                st = ((MIRRORED_TEST_S - (point->v.tc[0] / 2))
+                                st = ((MIRRORED_TEST_S -
+                                          (point->v.tc[TEXTURE_AXIS_S] / 2))
                                          << 16) |
-                                    ((point->v.tc[1] / 2) & 0xFFFF);
+                                    ((point->v.tc[TEXTURE_AXIS_T] / 2) &
+                                        0xFFFF);
                               } else {
-                                st =
-                                    ((mirroredS - (point->v.tc[0] / 2)) << 16) |
-                                    (point->v.tc[1] / 2);
+                                st = ((mirroredS -
+                                          (point->v.tc[TEXTURE_AXIS_S] / 2))
+                                         << 16) |
+                                    (point->v.tc[TEXTURE_AXIS_T] / 2);
                               }
 
                               gSPModifyVertex(gfx++,
@@ -4467,8 +4486,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
                                       cellColumn + pointColumn,
                                   (row * FINE_TILE_CELL_SPAN) + cellRow +
                                       pointRow);
-                              st = ((point->v.tc[0] / 2) << 16) |
-                                  (point->v.tc[1] / 2);
+                              st = ((point->v.tc[TEXTURE_AXIS_S] / 2) << 16) |
+                                  (point->v.tc[TEXTURE_AXIS_T] / 2);
                               if (IsGameFlagSet(
                                       GAME_FLAG_TEST_GROUND_TEXTURE)) {
                                 gDPSetTileSize(gfx++, 1, 0, 0, TEST_TILE_SIZE,

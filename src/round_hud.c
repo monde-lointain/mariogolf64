@@ -776,11 +776,11 @@ void PrepareHoleDisplay(void) {
 
   g_MatrixBufferIndex = 0;
   for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-    f_Arrows[0].body[i].v.tc[1] =
+    f_Arrows[0].body[i].v.tc[TEXTURE_AXIS_T] =
         ((f_Arrows[0].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
             ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
-    f_Arrows[1].body[i].v.tc[1] =
+    f_Arrows[1].body[i].v.tc[TEXTURE_AXIS_T] =
         ((f_Arrows[1].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
             ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
@@ -806,8 +806,8 @@ void InitRoundHud(void) {
         vertex->v.ob[AXIS_X] = column * HOLE_FLAG_CELL_SIZE;
         vertex->v.ob[AXIS_Y] = -row * HOLE_FLAG_CELL_SIZE;
         vertex->v.ob[AXIS_Z] = 0;
-        vertex->v.tc[0] = column * HOLE_FLAG_TEXEL_COLUMN_STEP;
-        vertex->v.tc[1] = row * HOLE_FLAG_TEXEL_ROW_STEP;
+        vertex->v.tc[TEXTURE_AXIS_S] = column * HOLE_FLAG_TEXEL_COLUMN_STEP;
+        vertex->v.tc[TEXTURE_AXIS_T] = row * HOLE_FLAG_TEXEL_ROW_STEP;
         vertex->v.cn[0] = HOLE_FLAG_START_SHADE;
         vertex->v.cn[1] = HOLE_FLAG_START_SHADE;
         vertex->v.cn[2] = HOLE_FLAG_START_SHADE;
@@ -821,7 +821,7 @@ void InitRoundHud(void) {
     vertex = f_HoleFlagVertices[1][grid];
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
-        vertex->v.tc[0] =
+        vertex->v.tc[TEXTURE_AXIS_S] =
             HOLE_FLAG_BACK_TEXEL_START - (column * HOLE_FLAG_TEXEL_COLUMN_STEP);
         vertex++;
       }
@@ -1361,13 +1361,14 @@ void ScrollWindArrow(void) {
   s32 i;
 
   for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-    f_Arrows[g_MatrixBufferIndex].body[i].v.tc[1] += step;
+    f_Arrows[g_MatrixBufferIndex].body[i].v.tc[TEXTURE_AXIS_T] += step;
   }
 
-  if (f_Arrows[g_MatrixBufferIndex].body[0].v.tc[1] >
+  if (f_Arrows[g_MatrixBufferIndex].body[0].v.tc[TEXTURE_AXIS_T] >
       ARROW_TEXTURE_COORDINATE_LIMIT) {
     for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-      f_Arrows[g_MatrixBufferIndex].body[i].v.tc[1] -= ARROW_TEXTURE_PERIOD;
+      f_Arrows[g_MatrixBufferIndex].body[i].v.tc[TEXTURE_AXIS_T] -=
+          ARROW_TEXTURE_PERIOD;
     }
   }
 }

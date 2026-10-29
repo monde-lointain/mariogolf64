@@ -1855,20 +1855,20 @@ void func_800628C4(void) {
       point = GetGroundPoint(column, row)->v;
       offset = GetMirroredOffset(point.ob[AXIS_X]);
       if (offset != 512) {
-        point.tc[0] = TexelCoordinate(offset);
+        point.tc[TEXTURE_AXIS_S] = TexelCoordinate(offset);
       } else {
-        point.tc[0] = 0x4000;
+        point.tc[TEXTURE_AXIS_S] = 0x4000;
       }
 
-      point.tc[0] += 0x100;
+      point.tc[TEXTURE_AXIS_S] += 0x100;
       offset = GetMirroredOffset(point.ob[AXIS_Z]);
       if (offset != 512) {
-        point.tc[1] = TexelCoordinate(offset);
+        point.tc[TEXTURE_AXIS_T] = TexelCoordinate(offset);
       } else {
-        point.tc[1] = 0x4000;
+        point.tc[TEXTURE_AXIS_T] = 0x4000;
       }
 
-      point.tc[1] += 0x100;
+      point.tc[TEXTURE_AXIS_T] += 0x100;
       SetGroundPoint(column, row, &point);
     }
   }
@@ -1894,8 +1894,10 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
     (midpoint)->v.ob[AXIS_Z] = \
         ((from)->v.ob[AXIS_Z] + (to)->v.ob[AXIS_Z]) / 2; \
     (midpoint)->v.flag = 0; \
-    (midpoint)->v.tc[0] = ((from)->v.tc[0] + (to)->v.tc[0]) / 2; \
-    (midpoint)->v.tc[1] = ((from)->v.tc[1] + (to)->v.tc[1]) / 2; \
+    (midpoint)->v.tc[TEXTURE_AXIS_S] = \
+        ((from)->v.tc[TEXTURE_AXIS_S] + (to)->v.tc[TEXTURE_AXIS_S]) / 2; \
+    (midpoint)->v.tc[TEXTURE_AXIS_T] = \
+        ((from)->v.tc[TEXTURE_AXIS_T] + (to)->v.tc[TEXTURE_AXIS_T]) / 2; \
   }
 
 /* Loads a row's odd vertices as averages of its even ones, so that they line up

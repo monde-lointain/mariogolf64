@@ -17,6 +17,9 @@
 
 /* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
 #define TEXEL_STEP_ONE (1 << 10)
+/* Indices of a vertex's texture coordinates */
+#define TEXTURE_AXIS_S 0
+#define TEXTURE_AXIS_T 1
 /*
  * Copy mode writes four 16-bit texels a cycle, so its texture rectangles step
  * this many texels a pixel

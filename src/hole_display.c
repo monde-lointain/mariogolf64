@@ -1573,70 +1573,70 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   cosine = cosf(g_SkyState.viewedWindAngles[viewIndex]);
   distance = clippedHeight + SKY_TEXTURE_FAR_DISTANCE;
   coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[1].v.tc[0] =
+  vertices[1].v.tc[TEXTURE_AXIS_S] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[1].v.tc[1] =
+  vertices[1].v.tc[TEXTURE_AXIS_T] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[2].v.tc[0] =
+  vertices[2].v.tc[TEXTURE_AXIS_S] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
   pitches = g_SkyState.pitches;
-  vertices[2].v.tc[1] =
+  vertices[2].v.tc[TEXTURE_AXIS_T] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   horizonHalfWidth = SCREEN_WIDTH;
   distance = SKY_TEXTURE_NEAR_DISTANCE -
       (pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) + clippedHeight;
   coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[0].v.tc[0] =
+  vertices[0].v.tc[TEXTURE_AXIS_S] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[0].v.tc[1] =
+  vertices[0].v.tc[TEXTURE_AXIS_T] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[3].v.tc[0] =
+  vertices[3].v.tc[TEXTURE_AXIS_S] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[3].v.tc[1] =
+  vertices[3].v.tc[TEXTURE_AXIS_T] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  vertices[4].v.tc[0] =
+  vertices[4].v.tc[TEXTURE_AXIS_S] =
       ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  vertices[4].v.tc[1] =
+  vertices[4].v.tc[TEXTURE_AXIS_T] =
       ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   distance = (SKY_TEXTURE_HORIZON_DISTANCE -
                  (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
       horizonHalfWidth / SCREEN_WIDTH;
   coordinate = (sine * distance) - (cosine * horizonHalfWidth);
-  vertices[6].v.tc[0] =
+  vertices[6].v.tc[TEXTURE_AXIS_S] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   coordinate = (cosine * distance) + (sine * horizonHalfWidth);
-  vertices[6].v.tc[1] =
+  vertices[6].v.tc[TEXTURE_AXIS_T] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   coordinate = (sine * distance) + (cosine * horizonHalfWidth);
-  vertices[7].v.tc[0] =
+  vertices[7].v.tc[TEXTURE_AXIS_S] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   coordinate = (cosine * distance) - (sine * horizonHalfWidth);
-  vertices[7].v.tc[1] =
+  vertices[7].v.tc[TEXTURE_AXIS_T] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   distance = (SKY_TEXTURE_NEAR_DISTANCE -
                  (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
       horizonHalfWidth / SCREEN_WIDTH;
   coordinate = (sine * distance) - (cosine * horizonHalfWidth);
-  vertices[5].v.tc[0] =
+  vertices[5].v.tc[TEXTURE_AXIS_S] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   coordinate = (cosine * distance) + (sine * horizonHalfWidth);
-  vertices[5].v.tc[1] =
+  vertices[5].v.tc[TEXTURE_AXIS_T] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   coordinate = (sine * distance) + (cosine * horizonHalfWidth);
-  vertices[8].v.tc[0] =
+  vertices[8].v.tc[TEXTURE_AXIS_S] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   coordinate = (cosine * distance) - (sine * horizonHalfWidth);
-  vertices[8].v.tc[1] =
+  vertices[8].v.tc[TEXTURE_AXIS_T] =
       ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  vertices[9].v.tc[0] =
+  vertices[9].v.tc[TEXTURE_AXIS_S] =
       ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  vertices[9].v.tc[1] =
+  vertices[9].v.tc[TEXTURE_AXIS_T] =
       ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
 }
 

@@ -72,8 +72,8 @@
   for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) { \
     vertex = \
         (Vtx*)FrameDataAddress(slot, (triangle)->vertices + (i * VTX_SIZE)); \
-    vertex->v.tc[0] = (sCoordinates)[i]; \
-    vertex->v.tc[1] = (tCoordinates)[i]; \
+    vertex->v.tc[TEXTURE_AXIS_S] = (sCoordinates)[i]; \
+    vertex->v.tc[TEXTURE_AXIS_T] = (tCoordinates)[i]; \
   }
 
 /* The size of a Vtx */

@@ -12,6 +12,7 @@
 #include "math_util.h"
 #include "play.h"
 #include "save.h"
+#include "screen.h"
 #include "shot_camera.h"
 #include "variables.h"
 #include "work_area.h"
@@ -168,10 +169,10 @@ void DrawHoleTriangles(
       case HOLE_TRIANGLE_KIND_FLAT:
         for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
             vertexIndex++) {
-          f_HoleTriangles[index].vertices[vertexIndex].v.tc[0] =
+          f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
               f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] *
               TEXTURE_COORDINATE_SCALE;
-          f_HoleTriangles[index].vertices[vertexIndex].v.tc[1] =
+          f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
               (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z] +
                   f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Y]) *
               TEXTURE_COORDINATE_SCALE;
@@ -184,11 +185,11 @@ void DrawHoleTriangles(
       case HOLE_TRIANGLE_KIND_UPRIGHT:
         for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
             vertexIndex++) {
-          f_HoleTriangles[index].vertices[vertexIndex].v.tc[0] =
+          f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
               (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] +
                   f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z]) *
               TEXTURE_COORDINATE_SCALE;
-          f_HoleTriangles[index].vertices[vertexIndex].v.tc[1] =
+          f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
               f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Y] *
               TEXTURE_COORDINATE_SCALE;
         }

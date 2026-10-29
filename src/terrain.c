@@ -947,8 +947,10 @@ void SetVertexMidpoint(Vtx* first, Vtx* second, Vtx* midpoint) {
   midpoint->v.ob[AXIS_Y] = (first->v.ob[AXIS_Y] + second->v.ob[AXIS_Y]) / 2;
   midpoint->v.ob[AXIS_Z] = (first->v.ob[AXIS_Z] + second->v.ob[AXIS_Z]) / 2;
   midpoint->v.flag = 0;
-  midpoint->v.tc[0] = (first->v.tc[0] + second->v.tc[0]) / 2;
-  midpoint->v.tc[1] = (first->v.tc[1] + second->v.tc[1]) / 2;
+  midpoint->v.tc[TEXTURE_AXIS_S] =
+      (first->v.tc[TEXTURE_AXIS_S] + second->v.tc[TEXTURE_AXIS_S]) / 2;
+  midpoint->v.tc[TEXTURE_AXIS_T] =
+      (first->v.tc[TEXTURE_AXIS_T] + second->v.tc[TEXTURE_AXIS_T]) / 2;
   midpoint->v.cn[0] = (first->v.cn[0] + second->v.cn[0]) / 2;
   midpoint->v.cn[1] = (first->v.cn[1] + second->v.cn[1]) / 2;
   midpoint->v.cn[2] = (first->v.cn[2] + second->v.cn[2]) / 2;
@@ -972,11 +974,11 @@ void BlendVertices(Vtx* first, Vtx* second, Vtx* result, s32 weight) {
       ((first->v.ob[AXIS_Z] * firstWeight) + (second->v.ob[AXIS_Z] * weight)) /
       EDGE_WEIGHT_MAX;
   result->v.flag = 0;
-  result->v.tc[0] =
-      ((first->v.tc[0] * firstWeight) + (second->v.tc[0] * weight)) /
+  result->v.tc[TEXTURE_AXIS_S] = ((first->v.tc[TEXTURE_AXIS_S] * firstWeight) +
+                                     (second->v.tc[TEXTURE_AXIS_S] * weight)) /
       EDGE_WEIGHT_MAX;
-  result->v.tc[1] =
-      ((first->v.tc[1] * firstWeight) + (second->v.tc[1] * weight)) /
+  result->v.tc[TEXTURE_AXIS_T] = ((first->v.tc[TEXTURE_AXIS_T] * firstWeight) +
+                                     (second->v.tc[TEXTURE_AXIS_T] * weight)) /
       EDGE_WEIGHT_MAX;
   result->v.cn[0] =
       ((first->v.cn[0] * firstWeight) + (second->v.cn[0] * weight)) /
@@ -1031,12 +1033,12 @@ void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
   vertex->v.ob[AXIS_Z] = row << GRID_VERTEX_WORLD_SHIFT;
   vertex->v.ob[AXIS_Y] = height & ~1;
   vertex->v.flag = 0;
-  vertex->v.tc[0] =
+  vertex->v.tc[TEXTURE_AXIS_S] =
       TexelCoordinate(column * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
-  vertex->v.tc[1] =
+  vertex->v.tc[TEXTURE_AXIS_T] =
       TexelCoordinate(row * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
   if (row == GROUND_GRID_ROW_COUNT - 1) {
-    vertex->v.tc[1] = MAX_TEXTURE_COORDINATE;
+    vertex->v.tc[TEXTURE_AXIS_T] = MAX_TEXTURE_COORDINATE;
   }
 
   vertex->v.cn[0] = shade;
@@ -1587,8 +1589,8 @@ void PrepareHoleTriangles(void) {
         highest[AXIS_Z] = vertex->ob[AXIS_Z];
       }
 
-      vertex->tc[0] = vertex->ob[AXIS_X];
-      vertex->tc[1] = vertex->ob[AXIS_Z];
+      vertex->tc[TEXTURE_AXIS_S] = vertex->ob[AXIS_X];
+      vertex->tc[TEXTURE_AXIS_T] = vertex->ob[AXIS_Z];
     }
 
     g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_X][BOUND_LOWEST] =

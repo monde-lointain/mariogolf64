@@ -2686,12 +2686,12 @@ void InitGridVertices(void) {
   z = 0;
   for (i = 0; i < GRID_VERTEX_COUNT; i++) {
     g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
-    g_WorkArea.hole.gridVertices[i].v.tc[0] =
+    g_WorkArea.hole.gridVertices[i].v.tc[TEXTURE_AXIS_S] =
         (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Y] = 0;
     g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Z] = z;
     g_WorkArea.hole.gridVertices[i].v.flag = 0;
-    g_WorkArea.hole.gridVertices[i].v.tc[1] =
+    g_WorkArea.hole.gridVertices[i].v.tc[TEXTURE_AXIS_T] =
         (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     g_WorkArea.hole.gridVertices[i].v.cn[0] = 0;
     g_WorkArea.hole.gridVertices[i].v.cn[1] = 0;
@@ -2761,9 +2761,9 @@ void InitTileMidpoints(void) {
       g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_Y] = 0;
       g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_Z] = z + offsets[i][1];
       g_WorkArea.hole.midpoints[tile][i].v.flag = 0;
-      g_WorkArea.hole.midpoints[tile][i].v.tc[0] =
+      g_WorkArea.hole.midpoints[tile][i].v.tc[TEXTURE_AXIS_S] =
           ((x + offsets[i][0]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-      g_WorkArea.hole.midpoints[tile][i].v.tc[1] =
+      g_WorkArea.hole.midpoints[tile][i].v.tc[TEXTURE_AXIS_T] =
           ((z + offsets[i][1]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
       g_WorkArea.hole.midpoints[tile][i].v.cn[0] = 0;
       g_WorkArea.hole.midpoints[tile][i].v.cn[1] = 0;
@@ -2908,7 +2908,7 @@ void ReadGridVertices(void) {
     if (!(flags & VERTEX_FLAG_SAME_X)) {
       ReadVertexX(&x, flags);
       g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
-      g_WorkArea.hole.gridVertices[i].v.tc[0] =
+      g_WorkArea.hole.gridVertices[i].v.tc[TEXTURE_AXIS_S] =
           (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
 
@@ -2917,7 +2917,7 @@ void ReadGridVertices(void) {
     if (!(flags & VERTEX_FLAG_SAME_Z)) {
       ReadVertexZ(&z, flags);
       g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Z] = z;
-      g_WorkArea.hole.gridVertices[i].v.tc[1] =
+      g_WorkArea.hole.gridVertices[i].v.tc[TEXTURE_AXIS_T] =
           (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
   }
@@ -2944,7 +2944,7 @@ void ReadTileMidpoints(void) {
     if (!(flags & VERTEX_FLAG_SAME_X)) {
       ReadVertexX(&x, flags);
       g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_X] = x;
-      g_WorkArea.hole.midpoints[tile][midpoint].v.tc[0] =
+      g_WorkArea.hole.midpoints[tile][midpoint].v.tc[TEXTURE_AXIS_S] =
           (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
 
@@ -2953,7 +2953,7 @@ void ReadTileMidpoints(void) {
     if (!(flags & VERTEX_FLAG_SAME_Z)) {
       ReadVertexZ(&z, flags);
       g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_Z] = z;
-      g_WorkArea.hole.midpoints[tile][midpoint].v.tc[1] =
+      g_WorkArea.hole.midpoints[tile][midpoint].v.tc[TEXTURE_AXIS_T] =
           (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
 
@@ -3977,13 +3977,13 @@ void SetMiniGolfTileTextureCoords(
     coord = TexelCoordinate((vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X) -
                 (column << TILE_ORIGIN_SHIFT)) +
         TILE_TEXTURE_ORIGIN;
-    vertex->tc[0] = coord;
+    vertex->tc[TEXTURE_AXIS_S] = coord;
 
     /* The second coordinate's two steps are there to match */
     coord = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) -
         (row << TILE_ORIGIN_SHIFT);
     coord = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
-    vertex->tc[1] = coord;
+    vertex->tc[TEXTURE_AXIS_T] = coord;
   }
 }
 
@@ -4004,12 +4004,12 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t* start, Vtx_t* end) {
     coord =
         TexelCoordinate(vertex->ob[AXIS_X] - (column << TILE_ORIGIN_SHIFT)) +
         TILE_TEXTURE_ORIGIN;
-    vertex->tc[0] = coord;
+    vertex->tc[TEXTURE_AXIS_S] = coord;
 
     /* The second coordinate's two steps are there to match */
     coord = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
     coord = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
-    vertex->tc[1] = coord;
+    vertex->tc[TEXTURE_AXIS_T] = coord;
   }
 }
 
@@ -4041,8 +4041,10 @@ void BuildGroundTileDisplayList(
     midpoint->ob[AXIS_Y] = (from->ob[AXIS_Y] + to->ob[AXIS_Y]) / 2;
     midpoint->ob[AXIS_Z] = (from->ob[AXIS_Z] + to->ob[AXIS_Z]) / 2;
     midpoint->flag = 0;
-    midpoint->tc[0] = (from->tc[0] + to->tc[0]) / 2;
-    midpoint->tc[1] = (from->tc[1] + to->tc[1]) / 2;
+    midpoint->tc[TEXTURE_AXIS_S] =
+        (from->tc[TEXTURE_AXIS_S] + to->tc[TEXTURE_AXIS_S]) / 2;
+    midpoint->tc[TEXTURE_AXIS_T] =
+        (from->tc[TEXTURE_AXIS_T] + to->tc[TEXTURE_AXIS_T]) / 2;
     midpoint->cn[0] = (from->cn[0] + to->cn[0]) / 2;
     midpoint->cn[1] = (from->cn[1] + to->cn[1]) / 2;
     midpoint->cn[2] = (from->cn[2] + to->cn[2]) / 2;
