@@ -2899,6 +2899,28 @@ static inline void FrameBallAndShot(void) {
   GetFramedView(g_Cameras[0].view.eye, g_Cameras[0].view.lookAt);
 }
 
+/* Whether the stopwatches run in a player state: from aiming to the flight */
+#define IsTimedState(state) \
+  ((state) == PLAYER_STATE_AIMING || (state) == PLAYER_STATE_SETTING_POWER || \
+      (state) == PLAYER_STATE_SETTING_IMPACT || \
+      (state) == PLAYER_STATE_STARTING_SWING || \
+      (state) == PLAYER_STATE_SWINGING || \
+      (state) == PLAYER_STATE_BALL_IN_FLIGHT)
+/* Whether a pause screen lets play go on */
+#define IsPlayGoingOn(pauseScreen) \
+  ((pauseScreen) == PAUSE_SCREEN_NONE || \
+      (pauseScreen) == PAUSE_SCREEN_FREE_LOOK)
+/* Whether a character is Yoshi or Donkey Kong, who share a round song */
+#define IsYoshiOrDonkeyKong(character) \
+  ((character) == CHARACTER_YOSHI || (character) == CHARACTER_DONKEY_KONG)
+/* Whether four players are all Yoshi or Donkey Kong, which has its own song */
+#define IsYoshiAndDonkeyKongRound() \
+  (g_GameState.playerCount == MAX_PLAYER_COUNT && \
+      IsYoshiOrDonkeyKong(g_Players[0].characterIndex) && \
+      IsYoshiOrDonkeyKong(g_Players[1].characterIndex) && \
+      IsYoshiOrDonkeyKong(g_Players[2].characterIndex) && \
+      IsYoshiOrDonkeyKong(g_Players[3].characterIndex))
+
 void UpdateTurns(void) {
   s32 playerIndex;
   s32 state;
@@ -3134,13 +3156,7 @@ void UpdateTurns(void) {
     D_80227170_ovl_00[playerIndex]++;
     nextState = state;
     D_80227150_ovl_00.unk18 = playerIndex;
-    if ((state == PLAYER_STATE_AIMING || state == PLAYER_STATE_SETTING_POWER ||
-            state == PLAYER_STATE_SETTING_IMPACT ||
-            state == PLAYER_STATE_STARTING_SWING ||
-            state == PLAYER_STATE_SWINGING ||
-            state == PLAYER_STATE_BALL_IN_FLIGHT) &&
-        (g_PauseScreen == PAUSE_SCREEN_NONE ||
-            g_PauseScreen == PAUSE_SCREEN_FREE_LOOK)) {
+    if (IsTimedState(state) && IsPlayGoingOn(g_PauseScreen)) {
       TickStopwatches();
     }
 
@@ -3351,15 +3367,7 @@ void UpdateTurns(void) {
                              g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
                   GetMatchStanding(0, 1) != MATCH_STANDING_OPEN) {
                 song = SONG_ROUND_FINAL;
-              } else if (g_GameState.playerCount == MAX_PLAYER_COUNT &&
-                  (g_Players[0].characterIndex == CHARACTER_YOSHI ||
-                      g_Players[0].characterIndex == CHARACTER_DONKEY_KONG) &&
-                  (g_Players[1].characterIndex == CHARACTER_YOSHI ||
-                      g_Players[1].characterIndex == CHARACTER_DONKEY_KONG) &&
-                  (g_Players[2].characterIndex == CHARACTER_YOSHI ||
-                      g_Players[2].characterIndex == CHARACTER_DONKEY_KONG) &&
-                  (g_Players[3].characterIndex == CHARACTER_YOSHI ||
-                      g_Players[3].characterIndex == CHARACTER_DONKEY_KONG)) {
+              } else if (IsYoshiAndDonkeyKongRound()) {
                 song = SONG_YOSHI_AND_DONKEY_KONG;
               } else {
                 switch (g_GameState.courseIndex) {
