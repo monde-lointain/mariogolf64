@@ -251,12 +251,12 @@ static Mtx D_8023BAE0_ovl_01[MAX_PLAYER_COUNT][2];
 static Mtx D_8023BCE0_ovl_01;
 static f32 D_8023BD20_ovl_01[MAX_PLAYER_COUNT]; /* Each character's scale */
 static LookAt D_8023BD30_ovl_01[2];
-static void** D_8023BD70_ovl_01;
-static void** D_8023BD74_ovl_01;
-static void* D_8023BD78_ovl_01;
-static void* D_8023BD7C_ovl_01;
-static void* D_8023BD80_ovl_01;
-static void* D_8023BD84_ovl_01;
+static void** f_SavedGameModeImages;
+static void** f_ChosenModeIconBuffers;
+static void* f_SavedGamesNamePlate;
+static void* f_GameModeLabels;
+static void* f_ControllerIcons;
+static void* f_PlayerLabels;
 
 /* Read by no routine */
 static u8 D_8023BD88_ovl_01[0x4];
@@ -267,9 +267,9 @@ static void* D_8023BD90_ovl_01;
 /* Read by no routine */
 static u8 D_8023BD94_ovl_01[0x4];
 
-static void* D_8023BD98_ovl_01;
-static void* D_8023BD9C_ovl_01;
-static void* D_8023BDA0_ovl_01;
+static void* f_FirstGameBoard;
+static void* f_SecondGameBoard;
+static void* f_ThirdGameBoard;
 /* The chosen saved game's human players, in the order they take controllers */
 static s16 f_HumanPlayerIndices[MAX_PLAYER_COUNT];
 static s32 D_8023BDAC_ovl_01;
@@ -1047,29 +1047,29 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
 
   switch (bufferKind) {
     case SAVE_GAME_BUFFER_CONTROLLER_ICONS:
-      D_8023BD80_ovl_01 = buffer;
+      f_ControllerIcons = buffer;
       OpenEncodedAsset(ASSET_CONTROLLER_ICONS, &asset);
-      ReadEncodedAsset(D_8023BD80_ovl_01, &asset);
+      ReadEncodedAsset(f_ControllerIcons, &asset);
       break;
     case SAVE_GAME_BUFFER_PLAYER_LABELS:
-      D_8023BD84_ovl_01 = buffer;
+      f_PlayerLabels = buffer;
       OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset);
-      ReadEncodedAsset(D_8023BD84_ovl_01, &asset);
+      ReadEncodedAsset(f_PlayerLabels, &asset);
       break;
     case SAVE_GAME_BUFFER_FIRST_BOARD:
-      imageSlot = &D_8023BD98_ovl_01;
+      imageSlot = &f_FirstGameBoard;
       *imageSlot = buffer;
       OpenEncodedAsset(ASSET_FIRST_GAME_BOARD, &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
     case SAVE_GAME_BUFFER_SECOND_BOARD:
-      imageSlot = &D_8023BD9C_ovl_01;
+      imageSlot = &f_SecondGameBoard;
       *imageSlot = buffer;
       OpenEncodedAsset(ASSET_SECOND_GAME_BOARD, &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
     case SAVE_GAME_BUFFER_THIRD_BOARD:
-      imageSlot = &D_8023BDA0_ovl_01;
+      imageSlot = &f_ThirdGameBoard;
       *imageSlot = buffer;
       OpenEncodedAsset(ASSET_THIRD_GAME_BOARD, &asset);
       ReadEncodedAsset(*imageSlot, &asset);
@@ -1260,7 +1260,7 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
 
   switch (bufferKind) {
     case SAVE_MENU_BUFFER_SLOTS:
-      D_8023BD70_ovl_01 = buffers;
+      f_SavedGameModeImages = buffers;
       modeImages = D_80230B5C_ovl_01;
       for (imageIndex = 0; imageIndex != SAVED_GAME_COUNT; imageIndex++) {
         mode = D_80230B50_ovl_01[imageIndex];
@@ -1269,14 +1269,14 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
         }
 
         OpenEncodedAsset(modeImages[mode].assetId, &asset);
-        ReadEncodedAsset(D_8023BD70_ovl_01[imageIndex], &asset);
+        ReadEncodedAsset(f_SavedGameModeImages[imageIndex], &asset);
       }
 
       OpenEncodedAsset(ASSET_SAVE_MENU_FRAME, &asset);
-      ReadEncodedAsset(D_8023BD70_ovl_01[SAVED_GAME_COUNT], &asset);
+      ReadEncodedAsset(f_SavedGameModeImages[SAVED_GAME_COUNT], &asset);
       break;
     case SAVE_MENU_BUFFER_CHOSEN:
-      D_8023BD74_ovl_01 = buffers;
+      f_ChosenModeIconBuffers = buffers;
       modeImages = D_80230B5C_ovl_01;
       for (imageIndex = 0; imageIndex != SAVE_MENU_CHOSEN_IMAGE_COUNT;
           imageIndex++) {
@@ -1286,7 +1286,7 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
         }
 
         OpenEncodedAsset(modeImages[mode].assetId, &asset);
-        ReadEncodedAsset(D_8023BD74_ovl_01[imageIndex], &asset);
+        ReadEncodedAsset(f_ChosenModeIconBuffers[imageIndex], &asset);
       }
 
       break;
@@ -1302,12 +1302,12 @@ void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
 
   switch (bufferKind) {
     case GAME_MODE_LABEL_BUFFER_NAME_PLATE:
-      D_8023BD78_ovl_01 = buffer;
+      f_SavedGamesNamePlate = buffer;
       break;
     case GAME_MODE_LABEL_BUFFER_LABELS:
-      D_8023BD7C_ovl_01 = buffer;
+      f_GameModeLabels = buffer;
       OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
-      ReadEncodedAsset(D_8023BD7C_ovl_01, &asset);
+      ReadEncodedAsset(f_GameModeLabels, &asset);
       break;
   }
 }
@@ -1329,7 +1329,8 @@ void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
           u8)D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]]] \
                           [g_AnimatedIconFrameIndex], \
       &asset); \
-  ReadEncodedAsset(D_8023BD74_ovl_01[g_AnimatedIconBufferIndex], &asset); \
+  ReadEncodedAsset( \
+      f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex], &asset); \
   if (CHOSEN_GAME.isValid) { \
     if (!CHOSEN_GAME.state.isMiniGolf) { \
       OpenEncodedAsset( \
@@ -1715,12 +1716,11 @@ const char D_80231A3C_ovl_01[] = "%s";
   (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER | \
       MENU_LAYER_LARGE_BANNER)
 
-/* The numbered boards of D_8023BD98, 64 by 64 CI8 images loaded in two strips
- */
+/* The numbered boards of f_FirstGameBoard onward: 64x64 CI8, in two strips */
 #define GAME_BOARD_WIDTH 64
 #define GAME_BOARD_STRIP_HEIGHT 32
 #define GAME_BOARD_STRIP_COUNT 2
-/* The animated mode icon of D_8023BD74, drawn on the board */
+/* The animated mode icon of f_ChosenModeIconBuffers, drawn on the board */
 #define MODE_ICON_WIDTH 64
 #define MODE_ICON_STRIP_HEIGHT 32
 #define MODE_ICON_STRIP_COUNT 2
@@ -1748,7 +1748,8 @@ const char D_80231A3C_ovl_01[] = "%s";
 /* The bob that a fourth board would have, a step of its phase per update */
 #define BOARD_BOB_PHASE_STEP 0.1f
 #define BOARD_BOB_HEIGHT 8.0f
-/* The 200 by 10 strips of D_8023BD78, drawn narrower by the player count */
+/* The 200 by 10 strips of f_SavedGamesNamePlate, drawn narrower by the player
+ * count */
 #define SAVED_GAME_STRIP_WIDTH 200
 #define SAVED_GAME_STRIP_HEIGHT 10
 #define SAVED_GAME_STRIP_COUNT 3
@@ -1940,10 +1941,10 @@ void DrawSavedGames(Gfx** displayListHead) {
       }
 
       gDPLoadTLUT_pal256(gfx++,
-          TextureAddress((u32)(&D_8023BD98_ovl_01)[slot] + IMAGE_HEADER_SIZE));
+          TextureAddress((u32)(&f_FirstGameBoard)[slot] + IMAGE_HEADER_SIZE));
       for (otherIndex = 0; otherIndex != GAME_BOARD_STRIP_COUNT; otherIndex++) {
         gDPLoadTextureBlock(gfx++,
-            TextureAddress((u32)(&D_8023BD98_ovl_01)[slot] +
+            TextureAddress((u32)(&f_FirstGameBoard)[slot] +
                 LARGE_PALETTED_TEXELS_OFFSET +
                 (otherIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT,
@@ -1960,11 +1961,11 @@ void DrawSavedGames(Gfx** displayListHead) {
 
       if (D_80230B50_ovl_01[slot] != -1) {
         gDPLoadTLUT_pal256(
-            gfx++, TextureAddress(ImageBody(D_8023BD70_ovl_01[slot])));
+            gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot])));
         for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT;
             otherIndex++) {
           gDPLoadTextureBlock(gfx++,
-              TextureAddress(LargeImageTexels(D_8023BD70_ovl_01[slot]) +
+              TextureAddress(LargeImageTexels(f_SavedGameModeImages[slot]) +
                   (otherIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
               G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
               0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2004,7 +2005,7 @@ void DrawSavedGames(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023BD78_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_SavedGamesNamePlate)));
   for (index = 0; index != SAVED_GAME_STRIP_COUNT; index++) {
     if (playerCount == 1) {
       stripLeft = SAVED_GAME_STRIP_LEFT;
@@ -2018,7 +2019,7 @@ void DrawSavedGames(Gfx** displayListHead) {
     }
 
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023BD78_ovl_01) +
+        TextureAddress(LargeImageTexels(f_SavedGamesNamePlate) +
             (index * SAVED_GAME_STRIP_WIDTH * SAVED_GAME_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, SAVED_GAME_STRIP_WIDTH,
         SAVED_GAME_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2039,9 +2040,9 @@ void DrawSavedGames(Gfx** displayListHead) {
   chosenMode = &D_80230B50_ovl_01[memory->savedGameIndex];
   if (*chosenMode != -1) {
     labelOffset = &D_80230CEC_ovl_01[D_80230BB0_ovl_01[*chosenMode]];
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023BD7C_ovl_01)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(D_8023BD7C_ovl_01) +
+        TextureAddress(ImageTexels(f_GameModeLabels) +
             (D_80230BB0_ovl_01[*chosenMode] * GAME_MODE_LABEL_IMAGE_SIZE)),
         G_IM_FMT_CI, GAME_MODE_LABEL_WIDTH, GAME_MODE_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -2155,11 +2156,11 @@ void func_80224AFC_ovl_01(
 
   gDPPipeSync(gfx++);
   gDPLoadTLUT_pal256(gfx++,
-      TextureAddress((u32)(&D_8023BD98_ovl_01)[memory->savedGameIndex] +
+      TextureAddress((u32)(&f_FirstGameBoard)[memory->savedGameIndex] +
           IMAGE_HEADER_SIZE));
   for (stripIndex = 0; stripIndex != GAME_BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)(&D_8023BD98_ovl_01)[memory->savedGameIndex] +
+        TextureAddress((u32)(&f_FirstGameBoard)[memory->savedGameIndex] +
             LARGE_PALETTED_TEXELS_OFFSET +
             (stripIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT, 0,
@@ -2175,7 +2176,7 @@ void func_80224AFC_ovl_01(
   }
 
   if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
-    image = D_8023BD74_ovl_01[g_AnimatedIconBufferIndex];
+    image = f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex];
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureBlock(gfx++,
@@ -2212,7 +2213,8 @@ void func_80224AFC_ovl_01(
       g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
       OpenEncodedAsset(
           g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex], &asset);
-      ReadEncodedAsset(D_8023BD74_ovl_01[g_AnimatedIconBufferIndex], &asset);
+      ReadEncodedAsset(
+          f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex], &asset);
     }
   }
 
@@ -2362,7 +2364,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  image = D_8023BD80_ovl_01;
+  image = f_ControllerIcons;
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (f_SavedPlayerControllers[playerIndex] != NO_CONTROLLER) {
@@ -2388,7 +2390,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
     }
   }
 
-  image = D_8023BD84_ovl_01;
+  image = f_PlayerLabels;
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
