@@ -1463,59 +1463,68 @@ s32 UpdateDebugSceneMenu(void) {
   }
 }
 
+/* Starts the search for each triangle's bounds past any corner coordinate */
+#define BEYOND_ANY_COORDINATE 0x20000000
+
 /* Sets each hole triangle's bounds and texture coordinates, then sets up the
  * rings */
 void PrepareHoleTriangles(void) {
   Vtx_t* vertex;
   s32 triangleIndex;
   s32 corner;
-  s32 lowest[3];
-  s32 highest[3];
+  s32 lowest[AXIS_COUNT];
+  s32 highest[AXIS_COUNT];
 
   for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT;
       triangleIndex++) {
-    lowest[2] = 0x20000000;
-    lowest[1] = lowest[2];
-    lowest[0] = lowest[1];
-    highest[2] = -0x20000000;
-    highest[1] = highest[2];
-    highest[0] = highest[1];
-    for (corner = 0; corner < 3; corner++) {
+    lowest[AXIS_Z] = BEYOND_ANY_COORDINATE;
+    lowest[AXIS_Y] = lowest[AXIS_Z];
+    lowest[AXIS_X] = lowest[AXIS_Y];
+    highest[AXIS_Z] = -BEYOND_ANY_COORDINATE;
+    highest[AXIS_Y] = highest[AXIS_Z];
+    highest[AXIS_X] = highest[AXIS_Y];
+    for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
       vertex = &g_WorkArea.hole.triangles[triangleIndex].vertices[corner].v;
-      if (vertex->ob[0] < lowest[0]) {
-        lowest[0] = vertex->ob[0];
+      if (vertex->ob[AXIS_X] < lowest[AXIS_X]) {
+        lowest[AXIS_X] = vertex->ob[AXIS_X];
       }
 
-      if (vertex->ob[0] > highest[0]) {
-        highest[0] = vertex->ob[0];
+      if (vertex->ob[AXIS_X] > highest[AXIS_X]) {
+        highest[AXIS_X] = vertex->ob[AXIS_X];
       }
 
-      if (vertex->ob[1] < lowest[1]) {
-        lowest[1] = vertex->ob[1];
+      if (vertex->ob[AXIS_Y] < lowest[AXIS_Y]) {
+        lowest[AXIS_Y] = vertex->ob[AXIS_Y];
       }
 
-      if (vertex->ob[1] > highest[1]) {
-        highest[1] = vertex->ob[1];
+      if (vertex->ob[AXIS_Y] > highest[AXIS_Y]) {
+        highest[AXIS_Y] = vertex->ob[AXIS_Y];
       }
 
-      if (vertex->ob[2] < lowest[2]) {
-        lowest[2] = vertex->ob[2];
+      if (vertex->ob[AXIS_Z] < lowest[AXIS_Z]) {
+        lowest[AXIS_Z] = vertex->ob[AXIS_Z];
       }
 
-      if (vertex->ob[2] > highest[2]) {
-        highest[2] = vertex->ob[2];
+      if (vertex->ob[AXIS_Z] > highest[AXIS_Z]) {
+        highest[AXIS_Z] = vertex->ob[AXIS_Z];
       }
 
-      vertex->tc[0] = vertex->ob[0];
-      vertex->tc[1] = vertex->ob[2];
+      vertex->tc[0] = vertex->ob[AXIS_X];
+      vertex->tc[1] = vertex->ob[AXIS_Z];
     }
 
-    g_WorkArea.hole.triangles[triangleIndex].bounds[0][0] = lowest[0];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[1][0] = lowest[1];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[2][0] = lowest[2];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[0][1] = highest[0];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[1][1] = highest[1];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[2][1] = highest[2];
+    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_X][BOUND_LOWEST] =
+        lowest[AXIS_X];
+    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Y][BOUND_LOWEST] =
+        lowest[AXIS_Y];
+    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Z][BOUND_LOWEST] =
+        lowest[AXIS_Z];
+    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_X][BOUND_HIGHEST] =
+        highest[AXIS_X];
+    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Y][BOUND_HIGHEST] =
+        highest[AXIS_Y];
+    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Z][BOUND_HIGHEST] =
+        highest[AXIS_Z];
   }
 
   InitRings();

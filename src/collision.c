@@ -2091,18 +2091,18 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       continue;
     }
 
-    if (highestY < candidate->bounds[AXIS_Y][0] ||
-        candidate->bounds[AXIS_Y][1] < lowestY) {
+    if (highestY < candidate->bounds[AXIS_Y][BOUND_LOWEST] ||
+        candidate->bounds[AXIS_Y][BOUND_HIGHEST] < lowestY) {
       continue;
     }
 
-    if (highestX < candidate->bounds[AXIS_X][0] ||
-        candidate->bounds[AXIS_X][1] < lowestX) {
+    if (highestX < candidate->bounds[AXIS_X][BOUND_LOWEST] ||
+        candidate->bounds[AXIS_X][BOUND_HIGHEST] < lowestX) {
       continue;
     }
 
-    if (highestZ < candidate->bounds[AXIS_Z][0] ||
-        candidate->bounds[AXIS_Z][1] < lowestZ) {
+    if (highestZ < candidate->bounds[AXIS_Z][BOUND_LOWEST] ||
+        candidate->bounds[AXIS_Z][BOUND_HIGHEST] < lowestZ) {
       continue;
     }
 
@@ -2320,18 +2320,18 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       continue;
     }
 
-    if (highestY < candidate->bounds[AXIS_Y][0] ||
-        candidate->bounds[AXIS_Y][1] < lowestY) {
+    if (highestY < candidate->bounds[AXIS_Y][BOUND_LOWEST] ||
+        candidate->bounds[AXIS_Y][BOUND_HIGHEST] < lowestY) {
       continue;
     }
 
-    if (highestX < candidate->bounds[AXIS_X][0] ||
-        candidate->bounds[AXIS_X][1] < lowestX) {
+    if (highestX < candidate->bounds[AXIS_X][BOUND_LOWEST] ||
+        candidate->bounds[AXIS_X][BOUND_HIGHEST] < lowestX) {
       continue;
     }
 
-    if (highestZ < candidate->bounds[AXIS_Z][0] ||
-        candidate->bounds[AXIS_Z][1] < lowestZ) {
+    if (highestZ < candidate->bounds[AXIS_Z][BOUND_LOWEST] ||
+        candidate->bounds[AXIS_Z][BOUND_HIGHEST] < lowestZ) {
       continue;
     }
 
@@ -2841,28 +2841,28 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
       }
 
       if (checksHeight == TRUE) {
-        if (highestY < candidate->bounds[AXIS_Y][0]) {
+        if (highestY < candidate->bounds[AXIS_Y][BOUND_LOWEST]) {
           continue;
         }
 
-        if (candidate->bounds[AXIS_Y][1] < lowestY) {
+        if (candidate->bounds[AXIS_Y][BOUND_HIGHEST] < lowestY) {
           continue;
         }
       }
 
-      if (highestX < candidate->bounds[AXIS_X][0]) {
+      if (highestX < candidate->bounds[AXIS_X][BOUND_LOWEST]) {
         continue;
       }
 
-      if (candidate->bounds[AXIS_X][1] < lowestX) {
+      if (candidate->bounds[AXIS_X][BOUND_HIGHEST] < lowestX) {
         continue;
       }
 
-      if (highestZ < candidate->bounds[AXIS_Z][0]) {
+      if (highestZ < candidate->bounds[AXIS_Z][BOUND_LOWEST]) {
         continue;
       }
 
-      if (candidate->bounds[AXIS_Z][1] < lowestZ) {
+      if (candidate->bounds[AXIS_Z][BOUND_HIGHEST] < lowestZ) {
         continue;
       }
 

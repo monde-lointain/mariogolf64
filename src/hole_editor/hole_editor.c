@@ -1863,12 +1863,18 @@ void func_80402E1C_hole_editor(void) {
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.cn[1] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.cn[2] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[2].v.cn[3] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].bounds[AXIS_X][0] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].bounds[AXIS_X][1] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].bounds[AXIS_Y][0] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].bounds[AXIS_Y][1] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].bounds[AXIS_Z][0] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].bounds[AXIS_Z][1] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .bounds[AXIS_X][BOUND_LOWEST] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .bounds[AXIS_X][BOUND_HIGHEST] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .bounds[AXIS_Y][BOUND_LOWEST] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .bounds[AXIS_Y][BOUND_HIGHEST] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .bounds[AXIS_Z][BOUND_LOWEST] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex]
+        .bounds[AXIS_Z][BOUND_HIGHEST] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_X] = 0.0f;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_Y] = 0.0f;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_Z] = 0.0f;
