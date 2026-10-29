@@ -322,22 +322,9 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32);
 void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
     s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton,
     s32 windowStyle);
+/* Writes the club tournament's number as an ordinal from the place glyphs */
 void func_802296C4_ovl_01(
     Gfx** displayListHead, s32 centerX, s32 top, s32 number);
-/*
- * func_802296C4 writes the club tournament's number as an ordinal from the
- * 24x24 glyphs of ASSET_PLACE_DIGITS: the digits, then "st", "nd", "rd" and
- * "th"
- */
-#define ORDINAL_GLYPH_SIZE 24
-#define ORDINAL_GLYPH_COUNT 14
-#define ORDINAL_IMAGE_HEIGHT (ORDINAL_GLYPH_SIZE * ORDINAL_GLYPH_COUNT)
-#define ORDINAL_DIGIT_SPACING 20
-#define ORDINAL_FIRST_SUFFIX 10
-#define ORDINAL_SUFFIX_TH 3
-/* Places past 100 lose their hundreds; "th" covers the 4th to the 20th */
-#define ORDINAL_PLACE_LIMIT 100
-#define ORDINAL_LAST_TEEN 20
 void func_8022A43C_ovl_01(Gfx** displayListHead);
 void func_8022A8F4_ovl_01(Gfx** displayListHead);
 void func_8022ADE8_ovl_01(Gfx** displayListHead);
@@ -1471,60 +1458,59 @@ void func_802296C4_ovl_01(
   LoadLargePalette(&gfx, ImageBody(image));
   width = 0;
   for (digit = g_PrintBuffer; *digit != '\0'; digit++) {
-    width += ORDINAL_DIGIT_SPACING;
+    width += PLACE_GLYPH_SPACING;
   }
 
-  left = centerX - (ORDINAL_GLYPH_SIZE / 2);
+  left = centerX - (PLACE_GLYPH_SIZE / 2);
   left -= width / 2;
   width = 0;
   for (digit = g_PrintBuffer; *digit != '\0';
-      digit++, width += ORDINAL_DIGIT_SPACING) {
+      digit++, width += PLACE_GLYPH_SPACING) {
     glyph = *digit;
     if (glyph != ' ') {
       gDPLoadTextureTile(gfx++, TextureAddress(LargeImageTexels(image)),
-          G_IM_FMT_CI, G_IM_SIZ_8b, ORDINAL_GLYPH_SIZE, ORDINAL_IMAGE_HEIGHT, 0,
-          (glyph - '0') * ORDINAL_GLYPH_SIZE, ORDINAL_GLYPH_SIZE - 1,
-          (glyph - '0') * ORDINAL_GLYPH_SIZE + ORDINAL_GLYPH_SIZE - 1, 0,
+          G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, PLACE_GLYPHS_HEIGHT, 0,
+          (glyph - '0') * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1,
+          (glyph - '0') * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPScisTextureRectangle(gfx++, (left + width) << 2, top << 2,
-          (left + width + ORDINAL_GLYPH_SIZE) << 2,
-          (top + ORDINAL_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,
-          TexelCoordinate((glyph - '0') * ORDINAL_GLYPH_SIZE), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+          (left + width + PLACE_GLYPH_SIZE) << 2, (top + PLACE_GLYPH_SIZE) << 2,
+          G_TX_RENDERTILE, 0, TexelCoordinate((glyph - '0') * PLACE_GLYPH_SIZE),
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
   suffix = number;
-  if (suffix > ORDINAL_PLACE_LIMIT) {
-    suffix %= ORDINAL_PLACE_LIMIT;
+  if (suffix > PLACES_PER_HUNDRED) {
+    suffix %= PLACES_PER_HUNDRED;
   }
 
   suffix--;
-  if (suffix >= ORDINAL_SUFFIX_TH) {
-    if (suffix < ORDINAL_LAST_TEEN) {
-      suffix = ORDINAL_SUFFIX_TH;
-    } else if (suffix < ORDINAL_PLACE_LIMIT) {
+  if (suffix >= PLACE_SUFFIX_TH) {
+    if (suffix < PLACE_TEENS_END) {
+      suffix = PLACE_SUFFIX_TH;
+    } else if (suffix < PLACES_PER_HUNDRED) {
       lastDigitSuffix = suffix % DECIMAL_BASE;
-      suffix = ORDINAL_SUFFIX_TH;
-      if (lastDigitSuffix < ORDINAL_SUFFIX_TH) {
+      suffix = PLACE_SUFFIX_TH;
+      if (lastDigitSuffix < PLACE_SUFFIX_TH) {
         suffix = lastDigitSuffix;
       }
     }
   }
 
   gDPLoadTextureTile(gfx++, TextureAddress(LargeImageTexels(image)),
-      G_IM_FMT_CI, G_IM_SIZ_8b, ORDINAL_GLYPH_SIZE, ORDINAL_IMAGE_HEIGHT, 0,
-      (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE,
-      ORDINAL_GLYPH_SIZE - 1,
-      (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE +
-          ORDINAL_GLYPH_SIZE - 1,
+      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, PLACE_GLYPHS_HEIGHT, 0,
+      (suffix + PLACE_SUFFIX_GLYPH_FIRST) * PLACE_GLYPH_SIZE,
+      PLACE_GLYPH_SIZE - 1,
+      (suffix + PLACE_SUFFIX_GLYPH_FIRST) * PLACE_GLYPH_SIZE +
+          PLACE_GLYPH_SIZE - 1,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gSPScisTextureRectangle(gfx++, (left + width) << 2, top << 2,
-      (left + width + ORDINAL_GLYPH_SIZE) << 2, (top + ORDINAL_GLYPH_SIZE) << 2,
+      (left + width + PLACE_GLYPH_SIZE) << 2, (top + PLACE_GLYPH_SIZE) << 2,
       G_TX_RENDERTILE, 0,
-      TexelCoordinate((suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE),
+      TexelCoordinate((suffix + PLACE_SUFFIX_GLYPH_FIRST) * PLACE_GLYPH_SIZE),
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }

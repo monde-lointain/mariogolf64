@@ -95,6 +95,28 @@ typedef struct TextSlot {
 #define DIGIT_GLYPH_COUNT 16
 #define DIGIT_FONT_HEIGHT (DIGIT_GLYPH_COUNT * DIGIT_GLYPH_SIZE)
 
+/*
+ * ASSET_PLACE_DIGITS holds 24x24 glyphs, the digits and then the suffixes,
+ * which places draw closer than a glyph apart
+ */
+#define PLACE_GLYPH_SIZE 24
+#define PLACE_GLYPH_COUNT 14
+#define PLACE_GLYPHS_HEIGHT (PLACE_GLYPH_SIZE * PLACE_GLYPH_COUNT)
+#define PLACE_GLYPH_SPACING 20
+#define PLACE_SUFFIX_GLYPH_FIRST 10
+
+/* The suffixes that end a place's number */
+enum PlaceSuffix {
+  PLACE_SUFFIX_ST,
+  PLACE_SUFFIX_ND,
+  PLACE_SUFFIX_RD,
+  PLACE_SUFFIX_TH
+};
+
+/* Places past 100 lose their hundreds; "th" covers the 4th to the 20th */
+#define PLACES_PER_HUNDRED 100
+#define PLACE_TEENS_END 20
+
 /* Without this flag, PlaceGlyphGroup centers the text on its x */
 #define GLYPH_FLAG_LEFT_ALIGNED 0x10
 /* Only the top or the bottom part of a large glyph is drawn */

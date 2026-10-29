@@ -1002,16 +1002,6 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   *displayListHead = gfx;
 }
 
-/* f_PlaceDigitsImage holds 24-pixel glyphs: the digits, then the st, nd, rd and
- * th suffixes */
-#define PLACE_GLYPH_SIZE 24
-#define PLACE_GLYPH_SPACING 20
-#define PLACE_SUFFIX_GLYPH_FIRST 10
-#define PLACE_SUFFIX_ST 0
-#define PLACE_SUFFIX_TH 3
-/* From the 4th to the 20th, places end in th */
-#define PLACE_TEENS_END 20
-#define PLACES_PER_HUNDRED 100
 #define PLACE_NUMBER_X_OFFSET (-12)
 
 /* Loads glyph from f_PlaceDigitsImage and draws it at x, y */
