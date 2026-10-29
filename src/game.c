@@ -40,6 +40,7 @@
 #include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
+#include "terrain.h"
 #include "text.h"
 #include "variables.h"
 #include "work_area.h"
@@ -1157,7 +1158,7 @@ s32 DrawGame(void) {
   u16 insetPerspNorm;
   u16 perspNorm;
   Boolean drawsScene;
-  s32 terrainStyle;
+  s32 terrainStyle; /* A TERRAIN_STYLE_* value */
   u32 drawMode;
   s32 viewIndex;
   s32 playerIndex;
@@ -1291,7 +1292,7 @@ s32 DrawGame(void) {
   for (viewIndex = 0, camera = g_Cameras; viewIndex < 2;
       viewIndex++, camera++) {
     drawsScene = TRUE;
-    terrainStyle = 0;
+    terrainStyle = TERRAIN_STYLE_NORMAL;
     usesFloatMatrices = FALSE;
     if (g_Scene == SCENE_STAFF_ROLL) {
       InitRcp(g_DrawBufferIndex + 4);
@@ -1339,7 +1340,7 @@ s32 DrawGame(void) {
             -(g_MapCamera.view.lookAt[0] - g_MapCamera.view.eye[0]),
             -(g_MapCamera.view.lookAt[1] - g_MapCamera.view.eye[1]),
             -(g_MapCamera.view.lookAt[2] - g_MapCamera.view.eye[2]));
-        terrainStyle = 2;
+        terrainStyle = TERRAIN_STYLE_MAP;
         guPerspective(&matrices->perspective, &mapPerspNorm, f_MapFieldOfView,
             ASPECT_RATIO, MAP_NEAR_CLIP, MAP_FAR_CLIP, 1.0f);
         gSPPerspNormalize(g_DisplayListHead++, mapPerspNorm);
@@ -1365,7 +1366,7 @@ s32 DrawGame(void) {
             MAP_ORTHO_HALF_WIDTH, -MAP_ORTHO_HALF_HEIGHT, MAP_ORTHO_HALF_HEIGHT,
             10.0f, MAP_ORTHO_FAR_CLIP, 8.0f);
         guTranslate(&matrices->placement, 0.0f, 0.0f, -1000.0f);
-        terrainStyle = 2;
+        terrainStyle = TERRAIN_STYLE_MAP;
         ScaleMatrix(&matrices->viewing, g_MapCamera.view.zoom,
             g_MapCamera.view.zoom, 1.0f);
         LoadProjection();
@@ -1378,7 +1379,9 @@ s32 DrawGame(void) {
         topDownEyeX = g_MapCamera.view.eye[0];
         topDownEyeY = g_MapCamera.view.eye[1] - MAP_TOP_DOWN_HEIGHT;
         topDownEyeZ = g_MapCamera.view.eye[2] - MAP_TOP_DOWN_TILT;
-        terrainStyle = (g_Scene == SCENE_CELL_EDITOR) ? 3 : 2;
+        terrainStyle = (g_Scene == SCENE_CELL_EDITOR)
+            ? TERRAIN_STYLE_TOP_DOWN_MAP
+            : TERRAIN_STYLE_MAP;
         guLookAt(&matrices->viewing, topDownEyeX, topDownEyeY, topDownEyeZ,
             topDownEyeX, g_MapCamera.view.eye[1], g_MapCamera.view.eye[2], 0.0f,
             -1.0f, 0.0f);
