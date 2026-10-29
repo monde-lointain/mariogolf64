@@ -15,6 +15,7 @@
 #include "effects.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_triangles.h"
 #include "libc.h"
 #include "math_util.h"
 #include "reaction.h"
@@ -859,7 +860,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         FindWallHit(startX, startY, startZ, simulation->position[AXIS_X],
             simulation->position[AXIS_Y], simulation->position[AXIS_Z],
             &D_8022BE10_ovl_05, &D_8022BE28_ovl_05) == TRUE &&
-        D_8022BE10_ovl_05.unk0 == 3) {
+        D_8022BE10_ovl_05.unk0 == HOLE_TRIANGLE_KIND_SHADED) {
       CoursePoint hitPosition;
       f32 normalX;
       f32 normalY;

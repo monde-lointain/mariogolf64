@@ -16,6 +16,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "hole_objects.h"
+#include "hole_triangles.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
@@ -954,7 +955,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       if (FindWallHit(startX, startY, startZ, simulation->position[AXIS_X],
               endY, simulation->position[AXIS_Z], &wall,
               &wallFraction) == TRUE &&
-          wall.unk0 == 3) {
+          wall.unk0 == HOLE_TRIANGLE_KIND_SHADED) {
         f32 bounce = 1.0f;
         BallSpeed inwardSpeed;
         f32 slide;
