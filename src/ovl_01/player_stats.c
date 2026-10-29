@@ -426,16 +426,16 @@ static u8 D_8023B1C0_ovl_01[0x100];
 static Mtx D_8023B2C0_ovl_01[PAGE_ARROW_COUNT];
 static void* D_8023B340_ovl_01;
 static void* D_8023B344_ovl_01;
-static void* D_8023B348_ovl_01;
-static void* D_8023B34C_ovl_01;
+static void* f_StakeMark;
+static void* f_StatsNamePlate;
 /* The two frames of the stats icon that func_80219460 animates */
 static void* D_8023B350_ovl_01[STATS_ICON_FRAME_COUNT];
-static void* D_8023B358_ovl_01;
-static void* D_8023B35C_ovl_01;
-static void* D_8023B360_ovl_01;
-static void* D_8023B364_ovl_01;
-static void* D_8023B368_ovl_01;
-static void* D_8023B36C_ovl_01;
+static void* f_StatsGreenArrows;
+static void* f_PageArrows;
+static void* f_HandicapPlaque;
+static void* f_BetLabels;
+static void* f_StatsPlayerLabels;
+static void* f_BrickWall;
 
 /* Read by no routine */
 static u8 D_8023B370_ovl_01[0xA0];
@@ -483,12 +483,12 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
 
       break;
     case PLAYER_STATS_BUFFER_STAKE_MARK:
-      D_8023B348_ovl_01 = buffer;
+      f_StakeMark = buffer;
       OpenEncodedAsset(ASSET_STAKE_MARK, &asset);
-      ReadEncodedAsset(D_8023B348_ovl_01, &asset);
+      ReadEncodedAsset(f_StakeMark, &asset);
       break;
     case PLAYER_STATS_BUFFER_NAME_PLATE:
-      D_8023B34C_ovl_01 = buffer;
+      f_StatsNamePlate = buffer;
       break;
     case PLAYER_STATS_BUFFER_UNK4:
       rowNumber = D_801B5634;
@@ -512,41 +512,41 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       D_8023B344_ovl_01 = buffer;
       break;
     case PLAYER_STATS_BUFFER_GREEN_ARROWS:
-      D_8023B358_ovl_01 = buffer;
+      f_StatsGreenArrows = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
-      ReadEncodedAsset(D_8023B358_ovl_01, &asset);
+      ReadEncodedAsset(f_StatsGreenArrows, &asset);
       break;
     case PLAYER_STATS_BUFFER_HANDICAP_PLAQUE:
-      D_8023B360_ovl_01 = buffer;
+      f_HandicapPlaque = buffer;
       OpenEncodedAsset(ASSET_HANDICAP_PLAQUE, &asset);
-      ReadEncodedAsset(D_8023B360_ovl_01, &asset);
+      ReadEncodedAsset(f_HandicapPlaque, &asset);
       break;
     case PLAYER_STATS_BUFFER_BET_LABELS:
-      D_8023B364_ovl_01 = buffer;
+      f_BetLabels = buffer;
       OpenEncodedAsset(ASSET_BET_LABELS, &asset);
-      ReadEncodedAsset(D_8023B364_ovl_01, &asset);
+      ReadEncodedAsset(f_BetLabels, &asset);
       break;
     case PLAYER_STATS_BUFFER_PLAYER_LABELS:
-      D_8023B368_ovl_01 = buffer;
+      f_StatsPlayerLabels = buffer;
       OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset);
-      ReadEncodedAsset(D_8023B368_ovl_01, &asset);
+      ReadEncodedAsset(f_StatsPlayerLabels, &asset);
       break;
     case PLAYER_STATS_BUFFER_BRICK_WALL:
-      D_8023B36C_ovl_01 = buffer;
+      f_BrickWall = buffer;
       OpenEncodedAsset(ASSET_STATS_BRICK_WALL, &asset);
-      ReadEncodedAsset(D_8023B36C_ovl_01, &asset);
+      ReadEncodedAsset(f_BrickWall, &asset);
       break;
     case PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS:
       assetId = ASSET_TRIPLE_PAGE_ARROWS;
-      D_8023B35C_ovl_01 = buffer;
+      f_PageArrows = buffer;
       OpenEncodedAsset(assetId, &asset);
-      ReadEncodedAsset(D_8023B35C_ovl_01, &asset);
+      ReadEncodedAsset(f_PageArrows, &asset);
       break;
     case PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS:
       assetId = ASSET_DOUBLE_PAGE_ARROWS;
-      D_8023B35C_ovl_01 = buffer;
+      f_PageArrows = buffer;
       OpenEncodedAsset(assetId, &asset);
-      ReadEncodedAsset(D_8023B35C_ovl_01, &asset);
+      ReadEncodedAsset(f_PageArrows, &asset);
       break;
   }
 
@@ -736,7 +736,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", UpdateBetSettings);
 #define LARGEST_STAKE_RAISE 3
 #define STAKE_MARK_COUNT 5
 /*
- * The banner of D_8023B34C is drawn twice: stretched to 270 columns in
+ * The banner of f_StatsNamePlate is drawn twice: stretched to 270 columns in
  * overlapping 20-row strips, then narrowed to 160 columns at its own height
  */
 #define WIDE_BANNER_LEFT 26
@@ -844,12 +844,12 @@ void DrawBetSettings(
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(D_8023B348_ovl_01)),
+  gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(f_StakeMark)),
       G_IM_FMT_CI, STAKE_MARK_SIZE, STAKE_MARK_SIZE, 0, 0, STAKE_MARK_SIZE - 1,
       STAKE_MARK_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B348_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StakeMark)));
   gDPPipeSync(gfx++);
 
   markGrowth = 0;
@@ -903,7 +903,7 @@ void DrawBetSettings(
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023B34C_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_StatsNamePlate)));
 
   bannerShift = slide;
   if (isSlideReversed) {
@@ -912,7 +912,7 @@ void DrawBetSettings(
 
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023B34C_ovl_01) +
+        TextureAddress(LargeImageTexels(f_StatsNamePlate) +
             (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -934,7 +934,7 @@ void DrawBetSettings(
 
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023B34C_ovl_01) +
+        TextureAddress(LargeImageTexels(f_StatsNamePlate) +
             (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1270,7 +1270,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023B34C_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_StatsNamePlate)));
   offsetY = slide;
   if (reverseVerticalSlide) {
     offsetY = -slide;
@@ -1279,7 +1279,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   for (stripIndex = 0; stripIndex != HANDICAP_BANNER_STRIP_COUNT;
       stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023B34C_ovl_01) +
+        TextureAddress(LargeImageTexels(f_StatsNamePlate) +
             (stripIndex * HANDICAP_BANNER_STRIP_SIZE)),
         G_IM_FMT_CI, G_IM_SIZ_8b, HANDICAP_BANNER_WIDTH,
         HANDICAP_BANNER_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1296,9 +1296,9 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     gDPPipeSync(gfx++);
   }
 
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B360_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_HandicapPlaque)));
   gDPLoadTLUT_pal16(gfx++, HANDICAP_LABEL_PALETTE,
-      TextureAddress(ImageBody(D_8023B368_ovl_01)));
+      TextureAddress(ImageBody(f_StatsPlayerLabels)));
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
     if (columnIndex == memory->unk29) {
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1311,7 +1311,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     for (stripIndex = 0; stripIndex != HANDICAP_COLUMN_STRIP_COUNT;
         stripIndex++) {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(ImageTexels(D_8023B360_ovl_01) +
+          TextureAddress(ImageTexels(f_HandicapPlaque) +
               (stripIndex * HANDICAP_COLUMN_STRIP_SIZE)),
           G_IM_FMT_CI, HANDICAP_COLUMN_WIDTH, HANDICAP_COLUMN_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1339,7 +1339,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
     gDPLoadMultiBlock_4b(gfx++,
         TextureAddress(ImageTexelsAt(
-            D_8023B368_ovl_01, labelIndex * PLAYER_LABEL_IMAGE_SIZE)),
+            f_StatsPlayerLabels, labelIndex * PLAYER_LABEL_IMAGE_SIZE)),
         HANDICAP_LABEL_TMEM, HANDICAP_LABEL_TILE, G_IM_FMT_CI,
         PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, HANDICAP_LABEL_PALETTE,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1363,11 +1363,11 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B358_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
   for (arrowIndex = 0; arrowIndex != MENU_ARROW_COUNT; arrowIndex++) {
     if (arrowIndex == MENU_ARROW_LEFT) {
       gDPLoadTextureTile_4b(gfx++,
-          TextureAddress((u32)D_8023B358_ovl_01 +
+          TextureAddress((u32)f_StatsGreenArrows +
               ((D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE) +
                   PALETTED_TEXELS_OFFSET +
                   (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE))),
@@ -1377,7 +1377,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
           HANDICAP_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureTile_4b(gfx++,
-          TextureAddress((u32)D_8023B358_ovl_01 +
+          TextureAddress((u32)f_StatsGreenArrows +
               ((D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE) +
                   PALETTED_TEXELS_OFFSET +
                   (arrowIndex * GREEN_ARROW_IMAGE_SIZE))),
@@ -1477,10 +1477,10 @@ void func_8021B1E0_ovl_01(
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B364_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_BetLabels)));
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(ImageTexels(D_8023B364_ovl_01) +
-          (labelIndex * GAME_LABEL_IMAGE_SIZE)),
+      TextureAddress(
+          ImageTexels(f_BetLabels) + (labelIndex * GAME_LABEL_IMAGE_SIZE)),
       G_IM_FMT_CI, GAME_LABEL_WIDTH, GAME_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1576,11 +1576,11 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
   gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023B36C_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BrickWall)));
   for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023B36C_ovl_01) +
+        TextureAddress(LargeImageTexels(f_BrickWall) +
             (stripHeight * STATS_WALL_IMAGE_WIDTH * rowIndex)),
         G_IM_FMT_CI, G_IM_SIZ_8b, STATS_WALL_IMAGE_WIDTH, stripHeight, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1657,13 +1657,13 @@ void DrawPageArrows(Gfx** displayListHead) {
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B35C_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PageArrows)));
   gDPPipeSync(gfx++);
   for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
     if (arrowIndex == PAGE_ARROW_RIGHT) {
       /* The right arrow is the left one's image, mirrored */
       gDPLoadTextureTile_4b(gfx++,
-          TextureAddress(ImageTexels(D_8023B35C_ovl_01) +
+          TextureAddress(ImageTexels(f_PageArrows) +
               D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0, G_TX_MIRROR | G_TX_WRAP,
@@ -1672,7 +1672,7 @@ void DrawPageArrows(Gfx** displayListHead) {
       left = PAGE_ARROW_RIGHT_X;
     } else {
       gDPLoadTextureTile_4b(gfx++,
-          TextureAddress(ImageTexels(D_8023B35C_ovl_01) +
+          TextureAddress(ImageTexels(f_PageArrows) +
               D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0,
@@ -1720,13 +1720,13 @@ void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B35C_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PageArrows)));
   gDPPipeSync(gfx++);
   for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
     if (arrowIndex == PAGE_ARROW_RIGHT) {
       /* The right arrow is the left one's image, mirrored */
       gDPLoadTextureTile_4b(gfx++,
-          TextureAddress(ImageTexels(D_8023B35C_ovl_01) +
+          TextureAddress(ImageTexels(f_PageArrows) +
               D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0, G_TX_MIRROR | G_TX_WRAP,
@@ -1735,7 +1735,7 @@ void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
       left = (SCREEN_WIDTH / 2) + (gap / 2);
     } else {
       gDPLoadTextureTile_4b(gfx++,
-          TextureAddress(ImageTexels(D_8023B35C_ovl_01) +
+          TextureAddress(ImageTexels(f_PageArrows) +
               D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0,
@@ -1800,9 +1800,9 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
     guScale(&D_8023B2C0_ovl_01[arrowIndex], 1.0f, 1.0f, 1.0f);
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B35C_ovl_01)));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PageArrows)));
     gDPLoadTextureTile_4b(gfx++,
-        TextureAddress(ImageTexels(D_8023B35C_ovl_01) +
+        TextureAddress(ImageTexels(f_PageArrows) +
             (D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE)),
         G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
         PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1845,10 +1845,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B358_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
   for (arrowIndex = 0; arrowIndex != STATS_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
-        TextureAddress(ImageTexels(D_8023B358_ovl_01) +
+        TextureAddress(ImageTexels(f_StatsGreenArrows) +
             (D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE +
                 arrowIndex * GREEN_ARROW_IMAGE_SIZE)),
         G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
