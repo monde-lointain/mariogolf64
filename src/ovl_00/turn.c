@@ -253,6 +253,13 @@
 /* While putting, the crane's steps are this times a count that grows with the
  * putt's length */
 #define AIM_CAMERA_PUTT_STEP_UNIT 426.700810546875
+/* The counts for each putt mode, when craning and when moving along the line */
+#define SHORT_PUTT_CRANE_STEP_COUNT 10
+#define MIDDLE_PUTT_CRANE_STEP_COUNT 13
+#define LONG_PUTT_CRANE_STEP_COUNT 15
+#define SHORT_PUTT_DOLLY_STEP_COUNT 10
+#define MIDDLE_PUTT_DOLLY_STEP_COUNT 15
+#define LONG_PUTT_DOLLY_STEP_COUNT 20
 /* The crane swings the camera forward only while it is below this height, and
  * back only above the other */
 #define AIM_CAMERA_CRANE_FORWARD_HEIGHT (-0x5A00)
@@ -945,11 +952,11 @@ void CraneAimCamera(void) {
 
   if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     if (g_CurrentShot.shotMode == PUTT_MODE_SHORT) {
-      stepCount = 10;
+      stepCount = SHORT_PUTT_CRANE_STEP_COUNT;
     } else if (g_CurrentShot.shotMode == PUTT_MODE_MIDDLE) {
-      stepCount = 13;
+      stepCount = MIDDLE_PUTT_CRANE_STEP_COUNT;
     } else {
-      stepCount = 15;
+      stepCount = LONG_PUTT_CRANE_STEP_COUNT;
     }
 
     if (g_TurnController.buttons & L_CBUTTONS) {
@@ -995,11 +1002,11 @@ void MoveAimCameraDistanceByUpDown(void) {
 
   if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     if (g_CurrentShot.shotMode == PUTT_MODE_SHORT) {
-      stepCount = 10;
+      stepCount = SHORT_PUTT_DOLLY_STEP_COUNT;
     } else if (g_CurrentShot.shotMode == PUTT_MODE_MIDDLE) {
-      stepCount = 15;
+      stepCount = MIDDLE_PUTT_DOLLY_STEP_COUNT;
     } else {
-      stepCount = 20;
+      stepCount = LONG_PUTT_DOLLY_STEP_COUNT;
     }
 
     if (g_TurnController.buttons & U_CBUTTONS) {
@@ -1731,6 +1738,18 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
   }
 }
 
+/* The course points that each shot of a kind earns */
+/* A great or an excellent shot */
+#define GREAT_SHOT_POINTS 2
+#define PIN_SHOT_POINTS 4
+#define CHIP_IN_POINTS 6
+#define LONG_CHIP_IN_POINTS 8
+/* A flag shot, an eagle or a water cut */
+#define BIG_SHOT_POINTS 10
+#define ALBATROSS_POINTS 16
+#define HOLE_IN_ONE_POINTS 20
+#define MINI_GOLF_HOLE_IN_ONE_POINTS 10
+
 /* The course points that the player has earned with the shots of one kind */
 s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
   s32 count = (u8)g_Players[playerIndex].unkAA[shotKind];
@@ -1739,34 +1758,34 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
   switch (shotKind) {
     case SHOT_KIND_GREAT:
     case SHOT_KIND_EXCELLENT:
-      points = 2;
+      points = GREAT_SHOT_POINTS;
       break;
     case SHOT_KIND_LONG_CHIP_IN:
-      points = 8;
+      points = LONG_CHIP_IN_POINTS;
       break;
     case SHOT_KIND_PIN_SHOT:
     case SHOT_KIND_UNK5:
-      points = 4;
+      points = PIN_SHOT_POINTS;
       break;
     case SHOT_KIND_HOLE_IN_ONE:
       if (g_GameState.isMiniGolf) {
-        points = 10;
+        points = MINI_GOLF_HOLE_IN_ONE_POINTS;
       } else {
-        points = 20;
+        points = HOLE_IN_ONE_POINTS;
       }
 
       break;
     case SHOT_KIND_FLAG_SHOT:
     case SHOT_KIND_EAGLE:
     case SHOT_KIND_WATER_CUT:
-      points = 10;
+      points = BIG_SHOT_POINTS;
       break;
     case SHOT_KIND_ALBATROSS:
-      points = 16;
+      points = ALBATROSS_POINTS;
       break;
     case SHOT_KIND_CHIP_IN:
     case SHOT_KIND_BIRDIE:
-      points = 6;
+      points = CHIP_IN_POINTS;
       break;
     default:
       osSyncPrintf("Unknown Shot Type%d\n", shotKind);
