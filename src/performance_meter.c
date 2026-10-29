@@ -299,7 +299,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   gSPViewport(gfx++, &f_MeterViewport);
   gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_InitRcpDisplayList));
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320 * scale,
-      osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+      RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
 
   /* The projection's origin is at the bottom left, so y is flipped */
   posY = (240.0 - METER_TOP_Y) - y;
@@ -584,7 +584,7 @@ void DrawMemoryMeter(u32 y, s32 taskFlags) {
 
   gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_InitRcpDisplayList));
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
-      osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+      RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);

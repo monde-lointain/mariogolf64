@@ -2548,7 +2548,7 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
     f_BackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-        OS_K0_TO_PHYSICAL(f_CapturedFrame) & ~7);
+        RenderTargetAddress(OS_K0_TO_PHYSICAL(f_CapturedFrame)));
     gDPPipeSync(gfx++);
     source = f_LastFrameBuffer;
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
@@ -2570,7 +2570,7 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
 
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-        OS_K0_TO_PHYSICAL(nuGfxCfb_ptr) & ~7);
+        RenderTargetAddress(OS_K0_TO_PHYSICAL(nuGfxCfb_ptr)));
   }
 
   *displayListHead = gfx;

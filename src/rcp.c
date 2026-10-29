@@ -81,20 +81,20 @@ void AppendBufferClear(s32 clearMode, Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-  gDPSetDepthImage(gfx++, OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~7);
+  gDPSetDepthImage(gfx++, RenderTargetAddress(OS_K0_TO_PHYSICAL(nuGfxZBuffer)));
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_FILL);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-      OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~7);
+      RenderTargetAddress(OS_K0_TO_PHYSICAL(nuGfxZBuffer)));
   gDPSetFillColor(
       gfx++, GPACK_ZDZ(MAX_DEPTH, 0) << 16 | GPACK_ZDZ(MAX_DEPTH, 0));
   gDPFillRectangle(gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
   gDPPipeSync(gfx++);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-      osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+      RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
   if (clearMode == BUFFER_CLEAR_BY_LINE) {
     /* Stops a line short, which the screen's border hides */
     for (line = 0; line < SCREEN_HEIGHT - 1; line++) {

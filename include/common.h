@@ -53,6 +53,8 @@ typedef s32 Boolean;
 
 /* The RDP loads textures from 8-byte boundaries */
 #define TextureAddress(address) ((u32)(address) & ~7)
+/* The RDP draws into color and depth images from 8-byte boundaries too */
+#define RenderTargetAddress(address) ((u32)(address) & ~7)
 
 /* A 32-bit RGBA color, as gSPModifyVertex takes a vertex color */
 #define RgbaColor(red, green, blue, alpha) \
