@@ -68,7 +68,6 @@ extern s16 D_800FE33C;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
-extern s8 g_BetSet;
 extern s8 D_801052E8;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC4;

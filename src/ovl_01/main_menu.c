@@ -277,7 +277,6 @@ extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
 extern u8 D_801B9410;
-extern s8 g_BetSet;
 
 /*
  * The mini-golf course select. A record's three courses lie on a disc that

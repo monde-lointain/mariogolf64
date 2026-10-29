@@ -297,7 +297,7 @@ ControllerState g_TurnController BSS = {0};
 void* g_PinFlagImages BSS = {0};
 u8* g_PlayerFaceImages[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 GameState D_801B55F0 BSS ALIGNED(8) = {0};
-s8 g_BetSet BSS = {0};
+BetSet g_BetSet BSS = {0};
 Mtx g_ScreenOrthoMatrix BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_801B5678[0x8] BSS = {0};

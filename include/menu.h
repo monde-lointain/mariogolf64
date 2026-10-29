@@ -474,6 +474,11 @@ enum BetSet {
   BET_SET_MINI_GOLF_FOUR_PLAYER
 };
 
+typedef u8 BetSet;
+
+/* The bets that the chosen game offers */
+extern BetSet g_BetSet;
+
 /* The ways SlideBrickWall slides the stats panel's rows */
 #define STATS_SLIDE_CURRENT 0
 #define STATS_SLIDE_OUT_RIGHT 1

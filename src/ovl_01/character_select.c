@@ -534,7 +534,6 @@ s32 func_80209BE0_ovl_01(void) {
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
-extern s8 g_BetSet;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 
 s32 GetClubTournamentCourse(void);

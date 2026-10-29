@@ -191,7 +191,6 @@ extern void* D_8012D430[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
 extern const char D_802319E0_ovl_01[];
 
-extern u8 g_BetSet;
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern u8 D_801B9410;
