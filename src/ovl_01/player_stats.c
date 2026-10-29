@@ -294,13 +294,15 @@ static s32 D_802304FC_ovl_01[STATS_INDEX_ROW_COUNT]
 /* Read by no routine */
 static char D_802305A4_ovl_01[8][10] = {
     "ﾄﾞﾗｺﾝ", "ﾆｱﾋﾟﾝ", "ｽｺｱ", "ﾀﾃ", "ﾖｺ", "ｽｷﾝｽﾞ", "ﾏｯﾁ", "ﾀﾞﾌﾞﾙｽ"};
-/* The view of the players' characters */
-static f32 D_802305F4_ovl_01[2] = {0.0f, 0.0f};
+/* The handicap screen's golfers' turn, in degrees about X and Y */
+static f32 f_HandicapGolferAngles[2] = {0.0f, 0.0f};
 /* Read by no routine */
 static s32 D_802305FC_ovl_01[3] = {0, 0, 0};
-static f32 D_80230608_ovl_01[MAX_PLAYER_COUNT] = {4.2f, 4.0f, 4.2f, 4.0f};
+/* Each golfer's scale on the handicap screen */
+static f32 f_HandicapGolferScales[MAX_PLAYER_COUNT] = {4.2f, 4.0f, 4.2f, 4.0f};
+/* Where DrawHandicaps stands each golfer, by the player count */
 // clang-format off
-static Vec3 D_80230618_ovl_01[MAX_PLAYER_COUNT]
+static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT]
                               [MAX_PLAYER_COUNT] = {
   {
     { 0.0f, -44.0f, -1000.0f },
@@ -329,7 +331,7 @@ static Vec3 D_80230618_ovl_01[MAX_PLAYER_COUNT]
 };
 // clang-format on
 /* The left of each player's column, by the player count */
-static s32 D_802306D8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+static s32 f_HandicapColumnLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {128, 0, 0, 0}, {96, 160, 0, 0}, {64, 128, 192, 0}, {32, 96, 160, 224}};
 static s32 D_80230718_ovl_01[STATS_SLIDE_ROW_COUNT] = {
     0, 2, 4, 6, 8, 10, 12, 14, 16};
@@ -413,9 +415,10 @@ static f32 f_BestShotsCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
 static s32 D_80230A48_ovl_01[CHARACTER_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 
-static Mtx D_8023ACC0_ovl_01[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
-static Mtx D_8023AEC0_ovl_01;
-static LookAt D_8023AF00_ovl_01[DRAW_BUFFER_COUNT];
+/* The camera and placement that DrawHandicaps draws each golfer with */
+static Mtx f_HandicapGolferTransforms[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_HandicapGolfersProjection;
+static LookAt f_HandicapGolfersLookAts[DRAW_BUFFER_COUNT];
 
 /* Read by no routine */
 static u8 D_8023AF40_ovl_01[0x100];
@@ -1189,18 +1192,18 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
   gDPPipeSync(gfx++);
-  guOrtho(&D_8023AEC0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
+  guOrtho(&f_HandicapGolfersProjection, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CHARACTERS_NEAR,
       MENU_CHARACTERS_FAR, MENU_CHARACTERS_ORTHO_SCALE);
   {
     Mat4 viewing;
 
-    guLookAtReflectF(viewing, &D_8023AF00_ovl_01[g_DrawBufferIndex], 0.0f,
-        MENU_CHARACTERS_EYE_Y, MENU_CHARACTERS_EYE_Z, 0.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f);
+    guLookAtReflectF(viewing, &f_HandicapGolfersLookAts[g_DrawBufferIndex],
+        0.0f, MENU_CHARACTERS_EYE_Y, MENU_CHARACTERS_EYE_Z, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f);
   }
 
-  gSPLookAt(gfx++, &D_8023AF00_ovl_01[g_DrawBufferIndex]);
+  gSPLookAt(gfx++, &f_HandicapGolfersLookAts[g_DrawBufferIndex]);
   for (playerIndex = 0; playerIndex != g_ChosenPlayerCount; playerIndex++) {
     if (D_8023BFC0_ovl_01[playerIndex] > 0) {
       D_8023BFC0_ovl_01[playerIndex]--;
@@ -1234,30 +1237,34 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
       }
     }
 
-    rotation[0] = DegreesToRadians(D_802305F4_ovl_01[0]);
-    rotation[1] = DegreesToRadians(D_802305F4_ovl_01[1]);
+    rotation[0] = DegreesToRadians(f_HandicapGolferAngles[0]);
+    rotation[1] = DegreesToRadians(f_HandicapGolferAngles[1]);
     rotation[2] = 0.0f;
     translation[0] =
-        D_80230618_ovl_01[g_ChosenPlayerCount - 1][playerIndex][0] + slide;
-    translation[1] = D_80230618_ovl_01[g_ChosenPlayerCount - 1][playerIndex][1];
-    translation[2] = D_80230618_ovl_01[g_ChosenPlayerCount - 1][playerIndex][2];
-    scale[0] = D_80230608_ovl_01[playerIndex];
-    scale[1] = D_80230608_ovl_01[playerIndex];
-    scale[2] = D_80230608_ovl_01[playerIndex];
+        f_HandicapGolferPositions[g_ChosenPlayerCount - 1][playerIndex][0] +
+        slide;
+    translation[1] =
+        f_HandicapGolferPositions[g_ChosenPlayerCount - 1][playerIndex][1];
+    translation[2] =
+        f_HandicapGolferPositions[g_ChosenPlayerCount - 1][playerIndex][2];
+    scale[0] = f_HandicapGolferScales[playerIndex];
+    scale[1] = f_HandicapGolferScales[playerIndex];
+    scale[2] = f_HandicapGolferScales[playerIndex];
 
     BuildTransformMatrix(transform, rotation, translation, scale);
     ConvertMatrixToFixed(
-        transform, &D_8023ACC0_ovl_01[playerIndex][g_DrawBufferIndex]);
+        transform, &f_HandicapGolferTransforms[playerIndex][g_DrawBufferIndex]);
 
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023AEC0_ovl_01),
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_HandicapGolfersProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&D_8023ACC0_ovl_01[playerIndex][g_DrawBufferIndex]),
+        OS_K0_TO_PHYSICAL(
+            &f_HandicapGolferTransforms[playerIndex][g_DrawBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
     /* DrawCharacter draws through g_DisplayListHead */
@@ -1331,12 +1338,13 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
           QuarterPixels(
-              D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] + slide),
+              f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
+              slide),
           QuarterPixels(HANDICAP_COLUMN_TOP +
               (stripIndex * HANDICAP_COLUMN_STRIP_HEIGHT)),
           QuarterPixels(
-              D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] + slide +
-              HANDICAP_COLUMN_WIDTH),
+              f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
+              slide + HANDICAP_COLUMN_WIDTH),
           QuarterPixels(HANDICAP_COLUMN_TOP +
               (stripIndex * HANDICAP_COLUMN_STRIP_HEIGHT) +
               HANDICAP_COLUMN_STRIP_HEIGHT),
@@ -1358,10 +1366,12 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
-        QuarterPixels(D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
+        QuarterPixels(
+            f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
             (slide + HANDICAP_LABEL_OFFSET_X)),
         QuarterPixels(HANDICAP_LABEL_TOP),
-        QuarterPixels(D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
+        QuarterPixels(
+            f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
             (slide + HANDICAP_LABEL_OFFSET_X) + PLAYER_LABEL_WIDTH),
         QuarterPixels(HANDICAP_LABEL_TOP + PLAYER_LABEL_HEIGHT),
         HANDICAP_LABEL_TILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1425,12 +1435,12 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     /* The left arrow starts at the right edge of its mirrored image */
     gSPScisTextureRectangle(gfx++,
         QuarterPixels(
-            D_802306D8_ovl_01[g_ChosenPlayerCount - 1][memory->unk29] + arrowX +
-            slide),
+            f_HandicapColumnLefts[g_ChosenPlayerCount - 1][memory->unk29] +
+            arrowX + slide),
         QuarterPixels(offsetY + HANDICAP_COLUMN_TOP + arrowY),
         QuarterPixels(
-            D_802306D8_ovl_01[g_ChosenPlayerCount - 1][memory->unk29] + arrowX +
-            slide + GREEN_ARROW_SIZE),
+            f_HandicapColumnLefts[g_ChosenPlayerCount - 1][memory->unk29] +
+            arrowX + slide + GREEN_ARROW_SIZE),
         QuarterPixels(
             offsetY + HANDICAP_COLUMN_TOP + arrowY + GREEN_ARROW_SIZE),
         G_TX_RENDERTILE,
@@ -1441,7 +1451,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
     DrawTwoDigitMenuNumber(&gfx,
-        D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
+        f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
             (slide + HANDICAP_NUMBER_OFFSET_X),
         HANDICAP_NUMBER_Y, g_ChosenHandicaps[columnIndex], MENU_NUMBER_PLAIN);
   }

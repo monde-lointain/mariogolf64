@@ -9,21 +9,21 @@ rom:0x11554C reloc:MIPS_LO16 symbol:D_80230FD4_ovl_01 addend:-0x1
 // DrawRingShotRecords reads f_RingShotIconPositions[openCourseCount - 1]; name the table, not the row before it
 rom:0x10A070 reloc:MIPS_HI16 symbol:f_RingShotIconPositions addend:-0xE
 rom:0x10A074 reloc:MIPS_LO16 symbol:f_RingShotIconPositions addend:-0xE
-// DrawHandicaps reads D_802305F4_ovl_01[1]; name the array, not its second element
-rom:0x103EF0 reloc:MIPS_HI16 symbol:D_802305F4_ovl_01 addend:0x4
-rom:0x103EF4 reloc:MIPS_LO16 symbol:D_802305F4_ovl_01 addend:0x4
-// DrawHandicaps reads each D_80230618_ovl_01 position's y and z; name the table, not the floats inside it
-rom:0x103F60 reloc:MIPS_HI16 symbol:D_80230618_ovl_01 addend:0x4
-rom:0x103F68 reloc:MIPS_LO16 symbol:D_80230618_ovl_01 addend:0x4
-rom:0x103F78 reloc:MIPS_HI16 symbol:D_80230618_ovl_01 addend:0x8
-rom:0x103F80 reloc:MIPS_LO16 symbol:D_80230618_ovl_01 addend:0x8
-// DrawHandicaps reads D_802306D8_ovl_01[g_ChosenPlayerCount - 1]; name the table, not the row before it
-rom:0x1045B4 reloc:MIPS_HI16 symbol:D_802306D8_ovl_01 addend:-0x10
-rom:0x1045B8 reloc:MIPS_LO16 symbol:D_802306D8_ovl_01 addend:-0x10
-rom:0x104DF4 reloc:MIPS_HI16 symbol:D_802306D8_ovl_01 addend:-0x10
-rom:0x104DF8 reloc:MIPS_LO16 symbol:D_802306D8_ovl_01 addend:-0x10
-rom:0x104FB8 reloc:MIPS_HI16 symbol:D_802306D8_ovl_01 addend:-0x10
-rom:0x104FBC reloc:MIPS_LO16 symbol:D_802306D8_ovl_01 addend:-0x10
+// DrawHandicaps reads f_HandicapGolferAngles[1]; name the array, not its second element
+rom:0x103EF0 reloc:MIPS_HI16 symbol:f_HandicapGolferAngles addend:0x4
+rom:0x103EF4 reloc:MIPS_LO16 symbol:f_HandicapGolferAngles addend:0x4
+// DrawHandicaps reads each f_HandicapGolferPositions position's y and z; name the table, not the floats inside it
+rom:0x103F60 reloc:MIPS_HI16 symbol:f_HandicapGolferPositions addend:0x4
+rom:0x103F68 reloc:MIPS_LO16 symbol:f_HandicapGolferPositions addend:0x4
+rom:0x103F78 reloc:MIPS_HI16 symbol:f_HandicapGolferPositions addend:0x8
+rom:0x103F80 reloc:MIPS_LO16 symbol:f_HandicapGolferPositions addend:0x8
+// DrawHandicaps reads f_HandicapColumnLefts[g_ChosenPlayerCount - 1]; name the table, not the row before it
+rom:0x1045B4 reloc:MIPS_HI16 symbol:f_HandicapColumnLefts addend:-0x10
+rom:0x1045B8 reloc:MIPS_LO16 symbol:f_HandicapColumnLefts addend:-0x10
+rom:0x104DF4 reloc:MIPS_HI16 symbol:f_HandicapColumnLefts addend:-0x10
+rom:0x104DF8 reloc:MIPS_LO16 symbol:f_HandicapColumnLefts addend:-0x10
+rom:0x104FB8 reloc:MIPS_HI16 symbol:f_HandicapColumnLefts addend:-0x10
+rom:0x104FBC reloc:MIPS_LO16 symbol:f_HandicapColumnLefts addend:-0x10
 // func_802104F0_ovl_01 reads each D_80230100_ovl_01 trophy position's y; name the table, not the field
 rom:0xFA930 reloc:MIPS_HI16 symbol:D_80230100_ovl_01 addend:0x4
 rom:0xFA938 reloc:MIPS_LO16 symbol:D_80230100_ovl_01 addend:0x4
