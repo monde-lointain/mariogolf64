@@ -42,6 +42,7 @@
 #include "scene.h"
 #include "scoring.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "shot_simulation.h"
 #include "sound.h"
 #include "surface.h"
@@ -3479,34 +3480,34 @@ void UpdateTurns(void) {
         } else if (g_PauseScreen == 3) {
         } else if (g_PauseScreen == 6) {
           switch (UpdatePrompt(&g_TurnController)) {
-            case 6:
+            case PROMPT_RESULT_GIVE_UP_HOLE:
               D_800C3094 = 1;
               SetMenuBackdrop(-1);
               ResumeRound();
               nextState = PLAYER_STATE_STARTING_REACTION;
               GiveUpHole(playerIndex);
               break;
-            case 5:
+            case PROMPT_RESULT_RESUME:
               g_PauseScreen = 0;
               SetMenuBackdrop(-1);
               ResumeRound();
               break;
-            case 1:
+            case PROMPT_RESULT_SAVE_REPLAY:
               SaveReplayToSlot();
               CloseSaveMenu();
               g_PauseScreen = 0;
               func_80060358();
               break;
-            case 0:
+            case PROMPT_RESULT_SAVE_GAME:
               SaveGameToSlot();
               g_PauseScreen = 5;
               break;
-            case 3:
+            case PROMPT_RESULT_END_GAME:
               LeaveGameSaveMenu();
-            case 2:
+            case PROMPT_RESULT_STAY_IN_SAVE_MENU:
               g_PauseScreen = 5;
               break;
-            case 4:
+            case PROMPT_RESULT_QUIT_GAME:
               g_PauseScreen = 0;
               ResumeRound();
               func_80060358();

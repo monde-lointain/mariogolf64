@@ -791,13 +791,6 @@ enum HoleMenuChoice {
 /* The argument that starts the Ring Shot results */
 #define RING_SHOT_RESULTS_MODE_UNK2 2
 
-/* The results of the prompt that the Ring Shot results open */
-enum PromptResult {
-  PROMPT_RESULT_UNK1 = 1,
-  PROMPT_RESULT_UNK2,
-  PROMPT_RESULT_UNK7 = 7
-};
-
 /* The notices shown when the hole unlocks something */
 #define UNLOCK_NOTICE_DONKEY_KONG 0
 #define UNLOCK_NOTICE_MAPLE 1
@@ -1579,17 +1572,17 @@ DIM_BACKDROP:
           case HOLE_END_STEP_PROMPT:
             result = UpdatePrompt(&g_TurnController);
             switch (result) {
-              case PROMPT_RESULT_UNK7:
+              case PROMPT_RESULT_SKIP_REPLAY:
                 func_802439B0();
                 f_HoleEndStep = result;
                 OpenPrompt(NO_PROMPT);
                 break;
-              case PROMPT_RESULT_UNK1:
+              case PROMPT_RESULT_SAVE_REPLAY:
                 func_80243898();
                 f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
                 OpenPrompt(NO_PROMPT);
                 break;
-              case PROMPT_RESULT_UNK2:
+              case PROMPT_RESULT_STAY_IN_SAVE_MENU:
                 g_PauseScreen = PAUSE_SCREEN_UNK5;
                 OpenPrompt(NO_PROMPT);
                 f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;

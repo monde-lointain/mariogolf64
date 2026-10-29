@@ -68,18 +68,6 @@ enum SendStatusStep {
   SEND_STATUS_WRITING
 };
 
-/* The answers to PROMPT_BRING_MORE_CHARACTERS */
-enum BringMoreCharactersAnswer {
-  BRING_MORE_CHARACTERS_YES = 8,
-  BRING_MORE_CHARACTERS_NO
-};
-
-/* The answers to PROMPT_OVERWRITE_RECORDS */
-enum OverwriteRecordsAnswer {
-  OVERWRITE_RECORDS_YES = 10,
-  OVERWRITE_RECORDS_NO
-};
-
 /* screenStep values on the Send Experience screen */
 enum SendExperienceStep {
   SEND_EXPERIENCE_CHOOSING,
@@ -789,10 +777,10 @@ void UpdateBringCharacters(void) {
       break;
     case BRING_ASKING:
       switch (UpdatePrompt(&f_TransmitController)) {
-        case BRING_MORE_CHARACTERS_YES:
+        case PROMPT_RESULT_BRING_MORE:
           transfer->screenStep = BRING_NEXT_CARTRIDGE;
           break;
-        case BRING_MORE_CHARACTERS_NO:
+        case PROMPT_RESULT_BRING_NO_MORE:
           transfer->screen = TRANSMIT_SCREEN_OPTIONS;
           break;
       }
@@ -999,11 +987,11 @@ void UpdateSendStatus(void) {
       break;
     case SEND_STATUS_ASKING:
       switch (UpdatePrompt(&f_TransmitController)) {
-        case OVERWRITE_RECORDS_YES:
+        case PROMPT_RESULT_YES:
           transfer->isAccessing = TRUE;
           transfer->screenStep = SEND_STATUS_WRITING;
           break;
-        case OVERWRITE_RECORDS_NO:
+        case PROMPT_RESULT_NO:
           transfer->screenStep = SEND_STATUS_CHOOSING;
           break;
       }

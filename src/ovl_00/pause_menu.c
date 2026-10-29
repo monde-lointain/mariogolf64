@@ -440,14 +440,6 @@ void FreePauseMenu(void) {
   SetSongVolume(SOUND_FULL_SCALE);
 }
 
-/* The prompts that some options open */
-enum PromptId {
-  PROMPT_UNK3 = 3,
-  PROMPT_UNK4,
-  PROMPT_UNK7 = 7,
-  PROMPT_UNK8
-};
-
 /* Where the panels of the wind and of the lie slide to while their option is
  * selected */
 #define PAUSE_PANEL_SHOWN_X 72.0f
@@ -509,19 +501,19 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
-        OpenPrompt(PROMPT_UNK4);
+        OpenPrompt(PROMPT_QUIT_GAME);
         break;
       case PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
-        OpenPrompt(PROMPT_UNK7);
+        OpenPrompt(PROMPT_QUIT_BROUGHT_OVER_GAME);
         break;
       case PAUSE_ACTION_QUIT_UNK3B_GAME:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         RequestPauseMenu(0, -1);
         g_PauseScreen = PAUSE_SCREEN_UNK6;
-        OpenPrompt(PROMPT_UNK8);
+        OpenPrompt(PROMPT_QUIT_UNK3B_GAME);
         break;
       case PAUSE_ACTION_SAVE_AND_QUIT:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -542,7 +534,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
           PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           RequestPauseMenu(0, -1);
           g_PauseScreen = PAUSE_SCREEN_UNK6;
-          OpenPrompt(PROMPT_UNK3);
+          OpenPrompt(PROMPT_GIVE_UP);
         }
 
         break;

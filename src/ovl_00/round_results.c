@@ -2360,12 +2360,6 @@ enum ScorePasswordStep {
   SCORE_PASSWORD_STEP_DONE
 };
 
-/* UpdatePrompt's results for PROMPT_SCORE_PASSWORD */
-enum ScorePasswordAnswer {
-  SCORE_PASSWORD_PROMPT_YES = 10,
-  SCORE_PASSWORD_PROMPT_NO
-};
-
 /* Shows the round's score password until the player says they have it. Returns
  * TRUE then. */
 s32 ShowScorePassword(ControllerState* controller) {
@@ -2399,10 +2393,10 @@ s32 ShowScorePassword(ControllerState* controller) {
       break;
     case SCORE_PASSWORD_STEP_ASKING:
       switch (UpdatePrompt(controller)) {
-        case SCORE_PASSWORD_PROMPT_YES:
+        case PROMPT_RESULT_YES:
           f_ResultsUnk78 = SCORE_PASSWORD_STEP_DONE;
           break;
-        case SCORE_PASSWORD_PROMPT_NO:
+        case PROMPT_RESULT_NO:
           f_ResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
           f_IsAwaitingConfirm = TRUE;
           break;
