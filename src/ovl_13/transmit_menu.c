@@ -1595,7 +1595,8 @@ void ResetSendExperience(void) {
 
 /* Returns the checksum that a save holds, which ComputeSaveChecksum checks */
 s32 GetStoredChecksum(u8* save) {
-  return save[SAVE_CHECKSUM_OFFSET] | (save[SAVE_CHECKSUM_OFFSET + 1] << 8);
+  return save[SAVE_CHECKSUM_OFFSET] |
+      (save[SAVE_CHECKSUM_OFFSET + 1] << BITS_PER_BYTE);
 }
 
 /* Sums the save's bytes after its checksum */
@@ -2509,9 +2510,9 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
 
         osSyncPrintf("PHASE 5\n");
         dataAddress = save[recordOffset + RECORD_ADDRESS_OFFSET] +
-            (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8);
+            (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << BITS_PER_BYTE);
         dataSize = save[recordOffset + RECORD_SIZE_OFFSET] +
-            (save[recordOffset + RECORD_SIZE_OFFSET + 1] << 8);
+            (save[recordOffset + RECORD_SIZE_OFFSET + 1] << BITS_PER_BYTE);
         osSyncPrintf("PHASE 6\n");
         result = nuContGBPakFread(&transfer->pakFile,
             dataAddress - STATUS_ADDRESS_BIAS, characterData, dataSize);
@@ -2523,7 +2524,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         sum = 0;
         osSyncPrintf("PHASE 7\n");
         storedSum = save[recordOffset + RECORD_SUM_OFFSET] |
-            (save[recordOffset + RECORD_SUM_OFFSET + 1] << 8);
+            (save[recordOffset + RECORD_SUM_OFFSET + 1] << BITS_PER_BYTE);
         for (index = 0; index != dataSize; index++) {
           sum += characterData[index];
         }
@@ -2540,11 +2541,12 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         if (IsCharacterFromSave(character, characterData)) {
           osSyncPrintf("PHASE 9.5\n");
           sum = character->experience +
-              ((characterData[DATA_EXPERIENCE_OFFSET + 1] << 8) |
+              ((characterData[DATA_EXPERIENCE_OFFSET + 1] << BITS_PER_BYTE) |
                   characterData[DATA_EXPERIENCE_OFFSET]);
           experience = (sum > MAX_EXPERIENCE) ? MAX_EXPERIENCE : sum;
           osSyncPrintf("PHASE 10\n");
-          characterData[DATA_EXPERIENCE_OFFSET + 1] = experience >> 8;
+          characterData[DATA_EXPERIENCE_OFFSET + 1] =
+              experience >> BITS_PER_BYTE;
           characterData[DATA_EXPERIENCE_OFFSET] = experience;
           characterData[DATA_UNK15E_OFFSET] = 100;
           result = nuContGBPakFwrite(&transfer->pakFile,
@@ -2566,7 +2568,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           osSyncPrintf("write sum %04x\n", sum);
           osSyncPrintf("PHASE 12\n");
           save[recordOffset + RECORD_SUM_OFFSET] = sum;
-          save[recordOffset + RECORD_SUM_OFFSET + 1] = sum >> 8;
+          save[recordOffset + RECORD_SUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
           result = nuContGBPakFwrite(&transfer->pakFile,
               CARTRIDGE_RAM_ADDRESS + recordOffset + RECORD_SUM_OFFSET,
               &save[recordOffset + RECORD_SUM_OFFSET], SAVE_HALFWORD_SIZE);
@@ -2578,7 +2580,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           osSyncPrintf("PHASE 13\n");
           sum = ComputeSaveChecksum(save);
           save[SAVE_CHECKSUM_OFFSET] = sum;
-          save[SAVE_CHECKSUM_OFFSET + 1] = sum >> 8;
+          save[SAVE_CHECKSUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
           result = nuContGBPakFwrite(&transfer->pakFile,
               CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
               &save[SAVE_CHECKSUM_OFFSET], SAVE_HALFWORD_SIZE);
@@ -2776,10 +2778,10 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
   }
 
   statusAddress = save[SAVE_STATUS_ADDRESS_OFFSET] +
-      (save[SAVE_STATUS_ADDRESS_OFFSET + 1] << 8);
+      (save[SAVE_STATUS_ADDRESS_OFFSET + 1] << BITS_PER_BYTE);
   save[SAVE_HAS_STATUS_OFFSET] = TRUE;
-  statusSize =
-      save[SAVE_STATUS_SIZE_OFFSET] + (save[SAVE_STATUS_SIZE_OFFSET + 1] << 8);
+  statusSize = save[SAVE_STATUS_SIZE_OFFSET] +
+      (save[SAVE_STATUS_SIZE_OFFSET + 1] << BITS_PER_BYTE);
   result = nuContGBPakFwrite(&transfer->pakFile,
       CARTRIDGE_RAM_ADDRESS + SAVE_HAS_STATUS_OFFSET,
       &save[SAVE_HAS_STATUS_OFFSET], SAVE_HALFWORD_SIZE);
@@ -2806,7 +2808,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
   sum &= 0xFFFF;
   osSyncPrintf(f_WriteSumFormat, sum);
   save[SAVE_STATUS_SUM_OFFSET] = sum;
-  save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> 8;
+  save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
   result = nuContGBPakFwrite(&transfer->pakFile,
       CARTRIDGE_RAM_ADDRESS + SAVE_STATUS_SUM_OFFSET,
       &save[SAVE_STATUS_SUM_OFFSET], SAVE_HALFWORD_SIZE);
@@ -2818,7 +2820,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
 
   sum = ComputeSaveChecksum(save) & 0xFFFF;
   save[SAVE_CHECKSUM_OFFSET] = sum;
-  save[SAVE_CHECKSUM_OFFSET + 1] = sum >> 8;
+  save[SAVE_CHECKSUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
   osSyncPrintf("write sum2 %04x\n", sum);
   result = nuContGBPakFwrite(&transfer->pakFile,
       CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET, &save[SAVE_CHECKSUM_OFFSET],
@@ -2953,16 +2955,17 @@ s32 ReadCartridgeCharacters(void) {
 
           /* Working out the address in storedSum first is there to match */
           storedSum = save[recordOffset + RECORD_ADDRESS_OFFSET] +
-              (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8) -
+              (save[recordOffset + RECORD_ADDRESS_OFFSET + 1]
+                  << BITS_PER_BYTE) -
               STATUS_ADDRESS_BIAS;
           dataSize = save[recordOffset + RECORD_SIZE_OFFSET] +
-              (save[recordOffset + RECORD_SIZE_OFFSET + 1] << 8);
+              (save[recordOffset + RECORD_SIZE_OFFSET + 1] << BITS_PER_BYTE);
           dataAddress = storedSum;
           for (attempt = 0; attempt != DATA_READ_ATTEMPTS; attempt++) {
             result = nuContGBPakFread(
                 &transfer->pakFile, dataAddress, characterData, dataSize);
             storedSum = save[recordOffset + RECORD_SUM_OFFSET] |
-                (save[recordOffset + RECORD_SUM_OFFSET + 1] << 8);
+                (save[recordOffset + RECORD_SUM_OFFSET + 1] << BITS_PER_BYTE);
             sum = 0;
             for (index = 0; index != dataSize; index++) {
               sum += characterData[index];
@@ -3571,16 +3574,16 @@ void BuildStatusData(u8* status) {
         /* Copying the count into value is there to match */
         value = entry->roundCount;
         course->roundCount[0] = value;
-        course->roundCount[1] = value >> 8;
+        course->roundCount[1] = value >> BITS_PER_BYTE;
         course->bestScore = entry->bestScore + STATUS_SCORE_BIAS;
         course->averageStrokes =
             RoundedWholePart(entry->strokeTotal * reciprocal);
         value = RoundedWholePart(entry->longestDrive * UNK_SCALE);
         course->longestDrive[0] = value;
-        course->longestDrive[1] = value >> 8;
+        course->longestDrive[1] = value >> BITS_PER_BYTE;
         value = RoundedWholePart(entry->averageDrive * UNK_SCALE);
         course->averageDrive[0] = value;
-        course->averageDrive[1] = value >> 8;
+        course->averageDrive[1] = value >> BITS_PER_BYTE;
         course->unk8 = RoundedWholePart(entry->measuredDriveTotal * reciprocal *
             (100.0f / HOLES_PER_ROUND));
         course->averagePutts = PackTenths(
@@ -3674,7 +3677,7 @@ void BuildStatusData(u8* status) {
   value = g_CourseStatFigures[COURSE_COUNT].roundCount;
   if (value > 0) {
     course->roundCount[0] = value;
-    course->roundCount[1] = value >> 8;
+    course->roundCount[1] = value >> BITS_PER_BYTE;
     course->bestScore =
         (s32)g_CourseStatFigures[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
     course->averageStrokes =
@@ -3683,10 +3686,10 @@ void BuildStatusData(u8* status) {
      * match */
     sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].bestDrive);
     course->longestDrive[0] = sum;
-    course->longestDrive[1] = sum >> 8;
+    course->longestDrive[1] = sum >> BITS_PER_BYTE;
     sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].averageDrive);
     course->averageDrive[0] = sum;
-    course->averageDrive[1] = sum >> 8;
+    course->averageDrive[1] = sum >> BITS_PER_BYTE;
     course->unk8 =
         RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].fairwayPercent);
     course->averagePutts =
@@ -3779,9 +3782,10 @@ void BuildStatusData(u8* status) {
     }
 
     progress->matchupBits[courseIndex].wonBits[0] = bits[0];
-    progress->matchupBits[courseIndex].wonBits[1] = bits[0] >> 8;
+    progress->matchupBits[courseIndex].wonBits[1] = bits[0] >> BITS_PER_BYTE;
     progress->matchupBits[courseIndex].wonUnsavedBits[0] = bits[1];
-    progress->matchupBits[courseIndex].wonUnsavedBits[1] = bits[1] >> 8;
+    progress->matchupBits[courseIndex].wonUnsavedBits[1] =
+        bits[1] >> BITS_PER_BYTE;
   }
 }
 
