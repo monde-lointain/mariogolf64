@@ -1592,8 +1592,8 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
 
   labelImage = GetMenuImageBuffer();
   labelImage += CHARACTER_SELECT_FIRST_IMAGE_SIZE;
-  LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(&gfx, labelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+  LoadSmallPalette(&gfx, 0, ImageBody(labelImage));
+  LoadNibbleTextureBlock(&gfx, ImageTexels(labelImage), G_IM_FMT_CI,
       LABEL_IMAGE_WIDTH, LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&gfx, LABEL_LEFT << 2, LABEL_TOP << 2,
       (LABEL_LEFT + LABEL_SHOWN_WIDTH) << 2,
@@ -1916,8 +1916,8 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
   }
 
   labelImage = GetMenuImageBuffer();
-  LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(&gfx, labelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+  LoadSmallPalette(&gfx, 0, ImageBody(labelImage));
+  LoadNibbleTextureBlock(&gfx, ImageTexels(labelImage), G_IM_FMT_CI,
       CURVE_LABEL_WIDTH, CURVE_LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   if (g_Clubs[clubSet * CLUB_SET_SIZE].curve > 0) {
     labelRow = CURVE_LABEL_DRAW;

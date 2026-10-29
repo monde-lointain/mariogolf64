@@ -810,25 +810,23 @@ void DrawGolfBalls(CameraMatrices* matrices) {
         G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
         G_TX_NOLOD, G_TX_NOLOD);
-    gDPLoadMultiBlock(gfx++,
-        TextureAddress(f_RollingBallImage + IMAGE_HEADER_SIZE), 0x80,
-        BALL_TILE_STILL, G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE,
+    gDPLoadMultiBlock(gfx++, TextureAddress(ImageBody(f_RollingBallImage)),
+        0x80, BALL_TILE_STILL, G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE,
         BALL_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
-    gDPLoadMultiBlock_4b(gfx++,
-        TextureAddress(f_BallSparkleImage + IMAGE_HEADER_SIZE), 0x100,
-        BALL_TILE_SHADOW, G_IM_FMT_I, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP,
+    gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_BallSparkleImage)),
+        0x100, BALL_TILE_SHADOW, G_IM_FMT_I, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_BallMarkerImage)),
+        0x140, BALL_TILE_MARKER, G_IM_FMT_I, 16, 16, 0,
+        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
+        G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_BallShadowImage)),
+        0x150, BALL_TILE_SMALL, G_IM_FMT_I, 16, 16, 0,
+        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
+        G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TextureAddress(f_BallMarkerImage + IMAGE_HEADER_SIZE), 0x140,
-        BALL_TILE_MARKER, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
-        G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
-    gDPLoadMultiBlock_4b(gfx++,
-        TextureAddress(f_BallShadowImage + IMAGE_HEADER_SIZE), 0x150,
-        BALL_TILE_SMALL, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
-        G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
-    gDPLoadMultiBlock_4b(gfx++,
-        TextureAddress(f_BallAfterimageImage + IMAGE_HEADER_SIZE), 0x190,
+        TextureAddress(ImageBody(f_BallAfterimageImage)), 0x190,
         BALL_TILE_AFTERIMAGE, G_IM_FMT_I, 16, 64, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);

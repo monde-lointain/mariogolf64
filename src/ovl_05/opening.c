@@ -3291,11 +3291,10 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         gDPSetTexturePersp(gfx++, G_TP_PERSP);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_NONE);
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-            G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_ShadowTexture)),
+            G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE,
+            0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gDPSetTextureLOD(gfx++, G_TL_TILE);
         gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
@@ -3339,7 +3338,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
         if (f_IsLogoBallSlot[slot]) {
           gDPLoadTLUT_pal256(
-              gfx++, TextureAddress(f_LogoBallImages + IMAGE_HEADER_SIZE));
+              gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
         } else {
           gDPLoadTLUT_pal256(gfx++,
               TextureAddress(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
@@ -3360,7 +3359,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           if (f_IsLogoBallSlot[slot]) {
             gDPLoadTextureBlock(gfx++,
-                TextureAddress(f_LogoBallImages + LARGE_PALETTED_TEXELS_OFFSET +
+                TextureAddress(LargeImageTexels(f_LogoBallImages) +
                     ((stripIndex * OPENING_BALL_STRIP_SIZE) +
                         (f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE))),
                 G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
@@ -3448,13 +3447,12 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPPipeSync(gfx++);
           gDPSetTextureLUT(gfx++, G_TT_RGBA16);
           gDPLoadTLUT_pal256(
-              gfx++, TextureAddress(f_LogoMarioImage + IMAGE_HEADER_SIZE));
+              gfx++, TextureAddress(ImageBody(f_LogoMarioImage)));
           gDPLoadTextureBlock(gfx++,
-              TextureAddress(f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
-              G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
-              LOGO_MARIO_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-              G_TX_NOLOD);
+              TextureAddress(LargeImageTexels(f_LogoMarioImage)), G_IM_FMT_CI,
+              G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE, LOGO_MARIO_IMAGE_SIZE, 0,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
           gDPSetTextureLOD(gfx++, G_TL_TILE);
           gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
@@ -3575,11 +3573,10 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetTexturePersp(gfx++, G_TP_PERSP);
           gDPPipeSync(gfx++);
           gDPSetTextureLUT(gfx++, G_TT_NONE);
-          gDPLoadTextureBlock(gfx++,
-              TextureAddress(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-              G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
-              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_ShadowTexture)),
+              G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE,
+              0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
           gDPSetTextureLOD(gfx++, G_TL_TILE);
           gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
@@ -3612,7 +3609,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetTextureLUT(gfx++, G_TT_RGBA16);
           if (f_IsLogoBallSlot[slot]) {
             gDPLoadTLUT_pal256(
-                gfx++, TextureAddress(f_LogoBallImages + IMAGE_HEADER_SIZE));
+                gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
           } else {
             gDPLoadTLUT_pal256(gfx++,
                 TextureAddress(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
@@ -3623,8 +3620,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               stripIndex++) {
             if (f_IsLogoBallSlot[slot]) {
               gDPLoadTextureBlock(gfx++,
-                  TextureAddress(f_LogoBallImages +
-                      LARGE_PALETTED_TEXELS_OFFSET +
+                  TextureAddress(LargeImageTexels(f_LogoBallImages) +
                       ((stripIndex * OPENING_BALL_STRIP_SIZE) +
                           (f_ProjectedLogoBallFrameIndex *
                               LOGO_BALL_FRAME_SIZE))),
@@ -3751,13 +3747,12 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
             gDPLoadTLUT_pal256(
-                gfx++, TextureAddress(f_LogoMarioImage + IMAGE_HEADER_SIZE));
+                gfx++, TextureAddress(ImageBody(f_LogoMarioImage)));
             gDPLoadTextureBlock(gfx++,
-                TextureAddress(f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
-                G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
-                LOGO_MARIO_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-                G_TX_NOLOD);
+                TextureAddress(LargeImageTexels(f_LogoMarioImage)), G_IM_FMT_CI,
+                G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE, LOGO_MARIO_IMAGE_SIZE, 0,
+                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
             gDPPipeSync(gfx++);
             gDPSetTextureLOD(gfx++, G_TL_TILE);
             gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
@@ -3861,7 +3856,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
-          gfx++, TextureAddress(f_OpeningEffectImage + IMAGE_HEADER_SIZE));
+          gfx++, TextureAddress(ImageBody(f_OpeningEffectImage)));
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
@@ -3974,11 +3969,9 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(f_LakituImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LakituImage)));
     gDPPipeSync(gfx++);
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress(f_LakituImage + LARGE_PALETTED_TEXELS_OFFSET),
+    gDPLoadTextureBlock(gfx++, TextureAddress(LargeImageTexels(f_LakituImage)),
         G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_IMAGE_SIZE, LAKITU_IMAGE_SIZE, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOMASK,
         G_TX_NOLOD, G_TX_NOLOD);
@@ -4019,9 +4012,8 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPSetEnvColor(gfx++, 255, 255, 255, 255);
     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
         0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(f_LakituTrailImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-        LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
+    gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_LakituTrailImage)),
+        G_IM_FMT_I, LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, 7,
         G_TX_NOLOD, G_TX_NOLOD);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
@@ -4179,10 +4171,10 @@ void DrawOpeningBurst(Gfx** displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, f_OpeningEffectImage + IMAGE_HEADER_SIZE);
+    gDPLoadTLUT_pal16(gfx++, 0, ImageBody(f_OpeningEffectImage));
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
-    gDPLoadTextureBlock_4b(gfx++, f_OpeningEffectImage + PALETTED_TEXELS_OFFSET,
+    gDPLoadTextureBlock_4b(gfx++, ImageTexels(f_OpeningEffectImage),
         G_IM_FMT_CI, BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -4300,9 +4292,8 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPSetTextureLOD(gfx++, G_TL_TILE);
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
-      gDPLoadTextureBlock(gfx++,
-          TextureAddress(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-          G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
+      gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_ShadowTexture)),
+          G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowTranslation),
@@ -4334,12 +4325,11 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(
-          gfx++, TextureAddress(f_ShotBallImage + IMAGE_HEADER_SIZE));
+      gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_ShotBallImage)));
       gDPPipeSync(gfx++);
       for (stripIndex = 0; stripIndex != SHOT_BALL_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_ShotBallImage + LARGE_PALETTED_TEXELS_OFFSET +
+            TextureAddress(LargeImageTexels(f_ShotBallImage) +
                 (stripIndex * SHOT_BALL_IMAGE_SIZE * SHOT_BALL_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, SHOT_BALL_IMAGE_SIZE,
             SHOT_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -4784,8 +4774,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPPipeSync(gfx++);
     gDPSetTextureLOD(gfx++, G_TL_TILE);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
-    gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(f_LogoLetterImages + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
@@ -4816,8 +4805,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     }
 
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
-    gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(f_LogoClubImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoClubImage)));
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_CLUB_STRIP_COUNT; i++) {
       gDPLoadTextureBlock(gfx++,
@@ -4868,8 +4856,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
         AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA |
             ALPHA_CVG_SEL |
             GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM));
-    gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(f_LogoLetterImages + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
         gDPLoadTextureBlock(gfx++,
@@ -4912,10 +4899,9 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
-      gDPLoadTextureBlock(gfx++,
-          TextureAddress(f_LogoShineImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-          G_IM_SIZ_8b, LOGO_SHINE_IMAGE_SIZE, LOGO_SHINE_IMAGE_SIZE, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_LogoShineImage)),
+          G_IM_FMT_I, G_IM_SIZ_8b, LOGO_SHINE_IMAGE_SIZE, LOGO_SHINE_IMAGE_SIZE,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
     }

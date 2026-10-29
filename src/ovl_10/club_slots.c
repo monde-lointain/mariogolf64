@@ -1112,8 +1112,8 @@ void DrawClubSlotsLogo(
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-  LoadTextureBlock(&gfx, f_ShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
-      G_IM_SIZ_8b, SHINE_SIZE, SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+  LoadTextureBlock(&gfx, ImageBody(f_ShineImage), G_IM_FMT_I, G_IM_SIZ_8b,
+      SHINE_SIZE, SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);
   shineTime = f_ShineTime++;
   if (f_ShineTime >= SHINE_DELAY) {

@@ -6659,7 +6659,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  LoadLargePalette(&gfx, mario + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(mario));
   for (stripIndex = 0; stripIndex != MARIO_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureTile(gfx++, TextureAddress(LargeImageTexels(mario)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MARIO_WIDTH, MARIO_HEIGHT, 0,
@@ -6821,8 +6821,8 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
     D_8022FEFC_ovl_01 = (D_8022FEFC_ovl_01 + 1) % ARROW_TIMER_PERIOD;
     frameIndex = D_8022FEFC_ovl_01 < ARROW_FRAME_DURATION;
     LoadNibbleTextureBlock(&gfx,
-        arrows + PALETTED_TEXELS_OFFSET + (frameIndex * ARROW_FRAME_SIZE),
-        G_IM_FMT_CI, ARROW_SIZE, ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        ImageTexels(arrows) + (frameIndex * ARROW_FRAME_SIZE), G_IM_FMT_CI,
+        ARROW_SIZE, ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     /* The first pass draws the arrows' shadows */
     for (loopIndex = 0; loopIndex != ARROW_PASS_COUNT; loopIndex++) {
       shiftX = 0;

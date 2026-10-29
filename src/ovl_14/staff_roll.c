@@ -1858,9 +1858,8 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
       glyphLeft = column * STAFF_GLYPH_WIDTH;
       glyphTop = row * STAFF_GLYPH_HEIGHT;
       gDPPipeSync(gfx++);
-      gDPLoadTextureTile_4b(gfx++,
-          TextureAddress(f_StaffFont + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-          STAFF_FONT_WIDTH, 0, glyphLeft, glyphTop,
+      gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageBody(f_StaffFont)),
+          G_IM_FMT_I, STAFF_FONT_WIDTH, 0, glyphLeft, glyphTop,
           glyphLeft + STAFF_GLYPH_WIDTH - 1, glyphTop + STAFF_GLYPH_HEIGHT - 1,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

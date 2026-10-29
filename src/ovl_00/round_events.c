@@ -1576,12 +1576,10 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     }
 
     growth = frame * WINNER_GROWTH_STEP;
-    LoadSmallPalette(
-        &gfx, 0, f_MovieBuffer + WINNER_PLAQUE_OFFSET + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, 0, ImageBody(f_MovieBuffer + WINNER_PLAQUE_OFFSET));
     LoadNibbleTextureBlock(&gfx,
-        f_MovieBuffer + WINNER_PLAQUE_OFFSET + PALETTED_TEXELS_OFFSET,
-        G_IM_FMT_CI, WINNER_PLAQUE_SIZE, WINNER_PLAQUE_SIZE, 0, 0, 0, 0, 0, 0,
-        0);
+        ImageTexels(f_MovieBuffer + WINNER_PLAQUE_OFFSET), G_IM_FMT_CI,
+        WINNER_PLAQUE_SIZE, WINNER_PLAQUE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
     step = ((WINNER_PLAQUE_SIZE / 2) << 10) / plaqueHalfSize;
     DrawTextureRect(&gfx, (WINNER_CENTER_X - plaqueHalfSize) << 2,
@@ -2775,8 +2773,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
-        TextureAddress(
-            g_SharedEffectImages + CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE));
+        TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
     gDPLoadTextureBlock(gfx++,
         TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, 64, 8, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2788,8 +2785,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
-        TextureAddress(
-            g_SharedEffectImages + CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE));
+        TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
     gDPLoadTextureBlock(gfx++,
         TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, 16, 100, 0, G_TX_MIRROR | G_TX_WRAP,
@@ -2797,29 +2793,28 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
       f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(
-            g_SharedEffectImages + CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE),
+        TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)),
         G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
   } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
       f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6 ||
       f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(g_SharedEffectImages + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-        32, 100, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I, 32, 100, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET +
-            IMAGE_HEADER_SIZE),
+        TextureAddress(
+            ImageBody(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET)),
         G_IM_FMT_I, 16, 100, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
   } else {
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(g_SharedEffectImages + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-        32, 100, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I, 32, 100, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   }
 
   guScaleF(
@@ -2833,8 +2828,8 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     if (f_ContactStyle == CONTACT_STYLE_WARIO ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET +
-              IMAGE_HEADER_SIZE),
+          TextureAddress(
+              ImageBody(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET)),
           G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
@@ -2857,8 +2852,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
-        TextureAddress(
-            g_SharedEffectImages + CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE));
+        TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, CONTACT_SPIN_ALPHA);
     gDPLoadTextureBlock(gfx++,
         TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
@@ -3036,10 +3030,9 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   gDPSetEnvColor(gfx++, 255, 255, 255, 255);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
       PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-  LoadNibbleTextureBlock(&gfx,
-      f_MovieBuffer + FLY_GUY_IMAGE_SIZE + IMAGE_HEADER_SIZE, G_IM_FMT_I,
-      WIND_STREAK_IMAGE_WIDTH, WIND_STREAK_IMAGE_HEIGHT, 0, G_TX_MIRROR,
-      G_TX_MIRROR, 0, WIND_STREAK_IMAGE_MASK_T, 0, 0);
+  LoadNibbleTextureBlock(&gfx, ImageBody(f_MovieBuffer + FLY_GUY_IMAGE_SIZE),
+      G_IM_FMT_I, WIND_STREAK_IMAGE_WIDTH, WIND_STREAK_IMAGE_HEIGHT, 0,
+      G_TX_MIRROR, G_TX_MIRROR, 0, WIND_STREAK_IMAGE_MASK_T, 0, 0);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
       G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
   gDPPipeSync(gfx++);
@@ -3094,9 +3087,8 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  LoadTextureBlock(&gfx, f_MovieBuffer + IMAGE_HEADER_SIZE, G_IM_FMT_RGBA,
-      G_IM_SIZ_16b, FLY_GUY_IMAGE_WIDTH, FLY_GUY_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0,
-      0);
+  LoadTextureBlock(&gfx, ImageBody(f_MovieBuffer), G_IM_FMT_RGBA, G_IM_SIZ_16b,
+      FLY_GUY_IMAGE_WIDTH, FLY_GUY_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&gfx, ((s32)position.x - (FLY_GUY_IMAGE_WIDTH / 2)) * 4,
       ((s32)position.y - (FLY_GUY_IMAGE_HEIGHT / 2)) * 4,
       ((s32)position.x + (FLY_GUY_IMAGE_WIDTH / 2)) * 4,

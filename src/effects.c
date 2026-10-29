@@ -1553,10 +1553,10 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(f_RippleImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-      RIPPLE_IMAGE_SIZE, RIPPLE_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP,
-      G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_RippleImage)),
+      G_IM_FMT_I, RIPPLE_IMAGE_SIZE, RIPPLE_IMAGE_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD,
+      G_TX_NOLOD);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
     if (effect->kind == EFFECT_KIND_RIPPLE) {
@@ -1564,7 +1564,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
     }
   }
 
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(f_ArcImage + IMAGE_HEADER_SIZE),
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_ArcImage)),
       G_IM_FMT_I, ARC_IMAGE_SIZE, ARC_IMAGE_SIZE, 0, G_TX_MIRROR | G_TX_WRAP,
       G_TX_MIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gSPLoadGeometryMode(gfx++, 0);
@@ -1681,8 +1681,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
       TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress(f_DropletImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_DropletImage)));
   /* Reusing the sparkles' color for the tears is there to match */
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
@@ -1798,10 +1797,9 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
             G_IM_FMT_CI, DROPLET_IMAGE_SIZE, DROPLET_IMAGE_SIZE, 0, G_TX_MIRROR,
             G_TX_WRAP, 4, 0, 2, 2);
       } else if (effect->kind == EFFECT_KIND_UNKE) {
-        gDPLoadTextureBlock_4b(gfx++,
-            TextureAddress(f_SpeckleImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-            SPECKLE_IMAGE_SIZE, SPECKLE_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP, 6,
-            6, 1, 1);
+        gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_SpeckleImage)),
+            G_IM_FMT_I, SPECKLE_IMAGE_SIZE, SPECKLE_IMAGE_SIZE, 0, G_TX_WRAP,
+            G_TX_WRAP, 6, 6, 1, 1);
       } else {
         gDPLoadTextureBlock(gfx++,
             TextureAddress(f_DebrisImage + (frameOffset + IMAGE_HEADER_SIZE)),
@@ -1906,7 +1904,7 @@ void DrawDrop(
   gDPSetTextureLUT(gfx++, G_TT_NONE);
 
   /* The masks of 6 are wider than the image; the original has them */
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(f_DropImage + IMAGE_HEADER_SIZE),
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_DropImage)),
       G_IM_FMT_I, DROP_IMAGE_SIZE, DROP_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP,
       6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
@@ -1942,7 +1940,7 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(f_DivotImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_DivotImage)));
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPPipeSync(gfx++);
@@ -1998,7 +1996,7 @@ void DrawDivotMark(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(f_DivotImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_DivotImage)));
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
 
@@ -2505,9 +2503,8 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, RAIN_ALPHA_THRESHOLD);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(f_RainSplashImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-        RAIN_SPLASH_IMAGE_WIDTH, RAIN_SPLASH_IMAGE_HEIGHT, 0,
+    gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_RainSplashImage)),
+        G_IM_FMT_I, RAIN_SPLASH_IMAGE_WIDTH, RAIN_SPLASH_IMAGE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPSetPrimColor(gfx++, 0, 0, RAIN_SPLASH_GRAY, RAIN_SPLASH_GRAY,
@@ -2637,7 +2634,7 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
       }
     }
 
-    LoadSmallPalette(&gfx, 0, f_CloudImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, 0, ImageBody(f_CloudImage));
 
     /* Grouping the frame's offset is there to match */
     gDPLoadTextureTile_4b(gfx++,
@@ -2649,9 +2646,9 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
         (BADGE_LEFT + BADGE_SIZE) << 2,
         (offsetY + BADGE_RESTING_TOP + BADGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
-    LoadSmallPalette(&gfx, 0, f_ClumpImage + IMAGE_HEADER_SIZE);
-    LoadNibbleTextureBlock(&gfx, f_ClumpImage + PALETTED_TEXELS_OFFSET,
-        G_IM_FMT_CI, 16, COUNT_GLYPHS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    LoadSmallPalette(&gfx, 0, ImageBody(f_ClumpImage));
+    LoadNibbleTextureBlock(&gfx, ImageTexels(f_ClumpImage), G_IM_FMT_CI, 16,
+        COUNT_GLYPHS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     DrawDigitText(
         &gfx, BADGE_LEFT + BADGE_SIZE, offsetY + BADGE_COUNT_TOP, "*");
     sprintf(g_PrintBuffer, "%d", f_ShownBadgeCount);

@@ -631,7 +631,7 @@ void DrawPlanks(Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, f_PlanksImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_PlanksImage));
   switch (f_PlankMotion) {
     case PLANKS_SHUT:
       break;
@@ -681,7 +681,7 @@ void DrawPlanks(Gfx** displayListHead) {
 
     gDPPipeSync(gfx++);
     LoadTextureBlock(&gfx,
-        f_PlanksImage + LARGE_PALETTED_TEXELS_OFFSET +
+        LargeImageTexels(f_PlanksImage) +
             (stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH),
         G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0, 0, 0, 0, 0,
         0);
@@ -747,14 +747,13 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, f_ArrowsImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, 0, ImageBody(f_ArrowsImage));
     if (g_GameState.replayKind == REPLAY_KIND_NONE &&
         CountOpenRingShotCourses() >= 2) {
       arrowFrame =
           f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
       LoadNibbleTextureBlock(&gfx,
-          f_ArrowsImage + PALETTED_TEXELS_OFFSET +
-              (arrowFrame * ARROWS_FRAME_SIZE),
+          ImageTexels(f_ArrowsImage) + (arrowFrame * ARROWS_FRAME_SIZE),
           G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
@@ -815,10 +814,10 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, f_BoardImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_BoardImage));
     for (stripIndex = 0; stripIndex != HOLE_SIGN_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureTile(gfx++,
-          f_BoardImage + LARGE_PALETTED_TEXELS_OFFSET +
+          LargeImageTexels(f_BoardImage) +
               stripIndex * HOLE_SIGN_STRIP_HEIGHT * HOLE_SIGN_WIDTH,
           G_IM_FMT_CI, G_IM_SIZ_8b, HOLE_SIGN_WIDTH, 0, 0, 0,
           HOLE_SIGN_WIDTH - 1, HOLE_SIGN_STRIP_HEIGHT - 1, 0,
@@ -865,9 +864,9 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, f_ArrowsImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, 0, ImageBody(f_ArrowsImage));
     LoadNibbleTextureBlock(&gfx,
-        f_ArrowsImage + PALETTED_TEXELS_OFFSET +
+        ImageTexels(f_ArrowsImage) +
             ((arrowFrame % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME) *
                 ARROWS_FRAME_SIZE),
         G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -953,10 +952,10 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, f_BoardImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_BoardImage));
   for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
     LoadTextureBlock(&gfx,
-        f_BoardImage + LARGE_PALETTED_TEXELS_OFFSET +
+        LargeImageTexels(f_BoardImage) +
             (stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH),
         G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
@@ -1001,32 +1000,29 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
   u8* starImage = f_StarImages[f_StarBufferIndex];
   u8* emptyStarImage;
 
-  LoadSmallPalette(&gfx, TILE_SPINNING_STAR, starImage + IMAGE_HEADER_SIZE);
-  gDPLoadTextureBlock_4b(gfx++, starImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-      STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_STAR, G_TX_NOMIRROR | G_TX_WRAP,
+  LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImageBody(starImage));
+  gDPLoadTextureBlock_4b(gfx++, ImageTexels(starImage), G_IM_FMT_CI, STAR_WIDTH,
+      STAR_HEIGHT, TILE_SPINNING_STAR, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   gDPPipeSync(gfx++);
   emptyStarImage = f_EmptyStarImages[f_StarBufferIndex];
-  LoadSmallPalette(
-      &gfx, TILE_SPINNING_EMPTY_STAR, emptyStarImage + IMAGE_HEADER_SIZE);
-  gDPLoadMultiBlock_4b(gfx++, emptyStarImage + PALETTED_TEXELS_OFFSET,
+  LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR, ImageBody(emptyStarImage));
+  gDPLoadMultiBlock_4b(gfx++, ImageTexels(emptyStarImage),
       STAR_TMEM_STEP * TILE_SPINNING_EMPTY_STAR, TILE_SPINNING_EMPTY_STAR,
       G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_EMPTY_STAR,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  LoadSmallPalette(&gfx, TILE_STILL_STAR,
-      f_StarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
-  gDPLoadMultiBlock_4b(gfx++,
-      f_StarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
+  LoadSmallPalette(
+      &gfx, TILE_STILL_STAR, ImageBody(f_StarImages[STILL_STAR_IMAGE]));
+  gDPLoadMultiBlock_4b(gfx++, ImageTexels(f_StarImages[STILL_STAR_IMAGE]),
       STAR_TMEM_STEP * TILE_STILL_STAR, TILE_STILL_STAR, G_IM_FMT_CI,
       STAR_WIDTH, STAR_HEIGHT, TILE_STILL_STAR, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   LoadSmallPalette(&gfx, TILE_STILL_EMPTY_STAR,
-      f_EmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
-  gDPLoadMultiBlock_4b(gfx++,
-      f_EmptyStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
+      ImageBody(f_EmptyStarImages[STILL_STAR_IMAGE]));
+  gDPLoadMultiBlock_4b(gfx++, ImageTexels(f_EmptyStarImages[STILL_STAR_IMAGE]),
       STAR_TMEM_STEP * TILE_STILL_EMPTY_STAR, TILE_STILL_EMPTY_STAR,
       G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_STILL_EMPTY_STAR,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

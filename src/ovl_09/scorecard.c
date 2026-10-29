@@ -1108,12 +1108,12 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
     stripCount = 2;
   }
 
-  LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(image));
   height /= stripCount;
   for (stripIndex = 0; stripIndex != stripCount; stripIndex++) {
     LoadTextureBlock(&gfx,
-        image + LARGE_PALETTED_TEXELS_OFFSET + (stripIndex * width * height),
-        G_IM_FMT_CI, G_IM_SIZ_8b, width, height, 0, 0, 0, 0, 0, 0, 0);
+        LargeImageTexels(image) + (stripIndex * width * height), G_IM_FMT_CI,
+        G_IM_SIZ_8b, width, height, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, left << 2, top << 2, (left + width) << 2,
         (top + height) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);

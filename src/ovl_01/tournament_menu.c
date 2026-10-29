@@ -1469,7 +1469,7 @@ void func_802296C4_ovl_01(
   sprintf(g_PrintBuffer, "%d", number);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(image));
   width = 0;
   for (digit = g_PrintBuffer; *digit != '\0'; digit++) {
     width += ORDINAL_DIGIT_SPACING;

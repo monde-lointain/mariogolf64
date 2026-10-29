@@ -948,7 +948,7 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   s32 offset;
 
   sprintf(g_PrintBuffer, f_NumberFormat, value);
-  LoadSmallPalette(&gfx, 0, f_DigitsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, ImageBody(f_DigitsImage));
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(f_DigitsImage)),
@@ -992,9 +992,9 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
 #define DrawPlaceGlyph(gfx, x, y, glyph) \
   { \
     gDPLoadTextureTile(gfx++, \
-        TextureAddress(f_PlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET), \
-        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0, \
-        (glyph) * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1, \
+        TextureAddress(LargeImageTexels(f_PlaceDigitsImage)), G_IM_FMT_CI, \
+        G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0, (glyph) * PLACE_GLYPH_SIZE, \
+        PLACE_GLYPH_SIZE - 1, \
         ((glyph) * PLACE_GLYPH_SIZE) + PLACE_GLYPH_SIZE - 1, 0, \
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
@@ -1019,7 +1019,7 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   sprintf(g_PrintBuffer, f_PlaceNumberFormat, place);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, f_PlaceDigitsImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_PlaceDigitsImage));
   width = 0;
   for (c = g_PrintBuffer; *c != '\0'; c++) {
     width += PLACE_GLYPH_SPACING;
@@ -1067,7 +1067,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawPlaceNumber);
 void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   Gfx* gfx = *displayListHead;
 
-  LoadLargePalette(&gfx, f_ResultsPlacesImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
   LoadTextureBlock(&gfx,
       f_ResultsPlacesImage +
           ((place * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
@@ -1131,7 +1131,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
       }
     }
 
-    LoadLargePalette(&gfx, f_ResultsPlacesImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
     LoadTextureBlock(&gfx,
         f_ResultsPlacesImage +
             ((suffix * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
@@ -1145,7 +1145,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         TEXEL_STEP_ONE);
     if (rank >= RANK_FOURTH) {
       sprintf(g_PrintBuffer, f_PlaceNumberFormat, rank + 1);
-      LoadSmallPalette(&gfx, 0, D_80225708_ovl_00 + IMAGE_HEADER_SIZE);
+      LoadSmallPalette(&gfx, 0, ImageBody(D_80225708_ovl_00));
       if (rank >= RANK_TENTH) {
         x -= PLACE_TWO_DIGIT_SHIFT;
       }
@@ -1154,8 +1154,8 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         digit = g_PrintBuffer[i] - '0';
         digitX = (i * PLACE_DIGIT_SPACING) + PLACE_DIGIT_X;
         gDPLoadTextureTile_4b(gfx++,
-            TextureAddress(D_80225708_ovl_00 + PALETTED_TEXELS_OFFSET),
-            G_IM_FMT_CI, PLACE_DIGIT_WIDTH, 0, 0, digit * PLACE_DIGIT_WIDTH,
+            TextureAddress(ImageTexels(D_80225708_ovl_00)), G_IM_FMT_CI,
+            PLACE_DIGIT_WIDTH, 0, 0, digit * PLACE_DIGIT_WIDTH,
             PLACE_DIGIT_WIDTH - 1,
             digit * PLACE_DIGIT_WIDTH + PLACE_DIGIT_WIDTH - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1175,7 +1175,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
       image = D_80225708_ovl_00;
     }
 
-    LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(image));
     for (i = 0, stripY = y, offset = LARGE_PALETTED_TEXELS_OFFSET;
         i != RANK_BANNER_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx, image + offset, G_IM_FMT_CI, G_IM_SIZ_8b,
@@ -1188,7 +1188,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
       offset += RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT;
     }
   } else {
-    LoadLargePalette(&gfx, f_ResultsPlacesImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
     LoadTextureBlock(&gfx,
         f_ResultsPlacesImage +
             ((rank * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
@@ -1212,7 +1212,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRank);
 void DrawResultsLabel(Gfx** displayListHead, s32 x, s32 y, s32 label) {
   Gfx* gfx = *displayListHead;
 
-  LoadSmallPalette(&gfx, 0, f_ResultsLabelsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLabelsImage));
   gDPLoadTextureTile_4b(gfx++,
       TextureAddress(f_ResultsLabelsImage +
           ((label * (RESULTS_LABEL_STORED_WIDTH * RESULTS_LABEL_HEIGHT / 2)) +
@@ -1358,13 +1358,13 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
   }
 
-  LoadLargePalette(&gfx, f_ResultsCourseImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
   for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
     size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) *
         NOTICE_COURSE_STRIP_HEIGHT;
     step = (NOTICE_COURSE_STRIP_HEIGHT << 10) / size;
     LoadTextureBlock(&gfx,
-        f_ResultsCourseImage + LARGE_PALETTED_TEXELS_OFFSET +
+        LargeImageTexels(f_ResultsCourseImage) +
             (i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_COURSE_STRIP_WIDTH,
         NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -1375,12 +1375,12 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         0, 0, step, step);
   }
 
-  LoadLargePalette(&gfx, f_NoticeTitleImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
     lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
     lift -= (s32)NOTICE_TITLE_LIFT;
     LoadTextureBlock(&gfx,
-        f_NoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+        LargeImageTexels(f_NoticeTitleImage) +
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -1402,12 +1402,12 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++,
       GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
       G_RM_AA_ZB_TEX_EDGE2);
-  LoadLargePalette(&gfx, f_NoticeTitleImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
     lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
     lift -= (s32)NOTICE_TITLE_LIFT;
     LoadTextureBlock(&gfx,
-        f_NoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+        LargeImageTexels(f_NoticeTitleImage) +
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -1431,7 +1431,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-  LoadTextureBlock(&gfx, f_ResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
+  LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
       G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   if (f_NoticeFrameCount == NOTICE_SHINE_START) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, NOTICE_SHINE_SOUND_CHANNEL,
@@ -1574,10 +1574,9 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   size = pop * NOTICE_NAMEPLATE_POP_SIZE;
   if (size > 0) {
-    LoadSmallPalette(&gfx, 0, f_NameplateImage + IMAGE_HEADER_SIZE);
-    LoadNibbleTextureBlock(&gfx, f_NameplateImage + PALETTED_TEXELS_OFFSET,
-        G_IM_FMT_CI, NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0,
-        0, 0, 0);
+    LoadSmallPalette(&gfx, 0, ImageBody(f_NameplateImage));
+    LoadNibbleTextureBlock(&gfx, ImageTexels(f_NameplateImage), G_IM_FMT_CI,
+        NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((NOTICE_NAMEPLATE_SIZE / 2) << 10) / size;
     centerX = f_NoticeLift + NOTICE_CENTER_X;
     centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
@@ -1604,10 +1603,10 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   height = pop * NOTICE_CHARACTER_TITLE_POP_HEIGHT;
   width = pop * NOTICE_CHARACTER_TITLE_POP_WIDTH;
   if (width > 0 && height > 0) {
-    LoadLargePalette(&gfx, f_NoticeTitleImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
     for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx,
-          f_NoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+          LargeImageTexels(f_NoticeTitleImage) +
               (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -1637,7 +1636,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         G_RM_AA_ZB_TEX_EDGE2);
     for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx,
-          f_NoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+          LargeImageTexels(f_NoticeTitleImage) +
               (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -1663,7 +1662,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-    LoadTextureBlock(&gfx, f_ResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
+    LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
         G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
       PlayCharacterSound(f_PortraitCharacterIndex, NOTICE_CHARACTER_VOICE_SLOT,
@@ -1953,7 +1952,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, BANNER_CLOUD_ALPHA);
   for (i = 0; i != BANNER_CLOUD_STRIP_COUNT; i++) {
     LoadNibbleTextureBlock(&gfx,
-        f_ResultsCloudImage + IMAGE_HEADER_SIZE + (i * BANNER_CLOUD_STRIP_SIZE),
+        ImageBody(f_ResultsCloudImage) + (i * BANNER_CLOUD_STRIP_SIZE),
         G_IM_FMT_I, BANNER_CLOUD_WIDTH, BANNER_CLOUD_HEIGHT, 0, G_TX_CLAMP,
         G_TX_CLAMP, 0, 0, 0, 0);
     if (f_BannerKind == BANNER_KIND_POINTS) {
@@ -2079,9 +2078,9 @@ void DrawResultsBanner(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TROPHY_SHINE_TEXT_ALPHA);
-      LoadTextureBlock(&gfx, f_ResultsShineImage + IMAGE_HEADER_SIZE,
-          G_IM_FMT_I, G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0,
-          0, 0, 0, 0, 0);
+      LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
+          G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0,
+          0);
       if (f_TrophyShineFrame == TROPHY_SHINE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, TROPHY_SHINE_SOUND_CHANNEL,
             TROPHY_SHINE_SOUND_VOLUME, TROPHY_SHINE_SOUND_REVERB,
@@ -2826,10 +2825,9 @@ void DrawTournamentResults(Gfx** displayListHead) {
         RESULTS_TEXT_ALPHA);
   }
 
-  LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(&gfx,
-      f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-      LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
+  LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
+      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   if (f_PlayerResults[0] == 0) {
     sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
   } else {
@@ -2885,10 +2883,9 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
         RESULTS_TEXT_ALPHA);
   }
 
-  LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(&gfx,
-      f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-      LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
+  LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
+      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   if (f_PlayerResults[0] == 0) {
     sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
   } else {
@@ -2981,10 +2978,9 @@ void DrawPlayersResults(Gfx** displayListHead) {
     }
   }
 
-  LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(&gfx,
-      f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-      LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
+  LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
+      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   if (f_HasBets) {
     for (i = 0; i != g_GameState.playerCount; i++) {
       if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
@@ -3120,10 +3116,10 @@ void DrawMatchResults(Gfx** displayListHead) {
         f_ResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
   }
 
-  LoadSmallPalette(&gfx, 0, f_MatchStandingWordsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(&gfx,
-      f_MatchStandingWordsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-      STANDING_WORDS_SIZE, STANDING_WORDS_SIZE, 0, 0, 0, 0, 0, 0, 0);
+  LoadSmallPalette(&gfx, 0, ImageBody(f_MatchStandingWordsImage));
+  LoadNibbleTextureBlock(&gfx, ImageTexels(f_MatchStandingWordsImage),
+      G_IM_FMT_CI, STANDING_WORDS_SIZE, STANDING_WORDS_SIZE, 0, 0, 0, 0, 0, 0,
+      0);
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_PlayerResults[i] > 0) {
       if (f_PlayerResults[i] < 10) {
@@ -3166,10 +3162,9 @@ void DrawMatchResults(Gfx** displayListHead) {
     }
   }
 
-  LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
-  LoadNibbleTextureBlock(&gfx,
-      f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
-      LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
+  LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
+      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_HasBets) {
       /* An even match draws only the word */
@@ -3284,10 +3279,10 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gameMode = GetClubTournamentGameMode();
-  LoadLargePalette(&gfx, f_ResultsCourseImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
   for (i = 0; i < CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
     LoadTextureBlock(&gfx,
-        f_ResultsCourseImage + LARGE_PALETTED_TEXELS_OFFSET +
+        LargeImageTexels(f_ResultsCourseImage) +
             (i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH *
                 CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
@@ -3305,10 +3300,10 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   if (isNintendo) {
     lineHeight = CLUB_TOURNAMENT_LINE_HEIGHT;
     DrawPlayerPortrait(&gfx, f_ResultsSlide + 96, f_ResultsTop + 136, 0, TRUE);
-    LoadLargePalette(&gfx, f_NintendoBadgeImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_NintendoBadgeImage));
     for (i = 0; i != NINTENDO_BADGE_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx,
-          f_NintendoBadgeImage + LARGE_PALETTED_TEXELS_OFFSET +
+          LargeImageTexels(f_NintendoBadgeImage) +
               (i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_STRIP_WIDTH,
           NINTENDO_BADGE_STRIP_HEIGHT, 0, G_TX_MIRROR, 0, 0, 0, 0, 0);
@@ -3466,12 +3461,12 @@ void DrawRoundResults(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  LoadLargePalette(&gfx, f_ResultsBackdropImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_ResultsBackdropImage));
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   if (g_GameState.isClubTournament) {
     for (i = 0; i != CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx,
-          f_ResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
+          LargeImageTexels(f_ResultsBackdropImage) +
               (i * BACKDROP_STRIP_WIDTH *
                   CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
@@ -3489,7 +3484,7 @@ void DrawRoundResults(Gfx** displayListHead) {
   } else {
     for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx,
-          f_ResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
+          LargeImageTexels(f_ResultsBackdropImage) +
               (i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH, BACKDROP_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);
@@ -3505,9 +3500,9 @@ void DrawRoundResults(Gfx** displayListHead) {
 
   if (f_IsAwaitingConfirm == TRUE) {
     f_HandFrame = (f_HandFrame + 1) % (HAND_FRAME_COUNT * HAND_FRAME_DRAWS);
-    LoadLargePalette(&gfx, f_ResultsHandImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_ResultsHandImage));
     LoadTextureBlock(&gfx,
-        f_ResultsHandImage + LARGE_PALETTED_TEXELS_OFFSET +
+        LargeImageTexels(f_ResultsHandImage) +
             (f_HandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE),
         G_IM_FMT_CI, G_IM_SIZ_8b, HAND_SIZE, HAND_SIZE, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, (f_ResultsSlide + 272) * 4, (f_ResultsTop + 192) * 4,
@@ -3559,7 +3554,7 @@ void DrawRoundResults(Gfx** displayListHead) {
     textureT = ((s32)(SUBTEXEL_STEPS - ((titleY - top) * SUBTEXEL_STEPS)) * 2) +
         TEXEL_UNITS;
     f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
-    LoadLargePalette(&gfx, f_FinalResultsTitleImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_FinalResultsTitleImage));
     right = left + FINAL_RESULTS_TITLE_WIDTH;
     for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
       stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
@@ -3568,7 +3563,7 @@ void DrawRoundResults(Gfx** displayListHead) {
       }
 
       LoadTextureBlock(&gfx,
-          f_FinalResultsTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+          LargeImageTexels(f_FinalResultsTitleImage) +
               (i * FINAL_RESULTS_TITLE_WIDTH *
                   FINAL_RESULTS_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, FINAL_RESULTS_TITLE_WIDTH,
