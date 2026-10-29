@@ -2014,7 +2014,7 @@ void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer) {
 }
 
 /* Draws the options screen's faces; DrawTransmitMenu draws the options */
-void DrawOptionsScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
+void DrawTransmitOptionFaces(Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
 
   DrawImportedFaces(&displayList, transfer);
@@ -2327,7 +2327,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
 
   switch (transfer->screen) {
     case TRANSMIT_SCREEN_OPTIONS:
-      DrawOptionsScreen(&displayList, transfer);
+      DrawTransmitOptionFaces(&displayList, transfer);
       break;
     case TRANSMIT_SCREEN_BRING_CHARACTERS:
       DrawBringCharactersScreen(&displayList, transfer);
