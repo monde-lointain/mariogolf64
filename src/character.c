@@ -1110,26 +1110,26 @@ s32 GetAnimationIndex(u32 slotIndex, s32 id) {
   return foundIndex;
 }
 
-#ifdef NON_MATCHING
+/*
+ * Returns the slot's animation with the given id, or its first if it has
+ * none with that id. Returns NULL if the slot is unused or its table, which
+ * ends at an animation without events, is empty.
+ */
 CharacterAnimation* FindAnimation(u32 slotIndex, s32 id) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
 
-  if (slot == NULL) {
-    return NULL;
+  if (slot != NULL) {
+    MAP_MODEL_BUFFER(slot);
+    id = GetAnimationIndex(slotIndex, id);
+    if (ANIMATIONS(slot->model)[id].events == NULL) {
+      return NULL;
+    }
+
+    return &ANIMATIONS(slot->model)[id];
   }
 
-  MAP_MODEL_BUFFER(slot);
-  id = GetAnimationIndex(slotIndex, id);
-  if (ANIMATIONS(slot->model)[id].events == NULL) {
-    return NULL;
-  }
-
-  return &ANIMATIONS(slot->model)[id];
+  return NULL;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/character", FindAnimation);
-#endif
 
 void SetCharacterAnimation(u32 slotIndex, s32 id) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
