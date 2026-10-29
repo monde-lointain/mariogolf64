@@ -509,6 +509,12 @@ s32 RoundedWholePart(f32 value);
  * menu */
 static ControllerState f_TransmitController;
 
+/* Where DumpCartridgeRam prints whether each stage succeeded */
+#define DUMP_STATUS_COLUMN 10
+#define DUMP_OPEN_ROW 3
+#define DUMP_READ_ROW 4
+#define DUMP_WRITE_ROW 5
+
 /* Debug code that writes the cartridge RAM of controller 1's Game Boy cartridge
  * to the host */
 void DumpCartridgeRam(void) {
@@ -517,21 +523,21 @@ void DumpCartridgeRam(void) {
   u8 cartridgeRam[CARTRIDGE_RAM_SIZE];
 
   nuContGBPakMgrInit();
-  PrintDebugText("          ", 10, 3);
-  PrintDebugText("          ", 10, 4);
-  PrintDebugText("          ", 10, 5);
+  PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_OPEN_ROW);
+  PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_READ_ROW);
+  PrintDebugText("          ", DUMP_STATUS_COLUMN, DUMP_WRITE_ROW);
 
   /* The original takes 0 from OpenGameBoyPakWithRetries as success, which is
    * not PAK_RESULT_OK */
   if (OpenGameBoyPakWithRetries(
           0, &transfer->cartridgeHeader, &transfer->pakFile) == 0) {
-    PrintDebugText("GOLF OK", 10, 3);
+    PrintDebugText("GOLF OK", DUMP_STATUS_COLUMN, DUMP_OPEN_ROW);
     if (nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS,
             cartridgeRam, CARTRIDGE_RAM_SIZE) == 0) {
-      PrintDebugText("READ OK", 10, 4);
+      PrintDebugText("READ OK", DUMP_STATUS_COLUMN, DUMP_READ_ROW);
       if (WriteHostFile("x:/golf/capture/gbsram.bin", CARTRIDGE_RAM_SIZE) ==
           0) {
-        PrintDebugText("WRITE OK", 10, 5);
+        PrintDebugText("WRITE OK", DUMP_STATUS_COLUMN, DUMP_WRITE_ROW);
       }
     }
   }
@@ -1742,6 +1748,10 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   *displayListHead = displayList;
 }
 
+/* Where DrawBringCharactersText prints the screen's step */
+#define STEP_DEBUG_COLUMN 20
+#define STEP_DEBUG_ROW 2
+
 void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   GameBoyCharacter* character = g_GameBoyCharacters;
   Gfx* displayList = *displayListHead;
@@ -1751,7 +1761,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   SetUpTextDrawing(&displayList);
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
   sprintf(g_PrintBuffer, "%3d", transfer->screenStep);
-  PrintDebugText(g_PrintBuffer, 20, 2);
+  PrintDebugText(g_PrintBuffer, STEP_DEBUG_COLUMN, STEP_DEBUG_ROW);
   if (transfer->screenStep == BRING_CHOOSING_SLOT) {
     isCharacterShown = TRUE;
     character = &g_GameBoyCharacters[transfer->characterIndex];
