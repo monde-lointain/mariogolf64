@@ -324,9 +324,6 @@ enum ResultSound {
 #define FLYOVER_INSET_DISTANCE 184320.0f
 #define FLYOVER_INSET_EYE_RISE 75.0f
 
-/* windSpeed's units in a unit of wind, and the speed of a wind that
- * EndHoleFlyover calls strong */
-#define WIND_SPEED_UNIT 0x10000
 #define STRONG_WIND_SPEED 6
 
 /* How far below the ball the look-at point settles, in world units */

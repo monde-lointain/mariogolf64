@@ -120,8 +120,6 @@ enum SceneryState {
 /* The flag can be skewed by HOLE_FLAG_SKEW per column, but it is zero */
 #define HOLE_FLAG_SKEW 0.0f
 #define HOLE_FLAG_ROW_SKEW_SCALE 5.0f
-/* Wind speeds here are in WIND_SPEED_UNIT */
-#define WIND_SPEED_UNIT 0x10000
 #define HOLE_FLAG_MIN_WIND_SPEED 1.5f
 #define HOLE_FLAG_GALE_WIND_SPEED 9.0f
 #define HOLE_FLAG_CALM_SPREAD 0.01f

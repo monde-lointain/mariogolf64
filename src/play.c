@@ -804,8 +804,6 @@ enum HoleMenuChoice {
 #define UNLOCK_NOTICE_METAL_MARIO 2
 #define UNLOCK_NOTICE_RING_SHOT_COURSE_BASE 2 /* Plus the course's index */
 
-#define WIPE_CLOSED_PROGRESS 0
-#define WIPE_OPEN_PROGRESS 20
 #define PLAYER_CHARACTER_SLOT 0
 #define TOURNAMENT_HALF_TURN_HOLE 9 /* The hole index after the front nine */
 

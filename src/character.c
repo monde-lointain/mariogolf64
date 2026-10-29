@@ -143,7 +143,6 @@
  */
 #define VIEW_DISTANCE 61440.0f
 #define VIEW_DROP 15360.0f
-#define QUARTER_TURN_RADIANS 1.5707964f
 
 void AdvanceTextureAnimations(
     u32 slotIndex, s32 unused, s32 frameLastDigit, s32 frame);

@@ -13,6 +13,10 @@ enum WipeState {
   WIPE_OPENING_FAST
 };
 
+/* GetWipeProgress's values when the screen is fully covered and fully shown */
+#define WIPE_CLOSED_PROGRESS 0
+#define WIPE_OPEN_PROGRESS 20
+
 /* The prompts that OpenPrompt opens */
 enum PromptId {
   NO_PROMPT = -1,

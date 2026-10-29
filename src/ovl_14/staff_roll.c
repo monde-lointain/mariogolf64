@@ -136,9 +136,6 @@
 #define PAINTING_FADE_IN_FRAMES 64
 #define CLOUD_ALPHA 180 /* Below this an image is drawn with G_RM_CLD_SURF */
 
-/* GetGroundHeight's units, 1024 to a world unit */
-#define COURSE_UNITS_PER_UNIT 1024.0f
-#define QUARTER_TURN_RADIANS 1.5707964f
 #define PITCH_STEP_COUNT 10
 #define FRAMING_GROUND_CLEARANCE 0xC00
 
@@ -885,9 +882,9 @@ void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
     SetFramingAngles(pitch, yaw);
     FrameSpheres(depthOffset);
     GetFramedView(eye, lookAt);
-    point[AXIS_X] = eye[AXIS_X] * COURSE_UNITS_PER_UNIT;
-    point[AXIS_Y] = eye[AXIS_Y] * COURSE_UNITS_PER_UNIT;
-    point[AXIS_Z] = eye[AXIS_Z] * COURSE_UNITS_PER_UNIT;
+    point[AXIS_X] = eye[AXIS_X] * WORLD_TO_COURSE_SCALE;
+    point[AXIS_Y] = eye[AXIS_Y] * WORLD_TO_COURSE_SCALE;
+    point[AXIS_Z] = eye[AXIS_Z] * WORLD_TO_COURSE_SCALE;
     if (point[AXIS_Y] - GetGroundHeight(point[AXIS_X], point[AXIS_Z]) <=
         -FRAMING_GROUND_CLEARANCE) {
       buriedPitch = pitch;
@@ -904,9 +901,9 @@ void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
   SetFramingAngles(buriedPitch, yaw);
   FrameSpheres(depthOffset);
   GetFramedView(eye, lookAt);
-  point[AXIS_X] = eye[AXIS_X] * COURSE_UNITS_PER_UNIT;
-  point[AXIS_Y] = eye[AXIS_Y] * COURSE_UNITS_PER_UNIT;
-  point[AXIS_Z] = eye[AXIS_Z] * COURSE_UNITS_PER_UNIT;
+  point[AXIS_X] = eye[AXIS_X] * WORLD_TO_COURSE_SCALE;
+  point[AXIS_Y] = eye[AXIS_Y] * WORLD_TO_COURSE_SCALE;
+  point[AXIS_Z] = eye[AXIS_Z] * WORLD_TO_COURSE_SCALE;
   GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
 }
 

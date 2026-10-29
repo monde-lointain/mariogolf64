@@ -52,7 +52,6 @@
 
 /* The framings look at this point of the character */
 #define REACTION_FOCUS_POINT 1
-#define QUARTER_TURN_RADIANS 1.5707964f
 /* The camera closes in from the start distance to the end one over the frames
  */
 #define REACTION_START_DISTANCE 76800.0f
