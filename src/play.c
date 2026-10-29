@@ -91,11 +91,7 @@ enum HoleResultsKind {
 
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
-extern s16 D_80104F78;
-extern s32 D_80104F7C;
-extern s32 D_80104F80;
-extern s32 D_80104F8C;
-extern s32 D_80104F90;
+extern CurrentShot D_80104F78; /* The replayed shot */
 extern u8 D_800FE330;
 extern s8 D_800FBDB8;
 extern GameState D_801B55F0;
@@ -154,8 +150,6 @@ void LoadSuperShotReplay(PlayRecord* record);
 
 /* Not static: the original left these to the linker's common block */
 u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
-s32 D_80104F84;
-s32 D_80104F88;
 PlayRecord D_800FED40;
 s8 g_WasDonkeyKongUnlocked;
 s8 g_WasMapleUnlocked;
@@ -614,23 +608,23 @@ void SetNextTeeOrder(void) {
 }
 
 void func_800600C0(s32 index) {
-  D_80104F78 = D_800FEDD8->shots[index].heading;
-  D_80104F7C = D_800FEDD8->shots[index].unk2;
-  D_80104F80 = D_800FEDD8->shots[index].unk3;
-  D_80104F84 = D_800FEDD8->shots[index].shotMode;
-  D_80104F88 = D_800FEDD8->shots[index].clubSlot;
-  D_80104F8C = D_800FEDD8->shots[index].unk6;
-  D_80104F90 = D_800FEDD8->shots[index].unk7;
+  D_80104F78.unk0 = D_800FEDD8->shots[index].heading;
+  D_80104F78.unk4 = D_800FEDD8->shots[index].unk2;
+  D_80104F78.unk8 = D_800FEDD8->shots[index].unk3;
+  D_80104F78.shotMode = D_800FEDD8->shots[index].shotMode;
+  D_80104F78.clubSlot = D_800FEDD8->shots[index].clubSlot;
+  D_80104F78.unk14 = D_800FEDD8->shots[index].unk6;
+  D_80104F78.unk18 = D_800FEDD8->shots[index].unk7;
 }
 
 void func_80060128(s32 index) {
-  D_80104F78 = D_80105F40->shots[index].heading;
-  D_80104F7C = D_80105F40->shots[index].unk2;
-  D_80104F80 = D_80105F40->shots[index].unk3;
-  D_80104F84 = D_80105F40->shots[index].shotMode;
-  D_80104F88 = D_80105F40->shots[index].clubSlot;
-  D_80104F8C = D_80105F40->shots[index].unk6;
-  D_80104F90 = D_80105F40->shots[index].unk7;
+  D_80104F78.unk0 = D_80105F40->shots[index].heading;
+  D_80104F78.unk4 = D_80105F40->shots[index].unk2;
+  D_80104F78.unk8 = D_80105F40->shots[index].unk3;
+  D_80104F78.shotMode = D_80105F40->shots[index].shotMode;
+  D_80104F78.clubSlot = D_80105F40->shots[index].clubSlot;
+  D_80104F78.unk14 = D_80105F40->shots[index].unk6;
+  D_80104F78.unk18 = D_80105F40->shots[index].unk7;
 }
 
 s32 func_80060190(s32 strokes) {
