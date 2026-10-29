@@ -2843,6 +2843,31 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 
 #define CUP_PASS_LOOKAHEAD_STEP_COUNT 30
 #define PATH_FLAG_LOOKAHEAD_STEP_COUNT 60
+/* The billboard hit view starts no sooner, and lasts this far past the hit */
+#define BILLBOARD_HIT_VIEW_MIN_STEP 60
+#define BILLBOARD_HIT_VIEW_STEP_COUNT 10
+/* Past the billboard hit view, a ball this far from the end is viewed there */
+#define END_VIEW_MIN_DISTANCE 0x25800
+/* Fewer steps left than this leave no time for a new camera kind */
+#define CAMERA_CHOICE_MIN_STEP_COUNT 40
+
+/* Whether the ball has passed the billboard hit and its view */
+#define IsPastBillboardHitView(step) \
+  (f_BillboardHitStep != NO_STEP && \
+      f_BillboardHitStep + BILLBOARD_HIT_VIEW_STEP_COUNT < (step))
+/* Whether the flying ball is still far from where the shot ends */
+#define IsFarFromShotEnd() \
+  ((s32)IntLength3D(f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X], \
+       f_FlightBallPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y], \
+       f_FlightBallPosition[AXIS_Z] - f_ShotEndPosition[AXIS_Z]) > \
+      END_VIEW_MIN_DISTANCE)
+/* Whether a new camera kind would be seen long enough, or the end is shown */
+#define HasTimeForNewCamera() \
+  (g_BallFlightStep + CAMERA_CHOICE_MIN_STEP_COUNT < \
+          g_SimulatedShot.stepCount || \
+      f_FlightPhase == FLIGHT_PHASE_END)
+/* Whether neither the cup view nor a coming event holds the camera */
+#define IsFlightCameraFree() (!g_IsCupViewShown && f_ComingFlightEvents == 0)
 #define VERY_LONG_SHOT_MIN_LENGTH 0x2A3000
 #define BALL_SOUND_MIN_SHOT_LENGTH 0x25800
 #define BALL_SOUND_VOLUME_LENGTH 0x7800 /* Shot length per step of volume */
@@ -3049,24 +3074,19 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
   }
 
-  if (step > 60 && step < f_BillboardHitStep && !f_CameraChangeHoldCount) {
+  if (step > BILLBOARD_HIT_VIEW_MIN_STEP && step < f_BillboardHitStep &&
+      !f_CameraChangeHoldCount) {
     f_FlightCameraKind = FLIGHT_CAMERA_BILLBOARD_HIT;
   }
 
-  if (f_BillboardHitStep != NO_STEP && f_BillboardHitStep + 10 < step &&
-      f_FlightCameraKind != FLIGHT_CAMERA_AROUND_END &&
-      (s32)IntLength3D(f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
-          f_FlightBallPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
-          f_FlightBallPosition[AXIS_Z] - f_ShotEndPosition[AXIS_Z]) > 0x25800) {
+  if (IsPastBillboardHitView(step) &&
+      f_FlightCameraKind != FLIGHT_CAMERA_AROUND_END && IsFarFromShotEnd()) {
     f_IsCameraKindNew = TRUE;
     f_FlightCameraKind = FLIGHT_CAMERA_AROUND_END;
   }
 
-  if (f_BillboardHitStep < step &&
-      (g_BallFlightStep + 40 < g_SimulatedShot.stepCount ||
-          f_FlightPhase == FLIGHT_PHASE_END) &&
-      f_HasFlightPhaseChanged == TRUE && !g_IsCupViewShown &&
-      f_ComingFlightEvents == 0) {
+  if (f_BillboardHitStep < step && HasTimeForNewCamera() &&
+      f_HasFlightPhaseChanged == TRUE && IsFlightCameraFree()) {
     if (!f_CameraChangeHoldCount) {
       ChooseFlightCameraKind();
     }
