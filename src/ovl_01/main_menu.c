@@ -207,13 +207,13 @@ typedef struct ImageCorner {
 #define MENU_BOB_PHASE_STEP 0.13f
 #define MENU_BOB_HEIGHT 5.0f
 
-/* Where DrawMenuBanner and func_801FCEF8 draw the banners of D_801052BC and
- * g_NamePlateImage */
+/* Where DrawMenuBanner and DrawNamePlateBanner draw the banners of D_801052BC
+ * and g_NamePlateImage */
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
 
-/* func_801FD1B4 squeezes g_NamePlateImage to this width at a given position;
- * nothing calls it */
+/* DrawSmallNamePlate squeezes g_NamePlateImage to this width at a given
+ * position; nothing calls it */
 #define SMALL_BANNER_WIDTH 96
 
 /* DrawLargeMenuBanner stretches g_NamePlateImage; its strips overlap, as they
@@ -4121,7 +4121,7 @@ void DrawNarrowMenuBoard(Gfx** displayListHead) {
 }
 
 /* Nothing in the menu calls this; menu.c loads its image, ASSET_NAME_PLATE */
-void func_801FCEF8_ovl_01(Gfx** displayListHead) {
+void DrawNamePlateBanner(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripTop;
@@ -4152,7 +4152,7 @@ void func_801FCEF8_ovl_01(Gfx** displayListHead) {
 /* Doesn't match: the original tests the s32 top << 2 for the texture's row
  * offset, not the s16 top */
 #ifdef NON_MATCHING
-void func_801FD1B4_ovl_01(Gfx** displayListHead, s16 left, s16 top) {
+void DrawSmallNamePlate(Gfx** displayListHead, s16 left, s16 top) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
 
@@ -4178,7 +4178,7 @@ void func_801FD1B4_ovl_01(Gfx** displayListHead, s16 left, s16 top) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FD1B4_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawSmallNamePlate);
 #endif
 
 /* Draws the large banner, for DrawLargeBannerBackdropLayers's
