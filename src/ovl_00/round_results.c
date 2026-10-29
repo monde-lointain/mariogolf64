@@ -3105,7 +3105,34 @@ void DrawPlayersResults(Gfx** displayListHead) {
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 
+/*
+ * Where the match results draw their parts, a row of MATCH_ROW_HEIGHT for
+ * each player. With bets, the columns sit further left to make room for the
+ * bet totals. Without them, the points step down a shorter row.
+ */
 #define MATCH_ROW_HEIGHT 72
+#define MATCH_HEADING_Y 62
+#define MATCH_RANK_Y 48
+#define MATCH_PORTRAIT_Y 76
+#define MATCH_NUMBER_Y 92
+#define MATCH_STANDING_Y 108
+#define BETTING_MATCH_BETS_LABEL_X 152
+#define BETTING_MATCH_POINTS_LABEL_X 240
+#define BETTING_MATCH_RANK_X 40
+#define BETTING_MATCH_PORTRAIT_X 62
+#define BETTING_MATCH_HOLE_COUNT_X 48
+#define BETTING_MATCH_STANDING_X 80
+#define BETTING_MATCH_BET_TOTAL_X 128
+#define BETTING_MATCH_POINTS_X 234
+#define PLAIN_MATCH_POINTS_LABEL_X 220
+#define PLAIN_MATCH_RANK_X 56
+#define PLAIN_MATCH_PORTRAIT_X 78
+#define PLAIN_MATCH_HOLE_COUNT_X 64
+#define PLAIN_MATCH_STANDING_X 96
+#define PLAIN_MATCH_POINTS_X 218
+#define PLAIN_MATCH_POINTS_ROW_HEIGHT 64
+/* Hole counts from this one take two digits */
+#define MIN_TWO_DIGIT_HOLE_COUNT 10
 /* The standing words are 48x48, holding UP, DOWN and EVEN in rows of 16 */
 #define STANDING_WORDS_SIZE 48
 #define STANDING_WORD_WIDTH 48
@@ -3145,25 +3172,29 @@ void DrawMatchResults(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   if (f_HasBets) {
-    DrawResultsLabel(&gfx, f_ResultsSlide + 152,
-        f_ResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_BETS);
-    DrawResultsLabel(&gfx, f_ResultsSlide + 240,
-        f_ResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_POINTS);
-    DrawRank(&gfx, f_ResultsSlide + 40, f_ResultsTop + 48, f_PlayerRanks[0]);
-    DrawRank(&gfx, f_ResultsSlide + 40, f_ResultsTop + 48 + MATCH_ROW_HEIGHT,
-        f_PlayerRanks[1]);
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + 62, f_ResultsTop + 76, 0, FALSE);
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + 62,
-        f_ResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
+    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_MATCH_BETS_LABEL_X,
+        f_ResultsTop + MATCH_HEADING_Y, RESULTS_LABEL_BETS);
+    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_MATCH_POINTS_LABEL_X,
+        f_ResultsTop + MATCH_HEADING_Y, RESULTS_LABEL_POINTS);
+    DrawRank(&gfx, f_ResultsSlide + BETTING_MATCH_RANK_X,
+        f_ResultsTop + MATCH_RANK_Y, f_PlayerRanks[0]);
+    DrawRank(&gfx, f_ResultsSlide + BETTING_MATCH_RANK_X,
+        f_ResultsTop + MATCH_RANK_Y + MATCH_ROW_HEIGHT, f_PlayerRanks[1]);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + BETTING_MATCH_PORTRAIT_X,
+        f_ResultsTop + MATCH_PORTRAIT_Y, 0, FALSE);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + BETTING_MATCH_PORTRAIT_X,
+        f_ResultsTop + MATCH_PORTRAIT_Y + MATCH_ROW_HEIGHT, 1, FALSE);
   } else {
-    DrawResultsLabel(&gfx, f_ResultsSlide + 220,
-        f_ResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_POINTS);
-    DrawRank(&gfx, f_ResultsSlide + 56, f_ResultsTop + 48, f_PlayerRanks[0]);
-    DrawRank(&gfx, f_ResultsSlide + 56, f_ResultsTop + 48 + MATCH_ROW_HEIGHT,
-        f_PlayerRanks[1]);
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + 78, f_ResultsTop + 76, 0, FALSE);
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + 78,
-        f_ResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
+    DrawResultsLabel(&gfx, f_ResultsSlide + PLAIN_MATCH_POINTS_LABEL_X,
+        f_ResultsTop + MATCH_HEADING_Y, RESULTS_LABEL_POINTS);
+    DrawRank(&gfx, f_ResultsSlide + PLAIN_MATCH_RANK_X,
+        f_ResultsTop + MATCH_RANK_Y, f_PlayerRanks[0]);
+    DrawRank(&gfx, f_ResultsSlide + PLAIN_MATCH_RANK_X,
+        f_ResultsTop + MATCH_RANK_Y + MATCH_ROW_HEIGHT, f_PlayerRanks[1]);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + PLAIN_MATCH_PORTRAIT_X,
+        f_ResultsTop + MATCH_PORTRAIT_Y, 0, FALSE);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + PLAIN_MATCH_PORTRAIT_X,
+        f_ResultsTop + MATCH_PORTRAIT_Y + MATCH_ROW_HEIGHT, 1, FALSE);
   }
 
   LoadSmallPalette(&gfx, 0, ImageBody(f_MatchStandingWordsImage));
@@ -3172,13 +3203,13 @@ void DrawMatchResults(Gfx** displayListHead) {
       0);
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_PlayerResults[i] > 0) {
-      if (f_PlayerResults[i] < 10) {
+      if (f_PlayerResults[i] < MIN_TWO_DIGIT_HOLE_COUNT) {
         standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
       } else {
         standingShift[i] = 0;
       }
     } else if (f_PlayerResults[i] < 0) {
-      if (f_PlayerResults[i] < -9) {
+      if (f_PlayerResults[i] <= -MIN_TWO_DIGIT_HOLE_COUNT) {
         standingShift[i] = STANDING_TWO_DIGIT_DOWN_SHIFT;
       } else {
         standingShift[i] = STANDING_ONE_DIGIT_DOWN_SHIFT;
@@ -3196,18 +3227,26 @@ void DrawMatchResults(Gfx** displayListHead) {
     }
 
     if (f_HasBets) {
-      DrawTextureRect(&gfx, (standingShift[i] + 80 + f_ResultsSlide) << 2,
-          (f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT)) << 2,
-          (standingShift[i] + 80 + STANDING_WORD_WIDTH + f_ResultsSlide) << 2,
-          (f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT)
+      DrawTextureRect(&gfx,
+          (standingShift[i] + BETTING_MATCH_STANDING_X + f_ResultsSlide) << 2,
+          (f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)) << 2,
+          (standingShift[i] + BETTING_MATCH_STANDING_X + STANDING_WORD_WIDTH +
+              f_ResultsSlide)
+              << 2,
+          (f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT) +
+              STANDING_WORD_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
     } else {
-      DrawTextureRect(&gfx, (standingShift[i] + 96 + f_ResultsSlide) << 2,
-          (f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT)) << 2,
-          (standingShift[i] + 96 + STANDING_WORD_WIDTH + f_ResultsSlide) << 2,
-          (f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT)
+      DrawTextureRect(&gfx,
+          (standingShift[i] + PLAIN_MATCH_STANDING_X + f_ResultsSlide) << 2,
+          (f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)) << 2,
+          (standingShift[i] + PLAIN_MATCH_STANDING_X + STANDING_WORD_WIDTH +
+              f_ResultsSlide)
+              << 2,
+          (f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT) +
+              STANDING_WORD_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
@@ -3227,21 +3266,25 @@ void DrawMatchResults(Gfx** displayListHead) {
         }
 
         sprintf(g_PrintBuffer, "%2d", holeCount);
-        DrawDigitText(&gfx, standingShift[i] + f_ResultsSlide + 48,
-            f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT), g_PrintBuffer);
+        DrawDigitText(&gfx,
+            standingShift[i] + f_ResultsSlide + BETTING_MATCH_HOLE_COUNT_X,
+            f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
+            g_PrintBuffer);
       }
 
       sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[i]);
-      DrawDigitText(&gfx, betShift + 128 + f_ResultsSlide,
-          f_ResultsTop + 92 + (i * MATCH_ROW_HEIGHT), g_PrintBuffer);
+      DrawDigitText(&gfx, betShift + BETTING_MATCH_BET_TOTAL_X + f_ResultsSlide,
+          f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
+          g_PrintBuffer);
       if (f_PlayerPoints[i] < 0) {
         sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
       } else {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
 
-      DrawDigitText(&gfx, f_ResultsSlide + 234,
-          f_ResultsTop + 92 + (i * MATCH_ROW_HEIGHT), g_PrintBuffer);
+      DrawDigitText(&gfx, f_ResultsSlide + BETTING_MATCH_POINTS_X,
+          f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
+          g_PrintBuffer);
     } else {
       if (f_PlayerResults[0] != 0) {
         holeCount = f_PlayerResults[i];
@@ -3250,8 +3293,10 @@ void DrawMatchResults(Gfx** displayListHead) {
         }
 
         sprintf(g_PrintBuffer, "%2d", holeCount);
-        DrawDigitText(&gfx, standingShift[i] + f_ResultsSlide + 64,
-            f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT), g_PrintBuffer);
+        DrawDigitText(&gfx,
+            standingShift[i] + f_ResultsSlide + PLAIN_MATCH_HOLE_COUNT_X,
+            f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
+            g_PrintBuffer);
       }
 
       if (f_PlayerPoints[i] < 0) {
@@ -3260,7 +3305,8 @@ void DrawMatchResults(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
 
-      DrawDigitText(&gfx, f_ResultsSlide + 218, f_ResultsTop + 92 + (i * 64),
+      DrawDigitText(&gfx, f_ResultsSlide + PLAIN_MATCH_POINTS_X,
+          f_ResultsTop + MATCH_NUMBER_Y + (i * PLAIN_MATCH_POINTS_ROW_HEIGHT),
           g_PrintBuffer);
     }
   }
