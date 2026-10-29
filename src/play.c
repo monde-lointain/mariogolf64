@@ -1745,7 +1745,7 @@ DIM_BACKDROP:
 INCLUDE_ASM("asm/nonmatchings/play", UpdatePlay);
 #endif
 
-/* Fills f_GroundNoiseTexels with random values from base up, capped at 255 */
+/* Fills f_GroundNoiseTexels with random intensities from base up */
 void FillGroundNoise(s32 range, s32 base) {
   s32 cell = 0;
   s32 row;
@@ -1755,8 +1755,8 @@ void FillGroundNoise(s32 range, s32 base) {
   for (row = 0; row < GROUND_NOISE_SIZE; row++) {
     for (column = 0; column < GROUND_NOISE_SIZE; column++) {
       value = (rand() % range) + base;
-      if (value >= 256) {
-        value = 255;
+      if (value > MAX_GROUND_NOISE_INTENSITY) {
+        value = MAX_GROUND_NOISE_INTENSITY;
       }
 
       f_GroundNoiseTexels[cell++] = value;
@@ -1769,7 +1769,7 @@ void InitExpansionPakFeatures(void) {
     func_80407D64();
   }
 
-  FillGroundNoise(0x60, 0xBE);
+  FillGroundNoise(GROUND_NOISE_RANGE, GROUND_NOISE_BASE);
 }
 
 /*

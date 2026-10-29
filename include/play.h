@@ -74,6 +74,19 @@ extern s32 D_800C3094;
 /* Asks for the HUD to turn away when the next player is picked */
 extern s8 g_IsHudTurnAwayRequested;
 
+/*
+ * FillGroundNoise's random intensities run from a base up through a range,
+ * capped at MAX_GROUND_NOISE_INTENSITY. Most courses take the default; Shy
+ * Guy Desert and Yoshi's Island take a lighter base, and mini golf a lighter
+ * and narrower spread.
+ */
+#define GROUND_NOISE_RANGE 0x60
+#define GROUND_NOISE_BASE 0xBE
+#define LIGHT_GROUND_NOISE_BASE 0xC8
+#define MINI_GOLF_GROUND_NOISE_RANGE 0x40
+#define MINI_GOLF_GROUND_NOISE_BASE 0xD2
+#define MAX_GROUND_NOISE_INTENSITY 0xFF
+
 void FillGroundNoise(s32 range, s32 base);
 
 #endif

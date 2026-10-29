@@ -2414,11 +2414,11 @@ void BuildHole(s32 course, s32 hole) {
 
   /* The repeated case is there to match */
   if (course == COURSE_RECORD_SHY_GUY_DESERT) {
-    FillGroundNoise(0x60, 0xC8);
+    FillGroundNoise(GROUND_NOISE_RANGE, LIGHT_GROUND_NOISE_BASE);
   } else if (course == COURSE_RECORD_YOSHIS_ISLAND) {
-    FillGroundNoise(0x60, 0xC8);
+    FillGroundNoise(GROUND_NOISE_RANGE, LIGHT_GROUND_NOISE_BASE);
   } else {
-    FillGroundNoise(0x60, 0xBE);
+    FillGroundNoise(GROUND_NOISE_RANGE, GROUND_NOISE_BASE);
   }
 
   if (g_GameState.isMiniGolf) {
@@ -2427,7 +2427,7 @@ void BuildHole(s32 course, s32 hole) {
       f_PaintLogic = LAST_MINI_GOLF_PAINT_LOGIC;
     }
 
-    FillGroundNoise(0x40, 0xD2);
+    FillGroundNoise(MINI_GOLF_GROUND_NOISE_RANGE, MINI_GOLF_GROUND_NOISE_BASE);
   } else if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
     f_PaintLogic = f_HolePaintLogics[course - 1][hole - 1];
     if (IsGameFlagSet(GAME_FLAG_UNK6A)) {
