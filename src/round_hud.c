@@ -143,6 +143,13 @@ enum SceneryState {
 /* The near and far planes of the screen's orthographic projection */
 #define SCREEN_ORTHO_NEAR 1.0f
 #define SCREEN_ORTHO_FAR 1000.0f
+/* g_ScreenEffectProjection's view */
+#define SCREEN_EFFECT_FIELD_OF_VIEW 45.0f
+#define SCREEN_EFFECT_NEAR_PLANE 10.0f
+#define SCREEN_EFFECT_FAR_PLANE 8000.0f
+/* The view of D_80105278, which nothing reads */
+#define NARROW_FIELD_OF_VIEW 10.0f
+#define NARROW_FAR_PLANE 30000.0f
 
 /*
  * A solid arrow: a triangular head on a rectangular shaft, from -160 to 160
@@ -830,10 +837,11 @@ void InitRoundHud(void) {
   guOrtho(&g_ScreenOrthoMatrix, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
       -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, SCREEN_ORTHO_NEAR,
       SCREEN_ORTHO_FAR, 1.0f);
-  guPerspective(&D_80105278, &g_ScreenEffectPerspNorm, 10.0f,
-      SCREEN_ASPECT_RATIO, 10.0f, 30000.0f, 1.0f);
-  guPerspective(&g_ScreenEffectProjection, &g_ScreenEffectPerspNorm, 45.0f,
-      SCREEN_ASPECT_RATIO, 10.0f, 8000.0f, 1.0f);
+  guPerspective(&D_80105278, &g_ScreenEffectPerspNorm, NARROW_FIELD_OF_VIEW,
+      SCREEN_ASPECT_RATIO, SCREEN_EFFECT_NEAR_PLANE, NARROW_FAR_PLANE, 1.0f);
+  guPerspective(&g_ScreenEffectProjection, &g_ScreenEffectPerspNorm,
+      SCREEN_EFFECT_FIELD_OF_VIEW, SCREEN_ASPECT_RATIO,
+      SCREEN_EFFECT_NEAR_PLANE, SCREEN_EFFECT_FAR_PLANE, 1.0f);
   g_SkyState.viewedWindAngles[0] = 0.0f;
   g_SkyState.horizonLevels[0] = 0.0f;
   g_SkyState.lookAtLevels[0] = 0.0f;
