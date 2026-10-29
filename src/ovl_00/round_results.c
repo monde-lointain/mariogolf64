@@ -2576,6 +2576,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 #define MATCH_STEP_START_TALLY 10
 #define CHARACTER_NOTICE_TITLE_ASSET 0x560
 #define CHARACTER_NOTICE_WAIT_FRAMES 8
+/*
+ * Whether beating a character in Get Character unlocks them: other feats
+ * unlock the rest
+ */
+#define IsUnlockedByBeating(character) \
+  ((character) != CHARACTER_PLUM && (character) != CHARACTER_CHARLIE && \
+      (character) != CHARACTER_MAPLE && (character) != CHARACTER_BABY_MARIO && \
+      (character) != CHARACTER_PEACH && \
+      (character) != CHARACTER_DONKEY_KONG && \
+      (character) < CHARACTER_METAL_MARIO)
 
 /*
  * Counts the earned course points into the save, then in Get Character
@@ -2698,18 +2708,11 @@ s32 UpdateMatchResults(ControllerState* controller) {
           f_ResultsUnk78 = MATCH_STEP_WAITING;
           f_ResultsUnk7C = 0;
           if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-            /* Beating a still locked opponent unlocks them, except those that
-             * other feats unlock */
+            /* Beating a still locked opponent unlocks them */
             if (f_PlayerRanks[0] == MATCH_RANK_WON &&
                 FindCharacterOnGrid((s8)g_Players[1].characterIndex) ==
                     CHARACTER_OFF_GRID &&
-                (s8)g_Players[1].characterIndex != CHARACTER_PLUM &&
-                (s8)g_Players[1].characterIndex != CHARACTER_CHARLIE &&
-                (s8)g_Players[1].characterIndex != CHARACTER_MAPLE &&
-                (s8)g_Players[1].characterIndex != CHARACTER_BABY_MARIO &&
-                (s8)g_Players[1].characterIndex != CHARACTER_PEACH &&
-                (s8)g_Players[1].characterIndex != CHARACTER_DONKEY_KONG &&
-                (s8)g_Players[1].characterIndex < CHARACTER_METAL_MARIO) {
+                IsUnlockedByBeating((s8)g_Players[1].characterIndex)) {
               f_ResultsUnk78 = MATCH_STEP_SHOW_CHARACTER_NOTICE;
             }
 
