@@ -186,23 +186,25 @@ static s32 D_8022FFD4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
 /* Read by no routine; the last 16 values of player_stats.c's D_80230960 */
 static s16 D_80230014_ovl_01[16] = {
     1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
-static Vtx D_80230038_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+/* The grid cursor's corners, whose colors DrawCharacterGridCursor cycles */
+static Vtx f_GridCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-24, -24, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{24, -24, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
 static s32 D_80230078_ovl_01[2] = {0, 0};
-/* The phase of each corner's color */
-static f32 D_80230080_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+/* The angle, in radians, of each corner's color cycle */
+static f32 f_GridCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
 /* Read by no routine */
 static s32 D_80230090_ovl_01[4] = {0, 0, 0, 0};
 
-static Mtx D_8023A3A0_ovl_01;
-static Mtx D_8023A3E0_ovl_01[2];
-static Mtx D_8023A460_ovl_01[2];
-static Mtx D_8023A4E0_ovl_01[2];
+/* The camera and placements that DrawCharacterGridCursor draws with */
+static Mtx f_GridCursorProjection;
+static Mtx f_GridCursorTranslations[2];
+static Mtx f_GridCursorRotations[2];
+static Mtx f_GridCursorScales[2];
 
 /* Read by no routine */
 static u8 D_8023A560_ovl_01[0x8];
@@ -213,7 +215,7 @@ static void* D_8023A568_ovl_01;
 static u8 D_8023A56C_ovl_01[0x4];
 
 static void* D_8023A570_ovl_01;
-static void* D_8023A574_ovl_01;
+static void* f_GridCursorBox;
 static void* D_8023A578_ovl_01;
 static void* D_8023A57C_ovl_01;
 static void* D_8023A580_ovl_01;
@@ -1174,7 +1176,7 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
       D_8023A568_ovl_01 = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_CURSOR_BOX:
-      D_8023A574_ovl_01 = buffer;
+      f_GridCursorBox = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_CONTROLLER_ICONS:
       D_8023A57C_ovl_01 = buffer;
@@ -1744,34 +1746,34 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y) {
 
   for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT;
       vertexIndex++) {
-    D_80230080_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
+    f_GridCursorPhases[vertexIndex] += MENU_CURSOR_PHASE_STEP;
     red =
-        (s32)(sinf(D_80230080_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
+        (s32)(sinf(f_GridCursorPhases[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    blue = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + (M_PI / 2)) *
+    blue = (s32)(sinf(f_GridCursorPhases[vertexIndex] + (M_PI / 2)) *
                MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    green = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + M_PI) *
+    green = (s32)(sinf(f_GridCursorPhases[vertexIndex] + M_PI) *
                 MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    D_80230038_ovl_01[vertexIndex].v.cn[0] = red;
-    D_80230038_ovl_01[vertexIndex].v.cn[2] = blue;
-    D_80230038_ovl_01[vertexIndex].v.cn[1] = green;
+    f_GridCursorVertices[vertexIndex].v.cn[0] = red;
+    f_GridCursorVertices[vertexIndex].v.cn[2] = blue;
+    f_GridCursorVertices[vertexIndex].v.cn[1] = green;
   }
 
-  guOrtho(&D_8023A3A0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
+  guOrtho(&f_GridCursorProjection, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
   screenX = (f32)(x - CHARACTER_CURSOR_ORIGIN_X) - HALF_PIXEL;
   screenY = (f32)(CHARACTER_CURSOR_ORIGIN_Y - y) + HALF_PIXEL;
-  guTranslate(
-      &D_8023A3E0_ovl_01[g_DrawBufferIndex], screenX, screenY, MENU_CURSOR_Z);
-  guRotate(&D_8023A460_ovl_01[g_DrawBufferIndex], 0.0f, 0.0f, 1.0f, 0.0f);
-  guScale(&D_8023A4E0_ovl_01[g_DrawBufferIndex], 1.0f, 1.0f, 1.0f);
+  guTranslate(&f_GridCursorTranslations[g_DrawBufferIndex], screenX, screenY,
+      MENU_CURSOR_Z);
+  guRotate(&f_GridCursorRotations[g_DrawBufferIndex], 0.0f, 0.0f, 1.0f, 0.0f);
+  guScale(&f_GridCursorScales[g_DrawBufferIndex], 1.0f, 1.0f, 1.0f);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(D_8023A574_ovl_01)),
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_GridCursorBox)),
       G_IM_FMT_IA, MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1787,16 +1789,17 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y) {
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A3A0_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_GridCursorProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A3E0_ovl_01[g_DrawBufferIndex]),
+  gSPMatrix(gfx++,
+      OS_K0_TO_PHYSICAL(&f_GridCursorTranslations[g_DrawBufferIndex]),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A460_ovl_01[g_DrawBufferIndex]),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_GridCursorRotations[g_DrawBufferIndex]),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023A4E0_ovl_01[g_DrawBufferIndex]),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_GridCursorScales[g_DrawBufferIndex]),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
-  gSPVertex(gfx++, D_80230038_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
+  gSPVertex(gfx++, f_GridCursorVertices, MENU_CURSOR_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
