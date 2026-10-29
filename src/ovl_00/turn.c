@@ -2748,8 +2748,6 @@ void ShowHoleOutBanner(s32 playerIndex) {
  */
 #ifdef NON_MATCHING
 extern s32 D_800B7D9C;
-extern u16 D_80104998;
-extern u16 D_80104994;
 extern u8 D_800FE330;
 
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3466,7 +3464,8 @@ void UpdateTurns(void) {
             }
           }
         } else if (g_PauseScreen == 2) {
-          UpdateScorecard(D_80104998, D_80104994);
+          UpdateScorecard(g_MergedController.repeatedButtons,
+              g_MergedController.pressedButtons);
         } else if (g_PauseScreen == 8) {
           if (g_IsModuleAlive[0x16]) {
             g_PauseScreen = 5;
