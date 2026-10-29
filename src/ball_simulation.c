@@ -564,12 +564,16 @@ void ResetBallSimulations(void) {
 #define SIDE_SPIN_MISMATCH_FALLOFF 0.8f
 #define CURVE_PER_SIDE_SPIN 0.038146973f
 #define MAX_CURVE_SPEED_RATIO 100.0f
+/* Only a ball faster than this along the ground curves */
+#define MIN_CURVE_SPEED KilometersPerHour(10)
 /* Back spin lifts the ball by no more than an eightieth of its air speed */
 #define LIFT_PER_SPIN 0.045776367f
 /* The lift pushes the ball this far from its path through the air, turning
    about the spin's axis */
 #define LIFT_ANGLE_DEGREES 88.0f
 #define MAX_LIFT_SPEED_RATIO 80.0f
+/* Only a ball faster than this through the air lifts */
+#define MIN_LIFT_AIR_SPEED KilometersPerHour(1)
 /* The share of each spin kept each frame in flight */
 #define SIDE_SPIN_DECAY 0.995f
 #define SPIN_DECAY 0.993f
@@ -2283,7 +2287,7 @@ ROLLED:
           }
         }
 
-        if (horizontalSpeed > KilometersPerHour(10)) {
+        if (horizontalSpeed > MIN_CURVE_SPEED) {
           f32 scale = (1.0f / horizontalSpeed) * curve;
 
           velocity[AXIS_X] += -relative[AXIS_Z] * scale;
@@ -2292,7 +2296,7 @@ ROLLED:
 
         simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;
         lift = simulation->spinSpeed * LIFT_PER_SPIN;
-        if (simulation->spinSpeed != 0 && airSpeed > KilometersPerHour(1)) {
+        if (simulation->spinSpeed != 0 && airSpeed > MIN_LIFT_AIR_SPEED) {
           f32 turned[3];
           f32 scale;
 
