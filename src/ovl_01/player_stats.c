@@ -432,7 +432,7 @@ static u8* D_8023B63C_ovl_01;
 static s16 D_8023B640_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
 /* Not static: the original left it to the linker's common block */
-s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
+s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
 
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -557,7 +557,7 @@ void func_80217B88_ovl_01(s32 requestedPreset) {
 
   memory->unkD = 0;
   for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-    D_8023BFDC_ovl_01[index] = index < g_ChosenPlayerCount ? 0 : -1;
+    g_ChosenHandicaps[index] = index < g_ChosenPlayerCount ? 0 : -1;
   }
 
   memory->unk29 = 0;
@@ -1026,9 +1026,9 @@ s32 UpdateHandicaps(void) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_8023BFDC_ovl_01[memory->unk29]++;
-      if (D_8023BFDC_ovl_01[memory->unk29] >= PLAYER_OPTION_COUNT) {
-        D_8023BFDC_ovl_01[memory->unk29] = 0;
+      g_ChosenHandicaps[memory->unk29]++;
+      if (g_ChosenHandicaps[memory->unk29] >= PLAYER_OPTION_COUNT) {
+        g_ChosenHandicaps[memory->unk29] = 0;
       }
 
       return;
@@ -1036,9 +1036,9 @@ s32 UpdateHandicaps(void) {
 
     if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_8023BFDC_ovl_01[memory->unk29]--;
-      if (D_8023BFDC_ovl_01[memory->unk29] < 0) {
-        D_8023BFDC_ovl_01[memory->unk29] = PLAYER_OPTION_COUNT - 1;
+      g_ChosenHandicaps[memory->unk29]--;
+      if (g_ChosenHandicaps[memory->unk29] < 0) {
+        g_ChosenHandicaps[memory->unk29] = PLAYER_OPTION_COUNT - 1;
       }
     }
   }
@@ -1096,7 +1096,7 @@ void DrawTwoDigitMenuNumber(
 
 /*
  * Draws the handicap screen: the players' characters, a column for each player
- * with the player's label and D_8023BFDC value, the banner below them, and the
+ * with the player's label and handicap, the banner below them, and the
  * arrows around the column of the player that memory->unk29 picks. All but
  * the banner slide across by slide, and the banner and arrows down by it, or
  * up when reverseVerticalSlide is set. With canShowPrompt set, the prompt
@@ -1389,7 +1389,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     DrawTwoDigitMenuNumber(&gfx,
         D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
             (slide + OPTION_NUMBER_OFFSET_X),
-        OPTION_NUMBER_Y, D_8023BFDC_ovl_01[columnIndex], MENU_NUMBER_PLAIN);
+        OPTION_NUMBER_Y, g_ChosenHandicaps[columnIndex], MENU_NUMBER_PLAIN);
   }
 
   if ((D_802303A1_ovl_01 == FALSE) & (canShowPrompt == TRUE)) {

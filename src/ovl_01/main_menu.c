@@ -1686,7 +1686,7 @@ void func_801F6B28_ovl_01(void) {
     }
 
     for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-      D_8023BFDC_ovl_01[index] = 0;
+      g_ChosenHandicaps[index] = 0;
     }
 
     if (func_8022BDC4_ovl_01() != -1) {
@@ -1742,7 +1742,7 @@ void func_801F6B28_ovl_01(void) {
 
   for (index = 0; index != g_GameState.playerCount; index++) {
     player = &g_Players[index];
-    player->handicap = D_8023BFDC_ovl_01[index];
+    player->handicap = g_ChosenHandicaps[index];
     player->unk22 = D_800FBE08[index];
     player->characterIndex = D_8012F480[index];
     player->controllerIndex = g_PlayerControllerIndices[index];
@@ -2190,7 +2190,7 @@ void UpdateModeSelect(void) {
         D_801B5634 = 0;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-          D_8023BFDC_ovl_01[index] = 0;
+          g_ChosenHandicaps[index] = 0;
         }
 
         /* The last setting is left as it was */
@@ -2216,7 +2216,7 @@ void UpdateModeSelect(void) {
         func_80217B88_ovl_01(MENU_UNKE_PRESET_STROKE);
         if (g_ChosenPlayerCount == 1) {
           for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-            D_8023BFDC_ovl_01[index] = 0;
+            g_ChosenHandicaps[index] = 0;
           }
 
           for (index = 0; index != MENU_UNKE_COUNT - 1; index++) {
@@ -2290,7 +2290,7 @@ void UpdateModeSelect(void) {
         func_80217B88_ovl_01(MENU_UNKE_PRESET_MINI_GOLF);
         if (g_ChosenPlayerCount == 1) {
           for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-            D_8023BFDC_ovl_01[index] = 0;
+            g_ChosenHandicaps[index] = 0;
           }
 
           for (index = 0; index != MENU_UNKE_COUNT - 1; index++) {
