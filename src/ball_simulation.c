@@ -231,6 +231,34 @@ void ResetBallSimulations(void) {
 #define FULL_VOLUME_LIP_OUT_SPEED KilometersPerHour(5)
 
 /*
+ * Distances from the cup's center, in course units; each is a whole number of
+ * centimeters, and the speeds are centimeters a frame
+ */
+/* 8 cm: nearer than this a slow ball drops in, and in the cup its center meets
+ * the wall this far out */
+#define CUP_RADIUS 1228.8f
+/* 7 cm a frame: a faster ball, or one rising faster than 5 km/h, does not drop
+ * in */
+#define MAX_CUP_IN_SPEED 1075.2f
+/* 10.5 cm a frame: a ball that drops in slower plays SOUND_CUP_IN */
+#define MAX_CUP_IN_SOUND_SPEED 1612.7999f
+/* 7 cm: where the wall puts a ball that reaches it */
+#define CUP_WALL_REBOUND_RADIUS 1075.2f
+/* 7 cm and 13 cm: a rolling ball between them is pulled toward the cup, and
+ * a flying one landing there bounces off ground tilted toward it */
+#define CUP_PULL_INNER_RADIUS 1075.2f
+#define CUP_PULL_OUTER_RADIUS 1996.7999f
+/* 4 cm: the pull and the lip-out act only on a ball within this height of the
+ * cup */
+#define CUP_PULL_MAX_HEIGHT 614.4f
+/* 4 cm: the pull rises and falls again over this much depth into its zone */
+#define CUP_PULL_DEPTH_RANGE 614.4f
+/* 2 cm and 3 mm a frame: how much the pull can rise above its least, and its
+ * least */
+#define CUP_PULL_RISE 307.2f
+#define MIN_CUP_PULL 46.079998f
+
+/*
  * Moves the simulated ball through one step, with a second substep when the
  * ball bounces within the first 40% of its path. Each substep tests the path
  * against rings, the ground, billboards, the pin, the cup, walls and hole
@@ -636,10 +664,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 simulation->position[AXIS_Y] -
                         g_HoleSetup.cupPosition[AXIS_Y] >=
                     -0x2FF &&
-                (f32)cupDistance < 1228.8f) {
+                (f32)cupDistance < CUP_RADIUS) {
               s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
-              if (speed < 1075.2f &&
+              if (speed < MAX_CUP_IN_SPEED &&
                   velocity[AXIS_Y] >= -KilometersPerHour(5)) {
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
@@ -647,17 +675,18 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 }
 
                 simulation->state = BALL_STATE_IN_CUP;
-                if (speed < 1612.7999f) {
+                if (speed < MAX_CUP_IN_SOUND_SPEED) {
                   simulation->unkA8[0] = 1;
                 }
               }
             }
 
-            if ((f32)cupDistance < 1996.7999f && (f32)cupDistance >= 1075.2f) {
+            if ((f32)cupDistance < CUP_PULL_OUTER_RADIUS &&
+                (f32)cupDistance >= CUP_PULL_INNER_RADIUS) {
               isNearCup = TRUE;
               if (simulation->state == BALL_STATE_ROLLING &&
                   (f32)Abs(simulation->position[AXIS_Y] -
-                      g_HoleSetup.cupPosition[AXIS_Y]) < 614.4f) {
+                      g_HoleSetup.cupPosition[AXIS_Y]) < CUP_PULL_MAX_HEIGHT) {
                 f32 toCup[3];
                 f32 direction[3];
                 f32 alignment;
@@ -687,14 +716,16 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   alignment = 0.0f;
                 }
 
-                depth = 1996.7999f - (f32)cupDistance;
+                depth = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
                 angle = atan2(toCup[AXIS_Z], toCup[AXIS_X]);
                 alignment = 1.0f - alignment;
-                if (depth > 614.4f) {
-                  depth = 614.4f;
+                if (depth > CUP_PULL_DEPTH_RANGE) {
+                  depth = CUP_PULL_DEPTH_RANGE;
                 }
 
-                pull = ((sinf(depth * 0.005113269f) * 307.2f) + 46.079998f) *
+                pull = ((sinf(depth * ((f32)M_PI / CUP_PULL_DEPTH_RANGE)) *
+                            CUP_PULL_RISE) +
+                           MIN_CUP_PULL) *
                     alignment;
                 velocity[AXIS_X] *= 0.93f;
                 velocity[AXIS_Z] *= 0.93f;
@@ -704,10 +735,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               }
             }
 
-            if ((f32)cupDistance >= 1996.7999f &&
+            if ((f32)cupDistance >= CUP_PULL_OUTER_RADIUS &&
                 (f32)IntLength2D(startX - g_HoleSetup.cupPosition[AXIS_X],
-                    startZ - g_HoleSetup.cupPosition[AXIS_Z]) < 1996.7999f &&
-                (f32)Abs(startY - g_HoleSetup.cupPosition[AXIS_Y]) < 614.4f) {
+                    startZ - g_HoleSetup.cupPosition[AXIS_Z]) <
+                    CUP_PULL_OUTER_RADIUS &&
+                (f32)Abs(startY - g_HoleSetup.cupPosition[AXIS_Y]) <
+                    CUP_PULL_MAX_HEIGHT) {
               f32 fromCup[3];
               f32 direction[3];
               BallSpeed speed;
@@ -811,7 +844,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       cupDistance = (s32)IntLength2D(
           simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
           simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
-      if (cupDistance >= 1228.8f) {
+      if (cupDistance >= CUP_RADIUS) {
         f32 toCupX;
         f32 toCupY;
         f32 toCupZ;
@@ -825,7 +858,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         push = ((toCupX * velocity[AXIS_X]) + (toCupY * velocity[AXIS_Y]) +
                    (toCupZ * velocity[AXIS_Z])) *
             1.5f;
-        scale = 1075.2f / cupDistance;
+        scale = CUP_WALL_REBOUND_RADIUS / cupDistance;
         velocity[AXIS_X] -= toCupX * push;
         velocity[AXIS_Y] -= toCupY * push;
         velocity[AXIS_Z] -= toCupZ * push;
@@ -1237,7 +1270,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       cupDistance = IntLength2D(
           g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X],
           g_HoleSetup.cupPosition[AXIS_Z] - simulation->position[AXIS_Z]);
-      if ((f32)cupDistance < 1996.7999f && (f32)cupDistance >= 1075.2f) {
+      if ((f32)cupDistance < CUP_PULL_OUTER_RADIUS &&
+          (f32)cupDistance >= CUP_PULL_INNER_RADIUS) {
         f32 toCup[3];
 
         toCup[AXIS_Y] = 1.0f;
