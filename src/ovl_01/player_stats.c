@@ -152,7 +152,8 @@ enum StatsDirection {
 #define BET_STAKE_LEVEL_COUNT 6
 /* What unkE holds for a bet that func_80217B88's preset leaves out */
 #define NO_BET -1
-/* Where func_80217D20 types the chosen bet's explanation, and its first message
+/* Where UpdateBetSettings types the chosen bet's explanation, and its first
+ * message
  */
 #define BET_HELP_X 36
 #define BET_HELP_Y 186
@@ -566,7 +567,7 @@ void func_80217B88_ovl_01(s32 requestedPreset) {
 /* Doesn't match: the bet icon's index and the frame swap registers ($v0 and
  * $v1) before OpenEncodedAsset. */
 #ifdef NON_MATCHING
-void func_80217D20_ovl_01(void) {
+void UpdateBetSettings(void) {
   EncodedAsset asset;
   MenuMemory* memory;
   s16 index;
@@ -674,7 +675,7 @@ void func_80217D20_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217D20_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", UpdateBetSettings);
 #endif
 
 /*
@@ -724,7 +725,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217D20_ovl_01);
  * and schedules the stake marks' coordinates differently
  */
 #ifdef NON_MATCHING
-void func_8021826C_ovl_01(
+void DrawBetSettings(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = func_8005AF74();
@@ -925,7 +926,7 @@ void func_8021826C_ovl_01(
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021826C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBetSettings);
 #endif
 
 void func_80219460_ovl_01(

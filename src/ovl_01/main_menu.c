@@ -371,7 +371,7 @@ void UpdateCharacterTable(void);
 void func_8021730C_ovl_01(void);
 void func_802177D0_ovl_01(void);
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind);
-void func_80217D20_ovl_01(void);
+void UpdateBetSettings(void);
 /* Defined without parameters, though UpdateMenus passes it two */
 s32 func_80219948_ovl_01();
 void func_8021CF10_ovl_01(void** buffers);
@@ -1067,7 +1067,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_BET_SETTINGS:
-      func_80217D20_ovl_01();
+      UpdateBetSettings();
       break;
 
     case MENU_SCREEN_UNK18:
@@ -4601,7 +4601,7 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     u8 enlargesChosenHole);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_8021826C_ovl_01(
+void DrawBetSettings(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled);
 void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
     u8 reverseVerticalSlide, u8 canShowPrompt);
@@ -6168,20 +6168,19 @@ void DrawCourseSelect(Gfx** displayListHead) {
     DrawMenuBackdropLayers(&gfx, COURSE_SELECT_FRONT_LAYERS);
     switch (D_8022BE88_ovl_01) {
       case BET_PHASE_OPENING:
-        func_8021826C_ovl_01(
-            &gfx, BET_SLIDE_DISTANCE - D_802322F0_ovl_01, 0, 0);
+        DrawBetSettings(&gfx, BET_SLIDE_DISTANCE - D_802322F0_ovl_01, 0, 0);
         break;
 
       case BET_PHASE_CHOOSING:
-        func_8021826C_ovl_01(&gfx, 0, 0, 1);
+        DrawBetSettings(&gfx, 0, 0, 1);
         break;
 
       case BET_PHASE_CANCELED:
-        func_8021826C_ovl_01(&gfx, D_802322F0_ovl_01, 0, 0);
+        DrawBetSettings(&gfx, D_802322F0_ovl_01, 0, 0);
         break;
 
       case BET_PHASE_CONFIRMED:
-        func_8021826C_ovl_01(&gfx, D_802322F0_ovl_01, 1, 0);
+        DrawBetSettings(&gfx, D_802322F0_ovl_01, 1, 0);
         func_80219BD4_ovl_01(
             &gfx, BET_SLIDE_DISTANCE - D_802322F4_ovl_01, 0, 0);
         break;
@@ -6191,8 +6190,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
 
       case MENU_PHASE_CANCELED:
-        func_8021826C_ovl_01(
-            &gfx, D_802322F0_ovl_01 - BET_SLIDE_DISTANCE, 1, 0);
+        DrawBetSettings(&gfx, D_802322F0_ovl_01 - BET_SLIDE_DISTANCE, 1, 0);
         func_80219BD4_ovl_01(&gfx, D_802322F4_ovl_01, 0, 0);
         break;
 

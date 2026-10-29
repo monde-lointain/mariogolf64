@@ -69,7 +69,7 @@ rom:0xEB030 reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0x8
 rom:0xEB034 reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0x8
 rom:0xEB038 reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0xC
 rom:0xEB03C reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0xC
-// func_80217D20_ovl_01 sets D_8023BFC0_ovl_01's later elements; name the table, not the element
+// UpdateBetSettings sets D_8023BFC0_ovl_01's later elements; name the table, not the element
 rom:0x101D68 reloc:MIPS_HI16 symbol:D_8023BFC0_ovl_01 addend:0x4
 rom:0x101D70 reloc:MIPS_LO16 symbol:D_8023BFC0_ovl_01 addend:0x4
 rom:0x101D8C reloc:MIPS_HI16 symbol:D_8023BFC0_ovl_01 addend:0x8
