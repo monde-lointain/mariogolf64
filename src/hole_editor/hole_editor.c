@@ -291,6 +291,8 @@ enum TriangleEdit {
 #define DIAGONAL_SIDE_COUNT 4
 /* How many different codes each side keeps */
 #define SIDE_CODE_COUNT 2
+/* Whether a diagonal side has gathered two different terrain codes */
+#define HasTwoSideCodes(codes) ((codes)[SIDE_CODE_COUNT - 1] != NO_TERRAIN_CODE)
 #define NO_TERRAIN_CODE (-1)
 #define HOLE_EDITOR_DIAGONAL_ASSERT_LINE 2046
 /* The vertex units in a terrain code column or row */
@@ -2809,10 +2811,8 @@ s32 func_80405870_hole_editor(s32 column, s32 row, s32 endColumn, s32 endRow) {
     }
   }
 
-  if (sideCodes[0][1] != NO_TERRAIN_CODE &&
-      sideCodes[1][1] != NO_TERRAIN_CODE &&
-      (sideCodes[2][1] == NO_TERRAIN_CODE ||
-          sideCodes[3][1] == NO_TERRAIN_CODE)) {
+  if (HasTwoSideCodes(sideCodes[0]) && HasTwoSideCodes(sideCodes[1]) &&
+      (!HasTwoSideCodes(sideCodes[2]) || !HasTwoSideCodes(sideCodes[3]))) {
     return TRUE;
   }
 
