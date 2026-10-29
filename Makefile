@@ -40,7 +40,7 @@ ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
 LD_HASH_SIZE := 8191
 LDFLAGS     := -T $(LD_SCRIPT) -T undefined_syms.txt -T $(BUILD_DIR)/splat/undefined_syms_auto.txt \
                -T $(BUILD_DIR)/splat/undefined_funcs_auto.txt -Map $(MAP) --no-check-sections \
-               --hash-size=$(LD_HASH_SIZE)
+               --hash-size=$(LD_HASH_SIZE) -G 0
 
 # Host-side syntax checking of C sources with clang, pretending to be 32-bit MIPS
 CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m32 -nostdinc \
