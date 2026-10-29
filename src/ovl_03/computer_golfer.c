@@ -213,7 +213,7 @@ s32 PlanCupDistance(s32 arg0);
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
 s32 ChooseClubForDistance(s32 distance);
 
-s32 func_8005F248(s32 value);
+s32 GetGaugeFramePower(s32 value);
 s32 StepTrialShot(void);
 Boolean IsTrialShotSafe(void);
 s32 ChooseShotOffset(void);
@@ -433,7 +433,8 @@ s32 GetSideSlope(void) {
 
 s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 
-/* f_Shot.powerGaugeFrame's range, which ScaleToShotUnk4 maps 0 to 256 onto */
+/* f_Shot.powerGaugeFrame's range, which GetPowerGaugeFrame maps 0 to 256 onto
+ */
 #define SHOT_UNK4_MIN 3
 /* The levels that PlanShot always tries, tries while the best evaluation is
  * poor, and tries at most */
@@ -2169,7 +2170,8 @@ s32 ChooseApproachClub(s32* targetX, s32* targetZ) {
 
 #define SHOT_UNK4_SCALE (SHOT_UNK4_MAX / 256.0f)
 
-s32 ScaleToShotUnk4(s32 amount) {
+/* The power gauge frame for a launch power out of 256 */
+s32 GetPowerGaugeFrame(s32 amount) {
   s32 value;
   s32 unused;
   s32 uninitialized;
@@ -2257,7 +2259,7 @@ s32 StepTrialShot(void) {
     f_TrialLaunch->heading = f_Shot.heading;
     f_TrialLaunch->clubIndex = f_Shot.clubSlot;
     f_ClosestTargetDistance = FAR_FROM_TARGET;
-    f_TrialLaunch->power = func_8005F248(f_Shot.powerGaugeFrame);
+    f_TrialLaunch->power = GetGaugeFramePower(f_Shot.powerGaugeFrame);
     f_TrialLaunch->unkC = 0;
     f_TrialLaunch->unk10 = f_Shot.unk14;
     f_TrialLaunch->unk14 = f_Shot.unk18;
@@ -2565,7 +2567,7 @@ EVALUATE:
           return 1;
         }
       } else {
-        f_Shot.powerGaugeFrame = ScaleToShotUnk4(launchPower);
+        f_Shot.powerGaugeFrame = GetPowerGaugeFrame(launchPower);
         if (f_IsPutting) {
           f_Shot.powerGaugeFrame = f_Shot.powerGaugeFrame + 1 + (rand() & 1);
         }
@@ -2579,12 +2581,14 @@ EVALUATE:
         }
 
         if (f_TrialLaunch->power < launchPower) {
-          if (func_8005F248(f_Shot.powerGaugeFrame) <= f_TrialLaunch->power &&
+          if (GetGaugeFramePower(f_Shot.powerGaugeFrame) <=
+                  f_TrialLaunch->power &&
               f_Shot.powerGaugeFrame < SHOT_UNK4_MAX) {
             f_Shot.powerGaugeFrame++;
           }
         } else if (launchPower < f_TrialLaunch->power) {
-          if (func_8005F248(f_Shot.powerGaugeFrame) >= f_TrialLaunch->power &&
+          if (GetGaugeFramePower(f_Shot.powerGaugeFrame) >=
+                  f_TrialLaunch->power &&
               f_Shot.powerGaugeFrame >= 4) {
             f_Shot.powerGaugeFrame--;
           }
@@ -2951,7 +2955,7 @@ Boolean IsTrialShotSafe(void) {
 
   f_TrialLaunch->heading = f_TrialShot.heading;
   f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
-  f_TrialLaunch->power = func_8005F248(f_TrialShot.powerGaugeFrame);
+  f_TrialLaunch->power = GetGaugeFramePower(f_TrialShot.powerGaugeFrame);
   f_TrialLaunch->unkC = f_TrialShot.impactGaugeFrame - 60;
   f_TrialLaunch->unk10 = f_TrialShot.unk14;
   f_TrialLaunch->unk14 = f_TrialShot.unk18;

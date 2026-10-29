@@ -3875,7 +3875,8 @@ void UpdateTurns(void) {
           SoundId sound;
 
           g_CurrentShot.powerGaugeFrame = g_CurrentShot.gaugeFrame;
-          D_80227150_ovl_00.power = func_8005F248(g_CurrentShot.gaugeFrame);
+          D_80227150_ovl_00.power =
+              GetGaugeFramePower(g_CurrentShot.gaugeFrame);
           g_SavedPlayers[playerIndex] = g_Players[playerIndex];
           g_Players[playerIndex].strokeCount++;
           if (g_Players[playerIndex].strokeCount > STROKE_COUNT_MAX) {

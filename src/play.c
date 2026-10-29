@@ -174,7 +174,11 @@ void func_8005F1C8(void) {
   g_ImpactPointLingerFrameCount = 0;
 }
 
-s32 func_8005F224(void) {
+/*
+ * How full the swing gauge is at the current gaugeFrame: it fills for 30
+ * frames, then empties until the impact mark
+ */
+s32 GetGaugeFill(void) {
   s32 value = g_CurrentShot.gaugeFrame;
 
   if (value >= 31) {
@@ -184,7 +188,8 @@ s32 func_8005F224(void) {
   return value;
 }
 
-s32 func_8005F248(s32 value) {
+/* The launch power, out of 256, of the gauge's fill at a gauge frame */
+s32 GetGaugeFramePower(s32 value) {
   if (value >= 31) {
     value = 60 - value;
   }

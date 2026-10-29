@@ -352,7 +352,7 @@ Boolean IsShotModeChangeDone(void) {
 #define MARKER_PULSE_STEP (M_PI / 6)
 #define MARKER_PULSE_LEVEL 100.0
 
-s32 func_8005F224(void);
+s32 GetGaugeFill(void);
 
 /* Draws the power gauge, its markers, and the bar for the lie's span */
 void DrawClubPanel(Gfx** displayListHead) {
@@ -474,7 +474,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
   gDPPipeSync(gfx++);
   fillWidth = GAUGE_FILL_IMAGE_WIDTH;
-  value = func_8005F224();
+  value = GetGaugeFill();
   gDPLoadTextureBlock(gfx++, ((u32)f_ShotModeImage + IMAGE_HEADER_SIZE) & ~7,
       G_IM_FMT_RGBA, G_IM_SIZ_16b, fillWidth, GAUGE_FILL_IMAGE_HEIGHT, 0,
       G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
