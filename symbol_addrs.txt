@@ -3216,6 +3216,7 @@ f_AssignedHumanCount = 0x80230B48; // type:s16 size:0x2 segment:ovl_01
 f_HumanPlayerCount = 0x80230B4A; // type:s16 size:0x2 segment:ovl_01
 f_IsGameChosen = 0x80230B4C; // type:u8 size:0x1 segment:ovl_01
 f_AreControllersAssigned = 0x80230B4D; // type:u8 size:0x1 segment:ovl_01
+f_ShownCourseBufferIndex = 0x80230B4E; // type:u8 size:0x1 segment:ovl_01
 D_802306D8_ovl_01 = 0x802306D8; // type:s32 size:0x40 segment:ovl_01
 g_CharacterFaceAssets = 0x802308A4; // type:u16 size:0x24 segment:ovl_01
 g_CharacterPaletteFiles = 0x802308C8; // type:s16 size:0x90 segment:ovl_01

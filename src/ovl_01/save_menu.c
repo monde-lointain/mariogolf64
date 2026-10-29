@@ -176,7 +176,8 @@ static s16 f_HumanPlayerCount = MAX_PLAYER_COUNT;
 static u8 f_IsGameChosen = 0;
 /* Set once every human player has a controller, so A starts the game */
 static u8 f_AreControllersAssigned = 0;
-static u8 D_80230B4E_ovl_01 = 0;
+/* Which of f_CourseImageBuffers is on screen */
+static u8 f_ShownCourseBufferIndex = 0;
 static s32 D_80230B50_ovl_01[SAVED_GAME_COUNT] = {-1, -1, -1};
 static SaveMenuModeImage D_80230B5C_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     {0, 0x0623}, {0, 0x0629}, {0, 0x0599}, {0, 0x05AF}, {0, 0x0631},
@@ -1140,7 +1141,7 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
       break;
   }
 
-  D_80230B4E_ovl_01 = 0;
+  f_ShownCourseBufferIndex = 0;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveGameBuffer);
@@ -1337,16 +1338,18 @@ void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
     if (!CHOSEN_GAME.state.isMiniGolf) { \
       OpenEncodedAsset( \
           g_CourseIconAssets[CHOSEN_GAME.state.courseIndex], &asset); \
-      ReadEncodedAsset(f_CourseImageBuffers[D_80230B4E_ovl_01 ^ 1], &asset); \
+      ReadEncodedAsset( \
+          f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
     } else { \
       miniGolfIndex = CHOSEN_GAME.state.courseIndex - MINI_GOLF_COURSE_INDEX; \
       OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset); \
-      ReadEncodedAsset(f_CourseImageBuffers[D_80230B4E_ovl_01 ^ 1], &asset); \
+      ReadEncodedAsset( \
+          f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
       OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file); \
       ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file); \
     } \
 \
-    D_80230B4E_ovl_01 ^= 1; \
+    f_ShownCourseBufferIndex ^= 1; \
   }
 
 /*
@@ -2443,12 +2446,12 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
   GetSaveData();
   func_8005AF74();
   gDPLoadTLUT_pal256(gfx++,
-      TextureAddress(
-          (u32)f_CourseImageBuffers[D_80230B4E_ovl_01] + IMAGE_HEADER_SIZE));
+      TextureAddress((u32)f_CourseImageBuffers[f_ShownCourseBufferIndex] +
+          IMAGE_HEADER_SIZE));
   for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT;
       stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)f_CourseImageBuffers[D_80230B4E_ovl_01] +
+        TextureAddress((u32)f_CourseImageBuffers[f_ShownCourseBufferIndex] +
             LARGE_PALETTED_TEXELS_OFFSET +
             (stripIndex * COURSE_THUMBNAIL_WIDTH *
                 COURSE_THUMBNAIL_STRIP_HEIGHT)),
@@ -2487,7 +2490,7 @@ void func_8022644C_ovl_01(Gfx** displayListHead) {
     /* The course and chosen course buffers are adjacent; D_80230B4E picks one
      */
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)f_CourseImageBuffers[D_80230B4E_ovl_01] +
+        TextureAddress((u32)f_CourseImageBuffers[f_ShownCourseBufferIndex] +
             (stripIndex * COURSE_THUMBNAIL_WIDTH *
                 COURSE_THUMBNAIL_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_THUMBNAIL_WIDTH,
