@@ -27,6 +27,14 @@
 #define TRANSFER_MODE_COUNT 2
 #define MODE_OPTION_COUNT 3
 
+/*
+ * The rows of f_ModeOptions: Send Status in both modes, then Bring Characters
+ * at boot or Send Experience from the menu, then the main menu at boot only
+ */
+#define STATUS_OPTION_ROW 0
+#define SECOND_OPTION_ROW 1
+#define MAIN_MENU_OPTION_ROW 2
+
 /* f_ModeOptions entries, counted from the message naming each */
 #define TRANSMIT_OPTION_MESSAGES 0x13F
 
@@ -1248,11 +1256,11 @@ void UpdateTransmitMenu(void) {
 
       if (f_TransmitController.pressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
-        if (transfer->optionIndex == 0) {
+        if (transfer->optionIndex == STATUS_OPTION_ROW) {
           transfer->screen = TRANSMIT_SCREEN_SEND_STATUS;
           transfer->screenStep = SEND_STATUS_STARTING;
           ResetSendStatus();
-        } else if (transfer->optionIndex == 1) {
+        } else if (transfer->optionIndex == SECOND_OPTION_ROW) {
           if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
             transfer->screen = TRANSMIT_SCREEN_BRING_CHARACTERS;
             transfer->screenStep = BRING_STARTING;
@@ -1264,7 +1272,7 @@ void UpdateTransmitMenu(void) {
           }
         }
 
-        if (transfer->optionIndex == 2) {
+        if (transfer->optionIndex == MAIN_MENU_OPTION_ROW) {
           if (!HaveAllRumblePaks()) {
             transfer->isCanceled = FALSE;
             transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
@@ -1287,7 +1295,9 @@ void UpdateTransmitMenu(void) {
         }
       } else if (f_TransmitController.repeatedButtons & U_JPAD) {
         if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
-          transfer->optionIndex = (transfer->optionIndex + 2) % 3;
+          transfer->optionIndex =
+              (transfer->optionIndex + MODE_OPTION_COUNT - 1) %
+              MODE_OPTION_COUNT;
         } else {
           transfer->optionIndex ^= 1;
         }
@@ -1295,7 +1305,9 @@ void UpdateTransmitMenu(void) {
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
       } else if (f_TransmitController.repeatedButtons & D_JPAD) {
         if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
-          transfer->optionIndex = (transfer->optionIndex + 4) % 3;
+          transfer->optionIndex =
+              (transfer->optionIndex + MODE_OPTION_COUNT + 1) %
+              MODE_OPTION_COUNT;
         } else {
           transfer->optionIndex ^= 1;
         }
