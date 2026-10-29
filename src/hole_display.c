@@ -41,7 +41,7 @@
 #define TITLE_LIGHT_YAW 0x6000
 #define GAME_FLAG_UNK7 0x07
 
-/* Unk800C5F34.imageKind values: which images InitSkyColors loads */
+/* Sun.imageKind values: which images InitSkyColors loads */
 enum SkyImageKind {
   SKY_IMAGE_KIND_0, /* ASSET_SKY_IMAGE_0 */
   SKY_IMAGE_KIND_1, /* ASSET_SKY_IMAGE_1 */
@@ -245,7 +245,7 @@ static f32 f_SunScreenX[SKY_VIEW_COUNT] = {0.0f, 0.0f}; /* For each view */
 static f32 f_SunScreenY[SKY_VIEW_COUNT] = {0.0f, 0.0f};
 /* The sky's suns, which g_SkyColors points to; none points to the fourth or
  * the sixth */
-static Unk800C5F34 f_Suns[7] = {
+static Sun f_Suns[7] = {
     {{0, 0, 0, 0}, 24, {0xFF, 0xEF, 0xBF}, {0xFF, 0xFF, 0x7F}, {0, 0}, 64, 0,
         0x400, 64.0f, SKY_IMAGE_KIND_1},
     {{0, 0, 0, 0}, 192, {0xFF, 0xEF, 0xE0}, {0xFF, 0xEF, 0xE0}, {0, 0}, 32, 0,

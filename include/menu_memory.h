@@ -97,14 +97,14 @@ MenuMemory* func_8005AF74(void);
 extern MenuMemory D_801323A0;
 
 /* The character select's record of which characters are taken */
-typedef struct Unk800FBD40 {
+typedef struct TakenCharacters {
   /* 0x00 */ s16 unk0;
   /* 0x02 */ u8 unk2[0x8 - 0x2];
   /* 0x08 */ Boolean isCharacterTaken[CHARACTER_COUNT];
   /* 0x50 */ u8 unk50[0x54 - 0x50];
-} Unk800FBD40; /* size = 0x54 */
+} TakenCharacters; /* size = 0x54 */
 
-extern Unk800FBD40 D_800FBD40;
+extern TakenCharacters D_800FBD40;
 
 /* The character each player has chosen, or NO_CHOSEN_CHARACTER */
 #define NO_CHOSEN_CHARACTER -1

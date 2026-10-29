@@ -49,14 +49,16 @@
 /* Each Ring Shot course after the first opens after this many more stars */
 #define STARS_PER_RING_SHOT_COURSE 4
 
-/* Mirrors of the save data's options */
-
-typedef struct Unk800C2B90 {
+/* Where an imported character goes in the character grid; unk0 and unk4 are
+ * never read */
+typedef struct ImportedCharacterCell {
   /* 0x0 */ s16 unk0;
   /* 0x2 */ s16 column;
   /* 0x4 */ s16 unk4;
   /* 0x6 */ s16 row;
-} Unk800C2B90; /* size = 0x8 */
+} ImportedCharacterCell; /* size = 0x8 */
+
+/* Mirrors of the save data's options */
 
 extern s8 D_800FBDB9;
 extern s8 D_800FBE08[4];
@@ -118,10 +120,11 @@ extern void* D_801B69EC;
 
 void func_8005CA48(void);
 
-typedef struct Unk800C29B8 {
+/* A cell of the character grid */
+typedef struct GridCell {
   /* 0x0 */ s16 column;
   /* 0x2 */ s16 row;
-} Unk800C29B8; /* size = 0x4 */
+} GridCell; /* size = 0x4 */
 
 s32 GetClubTournamentCourse(void);
 void func_8005D9A0(void);
@@ -410,9 +413,9 @@ static s16 f_StartingCharacterGrid
             EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT},
         {EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT,
             EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT}};
-static Unk800C29B8 f_SlotCells[] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0},
-    {2, 1}, {3, 0}, {3, 1}, {4, 0}, {4, 1}, {5, 0}, {5, 1}, {6, 0}, {6, 1},
-    {0, 2}, {1, 2}, {2, 2}, {3, 2}};
+static GridCell f_SlotCells[] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1},
+    {3, 0}, {3, 1}, {4, 0}, {4, 1}, {5, 0}, {5, 1}, {6, 0}, {6, 1}, {0, 2},
+    {1, 2}, {2, 2}, {3, 2}};
 char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH] = {"Plum", "Charlie",
     "Peach", "Baby Mario", "Luigi", "Yoshi", "Sonny", "Wario", "Harry", "Mario",
     "Maple", "DK", "Bowser", "Metal Mario"};
@@ -446,8 +449,9 @@ static u8 f_DebugImportedNames[IMPORTED_CHARACTER_COUNT]
                                       MARK_LOWERCASE('e'), MARK_LOWERCASE('a')},
                                   {'J', MARK_LOWERCASE('o'),
                                       MARK_LOWERCASE('e')}};
-static Unk800C2B90 f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] = {
-    {0, 0, 0, 2}, {0, 1, 0, 2}, {0, 2, 0, 2}, {0, 3, 0, 2}};
+static ImportedCharacterCell
+    f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] = {
+        {0, 0, 0, 2}, {0, 1, 0, 2}, {0, 2, 0, 2}, {0, 3, 0, 2}};
 static s16 f_CharacterSlots[] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
 s32 g_MenuCourseCount = 6;

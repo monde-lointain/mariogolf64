@@ -65,7 +65,7 @@
 int f_RandomState BSS = {0};
 /* Read by no routine */
 static u8 D_800FBD38[0x8] BSS = {0};
-Unk800FBD40 D_800FBD40 BSS ALIGNED(8) = {0};
+TakenCharacters D_800FBD40 BSS ALIGNED(8) = {0};
 u8 nuScPreNMIFlag BSS = {0};
 NUContData g_ControllerData[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 s8 D_800FBDB8 BSS = {0};

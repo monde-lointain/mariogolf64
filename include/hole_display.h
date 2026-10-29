@@ -62,7 +62,7 @@ typedef struct SkyColors {
                           g_CourseSkyImage */
   /* 0x11 */ u8 hasLensFlare;
   /* 0x12 */ u8 unk12[2];
-  /* 0x14 */ struct Unk800C5F34* unk14;
+  /* 0x14 */ struct Sun* unk14;
   /* 0x18 */ u8 fogColor[3];
   /* 0x1C */ s16 fogNear;
   /* 0x1E */ s16 fogFar;
@@ -74,7 +74,8 @@ typedef struct SkyColors {
 
 extern SkyColors g_SkyColors[][SKY_WEATHER_COUNT * SKY_TIME_COUNT];
 
-typedef struct Unk800C5F34 {
+/* The sun of a sky, and which sky images InitSkyColors loads with it */
+typedef struct Sun {
   /* 0x00 */ u8 unk0[4];
   /* 0x04 */ s32 sunHeight; /* Above the horizon */
   /* 0x08 */ u8 sunPrimColor[3];
@@ -85,7 +86,7 @@ typedef struct Unk800C5F34 {
   /* 0x16 */ s16 sunTexelStep;
   /* 0x18 */ f32 maxSunGlare; /* The most that DrawLensFlare's glare grows to */
   /* 0x1C */ u8 imageKind; /* A SKY_IMAGE_KIND_* value */
-} Unk800C5F34;
+} Sun;
 
 /* A MENU_BACKDROP_STATE_* value */
 extern s32 g_MenuBackdropState;
