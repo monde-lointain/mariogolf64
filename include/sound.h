@@ -146,6 +146,8 @@ enum Song {
 
 /* The song id when no song is playing */
 #define NO_SONG -1
+/* libmus scales a song's own tempo by SetSongTempo's value over this */
+#define NORMAL_SONG_TEMPO 0x80
 
 /* The audio channel for the next sound effect, alternating between two */
 extern s32 g_NextSoundChannel;

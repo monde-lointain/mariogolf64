@@ -629,7 +629,7 @@ segments:
       - [0x101830, c, ovl_01/player_stats]
       - [0x109570, c, ovl_01/save_menu]
       - [0x110670, c, ovl_01/tournament_menu]
-      - [0x115D80, data]
+      - [0x115D80, .data, ovl_01/main_menu]
       - [0x119E80, .data, ovl_01/character_select]
       - [0x11A020, .data, ovl_01/course_menu]
       - [0x11A0B0, .data, ovl_01/best_times]

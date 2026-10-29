@@ -143,6 +143,14 @@
 /* Places for the clubhouse's rows, three more than it shows */
 #define CLUBHOUSE_ROW_PLACE_COUNT 8
 
+/* The viewer's animation until the player picks another */
+#define VIEWER_STARTING_ANIMATION 13
+/* What D_8022FBA0 holds before the viewer shows a character, so that no
+ * character matches it */
+#define NO_VIEWER_CHARACTER -1
+/* A club mask with a bit set for every slot */
+#define ALL_CLUB_SLOTS ((1 << CLUB_SLOT_COUNT) - 1)
+
 /* Divides a turn among the player count's modes, keeping it whole should a
  * count be zero */
 #define SPREAD_OVER_MODES(amount) \
@@ -190,8 +198,6 @@ typedef struct ImageCorner {
 /* g_GameState.gameMode under a symbol of its own, which func_801F6B28_ovl_01
  * needs to match */
 extern u32 g_GameMode;
-extern f32 f_MenuBobOffset;
-extern f32 f_MenuBobPhase;
 
 /* Where func_801FD7B0 and func_801FCEF8 draw the banners of D_801052BC and
  * D_801B60D0 */
@@ -243,32 +249,7 @@ extern void* D_800FF420[2];
 extern s32 D_801051F0;
 extern void* D_801052BC[2];
 extern void* D_801F4A20;
-extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
-extern s32 D_8022BE30_ovl_01[MAX_PLAYER_COUNT]; /* Each player count's mode
-                                                  count */
-extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
-/* Whether the options screen's erase window is up */
-extern u8 f_IsEraseWindowUp;
-/* The sound test's sound, song and settings */
-extern s32 f_SoundTestSound;
-extern s32 f_SoundTestSong;
-extern s32 f_SoundTestSoundReverb;
-extern s32 f_SoundTestSongReverb;
-extern f32 f_SoundTestSoundFrequency;
-extern f32 f_SoundTestSongFrequency;
-extern s32 f_SoundTestSongTempo;
-extern char f_SoundTestSongNames[][SOUND_TEST_SONG_NAME_LENGTH];
-extern char f_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH];
-extern s16 D_8022BE8E_ovl_01;
-extern s16 D_8022BE90_ovl_01;
-extern s32 D_8022BE28_ovl_01;
 extern const char D_80231514_ovl_01[];
-extern s16 D_8022BE8C_ovl_01;
-extern s16 D_8022BE92_ovl_01;
-/* The menus' camera orbit's updates */
-extern s32 D_8022F8E0_ovl_01;
-/* Each player's sound pan, by the player count */
-extern u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 /* The parts of the menu backdrop that func_801FC60C and func_801FB54C draw */
 #define MENU_LAYER_UNK1 (1 << 0)
 #define MENU_LAYER_UNK4 (1 << 2)
@@ -291,14 +272,8 @@ extern u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern u8 g_OptionBits;
-extern s32 D_8022BE18_ovl_01;
 extern s32 D_800FBD40[];
-extern s32 D_8022BE0C_ovl_01;
-extern s32 D_8022BE2C_ovl_01;
 extern void* D_8010526C[2];
-extern s32 D_8022F8C8_ovl_01;
-extern s8 D_8022F8CD_ovl_01;
-extern s32 D_8022BE84_ovl_01;
 extern s32 D_802322F0_ovl_01;
 extern s32 D_802322F4_ovl_01;
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
@@ -308,10 +283,6 @@ extern u8 D_801B9410;
 extern s8 D_801B5634;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
-extern s32 D_8022BE1C_ovl_01;
-extern u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT]; /* Each player's clubs, a bit
-                                                   per slot */
-extern s32 D_8022F8F4_ovl_01[];
 
 /*
  * The mini-golf course select. A record's three courses lie on a disc that
@@ -333,10 +304,6 @@ extern s32 D_8022F8F4_ovl_01[];
 #define MENU_PHASE_UNK2 2
 
 extern void* D_801049A0[][MINI_GOLF_DISC_IMAGE_COUNT];
-extern s32 D_8022F8D4_ovl_01; /* The disc's frame */
-extern s32 D_8022F8D8_ovl_01; /* The calls that it has shown */
-extern u8 D_8022F8DC_ovl_01; /* Which way it turns */
-extern u8 D_8022F8DD_ovl_01; /* Which buffers it shows */
 
 /*
  * The course select. Its wheel shows the open courses and the next one
@@ -349,8 +316,6 @@ extern u8 D_8022F8DD_ovl_01; /* Which buffers it shows */
 #define COURSE_SELECT_TEXT_SLOT_COUNT 4
 
 extern void* D_800FBDFC[2];
-extern u8
-    D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers shows the course */
 
 /* What func_801F4C78 reads as the menu screen changes */
 extern void* D_800FBE30[2];
@@ -365,13 +330,6 @@ extern void* D_8012F4B0[7];
 extern s8 D_801323D0;
 extern u8 D_801B70F0[MAXCONTROLLERS];
 extern void* D_801B93E0[5];
-extern s32 D_8022BE08_ovl_01;
-extern s16 D_8022BE8A_ovl_01;
-extern u8 D_8022BE94_ovl_01;
-extern s32 D_8022F848_ovl_01[]; /* The star's frames */
-/* Which of D_801B93E0's buffers holds the star frame shown */
-extern u8 D_8022F8CC_ovl_01;
-extern u8 D_8022F8CE_ovl_01;
 extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 
 void InitPlay(s32 kind);
@@ -474,72 +432,376 @@ void func_80229CB0_ovl_01(Gfx** displayListHead);
 /* Not static: the original left it to the linker's common block */
 u8 D_801323E6;
 
-/* The strings that the data tables point to, in the order they are stored */
-const char D_80231190_ovl_01[] = "HOUISE";
-const char g_ContinueLabelText[] = "CONTINUE";
-const char D_802311A4_ovl_01[] = "4P GAME";
-const char D_802311AC_ovl_01[] = "3P GAME";
-const char D_802311B4_ovl_01[] = "2P GAME";
-const char D_802311BC_ovl_01[] = "1P GAME";
-const char D_802311C4_ovl_01[] = "CLUB HANDI";
-const char D_802311D0_ovl_01[] = "9HOLE MODE  ";
-const char D_802311E0_ovl_01[] = " BET";
-const char D_802311E8_ovl_01[] = " HANDI CAP";
-const char D_802311F4_ovl_01[] = "PUTTER GOLF";
-const char D_80231200_ovl_01[] = "TRAINING";
-const char D_8023120C_ovl_01[] = "TIME ATTACK";
-const char D_80231218_ovl_01[] = "SKINS";
-const char D_80231220_ovl_01[] = "MATCH PLAY";
-const char D_8023122C_ovl_01[] = "STROKE PLAY";
-const char D_80231238_ovl_01[] = "VS CHARACTER";
-const char D_80231248_ovl_01[] = "TOURNAMENT ";
-const char D_80231254_ovl_01[] = "SOUND TEST";
-const char D_80231260_ovl_01[] = "BGM TEST";
-const char D_8023126C_ovl_01[] = "DATA RESET";
-const char D_80231278_ovl_01[] = "SOUND";
-const char D_80231280_ovl_01[] = "BGM";
-const char g_BirdieBadgeLabelText[] = "BIRDIE BADGE";
-const char D_80231294_ovl_01[] = "SPECIAL SHOT";
-const char D_802312A4_ovl_01[] = "MEMORIAL HOLES";
-const char D_802312B4_ovl_01[] = "TOURNAMENT";
-const char D_802312C0_ovl_01[] = "GB 03 ";
-const char D_802312C8_ovl_01[] = "GB 02 ";
-const char D_802312D0_ovl_01[] = "GB 01 ";
-const char D_802312D8_ovl_01[] = "GB 00 ";
-const char D_802312E0_ovl_01[] = "FADE";
-const char D_802312E8_ovl_01[] = "DRAW";
-const char D_802312F0_ovl_01[] = "STRAIGHT";
-const char D_802312FC_ovl_01[] = "LASVEGAS";
-const char D_80231308_ovl_01[] = "NASSO";
-const char D_80231310_ovl_01[] = "STROKE";
-const char D_80231318_ovl_01[] = "NEAR PIN";
-const char D_80231324_ovl_01[] = "DRIVE CON";
-const char D_80231330_ovl_01[] = "TEST COURSE10";
-const char D_80231340_ovl_01[] = "TEST COURSE9";
-const char D_80231350_ovl_01[] = "TEST COURSE8";
-const char D_80231360_ovl_01[] = "TEST COURSE7";
-const char D_80231370_ovl_01[] = "TEST COURSE6";
-const char D_80231380_ovl_01[] = "TEST COURSE5";
-const char D_80231390_ovl_01[] = "TEST COURSE4";
-const char D_802313A0_ovl_01[] = "TEST COURSE3";
-const char D_802313B0_ovl_01[] = "TEST COURSE2";
-const char D_802313C0_ovl_01[] = "TEST COURSE1";
-const char D_802313D0_ovl_01[] = "PEACH";
-const char D_802313D8_ovl_01[] = "MARIO";
-const char D_802313E0_ovl_01[] = "PT";
-const char D_802313E4_ovl_01[] = "SW";
-const char D_802313E8_ovl_01[] = "PW";
-const char D_802313EC_ovl_01[] = "9I";
-const char D_802313F0_ovl_01[] = "8I";
-const char D_802313F4_ovl_01[] = "7I";
-const char D_802313F8_ovl_01[] = "6I";
-const char D_802313FC_ovl_01[] = "5I";
-const char D_80231400_ovl_01[] = "4I";
-const char D_80231404_ovl_01[] = "3I";
-const char D_80231408_ovl_01[] = "2I";
-const char D_8023140C_ovl_01[] = "4W";
-const char D_80231410_ovl_01[] = "3W";
-const char D_80231414_ovl_01[] = "1W";
+/* Defined after the routines whose strings come before theirs */
+extern const char D_802316EC_ovl_01[];
+extern const char D_802316FC_ovl_01[];
+
+/* Read by no routine */
+static Gfx D_8022BE00_ovl_01[] = {gsSPEndDisplayList()};
+static s32 D_8022BE08_ovl_01 = 0;
+static s32 D_8022BE0C_ovl_01 = CHARACTER_COUNT;
+/* Read by no routine */
+static u8 D_8022BE10_ovl_01[8] = {
+    0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static s32 D_8022BE18_ovl_01 = 0;
+static s32 D_8022BE1C_ovl_01 = 0;
+/* Read by no routine */
+static s32 D_8022BE20_ovl_01 = 0;
+static s32 D_8022BE24_ovl_01 = VIEWER_STARTING_ANIMATION;
+static s32 D_8022BE28_ovl_01 = 0;
+static s32 D_8022BE2C_ovl_01 = 0;
+/* Each player count's mode count */
+static s32 D_8022BE30_ovl_01[MAX_PLAYER_COUNT] = {7, 5, 4, 4};
+/* Read by no routine; the mode counts of D_8022BEEC */
+static s32 D_8022BE40_ovl_01[4] = {3, 5, 4, 4};
+/* Each player's clubs, a bit per slot */
+static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
+    ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
+/* Read by no routine */
+static s32 D_8022BE58_ovl_01[10] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
+/* Which of D_800FBDFC's buffers shows the course */
+static u8 D_8022BE80_ovl_01 = 0;
+static s8 D_8022BE81_ovl_01 = 0;
+static s32 D_8022BE84_ovl_01 = 0;
+u8 D_8022BE88_ovl_01 = 0;
+u8 D_8022BE89_ovl_01 = 0;
+static s16 D_8022BE8A_ovl_01 = 0;
+static s16 D_8022BE8C_ovl_01 = 0;
+static s16 D_8022BE8E_ovl_01 = 0;
+static s16 D_8022BE90_ovl_01 = 0;
+static s16 D_8022BE92_ovl_01 = 0;
+static u8 D_8022BE94_ovl_01 = 0;
+/* Whether the options screen's erase window is up */
+static u8 f_IsEraseWindowUp = FALSE;
+static f32 f_MenuBobOffset = 0.0f;
+static f32 f_MenuBobPhase = 0.0f;
+/* The sound test's sound, song and settings */
+static s32 f_SoundTestSound = 0;
+static s32 f_SoundTestSong = 0;
+static s32 f_SoundTestSoundReverb = 0;
+static s32 f_SoundTestSongReverb = 0;
+static f32 f_SoundTestSoundFrequency = 0.0f;
+static f32 f_SoundTestSongFrequency = 0.0f;
+static s32 f_SoundTestSongTempo = NORMAL_SONG_TEMPO;
+static u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT] = {
+    {MODE_ICON_TOURNAMENT, MODE_ICON_GET_CHARACTER, MODE_ICON_RING_SHOT,
+        MODE_ICON_SPEED_GOLF, MODE_ICON_STROKE, MODE_ICON_MINI_GOLF,
+        MODE_ICON_TRAINING},
+    {MODE_ICON_STROKE, MODE_ICON_MATCH_GAME, MODE_ICON_SKINS_MATCH,
+        MODE_ICON_CLUB_SLOTS, MODE_ICON_MINI_GOLF},
+    {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS,
+        MODE_ICON_MINI_GOLF},
+    {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS,
+        MODE_ICON_MINI_GOLF}};
+/* Read by no routine; modes like D_8022BEBC's, as many as D_8022BE40 counts */
+static u8 D_8022BEEC_ovl_01[4][12] = {
+    {2, 8, 3}, {2, 6, 7, 10, 5}, {2, 7, 10, 5}, {2, 7, 10, 5}};
+static s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT] = {
+    CLUBHOUSE_ROOM_COURSE_STATS, CLUBHOUSE_ROOM_CHARACTER_TABLE,
+    CLUBHOUSE_ROOM_BEST_TIMES, CLUBHOUSE_ROOM_UNK13, CLUBHOUSE_ROOM_UNK12};
+/* Read by no routine; the one room that D_8022BF1C leaves out */
+static s16 D_8022BF26_ovl_01 = CLUBHOUSE_ROOM_BIRDIE_BADGES;
+/* The plain-text menu's names; func_801FDA40 prints the first three */
+static const char* D_8022BF28_ovl_01[] = {
+    "1P GAME", "2P GAME", "3P GAME", "4P GAME", "CONTINUE", "HOUISE"};
+/* Read by no routine */
+static const char* D_8022BF40_ovl_01[] = {"TOURNAMENT ", "VS CHARACTER",
+    "STROKE PLAY", "MATCH PLAY", "SKINS", "TIME ATTACK", "TRAINING",
+    "PUTTER GOLF", " HANDI CAP", " BET", "9HOLE MODE  ", "CLUB HANDI"};
+/* Each character's name, with LOWERCASE_CODE_OFFSET added to its lowercase
+ * letters */
+char D_8022BF70_ovl_01[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
+    "P\xEC\xF5\xED", /* Plum */
+    "C\xE8\xE1\xF2\xEC\xE9\xE5", /* Charlie */
+    "P\xE5\xE1\xE3\xE8", /* Peach */
+    "B\xE1\xE2\xF9 \xED\xE1\xF2\xE9\xEF", /* Baby mario */
+    "L\xF5\xE9\xE7\xE9", /* Luigi */
+    "Y\xEF\xF3\xE8\xE9", /* Yoshi */
+    "S\xEF\xEE\xEE\xF9", /* Sonny */
+    "W\xE1\xF2\xE9\xEF", /* Wario */
+    "H\xE1\xF2\xF2\xF9", /* Harry */
+    "M\xE1\xF2\xE9\xEF", /* Mario */
+    "M\xE1\xF0\xEC\xE5", /* Maple */
+    "DK", /* DK */
+    "B\xEF\xF7\xF3\xE5\xF2", /* Bowser */
+    "M\xE5\xF4\xE1\xEC \xED\xE1\xF2\xE9\xEF", /* Metal mario */
+    "K\xE9\xE4", /* Kid */
+    "S\xE8\xE5\xF2\xF2\xF9", /* Sherry */
+    "A\xFA\xE1\xEC\xE5\xE1", /* Azalea */
+    "J\xEF\xE5" /* Joe */
+};
+/* Read by no routine */
+static const char* D_8022C048_ovl_01[] = {"TOURNAMENT", "MEMORIAL HOLES",
+    "SPECIAL SHOT", "BIRDIE BADGE", "VS CHARACTER", "TIME ATTACK", "BGM",
+    "SOUND", "DATA RESET", "BGM TEST", "SOUND TEST"};
+/* Read by no routine */
+static const char* D_8022C074_ovl_01[] = {
+    "GB 00 ", "GB 01 ", "GB 02 ", "GB 03 "};
+/* Read by no routine */
+static const char* D_8022C084_ovl_01[] = {"STRAIGHT", "DRAW", "FADE"};
+/* Read by no routine */
+static const char* D_8022C090_ovl_01[] = {
+    "DRIVE CON", "NEAR PIN", "STROKE", "SKINS", "NASSO", "LASVEGAS"};
+/* Read by no routine */
+static const char* D_8022C0A8_ovl_01[] = {"TEST COURSE1", "TEST COURSE2",
+    "TEST COURSE3", "TEST COURSE4", "TEST COURSE5", "TEST COURSE6",
+    "TEST COURSE7", "TEST COURSE8", "TEST COURSE9", "TEST COURSE10"};
+/* The caddies' names */
+static const char* D_8022C0D0_ovl_01[CADDY_COUNT] = {"MARIO", "PEACH"};
+/* Read by no routine */
+static const char* D_8022C0D8_ovl_01[] = {"1W", "3W", "4W", "2I", "3I", "4I",
+    "5I", "6I", "7I", "8I", "9I", "PW", "SW", "PT"};
+static char f_SoundTestSongNames[][SOUND_TEST_SONG_NAME_LENGTH] = {"jing1",
+    "jing02", "jing03", "jing04", "jing05", "jing06", "shori", "make", "hikiwa",
+    "mode-ok", "score", "coace3", "trad1", "trad2", "par", "bar", "dan1",
+    "bgm04", "bgm05", "bgm06", "coace5", "training", "gbdata", "coace9",
+    "coace8", "coace7", "coace6", "coace10", "coace4", "pop1", "pop2", "replay",
+    "trad3", "trad4", "pop3", "pop4", "pop5", "pop6", "time", "64theme",
+    "nangoku", "mariobgm", "mario20", "clav", "patar1", "patar2", "skins",
+    "openning", "bgm20", "ending", "end-jingle"};
+static char f_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH] = {"AE01 ",
+    "AE05 ", "BL01 ", "BL02 ", "BL03 ", "BL04 ", "BL05 ", "BL06 ", "BL07 ",
+    "BL08 ", "BL09 ", "BL10 ", "BL11 ", "BL14 ", "BL15 ", "BL16 ", "BL17 ",
+    "BL18 ", "BL19 ", "BL20 ", "BL22 ", "BL23 ", "BR01MOZU ", "BR02KAKKO ",
+    "BR03KANARIA ", "BR04MEJIRO ", "BR05SUZUME ", "BR06SUZUME02 ",
+    "BR07HIBARI ", "BR07HIBARI1 ", "BR09KAWASEMI ", "DR01 ", "DR03 ", "DR04 ",
+    "DR05 ", "DR06 ", "DR07 ", "DR10 ", "DR11 ", "DR12 ", "DR13 ", "DR14 ",
+    "DR15 ", "DR40 ", "DR41 ", "DR42 ", "DR50 ", "DR53 ", "DR54 ", "DR55 ",
+    "DR56 ", "DR57 ", "DR58 ", "DR59 ", "DR60 ", "DR61 ", "GP01 ", "GP02 ",
+    "GP03 ", "GP04 ", "GP05 ", "GP06 ", "GP07 ", "GP08 ", "GP09 ", "GP10 ",
+    "GP11 ", "SS01 ", "SS02 ", "SS03 ", "SS04 ", "SS05 ", "SS06 ", "SS07 ",
+    "SS08 ", "SS09 ", "SS10 ", "SS12 ", "SS13 ", "SS14 ", "SW01 ", "SW02 ",
+    "SW03 ", "SW04 ", "SW05 ", "SW06 ", "SW07 ", "SW08 ", "SW10 ", "SW20 ",
+    "SW21 ", "SY01 ", "SY02 ", "SY03 ", "SY04 ", "SY05 ", "SY06 ", "SY07 ",
+    "SY08 ", "SY09 ", "SY10 ", "SY11 ", "SY12 ", "SY13 ", "SY14 ", "SY15 ",
+    "SY17 ", "SY18 ", "SY19 ", "SY20 ", "SY21 ", "SY22 ", "USA20", "USA21",
+    "VO01 ", "VO02 ", "VO03 ", "VO04 ", "VO05 ", "VO10 ", "VO11 ", "VO12 ",
+    "VO13 ", "NR01 ", "NR02 ", "NR03 ", "NR04 ", "NR05 ", "NR06 ", "NR07 ",
+    "NR08 ", "NR09 ", "NR10 ", "NR11 ", "NR12 ", "NR13 ", "NR14 ", "NR15 ",
+    "NR16 ", "NR17 ", "NR18 ", "NR20 ", "NR21 ", "NR26 ", "NR27 ", "NR30 ",
+    "NR31 ", "NR32 ", "NR37 ", "NR38 ", "NR39 ", "NR40 ", "NR41 ", "NR42 ",
+    "NR43 ", "NR44 ", "NR45 ", "NR46 ", "CAZ00 ", "CAZ01 ", "CAZ02 ", "CAZ03 ",
+    "CAZ04 ", "CAZ05 ", "CAZ06 ", "CAZ07 ", "CAZ08 ", "CAZ09 ", "CAZ10 ",
+    "CAZ12 ", "CAZ13 ", "CAZ14 ", "CAZ15 ", "CAZ16 ", "CAZ17 ", "CAZ18 ",
+    "CAZ20 ", "CAZ21 ", "CAZ22 ", "CBB00 ", "CBB01 ", "CBB02 ", "CBB03 ",
+    "CBB04 ", "CBB05 ", "CBB06 ", "CBB07 ", "CBB08 ", "CBB09 ", "CBB10 ",
+    "CBB12 ", "CBB13 ", "CBB14 ", "CBB15 ", "CBB16 ", "CBB17 ", "CBB18 ",
+    "CBB20 ", "CBB22 ", "CBB23 ", "CBB27 ", "CBB30 ", "CBB31 ", "CBB32 ",
+    "CCH00 ", "CCH01 ", "CCH02 ", "CCH03 ", "CCH04 ", "CCH05 ", "CCH06 ",
+    "CCH07 ", "CCH08 ", "CCH09 ", "CCH10 ", "CCH12 ", "CCH13 ", "CCH14 ",
+    "CCH15 ", "CCH16 ", "CCH17 ", "CCH18 ", "CCH19 ", "CCH20 ", "CCH21 ",
+    "CCH24 ", "CDK00 ", "CDK01 ", "CDK02 ", "CDK03 ", "CDK04 ", "CDK05 ",
+    "CDK06 ", "CDK08 ", "CDK10 ", "CDK13 ", "CDK18 ", "CDK20 ", "CDK21 ",
+    "CHR00 ", "CHR01 ", "CHR02 ", "CHR03 ", "CHR04 ", "CHR05 ", "CHR06 ",
+    "CHR07 ", "CHR08 ", "CHR09 ", "CHR10 ", "CHR12 ", "CHR13 ", "CHR14 ",
+    "CHR15 ", "CHR16 ", "CHR17 ", "CHR18 ", "CHR19 ", "CHR20 ", "CHR21 ",
+    "CHR22 ", "CHR25 ", "CJO00 ", "CJO01 ", "CJO02 ", "CJO03 ", "CJO04 ",
+    "CJO05 ", "CJO06 ", "CJO07 ", "CJO08 ", "CJO09 ", "CJO10 ", "CJO12 ",
+    "CJO13 ", "CJO14 ", "CJO15 ", "CJO16 ", "CJO17 ", "CJO18 ", "CJO20 ",
+    "CJO21 ", "CJO22 ", "CJO24 ", "CKD00 ", "CKD02 ", "CKD03 ", "CKD04 ",
+    "CKD06 ", "CKD07 ", "CKD08 ", "CKD09 ", "CKD10 ", "CKD12 ", "CKD13 ",
+    "CKD14 ", "CKD15 ", "CKD16 ", "CKD17 ", "CKD18 ", "CKD20 ", "CKD21 ",
+    "CKD25 ", "CKP00 ", "CKP01 ", "CKP02 ", "CKP03 ", "CKP04 ", "CKP05 ",
+    "CKP06 ", "CKP08 ", "CKP09 ", "CKP10 ", "CKP13 ", "CKP18 ", "CKP20 ",
+    "CLG00 ", "CLG01 ", "CLG02 ", "CLG03 ", "CLG05 ", "CLG06 ", "CLG07 ",
+    "CLG08 ", "CLG09 ", "CLG10 ", "CLG12 ", "CLG13 ", "CLG14 ", "CLG15 ",
+    "CLG17 ", "CLG18 ", "CLG19 ", "CLG20 ", "CLG21 ", "CLG23 ", "CLG24 ",
+    "CLG30 ", "CLG31 ", "CME00 ", "CME01 ", "CME02 ", "CME03 ", "CME04 ",
+    "CME05 ", "CME06 ", "CME07 ", "CME08 ", "CME09 ", "CME10 ", "CME12 ",
+    "CME13 ", "CME14 ", "CME15 ", "CME16 ", "CME17 ", "CME18 ", "CME19 ",
+    "CME20 ", "CME21 ", "CME22 ", "CME25 ", "CMR00 ", "CMR01 ", "CMR02 ",
+    "CMR03 ", "CMR04 ", "CMR05 ", "CMR06 ", "CMR07 ", "CMR08", "CMR09", "CMR10",
+    "CMR11", "CMR12", "CMR13", "CMR14", "CMR15", "CMR16", "CMR17", "CMR18",
+    "CMR19", "CMR20", "CMR21", "CMR22", "CMR23", "CMR26", "CMR30", "CMR31",
+    "CMR32 ", "CMR33 ", "CMR34 ", "CMR35 ", "CMR36 ", "CMR37 ", "CPC00 ",
+    "CPC01 ", "CPC02 ", "CPC03 ", "CPC04 ", "CPC05 ", "CPC06 ", "CPC07 ",
+    "CPC08 ", "CPC09 ", "CPC10 ", "CPC12 ", "CPC13 ", "CPC14 ", "CPC15 ",
+    "CPC16 ", "CPC17 ", "CPC18 ", "CPC19 ", "CPC20 ", "CPC21 ", "CPC24 ",
+    "CPC30 ", "CPC31 ", "CPR00 ", "CPR01 ", "CPR02 ", "CPR03 ", "CPR04 ",
+    "CPR05 ", "CPR06 ", "CPR07 ", "CPR08 ", "CPR09 ", "CPR10 ", "CPR12 ",
+    "CPR13 ", "CPR14 ", "CPR15 ", "CPR16 ", "CPR17 ", "CPR18 ", "CPR19 ",
+    "CPR20 ", "CPR21 ", "CPR24 ", "CPR25 ", "CPR30 ", "CSN00 ", "CSN01 ",
+    "CSN02 ", "CSN03 ", "CSN04 ", "CSN05 ", "CSN06 ", "CSN07 ", "CSN08 ",
+    "CSN09 ", "CSN10 ", "CSN12 ", "CSN13 ", "CSN14 ", "CSN15 ", "CSN16 ",
+    "CSN17 ", "CSN18 ", "CSN19 ", "CSN20 ", "CSN21 ", "CSN24 ", "CSN25 ",
+    "CSN26 ", "CSN27 ", "CSY00 ", "CSY01 ", "CSY02 ", "CSY03 ", "CSY04 ",
+    "CSY05 ", "CSY06 ", "CSY07 ", "CSY08 ", "CSY09 ", "CSY10 ", "CSY12 ",
+    "CSY13 ", "CSY14 ", "CSY15 ", "CSY16 ", "CSY17 ", "CSY18 ", "CSY19 ",
+    "CSY20 ", "CSY21 ", "CSY26 ", "CWR00 ", "CWR01 ", "CWR02 ", "CWR03 ",
+    "CWR05 ", "CWR06 ", "CWR07 ", "CWR08 ", "CWR09 ", "CWR10 ", "CWR11 ",
+    "CWR12 ", "CWR13 ", "CWR14 ", "CWR15 ", "CWR16 ", "CWR17 ", "CWR18 ",
+    "CWR19 ", "CWR20 ", "CWR23 ", "CWR24 ", "CYS00 ", "CYS01 ", "CYS02 ",
+    "CYS03 ", "CYS04 ", "CYS05 ", "CYS06 ", "CYS07 ", "CYS08 ", "CYS13 ",
+    "CYS14 ", "CYS17 ", "CYS18 ", "CYS19 ", "CYS20 ", "CYS21 ", "TITLE ",
+    "USATITLE", "USATITLE01", "USATITLE02", "WARAI3", "NONE_SE", "NONE_SE",
+    "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE",
+    "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE",
+    "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE",
+    "NONE_SE", "NONE_SE"};
+/* Read by no routine */
+static Vtx D_8022F7C8_ovl_01[8] = {
+    {{{-32, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-32, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{32, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{32, 32, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-32, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-32, -32, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{32, -32, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{32, 0, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* The star's frames */
+static s32 D_8022F848_ovl_01[STAR_FRAME_COUNT] = {0x05BE, 0x05BF, 0x05C0,
+    0x05C1, 0x05C2, 0x05C3, 0x05C4, 0x05C5, 0x05C6, 0x05C7, 0x05C8, 0x05C9,
+    0x05CA, 0x05CB, 0x05CC};
+/* The silver star's frames */
+static s32 D_8022F884_ovl_01[STAR_FRAME_COUNT] = {0x05E5, 0x05E6, 0x05E7,
+    0x05E8, 0x05E9, 0x05EA, 0x05EB, 0x05EC, 0x05ED, 0x05EE, 0x05EF, 0x05F0,
+    0x05F1, 0x05F2, 0x05F3};
+s32 D_8022F8C0_ovl_01 = 0;
+u8 D_8022F8C4_ovl_01 = 0;
+s8 D_8022F8C5_ovl_01 = 0;
+static s32 D_8022F8C8_ovl_01 = 0;
+/* Which of D_801B93E0's buffers holds the star frame shown */
+static u8 D_8022F8CC_ovl_01 = 0;
+static s8 D_8022F8CD_ovl_01 = 0;
+static u8 D_8022F8CE_ovl_01 = 0;
+/* Read by no routine */
+static s32 D_8022F8D0_ovl_01 = 0;
+/* The mini-golf disc's frame */
+static s32 D_8022F8D4_ovl_01 = MINI_GOLF_FACING_FRAME;
+/* The calls that the mini-golf disc has shown */
+static s32 D_8022F8D8_ovl_01 = 0;
+/* Which way the mini-golf disc turns */
+static u8 D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
+/* Which buffers the mini-golf disc shows */
+static u8 D_8022F8DD_ovl_01 = 0;
+/* The menus' camera orbit's updates */
+static s32 D_8022F8E0_ovl_01 = 0;
+/* Each player's sound pan, by the player count */
+static u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+    {127, 0, 0, 0}, {15, 240, 0, 0}, {15, 127, 240, 0}, {15, 85, 170, 240}};
+static s32 D_8022F8F4_ovl_01[] = {
+    0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
+/* Read by no routine */
+static s32 D_8022F93C_ovl_01 = 0;
+static s32 D_8022F940_ovl_01[TITLE_LABEL_COUNT][2] = {{110, 86}, {40, 114},
+    {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
+static f32 D_8022F978_ovl_01 = 0.0f;
+/* Where each player's controller icon and label go, by the player count */
+static s32 D_8022F97C_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
+    {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
+    {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
+/* Read by no routine */
+static s32 D_8022F9FC_ovl_01[11] = {
+    110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
+/* How far left of the label's place each row of the modes' label image is
+ * drawn */
+static s32 D_8022FA28_ovl_01[MODE_ICON_COUNT] = {
+    85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
+static f32 D_8022FA54_ovl_01 = 0.0f;
+static f32 D_8022FA58_ovl_01 = 0.0f;
+static f32 D_8022FA5C_ovl_01 = 0.0f;
+/* Read by no routine */
+static s32 D_8022FA60_ovl_01[2] = {0, 0};
+static f32 D_8022FA68_ovl_01
+    [MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT][3] = {
+        {{-84.0f, -43.0f, -1000.0f}, {106.0f, -32.0f, -1000.0f},
+            {64.0f, 0.0f, -1000.0f}, {64.0f, 0.0f, -1000.0f},
+            {0.0f, 0.0f, 0.0f}},
+        {{-106.0f, -32.0f, -1000.0f}, {106.0f, -32.0f, -1000.0f},
+            {-106.0f, -52.0f, -1000.0f}, {106.0f, -52.0f, -1000.0f},
+            {0.0f, 0.0f, 0.0f}},
+        {{-106.0f, -52.0f, -1000.0f}, {-76.0f, -8.0f, -1700.0f},
+            {76.0f, -8.0f, -1700.0f}, {106.0f, -52.0f, -1000.0f},
+            {0.0f, 0.0f, 0.0f}},
+        {{-106.0f, -52.0f, -1000.0f}, {-76.0f, -8.0f, -1700.0f},
+            {76.0f, -8.0f, -1700.0f}, {106.0f, -52.0f, -1000.0f},
+            {0.0f, 0.0f, 0.0f}}};
+/* The character for each grid mark */
+static s32 D_8022FB58_ovl_01[CHARACTER_COUNT] = {
+    0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
+static s32 D_8022FBA0_ovl_01 = NO_VIEWER_CHARACTER;
+static s32 D_8022FBA4_ovl_01 = FALSE;
+static f32 D_8022FBA8_ovl_01 = 0.0f;
+static f32 D_8022FBAC_ovl_01 = 0.0f;
+static f32 D_8022FBB0_ovl_01 = 0.0f;
+static u32 D_8022FBB4_ovl_01 = 0;
+static f32 D_8022FBB8_ovl_01 = 0.0f;
+static f32 D_8022FBBC_ovl_01 = 0.0f;
+/* The front course's bob phase */
+static f32 D_8022FBC0_ovl_01 = 0.0f;
+/* Read by no routine */
+static s16 D_8022FBC4_ovl_01[6] = {0, 3, 4, 1, 5, 2};
+/* Read by no routine; katakana for "Bet", "Out: holes 1-9", "In: holes 10-18"
+ * and "1 round: 18 holes" */
+static char D_8022FBD0_ovl_01[4][20] = {
+    "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
+static ImageCorner D_8022FC20_ovl_01[HOLES_BADGE_COUNT] = {
+    {252, 134}, {230, 150}, {274, 150}, {252, 162}};
+/* Read by no routine */
+static ImageCorner D_8022FC30_ovl_01[6] = {
+    {24, 173}, {23, 173}, {23, 173}, {29, 161}, {19, 181}, {29, 171}};
+/* Each course's trophies' corners, by the number of trophies */
+static ImageCorner D_8022FC48_ovl_01
+    [COURSE_COUNT][TOURNAMENT_PLACE_COUNT][TOURNAMENT_PLACE_COUNT] = {
+        {{{24, 169}, {24, 173}, {24, 173}}, {{16, 169}, {32, 169}, {24, 173}},
+            {{16, 169}, {32, 169}, {24, 173}}},
+        {{{23, 169}, {23, 173}, {23, 173}}, {{15, 169}, {31, 169}, {23, 173}},
+            {{15, 169}, {31, 169}, {23, 173}}},
+        {{{23, 169}, {23, 173}, {23, 173}}, {{15, 169}, {31, 169}, {23, 173}},
+            {{15, 169}, {31, 169}, {23, 173}}},
+        {{{29, 157}, {29, 161}, {29, 161}}, {{21, 157}, {37, 157}, {29, 161}},
+            {{21, 157}, {37, 157}, {29, 161}}},
+        {{{19, 177}, {19, 181}, {19, 181}}, {{11, 177}, {27, 177}, {19, 181}},
+            {{11, 177}, {27, 177}, {19, 181}}},
+        {{{29, 167}, {29, 171}, {29, 171}}, {{21, 167}, {37, 167}, {29, 171}},
+            {{21, 167}, {37, 167}, {29, 171}}}};
+/* Read by no routine */
+static char D_8022FD20_ovl_01[16] = "ｺｰｽｹﾞｯﾄ純ﾞ";
+/* Read by no routine */
+static u8 D_8022FD30_ovl_01[16] = {0x71, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+/* The Bet badge's color phase */
+static f32 D_8022FD40_ovl_01 = 0.0f;
+/* The chosen mini-golf image's center Y */
+static f32 D_8022FD44_ovl_01 = 0.0f;
+static Vtx D_8022FD48_ovl_01[WATER_VERTEX_COUNT] = {
+    {{{-800, 64, -1024}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {{{-800, -128, 0}, 0, {0, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+    {{{0, -128, 0}, 0, {16384, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+    {{{800, -128, 0}, 0, {32736, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+    {{{800, 64, -1024}, 0, {32736, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+/* The water's scroll */
+static s32 D_8022FD98_ovl_01 = 0;
+/* Read by no routine; the values of D_8022FBD0 */
+static char D_8022FD9C_ovl_01[4][20] = {
+    "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
+/* The records' names */
+static const char* D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT] = {
+    D_802316FC_ovl_01, D_802316EC_ovl_01};
+static s32 D_8022FDF4_ovl_01[MAIN_CHOICE_COUNT][2] = {
+    {96, 84}, {96, 114}, {96, 144}, {96, 174}};
+/* The menu without Transmit skips the CODE ENTRY label */
+static s32 D_8022FE14_ovl_01[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT][2] = {
+    {96, 84}, {96, 124}, {96, 164}};
+static s32 D_8022FE2C_ovl_01[CLUBHOUSE_ROW_PLACE_COUNT][2] = {{76, 80},
+    {76, 102}, {76, 124}, {76, 146}, {76, 168}, {76, 190}, {76, 212},
+    {76, 234}};
+/* Read by no routine */
+static s32 D_8022FE6C_ovl_01[10][2] = {{48, 76}, {132, 76}, {180, 76}, {48, 98},
+    {72, 118}, {168, 118}, {48, 140}, {60, 160}, {176, 160}, {90, 182}};
+/* Read by no routine */
+static u8 D_8022FEBC_ovl_01[3][20] = {
+    {0xC3, 0xDE, 0xB0, 0xC0, 0x66, 0x7D, 0x8D, 0xDE, 0x83, 0x79, 0x7C, 0x83,
+        0x72, 0x72, 0x83, 0xDE, 0x7D, 0x76, 0x3F, 0x00},
+    {0x8A, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    {0x72, 0x72, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+/* Read by no routine */
+static s32 D_8022FEF8_ovl_01 = 0;
+static s32 D_8022FEFC_ovl_01 = 0;
 
 void* GetMenuImageBuffer(void) {
   return g_MenuImageBuffer;
@@ -3937,9 +4199,6 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
 #define PLAIN_MENU_FIGURES_Y 100
 #define TITLE_BOARD_KIND 61
 
-extern char* D_8022BF28_ovl_01[];
-extern s32 D_8022F940_ovl_01[TITLE_LABEL_COUNT][2];
-
 /*
  * Doesn't match: in the lit labels' loop GCC works out labelIndex *
  * TITLE_LABEL_IMAGE_SIZE afresh each pass, where the original steps an offset
@@ -4125,13 +4384,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
 #define RIVAL_SLOT 1
 #define RIVAL_SPIN_STEP 10.0f
 
-extern f32 D_8022FA54_ovl_01;
-extern f32 D_8022FA58_ovl_01;
-extern f32 D_8022FA5C_ovl_01;
-extern f32 D_8022FA68_ovl_01[MENU_CHARACTER_LAYOUT_COUNT]
-                            [MENU_CHARACTER_SLOT_COUNT][3];
-extern s32
-    D_8022FB58_ovl_01[CHARACTER_COUNT]; /* The character for each grid mark */
 extern Mtx D_80231D60_ovl_01[MAX_PLAYER_COUNT][2];
 extern Mtx D_80231F60_ovl_01;
 extern f32 D_80231FA0_ovl_01[MAX_PLAYER_COUNT];
@@ -4150,7 +4402,6 @@ extern f32 D_80231FA0_ovl_01[MAX_PLAYER_COUNT];
 #define CADDY_SELECT_FIRST_Y 64
 #define CADDY_SELECT_LINE_HEIGHT 8
 
-extern char* D_8022C0D0_ovl_01[CADDY_COUNT];
 extern const char D_8023176C_ovl_01[];
 
 /* The D_8022BE88 phase in which the course select's banners slide the other way
@@ -4199,12 +4450,6 @@ extern const char D_8023176C_ovl_01[];
 #define WON_COUNT_Y 72
 #define WON_COUNT_DIGIT_WIDTH 16
 
-extern f32 D_8022F978_ovl_01;
-/* Where each player's controller icon and label go, by the player count */
-extern s32 D_8022F97C_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2];
-/* How far left of the label's place each row of the modes' label image is
- * drawn */
-extern s32 D_8022FA28_ovl_01[MODE_ICON_COUNT];
 extern Mat4 D_80231CA0_ovl_01;
 extern Mat4 D_80231CE0_ovl_01;
 extern LookAt D_80231D20_ovl_01[2];
@@ -4268,15 +4513,6 @@ extern Mtx D_802321F0_ovl_01;
 extern Mtx D_80232230_ovl_01;
 extern Mat4 D_80232270_ovl_01;
 extern Mat4 D_802322B0_ovl_01;
-extern s32 D_8022FD98_ovl_01; /* The water's scroll */
-extern Vtx D_8022FD48_ovl_01[WATER_VERTEX_COUNT];
-extern f32 D_8022FBC0_ovl_01; /* The front course's bob phase */
-extern f32 D_8022FD40_ovl_01; /* The Bet badge's color phase */
-extern f32 D_8022FD44_ovl_01; /* The chosen mini-golf image's center Y */
-extern ImageCorner D_8022FC20_ovl_01[HOLES_BADGE_COUNT];
-/* Each course's trophies' corners, by the number of trophies */
-extern ImageCorner D_8022FC48_ovl_01[COURSE_COUNT][TOURNAMENT_PLACE_COUNT]
-                                    [TOURNAMENT_PLACE_COUNT];
 
 void StartLoadingChosenHole(void);
 void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
@@ -5027,16 +5263,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80200EF0_ovl_01);
 #define VIEWER_BASE_OFFSET -64.0f
 #define VIEWER_DEPTH -1000.0f
 
-extern s32 D_8022BE24_ovl_01;
-extern s8 D_8022BE81_ovl_01;
-extern s32 D_8022FBA0_ovl_01;
-extern s32 D_8022FBA4_ovl_01;
-extern f32 D_8022FBA8_ovl_01;
-extern f32 D_8022FBAC_ovl_01;
-extern f32 D_8022FBB0_ovl_01;
-extern u32 D_8022FBB4_ovl_01;
-extern f32 D_8022FBB8_ovl_01;
-extern f32 D_8022FBBC_ovl_01;
 extern Mtx D_80231FB0_ovl_01[2];
 extern Mtx D_80232030_ovl_01;
 
@@ -5093,14 +5319,11 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
       g_Clubs[D_801323A0.unk2 * CLUB_SET_SIZE].spin);
   DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SPIN_Y, g_PrintBuffer);
   if (g_Clubs[D_801323A0.unk2 * CLUB_SET_SIZE].sideSpin > 0) {
-    DrawShadowedText(
-        &gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, D_802312E8_ovl_01);
+    DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "DRAW");
   } else if (g_Clubs[D_801323A0.unk2 * CLUB_SET_SIZE].sideSpin < 0) {
-    DrawShadowedText(
-        &gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, D_802312E0_ovl_01);
+    DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "FADE");
   } else {
-    DrawShadowedText(
-        &gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, D_802312F0_ovl_01);
+    DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "STRAIGHT");
   }
 
   if (D_8022BE28_ovl_01 == 0) {
@@ -5921,8 +6144,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80202000_ovl_01);
 #define HOLES_CHOICE_MESSAGE_BASE 0xC3
 #define HOLES_CHOICE_TEXT_SLOT 1
 
-extern char* D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT];
-
 /*
  * Doesn't match: the original sets the text drawing's argument before the
  * mini-golf test that picks the name's colours, and keeps the course name
@@ -6038,11 +6259,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802047F0_ovl_01);
 void DrawContinueLabel(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
-  DrawShadowedText(&gfx, 96, 64, g_ContinueLabelText);
+  DrawShadowedText(&gfx, 96, 64, "CONTINUE");
   *displayListHead = gfx;
 }
-
-extern s32 D_8022FDF4_ovl_01[MAIN_CHOICE_COUNT][2];
 
 void func_80205038_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -6113,9 +6332,6 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-
-/* The menu without Transmit skips the CODE ENTRY label */
-extern s32 D_8022FE14_ovl_01[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT][2];
 
 void func_802058B8_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -6205,8 +6421,6 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
 #define ROOM_LABEL_WIDTH 192
 #define ROOM_LABEL_HEIGHT 20
 #define ROOM_LABEL_IMAGE_SIZE (ROOM_LABEL_WIDTH * ROOM_LABEL_HEIGHT / 2)
-
-extern s32 D_8022FE2C_ovl_01[CLUBHOUSE_ROW_PLACE_COUNT][2];
 
 void func_80206180_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -6384,8 +6598,6 @@ const char D_802316FC_ovl_01[] = "Luigi's Garden";
 #define ERASE_MESSAGE_PALETTE_RED 255
 #define ERASE_MESSAGE_PALETTE_GREEN 127
 #define ERASE_MESSAGE_PALETTE_BLUE 127
-
-extern s32 D_8022FEFC_ovl_01;
 
 void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
     s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton);
@@ -6899,8 +7111,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802081E8_ovl_01);
 #define SILVER_STAR_TMEM 128
 #define SILVER_STAR_TILE 1
 
-extern s32 D_8022F884_ovl_01[STAR_FRAME_COUNT]; /* The silver star's frames */
-
 void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
   EncodedAsset asset;
   SaveData* save = GetSaveData();
@@ -7024,7 +7234,7 @@ void func_80208F8C_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
 void DrawBirdieBadgeLabel(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
-  DrawShadowedText(&gfx, 64, 32, g_BirdieBadgeLabelText);
+  DrawShadowedText(&gfx, 64, 32, "BIRDIE BADGE");
   *displayListHead = gfx;
 }
 
