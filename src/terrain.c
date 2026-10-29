@@ -109,6 +109,18 @@ typedef struct MapOverviewControls {
 #define IsInSurfaceEdgeMargin(coordinate, sideSize) \
   ((u32)((coordinate) - SURFACE_EDGE_MARGIN) > \
       (sideSize) - (SURFACE_EDGE_MARGIN * 2) - 1)
+/* FindSurface and GetMiniGolfSurface weigh the codes of the texels nearest a
+ * point */
+#define NEAREST_CODE_COUNT 4
+/*
+ * How strongly each terrain code claims a point near a texel's edge: greens
+ * spread, and bunkers, roughs, waste areas and out of bounds give way
+ */
+#define GREEN_SURFACE_WEIGHT 1.1f
+#define ROUGH_SURFACE_WEIGHT 0.9f
+#define BUNKER_SURFACE_WEIGHT 0.7f
+#define OUT_OF_BOUNDS_SURFACE_WEIGHT 0.5f
+#define MINI_GOLF_OUT_OF_BOUNDS_SURFACE_WEIGHT 0.1f
 /* Mini golf spreads the terrain code grid over its smaller ground */
 #define MINI_GOLF_TEXEL_WIDTH (MINI_GOLF_GROUND_SIZE / CODE_GRID_COLUMN_COUNT)
 #define MINI_GOLF_TEXEL_LENGTH (MINI_GOLF_GROUND_SIZE / CODE_GRID_ROW_COUNT)
@@ -421,8 +433,8 @@ void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range) {
  * FindSurface but returns the first.
  */
 Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
-  s8 surfaces[4];
-  f32 weights[4];
+  s8 surfaces[NEAREST_CODE_COUNT];
+  f32 weights[NEAREST_CODE_COUNT];
   PlaneTriangle hit;
   f32 fraction;
   s32 shiftedX;
@@ -480,7 +492,7 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
       ((shiftedZ & (MINI_GOLF_TEXEL_LENGTH - 1)) < MINI_GOLF_TEXEL_LENGTH / 2)
       ? -1
       : 1;
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < NEAREST_CODE_COUNT; i++) {
     switch (GetTerrainCode((i & 1) ? column + stepColumn : column,
         (i & 2) ? row + stepRow : row)) {
       case TERRAIN_CODE_FAIRWAY:
@@ -488,19 +500,19 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         surface = SURFACE_MINI_GOLF_FAIRWAY;
         break;
       case TERRAIN_CODE_GREEN:
-        weight = 1.1f;
+        weight = GREEN_SURFACE_WEIGHT;
         surface = SURFACE_MINI_GOLF_GREEN;
         break;
       case TERRAIN_CODE_BUNKER:
-        weight = 0.7f;
+        weight = BUNKER_SURFACE_WEIGHT;
         surface = SURFACE_BUNKER;
         break;
       case TERRAIN_CODE_ROUGH:
-        weight = 0.9f;
+        weight = ROUGH_SURFACE_WEIGHT;
         surface = SURFACE_ROUGH;
         break;
       case TERRAIN_CODE_OUT_OF_BOUNDS:
-        weight = 0.1f;
+        weight = MINI_GOLF_OUT_OF_BOUNDS_SURFACE_WEIGHT;
         surface = SURFACE_OUT_OF_BOUNDS;
         break;
       case TERRAIN_CODE_CART_WAY:
@@ -532,11 +544,11 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         surface = SURFACE_BARE_GROUND_UNK13;
         break;
       case TERRAIN_CODE_DEEP_ROUGH:
-        weight = 0.9f;
+        weight = ROUGH_SURFACE_WEIGHT;
         surface = SURFACE_DEEP_ROUGH;
         break;
       case TERRAIN_CODE_WASTE_AREA:
-        weight = 0.9f;
+        weight = ROUGH_SURFACE_WEIGHT;
         surface = SURFACE_WASTE_AREA;
         break;
       default:
@@ -563,8 +575,8 @@ f32 ConvertToFloat(s32 value) {
  */
 #ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
-  s8 surfaces[4];
-  f32 weights[4];
+  s8 surfaces[NEAREST_CODE_COUNT];
+  f32 weights[NEAREST_CODE_COUNT];
   PlaneTriangle hit;
   f32 fraction;
   s32 waterBias;
@@ -616,7 +628,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
   stepColumn = (fractionX < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
   fractionZ = z & (GROUND_TEXEL_SIZE - 1);
   stepRow = (fractionZ < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < NEAREST_CODE_COUNT; i++) {
     switch (GetTerrainCode((i & 1) ? column + stepColumn : column,
         (i & 2) ? row + stepRow : row)) {
       case TERRAIN_CODE_FAIRWAY:
@@ -624,19 +636,19 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         surface = SURFACE_FAIRWAY;
         break;
       case TERRAIN_CODE_GREEN:
-        weight = 1.1f;
+        weight = GREEN_SURFACE_WEIGHT;
         surface = SURFACE_GREEN;
         break;
       case TERRAIN_CODE_BUNKER:
-        weight = 0.7f;
+        weight = BUNKER_SURFACE_WEIGHT;
         surface = SURFACE_BUNKER;
         break;
       case TERRAIN_CODE_ROUGH:
-        weight = 0.9f;
+        weight = ROUGH_SURFACE_WEIGHT;
         surface = SURFACE_ROUGH;
         break;
       case TERRAIN_CODE_OUT_OF_BOUNDS:
-        weight = 0.5f;
+        weight = OUT_OF_BOUNDS_SURFACE_WEIGHT;
         surface = SURFACE_OUT_OF_BOUNDS;
         break;
       case TERRAIN_CODE_CART_WAY:
@@ -668,11 +680,11 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         surface = SURFACE_BARE_GROUND_UNK13;
         break;
       case TERRAIN_CODE_DEEP_ROUGH:
-        weight = 0.9f;
+        weight = ROUGH_SURFACE_WEIGHT;
         surface = SURFACE_DEEP_ROUGH;
         break;
       case TERRAIN_CODE_WASTE_AREA:
-        weight = 0.9f;
+        weight = ROUGH_SURFACE_WEIGHT;
         surface = SURFACE_WASTE_AREA;
         break;
       default:
@@ -685,13 +697,13 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     weights[i] = weight;
   }
 
-  for (i = 1; i < 4; i++) {
+  for (i = 1; i < NEAREST_CODE_COUNT; i++) {
     if (surfaces[i] != surfaces[0]) {
       break;
     }
   }
 
-  if (i == 4) {
+  if (i == NEAREST_CODE_COUNT) {
     return surface;
   }
 
@@ -744,8 +756,9 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     weights[2] = 0.0f;
   }
 
+  /* The last code's weight has gone to another's or been dropped */
   bestWeight = 0.0f;
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < NEAREST_CODE_COUNT - 1; i++) {
     if (bestWeight < weights[i]) {
       bestIndex = i;
       bestWeight = weights[i];
