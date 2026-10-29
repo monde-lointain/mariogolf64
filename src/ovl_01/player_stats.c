@@ -117,8 +117,8 @@
 /* The bytes of each of D_80230984's record labels, such as "Birdie" */
 #define RECORD_LABEL_SIZE 16
 
-/* func_8021E97C puts the cursor on the stats grid's chosen cell, measured from
- * the screen's center */
+/* DrawBestShotsCursor puts the cursor on the stats grid's chosen cell, measured
+ * from the screen's center */
 #define STATS_CURSOR_COLUMN_WIDTH 34
 #define STATS_CURSOR_ROW_HEIGHT 26
 #define STATS_CURSOR_LEFT_X 6
@@ -177,7 +177,7 @@ extern u8 D_801B9410;
 void DrawBrickWallRows(Gfx** displayListHead, u8 slide);
 
 s16 GetChosenBestShot(void);
-void func_8021E97C_ovl_01(Gfx** displayListHead);
+void DrawBestShotsCursor(Gfx** displayListHead);
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
 void DrawOneDigitMenuNumber(
@@ -2084,7 +2084,7 @@ void DrawBestShots(Gfx** displayListHead) {
   }
 
   if (D_8023B640_ovl_01[memory->unk3A][memory->unk39] != STATS_CELL_EMPTY) {
-    func_8021E97C_ovl_01(&gfx);
+    DrawBestShotsCursor(&gfx);
   }
 
   gDPPipeSync(gfx++);
@@ -2386,8 +2386,8 @@ s16 GetChosenBestShot(void) {
   return D_8023B640_ovl_01[memory->unk3A][memory->unk39];
 }
 
-void func_8021E4B0_ovl_01(
-    Gfx** displayListHead, s32 left, s32 top, s32 labelIndex) {
+/* Draws one of the Japanese score labels at (left, top); nothing calls it */
+void DrawScoreLabel(Gfx** displayListHead, s32 left, s32 top, s32 labelIndex) {
   Gfx* gfx = *displayListHead;
   u8* image;
   s32 width;
@@ -2430,12 +2430,13 @@ void func_8021E4B0_ovl_01(
   *displayListHead = gfx;
 }
 
+/* Draws the color-cycling cursor on the chosen Best Shots cell */
 /*
  * Doesn't match: the stack slots of the pointers to the second pipe sync
  * after the image and the cycle type are swapped.
  */
 #ifdef NON_MATCHING
-void func_8021E97C_ovl_01(Gfx** displayListHead) {
+void DrawBestShotsCursor(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = func_8005AF74();
   s32 vertexIndex;
@@ -2503,7 +2504,7 @@ void func_8021E97C_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E97C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShotsCursor);
 #endif
 
 /*
