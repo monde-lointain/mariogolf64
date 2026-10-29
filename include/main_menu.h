@@ -34,7 +34,7 @@ extern void* D_8012D420[2];
 extern s16 D_800FE33C;
 extern u8 D_800FBDB9;
 
-extern void* D_801B60D0;
+extern void* g_NamePlateImage;
 /* The player count chosen on the title screen, which the saved games, the
  * menus and the club tournament set to 1 */
 extern s32 g_ChosenPlayerCount;

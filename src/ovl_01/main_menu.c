@@ -208,16 +208,16 @@ typedef struct ImageCorner {
 #define MENU_BOB_HEIGHT 5.0f
 
 /* Where DrawMenuBanner and func_801FCEF8 draw the banners of D_801052BC and
- * D_801B60D0 */
+ * g_NamePlateImage */
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
 
-/* func_801FD1B4 squeezes D_801B60D0 to this width at a given position; nothing
- * calls it */
+/* func_801FD1B4 squeezes g_NamePlateImage to this width at a given position;
+ * nothing calls it */
 #define SMALL_BANNER_WIDTH 96
 
-/* DrawLargeMenuBanner stretches D_801B60D0; its strips overlap, as they are
- * taller than their spacing */
+/* DrawLargeMenuBanner stretches g_NamePlateImage; its strips overlap, as they
+ * are taller than their spacing */
 #define LARGE_BANNER_LEFT 26
 #define LARGE_BANNER_TOP 174
 #define LARGE_BANNER_WIDTH 270
@@ -1233,7 +1233,7 @@ void UpdateMenus(void) {
             CHARACTER_SELECT_BUFFER_PLAYER_LABELS);
         func_8020B2C4_ovl_01(
             D_801B5CD0[D_8022BE90_ovl_01], CHARACTER_SELECT_BUFFER_CURSOR_BOX);
-        func_8020B2C4_ovl_01(D_801B60D0, CHARACTER_SELECT_BUFFER_UNREAD);
+        func_8020B2C4_ovl_01(g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
         func_8020B2C4_ovl_01(
             D_800FBE30[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         func_8020B438_ovl_01();
@@ -1253,7 +1253,7 @@ void UpdateMenus(void) {
             CHARACTER_SELECT_BUFFER_PLAYER_LABELS);
         func_8020B2C4_ovl_01(
             D_801B5CD0[D_8022BE90_ovl_01], CHARACTER_SELECT_BUFFER_CURSOR_BOX);
-        func_8020B2C4_ovl_01(D_801B60D0, CHARACTER_SELECT_BUFFER_UNREAD);
+        func_8020B2C4_ovl_01(g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
         func_8020B2C4_ovl_01(
             D_800FBE30[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         func_8020B438_ovl_01();
@@ -1276,7 +1276,7 @@ void UpdateMenus(void) {
         func_80221B20_ovl_01();
         func_80221EBC_ovl_01(D_801049A0[0], SAVE_MENU_BUFFER_SLOTS);
         func_80221EBC_ovl_01(D_8010526C, SAVE_MENU_BUFFER_CHOSEN);
-        func_80222038_ovl_01(D_801B60D0, 1);
+        func_80222038_ovl_01(g_NamePlateImage, 1);
         func_80222038_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 2);
         func_802218C0_ovl_01(D_800FF180[0], SAVE_GAME_BUFFER_CONTROLLER_ICONS);
         func_802218C0_ovl_01(D_800FF180[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
@@ -1326,7 +1326,7 @@ void UpdateMenus(void) {
         tournamentImage = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_PLACE_DIGITS, &asset);
         ReadEncodedAsset(tournamentImage, &asset);
-        func_80228A80_ovl_01(D_801B60D0, CODE_ENTRY_BUFFER_NAME_PLATE);
+        func_80228A80_ovl_01(g_NamePlateImage, CODE_ENTRY_BUFFER_NAME_PLATE);
         func_80228A80_ovl_01(
             D_800FF420[D_8022BE92_ovl_01], CODE_ENTRY_BUFFER_BAR);
         func_80228A80_ovl_01(
@@ -1449,7 +1449,7 @@ void UpdateMenus(void) {
         func_802178B0_ovl_01(
             D_800FF420[D_8022BE92_ovl_01], PLAYER_STATS_BUFFER_ICONS);
         func_802178B0_ovl_01(D_801B93E0[0], PLAYER_STATS_BUFFER_UNK2);
-        func_802178B0_ovl_01(D_801B60D0, PLAYER_STATS_BUFFER_UNK3);
+        func_802178B0_ovl_01(g_NamePlateImage, PLAYER_STATS_BUFFER_UNK3);
         func_802178B0_ovl_01(D_8010526C[0], PLAYER_STATS_BUFFER_UNK4);
         func_802178B0_ovl_01(D_8010526C[1], PLAYER_STATS_BUFFER_UNK5);
         func_802178B0_ovl_01(D_801B93E0[1], PLAYER_STATS_BUFFER_UNK7);
@@ -1477,7 +1477,7 @@ void UpdateMenus(void) {
         func_8020E010_ovl_01(D_801049A0[0]);
         func_8020E0AC_ovl_01(D_800FF4C4, COURSE_BUFFER_FIRST);
         func_8020E26C_ovl_01(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
-        func_8020E26C_ovl_01(D_801B60D0, COURSE_MENU_BUFFER_NAME_PLATE);
+        func_8020E26C_ovl_01(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
         func_8020E26C_ovl_01(D_8010526C[0], COURSE_MENU_BUFFER_SPINNING_BADGE);
         func_8020E26C_ovl_01(
             D_800FF180[0], COURSE_MENU_BUFFER_DIGITS_AND_ARROWS);
@@ -1498,7 +1498,7 @@ void UpdateMenus(void) {
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         func_80213464_ovl_01(
             D_801B5CD0[D_8022BE90_ovl_01], BEST_TIMES_BUFFER_UNREAD);
-        func_8020E26C_ovl_01(D_801B60D0, COURSE_MENU_BUFFER_NAME_PLATE);
+        func_8020E26C_ovl_01(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
         D_8022BE92_ovl_01 ^= 1;
         func_80213464_ovl_01(
             D_800FF420[D_8022BE92_ovl_01], BEST_TIMES_BUFFER_PLACES);
@@ -1515,7 +1515,7 @@ void UpdateMenus(void) {
         D_8022BE90_ovl_01 ^= 1;
         func_802159C0_ovl_01(
             D_801B5CD0[D_8022BE90_ovl_01], TABLE_BUFFER_CURSOR);
-        func_802159C0_ovl_01(D_801B60D0, TABLE_BUFFER_UNREAD);
+        func_802159C0_ovl_01(g_NamePlateImage, TABLE_BUFFER_UNREAD);
         func_8021730C_ovl_01();
         func_802159C0_ovl_01(D_800FBE30[0], TABLE_BUFFER_ARROWS);
         func_802159C0_ovl_01(D_800FBE30[1], TABLE_BUFFER_STAR);
@@ -1533,7 +1533,7 @@ void UpdateMenus(void) {
             D_801B5CD0[D_8022BE8E_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         func_8021CFAC_ovl_01(
             D_8012D420[D_8022BE90_ovl_01], SCORE_LABEL_BUFFER_CURSOR_BOX);
-        func_8021CFAC_ovl_01(D_801B60D0, SCORE_LABEL_BUFFER_UNREAD);
+        func_8021CFAC_ovl_01(g_NamePlateImage, SCORE_LABEL_BUFFER_UNREAD);
         func_8021CFAC_ovl_01(D_800FBE30[0], SCORE_LABEL_BUFFER_LABELS);
         func_8021E01C_ovl_01();
         func_8021EF64_ovl_01();
@@ -1547,7 +1547,7 @@ void UpdateMenus(void) {
         D_8022BE90_ovl_01 ^= 1;
         func_8020E26C_ovl_01(
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        func_8021F5F0_ovl_01(D_801B60D0, RING_SHOT_RECORD_BUFFER_UNREAD);
+        func_8021F5F0_ovl_01(g_NamePlateImage, RING_SHOT_RECORD_BUFFER_UNREAD);
         func_8021F5F0_ovl_01(
             D_8012D420[D_8022BE8E_ovl_01], RING_SHOT_RECORD_BUFFER_RAINBOW_BOX);
         func_8021F5F0_ovl_01(
@@ -4128,10 +4128,10 @@ void func_801FCEF8_ovl_01(Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_801B60D0)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_801B60D0) +
+        TextureAddress(LargeImageTexels(g_NamePlateImage) +
             (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -4158,10 +4158,10 @@ void func_801FD1B4_ovl_01(Gfx** displayListHead, s16 left, s16 top) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_801B60D0)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_801B60D0) +
+        TextureAddress(LargeImageTexels(g_NamePlateImage) +
             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -4190,10 +4190,10 @@ void DrawLargeMenuBanner(Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_801B60D0)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_801B60D0) +
+        TextureAddress(LargeImageTexels(g_NamePlateImage) +
             (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -4490,7 +4490,8 @@ extern const char D_8023176C_ovl_01[];
  * update */
 #define MODE_BOARD_BOB_PHASE_STEP 0.1f
 #define MODE_BOARD_BOB_HEIGHT 8.0f
-/* The strips of D_801B60D0 below the boards, drawn wider for a single player */
+/* The strips of g_NamePlateImage below the boards, drawn wider for a single
+ * player */
 #define MODE_BANNER_TOP 152
 #define MODE_BANNER_LEFT 80
 #define MODE_BANNER_SHOWN_WIDTH 160
@@ -4802,11 +4803,11 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_801B60D0)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   if (g_ChosenPlayerCount == 1) {
     for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress(LargeImageTexels(D_801B60D0) +
+          TextureAddress(LargeImageTexels(g_NamePlateImage) +
               (index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -4826,7 +4827,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   } else {
     for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress(LargeImageTexels(D_801B60D0) +
+          TextureAddress(LargeImageTexels(g_NamePlateImage) +
               (index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -6189,9 +6190,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80202000_ovl_01);
 #endif
 
 /*
- * DrawCourseSelectBanners draws the course select's banners of D_801B60D0: one
- * behind the course's name, and while the holes can be chosen, a wider one
- * below it behind the choice made, which squeezes the first.
+ * DrawCourseSelectBanners draws the course select's banners of
+ * g_NamePlateImage: one behind the course's name, and while the holes can be
+ * chosen, a wider one below it behind the choice made, which squeezes the
+ * first.
  */
 #define COURSE_NAME_BANNER_LEFT 67
 #define COURSE_NAME_BANNER_TOP 168
@@ -6230,11 +6232,11 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_801B60D0)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress(LargeImageTexels(D_801B60D0) +
+          TextureAddress(LargeImageTexels(g_NamePlateImage) +
               stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -6254,7 +6256,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   squeeze = MAP_CAMERA_MODE_TOP_BYTE != 0 ? COURSE_NAME_BANNER_SQUEEZE : 0;
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_801B60D0) +
+        TextureAddress(LargeImageTexels(g_NamePlateImage) +
             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -6582,9 +6584,9 @@ const char D_802316FC_ovl_01[] = "Luigi's Garden";
 #define OPTION_ROW_SPACING 30
 
 /*
- * The toggled options' values sit on banners of D_801B60D0, squeezed to 120
- * columns and 8 rows a strip. Their strips are placed from row 62 and drawn 20
- * rows lower. The chosen one's moves 2 columns left above a shadow 3 rows
+ * The toggled options' values sit on banners of g_NamePlateImage, squeezed to
+ * 120 columns and 8 rows a strip. Their strips are placed from row 62 and drawn
+ * 20 rows lower. The chosen one's moves 2 columns left above a shadow 3 rows
  * lower.
  */
 #define VALUE_BANNER_LEFT 136
@@ -6725,12 +6727,12 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_801B60D0)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, DIMMED_COLOR);
   for (loopIndex = 0; loopIndex != OPTION_TOGGLE_COUNT; loopIndex++) {
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
-          LargeImageTexels(D_801B60D0) +
+          LargeImageTexels(g_NamePlateImage) +
               (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);

@@ -318,7 +318,7 @@ static u8 D_801B6080[0x8] BSS = {0};
 GameState g_GameState BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_801B60CC[0x4] BSS = {0};
-void* D_801B60D0 BSS = {0};
+void* g_NamePlateImage BSS = {0};
 /* Read by no routine */
 static u8 D_801B60D8[0x8] BSS = {0};
 u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] BSS ALIGNED(

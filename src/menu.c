@@ -85,7 +85,7 @@ extern void* D_8012F4B0[7];
 extern void* D_801049A0[7];
 extern void* D_801052C4[2];
 extern void* D_800FF420[2];
-extern void* D_801B60D0;
+extern void* g_NamePlateImage;
 extern void* D_8012D420[2];
 extern void* D_801052BC[2];
 extern void* D_800FBDFC[2];
@@ -493,8 +493,8 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_800FF420[0], &asset);
   D_800FF420[1] = AllocMemory(OpenEncodedAsset(0x520, &asset));
   ReadEncodedAsset(D_800FF420[1], &asset);
-  D_801B60D0 = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
-  ReadEncodedAsset(D_801B60D0, &asset);
+  g_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
+  ReadEncodedAsset(g_NamePlateImage, &asset);
   D_8012D420[0] = AllocMemory(0x70A8);
   D_801B5CD0[0] = AllocMemory(0x70A8);
   D_8012D420[1] = AllocMemory(0x70A8);
@@ -629,7 +629,7 @@ void FreeMenuResources(void) {
   FreeMemory(&D_801052C4[1]);
   FreeMemory(&D_800FF420[0]);
   FreeMemory(&D_800FF420[1]);
-  FreeMemory(&D_801B60D0);
+  FreeMemory(&g_NamePlateImage);
   FreeMemory(&D_8012D420[0]);
   FreeMemory(&D_801B5CD0[0]);
   FreeMemory(&D_8012D420[1]);
