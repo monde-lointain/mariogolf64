@@ -44,6 +44,28 @@
 #include "variables.h"
 
 #define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
+
+/*
+ * The stages of the shot that UpdateFlightCamera moves f_FlightPhase through,
+ * each giving ChooseFlightCameraKind its own choice of camera kinds. Shots
+ * from the green skip EARLY_CLIMB, FALL and NEARING_CONTACT, and the simple
+ * camera goes from CLIMB to NEARING_CONTACT at the highest step.
+ */
+enum FlightPhase {
+  FLIGHT_PHASE_NONE,
+  FLIGHT_PHASE_LAUNCH,
+  FLIGHT_PHASE_EARLY_CLIMB, /* From the tenth step to the fifteenth */
+  FLIGHT_PHASE_CLIMB,
+  FLIGHT_PHASE_FALL, /* Past the path's highest step */
+  FLIGHT_PHASE_NEARING_CONTACT, /* Forty steps before the first step flag */
+  FLIGHT_PHASE_CONTACT, /* From the first step flag, or step 40 from the green
+                         */
+  FLIGHT_PHASE_END /* The last ten steps */
+};
+
+/* An enum FlightPhase value */
+typedef s32 FlightPhase;
+
 /* Bits of f_ComingFlightEvents */
 #define FLIGHT_EVENT_BILLBOARD_HIT (1 << 0)
 #define FLIGHT_EVENT_CUP_PASS (1 << 1)
@@ -316,7 +338,7 @@ static s32 D_800DAF44;
 static s8 f_PassedPathFlags;
 static SurfaceInfo* f_EndSurfaceInfo;
 /* How far the flight camera has followed the shot */
-static s32 f_FlightPhase;
+static FlightPhase f_FlightPhase;
 
 /* How far the golfer stands along the shot's yaw from the ball */
 #define STANCE_AIM_OFFSET -921.60004f
@@ -772,7 +794,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
 
   f_IsCameraKindNew = FALSE;
   f_HasFlightPhaseChanged = FALSE;
-  f_FlightPhase = 1;
+  f_FlightPhase = FLIGHT_PHASE_LAUNCH;
   f_FlightCameraKind = NO_FLIGHT_CAMERA;
   f_IsPinHitComing = FALSE;
   g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
@@ -2516,7 +2538,7 @@ void ChooseFlightCameraKind(void) {
   kind = 0;
   if (g_SimulatedShot.startsOnGreen) {
     switch (f_FlightPhase) {
-      case 1:
+      case FLIGHT_PHASE_LAUNCH:
         if (!(f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_UNK2) &&
             RandomBelow(2) == 0 && !IsPinInCup() &&
             f_StartCupDistance >= CUP_LANDING_MIN_DISTANCE &&
@@ -2561,7 +2583,7 @@ void ChooseFlightCameraKind(void) {
         }
 
         break;
-      case 3:
+      case FLIGHT_PHASE_CLIMB:
         if (f_FlightCameraKind != FLIGHT_CAMERA_FRAMING_PATH &&
             f_FlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP &&
             f_FlightCameraKind != FLIGHT_CAMERA_BEHIND_START) {
@@ -2569,14 +2591,14 @@ void ChooseFlightCameraKind(void) {
         }
 
         break;
-      case 6:
+      case FLIGHT_PHASE_CONTACT:
         if (f_FlightCameraKind != FLIGHT_CAMERA_FRAMING_PATH &&
             f_FlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
           kind = FLIGHT_CAMERA_AROUND_END;
         }
 
         break;
-      case 7:
+      case FLIGHT_PHASE_END:
         if (!g_SimulatedShot.endsInCup && RandomBelow(2) == 0) {
           kind = FLIGHT_CAMERA_UNKD;
         }
@@ -2585,7 +2607,7 @@ void ChooseFlightCameraKind(void) {
     }
   } else if (!func_8005DE40()) {
     switch (f_FlightPhase) {
-      case 1:
+      case FLIGHT_PHASE_LAUNCH:
         pick = NextCameraPick(1);
         if (f_BillboardHitStep != NO_STEP) {
           kind = FLIGHT_CAMERA_UNK3;
@@ -2625,7 +2647,7 @@ void ChooseFlightCameraKind(void) {
         }
 
         break;
-      case 2:
+      case FLIGHT_PHASE_EARLY_CLIMB:
         if (f_FlightCameraKind == FLIGHT_CAMERA_NEAR_LAUNCH) {
           animation = HUD_ANIMATION_TILES;
           kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
@@ -2652,7 +2674,7 @@ void ChooseFlightCameraKind(void) {
         }
 
         break;
-      case 3:
+      case FLIGHT_PHASE_CLIMB:
         if (f_FlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER) {
           if (g_SimulatedShot.stepCount < 120) {
             kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
@@ -2679,7 +2701,7 @@ void ChooseFlightCameraKind(void) {
         }
 
         break;
-      case 4:
+      case FLIGHT_PHASE_FALL:
         if (f_CameraChangeHoldCount) {
           f_HasFlightPhaseChanged = TRUE;
         } else if (f_FlightCameraKind == FLIGHT_CAMERA_TRAILING_BALL) {
@@ -2699,7 +2721,7 @@ void ChooseFlightCameraKind(void) {
         }
 
         break;
-      case 5:
+      case FLIGHT_PHASE_NEARING_CONTACT:
         kind = FLIGHT_CAMERA_AROUND_END;
 
         /* The repeated store is there to match */
@@ -2709,7 +2731,7 @@ void ChooseFlightCameraKind(void) {
         }
 
         break;
-      case 6:
+      case FLIGHT_PHASE_CONTACT:
         if (!f_CameraChangeHoldCount) {
           kind = FLIGHT_CAMERA_AROUND_END;
         } else {
@@ -2717,7 +2739,7 @@ void ChooseFlightCameraKind(void) {
         }
 
         break;
-      case 7:
+      case FLIGHT_PHASE_END:
         if (IsTroubleSurface(f_EndSurfaceInfo) || g_SimulatedShot.endsInCup) {
           /* The empty branch is there to match */
         } else {
@@ -2733,7 +2755,7 @@ void ChooseFlightCameraKind(void) {
     }
   } else {
     switch (f_FlightPhase) {
-      case 1:
+      case FLIGHT_PHASE_LAUNCH:
         pick = RandomBelow(9);
         switch (pick) {
           case 0:
@@ -2769,11 +2791,11 @@ void ChooseFlightCameraKind(void) {
 
         f_HasFlightPhaseChanged = TRUE;
         break;
-      case 5:
+      case FLIGHT_PHASE_NEARING_CONTACT:
         kind = FLIGHT_CAMERA_AROUND_END;
         f_HasFlightPhaseChanged = TRUE;
         break;
-      case 6:
+      case FLIGHT_PHASE_CONTACT:
         /* The empty case is there to match */
         break;
     }
@@ -2783,7 +2805,8 @@ void ChooseFlightCameraKind(void) {
     f_IsCameraKindNew = TRUE;
     StartHudAnimation(HUD_ANIMATION_NONE);
     if (animation == HUD_ANIMATION_NONE) {
-      if (f_FlightPhase >= 4 && !g_SimulatedShot.startsOnGreen &&
+      if (f_FlightPhase >= FLIGHT_PHASE_FALL &&
+          !g_SimulatedShot.startsOnGreen &&
           f_ShotLength > SHORT_SHOT_MAX_LENGTH) {
         if (kind == FLIGHT_CAMERA_AROUND_END) {
           if (RandomBelow(16) == 0 &&
@@ -2915,24 +2938,24 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
       f_FlightBallPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
   if (g_SimulatedShot.startsOnGreen) {
     switch (f_FlightPhase) {
-      case 1:
+      case FLIGHT_PHASE_LAUNCH:
         if (isAdvancing == TRUE && step == 10 &&
             g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
-          f_FlightPhase = 3;
+          f_FlightPhase = FLIGHT_PHASE_CLIMB;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
-      case 3:
+      case FLIGHT_PHASE_CLIMB:
         if (step == 40 && g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
-          f_FlightPhase = 6;
+          f_FlightPhase = FLIGHT_PHASE_CONTACT;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
-      case 6:
+      case FLIGHT_PHASE_CONTACT:
         if (g_SimulatedShot.stepCount - 10 < g_BallFlightStep) {
-          f_FlightPhase = 7;
+          f_FlightPhase = FLIGHT_PHASE_END;
           f_HasFlightPhaseChanged = TRUE;
         }
 
@@ -2940,48 +2963,48 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
   } else if (func_8005DE40() == 0) {
     switch (f_FlightPhase) {
-      case 0:
-        f_FlightPhase = 1;
+      case FLIGHT_PHASE_NONE:
+        f_FlightPhase = FLIGHT_PHASE_LAUNCH;
         f_HasFlightPhaseChanged = TRUE;
         break;
-      case 1:
+      case FLIGHT_PHASE_LAUNCH:
         if (isAdvancing == TRUE && step == 10) {
-          f_FlightPhase = 2;
+          f_FlightPhase = FLIGHT_PHASE_EARLY_CLIMB;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
-      case 2:
+      case FLIGHT_PHASE_EARLY_CLIMB:
         if (step == 15) {
-          f_FlightPhase = 3;
+          f_FlightPhase = FLIGHT_PHASE_CLIMB;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
-      case 3:
+      case FLIGHT_PHASE_CLIMB:
         if (g_BallFlightStep > g_SimulatedShot.minPositionStep[AXIS_Y]) {
-          f_FlightPhase = 4;
+          f_FlightPhase = FLIGHT_PHASE_FALL;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
-      case 4:
+      case FLIGHT_PHASE_FALL:
         if (g_SimulatedShot.pathFlags[step + 40]) {
-          f_FlightPhase = 5;
+          f_FlightPhase = FLIGHT_PHASE_NEARING_CONTACT;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
-      case 5:
+      case FLIGHT_PHASE_NEARING_CONTACT:
         if (g_SimulatedShot.pathFlags[step]) {
-          f_FlightPhase = 6;
+          f_FlightPhase = FLIGHT_PHASE_CONTACT;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
-      case 6:
+      case FLIGHT_PHASE_CONTACT:
         if (g_SimulatedShot.stepCount - 10 < g_BallFlightStep) {
-          f_FlightPhase = 7;
+          f_FlightPhase = FLIGHT_PHASE_END;
           f_HasFlightPhaseChanged = TRUE;
         }
 
@@ -2989,17 +3012,17 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
   } else {
     switch (f_FlightPhase) {
-      case 1:
-        f_FlightPhase = 3;
+      case FLIGHT_PHASE_LAUNCH:
+        f_FlightPhase = FLIGHT_PHASE_CLIMB;
         break;
-      case 3:
+      case FLIGHT_PHASE_CLIMB:
         if (g_BallFlightStep > g_SimulatedShot.minPositionStep[AXIS_Y]) {
-          f_FlightPhase = 5;
+          f_FlightPhase = FLIGHT_PHASE_NEARING_CONTACT;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
-      case 5:
+      case FLIGHT_PHASE_NEARING_CONTACT:
         /* The empty case is there to match */
         break;
     }
@@ -3041,7 +3064,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
   if (f_BillboardHitStep < step &&
       (g_BallFlightStep + 40 < g_SimulatedShot.stepCount ||
-          f_FlightPhase == 7) &&
+          f_FlightPhase == FLIGHT_PHASE_END) &&
       f_HasFlightPhaseChanged == TRUE && !g_IsCupViewShown &&
       f_ComingFlightEvents == 0) {
     if (!f_CameraChangeHoldCount) {
