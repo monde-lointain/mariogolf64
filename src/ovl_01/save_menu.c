@@ -317,7 +317,7 @@ void func_8021F6E0_ovl_01(void** buffers) {
   ReadEncodedAsset(D_8023B680_ovl_01[SAVE_MENU_IMAGE_COUNT], &asset);
 }
 
-void func_8021F79C_ovl_01(void) {
+void UpdateRingShotRecords(void) {
   MenuMemory* memory = func_8005AF74();
   SaveData* save = GetSaveData();
   s32 openCourseCount = func_8022181C_ovl_01();
@@ -441,9 +441,9 @@ void func_8021F79C_ovl_01(void) {
 }
 
 /*
- * func_8021FC5C draws the Ring Shot records. A row of icons, one for each open
- * course and one for the saved replays, sits above a shaded panel, with the
- * blinking arrows around the chosen one. For a course the panel shows each
+ * DrawRingShotRecords draws the Ring Shot records. A row of icons, one for each
+ * open course and one for the saved replays, sits above a shaded panel, with
+ * the blinking arrows around the chosen one. For a course the panel shows each
  * hole's number over a column of four characters from ringShotFirstCharacters
  * on, crossed out and darkened where the hole's unk1344 entry for them is 0,
  * with arrows where the list scrolls further. For the replays it shows each
@@ -518,7 +518,7 @@ void func_8021F79C_ovl_01(void) {
 /* Doesn't match: the original gives several values other saved registers,
  * and keeps memory on the stack */
 #ifdef NON_MATCHING
-void func_8021FC5C_ovl_01(Gfx** displayListHead) {
+void DrawRingShotRecords(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   /* Counts the strips, holds each face's draw mode and counts the replay
    * slots, as the original's shared register needs */
@@ -768,7 +768,7 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021FC5C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawRingShotRecords);
 #endif
 
 void func_80220A30_ovl_01(void) {

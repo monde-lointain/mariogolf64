@@ -377,7 +377,7 @@ void func_8021E01C_ovl_01(void);
 void func_8021EF64_ovl_01(void);
 void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind);
 void func_8021F6E0_ovl_01(void** buffers);
-void func_8021F79C_ovl_01(void);
+void UpdateRingShotRecords(void);
 void func_80220A30_ovl_01(void);
 void func_80220BB0_ovl_01(void);
 void func_80221B20_ovl_01(void);
@@ -409,7 +409,7 @@ void func_8020E898_ovl_01(Gfx** displayListHead);
 void func_80213748_ovl_01(Gfx** displayListHead);
 void func_80215DC4_ovl_01(Gfx** displayListHead);
 void func_8021D3AC_ovl_01(Gfx** displayListHead);
-void func_8021FC5C_ovl_01(Gfx** displayListHead);
+void DrawRingShotRecords(Gfx** displayListHead);
 void DrawSavedGames(Gfx** displayListHead);
 void func_80229CB0_ovl_01(Gfx** displayListHead);
 
@@ -1074,7 +1074,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_RING_SHOT_RECORDS:
-      func_8021F79C_ovl_01();
+      UpdateRingShotRecords();
       break;
 
     case MENU_SCREEN_COURSE_STATS:
@@ -3704,7 +3704,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       func_8021D3AC_ovl_01(&gfx);
       break;
     case MENU_SCREEN_RING_SHOT_RECORDS:
-      func_8021FC5C_ovl_01(&gfx);
+      DrawRingShotRecords(&gfx);
       break;
     case MENU_SCREEN_COURSE_STATS:
       func_8020E898_ovl_01(&gfx);
