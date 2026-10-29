@@ -334,7 +334,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
         sprintf(heightText, "Height %fYd   ",
             (simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y]) *
-                0.00007119878f);
+                YARDS_PER_UNIT);
         PrintDebugText(heightText, 1, 0xF);
       }
     }

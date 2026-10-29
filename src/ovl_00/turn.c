@@ -4859,17 +4859,17 @@ void UpdateTurns(void) {
 
   if (g_RoundHud.unkF) {
     s32 distance = GetSelectedShotDistance();
-    Radians angle = (u16)g_CurrentShot.unk0 * 0.0000958738f;
+    Radians angle = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
     f32 cosine;
     f32 scale;
     f32 length;
 
     if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
       cosine = cosf(angle);
-      scale = 15360.0f;
+      scale = UNITS_PER_METER;
     } else {
       cosine = cosf(angle);
-      scale = 14045.184f;
+      scale = UNITS_PER_YARD;
     }
 
     length = distance * scale;
