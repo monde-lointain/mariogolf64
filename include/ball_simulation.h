@@ -137,6 +137,9 @@ typedef struct ShotLaunch {
   /* 0x1C */ ShotMode shotMode;
 } ShotLaunch; /* size = 0x20 */
 
+/* BallSimulation's lastBounceStep before the ball's first bounce */
+#define NO_BOUNCE_STEP -2
+
 #define UNKA8_COUNT 8
 
 /* Added to a putt's y velocity as it launches */
@@ -178,7 +181,7 @@ typedef struct BallSimulation {
   /* Hits on the ground, hole triangles and billboards */
   /* 0x94 */ s32 bounceCount;
   /* 0x98 */ s32 stepCount;
-  /* The step of the ball's last bounce, or -2 before any */
+  /* The step of the ball's last bounce, or NO_BOUNCE_STEP before any */
   /* 0x9C */ s32 lastBounceStep;
   /* 0xA0 */ s8 isHoledOut; /* Set as the ball stops in the cup */
   /* 0xA1 */ s8 hasEnteredWater; /* Set once the ball is in the water */

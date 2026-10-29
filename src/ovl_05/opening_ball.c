@@ -1775,7 +1775,7 @@ s32 func_8020A488_ovl_05(
 
   simulation->bounceCount = 0;
   simulation->stepCount = 0;
-  simulation->lastBounceStep = -2;
+  simulation->lastBounceStep = NO_BOUNCE_STEP;
   simulation->isHoledOut = 0;
   simulation->hasHitFlag = FALSE;
   for (index = 0; index < UNKA8_COUNT; index++) {

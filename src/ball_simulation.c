@@ -394,6 +394,13 @@ void ResetBallSimulations(void) {
  */
 #define MIN_BOUNCE_SPEED_KEPT 0.1f
 #define EARLY_BOUNCE_STEP_COUNT 2
+/* A flying ball can't hit a billboard until this many steps after a bounce */
+#define BILLBOARD_HIT_BOUNCE_GAP 2
+/*
+ * A ball that lands slower than this out of bounds or in the water stops
+ * there
+ */
+#define LOST_BALL_STOP_SPEED KilometersPerHour(10)
 #define EARLY_BOUNCE_SPEED_SCALE 0.25
 
 /*
@@ -856,7 +863,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         hitsBillboard = FALSE;
         if (simulation->state == BALL_STATE_FLYING &&
             (simulation->lastBounceStep < 0 ||
-                simulation->lastBounceStep + 2 < simulation->stepCount)) {
+                simulation->lastBounceStep + BILLBOARD_HIT_BOUNCE_GAP <
+                    simulation->stepCount)) {
           hitsBillboard = FindBillboardHit(startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
               simulation->position[AXIS_Z], &triangle.unk0, &fraction);
@@ -1778,7 +1786,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       } else if (info->kind == SURFACE_KIND_OUT_OF_COURSE ||
           ((info->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
                info->kind == SURFACE_KIND_WATER_HAZARD) &&
-              impactSpeed < KilometersPerHour(10))) {
+              impactSpeed < LOST_BALL_STOP_SPEED)) {
         simulation->state = BALL_STATE_STOPPED;
       }
 
@@ -2574,6 +2582,9 @@ s32 GetAimSlopeAngle(Player* player, ShotLaunch* shot);
 #define WIND_SPEED_TO_VELOCITY 0.0078125f
 #define WIND_ALONG_SHOT_CUT 0.3f
 
+/* 0.1 mm: a launch starts at least this far above the ground */
+#define LAUNCH_GROUND_CLEARANCE 1.536f
+
 /* The rows of the launch values that GAME_FLAG_SHOW_LAUNCH_VALUES prints */
 enum LaunchValueRow {
   LAUNCH_VALUE_ROW_YAW = 6,
@@ -2642,7 +2653,7 @@ s32 LaunchBallSimulation(
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     groundHeight = GetGroundHeight(simulation->position[AXIS_X],
                        simulation->position[AXIS_Z]) -
-        1.536f;
+        LAUNCH_GROUND_CLEARANCE;
     if (groundHeight < simulation->position[AXIS_Y]) {
       simulation->position[AXIS_Y] = groundHeight;
     }
@@ -2862,7 +2873,7 @@ s32 LaunchBallSimulation(
 
   simulation->bounceCount = 0;
   simulation->stepCount = 0;
-  simulation->lastBounceStep = -2;
+  simulation->lastBounceStep = NO_BOUNCE_STEP;
   simulation->isHoledOut = 0;
   simulation->hasHitFlag = FALSE;
   simulation->rollFrameCount = 0;
