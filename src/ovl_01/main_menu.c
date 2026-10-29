@@ -4463,12 +4463,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 #define ANIMATED_ICON_IMAGE_SIZE (ANIMATED_ICON_SIZE * ANIMATED_ICON_SIZE / 2)
 #define ANIMATED_ICON_FRAME_COUNT 6
 #define ANIMATED_ICON_FRAME_DURATION 2
-/* func_80200A40 draws the chosen mode's icon, 64x64 CI8, in two strips */
+/* DrawScaledModeIcon draws the chosen mode's icon, 64x64 CI8, in two strips */
 #define MODE_ICON_WIDTH 64
 #define MODE_ICON_STRIP_HEIGHT 32
 #define MODE_ICON_STRIP_COUNT 2
 #define MODE_ICON_FRAME_DURATION 4
-/* Where func_802004A0 draws the mode icon, unscaled */
+/* Where DrawModeIcon draws the mode icon, unscaled */
 #define MODE_ICON_LEFT 168
 #define MODE_ICON_TOP 96
 
@@ -4603,7 +4603,7 @@ extern const char D_8023176C_ovl_01[];
 #define BET_SLIDE_DISTANCE 512
 
 void StartLoadingChosenHole(void);
-void func_80200A40_ovl_01(
+void DrawScaledModeIcon(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void DrawMenuCharacters(Gfx** displayListHead);
 void DrawCourseSelectBanners(Gfx** displayListHead);
@@ -4769,7 +4769,7 @@ void DrawModeSelect(Gfx** displayListHead) {
       }
 
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      func_80200A40_ovl_01(&gfx, boardX[slot] - halfSize,
+      DrawScaledModeIcon(&gfx, boardX[slot] - halfSize,
           boardY[slot] - halfSize + bob, halfSize, step);
     } else {
       if (D_801323A0.modeChoice == slot) {
@@ -5041,8 +5041,11 @@ void DrawModeSelect(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawModeSelect);
 #endif
 
-/* Nothing calls this */
-void func_802004A0_ovl_01(Gfx** displayListHead) {
+/*
+ * Draws the chosen mode's icon at its own size in a fixed place, and steps its
+ * animation on. Nothing calls it.
+ */
+void DrawModeIcon(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
   s32 stripIndex;
@@ -5106,7 +5109,12 @@ void func_802004A0_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_80200A40_ovl_01(
+/*
+ * Draws the chosen mode's icon from (left, top), its two strips each halfSize
+ * high and twice that wide at the texel step scale, so that the mode select can
+ * grow the chosen board's icon, and steps its animation on.
+ */
+void DrawScaledModeIcon(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
