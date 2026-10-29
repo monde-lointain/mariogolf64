@@ -31,7 +31,7 @@ enum MenuScreen {
   /* Loads what the chosen game needs and leaves the menu */
   MENU_SCREEN_EXIT = 19,
   MENU_SCREEN_UNK20,
-  MENU_SCREEN_UNK22 = 22,
+  MENU_SCREEN_BET_SETTINGS = 22,
   MENU_SCREEN_UNK23,
   MENU_SCREEN_UNK24,
   MENU_SCREEN_UNK26 = 26,

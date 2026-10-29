@@ -993,7 +993,7 @@ s32 func_80219948_ovl_01(void) {
 
     if (g_MenuPressedButtons & B_BUTTON) {
       PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      g_MenuScreen = MENU_SCREEN_UNK22;
+      g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
       D_802303A1_ovl_01 = 0;

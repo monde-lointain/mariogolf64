@@ -388,7 +388,7 @@ enum Song {
   SONG_TRAINING,
   SONG_TRANSMIT_MENU,
   /* The controls screen's song; the main menu also plays it as it enters
-   * MENU_SCREEN_UNK22 */
+   * MENU_SCREEN_BET_SETTINGS */
   SONG_CONTROLS,
   SONG_ROUND_UNK24,
   SONG_ROUND_MATCH,

@@ -1066,7 +1066,7 @@ void UpdateMenus(void) {
       func_80219948_ovl_01(1, g_ChosenPlayerCount);
       break;
 
-    case MENU_SCREEN_UNK22:
+    case MENU_SCREEN_BET_SETTINGS:
       func_80217D20_ovl_01();
       break;
 
@@ -2496,7 +2496,7 @@ void UpdateCourseSelect(void) {
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_UNK2) {
     PlaySong(SONG_CONTROLS, 0);
-    g_MenuScreen = MENU_SCREEN_UNK22;
+    g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
     D_8022BE88_ovl_01 = 1;
     D_8022BE89_ovl_01 = 0;
     return;
@@ -2796,7 +2796,7 @@ void UpdateMiniGolfCourseSelect(void) {
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_UNK2) {
     PlaySong(SONG_CONTROLS, 0);
-    g_MenuScreen = MENU_SCREEN_UNK22;
+    g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
     D_8022BE88_ovl_01 = 1;
     D_8022BE89_ovl_01 = 0;
     return;
@@ -3699,7 +3699,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       break;
     case MENU_SCREEN_COURSE_SELECT:
     case MENU_SCREEN_UNK20:
-    case MENU_SCREEN_UNK22:
+    case MENU_SCREEN_BET_SETTINGS:
       DrawCourseSelect(&gfx);
       break;
     case MENU_SCREEN_UNK18:
@@ -3803,7 +3803,7 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
 
   if (layers & MENU_LAYER_SCENERY) {
     if (g_MenuScreen == MENU_SCREEN_COURSE_SELECT ||
-        g_MenuScreen == MENU_SCREEN_UNK22 ||
+        g_MenuScreen == MENU_SCREEN_BET_SETTINGS ||
         g_MenuScreen == MENU_SCREEN_UNK20) {
       for (stripIndex = 0; stripIndex != CLAMPED_BACKDROP_STRIP_COUNT;
           stripIndex++) {
@@ -6089,7 +6089,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     DrawMenuBackdropLayers(&gfx, COURSE_SELECT_FRONT_LAYERS);
   }
 
-  if ((g_MenuScreen == MENU_SCREEN_UNK22) ||
+  if ((g_MenuScreen == MENU_SCREEN_BET_SETTINGS) ||
       (g_MenuScreen == MENU_SCREEN_UNK20)) {
     switch (D_8022BE88_ovl_01) {
       case BET_PHASE_OPENING:
