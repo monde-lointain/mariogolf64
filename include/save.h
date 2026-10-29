@@ -96,23 +96,6 @@ enum SaveReadResult {
 #define RING_SHOT_HOLE_COUNT 6
 #define SAVE_UNK1344_ENTRY_COUNT 18
 
-typedef struct Unk68 {
-  /* 0x00 */ s32 unk0[0x2C / 4];
-  /* 0x2C */ s8 unk2C;
-  /* 0x2D */ u8 unk2D[0x34 - 0x2D];
-  /* 0x34 */ u8 unk34;
-  /* 0x35 */ u8 unk35;
-  /* 0x36 */ s8 unk36;
-  /* 0x37 */ u8 unk37;
-  /* 0x38 */ u8 unk38;
-  /* 0x39 */ u8 unk39;
-  /* 0x3A */ u8 unk3A;
-  /* 0x3B */ u8 unk3B;
-  /* 0x3C */ u8 unk3C;
-  /* 0x3D */ u8 unk3D;
-  /* 0x3E */ u8 unk3E[0x68 - 0x3E];
-} Unk68; /* size = 0x68 */
-
 /* GameState.holeSelection values; code tests the nines as bits */
 #define HOLE_SELECTION_ALL 0
 #define HOLE_SELECTION_BACK_NINE (1 << 1)
@@ -239,7 +222,7 @@ typedef struct RingShotRecord {
   /* 0x00 */ HoleSetup hole;
   /* 0x34 */ s8 courseIndex;
   /* 0x35 */ s8 holeIndex;
-  /* 0x36 */ u8 scoreKind; /* What func_80060190 returns for the strokes */
+  /* 0x36 */ s8 scoreKind; /* What func_80060190 returns for the strokes */
   /* 0x37 */ u8 characterIndex;
   /* 0x38 */ u8 unk38;
   /* 0x39 */ u8 paletteIndex;
@@ -251,6 +234,10 @@ typedef struct RingShotRecord {
 } RingShotRecord; /* size = 0x68 */
 
 extern HoleSetup g_HoleSetup;
+
+/* Each player's last hole, and each player's last Ring Shot hole */
+extern PlayRecord D_800FEDD8[MAX_PLAYER_COUNT];
+extern RingShotRecord D_80105F40[MAX_PLAYER_COUNT];
 
 /* The current round's statistics, for the course's records */
 typedef struct RoundStats {
@@ -419,7 +406,7 @@ typedef struct SaveData {
   /* 0x002C */ u8 unk2C[0x38 - 0x2C];
   /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
   /* 0x0218 */ UnkB8 modePlayers[MODE_PLAYER_COUNT];
-  /* 0x0720 */ Unk68 modeRecords[MODE_RECORD_COUNT];
+  /* 0x0720 */ PlayRecord modeRecords[MODE_RECORD_COUNT];
   /* 0x0990 */ Unk990 unk990;
   /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
   /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT]
@@ -432,8 +419,8 @@ typedef struct SaveData {
   /* 0x1344 */ s8 unk1344[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT]
                          [SAVE_UNK1344_ENTRY_COUNT];
   /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
-  /* 0x15D0 */ Unk68 rankedRecords[RANKED_RECORD_COUNT];
-  /* 0x1DF0 */ Unk68 unk1DF0[SAVE_RECORD_COUNT];
+  /* 0x15D0 */ PlayRecord rankedRecords[RANKED_RECORD_COUNT];
+  /* 0x1DF0 */ RingShotRecord unk1DF0[SAVE_RECORD_COUNT];
   /* 0x1FF8 */ SavedGame savedGames[SAVED_GAME_COUNT];
   /* 0x21D8 */ UnkB8 savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
 } SaveData; /* size = 0x2A78 */

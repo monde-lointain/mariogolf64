@@ -281,8 +281,6 @@
 
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
-extern PlayRecord D_800FEDD8[];
-extern RingShotRecord D_80105F40[];
 extern CurrentShot D_80104F78; /* The replayed shot */
 /* Set once the shot preview has been built */
 static Boolean f_IsShotPreviewBuilt = FALSE;

@@ -65,7 +65,6 @@ extern s32 D_800FE334;
 extern s16 D_800FE33C;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
-extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_801052E8;
@@ -717,17 +716,17 @@ s32 GetCoursePointsNeeded(s32 courseIndex) {
   return f_CoursePointsNeeded[courseIndex];
 }
 
-s32 GetRecordPriority(Unk68* record) {
+s32 GetRecordPriority(PlayRecord* record) {
   s32 value;
   s32 bits;
   s32 unk2C;
   s32 kind;
   s32 maxValue;
 
-  bits = record->unk3A;
+  bits = record->scoreKind;
   kind = bits & 0xF;
   value = 0;
-  unk2C = record->unk2C;
+  unk2C = record->hole.par;
   maxValue = 0x64;
   if (bits & 0x80) {
     switch (kind) {
@@ -804,7 +803,7 @@ void SortIndicesDescending(s32* values, s32* order, s32 count) {
   }
 }
 
-void func_8005B28C(s32 recordIndex, Unk68* record) {
+void func_8005B28C(s32 recordIndex, RingShotRecord* record) {
   g_SaveData.unk1DF0[recordIndex] = *record;
   TransferSaveData(GetSaveData(), TRUE);
 }
@@ -812,12 +811,12 @@ void func_8005B28C(s32 recordIndex, Unk68* record) {
 /* The save keeps the highest-priority records of each kind, this many each */
 #define RANKED_GROUP_LENGTH 5
 
-void InsertRankedRecord(Unk68* record) {
+void InsertRankedRecord(PlayRecord* record) {
   s32 priorities[RANKED_RECORD_COUNT];
   s32 order[RANKED_RECORD_COUNT];
-  Unk68 copies[RANKED_RECORD_COUNT];
+  PlayRecord copies[RANKED_RECORD_COUNT];
   s32 newPriority;
-  Unk68* records;
+  PlayRecord* records;
   s32 firstIndex;
   s32 lowestPriority;
   s32 lowestIndex;
@@ -825,14 +824,14 @@ void InsertRankedRecord(Unk68* record) {
   s32 groupLength;
 
   osSyncPrintf("Checking SuperShot");
-  if ((s8)record->unk3A & 0x80) {
+  if ((s8)record->scoreKind & 0x80) {
     records = g_SaveData.rankedRecords;
     newPriority = GetRecordPriority(record);
     lowestPriority = 0x40000000; /* Above any priority */
     lowestIndex = 0;
 
     /* Every case sets the length, which the original needs to match */
-    switch (record->unk3A & 0xF) {
+    switch (record->scoreKind & 0xF) {
       case 3:
         firstIndex = 0 * RANKED_GROUP_LENGTH;
         groupLength = RANKED_GROUP_LENGTH;
@@ -902,7 +901,7 @@ void InsertRankedRecord(Unk68* record) {
 
 s32 SaveOrContinueGameByMode(Boolean isContinuing) {
   UnkB8* players;
-  Unk68* records;
+  PlayRecord* records;
   SavedGame* game;
   s32 playerCount;
   Boolean hasIllegalState;
@@ -1595,7 +1594,7 @@ void func_8005D0D8(void) {
   SaveData* save;
   Boolean isInvalid[SAVE_RECORD_COUNT];
   s32 recordIndex;
-  Unk68* record;
+  RingShotRecord* record;
   s32 kind;
   s32 unused[2]; /* The original frame has room for this */
 
@@ -1606,27 +1605,27 @@ void func_8005D0D8(void) {
 
   for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
     record = &save->unk1DF0[recordIndex];
-    kind = record->unk36;
-    if (record->unk36 & 0x80) {
+    kind = record->scoreKind;
+    if (record->scoreKind & 0x80) {
       kind &= 0xF;
       if (kind >= 5 || kind < 0) {
         isInvalid[recordIndex] = TRUE;
       }
     }
 
-    if (record->unk37 >= COURSE_HOLE_COUNT) {
+    if (record->characterIndex >= COURSE_HOLE_COUNT) {
       isInvalid[recordIndex] = TRUE;
     }
 
-    if (record->unk39 >= 4) {
+    if (record->paletteIndex >= 4) {
       isInvalid[recordIndex] = TRUE;
     }
 
-    if (record->unk34 >= 6) {
+    if ((u8)record->courseIndex >= 6) {
       isInvalid[recordIndex] = TRUE;
     }
 
-    if (record->unk35 >= 6) {
+    if ((u8)record->holeIndex >= 6) {
       isInvalid[recordIndex] = TRUE;
     }
   }
@@ -1636,7 +1635,7 @@ void func_8005D0D8(void) {
   for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
     record = &save->unk1DF0[recordIndex];
     if (isInvalid[recordIndex] == TRUE) {
-      record->unk36 ^= 0x80;
+      record->scoreKind ^= 0x80;
     }
   }
 }

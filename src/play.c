@@ -89,8 +89,6 @@ enum HoleResultsKind {
   HOLE_RESULTS_SPEED_GOLF
 };
 
-extern PlayRecord D_800FEDD8[];
-extern RingShotRecord D_80105F40[];
 extern CurrentShot D_80104F78; /* The replayed shot */
 extern u8 D_800FE330;
 extern s8 D_800FBDB8;

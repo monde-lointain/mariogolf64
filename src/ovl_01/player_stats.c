@@ -1915,7 +1915,7 @@ void func_8021D0B8_ovl_01(void) {
           column = memory->unk39;
           LoadWipeShape(
               (s8)save->rankedRecords[D_8023B640_ovl_01[memory->unk3A][column]]
-                  .unk38);
+                  .courseIndex);
           StartWipe(WIPE_CLOSING);
           D_801052E8 = 0;
         }
@@ -2062,8 +2062,8 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead) {
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
     for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
       if (D_8023B640_ovl_01[row][column] != STATS_CELL_EMPTY) {
-        character =
-            (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]].unk3B;
+        character = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]]
+                        .characterIndex;
         func_8021F124_ovl_01(&gfx, D_8012D430[character],
             D_8023B5E0_ovl_01[row][column],
             RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
@@ -2102,14 +2102,14 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead) {
     gDPLoadTLUT_pal256(gfx++,
         ((u32)D_8023B630_ovl_01[(
              s8)save->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
-                 .unk38] +
+                 .courseIndex] +
             IMAGE_HEADER_SIZE) &
             ~7);
     for (index = 0; index != RECORD_COURSE_STRIP_COUNT; index++) {
       gDPLoadTextureBlock(gfx++,
           ((u32)D_8023B630_ovl_01[(s8)save
                    ->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
-                   .unk38] +
+                   .courseIndex] +
               LARGE_PALETTED_TEXELS_OFFSET +
               (index * RECORD_COURSE_IMAGE_WIDTH *
                   RECORD_COURSE_STRIP_HEIGHT)) &
@@ -2147,13 +2147,13 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead) {
     sprintf(g_PrintBuffer, D_802319E0_ovl_01,
         g_CourseRecords
             [(s8)save->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
-                    .unk38]
+                    .courseIndex]
                 .name);
     DrawLargeText(
         &gfx, RECORD_COURSE_NAME_X, RECORD_COURSE_NAME_Y, g_PrintBuffer);
     SetTextSlotValue(
         (s8)save->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
-                .unk39 +
+                .holeIndex +
             1,
         1, 0);
     SetTextSlot(RECORD_DETAIL_X, RECORD_DETAIL_Y, MESSAGE_RECORD_DETAIL, 1, 1,
@@ -2204,7 +2204,7 @@ void func_8021E01C_ovl_01(void) {
   kindZeroCount = 0;
   kindOneCount = 0;
   for (recordIndex = 0; recordIndex != RANKED_RECORD_COUNT; recordIndex++) {
-    flags = (s8)save->rankedRecords[recordIndex].unk3A;
+    flags = (s8)save->rankedRecords[recordIndex].scoreKind;
     if (flags & RANKED_RECORD_SAVED) {
       switch (flags & RANKED_RECORD_KIND_MASK) {
         case 3:
@@ -2517,9 +2517,10 @@ void func_8021EF64_ovl_01(void) {
     cell = row * STATS_GRID_COLUMN_COUNT;
     for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++, cell++) {
       if (D_8023B640_ovl_01[row][column] != STATS_CELL_EMPTY) {
-        character =
-            (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]].unk3B;
-        palette = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]].unk3D;
+        character = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]]
+                        .characterIndex;
+        palette = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]]
+                      .paletteIndex;
         if (character < 0) {
           character = 0;
         }

@@ -229,7 +229,7 @@ enum ModeName {
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
 #define RING_SHOT_HOLE_COUNT 6
 
-/* Unk68.unk36's low bits: the kind of shot the record replays */
+/* RingShotRecord.scoreKind's low bits: the kind of shot the record replays */
 #define RECORD_KIND_MASK 0xF
 #define RECORD_KIND_HOLE_IN_ONE 0
 #define RECORD_KIND_ALBATROSS 1
@@ -246,12 +246,10 @@ enum ModeName {
 
 /*
  * This overlay reads the characters and variants of saved players and
- * records as signed, though UnkB8 and Unk68 keep them unsigned; the casts
- * are there to match.
+ * records as signed, though UnkB8 and RingShotRecord keep them unsigned; the
+ * casts are there to match.
  */
-extern HoleSetup D_80105F40;
-
-void func_8005B28C(s32 recordIndex, Unk68* record);
+void func_8005B28C(s32 recordIndex, RingShotRecord* record);
 void func_8005D0D8(void);
 void SetTextSlot(
     s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
@@ -379,7 +377,7 @@ void OpenSaveMenu(s32 kind) {
   s32 slot;
   s32 playerIndex;
   s32 iconIndex;
-  Unk68* record;
+  RingShotRecord* record;
   UnkB8* player;
   GameState* state;
   u16 frameId;
@@ -476,13 +474,13 @@ void OpenSaveMenu(s32 kind) {
   } else {
     for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
       record = &save->unk1DF0[slot];
-      if (record->unk36 & RECORD_IN_USE) {
-        OpenEncodedAsset(g_CharacterImageAssets[(s8)record->unk37] +
+      if (record->scoreKind & RECORD_IN_USE) {
+        OpenEncodedAsset(g_CharacterImageAssets[(s8)record->characterIndex] +
                 CHARACTER_FACE_IMAGE_OFFSET,
             &encodedAsset);
         ReadEncodedAsset(f_CharacterImages[slot], &encodedAsset);
-        OpenAssetFile(
-            g_CharacterPaletteAssets[(s8)record->unk37] + (s8)record->unk39,
+        OpenAssetFile(g_CharacterPaletteAssets[(s8)record->characterIndex] +
+                (s8)record->paletteIndex,
             &file);
         ReadAssetFile(f_CharacterFiles[slot], GetAssetFileSize(&file), &file);
       }
@@ -504,7 +502,7 @@ void OpenSaveMenu(s32 kind) {
   } else {
     f_CursorIndex = SKIP_REPLAY_ROW;
     for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
-      if (!(save->unk1DF0[slot].unk36 & RECORD_IN_USE)) {
+      if (!(save->unk1DF0[slot].scoreKind & RECORD_IN_USE)) {
         f_CursorIndex = slot;
         break;
       }
@@ -1088,19 +1086,20 @@ void LeaveGameSaveMenu(void) {
 void SaveReplayToSlot(void) {
   EncodedAsset encodedAsset;
   AssetFile file;
-  Unk68* record;
+  RingShotRecord* record;
 
   record = &GetSaveData()->unk1DF0[f_CursorIndex];
-  func_8005B28C(f_CursorIndex, (Unk68*)&D_80105F40);
+  func_8005B28C(f_CursorIndex, D_80105F40);
   f_StateFrame = 0;
   func_8005D0D8();
-  if (record->unk36 & RECORD_IN_USE) {
-    OpenEncodedAsset(
-        g_CharacterImageAssets[(s8)record->unk37] + CHARACTER_FACE_IMAGE_OFFSET,
+  if (record->scoreKind & RECORD_IN_USE) {
+    OpenEncodedAsset(g_CharacterImageAssets[(s8)record->characterIndex] +
+            CHARACTER_FACE_IMAGE_OFFSET,
         &encodedAsset);
     ReadEncodedAsset(f_CharacterImages[f_CursorIndex], &encodedAsset);
-    OpenAssetFile(
-        g_CharacterPaletteAssets[(s8)record->unk37] + (s8)record->unk39, &file);
+    OpenAssetFile(g_CharacterPaletteAssets[(s8)record->characterIndex] +
+            (s8)record->paletteIndex,
+        &file);
     ReadAssetFile(
         f_CharacterFiles[f_CursorIndex], GetAssetFileSize(&file), &file);
     f_MenuState = SAVE_MENU_STATE_SAVED;
@@ -1298,7 +1297,7 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
       if (controller->pressedButtons & A_BUTTON) {
         if (f_CursorIndex >= 0 && f_CursorIndex < SAVE_RECORD_COUNT) {
           /* The pointer arithmetic is there to match */
-          if ((save->unk1DF0 + f_CursorIndex)->unk36 & RECORD_IN_USE) {
+          if ((save->unk1DF0 + f_CursorIndex)->scoreKind & RECORD_IN_USE) {
             g_PauseScreen = PAUSE_SCREEN_UNK6;
             OpenPrompt(PROMPT_OVERWRITE_REPLAY);
             PlaySound(
@@ -1472,9 +1471,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         COURSE_NUMBERS_WIDTH - 1, COURSE_NUMBERS_HEIGHT - 1, 0, G_TX_MIRROR,
         G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     for (index = 0; index != SAVE_RECORD_COUNT; index++) {
-      Unk68* record = &save->unk1DF0[index];
+      RingShotRecord* record = &save->unk1DF0[index];
 
-      if (!(record->unk36 & RECORD_IN_USE)) {
+      if (!(record->scoreKind & RECORD_IN_USE)) {
         rowLabels[index] = NO_REPLAY_LABEL;
       } else {
         gDPPipeSync(gfx++);
@@ -1501,9 +1500,10 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
                 << 2,
             (COURSE_TOP + (index * REPLAY_ROW_SPACING) + COURSE_NUMBERS_HEIGHT)
                 << 2,
-            G_TX_RENDERTILE, ((s8)record->unk34 * COURSE_DIGIT_WIDTH) << 5, 0,
+            G_TX_RENDERTILE,
+            ((s8)record->courseIndex * COURSE_DIGIT_WIDTH) << 5, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        switch (record->unk36 & RECORD_KIND_MASK) {
+        switch (record->scoreKind & RECORD_KIND_MASK) {
           case RECORD_KIND_ALBATROSS:
             rowLabels[index] = REPLAY_LABEL_ALBATROSS;
             break;
@@ -1557,9 +1557,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     for (index = 0; index != SAVE_RECORD_COUNT; index++) {
-      Unk68* record = &save->unk1DF0[index];
+      RingShotRecord* record = &save->unk1DF0[index];
 
-      if (record->unk36 & RECORD_IN_USE) {
+      if (record->scoreKind & RECORD_IN_USE) {
         gDPPipeSync(gfx++);
         if (index == f_CursorIndex) {
           gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -1675,7 +1675,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     /* Each record's hole text, or that the row is empty */
     SetUpGradientTextDrawing(&gfx, 0);
     for (index = 0; index != SAVE_RECORD_COUNT; index++) {
-      Unk68* record;
+      RingShotRecord* record;
 
       gDPPipeSync(gfx++);
       record = &save->unk1DF0[index];
@@ -1687,7 +1687,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       }
 
       gDPPipeSync(gfx++);
-      if (!(record->unk36 & RECORD_IN_USE)) {
+      if (!(record->scoreKind & RECORD_IN_USE)) {
         SetUpGradientTextDrawing(&gfx, 0);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
@@ -1697,7 +1697,8 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         DrawCenteredLargeText(&gfx, rowOffsets[index] + (SCREEN_WIDTH / 2),
             EMPTY_TEXT_TOP + (index * REPLAY_ROW_SPACING), f_NoReplayText);
       } else {
-        text = ((s8)record->unk34 * RING_SHOT_HOLE_COUNT) + (s8)record->unk35;
+        text = ((s8)record->courseIndex * RING_SHOT_HOLE_COUNT) +
+            (s8)record->holeIndex;
         SetUpTextDrawing(&gfx);
         SetTextSlot(rowOffsets[index] + HOLE_TEXT_LEFT,
             HOLE_TEXT_TOP + (index * REPLAY_ROW_SPACING),

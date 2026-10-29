@@ -135,10 +135,6 @@ static s32 D_800C3FAC = 0;
 static OSThread f_LoaderThread;
 extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
-extern HoleSetup D_80105F40;
-/* menu.c declares this as Unk68[MAX_PLAYER_COUNT]; only its first bytes are
- * copied here */
-extern HoleSetup D_800FEDD8;
 
 void func_8005F1C8(void);
 void PlacePlayersOnTee(void);
@@ -761,9 +757,9 @@ s32 ChooseHoleConditions(void) {
   if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
       g_GameState.unk31 != 0) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      g_HoleSetup = D_80105F40;
+      g_HoleSetup = D_80105F40[0].hole;
     } else {
-      g_HoleSetup = D_800FEDD8;
+      g_HoleSetup = D_800FEDD8[0].hole;
     }
 
     return;
