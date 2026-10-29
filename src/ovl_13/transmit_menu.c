@@ -1750,7 +1750,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   }
 
   SetUpTextDrawing(&displayList);
-  if (transfer->unk7A0 == (g_ControllerCount * 4) - 1) {
+  if (transfer->readStep == (g_ControllerCount * 4) - 1) {
     message = NO_MESSAGE;
     switch (transfer->screenStep) {
       case BRING_CHOOSING:
@@ -2335,7 +2335,7 @@ void ClearCartridgeCharacters(void) {
   s32 save;
 
   if (transfer->screen == TRANSMIT_SCREEN_BRING_CHARACTERS) {
-    transfer->unk7A0 = 0;
+    transfer->readStep = 0;
     ResetBringCharacters();
     for (controller = 0; controller != MAXCONTROLLERS; controller++) {
       for (save = 0; save != CARTRIDGE_SAVE_COUNT; save++) {
@@ -2377,30 +2377,30 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
   s32 sum;
   s32 experience;
 
-  transfer->unk7C8 = FALSE;
-  transfer->unk7C4 = FALSE;
-  transfer->unk7C0 = FALSE;
-  transfer->unk7CC = FALSE;
-  transfer->unk7BC = 0;
+  transfer->hasMissingPak = FALSE;
+  transfer->hasOtherPak = FALSE;
+  transfer->hasMissingCartridge = FALSE;
+  transfer->hasWrongCartridge = FALSE;
+  transfer->openedCartridgeCount = 0;
   result = 0;
   for (controller = 0; controller != g_ControllerCount; controller++) {
     transfer->transferResult =
         OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controller],
             &transfer->cartridgeHeader, &transfer->pakFile);
     if (transfer->transferResult == PAK_RESULT_NO_PAK) {
-      transfer->unk7C8 = TRUE;
+      transfer->hasMissingPak = TRUE;
     }
 
     if (transfer->transferResult == PAK_RESULT_OTHER_PAK) {
-      transfer->unk7C4 = TRUE;
+      transfer->hasOtherPak = TRUE;
     }
 
     if (transfer->transferResult == PAK_RESULT_NO_CARTRIDGE) {
-      transfer->unk7C0 = TRUE;
+      transfer->hasMissingCartridge = TRUE;
     }
 
     if (transfer->transferResult == PAK_RESULT_WRONG_CARTRIDGE) {
-      transfer->unk7CC = TRUE;
+      transfer->hasWrongCartridge = TRUE;
     }
 
     if (transfer->transferResult == PAK_RESULT_OK) {
@@ -2408,7 +2408,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
       isSignatureWrong = FALSE;
       character = &g_GameBoyCharacters[characterIndex];
       saveIndex = character->unk38;
-      transfer->unk7BC++;
+      transfer->openedCartridgeCount++;
       osSyncPrintf("PHASE 1\n");
       result = nuContGBPakFread(
           &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
@@ -2539,7 +2539,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   }
 
-  if (transfer->unk7BC == 1) {
+  if (transfer->openedCartridgeCount == 1) {
     if (fault == CARTRIDGE_FAULT_UNINITIALIZED) {
       transfer->transferResult = PAK_RESULT_UNINITIALIZED;
       return EXPERIENCE_WRITE_FAILED;
@@ -2551,16 +2551,16 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
     }
   }
 
-  if (transfer->unk7BC > 0) {
+  if (transfer->openedCartridgeCount > 0) {
     transfer->transferResult = PAK_RESULT_NO_CHARACTERS;
     return EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE;
   }
 
-  if (transfer->unk7CC == TRUE) {
+  if (transfer->hasWrongCartridge == TRUE) {
     transfer->transferResult = PAK_RESULT_WRONG_CARTRIDGE;
-  } else if (transfer->unk7C0 == TRUE) {
+  } else if (transfer->hasMissingCartridge == TRUE) {
     transfer->transferResult = PAK_RESULT_NO_CARTRIDGE;
-  } else if (transfer->unk7C4 == TRUE) {
+  } else if (transfer->hasOtherPak == TRUE) {
     transfer->transferResult = PAK_RESULT_OTHER_PAK;
   } else if (result != 0) {
     transfer->transferResult = result;
@@ -2806,39 +2806,39 @@ s32 ReadCartridgeCharacters(void) {
   Boolean isAlreadyBrought;
   s32 slot;
 
-  if (transfer->unk7A0 == 0) {
+  if (transfer->readStep == 0) {
     nuContGBPakMgrInit();
-    transfer->unk7BC = 0;
+    transfer->openedCartridgeCount = 0;
     transfer->listedCharacterCount = 0;
-    transfer->unk7C0 = FALSE;
-    transfer->unk7C4 = FALSE;
-    transfer->unk7C8 = FALSE;
-    transfer->unk7CC = FALSE;
-    transfer->unk7D0 = FALSE;
+    transfer->hasMissingCartridge = FALSE;
+    transfer->hasOtherPak = FALSE;
+    transfer->hasMissingPak = FALSE;
+    transfer->hasWrongCartridge = FALSE;
+    transfer->hasUninitializedCartridge = FALSE;
   }
 
-  if (transfer->unk7A0 % 4 == 0) {
-    port = g_PlayerControllerPorts[transfer->unk7A0 / 4];
+  if (transfer->readStep % 4 == 0) {
+    port = g_PlayerControllerPorts[transfer->readStep / 4];
     transfer->transferResult = OpenGameBoyPakWithRetries(
         port, &transfer->cartridgeHeader, &transfer->pakFile);
     osSyncPrintf("loadres %d  cont %d\n", transfer->transferResult, port);
     if (transfer->transferResult == PAK_RESULT_NO_PAK) {
-      transfer->unk7C8 = TRUE;
+      transfer->hasMissingPak = TRUE;
     }
 
     if (transfer->transferResult == PAK_RESULT_OTHER_PAK) {
-      transfer->unk7C4 = TRUE;
+      transfer->hasOtherPak = TRUE;
     }
 
     if (transfer->transferResult == PAK_RESULT_NO_CARTRIDGE) {
-      transfer->unk7C0 = TRUE;
+      transfer->hasMissingCartridge = TRUE;
     }
 
     if (transfer->transferResult == PAK_RESULT_WRONG_CARTRIDGE) {
-      transfer->unk7CC = TRUE;
+      transfer->hasWrongCartridge = TRUE;
     }
   } else if (transfer->transferResult == PAK_RESULT_OK) {
-    saveIndex = (transfer->unk7A0 % 4) - 1;
+    saveIndex = (transfer->readStep % 4) - 1;
 
     /* The original starts the offset at 0xA042, which every save index replaces
      */
@@ -2848,7 +2848,7 @@ s32 ReadCartridgeCharacters(void) {
       characterData[index] = 0;
     }
 
-    transfer->unk7BC++;
+    transfer->openedCartridgeCount++;
     if (saveIndex == 0) {
       recordOffset = SAVE_RECORDS_OFFSET;
     }
@@ -2872,7 +2872,7 @@ s32 ReadCartridgeCharacters(void) {
           if (save[SAVE_SIGNATURE_OFFSET + index] !=
               f_CartridgeSaveSignature[index]) {
             isSignatureWrong = TRUE;
-            transfer->unk7D0 = TRUE;
+            transfer->hasUninitializedCartridge = TRUE;
           }
         }
 
@@ -2932,7 +2932,7 @@ s32 ReadCartridgeCharacters(void) {
                     &g_GameBoyCharacters[slot], characterData)) {
               isAlreadyBrought = TRUE;
               transfer
-                  ->cartridgeCharacters[(transfer->unk7A0 / 4 *
+                  ->cartridgeCharacters[(transfer->readStep / 4 *
                                             CARTRIDGE_SAVE_COUNT) +
                       saveIndex]
                   .status = GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER;
@@ -2944,28 +2944,28 @@ s32 ReadCartridgeCharacters(void) {
           if (!isAlreadyBrought) {
             /* transferResult is OK here, so the original never skips a save */
             if (transfer->transferResult == PAK_RESULT_NO_CHARACTERS) {
-              SkipCartridgeSave(characterData, transfer->unk7A0 / 4, saveIndex,
-                  transfer->cartridgeHeader.game_title,
+              SkipCartridgeSave(characterData, transfer->readStep / 4,
+                  saveIndex, transfer->cartridgeHeader.game_title,
                   transfer->cartridgeHeader.company_code);
             } else {
-              DecodeCartridgeCharacter(characterData, transfer->unk7A0 / 4,
+              DecodeCartridgeCharacter(characterData, transfer->readStep / 4,
                   saveIndex, transfer->cartridgeHeader.company_code);
             }
 
-            transfer
-                ->listingStates[(transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT) +
-                    saveIndex] = LISTING_SHOWN;
+            transfer->listingStates[(transfer->readStep / 4 *
+                                        CARTRIDGE_SAVE_COUNT) +
+                saveIndex] = LISTING_SHOWN;
             transfer->listedCharacterCount++;
             ListPresentCharacters();
           }
 
           break;
         case PFS_ERR_NOPACK:
-          transfer->unk7C8 = TRUE;
+          transfer->hasMissingPak = TRUE;
           osSyncPrintf("3rd PFS_ERR_NOPACK  \n");
           break;
         case PFS_ERR_DEVICE:
-          transfer->unk7C4 = TRUE;
+          transfer->hasOtherPak = TRUE;
           osSyncPrintf("3rd PFS_ERR_DEVICE  \n");
           break;
         case PFS_ERR_CONTRFAIL:
@@ -2973,7 +2973,7 @@ s32 ReadCartridgeCharacters(void) {
           osSyncPrintf("3rd PFS_ERR_CONTRFAIL  \n");
           break;
         case PFS_ERR_NO_GBCART:
-          transfer->unk7C0 = TRUE;
+          transfer->hasMissingCartridge = TRUE;
           osSyncPrintf("3rd PFS_ERR_NO_GBCART  \n");
           break;
         case PFS_ERR_NEW_GBCART:
@@ -2983,14 +2983,14 @@ s32 ReadCartridgeCharacters(void) {
     }
   }
 
-  if (transfer->unk7A0 % 4 == 3) {
+  if (transfer->readStep % 4 == 3) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   }
 
-  if (transfer->unk7A0 == (g_ControllerCount * 4) - 1) {
+  if (transfer->readStep == (g_ControllerCount * 4) - 1) {
     /* Repeating the results for one cartridge is there to match */
-    if (transfer->unk7BC == 1) {
-      if (transfer->unk7D0 == TRUE) {
+    if (transfer->openedCartridgeCount == 1) {
+      if (transfer->hasUninitializedCartridge == TRUE) {
         return PAK_RESULT_UNINITIALIZED;
       }
 
@@ -3001,7 +3001,7 @@ s32 ReadCartridgeCharacters(void) {
       return PAK_RESULT_OK;
     }
 
-    if (transfer->unk7BC > 0) {
+    if (transfer->openedCartridgeCount > 0) {
       if (transfer->listedCharacterCount == 0) {
         return PAK_RESULT_NO_CHARACTERS;
       }
@@ -3009,26 +3009,26 @@ s32 ReadCartridgeCharacters(void) {
       return PAK_RESULT_OK;
     }
 
-    if (transfer->unk7CC == TRUE) {
+    if (transfer->hasWrongCartridge == TRUE) {
       return PAK_RESULT_WRONG_CARTRIDGE;
     }
 
-    if (transfer->unk7C0 == TRUE) {
+    if (transfer->hasMissingCartridge == TRUE) {
       return PAK_RESULT_NO_CARTRIDGE;
     }
 
-    if (transfer->unk7C4 == TRUE) {
+    if (transfer->hasOtherPak == TRUE) {
       return PAK_RESULT_OTHER_PAK;
     }
 
-    if (transfer->unk7C8 == TRUE) {
+    if (transfer->hasMissingPak == TRUE) {
       return PAK_RESULT_NO_PAK;
     }
 
     return PAK_RESULT_CONNECTOR_PROBLEM;
   }
 
-  transfer->unk7A0++;
+  transfer->readStep++;
   return PAK_RESULT_STILL_READING;
 }
 

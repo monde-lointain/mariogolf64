@@ -132,19 +132,21 @@ typedef struct GameBoyTransfer {
   /* 0x75C */ s32 sourceIndices[GAME_BOY_CHARACTER_COUNT];
   /* 0x76C */ s32 listingStates[CARTRIDGE_CHARACTER_COUNT]; /* LISTING_* */
   /* 0x79C */ s32 listedCharacterCount;
-  /* 0x7A0 */ s32 unk7A0;
+  /* Each controller's cartridge is opened, then its saves read, a step each */
+  /* 0x7A0 */ s32 readStep;
   /* 0x7A4 */ s32 transferResult;
   /* 0x7A8 */ s32 screenStep;
   /* 0x7AC */ s32 bringingFrame;
   /* 0x7B0 */ s32 listedCharacterIndex;
   /* 0x7B4 */ s32 characterIndex; /* Into g_GameBoyCharacters */
   /* 0x7B8 */ s32 firstShownListedIndex; /* The list scrolls to show it first */
-  /* 0x7BC */ s32 unk7BC;
-  /* 0x7C0 */ s32 unk7C0;
-  /* 0x7C4 */ s32 unk7C4;
-  /* 0x7C8 */ s32 unk7C8;
-  /* 0x7CC */ s32 unk7CC;
-  /* 0x7D0 */ s32 unk7D0;
+  /* The Mario Golf cartridges opened, and which other results some pak gave */
+  /* 0x7BC */ s32 openedCartridgeCount;
+  /* 0x7C0 */ s32 hasMissingCartridge;
+  /* 0x7C4 */ s32 hasOtherPak;
+  /* 0x7C8 */ s32 hasMissingPak;
+  /* 0x7CC */ s32 hasWrongCartridge;
+  /* 0x7D0 */ s32 hasUninitializedCartridge;
   /* 0x7D4 */ s32 unk7D4;
   /* 0x7D8 */ s8
       listedCharacters[CARTRIDGE_CHARACTER_COUNT]; /* Present ones, then -1 */
