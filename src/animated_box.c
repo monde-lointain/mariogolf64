@@ -11,7 +11,6 @@
 
 /* Frames that opening and closing each take */
 #define BOX_ANIMATION_FRAME_COUNT 4
-#define QUEUED_BOX_CAPACITY 10
 /* Texture rectangle steps in s5.10: the boxes are flat colour, so any step will
  * do */
 #define ONE_TEXEL_PER_PIXEL (1 << 10)

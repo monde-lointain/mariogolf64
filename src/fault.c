@@ -21,9 +21,6 @@
 #define FAULT_TEXT_COLUMN 0
 #define FIELD_TEXT_COLUMN 3
 
-/* The room the report's line buffer has before the next common variable */
-#define FAULT_TEXT_SIZE 0x80
-
 #define FAULT_THREAD_STACK_SIZE 0x2000
 
 /* A value of a bit field of a register, and the text that describes it */

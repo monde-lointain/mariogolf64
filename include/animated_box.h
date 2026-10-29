@@ -24,6 +24,9 @@ typedef struct AnimatedBox {
   /* 0x10 */ s32 frameIndex;
 } AnimatedBox; /* size = 0x14 */
 
+/* How many boxes f_QueuedBoxes holds until DrawAnimatedBoxes empties it */
+#define QUEUED_BOX_CAPACITY 10
+
 void QueueAnimatedBox(AnimatedBox* box);
 void DrawAnimatedBoxes(void);
 

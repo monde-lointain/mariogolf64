@@ -9,6 +9,9 @@
  * back */
 #define HOLE_FLYOVER_ENDED (-1)
 
+/* How many noise grids f_NoiseGrids holds for the noise texture to blend */
+#define NOISE_GRID_COUNT 2
+
 /* The frame the hole's fly-over has reached */
 extern s32 g_HoleFlyoverFrame;
 /* While set, characters are drawn for every camera but the inset */

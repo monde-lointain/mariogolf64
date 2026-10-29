@@ -3463,7 +3463,6 @@ void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius) {
   }
 }
 
-#define NOISE_GRID_COUNT 2
 #define MIN_UNDIVIDED_NOISE_SIZE 2
 #define NOISE_DISPLACEMENT_MASK 0xFF
 #define NOISE_DISPLACEMENT_BIAS 0x80
