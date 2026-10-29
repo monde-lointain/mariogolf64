@@ -3300,9 +3300,9 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
         ((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
-    if (g_LetterboxState == 1) {
+    if (g_LetterboxState == LETTERBOX_STATE_MOVING_CAMERA) {
       label = ANIMATED_ICON_LABEL_UNK1;
-    } else if (g_LetterboxState == 2) {
+    } else if (g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
       label = ANIMATED_ICON_LABEL_UNK0;
     } else {
       label = ANIMATED_ICON_LABEL_UNK2;

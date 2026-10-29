@@ -29,13 +29,17 @@ enum PauseScreen {
   PAUSE_SCREEN_CONTROLS
 };
 
-/* g_LetterboxState's values */
+/* g_LetterboxState's values: the aim camera's views, which all but the
+ * aiming view letterbox */
 enum LetterboxState {
   LETTERBOX_STATE_NONE,
-  LETTERBOX_STATE_UNK1,
-  LETTERBOX_STATE_UNK2,
-  LETTERBOX_STATE_UNK3,
-  LETTERBOX_STATE_UNK4,
+  /* The player moves the camera, or free look is on */
+  LETTERBOX_STATE_MOVING_CAMERA,
+  LETTERBOX_STATE_LOOKING_DOWN_RANGE,
+  /* The first frame of looking back at the ball from beyond the cup */
+  LETTERBOX_STATE_STARTING_LOOK_BACK,
+  LETTERBOX_STATE_LOOKING_BACK,
+  /* Nothing sets it */
   LETTERBOX_STATE_UNK5
 };
 

@@ -630,8 +630,8 @@ OPAQUE:
         sprintf(g_PrintBuffer + DISTANCE_TEXT_OFFSET, "%2dy", distance);
       }
 
-      if (g_LetterboxState != LETTERBOX_STATE_UNK3 &&
-          g_LetterboxState != LETTERBOX_STATE_UNK4) {
+      if (g_LetterboxState != LETTERBOX_STATE_STARTING_LOOK_BACK &&
+          g_LetterboxState != LETTERBOX_STATE_LOOKING_BACK) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
         gDPPipeSync(g_DisplayListHead++);
@@ -663,8 +663,8 @@ OPAQUE:
         sprintf(g_PrintBuffer, "FLAT");
       }
 
-      if (g_LetterboxState != LETTERBOX_STATE_UNK3 &&
-          g_LetterboxState != LETTERBOX_STATE_UNK4) {
+      if (g_LetterboxState != LETTERBOX_STATE_STARTING_LOOK_BACK &&
+          g_LetterboxState != LETTERBOX_STATE_LOOKING_BACK) {
         DrawCenteredShadowedText(&g_DisplayListHead, point.x,
             point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
       }

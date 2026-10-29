@@ -167,7 +167,7 @@ void func_8005F1C8(void) {
   g_AltHeading = 0;
   g_ShotFlags = 0;
   D_800C3088 = 0;
-  g_LetterboxState = 0;
+  g_LetterboxState = LETTERBOX_STATE_NONE;
   g_ImpactPointState = IMPACT_POINT_OFF;
   g_FreeLookHeading = 0;
   g_ShotSetupFrameCount = 0;

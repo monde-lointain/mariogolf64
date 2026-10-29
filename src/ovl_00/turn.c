@@ -541,8 +541,8 @@ void PlaceShotCamera(void) {
   } else if (g_LetterboxState == LETTERBOX_STATE_NONE ||
       g_LetterboxState == LETTERBOX_STATE_UNK5) {
     PlaceAimCamera();
-  } else if (g_LetterboxState == LETTERBOX_STATE_UNK1 ||
-      g_LetterboxState == LETTERBOX_STATE_UNK2) {
+  } else if (g_LetterboxState == LETTERBOX_STATE_MOVING_CAMERA ||
+      g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
     s32 lowestGround;
     s32 ground;
     s32 probe;
@@ -793,7 +793,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceAimCamera);
  * line */
 void StartFreeLook(void) {
   g_CurrentShot.aimCameraDistance = FREE_LOOK_START_DISTANCE;
-  g_LetterboxState = LETTERBOX_STATE_UNK1;
+  g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
   D_800C3070 = 0;
   g_ImpactPointState = IMPACT_POINT_OFF;
   g_RoundHud.flags = FREE_LOOK_HUD_FLAGS;
@@ -1177,7 +1177,7 @@ s32 UpdateAimControls(void) {
           PlaySound(
               SOUND_LOOK_DOWN_RANGE, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           if (g_ShotFlags & SHOT_FLAG_UNK8) {
-            g_LetterboxState = LETTERBOX_STATE_UNK3;
+            g_LetterboxState = LETTERBOX_STATE_STARTING_LOOK_BACK;
             toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                 g_CurrentShot.ballPosition[AXIS_X];
             toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
@@ -1190,12 +1190,12 @@ s32 UpdateAimControls(void) {
                 LOOK_BACK_EXTRA_DISTANCE;
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
           } else {
-            g_LetterboxState = LETTERBOX_STATE_UNK2;
+            g_LetterboxState = LETTERBOX_STATE_LOOKING_DOWN_RANGE;
             D_800C3070 = 1;
           }
         } else if (g_TurnController.pressedButtons & B_BUTTON) {
           AimDownRange();
-          g_LetterboxState = LETTERBOX_STATE_UNK1;
+          g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
         }
 
         if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
@@ -1203,7 +1203,7 @@ s32 UpdateAimControls(void) {
         }
 
         break;
-      case LETTERBOX_STATE_UNK1:
+      case LETTERBOX_STATE_MOVING_CAMERA:
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
           ResetAimCamera();
@@ -1216,7 +1216,7 @@ s32 UpdateAimControls(void) {
 
         TurnAim(0);
         break;
-      case LETTERBOX_STATE_UNK2:
+      case LETTERBOX_STATE_LOOKING_DOWN_RANGE:
         D_800C3070 = 1;
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
@@ -1233,8 +1233,8 @@ s32 UpdateAimControls(void) {
 
         TurnAim(0);
         break;
-      case LETTERBOX_STATE_UNK3:
-      case LETTERBOX_STATE_UNK4:
+      case LETTERBOX_STATE_STARTING_LOOK_BACK:
+      case LETTERBOX_STATE_LOOKING_BACK:
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
           ResetAimCamera();
@@ -1297,7 +1297,7 @@ s32 UpdateAimControls(void) {
                 g_CurrentShot.ballPosition[AXIS_X];
             toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
                 g_CurrentShot.ballPosition[AXIS_Z];
-            g_LetterboxState = LETTERBOX_STATE_UNK3;
+            g_LetterboxState = LETTERBOX_STATE_STARTING_LOOK_BACK;
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
             g_AltHeading = g_CurrentShot.unk0;
             g_CurrentShot.aimCameraDistance =
@@ -1305,7 +1305,7 @@ s32 UpdateAimControls(void) {
                     (toCup[AXIS_Z] * toCup[AXIS_Z])) -
                 LOOK_BACK_EXTRA_DISTANCE;
           } else {
-            g_LetterboxState = LETTERBOX_STATE_UNK2;
+            g_LetterboxState = LETTERBOX_STATE_LOOKING_DOWN_RANGE;
             D_800C3070 = 1;
           }
         }
@@ -1315,7 +1315,7 @@ s32 UpdateAimControls(void) {
         }
 
         break;
-      case LETTERBOX_STATE_UNK1:
+      case LETTERBOX_STATE_MOVING_CAMERA:
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
@@ -1330,7 +1330,7 @@ s32 UpdateAimControls(void) {
 
         TurnAim(0);
         break;
-      case LETTERBOX_STATE_UNK2:
+      case LETTERBOX_STATE_LOOKING_DOWN_RANGE:
         D_800C3070 = 1;
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
@@ -1348,7 +1348,7 @@ s32 UpdateAimControls(void) {
 
         TurnAim(0);
         break;
-      case LETTERBOX_STATE_UNK3:
+      case LETTERBOX_STATE_STARTING_LOOK_BACK:
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
           g_ShotSetupFrameCount = 0;
@@ -1364,7 +1364,7 @@ s32 UpdateAimControls(void) {
         TurnAim(0);
         g_AltHeading = g_CurrentShot.unk0;
         break;
-      case LETTERBOX_STATE_UNK4:
+      case LETTERBOX_STATE_LOOKING_BACK:
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
           g_ShotSetupFrameCount = 0;
@@ -1391,13 +1391,13 @@ s32 UpdateAimControls(void) {
     if (g_TurnController.buttons & AIM_CAMERA_BUTTONS) {
       if (g_LetterboxState == LETTERBOX_STATE_NONE ||
           g_LetterboxState == LETTERBOX_STATE_UNK5 ||
-          g_LetterboxState == LETTERBOX_STATE_UNK2) {
-        g_LetterboxState = LETTERBOX_STATE_UNK1;
+          g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
+        g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
         D_800C3070 = 0;
       }
 
-      if (g_LetterboxState == LETTERBOX_STATE_UNK3) {
-        g_LetterboxState = LETTERBOX_STATE_UNK4;
+      if (g_LetterboxState == LETTERBOX_STATE_STARTING_LOOK_BACK) {
+        g_LetterboxState = LETTERBOX_STATE_LOOKING_BACK;
         D_800C3070 = 0;
       }
     }
@@ -1430,11 +1430,11 @@ s32 UpdateAimControls(void) {
     }
   }
 
-  if (g_LetterboxState == LETTERBOX_STATE_UNK3) {
-    g_LetterboxState = LETTERBOX_STATE_UNK4;
+  if (g_LetterboxState == LETTERBOX_STATE_STARTING_LOOK_BACK) {
+    g_LetterboxState = LETTERBOX_STATE_LOOKING_BACK;
   }
 
-  if (g_LetterboxState == LETTERBOX_STATE_UNK4) {
+  if (g_LetterboxState == LETTERBOX_STATE_LOOKING_BACK) {
     if (g_CurrentShot.aimCameraHeight > GREEN_AIM_CAMERA_MIN_HEIGHT) {
       g_CurrentShot.aimCameraHeight = GREEN_AIM_CAMERA_MIN_HEIGHT;
     }
@@ -2347,7 +2347,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_IsTrainingHeadingKept = FALSE;
   if (IsGameFlagSet(GAME_FLAG_AIM_DOWN_RANGE)) {
     AimDownRange();
-    g_LetterboxState = LETTERBOX_STATE_UNK1;
+    g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
   } else {
     ResetAimCamera();
     g_LetterboxState = LETTERBOX_STATE_NONE;
@@ -2911,7 +2911,7 @@ void UpdateTurns(void) {
     if ((GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])
                 ->surfaceMask &
             CLUB_SURFACE_GREEN) &&
-        g_LetterboxState != LETTERBOX_STATE_UNK4) {
+        g_LetterboxState != LETTERBOX_STATE_LOOKING_BACK) {
       SetCharacterTranslucent(0, TRUE);
     } else {
       SetCharacterTranslucent(0, FALSE);
@@ -3063,7 +3063,8 @@ void UpdateTurns(void) {
   }
 
   f_IsShotPreviewBuilt = 0;
-  if (!(g_LetterboxState == 0 || g_LetterboxState == 5)) {
+  if (!(g_LetterboxState == LETTERBOX_STATE_NONE ||
+          g_LetterboxState == LETTERBOX_STATE_UNK5)) {
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   }
 
@@ -3522,7 +3523,7 @@ void UpdateTurns(void) {
             SetMenuBackdrop(MENU_BACKDROP_NONE);
             SetFramebufferCount(TRIPLE_BUFFERING);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-            g_LetterboxState = 0;
+            g_LetterboxState = LETTERBOX_STATE_NONE;
             PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
             ResetAimCamera();
             func_8005F1C8();
@@ -3642,12 +3643,14 @@ void UpdateTurns(void) {
           D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
           PlaceCharacterForShot(0);
           UpdateGolferTranslucency();
-          if (!(g_LetterboxState == 0 || g_LetterboxState == 5) &&
+          if (!(g_LetterboxState == LETTERBOX_STATE_NONE ||
+                  g_LetterboxState == LETTERBOX_STATE_UNK5) &&
               g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
 
-          if (g_LetterboxState == 0 || g_LetterboxState == 5) {
+          if (g_LetterboxState == LETTERBOX_STATE_NONE ||
+              g_LetterboxState == LETTERBOX_STATE_UNK5) {
             if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
               SetSwingAnimation(0,
                   g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
@@ -3717,21 +3720,23 @@ void UpdateTurns(void) {
           D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
           PlaceShotCamera();
           if (g_ShotFlags & 1) {
-            if (g_LetterboxState == 5 || g_LetterboxState == 0) {
+            if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
+                g_LetterboxState == LETTERBOX_STATE_NONE) {
               g_RoundHud.flags = 5;
             } else {
               g_RoundHud.flags = 0x45;
             }
           } else if (g_ShotFlags & 2) {
-            if (g_LetterboxState == 5 || g_LetterboxState == 0) {
+            if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
+                g_LetterboxState == LETTERBOX_STATE_NONE) {
               g_RoundHud.flags = 7;
             } else {
               g_RoundHud.flags = 0x47;
             }
           } else {
-            if (g_LetterboxState == 5) {
+            if (g_LetterboxState == LETTERBOX_STATE_UNK5) {
               g_RoundHud.flags = 9;
-            } else if (g_LetterboxState == 0) {
+            } else if (g_LetterboxState == LETTERBOX_STATE_NONE) {
               g_RoundHud.flags = 3;
             } else {
               g_RoundHud.flags = 0x47;
