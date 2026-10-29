@@ -321,7 +321,7 @@ enum MenuSign {
 #define MENU_CURSOR_Z -100.0f
 #define MENU_CURSOR_SCALE_Y 0.87f
 
-/* The buffers of func_802218C0, and what it reads into them */
+/* The buffers of LoadSaveGameBuffer, and what it reads into them */
 enum SaveGameBuffer {
   SAVE_GAME_BUFFER_CONTROLLER_ICONS = 1,
   SAVE_GAME_BUFFER_PLAYER_LABELS,
@@ -339,9 +339,9 @@ enum SaveMenuBuffer {
   SAVE_MENU_BUFFER_CHOSEN
 };
 
-/* The buffers that func_8020B2C4 keeps, by the kind its caller gives, and the
- * image of D_8022FF2C that it reads into each. Callers pass no kind below 1,
- * nor 3, 4 or 9 */
+/* The buffers that LoadCharacterSelectBuffer keeps, by the kind its caller
+ * gives, and the image of D_8022FF2C that it reads into each. Callers pass no
+ * kind below 1, nor 3, 4 or 9 */
 enum CharacterSelectBuffer {
   CHARACTER_SELECT_BUFFER_PLAYER_LABELS = 1,
   /* The wooden board of character cells */
@@ -360,7 +360,7 @@ enum CharacterSelectBuffer {
   CHARACTER_SELECT_BUFFER_UNREAD = 10
 };
 
-/* The buffers that func_80213464 keeps, by the kind its caller gives */
+/* The buffers that LoadBestTimesBuffer keeps, by the kind its caller gives */
 enum BestTimesBuffer {
   /* Read into g_WorkArea, whatever buffer the caller gives */
   BEST_TIMES_BUFFER_FACE_STRIP = 1,
@@ -370,7 +370,7 @@ enum BestTimesBuffer {
   BEST_TIMES_BUFFER_GREEN_ARROWS
 };
 
-/* The buffers that func_8020E26C keeps, by the kind its caller gives */
+/* The buffers that LoadCourseMenuBuffer keeps, by the kind its caller gives */
 enum CourseMenuBuffer {
   /* Neither kept nor read */
   COURSE_MENU_BUFFER_UNUSED = 1,
@@ -383,7 +383,7 @@ enum CourseMenuBuffer {
   COURSE_MENU_BUFFER_GREEN_ARROWS
 };
 
-/* The buffers that func_8021CFAC keeps, by the kind its caller gives */
+/* The buffers that LoadScoreLabelBuffer keeps, by the kind its caller gives */
 enum ScoreLabelBuffer {
   /* Kept without reading an image into it */
   SCORE_LABEL_BUFFER_UNREAD = 1,
@@ -392,7 +392,7 @@ enum ScoreLabelBuffer {
   SCORE_LABEL_BUFFER_LABELS
 };
 
-/* The buffers that func_8021F5F0 keeps, by the kind its caller gives */
+/* The buffers that LoadRingShotRecordBuffer keeps, by its caller's kind */
 enum RingShotRecordBuffer {
   /* Kept without reading an image into it */
   RING_SHOT_RECORD_BUFFER_UNREAD = 1,
@@ -401,7 +401,7 @@ enum RingShotRecordBuffer {
   RING_SHOT_RECORD_BUFFER_GREEN_ARROWS
 };
 
-/* The buffers that func_802267B0 keeps, by the kind its caller gives */
+/* The buffers that LoadTournamentBuffer keeps, by the kind its caller gives */
 enum TournamentBuffer {
   TOURNAMENT_BUFFER_WIDE_CLOUD = 1,
   TOURNAMENT_BUFFER_YES_NO,
@@ -414,7 +414,7 @@ enum TournamentBuffer {
   TOURNAMENT_BUFFER_ROW_FILE
 };
 
-/* The buffers that func_80228A80 keeps, by the kind its caller gives */
+/* The buffers that LoadCodeEntryBuffer keeps, by the kind its caller gives */
 enum CodeEntryBuffer {
   CODE_ENTRY_BUFFER_NAME_PLATE = 1,
   CODE_ENTRY_BUFFER_BAR,
@@ -423,7 +423,7 @@ enum CodeEntryBuffer {
   CODE_ENTRY_BUFFER_CURSOR_BOX
 };
 
-/* The buffers that func_802159C0 keeps, by the kind its caller gives */
+/* The buffers that LoadCharacterTableBuffer keeps, by its caller's kind */
 enum TableBuffer {
   TABLE_BUFFER_CURSOR = 1,
   TABLE_BUFFER_UNREAD,
@@ -438,7 +438,8 @@ enum CourseBuffer {
   COURSE_BUFFER_LAST
 };
 
-/* The buffers that func_802178B0 fills, and the assets it reads into them */
+/* The buffers that LoadPlayerStatsBuffer fills, and the assets it reads into
+ * them */
 enum PlayerStatsBuffer {
   PLAYER_STATS_BUFFER_ICONS = 1,
   PLAYER_STATS_BUFFER_UNK2,

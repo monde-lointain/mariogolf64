@@ -116,7 +116,7 @@ void func_8021342C_ovl_01(void* buffer) {
   ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
 }
 
-void func_80213464_ovl_01(void* buffer, s16 bufferKind) {
+void LoadBestTimesBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {

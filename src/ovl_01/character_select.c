@@ -1162,7 +1162,7 @@ s32 UpdateCharacterSelect(
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", UpdateCharacterSelect);
 #endif
 
-void func_8020B2C4_ovl_01(void* buffer, s16 bufferKind) {
+void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
   void* image = buffer;
 

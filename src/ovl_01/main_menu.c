@@ -354,43 +354,43 @@ void LeaveMenuWithCourseWipe(void);
 void UpdateBirdieBadges(void);
 void func_801FB15C_ovl_01(void);
 void func_80209500_ovl_01(void);
-void func_8020B2C4_ovl_01(void* buffer, s16 bufferKind);
+void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind);
 void func_8020B3CC_ovl_01(void);
 void func_8020B438_ovl_01(void);
 void func_8020E010_ovl_01(void** buffers);
 void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind);
-void func_8020E26C_ovl_01(void* buffer, s16 bufferKind);
+void LoadCourseMenuBuffer(void* buffer, s16 bufferKind);
 void UpdateCourseStats(void);
 void func_80213390_ovl_01(void** buffers);
 void func_8021342C_ovl_01(void* buffer);
-void func_80213464_ovl_01(void* buffer, s16 bufferKind);
+void LoadBestTimesBuffer(void* buffer, s16 bufferKind);
 void UpdateBestTimes(void);
 void func_8021585C_ovl_01(void);
-void func_802159C0_ovl_01(void* buffer, s16 bufferKind);
+void LoadCharacterTableBuffer(void* buffer, s16 bufferKind);
 void UpdateCharacterTable(void);
 void func_8021730C_ovl_01(void);
 void func_802177D0_ovl_01(void);
-void func_802178B0_ovl_01(void* buffer, s16 bufferKind);
+void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind);
 void UpdateBetSettings(void);
 /* Defined without parameters, though UpdateMenus passes it two */
 s32 UpdateHandicaps();
 void func_8021CF10_ovl_01(void** buffers);
-void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind);
+void LoadScoreLabelBuffer(void* buffer, s16 bufferKind);
 void UpdateBestShots(void);
 void func_8021E01C_ovl_01(void);
 void func_8021EF64_ovl_01(void);
-void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind);
+void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind);
 void func_8021F6E0_ovl_01(void** buffers);
 void UpdateRingShotRecords(void);
 void func_80220A30_ovl_01(void);
 void func_80220BB0_ovl_01(void);
 void func_80221B20_ovl_01(void);
-void func_802218C0_ovl_01(void* buffer, u8 bufferKind);
+void LoadSaveGameBuffer(void* buffer, u8 bufferKind);
 void func_80221EBC_ovl_01(void** buffers, u8 bufferKind);
 void func_80222038_ovl_01(void* buffer, u8 bufferIndex);
 void UpdateSavedGames(void);
-void func_802267B0_ovl_01(void* buffer, s16 bufferKind);
-void func_80228A80_ovl_01(void* buffer, s32 bufferKind);
+void LoadTournamentBuffer(void* buffer, s16 bufferKind);
+void LoadCodeEntryBuffer(void* buffer, s32 bufferKind);
 void UpdateClubTournament(void);
 s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
@@ -1130,8 +1130,8 @@ void UpdateMenus(void) {
         f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
         ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
-        func_802267B0_ovl_01(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
-        func_802267B0_ovl_01(D_800FBE30[0], TOURNAMENT_BUFFER_YES_NO);
+        LoadTournamentBuffer(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
+        LoadTournamentBuffer(D_800FBE30[0], TOURNAMENT_BUFFER_YES_NO);
         imageBuffer = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_OPTIONS_MARIO, &asset);
         ReadEncodedAsset(imageBuffer, &asset);
@@ -1216,7 +1216,7 @@ void UpdateMenus(void) {
         g_AnimatedIconFrameTime = 0;
         OpenEncodedAsset(g_ModeIconAnimations[iconIndex][0], &asset);
         ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
-        func_802178B0_ovl_01(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK13);
+        LoadPlayerStatsBuffer(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK13);
         D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
         D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
         D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
@@ -1227,7 +1227,7 @@ void UpdateMenus(void) {
 
         OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
         ReadEncodedAsset(D_800FC898, &asset);
-        func_8020E26C_ovl_01(D_800FBE30[1], COURSE_MENU_BUFFER_LARGE_DIGITS);
+        LoadCourseMenuBuffer(D_800FBE30[1], COURSE_MENU_BUFFER_LARGE_DIGITS);
         f_SpinningStarFrameIndex = 0;
         f_SpinningStarBufferIndex = 0;
         f_SpinningStarFrameTime = 0;
@@ -1240,16 +1240,17 @@ void UpdateMenus(void) {
       case MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT:
         func_8005C674(g_ChosenPlayerCount, 0);
         f_MenuBoardImageIndex ^= 1;
-        func_8020B2C4_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
+        LoadCharacterSelectBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
             CHARACTER_SELECT_BUFFER_BOARD);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01],
+        LoadCharacterSelectBuffer(D_8012D420[D_8022BE8E_ovl_01],
             CHARACTER_SELECT_BUFFER_PLAYER_LABELS);
-        func_8020B2C4_ovl_01(
+        LoadCharacterSelectBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], CHARACTER_SELECT_BUFFER_CURSOR_BOX);
-        func_8020B2C4_ovl_01(g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
-        func_8020B2C4_ovl_01(
+        LoadCharacterSelectBuffer(
+            g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
+        LoadCharacterSelectBuffer(
             D_800FBE30[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         func_8020B438_ovl_01();
         break;
@@ -1260,16 +1261,17 @@ void UpdateMenus(void) {
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         f_MenuBoardImageIndex ^= 1;
-        func_8020B2C4_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
+        LoadCharacterSelectBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
             CHARACTER_SELECT_BUFFER_BOARD);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01],
+        LoadCharacterSelectBuffer(D_8012D420[D_8022BE8E_ovl_01],
             CHARACTER_SELECT_BUFFER_PLAYER_LABELS);
-        func_8020B2C4_ovl_01(
+        LoadCharacterSelectBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], CHARACTER_SELECT_BUFFER_CURSOR_BOX);
-        func_8020B2C4_ovl_01(g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
-        func_8020B2C4_ovl_01(
+        LoadCharacterSelectBuffer(
+            g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
+        LoadCharacterSelectBuffer(
             D_800FBE30[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         func_8020B438_ovl_01();
         func_8020B3CC_ovl_01();
@@ -1283,7 +1285,7 @@ void UpdateMenus(void) {
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         f_MenuBoardImageIndex ^= 1;
-        func_802178B0_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
+        LoadPlayerStatsBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
             PLAYER_STATS_BUFFER_UNK12);
         g_AnimatedIconFrameIndex = 0;
         g_AnimatedIconBufferIndex = 0;
@@ -1293,14 +1295,14 @@ void UpdateMenus(void) {
         func_80221EBC_ovl_01(D_8010526C, SAVE_MENU_BUFFER_CHOSEN);
         func_80222038_ovl_01(g_NamePlateImage, 1);
         func_80222038_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 2);
-        func_802218C0_ovl_01(D_800FF180[0], SAVE_GAME_BUFFER_CONTROLLER_ICONS);
-        func_802218C0_ovl_01(D_800FF180[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
-        func_802218C0_ovl_01(D_800FBE30[0], SAVE_GAME_BUFFER_FIRST_BOARD);
-        func_802218C0_ovl_01(D_800FBE30[1], SAVE_GAME_BUFFER_SECOND_BOARD);
-        func_802218C0_ovl_01(D_800FC6A0, SAVE_GAME_BUFFER_THIRD_BOARD);
-        func_802218C0_ovl_01(
+        LoadSaveGameBuffer(D_800FF180[0], SAVE_GAME_BUFFER_CONTROLLER_ICONS);
+        LoadSaveGameBuffer(D_800FF180[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
+        LoadSaveGameBuffer(D_800FBE30[0], SAVE_GAME_BUFFER_FIRST_BOARD);
+        LoadSaveGameBuffer(D_800FBE30[1], SAVE_GAME_BUFFER_SECOND_BOARD);
+        LoadSaveGameBuffer(D_800FC6A0, SAVE_GAME_BUFFER_THIRD_BOARD);
+        LoadSaveGameBuffer(
             D_8012D420[D_8022BE8E_ovl_01], SAVE_GAME_BUFFER_COURSE);
-        func_802218C0_ovl_01(D_800FF4C4[0], SAVE_GAME_BUFFER_CHOSEN_COURSE);
+        LoadSaveGameBuffer(D_800FF4C4[0], SAVE_GAME_BUFFER_CHOSEN_COURSE);
         D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
         D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
         D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
@@ -1341,20 +1343,20 @@ void UpdateMenus(void) {
         tournamentImage = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_PLACE_DIGITS, &asset);
         ReadEncodedAsset(tournamentImage, &asset);
-        func_80228A80_ovl_01(g_NamePlateImage, CODE_ENTRY_BUFFER_NAME_PLATE);
-        func_80228A80_ovl_01(
+        LoadCodeEntryBuffer(g_NamePlateImage, CODE_ENTRY_BUFFER_NAME_PLATE);
+        LoadCodeEntryBuffer(
             g_MenuBoardImages[f_MenuBoardImageIndex], CODE_ENTRY_BUFFER_BAR);
-        func_80228A80_ovl_01(
+        LoadCodeEntryBuffer(
             D_8012D420[D_8022BE8E_ovl_01], CODE_ENTRY_BUFFER_GLYPHS);
-        func_80228A80_ovl_01(D_800FBE30[0], CODE_ENTRY_BUFFER_POINTING_HAND);
-        func_80228A80_ovl_01(D_800FBE30[1], CODE_ENTRY_BUFFER_CURSOR_BOX);
-        func_802267B0_ovl_01(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
-        func_802267B0_ovl_01(D_801049A0[0][0], TOURNAMENT_BUFFER_YES_NO);
-        func_802267B0_ovl_01(
+        LoadCodeEntryBuffer(D_800FBE30[0], CODE_ENTRY_BUFFER_POINTING_HAND);
+        LoadCodeEntryBuffer(D_800FBE30[1], CODE_ENTRY_BUFFER_CURSOR_BOX);
+        LoadTournamentBuffer(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
+        LoadTournamentBuffer(D_801049A0[0][0], TOURNAMENT_BUFFER_YES_NO);
+        LoadTournamentBuffer(
             D_801049A0[0][1], TOURNAMENT_BUFFER_NINTENDO_BADGE);
-        func_802267B0_ovl_01(D_801049A0[1][0], TOURNAMENT_BUFFER_ICON);
-        func_802267B0_ovl_01(D_801049A0[1][1], TOURNAMENT_BUFFER_MENU_WINDOW);
-        func_802267B0_ovl_01(D_801049A0[2][0], TOURNAMENT_BUFFER_ROW_FILE);
+        LoadTournamentBuffer(D_801049A0[1][0], TOURNAMENT_BUFFER_ICON);
+        LoadTournamentBuffer(D_801049A0[1][1], TOURNAMENT_BUFFER_MENU_WINDOW);
+        LoadTournamentBuffer(D_801049A0[2][0], TOURNAMENT_BUFFER_ROW_FILE);
         break;
 
       case MENU_SCREEN_HELP:
@@ -1454,27 +1456,27 @@ void UpdateMenus(void) {
         OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
         ReadEncodedAsset(D_800FC898, &asset);
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(
+        LoadCourseMenuBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         f_SpinningStarFrameIndex = 0;
         f_SpinningStarBufferIndex = 0;
         f_SpinningStarFrameTime = 0;
         D_8022BE8A_ovl_01 = 0;
         f_MenuBoardImageIndex ^= 1;
-        func_802178B0_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
+        LoadPlayerStatsBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
             PLAYER_STATS_BUFFER_ICONS);
-        func_802178B0_ovl_01(D_801B93E0[0], PLAYER_STATS_BUFFER_UNK2);
-        func_802178B0_ovl_01(g_NamePlateImage, PLAYER_STATS_BUFFER_UNK3);
-        func_802178B0_ovl_01(D_8010526C[0], PLAYER_STATS_BUFFER_UNK4);
-        func_802178B0_ovl_01(D_8010526C[1], PLAYER_STATS_BUFFER_UNK5);
-        func_802178B0_ovl_01(D_801B93E0[1], PLAYER_STATS_BUFFER_UNK7);
-        func_802178B0_ovl_01(D_800FF180[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
-        func_802178B0_ovl_01(D_800FF180[1], PLAYER_STATS_BUFFER_UNK8);
+        LoadPlayerStatsBuffer(D_801B93E0[0], PLAYER_STATS_BUFFER_UNK2);
+        LoadPlayerStatsBuffer(g_NamePlateImage, PLAYER_STATS_BUFFER_UNK3);
+        LoadPlayerStatsBuffer(D_8010526C[0], PLAYER_STATS_BUFFER_UNK4);
+        LoadPlayerStatsBuffer(D_8010526C[1], PLAYER_STATS_BUFFER_UNK5);
+        LoadPlayerStatsBuffer(D_801B93E0[1], PLAYER_STATS_BUFFER_UNK7);
+        LoadPlayerStatsBuffer(D_800FF180[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
+        LoadPlayerStatsBuffer(D_800FF180[1], PLAYER_STATS_BUFFER_UNK8);
         D_8022BE8E_ovl_01 ^= 1;
-        func_802178B0_ovl_01(
+        LoadPlayerStatsBuffer(
             D_8012D420[D_8022BE8E_ovl_01], PLAYER_STATS_BUFFER_GAME_LABELS);
-        func_802178B0_ovl_01(D_8012D3AC, PLAYER_STATS_BUFFER_BRICK_WALL);
-        func_802178B0_ovl_01(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK12);
+        LoadPlayerStatsBuffer(D_8012D3AC, PLAYER_STATS_BUFFER_BRICK_WALL);
+        LoadPlayerStatsBuffer(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK12);
         ComputeRoundStatistics();
         D_8022F8D4_ovl_01 = MINI_GOLF_FACING_FRAME;
         D_8022F8D8_ovl_01 = 0;
@@ -1491,15 +1493,15 @@ void UpdateMenus(void) {
 
         func_8020E010_ovl_01(D_801049A0[0]);
         func_8020E0AC_ovl_01(D_800FF4C4, COURSE_BUFFER_FIRST);
-        func_8020E26C_ovl_01(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
-        func_8020E26C_ovl_01(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
-        func_8020E26C_ovl_01(D_8010526C[0], COURSE_MENU_BUFFER_SPINNING_BADGE);
-        func_8020E26C_ovl_01(
+        LoadCourseMenuBuffer(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
+        LoadCourseMenuBuffer(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
+        LoadCourseMenuBuffer(D_8010526C[0], COURSE_MENU_BUFFER_SPINNING_BADGE);
+        LoadCourseMenuBuffer(
             D_800FF180[0], COURSE_MENU_BUFFER_DIGITS_AND_ARROWS);
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(
+        LoadCourseMenuBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        func_8020E26C_ovl_01(D_800FBE30[0], COURSE_MENU_BUFFER_GREEN_ARROWS);
+        LoadCourseMenuBuffer(D_800FBE30[0], COURSE_MENU_BUFFER_GREEN_ARROWS);
         ComputeRoundStatistics();
         D_801323A0.statsCourse = GetOpenCourseCount();
         break;
@@ -1507,33 +1509,33 @@ void UpdateMenus(void) {
       case MENU_SCREEN_BEST_TIMES:
         func_80221B20_ovl_01();
         func_80213390_ovl_01(D_801049A0[0]);
-        func_80213464_ovl_01(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
+        LoadBestTimesBuffer(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(
+        LoadCourseMenuBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        func_80213464_ovl_01(
+        LoadBestTimesBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], BEST_TIMES_BUFFER_UNREAD);
-        func_8020E26C_ovl_01(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
+        LoadCourseMenuBuffer(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
         f_MenuBoardImageIndex ^= 1;
-        func_80213464_ovl_01(
+        LoadBestTimesBuffer(
             g_MenuBoardImages[f_MenuBoardImageIndex], BEST_TIMES_BUFFER_PLACES);
-        func_80213464_ovl_01(D_800FBE30[0], BEST_TIMES_BUFFER_GREEN_ARROWS);
+        LoadBestTimesBuffer(D_800FBE30[0], BEST_TIMES_BUFFER_GREEN_ARROWS);
         func_8021585C_ovl_01();
         break;
 
       case MENU_SCREEN_CHARACTER_TABLE:
         func_80221B20_ovl_01();
-        func_80213464_ovl_01(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
+        LoadBestTimesBuffer(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(
+        LoadCourseMenuBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         D_8022BE90_ovl_01 ^= 1;
-        func_802159C0_ovl_01(
+        LoadCharacterTableBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], TABLE_BUFFER_CURSOR);
-        func_802159C0_ovl_01(g_NamePlateImage, TABLE_BUFFER_UNREAD);
+        LoadCharacterTableBuffer(g_NamePlateImage, TABLE_BUFFER_UNREAD);
         func_8021730C_ovl_01();
-        func_802159C0_ovl_01(D_800FBE30[0], TABLE_BUFFER_ARROWS);
-        func_802159C0_ovl_01(D_800FBE30[1], TABLE_BUFFER_STAR);
+        LoadCharacterTableBuffer(D_800FBE30[0], TABLE_BUFFER_ARROWS);
+        LoadCharacterTableBuffer(D_800FBE30[1], TABLE_BUFFER_STAR);
         func_802177D0_ovl_01();
         break;
 
@@ -1544,12 +1546,12 @@ void UpdateMenus(void) {
         func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(
+        LoadCourseMenuBuffer(
             D_801B5CD0[D_8022BE8E_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        func_8021CFAC_ovl_01(
+        LoadScoreLabelBuffer(
             D_8012D420[D_8022BE90_ovl_01], SCORE_LABEL_BUFFER_CURSOR_BOX);
-        func_8021CFAC_ovl_01(g_NamePlateImage, SCORE_LABEL_BUFFER_UNREAD);
-        func_8021CFAC_ovl_01(D_800FBE30[0], SCORE_LABEL_BUFFER_LABELS);
+        LoadScoreLabelBuffer(g_NamePlateImage, SCORE_LABEL_BUFFER_UNREAD);
+        LoadScoreLabelBuffer(D_800FBE30[0], SCORE_LABEL_BUFFER_LABELS);
         func_8021E01C_ovl_01();
         func_8021EF64_ovl_01();
         break;
@@ -1560,15 +1562,16 @@ void UpdateMenus(void) {
         func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(
+        LoadCourseMenuBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        func_8021F5F0_ovl_01(g_NamePlateImage, RING_SHOT_RECORD_BUFFER_UNREAD);
-        func_8021F5F0_ovl_01(
+        LoadRingShotRecordBuffer(
+            g_NamePlateImage, RING_SHOT_RECORD_BUFFER_UNREAD);
+        LoadRingShotRecordBuffer(
             D_8012D420[D_8022BE8E_ovl_01], RING_SHOT_RECORD_BUFFER_RAINBOW_BOX);
-        func_8021F5F0_ovl_01(
+        LoadRingShotRecordBuffer(
             D_8010526C[0], RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS);
         func_8021F6E0_ovl_01(D_801049A0[0]);
-        func_8021F5F0_ovl_01(
+        LoadRingShotRecordBuffer(
             D_800FBE30[0], RING_SHOT_RECORD_BUFFER_GREEN_ARROWS);
         func_80220A30_ovl_01();
         func_80220BB0_ovl_01();

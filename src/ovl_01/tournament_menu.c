@@ -386,7 +386,7 @@ s32 IsMenuWindowClosed(void) {
   return check;
 }
 
-void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
+void LoadTournamentBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
   AssetFile file;
 
@@ -1084,7 +1084,7 @@ void func_802287EC_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY,
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802287EC_ovl_01);
 #endif
 
-void func_80228A80_ovl_01(void* buffer, s32 bufferKind) {
+void LoadCodeEntryBuffer(void* buffer, s32 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {

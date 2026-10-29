@@ -241,7 +241,7 @@ void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind) {
   }
 }
 
-void func_8020E26C_ovl_01(void* buffer, s16 bufferKind) {
+void LoadCourseMenuBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {

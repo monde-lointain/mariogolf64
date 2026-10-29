@@ -275,7 +275,7 @@ static u8 D_8023BDB8_ovl_01[0x88];
 u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
 u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][MENU_PALETTE_FILE_SIZE];
 
-void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {
+void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {
@@ -1006,7 +1006,7 @@ s32 func_8022181C_ovl_01(void) {
 /* Doesn't match: the original keeps the saved game's place in a saved register
  */
 #ifdef NON_MATCHING
-void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
+void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save = GetSaveData();
@@ -1112,7 +1112,7 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
   D_80230B4E_ovl_01 = 0;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802218C0_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveGameBuffer);
 #endif
 
 void func_80221B20_ovl_01(void) {

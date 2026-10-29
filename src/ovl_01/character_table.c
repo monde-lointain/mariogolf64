@@ -23,7 +23,8 @@ void func_8005C674(s32 arg0, s32 arg1);
 #define TABLE_ROW_COUNT 18
 #define TABLE_SHOWN_ROW_COUNT 5
 
-/* func_802159C0 reads this beside ASSET_CURSOR_BOX and ASSET_SPINNING_STAR */
+/* LoadCharacterTableBuffer reads this beside ASSET_CURSOR_BOX and
+ * ASSET_SPINNING_STAR */
 #define ASSET_TABLE_ARROWS 0x94A
 
 /* func_80217464 squeezes the star's image to fit a table cell */
@@ -222,7 +223,7 @@ static void* D_8023AC6C_ovl_01;
 static void* D_8023AC70_ovl_01;
 static s32 D_8023AC78_ovl_01[CHARACTER_COUNT];
 
-void func_802159C0_ovl_01(void* buffer, s16 bufferKind) {
+void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
   MenuMemory* memory = func_8005AF74();
   s32 x;

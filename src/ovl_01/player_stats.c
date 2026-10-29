@@ -37,7 +37,8 @@
 /* The images of g_CourseIconAssets that func_8021CF10 reads */
 #define PLAYER_STATS_IMAGE_COUNT 6
 
-/* The bytes of each of the four images that func_8021CFAC reads into one buffer
+/* The bytes of each of the four images that LoadScoreLabelBuffer reads into one
+ * buffer
  */
 #define PLAYER_STATS_IMAGE_SIZE 0x258
 /* They are the ASSET_JAPANESE_*_LABEL score labels */
@@ -54,7 +55,7 @@
 /* func_8021E01C lists each kind's records in rows one longer than the grid */
 #define STATS_KIND_LIST_SIZE (STATS_GRID_COLUMN_COUNT + 1)
 
-/* What func_802178B0 reads into the buffers it fills */
+/* What LoadPlayerStatsBuffer reads into the buffers it fills */
 #define PLAYER_STATS_ICON_COUNT 8
 #define PLAYER_STATS_ICON_SIZE 0x218
 #define ASSET_PLAYER_STATS_UNK2 0x671
@@ -434,7 +435,7 @@ static s16 D_8023B640_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 /* Not static: the original left it to the linker's common block */
 s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
 
-void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
+void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
   MenuMemory* memory = func_8005AF74();
   s16 iconIndex;
@@ -1838,7 +1839,7 @@ void func_8021CF10_ovl_01(void** buffers) {
   }
 }
 
-void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind) {
+void LoadScoreLabelBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {
