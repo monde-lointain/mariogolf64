@@ -4265,6 +4265,21 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
 const char D_80231634_ovl_01[] = "MAIN MENU";
 const char D_80231640_ovl_01[] = "%8d:%8d:%8d";
 
+/*
+ * Whether a title label is the chosen one: New Game and the chosen player
+ * count once New Game is chosen, or else the chosen choice's own label
+ */
+#define IsChosenTitleLabel(labelIndex) \
+  ((D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME && \
+       (labelIndex) == TITLE_LABEL_NEW_GAME) || \
+      (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME && \
+          (labelIndex) == \
+              D_801323A0.playerCountChoice + \
+                  TITLE_LABEL_FIRST_PLAYER_COUNT) || \
+      (D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE == \
+              (labelIndex) && \
+          D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME))
+
 void func_801FDA40_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 labelIndex;
@@ -4293,15 +4308,7 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
-    if ((D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
-            labelIndex == TITLE_LABEL_NEW_GAME) ||
-        (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
-            labelIndex ==
-                D_801323A0.playerCountChoice +
-                    TITLE_LABEL_FIRST_PLAYER_COUNT) ||
-        (D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE ==
-                labelIndex &&
-            D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
+    if (IsChosenTitleLabel(labelIndex)) {
       continue;
     }
     {
@@ -4332,15 +4339,7 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, ((u32)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
-    if ((D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
-            labelIndex == TITLE_LABEL_NEW_GAME) ||
-        (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
-            labelIndex ==
-                D_801323A0.playerCountChoice +
-                    TITLE_LABEL_FIRST_PLAYER_COUNT) ||
-        (labelIndex ==
-                D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE &&
-            D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
+    if (IsChosenTitleLabel(labelIndex)) {
       if (labelIndex == TITLE_LABEL_SAVED_GAMES &&
           g_HasBroughtOverCharacter == TRUE) {
         labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
