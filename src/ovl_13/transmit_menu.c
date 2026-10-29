@@ -319,8 +319,6 @@ typedef struct StatusData {
 /* A Game Boy save in the cartridge RAM */
 #define CARTRIDGE_SAVE_SIZE 0x200
 #define SAVE_CHECKSUM_OFFSET 0x30
-#define SAVE_UNKB_OFFSET 0xB
-#define SAVE_CHARACTER_OFFSET 0x10
 /* The save's 16-bit values are little-endian */
 #define SAVE_HALFWORD_SIZE 2
 #define SAVE_HAS_STATUS_OFFSET 0xA0
@@ -340,6 +338,8 @@ typedef struct StatusData {
 #define RECORD_SUM_OFFSET 6
 /* A Game Boy character's data */
 #define CHARACTER_DATA_SIZE 0x800
+#define DATA_UNKB_OFFSET 0xB
+#define DATA_CHARACTER_OFFSET 0x10
 #define DATA_EXPERIENCE_OFFSET 0x15C
 #define DATA_UNK15E_OFFSET 0x15E
 /* The experience and the byte after it */
@@ -1348,9 +1348,10 @@ void UpdateTransmitMenu(void) {
   }
 }
 
-/* Fills the slot for a cartridge's save from the save's bytes */
+/* Fills the slot for a cartridge's save from the character data its record
+ * points to */
 void DecodeCartridgeCharacter(
-    u8* save, s32 cartridgeIndex, s32 saveIndex, s32 unk34) {
+    u8* characterData, s32 cartridgeIndex, s32 saveIndex, s32 unk34) {
   GameBoyCharacter* character =
       &g_GameBoyTransfer
            .cartridgeCharacters[(cartridgeIndex * CARTRIDGE_SAVE_COUNT) +
@@ -1359,8 +1360,8 @@ void DecodeCartridgeCharacter(
 
   character->status = GAME_BOY_CHARACTER_STATUS_PRESENT;
   for (index = 0; index != (SAVE_NAME_SIZE - 1); index++) {
-    character->name[index] = save[index];
-    character->saveName[index] = save[index];
+    character->name[index] = characterData[index];
+    character->saveName[index] = characterData[index];
     if (character->name[index] >= 'a' && character->name[index] <= 'z') {
       character->name[index] += LOWERCASE_CODE_OFFSET;
     }
@@ -1369,10 +1370,10 @@ void DecodeCartridgeCharacter(
   character->name[(SAVE_NAME_SIZE - 1)] = '\0';
   character->saveName[(SAVE_NAME_SIZE - 1)] = '\0';
   for (index = 0; index != SAVE_UNKB_SIZE; index++) {
-    character->saveUnkB[index] = save[SAVE_UNKB_OFFSET + index];
+    character->saveUnkB[index] = characterData[DATA_UNKB_OFFSET + index];
   }
 
-  character->character = save[SAVE_CHARACTER_OFFSET];
+  character->character = characterData[DATA_CHARACTER_OFFSET];
   if (character->character >= GAME_BOY_GOLFER_COUNT) {
     character->character = GAME_BOY_GOLFER_COUNT - 1;
   }
@@ -1380,14 +1381,14 @@ void DecodeCartridgeCharacter(
   if (IsGameFlagSet(GAME_FLAG_UNK6F)) {
     character->unk1A = 1;
   } else {
-    character->unk1A = save[0x11];
+    character->unk1A = characterData[0x11];
   }
 
-  character->level = save[0x12];
-  character->unk1C = save[0x1C];
-  character->shotCurve = save[0x1D];
-  character->unk1E = save[0x1E];
-  character->mishitResistance = save[0x1F];
+  character->level = characterData[0x12];
+  character->unk1C = characterData[0x1C];
+  character->shotCurve = characterData[0x1D];
+  character->unk1E = characterData[0x1E];
+  character->mishitResistance = characterData[0x1F];
   if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_1)) {
     character->ballType = 1;
   } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_2)) {
@@ -1403,22 +1404,23 @@ void DecodeCartridgeCharacter(
   } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_7)) {
     character->ballType = 7;
   } else {
-    character->ballType = save[0x3E];
+    character->ballType = characterData[0x3E];
   }
 
   osSyncPrintf("balltype %d\n", character->ballType);
-  character->unk24 = (save[0x28] << 16) | (save[0x27] << 8) | save[0x26];
+  character->unk24 = (characterData[0x28] << 16) | (characterData[0x27] << 8) |
+      characterData[0x26];
   character->experience = 0;
-  character->driveDistance = save[0x1A] | (save[0x1B] << 8);
+  character->driveDistance = characterData[0x1A] | (characterData[0x1B] << 8);
   osSyncPrintf("%d, %d %d\n", character->experience, character->unk1C,
       character->shotCurve);
   for (index = 0; index != GAME_BOY_CHARACTER_UNK3C_COUNT; index++) {
-    character->unk3C[index].unk0 =
-        save[0x100 + (index * 6)] | (save[0x101 + (index * 6)] << 8);
-    character->unk3C[index].unk2 =
-        save[0x102 + (index * 6)] | (save[0x103 + (index * 6)] << 8);
-    character->unk3C[index].unk4 = save[0x104 + (index * 6)];
-    character->unk3C[index].unk5 = save[0x105 + (index * 6)];
+    character->unk3C[index].unk0 = characterData[0x100 + (index * 6)] |
+        (characterData[0x101 + (index * 6)] << 8);
+    character->unk3C[index].unk2 = characterData[0x102 + (index * 6)] |
+        (characterData[0x103 + (index * 6)] << 8);
+    character->unk3C[index].unk4 = characterData[0x104 + (index * 6)];
+    character->unk3C[index].unk5 = characterData[0x105 + (index * 6)];
     osSyncPrintf("%d, %d %d\n", index, character->unk3C[index].unk0,
         character->unk3C[index].unk2);
   }
@@ -1430,12 +1432,12 @@ void DecodeCartridgeCharacter(
 void SkipCartridgeSave(u8* unusedData, s32 unusedCartridgeIndex,
     s32 unusedSaveIndex, u8* unusedTitle, s32 unusedUnk34) {}
 
-Boolean IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
+Boolean IsCharacterFromSave(GameBoyCharacter* character, u8* characterData) {
   s32 index;
 
   osSyncPrintf("PHASE a\n");
   for (index = 0; index != SAVE_NAME_SIZE; index++) {
-    if (character->saveName[index] != save[index]) {
+    if (character->saveName[index] != characterData[index]) {
       if (FALSE) {
         osSyncPrintf("PHASE b\n");
       }
@@ -1446,7 +1448,7 @@ Boolean IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
 
   osSyncPrintf("PHASE c\n");
   for (index = 0; index != SAVE_UNKB_SIZE; index++) {
-    if (character->saveUnkB[index] != save[SAVE_UNKB_OFFSET + index]) {
+    if (character->saveUnkB[index] != characterData[DATA_UNKB_OFFSET + index]) {
       osSyncPrintf("PHASE d\n");
       return FALSE;
     }
