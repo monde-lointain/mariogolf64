@@ -220,10 +220,12 @@ static s16 D_802303A2_ovl_01 = 0;
 static s16 D_802303A4_ovl_01 = 0;
 static s16 D_802303A6_ovl_01 = 0;
 static s16 D_802303A8_ovl_01 = 0;
-static u32 D_802303AC_ovl_01[BET_ICON_COUNT] = {
+/* Each bet icon's first frame, read for the bet settings' rows */
+static u32 f_BetIconAssets[BET_ICON_COUNT] = {
     0x0674, 0x0678, 0x067A, 0x067E, 0x0680, 0x067C, 0x0676, 0x0672};
+/* Both frames of each bet icon, for the chosen bet's animation */
 // clang-format off
-static u32 D_802303CC_ovl_01[BET_ICON_COUNT]
+static u32 f_BetIconFrameAssets[BET_ICON_COUNT]
                              [BET_ICON_FRAME_COUNT] = {
   { 0x0674, 0x0675 },
   { 0x0678, 0x0679 },
@@ -424,12 +426,13 @@ static Mtx D_8023B140_ovl_01[PAGE_ARROW_COUNT];
 static u8 D_8023B1C0_ovl_01[0x100];
 
 static Mtx D_8023B2C0_ovl_01[PAGE_ARROW_COUNT];
-static void* D_8023B340_ovl_01;
+/* Every bet icon, BET_ICON_SLOT_SIZE apart */
+static void* f_BetIcons;
 static void* D_8023B344_ovl_01;
 static void* f_StakeMark;
 static void* f_StatsNamePlate;
-/* The two frames of the stats icon that DrawBetIcon animates */
-static void* D_8023B350_ovl_01[BET_ICON_FRAME_COUNT];
+/* The two frames of the bet icon that DrawBetIcon animates */
+static void* f_ChosenBetIconFrames[BET_ICON_FRAME_COUNT];
 static void* f_StatsGreenArrows;
 static void* f_PageArrows;
 static void* f_HandicapPlaque;
@@ -473,11 +476,11 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
 
   switch (bufferKind) {
     case PLAYER_STATS_BUFFER_BET_ICONS:
-      D_8023B340_ovl_01 = buffer;
+      f_BetIcons = buffer;
       for (iconIndex = 0; iconIndex != BET_ICON_COUNT; iconIndex++) {
-        OpenEncodedAsset(D_802303AC_ovl_01[iconIndex], &asset);
+        OpenEncodedAsset(f_BetIconAssets[iconIndex], &asset);
         ReadEncodedAsset(
-            ImageAt(D_8023B340_ovl_01, iconIndex * BET_ICON_SLOT_SIZE), &asset);
+            ImageAt(f_BetIcons, iconIndex * BET_ICON_SLOT_SIZE), &asset);
       }
 
       break;
@@ -491,19 +494,21 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       break;
     case PLAYER_STATS_BUFFER_BET_ICON_FIRST_FRAME:
       rowNumber = D_801B5634;
-      imageSlot = &D_8023B350_ovl_01[0];
+      imageSlot = &f_ChosenBetIconFrames[0];
       *imageSlot = buffer;
       OpenEncodedAsset(
-          D_802303CC_ovl_01[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]][0],
+          f_BetIconFrameAssets[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]]
+                              [0],
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
     case PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME:
       rowNumber = D_801B5634;
-      imageSlot = &D_8023B350_ovl_01[1];
+      imageSlot = &f_ChosenBetIconFrames[1];
       *imageSlot = buffer;
       OpenEncodedAsset(
-          D_802303CC_ovl_01[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]][1],
+          f_BetIconFrameAssets[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]]
+                              [1],
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
@@ -688,10 +693,11 @@ void UpdateBetSettings(void) {
         D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD] + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
-        D_802303CC_ovl_01[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]]
-                         [g_AnimatedIconFrameIndex],
+        f_BetIconFrameAssets[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]]
+                            [g_AnimatedIconFrameIndex],
         &asset);
-    ReadEncodedAsset(D_8023B350_ovl_01[g_AnimatedIconBufferIndex ^ 1], &asset);
+    ReadEncodedAsset(
+        f_ChosenBetIconFrames[g_AnimatedIconBufferIndex ^ 1], &asset);
     g_AnimatedIconBufferIndex ^= 1;
   } else if (g_MenuRepeatButtons & R_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -704,10 +710,11 @@ void UpdateBetSettings(void) {
         D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD] + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
-        D_802303CC_ovl_01[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]]
-                         [g_AnimatedIconFrameIndex],
+        f_BetIconFrameAssets[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]]
+                            [g_AnimatedIconFrameIndex],
         &asset);
-    ReadEncodedAsset(D_8023B350_ovl_01[g_AnimatedIconBufferIndex ^ 1], &asset);
+    ReadEncodedAsset(
+        f_ChosenBetIconFrames[g_AnimatedIconBufferIndex ^ 1], &asset);
     g_AnimatedIconBufferIndex ^= 1;
   }
 }
@@ -794,7 +801,7 @@ void DrawBetSettings(
     }
 
     if (columnIndex != memory->unkD) {
-      icon = ImageAt(D_8023B340_ovl_01, betIndex * BET_ICON_SLOT_SIZE);
+      icon = ImageAt(f_BetIcons, betIndex * BET_ICON_SLOT_SIZE);
       gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
       /* Bets without a stake are dimmed */
       if (memory->betStakeLevels[D_80230460_ovl_01[D_801B5634 - 1]
@@ -980,7 +987,7 @@ void DrawBetIcon(
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
-  image = D_8023B350_ovl_01[g_AnimatedIconBufferIndex];
+  image = f_ChosenBetIconFrames[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(image)), G_IM_FMT_CI,
       BET_ICON_SIZE, BET_ICON_SIZE, 0, 0, BET_ICON_SIZE - 1, BET_ICON_SIZE - 1,
@@ -1001,8 +1008,8 @@ void DrawBetIcon(
     g_AnimatedIconBufferIndex = !g_AnimatedIconBufferIndex;
     iconIndex = D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD];
     OpenEncodedAsset(
-        D_802303CC_ovl_01[iconIndex][g_AnimatedIconFrameIndex], &asset);
-    ReadEncodedAsset(D_8023B350_ovl_01[g_AnimatedIconBufferIndex], &asset);
+        f_BetIconFrameAssets[iconIndex][g_AnimatedIconFrameIndex], &asset);
+    ReadEncodedAsset(f_ChosenBetIconFrames[g_AnimatedIconBufferIndex], &asset);
   }
 
   *displayListHead = gfx;
