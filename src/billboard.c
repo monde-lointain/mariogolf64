@@ -44,6 +44,13 @@ typedef struct BillboardTexture {
   /* 0xC */ u16* pixels;
 } BillboardTexture; /* size = 0x10 */
 
+/* A color for the billboards' combiner, a channel to a word */
+typedef struct BillboardColor {
+  /* 0x0 */ s32 red;
+  /* 0x4 */ s32 green;
+  /* 0x8 */ s32 blue;
+} BillboardColor; /* size = 0xC */
+
 /* The size of every billboard texture, in texels */
 #define BILLBOARD_TEXTURE_WIDTH 32
 #define BILLBOARD_TEXTURE_HEIGHT 64
@@ -185,14 +192,12 @@ void RevertBillboardManager(void) {
   f_IsHeapReady = TRUE;
 }
 
-#ifndef NON_MATCHING
 /*
- * The initial values of the color arrays local to DrawBillboards and
- * DrawFadingBillboards, which their asm reads by name
+ * The initial values of the colors local to DrawBillboards and
+ * DrawFadingBillboards, which both copy
  */
-const s32 g_BillboardLightColor[3] = {255, 220, 160};
-const s32 g_BillboardEnvColor[3] = {128, 64, 32};
-#endif
+const BillboardColor g_BillboardLightColor = {255, 220, 160};
+const BillboardColor g_BillboardEnvColor = {128, 64, 32};
 
 /*
  * Whether a point is near the edge of a course; no point of the
@@ -329,8 +334,8 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  */
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   Gfx* gfx = g_DisplayListHead;
-  s32 lightColor[3] = {255, 220, 160};
-  s32 envColor[3] = {128, 64, 32};
+  BillboardColor lightColor = g_BillboardLightColor;
+  BillboardColor envColor = g_BillboardEnvColor;
   Vec3 viewDir;
   Vec3 lightDir;
   Vec3 unusedVector;
@@ -352,7 +357,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_2CYCLE);
   gDPPipeSync(gfx++);
-  gDPSetEnvColor(gfx++, envColor[0], envColor[1], envColor[2], 0x20);
+  gDPSetEnvColor(gfx++, envColor.red, envColor.green, envColor.blue, 0x20);
 
   lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
   lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
@@ -555,8 +560,8 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
 #ifdef NON_MATCHING
 void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   Gfx* gfx = g_DisplayListHead;
-  s32 lightColor[3] = {255, 220, 160};
-  s32 envColor[3] = {128, 64, 32};
+  BillboardColor lightColor = g_BillboardLightColor;
+  BillboardColor envColor = g_BillboardEnvColor;
   Boolean hasTranslucentMode;
   s32 ballDepth;
   s32 orderIndex;
@@ -573,7 +578,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_2CYCLE);
   gDPPipeSync(gfx++);
-  gDPSetEnvColor(gfx++, envColor[0], envColor[1], envColor[2], 0x20);
+  gDPSetEnvColor(gfx++, envColor.red, envColor.green, envColor.blue, 0x20);
   gSPClipRatio(gfx++, FRUSTRATIO_1);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
