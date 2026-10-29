@@ -15,6 +15,7 @@
 #include "course.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
+#include "framebuffer.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"
@@ -799,7 +800,6 @@ enum HoleMenuChoice {
 
 #define WIPE_CLOSED_PROGRESS 0
 #define WIPE_OPEN_PROGRESS 20
-#define ROUND_FRAMEBUFFER_COUNT 3
 #define PLAYER_CHARACTER_SLOT 0
 #define TOURNAMENT_HALF_TURN_HOLE 9 /* The hole index after the front nine */
 
@@ -1647,7 +1647,7 @@ DIM_BACKDROP:
               StopLoaderThread();
               f_PlayExit = PLAY_EXIT_NONE;
               SetMenuBackdrop(MENU_BACKDROP_NONE);
-              SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+              SetFramebufferCount(TRIPLE_BUFFERING);
               SetScreenEffect(SCREEN_EFFECT_NONE, 0);
             }
 
@@ -1691,7 +1691,7 @@ DIM_BACKDROP:
                 StopLoaderThread();
                 f_PlayExit = PLAY_EXIT_NONE;
                 SetMenuBackdrop(MENU_BACKDROP_NONE);
-                SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+                SetFramebufferCount(TRIPLE_BUFFERING);
                 SetScreenEffect(SCREEN_EFFECT_NONE, 0);
               } else {
                 RequestSubModule();
@@ -1706,7 +1706,7 @@ DIM_BACKDROP:
               memset(&g_RoundHud, 0, sizeof(RoundHud));
               SetMenuBackdrop(MENU_BACKDROP_NONE);
               g_PauseScreen = PAUSE_SCREEN_NONE;
-              SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+              SetFramebufferCount(TRIPLE_BUFFERING);
               SetScreenEffect(SCREEN_EFFECT_NONE, 0);
               StartHoleIntro();
               StartHoleCamerasAndSong();

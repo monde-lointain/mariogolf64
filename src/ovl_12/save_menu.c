@@ -10,6 +10,7 @@
 #include "character.h"
 #include "controller.h"
 #include "course.h"
+#include "framebuffer.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "math_util.h"
@@ -241,7 +242,6 @@ void SetTextSlot(
 void InvalidateBrokenSavedGames(void);
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
 void func_80060358(void);
-void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
 void SetUpTextDrawing(Gfx** displayListHead);
 void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
@@ -1207,7 +1207,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       CloseSaveMenu();
       g_PauseScreen = PAUSE_SCREEN_NONE;
       SetMenuBackdrop(MENU_BACKDROP_NONE);
-      SetFramebufferCount(3);
+      SetFramebufferCount(TRIPLE_BUFFERING);
       SetScreenEffect(SCREEN_EFFECT_NONE, 0);
       g_RoundHud.isLetterboxShown = TRUE;
       g_RoundHud.unkC = TRUE;
@@ -1836,7 +1836,7 @@ void UpdateControlsScreen(ControllerState* controller) {
       CloseControlsScreen();
       g_PauseScreen = PAUSE_SCREEN_NONE;
       SetMenuBackdrop(MENU_BACKDROP_NONE);
-      SetFramebufferCount(3);
+      SetFramebufferCount(TRIPLE_BUFFERING);
       SetScreenEffect(SCREEN_EFFECT_NONE, 0);
       g_RoundHud.isLetterboxShown = TRUE;
       g_RoundHud.unkC = TRUE;

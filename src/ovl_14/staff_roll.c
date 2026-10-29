@@ -15,6 +15,7 @@
 #include "course.h"
 #include "current_shot.h"
 #include "debug_text.h"
+#include "framebuffer.h"
 #include "framing.h"
 #include "functions.h"
 #include "game.h"
@@ -52,7 +53,6 @@
 #define STAFF_ROLL_IMAGE_SIZE 0x2AC00
 #define BILLBOARD_HEAP_SIZE 0x7038
 #define CLOSING_PICTURE_ASSET 0x967
-#define STAFF_ROLL_FRAMEBUFFER_COUNT 3
 
 /* The staff text's first bytes hold its size, big-endian */
 #define STAFF_TEXT_HEADER_SIZE 8
@@ -278,7 +278,6 @@ extern u8 g_StaffTextRomStart[];
 extern u8* g_ShadowTexture;
 
 void AssignCharacterBuffers(void);
-void SetFramebufferCount(s32 count);
 void FreeEffectImages(void);
 void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex);
 void DrawStaffRollPainting(Gfx** displayListHead);
@@ -687,7 +686,7 @@ void LoadStaffRoll(void) {
   g_GameState.playerCount = 1;
   StopLoaderThread();
   StartLoaderThread();
-  SetFramebufferCount(STAFF_ROLL_FRAMEBUFFER_COUNT);
+  SetFramebufferCount(TRIPLE_BUFFERING);
   f_IsLeavingStaffRoll = FALSE;
   f_TextScrollOffset = 0;
   f_TopLineIndex = FIRST_TOP_LINE_INDEX;

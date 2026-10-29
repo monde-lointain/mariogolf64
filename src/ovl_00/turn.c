@@ -20,6 +20,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
+#include "framebuffer.h"
 #include "functions.h"
 #include "game.h"
 #include "game_flags.h"
@@ -109,7 +110,6 @@
 #define FREE_LOOK_START_DISTANCE (-0x12C00)
 #define FREE_LOOK_TURN_STEP 200
 #define FREE_LOOK_HUD_FLAGS 0x47
-#define FREE_LOOK_FRAMEBUFFER_COUNT 3
 /* A shorter pulse than the shots' rumble in effects.c */
 #define TURN_RUMBLE_FREQUENCY 0x100
 #define TURN_RUMBLE_FRAME_COUNT 8
@@ -194,7 +194,6 @@
 #define REPLAY_AIM_MIN_STEP 0x80
 #define REPLAY_AIM_STEP_DIVISOR 128
 #define REPLAY_AIM_SETTLE_FRAMES 6
-#define REPLAY_FRAMEBUFFER_COUNT 2
 #define AIM_RESET_BUTTONS (L_CBUTTONS | R_CBUTTONS)
 #define AIM_CAMERA_BUTTONS (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)
 #define AIM_CAMERA_RAISE_BUTTONS (U_CBUTTONS | R_CBUTTONS)
@@ -345,7 +344,6 @@ static s32 D_8022401C_ovl_00 = 0;
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
 void PlaceShotCamera(void);
-void SetFramebufferCount(s32 count);
 s32 func_8005F30C(s32 x, s32 z);
 void func_8006034C(s8 value);
 s32 GetRecordedScoreKind(s32 strokes);
@@ -805,7 +803,7 @@ void StartFreeLook(void) {
   g_RoundHud.isLetterboxShown = FALSE;
   g_RoundHud.unkC = 0;
   if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
-    SetFramebufferCount(FREE_LOOK_FRAMEBUFFER_COUNT);
+    SetFramebufferCount(TRIPLE_BUFFERING);
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   }
 
@@ -1096,22 +1094,22 @@ void TurnAim(s32 turnsAltHeading) {
       if (heading == (s16)g_CurrentShot.unk0) {
         if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
           SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
-          SetFramebufferCount(2);
+          SetFramebufferCount(DOUBLE_BUFFERING);
         }
       } else if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
-        SetFramebufferCount(3);
+        SetFramebufferCount(TRIPLE_BUFFERING);
         SetScreenEffect(SCREEN_EFFECT_NONE, 0);
       }
     } else {
-      SetFramebufferCount(3);
+      SetFramebufferCount(TRIPLE_BUFFERING);
     }
   }
 
   if (IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
     if (rand() & 1) {
-      SetFramebufferCount(3);
+      SetFramebufferCount(TRIPLE_BUFFERING);
     } else {
-      SetFramebufferCount(2);
+      SetFramebufferCount(DOUBLE_BUFFERING);
     }
   }
 }
@@ -1141,7 +1139,7 @@ s32 UpdateAimControls(void) {
       g_CurrentShot.unk0 = D_80104F78.unk0;
       if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
         SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
-        SetFramebufferCount(REPLAY_FRAMEBUFFER_COUNT);
+        SetFramebufferCount(DOUBLE_BUFFERING);
       }
 
       return ++f_ReplayAimSettledFrameCount >= REPLAY_AIM_SETTLE_FRAMES;
@@ -1152,7 +1150,7 @@ s32 UpdateAimControls(void) {
     heading = g_CurrentShot.unk0;
     g_CurrentShot.unk0 = (headingLeft < 0) ? heading - turn : heading + turn;
     if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
-      SetFramebufferCount(FREE_LOOK_FRAMEBUFFER_COUNT);
+      SetFramebufferCount(TRIPLE_BUFFERING);
       SetScreenEffect(SCREEN_EFFECT_NONE, 0);
     }
 
@@ -3393,7 +3391,7 @@ void UpdateTurns(void) {
         TurnAim(0);
         PlaceCharacterForShot(0);
         if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
-          SetFramebufferCount(3);
+          SetFramebufferCount(TRIPLE_BUFFERING);
           SetScreenEffect(SCREEN_EFFECT_NONE, 0);
         }
 
@@ -3438,7 +3436,7 @@ void UpdateTurns(void) {
             TakePinOut();
             ClearShotEffects(CLEAR_KIND_ALL);
             PlacePlayersOnTee();
-            SetFramebufferCount(3);
+            SetFramebufferCount(TRIPLE_BUFFERING);
             nextState = PLAYER_STATE_WAITING;
           } else if (choice == PAUSE_ACTION_HOLE_OUT) {
             RequestPauseMenu(0, -1);
@@ -3522,7 +3520,7 @@ void UpdateTurns(void) {
           if (g_TurnController.pressedButtons & (A_BUTTON | R_TRIG)) {
             g_PauseScreen = PAUSE_SCREEN_NONE;
             SetMenuBackdrop(MENU_BACKDROP_NONE);
-            SetFramebufferCount(3);
+            SetFramebufferCount(TRIPLE_BUFFERING);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
             g_LetterboxState = 0;
             PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
@@ -3540,7 +3538,7 @@ void UpdateTurns(void) {
             D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
             UpdateAimControls();
             PlaceShotCamera();
-            SetFramebufferCount(3);
+            SetFramebufferCount(TRIPLE_BUFFERING);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
 
@@ -3589,7 +3587,7 @@ void UpdateTurns(void) {
             if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
               SetScreenEffect(
                   SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
-              SetFramebufferCount(2);
+              SetFramebufferCount(DOUBLE_BUFFERING);
             }
 
             StartTurnTimer();
@@ -3677,7 +3675,7 @@ void UpdateTurns(void) {
             g_CurrentShot.unk8 = 0;
             PlaySound(
                 SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
-            SetFramebufferCount(2);
+            SetFramebufferCount(DOUBLE_BUFFERING);
             nextState = PLAYER_STATE_SETTING_POWER;
             if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
               SetScreenEffect(
@@ -3945,7 +3943,7 @@ void UpdateTurns(void) {
         D_80223FF8_ovl_00++;
         g_SavedShots[playerIndex] = g_CurrentShot;
         SetCharacterTranslucent(0, FALSE);
-        SetFramebufferCount(3);
+        SetFramebufferCount(TRIPLE_BUFFERING);
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
         LoadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
         SetPaintSeed(&D_80227150_ovl_00);

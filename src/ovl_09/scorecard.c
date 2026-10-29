@@ -11,6 +11,7 @@
 #include "character.h"
 #include "character_slot.h"
 #include "course.h"
+#include "framebuffer.h"
 #include "functions.h"
 #include "game_flags.h"
 #include "heap.h"
@@ -47,7 +48,6 @@
 #define SCORECARD_CLOSE_TIME 10
 #define SCORECARD_SLIDE_SPEED 32
 #define SCORECARD_CLOSE_ACCELERATION 8
-#define ROUND_FRAMEBUFFER_COUNT 3
 /* The faces step through their images once every FACE_FRAME_TIME frames */
 #define FACE_FRAME_COUNT 5
 #define FACE_FRAME_TIME 3
@@ -73,7 +73,6 @@
 #define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
 #define THREE_PAGE_COUNT 3
 
-void SetFramebufferCount(s32 count);
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page);
 
 void ScrollLeaderboard(u16 buttons);
@@ -924,7 +923,7 @@ void AnimateScorecard(void) {
         FreeScorecard();
         g_PauseScreen = PAUSE_SCREEN_NONE;
         SetMenuBackdrop(MENU_BACKDROP_NONE);
-        SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+        SetFramebufferCount(TRIPLE_BUFFERING);
         SetScreenEffect(SCREEN_EFFECT_NONE, 0);
         g_RoundHud.isLetterboxShown = TRUE;
         g_RoundHud.unkC = 1;

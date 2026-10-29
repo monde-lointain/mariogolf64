@@ -12,6 +12,7 @@
 #include "course.h"
 #include "current_shot.h"
 #include "effects.h"
+#include "framebuffer.h"
 #include "functions.h"
 #include "heap.h"
 #include "hole_display.h"
@@ -33,8 +34,6 @@
 
 /* The small cloud behind a choice box */
 #define CHOICE_BOX_CLOUD_IMAGE_ASSET 0x71F
-
-#define ROUND_FRAMEBUFFER_COUNT 3
 
 /* Values of f_PauseMenuRequest, which the pause menu's drawing carries out */
 enum PauseMenuRequest {
@@ -310,8 +309,6 @@ static u8* f_ChoiceBoxCursorImage;
  */
 Boolean f_IsGiveUpAllowed;
 
-void SetFramebufferCount(s32 count);
-
 void HideRoundHud(void) {
   g_RoundHud.isLetterboxShown = FALSE;
   g_RoundHud.unkC = 0;
@@ -340,7 +337,7 @@ void ResumeRound(void) {
   g_RoundHud.unkD = 1;
   SetMenuBackdrop(MENU_BACKDROP_NONE);
   g_PauseScreen = PAUSE_SCREEN_NONE;
-  SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+  SetFramebufferCount(TRIPLE_BUFFERING);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
 }
 

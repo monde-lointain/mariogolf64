@@ -12,6 +12,7 @@
 #include "club.h"
 #include "controller.h"
 #include "cpu_projection.h"
+#include "framebuffer.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_display.h"
@@ -184,7 +185,6 @@ typedef struct ClubSlots {
   /* 0x58 */ u8* faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
 } ClubSlots; /* size = 0x78 */
 
-void SetFramebufferCount(s32 count);
 void DrawClubSlotsLogo(
     Gfx** displayListHead, s32 centerX, s32 centerY, f32 scale);
 
@@ -366,7 +366,7 @@ void FreeClubSlots(void) {
   s32 playerIndex;
 
   SetMenuBackdrop(MENU_BACKDROP_NONE);
-  SetFramebufferCount(3);
+  SetFramebufferCount(TRIPLE_BUFFERING);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   FreeMemory(&f_Slots->symbolImages);
   FreeMemory(&f_Slots->machineImage);

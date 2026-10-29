@@ -15,6 +15,7 @@
 #include "cpu_projection.h"
 #include "debug_text.h"
 #include "fireworks.h"
+#include "framebuffer.h"
 #include "game.h"
 #include "game_flags.h"
 #include "heap.h"
@@ -39,7 +40,6 @@
 #define TITLE_LIGHT_PITCH 0x1000
 #define TITLE_LIGHT_YAW 0x6000
 #define GAME_FLAG_UNK7 0x07
-#define TITLE_FRAMEBUFFER_COUNT 2
 
 /* Unk800C5F34.imageKind values: which images InitSkyColors loads */
 enum SkyImageKind {
@@ -197,8 +197,6 @@ void CaptureHudAnimationFrame(void);
 void DrawTileAnimation(void);
 void DrawSliceAnimation(void);
 void DrawSpiralAnimation(Gfx** displayListHead);
-
-void SetFramebufferCount(s32 count);
 
 /* f_SkyHorizonColor's starting value in each channel */
 #define SKY_HORIZON_LEVEL 63
@@ -683,7 +681,7 @@ void SetUpTitleHole(void) {
   g_GameState.playerCount = 1;
   StopLoaderThread();
   StartLoaderThread();
-  SetFramebufferCount(TITLE_FRAMEBUFFER_COUNT);
+  SetFramebufferCount(DOUBLE_BUFFERING);
 }
 
 /* Grows or fades the sun's glare by whether the z-buffer shows anything in
@@ -1083,7 +1081,6 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", InitSkyColors);
 #define SKY_EDITOR_COLUMN_WIDTH 4
 #define SKY_EDITOR_ERASE_COLUMN 14
 #define SKY_EDITOR_ERASE_ROW 5
-#define SKY_EDITOR_FRAMEBUFFER_COUNT 3
 
 /* The table's columns: top, bottom, the unkA colors, the background image's
  * color, and fog */
@@ -1395,7 +1392,7 @@ s32 UpdateSkyEditor(void) {
       (f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH) + SKY_EDITOR_TEXT_COLUMN +
           2,
       f_SkyEditorRow + SKY_EDITOR_TEXT_ROW + 1);
-  SetFramebufferCount(SKY_EDITOR_FRAMEBUFFER_COUNT);
+  SetFramebufferCount(TRIPLE_BUFFERING);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   return TRUE;
 }

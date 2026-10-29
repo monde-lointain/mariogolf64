@@ -14,6 +14,7 @@
 #include "club.h"
 #include "course.h"
 #include "fault.h"
+#include "framebuffer.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "host_file.h"
@@ -97,8 +98,6 @@ extern void* D_80105B78[18];
 extern void* D_800FBE30[2];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
-
-void SetFramebufferCount(s32 count);
 
 /* f_SlotCells lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
@@ -603,7 +602,7 @@ void LoadMenuResources(void) {
   D_801B69EC = AllocMemory(OpenEncodedAsset(0x709, &asset));
   ReadEncodedAsset(D_801B69EC, &asset);
   PlaySong(SONG_TITLE, 0);
-  SetFramebufferCount(3);
+  SetFramebufferCount(TRIPLE_BUFFERING);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   D_801323A0.statsCourse = 6;
   InitSram();
