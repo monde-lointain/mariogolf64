@@ -368,7 +368,8 @@ static s32 D_80230880_ovl_01[2] = {0, 0};
 static f32 D_80230888_ovl_01[4] = {0.0f, 2.0f, 4.0f, 6.0f};
 /* Read by no routine */
 static s32 D_80230898_ovl_01[2] = {0, 0};
-static u8 D_802308A0_ovl_01 = 0;
+/* Whether ReadBestShots found any recorded best shot */
+static u8 f_HasBestShots = FALSE;
 AssetId g_CharacterFaceAssets[CHARACTER_COUNT] = {0x07C5, 0x0755, 0x07A9,
     0x0747, 0x078D, 0x07B7, 0x07D3, 0x07E1, 0x0771, 0x079B, 0x07EF, 0x0763,
     0x077F, 0x098D, 0x07FD, 0x080B, 0x0819, 0x0827};
@@ -2221,7 +2222,7 @@ void DrawBestShots(Gfx** displayListHead) {
         TEXT_SLOT_LARGE_FONT, 1, 0, 255, 255, 255, 255);
   }
 
-  if (D_802308A0_ovl_01 == 0) {
+  if (f_HasBestShots == 0) {
     SetTextSlot(NO_RECORDS_X, NO_RECORDS_Y, MESSAGE_NO_RECORDS,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_CENTERED, 255, 255, 255, 255);
   }
@@ -2370,16 +2371,16 @@ void ReadBestShots(void) {
   }
 
   recordIndex = 0;
-  D_802308A0_ovl_01 = 0;
+  f_HasBestShots = 0;
   for (; recordIndex != STATS_GRID_ROW_COUNT; recordIndex++) {
     for (index = 0; index != STATS_GRID_COLUMN_COUNT; index++) {
       if (f_BestShotRecords[recordIndex][index] != STATS_CELL_EMPTY) {
-        D_802308A0_ovl_01++;
+        f_HasBestShots++;
         break;
       }
     }
 
-    if (D_802308A0_ovl_01 != 0) {
+    if (f_HasBestShots != 0) {
       break;
     }
   }

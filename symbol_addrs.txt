@@ -3223,6 +3223,7 @@ f_ShownCourseBufferIndex = 0x80230B4E; // type:u8 size:0x1 segment:ovl_01
 f_SavedGameModes = 0x80230B50; // type:s32 size:0xC segment:ovl_01
 f_ModeImageAssets = 0x80230B5C; // size:0x2C segment:ovl_01
 f_HandicapColumnLefts = 0x802306D8; // type:s32 size:0x40 segment:ovl_01
+f_HasBestShots = 0x802308A0; // type:u8 size:0x1 segment:ovl_01
 g_CharacterFaceAssets = 0x802308A4; // type:u16 size:0x24 segment:ovl_01
 g_CharacterPaletteFiles = 0x802308C8; // type:s16 size:0x90 segment:ovl_01
 D_8022BE2C_ovl_01 = 0x8022BE2C; // type:s32 size:0x4 segment:ovl_01
