@@ -43,8 +43,8 @@
 #include "variables.h"
 #include "work_area.h"
 
-/* D_800E12B0 is a square of random bytes this many on a side */
-#define RANDOM_GRID_SIZE 32
+/* f_GroundNoiseTexels is a square of random bytes this many on a side */
+#define GROUND_NOISE_SIZE 32
 
 /* How far above the tee a ball starts on the main courses */
 #define TEE_HEIGHT 307.2f
@@ -139,11 +139,11 @@ static u8 D_800C30E0[25] = {0, 5, 7, 10, 20, 1, 12, 13, 14, 21, 2, 15, 8, 16,
     22, 3, 17, 18, 19, 23, 4, 6, 9, 11, 24};
 static s32 f_GroundTimingRow = 0;
 
-static u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
+static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
 
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
 void func_80407D64(void);
-void FillRandomGrid(s32 range, s32 base);
+void FillGroundNoise(s32 range, s32 base);
 void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
@@ -1746,21 +1746,21 @@ DIM_BACKDROP:
 INCLUDE_ASM("asm/nonmatchings/play", UpdatePlay);
 #endif
 
-/* Fills D_800E12B0 with random values from base up, capped at 255 */
-void FillRandomGrid(s32 range, s32 base) {
+/* Fills f_GroundNoiseTexels with random values from base up, capped at 255 */
+void FillGroundNoise(s32 range, s32 base) {
   s32 cell = 0;
   s32 row;
   s32 column;
   s32 value;
 
-  for (row = 0; row < RANDOM_GRID_SIZE; row++) {
-    for (column = 0; column < RANDOM_GRID_SIZE; column++) {
+  for (row = 0; row < GROUND_NOISE_SIZE; row++) {
+    for (column = 0; column < GROUND_NOISE_SIZE; column++) {
       value = (rand() % range) + base;
       if (value >= 256) {
         value = 255;
       }
 
-      D_800E12B0[cell++] = value;
+      f_GroundNoiseTexels[cell++] = value;
     }
   }
 }
@@ -1770,7 +1770,7 @@ void InitExpansionPakFeatures(void) {
     func_80407D64();
   }
 
-  FillRandomGrid(0x60, 0xBE);
+  FillGroundNoise(0x60, 0xBE);
 }
 
 /*
@@ -1923,9 +1923,9 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 
 /* Loads the noise texture that DrawGround blends over the tiles */
 #define LoadNoiseTexture(shiftS, shiftT) \
-  gDPLoadMultiBlock(gfx++, TextureAddress(D_800E12B0), NOISE_TMEM, \
-      G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, RANDOM_GRID_SIZE, \
-      RANDOM_GRID_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
+  gDPLoadMultiBlock(gfx++, TextureAddress(f_GroundNoiseTexels), NOISE_TMEM, \
+      G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, GROUND_NOISE_SIZE, \
+      GROUND_NOISE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
 extern u32 g_GroundDrawFrame;
 void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);

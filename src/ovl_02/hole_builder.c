@@ -559,7 +559,7 @@ void ClearHolePoints(void);
 void ShadeGroundTiles(void);
 void CastBillboardShadows(void);
 void MoveRingsToEnd(void);
-void FillRandomGrid(s32 range, s32 base);
+void FillGroundNoise(s32 range, s32 base);
 
 /* A PAINT_LOGIC_* value */
 static s32 f_PaintLogic;
@@ -2414,11 +2414,11 @@ void BuildHole(s32 course, s32 hole) {
 
   /* The repeated case is there to match */
   if (course == COURSE_RECORD_SHY_GUY_DESERT) {
-    FillRandomGrid(0x60, 0xC8);
+    FillGroundNoise(0x60, 0xC8);
   } else if (course == COURSE_RECORD_YOSHIS_ISLAND) {
-    FillRandomGrid(0x60, 0xC8);
+    FillGroundNoise(0x60, 0xC8);
   } else {
-    FillRandomGrid(0x60, 0xBE);
+    FillGroundNoise(0x60, 0xBE);
   }
 
   if (g_GameState.isMiniGolf) {
@@ -2427,7 +2427,7 @@ void BuildHole(s32 course, s32 hole) {
       f_PaintLogic = LAST_MINI_GOLF_PAINT_LOGIC;
     }
 
-    FillRandomGrid(0x40, 0xD2);
+    FillGroundNoise(0x40, 0xD2);
   } else if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
     f_PaintLogic = f_HolePaintLogics[course - 1][hole - 1];
     if (IsGameFlagSet(GAME_FLAG_UNK6A)) {
