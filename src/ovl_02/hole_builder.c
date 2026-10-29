@@ -172,13 +172,24 @@ typedef struct GroundLightColor {
 #define NO_HEIGHT (-0x8000)
 #define NO_HEIGHT_PAIR 0x80008000
 /* Ground positions are in units of 1/HEIGHT_ROW_SPAN map texel */
-#define HEIGHT_ROW_SPAN 16
+#define HEIGHT_ROW_SPAN_SHIFT 4
+#define HEIGHT_ROW_SPAN (1 << HEIGHT_ROW_SPAN_SHIFT)
 #define HEIGHT_FRACTION_BITS 12
 /* Scales a step per ground unit to a step per map row in HEIGHT_FRACTION_BITS
  * fixed point */
 #define HEIGHT_ROW_STEP_SCALE 65536.0f
-/* f_HeightStepScales holds 65536 / n for the counts below this */
+/*
+ * DrawHeightRow steps a height across a row's texels in this many fraction
+ * bits; f_HeightStepScales holds TEXEL_HEIGHT_ONE / n for the counts below
+ * HEIGHT_STEP_SCALE_COUNT
+ */
+#define TEXEL_HEIGHT_FRACTION_BITS 16
+#define TEXEL_HEIGHT_ONE 65536.0f
 #define HEIGHT_STEP_SCALE_COUNT 32
+/* The band's heights are filled with NO_HEIGHT four at a time, as doubles */
+#define HEIGHTS_PER_FILL 4
+/* DrawBandHeights spins this many times after each band; the original has it */
+#define BAND_DELAY_LOOP_COUNT 0x2000
 
 /* The points of a tile's grid, edges included, that MeasureGroundTiles averages
  */
@@ -504,37 +515,37 @@ static s32 D_80254F4C_ovl_02 = 0;
 /* There is no step for a count of 0 */
 static f32 f_HeightStepScales[HEIGHT_STEP_SCALE_COUNT] = {
     0.0f,
-    HEIGHT_ROW_STEP_SCALE / 1,
-    HEIGHT_ROW_STEP_SCALE / 2,
-    HEIGHT_ROW_STEP_SCALE / 3,
-    HEIGHT_ROW_STEP_SCALE / 4,
-    HEIGHT_ROW_STEP_SCALE / 5,
-    HEIGHT_ROW_STEP_SCALE / 6,
-    HEIGHT_ROW_STEP_SCALE / 7,
-    HEIGHT_ROW_STEP_SCALE / 8,
-    HEIGHT_ROW_STEP_SCALE / 9,
-    HEIGHT_ROW_STEP_SCALE / 10,
-    HEIGHT_ROW_STEP_SCALE / 11,
-    HEIGHT_ROW_STEP_SCALE / 12,
-    HEIGHT_ROW_STEP_SCALE / 13,
-    HEIGHT_ROW_STEP_SCALE / 14,
-    HEIGHT_ROW_STEP_SCALE / 15,
-    HEIGHT_ROW_STEP_SCALE / 16,
-    HEIGHT_ROW_STEP_SCALE / 17,
-    HEIGHT_ROW_STEP_SCALE / 18,
-    HEIGHT_ROW_STEP_SCALE / 19,
-    HEIGHT_ROW_STEP_SCALE / 20,
-    HEIGHT_ROW_STEP_SCALE / 21,
-    HEIGHT_ROW_STEP_SCALE / 22,
-    HEIGHT_ROW_STEP_SCALE / 23,
-    HEIGHT_ROW_STEP_SCALE / 24,
-    HEIGHT_ROW_STEP_SCALE / 25,
-    HEIGHT_ROW_STEP_SCALE / 26,
-    HEIGHT_ROW_STEP_SCALE / 27,
-    HEIGHT_ROW_STEP_SCALE / 28,
-    HEIGHT_ROW_STEP_SCALE / 29,
-    HEIGHT_ROW_STEP_SCALE / 30,
-    HEIGHT_ROW_STEP_SCALE / 31,
+    TEXEL_HEIGHT_ONE / 1,
+    TEXEL_HEIGHT_ONE / 2,
+    TEXEL_HEIGHT_ONE / 3,
+    TEXEL_HEIGHT_ONE / 4,
+    TEXEL_HEIGHT_ONE / 5,
+    TEXEL_HEIGHT_ONE / 6,
+    TEXEL_HEIGHT_ONE / 7,
+    TEXEL_HEIGHT_ONE / 8,
+    TEXEL_HEIGHT_ONE / 9,
+    TEXEL_HEIGHT_ONE / 10,
+    TEXEL_HEIGHT_ONE / 11,
+    TEXEL_HEIGHT_ONE / 12,
+    TEXEL_HEIGHT_ONE / 13,
+    TEXEL_HEIGHT_ONE / 14,
+    TEXEL_HEIGHT_ONE / 15,
+    TEXEL_HEIGHT_ONE / 16,
+    TEXEL_HEIGHT_ONE / 17,
+    TEXEL_HEIGHT_ONE / 18,
+    TEXEL_HEIGHT_ONE / 19,
+    TEXEL_HEIGHT_ONE / 20,
+    TEXEL_HEIGHT_ONE / 21,
+    TEXEL_HEIGHT_ONE / 22,
+    TEXEL_HEIGHT_ONE / 23,
+    TEXEL_HEIGHT_ONE / 24,
+    TEXEL_HEIGHT_ONE / 25,
+    TEXEL_HEIGHT_ONE / 26,
+    TEXEL_HEIGHT_ONE / 27,
+    TEXEL_HEIGHT_ONE / 28,
+    TEXEL_HEIGHT_ONE / 29,
+    TEXEL_HEIGHT_ONE / 30,
+    TEXEL_HEIGHT_ONE / 31,
 };
 
 void BuildGroundTileDisplayList(
@@ -748,18 +759,20 @@ void DrawBandHeights(s16* heights, s32 band) {
       if (count < HEIGHT_STEP_SCALE_COUNT) {
         texelHeightStep = f_HeightStepScales[count] * (toHeight - fromHeight);
       } else {
-        texelHeightStep = ((toHeight - fromHeight) << 16) / count;
+        texelHeightStep =
+            ((toHeight - fromHeight) << TEXEL_HEIGHT_FRACTION_BITS) / count;
       }
 
-      texelColumn = longX >> (HEIGHT_FRACTION_BITS + 4);
-      texelRow = (texelRow >> 4) - band * HEIGHT_BAND_ROW_COUNT;
+      texelColumn = longX >> (HEIGHT_FRACTION_BITS + HEIGHT_ROW_SPAN_SHIFT);
+      texelRow =
+          (texelRow >> HEIGHT_ROW_SPAN_SHIFT) - band * HEIGHT_BAND_ROW_COUNT;
       if (texelRow >= 0 && texelRow < HEIGHT_BAND_ROW_COUNT) {
-        height = fromHeight << 16;
+        height = fromHeight << TEXEL_HEIGHT_FRACTION_BITS;
         texel = &heights[texelRow * MAP_COLUMN_COUNT];
         texel += texelColumn;
         for (texelIndex = 0; texelIndex <= count; texelIndex++) {
           if (texelColumn >= 0 && texelColumn < MAP_COLUMN_COUNT) {
-            value = height >> 16;
+            value = height >> TEXEL_HEIGHT_FRACTION_BITS;
             if (*texel != NO_HEIGHT) {
               value = (*texel + value) / 2;
             }
@@ -849,7 +862,8 @@ void DrawBandHeights(s16* heights, s32 band) {
     ((u32*)heights)[0] = NO_HEIGHT_PAIR;
     ((u32*)heights)[1] = NO_HEIGHT_PAIR;
     fill = *(f64*)heights;
-    for (column = 1; column < HEIGHT_BAND_ROW_COUNT * MAP_COLUMN_COUNT / 4;
+    for (column = 1;
+        column < HEIGHT_BAND_ROW_COUNT * MAP_COLUMN_COUNT / HEIGHTS_PER_FILL;
         column++) {
       ((f64*)heights)[column] = fill;
     }
@@ -909,8 +923,7 @@ void DrawBandHeights(s16* heights, s32 band) {
       }
     }
 
-    /* An empty loop; the original has it */
-    for (column = 0; column < 0x2000; column++) {
+    for (column = 0; column < BAND_DELAY_LOOP_COUNT; column++) {
     }
   }
 }
