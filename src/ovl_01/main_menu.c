@@ -3542,13 +3542,13 @@ void UpdateCaddySelect(void) {
     return;
   }
 
-  if ((g_MenuRepeatButtons & U_JPAD) && D_801323A0.unk19 > 0) {
+  if ((g_MenuRepeatButtons & U_JPAD) && D_801323A0.caddyChoice > 0) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    D_801323A0.unk19--;
+    D_801323A0.caddyChoice--;
   } else if ((g_MenuRepeatButtons & D_JPAD) &&
-      D_801323A0.unk19 < CADDY_COUNT - 1) {
+      D_801323A0.caddyChoice < CADDY_COUNT - 1) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    D_801323A0.unk19++;
+    D_801323A0.caddyChoice++;
   }
 }
 
@@ -7052,7 +7052,7 @@ void DrawCaddySelect(Gfx** displayListHead) {
   DrawShadowedText(
       &gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y, D_8023176C_ovl_01);
   for (caddyIndex = 0; caddyIndex != CADDY_COUNT; caddyIndex++) {
-    if (D_801323A0.unk19 == caddyIndex) {
+    if (D_801323A0.caddyChoice == caddyIndex) {
       SetTextColor(&gfx, 255, 255, 0);
     } else {
       SetTextColor(&gfx, 255, 255, 255);

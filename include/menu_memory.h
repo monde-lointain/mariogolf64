@@ -51,7 +51,7 @@ typedef struct MenuMemory {
   /* 0x17 */ s8
       courseSpin; /* How far the courses still have to turn to reach it */
   /* 0x18 */ s8 holesChoice; /* HOLES_CHOICE_* */
-  /* 0x19 */ s8 unk19;
+  /* 0x19 */ s8 caddyChoice; /* The debug caddy select's caddy */
   /* 0x1A */ s8 unk1A;
   /* 0x1B */ s8 mainChoice;
   /* 0x1C */ s8 mainChoiceWithoutTransmit;
