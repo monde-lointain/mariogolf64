@@ -2926,9 +2926,10 @@ s32 ReadCartridgeCharacters(void) {
     saveIndex =
         CartridgeReadPhaseStep(transfer->readStep) - CARTRIDGE_FIRST_SAVE_STEP;
 
-    /* The original starts the offset at 0xA042, which every save index replaces
-     */
-    recordOffset = 0xA042;
+    /* The original starts the offset at the cartridge address of the first
+     * record's address, which every save index replaces */
+    recordOffset =
+        CARTRIDGE_RAM_ADDRESS + SAVE_RECORDS_OFFSET + RECORD_ADDRESS_OFFSET;
     checkedState = NOT_CHECKED;
     for (index = 0; index != CHARACTER_DATA_SIZE; index++) {
       characterData[index] = 0;
