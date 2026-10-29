@@ -21,6 +21,15 @@ typedef f32 BallSpeed;
 #define METERS_PER_SECOND_PER_KILOMETER_PER_HOUR 0.2778
 /* In the cup the ball falls at half gravity */
 #define CUP_GRAVITY (GRAVITY / 2)
+
+/*
+ * The simulations draw noise from the low byte of the ball's coordinates:
+ * centered on the byte's midpoint for noise from -1 to 1, or as a pair whose
+ * sum, divided by its most, gives noise from 0 to 1
+ */
+#define NOISE_BYTE_MASK 0xFF
+#define NOISE_BYTE_MIDPOINT (NOISE_BYTE_MASK / 2.0f)
+#define MAX_NOISE_BYTE_PAIR_SUM (NOISE_BYTE_MASK * 2.0f)
 /* Mini golf holds a rolling ball to the ground at twice gravity */
 #define MINI_GOLF_ROLL_GRAVITY (GRAVITY * 2)
 

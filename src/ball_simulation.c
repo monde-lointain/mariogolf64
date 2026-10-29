@@ -361,9 +361,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
   f32 GetPositionNoise(void) {
     return (((simulation->position[AXIS_X] + simulation->position[AXIS_Z]) &
-                0xFF) -
-               127.5f) /
-        127.5f;
+                NOISE_BYTE_MASK) -
+               NOISE_BYTE_MIDPOINT) /
+        NOISE_BYTE_MIDPOINT;
   }
 
   inline f32 AbsoluteValue(f32 value) {
@@ -373,12 +373,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   inline f32 GetStepNoise(void) {
     return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                      g_Players[simulation->playerIndex].unk88) &
-               0xFF) /
-        510.0f +
+               NOISE_BYTE_MASK) /
+        MAX_NOISE_BYTE_PAIR_SUM +
         (u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
                   g_Players[simulation->playerIndex].unk88) &
-            0xFF) /
-        510.0f;
+            NOISE_BYTE_MASK) /
+        MAX_NOISE_BYTE_PAIR_SUM;
   }
 
   velocity[AXIS_X] = simulation->velocity[AXIS_X];
@@ -2180,12 +2180,12 @@ s32 LaunchBallSimulation(
   f32 PickLieBlend(void) {
     return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                      g_Players[simulation->playerIndex].unk88) &
-               0xFF) /
-        510.0f +
+               NOISE_BYTE_MASK) /
+        MAX_NOISE_BYTE_PAIR_SUM +
         (u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
                   g_Players[simulation->playerIndex].unk88) &
-            0xFF) /
-        510.0f;
+            NOISE_BYTE_MASK) /
+        MAX_NOISE_BYTE_PAIR_SUM;
   }
 
   launchScale = 1.0f;

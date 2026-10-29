@@ -247,12 +247,12 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
   f32 GetStepNoise(void) {
     return ((u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                       g_Players[simulation->playerIndex].unk88) &
-                0xFF) *
-               0.0019607844f) +
+                NOISE_BYTE_MASK) *
+               (1.0f / MAX_NOISE_BYTE_PAIR_SUM)) +
         ((u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
                    g_Players[simulation->playerIndex].unk88) &
-             0xFF) *
-            0.0019607844f);
+             NOISE_BYTE_MASK) *
+            (1.0f / MAX_NOISE_BYTE_PAIR_SUM));
   }
 
   f32 GetLength3D(f32 x, f32 y, f32 z) {
@@ -292,9 +292,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
   f32 GetPositionNoise(void) {
     return (((simulation->position[AXIS_X] + simulation->position[AXIS_Z]) &
-                0xFF) -
-               127.5f) *
-        0.007843138f;
+                NOISE_BYTE_MASK) -
+               NOISE_BYTE_MIDPOINT) *
+        (1.0f / NOISE_BYTE_MIDPOINT);
   }
 
   char speedText[128];
