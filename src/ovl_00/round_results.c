@@ -94,6 +94,8 @@ enum PortraitAnimation {
  * update, and is done NOTICE_DONE_FRAME frames after it starts
  */
 #define NOTICE_SWING_HEIGHT 160.0f
+/* Nearly a quarter turn back, so that the swing starts at its full height */
+#define NOTICE_SWING_START_ANGLE -1.57f
 #define NOTICE_SWING_STEP (M_PI / 9)
 #define NOTICE_SWING_FRAMES 46
 #define NOTICE_DONE_FRAME 51
@@ -107,6 +109,13 @@ enum PortraitAnimation {
 #define NOTICE_LAST_FACE 3
 #define NOTICE_LIFT_DELAY 50
 #define NOTICE_LIFT_START_SPEED 8
+/*
+ * Until the lift passes this, it rises NOTICE_LIFT_START_SPEED a frame; after,
+ * it grows each frame by this fraction of itself
+ */
+#define NOTICE_LIFT_START_LIMIT -2
+#define NOTICE_LIFT_GROWTH_NUMERATOR 2
+#define NOTICE_LIFT_GROWTH_DENOMINATOR 3
 #define NOTICE_LIFT_EXIT -200
 
 /* The places image's 32x32 icons, after its 256-color palette */
@@ -855,10 +864,11 @@ s32 UpdateUnlockNotice(void) {
   }
 
   if (f_NoticeTime > NOTICE_LIFT_DELAY) {
-    if (f_NoticeLift > -2) {
+    if (f_NoticeLift > NOTICE_LIFT_START_LIMIT) {
       f_NoticeLift -= NOTICE_LIFT_START_SPEED;
     } else {
-      f_NoticeLift += f_NoticeLift * 2 / 3;
+      f_NoticeLift += f_NoticeLift * NOTICE_LIFT_GROWTH_NUMERATOR /
+          NOTICE_LIFT_GROWTH_DENOMINATOR;
     }
 
     if (f_NoticeLift < NOTICE_LIFT_EXIT) {
@@ -1278,7 +1288,7 @@ void StartResultsNotice(s32 kind) {
       f_NoticeFrameCount = 0;
       f_NoticeSwing = SCREEN_WIDTH;
       f_NoticeUnk54 = 0;
-      f_NoticeAngle = -1.57f;
+      f_NoticeAngle = NOTICE_SWING_START_ANGLE;
       break;
     case UNLOCK_NOTICE_KIND_CHARACTER:
       f_IsNoticeHeld = FALSE;
@@ -1533,10 +1543,11 @@ void UpdateCharacterResultsNotice(void) {
   }
 
   if (f_NoticeTime > NOTICE_LIFT_DELAY) {
-    if (f_NoticeLift > -2) {
+    if (f_NoticeLift > NOTICE_LIFT_START_LIMIT) {
       f_NoticeLift -= NOTICE_LIFT_START_SPEED;
     } else {
-      f_NoticeLift += f_NoticeLift * 2 / 3;
+      f_NoticeLift += f_NoticeLift * NOTICE_LIFT_GROWTH_NUMERATOR /
+          NOTICE_LIFT_GROWTH_DENOMINATOR;
     }
 
     if (f_NoticeLift < NOTICE_LIFT_EXIT) {
