@@ -313,6 +313,59 @@ void ResetBallSimulations(void) {
 #define SKIP_SPEED_RATIO 0.4f
 #define WATER_ENTRY_DRAG 0.2f
 /*
+ * A bounce within this share of a step's length, in its first substep, adds
+ * a second substep
+ */
+#define EARLY_HIT_FRACTION 0.4f
+/*
+ * On a bounce, the ball's velocity moves toward its spin's, by this share
+ * times the ground's flatness and, unless the ball starts rolling, the
+ * bounce's grip. The spin loses a tenth, and moves toward the ball's
+ * velocity before the substep by its own share.
+ */
+#define TRIANGLE_SPIN_GRIP 0.25f
+#define GROUND_SPIN_GRIP 0.5f
+#define BOUNCE_SPIN_DECAY 0.9f
+#define TRIANGLE_SPIN_FOLLOW 0.25f
+#define GROUND_SPIN_FOLLOW 0.2f
+/*
+ * The spin's pull on a ball bouncing off the ground is no more than this
+ * share of the landing speed
+ */
+#define MAX_SPIN_DRIFT_SHARE 0.4f
+
+/*
+ * Ground landings. Within the cup's pull, a ball falling steeply toward the
+ * cup lands on ground tilted to face it: the ground's upward part is less
+ * this much before it is normalized.
+ */
+#define CUP_PULL_TILT 0.7f
+#define MAX_CUP_PULL_SLIDE_RATIO 0.5f
+/*
+ * Off mini golf, a fast landing tilts the ground to one side or the other at
+ * random, by at least MIN_LANDING_TILT
+ */
+#define LANDING_TILT_NOISE_SCALE 0.1f
+#define MIN_LANDING_TILT 0.02f
+/* A slower ball takes a fixed slide along the ground */
+#define MIN_SLIDE_SPEED 0.0001f
+#define STILL_BALL_SLIDE 0.1f
+/*
+ * A ball landing in a bunker faster than these is half or mostly buried;
+ * the faster is about 70 km/h
+ */
+#define FAIR_LIE_BUNKER_SPEED KilometersPerHour(50)
+#define POOR_LIE_BUNKER_SPEED 9956.353f
+/* A slower ball landing on the step after a bounce starts rolling */
+#define MAX_ROLL_START_SPEED KilometersPerHour(50)
+/*
+ * A bouncing ball keeps at least this share of its speed along the ground;
+ * off mini golf, a quarter of it in the first steps
+ */
+#define MIN_BOUNCE_SPEED_KEPT 0.1f
+#define EARLY_BOUNCE_STEP_COUNT 2
+#define EARLY_BOUNCE_SPEED_SCALE 0.25
+/*
  * 30 cm: a ball in the cup, or holed out, may settle this far below the
  * ground, deeper than the cup's floor
  */
@@ -1335,7 +1388,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           startY + (fraction * (velocity[AXIS_Y] * TRIANGLE_HIT_STEP_SHARE));
       simulation->position[AXIS_Z] =
           startZ + (fraction * (velocity[AXIS_Z] * TRIANGLE_HIT_STEP_SHARE));
-      substepCount += (fraction < 0.4f) & (substepCount == 1);
+      substepCount += (fraction < EARLY_HIT_FRACTION) & (substepCount == 1);
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->surface = SURFACE_FAIRWAY;
       } else {
@@ -1467,15 +1520,15 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         f32 grip = 1.0f - bounce;
 
         velocity[AXIS_X] += (spinVelocityX - velocity[AXIS_X]) * grip *
-            AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f;
+            AbsoluteValueExpression(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP;
         velocity[AXIS_Z] += (spinVelocityZ - velocity[AXIS_Z]) * grip *
-            AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f;
-        spinVelocityX *= 0.9f;
-        spinVelocityZ *= 0.9f;
-        spinVelocityX =
-            spinVelocityX + ((previousVelocityX - spinVelocityX) * 0.25f);
-        spinVelocityZ =
-            spinVelocityZ + ((previousVelocityZ - spinVelocityZ) * 0.25f);
+            AbsoluteValueExpression(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP;
+        spinVelocityX *= BOUNCE_SPIN_DECAY;
+        spinVelocityZ *= BOUNCE_SPIN_DECAY;
+        spinVelocityX = spinVelocityX +
+            ((previousVelocityX - spinVelocityX) * TRIANGLE_SPIN_FOLLOW);
+        spinVelocityZ = spinVelocityZ +
+            ((previousVelocityZ - spinVelocityZ) * TRIANGLE_SPIN_FOLLOW);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
         BuildUnk44Rotation();
@@ -1519,13 +1572,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         guNormalize(&toCup[AXIS_X], &toCup[AXIS_Y], &toCup[AXIS_Z]);
         plane.normal[AXIS_X] = toCup[AXIS_X];
         plane.normal[AXIS_Z] = toCup[AXIS_Z];
-        plane.normal[AXIS_Y] = toCup[AXIS_Y] - 0.7f;
+        plane.normal[AXIS_Y] = toCup[AXIS_Y] - CUP_PULL_TILT;
         guNormalize(&plane.normal[AXIS_X], &plane.normal[AXIS_Y],
             &plane.normal[AXIS_Z]);
         if ((plane.normal[AXIS_X] * velocity[AXIS_X]) +
                     (plane.normal[AXIS_Z] * velocity[AXIS_Z]) >=
                 0.0f ||
-            fabsf(velocity[AXIS_Y]) * 0.5f <
+            fabsf(velocity[AXIS_Y]) * MAX_CUP_PULL_SLIDE_RATIO <
                 sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                     (velocity[AXIS_Z] * velocity[AXIS_Z]))) {
           GetTrianglePlane(&triangle, &plane);
@@ -1536,7 +1589,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         GetTrianglePlane(&triangle, &plane);
       }
 
-      substepCount += (fraction < 0.4f) & (substepCount == 1);
+      substepCount += (fraction < EARLY_HIT_FRACTION) & (substepCount == 1);
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           speed >= KilometersPerHour(5) && !g_GameState.isMiniGolf) {
         f32 side[3];
@@ -1546,12 +1599,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         side[AXIS_Z] = velocity[AXIS_Z];
         if (fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >=
             KilometersPerHour(5)) {
-          f32 tilt = (GetStepNoise() - 0.5f) * 0.1f;
+          f32 tilt = (GetStepNoise() - 0.5f) * LANDING_TILT_NOISE_SCALE;
 
           if (tilt < 0.0f) {
-            tilt -= 0.02f;
+            tilt -= MIN_LANDING_TILT;
           } else {
-            tilt += 0.02f;
+            tilt += MIN_LANDING_TILT;
           }
 
           guNormalize(&side[AXIS_X], &side[AXIS_Y], &side[AXIS_Z]);
@@ -1577,7 +1630,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       impactSpeed = (plane.normal[AXIS_X] * velocity[AXIS_X]) +
           (plane.normal[AXIS_Y] * velocity[AXIS_Y]) +
           (plane.normal[AXIS_Z] * velocity[AXIS_Z]);
-      if (speed >= 0.0001f) {
+      if (speed >= MIN_SLIDE_SPEED) {
         f32 cosine = fabsf(impactSpeed) / speed;
 
         if (cosine < 1.0f) {
@@ -1586,7 +1639,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           slide = 0.0f;
         }
       } else {
-        slide = 0.1f;
+        slide = STILL_BALL_SLIDE;
       }
 
       switch (GetSurfaceInfo(simulation->surface)->kind) {
@@ -1634,9 +1687,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       if (simulation->surface == SURFACE_BUNKER) {
         s32 burial = 0;
 
-        if (impactSpeed >= 9956.353f) {
+        if (impactSpeed >= POOR_LIE_BUNKER_SPEED) {
           burial = 2;
-        } else if (impactSpeed >= KilometersPerHour(50)) {
+        } else if (impactSpeed >= FAIR_LIE_BUNKER_SPEED) {
           burial = 1;
         }
 
@@ -1755,7 +1808,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       }
 
       if (simulation->state != BALL_STATE_ROLLING &&
-          impactSpeed < KilometersPerHour(50) &&
+          impactSpeed < MAX_ROLL_START_SPEED &&
           simulation->stepCount - 1 == simulation->lastBounceStep) {
         s32 spinVelocityX;
         s32 spinVelocityZ;
@@ -1772,9 +1825,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         velocity[AXIS_X] += (spinVelocityX - velocity[AXIS_X]) *
-            AbsoluteValue(plane.normal[AXIS_Y]) * 0.5f;
+            AbsoluteValue(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
         velocity[AXIS_Z] += (spinVelocityZ - velocity[AXIS_Z]) *
-            AbsoluteValue(plane.normal[AXIS_Y]) * 0.5f;
+            AbsoluteValue(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
         simulation->spinSpeed = 0;
       } else {
         f32 keep = 1.0f - spin;
@@ -1788,12 +1841,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         f32 driftLimit;
         f32 drift;
 
-        if (keep <= 0.1f) {
-          keep = 0.1f;
+        if (keep <= MIN_BOUNCE_SPEED_KEPT) {
+          keep = MIN_BOUNCE_SPEED_KEPT;
         }
 
-        if (simulation->stepCount < 2 && !g_GameState.isMiniGolf) {
-          keep *= 0.25;
+        if (simulation->stepCount < EARLY_BOUNCE_STEP_COUNT &&
+            !g_GameState.isMiniGolf) {
+          keep *= EARLY_BOUNCE_SPEED_SCALE;
         }
 
         normalPart[AXIS_X] = -plane.normal[AXIS_X] * impactSpeed;
@@ -1813,11 +1867,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         grip = 1.0f - restitution;
         driftX = (spinVelocityX - velocity[AXIS_X]) *
-            (grip * fabsf(plane.normal[AXIS_Y]) * 0.5f);
+            (grip * fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
         driftZ = (spinVelocityZ - velocity[AXIS_Z]) *
-            (grip * fabsf(plane.normal[AXIS_Y]) * 0.5f);
+            (grip * fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
         drift = (s32)IntLength2D(driftX, driftZ);
-        driftLimit = impactSpeed * 0.4f;
+        driftLimit = impactSpeed * MAX_SPIN_DRIFT_SHARE;
         if (driftLimit < drift && impactSpeed > 1.0f) {
           f32 scale = driftLimit / drift;
 
@@ -1825,14 +1879,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           driftZ = driftZ * scale;
         }
 
-        spinVelocityX *= 0.9f;
-        spinVelocityZ *= 0.9f;
+        spinVelocityX *= BOUNCE_SPIN_DECAY;
+        spinVelocityZ *= BOUNCE_SPIN_DECAY;
         velocity[AXIS_X] += driftX;
         velocity[AXIS_Z] += driftZ;
-        spinVelocityX =
-            spinVelocityX + ((previousVelocityX - spinVelocityX) * 0.2f);
-        spinVelocityZ =
-            spinVelocityZ + ((previousVelocityZ - spinVelocityZ) * 0.2f);
+        spinVelocityX = spinVelocityX +
+            ((previousVelocityX - spinVelocityX) * GROUND_SPIN_FOLLOW);
+        spinVelocityZ = spinVelocityZ +
+            ((previousVelocityZ - spinVelocityZ) * GROUND_SPIN_FOLLOW);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
         BuildUnk44Rotation();
