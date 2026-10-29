@@ -74,8 +74,9 @@ enum GatheredBestShots {
 #define STATS_KIND_LIST_SIZE (STATS_GRID_COLUMN_COUNT + 1)
 
 /* What LoadPlayerStatsBuffer reads into the buffers it fills */
-#define PLAYER_STATS_ICON_COUNT 8
-#define PLAYER_STATS_ICON_SIZE 0x218
+#define BET_ICON_COUNT 8
+/* Each bet icon's room in the buffer, more than its 0x148 bytes */
+#define BET_ICON_SLOT_SIZE 0x218
 /* An 8x8 orange dot, drawn once per stake level of a bet */
 #define ASSET_STAKE_MARK 0x671
 /* A 64x44 wooden plaque, drawn behind each player's handicap */
@@ -98,11 +99,11 @@ enum GatheredBestShots {
  * in D_802304B4 hold STATS_INDEX_UNUSED */
 #define STATS_INDEX_ROW_COUNT 7
 #define STATS_INDEX_UNUSED -1
-/* The stats icons are 24x24, and DrawBetIcon shows each of their two frames
+/* The bet icons are 24x24, and DrawBetIcon shows each of their two frames
  * for 4 video frames */
-#define STATS_ICON_SIZE 24
-#define STATS_ICON_FRAME_COUNT 2
-#define STATS_ICON_FRAME_DURATION 4
+#define BET_ICON_SIZE 24
+#define BET_ICON_FRAME_COUNT 2
+#define BET_ICON_FRAME_DURATION 4
 
 /* The text slots that screen 12 clears on leaving */
 #define STATS_TEXT_SLOT_COUNT 4
@@ -219,11 +220,11 @@ static s16 D_802303A2_ovl_01 = 0;
 static s16 D_802303A4_ovl_01 = 0;
 static s16 D_802303A6_ovl_01 = 0;
 static s16 D_802303A8_ovl_01 = 0;
-static u32 D_802303AC_ovl_01[PLAYER_STATS_ICON_COUNT] = {
+static u32 D_802303AC_ovl_01[BET_ICON_COUNT] = {
     0x0674, 0x0678, 0x067A, 0x067E, 0x0680, 0x067C, 0x0676, 0x0672};
 // clang-format off
-static u32 D_802303CC_ovl_01[PLAYER_STATS_ICON_COUNT]
-                             [STATS_ICON_FRAME_COUNT] = {
+static u32 D_802303CC_ovl_01[BET_ICON_COUNT]
+                             [BET_ICON_FRAME_COUNT] = {
   { 0x0674, 0x0675 },
   { 0x0678, 0x0679 },
   { 0x067A, 0x067B },
@@ -428,7 +429,7 @@ static void* D_8023B344_ovl_01;
 static void* f_StakeMark;
 static void* f_StatsNamePlate;
 /* The two frames of the stats icon that DrawBetIcon animates */
-static void* D_8023B350_ovl_01[STATS_ICON_FRAME_COUNT];
+static void* D_8023B350_ovl_01[BET_ICON_FRAME_COUNT];
 static void* f_StatsGreenArrows;
 static void* f_PageArrows;
 static void* f_HandicapPlaque;
@@ -473,11 +474,10 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
   switch (bufferKind) {
     case PLAYER_STATS_BUFFER_ICONS:
       D_8023B340_ovl_01 = buffer;
-      for (iconIndex = 0; iconIndex != PLAYER_STATS_ICON_COUNT; iconIndex++) {
+      for (iconIndex = 0; iconIndex != BET_ICON_COUNT; iconIndex++) {
         OpenEncodedAsset(D_802303AC_ovl_01[iconIndex], &asset);
         ReadEncodedAsset(
-            ImageAt(D_8023B340_ovl_01, iconIndex * PLAYER_STATS_ICON_SIZE),
-            &asset);
+            ImageAt(D_8023B340_ovl_01, iconIndex * BET_ICON_SLOT_SIZE), &asset);
       }
 
       break;
@@ -794,7 +794,7 @@ void DrawBetSettings(
     }
 
     if (columnIndex != memory->unkD) {
-      icon = ImageAt(D_8023B340_ovl_01, betIndex * PLAYER_STATS_ICON_SIZE);
+      icon = ImageAt(D_8023B340_ovl_01, betIndex * BET_ICON_SLOT_SIZE);
       gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
       /* Bets without a stake are dimmed */
       if (memory->betStakeLevels[D_80230460_ovl_01[D_801B5634 - 1]
@@ -807,17 +807,17 @@ void DrawBetSettings(
       }
 
       gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(icon)),
-          G_IM_FMT_CI, STATS_ICON_SIZE, STATS_ICON_SIZE, 0, 0,
-          STATS_ICON_SIZE - 1, STATS_ICON_SIZE - 1, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          G_IM_FMT_CI, BET_ICON_SIZE, BET_ICON_SIZE, 0, 0, BET_ICON_SIZE - 1,
+          BET_ICON_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
           QuarterPixels(D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide),
           QuarterPixels(BET_ICON_TOP),
           QuarterPixels(D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide +
-              STATS_ICON_SIZE),
-          QuarterPixels(BET_ICON_TOP + STATS_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
+              BET_ICON_SIZE),
+          QuarterPixels(BET_ICON_TOP + BET_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -833,7 +833,7 @@ void DrawBetSettings(
 
   /* The chosen bet's icon is animated */
   DrawBetIcon(&gfx, D_802304FC_ovl_01[D_801B5634 - 1][memory->unkD] + slide,
-      CHOSEN_BET_ICON_TOP, STATS_ICON_SIZE, TEXEL_STEP_ONE);
+      CHOSEN_BET_ICON_TOP, BET_ICON_SIZE, TEXEL_STEP_ONE);
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
@@ -983,19 +983,18 @@ void DrawBetIcon(
   image = D_8023B350_ovl_01[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(image)), G_IM_FMT_CI,
-      STATS_ICON_SIZE, STATS_ICON_SIZE, 0, 0, STATS_ICON_SIZE - 1,
-      STATS_ICON_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+      BET_ICON_SIZE, BET_ICON_SIZE, 0, 0, BET_ICON_SIZE - 1, BET_ICON_SIZE - 1,
+      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
       QuarterPixels(left + size), QuarterPixels(top + size), G_TX_RENDERTILE, 0,
       0, textureStep, textureStep);
   g_AnimatedIconFrameTime++;
   gDPPipeSync(gfx++);
-  if (g_AnimatedIconFrameTime == STATS_ICON_FRAME_DURATION) {
+  if (g_AnimatedIconFrameTime == BET_ICON_FRAME_DURATION) {
     g_AnimatedIconFrameTime = 0;
     g_AnimatedIconFrameIndex++;
-    if (g_AnimatedIconFrameIndex >= STATS_ICON_FRAME_COUNT) {
+    if (g_AnimatedIconFrameIndex >= BET_ICON_FRAME_COUNT) {
       g_AnimatedIconFrameIndex = 0;
     }
 
