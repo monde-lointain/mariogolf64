@@ -1719,7 +1719,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
 
   cursorLeft = (memory->characterColumns[playerIndex] * GRID_CELL_SIZE) -
       GRID_CURSOR_SHIFT_LEFT;
-  func_8020CD20_ovl_01(&gfx, cursorLeft + GRID_LEFT,
+  DrawCharacterGridCursor(&gfx, cursorLeft + GRID_LEFT,
       (memory->characterRows[playerIndex] * GRID_CELL_SIZE) + GRID_TOP);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
@@ -1733,7 +1733,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C6D8_ovl_01);
  * each frame. The screen position goes in locals before the call because the
  * original loads the 96 for its y after g_DrawBufferIndex.
  */
-void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
+void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y) {
   Gfx* gfx = *displayListHead;
   s32 vertexIndex;
   s32 red;

@@ -120,7 +120,7 @@ void DrawUnalignedMenuNumber(
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
-void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y);
+void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y);
 void func_802169CC_ovl_01(Gfx** displayListHead);
 void func_80216C14_ovl_01(Gfx** displayListHead);
 void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top);
@@ -474,19 +474,20 @@ void DrawCharacterTable(Gfx** displayListHead) {
   }
 
   func_80216C14_ovl_01(&gfx);
-  func_8021640C_ovl_01(&gfx,
+  DrawTableCursor(&gfx,
       (memory->tableColumn * TABLE_CELL_WIDTH) + TABLE_CURSOR_X,
       (memory->tableRow * TABLE_CELL_HEIGHT) + TABLE_CURSOR_Y);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
 
+/* Draws the color-cycling cursor at (x, y), on the chosen table cell */
 /*
  * Doesn't match: the stack slots of the pointers to the second pipe sync
  * after the image and the cycle type are swapped.
  */
 #ifdef NON_MATCHING
-void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
+void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
   Gfx* gfx = *displayListHead;
   s32 vertexIndex;
   s32 red;
@@ -552,7 +553,7 @@ void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_8021640C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", DrawTableCursor);
 #endif
 
 void func_802169CC_ovl_01(Gfx** displayListHead) {

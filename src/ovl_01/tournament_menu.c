@@ -133,7 +133,8 @@ enum CodeKeyResult {
 #define CLUB_CODE_CHAR_WIDTH 24
 #define CLUB_CODE_NO_CHAR 0xFF
 
-/* func_8022B7E0 marks the next character to type with a shrunken menu cursor */
+/* DrawCodeCursor marks the next character to type with a shrunken menu cursor
+ */
 #define CODE_CURSOR_FIRST_X -42
 #define CODE_CURSOR_Y -50.0f
 #define CODE_CURSOR_SCALE 0.6f
@@ -328,7 +329,7 @@ void func_8022A8F4_ovl_01(Gfx** displayListHead);
 void func_8022ADE8_ovl_01(Gfx** displayListHead);
 void func_8022B360_ovl_01(Gfx** displayListHead);
 void func_8022B668_ovl_01(Gfx** displayListHead);
-void func_8022B7E0_ovl_01(Gfx** displayListHead);
+void DrawCodeCursor(Gfx** displayListHead);
 s32 func_8022BDC4_ovl_01(void);
 s32 func_8022B46C_ovl_01(void);
 s32 func_8022B5E0_ovl_01(void);
@@ -1536,7 +1537,7 @@ void DrawClubTournament(Gfx** displayListHead) {
   func_8022ADE8_ovl_01(&gfx);
   func_8022B360_ovl_01(&gfx);
   func_8022A8F4_ovl_01(&gfx);
-  func_8022B7E0_ovl_01(&gfx);
+  DrawCodeCursor(&gfx);
   func_8022B668_ovl_01(&gfx);
   if (D_80230F70_ovl_01 == 1) {
     if (IsNintendoClubTournament()) {
@@ -1974,11 +1975,15 @@ s32 func_8022B75C_ovl_01(void) {
 }
 
 /*
+ * Draws the color-cycling cursor on the club tournament code's character
+ * being entered, the last one once the code is full
+ */
+/*
  * Doesn't match: the stack slots of the pointers to the second pipe sync
  * after the image and the cycle type are swapped.
  */
 #ifdef NON_MATCHING
-void func_8022B7E0_ovl_01(Gfx** displayListHead) {
+void DrawCodeCursor(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 vertexIndex;
   s32 red;
@@ -2050,7 +2055,7 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B7E0_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawCodeCursor);
 #endif
 
 s32 func_8022BDB0_ovl_01(void) {
