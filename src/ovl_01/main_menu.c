@@ -804,7 +804,7 @@ static s32 D_8022FEF8_ovl_01 = 0;
 static s32 D_8022FEFC_ovl_01 = 0;
 
 void* GetMenuImageBuffer(void) {
-  return g_MenuImageBuffer;
+  return f_MenuImageBuffer;
 }
 
 void StartLoadingChosenHole(void) {
