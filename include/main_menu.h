@@ -28,7 +28,10 @@ extern u8 D_8022BE89_ovl_01;
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern s8 D_8022F8C5_ovl_01;
+/* Updates until each character fidgets, or -1 while it does */
+extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 extern s32 D_8023BFD0_ovl_01;
+extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
 extern s32 D_801B7070;
 extern s32 D_8012F480[MAX_PLAYER_COUNT];

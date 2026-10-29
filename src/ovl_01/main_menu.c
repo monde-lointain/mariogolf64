@@ -282,7 +282,6 @@ extern s16 D_800FBE2C;
 extern u8 D_801B9410;
 extern s8 D_801B5634;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
-extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 
 /*
  * The mini-golf course select. A record's three courses lie on a disc that
@@ -330,7 +329,6 @@ extern void* D_8012F4B0[7];
 extern s8 D_801323D0;
 extern u8 D_801B70F0[MAXCONTROLLERS];
 extern void* D_801B93E0[5];
-extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 
 void InitPlay(s32 kind);
 void func_801FE4D0_ovl_01(Gfx** displayListHead);

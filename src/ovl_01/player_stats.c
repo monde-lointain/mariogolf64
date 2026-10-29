@@ -164,8 +164,6 @@ enum StatsDirection {
 extern void* D_8012D430[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
-/* Updates until each character fidgets, or -1 while it does */
-extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 extern s8 D_801B70F0[MAXCONTROLLERS];
 extern const char D_802319E0_ovl_01[];
 
@@ -173,7 +171,6 @@ extern u8 D_801B5634;
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern u8 D_801B9410;
-extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 
 void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide);
 extern u8 D_8023BFF0_ovl_01[STATS_GRID_ROW_COUNT * STATS_GRID_COLUMN_COUNT]

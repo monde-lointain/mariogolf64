@@ -123,10 +123,6 @@ extern u8 D_801B70F0[MAXCONTROLLERS];
 #define NO_CONTROLLER -1
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
-extern s32
-    D_8023BFC0_ovl_01[MAX_PLAYER_COUNT]; /* Frames until each character fidgets,
-                                            or -1 while it does */
-
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
 extern u8 D_801052E8;
