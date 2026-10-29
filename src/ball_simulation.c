@@ -240,6 +240,7 @@ void ResetBallSimulations(void) {
 /* 7 cm a frame: a faster ball, or one rising faster than 5 km/h, does not drop
  * in */
 #define MAX_CUP_IN_SPEED 1075.2f
+#define MAX_CUP_IN_RISE_SPEED KilometersPerHour(5)
 /* 10.5 cm a frame: a ball that drops in slower plays SOUND_CUP_IN */
 #define MAX_CUP_IN_SOUND_SPEED 1612.7999f
 /* 7 cm: where the wall puts a ball that reaches it */
@@ -257,6 +258,19 @@ void ResetBallSimulations(void) {
  * least */
 #define CUP_PULL_RISE 307.2f
 #define MIN_CUP_PULL 46.079998f
+/* The pull keeps this much of the ball's speed each frame */
+#define CUP_PULL_DRAG 0.93f
+/*
+ * A rolling ball leaving the pull's zone heading out within about 53 degrees
+ * of straight away lips out: it keeps the share of its speed along the ground
+ * that its speed is of LIP_OUT_FULL_SPEED (14 cm a frame), and turns the rest
+ * upward, with LIP_OUT_EXTRA_RISE of its speed more. Directions' dot product
+ * never reaches THROUGH_CUP_ALIGNMENT, so "Through Cup" is never printed.
+ */
+#define MIN_LIP_OUT_ALIGNMENT 0.6f
+#define LIP_OUT_FULL_SPEED 2150.4f
+#define LIP_OUT_EXTRA_RISE 0.1f
+#define THROUGH_CUP_ALIGNMENT 17203.2f
 /*
  * 60 cm: only a ball within this of the cup along both x and z is tested
  * for dropping in or being pulled
@@ -296,6 +310,22 @@ void ResetBallSimulations(void) {
 #define MIN_WALL_SPARK_SPEED 153.6f
 /* A ball that hits a hole triangle is put this share of the way to it */
 #define TRIANGLE_HIT_STEP_SHARE 0.995f
+/*
+ * A flying ball that hits the pin keeps this much of its spin, and a rolling
+ * one is thrown up at this share of its speed along the ground. Either moves
+ * on from the hit to this share of the step's length.
+ */
+#define PIN_HIT_SPIN_KEPT 0.3f
+#define PIN_HIT_RISE_SCALE 0.5f
+#define PIN_HIT_STEP_SHARE 1.3f
+/*
+ * About 3.4 cm: in mini golf, a rolling ball also looks for the ground this
+ * far below its path
+ */
+#define MINI_GOLF_ROLL_PROBE_DEPTH 0x20C
+/* Where the debug text shows what the ball's path hit */
+#define CONTACT_DEBUG_TEXT_COLUMN 2
+#define CONTACT_DEBUG_TEXT_ROW 6
 
 /*
  * A softer surface takes more of a bouncing ball's speed, more for a steeper
@@ -513,6 +543,9 @@ void ResetBallSimulations(void) {
 #define MAX_CURVE_SPEED_RATIO 100.0f
 /* Back spin lifts the ball by no more than an eightieth of its air speed */
 #define LIFT_PER_SPIN 0.045776367f
+/* The lift pushes the ball this far from its path through the air, turning
+   about the spin's axis */
+#define LIFT_ANGLE_DEGREES 88.0f
 #define MAX_LIFT_SPEED_RATIO 80.0f
 /* The share of each spin kept each frame in flight */
 #define SIDE_SPIN_DECAY 0.995f
@@ -598,7 +631,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       axisZ = cosf(simulation->spinHeading) * simulation->spinSpeed;
       axisX = sinf(simulation->spinHeading) * simulation->spinSpeed;
       if (simulation->spinSpeed < 0) {
-        simulation->spinHeading += 3.1415927f;
+        simulation->spinHeading += (f32)M_PI;
         simulation->spinSpeed = -simulation->spinSpeed;
       }
     } else {
@@ -606,7 +639,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       axisX = 0.0f;
     }
 
-    guRotateF(simulation->liftRotation, 88.0f, -axisX, 0.0f, axisZ);
+    guRotateF(
+        simulation->liftRotation, LIFT_ANGLE_DEGREES, -axisX, 0.0f, axisZ);
   }
 
   void PlayBillboardHitSound(BillboardCell cell, s32 speed) {
@@ -768,7 +802,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               simulation->state == BALL_STATE_ROLLING) {
             hitsBillboard = FindMiniGolfGroundHit(simulation, startX, startY,
                 startZ, simulation->position[AXIS_X],
-                simulation->position[AXIS_Y] - 0x20C,
+                simulation->position[AXIS_Y] - MINI_GOLF_ROLL_PROBE_DEPTH,
                 simulation->position[AXIS_Z], &triangle, &fraction);
             if (hitsBillboard && (contact == 0 || fraction < hitFraction)) {
               contact = hitsBillboard;
@@ -838,7 +872,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       flags |= contact;
       if (printsDebugText) {
-        PrintDebugPaddedHex(contact, 2, 6);
+        PrintDebugPaddedHex(
+            contact, CONTACT_DEBUG_TEXT_COLUMN, CONTACT_DEBUG_TEXT_ROW);
         osSyncPrintf("col%d\n", contact);
       }
     }
@@ -903,7 +938,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             simulation->state = BALL_STATE_FLYING;
             velocity[AXIS_Y] = -sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                                    (velocity[AXIS_Z] * velocity[AXIS_Z])) *
-                0.5f;
+                PIN_HIT_RISE_SCALE;
             simulation->spinHeading =
                 atan2(pinVelocity[AXIS_Z], pinVelocity[AXIS_X]);
             contact = 0;
@@ -911,13 +946,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 IntLength2D(pinVelocity[AXIS_X], pinVelocity[AXIS_Z]);
           } else {
             velocity[AXIS_Y] = pinVelocity[AXIS_Y];
-            simulation->spinSpeed = simulation->spinSpeed * 0.3f;
+            simulation->spinSpeed = simulation->spinSpeed * PIN_HIT_SPIN_KEPT;
           }
 
           velocity[AXIS_X] = pinVelocity[AXIS_X];
           velocity[AXIS_Z] = pinVelocity[AXIS_Z];
           if (simulation->purpose != LAUNCH_PURPOSE_UNK5) {
-            f32 rest = 1.3f - pinFraction;
+            f32 rest = PIN_HIT_STEP_SHARE - pinFraction;
 
             simulation->position[AXIS_X] =
                 simulation->position[AXIS_X] + (rest * velocity[AXIS_X]);
@@ -952,7 +987,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
               if (speed < MAX_CUP_IN_SPEED &&
-                  velocity[AXIS_Y] >= -KilometersPerHour(5)) {
+                  velocity[AXIS_Y] >= -MAX_CUP_IN_RISE_SPEED) {
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
                   PrintDebugText(
@@ -1013,8 +1048,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                             CUP_PULL_RISE) +
                            MIN_CUP_PULL) *
                     alignment;
-                velocity[AXIS_X] *= 0.93f;
-                velocity[AXIS_Z] *= 0.93f;
+                velocity[AXIS_X] *= CUP_PULL_DRAG;
+                velocity[AXIS_Z] *= CUP_PULL_DRAG;
                 velocity[AXIS_X] += cosf(angle) * pull;
                 velocity[AXIS_Z] += sinf(angle) * pull;
                 flags |= STEP_FLAG_CUP_PULL;
@@ -1052,11 +1087,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   (direction[AXIS_Z] * fromCup[AXIS_Z]);
               osSyncPrintf("InnerMult %f, %f, %d\n", alignment, outwardSpeed,
                   simulation->state);
-              if (alignment >= 17203.2f) {
+              if (alignment >= THROUGH_CUP_ALIGNMENT) {
                 osSyncPrintf("Through Cup\n");
               } else if (simulation->state == BALL_STATE_ROLLING &&
-                  alignment >= 0.6f) {
-                f32 keep = speed * 0.0004650298f;
+                  alignment >= MIN_LIP_OUT_ALIGNMENT) {
+                f32 keep = speed * (1.0f / LIP_OUT_FULL_SPEED);
 
                 if (keep < 0.0f) {
                   keep = 0.0f;
@@ -1067,7 +1102,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 }
 
                 velocity[AXIS_Y] =
-                    -speed * (sqrtf(1.0f - (keep * keep)) + 0.1f);
+                    -speed * (sqrtf(1.0f - (keep * keep)) + LIP_OUT_EXTRA_RISE);
                 velocity[AXIS_X] *= keep;
                 velocity[AXIS_Z] *= keep;
                 simulation->state = BALL_STATE_FLYING;
