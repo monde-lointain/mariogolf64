@@ -3407,7 +3407,7 @@ void UpdateTurns(void) {
               (g_TurnController.buttons & START_BUTTON)) {
             ForceStopRumble();
             StopSound(8);
-            PlaySound(0x66, 2, SOUND_FULL_SCALE);
+            PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
             g_PauseScreen = 1;
             SetMenuBackdrop(2);
             RequestPauseMenu(g_Players[playerIndex].strokeCount != 0, 0);
@@ -3416,7 +3416,7 @@ void UpdateTurns(void) {
         } else if (g_PauseScreen == 1 && D_80227194_ovl_00 == 0 &&
             (g_TurnController.pressedButtons & (START_BUTTON | B_BUTTON))) {
           ForceStopRumble();
-          PlaySound(0x66, 2, SOUND_FULL_SCALE);
+          PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
           RequestPauseMenu(0, -1);
           g_PauseScreen = 0;
           SetMenuBackdrop(-1);
@@ -4561,7 +4561,8 @@ void UpdateTurns(void) {
           switch (UpdateChoiceBox(&g_TurnController)) {
             case CHOICE_RESULT_START_OVER:
               EndFlightCamera();
-              PlaySound(0x8E, 3, SOUND_FULL_SCALE);
+              PlaySound(SOUND_RING_SHOT_RETRY, RING_SHOT_RETRY_SOUND_CHANNEL,
+                  SOUND_FULL_SCALE);
               SkipNextPinDraw();
               PlacePlayersOnTee();
               nextState = 0x11;

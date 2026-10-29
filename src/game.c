@@ -47,6 +47,12 @@
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E
 
+/* The audio test plays three sounds at once on these channels */
+#define AUDIO_TEST_FIRST_CHANNEL 3
+#define AUDIO_TEST_SECOND_CHANNEL 4
+#define AUDIO_TEST_THIRD_CHANNEL 11
+#define AUDIO_TEST_VOLUME 0x60
+
 /* Steps that the inset view takes to open or close fully */
 #define INSET_VIEW_STEP_COUNT 8
 
@@ -1206,9 +1212,9 @@ s32 DrawGame(void) {
     }
 
     if (*trigger & A_BUTTON) {
-      PlaySound(0x87, 3, 0x60);
-      PlaySound(400, 4, 0x60);
-      PlaySound(0x76, 11, 0x60);
+      PlaySound(SOUND_UNK135, AUDIO_TEST_FIRST_CHANNEL, AUDIO_TEST_VOLUME);
+      PlaySound(SOUND_UNK400, AUDIO_TEST_SECOND_CHANNEL, AUDIO_TEST_VOLUME);
+      PlaySound(SOUND_UNK118, AUDIO_TEST_THIRD_CHANNEL, AUDIO_TEST_VOLUME);
     }
   }
 

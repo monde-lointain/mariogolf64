@@ -23,6 +23,19 @@
  * the others.
  */
 enum Sound {
+  SOUND_LAND_FAIRWAY = 2, /* Also for the semi-rough */
+  SOUND_LAND_ROUGH,
+  SOUND_LAND_SAND, /* Bunkers and bare ground */
+  SOUND_LAND_GREEN,
+  SOUND_LAND_WATER = 9,
+  SOUND_HIT_FLAGSTICK = 0xE,
+  SOUND_HIT_FLAG,
+  SOUND_HIT_CUP_WALL,
+  /* For a ball that drops fast onto the bottom of the cup */
+  SOUND_HIT_CUP_BOTTOM,
+  /* For a ball that comes into the cup slowly enough to stay */
+  SOUND_CUP_IN,
+  SOUND_ROLL = 0x14,
   SOUND_FLAG_SWISH = 0x1F,
   SOUND_TICK, /* A tally's tick and each click of the club slots' reels */
   SOUND_REEL_STOP,
@@ -35,6 +48,9 @@ enum Sound {
   SOUND_CONTACT_MARIO = 0x2E, /* Also Bowser's */
   SOUND_CONTACT_HEAVY_HITTER,
   SOUND_CONTACT_WARIO, /* Also played when the game halts on a fault */
+  /* Played a second before a firework launches */
+  SOUND_FIREWORK_LEAD_IN,
+  SOUND_FIREWORK_LAUNCH,
   SOUND_YOSHI_EAGLE_SECOND_EFFECT = 0x35, /* Also played in the opening */
   SOUND_METAL_MARIO_EAGLE_EFFECT = 0x38,
   SOUND_WARIO_BOGEY_EFFECT,
@@ -80,7 +96,10 @@ enum Sound {
   SOUND_MENU_CANCEL = 0x5F,
   SOUND_LOOK_AT_CUP,
   SOUND_LOOK_BACK, /* Also a sound of the scorecard */
-  /* The swing meter's click for an impact on the mark */
+  /*
+   * The swing meter's click for an impact on the mark; also a ring passed
+   * through and the Nintendo logo's sound
+   */
   SOUND_IMPACT_ON_MARK,
   /*
    * A menu choice that cannot be made, or a cursor that cannot move that way.
@@ -94,8 +113,10 @@ enum Sound {
   SOUND_PROMPT_OPEN,
   /* Also the inset view closing, a wipe opening and the aim camera rising */
   SOUND_PROMPT_CLOSE,
-  SOUND_THREE_STARS = 0x67, /* Also a sound of the scorecard */
-  SOUND_UNK106 = 0x6A,
+  SOUND_PAUSE, /* Also the debug scene menu's opening */
+  SOUND_THREE_STARS, /* Also a sound of the scorecard */
+  SOUND_UNLOCK_EVERYTHING = 0x69,
+  SOUND_UNK106,
   SOUND_SKIN_COUNTED,
   SOUND_TEXT_TYPING,
   /* The swing meter's click for an impact off the mark */
@@ -106,7 +127,10 @@ enum Sound {
   SOUND_CONTROLS_OPEN,
   /* Also played when the main menu shows the transmit option */
   SOUND_CONTROLS_CLOSE,
-  SOUND_OUT_OF_BOUNDS = 0x77,
+  /* SOUND_UNK118, SOUND_UNK135 and SOUND_UNK400 are the audio test's */
+  SOUND_UNK118 = 0x76,
+  SOUND_OUT_OF_BOUNDS,
+  SOUND_UNK135 = 0x87,
   SOUND_RING_SHOT_RETRY = 0x8E,
   SOUND_HOLE_INTRO,
   SOUND_UNK154 = 0x9A,
@@ -160,6 +184,7 @@ enum Sound {
   SOUND_AMBIENT_ALTERNATING_SECOND,
   SOUND_AMBIENT_REPEATING = 0x18B,
   SOUND_PEACH_PAR = 0x18E,
+  SOUND_UNK400 = 0x190, /* Also one of Peach's voice sounds */
   SOUND_PEACH_BIRDIE = 0x194,
   SOUND_PEACH_BOGEY = 0x19F,
   SOUND_PEACH_EAGLE,

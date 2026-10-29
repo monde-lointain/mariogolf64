@@ -25,6 +25,8 @@
 #define UNUSED_CODE_LENGTH 13
 /* Nothing has been held in that place of the sequence yet */
 #define NO_BUTTONS (-1)
+/* The channel of the sound for unlocking everything */
+#define UNLOCK_SOUND_CHANNEL 13
 
 void func_8005C674(s32, s32);
 
@@ -66,7 +68,7 @@ static s32 f_UnusedCodeLength = 0;
 void UnlockEverything(void) {
   SaveData* save = GetSaveData();
 
-  PlaySound(0x69, 0xD, 0x50);
+  PlaySound(SOUND_UNLOCK_EVERYTHING, UNLOCK_SOUND_CHANNEL, MENU_VOLUME_SOFT);
   InitSram();
   TransferSaveData(save, FALSE);
   GrantWinsStarsAndBadges();
@@ -170,7 +172,8 @@ void UpdateUnusedButtonCode(void) {
           f_UnusedCodeEntered[index] = NO_BUTTONS;
         }
 
-        PlaySound(0x69, 0xD, 0x50);
+        PlaySound(
+            SOUND_UNLOCK_EVERYTHING, UNLOCK_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         UnlockEverything();
       }
     } else {

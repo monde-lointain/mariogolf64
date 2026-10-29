@@ -205,12 +205,12 @@ void UpdateHelpBoard(void) {
     if (f_OpenTopic == 0) {
       f_OpenTopic = memory->helpTopicIndex + 1;
       ClearHelpText();
-      PlaySound(0x5D, 0xF, 0x50);
+      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       f_TopicPage++;
       ShowTopicPage();
     } else if (f_TopicPage < f_TopicPages.counts[f_OpenTopic]) {
       if (IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
-        PlaySound(0x5D, 0xF, 0x50);
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         f_TopicPage++;
         ShowTopicPage();
       } else {
@@ -226,7 +226,7 @@ void UpdateHelpBoard(void) {
       RevealTextSlot(HELP_TEXT_SLOT_PAGE);
     }
   } else if (g_MenuRepeatButtons & B_BUTTON) {
-    PlaySound(0x5F, 0xF, SOUND_FULL_SCALE);
+    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     if (f_OpenTopic <= 0) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       if (!memory->isTransmitShown) {
@@ -251,7 +251,7 @@ void UpdateHelpBoard(void) {
     }
   } else if (g_MenuRepeatButtons & U_JPAD) {
     if (f_OpenTopic == 0) {
-      PlaySound(0x5C, 0xF, 0x64);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (f_FirstListedTopic == memory->helpTopicIndex) {
         if (f_FirstListedTopic != 0) {
           f_FirstListedTopic--;
@@ -265,7 +265,7 @@ void UpdateHelpBoard(void) {
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
     if (f_OpenTopic == 0) {
-      PlaySound(0x5C, 0xF, 0x64);
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (f_FirstListedTopic + LISTED_TOPIC_COUNT - 1 ==
           memory->helpTopicIndex) {
         if (f_FirstListedTopic + LISTED_TOPIC_COUNT - 1 <

@@ -332,7 +332,7 @@ void UpdateTitleScreen(void) {
           g_SceneModuleToLoad = MODULE_MENU;
           f_TitleFrame = 0;
           f_TitleStage = TITLE_SWAPPING_MODULES;
-          PlaySound(0x5D, 0xF, SOUND_FULL_SCALE);
+          PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         } else if (IsLeavingForLogos(pressedButtons)) {
           f_TitleStage = TITLE_GOING_TO_LOGOS;
           StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);

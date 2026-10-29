@@ -45,8 +45,9 @@ enum BootLogo {
 #define FADE_OUT_ALPHA(frame) \
   (255 - (((frame) - FADE_OUT_FIRST_FRAME) * FADE_OUT_ALPHA_STEP))
 
-/* The Nintendo logo's sound plays on this frame */
+/* The Nintendo logo's sound plays on this frame, on this channel */
 #define NINTENDO_SOUND_FRAME 3
+#define NINTENDO_SOUND_CHANNEL 15
 /* The Camelot logo's frame count stops rising at this */
 #define CAMELOT_FRAME_LIMIT 60
 /* With g_IsDebugEnabled set, A skips the Camelot logo before this frame */
@@ -198,7 +199,8 @@ void UpdateBootLogos(void) {
       f_BootLogoFrame++;
       pressedButtons = 0;
       if (f_BootLogoFrame == NINTENDO_SOUND_FRAME) {
-        PlaySound(0x62, 0xF, SOUND_FULL_SCALE);
+        PlaySound(
+            SOUND_IMPACT_ON_MARK, NINTENDO_SOUND_CHANNEL, SOUND_FULL_SCALE);
       }
 
       for (controllerIndex = 0; controllerIndex != g_ControllerCount;

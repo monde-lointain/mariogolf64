@@ -25,6 +25,8 @@
 /* Frames of a firework's timer at which it plays a sound and launches */
 #define FIREWORK_SOUND_FRAME 160
 #define FIREWORK_LAUNCH_FRAME 220
+/* The fireworks' sounds play on this channel */
+#define FIREWORK_SOUND_CHANNEL 8
 
 /* Below this life, a particle's life runs out five times as fast */
 #define PARTICLE_FADE_LIFE 128
@@ -233,11 +235,13 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
       timer = f_Fireworks[fireworkIndex].timer + 1;
       f_Fireworks[fireworkIndex].timer = timer;
       if (timer == FIREWORK_SOUND_FRAME) {
-        PlaySound(0x31, 8, SOUND_FULL_SCALE);
+        PlaySound(
+            SOUND_FIREWORK_LEAD_IN, FIREWORK_SOUND_CHANNEL, SOUND_FULL_SCALE);
       } else if (timer == FIREWORK_LAUNCH_FRAME) {
         f_Fireworks[fireworkIndex].timer = 0;
         LaunchFirework(&f_Fireworks[fireworkIndex], fireworkIndex);
-        PlaySound(0x32, 8, SOUND_FULL_SCALE);
+        PlaySound(
+            SOUND_FIREWORK_LAUNCH, FIREWORK_SOUND_CHANNEL, SOUND_FULL_SCALE);
       }
     }
   }

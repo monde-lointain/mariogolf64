@@ -1540,7 +1540,7 @@ void UpdateStaffRoll(void) {
       g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
       f_StaffRollFrame = 0;
       f_IsLeavingStaffRoll = TRUE;
-      PlaySound(0x5D, 0xF, SOUND_FULL_SCALE);
+      PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
 
     if (g_IsDebugEnabled) {

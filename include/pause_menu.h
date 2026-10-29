@@ -72,4 +72,8 @@ s32 UpdatePauseMenu(ControllerState* controller);
 void OpenChoiceBox(s32 choiceBoxIndex);
 s32 UpdateChoiceBox(ControllerState* controller);
 
+/* The channels of the pause and Ring Shot retry sounds */
+#define PAUSE_SOUND_CHANNEL 2
+#define RING_SHOT_RETRY_SOUND_CHANNEL 3
+
 #endif

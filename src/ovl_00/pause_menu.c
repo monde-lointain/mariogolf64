@@ -452,8 +452,6 @@ enum PromptId {
   PROMPT_UNK8
 };
 
-#define RING_SHOT_RETRY_SOUND_CHANNEL 3
-
 /* Where the panels of the wind and of the lie slide to while their option is
  * selected */
 #define PAUSE_PANEL_SHOWN_X 72.0f
