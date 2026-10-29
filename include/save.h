@@ -11,7 +11,7 @@
 #define SAVE_MAGIC 0x12345678
 
 #define SAVE_COPY_COUNT 2
-#define SAVE_RECORD_COUNT 5
+#define RING_SHOT_RECORD_COUNT 5
 #define RANKED_RECORD_COUNT 20
 /* The games saved partway through, to continue later */
 #define SAVED_GAME_COUNT 3
@@ -439,7 +439,7 @@ typedef struct SaveData {
                          [SAVE_UNK1344_ENTRY_COUNT];
   /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
   /* 0x15D0 */ PlayRecord rankedRecords[RANKED_RECORD_COUNT];
-  /* 0x1DF0 */ RingShotRecord unk1DF0[SAVE_RECORD_COUNT];
+  /* 0x1DF0 */ RingShotRecord ringShotRecords[RING_SHOT_RECORD_COUNT];
   /* 0x1FF8 */ SavedGame savedGames[SAVED_GAME_COUNT];
   /* 0x21D8 */ UnkB8 savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
 } SaveData; /* size = 0x2A78 */

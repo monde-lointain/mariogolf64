@@ -350,11 +350,12 @@ void func_8021F79C_ovl_01(void) {
             func_80220DF8_ovl_01() != -1) {
           PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           index = memory->ringShotReplaySlot;
-          memory->holeIndex = save->unk1DF0[D_8023B684_ovl_01[index]].holeIndex;
+          memory->holeIndex =
+              save->ringShotRecords[D_8023B684_ovl_01[index]].holeIndex;
           memory->courseIndex =
-              save->unk1DF0[D_8023B684_ovl_01[index]].courseIndex;
+              save->ringShotRecords[D_8023B684_ovl_01[index]].courseIndex;
           D_800FE334 = 0;
-          LoadWipeShape((s8)save->unk1DF0[index].courseIndex);
+          LoadWipeShape((s8)save->ringShotRecords[index].courseIndex);
           StartWipe(WIPE_CLOSING);
           D_801052E8 = 0;
         }
@@ -689,13 +690,13 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
       if (D_8023B684_ovl_01[index] != -1) {
         replayCharacter =
-            save->unk1DF0[D_8023B684_ovl_01[index]].characterIndex;
+            save->ringShotRecords[D_8023B684_ovl_01[index]].characterIndex;
         func_8021F124_ovl_01(&gfx, D_8012D430[replayCharacter],
             D_8023E3F0_ovl_01[index], RING_SHOT_REPLAY_FACE_X,
             RING_SHOT_REPLAY_FACE_Y + (index * RING_SHOT_SLOT_SPACING),
             replayCharacter, FACE_PLAIN);
         func_80220E34_ovl_01(&gfx,
-            (s8)save->unk1DF0[D_8023B684_ovl_01[index]].courseIndex,
+            (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].courseIndex,
             RING_SHOT_REPLAY_COURSE_X,
             RING_SHOT_REPLAY_COURSE_Y + (index * RING_SHOT_SLOT_SPACING), TRUE);
       } else {
@@ -740,8 +741,10 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
           gDPSetEnvColor(gfx++, 0, 0, 0, 255);
         }
 
-        replayCourse = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].courseIndex;
-        replayHole = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].holeIndex;
+        replayCourse =
+            (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].courseIndex;
+        replayHole =
+            (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].holeIndex;
         if (index == memory->ringShotReplaySlot) {
           SetTextSlot(RING_SHOT_REPLAY_TEXT_X,
               RING_SHOT_REPLAY_TEXT_Y + (index * RING_SHOT_SLOT_SPACING),
@@ -780,7 +783,7 @@ void func_80220A30_ovl_01(void) {
   }
 
   for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
-    if ((s16)func_80220E28_ovl_01(&save->unk1DF0[slot])) {
+    if ((s16)func_80220E28_ovl_01(&save->ringShotRecords[slot])) {
       D_8023B684_ovl_01[slot] = slot;
     } else {
       D_8023B684_ovl_01[slot] = -1;
@@ -813,8 +816,10 @@ void func_80220BB0_ovl_01(void) {
 
   for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
     if (D_8023B684_ovl_01[index] != -1) {
-      character = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].characterIndex;
-      palette = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].paletteIndex;
+      character =
+          (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].characterIndex;
+      palette =
+          (s8)save->ringShotRecords[D_8023B684_ovl_01[index]].paletteIndex;
       if (character < 0) {
         character = 0;
       }

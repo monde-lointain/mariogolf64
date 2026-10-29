@@ -1616,7 +1616,7 @@ void func_801F6B28_ovl_01(void) {
   memset(&g_RoundHud, 0, sizeof(g_RoundHud));
   if (g_GameState.unk31 != REPLAY_KIND_NONE) {
     if (g_GameState.unk31 == REPLAY_KIND_RING_SHOT) {
-      LoadRingShotRecord(&save->unk1DF0[memory->ringShotReplaySlot]);
+      LoadRingShotRecord(&save->ringShotRecords[memory->ringShotReplaySlot]);
     } else {
       LoadSuperShotReplay(&save->rankedRecords[func_8021E468_ovl_01()]);
     }

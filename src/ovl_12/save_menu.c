@@ -95,7 +95,7 @@ enum ReplayMenuState {
 
 /* The rows below the saved games and the replay records */
 #define END_GAME_ROW SAVED_GAME_COUNT
-#define SKIP_REPLAY_ROW SAVE_RECORD_COUNT
+#define SKIP_REPLAY_ROW RING_SHOT_RECORD_COUNT
 #define SLIDE_ROW_COUNT 4
 /* The frames that the menu waits after saving before it slides out */
 #define SAVED_WAIT_FRAMES 15
@@ -173,7 +173,7 @@ enum ModeName {
 };
 
 /* The replay menu's rows: the records, then Hole Out */
-#define REPLAY_ROW_COUNT (SAVE_RECORD_COUNT + 1)
+#define REPLAY_ROW_COUNT (RING_SHOT_RECORD_COUNT + 1)
 #define FIRST_REPLAY_ROW_TOP 36
 #define REPLAY_ROW_SPACING 34
 /* The panel image is stretched over each row a strip at a time */
@@ -238,7 +238,7 @@ enum ModeName {
  * records as signed, though UnkB8 and RingShotRecord keep them unsigned; the
  * casts are there to match.
  */
-void func_8005B28C(s32 recordIndex, RingShotRecord* record);
+void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record);
 void func_8005D0D8(void);
 void SetTextSlot(
     s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
@@ -461,8 +461,8 @@ void OpenSaveMenu(s32 kind) {
       }
     }
   } else {
-    for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
-      record = &save->unk1DF0[slot];
+    for (slot = 0; slot != RING_SHOT_RECORD_COUNT; slot++) {
+      record = &save->ringShotRecords[slot];
       if (record->scoreKind & SCORE_KIND_RECORDED) {
         OpenEncodedAsset(g_CharacterImageAssets[(s8)record->characterIndex] +
                 CHARACTER_FACE_IMAGE_OFFSET,
@@ -490,8 +490,8 @@ void OpenSaveMenu(s32 kind) {
     }
   } else {
     f_CursorIndex = SKIP_REPLAY_ROW;
-    for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
-      if (!(save->unk1DF0[slot].scoreKind & SCORE_KIND_RECORDED)) {
+    for (slot = 0; slot != RING_SHOT_RECORD_COUNT; slot++) {
+      if (!(save->ringShotRecords[slot].scoreKind & SCORE_KIND_RECORDED)) {
         f_CursorIndex = slot;
         break;
       }
@@ -1077,8 +1077,8 @@ void SaveReplayToSlot(void) {
   AssetFile file;
   RingShotRecord* record;
 
-  record = &GetSaveData()->unk1DF0[f_CursorIndex];
-  func_8005B28C(f_CursorIndex, D_80105F40);
+  record = &GetSaveData()->ringShotRecords[f_CursorIndex];
+  SaveRingShotRecord(f_CursorIndex, D_80105F40);
   f_StateFrame = 0;
   func_8005D0D8();
   if (record->scoreKind & SCORE_KIND_RECORDED) {
@@ -1284,9 +1284,9 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
       }
 
       if (controller->pressedButtons & A_BUTTON) {
-        if (f_CursorIndex >= 0 && f_CursorIndex < SAVE_RECORD_COUNT) {
+        if (f_CursorIndex >= 0 && f_CursorIndex < RING_SHOT_RECORD_COUNT) {
           /* The pointer arithmetic is there to match */
-          if ((save->unk1DF0 + f_CursorIndex)->scoreKind &
+          if ((save->ringShotRecords + f_CursorIndex)->scoreKind &
               SCORE_KIND_RECORDED) {
             g_PauseScreen = PAUSE_SCREEN_UNK6;
             OpenPrompt(PROMPT_OVERWRITE_REPLAY);
@@ -1410,7 +1410,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
           G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
-      for (row = 0; row != SAVE_RECORD_COUNT; row++) {
+      for (row = 0; row != RING_SHOT_RECORD_COUNT; row++) {
         if (row == f_CursorIndex) {
           gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
               CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
@@ -1460,8 +1460,8 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0,
         COURSE_NUMBERS_WIDTH - 1, COURSE_NUMBERS_HEIGHT - 1, 0, G_TX_MIRROR,
         G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    for (index = 0; index != SAVE_RECORD_COUNT; index++) {
-      RingShotRecord* record = &save->unk1DF0[index];
+    for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
+      RingShotRecord* record = &save->ringShotRecords[index];
 
       if (!(record->scoreKind & SCORE_KIND_RECORDED)) {
         rowLabels[index] = NO_REPLAY_LABEL;
@@ -1515,7 +1515,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
 
     /* Each record's label */
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-    for (index = 0; index != SAVE_RECORD_COUNT; index++) {
+    for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
       if (rowLabels[index] != NO_REPLAY_LABEL) {
         labelImage = f_ReplayLabelImages[rowLabels[index]];
         labelWidth = labelImage[IMAGE_WIDTH_LOW_BYTE];
@@ -1546,8 +1546,8 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     /* Each record's golfer */
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
-    for (index = 0; index != SAVE_RECORD_COUNT; index++) {
-      RingShotRecord* record = &save->unk1DF0[index];
+    for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
+      RingShotRecord* record = &save->ringShotRecords[index];
 
       if (record->scoreKind & SCORE_KIND_RECORDED) {
         gDPPipeSync(gfx++);
@@ -1664,11 +1664,11 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
 
     /* Each record's hole text, or that the row is empty */
     SetUpGradientTextDrawing(&gfx, 0);
-    for (index = 0; index != SAVE_RECORD_COUNT; index++) {
+    for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
       RingShotRecord* record;
 
       gDPPipeSync(gfx++);
-      record = &save->unk1DF0[index];
+      record = &save->ringShotRecords[index];
       if (index == f_CursorIndex) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       } else {

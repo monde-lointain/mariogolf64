@@ -3599,3 +3599,4 @@ D_801323A0 = 0x801323A0; // size:0x49
 D_801B5CD0 = 0x801B5CD0; // size:0x38
 D_800FBD40 = 0x800FBD40; // size:0x54
 GetRecordedScoreKind = 0x80060190;
+SaveRingShotRecord = 0x8005B28C;

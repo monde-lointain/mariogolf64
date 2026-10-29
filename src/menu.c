@@ -803,8 +803,9 @@ void SortIndicesDescending(s32* values, s32* order, s32 count) {
   }
 }
 
-void func_8005B28C(s32 recordIndex, RingShotRecord* record) {
-  g_SaveData.unk1DF0[recordIndex] = *record;
+/* Keeps a Ring Shot hole's record in a save slot, writing the save at once */
+void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record) {
+  g_SaveData.ringShotRecords[recordIndex] = *record;
   TransferSaveData(GetSaveData(), TRUE);
 }
 
@@ -1592,19 +1593,19 @@ void InvalidateBrokenSavedGames(void) {
 #ifdef NON_MATCHING
 void func_8005D0D8(void) {
   SaveData* save;
-  Boolean isInvalid[SAVE_RECORD_COUNT];
+  Boolean isInvalid[RING_SHOT_RECORD_COUNT];
   s32 recordIndex;
   RingShotRecord* record;
   s32 kind;
   s32 unused[2]; /* The original frame has room for this */
 
   save = GetSaveData();
-  for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
+  for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
     isInvalid[recordIndex] = FALSE;
   }
 
-  for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
-    record = &save->unk1DF0[recordIndex];
+  for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
+    record = &save->ringShotRecords[recordIndex];
     kind = record->scoreKind;
     if (record->scoreKind & SCORE_KIND_RECORDED) {
       kind &= SCORE_KIND_MASK;
@@ -1632,8 +1633,8 @@ void func_8005D0D8(void) {
 
   /* Toggling rather than clearing sets the flag on records that fail with it
    * clear */
-  for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
-    record = &save->unk1DF0[recordIndex];
+  for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
+    record = &save->ringShotRecords[recordIndex];
     if (isInvalid[recordIndex] == TRUE) {
       record->scoreKind ^= SCORE_KIND_RECORDED;
     }
