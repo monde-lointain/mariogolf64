@@ -81,6 +81,13 @@
 
 /* The Koopa Park hole whose high ground is not faded */
 #define KOOPA_PARK_UNFADED_HOLE_INDEX 7
+/* Whether a course's high ground fades partway toward white; Boo Valley's
+ * fades fully */
+#define IsHighGroundFadedCourse(courseRecordIndex) \
+  ((courseRecordIndex) == COURSE_RECORD_TOAD_HIGHLANDS || \
+      (courseRecordIndex) == COURSE_RECORD_KOOPA_PARK || \
+      (courseRecordIndex) == COURSE_RECORD_YOSHIS_ISLAND || \
+      (courseRecordIndex) == COURSE_RECORD_MARIOS_STAR)
 
 #define LZ_STREAM_FLAG_FIRST (1 << 0)
 #define LZ_STREAM_FLAG_LAST (1 << 1)
@@ -977,10 +984,7 @@ void RunLoaderThread(void) {
       SetGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
       SetGameFlag(GAME_FLAG_FADE_HIGH_GROUND_FULLY);
     } else {
-      if (courseRecordIndex == COURSE_RECORD_TOAD_HIGHLANDS ||
-          courseRecordIndex == COURSE_RECORD_KOOPA_PARK ||
-          courseRecordIndex == COURSE_RECORD_YOSHIS_ISLAND ||
-          courseRecordIndex == COURSE_RECORD_MARIOS_STAR) {
+      if (IsHighGroundFadedCourse(courseRecordIndex)) {
         SetGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
       } else {
         ClearGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
