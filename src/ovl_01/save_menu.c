@@ -164,12 +164,16 @@ static s16 D_80230AE4_ovl_01[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT] = {
     {42, 84, 126, 168, 210, 0, 252}, {22, 60, 102, 144, 186, 228, 268}};
 /* Read by no routine */
 static s32 D_80230B38_ovl_01[2] = {0, 0};
-static s16 D_80230B40_ovl_01[MAX_PLAYER_COUNT] = {
+/* The controller each of the chosen saved game's players takes */
+static s16 f_SavedPlayerControllers[MAX_PLAYER_COUNT] = {
     NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER};
-static s16 D_80230B48_ovl_01 = 0;
-static s16 D_80230B4A_ovl_01 = MAX_PLAYER_COUNT;
-static u8 D_80230B4C_ovl_01 = 0;
-static u8 D_80230B4D_ovl_01 = 0;
+/* How many of the human players have pressed A for a controller so far */
+static s16 f_AssignedHumanCount = 0;
+static s16 f_HumanPlayerCount = MAX_PLAYER_COUNT;
+/* Set once A chooses a saved game, before its players take controllers */
+static u8 f_IsGameChosen = 0;
+/* Set once every human player has a controller, so A starts the game */
+static u8 f_AreControllersAssigned = 0;
 static u8 D_80230B4E_ovl_01 = 0;
 static s32 D_80230B50_ovl_01[SAVED_GAME_COUNT] = {-1, -1, -1};
 static SaveMenuModeImage D_80230B5C_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1] = {
@@ -265,7 +269,8 @@ static u8 D_8023BD94_ovl_01[0x4];
 static void* D_8023BD98_ovl_01;
 static void* D_8023BD9C_ovl_01;
 static void* D_8023BDA0_ovl_01;
-static s16 D_8023BDA4_ovl_01[MAX_PLAYER_COUNT];
+/* The chosen saved game's human players, in the order they take controllers */
+static s16 f_HumanPlayerIndices[MAX_PLAYER_COUNT];
 static s32 D_8023BDAC_ovl_01;
 static s32 D_8023BDB0_ovl_01;
 
@@ -1134,7 +1139,7 @@ void ReadSavedGames(void) {
     D_80230B50_ovl_01[gameIndex] = -1;
   }
 
-  D_80230B4D_ovl_01 = 0;
+  f_AreControllersAssigned = 0;
   InitSram();
   TransferSaveData(save, FALSE);
   for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
@@ -1185,34 +1190,34 @@ void ResetSavedGameControllers(void) {
   Player* savedPlayers;
 
   for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
-    D_80230B40_ovl_01[playerIndex] = NO_CONTROLLER;
-    D_8023BDA4_ovl_01[playerIndex] = -1;
+    f_SavedPlayerControllers[playerIndex] = NO_CONTROLLER;
+    f_HumanPlayerIndices[playerIndex] = -1;
   }
 
-  D_80230B48_ovl_01 = 0;
+  f_AssignedHumanCount = 0;
   gameIndex = memory->savedGameIndex;
   playerCount = save->savedGames[gameIndex].state.playerCount;
   savedPlayers = save->savedPlayers[gameIndex];
-  D_80230B4A_ovl_01 = save->savedGames[gameIndex].state.playerCount;
+  f_HumanPlayerCount = save->savedGames[gameIndex].state.playerCount;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (savedPlayers[playerIndex].isComputer) {
-      D_80230B40_ovl_01[playerIndex] = COMPUTER_CONTROLLER;
-      D_80230B4A_ovl_01--;
+      f_SavedPlayerControllers[playerIndex] = COMPUTER_CONTROLLER;
+      f_HumanPlayerCount--;
     } else {
-      D_80230B40_ovl_01[playerIndex] = NO_CONTROLLER;
+      f_SavedPlayerControllers[playerIndex] = NO_CONTROLLER;
     }
   }
 
   humanCount = 0;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    if (D_80230B40_ovl_01[playerIndex] != COMPUTER_CONTROLLER) {
-      D_8023BDA4_ovl_01[humanCount] = playerIndex;
+    if (f_SavedPlayerControllers[playerIndex] != COMPUTER_CONTROLLER) {
+      f_HumanPlayerIndices[humanCount] = playerIndex;
       humanCount++;
     }
   }
 
-  D_80230B48_ovl_01 = 0;
-  D_80230B4C_ovl_01 = 0;
+  f_AssignedHumanCount = 0;
+  f_IsGameChosen = 0;
   for (playerIndex = 0; playerIndex != MAXCONTROLLERS; playerIndex++) {
     D_801B70F0[playerIndex] = 0;
   }
@@ -1362,14 +1367,14 @@ void UpdateSavedGames(void) {
 
       g_MenuScreen = MENU_SCREEN_EXIT;
       for (slot = 0; slot != MAX_PLAYER_COUNT; slot++) {
-        g_PlayerControllerIndices[slot] = D_80230B40_ovl_01[slot];
+        g_PlayerControllerIndices[slot] = f_SavedPlayerControllers[slot];
       }
 
       CheckControllersAndSetPans();
       ResumeBets();
     }
   } else if (IsHudAnimationDone() == TRUE) {
-    if (D_80230B4D_ovl_01) {
+    if (f_AreControllersAssigned) {
       if (g_MenuPressedButtons & A_BUTTON) {
         if (memory->savedGameTurn != 0) {
           memory->savedGameTurn = 0;
@@ -1387,7 +1392,7 @@ void UpdateSavedGames(void) {
               0xFF, 0xFF, 0xFF);
         }
 
-        D_80230B4D_ovl_01 = FALSE;
+        f_AreControllersAssigned = FALSE;
         return;
       }
 
@@ -1396,17 +1401,18 @@ void UpdateSavedGames(void) {
           memory->savedGameTurn = 0;
         }
 
-        D_80230B4D_ovl_01 = FALSE;
+        f_AreControllersAssigned = FALSE;
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
               0xFF, 0xFF, 0xFF);
         }
 
-        if (D_80230B4A_ovl_01 == 1 || g_ControllerCount == 1) {
-          D_80230B48_ovl_01 = 0;
-          for (slot = 0; slot != D_80230B4A_ovl_01; slot++) {
-            D_80230B40_ovl_01[D_8023BDA4_ovl_01[slot]] = NO_CONTROLLER;
+        if (f_HumanPlayerCount == 1 || g_ControllerCount == 1) {
+          f_AssignedHumanCount = 0;
+          for (slot = 0; slot != f_HumanPlayerCount; slot++) {
+            f_SavedPlayerControllers[f_HumanPlayerIndices[slot]] =
+                NO_CONTROLLER;
           }
 
           for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
@@ -1414,12 +1420,13 @@ void UpdateSavedGames(void) {
                 0xFF, 0xFF, 0xFF);
           }
 
-          D_80230B4C_ovl_01 = FALSE;
+          f_IsGameChosen = FALSE;
           return;
         }
 
-        D_80230B48_ovl_01--;
-        D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] = NO_CONTROLLER;
+        f_AssignedHumanCount--;
+        f_SavedPlayerControllers[f_HumanPlayerIndices[f_AssignedHumanCount]] =
+            NO_CONTROLLER;
       }
     } else if (g_MenuPressedButtons & A_BUTTON) {
       if (memory->savedGameTurn != 0) {
@@ -1433,16 +1440,16 @@ void UpdateSavedGames(void) {
 
       if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        if (!D_80230B4C_ovl_01) {
-          D_80230B4C_ovl_01 = TRUE;
-          if (D_80230B4A_ovl_01 == 1) {
+        if (!f_IsGameChosen) {
+          f_IsGameChosen = TRUE;
+          if (f_HumanPlayerCount == 1) {
             for (controller = 0; controller != g_ControllerCount;
                 controller++) {
               if (g_MenuControllerData[controller].button & A_BUTTON) {
-                D_80230B4D_ovl_01 = TRUE;
-                D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] =
-                    controller;
-                D_80230B48_ovl_01++;
+                f_AreControllersAssigned = TRUE;
+                f_SavedPlayerControllers
+                    [f_HumanPlayerIndices[f_AssignedHumanCount]] = controller;
+                f_AssignedHumanCount++;
                 for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
                   SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0,
                       0xFF, 0xFF, 0xFF, 0xFF);
@@ -1452,13 +1459,14 @@ void UpdateSavedGames(void) {
               }
             }
           } else if (g_ControllerCount == 1) {
-            for (humanIndex = D_80230B48_ovl_01;
-                humanIndex != D_80230B4A_ovl_01; humanIndex++) {
-              D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] = 0;
-              D_80230B48_ovl_01++;
+            for (humanIndex = f_AssignedHumanCount;
+                humanIndex != f_HumanPlayerCount; humanIndex++) {
+              f_SavedPlayerControllers
+                  [f_HumanPlayerIndices[f_AssignedHumanCount]] = 0;
+              f_AssignedHumanCount++;
             }
 
-            D_80230B4D_ovl_01 = TRUE;
+            f_AreControllersAssigned = TRUE;
             for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
               SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
                   0xFF, 0xFF, 0xFF);
@@ -1475,15 +1483,15 @@ void UpdateSavedGames(void) {
 
         for (controller = 0; controller != g_ControllerCount; controller++) {
           if (g_MenuControllerData[controller].button & A_BUTTON) {
-            D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] =
-                controller;
-            D_80230B48_ovl_01++;
+            f_SavedPlayerControllers
+                [f_HumanPlayerIndices[f_AssignedHumanCount]] = controller;
+            f_AssignedHumanCount++;
             break;
           }
         }
 
-        if (D_80230B48_ovl_01 == D_80230B4A_ovl_01) {
-          D_80230B4D_ovl_01 = TRUE;
+        if (f_AssignedHumanCount == f_HumanPlayerCount) {
+          f_AreControllersAssigned = TRUE;
           for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
             SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
                 0xFF, 0xFF, 0xFF);
@@ -1498,7 +1506,7 @@ void UpdateSavedGames(void) {
         memory->savedGameTurn = 0;
       }
 
-      if (D_80230B48_ovl_01 <= 0) {
+      if (f_AssignedHumanCount <= 0) {
         StartHudAnimation(HUD_ANIMATION_FADE_OUT);
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
@@ -1511,10 +1519,11 @@ void UpdateSavedGames(void) {
         D_800FE334 = 0;
       }
 
-      D_80230B48_ovl_01--;
-      D_80230B40_ovl_01[D_8023BDA4_ovl_01[D_80230B48_ovl_01]] = NO_CONTROLLER;
-      if (D_80230B48_ovl_01 <= 0) {
-        D_80230B4C_ovl_01 = FALSE;
+      f_AssignedHumanCount--;
+      f_SavedPlayerControllers[f_HumanPlayerIndices[f_AssignedHumanCount]] =
+          NO_CONTROLLER;
+      if (f_AssignedHumanCount <= 0) {
+        f_IsGameChosen = FALSE;
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
               0xFF, 0xFF, 0xFF);
@@ -1647,7 +1656,7 @@ s32 func_80222F2C_ovl_01(void) {
 
   savedPlayer = save->savedPlayers[memory->savedGameIndex];
   for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
-    controller = D_80230B40_ovl_01[playerIndex];
+    controller = f_SavedPlayerControllers[playerIndex];
     g_PlayerControllerIndices[playerIndex] = controller;
     g_Players[playerIndex].controllerIndex = controller;
     sprintf(g_Players[playerIndex].name, D_80231A3C_ovl_01, savedPlayer->name);
@@ -2019,7 +2028,7 @@ void DrawSavedGames(Gfx** displayListHead) {
   if (func_80222C94_ovl_01() != 0) {
     SetTextSlot(EMPTY_GAME_TEXT_X, EMPTY_GAME_TEXT_Y, MESSAGE_EMPTY_SAVED_GAME,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
-  } else if (!D_80230B4C_ovl_01) {
+  } else if (!f_IsGameChosen) {
     gameIndex = memory->savedGameIndex;
     if (gameIndex < 0) {
       gameIndex = 0;
@@ -2062,26 +2071,26 @@ void DrawSavedGames(Gfx** displayListHead) {
     SetTextSlot(SAVED_GAME_HOLE_X, SAVED_GAME_HOLE_Y, MESSAGE_SAVED_GAME_HOLE,
         TEXT_SLOT_LARGE_FONT, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF);
   } else if (GetWipeKind() == 0) {
-    if (D_80230B4D_ovl_01) {
+    if (f_AreControllersAssigned) {
       SetTextSlot(CONTINUE_PROMPT_X, PROMPT_Y, MESSAGE_CONTINUE_PROMPT,
           TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
     } else {
-      SetTextSlotValue(D_8023BDA4_ovl_01[D_80230B48_ovl_01] + 1, 0, 0);
+      SetTextSlotValue(f_HumanPlayerIndices[f_AssignedHumanCount] + 1, 0, 0);
 
       /* The prompt names the player in the player's own color */
-      if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 0) {
+      if (f_HumanPlayerIndices[f_AssignedHumanCount] == 0) {
         SetTextPaletteColor(255, 127, 127, 0);
       }
 
-      if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 1) {
+      if (f_HumanPlayerIndices[f_AssignedHumanCount] == 1) {
         SetTextPaletteColor(0, 255, 255, 0);
       }
 
-      if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 2) {
+      if (f_HumanPlayerIndices[f_AssignedHumanCount] == 2) {
         SetTextPaletteColor(255, 255, 0, 0);
       }
 
-      if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 3) {
+      if (f_HumanPlayerIndices[f_AssignedHumanCount] == 3) {
         SetTextPaletteColor(63, 255, 63, 0);
       }
 
@@ -2324,10 +2333,10 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   image = D_8023BD80_ovl_01;
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    if (D_80230B40_ovl_01[playerIndex] != NO_CONTROLLER) {
+    if (f_SavedPlayerControllers[playerIndex] != NO_CONTROLLER) {
       position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
       position[AXIS_Y] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
-      controller = D_80230B40_ovl_01[playerIndex];
+      controller = f_SavedPlayerControllers[playerIndex];
       if (controller != COMPUTER_CONTROLLER) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress(LargeImageTexels(image) +
@@ -2352,7 +2361,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
     position[AXIS_Y] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
-    if (D_80230B40_ovl_01[playerIndex] == COMPUTER_CONTROLLER) {
+    if (f_SavedPlayerControllers[playerIndex] == COMPUTER_CONTROLLER) {
       if (save->savedGames[memory->savedGameIndex].state.gameMode ==
           GAME_MODE_GET_CHARACTER) {
         labelIndex = PLAYER_LABEL_COM;
