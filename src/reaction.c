@@ -32,8 +32,6 @@
 #define LAST_REACTION_CHANNEL 7
 #define NO_REACTION_SOUND -1
 
-/* Course units in a world unit */
-#define COURSE_UNITS_PER_UNIT 1024
 /* The camera keeps this many course units above the ground */
 #define CAMERA_GROUND_CLEARANCE 0x1E00
 
