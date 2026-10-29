@@ -124,6 +124,10 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define ASSET_GREEN_ARROWS 0x720
 /* Yellow digits, then m, y, ft and a point */
 #define ASSET_DISTANCE_DIGITS 0x722
+/* Its glyphs sit side by side in a strip DISTANCE_FONT_WIDTH wide */
+#define DISTANCE_FONT_WIDTH 128
+#define DISTANCE_GLYPH_HEIGHT 12
+#define DISTANCE_DIGIT_WIDTH 8
 /* A square wooden plaque, 48 by 48 */
 #define ASSET_WOODEN_PLAQUE 0x832
 /* A glove's frames as it presses a button */

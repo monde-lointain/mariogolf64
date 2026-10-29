@@ -75,9 +75,6 @@ enum UnlockNoticeKind {
   UNLOCK_NOTICE_KIND_CHARACTER
 };
 
-#define RESULTS_DIGIT_WIDTH 8
-#define RESULTS_DIGIT_HEIGHT 12
-
 /* f_TallySpeed normally, and while A is held */
 #define NORMAL_TALLY_SPEED 1
 #define FAST_TALLY_SPEED 10
@@ -977,18 +974,18 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(f_DigitsImage)),
-      G_IM_FMT_CI, 128, RESULTS_DIGIT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_IM_FMT_CI, DISTANCE_FONT_WIDTH, DISTANCE_GLYPH_HEIGHT, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   c = (u8*)g_PrintBuffer;
   offset = 0;
   while (*c != '\0') {
     ch = *c;
     if (ch != ' ') {
       gSPScisTextureRectangle(gfx++, (x + offset) << 2, y << 2,
-          (x + offset + RESULTS_DIGIT_WIDTH) << 2,
-          (y + RESULTS_DIGIT_HEIGHT) << 2, G_TX_RENDERTILE,
-          TexelCoordinate((ch - '0') * RESULTS_DIGIT_WIDTH), 0, TEXEL_STEP_ONE,
+          (x + offset + DISTANCE_DIGIT_WIDTH) << 2,
+          (y + DISTANCE_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE,
+          TexelCoordinate((ch - '0') * DISTANCE_DIGIT_WIDTH), 0, TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
       /* The empty do-while is there to match */
       do {
@@ -996,7 +993,7 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
     }
 
     c++;
-    offset += RESULTS_DIGIT_WIDTH;
+    offset += DISTANCE_DIGIT_WIDTH;
   }
 
   *displayListHead = gfx;

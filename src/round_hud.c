@@ -326,12 +326,7 @@ enum LandingGlyphGroup {
 #define LONG_SHOT_HEAVY_SOUND_VOLUME 0x60
 #define LONG_SHOT_SOUND_REVERB 30
 
-/*
- * The loaded texture of distance glyphs: the digits, then the units and the
- * decimal point, all DISTANCE_GLYPH_HEIGHT high
- */
-#define DISTANCE_GLYPH_HEIGHT 12
-#define DISTANCE_DIGIT_WIDTH 8
+/* The distance font's unit and point glyphs, after its digits */
 #define DISTANCE_METERS_S 80
 #define DISTANCE_YARDS_S 88
 #define DISTANCE_FEET_S 96
@@ -3571,7 +3566,6 @@ void DrawColorTest(Gfx** displayListHead) {
 #define RING_ICON_Y 92
 #define RING_COUNT_X 46
 #define RING_COUNT_Y 112
-#define DISTANCE_FONT_WIDTH 128
 
 #define HOLE_YARDAGE_X 60
 #define HOLE_YARDAGE_Y 56
