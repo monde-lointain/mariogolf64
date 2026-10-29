@@ -34,8 +34,13 @@ endif
 OPTFLAGS    := -O2
 CFLAGS       = -G0 -mips3 -mgp32 -mfp32 -mno-abicalls -fno-PIC -ffast-math -nostdinc -funsigned-char -w -Wa,--force-n64align $(OPTFLAGS)
 ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
+# ld lays out each object's common symbols in the order of its symbol hash
+# table's buckets. The table grows with the symbol count unless it starts big
+# enough, so fix its size to keep the commons where the names put them.
+LD_HASH_SIZE := 8191
 LDFLAGS     := -T $(LD_SCRIPT) -T undefined_syms.txt -T $(BUILD_DIR)/splat/undefined_syms_auto.txt \
-               -T $(BUILD_DIR)/splat/undefined_funcs_auto.txt -Map $(MAP) --no-check-sections
+               -T $(BUILD_DIR)/splat/undefined_funcs_auto.txt -Map $(MAP) --no-check-sections \
+               --hash-size=$(LD_HASH_SIZE)
 
 # Host-side syntax checking of C sources with clang, pretending to be 32-bit MIPS
 CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m32 -nostdinc \
