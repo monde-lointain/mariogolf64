@@ -887,7 +887,7 @@ s32 UpdateCharacterSelect(
           StartWipe(WIPE_CLOSING);
         } else {
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-          g_MenuScreen = MENU_SCREEN_UNK5;
+          g_MenuScreen = MENU_SCREEN_MODE_SELECT;
         }
       } else {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
@@ -957,7 +957,7 @@ s32 UpdateCharacterSelect(
           g_MenuScreen = MENU_SCREEN_TITLE;
         }
       } else {
-        g_MenuScreen = MENU_SCREEN_UNK5;
+        g_MenuScreen = MENU_SCREEN_MODE_SELECT;
       }
 
       g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;

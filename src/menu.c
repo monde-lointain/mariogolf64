@@ -505,7 +505,7 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_8012D420[0], &asset);
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(D_8012D420[1], &asset);
-  if (g_MenuScreen == MENU_SCREEN_UNK5) {
+  if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
     OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
     ReadEncodedAsset(D_801B5CD0[0], &asset);
     OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
@@ -524,7 +524,7 @@ void LoadMenuResources(void) {
       AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
   ReadEncodedAsset(g_MenuTitleImages[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
-    if (g_MenuScreen == MENU_SCREEN_UNK5) {
+    if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
       size = OpenEncodedAsset(
           g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
     } else {
@@ -533,7 +533,7 @@ void LoadMenuResources(void) {
 
     D_801049A0[index] = AllocMemory(size);
     ReadEncodedAsset(D_801049A0[index], &asset);
-    if (g_MenuScreen == MENU_SCREEN_UNK5) {
+    if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
       size = OpenEncodedAsset(
           g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
     } else {
@@ -2069,7 +2069,7 @@ void func_8005DD10(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_MenuScreen = MENU_SCREEN_UNK5;
+  g_MenuScreen = MENU_SCREEN_MODE_SELECT;
 }
 
 void func_8005DD44(void) {

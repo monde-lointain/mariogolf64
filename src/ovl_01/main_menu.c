@@ -1000,7 +1000,7 @@ void UpdateMenus(void) {
       UpdateMenuTitleScreen();
       break;
 
-    case MENU_SCREEN_UNK5:
+    case MENU_SCREEN_MODE_SELECT:
       UpdateModeSelect();
       break;
 
@@ -1190,7 +1190,7 @@ void UpdateMenus(void) {
         ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         break;
 
-      case MENU_SCREEN_UNK5:
+      case MENU_SCREEN_MODE_SELECT:
         for (index = 0; index != ARRAY_COUNT(D_8012F4B0); index++) {
           OpenEncodedAsset(
               g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
@@ -2123,10 +2123,10 @@ void func_801F7CD0_ovl_01(void) {
   g_AnimatedIconBufferIndex ^= 1
 
 /*
- * Updates the mode select (MENU_SCREEN_UNK5), the wheel of the modes that
- * the chosen player count can play. A starts the chosen mode, or first
- * stops the wheel on it while it still turns; B goes back to the
- * character select, undoing the last player's character.
+ * Updates the mode select, the wheel of the modes that the chosen player count
+ * can play. A starts the chosen mode, or first stops the wheel on it while it
+ * still turns; B goes back to the character select, undoing the last player's
+ * character.
  */
 /*
  * Doesn't match: the stroke and mini golf cases load their 1 and store
@@ -2569,7 +2569,7 @@ void func_801F8BAC_ovl_01(void) {
       D_801B7070--;
       g_TakenCharacters.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
     } else {
-      g_MenuScreen = MENU_SCREEN_UNK5;
+      g_MenuScreen = MENU_SCREEN_MODE_SELECT;
     }
 
     MAP_CAMERA_MODE_TOP_BYTE = 0;
@@ -2844,7 +2844,7 @@ void func_801F93D8_ovl_01(void) {
     D_801323A0.unk2D = 0;
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     g_GameState.isMiniGolf = FALSE;
-    g_MenuScreen = MENU_SCREEN_UNK5;
+    g_MenuScreen = MENU_SCREEN_MODE_SELECT;
     MAP_CAMERA_MODE_TOP_BYTE = 0;
     D_800FE334 = 0;
     StopLoaderThread();
@@ -3533,7 +3533,7 @@ void func_801FADBC_ovl_01(void) {
 
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    if (D_801323A0.modeChoice == MENU_SCREEN_UNK5) {
+    if (D_801323A0.modeChoice == MENU_SCREEN_MODE_SELECT) {
       g_MenuScreen = D_801323A0.modeChoice;
     } else {
       g_MenuScreen = MENU_SCREEN_UNK6;
@@ -3723,7 +3723,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
     case MENU_SCREEN_CHARACTER_TABLE:
       DrawCharacterTable(&gfx);
       break;
-    case MENU_SCREEN_UNK5:
+    case MENU_SCREEN_MODE_SELECT:
     case MENU_SCREEN_UNK23:
     case MENU_SCREEN_UNK26:
       DrawModeSelect(&gfx);
