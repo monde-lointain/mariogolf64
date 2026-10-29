@@ -2018,7 +2018,7 @@ s32 DrawGame(void) {
     g_FrameStepState = FRAME_STEP_PAUSED;
   }
 
-  if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {
+  if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
     if (g_ControllerStates[1].buttons & D_CBUTTONS) {
       SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
     }
@@ -2111,7 +2111,7 @@ s32 DrawGame(void) {
     }
   }
 
-  if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {
+  if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
     if (g_ControllerStates[1].pressedButtons & Z_TRIG) {
       func_8040C124();
     }
@@ -2349,7 +2349,7 @@ void UpdateGame(void) {
       StepNoiseTexture();
     }
 
-    if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {
+    if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
       if ((g_ControllerStates[1].pressedButtons & L_JPAD) &&
           g_InsetView.step < INSET_VIEW_STEP_COUNT) {
         g_InsetView.animation = INSET_VIEW_OPENING;

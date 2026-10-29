@@ -63,8 +63,12 @@
 #define GAME_FLAG_SHOW_OPENING_BALL_SPEED 0x09
 /* Prints how far the opening's ball is above where it was struck, in yards */
 #define GAME_FLAG_SHOW_OPENING_BALL_HEIGHT 0x0B
-/* Lets the second and fourth controllers open and close the inset view */
-#define GAME_FLAG_INSET_VIEW_BUTTONS 0x2F
+/*
+ * Lets the second and fourth controllers' D-pad open and close the inset
+ * view, the second's C buttons start screen effects, and its Z and D-pad
+ * right call func_8040C124 and func_8040BFC8
+ */
+#define GAME_FLAG_SCREEN_TEST_BUTTONS 0x2F
 
 /* Shows and edits UpdateGame's f_DebugMenuValues in one scene */
 #define GAME_FLAG_DEBUG_MENU_VALUES 0x57
