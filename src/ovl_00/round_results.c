@@ -205,7 +205,7 @@ s32 UpdateTournamentResults();
 s32 ShowScorePassword();
 s32 UpdateCoursePointsResults();
 s32 UpdateMatchResults();
-s32 func_8005CEE0(s32 index);
+s32 FindCharacterOnGrid(CharacterId character);
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin);
 
 /* The score password shows as two lines of ten symbols */
@@ -2702,7 +2702,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
             /* Beating a still locked opponent unlocks them, except those that
              * other feats unlock */
             if (f_PlayerRanks[0] == MATCH_RANK_WON &&
-                func_8005CEE0((s8)g_Players[1].characterIndex) == -1 &&
+                FindCharacterOnGrid((s8)g_Players[1].characterIndex) == -1 &&
                 (s8)g_Players[1].characterIndex != CHARACTER_PLUM &&
                 (s8)g_Players[1].characterIndex != CHARACTER_CHARLIE &&
                 (s8)g_Players[1].characterIndex != CHARACTER_MAPLE &&
