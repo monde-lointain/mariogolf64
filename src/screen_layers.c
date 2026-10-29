@@ -137,7 +137,6 @@ enum HalfTurnState {
 #define PROMPT_TEXT_Y 108
 #define PROMPT_TEXT_SLOT 0
 #define SAVE_SOUND_CHANNEL 15
-#define PROMPT_FONT_SIZE 12
 #define PROMPT_GROWTH_FRAMES 4
 /* The cloud is 256 by 64; each half is stretched over cloudHeight */
 #define PROMPT_CLOUD_WIDTH 256
@@ -638,7 +637,7 @@ void DrawPrompt(Gfx** displayListHead) {
   }
 
   MeasureMessage(
-      prompt->messageId, PROMPT_FONT_SIZE, &textWidth, &textHeight, 0);
+      prompt->messageId, FONT_SIZE_LARGE, &textWidth, &textHeight, 0);
   cloudHeight = textHeight + PROMPT_CLOUD_MARGIN;
   if (cloudHeight < PROMPT_CLOUD_SMALLEST_HEIGHT) {
     cloudHeight = PROMPT_CLOUD_SMALLEST_HEIGHT;

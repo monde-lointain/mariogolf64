@@ -150,8 +150,6 @@ enum ReplayMenuState {
 /* The cursor's frame pulses between these alphas */
 #define CURSOR_ALPHA_MIDDLE 127
 #define CURSOR_ALPHA_SWING 64.0f
-/* MeasureText's font size for the course names */
-#define COURSE_NAME_FONT_SIZE 12
 /* Each mini-golf course record has three courses */
 #define MINI_GOLF_GREEN 0
 #define MINI_GOLF_SLOW 1
@@ -995,7 +993,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               g_PrintBuffer, "%s", g_CourseRecords[state->courseIndex].name);
         }
 
-        MeasureText(g_PrintBuffer, COURSE_NAME_FONT_SIZE);
+        MeasureText(g_PrintBuffer, FONT_SIZE_LARGE);
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
             COURSE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer,
             0x00FFFF00, 0xFFFFFF00, 0);
