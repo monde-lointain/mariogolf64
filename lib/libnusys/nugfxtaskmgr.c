@@ -156,7 +156,7 @@ void nuGfxTaskMgrInit(void)
 	 nuGfxTask[cnt].list.t.output_buff_size =
 	     (u64 *)(nuRDPOutputBuf + NU_GFX_RDP_OUTPUTBUFF_SIZE);
 	 nuGfxTask[cnt].list.t.yield_data_ptr	= (u64 *) nuYieldBuf;
-	 nuGfxTask[cnt].list.t.yield_data_size	= OS_YIELD_DATA_SIZE; /* Mario Golf: no padding */
+	 nuGfxTask[cnt].list.t.yield_data_size	= NU_GFX_YIELD_BUF_SIZE;
 	 nuGfxTask[cnt].msgQ			= &nuGfxTaskMgrMesgQ;
      }
      nuGfxTask[NU_GFX_TASK_NUM-1].next = &nuGfxTask[0];

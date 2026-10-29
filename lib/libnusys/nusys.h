@@ -180,7 +180,8 @@ extern "C" {
 #define	NU_GFX_DISPLAY_ON		1	/* Display */
 #define	NU_GFX_DISPLAY_ON_TRIGGER	0x80	/* Trigger		*/
 
-#define NU_GFX_YIELD_BUF_SIZE		(OS_YIELD_DATA_SIZE + 0x10)
+/* Mario Golf: no padding, the size nuGfxTaskMgrInit gives the task */
+#define NU_GFX_YIELD_BUF_SIZE		OS_YIELD_DATA_SIZE
 					   
 /*----------------------------------------------------------------------*/
 /* SI MANAGER DEFINE							*/
