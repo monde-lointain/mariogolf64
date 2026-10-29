@@ -3728,14 +3728,14 @@ void UpdateTurns(void) {
           D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
           D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
           PlaceShotCamera();
-          if (g_ShotFlags & 1) {
+          if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
             if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
                 g_LetterboxState == LETTERBOX_STATE_NONE) {
               g_RoundHud.flags = 5;
             } else {
               g_RoundHud.flags = 0x45;
             }
-          } else if (g_ShotFlags & 2) {
+          } else if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
             if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
                 g_LetterboxState == LETTERBOX_STATE_NONE) {
               g_RoundHud.flags = 7;
@@ -3771,7 +3771,7 @@ void UpdateTurns(void) {
 
         g_RoundHud.unkF = 0;
         g_RoundHud.unk12 = 0;
-        if (g_ShotFlags & 2) {
+        if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
           g_RoundHud.flags = 0x10;
         } else {
           g_RoundHud.flags = 0x18;
@@ -3853,7 +3853,7 @@ void UpdateTurns(void) {
         ReuseLastCharacterMatrices(0);
         BuildShotPreview(&D_80227150_ovl_00, state);
         areCallsAllowed = FALSE;
-        if (g_ShotFlags & 2) {
+        if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
           g_RoundHud.flags = 0x20;
         } else {
           g_RoundHud.flags = 0x28;
