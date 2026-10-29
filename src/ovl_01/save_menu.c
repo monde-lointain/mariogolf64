@@ -1801,7 +1801,7 @@ const char D_80231A3C_ovl_01[] = "%s";
 #define MESSAGE_EMPTY_SAVED_GAME 0x26
 
 void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY);
-void func_80224AFC_ovl_01(
+void DrawChosenGameBoard(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void DrawSavedGolfers(Gfx** displayListHead);
 void DrawPlayerControllers(Gfx** displayListHead);
@@ -1993,7 +1993,7 @@ void DrawSavedGames(Gfx** displayListHead) {
       }
     } else {
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      func_80224AFC_ovl_01(&gfx, boardX[slot] - halfSize,
+      DrawChosenGameBoard(&gfx, boardX[slot] - halfSize,
           boardY[slot] - halfSize + bob, halfSize, step);
     }
   }
@@ -2150,7 +2150,12 @@ void DrawSavedGames(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawSavedGames);
 #endif
 
-void func_80224AFC_ovl_01(
+/*
+ * Draws the chosen saved game's board, halfSize * 2 pixels square, at (left,
+ * top) and, if the game has a mode image, the mode's icon on top, reading the
+ * icon's next frame in turn
+ */
+void DrawChosenGameBoard(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
   MenuMemory* memory = func_8005AF74();
   Gfx* gfx = *displayListHead;
