@@ -78,6 +78,14 @@ enum UnlockNoticeKind {
 /* f_TallySpeed normally, and while A is held */
 #define NORMAL_TALLY_SPEED 1
 #define FAST_TALLY_SPEED 10
+/* At the normal speed, the tally ticks on every fourth call */
+#define TALLY_SOUND_INTERVAL_MASK 3
+/* The points that the debug point flags add */
+#define SMALL_DEBUG_POINTS_BONUS 500
+#define LARGE_DEBUG_POINTS_BONUS 9999
+/* Where the debug unlock choice prints the chosen character */
+#define DEBUG_UNLOCK_CHOICE_COLUMN 25
+#define DEBUG_UNLOCK_CHOICE_ROW 5
 #define CONFIRM_SOUND_CHANNEL 15
 #define CONFIRM_SOUND_VOLUME 100
 
@@ -435,11 +443,11 @@ void LoadRoundResults(void) {
   f_TallySpeed = NORMAL_TALLY_SPEED;
   f_IsAwaitingConfirm = FALSE;
   if (IsGameFlagSet(GAME_FLAG_ADD_500_POINTS)) {
-    g_Players[0].points += 500;
+    g_Players[0].points += SMALL_DEBUG_POINTS_BONUS;
   }
 
   if (IsGameFlagSet(GAME_FLAG_ADD_9999_POINTS)) {
-    g_Players[0].points += 9999;
+    g_Players[0].points += LARGE_DEBUG_POINTS_BONUS;
   }
 
   f_ResultsBackdropImage = AllocMemory(OpenEncodedAsset(
@@ -954,10 +962,11 @@ void StartPortraitAnimation(s32 animation, s32 playerIndex) {
   f_PortraitTimers[playerIndex] = 0;
 }
 
-/* Ticks as the points count up, on every fourth call while f_TallySpeed is 1 */
+/* Ticks as the points count up, on every fourth call at the normal speed */
 void PlayTallySound(void) {
   f_TallySoundCount++;
-  if (f_TallySpeed != 1 || !(f_TallySoundCount & 3)) {
+  if (f_TallySpeed != NORMAL_TALLY_SPEED ||
+      !(f_TallySoundCount & TALLY_SOUND_INTERVAL_MASK)) {
     PlaySound(SOUND_TICK, g_NextSoundChannel, SOUND_FULL_SCALE);
   }
 }
@@ -2768,7 +2777,8 @@ s32 UpdateMatchResults(ControllerState* controller) {
             }
 
             sprintf(g_PrintBuffer, "CHARA:%2d", f_DebugUnlockCharacter);
-            PrintDebugText(g_PrintBuffer, 25, 5);
+            PrintDebugText(g_PrintBuffer, DEBUG_UNLOCK_CHOICE_COLUMN,
+                DEBUG_UNLOCK_CHOICE_ROW);
             if (controller->pressedButtons & B_BUTTON) {
               EncodedAsset portraitAsset;
               AssetFile file;
