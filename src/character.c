@@ -181,7 +181,6 @@ static u8 D_800DEA30[120];
 
 #define MODEL_SCALE 0.01f
 #define HALF_TURN_DEGREES 180
-#define FULL_TURN_DEGREES 360
 #define BLEND_ALPHA 0x80
 #define OPAQUE_ALPHA 0xFF
 /* The models' translucent mode: like G_RM_ZB_XLU_SURF, but updating the
@@ -1896,7 +1895,7 @@ void DrawCharacter(u32 slotIndex) {
     guScale(&f_ModelScaleMatrix, MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
     guRotate(&f_RollMatrix, HALF_TURN_DEGREES, 0.0f, 0.0f, 1.0f);
     guRotate(&f_HeadingMatrix,
-        (f_DrawParity * FULL_TURN_DEGREES / BINARY_ANGLE_TURN) +
+        (f_DrawParity * DEGREES_PER_TURN / BINARY_ANGLE_TURN) +
             HALF_TURN_DEGREES,
         0.0f, 1.0f, 0.0f);
   }

@@ -282,7 +282,6 @@ enum MenuArrow {
  * higher again */
 #define WHEEL_RAISE 32
 #define WHEEL_ICON_RAISE 12
-#define DEGREES_PER_TURN 360
 /* The spins count steps of four degrees */
 #define DEGREES_PER_SPIN_STEP 4
 #define COURSE_ICON_WIDTH 64
