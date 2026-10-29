@@ -300,6 +300,17 @@
 #define PREPARED_SHOT_MIN_AIM_FRAMES 30
 /* The latest frame of a skipped swing animation at which its impact comes */
 #define SKIPPED_SWING_IMPACT_FRAME 15
+/*
+ * A putt's power, scaled to a short putt's by about how many times a short
+ * putt's reach the long and middle putts have, picks its swing: the middle
+ * putt's from MIDDLE_PUTT_SWING_POWER, the short putt's below it, slowed
+ * below SLOW_PUTT_SWING_POWER for PUTT_SLOWDOWN_LEAD_FRAMES before the impact
+ */
+#define LONG_PUTT_REACH_SCALE 6
+#define MIDDLE_PUTT_REACH_SCALE 3
+#define MIDDLE_PUTT_SWING_POWER (MAX_LAUNCH_POWER / 2)
+#define SLOW_PUTT_SWING_POWER (MAX_LAUNCH_POWER / 4)
+#define PUTT_SLOWDOWN_LEAD_FRAMES 3
 
 /* The song's tempo while aiming, a step below NORMAL_SONG_TEMPO; on the green,
  * f_GreenSongTempo rises from it by GREEN_SONG_TEMPO_STEP each frame */
@@ -4113,24 +4124,26 @@ void UpdateTurns(void) {
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
             s32 power = f_ShotLaunch.power;
 
-            if (f_ShotLaunch.shotMode == 0) {
-              power *= 6;
+            if (f_ShotLaunch.shotMode == PUTT_MODE_LONG) {
+              power *= LONG_PUTT_REACH_SCALE;
             }
 
-            if (f_ShotLaunch.shotMode == 1) {
-              power *= 3;
+            if (f_ShotLaunch.shotMode == PUTT_MODE_MIDDLE) {
+              power *= MIDDLE_PUTT_REACH_SCALE;
             }
 
-            if (power >= 0x80) {
-              shotMode = 1;
+            if (power >= MIDDLE_PUTT_SWING_POWER) {
+              shotMode = PUTT_MODE_MIDDLE;
             } else {
-              shotMode = 2;
-              if (power < 0x40) {
-                f32 speed = (f32)GetPuttPower(power, 2) / GetPuttPower(0x40, 2);
+              shotMode = PUTT_MODE_SHORT;
+              if (power < SLOW_PUTT_SWING_POWER) {
+                f32 speed = (f32)GetPuttPower(power, PUTT_MODE_SHORT) /
+                    GetPuttPower(SLOW_PUTT_SWING_POWER, PUTT_MODE_SHORT);
 
-                f_PuttSlowdownLead = 3;
+                f_PuttSlowdownLead = PUTT_SLOWDOWN_LEAD_FRAMES;
                 f_PuttSwingSpeed = speed;
-                f_ImpactDelay = (3.0f / speed) - 3.0f;
+                f_ImpactDelay = (PUTT_SLOWDOWN_LEAD_FRAMES / speed) -
+                    PUTT_SLOWDOWN_LEAD_FRAMES;
               }
             }
 
