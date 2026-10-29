@@ -4493,6 +4493,9 @@ extern const char D_8023176C_ovl_01[];
 #define WON_COUNT_X 250
 #define WON_COUNT_Y 72
 #define WON_COUNT_DIGIT_WIDTH 16
+/* The won counts from which a count takes two digits, and three */
+#define MIN_TWO_DIGIT_WON_COUNT 10
+#define MIN_THREE_DIGIT_WON_COUNT 100
 
 /*
  * The course select's water plane, D_8022FD48, blends the water image and the
@@ -4927,15 +4930,16 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
     }
 
     countShift = 0;
-    if (badgeCount < 10) {
+    if (badgeCount < MIN_TWO_DIGIT_WON_COUNT) {
       countShift = WON_COUNT_DIGIT_WIDTH;
     }
 
-    if ((badgeCount >= 10) && (badgeCount < 100)) {
+    if ((badgeCount >= MIN_TWO_DIGIT_WON_COUNT) &&
+        (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
       countShift = 0;
     }
 
-    if (badgeCount >= 100) {
+    if (badgeCount >= MIN_THREE_DIGIT_WON_COUNT) {
       countShift = -WON_COUNT_DIGIT_WIDTH;
     }
 
@@ -4960,16 +4964,17 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
     }
 
     countShift = 0;
-    if (starCount < 10) {
+    if (starCount < MIN_TWO_DIGIT_WON_COUNT) {
       countShift = WON_COUNT_DIGIT_WIDTH;
     }
 
     /* This tests the badge count, which is zero here, for the star count */
-    if ((starCount >= 10) && (badgeCount < 100)) {
+    if ((starCount >= MIN_TWO_DIGIT_WON_COUNT) &&
+        (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
       countShift = 0;
     }
 
-    if (starCount >= 100) {
+    if (starCount >= MIN_THREE_DIGIT_WON_COUNT) {
       countShift = -WON_COUNT_DIGIT_WIDTH;
     }
 
@@ -5807,15 +5812,16 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
       }
 
       /* Centers the count by its number of digits */
-      if (badgeCount < 10) {
+      if (badgeCount < MIN_TWO_DIGIT_WON_COUNT) {
         otherIndex = WON_COUNT_DIGIT_WIDTH;
       }
 
-      if ((badgeCount >= 10) && (badgeCount < 100)) {
+      if ((badgeCount >= MIN_TWO_DIGIT_WON_COUNT) &&
+          (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
         otherIndex = 0;
       }
 
-      if (badgeCount >= 100) {
+      if (badgeCount >= MIN_THREE_DIGIT_WON_COUNT) {
         otherIndex = -WON_COUNT_DIGIT_WIDTH;
       }
 
@@ -5951,15 +5957,16 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
       }
 
       /* Centers the count by its number of digits */
-      if (badgeCount < 10) {
+      if (badgeCount < MIN_TWO_DIGIT_WON_COUNT) {
         otherIndex = WON_COUNT_DIGIT_WIDTH;
       }
 
-      if ((badgeCount >= 10) && (badgeCount < 100)) {
+      if ((badgeCount >= MIN_TWO_DIGIT_WON_COUNT) &&
+          (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
         otherIndex = 0;
       }
 
-      if (badgeCount >= 100) {
+      if (badgeCount >= MIN_THREE_DIGIT_WON_COUNT) {
         otherIndex = -WON_COUNT_DIGIT_WIDTH;
       }
 
