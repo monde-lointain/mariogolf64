@@ -286,13 +286,14 @@ typedef struct RoundStats {
   /* 0x18 */ Boolean isDriveAveraged;
 } RoundStats; /* size = 0x1C */
 
-/* Indices of UnkE98.hasPlace */
+/* Indices of CourseStats.hasPlace */
 #define THIRD_PLACE_INDEX 0
 #define SECOND_PLACE_INDEX 1
 #define FIRST_PLACE_INDEX 2
 #define TOURNAMENT_PLACE_COUNT 3
 
-typedef struct UnkE98 {
+/* A course's statistics over every round played on it */
+typedef struct CourseStats {
   /* 0x00 */ s32 roundCount;
   /* 0x04 */ s32 bestScore; /* The lowest net score to par over a round */
   /* 0x08 */ s32 strokeTotal;
@@ -314,7 +315,7 @@ typedef struct UnkE98 {
       characterBestScores[CHARACTER_COUNT]; /* bestScore, by character */
   /* 0x60 */ u8 hasCharacterBestScore[CHARACTER_COUNT];
   /* 0x72 */ u8 unk72[0x74 - 0x72];
-} UnkE98; /* size = 0x74 */
+} CourseStats; /* size = 0x74 */
 
 typedef struct SavedGame {
   /* 0x00 */ Boolean isValid;
@@ -490,7 +491,7 @@ typedef struct SaveData {
                             [BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
   /* 0x0E08 */ s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
   /* 0x0E50 */ s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x0E98 */ UnkE98 unkE98[COURSE_COUNT];
+  /* 0x0E98 */ CourseStats unkE98[COURSE_COUNT];
   /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
   /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
   /* 0x1344 */ s8 unk1344[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT]
@@ -523,8 +524,11 @@ extern GameState g_GameState;
 /* The current game's, which a saved game is loaded into and stored from */
 extern Player g_Players[MAX_PLAYER_COUNT];
 
-/* The figures D_80105C38 holds for each course, then for all of them */
-typedef struct Unk80105C38 {
+/*
+ * The statistics that the menus show, worked out from CourseStats: for
+ * each course, then for all of them
+ */
+typedef struct CourseStatFigures {
   /* 0x00 */ f32 roundCount;
   /* 0x04 */ f32 bestScore;
   /* 0x08 */ f32 averageScore;
@@ -537,9 +541,9 @@ typedef struct Unk80105C38 {
   /* 0x24 */ f32 parOnPercent;
   /* 0x28 */ f32 sandSavePercent;
   /* 0x2C */ Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
-} Unk80105C38; /* size = 0x38 */
+} CourseStatFigures; /* size = 0x38 */
 
-extern Unk80105C38 D_80105C38[COURSE_COUNT + 1];
+extern CourseStatFigures D_80105C38[COURSE_COUNT + 1];
 
 #define HOLES_PER_ROUND 18.0f
 

@@ -107,7 +107,7 @@ void ReportBirdieBadgeCount(void) {
  * third or better, and saves */
 #ifdef NON_MATCHING
 void RecordTournamentPlace(void) {
-  UnkE98* stats;
+  CourseStats* stats;
   s32* placeFlag;
   Boolean hasPlace;
   s32 place;

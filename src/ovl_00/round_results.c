@@ -2148,7 +2148,7 @@ enum TournamentStep {
  */
 s32 UpdateTournamentResults(ControllerState* controller) {
   EncodedAsset asset;
-  UnkE98* record;
+  CourseStats* record;
   s32 overshoot;
 
   GetSaveData();

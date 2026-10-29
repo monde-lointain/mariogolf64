@@ -1768,8 +1768,8 @@ void func_8005D334(void) {
 }
 
 void ComputeRoundStatistics(void) {
-  UnkE98* saved;
-  UnkE98* entry;
+  CourseStats* saved;
+  CourseStats* entry;
   f32 reciprocal;
   s32 sum;
   CourseIndex courseIndex;

@@ -333,7 +333,7 @@ void UpdateContest(Boolean isHoleOver) {
  * moving.
  */
 void RecordCourseRound(void) {
-  UnkE98* record = &GetSaveData()->unkE98[g_GameState.courseIndex];
+  CourseStats* record = &GetSaveData()->unkE98[g_GameState.courseIndex];
   RoundStats* stats = &g_RoundStats;
   CourseRecord* course = &g_CourseRecords[g_GameState.courseIndex];
   Boolean isAtRoundLimit;

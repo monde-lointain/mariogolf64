@@ -3374,7 +3374,7 @@ typedef struct SaveRecords {
   s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
   s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
   s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
-  UnkE98 unkE98[COURSE_COUNT];
+  CourseStats unkE98[COURSE_COUNT];
   u8 unk1150[0x1320 - 0x1150];
   s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
 } SaveRecords;
@@ -3414,8 +3414,8 @@ void BuildStatusData(u8* status) {
 
   /* Reading the records through a pointer to unk990 is there to match */
   SaveRecords* records = (SaveRecords*)&save->unk990;
-  UnkE98* entry;
-  UnkE98* scores;
+  CourseStats* entry;
+  CourseStats* scores;
   f32 reciprocal;
   s32 value;
   s32 sum;
