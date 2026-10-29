@@ -415,11 +415,11 @@ void DrawTitleScreen(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
         TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
-    gDPLoadTextureTile_4b(gfx++, (u32)f_PressStartText.texels & ~7, G_IM_FMT_I,
-        PRESS_START_WIDTH, PRESS_START_HEIGHT, 0, 0, PRESS_START_WIDTH - 1,
-        PRESS_START_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
+    gDPLoadTextureTile_4b(gfx++, TextureAddress(f_PressStartText.texels),
+        G_IM_FMT_I, PRESS_START_WIDTH, PRESS_START_HEIGHT, 0, 0,
+        PRESS_START_WIDTH - 1, PRESS_START_HEIGHT - 1, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     DrawTextureRect(&gfx, PRESS_START_LEFT << 2, PRESS_START_TOP << 2,
         (PRESS_START_LEFT + PRESS_START_WIDTH) << 2,

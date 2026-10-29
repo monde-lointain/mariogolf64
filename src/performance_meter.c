@@ -238,8 +238,9 @@ static void DrawDigits(Gfx** gfxP, u16 x, u16 y, char* text) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
-  gDPLoadTextureBlock_4b(gfx++, (u32)f_DigitTexture & ~7, G_IM_FMT_IA, 64, 8, 0,
-      G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(f_DigitTexture), G_IM_FMT_IA, 64,
+      8, 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   f_DigitDrawCount = (f_DigitDrawCount + 1) & 0x3FF;
   gDPPipeSync(gfx++);
 

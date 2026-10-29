@@ -203,7 +203,7 @@ extern u8* g_ShadowTexture;
 /* The square's texture coordinates, in s10.5, span the texture and the mirror
  * image its tile wraps to */
 #define SHADOW_QUAD_TEXEL_SPAN ((SHADOW_TEXTURE_SIZE * 2) << 5)
-#define ShadowTexturePixels(texture) (((u32)(texture) + 8) & ~7)
+#define ShadowTexturePixels(texture) (TextureAddress((u32)(texture) + 8))
 /* The camera index DrawCharacterAndShadow always draws for */
 #define CAMERA_UNK2 2
 #define SECOND_LIGHT_DIRECTION_LENGTH 64.0f

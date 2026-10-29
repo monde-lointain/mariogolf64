@@ -1628,9 +1628,9 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   LoadSmallPalette(
       &displayList, 0, (u8*)transfer->statBarsImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(displayList++,
-      ((u32)transfer->statBarsImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
-      CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0,
-      0, 0, 0, 0, 0);
+      TextureAddress((u32)transfer->statBarsImage + PALETTED_TEXELS_OFFSET),
+      G_IM_FMT_CI, CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1,
+      CURVE_BAR_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2,
       (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
       (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
@@ -1837,7 +1837,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
           G_IM_FMT_CI, CONTROLLER_ICON_SIZE,
           CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0, 0, 0, 0);
       gDPLoadTextureTile_4b(displayList++,
-          ((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET) & ~7,
+          TextureAddress((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1,
           POINTER_IMAGE_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
       /* Subtracting the swing in each coordinate is there to match */
@@ -1948,9 +1948,9 @@ void DrawBringCharactersScreen(
   LoadSmallPalette(
       &displayList, 0, (u8*)transfer->statBarsImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(displayList++,
-      ((u32)transfer->statBarsImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
-      CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0,
-      0, 0, 0, 0, 0);
+      TextureAddress((u32)transfer->statBarsImage + PALETTED_TEXELS_OFFSET),
+      G_IM_FMT_CI, CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1,
+      CURVE_BAR_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2,
       (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
       (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
@@ -2155,9 +2155,9 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   LoadLargePalette(&displayList, (u8*)transfer->titleImage + IMAGE_HEADER_SIZE);
   for (index = 0; index != TITLE_STRIP_COUNT; index++) {
     gDPLoadTextureTile(displayList++,
-        ((u32)transfer->titleImage + LARGE_PALETTED_TEXELS_OFFSET +
-            (index * (TITLE_WIDTH * TITLE_STRIP_ROWS))) &
-            ~7,
+        TextureAddress((u32)transfer->titleImage +
+            LARGE_PALETTED_TEXELS_OFFSET +
+            (index * (TITLE_WIDTH * TITLE_STRIP_ROWS))),
         G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_WIDTH, 0, 0, 0, TITLE_WIDTH - 1,
         TITLE_STRIP_ROWS - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&displayList, TITLE_LEFT << 2,
@@ -2173,9 +2173,8 @@ void DrawTransmitMenu(Gfx** displayListHead) {
     panelRowCount =
         (index != WOOD_PANEL_STRIP_COUNT - 1) ? WOOD_PANEL_STRIP_ROWS : 1;
     gDPLoadTextureTile(displayList++,
-        ((u32)transfer->woodPanelImage + IMAGE_HEADER_SIZE +
-            (index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2))) &
-            ~7,
+        TextureAddress((u32)transfer->woodPanelImage + IMAGE_HEADER_SIZE +
+            (index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2))),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, WOOD_PANEL_WIDTH, 0, 0, 0,
         WOOD_PANEL_WIDTH - 1, panelRowCount - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&displayList, WOOD_PANEL_LEFT << 2,
@@ -2217,7 +2216,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
     LoadSmallPalette(
         &displayList, 0, (u8*)transfer->pointerImage + IMAGE_HEADER_SIZE);
     gDPLoadTextureTile_4b(displayList++,
-        ((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET) & ~7,
+        TextureAddress((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET),
         G_IM_FMT_CI, POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1,
         POINTER_IMAGE_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
     pointerLeft = OPTIONS_CENTER_X - OPTION_POINTER_GAP - POINTER_WIDTH -

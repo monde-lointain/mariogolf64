@@ -502,15 +502,15 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
     image = (slot == courseCount) ? COURSE_TOTALS_IMAGE : slot;
     halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
     step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
-    gDPLoadTLUT_pal256(
-        gfx++, (u32)((u8*)D_8023A820_ovl_01[image] + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal256(gfx++,
+        TextureAddress((u8*)D_8023A820_ovl_01[image] + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     for (sortIndex = 0; sortIndex != COURSE_ICON_STRIP_COUNT; sortIndex++) {
       gDPLoadTextureBlock(gfx++,
-          (u32)((u8*)D_8023A820_ovl_01[image] + LARGE_PALETTED_TEXELS_OFFSET +
-              sortIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT) &
-              ~7,
+          TextureAddress((u8*)D_8023A820_ovl_01[image] +
+              LARGE_PALETTED_TEXELS_OFFSET +
+              sortIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH, COURSE_ICON_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -560,12 +560,12 @@ void func_8020F2D0_ovl_01(
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, ((u32)D_8023A824_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(
+      gfx++, TextureAddress((u32)D_8023A824_ovl_01 + IMAGE_HEADER_SIZE));
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        ((u32)D_8023A824_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
-            ~7,
+        TextureAddress((u32)D_8023A824_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -860,7 +860,7 @@ void func_80210190_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal16(
-        gfx++, 0, ((u32)D_8023A828_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+        gfx++, 0, TextureAddress((u32)D_8023A828_ovl_01 + IMAGE_HEADER_SIZE));
     for (arrowIndex = 0; arrowIndex != arrowCount; arrowIndex++) {
       top = (arrowIndex != 0) ? STATS_DOWN_ARROW_TOP : STATS_UP_ARROW_TOP;
       if (arrowCount == 1 && firstArrow) {
@@ -868,11 +868,10 @@ void func_80210190_ovl_01(Gfx** displayListHead) {
       }
 
       gDPLoadTextureBlock_4b(gfx++,
-          ((u32)D_8023A828_ovl_01 +
+          TextureAddress((u32)D_8023A828_ovl_01 +
               (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE +
               (PALETTED_TEXELS_OFFSET +
-                  (STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE))) &
-              ~7,
+                  (STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE))),
           G_IM_FMT_CI, STATS_ARROW_WIDTH, STATS_ARROW_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -948,9 +947,9 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
         }
 
         texels = D_8023A814_ovl_01[D_802300A4_ovl_01];
-        gDPLoadTLUT_pal256(gfx++, (u32)palette & ~7);
-        gDPLoadTextureTile(gfx++, (u32)texels & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
-            g_TrophySizes[memory->statsCourse].width,
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
+        gDPLoadTextureTile(gfx++, TextureAddress(texels), G_IM_FMT_CI,
+            G_IM_SIZ_8b, g_TrophySizes[memory->statsCourse].width,
             g_TrophySizes[memory->statsCourse].height, 0, 0,
             g_TrophySizes[memory->statsCourse].width - 1,
             g_TrophySizes[memory->statsCourse].height - 1, 0,
@@ -1161,7 +1160,7 @@ void DrawMenuNumber(
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal16(
-      gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+      gfx++, 0, TextureAddress((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE));
   shift = 0;
   if (mark != MENU_NUMBER_PLAIN) {
     switch (mark) {
@@ -1196,9 +1195,8 @@ void DrawMenuNumber(
 
     if (mark != MENU_NUMBER_RED_TINT && mark != MENU_NUMBER_GREEN_TINT) {
       gDPLoadTextureBlock_4b(gfx++,
-          ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-              (index * MENU_GLYPH_IMAGE_SIZE)) &
-              ~7,
+          TextureAddress((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+              (index * MENU_GLYPH_IMAGE_SIZE)),
           G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1328,10 +1326,8 @@ void DrawMenuNumber(
 
   for (index = 0; index != digitCount; index++) {
     gDPLoadTextureBlock_4b(gfx++,
-        ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-            ((digits[index] + MENU_GLYPH_FIRST_DIGIT) *
-                MENU_GLYPH_IMAGE_SIZE)) &
-            ~7,
+        TextureAddress((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+            ((digits[index] + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)),
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1406,7 +1402,7 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal16(
-      gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+      gfx++, 0, TextureAddress((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE));
   shift = 0;
   if (whole >= 0 && whole < DECIMAL_BASE) {
     shift = 2 * MENU_GLYPH_SIZE;
@@ -1424,9 +1420,8 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
     }
 
     gDPLoadTextureBlock_4b(gfx++,
-        ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-            ((digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)) &
-            ~7,
+        TextureAddress((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+            ((digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)),
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1440,9 +1435,8 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   }
 
   gDPLoadTextureBlock_4b(gfx++,
-      ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-          (MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE)) &
-          ~7,
+      TextureAddress((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+          (MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE)),
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1458,9 +1452,8 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
       TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock_4b(gfx++,
-      ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-          ((fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)) &
-          ~7,
+      TextureAddress((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+          ((fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)),
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1504,11 +1497,10 @@ void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal16(
-      gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+      gfx++, 0, TextureAddress((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE));
   gDPLoadTextureBlock_4b(gfx++,
-      ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-          (glyphIndex * MENU_GLYPH_IMAGE_SIZE)) &
-          ~7,
+      TextureAddress((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+          (glyphIndex * MENU_GLYPH_IMAGE_SIZE)),
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1534,12 +1526,11 @@ void func_80212858_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal16(
-      gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+      gfx++, 0, TextureAddress((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE));
   for (glyphIndex = 0; glyphIndex != OFF_GLYPH_COUNT; glyphIndex++) {
     gDPLoadTextureBlock_4b(gfx++,
-        ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-            ((OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE)) &
-            ~7,
+        TextureAddress((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+            ((OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE)),
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1574,15 +1565,14 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress((u32)image + IMAGE_HEADER_SIZE));
   frameOffset =
       (*blinkFrame * SIDE_ARROW_BLINK_STRIDE) + PALETTED_TEXELS_OFFSET;
   for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
-        ((u32)image +
+        TextureAddress((u32)image +
             ((SIDE_ARROW_FIRST_IMAGE + arrowIndex) * SIDE_ARROW_IMAGE_SIZE +
-                frameOffset)) &
-            ~7,
+                frameOffset)),
         G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0,
         SIDE_ARROW_SIZE - 1, SIDE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -1639,14 +1629,13 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + headerSize) & ~7);
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress((u32)image + headerSize));
   gDPLoadTextureTile_4b(gfx++,
-      ((u32)image +
+      TextureAddress((u32)image +
           (direction * SIDE_ARROW_IMAGE_SIZE +
               (blinkFrame * SIDE_ARROW_BLINK_STRIDE +
                   (headerSize +
-                      SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)))) &
-          ~7,
+                      SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)))),
       G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0, SIDE_ARROW_SIZE - 1,
       SIDE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,

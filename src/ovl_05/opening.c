@@ -3861,7 +3861,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
-          gfx++, (u32)(f_OpeningEffectImage + IMAGE_HEADER_SIZE) & ~7);
+          gfx++, TextureAddress(f_OpeningEffectImage + IMAGE_HEADER_SIZE));
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
@@ -3872,7 +3872,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
           stripIndex++) {
         bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
         gDPLoadTextureBlock(gfx++,
-            (u32)(f_OpeningEffectImage + texelOffset) & ~7, G_IM_FMT_I,
+            TextureAddress(f_OpeningEffectImage + texelOffset), G_IM_FMT_I,
             G_IM_SIZ_8b, IMPACT_LINES_SIZE, IMPACT_LINES_STRIP_HEIGHT, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

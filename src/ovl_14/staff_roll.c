@@ -1858,8 +1858,9 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
       glyphLeft = column * STAFF_GLYPH_WIDTH;
       glyphTop = row * STAFF_GLYPH_HEIGHT;
       gDPPipeSync(gfx++);
-      gDPLoadTextureTile_4b(gfx++, (u32)(f_StaffFont + IMAGE_HEADER_SIZE) & ~7,
-          G_IM_FMT_I, STAFF_FONT_WIDTH, 0, glyphLeft, glyphTop,
+      gDPLoadTextureTile_4b(gfx++,
+          TextureAddress(f_StaffFont + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+          STAFF_FONT_WIDTH, 0, glyphLeft, glyphTop,
           glyphLeft + STAFF_GLYPH_WIDTH - 1, glyphTop + STAFF_GLYPH_HEIGHT - 1,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1943,7 +1944,7 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, (u32)f_StaffRollImage.texels & ~7);
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_StaffRollImage.texels));
     for (stripIndex = 0; stripIndex != IMAGE_STRIP_COUNT; stripIndex++) {
       scrolledRows = f_StaffRollFrame - PAINTING_SCROLL_FRAME;
       if (scrolledRows > PAINTING_SCROLL_LIMIT) {

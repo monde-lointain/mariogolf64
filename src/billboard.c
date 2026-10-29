@@ -300,7 +300,7 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
 
   if (NeedsTextureLoad(billboard, textureIndex)) {
     gDPLoadTextureBlock(gfx++,
-        (u32)f_BillboardTextures[textureIndex].pixels & ~7, G_IM_FMT_RGBA,
+        TextureAddress(f_BillboardTextures[textureIndex].pixels), G_IM_FMT_RGBA,
         G_IM_SIZ_16b, f_BillboardTextures[textureIndex].width,
         f_BillboardTextures[textureIndex].height, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 5, 6, 2, G_TX_NOLOD);

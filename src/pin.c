@@ -440,7 +440,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
     gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        ((u32)f_PinShadowTexture + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+        TextureAddress((u32)f_PinShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
         PIN_SHADOW_TEXTURE_WIDTH, PIN_SHADOW_TEXTURE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -513,12 +513,12 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
 
     if (cupDepth < SMALL_CUP_DEPTH) {
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-          ((u32)f_SmallCupTexture + IMAGE_HEADER_SIZE) & ~7);
+          TextureAddress((u32)f_SmallCupTexture + IMAGE_HEADER_SIZE));
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
       gDPLoadTextureBlock_4b(g_DisplayListHead++,
-          ((u32)f_SmallCupTexture + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
-          SMALL_CUP_TEXTURE_SIZE, SMALL_CUP_TEXTURE_SIZE, 0,
+          TextureAddress((u32)f_SmallCupTexture + PALETTED_TEXELS_OFFSET),
+          G_IM_FMT_CI, SMALL_CUP_TEXTURE_SIZE, SMALL_CUP_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
           G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(
@@ -529,7 +529,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
           g_DisplayListHead++, 3, G_MWO_POINT_ST, SmallCupTexcoords(8, 0));
     } else {
       gDPLoadTextureBlock(g_DisplayListHead++,
-          ((u32)f_CupTexture + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_RGBA,
+          TextureAddress((u32)f_CupTexture + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
           G_IM_SIZ_16b, CUP_TEXTURE_WIDTH, CUP_TEXTURE_HEIGHT, 0,
           G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, 5, 6, G_TX_NOLOD,
           G_TX_NOLOD);
@@ -671,10 +671,10 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-          ((u32)f_FlagstickTexture + IMAGE_HEADER_SIZE) & ~7);
+          TextureAddress((u32)f_FlagstickTexture + IMAGE_HEADER_SIZE));
       gDPLoadTextureBlock_4b(g_DisplayListHead++,
-          ((u32)f_FlagstickTexture + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
-          FLAGSTICK_TEXTURE_SIZE, FLAGSTICK_TEXTURE_SIZE, 0,
+          TextureAddress((u32)f_FlagstickTexture + PALETTED_TEXELS_OFFSET),
+          G_IM_FMT_CI, FLAGSTICK_TEXTURE_SIZE, FLAGSTICK_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 4,
           G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(g_DisplayListHead++);

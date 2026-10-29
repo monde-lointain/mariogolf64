@@ -829,9 +829,10 @@ void DrawLensFlare(Gfx** displayListHead) {
   gDPSetAlphaDither(gfx++, G_AD_PATTERN);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-  gDPLoadTextureBlock(gfx++, (u32)g_RingTexels & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
-      RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, 0, G_TX_MIRROR | G_TX_WRAP,
-      G_TX_MIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadTextureBlock(gfx++, TextureAddress(g_RingTexels), G_IM_FMT_I,
+      G_IM_SIZ_8b, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, 0,
+      G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD,
+      G_TX_NOLOD);
   for (i = 0; i != LENS_FLARE_COUNT; i++) {
     centerX = f_SunScreenX[0] +
         ((LENS_FLARE_AXIS_X - f_SunScreenX[0]) * f_LensFlares[i].position);
@@ -1730,9 +1731,9 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   }
 
   gDPSetEnvColor(gfx++, colors->unkA[0], colors->unkA[1], colors->unkA[2], 255);
-  gDPLoadTextureBlock(gfx++, (u32)g_NoiseTexels & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
-      SKY_NOISE_IMAGE_SIZE, SKY_NOISE_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP,
-      SKY_NOISE_MASK, SKY_NOISE_MASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadTextureBlock(gfx++, TextureAddress(g_NoiseTexels), G_IM_FMT_I,
+      G_IM_SIZ_8b, SKY_NOISE_IMAGE_SIZE, SKY_NOISE_IMAGE_SIZE, 0, G_TX_WRAP,
+      G_TX_WRAP, SKY_NOISE_MASK, SKY_NOISE_MASK, G_TX_NOLOD, G_TX_NOLOD);
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
@@ -1806,12 +1807,13 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
         gDPSetCycleType(gfx++, G_CYC_2CYCLE);
         gDPSetCombineLERP(gfx++, TEXEL1, 0, TEXEL0, 0, 0, 0, 0, TEXEL1, TEXEL1,
             0, COMBINED, 0, 0, 0, 0, COMBINED);
-        gDPLoadTextureBlock(gfx++, ((u32)g_SkyImage + IMAGE_HEADER_SIZE) & ~7,
-            G_IM_FMT_RGBA, G_IM_SIZ_16b, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0,
-            G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++,
+            TextureAddress((u32)g_SkyImage + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
+            G_IM_SIZ_16b, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0, G_TX_WRAP,
+            G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPLoadMultiBlock_4b(gfx++,
-            ((u32)g_SkyImage + SKY_IMAGE_HALF_OFFSET + IMAGE_HEADER_SIZE) & ~7,
+            TextureAddress(
+                (u32)g_SkyImage + SKY_IMAGE_HALF_OFFSET + IMAGE_HEADER_SIZE),
             SUN_MASK_TMEM, 1, G_IM_FMT_I, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0,
             G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
@@ -1832,10 +1834,11 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
         gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0,
             0, 0, TEXEL0, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0,
             TEXEL0);
-        gDPLoadTextureBlock(gfx++, ((u32)g_SkyImage + IMAGE_HEADER_SIZE) & ~7,
-            G_IM_FMT_I, G_IM_SIZ_8b, SUN_GLOW_IMAGE_SIZE, SUN_GLOW_IMAGE_SIZE,
-            0, G_TX_MIRROR, G_TX_MIRROR, SUN_GLOW_MASK, SUN_GLOW_MASK,
-            G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++,
+            TextureAddress((u32)g_SkyImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+            G_IM_SIZ_8b, SUN_GLOW_IMAGE_SIZE, SUN_GLOW_IMAGE_SIZE, 0,
+            G_TX_MIRROR, G_TX_MIRROR, SUN_GLOW_MASK, SUN_GLOW_MASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPSetPrimColor(gfx++, 0, 0, colors->unk14->sunPrimColor[0],
             colors->unk14->sunPrimColor[1], colors->unk14->sunPrimColor[2],
             255);
@@ -1931,7 +1934,8 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTLUT_pal256(gfx++, ((u32)g_CourseSkyImage + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(
+      gfx++, TextureAddress((u32)g_CourseSkyImage + IMAGE_HEADER_SIZE));
   f_BackdropStripCount = COURSE_BACKDROP_STRIP_COUNT;
   f_BackdropStripHeight = COURSE_BACKDROP_STRIP_HEIGHT;
   f_BackdropImageWidth = BACKDROP_IMAGE_WIDTH;
@@ -1974,13 +1978,13 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
       texelWord = texelByte / 2;
       if (!isNibbleImage) {
         gDPLoadTextureBlock(gfx++,
-            (u32)((u16*)g_CourseSkyImage + PALETTE_START + texelWord) & ~7,
+            TextureAddress((u16*)g_CourseSkyImage + PALETTE_START + texelWord),
             G_IM_FMT_CI, G_IM_SIZ_8b, f_BackdropImageWidth,
             f_BackdropStripHeight, 0, G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask,
             0, 0, 0);
       } else {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-            (u32)((u16*)g_CourseSkyImage + texelWord) & ~7);
+            TextureAddress((u16*)g_CourseSkyImage + texelWord));
         gDPLoadSync(gfx++);
         gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
             (((f_BackdropImageWidth * f_BackdropStripHeight) + 3) >> 2) - 1,
@@ -2064,12 +2068,12 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
       texelWord = texelByte / 2;
       if (!isNibbleImage) {
         gDPLoadTextureBlock(gfx++,
-            (u32)((u16*)g_CourseSkyImage + texelWord) & ~7, G_IM_FMT_CI,
+            TextureAddress((u16*)g_CourseSkyImage + texelWord), G_IM_FMT_CI,
             G_IM_SIZ_8b, f_BackdropImageWidth, f_BackdropStripHeight, 0,
             G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask, 0, 0, 0);
       } else {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-            (u32)((u16*)g_CourseSkyImage + texelWord) & ~7);
+            TextureAddress((u16*)g_CourseSkyImage + texelWord));
         gDPLoadSync(gfx++);
         gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
             (((f_BackdropImageWidth * f_BackdropStripHeight) + 3) >> 2) - 1,
@@ -2184,7 +2188,7 @@ void HandleFrameBufferSwap(void) {}
   { \
     if (!(isTileSet)) { \
       gDPSetTextureImage( \
-          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7); \
+          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
       gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, \
           0, 0, 0, 0, 0, 0); \
       gDPLoadSync(gfx++); \
@@ -2201,7 +2205,7 @@ void HandleFrameBufferSwap(void) {}
       isTileSet = TRUE; \
     } else { \
       gDPSetTextureImage( \
-          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7); \
+          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
       gDPLoadSync(gfx++); \
       gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, \
           ((height) * FADE_FRAME_WIDTH) - 1, \
@@ -2259,7 +2263,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         source = f_LastFrameBuffer;
         for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
           height = StripHeight(strip);
-          gDPLoadTextureTile(gfx++, (u32)source & ~7, G_IM_FMT_RGBA,
+          gDPLoadTextureTile(gfx++, TextureAddress(source), G_IM_FMT_RGBA,
               G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
               BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -2429,8 +2433,8 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
     }
 
     for (tileIndex = 0; tileIndex != tileCount; tileIndex++) {
-      gDPLoadTextureTile(gfx++, (u32)frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-          SPIRAL_FRAME_WIDTH, 0, tileColumn * SPIRAL_TILE_WIDTH,
+      gDPLoadTextureTile(gfx++, TextureAddress(frame), G_IM_FMT_RGBA,
+          G_IM_SIZ_16b, SPIRAL_FRAME_WIDTH, 0, tileColumn * SPIRAL_TILE_WIDTH,
           tileRow * SPIRAL_TILE_HEIGHT,
           (tileColumn * SPIRAL_TILE_WIDTH) + SPIRAL_TILE_WIDTH - 1,
           (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1, 0,
@@ -2463,8 +2467,8 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
 
     for (; tileIndex != tileCount; tileIndex++) {
       alpha -= SPIRAL_ALPHA_STEP;
-      gDPLoadTextureTile(gfx++, (u32)frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-          SPIRAL_FRAME_WIDTH, 0, tileColumn * SPIRAL_TILE_WIDTH,
+      gDPLoadTextureTile(gfx++, TextureAddress(frame), G_IM_FMT_RGBA,
+          G_IM_SIZ_16b, SPIRAL_FRAME_WIDTH, 0, tileColumn * SPIRAL_TILE_WIDTH,
           tileRow * SPIRAL_TILE_HEIGHT,
           (tileColumn * SPIRAL_TILE_WIDTH) + SPIRAL_TILE_WIDTH - 1,
           (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1, 0,
@@ -2549,11 +2553,11 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
     source = f_LastFrameBuffer;
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
       height = StripHeight(strip);
-      gDPLoadTextureTile(gfx++, (u32)source & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-          SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER, BACKDROP_RIGHT,
-          BACKDROP_BORDER + height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-          G_TX_NOLOD);
+      gDPLoadTextureTile(gfx++, TextureAddress(source), G_IM_FMT_RGBA,
+          G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
+          BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2,
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
           BACKDROP_RIGHT << 2,
@@ -2610,14 +2614,14 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
-        ((u32)g_BackdropPatternImage + PALETTED_TEXELS_OFFSET) & ~7,
+        TextureAddress((u32)g_BackdropPatternImage + PALETTED_TEXELS_OFFSET),
         G_IM_FMT_CI, BACKDROP_PATTERN_SIZE, BACKDROP_PATTERN_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         BACKDROP_PATTERN_MASK, BACKDROP_PATTERN_MASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(
-        gfx++, 0, ((u32)g_BackdropPatternImage + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(gfx++, 0,
+        TextureAddress((u32)g_BackdropPatternImage + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, BACKDROP_BORDER << 2,
         (SCREEN_WIDTH - BACKDROP_BORDER) << 2,
@@ -2758,10 +2762,10 @@ void DrawTileAnimation(void) {
         }
 
         gDPLoadTextureBlock(g_DisplayListHead++,
-            (u32)&f_CapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-            FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+            TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
+            G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         wordIndex += FRAME_TILE_WORD_COUNT;
         gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
         gDPPipeSync(g_DisplayListHead++);
@@ -2846,10 +2850,10 @@ void DrawTurnAwayAnimation(void) {
     for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
       for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
         gDPLoadTextureBlock(g_DisplayListHead++,
-            (u32)&f_CapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-            FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+            TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
+            G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         wordIndex += FRAME_TILE_WORD_COUNT;
         width = FRAME_TILE_WIDTH;
         if (column == FRAME_TILE_COLUMN_COUNT - 1) {
@@ -2896,10 +2900,10 @@ void DrawTurnAwayAnimation(void) {
     for (row = 0; row != TURN_AWAY_LOWER_ROW_COUNT; row++) {
       for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
         gDPLoadTextureBlock(g_DisplayListHead++,
-            (u32)&f_CapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-            FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+            TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
+            G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         wordIndex += FRAME_TILE_WORD_COUNT;
         width = FRAME_TILE_WIDTH;
         if (column == FRAME_TILE_COLUMN_COUNT - 1) {
@@ -3084,10 +3088,10 @@ void DrawSliceAnimation(void) {
     y = sliceY;
     for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
       gDPLoadTextureBlock(g_DisplayListHead++,
-          (u32)&f_CapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-          SLICE_WIDTH, SLICE_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-          G_TX_NOLOD);
+          TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
+          G_IM_SIZ_16b, SLICE_WIDTH, SLICE_STRIP_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       wordIndex += SLICE_STRIP_WORD_COUNT;
       gSPTextureRectangle(g_DisplayListHead++, column * SLICE_WIDTH << 2,
           y << 2, (column * SLICE_WIDTH + SLICE_WIDTH) << 2,

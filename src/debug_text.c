@@ -81,9 +81,10 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
-  gDPLoadTextureBlock_4b(gfx++, (u32)f_DebugFont & ~7, G_IM_FMT_IA, FONT_WIDTH,
-      FONT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(f_DebugFont), G_IM_FMT_IA,
+      FONT_WIDTH, FONT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }

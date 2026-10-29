@@ -1347,7 +1347,7 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
     loadHeight =
         (row + TABLE_LOAD_HEIGHT <= TABLE_BODY_HEIGHT) ? TABLE_LOAD_HEIGHT : 1;
     gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-        (u32)(g_Scorecard.tableImage + texelsOffset) & ~7);
+        TextureAddress(g_Scorecard.tableImage + texelsOffset));
     gDPLoadSync(gfx++);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
         (loadHeight * (TABLE_WIDTH / 2)) - 1,

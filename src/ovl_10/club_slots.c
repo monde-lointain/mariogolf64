@@ -771,7 +771,7 @@ void DrawClubSlots(Gfx** displayListHead) {
     } else {
       /* The tiles stay as the first strip set them */
       gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-          ((u32)f_Slots->machineImage + texelOffset) & ~7);
+          TextureAddress((u32)f_Slots->machineImage + texelOffset));
       gDPLoadSync(gfx++);
       gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
           ((stripHeight * MACHINE_WIDTH + G_IM_SIZ_8b_INCR) >>
@@ -850,10 +850,10 @@ void DrawClubSlots(Gfx** displayListHead) {
       stripHeight = (stripIndex != START_STRIP_COUNT - 1)
           ? START_STRIP_HEIGHT
           : START_LAST_STRIP_HEIGHT;
-      gDPLoadTextureTile(gfx++, ((u32)f_Slots->startImage + texelOffset) & ~7,
-          G_IM_FMT_CI, G_IM_SIZ_8b, START_WIDTH, stripHeight, 0, 0,
-          START_WIDTH - 1, stripHeight - 1, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0,
-          0);
+      gDPLoadTextureTile(gfx++,
+          TextureAddress((u32)f_Slots->startImage + texelOffset), G_IM_FMT_CI,
+          G_IM_SIZ_8b, START_WIDTH, stripHeight, 0, 0, START_WIDTH - 1,
+          stripHeight - 1, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, (s32)((SCREEN_WIDTH / 2) - halfWidth) << 2,
           (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
@@ -1055,12 +1055,12 @@ void DrawClubSlotsLogo(
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPLoadTLUT_pal256(gfx++, ((u32)f_LogoImage + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(
+      gfx++, TextureAddress((u32)f_LogoImage + IMAGE_HEADER_SIZE));
   for (index = 0; index != LOGO_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
-        ((u32)f_LogoImage + LARGE_PALETTED_TEXELS_OFFSET +
-            (index * LOGO_STRIP_HEIGHT * LOGO_WIDTH)) &
-            ~7,
+        TextureAddress((u32)f_LogoImage + LARGE_PALETTED_TEXELS_OFFSET +
+            (index * LOGO_STRIP_HEIGHT * LOGO_WIDTH)),
         G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT, 0, G_TX_WRAP,
         G_TX_WRAP, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
@@ -1083,12 +1083,12 @@ void DrawClubSlotsLogo(
   gDPSetRenderMode(gfx++,
       GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
       G_RM_AA_ZB_TEX_EDGE2);
-  gDPLoadTLUT_pal256(gfx++, ((u32)f_LogoImage + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(
+      gfx++, TextureAddress((u32)f_LogoImage + IMAGE_HEADER_SIZE));
   for (index = 0; index != LOGO_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
-        ((u32)f_LogoImage + LARGE_PALETTED_TEXELS_OFFSET +
-            (index * LOGO_STRIP_HEIGHT * LOGO_WIDTH)) &
-            ~7,
+        TextureAddress((u32)f_LogoImage + LARGE_PALETTED_TEXELS_OFFSET +
+            (index * LOGO_STRIP_HEIGHT * LOGO_WIDTH)),
         G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT, 0, G_TX_WRAP,
         G_TX_WRAP, 0, 0, 0, 0);
     gDPPipeSync(gfx++);

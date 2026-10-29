@@ -952,8 +952,8 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTextureBlock_4b(gfx++,
-      ((u32)f_DigitsImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI, 128,
-      RESULTS_DIGIT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureAddress((u32)f_DigitsImage + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
+      128, RESULTS_DIGIT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   c = (u8*)g_PrintBuffer;
@@ -993,7 +993,7 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
 #define DrawPlaceGlyph(gfx, x, y, glyph) \
   { \
     gDPLoadTextureTile(gfx++, \
-        (u32)(f_PlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, \
+        TextureAddress(f_PlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET), \
         G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0, \
         (glyph) * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1, \
         ((glyph) * PLACE_GLYPH_SIZE) + PLACE_GLYPH_SIZE - 1, 0, \
@@ -1155,8 +1155,8 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         digit = g_PrintBuffer[i] - '0';
         digitX = (i * PLACE_DIGIT_SPACING) + PLACE_DIGIT_X;
         gDPLoadTextureTile_4b(gfx++,
-            (u32)(D_80225708_ovl_00 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
-            PLACE_DIGIT_WIDTH, 0, 0, digit * PLACE_DIGIT_WIDTH,
+            TextureAddress(D_80225708_ovl_00 + PALETTED_TEXELS_OFFSET),
+            G_IM_FMT_CI, PLACE_DIGIT_WIDTH, 0, 0, digit * PLACE_DIGIT_WIDTH,
             PLACE_DIGIT_WIDTH - 1,
             digit * PLACE_DIGIT_WIDTH + PLACE_DIGIT_WIDTH - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1215,10 +1215,9 @@ void DrawResultsLabel(Gfx** displayListHead, s32 x, s32 y, s32 label) {
 
   LoadSmallPalette(&gfx, 0, f_ResultsLabelsImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(gfx++,
-      (u32)(f_ResultsLabelsImage +
+      TextureAddress(f_ResultsLabelsImage +
           ((label * (RESULTS_LABEL_STORED_WIDTH * RESULTS_LABEL_HEIGHT / 2)) +
-              PALETTED_TEXELS_OFFSET)) &
-          ~7,
+              PALETTED_TEXELS_OFFSET)),
       G_IM_FMT_CI, RESULTS_LABEL_STORED_WIDTH, 0, 0, 0, RESULTS_LABEL_WIDTH - 1,
       RESULTS_LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -2009,10 +2008,9 @@ void DrawResultsBanner(Gfx** displayListHead) {
           f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
       for (i = 0; i != TROPHY_PART_COUNT; i++) {
         gDPLoadTextureTile(gfx++,
-            ((u32)f_TrophyImage +
+            TextureAddress((u32)f_TrophyImage +
                 (i * f_TrophySizes[course][TROPHY_WIDTH] *
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS])) &
-                ~7,
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS])),
             G_IM_FMT_CI, G_IM_SIZ_8b, f_TrophySizes[course][TROPHY_WIDTH],
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
             f_TrophySizes[course][TROPHY_WIDTH] - 1,
@@ -2047,10 +2045,9 @@ void DrawResultsBanner(Gfx** displayListHead) {
           f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
       for (i = 0; i != TROPHY_PART_COUNT; i++) {
         gDPLoadTextureTile(gfx++,
-            ((u32)f_TrophyImage +
+            TextureAddress((u32)f_TrophyImage +
                 (i * f_TrophySizes[course][TROPHY_WIDTH] *
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS])) &
-                ~7,
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS])),
             G_IM_FMT_CI, G_IM_SIZ_8b, f_TrophySizes[course][TROPHY_WIDTH],
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
             f_TrophySizes[course][TROPHY_WIDTH] - 1,

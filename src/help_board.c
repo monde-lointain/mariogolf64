@@ -327,9 +327,10 @@ void DrawHelpBoard(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_HandImages + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(
+        gfx++, 0, TextureAddress((u32)f_HandImages + IMAGE_HEADER_SIZE));
     gDPLoadTextureTile_4b(gfx++,
-        ((u32)f_HandImages + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+        TextureAddress((u32)f_HandImages + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
         HAND_SIZE, 0, 0, 0, HAND_SIZE - 1, HAND_SIZE - 1, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -379,14 +380,14 @@ void DrawHelpBoard(Gfx** displayListHead) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_ArrowImages + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(
+        gfx++, 0, TextureAddress((u32)f_ArrowImages + IMAGE_HEADER_SIZE));
     for (index = 0; index != ARROW_COUNT; index++) {
       if (IsTopicArrowShown(index)) {
         gDPLoadTextureTile_4b(gfx++,
-            (u32)((u8*)f_ArrowImages +
+            TextureAddress((u8*)f_ArrowImages +
                 (index * ARROW_IMAGE_SIZE + PALETTED_TEXELS_OFFSET +
-                    f_ArrowFrame * ARROW_FRAME_SIZE)) &
-                ~7,
+                    f_ArrowFrame * ARROW_FRAME_SIZE)),
             G_IM_FMT_CI, ARROW_SIZE, 0, 0, 0, ARROW_SIZE - 1, ARROW_SIZE - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -450,10 +451,11 @@ void DrawUnusedHelpBoardImage(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
       TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
-  gDPLoadTextureBlock_4b(gfx++, ((u32)f_UnusedImage + IMAGE_HEADER_SIZE) & ~7,
-      G_IM_FMT_I, UNUSED_IMAGE_WIDTH, UNUSED_IMAGE_HEIGHT, 0,
-      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(gfx++,
+      TextureAddress((u32)f_UnusedImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+      UNUSED_IMAGE_WIDTH, UNUSED_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, UNUSED_IMAGE_LEFT << 2, UNUSED_IMAGE_TOP << 2,
       UNUSED_IMAGE_RIGHT << 2, UNUSED_IMAGE_BOTTOM << 2, G_TX_RENDERTILE, 0, 0,
@@ -481,12 +483,12 @@ void DrawChalkboard(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPPipeSync(gfx++);
-  gDPLoadTLUT_pal256(gfx++, ((u32)f_ChalkboardImage + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(
+      gfx++, TextureAddress((u32)f_ChalkboardImage + IMAGE_HEADER_SIZE));
   for (stripIndex = 0; stripIndex != CHALKBOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        ((u32)f_ChalkboardImage + CHALKBOARD_TEXELS_OFFSET +
-            (stripIndex * CHALKBOARD_WIDTH * CHALKBOARD_STRIP_HEIGHT)) &
-            ~7,
+        TextureAddress((u32)f_ChalkboardImage + CHALKBOARD_TEXELS_OFFSET +
+            (stripIndex * CHALKBOARD_WIDTH * CHALKBOARD_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, CHALKBOARD_WIDTH, CHALKBOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

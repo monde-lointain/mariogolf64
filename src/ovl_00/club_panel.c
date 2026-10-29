@@ -420,7 +420,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE,
       PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
   gDPLoadTextureBlock_4b(gfx++,
-      ((u32)f_ClubPanelImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+      TextureAddress((u32)f_ClubPanelImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
       GAUGE_TICK_IMAGE_WIDTH, GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP,
       2, 0, 0, 0);
   for (group = 0, firstTick = 0; group != GAUGE_GROUP_COUNT;
@@ -475,9 +475,10 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   fillWidth = GAUGE_FILL_IMAGE_WIDTH;
   value = GetGaugeFill();
-  gDPLoadTextureBlock(gfx++, ((u32)f_ShotModeImage + IMAGE_HEADER_SIZE) & ~7,
-      G_IM_FMT_RGBA, G_IM_SIZ_16b, fillWidth, GAUGE_FILL_IMAGE_HEIGHT, 0,
-      G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
+  gDPLoadTextureBlock(gfx++,
+      TextureAddress((u32)f_ShotModeImage + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
+      G_IM_SIZ_16b, fillWidth, GAUGE_FILL_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP,
+      0, 0, 0, 0);
   if (playerState != PLAYER_STATE_AIMING &&
       playerState == PLAYER_STATE_SETTING_POWER) {
     f_ClubPanelUnk24 = value;
@@ -503,7 +504,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPLoadTextureBlock_4b(gfx++,
-      ((u32)f_ClubPanelImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+      TextureAddress((u32)f_ClubPanelImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
       GAUGE_TICK_IMAGE_WIDTH, GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP,
       2, 0, 0, 0);
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE,

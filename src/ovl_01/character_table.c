@@ -520,7 +520,7 @@ void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPLoadTextureBlock_4b(gfx++,
-      ((u32)D_8023AC64_ovl_01 + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA,
+      TextureAddress((u32)D_8023AC64_ovl_01 + IMAGE_HEADER_SIZE), G_IM_FMT_IA,
       MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
@@ -621,12 +621,12 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, ((u32)D_8023AC68_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(
+      gfx++, TextureAddress((u32)D_8023AC68_ovl_01 + IMAGE_HEADER_SIZE));
   for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
-        ((u32)D_8023AC68_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-            index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
-            ~7,
+        TextureAddress((u32)D_8023AC68_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+            index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -761,10 +761,10 @@ void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
   gDPPipeSync(gfx++);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(
-      gfx++, 0, ((u32)D_8023AC70_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+      gfx++, 0, TextureAddress((u32)D_8023AC70_ovl_01 + IMAGE_HEADER_SIZE));
   gDPLoadTextureBlock_4b(gfx++,
-      ((u32)D_8023AC70_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
-      TABLE_STAR_IMAGE_WIDTH, TABLE_STAR_IMAGE_HEIGHT, 0,
+      TextureAddress((u32)D_8023AC70_ovl_01 + PALETTED_TEXELS_OFFSET),
+      G_IM_FMT_CI, TABLE_STAR_IMAGE_WIDTH, TABLE_STAR_IMAGE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gSPScisTextureRectangle(gfx++, left << 2, top << 2,

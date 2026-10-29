@@ -735,9 +735,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
       }
 
       gDPLoadTextureTile(gfx++,
-          ((u32)f_SaveMenuTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
-              (row * TITLE_STRIP_SIZE)) &
-              ~7,
+          TextureAddress((u32)f_SaveMenuTitleImage +
+              LARGE_PALETTED_TEXELS_OFFSET + (row * TITLE_STRIP_SIZE)),
           G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_IMAGE_WIDTH, TITLE_STRIP_DRAWN_HEIGHT,
           0, 0, TITLE_IMAGE_WIDTH - 1, TITLE_STRIP_DRAWN_HEIGHT - 1, 0, 0, 0, 0,
           0, 0, 0);
@@ -1457,8 +1456,8 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     /* Each record's "COURSE" and course number */
     LoadSmallPalette(&gfx, 0, (u8*)f_CourseNumbersImage + IMAGE_HEADER_SIZE);
     gDPLoadTextureTile_4b(gfx++,
-        ((u32)f_CourseNumbersImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
-        COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0,
+        TextureAddress((u32)f_CourseNumbersImage + PALETTED_TEXELS_OFFSET),
+        G_IM_FMT_CI, COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0,
         COURSE_NUMBERS_WIDTH - 1, COURSE_NUMBERS_HEIGHT - 1, 0, G_TX_MIRROR,
         G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
