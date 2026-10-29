@@ -66,8 +66,8 @@ enum GameBoyBallType {
 
 /* A banner's letters, each an image drawn on its own square */
 #define BANNER_MAX_LETTERS 11
-/* f_BannerLetters has room for one letter fewer: the eleventh of banner 17,
- * the only banner that long, would fall on f_ContactMatrices */
+/* f_ActiveBannerLetters has room for one letter fewer: the eleventh of banner
+ * 17, the only banner that long, would fall on f_ContactMatrices */
 #define BANNER_LETTER_SLOT_COUNT 10
 
 /*
@@ -563,7 +563,7 @@ static Mtx f_BannerMatrices[2];
 static u8 D_80227F30_ovl_00[0xD0];
 
 /* Not static: the original left these to the linker's common block */
-BannerLetter f_BannerLetters[BANNER_LETTER_SLOT_COUNT];
+BannerLetter f_ActiveBannerLetters[BANNER_LETTER_SLOT_COUNT];
 u8* f_MovieBuffer;
 Mtx f_ContactMatrices[CONTACT_MATRIX_COUNT];
 LakituFlight f_Lakitu;
@@ -641,23 +641,23 @@ void StartBanner(s32 banner) {
     }
 
     for (i = 0; i != f_BannerNumberLetterCount; i++) {
-      f_BannerLetters[i].x = (i * BANNER_LETTER_SPACING) -
+      f_ActiveBannerLetters[i].x = (i * BANNER_LETTER_SPACING) -
           ((f_BannerNumberLetterCount - 1) * (BANNER_LETTER_SPACING / 2));
-      f_BannerLetters[i].y = 0.0f;
-      f_BannerLetters[i].unkC = 0;
-      f_BannerLetters[i].scale = 1.0f;
+      f_ActiveBannerLetters[i].y = 0.0f;
+      f_ActiveBannerLetters[i].unkC = 0;
+      f_ActiveBannerLetters[i].scale = 1.0f;
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
       rotation[AXIS_Z] = 0;
-      translation[AXIS_X] = f_BannerLetters[i].x;
-      translation[AXIS_Y] = f_BannerLetters[i].y;
+      translation[AXIS_X] = f_ActiveBannerLetters[i].x;
+      translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
       translation[AXIS_Z] = BANNER_Z;
-      scale[AXIS_X] = f_BannerLetters[i].scale;
-      scale[AXIS_Y] = f_BannerLetters[i].scale;
-      scale[AXIS_Z] = f_BannerLetters[i].scale;
+      scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
+      scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
+      scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(
-          matrix, &f_BannerLetters[i].matrices[g_MatrixBufferIndex]);
+          matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
     }
   }
 
@@ -668,25 +668,25 @@ void StartBanner(s32 banner) {
     ReadEncodedAsset(f_MovieBuffer, &asset);
     f_LoadedBanner = f_CurrentBanner;
     for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
-      f_BannerLetters[i].x =
+      f_ActiveBannerLetters[i].x =
           (f32)
               f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_FIRST_LETTER + i] +
           (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT];
-      f_BannerLetters[i].y = 0.0f;
-      f_BannerLetters[i].unkC = 0;
-      f_BannerLetters[i].scale = 1.0f;
+      f_ActiveBannerLetters[i].y = 0.0f;
+      f_ActiveBannerLetters[i].unkC = 0;
+      f_ActiveBannerLetters[i].scale = 1.0f;
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
       rotation[AXIS_Z] = 0;
-      translation[AXIS_X] = f_BannerLetters[i].x;
-      translation[AXIS_Y] = f_BannerLetters[i].y;
+      translation[AXIS_X] = f_ActiveBannerLetters[i].x;
+      translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
       translation[AXIS_Z] = BANNER_Z;
-      scale[AXIS_X] = f_BannerLetters[i].scale;
-      scale[AXIS_Y] = f_BannerLetters[i].scale;
-      scale[AXIS_Z] = f_BannerLetters[i].scale;
+      scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
+      scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
+      scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(
-          matrix, &f_BannerLetters[i].matrices[g_MatrixBufferIndex]);
+          matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
     }
   }
 }
@@ -711,7 +711,8 @@ void DrawNumberBanner(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH,
         BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_BannerLetters[i].matrices[g_MatrixBufferIndex]),
+        OS_K0_TO_PHYSICAL(
+            &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_BannerLetterVertices, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -736,7 +737,8 @@ void DrawBannerLetters(Gfx** displayListHead) {
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BannerMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_BannerLetters[i].matrices[g_MatrixBufferIndex]),
+        OS_K0_TO_PHYSICAL(
+            &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_BannerLetterVertices, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 2, 3, 0);
@@ -952,48 +954,48 @@ void DrawBanner(Gfx** displayListHead) {
 
   if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
     for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
-      f_BannerLetters[i].x =
+      f_ActiveBannerLetters[i].x =
           ((f32)f_BannerLayouts[f_CurrentBanner]
                                [BANNER_LAYOUT_FIRST_LETTER + i] +
               (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT]) *
           letterScale;
-      f_BannerLetters[i].y = 0.0f;
-      f_BannerLetters[i].unkC = 0;
-      f_BannerLetters[i].scale = letterScale;
+      f_ActiveBannerLetters[i].y = 0.0f;
+      f_ActiveBannerLetters[i].unkC = 0;
+      f_ActiveBannerLetters[i].scale = letterScale;
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
       rotation[AXIS_Z] = 0.0f;
-      translation[AXIS_X] = f_BannerLetters[i].x;
-      translation[AXIS_Y] = f_BannerLetters[i].y;
+      translation[AXIS_X] = f_ActiveBannerLetters[i].x;
+      translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
       translation[AXIS_Z] = BANNER_Z;
-      scale[AXIS_X] = f_BannerLetters[i].scale;
-      scale[AXIS_Y] = f_BannerLetters[i].scale;
-      scale[AXIS_Z] = f_BannerLetters[i].scale;
+      scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
+      scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
+      scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(
-          matrix, &f_BannerLetters[i].matrices[g_MatrixBufferIndex]);
+          matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
     }
   } else {
     for (i = 0; i != f_BannerNumberLetterCount; i++) {
-      f_BannerLetters[i].x =
+      f_ActiveBannerLetters[i].x =
           ((i * BANNER_LETTER_SPACING) -
               (f_BannerNumberLetterCount * (BANNER_LETTER_SPACING / 2))) *
           letterScale;
-      f_BannerLetters[i].y = 0.0f;
-      f_BannerLetters[i].unkC = 0;
-      f_BannerLetters[i].scale = letterScale;
+      f_ActiveBannerLetters[i].y = 0.0f;
+      f_ActiveBannerLetters[i].unkC = 0;
+      f_ActiveBannerLetters[i].scale = letterScale;
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
       rotation[AXIS_Z] = 0.0f;
-      translation[AXIS_X] = f_BannerLetters[i].x;
-      translation[AXIS_Y] = f_BannerLetters[i].y;
+      translation[AXIS_X] = f_ActiveBannerLetters[i].x;
+      translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
       translation[AXIS_Z] = BANNER_Z;
-      scale[AXIS_X] = f_BannerLetters[i].scale;
-      scale[AXIS_Y] = f_BannerLetters[i].scale;
-      scale[AXIS_Z] = f_BannerLetters[i].scale;
+      scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
+      scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
+      scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(
-          matrix, &f_BannerLetters[i].matrices[g_MatrixBufferIndex]);
+          matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
     }
   }
 
