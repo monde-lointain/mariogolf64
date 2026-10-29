@@ -3016,12 +3016,10 @@ void DrawShotEffect(Gfx** displayListHead) {
  * make up for the bulges.
  *
  * factor and otherFactor hold several unrelated factors in turn, as in the
- * original; separate variables change the registers.
- *
- * Doesn't match: the zero for the skew factors goes in otherFactor's register
- * first instead of factor's.
+ * original; separate variables change the registers. calmOwnShare is worked
+ * out ahead of its use because doing so puts the zero for the skew factors
+ * in factor's register first, as the original does.
  */
-#ifdef NON_MATCHING
 void WaveHoleFlag(void) {
   s32 row;
   s32 column;
@@ -3033,10 +3031,12 @@ void WaveHoleFlag(void) {
   f32 factor;
   f32 otherFactor;
   f32 bulge;
+  f32 calmOwnShare;
 
   ScrollWindArrow();
   windSpeed = g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT;
   factor = HOLE_FLAG_SKEW;
+  calmOwnShare = 1.0f - HOLE_FLAG_CALM_SPREAD;
   otherFactor = factor;
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
     for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
@@ -3060,7 +3060,7 @@ void WaveHoleFlag(void) {
    * how much of its own it keeps */
   if (windSpeed < 1.0f) {
     factor = HOLE_FLAG_CALM_SPREAD;
-    otherFactor = 1.0f - HOLE_FLAG_CALM_SPREAD;
+    otherFactor = calmOwnShare;
   } else if (windSpeed > HOLE_FLAG_GALE_WIND_SPEED) {
     factor = 1.0f;
     otherFactor = 0.0f;
@@ -3145,9 +3145,6 @@ void WaveHoleFlag(void) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", WaveHoleFlag);
-#endif
 
 /* Moves the shot offset marker and its trail back to the center */
 void ResetShotOffsetMarker(void) {
