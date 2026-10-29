@@ -306,6 +306,35 @@
 #define IsReplayingShot() (f_SwingCount >= FIRST_REPLAY_SWING_COUNT)
 /* A replay can itself be replayed in flight from this frame of its swing */
 #define REPLAY_MIN_SWING_FRAMES 40
+
+/* Frames from the start of a swing, through the flight that follows it */
+/* A wood's swing trail starts this many frames before the impact */
+#define WOOD_SWING_TRAIL_LEAD_FRAMES 3
+/* With GAME_FLAG_FAST_FLIGHT, the ball is launched by this frame */
+#define FAST_FLIGHT_LAUNCH_FRAME 4
+/* The swing trail fades this many frames after the impact */
+#define SWING_TRAIL_FADE_DELAY 10
+/* The golfer's random texture animations, which the swing stops, start again
+ * at this frame */
+#define RANDOM_TEXTURE_RESUME_FRAME 30
+/* With Z or L held, a rolling ball takes up to this many more steps a frame,
+ * outside mini golf and until it rolls toward the cup on the green */
+#define MAX_ROLL_SKIP_STEPS 4
+/* In the debug mode, with fast flight or Z or L held, the ball takes this
+ * many more steps a frame */
+#define FAST_FLIGHT_EXTRA_STEPS 3
+
+/* A reaction lasts this many frames past its animation, whose end calls
+ * StartBanner(-1) */
+#define REACTION_HOLD_FRAMES 10
+/* How long a reaction lasts with GAME_FLAG_UNK32 set */
+#define SHORT_REACTION_FRAMES 15
+/* How long a reaction lasts in sudden death */
+#define SUDDEN_DEATH_REACTION_FRAMES 160
+/* The frames at which PLAYER_STATE_SHOWING_OUT_PLAYER calls
+ * ShowFlipMessage(-1), and ends */
+#define OUT_PLAYER_FLIP_FRAME 80
+#define OUT_PLAYER_SHOWN_FRAMES 90
 /*
  * A putt's power, scaled to a short putt's by about how many times a short
  * putt's reach the long and middle putts have, picks its swing: the middle
@@ -4196,7 +4225,8 @@ void UpdateTurns(void) {
         break;
       }
       case PLAYER_STATE_SWINGING:
-        if (f_StateFrameCounts[playerIndex] == f_StateEventFrame - 3 &&
+        if (f_StateFrameCounts[playerIndex] ==
+                f_StateEventFrame - WOOD_SWING_TRAIL_LEAD_FRAMES &&
             GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])
                     ->kind == CLUB_KIND_WOOD) {
           if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
@@ -4216,7 +4246,7 @@ void UpdateTurns(void) {
         if (f_StateFrameCounts[playerIndex] >=
                 f_StateEventFrame + f_ImpactDelay ||
             (IsGameFlagSet(GAME_FLAG_FAST_FLIGHT) &&
-                f_StateFrameCounts[playerIndex] >= 4)) {
+                f_StateFrameCounts[playerIndex] >= FAST_FLIGHT_LAUNCH_FRAME)) {
           if (IsBButtonHeld()) {
             f_IsReplayRequested = TRUE;
           }
@@ -4243,7 +4273,8 @@ void UpdateTurns(void) {
         Boolean isCameraDone;
         s32 previousPosition[3];
 
-        if (f_StateEventFrame + 10 == f_StateFrameCounts[playerIndex]) {
+        if (f_StateEventFrame + SWING_TRAIL_FADE_DELAY ==
+            f_StateFrameCounts[playerIndex]) {
           StartSwingTrail(SWING_TRAIL_KIND_FADE);
         }
 
@@ -4254,7 +4285,7 @@ void UpdateTurns(void) {
         StepBallSimulation(&g_TurnBallSimulation);
         func_80207660_ovl_00(&g_Players[playerIndex]);
         isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
-        if (f_StateFrameCounts[playerIndex] == 30) {
+        if (f_StateFrameCounts[playerIndex] == RANDOM_TEXTURE_RESUME_FRAME) {
           SetPlaysRandomTextureAnimation(0, 1);
         }
 
@@ -4273,7 +4304,7 @@ void UpdateTurns(void) {
               previousPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
               previousPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
 
-          for (i = 0; i < 4; i++) {
+          for (i = 0; i < MAX_ROLL_SKIP_STEPS; i++) {
             u32 distance = IntLength2D(g_TurnBallSimulation.position[AXIS_X] -
                     g_HoleSetup.cupPosition[AXIS_X],
                 g_TurnBallSimulation.position[AXIS_Z] -
@@ -4304,7 +4335,7 @@ void UpdateTurns(void) {
 
             if (IsGameFlagSet(GAME_FLAG_FAST_FLIGHT) ||
                 (g_TurnController.buttons & (Z_TRIG | L_TRIG))) {
-              for (i = 0; i < 3; i++) {
+              for (i = 0; i < FAST_FLIGHT_EXTRA_STEPS; i++) {
                 if (!isCameraDone) {
                   StepBallSimulation(&g_TurnBallSimulation);
                   TickStopwatches();
@@ -4636,10 +4667,10 @@ void UpdateTurns(void) {
           StartReaction(0, f_GutsTestCharacter, f_GutsTestMotion);
         }
 
-        f_StateEventFrame =
-            GetCurrentAnimationEndFrame(0) - GetAnimationFrame(0) + 10;
+        f_StateEventFrame = GetCurrentAnimationEndFrame(0) -
+            GetAnimationFrame(0) + REACTION_HOLD_FRAMES;
         if (IsGameFlagSet(GAME_FLAG_UNK32)) {
-          f_StateEventFrame = 15;
+          f_StateEventFrame = SHORT_REACTION_FRAMES;
         }
 
         PlaceAndViewCharacter(0);
@@ -4675,13 +4706,14 @@ void UpdateTurns(void) {
         PlaceAndViewCharacter(0);
         areCallsAllowed = FALSE;
         f_ShouldUpdateReaction = 1;
-        if (f_StateFrameCounts[playerIndex] == f_StateEventFrame - 10) {
+        if (f_StateFrameCounts[playerIndex] ==
+            f_StateEventFrame - REACTION_HOLD_FRAMES) {
           StartBanner(-1);
         }
 
         if (g_HoleSetup.conditions.sceneColorIndex ==
             SCENE_COLOR_INDEX_SUDDEN_DEATH) {
-          f_StateEventFrame = 160;
+          f_StateEventFrame = SUDDEN_DEATH_REACTION_FRAMES;
         }
 
         if (f_StateFrameCounts[playerIndex] >= f_StateEventFrame) {
@@ -4926,11 +4958,11 @@ void UpdateTurns(void) {
         PlaceAndViewCharacter(0);
         f_ShouldUpdateReaction = 1;
         areCallsAllowed = FALSE;
-        if (f_StateFrameCounts[playerIndex] == 80) {
+        if (f_StateFrameCounts[playerIndex] == OUT_PLAYER_FLIP_FRAME) {
           ShowFlipMessage(-1);
         }
 
-        if (f_StateFrameCounts[playerIndex] == 90) {
+        if (f_StateFrameCounts[playerIndex] == OUT_PLAYER_SHOWN_FRAMES) {
           StartBanner(-1);
           nextState = PLAYER_STATE_FINDING_OUT_PLAYER;
           ClearDebugText();
