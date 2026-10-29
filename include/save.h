@@ -127,7 +127,7 @@ enum SaveReadResult {
 #define CARRIED_POT_HOLE 2
 #define CARRIED_POT_COUNT 3
 
-/* GameState.unk0's values, the step that UpdatePlay is on */
+/* GameState.step's values: the step that UpdatePlay is on */
 enum GameStateStep {
   GAME_STATE_START,
   GAME_STATE_LOAD_HOLE,
@@ -145,6 +145,8 @@ enum GameStateStep {
   GAME_STATE_RELOAD_HOLE
 };
 
+typedef s32 GameStateStep;
+
 /* Whether a game state step shows the whole hole, rather than a turn */
 #define IsHoleOverviewStep(step) \
   ((step) == GAME_STATE_HOLE_INTRO || (step) == GAME_STATE_FLYOVER)
@@ -154,7 +156,7 @@ enum GameStateStep {
  * to be continued with.
  */
 typedef struct GameState {
-  /* 0x00 */ s32 unk0; /* A GAME_STATE_* value */
+  /* 0x00 */ GameStateStep step;
   /* 0x04 */ u32 gameMode; /* A GAME_MODE_* value */
   /* 0x08 */ s32 playerCount;
   /* 0x0C */ CourseIndex courseIndex;

@@ -465,7 +465,7 @@ void UpdateGolfBalls(void) {
   s8 markerPlayerIndex;
 
   currentIndex = 0;
-  if (g_GameState.unk0 == GAME_STATE_UNK6) {
+  if (g_GameState.step == GAME_STATE_UNK6) {
     currentIndex = g_GameState.currentPlayerIndex;
   }
 
@@ -487,8 +487,8 @@ void UpdateGolfBalls(void) {
     }
   }
 
-  if (g_GameState.unk0 == GAME_STATE_UNK6 ||
-      g_GameState.unk0 == GAME_STATE_UNK11) {
+  if (g_GameState.step == GAME_STATE_UNK6 ||
+      g_GameState.step == GAME_STATE_UNK11) {
     ball = &f_GolfBalls[currentIndex];
     for (i = 0; i < BALL_SIMULATION_COUNT; i++) {
       simulation = &g_BallSimulations[i];
@@ -781,8 +781,8 @@ void DrawGolfBalls(CameraMatrices* matrices) {
   s32 halfHeight;
   u32 afterimageDepth;
 
-  if (g_GameState.unk0 != GAME_STATE_UNK6 &&
-      g_GameState.unk0 != GAME_STATE_UNK11) {
+  if (g_GameState.step != GAME_STATE_UNK6 &&
+      g_GameState.step != GAME_STATE_UNK11) {
     return;
   }
   {

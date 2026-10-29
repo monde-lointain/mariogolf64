@@ -1654,7 +1654,7 @@ void func_801F6B28_ovl_01(void) {
 
     g_GameState.unk14 = 0;
     g_GameState.playerCount = 1;
-    g_GameState.unk0 = GAME_STATE_START;
+    g_GameState.step = GAME_STATE_START;
     return;
   }
 
@@ -1717,7 +1717,7 @@ void func_801F6B28_ovl_01(void) {
     g_GameState.playerCount = 2;
   }
 
-  g_GameState.unk0 = GAME_STATE_RELOAD_HOLE;
+  g_GameState.step = GAME_STATE_RELOAD_HOLE;
   func_801F6A38_ovl_01();
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     StartRoundStats();

@@ -238,7 +238,7 @@ void func_8005F360(void) {
       g_GameState.playerCount =
           (IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_HIGH_BIT) * 2) +
           IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_LOW_BIT) + 1;
-      g_GameState.unk0 = GAME_STATE_START;
+      g_GameState.step = GAME_STATE_START;
       g_GameState.gameMode = 0;
       break;
     case 1:
@@ -246,7 +246,7 @@ void func_8005F360(void) {
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
       g_GameState.playerCount = 1;
-      g_GameState.unk0 = GAME_STATE_START;
+      g_GameState.step = GAME_STATE_START;
       g_GameState.gameMode = 3;
       break;
     case 2:
@@ -254,7 +254,7 @@ void func_8005F360(void) {
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
       g_GameState.playerCount = 2;
-      g_GameState.unk0 = GAME_STATE_START;
+      g_GameState.step = GAME_STATE_START;
       g_GameState.gameMode = 2;
 
       /* The original has no break here, so the default case overrides this one
@@ -264,7 +264,7 @@ void func_8005F360(void) {
       g_GameState.courseIndex = 0;
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
-      g_GameState.unk0 = GAME_STATE_START;
+      g_GameState.step = GAME_STATE_START;
       g_GameState.gameMode = 10;
       break;
   }
@@ -275,7 +275,7 @@ void func_8005F4AC(void) {
   g_GameState.playerCount = 1;
   g_GameState.holeIndex = 0;
   g_GameState.unk14 = 0;
-  g_GameState.unk0 = GAME_STATE_UNK11;
+  g_GameState.step = GAME_STATE_UNK11;
   if (IsGameFlagSet(GAME_FLAG_INIT_RING_SHOT)) {
     g_GameState.gameMode = 9;
   } else {
@@ -381,7 +381,7 @@ void InitPlay(s32 kind) {
     LoadSuperShotReplay(&D_800FED40);
     g_GameState.unk14 = 0;
     g_GameState.playerCount = 1;
-    g_GameState.unk0 = GAME_STATE_START;
+    g_GameState.step = GAME_STATE_START;
     g_GameState.gameMode = GAME_MODE_STROKE;
     g_GameState.courseIndex = D_800FEDD8[0].courseIndex;
     g_GameState.holeIndex = D_800FEDD8[0].holeIndex;
@@ -688,7 +688,7 @@ void func_80060358(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
   SaveOrContinueGameByMode(FALSE);
   ClearShotEffects(CLEAR_KIND_EFFECTS);
-  g_GameState.unk0 = GAME_STATE_HOLE_END;
+  g_GameState.step = GAME_STATE_HOLE_END;
   f_PlayExit = 3;
   f_HoleEndStep = 9;
 }
@@ -899,18 +899,18 @@ void UpdatePlay(void) {
     }
 
     repeat = FALSE;
-    switch (g_GameState.unk0) {
+    switch (g_GameState.step) {
       case GAME_STATE_START:
-        g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
+        g_GameState.step = GAME_STATE_LOAD_HOLE;
       case GAME_STATE_LOAD_HOLE:
         StopLoaderThread();
         StartLoaderThread();
-        g_GameState.unk0 = GAME_STATE_WAIT_FOR_HOLE;
+        g_GameState.step = GAME_STATE_WAIT_FOR_HOLE;
         osSyncPrintf("MAKEHOLE2\n");
         break;
       case GAME_STATE_RELOAD_HOLE:
         if (g_HasLoaderFinished == TRUE) {
-          g_GameState.unk0 = GAME_STATE_WAIT_FOR_HOLE;
+          g_GameState.step = GAME_STATE_WAIT_FOR_HOLE;
         }
 
         break;
@@ -920,7 +920,7 @@ void UpdatePlay(void) {
             break;
           }
 
-          g_GameState.unk0 = GAME_STATE_HOLE_INTRO;
+          g_GameState.step = GAME_STATE_HOLE_INTRO;
           func_801FDA04();
           SetGameFlag(GAME_FLAG_HOLE_LOADED);
           if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
@@ -949,7 +949,7 @@ void UpdatePlay(void) {
                 StartWipe(WIPE_CLOSING);
               }
 
-              g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
+              g_GameState.step = GAME_STATE_LOAD_HOLE;
               repeat = TRUE;
             }
           } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
@@ -960,7 +960,7 @@ void UpdatePlay(void) {
               LoadWipeShape(g_GameState.courseIndex);
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               func_80242384(FALSE);
-              g_GameState.unk0 = result;
+              g_GameState.step = result;
               repeat = TRUE;
             }
           }
@@ -980,20 +980,20 @@ void UpdatePlay(void) {
                 StartWipe(WIPE_CLOSING);
                 repeat = TRUE;
                 LoadWipeShape(g_GameState.courseIndex);
-                g_GameState.unk0 = result;
+                g_GameState.step = result;
                 break;
               case HOLE_MENU_QUIT:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 f_PlayExit = PLAY_EXIT_QUIT;
                 PlaySound(
                     SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-                g_GameState.unk0 = GAME_STATE_HOLE_END;
+                g_GameState.step = GAME_STATE_HOLE_END;
                 f_HoleEndStep = HOLE_END_STEP_START;
                 ClearHoleIntroText();
                 break;
               case HOLE_MENU_NONE:
                 if (GetWipeProgress() == WIPE_OPEN_PROGRESS && IS_A_PRESSED()) {
-                  g_GameState.unk0 = GAME_STATE_END_INTRO;
+                  g_GameState.step = GAME_STATE_END_INTRO;
                   StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
                 }
 
@@ -1009,7 +1009,7 @@ void UpdatePlay(void) {
               case HOLE_MENU_RELOAD:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 func_80242384(FALSE);
-                g_GameState.unk0 = result;
+                g_GameState.step = result;
                 repeat = TRUE;
                 LoadWipeShape(g_GameState.courseIndex);
                 break;
@@ -1018,14 +1018,14 @@ void UpdatePlay(void) {
                 f_PlayExit = PLAY_EXIT_QUIT;
                 PlaySound(
                     SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-                g_GameState.unk0 = GAME_STATE_HOLE_END;
+                g_GameState.step = GAME_STATE_HOLE_END;
                 f_HoleEndStep = HOLE_END_STEP_START;
                 ClearHoleIntroText();
                 break;
               case HOLE_MENU_NONE:
                 if (func_80242374() &&
                     GetWipeProgress() == WIPE_OPEN_PROGRESS && IS_A_PRESSED()) {
-                  g_GameState.unk0 = GAME_STATE_END_INTRO;
+                  g_GameState.step = GAME_STATE_END_INTRO;
                   StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
                 }
 
@@ -1037,11 +1037,11 @@ void UpdatePlay(void) {
               (f_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
                   IS_A_PRESSED())) {
             if (!g_GameState.unk30) {
-              g_GameState.unk0 = GAME_STATE_SLOTS;
+              g_GameState.step = GAME_STATE_SLOTS;
               func_80241800();
             } else {
               StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-              g_GameState.unk0 = GAME_STATE_END_INTRO;
+              g_GameState.step = GAME_STATE_END_INTRO;
             }
           }
         } else if (g_GameState.unk31) {
@@ -1050,13 +1050,13 @@ void UpdatePlay(void) {
             if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
               StartHoleFlyover();
               EndHoleIntro();
-              g_GameState.unk0 = GAME_STATE_UNK6;
+              g_GameState.step = GAME_STATE_UNK6;
               EndHoleFlyover();
               StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
               f_PlayStateFrameCount = 0;
             } else {
               StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-              g_GameState.unk0 = GAME_STATE_END_INTRO;
+              g_GameState.step = GAME_STATE_END_INTRO;
             }
           }
         } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
@@ -1066,13 +1066,13 @@ void UpdatePlay(void) {
           if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
             StartHoleFlyover();
             EndHoleIntro();
-            g_GameState.unk0 = GAME_STATE_UNK6;
+            g_GameState.step = GAME_STATE_UNK6;
             EndHoleFlyover();
             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
             f_PlayStateFrameCount = 0;
           } else {
             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-            g_GameState.unk0 = GAME_STATE_END_INTRO;
+            g_GameState.step = GAME_STATE_END_INTRO;
           }
         }
 
@@ -1161,13 +1161,13 @@ void UpdatePlay(void) {
             func_80241EE8();
           }
 
-          g_GameState.unk0 = GAME_STATE_END_INTRO;
+          g_GameState.step = GAME_STATE_END_INTRO;
         }
 
         break;
       case GAME_STATE_END_INTRO:
         StepHoleFlyover();
-        g_GameState.unk0 = GAME_STATE_FLYOVER;
+        g_GameState.step = GAME_STATE_FLYOVER;
         EndHoleIntro();
         StartHoleFlyover();
         break;
@@ -1178,7 +1178,7 @@ void UpdatePlay(void) {
         g_Cameras[1].mode = CAMERA_MODE_BEHIND_GOLFER;
         if (StepHoleFlyover() ||
             (IsHudAnimationDone() && (IS_A_PRESSED() || func_8005F180()))) {
-          g_GameState.unk0 = GAME_STATE_UNK6;
+          g_GameState.step = GAME_STATE_UNK6;
           EndHoleFlyover();
         }
 
@@ -1211,16 +1211,16 @@ void UpdatePlay(void) {
 
         PlayContestMovies();
         if (func_8005FCB8()) {
-          if (g_GameState.unk0 == GAME_STATE_UNK11) {
+          if (g_GameState.step == GAME_STATE_UNK11) {
             ChooseConditionsAndInitHole();
           } else {
-            g_GameState.unk0 = GAME_STATE_HOLE_END;
+            g_GameState.step = GAME_STATE_HOLE_END;
             f_HoleEndStep = HOLE_END_STEP_START;
             f_PlayStateFrameCount = 0;
           }
         }
 
-        if (g_GameState.unk0 == GAME_STATE_HOLE_END) {
+        if (g_GameState.step == GAME_STATE_HOLE_END) {
           UnloadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
           SetNextTeeOrder();
           UpdateContest(TRUE);
@@ -1701,7 +1701,7 @@ DIM_BACKDROP:
             break;
           case HOLE_END_STEP_LOAD_NEXT_HOLE:
             if (g_HasLoaderFinished == TRUE && IsSubModuleLoaded()) {
-              g_GameState.unk0 = GAME_STATE_HOLE_INTRO;
+              g_GameState.step = GAME_STATE_HOLE_INTRO;
               SetGameFlag(GAME_FLAG_HOLE_LOADED);
               memset(&g_RoundHud, 0, sizeof(RoundHud));
               SetMenuBackdrop(MENU_BACKDROP_NONE);

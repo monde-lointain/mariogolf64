@@ -1612,7 +1612,7 @@ s32 func_80222CDC_ovl_01(void) {
   }
 
   g_GameState = game->state;
-  g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
+  g_GameState.step = GAME_STATE_LOAD_HOLE;
   SetGameFlag(GAME_FLAG_UNK1E);
   g_HoleSetup = game->hole;
   g_GameState.unk30 = 2;

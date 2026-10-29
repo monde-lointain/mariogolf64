@@ -795,7 +795,7 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
   }
 
   stripTop = g_HorizonRow - HORIZON_STRIP_RISE;
-  mode = g_GameState.unk0;
+  mode = g_GameState.step;
   if (IsHoleOverviewStep(mode)) {
     sourceTop = 0;
     destOffset = 0;
@@ -1823,7 +1823,7 @@ s32 DrawGame(void) {
               DrawFadingBillboards(matrices, viewIndex);
             }
 
-            if (!IsHoleOverviewStep(g_GameState.unk0)) {
+            if (!IsHoleOverviewStep(g_GameState.step)) {
               mode = g_Cameras[viewIndex].mode;
               if (mode != 8 && mode != 2) {
                 if (!IsGameFlagSet(GAME_FLAG_HIDE_GOLF_BALLS) &&
@@ -1848,7 +1848,7 @@ s32 DrawGame(void) {
               }
             }
 
-            if (!IsHoleOverviewStep(g_GameState.unk0)) {
+            if (!IsHoleOverviewStep(g_GameState.step)) {
               if (g_IsModuleAlive[MODULE_SHOT_LABELS] &&
                   !IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
                 DrawAimGuides(matrices);
@@ -1865,7 +1865,7 @@ s32 DrawGame(void) {
             }
 
             DrawRain(&g_DisplayListHead, matrices);
-            if (!IsHoleOverviewStep(g_GameState.unk0)) {
+            if (!IsHoleOverviewStep(g_GameState.step)) {
               if (viewIndex == 0) {
                 DrawBallTrail(&g_DisplayListHead, matrices);
                 DrawShotEffect(&g_DisplayListHead);
