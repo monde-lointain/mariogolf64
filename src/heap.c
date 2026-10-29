@@ -20,7 +20,7 @@
 #define BLOCK_SENTINEL -1
 
 /* Larger than any block, so the first block that fits is the smallest so far */
-#define NO_BLOCK_SIZE 0x7FFFFFFF
+#define NO_BLOCK_SIZE S32_MAX
 /* The largest free size before any allocation has measured it */
 #define UNMEASURED_SIZE -1
 

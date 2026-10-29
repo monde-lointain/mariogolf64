@@ -119,7 +119,7 @@ enum PortraitAnimation {
 #define PORTRAIT_SIZE 32
 
 /* Course points are clamped there rather than overflow */
-#define MAX_COURSE_POINTS 0x7FFFFFFF
+#define MAX_COURSE_POINTS S32_MAX
 
 /* The places of f_TournamentPrizes's columns after the trophy winners' */
 #define TROPHY_PLACE_COUNT 3

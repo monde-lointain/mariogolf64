@@ -1707,7 +1707,7 @@ void PickStartingClub(HoleSetup* hole) {
       break;
     }
   } else {
-    s32 bestGap = 0x7FFFFFFF;
+    s32 bestGap = S32_MAX;
     s32 reaches = FALSE;
     s32 bestSlot = 0;
     s32 distance;
@@ -2558,7 +2558,7 @@ void PickNextPlayer(void) {
   }
 
   bestPriority = 0;
-  bestTeeOrder = 0x7FFFFFFF;
+  bestTeeOrder = S32_MAX;
   nextPlayer = 0;
   for (i = 0; i < g_GameState.playerCount; i++) {
     priority = LIE_PRIORITY_TEE;

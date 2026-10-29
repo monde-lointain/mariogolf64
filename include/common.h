@@ -6,6 +6,8 @@
 #include "include_asm.h"
 
 #define BITS_PER_BYTE 8
+/* The largest s32 value */
+#define S32_MAX 0x7FFFFFFF
 
 /* Indices of a point's coordinates; y is up */
 #define AXIS_X 0

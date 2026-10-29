@@ -18,7 +18,7 @@
 
 #define NO_SKINS_WINNER -1
 /* The course records' totals stop here */
-#define RECORD_TOTAL_LIMIT 0x7FFFFFFF
+#define RECORD_TOTAL_LIMIT S32_MAX
 #define NO_BEST_SCORE RECORD_TOTAL_LIMIT
 #define ROUND_COUNT_LIMIT 9999
 /* Three under par on every hole */
