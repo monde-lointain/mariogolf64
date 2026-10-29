@@ -86,6 +86,15 @@
 #define OFF_GLYPH_COUNT 2
 #define MENU_GLYPH_POINT 18
 #define DECIMAL_BASE 10
+/* The largest number written in one decimal digit, and in two */
+#define MAX_ONE_DIGIT_NUMBER (DECIMAL_BASE - 1)
+#define MAX_TWO_DIGIT_NUMBER ((DECIMAL_BASE * DECIMAL_BASE) - 1)
+/* Whether a signed number's magnitude takes one digit, and two */
+#define IsOneDigitNumber(n) \
+  ((n) >= -MAX_ONE_DIGIT_NUMBER && (n) <= MAX_ONE_DIGIT_NUMBER)
+#define IsTwoDigitNumber(n) \
+  (((n) >= DECIMAL_BASE && (n) <= MAX_TWO_DIGIT_NUMBER) || \
+      ((n) >= -MAX_TWO_DIGIT_NUMBER && (n) <= -DECIMAL_BASE))
 
 /* The arrows beside the statistics that show there are more rows above or below
  */
@@ -655,12 +664,11 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
       break;
     case STAT_BEST_SCORE:
       bestScore = D_80105C38[courseIndex].bestScore;
-      if (bestScore >= -9 && bestScore <= 9) {
+      if (IsOneDigitNumber(bestScore)) {
         func_80210DF4_ovl_01(&gfx, STATS_ONE_DIGIT_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_SIGNED);
-      } else if ((bestScore >= 10 && bestScore <= 99) ||
-          (bestScore >= -99 && bestScore <= -10)) {
+      } else if (IsTwoDigitNumber(bestScore)) {
         func_80210DF4_ovl_01(&gfx, STATS_TWO_DIGIT_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_SIGNED);
