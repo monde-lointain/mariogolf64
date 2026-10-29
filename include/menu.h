@@ -67,25 +67,6 @@ extern u8 D_800C2BD5;
 #define MENU_VOLUME_SOFT 80
 #define MENU_VOLUME_MEDIUM 100
 
-/* The choices that the menus remember */
-typedef struct MenuChoices {
-  /* 0x00 */ s8 unk0;
-  /* 0x01 */ s8 unk1;
-  /* 0x02 */ s8 unk2;
-  /* 0x03 */ s8 mainChoice;
-  /* 0x04 */ s8 mainChoiceWithoutTransmit;
-  /* 0x05 */ s8 clubhouseChoice;
-  /* 0x06 */ s8 optionsChoice;
-  /* 0x07 */ s8 unk7[0x13 - 0x7];
-  /* 0x13 */ s8 unk13;
-  /* 0x14 */ s8 unk14;
-  /* 0x15 */ s8 unk15;
-  /* 0x16 */ s8 holeIndex;
-  /* 0x17 */ s8 courseIndex;
-} MenuChoices; /* size = 0x18 */
-
-extern MenuChoices g_MenuChoices;
-
 /* Each course's images for the menus' turning wheel of courses, and the trophy
  * files read with them */
 #define COURSE_IMAGE_COUNT 16

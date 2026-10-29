@@ -42,13 +42,21 @@ typedef struct MenuMemory {
                                  next one still shut */
   /* 0x17 */ s8
       courseSpin; /* How far the courses still have to turn to reach it */
-  /* 0x18 */ u8 unk18[0x1F - 0x18];
+  /* 0x18 */ s8 unk18;
+  /* 0x19 */ s8 unk19;
+  /* 0x1A */ s8 unk1A;
+  /* 0x1B */ s8 mainChoice;
+  /* 0x1C */ s8 mainChoiceWithoutTransmit;
+  /* 0x1D */ s8 clubhouseChoice;
+  /* 0x1E */ s8 optionsChoice;
   /* 0x1F */ s8 eraseChoice; /* The erase window's yes or no */
   /* 0x20 */ s8 helpTopicIndex;
   /* 0x21 */ u8 unk21[0x29 - 0x21];
   /* 0x29 */ s8 unk29;
   /* 0x2A */ s8 unk2A;
-  /* 0x2B */ u8 unk2B[0x2E - 0x2B];
+  /* 0x2B */ s8 unk2B;
+  /* 0x2C */ s8 unk2C;
+  /* 0x2D */ s8 unk2D;
   /* 0x2E */ s8 holeIndex; /* The hole the Ring Shot select points at */
   /* 0x2F */ s8 courseIndex; /* And its course */
   /* 0x30 */ s8 statsCourse; /* The course whose statistics show; one past the
@@ -76,13 +84,16 @@ typedef struct MenuMemory {
   /* 0x43 */ s8 savedGameIndex;
   /* 0x44 */ s8 savedGameTurn; /* Updates left of the saved games' boards
                                  turning, negative when turning right */
-  /* 0x45 */ u8 unk45;
-  /* 0x46 */ u8 unk46;
+  /* 0x45 */ u8 optionBits; /* Each OPTION_BIT_* mirrors a saved option */
+  /* 0x46 */ u8 isTransmitShown; /* The menus were entered with the transmit
+                                  buttons, so the main menu offers it */
   /* 0x47 */ s8
       codeKeyColumn; /* The club tournament code keyboard's chosen key */
   /* 0x48 */ s8 codeKeyRow;
 } MenuMemory;
 
 MenuMemory* func_8005AF74(void);
+
+extern MenuMemory D_801323A0;
 
 #endif

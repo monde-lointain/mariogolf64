@@ -229,7 +229,7 @@ void UpdateHelpBoard(void) {
     PlaySound(0x5F, 0xF, SOUND_FULL_SCALE);
     if (f_OpenTopic <= 0) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-      if (memory->unk46 == 0) {
+      if (!memory->isTransmitShown) {
         g_MenuScreen = 0x1C;
       } else {
         g_MenuScreen = 2;

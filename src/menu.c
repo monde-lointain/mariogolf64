@@ -19,6 +19,7 @@
 #include "host_file.h"
 #include "libc.h"
 #include "math_util.h"
+#include "menu_memory.h"
 #include "password.h"
 #include "round_stats.h"
 #include "save.h"
@@ -47,7 +48,6 @@
 #define STARS_PER_RING_SHOT_COURSE 4
 
 /* Mirrors of the save data's options */
-extern u8 g_OptionBits;
 
 extern char g_RomBuildDate[];
 
@@ -77,8 +77,6 @@ extern s32 D_80105DCC;
 /* The code of the tournament whose password was entered */
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 extern s32 D_8012F480;
-extern u8 D_801323A0[0x49];
-extern s8 D_801323D0;
 extern s32 D_801B7070;
 extern s8 D_801B70F0;
 extern s16 D_801B71CC;
@@ -133,7 +131,6 @@ typedef struct Unk800C29B8 {
   /* 0x2 */ s16 row;
 } Unk800C29B8; /* size = 0x4 */
 
-void* func_8005AF74(void);
 s32 GetClubTournamentCourse(void);
 void func_8005D9A0(void);
 s32 ReadSaveCopies(SaveData* save, u8 isInSram);
@@ -610,7 +607,7 @@ void LoadMenuResources(void) {
   PlaySong(0x27, 0);
   SetFramebufferCount(3);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-  D_801323D0 = 6;
+  D_801323A0.statsCourse = 6;
   InitSram();
   TransferSaveData(save, FALSE);
 }
@@ -677,8 +674,8 @@ SaveData* GetSaveData(void) {
   return &g_SaveData;
 }
 
-void* func_8005AF74(void) {
-  return D_801323A0;
+MenuMemory* func_8005AF74(void) {
+  return &D_801323A0;
 }
 
 void ResetSaveData(void) {
@@ -1650,11 +1647,11 @@ INCLUDE_ASM("asm/nonmatchings/menu", func_8005D0D8);
 #endif
 
 void func_8005D1E4(void) {
-  u8* unk;
+  MenuMemory* memory;
 
-  unk = func_8005AF74();
-  unk[0x2E] = g_GameState.holeIndex;
-  unk[0x2F] = g_GameState.courseIndex;
+  memory = func_8005AF74();
+  memory->holeIndex = g_GameState.holeIndex;
+  memory->courseIndex = g_GameState.courseIndex;
 }
 
 s32 GetClubTournamentGameMode(void) {
@@ -1945,7 +1942,7 @@ void func_8005D9A0(void) {
   D_801B70F1 = 0;
   D_801B70F2 = 0;
   D_801B70F3 = 0;
-  memset(D_801323A0, 0, sizeof(D_801323A0));
+  memset(&D_801323A0, 0, sizeof(D_801323A0));
   D_800FBD40 = 0;
   D_801B71CC = 0;
   D_800FBE2C = 0;
@@ -1957,9 +1954,9 @@ void func_8005D9A0(void) {
     D_800FBE08[index] = 0;
   }
 
-  g_MenuChoices.unk0 = 3;
+  D_801323A0.unk18 = 3;
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
-  D_801323D0 = 6;
+  D_801323A0.statsCourse = 6;
   D_801052E8 = 0;
   D_800C2BD4 = 0;
 }
@@ -2097,15 +2094,15 @@ void WriteSaveData(void) {
   TransferSaveData(GetSaveData(), TRUE);
 }
 
-/* Copies the options between the save data and g_OptionBits, in the direction
- * of the transfer */
+/* Copies the options between the save data and D_801323A0's option bits, in the
+ * direction of the transfer */
 void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult) {
   u8* bits;
   s8* options;
 
   options = save->options;
   if (!isWrite) {
-    bits = &g_OptionBits;
+    bits = &D_801323A0.optionBits;
     *bits = 0;
     if (readResult > 0) {
       if (options[SAVE_OPTION_MUSIC_OFF]) {
@@ -2122,19 +2119,19 @@ void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult) {
       }
     }
   } else {
-    if (g_OptionBits & OPTION_BIT_MUSIC_OFF) {
+    if (D_801323A0.optionBits & OPTION_BIT_MUSIC_OFF) {
       options[SAVE_OPTION_MUSIC_OFF] = TRUE;
     } else {
       options[SAVE_OPTION_MUSIC_OFF] = FALSE;
     }
 
-    if (g_OptionBits & OPTION_BIT_MONO) {
+    if (D_801323A0.optionBits & OPTION_BIT_MONO) {
       options[SAVE_OPTION_MONO] = TRUE;
     } else {
       options[SAVE_OPTION_MONO] = FALSE;
     }
 
-    if (g_OptionBits & OPTION_BIT_SIMPLE_CAMERA) {
+    if (D_801323A0.optionBits & OPTION_BIT_SIMPLE_CAMERA) {
       options[SAVE_OPTION_SIMPLE_CAMERA] = TRUE;
     } else {
       options[SAVE_OPTION_SIMPLE_CAMERA] = FALSE;

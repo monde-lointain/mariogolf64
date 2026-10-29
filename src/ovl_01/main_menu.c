@@ -273,7 +273,6 @@ extern const char D_80231514_ovl_01[];
 
 extern s8 D_801052E8;
 extern s32 D_800FE334;
-extern u8 g_OptionBits;
 extern s32 D_800FBD40[];
 extern void* D_8010526C[2];
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
@@ -295,7 +294,7 @@ extern s8 D_801B60BA[MENU_UNKE_COUNT];
 #define MINI_GOLF_TURN_TO_NEXT 2
 #define MINI_GOLF_RECORD_SLIDE 45
 #define MINI_GOLF_RECORD_SLIDE_STEP 9
-/* What g_MenuChoices.unk0 holds once the C buttons choose the holes to play */
+/* What D_801323A0.unk18 holds once the C buttons choose the holes to play */
 #define HOLES_CHOICE_FRONT_NINE 1
 #define HOLES_CHOICE_BACK_NINE 2
 #define HOLES_CHOICE_ALL 3
@@ -326,7 +325,6 @@ extern void* D_801052C4[2];
 extern void* D_80106100;
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
-extern s8 D_801323D0;
 extern u8 D_801B70F0[MAXCONTROLLERS];
 extern void* D_801B93E0[5];
 
@@ -428,7 +426,6 @@ void func_802230C0_ovl_01(Gfx** displayListHead);
 void func_80229CB0_ovl_01(Gfx** displayListHead);
 
 /* Not static: the original left these to the linker's common block */
-u8 D_801323E6;
 s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 s32 D_8023BFD0_ovl_01;
 
@@ -844,8 +841,8 @@ void StartLoadingChosenHole(void) {
   D_800FE334 = 1;
   if (g_MenuScreen == MENU_SCREEN_UNK23 ||
       g_MenuScreen == MENU_SCREEN_RING_SHOT_RECORDS) {
-    g_GameState.courseIndex = g_MenuChoices.courseIndex;
-    g_GameState.holeIndex = g_MenuChoices.holeIndex;
+    g_GameState.courseIndex = D_801323A0.courseIndex;
+    g_GameState.holeIndex = D_801323A0.holeIndex;
   } else if (g_MenuScreen == MENU_SCREEN_CLUB_TOURNAMENT) {
     g_GameState.courseIndex = GetClubTournamentCourse();
     g_GameState.isMiniGolf = g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX;
@@ -855,8 +852,8 @@ void StartLoadingChosenHole(void) {
     g_GameState.holeIndex = 0;
   } else {
     if (g_GameState.isMiniGolf) {
-      g_GameState.courseIndex = g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
-          (g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD);
+      g_GameState.courseIndex = D_801323A0.unk2C + MINI_GOLF_COURSE_INDEX +
+          (D_801323A0.unk2B * MINI_GOLF_COURSES_PER_RECORD);
     } else {
       g_GameState.courseIndex = D_801323A0.courseChoice;
     }
@@ -880,8 +877,8 @@ void StartLoadingChosenHole(void) {
 
 s32 GetChosenCourseIndex(void) {
   if (g_GameState.isMiniGolf) {
-    return g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
-        (g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD);
+    return D_801323A0.unk2C + MINI_GOLF_COURSE_INDEX +
+        (D_801323A0.unk2B * MINI_GOLF_COURSES_PER_RECORD);
   }
 
   return D_801323A0.courseChoice;
@@ -949,8 +946,8 @@ void func_801F4C78_ovl_01(void) {
       StartLoadingChosenHole();
     }
   } else if (g_MenuScreen == MENU_SCREEN_UNK23) {
-    if ((g_GameState.holeIndex != g_MenuChoices.holeIndex) ||
-        (g_GameState.courseIndex != g_MenuChoices.courseIndex) || !D_800FE334) {
+    if ((g_GameState.holeIndex != D_801323A0.holeIndex) ||
+        (g_GameState.courseIndex != D_801323A0.courseIndex) || !D_800FE334) {
       StartLoadingChosenHole();
     }
   }
@@ -1134,7 +1131,7 @@ void func_801F4C78_ovl_01(void) {
         ReadEncodedAsset(imageBuffer + OPTIONS_SHADOW_OFFSET, &asset);
         InitSram();
         TransferSaveData(save, FALSE);
-        optionBits = &g_OptionBits;
+        optionBits = &D_801323A0.optionBits;
         *optionBits = 0;
         if (func_8005DE00()) {
           *optionBits |= OPTION_BIT_MUSIC_OFF;
@@ -1382,13 +1379,13 @@ void func_801F4C78_ovl_01(void) {
         if (g_GameState.isMiniGolf) {
           for (index = 0; index != MINI_GOLF_DISC_IMAGE_COUNT; index++) {
             OpenEncodedAsset(
-                g_MiniGolfDiscFrameAssets[(g_MenuChoices.unk14 *
+                g_MiniGolfDiscFrameAssets[(D_801323A0.unk2C *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     index][MINI_GOLF_FACING_FRAME],
                 &asset);
             ReadEncodedAsset(D_801049A0[0][index], &asset);
             OpenEncodedAsset(
-                g_MiniGolfDiscFrameAssets[(g_MenuChoices.unk14 *
+                g_MiniGolfDiscFrameAssets[(D_801323A0.unk2C *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     index][MINI_GOLF_FACING_FRAME],
                 &asset);
@@ -1397,7 +1394,7 @@ void func_801F4C78_ovl_01(void) {
 
           for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
             OpenAssetFile(
-                g_MiniGolfDiscFiles[(g_MenuChoices.unk14 * 2) + index], &file);
+                g_MiniGolfDiscFiles[(D_801323A0.unk2C * 2) + index], &file);
             ReadAssetFile(D_801052C4[index], GetAssetFileSize(&file), &file);
           }
         } else {
@@ -1475,7 +1472,7 @@ void func_801F4C78_ovl_01(void) {
         func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
         func_8020E26C_ovl_01(D_800FBE30[0], 7);
         ComputeRoundStatistics();
-        D_801323D0 = GetOpenCourseCount();
+        D_801323A0.statsCourse = GetOpenCourseCount();
         break;
 
       case MENU_SCREEN_BEST_TIMES:
@@ -1655,7 +1652,7 @@ void func_801F6B28_ovl_01(void) {
     }
   } else {
     if (g_GameMode == GAME_MODE_RING_SHOT) {
-      g_CourseIndex = g_MenuChoices.courseIndex;
+      g_CourseIndex = D_801323A0.courseIndex;
     } else if (g_GameMode == GAME_MODE_TRAINING) {
       g_GameState.courseIndex = 0;
     } else {
@@ -1671,7 +1668,7 @@ void func_801F6B28_ovl_01(void) {
       skippedNines = &g_SkippedNines;
       *skippedNines = D_8022BE1C_ovl_01;
       if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
-        switch (g_MenuChoices.unk0) {
+        switch (D_801323A0.unk18) {
           case 0:
             *skippedNines = 0;
             break;
@@ -1853,10 +1850,10 @@ void func_801F70F0_ovl_01(void) {
           (g_MenuRepeatButtons == TRANSMIT_OTHER_BUTTONS)) {
         PlaySound(
             SOUND_CONTROLS_CLOSE, TRANSMIT_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        D_801323E6 = 1;
+        D_801323A0.isTransmitShown = TRUE;
         g_MenuScreen = titleChoice;
       } else {
-        D_801323E6 = 0;
+        D_801323A0.isTransmitShown = FALSE;
         g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
       }
     }
@@ -2167,7 +2164,7 @@ void func_801F7D28_ovl_01(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_UNK6;
-        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        D_801323A0.unk18 = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
@@ -2199,7 +2196,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 3;
-        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        D_801323A0.unk18 = HOLES_CHOICE_ALL;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_MATCH_GAME);
         break;
       case MODE_ICON_SKINS_MATCH:
@@ -2210,7 +2207,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 4;
-        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        D_801323A0.unk18 = HOLES_CHOICE_ALL;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_SKINS_MATCH);
         break;
       case MODE_ICON_SPEED_GOLF:
@@ -2221,7 +2218,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
-        g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+        D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_MINI_GOLF:
@@ -2240,7 +2237,7 @@ void func_801F7D28_ovl_01(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_UNK6;
-        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        D_801323A0.unk18 = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         g_GameState.isMiniGolf = TRUE;
         D_800FF4C0 = 1;
@@ -2275,7 +2272,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
-        g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+        D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_UNK9:
@@ -2286,7 +2283,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
-        g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+        D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
         break;
       case MODE_ICON_RING_SHOT:
@@ -2319,7 +2316,7 @@ void func_801F7D28_ovl_01(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 5;
-        g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+        D_801323A0.unk18 = HOLES_CHOICE_ALL;
         func_80217B88_ovl_01(MENU_UNKE_PRESET_CLUB_SLOTS);
         break;
     }
@@ -2577,19 +2574,19 @@ void func_801F8BAC_ovl_01(void) {
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+      D_801323A0.unk18 = HOLES_CHOICE_ALL;
       g_SkippedNines = 0;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+      D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
       g_SkippedNines = BACK_NINE_SKIPPED;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
+      D_801323A0.unk18 = HOLES_CHOICE_BACK_NINE;
       g_SkippedNines = FRONT_NINE_SKIPPED;
       StartLoadingChosenHole();
     }
@@ -2655,7 +2652,7 @@ void func_801F93D8_ovl_01(void) {
 
           if (D_8022F8D4_ovl_01 >= 0 &&
               D_8022F8D4_ovl_01 <= MINI_GOLF_FACING_FRAME) {
-            course = g_MenuChoices.unk14 - 1;
+            course = D_801323A0.unk2C - 1;
             if (course < 0) {
               course = MINI_GOLF_COURSES_PER_RECORD - 1;
             }
@@ -2671,7 +2668,7 @@ void func_801F93D8_ovl_01(void) {
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
-            course = g_MenuChoices.unk14;
+            course = D_801323A0.unk2C;
             buffers = D_801049A0;
             OpenEncodedAsset(g_MiniGolfDiscFrameAssets[course *
                                  MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01],
@@ -2687,8 +2684,8 @@ void func_801F93D8_ovl_01(void) {
 
           D_8022F8DD_ovl_01 ^= 1;
           if (D_8022F8D4_ovl_01 == MINI_GOLF_FACING_FRAME) {
-            if (--g_MenuChoices.unk14 < 0) {
-              g_MenuChoices.unk14 = MINI_GOLF_COURSES_PER_RECORD - 1;
+            if (--D_801323A0.unk2C < 0) {
+              D_801323A0.unk2C = MINI_GOLF_COURSES_PER_RECORD - 1;
             }
 
             D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
@@ -2705,7 +2702,7 @@ void func_801F93D8_ovl_01(void) {
 
           if (D_8022F8D4_ovl_01 >= MINI_GOLF_FACING_FRAME &&
               D_8022F8D4_ovl_01 < MINI_GOLF_TURN_FRAME_COUNT) {
-            course = g_MenuChoices.unk14 + 1;
+            course = D_801323A0.unk2C + 1;
             if (course >= MINI_GOLF_COURSES_PER_RECORD) {
               course = 0;
             }
@@ -2721,7 +2718,7 @@ void func_801F93D8_ovl_01(void) {
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
-            course = g_MenuChoices.unk14;
+            course = D_801323A0.unk2C;
             buffers = D_801049A0;
             OpenEncodedAsset(g_MiniGolfDiscFrameAssets[course *
                                  MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01],
@@ -2737,8 +2734,8 @@ void func_801F93D8_ovl_01(void) {
 
           D_8022F8DD_ovl_01 ^= 1;
           if (D_8022F8D4_ovl_01 == MINI_GOLF_FACING_FRAME) {
-            if (++g_MenuChoices.unk14 >= MINI_GOLF_COURSES_PER_RECORD) {
-              g_MenuChoices.unk14 = 0;
+            if (++D_801323A0.unk2C >= MINI_GOLF_COURSES_PER_RECORD) {
+              D_801323A0.unk2C = 0;
             }
 
             D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
@@ -2777,16 +2774,16 @@ void func_801F93D8_ovl_01(void) {
   }
 
   if (g_MenuPressedButtons & A_BUTTON) {
-    if (g_MenuChoices.unk15 != 0) {
-      g_MenuChoices.unk15 = 0;
+    if (D_801323A0.unk2D != 0) {
+      D_801323A0.unk2D = 0;
       return;
     }
 
-    if (g_MenuChoices.unk13 < g_MenuCourseCount) {
+    if (D_801323A0.unk2B < g_MenuCourseCount) {
       D_801B9410 = 0;
       FreeAllCharacterSlots();
-      LoadWipeShape(g_MenuChoices.unk14 +
-          (g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD) +
+      LoadWipeShape(D_801323A0.unk2C +
+          (D_801323A0.unk2B * MINI_GOLF_COURSES_PER_RECORD) +
           MINI_GOLF_COURSE_INDEX);
       StartWipe(WIPE_CLOSING);
       D_801052E8 = 0;
@@ -2798,7 +2795,7 @@ void func_801F93D8_ovl_01(void) {
 
   if (g_MenuPressedButtons & B_BUTTON) {
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-    g_MenuChoices.unk15 = 0;
+    D_801323A0.unk2D = 0;
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     g_GameState.isMiniGolf = FALSE;
     g_MenuScreen = MENU_SCREEN_UNK5;
@@ -2810,21 +2807,21 @@ void func_801F93D8_ovl_01(void) {
   }
 
   /* isDone is still TRUE, and the C-up test compares with it */
-  if (g_MenuChoices.unk15 == 0) {
+  if (D_801323A0.unk2D == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      if (--g_MenuChoices.unk13 < 0) {
-        g_MenuChoices.unk13 = MINI_GOLF_RECORD_COUNT - 1;
+      if (--D_801323A0.unk2B < 0) {
+        D_801323A0.unk2B = MINI_GOLF_RECORD_COUNT - 1;
       }
 
-      g_MenuChoices.unk15 = MINI_GOLF_RECORD_SLIDE;
+      D_801323A0.unk2D = MINI_GOLF_RECORD_SLIDE;
     } else if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      if (++g_MenuChoices.unk13 >= MINI_GOLF_RECORD_COUNT) {
-        g_MenuChoices.unk13 = 0;
+      if (++D_801323A0.unk2B >= MINI_GOLF_RECORD_COUNT) {
+        D_801323A0.unk2B = 0;
       }
 
-      g_MenuChoices.unk15 = -MINI_GOLF_RECORD_SLIDE;
+      D_801323A0.unk2D = -MINI_GOLF_RECORD_SLIDE;
     } else if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_PREVIOUS;
@@ -2843,32 +2840,32 @@ void func_801F93D8_ovl_01(void) {
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+      D_801323A0.unk18 = HOLES_CHOICE_ALL;
       g_SkippedNines = 0;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+      D_801323A0.unk18 = HOLES_CHOICE_FRONT_NINE;
       g_SkippedNines = BACK_NINE_SKIPPED;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
+      D_801323A0.unk18 = HOLES_CHOICE_BACK_NINE;
       g_SkippedNines = FRONT_NINE_SKIPPED;
       StartLoadingChosenHole();
     }
   }
 
-  if (ABS(g_MenuChoices.unk15) != 0) {
-    direction = g_MenuChoices.unk15 >= 0 ? 1 : -1;
+  if (ABS(D_801323A0.unk2D) != 0) {
+    direction = D_801323A0.unk2D >= 0 ? 1 : -1;
     step = MINI_GOLF_RECORD_SLIDE_STEP;
-    g_MenuChoices.unk15 -= direction * step;
+    D_801323A0.unk2D -= direction * step;
 
     /* Stop on reaching the record rather than sliding past it */
-    if ((g_MenuChoices.unk15 >= 0 ? 1 : -1) != direction) {
-      g_MenuChoices.unk15 = 0;
+    if ((D_801323A0.unk2D >= 0 ? 1 : -1) != direction) {
+      D_801323A0.unk2D = 0;
     }
   }
 }
@@ -2898,7 +2895,7 @@ void func_801F9C58_ovl_01(void) {
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      switch (g_MenuChoices.mainChoice) {
+      switch (D_801323A0.mainChoice) {
         case MAIN_CHOICE_CLUBHOUSE:
           g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
           break;
@@ -2939,18 +2936,18 @@ void func_801F9C58_ovl_01(void) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      g_MenuChoices.mainChoice--;
+      D_801323A0.mainChoice--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      g_MenuChoices.mainChoice++;
+      D_801323A0.mainChoice++;
     }
 
-    if (g_MenuChoices.mainChoice >= MAIN_CHOICE_COUNT) {
-      g_MenuChoices.mainChoice = 0;
+    if (D_801323A0.mainChoice >= MAIN_CHOICE_COUNT) {
+      D_801323A0.mainChoice = 0;
     }
 
-    if (g_MenuChoices.mainChoice < 0) {
-      g_MenuChoices.mainChoice = MAIN_CHOICE_COUNT - 1;
+    if (D_801323A0.mainChoice < 0) {
+      D_801323A0.mainChoice = MAIN_CHOICE_COUNT - 1;
     }
   }
 }
@@ -2960,7 +2957,7 @@ void func_801F9E38_ovl_01(void) {
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      switch (g_MenuChoices.mainChoiceWithoutTransmit) {
+      switch (D_801323A0.mainChoiceWithoutTransmit) {
         case MAIN_CHOICE_CLUBHOUSE:
           g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
           break;
@@ -2996,19 +2993,19 @@ void func_801F9E38_ovl_01(void) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      g_MenuChoices.mainChoiceWithoutTransmit--;
+      D_801323A0.mainChoiceWithoutTransmit--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      g_MenuChoices.mainChoiceWithoutTransmit++;
+      D_801323A0.mainChoiceWithoutTransmit++;
     }
 
-    if (g_MenuChoices.mainChoiceWithoutTransmit >=
+    if (D_801323A0.mainChoiceWithoutTransmit >=
         MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT) {
-      g_MenuChoices.mainChoiceWithoutTransmit = 0;
+      D_801323A0.mainChoiceWithoutTransmit = 0;
     }
 
-    if (g_MenuChoices.mainChoiceWithoutTransmit < 0) {
-      g_MenuChoices.mainChoiceWithoutTransmit =
+    if (D_801323A0.mainChoiceWithoutTransmit < 0) {
+      D_801323A0.mainChoiceWithoutTransmit =
           MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT - 1;
     }
   }
@@ -3019,7 +3016,7 @@ void func_801F9FF8_ovl_01(void) {
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      switch (D_8022BF1C_ovl_01[g_MenuChoices.clubhouseChoice]) {
+      switch (D_8022BF1C_ovl_01[D_801323A0.clubhouseChoice]) {
         case CLUBHOUSE_ROOM_COURSE_STATS:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_COURSE_STATS;
@@ -3052,7 +3049,7 @@ void func_801F9FF8_ovl_01(void) {
 
     if (g_MenuPressedButtons & B_BUTTON) {
       PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      if (D_801323E6 == isDone) {
+      if (D_801323A0.isTransmitShown == isDone) {
         g_MenuScreen = MENU_SCREEN_MAIN;
       } else {
         g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
@@ -3064,18 +3061,18 @@ void func_801F9FF8_ovl_01(void) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      g_MenuChoices.clubhouseChoice--;
+      D_801323A0.clubhouseChoice--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      g_MenuChoices.clubhouseChoice++;
+      D_801323A0.clubhouseChoice++;
     }
 
-    if (g_MenuChoices.clubhouseChoice >= CLUBHOUSE_CHOICE_COUNT) {
-      g_MenuChoices.clubhouseChoice = 0;
+    if (D_801323A0.clubhouseChoice >= CLUBHOUSE_CHOICE_COUNT) {
+      D_801323A0.clubhouseChoice = 0;
     }
 
-    if (g_MenuChoices.clubhouseChoice < 0) {
-      g_MenuChoices.clubhouseChoice = CLUBHOUSE_CHOICE_COUNT - 1;
+    if (D_801323A0.clubhouseChoice < 0) {
+      D_801323A0.clubhouseChoice = CLUBHOUSE_CHOICE_COUNT - 1;
     }
   }
 }
@@ -3144,7 +3141,7 @@ void func_801FA20C_ovl_01(void) {
       if (memory->eraseChoice == ERASE_CHOICE_YES) {
         PlaySound(SOUND_CAPTION_MEET, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         ResetSaveData();
-        memory->unk45 = 0;
+        memory->optionBits = 0;
         g_SoundOptionBits = 0;
         MusSetStereo(TRUE);
       } else {
@@ -3175,7 +3172,7 @@ void func_801FA20C_ovl_01(void) {
       }
     }
   } else if (g_MenuPressedButtons & A_BUTTON) {
-    switch (g_MenuChoices.optionsChoice) {
+    switch (D_801323A0.optionsChoice) {
       case OPTIONS_CHOICE_MUSIC:
       case OPTIONS_CHOICE_MONO:
       case OPTIONS_CHOICE_CAMERA:
@@ -3209,7 +3206,7 @@ void func_801FA20C_ovl_01(void) {
   } else if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     TransferSaveData(save, TRUE);
-    if (D_801323E6) {
+    if (D_801323A0.isTransmitShown) {
       g_MenuScreen = MENU_SCREEN_MAIN;
     } else {
       g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
@@ -3218,37 +3215,37 @@ void func_801FA20C_ovl_01(void) {
     PlaySong(SONG_TITLE, 0);
   } else {
     if (g_MenuRepeatButtons & U_JPAD) {
-      g_MenuChoices.optionsChoice--;
+      D_801323A0.optionsChoice--;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     } else if (g_MenuRepeatButtons & D_JPAD) {
-      g_MenuChoices.optionsChoice++;
+      D_801323A0.optionsChoice++;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     }
 
     if (IsGameFlagSet(GAME_FLAG_UNK55)) {
-      if (g_MenuChoices.optionsChoice >= OPTIONS_SOUND_TEST_CHOICE_COUNT) {
-        g_MenuChoices.optionsChoice = 0;
+      if (D_801323A0.optionsChoice >= OPTIONS_SOUND_TEST_CHOICE_COUNT) {
+        D_801323A0.optionsChoice = 0;
       }
 
-      if (g_MenuChoices.optionsChoice < 0) {
-        g_MenuChoices.optionsChoice = OPTIONS_SOUND_TEST_CHOICE_COUNT - 1;
+      if (D_801323A0.optionsChoice < 0) {
+        D_801323A0.optionsChoice = OPTIONS_SOUND_TEST_CHOICE_COUNT - 1;
       }
     } else {
-      if (g_MenuChoices.optionsChoice >= OPTIONS_CHOICE_COUNT) {
-        g_MenuChoices.optionsChoice = 0;
+      if (D_801323A0.optionsChoice >= OPTIONS_CHOICE_COUNT) {
+        D_801323A0.optionsChoice = 0;
       }
 
-      if (g_MenuChoices.optionsChoice < 0) {
-        g_MenuChoices.optionsChoice = OPTIONS_CHOICE_COUNT - 1;
+      if (D_801323A0.optionsChoice < 0) {
+        D_801323A0.optionsChoice = OPTIONS_CHOICE_COUNT - 1;
       }
     }
 
-    switch (g_MenuChoices.optionsChoice) {
+    switch (D_801323A0.optionsChoice) {
       case OPTIONS_CHOICE_MUSIC:
         if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
           PlaySound(
               SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          optionBits = &g_OptionBits;
+          optionBits = &D_801323A0.optionBits;
           *optionBits ^= OPTION_BIT_MUSIC_OFF;
         }
 
@@ -3257,7 +3254,7 @@ void func_801FA20C_ovl_01(void) {
         if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
           PlaySound(
               SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          optionBits = &g_OptionBits;
+          optionBits = &D_801323A0.optionBits;
           *optionBits ^= OPTION_BIT_MONO;
           g_SoundOptionBits = *optionBits;
           if (*optionBits & OPTION_BIT_MONO) {
@@ -3272,7 +3269,7 @@ void func_801FA20C_ovl_01(void) {
         if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
           PlaySound(
               SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          optionBits = &g_OptionBits;
+          optionBits = &D_801323A0.optionBits;
           *optionBits ^= OPTION_BIT_SIMPLE_CAMERA;
         }
 
@@ -3495,13 +3492,13 @@ void func_801FADBC_ovl_01(void) {
     return;
   }
 
-  if ((g_MenuRepeatButtons & U_JPAD) && g_MenuChoices.unk1 > 0) {
+  if ((g_MenuRepeatButtons & U_JPAD) && D_801323A0.unk19 > 0) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    g_MenuChoices.unk1--;
+    D_801323A0.unk19--;
   } else if ((g_MenuRepeatButtons & D_JPAD) &&
-      g_MenuChoices.unk1 < CADDY_COUNT - 1) {
+      D_801323A0.unk19 < CADDY_COUNT - 1) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    g_MenuChoices.unk1++;
+    D_801323A0.unk19++;
   }
 }
 
@@ -3524,7 +3521,7 @@ void LeaveMenuWithCourseWipe(void) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
   } else {
-    LoadWipeShape(g_MenuChoices.courseIndex);
+    LoadWipeShape(D_801323A0.courseIndex);
     StartWipe(WIPE_CLOSING);
     D_801052E8 = 0;
     D_801B9410 = 0;
@@ -3543,7 +3540,7 @@ void func_801FAFEC_ovl_01(void) {
 
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    if (D_801323E6) {
+    if (D_801323A0.isTransmitShown) {
       g_MenuScreen = MENU_SCREEN_MAIN;
     } else {
       g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
@@ -5649,11 +5646,11 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     if (g_GameState.isMiniGolf) {
-      choice = g_MenuChoices.unk13;
+      choice = D_801323A0.unk2B;
       courseCount = MINI_GOLF_DISC_IMAGE_COUNT;
       angleStep = DEGREES_PER_TURN / MINI_GOLF_DISC_IMAGE_COUNT;
       texelsOffset = 0;
-      spin = g_MenuChoices.unk15;
+      spin = D_801323A0.unk2D;
     } else {
       courseCount = GetOpenCourseCount();
       courseCount =
@@ -5761,7 +5758,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         stripOffset += COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT;
       }
 
-      if ((g_GameState.isMiniGolf == TRUE) && (g_MenuChoices.unk13 == slot)) {
+      if ((g_GameState.isMiniGolf == TRUE) && (D_801323A0.unk2B == slot)) {
         if ((spin == 0) || (D_8022FD44_ovl_01 == 0.0f)) {
           D_8022FD44_ovl_01 = iconY[slot];
         }
@@ -5842,7 +5839,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           gDPPipeSync(gfx++);
           gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-        } else if (g_MenuChoices.unk0 == otherIndex) {
+        } else if (D_801323A0.unk18 == otherIndex) {
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         } else {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -6226,13 +6223,13 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
           g_TournamentNames[D_801323A0.courseChoice]);
     }
   } else {
-    sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuChoices.unk13 + 1,
-        D_8022FDEC_ovl_01[g_MenuChoices.unk13]);
+    sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.unk2B + 1,
+        D_8022FDEC_ovl_01[D_801323A0.unk2B]);
   }
 
   SetUpGradientTextDrawing(&gfx, 0);
   if (g_GameState.isMiniGolf == TRUE) {
-    stripIndex = g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX;
+    stripIndex = D_801323A0.unk2C + MINI_GOLF_COURSE_INDEX;
   } else {
     stripIndex = D_801323A0.courseChoice;
   }
@@ -6248,9 +6245,8 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     SetTextSlot(SCREEN_WIDTH / 2, slide + HOLES_CHOICE_Y,
-        g_MenuChoices.unk0 + HOLES_CHOICE_MESSAGE_BASE, 1,
-        HOLES_CHOICE_TEXT_SLOT, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255,
-        255, 255);
+        D_801323A0.unk18 + HOLES_CHOICE_MESSAGE_BASE, 1, HOLES_CHOICE_TEXT_SLOT,
+        TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, HOLES_CHOICE_TEXT_SLOT);
   }
 
@@ -6276,7 +6272,7 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_COUNT; choiceIndex++) {
-    if (g_MenuChoices.mainChoice != choiceIndex) {
+    if (D_801323A0.mainChoice != choiceIndex) {
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET +
               (choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE)) &
@@ -6296,7 +6292,7 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal16(
       gfx++, 0, ((u32)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
-  choiceIndex = g_MenuChoices.mainChoice;
+  choiceIndex = D_801323A0.mainChoice;
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET +
           (choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE)) &
@@ -6348,7 +6344,7 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
       gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT;
       choiceIndex++) {
-    if (g_MenuChoices.mainChoiceWithoutTransmit != choiceIndex) {
+    if (D_801323A0.mainChoiceWithoutTransmit != choiceIndex) {
       labelOffset = MAIN_CHOICE_FULL_OPTIONS * MAIN_CHOICE_LABEL_IMAGE_SIZE;
       if (choiceIndex < MAIN_CHOICE_OPTIONS) {
         labelOffset = choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE;
@@ -6373,7 +6369,7 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal16(
       gfx++, 0, ((u32)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
-  choiceIndex = g_MenuChoices.mainChoiceWithoutTransmit;
+  choiceIndex = D_801323A0.mainChoiceWithoutTransmit;
   if (choiceIndex == MAIN_CHOICE_OPTIONS) {
     labelOffset = MAIN_CHOICE_FULL_OPTIONS * MAIN_CHOICE_LABEL_IMAGE_SIZE;
   } else {
@@ -6436,7 +6432,7 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (choiceIndex = 0; choiceIndex != CLUBHOUSE_CHOICE_COUNT; choiceIndex++) {
-    if (choiceIndex != g_MenuChoices.clubhouseChoice) {
+    if (choiceIndex != D_801323A0.clubhouseChoice) {
       labelOffset = D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE;
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET +
@@ -6457,7 +6453,7 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal16(
       gfx++, 0, ((u32)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
-  choiceIndex = g_MenuChoices.clubhouseChoice;
+  choiceIndex = D_801323A0.clubhouseChoice;
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET +
           (D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE)) &
@@ -6683,7 +6679,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
               (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);
-      if (g_MenuChoices.optionsChoice == loopIndex) {
+      if (D_801323A0.optionsChoice == loopIndex) {
         stripTop = (loopIndex * OPTION_ROW_SPACING) +
             ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetPrimColor(gfx++, 0, 0, BANNER_SHADOW_COLOR, BANNER_SHADOW_COLOR,
@@ -6729,7 +6725,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
   for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
-    if (g_MenuChoices.optionsChoice != loopIndex) {
+    if (D_801323A0.optionsChoice != loopIndex) {
       LoadNibbleTextureBlock(&gfx,
           (u8*)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET +
               (loopIndex * OPTION_LABEL_SPACING),
@@ -6748,7 +6744,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   LoadSmallPalette(
       &gfx, 0, (u8*)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE);
   for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
-    if (g_MenuChoices.optionsChoice == loopIndex) {
+    if (D_801323A0.optionsChoice == loopIndex) {
       LoadNibbleTextureBlock(&gfx,
           (u8*)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET +
               (loopIndex * OPTION_LABEL_SPACING),
@@ -6776,19 +6772,19 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
     valueOffset = loopIndex * 2 * OPTION_LABEL_IMAGE_SIZE;
     switch (loopIndex) {
       case OPTIONS_CHOICE_MUSIC:
-        if (g_OptionBits & OPTION_BIT_MUSIC_OFF) {
+        if (D_801323A0.optionBits & OPTION_BIT_MUSIC_OFF) {
           valueOffset += OPTION_LABEL_IMAGE_SIZE;
         }
 
         break;
       case OPTIONS_CHOICE_MONO:
-        if (g_OptionBits & OPTION_BIT_MONO) {
+        if (D_801323A0.optionBits & OPTION_BIT_MONO) {
           valueOffset += OPTION_LABEL_IMAGE_SIZE;
         }
 
         break;
       case OPTIONS_CHOICE_CAMERA:
-        if (g_OptionBits & OPTION_BIT_SIMPLE_CAMERA) {
+        if (D_801323A0.optionBits & OPTION_BIT_SIMPLE_CAMERA) {
           valueOffset += OPTION_LABEL_IMAGE_SIZE;
         }
 
@@ -6800,7 +6796,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
             PALETTED_TEXELS_OFFSET + valueOffset,
         G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0, 0,
         0);
-    if (g_MenuChoices.optionsChoice == loopIndex) {
+    if (D_801323A0.optionsChoice == loopIndex) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     } else {
       gDPSetPrimColor(
@@ -6817,7 +6813,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   }
 
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)arrows + IMAGE_HEADER_SIZE) & ~7);
-  if (g_MenuChoices.optionsChoice != OPTIONS_CHOICE_ERASE_SAVE_DATA) {
+  if (D_801323A0.optionsChoice != OPTIONS_CHOICE_ERASE_SAVE_DATA) {
     D_8022FEFC_ovl_01 = (D_8022FEFC_ovl_01 + 1) % ARROW_TIMER_PERIOD;
     frameIndex = D_8022FEFC_ovl_01 < ARROW_FRAME_DURATION;
     LoadNibbleTextureBlock(&gfx,
@@ -6838,13 +6834,13 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       }
 
-      rowTop = g_MenuChoices.optionsChoice * OPTION_ROW_SPACING;
+      rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
       DrawTextureRect(&gfx, (LEFT_ARROW_LEFT + shiftX) << 2,
           (rowTop + ARROW_TOP + shiftY) << 2,
           (LEFT_ARROW_LEFT + ARROW_SIZE + shiftX) << 2,
           (rowTop + ARROW_TOP + ARROW_SIZE + shiftY) << 2, G_TX_RENDERTILE, 0,
           LEFT_ARROW_ROW << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      rowTop = g_MenuChoices.optionsChoice * OPTION_ROW_SPACING;
+      rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
       DrawTextureRect(&gfx, (RIGHT_ARROW_LEFT + shiftX) << 2,
           (rowTop + ARROW_TOP + shiftY) << 2,
           (RIGHT_ARROW_LEFT + ARROW_SIZE + shiftX) << 2,
@@ -6856,7 +6852,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   if (IsGameFlagSet(GAME_FLAG_UNK55)) {
     BeginShadowedText(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SONG) {
+    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SONG) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -6874,7 +6870,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
       DrawShadowedText(&gfx, SONG_NAME_X, TEST_NAME_Y, g_PrintBuffer);
     }
 
-    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SONG_REVERB) {
+    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SONG_REVERB) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -6882,7 +6878,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, " REVERB: %3d", f_SoundTestSongReverb);
     DrawShadowedText(&gfx, SONG_TEST_X, TEST_REVERB_Y, g_PrintBuffer);
-    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SONG_FREQUENCY) {
+    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SONG_FREQUENCY) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -6890,7 +6886,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, " PICH  : %3.1f", f_SoundTestSongFrequency);
     DrawShadowedText(&gfx, SONG_TEST_X, TEST_PITCH_Y, g_PrintBuffer);
-    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SONG_TEMPO) {
+    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SONG_TEMPO) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -6898,7 +6894,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, " TEMPO : %3d", f_SoundTestSongTempo);
     DrawShadowedText(&gfx, SONG_TEST_X, TEST_TEMPO_Y, g_PrintBuffer);
-    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SOUND) {
+    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SOUND) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -6909,7 +6905,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
     sprintf(g_PrintBuffer, D_80231514_ovl_01,
         f_SoundTestSoundNames[f_SoundTestSound]);
     DrawShadowedText(&gfx, SOUND_NAME_X, TEST_NAME_Y, g_PrintBuffer);
-    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SOUND_REVERB) {
+    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SOUND_REVERB) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -6917,7 +6913,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, " REVERB: %3d", f_SoundTestSoundReverb);
     DrawShadowedText(&gfx, SOUND_TEST_X, TEST_REVERB_Y, g_PrintBuffer);
-    if (g_MenuChoices.optionsChoice == OPTIONS_CHOICE_SOUND_FREQUENCY) {
+    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SOUND_FREQUENCY) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -6976,7 +6972,7 @@ void func_80207D08_ovl_01(Gfx** displayListHead) {
   DrawShadowedText(
       &gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y, D_8023176C_ovl_01);
   for (caddyIndex = 0; caddyIndex != CADDY_COUNT; caddyIndex++) {
-    if (g_MenuChoices.unk1 == caddyIndex) {
+    if (D_801323A0.unk19 == caddyIndex) {
       SetTextColor(&gfx, 255, 255, 0);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -7063,7 +7059,7 @@ void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
     growWidth = 0;
     if (enlargesChosenHole == TRUE) {
       growHeight = 0;
-      if (starIndex == g_MenuChoices.holeIndex) {
+      if (starIndex == D_801323A0.holeIndex) {
         growWidth = CHOSEN_STAR_GROWTH;
         growHeight = CHOSEN_STAR_GROWTH;
       }
@@ -7155,7 +7151,7 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
   gDPPipeSync(gfx++);
   for (holeIndex = 0; holeIndex < RING_SHOT_HOLE_COUNT; holeIndex++) {
     growWidth = 0;
-    if (holeIndex == g_MenuChoices.holeIndex) {
+    if (holeIndex == D_801323A0.holeIndex) {
       growWidth = RING_SHOT_STAR_GROWTH;
       growHeight = RING_SHOT_STAR_GROWTH;
     } else {
@@ -7168,7 +7164,7 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
     top += centerY - (RING_SHOT_STAR_HEIGHT / 2);
 
     /* A hole without its star draws from the silver star's tile */
-    tile = save->hasRingShotStar[g_MenuChoices.courseIndex][holeIndex] == FALSE;
+    tile = save->hasRingShotStar[D_801323A0.courseIndex][holeIndex] == FALSE;
     gSPScisTextureRectangle(gfx++, (left - (growWidth / 2)) << 2,
         (top - (growHeight / 2)) << 2,
         (left + RING_SHOT_STAR_WIDTH + (growWidth / 2)) << 2,
