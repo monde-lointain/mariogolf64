@@ -13,9 +13,14 @@
 #define SCREEN_BORDER 8
 
 /* Screen coordinates in display lists are in quarter pixels */
-#define QUARTER_PIXELS_PER_PIXEL 4
-/* A screen position in pixels, in the quarter pixels display lists take */
-#define QuarterPixels(pixels) ((pixels) * QUARTER_PIXELS_PER_PIXEL)
+#define QUARTER_PIXEL_SHIFT 2
+#define QUARTER_PIXELS_PER_PIXEL (1 << QUARTER_PIXEL_SHIFT)
+/*
+ * A screen position in pixels, in the quarter pixels display lists take. It
+ * shifts rather than multiplies, since the GBI's masks fold differently
+ * around a multiply.
+ */
+#define QuarterPixels(pixels) ((pixels) << QUARTER_PIXEL_SHIFT)
 
 /* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
 #define TEXEL_STEP_ONE (1 << 10)

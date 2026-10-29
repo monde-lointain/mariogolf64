@@ -3072,8 +3072,9 @@ void DrawNameLogos(Gfx** displayListHead) {
             drawnHeight = 1;
           }
 
-          gSPScisTextureRectangle(gfx++, xEdges[0] << 2,
-              yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip] << 2, xEdges[1] << 2,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(xEdges[0]),
+              yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip] << 2,
+              QuarterPixels(xEdges[1]),
               yEdges[NAME_LOGO_STRIP_COUNT - strip] << 2, G_TX_RENDERTILE, 0,
               TexelCoordinate(NAME_LOGO_STRIP_ROWS),
               (SLOT_LOGO.width << 10) / drawnWidth,
@@ -3099,8 +3100,9 @@ void DrawNameLogos(Gfx** displayListHead) {
             drawnHeight = 1;
           }
 
-          gSPScisTextureRectangle(gfx++, xEdges[0] << 2, yEdges[strip] << 2,
-              xEdges[1] << 2, yEdges[strip + 1] << 2, G_TX_RENDERTILE, 0, 0,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(xEdges[0]),
+              QuarterPixels(yEdges[strip]), QuarterPixels(xEdges[1]),
+              yEdges[strip + 1] << 2, G_TX_RENDERTILE, 0, 0,
               (SLOT_LOGO.width << 10) / drawnWidth,
               (SLOT_LOGO.height << 8) / drawnHeight);
         }
@@ -3663,9 +3665,10 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
 
               f_ProjectedBallTexelStep = OPENING_BALL_STRIP_HEIGHT *
                   TEXEL_STEP_ONE / (halfSize + f_ProjectedBallExtraPixel);
-              gSPScisTextureRectangle(gfx++, f_ProjectedBallLeft << 2,
-                  f_ProjectedBallTop << 2, f_ProjectedBallRight << 2,
-                  f_ProjectedBallBottom << 2, G_TX_RENDERTILE, 0, 0,
+              gSPScisTextureRectangle(gfx++, QuarterPixels(f_ProjectedBallLeft),
+                  QuarterPixels(f_ProjectedBallTop),
+                  QuarterPixels(f_ProjectedBallRight),
+                  QuarterPixels(f_ProjectedBallBottom), G_TX_RENDERTILE, 0, 0,
                   f_ProjectedBallTexelStep, f_ProjectedBallTexelStep);
             }
 
@@ -3871,10 +3874,10 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, IMPACT_LINES_LEFT << 2,
-            (bottom - IMPACT_LINES_STRIP_HEIGHT) << 2,
-            (IMPACT_LINES_LEFT + width) << 2, bottom << 2, G_TX_RENDERTILE, 0,
-            0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPScisTextureRectangle(gfx++, QuarterPixels(IMPACT_LINES_LEFT),
+            QuarterPixels(bottom - IMPACT_LINES_STRIP_HEIGHT),
+            QuarterPixels(IMPACT_LINES_LEFT + width), QuarterPixels(bottom),
+            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
         texelOffset += IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT;
         row--;
@@ -3977,10 +3980,10 @@ void DrawLakitu(Gfx** displayListHead) {
         G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
-        (f_LakituScreenPoint[0] - (LAKITU_DRAWN_SIZE / 2)) << 2,
-        (f_LakituScreenPoint[1] - (LAKITU_DRAWN_SIZE / 2)) << 2,
-        (f_LakituScreenPoint[0] + (LAKITU_DRAWN_SIZE / 2)) << 2,
-        (f_LakituScreenPoint[1] + (LAKITU_DRAWN_SIZE / 2)) << 2,
+        QuarterPixels(f_LakituScreenPoint[0] - (LAKITU_DRAWN_SIZE / 2)),
+        QuarterPixels(f_LakituScreenPoint[1] - (LAKITU_DRAWN_SIZE / 2)),
+        QuarterPixels(f_LakituScreenPoint[0] + (LAKITU_DRAWN_SIZE / 2)),
+        QuarterPixels(f_LakituScreenPoint[1] + (LAKITU_DRAWN_SIZE / 2)),
         G_TX_RENDERTILE, TexelCoordinate(LAKITU_IMAGE_SIZE), 0, LAKITU_SCALE,
         LAKITU_SCALE);
     gDPPipeSync(gfx++);
@@ -4180,8 +4183,9 @@ void DrawOpeningBurst(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
-        G_TX_RENDERTILE, 0, 0, (BURST_IMAGE_SIZE << 10) / (right - left),
+    gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+        QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
+        (BURST_IMAGE_SIZE << 10) / (right - left),
         (BURST_IMAGE_SIZE << 10) / (bottom - top));
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
@@ -4356,8 +4360,8 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           bottom = ballPoint.y + (stripIndex * size) - size;
         }
 
-        gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
-            G_TX_RENDERTILE, 0, 0,
+        gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+            QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
             (SHOT_BALL_IMAGE_SIZE << 10) / (right - left),
             SHOT_BALL_STRIP_ROWS_FIXED / (bottom - top));
         gDPPipeSync(gfx++);
@@ -4842,9 +4846,10 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPSetRenderMode(gfx++,
         GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
         G_RM_AA_ZB_OPA_SURF2);
-    gSPTextureRectangle(gfx++, LOGO_SHINE_MASK_LEFT << 2, LOGO_SHINE_TOP << 2,
-        LOGO_SHINE_MASK_RIGHT << 2, LOGO_SHINE_BOTTOM << 2, G_TX_RENDERTILE, 0,
-        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPTextureRectangle(gfx++, QuarterPixels(LOGO_SHINE_MASK_LEFT),
+        QuarterPixels(LOGO_SHINE_TOP), QuarterPixels(LOGO_SHINE_MASK_RIGHT),
+        QuarterPixels(LOGO_SHINE_BOTTOM), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPSetPrimDepth(gfx++, LOGO_SHINE_LETTER_DEPTH, 0);
     gDPPipeSync(gfx++);
@@ -4912,8 +4917,9 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
 
     if (isDrawn == TRUE && f_LogoShineFrame > LOGO_SHINE_FIRST_SHOWN_FRAME &&
         f_LogoShineFrame < LOGO_SHINE_LAST_SHOWN_FRAME) {
-      gSPTextureRectangle(gfx++, LOGO_SHINE_LEFT << 2, LOGO_SHINE_TOP << 2,
-          LOGO_SHINE_RIGHT << 2, LOGO_SHINE_BOTTOM << 2, G_TX_RENDERTILE,
+      gSPTextureRectangle(gfx++, QuarterPixels(LOGO_SHINE_LEFT),
+          QuarterPixels(LOGO_SHINE_TOP), QuarterPixels(LOGO_SHINE_RIGHT),
+          QuarterPixels(LOGO_SHINE_BOTTOM), G_TX_RENDERTILE,
           TexelCoordinate(LOGO_SHINE_ORIGIN_TEXEL -
               (f_LogoShineFrame - LOGO_SHINE_ORIGIN_FRAME) * LOGO_SHINE_SPEED),
           0, LOGO_SHINE_TEXEL_STEP, LOGO_SHINE_TEXEL_STEP);

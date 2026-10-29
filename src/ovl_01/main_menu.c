@@ -3796,12 +3796,11 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
 
-          gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
-              BACKDROP_FIRST_TOP << 2,
-              (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
-              (BACKDROP_FIRST_TOP +
-                  ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE))
-                  << 2,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+              QuarterPixels(BACKDROP_FIRST_TOP),
+              QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+              QuarterPixels(BACKDROP_FIRST_TOP +
+                  ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
               TEXEL_STEP_ONE / BACKDROP_SCALE);
         } else {
@@ -3816,18 +3815,22 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
           gDPPipeSync(gfx++);
 
           if (stripIndex == CLAMPED_BACKDROP_STRIP_COUNT - 1) {
-            gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
-                CLAMPED_BACKDROP_LAST_TOP << 2,
-                (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
-                CLAMPED_BACKDROP_BOTTOM << 2, G_TX_RENDERTILE, 0,
+            gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+                QuarterPixels(CLAMPED_BACKDROP_LAST_TOP),
+                QuarterPixels(
+                    BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+                QuarterPixels(CLAMPED_BACKDROP_BOTTOM), G_TX_RENDERTILE, 0,
                 BACKDROP_SECOND_ROW_START, TEXEL_STEP_ONE / BACKDROP_SCALE,
                 TEXEL_STEP_ONE / BACKDROP_SCALE);
           } else {
             stripTop = BACKDROP_TOP +
                 (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
-            gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
-                (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
-                (stripTop + (BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE)) << 2,
+            gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+                QuarterPixels(stripTop),
+                QuarterPixels(
+                    BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+                QuarterPixels(
+                    stripTop + (BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE)),
                 G_TX_RENDERTILE, 0, BACKDROP_SECOND_ROW_START,
                 TEXEL_STEP_ONE / BACKDROP_SCALE,
                 TEXEL_STEP_ONE / BACKDROP_SCALE);
@@ -3852,12 +3855,11 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
 
-          gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
-              BACKDROP_FIRST_TOP << 2,
-              (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
-              (BACKDROP_FIRST_TOP +
-                  ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE))
-                  << 2,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+              QuarterPixels(BACKDROP_FIRST_TOP),
+              QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+              QuarterPixels(BACKDROP_FIRST_TOP +
+                  ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
               TEXEL_STEP_ONE / BACKDROP_SCALE);
         } else {
@@ -3873,12 +3875,12 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
 
           stripTop = BACKDROP_TOP +
               (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
-          gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
-              (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
-              (BACKDROP_TOP +
+          gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+              QuarterPixels(stripTop),
+              QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+              QuarterPixels(BACKDROP_TOP +
                   (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE) +
-                  (shownRowCount * BACKDROP_SCALE))
-                  << 2,
+                  (shownRowCount * BACKDROP_SCALE)),
               G_TX_RENDERTILE, 0, BACKDROP_SECOND_ROW_START,
               TEXEL_STEP_ONE / BACKDROP_SCALE, TEXEL_STEP_ONE / BACKDROP_SCALE);
         }
@@ -3907,9 +3909,9 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
       gDPPipeSync(gfx++);
 
       stripTop = BOARD_TOP + (stripIndex * BOARD_STRIP_SPACING);
-      gSPScisTextureRectangle(gfx++, BOARD_LEFT << 2, stripTop << 2,
-          (BOARD_LEFT + BOARD_WIDTH) << 2,
-          (stripTop + BOARD_STRIP_SPACING) << 2, G_TX_RENDERTILE, 0, 0,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(BOARD_LEFT),
+          QuarterPixels(stripTop), QuarterPixels(BOARD_LEFT + BOARD_WIDTH),
+          QuarterPixels(stripTop + BOARD_STRIP_SPACING), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, (BOARD_STRIP_HEIGHT << 10) / BOARD_STRIP_SPACING);
       gDPPipeSync(gfx++);
     }
@@ -3937,9 +3939,10 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
       gDPPipeSync(gfx++);
 
       stripTop = BOARD_TOP + (stripIndex * BOARD_STRIP_SPACING);
-      gSPScisTextureRectangle(gfx++, TALL_NARROW_BOARD_LEFT << 2, stripTop << 2,
-          (TALL_NARROW_BOARD_LEFT + NARROW_BOARD_WIDTH) << 2,
-          (stripTop + BOARD_STRIP_SPACING) << 2, G_TX_RENDERTILE, 0, 0,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(TALL_NARROW_BOARD_LEFT),
+          QuarterPixels(stripTop),
+          QuarterPixels(TALL_NARROW_BOARD_LEFT + NARROW_BOARD_WIDTH),
+          QuarterPixels(stripTop + BOARD_STRIP_SPACING), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE,
           (NARROW_BOARD_STRIP_HEIGHT << 10) / BOARD_STRIP_SPACING);
       gDPPipeSync(gfx++);
@@ -3965,10 +3968,10 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
       gDPPipeSync(gfx++);
 
       stripTop = bobOffset + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
-      gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2,
-          (stripTop + MENU_BANNER_TOP) << 2,
-          (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
-          (stripTop + MENU_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT) << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(MENU_BANNER_LEFT),
+          QuarterPixels(stripTop + MENU_BANNER_TOP),
+          QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
+          QuarterPixels(stripTop + MENU_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -4039,12 +4042,11 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
-          BACKDROP_FIRST_TOP << 2,
-          (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
-          (BACKDROP_FIRST_TOP +
-              ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE))
-              << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+          QuarterPixels(BACKDROP_FIRST_TOP),
+          QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+          QuarterPixels(BACKDROP_FIRST_TOP +
+              ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
           TEXEL_STEP_ONE / BACKDROP_SCALE);
     } else {
@@ -4059,12 +4061,12 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       stripTop = BACKDROP_TOP +
           (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
-      gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
-          (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
-          (BACKDROP_TOP +
+      gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+          QuarterPixels(stripTop),
+          QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+          QuarterPixels(BACKDROP_TOP +
               (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE) +
-              (shownRowCount * BACKDROP_SCALE))
-              << 2,
+              (shownRowCount * BACKDROP_SCALE)),
           G_TX_RENDERTILE, 0, BACKDROP_SECOND_ROW_START,
           TEXEL_STEP_ONE / BACKDROP_SCALE, TEXEL_STEP_ONE / BACKDROP_SCALE);
     }
@@ -4097,10 +4099,11 @@ void func_801FCB74_ovl_01(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = NARROW_BOARD_TOP + (stripIndex * NARROW_BOARD_STRIP_SPACING);
-    gSPScisTextureRectangle(gfx++, NARROW_BOARD_LEFT << 2, stripTop << 2,
-        (NARROW_BOARD_LEFT + NARROW_BOARD_SHOWN_WIDTH) << 2,
-        (stripTop + NARROW_BOARD_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        (NARROW_BOARD_WIDTH << 10) / NARROW_BOARD_SHOWN_WIDTH,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(NARROW_BOARD_LEFT),
+        QuarterPixels(stripTop),
+        QuarterPixels(NARROW_BOARD_LEFT + NARROW_BOARD_SHOWN_WIDTH),
+        QuarterPixels(stripTop + NARROW_BOARD_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
+        0, (NARROW_BOARD_WIDTH << 10) / NARROW_BOARD_SHOWN_WIDTH,
         (NARROW_BOARD_STRIP_HEIGHT << 10) / NARROW_BOARD_ROW_SCALE);
     gDPPipeSync(gfx++);
   }
@@ -4126,10 +4129,11 @@ void func_801FCEF8_ovl_01(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = UNUSED_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
-    gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
-        (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
-        (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(MENU_BANNER_LEFT),
+        QuarterPixels(stripTop),
+        QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
+        QuarterPixels(stripTop + MENU_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
+        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -4154,10 +4158,10 @@ void func_801FD1B4_ovl_01(Gfx** displayListHead, s16 left, s16 top) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, left << 2, top << 2,
-        (left + SMALL_BANNER_WIDTH) << 2, (top + MENU_BANNER_STRIP_HEIGHT) << 2,
-        G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH,
-        TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+        QuarterPixels(left + SMALL_BANNER_WIDTH),
+        QuarterPixels(top + MENU_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
+        (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH, TEXEL_STEP_ONE);
     top += MENU_BANNER_STRIP_HEIGHT;
     gDPPipeSync(gfx++);
   }
@@ -4186,10 +4190,11 @@ void func_801FD4F0_ovl_01(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = LARGE_BANNER_TOP + (stripIndex * LARGE_BANNER_STRIP_SPACING);
-    gSPScisTextureRectangle(gfx++, LARGE_BANNER_LEFT << 2, stripTop << 2,
-        (LARGE_BANNER_LEFT + LARGE_BANNER_WIDTH) << 2,
-        (stripTop + LARGE_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        (MENU_BANNER_WIDTH << 10) / LARGE_BANNER_WIDTH,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(LARGE_BANNER_LEFT),
+        QuarterPixels(stripTop),
+        QuarterPixels(LARGE_BANNER_LEFT + LARGE_BANNER_WIDTH),
+        QuarterPixels(stripTop + LARGE_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
+        0, (MENU_BANNER_WIDTH << 10) / LARGE_BANNER_WIDTH,
         (MENU_BANNER_STRIP_HEIGHT << 10) / LARGE_BANNER_STRIP_HEIGHT);
     gDPPipeSync(gfx++);
   }
@@ -4213,10 +4218,11 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = MENU_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
-    gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
-        (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
-        (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(MENU_BANNER_LEFT),
+        QuarterPixels(stripTop),
+        QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
+        QuarterPixels(stripTop + MENU_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
+        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -4316,10 +4322,11 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, D_8022F940_ovl_01[labelIndex][0] << 2,
-          D_8022F940_ovl_01[labelIndex][1] << 2,
-          (D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH) << 2,
-          (D_8022F940_ovl_01[labelIndex][1] + TITLE_LABEL_HEIGHT) << 2,
+      gSPScisTextureRectangle(gfx++,
+          QuarterPixels(D_8022F940_ovl_01[labelIndex][0]),
+          QuarterPixels(D_8022F940_ovl_01[labelIndex][1]),
+          QuarterPixels(D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH),
+          QuarterPixels(D_8022F940_ovl_01[labelIndex][1] + TITLE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -4351,13 +4358,12 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
       }
 
       gSPScisTextureRectangle(gfx++,
-          (D_8022F940_ovl_01[labelIndex][0] - (growth / 2)) << 2,
-          (D_8022F940_ovl_01[labelIndex][1] - (growth / 2)) << 2,
-          (D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH + (growth / 2))
-              << 2,
-          (D_8022F940_ovl_01[labelIndex][1] +
-              (TITLE_LABEL_HEIGHT + (growth / 2)))
-              << 2,
+          QuarterPixels(D_8022F940_ovl_01[labelIndex][0] - (growth / 2)),
+          QuarterPixels(D_8022F940_ovl_01[labelIndex][1] - (growth / 2)),
+          QuarterPixels(D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH +
+              (growth / 2)),
+          QuarterPixels(D_8022F940_ovl_01[labelIndex][1] +
+              (TITLE_LABEL_HEIGHT + (growth / 2))),
           G_TX_RENDERTILE, 0, 0,
           (TITLE_LABEL_WIDTH << 10) / (growth + TITLE_LABEL_WIDTH),
           (TITLE_LABEL_HEIGHT << 10) / (growth + TITLE_LABEL_HEIGHT));
@@ -4786,12 +4792,12 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, MODE_BANNER_LEFT << 2,
-          (MODE_BANNER_TOP + (index * MENU_BANNER_STRIP_HEIGHT)) << 2,
-          (MODE_BANNER_LEFT + SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH) << 2,
-          (MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
-              (index * MENU_BANNER_STRIP_HEIGHT))
-              << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(MODE_BANNER_LEFT),
+          QuarterPixels(MODE_BANNER_TOP + (index * MENU_BANNER_STRIP_HEIGHT)),
+          QuarterPixels(
+              MODE_BANNER_LEFT + SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH),
+          QuarterPixels(MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
+              (index * MENU_BANNER_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0,
           (MENU_BANNER_WIDTH << 10) / SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH,
           TEXEL_STEP_ONE);
@@ -4806,12 +4812,11 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, MODE_BANNER_LEFT << 2,
-          (MODE_BANNER_TOP + (index * MENU_BANNER_STRIP_HEIGHT)) << 2,
-          (MODE_BANNER_LEFT + MODE_BANNER_SHOWN_WIDTH) << 2,
-          (MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
-              (index * MENU_BANNER_STRIP_HEIGHT))
-              << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(MODE_BANNER_LEFT),
+          QuarterPixels(MODE_BANNER_TOP + (index * MENU_BANNER_STRIP_HEIGHT)),
+          QuarterPixels(MODE_BANNER_LEFT + MODE_BANNER_SHOWN_WIDTH),
+          QuarterPixels(MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
+              (index * MENU_BANNER_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0,
           (MENU_BANNER_WIDTH << 10) / MODE_BANNER_SHOWN_WIDTH, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -4833,9 +4838,10 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   labelOffset = &D_8022FA28_ovl_01[labelIndex];
   labelX =
       (g_ChosenPlayerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
-  gSPScisTextureRectangle(gfx++, (labelX - *labelOffset) << 2,
-      MODE_LABEL_TOP << 2, (labelX - *labelOffset + MODE_LABEL_WIDTH) << 2,
-      (MODE_LABEL_TOP + MODE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+  gSPScisTextureRectangle(gfx++, QuarterPixels(labelX - *labelOffset),
+      QuarterPixels(MODE_LABEL_TOP),
+      QuarterPixels(labelX - *labelOffset + MODE_LABEL_WIDTH),
+      QuarterPixels(MODE_LABEL_TOP + MODE_LABEL_HEIGHT), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
 
@@ -4864,10 +4870,11 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, position[AXIS_X] << 2,
-          position[AXIS_Y] << 2, (position[AXIS_X] + CONTROLLER_ICON_SIZE) << 2,
-          (position[AXIS_Y] + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPScisTextureRectangle(gfx++, QuarterPixels(position[AXIS_X]),
+          QuarterPixels(position[AXIS_Y]),
+          QuarterPixels(position[AXIS_X] + CONTROLLER_ICON_SIZE),
+          QuarterPixels(position[AXIS_Y] + CONTROLLER_ICON_SIZE),
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
   }
@@ -4896,10 +4903,12 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
 
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
-        (position[AXIS_X] + PLAYER_LABEL_OFFSET_X) << 2,
-        (position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y) << 2,
-        (position[AXIS_X] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH) << 2,
-        (position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT) << 2,
+        QuarterPixels(position[AXIS_X] + PLAYER_LABEL_OFFSET_X),
+        QuarterPixels(position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y),
+        QuarterPixels(
+            position[AXIS_X] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH),
+        QuarterPixels(
+            position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -5010,12 +5019,11 @@ void func_802004A0_ovl_01(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, MODE_ICON_LEFT << 2,
-        (MODE_ICON_TOP + (stripIndex * MODE_ICON_STRIP_HEIGHT)) << 2,
-        (MODE_ICON_LEFT + MODE_ICON_WIDTH) << 2,
-        (MODE_ICON_TOP + MODE_ICON_STRIP_HEIGHT +
-            (stripIndex * MODE_ICON_STRIP_HEIGHT))
-            << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(MODE_ICON_LEFT),
+        QuarterPixels(MODE_ICON_TOP + (stripIndex * MODE_ICON_STRIP_HEIGHT)),
+        QuarterPixels(MODE_ICON_LEFT + MODE_ICON_WIDTH),
+        QuarterPixels(MODE_ICON_TOP + MODE_ICON_STRIP_HEIGHT +
+            (stripIndex * MODE_ICON_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -5063,10 +5071,11 @@ void func_80200A40_ovl_01(
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, left << 2,
-        (top + (stripIndex * halfSize)) << 2, (left + halfSize + halfSize) << 2,
-        (top + halfSize + (stripIndex * halfSize)) << 2, G_TX_RENDERTILE, 0, 0,
-        scale, scale);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(left),
+        QuarterPixels(top + (stripIndex * halfSize)),
+        QuarterPixels(left + halfSize + halfSize),
+        QuarterPixels(top + halfSize + (stripIndex * halfSize)),
+        G_TX_RENDERTILE, 0, 0, scale, scale);
     gDPPipeSync(gfx++);
   }
 
@@ -5834,10 +5843,11 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
-          gSPScisTextureRectangle(gfx++, D_8022FC20_ovl_01[otherIndex].x << 2,
-              D_8022FC20_ovl_01[otherIndex].y << 2,
-              (D_8022FC20_ovl_01[otherIndex].x + HOLES_BADGE_SIZE) << 2,
-              (D_8022FC20_ovl_01[otherIndex].y + HOLES_BADGE_SIZE) << 2,
+          gSPScisTextureRectangle(gfx++,
+              QuarterPixels(D_8022FC20_ovl_01[otherIndex].x),
+              QuarterPixels(D_8022FC20_ovl_01[otherIndex].y),
+              QuarterPixels(D_8022FC20_ovl_01[otherIndex].x + HOLES_BADGE_SIZE),
+              QuarterPixels(D_8022FC20_ovl_01[otherIndex].y + HOLES_BADGE_SIZE),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
           D_8022FD40_ovl_01 += BET_BADGE_COLOR_STEP;
@@ -5872,10 +5882,11 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, D_8022FC20_ovl_01[otherIndex].x << 2,
-            D_8022FC20_ovl_01[otherIndex].y << 2,
-            (D_8022FC20_ovl_01[otherIndex].x + HOLES_BADGE_SIZE) << 2,
-            (D_8022FC20_ovl_01[otherIndex].y + HOLES_BADGE_SIZE) << 2,
+        gSPScisTextureRectangle(gfx++,
+            QuarterPixels(D_8022FC20_ovl_01[otherIndex].x),
+            QuarterPixels(D_8022FC20_ovl_01[otherIndex].y),
+            QuarterPixels(D_8022FC20_ovl_01[otherIndex].x + HOLES_BADGE_SIZE),
+            QuarterPixels(D_8022FC20_ovl_01[otherIndex].y + HOLES_BADGE_SIZE),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
@@ -5920,9 +5931,12 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
           top = D_8022FC48_ovl_01[D_801323A0.courseChoice][placeCount - 1]
                                  [otherIndex]
                                      .y;
-          gSPScisTextureRectangle(gfx++, left << 2, top << 2,
-              (left + g_TrophySizes[D_801323A0.courseChoice].width) << 2,
-              (top + g_TrophySizes[D_801323A0.courseChoice].height) << 2,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(left),
+              QuarterPixels(top),
+              QuarterPixels(
+                  left + g_TrophySizes[D_801323A0.courseChoice].width),
+              QuarterPixels(
+                  top + g_TrophySizes[D_801323A0.courseChoice].height),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }
@@ -5965,9 +5979,10 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
       gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
       gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
       gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++, LOCKED_PANEL_LEFT << 2, LOCKED_PANEL_TOP << 2,
-          LOCKED_PANEL_RIGHT << 2, LOCKED_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0,
-          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPTextureRectangle(gfx++, QuarterPixels(LOCKED_PANEL_LEFT),
+          QuarterPixels(LOCKED_PANEL_TOP), QuarterPixels(LOCKED_PANEL_RIGHT),
+          QuarterPixels(LOCKED_PANEL_BOTTOM), G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       SetUpGradientTextDrawing(&gfx, TRUE);
       gDPSetEnvColor(gfx++, 191, 191, 255, 255);
@@ -6197,11 +6212,11 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       stripTop = HOLES_BANNER_TOP + (stripIndex * HOLES_BANNER_STRIP_HEIGHT);
-      gSPScisTextureRectangle(gfx++, HOLES_BANNER_LEFT << 2,
-          (slide + stripTop) << 2,
-          (HOLES_BANNER_LEFT + HOLES_BANNER_WIDTH) << 2,
-          (slide + stripTop + HOLES_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE,
-          0, 0, (MENU_BANNER_WIDTH << 10) / HOLES_BANNER_WIDTH,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(HOLES_BANNER_LEFT),
+          QuarterPixels(slide + stripTop),
+          QuarterPixels(HOLES_BANNER_LEFT + HOLES_BANNER_WIDTH),
+          QuarterPixels(slide + stripTop + HOLES_BANNER_STRIP_HEIGHT),
+          G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / HOLES_BANNER_WIDTH,
           (MENU_BANNER_STRIP_HEIGHT << 10) / HOLES_BANNER_STRIP_HEIGHT);
       gDPPipeSync(gfx++);
     }
@@ -6218,11 +6233,13 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     stripTop = COURSE_NAME_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
     gSPScisTextureRectangle(gfx++,
-        (COURSE_NAME_BANNER_LEFT + (squeeze / 2)) << 2, (slide + stripTop) << 2,
-        (COURSE_NAME_BANNER_LEFT + COURSE_NAME_BANNER_WIDTH - (squeeze / 2))
-            << 2,
-        (slide + stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-        0, (MENU_BANNER_WIDTH << 10) / (COURSE_NAME_BANNER_WIDTH - squeeze),
+        QuarterPixels(COURSE_NAME_BANNER_LEFT + (squeeze / 2)),
+        QuarterPixels(slide + stripTop),
+        QuarterPixels(
+            COURSE_NAME_BANNER_LEFT + COURSE_NAME_BANNER_WIDTH - (squeeze / 2)),
+        QuarterPixels(slide + stripTop + MENU_BANNER_STRIP_HEIGHT),
+        G_TX_RENDERTILE, 0, 0,
+        (MENU_BANNER_WIDTH << 10) / (COURSE_NAME_BANNER_WIDTH - squeeze),
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -6296,10 +6313,13 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, D_8022FDF4_ovl_01[choiceIndex][0] << 2,
-          D_8022FDF4_ovl_01[choiceIndex][1] << 2,
-          (D_8022FDF4_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH) << 2,
-          (D_8022FDF4_ovl_01[choiceIndex][1] + MAIN_CHOICE_LABEL_HEIGHT) << 2,
+      gSPScisTextureRectangle(gfx++,
+          QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][0]),
+          QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][1]),
+          QuarterPixels(
+              D_8022FDF4_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH),
+          QuarterPixels(
+              D_8022FDF4_ovl_01[choiceIndex][1] + MAIN_CHOICE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -6316,14 +6336,12 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      (D_8022FDF4_ovl_01[choiceIndex][0] - (D_800FE33C / 2)) << 2,
-      (D_8022FDF4_ovl_01[choiceIndex][1] - (D_800FE33C / 2)) << 2,
-      (D_8022FDF4_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH +
-          (D_800FE33C / 2))
-          << 2,
-      (D_8022FDF4_ovl_01[choiceIndex][1] +
-          (MAIN_CHOICE_LABEL_HEIGHT + (D_800FE33C / 2)))
-          << 2,
+      QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][0] - (D_800FE33C / 2)),
+      QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][1] - (D_800FE33C / 2)),
+      QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][0] +
+          MAIN_CHOICE_LABEL_WIDTH + (D_800FE33C / 2)),
+      QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][1] +
+          (MAIN_CHOICE_LABEL_HEIGHT + (D_800FE33C / 2))),
       G_TX_RENDERTILE, 0, 0,
       (MAIN_CHOICE_LABEL_WIDTH << 10) / (D_800FE33C + MAIN_CHOICE_LABEL_WIDTH),
       (MAIN_CHOICE_LABEL_HEIGHT << 10) /
@@ -6371,10 +6389,13 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, D_8022FE14_ovl_01[choiceIndex][0] << 2,
-          D_8022FE14_ovl_01[choiceIndex][1] << 2,
-          (D_8022FE14_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH) << 2,
-          (D_8022FE14_ovl_01[choiceIndex][1] + MAIN_CHOICE_LABEL_HEIGHT) << 2,
+      gSPScisTextureRectangle(gfx++,
+          QuarterPixels(D_8022FE14_ovl_01[choiceIndex][0]),
+          QuarterPixels(D_8022FE14_ovl_01[choiceIndex][1]),
+          QuarterPixels(
+              D_8022FE14_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH),
+          QuarterPixels(
+              D_8022FE14_ovl_01[choiceIndex][1] + MAIN_CHOICE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -6396,14 +6417,12 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      (D_8022FE14_ovl_01[choiceIndex][0] - (D_800FE33C / 2)) << 2,
-      (D_8022FE14_ovl_01[choiceIndex][1] - (D_800FE33C / 2)) << 2,
-      (D_8022FE14_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH +
-          (D_800FE33C / 2))
-          << 2,
-      (D_8022FE14_ovl_01[choiceIndex][1] +
-          (MAIN_CHOICE_LABEL_HEIGHT + (D_800FE33C / 2)))
-          << 2,
+      QuarterPixels(D_8022FE14_ovl_01[choiceIndex][0] - (D_800FE33C / 2)),
+      QuarterPixels(D_8022FE14_ovl_01[choiceIndex][1] - (D_800FE33C / 2)),
+      QuarterPixels(D_8022FE14_ovl_01[choiceIndex][0] +
+          MAIN_CHOICE_LABEL_WIDTH + (D_800FE33C / 2)),
+      QuarterPixels(D_8022FE14_ovl_01[choiceIndex][1] +
+          (MAIN_CHOICE_LABEL_HEIGHT + (D_800FE33C / 2))),
       G_TX_RENDERTILE, 0, 0,
       (MAIN_CHOICE_LABEL_WIDTH << 10) / (D_800FE33C + MAIN_CHOICE_LABEL_WIDTH),
       (MAIN_CHOICE_LABEL_HEIGHT << 10) /
@@ -6452,10 +6471,11 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, D_8022FE2C_ovl_01[choiceIndex][0] << 2,
-          D_8022FE2C_ovl_01[choiceIndex][1] << 2,
-          (D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH) << 2,
-          (D_8022FE2C_ovl_01[choiceIndex][1] + ROOM_LABEL_HEIGHT) << 2,
+      gSPScisTextureRectangle(gfx++,
+          QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0]),
+          QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1]),
+          QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH),
+          QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1] + ROOM_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -6472,13 +6492,12 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      (D_8022FE2C_ovl_01[choiceIndex][0] - (D_800FE33C / 2)) << 2,
-      (D_8022FE2C_ovl_01[choiceIndex][1] - (D_800FE33C / 2)) << 2,
-      (D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH + (D_800FE33C / 2))
-          << 2,
-      (D_8022FE2C_ovl_01[choiceIndex][1] +
-          (ROOM_LABEL_HEIGHT + (D_800FE33C / 2)))
-          << 2,
+      QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0] - (D_800FE33C / 2)),
+      QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1] - (D_800FE33C / 2)),
+      QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH +
+          (D_800FE33C / 2)),
+      QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1] +
+          (ROOM_LABEL_HEIGHT + (D_800FE33C / 2))),
       G_TX_RENDERTILE, 0, 0,
       (ROOM_LABEL_WIDTH << 10) / (D_800FE33C + ROOM_LABEL_WIDTH),
       (ROOM_LABEL_HEIGHT << 10) / (D_800FE33C + ROOM_LABEL_HEIGHT));
@@ -6654,10 +6673,11 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
       MARIO_SHADOW_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
-  DrawTextureRect(&gfx, MARIO_SHADOW_LEFT << 2, MARIO_SHADOW_TOP << 2,
-      (MARIO_SHADOW_LEFT + MARIO_SHADOW_WIDTH) << 2,
-      (MARIO_SHADOW_TOP + MARIO_SHADOW_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  DrawTextureRect(&gfx, QuarterPixels(MARIO_SHADOW_LEFT),
+      QuarterPixels(MARIO_SHADOW_TOP),
+      QuarterPixels(MARIO_SHADOW_LEFT + MARIO_SHADOW_WIDTH),
+      QuarterPixels(MARIO_SHADOW_TOP + MARIO_SHADOW_HEIGHT), G_TX_RENDERTILE, 0,
+      0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -6670,11 +6690,11 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
         (stripIndex * MARIO_STRIP_HEIGHT) + (MARIO_STRIP_HEIGHT - 1), 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, MARIO_LEFT << 2,
-        (MARIO_TOP + (stripIndex * MARIO_STRIP_HEIGHT)) << 2,
-        (MARIO_LEFT + MARIO_WIDTH) << 2,
-        (MARIO_TOP + MARIO_STRIP_HEIGHT + (stripIndex * MARIO_STRIP_HEIGHT))
-            << 2,
+    DrawTextureRect(&gfx, QuarterPixels(MARIO_LEFT),
+        QuarterPixels(MARIO_TOP + (stripIndex * MARIO_STRIP_HEIGHT)),
+        QuarterPixels(MARIO_LEFT + MARIO_WIDTH),
+        QuarterPixels(
+            MARIO_TOP + MARIO_STRIP_HEIGHT + (stripIndex * MARIO_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, TexelCoordinate(stripIndex * MARIO_STRIP_HEIGHT),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
@@ -6695,20 +6715,23 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
             BANNER_SHADOW_COLOR, BANNER_SHADOW_ALPHA);
         gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
             0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-        DrawTextureRect(&gfx, VALUE_BANNER_LEFT << 2,
-            (stripTop + VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP) << 2,
-            (VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH) << 2,
-            (stripTop + VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP +
-                VALUE_BANNER_STRIP_HEIGHT)
-                << 2,
+        DrawTextureRect(&gfx, QuarterPixels(VALUE_BANNER_LEFT),
+            QuarterPixels(
+                stripTop + VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP),
+            QuarterPixels(VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH),
+            QuarterPixels(stripTop + VALUE_BANNER_OFFSET_Y +
+                BANNER_SHADOW_DROP + VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
             (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
             (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        DrawTextureRect(&gfx, (VALUE_BANNER_LEFT - CHOSEN_BANNER_SHIFT) << 2,
-            (stripTop + VALUE_BANNER_OFFSET_Y) << 2,
-            (VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH - CHOSEN_BANNER_SHIFT) << 2,
-            (stripTop + VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT) << 2,
+        DrawTextureRect(&gfx,
+            QuarterPixels(VALUE_BANNER_LEFT - CHOSEN_BANNER_SHIFT),
+            QuarterPixels(stripTop + VALUE_BANNER_OFFSET_Y),
+            QuarterPixels(
+                VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH - CHOSEN_BANNER_SHIFT),
+            QuarterPixels(
+                stripTop + VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
             (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
             (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
@@ -6719,10 +6742,11 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
             PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0);
         gDPSetPrimColor(
             gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
-        DrawTextureRect(&gfx, VALUE_BANNER_LEFT << 2,
-            (stripTop + VALUE_BANNER_OFFSET_Y) << 2,
-            (VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH) << 2,
-            (stripTop + VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT) << 2,
+        DrawTextureRect(&gfx, QuarterPixels(VALUE_BANNER_LEFT),
+            QuarterPixels(stripTop + VALUE_BANNER_OFFSET_Y),
+            QuarterPixels(VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH),
+            QuarterPixels(
+                stripTop + VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
             (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
             (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
@@ -6740,12 +6764,11 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
               (loopIndex * OPTION_LABEL_SPACING),
           G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0,
           0, 0);
-      DrawTextureRect(&gfx, OPTION_LABEL_LEFT << 2,
-          (OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)) << 2,
-          (OPTION_LABEL_LEFT + OPTION_LABEL_WIDTH) << 2,
-          (OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
-              (loopIndex * OPTION_ROW_SPACING))
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(OPTION_LABEL_LEFT),
+          QuarterPixels(OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)),
+          QuarterPixels(OPTION_LABEL_LEFT + OPTION_LABEL_WIDTH),
+          QuarterPixels(OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
+              (loopIndex * OPTION_ROW_SPACING)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
@@ -6759,12 +6782,11 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
           G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0,
           0, 0);
       gDPPipeSync(gfx++);
-      DrawTextureRect(&gfx, OPTION_LABEL_LEFT << 2,
-          (OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)) << 2,
-          (OPTION_LABEL_LEFT + OPTION_LABEL_WIDTH) << 2,
-          (OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
-              (loopIndex * OPTION_ROW_SPACING))
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(OPTION_LABEL_LEFT),
+          QuarterPixels(OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)),
+          QuarterPixels(OPTION_LABEL_LEFT + OPTION_LABEL_WIDTH),
+          QuarterPixels(OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
+              (loopIndex * OPTION_ROW_SPACING)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
@@ -6811,12 +6833,11 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
           gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
     }
 
-    DrawTextureRect(&gfx, OPTION_VALUE_LEFT << 2,
-        (OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)) << 2,
-        (OPTION_VALUE_LEFT + OPTION_LABEL_WIDTH) << 2,
-        (OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
-            (loopIndex * OPTION_ROW_SPACING))
-            << 2,
+    DrawTextureRect(&gfx, QuarterPixels(OPTION_VALUE_LEFT),
+        QuarterPixels(OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)),
+        QuarterPixels(OPTION_VALUE_LEFT + OPTION_LABEL_WIDTH),
+        QuarterPixels(OPTION_LABEL_TOP + OPTION_LABEL_HEIGHT +
+            (loopIndex * OPTION_ROW_SPACING)),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -6843,17 +6864,19 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
       }
 
       rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
-      DrawTextureRect(&gfx, (LEFT_ARROW_LEFT + shiftX) << 2,
-          (rowTop + ARROW_TOP + shiftY) << 2,
-          (LEFT_ARROW_LEFT + ARROW_SIZE + shiftX) << 2,
-          (rowTop + ARROW_TOP + ARROW_SIZE + shiftY) << 2, G_TX_RENDERTILE, 0,
-          TexelCoordinate(LEFT_ARROW_ROW), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      DrawTextureRect(&gfx, QuarterPixels(LEFT_ARROW_LEFT + shiftX),
+          QuarterPixels(rowTop + ARROW_TOP + shiftY),
+          QuarterPixels(LEFT_ARROW_LEFT + ARROW_SIZE + shiftX),
+          QuarterPixels(rowTop + ARROW_TOP + ARROW_SIZE + shiftY),
+          G_TX_RENDERTILE, 0, TexelCoordinate(LEFT_ARROW_ROW), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
-      DrawTextureRect(&gfx, (RIGHT_ARROW_LEFT + shiftX) << 2,
-          (rowTop + ARROW_TOP + shiftY) << 2,
-          (RIGHT_ARROW_LEFT + ARROW_SIZE + shiftX) << 2,
-          (rowTop + ARROW_TOP + ARROW_SIZE + shiftY) << 2, G_TX_RENDERTILE, 0,
-          TexelCoordinate(RIGHT_ARROW_ROW), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      DrawTextureRect(&gfx, QuarterPixels(RIGHT_ARROW_LEFT + shiftX),
+          QuarterPixels(rowTop + ARROW_TOP + shiftY),
+          QuarterPixels(RIGHT_ARROW_LEFT + ARROW_SIZE + shiftX),
+          QuarterPixels(rowTop + ARROW_TOP + ARROW_SIZE + shiftY),
+          G_TX_RENDERTILE, 0, TexelCoordinate(RIGHT_ARROW_ROW), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
 
@@ -7018,9 +7041,10 @@ void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y) {
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gSPScisTextureRectangle(gfx++, x << 2, y << 2, (x + ANIMATED_ICON_SIZE) << 2,
-      (y + ANIMATED_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  gSPScisTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+      QuarterPixels(x + ANIMATED_ICON_SIZE),
+      QuarterPixels(y + ANIMATED_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   D_8022F8CD_ovl_01++;
   if (D_8022F8CD_ovl_01 == ANIMATED_ICON_FRAME_DURATION) {
@@ -7075,11 +7099,12 @@ void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
     }
 
     gSPScisTextureRectangle(gfx++,
-        (left + starIndex * STAR_WIDTH - (growWidth / 2)) << 2,
-        (top - (growHeight / 2)) << 2,
-        (left + starIndex * STAR_WIDTH + (growWidth / 2) + STAR_WIDTH) << 2,
-        (top + (growHeight / 2) + STAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        (STAR_WIDTH << 10) / (growWidth + STAR_WIDTH),
+        QuarterPixels(left + starIndex * STAR_WIDTH - (growWidth / 2)),
+        QuarterPixels(top - (growHeight / 2)),
+        QuarterPixels(
+            left + starIndex * STAR_WIDTH + (growWidth / 2) + STAR_WIDTH),
+        QuarterPixels(top + (growHeight / 2) + STAR_HEIGHT), G_TX_RENDERTILE, 0,
+        0, (STAR_WIDTH << 10) / (growWidth + STAR_WIDTH),
         (STAR_HEIGHT << 10) / (growHeight + STAR_HEIGHT));
     gDPPipeSync(gfx++);
   }
@@ -7171,11 +7196,11 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
 
     /* A hole without its star draws from the silver star's tile */
     tile = save->hasRingShotStar[D_801323A0.courseIndex][holeIndex] == FALSE;
-    gSPScisTextureRectangle(gfx++, (left - (growWidth / 2)) << 2,
-        (top - (growHeight / 2)) << 2,
-        (left + RING_SHOT_STAR_WIDTH + (growWidth / 2)) << 2,
-        (top + RING_SHOT_STAR_HEIGHT + (growHeight / 2)) << 2, tile, 0, 0,
-        (RING_SHOT_STAR_WIDTH << 10) / (growWidth + RING_SHOT_STAR_WIDTH),
+    gSPScisTextureRectangle(gfx++, QuarterPixels(left - (growWidth / 2)),
+        QuarterPixels(top - (growHeight / 2)),
+        QuarterPixels(left + RING_SHOT_STAR_WIDTH + (growWidth / 2)),
+        QuarterPixels(top + RING_SHOT_STAR_HEIGHT + (growHeight / 2)), tile, 0,
+        0, (RING_SHOT_STAR_WIDTH << 10) / (growWidth + RING_SHOT_STAR_WIDTH),
         (RING_SHOT_STAR_HEIGHT << 10) / (growHeight + RING_SHOT_STAR_HEIGHT));
     gDPPipeSync(gfx++);
   }
@@ -7227,9 +7252,10 @@ void func_80208F8C_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, left << 2,
-        (top + (stripIndex * TOAD_STRIP_HEIGHT)) << 2, (left + TOAD_WIDTH) << 2,
-        (top + (stripIndex * TOAD_STRIP_HEIGHT) + rowCount) << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(left),
+        QuarterPixels(top + (stripIndex * TOAD_STRIP_HEIGHT)),
+        QuarterPixels(left + TOAD_WIDTH),
+        QuarterPixels(top + (stripIndex * TOAD_STRIP_HEIGHT) + rowCount),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }

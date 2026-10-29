@@ -441,9 +441,10 @@ void DrawWipe(Gfx** displayListHead) {
   if (shapeSize < WIPE_SMALLEST_SHAPE) {
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-    gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, SCREEN_BORDER << 2,
-        (SCREEN_WIDTH - SCREEN_BORDER) << 2,
-        (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, 0, 0,
+    gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER),
+        QuarterPixels(SCREEN_HEIGHT - SCREEN_BORDER), G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   } else {
@@ -454,10 +455,12 @@ void DrawWipe(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, WIPE_SQUARE_LEFT << 2, WIPE_SQUARE_TOP << 2,
-        (WIPE_SQUARE_LEFT + WIPE_SQUARE_SIZE) << 2,
-        (WIPE_SQUARE_TOP + WIPE_SQUARE_SIZE) << 2, G_TX_RENDERTILE, texelOffset,
-        texelOffset, WIPE_SHAPE_TEXELS * TEXEL_STEP_ONE / (f32)shapeSize,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(WIPE_SQUARE_LEFT),
+        QuarterPixels(WIPE_SQUARE_TOP),
+        QuarterPixels(WIPE_SQUARE_LEFT + WIPE_SQUARE_SIZE),
+        QuarterPixels(WIPE_SQUARE_TOP + WIPE_SQUARE_SIZE), G_TX_RENDERTILE,
+        texelOffset, texelOffset,
+        WIPE_SHAPE_TEXELS * TEXEL_STEP_ONE / (f32)shapeSize,
         WIPE_SHAPE_TEXELS * TEXEL_STEP_ONE / (f32)shapeSize);
     gDPPipeSync(gfx++);
   }
@@ -529,9 +532,10 @@ void DrawScreenFade(Gfx** displayListHead) {
         g_ScreenFadeBlue, alpha);
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPPipeSync(gfx++);
-    gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, SCREEN_BORDER << 2,
-        (SCREEN_WIDTH - SCREEN_BORDER) << 2,
-        (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, 0, 0,
+    gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER),
+        QuarterPixels(SCREEN_HEIGHT - SCREEN_BORDER), G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     g_ScreenFadeFramesLeft--;
@@ -701,11 +705,12 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     texelOffset += PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2;
-    DrawTextureRect(&gfx, (PROMPT_CENTER_X - halfWidth) << 2,
-        (PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight) - halfHeight) << 2,
-        (PROMPT_CENTER_X + halfWidth) << 2,
-        (PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight)) << 2, G_TX_RENDERTILE, 0,
-        0, PROMPT_CLOUD_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+    DrawTextureRect(&gfx, QuarterPixels(PROMPT_CENTER_X - halfWidth),
+        QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight) - halfHeight),
+        QuarterPixels(PROMPT_CENTER_X + halfWidth),
+        QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight)),
+        G_TX_RENDERTILE, 0, 0,
+        PROMPT_CLOUD_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         PROMPT_CLOUD_HALF_TEXELS * TEXEL_STEP_ONE / halfHeight);
     half++;
   } while (half != 2);
@@ -734,10 +739,10 @@ void DrawPrompt(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, (YES_CENTER_X - halfWidth) << 2,
-        ((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight) << 2,
-        (YES_CENTER_X + halfWidth) << 2,
-        ((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight) << 2,
+    DrawTextureRect(&gfx, QuarterPixels(YES_CENTER_X - halfWidth),
+        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
+        QuarterPixels(YES_CENTER_X + halfWidth),
+        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight),
         G_TX_RENDERTILE, 0, 0,
         CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
@@ -755,10 +760,10 @@ void DrawPrompt(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, (NO_CENTER_X - halfWidth) << 2,
-        ((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight) << 2,
-        (NO_CENTER_X + halfWidth) << 2,
-        ((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight) << 2,
+    DrawTextureRect(&gfx, QuarterPixels(NO_CENTER_X - halfWidth),
+        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
+        QuarterPixels(NO_CENTER_X + halfWidth),
+        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight),
         G_TX_RENDERTILE, 0, 0,
         CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
@@ -921,10 +926,10 @@ void DrawHalfTurn(Gfx** displayListHead) {
         HALF_TURN_WIDTH - 1, stripRows - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
-    DrawTextureRect(&gfx, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS)) << 2,
-        (SCREEN_BORDER + HALF_TURN_WIDTH) << 2,
-        (SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS) + stripRows) << 2,
+    DrawTextureRect(&gfx, QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS)),
+        QuarterPixels(SCREEN_BORDER + HALF_TURN_WIDTH),
+        QuarterPixels(SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS) + stripRows),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 

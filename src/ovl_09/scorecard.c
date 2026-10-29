@@ -1114,9 +1114,9 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
     LoadTextureBlock(&gfx,
         LargeImageTexels(image) + (stripIndex * width * height), G_IM_FMT_CI,
         G_IM_SIZ_8b, width, height, 0, 0, 0, 0, 0, 0, 0);
-    DrawTextureRect(&gfx, left << 2, top << 2, (left + width) << 2,
-        (top + height) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(left), QuarterPixels(top),
+        QuarterPixels(left + width), QuarterPixels(top + height),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     top += height;
   }
 
@@ -1332,10 +1332,11 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
       LoadTextureBlock(&gfx, g_Scorecard.tableImage + texelsOffset, G_IM_FMT_CI,
           G_IM_SIZ_8b, TABLE_WIDTH, TABLE_LOAD_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
-      DrawTextureRect(&gfx, (g_Scorecard.x + TABLE_LEFT) << 2,
-          (row + g_Scorecard.y + TAB_TOP + dropY) << 2,
-          (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2,
-          (row + (g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT) + dropY) << 2,
+      DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + TABLE_LEFT),
+          QuarterPixels(row + g_Scorecard.y + TAB_TOP + dropY),
+          QuarterPixels(g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH),
+          QuarterPixels(
+              row + (g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT) + dropY),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
@@ -1354,10 +1355,11 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
         CALC_DXT(TABLE_WIDTH, G_IM_SIZ_8b_BYTES));
     top = g_Scorecard.y + TABLE_BODY_TOP;
     texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
-    DrawTextureRect(&gfx, (g_Scorecard.x + TABLE_LEFT) << 2, (row + top) << 2,
-        (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2,
-        (row + loadHeight + top) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + TABLE_LEFT),
+        QuarterPixels(row + top),
+        QuarterPixels(g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH),
+        QuarterPixels(row + loadHeight + top), G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPPipeSync(gfx++);

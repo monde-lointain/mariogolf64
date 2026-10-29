@@ -188,28 +188,32 @@ void DrawShotLabels(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     switch (corner) {
       case CORNER_LOWER_RIGHT:
-        gSPScisTextureRectangle(gfx++, (x - LEADER_LINE_FAR_X) << 2,
-            (y - LEADER_LINE_FAR_Y) << 2, (x - LEADER_LINE_NEAR_X) << 2,
-            (y - LEADER_LINE_NEAR_Y) << 2, G_TX_RENDERTILE, 0, 0,
+        gSPScisTextureRectangle(gfx++, QuarterPixels(x - LEADER_LINE_FAR_X),
+            QuarterPixels(y - LEADER_LINE_FAR_Y),
+            QuarterPixels(x - LEADER_LINE_NEAR_X),
+            QuarterPixels(y - LEADER_LINE_NEAR_Y), G_TX_RENDERTILE, 0, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         break;
       case CORNER_LOWER_LEFT:
-        gSPScisTextureRectangle(gfx++, (x + LEADER_LINE_NEAR_X) << 2,
-            (y - LEADER_LINE_FAR_Y) << 2, (x + LEADER_LINE_FAR_X) << 2,
-            (y - LEADER_LINE_NEAR_Y) << 2, G_TX_RENDERTILE,
+        gSPScisTextureRectangle(gfx++, QuarterPixels(x + LEADER_LINE_NEAR_X),
+            QuarterPixels(y - LEADER_LINE_FAR_Y),
+            QuarterPixels(x + LEADER_LINE_FAR_X),
+            QuarterPixels(y - LEADER_LINE_NEAR_Y), G_TX_RENDERTILE,
             TexelCoordinate(TAG_WIDTH), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         break;
       case CORNER_UPPER_LEFT:
-        gSPScisTextureRectangle(gfx++, (x + LEADER_LINE_NEAR_X) << 2,
-            (y + LEADER_LINE_NEAR_Y) << 2, (x + LEADER_LINE_FAR_X) << 2,
-            (y + LEADER_LINE_FAR_Y) << 2, G_TX_RENDERTILE,
+        gSPScisTextureRectangle(gfx++, QuarterPixels(x + LEADER_LINE_NEAR_X),
+            QuarterPixels(y + LEADER_LINE_NEAR_Y),
+            QuarterPixels(x + LEADER_LINE_FAR_X),
+            QuarterPixels(y + LEADER_LINE_FAR_Y), G_TX_RENDERTILE,
             TexelCoordinate(TAG_WIDTH), TexelCoordinate(TAG_HEIGHT),
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         break;
       case CORNER_UPPER_RIGHT:
-        gSPScisTextureRectangle(gfx++, (x - LEADER_LINE_FAR_X) << 2,
-            (y + LEADER_LINE_NEAR_Y) << 2, (x - LEADER_LINE_NEAR_X) << 2,
-            (y + LEADER_LINE_FAR_Y) << 2, G_TX_RENDERTILE, 0,
+        gSPScisTextureRectangle(gfx++, QuarterPixels(x - LEADER_LINE_FAR_X),
+            QuarterPixels(y + LEADER_LINE_NEAR_Y),
+            QuarterPixels(x - LEADER_LINE_NEAR_X),
+            QuarterPixels(y + LEADER_LINE_FAR_Y), G_TX_RENDERTILE, 0,
             TexelCoordinate(TAG_HEIGHT), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         break;
     }
@@ -226,10 +230,10 @@ void DrawShotLabels(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (x - TAG_WIDTH / 2) << 2,
-        (y - TAG_HEIGHT / 2) << 2, (x + TAG_WIDTH / 2) << 2,
-        (y + TAG_HEIGHT / 2) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(x - TAG_WIDTH / 2),
+        QuarterPixels(y - TAG_HEIGHT / 2), QuarterPixels(x + TAG_WIDTH / 2),
+        QuarterPixels(y + TAG_HEIGHT / 2), G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -586,19 +590,21 @@ OPAQUE:
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, alpha);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(g_DisplayListHead++,
-          (point.x - (SIGN_WIDTH / 2)) << 2, (point.y - SIGN_HEIGHT) << 2,
-          (point.x + (SIGN_WIDTH / 2)) << 2,
-          (point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          QuarterPixels(point.x - (SIGN_WIDTH / 2)),
+          QuarterPixels(point.y - SIGN_HEIGHT),
+          QuarterPixels(point.x + (SIGN_WIDTH / 2)),
+          QuarterPixels(point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT),
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       /* The post is drawn opaque */
       gDPPipeSync(g_DisplayListHead++);
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(g_DisplayListHead++,
-          (point.x - (SIGN_WIDTH / 2)) << 2,
-          (point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT) << 2,
-          (point.x + (SIGN_WIDTH / 2)) << 2, point.y << 2, G_TX_RENDERTILE, 0,
-          TexelCoordinate(SIGN_BOARD_HEIGHT), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          QuarterPixels(point.x - (SIGN_WIDTH / 2)),
+          QuarterPixels(point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT),
+          QuarterPixels(point.x + (SIGN_WIDTH / 2)), QuarterPixels(point.y),
+          G_TX_RENDERTILE, 0, TexelCoordinate(SIGN_BOARD_HEIGHT),
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(g_DisplayListHead++);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
@@ -795,9 +801,10 @@ OPAQUE:
           }
 
           gSPScisTextureRectangle(g_DisplayListHead++,
-              (point.x - PIN_FLAG_LEFT) << 2,
-              (point.y - PIN_FLAG_IMAGE_HEIGHT) << 2,
-              (point.x + PIN_FLAG_RIGHT) << 2, point.y << 2, G_TX_RENDERTILE,
+              QuarterPixels(point.x - PIN_FLAG_LEFT),
+              QuarterPixels(point.y - PIN_FLAG_IMAGE_HEIGHT),
+              QuarterPixels(point.x + PIN_FLAG_RIGHT), QuarterPixels(point.y),
+              G_TX_RENDERTILE,
               TexelCoordinate(f_PinFlagWaveFrame / PIN_FLAG_WAVE_TICKS *
                   PIN_FLAG_FRAME_WIDTH),
               0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);

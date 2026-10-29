@@ -1005,9 +1005,9 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   while (*c != '\0') {
     ch = *c;
     if (ch != ' ') {
-      gSPScisTextureRectangle(gfx++, (x + offset) << 2, y << 2,
-          (x + offset + DISTANCE_DIGIT_WIDTH) << 2,
-          (y + DISTANCE_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(x + offset),
+          QuarterPixels(y), QuarterPixels(x + offset + DISTANCE_DIGIT_WIDTH),
+          QuarterPixels(y + DISTANCE_GLYPH_HEIGHT), G_TX_RENDERTILE,
           TexelCoordinate((ch - '0') * DISTANCE_DIGIT_WIDTH), 0, TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
       /* The empty do-while is there to match */
@@ -1034,8 +1034,8 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
         ((glyph) * PLACE_GLYPH_SIZE) + PLACE_GLYPH_SIZE - 1, 0, \
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
-    gSPScisTextureRectangle(gfx++, (x) << 2, (y) << 2, \
-        ((x) + PLACE_GLYPH_SIZE) << 2, ((y) + PLACE_GLYPH_SIZE) << 2, \
+    gSPScisTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y), \
+        ((x) + PLACE_GLYPH_SIZE) << 2, QuarterPixels((y) + PLACE_GLYPH_SIZE), \
         G_TX_RENDERTILE, 0, TexelCoordinate((glyph) * PLACE_GLYPH_SIZE), \
         TEXEL_STEP_ONE, TEXEL_STEP_ONE); \
   }
@@ -3270,26 +3270,26 @@ void DrawMatchResults(Gfx** displayListHead) {
 
     if (f_HasBets) {
       DrawTextureRect(&gfx,
-          (standingShift[i] + BETTING_MATCH_STANDING_X + f_ResultsSlide) << 2,
-          (f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)) << 2,
-          (standingShift[i] + BETTING_MATCH_STANDING_X + STANDING_WORD_WIDTH +
-              f_ResultsSlide)
-              << 2,
-          (f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT) +
-              STANDING_WORD_HEIGHT)
-              << 2,
+          QuarterPixels(
+              standingShift[i] + BETTING_MATCH_STANDING_X + f_ResultsSlide),
+          QuarterPixels(
+              f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
+          QuarterPixels(standingShift[i] + BETTING_MATCH_STANDING_X +
+              STANDING_WORD_WIDTH + f_ResultsSlide),
+          QuarterPixels(f_ResultsTop + MATCH_STANDING_Y +
+              (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT),
           G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
     } else {
       DrawTextureRect(&gfx,
-          (standingShift[i] + PLAIN_MATCH_STANDING_X + f_ResultsSlide) << 2,
-          (f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)) << 2,
-          (standingShift[i] + PLAIN_MATCH_STANDING_X + STANDING_WORD_WIDTH +
-              f_ResultsSlide)
-              << 2,
-          (f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT) +
-              STANDING_WORD_HEIGHT)
-              << 2,
+          QuarterPixels(
+              standingShift[i] + PLAIN_MATCH_STANDING_X + f_ResultsSlide),
+          QuarterPixels(
+              f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
+          QuarterPixels(standingShift[i] + PLAIN_MATCH_STANDING_X +
+              STANDING_WORD_WIDTH + f_ResultsSlide),
+          QuarterPixels(f_ResultsTop + MATCH_STANDING_Y +
+              (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT),
           G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
     }

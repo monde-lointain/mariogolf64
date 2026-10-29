@@ -688,11 +688,12 @@ void DrawPlanks(Gfx** displayListHead) {
     top = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT)) << 2;
     bottom = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT) + stripHeight)
         << 2;
-    DrawTextureRect(&gfx, SCREEN_BORDER << 2, top, slide << 2, bottom,
-        G_TX_RENDERTILE, TexelCoordinate(PLANKS_MIDDLE - slide),
-        TexelCoordinate(1), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    DrawTextureRect(&gfx, (SCREEN_WIDTH - slide) << 2, top,
-        (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom, G_TX_RENDERTILE,
+    DrawTextureRect(&gfx, QuarterPixels(SCREEN_BORDER), top,
+        QuarterPixels(slide), bottom, G_TX_RENDERTILE,
+        TexelCoordinate(PLANKS_MIDDLE - slide), TexelCoordinate(1),
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(SCREEN_WIDTH - slide), top,
+        QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER), bottom, G_TX_RENDERTILE,
         TexelCoordinate(PLANKS_WIDTH / 2), TexelCoordinate(1), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
   }
@@ -729,14 +730,13 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       gDPPipeSync(gfx++);
-      DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-          ((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) + f_SlideOffset +
-              RING_SHOT_COURSE_IMAGE_TOP)
-              << 2,
-          (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-          ((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) + f_SlideOffset +
-              RING_SHOT_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(COURSE_IMAGE_LEFT),
+          QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
+              f_SlideOffset + RING_SHOT_COURSE_IMAGE_TOP),
+          QuarterPixels(COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH),
+          QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
+              f_SlideOffset + RING_SHOT_COURSE_IMAGE_TOP +
+              COURSE_IMAGE_STRIP_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -758,16 +758,20 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-      DrawTextureRect(&gfx, ARROW_LEFT << 2,
-          (f_PressedDirection == DIRECTION_UP ? push + 128 : push + 132) << 2,
-          (ARROW_LEFT + ARROW_SIZE) << 2,
-          (f_PressedDirection == DIRECTION_UP ? push + 144 : push + 148) << 2,
+      DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
+          QuarterPixels(
+              f_PressedDirection == DIRECTION_UP ? push + 128 : push + 132),
+          QuarterPixels(ARROW_LEFT + ARROW_SIZE),
+          QuarterPixels(
+              f_PressedDirection == DIRECTION_UP ? push + 144 : push + 148),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-      DrawTextureRect(&gfx, ARROW_LEFT << 2,
-          (f_PressedDirection == DIRECTION_DOWN ? push + 208 : push + 204) << 2,
-          (ARROW_LEFT + ARROW_SIZE) << 2,
-          (f_PressedDirection == DIRECTION_DOWN ? push + 224 : push + 220) << 2,
+      DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
+          QuarterPixels(
+              f_PressedDirection == DIRECTION_DOWN ? push + 208 : push + 204),
+          QuarterPixels(ARROW_LEFT + ARROW_SIZE),
+          QuarterPixels(
+              f_PressedDirection == DIRECTION_DOWN ? push + 224 : push + 220),
           G_TX_RENDERTILE, 0, TexelCoordinate(ARROW_SIZE), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -826,14 +830,12 @@ void DrawHoleSelect(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      DrawTextureRect(&gfx, HOLE_SIGN_LEFT << 2,
-          ((stripIndex * HOLE_SIGN_STRIP_HEIGHT) -
-              (f_SlideOffset - HOLE_SIGN_TOP))
-              << 2,
-          (HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH) << 2,
-          ((stripIndex * HOLE_SIGN_STRIP_HEIGHT) -
-              (f_SlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT)))
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(HOLE_SIGN_LEFT),
+          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) -
+              (f_SlideOffset - HOLE_SIGN_TOP)),
+          QuarterPixels(HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH),
+          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) -
+              (f_SlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT))),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -846,14 +848,13 @@ void DrawHoleSelect(Gfx** displayListHead) {
           G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       gDPPipeSync(gfx++);
-      DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-          ((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) + f_SlideOffset +
-              HOLE_COURSE_IMAGE_TOP)
-              << 2,
-          (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-          ((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) + f_SlideOffset +
-              HOLE_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(COURSE_IMAGE_LEFT),
+          QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
+              f_SlideOffset + HOLE_COURSE_IMAGE_TOP),
+          QuarterPixels(COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH),
+          QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
+              f_SlideOffset + HOLE_COURSE_IMAGE_TOP +
+              COURSE_IMAGE_STRIP_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -874,44 +875,40 @@ void DrawHoleSelect(Gfx** displayListHead) {
         G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
     push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-    DrawTextureRect(&gfx, ARROW_LEFT << 2,
-        (f_PressedDirection != DIRECTION_UP
+    DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
+        QuarterPixels(f_PressedDirection != DIRECTION_UP
                 ? push + 140 + f_SlideOffset
-                : push + 140 + f_SlideOffset - ARROW_STEP)
-            << 2,
-        (ARROW_LEFT + ARROW_SIZE) << 2,
-        (f_PressedDirection != DIRECTION_UP
+                : push + 140 + f_SlideOffset - ARROW_STEP),
+        QuarterPixels(ARROW_LEFT + ARROW_SIZE),
+        QuarterPixels(f_PressedDirection != DIRECTION_UP
                 ? push + 156 + f_SlideOffset
-                : push + 156 + f_SlideOffset - ARROW_STEP)
-            << 2,
+                : push + 156 + f_SlideOffset - ARROW_STEP),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-    DrawTextureRect(&gfx, ARROW_LEFT << 2,
-        (f_PressedDirection != DIRECTION_DOWN
+    DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
+        QuarterPixels(f_PressedDirection != DIRECTION_DOWN
                 ? push + 212 + f_SlideOffset
-                : push + 212 + f_SlideOffset + ARROW_STEP)
-            << 2,
-        (ARROW_LEFT + ARROW_SIZE) << 2,
-        (f_PressedDirection != DIRECTION_DOWN
+                : push + 212 + f_SlideOffset + ARROW_STEP),
+        QuarterPixels(ARROW_LEFT + ARROW_SIZE),
+        QuarterPixels(f_PressedDirection != DIRECTION_DOWN
                 ? push + 228 + f_SlideOffset
-                : push + 228 + f_SlideOffset + ARROW_STEP)
-            << 2,
+                : push + 228 + f_SlideOffset + ARROW_STEP),
         G_TX_RENDERTILE, 0, TexelCoordinate(ARROW_SIZE), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     if (!IsOnDrivingRange()) {
       DrawTextureRect(&gfx,
-          (f_PressedDirection == DIRECTION_LEFT ? 100 : 104) << 2,
-          (44 - f_SlideOffset) << 2,
-          (f_PressedDirection == DIRECTION_LEFT ? 116 : 120) << 2,
-          (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0,
+          QuarterPixels(f_PressedDirection == DIRECTION_LEFT ? 100 : 104),
+          QuarterPixels(44 - f_SlideOffset),
+          QuarterPixels(f_PressedDirection == DIRECTION_LEFT ? 116 : 120),
+          QuarterPixels(60 - f_SlideOffset), G_TX_RENDERTILE, 0,
           TexelCoordinate(3 * ARROW_SIZE), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx,
-          (f_PressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2,
-          (44 - f_SlideOffset) << 2,
-          (f_PressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2,
-          (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0,
+          QuarterPixels(f_PressedDirection == DIRECTION_RIGHT ? 204 : 200),
+          QuarterPixels(44 - f_SlideOffset),
+          QuarterPixels(f_PressedDirection == DIRECTION_RIGHT ? 220 : 216),
+          QuarterPixels(60 - f_SlideOffset), G_TX_RENDERTILE, 0,
           TexelCoordinate(2 * ARROW_SIZE), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -963,9 +960,10 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
         G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
-    DrawTextureRect(&gfx, (centerX - NAME_PLATE_HALF_WIDTH) << 2,
-        (top - 15) << 2, (centerX + NAME_PLATE_HALF_WIDTH) << 2, (top - 5) << 2,
-        G_TX_RENDERTILE, 0, 0, NAME_PLATE_TEXEL_STEP, TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(centerX - NAME_PLATE_HALF_WIDTH),
+        QuarterPixels(top - 15), QuarterPixels(centerX + NAME_PLATE_HALF_WIDTH),
+        QuarterPixels(top - 5), G_TX_RENDERTILE, 0, 0, NAME_PLATE_TEXEL_STEP,
+        TEXEL_STEP_ONE);
     top += NAME_PLATE_STRIP_HEIGHT;
     gDPPipeSync(gfx++);
   }
@@ -1051,9 +1049,10 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
           : TILE_STILL_STAR;
     }
 
-    DrawTextureRect(&gfx, (left - (width / 2)) << 2,
-        (STARS_TOP - (height / 2)) << 2, (left + (width / 2) + STAR_WIDTH) << 2,
-        ((height / 2) + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
+    DrawTextureRect(&gfx, QuarterPixels(left - (width / 2)),
+        QuarterPixels(STARS_TOP - (height / 2)),
+        QuarterPixels(left + (width / 2) + STAR_WIDTH),
+        QuarterPixels((height / 2) + STAR_HEIGHT + STARS_TOP), tile, 0, 0,
         (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
         (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);

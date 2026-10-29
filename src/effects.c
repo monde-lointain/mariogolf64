@@ -1835,16 +1835,18 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
 
       /* Odd frames of a tear draw the droplet mirrored */
       if (effect->kind == EFFECT_KIND_TEAR) {
-        gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2,
-            (center.y - halfSize) << 2, (center.x + halfSize) << 2,
-            (center.y + halfSize) << 2, G_TX_RENDERTILE,
+        gSPScisTextureRectangle(gfx++, QuarterPixels(center.x - halfSize),
+            QuarterPixels(center.y - halfSize),
+            QuarterPixels(center.x + halfSize),
+            QuarterPixels(center.y + halfSize), G_TX_RENDERTILE,
             (effect->unk3B & 1) << TEAR_MIRROR_S_SHIFT, 0, textureStep,
             textureStep);
       } else {
-        gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2,
-            (center.y - halfSize) << 2, (center.x + halfSize) << 2,
-            (center.y + halfSize) << 2, G_TX_RENDERTILE, 0, 0, textureStep,
-            textureStep);
+        gSPScisTextureRectangle(gfx++, QuarterPixels(center.x - halfSize),
+            QuarterPixels(center.y - halfSize),
+            QuarterPixels(center.x + halfSize),
+            QuarterPixels(center.y + halfSize), G_TX_RENDERTILE, 0, 0,
+            textureStep, textureStep);
       }
 
       gDPPipeSync(gfx++);
@@ -1876,9 +1878,10 @@ void DrawEffectShadow(Gfx** displayListHead, Effect* effect) {
       gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
       gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, SHADOW_ALPHA);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, (shadow.x - 1) << 2, (shadow.y - 1) << 2,
-          (shadow.x + 1) << 2, (shadow.y + 1) << 2, G_TX_RENDERTILE, 0, 0,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPScisTextureRectangle(gfx++, QuarterPixels(shadow.x - 1),
+          QuarterPixels(shadow.y - 1), QuarterPixels(shadow.x + 1),
+          QuarterPixels(shadow.y + 1), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
   }
@@ -1973,10 +1976,11 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
           G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP,
           G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2,
-          (center.y - halfSize) << 2, (center.x + halfSize) << 2,
-          (center.y + halfSize) << 2, G_TX_RENDERTILE, 0, 0, textureStep,
-          textureStep);
+      gSPScisTextureRectangle(gfx++, QuarterPixels(center.x - halfSize),
+          QuarterPixels(center.y - halfSize),
+          QuarterPixels(center.x + halfSize),
+          QuarterPixels(center.y + halfSize), G_TX_RENDERTILE, 0, 0,
+          textureStep, textureStep);
       gDPPipeSync(gfx++);
     }
   }
@@ -2641,10 +2645,11 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
             ImageTexelsAt(f_CloudImage, spinFrame * BADGE_FRAME_SIZE)),
         G_IM_FMT_CI, BADGE_SIZE, BADGE_SIZE, 0, 0, BADGE_SIZE - 1,
         BADGE_SIZE - 1, 0, 0, 0, 0, 0, 0, 0);
-    DrawTextureRect(&gfx, BADGE_LEFT << 2, (offsetY + BADGE_RESTING_TOP) << 2,
-        (BADGE_LEFT + BADGE_SIZE) << 2,
-        (offsetY + BADGE_RESTING_TOP + BADGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(BADGE_LEFT),
+        QuarterPixels(offsetY + BADGE_RESTING_TOP),
+        QuarterPixels(BADGE_LEFT + BADGE_SIZE),
+        QuarterPixels(offsetY + BADGE_RESTING_TOP + BADGE_SIZE),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     LoadSmallPalette(&gfx, 0, ImageBody(f_ClumpImage));
     LoadNibbleTextureBlock(&gfx, ImageTexels(f_ClumpImage), G_IM_FMT_CI, 16,
         COUNT_GLYPHS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);

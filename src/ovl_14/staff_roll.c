@@ -1671,8 +1671,9 @@ void DrawStaffRoll(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-    gSPTextureRectangle(gfx++, 0, 0, FADE_RIGHT << 2, FADE_BOTTOM << 2,
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPTextureRectangle(gfx++, 0, 0, QuarterPixels(FADE_RIGHT),
+        QuarterPixels(FADE_BOTTOM), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -1786,10 +1787,11 @@ void DrawStaffRoll(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-          (SCREEN_BORDER + (index * IMAGE_STRIP_STEP)) << 2,
-          (SCREEN_BORDER + STAFF_ROLL_IMAGE_WIDTH) << 2,
-          (SCREEN_BORDER + (index * IMAGE_STRIP_STEP) + stripHeight) << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+          QuarterPixels(SCREEN_BORDER + (index * IMAGE_STRIP_STEP)),
+          QuarterPixels(SCREEN_BORDER + STAFF_ROLL_IMAGE_WIDTH),
+          QuarterPixels(
+              SCREEN_BORDER + (index * IMAGE_STRIP_STEP) + stripHeight),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -1863,17 +1865,20 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
       gDPPipeSync(gfx++);
       if ((u32)(character - FIRST_OVERLAID_CHARACTER) <
           OVERLAID_CHARACTER_COUNT) {
-        gSPTextureRectangle(gfx++, (left - OVERLAID_CHARACTER_SHIFT_X) << 2,
-            (top - OVERLAID_CHARACTER_SHIFT_Y) << 2,
-            (left + OVERLAID_CHARACTER_SHIFT_X) << 2,
-            (top - OVERLAID_CHARACTER_SHIFT_Y + STAFF_GLYPH_HEIGHT) << 2,
+        gSPTextureRectangle(gfx++,
+            QuarterPixels(left - OVERLAID_CHARACTER_SHIFT_X),
+            QuarterPixels(top - OVERLAID_CHARACTER_SHIFT_Y),
+            QuarterPixels(left + OVERLAID_CHARACTER_SHIFT_X),
+            QuarterPixels(
+                top - OVERLAID_CHARACTER_SHIFT_Y + STAFF_GLYPH_HEIGHT),
             G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
             TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       } else {
-        gSPTextureRectangle(gfx++, left << 2, top << 2,
-            (left + STAFF_GLYPH_WIDTH) << 2, (top + STAFF_GLYPH_HEIGHT) << 2,
-            G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
-            TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+            QuarterPixels(left + STAFF_GLYPH_WIDTH),
+            QuarterPixels(top + STAFF_GLYPH_HEIGHT), G_TX_RENDERTILE,
+            TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop),
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         left += f_StaffGlyphAdvances[character];
       }
     }
@@ -1967,10 +1972,11 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-          (SCREEN_BORDER + (stripIndex * IMAGE_STRIP_STEP)) << 2,
-          (SCREEN_BORDER + STAFF_ROLL_IMAGE_WIDTH) << 2,
-          (SCREEN_BORDER + (stripIndex * IMAGE_STRIP_STEP) + stripHeight) << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+          QuarterPixels(SCREEN_BORDER + (stripIndex * IMAGE_STRIP_STEP)),
+          QuarterPixels(SCREEN_BORDER + STAFF_ROLL_IMAGE_WIDTH),
+          QuarterPixels(
+              SCREEN_BORDER + (stripIndex * IMAGE_STRIP_STEP) + stripHeight),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }

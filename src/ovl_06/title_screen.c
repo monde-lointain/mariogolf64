@@ -398,10 +398,11 @@ void DrawTitleScreen(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT)) << 2,
-        (SCREEN_BORDER + TITLE_IMAGE_WIDTH) << 2,
-        (SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT) + stripHeight) << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT)),
+        QuarterPixels(SCREEN_BORDER + TITLE_IMAGE_WIDTH),
+        QuarterPixels(
+            SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT) + stripHeight),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -421,10 +422,11 @@ void DrawTitleScreen(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    DrawTextureRect(&gfx, PRESS_START_LEFT << 2, PRESS_START_TOP << 2,
-        (PRESS_START_LEFT + PRESS_START_WIDTH) << 2,
-        (PRESS_START_TOP + PRESS_START_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(PRESS_START_LEFT),
+        QuarterPixels(PRESS_START_TOP),
+        QuarterPixels(PRESS_START_LEFT + PRESS_START_WIDTH),
+        QuarterPixels(PRESS_START_TOP + PRESS_START_HEIGHT), G_TX_RENDERTILE, 0,
+        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   *displayListHead = gfx;

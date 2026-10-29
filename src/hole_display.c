@@ -1819,10 +1819,12 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
             G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
-            ((s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1) << 2,
-            ((s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1) << 2,
-            ((s32)f_SunScreenX[cameraIndex] + colors->sun->radius) << 2,
-            ((s32)f_SunScreenY[cameraIndex] + colors->sun->radius) << 2,
+            QuarterPixels(
+                (s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1),
+            QuarterPixels(
+                (s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1),
+            QuarterPixels((s32)f_SunScreenX[cameraIndex] + colors->sun->radius),
+            QuarterPixels((s32)f_SunScreenY[cameraIndex] + colors->sun->radius),
             G_TX_RENDERTILE, 0, 0, colors->sun->texelStep,
             colors->sun->texelStep);
         gDPPipeSync(gfx++);
@@ -1842,10 +1844,12 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
             colors->sun->envColor[1], colors->sun->envColor[2], 255);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
-            ((s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1) << 2,
-            ((s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1) << 2,
-            ((s32)f_SunScreenX[cameraIndex] + colors->sun->radius) << 2,
-            ((s32)f_SunScreenY[cameraIndex] + colors->sun->radius) << 2,
+            QuarterPixels(
+                (s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1),
+            QuarterPixels(
+                (s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1),
+            QuarterPixels((s32)f_SunScreenX[cameraIndex] + colors->sun->radius),
+            QuarterPixels((s32)f_SunScreenY[cameraIndex] + colors->sun->radius),
             G_TX_RENDERTILE, 0, 0, colors->sun->texelStep,
             colors->sun->texelStep);
         gDPPipeSync(gfx++);
@@ -1999,18 +2003,19 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
           bottom = SCREEN_HEIGHT - SCREEN_BORDER;
         }
 
-        gSPTextureRectangle(gfx++, SCREEN_BORDER << 2,
-            (SCREEN_BORDER + clip + y) << 2,
-            (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2, bottom << 2,
-            G_TX_RENDERTILE, yawOffset, TexelCoordinate(clip),
-            COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
+        gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+            QuarterPixels(SCREEN_BORDER + clip + y),
+            QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
+            QuarterPixels(bottom), G_TX_RENDERTILE, yawOffset,
+            TexelCoordinate(clip), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
       } else {
         /* The last strip stretches to the bottom of the screen */
-        gSPTextureRectangle(gfx++, SCREEN_BORDER << 2,
-            (SCREEN_BORDER + clip + y) << 2,
-            (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
-            (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, yawOffset,
-            TexelCoordinate(clip), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
+        gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+            QuarterPixels(SCREEN_BORDER + clip + y),
+            QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
+            QuarterPixels(SCREEN_HEIGHT - SCREEN_BORDER), G_TX_RENDERTILE,
+            yawOffset, TexelCoordinate(clip), COPY_MODE_TEXEL_STEP,
+            TEXEL_STEP_ONE);
         break;
       }
     }
@@ -2090,9 +2095,11 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         bottom = view->scissorY + view->scissorHeight;
       }
 
-      gSPTextureRectangle(gfx++, view->scissorX << 2, top << 2,
-          (view->scissorX + view->scissorWidth) << 2, bottom << 2,
-          G_TX_RENDERTILE, textureX, 0, texelStepX, texelStepY);
+      gSPTextureRectangle(gfx++, QuarterPixels(view->scissorX),
+          QuarterPixels(top),
+          QuarterPixels(view->scissorX + view->scissorWidth),
+          QuarterPixels(bottom), G_TX_RENDERTILE, textureX, 0, texelStepX,
+          texelStepY);
       if (bottom == view->scissorY + view->scissorHeight) {
         break;
       }
@@ -2262,10 +2269,11 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-          gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2,
-              (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
-              (BACKDROP_RIGHT + 1) << 2,
-              (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
+              QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+              QuarterPixels(BACKDROP_RIGHT + 1),
+              QuarterPixels(
+                  strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
               G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
               TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
@@ -2288,18 +2296,20 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               &frame[strip * BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW],
               height, isTileSet);
           gDPPipeSync(gfx++);
-          gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2,
-              (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
-              f_HudAnimationFramesLeft << 2,
-              (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
+              QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+              QuarterPixels(f_HudAnimationFramesLeft),
+              QuarterPixels(
+                  strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
               G_TX_RENDERTILE,
               TexelCoordinate((SCREEN_WIDTH / 2) - f_HudAnimationFramesLeft), 0,
               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gSPScisTextureRectangle(gfx++,
-              (SCREEN_WIDTH - f_HudAnimationFramesLeft) << 2,
-              (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
-              (BACKDROP_RIGHT + 1) << 2,
-              (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
+              QuarterPixels(SCREEN_WIDTH - f_HudAnimationFramesLeft),
+              QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+              QuarterPixels(BACKDROP_RIGHT + 1),
+              QuarterPixels(
+                  strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
               G_TX_RENDERTILE, TexelCoordinate(FADE_FRAME_WIDTH / 2), 0,
               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
@@ -2319,9 +2329,10 @@ void DrawFadeAnimation(Gfx** displayListHead) {
           ? BACKDROP_STRIP_HEIGHT
           : BACKDROP_LAST_STRIP_HEIGHT;
       LoadFadeFrameStrip(gfx, frame, height, isTileSet);
-      gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, row << 2,
-          (BACKDROP_RIGHT + 1) << 2, (row + height) << 2, G_TX_RENDERTILE, 0, 0,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
+          QuarterPixels(row), QuarterPixels(BACKDROP_RIGHT + 1),
+          QuarterPixels(row + height), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       frame += BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW;
     }
 
@@ -2436,14 +2447,12 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++,
-          ((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS) << 2,
-          ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS) << 2,
-          ((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS +
-              SPIRAL_TILE_WIDTH)
-              << 2,
-          ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
-              SPIRAL_TILE_HEIGHT)
-              << 2,
+          QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS),
+          QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS),
+          QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS +
+              SPIRAL_TILE_WIDTH),
+          QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
+              SPIRAL_TILE_HEIGHT),
           G_TX_RENDERTILE, TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
           TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
@@ -2473,14 +2482,12 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
           SPIRAL_OPAQUE_ALPHA, alpha);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++,
-          ((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS) << 2,
-          ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS) << 2,
-          ((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS +
-              SPIRAL_TILE_WIDTH)
-              << 2,
-          ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
-              SPIRAL_TILE_HEIGHT)
-              << 2,
+          QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS),
+          QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS),
+          QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS +
+              SPIRAL_TILE_WIDTH),
+          QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
+              SPIRAL_TILE_HEIGHT),
           G_TX_RENDERTILE, TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
           TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
@@ -2554,10 +2561,11 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
           BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2,
-          (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
-          BACKDROP_RIGHT << 2,
-          (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height - 1) << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
+          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+          QuarterPixels(BACKDROP_RIGHT),
+          QuarterPixels(
+              strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height - 1),
           G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
           TexelCoordinate(BACKDROP_BORDER), COPY_MODE_TEXEL_STEP,
           TEXEL_STEP_ONE);
@@ -2620,9 +2628,10 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     gDPLoadTLUT_pal16(
         gfx++, 0, TextureAddress(ImageBody(g_BackdropPatternImage)));
     gDPPipeSync(gfx++);
-    gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, BACKDROP_BORDER << 2,
-        (SCREEN_WIDTH - BACKDROP_BORDER) << 2,
-        (SCREEN_HEIGHT - BACKDROP_BORDER) << 2, G_TX_RENDERTILE,
+    gSPTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
+        QuarterPixels(BACKDROP_BORDER),
+        QuarterPixels(SCREEN_WIDTH - BACKDROP_BORDER),
+        QuarterPixels(SCREEN_HEIGHT - BACKDROP_BORDER), G_TX_RENDERTILE,
         TexelCoordinate(f_BackdropPatternScroll),
         TexelCoordinate(f_BackdropPatternScroll), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
@@ -2651,10 +2660,10 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
           BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2,
-          (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
-          (BACKDROP_RIGHT + 1) << 2,
-          (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
+          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+          QuarterPixels(BACKDROP_RIGHT + 1),
+          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
           G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
           TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -2672,10 +2681,10 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
           BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2,
-          (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
-          (BACKDROP_RIGHT + 1) << 2,
-          (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
+          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+          QuarterPixels(BACKDROP_RIGHT + 1),
+          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
           G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
           TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -3094,9 +3103,9 @@ void DrawSliceAnimation(void) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       wordIndex += SLICE_STRIP_WORD_COUNT;
       gSPTextureRectangle(g_DisplayListHead++, column * SLICE_WIDTH << 2,
-          y << 2, (column * SLICE_WIDTH + SLICE_WIDTH) << 2,
-          (y + SLICE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+          QuarterPixels(y), QuarterPixels(column * SLICE_WIDTH + SLICE_WIDTH),
+          QuarterPixels(y + SLICE_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(g_DisplayListHead++);
       y += SLICE_STRIP_HEIGHT;
     }

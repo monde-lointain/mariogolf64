@@ -352,9 +352,10 @@ void DrawHelpBoard(Gfx** displayListHead) {
     handTop = f_HelpListLayout.top +
         ((memory->helpTopicIndex - f_FirstListedTopic) *
             f_HelpListLayout.rowSpacing);
-    gSPScisTextureRectangle(gfx++, handLeft << 2, handTop << 2,
-        (handLeft + HAND_SIZE) << 2, (handTop + HAND_SIZE) << 2,
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(handLeft),
+        QuarterPixels(handTop), QuarterPixels(handLeft + HAND_SIZE),
+        QuarterPixels(handTop + HAND_SIZE), G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     f_ArrowFrameTime++;
     if (f_ArrowFrameTime == ARROW_FRAME_TIME) {
@@ -395,9 +396,10 @@ void DrawHelpBoard(Gfx** displayListHead) {
           arrowTop = ARROW_UP_TOP;
         }
 
-        gSPScisTextureRectangle(gfx++, arrowLeft << 2, arrowTop << 2,
-            (arrowLeft + ARROW_SIZE) << 2, (arrowTop + ARROW_SIZE) << 2,
-            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPScisTextureRectangle(gfx++, QuarterPixels(arrowLeft),
+            QuarterPixels(arrowTop), QuarterPixels(arrowLeft + ARROW_SIZE),
+            QuarterPixels(arrowTop + ARROW_SIZE), G_TX_RENDERTILE, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
     }
@@ -453,8 +455,9 @@ void DrawUnusedHelpBoardImage(Gfx** displayListHead) {
       G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gSPTextureRectangle(gfx++, UNUSED_IMAGE_LEFT << 2, UNUSED_IMAGE_TOP << 2,
-      UNUSED_IMAGE_RIGHT << 2, UNUSED_IMAGE_BOTTOM << 2, G_TX_RENDERTILE, 0, 0,
+  gSPTextureRectangle(gfx++, QuarterPixels(UNUSED_IMAGE_LEFT),
+      QuarterPixels(UNUSED_IMAGE_TOP), QuarterPixels(UNUSED_IMAGE_RIGHT),
+      QuarterPixels(UNUSED_IMAGE_BOTTOM), G_TX_RENDERTILE, 0, 0,
       (UNUSED_IMAGE_WIDTH << 10) / (UNUSED_IMAGE_RIGHT - UNUSED_IMAGE_LEFT),
       (UNUSED_IMAGE_HEIGHT << 10) / (UNUSED_IMAGE_BOTTOM - UNUSED_IMAGE_TOP));
   gDPPipeSync(gfx++);
@@ -490,10 +493,11 @@ void DrawChalkboard(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = CHALKBOARD_TOP + (stripIndex * CHALKBOARD_DRAWN_STRIP_HEIGHT);
-    gSPScisTextureRectangle(gfx++, CHALKBOARD_LEFT << 2, stripTop << 2,
-        (CHALKBOARD_LEFT + CHALKBOARD_WIDTH) << 2,
-        (stripTop + CHALKBOARD_DRAWN_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(CHALKBOARD_LEFT),
+        QuarterPixels(stripTop),
+        QuarterPixels(CHALKBOARD_LEFT + CHALKBOARD_WIDTH),
+        QuarterPixels(stripTop + CHALKBOARD_DRAWN_STRIP_HEIGHT),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
         (CHALKBOARD_STRIP_HEIGHT << 10) / CHALKBOARD_DRAWN_STRIP_HEIGHT);
     gDPPipeSync(gfx++);
   }

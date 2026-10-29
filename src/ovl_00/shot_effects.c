@@ -453,10 +453,11 @@ void DrawSparks(Gfx** displayListHead) {
               burstPoints[burst][0];
           top = (f_SparkOffsets[i][1] * burstScales[burst]) +
               burstPoints[burst][1];
-          gSPScisTextureRectangle(gfx++, (left - burstHalfSizes[burst]) << 2,
-              (top - burstHalfSizes[burst]) << 2,
-              (left + burstHalfSizes[burst]) << 2,
-              (top + burstHalfSizes[burst]) << 2, G_TX_RENDERTILE, 0, 0,
+          gSPScisTextureRectangle(gfx++,
+              QuarterPixels(left - burstHalfSizes[burst]),
+              QuarterPixels(top - burstHalfSizes[burst]),
+              QuarterPixels(left + burstHalfSizes[burst]),
+              QuarterPixels(top + burstHalfSizes[burst]), G_TX_RENDERTILE, 0, 0,
               burstTextureSteps[burst], burstTextureSteps[burst]);
         }
       }

@@ -464,13 +464,12 @@ void DrawTiledImageEffect(Gfx** displayListHead, CameraView* view) {
         G_TX_NOLOD);
     texelPairOffset += TILED_IMAGE_STRIP_HEIGHT * SCREEN_WIDTH / 2;
     for (copyIndex = 0; copyIndex != TILED_IMAGE_COPY_COUNT; copyIndex++) {
-      gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-          (SCREEN_BORDER + (copyIndex * TILED_IMAGE_COPY_SPACING) + stripTop)
-              << 2,
-          (SCREEN_WIDTH - SCREEN_BORDER) << 2,
-          (SCREEN_BORDER + (copyIndex * TILED_IMAGE_COPY_SPACING) + stripTop +
-              TILED_IMAGE_STRIP_SCREEN_HEIGHT)
-              << 2,
+      gSPScisTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+          QuarterPixels(SCREEN_BORDER + (copyIndex * TILED_IMAGE_COPY_SPACING) +
+              stripTop),
+          QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER),
+          QuarterPixels(SCREEN_BORDER + (copyIndex * TILED_IMAGE_COPY_SPACING) +
+              stripTop + TILED_IMAGE_STRIP_SCREEN_HEIGHT),
           G_TX_RENDERTILE, TexelCoordinate(TILED_IMAGE_LEFT), 0,
           TILED_IMAGE_SCALE, TILED_IMAGE_SCALE);
     }
@@ -606,12 +605,11 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)) << 2,
-        (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
-        ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
-            1)
-            << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)),
+        QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
+        QuarterPixels((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER +
+            stripHeight - 1),
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
         TexelCoordinate(SCREEN_BORDER), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -633,12 +631,11 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)) << 2,
-        (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
-        ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
-            1)
-            << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)),
+        QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
+        QuarterPixels((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER +
+            stripHeight - 1),
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
         TexelCoordinate(SCREEN_BORDER), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -847,10 +844,12 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
             sourceTop + HORIZON_FIRST_ROW + (rowIndex * HORIZON_ROW_SPACING), 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        gSPScisTextureRectangle(gfx++, (blockIndex * MIRROR_BLOCK_WIDTH) << 2,
-            (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset) << 2,
-            ((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH) << 2,
-            (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset + 1) << 2,
+        gSPScisTextureRectangle(gfx++,
+            QuarterPixels(blockIndex * MIRROR_BLOCK_WIDTH),
+            QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset),
+            QuarterPixels(
+                (blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH),
+            QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset + 1),
             G_TX_RENDERTILE,
             TexelCoordinate(
                 MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
@@ -877,9 +876,9 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, MIRROR_NOISE_ALPHA);
   if (rowCount > 0) {
     gSPScisTextureRectangle(gfx++, 0,
-        (DYNAMIC_TEXTURE_SIZE - destOffset - rowCount) << 2,
-        DYNAMIC_TEXTURE_SIZE << 2, (DYNAMIC_TEXTURE_SIZE - destOffset) << 2,
-        G_TX_RENDERTILE, 0,
+        QuarterPixels(DYNAMIC_TEXTURE_SIZE - destOffset - rowCount),
+        QuarterPixels(DYNAMIC_TEXTURE_SIZE),
+        QuarterPixels(DYNAMIC_TEXTURE_SIZE - destOffset), G_TX_RENDERTILE, 0,
         TexelCoordinate(DYNAMIC_TEXTURE_SIZE - destOffset - rowCount),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
@@ -900,9 +899,9 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_HorizonTextureScroll, 32,
       f_HorizonTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
-  gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  gSPTextureRectangle(gfx++, 0, 0, QuarterPixels(DYNAMIC_TEXTURE_SIZE),
+      QuarterPixels(DYNAMIC_TEXTURE_SIZE), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       RenderTargetAddress(osVirtualToPhysical(g_BlendedTexture)));
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, BLENDED_TEXTURE_ALPHA);
@@ -918,9 +917,9 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
       f_HorizonTextureScroll, f_HorizonTextureScroll + 32,
       f_HorizonTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
-  gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  gSPTextureRectangle(gfx++, 0, 0, QuarterPixels(DYNAMIC_TEXTURE_SIZE),
+      QuarterPixels(DYNAMIC_TEXTURE_SIZE), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
       RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
   gDPPipeSync(gfx++);
@@ -979,10 +978,11 @@ void BuildDynamicTextures(Gfx** displayListHead) {
               MIRROR_ROW_SPACING,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPScisTextureRectangle(gfx++, (blockIndex * MIRROR_BLOCK_WIDTH) << 2,
-          (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex) << 2,
-          ((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH) << 2,
-          (DYNAMIC_TEXTURE_SIZE - rowIndex) << 2, G_TX_RENDERTILE,
+      gSPScisTextureRectangle(gfx++,
+          QuarterPixels(blockIndex * MIRROR_BLOCK_WIDTH),
+          QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex),
+          QuarterPixels((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH),
+          QuarterPixels(DYNAMIC_TEXTURE_SIZE - rowIndex), G_TX_RENDERTILE,
           TexelCoordinate(
               MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
           TexelCoordinate(MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING)),
@@ -999,9 +999,9 @@ void BuildDynamicTextures(Gfx** displayListHead) {
   gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0,
       0, 0, 0, PRIMITIVE);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, MIRROR_NOISE_ALPHA);
-  gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  gSPTextureRectangle(gfx++, 0, 0, QuarterPixels(DYNAMIC_TEXTURE_SIZE),
+      QuarterPixels(DYNAMIC_TEXTURE_SIZE), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_2CYCLE);
   gDPPipeSync(gfx++);
@@ -1022,9 +1022,9 @@ void BuildDynamicTextures(Gfx** displayListHead) {
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_DynamicTextureScroll, 32,
       f_DynamicTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
-  gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  gSPTextureRectangle(gfx++, 0, 0, QuarterPixels(DYNAMIC_TEXTURE_SIZE),
+      QuarterPixels(DYNAMIC_TEXTURE_SIZE), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       RenderTargetAddress(osVirtualToPhysical(g_BlendedTexture)));
   gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
@@ -1040,9 +1040,9 @@ void BuildDynamicTextures(Gfx** displayListHead) {
       f_DynamicTextureScroll, f_DynamicTextureScroll + 32,
       f_DynamicTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
-  gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+  gSPTextureRectangle(gfx++, 0, 0, QuarterPixels(DYNAMIC_TEXTURE_SIZE),
+      QuarterPixels(DYNAMIC_TEXTURE_SIZE), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
       RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
   gDPPipeSync(gfx++);
@@ -2049,10 +2049,13 @@ s32 DrawGame(void) {
     if (f_FadeColor != FADE_COLOR_NONE) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(g_DisplayListHead++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-      gSPTextureRectangle(g_DisplayListHead++, g_Cameras[0].view.scissorX << 2,
-          g_Cameras[0].view.scissorY << 2,
-          (g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth) << 2,
-          (g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight) << 2,
+      gSPTextureRectangle(g_DisplayListHead++,
+          QuarterPixels(g_Cameras[0].view.scissorX),
+          QuarterPixels(g_Cameras[0].view.scissorY),
+          QuarterPixels(
+              g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth),
+          QuarterPixels(
+              g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
@@ -2272,12 +2275,11 @@ void CopyPreviousFrame(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)) << 2,
-        (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
-        ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
-            1)
-            << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)),
+        QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
+        QuarterPixels((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER +
+            stripHeight - 1),
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
         TexelCoordinate(SCREEN_BORDER), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -2318,8 +2320,9 @@ void DrawResetFade(void) {
         PRIMITIVE, 0, 0, 0, 0, PRIMITIVE);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-    gSPTextureRectangle(gfx++, 0, 0, SCREEN_WIDTH << 2, SCREEN_HEIGHT << 2,
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPTextureRectangle(gfx++, 0, 0, QuarterPixels(SCREEN_WIDTH),
+        QuarterPixels(SCREEN_HEIGHT), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     gDPFullSync(gfx++);
     gSPEndDisplayList(gfx++);
     nuGfxTaskStart(displayList, (s32)(gfx - displayList) * sizeof(Gfx),

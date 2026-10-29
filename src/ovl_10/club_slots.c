@@ -782,9 +782,10 @@ void DrawClubSlots(Gfx** displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    DrawTextureRect(&gfx, SCREEN_BORDER << 2, top << 2,
-        (SCREEN_BORDER + MACHINE_WIDTH - 1) << 2, (top + stripHeight - 1) << 2,
-        G_TX_RENDERTILE, 0, 0, COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(SCREEN_BORDER), QuarterPixels(top),
+        QuarterPixels(SCREEN_BORDER + MACHINE_WIDTH - 1),
+        QuarterPixels(top + stripHeight - 1), G_TX_RENDERTILE, 0, 0,
+        COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -804,13 +805,13 @@ void DrawClubSlots(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, BUTTON_WIDTH, BUTTON_STRIP_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       gDPPipeSync(gfx++);
-      DrawTextureRect(&gfx, ((buttonIndex * BUTTON_WIDTH) + BUTTON_LEFT) << 2,
-          (BUTTON_TOP + (stripIndex * BUTTON_STRIP_HEIGHT)) << 2,
-          (BUTTON_LEFT + BUTTON_SHOWN_WIDTH - 1 + (buttonIndex * BUTTON_WIDTH))
-              << 2,
-          (BUTTON_TOP + BUTTON_STRIP_HEIGHT - 1 +
-              (stripIndex * BUTTON_STRIP_HEIGHT))
-              << 2,
+      DrawTextureRect(&gfx,
+          QuarterPixels((buttonIndex * BUTTON_WIDTH) + BUTTON_LEFT),
+          QuarterPixels(BUTTON_TOP + (stripIndex * BUTTON_STRIP_HEIGHT)),
+          QuarterPixels(BUTTON_LEFT + BUTTON_SHOWN_WIDTH - 1 +
+              (buttonIndex * BUTTON_WIDTH)),
+          QuarterPixels(BUTTON_TOP + BUTTON_STRIP_HEIGHT - 1 +
+              (stripIndex * BUTTON_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0, COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -889,10 +890,10 @@ void DrawClubSlots(Gfx** displayListHead) {
           G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-      DrawTextureRect(&gfx, FACE_LEFT << 2,
-          (FACE_TOP + (playerIndex * FACE_SPACING)) << 2,
-          (FACE_LEFT + FACE_SIZE) << 2,
-          (FACE_TOP + FACE_SIZE + (playerIndex * FACE_SPACING)) << 2,
+      DrawTextureRect(&gfx, QuarterPixels(FACE_LEFT),
+          QuarterPixels(FACE_TOP + (playerIndex * FACE_SPACING)),
+          QuarterPixels(FACE_LEFT + FACE_SIZE),
+          QuarterPixels(FACE_TOP + FACE_SIZE + (playerIndex * FACE_SPACING)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       if (f_IsShowingResult == TRUE && ++f_FaceFrameTime >= FACE_FRAME_TIME) {
         f_FaceFrameTime = 0;
@@ -942,11 +943,11 @@ void DrawClubSlots(Gfx** displayListHead) {
       LoadTextureBlock(&gfx, g_PlayerFaceImages[playerIndex], G_IM_FMT_CI,
           G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
-      DrawTextureRect(&gfx, OTHER_FACE_LEFT << 2,
-          (OTHER_FACE_TOP + (playerIndex * FACE_SPACING)) << 2,
-          (OTHER_FACE_LEFT + FACE_SIZE) << 2,
-          (OTHER_FACE_TOP + OTHER_FACE_HEIGHT + (playerIndex * FACE_SPACING))
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(OTHER_FACE_LEFT),
+          QuarterPixels(OTHER_FACE_TOP + (playerIndex * FACE_SPACING)),
+          QuarterPixels(OTHER_FACE_LEFT + FACE_SIZE),
+          QuarterPixels(OTHER_FACE_TOP + OTHER_FACE_HEIGHT +
+              (playerIndex * FACE_SPACING)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
 

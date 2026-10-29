@@ -585,15 +585,16 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
       gDPPipeSync(gfx++);
       if (code >= CHARACTER_CODE_MARK_FIRST &&
           code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
-        gSPTextureRectangle(gfx++, (x - LARGE_TEXT_MARK_BACKSPACE) << 2,
-            (y - LARGE_TEXT_MARK_RISE) << 2,
-            (x - LARGE_TEXT_MARK_BACKSPACE + FONT_SIZE_LARGE) << 2,
-            (y - LARGE_TEXT_MARK_RISE + FONT_SIZE_LARGE) << 2, G_TX_RENDERTILE,
-            TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop),
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPTextureRectangle(gfx++, QuarterPixels(x - LARGE_TEXT_MARK_BACKSPACE),
+            QuarterPixels(y - LARGE_TEXT_MARK_RISE),
+            QuarterPixels(x - LARGE_TEXT_MARK_BACKSPACE + FONT_SIZE_LARGE),
+            QuarterPixels(y - LARGE_TEXT_MARK_RISE + FONT_SIZE_LARGE),
+            G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
+            TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       } else {
-        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_LARGE) << 2,
-            (y + FONT_SIZE_LARGE) << 2, G_TX_RENDERTILE,
+        gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+            QuarterPixels(x + FONT_SIZE_LARGE),
+            QuarterPixels(y + FONT_SIZE_LARGE), G_TX_RENDERTILE,
             TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop),
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         x += f_LargeFontWidths[code];
@@ -609,9 +610,10 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_LARGE) << 2,
-          (y + FONT_SIZE_LARGE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+      gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+          QuarterPixels(x + FONT_SIZE_LARGE),
+          QuarterPixels(y + FONT_SIZE_LARGE), G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       x += advance;
     } else {
@@ -746,17 +748,19 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           if ((u8)g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
               (u8)g_PrintBuffer[index] <
                   CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
-            gSPTextureRectangle(gfx++, (x - LARGE_TEXT_MARK_BACKSPACE) << 2,
-                (y - LARGE_TEXT_MARK_RISE) << 2,
-                (x - LARGE_TEXT_MARK_BACKSPACE + FONT_SIZE_LARGE) << 2,
-                (y - LARGE_TEXT_MARK_RISE + FONT_SIZE_LARGE) << 2,
+            gSPTextureRectangle(gfx++,
+                QuarterPixels(x - LARGE_TEXT_MARK_BACKSPACE),
+                QuarterPixels(y - LARGE_TEXT_MARK_RISE),
+                QuarterPixels(x - LARGE_TEXT_MARK_BACKSPACE + FONT_SIZE_LARGE),
+                QuarterPixels(y - LARGE_TEXT_MARK_RISE + FONT_SIZE_LARGE),
                 G_TX_RENDERTILE, TexelCoordinate(characterLeft),
                 TexelCoordinate(characterTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           } else {
-            gSPTextureRectangle(gfx++, x << 2, y << 2,
-                (x + FONT_SIZE_LARGE) << 2, (y + FONT_SIZE_LARGE) << 2,
-                G_TX_RENDERTILE, TexelCoordinate(characterLeft),
-                TexelCoordinate(characterTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+                QuarterPixels(x + FONT_SIZE_LARGE),
+                QuarterPixels(y + FONT_SIZE_LARGE), G_TX_RENDERTILE,
+                TexelCoordinate(characterLeft), TexelCoordinate(characterTop),
+                TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             x += f_LargeFontWidths[(u8)g_PrintBuffer[index]];
           }
         }
@@ -786,9 +790,10 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (ICON_WIDTH - 1) << 2,
             (ICON_WIDTH - 1) << 2);
         gDPPipeSync(gfx++);
-        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_LARGE) << 2,
-            (y + FONT_SIZE_LARGE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-            TEXEL_STEP_ONE);
+        gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+            QuarterPixels(x + FONT_SIZE_LARGE),
+            QuarterPixels(y + FONT_SIZE_LARGE), G_TX_RENDERTILE, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
         x += advance;
       }
@@ -876,15 +881,16 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
       gDPPipeSync(gfx++);
       if (code >= CHARACTER_CODE_MARK_FIRST &&
           code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
-        gSPTextureRectangle(gfx++, (x - SLOT_MARK_BACKSPACE) << 2,
-            (y - SLOT_MARK_RISE) << 2,
-            (x - SLOT_MARK_BACKSPACE + FONT_SIZE_MEDIUM) << 2,
-            (y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE,
-            TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop),
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPTextureRectangle(gfx++, QuarterPixels(x - SLOT_MARK_BACKSPACE),
+            QuarterPixels(y - SLOT_MARK_RISE),
+            QuarterPixels(x - SLOT_MARK_BACKSPACE + FONT_SIZE_MEDIUM),
+            QuarterPixels(y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM),
+            G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
+            TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       } else {
-        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_MEDIUM) << 2,
-            (y + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE,
+        gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+            QuarterPixels(x + FONT_SIZE_MEDIUM),
+            QuarterPixels(y + FONT_SIZE_MEDIUM), G_TX_RENDERTILE,
             TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop),
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         x += advance;
@@ -1006,16 +1012,19 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
           if ((u8)g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
               (u8)g_PrintBuffer[index] <
                   CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
-            gSPTextureRectangle(gfx++, (x - (FONT_SIZE_MEDIUM / 2)) << 2,
-                (y - SLOT_MARK_RISE) << 2, (x + (FONT_SIZE_MEDIUM / 2)) << 2,
-                (y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE,
-                TexelCoordinate(characterLeft), TexelCoordinate(characterTop),
-                TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-          } else {
-            gSPTextureRectangle(gfx++, x << 2, y << 2,
-                (x + FONT_SIZE_MEDIUM) << 2, (y + FONT_SIZE_MEDIUM) << 2,
+            gSPTextureRectangle(gfx++,
+                QuarterPixels(x - (FONT_SIZE_MEDIUM / 2)),
+                QuarterPixels(y - SLOT_MARK_RISE),
+                QuarterPixels(x + (FONT_SIZE_MEDIUM / 2)),
+                QuarterPixels(y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM),
                 G_TX_RENDERTILE, TexelCoordinate(characterLeft),
                 TexelCoordinate(characterTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          } else {
+            gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+                QuarterPixels(x + FONT_SIZE_MEDIUM),
+                QuarterPixels(y + FONT_SIZE_MEDIUM), G_TX_RENDERTILE,
+                TexelCoordinate(characterLeft), TexelCoordinate(characterTop),
+                TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             x += advance;
           }
         }
@@ -1045,9 +1054,10 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (ICON_WIDTH - 1) << 2,
             (ICON_WIDTH - 1) << 2);
         gDPPipeSync(gfx++);
-        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_MEDIUM) << 2,
-            (y + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-            TEXEL_STEP_ONE);
+        gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+            QuarterPixels(x + FONT_SIZE_MEDIUM),
+            QuarterPixels(y + FONT_SIZE_MEDIUM), G_TX_RENDERTILE, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
         x += advance;
       }
@@ -1324,10 +1334,11 @@ void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           (glyphLeft + GLYPH_TILE_WIDTH) << 2,
           (glyphTop + FONT_SIZE_LARGE) << 2);
       gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++, left << 2, top << 2,
-          (left + FONT_SIZE_LARGE) << 2, (top + FONT_SIZE_LARGE) << 2,
-          G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
-          TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+          QuarterPixels(left + FONT_SIZE_LARGE),
+          QuarterPixels(top + FONT_SIZE_LARGE), G_TX_RENDERTILE,
+          TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       x += FONT_SIZE_LARGE;
       text++;
     }
@@ -1398,10 +1409,11 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           (glyphLeft + GLYPH_TILE_WIDTH) << 2,
           (glyphTop + FONT_SIZE_LARGE) << 2);
       gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++, left << 2, top << 2,
-          (left + FONT_SIZE_LARGE) << 2, (top + FONT_SIZE_LARGE) << 2,
-          G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
-          TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+          QuarterPixels(left + FONT_SIZE_LARGE),
+          QuarterPixels(top + FONT_SIZE_LARGE), G_TX_RENDERTILE,
+          TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       text++;
       x += f_LargeFontWidths[code];
     }
@@ -1474,10 +1486,11 @@ void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           (glyphLeft + GLYPH_TILE_WIDTH - 1) << 2,
           (glyphTop + FONT_SIZE_MEDIUM - 1) << 2);
       gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++, left << 2, top << 2,
-          (left + FONT_SIZE_MEDIUM) << 2, (top + FONT_SIZE_MEDIUM) << 2,
-          G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
-          TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+          QuarterPixels(left + FONT_SIZE_MEDIUM),
+          QuarterPixels(top + FONT_SIZE_MEDIUM), G_TX_RENDERTILE,
+          TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       text++;
       x += FONT_SIZE_MEDIUM;
     }
@@ -1548,10 +1561,11 @@ void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           (glyphLeft + FONT_SIZE_SMALL - 1) << 2,
           (glyphTop + FONT_SIZE_SMALL - 1) << 2);
       gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++, left << 2, top << 2,
-          (left + FONT_SIZE_SMALL) << 2, (top + FONT_SIZE_SMALL) << 2,
-          G_TX_RENDERTILE, TexelCoordinate(glyphLeft),
-          TexelCoordinate(glyphTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+          QuarterPixels(left + FONT_SIZE_SMALL),
+          QuarterPixels(top + FONT_SIZE_SMALL), G_TX_RENDERTILE,
+          TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       text++;
       x += FONT_SIZE_SMALL;
     }
@@ -1661,8 +1675,9 @@ void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
 
     glyphLeft = GetShadowedGlyphLeft(code);
     glyphTop = GetShadowedGlyphTop(code);
-    gSPTextureRectangle(gfx++, x << 2, y << 2, (x + SHADOWED_GLYPH_SIZE) << 2,
-        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE,
+    gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+        QuarterPixels(x + SHADOWED_GLYPH_SIZE),
+        QuarterPixels(y + SHADOWED_GLYPH_SIZE), G_TX_RENDERTILE,
         TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     if (*text == '.') {
@@ -1718,8 +1733,9 @@ void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   x -= length * NARROW_GLYPH_WIDTH / 2;
   while ((code = *text) != '\0') {
     glyphLeft = (code - NARROW_GLYPH_FIRST) * SHADOWED_GLYPH_SIZE;
-    gSPTextureRectangle(gfx++, x << 2, y << 2, (x + NARROW_GLYPH_SIZE) << 2,
-        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE,
+    gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+        QuarterPixels(x + NARROW_GLYPH_SIZE),
+        QuarterPixels(y + SHADOWED_GLYPH_SIZE), G_TX_RENDERTILE,
         TexelCoordinate(glyphLeft),
         TexelCoordinate(NARROW_GLYPH_ROW * SHADOWED_GLYPH_SIZE), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
@@ -1743,8 +1759,9 @@ void DrawCondensedShadowedText(
   while ((code = *text) != '\0') {
     glyphLeft = GetShadowedGlyphLeft(code);
     glyphTop = GetShadowedGlyphTop(code);
-    gSPTextureRectangle(gfx++, x << 2, y << 2, (x + SHADOWED_GLYPH_SIZE) << 2,
-        (y + SHADOWED_GLYPH_SIZE) << 2, G_TX_RENDERTILE,
+    gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+        QuarterPixels(x + SHADOWED_GLYPH_SIZE),
+        QuarterPixels(y + SHADOWED_GLYPH_SIZE), G_TX_RENDERTILE,
         TexelCoordinate(glyphLeft), TexelCoordinate(glyphTop), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     text++;
@@ -2184,8 +2201,9 @@ void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text) {
 
   gDPPipeSync(gfx++);
   for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
-    DrawTextureRect(&gfx, x << 2, y << 2, (x + DIGIT_GLYPH_SIZE) << 2,
-        (y + DIGIT_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,
+    DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
+        QuarterPixels(x + DIGIT_GLYPH_SIZE),
+        QuarterPixels(y + DIGIT_GLYPH_SIZE), G_TX_RENDERTILE, 0,
         TexelCoordinate(GetDigitGlyphTop(text[index])), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     x += DIGIT_GLYPH_WIDTH;

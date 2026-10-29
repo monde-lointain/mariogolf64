@@ -256,9 +256,10 @@ void DrawDebugText(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
       }
 
-      gSPTextureRectangle(gfx++, (column * GLYPH_SIZE) << 2,
-          (row * GLYPH_SIZE) << 2, ((column * GLYPH_SIZE) + GLYPH_SIZE) << 2,
-          ((row * GLYPH_SIZE) + GLYPH_SIZE) << 2, G_TX_RENDERTILE,
+      gSPTextureRectangle(gfx++, QuarterPixels(column * GLYPH_SIZE),
+          QuarterPixels(row * GLYPH_SIZE),
+          QuarterPixels((column * GLYPH_SIZE) + GLYPH_SIZE),
+          QuarterPixels((row * GLYPH_SIZE) + GLYPH_SIZE), G_TX_RENDERTILE,
           TexelCoordinate((glyph & 0x1F) * GLYPH_SIZE),
           TexelCoordinate((glyph >> 5) * GLYPH_SIZE), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);

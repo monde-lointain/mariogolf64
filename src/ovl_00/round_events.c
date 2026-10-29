@@ -1514,12 +1514,13 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
       centerX = CONTEST_IMAGE_CENTER_X + slide;
-      DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
-          (bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER)) << 2,
-          (centerX + halfWidth) << 2,
-          (bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER) +
-              MOVIE_IMAGE_STRIP_HEIGHT)
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
+          QuarterPixels(
+              bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER)),
+          QuarterPixels(centerX + halfWidth),
+          QuarterPixels(bottom -
+              (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER) +
+              MOVIE_IMAGE_STRIP_HEIGHT),
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
       bottom += MOVIE_IMAGE_STRIP_HEIGHT;
@@ -1582,18 +1583,20 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
         WINNER_PLAQUE_SIZE, WINNER_PLAQUE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
     step = ((WINNER_PLAQUE_SIZE / 2) << 10) / plaqueHalfSize;
-    DrawTextureRect(&gfx, (WINNER_CENTER_X - plaqueHalfSize) << 2,
-        (WINNER_CENTER_Y - plaqueHalfSize) << 2,
-        (WINNER_CENTER_X + plaqueHalfSize) << 2,
-        (WINNER_CENTER_Y + plaqueHalfSize) << 2, G_TX_RENDERTILE, 0, 0, step,
-        step);
+    DrawTextureRect(&gfx, QuarterPixels(WINNER_CENTER_X - plaqueHalfSize),
+        QuarterPixels(WINNER_CENTER_Y - plaqueHalfSize),
+        QuarterPixels(WINNER_CENTER_X + plaqueHalfSize),
+        QuarterPixels(WINNER_CENTER_Y + plaqueHalfSize), G_TX_RENDERTILE, 0, 0,
+        step, step);
     LoadLargePalette(&gfx, f_MovieBuffer + WINNER_PALETTE_OFFSET);
     LoadTextureBlock(&gfx, f_MovieBuffer + WINNER_FACE_OFFSET, G_IM_FMT_CI,
         G_IM_SIZ_8b, WINNER_FACE_SIZE, WINNER_FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((WINNER_FACE_SIZE / 2) << 10) / growth;
-    DrawTextureRect(&gfx, (WINNER_CENTER_X - growth) << 2,
-        (WINNER_CENTER_Y - growth) << 2, (WINNER_CENTER_X + growth) << 2,
-        (WINNER_CENTER_Y + growth) << 2, G_TX_RENDERTILE, 0, 0, step, step);
+    DrawTextureRect(&gfx, QuarterPixels(WINNER_CENTER_X - growth),
+        QuarterPixels(WINNER_CENTER_Y - growth),
+        QuarterPixels(WINNER_CENTER_X + growth),
+        QuarterPixels(WINNER_CENTER_Y + growth), G_TX_RENDERTILE, 0, 0, step,
+        step);
   }
 
   gDPPipeSync(gfx++);
@@ -1688,21 +1691,22 @@ void DrawDriveRecord(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
       centerX = SHRINKING_IMAGE_CENTER_X + slide;
-      DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
-          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)) << 2,
-          (centerX + halfWidth) << 2,
-          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
-              stripHeight)
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
+          QuarterPixels(
+              bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
+          QuarterPixels(centerX + halfWidth),
+          QuarterPixels(bottom -
+              (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
+              stripHeight),
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
       if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
         centerX = SHRINKING_IMAGE_CENTER_X - slide;
         copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-        DrawTextureRect(&gfx, (centerX - (s32)(width >> 1)) << 2, copyTop << 2,
-            (centerX + (s32)(width >> 1)) << 2,
-            (copyTop + MOVIE_IMAGE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, QuarterPixels(centerX - (s32)(width >> 1)),
+            QuarterPixels(copyTop), QuarterPixels(centerX + (s32)(width >> 1)),
+            QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE,
+            0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
 
       bottom += stripHeight;
@@ -1802,21 +1806,22 @@ void DrawPuttCaption(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
       centerX = SHRINKING_IMAGE_CENTER_X + slide;
-      DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
-          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)) << 2,
-          (centerX + halfWidth) << 2,
-          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
-              stripHeight)
-              << 2,
+      DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
+          QuarterPixels(
+              bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
+          QuarterPixels(centerX + halfWidth),
+          QuarterPixels(bottom -
+              (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
+              stripHeight),
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
       if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
         centerX = SHRINKING_IMAGE_CENTER_X - slide;
         copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-        DrawTextureRect(&gfx, (centerX - (s32)(width >> 1)) << 2, copyTop << 2,
-            (centerX + (s32)(width >> 1)) << 2,
-            (copyTop + MOVIE_IMAGE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, QuarterPixels(centerX - (s32)(width >> 1)),
+            QuarterPixels(copyTop), QuarterPixels(centerX + (s32)(width >> 1)),
+            QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE,
+            0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
 
       bottom += stripHeight;
@@ -2060,9 +2065,11 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
         offset += width;
         top = bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER);
         bottom += stripHeight;
-        DrawTextureRect(&gfx, (SHRINKING_IMAGE_CENTER_X - halfWidth) << 2,
-            top << 2, (SHRINKING_IMAGE_CENTER_X + halfWidth) << 2,
-            (top + stripHeight) << 2, G_TX_RENDERTILE, 0, 0,
+        DrawTextureRect(&gfx,
+            QuarterPixels(SHRINKING_IMAGE_CENTER_X - halfWidth),
+            QuarterPixels(top),
+            QuarterPixels(SHRINKING_IMAGE_CENTER_X + halfWidth),
+            QuarterPixels(top + stripHeight), G_TX_RENDERTILE, 0, 0,
             ((width >> 1) << 10) / halfWidth,
             (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
       }
@@ -2110,11 +2117,11 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
         0, MONTY_MOLE_WIDTH - 1, MONTY_MOLE_STRIP_HEIGHT - 1, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, MONTY_MOLE_X << 2,
-        (MONTY_MOLE_Y + (i * MONTY_MOLE_STRIP_HEIGHT)) << 2,
-        (MONTY_MOLE_X + MONTY_MOLE_WIDTH) << 2,
-        (MONTY_MOLE_Y + MONTY_MOLE_STRIP_HEIGHT + (i * MONTY_MOLE_STRIP_HEIGHT))
-            << 2,
+    DrawTextureRect(&gfx, QuarterPixels(MONTY_MOLE_X),
+        QuarterPixels(MONTY_MOLE_Y + (i * MONTY_MOLE_STRIP_HEIGHT)),
+        QuarterPixels(MONTY_MOLE_X + MONTY_MOLE_WIDTH),
+        QuarterPixels(MONTY_MOLE_Y + MONTY_MOLE_STRIP_HEIGHT +
+            (i * MONTY_MOLE_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -2164,11 +2171,11 @@ void DrawGoombaMovie(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, GOOMBA_WIDTH, height, 0, 0, GOOMBA_WIDTH - 1,
         height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, GOOMBA_X << 2,
-        (GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT)) << 2,
-        (GOOMBA_X + GOOMBA_WIDTH) << 2,
-        (GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT) + height) << 2, G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, QuarterPixels(GOOMBA_X),
+        QuarterPixels(GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT)),
+        QuarterPixels(GOOMBA_X + GOOMBA_WIDTH),
+        QuarterPixels(GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT) + height),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPPipeSync(gfx++);
@@ -2261,10 +2268,11 @@ void DrawLakituMovie(Gfx** displayListHead) {
 
     /* Start half a texel in, less the rounding, so that the image stays
      * centered as it scales */
-    DrawTextureRect(&gfx, (x - roundedHalfWidth) << 2,
-        (y - roundedHalfHeight + (i * roundedHalfHeight)) << 2,
-        (x + roundedHalfWidth) << 2, (y + (i * roundedHalfHeight)) << 2,
-        G_TX_RENDERTILE, 16.0f - (((f32)roundedHalfWidth - halfWidth) * 16.0f),
+    DrawTextureRect(&gfx, QuarterPixels(x - roundedHalfWidth),
+        QuarterPixels(y - roundedHalfHeight + (i * roundedHalfHeight)),
+        QuarterPixels(x + roundedHalfWidth),
+        QuarterPixels(y + (i * roundedHalfHeight)), G_TX_RENDERTILE,
+        16.0f - (((f32)roundedHalfWidth - halfWidth) * 16.0f),
         16.0f - (((f32)roundedHalfHeight - halfHeight) * 16.0f),
         ((LAKITU_WIDTH / 2) << 10) / halfWidth,
         (LAKITU_STRIP_HEIGHT << 10) / halfHeight);
@@ -2336,9 +2344,10 @@ void DrawToadMovie(Gfx** displayListHead) {
         TOAD_WIDTH - 1, TOAD_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
-    DrawTextureRect(&gfx, TOAD_X << 2, (TOAD_Y + (i * TOAD_STRIP_HEIGHT)) << 2,
-        (TOAD_X + TOAD_WIDTH) << 2,
-        (TOAD_Y + TOAD_STRIP_HEIGHT + (i * TOAD_STRIP_HEIGHT)) << 2,
+    DrawTextureRect(&gfx, QuarterPixels(TOAD_X),
+        QuarterPixels(TOAD_Y + (i * TOAD_STRIP_HEIGHT)),
+        QuarterPixels(TOAD_X + TOAD_WIDTH),
+        QuarterPixels(TOAD_Y + TOAD_STRIP_HEIGHT + (i * TOAD_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 

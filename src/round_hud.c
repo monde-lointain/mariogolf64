@@ -1285,28 +1285,24 @@ void DrawInsetViewFrame(void) {
   gDPPipeSync(g_DisplayListHead++);
   if (g_Cameras[INSET_CAMERA].view.scissorWidth > 0) {
     gSPTextureRectangle(g_DisplayListHead++,
-        g_Cameras[INSET_CAMERA].view.scissorX << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorY - INSET_FRAME_BORDER_OUTSIDE)
-            << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorX +
-            g_Cameras[INSET_CAMERA].view.scissorWidth)
-            << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorY + INSET_FRAME_BORDER_INSIDE)
-            << 2,
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX),
+        QuarterPixels(
+            g_Cameras[INSET_CAMERA].view.scissorY - INSET_FRAME_BORDER_OUTSIDE),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
+            g_Cameras[INSET_CAMERA].view.scissorWidth),
+        QuarterPixels(
+            g_Cameras[INSET_CAMERA].view.scissorY + INSET_FRAME_BORDER_INSIDE),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gSPTextureRectangle(g_DisplayListHead++,
-        g_Cameras[INSET_CAMERA].view.scissorX << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorY +
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY +
             g_Cameras[INSET_CAMERA].view.scissorHeight -
-            INSET_FRAME_BORDER_INSIDE)
-            << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorX +
-            g_Cameras[INSET_CAMERA].view.scissorWidth)
-            << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorY +
+            INSET_FRAME_BORDER_INSIDE),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
+            g_Cameras[INSET_CAMERA].view.scissorWidth),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY +
             g_Cameras[INSET_CAMERA].view.scissorHeight +
-            INSET_FRAME_BORDER_OUTSIDE)
-            << 2,
+            INSET_FRAME_BORDER_OUTSIDE),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -1319,29 +1315,25 @@ void DrawInsetViewFrame(void) {
   gDPPipeSync(g_DisplayListHead++);
   if (g_Cameras[INSET_CAMERA].view.scissorHeight > 0) {
     gSPTextureRectangle(g_DisplayListHead++,
-        (g_Cameras[INSET_CAMERA].view.scissorX - INSET_FRAME_SIDE_HALF_WIDTH)
-            << 2,
-        g_Cameras[INSET_CAMERA].view.scissorY << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorX + INSET_FRAME_SIDE_HALF_WIDTH)
-            << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorY +
-            g_Cameras[INSET_CAMERA].view.scissorHeight)
-            << 2,
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX -
+            INSET_FRAME_SIDE_HALF_WIDTH),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
+            INSET_FRAME_SIDE_HALF_WIDTH),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY +
+            g_Cameras[INSET_CAMERA].view.scissorHeight),
         G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gSPTextureRectangle(g_DisplayListHead++,
-        (g_Cameras[INSET_CAMERA].view.scissorX +
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
             g_Cameras[INSET_CAMERA].view.scissorWidth -
-            INSET_FRAME_SIDE_HALF_WIDTH)
-            << 2,
-        g_Cameras[INSET_CAMERA].view.scissorY << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorX +
+            INSET_FRAME_SIDE_HALF_WIDTH),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
             g_Cameras[INSET_CAMERA].view.scissorWidth +
-            INSET_FRAME_SIDE_HALF_WIDTH)
-            << 2,
-        (g_Cameras[INSET_CAMERA].view.scissorY +
-            g_Cameras[INSET_CAMERA].view.scissorHeight)
-            << 2,
+            INSET_FRAME_SIDE_HALF_WIDTH),
+        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY +
+            g_Cameras[INSET_CAMERA].view.scissorHeight),
         G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
@@ -2274,10 +2266,12 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
         glyphWidth = WIND_DIGIT_WIDTH;
       }
 
-      gSPScisTextureRectangle(gfx++, (textX + offsetX) << 2,
-          (textY - WIND_TEXT_RAISE) << 2, (textX + offsetX + glyphWidth) << 2,
-          (textY - WIND_TEXT_RAISE + WIND_FONT_HEIGHT) << 2, G_TX_RENDERTILE,
-          TexelCoordinate(glyphS), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gSPScisTextureRectangle(gfx++, QuarterPixels(textX + offsetX),
+          QuarterPixels(textY - WIND_TEXT_RAISE),
+          QuarterPixels(textX + offsetX + glyphWidth),
+          QuarterPixels(textY - WIND_TEXT_RAISE + WIND_FONT_HEIGHT),
+          G_TX_RENDERTILE, TexelCoordinate(glyphS), 0, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
 
@@ -2333,18 +2327,14 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   roundedCenterX = centerX + 0.5f;
   roundedCenterY = centerY + 0.5f;
   gSPScisTextureRectangle(gfx++,
-      (roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X -
-          halfWidthRounded)
-          << 2,
-      (roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y -
-          halfHeightRounded)
-          << 2,
-      (roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X +
-          halfWidthRounded)
-          << 2,
-      (roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y +
-          halfHeightRounded)
-          << 2,
+      QuarterPixels(roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X -
+          halfWidthRounded),
+      QuarterPixels(roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y -
+          halfHeightRounded),
+      QuarterPixels(roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X +
+          halfWidthRounded),
+      QuarterPixels(roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y +
+          halfHeightRounded),
       G_TX_RENDERTILE, textureS, textureT, dsdx, dtdy);
   gDPPipeSync(gfx++);
   SetUpTextDrawing(&gfx);
@@ -3216,19 +3206,17 @@ void DrawShotOffsetMarker(void) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(g_DisplayListHead++);
   gSPScisTextureRectangle(g_DisplayListHead++,
-      (f_ShotOffsetMarkerXs[0] + (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X))
-          << 2,
-      (f_ShotOffsetMarkerYs[0] + (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y) +
-          f_HudOffsetY)
-          << 2,
-      (f_ShotOffsetMarkerXs[0] + (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X) +
-          SHOT_OFFSET_MARKER_SIZE)
-          << 2,
-      (f_ShotOffsetMarkerYs[0] +
+      QuarterPixels(f_ShotOffsetMarkerXs[0] +
+          (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X)),
+      QuarterPixels(f_ShotOffsetMarkerYs[0] +
+          (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y) + f_HudOffsetY),
+      QuarterPixels(f_ShotOffsetMarkerXs[0] +
+          (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X) +
+          SHOT_OFFSET_MARKER_SIZE),
+      QuarterPixels(f_ShotOffsetMarkerYs[0] +
           (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y +
               SHOT_OFFSET_MARKER_SIZE) +
-          f_HudOffsetY)
-          << 2,
+          f_HudOffsetY),
       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
 }
 #else
@@ -3297,9 +3285,9 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, (s32)f_AnimatedIconX << 2,
         (s32)f_AnimatedIconY << 2,
-        ((s32)f_AnimatedIconX + ANIMATED_ICON_SIZE) << 2,
-        ((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_SIZE),
+        QuarterPixels((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     if (g_LetterboxState == LETTERBOX_STATE_MOVING_CAMERA) {
       label = ANIMATED_ICON_LABEL_UNK1;
@@ -3318,12 +3306,11 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
-        ((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X) << 2,
+        QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X),
         (s32)f_AnimatedIconY << 2,
-        ((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X +
-            ANIMATED_ICON_LABEL_WIDTH)
-            << 2,
-        ((s32)f_AnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT) << 2,
+        QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X +
+            ANIMATED_ICON_LABEL_WIDTH),
+        QuarterPixels((s32)f_AnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     *displayListHead = gfx;
   }
@@ -3347,13 +3334,15 @@ s32 DrawLetterbox(Gfx** gfxP, s32 height) {
       gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
       gDPPipeSync(gfx++);
       if (height > 0) {
-        gSPScisTextureRectangle(gfx++, HUD_MARGIN << 2, HUD_MARGIN << 2,
-            (SCREEN_WIDTH - HUD_MARGIN) << 2, (HUD_MARGIN + height) << 2,
-            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        gSPScisTextureRectangle(gfx++, HUD_MARGIN << 2,
-            (SCREEN_HEIGHT - HUD_MARGIN - height) << 2,
-            (SCREEN_WIDTH - HUD_MARGIN) << 2, (SCREEN_HEIGHT - HUD_MARGIN) << 2,
-            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPScisTextureRectangle(gfx++, QuarterPixels(HUD_MARGIN),
+            QuarterPixels(HUD_MARGIN), QuarterPixels(SCREEN_WIDTH - HUD_MARGIN),
+            QuarterPixels(HUD_MARGIN + height), G_TX_RENDERTILE, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPScisTextureRectangle(gfx++, QuarterPixels(HUD_MARGIN),
+            QuarterPixels(SCREEN_HEIGHT - HUD_MARGIN - height),
+            QuarterPixels(SCREEN_WIDTH - HUD_MARGIN),
+            QuarterPixels(SCREEN_HEIGHT - HUD_MARGIN), G_TX_RENDERTILE, 0, 0,
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
 
       gDPPipeSync(gfx++);
@@ -3405,9 +3394,10 @@ void DrawDistanceText(Gfx** gfxP, s32 x, s32 y, char* text) {
         break;
     }
 
-    gSPTextureRectangle(gfx++, x << 2, y << 2, (x + width) << 2,
-        (y + DISTANCE_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE,
-        TexelCoordinate(glyphS), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
+        QuarterPixels(x + width), QuarterPixels(y + DISTANCE_GLYPH_HEIGHT),
+        G_TX_RENDERTILE, TexelCoordinate(glyphS), 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     x += width;
   }
 
@@ -3708,22 +3698,23 @@ void DrawRoundHud(CameraView* view) {
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
         gDPPipeSync(g_DisplayListHead++);
         gSPScisTextureRectangle(g_DisplayListHead++,
-            (scoreboardX - FACE_INSET_X) << 2,
-            (SCOREBOARD_Y - FACE_INSET_Y + i * SCOREBOARD_ROW_HEIGHT) << 2,
-            (scoreboardX - FACE_INSET_X + FACE_WIDTH) << 2,
-            (SCOREBOARD_Y - FACE_INSET_Y + FACE_HEIGHT +
-                i * SCOREBOARD_ROW_HEIGHT)
-                << 2,
+            QuarterPixels(scoreboardX - FACE_INSET_X),
+            QuarterPixels(
+                SCOREBOARD_Y - FACE_INSET_Y + i * SCOREBOARD_ROW_HEIGHT),
+            QuarterPixels(scoreboardX - FACE_INSET_X + FACE_WIDTH),
+            QuarterPixels(SCOREBOARD_Y - FACE_INSET_Y + FACE_HEIGHT +
+                i * SCOREBOARD_ROW_HEIGHT),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       } else {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 127, 127, 127, 127);
         gDPPipeSync(g_DisplayListHead++);
-        gSPScisTextureRectangle(g_DisplayListHead++, scoreboardX << 2,
-            (SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT) << 2,
-            (scoreboardX + SMALL_FACE_WIDTH) << 2,
-            (SCOREBOARD_Y + SMALL_FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT) << 2,
+        gSPScisTextureRectangle(g_DisplayListHead++, QuarterPixels(scoreboardX),
+            QuarterPixels(SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT),
+            QuarterPixels(scoreboardX + SMALL_FACE_WIDTH),
+            QuarterPixels(
+                SCOREBOARD_Y + SMALL_FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT),
             G_TX_RENDERTILE, 0, 0, SMALL_FACE_STEP, SMALL_FACE_STEP);
       }
     }
@@ -3764,9 +3755,10 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (PIN_FLAG_X - g_ShotPanelOffsetX) << 2, PIN_FLAG_Y << 2,
-        (PIN_FLAG_X + PIN_FLAG_WIDTH - g_ShotPanelOffsetX) << 2,
-        (PIN_FLAG_Y + PIN_FLAG_HEIGHT) << 2, G_TX_RENDERTILE,
+        QuarterPixels(PIN_FLAG_X - g_ShotPanelOffsetX),
+        QuarterPixels(PIN_FLAG_Y),
+        QuarterPixels(PIN_FLAG_X + PIN_FLAG_WIDTH - g_ShotPanelOffsetX),
+        QuarterPixels(PIN_FLAG_Y + PIN_FLAG_HEIGHT), G_TX_RENDERTILE,
         (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) *
             TexelCoordinate(PIN_FLAG_WIDTH),
         TexelCoordinate(PIN_FLAG_IMAGE_T), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -3780,10 +3772,12 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX) << 2, REST_LABEL_Y << 2,
-        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
-        (REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        QuarterPixels(SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX),
+        QuarterPixels(REST_LABEL_Y),
+        QuarterPixels(
+            SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
+        QuarterPixels(REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT), G_TX_RENDERTILE,
+        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
 
     /* A putt's height is labeled by its height in meters, which the feet are
@@ -3800,10 +3794,12 @@ void DrawRoundHud(CameraView* view) {
 
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX) << 2, HEIGHT_LABEL_Y << 2,
-        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
-        (HEIGHT_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        QuarterPixels(SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX),
+        QuarterPixels(HEIGHT_LABEL_Y),
+        QuarterPixels(
+            SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
+        QuarterPixels(HEIGHT_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       if (f_RingFrameTime++ % RING_FRAME_LENGTH == 0) {
@@ -3823,9 +3819,10 @@ void DrawRoundHud(CameraView* view) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(g_DisplayListHead++,
-          (RING_ICON_X - g_ShotPanelOffsetX) << 2, RING_ICON_Y << 2,
-          (RING_ICON_X + RING_IMAGE_SIZE - g_ShotPanelOffsetX) << 2,
-          (RING_ICON_Y + RING_IMAGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+          QuarterPixels(RING_ICON_X - g_ShotPanelOffsetX),
+          QuarterPixels(RING_ICON_Y),
+          QuarterPixels(RING_ICON_X + RING_IMAGE_SIZE - g_ShotPanelOffsetX),
+          QuarterPixels(RING_ICON_Y + RING_IMAGE_SIZE), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(g_DisplayListHead++);
       gDPPipeSync(g_DisplayListHead++);
@@ -3932,11 +3929,11 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (CLUB_PANEL_X - g_ShotPanelOffsetX) << 2,
-        (f_HudOffsetY + CLUB_PANEL_Y) << 2,
-        (CLUB_PANEL_X + CLUB_PANEL_WIDTH - g_ShotPanelOffsetX) << 2,
-        (f_HudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT) << 2, G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        QuarterPixels(CLUB_PANEL_X - g_ShotPanelOffsetX),
+        QuarterPixels(f_HudOffsetY + CLUB_PANEL_Y),
+        QuarterPixels(CLUB_PANEL_X + CLUB_PANEL_WIDTH - g_ShotPanelOffsetX),
+        QuarterPixels(f_HudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
         TextureAddress(ImageBody(f_ClubNameImages[f_ClubNameImageIndex])));
@@ -3947,11 +3944,11 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (CLUB_NAME_X - g_ShotPanelOffsetX) << 2,
-        (f_HudOffsetY + CLUB_NAME_Y) << 2,
-        (CLUB_NAME_X + CLUB_NAME_WIDTH - g_ShotPanelOffsetX) << 2,
-        (f_HudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT) << 2, G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        QuarterPixels(CLUB_NAME_X - g_ShotPanelOffsetX),
+        QuarterPixels(f_HudOffsetY + CLUB_NAME_Y),
+        QuarterPixels(CLUB_NAME_X + CLUB_NAME_WIDTH - g_ShotPanelOffsetX),
+        QuarterPixels(f_HudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
   }
 
@@ -3965,10 +3962,12 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
-        (PAR_IMAGE_X - g_ShotPanelOffsetX) << 2, PAR_IMAGE_Y << 2,
-        (PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
-        (PAR_IMAGE_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        QuarterPixels(PAR_IMAGE_X - g_ShotPanelOffsetX),
+        QuarterPixels(PAR_IMAGE_Y),
+        QuarterPixels(
+            PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
+        QuarterPixels(PAR_IMAGE_Y + SHOT_PANEL_LABEL_HEIGHT), G_TX_RENDERTILE,
+        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
   }
 
@@ -4155,10 +4154,11 @@ void DrawRoundHud(CameraView* view) {
         G_IM_FMT_RGBA, G_IM_SIZ_16b, MIRROR_TEXTURE_SIZE, MIRROR_TEXTURE_SIZE,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
         MIRROR_TEXTURE_SIZE_LOG2, G_TX_NOLOD, G_TX_NOLOD);
-    gSPScisTextureRectangle(g_DisplayListHead++, MIRROR_TEXTURE_X << 2,
-        MIRROR_TEXTURE_Y << 2, (MIRROR_TEXTURE_X + MIRROR_TEXTURE_SIZE) << 2,
-        (MIRROR_TEXTURE_Y + MIRROR_TEXTURE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(g_DisplayListHead++,
+        QuarterPixels(MIRROR_TEXTURE_X), QuarterPixels(MIRROR_TEXTURE_Y),
+        QuarterPixels(MIRROR_TEXTURE_X + MIRROR_TEXTURE_SIZE),
+        QuarterPixels(MIRROR_TEXTURE_Y + MIRROR_TEXTURE_SIZE), G_TX_RENDERTILE,
+        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
   }
 
@@ -4288,10 +4288,12 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
               CONTEST_IMAGE_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR,
               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
-          gSPScisTextureRectangle(gfx++, CONTEST_IMAGE_X << 2,
-              (CONTEST_IMAGE_Y + strip * CONTEST_IMAGE_STRIP_HEIGHT) << 2,
-              (CONTEST_IMAGE_X + CONTEST_IMAGE_WIDTH) << 2,
-              (CONTEST_IMAGE_Y + (strip + 1) * CONTEST_IMAGE_STRIP_HEIGHT) << 2,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(CONTEST_IMAGE_X),
+              QuarterPixels(
+                  CONTEST_IMAGE_Y + strip * CONTEST_IMAGE_STRIP_HEIGHT),
+              QuarterPixels(CONTEST_IMAGE_X + CONTEST_IMAGE_WIDTH),
+              QuarterPixels(
+                  CONTEST_IMAGE_Y + (strip + 1) * CONTEST_IMAGE_STRIP_HEIGHT),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }
@@ -4310,10 +4312,11 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
               MATCH_IMAGE_STRIP_HEIGHT - 1, 0, G_TX_MIRROR, G_TX_MIRROR,
               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
-          gSPScisTextureRectangle(gfx++, MATCH_IMAGE_X << 2,
-              (MATCH_IMAGE_Y + strip * MATCH_IMAGE_STRIP_HEIGHT) << 2,
-              (MATCH_IMAGE_X + MATCH_IMAGE_WIDTH) << 2,
-              (MATCH_IMAGE_Y + (strip + 1) * MATCH_IMAGE_STRIP_HEIGHT) << 2,
+          gSPScisTextureRectangle(gfx++, QuarterPixels(MATCH_IMAGE_X),
+              QuarterPixels(MATCH_IMAGE_Y + strip * MATCH_IMAGE_STRIP_HEIGHT),
+              QuarterPixels(MATCH_IMAGE_X + MATCH_IMAGE_WIDTH),
+              QuarterPixels(
+                  MATCH_IMAGE_Y + (strip + 1) * MATCH_IMAGE_STRIP_HEIGHT),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }

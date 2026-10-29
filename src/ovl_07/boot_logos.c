@@ -312,8 +312,8 @@ void DrawBootLogos(Gfx** displayListHead) {
       for (stripIndex = 0; stripIndex != N64_LOGO_STRIP_COUNT; stripIndex++) {
         LoadTextureBlock(&gfx, n64Texels, G_IM_FMT_RGBA, G_IM_SIZ_16b,
             N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-        DrawTextureRect(&gfx, N64_LOGO_LEFT << 2, top,
-            (N64_LOGO_LEFT + N64_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
+        DrawTextureRect(&gfx, QuarterPixels(N64_LOGO_LEFT), top,
+            QuarterPixels(N64_LOGO_LEFT + N64_LOGO_WIDTH), bottom, 0, 0, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += N64_LOGO_STRIP_HEIGHT << 2;
         top += N64_LOGO_STRIP_HEIGHT << 2;
@@ -350,9 +350,9 @@ void DrawBootLogos(Gfx** displayListHead) {
             NINTENDO_LOGO_WIDTH - 1, NINTENDO_LOGO_STRIP_HEIGHT - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        DrawTextureRect(&gfx, NINTENDO_LOGO_LEFT << 2, top,
-            (NINTENDO_LOGO_LEFT + NINTENDO_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, QuarterPixels(NINTENDO_LOGO_LEFT), top,
+            QuarterPixels(NINTENDO_LOGO_LEFT + NINTENDO_LOGO_WIDTH), bottom, 0,
+            0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += NINTENDO_LOGO_STRIP_HEIGHT << 2;
         top += NINTENDO_LOGO_STRIP_HEIGHT << 2;
         texelOffset += NINTENDO_LOGO_WIDTH * NINTENDO_LOGO_STRIP_HEIGHT;
@@ -387,9 +387,9 @@ void DrawBootLogos(Gfx** displayListHead) {
             CAMELOT_LOGO_WIDTH - 1, CAMELOT_LOGO_STRIP_HEIGHT - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        DrawTextureRect(&gfx, CAMELOT_LOGO_LEFT << 2, top,
-            (CAMELOT_LOGO_LEFT + CAMELOT_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, QuarterPixels(CAMELOT_LOGO_LEFT), top,
+            QuarterPixels(CAMELOT_LOGO_LEFT + CAMELOT_LOGO_WIDTH), bottom, 0, 0,
+            0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += CAMELOT_LOGO_STRIP_HEIGHT << 2;
         top += CAMELOT_LOGO_STRIP_HEIGHT << 2;
         texelOffset += CAMELOT_LOGO_WIDTH / 2 * CAMELOT_LOGO_STRIP_HEIGHT;

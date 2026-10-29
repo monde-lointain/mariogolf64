@@ -1613,26 +1613,28 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   LoadSmallPalette(&displayList, 0, ImageBody(transfer->shotTypesImage));
   LoadNibbleTextureBlock(&displayList, ImageTexels(transfer->shotTypesImage),
       G_IM_FMT_CI, SHOT_TYPE_WIDTH, SHOT_TYPE_HEIGHT * 3, 0, 0, 0, 0, 0, 0, 0);
-  DrawTextureRect(&displayList, SHOT_TYPE_LEFT << 2, SHOT_TYPE_TOP << 2,
-      (SHOT_TYPE_LEFT + SHOT_TYPE_WIDTH) << 2,
-      (SHOT_TYPE_TOP + SHOT_TYPE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+  DrawTextureRect(&displayList, QuarterPixels(SHOT_TYPE_LEFT),
+      QuarterPixels(SHOT_TYPE_TOP),
+      QuarterPixels(SHOT_TYPE_LEFT + SHOT_TYPE_WIDTH),
+      QuarterPixels(SHOT_TYPE_TOP + SHOT_TYPE_HEIGHT), G_TX_RENDERTILE, 0,
       TexelCoordinate(segmentCurve * SHOT_TYPE_HEIGHT), TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
   LoadSmallPalette(&displayList, 0, ImageBody(transfer->statLabelsImage));
   LoadNibbleTextureBlock(&displayList, ImageTexels(transfer->statLabelsImage),
       G_IM_FMT_CI, STAT_LABELS_WIDTH, STAT_LABELS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-  DrawTextureRect(&displayList, STATS_LEFT << 2, STATS_TOP << 2,
-      (STATS_LEFT + STAT_LABELS_WIDTH) << 2,
-      (STATS_TOP + STAT_LABELS_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+  DrawTextureRect(&displayList, QuarterPixels(STATS_LEFT),
+      QuarterPixels(STATS_TOP), QuarterPixels(STATS_LEFT + STAT_LABELS_WIDTH),
+      QuarterPixels(STATS_TOP + STAT_LABELS_HEIGHT), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   LoadSmallPalette(&displayList, 0, ImageBody(transfer->statBarsImage));
   gDPLoadTextureTile_4b(displayList++,
       TextureAddress(ImageTexels(transfer->statBarsImage)), G_IM_FMT_CI,
       CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0,
       0, 0, 0, 0, 0);
-  DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2,
-      (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
-      (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+  DrawTextureRect(&displayList, QuarterPixels(CURVE_BAR_LEFT),
+      QuarterPixels(CURVE_BAR_TOP),
+      QuarterPixels(CURVE_BAR_LEFT + CURVE_BAR_WIDTH),
+      QuarterPixels(CURVE_BAR_TOP + CURVE_BAR_HEIGHT), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   LoadLargePalette(&displayList, ImageBody(transfer->curveSegmentsImage));
   LoadTextureBlock(&displayList, LargeImageTexels(transfer->curveSegmentsImage),
@@ -1667,10 +1669,10 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
     }
 
     DrawTextureRect(&displayList,
-        (CURVE_BAR_LEFT + (segment * CURVE_SEGMENT_WIDTH)) << 2,
-        CURVE_BAR_TOP << 2,
-        (CURVE_BAR_LEFT + ((segment + 1) * CURVE_SEGMENT_WIDTH)) << 2,
-        (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+        QuarterPixels(CURVE_BAR_LEFT + (segment * CURVE_SEGMENT_WIDTH)),
+        QuarterPixels(CURVE_BAR_TOP),
+        QuarterPixels(CURVE_BAR_LEFT + ((segment + 1) * CURVE_SEGMENT_WIDTH)),
+        QuarterPixels(CURVE_BAR_TOP + CURVE_BAR_HEIGHT), G_TX_RENDERTILE, 0,
         TexelCoordinate(segment * CURVE_SEGMENT_WIDTH), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
   }
@@ -1801,12 +1803,12 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
     }
 
     DrawTextureRect(&displayList,
-        (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)) << 2,
-        CONTROLLER_ICONS_TOP << 2,
-        (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING) +
-            CONTROLLER_ICON_SIZE)
-            << 2,
-        (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
+        QuarterPixels(CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)),
+        QuarterPixels(CONTROLLER_ICONS_TOP),
+        QuarterPixels(CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING) +
+            CONTROLLER_ICON_SIZE),
+        QuarterPixels(CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE),
+        G_TX_RENDERTILE, 0,
         TexelCoordinate(
             transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1841,10 +1843,11 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
       pointerRestLeft =
           (transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING) +
           (CONTROLLER_ICONS_LEFT - POINTER_WIDTH);
-      DrawTextureRect(&displayList, (pointerRestLeft - pointerSwing) << 2,
-          POINTER_TOP << 2,
-          (pointerRestLeft - pointerSwing + POINTER_WIDTH) << 2,
-          (POINTER_TOP + POINTER_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+      DrawTextureRect(&displayList,
+          QuarterPixels(pointerRestLeft - pointerSwing),
+          QuarterPixels(POINTER_TOP),
+          QuarterPixels(pointerRestLeft - pointerSwing + POINTER_WIDTH),
+          QuarterPixels(POINTER_TOP + POINTER_HEIGHT), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else if (transfer->screenStep == SEND_STATUS_READY) {
       DrawCursorBox(&displayList,
@@ -1870,10 +1873,12 @@ void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer) {
       LoadLargePalette(&displayList, transfer->facePalettes[character]);
       LoadTextureBlock(&displayList, transfer->faceImages[character],
           G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&displayList, (FACES_LEFT + (slot * FACE_SPACING)) << 2,
-          FACES_TOP << 2, (FACES_LEFT + (slot * FACE_SPACING) + FACE_SIZE) << 2,
-          (FACES_TOP + FACE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+      DrawTextureRect(&displayList,
+          QuarterPixels(FACES_LEFT + (slot * FACE_SPACING)),
+          QuarterPixels(FACES_TOP),
+          QuarterPixels(FACES_LEFT + (slot * FACE_SPACING) + FACE_SIZE),
+          QuarterPixels(FACES_TOP + FACE_SIZE), G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -1924,12 +1929,12 @@ void DrawBringCharactersScreen(
                 .status == GAME_BOY_CHARACTER_STATUS_PRESENT &&
         IsListed(transfer->listingStates[transfer->listedCharacters[index]])) {
       DrawTextureRect(&displayList,
-          (LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING)) << 2,
-          LISTED_ICONS_TOP << 2,
-          (LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING) +
-              CONTROLLER_ICON_SIZE)
-              << 2,
-          (LISTED_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
+          QuarterPixels(LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING)),
+          QuarterPixels(LISTED_ICONS_TOP),
+          QuarterPixels(LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING) +
+              CONTROLLER_ICON_SIZE),
+          QuarterPixels(LISTED_ICONS_TOP + CONTROLLER_ICON_SIZE),
+          G_TX_RENDERTILE, 0,
           TexelCoordinate(transfer->listedCharacters[index] /
               CARTRIDGE_SAVE_COUNT * CONTROLLER_ICON_SIZE),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1945,9 +1950,10 @@ void DrawBringCharactersScreen(
       TextureAddress(ImageTexels(transfer->statBarsImage)), G_IM_FMT_CI,
       CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0,
       0, 0, 0, 0, 0);
-  DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2,
-      (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
-      (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+  DrawTextureRect(&displayList, QuarterPixels(CURVE_BAR_LEFT),
+      QuarterPixels(CURVE_BAR_TOP),
+      QuarterPixels(CURVE_BAR_LEFT + CURVE_BAR_WIDTH),
+      QuarterPixels(CURVE_BAR_TOP + CURVE_BAR_HEIGHT), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   shownCount = 0;
   for (index = transfer->unk7B8; index != CARTRIDGE_CHARACTER_COUNT; index++) {
@@ -1969,9 +1975,9 @@ void DrawBringCharactersScreen(
       LoadLargePalette(&displayList, transfer->facePalettes[character]);
       LoadTextureBlock(&displayList, transfer->faceImages[character],
           G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&displayList, left << 2, top << 2,
-          (left + FACE_SIZE) << 2, (top + FACE_SIZE) << 2, G_TX_RENDERTILE, 0,
-          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      DrawTextureRect(&displayList, QuarterPixels(left), QuarterPixels(top),
+          QuarterPixels(left + FACE_SIZE), QuarterPixels(top + FACE_SIZE),
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       shownCount++;
       if (shownCount == SHOWN_LISTED_COUNT) {
         break;
@@ -2008,18 +2014,20 @@ void DrawBringCharactersScreen(
         G_IM_FMT_CI, ARROW_SIZE, ARROW_SIZE * 4, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(displayList++);
     if (transfer->unk7B8 > 0) {
-      DrawTextureRect(&displayList, LEFT_ARROW_LEFT << 2, ARROWS_TOP << 2,
-          (LEFT_ARROW_LEFT + ARROW_SIZE) << 2, (ARROWS_TOP + ARROW_SIZE) << 2,
-          G_TX_RENDERTILE, 0, TexelCoordinate(LEFT_ARROW_ROW), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+      DrawTextureRect(&displayList, QuarterPixels(LEFT_ARROW_LEFT),
+          QuarterPixels(ARROWS_TOP),
+          QuarterPixels(LEFT_ARROW_LEFT + ARROW_SIZE),
+          QuarterPixels(ARROWS_TOP + ARROW_SIZE), G_TX_RENDERTILE, 0,
+          TexelCoordinate(LEFT_ARROW_ROW), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
 
     if (transfer->unk7B8 <
         transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
-      DrawTextureRect(&displayList, RIGHT_ARROW_LEFT << 2, ARROWS_TOP << 2,
-          (RIGHT_ARROW_LEFT + ARROW_SIZE) << 2, (ARROWS_TOP + ARROW_SIZE) << 2,
-          G_TX_RENDERTILE, 0, TexelCoordinate(RIGHT_ARROW_ROW), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+      DrawTextureRect(&displayList, QuarterPixels(RIGHT_ARROW_LEFT),
+          QuarterPixels(ARROWS_TOP),
+          QuarterPixels(RIGHT_ARROW_LEFT + ARROW_SIZE),
+          QuarterPixels(ARROWS_TOP + ARROW_SIZE), G_TX_RENDERTILE, 0,
+          TexelCoordinate(RIGHT_ARROW_ROW), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -2061,12 +2069,12 @@ void DrawSendExperienceScreen(
     }
 
     DrawTextureRect(&displayList,
-        (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)) << 2,
-        CONTROLLER_ICONS_TOP << 2,
-        (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING) +
-            CONTROLLER_ICON_SIZE)
-            << 2,
-        (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
+        QuarterPixels(CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)),
+        QuarterPixels(CONTROLLER_ICONS_TOP),
+        QuarterPixels(CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING) +
+            CONTROLLER_ICON_SIZE),
+        QuarterPixels(CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE),
+        G_TX_RENDERTILE, 0,
         TexelCoordinate(
             transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -2122,10 +2130,10 @@ void DrawTransmitMenu(Gfx** displayListHead) {
           LargeImageTexels(transfer->courseSceneImage), G_IM_FMT_CI,
           G_IM_SIZ_8b, COURSE_SCENE_WIDTH, COURSE_SCENE_STRIP_ROWS + 2, 0, 0, 0,
           0, 0, 0, 0);
-      DrawTextureRect(&displayList, COURSE_SCENE_LEFT << 2,
-          COURSE_SCENE_TOP << 2,
-          (COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)) << 2,
-          (COURSE_SCENE_TOP + ((COURSE_SCENE_STRIP_ROWS + 1) * 2)) << 2,
+      DrawTextureRect(&displayList, QuarterPixels(COURSE_SCENE_LEFT),
+          QuarterPixels(COURSE_SCENE_TOP),
+          QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)),
+          QuarterPixels(COURSE_SCENE_TOP + ((COURSE_SCENE_STRIP_ROWS + 1) * 2)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
     } else {
       LoadTextureBlock(&displayList,
@@ -2133,12 +2141,12 @@ void DrawTransmitMenu(Gfx** displayListHead) {
               (index * (COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROWS)),
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_SCENE_WIDTH, rowCount + 2, 0, 0, 0,
           0, 0, 0, 0);
-      DrawTextureRect(&displayList, COURSE_SCENE_LEFT << 2,
-          (COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2)) << 2,
-          (COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)) << 2,
-          (COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2) +
-              (rowCount * 2))
-              << 2,
+      DrawTextureRect(&displayList, QuarterPixels(COURSE_SCENE_LEFT),
+          QuarterPixels(
+              COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2)),
+          QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)),
+          QuarterPixels(COURSE_SCENE_TOP + 2 +
+              (index * COURSE_SCENE_STRIP_ROWS * 2) + (rowCount * 2)),
           G_TX_RENDERTILE, 0, TexelCoordinate(1), TEXEL_STEP_ONE / 2,
           TEXEL_STEP_ONE / 2);
     }
@@ -2151,10 +2159,11 @@ void DrawTransmitMenu(Gfx** displayListHead) {
             (index * (TITLE_WIDTH * TITLE_STRIP_ROWS))),
         G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_WIDTH, 0, 0, 0, TITLE_WIDTH - 1,
         TITLE_STRIP_ROWS - 1, 0, 0, 0, 0, 0, 0, 0);
-    DrawTextureRect(&displayList, TITLE_LEFT << 2,
-        (TITLE_TOP + (index * TITLE_STRIP_ROWS)) << 2,
-        (TITLE_LEFT + TITLE_WIDTH) << 2,
-        (TITLE_TOP + (index * TITLE_STRIP_ROWS) + TITLE_STRIP_ROWS) << 2,
+    DrawTextureRect(&displayList, QuarterPixels(TITLE_LEFT),
+        QuarterPixels(TITLE_TOP + (index * TITLE_STRIP_ROWS)),
+        QuarterPixels(TITLE_LEFT + TITLE_WIDTH),
+        QuarterPixels(
+            TITLE_TOP + (index * TITLE_STRIP_ROWS) + TITLE_STRIP_ROWS),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -2168,10 +2177,11 @@ void DrawTransmitMenu(Gfx** displayListHead) {
             (index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2))),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, WOOD_PANEL_WIDTH, 0, 0, 0,
         WOOD_PANEL_WIDTH - 1, panelRowCount - 1, 0, 0, 0, 0, 0, 0, 0);
-    DrawTextureRect(&displayList, WOOD_PANEL_LEFT << 2,
-        (WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS)) << 2,
-        (WOOD_PANEL_LEFT + WOOD_PANEL_WIDTH) << 2,
-        (WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS) + panelRowCount) << 2,
+    DrawTextureRect(&displayList, QuarterPixels(WOOD_PANEL_LEFT),
+        QuarterPixels(WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS)),
+        QuarterPixels(WOOD_PANEL_LEFT + WOOD_PANEL_WIDTH),
+        QuarterPixels(
+            WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS) + panelRowCount),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -2211,12 +2221,12 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         0, 0, 0, 0, 0, 0);
     pointerLeft = OPTIONS_CENTER_X - OPTION_POINTER_GAP - POINTER_WIDTH -
         (width / 2) - pointerSwing;
-    DrawTextureRect(&displayList, pointerLeft << 2,
-        (OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING)) << 2,
-        (pointerLeft + POINTER_WIDTH) << 2,
-        (OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING) +
-            POINTER_HEIGHT)
-            << 2,
+    DrawTextureRect(&displayList, QuarterPixels(pointerLeft),
+        QuarterPixels(
+            OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING)),
+        QuarterPixels(pointerLeft + POINTER_WIDTH),
+        QuarterPixels(OPTION_POINTER_TOP +
+            (transfer->optionIndex * OPTION_SPACING) + POINTER_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -3296,10 +3306,10 @@ void DrawNotice(Gfx** displayListHead) {
           G_TX_CLAMP, 0, 0, 0, 0);
       stripHeight = halfHeight;
       bottom = (strip * stripHeight) + NOTICE_CENTER_Y;
-      DrawTextureRect(&displayList, (NOTICE_CENTER_X - halfWidth) << 2,
-          (bottom - stripHeight) << 2, (NOTICE_CENTER_X + halfWidth) << 2,
-          bottom << 2, G_TX_RENDERTILE, 0, 0,
-          (NOTICE_WIDTH << 10) / 2 / halfWidth,
+      DrawTextureRect(&displayList, QuarterPixels(NOTICE_CENTER_X - halfWidth),
+          QuarterPixels(bottom - stripHeight),
+          QuarterPixels(NOTICE_CENTER_X + halfWidth), QuarterPixels(bottom),
+          G_TX_RENDERTILE, 0, 0, (NOTICE_WIDTH << 10) / 2 / halfWidth,
           (NOTICE_STRIP_HEIGHT << 10) / stripHeight);
     }
   }
@@ -3329,12 +3339,11 @@ void DrawAccessingSign(Gfx** displayListHead) {
             (strip * ACCESSING_STRIP_SIZE),
         G_IM_FMT_CI, G_IM_SIZ_8b, ACCESSING_WIDTH, ACCESSING_STRIP_HEIGHT, 0, 0,
         0, 0, 0, 0, 0);
-    DrawTextureRect(&displayList, ACCESSING_LEFT << 2,
-        (ACCESSING_TOP + (strip * ACCESSING_STRIP_HEIGHT)) << 2,
-        (ACCESSING_LEFT + ACCESSING_WIDTH) << 2,
-        (ACCESSING_TOP + (strip * ACCESSING_STRIP_HEIGHT) +
-            ACCESSING_STRIP_HEIGHT)
-            << 2,
+    DrawTextureRect(&displayList, QuarterPixels(ACCESSING_LEFT),
+        QuarterPixels(ACCESSING_TOP + (strip * ACCESSING_STRIP_HEIGHT)),
+        QuarterPixels(ACCESSING_LEFT + ACCESSING_WIDTH),
+        QuarterPixels(ACCESSING_TOP + (strip * ACCESSING_STRIP_HEIGHT) +
+            ACCESSING_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -3353,17 +3362,17 @@ void DrawPressingHand(Gfx** displayListHead) {
       G_IM_FMT_CI, G_IM_SIZ_8b, PRESSING_HAND_SIZE, PRESSING_HAND_SIZE, 0, 0, 0,
       0, 0, 0, 0);
   if (g_GameBoyTransfer.pressingHandPosition == PRESSING_HAND_LOW) {
-    DrawTextureRect(&displayList, LOW_PRESSING_HAND_LEFT << 2,
-        LOW_PRESSING_HAND_TOP << 2,
-        (LOW_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE) << 2,
-        (LOW_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2, G_TX_RENDERTILE, 0,
-        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    DrawTextureRect(&displayList, QuarterPixels(LOW_PRESSING_HAND_LEFT),
+        QuarterPixels(LOW_PRESSING_HAND_TOP),
+        QuarterPixels(LOW_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
+        QuarterPixels(LOW_PRESSING_HAND_TOP + PRESSING_HAND_SIZE),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   } else {
-    DrawTextureRect(&displayList, NOTICE_PRESSING_HAND_LEFT << 2,
-        NOTICE_PRESSING_HAND_TOP << 2,
-        (NOTICE_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE) << 2,
-        (NOTICE_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2, G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    DrawTextureRect(&displayList, QuarterPixels(NOTICE_PRESSING_HAND_LEFT),
+        QuarterPixels(NOTICE_PRESSING_HAND_TOP),
+        QuarterPixels(NOTICE_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
+        QuarterPixels(NOTICE_PRESSING_HAND_TOP + PRESSING_HAND_SIZE),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   *displayListHead = displayList;

@@ -365,9 +365,10 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gDPPipeSync(gfx++);
-  gSPTextureRectangle(gfx++, TABLE_PANEL_LEFT << 2, TABLE_PANEL_TOP << 2,
-      TABLE_PANEL_RIGHT << 2, TABLE_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0, 0,
-      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  gSPTextureRectangle(gfx++, QuarterPixels(TABLE_PANEL_LEFT),
+      QuarterPixels(TABLE_PANEL_TOP), QuarterPixels(TABLE_PANEL_RIGHT),
+      QuarterPixels(TABLE_PANEL_BOTTOM), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   func_802169CC_ovl_01(&gfx);
   gDPPipeSync(gfx++);
@@ -564,8 +565,9 @@ void func_802169CC_ovl_01(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gDPPipeSync(gfx++);
   for (index = 0; index != TABLE_LINE_COUNT * 2; index += 2) {
-    gSPScisTextureRectangle(gfx++, D_80230248_ovl_01[index].x << 2,
-        D_80230248_ovl_01[index].y << 2, D_80230248_ovl_01[index + 1].x << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(D_80230248_ovl_01[index].x),
+        QuarterPixels(D_80230248_ovl_01[index].y),
+        D_80230248_ovl_01[index + 1].x << 2,
         D_80230248_ovl_01[index + 1].y << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -630,12 +632,11 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, D_80230190_ovl_01 << 2,
-        (D_80230194_ovl_01 + index * TABLE_POPUP_STRIP_HEIGHT) << 2,
-        (D_80230190_ovl_01 + TABLE_POPUP_WIDTH) << 2,
-        (D_80230194_ovl_01 + index * TABLE_POPUP_STRIP_HEIGHT +
-            TABLE_POPUP_STRIP_HEIGHT)
-            << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(D_80230190_ovl_01),
+        QuarterPixels(D_80230194_ovl_01 + index * TABLE_POPUP_STRIP_HEIGHT),
+        QuarterPixels(D_80230190_ovl_01 + TABLE_POPUP_WIDTH),
+        QuarterPixels(D_80230194_ovl_01 + index * TABLE_POPUP_STRIP_HEIGHT +
+            TABLE_POPUP_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / TABLE_POPUP_WIDTH,
         (MENU_BANNER_STRIP_HEIGHT << 10) / TABLE_POPUP_STRIP_HEIGHT);
     gDPPipeSync(gfx++);
@@ -767,9 +768,10 @@ void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
       G_IM_FMT_CI, TABLE_STAR_IMAGE_WIDTH, TABLE_STAR_IMAGE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  gSPScisTextureRectangle(gfx++, left << 2, top << 2,
-      (left + TABLE_STAR_WIDTH) << 2, (top + TABLE_STAR_HEIGHT) << 2,
-      G_TX_RENDERTILE, 0, 0, (TABLE_STAR_IMAGE_WIDTH << 10) / TABLE_STAR_WIDTH,
+  gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+      QuarterPixels(left + TABLE_STAR_WIDTH),
+      QuarterPixels(top + TABLE_STAR_HEIGHT), G_TX_RENDERTILE, 0, 0,
+      (TABLE_STAR_IMAGE_WIDTH << 10) / TABLE_STAR_WIDTH,
       (TABLE_STAR_IMAGE_HEIGHT << 10) / TABLE_STAR_HEIGHT);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
