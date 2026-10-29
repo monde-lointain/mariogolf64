@@ -27,7 +27,10 @@
 #define GROUND_LENGTH (GROUND_TILE_ROW_COUNT << GROUND_TILE_SHIFT)
 /* The mini-golf ground is this many course units a side */
 #define MINI_GOLF_GROUND_SIZE 0x100000
-/* Each tile's midpoints: the odd points of its top-left 4 by 4 */
+/*
+ * Each tile's midpoints: the points of its GROUND_TILE_POINT_SPAN + 1 a side,
+ * edges included, that aren't grid vertices
+ */
 #define TILE_MIDPOINT_COUNT 16
 /*
  * The grid's vertices are every other ground point each way. Each row of them
