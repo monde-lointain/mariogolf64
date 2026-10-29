@@ -79,6 +79,8 @@ enum SaveMenuGame {
  * golf's */
 #define SAVE_MENU_MODE_COUNT 10
 #define SAVE_MENU_MODE_MINI_GOLF 10
+/* An empty saved game's mode */
+#define NO_SAVE_MENU_MODE -1
 
 extern const char D_80231A3C_ovl_01[];
 
@@ -179,8 +181,9 @@ static u8 f_IsGameChosen = 0;
 static u8 f_AreControllersAssigned = 0;
 /* Which of f_CourseImageBuffers is on screen */
 static u8 f_ShownCourseBufferIndex = 0;
-/* Each saved game's save menu mode, or -1 for an empty slot */
-static s32 f_SavedGameModes[SAVED_GAME_COUNT] = {-1, -1, -1};
+/* Each saved game's save menu mode */
+static s32 f_SavedGameModes[SAVED_GAME_COUNT] = {
+    NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE};
 /* The image of each save menu mode, mini golf last */
 static SaveMenuModeImage f_ModeImageAssets[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     {0, 0x0623}, {0, 0x0629}, {0, 0x0599}, {0, 0x05AF}, {0, 0x0631},
@@ -1166,7 +1169,7 @@ void ReadSavedGames(void) {
   s8 modeIndex;
 
   for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
-    f_SavedGameModes[gameIndex] = -1;
+    f_SavedGameModes[gameIndex] = NO_SAVE_MENU_MODE;
   }
 
   f_AreControllersAssigned = 0;
@@ -1189,7 +1192,7 @@ void ReadSavedGames(void) {
   }
 
   for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
-    if (f_SavedGameModes[gameIndex] != -1) {
+    if (f_SavedGameModes[gameIndex] != NO_SAVE_MENU_MODE) {
       break;
     }
   }
@@ -1274,7 +1277,7 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
       modeImages = f_ModeImageAssets;
       for (imageIndex = 0; imageIndex != SAVED_GAME_COUNT; imageIndex++) {
         mode = f_SavedGameModes[imageIndex];
-        if (mode == -1) {
+        if (mode == NO_SAVE_MENU_MODE) {
           mode = 0;
         }
 
@@ -1291,7 +1294,7 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
       for (imageIndex = 0; imageIndex != SAVE_MENU_CHOSEN_IMAGE_COUNT;
           imageIndex++) {
         mode = f_SavedGameModes[memory->savedGameIndex];
-        if (mode == -1) {
+        if (mode == NO_SAVE_MENU_MODE) {
           mode = 0;
         }
 
@@ -1464,7 +1467,7 @@ void UpdateSavedGames(void) {
       }
     } else if (g_MenuPressedButtons & A_BUTTON) {
       if (memory->savedGameTurn != 0) {
-        PlaySound(f_SavedGameModes[memory->savedGameIndex] != -1
+        PlaySound(f_SavedGameModes[memory->savedGameIndex] != NO_SAVE_MENU_MODE
                 ? SOUND_MENU_CONFIRM
                 : SOUND_MENU_BLOCKED,
             MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -1472,7 +1475,7 @@ void UpdateSavedGames(void) {
         return;
       }
 
-      if (f_SavedGameModes[memory->savedGameIndex] != -1) {
+      if (f_SavedGameModes[memory->savedGameIndex] != NO_SAVE_MENU_MODE) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         if (!f_IsGameChosen) {
           f_IsGameChosen = TRUE;
@@ -1691,7 +1694,7 @@ s32 ContinueSavedGame(void) {
   CharacterId character;
   u16 controller;
 
-  if (f_SavedGameModes[memory->savedGameIndex] == -1) {
+  if (f_SavedGameModes[memory->savedGameIndex] == NO_SAVE_MENU_MODE) {
     return -1;
   }
 
@@ -1969,7 +1972,7 @@ void DrawSavedGames(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
       }
 
-      if (f_SavedGameModes[slot] != -1) {
+      if (f_SavedGameModes[slot] != NO_SAVE_MENU_MODE) {
         gDPLoadTLUT_pal256(
             gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot])));
         for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT;
@@ -2048,7 +2051,7 @@ void DrawSavedGames(Gfx** displayListHead) {
 
   DrawCenteredPageArrows(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
   chosenMode = &f_SavedGameModes[memory->savedGameIndex];
-  if (*chosenMode != -1) {
+  if (*chosenMode != NO_SAVE_MENU_MODE) {
     labelOffset = &D_80230CEC_ovl_01[f_SaveMenuModeIcons[*chosenMode]];
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
     gDPLoadTextureBlock_4b(gfx++,
@@ -2188,7 +2191,7 @@ void DrawChosenGameBoard(
     gDPPipeSync(gfx++);
   }
 
-  if (f_SavedGameModes[memory->savedGameIndex] != -1) {
+  if (f_SavedGameModes[memory->savedGameIndex] != NO_SAVE_MENU_MODE) {
     image = f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex];
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
