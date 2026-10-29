@@ -384,7 +384,7 @@ void func_80221B20_ovl_01(void);
 void func_802218C0_ovl_01(void* buffer, u8 bufferKind);
 void func_80221EBC_ovl_01(void** buffers, u8 bufferKind);
 void func_80222038_ovl_01(void* buffer, u8 bufferIndex);
-void func_8022209C_ovl_01(void);
+void UpdateSavedGames(void);
 void func_802267B0_ovl_01(void* buffer, s16 bufferKind);
 void func_80228A80_ovl_01(void* buffer, s32 bufferKind);
 void func_80228C00_ovl_01(void);
@@ -410,7 +410,7 @@ void func_80213748_ovl_01(Gfx** displayListHead);
 void func_80215DC4_ovl_01(Gfx** displayListHead);
 void func_8021D3AC_ovl_01(Gfx** displayListHead);
 void func_8021FC5C_ovl_01(Gfx** displayListHead);
-void func_802230C0_ovl_01(Gfx** displayListHead);
+void DrawSavedGames(Gfx** displayListHead);
 void func_80229CB0_ovl_01(Gfx** displayListHead);
 
 /* Not static: the original left these to the linker's common block */
@@ -1012,7 +1012,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_SAVED_GAMES:
-      func_8022209C_ovl_01();
+      UpdateSavedGames();
       break;
 
     case MENU_SCREEN_MAIN:
@@ -3664,7 +3664,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       func_8020B590_ovl_01(&gfx, 1);
       break;
     case MENU_SCREEN_SAVED_GAMES:
-      func_802230C0_ovl_01(&gfx);
+      DrawSavedGames(&gfx);
       break;
     case MENU_SCREEN_MAIN:
       DrawMainMenu(&gfx);

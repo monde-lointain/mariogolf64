@@ -1321,7 +1321,7 @@ void func_80222038_ovl_01(void* buffer, u8 bufferIndex) {
  * it also counts the controller loops through the controller table's address.
  */
 #ifdef NON_MATCHING
-void func_8022209C_ovl_01(void) {
+void UpdateSavedGames(void) {
   MenuMemory* memory = func_8005AF74();
   SaveData* save = GetSaveData();
   EncodedAsset asset;
@@ -1553,7 +1553,7 @@ void func_8022209C_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8022209C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", UpdateSavedGames);
 #endif
 
 s32 func_80222C94_ovl_01(void) {
@@ -1755,7 +1755,7 @@ void func_8022644C_ovl_01(Gfx** displayListHead);
  * the degrees-to-radians factor in a register.
  */
 #ifdef NON_MATCHING
-void func_802230C0_ovl_01(Gfx** displayListHead) {
+void DrawSavedGames(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u16 perspNorm;
   /* Sized like the course wheel's, of which the boards use three */
@@ -2085,7 +2085,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802230C0_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawSavedGames);
 #endif
 
 void func_80224AFC_ovl_01(
