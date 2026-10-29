@@ -16,6 +16,7 @@
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
+#include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
@@ -166,16 +167,9 @@ extern s8 D_801B60BA[MENU_UNKE_COUNT];
 /* Updates until each character fidgets, or -1 while it does */
 extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 extern s8 D_801B70F0[MAXCONTROLLERS];
-extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 extern const char D_802319E0_ovl_01[];
-extern u8 D_8022BE88_ovl_01;
-extern u8 D_8022BE89_ovl_01;
-extern s32 D_8023BFD0_ovl_01;
 
 extern u8 D_801B5634;
-extern s32 D_8022F8C0_ovl_01;
-extern u8 D_8022F8C4_ovl_01;
-extern s8 D_8022F8C5_ovl_01;
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern u8 D_801B9410;

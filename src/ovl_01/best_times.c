@@ -10,6 +10,7 @@
 #include "game.h"
 #include "hole_display.h"
 #include "libc.h"
+#include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
@@ -63,7 +64,6 @@
 extern void* D_8012D430[CHARACTER_COUNT];
 extern u8 D_8023BFF0_ovl_01[COURSE_COUNT * BEST_TIME_COUNT]
                            [BEST_TIME_HOLDER_FILE_SIZE];
-extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 
 s32 GetOpenCourseCount(void);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);

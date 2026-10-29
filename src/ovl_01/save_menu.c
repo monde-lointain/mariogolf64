@@ -128,9 +128,6 @@ extern s32
                                             or -1 while it does */
 
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
-extern s32 D_8022F8C0_ovl_01;
-extern u8 D_8022F8C4_ovl_01;
-extern s8 D_8022F8C5_ovl_01;
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
 extern u8 D_801052E8;
 extern s32 D_800FE334;
