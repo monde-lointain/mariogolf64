@@ -742,7 +742,7 @@ void LoadUnlockNotice(s32 unlock) {
     f_PortraitCharacterIndex = CHARACTER_DONKEY_KONG;
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
   } else if (unlock == UNLOCK_NOTICE_PEACH) {
-    f_PortraitCharacterIndex = CHARACTER_PEACH;
+    f_PortraitCharacterIndex = CHARACTER_MAPLE;
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
   } else if (unlock == UNLOCK_NOTICE_METAL_MARIO) {
     f_PortraitCharacterIndex = CHARACTER_METAL_MARIO;
@@ -2716,9 +2716,9 @@ s32 UpdateMatchResults(ControllerState* controller) {
                 func_8005CEE0((s8)g_Players[1].characterIndex) == -1 &&
                 (s8)g_Players[1].characterIndex != CHARACTER_PLUM &&
                 (s8)g_Players[1].characterIndex != CHARACTER_CHARLIE &&
-                (s8)g_Players[1].characterIndex != CHARACTER_PEACH &&
+                (s8)g_Players[1].characterIndex != CHARACTER_MAPLE &&
                 (s8)g_Players[1].characterIndex != CHARACTER_BABY_MARIO &&
-                (s8)g_Players[1].characterIndex != CHARACTER_YOSHI &&
+                (s8)g_Players[1].characterIndex != CHARACTER_PEACH &&
                 (s8)g_Players[1].characterIndex != CHARACTER_DONKEY_KONG &&
                 (s8)g_Players[1].characterIndex < CHARACTER_METAL_MARIO) {
               f_ResultsUnk78 = MATCH_STEP_SHOW_CHARACTER_NOTICE;

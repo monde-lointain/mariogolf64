@@ -374,7 +374,7 @@ s32 PlayReactionSounds(void) {
       }
 
       break;
-    case CHARACTER_PEACH:
+    case CHARACTER_MAPLE:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(44, SOUND_PEACH_EAGLE);
@@ -427,7 +427,7 @@ s32 PlayReactionSounds(void) {
       }
 
       break;
-    case CHARACTER_YOSHI:
+    case CHARACTER_PEACH:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, SOUND_YOSHI_EAGLE);
@@ -522,7 +522,7 @@ s32 PlayReactionSounds(void) {
       }
 
       break;
-    case CHARACTER_MAPLE:
+    case CHARACTER_YOSHI:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(66, SOUND_MAPLE_EAGLE);
@@ -1295,7 +1295,7 @@ s32 UpdateReaction(u32 slotIndex) {
   if (slot != NULL) {
     view = &g_Cameras[0].view;
     switch (slot->modelIndex % CHARACTER_COUNT) {
-      case CHARACTER_YOSHI:
+      case CHARACTER_PEACH:
         FrameYoshiReaction(slotIndex, view);
         break;
       case CHARACTER_MARIO:
@@ -1305,7 +1305,7 @@ s32 UpdateReaction(u32 slotIndex) {
       case CHARACTER_WARIO:
         FrameWarioReaction(slotIndex, view);
         break;
-      case CHARACTER_MAPLE:
+      case CHARACTER_YOSHI:
         FrameMapleReaction(slotIndex, view);
         break;
       case CHARACTER_BOWSER:
@@ -1328,7 +1328,7 @@ s32 UpdateReaction(u32 slotIndex) {
         break;
       case CHARACTER_PLUM:
       case CHARACTER_CHARLIE:
-      case CHARACTER_PEACH:
+      case CHARACTER_MAPLE:
       case CHARACTER_LUIGI:
       case CHARACTER_SONNY:
       case CHARACTER_HARRY:

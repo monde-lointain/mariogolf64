@@ -2399,7 +2399,7 @@ s32 GetContactStyle(UnkB8* player) {
     return CONTACT_STYLE_WARIO;
   }
 
-  if (character == CHARACTER_MAPLE || character == CHARACTER_DONKEY_KONG) {
+  if (character == CHARACTER_YOSHI || character == CHARACTER_DONKEY_KONG) {
     return CONTACT_STYLE_HEAVY_HITTER;
   }
 

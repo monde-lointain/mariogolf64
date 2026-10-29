@@ -123,13 +123,13 @@ static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
     {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {0, 2, 2, 2, 2, 2}, 10},
     /* Charlie */
     {2, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 2, 2, 2, 2, 2}, 8},
-    /* Peach */
+    /* Maple */
     {0, 0, 0, 6, 0, WIND_PLAY_STRONG_WINDS, 0, {-2, 0, 0, 2, 0, 2}, -3},
     /* Baby Mario */
     {1, 1, 1, 12, 1, WIND_PLAY_FOLLOWING_WINDS, 1, {0, 2, 2, 2, 2, 2}, 4},
     /* Luigi */
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 2, 2, 2, 2, 2}, 2},
-    /* Yoshi */
+    /* Peach */
     {0, 0, 0, 6, 1, WIND_PLAY_STRONG_WINDS, 1, {0, 2, 2, 2, 2, 2}, 6},
     /* Sonny */
     {2, 2, 2, 12, 2, WIND_PLAY_FOLLOWING_WINDS, 2, {0, 0, 0, 2, 2, 2}, -2},
@@ -139,7 +139,7 @@ static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
     {2, 2, 1, 12, 1, WIND_PLAY_FOLLOWING_WINDS, 1, {-2, -2, 0, 2, 0, 0}, -6},
     /* Mario */
     {0, 1, 0, 6, 2, WIND_PLAY_STRONG_WINDS, 1, {-2, -2, -2, 0, 2, 0}, -9},
-    /* Maple */
+    /* Yoshi */
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 2, -2, 2, 2}, 0},
     /* Donkey Kong */
     {0, 0, 1, 12, 1, WIND_PLAY_HEAD_WINDS, 2, {-2, -2, 0, 2, 2, 0}, -11},

@@ -6,21 +6,22 @@
 #include "asset.h"
 
 /*
- * Indices of the playable characters, in the order of the name table. A
- * character's models are this index plus a multiple of CHARACTER_COUNT.
+ * Indices of the playable characters, in the order of g_Players'
+ * characterIndex and of the tables that it indexes. A character's models
+ * are this index plus a multiple of CHARACTER_COUNT.
  */
 enum CharacterId {
   CHARACTER_PLUM,
   CHARACTER_CHARLIE,
-  CHARACTER_PEACH,
+  CHARACTER_MAPLE,
   CHARACTER_BABY_MARIO,
   CHARACTER_LUIGI,
-  CHARACTER_YOSHI,
+  CHARACTER_PEACH,
   CHARACTER_SONNY,
   CHARACTER_WARIO,
   CHARACTER_HARRY,
   CHARACTER_MARIO,
-  CHARACTER_MAPLE,
+  CHARACTER_YOSHI,
   CHARACTER_DONKEY_KONG,
   CHARACTER_BOWSER,
   CHARACTER_METAL_MARIO,
@@ -28,6 +29,32 @@ enum CharacterId {
   CHARACTER_SHERRY,
   CHARACTER_AZALEA,
   CHARACTER_JOE
+};
+
+/*
+ * The playable characters in the order that the menus' character grids,
+ * g_CharacterNames and the character name messages use, which swaps three
+ * of them around from CharacterId's order
+ */
+enum CharacterChoice {
+  CHARACTER_CHOICE_PLUM,
+  CHARACTER_CHOICE_CHARLIE,
+  CHARACTER_CHOICE_PEACH,
+  CHARACTER_CHOICE_BABY_MARIO,
+  CHARACTER_CHOICE_LUIGI,
+  CHARACTER_CHOICE_YOSHI,
+  CHARACTER_CHOICE_SONNY,
+  CHARACTER_CHOICE_WARIO,
+  CHARACTER_CHOICE_HARRY,
+  CHARACTER_CHOICE_MARIO,
+  CHARACTER_CHOICE_MAPLE,
+  CHARACTER_CHOICE_DONKEY_KONG,
+  CHARACTER_CHOICE_BOWSER,
+  CHARACTER_CHOICE_METAL_MARIO,
+  CHARACTER_CHOICE_KID,
+  CHARACTER_CHOICE_SHERRY,
+  CHARACTER_CHOICE_AZALEA,
+  CHARACTER_CHOICE_JOE
 };
 
 #define CHARACTER_COUNT 18
