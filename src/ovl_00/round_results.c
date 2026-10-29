@@ -1343,7 +1343,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   s32 step;
   s32 lift;
   s32 top;
-  s32 pan;
+  SoundPan pan;
   s32 centerX;
   s32 i;
 

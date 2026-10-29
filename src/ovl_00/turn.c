@@ -3260,7 +3260,7 @@ void UpdateTurns(void) {
             break;
         }
         {
-          s32 song = SONG_ROUND_UNK31;
+          SongId song = SONG_ROUND_UNK31;
 
           if (g_GameState.unk31) {
             PlaySong(song, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
@@ -3839,7 +3839,7 @@ void UpdateTurns(void) {
         if ((f_ShotSource != SHOT_SOURCE_PLAYER)
                 ? (D_80104F78.unk4 == g_CurrentShot.unk40)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
-          s32 sound;
+          SoundId sound;
 
           g_CurrentShot.unk4 = g_CurrentShot.unk40;
           D_80227150_ovl_00.power = func_8005F248(g_CurrentShot.unk40);

@@ -12,6 +12,19 @@
  */
 #define SOUND_FULL_SCALE 0x7F
 
+/* An enum Sound value */
+typedef s32 SoundId;
+/* An enum Song value, or NO_SONG */
+typedef s32 SongId;
+/* From 0 to SOUND_CHANNEL_COUNT - 1 */
+typedef s32 SoundChannel;
+/* How loud a sound plays, from 0 to SOUND_FULL_SCALE */
+typedef s32 SoundVolume;
+/* Where a sound plays, from 0 at the left to SOUND_FULL_SCALE at the right */
+typedef s32 SoundPan;
+/* How much echo a sound gets, from 0 to SOUND_FULL_SCALE */
+typedef s32 SoundReverb;
+
 /* The menus' sound channel, and how loud each of their sounds plays */
 #define MENU_SOUND_CHANNEL 15
 #define MENU_VOLUME_SOFT 80
@@ -467,31 +480,31 @@ enum CharacterSoundKind {
 };
 
 /* The audio channel for the next sound effect, alternating between two */
-extern s32 g_NextSoundChannel;
+extern SoundChannel g_NextSoundChannel;
 
-void PlaySound(s32 soundId, s32 channel, s32 volume);
-void PlaySoundWithEffects(
-    s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan);
-void StopSound(s32 channel);
-void SetSoundPan(s32 channel, s32 pan);
-void SetSoundVolume(s32 channel, s32 volume);
-void SetSoundReverb(s32 channel, s32 reverb);
-void FadeOutSound(s32 channel, u32 frameCount);
-void SetSoundTempo(s32 channel, s32 tempo);
+void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume);
+void PlaySoundWithEffects(SoundId soundId, SoundChannel channel,
+    SoundVolume volume, SoundReverb reverb, SoundPan pan);
+void StopSound(SoundChannel channel);
+void SetSoundPan(SoundChannel channel, SoundPan pan);
+void SetSoundVolume(SoundChannel channel, SoundVolume volume);
+void SetSoundReverb(SoundChannel channel, SoundReverb reverb);
+void FadeOutSound(SoundChannel channel, u32 frameCount);
+void SetSoundTempo(SoundChannel channel, s32 tempo);
 void PlayCharacterSound(
-    s32 character, s32 slot, s32 soundIndex, s32 volume, s32 pan);
+    s32 character, s32 slot, s32 soundIndex, SoundVolume volume, SoundPan pan);
 void QueueCharacterSound(
-    s32 character, s32 slot, s32 kind, s32 volume, s32 pan);
-void SetSoundFrequencyOffset(s32 channel, f32 offset);
+    s32 character, s32 slot, s32 kind, SoundVolume volume, SoundPan pan);
+void SetSoundFrequencyOffset(SoundChannel channel, f32 offset);
 s32 UpdateAudio(void);
 void StopSong(s32 fadeFrameCount);
 void RequestSongStop(void);
-void SetSongVolume(s32 volume);
-void SetSongReverb(s32 reverb);
+void SetSongVolume(SoundVolume volume);
+void SetSongReverb(SoundReverb reverb);
 void SetSongTempo(s32 tempo);
 void SetSongFrequencyOffset(f32 offset);
-s32 GetSongId(void);
-void PlaySong(s32 songId, s32 flags);
+SongId GetSongId(void);
+void PlaySong(SongId songId, s32 flags);
 void InitAudio(void);
 
 #endif

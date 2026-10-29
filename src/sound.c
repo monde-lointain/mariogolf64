@@ -58,14 +58,14 @@ typedef struct QueuedCharacterSound {
   /* 0x00 */ s32 character;
   /* 0x04 */ s32 delay; /* Frames until it plays; negative once played */
   /* 0x08 */ s32 kind;
-  /* 0x0C */ s32 volume;
-  /* 0x10 */ s32 pan;
+  /* 0x0C */ SoundVolume volume;
+  /* 0x10 */ SoundPan pan;
 } QueuedCharacterSound; /* size = 0x14 */
 
 /* A song change for UpdateAudio to make once its delay runs out */
 typedef struct SongChange {
   /* 0x00 */ s32 state;
-  /* 0x04 */ s32 songId;
+  /* 0x04 */ SongId songId;
   /* 0x08 */ s32 flags;
   /* 0x0C */ s32 delay;
 } SongChange; /* size = 0x10 */
@@ -76,7 +76,7 @@ extern u8 g_SoundWaveBankRomStart[];
 extern u8 g_SoundEffectBankRomStart[];
 extern u8 g_SoundEffectBankRomEnd[];
 
-s32 g_NextSoundChannel = 0;
+SoundChannel g_NextSoundChannel = 0;
 static s32 f_SongHandle = NO_HANDLE;
 /* Read by no routine */
 static s32 D_800C0E68 = -1;
@@ -118,7 +118,7 @@ static u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT] = {
 static s32 f_DelayEditorCharacter = 0;
 static s32 f_DelayEditorKind = 0;
 static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};
-static s32 f_SongId = NO_SONG;
+static SongId f_SongId = NO_SONG;
 /* The start and end of each song in the ROM, in turn */
 static u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2] = {
     (u32)g_SoundEffectBankRomEnd,
@@ -228,7 +228,7 @@ static u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2] = {
 static s32 D_800C1348[10] = {5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
 static u32 f_LastAudioFrame;
 
-musHandle StartSoundEffect(s32 soundId);
+musHandle StartSoundEffect(SoundId soundId);
 musHandle StartLoadedSong(void);
 void LoadSong(u32 romAddress, u32 size);
 void LoadSampleBank(u8* pointerBankRom, u32 pointerBankSize, u8* waveBankRom);
@@ -237,7 +237,7 @@ void InitMusic(musConfig* config);
 s32 func_8005DE00(void);
 s32 ChangeCustomEffect(s32 type);
 
-void PlaySound(s32 soundId, s32 channel, s32 volume) {
+void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
   s32* handle;
   s32 mask;
   s32 index;
@@ -293,8 +293,8 @@ void PlaySound(s32 soundId, s32 channel, s32 volume) {
  * The reverb goes only to the sound being stopped; the new one gets the
  * reverb PlaySound would give it.
  */
-void PlaySoundWithEffects(
-    s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan) {
+void PlaySoundWithEffects(SoundId soundId, SoundChannel channel,
+    SoundVolume volume, SoundReverb reverb, SoundPan pan) {
   s32* handle;
   s32 mask;
   s32 index;
@@ -346,7 +346,7 @@ void PlaySoundWithEffects(
   }
 }
 
-void StopSound(s32 channel) {
+void StopSound(SoundChannel channel) {
   s32 mask = osSetIntMask(OS_IM_NONE);
 
   if (f_SoundHandles[channel] != NO_HANDLE) {
@@ -356,7 +356,7 @@ void StopSound(s32 channel) {
   osSetIntMask(mask);
 }
 
-void SetSoundPan(s32 channel, s32 pan) {
+void SetSoundPan(SoundChannel channel, SoundPan pan) {
   s32 mask = osSetIntMask(OS_IM_NONE);
 
   if (f_SoundHandles[channel] != NO_HANDLE) {
@@ -366,7 +366,7 @@ void SetSoundPan(s32 channel, s32 pan) {
   osSetIntMask(mask);
 }
 
-void SetSoundVolume(s32 channel, s32 volume) {
+void SetSoundVolume(SoundChannel channel, SoundVolume volume) {
   s32 mask = osSetIntMask(OS_IM_NONE);
 
   if (f_SoundHandles[channel] != NO_HANDLE) {
@@ -376,7 +376,7 @@ void SetSoundVolume(s32 channel, s32 volume) {
   osSetIntMask(mask);
 }
 
-void SetSoundReverb(s32 channel, s32 reverb) {
+void SetSoundReverb(SoundChannel channel, SoundReverb reverb) {
   s32 mask = osSetIntMask(OS_IM_NONE);
 
   if (f_SoundHandles[channel] != NO_HANDLE) {
@@ -387,11 +387,11 @@ void SetSoundReverb(s32 channel, s32 reverb) {
 }
 
 /* UpdateAudio lowers the volume to nothing over the frames */
-void FadeOutSound(s32 channel, u32 frameCount) {
+void FadeOutSound(SoundChannel channel, u32 frameCount) {
   f_SoundFadeFrameCounts[channel] = frameCount;
 }
 
-void SetSoundTempo(s32 channel, s32 tempo) {
+void SetSoundTempo(SoundChannel channel, s32 tempo) {
   s32 mask = osSetIntMask(OS_IM_NONE);
 
   if (f_SoundHandles[channel] != NO_HANDLE) {
@@ -402,7 +402,7 @@ void SetSoundTempo(s32 channel, s32 tempo) {
 }
 
 void QueueCharacterSound(
-    s32 character, s32 slot, s32 kind, s32 volume, s32 pan) {
+    s32 character, s32 slot, s32 kind, SoundVolume volume, SoundPan pan) {
   f_QueuedCharacterSounds[slot].delay = f_CharacterSoundDelays[kind][character];
   f_QueuedCharacterSounds[slot].character = character;
   f_QueuedCharacterSounds[slot].kind = kind;
@@ -525,7 +525,7 @@ static void UpdateCharacterSounds(void) {
       f_DelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
 }
 
-void SetSoundFrequencyOffset(s32 channel, f32 offset) {
+void SetSoundFrequencyOffset(SoundChannel channel, f32 offset) {
   s32 mask = osSetIntMask(OS_IM_NONE);
 
   if (f_SoundHandles[channel] != NO_HANDLE) {
@@ -543,7 +543,7 @@ void SetSoundFrequencyOffset(s32 channel, f32 offset) {
 s32 UpdateAudio(void) {
   u32 frame;
   u32 frameCount;
-  s32 channel;
+  SoundChannel channel;
 
   frame = MusGetFrameCount();
   if (frame == f_LastAudioFrame) {
@@ -612,7 +612,7 @@ void RequestSongStop(void) {
   f_SongId = NO_SONG;
 }
 
-void SetSongVolume(s32 volume) {
+void SetSongVolume(SoundVolume volume) {
   s32 mask;
 
   if (f_SongHandle != NO_HANDLE) {
@@ -622,7 +622,7 @@ void SetSongVolume(s32 volume) {
   }
 }
 
-void SetSongReverb(s32 reverb) {
+void SetSongReverb(SoundReverb reverb) {
   s32 mask;
 
   if (f_SongHandle != NO_HANDLE) {
@@ -652,7 +652,7 @@ void SetSongFrequencyOffset(f32 offset) {
   }
 }
 
-s32 GetSongId(void) {
+SongId GetSongId(void) {
   return f_SongId;
 }
 
@@ -660,7 +660,7 @@ s32 GetSongId(void) {
  * Starts a song. While another song plays, or this one with
  * SONG_FLAG_RESTART, has UpdateAudio stop it and start this one instead.
  */
-void PlaySong(s32 songId, s32 flags) {
+void PlaySong(SongId songId, s32 flags) {
   if (!IsGameFlagSet(GAME_FLAG_SILENCE_SONGS)) {
     if (func_8005DE00() && (flags & SONG_FLAG_UNK10)) {
       RequestSongStop();
@@ -701,7 +701,7 @@ void PlaySong(s32 songId, s32 flags) {
 }
 
 void InitAudio(void) {
-  s32 channel;
+  SoundChannel channel;
 
   InitMusic(NULL);
   f_PendingSongChange.state = SONG_CHANGE_NONE;

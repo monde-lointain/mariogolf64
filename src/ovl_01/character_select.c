@@ -572,7 +572,7 @@ s32 func_80209D50_ovl_01(
   u16 faceCharacter;
   void* faceImage;
   u16(*faceAssets)[8];
-  s32 channel;
+  SoundChannel channel;
 
   if (IsHudAnimationDone() != TRUE) {
     return;

@@ -313,7 +313,7 @@ static s32 f_OpeningFrameCount = 0;
  */
 static Boolean f_HasLogoStarted = FALSE;
 /* The channel for the script's next sound */
-static s32 f_OpeningSoundChannel = 0;
+static SoundChannel f_OpeningSoundChannel = 0;
 static s32 f_LogoClubPosition[3] = {0, 2300, 32};
 static f32 f_LogoClubOrbitRadius = LOGO_CLUB_START_ORBIT_RADIUS;
 static Boolean f_IsLogoClubSwinging = FALSE;
@@ -608,8 +608,8 @@ static Mtx f_OpeningSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
  * The channels of two sounds that keep playing into the title screen: Donkey
  * Kong's, when he is shown, and the one the last scene starts
  */
-static s32 f_DonkeyKongSoundChannel;
-static s32 f_ClosingSoundChannel;
+static SoundChannel f_DonkeyKongSoundChannel;
+static SoundChannel f_ClosingSoundChannel;
 static u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
 static s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
 static s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
@@ -1399,7 +1399,7 @@ void UpdateOpening(void) {
   Vec3 logoBallPoint;
   Vec3 handPoint;
   s32 slot;
-  s32 channel;
+  SoundChannel channel;
   s32 i;
   s32 pressedButtons;
   s32 skipButtons;

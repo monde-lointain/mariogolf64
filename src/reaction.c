@@ -169,7 +169,7 @@ static Lights3 f_ReactionLights =
     gdSPDefLights3(0x60, 0x60, 0x60, 0xFF, 0xDC, 0xDC, 0x00, 0x88, 0x78, 0xFF,
         0xDC, 0xDC, 0x00, 0x88, 0x78, 0xFF, 0xDC, 0xDC, 0x00, 0x88, 0x78);
 
-static s32 f_ReactionChannel = FIRST_REACTION_CHANNEL;
+static SoundChannel f_ReactionChannel = FIRST_REACTION_CHANNEL;
 
 static s32 f_ReactionCharacter;
 static s32 f_ReactionAnimation;
@@ -318,7 +318,7 @@ void TurnOffReactionLight(void) {
 }
 
 /* Plays the sound if this is the frame after the given one */
-void CueReactionSound(s32 frame, s32 soundId) {
+void CueReactionSound(s32 frame, SoundId soundId) {
   if (soundId != NO_REACTION_SOUND && f_ReactionFrame - 1 == frame) {
     PlaySound(soundId, f_ReactionChannel, SOUND_FULL_SCALE);
     f_ReactionChannel++;

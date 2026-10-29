@@ -480,7 +480,7 @@ void StartScorecardTally(s32 layout) {
   s32 ranks[MAX_PLAYER_COUNT];
   s32 scoresToPar[MAX_PLAYER_COUNT];
   s32 holeIndex;
-  s32 song;
+  SongId song;
   s32 timedHoleCount;
   s32 i;
   s32 j;
@@ -1384,7 +1384,7 @@ void FreeResultCharacters(void) {
 #ifdef NON_MATCHING
 s32 LoadResultCharacters(void) {
   s32 holeIndex = g_Scorecard.content.holeIndex - 1;
-  s32 song;
+  SongId song;
 
   if (IsCharacterSlotBusy(0) || IsCharacterSlotBusy(1)) {
     FreeCharacterSlot(0);

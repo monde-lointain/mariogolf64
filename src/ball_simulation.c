@@ -253,8 +253,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   s32 rollSpeed;
   Boolean isSteep;
 
-  void PlayStrokeImpactSound(s32 sound, f32 fullSpeed, f32 speed) {
-    s32 volume = speed * 127.0f / fullSpeed;
+  void PlayStrokeImpactSound(SoundId sound, f32 fullSpeed, f32 speed) {
+    SoundVolume volume = speed * 127.0f / fullSpeed;
 
     if (volume >= 10) {
       if (volume >= 128) {
@@ -287,8 +287,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   }
 
   void PlayBillboardHitSound(s32 cell, s32 speed) {
-    void PlayImpactSound(s32 sound, f32 fullSpeed, f32 speed) {
-      s32 volume = speed * 127.0f / fullSpeed;
+    void PlayImpactSound(SoundId sound, f32 fullSpeed, f32 speed) {
+      SoundVolume volume = speed * 127.0f / fullSpeed;
 
       if (volume >= 10) {
         if (volume >= 128) {
@@ -564,7 +564,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 (velocity[AXIS_Z] * velocity[AXIS_Z]));
 
             if (speed > 142.2336f) {
-              s32 volume = speed * 8.858665f;
+              SoundVolume volume = speed * 8.858665f;
 
               if (volume >= 127) {
                 volume = 126;
@@ -823,7 +823,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 scale) +
             g_HoleSetup.cupPosition[AXIS_Z];
         if (speed >= 711.168f) {
-          s32 volume = speed * 0.88586664f;
+          SoundVolume volume = speed * 0.88586664f;
 
           if (volume >= 127) {
             volume = 126;
@@ -876,7 +876,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->unkA8[0] = 2;
         } else if (simulation->unkA8[0] == 0) {
           if (fallSpeed >= 284.4672f) {
-            s32 volume = fallSpeed * 0.88586664f;
+            SoundVolume volume = fallSpeed * 0.88586664f;
 
             if (volume >= 128) {
               volume = 127;
@@ -2014,7 +2014,7 @@ NEXT:
         simulation->unkA8[1] = FALSE;
       } else {
         s32 rollFrames = (u16)simulation->unkB2;
-        s32 volume;
+        SoundVolume volume;
 
         if (rollFrames > 5) {
           rollFrames = 5;

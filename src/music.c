@@ -7,6 +7,8 @@
 #include <PR/libmus.h>
 #include <lib/libnusys/nusys.h>
 
+#include "sound.h"
+
 /* Called with NU_SC_PRENMI_MSG on a pre-NMI, then with NU_SC_RETRACE_MSG after
  * each audio task */
 typedef void (*AudioEventCallback)(NUScMsg type, s32 frame);
@@ -220,12 +222,12 @@ void AllocSoundEffectBuffer(s32 size) {
   f_SoundEffectBuffer = __MusIntMemMalloc(size);
 }
 
-musHandle StartSoundEffect(s32 soundId) {
+musHandle StartSoundEffect(SoundId soundId) {
   return MusStartEffect(soundId);
 }
 
-musHandle StartSoundEffectWith(
-    s32 soundId, s32 volume, s32 pan, s32 restartFlag, s32 priority) {
+musHandle StartSoundEffectWith(SoundId soundId, SoundVolume volume,
+    SoundPan pan, s32 restartFlag, s32 priority) {
   return MusStartEffect2(soundId, volume, pan, restartFlag, priority);
 }
 

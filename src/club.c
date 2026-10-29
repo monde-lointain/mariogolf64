@@ -1744,7 +1744,7 @@ void HandleShotModeInput(void) {
       GetCupDistance(g_CurrentShot.ballPosition[0] - g_HoleSetup.cupPosition[0],
           g_CurrentShot.ballPosition[2] - g_HoleSetup.cupPosition[2]) *
       YARDS_PER_UNIT;
-  s32 sound;
+  SoundId sound;
 
   if ((g_MenuControllerData[g_CurrentShot.controllerIndex].button & B_BUTTON) &&
       IsShotModeChangeDone()) {

@@ -172,7 +172,7 @@ void ClearShotEffects(s32 kind) {
 }
 
 void StopAllSounds(void) {
-  s32 channel;
+  SoundChannel channel;
 
   for (channel = 0; channel != SOUND_CHANNEL_COUNT; channel++) {
     StopSound(channel);

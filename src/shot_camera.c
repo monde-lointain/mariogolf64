@@ -2834,7 +2834,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   f32 point[3];
   s32 step;
-  s32 volume;
+  SoundVolume volume;
   s32 aheadStep;
   s32 waitFrame;
   s32* flightStep;

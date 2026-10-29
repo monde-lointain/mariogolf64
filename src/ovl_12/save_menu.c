@@ -293,7 +293,7 @@ static char f_EndGameText[] = "End Game";
 static char f_SaveMenuText[] = "Save Menu";
 static s32 f_IconImageIndex = 0;
 static s32 f_UnusedSaveMenuWord = 0;
-static s32 f_ResumedSongId = NO_SONG;
+static SongId f_ResumedSongId = NO_SONG;
 static s16 f_ReplayLabelIds[REPLAY_LABEL_COUNT] = {
     0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C};
 static s32 f_IconFrameTimer = 0;
