@@ -83,8 +83,8 @@ typedef struct MenuMemory {
   /* 0x37 */ s8 tableFirstColumn; /* The first column shown of a table wider
                                      than the screen */
   /* 0x38 */ s8 tableFirstRow; /* And the first row shown of one taller */
-  /* 0x39 */ s8 unk39;
-  /* 0x3A */ s8 unk3A;
+  /* 0x39 */ s8 bestShotColumn; /* The Best Shots cursor's cell */
+  /* 0x3A */ s8 bestShotRow;
   /* 0x3B */ s8 ringShotRow; /* The Ring Shot records' row: a course, or the
                                 replays after them */
   /* 0x3C */ s8

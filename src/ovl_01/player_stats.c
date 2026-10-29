@@ -1918,9 +1918,10 @@ void UpdateBestShots(void) {
         if (GetChosenBestShot() != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           D_801B9410 = 0;
-          column = memory->unk39;
-          LoadWipeShape(
-              (s8)save->rankedRecords[D_8023B640_ovl_01[memory->unk3A][column]]
+          column = memory->bestShotColumn;
+          LoadWipeShape((s8)save
+                  ->rankedRecords[D_8023B640_ovl_01[memory->bestShotRow]
+                                                   [column]]
                   .courseIndex);
           StartWipe(WIPE_CLOSING);
           D_801052E8 = 0;
@@ -1936,31 +1937,31 @@ void UpdateBestShots(void) {
         }
       } else if (g_MenuRepeatButtons & U_JPAD) {
         moved = FindNextBestShotCell(
-            memory->unk39, memory->unk3A, STATS_DIRECTION_UP);
+            memory->bestShotColumn, memory->bestShotRow, STATS_DIRECTION_UP);
         if ((s16)moved != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          memory->unk3A = moved;
+          memory->bestShotRow = moved;
         }
       } else if (g_MenuRepeatButtons & D_JPAD) {
         moved = FindNextBestShotCell(
-            memory->unk39, memory->unk3A, STATS_DIRECTION_DOWN);
+            memory->bestShotColumn, memory->bestShotRow, STATS_DIRECTION_DOWN);
         if ((s16)moved != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          memory->unk3A = moved;
+          memory->bestShotRow = moved;
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
         moved = FindNextBestShotCell(
-            memory->unk39, memory->unk3A, STATS_DIRECTION_LEFT);
+            memory->bestShotColumn, memory->bestShotRow, STATS_DIRECTION_LEFT);
         if ((s16)moved != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          memory->unk39 = moved;
+          memory->bestShotColumn = moved;
         }
       } else if (g_MenuRepeatButtons & R_JPAD) {
         moved = FindNextBestShotCell(
-            memory->unk39, memory->unk3A, STATS_DIRECTION_RIGHT);
+            memory->bestShotColumn, memory->bestShotRow, STATS_DIRECTION_RIGHT);
         if ((s16)moved != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          memory->unk39 = moved;
+          memory->bestShotColumn = moved;
         }
       }
     }
@@ -2083,7 +2084,8 @@ void DrawBestShots(Gfx** displayListHead) {
     }
   }
 
-  if (D_8023B640_ovl_01[memory->unk3A][memory->unk39] != STATS_CELL_EMPTY) {
+  if (D_8023B640_ovl_01[memory->bestShotRow][memory->bestShotColumn] !=
+      STATS_CELL_EMPTY) {
     DrawBestShotsCursor(&gfx);
   }
 
@@ -2101,8 +2103,8 @@ void DrawBestShots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
-  chosenRow = memory->unk3A;
-  chosenColumn = memory->unk39;
+  chosenRow = memory->bestShotRow;
+  chosenColumn = memory->bestShotColumn;
   if (D_8023B640_ovl_01[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
     gDPLoadTLUT_pal256(gfx++,
         TextureAddress(
@@ -2146,8 +2148,8 @@ void DrawBestShots(Gfx** displayListHead) {
         (s16)(RECORD_PLACE_Y + (row * STATS_CURSOR_ROW_HEIGHT)), g_PrintBuffer);
   }
 
-  chosenRow = memory->unk3A;
-  chosenColumn = memory->unk39;
+  chosenRow = memory->bestShotRow;
+  chosenColumn = memory->bestShotColumn;
   if (D_8023B640_ovl_01[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
     sprintf(g_PrintBuffer, D_802319E0_ovl_01,
         g_CourseRecords
@@ -2257,12 +2259,13 @@ void ReadBestShots(void) {
     }
   }
 
-  switch (memory->unk3A) {
+  switch (memory->bestShotRow) {
     case 0:
       if (kindThreeCount != 0) {
         row = 0;
-        if (memory->unk39 < kindThreeCount && memory->unk39 >= 0) {
-          column = memory->unk39;
+        if (memory->bestShotColumn < kindThreeCount &&
+            memory->bestShotColumn >= 0) {
+          column = memory->bestShotColumn;
         }
       }
 
@@ -2270,8 +2273,9 @@ void ReadBestShots(void) {
     case 1:
       if (kindTwoCount != 0) {
         row = 1;
-        if (memory->unk39 < kindTwoCount && memory->unk39 >= 0) {
-          column = memory->unk39;
+        if (memory->bestShotColumn < kindTwoCount &&
+            memory->bestShotColumn >= 0) {
+          column = memory->bestShotColumn;
         }
       }
 
@@ -2279,8 +2283,9 @@ void ReadBestShots(void) {
     case 2:
       if (kindOneCount != 0) {
         row = 2;
-        if (memory->unk39 < kindOneCount && memory->unk39 >= 0) {
-          column = memory->unk39;
+        if (memory->bestShotColumn < kindOneCount &&
+            memory->bestShotColumn >= 0) {
+          column = memory->bestShotColumn;
         }
       }
 
@@ -2288,16 +2293,17 @@ void ReadBestShots(void) {
     case 3:
       if (kindZeroCount != 0) {
         row = 3;
-        if (memory->unk39 < kindZeroCount && memory->unk39 >= 0) {
-          column = memory->unk39;
+        if (memory->bestShotColumn < kindZeroCount &&
+            memory->bestShotColumn >= 0) {
+          column = memory->bestShotColumn;
         }
       }
 
       break;
   }
 
-  memory->unk39 = column;
-  memory->unk3A = row;
+  memory->bestShotColumn = column;
+  memory->bestShotRow = row;
   for (recordIndex = 0; recordIndex != STATS_GRID_COLUMN_COUNT; recordIndex++) {
     D_8023B640_ovl_01[0][recordIndex] = kindRecords[0][recordIndex];
     D_8023B640_ovl_01[1][recordIndex] = kindRecords[1][recordIndex];
@@ -2383,7 +2389,7 @@ s8 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
 s16 GetChosenBestShot(void) {
   MenuMemory* memory = func_8005AF74();
 
-  return D_8023B640_ovl_01[memory->unk3A][memory->unk39];
+  return D_8023B640_ovl_01[memory->bestShotRow][memory->bestShotColumn];
 }
 
 /* Draws one of the Japanese score labels at (left, top); nothing calls it */
@@ -2465,8 +2471,9 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
   guTranslate(&D_8023B450_ovl_01,
-      (memory->unk39 * STATS_CURSOR_COLUMN_WIDTH) + STATS_CURSOR_LEFT_X,
-      STATS_CURSOR_TOP_Y - (memory->unk3A * STATS_CURSOR_ROW_HEIGHT),
+      (memory->bestShotColumn * STATS_CURSOR_COLUMN_WIDTH) +
+          STATS_CURSOR_LEFT_X,
+      STATS_CURSOR_TOP_Y - (memory->bestShotRow * STATS_CURSOR_ROW_HEIGHT),
       MENU_CURSOR_Z);
   guRotate(&D_8023B490_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
   guScale(&D_8023B550_ovl_01, 1.0f, MENU_CURSOR_SCALE_Y, 1.0f);
