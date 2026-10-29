@@ -222,6 +222,13 @@ void ResetBallSimulations(void) {
 /* The channels of a rolling ball's sound and of a ring passed through */
 #define ROLL_SOUND_CHANNEL 8
 #define RING_SOUND_CHANNEL 14
+/* Hit sounds quieter than this are not played */
+#define MIN_HIT_SOUND_VOLUME 10
+/* The speeds of the ball's hits whose sounds play at SOUND_FULL_SCALE: most
+ * hits, a wall's and a lip-out's */
+#define FULL_VOLUME_HIT_SPEED 2844.672f
+#define FULL_VOLUME_WALL_HIT_SPEED 1422.336f
+#define FULL_VOLUME_LIP_OUT_SPEED 711.168f
 
 /*
  * Moves the simulated ball through one step, with a second substep when the
@@ -257,11 +264,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   Boolean isSteep;
 
   void PlayStrokeImpactSound(SoundId sound, f32 fullSpeed, f32 speed) {
-    SoundVolume volume = speed * 127.0f / fullSpeed;
+    SoundVolume volume = speed * SOUND_FULL_SCALE / fullSpeed;
 
-    if (volume >= 10) {
-      if (volume >= 128) {
-        volume = 127;
+    if (volume >= MIN_HIT_SOUND_VOLUME) {
+      if (volume > SOUND_FULL_SCALE) {
+        volume = SOUND_FULL_SCALE;
       }
 
       if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -291,11 +298,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
   void PlayBillboardHitSound(BillboardCell cell, s32 speed) {
     void PlayImpactSound(SoundId sound, f32 fullSpeed, f32 speed) {
-      SoundVolume volume = speed * 127.0f / fullSpeed;
+      SoundVolume volume = speed * SOUND_FULL_SCALE / fullSpeed;
 
-      if (volume >= 10) {
-        if (volume >= 128) {
-          volume = 127;
+      if (volume >= MIN_HIT_SOUND_VOLUME) {
+        if (volume > SOUND_FULL_SCALE) {
+          volume = SOUND_FULL_SCALE;
         }
 
         PlaySound(sound, g_NextSoundChannel, volume);
@@ -304,17 +311,17 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
     switch (cell) {
       case BILLBOARD_CELL_TRUNK:
-        PlayImpactSound(SOUND_HIT_TRUNK, 2844.672f, speed);
+        PlayImpactSound(SOUND_HIT_TRUNK, FULL_VOLUME_HIT_SPEED, speed);
         break;
       case BILLBOARD_CELL_FOLIAGE:
-        PlayImpactSound(SOUND_HIT_FOLIAGE, 2844.672f, speed);
+        PlayImpactSound(SOUND_HIT_FOLIAGE, FULL_VOLUME_HIT_SPEED, speed);
         break;
       case BILLBOARD_CELL_SHELL:
-        PlayImpactSound(SOUND_HIT_SHELL, 2844.672f, speed);
+        PlayImpactSound(SOUND_HIT_SHELL, FULL_VOLUME_HIT_SPEED, speed);
         break;
       case BILLBOARD_CELL_SOLID:
       default:
-        PlayImpactSound(SOUND_HIT_SOLID, 2844.672f, speed);
+        PlayImpactSound(SOUND_HIT_SOLID, FULL_VOLUME_HIT_SPEED, speed);
         break;
     }
   }
@@ -752,8 +759,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   StartFlagstickSparks(simulation->position);
                 }
 
-                PlayStrokeImpactSound(
-                    SOUND_HIT_CUP_WALL, 711.168f, outwardSpeed);
+                PlayStrokeImpactSound(SOUND_HIT_CUP_WALL,
+                    FULL_VOLUME_LIP_OUT_SPEED, outwardSpeed);
               }
             }
           }
@@ -882,8 +889,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (fallSpeed >= 284.4672f) {
             SoundVolume volume = fallSpeed * 0.88586664f;
 
-            if (volume >= 128) {
-              volume = 127;
+            if (volume > SOUND_FULL_SCALE) {
+              volume = SOUND_FULL_SCALE;
             }
 
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -978,8 +985,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         guNormalize(&normalX, &normalY, &normalZ);
         inwardSpeed = (-normalZ * velocity[AXIS_X]) +
             (normalY * velocity[AXIS_Y]) + (normalX * velocity[AXIS_Z]);
-        PlayStrokeImpactSound(
-            SOUND_HIT_WALL, 1422.336f, AbsoluteValueExpression(inwardSpeed));
+        PlayStrokeImpactSound(SOUND_HIT_WALL, FULL_VOLUME_WALL_HIT_SPEED,
+            AbsoluteValueExpression(inwardSpeed));
         squareX = velocity[AXIS_X] * velocity[AXIS_X];
         squareZ = velocity[AXIS_Z] * velocity[AXIS_Z];
         along = wallFraction;
@@ -1305,13 +1312,15 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       switch (GetSurfaceInfo(simulation->surface)->kind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
-          PlayStrokeImpactSound(SOUND_LAND_GREEN, 2844.672f, impactSpeed);
+          PlayStrokeImpactSound(
+              SOUND_LAND_GREEN, FULL_VOLUME_HIT_SPEED, impactSpeed);
           break;
         case SURFACE_KIND_FAIRWAY:
         case SURFACE_KIND_FAIRWAY_FAIR_LIE:
         case SURFACE_KIND_FAIRWAY_POOR_LIE:
         case SURFACE_KIND_SEMI_ROUGH:
-          PlayStrokeImpactSound(SOUND_LAND_FAIRWAY, 2844.672f, impactSpeed);
+          PlayStrokeImpactSound(
+              SOUND_LAND_FAIRWAY, FULL_VOLUME_HIT_SPEED, impactSpeed);
           break;
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
@@ -1319,7 +1328,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_BUNKER_UNK9:
         case SURFACE_KIND_BARE_GROUND:
         case SURFACE_KIND_WASTE_AREA:
-          PlayStrokeImpactSound(SOUND_LAND_SAND, 2844.672f, impactSpeed);
+          PlayStrokeImpactSound(
+              SOUND_LAND_SAND, FULL_VOLUME_HIT_SPEED, impactSpeed);
           break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROUGH_POOR_LIE:
@@ -1329,7 +1339,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_TEE_GROUND:
         case SURFACE_KIND_ROCK:
         case SURFACE_KIND_DEEP_ROUGH:
-          PlayStrokeImpactSound(SOUND_LAND_ROUGH, 2844.672f, impactSpeed);
+          PlayStrokeImpactSound(
+              SOUND_LAND_ROUGH, FULL_VOLUME_HIT_SPEED, impactSpeed);
           break;
       }
 
