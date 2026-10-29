@@ -3504,6 +3504,7 @@ f_BetStakeAmounts = 0x802304F4; // type:u8 size:0x8 segment:ovl_01
 D_802304FC_ovl_01 = 0x802304FC; // type:s32 size:0xA8 segment:ovl_01
 D_802309F0_ovl_01 = 0x802309F0; // type:s32 size:0x40 segment:ovl_01
 D_80231138_ovl_01 = 0x80231138; // type:s32 size:0x40 segment:ovl_01
+f_GameModeLabelOffsets = 0x80230CEC; // type:s32 size:0x2C segment:ovl_01
 D_80230D18_ovl_01 = 0x80230D18; // type:f32 size:0xC segment:ovl_01
 D_80230D28_ovl_01 = 0x80230D28; // type:f32 size:0xC0 segment:ovl_01
 f_SaveMenuModeIcons = 0x80230BB0; // type:s32 size:0x2C segment:ovl_01

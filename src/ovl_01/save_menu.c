@@ -217,9 +217,9 @@ static s32 D_80230CB8_ovl_01[11] = {
     110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 /* Read by no routine */
 static char D_80230CE4_ovl_01[] = "Hole";
-/* How far left of the label's place each row of the game modes' image is drawn
+/* How far left of the label's place each mode icon's game mode label is drawn
  */
-static s32 D_80230CEC_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1] = {
+static s32 f_GameModeLabelOffsets[MODE_ICON_COUNT] = {
     85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
 static f32 D_80230D18_ovl_01[3] = {0.0f, 0.0f, 0.0f};
 /* Read by no routine */
@@ -2052,7 +2052,7 @@ void DrawSavedGames(Gfx** displayListHead) {
   DrawCenteredPageArrows(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
   chosenMode = &f_SavedGameModes[memory->savedGameIndex];
   if (*chosenMode != NO_SAVE_MENU_MODE) {
-    labelOffset = &D_80230CEC_ovl_01[f_SaveMenuModeIcons[*chosenMode]];
+    labelOffset = &f_GameModeLabelOffsets[f_SaveMenuModeIcons[*chosenMode]];
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
     gDPLoadTextureBlock_4b(gfx++,
         TextureAddress(ImageTexels(f_GameModeLabels) +
