@@ -3,17 +3,23 @@
 
 #include <ultra64.h>
 
-/* SetMenuBackdrop's backdrops, and the styles that DrawGame draws them in */
-#define MENU_BACKDROP_NONE (-1)
-#define MENU_BACKDROP_STILL 0
-/* The last frame in brown, read as intensity */
-#define MENU_BACKDROP_TINTED 1
-/* The last frame, dimming to half brightness */
-#define MENU_BACKDROP_DIMMING 2
-#define MENU_BACKDROP_PATTERN 3 /* A scrolling pattern */
-#define MENU_BACKDROP_STYLE_NONE 0
-#define MENU_BACKDROP_STYLE_PLAIN 1
-#define MENU_BACKDROP_STYLE_UNK2 2
+/* SetMenuBackdrop's backdrops */
+enum MenuBackdrop {
+  MENU_BACKDROP_NONE = -1,
+  MENU_BACKDROP_STILL,
+  /* The last frame in brown, read as intensity */
+  MENU_BACKDROP_TINTED,
+  /* The last frame, dimming to half brightness */
+  MENU_BACKDROP_DIMMING,
+  MENU_BACKDROP_PATTERN /* A scrolling pattern */
+};
+
+/* The styles that DrawGame draws the backdrops in */
+enum MenuBackdropStyle {
+  MENU_BACKDROP_STYLE_NONE,
+  MENU_BACKDROP_STYLE_PLAIN,
+  MENU_BACKDROP_STYLE_UNK2
+};
 
 /* StartHudAnimation's animations, which DrawHudAnimation draws */
 enum HudAnimation {
@@ -80,6 +86,7 @@ typedef struct Unk800C5F34 {
   /* 0x1C */ u8 imageKind; /* A SKY_IMAGE_KIND_* value */
 } Unk800C5F34;
 
+/* A MENU_BACKDROP_STYLE_* value */
 extern s32 g_MenuBackdropStyle;
 
 void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused);

@@ -1533,7 +1533,7 @@ s32 DrawGame(void) {
 
         break;
       case DRAW_MODE_COURSE:
-        if (g_MenuBackdropStyle != 0 &&
+        if (g_MenuBackdropStyle != MENU_BACKDROP_STYLE_NONE &&
             g_PauseScreen != PAUSE_SCREEN_FREE_LOOK) {
           ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
         } else if (g_HasLoaderFinished == 0) {
@@ -1746,7 +1746,7 @@ s32 DrawGame(void) {
 
     gSPMatrix(g_DisplayListHead++, &f_IdentityMatrix,
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    if (g_MenuBackdropStyle != 0) {
+    if (g_MenuBackdropStyle != MENU_BACKDROP_STYLE_NONE) {
       if (viewIndex == 0) {
         CaptureMenuBackdrop(&g_DisplayListHead, g_MenuBackdropStyle);
         DrawMenuBackdrop(&g_DisplayListHead);
@@ -1755,7 +1755,7 @@ s32 DrawGame(void) {
 
     if (drawMode == DRAW_MODE_COURSE) {
       if (g_HasLoaderFinished == 1 &&
-          (g_MenuBackdropStyle == 0 ||
+          (g_MenuBackdropStyle == MENU_BACKDROP_STYLE_NONE ||
               g_PauseScreen == PAUSE_SCREEN_FREE_LOOK)) {
         if (g_Cameras[viewIndex].view.drawFlags != 0) {
           if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&

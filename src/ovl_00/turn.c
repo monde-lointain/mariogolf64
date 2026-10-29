@@ -3410,7 +3410,7 @@ void UpdateTurns(void) {
             StopSound(8);
             PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
             g_PauseScreen = PAUSE_SCREEN_PAUSE_MENU;
-            SetMenuBackdrop(2);
+            SetMenuBackdrop(MENU_BACKDROP_DIMMING);
             RequestPauseMenu(g_Players[playerIndex].strokeCount != 0, 0);
             HideRoundHud();
           }
@@ -3421,7 +3421,7 @@ void UpdateTurns(void) {
           PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
           RequestPauseMenu(0, -1);
           g_PauseScreen = PAUSE_SCREEN_NONE;
-          SetMenuBackdrop(-1);
+          SetMenuBackdrop(MENU_BACKDROP_NONE);
           ResumeRound();
           break;
         }
@@ -3487,14 +3487,14 @@ void UpdateTurns(void) {
           switch (UpdatePrompt(&g_TurnController)) {
             case PROMPT_RESULT_GIVE_UP_HOLE:
               D_800C3094 = 1;
-              SetMenuBackdrop(-1);
+              SetMenuBackdrop(MENU_BACKDROP_NONE);
               ResumeRound();
               nextState = PLAYER_STATE_STARTING_REACTION;
               GiveUpHole(playerIndex);
               break;
             case PROMPT_RESULT_RESUME:
               g_PauseScreen = PAUSE_SCREEN_NONE;
-              SetMenuBackdrop(-1);
+              SetMenuBackdrop(MENU_BACKDROP_NONE);
               ResumeRound();
               break;
             case PROMPT_RESULT_SAVE_REPLAY:
@@ -3521,7 +3521,7 @@ void UpdateTurns(void) {
         } else if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
           if (g_TurnController.pressedButtons & (A_BUTTON | R_TRIG)) {
             g_PauseScreen = PAUSE_SCREEN_NONE;
-            SetMenuBackdrop(-1);
+            SetMenuBackdrop(MENU_BACKDROP_NONE);
             SetFramebufferCount(3);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
             g_LetterboxState = 0;
