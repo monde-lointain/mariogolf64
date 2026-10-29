@@ -230,8 +230,8 @@
 #define GAME_FLAG_UNK99 0x99
 
 /*
- * Set by the staff roll's timeline as it starts; it has scene 30 draw in
- * DRAW_MODE_COURSE
+ * Set by the staff roll's timeline as it starts; it has SCENE_STAFF_ROLL
+ * draw in DRAW_MODE_COURSE
  */
 #define GAME_FLAG_UNK9A 0x9A
 

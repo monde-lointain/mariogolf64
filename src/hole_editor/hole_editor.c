@@ -275,7 +275,7 @@ enum TriangleEdit {
 #define HOLE_POINT_TEXT_COLUMN 9
 #define HOLE_POINT_MODE_TEXT_ROW 6
 #define HOLE_POINT_INDEX_TEXT_ROW 7
-/* How scene 9's cursor zooms the map camera each frame R or L is held */
+/* How SCENE_UNK9's cursor zooms the map camera each frame R or L is held */
 #define CURSOR_ZOOM_IN_FACTOR 1.1f
 #define CURSOR_ZOOM_OUT_FACTOR 0.9f
 #define CURSOR_ZOOM_MAX 10.0f
@@ -569,10 +569,11 @@ static u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
 static s32 f_HolePointCursor[2] = {0, 0}; /* x, z */
 /* Read by no routine */
 static s32 D_8040C5A4_hole_editor = -1;
-/* The cell that scene 9's cursor is on */
+/* The cell that SCENE_UNK9's cursor is on */
 static s32 f_CellCursorColumn = 0;
 static s32 f_CellCursorRow = 0;
-/* The ground point that scene 10's cursor is on, starting at scene 9's cell */
+/* The ground point that SCENE_UNK10's cursor is on, starting at SCENE_UNK9's
+ * cell */
 static s32 f_PointCursorColumn = 0;
 static s32 f_PointCursorRow = 0;
 static s32 D_8040C5B8_hole_editor = 0;
@@ -732,9 +733,9 @@ void* func_80400000_hole_editor(void) {
 }
 
 /*
- * Runs scene 9's cell cursor: the D-pad moves it over the ground cells,
+ * Runs SCENE_UNK9's cell cursor: the D-pad moves it over the ground cells,
  * R and L zoom the map camera, A toggles the cell's bit and Z hands the
- * cell to scene 10. The map camera's eye stays over the cell's middle.
+ * cell to SCENE_UNK10. The map camera's eye stays over the cell's middle.
  */
 void func_8040000C_hole_editor(void) {
   Vtx* corner;
@@ -804,11 +805,11 @@ void func_8040000C_hole_editor(void) {
 }
 
 /*
- * Scene 10's ground point editor. The control pad moves the cursor over the
+ * SCENE_UNK10's ground point editor. The control pad moves the cursor over the
  * ground points, and the C-buttons move the point and its texture coordinates
  * within its tile; a point on a tile's edge stays on that edge. A move
  * that would make a dead triangle is undone. R and L zoom the map camera, and Z
- * hands the point back to scene 9.
+ * hands the point back to SCENE_UNK9.
  */
 void func_804002C0_hole_editor(void) {
   Vtx_t points[POINT_MOVE_COUNT +
@@ -3207,7 +3208,7 @@ s32 func_804066C8_hole_editor(s32 column, s32 row) {
 }
 
 /*
- * Runs scene 11's menu, which loads a hole with BuildHole or saves the
+ * Runs SCENE_UNK11's menu, which loads a hole with BuildHole or saves the
  * one in memory with SaveHoleFiles. The D-pad picks the action, then the
  * course and the hole; A goes on to the next step and B goes back.
  */

@@ -15,7 +15,8 @@
  */
 
 /*
- * Scenes the debug scene menu offers. The map scenes each run one routine
+ * The game's scenes, most of which the debug scene menu offers. The map
+ * scenes each run one routine
  * in the hole_editor overlay, and the hole-editor names below follow the
  * menu's labels until those routines are decompiled.
  */
@@ -35,10 +36,17 @@ enum Scene {
   SCENE_MENU = 14,
   SCENE_TRIANGLES = 15,
   SCENE_RINGS = 16,
+  SCENE_UNK17 = 17,
+  SCENE_UNK18 = 18,
   SCENE_OPENING = 19, /* The opening movie */
+  SCENE_UNK20 = 20,
   SCENE_TITLE_SCREEN = 21,
+  SCENE_UNK22 = 22,
   /* The current scene while UpdateOverlays swaps the scene's modules */
   SCENE_SWAPPING_MODULES = 25,
+  /* Waits for A or Start, then enters the boot logos; no code found enters it
+   */
+  SCENE_CONFIRM_WAIT = 26,
   SCENE_BOOT_LOGOS = 27,
   SCENE_WALLS = 28,
   SCENE_TRANSMIT = 29, /* Trades data with Mario Golf for Game Boy */

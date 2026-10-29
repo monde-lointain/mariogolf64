@@ -238,8 +238,8 @@ static u8 D_800DAC30[16];
 /* The scenes are still known only by number */
 
 /*
- * In scene 2, the C buttons move the map camera, the stick turns and raises
- * it, and it looks ahead along the ground
+ * In SCENE_GROUND_CAMERA, the C buttons move the map camera, the stick turns
+ * and raises it, and it looks ahead along the ground
  */
 #define MAP_CAMERA_STEP 10.0f
 #define MAP_CAMERA_HEIGHT 120.0f
@@ -251,7 +251,7 @@ static u8 D_800DAC30[16];
 #define GROUND_UNITS_PER_UNIT 1024
 
 /*
- * Scene 14 opens a larger, square inset view, in more steps and without
+ * SCENE_MENU opens a larger, square inset view, in more steps and without
  * sounds. Each step adds this many pixels to its sides.
  */
 #define LARGE_INSET_VIEW_STEP_COUNT 32
@@ -751,7 +751,8 @@ void DrawScreenEffect(CameraMatrices* matrices, CameraView* view) {
 
 /*
  * Draws the dynamic textures, filling g_MirrorTexture from a strip of the
- * frame above the horizon. Only scenes 12 and 14 use it.
+ * frame above the horizon. Only SCENE_PLAY_UNK12 and SCENE_MENU
+ * use it.
  */
 void BuildHorizonDynamicTextures(Gfx** displayListHead) {
   s32 stripTop;
@@ -1040,19 +1041,24 @@ void BuildDynamicTextures(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/*
- * How DrawGame draws a frame, chosen by scene. The scene modules' own
- * screens are still known only by number.
- */
+/* How DrawGame draws a frame, chosen by scene */
 /* A module's screen, with the course in the inset view */
 enum DrawMode {
   DRAW_MODE_INSET_SCREEN,
   DRAW_MODE_COURSE,
-  DRAW_MODE_MAP_PERSPECTIVE = 3,
+  /* DRAW_MODE_UNK2 and DRAW_MODE_OPENING are never chosen */
+  DRAW_MODE_UNK2, /* Draws as DRAW_MODE_CONFIRM_WAIT does */
+  DRAW_MODE_MAP_PERSPECTIVE,
   DRAW_MODE_MAP_ISOMETRIC,
   DRAW_MODE_MAP_MINIATURE,
   DRAW_MODE_MAP_TOP_DOWN,
-  DRAW_MODE_NOTHING = 13,
+  DRAW_MODE_OPENING,
+  DRAW_MODE_CONFIRM_WAIT,
+  DRAW_MODE_BOOT_LOGOS,
+  DRAW_MODE_TITLE_SCREEN,
+  DRAW_MODE_STAFF_ROLL,
+  DRAW_MODE_TRANSMIT,
+  DRAW_MODE_NOTHING,
   DRAW_MODE_BLANK
 };
 
@@ -1239,27 +1245,28 @@ s32 DrawGame(void) {
       drawMode = DRAW_MODE_INSET_SCREEN;
       break;
     case SCENE_BOOT_LOGOS:
-      drawMode = 9;
+      drawMode = DRAW_MODE_BOOT_LOGOS;
       break;
-    case 26:
-      drawMode = 8;
+    case SCENE_CONFIRM_WAIT:
+      drawMode = DRAW_MODE_CONFIRM_WAIT;
       break;
-    case 21:
-      drawMode = 10;
+    case SCENE_TITLE_SCREEN:
+      drawMode = DRAW_MODE_TITLE_SCREEN;
       break;
-    case 30:
-      drawMode = IsGameFlagSet(GAME_FLAG_UNK9A) ? DRAW_MODE_COURSE : 11;
+    case SCENE_STAFF_ROLL:
+      drawMode = IsGameFlagSet(GAME_FLAG_UNK9A) ? DRAW_MODE_COURSE
+                                                : DRAW_MODE_STAFF_ROLL;
       break;
-    case 29:
-      drawMode = 12;
+    case SCENE_TRANSMIT:
+      drawMode = DRAW_MODE_TRANSMIT;
       break;
-    case 20:
-    case 22:
+    case SCENE_UNK20:
+    case SCENE_UNK22:
       drawMode = DRAW_MODE_NOTHING;
       break;
-    case 8:
-    case 17:
-    case 18:
+    case SCENE_FLAG_PANEL:
+    case SCENE_UNK17:
+    case SCENE_UNK18:
     case SCENE_SWAPPING_MODULES:
       drawMode = DRAW_MODE_BLANK;
       break;
@@ -1283,7 +1290,7 @@ s32 DrawGame(void) {
     drawsScene = TRUE;
     terrainStyle = 0;
     usesFloatMatrices = FALSE;
-    if (g_Scene == 30) {
+    if (g_Scene == SCENE_STAFF_ROLL) {
       InitRcp(g_DrawBufferIndex + 4);
       if (viewIndex == 1) {
         break;
@@ -1417,8 +1424,8 @@ s32 DrawGame(void) {
             MAP_MINIATURE_SCALE, MAP_MINIATURE_SCALE);
         LoadProjection();
         break;
-      case 2:
-      case 8:
+      case DRAW_MODE_UNK2:
+      case DRAW_MODE_CONFIRM_WAIT:
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
@@ -1427,7 +1434,7 @@ s32 DrawGame(void) {
         }
 
         break;
-      case 9:
+      case DRAW_MODE_BOOT_LOGOS:
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
@@ -1436,7 +1443,7 @@ s32 DrawGame(void) {
         }
 
         break;
-      case 7:
+      case DRAW_MODE_OPENING:
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
@@ -1445,7 +1452,7 @@ s32 DrawGame(void) {
         }
 
         break;
-      case 10:
+      case DRAW_MODE_TITLE_SCREEN:
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           FillScreen();
@@ -1455,7 +1462,7 @@ s32 DrawGame(void) {
         }
 
         break;
-      case 11:
+      case DRAW_MODE_STAFF_ROLL:
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           FillScreen();
@@ -1465,7 +1472,7 @@ s32 DrawGame(void) {
         }
 
         break;
-      case 12:
+      case DRAW_MODE_TRANSMIT:
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
@@ -1530,7 +1537,7 @@ s32 DrawGame(void) {
             ClearBuffers(BUFFER_CLEAR_WHOLE);
           }
         } else {
-          if (g_Scene == 30) {
+          if (g_Scene == SCENE_STAFF_ROLL) {
             ClearBuffers(BUFFER_CLEAR_WHOLE);
           } else if (viewIndex == 0) {
             ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
@@ -1819,7 +1826,7 @@ s32 DrawGame(void) {
                 if (!IsGameFlagSet(GAME_FLAG_HIDE_CHARACTERS)) {
                   for (playerIndex = 0; playerIndex < 4; playerIndex++) {
                     DrawCharacterAndShadow(matrices, viewIndex, playerIndex);
-                    if (g_Scene != 30) {
+                    if (g_Scene != SCENE_STAFF_ROLL) {
                       break;
                     }
                   }
@@ -2092,7 +2099,7 @@ s32 DrawGame(void) {
     DrawOpeningLogo(&g_DisplayListHead, 1);
   }
 
-  if (g_Scene == 30 && g_IsModuleAlive[31]) {
+  if (g_Scene == SCENE_STAFF_ROLL && g_IsModuleAlive[MODULE_STAFF_ROLL]) {
     DrawStaffRoll(&g_DisplayListHead);
   }
 
@@ -2470,13 +2477,13 @@ void UpdateGame(void) {
     g_Cameras[INSET_CAMERA].view.scissorHeight = SCREEN_HEIGHT / 2;
   } else if (g_Scene == SCENE_BOOT_LOGOS) {
     UpdateBootLogos();
-  } else if (g_Scene == 26) {
+  } else if (g_Scene == SCENE_CONFIRM_WAIT) {
     func_801F4A40();
   } else if (g_Scene == SCENE_TITLE_SCREEN) {
     UpdateTitleScreen();
-  } else if (g_Scene == 30) {
+  } else if (g_Scene == SCENE_STAFF_ROLL) {
     UpdateStaffRoll();
-  } else if (g_Scene == 29) {
+  } else if (g_Scene == SCENE_TRANSMIT) {
     func_801F5F1C();
   }
 

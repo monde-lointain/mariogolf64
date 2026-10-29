@@ -1,6 +1,6 @@
 /*
- * The title screen, module 0x04, which LeaveBootLogos can swap in. A or
- * Start on any controller swaps in module 0x02; otherwise it goes back to
+ * The title screen, MODULE_TITLE_SCREEN, which LeaveBootLogos can swap in.
+ * A or Start on any controller swaps in MODULE_MENU; otherwise it goes back to
  * the logos after a while. Without a controller, it shows a screen asking
  * for one and stays there. Button codes entered on the first controller
  * unlock parts of the save or enable debugging.
@@ -327,7 +327,7 @@ void UpdateTitleScreen(void) {
         if (pressedButtons & (A_BUTTON | START_BUTTON)) {
           StartHudAnimation(HUD_ANIMATION_SPIRAL);
           g_Scene = SCENE_SWAPPING_MODULES;
-          g_NextScene = 14;
+          g_NextScene = SCENE_MENU;
           g_SceneModuleToUnload = MODULE_TITLE_SCREEN;
           g_SceneModuleToLoad = MODULE_MENU;
           f_TitleFrame = 0;
@@ -343,7 +343,7 @@ void UpdateTitleScreen(void) {
     case TITLE_GOING_TO_LOGOS:
       if (HasScreenFadeEnded()) {
         g_Scene = SCENE_SWAPPING_MODULES;
-        g_NextScene = 27;
+        g_NextScene = SCENE_BOOT_LOGOS;
         g_SceneModuleToUnload = MODULE_TITLE_SCREEN;
         g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
         f_TitleFrame = 0;

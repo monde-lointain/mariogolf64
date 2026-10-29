@@ -1,6 +1,6 @@
 /*
- * The staff roll, module 0x1F, shown in scene 30. It scrolls the staff
- * text a pixel a frame, has characters from the cast swing on Yoshi's
+ * The staff roll, MODULE_STAFF_ROLL, shown in SCENE_STAFF_ROLL. It scrolls the
+ * staff text a pixel a frame, has characters from the cast swing on Yoshi's
  * Island's seventh hole, and ends on a closing picture.
  */
 #include "common.h"

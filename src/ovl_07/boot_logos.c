@@ -150,7 +150,7 @@ void LeaveBootLogos(void) {
     ClearBootTransmitPending();
     g_Scene = SCENE_SWAPPING_MODULES;
     g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
-    g_NextScene = 29;
+    g_NextScene = SCENE_TRANSMIT;
     g_SceneModuleToLoad = MODULE_TRANSMIT;
     ResetGameBoyTransfer(0);
     StartWipe(WIPE_OPENING);
@@ -164,7 +164,7 @@ void LeaveBootLogos(void) {
     StopLoaderThread();
     g_Scene = SCENE_SWAPPING_MODULES;
     g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
-    g_NextScene = 21;
+    g_NextScene = SCENE_TITLE_SCREEN;
     g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
   }
 
