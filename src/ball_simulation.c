@@ -257,6 +257,16 @@ void ResetBallSimulations(void) {
  * least */
 #define CUP_PULL_RISE 307.2f
 #define MIN_CUP_PULL 46.079998f
+/*
+ * 60 cm: only a ball within this of the cup along both x and z is tested
+ * for dropping in or being pulled
+ */
+#define CUP_SEARCH_SPAN 0x2400
+/* Just under 5 cm: a ball higher than this above the cup does not drop in */
+#define MAX_CUP_ENTRY_HEIGHT 0x2FF
+/* Where the debug text shows that a ball drops in or is pulled */
+#define CUP_DEBUG_TEXT_COLUMN 0x14
+#define CUP_DEBUG_TEXT_ROW 0xA
 
 /* Gravity pulls a rolling ball down a slope by up to this */
 #define SLOPE_ACCELERATION (GRAVITY * 3 / 4)
@@ -657,17 +667,17 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         s32 cupOffsetX =
             simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
 
-        if (Abs(cupOffsetX) < 0x2400) {
+        if (Abs(cupOffsetX) < CUP_SEARCH_SPAN) {
           s32 cupOffsetZ =
               simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
 
-          if (Abs(cupOffsetZ) < 0x2400) {
+          if (Abs(cupOffsetZ) < CUP_SEARCH_SPAN) {
             s32 cupDistance = IntLength2D(cupOffsetX, cupOffsetZ);
 
             if (simulation->state != BALL_STATE_IN_CUP &&
                 simulation->position[AXIS_Y] -
                         g_HoleSetup.cupPosition[AXIS_Y] >=
-                    -0x2FF &&
+                    -MAX_CUP_ENTRY_HEIGHT &&
                 (f32)cupDistance < CUP_RADIUS) {
               s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
@@ -675,7 +685,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   velocity[AXIS_Y] >= -KilometersPerHour(5)) {
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
-                  PrintDebugText("CUPIN!", 0x14, 0xA);
+                  PrintDebugText(
+                      "CUPIN!", CUP_DEBUG_TEXT_COLUMN, CUP_DEBUG_TEXT_ROW);
                 }
 
                 simulation->state = BALL_STATE_IN_CUP;
@@ -700,7 +711,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
                 if (printsDebugText) {
                   SetDebugTextHighlight(1);
-                  PrintDebugText("KURU!", 0x14, 0xA);
+                  PrintDebugText(
+                      "KURU!", CUP_DEBUG_TEXT_COLUMN, CUP_DEBUG_TEXT_ROW);
                 }
 
                 toCup[AXIS_Y] = 0.0f;
