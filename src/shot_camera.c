@@ -164,7 +164,7 @@ static s8 f_NoiseRow = 0;
 
 /* menu.c returns an s8, but the original calls it without truncating, as if
  * undeclared */
-s32 func_8005DE40();
+s32 IsSimpleCameraChosen();
 void ChooseFlightCameraKind(void);
 void PlaceFlightCamera(s32 step);
 s32 StepHoleFlyover(void);
@@ -1447,7 +1447,7 @@ void PlaceCameraAroundShotEnd(void) {
     RandomBelow(RANDOM_YAW_MASK);
     yawScale = M_PI / 65536;
     yaw = f_ShotFlightYaw - ((f32)(rand() & RANDOM_YAW_MASK) * yawScale);
-  } else if (!func_8005DE40()) {
+  } else if (!IsSimpleCameraChosen()) {
     if (f_ShotLength <= SHORT_SHOT_MAX_LENGTH) {
       distance = SHORT_SHOT_DISTANCE;
       height = 0.0f;
@@ -2616,7 +2616,7 @@ void ChooseFlightCameraKind(void) {
 
         break;
     }
-  } else if (!func_8005DE40()) {
+  } else if (!IsSimpleCameraChosen()) {
     switch (f_FlightPhase) {
       case FLIGHT_PHASE_LAUNCH:
         pick = NextCameraPick(1);
@@ -2997,7 +2997,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
         break;
     }
-  } else if (func_8005DE40() == 0) {
+  } else if (!IsSimpleCameraChosen()) {
     switch (f_FlightPhase) {
       case FLIGHT_PHASE_NONE:
         f_FlightPhase = FLIGHT_PHASE_LAUNCH;

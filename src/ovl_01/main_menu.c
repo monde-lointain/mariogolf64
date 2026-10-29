@@ -333,9 +333,9 @@ void func_80207D08_ovl_01(Gfx** displayListHead);
 void func_80207E18_ovl_01(Gfx** displayListHead);
 void DrawBirdieBadgeLabel(Gfx** displayListHead);
 /* Defined as returning s8, but their callers here use the whole register */
-s32 func_8005DE00(void);
-s32 func_8005DE20(void);
-s32 func_8005DE40(void);
+s32 IsMusicOffChosen(void);
+s32 IsMonoChosen(void);
+s32 IsSimpleCameraChosen(void);
 void func_8005C674(s32 arg0, s32 arg1);
 void func_8005D334(void);
 void func_801F6B20_ovl_01(void);
@@ -1126,15 +1126,15 @@ void func_801F4C78_ovl_01(void) {
         TransferSaveData(save, FALSE);
         optionBits = &D_801323A0.optionBits;
         *optionBits = 0;
-        if (func_8005DE00()) {
+        if (IsMusicOffChosen()) {
           *optionBits |= OPTION_BIT_MUSIC_OFF;
         }
 
-        if (func_8005DE20()) {
+        if (IsMonoChosen()) {
           *optionBits |= OPTION_BIT_MONO;
         }
 
-        if (func_8005DE40()) {
+        if (IsSimpleCameraChosen()) {
           *optionBits |= OPTION_BIT_SIMPLE_CAMERA;
         }
 

@@ -234,7 +234,7 @@ void LoadSong(u32 romAddress, u32 size);
 void LoadSampleBank(u8* pointerBankRom, u32 pointerBankSize, u8* waveBankRom);
 void LoadSoundEffectBank(u8* rom, u32 size);
 void InitMusic(musConfig* config);
-s32 func_8005DE00(void);
+s32 IsMusicOffChosen(void);
 s32 ChangeCustomEffect(s32 type);
 
 void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
@@ -662,7 +662,7 @@ SongId GetSongId(void) {
  */
 void PlaySong(SongId songId, s32 flags) {
   if (!IsGameFlagSet(GAME_FLAG_SILENCE_SONGS)) {
-    if (func_8005DE00() && (flags & SONG_FLAG_UNK10)) {
+    if (IsMusicOffChosen() && (flags & SONG_FLAG_UNK10)) {
       RequestSongStop();
       return;
     }
@@ -679,7 +679,7 @@ void PlaySong(SongId songId, s32 flags) {
       f_PendingSongChange.flags = flags;
     } else {
       osSyncPrintf("SeqGo %d\n", songId);
-      if (!func_8005DE00() || !(flags & SONG_FLAG_UNK10)) {
+      if (!IsMusicOffChosen() || !(flags & SONG_FLAG_UNK10)) {
         f_SongId = songId;
         if (songId > LAST_SONG_ID) {
           songId = LAST_SONG_ID;

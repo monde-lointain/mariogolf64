@@ -2078,15 +2078,18 @@ void func_8005DDAC(void) {
   g_MenuScreen = MENU_SCREEN_UNK12;
 }
 
-s8 func_8005DE00(void) {
+/* Returns whether the music is turned off in the options */
+s8 IsMusicOffChosen(void) {
   return GetSaveData()->options[SAVE_OPTION_MUSIC_OFF];
 }
 
-s8 func_8005DE20(void) {
+/* Returns whether mono sound is chosen in the options */
+s8 IsMonoChosen(void) {
   return GetSaveData()->options[SAVE_OPTION_MONO];
 }
 
-s8 func_8005DE40(void) {
+/* Returns whether the simple flight camera is chosen in the options */
+s8 IsSimpleCameraChosen(void) {
   return GetSaveData()->options[SAVE_OPTION_SIMPLE_CAMERA];
 }
 
