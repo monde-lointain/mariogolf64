@@ -377,8 +377,8 @@ s32 UpdateHandicaps();
 void LoadBestShotsCourseIcons(void** buffers);
 void LoadScoreLabelBuffer(void* buffer, s16 bufferKind);
 void UpdateBestShots(void);
-void func_8021E01C_ovl_01(void);
-void func_8021EF64_ovl_01(void);
+void ReadBestShots(void);
+void LoadBestShotFaces(void);
 void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind);
 void LoadRingShotCourseIcons(void** buffers);
 void UpdateRingShotRecords(void);
@@ -396,7 +396,7 @@ s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
 s32 func_8022BDC4_ovl_01(void);
 s32 func_8022BDD0_ovl_01(void);
-s32 func_8021E468_ovl_01(void);
+s32 GetChosenBestShot(void);
 void LoadRingShotRecord(RingShotRecord* record);
 void LoadBestShotReplay(PlayRecord* record);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
@@ -1554,8 +1554,8 @@ void UpdateMenus(void) {
             D_8012D420[D_8022BE90_ovl_01], SCORE_LABEL_BUFFER_CURSOR_BOX);
         LoadScoreLabelBuffer(g_NamePlateImage, SCORE_LABEL_BUFFER_UNREAD);
         LoadScoreLabelBuffer(D_800FBE30[0], SCORE_LABEL_BUFFER_LABELS);
-        func_8021E01C_ovl_01();
-        func_8021EF64_ovl_01();
+        ReadBestShots();
+        LoadBestShotFaces();
         break;
 
       case MENU_SCREEN_RING_SHOT_RECORDS:
@@ -1681,7 +1681,7 @@ void SetUpChosenGame(void) {
     if (g_GameState.replayKind == REPLAY_KIND_RING_SHOT) {
       LoadRingShotRecord(&save->ringShotRecords[memory->ringShotReplaySlot]);
     } else {
-      LoadBestShotReplay(&save->rankedRecords[func_8021E468_ovl_01()]);
+      LoadBestShotReplay(&save->rankedRecords[GetChosenBestShot()]);
     }
 
     g_GameState.unk14 = 0;

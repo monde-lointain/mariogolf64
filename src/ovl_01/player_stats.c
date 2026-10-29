@@ -53,7 +53,7 @@
 #define STATS_GRID_COLUMN_COUNT 5
 #define STATS_GRID_ROW_COUNT 4
 #define STATS_CELL_EMPTY -1
-/* func_8021E01C lists each kind's records in rows one longer than the grid */
+/* ReadBestShots lists each kind's records in rows one longer than the grid */
 #define STATS_KIND_LIST_SIZE (STATS_GRID_COLUMN_COUNT + 1)
 
 /* What LoadPlayerStatsBuffer reads into the buffers it fills */
@@ -125,7 +125,8 @@
 #define STATS_CURSOR_LEFT_X 6
 #define STATS_CURSOR_TOP_Y 30
 
-/* The directions that func_8021E340 moves the cursor in, which index D_802309C4
+/* The directions that FindNextBestShotCell moves the cursor in, which index
+ * D_802309C4
  */
 enum StatsDirection {
   STATS_DIRECTION_LEFT,
@@ -176,7 +177,7 @@ extern u8 D_801B9410;
 
 void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide);
 
-s16 func_8021E468_ovl_01(void);
+s16 GetChosenBestShot(void);
 void func_8021E97C_ovl_01(Gfx** displayListHead);
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
@@ -1869,8 +1870,8 @@ void LoadScoreLabelBuffer(void* buffer, s16 bufferKind) {
   }
 }
 
-/* func_8021E340 is called without a prototype; the original extends its result
- * from 16 bits, not 8 */
+/* FindNextBestShotCell is called without a prototype; the original extends its
+ * result from 16 bits, not 8 */
 void UpdateBestShots(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
@@ -1892,7 +1893,7 @@ void UpdateBestShots(void) {
       }
     } else if (GetWipeKind() == WIPE_NONE || D_801B9410 != 1) {
       if (g_MenuPressedButtons & A_BUTTON) {
-        if (func_8021E468_ovl_01() != STATS_CELL_EMPTY) {
+        if (GetChosenBestShot() != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           D_801B9410 = 0;
           column = memory->unk39;
@@ -1912,28 +1913,28 @@ void UpdateBestShots(void) {
               0xFF, 0xFF, 0xFF);
         }
       } else if (g_MenuRepeatButtons & U_JPAD) {
-        moved = func_8021E340_ovl_01(
+        moved = FindNextBestShotCell(
             memory->unk39, memory->unk3A, STATS_DIRECTION_UP);
         if ((s16)moved != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->unk3A = moved;
         }
       } else if (g_MenuRepeatButtons & D_JPAD) {
-        moved = func_8021E340_ovl_01(
+        moved = FindNextBestShotCell(
             memory->unk39, memory->unk3A, STATS_DIRECTION_DOWN);
         if ((s16)moved != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->unk3A = moved;
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
-        moved = func_8021E340_ovl_01(
+        moved = FindNextBestShotCell(
             memory->unk39, memory->unk3A, STATS_DIRECTION_LEFT);
         if ((s16)moved != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           memory->unk39 = moved;
         }
       } else if (g_MenuRepeatButtons & R_JPAD) {
-        moved = func_8021E340_ovl_01(
+        moved = FindNextBestShotCell(
             memory->unk39, memory->unk3A, STATS_DIRECTION_RIGHT);
         if ((s16)moved != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -2154,11 +2155,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShots);
 #endif
 
 /*
+ * Reads the save data from SRAM and lays the recorded best shots out in a grid,
+ * a row for each score kind, keeping the cursor on a shot where it can
+ */
+/*
  * Doesn't match: the original copies the chosen row's zero into the column
  * rather than loading zero, and so reads the last row into a1 instead of v1.
  */
 #ifdef NON_MATCHING
-void func_8021E01C_ovl_01(void) {
+void ReadBestShots(void) {
   SaveData* save = GetSaveData();
   s32 kindRecords[STATS_GRID_ROW_COUNT][STATS_KIND_LIST_SIZE];
   s32 index;
@@ -2294,10 +2299,14 @@ void func_8021E01C_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E01C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", ReadBestShots);
 #endif
 
-s8 func_8021E340_ovl_01(s8 column, s8 row, u8 direction) {
+/*
+ * Returns the column or row of the next shot from (column, row) in direction,
+ * wrapping, or -1 if that line holds no shot
+ */
+s8 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
   s32 stepCount;
   s32 stepIndex;
 
@@ -2348,7 +2357,8 @@ s8 func_8021E340_ovl_01(s8 column, s8 row, u8 direction) {
   }
 }
 
-s16 func_8021E468_ovl_01(void) {
+/* Returns the ranked record under the Best Shots cursor */
+s16 GetChosenBestShot(void) {
   MenuMemory* memory = func_8005AF74();
 
   return D_8023B640_ovl_01[memory->unk3A][memory->unk39];
@@ -2474,10 +2484,14 @@ void func_8021E97C_ovl_01(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E97C_ovl_01);
 #endif
 
+/*
+ * Reads every character's face, then the palette of each best shot's character
+ * in the grid, clamped to the known ones
+ */
 /* Doesn't match: the original keeps the row and column counters in other saved
  * registers */
 #ifdef NON_MATCHING
-void func_8021EF64_ovl_01(void) {
+void LoadBestShotFaces(void) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save = GetSaveData();
@@ -2529,7 +2543,7 @@ void func_8021EF64_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021EF64_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", LoadBestShotFaces);
 #endif
 
 /*
