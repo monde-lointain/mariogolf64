@@ -294,7 +294,6 @@ void UpdateHelpBoard(void) {
 
 /* Draws the chalkboard, the topic list with its hand and arrows, and the text
  */
-#ifdef NON_MATCHING
 void DrawHelpBoard(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = func_8005AF74();
@@ -382,8 +381,8 @@ void DrawHelpBoard(Gfx** displayListHead) {
       if (IsTopicArrowShown(index)) {
         gDPLoadTextureTile_4b(gfx++,
             (u32)((u8*)f_ArrowImages +
-                (index * ARROW_IMAGE_SIZE + f_ArrowFrame * ARROW_FRAME_SIZE +
-                    PALETTED_TEXELS_OFFSET)) &
+                (index * ARROW_IMAGE_SIZE + PALETTED_TEXELS_OFFSET +
+                    f_ArrowFrame * ARROW_FRAME_SIZE)) &
                 ~7,
             G_IM_FMT_CI, ARROW_SIZE, 0, 0, 0, ARROW_SIZE - 1, ARROW_SIZE - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -430,10 +429,6 @@ void DrawHelpBoard(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/help_board", DrawHelpBoard);
-#endif
 
 /* Draws a tinted intensity image across the board; nothing calls this or loads
  * its image */
