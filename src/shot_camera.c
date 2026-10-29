@@ -240,6 +240,12 @@ enum ResultSound {
  */
 #define FULL_SHOT_FRACTION 0.8f
 #define SHORT_SHOT_FRACTION 0.6f
+/* Whether the shot goes beyond a fraction of the distance selected for it */
+#define IsShotBeyond(fraction) \
+  (GetSelectedShotDistance() * (fraction) < f_ShotLength * YARDS_PER_UNIT)
+/* Whether a stroke count on the hole is an albatross or better */
+#define IsAlbatrossOrBetter(strokes) \
+  (g_HoleSetup.par + SCORE_TO_PAR_ALBATROSS >= (strokes))
 
 /*
  * The flyover's frames: it swings around the cup by a half turn every
@@ -891,13 +897,11 @@ s32 RateShotLength(void) {
   }
 
   if (IsShotLengthRated(endKind)) {
-    if (GetSelectedShotDistance() * FULL_SHOT_FRACTION <
-        f_ShotLength * YARDS_PER_UNIT) {
+    if (IsShotBeyond(FULL_SHOT_FRACTION)) {
       return SHOT_LENGTH_FULL;
     }
 
-    if (GetSelectedShotDistance() * SHORT_SHOT_FRACTION <
-        f_ShotLength * YARDS_PER_UNIT) {
+    if (IsShotBeyond(SHORT_SHOT_FRACTION)) {
       return SHOT_LENGTH_SHORT;
     }
   }
@@ -1075,8 +1079,8 @@ void PlayFlightSounds(s32 step) {
           SOUND_CALL_PIN_SHOT, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
       f_PendingResultSound = RESULT_SOUND_UNK2;
     } else if (g_SimulatedShot.endsOnGreen) {
-      if (g_HoleSetup.par + SCORE_TO_PAR_ALBATROSS >=
-          g_Players[g_CurrentShot.playerIndex].strokeCount) {
+      if (IsAlbatrossOrBetter(
+              g_Players[g_CurrentShot.playerIndex].strokeCount)) {
         CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_GREAT);
         StartBanner(BANNER_GREAT);
         PlaySound(
@@ -1208,13 +1212,11 @@ void PlayFlightSounds(s32 step) {
     isStillPlayed = &f_IsLandingSoundPlayed;
     if (!*isStillPlayed && g_BallFlightStep > EARLY_STEP_COUNT &&
         (g_SimulatedShot.pathFlags[step - EARLY_STEP_COUNT] & PATH_FLAG_UNK1) &&
-        GetSelectedShotDistance() * FULL_SHOT_FRACTION <
-            f_ShotLength * YARDS_PER_UNIT &&
+        IsShotBeyond(FULL_SHOT_FRACTION) &&
         (info = GetSurfaceInfo(g_TurnBallSimulation.surface),
             IsFairwayKind(info->kind)) &&
         !g_GameState.isMiniGolf && f_StartCupDistance > f_LandingCupDistance &&
-        g_HoleSetup.par + SCORE_TO_PAR_ALBATROSS >=
-            g_Players[g_CurrentShot.playerIndex].strokeCount) {
+        IsAlbatrossOrBetter(g_Players[g_CurrentShot.playerIndex].strokeCount)) {
       *isStillPlayed = TRUE;
       PlaySound(SOUND_UNK117, FLIGHT_SOUND_CHANNEL_UNKB, FAIRWAY_SOUND_VOLUME);
     }
