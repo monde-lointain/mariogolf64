@@ -25,7 +25,8 @@ enum MenuScreen {
   MENU_SCREEN_RING_SHOT_RECORDS,
   MENU_SCREEN_BIRDIE_BADGES,
   MENU_SCREEN_CHARACTER_TABLE,
-  MENU_SCREEN_UNK16,
+  /* Get Character's choice of the second player's character */
+  MENU_SCREEN_OPPONENT_SELECT,
   MENU_SCREEN_HELP,
   MENU_SCREEN_UNK18,
   /* Loads what the chosen game needs and leaves the menu */
@@ -33,7 +34,8 @@ enum MenuScreen {
   MENU_SCREEN_HANDICAPS,
   MENU_SCREEN_BET_SETTINGS = 22,
   MENU_SCREEN_UNK23,
-  MENU_SCREEN_UNK24,
+  /* The one player's character select for a Club Tournament */
+  MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT,
   MENU_SCREEN_UNK26 = 26,
   /* A tournament entered with a code */
   MENU_SCREEN_CLUB_TOURNAMENT,

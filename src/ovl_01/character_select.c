@@ -1,7 +1,8 @@
 /*
- * The character select screen, which screens 16 and 24 draw as well. Each
- * player moves a cursor over the character grid, and the chosen character's
- * shot curve shows as a meter.
+ * The character select screen, which Get Character's opponent select and the
+ * Club Tournament's character select draw as well. Each player moves a cursor
+ * over the character grid, and the chosen character's shot curve shows as a
+ * meter.
  */
 #include "common.h"
 
@@ -882,7 +883,7 @@ s32 UpdateCharacterSelect(
 
     if (playerIndex == playerCount) {
       if ((u8)canChooseMarked == FALSE) {
-        if (g_MenuScreen == MENU_SCREEN_UNK24) {
+        if (g_MenuScreen == MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT) {
           LoadWipeShape(GetClubTournamentCourse());
           StartWipe(WIPE_CLOSING);
         } else {
@@ -945,12 +946,12 @@ s32 UpdateCharacterSelect(
     slot = memory->characterRows[playerIndex];
     if (playerIndex == firstPlayerIndex) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-      if (g_MenuScreen != MENU_SCREEN_UNK16) {
+      if (g_MenuScreen != MENU_SCREEN_OPPONENT_SELECT) {
         memory->modeChoice = 0;
       }
 
       if ((u8)canChooseMarked == FALSE) {
-        if (g_MenuScreen == MENU_SCREEN_UNK24) {
+        if (g_MenuScreen == MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT) {
           g_GameState.isClubTournament = FALSE;
           g_MenuScreen = MENU_SCREEN_CLUB_TOURNAMENT;
         } else {
@@ -1415,7 +1416,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
     for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
       slot = g_CharacterGrid[row][column];
-      if (g_MenuScreen == MENU_SCREEN_UNK16 &&
+      if (g_MenuScreen == MENU_SCREEN_OPPONENT_SELECT &&
           row == memory->characterRows[0] &&
           column == memory->characterColumns[0] &&
           (s8)g_Players[0].characterIndex >= FIRST_IMPORTED_CHARACTER) {
@@ -1654,7 +1655,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A570_ovl_01)));
-  if (g_MenuScreen == MENU_SCREEN_UNK24) {
+  if (g_MenuScreen == MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT) {
     tagCount = 1;
   }
 
@@ -1712,7 +1713,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
 
   /* playerIndex now picks whose cursor to draw */
   playerIndex = 0;
-  if (g_MenuScreen != MENU_SCREEN_UNK24) {
+  if (g_MenuScreen != MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT) {
     playerIndex = D_801B7070;
   }
 

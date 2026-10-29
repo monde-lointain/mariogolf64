@@ -1382,7 +1382,7 @@ void func_80229278_ovl_01(void) {
       if (func_8022BDB0_ovl_01()) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         StartLoadingChosenHole();
-        g_MenuScreen = MENU_SCREEN_UNK24;
+        g_MenuScreen = MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT;
       } else {
         for (index = 0; index != g_ControllerCount; index++) {
           if (g_MenuControllerData[index].button & A_BUTTON) {

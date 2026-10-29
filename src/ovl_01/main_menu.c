@@ -1008,11 +1008,11 @@ void UpdateMenus(void) {
       UpdateCharacterSelect(0, g_ChosenPlayerCount, FALSE);
       break;
 
-    case MENU_SCREEN_UNK24:
+    case MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT:
       UpdateCharacterSelect(0, 1, FALSE);
       break;
 
-    case MENU_SCREEN_UNK16:
+    case MENU_SCREEN_OPPONENT_SELECT:
       UpdateCharacterSelect(1, 2, TRUE);
       break;
 
@@ -1237,7 +1237,7 @@ void UpdateMenus(void) {
         break;
 
       case MENU_SCREEN_CHARACTER_SELECT:
-      case MENU_SCREEN_UNK24:
+      case MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT:
         func_8005C674(g_ChosenPlayerCount, 0);
         f_MenuBoardImageIndex ^= 1;
         func_8020B2C4_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
@@ -1254,7 +1254,7 @@ void UpdateMenus(void) {
         func_8020B438_ovl_01();
         break;
 
-      case MENU_SCREEN_UNK16:
+      case MENU_SCREEN_OPPONENT_SELECT:
         func_8005C674(1, 0);
         func_80209500_ovl_01();
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
@@ -2184,7 +2184,7 @@ void UpdateModeSelect(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
         g_GameState.playerCount = 2;
-        g_MenuScreen = MENU_SCREEN_UNK16;
+        g_MenuScreen = MENU_SCREEN_OPPONENT_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
@@ -2565,7 +2565,7 @@ void UpdateCourseSelect(void) {
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
     if (D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice] ==
         MODE_ICON_GET_CHARACTER) {
-      g_MenuScreen = MENU_SCREEN_UNK16;
+      g_MenuScreen = MENU_SCREEN_OPPONENT_SELECT;
       D_801B7070--;
       g_TakenCharacters.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
     } else {
@@ -3662,10 +3662,10 @@ void DrawMenuScreen(Gfx** displayListHead) {
       DrawMenuTitleScreen(&gfx);
       break;
     case MENU_SCREEN_CHARACTER_SELECT:
-    case MENU_SCREEN_UNK24:
+    case MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT:
       DrawCharacterSelect(&gfx, 0);
       break;
-    case MENU_SCREEN_UNK16:
+    case MENU_SCREEN_OPPONENT_SELECT:
       DrawCharacterSelect(&gfx, 1);
       break;
     case MENU_SCREEN_SAVED_GAMES:
