@@ -143,7 +143,6 @@ static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
 
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
 void func_80407D64(void);
-void FillGroundNoise(s32 range, s32 base);
 void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);

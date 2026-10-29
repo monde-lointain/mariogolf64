@@ -74,4 +74,6 @@ extern s32 D_800C3094;
 /* Asks for the HUD to turn away when the next player is picked */
 extern s8 g_IsHudTurnAwayRequested;
 
+void FillGroundNoise(s32 range, s32 base);
+
 #endif

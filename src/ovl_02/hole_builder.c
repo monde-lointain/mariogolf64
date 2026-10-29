@@ -17,6 +17,7 @@
 #include "hole_triangles.h"
 #include "host_file.h"
 #include "math_util.h"
+#include "play.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -559,7 +560,6 @@ void ClearHolePoints(void);
 void ShadeGroundTiles(void);
 void CastBillboardShadows(void);
 void MoveRingsToEnd(void);
-void FillGroundNoise(s32 range, s32 base);
 
 /* A PAINT_LOGIC_* value */
 static s32 f_PaintLogic;
