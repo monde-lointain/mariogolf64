@@ -2072,7 +2072,7 @@ void func_8005DDAC(void) {
   D_801052E8 = 1;
   D_800C2BD4 = 0;
   D_801B9410 = 1;
-  g_GameState.replayKind = 0;
+  g_GameState.replayKind = REPLAY_KIND_NONE;
   ClearGameFlag(GAME_FLAG_UNK1E);
   g_MenuScreen = MENU_SCREEN_UNK12;
 }

@@ -259,9 +259,6 @@ extern const char D_80231514_ovl_01[];
 #define MENU_LAYER_UNK20 (1 << 5)
 #define MENU_LAYER_UNK80 (1 << 7)
 
-/* Values of g_GameState.replayKind, the replay that leaving the menus starts */
-#define REPLAY_KIND_NONE 0
-#define REPLAY_KIND_RING_SHOT 2
 #define PLAYER_UNK28_TRAINING (-1)
 #define PLAYER_UNK28_NINE_HOLES 3
 #define PLAYER_UNK28_EIGHTEEN_HOLES 6
@@ -1806,7 +1803,7 @@ void func_801F70F0_ovl_01(void) {
   g_GameState.unk30 = 0;
   g_GameState.isSuddenDeath = FALSE;
   g_GameState.isMiniGolf = FALSE;
-  g_GameState.replayKind = 0;
+  g_GameState.replayKind = REPLAY_KIND_NONE;
   g_GameState.currentPlayerIndex = 0;
   if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
     if (GetWipeProgress() == 0) {
@@ -3566,7 +3563,7 @@ void func_801FAFEC_ovl_01(void) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     g_MenuScreen = MENU_SCREEN_EXIT;
     D_800FE334 = 0;
-    g_GameState.replayKind = 2;
+    g_GameState.replayKind = REPLAY_KIND_RING_SHOT;
     return;
   }
 

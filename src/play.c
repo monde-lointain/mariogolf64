@@ -1279,7 +1279,7 @@ void UpdatePlay(void) {
 
             if (g_GameState.gameMode == GAME_MODE_UNK8 ||
                 g_GameState.replayKind) {
-              g_GameState.replayKind = 0;
+              g_GameState.replayKind = REPLAY_KIND_NONE;
               func_80060358();
               if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
                 f_PlayExit = PLAY_EXIT_RING_SHOT;

@@ -749,7 +749,8 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadSmallPalette(&gfx, 0, f_ArrowsImage + IMAGE_HEADER_SIZE);
-    if (g_GameState.replayKind == 0 && CountOpenRingShotCourses() >= 2) {
+    if (g_GameState.replayKind == REPLAY_KIND_NONE &&
+        CountOpenRingShotCourses() >= 2) {
       arrowFrame =
           f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
       LoadNibbleTextureBlock(&gfx,

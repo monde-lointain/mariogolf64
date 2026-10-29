@@ -341,7 +341,7 @@ void func_8021F79C_ovl_01(void) {
         }
 
         g_MenuScreen = MENU_SCREEN_EXIT;
-        g_GameState.replayKind = 2;
+        g_GameState.replayKind = REPLAY_KIND_RING_SHOT;
         SetGameFlag(GAME_FLAG_UNK1E);
       }
     } else if (GetWipeKind() == WIPE_NONE || D_801052E8 != 1) {
