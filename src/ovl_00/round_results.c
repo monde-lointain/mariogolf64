@@ -413,7 +413,7 @@ void LoadRoundResults(void) {
   f_BannerState = BANNER_HIDDEN;
   f_BannerKind = BANNER_KIND_NONE;
   f_TallySpeed = NORMAL_TALLY_SPEED;
-  f_IsAwaitingConfirm = 0;
+  f_IsAwaitingConfirm = FALSE;
   if (IsGameFlagSet(GAME_FLAG_ADD_500_POINTS)) {
     g_Players[0].points += 500;
   }

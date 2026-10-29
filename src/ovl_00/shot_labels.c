@@ -517,7 +517,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
   surfaceKind =
       GetSurfaceInfoAt(g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z])
           ->kind;
-  if (g_IsCupViewShown != 0) {
+  if (g_IsCupViewShown) {
     return;
   }
 

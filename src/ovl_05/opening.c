@@ -684,7 +684,7 @@ void AdvanceOpeningSoundChannel(void) {
 
 /* Plays the title logo's club striking while it swings round */
 void PlayLogoClubSound(void) {
-  if (f_IsLogoClubSwinging != 0) {
+  if (f_IsLogoClubSwinging) {
     PlaySoundWithEffects(SOUND_CONTACT_PLAIN, LOGO_CLUB_SOUND_CHANNEL,
         LOGO_CLUB_SOUND_LOUDEST_VOLUME -
             (s32)(f_LogoClubOrbitRadius * LOGO_CLUB_SOUND_FADE_RATE),
@@ -719,7 +719,7 @@ void PlayLogoClubSound(void) {
  * then counts down for the length of the sound that started.
  */
 void PlayOpeningAmbientSounds(void) {
-  if (f_AreAmbientSoundsOn == 1) {
+  if (f_AreAmbientSoundsOn == TRUE) {
     if ((u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE) <
         SOUND_FULL_SCALE) {
       if (f_AlternatingSoundTimer == 0 &&
@@ -828,7 +828,7 @@ void LoadOpening(void) {
   SetCharacterBuffer(3, (u8*)g_DepthBuffer);
   g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
   ReadEncodedAsset(g_ShadowTexture, &asset);
-  f_AreAmbientSoundsOn = 0;
+  f_AreAmbientSoundsOn = FALSE;
   LoadEffectImages();
   LoadOpeningLogo();
 }
@@ -1242,7 +1242,7 @@ s32 UpdateOpeningCharacters(void) {
       }
 
       SetAnimationSpeed(2, 0.0f);
-      if (f_IsDonkeyKongShown != 0) {
+      if (f_IsDonkeyKongShown) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
       } else {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
@@ -1252,7 +1252,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 3;
       func_80206680_ovl_05(3, OPENING_MODEL_BABY_MARIO);
       SetAnimationSpeed(3, 0.0f);
-      if (f_IsDonkeyKongShown != 0) {
+      if (f_IsDonkeyKongShown) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
       } else {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
@@ -1411,7 +1411,7 @@ void UpdateOpening(void) {
       PlaySound(
           SOUND_MENU_BLOCKED, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       ClearGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
-      f_IsLookAtMarkerShown = 0;
+      f_IsLookAtMarkerShown = FALSE;
       ClearDebugText();
     }
   } else {
@@ -2130,9 +2130,9 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0x50) {
           if (IsDonkeyKongUnlocked()) {
             if (!(rand() & 0x80)) {
-              f_IsDonkeyKongShown = 1;
+              f_IsDonkeyKongShown = TRUE;
             } else {
-              f_IsDonkeyKongShown = 0;
+              f_IsDonkeyKongShown = FALSE;
             }
           }
 
@@ -2557,7 +2557,7 @@ void UpdateOpening(void) {
         break;
       case 0xDD:
         if (f_OpeningSceneFramesLeft == 0x1E) {
-          f_AreImpactLinesShown = 1;
+          f_AreImpactLinesShown = TRUE;
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
@@ -2618,7 +2618,7 @@ void UpdateOpening(void) {
             956.687f, -259.45f, 1874.671f, 933.391f, -243.5f, 1884.391f);
         f_OpeningSceneFramesLeft = 0x14;
         f_OpeningCue = 0x1A;
-        f_AreImpactLinesShown = 0;
+        f_AreImpactLinesShown = FALSE;
         g_CameraEditor.fieldOfView = 18.0f;
         f_OpeningScene++;
         break;
@@ -2696,7 +2696,7 @@ void UpdateOpening(void) {
         break;
       case 0xFA:
         if (f_OpeningSceneFramesLeft == 0x2E) {
-          f_IsBurstShown = 1;
+          f_IsBurstShown = TRUE;
           PlaySound(SOUND_BURST, f_OpeningSoundChannel, 0x50);
           AdvanceOpeningSoundChannel();
         }
@@ -2707,7 +2707,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0x14) {
-          f_AreAmbientSoundsOn = 1;
+          f_AreAmbientSoundsOn = TRUE;
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
@@ -2750,12 +2750,12 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
-          f_IsLakituFlying = 1;
+          f_IsLakituFlying = TRUE;
           f_OpeningSceneFramesLeft = 1000;
           f_OpeningScene++;
           PlaySound(SOUND_WIND_FLY_GUY, f_OpeningSoundChannel, 0x3F);
           AdvanceOpeningSoundChannel();
-          f_AreAmbientSoundsOn = 0;
+          f_AreAmbientSoundsOn = FALSE;
         }
 
         break;
@@ -2899,7 +2899,7 @@ void UpdateOpening(void) {
         PlaySound(
             SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         SetGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
-        f_IsLookAtMarkerShown = 1;
+        f_IsLookAtMarkerShown = TRUE;
         f_LookAtEaseMode = 0;
       }
 
@@ -3399,7 +3399,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             movement[2] = f_OpeningBallPositions[slot][2] -
                 f_LogoBallLastPosition[AXIS_Z];
           } else {
-            f_HasLogoBallLastPosition = 1;
+            f_HasLogoBallLastPosition = TRUE;
             movement[0] = 0.0f;
             movement[1] = 0.0f;
             movement[2] = 0.0f;
@@ -3693,7 +3693,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               movement[2] = f_OpeningBallPositions[slot][2] -
                   f_ProjectedLogoBallLastPosition[AXIS_Z];
             } else {
-              f_HasProjectedLogoBallLastPosition = 1;
+              f_HasProjectedLogoBallLastPosition = TRUE;
               movement[0] = 0.0f;
               movement[1] = 0.0f;
               movement[2] = 0.0f;
@@ -4672,7 +4672,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     g_ScreenFadeGreen = g_ScreenFadeBlue;
     g_ScreenFadeRed = g_ScreenFadeGreen;
     f_LogoFadeStage = LOGO_FADE_GRAYING;
-    f_HasLogoStarted = 1;
+    f_HasLogoStarted = TRUE;
   }
 
   if (f_LogoLetterStates[LOGO_LETTER_A] == LOGO_LETTER_WAITING &&
@@ -4732,7 +4732,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     f_LogoState = LOGO_CLUB_STARTING;
   }
 
-  if (isDrawn == 1) {
+  if (isDrawn == TRUE) {
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       guTranslate(&f_LogoLetterTranslations[i][g_DrawBufferIndex],
           f_LogoLetters[i].x - (SCREEN_WIDTH / 2.0f),
@@ -4848,7 +4848,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     }
   }
 
-  if ((f_LogoState == LOGO_SHINING) & (isDrawn == 1)) {
+  if ((f_LogoState == LOGO_SHINING) & (isDrawn == TRUE)) {
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     gDPSetPrimDepth(gfx++, LOGO_SHINE_MASK_DEPTH, 0);
@@ -4899,7 +4899,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       }
     }
 
-    if (isDrawn == 1) {
+    if (isDrawn == TRUE) {
       gDPSetPrimDepth(gfx++, LOGO_SHINE_DEPTH, 0);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
@@ -4927,7 +4927,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       f_LogoState = LOGO_SHRINK_STARTING;
     }
 
-    if (isDrawn == 1 && f_LogoShineFrame > LOGO_SHINE_FIRST_SHOWN_FRAME &&
+    if (isDrawn == TRUE && f_LogoShineFrame > LOGO_SHINE_FIRST_SHOWN_FRAME &&
         f_LogoShineFrame < LOGO_SHINE_LAST_SHOWN_FRAME) {
       gSPTextureRectangle(gfx++, LOGO_SHINE_LEFT << 2, LOGO_SHINE_TOP << 2,
           LOGO_SHINE_RIGHT << 2, LOGO_SHINE_BOTTOM << 2, G_TX_RENDERTILE,
@@ -5029,7 +5029,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     f_LogoClubPosition[AXIS_Y] =
         (s32)(-sinf(angle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_Y;
-    f_IsLogoClubSwinging = 1;
+    f_IsLogoClubSwinging = TRUE;
   }
 
   if (f_LogoState == LOGO_CLUB_CIRCLING) {
@@ -5062,7 +5062,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       if (f_LogoClubAngle < 0.0f) {
         f_LogoClubAngle = 0.0f;
         f_LogoState = LOGO_SHINING;
-        f_IsLogoClubSwinging = 0;
+        f_IsLogoClubSwinging = FALSE;
       }
     }
   }

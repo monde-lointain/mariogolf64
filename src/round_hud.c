@@ -1696,8 +1696,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 dy;
   f32 scale;
 
-  if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN || g_IsCupViewShown == 1 ||
-      IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
+  if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN ||
+      g_IsCupViewShown == TRUE || IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
       (g_GameState.unk0 != GAME_STATE_UNK6 &&
           g_GameState.unk0 != GAME_STATE_UNK11)) {
     return;
@@ -2122,7 +2122,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
 
-    if (g_IsCupViewShown != 1) {
+    if (g_IsCupViewShown != TRUE) {
       /* Projects the trail from its newest position back */
       index = f_BallTrailHead;
       for (i = 0; i != BALL_TRAIL_LENGTH; i++, index--) {
@@ -2378,7 +2378,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
 
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  if (g_RoundHud.areWindSpeedArrowsShown == 1) {
+  if (g_RoundHud.areWindSpeedArrowsShown == TRUE) {
     if (speed != 0) {
       DrawPauseArrows(&gfx, centerX - WIND_ARROWS_OFFSET_X,
           centerY - WIND_ARROWS_OFFSET_Y, WIND_ARROWS_WIDE_GAP);
@@ -2546,7 +2546,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
   } else if (g_HoleSetup.conditions.windSpeed != 0 &&
       g_RoundHud.isWindIndicatorShown &&
       GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN &&
-      g_IsCupViewShown == 0) {
+      !g_IsCupViewShown) {
     DrawWindIndicator(&gfx, g_ShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
         SHOT_PANEL_WIND_INDICATOR_Y);
   }
@@ -2556,11 +2556,11 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
   gDPPipeSync(gfx++);
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK);
-  if (g_IsCupViewShown == 0 && g_IsModuleAlive[MODULE_CLUB_PANEL]) {
+  if (!g_IsCupViewShown && g_IsModuleAlive[MODULE_CLUB_PANEL]) {
     DrawClubPanelIfShown(&gfx);
   }
 
-  if (g_RoundHud.isClubHeadIconShown && g_IsCupViewShown == 0) {
+  if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
     club = GetClub(
         g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
     if (club->headImageAsset != f_ClubHeadImageAsset) {
@@ -2617,7 +2617,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
   }
 
   if ((g_RoundHud.isLieIconShown || g_RoundHud.areLieArrowsShown) &&
-      g_IsCupViewShown == 0) {
+      !g_IsCupViewShown) {
     lieAngle = g_RoundHud.lieTilt * BINARY_ANGLE_TO_RADIANS;
     if (lieAngle > M_PI) {
       lieAngle -= 2 * M_PI;
@@ -4256,7 +4256,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 strip;
 
-  if (g_RoundHud.isHoleIntroTextShown == 1) {
+  if (g_RoundHud.isHoleIntroTextShown == TRUE) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
         func_802427E8(&gfx);
@@ -4338,7 +4338,7 @@ void DrawHoleIntroText(Gfx** displayListHead) {
   s32 seconds;
   s32 totalSeconds;
 
-  if (g_RoundHud.isHoleIntroTextShown == 1) {
+  if (g_RoundHud.isHoleIntroTextShown == TRUE) {
     if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
       if (g_IsModuleAlive[MODULE_CLUB_SLOTS] && func_80242418()) {
         func_80242424(&gfx);

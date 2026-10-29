@@ -2646,7 +2646,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     g_ContactEffect++;
   }
 
-  if (g_IsCupViewShown == 1) {
+  if (g_IsCupViewShown == TRUE) {
     return;
   }
 

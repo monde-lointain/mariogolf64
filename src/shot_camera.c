@@ -550,7 +550,7 @@ s32 NextCameraPick(Boolean isDealing) {
  */
 void EndFlightCamera(void) {
   D_800BE698 = 1;
-  g_IsCupViewShown = 0;
+  g_IsCupViewShown = FALSE;
   f_CupViewHoldCount = 0;
   D_800C5AAC = 0;
   g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
@@ -1158,7 +1158,7 @@ void PlayFlightSounds(s32 step) {
         g_SimulatedShot.unk2E10) {
       *isPlayed = TRUE;
       if (IsGameFlagSet(GAME_FLAG_UNK48)) {
-        if (g_IsCupViewShown == 1 &&
+        if (g_IsCupViewShown == TRUE &&
             (scoreToPar >= SCORE_TO_PAR_EAGLE &&
                 scoreToPar <= SCORE_TO_PAR_BOGEY) &&
             !IsPinInCup()) {
@@ -1166,7 +1166,7 @@ void PlayFlightSounds(s32 step) {
         }
       } else if (scoreToPar >= SCORE_TO_PAR_EAGLE &&
           scoreToPar <= SCORE_TO_PAR_PAR && !IsPinInCup() &&
-          g_IsCupViewShown == 1) {
+          g_IsCupViewShown == TRUE) {
         if (g_SimulatedShot.shot.shotMode == SHOT_MODE_NORMAL) {
           StartMovie(MOVIE_MONTY_MOLE);
         } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER) {
@@ -1480,7 +1480,7 @@ void PlaceCameraAroundShotEnd(void) {
 /* Resets the cameras for the start of a hole, and plays the game mode's song */
 void StartHoleCamerasAndSong(void) {
   SetMenuBackdrop(MENU_BACKDROP_NONE);
-  g_RoundHud.isHoleIntroTextShown = 1;
+  g_RoundHud.isHoleIntroTextShown = TRUE;
   g_RoundHud.scorecardPage = NO_SCORECARD_PAGE;
   g_RoundHud.unk8 = 1;
   g_RoundHud.unkB = 1;
@@ -1552,7 +1552,7 @@ void StartHoleCamerasAndSong(void) {
 /* Starts the flyover of the hole, with the inset view on the cup */
 void StartHoleFlyover(void) {
   g_HoleFlyoverFrame = 0;
-  g_RoundHud.isHoleIntroTextShown = 0;
+  g_RoundHud.isHoleIntroTextShown = FALSE;
   g_InsetView.animation = INSET_VIEW_STILL;
   g_InsetView.step = 0;
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
@@ -1569,7 +1569,7 @@ void StartHoleFlyover(void) {
 }
 
 void ClearHoleIntroText(void) {
-  g_RoundHud.isHoleIntroTextShown = 0;
+  g_RoundHud.isHoleIntroTextShown = FALSE;
   SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK0, 0,
       0, 0, 0, 0);
   SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK1, 0,
@@ -2842,7 +2842,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   s32 waitFrame;
   s32* flightStep;
 
-  if (isAdvancing == 0) {
+  if (!isAdvancing) {
     g_RoundHud.unk13 = 0;
   } else {
     g_RoundHud.unk13 = 1;
@@ -2850,10 +2850,10 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
   if (buttons & START_BUTTON) {
     g_RoundHud.unkC = 0;
-    g_RoundHud.isWindIndicatorShown = 0;
+    g_RoundHud.isWindIndicatorShown = FALSE;
     g_RoundHud.unk8 = 0;
-    g_RoundHud.isLieIconShown = 0;
-    g_RoundHud.isClubHeadIconShown = 0;
+    g_RoundHud.isLieIconShown = FALSE;
+    g_RoundHud.isClubHeadIconShown = FALSE;
     g_RoundHud.unkB = 0;
     g_RoundHud.unkD = 0;
     g_RoundHud.unk13 = 0;
@@ -2877,7 +2877,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     step = g_SimulatedShot.stepCount - 1;
   }
 
-  if (isAdvancing == 0) {
+  if (!isAdvancing) {
     f_FlightBallPosition[AXIS_X] = f_ShotStartPosition[AXIS_X];
     f_FlightBallPosition[AXIS_Y] = f_ShotStartPosition[AXIS_Y];
     f_FlightBallPosition[AXIS_Z] = f_ShotStartPosition[AXIS_Z];
@@ -2901,7 +2901,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   if (g_SimulatedShot.unk2E08) {
     switch (D_800DAF50) {
       case 1:
-        if (isAdvancing == 1 && step == 10 &&
+        if (isAdvancing == TRUE && step == 10 &&
             g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
           D_800DAF50 = 3;
           D_800BE630 = TRUE;
@@ -2930,7 +2930,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         D_800BE630 = TRUE;
         break;
       case 1:
-        if (isAdvancing == 1 && step == 10) {
+        if (isAdvancing == TRUE && step == 10) {
           D_800DAF50 = 2;
           D_800BE630 = TRUE;
         }
@@ -3123,7 +3123,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
   }
 
-  if (isAdvancing == 1) {
+  if (isAdvancing == TRUE) {
     if (D_800BE650 > 0) {
       D_800BE650--;
     }
@@ -3244,13 +3244,13 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     StartHudAnimation(HUD_ANIMATION_NONE);
   }
 
-  if (isAdvancing == 1 && g_BallFlightStep == 0) {
+  if (isAdvancing == TRUE && g_BallFlightStep == 0) {
     PlayContactSound();
   }
 
   /* Reading D_800BE620 and g_BallFlightStep through locals is there to match */
   waitFrame = D_800BE620;
-  if (isAdvancing == 1) {
+  if (isAdvancing == TRUE) {
     flightStep = &g_BallFlightStep;
     if (*flightStep == g_SimulatedShot.stepCount) {
       if (waitFrame == 0 && !g_TurnBallSimulation.unkA0) {

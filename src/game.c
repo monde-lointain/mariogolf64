@@ -1497,7 +1497,7 @@ s32 DrawGame(void) {
           g_Cameras[0].view.eye[1] = 10.0f;
           g_Cameras[0].view.eye[2] = 60.0f;
           SetCharacterHilite(matrices);
-        } else if (D_8022BE08 != 0 && g_HasLoaderFinished == 1) {
+        } else if (D_8022BE08 != 0 && g_HasLoaderFinished == TRUE) {
           usesFloatMatrices = TRUE;
           guPerspectiveF(matrices->perspectiveF, &insetPerspNorm,
               g_Cameras[viewIndex].view.fieldOfView,
@@ -1536,7 +1536,7 @@ s32 DrawGame(void) {
         if (g_MenuBackdropState != MENU_BACKDROP_STATE_NONE &&
             g_PauseScreen != PAUSE_SCREEN_FREE_LOOK) {
           ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
-        } else if (g_HasLoaderFinished == 0) {
+        } else if (!g_HasLoaderFinished) {
           if (viewIndex == 0) {
             ClearBuffers(BUFFER_CLEAR_WHOLE);
           }
@@ -1754,7 +1754,7 @@ s32 DrawGame(void) {
     }
 
     if (drawMode == DRAW_MODE_COURSE) {
-      if (g_HasLoaderFinished == 1 &&
+      if (g_HasLoaderFinished == TRUE &&
           (g_MenuBackdropState == MENU_BACKDROP_STATE_NONE ||
               g_PauseScreen == PAUSE_SCREEN_FREE_LOOK)) {
         if (g_Cameras[viewIndex].view.drawFlags != 0) {
@@ -1901,7 +1901,7 @@ s32 DrawGame(void) {
         }
       }
     } else if (drawMode == DRAW_MODE_INSET_SCREEN) {
-      if (D_8022BE08 != 0 && viewIndex == 1 && g_HasLoaderFinished == 1) {
+      if (D_8022BE08 != 0 && viewIndex == 1 && g_HasLoaderFinished == TRUE) {
         SetSceneFog(&g_DisplayListHead);
         DrawGround(matrices, terrainStyle);
         DrawBillboards(matrices, viewIndex);
@@ -1950,7 +1950,8 @@ s32 DrawGame(void) {
       DrawPauseMenu(&g_DisplayListHead);
     }
 
-    if (g_HasLoaderFinished == 1 && !IsGameFlagSet(GAME_FLAG_HIDE_ROUND_HUD) &&
+    if (g_HasLoaderFinished == TRUE &&
+        !IsGameFlagSet(GAME_FLAG_HIDE_ROUND_HUD) &&
         !IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
       DrawRoundHud(&g_Cameras[0].view);
     }

@@ -414,7 +414,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
         g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     shadowTranslation[AXIS_Z] =
         g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    if (g_IsCupViewShown == 1) {
+    if (g_IsCupViewShown == TRUE) {
       shadowScale[AXIS_X] = LARGE_PIN_SHADOW_SCALE;
       shadowScale[AXIS_Y] = LARGE_PIN_SHADOW_SCALE;
       shadowScale[AXIS_Z] = LARGE_PIN_SHADOW_SCALE;
@@ -462,14 +462,14 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       (g_HoleSetup.cupPosition[AXIS_Z] - footOffsetZ) * COURSE_TO_WORLD_SCALE,
       &stickFoot);
   g_CupViewDepth = cupDepth;
-  if (g_IsCupViewShown == 1) {
+  if (g_IsCupViewShown == TRUE) {
     g_PinVertexScale = LARGE_PIN_VERTEX_SCALE;
   } else {
     g_PinVertexScale = PIN_VERTEX_SCALE;
   }
 
   if (cupDepth < 0) {
-    if (g_IsCupViewShown == 1) {
+    if (g_IsCupViewShown == TRUE) {
       primDepth = LARGE_CUP_PRIM_DEPTH;
     } else {
       primDepth = cup.depth -
@@ -502,7 +502,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gSPMatrix(g_DisplayListHead++,
         OS_K0_TO_PHYSICAL(&f_PinMatrices[cameraIndex][g_DrawBufferIndex]),
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    if (g_IsCupViewShown == 1) {
+    if (g_IsCupViewShown == TRUE) {
       gSPVertex(g_DisplayListHead++, f_LargePinVertices, PIN_VERTEX_COUNT, 0);
     } else {
       gSPVertex(g_DisplayListHead++, f_PinVertices, PIN_VERTEX_COUNT, 0);
@@ -567,7 +567,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
-    if (g_IsCupViewShown == 1) {
+    if (g_IsCupViewShown == TRUE) {
       primDepth = LARGE_CUP_WALL_PRIM_DEPTH;
     } else {
       primDepth = cup.depth -
@@ -576,7 +576,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       primDepth &= PRIM_DEPTH_MASK;
     }
 
-    if (g_IsCupViewShown == 1) {
+    if (g_IsCupViewShown == TRUE) {
       gDPSetPrimDepth(g_DisplayListHead++, primDepth, 0);
       gDPSetCombineLERP(g_DisplayListHead++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1,
           0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
@@ -634,7 +634,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
                 (top.y * SCREEN_SUBPIXEL_COUNT));
       }
 
-      if (g_IsCupViewShown == 1) {
+      if (g_IsCupViewShown == TRUE) {
         primDepth = LARGE_FLAGSTICK_PRIM_DEPTH;
       } else if (cupDepth < SMALL_CUP_DEPTH) {
         primDepth = cup.depth;

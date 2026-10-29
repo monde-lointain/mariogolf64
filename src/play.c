@@ -163,7 +163,7 @@ s32 func_8005F180(void) {
 void func_8005F1C8(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
   D_800C3070 = 0;
-  g_HasPressedShotButton = 0;
+  g_HasPressedShotButton = FALSE;
   g_AltHeading = 0;
   g_ShotFlags = 0;
   D_800C3088 = 0;
@@ -417,7 +417,7 @@ void PlacePlayersOnTee(void) {
   f32 teeHeight;
 
   D_800C3094 = 0;
-  g_IsHudTurnAwayRequested = 0;
+  g_IsHudTurnAwayRequested = FALSE;
   if (g_GameState.unk30 != 2) {
     for (i = 0; i < MAX_PLAYER_COUNT; i++) {
       g_Players[i].state = PLAYER_STATE_WAITING;
@@ -968,7 +968,7 @@ void UpdatePlay(void) {
 
         break;
       case GAME_STATE_HOLE_INTRO:
-        f_IsPlayStateBackedUp = 0;
+        f_IsPlayStateBackedUp = FALSE;
         nuGfxDisplayOn();
         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
           if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
@@ -1173,7 +1173,7 @@ void UpdatePlay(void) {
         break;
       case GAME_STATE_FLYOVER:
         g_RoundHud.isHoleIntroTextShown = FALSE;
-        g_IsTrainingHeadingKept = 0;
+        g_IsTrainingHeadingKept = FALSE;
         g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
         g_Cameras[1].mode = CAMERA_MODE_BEHIND_GOLFER;
         if (StepHoleFlyover() ||

@@ -1188,7 +1188,7 @@ s32 UpdateAimControls(void) {
     return FALSE;
   }
 
-  g_HasPressedShotButton = 0;
+  g_HasPressedShotButton = FALSE;
   if (g_TurnController.buttons == AIM_RESET_BUTTONS) {
     g_CurrentShot.heading = atan2(g_HoleSetup.cupPosition[AXIS_Z] -
                                     g_CurrentShot.ballPosition[AXIS_Z],
@@ -1202,7 +1202,7 @@ s32 UpdateAimControls(void) {
       case LETTERBOX_STATE_NONE:
         if ((g_TurnController.pressedButtons & A_BUTTON) &&
             IsShotModeChangeDone()) {
-          g_HasPressedShotButton = 1;
+          g_HasPressedShotButton = TRUE;
           ResetAimCamera();
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(
@@ -1318,7 +1318,7 @@ s32 UpdateAimControls(void) {
       case LETTERBOX_STATE_UNK5:
         if ((g_TurnController.pressedButtons & A_BUTTON) &&
             IsShotModeChangeDone()) {
-          g_HasPressedShotButton = 1;
+          g_HasPressedShotButton = TRUE;
           ResetAimCamera();
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(SOUND_LOOK_AT_CUP, g_NextSoundChannel, LOOK_SOUND_VOLUME);
@@ -1419,7 +1419,7 @@ s32 UpdateAimControls(void) {
     g_RoundHud.greenGridState = 0;
   }
 
-  if (g_HasPressedShotButton != 1) {
+  if (g_HasPressedShotButton != TRUE) {
     if (g_TurnController.buttons & AIM_CAMERA_BUTTONS) {
       if (g_LetterboxState == LETTERBOX_STATE_NONE ||
           g_LetterboxState == LETTERBOX_STATE_UNK5 ||
@@ -2490,7 +2490,7 @@ void PickNextPlayer(void) {
   g_Players[nextPlayer].state = PLAYER_STATE_STARTING_TURN;
   if (g_IsHudTurnAwayRequested) {
     StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
-    g_IsHudTurnAwayRequested = 0;
+    g_IsHudTurnAwayRequested = FALSE;
   }
 }
 #else
@@ -2831,7 +2831,7 @@ static inline void DebugTestGutsMotion(void) {
       break;
   }
 
-  f_HasGutsTestRun = 1;
+  f_HasGutsTestRun = TRUE;
   if (g_TurnController.repeatedButtons & L_JPAD) {
     f_GutsTestCharacter--;
   }
@@ -3103,7 +3103,7 @@ void UpdateTurns(void) {
     PrintCoursePoints();
   }
 
-  f_IsShotPreviewBuilt = 0;
+  f_IsShotPreviewBuilt = FALSE;
   if (!(g_LetterboxState == LETTERBOX_STATE_NONE ||
           g_LetterboxState == LETTERBOX_STATE_UNK5)) {
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -3576,7 +3576,7 @@ void UpdateTurns(void) {
             ResetAimCamera();
             func_8005F1C8();
             g_RoundHud.unkC = 1;
-            g_RoundHud.isLetterboxShown = 1;
+            g_RoundHud.isLetterboxShown = TRUE;
             SetRoundHudPartsShown(1);
           } else {
             SetRoundHudPartsShown(
@@ -3722,7 +3722,7 @@ void UpdateTurns(void) {
 
           if ((f_ShotSource != SHOT_SOURCE_PLAYER && isReady) ||
               (f_ShotSource == SHOT_SOURCE_PLAYER &&
-                  g_HasPressedShotButton == 1)) {
+                  g_HasPressedShotButton == TRUE)) {
             g_ShowsGroundWaves = 0;
             if (g_CurrentShot.shotMode != SHOT_MODE_APPROACH) {
               SkipToAnimationEnd(0);
@@ -4623,7 +4623,7 @@ void UpdateTurns(void) {
               ForceStopRumble();
               break;
             case CHOICE_RESULT_MULLIGAN:
-              g_IsTrainingHeadingKept = 1;
+              g_IsTrainingHeadingKept = TRUE;
               g_Players[playerIndex] = g_SavedPlayers[playerIndex];
               EndFlightCamera();
               StartHudAnimation(2);
@@ -4690,7 +4690,7 @@ void UpdateTurns(void) {
         CheckRingShotClear(playerIndex);
         if (D_80227170_ovl_00[playerIndex] == 1) {
           StartBanner(-1);
-          g_IsHudTurnAwayRequested = 1;
+          g_IsHudTurnAwayRequested = TRUE;
           if (g_GameState.unk31) {
             nextState = PLAYER_STATE_HOLE_DONE;
           } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||

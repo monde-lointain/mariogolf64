@@ -154,7 +154,7 @@ void LeaveBootLogos(void) {
     g_SceneModuleToLoad = MODULE_TRANSMIT;
     ResetGameBoyTransfer(0);
     StartWipe(WIPE_OPENING);
-  } else if (f_HasResetGameState && g_HasLoaderFinished == 1 &&
+  } else if (f_HasResetGameState && g_HasLoaderFinished == TRUE &&
       g_ControllerCount != 0) {
     g_Scene = SCENE_SWAPPING_MODULES;
     g_SceneModuleToUnload = MODULE_BOOT_LOGOS;
@@ -236,7 +236,7 @@ void UpdateBootLogos(void) {
           f_BootLogoFrame < CAMELOT_SKIP_FRAME_LIMIT) {
         f_BootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
         f_BootLogoFrame = 0;
-      } else if (g_HasLoaderFinished == 1 &&
+      } else if (g_HasLoaderFinished == TRUE &&
           f_BootLogoFrame >= CAMELOT_LEAVE_FRAME) {
         if (f_BootLogoFrame > 0) {
           f_BootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;

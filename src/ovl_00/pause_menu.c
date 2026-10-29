@@ -312,13 +312,13 @@ Boolean f_IsGiveUpAllowed;
 void HideRoundHud(void) {
   g_RoundHud.isLetterboxShown = FALSE;
   g_RoundHud.unkC = 0;
-  g_RoundHud.isWindIndicatorShown = 0;
-  g_RoundHud.areLieArrowsShown = 0;
-  g_RoundHud.areWindSpeedArrowsShown = 0;
-  g_RoundHud.areWindDirectionArrowsShown = 0;
+  g_RoundHud.isWindIndicatorShown = FALSE;
+  g_RoundHud.areLieArrowsShown = FALSE;
+  g_RoundHud.areWindSpeedArrowsShown = FALSE;
+  g_RoundHud.areWindDirectionArrowsShown = FALSE;
   g_RoundHud.unk8 = 0;
-  g_RoundHud.isLieIconShown = 0;
-  g_RoundHud.isClubHeadIconShown = 0;
+  g_RoundHud.isLieIconShown = FALSE;
+  g_RoundHud.isClubHeadIconShown = FALSE;
   g_RoundHud.unkB = 0;
   g_RoundHud.unkD = 0;
 }
@@ -326,13 +326,13 @@ void HideRoundHud(void) {
 void ResumeRound(void) {
   g_RoundHud.isLetterboxShown = TRUE;
   g_RoundHud.unkC = 1;
-  g_RoundHud.isWindIndicatorShown = 1;
-  g_RoundHud.areLieArrowsShown = 0;
-  g_RoundHud.areWindSpeedArrowsShown = 0;
-  g_RoundHud.areWindDirectionArrowsShown = 0;
+  g_RoundHud.isWindIndicatorShown = TRUE;
+  g_RoundHud.areLieArrowsShown = FALSE;
+  g_RoundHud.areWindSpeedArrowsShown = FALSE;
+  g_RoundHud.areWindDirectionArrowsShown = FALSE;
   g_RoundHud.unk8 = 1;
-  g_RoundHud.isLieIconShown = 1;
-  g_RoundHud.isClubHeadIconShown = 1;
+  g_RoundHud.isLieIconShown = TRUE;
+  g_RoundHud.isClubHeadIconShown = TRUE;
   g_RoundHud.unkB = 1;
   g_RoundHud.unkD = 1;
   SetMenuBackdrop(MENU_BACKDROP_NONE);
@@ -578,9 +578,9 @@ s32 UpdatePauseMenu(ControllerState* controller) {
   kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
              .kind;
   f_PauseMenuDrawnMarker = 0;
-  g_RoundHud.areLieArrowsShown = 0;
-  g_RoundHud.areWindSpeedArrowsShown = 0;
-  g_RoundHud.areWindDirectionArrowsShown = 0;
+  g_RoundHud.areLieArrowsShown = FALSE;
+  g_RoundHud.areWindSpeedArrowsShown = FALSE;
+  g_RoundHud.areWindDirectionArrowsShown = FALSE;
   if (kind == PAUSE_OPTION_KIND_WIND_SPEED ||
       kind == PAUSE_OPTION_KIND_WIND_DIRECTION) {
     g_WindPanelPosition[AXIS_X] +=
@@ -642,7 +642,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         break;
     }
 
-    g_RoundHud.areLieArrowsShown = 1;
+    g_RoundHud.areLieArrowsShown = TRUE;
     if (controller->repeatedButtons & L_JPAD) {
       hasLieChanged = TRUE;
       lie = (lie + PAUSE_LIE_COUNT - 1) % PAUSE_LIE_COUNT;
@@ -721,7 +721,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       StartShotPanel();
     }
   } else if (kind == PAUSE_OPTION_KIND_WIND_DIRECTION) {
-    g_RoundHud.areWindDirectionArrowsShown = 1;
+    g_RoundHud.areWindDirectionArrowsShown = TRUE;
     g_HoleSetup.conditions.windDirection +=
         controller->stickX * PAUSE_WIND_TURN_PER_STICK;
     if (controller->stickX == 0) {
@@ -734,7 +734,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       }
     }
   } else if (kind == PAUSE_OPTION_KIND_WIND_SPEED) {
-    g_RoundHud.areWindSpeedArrowsShown = 1;
+    g_RoundHud.areWindSpeedArrowsShown = TRUE;
     if ((controller->repeatedButtons & L_JPAD) &&
         g_HoleSetup.conditions.windSpeed > 0) {
       g_HoleSetup.conditions.windSpeed -= PAUSE_WIND_SPEED_STEP;

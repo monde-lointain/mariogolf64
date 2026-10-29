@@ -1804,7 +1804,7 @@ void func_801F70F0_ovl_01(void) {
   D_802322F0_ovl_01 = 0;
   D_802322F4_ovl_01 = 0;
   g_GameState.unk30 = 0;
-  g_GameState.isSuddenDeath = 0;
+  g_GameState.isSuddenDeath = FALSE;
   g_GameState.isMiniGolf = FALSE;
   g_GameState.unk31 = 0;
   g_GameState.currentPlayerIndex = 0;

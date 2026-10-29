@@ -215,7 +215,7 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading);
  */
 #define IsReactionViewLow() \
   (IsGameFlagSet(GAME_FLAG_UNK7F) || \
-      ((g_Scene != SCENE_STAFF_ROLL) && (g_GameState.isSuddenDeath == 1)))
+      ((g_Scene != SCENE_STAFF_ROLL) && (g_GameState.isSuddenDeath == TRUE)))
 
 /*
  * Whether a spot this rough should become the reaction spot: it does when

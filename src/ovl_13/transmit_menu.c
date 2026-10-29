@@ -683,7 +683,7 @@ void UpdateBringCharacters(void) {
 
       break;
     case BRING_BRINGING:
-      g_HasBroughtOverCharacter = 1;
+      g_HasBroughtOverCharacter = TRUE;
       if (++transfer->bringingFrame == BRINGING_FRAME_COUNT) {
         BringOverCharacter(
             transfer->listedCharacterIndex, transfer->characterIndex);

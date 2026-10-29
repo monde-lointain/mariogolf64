@@ -200,7 +200,7 @@ void DrawHoleTriangles(
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         break;
       case HOLE_TRIANGLE_KIND_SHADED:
-        if (g_IsCupViewShown != 0) {
+        if (g_IsCupViewShown) {
           break;
         }
 
