@@ -3815,6 +3815,10 @@ void LoadOpeningImpactLines(void) {
 #define IMPACT_LINES_SECOND_BLINK_FRAME 9
 #define IMPACT_LINES_BLINK_FRAME_COUNT 3
 #define IMPACT_LINES_FRAME_COUNT 19
+/* Whether a frame is outside the blink that starts on blinkFrame */
+#define IsOutsideBlink(frame, blinkFrame) \
+  ((frame) < (blinkFrame) || \
+      (frame) >= (blinkFrame) + IMPACT_LINES_BLINK_FRAME_COUNT)
 
 /*
  * Draws blinking impact lines around the burst for a few frames, once
@@ -3837,12 +3841,8 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
 
   if (f_AreImpactLinesShown) {
     frame = f_ImpactLinesFrame++;
-    if ((frame < IMPACT_LINES_FIRST_BLINK_FRAME ||
-            frame >= IMPACT_LINES_FIRST_BLINK_FRAME +
-                    IMPACT_LINES_BLINK_FRAME_COUNT) &&
-        (frame < IMPACT_LINES_SECOND_BLINK_FRAME ||
-            frame >= IMPACT_LINES_SECOND_BLINK_FRAME +
-                    IMPACT_LINES_BLINK_FRAME_COUNT) &&
+    if (IsOutsideBlink(frame, IMPACT_LINES_FIRST_BLINK_FRAME) &&
+        IsOutsideBlink(frame, IMPACT_LINES_SECOND_BLINK_FRAME) &&
         f_ImpactLinesFrame < IMPACT_LINES_FRAME_COUNT) {
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);

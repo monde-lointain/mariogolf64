@@ -76,6 +76,14 @@ enum PauseOptionKind {
   PAUSE_OPTION_KIND_GIVE_UP = 7
 };
 
+/* Whether a pause option kind always shows a value beside its label */
+#define IsValueOptionKind(kind) \
+  ((kind) == PAUSE_OPTION_KIND_WEATHER || \
+      (kind) == PAUSE_OPTION_KIND_GRID_COLOR || \
+      (kind) == PAUSE_OPTION_KIND_WIND_SPEED || \
+      (kind) == PAUSE_OPTION_KIND_WIND_DIRECTION || \
+      (kind) == PAUSE_OPTION_KIND_LIE)
+
 /* The texts of f_PauseValueTexts, which the weather and grid color show */
 enum PauseValueText {
   PAUSE_VALUE_TEXT_CLEAR,
@@ -1009,11 +1017,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
   selectedKind =
       f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
           .kind;
-  if (selectedKind == PAUSE_OPTION_KIND_WEATHER ||
-      selectedKind == PAUSE_OPTION_KIND_GRID_COLOR ||
-      selectedKind == PAUSE_OPTION_KIND_WIND_SPEED ||
-      selectedKind == PAUSE_OPTION_KIND_WIND_DIRECTION ||
-      selectedKind == PAUSE_OPTION_KIND_LIE) {
+  if (IsValueOptionKind(selectedKind)) {
     DrawTextureRect(&gfx, PAUSE_TEE_X * 4,
         ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8) * 4,
         PAUSE_CURSOR_RIGHT * 4,

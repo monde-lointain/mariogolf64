@@ -3743,11 +3743,17 @@ void DrawMenuScreen(Gfx** displayListHead) {
 #define TALL_NARROW_BOARD_LEFT 16
 
 /*
- * On some screens the banner bobs with the menu's items; the game adds the
- * first and takes the second, so it sits 4 to 14 rows lower
+ * On some screens (IsBannerBobScreen) the banner bobs with the menu's items;
+ * the game adds the first and takes the second, so it sits 4 to 14 rows lower
  */
 #define BANNER_BOB_LOWERING 13.0f
 #define BANNER_BOB_RAISING 4.0f
+/* Whether the banner bobs on a menu screen */
+#define IsBannerBobScreen(screen) \
+  ((screen) == MENU_SCREEN_TITLE || (screen) == MENU_SCREEN_OPTIONS || \
+      (screen) == MENU_SCREEN_MAIN || \
+      (screen) == MENU_SCREEN_MAIN_WITHOUT_TRANSMIT || \
+      (screen) == MENU_SCREEN_CLUBHOUSE)
 
 /* Doesn't match: the game keeps 0xFD500000 in a register and spills
  * 0x073DB06C where this spills the other way, and it reads g_MenuScreen for
@@ -3947,10 +3953,7 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
   }
 
   bobOffset = 0;
-  if (g_MenuScreen == MENU_SCREEN_TITLE ||
-      g_MenuScreen == MENU_SCREEN_OPTIONS || g_MenuScreen == MENU_SCREEN_MAIN ||
-      g_MenuScreen == MENU_SCREEN_MAIN_WITHOUT_TRANSMIT ||
-      g_MenuScreen == MENU_SCREEN_CLUBHOUSE) {
+  if (IsBannerBobScreen(g_MenuScreen)) {
     bobOffset = (f_MenuBobOffset + BANNER_BOB_LOWERING) - BANNER_BOB_RAISING;
   }
 
