@@ -121,7 +121,6 @@ enum HalfTurnState {
 /* The fade's opacity runs over this many steps */
 #define FADE_ALPHA_RANGE 256
 
-#define YES_NO_MESSAGE 0x70C
 #define PROMPT_STATE_CLOSED -1
 #define PROMPT_STATE_OPENING 0
 #define PROMPT_STATE_CHOOSING 1
@@ -539,7 +538,7 @@ void LoadPromptImages(void) {
 
   f_PromptCloudImage = AllocMemory(OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset));
   ReadEncodedAsset(f_PromptCloudImage, &asset);
-  f_YesNoImage = AllocMemory(OpenEncodedAsset(YES_NO_MESSAGE, &asset));
+  f_YesNoImage = AllocMemory(OpenEncodedAsset(ASSET_YES_NO, &asset));
   ReadEncodedAsset(f_YesNoImage, &asset);
 }
 

@@ -399,7 +399,6 @@ enum ExperienceWriteResult {
 #define WOOD_PANEL_ASSET 0x8FD
 #define CONTROLLER_ICONS_ASSET 0x900
 #define TITLE_ASSET 0x93F
-#define CURSOR_BOX_ASSET 0x5F7
 #define CURVE_SEGMENTS_ASSET 0x8EE
 #define STAT_BARS_ASSET 0x95D
 #define SHOT_TYPES_ASSET 0x979
@@ -536,7 +535,7 @@ void LoadTransmitMenu(void) {
                        AllocMemory(OpenEncodedAsset(TITLE_ASSET, &asset)),
       &asset);
   ReadEncodedAsset(g_GameBoyTransfer.cursorBoxImage =
-                       AllocMemory(OpenEncodedAsset(CURSOR_BOX_ASSET, &asset)),
+                       AllocMemory(OpenEncodedAsset(ASSET_RAINBOW_BOX, &asset)),
       &asset);
   ReadEncodedAsset(g_GameBoyTransfer.curveSegmentsImage = AllocMemory(
                        OpenEncodedAsset(CURVE_SEGMENTS_ASSET, &asset)),

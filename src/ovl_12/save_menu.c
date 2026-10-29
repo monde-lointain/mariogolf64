@@ -78,7 +78,6 @@ enum SaveMenuState {
 #define SAVE_MENU_SOUND_PAN 0xFF
 
 #define SAVE_MENU_TITLE_IMAGE 0x6A5
-#define COURSE_NUMBERS_IMAGE 0x70E
 /* Where SetTextSlot is told to put the cleared messages */
 #define MESSAGE_CENTER_X 160
 #define MESSAGE_CENTER_Y 114
@@ -431,7 +430,7 @@ void OpenSaveMenu(s32 kind) {
     }
 
     ReadEncodedAsset(f_CourseNumbersImage = AllocMemory(
-                         OpenEncodedAsset(COURSE_NUMBERS_IMAGE, &encodedAsset)),
+                         OpenEncodedAsset(ASSET_COURSE_NUMBERS, &encodedAsset)),
         &encodedAsset);
   }
 

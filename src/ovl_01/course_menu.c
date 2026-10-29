@@ -19,6 +19,12 @@
 #include "text.h"
 #include "variables.h"
 
+/* A gold coin with a star, reading HOLE IN ONE */
+#define ASSET_HOLE_IN_ONE_BADGE 0x8EA
+/* Orange 1 to 6, then up and down arrows; the course stats draw only the
+ * arrows */
+#define ASSET_DIGITS_AND_ARROWS 0x5A5
+
 /* The images of g_CourseIconAssets that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
 
@@ -241,7 +247,7 @@ void func_8020E26C_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 2:
       D_8023A810_ovl_01 = buffer;
-      OpenEncodedAsset(0x8EA, &asset);
+      OpenEncodedAsset(ASSET_HOLE_IN_ONE_BADGE, &asset);
       ReadEncodedAsset(D_8023A810_ovl_01, &asset);
       break;
     case 3:
@@ -256,7 +262,7 @@ void func_8020E26C_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 5:
       D_8023A828_ovl_01 = buffer;
-      OpenEncodedAsset(0x5A5, &asset);
+      OpenEncodedAsset(ASSET_DIGITS_AND_ARROWS, &asset);
       ReadEncodedAsset(D_8023A828_ovl_01, &asset);
       break;
     case 6:

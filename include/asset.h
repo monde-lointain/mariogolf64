@@ -76,6 +76,8 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 /* The first images of a star's spin */
 #define ASSET_SPINNING_STAR 0x5BE
 #define ASSET_PLAYER_LABELS 0x5E3 /* 1P to 4P, 1C to 4C and Com */
+/* A rounded square outline in rainbow colors */
+#define ASSET_RAINBOW_BOX 0x5F7
 /* Controllers numbered 1 to 4, 32 by 32 each */
 #define ASSET_CONTROLLER_ICONS 0x63D
 /* A gold coin's turns */
@@ -92,6 +94,10 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define ASSET_CURSOR_BOX 0x6EF
 /* The wide cloud behind notices, prompts and the pause menu */
 #define ASSET_WIDE_CLOUD 0x70B
+/* The words YES and NO */
+#define ASSET_YES_NO 0x70C
+/* Green 1 to 6, then COURSE */
+#define ASSET_COURSE_NUMBERS 0x70E
 /* A pointing glove and two tees */
 #define ASSET_POINTING_HAND 0x70F
 /* Pixel for pixel the same as ASSET_GREEN_ARROWS */
@@ -104,6 +110,8 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define ASSET_WOODEN_PLAQUE 0x832
 /* A glove's frames as it presses a button */
 #define ASSET_PRESSING_HAND 0x8EB
+/* A plate that reads Nintendo */
+#define ASSET_NINTENDO_BADGE 0x949
 /* Green digits, then st, nd, rd and th */
 #define ASSET_PLACE_DIGITS 0x98E
 /* A 64x64 I8 gradient, which the opening and the club slots sweep across

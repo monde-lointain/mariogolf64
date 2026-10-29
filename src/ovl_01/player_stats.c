@@ -28,14 +28,19 @@
 #include "text.h"
 #include "variables.h"
 
+/* Score labels in Japanese */
+#define ASSET_JAPANESE_BIRDIE_LABEL 0x82D
+#define ASSET_JAPANESE_ALBATROSS_LABEL 0x82E
+#define ASSET_JAPANESE_EAGLE_LABEL 0x82F
+#define ASSET_JAPANESE_HOLE_IN_ONE_LABEL 0x830
+
 /* The images of g_CourseIconAssets that func_8021CF10 reads */
 #define PLAYER_STATS_IMAGE_COUNT 6
 
 /* The bytes of each of the four images that func_8021CFAC reads into one buffer
  */
 #define PLAYER_STATS_IMAGE_SIZE 0x258
-/* They are Japanese score labels (assets 0x82D, 0x82F, 0x82E and 0x830), such
- * as birdie and albatross */
+/* They are the ASSET_JAPANESE_*_LABEL score labels */
 #define SCORE_LABEL_COUNT 4
 
 /* func_8021F124 writes names beside the faces of these first characters only */
@@ -1873,14 +1878,14 @@ void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 3:
       D_8023B63C_ovl_01 = buffer;
-      OpenEncodedAsset(0x82D, &asset);
+      OpenEncodedAsset(ASSET_JAPANESE_BIRDIE_LABEL, &asset);
       ReadEncodedAsset(D_8023B63C_ovl_01, &asset);
-      OpenEncodedAsset(0x82F, &asset);
+      OpenEncodedAsset(ASSET_JAPANESE_EAGLE_LABEL, &asset);
       ReadEncodedAsset(D_8023B63C_ovl_01 + PLAYER_STATS_IMAGE_SIZE, &asset);
-      OpenEncodedAsset(0x82E, &asset);
+      OpenEncodedAsset(ASSET_JAPANESE_ALBATROSS_LABEL, &asset);
       ReadEncodedAsset(
           D_8023B63C_ovl_01 + (PLAYER_STATS_IMAGE_SIZE * 2), &asset);
-      OpenEncodedAsset(0x830, &asset);
+      OpenEncodedAsset(ASSET_JAPANESE_HOLE_IN_ONE_LABEL, &asset);
       ReadEncodedAsset(
           D_8023B63C_ovl_01 + (PLAYER_STATS_IMAGE_SIZE * 3), &asset);
       break;

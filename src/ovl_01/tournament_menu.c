@@ -22,6 +22,11 @@
 #include "text.h"
 #include "variables.h"
 
+/* The CODE ENTRY label and the row of key boxes beside it */
+#define ASSET_CODE_ENTRY_BAR 0x93E
+/* The keys' glyphs: 0 to 9, A to Z, a back arrow and OK, 16 by 16 each */
+#define ASSET_CODE_ENTRY_GLYPHS 0x942
+
 /* The intensity image of D_80230E70 that func_802287EC draws, in two strips */
 #define TOURNAMENT_BANNER_WIDTH 256
 #define TOURNAMENT_BANNER_STRIP_HEIGHT 32
@@ -88,7 +93,7 @@ enum ClubCodeState {
 #define CODE_KEY_BACK 0xFE
 #define CODE_KEY_END 0xFF
 /*
- * func_8022ADE8 draws each key's 16x16 glyph from asset 0x942 in
+ * func_8022ADE8 draws each key's 16x16 glyph from ASSET_CODE_ENTRY_GLYPHS in
  * D_80230F4C, tinting the chosen one yellow
  */
 #define CODE_GLYPH_SIZE 16
@@ -410,12 +415,12 @@ void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 2:
       D_80230E74_ovl_01 = buffer;
-      OpenEncodedAsset(0x70C, &asset);
+      OpenEncodedAsset(ASSET_YES_NO, &asset);
       ReadEncodedAsset(D_80230E74_ovl_01, &asset);
       break;
     case 3:
       D_80230E78_ovl_01 = buffer;
-      OpenEncodedAsset(0x949, &asset);
+      OpenEncodedAsset(ASSET_NINTENDO_BADGE, &asset);
       ReadEncodedAsset(D_80230E78_ovl_01, &asset);
       break;
     case 4:
@@ -1101,12 +1106,12 @@ void func_80228A80_ovl_01(void* buffer, s32 bufferKind) {
       break;
     case 2:
       D_80230F48_ovl_01 = buffer;
-      OpenEncodedAsset(0x93E, &asset);
+      OpenEncodedAsset(ASSET_CODE_ENTRY_BAR, &asset);
       ReadEncodedAsset(D_80230F48_ovl_01, &asset);
       break;
     case 3:
       D_80230F4C_ovl_01 = buffer;
-      OpenEncodedAsset(0x942, &asset);
+      OpenEncodedAsset(ASSET_CODE_ENTRY_GLYPHS, &asset);
       ReadEncodedAsset(D_80230F4C_ovl_01, &asset);
       break;
     case 4:

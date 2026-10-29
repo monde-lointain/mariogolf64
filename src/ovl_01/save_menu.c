@@ -284,12 +284,12 @@ void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {
       break;
     case 2:
       D_8023B674_ovl_01 = buffer;
-      OpenEncodedAsset(0x5F7, &asset);
+      OpenEncodedAsset(ASSET_RAINBOW_BOX, &asset);
       ReadEncodedAsset(D_8023B674_ovl_01, &asset);
       break;
     case 3:
       D_8023B678_ovl_01 = buffer;
-      OpenEncodedAsset(0x70E, &asset);
+      OpenEncodedAsset(ASSET_COURSE_NUMBERS, &asset);
       ReadEncodedAsset(D_8023B678_ovl_01, &asset);
       break;
     case 4:

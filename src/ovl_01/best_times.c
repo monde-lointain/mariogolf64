@@ -21,6 +21,9 @@
 #include "variables.h"
 #include "work_area.h"
 
+/* Each character's face, 32 by 24, one above another */
+#define ASSET_CHARACTER_FACE_STRIP 0x8E9
+
 /* The images of g_CourseIconAssets that func_80213390 reads */
 #define BEST_TIMES_IMAGE_COUNT 6
 
@@ -111,7 +114,7 @@ void func_8021342C_ovl_01(void* buffer) {
   EncodedAsset asset;
 
   D_8023AA44_ovl_01 = buffer;
-  OpenEncodedAsset(0x8E9, &asset);
+  OpenEncodedAsset(ASSET_CHARACTER_FACE_STRIP, &asset);
   ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
 }
 
@@ -121,7 +124,7 @@ void func_80213464_ovl_01(void* buffer, s16 bufferKind) {
   switch (bufferKind) {
     case 1:
       D_8023AA44_ovl_01 = &g_WorkArea;
-      OpenEncodedAsset(0x8E9, &asset);
+      OpenEncodedAsset(ASSET_CHARACTER_FACE_STRIP, &asset);
       ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
       break;
     case 2:

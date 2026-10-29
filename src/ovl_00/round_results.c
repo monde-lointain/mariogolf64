@@ -129,7 +129,6 @@ enum PortraitAnimation {
 /* The results' images. g_GameState.isClubTournament swaps in another set. */
 #define RESULTS_BACKDROP_ASSET 0x6A0
 #define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
-#define NINTENDO_BADGE_ASSET 0x949
 #define FINAL_RESULTS_TITLE_ASSET 0x69F
 #define NOTICE_TITLE_ASSET 0x55F
 #define RESULTS_UNK72C_IMAGE_ASSET 0x72C
@@ -439,7 +438,7 @@ void LoadRoundResults(void) {
   ReadEncodedAsset(f_PlaceDigitsImage, &asset);
   if (g_GameState.isClubTournament) {
     f_NintendoBadgeImage =
-        AllocMemory(OpenEncodedAsset(NINTENDO_BADGE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(ASSET_NINTENDO_BADGE, &asset));
     ReadEncodedAsset(f_NintendoBadgeImage, &asset);
     f_ResultsCourseImage = AllocMemory(OpenEncodedAsset(
         g_TournamentIconAssets[GetClubTournamentCourse()], &asset));
