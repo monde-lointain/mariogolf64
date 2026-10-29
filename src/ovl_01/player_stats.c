@@ -1864,7 +1864,7 @@ void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind) {
 
 /* func_8021E340 is called without a prototype; the original extends its result
  * from 16 bits, not 8 */
-void func_8021D0B8_ovl_01(void) {
+void UpdateBestShots(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   s32 slot;
@@ -1938,7 +1938,7 @@ void func_8021D0B8_ovl_01(void) {
 }
 
 /*
- * func_8021D3AC draws the records page: a shaded panel, the image in
+ * DrawBestShots draws the records page: a shaded panel, the image in
  * D_8023B634 in strips below it, and a row of up to five ranked faces for each
  * label of D_80230984. The chosen record also shows its course's image and
  * name.
@@ -1981,7 +1981,7 @@ void func_8021D0B8_ovl_01(void) {
  * where GCC reuses the address from the check.
  */
 #ifdef NON_MATCHING
-void func_8021D3AC_ovl_01(Gfx** displayListHead) {
+void DrawBestShots(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s16 index = 0;
   SaveData* save = GetSaveData();
@@ -2143,7 +2143,7 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021D3AC_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShots);
 #endif
 
 /*

@@ -376,7 +376,7 @@ void func_80217D20_ovl_01(void);
 s32 func_80219948_ovl_01();
 void func_8021CF10_ovl_01(void** buffers);
 void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind);
-void func_8021D0B8_ovl_01(void);
+void UpdateBestShots(void);
 void func_8021E01C_ovl_01(void);
 void func_8021EF64_ovl_01(void);
 void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind);
@@ -412,7 +412,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer);
 void DrawCourseStats(Gfx** displayListHead);
 void DrawBestTimes(Gfx** displayListHead);
 void DrawCharacterTable(Gfx** displayListHead);
-void func_8021D3AC_ovl_01(Gfx** displayListHead);
+void DrawBestShots(Gfx** displayListHead);
 void DrawRingShotRecords(Gfx** displayListHead);
 void DrawSavedGames(Gfx** displayListHead);
 void DrawClubTournament(Gfx** displayListHead);
@@ -1075,7 +1075,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_BEST_SHOTS:
-      func_8021D0B8_ovl_01();
+      UpdateBestShots();
       break;
 
     case MENU_SCREEN_RING_SHOT_RECORDS:
@@ -3706,7 +3706,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       func_80207E18_ovl_01(&gfx);
       break;
     case MENU_SCREEN_BEST_SHOTS:
-      func_8021D3AC_ovl_01(&gfx);
+      DrawBestShots(&gfx);
       break;
     case MENU_SCREEN_RING_SHOT_RECORDS:
       DrawRingShotRecords(&gfx);
