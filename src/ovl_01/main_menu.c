@@ -677,7 +677,7 @@ static u8 D_8022F8DD_ovl_01 = 0;
 /* The menus' camera orbit's updates */
 static s32 D_8022F8E0_ovl_01 = 0;
 /* Each player's sound pan, by the player count */
-static u8 D_8022F8E4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+static u8 f_PlayerSoundPans[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {127, 0, 0, 0}, {15, 240, 0, 0}, {15, 127, 240, 0}, {15, 85, 170, 240}};
 static s32 D_8022F8F4_ovl_01[] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
@@ -1633,7 +1633,7 @@ void func_801F6A38_ovl_01(void) {
 
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     g_Players[playerIndex].soundPan =
-        D_8022F8E4_ovl_01[g_GameState.playerCount - 1][playerIndex];
+        f_PlayerSoundPans[g_GameState.playerCount - 1][playerIndex];
   }
 }
 #else
