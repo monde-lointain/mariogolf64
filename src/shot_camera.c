@@ -723,13 +723,13 @@ void StartFlightCamera(s32 earlierFlightCount) {
   }
 
   D_800BE648 = FALSE;
-  f_FlaggedStep = -1;
+  f_FlaggedStep = NO_STEP;
   D_800BE650 = -1;
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
     if (i < g_SimulatedShot.stepCount && (g_SimulatedShot.pathFlags[i] & 2)) {
       D_800BE648 = TRUE;
       D_800BE658 |= 1;
-      if (f_FlaggedStep == -1) {
+      if (f_FlaggedStep == NO_STEP) {
         f_FlaggedStep = i;
         D_800BE650 = 40;
       }
@@ -2589,7 +2589,7 @@ void ChooseFlightCameraKind(void) {
     switch (f_FlightPhase) {
       case 1:
         pick = NextCameraPick(1);
-        if (f_FlaggedStep != -1) {
+        if (f_FlaggedStep != NO_STEP) {
           kind = FLIGHT_CAMERA_UNK3;
         } else if (pick < 4) {
           kind = FLIGHT_CAMERA_UNK3;
@@ -3021,7 +3021,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   if (g_SimulatedShot.stepCount >= aheadStep &&
       (g_SimulatedShot.pathFlags[aheadStep] & PATH_FLAG_UNK2)) {
     D_800BE658 |= 1;
-    if (f_FlaggedStep == -1) {
+    if (f_FlaggedStep == NO_STEP) {
       f_FlaggedStep = aheadStep;
       D_800BE650 = 70;
     }
@@ -3031,7 +3031,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     f_FlightCameraKind = FLIGHT_CAMERA_FLAGGED_STEP;
   }
 
-  if (f_FlaggedStep != -1 && f_FlaggedStep + 10 < step &&
+  if (f_FlaggedStep != NO_STEP && f_FlaggedStep + 10 < step &&
       f_FlightCameraKind != FLIGHT_CAMERA_AROUND_END &&
       (s32)IntLength3D(f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
           f_FlightBallPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
