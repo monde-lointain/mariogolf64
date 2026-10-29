@@ -354,24 +354,24 @@ s32 GetTerrainCodeColor(s32 code) {
 /* Returns the terrain code whose color is nearest an RGBA16 color */
 s32 GetColorTerrainCode(s32 color) {
   switch (FindNearestTerrainColor(color)) {
-    case 1:
+    case TERRAIN_COLOR_GREEN:
       return TERRAIN_CODE_GREEN;
-    case 2:
+    case TERRAIN_COLOR_BUNKER:
       return TERRAIN_CODE_BUNKER;
-    case 3:
+    case TERRAIN_COLOR_ROUGH:
       return TERRAIN_CODE_ROUGH;
-    case 4:
+    case TERRAIN_COLOR_UNK3:
       return TERRAIN_CODE_UNK3;
-    case 6:
+    case TERRAIN_COLOR_CART_WAY:
       return TERRAIN_CODE_CART_WAY;
-    case 0:
-    case 7:
+    case TERRAIN_COLOR_FAIRWAY:
+    case TERRAIN_COLOR_UNK7:
       return TERRAIN_CODE_FAIRWAY;
-    case 8:
+    case TERRAIN_COLOR_TEE_GROUND:
       return TERRAIN_CODE_TEE_GROUND;
-    case 9:
+    case TERRAIN_COLOR_ROCK:
       return TERRAIN_CODE_ROCK;
-    case 10:
+    case TERRAIN_COLOR_DEEP_ROUGH:
       return TERRAIN_CODE_DEEP_ROUGH;
   }
 
