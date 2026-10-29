@@ -614,6 +614,7 @@ void LoadTransmitMenu(void) {
   nuContRmbForceStop();
 }
 
+/* Frees the images that the menu loaded, so the main menu has room */
 void FreeTransmitMenu(void) {
   s32 index;
 
@@ -841,6 +842,7 @@ void UpdateBringCharacters(void) {
   }
 }
 
+/* Opens the notice that explains a controller pak error to the player */
 void ShowPakError(s32 pfsError) {
   switch (pfsError) {
     case PFS_ERR_NOPACK:
@@ -861,6 +863,8 @@ void ShowPakError(s32 pfsError) {
   }
 }
 
+/* Opens the notice that explains a transfer's result, with the hand pressing
+ * A beside it */
 void ShowTransferError(u32 result) {
   g_GameBoyTransfer.pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
   switch (result) {
@@ -1493,9 +1497,12 @@ void DecodeCartridgeCharacter(
   character->unk38 = saveIndex;
 }
 
+/* Would skip a save without characters, but does nothing */
 void SkipCartridgeSave(u8* unusedData, s32 unusedCartridgeIndex,
     s32 unusedSaveIndex, u8* unusedTitle, s32 unusedUnk34) {}
 
+/* Whether a Game Boy character came from the save that the character data
+ * belongs to, by its save name and unkB bytes */
 Boolean IsCharacterFromSave(GameBoyCharacter* character, u8* characterData) {
   s32 index;
 
@@ -1548,6 +1555,8 @@ static s32 f_UnusedZeros[2] = {0, 0};
 static s32 f_StatusCharacterOrder[CHARACTER_COUNT] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
+/* Copies a listed cartridge character into a Game Boy character slot and
+ * marks it brought over, remembering where it came from */
 void BringOverCharacter(s32 listedIndex, s32 slot) {
   /* The transfer pointer is there to match */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
@@ -1560,6 +1569,7 @@ void BringOverCharacter(s32 listedIndex, s32 slot) {
   transfer->sourceIndices[slot] = transfer->listedCharacters[listedIndex];
 }
 
+/* Starts the Bring Characters screen with its cursors at the first entries */
 void ResetBringCharacters(void) {
   g_GameBoyTransfer.listedCharacterIndex = 0;
   g_GameBoyTransfer.characterIndex = 0;
@@ -1567,12 +1577,15 @@ void ResetBringCharacters(void) {
   g_GameBoyTransfer.isCanceled = FALSE;
 }
 
+/* Starts the Send Status screen with no cartridge tagged or chosen */
 void ResetSendStatus(void) {
   g_GameBoyTransfer.chosenCartridgeIndex = 0;
   g_GameBoyTransfer.taggedCartridgeCount = 0;
   g_GameBoyTransfer.isCanceled = FALSE;
 }
 
+/* Starts the Send Experience screen with no cartridge tagged and the first
+ * character chosen */
 void ResetSendExperience(void) {
   g_GameBoyTransfer.chosenCartridgeIndex = 0;
   g_GameBoyTransfer.characterIndex = 0;
@@ -1580,6 +1593,7 @@ void ResetSendExperience(void) {
   g_GameBoyTransfer.isCanceled = FALSE;
 }
 
+/* Returns the checksum that a save holds, which ComputeSaveChecksum checks */
 s32 GetStoredChecksum(u8* save) {
   return save[SAVE_CHECKSUM_OFFSET] | (save[SAVE_CHECKSUM_OFFSET + 1] << 8);
 }
@@ -1597,6 +1611,8 @@ s32 ComputeSaveChecksum(u8* save) {
   return sum;
 }
 
+/* Rebuilds the list of cartridge characters that can still be brought over,
+ * padding the rest with -1 */
 void ListPresentCharacters(void) {
   /* The transfer pointer is there to match */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
@@ -1615,6 +1631,8 @@ void ListPresentCharacters(void) {
   }
 }
 
+/* Draws the hint that tells the player what to do at the Send Status screen's
+ * step */
 void DrawSendStatusHint(Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   MessageId message = NO_MESSAGE;
@@ -1752,6 +1770,8 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
 #define STEP_DEBUG_COLUMN 20
 #define STEP_DEBUG_ROW 2
 
+/* Draws the Bring Characters screen's text: the stats of the character under
+ * the cursor and the hint for the step */
 void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   GameBoyCharacter* character = g_GameBoyCharacters;
   Gfx* displayList = *displayListHead;
@@ -1804,6 +1824,8 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   *displayListHead = displayList;
 }
 
+/* Draws the Send Experience screen's text: each character's experience, the
+ * chosen one's stats and the hint for the step */
 void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   s32 slot;
@@ -1931,6 +1953,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
   *displayListHead = displayList;
 }
 
+/* Draws the faces of the characters already brought over, in their slots */
 void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   s32 slot;
@@ -1956,6 +1979,7 @@ void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer) {
   *displayListHead = displayList;
 }
 
+/* Draws the options screen's faces; DrawTransmitMenu draws the options */
 void DrawOptionsScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
 
@@ -2111,6 +2135,8 @@ void DrawBringCharactersScreen(
   *displayListHead = displayList;
 }
 
+/* Draws the Send Experience screen: the faces with their cursor and the
+ * cartridges' controller icons, dimming the unchosen ones once sent */
 void DrawSendExperienceScreen(
     Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
@@ -2168,6 +2194,8 @@ void DrawSendExperienceScreen(
       (screen) == TRANSMIT_SCREEN_UNK6 || \
       (screen) == TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT)
 
+/* Draws the backdrop, the title, the current screen and the options, notice
+ * and hand over it */
 void DrawTransmitMenu(Gfx** displayListHead) {
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   Gfx* displayList = *displayListHead;
@@ -2357,6 +2385,8 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   *displayListHead = displayList;
 }
 
+/* Forgets the cartridge characters read before, so that the Bring Characters
+ * screen reads them again */
 void ClearCartridgeCharacters(void) {
   /* The transfer pointer is there to match */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
@@ -3067,6 +3097,8 @@ s32 ReadCartridgeCharacters(void) {
   return PAK_RESULT_STILL_READING;
 }
 
+/* Opens a controller's Game Boy pak, restarting the Game Boy pak manager after
+ * each failed attempt, and returns the last PAK_RESULT_* */
 s32 OpenGameBoyPakWithRetries(
     s32 port, OSGbpakId* header, NUContPakFile* file) {
   s32 failureCount;
@@ -3316,6 +3348,7 @@ s32 TagCartridges(void) {
   return PAK_RESULT_LOOSE_PAK;
 }
 
+/* Opens the notice cloud with a message, or starts closing it */
 void SetNoticeState(s32 state, MessageId message) {
   f_NoticeState = state;
   if (state == NOTICE_OPENING) {
@@ -3328,6 +3361,7 @@ void SetNoticeState(s32 state, MessageId message) {
   }
 }
 
+/* Returns the NOTICE_* state, so the screens wait for the notice to close */
 s32 GetNoticeState(void) {
   return f_NoticeState;
 }
@@ -3411,6 +3445,8 @@ void DrawNotice(Gfx** displayListHead) {
   *displayListHead = displayList;
 }
 
+/* Draws the Accessing sign, which asks the player not to remove the Game Pak
+ * while a pak is being accessed */
 void DrawAccessingSign(Gfx** displayListHead) {
   Gfx* displayList = *displayListHead;
   s32 strip;
@@ -3433,6 +3469,7 @@ void DrawAccessingSign(Gfx** displayListHead) {
   *displayListHead = displayList;
 }
 
+/* Draws the hand that presses A beside a notice or a prompt, at its position */
 void DrawPressingHand(Gfx** displayListHead) {
   Gfx* displayList = *displayListHead;
 
