@@ -6692,8 +6692,8 @@ const char D_802316FC_ovl_01[] = "Luigi's Garden";
 #define ERASE_MESSAGE_PALETTE_GREEN 127
 #define ERASE_MESSAGE_PALETTE_BLUE 127
 
-void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
-    s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton);
+void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
+    s32 centerY, s32 okTextShown, s32 chosenButton);
 
 /*
  * Draws the options screen: Mario and his shadow, each option's label, the
@@ -7036,7 +7036,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   }
 
   if (f_IsEraseWindowUp == TRUE) {
-    func_80226A58_ovl_01(&gfx, ERASE_WINDOW_WIDTH, ERASE_WINDOW_HEIGHT,
+    DrawYesNoWindow(&gfx, ERASE_WINDOW_WIDTH, ERASE_WINDOW_HEIGHT,
         ERASE_WINDOW_CENTER_X, ERASE_WINDOW_CENTER_Y, NO_OK_TEXT,
         memory->eraseChoice);
     if (IsMenuWindowOpen()) {

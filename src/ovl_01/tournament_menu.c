@@ -318,9 +318,8 @@ static f32 D_80231180_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
 Boolean IsNintendoClubTournament(void);
 s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentModeMessage(void);
-void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
-    s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton,
-    s32 windowStyle);
+void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
+    s32 centerY, s32 okTextShown, s32 chosenButton, s32 windowStyle);
 /* Writes the club tournament's number as an ordinal from the place glyphs */
 void func_802296C4_ovl_01(
     Gfx** displayListHead, s32 centerX, s32 top, s32 number);
@@ -491,7 +490,7 @@ void func_80226A34_ovl_01(void) {
   func_8005AF74();
 }
 
-/* func_80226A58 draws a cloud window with Yes and No buttons, the chosen one
+/* DrawYesNoWindow draws a cloud window with Yes and No buttons, the chosen one
  * pulsing */
 #define MENU_WINDOW_SCALE_STEP 0.4f
 #define MENU_WINDOW_CLOSED_SCALE 0.1f
@@ -529,8 +528,8 @@ void func_80226A34_ovl_01(void) {
  * but nothing suggests the original did that.
  */
 #ifdef NON_MATCHING
-void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
-    s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton) {
+void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
+    s32 centerY, s32 okTextShown, s32 chosenButton) {
   Gfx* gfx = *displayListHead;
   f32 windowWidth;
   f32 windowHalfHeight;
@@ -707,11 +706,11 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226A58_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
 #endif
 
 /*
- * func_8022747C adds to that window the Nintendo badge of D_80230E78 near its
+ * DrawClubWindow adds to that window the Nintendo badge of D_80230E78 near its
  * top, the course image of D_80230E7C at its lower left and the picture of
  * f_MenuWindowImage, colored by the palette in D_80230E84, at its lower right
  */
@@ -732,17 +731,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226A58_ovl_01);
  * Draws the club tournament's details window: the cloud window, its Yes and No
  * buttons with the chosen one pulsing, the Nintendo badge for a Nintendo
  * tournament, the course image, the picture and the OK text once the window is
- * open. The window grows and shrinks as func_80226A58's does.
+ * open. The window grows and shrinks as DrawYesNoWindow's does.
  */
 /*
- * Doesn't match: as in func_80226A58, GCC hoists the window's edges out of the
- * strip loop where the original works them out in the loop from centerX on the
- * stack, and it schedules the course image's position differently
+ * Doesn't match: as in DrawYesNoWindow, GCC hoists the window's edges out of
+ * the strip loop where the original works them out in the loop from centerX on
+ * the stack, and it schedules the course image's position differently
  */
 #ifdef NON_MATCHING
-void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
-    s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton,
-    s32 windowStyle) {
+void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
+    s32 centerY, s32 okTextShown, s32 chosenButton, s32 windowStyle) {
   Gfx* gfx = *displayListHead;
   f32 windowWidth;
   f32 windowHalfHeight;
@@ -1040,7 +1038,7 @@ void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022747C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawClubWindow);
 #endif
 
 /* Doesn't match: the original keeps the strip height constant in a saved
@@ -1563,7 +1561,7 @@ void DrawClubTournament(Gfx** displayListHead) {
         }
       }
 
-      func_8022747C_ovl_01(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
+      DrawClubWindow(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
           windowStyle);
       func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
@@ -1586,7 +1584,7 @@ void DrawClubTournament(Gfx** displayListHead) {
         }
       }
 
-      func_8022747C_ovl_01(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
+      DrawClubWindow(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
           windowStyle);
       func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
