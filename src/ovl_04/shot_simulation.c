@@ -60,13 +60,13 @@ void SimulateShot(Unk20* shot) {
   hasUnk40Flag = FALSE;
   g_SimulatedShot.usesPutter =
       GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
-  g_SimulatedShot.unk2E14 = shot->unkC == 0 &&
+  g_SimulatedShot.unk2E14 = shot->impactTiming == 0 &&
       shot->power >= MAX_LAUNCH_POWER &&
       !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
   g_SimulatedShot.unk2E42 = GetUnkCEntry(
       GetClub(
           g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
-      g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
+      g_CurrentShot.surface, g_CurrentShot.shotMode, shot->impactTiming)
                                 ->unk5;
   LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
   g_SimulatedShot.startsOnGreen = g_GameState.isMiniGolf ||

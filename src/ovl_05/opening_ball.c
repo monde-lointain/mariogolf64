@@ -110,7 +110,7 @@ static s32 D_8020B858_ovl_05 = 0;
 static Unk6 D_8020B85C_ovl_05 = {-90, -64, -40, -10, 100, 1};
 static Unk6 D_8020B864_ovl_05 = {-80, 64, 30, 10, -5, 1};
 /* The opening's copy of D_800B7C10 */
-static Unk6 D_8020B86C_ovl_05[MAX_LIE_RATING + 1][UNKC_ENTRY_COUNT] = {
+static Unk6 D_8020B86C_ovl_05[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {{-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1}, {0, 0, 0, 0, 0, 0},
@@ -1660,14 +1660,14 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   simulation->unkA7 = simulation->unkA2;
   simulation->unkA1 = 0;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    simulation->playerIndex = shot->unk18;
+    simulation->playerIndex = shot->playerIndex;
   } else {
     simulation->playerIndex = 0;
   }
 
   club = &D_8020B9F8_ovl_05[shot->clubIndex];
-  entry = &D_8020B86C_ovl_05[0][UNKC_ENTRY_LIMIT];
-  rumbles = D_8020B86C_ovl_05[0][UNKC_ENTRY_LIMIT].unk5;
+  entry = &D_8020B86C_ovl_05[0][IMPACT_TIMING_ENTRY_LIMIT];
+  rumbles = D_8020B86C_ovl_05[0][IMPACT_TIMING_ENTRY_LIMIT].unk5;
   if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
       simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     speed = GetPuttPower(shot->power, shot->shotMode);
@@ -1697,15 +1697,15 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     pitch = 0.0f;
   }
 
-  simulation->unk38 = (((((sideSign * entry->unk3) + shot->unk10) * 2) +
+  simulation->unk38 = (((((sideSign * entry->unk3) + shot->offsetX) * 2) +
                            ((club->sideSpin * 2) * sideSign)) *
                           speed) *
       0.00078125f;
-  pitch += (f32)club->unk10 * shot->unk14 * 0.00054541545f;
+  pitch += (f32)club->unk10 * shot->offsetY * 0.00054541545f;
   yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
   spinBase = club->spin * 0.5f;
   simulation->unk34 =
-      (((spinBase + 25.0f) * (shot->unk14 * 0.006f)) - spinBase) * speed *
+      (((spinBase + 25.0f) * (shot->offsetY * 0.006f)) - spinBase) * speed *
       0.0078125f;
   simulation->unk40 = 0.0f;
   simulation->unk3C = yawRadians;

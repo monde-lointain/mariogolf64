@@ -860,7 +860,7 @@ void PlayContactSound(void) {
   Club* club;
   SurfaceInfo* surfaceInfo;
 
-  club = GetClub(g_Players[g_SimulatedShot.shot.unk18]
+  club = GetClub(g_Players[g_SimulatedShot.shot.playerIndex]
           .clubs[g_SimulatedShot.shot.clubIndex]);
   surfaceInfo = GetSurfaceInfo(g_CurrentShot.surface);
   if (club->kind == CLUB_KIND_WOOD) {

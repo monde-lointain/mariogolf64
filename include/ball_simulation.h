@@ -38,10 +38,10 @@ enum BallState {
 #define RESET_BALL_SPEED_MASK 0x3FF
 #define RESET_BALL_VELOCITY_Y (-100)
 
-/* Unk20 unkC values from -UNKC_ENTRY_LIMIT to UNKC_ENTRY_LIMIT have an Unk6 per
- * lie rating */
-#define UNKC_ENTRY_LIMIT 5
-#define UNKC_ENTRY_COUNT ((UNKC_ENTRY_LIMIT * 2) + 1)
+/* Unk20 impactTiming values from -IMPACT_TIMING_ENTRY_LIMIT to
+ * IMPACT_TIMING_ENTRY_LIMIT have an Unk6 per lie rating */
+#define IMPACT_TIMING_ENTRY_LIMIT 5
+#define IMPACT_TIMING_ENTRY_COUNT ((IMPACT_TIMING_ENTRY_LIMIT * 2) + 1)
 
 /*
  * The steepest ground that a ball is dropped on, as the square of its
@@ -77,10 +77,10 @@ typedef struct Unk20 {
   /* 0x00 */ SignedBinaryAngle heading;
   /* 0x04 */ s32 clubIndex;
   /* 0x08 */ s32 power; /* Out of MAX_LAUNCH_POWER */
-  /* 0x0C */ s32 unkC;
-  /* 0x10 */ s32 unk10;
-  /* 0x14 */ s32 unk14;
-  /* 0x18 */ s32 unk18;
+  /* 0x0C */ s32 impactTiming; /* Gauge frames past the impact mark */
+  /* 0x10 */ s32 offsetX; /* CurrentShot's offsetX and offsetY */
+  /* 0x14 */ s32 offsetY;
+  /* 0x18 */ s32 playerIndex;
   /* 0x1C */ s32 shotMode;
 } Unk20; /* size = 0x20 */
 
@@ -149,7 +149,7 @@ typedef struct BallSimulation {
 extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 
 void ResetBallSimulations(void);
-Unk6* GetUnkCEntry(Club* club, Surface surface, s32 shotMode, s32 unkC);
+Unk6* GetUnkCEntry(Club* club, Surface surface, s32 shotMode, s32 impactTiming);
 s32 StepBallSimulation(BallSimulation* simulation);
 s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot);
 

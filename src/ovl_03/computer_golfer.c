@@ -2258,10 +2258,10 @@ s32 StepTrialShot(void) {
     f_TrialLaunch->clubIndex = f_Shot.clubSlot;
     f_ClosestTargetDistance = FAR_FROM_TARGET;
     f_TrialLaunch->power = GetGaugeFramePower(f_Shot.powerGaugeFrame);
-    f_TrialLaunch->unkC = 0;
-    f_TrialLaunch->unk10 = f_Shot.offsetX;
-    f_TrialLaunch->unk14 = f_Shot.offsetY;
-    f_TrialLaunch->unk18 = f_Shot.playerIndex;
+    f_TrialLaunch->impactTiming = 0;
+    f_TrialLaunch->offsetX = f_Shot.offsetX;
+    f_TrialLaunch->offsetY = f_Shot.offsetY;
+    f_TrialLaunch->playerIndex = f_Shot.playerIndex;
     f_TrialLaunch->shotMode = f_Shot.shotMode;
     f_IsPutting = GetClub(f_Shot.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN;
     if (!IsGameFlagSet(GAME_FLAG_UNK3C)) {
@@ -2954,10 +2954,10 @@ Boolean IsTrialShotSafe(void) {
   f_TrialLaunch->heading = f_TrialShot.heading;
   f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
   f_TrialLaunch->power = GetGaugeFramePower(f_TrialShot.powerGaugeFrame);
-  f_TrialLaunch->unkC = f_TrialShot.impactGaugeFrame - 60;
-  f_TrialLaunch->unk10 = f_TrialShot.offsetX;
-  f_TrialLaunch->unk14 = f_TrialShot.offsetY;
-  f_TrialLaunch->unk18 = f_TrialShot.playerIndex;
+  f_TrialLaunch->impactTiming = f_TrialShot.impactGaugeFrame - 60;
+  f_TrialLaunch->offsetX = f_TrialShot.offsetX;
+  f_TrialLaunch->offsetY = f_TrialShot.offsetY;
+  f_TrialLaunch->playerIndex = f_TrialShot.playerIndex;
   f_TrialLaunch->shotMode = f_TrialShot.shotMode;
   f_TrialSimulation.position[AXIS_X] = f_TrialShot.ballPosition[AXIS_X];
   f_TrialSimulation.position[AXIS_Y] = f_TrialShot.ballPosition[AXIS_Y];

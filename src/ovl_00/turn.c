@@ -254,7 +254,7 @@
 #define LAST_POWER_GAUGE_FRAME (GAUGE_IMPACT_FRAME - 1)
 #define LAST_IMPACT_GAUGE_FRAME (GAUGE_IMPACT_FRAME + 9)
 /* How far either side of the impact mark the impact counts */
-#define MAX_IMPACT_OFFSET 6
+#define MAX_IMPACT_TIMING 6
 /*
  * The swing animation starts once fewer gauge frames are left before this one
  * than its event frame, D_80224000_ovl_00
@@ -401,9 +401,9 @@ void RecordRingShotClear(s32 playerIndex);
 static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
 /*
  * The launch of the shot being taken, which the shot preview and the ball
- * simulation start from. unkC is how far from the meter's impact mark the swing
- * was stopped, and clubIndex and shotMode are also the club slot and shot mode
- * that the golfer was last posed with.
+ * simulation start from. impactTiming is how far from the meter's impact mark
+ * the swing was stopped, and clubIndex and shotMode are also the club slot and
+ * shot mode that the golfer was last posed with.
  */
 static Unk20 D_80227150_ovl_00;
 static s32 D_80227170_ovl_00[MAX_PLAYER_COUNT];
@@ -1916,16 +1916,16 @@ void BuildShotPreview(Unk20* swing, s32 playerState) {
     shot.power = swing->power;
   }
 
-  shot.unkC = 0;
+  shot.impactTiming = 0;
   if (IsBeforeImpactSet(playerState)) {
-    shot.unk10 = swing->unk10;
-    shot.unk14 = swing->unk14;
+    shot.offsetX = swing->offsetX;
+    shot.offsetY = swing->offsetY;
   } else {
-    shot.unk10 = 0;
-    shot.unk14 = 0;
+    shot.offsetX = 0;
+    shot.offsetY = 0;
   }
 
-  shot.unk18 = g_CurrentShot.playerIndex;
+  shot.playerIndex = g_CurrentShot.playerIndex;
   shot.shotMode = g_CurrentShot.shotMode;
   simulation.position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
   simulation.position[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
@@ -3142,7 +3142,7 @@ void UpdateTurns(void) {
    * mishit */
   Boolean DoesImpactRumble(void) {
     return GetUnkCEntry(GetSelectedClub(), g_CurrentShot.surface,
-        g_CurrentShot.shotMode, D_80227150_ovl_00.unkC)
+        g_CurrentShot.shotMode, D_80227150_ovl_00.impactTiming)
         ->unk5;
   }
 
@@ -3151,7 +3151,7 @@ void UpdateTurns(void) {
   void PlayImpactClickSound(void) {
     if (DoesImpactRumble()) {
       PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
-    } else if (D_80227150_ovl_00.unkC == 0) {
+    } else if (D_80227150_ovl_00.impactTiming == 0) {
       PlaySound(SOUND_IMPACT_ON_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
     } else {
       PlaySound(SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
@@ -3193,7 +3193,7 @@ void UpdateTurns(void) {
 
     D_80227170_ovl_00[playerIndex]++;
     nextState = state;
-    D_80227150_ovl_00.unk18 = playerIndex;
+    D_80227150_ovl_00.playerIndex = playerIndex;
     if (IsTimedState(state) && IsPlayGoingOn(g_PauseScreen)) {
       TickStopwatches();
     }
@@ -3635,8 +3635,8 @@ void UpdateTurns(void) {
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
 
-          D_80227150_ovl_00.unk10 = 0;
-          D_80227150_ovl_00.unk14 = 0;
+          D_80227150_ovl_00.offsetX = 0;
+          D_80227150_ovl_00.offsetY = 0;
           D_80227150_ovl_00.heading = g_CurrentShot.heading;
           BuildShotPreview(&D_80227150_ovl_00, state);
         } else if (g_PauseScreen == PAUSE_SCREEN_NONE) {
@@ -3815,8 +3815,8 @@ void UpdateTurns(void) {
           }
 
           SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
-          D_80227150_ovl_00.unk10 = g_CurrentShot.offsetX;
-          D_80227150_ovl_00.unk14 = g_CurrentShot.offsetY;
+          D_80227150_ovl_00.offsetX = g_CurrentShot.offsetX;
+          D_80227150_ovl_00.offsetY = g_CurrentShot.offsetY;
           PlaceShotCamera();
           if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
             if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
@@ -3884,8 +3884,8 @@ void UpdateTurns(void) {
         }
 
         SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
-        D_80227150_ovl_00.unk10 = g_CurrentShot.offsetX;
-        D_80227150_ovl_00.unk14 = g_CurrentShot.offsetY;
+        D_80227150_ovl_00.offsetX = g_CurrentShot.offsetX;
+        D_80227150_ovl_00.offsetY = g_CurrentShot.offsetY;
         if ((f_ShotSource != SHOT_SOURCE_PLAYER)
                 ? (D_80104F78.powerGaugeFrame == g_CurrentShot.gaugeFrame)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
@@ -3909,9 +3909,9 @@ void UpdateTurns(void) {
               }
             }
 
-            D_80227150_ovl_00.unkC = 0;
-            D_80227150_ovl_00.unk10 = 0;
-            D_80227150_ovl_00.unk14 = 0;
+            D_80227150_ovl_00.impactTiming = 0;
+            D_80227150_ovl_00.offsetX = 0;
+            D_80227150_ovl_00.offsetY = 0;
             nextState = PLAYER_STATE_STARTING_SWING;
             if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
               SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -3981,28 +3981,28 @@ void UpdateTurns(void) {
         }
 
         SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
-        D_80227150_ovl_00.unk10 = g_CurrentShot.offsetX;
-        D_80227150_ovl_00.unk14 = g_CurrentShot.offsetY;
+        D_80227150_ovl_00.offsetX = g_CurrentShot.offsetX;
+        D_80227150_ovl_00.offsetY = g_CurrentShot.offsetY;
         if (((f_ShotSource != SHOT_SOURCE_PLAYER)
                     ? (g_CurrentShot.gaugeFrame == D_80104F78.impactGaugeFrame)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||
             g_CurrentShot.gaugeFrame >= LAST_IMPACT_GAUGE_FRAME) {
           g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
-          D_80227150_ovl_00.unkC =
+          D_80227150_ovl_00.impactTiming =
               g_CurrentShot.gaugeFrame - GAUGE_IMPACT_FRAME;
-          if (D_80227150_ovl_00.unkC > MAX_IMPACT_OFFSET) {
-            D_80227150_ovl_00.unkC = MAX_IMPACT_OFFSET;
+          if (D_80227150_ovl_00.impactTiming > MAX_IMPACT_TIMING) {
+            D_80227150_ovl_00.impactTiming = MAX_IMPACT_TIMING;
           }
 
-          if (D_80227150_ovl_00.unkC < -MAX_IMPACT_OFFSET) {
-            D_80227150_ovl_00.unkC = -MAX_IMPACT_OFFSET;
+          if (D_80227150_ovl_00.impactTiming < -MAX_IMPACT_TIMING) {
+            D_80227150_ovl_00.impactTiming = -MAX_IMPACT_TIMING;
           }
 
           PlayImpactClickSound();
           StopSound(IMPACT_POINT_SOUND_CHANNEL);
           nextState = PLAYER_STATE_STARTING_SWING;
           if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
-              (D_80227150_ovl_00.unkC != 0 ||
+              (D_80227150_ovl_00.impactTiming != 0 ||
                   D_80227150_ovl_00.power < MAX_LAUNCH_POWER)) {
             if (g_Players[playerIndex].unk28 > 0) {
               g_Players[playerIndex].unk28--;
@@ -4035,13 +4035,13 @@ void UpdateTurns(void) {
             D_80227150_ovl_00.power = MAX_LAUNCH_POWER;
           }
 
-          D_80227150_ovl_00.unkC = 0;
-          if (D_80227150_ovl_00.unkC > MAX_IMPACT_OFFSET) {
-            D_80227150_ovl_00.unkC = MAX_IMPACT_OFFSET;
+          D_80227150_ovl_00.impactTiming = 0;
+          if (D_80227150_ovl_00.impactTiming > MAX_IMPACT_TIMING) {
+            D_80227150_ovl_00.impactTiming = MAX_IMPACT_TIMING;
           }
 
-          if (D_80227150_ovl_00.unkC < -MAX_IMPACT_OFFSET) {
-            D_80227150_ovl_00.unkC = -MAX_IMPACT_OFFSET;
+          if (D_80227150_ovl_00.impactTiming < -MAX_IMPACT_TIMING) {
+            D_80227150_ovl_00.impactTiming = -MAX_IMPACT_TIMING;
           }
 
           PlayImpactClickSound();
@@ -4177,7 +4177,7 @@ void UpdateTurns(void) {
 
           LaunchBallSimulation(&g_TurnBallSimulation, 0, &D_80227150_ovl_00);
           nextState = PLAYER_STATE_BALL_IN_FLIGHT;
-          if (D_80227150_ovl_00.unkC == 0 &&
+          if (D_80227150_ovl_00.impactTiming == 0 &&
               D_80227150_ovl_00.power >= MAX_LAUNCH_POWER &&
               !(GetClub(D_80227150_ovl_00.clubIndex)->surfaceMask &
                   CLUB_SURFACE_GREEN) &&

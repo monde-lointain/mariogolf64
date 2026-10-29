@@ -92,10 +92,10 @@ static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
     {SURFACE_KIND_CART_WAY, "RED", 80, 100, 10, 980, 800, 0x8F4, 0, 4},
 };
 
-/* For unkC values below and above the entries of D_800B7C10 */
+/* For impactTiming values below and above the entries of D_800B7C10 */
 static Unk6 D_800B7C00 = {-90, -64, -40, -10, 100, 1};
 static Unk6 D_800B7C08 = {-80, 64, 30, 10, -5, 1};
-static Unk6 D_800B7C10[MAX_LIE_RATING + 1][UNKC_ENTRY_COUNT] = {
+static Unk6 D_800B7C10[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
@@ -2042,8 +2042,9 @@ INCLUDE_ASM("asm/nonmatchings/ball_simulation", GetPositionNoise);
 INCLUDE_ASM("asm/nonmatchings/ball_simulation", StepBallSimulation);
 #endif
 
-/* Returns the Unk6 entry for the club's lie rating and unkC */
-Unk6* GetUnkCEntry(Club* club, Surface surface, s32 shotMode, s32 unkC) {
+/* Returns the Unk6 entry for the club's lie rating and impactTiming */
+Unk6* GetUnkCEntry(
+    Club* club, Surface surface, s32 shotMode, s32 impactTiming) {
   s32 row;
 
   row = GetLieRating(club, surface, shotMode) - 1;
@@ -2055,12 +2056,12 @@ Unk6* GetUnkCEntry(Club* club, Surface surface, s32 shotMode, s32 unkC) {
     row = MAX_LIE_RATING;
   }
 
-  if (unkC < -UNKC_ENTRY_LIMIT) {
+  if (impactTiming < -IMPACT_TIMING_ENTRY_LIMIT) {
     return &D_800B7C00;
   }
 
-  if (unkC <= UNKC_ENTRY_LIMIT) {
-    return &D_800B7C10[row][unkC + UNKC_ENTRY_LIMIT];
+  if (impactTiming <= IMPACT_TIMING_ENTRY_LIMIT) {
+    return &D_800B7C10[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
   }
 
   return &D_800B7C08;
@@ -2078,7 +2079,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   s32 percentRange[2];
   Club* club;
   Unk6* entry;
-  s32 unkC;
+  s32 impactTiming;
   s32 groundHeight;
   s32 speed;
   s32 sideSign;
@@ -2113,7 +2114,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   }
 
   launchScale = 1.0f;
-  unkC = shot->unkC;
+  impactTiming = shot->impactTiming;
   simulation->purpose = purpose;
   sideSign = 1;
   D_800B7D9C++;
@@ -2142,13 +2143,13 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
 
   /* The tests of purpose, and their senses, are there to match */
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    simulation->playerIndex = shot->unk18;
+    simulation->playerIndex = shot->playerIndex;
   } else {
     simulation->playerIndex = 0;
   }
 
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    s16* clubs = g_Players[shot->unk18].clubs;
+    s16* clubs = g_Players[shot->playerIndex].clubs;
 
     club = GetClub(clubs[shot->clubIndex]);
   } else {
@@ -2156,8 +2157,8 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   }
 
   if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
-    entry = &D_800B7C10[0][UNKC_ENTRY_LIMIT];
-    rumbles = D_800B7C10[0][UNKC_ENTRY_LIMIT].unk5;
+    entry = &D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT];
+    rumbles = D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT].unk5;
   } else {
     /* The same as GetUnkCEntry; writing it out is there to match */
     s32 row = GetLieRating(club, simulation->surface, shot->shotMode) - 1;
@@ -2170,12 +2171,12 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       row = MAX_LIE_RATING;
     }
 
-    if (unkC < -UNKC_ENTRY_LIMIT) {
+    if (impactTiming < -IMPACT_TIMING_ENTRY_LIMIT) {
       entry = &D_800B7C00;
-    } else if (unkC > UNKC_ENTRY_LIMIT) {
+    } else if (impactTiming > IMPACT_TIMING_ENTRY_LIMIT) {
       entry = &D_800B7C08;
     } else {
-      entry = &D_800B7C10[row][unkC + UNKC_ENTRY_LIMIT];
+      entry = &D_800B7C10[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
     }
 
     rumbles = entry->unk5;
@@ -2213,9 +2214,9 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
     sinf(pitch); /* The original has it */
     along = pitch - (club->unk10 * 0.017453294f);
-    pitch += (f32)club->unk10 * shot->unk14 * 0.00054541545f;
+    pitch += (f32)club->unk10 * shot->offsetY * 0.00054541545f;
     sinf(pitch); /* The original has it */
-    launchScale = (cosf(along) - 0.86f) * shot->unk14 * 0.008300781f;
+    launchScale = (cosf(along) - 0.86f) * shot->offsetY * 0.008300781f;
     if (club->kind == CLUB_KIND_WOOD) {
       launchScale *= 2.0f;
     }
@@ -2225,10 +2226,11 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
 
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     if ((club->surfaceMask & CLUB_SURFACE_GREEN) && !g_GameState.isMiniGolf) {
-      pitch += (u16)GetAimSlopeAngle(&g_Players[shot->unk18], shot) *
+      pitch += (u16)GetAimSlopeAngle(&g_Players[shot->playerIndex], shot) *
           BINARY_ANGLE_TO_RADIANS;
     } else {
-      slopePitch = (u16)(GetAimSlopeAngle(&g_Players[shot->unk18], shot) / 4) *
+      slopePitch =
+          (u16)(GetAimSlopeAngle(&g_Players[shot->playerIndex], shot) / 4) *
           BINARY_ANGLE_TO_RADIANS;
       pitch += slopePitch;
       speed = speed * (1.0f - sinf(slopePitch));
@@ -2239,14 +2241,14 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       (club->surfaceMask & CLUB_SURFACE_GREEN)) {
     yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
   } else {
-    crossSlope = GetCrossSlopeAngle(&g_Players[shot->unk18], shot);
+    crossSlope = GetCrossSlopeAngle(&g_Players[shot->playerIndex], shot);
     crossSlopeSize = crossSlope;
     if (crossSlope < 0) {
       crossSlopeSize = -crossSlope;
     }
 
     curve = sqrtf(crossSlopeSize * 0.25f);
-    sideSign = g_Players[shot->unk18].unk22 ? -1 : 1;
+    sideSign = g_Players[shot->playerIndex].unk22 ? -1 : 1;
     if (crossSlope < 0) {
       curve = -curve;
     }
@@ -2265,7 +2267,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     simulation->unk40 = 0.0f;
     spinBase = club->spin * 0.5f;
     simulation->unk34 =
-        (((spinBase + 25.0f) * 0.006f * shot->unk14) - spinBase) *
+        (((spinBase + 25.0f) * 0.006f * shot->offsetY) - spinBase) *
         (speed / launchScale) * 0.0078125f;
     simulation->unk3C = yawRadians;
     if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
@@ -2278,12 +2280,12 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   } else {
     GetSurfaceInfo(simulation->unkA2); /* The original has it */
     simulation->unk38 = (((sideSign * entry->unk3 * club->unk0) / 64) +
-                            (shot->unk10 * (club->unk0 * 0.0078125f)) +
+                            (shot->offsetX * (club->unk0 * 0.0078125f)) +
                             slopeSpin + (sideSign * 2 * club->sideSpin)) *
         (speed * launchScale * launchScale) * 0.00078125f;
     if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
       simulation->unk34 = ((((club->spin * 0.8f) + 10.0f) * 0.004f *
-                               (entry->unk4 + shot->unk14)) -
+                               (entry->unk4 + shot->offsetY)) -
                               (club->spin * 0.5f)) *
           speed * 0.0078125f;
       speed = speed * launchScale;
