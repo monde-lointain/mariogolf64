@@ -207,7 +207,7 @@ typedef struct ImageCorner {
 #define MENU_BOB_PHASE_STEP 0.13f
 #define MENU_BOB_HEIGHT 5.0f
 
-/* Where func_801FD7B0 and func_801FCEF8 draw the banners of D_801052BC and
+/* Where DrawMenuBanner and func_801FCEF8 draw the banners of D_801052BC and
  * D_801B60D0 */
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
@@ -216,8 +216,8 @@ typedef struct ImageCorner {
  * calls it */
 #define SMALL_BANNER_WIDTH 96
 
-/* func_801FD4F0 stretches D_801B60D0; its strips overlap, as they are taller
- * than their spacing */
+/* DrawLargeMenuBanner stretches D_801B60D0; its strips overlap, as they are
+ * taller than their spacing */
 #define LARGE_BANNER_LEFT 26
 #define LARGE_BANNER_TOP 174
 #define LARGE_BANNER_WIDTH 270
@@ -225,9 +225,9 @@ typedef struct ImageCorner {
 #define LARGE_BANNER_STRIP_SPACING 16
 
 /*
- * func_801FCB74 reads D_800FF420's buffer as a 160 texel wide image, though
- * menu.c loads the 256 texel wide board into it; its strips overlap, as each
- * samples its rows at 8/9 of a texel
+ * DrawNarrowMenuBoard reads D_800FF420's buffer as a 160 texel wide image,
+ * though menu.c loads the 256 texel wide board into it; its strips overlap, as
+ * each samples its rows at 8/9 of a texel
  */
 #define NARROW_BOARD_WIDTH 160
 #define NARROW_BOARD_STRIP_HEIGHT 8
@@ -239,9 +239,9 @@ typedef struct ImageCorner {
 #define NARROW_BOARD_SHOWN_WIDTH 170
 
 /*
- * func_801FC754 draws the course backdrop of g_MenuCourseSceneryAsset at double
- * size. Each strip loads a row either side of the rows it shows, so that the
- * filtering blends across the seams.
+ * DrawMenuScenery draws the course backdrop of g_MenuCourseSceneryAsset at
+ * double size. Each strip loads a row either side of the rows it shows, so that
+ * the filtering blends across the seams.
  */
 #define BACKDROP_WIDTH 152
 #define BACKDROP_SCALE 2
@@ -399,10 +399,10 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing);
 s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber);
 void func_80217B88_ovl_01(s32 requestedPreset);
 void func_80228B60_ovl_01(void);
-void func_801FC754_ovl_01(Gfx** displayListHead);
-void func_801FCB74_ovl_01(Gfx** displayListHead);
-void func_801FD4F0_ovl_01(Gfx** displayListHead);
-void func_801FD7B0_ovl_01(Gfx** displayListHead);
+void DrawMenuScenery(Gfx** displayListHead);
+void DrawNarrowMenuBoard(Gfx** displayListHead);
+void DrawLargeMenuBanner(Gfx** displayListHead);
+void DrawMenuBanner(Gfx** displayListHead);
 void func_801FDA40_ovl_01(Gfx** displayListHead);
 void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
 void func_8020E898_ovl_01(Gfx** displayListHead);
@@ -4003,26 +4003,26 @@ void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   if (layers & MENU_LAYER_SCENERY) {
-    func_801FC754_ovl_01(&gfx);
+    DrawMenuScenery(&gfx);
   }
 
   if (layers & MENU_LAYER_BOARD) {
-    func_801FCB74_ovl_01(&gfx);
+    DrawNarrowMenuBoard(&gfx);
   }
 
   if (layers & MENU_LAYER_LARGE_BANNER) {
-    func_801FD4F0_ovl_01(&gfx);
+    DrawLargeMenuBanner(&gfx);
   }
 
   if (layers & MENU_LAYER_BANNER) {
-    func_801FD7B0_ovl_01(&gfx);
+    DrawMenuBanner(&gfx);
   }
 
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
 
-void func_801FC754_ovl_01(Gfx** displayListHead) {
+void DrawMenuScenery(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 shownRowCount;
@@ -4079,7 +4079,7 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_801FCB74_ovl_01(Gfx** displayListHead) {
+void DrawNarrowMenuBoard(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripTop;
@@ -4176,7 +4176,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FD1B4_ovl_01);
 #endif
 
 /* Draws the large banner, for func_801FC60C's MENU_LAYER_LARGE_BANNER */
-void func_801FD4F0_ovl_01(Gfx** displayListHead) {
+void DrawLargeMenuBanner(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripTop;
@@ -4205,7 +4205,7 @@ void func_801FD4F0_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_801FD7B0_ovl_01(Gfx** displayListHead) {
+void DrawMenuBanner(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   u8* image = D_801052BC[D_8022BE8C_ovl_01];

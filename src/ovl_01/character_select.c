@@ -127,8 +127,8 @@ extern void* D_801B69EC;
 /* Moves the cursor by half a pixel so that its edges sit on pixel centers */
 #define HALF_PIXEL 0.5f
 
-void func_801FC754_ovl_01(Gfx** displayListHead);
-void func_801FD7B0_ovl_01(Gfx** displayListHead);
+void DrawMenuScenery(Gfx** displayListHead);
+void DrawMenuBanner(Gfx** displayListHead);
 void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
 void func_8020C3B8_ovl_01(Gfx** displayListHead);
 void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode);
@@ -1290,8 +1290,8 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-  func_801FC754_ovl_01(&gfx);
-  func_801FD7B0_ovl_01(&gfx);
+  DrawMenuScenery(&gfx);
+  DrawMenuBanner(&gfx);
   func_8020C3B8_ovl_01(&gfx);
   func_8020BA08_ovl_01(&gfx, (u8)isSinglePlayer);
   if ((u8)isSinglePlayer == TRUE) {
