@@ -3,6 +3,9 @@
 
 #include <ultra64.h>
 
+/* End of the RDRAM that every console has, without the Expansion Pak */
+#define BASE_RDRAM_END 0x80400000
+
 /* Values of g_FrameStepState, with which the second controller pauses
    the game (L on the control pad) and steps it a frame at a time */
 enum FrameStep {

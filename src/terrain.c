@@ -1535,7 +1535,7 @@ void PrepareHoleTriangles(void) {
  * is not, so this returns FALSE and the debug scene menu never opens.
  */
 Boolean IsOverlayInExpansionMemory(void) {
-  return (u32)BuildHole > 0x803FFFFF;
+  return (u32)BuildHole > BASE_RDRAM_END - 1;
 }
 
 /* Marks each billboard on the map image in red */

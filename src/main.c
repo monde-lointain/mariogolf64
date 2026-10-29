@@ -31,9 +31,6 @@
 /* The audio interface's sample rate, in Hz */
 #define AUDIO_FREQUENCY 32000
 
-/* End of the RDRAM that every console has, without the Expansion Pak */
-#define BASE_RDRAM_END 0x80400000
-
 /* Frame buffers that the game swaps between */
 #define FRAMEBUFFER_COUNT 3
 
