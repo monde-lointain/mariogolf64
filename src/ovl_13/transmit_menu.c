@@ -301,6 +301,14 @@ typedef struct StatusTime {
   /* 0x4 */ u8 unk4;
 } StatusTime; /* size = 0x5 */
 
+/*
+ * The status packs a course's birdie badges one bit per hole, eight holes to a
+ * byte, from the top bit of the first byte
+ */
+#define BIRDIE_BADGE_BYTE_COUNT \
+  ((COURSE_HOLE_COUNT + BITS_PER_BYTE - 1) / BITS_PER_BYTE)
+#define BirdieBadgeBit(holeInByte) (1 << (BITS_PER_BYTE - 1 - (holeInByte)))
+
 /* One course's figures in the status data, or every course's together */
 typedef struct StatusCourse {
   /* 0x00 */ u8 roundCount[2];
@@ -316,8 +324,7 @@ typedef struct StatusCourse {
   /* 0x0D */ u8 places; /* STATUS_*_PLACE bits */
   /* 0x0E */ u8 characterBestScores[CHARACTER_COUNT];
   /* 0x20 */ StatusTime bestTimes[BEST_TIME_COUNT];
-  /* 0x2F */ u8
-      birdieBadges[3]; /* One bit per hole, from the first hole's top bit */
+  /* 0x2F */ u8 birdieBadges[BIRDIE_BADGE_BYTE_COUNT]; /* See BirdieBadgeBit */
 } StatusCourse; /* size = 0x32 */
 
 /* One bit per computer character, for one of the player's characters */
@@ -3653,21 +3660,23 @@ void BuildStatusData(u8* status) {
     course->birdieBadges[0] = 0;
     course->birdieBadges[1] = 0;
     course->birdieBadges[2] = 0;
-    for (index = 0; index != 8; index++) {
+    for (index = 0; index != BITS_PER_BYTE; index++) {
       if (records->awards.birdieBadgeCounts[courseIndex][index] > 0) {
-        course->birdieBadges[0] |= 1 << (7 - index);
+        course->birdieBadges[0] |= BirdieBadgeBit(index);
       }
     }
 
-    for (index = 0; index != 8; index++) {
-      if (records->awards.birdieBadgeCounts[courseIndex][8 + index] > 0) {
-        course->birdieBadges[1] |= 1 << (7 - index);
+    for (index = 0; index != BITS_PER_BYTE; index++) {
+      if (records->awards
+              .birdieBadgeCounts[courseIndex][BITS_PER_BYTE + index] > 0) {
+        course->birdieBadges[1] |= BirdieBadgeBit(index);
       }
     }
 
-    for (index = 0; index != 2; index++) {
-      if (records->awards.birdieBadgeCounts[courseIndex][16 + index] > 0) {
-        course->birdieBadges[2] |= 1 << (7 - index);
+    for (index = 0; index != COURSE_HOLE_COUNT - (BITS_PER_BYTE * 2); index++) {
+      if (records->awards.birdieBadgeCounts[courseIndex]
+                                           [(BITS_PER_BYTE * 2) + index] > 0) {
+        course->birdieBadges[2] |= BirdieBadgeBit(index);
       }
     }
   }
