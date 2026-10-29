@@ -234,6 +234,13 @@
 #define GAME_FLAG_AIM_DOWN_RANGE 0x24
 /* Only hole-outs in fewer strokes than this enter the records */
 #define MAX_RECORDED_STROKE_COUNT 4
+/* The most strokes a player's count shows */
+#define STROKE_COUNT_MAX 99
+/* Outside training, a player who reaches this many times the hole's par
+ * is out of the hole */
+#define STROKE_LIMIT_PER_PAR 3
+/* Speed golf adds this to a player stopped by the stroke limit */
+#define STROKE_LIMIT_PENALTY_MINUTES 10
 /* Where the aim camera starts, in course units */
 #define AIM_CAMERA_START_DISTANCE (-0xF000)
 #define AIM_CAMERA_START_HEIGHT (-0x4E00)
@@ -3790,16 +3797,16 @@ void UpdateTurns(void) {
           D_80227150_ovl_00.power = func_8005F248(g_CurrentShot.unk40);
           g_SavedPlayers[playerIndex] = g_Players[playerIndex];
           g_Players[playerIndex].strokeCount++;
-          if (g_Players[playerIndex].strokeCount >= 100) {
-            g_Players[playerIndex].strokeCount = 99;
+          if (g_Players[playerIndex].strokeCount > STROKE_COUNT_MAX) {
+            g_Players[playerIndex].strokeCount = STROKE_COUNT_MAX;
           }
 
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
             if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
                 SURFACE_KIND_GREEN) {
               g_Players[playerIndex].puttCount++;
-              if (g_Players[playerIndex].puttCount >= 100) {
-                g_Players[playerIndex].puttCount = 99;
+              if (g_Players[playerIndex].puttCount > STROKE_COUNT_MAX) {
+                g_Players[playerIndex].puttCount = STROKE_COUNT_MAX;
               }
             }
 
@@ -4234,12 +4241,13 @@ void UpdateTurns(void) {
               !IsGameFlagSet(GAME_FLAG_NO_OUT_OF_BOUNDS_PENALTY)) {
             g_Players[playerIndex].strokeCount++;
             if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-              if (g_Players[playerIndex].strokeCount >= 100) {
-                g_Players[playerIndex].strokeCount = 99;
+              if (g_Players[playerIndex].strokeCount > STROKE_COUNT_MAX) {
+                g_Players[playerIndex].strokeCount = STROKE_COUNT_MAX;
               }
             } else if (g_Players[playerIndex].strokeCount >
-                g_HoleSetup.par * 3) {
-              g_Players[playerIndex].strokeCount = g_HoleSetup.par * 3;
+                g_HoleSetup.par * STROKE_LIMIT_PER_PAR) {
+              g_Players[playerIndex].strokeCount =
+                  g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
             }
 
             if ((s8)player->ballSurface != 0x17) {
@@ -4255,12 +4263,13 @@ void UpdateTurns(void) {
                 GetSurface(player->ballPosition[0], player->ballPosition[2]);
             g_Players[playerIndex].strokeCount++;
             if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-              if (g_Players[playerIndex].strokeCount >= 100) {
-                g_Players[playerIndex].strokeCount = 99;
+              if (g_Players[playerIndex].strokeCount > STROKE_COUNT_MAX) {
+                g_Players[playerIndex].strokeCount = STROKE_COUNT_MAX;
               }
             } else if (g_Players[playerIndex].strokeCount >
-                g_HoleSetup.par * 3) {
-              g_Players[playerIndex].strokeCount = g_HoleSetup.par * 3;
+                g_HoleSetup.par * STROKE_LIMIT_PER_PAR) {
+              g_Players[playerIndex].strokeCount =
+                  g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
             }
           } else {
             player->ballPosition[0] = g_TurnBallSimulation.position[0];
@@ -4321,7 +4330,8 @@ void UpdateTurns(void) {
             } else if (!g_GameState.unk31 &&
                 (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                     g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
-              if (g_Players[playerIndex].strokeCount >= g_HoleSetup.par * 3 ||
+              if (g_Players[playerIndex].strokeCount >=
+                      g_HoleSetup.par * STROKE_LIMIT_PER_PAR ||
                   GetMatchHoleResult(0, 1)) {
                 nextState = PLAYER_STATE_STARTING_REACTION;
                 GiveUpHole(playerIndex);
@@ -4335,7 +4345,8 @@ void UpdateTurns(void) {
                     g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
               s8 results[MAX_PLAYER_COUNT];
 
-              if (g_Players[playerIndex].strokeCount >= g_HoleSetup.par * 3) {
+              if (g_Players[playerIndex].strokeCount >=
+                  g_HoleSetup.par * STROKE_LIMIT_PER_PAR) {
                 g_Players[playerIndex]
                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                     .strokes = 0;
@@ -4355,16 +4366,19 @@ void UpdateTurns(void) {
                 nextState = PLAYER_STATE_ENDING_TURN;
               }
             } else if (g_Players[playerIndex].strokeCount >=
-                g_HoleSetup.par * 3) {
+                g_HoleSetup.par * STROKE_LIMIT_PER_PAR) {
               g_Players[playerIndex]
                   .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                  .strokes = g_HoleSetup.par * 3;
+                  .strokes = g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
               g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
               nextState = PLAYER_STATE_STARTING_REACTION;
               if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-                g_Players[playerIndex].stopwatchFrameCount += 18000;
-                g_GameState.stopwatchFrameCount += 18000;
-                g_HoleTimeFrames[g_GameState.holeIndex] += 18000;
+                g_Players[playerIndex].stopwatchFrameCount +=
+                    STROKE_LIMIT_PENALTY_MINUTES * FRAMES_PER_MINUTE;
+                g_GameState.stopwatchFrameCount +=
+                    STROKE_LIMIT_PENALTY_MINUTES * FRAMES_PER_MINUTE;
+                g_HoleTimeFrames[g_GameState.holeIndex] +=
+                    STROKE_LIMIT_PENALTY_MINUTES * FRAMES_PER_MINUTE;
                 if (g_Players[playerIndex].stopwatchFrameCount >
                     STOPWATCH_MAX_FRAMES) {
                   g_Players[playerIndex].stopwatchFrameCount =
