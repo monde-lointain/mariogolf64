@@ -969,6 +969,12 @@ s32 GetEndReaction(void) {
 #define SHOT_RESULT_STEP 20
 /* Most sounds wait for the flight to pass its first steps */
 #define EARLY_STEP_COUNT 10
+/* The green landing sounds play this many steps after the ball lands */
+#define GREEN_SOUND_DELAY_STEP_COUNT 2
+
+/* Whether the ball hit the ground the given number of steps back */
+#define HasHitGroundBefore(step, stepsBack) \
+  (g_SimulatedShot.pathFlags[(step) - (stepsBack)] & STEP_FLAG_GROUND_HIT)
 /* Sounds that play this many steps before the end of the flight */
 #define LANDING_SOUND_STEP_COUNT 3
 #define CHIP_IN_CALL_STEP_COUNT 10
@@ -1075,7 +1081,7 @@ void PlayFlightSounds(s32 step) {
   if (step > EARLY_STEP_COUNT) {
     greenSoundCount = &f_GreenSoundCount;
     if (!*greenSoundCount && !shownRingCount &&
-        (g_SimulatedShot.pathFlags[step - 2] & STEP_FLAG_GROUND_HIT) &&
+        HasHitGroundBefore(step, GREEN_SOUND_DELAY_STEP_COUNT) &&
         IsShotOntoGreen()) {
       if (g_HoleSetup.par >
           g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
@@ -1259,8 +1265,7 @@ void PlayFlightSounds(s32 step) {
 
     isStillPlayed = &f_IsLandingSoundPlayed;
     if (!*isStillPlayed && g_BallFlightStep > EARLY_STEP_COUNT &&
-        (g_SimulatedShot.pathFlags[step - EARLY_STEP_COUNT] &
-            STEP_FLAG_GROUND_HIT) &&
+        HasHitGroundBefore(step, EARLY_STEP_COUNT) &&
         IsShotBeyond(FULL_SHOT_FRACTION) &&
         (info = GetSurfaceInfo(g_TurnBallSimulation.surface),
             IsFairwayKind(info->kind)) &&
