@@ -44,8 +44,6 @@
 #include "variables.h"
 
 #define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
-#define PATH_FLAG_UNK4 (1 << 2)
-#define PATH_FLAG_UNK8 (1 << 3)
 #define RANDOM_YAW_MASK 0x7FFF
 #define SHORT_SHOT_MAX_LENGTH 0xBB7FF
 #define CAMERA_CHANGE_HOLD_COUNT 20
@@ -81,7 +79,7 @@ static s32 f_ShotLength = 0;
 /* How far the shot starts from the cup */
 static s32 f_StartCupDistance = 0;
 static s32 D_800BE648 = 0;
-/* The first step of the path with PATH_FLAG_UNK2 set, or NO_STEP */
+/* The first step of the path with STEP_FLAG_BILLBOARD_HIT set, or NO_STEP */
 static s32 f_FlaggedStep = 0;
 static s32 D_800BE650 = 0;
 static Radians f_CameraYaw = 0.0f;
@@ -719,7 +717,8 @@ void StartFlightCamera(s32 earlierFlightCount) {
   f_FlaggedStep = NO_STEP;
   D_800BE650 = -1;
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
-    if (i < g_SimulatedShot.stepCount && (g_SimulatedShot.pathFlags[i] & 2)) {
+    if (i < g_SimulatedShot.stepCount &&
+        (g_SimulatedShot.pathFlags[i] & STEP_FLAG_BILLBOARD_HIT)) {
       D_800BE648 = TRUE;
       D_800BE658 |= 1;
       if (f_FlaggedStep == NO_STEP) {
@@ -929,10 +928,6 @@ s32 GetEndReaction(void) {
 #define UNK92_SOUND_STEP_COUNT 10
 #define UNKB0_SOUND_STEP_COUNT 15
 
-/* Bits of g_SimulatedShot.pathFlags */
-#define PATH_FLAG_UNK1 (1 << 0)
-#define PATH_FLAG_UNK2 (1 << 1)
-
 /* Distances that PlayFlightSounds tests, in course units */
 #define CLOSE_LANDING_DISTANCE 0x3C00
 #define NEAR_LANDING_DISTANCE 0x5A00
@@ -961,12 +956,12 @@ static inline void QueueOnlookerSounds(s32 kind) {
 
 /*
  * Whether a putt earns the Nice Touch call: from far, stopping close, with no
- * PATH_FLAG_UNK4 or UNK8 step passed, and before par
+ * lip-out or pin hit passed, and before par
  */
 #define IsNiceTouchPutt() \
   (f_LandingCupDistance < CLOSE_LANDING_DISTANCE && \
       f_StartCupDistance > LONG_PUTT_MIN_DISTANCE && \
-      !(f_PassedPathFlags & (PATH_FLAG_UNK4 | PATH_FLAG_UNK8)) && \
+      !(f_PassedPathFlags & (STEP_FLAG_LIPPED_OUT | STEP_FLAG_PIN_HIT)) && \
       g_HoleSetup.par > g_Players[g_CurrentShot.playerIndex].strokeCount)
 
 /* Whether the shot reaches the green from off it, without the putter */
@@ -1034,7 +1029,7 @@ void PlayFlightSounds(s32 step) {
   if (step > EARLY_STEP_COUNT) {
     greenSoundCount = &f_GreenSoundCount;
     if (!*greenSoundCount && !shownRingCount &&
-        (g_SimulatedShot.pathFlags[step - 2] & PATH_FLAG_UNK1) &&
+        (g_SimulatedShot.pathFlags[step - 2] & STEP_FLAG_GROUND_HIT) &&
         IsShotOntoGreen()) {
       if (g_HoleSetup.par >
           g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
@@ -1058,12 +1053,12 @@ void PlayFlightSounds(s32 step) {
   }
 
   if (!g_GameState.isMiniGolf) {
-    if ((g_SimulatedShot.pathFlags[step + 5] & PATH_FLAG_UNK8) &&
+    if ((g_SimulatedShot.pathFlags[step + 5] & STEP_FLAG_PIN_HIT) &&
         g_SimulatedShot.unkB0Step == NO_STEP) {
       D_800BE680 = 1;
     }
 
-    if ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) &&
+    if ((g_SimulatedShot.pathFlags[step] & STEP_FLAG_PIN_HIT) &&
         !g_SimulatedShot.endsInCup && g_SimulatedShot.unkB0Step == NO_STEP) {
       D_800BE680 = 0;
       StartMonkeyDrop(D_800BE684);
@@ -1084,7 +1079,7 @@ void PlayFlightSounds(s32 step) {
           SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
       f_PendingResultSound = RESULT_SOUND_UNK2;
-    } else if (f_PassedPathFlags & PATH_FLAG_UNK8) {
+    } else if (f_PassedPathFlags & STEP_FLAG_PIN_HIT) {
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_PIN_SHOT);
       StartBanner(BANNER_PIN_SHOT);
       PlaySound(
@@ -1220,7 +1215,8 @@ void PlayFlightSounds(s32 step) {
 
     isStillPlayed = &f_IsLandingSoundPlayed;
     if (!*isStillPlayed && g_BallFlightStep > EARLY_STEP_COUNT &&
-        (g_SimulatedShot.pathFlags[step - EARLY_STEP_COUNT] & PATH_FLAG_UNK1) &&
+        (g_SimulatedShot.pathFlags[step - EARLY_STEP_COUNT] &
+            STEP_FLAG_GROUND_HIT) &&
         IsShotBeyond(FULL_SHOT_FRACTION) &&
         (info = GetSurfaceInfo(g_TurnBallSimulation.surface),
             IsFairwayKind(info->kind)) &&
@@ -3009,7 +3005,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
   aheadStep = step + PATH_FLAG_LOOKAHEAD_STEP_COUNT;
   if (g_SimulatedShot.stepCount >= aheadStep &&
-      (g_SimulatedShot.pathFlags[aheadStep] & PATH_FLAG_UNK2)) {
+      (g_SimulatedShot.pathFlags[aheadStep] & STEP_FLAG_BILLBOARD_HIT)) {
     D_800BE658 |= 1;
     if (f_FlaggedStep == NO_STEP) {
       f_FlaggedStep = aheadStep;
@@ -3114,7 +3110,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     /* pathFlags is an s8, so testing 0x100 tests its sign; the original has it
      */
     if ((g_SimulatedShot.pathFlags[step] & 0x100) ||
-        (g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK4)) {
+        (g_SimulatedShot.pathFlags[step] & STEP_FLAG_LIPPED_OUT)) {
       StartContactEffect(CONTACT_EFFECT_NONE);
     }
   } else if (g_SimulatedShot.pathFlags[step]) {
@@ -3138,7 +3134,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
 
     if (!g_GameState.isMiniGolf && !g_SimulatedShot.endsInCup &&
-        ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) ||
+        ((g_SimulatedShot.pathFlags[step] & STEP_FLAG_PIN_HIT) ||
             IsMonkeyShown() || D_800BE680 == TRUE)) {
       g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
       StartHudAnimation(HUD_ANIMATION_NONE);
