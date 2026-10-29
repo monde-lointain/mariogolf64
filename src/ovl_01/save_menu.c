@@ -208,7 +208,7 @@ static s32 D_80230BEC_ovl_01[18] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 /* The angle, in radians, of the sine wave that bobs the saved games' boards */
 static f32 f_BoardBobPhase = 0.0f;
-/* Read by no routine; the values of D_80230DE8 */
+/* Read by no routine; the values of f_ControllerIconPositions */
 static s32 D_80230C38_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
@@ -223,10 +223,12 @@ static char D_80230CE4_ovl_01[] = "Hole";
  */
 static s32 f_GameModeLabelOffsets[MODE_ICON_COUNT] = {
     85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
-static f32 D_80230D18_ovl_01[3] = {0.0f, 0.0f, 0.0f};
+/* The saved games' golfers' turn, in degrees about X and Y */
+static f32 f_SavedGolferAngles[3] = {0.0f, 0.0f, 0.0f};
 /* Read by no routine */
 static s32 D_80230D24_ovl_01 = 0;
-static Vec3 D_80230D28_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+/* Where DrawSavedGolfers stands each golfer, by the player count */
+static Vec3 f_SavedGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {{-84.0f, -43.0f, -1000.0f}, {64.0f, 0.0f, -1000.0f},
         {64.0f, 0.0f, -1000.0f}, {64.0f, 0.0f, -1000.0f}},
     {{-106.0f, -32.0f, -1000.0f}, {106.0f, -32.0f, -1000.0f},
@@ -237,7 +239,7 @@ static Vec3 D_80230D28_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
         {76.0f, -8.0f, -1700.0f}, {106.0f, -52.0f, -1000.0f}}};
 /* Where a saved game's screen puts each player's controller icon and label, by
  * the player count */
-static s32 D_80230DE8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
+static s32 f_ControllerIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
@@ -260,7 +262,8 @@ static Mat4 D_8023BA60_ovl_01;
 static Mat4 D_8023BAA0_ovl_01;
 static Mtx D_8023BAE0_ovl_01[MAX_PLAYER_COUNT][2];
 static Mtx D_8023BCE0_ovl_01;
-static f32 D_8023BD20_ovl_01[MAX_PLAYER_COUNT]; /* Each character's scale */
+/* Each golfer's scale, which DrawSavedGolfers sets by the player count */
+static f32 f_SavedGolferScales[MAX_PLAYER_COUNT];
 static LookAt D_8023BD30_ovl_01[2];
 static void** f_SavedGameModeImages;
 static void** f_ChosenModeIconBuffers;
@@ -2266,24 +2269,24 @@ void DrawSavedGolfers(Gfx** displayListHead) {
 
   switch (playerCount) {
     case 1:
-      D_8023BD20_ovl_01[0] = 5.0f;
+      f_SavedGolferScales[0] = 5.0f;
       break;
     case 2:
-      D_8023BD20_ovl_01[0] = 4.0f;
-      D_8023BD20_ovl_01[1] = 4.0f;
+      f_SavedGolferScales[0] = 4.0f;
+      f_SavedGolferScales[1] = 4.0f;
       break;
     case 3:
     case 4:
-      D_8023BD20_ovl_01[0] = 3.5f;
-      D_8023BD20_ovl_01[1] = 3.4f;
-      D_8023BD20_ovl_01[2] = 3.4f;
-      D_8023BD20_ovl_01[3] = 3.5f;
+      f_SavedGolferScales[0] = 3.5f;
+      f_SavedGolferScales[1] = 3.4f;
+      f_SavedGolferScales[2] = 3.4f;
+      f_SavedGolferScales[3] = 3.5f;
       break;
     default:
-      D_8023BD20_ovl_01[0] = 4.0f;
-      D_8023BD20_ovl_01[1] = 4.0f;
-      D_8023BD20_ovl_01[2] = 4.0f;
-      D_8023BD20_ovl_01[3] = 4.0f;
+      f_SavedGolferScales[0] = 4.0f;
+      f_SavedGolferScales[1] = 4.0f;
+      f_SavedGolferScales[2] = 4.0f;
+      f_SavedGolferScales[3] = 4.0f;
       break;
   }
 
@@ -2327,18 +2330,19 @@ void DrawSavedGolfers(Gfx** displayListHead) {
       }
     }
 
-    rotation[0] = DegreesToRadians(D_80230D18_ovl_01[0]);
-    rotation[1] = DegreesToRadians(D_80230D18_ovl_01[1]);
+    rotation[0] = DegreesToRadians(f_SavedGolferAngles[0]);
+    rotation[1] = DegreesToRadians(f_SavedGolferAngles[1]);
     rotation[2] = 0.0f;
     raise = ((s8)players[playerIndex].characterIndex == CHARACTER_BABY_MARIO)
         ? BABY_MARIO_RAISE
         : 0;
-    translation[0] = D_80230D28_ovl_01[playerCount - 1][playerIndex][0];
-    translation[1] = D_80230D28_ovl_01[playerCount - 1][playerIndex][1] + raise;
-    translation[2] = D_80230D28_ovl_01[playerCount - 1][playerIndex][2];
-    scale[0] = D_8023BD20_ovl_01[playerIndex];
-    scale[1] = D_8023BD20_ovl_01[playerIndex];
-    scale[2] = D_8023BD20_ovl_01[playerIndex];
+    translation[0] = f_SavedGolferPositions[playerCount - 1][playerIndex][0];
+    translation[1] =
+        f_SavedGolferPositions[playerCount - 1][playerIndex][1] + raise;
+    translation[2] = f_SavedGolferPositions[playerCount - 1][playerIndex][2];
+    scale[0] = f_SavedGolferScales[playerIndex];
+    scale[1] = f_SavedGolferScales[playerIndex];
+    scale[2] = f_SavedGolferScales[playerIndex];
     BuildTransformMatrix(transform, rotation, translation, scale);
     ConvertMatrixToFixed(
         transform, &D_8023BAE0_ovl_01[playerIndex][g_DrawBufferIndex]);
@@ -2390,8 +2394,10 @@ void DrawPlayerControllers(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (f_SavedPlayerControllers[playerIndex] != NO_CONTROLLER) {
-      position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
-      position[AXIS_Y] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
+      position[AXIS_X] =
+          f_ControllerIconPositions[playerCount - 1][playerIndex][0];
+      position[AXIS_Y] =
+          f_ControllerIconPositions[playerCount - 1][playerIndex][1];
       controller = f_SavedPlayerControllers[playerIndex];
       if (controller != COMPUTER_CONTROLLER) {
         gDPLoadTextureBlock(gfx++,
@@ -2415,8 +2421,10 @@ void DrawPlayerControllers(Gfx** displayListHead) {
   image = f_PlayerLabels;
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
-    position[AXIS_Y] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
+    position[AXIS_X] =
+        f_ControllerIconPositions[playerCount - 1][playerIndex][0];
+    position[AXIS_Y] =
+        f_ControllerIconPositions[playerCount - 1][playerIndex][1];
     if (f_SavedPlayerControllers[playerIndex] == COMPUTER_CONTROLLER) {
       if (save->savedGames[memory->savedGameIndex].state.gameMode ==
           GAME_MODE_GET_CHARACTER) {
