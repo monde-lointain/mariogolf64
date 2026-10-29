@@ -441,6 +441,19 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 #define POOR_TRIAL_LEVEL_COUNT 8
 #define MAX_TRIAL_LEVEL_COUNT 30
 #define POOR_EVALUATION 0x10000
+/*
+ * Whether PlanShot tries another level: until MIN_TRIAL_LEVEL_COUNT, then
+ * while the best evaluation is poor or there is none yet
+ */
+#define IsTrialLevelLeft() \
+  (f_TrialLevel < MIN_TRIAL_LEVEL_COUNT || \
+      (f_BestEvaluation > POOR_EVALUATION && \
+          f_TrialLevel < POOR_TRIAL_LEVEL_COUNT) || \
+      (!f_HasBestEvaluation && f_TrialLevel < MAX_TRIAL_LEVEL_COUNT))
+/* Whether a plan stage is part of a trial under way */
+#define IsTrialStage(stage) \
+  ((stage) == PLAN_STAGE_TRIAL_TAKEN || (stage) == PLAN_STAGE_UNK4 || \
+      (stage) == PLAN_STAGE_TRIAL_RUNNING)
 #define INITIAL_CARRY_SCALE 1.1f
 #define CARRY_SCALE_STEP 0.9f
 #define RAINY_CARRY_SCALE 0.95f
@@ -564,13 +577,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
     f_PlanStage = PLAN_STAGE_STARTED;
     return PLAN_UNFINISHED;
   }
-  while (f_TrialLevel < MIN_TRIAL_LEVEL_COUNT ||
-      (f_BestEvaluation > POOR_EVALUATION &&
-          f_TrialLevel < POOR_TRIAL_LEVEL_COUNT) ||
-      (!f_HasBestEvaluation && f_TrialLevel < MAX_TRIAL_LEVEL_COUNT)) {
-    if (f_PlanStage == PLAN_STAGE_TRIAL_TAKEN ||
-        f_PlanStage == PLAN_STAGE_UNK4 ||
-        f_PlanStage == PLAN_STAGE_TRIAL_RUNNING) {
+  while (IsTrialLevelLeft()) {
+    if (IsTrialStage(f_PlanStage)) {
       /* A trial is under way */
     } else if (f_NeedsNewTarget == TRUE) {
       if (f_PlanStage != PLAN_STAGE_TARGET_CHOSEN) {
