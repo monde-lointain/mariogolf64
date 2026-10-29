@@ -76,15 +76,23 @@ enum GatheredBestShots {
 /* What LoadPlayerStatsBuffer reads into the buffers it fills */
 #define PLAYER_STATS_ICON_COUNT 8
 #define PLAYER_STATS_ICON_SIZE 0x218
-#define ASSET_PLAYER_STATS_UNK2 0x671
-#define ASSET_PLAYER_STATS_UNK8 0x6C4
-#define ASSET_PLAYER_STATS_GAME_LABELS 0x6E8
+/* An 8x8 orange dot, drawn once per stake level of a bet */
+#define ASSET_STAKE_MARK 0x671
+/* A 64x44 wooden plaque, drawn behind each player's handicap */
+#define ASSET_HANDICAP_PLAQUE 0x6C4
+/*
+ * The 128x20 names of the bets: Driving Contest, Closest to Pin, Score, Nassau,
+ * a blank, Skins, Match and Doubles
+ */
+#define ASSET_BET_LABELS 0x6E8
 #define GAME_LABEL_WIDTH 128
 #define GAME_LABEL_HEIGHT 20
 #define GAME_LABEL_IMAGE_SIZE (GAME_LABEL_WIDTH * GAME_LABEL_HEIGHT / 2)
 #define ASSET_STATS_BRICK_WALL 0x721
-#define ASSET_PLAYER_STATS_UNK12 0x828
-#define ASSET_PLAYER_STATS_UNK13 0x829
+/* Eight 32x32 frames of flashing triple arrows pointing left */
+#define ASSET_TRIPLE_PAGE_ARROWS 0x828
+/* The same as ASSET_TRIPLE_PAGE_ARROWS, with double arrows */
+#define ASSET_DOUBLE_PAGE_ARROWS 0x829
 #define STATS_INDEX_COLUMN_COUNT 6
 /* D_801B5634 counts the index tables' rows from 1; columns past a row's count
  * in D_802304B4 hold STATS_INDEX_UNUSED */
@@ -476,7 +484,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       break;
     case PLAYER_STATS_BUFFER_UNK2:
       D_8023B348_ovl_01 = buffer;
-      OpenEncodedAsset(ASSET_PLAYER_STATS_UNK2, &asset);
+      OpenEncodedAsset(ASSET_STAKE_MARK, &asset);
       ReadEncodedAsset(D_8023B348_ovl_01, &asset);
       break;
     case PLAYER_STATS_BUFFER_UNK3:
@@ -510,12 +518,12 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       break;
     case PLAYER_STATS_BUFFER_UNK8:
       D_8023B360_ovl_01 = buffer;
-      OpenEncodedAsset(ASSET_PLAYER_STATS_UNK8, &asset);
+      OpenEncodedAsset(ASSET_HANDICAP_PLAQUE, &asset);
       ReadEncodedAsset(D_8023B360_ovl_01, &asset);
       break;
     case PLAYER_STATS_BUFFER_GAME_LABELS:
       D_8023B364_ovl_01 = buffer;
-      OpenEncodedAsset(ASSET_PLAYER_STATS_GAME_LABELS, &asset);
+      OpenEncodedAsset(ASSET_BET_LABELS, &asset);
       ReadEncodedAsset(D_8023B364_ovl_01, &asset);
       break;
     case PLAYER_STATS_BUFFER_PLAYER_LABELS:
@@ -529,13 +537,13 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       ReadEncodedAsset(D_8023B36C_ovl_01, &asset);
       break;
     case PLAYER_STATS_BUFFER_UNK12:
-      assetId = ASSET_PLAYER_STATS_UNK12;
+      assetId = ASSET_TRIPLE_PAGE_ARROWS;
       D_8023B35C_ovl_01 = buffer;
       OpenEncodedAsset(assetId, &asset);
       ReadEncodedAsset(D_8023B35C_ovl_01, &asset);
       break;
     case PLAYER_STATS_BUFFER_UNK13:
-      assetId = ASSET_PLAYER_STATS_UNK13;
+      assetId = ASSET_DOUBLE_PAGE_ARROWS;
       D_8023B35C_ovl_01 = buffer;
       OpenEncodedAsset(assetId, &asset);
       ReadEncodedAsset(D_8023B35C_ovl_01, &asset);
