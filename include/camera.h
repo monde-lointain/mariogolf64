@@ -15,6 +15,13 @@ enum CameraMode {
   CAMERA_MODE_HOLE_INTRO = 8
 };
 
+/*
+ * Whether a camera mode can come close to the ground; such cameras clip
+ * nearer, draw the ground with a finer depth scale and show no rain
+ */
+#define IsCloseUpCameraMode(mode) \
+  ((mode) == CAMERA_MODE_FREE_LOOK || (mode) == CAMERA_MODE_HOLE_INTRO)
+
 /* Camera drawFlags bits */
 #define CAMERA_DRAW_SCENE (1 << 0)
 #define CAMERA_DRAW_SCREEN_EFFECT (1 << 1)
