@@ -132,9 +132,16 @@ static s32 D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
 static s32 D_8023019C_ovl_01 = 0;
 static s32 D_802301A0_ovl_01 = 0;
 static s32 D_802301A4_ovl_01 = 0;
-/* The character in each place of the table */
-static CharacterId D_802301A8_ovl_01[CHARACTER_COUNT] = {
-    0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
+/*
+ * The character in each place of the table: the CharacterId of each
+ * CharacterChoice, as character_select.c keeps its own copy
+ */
+static CharacterId D_802301A8_ovl_01[CHARACTER_COUNT] = {CHARACTER_PLUM,
+    CHARACTER_CHARLIE, CHARACTER_PEACH, CHARACTER_BABY_MARIO, CHARACTER_LUIGI,
+    CHARACTER_YOSHI, CHARACTER_SONNY, CHARACTER_WARIO, CHARACTER_HARRY,
+    CHARACTER_MARIO, CHARACTER_MAPLE, CHARACTER_DONKEY_KONG, CHARACTER_BOWSER,
+    CHARACTER_METAL_MARIO, CHARACTER_KID, CHARACTER_SHERRY, CHARACTER_AZALEA,
+    CHARACTER_JOE};
 static Vtx D_802301F0_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},

@@ -16,7 +16,7 @@
 #define CHARACTER_SOUND_VOLUME -1
 
 /* The one character whose sounds play without reverb */
-#define DRY_CHARACTER 3
+#define DRY_CHARACTER CHARACTER_BABY_MARIO
 #define CHARACTER_SOUND_REVERB 0x14
 
 static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
