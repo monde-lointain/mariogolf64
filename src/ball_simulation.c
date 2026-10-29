@@ -407,6 +407,35 @@ void ResetBallSimulations(void) {
 #define OTHER_LANDING_SPIN 0.2f
 /* The most of its speed into the ground that a landing ball bounces back */
 #define MAX_RESTITUTION 1.5f
+
+/*
+ * Flight. The air's drag grows from a least value with the root of the
+ * ball's speed through it, in half kilometers an hour.
+ */
+#define AIR_DRAG_SPEED_SCALE (1.0f / KilometersPerHour(0.5f))
+#define AIR_DRAG_PER_ROOT_SPEED 0.0011f
+#define MIN_AIR_DRAG 0.004f
+/*
+ * Side spin curves the ball most when its scaled size matches the ball's
+ * speed along the ground, less the further they differ, and never by more
+ * than a hundredth of that speed a frame
+ */
+#define SIDE_SPIN_SPEED_SCALE 8.0f
+#define SIDE_SPIN_MISMATCH_FALLOFF 0.8f
+#define CURVE_PER_SIDE_SPIN 0.038146973f
+#define MAX_CURVE_SPEED_RATIO 100.0f
+/* Back spin lifts the ball by no more than an eightieth of its air speed */
+#define LIFT_PER_SPIN 0.045776367f
+#define MAX_LIFT_SPEED_RATIO 80.0f
+/* The share of each spin kept each frame in flight */
+#define SIDE_SPIN_DECAY 0.995f
+#define SPIN_DECAY 0.993f
+/*
+ * The wind carries a ball no higher than where the shot started at half
+ * strength, gaining strength with height: full 40 yards up, and more above
+ */
+#define LOW_WIND_SCALE 0.5f
+#define WIND_SCALE_PER_HEIGHT (1.0f / (80 * UNITS_PER_YARD))
 /*
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
@@ -2070,25 +2099,27 @@ ROLLED:
         airSpeed = sqrtf((relative[AXIS_X] * relative[AXIS_X]) +
             (relative[AXIS_Y] * relative[AXIS_Y]) +
             (relative[AXIS_Z] * relative[AXIS_Z]));
-        drag = (sqrtf(airSpeed * 0.0140613755f) * 0.0011f) + 0.004f;
+        drag =
+            (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) +
+            MIN_AIR_DRAG;
         sideSpin = simulation->sideSpin;
         horizontalSpeed = sqrtf((relative[AXIS_X] * relative[AXIS_X]) +
             (relative[AXIS_Z] * relative[AXIS_Z]));
-        sideSpinMagnitude = fabsf(sideSpin * 8.0f);
+        sideSpinMagnitude = fabsf(sideSpin * SIDE_SPIN_SPEED_SCALE);
         if (sideSpinMagnitude != 0.0f) {
           ratio = horizontalSpeed / sideSpinMagnitude;
         } else {
           ratio = 0.0f;
         }
 
-        weight = 1.0f - (fabsf(ratio - 1.0f) * 0.8f);
+        weight = 1.0f - (fabsf(ratio - 1.0f) * SIDE_SPIN_MISMATCH_FALLOFF);
         if (weight < 0.0f) {
           weight = 0.0f;
         }
 
-        curve = sideSpin * (weight * 0.038146973f);
-        if (horizontalSpeed < fabsf(curve) * 100.0f) {
-          curve = horizontalSpeed * 0.01f;
+        curve = sideSpin * (weight * CURVE_PER_SIDE_SPIN);
+        if (horizontalSpeed < fabsf(curve) * MAX_CURVE_SPEED_RATIO) {
+          curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
           if (simulation->sideSpin < 0) {
             curve = -curve;
           }
@@ -2101,8 +2132,8 @@ ROLLED:
           velocity[AXIS_Z] += relative[AXIS_X] * scale;
         }
 
-        simulation->sideSpin = simulation->sideSpin * 0.995f;
-        lift = simulation->spinSpeed * 0.045776367f;
+        simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;
+        lift = simulation->spinSpeed * LIFT_PER_SPIN;
         if (simulation->spinSpeed != 0 && airSpeed > KilometersPerHour(1)) {
           f32 turned[3];
           f32 scale;
@@ -2110,8 +2141,8 @@ ROLLED:
           guMtxXFMF(simulation->unk44, relative[AXIS_X], relative[AXIS_Y],
               relative[AXIS_Z], &turned[AXIS_X], &turned[AXIS_Y],
               &turned[AXIS_Z]);
-          if (airSpeed < fabsf(lift) * 80.0f) {
-            lift = airSpeed * 0.0125f;
+          if (airSpeed < fabsf(lift) * MAX_LIFT_SPEED_RATIO) {
+            lift = airSpeed * (1.0f / MAX_LIFT_SPEED_RATIO);
           }
 
           scale = lift /
@@ -2124,16 +2155,16 @@ ROLLED:
           velocity[AXIS_X] += turned[AXIS_X];
           velocity[AXIS_Y] += turned[AXIS_Y];
           velocity[AXIS_Z] += turned[AXIS_Z];
-          simulation->spinSpeed = simulation->spinSpeed * 0.993f;
+          simulation->spinSpeed = simulation->spinSpeed * SPIN_DECAY;
         }
 
         height =
             simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y];
         if (height <= 0.0f) {
-          windX = simulation->windVelocityX * 0.5f;
-          windZ = simulation->windVelocityZ * 0.5f;
+          windX = simulation->windVelocityX * LOW_WIND_SCALE;
+          windZ = simulation->windVelocityZ * LOW_WIND_SCALE;
         } else {
-          f32 scale = (height * 0.00000088998473f) + 0.5f;
+          f32 scale = (height * WIND_SCALE_PER_HEIGHT) + LOW_WIND_SCALE;
 
           windX = simulation->windVelocityX * scale;
           windZ = simulation->windVelocityZ * scale;
