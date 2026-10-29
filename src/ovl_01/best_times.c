@@ -206,7 +206,6 @@ void func_80213558_ovl_01(void) {
  * times on a shaded panel: each with its place, its unkD78 as a signed number
  * and its holder's face. A row of dashes stands in for each unset time.
  */
-#define BEST_TIMES_BOARD_KIND 11
 #define BEST_TIME_PLACE_X 22
 #define BEST_TIME_FIRST_PLACE_Y 144
 #define BEST_TIME_PLACE_SPACING 27
@@ -260,7 +259,7 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
   s16 dashIndex;
   u8(*holderPalettes)[MENU_PALETTE_FILE_SIZE];
 
-  func_801FB54C_ovl_01(&gfx, BEST_TIMES_BOARD_KIND);
+  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
   guPerspectiveF(D_8023A9C0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
   guLookAtF(D_8023AA00_ovl_01, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE, 0.0f,

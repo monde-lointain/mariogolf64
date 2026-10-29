@@ -24,6 +24,10 @@
 #define MENU_LAYER_LARGE_BANNER (1 << 4)
 #define MENU_LAYER_UNK20 (1 << 5)
 #define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
+/* Just the scenery and the banner, behind the screens that draw their own
+ * panel or model where the others have a board */
+#define PLAIN_BACKDROP_LAYERS \
+  (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER)
 
 extern void* D_8012D420[2];
 extern s16 D_800FE33C;

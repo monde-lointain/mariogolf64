@@ -153,7 +153,6 @@ void StartLoadingChosenHole(void);
 extern s32 D_80105DCC;
 /* The first club tournament's name; D_80105DC8 picks the tournament */
 #define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F
-#define CLUB_TOURNAMENT_BOARD_KIND 11
 /* The club tournament's details window and the text in it */
 #define CLUB_WINDOW_WIDTH 280
 #define CLUB_WINDOW_HEIGHT 180
@@ -1533,7 +1532,7 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
   u16 buttons;
   s32 pressedButtons;
 
-  func_801FB54C_ovl_01(&gfx, CLUB_TOURNAMENT_BOARD_KIND);
+  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
   func_8022A43C_ovl_01(&gfx);
   func_8022A090_ovl_01(&gfx);
   func_8022ADE8_ovl_01(&gfx);

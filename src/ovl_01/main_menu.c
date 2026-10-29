@@ -4242,7 +4242,11 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
 #define PLAIN_MENU_NAME_SPACING 8
 #define PLAIN_MENU_FIGURES_X 32
 #define PLAIN_MENU_FIGURES_Y 100
-#define TITLE_BOARD_KIND 61
+/* The scenery, the board and both banners, behind the title, the main menus,
+ * the clubhouse and screen 8 */
+#define BOARD_BACKDROP_LAYERS \
+  (MENU_LAYER_SCENERY | MENU_LAYER_BOARD | MENU_LAYER_BANNER | \
+      MENU_LAYER_LARGE_BANNER | MENU_LAYER_UNK20)
 
 /*
  * Doesn't match: in the lit labels' loop GCC works out labelIndex *
@@ -4289,7 +4293,7 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
   sprintf(g_PrintBuffer, D_80231640_ovl_01, 0x820, 0x208, 0x2A78);
   DrawShadowedText(
       &gfx, PLAIN_MENU_FIGURES_X, PLAIN_MENU_FIGURES_Y, g_PrintBuffer);
-  func_801FB54C_ovl_01(&gfx, TITLE_BOARD_KIND);
+  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
   if (g_ControllerStates[0].buttons & B_BUTTON) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
@@ -4451,7 +4455,9 @@ extern const char D_8023176C_ovl_01[];
  * wider for a single player; the chosen one shows its animated mode icon once
  * it stops turning
  */
-#define MODE_SELECT_BOARD_KIND 0x1B
+#define MODE_SELECT_BACKDROP_LAYERS \
+  (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER | \
+      MENU_LAYER_LARGE_BANNER)
 #define MODE_SELECT_LIGHT_YAW 0
 #define MODE_SELECT_LIGHT_PITCH 0x3000
 #define MODE_BOARD_EYE_HEIGHT 70.0f
@@ -4540,8 +4546,8 @@ extern const char D_8023176C_ovl_01[];
 #define BET_BADGE_ENV_DIVISOR 4
 /* func_801FB54C's layers drawn behind the course select, and in front of it
  * and of screens 20 and 22 */
-#define COURSE_SELECT_BACK_BOARD_KIND 1
-#define COURSE_SELECT_FRONT_BOARD_KIND 10
+#define COURSE_SELECT_BACK_LAYERS MENU_LAYER_SCENERY
+#define COURSE_SELECT_FRONT_LAYERS (MENU_LAYER_UNK2 | MENU_LAYER_BANNER)
 /* Screens 20 and 22 slide their pages this far, a step per update */
 #define BET_SLIDE_STEP 32
 #define BET_SLIDE_DISTANCE 512
@@ -4611,7 +4617,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
 
   g_HoleSetup.conditions.lightYaw = MODE_SELECT_LIGHT_YAW;
   g_HoleSetup.conditions.lightPitch = MODE_SELECT_LIGHT_PITCH;
-  func_801FC60C_ovl_01(&gfx, MODE_SELECT_BOARD_KIND);
+  func_801FC60C_ovl_01(&gfx, MODE_SELECT_BACKDROP_LAYERS);
   guPerspectiveF(D_80231CA0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
   guLookAtReflectF(D_80231CE0_ovl_01, &D_80231D20_ovl_01[g_DrawBufferIndex],
@@ -5261,7 +5267,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80200EF0_ovl_01);
  * and right pick an animation, R plays it, Z with the C buttons steps through
  * it and L changes the character's kind.
  */
-#define VIEWER_BOARD_KIND 11
 #define VIEWER_NAME_X 32
 #define VIEWER_NAME_Y 192
 #define VIEWER_PLAYER_NUMBER_X 144
@@ -5311,7 +5316,7 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
   }
 
   if (D_8022BE28_ovl_01 == 0) {
-    func_801FB54C_ovl_01(&gfx, VIEWER_BOARD_KIND);
+    func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
   }
 
   SetUpTextDrawing(&gfx);
@@ -5591,7 +5596,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
   save = GetSaveData();
   gfx = *displayListHead;
   if (g_MenuScreen == MENU_SCREEN_UNK6) {
-    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_BACK_BOARD_KIND);
+    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_BACK_LAYERS);
     guTranslate(&D_802321F0_ovl_01, 0.0f, 0.0f, -WATER_PLANE_DISTANCE);
     guPerspective(&D_80232230_ovl_01, &perspNorm, WATER_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE,
@@ -6036,7 +6041,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         break;
     }
 
-    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_BOARD_KIND);
+    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_LAYERS);
   }
 
   if ((g_MenuScreen == MENU_SCREEN_UNK22) ||
@@ -6115,7 +6120,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
       func_802047F0_ovl_01(&gfx);
     }
 
-    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_BOARD_KIND);
+    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_LAYERS);
     switch (D_8022BE88_ovl_01) {
       case BET_PHASE_OPENING:
         func_8021826C_ovl_01(
@@ -6301,7 +6306,7 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 choiceIndex;
 
-  func_801FB54C_ovl_01(&gfx, 61);
+  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_COUNT; choiceIndex++) {
@@ -6371,7 +6376,7 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
   s32 choiceIndex;
   s32 labelOffset;
 
-  func_801FB54C_ovl_01(&gfx, 61);
+  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT;
@@ -6458,7 +6463,7 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
   s32 choiceIndex;
   s32 labelOffset;
 
-  func_801FB54C_ovl_01(&gfx, 61);
+  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != CLUBHOUSE_CHOICE_COUNT; choiceIndex++) {
@@ -6524,14 +6529,17 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
 void func_80206A2C_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
-  func_801FB54C_ovl_01(&gfx, 61);
+  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
   *displayListHead = gfx;
 }
 
 const char D_802316EC_ovl_01[] = "Peach's Castle";
 const char D_802316FC_ovl_01[] = "Luigi's Garden";
 
-#define OPTIONS_BOARD_KIND 0xB9
+/* The options draw the narrow board in place of the board */
+#define OPTIONS_BACKDROP_LAYERS \
+  (MENU_LAYER_SCENERY | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | \
+      MENU_LAYER_UNK20 | MENU_LAYER_TALL_NARROW_BOARD)
 
 /* The options screen's Mario and his shadow, in the menu image buffer */
 #define MARIO_WIDTH 100
@@ -6658,7 +6666,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   s32 rowTop;
   s32 frameIndex;
 
-  func_801FB54C_ovl_01(&gfx, OPTIONS_BOARD_KIND);
+  func_801FB54C_ovl_01(&gfx, OPTIONS_BACKDROP_LAYERS);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
@@ -6997,7 +7005,7 @@ void func_80207D08_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 caddyIndex;
 
-  func_801FB54C_ovl_01(&gfx, 61);
+  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   DrawShadowedText(

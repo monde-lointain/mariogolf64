@@ -1951,7 +1951,6 @@ void func_8021D0B8_ovl_01(void) {
  * label of D_80230984. The chosen record also shows its course's image and
  * name.
  */
-#define RECORDS_BOARD_KIND 11
 #define RECORDS_PANEL_LEFT 24
 #define RECORDS_PANEL_TOP 48
 #define RECORDS_PANEL_RIGHT 302
@@ -2001,7 +2000,7 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead) {
   s32 chosenRow;
   s32 chosenColumn;
 
-  func_801FB54C_ovl_01(&gfx, RECORDS_BOARD_KIND);
+  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
   gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);

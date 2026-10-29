@@ -398,7 +398,6 @@ void func_8020E390_ovl_01(void) {
 
 /* func_8020E898 turns a totals image on the wheel of menu.h after the open
  * courses' images */
-#define COURSE_BOARD_KIND 11
 #define COURSE_TOTALS_IMAGE COURSE_COUNT
 
 /*
@@ -432,7 +431,7 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   s32 halfSize;
   s32 step;
 
-  func_801FB54C_ovl_01(&gfx, COURSE_BOARD_KIND);
+  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
   guPerspectiveF(D_8023A790_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
   guLookAtF(D_8023A7D0_ovl_01, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE, 0.0f,

@@ -84,7 +84,6 @@ typedef struct TableCorner {
 
 /* func_80215DC4 draws the table over a dimmed panel, with a face beside each
  * shown row and above each column */
-#define TABLE_BOARD_KIND 11
 #define TABLE_PANEL_LEFT 24
 #define TABLE_PANEL_TOP 50
 #define TABLE_PANEL_RIGHT 302
@@ -359,7 +358,7 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
   s32 rowWins;
   u8 drawMode;
 
-  func_801FB54C_ovl_01(&gfx, TABLE_BOARD_KIND);
+  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
   gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);

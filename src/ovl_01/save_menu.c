@@ -451,7 +451,6 @@ void func_8021F79C_ovl_01(void) {
  * dashes where it is empty, and the chosen slot's message glows in shifting
  * colors. Message 0x1E plus the row is shown below the panel.
  */
-#define RING_SHOT_BOARD_KIND 11
 #define RING_SHOT_PANEL_LEFT 24
 #define RING_SHOT_PANEL_TOP 70
 #define RING_SHOT_PANEL_RIGHT 302
@@ -545,7 +544,7 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
   s16 replayCourse;
   s16 replayHole;
 
-  func_801FB54C_ovl_01(&gfx, RING_SHOT_BOARD_KIND);
+  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
 
   gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
   gDPPipeSync(gfx++);
@@ -1657,7 +1656,9 @@ s32 func_80222F2C_ovl_01(void) {
 const char D_80231A3C_ovl_01[] = "%s";
 
 /* The backdrop layers that func_801FC60C draws behind the saved games */
-#define SAVED_GAMES_BOARD_KIND 0x1B
+#define SAVED_GAMES_BACKDROP_LAYERS \
+  (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER | \
+      MENU_LAYER_LARGE_BANNER)
 
 /* The numbered boards of D_8023BD98, 64 by 64 CI8 images loaded in two strips
  */
@@ -1788,7 +1789,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
   f32 radiusX;
   s32 boardDegrees;
 
-  func_801FC60C_ovl_01(&gfx, SAVED_GAMES_BOARD_KIND);
+  func_801FC60C_ovl_01(&gfx, SAVED_GAMES_BACKDROP_LAYERS);
   BuildDynamicTextures(&gfx);
   func_80225358_ovl_01(&gfx);
   gDPPipeSync(gfx++);
