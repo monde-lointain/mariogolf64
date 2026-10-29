@@ -82,8 +82,8 @@ typedef struct TableCorner {
   /* 0x4 */ s32 y;
 } TableCorner; /* size = 0x8 */
 
-/* func_80215DC4 draws the table over a dimmed panel, with a face beside each
- * shown row and above each column */
+/* DrawCharacterTable draws the table over a dimmed panel, with a face beside
+ * each shown row and above each column */
 #define TABLE_PANEL_LEFT 24
 #define TABLE_PANEL_TOP 50
 #define TABLE_PANEL_RIGHT 302
@@ -278,7 +278,7 @@ void func_802159C0_ovl_01(void* buffer, s16 bufferKind) {
   D_80230194_ovl_01 = y;
 }
 
-void func_80215B84_ovl_01(void) {
+void UpdateCharacterTable(void) {
   MenuMemory* memory = func_8005AF74();
   s8 firstColumn;
   s8 firstRow;
@@ -344,7 +344,7 @@ void func_80215B84_ovl_01(void) {
   }
 }
 
-void func_80215DC4_ovl_01(Gfx** displayListHead) {
+void DrawCharacterTable(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
