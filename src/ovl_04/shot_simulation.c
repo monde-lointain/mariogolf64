@@ -63,7 +63,7 @@ void SimulateShot(ShotLaunch* shot) {
   g_SimulatedShot.unk2E14 = shot->impactTiming == 0 &&
       shot->power >= MAX_LAUNCH_POWER &&
       !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
-  g_SimulatedShot.unk2E42 = GetUnkCEntry(
+  g_SimulatedShot.unk2E42 = GetImpactTimingEntry(
       GetClub(
           g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
       g_CurrentShot.surface, g_CurrentShot.shotMode, shot->impactTiming)

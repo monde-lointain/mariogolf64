@@ -106,7 +106,7 @@ static SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT] = {
  */
 static s32 D_8020B858_ovl_05 = 0;
 /* The opening's copies of D_800B7C00 and D_800B7C08, which its copy of
- * GetUnkCEntry doesn't read */
+ * GetImpactTimingEntry doesn't read */
 static Unk6 D_8020B85C_ovl_05 = {-90, -64, -40, -10, 100, 1};
 static Unk6 D_8020B864_ovl_05 = {-80, 64, 30, 10, -5, 1};
 /* The opening's copy of D_800B7C10 */

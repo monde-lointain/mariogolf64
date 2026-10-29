@@ -405,7 +405,7 @@ static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
  * the swing was stopped, and clubIndex and shotMode are also the club slot and
  * shot mode that the golfer was last posed with.
  */
-static ShotLaunch D_80227150_ovl_00;
+static ShotLaunch f_ShotLaunch;
 static s32 D_80227170_ovl_00[MAX_PLAYER_COUNT];
 static f32 D_80227180_ovl_00;
 static f32 D_80227184_ovl_00;
@@ -425,7 +425,7 @@ s32 f_AimFrameCount;
 /* Defined in main_bss.c, at their addresses in the original */
 extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
 extern UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT];
-extern ShotLaunch g_PreviousBallSurfaceInfo;
+extern ShotLaunch g_LastShotLaunch;
 
 /* Lets the Rumble Paks run again after nuContRmbForceStop */
 void EndRumbleForceStop(void) {
@@ -3027,12 +3027,12 @@ void UpdateTurns(void) {
    * show the stance.
    */
   void PoseGolferForShot(void) {
-    s32* lastClubSlot = &D_80227150_ovl_00.clubIndex;
+    s32* lastClubSlot = &f_ShotLaunch.clubIndex;
 
     if (*lastClubSlot != g_CurrentShot.clubSlot ||
-        D_80227150_ovl_00.shotMode != g_CurrentShot.shotMode) {
+        f_ShotLaunch.shotMode != g_CurrentShot.shotMode) {
       *lastClubSlot = g_CurrentShot.clubSlot;
-      D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
+      f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
       SetCharacterClub(0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot]);
       UpdateGolferTranslucency();
       if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
@@ -3141,8 +3141,8 @@ void UpdateTurns(void) {
   /* Returns whether a shot stopped this far from the impact mark rumbles, as a
    * mishit */
   Boolean DoesImpactRumble(void) {
-    return GetUnkCEntry(GetSelectedClub(), g_CurrentShot.surface,
-        g_CurrentShot.shotMode, D_80227150_ovl_00.impactTiming)
+    return GetImpactTimingEntry(GetSelectedClub(), g_CurrentShot.surface,
+        g_CurrentShot.shotMode, f_ShotLaunch.impactTiming)
         ->unk5;
   }
 
@@ -3151,7 +3151,7 @@ void UpdateTurns(void) {
   void PlayImpactClickSound(void) {
     if (DoesImpactRumble()) {
       PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
-    } else if (D_80227150_ovl_00.impactTiming == 0) {
+    } else if (f_ShotLaunch.impactTiming == 0) {
       PlaySound(SOUND_IMPACT_ON_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
     } else {
       PlaySound(SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
@@ -3193,7 +3193,7 @@ void UpdateTurns(void) {
 
     D_80227170_ovl_00[playerIndex]++;
     nextState = state;
-    D_80227150_ovl_00.playerIndex = playerIndex;
+    f_ShotLaunch.playerIndex = playerIndex;
     if (IsTimedState(state) && IsPlayGoingOn(g_PauseScreen)) {
       TickStopwatches();
     }
@@ -3230,11 +3230,11 @@ void UpdateTurns(void) {
         SetCharacterLighting(0, 1);
         ClearGameFlag(GAME_FLAG_FAST_FLIGHT);
         StartPlayerShot(playerIndex);
-        D_80227150_ovl_00.heading = g_CurrentShot.heading;
+        f_ShotLaunch.heading = g_CurrentShot.heading;
         g_RoundHud.clubHeadTilt =
-            GetAimSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
+            GetAimSlopeAngle(&g_Players[playerIndex], &f_ShotLaunch);
         g_RoundHud.lieTilt =
-            GetCrossSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
+            GetCrossSlopeAngle(&g_Players[playerIndex], &f_ShotLaunch);
         UpdateShotFlags();
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
         g_CurrentShot.cupDistance =
@@ -3245,8 +3245,8 @@ void UpdateTurns(void) {
         g_RoundHud.greenGridState = 1;
         g_RoundHud.unkF = 1;
         g_RoundHud.unk12 = 1;
-        D_80227150_ovl_00.clubIndex = g_CurrentShot.clubSlot;
-        D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
+        f_ShotLaunch.clubIndex = g_CurrentShot.clubSlot;
+        f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
         g_ShotSetupFrameCount = 0;
         SetCharacterClub(
             0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot]);
@@ -3449,9 +3449,9 @@ void UpdateTurns(void) {
         StartTurnRumble(g_GameState.currentPlayerIndex);
         break;
       case PLAYER_STATE_PREPARING_AIM:
-        D_80227150_ovl_00.clubIndex = g_CurrentShot.clubSlot;
-        D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
-        D_80227150_ovl_00.heading = g_CurrentShot.heading;
+        f_ShotLaunch.clubIndex = g_CurrentShot.clubSlot;
+        f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
+        f_ShotLaunch.heading = g_CurrentShot.heading;
         if (f_ShotSource == SHOT_SOURCE_PLANNING) {
           StartTurnTimer();
           for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
@@ -3628,17 +3628,17 @@ void UpdateTurns(void) {
             HandleClubInput();
             HandleShotModeInput();
             PoseGolferForShot();
-            D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
+            f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
             UpdateAimControls();
             PlaceShotCamera();
             SetFramebufferCount(TRIPLE_BUFFERING);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
 
-          D_80227150_ovl_00.offsetX = 0;
-          D_80227150_ovl_00.offsetY = 0;
-          D_80227150_ovl_00.heading = g_CurrentShot.heading;
-          BuildShotPreview(&D_80227150_ovl_00, state);
+          f_ShotLaunch.offsetX = 0;
+          f_ShotLaunch.offsetY = 0;
+          f_ShotLaunch.heading = g_CurrentShot.heading;
+          BuildShotPreview(&f_ShotLaunch, state);
         } else if (g_PauseScreen == PAUSE_SCREEN_NONE) {
           Boolean isReady;
           s32 tempo;
@@ -3648,7 +3648,7 @@ void UpdateTurns(void) {
               (g_TurnController.buttons & (Z_TRIG | L_TRIG)) &&
               (g_TurnController.pressedButtons & R_TRIG)) {
             StartFreeLook();
-            BuildShotPreview(&D_80227150_ovl_00, state);
+            BuildShotPreview(&f_ShotLaunch, state);
             break;
           }
 
@@ -3738,7 +3738,7 @@ void UpdateTurns(void) {
             isReady = UpdateAimControls() && isReady;
           }
 
-          D_80227150_ovl_00.heading = g_CurrentShot.heading;
+          f_ShotLaunch.heading = g_CurrentShot.heading;
           PlaceCharacterForShot(0);
           UpdateGolferTranslucency();
           if (!(g_LetterboxState == LETTERBOX_STATE_NONE ||
@@ -3786,10 +3786,10 @@ void UpdateTurns(void) {
           }
 
           g_RoundHud.clubHeadTilt =
-              GetAimSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
+              GetAimSlopeAngle(&g_Players[playerIndex], &f_ShotLaunch);
           g_RoundHud.lieTilt =
-              GetCrossSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
-          if (GetClub(D_80227150_ovl_00.clubIndex)->surfaceMask &
+              GetCrossSlopeAngle(&g_Players[playerIndex], &f_ShotLaunch);
+          if (GetClub(f_ShotLaunch.clubIndex)->surfaceMask &
               CLUB_SURFACE_GREEN) {
             g_RoundHud.unk84[1] = 1;
           } else {
@@ -3815,8 +3815,8 @@ void UpdateTurns(void) {
           }
 
           SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
-          D_80227150_ovl_00.offsetX = g_CurrentShot.offsetX;
-          D_80227150_ovl_00.offsetY = g_CurrentShot.offsetY;
+          f_ShotLaunch.offsetX = g_CurrentShot.offsetX;
+          f_ShotLaunch.offsetY = g_CurrentShot.offsetY;
           PlaceShotCamera();
           if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
             if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
@@ -3853,14 +3853,14 @@ void UpdateTurns(void) {
             }
           }
 
-          BuildShotPreview(&D_80227150_ovl_00, state);
+          BuildShotPreview(&f_ShotLaunch, state);
         }
 
         break;
       case PLAYER_STATE_SETTING_POWER:
         UpdateImpactPointMode();
         ReuseLastCharacterMatrices(0);
-        BuildShotPreview(&D_80227150_ovl_00, state);
+        BuildShotPreview(&f_ShotLaunch, state);
         areCallsAllowed = FALSE;
         if (g_RoundHud.greenGridState == 1) {
           g_RoundHud.greenGridState = 2;
@@ -3884,16 +3884,15 @@ void UpdateTurns(void) {
         }
 
         SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
-        D_80227150_ovl_00.offsetX = g_CurrentShot.offsetX;
-        D_80227150_ovl_00.offsetY = g_CurrentShot.offsetY;
+        f_ShotLaunch.offsetX = g_CurrentShot.offsetX;
+        f_ShotLaunch.offsetY = g_CurrentShot.offsetY;
         if ((f_ShotSource != SHOT_SOURCE_PLAYER)
                 ? (D_80104F78.powerGaugeFrame == g_CurrentShot.gaugeFrame)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
           SoundId sound;
 
           g_CurrentShot.powerGaugeFrame = g_CurrentShot.gaugeFrame;
-          D_80227150_ovl_00.power =
-              GetGaugeFramePower(g_CurrentShot.gaugeFrame);
+          f_ShotLaunch.power = GetGaugeFramePower(g_CurrentShot.gaugeFrame);
           g_SavedPlayers[playerIndex] = g_Players[playerIndex];
           g_Players[playerIndex].strokeCount++;
           if (g_Players[playerIndex].strokeCount > STROKE_COUNT_MAX) {
@@ -3909,9 +3908,9 @@ void UpdateTurns(void) {
               }
             }
 
-            D_80227150_ovl_00.impactTiming = 0;
-            D_80227150_ovl_00.offsetX = 0;
-            D_80227150_ovl_00.offsetY = 0;
+            f_ShotLaunch.impactTiming = 0;
+            f_ShotLaunch.offsetX = 0;
+            f_ShotLaunch.offsetY = 0;
             nextState = PLAYER_STATE_STARTING_SWING;
             if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
               SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -3920,7 +3919,7 @@ void UpdateTurns(void) {
             sound = SOUND_IMPACT_OFF_MARK;
           } else {
             nextState = PLAYER_STATE_SETTING_IMPACT;
-            if (D_80227150_ovl_00.power == MAX_LAUNCH_POWER) {
+            if (f_ShotLaunch.power == MAX_LAUNCH_POWER) {
               StartShotEffect(1);
               sound = SOUND_IMPACT_ON_MARK;
             } else {
@@ -3950,7 +3949,7 @@ void UpdateTurns(void) {
       case PLAYER_STATE_SETTING_IMPACT:
         UpdateImpactPointMode();
         ReuseLastCharacterMatrices(0);
-        BuildShotPreview(&D_80227150_ovl_00, state);
+        BuildShotPreview(&f_ShotLaunch, state);
         areCallsAllowed = FALSE;
         if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
           g_RoundHud.flags = HUD_FLAG_SETTING_IMPACT;
@@ -3981,29 +3980,29 @@ void UpdateTurns(void) {
         }
 
         SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
-        D_80227150_ovl_00.offsetX = g_CurrentShot.offsetX;
-        D_80227150_ovl_00.offsetY = g_CurrentShot.offsetY;
+        f_ShotLaunch.offsetX = g_CurrentShot.offsetX;
+        f_ShotLaunch.offsetY = g_CurrentShot.offsetY;
         if (((f_ShotSource != SHOT_SOURCE_PLAYER)
                     ? (g_CurrentShot.gaugeFrame == D_80104F78.impactGaugeFrame)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||
             g_CurrentShot.gaugeFrame >= LAST_IMPACT_GAUGE_FRAME) {
           g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
-          D_80227150_ovl_00.impactTiming =
+          f_ShotLaunch.impactTiming =
               g_CurrentShot.gaugeFrame - GAUGE_IMPACT_FRAME;
-          if (D_80227150_ovl_00.impactTiming > MAX_IMPACT_TIMING) {
-            D_80227150_ovl_00.impactTiming = MAX_IMPACT_TIMING;
+          if (f_ShotLaunch.impactTiming > MAX_IMPACT_TIMING) {
+            f_ShotLaunch.impactTiming = MAX_IMPACT_TIMING;
           }
 
-          if (D_80227150_ovl_00.impactTiming < -MAX_IMPACT_TIMING) {
-            D_80227150_ovl_00.impactTiming = -MAX_IMPACT_TIMING;
+          if (f_ShotLaunch.impactTiming < -MAX_IMPACT_TIMING) {
+            f_ShotLaunch.impactTiming = -MAX_IMPACT_TIMING;
           }
 
           PlayImpactClickSound();
           StopSound(IMPACT_POINT_SOUND_CHANNEL);
           nextState = PLAYER_STATE_STARTING_SWING;
           if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
-              (D_80227150_ovl_00.impactTiming != 0 ||
-                  D_80227150_ovl_00.power < MAX_LAUNCH_POWER)) {
+              (f_ShotLaunch.impactTiming != 0 ||
+                  f_ShotLaunch.power < MAX_LAUNCH_POWER)) {
             if (g_Players[playerIndex].unk28 > 0) {
               g_Players[playerIndex].unk28--;
             }
@@ -4032,16 +4031,16 @@ void UpdateTurns(void) {
             (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
           g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
           if (g_TurnController.pressedButtons & B_BUTTON) {
-            D_80227150_ovl_00.power = MAX_LAUNCH_POWER;
+            f_ShotLaunch.power = MAX_LAUNCH_POWER;
           }
 
-          D_80227150_ovl_00.impactTiming = 0;
-          if (D_80227150_ovl_00.impactTiming > MAX_IMPACT_TIMING) {
-            D_80227150_ovl_00.impactTiming = MAX_IMPACT_TIMING;
+          f_ShotLaunch.impactTiming = 0;
+          if (f_ShotLaunch.impactTiming > MAX_IMPACT_TIMING) {
+            f_ShotLaunch.impactTiming = MAX_IMPACT_TIMING;
           }
 
-          if (D_80227150_ovl_00.impactTiming < -MAX_IMPACT_TIMING) {
-            D_80227150_ovl_00.impactTiming = -MAX_IMPACT_TIMING;
+          if (f_ShotLaunch.impactTiming < -MAX_IMPACT_TIMING) {
+            f_ShotLaunch.impactTiming = -MAX_IMPACT_TIMING;
           }
 
           PlayImpactClickSound();
@@ -4065,7 +4064,7 @@ void UpdateTurns(void) {
         SetFramebufferCount(TRIPLE_BUFFERING);
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
         LoadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
-        SimulateShot(&D_80227150_ovl_00);
+        SimulateShot(&f_ShotLaunch);
         if (IsRecordableHoleOut(playerIndex)) {
           RecordHoleOut(playerIndex);
         }
@@ -4083,13 +4082,13 @@ void UpdateTurns(void) {
         if (!D_80224004_ovl_00) {
           D_80227170_ovl_00[playerIndex] = 0;
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
-            s32 power = D_80227150_ovl_00.power;
+            s32 power = f_ShotLaunch.power;
 
-            if (D_80227150_ovl_00.shotMode == 0) {
+            if (f_ShotLaunch.shotMode == 0) {
               power *= 6;
             }
 
-            if (D_80227150_ovl_00.shotMode == 1) {
+            if (f_ShotLaunch.shotMode == 1) {
               power *= 3;
             }
 
@@ -4175,11 +4174,11 @@ void UpdateTurns(void) {
             ResetBallRotation();
           }
 
-          LaunchBallSimulation(&g_TurnBallSimulation, 0, &D_80227150_ovl_00);
+          LaunchBallSimulation(&g_TurnBallSimulation, 0, &f_ShotLaunch);
           nextState = PLAYER_STATE_BALL_IN_FLIGHT;
-          if (D_80227150_ovl_00.impactTiming == 0 &&
-              D_80227150_ovl_00.power >= MAX_LAUNCH_POWER &&
-              !(GetClub(D_80227150_ovl_00.clubIndex)->surfaceMask &
+          if (f_ShotLaunch.impactTiming == 0 &&
+              f_ShotLaunch.power >= MAX_LAUNCH_POWER &&
+              !(GetClub(f_ShotLaunch.clubIndex)->surfaceMask &
                   CLUB_SURFACE_GREEN) &&
               RateShotLength() == 1) {
             StartBanner(0);
@@ -4895,13 +4894,12 @@ void UpdateTurns(void) {
 
     g_Players[playerIndex].state = nextState;
     g_BallSimulations[0] = g_TurnBallSimulation;
-    g_PreviousBallSurfaceInfo = D_80227150_ovl_00;
+    g_LastShotLaunch = f_ShotLaunch;
   }
 
   MarkNearbyGroundTiles(
       g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
-  GetBallSurfaceInfo(
-      &g_Players[g_GameState.currentPlayerIndex], &D_80227150_ovl_00);
+  GetBallSurfaceInfo(&g_Players[g_GameState.currentPlayerIndex], &f_ShotLaunch);
   if (areCallsAllowed) {
     PlayWaitingPlayersCalls();
   }

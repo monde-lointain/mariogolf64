@@ -150,7 +150,8 @@ typedef struct BallSimulation {
 extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 
 void ResetBallSimulations(void);
-Unk6* GetUnkCEntry(Club* club, Surface surface, s32 shotMode, s32 impactTiming);
+Unk6* GetImpactTimingEntry(
+    Club* club, Surface surface, s32 shotMode, s32 impactTiming);
 s32 StepBallSimulation(BallSimulation* simulation);
 s32 LaunchBallSimulation(
     BallSimulation* simulation, s32 purpose, ShotLaunch* shot);

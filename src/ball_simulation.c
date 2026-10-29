@@ -2043,7 +2043,7 @@ INCLUDE_ASM("asm/nonmatchings/ball_simulation", StepBallSimulation);
 #endif
 
 /* Returns the Unk6 entry for the club's lie rating and impactTiming */
-Unk6* GetUnkCEntry(
+Unk6* GetImpactTimingEntry(
     Club* club, Surface surface, s32 shotMode, s32 impactTiming) {
   s32 row;
 
@@ -2161,7 +2161,7 @@ s32 LaunchBallSimulation(
     entry = &D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT];
     rumbles = D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT].unk5;
   } else {
-    /* The same as GetUnkCEntry; writing it out is there to match */
+    /* The same as GetImpactTimingEntry; writing it out is there to match */
     s32 row = GetLieRating(club, simulation->surface, shot->shotMode) - 1;
 
     if (row < 0) {

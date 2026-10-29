@@ -301,7 +301,8 @@ s8 D_801B5634 BSS = {0};
 Mtx g_ScreenOrthoMatrix BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_801B5678[0x8] BSS = {0};
-ShotLaunch g_PreviousBallSurfaceInfo BSS ALIGNED(8) = {0};
+/* Read by no routine: UpdateTurns copies f_ShotLaunch here each frame */
+ShotLaunch g_LastShotLaunch BSS ALIGNED(8) = {0};
 ALGlobals __libmus_alglobals BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_801B56EC[0x4] BSS = {0};
