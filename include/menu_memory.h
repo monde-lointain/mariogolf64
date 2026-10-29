@@ -110,4 +110,7 @@ extern Unk800FBD40 D_800FBD40;
 #define NO_CHOSEN_CHARACTER -1
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 
+/* Whether the menus have loaded each character slot's character */
+extern u8 D_801B70F0[MAXCONTROLLERS];
+
 #endif

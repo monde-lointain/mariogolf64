@@ -322,7 +322,6 @@ extern void* D_801052C4[2];
 extern void* D_80106100;
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
-extern u8 D_801B70F0[MAXCONTROLLERS];
 extern void* D_801B93E0[5];
 
 void InitPlay(s32 kind);

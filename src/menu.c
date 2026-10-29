@@ -75,7 +75,6 @@ extern s32 D_80105DCC;
 /* The code of the tournament whose password was entered */
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 extern s32 D_801B7070;
-extern s8 D_801B70F0;
 extern s16 D_801B71CC;
 extern s8 D_801B9410;
 extern u8 g_MapCamera[];
@@ -453,11 +452,6 @@ static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
 };
 /* Read by no routine */
 static s32 D_800C2C00[4] = {0};
-
-/* Not static: the original left these to the linker's common block */
-s8 D_801B70F1;
-s8 D_801B70F2;
-s8 D_801B70F3;
 
 /*
  * Allocates and reads the menu's assets, then reads the save. Overlay 3
@@ -1932,10 +1926,10 @@ void func_8005D9A0(void) {
   D_8012F480[1] = NO_CHOSEN_CHARACTER;
   D_8012F480[2] = NO_CHOSEN_CHARACTER;
   D_8012F480[3] = NO_CHOSEN_CHARACTER;
-  D_801B70F0 = 0;
-  D_801B70F1 = 0;
-  D_801B70F2 = 0;
-  D_801B70F3 = 0;
+  D_801B70F0[0] = FALSE;
+  D_801B70F0[1] = FALSE;
+  D_801B70F0[2] = FALSE;
+  D_801B70F0[3] = FALSE;
   memset(&D_801323A0, 0, sizeof(D_801323A0));
   D_800FBD40.unk0 = 0;
   D_801B71CC = 0;

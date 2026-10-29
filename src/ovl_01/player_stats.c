@@ -156,7 +156,6 @@ enum StatsDirection {
 
 extern void* D_8012D430[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
-extern s8 D_801B70F0[MAXCONTROLLERS];
 extern const char D_802319E0_ovl_01[];
 
 extern u8 D_801B5634;
@@ -1170,7 +1169,7 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
       }
     }
 
-    if ((u8)D_801B70F0[playerIndex] == FALSE) {
+    if (!D_801B70F0[playerIndex]) {
       if (IsCharacterSlotBusy(playerIndex)) {
         FreeCharacterSlot(playerIndex);
       } else {
