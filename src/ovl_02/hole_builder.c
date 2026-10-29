@@ -3168,8 +3168,13 @@ void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
 #define SHADOW_NEARNESS_LIMIT 1.5f
 #define SHADOW_NEARNESS_MIN 0.1f
 #define SHADOW_SOLIDITY_SCALE 4.0f
-/* A texel's brightness is its red * 4 + green * 8 + blue * 2, less
- * SHADOW_BRIGHTNESS_FLOOR */
+/*
+ * A texel's brightness is its red * 4 + green * 8 + blue * 2, less
+ * SHADOW_BRIGHTNESS_FLOOR. Each masked channel is shifted from its place in
+ * the texel to its weight; blue's place already weighs it 2.
+ */
+#define RED_BRIGHTNESS_SHIFT (RGBA16_RED_SHIFT - 2)
+#define GREEN_BRIGHTNESS_SHIFT (RGBA16_GREEN_SHIFT - 3)
 #define SHADOW_BRIGHTNESS_FLOOR 60
 #define SHADOW_BRIGHTNESS_MAX 163
 #define SHADOW_DARKENING_SCALE 4
@@ -3199,7 +3204,7 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
-  f32 lightView[4][4];
+  Mat4 lightView;
   Vec3 lightPoint;
   u8 solidities[SOLIDITY_ROW_LENGTH][SOLIDITY_ROW_LENGTH];
   u8* solidityCells;
@@ -3284,13 +3289,13 @@ void CastBillboardShadows(void) {
     heightScale = 1.0f / height;
     x = g_Billboards[index].x;
     z = g_Billboards[index].z;
-    lightPoint[0] =
+    lightPoint[AXIS_X] =
         (cosf(lightPitch) * cosf(lightYaw) * SHADOW_LIGHT_DISTANCE) + x;
-    lightPoint[2] =
+    lightPoint[AXIS_Z] =
         (cosf(lightPitch) * sinf(lightYaw) * SHADOW_LIGHT_DISTANCE) + z;
-    lightPoint[1] = sinf(lightPitch) * SHADOW_LIGHT_DISTANCE;
-    guLookAtF(lightView, x, 0.0f, z, lightPoint[0], lightPoint[1],
-        lightPoint[2], 0.0f, -1.0f, 0.0f);
+    lightPoint[AXIS_Y] = sinf(lightPitch) * SHADOW_LIGHT_DISTANCE;
+    guLookAtF(lightView, x, 0.0f, z, lightPoint[AXIS_X], lightPoint[AXIS_Y],
+        lightPoint[AXIS_Z], 0.0f, -1.0f, 0.0f);
     centerColumn = x / BILLBOARD_UNITS_PER_TEXEL;
     centerRow = z / BILLBOARD_UNITS_PER_TEXEL;
     lightView[0][0] *= BILLBOARD_UNITS_PER_TEXEL;
@@ -3310,9 +3315,9 @@ void CastBillboardShadows(void) {
     }
 
     for (; row < rowEnd; row++) {
-      rowPoint[0] = (lightView[2][0] * row) + lightView[3][0];
-      rowPoint[1] = (lightView[2][1] * row) + lightView[3][1];
-      rowPoint[2] = (lightView[2][2] * row) + lightView[3][2];
+      rowPoint[AXIS_X] = (lightView[2][0] * row) + lightView[3][0];
+      rowPoint[AXIS_Y] = (lightView[2][1] * row) + lightView[3][1];
+      rowPoint[AXIS_Z] = (lightView[2][2] * row) + lightView[3][2];
       isRowInWidth = FALSE;
       column = centerColumn - SHADOW_COLUMN_REACH;
       columnEnd = centerColumn + SHADOW_COLUMN_REACH;
@@ -3325,7 +3330,7 @@ void CastBillboardShadows(void) {
       }
 
       for (; column < columnEnd; column++) {
-        viewX = (lightView[0][0] * column) + rowPoint[0];
+        viewX = (lightView[0][0] * column) + rowPoint[AXIS_X];
         if (width <= fabsf(viewX)) {
           if (!isRowInWidth) {
             continue;
@@ -3335,7 +3340,7 @@ void CastBillboardShadows(void) {
         }
 
         isRowInWidth = TRUE;
-        viewY = (lightView[0][1] * column) + rowPoint[1];
+        viewY = (lightView[0][1] * column) + rowPoint[AXIS_Y];
         if (((-width <= viewY) & (viewY < height)) == 0) {
           continue;
         }
@@ -3356,7 +3361,8 @@ void CastBillboardShadows(void) {
               (s32)(widthFraction * BILLBOARD_MASK_SIZE)];
           if (solidity != 0) {
             nearness = SHADOW_NEARNESS_LIMIT -
-                (fabsf((lightView[0][2] * column) + rowPoint[2]) * heightScale);
+                (fabsf((lightView[0][2] * column) + rowPoint[AXIS_Z]) *
+                    heightScale);
             if (nearness > SHADOW_NEARNESS_MIN) {
               solidLitPercent = LIT_PERCENT_FULL -
                   (solidity * nearness * SHADOW_SOLIDITY_SCALE);
@@ -3375,7 +3381,8 @@ void CastBillboardShadows(void) {
         red = color & TEXEL_RED_MASK;
         green = color & TEXEL_GREEN_MASK;
         blue = color & TEXEL_BLUE_MASK;
-        brightness = (red >> 9) + (green >> 3) + blue - SHADOW_BRIGHTNESS_FLOOR;
+        brightness = (red >> RED_BRIGHTNESS_SHIFT) +
+            (green >> GREEN_BRIGHTNESS_SHIFT) + blue - SHADOW_BRIGHTNESS_FLOOR;
         if (brightness < 0) {
           continue;
         }
