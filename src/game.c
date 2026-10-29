@@ -2549,7 +2549,7 @@ void SetInsetViewRect(s32 centerX, s32 centerY, s32 width, s32 height) {
   f_InsetViewCenterY = centerY;
 }
 
-/* Grows or shrinks the inset view's window by a step and centres it */
+/* Grows or shrinks the inset view's window by a step and centers it */
 void UpdateInsetView(void) {
   s32* animation = &g_InsetView.animation;
 

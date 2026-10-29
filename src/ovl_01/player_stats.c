@@ -109,7 +109,7 @@
 #define RECORD_LABEL_SIZE 16
 
 /* func_8021E97C puts the cursor on the stats grid's chosen cell, measured from
- * the screen's centre */
+ * the screen's center */
 #define STATS_CURSOR_COLUMN_WIDTH 34
 #define STATS_CURSOR_ROW_HEIGHT 26
 #define STATS_CURSOR_LEFT_X 6
@@ -699,7 +699,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217D20_ovl_01);
 #define BET_BANNER_LEFT 80
 #define BET_BANNER_RIGHT 240
 #define BET_BANNER_TOP 152
-/* The chosen bet's label is centred on the banner */
+/* The chosen bet's label is centered on the banner */
 #define BET_LABEL_CENTER_X 160
 #define BET_LABEL_TOP 156
 
@@ -1405,7 +1405,7 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
   if ((D_802303A1_ovl_01 == FALSE) & (canShowPrompt == TRUE)) {
     SetTextSlotValue(memory->unk29 + 1, 0, 0);
 
-    /* The prompt names the player in the player's own colour */
+    /* The prompt names the player in the player's own color */
     if (memory->unk29 == 0) {
       SetTextPaletteColor(255, 127, 127, 0);
     }
@@ -1794,7 +1794,7 @@ void func_8021C67C_ovl_01(Gfx** displayListHead, s32 spacing, s32 y) {
 
 /*
  * Doesn't match: the original adds the texel offset to the blink frame's
- * offset before the arrow's, and adds the arrow size to the centre first.
+ * offset before the arrow's, and adds the arrow size to the center first.
  */
 #ifdef NON_MATCHING
 void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY) {

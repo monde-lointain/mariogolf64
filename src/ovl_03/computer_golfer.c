@@ -1667,7 +1667,7 @@ s32 GetLandingRating(u32 surfaceKind) {
 #define EXTRA_TARGET_STEP_COUNT 50.0f
 #define TARGET_SIDE_COUNT 100
 #define TARGET_SIDE_SPACING (4 * UNITS_PER_YARD)
-/* The neighbours a target's lie is tested at, in TARGET_NEIGHBOUR_SPACINGs */
+/* The neighbors a target's lie is tested at, in TARGET_NEIGHBOUR_SPACINGs */
 #define TARGET_NEIGHBOUR_REACH 2
 #define TARGET_NEIGHBOUR_SPACING 4
 /* Rolls shorter than this are not tested for ground in the way */

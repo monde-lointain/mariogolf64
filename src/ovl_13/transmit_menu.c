@@ -56,7 +56,7 @@ enum TransmitOption {
 
 /* screenStep values on the Send Status screen */
 enum SendStatusStep {
-  SEND_STATUS_SHOWING_ERROR, /* Or the cancelled pak check, closing */
+  SEND_STATUS_SHOWING_ERROR, /* Or the canceled pak check, closing */
   SEND_STATUS_CHOOSING,
   SEND_STATUS_READY = 3,
   SEND_STATUS_CHECKING,
@@ -198,7 +198,7 @@ enum ListingState {
 #define POINTER_TOP 76
 #define EXPERIENCE_LEFT 20 /* Below each face */
 #define EXPERIENCE_TOP 174
-/* The options, centred above the hint, with the pointer at the left of the
+/* The options, centered above the hint, with the pointer at the left of the
  * chosen one */
 #define OPTIONS_CENTRE_X 160
 #define OPTIONS_TOP 64
@@ -226,7 +226,7 @@ enum ListingState {
 
 /* The notice cloud grows by one step each time it is drawn, up to this size */
 #define NOTICE_FULL_SIZE 4
-/* The cloud is drawn in two strips about its centre, its half-size growing by a
+/* The cloud is drawn in two strips about its center, its half-size growing by a
  * step per size */
 #define NOTICE_CENTRE_X 160
 #define NOTICE_CENTRE_Y 116
@@ -1586,7 +1586,7 @@ void DrawSendStatusHint(Gfx** displayListHead, GameBoyTransfer* transfer) {
 
 /*
  * Draws a Game Boy character's name, level and drive, the name of their shot
- * type and a bar from its centre out to their shot curve.
+ * type and a bar from its center out to their shot curve.
  */
 void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
     GameBoyTransfer* transfer) {
@@ -1656,7 +1656,7 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
       CURVE_SEGMENT_WIDTH * CURVE_SEGMENT_COUNT, 0, 0, 0, 0, 0, 0, 0);
   for (segment = 0, segmentCurve = -CURVE_SEGMENT_COUNT / 2;
       segment != CURVE_SEGMENT_COUNT; segment++, segmentCurve++) {
-    /* Light segments from the centre out to the shot curve; the continues are
+    /* Light segments from the center out to the shot curve; the continues are
      * there to match */
     if (character->shotCurve < 0) {
       if (segmentCurve < character->shotCurve) {
@@ -3259,7 +3259,7 @@ s32 GetNoticeState(void) {
 }
 
 /*
- * Steps the notice cloud's size and draws it from its centre, with its message
+ * Steps the notice cloud's size and draws it from its center, with its message
  * once it is full size.
  */
 void DrawNotice(Gfx** displayListHead) {

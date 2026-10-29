@@ -85,7 +85,7 @@ enum PauseValueText {
   PAUSE_VALUE_TEXT_WHITE
 };
 
-/* Give Up, which is greyed out while f_IsGiveUpAllowed is clear */
+/* Give Up, which is grayed out while f_IsGiveUpAllowed is clear */
 #define PAUSE_OPTION_GIVE_UP 2
 
 #define PAUSE_LAYOUT_MAX_OPTIONS 9
@@ -818,7 +818,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
 #define PAUSE_LEFT_ARROW_T ((PAUSE_ARROW_SIZE * 3) << 5)
 #define PAUSE_RIGHT_ARROW_T ((PAUSE_ARROW_SIZE * 2) << 5)
 
-/* Draws a pair of flashing arrows centred on (x, y), with their centres gap
+/* Draws a pair of flashing arrows centered on (x, y), with their centers gap
  * pixels apart */
 void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
   Gfx* gfx = *displayListHead;

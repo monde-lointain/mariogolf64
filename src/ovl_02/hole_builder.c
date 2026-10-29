@@ -136,7 +136,7 @@ typedef struct PaintLogic {
 /* Farther than any distance ListOffsetsByDistance computes */
 #define BEYOND_ALL_DISTANCES 0x10000
 
-/* A colour that lights or shades the ground */
+/* A color that lights or shades the ground */
 typedef struct GroundLightColor {
   /* 0x0 */ u16 red;
   /* 0x2 */ u16 green;
@@ -908,10 +908,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ResetTerrainCodeCells);
 
 /*
  * The paint logic of Toad Highlands, Koopa Park and Mario's Star. It returns
- * a cell's colour in the upper half and its painted terrain code in the
+ * a cell's color in the upper half and its painted terrain code in the
  * lower: fairway near other terrain is painted as semi-rough, fairway and
  * greens are striped, rough away from fairway and TERRAIN_CODE_UNK3 are
- * mottled with random colours, and greens are edged as green edge.
+ * mottled with random colors, and greens are edged as green edge.
  */
 s32 PaintMainCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
@@ -1015,7 +1015,7 @@ s32 PaintMainCourse(
  * A paint logic like PaintMainCourse with pale rough, out-of-bounds ground
  * painted 0xBEEF, and TERRAIN_CODE_UNK3 painted as cart way away from more of
  * it. Neither the paint-logic table nor any code refers to it. It does not
- * match: the original keeps the test between the two equal cart-way colours
+ * match: the original keeps the test between the two equal cart-way colors
  * and has no stack frame.
  */
 #ifdef NON_MATCHING
@@ -1073,7 +1073,7 @@ s32 PaintPaleRoughCourse(
         color = 0x3E;
         paintedCode = TERRAIN_CODE_UNK3;
       } else {
-        /* Both colours are the same in the original */
+        /* Both colors are the same in the original */
         if (nearestDistance == 1) {
           color = 0x94A5;
         } else {
@@ -1128,8 +1128,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintPaleRoughCourse);
 
 /*
  * The paint logic of Shy Guy Desert: like PaintMainCourse with other
- * colours, except that deep rough is painted as waste area and rough away
- * from fairway is mottled with other random colours
+ * colors, except that deep rough is painted as waste area and rough away
+ * from fairway is mottled with other random colors
  */
 s32 PaintShyGuyDesert(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
@@ -1230,7 +1230,7 @@ s32 PaintShyGuyDesert(
 }
 
 /* The paint logic of Boo Valley: PaintMainCourse with other bunker and
- * out-of-bounds colours */
+ * out-of-bounds colors */
 s32 PaintBooValley(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
@@ -1329,7 +1329,7 @@ s32 PaintBooValley(
   return (color << 16) | paintedCode;
 }
 
-/* The paint logic of Yoshi's Island: PaintMainCourse with other colours */
+/* The paint logic of Yoshi's Island: PaintMainCourse with other colors */
 s32 PaintYoshisIsland(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
@@ -1532,9 +1532,9 @@ s32 PaintUnlistedCourse(
 
 /*
  * The paint logic of the first course of each mini-golf set. It returns a
- * cell's colour in the upper half and its painted terrain code in the
+ * cell's color in the upper half and its painted terrain code in the
  * lower: greens are striped and edged, TERRAIN_CODE_UNK3 is mottled with
- * random colours, and anything other than out of bounds is painted white as
+ * random colors, and anything other than out of bounds is painted white as
  * out of bounds.
  */
 s32 PaintFirstMiniGolfCourse(
@@ -1586,7 +1586,7 @@ s32 PaintFirstMiniGolfCourse(
 
 /*
  * The paint logic of the second course of each mini-golf set: like
- * PaintFirstMiniGolfCourse with other colours, except that greens are painted
+ * PaintFirstMiniGolfCourse with other colors, except that greens are painted
  * as fairway
  */
 s32 PaintSecondMiniGolfCourse(
@@ -1638,7 +1638,7 @@ s32 PaintSecondMiniGolfCourse(
 
 /*
  * The paint logic of the third course of each mini-golf set: like
- * PaintFirstMiniGolfCourse with other colours, except that greens are painted
+ * PaintFirstMiniGolfCourse with other colors, except that greens are painted
  * as cart way and other terrain is painted red
  */
 s32 PaintThirdMiniGolfCourse(
@@ -1683,10 +1683,10 @@ s32 PaintThirdMiniGolfCourse(
 }
 
 /*
- * The paint logic of the driving range. It returns a cell's colour in the
+ * The paint logic of the driving range. It returns a cell's color in the
  * upper half and its painted terrain code in the lower: fairway and greens
  * are striped, rough away from fairway and TERRAIN_CODE_UNK3 are mottled
- * with random colours, and greens are edged as green edge.
+ * with random colors, and greens are edged as green edge.
  */
 s32 PaintDrivingRange(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
@@ -1853,7 +1853,7 @@ static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
 
 /*
  * Clears the map, reads a code map from the host and paints the map's texels
- * with the colours of its terrain codes. Doesn't match: like
+ * with the colors of its terrain codes. Doesn't match: like
  * EncodeCodeMap, the original adds the work area's address to the tile
  * offset after it computes the texel offset.
  */
@@ -1919,8 +1919,8 @@ static inline void SetCode(s32 column, s32 row, u8 code) {
 }
 
 /*
- * Fills the code at a column and row of the code map with its neighbours'
- * code, if they are equal and it differs. The neighbours are a step away
+ * Fills the code at a column and row of the code map with its neighbors'
+ * code, if they are equal and it differs. The neighbors are a step away
  * each side.
  */
 static inline void FillCodeGap(
@@ -1939,10 +1939,10 @@ static inline void FillCodeGap(
 
 /*
  * Encodes the map as EncodeCodeMap does, then runs the clean-up passes, each
- * filling the codes that differ from two equal neighbours, along the row
+ * filling the codes that differ from two equal neighbors, along the row
  * and then down the column. There are no passes, so it only encodes the map.
  * Doesn't match: the encoding has EncodeCodeMap's texel address order,
- * and the passes compute each neighbour's index from one strength-reduced
+ * and the passes compute each neighbor's index from one strength-reduced
  * index and read the previous code's address once, where the original
  * computes it for both reads.
  */
@@ -2082,7 +2082,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
  * Paints the map's texels from the code map with the course's paint logic,
  * sets each terrain code's color, and stores the painted terrain codes in
  * their cells. Doesn't match: ours keeps the painting in other
- * registers, sets up the neighbour search's offset pointer before the
+ * registers, sets up the neighbor search's offset pointer before the
  * scaled search span, and when the blocks run out it branches to the texel
  * loop's increment, where the original's branch-likely does the increment
  * in its delay slot.
@@ -2203,7 +2203,7 @@ void ToggleCodeMapCleanup(void) {
 }
 
 /*
- * Sets each ground tile's centre to the average of its ground points and its
+ * Sets each ground tile's center to the average of its ground points and its
  * height range to the spread of their heights, at least
  * MIN_GROUND_TILE_HEIGHT_RANGE, or FLAT_GROUND_TILE_HEIGHT_RANGE for a flat
  * tile. It returns the tile count as a float, which no caller uses.
@@ -2273,7 +2273,7 @@ f32 MeasureGroundTiles(void) {
 }
 
 /*
- * Scales the hole's ground points, tile centres, billboards, tee and cup
+ * Scales the hole's ground points, tile centers, billboards, tee and cup
  * with g_MiniGolfScale
  */
 void ScaleMiniGolfHole(void) {
@@ -3318,7 +3318,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
 #endif
 
 /*
- * Sets the ground's light and shade colours for the scene's colour index,
+ * Sets the ground's light and shade colors for the scene's color index,
  * interpolating between those of the key indexes around it.
  * InterpolateChannel is a nested function, a GNU C extension.
  */
@@ -3423,14 +3423,14 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
 /* How far apart, in map texels, the heights that give a slope are, along the
  * light's yaw */
 #define LIGHT_OFFSET_LENGTH 4.5f
-/* The light's colour is in fractions of full brightness of this many bits */
+/* The light's color is in fractions of full brightness of this many bits */
 #define LIGHT_COLOR_FRACTION_BITS 5
 /* How much a unit of height fades the ground toward white */
 #define HEIGHT_FADE_SCALE 0.008f
 #define HEIGHT_FADE_LIMIT 0.25f
 #define HEIGHT_FADE_FULL 1.0f
 
-/* The light's colour for each slope, a channel per word */
+/* The light's color for each slope, a channel per word */
 #define SLOPE_LIGHT_RED 0
 #define SLOPE_LIGHT_GREEN 1
 #define SLOPE_LIGHT_BLUE 2

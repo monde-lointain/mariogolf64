@@ -1,5 +1,5 @@
 /*
- * Derives the shaded quads' colours from the scene's colours, and draws the
+ * Derives the shaded quads' colors from the scene's colors, and draws the
  * plane of two blended texture layers.
  */
 #include "common.h"

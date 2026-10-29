@@ -142,7 +142,7 @@ static u8 f_PlayerTagColors[MAX_PLAYER_COUNT][3] = {{0xDC, 0x00, 0x00},
 static ShotLabel f_ShotLabels[MAX_PLAYER_COUNT] = {{0, 0, 0, NO_CORNER},
     {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}};
 static s32 f_ShotLabelPlayers = SHOT_LABELS_NONE;
-/* Where a tag's centre sits from the ball at each corner */
+/* Where a tag's center sits from the ball at each corner */
 static s8 f_TagOffsetsX[CORNER_COUNT] = {22, -22, -22, 22};
 static s8 f_TagOffsetsY[CORNER_COUNT] = {12, 12, -12, -12};
 static Radians f_OutOfBoundsPulseAngle = 0.0f;
@@ -215,7 +215,7 @@ void DrawShotLabels(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
   }
 
-  /* Draws tag number tag centred on x and y */
+  /* Draws tag number tag centered on x and y */
   void DrawPlayerTag(s32 x, s32 y, s32 corner, s32 tag) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,

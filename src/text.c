@@ -66,7 +66,7 @@ typedef struct MessageTable {
 /* The current player's score, as the game mode counts it */
 #define MESSAGE_CODE_SCORE 0x8018
 #define MESSAGE_CODE_LINE_BREAK 0x8019
-/* Then one for each of g_TextPalette's colours */
+/* Then one for each of g_TextPalette's colors */
 #define MESSAGE_CODE_PALETTE_COLOR 0x8022
 #define MESSAGE_CODE_SLOT_COLOR 0x8026
 /*
@@ -194,7 +194,7 @@ static u8 f_LargeFontWidths[CHAR_CODE_COUNT] = {
     /* 0xF0 */  6,  9,  6,  6,  6,  9,  9, 12,  9, 10,  7,  0,  0,  0,  0,  0
 };
 /* clang-format on */
-/* The quads glyph sprites are drawn with, centred on the sprite */
+/* The quads glyph sprites are drawn with, centered on the sprite */
 static Vtx f_LargeGlyphVertices[4] = {
     {{{0, 6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -6, 0}, 0, {0, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -318,7 +318,7 @@ void FreeTextAssets(void) {
 }
 
 /*
- * Sets up the RDP to draw translucent text in the primitive colour, with
+ * Sets up the RDP to draw translucent text in the primitive color, with
  * the glyphs' alpha scaled by the primitive alpha
  */
 void SetUpTextDrawing(Gfx** displayListHead) {
@@ -429,7 +429,7 @@ void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
 }
 
 /*
- * Draws the message of every text slot that has one, in the slot's colour,
+ * Draws the message of every text slot that has one, in the slot's color,
  * in the medium font or the font of the slot's size
  */
 void DrawTextSlots(Gfx** displayListHead) {
@@ -469,7 +469,7 @@ Boolean IsTextSlotRevealed(s32 slot) {
 
 /*
  * Draws a slot's message in the large font, with its glyphs, icons,
- * colours, the name, the slot's values and the player's score
+ * colors, the name, the slot's values and the player's score
  */
 void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
   Gfx* gfx = *displayListHead;
@@ -1022,8 +1022,8 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
 }
 
 /*
- * Sets up the RDP to draw text shaded between the primitive colour, where
- * the gradient is dark, and the environment colour, where it is bright.
+ * Sets up the RDP to draw text shaded between the primitive color, where
+ * the gradient is dark, and the environment color, where it is bright.
  * The glyphs' alpha comes from the first texel and the gradient, chosen by
  * the low bit of gradient, is loaded as the second.
  */
@@ -1520,7 +1520,7 @@ void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   *displayListHead = gfx;
 }
 
-/* Draws text in the large font, centred on x */
+/* Draws text in the large font, centered on x */
 void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   Gfx* gfx = *displayListHead;
 
@@ -1530,7 +1530,7 @@ void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   *displayListHead = gfx;
 }
 
-/* Draws text in the medium font, centred on x */
+/* Draws text in the medium font, centered on x */
 void DrawCenteredMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   Gfx* gfx = *displayListHead;
 
@@ -1540,7 +1540,7 @@ void DrawCenteredMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   *displayListHead = gfx;
 }
 
-/* Draws text in the small font, centred on x */
+/* Draws text in the small font, centered on x */
 void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   Gfx* gfx = *displayListHead;
 
@@ -1558,7 +1558,7 @@ void DrawTextStub(Gfx** displayListHead, s16 x, s16 y, char* text) {}
 
 /*
  * Sets up the RDP to draw shadowed text, modulating the font's intensity
- * by the primitive colour, and loads the shadowed font image
+ * by the primitive color, and loads the shadowed font image
  */
 void BeginShadowedText(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1592,7 +1592,7 @@ void BeginShadowedText(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Sets the colour, fully opaque, of the text drawn after it */
+/* Sets the color, fully opaque, of the text drawn after it */
 void SetTextColor(Gfx** displayListHead, s32 red, s32 green, s32 blue) {
   Gfx* gfx = *displayListHead;
 
@@ -1637,7 +1637,7 @@ void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   *displayListHead = gfx;
 }
 
-/* Draws text in the shadowed font, centred on x */
+/* Draws text in the shadowed font, centered on x */
 void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   Gfx* gfx = *displayListHead;
 
@@ -1659,7 +1659,7 @@ void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
 }
 
 /*
- * Draws text centred on x in the narrow glyphs of the shadowed font's last
+ * Draws text centered on x in the narrow glyphs of the shadowed font's last
  * row, which start at the apostrophe
  */
 void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text) {
@@ -1724,7 +1724,7 @@ void ClearGlyphSprites(void) {
  * Places the glyphs of text as sprites of a group, replacing the group's
  * old sprites, or only frees them if the font size is NO_FONT_SIZE. Marks
  * are placed over the glyph before them. Without GLYPH_FLAG_LEFT_ALIGNED
- * the text is centred on x.
+ * the text is centered on x.
  */
 void PlaceGlyphGroup(
     s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char* text) {
@@ -1806,7 +1806,7 @@ void PlaceGlyphGroup(
 }
 
 /*
- * Places the glyphs and icons of a message as sprites of a group, centred
+ * Places the glyphs and icons of a message as sprites of a group, centered
  * on x and y, replacing the group's old sprites. Every glyph advances by
  * its width in the large font. Returns half the message's width in the
  * high halfword and half its height in the low one.
@@ -2079,7 +2079,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
 }
 
 /*
- * Sets up the RDP to draw translucent text in the primitive colour, with
+ * Sets up the RDP to draw translucent text in the primitive color, with
  * perspective-correct textures
  */
 void SetUpPerspectiveTextDrawing(Gfx** displayListHead) {
@@ -2154,7 +2154,7 @@ void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text) {
 
 /*
  * Draws text in the large font over a shadow a quarter as bright, one pixel
- * down and to the right. The colours are packed as RGBA, but the alpha is
+ * down and to the right. The colors are packed as RGBA, but the alpha is
  * ignored.
  */
 void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,

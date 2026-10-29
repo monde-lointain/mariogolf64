@@ -85,7 +85,7 @@ enum HaltState {
 #define STICK_PRESS_THRESHOLD 56
 #define STICK_RELEASE_THRESHOLD 20
 
-/* Stick readings this close to the centre count as 0 */
+/* Stick readings this close to the center count as 0 */
 #define STICK_DEAD_ZONE 16
 
 /* The largest stick magnitude in menu readings */

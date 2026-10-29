@@ -38,7 +38,7 @@ extern AssetId g_CharacterImageAssets[CHARACTER_COUNT];
  * show */
 #define CHARACTER_FACE_IMAGE_OFFSET 9
 /* The asset file of each character's first palette, followed by those of its
- * other colours */
+ * other colors */
 extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
 #define CHARACTER_PALETTE_COUNT 4
 /* What the menus read by character id: each face, its g_CharacterImageAssets
@@ -67,7 +67,7 @@ extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 /* The names of the characters before the imported ones */
 extern char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH];
 
-/* Each character's face palette file in each of the character's colour schemes
+/* Each character's face palette file in each of the character's color schemes
  */
 extern s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];
 

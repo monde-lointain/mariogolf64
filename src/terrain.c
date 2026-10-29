@@ -1,5 +1,5 @@
 /*
- * The terrain: its codes and their colours, the surface at a point, and the
+ * The terrain: its codes and their colors, the surface at a point, and the
  * ground's grid vertices, tiles, triangles and heights. The debug scene menu
  * and the flag panel are here too.
  */
@@ -272,7 +272,7 @@ s32 GetTerrainCode(s32 column, s32 row) {
 INCLUDE_ASM("asm/nonmatchings/terrain", GetTerrainCode);
 #endif
 
-/* Returns the index of the terrain colour nearest an RGBA16 colour */
+/* Returns the index of the terrain color nearest an RGBA16 color */
 s32 FindNearestTerrainColor(s32 color) {
   s32 nearestDistance = 1000000;
   s32 nearestIndex = 0;
@@ -307,7 +307,7 @@ s32 FindNearestTerrainColor(s32 color) {
   return nearestIndex;
 }
 
-/* Returns a terrain code's colour as RGBA16 */
+/* Returns a terrain code's color as RGBA16 */
 s32 GetTerrainCodeColor(s32 code) {
   s32 colorIndex = TERRAIN_COLOR_FAIRWAY;
 
@@ -350,7 +350,7 @@ s32 GetTerrainCodeColor(s32 code) {
       f_TerrainColors[colorIndex].alpha;
 }
 
-/* Returns the terrain code whose colour is nearest an RGBA16 colour */
+/* Returns the terrain code whose color is nearest an RGBA16 color */
 s32 GetColorTerrainCode(s32 color) {
   switch (FindNearestTerrainColor(color)) {
     case 1:
@@ -737,7 +737,7 @@ SurfaceInfo* GetSurfaceInfoAt(s32 x, s32 z) {
   return GetSurfaceInfo(GetSurface(x, z));
 }
 
-/* Returns the map image's colour at a point, or 0 off the course */
+/* Returns the map image's color at a point, or 0 off the course */
 u16 GetMapColor(s32 x, s32 z) {
   u32 column;
   u32 row;
@@ -756,7 +756,7 @@ u16 GetMapColor(s32 x, s32 z) {
   return MAP_TEXEL(column, row) | 1;
 }
 
-/* Returns the map colour at a point, averaged with the colour of the terrain
+/* Returns the map color at a point, averaged with the color of the terrain
  * code for a surface */
 s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface) {
   u16 groundColor = GetMapColor(x, z);
@@ -1131,7 +1131,7 @@ void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow) {
   SetVertexMidpoint(CORNER(1, 2), CORNER(2, 1), &midpoints[15]);
 }
 
-/* Gives every tile its own midpoints and centre, and builds them */
+/* Gives every tile its own midpoints and center, and builds them */
 void BuildAllTileMidpoints(void) {
   s32 tileIndex = 0;
   s32 tileRow;

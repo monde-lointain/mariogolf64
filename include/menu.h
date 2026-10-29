@@ -310,7 +310,7 @@ enum MenuSign {
 
 /*
  * The cursor of the character table and the player stats: a quad whose corners
- * cycle through the colours, masked by the 48x48 IA4 image of asset 0x6EF
+ * cycle through the colors, masked by the 48x48 IA4 image of asset 0x6EF
  */
 #define MENU_CURSOR_SIZE 48
 #define MENU_CURSOR_VERTEX_COUNT 4

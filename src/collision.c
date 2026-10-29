@@ -34,7 +34,7 @@
 /* Cells the masks mark with this are treated as empty */
 #define BILLBOARD_CELL_IGNORED 3
 #define BILLBOARD_CELL_LAST 15
-/* The centre cell counts this many times as much as each neighbour */
+/* The center cell counts this many times as much as each neighbor */
 #define BILLBOARD_CENTER_CELL_WEIGHT 4
 
 /* Shifting a course point's coordinate right by this gives whole units, as
@@ -3113,7 +3113,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindRingHit);
 /*
  * Returns how solid a billboard's hit mask is around a point: the cell
  * there counted BILLBOARD_CENTER_CELL_WEIGHT times, plus each of its four
- * neighbours that is not empty
+ * neighbors that is not empty
  */
 s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down) {
   s32 column = across * BILLBOARD_MASK_SIZE;

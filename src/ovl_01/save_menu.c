@@ -2046,7 +2046,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
     } else {
       SetTextSlotValue(D_8023BDA4_ovl_01[D_80230B48_ovl_01] + 1, 0, 0);
 
-      /* The prompt names the player in the player's own colour */
+      /* The prompt names the player in the player's own color */
       if (D_8023BDA4_ovl_01[D_80230B48_ovl_01] == 0) {
         SetTextPaletteColor(255, 127, 127, 0);
       }

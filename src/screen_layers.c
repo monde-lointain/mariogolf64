@@ -36,7 +36,7 @@
 #define WIPE_FADE_ALPHA_STEP 25.4f
 /* A shape smaller than this, in pixels, is drawn as a covered screen */
 #define WIPE_SMALLEST_SHAPE 2
-/* The square that the shape is stretched over, centred on the screen */
+/* The square that the shape is stretched over, centered on the screen */
 #define WIPE_SQUARE_SIZE 304
 #define WIPE_SQUARE_LEFT SCREEN_BORDER
 #define WIPE_SQUARE_TOP ((SCREEN_HEIGHT / 2) - (WIPE_SQUARE_SIZE / 2))
@@ -480,7 +480,7 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
   g_ScreenFadeBlue = blue;
 }
 
-/* Covers the screen with the fade's colour, at the opacity it has reached */
+/* Covers the screen with the fade's color, at the opacity it has reached */
 #ifdef NON_MATCHING
 void DrawScreenFade(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

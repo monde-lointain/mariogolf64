@@ -12,7 +12,7 @@
 
 /* The screen depth of the far plane over two, in a viewport's depth units */
 #define SCREEN_DEPTH_SCALE 16352.0f
-/* Screen coordinates are clamped to this either side of the centre */
+/* Screen coordinates are clamped to this either side of the center */
 #define SCREEN_COORDINATE_LIMIT 0x400
 
 static Mat4 f_CpuProjectionMatrix;

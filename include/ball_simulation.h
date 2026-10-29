@@ -118,7 +118,7 @@ typedef struct BallSimulation {
  * steps longer than this are not stretched into a dash
  */
 #define SHOT_PREVIEW_MAX_DASH_LENGTH 0x4AFFF
-/* How far below the ball's centre the preview is drawn */
+/* How far below the ball's center the preview is drawn */
 #define SHOT_PREVIEW_DROP 0x133
 
 extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];

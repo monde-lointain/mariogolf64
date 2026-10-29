@@ -73,7 +73,7 @@ enum GameBoyBallType {
 
 /*
  * The caption and a copy of it slide in from either side until they meet
- * at the centre. The caption flashes, then grows and fades away.
+ * at the center. The caption flashes, then grows and fades away.
  */
 #define CAPTION_MEET_DRAW 25
 #define CAPTION_FLASH_END_DRAW 37
@@ -177,7 +177,7 @@ typedef struct LakituVelocity {
 #define SHRINKING_IMAGE_CENTRE_X 160
 #define SHRINKING_IMAGE_CENTRE_Y 104
 #define SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE 4
-/* The effect sits a little below the ball's centre */
+/* The effect sits a little below the ball's center */
 #define CONTACT_DROP_PER_PIN_SCALE 0.3f
 #define CONTACT_SOUND_CHANNEL 2
 #define CONTACT_STYLE_SOUND_CHANNEL 15
@@ -1609,7 +1609,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #endif
 
-/* The record distance shows under the caption once it has met at the centre */
+/* The record distance shows under the caption once it has met at the center */
 #define DRIVE_RECORD_DISTANCE_DRAW 26
 #define DRIVE_RECORD_DISTANCE_END_DRAW 45
 #define DRIVE_RECORD_DISTANCE_X 136
@@ -2265,8 +2265,8 @@ void DrawLakituMovie(Gfx** displayListHead) {
     x = f_Lakitu.x;
     y = f_Lakitu.y;
 
-    /* Start half a texel in, less the rounding, so that the image stays centred
-     * as it scales */
+    /* Start half a texel in, less the rounding, so that the image stays
+     * centered as it scales */
     DrawTextureRect(&gfx, (x - roundedHalfWidth) << 2,
         (y - roundedHalfHeight + (i * roundedHalfHeight)) << 2,
         (x + roundedHalfWidth) << 2, (y + (i * roundedHalfHeight)) << 2,
@@ -2769,7 +2769,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
   }
 
-  /* Bowser's and the heavy hitters' images have their own colours */
+  /* Bowser's and the heavy hitters' images have their own colors */
   if (f_ContactStyle == CONTACT_STYLE_BOWSER ||
       f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,

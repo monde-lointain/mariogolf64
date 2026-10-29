@@ -174,7 +174,8 @@ enum PortraitAnimation {
 #define SHOWN_MINUTES_LIMIT 99
 #define RESULTS_LABEL_BETS 4
 #define RESULTS_HEADING_Y 54
-/* Bet totals of four digits all shift left, so that the column stays centred */
+/* Bet totals of four digits all shift left, so that the column stays centered
+ */
 #define FOUR_DIGIT_BET_SHIFT -16
 #define FOUR_DIGIT_BET_MIN 999
 #define FOUR_DIGIT_BET_MAX 9999
@@ -271,7 +272,7 @@ static s32 f_TrophyFrame = 0;
 static s32 f_DebugUnlockCharacter = 0;
 /* Read by no routine */
 static void* D_8021FE40_ovl_00[2] = {NULL, D_80224E10_ovl_00};
-/* The text colour of each text slot, from slot 1 */
+/* The text color of each text slot, from slot 1 */
 static u8 f_TextSlotColors[][3] = {{0xFF, 0xFF, 0xFF}, {0x7F, 0xBF, 0xFF},
     {0x7F, 0xBF, 0xFF}, {0x7F, 0xFF, 0x4B}, {0xFF, 0x7F, 0x9F}};
 /* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a
@@ -1012,7 +1013,7 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
         TEXEL_STEP_ONE); \
   }
 
-/* Draws place, as in "21st", centred on x */
+/* Draws place, as in "21st", centered on x */
 #ifdef NON_MATCHING
 void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   Gfx* gfx = *displayListHead;
@@ -3076,7 +3077,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 #define STANDING_WORD_UP_ROW 0
 #define STANDING_WORD_DOWN_ROW 16
 #define STANDING_WORD_EVEN_ROW 32
-/* Shifts the hole count and its word left, so that the pair stays centred */
+/* Shifts the hole count and its word left, so that the pair stays centered */
 #define STANDING_ONE_DIGIT_UP_SHIFT -8
 #define STANDING_ONE_DIGIT_DOWN_SHIFT -20
 #define STANDING_TWO_DIGIT_DOWN_SHIFT -12

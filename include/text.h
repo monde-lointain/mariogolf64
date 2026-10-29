@@ -108,7 +108,7 @@ typedef struct TextSlot {
 #define DIGIT_GLYPH_COUNT 16
 #define DIGIT_FONT_HEIGHT (DIGIT_GLYPH_COUNT * DIGIT_GLYPH_SIZE)
 
-/* Without this flag, PlaceGlyphGroup centres the text on its x */
+/* Without this flag, PlaceGlyphGroup centers the text on its x */
 #define GLYPH_FLAG_LEFT_ALIGNED 0x10
 /* Only the top or the bottom part of a large glyph is drawn */
 #define GLYPH_FLAG_TOP_PART 0x01

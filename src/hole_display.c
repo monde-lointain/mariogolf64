@@ -2350,7 +2350,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawFadeAnimation);
 /*
  * Draws HUD_ANIMATION_SPIRAL, where the frame is cut into a grid of tiles. It
  * draws the tiles along a spiral from the top left corner inwards, and draws
- * fewer of them each frame, so the frame disappears from the centre out. The
+ * fewer of them each frame, so the frame disappears from the center out. The
  * few tiles after the opaque ones fade, more the further in they are.
  */
 void DrawSpiralAnimation(Gfx** displayListHead) {

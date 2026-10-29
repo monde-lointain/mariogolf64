@@ -89,7 +89,7 @@ enum TerrainCode {
 
 #define TERRAIN_CODE_COUNT 16
 
-/* Each terrain code's map colour, which the hole loader sets */
+/* Each terrain code's map color, which the hole loader sets */
 extern u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
 
 /*

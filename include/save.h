@@ -16,7 +16,7 @@
 /* The games saved partway through, to continue later */
 #define SAVED_GAME_COUNT 3
 #define MAX_PLAYER_COUNT 4
-/* The face of each player's character, and its palette in the player's colours
+/* The face of each player's character, and its palette in the player's colors
  */
 extern u8* g_PlayerFaceImages[MAX_PLAYER_COUNT];
 extern u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];

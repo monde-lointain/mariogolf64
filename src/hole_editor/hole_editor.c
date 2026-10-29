@@ -240,7 +240,7 @@ enum TriangleEdit {
 #define HOLE_FILE_PROMPT_ROW 18
 #define DEBUG_TEXT_BUFFER_SIZE 0x80
 
-/* The ground cells, between neighbouring ground points */
+/* The ground cells, between neighboring ground points */
 #define CELL_COLUMN_COUNT (GROUND_POINT_COLUMN_COUNT - 1)
 #define CELL_ROW_COUNT (GROUND_POINT_ROW_COUNT - 1)
 

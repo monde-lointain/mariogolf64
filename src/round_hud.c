@@ -229,12 +229,12 @@ typedef struct ArrowShape {
 #define HUD_OFFSET_CONTROLLER 1
 
 /*
- * A debug screen for trying out text colours: controller 2 picks a channel
- * of the primitive or environment colour and changes it, and moves and
+ * A debug screen for trying out text colors: controller 2 picks a channel
+ * of the primitive or environment color and changes it, and moves and
  * shades the sample text
  */
 #define COLOR_TEST_CONTROLLER 1
-#define COLOR_TEST_COLOR_COUNT 2 /* The primitive and environment colours */
+#define COLOR_TEST_COLOR_COUNT 2 /* The primitive and environment colors */
 #define COLOR_TEST_CHANNEL_COUNT 3
 #define COLOR_TEST_PRIM 0
 #define COLOR_TEST_ENV 1
@@ -854,7 +854,7 @@ void InitRoundHud(void) {
 INCLUDE_ASM("asm/nonmatchings/round_hud", InitRoundHud);
 #endif
 
-/* Loads the face of a player's character in the colours of the given palette */
+/* Loads the face of a player's character in the colors of the given palette */
 void LoadPlayerFace(s32 playerIndex, s32 character, s32 paletteIndex) {
   EncodedAsset asset;
   AssetFile file;
@@ -1549,7 +1549,7 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawLandingReaction);
 
 /*
  * Returns white tinted toward red by a positive warmth, or toward blue by a
- * negative one, as an RGBA colour with the given alpha. Nothing calls it.
+ * negative one, as an RGBA color with the given alpha. Nothing calls it.
  */
 u32 GetWarmthTint(s32 warmth, s32 alpha) {
   s32 red;
@@ -2488,9 +2488,9 @@ void AdjustHudOffset(void) {
 #define SHOT_PANEL_WIND_INDICATOR_X 100.0f
 #define SHOT_PANEL_WIND_INDICATOR_Y 76.0f
 /* The arrows beside a pause menu panel; they take screen coordinates, while the
- * panels sit in the centred view */
+ * panels sit in the centered view */
 #define PAUSE_PANEL_ARROWS_GAP 64
-/* The shot panel's icons, in the centred orthographic view and in front of the
+/* The shot panel's icons, in the centered orthographic view and in front of the
  * camera */
 #define CLUB_HEAD_ICON_X -128.0f
 #define CLUB_HEAD_ICON_Y -76.0f
@@ -3418,7 +3418,7 @@ INCLUDE_RODATA("asm/nonmatchings/round_hud", f_ColorTestSampleText);
 
 INCLUDE_RODATA("asm/nonmatchings/round_hud", f_BlankText);
 
-/* Draws the colour test screen and handles its controls */
+/* Draws the color test screen and handles its controls */
 void DrawColorTest(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
@@ -3785,7 +3785,7 @@ void DrawRoundHud(CameraView* view) {
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
 
-    /* A putt's height is labelled by its height in meters, which the feet are
+    /* A putt's height is labeled by its height in meters, which the feet are
      * measured from */
     if ((club->surfaceMask & CLUB_SURFACE_GREEN)
             ? g_RoundHud.ballHeightMetersDirection == HEIGHT_LEVEL

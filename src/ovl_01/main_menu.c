@@ -6153,7 +6153,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80202000_ovl_01);
 
 /*
  * Doesn't match: the original sets the text drawing's argument before the
- * mini-golf test that picks the name's colours, and keeps the course name
+ * mini-golf test that picks the name's colors, and keeps the course name
  * banner's strip top in one register instead of copying it.
  */
 #ifdef NON_MATCHING
@@ -6161,7 +6161,7 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 slide = D_8023BFD0_ovl_01;
 
-  /* Also the course's index into the name colours, to match the original's
+  /* Also the course's index into the name colors, to match the original's
    * registers */
   s32 stripIndex;
   s32 stripTop;
@@ -7103,7 +7103,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802081E8_ovl_01);
 
 /*
  * func_8020879C draws the course's Ring Shot holes as stars on a hexagon
- * around a centre, gold where the hole's star was won and silver where not,
+ * around a center, gold where the hole's star was won and silver where not,
  * with the chosen hole larger. Nothing calls it.
  */
 #define RING_SHOT_STAR_RADIUS 56

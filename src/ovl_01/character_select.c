@@ -124,7 +124,7 @@ extern void* D_801B69EC;
  * placed by its corner */
 #define CHARACTER_CURSOR_ORIGIN_X 140
 #define CHARACTER_CURSOR_ORIGIN_Y 96
-/* Moves the cursor by half a pixel so that its edges sit on pixel centres */
+/* Moves the cursor by half a pixel so that its edges sit on pixel centers */
 #define HALF_PIXEL 0.5f
 
 void func_801FC754_ovl_01(Gfx** displayListHead);
@@ -1338,7 +1338,7 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
     } else {
       SetTextSlotValue(D_801B7070 + 1, 0, 0);
 
-      /* The prompt names the player in the player's own colour */
+      /* The prompt names the player in the player's own color */
       if (D_801B7070 == 0) {
         SetTextPaletteColor(255, 127, 127, 0);
       }

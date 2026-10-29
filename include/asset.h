@@ -53,7 +53,7 @@ s32 GetAssetFileSize(AssetFile* file);
 void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 /* Encoded images start with a header, then a CI palette, then texels */
 #define IMAGE_HEADER_SIZE 8
-/* Each palette colour is one RGBA16 value */
+/* Each palette color is one RGBA16 value */
 #define PALETTE_COLOR_SIZE 2
 #define SMALL_PALETTE_COLOR_COUNT 16
 #define LARGE_PALETTE_COLOR_COUNT 256

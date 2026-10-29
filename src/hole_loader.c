@@ -1,6 +1,6 @@
 /*
  * Loads holes on the loader thread: decompressing their data, shrinking mini-
- * golf holes, choosing the wind, the rain and the scene colours, and setting up
+ * golf holes, choosing the wind, the rain and the scene colors, and setting up
  * the hole's state.
  */
 #include "common.h"

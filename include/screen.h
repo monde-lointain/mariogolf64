@@ -24,8 +24,8 @@ enum ScreenEffect {
 
 extern s32 g_ScreenEffect; /* The effect SetScreenEffect last set */
 
-/* An orthographic projection of one unit per pixel, centred on the screen, with
- * y rising */
+/* An orthographic projection of one unit per pixel, centered on the screen,
+ * with y rising */
 extern Mtx g_ScreenOrthoMatrix;
 
 /* A rectangle of the screen, in pixels */

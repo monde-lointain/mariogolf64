@@ -235,7 +235,7 @@ typedef enum SparksState {
 typedef enum LogoState {
   LOGO_DROPPING_LETTERS,
   LOGO_CLUB_STARTING, /* The last letter has been dropped */
-  LOGO_CLUB_CIRCLING, /* Spiralling in to the letters, spinning */
+  LOGO_CLUB_CIRCLING, /* Spiraling in to the letters, spinning */
   LOGO_CLUB_SPINNING, /* In place, until it turns upright */
   LOGO_SHINING,
   LOGO_SHRINK_STARTING,
@@ -679,7 +679,7 @@ void AdvanceOpeningSoundChannel(void) {
  * pixel of radius */
 #define LOGO_CLUB_SOUND_LOUDEST_VOLUME 48
 #define LOGO_CLUB_SOUND_FADE_RATE 0.2f
-/* The pan moves one step for every two pixels from the screen's centre */
+/* The pan moves one step for every two pixels from the screen's center */
 #define LOGO_CLUB_PIXELS_PER_PAN_STEP 2
 
 /* Plays the title logo's club striking while it swings round */

@@ -1,5 +1,5 @@
 /*
- * Boxes of flat colour that open and close over a few frames. A box is queued
+ * Boxes of flat color that open and close over a few frames. A box is queued
  * for each frame it shows, and drawing empties the queue. The debug scene menu
  * draws its box with them.
  */
@@ -11,7 +11,7 @@
 
 /* Frames that opening and closing each take */
 #define BOX_ANIMATION_FRAME_COUNT 4
-/* Texture rectangle steps in s5.10: the boxes are flat colour, so any step will
+/* Texture rectangle steps in s5.10: the boxes are flat color, so any step will
  * do */
 #define ONE_TEXEL_PER_PIXEL (1 << 10)
 

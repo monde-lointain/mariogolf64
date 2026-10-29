@@ -2047,7 +2047,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
 #define ROUND_LABEL_LEFT 256
 #define CELL_SHADE 0xDC
 #define SCORES_FACE_LEFT 18
-/* Faces of odd rows sit this far right, so that neighbours don't cover each
+/* Faces of odd rows sit this far right, so that neighbors don't cover each
  * other */
 #define SCORES_FACE_STAGGER 24
 #define SCORES_FACE_RISE 14
@@ -2093,7 +2093,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
 #define HOLE_LOST_CODE 0x85
 #define HANDICAP_STROKE_CODE 0x91
 #define BIRDIE_BADGE_CODE 0x81
-/* The colours a score is drawn in, by how it stands to par */
+/* The colors a score is drawn in, by how it stands to par */
 #define PAR_COLOR 0
 #define BIRDIE_COLOR 1
 #define DOUBLE_BOGEY_COLOR 2 /* Or worse */
@@ -2107,7 +2107,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
 
 /*
  * Draws the scores page: the par and each player's score of every hole, in
- * the colour of how it stands to par. In the match modes it shows who won each
+ * the color of how it stands to par. In the match modes it shows who won each
  * hole instead, and in the skins modes the skins won. A single player also
  * sees their putts and strokes over par, and in a tournament the holes whose
  * birdie badge they hold.
@@ -2359,7 +2359,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     }
   }
 
-  /* The cells, in a checkerboard of two shades of each row's colour */
+  /* The cells, in a checkerboard of two shades of each row's color */
   for (i = 0; i != CELL_ROW_COUNT; i++) {
     for (j = 0; j != HOLES_PER_NINE; j++) {
       gDPPipeSync(gfx++);

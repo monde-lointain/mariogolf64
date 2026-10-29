@@ -514,7 +514,7 @@ void func_80226A34_ovl_01(void) {
 /* The size the buttons are drawn at, smaller than their images */
 #define YES_NO_BUTTON_SHOWN_WIDTH 48.0f
 #define YES_NO_BUTTON_SHOWN_HEIGHT 16.0f
-/* How far the buttons sit from the window's centre across and from its bottom
+/* How far the buttons sit from the window's center across and from its bottom
  */
 #define YES_NO_BUTTON_OFFSET 30.0f
 #define YES_NO_PULSE_STEP 2
@@ -721,7 +721,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226A58_ovl_01);
 /*
  * func_8022747C adds to that window the Nintendo badge of D_80230E78 near its
  * top, the course image of D_80230E7C at its lower left and the picture of
- * f_MenuWindowImage, coloured by the palette in D_80230E84, at its lower right
+ * f_MenuWindowImage, colored by the palette in D_80230E84, at its lower right
  */
 #define NINTENDO_BADGE_WIDTH 144
 #define NINTENDO_BADGE_STRIP_HEIGHT 10
@@ -1398,7 +1398,7 @@ void func_80229278_ovl_01(void) {
         buttons = g_ControllerStates[0].buttons |
             g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
             g_ControllerStates[3].buttons;
-        /* The held C buttons pick the player's colours */
+        /* The held C buttons pick the player's colors */
         if (buttons & L_CBUTTONS) {
           g_Players[0].paletteIndex = 1;
         } else if (buttons & D_CBUTTONS) {
@@ -1440,7 +1440,7 @@ void func_80229278_ovl_01(void) {
 }
 
 /*
- * Doesn't match: the left edge takes $t4 instead of the centre's $s2, which
+ * Doesn't match: the left edge takes $t4 instead of the center's $s2, which
  * shifts the texel address and the rectangle's halves along a register.
  */
 #ifdef NON_MATCHING
