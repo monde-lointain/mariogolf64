@@ -489,9 +489,11 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
   D_8012D3AC = AllocMemory(OpenEncodedAsset(0x721, &asset));
   ReadEncodedAsset(D_8012D3AC, &asset);
-  g_MenuBoardImages[0] = AllocMemory(OpenEncodedAsset(0x520, &asset));
+  g_MenuBoardImages[0] =
+      AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
   ReadEncodedAsset(g_MenuBoardImages[0], &asset);
-  g_MenuBoardImages[1] = AllocMemory(OpenEncodedAsset(0x520, &asset));
+  g_MenuBoardImages[1] =
+      AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
   ReadEncodedAsset(g_MenuBoardImages[1], &asset);
   g_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
   ReadEncodedAsset(g_NamePlateImage, &asset);

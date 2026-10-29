@@ -87,6 +87,8 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define ASSET_BLENDED_TEXTURE_SCROLLING_LAYER 0x4D7
 /* A fairway under a blue sky, 152 by 117 */
 #define ASSET_COURSE_SCENE 0x51E
+/* A wooden board, 256 by 160 */
+#define ASSET_WIDE_BOARD 0x520
 /* A long wooden plate, 200 by 30 */
 #define ASSET_NAME_PLATE 0x521
 /* The image listing the game modes, in orange */

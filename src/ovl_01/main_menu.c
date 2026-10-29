@@ -903,7 +903,6 @@ s32 GetChosenCourseIndex(void) {
 #define ASSET_OPTIONS_LABELS_DIM 0x52A
 #define ASSET_OPTION_VALUES 0x97C /* On, ... Simple, in green */
 /* The other images that the screens read */
-#define ASSET_WIDE_BOARD 0x520 /* A wooden board, 256 by 160 */
 #define ASSET_SQUARE_BOARD 0x591 /* A wooden board, 160 by 160 */
 #define ASSET_OPTIONS_MARIO 0x97D
 #define ASSET_OPTIONS_SHADOW 0x97E
