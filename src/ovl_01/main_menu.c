@@ -123,8 +123,8 @@
 #define TITLE_LABEL_WIDTH 128
 #define TITLE_LABEL_HEIGHT 20
 #define TITLE_LABEL_IMAGE_SIZE (TITLE_LABEL_WIDTH * TITLE_LABEL_HEIGHT / 2)
-/* func_802081E8 draws a row of spinning stars, one per hole, from D_801B93E0,
- * and enlarges the chosen hole's */
+/* DrawSpinningStars draws a row of spinning stars, one per hole, from
+ * D_801B93E0, and enlarges the chosen hole's */
 #define STAR_WIDTH 32
 #define STAR_HEIGHT 24
 #define STAR_FRAME_COUNT 15
@@ -4566,8 +4566,8 @@ void func_80200A40_ovl_01(
 void DrawMenuCharacters(Gfx** displayListHead);
 void DrawCourseSelectBanners(Gfx** displayListHead);
 void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
-void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
-    u8 starCount, u8 enlargesChosenHole);
+void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
+    u8 enlargesChosenHole);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_8021826C_ovl_01(
@@ -4985,7 +4985,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
       countShift = -WON_COUNT_DIGIT_WIDTH;
     }
 
-    func_802081E8_ovl_01(
+    DrawSpinningStars(
         &gfx, WON_COUNT_ICON_X + countShift, WON_COUNT_ICON_Y, 1, FALSE);
     gDPPipeSync(gfx++);
     DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
@@ -7080,8 +7080,8 @@ void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y) {
  * right and bottom edges add their constants last.
  */
 #ifdef NON_MATCHING
-void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
-    u8 starCount, u8 enlargesChosenHole) {
+void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
+    u8 enlargesChosenHole) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
   void* image = D_801B93E0[D_8022F8CC_ovl_01];
@@ -7142,7 +7142,7 @@ void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802081E8_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawSpinningStars);
 #endif
 
 /*
