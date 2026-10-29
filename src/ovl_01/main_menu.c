@@ -49,6 +49,80 @@
 #include "transfer_pak.h"
 #include "variables.h"
 
+/* The most modes the mode select offers for a player count */
+#define MODE_CHOICE_LIMIT 12
+
+/* The choices of both main menus; the one without Transmit stops at its options
+ */
+#define MAIN_CHOICE_CLUBHOUSE 0
+#define MAIN_CHOICE_HELP 1
+#define MAIN_CHOICE_OPTIONS 2
+#define MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT 3
+#define MAIN_CHOICE_CLUB_TOURNAMENT 2
+#define MAIN_CHOICE_FULL_OPTIONS 3
+#define MAIN_CHOICE_COUNT 4
+
+/* The clubhouse's rows, and the rooms that D_8022BF1C gives each of them */
+#define CLUBHOUSE_CHOICE_COUNT 5
+#define CLUBHOUSE_ROOM_COURSE_STATS 0
+#define CLUBHOUSE_ROOM_UNK12 1
+#define CLUBHOUSE_ROOM_UNK13 2
+#define CLUBHOUSE_ROOM_BIRDIE_BADGES 3
+#define CLUBHOUSE_ROOM_CHARACTER_TABLE 4
+#define CLUBHOUSE_ROOM_BEST_TIMES 5
+
+/* The options screen's choices; game flag 0x55 adds the sound test's */
+#define OPTIONS_CHOICE_MUSIC 0
+#define OPTIONS_CHOICE_MONO 1
+#define OPTIONS_CHOICE_CAMERA 2
+#define OPTIONS_CHOICE_ERASE_SAVE_DATA 3
+#define OPTIONS_CHOICE_COUNT 4
+#define OPTIONS_CHOICE_SONG 4
+#define OPTIONS_CHOICE_SONG_REVERB 5
+#define OPTIONS_CHOICE_SONG_FREQUENCY 6
+#define OPTIONS_CHOICE_SONG_TEMPO 7
+#define OPTIONS_CHOICE_SOUND 8
+#define OPTIONS_CHOICE_SOUND_REVERB 9
+#define OPTIONS_CHOICE_SOUND_FREQUENCY 10
+#define OPTIONS_SOUND_TEST_CHOICE_COUNT 21
+
+/*
+ * The menu image buffer holds the options screen's Mario at its start, then
+ * two frames of four 16 by 16 arrows, then Mario's shadow
+ */
+#define OPTIONS_ARROWS_OFFSET 0x3408
+#define OPTIONS_SHADOW_OFFSET 0x3830
+/* Where the options' lit values follow their lit labels in D_8012D420 */
+#define OPTION_VALUES_OFFSET 0x3228
+
+/* Where the course select's images follow the sky in D_801F4A20 */
+#define COURSE_SELECT_WATER_OFFSET 0x1E88
+#define COURSE_SELECT_LAYER_OFFSET 0x2E90
+
+/* The sound test's song and sound file names, which it prints */
+#define SOUND_TEST_SONG_NAME_LENGTH 12
+#define SOUND_TEST_SOUND_NAME_LENGTH 24
+
+/* The debug caddy select's two caddies */
+#define CADDY_COUNT 2
+
+/* The mini-golf course select's records, of three courses each */
+#define MINI_GOLF_RECORD_COUNT 2
+
+/* The chosen label grows two pixels a frame until it passes the limit, then
+ * shrinks until it passes 0 */
+#define CHOSEN_LABEL_GROWTH_LIMIT 6
+#define CHOSEN_LABEL_GROWTH_STEP 2
+#define LABEL_GROWING 0
+#define LABEL_SHRINKING 1
+
+/* Divides a turn among the player count's modes, keeping it whole should a
+ * count be zero */
+#define SPREAD_OVER_MODES(amount) \
+  (D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] != 0 \
+          ? (amount) / D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] \
+          : (amount))
+
 /* The wind and light of the hole that loads behind the menus */
 #define CHOSEN_HOLE_WIND_SPEED_MASK 0x3F
 #define CHOSEN_HOLE_WIND_SPEED_STEP 6000
@@ -137,6 +211,26 @@ extern void* D_800FF420[2];
 extern s32 D_801051F0;
 extern void* D_801052BC[2];
 extern void* D_801F4A20;
+extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
+extern s32 D_8022BE30_ovl_01[MAX_PLAYER_COUNT]; /* Each player count's mode
+                                                  count */
+extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
+/* Whether the options screen's erase window is up */
+extern u8 f_IsEraseWindowUp;
+/* The sound test's sound, song and settings */
+extern s32 f_SoundTestSound;
+extern s32 f_SoundTestSong;
+extern s32 f_SoundTestSoundReverb;
+extern s32 f_SoundTestSongReverb;
+extern f32 f_SoundTestSoundFrequency;
+extern f32 f_SoundTestSongFrequency;
+extern s32 f_SoundTestSongTempo;
+extern char f_SoundTestSongNames[][SOUND_TEST_SONG_NAME_LENGTH];
+extern char f_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH];
+extern s16 D_8022BE8E_ovl_01;
+extern s16 D_8022BE90_ovl_01;
+extern s32 D_8022BE28_ovl_01;
+extern const char D_80231514_ovl_01[];
 extern s16 D_8022BE8C_ovl_01;
 extern s16 D_8022BE92_ovl_01;
 /* The menus' camera orbit's updates */
@@ -249,6 +343,16 @@ extern u8 D_8022F8CE_ovl_01;
 extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 
 void InitPlay(s32 kind);
+void func_801FE4D0_ovl_01(Gfx** displayListHead);
+void func_80201574_ovl_01(Gfx** displayListHead);
+void func_80202000_ovl_01(Gfx** displayListHead);
+void func_80205038_ovl_01(Gfx** displayListHead);
+void func_802058B8_ovl_01(Gfx** displayListHead);
+void func_80206180_ovl_01(Gfx** displayListHead);
+void func_80206A68_ovl_01(Gfx** displayListHead);
+void func_80207D08_ovl_01(Gfx** displayListHead);
+void func_80207E18_ovl_01(Gfx** displayListHead);
+void DrawBirdieBadgeLabel(Gfx** displayListHead);
 /* Defined as returning s8, but their callers here use the whole register */
 s32 func_8005DE00(void);
 s32 func_8005DE20(void);
