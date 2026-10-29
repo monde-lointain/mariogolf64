@@ -34,9 +34,6 @@
 /* The center cell counts this many times as much as each neighbor */
 #define BILLBOARD_CENTER_CELL_WEIGHT 4
 
-/* Shifting a course point's coordinate right by this gives whole units, as
- * billboards are placed in */
-#define COURSE_UNIT_SHIFT 10
 /* The fraction along a path that the hit tests return when nothing is hit: past
  * its end */
 #define NO_HIT_FRACTION 1.1f
@@ -59,7 +56,7 @@
 #define FLAGSTICK_LEAST_BOUNCE 0.2f
 
 /* Course units in a whole unit */
-#define WHOLE_UNIT_SIZE (1 << COURSE_UNIT_SHIFT)
+#define WHOLE_UNIT_SIZE (1 << WORLD_TO_COURSE_SHIFT)
 /* FindHoleTriangleHit's paths that rise by more than this many course units hit
  * nothing */
 #define PATH_MOST_RISE 153.6f
@@ -1159,34 +1156,35 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
           if (((triangles[i].corners[AXIS_X][1] -
                    triangles[i].corners[AXIS_X][0]) *
                   (hitZ -
-                      (triangles[i].corners[AXIS_Z][0] << COURSE_UNIT_SHIFT))) -
+                      (triangles[i].corners[AXIS_Z][0]
+                          << WORLD_TO_COURSE_SHIFT))) -
                   ((triangles[i].corners[AXIS_Z][1] -
                        triangles[i].corners[AXIS_Z][0]) *
                       (hitX -
                           (triangles[i].corners[AXIS_X][0]
-                              << COURSE_UNIT_SHIFT))) >=
+                              << WORLD_TO_COURSE_SHIFT))) >=
               0) {
             if (((triangles[i].corners[AXIS_X][2] -
                      triangles[i].corners[AXIS_X][1]) *
                     (hitZ -
                         (triangles[i].corners[AXIS_Z][1]
-                            << COURSE_UNIT_SHIFT))) -
+                            << WORLD_TO_COURSE_SHIFT))) -
                     ((triangles[i].corners[AXIS_Z][2] -
                          triangles[i].corners[AXIS_Z][1]) *
                         (hitX -
                             (triangles[i].corners[AXIS_X][1]
-                                << COURSE_UNIT_SHIFT))) >=
+                                << WORLD_TO_COURSE_SHIFT))) >=
                 0) {
               if (((triangles[i].corners[AXIS_X][0] -
                        triangles[i].corners[AXIS_X][2]) *
                       (hitZ -
                           (triangles[i].corners[AXIS_Z][2]
-                              << COURSE_UNIT_SHIFT))) -
+                              << WORLD_TO_COURSE_SHIFT))) -
                       ((triangles[i].corners[AXIS_Z][0] -
                            triangles[i].corners[AXIS_Z][2]) *
                           (hitX -
                               (triangles[i].corners[AXIS_X][2]
-                                  << COURSE_UNIT_SHIFT))) >=
+                                  << WORLD_TO_COURSE_SHIFT))) >=
                   0) {
                 nearestFraction = hitFraction;
                 hitIndex = i;
@@ -1425,34 +1423,35 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           if (((triangles[i].corners[AXIS_X][1] -
                    triangles[i].corners[AXIS_X][0]) *
                   (hitZ -
-                      (triangles[i].corners[AXIS_Z][0] << COURSE_UNIT_SHIFT))) -
+                      (triangles[i].corners[AXIS_Z][0]
+                          << WORLD_TO_COURSE_SHIFT))) -
                   ((triangles[i].corners[AXIS_Z][1] -
                        triangles[i].corners[AXIS_Z][0]) *
                       (hitX -
                           (triangles[i].corners[AXIS_X][0]
-                              << COURSE_UNIT_SHIFT))) >=
+                              << WORLD_TO_COURSE_SHIFT))) >=
               0) {
             if (((triangles[i].corners[AXIS_X][2] -
                      triangles[i].corners[AXIS_X][1]) *
                     (hitZ -
                         (triangles[i].corners[AXIS_Z][1]
-                            << COURSE_UNIT_SHIFT))) -
+                            << WORLD_TO_COURSE_SHIFT))) -
                     ((triangles[i].corners[AXIS_Z][2] -
                          triangles[i].corners[AXIS_Z][1]) *
                         (hitX -
                             (triangles[i].corners[AXIS_X][1]
-                                << COURSE_UNIT_SHIFT))) >=
+                                << WORLD_TO_COURSE_SHIFT))) >=
                 0) {
               if (((triangles[i].corners[AXIS_X][0] -
                        triangles[i].corners[AXIS_X][2]) *
                       (hitZ -
                           (triangles[i].corners[AXIS_Z][2]
-                              << COURSE_UNIT_SHIFT))) -
+                              << WORLD_TO_COURSE_SHIFT))) -
                       ((triangles[i].corners[AXIS_Z][0] -
                            triangles[i].corners[AXIS_Z][2]) *
                           (hitX -
                               (triangles[i].corners[AXIS_X][2]
-                                  << COURSE_UNIT_SHIFT))) >=
+                                  << WORLD_TO_COURSE_SHIFT))) >=
                   0) {
                 nearestFraction = hitFraction;
                 hitIndex = i;
@@ -1564,15 +1563,15 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     s32 endZ, BillboardCell* cell, f32* fraction) {
-  s32 fromY = startY >> COURSE_UNIT_SHIFT;
+  s32 fromY = startY >> WORLD_TO_COURSE_SHIFT;
   f32 nearestFraction = NO_HIT_FRACTION;
-  s32 fromX = startX >> COURSE_UNIT_SHIFT;
-  s32 toX = endX >> COURSE_UNIT_SHIFT;
+  s32 fromX = startX >> WORLD_TO_COURSE_SHIFT;
+  s32 toX = endX >> WORLD_TO_COURSE_SHIFT;
   s32 deltaX = toX - fromX;
   s32 i = 0;
-  s32 fromZ = startZ >> COURSE_UNIT_SHIFT;
-  s32 toZ = endZ >> COURSE_UNIT_SHIFT;
-  s32 toY = endY >> COURSE_UNIT_SHIFT;
+  s32 fromZ = startZ >> WORLD_TO_COURSE_SHIFT;
+  s32 toZ = endZ >> WORLD_TO_COURSE_SHIFT;
+  s32 toY = endY >> WORLD_TO_COURSE_SHIFT;
   Boolean isHit = FALSE;
   s32 deltaZ = toZ - fromZ;
   Billboard* billboard;
@@ -2138,9 +2137,11 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
          */
         edgeCrosses[0] =
             ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
-                (hitZ - (triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT))) -
+                (hitZ -
+                    (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
             ((triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0]) *
-                (hitX - (triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT)));
+                (hitX -
+                    (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT)));
         if (edgeCrosses[0] < 0) {
           sides = EDGE_SIDE_NEGATIVE;
         } else {
@@ -2149,9 +2150,11 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
         edgeCrosses[1] =
             ((triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][1]) *
-                (hitZ - (triangle.corners[AXIS_Z][1] << COURSE_UNIT_SHIFT))) -
+                (hitZ -
+                    (triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT))) -
             ((triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][1]) *
-                (hitX - (triangle.corners[AXIS_X][1] << COURSE_UNIT_SHIFT)));
+                (hitX -
+                    (triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT)));
         if (edgeCrosses[1] < 0) {
           sides &= EDGE_SIDE_NEGATIVE;
         } else if (edgeCrosses[1] == 0) {
@@ -2163,9 +2166,11 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         if (sides != 0) {
           edgeCrosses[2] =
               ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
-                  (hitZ - (triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT))) -
+                  (hitZ -
+                      (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT))) -
               ((triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0]) *
-                  (hitX - (triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT)));
+                  (hitX -
+                      (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT)));
           if (edgeCrosses[2] < 0) {
             sides &= EDGE_SIDE_NEGATIVE;
           } else if (edgeCrosses[2] == 0) {
@@ -2390,11 +2395,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2],
                 triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2]);
         if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][2]) {
-          farEnd = triangle.corners[AXIS_X][2] << COURSE_UNIT_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT;
+          farEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
         } else {
-          farEnd = triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][2] << COURSE_UNIT_SHIFT;
+          farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
         }
 
         if (endX < startX) {
@@ -2450,11 +2455,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1],
                 triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1]);
         if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][1]) {
-          farEnd = triangle.corners[AXIS_X][1] << COURSE_UNIT_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT;
+          farEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
         } else {
-          farEnd = triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][1] << COURSE_UNIT_SHIFT;
+          farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
         }
 
         if (endX < startX) {
@@ -2512,8 +2517,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       if (hitFraction == 0.0f) {
         nearestCorner = FARTHEST_CORNER_DISTANCE;
         for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
-          cornerDistance = fabsf(
-              hitPointU - (triangle.corners[AXIS_X][k] << COURSE_UNIT_SHIFT));
+          cornerDistance = fabsf(hitPointU -
+              (triangle.corners[AXIS_X][k] << WORLD_TO_COURSE_SHIFT));
           if (cornerDistance < nearestCorner) {
             nearestCorner = cornerDistance;
           }
@@ -2555,11 +2560,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             Length2D(triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2],
                 triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2]);
         if (triangle.corners[AXIS_Z][0] < triangle.corners[AXIS_Z][2]) {
-          farEnd = triangle.corners[AXIS_Z][2] << COURSE_UNIT_SHIFT;
-          nearEnd = triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT;
+          farEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
         } else {
-          farEnd = triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT;
-          nearEnd = triangle.corners[AXIS_Z][2] << COURSE_UNIT_SHIFT;
+          farEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
         }
 
         /* Unlike along x, the fraction is to the wall's end itself, not past it
@@ -2609,11 +2614,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             Length2D(triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1],
                 triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1]);
         if (triangle.corners[AXIS_Z][0] < triangle.corners[AXIS_Z][1]) {
-          farEnd = triangle.corners[AXIS_Z][1] << COURSE_UNIT_SHIFT;
-          nearEnd = triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT;
+          farEnd = triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
         } else {
-          farEnd = triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT;
-          nearEnd = triangle.corners[AXIS_Z][1] << COURSE_UNIT_SHIFT;
+          farEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT;
         }
 
         if (endZ < startZ) {
@@ -2661,8 +2666,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       if (hitFraction == 0.0f) {
         nearestCorner = FARTHEST_CORNER_DISTANCE;
         for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
-          cornerDistance = fabsf(
-              hitPointV - (triangle.corners[AXIS_Z][k] << COURSE_UNIT_SHIFT));
+          cornerDistance = fabsf(hitPointV -
+              (triangle.corners[AXIS_Z][k] << WORLD_TO_COURSE_SHIFT));
           if (cornerDistance < nearestCorner) {
             nearestCorner = cornerDistance;
           }
@@ -2882,15 +2887,15 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
 
       osSyncPrintf("うっ\n"); /* "Ugh" */
       for (corner = 0; corner < TRIANGLE_CORNER_COUNT; corner++) {
-        cornerDistance =
-            Length2D((wall.corners[AXIS_X][corner] << COURSE_UNIT_SHIFT) - x,
-                (wall.corners[AXIS_Z][corner] << COURSE_UNIT_SHIFT) - z);
+        cornerDistance = Length2D(
+            (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT) - x,
+            (wall.corners[AXIS_Z][corner] << WORLD_TO_COURSE_SHIFT) - z);
         if (cornerDistance < WALL_TOUCH_DISTANCE) {
           push[AXIS_Y] = 0.0f;
           push[AXIS_X] =
-              x - (wall.corners[AXIS_X][corner] << COURSE_UNIT_SHIFT);
+              x - (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT);
           push[AXIS_Z] =
-              z - (wall.corners[AXIS_Z][corner] << COURSE_UNIT_SHIFT);
+              z - (wall.corners[AXIS_Z][corner] << WORLD_TO_COURSE_SHIFT);
           if (cornerDistance > CORNER_LEAST_DISTANCE) {
             guNormalize(&push[AXIS_X], &push[AXIS_Y], &push[AXIS_Z]);
           } else {
@@ -2900,9 +2905,9 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
           push[AXIS_X] *= WALL_PUSH_DISTANCE;
           push[AXIS_Z] *= WALL_PUSH_DISTANCE;
           x = push[AXIS_X] +
-              (wall.corners[AXIS_X][corner] << COURSE_UNIT_SHIFT);
+              (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT);
           z = push[AXIS_Z] +
-              (wall.corners[AXIS_Z][corner] << COURSE_UNIT_SHIFT);
+              (wall.corners[AXIS_Z][corner] << WORLD_TO_COURSE_SHIFT);
           isPushed = TRUE;
           osSyncPrintf("WallInsideOutCorner!\n");
           break;
