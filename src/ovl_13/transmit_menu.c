@@ -148,7 +148,8 @@ enum SendExperienceStep {
 enum ShotType {
   SHOT_TYPE_STRAIGHT,
   SHOT_TYPE_DRAW,
-  SHOT_TYPE_FADE
+  SHOT_TYPE_FADE,
+  SHOT_TYPE_COUNT
 };
 
 /* The faces of the characters brought over, along the bottom */
@@ -1519,7 +1520,8 @@ static s32 f_ModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
         TRANSMIT_OPTION_MAIN_MENU},
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_EXPERIENCE, TRANSMIT_OPTION_NONE},
 };
-static char* f_UnusedShotTypeNames[] = {"Straight", "Draw", "Fade"};
+static char* f_UnusedShotTypeNames[SHOT_TYPE_COUNT] = {
+    "Straight", "Draw", "Fade"};
 static char f_UnusedDriveName[8] = "Drive";
 static Radians f_StatusPointerAngle = 0.0f;
 static s32 f_CharacterArrowFrame = 0;
@@ -1668,7 +1670,8 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   gDPSetTextureLUT(displayList++, G_TT_RGBA16);
   LoadSmallPalette(&displayList, 0, ImageBody(transfer->shotTypesImage));
   LoadNibbleTextureBlock(&displayList, ImageTexels(transfer->shotTypesImage),
-      G_IM_FMT_CI, SHOT_TYPE_WIDTH, SHOT_TYPE_HEIGHT * 3, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, SHOT_TYPE_WIDTH, SHOT_TYPE_HEIGHT * SHOT_TYPE_COUNT, 0, 0, 0,
+      0, 0, 0, 0);
   DrawTextureRect(&displayList, QuarterPixels(SHOT_TYPE_LEFT),
       QuarterPixels(SHOT_TYPE_TOP),
       QuarterPixels(SHOT_TYPE_LEFT + SHOT_TYPE_WIDTH),
