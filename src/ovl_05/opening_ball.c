@@ -224,7 +224,7 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * addresses, which lie in the opening's BSS while it is loaded. Returns the
  * STEP_FLAG_* bits for the step.
  *
- * Nonmatching: the nested helpers match, but the routine keeps 614.4f and
+ * Doesn't match: the nested helpers match, but the routine keeps 614.4f and
  * 1996.8f in saved registers where the original reloads them, so 0.5f loses
  * the register it had and the floating-point registers are allocated
  * differently.
@@ -1620,7 +1620,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
  * entry, picks a lie blend of 0, leaves out the slopes, rain and wind, and
  * prints the launch velocity to the debug output.
  *
- * Nonmatching: GCC schedules the block that sets the spin differently, which
+ * Doesn't match: GCC schedules the block that sets the spin differently, which
  * moves the unk40 and unk38 stores and swaps two float registers there.
  */
 #ifdef NON_MATCHING

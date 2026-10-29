@@ -2315,7 +2315,7 @@ void ClearCartridgeCharacters(void) {
 /*
  * Adds the character's experience to its save on the Game Boy cartridge it came
  * from, looking through every controller's pak for it, and rewrites the save's
- * checksums. It does not match: the original copies the experience sum from a
+ * checksums. Doesn't match: the original copies the experience sum from a
  * scratch register into the one that holds the character data's experience.
  */
 #ifdef NON_MATCHING

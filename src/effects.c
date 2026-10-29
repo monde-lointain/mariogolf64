@@ -2155,7 +2155,7 @@ void PlaceRainCenter(void) {
 /*
  * Places a raindrop at a random spot above the area around the rain's center,
  * moved back along the rain's path by as far as it drifts while falling to just
- * below the camera. It does not match: from the head's z drift on, the
+ * below the camera. Doesn't match: from the head's z drift on, the
  * instructions are scheduled differently.
  */
 #ifdef NON_MATCHING

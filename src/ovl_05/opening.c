@@ -2965,7 +2965,7 @@ void LoadNameLogo(s32 logoIndex, s32 slot) {
  * its strips are drawn in reverse order with their rows mirrored, which turns
  * it upside down.
  *
- * Differs from the original only in stack slots: the pointers of the second
+ * Doesn't match: only the stack slots differ. The pointers of the second
  * and third commands swap slots, as in the opening's sparks.
  */
 #ifdef NON_MATCHING
@@ -3187,7 +3187,7 @@ void LoadOpeningBall(s32 ballIndex, s32 slot) {
  * drawn as texture rectangles. The logo ball rolls with its movement, with
  * the Mario image turning on it.
  *
- * Differs from the original only in stack slot choices: two pairs of spilled
+ * Doesn't match: only the stack slots differ. Two pairs of spilled
  * display list pointers swap slots before the Mario image is drawn.
  */
 #ifdef NON_MATCHING
@@ -3902,7 +3902,7 @@ void LoadLakitu(void) {
 /*
  * Draws Lakitu while he flies, with a fading trail of the places he has been.
  *
- * Differs from the original only in stack slots: the pointers of some pairs
+ * Doesn't match: only the stack slots differ. The pointers of some pairs
  * of a pipe sync and the command after it swap slots, as in the opening's
  * sparks.
  */
@@ -4191,7 +4191,7 @@ void LoadOpeningShotBall(void) {
  * strips, at f_ShotBallScale times the image's size. When the camera is far
  * away, the ball is instead a dot that fades with distance.
  *
- * Differs from the original only in register and stack slot choices: some
+ * Doesn't match: only the register and stack slot choices differ. Some
  * pairs of spilled display list pointers swap slots, and the far branch
  * uses other registers.
  */
@@ -4541,7 +4541,7 @@ void LoadOpeningLogo(void) {
  * into place. Meanwhile the screen behind it fades to gray and then white.
  * The logo is only drawn when isDrawn is 1, but moves on every call.
  *
- * Differs from the original in register allocation and stack slots: some
+ * Doesn't match: the register allocation and stack slots differ. Some
  * spilled display list pointers swap slots, a few addresses are kept in
  * registers instead of reloaded, and the letters' texture offsets are folded
  * into their relocations.

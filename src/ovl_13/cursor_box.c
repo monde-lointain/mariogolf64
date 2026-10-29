@@ -62,7 +62,7 @@ void LoadCursorBox(void* image) {
 /*
  * Draws the cursor box with its top-left corner at the given screen position.
  * Each corner's red pulses with the sine of its own phase, which the four
- * corners start a quarter turn apart. It does not match: the original keeps the
+ * corners start a quarter turn apart. Doesn't match: the original keeps the
  * green and blue in the loop rather than hoisting them, which leaves left in a
  * saved register and the frame 8 bytes smaller.
  */

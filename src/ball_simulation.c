@@ -223,7 +223,7 @@ void ResetBallSimulations(void) {
  * against rings, the ground, billboards, the pin, the cup, walls and hole
  * triangles, then bounces, rolls, sinks or stops the ball, and a flying ball
  * feels drag, curve, lift and the wind. Returns the STEP_FLAG_* bits for the
- * step. It does not match: the register allocation and instruction scheduling
+ * step. Doesn't match: the register allocation and instruction scheduling
  * differ in many places, and where the original recomputes abs.s for each use
  * of a float's absolute value, this code shares one abs.s or compiles a compare
  * and branch.

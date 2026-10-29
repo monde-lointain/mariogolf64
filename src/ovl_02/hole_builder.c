@@ -557,7 +557,7 @@ void SetPaintSeed(u32 seed) {
 /*
  * Fills offsets with up to maxCount column and row offsets less than span
  * from the origin, nearest first, and returns how many it wrote. Distances
- * are in units of 1/OFFSET_DISTANCE_SCALE. It does not match: the row
+ * are in units of 1/OFFSET_DISTANCE_SCALE. Doesn't match: the row
  * counter and the squares pointer swap registers.
  */
 #ifdef NON_MATCHING
@@ -655,7 +655,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ListOffsetsByDistance);
  * columns, with the ground's heights, by drawing the two triangles of each
  * ground grid square that covers the band. Where triangles overlap, it averages
  * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
- * It does not match: the nested DrawTriangleHeights allocates its registers
+ * Doesn't match: the nested DrawTriangleHeights allocates its registers
  * differently, using $s7 where the original reloads the static chain.
  */
 #ifdef NON_MATCHING
@@ -1806,7 +1806,7 @@ static inline u16 ReadMapTexel(s32 column, s32 row) {
 
 /*
  * Encodes the map's texels as terrain codes, a byte each, in the hole file
- * buffer. It does not match: the original adds the work area's address to
+ * buffer. Doesn't match: the original adds the work area's address to
  * the tile offset after it computes the texel offset, so it reads the texel
  * into $v0 rather than $v1.
  */
@@ -1853,7 +1853,7 @@ static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
 
 /*
  * Clears the map, reads a code map from the host and paints the map's texels
- * with the colours of its terrain codes. It does not match: like
+ * with the colours of its terrain codes. Doesn't match: like
  * EncodeCodeMap, the original adds the work area's address to the tile
  * offset after it computes the texel offset.
  */
@@ -1941,7 +1941,7 @@ static inline void FillCodeGap(
  * Encodes the map as EncodeCodeMap does, then runs the clean-up passes, each
  * filling the codes that differ from two equal neighbours, along the row
  * and then down the column. There are no passes, so it only encodes the map.
- * It does not match: the encoding has EncodeCodeMap's texel address order,
+ * Doesn't match: the encoding has EncodeCodeMap's texel address order,
  * and the passes compute each neighbour's index from one strength-reduced
  * index and read the previous code's address once, where the original
  * computes it for both reads.
@@ -2081,7 +2081,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
 /*
  * Paints the map's texels from the code map with the course's paint logic,
  * sets each terrain code's color, and stores the painted terrain codes in
- * their cells. It does not match: ours keeps the painting in other
+ * their cells. Doesn't match: ours keeps the painting in other
  * registers, sets up the neighbour search's offset pointer before the
  * scaled search span, and when the blocks run out it branches to the texel
  * loop's increment, where the original's branch-likely does the increment
@@ -2462,7 +2462,7 @@ void BuildHole(s32 course, s32 hole) {
 /*
  * Writes a hole's files to the host, the attributes as the map's terrain
  * codes, a byte each. A cleaned code map is first restored from its backup.
- * It does not match for the same reason as EncodeCodeMap.
+ * Doesn't match: for the same reason as EncodeCodeMap.
  */
 #ifdef NON_MATCHING
 void SaveHoleFiles(s32 course, s32 hole) {
@@ -3086,7 +3086,7 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texels are kept, and bright ones are darkened the most. A row with no texel
  * within the width ends the shadow once one has started. Billboards with a
  * texture in f_ShadowlessTextures cast no shadow.
- * It does not match: ours keeps heightScale in a float register and loads
+ * Doesn't match: ours keeps heightScale in a float register and loads
  * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
  * $s2 and $f22, and the other registers differ from there.
  */
@@ -3442,7 +3442,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * Texels at heights below 0 are only lit. When GAME_FLAG_UNK12 is set, the
  * others also fade toward white with height: up to HEIGHT_FADE_LIMIT, fully
  * when GAME_FLAG_UNK60 is set, or not at all when GAME_FLAG_UNK69 is set.
- * It does not match: the original computes the leading height row last and
+ * Doesn't match: the original computes the leading height row last and
  * keeps a second, spilled copy of the trailing one, and it reads the fade
  * flags from the stack for each tile, where ours extends isHighGroundFaded
  * once per row and keeps it in another stack slot.
@@ -3804,7 +3804,7 @@ static inline u16 ReadTileTexel(
 
 /*
  * Switches the ground tiles between their two texel layouts: 32 texels a
- * row, or inside a border of their neighbors' texels. It does not match:
+ * row, or inside a border of their neighbors' texels. Doesn't match:
  * where ReadTileTexel reads a tile, the original adds the tile's address
  * after the layout test, and ours adds it before; ours also masks the texel
  * coordinates in another order, and is two instructions shorter.

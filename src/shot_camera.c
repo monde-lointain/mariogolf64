@@ -1284,7 +1284,7 @@ void PlayFlightSounds(s32 step) {
 
 /*
  * Eases the look-at point toward the ball, unless it is landing.
- * It does not match: the original keeps the loads of the ball's and the
+ * Doesn't match: the original keeps the loads of the ball's and the
  * look-at point's coordinates in statement order, where this schedules the
  * ball's loads first.
  */
@@ -1311,7 +1311,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtFlyingBall);
 
 /*
  * Eases the look-at point toward a point drop below the ball, unless it is
- * landing. It does not match: the original keeps the loads of the ball's and
+ * landing. Doesn't match: the original keeps the loads of the ball's and
  * the look-at point's coordinates in statement order, where this schedules the
  * ball's loads first and copies drop to another register.
  */
@@ -1339,7 +1339,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtBelowBall);
 /*
  * Eases the look-at point toward the ball.
  * It ignores yaw, which PlaceFlightCamera passes.
- * It does not match: the original keeps the loads of the ball's and the
+ * Doesn't match: the original keeps the loads of the ball's and the
  * look-at point's coordinates in statement order, where this schedules the
  * ball's loads first.
  */
@@ -1820,7 +1820,7 @@ void PlaceAimCamera(void);
  * Places the flight camera's eye and look-at point for f_FlightCameraKind at a
  * step of the ball's flight, then keeps the eye above the ground and over the
  * course. The kinds that test D_800BE628 do their setup once when it is set,
- * then clear it. It does not match: the original allocates some registers
+ * then clear it. Doesn't match: the original allocates some registers
  * differently, and orders three spots differently: the load of
  * CHASE_FIELD_OF_VIEW, the move of cosf's argument for
  * FLIGHT_CAMERA_BEHIND_START, and the stores of point for FLIGHT_CAMERA_UNKD.
@@ -3361,7 +3361,7 @@ void func_8004C6B8(void) {}
  * Builds the top-left quarter of a spot, as SPOT_QUARTER_SIZE x
  * SPOT_QUARTER_SIZE I8 texels. A soft spot is a disc that fades out toward its
  * edge. Otherwise it is a disc, a dark gap and a ring that brightens outward.
- * It does not match: the soft spot converts its squared distance in $f2
+ * Doesn't match: the soft spot converts its squared distance in $f2
  * rather than $f0.
  */
 #ifdef NON_MATCHING

@@ -2205,7 +2205,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * better than the best so far, and 1 once it has evaluated the trial, or
  * abandoned it, and adjusted f_Shot's power, mode or aim for the next one.
  *
- * It does not match: ours gives some values other saved registers than the
+ * Doesn't match: ours gives some values other saved registers than the
  * original does, and it keeps the address of f_Shot.ballPosition's z in a saved
  * register across the atan2 calls, where the original loads it again.
  */
@@ -2935,7 +2935,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * Simulates f_TrialShot and returns TRUE if the ball comes to rest, and not out
  * of bounds, off the course or in a water hazard
  *
- * It does not match: ours reads the simulation's state in the loop test from
+ * Doesn't match: ours reads the simulation's state in the loop test from
  * its address, where the original reads it through the register that holds the
  * simulation's address, and the original places the fault report after the
  * surface test.
