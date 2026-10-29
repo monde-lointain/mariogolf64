@@ -3238,6 +3238,7 @@ g_MenuPressedButtons = 0x800C2004; // size:0x4
 g_MenuScreen = 0x801EFFA0; // size:0x4
 f_MenuImageBuffer = 0x80232300; // segment:ovl_01
 GetMenuImageBuffer = 0x801F4A40; // type:func segment:ovl_01
+DrawCourseSelectBanners = 0x802047F0; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01

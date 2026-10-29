@@ -4564,7 +4564,7 @@ void StartLoadingChosenHole(void);
 void func_80200A40_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void func_80200EF0_ovl_01(Gfx** displayListHead);
-void func_802047F0_ovl_01(Gfx** displayListHead);
+void DrawCourseSelectBanners(Gfx** displayListHead);
 void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
 void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
     u8 starCount, u8 enlargesChosenHole);
@@ -5989,7 +5989,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     }
 
     func_8021BE88_ovl_01(&gfx);
-    func_802047F0_ovl_01(&gfx);
+    DrawCourseSelectBanners(&gfx);
     if (!g_GameState.isMiniGolf &&
         (D_801323A0.courseChoice == (courseCount - 1)) &&
         (GetOpenCourseCount() < COURSE_COUNT)) {
@@ -6131,7 +6131,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     if ((D_8022BE88_ovl_01 >= BET_PHASE_CHOOSING) &&
         ((D_8022BE88_ovl_01 != BET_PHASE_CANCELED) &&
             (D_8022BE88_ovl_01 != MENU_PHASE_CONFIRMED))) {
-      func_802047F0_ovl_01(&gfx);
+      DrawCourseSelectBanners(&gfx);
     }
 
     func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_LAYERS);
@@ -6179,9 +6179,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80202000_ovl_01);
 #endif
 
 /*
- * func_802047F0 draws the course select's banners of D_801B60D0: one behind
- * the course's name, and while the holes can be chosen, a wider one below
- * it behind the choice made, which squeezes the first.
+ * DrawCourseSelectBanners draws the course select's banners of D_801B60D0: one
+ * behind the course's name, and while the holes can be chosen, a wider one
+ * below it behind the choice made, which squeezes the first.
  */
 #define COURSE_NAME_BANNER_LEFT 67
 #define COURSE_NAME_BANNER_TOP 168
@@ -6203,7 +6203,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80202000_ovl_01);
  * banner's strip top in one register instead of copying it.
  */
 #ifdef NON_MATCHING
-void func_802047F0_ovl_01(Gfx** displayListHead) {
+void DrawCourseSelectBanners(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 slide = D_8023BFD0_ovl_01;
 
@@ -6306,7 +6306,7 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802047F0_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelectBanners);
 #endif
 
 void DrawContinueLabel(Gfx** displayListHead) {
