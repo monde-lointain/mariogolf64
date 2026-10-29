@@ -327,7 +327,7 @@ enum LandingGlyphGroup {
  */
 #define DISTANCE_GLYPH_HEIGHT 12
 #define DISTANCE_DIGIT_WIDTH 8
-#define DISTANCE_METRES_S 80
+#define DISTANCE_METERS_S 80
 #define DISTANCE_YARDS_S 88
 #define DISTANCE_FEET_S 96
 #define DISTANCE_FEET_WIDTH 16
@@ -3389,7 +3389,7 @@ void DrawDistanceText(Gfx** gfxP, s32 x, s32 y, char* text) {
         break;
       case 'm':
         width = DISTANCE_DIGIT_WIDTH;
-        glyphS = DISTANCE_METRES_S;
+        glyphS = DISTANCE_METERS_S;
         break;
       case 'y':
         width = DISTANCE_DIGIT_WIDTH;

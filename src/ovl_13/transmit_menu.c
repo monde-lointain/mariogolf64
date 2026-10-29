@@ -200,7 +200,7 @@ enum ListingState {
 #define EXPERIENCE_TOP 174
 /* The options, centered above the hint, with the pointer at the left of the
  * chosen one */
-#define OPTIONS_CENTRE_X 160
+#define OPTIONS_CENTER_X 160
 #define OPTIONS_TOP 64
 #define OPTION_SPACING 18
 #define OPTION_POINTER_TOP 60
@@ -228,8 +228,8 @@ enum ListingState {
 #define NOTICE_FULL_SIZE 4
 /* The cloud is drawn in two strips about its center, its half-size growing by a
  * step per size */
-#define NOTICE_CENTRE_X 160
-#define NOTICE_CENTRE_Y 116
+#define NOTICE_CENTER_X 160
+#define NOTICE_CENTER_Y 116
 #define NOTICE_WIDTH 256
 #define NOTICE_STRIP_HEIGHT 32
 #define NOTICE_STRIP_COUNT 2
@@ -645,7 +645,7 @@ void UpdateBringCharacters(void) {
     case BRING_CONFIRMING:
       switch (GetNoticeState()) {
         case NOTICE_HIDDEN:
-          if (!transfer->isCancelled) {
+          if (!transfer->isCanceled) {
             transfer->isAccessing = TRUE;
             transfer->screenStep = BRING_READING;
           } else {
@@ -660,12 +660,12 @@ void UpdateBringCharacters(void) {
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-            transfer->isCancelled = FALSE;
+            transfer->isCanceled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-            transfer->isCancelled = TRUE;
+            transfer->isCanceled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
@@ -906,7 +906,7 @@ void UpdateSendStatus(void) {
       switch (GetNoticeState()) {
         case NOTICE_HIDDEN:
           transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-          if (!transfer->isCancelled) {
+          if (!transfer->isCanceled) {
             transfer->isAccessing = TRUE;
             transfer->screenStep = SEND_STATUS_TAGGING;
           } else {
@@ -921,12 +921,12 @@ void UpdateSendStatus(void) {
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-            transfer->isCancelled = FALSE;
+            transfer->isCanceled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-            transfer->isCancelled = TRUE;
+            transfer->isCanceled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
@@ -1105,7 +1105,7 @@ void UpdateSendExperience(void) {
       switch (GetNoticeState()) {
         case NOTICE_HIDDEN:
           transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-          if (!transfer->isCancelled) {
+          if (!transfer->isCanceled) {
             transfer->isAccessing = TRUE;
             transfer->screenStep = SEND_EXPERIENCE_WRITING;
           } else {
@@ -1120,12 +1120,12 @@ void UpdateSendExperience(void) {
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
           if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-            transfer->isCancelled = FALSE;
+            transfer->isCanceled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
           } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-            transfer->isCancelled = TRUE;
+            transfer->isCanceled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
@@ -1263,7 +1263,7 @@ void UpdateTransmitMenu(void) {
 
         if (transfer->optionIndex == 2) {
           if (!HaveAllRumblePaks()) {
-            transfer->isCancelled = FALSE;
+            transfer->isCanceled = FALSE;
             transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
             SetNoticeState(NOTICE_OPENING, INSERT_RUMBLE_PAK_MESSAGE);
           } else {
@@ -1274,7 +1274,7 @@ void UpdateTransmitMenu(void) {
       } else if (f_TransmitController.pressedButtons & B_BUTTON) {
         if (transfer->transferMode == TRANSFER_MODE_FROM_MENU) {
           if (!HaveAllRumblePaks()) {
-            transfer->isCancelled = TRUE;
+            transfer->isCanceled = TRUE;
             transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
             SetNoticeState(NOTICE_OPENING, INSERT_RUMBLE_PAK_MESSAGE);
           } else {
@@ -1314,7 +1314,7 @@ void UpdateTransmitMenu(void) {
       switch (GetNoticeState()) {
         case NOTICE_HIDDEN:
           transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-          if (!transfer->isCancelled) {
+          if (!transfer->isCanceled) {
             transfer->screen = TRANSMIT_SCREEN_LEAVING;
           } else {
             transfer->screen = TRANSMIT_SCREEN_UNK6;
@@ -1508,20 +1508,20 @@ void ResetBringCharacters(void) {
   g_GameBoyTransfer.listedCharacterIndex = 0;
   g_GameBoyTransfer.characterIndex = 0;
   g_GameBoyTransfer.unk7B8 = 0;
-  g_GameBoyTransfer.isCancelled = FALSE;
+  g_GameBoyTransfer.isCanceled = FALSE;
 }
 
 void ResetSendStatus(void) {
   g_GameBoyTransfer.chosenCartridgeIndex = 0;
   g_GameBoyTransfer.taggedCartridgeCount = 0;
-  g_GameBoyTransfer.isCancelled = FALSE;
+  g_GameBoyTransfer.isCanceled = FALSE;
 }
 
 void ResetSendExperience(void) {
   g_GameBoyTransfer.chosenCartridgeIndex = 0;
   g_GameBoyTransfer.characterIndex = 0;
   g_GameBoyTransfer.taggedCartridgeCount = 0;
-  g_GameBoyTransfer.isCancelled = FALSE;
+  g_GameBoyTransfer.isCanceled = FALSE;
 }
 
 s32 GetStoredChecksum(u8* save) {
@@ -2226,7 +2226,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         ((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET) & ~7,
         G_IM_FMT_CI, POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1,
         POINTER_IMAGE_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
-    pointerLeft = OPTIONS_CENTRE_X - OPTION_POINTER_GAP - POINTER_WIDTH -
+    pointerLeft = OPTIONS_CENTER_X - OPTION_POINTER_GAP - POINTER_WIDTH -
         (width / 2) - pointerSwing;
     DrawTextureRect(&displayList, pointerLeft << 2,
         (OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING)) << 2,
@@ -2246,7 +2246,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
     for (index = 0; index != MODE_OPTION_COUNT; index++) {
       option = f_ModeOptions[transfer->transferMode][index];
       if (option != TRANSMIT_OPTION_NONE) {
-        SetTextSlot(OPTIONS_CENTRE_X, OPTIONS_TOP + (index * OPTION_SPACING),
+        SetTextSlot(OPTIONS_CENTER_X, OPTIONS_TOP + (index * OPTION_SPACING),
             option + TRANSMIT_OPTION_MESSAGES, 1, index,
             TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
         DrawLargeTextSlot(&displayList, index);
@@ -3314,9 +3314,9 @@ void DrawNotice(Gfx** displayListHead) {
           G_IM_FMT_I, NOTICE_WIDTH, NOTICE_STRIP_HEIGHT, 0, G_TX_CLAMP,
           G_TX_CLAMP, 0, 0, 0, 0);
       stripHeight = halfHeight;
-      bottom = (strip * stripHeight) + NOTICE_CENTRE_Y;
-      DrawTextureRect(&displayList, (NOTICE_CENTRE_X - halfWidth) << 2,
-          (bottom - stripHeight) << 2, (NOTICE_CENTRE_X + halfWidth) << 2,
+      bottom = (strip * stripHeight) + NOTICE_CENTER_Y;
+      DrawTextureRect(&displayList, (NOTICE_CENTER_X - halfWidth) << 2,
+          (bottom - stripHeight) << 2, (NOTICE_CENTER_X + halfWidth) << 2,
           bottom << 2, G_TX_RENDERTILE, 0, 0,
           (NOTICE_WIDTH << 10) / 2 / halfWidth,
           (NOTICE_STRIP_HEIGHT << 10) / stripHeight);
@@ -3327,7 +3327,7 @@ void DrawNotice(Gfx** displayListHead) {
     /* The unused array is there to match */
     s32 unused[2];
 
-    SetTextSlot(NOTICE_CENTRE_X, NOTICE_TEXT_TOP, f_NoticeMessage, 1,
+    SetTextSlot(NOTICE_CENTER_X, NOTICE_TEXT_TOP, f_NoticeMessage, 1,
         NOTICE_TEXT_SLOT, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255,
         255);
     gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, 255);

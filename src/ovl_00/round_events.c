@@ -86,8 +86,8 @@ enum GameBoyBallType {
 #define CAPTION_MAX_GROWTH 48
 #define CAPTION_COPY_ALPHA 127
 #define CAPTION_COPY_TOP \
-  (SHRINKING_IMAGE_CENTRE_Y - \
-      (MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE))
+  (SHRINKING_IMAGE_CENTER_Y - \
+      (MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER))
 #define CAPTION_FLASH_DEPTH 127.0f
 #define CAPTION_SOUND_CHANNEL 13
 #define CAPTION_SOUND_VOLUME 63
@@ -174,9 +174,9 @@ typedef struct LakituVelocity {
 #define SHRINKING_IMAGE_DRAW_COUNT 90
 /* The image shrinks from double size over the quarter turn's 8 frames */
 #define SHRINKING_IMAGE_TURN_PER_FRAME (M_PI / 16)
-#define SHRINKING_IMAGE_CENTRE_X 160
-#define SHRINKING_IMAGE_CENTRE_Y 104
-#define SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE 4
+#define SHRINKING_IMAGE_CENTER_X 160
+#define SHRINKING_IMAGE_CENTER_Y 104
+#define SHRINKING_IMAGE_STRIPS_ABOVE_CENTER 4
 /* The effect sits a little below the ball's center */
 #define CONTACT_DROP_PER_PIN_SCALE 0.3f
 #define CONTACT_SOUND_CHANNEL 2
@@ -1368,8 +1368,8 @@ void DrawMovie(Gfx** displayListHead) {
 #define WINNER_PLAQUE_SIZE 48
 /* The plaque shows this much more than the face on each side */
 #define WINNER_PLAQUE_MARGIN 8
-#define WINNER_CENTRE_X 160
-#define WINNER_CENTRE_Y 128
+#define WINNER_CENTER_X 160
+#define WINNER_CENTER_Y 128
 /* The face and plaque grow to this many steps of WINNER_GROWTH_STEP pixels,
  * then shrink back */
 #define WINNER_MAX_GROWTH 4
@@ -1390,9 +1390,9 @@ void DrawMovie(Gfx** displayListHead) {
 #define CONTEST_COPY_ALPHA 127
 #define CONTEST_FLASH_DEPTH 127.0f
 #define CONTEST_TURN_PER_FRAME (M_PI / 12)
-#define CONTEST_IMAGE_CENTRE_X 160
-#define CONTEST_IMAGE_CENTRE_Y 80
-#define CONTEST_IMAGE_STRIPS_ABOVE_CENTRE 4
+#define CONTEST_IMAGE_CENTER_X 160
+#define CONTEST_IMAGE_CENTER_Y 80
+#define CONTEST_IMAGE_STRIPS_ABOVE_CENTER 4
 /* The winner cheers as the caption meets */
 #define CONTEST_CHEER_DRAW 26
 #define CHARACTER_SOUND_LONGEST_DRIVE 16
@@ -1509,7 +1509,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
-    bottom = CONTEST_IMAGE_CENTRE_Y;
+    bottom = CONTEST_IMAGE_CENTER_Y;
     for (i = 0; i != stripCount; i++) {
       LoadTextureBlock(&gfx,
           f_MovieBuffer +
@@ -1517,11 +1517,11 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
                   MOVIE_IMAGE_PIXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
-      centerX = CONTEST_IMAGE_CENTRE_X + slide;
+      centerX = CONTEST_IMAGE_CENTER_X + slide;
       DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
-          (bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTRE)) << 2,
+          (bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER)) << 2,
           (centerX + halfWidth) << 2,
-          (bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTRE) +
+          (bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER) +
               MOVIE_IMAGE_STRIP_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
@@ -1588,18 +1588,18 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
         0);
     plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
     step = ((WINNER_PLAQUE_SIZE / 2) << 10) / plaqueHalfSize;
-    DrawTextureRect(&gfx, (WINNER_CENTRE_X - plaqueHalfSize) << 2,
-        (WINNER_CENTRE_Y - plaqueHalfSize) << 2,
-        (WINNER_CENTRE_X + plaqueHalfSize) << 2,
-        (WINNER_CENTRE_Y + plaqueHalfSize) << 2, G_TX_RENDERTILE, 0, 0, step,
+    DrawTextureRect(&gfx, (WINNER_CENTER_X - plaqueHalfSize) << 2,
+        (WINNER_CENTER_Y - plaqueHalfSize) << 2,
+        (WINNER_CENTER_X + plaqueHalfSize) << 2,
+        (WINNER_CENTER_Y + plaqueHalfSize) << 2, G_TX_RENDERTILE, 0, 0, step,
         step);
     LoadLargePalette(&gfx, f_MovieBuffer + WINNER_PALETTE_OFFSET);
     LoadTextureBlock(&gfx, f_MovieBuffer + WINNER_FACE_OFFSET, G_IM_FMT_CI,
         G_IM_SIZ_8b, WINNER_FACE_SIZE, WINNER_FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((WINNER_FACE_SIZE / 2) << 10) / growth;
-    DrawTextureRect(&gfx, (WINNER_CENTRE_X - growth) << 2,
-        (WINNER_CENTRE_Y - growth) << 2, (WINNER_CENTRE_X + growth) << 2,
-        (WINNER_CENTRE_Y + growth) << 2, G_TX_RENDERTILE, 0, 0, step, step);
+    DrawTextureRect(&gfx, (WINNER_CENTER_X - growth) << 2,
+        (WINNER_CENTER_Y - growth) << 2, (WINNER_CENTER_X + growth) << 2,
+        (WINNER_CENTER_Y + growth) << 2, G_TX_RENDERTILE, 0, 0, step, step);
   }
 
   gDPPipeSync(gfx++);
@@ -1679,7 +1679,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    bottom = SHRINKING_IMAGE_CENTRE_Y;
+    bottom = SHRINKING_IMAGE_CENTER_Y;
     for (i = 0; i != stripCount; i++) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
@@ -1693,17 +1693,17 @@ void DrawDriveRecord(Gfx** displayListHead) {
                   MOVIE_IMAGE_PIXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
-      centerX = SHRINKING_IMAGE_CENTRE_X + slide;
+      centerX = SHRINKING_IMAGE_CENTER_X + slide;
       DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
-          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE)) << 2,
+          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)) << 2,
           (centerX + halfWidth) << 2,
-          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE) +
+          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
               stripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
       if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-        centerX = SHRINKING_IMAGE_CENTRE_X - slide;
+        centerX = SHRINKING_IMAGE_CENTER_X - slide;
         copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
         DrawTextureRect(&gfx, (centerX - (s32)(width >> 1)) << 2, copyTop << 2,
             (centerX + (s32)(width >> 1)) << 2,
@@ -1793,7 +1793,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    bottom = SHRINKING_IMAGE_CENTRE_Y;
+    bottom = SHRINKING_IMAGE_CENTER_Y;
     for (i = 0; i != stripCount; i++) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
@@ -1807,17 +1807,17 @@ void DrawPuttCaption(Gfx** displayListHead) {
                   MOVIE_IMAGE_PIXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
-      centerX = SHRINKING_IMAGE_CENTRE_X + slide;
+      centerX = SHRINKING_IMAGE_CENTER_X + slide;
       DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
-          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE)) << 2,
+          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)) << 2,
           (centerX + halfWidth) << 2,
-          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE) +
+          (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
               stripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
       if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-        centerX = SHRINKING_IMAGE_CENTRE_X - slide;
+        centerX = SHRINKING_IMAGE_CENTER_X - slide;
         copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
         DrawTextureRect(&gfx, (centerX - (s32)(width >> 1)) << 2, copyTop << 2,
             (centerX + (s32)(width >> 1)) << 2,
@@ -2054,7 +2054,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
     halfWidth = (cosf(angle) + 1.0f) * width * 0.5f;
     stripHeight = (cosf(angle) + 1.0f) * MOVIE_IMAGE_STRIP_HEIGHT;
     if (halfWidth > 0 && stripHeight > 0) {
-      bottom = SHRINKING_IMAGE_CENTRE_Y;
+      bottom = SHRINKING_IMAGE_CENTER_Y;
       offset = 0;
       for (i = 0; i < stripCount; i++) {
         LoadTextureBlock(&gfx,
@@ -2064,10 +2064,10 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
             G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
             0, 0, 0, 0);
         offset += width;
-        top = bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE);
+        top = bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER);
         bottom += stripHeight;
-        DrawTextureRect(&gfx, (SHRINKING_IMAGE_CENTRE_X - halfWidth) << 2,
-            top << 2, (SHRINKING_IMAGE_CENTRE_X + halfWidth) << 2,
+        DrawTextureRect(&gfx, (SHRINKING_IMAGE_CENTER_X - halfWidth) << 2,
+            top << 2, (SHRINKING_IMAGE_CENTER_X + halfWidth) << 2,
             (top + stripHeight) << 2, G_TX_RENDERTILE, 0, 0,
             ((width >> 1) << 10) / halfWidth,
             (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);

@@ -1321,8 +1321,8 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_COURSE_STRIP_WIDTH 64
 #define NOTICE_COURSE_STRIP_HEIGHT 32
 #define NOTICE_COURSE_STRIP_COUNT 2
-#define NOTICE_COURSE_CENTRE_X 160
-#define NOTICE_COURSE_CENTRE_Y 128
+#define NOTICE_COURSE_CENTER_X 160
+#define NOTICE_COURSE_CENTER_Y 128
 #define NOTICE_COURSE_SCALE_BIAS 2.0f
 #define NOTICE_TITLE_STRIP_WIDTH 160
 #define NOTICE_TITLE_STRIP_COUNT 8
@@ -1379,8 +1379,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
             (i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_COURSE_STRIP_WIDTH,
         NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-    top = (i * size) + NOTICE_COURSE_CENTRE_Y - size;
-    centerX = f_NoticeSwing + NOTICE_COURSE_CENTRE_X;
+    top = (i * size) + NOTICE_COURSE_CENTER_Y - size;
+    centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
     DrawTextureRect(&gfx, (centerX - size) * 4, (top + f_NoticeUnk54) * 4,
         (size + centerX) * 4, (top + size + f_NoticeUnk54) * 4, G_TX_RENDERTILE,
         0, 0, step, step);
@@ -1458,8 +1458,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   /* The swing sound follows the notice across the screen */
   if (f_NoticeFrameCount >= NOTICE_PAN_START &&
       f_NoticeFrameCount < NOTICE_PAN_END) {
-    pan = (f_NoticeSwing + NOTICE_COURSE_CENTRE_X) * NOTICE_PAN_RANGE /
-        NOTICE_COURSE_CENTRE_X;
+    pan = (f_NoticeSwing + NOTICE_COURSE_CENTER_X) * NOTICE_PAN_RANGE /
+        NOTICE_COURSE_CENTER_X;
     if (pan < 0) {
       pan = 0;
     }
@@ -1533,8 +1533,8 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_POP_FRAMES 10
 #define NOTICE_POP_STEP 0.15f
 #define NOTICE_POP_SETTLE_ANGLE (3 * M_PI / 4)
-#define NOTICE_CENTRE_X 160
-#define NOTICE_CENTRE_Y 128
+#define NOTICE_CENTER_X 160
+#define NOTICE_CENTER_Y 128
 #define NOTICE_NAMEPLATE_SIZE 48
 #define NOTICE_NAMEPLATE_POP_SIZE 36.0f
 #define NOTICE_PORTRAIT_SIZE 32
@@ -1590,8 +1590,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         G_IM_FMT_CI, NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0,
         0, 0, 0);
     step = ((NOTICE_NAMEPLATE_SIZE / 2) << 10) / size;
-    centerX = f_NoticeLift + NOTICE_CENTRE_X;
-    centerY = f_NoticeUnk6C + NOTICE_CENTRE_Y;
+    centerX = f_NoticeLift + NOTICE_CENTER_X;
+    centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, (centerX - size) * 4, (centerY - size) * 4,
         (size + centerX) * 4, (size + centerY) * 4, G_TX_RENDERTILE, 0, 0, step,
         step);
@@ -1603,8 +1603,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
         NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((NOTICE_PORTRAIT_SIZE / 2) << 10) / size;
-    centerX = f_NoticeLift + NOTICE_CENTRE_X;
-    centerY = f_NoticeUnk6C + NOTICE_CENTRE_Y;
+    centerX = f_NoticeLift + NOTICE_CENTER_X;
+    centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, (centerX - size) * 4, (centerY - size) * 4,
         (size + centerX) * 4, (size + centerY) * 4, G_TX_RENDERTILE, 0, 0, step,
         step);
@@ -1625,9 +1625,9 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
       top = NOTICE_CHARACTER_TITLE_TOP -
           (height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + (i * height);
       /* This pass mirrors the slide, unlike the depth pass and the shine */
-      DrawTextureRect(&gfx, (NOTICE_CENTRE_X - (f_NoticeLift + width)) * 4,
+      DrawTextureRect(&gfx, (NOTICE_CENTER_X - (f_NoticeLift + width)) * 4,
           (top + f_NoticeUnk6C) * 4,
-          (width - (f_NoticeLift - NOTICE_CENTRE_X)) * 4,
+          (width - (f_NoticeLift - NOTICE_CENTER_X)) * 4,
           (top + height + f_NoticeUnk6C) * 4,
 
           G_TX_RENDERTILE, 0, 0,
@@ -1654,7 +1654,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       top = NOTICE_CHARACTER_TITLE_TOP -
           (height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + (i * height);
-      centerX = f_NoticeLift + NOTICE_CENTRE_X;
+      centerX = f_NoticeLift + NOTICE_CENTER_X;
       DrawTextureRect(&gfx, (centerX - width) * 4, (top + f_NoticeUnk6C) * 4,
           (width + centerX) * 4, (top + height + f_NoticeUnk6C) * 4,
           G_TX_RENDERTILE, 0, 0,
@@ -1833,7 +1833,7 @@ void SetResultsBanner(s32 state, s32 kind) {
 /* The trophy turns, a frame each TROPHY_FRAME_TICKS, as the shine sweeps it */
 #define TROPHY_SHINE_CYCLE 256
 #define TROPHY_FRAME_TICKS 3
-#define TROPHY_CENTRE_X 48
+#define TROPHY_CENTER_X 48
 #define TROPHY_BOTTOM 160
 #define TROPHY_SHINE_TEXT_ALPHA 127
 #define TROPHY_SHINE_START 16
@@ -2029,11 +2029,11 @@ void DrawResultsBanner(Gfx** displayListHead) {
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0, 0, 0,
             0, 0);
         DrawTextureRect(&gfx,
-            (TROPHY_CENTRE_X + f_BannerX -
+            (TROPHY_CENTER_X + f_BannerX -
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                 4,
             (top + TROPHY_BOTTOM) * 4,
-            (TROPHY_CENTRE_X + f_BannerX +
+            (TROPHY_CENTER_X + f_BannerX +
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                 4,
             (f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] + TROPHY_BOTTOM +
@@ -2067,11 +2067,11 @@ void DrawResultsBanner(Gfx** displayListHead) {
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0, 0, 0,
             0, 0);
         DrawTextureRect(&gfx,
-            (TROPHY_CENTRE_X + f_BannerX -
+            (TROPHY_CENTER_X + f_BannerX -
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                 4,
             (top + TROPHY_BOTTOM) * 4,
-            (TROPHY_CENTRE_X + f_BannerX +
+            (TROPHY_CENTER_X + f_BannerX +
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                 4,
             (f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] + TROPHY_BOTTOM +
@@ -2107,11 +2107,11 @@ void DrawResultsBanner(Gfx** displayListHead) {
           top = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
               f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
           DrawTextureRect(&gfx,
-              (TROPHY_CENTRE_X + f_BannerX -
+              (TROPHY_CENTER_X + f_BannerX -
                   (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                   4,
               (TROPHY_BOTTOM - top) * 4,
-              (TROPHY_CENTRE_X + f_BannerX +
+              (TROPHY_CENTER_X + f_BannerX +
                   (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
                   4,
               (TROPHY_BOTTOM - top +

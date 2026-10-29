@@ -6027,7 +6027,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
 
         break;
 
-      case BET_PHASE_CANCELLED:
+      case BET_PHASE_CANCELED:
         D_8022BE84_ovl_01 += BET_SLIDE_STEP;
         D_802322F0_ovl_01 += BET_SLIDE_STEP;
         D_8023BFD0_ovl_01 -= BET_SLIDE_STEP;
@@ -6054,7 +6054,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
 
         break;
 
-      case MENU_PHASE_CANCELLED:
+      case MENU_PHASE_CANCELED:
         D_8022BE84_ovl_01 += BET_SLIDE_STEP;
         D_802322F0_ovl_01 += BET_SLIDE_STEP;
         D_802322F4_ovl_01 += BET_SLIDE_STEP;
@@ -6083,7 +6083,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
 
     func_8021B618_ovl_01(&gfx, STATS_SLIDE_OUT_RIGHT);
     if ((D_8022BE88_ovl_01 >= BET_PHASE_CHOOSING) &&
-        ((D_8022BE88_ovl_01 != BET_PHASE_CANCELLED) &&
+        ((D_8022BE88_ovl_01 != BET_PHASE_CANCELED) &&
             (D_8022BE88_ovl_01 != MENU_PHASE_CONFIRMED))) {
       func_802047F0_ovl_01(&gfx);
     }
@@ -6099,7 +6099,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         func_8021826C_ovl_01(&gfx, 0, 0, 1);
         break;
 
-      case BET_PHASE_CANCELLED:
+      case BET_PHASE_CANCELED:
         func_8021826C_ovl_01(&gfx, D_802322F0_ovl_01, 0, 0);
         break;
 
@@ -6113,7 +6113,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         func_80219BD4_ovl_01(&gfx, 0, 0, 1);
         break;
 
-      case MENU_PHASE_CANCELLED:
+      case MENU_PHASE_CANCELED:
         func_8021826C_ovl_01(
             &gfx, D_802322F0_ovl_01 - BET_SLIDE_DISTANCE, 1, 0);
         func_80219BD4_ovl_01(&gfx, D_802322F4_ovl_01, 0, 0);

@@ -603,7 +603,7 @@ void func_80217D20_ovl_01(void) {
 
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    D_8022BE88_ovl_01 = BET_PHASE_CANCELLED;
+    D_8022BE88_ovl_01 = BET_PHASE_CANCELED;
     D_802303A0_ovl_01 = 0;
     SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     for (index = 0; index != MENU_UNKE_COUNT; index++) {
@@ -993,7 +993,7 @@ s32 func_80219948_ovl_01(void) {
       g_MenuScreen = MENU_SCREEN_UNK22;
       SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
       D_802303A1_ovl_01 = 0;
-      D_8022BE88_ovl_01 = MENU_PHASE_CANCELLED;
+      D_8022BE88_ovl_01 = MENU_PHASE_CANCELED;
       return;
     }
 

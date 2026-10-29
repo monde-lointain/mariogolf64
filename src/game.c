@@ -58,7 +58,7 @@ enum FadeColor {
   FADE_COLOR_BLACK
 };
 
-#define FADE_NOISE_GREY 0xBF
+#define FADE_NOISE_GRAY 0xBF
 
 /* Values a debug menu edits; nothing reads them */
 #define DEBUG_MENU_VALUE_COUNT 3
@@ -1995,8 +1995,8 @@ s32 DrawGame(void) {
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, f_FadeAlpha);
       gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     } else if (f_FadeColor == FADE_COLOR_NOISE) {
-      gDPSetPrimColor(g_DisplayListHead++, 0, 0, FADE_NOISE_GREY,
-          FADE_NOISE_GREY, FADE_NOISE_GREY, f_FadeAlpha);
+      gDPSetPrimColor(g_DisplayListHead++, 0, 0, FADE_NOISE_GRAY,
+          FADE_NOISE_GRAY, FADE_NOISE_GRAY, f_FadeAlpha);
       gDPSetCombineLERP(g_DisplayListHead++, NOISE, 0, PRIMITIVE, 0, 0, 0, 0,
           PRIMITIVE, NOISE, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE);
     }

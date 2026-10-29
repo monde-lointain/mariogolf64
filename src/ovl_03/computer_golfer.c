@@ -1667,9 +1667,9 @@ s32 GetLandingRating(u32 surfaceKind) {
 #define EXTRA_TARGET_STEP_COUNT 50.0f
 #define TARGET_SIDE_COUNT 100
 #define TARGET_SIDE_SPACING (4 * UNITS_PER_YARD)
-/* The neighbors a target's lie is tested at, in TARGET_NEIGHBOUR_SPACINGs */
-#define TARGET_NEIGHBOUR_REACH 2
-#define TARGET_NEIGHBOUR_SPACING 4
+/* The neighbors a target's lie is tested at, in TARGET_NEIGHBOR_SPACINGs */
+#define TARGET_NEIGHBOR_REACH 2
+#define TARGET_NEIGHBOR_SPACING 4
 /* Rolls shorter than this are not tested for ground in the way */
 #define MIN_TESTED_ROLL (2 * UNITS_PER_YARD)
 
@@ -1867,18 +1867,18 @@ void ChooseLandingTarget(
       isPoorlySurrounded = FALSE;
       if (candidateX != g_HoleSetup.cupPosition[AXIS_X] ||
           candidateZ != g_HoleSetup.cupPosition[AXIS_Z]) {
-        for (column = -TARGET_NEIGHBOUR_REACH; column <= TARGET_NEIGHBOUR_REACH;
+        for (column = -TARGET_NEIGHBOR_REACH; column <= TARGET_NEIGHBOR_REACH;
             column++) {
-          for (row = -TARGET_NEIGHBOUR_REACH; row <= TARGET_NEIGHBOUR_REACH;
+          for (row = -TARGET_NEIGHBOR_REACH; row <= TARGET_NEIGHBOR_REACH;
               row++) {
             if (column == 0 && row == 0) {
               continue;
             }
 
             if (GetLandingRating(GetSurfaceInfoAt(candidateX +
-                        (column * TARGET_NEIGHBOUR_SPACING * UNITS_PER_YARD),
+                        (column * TARGET_NEIGHBOR_SPACING * UNITS_PER_YARD),
                     candidateZ +
-                        (row * TARGET_NEIGHBOUR_SPACING * UNITS_PER_YARD))
+                        (row * TARGET_NEIGHBOR_SPACING * UNITS_PER_YARD))
                         ->kind) < endRating - 1) {
               isPoorlySurrounded = TRUE;
               break;

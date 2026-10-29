@@ -386,7 +386,7 @@ enum PlayerStatsBuffer {
 /* The phases of the screen 20 handler, which D_8022BE88 holds */
 #define MENU_PHASE_START 0
 #define MENU_PHASE_CHOOSING 5
-#define MENU_PHASE_CANCELLED 6
+#define MENU_PHASE_CANCELED 6
 #define MENU_PHASE_CONFIRMED 7
 /* Values of D_8022BE89 */
 #define MENU_UNK89_UNK3 3
@@ -394,7 +394,7 @@ enum PlayerStatsBuffer {
 /* The bet settings screen's phases in D_8022BE88 */
 #define BET_PHASE_OPENING 1
 #define BET_PHASE_CHOOSING 2
-#define BET_PHASE_CANCELLED 3
+#define BET_PHASE_CANCELED 3
 #define BET_PHASE_CONFIRMED 4
 
 #endif

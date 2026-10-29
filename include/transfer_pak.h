@@ -139,7 +139,7 @@ typedef struct GameBoyTransfer {
   /* 0x7E8 */ s32 taggedCartridgeCount;
   /* 0x7EC */ s32 taggedControllers[MAXCONTROLLERS];
   /* 0x7FC */ u8 cartridgeTags[MAXCONTROLLERS][CARTRIDGE_TAG_SIZE];
-  /* 0x83C */ Boolean isCancelled;
+  /* 0x83C */ Boolean isCanceled;
   /* 0x840 */ s32 pressingHandPosition; /* 0 hides the hand */
   /* 0x844 */ Boolean isAccessing;
 } GameBoyTransfer; /* size = 0x848 */
