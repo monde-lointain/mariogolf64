@@ -1185,7 +1185,7 @@ void ResetSavedGameControllers(void) {
   Player* savedPlayers;
 
   for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
-    D_80230B40_ovl_01[playerIndex] = -1;
+    D_80230B40_ovl_01[playerIndex] = NO_CONTROLLER;
     D_8023BDA4_ovl_01[playerIndex] = -1;
   }
 
@@ -1196,16 +1196,16 @@ void ResetSavedGameControllers(void) {
   D_80230B4A_ovl_01 = save->savedGames[gameIndex].state.playerCount;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (savedPlayers[playerIndex].isComputer) {
-      D_80230B40_ovl_01[playerIndex] = MAXCONTROLLERS;
+      D_80230B40_ovl_01[playerIndex] = COMPUTER_CONTROLLER;
       D_80230B4A_ovl_01--;
     } else {
-      D_80230B40_ovl_01[playerIndex] = -1;
+      D_80230B40_ovl_01[playerIndex] = NO_CONTROLLER;
     }
   }
 
   humanCount = 0;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    if (D_80230B40_ovl_01[playerIndex] != MAXCONTROLLERS) {
+    if (D_80230B40_ovl_01[playerIndex] != COMPUTER_CONTROLLER) {
       D_8023BDA4_ovl_01[humanCount] = playerIndex;
       humanCount++;
     }
