@@ -371,12 +371,15 @@ void RollGolfBall(GolfBall* ball, BallSimulation* simulation) {
 
   if (simulation->state == BALL_STATE_FLYING ||
       simulation->state == BALL_STATE_ROLLING) {
-    movement[0] = simulation->position[0] - f_LastRolledBallPosition[0];
-    movement[1] = simulation->position[1] - f_LastRolledBallPosition[1];
-    movement[2] = simulation->position[2] - f_LastRolledBallPosition[2];
-    f_LastRolledBallPosition[0] = simulation->position[0];
-    f_LastRolledBallPosition[1] = simulation->position[1];
-    f_LastRolledBallPosition[2] = simulation->position[2];
+    movement[0] =
+        simulation->position[AXIS_X] - f_LastRolledBallPosition[AXIS_X];
+    movement[1] =
+        simulation->position[AXIS_Y] - f_LastRolledBallPosition[AXIS_Y];
+    movement[2] =
+        simulation->position[AXIS_Z] - f_LastRolledBallPosition[AXIS_Z];
+    f_LastRolledBallPosition[AXIS_X] = simulation->position[AXIS_X];
+    f_LastRolledBallPosition[AXIS_Y] = simulation->position[AXIS_Y];
+    f_LastRolledBallPosition[AXIS_Z] = simulation->position[AXIS_Z];
   } else {
     movement[0] = simulation->velocity[0];
     movement[1] = simulation->velocity[1];
@@ -493,22 +496,25 @@ void UpdateGolfBalls(void) {
       if (simulation->playerIndex >= 0 &&
           g_Players[currentIndex].holeStatus == HOLE_STATUS_PLAYING) {
         if (g_IsCupViewShown == TRUE) {
-          ball->position[0] =
-              (simulation->position[0] -
-                  (f32)(g_HoleSetup.cupPosition[0] - simulation->position[0])) *
+          ball->position[AXIS_X] = (simulation->position[AXIS_X] -
+                                       (f32)(g_HoleSetup.cupPosition[AXIS_X] -
+                                           simulation->position[AXIS_X])) *
               COURSE_TO_WORLD_SCALE;
-          ball->position[1] =
-              (simulation->position[1] -
-                  (f32)(g_HoleSetup.cupPosition[1] - simulation->position[1])) *
+          ball->position[AXIS_Y] = (simulation->position[AXIS_Y] -
+                                       (f32)(g_HoleSetup.cupPosition[AXIS_Y] -
+                                           simulation->position[AXIS_Y])) *
               COURSE_TO_WORLD_SCALE;
-          ball->position[2] =
-              (simulation->position[2] -
-                  (f32)(g_HoleSetup.cupPosition[2] - simulation->position[2])) *
+          ball->position[AXIS_Z] = (simulation->position[AXIS_Z] -
+                                       (f32)(g_HoleSetup.cupPosition[AXIS_Z] -
+                                           simulation->position[AXIS_Z])) *
               COURSE_TO_WORLD_SCALE;
         } else {
-          ball->position[0] = simulation->position[0] * COURSE_TO_WORLD_SCALE;
-          ball->position[1] = simulation->position[1] * COURSE_TO_WORLD_SCALE;
-          ball->position[2] = simulation->position[2] * COURSE_TO_WORLD_SCALE;
+          ball->position[AXIS_X] =
+              simulation->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+          ball->position[AXIS_Y] =
+              simulation->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+          ball->position[AXIS_Z] =
+              simulation->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         }
 
         ball->alpha = BALL_SHOWN;
@@ -519,8 +525,10 @@ void UpdateGolfBalls(void) {
           ball->isInCup = TRUE;
         }
 
-        if (GetCupDistance(simulation->position[0] - g_HoleSetup.cupPosition[0],
-                simulation->position[2] - g_HoleSetup.cupPosition[2]) == 0 ||
+        if (GetCupDistance(
+                simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+                simulation->position[AXIS_Z] -
+                    g_HoleSetup.cupPosition[AXIS_Z]) == 0 ||
             simulation->state == BALL_STATE_IN_CUP || simulation->unkA0 != 0) {
           ball->isInCup = TRUE;
         } else {
@@ -542,9 +550,10 @@ void UpdateGolfBalls(void) {
         scale = g_PinVertexScale * BALL_MODEL_SCALE;
         guScaleF(scaling, scale, scale, scale);
         guMtxCatF(f_BallRotation, scaling, rotated);
-        guTranslateF(translation, ball->position[0],
-            ball->position[1] - ((g_PinVertexScale * BALL_RADIUS) / 5120.0),
-            ball->position[2]);
+        guTranslateF(translation, ball->position[AXIS_X],
+            ball->position[AXIS_Y] -
+                ((g_PinVertexScale * BALL_RADIUS) / 5120.0),
+            ball->position[AXIS_Z]);
         MultiplyMatrices(rotated, translation, scaling);
         ConvertMatrixToFixed(scaling, &ball->matrices[g_DrawBufferIndex]);
       }
@@ -560,15 +569,15 @@ void UpdateGolfBalls(void) {
           if (afterimage->alpha != AFTERIMAGE_UNUSED) {
             s32 coursePosition[3];
 
-            coursePosition[0] = afterimage->position[0] * 1024.0f;
-            coursePosition[1] = afterimage->position[1] * 1024.0f;
-            coursePosition[2] = afterimage->position[2] * 1024.0f;
-            afterimage->position[0] += afterimage->position[0] -
-                (g_HoleSetup.cupPosition[0] * COURSE_TO_WORLD_SCALE);
-            afterimage->position[1] += afterimage->position[1] -
-                (g_HoleSetup.cupPosition[1] * COURSE_TO_WORLD_SCALE);
-            afterimage->position[2] += afterimage->position[2] -
-                (g_HoleSetup.cupPosition[2] * COURSE_TO_WORLD_SCALE);
+            coursePosition[AXIS_X] = afterimage->position[AXIS_X] * 1024.0f;
+            coursePosition[AXIS_Y] = afterimage->position[AXIS_Y] * 1024.0f;
+            coursePosition[AXIS_Z] = afterimage->position[AXIS_Z] * 1024.0f;
+            afterimage->position[AXIS_X] += afterimage->position[AXIS_X] -
+                (g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE);
+            afterimage->position[AXIS_Y] += afterimage->position[AXIS_Y] -
+                (g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE);
+            afterimage->position[AXIS_Z] += afterimage->position[AXIS_Z] -
+                (g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
           }
         }
       }
@@ -577,17 +586,17 @@ void UpdateGolfBalls(void) {
       for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
           i++, afterimage++) {
         if (afterimage->alpha != AFTERIMAGE_UNUSED) {
-          afterimage->position[0] -=
-              (afterimage->position[0] -
-                  (g_HoleSetup.cupPosition[0] * COURSE_TO_WORLD_SCALE)) *
+          afterimage->position[AXIS_X] -=
+              (afterimage->position[AXIS_X] -
+                  (g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
-          afterimage->position[1] -=
-              (afterimage->position[1] -
-                  (g_HoleSetup.cupPosition[1] * COURSE_TO_WORLD_SCALE)) *
+          afterimage->position[AXIS_Y] -=
+              (afterimage->position[AXIS_Y] -
+                  (g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
-          afterimage->position[2] -=
-              (afterimage->position[2] -
-                  (g_HoleSetup.cupPosition[2] * COURSE_TO_WORLD_SCALE)) *
+          afterimage->position[AXIS_Z] -=
+              (afterimage->position[AXIS_Z] -
+                  (g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
         }
       }
@@ -603,9 +612,9 @@ void UpdateGolfBalls(void) {
     {
       f32 offset[3];
 
-      offset[0] = ball->position[0] - previous->position[0];
-      offset[1] = ball->position[1] - previous->position[1];
-      offset[2] = ball->position[2] - previous->position[2];
+      offset[0] = ball->position[AXIS_X] - previous->position[AXIS_X];
+      offset[1] = ball->position[AXIS_Y] - previous->position[AXIS_Y];
+      offset[2] = ball->position[AXIS_Z] - previous->position[AXIS_Z];
       distance = sqrtf((offset[0] * offset[0]) + (offset[1] * offset[1]) +
           (offset[2] * offset[2]));
     }
@@ -614,9 +623,9 @@ void UpdateGolfBalls(void) {
       if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.00009765625f < distance &&
           g_BallSimulations[0].state == BALL_STATE_ROLLING) {
         head->alpha = AFTERIMAGE_FAST_ALPHA;
-        head->position[0] = ball->position[0];
-        head->position[1] = ball->position[1];
-        head->position[2] = ball->position[2];
+        head->position[AXIS_X] = ball->position[AXIS_X];
+        head->position[AXIS_Y] = ball->position[AXIS_Y];
+        head->position[AXIS_Z] = ball->position[AXIS_Z];
         if (ball->isInCup != TRUE) {
           head->isInCup = FALSE;
         } else {
@@ -638,9 +647,9 @@ void UpdateGolfBalls(void) {
     } else {
       if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.0005859375f < distance) {
         head->alpha = AFTERIMAGE_ALPHA;
-        head->position[0] = ball->position[0];
-        head->position[1] = ball->position[1];
-        head->position[2] = ball->position[2];
+        head->position[AXIS_X] = ball->position[AXIS_X];
+        head->position[AXIS_Y] = ball->position[AXIS_Y];
+        head->position[AXIS_Z] = ball->position[AXIS_Z];
         if (ball->isInCup != TRUE) {
           head->isInCup = FALSE;
         } else {
@@ -831,11 +840,12 @@ void DrawGolfBalls(CameraMatrices* matrices) {
       if (ball->alpha > 0) {
         surface = ball->surface;
         groundHeight =
-            GetGroundHeight(ball->position[0] * WORLD_TO_COURSE_SCALE,
-                ball->position[2] * WORLD_TO_COURSE_SCALE);
+            GetGroundHeight(ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                ball->position[AXIS_Z] * WORLD_TO_COURSE_SCALE);
         spriteKind = BALL_SPRITE_FULL;
         isAboveGround = TRUE;
-        if (ball->position[1] * WORLD_TO_COURSE_SCALE < groundHeight - 153.6f) {
+        if (ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE <
+            groundHeight - 153.6f) {
           isAboveGround = FALSE;
         }
 
@@ -852,28 +862,29 @@ void DrawGolfBalls(CameraMatrices* matrices) {
         }
 
         isAboveCup = FALSE;
-        if (groundHeight + 768.0f < ball->position[1] * WORLD_TO_COURSE_SCALE) {
+        if (groundHeight + 768.0f <
+            ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE) {
           isAboveCup = ball->isInCup == TRUE;
         }
 
-        ballDepth = ProjectPoint(ball->position[0],
-            ball->position[1] - (g_PinVertexScale * 0.3f), ball->position[2],
-            &ballPoint);
-        shadowDepth = ProjectPoint(ball->position[0],
+        ballDepth = ProjectPoint(ball->position[AXIS_X],
+            ball->position[AXIS_Y] - (g_PinVertexScale * 0.3f),
+            ball->position[AXIS_Z], &ballPoint);
+        shadowDepth = ProjectPoint(ball->position[AXIS_X],
             (groundHeight * COURSE_TO_WORLD_SCALE) - (g_PinVertexScale * 0.06f),
-            ball->position[2], &shadowPoint);
+            ball->position[AXIS_Z], &shadowPoint);
         if (ball->markerPlayerIndex == BALL_NO_MARKER) {
           if (ballDepth < BALL_NEAREST_DEPTH && exposure >= BALL_HALF_SUNK) {
             gDPPipeSync(gfx++);
             if (ball->unk9E) {
               groundHeight = GetGroundOrWaterHeight(
-                  ball->position[0] * WORLD_TO_COURSE_SCALE,
-                  ball->position[2] * WORLD_TO_COURSE_SCALE);
+                  ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                  ball->position[AXIS_Z] * WORLD_TO_COURSE_SCALE);
               gDPPipeSync(gfx++);
               gDPSetRenderMode(gfx++, RM_AA_ZB_XLU_SURF_UPDATE(1),
                   RM_AA_ZB_XLU_SURF_UPDATE(2));
               shade = 100 -
-                  (s32)(((ball->position[1] * WORLD_TO_COURSE_SCALE) -
+                  (s32)(((ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE) -
                             groundHeight) *
                       0.0032552085f);
               if (shade < 0) {
@@ -1035,7 +1046,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
 
               shade = 0x7F -
                   ((s32)(groundHeight -
-                       (ball->position[1] * WORLD_TO_COURSE_SCALE)) /
+                       (ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)) /
                       128);
               if (shade < 0x3F) {
                 shade = 0x3F;
@@ -1065,7 +1076,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
 
               shade = 0x7F -
                   ((s32)(groundHeight -
-                       (ball->position[1] * WORLD_TO_COURSE_SCALE)) /
+                       (ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)) /
                       512);
               if (shade < 0x5F) {
                 shade = 0x5F;
@@ -1164,9 +1175,9 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     for (i = 0; i != f_BallAfterimageLength; i++) {
       afterimage = &f_BallAfterimages[i];
       if (afterimage->alpha > 0) {
-        ballDepth = ProjectPoint(afterimage->position[0],
-            afterimage->position[1] - (g_PinVertexScale * 0.27f),
-            afterimage->position[2], &ballPoint);
+        ballDepth = ProjectPoint(afterimage->position[AXIS_X],
+            afterimage->position[AXIS_Y] - (g_PinVertexScale * 0.27f),
+            afterimage->position[AXIS_Z], &ballPoint);
         if (ballDepth < BALL_NEAREST_DEPTH) {
           if (g_IsCupViewShown == TRUE) {
             afterimageDepth = 0x402F;

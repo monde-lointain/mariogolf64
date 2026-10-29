@@ -2320,8 +2320,8 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (D_80230B40_ovl_01[playerIndex] != NO_CONTROLLER) {
-      position[0] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
-      position[1] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
+      position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
+      position[AXIS_Y] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
       controller = D_80230B40_ovl_01[playerIndex];
       if (controller != COMPUTER_CONTROLLER) {
         gDPLoadTextureBlock(gfx++,
@@ -2333,10 +2333,11 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, position[0] << 2, position[1] << 2,
-            (position[0] + CONTROLLER_ICON_SIZE) << 2,
-            (position[1] + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPScisTextureRectangle(gfx++, position[AXIS_X] << 2,
+            position[AXIS_Y] << 2,
+            (position[AXIS_X] + CONTROLLER_ICON_SIZE) << 2,
+            (position[AXIS_Y] + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
+            0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
     }
@@ -2345,8 +2346,8 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   image = D_8023BD84_ovl_01;
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    position[0] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
-    position[1] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
+    position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
+    position[AXIS_Y] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
     if (D_80230B40_ovl_01[playerIndex] == COMPUTER_CONTROLLER) {
       if (save->savedGames[memory->savedGameIndex].state.gameMode ==
           GAME_MODE_GET_CHARACTER) {
@@ -2373,10 +2374,11 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (position[0] + PLAYER_LABEL_OFFSET_X) << 2,
-        (position[1] + PLAYER_LABEL_OFFSET_Y) << 2,
-        (position[0] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH) << 2,
-        (position[1] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT) << 2,
+    gSPScisTextureRectangle(gfx++,
+        (position[AXIS_X] + PLAYER_LABEL_OFFSET_X) << 2,
+        (position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y) << 2,
+        (position[AXIS_X] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH) << 2,
+        (position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }

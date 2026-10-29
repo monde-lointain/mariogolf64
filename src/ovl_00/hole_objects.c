@@ -184,13 +184,14 @@ void StartMonkeyDrop(Radians cameraYaw) {
       creature->isFacingBack = FALSE;
       creature->frameCount = 0;
       creature->velocity[1] = 0;
-      creature->position[0] = g_HoleSetup.cupPosition[0];
-      creature->position[1] = g_HoleSetup.cupPosition[1] - MONKEY_DROP_HEIGHT;
-      creature->position[2] = g_HoleSetup.cupPosition[2];
+      creature->position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
+      creature->position[AXIS_Y] =
+          g_HoleSetup.cupPosition[AXIS_Y] - MONKEY_DROP_HEIGHT;
+      creature->position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
       creature->yaw = -cameraYaw + M_PI;
-      translation[0] = creature->position[0] * COURSE_TO_WORLD_SCALE;
-      translation[1] = creature->position[1] * COURSE_TO_WORLD_SCALE;
-      translation[2] = creature->position[2] * COURSE_TO_WORLD_SCALE;
+      translation[0] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      translation[1] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      translation[2] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       rotation[0] = 0.0f;
       rotation[1] = creature->yaw;
       rotation[2] = 0;
@@ -237,13 +238,14 @@ void StartCheepCheepLeap(s32 arg0) {
       s32 random = guRandom();
 
       creature->state = HOLE_CREATURE_CHEEP_CHEEP;
-      creature->position[0] = g_TurnBallSimulation.position[0];
-      creature->position[1] =
-          g_TurnBallSimulation.position[1] + CHEEP_CHEEP_DEPTH;
-      creature->position[2] = g_TurnBallSimulation.position[2];
+      creature->position[AXIS_X] = g_TurnBallSimulation.position[AXIS_X];
+      creature->position[AXIS_Y] =
+          g_TurnBallSimulation.position[AXIS_Y] + CHEEP_CHEEP_DEPTH;
+      creature->position[AXIS_Z] = g_TurnBallSimulation.position[AXIS_Z];
       speed = (random % CHEEP_CHEEP_SPEED_RANGE) + CHEEP_CHEEP_MIN_SPEED;
-      creature->groundHeight = GetGroundOrWaterHeight(
-          g_TurnBallSimulation.position[0], g_TurnBallSimulation.position[2]);
+      creature->groundHeight =
+          GetGroundOrWaterHeight(g_TurnBallSimulation.position[AXIS_X],
+              g_TurnBallSimulation.position[AXIS_Z]);
       creature->isFacingBack = guRandom() % 2;
       creature->isGold = guRandom() % 2;
       if (!creature->isGold) {
@@ -264,9 +266,9 @@ void StartCheepCheepLeap(s32 arg0) {
       rotation[0] = 0;
       creature->velocity[1] = -CHEEP_CHEEP_LEAP_SPEED;
       creature->pitch = -M_PI / 2;
-      translation[0] = creature->position[0] * COURSE_TO_WORLD_SCALE;
-      translation[1] = creature->position[1] * COURSE_TO_WORLD_SCALE;
-      translation[2] = creature->position[2] * COURSE_TO_WORLD_SCALE;
+      translation[0] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      translation[1] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      translation[2] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       rotation[1] = creature->yaw;
       rotation[2] = creature->pitch + (M_PI / 2);
       scale[0] = 1.0f;
@@ -321,11 +323,12 @@ void DrawHoleCreatures(Gfx** displayListHead) {
     creature = &f_HoleCreatures[i];
     if (creature->state == HOLE_CREATURE_NONE) {
     } else if (creature->state == HOLE_CREATURE_CHEEP_CHEEP) {
-      wasUnderwater = g_TurnBallSimulation.position[1] < creature->position[1];
+      wasUnderwater =
+          g_TurnBallSimulation.position[AXIS_Y] < creature->position[AXIS_Y];
       creature->velocity[1] += CHEEP_CHEEP_GRAVITY;
-      creature->position[0] += creature->velocity[0];
-      creature->position[1] += creature->velocity[1];
-      creature->position[2] += creature->velocity[2];
+      creature->position[AXIS_X] += creature->velocity[0];
+      creature->position[AXIS_Y] += creature->velocity[1];
+      creature->position[AXIS_Z] += creature->velocity[2];
       horizontalSpeed = 0.0f;
       horizontalSpeedSquared = (creature->velocity[0] * creature->velocity[0]) +
           (creature->velocity[2] * creature->velocity[2]);
@@ -336,9 +339,9 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       creature->pitch = ((f32)atan2(creature->velocity[1], horizontalSpeed) -
                             creature->pitch) *
           CHEEP_CHEEP_PITCH_EASING;
-      translation[0] = creature->position[0] * COURSE_TO_WORLD_SCALE;
-      translation[1] = creature->position[1] * COURSE_TO_WORLD_SCALE;
-      translation[2] = creature->position[2] * COURSE_TO_WORLD_SCALE;
+      translation[0] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      translation[1] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      translation[2] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       rotation[0] = 0.0f;
       rotation[1] = creature->yaw;
       rotation[2] = 0;
@@ -357,33 +360,36 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       guMtxCatF(roll, transform, transform);
       ConvertMatrixToFixed(transform, &creature->matrices[g_MatrixBufferIndex]);
       if (wasUnderwater == TRUE) {
-        if (creature->position[1] < g_TurnBallSimulation.position[1]) {
-          splashPosition[0] = creature->position[0];
-          splashPosition[2] = creature->position[2];
-          splashPosition[1] = creature->groundHeight;
+        if (creature->position[AXIS_Y] <
+            g_TurnBallSimulation.position[AXIS_Y]) {
+          splashPosition[AXIS_X] = creature->position[AXIS_X];
+          splashPosition[AXIS_Z] = creature->position[AXIS_Z];
+          splashPosition[AXIS_Y] = creature->groundHeight;
           SpawnRipple(splashPosition);
           PlaySound(
               SOUND_SPLASH, HOLE_OBJECT_SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
         }
-      } else if (creature->position[1] > g_TurnBallSimulation.position[1]) {
-        splashPosition[0] = creature->position[0];
-        splashPosition[2] = creature->position[2];
-        splashPosition[1] = creature->groundHeight;
+      } else if (creature->position[AXIS_Y] >
+          g_TurnBallSimulation.position[AXIS_Y]) {
+        splashPosition[AXIS_X] = creature->position[AXIS_X];
+        splashPosition[AXIS_Z] = creature->position[AXIS_Z];
+        splashPosition[AXIS_Y] = creature->groundHeight;
         SpawnRipple(splashPosition);
         PlaySound(SOUND_SPLASH, HOLE_OBJECT_SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
       }
 
-      if (creature->position[1] < g_TurnBallSimulation.position[1]) {
+      if (creature->position[AXIS_Y] < g_TurnBallSimulation.position[AXIS_Y]) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       } else {
-        s32 alpha = (g_TurnBallSimulation.position[1] - creature->position[1]) *
+        s32 alpha = (g_TurnBallSimulation.position[AXIS_Y] -
+                        creature->position[AXIS_Y]) *
             0xFF / CHEEP_CHEEP_FADE_DEPTH;
 
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, alpha);
       }
 
-      if (g_TurnBallSimulation.position[1] + CHEEP_CHEEP_DEPTH <
-          creature->position[1]) {
+      if (g_TurnBallSimulation.position[AXIS_Y] + CHEEP_CHEEP_DEPTH <
+          creature->position[AXIS_Y]) {
         creature->state = HOLE_CREATURE_NONE;
       }
 
@@ -401,7 +407,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     } else if (creature->state == HOLE_CREATURE_MONKEY) {
       creature->velocity[1] += MONKEY_GRAVITY;
-      creature->position[1] += creature->velocity[1];
+      creature->position[AXIS_Y] += creature->velocity[1];
       switch (++creature->frameCount) {
         case MONKEY_SECOND_FRAME:
           OpenEncodedAsset(f_MonkeyFrameAssets[1], &asset);
@@ -418,17 +424,17 @@ void DrawHoleCreatures(Gfx** displayListHead) {
           break;
       }
 
-      if (creature->position[1] > g_HoleSetup.cupPosition[AXIS_Y]) {
-        creature->position[1] = g_HoleSetup.cupPosition[AXIS_Y];
+      if (creature->position[AXIS_Y] > g_HoleSetup.cupPosition[AXIS_Y]) {
+        creature->position[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
       }
 
       if (creature->frameCount >= MONKEY_LIFETIME) {
         creature->state = HOLE_CREATURE_NONE;
       }
 
-      translation[0] = creature->position[0] * COURSE_TO_WORLD_SCALE;
-      translation[1] = creature->position[1] * COURSE_TO_WORLD_SCALE;
-      translation[2] = creature->position[2] * COURSE_TO_WORLD_SCALE;
+      translation[0] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      translation[1] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      translation[2] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       rotation[0] = 0.0f;
       rotation[1] = GetCameraYaw();
       rotation[2] = 0;

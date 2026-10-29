@@ -2792,21 +2792,21 @@ s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32* position) {
       guTranslate(
           &offsetMatrix, point->offset[0], point->offset[1], point->offset[2]);
       guMtxCatL(&offsetMatrix, &pointMatrix, &pointMatrix);
-      guMtxXFML(&pointMatrix, 0.0f, 0.0f, 0.0f, &position[0], &position[1],
-          &position[2]);
-      position[0] *= MODEL_TO_WORLD_SCALE;
-      position[1] *= MODEL_TO_WORLD_SCALE;
-      position[2] *= MODEL_TO_WORLD_SCALE;
+      guMtxXFML(&pointMatrix, 0.0f, 0.0f, 0.0f, &position[AXIS_X],
+          &position[AXIS_Y], &position[AXIS_Z]);
+      position[AXIS_X] *= MODEL_TO_WORLD_SCALE;
+      position[AXIS_Y] *= MODEL_TO_WORLD_SCALE;
+      position[AXIS_Z] *= MODEL_TO_WORLD_SCALE;
       return 0;
     }
 
     /* The chained assignment is there to match */
-    position[0] = position[1] = position[2] = 0.0f;
+    position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
     return 1;
   }
 
   /* The chained assignment is there to match */
-  position[0] = position[1] = position[2] = 0.0f;
+  position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
   return -1;
 }
 
@@ -2814,9 +2814,9 @@ void GetCharacterSlotMatrix(CharacterSlot* slot, Mat4 matrix) {
   Mat4 translation;
   Mat4 transform;
 
-  guTranslateF(translation, slot->position[0] * SLOT_POSITION_SCALE,
-      slot->position[1] * SLOT_POSITION_SCALE,
-      slot->position[2] * SLOT_POSITION_SCALE);
+  guTranslateF(translation, slot->position[AXIS_X] * SLOT_POSITION_SCALE,
+      slot->position[AXIS_Y] * SLOT_POSITION_SCALE,
+      slot->position[AXIS_Z] * SLOT_POSITION_SCALE);
   guRotateRPYF(transform,
       (s32)(ROLL_ORIGIN_DEGREES -
           (s32)(slot->rotation[0] * RADIANS_TO_DEGREES)),
@@ -2836,11 +2836,12 @@ s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32* position) {
   result = GetCharacterPointModelPosition(slotIndex, pointId, modelPosition);
   if (result < 0) {
     /* The chained assignment is there to match */
-    position[0] = position[1] = position[2] = 0.0f;
+    position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
   } else {
     GetCharacterSlotMatrix(GetUsedCharacterSlot(slotIndex), matrix);
-    guMtxXFMF(matrix, modelPosition[0], modelPosition[1], modelPosition[2],
-        &position[0], &position[1], &position[2]);
+    guMtxXFMF(matrix, modelPosition[AXIS_X], modelPosition[AXIS_Y],
+        modelPosition[AXIS_Z], &position[AXIS_X], &position[AXIS_Y],
+        &position[AXIS_Z]);
   }
 
   return result;

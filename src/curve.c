@@ -46,11 +46,11 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
   f32 catchUpFraction;
 
   if (f_PathPointIndex >= pointCount - 1) {
-    position[0] = points[pointCount - 1][0];
-    position[1] = points[pointCount - 1][1];
+    position[AXIS_X] = points[pointCount - 1][0];
+    position[AXIS_Y] = points[pointCount - 1][1];
     f_PathStepIndex = 0;
     f_PathPointIndex = 0;
-    position[2] = points[pointCount - 1][2];
+    position[AXIS_Z] = points[pointCount - 1][2];
     return 1;
   }
 
@@ -94,10 +94,10 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
         break;
     }
 
-    f_PathPosition[0] = points[0][0];
-    f_PathPosition[1] = points[0][1];
+    f_PathPosition[AXIS_X] = points[0][0];
+    f_PathPosition[AXIS_Y] = points[0][1];
     f_PathPointIndex = 1;
-    f_PathPosition[2] = points[0][2];
+    f_PathPosition[AXIS_Z] = points[0][2];
     f_PathProgressStep = 1.0f / f_PathStepsPerSegment;
   }
 
@@ -114,24 +114,24 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
   stepsPerSegment = f_PathStepsPerSegment;
   catchUpFraction = (1.0f / stepsPerSegment) * f_PathCatchUp;
   progress = f_PathProgress;
-  f_PathPosition[0] +=
+  f_PathPosition[AXIS_X] +=
       (s32)((f_PathSegment[0][0] +
                 ((f_PathSegment[1][0] - f_PathSegment[0][0]) * progress) -
-                f_PathPosition[0]) *
+                f_PathPosition[AXIS_X]) *
           catchUpFraction);
-  f_PathPosition[1] +=
+  f_PathPosition[AXIS_Y] +=
       (s32)((f_PathSegment[0][1] +
                 ((f_PathSegment[1][1] - f_PathSegment[0][1]) * progress) -
-                f_PathPosition[1]) *
+                f_PathPosition[AXIS_Y]) *
           catchUpFraction);
-  f_PathPosition[2] +=
+  f_PathPosition[AXIS_Z] +=
       (s32)((f_PathSegment[0][2] +
                 ((f_PathSegment[1][2] - f_PathSegment[0][2]) * progress) -
-                f_PathPosition[2]) *
+                f_PathPosition[AXIS_Z]) *
           catchUpFraction);
-  position[0] = f_PathPosition[0];
-  position[1] = f_PathPosition[1];
-  position[2] = f_PathPosition[2];
+  position[AXIS_X] = f_PathPosition[AXIS_X];
+  position[AXIS_Y] = f_PathPosition[AXIS_Y];
+  position[AXIS_Z] = f_PathPosition[AXIS_Z];
   f_PathStepIndex++;
   f_PathProgress = progress + f_PathProgressStep;
   if (stepsPerSegment <= f_PathStepIndex) {

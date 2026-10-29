@@ -690,7 +690,7 @@ void PlayLogoClubSound(void) {
             (s32)(f_LogoClubOrbitRadius * LOGO_CLUB_SOUND_FADE_RATE),
         0,
         SOUND_FULL_SCALE -
-            ((f_LogoClubPosition[0] - (SCREEN_WIDTH / 2)) /
+            ((f_LogoClubPosition[AXIS_X] - (SCREEN_WIDTH / 2)) /
                 LOGO_CLUB_PIXELS_PER_PAN_STEP));
   }
 }
@@ -1461,21 +1461,21 @@ void UpdateOpening(void) {
           TiltEditorCamera(1, -0.324127f, 0x28);
           f_OpeningScene++;
           LoadOpeningShotBall();
-          f_OpeningShotSimulation.position[0] = 0xF1B96;
-          f_OpeningShotSimulation.position[2] = 0x48CFDC;
-          f_OpeningShotSimulation.position[1] =
+          f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
+          f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
+          f_OpeningShotSimulation.position[AXIS_Y] =
               GetGroundHeight(0xF1B96, 0x48CFDC);
           f_ShotBallScale = 2;
           f_OpeningSparksOrigin[0] =
-              f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+              f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
           f_OpeningSparksOrigin[1] =
-              f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+              f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
           f_OpeningSparksOrigin[2] =
-              f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+              f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
           ClearEffects();
-          D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[0];
-          D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
-          D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
+          D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[AXIS_X];
+          D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[AXIS_Y];
+          D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[AXIS_Z];
         }
 
         break;
@@ -1581,9 +1581,9 @@ void UpdateOpening(void) {
       case 0x28:
         PlaceEditorCamera(
             1269.768f, -127.806f, 4719.564f, 1179.989f, -111.987f, 4715.451f);
-        f_OpeningShotSimulation.position[0] = 0xF1B96;
-        f_OpeningShotSimulation.position[2] = 0x48CFDC;
-        f_OpeningShotSimulation.position[1] =
+        f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
+        f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
+        f_OpeningShotSimulation.position[AXIS_Y] =
             GetGroundHeight(0xF1B96, 0x48CFDC);
         f_OpeningShotSimulation.playerIndex = 0;
         f_OpeningShotSimulation.unkA0 = 0;
@@ -1625,21 +1625,21 @@ void UpdateOpening(void) {
         f_LookAtEaseMode = 0;
         f_OpeningSceneFramesLeft = 0x64;
         D_8020AE44_ovl_05 = 0;
-        f_OpeningShotSimulation.position[0] = 0xF1882;
-        f_OpeningShotSimulation.position[2] = 0x48D4C4;
+        f_OpeningShotSimulation.position[AXIS_X] = 0xF1882;
+        f_OpeningShotSimulation.position[AXIS_Z] = 0x48D4C4;
         f_OpeningScene++;
-        f_OpeningShotSimulation.position[1] =
+        f_OpeningShotSimulation.position[AXIS_Y] =
             GetGroundHeight(0xF1882, 0x48D4C4);
         f_ShotBallScale = 2;
-        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[0];
-        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
-        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
+        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[AXIS_X];
+        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[AXIS_Y];
+        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[AXIS_Z];
         f_OpeningSparksOrigin[0] =
-            f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
         f_OpeningSparksOrigin[1] =
-            f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         f_OpeningSparksOrigin[2] =
-            f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         break;
       case 0x33:
         if (f_OpeningSceneFramesLeft == 0x18) {
@@ -1709,9 +1709,9 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0x14) {
-          f_OpeningShotSimulation.position[0] = 0xF1B96;
-          f_OpeningShotSimulation.position[2] = 0x48CFDC;
-          f_OpeningShotSimulation.position[1] =
+          f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
+          f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
+          f_OpeningShotSimulation.position[AXIS_Y] =
               GetGroundHeight(0xF1B96, 0x48CFDC);
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
@@ -1748,20 +1748,20 @@ void UpdateOpening(void) {
         LoadNameLogo(3, 0);
         D_8020AE44_ovl_05 = 0;
         f_LookAtEaseMode = 0;
-        f_OpeningShotSimulation.position[0] = 0xF3930;
-        f_OpeningShotSimulation.position[2] = 0x48D1D1;
-        f_OpeningShotSimulation.position[1] =
+        f_OpeningShotSimulation.position[AXIS_X] = 0xF3930;
+        f_OpeningShotSimulation.position[AXIS_Z] = 0x48D1D1;
+        f_OpeningShotSimulation.position[AXIS_Y] =
             GetGroundHeight(0xF3930, 0x48D1D1);
         f_ShotBallScale = 2;
-        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[0];
-        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
-        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
+        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[AXIS_X];
+        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[AXIS_Y];
+        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[AXIS_Z];
         f_OpeningSparksOrigin[0] =
-            f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
         f_OpeningSparksOrigin[1] =
-            f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         f_OpeningSparksOrigin[2] =
-            f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         break;
       case 0x51:
         if (f_OpeningSceneFramesLeft == 0x18) {
@@ -1843,20 +1843,20 @@ void UpdateOpening(void) {
         f_OpeningScene++;
         LoadNameLogo(1, 0);
         f_OpeningSceneFramesLeft = 0xA;
-        f_OpeningShotSimulation.position[0] = 0xF190E;
-        f_OpeningShotSimulation.position[2] = 0x48D416;
-        f_OpeningShotSimulation.position[1] =
+        f_OpeningShotSimulation.position[AXIS_X] = 0xF190E;
+        f_OpeningShotSimulation.position[AXIS_Z] = 0x48D416;
+        f_OpeningShotSimulation.position[AXIS_Y] =
             GetGroundHeight(0xF190E, 0x48D416);
         f_ShotBallScale = 2;
-        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[0];
-        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
-        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
+        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[AXIS_X];
+        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[AXIS_Y];
+        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[AXIS_Z];
         f_OpeningSparksOrigin[0] =
-            f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
         f_OpeningSparksOrigin[1] =
-            f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         f_OpeningSparksOrigin[2] =
-            f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+            f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         break;
       case 0x66:
         TurnEditorCamera(1, -1.0471976f, 0x50);
@@ -1901,9 +1901,9 @@ void UpdateOpening(void) {
         func_80206AA4_ovl_05(&f_OpeningShotSimulation);
         if (AreEditorMovesDone()) {
           PlaceEditorCamera(934.786f, -128.501f, 4716.105f,
-              f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE,
-              f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE,
-              f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE);
+              f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
+              f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+              f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
           f_LookAtEaseMode = 2;
           f_OpeningSceneFramesLeft = 0x8C;
           f_IsNameSlotShown[0] = 0;
@@ -2118,11 +2118,11 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft >= 0x17 &&
             f_OpeningSceneFramesLeft < 0x2A) {
           GetCharacterPointPosition(2, 2, point);
-          g_CurrentShot.ballPosition[0] = (s32)point[0] * 1024;
-          g_CurrentShot.ballPosition[2] = (s32)point[2] * 1024;
-          g_CurrentShot.ballPosition[1] =
-              GetGroundHeight(g_CurrentShot.ballPosition[0],
-                  g_CurrentShot.ballPosition[2]) +
+          g_CurrentShot.ballPosition[AXIS_X] = (s32)point[0] * 1024;
+          g_CurrentShot.ballPosition[AXIS_Z] = (s32)point[2] * 1024;
+          g_CurrentShot.ballPosition[AXIS_Y] =
+              GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X],
+                  g_CurrentShot.ballPosition[AXIS_Z]) +
               15360.0f;
           SpawnRisingClumps(D_8020C404_ovl_05);
         }
@@ -2864,9 +2864,9 @@ void UpdateOpening(void) {
       }
     }
 
-    point[0] = f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
-    point[1] = f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
-    point[2] = f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+    point[0] = f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    point[1] = f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    point[2] = f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     func_80206AA4_ovl_05(&f_OpeningShotSimulation);
   } else if (D_8020AE44_ovl_05 == 2) {
     func_80206AA4_ovl_05(&f_OpeningShotSimulation);
@@ -3246,25 +3246,28 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
     gfx = *displayListHead;
     for (slot = 0; slot < OPENING_BALL_SLOT_COUNT; slot++) {
       if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
-        position[0] = f_OpeningBallPositions[slot][0];
-        position[2] = f_OpeningBallPositions[slot][2];
-        position[1] = GetGroundHeight(position[0] * WORLD_TO_COURSE_SCALE,
-                          position[2] * WORLD_TO_COURSE_SCALE) *
+        position[AXIS_X] = f_OpeningBallPositions[slot][0];
+        position[AXIS_Z] = f_OpeningBallPositions[slot][2];
+        position[AXIS_Y] =
+            GetGroundHeight(position[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                position[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
             COURSE_TO_WORLD_SCALE;
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_1CYCLE);
         if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
           guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-              position[0], position[1] - OPENING_BALL_IN_AIR_SHADOW_DROP,
-              position[2]);
+              position[AXIS_X],
+              position[AXIS_Y] - OPENING_BALL_IN_AIR_SHADOW_DROP,
+              position[AXIS_Z]);
         } else if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
           guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-              position[0], position[1] - OPENING_BALL_LARGE_SHADOW_DROP,
-              position[2]);
+              position[AXIS_X],
+              position[AXIS_Y] - OPENING_BALL_LARGE_SHADOW_DROP,
+              position[AXIS_Z]);
         } else {
           guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-              position[0], position[1], position[2]);
+              position[AXIS_X], position[AXIS_Y], position[AXIS_Z]);
         }
 
         guScale(&f_OpeningBallScaleMatrices[slot],
@@ -3308,15 +3311,15 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
         gDPPipeSync(gfx++);
         if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-          position[1] = f_OpeningBallPositions[slot][1];
+          position[AXIS_Y] = f_OpeningBallPositions[slot][1];
         }
 
         if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
-          position[1] += OPENING_BALL_LARGE_LIFT;
+          position[AXIS_Y] += OPENING_BALL_LARGE_LIFT;
         }
 
         guTranslate(&f_OpeningBallMatrices[slot][g_DrawBufferIndex],
-            position[0], position[1], position[2]);
+            position[AXIS_X], position[AXIS_Y], position[AXIS_Z]);
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -3389,12 +3392,12 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           }
 
           if (f_HasLogoBallLastPosition) {
-            movement[0] =
-                f_OpeningBallPositions[slot][0] - f_LogoBallLastPosition[0];
-            movement[1] =
-                f_OpeningBallPositions[slot][1] - f_LogoBallLastPosition[1];
-            movement[2] =
-                f_OpeningBallPositions[slot][2] - f_LogoBallLastPosition[2];
+            movement[0] = f_OpeningBallPositions[slot][0] -
+                f_LogoBallLastPosition[AXIS_X];
+            movement[1] = f_OpeningBallPositions[slot][1] -
+                f_LogoBallLastPosition[AXIS_Y];
+            movement[2] = f_OpeningBallPositions[slot][2] -
+                f_LogoBallLastPosition[AXIS_Z];
           } else {
             f_HasLogoBallLastPosition = 1;
             movement[0] = 0.0f;
@@ -3405,9 +3408,9 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           rollAngle = sqrtf((movement[0] * movement[0]) +
               (movement[1] * movement[1]) + (movement[2] * movement[2]));
           rollAngle *= (f32)RADIANS_TO_DEGREES;
-          f_LogoBallLastPosition[0] = f_OpeningBallPositions[slot][0];
-          f_LogoBallLastPosition[1] = f_OpeningBallPositions[slot][1];
-          f_LogoBallLastPosition[2] = f_OpeningBallPositions[slot][2];
+          f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
+          f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
+          f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
           rollAngle = fabsf(rollAngle);
           if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
             f_LogoBallFrameIndex++;
@@ -3491,20 +3494,21 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
     gfx = *displayListHead;
     for (slot = 0; slot != OPENING_BALL_SLOT_COUNT; slot++) {
       if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
-        f_ProjectedBallPosition[0] = f_OpeningBallPositions[slot][0];
-        f_ProjectedBallPosition[2] = f_OpeningBallPositions[slot][2];
+        f_ProjectedBallPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
+        f_ProjectedBallPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
         if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-          f_ProjectedBallPosition[1] = f_OpeningBallPositions[slot][1];
+          f_ProjectedBallPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
         } else {
-          f_ProjectedBallPosition[1] =
+          f_ProjectedBallPosition[AXIS_Y] =
               GetGroundHeight(
-                  f_ProjectedBallPosition[0] * WORLD_TO_COURSE_SCALE,
-                  f_ProjectedBallPosition[2] * WORLD_TO_COURSE_SCALE) *
+                  f_ProjectedBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                  f_ProjectedBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
               COURSE_TO_WORLD_SCALE;
         }
 
-        if (ProjectPoint(f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
-                f_ProjectedBallPosition[2], &ballPoint) < 0) {
+        if (ProjectPoint(f_ProjectedBallPosition[AXIS_X],
+                f_ProjectedBallPosition[AXIS_Y],
+                f_ProjectedBallPosition[AXIS_Z], &ballPoint) < 0) {
           screenScale = ballPoint.scaleX;
           if (screenScale < 0.0f) {
             screenScale = -screenScale;
@@ -3527,24 +3531,26 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             }
           }
 
-          f_ProjectedBallPosition[1] =
+          f_ProjectedBallPosition[AXIS_Y] =
               GetGroundHeight(
-                  f_ProjectedBallPosition[0] * WORLD_TO_COURSE_SCALE,
-                  f_ProjectedBallPosition[2] * WORLD_TO_COURSE_SCALE) *
+                  f_ProjectedBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                  f_ProjectedBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
               COURSE_TO_WORLD_SCALE;
           if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
-            f_ProjectedBallPosition[1] -= PROJECTED_BALL_LARGE_SHADOW_DROP;
+            f_ProjectedBallPosition[AXIS_Y] -= PROJECTED_BALL_LARGE_SHADOW_DROP;
           }
 
           if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
             guTranslate(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
-                f_ProjectedBallPosition[0],
-                f_ProjectedBallPosition[1] - OPENING_BALL_IN_AIR_SHADOW_DROP,
-                f_ProjectedBallPosition[2]);
+                f_ProjectedBallPosition[AXIS_X],
+                f_ProjectedBallPosition[AXIS_Y] -
+                    OPENING_BALL_IN_AIR_SHADOW_DROP,
+                f_ProjectedBallPosition[AXIS_Z]);
           } else {
             guTranslate(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
-                f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
-                f_ProjectedBallPosition[2]);
+                f_ProjectedBallPosition[AXIS_X],
+                f_ProjectedBallPosition[AXIS_Y],
+                f_ProjectedBallPosition[AXIS_Z]);
           }
 
           guScale(&f_ProjectedShadowScaleMatrices[slot],
@@ -3681,11 +3687,11 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
 
             if (f_HasProjectedLogoBallLastPosition) {
               movement[0] = f_OpeningBallPositions[slot][0] -
-                  f_ProjectedLogoBallLastPosition[0];
+                  f_ProjectedLogoBallLastPosition[AXIS_X];
               movement[1] = f_OpeningBallPositions[slot][1] -
-                  f_ProjectedLogoBallLastPosition[1];
+                  f_ProjectedLogoBallLastPosition[AXIS_Y];
               movement[2] = f_OpeningBallPositions[slot][2] -
-                  f_ProjectedLogoBallLastPosition[2];
+                  f_ProjectedLogoBallLastPosition[AXIS_Z];
             } else {
               f_HasProjectedLogoBallLastPosition = 1;
               movement[0] = 0.0f;
@@ -3696,11 +3702,11 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             rollAngle = sqrtf((movement[0] * movement[0]) +
                 (movement[1] * movement[1]) + (movement[2] * movement[2]));
             rollAngle *= (f32)RADIANS_TO_DEGREES;
-            f_ProjectedLogoBallLastPosition[0] =
+            f_ProjectedLogoBallLastPosition[AXIS_X] =
                 f_OpeningBallPositions[slot][0];
-            f_ProjectedLogoBallLastPosition[1] =
+            f_ProjectedLogoBallLastPosition[AXIS_Y] =
                 f_OpeningBallPositions[slot][1];
-            f_ProjectedLogoBallLastPosition[2] =
+            f_ProjectedLogoBallLastPosition[AXIS_Z] =
                 f_OpeningBallPositions[slot][2];
             rollAngle = fabsf(rollAngle);
             if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
@@ -4245,12 +4251,12 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
   s32 bottom;
 
   if (f_ShotBallScale != 0) {
-    f_ShotBallPosition[0] =
-        f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
-    f_ShotBallPosition[2] =
-        f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
-    f_ShotBallPosition[1] =
-        (f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE) +
+    f_ShotBallPosition[AXIS_X] =
+        f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    f_ShotBallPosition[AXIS_Z] =
+        f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    f_ShotBallPosition[AXIS_Y] =
+        (f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) +
         SHOT_BALL_LIFT;
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -4258,19 +4264,19 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(gfx++);
-    if (ProjectPoint(f_ShotBallPosition[0], f_ShotBallPosition[1],
-            f_ShotBallPosition[2], &ballPoint) < 0) {
+    if (ProjectPoint(f_ShotBallPosition[AXIS_X], f_ShotBallPosition[AXIS_Y],
+            f_ShotBallPosition[AXIS_Z], &ballPoint) < 0) {
       gDPPipeSync(gfx++);
       gDPSetDepthSource(gfx++, G_ZS_PRIM);
       gDPSetPrimDepth(gfx++, ballPoint.depth, 0);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
-      f_ShotBallPosition[1] =
-          GetGroundHeight(f_ShotBallPosition[0] * WORLD_TO_COURSE_SCALE,
-              f_ShotBallPosition[2] * WORLD_TO_COURSE_SCALE) *
+      f_ShotBallPosition[AXIS_Y] =
+          GetGroundHeight(f_ShotBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
+              f_ShotBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
           COURSE_TO_WORLD_SCALE;
-      guTranslate(&f_ShotBallShadowTranslation, f_ShotBallPosition[0],
-          f_ShotBallPosition[1], f_ShotBallPosition[2]);
+      guTranslate(&f_ShotBallShadowTranslation, f_ShotBallPosition[AXIS_X],
+          f_ShotBallPosition[AXIS_Y], f_ShotBallPosition[AXIS_Z]);
       guScale(&f_ShotBallShadowScaling,
           f_ShotBallScale * SHOT_BALL_SHADOW_SCALE,
           f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE,
@@ -4393,30 +4399,30 @@ void EaseOpeningLookAt(void) {
   switch (f_LookAtEaseMode) {
     case LOOK_AT_EASE_FAST:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          ((f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE) -
+          ((f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           0.1f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          ((f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE) -
+          ((f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           0.1f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          ((f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE) -
+          ((f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.1f;
       MeasureEditorCamera();
       break;
     case LOOK_AT_EASE_SLOW:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          ((f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE) -
+          ((f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           0.01f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          ((f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE) -
+          ((f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           0.01f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          ((f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE) -
+          ((f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.01f;
       MeasureEditorCamera();
@@ -4737,9 +4743,9 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     }
 
     guTranslate(&f_LogoClubTranslations[g_DrawBufferIndex],
-        f_LogoClubPosition[0] - (SCREEN_WIDTH / 2.0f),
-        f_LogoClubPosition[1] - (SCREEN_HEIGHT / 2.0f),
-        f_LogoClubPosition[2] + LOGO_Z);
+        f_LogoClubPosition[AXIS_X] - (SCREEN_WIDTH / 2.0f),
+        f_LogoClubPosition[AXIS_Y] - (SCREEN_HEIGHT / 2.0f),
+        f_LogoClubPosition[AXIS_Z] + LOGO_Z);
     guRotate(&f_LogoClubRotations[g_DrawBufferIndex], f_LogoClubAngle, 0.0f,
         0.0f, 1.0f);
     guScale(&f_LogoClubScalings[g_DrawBufferIndex], f_LogoClubScale[0],
@@ -5017,10 +5023,10 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     wobble = -sinf(f_LogoClubWobbleAngle * LOGO_DEGREES_TO_RADIANS) *
         LOGO_CLUB_FIRST_WOBBLE;
     f_LogoState = LOGO_CLUB_CIRCLING;
-    f_LogoClubPosition[0] =
+    f_LogoClubPosition[AXIS_X] =
         (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_X;
-    f_LogoClubPosition[1] =
+    f_LogoClubPosition[AXIS_Y] =
         (s32)(-sinf(angle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_Y;
     f_IsLogoClubSwinging = 1;
@@ -5031,10 +5037,10 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
     wobble = -sinf(f_LogoClubWobbleAngle * LOGO_DEGREES_TO_RADIANS) *
         LOGO_CLUB_WOBBLE;
-    f_LogoClubPosition[0] =
+    f_LogoClubPosition[AXIS_X] =
         (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_X;
-    f_LogoClubPosition[1] =
+    f_LogoClubPosition[AXIS_Y] =
         (s32)(-sinf(angle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_Y;
     f_LogoClubOrbitRadius -= LOGO_CLUB_ORBIT_RADIUS_STEP;
@@ -5093,9 +5099,9 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
         (LOGO_SHRUNK_SCALE - f_LogoLetterScales[LOGO_LETTER_M][0]) *
         (1.0f / LOGO_SHRINK_FRAMES);
     f_LogoClubStepX =
-        (LOGO_SHRUNK_CLUB_X - f_LogoClubPosition[0]) / LOGO_SHRINK_FRAMES;
+        (LOGO_SHRUNK_CLUB_X - f_LogoClubPosition[AXIS_X]) / LOGO_SHRINK_FRAMES;
     f_LogoClubStepY =
-        (LOGO_SHRUNK_CLUB_Y - f_LogoClubPosition[1]) / LOGO_SHRINK_FRAMES;
+        (LOGO_SHRUNK_CLUB_Y - f_LogoClubPosition[AXIS_Y]) / LOGO_SHRINK_FRAMES;
   }
 
   if (f_LogoState == LOGO_SHRINKING) {
@@ -5110,8 +5116,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
 
     f_LogoLetters[LOGO_LETTER_L].x += f_LogoLetterSteps[LOGO_LETTER_L];
     f_LogoLetters[LOGO_LETTER_L].y += f_LogoLetterRises[LOGO_LETTER_A];
-    f_LogoClubPosition[0] += f_LogoClubStepX;
-    f_LogoClubPosition[1] += f_LogoClubStepY;
+    f_LogoClubPosition[AXIS_X] += f_LogoClubStepX;
+    f_LogoClubPosition[AXIS_Y] += f_LogoClubStepY;
     f_LogoLetterScales[LOGO_LETTER_L][0] += f_LogoScaleStep;
     f_LogoLetterScales[LOGO_LETTER_L][1] += f_LogoScaleStep;
     f_LogoClubScale[0] += f_LogoScaleStep;

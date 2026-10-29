@@ -1094,9 +1094,9 @@ void GenerateClub(s32 clubIndex) {
 
     osSyncPrintf("Generation Club%d PowerMode%d\n", clubIndex, shotMode);
     for (tryIndex = 0; tryIndex < MAX_CLUB_TRY_COUNT; tryIndex++) {
-      simulation.position[0] = 0;
-      simulation.position[1] = 0;
-      simulation.position[2] = 0;
+      simulation.position[AXIS_X] = 0;
+      simulation.position[AXIS_Y] = 0;
+      simulation.position[AXIS_Z] = 0;
       LaunchBallSimulation(
           &simulation, LAUNCH_PURPOSE_CLUB_TEST, &f_ClubTestShot);
       for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
@@ -1107,7 +1107,8 @@ void GenerateClub(s32 clubIndex) {
         StepBallSimulation(&simulation);
       }
 
-      distance = IntLength2D(simulation.position[0], simulation.position[2]);
+      distance =
+          IntLength2D(simulation.position[AXIS_X], simulation.position[AXIS_Z]);
       error = distance - targetDistance;
       osSyncPrintf("Try %d: dist %fYd:  Error %f%\n", tryIndex + 1,
           distance * YARDS_PER_UNIT, error / targetDistance * 100.0f);
@@ -1149,8 +1150,10 @@ void GenerateClub(s32 clubIndex) {
     }
 
     club->deflection[shotMode] = STRAIGHT_ANGLE -
-        (s32)(atan2(simulation.position[2] - simulation.startPosition[2],
-                  simulation.position[0] - simulation.startPosition[0]) *
+        (s32)(atan2(simulation.position[AXIS_Z] -
+                      simulation.startPosition[AXIS_Z],
+                  simulation.position[AXIS_X] -
+                      simulation.startPosition[AXIS_X]) *
             RADIANS_TO_BINARY_ANGLE);
   }
 
@@ -1324,9 +1327,9 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
       PUTT_OVERSHOOT;
   putter->power[shotMode] = (s32)(reach * 130.048f) / 3;
   for (; tryIndex < MAX_PUTT_TRY_COUNT; tryIndex++) {
-    simulation.position[0] = 0;
-    simulation.position[1] = 0;
-    simulation.position[2] = 0;
+    simulation.position[AXIS_X] = 0;
+    simulation.position[AXIS_Y] = 0;
+    simulation.position[AXIS_Z] = 0;
     simulation.surface = PUTT_TEST_SURFACE;
     LaunchBallSimulation(
         &simulation, LAUNCH_PURPOSE_CLUB_TEST, &f_PutterTestShot);
@@ -1338,7 +1341,8 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
       StepBallSimulation(&simulation);
     }
 
-    distance = IntLength2D(simulation.position[0], simulation.position[2]);
+    distance =
+        IntLength2D(simulation.position[AXIS_X], simulation.position[AXIS_Z]);
     error = fabsf(distance - targetDistance);
     if (error < targetDistance * GENERATION_TOLERANCE) {
       break;
@@ -1740,9 +1744,10 @@ static inline Boolean IsFartherThan(s32 distance, s32 limit) {
  */
 void HandleShotModeInput(void) {
   Club* club = GetSelectedClub();
-  s32 cupDistance =
-      GetCupDistance(g_CurrentShot.ballPosition[0] - g_HoleSetup.cupPosition[0],
-          g_CurrentShot.ballPosition[2] - g_HoleSetup.cupPosition[2]) *
+  s32 cupDistance = GetCupDistance(g_CurrentShot.ballPosition[AXIS_X] -
+                            g_HoleSetup.cupPosition[AXIS_X],
+                        g_CurrentShot.ballPosition[AXIS_Z] -
+                            g_HoleSetup.cupPosition[AXIS_Z]) *
       YARDS_PER_UNIT;
   SoundId sound;
 

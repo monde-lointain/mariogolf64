@@ -4869,8 +4869,8 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
-      position[0] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
-      position[1] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
+      position[AXIS_X] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
+      position[AXIS_Y] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
       gDPLoadTextureBlock(gfx++,
           ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
               (g_ChoosingControllerIndices[index] *
@@ -4880,9 +4880,9 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, position[0] << 2, position[1] << 2,
-          (position[0] + CONTROLLER_ICON_SIZE) << 2,
-          (position[1] + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+      gSPScisTextureRectangle(gfx++, position[AXIS_X] << 2,
+          position[AXIS_Y] << 2, (position[AXIS_X] + CONTROLLER_ICON_SIZE) << 2,
+          (position[AXIS_Y] + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -4891,8 +4891,8 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   image = D_800FF180[1];
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   for (index = 0; index != g_ChosenPlayerCount; index++) {
-    position[0] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
-    position[1] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
+    position[AXIS_X] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
+    position[AXIS_Y] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
     if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)image + PALETTED_TEXELS_OFFSET +
@@ -4913,10 +4913,11 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (position[0] + PLAYER_LABEL_OFFSET_X) << 2,
-        (position[1] + PLAYER_LABEL_OFFSET_Y) << 2,
-        (position[0] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH) << 2,
-        (position[1] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT) << 2,
+    gSPScisTextureRectangle(gfx++,
+        (position[AXIS_X] + PLAYER_LABEL_OFFSET_X) << 2,
+        (position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y) << 2,
+        (position[AXIS_X] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH) << 2,
+        (position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }

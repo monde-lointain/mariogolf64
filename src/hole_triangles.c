@@ -358,9 +358,9 @@ void DrawRings(
               ringPoint[2] = 0;
               guMtxXFMF(transform, ringPoint[0], ringPoint[1], ringPoint[2],
                   &worldPoint[0], &worldPoint[1], &worldPoint[2]);
-              position[0] = worldPoint[0] * POSITION_SCALE;
-              position[1] = worldPoint[1] * POSITION_SCALE;
-              position[2] = worldPoint[2] * POSITION_SCALE;
+              position[AXIS_X] = worldPoint[0] * POSITION_SCALE;
+              position[AXIS_Y] = worldPoint[1] * POSITION_SCALE;
+              position[AXIS_Z] = worldPoint[2] * POSITION_SCALE;
               SpawnSparkle(position);
             }
           }

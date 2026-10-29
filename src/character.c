@@ -540,9 +540,10 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubKind, s32 shotMode) {
     distance = f_BallDistances[modelIndex][column];
   } else if (GetCharacterPointModelPosition(slotIndex, pointId, position) ==
       0) {
-    sprintf(text, "pres %f,%f,%f", position[0], position[1], position[2]);
+    sprintf(text, "pres %f,%f,%f", position[AXIS_X], position[AXIS_Y],
+        position[AXIS_Z]);
     PrintDebugText(text, POINT_POSITION_TEXT_COLUMN, POINT_POSITION_TEXT_ROW);
-    depth = position[2] * POINT_DEPTH_TO_BALL_DISTANCE;
+    depth = position[AXIS_Z] * POINT_DEPTH_TO_BALL_DISTANCE;
     if (depth < 0.0f) {
       depth = -depth;
     }
@@ -2139,9 +2140,9 @@ void DrawCharacterAndShadow(
       f_ModelMatrices[slotIndex][g_DrawBufferIndex] =
           f_ModelMatrices[slotIndex][g_DrawBufferIndex ^ 1];
     } else {
-      guTranslateF(transform, slot->position[0] * COURSE_TO_WORLD_SCALE,
-          slot->position[1] * COURSE_TO_WORLD_SCALE,
-          slot->position[2] * COURSE_TO_WORLD_SCALE);
+      guTranslateF(transform, slot->position[AXIS_X] * COURSE_TO_WORLD_SCALE,
+          slot->position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+          slot->position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
       guRotateRPYF(rotation,
           (s32)(ROLL_ORIGIN_DEGREES -
               (s32)(slot->rotation[0] * RADIANS_TO_DEGREES)),

@@ -2785,21 +2785,25 @@ static inline void DebugPlaceBall(s32 playerIndex) {
   D_8022718C_ovl_00 = g_GameState.holeIndex;
   SetGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
   sprintf(text, "X:%X Y:%X Z:%X  Attr%d             ",
-      g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[1],
-      g_CurrentShot.ballPosition[2],
-      GetSurface(g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]));
+      g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Y],
+      g_CurrentShot.ballPosition[AXIS_Z],
+      GetSurface(g_CurrentShot.ballPosition[AXIS_X],
+          g_CurrentShot.ballPosition[AXIS_Z]));
   PrintDebugText(text, 3, 6);
   ClearGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
   if (g_ControllerData[1].button & Z_TRIG) {
-    g_CurrentShot.ballPosition[0] += g_ControllerStates[1].stickX *
+    g_CurrentShot.ballPosition[AXIS_X] += g_ControllerStates[1].stickX *
         ((ABS(g_ControllerStates[1].stickX) * 2) + 1);
-    g_CurrentShot.ballPosition[2] += g_ControllerStates[1].stickY *
+    g_CurrentShot.ballPosition[AXIS_Z] += g_ControllerStates[1].stickY *
         ((ABS(g_ControllerStates[1].stickY) * 2) + 1);
-    g_CurrentShot.ballPosition[1] = GetGroundHeight(
-        g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]);
-    g_Players[playerIndex].ballPosition[0] = g_CurrentShot.ballPosition[0];
-    g_Players[playerIndex].ballPosition[1] = g_CurrentShot.ballPosition[1];
-    g_Players[playerIndex].ballPosition[2] = g_CurrentShot.ballPosition[2];
+    g_CurrentShot.ballPosition[AXIS_Y] = GetGroundHeight(
+        g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
+    g_Players[playerIndex].ballPosition[AXIS_X] =
+        g_CurrentShot.ballPosition[AXIS_X];
+    g_Players[playerIndex].ballPosition[AXIS_Y] =
+        g_CurrentShot.ballPosition[AXIS_Y];
+    g_Players[playerIndex].ballPosition[AXIS_Z] =
+        g_CurrentShot.ballPosition[AXIS_Z];
     PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
   }
 }
@@ -2883,13 +2887,13 @@ static inline void FrameBallAndShot(void) {
   f_DebugFramingPitch += g_ControllerStates[1].stickY * 0.002f;
   ClearFramedSpheres();
   SetFramingAngles(f_DebugFramingPitch, f_DebugFramingYaw);
-  center[0] = g_TurnBallSimulation.position[0] * COURSE_TO_WORLD_SCALE;
-  center[1] = g_TurnBallSimulation.position[1] * COURSE_TO_WORLD_SCALE;
-  center[2] = g_TurnBallSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+  center[0] = g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+  center[1] = g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+  center[2] = g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   AddFramedSphere(center, 7.5f);
-  center[0] = g_CurrentShot.ballPosition[0] * COURSE_TO_WORLD_SCALE;
-  center[1] = g_CurrentShot.ballPosition[1] * COURSE_TO_WORLD_SCALE;
-  center[2] = g_CurrentShot.ballPosition[2] * COURSE_TO_WORLD_SCALE;
+  center[0] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+  center[1] = g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+  center[2] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   AddFramedSphere(center, 7.5f);
   FrameSpheres(0);
   GetFramedView(g_Cameras[0].view.eye, g_Cameras[0].view.lookAt);
@@ -3179,9 +3183,11 @@ void UpdateTurns(void) {
             GetCrossSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
         UpdateShotFlags();
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
-        g_CurrentShot.cupDistance = GetCupDistance(
-            g_TurnBallSimulation.position[0] - g_HoleSetup.cupPosition[0],
-            g_TurnBallSimulation.position[2] - g_HoleSetup.cupPosition[AXIS_Z]);
+        g_CurrentShot.cupDistance =
+            GetCupDistance(g_TurnBallSimulation.position[AXIS_X] -
+                    g_HoleSetup.cupPosition[AXIS_X],
+                g_TurnBallSimulation.position[AXIS_Z] -
+                    g_HoleSetup.cupPosition[AXIS_Z]);
         g_RoundHud.greenGridState = 1;
         g_RoundHud.unkF = 1;
         g_RoundHud.unk12 = 1;
@@ -4141,9 +4147,9 @@ void UpdateTurns(void) {
         }
 
         ReuseLastCharacterMatrices(0);
-        previousPosition[0] = g_TurnBallSimulation.position[0];
-        previousPosition[1] = g_TurnBallSimulation.position[1];
-        previousPosition[2] = g_TurnBallSimulation.position[2];
+        previousPosition[AXIS_X] = g_TurnBallSimulation.position[AXIS_X];
+        previousPosition[AXIS_Y] = g_TurnBallSimulation.position[AXIS_Y];
+        previousPosition[AXIS_Z] = g_TurnBallSimulation.position[AXIS_Z];
         StepBallSimulation(&g_TurnBallSimulation);
         func_80207660_ovl_00(&g_Players[playerIndex]);
         isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
@@ -4161,14 +4167,14 @@ void UpdateTurns(void) {
         }
 
         if (g_MergedController.buttons & (Z_TRIG | L_TRIG)) {
-          u32 previousDistance =
-              IntLength2D(previousPosition[0] - g_HoleSetup.cupPosition[0],
-                  previousPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
+          u32 previousDistance = IntLength2D(
+              previousPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+              previousPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
 
           for (i = 0; i < 4; i++) {
-            u32 distance = IntLength2D(
-                g_TurnBallSimulation.position[0] - g_HoleSetup.cupPosition[0],
-                g_TurnBallSimulation.position[2] -
+            u32 distance = IntLength2D(g_TurnBallSimulation.position[AXIS_X] -
+                    g_HoleSetup.cupPosition[AXIS_X],
+                g_TurnBallSimulation.position[AXIS_Z] -
                     g_HoleSetup.cupPosition[AXIS_Z]);
 
             if (g_TurnBallSimulation.state != BALL_STATE_ROLLING ||
@@ -4299,16 +4305,16 @@ void UpdateTurns(void) {
             }
 
             if ((s8)player->ballSurface != 0x17) {
-              player->ballSurface =
-                  GetSurface(player->ballPosition[0], player->ballPosition[2]);
+              player->ballSurface = GetSurface(
+                  player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
             }
           } else if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
-            player->ballPosition[0] = g_TurnBallSimulation.unkC[0];
-            player->ballPosition[2] = g_TurnBallSimulation.unkC[2];
-            player->ballPosition[1] = GetGroundHeight(
-                player->ballPosition[0], player->ballPosition[2]);
-            player->ballSurface =
-                GetSurface(player->ballPosition[0], player->ballPosition[2]);
+            player->ballPosition[AXIS_X] = g_TurnBallSimulation.unkC[AXIS_X];
+            player->ballPosition[AXIS_Z] = g_TurnBallSimulation.unkC[AXIS_Z];
+            player->ballPosition[AXIS_Y] = GetGroundHeight(
+                player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
+            player->ballSurface = GetSurface(
+                player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
             g_Players[playerIndex].strokeCount++;
             if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               if (g_Players[playerIndex].strokeCount > STROKE_COUNT_MAX) {
@@ -4320,9 +4326,12 @@ void UpdateTurns(void) {
                   g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
             }
           } else {
-            player->ballPosition[0] = g_TurnBallSimulation.position[0];
-            player->ballPosition[1] = g_TurnBallSimulation.position[1];
-            player->ballPosition[2] = g_TurnBallSimulation.position[2];
+            player->ballPosition[AXIS_X] =
+                g_TurnBallSimulation.position[AXIS_X];
+            player->ballPosition[AXIS_Y] =
+                g_TurnBallSimulation.position[AXIS_Y];
+            player->ballPosition[AXIS_Z] =
+                g_TurnBallSimulation.position[AXIS_Z];
             player->ballSurface = g_TurnBallSimulation.surface;
           }
 
@@ -4843,7 +4852,7 @@ void UpdateTurns(void) {
   }
 
   MarkNearbyGroundTiles(
-      g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]);
+      g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
   GetBallSurfaceInfo(
       &g_Players[g_GameState.currentPlayerIndex], &D_80227150_ovl_00);
   if (areCallsAllowed) {
@@ -4875,11 +4884,12 @@ void UpdateTurns(void) {
     }
 
     length = distance * scale;
-    g_CurrentShot.unk44[0] = (cosine * length) + g_CurrentShot.ballPosition[0];
-    g_CurrentShot.unk44[2] =
-        (sinf(angle) * length) + g_CurrentShot.ballPosition[2];
-    g_CurrentShot.unk44[1] =
-        GetGroundHeight(g_CurrentShot.unk44[0], g_CurrentShot.unk44[2]);
+    g_CurrentShot.unk44[AXIS_X] =
+        (cosine * length) + g_CurrentShot.ballPosition[AXIS_X];
+    g_CurrentShot.unk44[AXIS_Z] =
+        (sinf(angle) * length) + g_CurrentShot.ballPosition[AXIS_Z];
+    g_CurrentShot.unk44[AXIS_Y] = GetGroundHeight(
+        g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z]);
   }
 
   UpdateGolfBalls();
