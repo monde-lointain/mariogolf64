@@ -58,17 +58,54 @@ typedef struct MessageTable {
 #define FILE_HEADER_SIZE 8
 
 /* Character codes */
-/* The first that draws a glyph of the glyph file */
-#define MESSAGE_CODE_GLYPH 0x100
-#define MESSAGE_CODE_CONTROL 0x8000
-#define MESSAGE_CODE_NAME 0x800F
-#define MESSAGE_CODE_VALUE 0x8014 /* Then one for each of the slot's values */
-/* The current player's score, as the game mode counts it */
-#define MESSAGE_CODE_SCORE 0x8018
-#define MESSAGE_CODE_LINE_BREAK 0x8019
-/* Then one for each of g_TextPalette's colors */
-#define MESSAGE_CODE_PALETTE_COLOR 0x8022
-#define MESSAGE_CODE_SLOT_COLOR 0x8026
+enum MessageCode {
+  /* The first that draws a glyph of the glyph file */
+  MESSAGE_CODE_GLYPH = 0x100,
+  /* The first that controls the text instead of drawing a glyph */
+  MESSAGE_CODE_CONTROL = 0x8000,
+  /* The codes up to MESSAGE_CODE_R_BUTTON draw an icon of TEXT_ASSET_ICONS */
+  MESSAGE_CODE_A_BUTTON = MESSAGE_CODE_CONTROL,
+  MESSAGE_CODE_B_BUTTON,
+  MESSAGE_CODE_Z_BUTTON,
+  /* The next four draw the Z button too */
+  MESSAGE_CODE_UNK32771,
+  MESSAGE_CODE_UNK32772,
+  MESSAGE_CODE_UNK32773,
+  MESSAGE_CODE_UNK32774,
+  MESSAGE_CODE_C_UP,
+  MESSAGE_CODE_C_DOWN,
+  MESSAGE_CODE_C_LEFT,
+  MESSAGE_CODE_C_RIGHT,
+  /* Drawn as nothing */
+  MESSAGE_CODE_UNK32779,
+  MESSAGE_CODE_START_BUTTON,
+  MESSAGE_CODE_L_BUTTON,
+  MESSAGE_CODE_R_BUTTON,
+  MESSAGE_CODE_NAME,
+  /* Then one for each of the slot's values */
+  MESSAGE_CODE_VALUE = 0x8014,
+  /* The current player's score, as the game mode counts it */
+  MESSAGE_CODE_SCORE = 0x8018,
+  MESSAGE_CODE_LINE_BREAK,
+  /* Then one for each of g_TextPalette's colors */
+  MESSAGE_CODE_PALETTE_COLOR = 0x8022,
+  MESSAGE_CODE_SLOT_COLOR = 0x8026
+};
+
+/* The icons of TEXT_ASSET_ICONS, in their order in the image */
+enum TextIcon {
+  TEXT_ICON_A_BUTTON,
+  TEXT_ICON_B_BUTTON,
+  TEXT_ICON_START_BUTTON,
+  TEXT_ICON_Z_BUTTON,
+  TEXT_ICON_L_BUTTON,
+  TEXT_ICON_R_BUTTON,
+  TEXT_ICON_C_UP,
+  TEXT_ICON_C_DOWN,
+  TEXT_ICON_C_LEFT,
+  TEXT_ICON_C_RIGHT
+};
+
 /*
  * Marks drawn over the character before them take no room. In JIS X 0201,
  * 0xDE and 0xDF are the kana voicing marks.
@@ -582,39 +619,39 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           x = textSlot->x;
           y += LINE_SPACING + advance;
           break;
-        case 0x8000:
-          iconOffset = 0 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_A_BUTTON:
+          iconOffset = TEXT_ICON_A_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x8001:
-          iconOffset = 1 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_B_BUTTON:
+          iconOffset = TEXT_ICON_B_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x8002:
-        case 0x8003:
-        case 0x8004:
-        case 0x8005:
-        case 0x8006:
-          iconOffset = 3 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_Z_BUTTON:
+        case MESSAGE_CODE_UNK32771:
+        case MESSAGE_CODE_UNK32772:
+        case MESSAGE_CODE_UNK32773:
+        case MESSAGE_CODE_UNK32774:
+          iconOffset = TEXT_ICON_Z_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x8007:
-          iconOffset = 6 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_C_UP:
+          iconOffset = TEXT_ICON_C_UP * ICON_TEXEL_COUNT;
           break;
-        case 0x8008:
-          iconOffset = 7 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_C_DOWN:
+          iconOffset = TEXT_ICON_C_DOWN * ICON_TEXEL_COUNT;
           break;
-        case 0x8009:
-          iconOffset = 8 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_C_LEFT:
+          iconOffset = TEXT_ICON_C_LEFT * ICON_TEXEL_COUNT;
           break;
-        case 0x800A:
-          iconOffset = 9 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_C_RIGHT:
+          iconOffset = TEXT_ICON_C_RIGHT * ICON_TEXEL_COUNT;
           break;
-        case 0x800C:
-          iconOffset = 2 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_START_BUTTON:
+          iconOffset = TEXT_ICON_START_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x800D:
-          iconOffset = 4 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_L_BUTTON:
+          iconOffset = TEXT_ICON_L_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x800E:
-          iconOffset = 5 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_R_BUTTON:
+          iconOffset = TEXT_ICON_R_BUTTON * ICON_TEXEL_COUNT;
           break;
         case MESSAGE_CODE_NAME:
           isPrinted = TRUE;
@@ -863,39 +900,39 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
           x = textSlot->x;
           y += MEDIUM_SLOT_LINE_SPACING + advance;
           break;
-        case 0x8000:
-          iconOffset = 0 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_A_BUTTON:
+          iconOffset = TEXT_ICON_A_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x8001:
-          iconOffset = 1 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_B_BUTTON:
+          iconOffset = TEXT_ICON_B_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x8002:
-        case 0x8003:
-        case 0x8004:
-        case 0x8005:
-        case 0x8006:
-          iconOffset = 3 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_Z_BUTTON:
+        case MESSAGE_CODE_UNK32771:
+        case MESSAGE_CODE_UNK32772:
+        case MESSAGE_CODE_UNK32773:
+        case MESSAGE_CODE_UNK32774:
+          iconOffset = TEXT_ICON_Z_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x8007:
-          iconOffset = 6 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_C_UP:
+          iconOffset = TEXT_ICON_C_UP * ICON_TEXEL_COUNT;
           break;
-        case 0x8008:
-          iconOffset = 7 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_C_DOWN:
+          iconOffset = TEXT_ICON_C_DOWN * ICON_TEXEL_COUNT;
           break;
-        case 0x8009:
-          iconOffset = 8 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_C_LEFT:
+          iconOffset = TEXT_ICON_C_LEFT * ICON_TEXEL_COUNT;
           break;
-        case 0x800A:
-          iconOffset = 9 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_C_RIGHT:
+          iconOffset = TEXT_ICON_C_RIGHT * ICON_TEXEL_COUNT;
           break;
-        case 0x800C:
-          iconOffset = 2 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_START_BUTTON:
+          iconOffset = TEXT_ICON_START_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x800D:
-          iconOffset = 4 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_L_BUTTON:
+          iconOffset = TEXT_ICON_L_BUTTON * ICON_TEXEL_COUNT;
           break;
-        case 0x800E:
-          iconOffset = 5 * ICON_TEXEL_COUNT;
+        case MESSAGE_CODE_R_BUTTON:
+          iconOffset = TEXT_ICON_R_BUTTON * ICON_TEXEL_COUNT;
           break;
         case MESSAGE_CODE_NAME:
           isPrinted = TRUE;
@@ -1176,20 +1213,20 @@ void MeasureMessage(
               g_TextSlots[slot].values[code - MESSAGE_CODE_VALUE]);
           lineWidths[line] += GetTextLength(g_PrintBuffer) * fontSize;
           break;
-        case 0x8000:
-        case 0x8001:
-        case 0x8002:
-        case 0x8003:
-        case 0x8004:
-        case 0x8005:
-        case 0x8006:
-        case 0x8007:
-        case 0x8008:
-        case 0x8009:
-        case 0x800A:
-        case 0x800C:
-        case 0x800D:
-        case 0x800E:
+        case MESSAGE_CODE_A_BUTTON:
+        case MESSAGE_CODE_B_BUTTON:
+        case MESSAGE_CODE_Z_BUTTON:
+        case MESSAGE_CODE_UNK32771:
+        case MESSAGE_CODE_UNK32772:
+        case MESSAGE_CODE_UNK32773:
+        case MESSAGE_CODE_UNK32774:
+        case MESSAGE_CODE_C_UP:
+        case MESSAGE_CODE_C_DOWN:
+        case MESSAGE_CODE_C_LEFT:
+        case MESSAGE_CODE_C_RIGHT:
+        case MESSAGE_CODE_START_BUTTON:
+        case MESSAGE_CODE_L_BUTTON:
+        case MESSAGE_CODE_R_BUTTON:
           lineWidths[line] += ICON_WIDTH;
           break;
       }
@@ -1872,20 +1909,20 @@ s32 PlaceMessageGlyphGroup(
             advance = 0;
             y -= LINE_SPACING + fontSize;
             break;
-          case 0x8000:
-          case 0x8001:
-          case 0x8002:
-          case 0x8003:
-          case 0x8004:
-          case 0x8005:
-          case 0x8006:
-          case 0x8007:
-          case 0x8008:
-          case 0x8009:
-          case 0x800A:
-          case 0x800C:
-          case 0x800D:
-          case 0x800E:
+          case MESSAGE_CODE_A_BUTTON:
+          case MESSAGE_CODE_B_BUTTON:
+          case MESSAGE_CODE_Z_BUTTON:
+          case MESSAGE_CODE_UNK32771:
+          case MESSAGE_CODE_UNK32772:
+          case MESSAGE_CODE_UNK32773:
+          case MESSAGE_CODE_UNK32774:
+          case MESSAGE_CODE_C_UP:
+          case MESSAGE_CODE_C_DOWN:
+          case MESSAGE_CODE_C_LEFT:
+          case MESSAGE_CODE_C_RIGHT:
+          case MESSAGE_CODE_START_BUTTON:
+          case MESSAGE_CODE_L_BUTTON:
+          case MESSAGE_CODE_R_BUTTON:
             guTranslate(&g_GlyphSprites[i].matrix, advance - width + x, y, 0);
             advance += fontSize;
             g_GlyphSprites[i].code = code;
@@ -1972,39 +2009,39 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
             (s + GLYPH_TILE_WIDTH - 1) << 2, (t + GLYPH_TILE_WIDTH - 1) << 2);
       } else if (code >= MESSAGE_CODE_CONTROL) {
         switch (code) {
-          case 0x8000:
-            iconOffset = 0 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_A_BUTTON:
+            iconOffset = TEXT_ICON_A_BUTTON * ICON_TEXEL_COUNT;
             break;
-          case 0x8001:
-            iconOffset = 1 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_B_BUTTON:
+            iconOffset = TEXT_ICON_B_BUTTON * ICON_TEXEL_COUNT;
             break;
-          case 0x8002:
-          case 0x8003:
-          case 0x8004:
-          case 0x8005:
-          case 0x8006:
-            iconOffset = 3 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_Z_BUTTON:
+          case MESSAGE_CODE_UNK32771:
+          case MESSAGE_CODE_UNK32772:
+          case MESSAGE_CODE_UNK32773:
+          case MESSAGE_CODE_UNK32774:
+            iconOffset = TEXT_ICON_Z_BUTTON * ICON_TEXEL_COUNT;
             break;
-          case 0x8007:
-            iconOffset = 6 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_C_UP:
+            iconOffset = TEXT_ICON_C_UP * ICON_TEXEL_COUNT;
             break;
-          case 0x8008:
-            iconOffset = 7 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_C_DOWN:
+            iconOffset = TEXT_ICON_C_DOWN * ICON_TEXEL_COUNT;
             break;
-          case 0x8009:
-            iconOffset = 8 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_C_LEFT:
+            iconOffset = TEXT_ICON_C_LEFT * ICON_TEXEL_COUNT;
             break;
-          case 0x800A:
-            iconOffset = 9 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_C_RIGHT:
+            iconOffset = TEXT_ICON_C_RIGHT * ICON_TEXEL_COUNT;
             break;
-          case 0x800C:
-            iconOffset = 2 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_START_BUTTON:
+            iconOffset = TEXT_ICON_START_BUTTON * ICON_TEXEL_COUNT;
             break;
-          case 0x800D:
-            iconOffset = 4 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_L_BUTTON:
+            iconOffset = TEXT_ICON_L_BUTTON * ICON_TEXEL_COUNT;
             break;
-          case 0x800E:
-            iconOffset = 5 * ICON_TEXEL_COUNT;
+          case MESSAGE_CODE_R_BUTTON:
+            iconOffset = TEXT_ICON_R_BUTTON * ICON_TEXEL_COUNT;
             break;
         }
 
