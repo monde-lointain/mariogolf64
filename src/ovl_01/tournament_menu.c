@@ -223,7 +223,7 @@ static void* D_80230F44_ovl_01 = NULL;
 static void* D_80230F48_ovl_01 = NULL;
 static void* D_80230F4C_ovl_01 = NULL;
 static void* D_80230F50_ovl_01 = NULL;
-static void* D_80230F54_ovl_01 = NULL;
+static void* f_CodeCursorBox = NULL;
 /* Read by no routine */
 static s32 D_80230F58_ovl_01 = 0;
 static s32 D_80230F5C_ovl_01 = 0;
@@ -305,15 +305,16 @@ static s32 D_802310FC_ovl_01[14] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13};
 /* The tournament code byte being edited */
 static s32 D_80231134_ovl_01 = 0;
-static Vtx D_80231138_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+/* The code cursor's corners, whose colors DrawCodeCursor cycles */
+static Vtx f_CodeCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
 static s32 D_80231178_ovl_01[2] = {0, 0};
-/* The phase of each corner's color */
-static f32 D_80231180_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
+/* The angle, in radians, of each corner's color cycle */
+static f32 f_CodeCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
 
 Boolean IsNintendoClubTournament(void);
@@ -334,14 +335,15 @@ s32 func_8022BDC4_ovl_01(void);
 s32 func_8022B46C_ovl_01(void);
 s32 func_8022B5E0_ovl_01(void);
 
-static Mtx D_8023BE40_ovl_01;
-static Mtx D_8023BE80_ovl_01;
-static Mtx D_8023BEC0_ovl_01;
+/* The camera and placement that DrawCodeCursor draws the cursor with */
+static Mtx f_CodeCursorProjection;
+static Mtx f_CodeCursorTranslation;
+static Mtx f_CodeCursorRotation;
 
 /* Read by no routine */
 static u8 D_8023BF00_ovl_01[0x80];
 
-static Mtx D_8023BF80_ovl_01;
+static Mtx f_CodeCursorScale;
 
 void ResetMenuWindow(void) {
   f_MenuWindowState = MENU_WINDOW_OPENING;
@@ -1110,9 +1112,9 @@ void LoadCodeEntryBuffer(void* buffer, s32 bufferKind) {
       ReadEncodedAsset(D_80230F50_ovl_01, &asset);
       break;
     case CODE_ENTRY_BUFFER_CURSOR_BOX:
-      D_80230F54_ovl_01 = buffer;
+      f_CodeCursorBox = buffer;
       OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
-      ReadEncodedAsset(D_80230F54_ovl_01, &asset);
+      ReadEncodedAsset(f_CodeCursorBox, &asset);
       break;
   }
 }
@@ -1993,22 +1995,22 @@ void DrawCodeCursor(Gfx** displayListHead) {
 
   for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT;
       vertexIndex++) {
-    D_80231180_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
+    f_CodeCursorPhases[vertexIndex] += MENU_CURSOR_PHASE_STEP;
     red =
-        (s32)(sinf(D_80231180_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
+        (s32)(sinf(f_CodeCursorPhases[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    blue = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + (M_PI / 2)) *
+    blue = (s32)(sinf(f_CodeCursorPhases[vertexIndex] + (M_PI / 2)) *
                MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    green = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + M_PI) *
+    green = (s32)(sinf(f_CodeCursorPhases[vertexIndex] + M_PI) *
                 MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    D_80231138_ovl_01[vertexIndex].v.cn[0] = red;
-    D_80231138_ovl_01[vertexIndex].v.cn[2] = blue;
-    D_80231138_ovl_01[vertexIndex].v.cn[1] = green;
+    f_CodeCursorVertices[vertexIndex].v.cn[0] = red;
+    f_CodeCursorVertices[vertexIndex].v.cn[2] = blue;
+    f_CodeCursorVertices[vertexIndex].v.cn[1] = green;
   }
 
-  guOrtho(&D_8023BE40_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
+  guOrtho(&f_CodeCursorProjection, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
   charIndex = D_80230F68_ovl_01;
@@ -2016,15 +2018,15 @@ void DrawCodeCursor(Gfx** displayListHead) {
     charIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
   }
 
-  guTranslate(&D_8023BE80_ovl_01,
+  guTranslate(&f_CodeCursorTranslation,
       (charIndex * CLUB_CODE_CHAR_WIDTH) + CODE_CURSOR_FIRST_X, CODE_CURSOR_Y,
       MENU_CURSOR_Z);
-  guRotate(&D_8023BEC0_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
-  guScale(&D_8023BF80_ovl_01, CODE_CURSOR_SCALE, CODE_CURSOR_SCALE, 1.0f);
+  guRotate(&f_CodeCursorRotation, 0.0f, 0.0f, 1.0f, 0.0f);
+  guScale(&f_CodeCursorScale, CODE_CURSOR_SCALE, CODE_CURSOR_SCALE, 1.0f);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(D_80230F54_ovl_01)),
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_CodeCursorBox)),
       G_IM_FMT_IA, MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2040,16 +2042,16 @@ void DrawCodeCursor(Gfx** displayListHead) {
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BE40_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_CodeCursorProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BE80_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_CodeCursorTranslation),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BEC0_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_CodeCursorRotation),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BF80_ovl_01),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_CodeCursorScale),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
-  gSPVertex(gfx++, D_80231138_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
+  gSPVertex(gfx++, f_CodeCursorVertices, MENU_CURSOR_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
