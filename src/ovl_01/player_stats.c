@@ -215,7 +215,7 @@ void DrawBetIcon(
 void DrawBetLabel(Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex);
 
 /* Set once the chosen bet's help or the handicap prompt has been typed */
-static u8 f_IsBetHelpShown = 0;
+static u8 f_IsBetHelpShown = FALSE;
 static u8 f_IsHandicapPromptShown = FALSE;
 /* The blinking green arrows' frame and its time shown */
 static s16 f_GreenArrowFrame = 0;
@@ -568,8 +568,8 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
   g_AnimatedIconFrameTime = 0;
   g_AnimatedIconFrameIndex = 0;
   g_AnimatedIconBufferIndex = 0;
-  f_IsBetHelpShown = 0;
-  f_IsHandicapPromptShown = 0;
+  f_IsBetHelpShown = FALSE;
+  f_IsHandicapPromptShown = FALSE;
 }
 
 /*
@@ -648,7 +648,7 @@ void UpdateBetSettings(void) {
     D_8022BE88_ovl_01 = BET_PHASE_CONFIRMED;
     FreeAllCharacterSlots();
     g_MenuScreen = MENU_SCREEN_HANDICAPS;
-    f_IsBetHelpShown = 0;
+    f_IsBetHelpShown = FALSE;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
@@ -666,7 +666,7 @@ void UpdateBetSettings(void) {
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     D_8022BE88_ovl_01 = BET_PHASE_CANCELED;
-    f_IsBetHelpShown = 0;
+    f_IsBetHelpShown = FALSE;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
@@ -971,10 +971,10 @@ void DrawBetSettings(
 
   betIndex = D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD];
   DrawBetLabel(&gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
-  if (f_IsBetHelpShown == 0 && isSettled == TRUE) {
+  if (!f_IsBetHelpShown && isSettled == TRUE) {
     SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
-    f_IsBetHelpShown = 1;
+    f_IsBetHelpShown = TRUE;
   }
 
   *displayListHead = gfx;
@@ -1044,7 +1044,7 @@ s32 UpdateHandicaps(void) {
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
       D_8023BFD0_ovl_01 = HANDICAP_SLIDE_START;
-      f_IsHandicapPromptShown = 0;
+      f_IsHandicapPromptShown = FALSE;
       D_8022BE88_ovl_01 = MENU_PHASE_CONFIRMED;
       return;
     }
@@ -1054,7 +1054,7 @@ s32 UpdateHandicaps(void) {
       g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
-      f_IsHandicapPromptShown = 0;
+      f_IsHandicapPromptShown = FALSE;
       D_8022BE88_ovl_01 = MENU_PHASE_CANCELED;
       return;
     }
@@ -1066,7 +1066,7 @@ s32 UpdateHandicaps(void) {
         memory->unk29 = g_ChosenPlayerCount - 1;
       }
 
-      f_IsHandicapPromptShown = 0;
+      f_IsHandicapPromptShown = FALSE;
       return;
     }
 
@@ -1077,7 +1077,7 @@ s32 UpdateHandicaps(void) {
         memory->unk29 = 0;
       }
 
-      f_IsHandicapPromptShown = 0;
+      f_IsHandicapPromptShown = FALSE;
       return;
     }
 
