@@ -1830,8 +1830,8 @@ void func_801F70F0_ovl_01(void) {
     titleChoice = D_801323A0.titleChoice;
     if (titleChoice == TITLE_CHOICE_NEW_GAME) {
       for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-        *((s8*)memory + index + 3) = 0;
-        *((s8*)memory + index + 7) = 0;
+        memory->characterColumns[index] = 0;
+        memory->characterRows[index] = 0;
       }
 
       memory->modeChoice = 0;
