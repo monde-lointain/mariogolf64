@@ -54,6 +54,7 @@ enum TransmitOption {
 #define BRING_CHOOSING 2
 #define BRING_BRINGING 3
 #define BRING_ASKING 4 /* Whether to bring more characters */
+#define BRING_UNK5 5
 #define BRING_BROUGHT 7
 #define BRING_CHOOSING_SLOT 8 /* The character to replace */
 #define BRING_NO_CHARACTERS 10
@@ -82,7 +83,10 @@ enum SendExperienceStep {
   SEND_EXPERIENCE_CHOOSING,
   SEND_EXPERIENCE_SENT = 3,
   SEND_EXPERIENCE_WRITING,
-  SEND_EXPERIENCE_FAILED = 8,
+  SEND_EXPERIENCE_UNK5,
+  SEND_EXPERIENCE_UNK6,
+  SEND_EXPERIENCE_UNK7,
+  SEND_EXPERIENCE_FAILED,
   SEND_EXPERIENCE_DONE,
   /* Asking the player to start a pak check */
   SEND_EXPERIENCE_CONFIRMING,
@@ -855,7 +859,7 @@ void UpdateBringCharacters(void) {
       }
 
       break;
-    case 5: /* Step 5 does nothing */
+    case BRING_UNK5: /* Does nothing */
       break;
   }
 }
@@ -1224,9 +1228,10 @@ void UpdateSendExperience(void) {
       }
 
       break;
-    case 5: /* Steps 5 to 7 end like a failure */
-    case 6:
-    case 7:
+    /* Steps 5 to 7 end like a failure */
+    case SEND_EXPERIENCE_UNK5:
+    case SEND_EXPERIENCE_UNK6:
+    case SEND_EXPERIENCE_UNK7:
     case SEND_EXPERIENCE_FAILED:
       switch (GetNoticeState()) {
         case NOTICE_HIDDEN:
