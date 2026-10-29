@@ -1143,7 +1143,7 @@ void UpdatePlay(void) {
             }
           }
 
-          g_Cameras[0].mode = CAMERA_MODE_UNK8;
+          g_Cameras[0].mode = CAMERA_MODE_HOLE_INTRO;
           g_Cameras[0].view.eye[AXIS_X] = eye[AXIS_X];
           g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
           g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
@@ -2080,8 +2080,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   g_GroundFarthestDepth = 0.0f;
   g_GroundNearDepthEighth = NO_NEAR_DEPTH;
   fineScale = FINE_DEPTH_SCALE;
-  if (g_Cameras[0].mode == CAMERA_MODE_UNK2 ||
-      g_Cameras[0].mode == CAMERA_MODE_UNK8) {
+  if (g_Cameras[0].mode == CAMERA_MODE_FREE_LOOK ||
+      g_Cameras[0].mode == CAMERA_MODE_HOLE_INTRO) {
     fineScale = ZOOMED_FINE_DEPTH_SCALE;
   }
 

@@ -2409,8 +2409,8 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
       f_Weather == WEATHER_RAIN
 
       /* Comparing with FALSE is there to match */
-      && (g_Cameras[0].mode == CAMERA_MODE_UNK2 ||
-             g_Cameras[0].mode == CAMERA_MODE_UNK8) == FALSE) {
+      && (g_Cameras[0].mode == CAMERA_MODE_FREE_LOOK ||
+             g_Cameras[0].mode == CAMERA_MODE_HOLE_INTRO) == FALSE) {
     UpdateRain();
     for (index = 0; index != f_RaindropCount; index++) {
       drop = &f_Raindrops[index];

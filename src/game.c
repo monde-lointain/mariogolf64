@@ -1554,8 +1554,8 @@ s32 DrawGame(void) {
           if (g_Cameras[viewIndex].view.drawFlags != 0) {
             nearZ = -COURSE_NEAR_CLIP;
             farClip = -g_GroundFarthestDepth * 1.2f;
-            if (g_Cameras[viewIndex].mode == CAMERA_MODE_UNK8 ||
-                g_Cameras[viewIndex].mode == CAMERA_MODE_UNK2) {
+            if (g_Cameras[viewIndex].mode == CAMERA_MODE_HOLE_INTRO ||
+                g_Cameras[viewIndex].mode == CAMERA_MODE_FREE_LOOK) {
               nearZ = -CLOSE_UP_NEAR_CLIP;
             }
 

@@ -5,11 +5,14 @@
 
 #include "math_util.h"
 
-/* The camera mode that frames the shot from behind the golfer */
+/* How a camera is placed */
 enum CameraMode {
+  /* Frames the shot from behind the golfer */
   CAMERA_MODE_BEHIND_GOLFER = 1,
-  CAMERA_MODE_UNK2,
-  CAMERA_MODE_UNK8 = 8
+  /* Set while the pause menu's free look moves the camera */
+  CAMERA_MODE_FREE_LOOK,
+  /* Set while the camera circles the hole during its intro */
+  CAMERA_MODE_HOLE_INTRO = 8
 };
 
 /* Camera drawFlags bits */
