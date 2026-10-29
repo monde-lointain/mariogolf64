@@ -433,7 +433,7 @@ s32 GetSideSlope(void) {
 
 s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 
-/* f_Shot.unk4's range, which ScaleToShotUnk4 maps 0 to 256 onto */
+/* f_Shot.powerGaugeFrame's range, which ScaleToShotUnk4 maps 0 to 256 onto */
 #define SHOT_UNK4_MIN 3
 /* The levels that PlanShot always tries, tries while the best evaluation is
  * poor, and tries at most */
@@ -471,8 +471,8 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 /* The whole of a surface's percent range */
 #define FULL_PERCENT 100
 #define DEFAULT_SHOT_UNK8 60
-/* The least f_Shot.unk4 that PlanShot plans, and how much it scales it up by
- * for some golfers */
+/* The least f_Shot.powerGaugeFrame that PlanShot plans, and how much it scales
+ * it up by for some golfers */
 #define MIN_PLANNED_SHOT_UNK4 2
 #define SHOT_UNK4_BOOST 1.2f
 /* The trials taken at each level, at a level that aims at the cup, and under
@@ -514,8 +514,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
   f32 missX;
   f32 missZ;
   f32 along;
-  s32 savedUnk4;
-  s32 savedUnk8;
+  s32 savedPowerGaugeFrame;
+  s32 savedImpactGaugeFrame;
   s32 par;
   s32 strokes;
   s32 mishit;
@@ -620,7 +620,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
             GetSurfacePercentRange(GetSurfaceInfo(f_Shot.surface),
                 GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
                 percentRange);
-            /* The carry per unit of f_Shot.unk4 at the least percent */
+            /* The carry per unit of f_Shot.powerGaugeFrame at the least percent
+             */
             shortestReach = shortestReach * percentRange[0] /
                 (FULL_PERCENT * SHOT_UNK4_MAX);
             if (shortestReach < MIN_CLUB_DOWN_REACH ||
@@ -699,8 +700,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
         f_Shot.heading += GetSideSlope();
       }
 
-      f_Shot.unk8 = DEFAULT_SHOT_UNK8;
-      f_Shot.unk4 = SHOT_UNK4_MAX;
+      f_Shot.impactGaugeFrame = DEFAULT_SHOT_UNK8;
+      f_Shot.powerGaugeFrame = SHOT_UNK4_MAX;
       reach = GetShotWorldDistance(
           GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
           f_Shot.shotMode);
@@ -713,10 +714,10 @@ s32 PlanShot(CurrentShot* plannedShot) {
       GetSurfacePercentRange(GetSurfaceInfo(f_Shot.surface),
           GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
           percentRange);
-      /* The carry per unit of f_Shot.unk4 at the mean percent */
+      /* The carry per unit of f_Shot.powerGaugeFrame at the mean percent */
       reach = reach * (percentRange[1] + percentRange[0]) /
           (2 * FULL_PERCENT * SHOT_UNK4_MAX);
-      /* Holding f_Shot.unk4 in distance is there to match */
+      /* Holding f_Shot.powerGaugeFrame in distance is there to match */
       distance = (rand() & 3) + (distance / reach);
       if (GetGolferTraitUnk2() >= 2) {
         distance = distance * SHOT_UNK4_BOOST;
@@ -729,7 +730,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
       }
 
       /* Storing through shotPower is there to match */
-      shotPower = &f_Shot.unk4;
+      shotPower = &f_Shot.powerGaugeFrame;
       *shotPower = distance;
       if (f_ShotOffset == SHOT_OFFSET_NONE) {
         f_Shot.unk14 = 0;
@@ -844,8 +845,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
 
   osSyncPrintf("Finish Eval %d tlevel%d bestevalappear %d\n", f_BestEvaluation,
       f_TrialLevel, f_HasBestEvaluation);
-  savedUnk8 = f_TrialShot.unk8;
-  savedUnk4 = f_TrialShot.unk4;
+  savedImpactGaugeFrame = f_TrialShot.impactGaugeFrame;
+  savedPowerGaugeFrame = f_TrialShot.powerGaugeFrame;
   if ((s32)IntLength2D(
           g_HoleSetup.cupPosition[AXIS_X] - f_TrialShot.ballPosition[AXIS_X],
           g_HoleSetup.cupPosition[AXIS_Z] - f_TrialShot.ballPosition[AXIS_Z]) <
@@ -890,7 +891,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
         mishit = -mishit;
       }
 
-      f_TrialShot.unk8 += mishit;
+      f_TrialShot.impactGaugeFrame += mishit;
 
       /* Never printed; the original has it, and its string is in the ROM */
       if (FALSE) {
@@ -899,14 +900,14 @@ s32 PlanShot(CurrentShot* plannedShot) {
     }
 
     if ((f_HoleTargetToPar <= 0) & (mishit != 0) && !IsTrialShotSafe()) {
-      f_TrialShot.unk8 = savedUnk8;
-      f_TrialShot.unk4 = savedUnk4;
+      f_TrialShot.impactGaugeFrame = savedImpactGaugeFrame;
+      f_TrialShot.powerGaugeFrame = savedPowerGaugeFrame;
     }
   }
 
   osSyncPrintf("clubidx = %d\n", f_TrialShot.clubSlot);
-  osSyncPrintf("pgaugeresult = %d\n", f_TrialShot.unk4);
-  osSyncPrintf("pgaugeinpact = %d\n", f_TrialShot.unk8);
+  osSyncPrintf("pgaugeresult = %d\n", f_TrialShot.powerGaugeFrame);
+  osSyncPrintf("pgaugeinpact = %d\n", f_TrialShot.impactGaugeFrame);
   *plannedShot = f_TrialShot;
   osSyncPrintf("AI End\n");
   return 1;
@@ -2256,7 +2257,7 @@ s32 StepTrialShot(void) {
     f_TrialLaunch->heading = f_Shot.heading;
     f_TrialLaunch->clubIndex = f_Shot.clubSlot;
     f_ClosestTargetDistance = FAR_FROM_TARGET;
-    f_TrialLaunch->power = func_8005F248(f_Shot.unk4);
+    f_TrialLaunch->power = func_8005F248(f_Shot.powerGaugeFrame);
     f_TrialLaunch->unkC = 0;
     f_TrialLaunch->unk10 = f_Shot.unk14;
     f_TrialLaunch->unk14 = f_Shot.unk18;
@@ -2564,28 +2565,28 @@ EVALUATE:
           return 1;
         }
       } else {
-        f_Shot.unk4 = ScaleToShotUnk4(launchPower);
+        f_Shot.powerGaugeFrame = ScaleToShotUnk4(launchPower);
         if (f_IsPutting) {
-          f_Shot.unk4 = f_Shot.unk4 + 1 + (rand() & 1);
+          f_Shot.powerGaugeFrame = f_Shot.powerGaugeFrame + 1 + (rand() & 1);
         }
 
-        if (f_Shot.unk4 > SHOT_UNK4_MAX) {
-          f_Shot.unk4 = SHOT_UNK4_MAX;
+        if (f_Shot.powerGaugeFrame > SHOT_UNK4_MAX) {
+          f_Shot.powerGaugeFrame = SHOT_UNK4_MAX;
         }
 
-        if (f_Shot.unk4 < 2) {
-          f_Shot.unk4 = 2;
+        if (f_Shot.powerGaugeFrame < 2) {
+          f_Shot.powerGaugeFrame = 2;
         }
 
         if (f_TrialLaunch->power < launchPower) {
-          if (func_8005F248(f_Shot.unk4) <= f_TrialLaunch->power &&
-              f_Shot.unk4 < SHOT_UNK4_MAX) {
-            f_Shot.unk4++;
+          if (func_8005F248(f_Shot.powerGaugeFrame) <= f_TrialLaunch->power &&
+              f_Shot.powerGaugeFrame < SHOT_UNK4_MAX) {
+            f_Shot.powerGaugeFrame++;
           }
         } else if (launchPower < f_TrialLaunch->power) {
-          if (func_8005F248(f_Shot.unk4) >= f_TrialLaunch->power &&
-              f_Shot.unk4 >= 4) {
-            f_Shot.unk4--;
+          if (func_8005F248(f_Shot.powerGaugeFrame) >= f_TrialLaunch->power &&
+              f_Shot.powerGaugeFrame >= 4) {
+            f_Shot.powerGaugeFrame--;
           }
         }
       }
@@ -2950,8 +2951,8 @@ Boolean IsTrialShotSafe(void) {
 
   f_TrialLaunch->heading = f_TrialShot.heading;
   f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
-  f_TrialLaunch->power = func_8005F248(f_TrialShot.unk4);
-  f_TrialLaunch->unkC = f_TrialShot.unk8 - 60;
+  f_TrialLaunch->power = func_8005F248(f_TrialShot.powerGaugeFrame);
+  f_TrialLaunch->unkC = f_TrialShot.impactGaugeFrame - 60;
   f_TrialLaunch->unk10 = f_TrialShot.unk14;
   f_TrialLaunch->unk14 = f_TrialShot.unk18;
   f_TrialLaunch->unk18 = f_TrialShot.playerIndex;

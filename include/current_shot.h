@@ -9,8 +9,8 @@
 /* The state of the shot being set up by the player whose turn it is */
 typedef struct CurrentShot {
   /* 0x00 */ SignedBinaryAngle heading;
-  /* 0x04 */ s32 unk4;
-  /* 0x08 */ s32 unk8;
+  /* 0x04 */ s32 powerGaugeFrame; /* The gaugeFrame at which power is set */
+  /* 0x08 */ s32 impactGaugeFrame; /* The gaugeFrame at which impact is set */
   /* 0x0C */ s32 shotMode;
   /* 0x10 */ s32 clubSlot; /* Index into the player's clubs */
   /* 0x14 */ s32 unk14;
@@ -24,7 +24,7 @@ typedef struct CurrentShot {
   /* 0x38 */ s32 unk38;
   /* 0x3C */ s32 aimCameraHeight; /* Added to the lower of the ground's and the
                                      ball's heights */
-  /* 0x40 */ s32 unk40;
+  /* 0x40 */ s32 gaugeFrame; /* Frames since the swing gauge started */
   /* 0x44 */ CoursePoint unk44;
   /* 0x50 */ s32 cupDistance; /* From GetCupDistance */
   /* 0x54 */ s8 unk54;

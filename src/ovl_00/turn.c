@@ -2185,8 +2185,8 @@ void RecordHoleOut(s32 playerIndex) {
     record->unk40 = g_Players[playerIndex].unk88;
     record->hole = g_HoleSetup;
     record->shots[shotIndex].heading = g_CurrentShot.heading;
-    record->shots[shotIndex].unk2 = g_CurrentShot.unk4;
-    record->shots[shotIndex].unk3 = g_CurrentShot.unk8;
+    record->shots[shotIndex].unk2 = g_CurrentShot.powerGaugeFrame;
+    record->shots[shotIndex].unk3 = g_CurrentShot.impactGaugeFrame;
     record->shots[shotIndex].shotMode = g_CurrentShot.shotMode;
     record->shots[shotIndex].clubSlot = g_CurrentShot.clubSlot;
     record->shots[shotIndex].unk6 = g_CurrentShot.unk14;
@@ -2213,8 +2213,8 @@ void RecordRingShotHole(s32 playerIndex) {
     record->unk3C = g_Players[playerIndex].unk88;
     record->hole = g_HoleSetup;
     record->shots[shotIndex].heading = g_CurrentShot.heading;
-    record->shots[shotIndex].unk2 = g_CurrentShot.unk4;
-    record->shots[shotIndex].unk3 = g_CurrentShot.unk8;
+    record->shots[shotIndex].unk2 = g_CurrentShot.powerGaugeFrame;
+    record->shots[shotIndex].unk3 = g_CurrentShot.impactGaugeFrame;
     record->shots[shotIndex].shotMode = g_CurrentShot.shotMode;
     record->shots[shotIndex].clubSlot = g_CurrentShot.clubSlot;
     record->shots[shotIndex].unk6 = g_CurrentShot.unk14;
@@ -2372,7 +2372,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.unk18 = 0;
   g_CurrentShot.unk14 = 0;
   g_CurrentShot.unk54 = player->unk28;
-  g_CurrentShot.unk40 = 0;
+  g_CurrentShot.gaugeFrame = 0;
   g_CurrentShot.cupDistance = GetCupDistance(
       x - g_HoleSetup.cupPosition[AXIS_X], z - g_HoleSetup.cupPosition[AXIS_Z]);
   if (!g_IsTrainingHeadingKept || g_GameState.gameMode != GAME_MODE_TRAINING) {
@@ -3755,9 +3755,9 @@ void UpdateTurns(void) {
               SkipToAnimationEnd(0);
             }
 
-            g_CurrentShot.unk40 = 0;
-            g_CurrentShot.unk4 = 0;
-            g_CurrentShot.unk8 = 0;
+            g_CurrentShot.gaugeFrame = 0;
+            g_CurrentShot.powerGaugeFrame = 0;
+            g_CurrentShot.impactGaugeFrame = 0;
             PlaySound(
                 SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
             SetFramebufferCount(DOUBLE_BUFFERING);
@@ -3792,9 +3792,9 @@ void UpdateTurns(void) {
             g_CurrentShot.unk18 = 0;
           }
 
-          g_CurrentShot.unk40 = 0;
+          g_CurrentShot.gaugeFrame = 0;
           if (IsGameFlagSet(GAME_FLAG_UNK32)) {
-            g_CurrentShot.unk40 = D_80104F78.unk4;
+            g_CurrentShot.gaugeFrame = D_80104F78.powerGaugeFrame;
           }
 
           SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
@@ -3870,12 +3870,12 @@ void UpdateTurns(void) {
         D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
         D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
         if ((f_ShotSource != SHOT_SOURCE_PLAYER)
-                ? (D_80104F78.unk4 == g_CurrentShot.unk40)
+                ? (D_80104F78.powerGaugeFrame == g_CurrentShot.gaugeFrame)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
           SoundId sound;
 
-          g_CurrentShot.unk4 = g_CurrentShot.unk40;
-          D_80227150_ovl_00.power = func_8005F248(g_CurrentShot.unk40);
+          g_CurrentShot.powerGaugeFrame = g_CurrentShot.gaugeFrame;
+          D_80227150_ovl_00.power = func_8005F248(g_CurrentShot.gaugeFrame);
           g_SavedPlayers[playerIndex] = g_Players[playerIndex];
           g_Players[playerIndex].strokeCount++;
           if (g_Players[playerIndex].strokeCount > STROKE_COUNT_MAX) {
@@ -3911,7 +3911,7 @@ void UpdateTurns(void) {
           }
 
           PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
-        } else if (g_CurrentShot.unk40 >= 59 ||
+        } else if (g_CurrentShot.gaugeFrame >= 59 ||
             (f_ShotSource == SHOT_SOURCE_PLAYER &&
                 (g_TurnController.pressedButtons & B_BUTTON))) {
           UpdateGolferTranslucency();
@@ -3927,7 +3927,7 @@ void UpdateTurns(void) {
           g_RoundHud.unk12 = 1;
         }
 
-        g_CurrentShot.unk40++;
+        g_CurrentShot.gaugeFrame++;
         break;
       case PLAYER_STATE_SETTING_IMPACT:
         UpdateImpactPointMode();
@@ -3945,7 +3945,8 @@ void UpdateTurns(void) {
           g_CurrentShot.unk14 = GetTurnStickX();
           g_CurrentShot.unk18 = GetTurnStickY();
         } else {
-          s32 framesLeft = D_80104F78.unk8 - g_CurrentShot.unk40 - 10;
+          s32 framesLeft =
+              D_80104F78.impactGaugeFrame - g_CurrentShot.gaugeFrame - 10;
 
           if (framesLeft > 10) {
             g_CurrentShot.unk14 = 0;
@@ -3963,11 +3964,11 @@ void UpdateTurns(void) {
         D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
         D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
         if (((f_ShotSource != SHOT_SOURCE_PLAYER)
-                    ? (g_CurrentShot.unk40 == D_80104F78.unk8)
+                    ? (g_CurrentShot.gaugeFrame == D_80104F78.impactGaugeFrame)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||
-            g_CurrentShot.unk40 >= 69) {
-          g_CurrentShot.unk8 = g_CurrentShot.unk40;
-          D_80227150_ovl_00.unkC = g_CurrentShot.unk40 - 60;
+            g_CurrentShot.gaugeFrame >= 69) {
+          g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
+          D_80227150_ovl_00.unkC = g_CurrentShot.gaugeFrame - 60;
           if (D_80227150_ovl_00.unkC > 6) {
             D_80227150_ovl_00.unkC = 6;
           }
@@ -3991,8 +3992,8 @@ void UpdateTurns(void) {
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
         } else {
-          g_CurrentShot.unk40++;
-          if (71 - g_CurrentShot.unk40 < D_80224000_ovl_00 &&
+          g_CurrentShot.gaugeFrame++;
+          if (71 - g_CurrentShot.gaugeFrame < D_80224000_ovl_00 &&
               !D_80224004_ovl_00) {
             D_80227170_ovl_00[playerIndex] = 0;
             D_80224004_ovl_00 = 1;
@@ -4007,7 +4008,7 @@ void UpdateTurns(void) {
 
         if (g_IsDebugEnabled &&
             (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
-          g_CurrentShot.unk8 = g_CurrentShot.unk40;
+          g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
           if (g_TurnController.pressedButtons & B_BUTTON) {
             D_80227150_ovl_00.power = MAX_LAUNCH_POWER;
           }

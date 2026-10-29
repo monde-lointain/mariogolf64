@@ -175,7 +175,7 @@ void func_8005F1C8(void) {
 }
 
 s32 func_8005F224(void) {
-  s32 value = g_CurrentShot.unk40;
+  s32 value = g_CurrentShot.gaugeFrame;
 
   if (value >= 31) {
     value = 60 - value;
@@ -612,8 +612,8 @@ void SetNextTeeOrder(void) {
 
 void func_800600C0(s32 index) {
   D_80104F78.heading = D_800FEDD8->shots[index].heading;
-  D_80104F78.unk4 = D_800FEDD8->shots[index].unk2;
-  D_80104F78.unk8 = D_800FEDD8->shots[index].unk3;
+  D_80104F78.powerGaugeFrame = D_800FEDD8->shots[index].unk2;
+  D_80104F78.impactGaugeFrame = D_800FEDD8->shots[index].unk3;
   D_80104F78.shotMode = D_800FEDD8->shots[index].shotMode;
   D_80104F78.clubSlot = D_800FEDD8->shots[index].clubSlot;
   D_80104F78.unk14 = D_800FEDD8->shots[index].unk6;
@@ -622,8 +622,8 @@ void func_800600C0(s32 index) {
 
 void func_80060128(s32 index) {
   D_80104F78.heading = D_80105F40->shots[index].heading;
-  D_80104F78.unk4 = D_80105F40->shots[index].unk2;
-  D_80104F78.unk8 = D_80105F40->shots[index].unk3;
+  D_80104F78.powerGaugeFrame = D_80105F40->shots[index].unk2;
+  D_80104F78.impactGaugeFrame = D_80105F40->shots[index].unk3;
   D_80104F78.shotMode = D_80105F40->shots[index].shotMode;
   D_80104F78.clubSlot = D_80105F40->shots[index].clubSlot;
   D_80104F78.unk14 = D_80105F40->shots[index].unk6;
