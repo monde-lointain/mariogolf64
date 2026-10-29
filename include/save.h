@@ -543,7 +543,7 @@ typedef struct CourseStatFigures {
   /* 0x2C */ Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
 } CourseStatFigures; /* size = 0x38 */
 
-extern CourseStatFigures D_80105C38[COURSE_COUNT + 1];
+extern CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
 
 #define HOLES_PER_ROUND 18.0f
 

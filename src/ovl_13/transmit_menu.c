@@ -3538,28 +3538,32 @@ void BuildStatusData(u8* status) {
 
   ComputeRoundStatistics();
   course = &data->allCourses;
-  value = D_80105C38[COURSE_COUNT].roundCount;
+  value = g_CourseStatFigures[COURSE_COUNT].roundCount;
   if (value > 0) {
     course->roundCount[0] = value;
     course->roundCount[1] = value >> 8;
     course->bestScore =
-        (s32)D_80105C38[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
+        (s32)g_CourseStatFigures[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
     course->averageStrokes =
-        RoundedWholePart(D_80105C38[COURSE_COUNT].averageScore);
+        RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].averageScore);
     /* Holding the drives in sum, and the scores below in scores, is there to
      * match */
-    sum = RoundedWholePart(D_80105C38[COURSE_COUNT].bestDrive);
+    sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].bestDrive);
     course->longestDrive[0] = sum;
     course->longestDrive[1] = sum >> 8;
-    sum = RoundedWholePart(D_80105C38[COURSE_COUNT].averageDrive);
+    sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].averageDrive);
     course->averageDrive[0] = sum;
     course->averageDrive[1] = sum >> 8;
-    course->unk8 = RoundedWholePart(D_80105C38[COURSE_COUNT].fairwayPercent);
-    course->averagePutts = PackTenths(D_80105C38[COURSE_COUNT].averagePutts);
+    course->unk8 =
+        RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].fairwayPercent);
+    course->averagePutts =
+        PackTenths(g_CourseStatFigures[COURSE_COUNT].averagePutts);
     course->parOrBetterRate =
-        RoundedWholePart(D_80105C38[COURSE_COUNT].parSavePercent);
-    course->parOnRate = RoundedWholePart(D_80105C38[COURSE_COUNT].parOnPercent);
-    course->unkC = RoundedWholePart(D_80105C38[COURSE_COUNT].sandSavePercent);
+        RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parSavePercent);
+    course->parOnRate =
+        RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parOnPercent);
+    course->unkC =
+        RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].sandSavePercent);
     course->places = 0;
     for (index = 0; index != CHARACTER_COUNT; index++) {
       for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {

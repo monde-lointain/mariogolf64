@@ -650,7 +650,7 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
     courseIndex = COURSE_COUNT;
   }
 
-  if (D_80105C38[courseIndex].roundCount == 0.0f) {
+  if (g_CourseStatFigures[courseIndex].roundCount == 0.0f) {
     return;
   }
 
@@ -658,10 +658,10 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
     case STAT_ROUND_COUNT:
       DrawFourDigitMenuNumber(&gfx, STATS_ROUND_COUNT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].roundCount, MENU_NUMBER_PLAIN);
+          g_CourseStatFigures[courseIndex].roundCount, MENU_NUMBER_PLAIN);
       break;
     case STAT_BEST_SCORE:
-      bestScore = D_80105C38[courseIndex].bestScore;
+      bestScore = g_CourseStatFigures[courseIndex].bestScore;
       if (IsOneDigitNumber(bestScore)) {
         DrawUnalignedMenuNumber(&gfx, STATS_ONE_DIGIT_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
@@ -680,12 +680,12 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
     case STAT_AVERAGE_SCORE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].averageScore);
+          g_CourseStatFigures[courseIndex].averageScore);
       break;
     case STAT_BEST_DRIVE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].bestDrive);
+          g_CourseStatFigures[courseIndex].bestDrive);
       gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
       func_8020FD48_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
@@ -693,40 +693,40 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
     case STAT_AVERAGE_DRIVE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].averageDrive);
+          g_CourseStatFigures[courseIndex].averageDrive);
       func_8020FD48_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_FAIRWAY_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].fairwayPercent);
+          g_CourseStatFigures[courseIndex].fairwayPercent);
       func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_PUTTS:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].averagePutts);
+          g_CourseStatFigures[courseIndex].averagePutts);
       break;
     case STAT_PAR_SAVE_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].parSavePercent);
+          g_CourseStatFigures[courseIndex].parSavePercent);
       func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_PAR_ON_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].parOnPercent);
+          g_CourseStatFigures[courseIndex].parOnPercent);
       func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_SAND_SAVE_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
-          D_80105C38[courseIndex].sandSavePercent);
+          g_CourseStatFigures[courseIndex].sandSavePercent);
       func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
@@ -929,7 +929,7 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     for (place = 0; place != TOURNAMENT_PLACE_COUNT; place++) {
-      if (D_80105C38[memory->statsCourse].hasPlace[place]) {
+      if (g_CourseStatFigures[memory->statsCourse].hasPlace[place]) {
         gDPPipeSync(gfx++);
         if (place == FIRST_PLACE_INDEX) {
           palette = D_800FBE38[FIRST_PLACE_INDEX];

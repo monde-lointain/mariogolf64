@@ -5885,7 +5885,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     if ((MAP_CAMERA_MODE_TOP_BYTE == 0) && !g_GameState.isMiniGolf) {
       placeCount = 0;
       for (otherIndex = 0; otherIndex != TOURNAMENT_PLACE_COUNT; otherIndex++) {
-        if (D_80105C38[D_801323A0.courseChoice].hasPlace[otherIndex]) {
+        if (g_CourseStatFigures[D_801323A0.courseChoice].hasPlace[otherIndex]) {
           places[placeCount] = otherIndex;
           placeCount++;
         }

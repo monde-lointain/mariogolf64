@@ -1790,91 +1790,102 @@ void ComputeRoundStatistics(void) {
   saved = GetSaveData()->courseStats;
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     entry = &saved[courseIndex];
-    D_80105C38[courseIndex].roundCount = entry->roundCount;
-    if (D_80105C38[courseIndex].roundCount == 0.0f) {
-      D_80105C38[courseIndex].bestScore = 0.0f;
-      D_80105C38[courseIndex].averageScore = 0.0f;
-      D_80105C38[courseIndex].bestDrive = 0.0f;
-      D_80105C38[courseIndex].averageDrive = 0.0f;
-      D_80105C38[courseIndex].unk14 = 0.0f;
-      D_80105C38[courseIndex].fairwayPercent = 0.0f;
-      D_80105C38[courseIndex].averagePutts = 0.0f;
-      D_80105C38[courseIndex].parOnPercent = 0.0f;
-      D_80105C38[courseIndex].parSavePercent = 0.0f;
-      D_80105C38[courseIndex].hasPlace[THIRD_PLACE_INDEX] = FALSE;
-      D_80105C38[courseIndex].hasPlace[SECOND_PLACE_INDEX] = FALSE;
-      D_80105C38[courseIndex].hasPlace[FIRST_PLACE_INDEX] = FALSE;
+    g_CourseStatFigures[courseIndex].roundCount = entry->roundCount;
+    if (g_CourseStatFigures[courseIndex].roundCount == 0.0f) {
+      g_CourseStatFigures[courseIndex].bestScore = 0.0f;
+      g_CourseStatFigures[courseIndex].averageScore = 0.0f;
+      g_CourseStatFigures[courseIndex].bestDrive = 0.0f;
+      g_CourseStatFigures[courseIndex].averageDrive = 0.0f;
+      g_CourseStatFigures[courseIndex].unk14 = 0.0f;
+      g_CourseStatFigures[courseIndex].fairwayPercent = 0.0f;
+      g_CourseStatFigures[courseIndex].averagePutts = 0.0f;
+      g_CourseStatFigures[courseIndex].parOnPercent = 0.0f;
+      g_CourseStatFigures[courseIndex].parSavePercent = 0.0f;
+      g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] = FALSE;
+      g_CourseStatFigures[courseIndex].hasPlace[SECOND_PLACE_INDEX] = FALSE;
+      g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] = FALSE;
     } else {
       /* unk14 is left as it was */
       reciprocal = 1.0f / entry->roundCount;
-      D_80105C38[courseIndex].bestScore = entry->bestScore;
-      D_80105C38[courseIndex].averageScore = entry->strokeTotal * reciprocal;
-      D_80105C38[courseIndex].bestDrive = entry->longestDrive * UNK_SCALE;
-      D_80105C38[courseIndex].averageDrive = entry->averageDrive * UNK_SCALE;
-      D_80105C38[courseIndex].fairwayPercent =
+      g_CourseStatFigures[courseIndex].bestScore = entry->bestScore;
+      g_CourseStatFigures[courseIndex].averageScore =
+          entry->strokeTotal * reciprocal;
+      g_CourseStatFigures[courseIndex].bestDrive =
+          entry->longestDrive * UNK_SCALE;
+      g_CourseStatFigures[courseIndex].averageDrive =
+          entry->averageDrive * UNK_SCALE;
+      g_CourseStatFigures[courseIndex].fairwayPercent =
           entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
-      D_80105C38[courseIndex].averagePutts =
+      g_CourseStatFigures[courseIndex].averagePutts =
           entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
-      D_80105C38[courseIndex].parSavePercent =
+      g_CourseStatFigures[courseIndex].parSavePercent =
           entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
-      D_80105C38[courseIndex].parOnPercent =
+      g_CourseStatFigures[courseIndex].parOnPercent =
           entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
       sum = entry->sandSaveCount + entry->missedSandSaveCount;
       if (sum <= 0) {
-        D_80105C38[courseIndex].sandSavePercent = 0.0f;
+        g_CourseStatFigures[courseIndex].sandSavePercent = 0.0f;
       } else {
-        D_80105C38[courseIndex].sandSavePercent =
+        g_CourseStatFigures[courseIndex].sandSavePercent =
             ((f32)entry->sandSaveCount / (f32)sum) * 100.0f;
       }
 
-      D_80105C38[courseIndex].hasPlace[THIRD_PLACE_INDEX] =
+      g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] =
           entry->hasPlace[THIRD_PLACE_INDEX];
-      D_80105C38[courseIndex].hasPlace[SECOND_PLACE_INDEX] =
+      g_CourseStatFigures[courseIndex].hasPlace[SECOND_PLACE_INDEX] =
           entry->hasPlace[SECOND_PLACE_INDEX];
-      D_80105C38[courseIndex].hasPlace[FIRST_PLACE_INDEX] =
+      g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] =
           entry->hasPlace[FIRST_PLACE_INDEX];
     }
   }
 
   courseIndex = 0; /* Zeroed this early to match */
   hasPlayedCourse = FALSE;
-  D_80105C38[COURSE_COUNT].roundCount = 0.0f;
-  D_80105C38[COURSE_COUNT].bestScore = 0.0f;
-  D_80105C38[COURSE_COUNT].averageScore = 0.0f;
-  D_80105C38[COURSE_COUNT].bestDrive = 0.0f;
-  D_80105C38[COURSE_COUNT].averageDrive = 0.0f;
-  D_80105C38[COURSE_COUNT].fairwayPercent = 0.0f;
-  D_80105C38[COURSE_COUNT].averagePutts = 0.0f;
-  D_80105C38[COURSE_COUNT].parSavePercent = 0.0f;
-  D_80105C38[COURSE_COUNT].parOnPercent = 0.0f;
-  D_80105C38[COURSE_COUNT].sandSavePercent = 0.0f;
-  D_80105C38[COURSE_COUNT].hasPlace[THIRD_PLACE_INDEX] = FALSE;
-  D_80105C38[COURSE_COUNT].hasPlace[SECOND_PLACE_INDEX] = FALSE;
-  D_80105C38[COURSE_COUNT].hasPlace[FIRST_PLACE_INDEX] = FALSE;
-  D_80105C38[COURSE_COUNT].bestScore = 0.0f;
-  D_80105C38[COURSE_COUNT].bestDrive = 0.0f;
-  D_80105C38[COURSE_COUNT].bestScore = D_80105C38[0].bestScore;
-  D_80105C38[COURSE_COUNT].bestDrive = D_80105C38[0].bestDrive;
-  zero = D_80105C38[COURSE_COUNT].roundCount; /* Read back after being zeroed */
+  g_CourseStatFigures[COURSE_COUNT].roundCount = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].bestScore = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].averageScore = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].fairwayPercent = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].averagePutts = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].parSavePercent = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].parOnPercent = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].sandSavePercent = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].hasPlace[THIRD_PLACE_INDEX] = FALSE;
+  g_CourseStatFigures[COURSE_COUNT].hasPlace[SECOND_PLACE_INDEX] = FALSE;
+  g_CourseStatFigures[COURSE_COUNT].hasPlace[FIRST_PLACE_INDEX] = FALSE;
+  g_CourseStatFigures[COURSE_COUNT].bestScore = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
+  g_CourseStatFigures[COURSE_COUNT].bestScore =
+      g_CourseStatFigures[0].bestScore;
+  g_CourseStatFigures[COURSE_COUNT].bestDrive =
+      g_CourseStatFigures[0].bestDrive;
+  zero = g_CourseStatFigures[COURSE_COUNT]
+             .roundCount; /* Read back after being zeroed */
   for (; courseIndex != COURSE_COUNT; courseIndex++) {
-    if (zero < D_80105C38[courseIndex].roundCount) {
+    if (zero < g_CourseStatFigures[courseIndex].roundCount) {
       if (!hasPlayedCourse) {
-        D_80105C38[COURSE_COUNT].bestScore = D_80105C38[courseIndex].bestScore;
+        g_CourseStatFigures[COURSE_COUNT].bestScore =
+            g_CourseStatFigures[courseIndex].bestScore;
         hasPlayedCourse = TRUE;
-        D_80105C38[COURSE_COUNT].bestDrive = D_80105C38[courseIndex].bestDrive;
+        g_CourseStatFigures[COURSE_COUNT].bestDrive =
+            g_CourseStatFigures[courseIndex].bestDrive;
       }
 
-      if (D_80105C38[COURSE_COUNT].bestScore >
-          D_80105C38[courseIndex].bestScore) {
-        D_80105C38[COURSE_COUNT].bestScore = D_80105C38[courseIndex].bestScore;
+      if (g_CourseStatFigures[COURSE_COUNT].bestScore >
+          g_CourseStatFigures[courseIndex].bestScore) {
+        g_CourseStatFigures[COURSE_COUNT].bestScore =
+            g_CourseStatFigures[courseIndex].bestScore;
       }
 
-      if (D_80105C38[COURSE_COUNT].bestDrive <
-          D_80105C38[courseIndex].bestDrive) {
-        D_80105C38[COURSE_COUNT].bestDrive = D_80105C38[courseIndex].bestDrive;
+      if (g_CourseStatFigures[COURSE_COUNT].bestDrive <
+          g_CourseStatFigures[courseIndex].bestDrive) {
+        g_CourseStatFigures[COURSE_COUNT].bestDrive =
+            g_CourseStatFigures[courseIndex].bestDrive;
       }
 
-      D_80105C38[COURSE_COUNT].roundCount += D_80105C38[courseIndex].roundCount;
+      g_CourseStatFigures[COURSE_COUNT].roundCount +=
+          g_CourseStatFigures[courseIndex].roundCount;
     }
   }
 
@@ -1890,7 +1901,7 @@ void ComputeRoundStatistics(void) {
   emptyCount = 0.0f;
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     entry = &saved[courseIndex];
-    if (emptyCount < D_80105C38[courseIndex].roundCount) {
+    if (emptyCount < g_CourseStatFigures[courseIndex].roundCount) {
       sum18 += entry->measuredDriveTotal;
       sum1C += entry->puttTotal;
       sum20 += entry->parOrBetterCount;
@@ -1903,25 +1914,28 @@ void ComputeRoundStatistics(void) {
     }
   }
 
-  if (D_80105C38[COURSE_COUNT].roundCount > 0.0f) {
+  if (g_CourseStatFigures[COURSE_COUNT].roundCount > 0.0f) {
     if (sandSaveChanceSum <= 0.0f) {
-      D_80105C38[COURSE_COUNT].sandSavePercent = 0.0f;
+      g_CourseStatFigures[COURSE_COUNT].sandSavePercent = 0.0f;
     } else {
-      D_80105C38[COURSE_COUNT].sandSavePercent =
+      g_CourseStatFigures[COURSE_COUNT].sandSavePercent =
           (sandSaveSum / sandSaveChanceSum) * 100.0f;
     }
 
-    holeCount = D_80105C38[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
-    D_80105C38[COURSE_COUNT].averagePutts = sum1C / holeCount;
-    D_80105C38[COURSE_COUNT].fairwayPercent = (sum18 / holeCount) * 100.0f;
-    D_80105C38[COURSE_COUNT].parSavePercent = (sum20 / holeCount) * 100.0f;
-    D_80105C38[COURSE_COUNT].parOnPercent = (sum24 / holeCount) * 100.0f;
-    D_80105C38[COURSE_COUNT].averageScore =
-        sum8 / D_80105C38[COURSE_COUNT].roundCount;
+    holeCount = g_CourseStatFigures[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
+    g_CourseStatFigures[COURSE_COUNT].averagePutts = sum1C / holeCount;
+    g_CourseStatFigures[COURSE_COUNT].fairwayPercent =
+        (sum18 / holeCount) * 100.0f;
+    g_CourseStatFigures[COURSE_COUNT].parSavePercent =
+        (sum20 / holeCount) * 100.0f;
+    g_CourseStatFigures[COURSE_COUNT].parOnPercent =
+        (sum24 / holeCount) * 100.0f;
+    g_CourseStatFigures[COURSE_COUNT].averageScore =
+        sum8 / g_CourseStatFigures[COURSE_COUNT].roundCount;
     if (sum10 > 0.0f && sum14 > 0) {
-      D_80105C38[COURSE_COUNT].averageDrive = sum10 / sum14;
+      g_CourseStatFigures[COURSE_COUNT].averageDrive = sum10 / sum14;
     } else {
-      D_80105C38[COURSE_COUNT].averageDrive = 0.0f;
+      g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
     }
   }
 }
