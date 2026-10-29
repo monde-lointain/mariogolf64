@@ -202,9 +202,9 @@ static s32 D_80230090_ovl_01[4] = {0, 0, 0, 0};
 
 /* The camera and placements that DrawCharacterGridCursor draws with */
 static Mtx f_GridCursorProjection;
-static Mtx f_GridCursorTranslations[2];
-static Mtx f_GridCursorRotations[2];
-static Mtx f_GridCursorScales[2];
+static Mtx f_GridCursorTranslations[DRAW_BUFFER_COUNT];
+static Mtx f_GridCursorRotations[DRAW_BUFFER_COUNT];
+static Mtx f_GridCursorScales[DRAW_BUFFER_COUNT];
 
 /* Read by no routine */
 static u8 D_8023A560_ovl_01[0x8];
