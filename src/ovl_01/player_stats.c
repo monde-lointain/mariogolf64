@@ -560,13 +560,14 @@ void ApplyBetPreset(s32 requestedPreset) {
   } else {
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       memory->betStakeLevels[index] = NO_BET;
-      g_GameState.betRates[index] = -1;
+      g_GameState.betRates[index] = UNSET_BET_RATE;
     }
   }
 
   memory->unkD = 0;
   for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-    g_ChosenHandicaps[index] = index < g_ChosenPlayerCount ? 0 : -1;
+    g_ChosenHandicaps[index] =
+        index < g_ChosenPlayerCount ? 0 : ABSENT_PLAYER_HANDICAP;
   }
 
   memory->unk29 = 0;
@@ -614,7 +615,7 @@ void UpdateBetSettings(void) {
         g_GameState.betRates[index] =
             f_BetStakeAmounts[memory->betStakeLevels[index]];
       } else {
-        g_GameState.betRates[index] = -1;
+        g_GameState.betRates[index] = UNSET_BET_RATE;
       }
     }
 
@@ -632,7 +633,7 @@ void UpdateBetSettings(void) {
         g_GameState.betRates[index] =
             f_BetStakeAmounts[memory->betStakeLevels[index]];
       } else {
-        g_GameState.betRates[index] = -1;
+        g_GameState.betRates[index] = UNSET_BET_RATE;
       }
     }
 

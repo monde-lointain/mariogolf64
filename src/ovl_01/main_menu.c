@@ -1697,7 +1697,7 @@ void SetUpChosenGame(void) {
     g_GameState.gameMode = GetClubTournamentGameMode();
     g_GameState.isMiniGolf = g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX;
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
-      g_GameState.betRates[index] = -1;
+      g_GameState.betRates[index] = UNSET_BET_RATE;
     }
 
     for (index = 0; index != MAX_PLAYER_COUNT; index++) {
@@ -2225,7 +2225,7 @@ void UpdateModeSelect(void) {
 
         /* The last setting is left as it was */
         for (index = 0; index != BET_STAKE_SLOT_COUNT - 1; index++) {
-          g_GameState.betRates[index] = -1;
+          g_GameState.betRates[index] = UNSET_BET_RATE;
         }
 
         break;
@@ -2250,7 +2250,7 @@ void UpdateModeSelect(void) {
           }
 
           for (index = 0; index != BET_STAKE_SLOT_COUNT - 1; index++) {
-            g_GameState.betRates[index] = -1;
+            g_GameState.betRates[index] = UNSET_BET_RATE;
           }
 
           D_800C2BD5 = 1;
@@ -2324,7 +2324,7 @@ void UpdateModeSelect(void) {
           }
 
           for (index = 0; index != BET_STAKE_SLOT_COUNT - 1; index++) {
-            g_GameState.betRates[index] = -1;
+            g_GameState.betRates[index] = UNSET_BET_RATE;
           }
 
           D_800C2BD5 = 1;
