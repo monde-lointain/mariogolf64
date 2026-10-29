@@ -427,6 +427,9 @@ static void* D_8023B638_ovl_01;
 static u8* D_8023B63C_ovl_01;
 static s16 D_8023B640_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
+/* Not static: the original left it to the linker's common block */
+s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
+
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
   MenuMemory* memory = func_8005AF74();

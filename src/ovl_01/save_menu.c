@@ -273,7 +273,8 @@ static s32 D_8023BDB0_ovl_01;
 static u8 D_8023BDB4_ovl_01[0x4];
 static u8 D_8023BDB8_ovl_01[0x88];
 
-/* Not static: the original left it to the linker's common block */
+/* Not static: the original left these to the linker's common block */
+u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
 u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][MENU_PALETTE_FILE_SIZE];
 
 void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {

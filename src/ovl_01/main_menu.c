@@ -427,8 +427,10 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead);
 void func_802230C0_ovl_01(Gfx** displayListHead);
 void func_80229CB0_ovl_01(Gfx** displayListHead);
 
-/* Not static: the original left it to the linker's common block */
+/* Not static: the original left these to the linker's common block */
 u8 D_801323E6;
+s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
+s32 D_8023BFD0_ovl_01;
 
 /* Defined after the routines whose strings come before theirs */
 extern const char D_802316EC_ovl_01[];

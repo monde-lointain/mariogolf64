@@ -654,7 +654,10 @@ segments:
       - { type: .bss, vram: 0x8023ACC0, name: ovl_01/player_stats }
       - { type: .bss, vram: 0x8023B670, name: ovl_01/save_menu }
       - { type: .bss, vram: 0x8023BE40, name: ovl_01/tournament_menu }
-      - { type: bss, vram: 0x8023BFC0, name: bss_8023BFC0 }
+      - { type: .bss, vram: 0x8023BFC0, name: ovl_01/main_menu, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8023BFD4, name: ovl_01/character_select, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8023BFDC, name: ovl_01/player_stats, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8023BFF0, name: ovl_01/save_menu, linker_section: COMMON .scommon }
 
   - name: hole_editor
     type: code
