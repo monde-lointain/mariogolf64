@@ -36,6 +36,11 @@ typedef struct MemoryBlock {
   /* 0x0C */ struct MemoryBlock* prev;
 } MemoryBlock; /* size = 0x10 */
 
+/* Allocations round each block, header included, up to a multiple of this */
+#define BLOCK_ALIGNMENT 8
+#define RoundUpToBlockAlignment(size) \
+  (((size) + BLOCK_ALIGNMENT - 1) & ~(BLOCK_ALIGNMENT - 1))
+
 /* The bytes from start up to end */
 #define RegionSize(start, end) ((u8*)(end) - (u8*)(start))
 /* The block that starts offset bytes into block */
@@ -109,7 +114,7 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
   mask = osSetIntMask(OS_IM_NONE);
 
   /* The size is reused for the block's, to match */
-  size = (size + sizeof(MemoryBlock) + 7) & ~7;
+  size = RoundUpToBlockAlignment(size + sizeof(MemoryBlock));
   bestSize = NO_BLOCK_SIZE;
   block = heap->sentinel.next;
   bestBlock = NULL;
@@ -268,7 +273,7 @@ void* AllocMemory(u32 size) {
   mask = osSetIntMask(OS_IM_NONE);
 
   /* The size is reused for the block's, to match */
-  size = (size + sizeof(MemoryBlock) + 7) & ~7;
+  size = RoundUpToBlockAlignment(size + sizeof(MemoryBlock));
   bestSize = NO_BLOCK_SIZE;
   bestBlock = NULL;
   block = f_Memory.sentinel.next;
