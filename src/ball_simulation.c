@@ -296,6 +296,22 @@ void ResetBallSimulations(void) {
 #define MIN_WALL_SPARK_SPEED 153.6f
 /* A ball that hits a hole triangle is put this share of the way to it */
 #define TRIANGLE_HIT_STEP_SHARE 0.995f
+
+/*
+ * A softer surface takes more of a bouncing ball's speed, more for a steeper
+ * landing, in thousandths at this scale
+ */
+#define SOFTNESS_SPEED_LOSS_SCALE 0.1f
+/*
+ * Landing in the water, a ball skips off only if it is flying between these
+ * speeds into the water, and this share of its speed along the water is
+ * more. Otherwise it sinks, keeping the square of WATER_ENTRY_DRAG of its
+ * speed along x.
+ */
+#define MIN_SKIP_IMPACT_SPEED KilometersPerHour(3)
+#define MAX_SKIP_IMPACT_SPEED KilometersPerHour(100)
+#define SKIP_SPEED_RATIO 0.4f
+#define WATER_ENTRY_DRAG 0.2f
 /*
  * 30 cm: a ball in the cup, or holed out, may settle this far below the
  * ground, deeper than the cup's floor
@@ -343,11 +359,14 @@ void ResetBallSimulations(void) {
 #define ROLL_VOLUME_RAMP_FRAMES 5
 #define MAX_ROLL_VOLUME 0x37
 
+/* The surface's ratings are in thousandths */
+#define THOUSANDTHS_PER_ONE 1000
+#define ONE_PER_THOUSANDTH (1.0f / THOUSANDTHS_PER_ONE)
+
 /*
  * Rolling. A surface gives the share of a rolling ball's speed it keeps each
- * frame in thousandths, kept less in the rain.
+ * frame, kept less in the rain.
  */
-#define SURFACE_FRICTION_SCALE 0.001f
 #define RAIN_FRICTION_SCALE 0.993f
 /* A slope of 45 degrees or more is steep, but only for this many steps */
 #define STEEP_SLOPE_STEP_LIMIT 800
@@ -1409,26 +1428,29 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       if (simulation->surface == SURFACE_WATER_HAZARD &&
           (simulation->state == BALL_STATE_ROLLING ||
-              fabsf(impactSpeed) >= KilometersPerHour(100) ||
-              fabsf(impactSpeed) <= KilometersPerHour(3) ||
+              fabsf(impactSpeed) >= MAX_SKIP_IMPACT_SPEED ||
+              fabsf(impactSpeed) <= MIN_SKIP_IMPACT_SPEED ||
               sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                   (velocity[AXIS_Z] * velocity[AXIS_Z])) *
-                      0.4f <=
+                      SKIP_SPEED_RATIO <=
                   fabsf(impactSpeed))) {
         simulation->state = BALL_STATE_IN_WATER;
         impactSpeed = 0.0f;
-        velocity[AXIS_X] = velocity[AXIS_X] * 0.2f * 0.2f;
+        velocity[AXIS_X] =
+            velocity[AXIS_X] * WATER_ENTRY_DRAG * WATER_ENTRY_DRAG;
       }
 
-      softness = 1000 - GetSurfaceInfo(simulation->surface)->bounciness;
-      bounce = 1.0f - (softness * steepness * 0.001f);
+      softness =
+          THOUSANDTHS_PER_ONE - GetSurfaceInfo(simulation->surface)->bounciness;
+      bounce = 1.0f - (softness * steepness * ONE_PER_THOUSANDTH);
       push = (bounce + 1.0f) * impactSpeed;
       bounced[AXIS_X] = velocity[AXIS_X] - (plane.normal[AXIS_X] * push);
       bounced[AXIS_Y] = velocity[AXIS_Y] - (plane.normal[AXIS_Y] * push);
       bounced[AXIS_Z] = velocity[AXIS_Z] - (plane.normal[AXIS_Z] * push);
-      keep = steepness * 0.1f;
+      keep = steepness * SOFTNESS_SPEED_LOSS_SCALE;
       keep = softness * keep;
-      keep = (1000.0f - (keep * steepness)) * 0.001f;
+      keep =
+          ((f32)THOUSANDTHS_PER_ONE - (keep * steepness)) * ONE_PER_THOUSANDTH;
       if (simulation->state == BALL_STATE_IN_WATER) {
         keep = 0.0f;
       }
@@ -1608,7 +1630,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       }
 
       info = GetSurfaceInfo(simulation->surface);
-      friction = (1000 - info->bounciness) * 0.001f;
+      friction = (THOUSANDTHS_PER_ONE - info->bounciness) * ONE_PER_THOUSANDTH;
       if (simulation->surface == SURFACE_BUNKER) {
         s32 burial = 0;
 
@@ -1992,7 +2014,7 @@ TAKE_OFF:
         isSteep = TRUE;
       }
 
-      friction = info->rollSpeedKept * SURFACE_FRICTION_SCALE;
+      friction = info->rollSpeedKept * ONE_PER_THOUSANDTH;
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_HoleSetup.conditions.isRaining == TRUE) {
         friction *= RAIN_FRICTION_SCALE;
