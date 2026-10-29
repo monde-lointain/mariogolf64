@@ -105,11 +105,11 @@
 #define WARIO_BIRDIE_FOCUS_DROP 1.5f
 #define WARIO_EYE_RISE 4.5f
 #define WARIO_BIRDIE_EYE_RISE 9.0f
-#define MAPLE_EYE_RISE 15.0f
+#define YOSHI_EYE_RISE 15.0f
 #define BOWSER_EAGLE_EYE_RISE 15.0f
 #define AZALEA_FOCUS_DROP 3.0f
 #define AZALEA_EYE_RISE 7.5f
-#define YOSHI_FOCUS_DROP 4.5f
+#define PEACH_FOCUS_DROP 4.5f
 
 /*
  * How far the low views of IsReactionViewLow raise what the camera looks at
@@ -118,15 +118,15 @@
 #define LOW_VIEW_LOOK_AT_RISE 4.5f
 #define LOW_VIEW_EYE_DROP 4.5f
 #define LOW_VIEW_SHORT_EYE_DROP 3.0f
-#define MAPLE_LOW_VIEW_SHIFT 7.5f
+#define YOSHI_LOW_VIEW_SHIFT 7.5f
 #define BOWSER_EAGLE_LOW_VIEW_LOOK_AT_RISE 7.5f
 #define BOWSER_EAGLE_LOW_VIEW_EYE_DROP 9.0f
 #define BOWSER_LOW_VIEW_SHIFT 3.0f
 
 /* Most reaction effects start from this character point */
 #define REACTION_EFFECT_POINT 3
-/* Maple's eagle sparkles on every third frame */
-#define MAPLE_SPARKLE_INTERVAL 3
+/* Yoshi's eagle sparkles on every third frame */
+#define YOSHI_SPARKLE_INTERVAL 3
 /*
  * Each frame, Sherry sparkles at one point of each of two runs of points,
  * which start at these
@@ -196,12 +196,12 @@ s32 GetAnimationFrameCount(u32 slotIndex, s32 id);
 void FrameMarioReaction(u32 slotIndex, CameraView* view);
 void FrameWarioReaction(u32 slotIndex, CameraView* view);
 void FrameBabyMarioReaction(u32 slotIndex, CameraView* view);
-void FrameMapleReaction(u32 slotIndex, CameraView* view);
+void FrameYoshiReaction(u32 slotIndex, CameraView* view);
 void FrameBowserReaction(u32 slotIndex, CameraView* view);
 void FrameAzaleaReaction(u32 slotIndex, CameraView* view);
 void FrameDonkeyKongReaction(u32 slotIndex, CameraView* view);
 void FrameReaction(u32 slotIndex, CameraView* view);
-void FrameYoshiReaction(u32 slotIndex, CameraView* view);
+void FramePeachReaction(u32 slotIndex, CameraView* view);
 void FrameSherryReaction(u32 slotIndex, CameraView* view);
 void FrameKidReaction(u32 slotIndex, CameraView* view);
 void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId);
@@ -377,17 +377,17 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_MAPLE:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(44, SOUND_PEACH_EAGLE);
-          CueReactionSound(92, SOUND_PEACH_EAGLE_EFFECT);
+          CueReactionSound(44, SOUND_MAPLE_EAGLE);
+          CueReactionSound(92, SOUND_MAPLE_EAGLE_EFFECT);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(12, SOUND_PEACH_BIRDIE);
+          CueReactionSound(12, SOUND_MAPLE_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(12, SOUND_PEACH_PAR);
+          CueReactionSound(12, SOUND_MAPLE_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(8, SOUND_PEACH_BOGEY);
+          CueReactionSound(8, SOUND_MAPLE_BOGEY);
           break;
       }
 
@@ -430,19 +430,19 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_PEACH:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(0, SOUND_YOSHI_EAGLE);
+          CueReactionSound(0, SOUND_PEACH_EAGLE);
           CueReactionSound(56, SOUND_SAVED);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(6, SOUND_YOSHI_BIRDIE);
-          CueReactionSound(6, SOUND_YOSHI_BIRDIE_EFFECT);
+          CueReactionSound(6, SOUND_PEACH_BIRDIE);
+          CueReactionSound(6, SOUND_PEACH_BIRDIE_EFFECT);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(12, SOUND_YOSHI_PAR);
+          CueReactionSound(12, SOUND_PEACH_PAR);
           CueReactionSound(42, SOUND_SAVED);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(16, SOUND_YOSHI_BOGEY);
+          CueReactionSound(16, SOUND_PEACH_BOGEY);
           break;
       }
 
@@ -468,7 +468,7 @@ s32 PlayReactionSounds(void) {
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, SOUND_WARIO_EAGLE);
-          CueReactionSound(21, SOUND_YOSHI_BIRDIE_EFFECT);
+          CueReactionSound(21, SOUND_PEACH_BIRDIE_EFFECT);
           CueReactionSound(88, SOUND_SAVED);
           break;
         case REACTION_ANIMATION_BIRDIE:
@@ -507,7 +507,7 @@ s32 PlayReactionSounds(void) {
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, SOUND_METAL_MARIO_EAGLE);
-          CueReactionSound(0, SOUND_YOSHI_BIRDIE_EFFECT);
+          CueReactionSound(0, SOUND_PEACH_BIRDIE_EFFECT);
           CueReactionSound(68, SOUND_METAL_MARIO_EAGLE_EFFECT);
           break;
         case REACTION_ANIMATION_BIRDIE:
@@ -525,25 +525,25 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_YOSHI:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(66, SOUND_MAPLE_EAGLE);
-          CueReactionSound(38, SOUND_MAPLE_EAGLE_EFFECT);
-          CueReactionSound(38, SOUND_MAPLE_EAGLE_SECOND_EFFECT);
-          CueReactionSound(3, SOUND_MAPLE_REPEATED);
-          CueReactionSound(11, SOUND_MAPLE_REPEATED);
-          CueReactionSound(18, SOUND_MAPLE_REPEATED);
-          CueReactionSound(25, SOUND_MAPLE_REPEATED);
-          CueReactionSound(32, SOUND_MAPLE_REPEATED);
+          CueReactionSound(66, SOUND_YOSHI_EAGLE);
+          CueReactionSound(38, SOUND_YOSHI_EAGLE_EFFECT);
+          CueReactionSound(38, SOUND_YOSHI_EAGLE_SECOND_EFFECT);
+          CueReactionSound(3, SOUND_YOSHI_REPEATED);
+          CueReactionSound(11, SOUND_YOSHI_REPEATED);
+          CueReactionSound(18, SOUND_YOSHI_REPEATED);
+          CueReactionSound(25, SOUND_YOSHI_REPEATED);
+          CueReactionSound(32, SOUND_YOSHI_REPEATED);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(40, SOUND_MAPLE_BIRDIE);
-          CueReactionSound(20, SOUND_MAPLE_REPEATED);
-          CueReactionSound(38, SOUND_MAPLE_REPEATED);
+          CueReactionSound(40, SOUND_YOSHI_BIRDIE);
+          CueReactionSound(20, SOUND_YOSHI_REPEATED);
+          CueReactionSound(38, SOUND_YOSHI_REPEATED);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(28, SOUND_MAPLE_PAR);
+          CueReactionSound(28, SOUND_YOSHI_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(0, SOUND_MAPLE_BOGEY);
+          CueReactionSound(0, SOUND_YOSHI_BOGEY);
           break;
       }
 
@@ -618,7 +618,7 @@ s32 PlayReactionSounds(void) {
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, SOUND_SHERRY_EAGLE);
-          CueReactionSound(6, SOUND_YOSHI_BIRDIE_EFFECT);
+          CueReactionSound(6, SOUND_PEACH_BIRDIE_EFFECT);
           break;
         case REACTION_ANIMATION_BIRDIE:
           CueReactionSound(20, SOUND_SHERRY_BIRDIE);
@@ -903,9 +903,9 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
   }
 }
 
-/* Frames Maple from farther away, with an effect every third frame of the eagle
+/* Frames Yoshi from farther away, with an effect every third frame of the eagle
  * animation */
-void FrameMapleReaction(u32 slotIndex, CameraView* view) {
+void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(FAR_REACTION_START_DISTANCE,
       REACTION_END_DISTANCE, f_ReactionFrame * REACTION_ZOOM_RATE);
@@ -914,7 +914,7 @@ void FrameMapleReaction(u32 slotIndex, CameraView* view) {
   f32 highestHeight;
 
   if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
-    if (f_ReactionFrame % MAPLE_SPARKLE_INTERVAL == 0) {
+    if (f_ReactionFrame % YOSHI_SPARKLE_INTERVAL == 0) {
       SpawnSparkleNearPoint(slotIndex, REACTION_EFFECT_POINT);
     }
   }
@@ -937,7 +937,7 @@ void FrameMapleReaction(u32 slotIndex, CameraView* view) {
   if (f_ReactionAnimation == REACTION_ANIMATION_BOGEY) {
     view->eye[AXIS_Y] = focus[AXIS_Y];
   } else {
-    view->eye[AXIS_Y] = focus[AXIS_Y] + (-MAPLE_EYE_RISE);
+    view->eye[AXIS_Y] = focus[AXIS_Y] + (-YOSHI_EYE_RISE);
   }
 
   view->eye[AXIS_Z] = focus[AXIS_Z] +
@@ -951,8 +951,8 @@ void FrameMapleReaction(u32 slotIndex, CameraView* view) {
       view->lookAt[AXIS_Y] -= LOW_VIEW_LOOK_AT_RISE;
       view->eye[AXIS_Y] += LOW_VIEW_SHORT_EYE_DROP;
     } else {
-      view->lookAt[AXIS_Y] -= MAPLE_LOW_VIEW_SHIFT;
-      view->eye[AXIS_Y] += MAPLE_LOW_VIEW_SHIFT;
+      view->lookAt[AXIS_Y] -= YOSHI_LOW_VIEW_SHIFT;
+      view->eye[AXIS_Y] += YOSHI_LOW_VIEW_SHIFT;
     }
   }
 }
@@ -1139,8 +1139,8 @@ void FrameReaction(u32 slotIndex, CameraView* view) {
   }
 }
 
-/* Frames Yoshi, looking lower except after a bogey */
-void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
+/* Frames Peach, looking lower except after a bogey */
+void FramePeachReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
       f_ReactionFrame * REACTION_ZOOM_RATE);
@@ -1158,7 +1158,7 @@ void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
   }
 
   if (f_ReactionAnimation != REACTION_ANIMATION_BOGEY) {
-    focus[AXIS_Y] += YOSHI_FOCUS_DROP;
+    focus[AXIS_Y] += PEACH_FOCUS_DROP;
   }
 
   view->lookAt[AXIS_X] = focus[AXIS_X];
@@ -1296,7 +1296,7 @@ s32 UpdateReaction(u32 slotIndex) {
     view = &g_Cameras[0].view;
     switch (slot->modelIndex % CHARACTER_COUNT) {
       case CHARACTER_PEACH:
-        FrameYoshiReaction(slotIndex, view);
+        FramePeachReaction(slotIndex, view);
         break;
       case CHARACTER_MARIO:
       case CHARACTER_METAL_MARIO:
@@ -1306,7 +1306,7 @@ s32 UpdateReaction(u32 slotIndex) {
         FrameWarioReaction(slotIndex, view);
         break;
       case CHARACTER_YOSHI:
-        FrameMapleReaction(slotIndex, view);
+        FrameYoshiReaction(slotIndex, view);
         break;
       case CHARACTER_BOWSER:
         FrameBowserReaction(slotIndex, view);

@@ -30,7 +30,7 @@ enum Sound {
   SOUND_CONTACT_MARIO = 0x2E, /* Also Bowser's */
   SOUND_CONTACT_HEAVY_HITTER,
   SOUND_CONTACT_WARIO, /* Also played when the game halts on a fault */
-  SOUND_MAPLE_EAGLE_SECOND_EFFECT = 0x35, /* Also played in the opening */
+  SOUND_YOSHI_EAGLE_SECOND_EFFECT = 0x35, /* Also played in the opening */
   SOUND_METAL_MARIO_EAGLE_EFFECT = 0x38,
   SOUND_WARIO_BOGEY_EFFECT,
   /* With each spreading circle of Bowser's bogey reaction */
@@ -38,9 +38,9 @@ enum Sound {
   /* Also played by the save prompt and late in some eagle reactions */
   SOUND_SAVED,
   /* Also in Metal Mario's, Sherry's and Wario's eagles */
-  SOUND_YOSHI_BIRDIE_EFFECT,
-  SOUND_PEACH_EAGLE_EFFECT,
+  SOUND_PEACH_BIRDIE_EFFECT,
   SOUND_MAPLE_EAGLE_EFFECT,
+  SOUND_YOSHI_EAGLE_EFFECT,
   SOUND_CHARLIE_BIRDIE_EFFECT,
   /* Over and over in his reactions and the opening */
   SOUND_DONKEY_KONG_REPEATED = 0x41,
@@ -63,7 +63,7 @@ enum Sound {
   SOUND_GO,
   SOUND_CAPTION_MEET, /* Also played when the save data is erased */
   /* Over and over in her reactions and the opening */
-  SOUND_MAPLE_REPEATED = 0x4F,
+  SOUND_YOSHI_REPEATED = 0x4F,
   SOUND_MENU_START,
   /* A ball being struck by a plain club or bouncing on hard ground */
   SOUND_CONTACT_PLAIN,
@@ -142,10 +142,10 @@ enum Sound {
   SOUND_LUIGI_BOGEY,
   SOUND_LUIGI_PAR = 0x14E,
   SOUND_LUIGI_EAGLE = 0x150,
-  SOUND_PEACH_BOGEY = 0x159,
-  SOUND_PEACH_EAGLE = 0x15D,
-  SOUND_PEACH_BIRDIE = 0x168,
-  SOUND_PEACH_PAR,
+  SOUND_MAPLE_BOGEY = 0x159,
+  SOUND_MAPLE_EAGLE = 0x15D,
+  SOUND_MAPLE_BIRDIE = 0x168,
+  SOUND_MAPLE_PAR,
   SOUND_METAL_MARIO_BIRDIE = 0x173,
   SOUND_METAL_MARIO_BOGEY = 0x17F,
   SOUND_METAL_MARIO_EAGLE,
@@ -154,10 +154,10 @@ enum Sound {
   SOUND_AMBIENT_ALTERNATING_FIRST = 0x184,
   SOUND_AMBIENT_ALTERNATING_SECOND,
   SOUND_AMBIENT_REPEATING = 0x18B,
-  SOUND_YOSHI_PAR = 0x18E,
-  SOUND_YOSHI_BIRDIE = 0x194,
-  SOUND_YOSHI_BOGEY = 0x19F,
-  SOUND_YOSHI_EAGLE,
+  SOUND_PEACH_PAR = 0x18E,
+  SOUND_PEACH_BIRDIE = 0x194,
+  SOUND_PEACH_BOGEY = 0x19F,
+  SOUND_PEACH_EAGLE,
   SOUND_AMBIENT_RANDOM_FIRST = 0x1A3, /* Also Plum's par reaction */
   SOUND_PLUM_EAGLE = 0x1AC,
   SOUND_PLUM_BOGEY = 0x1B7,
@@ -175,10 +175,10 @@ enum Sound {
   SOUND_WARIO_BIRDIE = 0x1F2,
   SOUND_WARIO_PAR,
   SOUND_WARIO_EAGLE = 0x1FF,
-  SOUND_MAPLE_EAGLE,
-  SOUND_MAPLE_BOGEY = 0x206,
-  SOUND_MAPLE_BIRDIE = 0x208,
-  SOUND_MAPLE_PAR
+  SOUND_YOSHI_EAGLE,
+  SOUND_YOSHI_BOGEY = 0x206,
+  SOUND_YOSHI_BIRDIE = 0x208,
+  SOUND_YOSHI_PAR
 };
 
 /*

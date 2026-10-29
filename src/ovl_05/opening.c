@@ -1969,7 +1969,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningFrameCount == 0x375) {
-          PlaySound(SOUND_MAPLE_REPEATED, f_OpeningSoundChannel, 0x3C);
+          PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x3C);
           AdvanceOpeningSoundChannel();
         }
 
@@ -2088,7 +2088,7 @@ void UpdateOpening(void) {
             break;
           case 0x2A:
             PlaySound(
-                SOUND_MAPLE_EAGLE_SECOND_EFFECT, f_OpeningSoundChannel, 0x46);
+                SOUND_YOSHI_EAGLE_SECOND_EFFECT, f_OpeningSoundChannel, 0x46);
             SetSoundFrequencyOffset(f_OpeningSoundChannel, 7.0f);
             AdvanceOpeningSoundChannel();
             break;
@@ -2355,7 +2355,7 @@ void UpdateOpening(void) {
           switch (f_OpeningSceneFramesLeft) {
             case 0x13:
             case 9:
-              PlaySound(SOUND_MAPLE_REPEATED, f_OpeningSoundChannel, 0x43);
+              PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x43);
               AdvanceOpeningSoundChannel();
               break;
           }
@@ -2420,11 +2420,11 @@ void UpdateOpening(void) {
             case 0x45:
             case 0x4F:
             case 0x59:
-              PlaySound(SOUND_MAPLE_REPEATED, f_OpeningSoundChannel, 0x57);
+              PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x57);
               AdvanceOpeningSoundChannel();
               break;
             case 0x2A:
-              PlaySound(SOUND_MAPLE_REPEATED, f_OpeningSoundChannel, 0x61);
+              PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x61);
               AdvanceOpeningSoundChannel();
               break;
             case 0x3B:

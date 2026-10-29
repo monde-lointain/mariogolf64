@@ -62,7 +62,7 @@ enum BannerState {
 /* LoadUnlockNotice's unlocks */
 enum UnlockNotice {
   UNLOCK_NOTICE_DONKEY_KONG,
-  UNLOCK_NOTICE_PEACH,
+  UNLOCK_NOTICE_MAPLE,
   UNLOCK_NOTICE_METAL_MARIO,
   UNLOCK_NOTICE_COURSES /* The first of the courses' unlocks */
 };
@@ -741,7 +741,7 @@ void LoadUnlockNotice(s32 unlock) {
   if (unlock == UNLOCK_NOTICE_DONKEY_KONG) {
     f_PortraitCharacterIndex = CHARACTER_DONKEY_KONG;
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
-  } else if (unlock == UNLOCK_NOTICE_PEACH) {
+  } else if (unlock == UNLOCK_NOTICE_MAPLE) {
     f_PortraitCharacterIndex = CHARACTER_MAPLE;
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
   } else if (unlock == UNLOCK_NOTICE_METAL_MARIO) {
