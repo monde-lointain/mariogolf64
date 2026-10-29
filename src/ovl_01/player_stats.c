@@ -455,11 +455,13 @@ static Mtx D_8023B550_ovl_01;
 /* Read by no routine */
 static u8 D_8023B590_ovl_01[0x50];
 
-static void* D_8023B5E0_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
-static void** D_8023B630_ovl_01;
-static void* D_8023B634_ovl_01;
-static void* D_8023B638_ovl_01;
-static u8* D_8023B63C_ovl_01;
+/* The Best Shots screen's images: each cell's face, then the course icons,
+ * the name plate, the cursor box and the score labels */
+static void* f_BestShotFaces[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
+static void** f_BestShotsCourseIcons;
+static void* f_BestShotsNamePlate;
+static void* f_BestShotsCursorBox;
+static u8* f_ScoreLabels;
 /* Each Best Shots cell's ranked record, or STATS_CELL_EMPTY; a row per kind */
 static s16 f_BestShotRecords[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
@@ -1889,10 +1891,10 @@ void LoadBestShotsCourseIcons(void** buffers) {
   EncodedAsset asset;
   s16 imageIndex;
 
-  D_8023B630_ovl_01 = buffers;
+  f_BestShotsCourseIcons = buffers;
   for (imageIndex = 0; imageIndex != PLAYER_STATS_IMAGE_COUNT; imageIndex++) {
     OpenEncodedAsset(g_CourseIconAssets[imageIndex], &asset);
-    ReadEncodedAsset(D_8023B630_ovl_01[imageIndex], &asset);
+    ReadEncodedAsset(f_BestShotsCourseIcons[imageIndex], &asset);
   }
 }
 
@@ -1901,25 +1903,23 @@ void LoadScoreLabelBuffer(void* buffer, s16 bufferKind) {
 
   switch (bufferKind) {
     case SCORE_LABEL_BUFFER_UNREAD:
-      D_8023B634_ovl_01 = buffer;
+      f_BestShotsNamePlate = buffer;
       break;
     case SCORE_LABEL_BUFFER_CURSOR_BOX:
-      D_8023B638_ovl_01 = buffer;
+      f_BestShotsCursorBox = buffer;
       OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
-      ReadEncodedAsset(D_8023B638_ovl_01, &asset);
+      ReadEncodedAsset(f_BestShotsCursorBox, &asset);
       break;
     case SCORE_LABEL_BUFFER_LABELS:
-      D_8023B63C_ovl_01 = buffer;
+      f_ScoreLabels = buffer;
       OpenEncodedAsset(ASSET_JAPANESE_BIRDIE_LABEL, &asset);
-      ReadEncodedAsset(D_8023B63C_ovl_01, &asset);
+      ReadEncodedAsset(f_ScoreLabels, &asset);
       OpenEncodedAsset(ASSET_JAPANESE_EAGLE_LABEL, &asset);
-      ReadEncodedAsset(D_8023B63C_ovl_01 + PLAYER_STATS_IMAGE_SIZE, &asset);
+      ReadEncodedAsset(f_ScoreLabels + PLAYER_STATS_IMAGE_SIZE, &asset);
       OpenEncodedAsset(ASSET_JAPANESE_ALBATROSS_LABEL, &asset);
-      ReadEncodedAsset(
-          D_8023B63C_ovl_01 + (PLAYER_STATS_IMAGE_SIZE * 2), &asset);
+      ReadEncodedAsset(f_ScoreLabels + (PLAYER_STATS_IMAGE_SIZE * 2), &asset);
       OpenEncodedAsset(ASSET_JAPANESE_HOLE_IN_ONE_LABEL, &asset);
-      ReadEncodedAsset(
-          D_8023B63C_ovl_01 + (PLAYER_STATS_IMAGE_SIZE * 3), &asset);
+      ReadEncodedAsset(f_ScoreLabels + (PLAYER_STATS_IMAGE_SIZE * 3), &asset);
       break;
   }
 }
@@ -2002,9 +2002,9 @@ void UpdateBestShots(void) {
 
 /*
  * DrawBestShots draws the records page: a shaded panel, the image in
- * D_8023B634 in strips below it, and a row of up to five ranked faces for each
- * label of D_80230984. The chosen record also shows its course's image and
- * name.
+ * f_BestShotsNamePlate in strips below it, and a row of up to five ranked faces
+ * for each label of D_80230984. The chosen record also shows its course's image
+ * and name.
  */
 #define RECORDS_PANEL_LEFT 24
 #define RECORDS_PANEL_TOP 48
@@ -2075,10 +2075,10 @@ void DrawBestShots(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023B634_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BestShotsNamePlate)));
   do {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023B634_ovl_01) +
+        TextureAddress(LargeImageTexels(f_BestShotsNamePlate) +
             (index * RECORDS_STRIP_WIDTH * RECORDS_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, RECORDS_STRIP_WIDTH, RECORDS_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -2103,7 +2103,7 @@ void DrawBestShots(Gfx** displayListHead) {
         character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
                         .characterIndex;
         DrawCharacterFace(&gfx, D_8012D430[character],
-            D_8023B5E0_ovl_01[row][column],
+            f_BestShotFaces[row][column],
             RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
             RECORD_FACE_Y + (row * STATS_CURSOR_ROW_HEIGHT), character,
             FACE_PLAIN);
@@ -2140,14 +2140,14 @@ void DrawBestShots(Gfx** displayListHead) {
   if (f_BestShotRecords[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
     gDPLoadTLUT_pal256(gfx++,
         TextureAddress(
-            (u32)D_8023B630_ovl_01[(s8)save
+            (u32)f_BestShotsCourseIcons[(s8)save
                     ->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
                     .courseIndex] +
             IMAGE_HEADER_SIZE));
     for (index = 0; index != RECORD_COURSE_STRIP_COUNT; index++) {
       gDPLoadTextureBlock(gfx++,
           TextureAddress(
-              (u32)D_8023B630_ovl_01[(s8)save
+              (u32)f_BestShotsCourseIcons[(s8)save
                       ->rankedRecords[f_BestShotRecords[chosenRow]
                                                        [chosenColumn]]
                       .courseIndex] +
@@ -2453,7 +2453,7 @@ void DrawScoreLabel(Gfx** displayListHead, s32 left, s32 top, s32 labelIndex) {
     labelIndex = SCORE_LABEL_COUNT - 1;
   }
 
-  image = D_8023B63C_ovl_01 + (labelIndex * PLAYER_STATS_IMAGE_SIZE);
+  image = f_ScoreLabels + (labelIndex * PLAYER_STATS_IMAGE_SIZE);
   width = image[IMAGE_WIDTH_LOW_BYTE];
   height = image[IMAGE_HEIGHT_LOW_BYTE];
 
@@ -2516,7 +2516,7 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(D_8023B638_ovl_01)),
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_BestShotsCursorBox)),
       G_IM_FMT_IA, MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2601,10 +2601,10 @@ void LoadBestShotFaces(void) {
         palette = 0;
       }
 
-      D_8023B5E0_ovl_01[row][column] = D_8023BFF0_ovl_01[cell];
+      f_BestShotFaces[row][column] = D_8023BFF0_ovl_01[cell];
       OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
       ReadAssetFile(
-          D_8023B5E0_ovl_01[row][column], GetAssetFileSize(&file), &file);
+          f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);
     }
   }
 }
