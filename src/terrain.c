@@ -262,6 +262,20 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point);
 #define FLAG_PANEL_COLUMN_COUNT 16
 /* The first row of the last page, which ends at flag 0xFF */
 #define FLAG_PANEL_FIRST_ROW_MAX 8
+/*
+ * The panel's debug text cells: the build dates' labels and values, the
+ * header of flag columns, and the flag rows, whose labels sit before the
+ * flags and whose flags are spaced two cells apart
+ */
+#define BUILD_DATE_LABEL_COLUMN 3
+#define BUILD_DATE_COLUMN 8
+#define ROM_BUILD_DATE_ROW 4
+#define SAVE_BUILD_DATE_ROW 5
+#define FLAG_PANEL_HEADER_ROW 12
+#define FLAG_PANEL_FIRST_TEXT_ROW 14
+#define FLAG_ROW_LABEL_COLUMN 3
+#define FIRST_FLAG_TEXT_COLUMN 6
+#define FLAG_TEXT_SPACING 2
 
 void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow);
 void BuildAllTileMidpoints(void);
@@ -1236,18 +1250,20 @@ void UpdateFlagPanel(void) {
   }
 
   ClearDebugText();
-  PrintDebugText("ROM :", 3, 4);
-  PrintDebugText(g_RomBuildDate, 8, 4);
-  PrintDebugText("SRAM:", 3, 5);
-  PrintDebugText(g_SaveBuildDate, 8, 5);
+  PrintDebugText("ROM :", BUILD_DATE_LABEL_COLUMN, ROM_BUILD_DATE_ROW);
+  PrintDebugText(g_RomBuildDate, BUILD_DATE_COLUMN, ROM_BUILD_DATE_ROW);
+  PrintDebugText("SRAM:", BUILD_DATE_LABEL_COLUMN, SAVE_BUILD_DATE_ROW);
+  PrintDebugText(g_SaveBuildDate, BUILD_DATE_COLUMN, SAVE_BUILD_DATE_ROW);
   for (row = 0; row < FLAG_PANEL_ROW_COUNT; row++) {
     sprintf(text, "%x0|", row + f_FlagPanelFirstRow);
-    PrintDebugText(text, 3, row + 14);
-    for (column = 0, textColumn = 6; column < FLAG_PANEL_COLUMN_COUNT;
-        column++, textColumn += 2) {
+    PrintDebugText(
+        text, FLAG_ROW_LABEL_COLUMN, row + FLAG_PANEL_FIRST_TEXT_ROW);
+    for (column = 0, textColumn = FIRST_FLAG_TEXT_COLUMN;
+        column < FLAG_PANEL_COLUMN_COUNT;
+        column++, textColumn += FLAG_TEXT_SPACING) {
       if (row == 0) {
         sprintf(text, "%X", column);
-        PrintDebugText(text, textColumn, 12);
+        PrintDebugText(text, textColumn, FLAG_PANEL_HEADER_ROW);
       }
 
       sprintf(text, "%X",
@@ -1258,7 +1274,7 @@ void UpdateFlagPanel(void) {
         SetDebugTextHighlight(TRUE);
       }
 
-      PrintDebugText(text, textColumn, row + 14);
+      PrintDebugText(text, textColumn, row + FLAG_PANEL_FIRST_TEXT_ROW);
     }
   }
 
