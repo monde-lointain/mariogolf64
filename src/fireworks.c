@@ -97,7 +97,6 @@ void StopFireworks(void) {
  * Loads the shape for the course, picked by its record index, and allocates
  * the fireworks' particles
  */
-#ifdef NON_MATCHING
 void LoadFireworks(s32 courseRecordIndex) {
   EncodedAsset asset;
   s32 index;
@@ -106,6 +105,7 @@ void LoadFireworks(s32 courseRecordIndex) {
   s32 height;
   s32 row;
   s32 column;
+  u8* cell;
 
   f_FireworkShape =
       AllocMemory(OpenEncodedAsset(f_FireworkShapeAssetIds[courseRecordIndex %
@@ -128,7 +128,8 @@ void LoadFireworks(s32 courseRecordIndex) {
     height = firework->shape->height;
     for (row = 0; row != height; row++) {
       for (column = 0; column != width; column++) {
-        if (firework->shape->cells[column + (row * width)] == 0) {
+        cell = &firework->shape->cells[column + (row * width)];
+        if (*cell == 0) {
           firework->particleCount++;
         }
       }
@@ -143,10 +144,6 @@ void LoadFireworks(s32 courseRecordIndex) {
 
   f_FireworkState = FIREWORKS_LOADED;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/fireworks", LoadFireworks);
-#endif
 
 void FreeFireworks(void) {
   s32 index;
