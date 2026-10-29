@@ -80,7 +80,7 @@ static s32 f_ShotLength = 0;
 static s32 f_StartCupDistance = 0;
 static s32 D_800BE648 = 0;
 /* The first step of the path with STEP_FLAG_BILLBOARD_HIT set, or NO_STEP */
-static s32 f_FlaggedStep = 0;
+static s32 f_BillboardHitStep = 0;
 static s32 D_800BE650 = 0;
 static Radians f_CameraYaw = 0.0f;
 static s32 D_800BE658 = 0;
@@ -160,8 +160,8 @@ static const char f_UnusedFloatFormat[] = "            %f";
 /* Frames the cup and the ball; it keeps the putter's contact from calling
  * StartContactEffect */
 #define FLIGHT_CAMERA_FRAMING_CUP 0x13
-/* Looks along the path at f_FlaggedStep */
-#define FLIGHT_CAMERA_FLAGGED_STEP 0x14
+/* Looks along the path at f_BillboardHitStep */
+#define FLIGHT_CAMERA_BILLBOARD_HIT 0x14
 
 /* The values 0 to CAMERA_PICK_COUNT - 1, shuffled; NextCameraPick deals them in
  * turn */
@@ -294,7 +294,7 @@ static CoursePoint f_FlightBallPosition;
 static CoursePoint f_ShotEndPosition;
 static CoursePoint f_ShotStartPosition;
 static Radians f_ShotFlightYaw;
-static Radians f_FlaggedStepYaw;
+static Radians f_BillboardHitYaw;
 static Radians f_EndYawFromCup;
 static Radians f_StartYawFromCup;
 static s32 D_800DAF20;
@@ -714,15 +714,15 @@ void StartFlightCamera(s32 earlierFlightCount) {
   }
 
   D_800BE648 = FALSE;
-  f_FlaggedStep = NO_STEP;
+  f_BillboardHitStep = NO_STEP;
   D_800BE650 = -1;
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
     if (i < g_SimulatedShot.stepCount &&
         (g_SimulatedShot.pathFlags[i] & STEP_FLAG_BILLBOARD_HIT)) {
       D_800BE648 = TRUE;
       D_800BE658 |= 1;
-      if (f_FlaggedStep == NO_STEP) {
-        f_FlaggedStep = i;
+      if (f_BillboardHitStep == NO_STEP) {
+        f_BillboardHitStep = i;
         D_800BE650 = 40;
       }
     }
@@ -1768,8 +1768,8 @@ void PlaceAimCamera(void);
 #define UNKD_VIEW_RISE 0x5A00
 #define UNKD_EASE_DEAD_ZONE 0.5f
 #define UNKD_EASE_FRACTION 0.1f
-#define FLAGGED_VIEW_DISTANCE 460800.0f
-#define FLAGGED_VIEW_RISE 0x4B000
+#define BILLBOARD_HIT_VIEW_DISTANCE 460800.0f
+#define BILLBOARD_HIT_VIEW_RISE 0x4B000
 /* While D_800BE624 is below this, the circle starts at angle 0 rather than at a
  * side */
 #define CIRCLE_START_FLIGHT_COUNT 2
@@ -2269,22 +2269,22 @@ void PlaceFlightCamera(s32 step) {
 
       EaseLookAtPoint(f_EndYawFromCup);
       break;
-    case FLIGHT_CAMERA_FLAGGED_STEP:
-      if (f_FlaggedStep == 0) {
-        f_FlaggedStep = 1;
+    case FLIGHT_CAMERA_BILLBOARD_HIT:
+      if (f_BillboardHitStep == 0) {
+        f_BillboardHitStep = 1;
       }
 
-      f_FlaggedStepYaw =
-          -atan2((f32)(g_SimulatedShot.path[f_FlaggedStep][AXIS_X] -
-                     g_SimulatedShot.path[f_FlaggedStep - 1][AXIS_X]),
-              (f32)(g_SimulatedShot.path[f_FlaggedStep][AXIS_Z] -
-                  g_SimulatedShot.path[f_FlaggedStep - 1][AXIS_Z]));
-      point[AXIS_X] = (-sinf(f_FlaggedStepYaw) * FLAGGED_VIEW_DISTANCE) +
-          g_SimulatedShot.path[f_FlaggedStep][AXIS_X];
-      point[AXIS_Z] = (cosf(f_FlaggedStepYaw) * FLAGGED_VIEW_DISTANCE) +
-          g_SimulatedShot.path[f_FlaggedStep][AXIS_Z];
-      point[AXIS_Y] =
-          GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - FLAGGED_VIEW_RISE;
+      f_BillboardHitYaw =
+          -atan2((f32)(g_SimulatedShot.path[f_BillboardHitStep][AXIS_X] -
+                     g_SimulatedShot.path[f_BillboardHitStep - 1][AXIS_X]),
+              (f32)(g_SimulatedShot.path[f_BillboardHitStep][AXIS_Z] -
+                  g_SimulatedShot.path[f_BillboardHitStep - 1][AXIS_Z]));
+      point[AXIS_X] = (-sinf(f_BillboardHitYaw) * BILLBOARD_HIT_VIEW_DISTANCE) +
+          g_SimulatedShot.path[f_BillboardHitStep][AXIS_X];
+      point[AXIS_Z] = (cosf(f_BillboardHitYaw) * BILLBOARD_HIT_VIEW_DISTANCE) +
+          g_SimulatedShot.path[f_BillboardHitStep][AXIS_Z];
+      point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) -
+          BILLBOARD_HIT_VIEW_RISE;
       f_CameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
       f_CameraPosition[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       f_CameraPosition[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
@@ -2575,7 +2575,7 @@ void ChooseFlightCameraKind(void) {
     switch (f_FlightPhase) {
       case 1:
         pick = NextCameraPick(1);
-        if (f_FlaggedStep != NO_STEP) {
+        if (f_BillboardHitStep != NO_STEP) {
           kind = FLIGHT_CAMERA_UNK3;
         } else if (pick < 4) {
           kind = FLIGHT_CAMERA_UNK3;
@@ -3007,17 +3007,17 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   if (g_SimulatedShot.stepCount >= aheadStep &&
       (g_SimulatedShot.pathFlags[aheadStep] & STEP_FLAG_BILLBOARD_HIT)) {
     D_800BE658 |= 1;
-    if (f_FlaggedStep == NO_STEP) {
-      f_FlaggedStep = aheadStep;
+    if (f_BillboardHitStep == NO_STEP) {
+      f_BillboardHitStep = aheadStep;
       D_800BE650 = 70;
     }
   }
 
-  if (step > 60 && step < f_FlaggedStep && !D_800BE674) {
-    f_FlightCameraKind = FLIGHT_CAMERA_FLAGGED_STEP;
+  if (step > 60 && step < f_BillboardHitStep && !D_800BE674) {
+    f_FlightCameraKind = FLIGHT_CAMERA_BILLBOARD_HIT;
   }
 
-  if (f_FlaggedStep != NO_STEP && f_FlaggedStep + 10 < step &&
+  if (f_BillboardHitStep != NO_STEP && f_BillboardHitStep + 10 < step &&
       f_FlightCameraKind != FLIGHT_CAMERA_AROUND_END &&
       (s32)IntLength3D(f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
           f_FlightBallPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
@@ -3026,7 +3026,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     f_FlightCameraKind = FLIGHT_CAMERA_AROUND_END;
   }
 
-  if (f_FlaggedStep < step &&
+  if (f_BillboardHitStep < step &&
       (g_BallFlightStep + 40 < g_SimulatedShot.stepCount ||
           f_FlightPhase == 7) &&
       f_HasFlightPhaseChanged == TRUE && !g_IsCupViewShown && !D_800BE658) {
