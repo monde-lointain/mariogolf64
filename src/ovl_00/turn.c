@@ -40,6 +40,7 @@
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
+#include "scorecard.h"
 #include "scoring.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -3451,17 +3452,17 @@ void UpdateTurns(void) {
             g_PauseScreen = PAUSE_SCREEN_SCORECARD;
             OpenScorecard(g_GameState.courseIndex, g_GameState.holeIndex);
             if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
-              SetScorecardLayout(3);
+              SetScorecardLayout(SCORECARD_LAYOUT_TOURNAMENT);
             } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-              SetScorecardLayout(4);
+              SetScorecardLayout(SCORECARD_LAYOUT_SPEED_GOLF);
             } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-              SetScorecardLayout(2);
+              SetScorecardLayout(SCORECARD_LAYOUT_SKINS);
             } else if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                 g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-              SetScorecardLayout(1);
+              SetScorecardLayout(SCORECARD_LAYOUT_MATCH);
             } else {
-              SetScorecardLayout(0);
+              SetScorecardLayout(SCORECARD_LAYOUT_STROKE);
             }
           }
         } else if (g_PauseScreen == PAUSE_SCREEN_SCORECARD) {

@@ -31,13 +31,6 @@
 #include "tournament.h"
 #include "variables.h"
 
-/* The layouts that SetScorecardLayout picks for the game modes */
-#define SCORECARD_LAYOUT_STROKE 0
-#define SCORECARD_LAYOUT_MATCH 1 /* Match games and Get Character */
-#define SCORECARD_LAYOUT_SKINS 2 /* Skins matches and club slots */
-#define SCORECARD_LAYOUT_TOURNAMENT 3
-#define SCORECARD_LAYOUT_SPEED_GOLF 4
-
 /*
  * The tallies of a match's hole happen at these frames of the TALLYING state.
  * A skins match carries a halved hole's skins over at SKINS_TALLY_TIME, or

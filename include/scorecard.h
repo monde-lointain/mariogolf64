@@ -12,6 +12,15 @@
 #define HOLE_WINNER_HALVED (-1) /* Nobody won the last hole outright */
 #define HOLE_WINNER_UNSET (-2) /* What SetScorecardLayout starts it as */
 
+/* The layouts that SetScorecardLayout takes for the game modes */
+enum ScorecardLayout {
+  SCORECARD_LAYOUT_STROKE,
+  SCORECARD_LAYOUT_MATCH, /* Match games and Get Character */
+  SCORECARD_LAYOUT_SKINS, /* Skins matches and club slots */
+  SCORECARD_LAYOUT_TOURNAMENT,
+  SCORECARD_LAYOUT_SPEED_GOLF
+};
+
 /* g_ScorecardState values */
 enum ScorecardState {
   SCORECARD_OPENING, /* Sliding in */
@@ -133,6 +142,9 @@ void DrawSpeedGolfPage(Gfx** displayListHead);
 void DrawLeaderboardPage(Gfx** displayListHead);
 void DrawScoresPage(Gfx** displayListHead);
 
+void OpenScorecard(s32 courseIndex, s32 holeIndex);
+void SetScorecardLayout(s32 layout);
+void UpdateScorecard(u16 buttons, u16 pressedButtons);
 void DrawScorecard(Gfx** displayListHead);
 
 #endif
