@@ -602,7 +602,7 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_800FC6A0, &asset);
   D_801B69EC = AllocMemory(OpenEncodedAsset(0x709, &asset));
   ReadEncodedAsset(D_801B69EC, &asset);
-  PlaySong(0x27, 0);
+  PlaySong(SONG_TITLE, 0);
   SetFramebufferCount(3);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   D_801323A0.statsCourse = 6;

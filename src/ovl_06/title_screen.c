@@ -267,11 +267,11 @@ void LoadTitleScreen(void) {
   if (g_ControllerCount == 0) {
     OpenEncodedAsset(NO_CONTROLLER_IMAGE_ASSET, &asset);
     ReadEncodedAsset(&f_TitleImage, &asset);
-    PlaySong(5, SONG_FLAG_RESTART);
+    PlaySong(SONG_HOLE_OUT_OVER_BOGEY, SONG_FLAG_RESTART);
   } else {
     OpenEncodedAsset(TITLE_IMAGE_ASSET, &asset);
     ReadEncodedAsset(&f_TitleImage, &asset);
-    PlaySong(0x2A, SONG_FLAG_RESTART);
+    PlaySong(SONG_ATTRACT_TITLE, SONG_FLAG_RESTART);
   }
 
   OpenEncodedAsset(JAPANESE_LOGO_ASSET, &asset);

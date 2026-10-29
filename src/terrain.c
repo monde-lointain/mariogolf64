@@ -1360,7 +1360,7 @@ s32 UpdateDebugSceneMenu(void) {
     if (f_SceneMenuSelection == SCENE_MENU) {
       func_8005D9A0();
     } else {
-      PlaySong(1, 0);
+      PlaySong(SONG_HOLE_OUT_BIRDIE, 0);
     }
 
     switch ((u32)g_Scene) {

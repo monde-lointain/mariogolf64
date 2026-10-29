@@ -185,22 +185,35 @@ enum Sound {
  * The songs that PlaySong plays. SONG_HOLE_* are a hole's result: Stroke play
  * picks one by the score against par, Get Character plays the one for how the
  * first player did, and match games and skins matches play SONG_HOLE_WON for
- * any hole that somebody won. SONG_ROUND_* play through a hole.
+ * any hole that somebody won. SONG_ROUND_* play through a hole. When a shot
+ * comes to rest, UpdateTurns plays the song of the course, the mode or the
+ * tournament's course, or SONG_CUP_IN_* by the score for a shot that holes
+ * out.
  */
 enum Song {
   SONG_HOLE_OUT_EAGLE, /* Also for an albatross */
-  SONG_HOLE_OUT_BIRDIE, /* Also for a hole-in-one */
+  /* Also for a hole-in-one, and on choosing a scene from the debug menu */
+  SONG_HOLE_OUT_BIRDIE,
   SONG_HOLE_OUT_PAR,
   SONG_RESULTS, /* The round results' song, outside tournaments */
   SONG_HOLE_OUT_BOGEY,
-  SONG_HOLE_OUT_OVER_BOGEY,
+  SONG_HOLE_OUT_OVER_BOGEY, /* Also the no-controller screen's song */
   SONG_HOLE_WON,
   SONG_HOLE_LOST,
   SONG_HOLE_HALVED,
-  SONG_MATCH_RESULT = 10,
+  SONG_MATCH_RESULT = 0xA,
   SONG_ROUND_TOURNAMENT,
-  SONG_ROUND_FINAL = 20, /* A hole that can decide the round */
-  SONG_TRANSMIT_MENU = 22,
+  SONG_COURSE_TOAD_HIGHLANDS,
+  SONG_COURSE_KOOPA_PARK,
+  SONG_CUP_IN_PAR,
+  SONG_CUP_IN_OVER_PAR,
+  SONG_CUP_IN_UNDER_PAR,
+  SONG_COURSE_SHY_GUY_DESERT,
+  SONG_COURSE_BOO_VALLEY,
+  SONG_COURSE_YOSHIS_ISLAND,
+  SONG_ROUND_FINAL, /* A hole that can decide the round */
+  SONG_TRAINING,
+  SONG_TRANSMIT_MENU,
   /* The controls screen's song; the main menu also plays it as it enters
    * MENU_SCREEN_UNK22 */
   SONG_CONTROLS,
@@ -208,14 +221,32 @@ enum Song {
   SONG_ROUND_MATCH,
   SONG_ROUND_UNK26,
   SONG_ROUND_COURSE,
-  SONG_ROUND_RING_SHOT = 29,
-  SONG_ROUND_UNK31 = 31,
-  SONG_TOURNAMENT_RESULTS = 37,
-  SONG_TITLE = 39, /* The title screen's song */
-  SONG_ROUND_CLUB_SLOTS = 43,
-  SONG_ROUND_MINI_GOLF = 45,
+  SONG_ROUND_RING_SHOT = 0x1D,
+  SONG_RING_SHOT,
+  SONG_ROUND_UNK31,
+  SONG_TOURNAMENT_TOAD_HIGHLANDS,
+  SONG_TOURNAMENT_KOOPA_PARK,
+  SONG_TOURNAMENT_SHY_GUY_DESERT,
+  SONG_TOURNAMENT_BOO_VALLEY,
+  SONG_TOURNAMENT_MARIOS_STAR,
+  SONG_TOURNAMENT_RESULTS,
+  SONG_SPEED_GOLF,
+  SONG_TITLE, /* The menus' title screen's song */
+  /* For a round of four players who are all Yoshi or Donkey Kong */
+  SONG_YOSHI_AND_DONKEY_KONG,
+  SONG_COURSE_MARIOS_STAR,
+  /*
+   * The title screen that alternates with the boot logos, before the menus;
+   * the menus' own title screen plays SONG_TITLE
+   */
+  SONG_ATTRACT_TITLE,
+  SONG_ROUND_CLUB_SLOTS,
+  SONG_MINI_GOLF,
+  SONG_ROUND_MINI_GOLF,
   SONG_ROUND_SKINS_MATCH,
-  SONG_STAFF_ROLL = 49,
+  SONG_OPENING,
+  SONG_TOURNAMENT_YOSHIS_ISLAND,
+  SONG_STAFF_ROLL,
   SONG_CLOSING
 };
 

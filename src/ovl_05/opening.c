@@ -1482,7 +1482,7 @@ void UpdateOpening(void) {
       case 0x2:
         if (f_OpeningSceneFramesLeft == 0) {
           f_IsNameSlotShown[0] = 1;
-          PlaySong(0x2F, 0);
+          PlaySong(SONG_OPENING, 0);
         }
 
         if (AreEditorMovesDone()) {
