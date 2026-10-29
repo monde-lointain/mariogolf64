@@ -9,7 +9,8 @@
 /* The largest s32 value */
 #define S32_MAX 0x7FFFFFFF
 
-/* Indices of a point's coordinates; y is up */
+/* Indices of a point's coordinates; y is vertical, and in the ball's
+ * simulation it grows downward, the way GRAVITY pulls */
 #define AXIS_X 0
 #define AXIS_Y 1
 #define AXIS_Z 2
