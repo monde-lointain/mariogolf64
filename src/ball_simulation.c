@@ -483,11 +483,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       goto SETTLE;
     }
 
-    if (simulation->unk98 == 0) {
+    if (simulation->stepCount == 0) {
       BuildUnk44Rotation();
     }
 
-    if (++simulation->unk98 >= MAX_STEP_COUNT) {
+    if (++simulation->stepCount >= MAX_STEP_COUNT) {
       simulation->position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] + 614.4f;
       simulation->velocity[AXIS_X] = 0;
       simulation->velocity[AXIS_Z] = 0;
@@ -592,8 +592,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         hitsBillboard = FALSE;
         if (simulation->state == BALL_STATE_FLYING &&
-            (simulation->unk9C < 0 ||
-                simulation->unk9C + 2 < simulation->unk98)) {
+            (simulation->lastBounceStep < 0 ||
+                simulation->lastBounceStep + 2 < simulation->stepCount)) {
           hitsBillboard = FindBillboardHit(startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
               simulation->position[AXIS_Z], &triangle.unk0, &fraction);
@@ -1036,7 +1036,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->position[AXIS_X] = startX + (fraction * velocity[AXIS_X]);
       simulation->position[AXIS_Y] = startY + (fraction * velocity[AXIS_Y]);
       simulation->position[AXIS_Z] = startZ + (fraction * velocity[AXIS_Z]);
-      simulation->unk9C = simulation->unk98;
+      simulation->lastBounceStep = simulation->stepCount;
       simulation->spinSpeed /= 2;
       simulation->sideSpin /= 2;
       switch (triangle.unk0) {
@@ -1309,7 +1309,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       velocity[AXIS_X] = bounced[AXIS_X] * keep;
       velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
       velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
-      simulation->unk9C = simulation->unk98;
+      simulation->lastBounceStep = simulation->stepCount;
       if (simulation->state == BALL_STATE_FLYING) {
         s32 spinVelocityX =
             simulation->spinSpeed * cosf(simulation->spinHeading);
@@ -1605,7 +1605,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       if (simulation->state != BALL_STATE_ROLLING &&
           impactSpeed < KilometersPerHour(50) &&
-          simulation->unk98 - 1 == simulation->unk9C) {
+          simulation->stepCount - 1 == simulation->lastBounceStep) {
         s32 spinVelocityX;
         s32 spinVelocityZ;
 
@@ -1641,7 +1641,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           keep = 0.1f;
         }
 
-        if (simulation->unk98 < 2 && !g_GameState.isMiniGolf) {
+        if (simulation->stepCount < 2 && !g_GameState.isMiniGolf) {
           keep *= 0.25;
         }
 
@@ -1657,7 +1657,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             (tangent[AXIS_Y] * keep) + (normalPart[AXIS_Y] * restitution);
         velocity[AXIS_Z] =
             (tangent[AXIS_Z] * keep) + (normalPart[AXIS_Z] * restitution);
-        simulation->unk9C = simulation->unk98;
+        simulation->lastBounceStep = simulation->stepCount;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         grip = 1.0f - restitution;
@@ -1859,7 +1859,7 @@ TAKE_OFF:
       if (plane.normal[AXIS_Y] * plane.normal[AXIS_Y] <=
               (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
                   (plane.normal[AXIS_Z] * plane.normal[AXIS_Z]) &&
-          simulation->unk98 < 800) {
+          simulation->stepCount < 800) {
         isSteep = TRUE;
       }
 
@@ -1887,11 +1887,11 @@ TAKE_OFF:
           slopeZ = slopeZ * scale;
         }
 
-        if (simulation->unk98 >= 600) {
+        if (simulation->stepCount >= 600) {
           friction *= 0.5f;
-        } else if (simulation->unk98 >= 400) {
+        } else if (simulation->stepCount >= 400) {
           friction *= 0.9f;
-        } else if (simulation->unk98 >= 150) {
+        } else if (simulation->stepCount >= 150) {
           friction *= 0.99f;
         }
       }
@@ -1949,7 +1949,7 @@ TAKE_OFF:
       }
 
       if (!isSteep && info->kind != SURFACE_KIND_GREEN &&
-          simulation->unk9C + 90 < simulation->unk98 &&
+          simulation->lastBounceStep + 90 < simulation->stepCount &&
           sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
               (velocity[AXIS_Y] * velocity[AXIS_Y]) +
               (velocity[AXIS_Z] * velocity[AXIS_Z])) <
@@ -2493,8 +2493,8 @@ s32 LaunchBallSimulation(
   }
 
   simulation->unk94 = 0;
-  simulation->unk98 = 0;
-  simulation->unk9C = -2;
+  simulation->stepCount = 0;
+  simulation->lastBounceStep = -2;
   simulation->isHoledOut = 0;
   simulation->hasHitFlag = FALSE;
   simulation->rollFrameCount = 0;

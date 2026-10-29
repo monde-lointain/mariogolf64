@@ -354,11 +354,11 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       goto SETTLE;
     }
 
-    if (simulation->unk98 == 0) {
+    if (simulation->stepCount == 0) {
       BuildUnk44Rotation();
     }
 
-    simulation->unk98++;
+    simulation->stepCount++;
     simulation->position[AXIS_X] += simulation->velocity[AXIS_X];
     simulation->position[AXIS_Y] += simulation->velocity[AXIS_Y];
     simulation->position[AXIS_Z] += simulation->velocity[AXIS_Z];
@@ -432,7 +432,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         hitsBillboard = FALSE;
         if (simulation->state == BALL_STATE_FLYING) {
-          if (simulation->unk9C + 2 < simulation->unk98) {
+          if (simulation->lastBounceStep + 2 < simulation->stepCount) {
             hitsBillboard = ((BillboardHitFinder)FindBillboardHit)(startX,
                 startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
@@ -790,7 +790,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         simulation->state == BALL_STATE_FLYING) {
       simulation->unk94++;
       simulation->spinSpeed /= 2;
-      simulation->unk9C = simulation->unk98;
+      simulation->lastBounceStep = simulation->stepCount;
       simulation->sideSpin /= 2;
       simulation->position[AXIS_X] =
           startX + (fraction * simulation->velocity[AXIS_X]);
@@ -976,7 +976,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
       softness = 1000 - GetSurfaceInfo(simulation->surface)->unkE;
       keep = (1000.0f - (softness * (steepness * 0.1f) * steepness)) * 0.001f;
-      if (simulation->unk98 < 3) {
+      if (simulation->stepCount < 3) {
         keep *= 0.25;
       }
 
@@ -990,7 +990,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           simulation->velocity[AXIS_Z] - (plane.normal[AXIS_Z] * push);
       simulation->velocity[AXIS_X] = bounced[AXIS_X] * keep;
       simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
-      simulation->unk9C = simulation->unk98;
+      simulation->lastBounceStep = simulation->stepCount;
       simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
       if (simulation->state == BALL_STATE_FLYING) {
         s32 spinVelocityX =
@@ -1132,7 +1132,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
       if (simulation->state != BALL_STATE_ROLLING &&
           impactSpeed < KilometersPerHour(50) &&
-          simulation->unk98 - 1 == simulation->unk9C) {
+          simulation->stepCount - 1 == simulation->lastBounceStep) {
         s32 spinVelocityX;
         s32 spinVelocityZ;
 
@@ -1173,7 +1173,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           keep = 1.0f;
         }
 
-        if (simulation->unk98 < 2 && !g_GameState.isMiniGolf) {
+        if (simulation->stepCount < 2 && !g_GameState.isMiniGolf) {
           keep *= 0.25;
           osSyncPrintf("Ouch! %d, %d\n", startY, simulation->position[AXIS_Y]);
         }
@@ -1187,7 +1187,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             simulation->velocity[AXIS_Z] - (plane.normal[AXIS_Z] * push);
         simulation->velocity[AXIS_X] = bounced[AXIS_X] * keep;
         simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
-        simulation->unk9C = simulation->unk98;
+        simulation->lastBounceStep = simulation->stepCount;
         simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
@@ -1340,7 +1340,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       if (plane.normal[AXIS_Y] * plane.normal[AXIS_Y] <=
               (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
                   (plane.normal[AXIS_Z] * plane.normal[AXIS_Z]) &&
-          simulation->unk98 < 800) {
+          simulation->stepCount < 800) {
         isSteep = TRUE;
       }
 
@@ -1364,11 +1364,11 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           slopeZ = slopeZ * scale;
         }
 
-        if (simulation->unk98 >= 600) {
+        if (simulation->stepCount >= 600) {
           friction *= 0.5f;
-        } else if (simulation->unk98 >= 400) {
+        } else if (simulation->stepCount >= 400) {
           friction *= 0.9f;
-        } else if (simulation->unk98 >= 150) {
+        } else if (simulation->stepCount >= 150) {
           friction *= 0.99f;
         }
       }
@@ -1406,7 +1406,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       }
 
       if (!isSteep && info->kind != SURFACE_KIND_GREEN &&
-          simulation->unk9C + 90 < simulation->unk98 &&
+          simulation->lastBounceStep + 90 < simulation->stepCount &&
           GetLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y],
               simulation->velocity[AXIS_Z]) < (f64)KilometersPerHour(2)) {
@@ -1769,8 +1769,8 @@ s32 func_8020A488_ovl_05(
   }
 
   simulation->unk94 = 0;
-  simulation->unk98 = 0;
-  simulation->unk9C = -2;
+  simulation->stepCount = 0;
+  simulation->lastBounceStep = -2;
   simulation->isHoledOut = 0;
   simulation->hasHitFlag = FALSE;
   for (index = 0; index < UNKA8_COUNT; index++) {

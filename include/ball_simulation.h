@@ -173,8 +173,9 @@ typedef struct BallSimulation {
   /* 0x8C */ s32 state; /* A BALL_STATE_* value */
   /* 0x90 */ s32 purpose;
   /* 0x94 */ s32 unk94;
-  /* 0x98 */ s32 unk98;
-  /* 0x9C */ s32 unk9C;
+  /* 0x98 */ s32 stepCount;
+  /* The step of the ball's last bounce, or -2 before any */
+  /* 0x9C */ s32 lastBounceStep;
   /* 0xA0 */ s8 isHoledOut; /* Set as the ball stops in the cup */
   /* 0xA1 */ s8 hasEnteredWater; /* Set once the ball is in the water */
   /* 0xA2 */ s8 unkA2; /* A SURFACE_* value */
