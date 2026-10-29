@@ -179,18 +179,20 @@ static u8 f_IsGameChosen = 0;
 static u8 f_AreControllersAssigned = 0;
 /* Which of f_CourseImageBuffers is on screen */
 static u8 f_ShownCourseBufferIndex = 0;
-static s32 D_80230B50_ovl_01[SAVED_GAME_COUNT] = {-1, -1, -1};
-static SaveMenuModeImage D_80230B5C_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1] = {
+/* Each saved game's save menu mode, or -1 for an empty slot */
+static s32 f_SavedGameModes[SAVED_GAME_COUNT] = {-1, -1, -1};
+/* The image of each save menu mode, mini golf last */
+static SaveMenuModeImage f_ModeImageAssets[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     {0, 0x0623}, {0, 0x0629}, {0, 0x0599}, {0, 0x05AF}, {0, 0x0631},
     {0, 0x0665}, {0, 0x05B7}, {0, 0x05DD}, {0, 0x065E}, {0, 0x0599},
     {0, 0x06FC}};
 /* The game mode of each save menu mode that has an image */
-static s32 D_80230B88_ovl_01[SAVE_MENU_MODE_COUNT] = {GAME_MODE_TOURNAMENT,
+static s32 f_SaveMenuGameModes[SAVE_MENU_MODE_COUNT] = {GAME_MODE_TOURNAMENT,
     GAME_MODE_GET_CHARACTER, GAME_MODE_STROKE, GAME_MODE_SPEED_GOLF,
     GAME_MODE_MATCH_GAME, GAME_MODE_CLUB_SLOTS, GAME_MODE_RING_SHOT,
     GAME_MODE_TRAINING, GAME_MODE_SKINS_MATCH, GAME_MODE_UNK1};
 /* The mode icon of each save menu mode, mini golf last */
-static s32 D_80230BB0_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1] = {
+static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     MODE_ICON_TOURNAMENT, MODE_ICON_GET_CHARACTER, MODE_ICON_STROKE,
     MODE_ICON_SPEED_GOLF, MODE_ICON_MATCH_GAME, MODE_ICON_CLUB_SLOTS,
     MODE_ICON_RING_SHOT, MODE_ICON_TRAINING, MODE_ICON_SKINS_MATCH,
@@ -1164,7 +1166,7 @@ void ReadSavedGames(void) {
   s8 modeIndex;
 
   for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
-    D_80230B50_ovl_01[gameIndex] = -1;
+    f_SavedGameModes[gameIndex] = -1;
   }
 
   f_AreControllersAssigned = 0;
@@ -1173,12 +1175,12 @@ void ReadSavedGames(void) {
   for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
     if (save->savedGames[gameIndex].isValid) {
       if (save->savedGames[gameIndex].state.isMiniGolf) {
-        D_80230B50_ovl_01[gameIndex] = SAVE_MENU_MODE_MINI_GOLF;
+        f_SavedGameModes[gameIndex] = SAVE_MENU_MODE_MINI_GOLF;
       } else {
         for (modeIndex = 0; modeIndex != SAVE_MENU_MODE_COUNT; modeIndex++) {
           if (save->savedGames[gameIndex].state.gameMode ==
-              D_80230B88_ovl_01[modeIndex]) {
-            D_80230B50_ovl_01[gameIndex] = modeIndex;
+              f_SaveMenuGameModes[modeIndex]) {
+            f_SavedGameModes[gameIndex] = modeIndex;
             break;
           }
         }
@@ -1187,7 +1189,7 @@ void ReadSavedGames(void) {
   }
 
   for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
-    if (D_80230B50_ovl_01[gameIndex] != -1) {
+    if (f_SavedGameModes[gameIndex] != -1) {
       break;
     }
   }
@@ -1269,9 +1271,9 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
   switch (bufferKind) {
     case SAVE_MENU_BUFFER_SLOTS:
       f_SavedGameModeImages = buffers;
-      modeImages = D_80230B5C_ovl_01;
+      modeImages = f_ModeImageAssets;
       for (imageIndex = 0; imageIndex != SAVED_GAME_COUNT; imageIndex++) {
-        mode = D_80230B50_ovl_01[imageIndex];
+        mode = f_SavedGameModes[imageIndex];
         if (mode == -1) {
           mode = 0;
         }
@@ -1285,10 +1287,10 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
       break;
     case SAVE_MENU_BUFFER_CHOSEN:
       f_ChosenModeIconBuffers = buffers;
-      modeImages = D_80230B5C_ovl_01;
+      modeImages = f_ModeImageAssets;
       for (imageIndex = 0; imageIndex != SAVE_MENU_CHOSEN_IMAGE_COUNT;
           imageIndex++) {
-        mode = D_80230B50_ovl_01[memory->savedGameIndex];
+        mode = f_SavedGameModes[memory->savedGameIndex];
         if (mode == -1) {
           mode = 0;
         }
@@ -1334,7 +1336,7 @@ void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
 #define LoadChosenGameImages() \
   OpenEncodedAsset( \
       g_ModeIconAnimations[( \
-          u8)D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]]] \
+          u8)f_SaveMenuModeIcons[f_SavedGameModes[memory->savedGameIndex]]] \
                           [g_AnimatedIconFrameIndex], \
       &asset); \
   ReadEncodedAsset( \
@@ -1462,7 +1464,7 @@ void UpdateSavedGames(void) {
       }
     } else if (g_MenuPressedButtons & A_BUTTON) {
       if (memory->savedGameTurn != 0) {
-        PlaySound(D_80230B50_ovl_01[memory->savedGameIndex] != -1
+        PlaySound(f_SavedGameModes[memory->savedGameIndex] != -1
                 ? SOUND_MENU_CONFIRM
                 : SOUND_MENU_BLOCKED,
             MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -1470,7 +1472,7 @@ void UpdateSavedGames(void) {
         return;
       }
 
-      if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
+      if (f_SavedGameModes[memory->savedGameIndex] != -1) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         if (!f_IsGameChosen) {
           f_IsGameChosen = TRUE;
@@ -1689,7 +1691,7 @@ s32 ContinueSavedGame(void) {
   CharacterId character;
   u16 controller;
 
-  if (D_80230B50_ovl_01[memory->savedGameIndex] == -1) {
+  if (f_SavedGameModes[memory->savedGameIndex] == -1) {
     return -1;
   }
 
@@ -1967,7 +1969,7 @@ void DrawSavedGames(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
       }
 
-      if (D_80230B50_ovl_01[slot] != -1) {
+      if (f_SavedGameModes[slot] != -1) {
         gDPLoadTLUT_pal256(
             gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot])));
         for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT;
@@ -2045,13 +2047,13 @@ void DrawSavedGames(Gfx** displayListHead) {
   }
 
   DrawCenteredPageArrows(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
-  chosenMode = &D_80230B50_ovl_01[memory->savedGameIndex];
+  chosenMode = &f_SavedGameModes[memory->savedGameIndex];
   if (*chosenMode != -1) {
-    labelOffset = &D_80230CEC_ovl_01[D_80230BB0_ovl_01[*chosenMode]];
+    labelOffset = &D_80230CEC_ovl_01[f_SaveMenuModeIcons[*chosenMode]];
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
     gDPLoadTextureBlock_4b(gfx++,
         TextureAddress(ImageTexels(f_GameModeLabels) +
-            (D_80230BB0_ovl_01[*chosenMode] * GAME_MODE_LABEL_IMAGE_SIZE)),
+            (f_SaveMenuModeIcons[*chosenMode] * GAME_MODE_LABEL_IMAGE_SIZE)),
         G_IM_FMT_CI, GAME_MODE_LABEL_WIDTH, GAME_MODE_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2186,7 +2188,7 @@ void DrawChosenGameBoard(
     gDPPipeSync(gfx++);
   }
 
-  if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
+  if (f_SavedGameModes[memory->savedGameIndex] != -1) {
     image = f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex];
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
@@ -2209,7 +2211,7 @@ void DrawChosenGameBoard(
 
     g_AnimatedIconFrameTime++;
     if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
-      iconIndex = D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]];
+      iconIndex = f_SaveMenuModeIcons[f_SavedGameModes[memory->savedGameIndex]];
       g_AnimatedIconFrameTime = 0;
       g_AnimatedIconFrameIndex++;
       if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
