@@ -51,7 +51,6 @@
  */
 #define TIME_GROUP_COUNT 3
 #define TIME_GROUP_DIGIT_COUNT 2
-#define TIME_DIGIT_BASE 10
 #define HUNDREDTHS_PER_MINUTE (SECONDS_PER_MINUTE * HUNDREDTHS_PER_SECOND)
 #define TIME_GLYPH_SIZE 16
 #define TIME_GLYPH_BYTES (TIME_GLYPH_SIZE * TIME_GLYPH_SIZE / 2)
@@ -539,12 +538,12 @@ void func_8021508C_ovl_01(
   hundredths %= HUNDREDTHS_PER_MINUTE;
   seconds = hundredths / HUNDREDTHS_PER_SECOND;
   hundredths %= HUNDREDTHS_PER_SECOND;
-  digits[0][0] = minutes / TIME_DIGIT_BASE;
-  digits[0][1] = minutes % TIME_DIGIT_BASE;
-  digits[1][0] = seconds / TIME_DIGIT_BASE;
-  digits[1][1] = seconds % TIME_DIGIT_BASE;
-  digits[2][0] = hundredths / TIME_DIGIT_BASE;
-  digits[2][1] = hundredths % TIME_DIGIT_BASE;
+  digits[0][0] = minutes / DECIMAL_BASE;
+  digits[0][1] = minutes % DECIMAL_BASE;
+  digits[1][0] = seconds / DECIMAL_BASE;
+  digits[1][1] = seconds % DECIMAL_BASE;
+  digits[2][0] = hundredths / DECIMAL_BASE;
+  digits[2][1] = hundredths % DECIMAL_BASE;
   separatorShift = 0;
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);

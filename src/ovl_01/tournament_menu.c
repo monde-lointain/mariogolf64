@@ -338,7 +338,6 @@ void func_802296C4_ovl_01(
 /* Places past 100 lose their hundreds; "th" covers the 4th to the 20th */
 #define ORDINAL_PLACE_LIMIT 100
 #define ORDINAL_LAST_TEEN 20
-#define ORDINAL_NUMBER_BASE 10
 void func_8022A43C_ovl_01(Gfx** displayListHead);
 void func_8022A8F4_ovl_01(Gfx** displayListHead);
 void func_8022ADE8_ovl_01(Gfx** displayListHead);
@@ -1506,7 +1505,7 @@ void func_802296C4_ovl_01(
     if (suffix < ORDINAL_LAST_TEEN) {
       suffix = ORDINAL_SUFFIX_TH;
     } else if (suffix < ORDINAL_PLACE_LIMIT) {
-      lastDigitSuffix = suffix % ORDINAL_NUMBER_BASE;
+      lastDigitSuffix = suffix % DECIMAL_BASE;
       suffix = ORDINAL_SUFFIX_TH;
       if (lastDigitSuffix < ORDINAL_SUFFIX_TH) {
         suffix = lastDigitSuffix;

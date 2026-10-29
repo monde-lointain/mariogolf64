@@ -6,6 +6,8 @@
 #include "include_asm.h"
 
 #define BITS_PER_BYTE 8
+/* The base of the decimal numbers the game shows */
+#define DECIMAL_BASE 10
 /* The largest s32 value */
 #define S32_MAX 0x7FFFFFFF
 

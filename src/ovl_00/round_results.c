@@ -1074,7 +1074,7 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
     if (suffix < PLACE_TEENS_END) {
       suffix = PLACE_SUFFIX_TH;
     } else if (suffix < PLACES_PER_HUNDRED) {
-      lastDigit = suffix % 10;
+      lastDigit = suffix % DECIMAL_BASE;
       if (lastDigit < PLACE_SUFFIX_TH) {
         suffix = lastDigit;
       } else {

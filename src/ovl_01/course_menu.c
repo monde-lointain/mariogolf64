@@ -85,7 +85,6 @@
 #define OFF_FIRST_GLYPH 16
 #define OFF_GLYPH_COUNT 2
 #define MENU_GLYPH_POINT 18
-#define DECIMAL_BASE 10
 /* The largest number written in one decimal digit, and in two */
 #define MAX_ONE_DIGIT_NUMBER (DECIMAL_BASE - 1)
 #define MAX_TWO_DIGIT_NUMBER ((DECIMAL_BASE * DECIMAL_BASE) - 1)
