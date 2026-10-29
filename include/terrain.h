@@ -268,6 +268,8 @@ enum TerrainStyle {
 #define CLIP_RATIO_COUNT 6
 #define CLIP_RATIO_TEXT_COLUMN 10
 #define CLIP_RATIO_TEXT_ROW 12
+/* DrawGround formats the clip ratio's debug text into a buffer this big */
+#define CLIP_RATIO_TEXT_SIZE 0x98
 /* osGetCount ticks per unit of the printed time */
 #define GROUND_TIMING_TICKS 3000
 #define GROUND_TIMING_COLUMN 5

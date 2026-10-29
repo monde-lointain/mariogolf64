@@ -1995,7 +1995,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   }
 
   if (IsGameFlagSet(GAME_FLAG_CYCLE_CLIP_RATIO)) {
-    char text[0x98];
+    char text[CLIP_RATIO_TEXT_SIZE];
 
     sprintf(text, "CLIPRATIO=%d", f_GroundClipRatio);
     PrintDebugText(text, CLIP_RATIO_TEXT_COLUMN, CLIP_RATIO_TEXT_ROW);

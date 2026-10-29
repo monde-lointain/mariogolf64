@@ -293,6 +293,9 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point);
 #define FLAG_ROW_LABEL_COLUMN 3
 #define FIRST_FLAG_TEXT_COLUMN 6
 #define FLAG_TEXT_SPACING 2
+/* The panel's column headers, row labels and flags are each formatted into a
+ * buffer this big */
+#define FLAG_PANEL_TEXT_SIZE 0x10
 
 void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow);
 void BuildAllTileMidpoints(void);
@@ -1312,7 +1315,7 @@ void BuildAllTileMidpoints(void) {
  * moves through and sets or clears
  */
 void UpdateFlagPanel(void) {
-  char text[0x10];
+  char text[FLAG_PANEL_TEXT_SIZE];
   s32 row;
   s32 column;
   s32 textColumn;
