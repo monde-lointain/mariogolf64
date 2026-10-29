@@ -1802,7 +1802,7 @@ void func_801F70F0_ovl_01(void) {
   g_GameState.replayKind = REPLAY_KIND_NONE;
   g_GameState.currentPlayerIndex = 0;
   if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_Scene = SCENE_SWAPPING_MODULES;
       g_SceneModuleToUnload = MODULE_MENU;
       g_NextScene = SCENE_TRANSMIT;
@@ -2482,7 +2482,7 @@ void func_801F8BAC_ovl_01(void) {
   }
 
   if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
 
@@ -2782,7 +2782,7 @@ void func_801F93D8_ovl_01(void) {
   }
 
   if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
 
@@ -3493,7 +3493,7 @@ void func_801FADBC_ovl_01(void) {
   }
 
   if (GetWipeKind() != WIPE_NONE) {
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
 
@@ -3529,7 +3529,7 @@ void func_801FADBC_ovl_01(void) {
 
 void LeaveMenuWithWipe(void) {
   if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
   } else {
@@ -3542,7 +3542,7 @@ void LeaveMenuWithWipe(void) {
 
 void LeaveMenuWithCourseWipe(void) {
   if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
   } else {

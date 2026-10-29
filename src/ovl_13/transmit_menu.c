@@ -1242,7 +1242,7 @@ void UpdateTransmitMenu(void) {
 
   switch (transfer->screen) {
     case TRANSMIT_SCREEN_OPTIONS:
-      if (GetWipeProgress() != 20) {
+      if (GetWipeProgress() != WIPE_OPEN_PROGRESS) {
         break;
       }
 
@@ -1340,7 +1340,7 @@ void UpdateTransmitMenu(void) {
 
       break;
     case TRANSMIT_SCREEN_LEAVING:
-      if (GetWipeProgress() == 0) {
+      if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         StartWipe(WIPE_OPENING);
         g_Scene = SCENE_SWAPPING_MODULES;
         g_SceneModuleToUnload = MODULE_TRANSMIT;
@@ -1350,7 +1350,7 @@ void UpdateTransmitMenu(void) {
 
       break;
     case TRANSMIT_SCREEN_UNK6:
-      if (GetWipeProgress() == 0) {
+      if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         StartWipe(WIPE_OPENING);
         func_8005DC50();
         g_Scene = SCENE_SWAPPING_MODULES;

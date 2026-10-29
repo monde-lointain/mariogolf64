@@ -1872,7 +1872,7 @@ void func_8021D0B8_ovl_01(void) {
 
   if (IsHudAnimationDone() == TRUE) {
     if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
-      if (GetWipeProgress() == 0) {
+      if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         g_MenuScreen = MENU_SCREEN_EXIT;
         D_800FE334 = 0;
         g_GameState.replayKind = REPLAY_KIND_BEST_SHOT;

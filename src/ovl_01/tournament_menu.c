@@ -1342,7 +1342,7 @@ void func_80229278_ovl_01(void) {
           0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
     }
 
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_GameState.unk2C = (g_TournamentCode[0] << 16) |
           (g_TournamentCode[1] << 8) | g_TournamentCode[2];
       StartLoadingChosenHole();

@@ -2535,7 +2535,7 @@ void UpdateOpening(void) {
 
         break;
       case 0xD4:
-        if (!GetWipeProgress()) {
+        if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
           f_OpeningSceneFramesLeft = 0x14;
           f_OpeningScene = 0xDC;
           f_OpeningCue = 0x18;

@@ -334,7 +334,7 @@ void func_8021F79C_ovl_01(void) {
 
   if (IsHudAnimationDone() == TRUE) {
     if (GetWipeKind() != WIPE_NONE && D_801052E8 == 0) {
-      if (GetWipeProgress() == 0) {
+      if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
               0xFF, 0xFF, 0xFF);
@@ -1338,7 +1338,7 @@ void func_8022209C_ovl_01(void) {
           0xFF, 0xFF);
     }
 
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       StopLoaderThread();
       FreeAllCharacterSlots();
       D_800FE334 = 0;

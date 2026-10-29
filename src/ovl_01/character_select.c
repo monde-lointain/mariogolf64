@@ -584,7 +584,7 @@ s32 func_80209D50_ovl_01(
           0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
     }
 
-    if (GetWipeProgress() == 0) {
+    if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
       g_GameState.unk2C = (g_TournamentCode[0] << (2 * BITS_PER_BYTE)) |
           (g_TournamentCode[1] << BITS_PER_BYTE) | g_TournamentCode[2];
