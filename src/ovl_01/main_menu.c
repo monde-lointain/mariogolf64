@@ -1557,7 +1557,7 @@ void UpdateMenus(void) {
             D_801B5CD0[D_8022BE8E_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         LoadScoreLabelBuffer(
             D_8012D420[D_8022BE90_ovl_01], SCORE_LABEL_BUFFER_CURSOR_BOX);
-        LoadScoreLabelBuffer(g_NamePlateImage, SCORE_LABEL_BUFFER_UNREAD);
+        LoadScoreLabelBuffer(g_NamePlateImage, SCORE_LABEL_BUFFER_NAME_PLATE);
         LoadScoreLabelBuffer(D_800FBE30[0], SCORE_LABEL_BUFFER_LABELS);
         ReadBestShots();
         LoadBestShotFaces();

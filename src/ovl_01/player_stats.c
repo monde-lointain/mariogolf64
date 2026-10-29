@@ -1902,7 +1902,7 @@ void LoadScoreLabelBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {
-    case SCORE_LABEL_BUFFER_UNREAD:
+    case SCORE_LABEL_BUFFER_NAME_PLATE:
       f_BestShotsNamePlate = buffer;
       break;
     case SCORE_LABEL_BUFFER_CURSOR_BOX:

@@ -391,8 +391,8 @@ enum CourseMenuBuffer {
 
 /* The buffers that LoadScoreLabelBuffer keeps, by the kind its caller gives */
 enum ScoreLabelBuffer {
-  /* Kept without reading an image into it */
-  SCORE_LABEL_BUFFER_UNREAD = 1,
+  /* The menus' name plate image, kept without reading an image into it */
+  SCORE_LABEL_BUFFER_NAME_PLATE = 1,
   SCORE_LABEL_BUFFER_CURSOR_BOX,
   /* The four Japanese score labels, one after another */
   SCORE_LABEL_BUFFER_LABELS
