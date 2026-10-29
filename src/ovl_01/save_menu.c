@@ -64,8 +64,8 @@ enum SaveMenuGame {
 #define SAVE_MENU_IMAGE_COUNT 6
 /* A 64x64 blue movie camera, read after the course icons */
 #define ASSET_MOVIE_CAMERA_ICON 0x944
-/* The 64x64 CI8 icons of D_8023B680, which func_802213C8 shrinks to 32x24 in
- * two strips */
+/* The 64x64 CI8 icons of f_RingShotCourseIcons, which func_802213C8 shrinks to
+ * 32x24 in two strips */
 #define SAVE_ICON_WIDTH 64
 #define SAVE_ICON_STRIP_HEIGHT 32
 #define SAVE_ICON_STRIP_COUNT 2
@@ -88,9 +88,9 @@ void ResetSavedGameControllers(void);
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
 #define ASSET_SAVE_MENU_FRAME 0x70D
 /*
- * D_8023B678 holds the digits 1 to 6, 16 wide each, followed by the word
- * COURSE. func_80220E34 draws the word, then the course's digit overlapping its
- * end.
+ * f_RingShotCourseNumbers holds the digits 1 to 6, 16 wide each, followed by
+ * the word COURSE. func_80220E34 draws the word, then the course's digit
+ * overlapping its end.
  */
 #define COURSE_LABEL_WIDTH 136
 #define COURSE_LABEL_HEIGHT 16
@@ -234,11 +234,11 @@ static s32 D_80230DE8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
 /* Read by no routine */
 static s32 D_80230E68_ovl_01[2] = {0, 0};
 
-static void* D_8023B670_ovl_01;
-static void* D_8023B674_ovl_01;
-static void* D_8023B678_ovl_01;
-static void* D_8023B67C_ovl_01;
-static void** D_8023B680_ovl_01;
+static void* f_RingShotNamePlate;
+static void* f_RingShotRainbowBox;
+static void* f_RingShotCourseNumbers;
+static void* f_RingShotGreenArrows;
+static void** f_RingShotCourseIcons;
 /* Each Ring Shot record's slot if it holds a recording, or -1 */
 static s16 f_RecordedReplaySlots[SAVE_MENU_SLOT_COUNT];
 
@@ -288,22 +288,22 @@ void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind) {
 
   switch (bufferKind) {
     case RING_SHOT_RECORD_BUFFER_UNREAD:
-      D_8023B670_ovl_01 = buffer;
+      f_RingShotNamePlate = buffer;
       break;
     case RING_SHOT_RECORD_BUFFER_RAINBOW_BOX:
-      D_8023B674_ovl_01 = buffer;
+      f_RingShotRainbowBox = buffer;
       OpenEncodedAsset(ASSET_RAINBOW_BOX, &asset);
-      ReadEncodedAsset(D_8023B674_ovl_01, &asset);
+      ReadEncodedAsset(f_RingShotRainbowBox, &asset);
       break;
     case RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS:
-      D_8023B678_ovl_01 = buffer;
+      f_RingShotCourseNumbers = buffer;
       OpenEncodedAsset(ASSET_COURSE_NUMBERS, &asset);
-      ReadEncodedAsset(D_8023B678_ovl_01, &asset);
+      ReadEncodedAsset(f_RingShotCourseNumbers, &asset);
       break;
     case RING_SHOT_RECORD_BUFFER_GREEN_ARROWS:
-      D_8023B67C_ovl_01 = buffer;
+      f_RingShotGreenArrows = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
-      ReadEncodedAsset(D_8023B67C_ovl_01, &asset);
+      ReadEncodedAsset(f_RingShotGreenArrows, &asset);
       D_80230A90_ovl_01 = 0;
       D_80230A94_ovl_01 = 0;
       D_80230A98_ovl_01 = 0;
@@ -317,14 +317,14 @@ void LoadRingShotCourseIcons(void** buffers) {
   EncodedAsset asset;
   s16 imageIndex;
 
-  D_8023B680_ovl_01 = buffers;
+  f_RingShotCourseIcons = buffers;
   for (imageIndex = 0; imageIndex != SAVE_MENU_IMAGE_COUNT; imageIndex++) {
     OpenEncodedAsset(g_CourseIconAssets[imageIndex], &asset);
-    ReadEncodedAsset(D_8023B680_ovl_01[imageIndex], &asset);
+    ReadEncodedAsset(f_RingShotCourseIcons[imageIndex], &asset);
   }
 
   OpenEncodedAsset(ASSET_MOVIE_CAMERA_ICON, &asset);
-  ReadEncodedAsset(D_8023B680_ovl_01[SAVE_MENU_IMAGE_COUNT], &asset);
+  ReadEncodedAsset(f_RingShotCourseIcons[SAVE_MENU_IMAGE_COUNT], &asset);
 }
 
 void UpdateRingShotRecords(void) {
@@ -577,10 +577,10 @@ void DrawRingShotRecords(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
 
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023B670_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_RingShotNamePlate)));
   do {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023B670_ovl_01) +
+        TextureAddress(LargeImageTexels(f_RingShotNamePlate) +
             (index * RING_SHOT_STRIP_WIDTH * RING_SHOT_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, RING_SHOT_STRIP_WIDTH, RING_SHOT_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -632,15 +632,15 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
     if (row == memory->ringShotRow) {
       if (row == 0) {
-        func_80212C54_ovl_01(&gfx, D_8023B67C_ovl_01, &D_80230A90_ovl_01,
+        func_80212C54_ovl_01(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
             &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH, RING_SHOT_FIRST_ARROW_X,
             RING_SHOT_ARROW_Y);
       } else if (row == RING_SHOT_REPLAY_ROW) {
-        func_80212C54_ovl_01(&gfx, D_8023B67C_ovl_01, &D_80230A90_ovl_01,
+        func_80212C54_ovl_01(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
             &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH, RING_SHOT_REPLAY_ARROW_X,
             RING_SHOT_ARROW_Y);
       } else {
-        func_80212C54_ovl_01(&gfx, D_8023B67C_ovl_01, &D_80230A90_ovl_01,
+        func_80212C54_ovl_01(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
             &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH,
             (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ARROW_OFFSET_X,
             RING_SHOT_ARROW_Y);
@@ -682,7 +682,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
     for (column = 0; column != RING_SHOT_SCROLL_COLUMN_COUNT; column++) {
       if (memory->ringShotFirstCharacters[memory->ringShotRow] > 0) {
-        func_80212FEC_ovl_01(&gfx, D_8023B67C_ovl_01, D_80230A90_ovl_01,
+        func_80212FEC_ovl_01(&gfx, f_RingShotGreenArrows, D_80230A90_ovl_01,
             MENU_ARROW_UP,
             RING_SHOT_SCROLL_ARROW_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_UP_ARROW_Y);
@@ -690,7 +690,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
       if (memory->ringShotFirstCharacters[memory->ringShotRow] <
           RING_SHOT_LAST_FIRST_CHARACTER) {
-        func_80212FEC_ovl_01(&gfx, D_8023B67C_ovl_01, D_80230A90_ovl_01,
+        func_80212FEC_ovl_01(&gfx, f_RingShotGreenArrows, D_80230A90_ovl_01,
             MENU_ARROW_DOWN,
             RING_SHOT_SCROLL_ARROW_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_DOWN_ARROW_Y);
@@ -928,12 +928,14 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B678_ovl_01)));
-  gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(D_8023B678_ovl_01)),
-      G_IM_FMT_CI, COURSE_LABEL_WIDTH, COURSE_LABEL_HEIGHT, 0, 0,
-      COURSE_LABEL_WIDTH - 1, COURSE_LABEL_HEIGHT - 1, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadTLUT_pal16(
+      gfx++, 0, TextureAddress(ImageBody(f_RingShotCourseNumbers)));
+  gDPLoadTextureTile_4b(gfx++,
+      TextureAddress(ImageTexels(f_RingShotCourseNumbers)), G_IM_FMT_CI,
+      COURSE_LABEL_WIDTH, COURSE_LABEL_HEIGHT, 0, 0, COURSE_LABEL_WIDTH - 1,
+      COURSE_LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   if (showsCourseWord == TRUE) {
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, QuarterPixels(left + COURSE_WORD_OFFSET_X),
@@ -971,10 +973,10 @@ void func_802213C8_ovl_01(
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(ImageBody(D_8023B680_ovl_01[imageIndex])));
+      gfx++, TextureAddress(ImageBody(f_RingShotCourseIcons[imageIndex])));
   for (stripIndex = 0; stripIndex != SAVE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023B680_ovl_01[imageIndex]) +
+        TextureAddress(LargeImageTexels(f_RingShotCourseIcons[imageIndex]) +
             (stripIndex * SAVE_ICON_WIDTH * SAVE_ICON_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, SAVE_ICON_WIDTH, SAVE_ICON_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
