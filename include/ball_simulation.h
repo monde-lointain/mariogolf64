@@ -21,6 +21,21 @@ typedef f32 BallSpeed;
   ((BallSpeed)((kmh) * METERS_PER_SECOND_PER_KILOMETER_PER_HOUR * \
       SPEED_UNITS_PER_METER_PER_SECOND))
 
+/*
+ * The launch debug displays turn speeds into kilometers per hour with this:
+ * 1 / KilometersPerHour(1), written out to ten places, which rounds it to the
+ * float below
+ */
+#define KILOMETERS_PER_HOUR_PER_SPEED_UNIT 0.0070306873f
+
+/* The smallest a ball may be across by the rules, as the spin's RPM takes it */
+#define BALL_DIAMETER_METERS 0.04267
+/* Turns a spin speed, the speed of the ball's surface, into revolutions per
+ * minute */
+#define RPM_PER_SPIN_SPEED_UNIT \
+  ((f32)(SECONDS_PER_MINUTE / \
+      (SPEED_UNITS_PER_METER_PER_SECOND * (f32)M_PI * BALL_DIAMETER_METERS)))
+
 /* A simulation still going after this many steps is given up on */
 #define MAX_STEP_COUNT 1801
 

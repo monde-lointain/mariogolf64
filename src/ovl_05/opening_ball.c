@@ -210,6 +210,13 @@ static void ResetBallSimulations(void) {
 
 #define SPEED_TEXT_ROW_COUNT 8
 #define SPEED_TEXT_FIRST_ROW 8
+/*
+ * The speed display turns speeds into kilometers per hour with this: 3.6
+ * kilometers per hour per meter per second over
+ * SPEED_UNITS_PER_METER_PER_SECOND, written out to ten places, which rounds it
+ * to the float above
+ */
+#define SPEED_TEXT_KILOMETERS_PER_HOUR_PER_SPEED_UNIT 0.0070312503f
 
 /*
  * The opening calls FindBillboardHit with a ninth argument, the simulation,
@@ -327,7 +334,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       sprintf(speedText, "%fkm/h   ",
           (s32)IntLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]) *
-              0.0070312503f);
+              SPEED_TEXT_KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
       PrintDebugText(speedText, 3, D_8020B858_ovl_05 + SPEED_TEXT_FIRST_ROW);
       D_8020B858_ovl_05 = (D_8020B858_ovl_05 + 1) % SPEED_TEXT_ROW_COUNT;
       PrintDebugText("                            ", 7,
@@ -1791,17 +1798,17 @@ s32 func_8020A488_ovl_05(
       PrintDebugText(text, 3, 9);
       sprintf(text, "SpinX = %d", simulation->spinSpeed);
       PrintDebugText(text, 3, 10);
-      sprintf(
-          text, "SpinVel = %fRPM      ", simulation->spinSpeed * 0.8741959f);
+      sprintf(text, "SpinVel = %fRPM      ",
+          simulation->spinSpeed * RPM_PER_SPIN_SPEED_UNIT);
       PrintDebugText(text, 3, 11);
       sprintf(text, "SpinAngle = %3.3d/360",
           (s32)(simulation->spinHeading * (f32)RADIANS_TO_DEGREES));
       PrintDebugText(text, 3, 12);
       sprintf(text, "SpinVelX = %fkm/h      ",
-          simulation->spinSpeed * 0.0070306873f);
+          simulation->spinSpeed * KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
       PrintDebugText(text, 3, 13);
       sprintf(text, "SpinVelY = %fkm/h      ",
-          simulation->sideSpin * 0.0070306873f);
+          simulation->sideSpin * KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
       PrintDebugText(text, 3, 14);
     }
   }

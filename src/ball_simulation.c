@@ -2416,17 +2416,17 @@ s32 LaunchBallSimulation(
       PrintDebugText(text, 3, 9);
       sprintf(text, "SpinX = %d", simulation->spinSpeed);
       PrintDebugText(text, 3, 10);
-      sprintf(
-          text, "SpinVel = %fRPM      ", simulation->spinSpeed * 0.8741959f);
+      sprintf(text, "SpinVel = %fRPM      ",
+          simulation->spinSpeed * RPM_PER_SPIN_SPEED_UNIT);
       PrintDebugText(text, 3, 11);
       sprintf(text, "SpinAngle = %3.3d/360",
           (s32)(simulation->spinHeading * (f32)RADIANS_TO_DEGREES));
       PrintDebugText(text, 3, 12);
       sprintf(text, "SpinVelX = %fkm/h      ",
-          simulation->spinSpeed * 0.0070306873f);
+          simulation->spinSpeed * KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
       PrintDebugText(text, 3, 13);
       sprintf(text, "SpinVelY = %fkm/h      ",
-          simulation->sideSpin * 0.0070306873f);
+          simulation->sideSpin * KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
       PrintDebugText(text, 3, 14);
     }
   }
