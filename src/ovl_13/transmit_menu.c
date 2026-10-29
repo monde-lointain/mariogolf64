@@ -174,8 +174,10 @@ enum ListingState {
 #define SHOWN_LISTED_COUNT 6
 #define BRING_CURSOR_MARGIN 8
 
-/* The arrows beside the list when it scrolls */
-#define ARROW_FRAME_COUNT 8
+/* The arrows beside the list when it scrolls, which show each frame for four
+ * updates */
+#define ARROW_FRAME_TICKS 4
+#define ARROW_CYCLE_TICKS (GREEN_ARROW_FRAME_COUNT * ARROW_FRAME_TICKS)
 #define ARROWS_TOP 92
 #define LEFT_ARROW_LEFT 16
 #define RIGHT_ARROW_LEFT 288
@@ -776,7 +778,7 @@ void UpdateBringCharacters(void) {
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
           transfer->listedCharacterIndex < transfer->listedCharacterCount - 1) {
         transfer->listedCharacterIndex++;
-        if (transfer->firstShownListedIndex + 5 <
+        if (transfer->firstShownListedIndex + (SHOWN_LISTED_COUNT - 1) <
             transfer->listedCharacterIndex) {
           transfer->firstShownListedIndex++;
         }
@@ -2049,11 +2051,11 @@ void DrawBringCharactersScreen(
   gDPPipeSync(displayList++);
   gDPSetTexturePersp(displayList++, G_TP_NONE);
   if (transfer->screenStep == BRING_CHOOSING) {
-    f_CharacterArrowFrame = (f_CharacterArrowFrame + 1) % ARROW_FRAME_COUNT;
+    f_CharacterArrowFrame = (f_CharacterArrowFrame + 1) % ARROW_CYCLE_TICKS;
     LoadSmallPalette(&displayList, 0, ImageBody(transfer->arrowsImage));
     LoadNibbleTextureBlock(&displayList,
         ImageTexelsAt(transfer->arrowsImage,
-            f_CharacterArrowFrame / 4 * GREEN_ARROW_FRAME_SIZE),
+            f_CharacterArrowFrame / ARROW_FRAME_TICKS * GREEN_ARROW_FRAME_SIZE),
         G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0,
         0, 0);
     gDPPipeSync(displayList++);
