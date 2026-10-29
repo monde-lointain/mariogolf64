@@ -959,7 +959,7 @@ s32 GetEndReaction(void) {
 /* Sounds that play this many steps before the end of the flight */
 #define LANDING_SOUND_STEP_COUNT 3
 #define UNK92_SOUND_STEP_COUNT 10
-#define UNKB0_SOUND_STEP_COUNT 15
+#define FLAG_SHOT_CALL_STEP_COUNT 15
 
 /* Distances that PlayFlightSounds tests, in course units */
 #define CLOSE_LANDING_DISTANCE 0x3C00
@@ -1087,12 +1087,12 @@ void PlayFlightSounds(s32 step) {
 
   if (!g_GameState.isMiniGolf) {
     if ((g_SimulatedShot.pathFlags[step + 5] & STEP_FLAG_PIN_HIT) &&
-        g_SimulatedShot.unkB0Step == NO_STEP) {
+        g_SimulatedShot.flagHitStep == NO_STEP) {
       f_IsPinHitComing = TRUE;
     }
 
     if ((g_SimulatedShot.pathFlags[step] & STEP_FLAG_PIN_HIT) &&
-        !g_SimulatedShot.endsInCup && g_SimulatedShot.unkB0Step == NO_STEP) {
+        !g_SimulatedShot.endsInCup && g_SimulatedShot.flagHitStep == NO_STEP) {
       f_IsPinHitComing = FALSE;
       StartMonkeyDrop(D_800BE684);
     }
@@ -1106,7 +1106,7 @@ void PlayFlightSounds(s32 step) {
         PlaySound(
             SOUND_CALL_NICE_TOUCH, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
       }
-    } else if (g_SimulatedShot.unkB0Step != NO_STEP) {
+    } else if (g_SimulatedShot.flagHitStep != NO_STEP) {
       StartBanner(BANNER_FLAG_SHOT);
       PlaySound(
           SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
@@ -1164,9 +1164,9 @@ void PlayFlightSounds(s32 step) {
 
   if (g_SimulatedShot.endsInCup) {
     if (g_BallFlightStep >=
-            g_SimulatedShot.stepCount - UNKB0_SOUND_STEP_COUNT &&
+            g_SimulatedShot.stepCount - FLAG_SHOT_CALL_STEP_COUNT &&
         f_EndReaction == END_REACTION_NONE &&
-        g_SimulatedShot.unkB0Step != NO_STEP) {
+        g_SimulatedShot.flagHitStep != NO_STEP) {
       StartBanner(BANNER_FLAG_SHOT);
       PlaySound(
           SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
@@ -1180,7 +1180,7 @@ void PlayFlightSounds(s32 step) {
             g_SimulatedShot.stepCount - UNK92_SOUND_STEP_COUNT &&
         f_EndReaction == END_REACTION_NONE && !g_SimulatedShot.startsOnGreen &&
         g_Players[g_CurrentShot.playerIndex].strokeCount >= 2 &&
-        g_SimulatedShot.unkB0Step == NO_STEP) {
+        g_SimulatedShot.flagHitStep == NO_STEP) {
       StartBanner(BANNER_CHIP_IN);
       PlaySound(
           SOUND_CALL_CHIP_IN, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);

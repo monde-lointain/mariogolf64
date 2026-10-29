@@ -40,7 +40,7 @@ void SimulateShot(Unk20* shot) {
   g_SimulatedShot.minPositionStep[0] = 0;
   g_SimulatedShot.minPositionStep[1] = 0;
   g_SimulatedShot.minPositionStep[2] = 0;
-  g_SimulatedShot.unkB0Step = NO_STEP;
+  g_SimulatedShot.flagHitStep = NO_STEP;
 
   /* The chained assignment is there to match */
   g_SimulatedShot.maxPosition[AXIS_X] = g_SimulatedShot.minPosition[AXIS_X] =
@@ -81,8 +81,8 @@ void SimulateShot(Unk20* shot) {
       g_SimulatedShot.path[step][2] = simulation->position[AXIS_Z];
     }
 
-    if (simulation->unkB0 && g_SimulatedShot.unkB0Step == NO_STEP) {
-      g_SimulatedShot.unkB0Step = step;
+    if (simulation->hasHitFlag && g_SimulatedShot.flagHitStep == NO_STEP) {
+      g_SimulatedShot.flagHitStep = step;
     }
 
     if (flags & STEP_FLAG_GROUND_HIT & !hasGroundHit) {

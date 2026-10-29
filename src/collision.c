@@ -1725,7 +1725,7 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
-    CoursePoint velocity, f32* fraction, s32 unkB0,
+    CoursePoint velocity, f32* fraction, s32 hasHitFlag,
     BallSimulation* simulation) {
   s32 i = 0;
   s32 deltaX = endX - startX;
@@ -1810,7 +1810,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       continue;
     }
 
-    if (unkB0 == 0) {
+    if (!hasHitFlag) {
       if (height > FLAG_BOTTOM_HEIGHT) {
         isFlagHit = TRUE;
       }

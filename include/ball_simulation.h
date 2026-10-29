@@ -130,7 +130,8 @@ typedef struct BallSimulation {
   /* 0xA6 */ s8 unkA6;
   /* 0xA7 */ s8 unkA7;
   /* 0xA8 */ s8 unkA8[UNKA8_COUNT];
-  /* 0xB0 */ s8 unkB0;
+  /* Keeps the flag from being hit twice */
+  /* 0xB0 */ s8 hasHitFlag;
   /* 0xB1 */ u8 unkB1;
   /* 0xB2 */ s16 unkB2;
   /* 0xB4 */ s8 unkB4;

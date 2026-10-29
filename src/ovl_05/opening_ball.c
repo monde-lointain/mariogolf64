@@ -483,7 +483,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         pinHit =
             FindPinHit(startX, startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
-                pinVelocity, &pinFraction, simulation->unkB0, simulation);
+                pinVelocity, &pinFraction, simulation->hasHitFlag, simulation);
         if (pinHit && !(simulation->unkB1 & STEP_FLAG_PIN_HIT)) {
           simulation->position[AXIS_X] =
               startX + (pinFraction * simulation->velocity[AXIS_X]);
@@ -492,7 +492,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           simulation->position[AXIS_Z] =
               startZ + (pinFraction * simulation->velocity[AXIS_Z]);
           if (pinHit == PIN_HIT_FLAG) {
-            simulation->unkB0 = 1;
+            simulation->hasHitFlag = TRUE;
             simulation->windVelocityX = 0.0f;
             simulation->windVelocityZ = 0.0f;
           }
@@ -1744,7 +1744,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   simulation->unk98 = 0;
   simulation->unk9C = -2;
   simulation->isHoledOut = 0;
-  simulation->unkB0 = 0;
+  simulation->hasHitFlag = FALSE;
   for (index = 0; index < UNKA8_COUNT; index++) {
     simulation->unkA8[index] = 0;
   }

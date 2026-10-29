@@ -530,7 +530,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         pinHit =
             FindPinHit(startX, startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
-                pinVelocity, &pinFraction, simulation->unkB0, simulation);
+                pinVelocity, &pinFraction, simulation->hasHitFlag, simulation);
         if (pinHit && !(simulation->unkB1 & 8)) {
           simulation->unk94++;
           simulation->position[AXIS_X] =
@@ -544,7 +544,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               PlaySound(SOUND_HIT_FLAG, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
 
-            simulation->unkB0 = 1;
+            simulation->hasHitFlag = TRUE;
             simulation->windVelocityX = 0.0f;
             simulation->windVelocityZ = 0.0f;
           }
@@ -2326,7 +2326,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   simulation->unk98 = 0;
   simulation->unk9C = -2;
   simulation->isHoledOut = 0;
-  simulation->unkB0 = 0;
+  simulation->hasHitFlag = FALSE;
   simulation->unkB2 = 0;
   for (index = 0; index < UNKA8_COUNT; index++) {
     simulation->unkA8[index] = 0;
