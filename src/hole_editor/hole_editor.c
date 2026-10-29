@@ -31,10 +31,6 @@
 
 /* The points along a tile's edge, its corners included */
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
-/* An interpolation weight runs from 0, all the first end, to this, all the
- * second */
-#define EDGE_WEIGHT_MAX 16
-
 /* func_804079B8 goes over the ground in two halves of 8 by 16 blocks */
 #define SLOPE_HALF_COUNT 2
 #define SLOPE_BLOCK_COLUMN_COUNT 8

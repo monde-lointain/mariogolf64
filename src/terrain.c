@@ -924,29 +924,41 @@ void SetVertexMidpoint(Vtx* first, Vtx* second, Vtx* midpoint) {
   midpoint->v.cn[3] = (first->v.cn[3] + second->v.cn[3]) / 2;
 }
 
-/* Sets a vertex weight sixteenths of the way from one vertex to another */
+/*
+ * Sets a vertex the fraction weight / EDGE_WEIGHT_MAX of the way from one
+ * vertex to another
+ */
 void BlendVertices(Vtx* first, Vtx* second, Vtx* result, s32 weight) {
-  s32 firstWeight = 16 - weight;
+  s32 firstWeight = EDGE_WEIGHT_MAX - weight;
 
   result->v.ob[0] =
-      ((first->v.ob[0] * firstWeight) + (second->v.ob[0] * weight)) / 16;
+      ((first->v.ob[0] * firstWeight) + (second->v.ob[0] * weight)) /
+      EDGE_WEIGHT_MAX;
   result->v.ob[1] =
-      ((first->v.ob[1] * firstWeight) + (second->v.ob[1] * weight)) / 16;
+      ((first->v.ob[1] * firstWeight) + (second->v.ob[1] * weight)) /
+      EDGE_WEIGHT_MAX;
   result->v.ob[2] =
-      ((first->v.ob[2] * firstWeight) + (second->v.ob[2] * weight)) / 16;
+      ((first->v.ob[2] * firstWeight) + (second->v.ob[2] * weight)) /
+      EDGE_WEIGHT_MAX;
   result->v.flag = 0;
   result->v.tc[0] =
-      ((first->v.tc[0] * firstWeight) + (second->v.tc[0] * weight)) / 16;
+      ((first->v.tc[0] * firstWeight) + (second->v.tc[0] * weight)) /
+      EDGE_WEIGHT_MAX;
   result->v.tc[1] =
-      ((first->v.tc[1] * firstWeight) + (second->v.tc[1] * weight)) / 16;
+      ((first->v.tc[1] * firstWeight) + (second->v.tc[1] * weight)) /
+      EDGE_WEIGHT_MAX;
   result->v.cn[0] =
-      ((first->v.cn[0] * firstWeight) + (second->v.cn[0] * weight)) / 16;
+      ((first->v.cn[0] * firstWeight) + (second->v.cn[0] * weight)) /
+      EDGE_WEIGHT_MAX;
   result->v.cn[1] =
-      ((first->v.cn[1] * firstWeight) + (second->v.cn[1] * weight)) / 16;
+      ((first->v.cn[1] * firstWeight) + (second->v.cn[1] * weight)) /
+      EDGE_WEIGHT_MAX;
   result->v.cn[2] =
-      ((first->v.cn[2] * firstWeight) + (second->v.cn[2] * weight)) / 16;
+      ((first->v.cn[2] * firstWeight) + (second->v.cn[2] * weight)) /
+      EDGE_WEIGHT_MAX;
   result->v.cn[3] =
-      ((first->v.cn[3] * firstWeight) + (second->v.cn[3] * weight)) / 16;
+      ((first->v.cn[3] * firstWeight) + (second->v.cn[3] * weight)) /
+      EDGE_WEIGHT_MAX;
 }
 
 /* Returns the grid vertex at a vertex column and row, or the first one off the

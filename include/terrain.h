@@ -38,6 +38,9 @@
 #define GROUND_GRID_EVEN_COLUMN_COUNT ((GROUND_GRID_COLUMN_COUNT + 1) / 2)
 /* A tile spans this many grid columns and rows */
 #define GROUND_TILE_GRID_SPAN (GROUND_TILE_POINT_SPAN / 2)
+/* An interpolation weight runs from 0, all the first end, to this, all the
+ * second */
+#define EDGE_WEIGHT_MAX 16
 /* The grid vertex at a grid column and row within a tile */
 #define TileGridVertex(tileColumn, tileRow, gridColumn, gridRow) \
   GetGridVertex(((tileColumn) * GROUND_TILE_GRID_SPAN) + (gridColumn), \
