@@ -1941,10 +1941,10 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         SetGreenGridTint(slopes[point]);
         if (column & 1) {
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-              (screenPoints[point].x << 16) + screenPoints[point].y);
+              ScreenPointWord(screenPoints[point].x, screenPoints[point].y));
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-              ((screenPoints[point].x + (s32)dy) << 16) +
-                  (screenPoints[point].y - (s32)dx));
+              ScreenPointWord(screenPoints[point].x + (s32)dy,
+                  screenPoints[point].y - (s32)dx));
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
               RgbaColor(red, green, blue, f_GreenGridAlpha));
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
@@ -1962,10 +1962,10 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
           }
         } else {
           gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-              (screenPoints[point].x << 16) + screenPoints[point].y);
+              ScreenPointWord(screenPoints[point].x, screenPoints[point].y));
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-              ((screenPoints[point].x + (s32)dy) << 16) +
-                  (screenPoints[point].y - (s32)dx));
+              ScreenPointWord(screenPoints[point].x + (s32)dy,
+                  screenPoints[point].y - (s32)dx));
           gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
               RgbaColor(red, green, blue, f_GreenGridAlpha));
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
@@ -2027,16 +2027,16 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
             RgbaColor(red, green, blue, f_GreenGridAlpha));
         gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-            (screenPoints[point].x << 16) + screenPoints[point].y);
+            ScreenPointWord(screenPoints[point].x, screenPoints[point].y));
         gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-            ((screenPoints[point].x - (s32)dy) << 16) +
-                (screenPoints[point].y + (s32)dx));
+            ScreenPointWord(screenPoints[point].x - (s32)dy,
+                screenPoints[point].y + (s32)dx));
         gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-            (screenPoints[point + columnCount].x << 16) +
-                screenPoints[point + columnCount].y);
+            ScreenPointWord(screenPoints[point + columnCount].x,
+                screenPoints[point + columnCount].y));
         gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-            ((screenPoints[point + columnCount].x - (s32)dy) << 16) +
-                (screenPoints[point + columnCount].y + (s32)dx));
+            ScreenPointWord(screenPoints[point + columnCount].x - (s32)dy,
+                screenPoints[point + columnCount].y + (s32)dx));
         gDPPipeSync(gfx++);
         if (screenPoints[point].depth <
             screenPoints[point + columnCount].depth) {
@@ -2203,17 +2203,17 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
             gSPModifyVertex(
                 gfx++, 3, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
             gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-                ((f_BallTrailPoints[i].x + (s32)offsetX) << 16) +
-                    (f_BallTrailPoints[i].y - (s32)offsetY));
+                ScreenPointWord(f_BallTrailPoints[i].x + (s32)offsetX,
+                    f_BallTrailPoints[i].y - (s32)offsetY));
             gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-                ((f_BallTrailPoints[i].x - (s32)offsetX) << 16) +
-                    (f_BallTrailPoints[i].y + (s32)offsetY));
+                ScreenPointWord(f_BallTrailPoints[i].x - (s32)offsetX,
+                    f_BallTrailPoints[i].y + (s32)offsetY));
             gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-                ((f_BallTrailPoints[i + 1].x + (s32)offsetX) << 16) +
-                    (f_BallTrailPoints[i + 1].y - (s32)offsetY));
+                ScreenPointWord(f_BallTrailPoints[i + 1].x + (s32)offsetX,
+                    f_BallTrailPoints[i + 1].y - (s32)offsetY));
             gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-                ((f_BallTrailPoints[i + 1].x - (s32)offsetX) << 16) +
-                    (f_BallTrailPoints[i + 1].y + (s32)offsetY));
+                ScreenPointWord(f_BallTrailPoints[i + 1].x - (s32)offsetX,
+                    f_BallTrailPoints[i + 1].y + (s32)offsetY));
             gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
           }
         }
@@ -2754,10 +2754,9 @@ void DrawHoleFlag(Boolean isBackDrawn) {
         /* These texture coordinates are after the gSPTexture scale, which
          * halves them */
         gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_ST,
-            (((HOLE_FLAG_BACK_TEXEL_START / 2) -
-                 (column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)))
-                << 16) +
-                (row * (HOLE_FLAG_TEXEL_ROW_STEP / 2)));
+            TexcoordWord((HOLE_FLAG_BACK_TEXEL_START / 2) -
+                    (column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)),
+                row * (HOLE_FLAG_TEXEL_ROW_STEP / 2)));
         gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_RGBA,
             ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0]) << 24) |
                 ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1]) << 16) |

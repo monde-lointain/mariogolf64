@@ -1967,12 +1967,12 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
           G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
       gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-          (TexelCoordinate(READY_WIDTH) - 1) << 16);
+          TexcoordWord(TexelCoordinate(READY_WIDTH) - 1, 0));
       gSPModifyVertex(
           gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoordinate(stripHeight));
       gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
-          ((TexelCoordinate(READY_WIDTH) - 1) << 16) +
-              TexelCoordinate(stripHeight));
+          TexcoordWord(
+              TexelCoordinate(READY_WIDTH) - 1, TexelCoordinate(stripHeight)));
     } else {
       stripHeight = (i != READY_GO_STRIP_COUNT - 1)
           ? GO_STRIP_HEIGHT
@@ -1986,12 +1986,12 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
       gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-          (TexelCoordinate(GO_WIDTH) - 1) << 16);
+          TexcoordWord(TexelCoordinate(GO_WIDTH) - 1, 0));
       gSPModifyVertex(
           gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoordinate(stripHeight));
       gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
-          ((TexelCoordinate(GO_WIDTH) - 1) << 16) +
-              TexelCoordinate(stripHeight));
+          TexcoordWord(
+              TexelCoordinate(GO_WIDTH) - 1, TexelCoordinate(stripHeight)));
     }
 
     gSP2Triangles(gfx++, i * 2, (i * 2) + 2, (i * 2) + 3, 0, i * 2, (i * 2) + 3,
@@ -2587,7 +2587,7 @@ void LoadContactImages(UnkB8* player) {
   gSPModifyVertex( \
       gfx++, firstVertex, G_MWO_POINT_ST, f_ContactTextureT*(segment)); \
   gSPModifyVertex(gfx++, (firstVertex) + 1, G_MWO_POINT_ST, \
-      (f_ContactTextureS << 16) + (f_ContactTextureT * (segment)))
+      TexcoordWord(f_ContactTextureS, f_ContactTextureT * (segment)))
 
 #define DrawContactTriangles() \
   for (i = 0; i != CONTACT_RIBBON_RELOAD_SEGMENTS; i++) { \
@@ -3045,7 +3045,7 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
     gSPModifyVertex(
         gfx++, i * 2, G_MWO_POINT_ST, i << WIND_STREAK_TEXTURE_T_SHIFT);
     gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-        (WIND_STREAK_TEXTURE_S << 16) + (i << WIND_STREAK_TEXTURE_T_SHIFT));
+        TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT));
   }
 
   for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
@@ -3066,7 +3066,7 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
         i << WIND_STREAK_TEXTURE_T_SHIFT);
     gSPModifyVertex(gfx++, WIND_STREAK_LAST_SLOT + 1 - slotsBack,
         G_MWO_POINT_ST,
-        (WIND_STREAK_TEXTURE_S << 16) + (i << WIND_STREAK_TEXTURE_T_SHIFT));
+        TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT));
   }
 
   for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {

@@ -635,9 +635,9 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       gSPModifyVertex(
           gfx++, step * 2 + 1, G_MWO_POINT_RGBA, 0xFFFFFF00 | alpha);
       gSPModifyVertex(gfx++, step * 2, G_MWO_POINT_ST,
-          ((textureStep * segment - 1) << 16) + 0x400);
+          TexcoordWord(textureStep * segment - 1, 0x400));
       gSPModifyVertex(gfx++, step * 2 + 1, G_MWO_POINT_ST,
-          (textureStep * segment - 1) << 16);
+          TexcoordWord(textureStep * segment - 1, 0));
       segment++;
     }
 

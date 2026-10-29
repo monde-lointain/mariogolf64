@@ -109,12 +109,12 @@
 
 /* Texture coordinates in texels, packed as s10.5 */
 #define SmallCupTexcoords(s, t) \
-  ((TexelCoordinate(s) << 16) | TexelCoordinate(t))
+  TexcoordWord(TexelCoordinate(s), TexelCoordinate(t))
 /* Packs screen coordinates in pixels into the quarter pixels of a vertex's
  * G_MWO_POINT_XYSCREEN word */
 #define ScreenXY(x, y) \
-  ((((x) * QUARTER_PIXELS_PER_PIXEL) << 16) + \
-      (s32)((y) * QUARTER_PIXELS_PER_PIXEL))
+  ScreenPointWord( \
+      (x) * QUARTER_PIXELS_PER_PIXEL, (s32)((y) * QUARTER_PIXELS_PER_PIXEL))
 /* Half the screen-space flagstick's width, in quarter pixels */
 #define SCREEN_FLAGSTICK_HALF_WIDTH 2
 /* How far above its projected foot the screen-space flagstick starts, in pixels
@@ -615,25 +615,23 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       if ((f32)(stickScreenScale * FLAGSTICK_SCREEN_RADIUS) <
           SCREEN_FLAGSTICK_MAX_SIZE) {
         gSPModifyVertex(g_DisplayListHead++, 11, G_MWO_POINT_XYSCREEN,
-            (((top.x * QUARTER_PIXELS_PER_PIXEL) - SCREEN_FLAGSTICK_HALF_WIDTH)
-                << 16) +
-                (top.y * QUARTER_PIXELS_PER_PIXEL));
+            ScreenPointWord((top.x * QUARTER_PIXELS_PER_PIXEL) -
+                    SCREEN_FLAGSTICK_HALF_WIDTH,
+                top.y * QUARTER_PIXELS_PER_PIXEL));
         gSPModifyVertex(g_DisplayListHead++, 10, G_MWO_POINT_XYSCREEN,
-            (((stickFoot.x * QUARTER_PIXELS_PER_PIXEL) -
-                 SCREEN_FLAGSTICK_HALF_WIDTH)
-                << 16) +
-                ((stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
+            ScreenPointWord((stickFoot.x * QUARTER_PIXELS_PER_PIXEL) -
+                    SCREEN_FLAGSTICK_HALF_WIDTH,
+                (stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
                     QUARTER_PIXELS_PER_PIXEL));
         gSPModifyVertex(g_DisplayListHead++, 9, G_MWO_POINT_XYSCREEN,
-            (((stickFoot.x * QUARTER_PIXELS_PER_PIXEL) +
-                 SCREEN_FLAGSTICK_HALF_WIDTH)
-                << 16) +
-                ((stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
+            ScreenPointWord((stickFoot.x * QUARTER_PIXELS_PER_PIXEL) +
+                    SCREEN_FLAGSTICK_HALF_WIDTH,
+                (stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
                     QUARTER_PIXELS_PER_PIXEL));
         gSPModifyVertex(g_DisplayListHead++, 8, G_MWO_POINT_XYSCREEN,
-            (((top.x * QUARTER_PIXELS_PER_PIXEL) + SCREEN_FLAGSTICK_HALF_WIDTH)
-                << 16) +
-                (top.y * QUARTER_PIXELS_PER_PIXEL));
+            ScreenPointWord((top.x * QUARTER_PIXELS_PER_PIXEL) +
+                    SCREEN_FLAGSTICK_HALF_WIDTH,
+                top.y * QUARTER_PIXELS_PER_PIXEL));
       }
 
       if (g_IsCupViewShown == TRUE) {

@@ -19,6 +19,10 @@
 #define TEXEL_STEP_ONE (1 << 10)
 /* A texel position, as texture coordinates take it in 10.5 fixed point */
 #define TexelCoordinate(texel) ((texel) << 5)
+/* The words gSPModifyVertex takes for a point's screen position, x and y in
+ * quarter pixels, and for its texture coordinates, s and t in 10.5 */
+#define ScreenPointWord(x, y) (((x) << 16) + (y))
+#define TexcoordWord(s, t) (((s) << 16) + (t))
 
 /* SetScreenEffect's effects */
 enum ScreenEffect {

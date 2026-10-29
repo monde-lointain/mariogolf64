@@ -708,12 +708,12 @@ void DrawClubSlots(Gfx** displayListHead) {
           0, 0);
       gDPPipeSync(gfx++);
       gSPModifyVertex(gfx++, quadIndex * 2, G_MWO_POINT_ST, 0);
-      gSPModifyVertex(
-          gfx++, (quadIndex * 2) + 1, G_MWO_POINT_ST, SYMBOL_ST_END << 16);
+      gSPModifyVertex(gfx++, (quadIndex * 2) + 1, G_MWO_POINT_ST,
+          TexcoordWord(SYMBOL_ST_END, 0));
       gSPModifyVertex(
           gfx++, (quadIndex * 2) + 2, G_MWO_POINT_ST, SYMBOL_ST_END);
       gSPModifyVertex(gfx++, (quadIndex * 2) + 3, G_MWO_POINT_ST,
-          (SYMBOL_ST_END << 16) | SYMBOL_ST_END);
+          TexcoordWord(SYMBOL_ST_END, SYMBOL_ST_END));
       gSP2Triangles(gfx++, (quadIndex * 2) + 1, quadIndex * 2,
           (quadIndex * 2) + 2, 0, (quadIndex * 2) + 1, (quadIndex * 2) + 2,
           (quadIndex * 2) + 3, 0);

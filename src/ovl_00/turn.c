@@ -2149,13 +2149,13 @@ void DrawShotPreview(CameraMatrices* matrices) {
       offsetX = dy * scale;
       offsetY = dx * scale;
       gSPModifyVertex(g_DisplayListHead++, 0, G_MWO_POINT_XYSCREEN,
-          ((ball.x + offsetX) << 16) + ball.y);
+          ScreenPointWord(ball.x + offsetX, ball.y));
       gSPModifyVertex(g_DisplayListHead++, 1, G_MWO_POINT_XYSCREEN,
-          (ball.x << 16) + (ball.y + offsetY));
+          ScreenPointWord(ball.x, ball.y + offsetY));
       gSPModifyVertex(g_DisplayListHead++, 2, G_MWO_POINT_XYSCREEN,
-          ((end.x + offsetX) << 16) + end.y);
+          ScreenPointWord(end.x + offsetX, end.y));
       gSPModifyVertex(g_DisplayListHead++, 3, G_MWO_POINT_XYSCREEN,
-          (end.x << 16) + (end.y + offsetY));
+          ScreenPointWord(end.x, end.y + offsetY));
       gSP2Triangles(g_DisplayListHead++, 1, 0, 2, 0, 1, 2, 3, 0);
       gSPMatrix(g_DisplayListHead++, &matrices->projection,
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);

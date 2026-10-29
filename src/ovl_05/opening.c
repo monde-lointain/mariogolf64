@@ -4029,7 +4029,7 @@ void DrawLakitu(Gfx** displayListHead) {
       gSPModifyVertex(
           gfx++, drawnIndex * 2, G_MWO_POINT_ST, LakituTrailT(drawnIndex));
       gSPModifyVertex(gfx++, (drawnIndex * 2) + 1, G_MWO_POINT_ST,
-          (LAKITU_TRAIL_RIGHT_S << 16) + LakituTrailT(drawnIndex));
+          TexcoordWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex)));
       segmentIndex--;
       if (segmentIndex < 0) {
         segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
@@ -4058,7 +4058,7 @@ void DrawLakitu(Gfx** displayListHead) {
           G_MWO_POINT_ST, LakituTrailT(drawnIndex));
       gSPModifyVertex(gfx++, LakituTrailSecondBatchSlot(drawnIndex) + 1,
           G_MWO_POINT_ST,
-          (LAKITU_TRAIL_RIGHT_S << 16) + LakituTrailT(drawnIndex));
+          TexcoordWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex)));
       segmentIndex--;
       if (segmentIndex < 0) {
         segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;

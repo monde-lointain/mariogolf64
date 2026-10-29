@@ -2470,18 +2470,18 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
           /* Scaling the lengths in place is there to match */
           lengthY *= widthScale;
           gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-              ((streak->headScreenX + (s32)lengthY) << 16) +
-                  streak->headScreenY);
+              ScreenPointWord(
+                  streak->headScreenX + (s32)lengthY, streak->headScreenY));
           lengthX *= widthScale;
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-              (streak->headScreenX << 16) +
-                  (streak->headScreenY + (s32)lengthX));
+              ScreenPointWord(
+                  streak->headScreenX, streak->headScreenY + (s32)lengthX));
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-              ((streak->tailScreenX + (s32)lengthY) << 16) +
-                  streak->tailScreenY);
+              ScreenPointWord(
+                  streak->tailScreenX + (s32)lengthY, streak->tailScreenY));
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-              (streak->tailScreenX << 16) +
-                  (streak->tailScreenY + (s32)lengthX));
+              ScreenPointWord(
+                  streak->tailScreenX, streak->tailScreenY + (s32)lengthX));
           gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
         }
       }
