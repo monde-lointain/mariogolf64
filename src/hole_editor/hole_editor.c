@@ -472,7 +472,7 @@ enum EditorCombineMode {
 };
 
 /* Whether ToggleGroundTileBorders has given a tile its bordered layout */
-#define TILE_HAS_BORDERS(tileIndex) \
+#define HasTileBorders(tileIndex) \
   (g_WorkArea.hole.tiles[tileIndex].texels[GROUND_TILE_TEXEL_ROW_COUNT - \
        1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0)
 
@@ -503,7 +503,7 @@ enum EditorCombineMode {
     s32 tileS = (tileColumn) * TILE_COORDINATE_SPAN; \
     s32 tileT = (row) * TILE_COORDINATE_SPAN; \
 \
-    if (TILE_HAS_BORDERS(tileIndex)) { \
+    if (HasTileBorders(tileIndex)) { \
       if ((pass) == 0 || g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) { \
         SetEditorCombineMode((g_WorkArea.hole.tiles[tileIndex].unk990 != 0) \
                 ? TILE_PASS_FIRST \
