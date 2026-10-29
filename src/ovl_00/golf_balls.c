@@ -256,8 +256,7 @@ static Gfx f_BooBodyDisplayList[] = {
     gsSP2Triangles(3, 25, 1, 0, 1, 25, 24, 0),
     gsSPEndDisplayList(),
 };
-/* Read by no routine */
-static Gfx f_BooDisplayList[] = {
+Gfx g_BooDisplayList[] = {
     gsSPDisplayList(f_BooEyeDisplayList),
     gsSPDisplayList(f_BooMouthDisplayList),
     gsSPDisplayList(f_BooBodyDisplayList),

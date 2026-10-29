@@ -3,6 +3,9 @@
 
 #include <ultra64.h>
 
+/* The wind indicator draws it while MODULE_WIND_BOO is alive */
+extern Gfx g_BooDisplayList[];
+
 void LoadGolfBallImages(void);
 void ResetBallAfterimage(void);
 void StartFastBallAfterimage(void);

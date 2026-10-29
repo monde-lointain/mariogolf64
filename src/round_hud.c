@@ -395,7 +395,6 @@ extern void* g_ShadowTexture;
 #define WIND_TEXT_ENV_RED 0x00
 #define WIND_TEXT_ENV_GREEN 0x20
 #define WIND_TEXT_ENV_BLUE 0x7F
-extern Gfx D_80222400[];
 
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
 
@@ -2455,7 +2454,7 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   gSPSetLights1(gfx++, f_WindArrowLights);
   if (g_IsModuleAlive[MODULE_WIND_BOO]) {
     g_ModuleRdpRequestFrames[MODULE_WIND_BOO] = g_FrameCount;
-    gSPDisplayList(gfx++, D_80222400);
+    gSPDisplayList(gfx++, g_BooDisplayList);
   }
 
   if (g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
