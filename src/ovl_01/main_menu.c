@@ -1058,7 +1058,7 @@ void UpdateMenus(void) {
 
       break;
 
-    case MENU_SCREEN_UNK8:
+    case MENU_SCREEN_CADDY_SELECT:
       func_801FADBC_ovl_01();
       break;
 
@@ -3694,7 +3694,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       }
 
       break;
-    case MENU_SCREEN_UNK8:
+    case MENU_SCREEN_CADDY_SELECT:
       func_80207D08_ovl_01(&gfx);
       break;
     case MENU_SCREEN_COURSE_SELECT:
