@@ -625,7 +625,11 @@ void func_80060128(s32 index) {
   D_80104F78.unk18 = D_80105F40->shots[index].unk7;
 }
 
-s32 func_80060190(s32 strokes) {
+/*
+ * Gives the score worth recording for a hole finished in this many strokes,
+ * as SCORE_KIND_RECORDED with its ScoreKind, or 0 for none
+ */
+s32 GetRecordedScoreKind(s32 strokes) {
   s32 toPar = strokes - g_HoleSetup.par;
 
   if (strokes == 1) {

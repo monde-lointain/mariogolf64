@@ -365,7 +365,7 @@ void PlaceShotCamera(void);
 void SetFramebufferCount(s32 count);
 s32 func_8005F30C(s32 x, s32 z);
 void func_8006034C(s8 value);
-s32 func_80060190(s32 strokes);
+s32 GetRecordedScoreKind(s32 strokes);
 Boolean HasNoRingsLeft(UnkB8* player);
 void RecordRingShotClear(s32 playerIndex);
 
@@ -2133,7 +2133,8 @@ void RecordHoleOut(s32 playerIndex) {
     record->gameMode = g_GameState.gameMode;
     record->courseIndex = g_GameState.courseIndex;
     record->holeIndex = g_GameState.holeIndex;
-    record->scoreKind = func_80060190(g_Players[playerIndex].strokeCount);
+    record->scoreKind =
+        GetRecordedScoreKind(g_Players[playerIndex].strokeCount);
     record->characterIndex = g_Players[playerIndex].characterIndex;
     record->unk3C = g_Players[playerIndex].unk22;
     record->paletteIndex = g_Players[playerIndex].paletteIndex;
@@ -2160,7 +2161,8 @@ void RecordRingShotHole(s32 playerIndex) {
 
     record->courseIndex = g_GameState.courseIndex;
     record->holeIndex = g_GameState.holeIndex;
-    record->scoreKind = func_80060190(g_Players[playerIndex].strokeCount);
+    record->scoreKind =
+        GetRecordedScoreKind(g_Players[playerIndex].strokeCount);
     record->characterIndex = g_Players[playerIndex].characterIndex;
     record->unk38 = g_Players[playerIndex].unk22;
     record->paletteIndex = g_Players[playerIndex].paletteIndex;

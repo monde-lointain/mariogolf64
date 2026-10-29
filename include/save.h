@@ -222,7 +222,8 @@ typedef struct PlayRecord {
   /* 0x34 */ s32 gameMode;
   /* 0x38 */ s8 courseIndex;
   /* 0x39 */ s8 holeIndex;
-  /* 0x3A */ u8 scoreKind; /* What func_80060190 returns for the strokes */
+  /* 0x3A */ u8
+      scoreKind; /* What GetRecordedScoreKind returns for the strokes */
   /* 0x3B */ u8 characterIndex;
   /* 0x3C */ u8 unk3C;
   /* 0x3D */ u8 paletteIndex;
@@ -239,7 +240,8 @@ typedef struct RingShotRecord {
   /* 0x00 */ HoleSetup hole;
   /* 0x34 */ s8 courseIndex;
   /* 0x35 */ s8 holeIndex;
-  /* 0x36 */ s8 scoreKind; /* What func_80060190 returns for the strokes */
+  /* 0x36 */ s8
+      scoreKind; /* What GetRecordedScoreKind returns for the strokes */
   /* 0x37 */ u8 characterIndex;
   /* 0x38 */ u8 unk38;
   /* 0x39 */ u8 paletteIndex;
