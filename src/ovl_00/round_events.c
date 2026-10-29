@@ -46,10 +46,14 @@
  * assets */
 #define CONTACT_IMAGE_OFFSET 0x970
 #define CONTACT_SECOND_IMAGE_OFFSET 0x1578
+/* A fireball */
 #define MARIO_CONTACT_IMAGE_ASSET 0x6BE
+/* Half of a streak of flame, which the mirrored wrap completes */
 #define BOWSER_CONTACT_IMAGE_ASSET 0x6AE
+/* The spark trail's first two lightning bolts */
 #define WARIO_CONTACT_IMAGE_ASSET 0x6A7
 #define WARIO_CONTACT_SECOND_IMAGE_ASSET 0x6A8
+/* A row of spectrum colors */
 #define RAINBOW_CONTACT_IMAGE_ASSET 0x6A6
 
 /* A banner's letters, each an image drawn on its own square */
