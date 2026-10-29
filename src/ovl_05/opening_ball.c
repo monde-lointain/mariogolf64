@@ -5,6 +5,7 @@
  */
 #include "common.h"
 
+#include "ball_physics.h"
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "character_slot.h"
@@ -29,16 +30,6 @@
 
 /* The clubs that the opening's golfers swing */
 #define OPENING_CLUB_COUNT 2
-
-/*
- * The absolute value as a statement expression, as StepBallSimulation has it,
- * which compiles to a compare and branch
- */
-#define AbsoluteValueExpression(value) \
-  ({ \
-    f32 absValue = (value); \
-    (absValue < 0.0f) ? -absValue : absValue; \
-  })
 
 /* The opening's copy of g_ClubTestMode */
 static s8 D_8020B560_ovl_05 = CLUB_TEST_NONE;
