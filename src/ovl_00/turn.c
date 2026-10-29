@@ -43,6 +43,7 @@
 #include "scoring.h"
 #include "screen.h"
 #include "screen_layers.h"
+#include "shot_effects.h"
 #include "shot_simulation.h"
 #include "sound.h"
 #include "surface.h"
@@ -3434,7 +3435,7 @@ void UpdateTurns(void) {
             RequestPauseMenu(0, -1);
             ResumeRound();
             TakePinOut();
-            ClearShotEffects(1);
+            ClearShotEffects(CLEAR_KIND_ALL);
             PlacePlayersOnTee();
             SetFramebufferCount(3);
             nextState = PLAYER_STATE_WAITING;
@@ -3442,7 +3443,7 @@ void UpdateTurns(void) {
             RequestPauseMenu(0, -1);
             nextState = PLAYER_STATE_HOLE_DONE;
             EndFlightCamera();
-            ClearShotEffects(1);
+            ClearShotEffects(CLEAR_KIND_ALL);
             FreeCharacterAndReactionLight(0);
           }
         } else if (g_PauseScreen == PAUSE_SCREEN_LOADING_SCORECARD) {
@@ -4028,9 +4029,9 @@ void UpdateTurns(void) {
             GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])
                     ->kind == CLUB_KIND_WOOD) {
           if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
-            StartSwingTrail(2);
+            StartSwingTrail(SWING_TRAIL_KIND_NORMAL_SHOT);
           } else if (g_CurrentShot.shotMode == SHOT_MODE_POWER) {
-            StartSwingTrail(1);
+            StartSwingTrail(SWING_TRAIL_KIND_POWER_SHOT);
           }
         }
 
@@ -4072,7 +4073,7 @@ void UpdateTurns(void) {
         s32 previousPosition[3];
 
         if (D_80224000_ovl_00 + 10 == D_80227170_ovl_00[playerIndex]) {
-          StartSwingTrail(0);
+          StartSwingTrail(SWING_TRAIL_KIND_FADE);
         }
 
         ReuseLastCharacterMatrices(0);
@@ -4156,12 +4157,12 @@ void UpdateTurns(void) {
             }
 
             ResetShotEffects();
-            ClearShotEffects(2);
+            ClearShotEffects(CLEAR_KIND_NICE_SHOT_BANNER);
           }
         }
 
         if (!g_TurnBallSimulation.state) {
-          ClearShotEffects(0);
+          ClearShotEffects(CLEAR_KIND_EFFECTS);
           nextState = PLAYER_STATE_BALL_AT_REST;
           D_800C3094 = 1;
           D_80227170_ovl_00[playerIndex] = 0;
@@ -4405,7 +4406,7 @@ void UpdateTurns(void) {
         ConsiderReactionSpot(g_CurrentShot.ballPosition);
         ConsiderReactionSpot(g_HoleSetup.cupPosition);
         ConsiderReactionSpot(g_HoleSetup.teePosition);
-        ClearShotEffects(0);
+        ClearShotEffects(CLEAR_KIND_EFFECTS);
         EndFlightCamera();
         if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasGutsTestRun) {
           character = f_GutsTestCharacter;

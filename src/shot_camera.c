@@ -552,7 +552,7 @@ void EndFlightCamera(void) {
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
   FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FADE_FRAME_COUNT);
   FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKF, SOUND_FADE_FRAME_COUNT);
-  ClearShotEffects(0);
+  ClearShotEffects(CLEAR_KIND_EFFECTS);
   f_FlightCameraKind = NO_FLIGHT_CAMERA;
   if (g_BallFlightStep == g_SimulatedShot.stepCount) {
     osSyncPrintf("\nCheckWater1\n");
@@ -590,7 +590,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
   f32 degrees;
 
   D_800BE624 = earlierFlightCount;
-  ClearShotEffects(1);
+  ClearShotEffects(CLEAR_KIND_ALL);
   ResetBallTrail();
   D_800BE674 = 0;
   f_EndSurfaceInfo = GetSurfaceInfo(g_SimulatedShot.endSurface);

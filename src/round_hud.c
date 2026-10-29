@@ -1072,7 +1072,7 @@ void FreeScenery(void) {
     DestroyBillboardManager();
     FreeMemory(&f_SceneryBillboardHeap);
     EndWeather();
-    ClearShotEffects(1);
+    ClearShotEffects(CLEAR_KIND_ALL);
     FreeSceneryImages();
     f_SceneryState = SCENERY_UNLOADED;
     memset(&g_RoundHud, 0, sizeof(g_RoundHud));

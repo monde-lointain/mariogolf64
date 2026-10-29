@@ -686,7 +686,7 @@ void func_8006034C(s8 value) {
 void func_80060358(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
   SaveOrContinueGameByMode(FALSE);
-  ClearShotEffects(0);
+  ClearShotEffects(CLEAR_KIND_EFFECTS);
   g_GameState.unk0 = 7;
   f_PlayExit = 3;
   f_HoleEndStep = 9;

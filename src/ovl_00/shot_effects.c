@@ -48,25 +48,12 @@ enum SparkKind {
 
 #define IMPACT_FLASH_FULL_LEVEL 255
 
-/* The ways that ClearShotEffects ends the round's effects */
-enum ClearKind {
-  CLEAR_KIND_ROUND_END = 1,
-  CLEAR_KIND_HOLE_END
-};
-
 #define SPARK_IMAGE_ASSET 0x561
 #define SWING_TRAIL_IMAGE_ASSET 0x973
 #define SHARED_EFFECT_IMAGES_SIZE 0x2180
 #define SHARED_EFFECT_IMAGE_ASSET 0x6AD
 #define SHARED_EFFECT_SECOND_IMAGE_ASSET 0x969
 #define SHARED_EFFECT_SECOND_IMAGE_OFFSET 0x648
-
-/* The arguments of StartSwingTrail */
-enum SwingTrailKind {
-  SWING_TRAIL_CLEAR = -1,
-  SWING_TRAIL_KIND_UNK1 = 1,
-  SWING_TRAIL_KIND_UNK2
-};
 
 enum SwingTrailState {
   SWING_TRAIL_NONE,
@@ -165,23 +152,23 @@ void ResetShotEffects(void) {
 void ClearShotEffects(s32 kind) {
   osSyncPrintf("effect Clear!%d\n", kind);
   ShowWindFlyGuy(FLY_GUY_HIDDEN);
-  StartShotEffect(-1);
+  StartShotEffect(SHOT_EFFECT_NONE);
   ClearEffects();
   f_ImpactFrameCount = 0;
   g_ImpactFlashState = IMPACT_FLASH_NONE;
   ClearHoleCreatures();
   StartContactEffect(CONTACT_EFFECT_NONE);
-  if (kind == CLEAR_KIND_HOLE_END) {
+  if (kind == CLEAR_KIND_NICE_SHOT_BANNER) {
     StartBanner(BANNER_HIDE_NICE_SHOT);
   }
 
-  if (kind == CLEAR_KIND_ROUND_END) {
-    StartMovie(-1);
+  if (kind == CLEAR_KIND_ALL) {
+    StartMovie(MOVIE_NONE);
     StartBanner(BANNER_NONE);
   }
 
   ResetBallAfterimage();
-  StartSwingTrail(-1);
+  StartSwingTrail(SWING_TRAIL_KIND_CLEAR);
 }
 
 void StopAllSounds(void) {
@@ -532,7 +519,7 @@ void func_80217F54_ovl_00(void) {}
 
 /*
  * Starts the trail of a swing of the given kind, recording the path of the
- * club through the swing's next frames, or with SWING_TRAIL_CLEAR stops it
+ * club through the swing's next frames, or with SWING_TRAIL_KIND_CLEAR stops it
  * at once. Any other kind lets the trail fade out quickly.
  */
 #ifdef NON_MATCHING
@@ -542,9 +529,10 @@ void StartSwingTrail(s32 kind) {
   s32 i;
   f32 position;
 
-  if (kind == SWING_TRAIL_CLEAR) {
+  if (kind == SWING_TRAIL_KIND_CLEAR) {
     f_SwingTrailState = SWING_TRAIL_NONE;
-  } else if (kind == SWING_TRAIL_KIND_UNK1 || kind == SWING_TRAIL_KIND_UNK2) {
+  } else if (kind == SWING_TRAIL_KIND_POWER_SHOT ||
+      kind == SWING_TRAIL_KIND_NORMAL_SHOT) {
     f_SwingTrailState = SWING_TRAIL_SHOWN;
     f_SwingTrailHead = 0;
     f_SwingTrailPathIndex = 0;
@@ -733,7 +721,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       G_IM_SIZ_8b, SWING_TRAIL_IMAGE_WIDTH, SWING_TRAIL_IMAGE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  if (f_SwingTrailKind == SWING_TRAIL_KIND_UNK1) {
+  if (f_SwingTrailKind == SWING_TRAIL_KIND_POWER_SHOT) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, SHADE, 0, 0, 0, 0,
         TEXEL0, TEXEL0, 0, SHADE, 0);
   } else {
