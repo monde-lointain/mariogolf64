@@ -33,6 +33,8 @@ typedef f32 BallSpeed;
 #define NOISE_BYTE_MASK 0xFF
 #define NOISE_BYTE_MIDPOINT (NOISE_BYTE_MASK / 2.0f)
 #define MAX_NOISE_BYTE_PAIR_SUM (NOISE_BYTE_MASK * 2.0f)
+/* Noise from 0 to 1 less this is centered on 0 */
+#define NOISE_MIDDLE 0.5f
 /* Mini golf holds a rolling ball to the ground at twice gravity */
 #define MINI_GOLF_ROLL_GRAVITY (GRAVITY * 2)
 

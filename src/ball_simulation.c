@@ -395,6 +395,29 @@ void ResetBallSimulations(void) {
 #define MIN_BOUNCE_SPEED_KEPT 0.1f
 #define EARLY_BOUNCE_STEP_COUNT 2
 #define EARLY_BOUNCE_SPEED_SCALE 0.25
+
+/*
+ * Rolling into the ground. A rolling ball pressing into it this fast, or in
+ * mini golf about 4.6 km/h, leaves along it; off mini golf, keeping a tenth
+ * of its speed.
+ */
+#define MINI_GOLF_ROLL_JUMP_SPEED 655.0f
+#define ROLL_JUMP_SPEED KilometersPerHour(50)
+#define ROLL_JUMP_SPEED_KEPT 0.1f
+/*
+ * Off mini golf, the ground under a rolling ball tilts at random to one side,
+ * by up to a quarter of the share that the ball's speed is of
+ * ROLL_TILT_FULL_SPEED
+ */
+#define ROLL_TILT_NOISE_SCALE 0.5f
+#define ROLL_TILT_FULL_SPEED KilometersPerHour(20)
+/*
+ * The chances that a ball on the fairway, off mini golf, sits in a divot or
+ * a tuft, and in the rough deeper in the grass
+ */
+#define FAIRWAY_POOR_LIE_CHANCE 0.25f
+#define FAIRWAY_FAIR_LIE_CHANCE 0.25f
+#define ROUGH_POOR_LIE_CHANCE 0.35f
 /*
  * 30 cm: a ball in the cup, or holed out, may settle this far below the
  * ground, deeper than the cup's floor
@@ -1638,7 +1661,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         side[AXIS_Z] = velocity[AXIS_Z];
         if (fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >=
             KilometersPerHour(5)) {
-          f32 tilt = (GetStepNoise() - 0.5f) * LANDING_TILT_NOISE_SCALE;
+          f32 tilt = (GetStepNoise() - NOISE_MIDDLE) * LANDING_TILT_NOISE_SCALE;
 
           if (tilt < 0.0f) {
             tilt -= MIN_LANDING_TILT;
@@ -1988,15 +2011,16 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               (plane.normal[AXIS_Y] * velocity[AXIS_Y]) +
               (plane.normal[AXIS_Z] * velocity[AXIS_Z]);
 
-          if ((g_GameState.isMiniGolf && pressing >= 655.0f) ||
-              pressing >= KilometersPerHour(50)) {
+          if ((g_GameState.isMiniGolf &&
+                  pressing >= MINI_GOLF_ROLL_JUMP_SPEED) ||
+              pressing >= ROLL_JUMP_SPEED) {
             f32 along[3];
             f32 damping;
 
             osSyncPrintf("Jump\n");
             damping = 1.0f;
             if (!g_GameState.isMiniGolf) {
-              damping = 0.1f;
+              damping = ROLL_JUMP_SPEED_KEPT;
             }
 
             along[AXIS_X] =
@@ -2021,12 +2045,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             !g_GameState.isMiniGolf &&
             fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >=
                 KilometersPerHour(5)) {
-          f32 tilt = (GetStepNoise() - 0.5f) * 0.5f;
+          f32 tilt = (GetStepNoise() - NOISE_MIDDLE) * ROLL_TILT_NOISE_SCALE;
 
           plane.normal[AXIS_X] -=
-              velocity[AXIS_Z] * (1.0f / KilometersPerHour(20)) * tilt;
+              velocity[AXIS_Z] * (1.0f / ROLL_TILT_FULL_SPEED) * tilt;
           plane.normal[AXIS_Z] +=
-              velocity[AXIS_X] * (1.0f / KilometersPerHour(20)) * tilt;
+              velocity[AXIS_X] * (1.0f / ROLL_TILT_FULL_SPEED) * tilt;
           guNormalize(&plane.normal[AXIS_X], &plane.normal[AXIS_Y],
               &plane.normal[AXIS_Z]);
         }
@@ -2038,16 +2062,17 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             if (!g_GameState.isMiniGolf) {
               f32 lie = GetStepNoise();
 
-              if (lie < 0.25f) {
+              if (lie < FAIRWAY_POOR_LIE_CHANCE) {
                 simulation->surface = SURFACE_FAIRWAY_POOR_LIE;
-              } else if (lie < 0.5f) {
+              } else if (lie <
+                  FAIRWAY_POOR_LIE_CHANCE + FAIRWAY_FAIR_LIE_CHANCE) {
                 simulation->surface = SURFACE_FAIRWAY_FAIR_LIE;
               }
             }
 
             break;
           case SURFACE_ROUGH:
-            if (GetStepNoise() < 0.35f) {
+            if (GetStepNoise() < ROUGH_POOR_LIE_CHANCE) {
               simulation->surface = SURFACE_ROUGH_POOR_LIE;
             }
 
