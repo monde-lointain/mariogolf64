@@ -58,6 +58,8 @@ enum SaveMenuGame {
 
 /* The slots that the save menu steps through, which hold -1 when empty */
 #define SAVE_MENU_SLOT_COUNT 5
+/* The saved games' course image is double buffered */
+#define COURSE_IMAGE_BUFFER_COUNT 2
 
 /* The images of g_CourseIconAssets that LoadRingShotCourseIcons reads, before
  * one of its own */
@@ -261,8 +263,8 @@ static void* f_PlayerLabels;
 /* Read by no routine */
 static u8 D_8023BD88_ovl_01[0x4];
 
-static void* D_8023BD8C_ovl_01;
-static void* D_8023BD90_ovl_01;
+/* The chosen game's course image, shown from one while the other loads */
+static void* f_CourseImageBuffers[COURSE_IMAGE_BUFFER_COUNT];
 
 /* Read by no routine */
 static u8 D_8023BD94_ovl_01[0x4];
@@ -1075,7 +1077,7 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
       ReadEncodedAsset(*imageSlot, &asset);
       break;
     case SAVE_GAME_BUFFER_COURSE:
-      bufferSlot = &D_8023BD8C_ovl_01;
+      bufferSlot = &f_CourseImageBuffers[0];
       *bufferSlot = buffer;
       gameIndex = memory->savedGameIndex;
       if (gameIndex < 0) {
@@ -1106,7 +1108,7 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
 
       break;
     case SAVE_GAME_BUFFER_CHOSEN_COURSE:
-      bufferSlot = &D_8023BD90_ovl_01;
+      bufferSlot = &f_CourseImageBuffers[1];
       *bufferSlot = buffer;
       gameIndex = memory->savedGameIndex;
       if (gameIndex < 0) {
@@ -1335,11 +1337,11 @@ void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
     if (!CHOSEN_GAME.state.isMiniGolf) { \
       OpenEncodedAsset( \
           g_CourseIconAssets[CHOSEN_GAME.state.courseIndex], &asset); \
-      ReadEncodedAsset((&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01 ^ 1], &asset); \
+      ReadEncodedAsset(f_CourseImageBuffers[D_80230B4E_ovl_01 ^ 1], &asset); \
     } else { \
       miniGolfIndex = CHOSEN_GAME.state.courseIndex - MINI_GOLF_COURSE_INDEX; \
       OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset); \
-      ReadEncodedAsset((&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01 ^ 1], &asset); \
+      ReadEncodedAsset(f_CourseImageBuffers[D_80230B4E_ovl_01 ^ 1], &asset); \
       OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file); \
       ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file); \
     } \
@@ -2442,11 +2444,11 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
   func_8005AF74();
   gDPLoadTLUT_pal256(gfx++,
       TextureAddress(
-          (u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] + IMAGE_HEADER_SIZE));
+          (u32)f_CourseImageBuffers[D_80230B4E_ovl_01] + IMAGE_HEADER_SIZE));
   for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT;
       stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] +
+        TextureAddress((u32)f_CourseImageBuffers[D_80230B4E_ovl_01] +
             LARGE_PALETTED_TEXELS_OFFSET +
             (stripIndex * COURSE_THUMBNAIL_WIDTH *
                 COURSE_THUMBNAIL_STRIP_HEIGHT)),
@@ -2485,7 +2487,7 @@ void func_8022644C_ovl_01(Gfx** displayListHead) {
     /* The course and chosen course buffers are adjacent; D_80230B4E picks one
      */
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] +
+        TextureAddress((u32)f_CourseImageBuffers[D_80230B4E_ovl_01] +
             (stripIndex * COURSE_THUMBNAIL_WIDTH *
                 COURSE_THUMBNAIL_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_THUMBNAIL_WIDTH,
