@@ -176,8 +176,8 @@ static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_PLAY_HOLE,
     SCENE_GROUND_CAMERA,
     SCENE_HEIGHTS,
-    SCENE_UNK9,
-    SCENE_UNK10,
+    SCENE_CELL_EDITOR,
+    SCENE_POINT_EDITOR,
     SCENE_TRIANGLES,
     SCENE_TREES,
     SCENE_PIN,
@@ -1277,13 +1277,13 @@ const char* GetDebugSceneLabel(u32 scene) {
       return " TREE ";
     case SCENE_PIN:
       return " PIN  ";
-    case SCENE_UNK9:
+    case SCENE_CELL_EDITOR:
       return "DIVINF";
     case SCENE_TRIANGLES:
       return "TRIANG";
     case SCENE_MENU:
       return "MENU";
-    case SCENE_UNK10:
+    case SCENE_POINT_EDITOR:
       return "XZ-DIV";
     case SCENE_UNK11:
       return " FILE ";
@@ -1369,7 +1369,7 @@ s32 UpdateDebugSceneMenu(void) {
         ChooseConditionsAndInitHole();
         InitRoundHud();
         break;
-      case SCENE_UNK9:
+      case SCENE_CELL_EDITOR:
         break;
       case SCENE_PLAY_UNK12:
         InitPlay(1);
@@ -1546,9 +1546,9 @@ void UpdateDebugScenes(void) {
     UpdateFlagPanel();
   }
 
-  if (g_Scene == SCENE_UNK9) {
+  if (g_Scene == SCENE_CELL_EDITOR) {
     func_8040000C();
-  } else if (g_Scene == SCENE_UNK10) {
+  } else if (g_Scene == SCENE_POINT_EDITOR) {
     func_804002C0();
   }
 

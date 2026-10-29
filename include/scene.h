@@ -28,8 +28,10 @@ enum Scene {
   SCENE_PIN = 5,
   SCENE_PLAY_HOLE = 7, /* Picks the conditions and starts a hole */
   SCENE_FLAG_PANEL = 8,
-  SCENE_UNK9 = 9, /* A top-down map scene */
-  SCENE_UNK10 = 10, /* A top-down map scene */
+  /* A top-down map where the editor toggles the ground cells' bits */
+  SCENE_CELL_EDITOR = 9,
+  /* A top-down map where the editor moves the ground points */
+  SCENE_POINT_EDITOR = 10,
   SCENE_UNK11 = 11,
   SCENE_PLAY_UNK12 = 12, /* Updates like SCENE_PLAY_HOLE */
   SCENE_PLAY_UNK13 = 13, /* Updates like SCENE_PLAY_HOLE */

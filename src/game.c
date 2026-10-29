@@ -1236,8 +1236,8 @@ s32 DrawGame(void) {
     case SCENE_WALLS:
       drawMode = DRAW_MODE_MAP_PERSPECTIVE;
       break;
-    case SCENE_UNK9:
-    case SCENE_UNK10:
+    case SCENE_CELL_EDITOR:
+    case SCENE_POINT_EDITOR:
       drawMode = DRAW_MODE_MAP_TOP_DOWN;
       break;
     case SCENE_MAP_OVERVIEW:
@@ -1378,7 +1378,7 @@ s32 DrawGame(void) {
         topDownEyeX = g_MapCamera.view.eye[0];
         topDownEyeY = g_MapCamera.view.eye[1] - MAP_TOP_DOWN_HEIGHT;
         topDownEyeZ = g_MapCamera.view.eye[2] - MAP_TOP_DOWN_TILT;
-        terrainStyle = (g_Scene == SCENE_UNK9) ? 3 : 2;
+        terrainStyle = (g_Scene == SCENE_CELL_EDITOR) ? 3 : 2;
         guLookAt(&matrices->viewing, topDownEyeX, topDownEyeY, topDownEyeZ,
             topDownEyeX, g_MapCamera.view.eye[1], g_MapCamera.view.eye[2], 0.0f,
             -1.0f, 0.0f);

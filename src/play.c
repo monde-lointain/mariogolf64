@@ -2108,7 +2108,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
     }
 
     /* The map scenes draw every visible tile finely */
-    if ((g_Scene == SCENE_UNK9 || g_Scene == SCENE_UNK10) &&
+    if ((g_Scene == SCENE_CELL_EDITOR || g_Scene == SCENE_POINT_EDITOR) &&
         (terrainStyle == TERRAIN_STYLE_MAP ||
             terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) &&
         detail != GROUND_DETAIL_HIDDEN) {
