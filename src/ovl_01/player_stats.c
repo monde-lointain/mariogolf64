@@ -354,7 +354,8 @@ static s32 D_802307A8_ovl_01[STATS_SLIDE_COUNT - 1]
 };
 // clang-format on
 static u8 D_80230838_ovl_01 = 0;
-static Vtx D_80230840_ovl_01[TURNED_ARROW_VERTEX_COUNT] = {
+/* The corners of each page arrow that DrawTurnedPageArrows tilts */
+static Vtx f_TurnedArrowVertices[TURNED_ARROW_VERTEX_COUNT] = {
     {{{-16, 16, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-16, -16, 0}, 0, {0, 2048}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{16, -16, 0}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0xFF}}},
@@ -426,14 +427,16 @@ static LookAt f_HandicapGolfersLookAts[DRAW_BUFFER_COUNT];
 /* Read by no routine */
 static u8 D_8023AF40_ovl_01[0x100];
 
-static Mtx D_8023B040_ovl_01[PAGE_ARROW_COUNT];
-static Mtx D_8023B0C0_ovl_01[PAGE_ARROW_COUNT];
-static Mtx D_8023B140_ovl_01[PAGE_ARROW_COUNT];
+/* The camera and placement of each arrow that DrawTurnedPageArrows draws */
+static Mtx f_TurnedArrowProjections[PAGE_ARROW_COUNT];
+static Mtx f_TurnedArrowTranslations[PAGE_ARROW_COUNT];
+static Mtx f_TurnedArrowRotations[PAGE_ARROW_COUNT];
 
 /* Read by no routine */
 static u8 D_8023B1C0_ovl_01[0x100];
 
-static Mtx D_8023B2C0_ovl_01[PAGE_ARROW_COUNT];
+/* The scale of each arrow that DrawTurnedPageArrows draws */
+static Mtx f_TurnedArrowScales[PAGE_ARROW_COUNT];
 /* Every bet icon, BET_ICON_SLOT_SIZE apart */
 static void* f_BetIcons;
 static void* D_8023B344_ovl_01;
@@ -1806,7 +1809,7 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gDPPipeSync(gfx++);
   for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
-    guOrtho(&D_8023B040_ovl_01[arrowIndex], -(SCREEN_WIDTH / 2),
+    guOrtho(&f_TurnedArrowProjections[arrowIndex], -(SCREEN_WIDTH / 2),
         SCREEN_WIDTH / 2, -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2,
         TURNED_ARROW_NEAR, TURNED_ARROW_FAR, 1.0f);
     if (arrowIndex == 0) {
@@ -1820,9 +1823,9 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
       angle = -TURNED_ARROW_ANGLE;
     }
 
-    guTranslate(&D_8023B0C0_ovl_01[arrowIndex], x, y, TURNED_ARROW_Z);
-    guRotate(&D_8023B140_ovl_01[arrowIndex], angle, 0.0f, 0.0f, 1.0f);
-    guScale(&D_8023B2C0_ovl_01[arrowIndex], 1.0f, 1.0f, 1.0f);
+    guTranslate(&f_TurnedArrowTranslations[arrowIndex], x, y, TURNED_ARROW_Z);
+    guRotate(&f_TurnedArrowRotations[arrowIndex], angle, 0.0f, 0.0f, 1.0f);
+    guScale(&f_TurnedArrowScales[arrowIndex], 1.0f, 1.0f, 1.0f);
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PageArrows)));
@@ -1834,16 +1837,16 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B040_ovl_01[arrowIndex]),
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TurnedArrowProjections[arrowIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B0C0_ovl_01[arrowIndex]),
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TurnedArrowTranslations[arrowIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B140_ovl_01[arrowIndex]),
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TurnedArrowRotations[arrowIndex]),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B2C0_ovl_01[arrowIndex]),
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TurnedArrowScales[arrowIndex]),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
-    gSPVertex(gfx++, D_80230840_ovl_01, TURNED_ARROW_VERTEX_COUNT, 0);
+    gSPVertex(gfx++, f_TurnedArrowVertices, TURNED_ARROW_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gDPPipeSync(gfx++);
   }
