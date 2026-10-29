@@ -206,25 +206,24 @@ s32 GetCupDistance(s32 x, s32 z) {
 }
 
 /* Lays the pin's shadow vertices over the ground around the cup */
-#ifdef NON_MATCHING
 void BuildPinShadow(void) {
   s32 points[PIN_SHADOW_VERTEX_COUNT][AXIS_COUNT];
   s32 i;
   Radians heading =
       (g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
+  f32 rowSpacing = PIN_SHADOW_ROW_SPACING;
 
   for (i = 0; i != PIN_SHADOW_ROW_COUNT; i++) {
-    points[i * 2][AXIS_X] = (sinf(heading) * i * PIN_SHADOW_ROW_SPACING) +
+    points[i * 2][AXIS_X] = (sinf(heading) * i * rowSpacing) +
         (sinf(heading - (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) *
             PIN_SHADOW_WIDTH_STEP);
-    points[i * 2][AXIS_Z] = (-cosf(heading) * i * PIN_SHADOW_ROW_SPACING) -
+    points[i * 2][AXIS_Z] = (-cosf(heading) * i * rowSpacing) -
         (cosf(heading - (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) *
             PIN_SHADOW_WIDTH_STEP);
-    points[(i * 2) + 1][AXIS_X] = (sinf(heading) * i * PIN_SHADOW_ROW_SPACING) +
+    points[(i * 2) + 1][AXIS_X] = (sinf(heading) * i * rowSpacing) +
         (sinf(heading + (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) *
             PIN_SHADOW_WIDTH_STEP);
-    points[(i * 2) + 1][AXIS_Z] =
-        (-cosf(heading) * i * PIN_SHADOW_ROW_SPACING) -
+    points[(i * 2) + 1][AXIS_Z] = (-cosf(heading) * i * rowSpacing) -
         (cosf(heading + (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) *
             PIN_SHADOW_WIDTH_STEP);
     points[i * 2][AXIS_Y] =
@@ -247,10 +246,6 @@ void BuildPinShadow(void) {
         points[i][AXIS_Z] / COURSE_UNITS_PER_VERTEX_UNIT;
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/pin", BuildPinShadow);
-#endif
 
 /* Draws the pin's shadow, with its texture already loaded */
 void DrawPinShadow(void) {
