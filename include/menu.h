@@ -332,8 +332,8 @@ enum SaveGameBuffer {
   SAVE_GAME_BUFFER_CHOSEN_COURSE
 };
 
-/* What func_80221EBC reads: each saved game's mode image and a frame, or the
- * chosen game's two */
+/* What LoadSaveMenuBuffers reads: each saved game's mode image and a frame, or
+ * the chosen game's two */
 enum SaveMenuBuffer {
   SAVE_MENU_BUFFER_SLOTS = 1,
   SAVE_MENU_BUFFER_CHOSEN

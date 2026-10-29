@@ -84,7 +84,7 @@ void ResetSavedGameControllers(void);
 /* The Ring Shot stars that each level of GetOpenRingShotCourseCount takes */
 #define RING_SHOT_STARS_PER_LEVEL 4
 
-/* What func_80221EBC reads for the chosen game, and the saved games' frame */
+/* What LoadSaveMenuBuffers reads for the chosen game, and the games' frame */
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
 #define ASSET_SAVE_MENU_FRAME 0x70D
 /*
@@ -1248,7 +1248,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", ResetSavedGameControllers);
  * each other's saved registers.
  */
 #ifdef NON_MATCHING
-void func_80221EBC_ovl_01(void** buffers, u8 bufferKind) {
+void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
   EncodedAsset asset;
   MenuMemory* memory = func_8005AF74();
   s32 imageIndex;
@@ -1290,10 +1290,11 @@ void func_80221EBC_ovl_01(void** buffers, u8 bufferKind) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80221EBC_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveMenuBuffers);
 #endif
 
-void func_80222038_ovl_01(void* buffer, u8 bufferIndex) {
+/* Keeps the name plate's buffer, or reads the game mode labels into theirs */
+void LoadGameModeLabelBuffer(void* buffer, u8 bufferIndex) {
   EncodedAsset asset;
 
   switch (bufferIndex) {
