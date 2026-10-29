@@ -327,6 +327,64 @@ void ResetBallSimulations(void) {
 #define ROLL_VOLUME_PER_SPEED (SOUND_FULL_SCALE / KilometersPerHour(100))
 #define ROLL_VOLUME_RAMP_FRAMES 5
 #define MAX_ROLL_VOLUME 0x37
+
+/*
+ * Rolling. A surface gives the share of a rolling ball's speed it keeps each
+ * frame in thousandths, kept less in the rain.
+ */
+#define SURFACE_FRICTION_SCALE 0.001f
+#define RAIN_FRICTION_SCALE 0.993f
+/* A slope of 45 degrees or more is steep, but only for this many steps */
+#define STEEP_SLOPE_STEP_LIMIT 800
+/*
+ * For its first frames rolling, a ball that has been in the water feels the
+ * slope three times as much, and counts as on a steep one
+ */
+#define WATER_EXIT_ROLL_FRAMES 30
+#define WATER_EXIT_SLOPE_SCALE 3
+/* A steep slope pulls twice as hard, and keeps at least 0.9 of the speed */
+#define STEEP_SLOPE_SCALE 2
+#define MIN_STEEP_FRICTION 0.9f
+/*
+ * 2 cm a frame: a slower ball on a gentle slope feels it from an eighth as
+ * much, at rest, rising to all of it at this speed
+ */
+#define SLOW_ROLL_SPEED 307.2f
+#define MIN_SLOW_ROLL_SLOPE_SCALE 0.125f
+#define SLOW_ROLL_SLOPE_SCALE_PER_SPEED \
+  ((1.0f - MIN_SLOW_ROLL_SLOPE_SCALE) / SLOW_ROLL_SPEED)
+/* On a gentle slope, a simulation that runs long keeps less of the speed */
+#define LONG_ROLL_STEP_COUNT 150
+#define LONGER_ROLL_STEP_COUNT 400
+#define LONGEST_ROLL_STEP_COUNT 600
+#define LONG_ROLL_FRICTION_SCALE 0.99f
+#define LONGER_ROLL_FRICTION_SCALE 0.9f
+#define LONGEST_ROLL_FRICTION_SCALE 0.5f
+/*
+ * 1 mm a frame: a faster ball's slope changes by a fifth of its part against
+ * the ball's motion, times the slope's share of the speed, and a slower ball
+ * feels half the slope
+ */
+#define MIN_SLOPE_STEER_SPEED 15.36f
+#define SLOPE_STEER_SCALE 0.2f
+#define STILL_BALL_SLOPE_SCALE 0.5f
+/* The slope's pull on the ball's velocity, before friction */
+#define SLOPE_PULL_SCALE 0.4f
+/*
+ * After its first frames rolling, a ball stops when slower than
+ * MAX_STOP_SPEED with the slope's pull, times friction, under
+ * MAX_STOP_SLOPE_PULL, off a steep slope. A ball that has been in the water
+ * stops after WATER_STOP_ROLL_FRAMES.
+ */
+#define MIN_STOP_ROLL_FRAMES 16
+#define WATER_STOP_ROLL_FRAMES 61
+#define MAX_STOP_SPEED 30
+#define MAX_STOP_SLOPE_PULL 500.0f
+/*
+ * Off the green and off a steep slope, a ball slower than 2 km/h this many
+ * steps after its last bounce stops
+ */
+#define OFF_GREEN_STOP_STEPS 90
 /*
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
@@ -1859,61 +1917,63 @@ TAKE_OFF:
       if (plane.normal[AXIS_Y] * plane.normal[AXIS_Y] <=
               (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
                   (plane.normal[AXIS_Z] * plane.normal[AXIS_Z]) &&
-          simulation->stepCount < 800) {
+          simulation->stepCount < STEEP_SLOPE_STEP_LIMIT) {
         isSteep = TRUE;
       }
 
-      friction = info->unkC * 0.001f;
+      friction = info->unkC * SURFACE_FRICTION_SCALE;
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_HoleSetup.conditions.isRaining == TRUE) {
-        friction *= 0.993f;
+        friction *= RAIN_FRICTION_SCALE;
       }
 
-      if (simulation->hasEnteredWater && (u16)simulation->rollFrameCount < 30) {
-        slopeX *= 3;
-        slopeZ *= 3;
+      if (simulation->hasEnteredWater &&
+          (u16)simulation->rollFrameCount < WATER_EXIT_ROLL_FRAMES) {
+        slopeX *= WATER_EXIT_SLOPE_SCALE;
+        slopeZ *= WATER_EXIT_SLOPE_SCALE;
         isSteep = TRUE;
       } else if (isSteep) {
-        slopeX *= 2;
-        slopeZ *= 2;
-        if (friction < 0.9f) {
-          friction = 0.9f;
+        slopeX *= STEEP_SLOPE_SCALE;
+        slopeZ *= STEEP_SLOPE_SCALE;
+        if (friction < MIN_STEEP_FRICTION) {
+          friction = MIN_STEEP_FRICTION;
         }
       } else {
-        if ((f32)rollSpeed < 307.2f) {
-          f32 scale = (rollSpeed * 0.0028483071f) + 0.125f;
+        if ((f32)rollSpeed < SLOW_ROLL_SPEED) {
+          f32 scale = (rollSpeed * SLOW_ROLL_SLOPE_SCALE_PER_SPEED) +
+              MIN_SLOW_ROLL_SLOPE_SCALE;
 
           slopeX = slopeX * scale;
           slopeZ = slopeZ * scale;
         }
 
-        if (simulation->stepCount >= 600) {
-          friction *= 0.5f;
-        } else if (simulation->stepCount >= 400) {
-          friction *= 0.9f;
-        } else if (simulation->stepCount >= 150) {
-          friction *= 0.99f;
+        if (simulation->stepCount >= LONGEST_ROLL_STEP_COUNT) {
+          friction *= LONGEST_ROLL_FRICTION_SCALE;
+        } else if (simulation->stepCount >= LONGER_ROLL_STEP_COUNT) {
+          friction *= LONGER_ROLL_FRICTION_SCALE;
+        } else if (simulation->stepCount >= LONG_ROLL_STEP_COUNT) {
+          friction *= LONG_ROLL_FRICTION_SCALE;
         }
       }
 
       speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
           (velocity[AXIS_Z] * velocity[AXIS_Z]));
-      if (speed > 15.36f) {
+      if (speed > MIN_SLOPE_STEER_SPEED) {
         f32 against = -((((f32)slopeX * velocity[AXIS_X]) +
                             ((f32)slopeZ * velocity[AXIS_Z])) /
             speed);
 
-        slopeX = slopeX + (against * ((slopeX / speed) * 0.2f));
-        slopeZ = slopeZ + (against * ((slopeZ / speed) * 0.2f));
+        slopeX = slopeX + (against * ((slopeX / speed) * SLOPE_STEER_SCALE));
+        slopeZ = slopeZ + (against * ((slopeZ / speed) * SLOPE_STEER_SCALE));
       } else {
-        slopeX = slopeX * 0.5f;
-        slopeZ = slopeZ * 0.5f;
+        slopeX = slopeX * STILL_BALL_SLOPE_SCALE;
+        slopeZ = slopeZ * STILL_BALL_SLOPE_SCALE;
       }
 
-      velocity[AXIS_X] =
-          (slopeX * friction * 0.4f) + (velocity[AXIS_X] * friction);
-      velocity[AXIS_Z] =
-          (slopeZ * friction * 0.4f) + (velocity[AXIS_Z] * friction);
+      velocity[AXIS_X] = (slopeX * friction * SLOPE_PULL_SCALE) +
+          (velocity[AXIS_X] * friction);
+      velocity[AXIS_Z] = (slopeZ * friction * SLOPE_PULL_SCALE) +
+          (velocity[AXIS_Z] * friction);
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_GameState.isMiniGolf) {
         if ((f32)(groundHeight - startY) < velocity[AXIS_Y]) {
@@ -1935,21 +1995,23 @@ TAKE_OFF:
         osSyncPrintf("V[1] %d\n", velocity[AXIS_Y]);
       }
 
-      if ((u16)simulation->rollFrameCount >= 16) {
+      if ((u16)simulation->rollFrameCount >= MIN_STOP_ROLL_FRAMES) {
         s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
-        if ((u16)simulation->rollFrameCount >= 61 &&
+        if ((u16)simulation->rollFrameCount >= WATER_STOP_ROLL_FRAMES &&
             simulation->hasEnteredWater) {
           simulation->state = BALL_STATE_STOPPED;
-        } else if (speed < 30) {
-          if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < 500.0f) {
+        } else if (speed < MAX_STOP_SPEED) {
+          if (!isSteep &&
+              IntLength2D(slopeX, slopeZ) * friction < MAX_STOP_SLOPE_PULL) {
             simulation->state = BALL_STATE_STOPPED;
           }
         }
       }
 
       if (!isSteep && info->kind != SURFACE_KIND_GREEN &&
-          simulation->lastBounceStep + 90 < simulation->stepCount &&
+          simulation->lastBounceStep + OFF_GREEN_STOP_STEPS <
+              simulation->stepCount &&
           sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
               (velocity[AXIS_Y] * velocity[AXIS_Y]) +
               (velocity[AXIS_Z] * velocity[AXIS_Z])) <
