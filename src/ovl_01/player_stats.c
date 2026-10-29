@@ -1,7 +1,7 @@
 /*
  * The clubhouse's Best Shots, screen 12, a grid of stats over a brick wall with
  * ranked records and page arrows. The file also holds the bet settings screen
- * and screen 20, where each player makes a choice.
+ * and the handicap screen, where each player chooses a handicap.
  */
 #include "common.h"
 
@@ -159,7 +159,7 @@ enum StatsDirection {
 #define BET_HELP_Y 186
 #define BET_HELP_MESSAGE 0x15
 
-/* Each player's choice on screen 20, and where the screen's slide starts */
+/* Each player's choice of handicap, and where the screen's slide starts */
 #define PLAYER_OPTION_COUNT 37
 #define PLAYER_OPTION_SLIDE_START -512
 
@@ -596,7 +596,7 @@ void UpdateBetSettings(void) {
 
     D_8022BE88_ovl_01 = BET_PHASE_CONFIRMED;
     FreeAllCharacterSlots();
-    g_MenuScreen = MENU_SCREEN_UNK20;
+    g_MenuScreen = MENU_SCREEN_HANDICAPS;
     D_802303A0_ovl_01 = 0;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
@@ -1044,8 +1044,8 @@ s32 func_80219948_ovl_01(void) {
   }
 }
 
-/* The 200x30 CI8 banner along screen 20's foot, drawn in strips of 10 rows,
- * each stretched across the screen */
+/* The 200x30 CI8 banner along the handicap screen's foot, drawn in strips of 10
+ * rows, each stretched across the screen */
 #define OPTION_BANNER_WIDTH 200
 #define OPTION_BANNER_STRIP_HEIGHT 10
 #define OPTION_BANNER_STRIP_COUNT 3
@@ -1095,8 +1095,8 @@ void DrawTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 
 /*
- * Draws screen 20: the players' characters, a column for each player with
- * the player's label and D_8023BFDC value, the banner below them, and the
+ * Draws the handicap screen: the players' characters, a column for each player
+ * with the player's label and D_8023BFDC value, the banner below them, and the
  * arrows around the column of the player that memory->unk29 picks. All but
  * the banner slide across by slide, and the banner and arrows down by it, or
  * up when reverseVerticalSlide is set. With canShowPrompt set, the prompt

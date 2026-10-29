@@ -30,7 +30,7 @@ enum MenuScreen {
   MENU_SCREEN_UNK18,
   /* Loads what the chosen game needs and leaves the menu */
   MENU_SCREEN_EXIT = 19,
-  MENU_SCREEN_UNK20,
+  MENU_SCREEN_HANDICAPS,
   MENU_SCREEN_BET_SETTINGS = 22,
   MENU_SCREEN_UNK23,
   MENU_SCREEN_UNK24,
@@ -459,7 +459,7 @@ enum PlayerStatsBuffer {
 #define STATS_SLIDE_IN_FROM_LEFT 4
 #define STATS_SLIDE_COUNT 5
 
-/* The phases of the screen 20 handler, which D_8022BE88 holds */
+/* The phases of the handicap screen's update, which D_8022BE88 holds */
 #define MENU_PHASE_START 0
 #define MENU_PHASE_CHOOSING 5
 #define MENU_PHASE_CANCELED 6

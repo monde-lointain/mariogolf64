@@ -1062,7 +1062,7 @@ void UpdateMenus(void) {
       UpdateCaddySelect();
       break;
 
-    case MENU_SCREEN_UNK20:
+    case MENU_SCREEN_HANDICAPS:
       func_80219948_ovl_01(1, g_ChosenPlayerCount);
       break;
 
@@ -3698,7 +3698,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       DrawCaddySelect(&gfx);
       break;
     case MENU_SCREEN_COURSE_SELECT:
-    case MENU_SCREEN_UNK20:
+    case MENU_SCREEN_HANDICAPS:
     case MENU_SCREEN_BET_SETTINGS:
       DrawCourseSelect(&gfx);
       break;
@@ -3804,7 +3804,7 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   if (layers & MENU_LAYER_SCENERY) {
     if (g_MenuScreen == MENU_SCREEN_COURSE_SELECT ||
         g_MenuScreen == MENU_SCREEN_BET_SETTINGS ||
-        g_MenuScreen == MENU_SCREEN_UNK20) {
+        g_MenuScreen == MENU_SCREEN_HANDICAPS) {
       for (stripIndex = 0; stripIndex != CLAMPED_BACKDROP_STRIP_COUNT;
           stripIndex++) {
         if (stripIndex == 0) {
@@ -4584,10 +4584,11 @@ extern const char D_8023176C_ovl_01[];
 #define BET_BADGE_COLOR_SWING 127.0f
 #define BET_BADGE_ENV_DIVISOR 4
 /* DrawMenuBackdropLayers's layers drawn behind the course select, and in front
- * of it and of screens 20 and 22 */
+ * of it and of the handicap and bet settings screens */
 #define COURSE_SELECT_BACK_LAYERS MENU_LAYER_SCENERY
 #define COURSE_SELECT_FRONT_LAYERS (MENU_LAYER_UNK2 | MENU_LAYER_BANNER)
-/* Screens 20 and 22 slide their pages this far, a step per update */
+/* The handicap and bet settings screens slide their pages this far, a step per
+ * update */
 #define BET_SLIDE_STEP 32
 #define BET_SLIDE_DISTANCE 512
 
@@ -5583,8 +5584,8 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
 }
 
 /*
- * Draws the course select, or the bet settings and screen 20's columns as
- * screens 20 and 22 slide between them. The course select draws the water
+ * Draws the course select, or the bet settings and the handicaps' columns as
+ * the two screens slide between them. The course select draws the water
  * plane, then the wheel of the open courses and the next one, or of the
  * mini-golf disc's images, the front one bobbing. While the holes are
  * chosen (MAP_CAMERA_MODE_TOP_BYTE is 1) it draws the holes badges;
@@ -6090,7 +6091,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
   }
 
   if ((g_MenuScreen == MENU_SCREEN_BET_SETTINGS) ||
-      (g_MenuScreen == MENU_SCREEN_UNK20)) {
+      (g_MenuScreen == MENU_SCREEN_HANDICAPS)) {
     switch (D_8022BE88_ovl_01) {
       case BET_PHASE_OPENING:
         D_8022BE84_ovl_01 += BET_SLIDE_STEP;
