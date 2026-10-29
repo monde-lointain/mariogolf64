@@ -48,7 +48,7 @@
 #define ASSET_SECOND_GAME_BOARD 0x82B
 #define ASSET_THIRD_GAME_BOARD 0x82C
 
-/* The games that func_80222CDC continues from the save's mode tables, by the
+/* The games that ContinueModeGame continues from the save's mode tables, by the
  * save menu's slot */
 enum SaveMenuGame {
   SAVE_MENU_GAME_TOURNAMENT,
@@ -1403,7 +1403,7 @@ void UpdateSavedGames(void) {
         LoadWipeShape(
             save->savedGames[memory->savedGameIndex].state.courseIndex);
         StartWipe(WIPE_CLOSING);
-        func_80222F2C_ovl_01();
+        ContinueSavedGame();
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
               0xFF, 0xFF, 0xFF);
@@ -1595,7 +1595,8 @@ void UpdateSavedGames(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", UpdateSavedGames);
 #endif
 
-s32 func_80222C94_ovl_01(void) {
+/* Returns -1 when the chosen saved game slot holds no game, and 0 otherwise */
+s32 IsChosenGameEmpty(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   SavedGame* game = &save->savedGames[memory->savedGameIndex];
@@ -1603,7 +1604,12 @@ s32 func_80222C94_ovl_01(void) {
   return -(game->isValid == FALSE);
 }
 
-s32 func_80222CDC_ovl_01(void) {
+/*
+ * Copies the chosen slot's game from the save's mode tables into the players,
+ * their records and the game state, to resume at loading the hole. It returns
+ * -1 when that game is empty or has too many players. Nothing calls it.
+ */
+s32 ContinueModeGame(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   SavedGame* game;
@@ -1655,7 +1661,12 @@ s32 func_80222CDC_ovl_01(void) {
   return 0;
 }
 
-s32 func_80222F2C_ovl_01(void) {
+/*
+ * Resumes the chosen saved game with the controllers its players chose, and
+ * erases it from the save unless GAME_FLAG_KEEP_SAVED_GAMES is set. It returns
+ * -1 when the game can't be resumed.
+ */
+s32 ContinueSavedGame(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   Player* savedPlayer;
@@ -2042,7 +2053,7 @@ void DrawSavedGames(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
   }
 
-  if (func_80222C94_ovl_01() != 0) {
+  if (IsChosenGameEmpty() != 0) {
     SetTextSlot(EMPTY_GAME_TEXT_X, EMPTY_GAME_TEXT_Y, MESSAGE_EMPTY_SAVED_GAME,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
   } else if (!f_IsGameChosen) {
