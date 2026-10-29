@@ -2797,6 +2797,7 @@ f_BallRotation = 0x802270C0; // size:0x40 segment:ovl_00
 f_GolfBallUnk100 = 0x80227100; // size:0x4 segment:ovl_00
 f_LastRolledBallPosition = 0x80227104; // size:0xC segment:ovl_00
 f_ShotLaunch = 0x80227150; // size:0x20 segment:ovl_00
+f_GreenSongTempo = 0x80227184; // size:0x4 segment:ovl_00
 UpdateClubPanelDebugValue = 0x8021E550; // type:func segment:ovl_00
 LoadClubPanelImages = 0x8021E5F4; // type:func segment:ovl_00
 FreeClubPanelImages = 0x8021E6B8; // type:func segment:ovl_00

@@ -299,6 +299,17 @@
 /* A prepared shot waits this many frames of aiming before it is played */
 #define PREPARED_SHOT_MIN_AIM_FRAMES 30
 
+/* The song's tempo while aiming, a step below NORMAL_SONG_TEMPO; on the green,
+ * f_GreenSongTempo rises from it by GREEN_SONG_TEMPO_STEP each frame */
+#define AIMING_SONG_TEMPO 0x7F
+#define GREEN_SONG_TEMPO_STEP 0.04f
+#define MAX_GREEN_SONG_TEMPO 155.0f
+/* While aiming, the golfer's alpha swings by AIMING_ALPHA_SWING about
+ * AIMING_MEAN_ALPHA, at AIMING_ALPHA_RATE radians a frame of the stopwatch */
+#define AIMING_ALPHA_RATE 0.20933335f
+#define AIMING_ALPHA_SWING 32.0f
+#define AIMING_MEAN_ALPHA 64.0f
+
 /* Where the current turn's shot comes from, as f_ShotSource records */
 enum ShotSource {
   /* The player's controller */
@@ -408,7 +419,9 @@ static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
 static ShotLaunch f_ShotLaunch;
 static s32 D_80227170_ovl_00[MAX_PLAYER_COUNT];
 static f32 D_80227180_ovl_00;
-static f32 D_80227184_ovl_00;
+/* The song's tempo while aiming on the green, which rises the longer the
+ * player aims */
+static f32 f_GreenSongTempo;
 static s32 D_80227188_ovl_00;
 static s32 D_8022718C_ovl_00;
 static s32 D_80227190_ovl_00;
@@ -3211,7 +3224,7 @@ void UpdateTurns(void) {
         f_ShouldUpdateReaction = 0;
         UnloadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
         f_ShotFlightCount = 0;
-        D_80227184_ovl_00 = 127.0f;
+        f_GreenSongTempo = AIMING_SONG_TEMPO;
         UpdateContest(FALSE);
         func_8005F1C8();
         g_RoundHud.flags = 0;
@@ -3656,25 +3669,26 @@ void UpdateTurns(void) {
           }
 
           SetCharacterSlotAlpha(0,
-              (sinf(g_Players[playerIndex].stopwatchFrameCount * 0.20933335f) *
-                  32.0f) +
-                  64.0f);
+              (sinf(g_Players[playerIndex].stopwatchFrameCount *
+                   AIMING_ALPHA_RATE) *
+                  AIMING_ALPHA_SWING) +
+                  AIMING_MEAN_ALPHA);
           isReady = TRUE;
-          tempo = 0x7F;
+          tempo = AIMING_SONG_TEMPO;
           if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
                   SURFACE_KIND_GREEN &&
               !g_GameState.isMiniGolf) {
-            D_80227184_ovl_00 += 0.04f;
-            if (D_80227184_ovl_00 > 155.0f) {
-              D_80227184_ovl_00 = 155.0f;
+            f_GreenSongTempo += GREEN_SONG_TEMPO_STEP;
+            if (f_GreenSongTempo > MAX_GREEN_SONG_TEMPO) {
+              f_GreenSongTempo = MAX_GREEN_SONG_TEMPO;
             }
 
             if (IsGameFlagSet(GAME_FLAG_SHOW_SWING_TEMPO)) {
-              sprintf(g_PrintBuffer, "tempo:%5.2f", D_80227184_ovl_00);
+              sprintf(g_PrintBuffer, "tempo:%5.2f", f_GreenSongTempo);
               PrintDebugText(g_PrintBuffer, 10, 10);
             }
 
-            tempo = D_80227184_ovl_00;
+            tempo = f_GreenSongTempo;
           }
 
           SetSongTempo(tempo);
