@@ -107,7 +107,8 @@
 /* FindRingHit's use of a ring's corners */
 #define RING_CENTER 0
 #define RING_FACING 1
-#define RING_SCALE 2 /* Only its x is used */
+/* Only its x is used */
+#define RING_SCALE 2
 /* A ring's hit radius in units for each unit of its scale's x, which is 1024 at
  * full size */
 #define RING_HIT_RADIUS_PER_SCALE 0.1274414f

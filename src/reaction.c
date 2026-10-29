@@ -39,7 +39,8 @@
 #define SPOT_RING_COUNT 4
 #define SPOT_RING_SPACING 15360.0f
 #define SPOT_SAMPLES_PER_RING 16
-#define SPOT_SAMPLE_ANGLE 0.3926991f /* A sixteenth of a turn */
+/* A sixteenth of a turn */
+#define SPOT_SAMPLE_ANGLE 0.3926991f
 /* A spot this near a billboard's edge, in course units, counts as rough */
 #define SPOT_BILLBOARD_CLEARANCE 0x12C00
 #define NEAR_BILLBOARD_ROUGHNESS 0x465000

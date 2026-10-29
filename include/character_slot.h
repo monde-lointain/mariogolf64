@@ -29,7 +29,8 @@
 #define CHARACTER_MODEL_TEXTURE_ANIMATIONS 6
 /* AnimatedTriangle pointers, ended by NULL */
 #define CHARACTER_MODEL_ANIMATED_TRIANGLES 7
-#define CHARACTER_MODEL_TEXTURES 8 /* AnimatedTextures */
+/* AnimatedTextures */
+#define CHARACTER_MODEL_TEXTURES 8
 /* Six f32 values, one in each segment address from here, copied to a slot's
  * unk68 */
 #define CHARACTER_MODEL_UNK68 9

@@ -132,7 +132,8 @@ enum TextIcon {
 #define WIDE_LARGE_FONT_ADVANCE 14
 #define TYPING_SOUND_CHANNEL 2
 #define TYPING_SOUND_VOLUME 64
-#define TYPING_SOUND_INTERVAL 3 /* Codes shown between sounds */
+/* Codes shown between sounds */
+#define TYPING_SOUND_INTERVAL 3
 #define ICON_TEXEL_COUNT (ICON_WIDTH * ICON_WIDTH)
 /* Given as the icon of a code that has none */
 #define NO_ICON (-1)

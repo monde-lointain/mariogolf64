@@ -95,7 +95,8 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define ASSET_MENU_GAME_MODES 0x528
 /* The first images of a star's spin */
 #define ASSET_SPINNING_STAR 0x5BE
-#define ASSET_PLAYER_LABELS 0x5E3 /* 1P to 4P, 1C to 4C and Com */
+/* 1P to 4P, 1C to 4C and Com */
+#define ASSET_PLAYER_LABELS 0x5E3
 /* A rounded square outline in rainbow colors */
 #define ASSET_RAINBOW_BOX 0x5F7
 /* Controllers numbered 1 to 4, 32 by 32 each */

@@ -1606,12 +1606,14 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
 /* How func_8020C6D8 places the player tags. Nothing passes PLAYER_TAG_LINED_UP.
  */
 #define PLAYER_TAG_LINED_UP 0
-#define PLAYER_TAG_SINGLE_PLAYER 2 /* The second tag then reads "Com" */
+/* The second tag then reads "Com" */
+#define PLAYER_TAG_SINGLE_PLAYER 2
 /* The player tag images: 1P to 4P, then 1C to 4C, then Com */
 #define PLAYER_TAG_FIRST_PLAYER 0
 #define PLAYER_TAG_FIRST_COMPUTER 4
 #define PLAYER_TAG_COM 8
-#define PLAYER_TAG_IMAGE_SIZE 64 /* Bytes, as 16 by 8 nibbles */
+/* Bytes, as 16 by 8 nibbles */
+#define PLAYER_TAG_IMAGE_SIZE 64
 /*
  * The texels of the tag playerIndex tags past firstTag, as the tags sit side
  * by side in one image. The two offsets are scaled apart, to match.

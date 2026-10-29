@@ -32,7 +32,8 @@
  */
 #define PIN_SHADOW_ROW_COUNT 9
 #define PIN_SHADOW_VERTEX_COUNT (PIN_SHADOW_ROW_COUNT * 2)
-#define PIN_SHADOW_ROW_SPACING 8533.0f /* In 1/1024ths of a unit */
+/* In 1/1024ths of a unit */
+#define PIN_SHADOW_ROW_SPACING 8533.0f
 #define PIN_SHADOW_WIDTH_STEP 46.079998f
 /* The shadow's vertices are in 1/256ths of a unit */
 #define COURSE_UNITS_PER_VERTEX_UNIT 4
@@ -60,7 +61,8 @@
 /* Half the distance in front of the cup, toward the camera, of the point
  * projected as the flagstick's foot */
 #define STICK_FOOT_HALF_DISTANCE 614.4f
-#define FLAGSTICK_HEIGHT 0xB400 /* In 1/1024ths of a unit */
+/* In 1/1024ths of a unit */
+#define FLAGSTICK_HEIGHT 0xB400
 
 /* Each part's prim depth is the cup's, moved by a height in vertex units and an
  * offset */

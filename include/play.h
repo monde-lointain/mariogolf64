@@ -7,7 +7,8 @@
 
 /* g_ShotFlags's bits, which UpdateShotFlags sets for the shot being set up */
 #define SHOT_FLAG_ON_GREEN 1
-#define SHOT_FLAG_NO_IMPACT_POINT 2 /* For a putter, or in mini golf */
+/* For a putter, or in mini golf */
+#define SHOT_FLAG_NO_IMPACT_POINT 2
 #define SHOT_FLAG_APPROACH 4
 /* Set while the ball is at most turn.c's NEAR_CUP_MAX_DECIMETERS from the
  * cup */

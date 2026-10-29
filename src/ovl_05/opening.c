@@ -87,9 +87,12 @@ typedef struct OpeningNameLogo {
 } OpeningNameLogo; /* size = 0x1C */
 
 /* The steps that a name logo's animation starts each phase at */
-#define NAME_LOGO_UNFOLD 0 /* Widens over 8 frames */
-#define NAME_LOGO_FLIP_DOWN 10 /* Flattens over 4 frames */
-#define NAME_LOGO_FLIP_UP 20 /* Grows back over 4 frames */
+/* Widens over 8 frames */
+#define NAME_LOGO_UNFOLD 0
+/* Flattens over 4 frames */
+#define NAME_LOGO_FLIP_DOWN 10
+/* Grows back over 4 frames */
+#define NAME_LOGO_FLIP_UP 20
 #define NAME_LOGO_STILL 30
 
 /* f_OpeningCue's values: the cues, then the states past them */
@@ -4094,7 +4097,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawLakitu);
 
 /* Flies Lakitu across the screen in loops until it has turned through 540
  * degrees */
-#define LAKITU_TURN_STEP 12 /* In degrees a frame */
+/* In degrees a frame */
+#define LAKITU_TURN_STEP 12
 #define LAKITU_LAST_ANGLE 540
 /* In pixels a frame, besides the loops */
 #define LAKITU_DRIFT_X 8
@@ -4383,7 +4387,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningShotBall);
 /* f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point */
 /* To the shot ball, a tenth of the way a frame */
 #define LOOK_AT_EASE_FAST 1
-#define LOOK_AT_EASE_SLOW 2 /* To the shot ball, a hundredth of the way */
+/* To the shot ball, a hundredth of the way */
+#define LOOK_AT_EASE_SLOW 2
 /* Near f_OpeningBallPositions[1], at a rate that grows to a tenth */
 #define LOOK_AT_EASE_SPEEDING_UP 3
 

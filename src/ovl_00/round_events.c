@@ -2547,7 +2547,8 @@ void LoadContactImages(Player* player) {
 #define CONTACT_AGE_MAX 255
 #define CONTACT_FADE_STEP 4
 #define CONTACT_MIN_ALPHA 4
-#define CONTACT_WARIO_ALPHA 200 /* Also Mario's, which fades from the start */
+/* Also Mario's, which fades from the start */
+#define CONTACT_WARIO_ALPHA 200
 #define CONTACT_WARIO_HOLD_AGE 8
 #define CONTACT_WARIO_FADE_PER_AGE 30
 #define CONTACT_CHARACTER_ALPHA 160

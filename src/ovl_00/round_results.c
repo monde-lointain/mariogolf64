@@ -110,7 +110,8 @@ enum PortraitAnimation {
  * a pause, then lifts away, faster and faster, until it is off screen
  */
 #define NOTICE_FACE_DELAY 10
-#define NOTICE_FACE_INTERVAL_MASK 3 /* Every fourth frame */
+/* Every fourth frame */
+#define NOTICE_FACE_INTERVAL_MASK 3
 #define NOTICE_LAST_FACE 3
 #define NOTICE_LIFT_DELAY 50
 #define NOTICE_LIFT_START_SPEED 8
@@ -261,7 +262,8 @@ typedef struct TrophyAssets {
 
 /* Each course's trophy image's sizes, indexed by these */
 #define TROPHY_WIDTH 0
-#define TROPHY_PART_HEIGHTS 1 /* TROPHY_PART_COUNT of them */
+/* TROPHY_PART_COUNT of them */
+#define TROPHY_PART_HEIGHTS 1
 #define TROPHY_SHINE_HEIGHT 3
 #define TROPHY_SIZE_COUNT 4
 
@@ -1828,9 +1830,11 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define BANNER_GONE_X (-SCREEN_WIDTH)
 #define BANNER_SLIDE_OUT_SPEED 4
 
-#define MESSAGE_TROPHY_PRIZE 0x3C /* Plus the place */
+/* Plus the place */
+#define MESSAGE_TROPHY_PRIZE 0x3C
 #define MESSAGE_PLACE_PRIZE 0x40
-#define MESSAGE_TROPHY_PLACE 0x40 /* Plus the place */
+/* Plus the place */
+#define MESSAGE_TROPHY_PLACE 0x40
 #define MESSAGE_UNK48 0x48
 #define MESSAGE_PLACE 0x49
 #define MESSAGE_POINTS_EARNED 0x1F3

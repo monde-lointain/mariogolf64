@@ -43,7 +43,8 @@
 #define SKINS_TALLY_INTERVAL 4
 #define MATCH_RESULT_SOUND_CHANNEL 14
 
-#define SCORECARD_OPEN_TIME 12 /* Frames the scorecard takes to slide in */
+/* Frames the scorecard takes to slide in */
+#define SCORECARD_OPEN_TIME 12
 /* Frames before a closing scorecard is freed */
 #define SCORECARD_CLOSE_TIME 10
 #define SCORECARD_SLIDE_SPEED 32
@@ -70,7 +71,8 @@
 #define ROW_FLIP_END_DEGREES 175
 #define ROW_FLIP_SOUND_CHANNEL 13
 
-#define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
+/* The face shown for a player behind */
+#define BEHIND_FACE_IMAGE_OFFSET 4
 #define THREE_PAGE_COUNT 3
 
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page);
@@ -1253,12 +1255,14 @@ void DrawScorecard(Gfx** displayListHead) {
 #define TAB_TOP 20
 #define TAB_HEIGHT 24
 #define TAB_STRIP_COUNT 5
-#define TAB_BACK_DROP 2 /* The tabs behind the front one sit lower */
+/* The tabs behind the front one sit lower */
+#define TAB_BACK_DROP 2
 #define TABLE_BODY_TOP 44
 #define TABLE_BODY_HEIGHT 190
 #define TABLE_BODY_OFFSET \
   (LARGE_PALETTED_TEXELS_OFFSET + (TAB_STRIP_COUNT * TAB_HEIGHT * TABLE_WIDTH))
-#define TABLE_LOAD_HEIGHT 7 /* The rows that fit in texture memory at once */
+/* The rows that fit in texture memory at once */
+#define TABLE_LOAD_HEIGHT 7
 #define TAB_BACK_GRAY 0xBF
 #define FIRST_OF_THREE_TAB_STRIP 0
 #define SECOND_OF_THREE_TAB_STRIP 1

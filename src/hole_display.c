@@ -66,7 +66,8 @@ enum SkyImageKind {
 #define IsNearScreen(x, y, margin) \
   ((x) > -(margin) && (x) < SCREEN_WIDTH + (margin) && (y) > -(margin) && \
       (y) < SCREEN_HEIGHT + (margin))
-#define SUN_SKY_DEPTH 0xFFFC /* The z-buffer value of the sky */
+/* The z-buffer value of the sky */
+#define SUN_SKY_DEPTH 0xFFFC
 #define SUN_GLARE_FADE_STEP 0.1f
 #define SUN_GLARE_GROWTH_STEP 0.3f
 #define SUN_GLARE_FLARE_STRENGTH 1.5f
@@ -75,7 +76,8 @@ enum SkyImageKind {
 /* The sky's vertices, for each view and each matrix buffer */
 #define SKY_VERTEX_COUNT 10
 #define SKY_COLORED_VERTEX_COUNT 5
-#define SKY_BLEND_STEP_COUNT 1000 /* f_SkyBlendStep counts to this at most */
+/* f_SkyBlendStep counts to this at most */
+#define SKY_BLEND_STEP_COUNT 1000
 
 /*
  * Each scene color index has a time of day for the sky's colors, and a time
@@ -207,7 +209,8 @@ void DrawSpiralAnimation(Gfx** displayListHead);
 
 /* f_SkyHorizonColor's starting value in each channel */
 #define SKY_HORIZON_LEVEL 63
-#define BACKDROP_IMAGE_WIDTH_MASK 9 /* The image's width is 1 << this */
+/* The image's width is 1 << this */
+#define BACKDROP_IMAGE_WIDTH_MASK 9
 /*
  * The backdrop's strips before DrawBackdrop sets them for the course, which it
  * does before reading them. The width mask is the course's, for an image twice
@@ -2590,7 +2593,8 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
 #define BACKDROP_TINT_BLUE 32
 /* MENU_BACKDROP_PATTERN's image, which scrolls diagonally by a texel a frame */
 #define BACKDROP_PATTERN_SIZE 64
-#define BACKDROP_PATTERN_MASK 6 /* log2(BACKDROP_PATTERN_SIZE) */
+/* log2(BACKDROP_PATTERN_SIZE) */
+#define BACKDROP_PATTERN_MASK 6
 
 /*
  * Draws the menu backdrop that SetMenuBackdrop chose, inside the backdrop's

@@ -36,13 +36,15 @@ enum HoleCreatureKind {
 #define CHEEP_CHEEP_FIRST_VIEW_ASSET 0x6DE
 #define CHEEP_CHEEP_VIEW_COUNT 5
 #define GOLD_CHEEP_CHEEP_ASSET 0x6E5
-#define MONKEY_ASSET 0x6F0 /* The first of its frames */
+/* The first of its frames */
+#define MONKEY_ASSET 0x6F0
 #define MONKEY_FRAME_COUNT 4
 
 /* Course heights grow downwards, so these lift a creature by subtracting */
 /* Below the ball where a Cheep Cheep starts and ends */
 #define CHEEP_CHEEP_DEPTH 0x7800
-#define CHEEP_CHEEP_LEAP_SPEED 9216.0f /* Upwards */
+/* Upwards */
+#define CHEEP_CHEEP_LEAP_SPEED 9216.0f
 /* Twice the course's gravity */
 #define CHEEP_CHEEP_GRAVITY (GRAVITY * 2)
 /* And the range of random speeds above it */
@@ -51,7 +53,8 @@ enum HoleCreatureKind {
 #define CHEEP_CHEEP_PITCH_EASING 0.7f
 /* Below the ball, over which a Cheep Cheep fades out */
 #define CHEEP_CHEEP_FADE_DEPTH 46080
-#define MONKEY_DROP_HEIGHT 0x9600 /* Above the cup */
+/* Above the cup */
+#define MONKEY_DROP_HEIGHT 0x9600
 /* The frames at which the monkey shows each of its later images */
 #define MONKEY_SECOND_FRAME 16
 #define MONKEY_THIRD_FRAME 20

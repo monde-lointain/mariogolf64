@@ -10,8 +10,10 @@
 /* The leaderboard shows this many of the tournament's contestants at a time */
 #define LEADERBOARD_ROW_COUNT 10
 
-#define HOLE_WINNER_HALVED (-1) /* Nobody won the last hole outright */
-#define HOLE_WINNER_UNSET (-2) /* What SetScorecardLayout starts it as */
+/* Nobody won the last hole outright */
+#define HOLE_WINNER_HALVED (-1)
+/* What SetScorecardLayout starts it as */
+#define HOLE_WINNER_UNSET (-2)
 
 /* The layouts that SetScorecardLayout takes for the game modes */
 enum ScorecardLayout {

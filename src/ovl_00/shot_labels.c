@@ -73,7 +73,8 @@ typedef struct ShotLabel {
 /* The sign shows the shot's distance, with the target's height below it */
 #define SIGN_WIDTH 40
 #define SIGN_HEIGHT 24
-#define SIGN_BOARD_HEIGHT 18 /* Above the post */
+/* Above the post */
+#define SIGN_BOARD_HEIGHT 18
 #define SIGN_DISTANCE_TEXT_Y 15
 /* The distance is printed after the height, in the same buffer */
 #define DISTANCE_TEXT_OFFSET 10
@@ -103,7 +104,8 @@ typedef struct ShotLabel {
 #define PIN_FLAG_LEFT 3
 #define PIN_FLAG_RIGHT 5
 #define PIN_FLAG_WAVE_MASK 15
-#define PIN_FLAG_WAVE_TICKS 4 /* Per frame */
+/* Per frame */
+#define PIN_FLAG_WAVE_TICKS 4
 #define PIN_FLAG_WAVE_HALF 8
 /* Off the green, the flag sits at this height over the cup */
 #define PIN_FLAG_TOP_Y 40

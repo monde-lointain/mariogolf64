@@ -218,10 +218,12 @@ void StartRain(void);
 
 #define RIPPLE_IMAGE_ASSET 0x6B0
 #define DROP_IMAGE_ASSET 0x6B2
-#define GRASS_IMAGE_ASSET 0x6B6 /* Blades of grass */
+/* Blades of grass */
+#define GRASS_IMAGE_ASSET 0x6B6
 #define CLOUD_IMAGE_ASSET 0x6B5
 #define CLUMP_IMAGE_ASSET 0x6B8
-#define DIVOT_IMAGE_ASSET 0x6C0 /* A flying divot, then the mark it leaves */
+/* A flying divot, then the mark it leaves */
+#define DIVOT_IMAGE_ASSET 0x6C0
 #define PLUME_IMAGE_ASSET 0x6C1
 #define SPLASH_IMAGE_ASSET 0x6C2
 #define STAR_IMAGE_ASSET 0x69E

@@ -61,8 +61,10 @@ extern u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 #define MODE0_PLAYER_COUNT 4
 
 /* Indices of SaveData's options */
-#define SAVE_OPTION_MUSIC_OFF 0 /* The options screen's MUSIC set to OFF */
-#define SAVE_OPTION_MONO 1 /* Plays the sound in mono instead of stereo */
+/* The options screen's MUSIC set to OFF */
+#define SAVE_OPTION_MUSIC_OFF 0
+/* Plays the sound in mono instead of stereo */
+#define SAVE_OPTION_MONO 1
 /* Copied into each player's Player.gridColor */
 #define SAVE_OPTION_GRID_COLOR 2
 /* The options screen's CAMERA set to SIMPLE instead of DYNAMIC */
@@ -104,15 +106,20 @@ enum SaveReadResult {
 #define HOLE_SELECTION_FRONT_NINE (1 << 2)
 
 /* The bets of a game, indexing GameState.betRates and Player.betTallies */
-#define BET_LONGEST_DRIVE 0 /* On marked par 5 holes */
-#define BET_NEAREST_PIN 1 /* On par 3 holes */
-#define BET_STROKES 2 /* Paid per stroke, between each pair of players */
+/* On marked par 5 holes */
+#define BET_LONGEST_DRIVE 0
+/* On par 3 holes */
+#define BET_NEAREST_PIN 1
+/* Paid per stroke, between each pair of players */
+#define BET_STROKES 2
 /* Paid on the front nine, the back nine and the round */
 #define BET_NASSAU 3
 /* Settled on each hole; a tie carries the pot over */
 #define BET_UNK4 4
-#define BET_UNK5 5 /* Settled as BET_UNK4, when that bet is not set */
-#define BET_LAS_VEGAS 6 /* Paid per stroke, between the two teams of two */
+/* Settled as BET_UNK4, when that bet is not set */
+#define BET_UNK5 5
+/* Paid per stroke, between the two teams of two */
+#define BET_LAS_VEGAS 6
 #define BET_COUNT 7
 /* The rate of a bet that is not played */
 #define UNSET_BET_RATE (-1)

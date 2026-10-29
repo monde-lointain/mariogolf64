@@ -62,7 +62,8 @@ typedef struct RingCorners {
 #define RING_SPIN_SPEED 2.0
 
 #define RING_FADE_STEP 16
-#define RING_SPARKLE_SPACING 4 /* In sections */
+/* In sections */
+#define RING_SPARKLE_SPACING 4
 #define RING_SPARKLE_TURN ((f32)M_PI / 64) /* Radians each frame */
 #define POSITION_SCALE 1024.0f
 

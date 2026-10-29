@@ -43,7 +43,8 @@ enum PauseMenuRequest {
 };
 
 /* The pause menu's option lists, which the game mode picks */
-#define PAUSE_LAYOUT_NONE (-1) /* For a record being played back */
+/* For a record being played back */
+#define PAUSE_LAYOUT_NONE (-1)
 #define PAUSE_LAYOUT_SPEED_GOLF 0
 #define PAUSE_LAYOUT_RING_SHOT 1
 #define PAUSE_LAYOUT_TRAINING 2
@@ -51,7 +52,8 @@ enum PauseMenuRequest {
 #define PAUSE_LAYOUT_DRIVING_RANGE 4
 /* Match Game, Get Character, Skins Match and Club Slots */
 #define PAUSE_LAYOUT_VERSUS 5
-#define PAUSE_LAYOUT_STROKE 6 /* Stroke, Tournament and the modes like them */
+/* Stroke, Tournament and the modes like them */
+#define PAUSE_LAYOUT_STROKE 6
 /* The layouts used while g_HasBroughtOverCharacter is set */
 #define PAUSE_LAYOUT_BROUGHT_OVER_SPEED_GOLF 7
 #define PAUSE_LAYOUT_BROUGHT_OVER 8
@@ -459,7 +461,8 @@ void FreePauseMenu(void) {
  */
 #define PAUSE_WIND_SPEED_STEP 0x71C7
 #define PAUSE_WIND_SPEED_FIRST_STEP 0xAAAA
-#define PAUSE_WIND_SPEED_CALM 0x93E8 /* Slower winds than this are calm */
+/* Slower winds than this are calm */
+#define PAUSE_WIND_SPEED_CALM 0x93E8
 #define PAUSE_WIND_SPEED_MAX 0x99CF0
 #define PAUSE_WIND_SPEED_RAISE_LIMIT 0x9FFFF
 #define PAUSE_WIND_TURN_PER_STICK 5

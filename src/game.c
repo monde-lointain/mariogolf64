@@ -309,7 +309,8 @@ static u8 D_800DAC30[16];
 #define TILED_IMAGE_STRIP_SCREEN_HEIGHT 13
 #define TILED_IMAGE_COPY_COUNT 4
 #define TILED_IMAGE_COPY_SPACING 72
-#define TILED_IMAGE_SCALE 0x04EC /* Texels per pixel, s5.10: about 1.23 */
+/* Texels per pixel, s5.10: about 1.23 */
+#define TILED_IMAGE_SCALE 0x04EC
 
 /* Turns gamma correction off and gamma dithering and the dither filter on */
 #define VI_FEATURES \

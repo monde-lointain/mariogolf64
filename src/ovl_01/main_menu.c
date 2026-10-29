@@ -893,22 +893,29 @@ s32 GetChosenCourseIndex(void) {
 #define MIDPOINT_TO_WORLD_SCALE (0.5f / WORLD_TO_COURSE_SCALE)
 
 /* The labels' images, lit and dimmed, that each screen reads as it opens */
-#define ASSET_TITLE_LABELS 0x52B /* Players, One to Four, ... Transmit */
+/* Players, One to Four, ... Transmit */
+#define ASSET_TITLE_LABELS 0x52B
 #define ASSET_TITLE_LABELS_DIM 0x52C
-#define ASSET_MAIN_LABELS 0x523 /* Status, How to Play, Code Entry, Options */
+/* Status, How to Play, Code Entry, Options */
+#define ASSET_MAIN_LABELS 0x523
 #define ASSET_MAIN_LABELS_DIM 0x524
-#define ASSET_CLUBHOUSE_LABELS 0x525 /* Tournament, ... Speed Golf */
+/* Tournament, ... Speed Golf */
+#define ASSET_CLUBHOUSE_LABELS 0x525
 #define ASSET_CLUBHOUSE_LABELS_DIM 0x526
-#define ASSET_OPTIONS_LABELS 0x529 /* Music, ... Erase Data */
+/* Music, ... Erase Data */
+#define ASSET_OPTIONS_LABELS 0x529
 #define ASSET_OPTIONS_LABELS_DIM 0x52A
-#define ASSET_OPTION_VALUES 0x97C /* On, ... Simple, in green */
+/* On, ... Simple, in green */
+#define ASSET_OPTION_VALUES 0x97C
 /* The other images that the screens read */
-#define ASSET_SQUARE_BOARD 0x591 /* A wooden board, 160 by 160 */
+/* A wooden board, 160 by 160 */
+#define ASSET_SQUARE_BOARD 0x591
 #define ASSET_OPTIONS_MARIO 0x97D
 #define ASSET_OPTIONS_SHADOW 0x97E
 #define ASSET_SKY 0x51F
 #define ASSET_WATER 0x4D8
-#define ASSET_HOLES_BADGES 0x65D /* Bet, Front 9, Back 9 and 18 */
+/* Bet, Front 9, Back 9 and 18 */
+#define ASSET_HOLES_BADGES 0x65D
 
 /*
  * The menus' update: gathers every controller's buttons, starts loading the
@@ -2090,7 +2097,8 @@ void func_801F7CD0_ovl_01(void) {
 #define MODE_TEXT_X 40
 #define MODE_TEXT_Y 188
 #define MODE_TEXT_SLOT 0
-#define MESSAGE_FIRST_MODE 4 /* Followed by one per mode icon */
+/* Followed by one per mode icon */
+#define MESSAGE_FIRST_MODE 4
 #define MESSAGE_SOLO_STROKE 0x39
 #define MESSAGE_MODE_NEEDS_CONTROLLERS 0x4A
 

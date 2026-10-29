@@ -131,10 +131,13 @@
 /* Rows scrolled when the painting's bottom is shown */
 #define PAINTING_SCROLL_LIMIT 228
 #define OPAQUE_ALPHA 255
-#define CLOSING_FADE_RATE 2 /* Alpha per frame */
-#define PAINTING_FADE_RATE 4 /* Alpha per frame */
+/* Alpha per frame */
+#define CLOSING_FADE_RATE 2
+/* Alpha per frame */
+#define PAINTING_FADE_RATE 4
 #define PAINTING_FADE_IN_FRAMES 64
-#define CLOUD_ALPHA 180 /* Below this an image is drawn with G_RM_CLD_SURF */
+/* Below this an image is drawn with G_RM_CLD_SURF */
+#define CLOUD_ALPHA 180
 
 #define PITCH_STEP_COUNT 10
 #define FRAMING_GROUND_CLEARANCE 0xC00
@@ -146,7 +149,8 @@
  * repeat the numbers.
  */
 #define FIRST_SWING_FRAME 60
-#define VIEW_SHRINK_FRAME 150 /* Also the tee's second shot */
+/* Also the tee's second shot */
+#define VIEW_SHRINK_FRAME 150
 #define TEE_REACTIONS_FRAME 300
 #define FAIRWAY_FADE_OUT_FRAME 560
 #define FAIRWAY_SHOTS_FRAME 600
@@ -161,7 +165,8 @@
 #define PUTT_SWING_FRAME 2000
 #define PUTT_REACTIONS_FRAME 2200
 #define FINALE_FADE_OUT_FRAME 2590
-#define FINALE_FRAME 2630 /* The last of the cast takes all four shots */
+/* The last of the cast takes all four shots */
+#define FINALE_FRAME 2630
 #define LAST_FADE_OUT_FRAME 3360
 #define NEVER_FRAME 0x100000
 

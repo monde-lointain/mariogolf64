@@ -45,7 +45,8 @@ enum ClubPanelState {
 
 /* The panel's images, in each shot mode */
 #define PANEL_ASSET_POWER 0x56C
-#define PANEL_ASSET_POWER_UNK3 0x56D /* In GAME_MODE_TRAINING */
+/* In GAME_MODE_TRAINING */
+#define PANEL_ASSET_POWER_UNK3 0x56D
 #define PANEL_ASSET_NORMAL 0x56E
 #define PANEL_ASSET_APPROACH 0x56F
 #define PANEL_ASSET_PUTT_LONG 0x570

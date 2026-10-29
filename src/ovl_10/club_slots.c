@@ -25,10 +25,14 @@
 #include "variables.h"
 /* f_ClubSlotsState values */
 #define CLUB_SLOTS_DONE 0
-#define CLUB_SLOTS_STARTING 1 /* Before the reels speed up */
-#define CLUB_SLOTS_SPEEDING 2 /* The reels speed up while START! grows */
-#define CLUB_SLOTS_STOPPING 3 /* The player stops the reels one by one */
-#define CLUB_SLOTS_STOPPED 4 /* All three reels show their clubs */
+/* Before the reels speed up */
+#define CLUB_SLOTS_STARTING 1
+/* The reels speed up while START! grows */
+#define CLUB_SLOTS_SPEEDING 2
+/* The player stops the reels one by one */
+#define CLUB_SLOTS_STOPPING 3
+/* All three reels show their clubs */
+#define CLUB_SLOTS_STOPPED 4
 /* Each of the first two states lasts this many frames */
 #define CLUB_SLOTS_STATE_TIME 20
 /* The clubs are given this many frames after the reels stop */

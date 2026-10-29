@@ -107,7 +107,8 @@ enum SceneryState {
 #define HOLE_FLAG_SIDE_COUNT 2
 #define MATRIX_BUFFER_COUNT 2
 #define HOLE_FLAG_CELL_SIZE 160
-#define HOLE_FLAG_TEXEL_COLUMN_STEP 0x266 /* In s10.5 texture coordinates */
+/* In s10.5 texture coordinates */
+#define HOLE_FLAG_TEXEL_COLUMN_STEP 0x266
 #define HOLE_FLAG_TEXEL_ROW_STEP 0x2A0
 #define HOLE_FLAG_BACK_TEXEL_START 0xC00
 #define HOLE_FLAG_START_SHADE 0xB7
@@ -158,7 +159,8 @@ enum SceneryState {
 #define ARROW_COUNT 2
 #define ARROW_VERTEX_COUNT 14
 #define ARROW_UNITS_PER_TEXEL_ROW 10
-#define ARROW_CENTER_TEXEL_ROW 16 /* The texel row at y = 0 */
+/* The texel row at y = 0 */
+#define ARROW_CENTER_TEXEL_ROW 16
 /* Texture coordinates are in s10.5 fixed point */
 #define TEXEL_COORDINATE_SHIFT 5
 
@@ -239,7 +241,8 @@ typedef struct ArrowShape {
  * shades the sample text
  */
 #define COLOR_TEST_CONTROLLER 1
-#define COLOR_TEST_COLOR_COUNT 2 /* The primitive and environment colors */
+/* The primitive and environment colors */
+#define COLOR_TEST_COLOR_COUNT 2
 #define COLOR_TEST_CHANNEL_COUNT 3
 #define COLOR_TEST_PRIM 0
 #define COLOR_TEST_ENV 1
@@ -1570,7 +1573,8 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
   return RgbaColor(red, green, blue, alpha & 0xFF);
 }
 
-#define GREEN_GRID_SHORT_ROW_COUNT 8 /* For the longest putt */
+/* For the longest putt */
+#define GREEN_GRID_SHORT_ROW_COUNT 8
 #define GREEN_GRID_LANDING_ROW_COUNT 16
 /* With GREEN_GRID_MAX_ROW_COUNT rows, only every other row is sampled, up to
  * here */
@@ -1598,7 +1602,8 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GAME_FLAG_HIDE_GREEN_GRID 0x79
 /* g_RoundHud.greenGridState values */
 #define GREEN_GRID_HIDDEN 0
-#define GREEN_GRID_SHOWN 1 /* Samples the ground and scrolls */
+/* Samples the ground and scrolls */
+#define GREEN_GRID_SHOWN 1
 #define GREEN_GRID_FADING 2
 #define TINT_CHANNEL_MAX 0xFF
 

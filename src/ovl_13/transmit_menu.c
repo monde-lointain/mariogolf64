@@ -53,12 +53,15 @@ enum TransmitOption {
 #define BRING_READING 0
 #define BRING_CHOOSING 2
 #define BRING_BRINGING 3
-#define BRING_ASKING 4 /* Whether to bring more characters */
+/* Whether to bring more characters */
+#define BRING_ASKING 4
 #define BRING_UNK5 5
 #define BRING_BROUGHT 7
-#define BRING_CHOOSING_SLOT 8 /* The character to replace */
+/* The character to replace */
+#define BRING_CHOOSING_SLOT 8
 #define BRING_NO_CHARACTERS 10
-#define BRING_CONFIRMING 12 /* Asking the player to start a pak check */
+/* Asking the player to start a pak check */
+#define BRING_CONFIRMING 12
 #define BRING_STARTING 13
 #define BRING_SHOWING_ERROR 14
 #define BRING_NEXT_CARTRIDGE 16
@@ -133,7 +136,8 @@ enum SendExperienceStep {
 /* DrawCharacterStats' layout */
 #define STATS_NAME_LEFT 192
 #define STATS_NAME_TOP 140
-#define STATS_LEFT 188 /* Of both the stat labels and the stats */
+/* Of both the stat labels and the stats */
+#define STATS_LEFT 188
 #define STATS_TOP 172
 #define STAT_LABELS_WIDTH 80
 #define STAT_LABELS_HEIGHT 8
@@ -146,7 +150,8 @@ enum SendExperienceStep {
 #define CURVE_BAR_WIDTH 72
 #define CURVE_BAR_HEIGHT 8
 #define CURVE_SEGMENT_WIDTH 8
-#define CURVE_SEGMENT_COUNT 9 /* From a fade of 4 to a draw of 4 */
+/* From a fade of 4 to a draw of 4 */
+#define CURVE_SEGMENT_COUNT 9
 
 /* The rows of the shot types image */
 enum ShotType {
@@ -199,7 +204,8 @@ enum ListingState {
 /* Both pointers swing out and back over half a turn of their angle */
 #define POINTER_SWING_STEP DegreesToRadians(10)
 #define POINTER_SWING_DISTANCE 8.0f
-#define EXPERIENCE_LEFT 20 /* Below each face */
+/* Below each face */
+#define EXPERIENCE_LEFT 20
 #define EXPERIENCE_TOP 174
 /* The options, centered above the hint, with the pointer at the left of the
  * chosen one */
@@ -420,11 +426,14 @@ enum CartridgeFault {
 
 /* How far ReadCartridgeCharacters has checked a save */
 #define NOT_CHECKED 0
-#define SAVE_CHECKED 1 /* Its signature and checksum */
-#define DATA_CHECKED 2 /* Its character data's sum too */
+/* Its signature and checksum */
+#define SAVE_CHECKED 1
+/* Its character data's sum too */
+#define DATA_CHECKED 2
 #define SAVE_READ_ATTEMPTS 5
 #define DATA_READ_ATTEMPTS 3
-#define RECORD_PRESENT 1 /* The first byte of a record in use */
+/* The first byte of a record in use */
+#define RECORD_PRESENT 1
 
 /* What CheckStatusCartridge found */
 enum StatusCheck {
@@ -508,7 +517,8 @@ s32 GetNoticeState(void);
 /* OpenGameBoyPak knows Mario Golf's cartridge by its title's start and
  * Nintendo's licensee code */
 #define GAME_BOY_TITLE_CHECKED_LENGTH 14
-#define GAME_BOY_COMPANY_CODE 0x3031 /* "01" */
+/* The characters "01" */
+#define GAME_BOY_COMPANY_CODE 0x3031
 
 /*
  * g_GameBoyTransfer.pressingHandImage under a scalar name. Reading it as a

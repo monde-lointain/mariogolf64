@@ -183,7 +183,8 @@ enum TriangleEdit {
 #define WALL_HEIGHT 24.0f
 /* How far a dropped wall reaches below the ground */
 #define WALL_SINK_DEPTH (12 << WORLD_TO_COURSE_SHIFT)
-#define WALL_LIMIT_SOUND 0xE /* Also the ball's flagstick hit */
+/* Also the ball's flagstick hit */
+#define WALL_LIMIT_SOUND 0xE
 #define WALL_LIMIT_SOUND_CHANNEL 11
 #define WALL_TEXT_COLUMN 5
 #define WALL_TEXT_ROW 3
@@ -202,7 +203,8 @@ enum TriangleEdit {
 #define IsFreeBillboard(billboard) \
   ((billboard).x <= 0 || (billboard).x >= TREE_X_LIMIT || \
       (billboard).z <= 0 || (billboard).z >= TREE_Z_LIMIT)
-#define COPIED_TREE_OFFSET 0x100 /* In x */
+/* Along x */
+#define COPIED_TREE_OFFSET 0x100
 
 /* func_80407F08's hex dump */
 #define HEX_DUMP_BUFFER_SIZE 0x40000
@@ -234,7 +236,8 @@ enum TriangleEdit {
 #define CELL_ROW_COUNT (GROUND_POINT_ROW_COUNT - 1)
 
 /* func_804002C0's ground point editor */
-#define POINT_MOVE_COUNT 4 /* One for each C-button */
+/* One for each C-button */
+#define POINT_MOVE_COUNT 4
 #define POINT_MOVE_STEP 0x10
 #define POINT_TEXTURE_STEP 0x40
 #define TILE_POINT_MASK (GROUND_TILE_POINT_SPAN - 1)

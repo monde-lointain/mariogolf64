@@ -71,7 +71,8 @@
  */
 #define STANDINGS_HOLE_LEFT 40
 #define STANDINGS_HOLE_TOP 48
-#define SCORE_LABEL 2 /* Drawn over the score column */
+/* Drawn over the score column */
+#define SCORE_LABEL 2
 /* Where the bets page draws each player's tallies, from the scorecard's left
  * and top */
 #define BETS_PAGE_TALLY_LEFT 53
@@ -378,7 +379,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_LoseText);
 #define STANDINGS_LABEL_TOP 52
 #define STANDINGS_SCORE_LABEL_LEFT 160
 #define STANDINGS_BET_TOTAL_LABEL_LEFT 248
-#define BET_TOTAL_LABEL 4 /* Drawn over the bet total column */
+/* Drawn over the bet total column */
+#define BET_TOTAL_LABEL 4
 #define WIDE_BET_TOTAL 1000
 
 /*
@@ -491,7 +493,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_TotalFormat);
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat);
 
 /* SetTextSlot messages */
-#define WINS_NEEDED_MESSAGE 1 /* Shows SetTextSlotValue's count */
+/* Shows SetTextSlotValue's count */
+#define WINS_NEEDED_MESSAGE 1
 /* Shown instead of a count of one when the match can be drawn */
 #define LAST_WIN_NEEDED_MESSAGE 2
 #define SUDDEN_DEATH_ENV_COLOR 0x00FFFF00
@@ -542,7 +545,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat)
 #define ARROW_HEIGHT 8
 #define ARROW_LEFT 40
 #define ARROW_TOP 81
-#define MATCH_COUNT_TIME 20 /* When the hole's result joins the counts */
+/* When the hole's result joins the counts */
+#define MATCH_COUNT_TIME 20
 #define MATCH_ANIMATION_TIME 30
 
 /*
@@ -1048,7 +1052,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C848_ovl_09);
 #define GRID_ROW_HEIGHT 32
 #define GRID_COLUMN_LINE_LEFT 54
 #define GRID_COLUMN_COUNT 7
-#define GRID_STRETCHED_STEP 11 /* Stretches one texel along a header line */
+/* Stretches one texel along a header line */
+#define GRID_STRETCHED_STEP 11
 /* Stretches the column line's texels down the grid */
 #define GRID_COLUMN_STEP 18
 #define GRID_TEXEL_LINE 3
@@ -2073,10 +2078,13 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
 /* The colors a score is drawn in, by how it stands to par */
 #define PAR_COLOR 0
 #define BIRDIE_COLOR 1
-#define DOUBLE_BOGEY_COLOR 2 /* Or worse */
-#define EAGLE_COLOR 3 /* On a par five */
+/* For a double bogey or worse */
+#define DOUBLE_BOGEY_COLOR 2
+/* For an eagle on a par five */
+#define EAGLE_COLOR 3
 #define BOGEY_COLOR 4
-#define PULSING_COLOR 5 /* An eagle on a shorter hole, or better */
+/* An eagle on a shorter hole, or better */
+#define PULSING_COLOR 5
 #define PULSE_STEP DegreesToRadians(20)
 #define PULSE_RANGE 127
 #define BADGE_GLOW_STEP DegreesToRadians(10)

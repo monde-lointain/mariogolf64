@@ -1779,7 +1779,8 @@ void PlaceAimCamera(void);
 /* PlaceFlightCamera's distances are in course units unless they say otherwise;
  * y points down */
 #define CUP_FRAMING_PITCH -0.14f
-#define CUP_FRAMING_RISE 0xC00 /* Above the cup, of both framed spheres */
+/* Above the cup, of both framed spheres */
+#define CUP_FRAMING_RISE 0xC00
 #define CUP_FRAMING_RADIUS 3.0f
 #define CUP_FRAMING_DEPTH_OFFSET -1.5f
 #define PATH_FRAMING_PITCH -0.7853982f
@@ -1787,7 +1788,8 @@ void PlaceAimCamera(void);
 #define PATH_FRAMING_DEPTH_OFFSET -150.0f
 #define LAUNCH_VIEW_STEP 11
 #define LAUNCH_VIEW_MIN_RISE 0x6600
-#define CHASE_DISTANCE 15.0f /* In world units */
+/* In world units */
+#define CHASE_DISTANCE 15.0f
 #define CHASE_FIELD_OF_VIEW 80.0f
 /* How many path steps behind the ball the camera follows */
 #define FOLLOW_STEP_COUNT 10
@@ -1806,7 +1808,8 @@ void PlaceAimCamera(void);
 #define BEHIND_VIEW_SIDE_SPREAD_FRACTION 0.2
 #define BEHIND_VIEW_SIDE_DISTANCE 23040.0f
 #define BEHIND_VIEW_RISE 23040.0f
-#define BEHIND_LOOK_AT_RISE 4.5f /* In world units */
+/* In world units */
+#define BEHIND_LOOK_AT_RISE 4.5f
 #define BEHIND_LOOK_AT_EASED_RISE 4608.0f
 #define APEX_VIEW_NEAR_HALF_DISTANCE 1536.0f
 #define APEX_VIEW_FAR_DISTANCE 30720.0f
@@ -1854,7 +1857,8 @@ void PlaceAimCamera(void);
 #define BESIDE_GOLFER_STEP 1536.0f
 #define BESIDE_GOLFER_RISE 1536.0f
 #define BESIDE_GOLFER_MIN_RISE 7680.0f
-#define BESIDE_GOLFER_CLEARANCE 22.5f /* In world units */
+/* In world units */
+#define BESIDE_GOLFER_CLEARANCE 22.5f
 #define BESIDE_GOLFER_LOOK_AT_RISE 12288.0f
 #define BESIDE_GOLFER_FLIGHT_FIELD_OF_VIEW 80.0f
 #define MAX_EYE_DEPTH_BELOW_GROUND 0x21C0000
@@ -2917,7 +2921,8 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 #define IsFlightCameraFree() (!g_IsCupViewShown && f_ComingFlightEvents == 0)
 #define VERY_LONG_SHOT_MIN_LENGTH 0x2A3000
 #define BALL_SOUND_MIN_SHOT_LENGTH 0x25800
-#define BALL_SOUND_VOLUME_LENGTH 0x7800 /* Shot length per step of volume */
+/* Shot length per step of volume */
+#define BALL_SOUND_VOLUME_LENGTH 0x7800
 #define BALL_SOUND_MIN_VOLUME 10
 #define BALL_SOUND_MAX_VOLUME 64
 #define BALL_SOUND_EARLY_STEP 6

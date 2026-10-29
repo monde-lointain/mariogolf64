@@ -802,10 +802,12 @@ enum HoleMenuChoice {
 #define UNLOCK_NOTICE_DONKEY_KONG 0
 #define UNLOCK_NOTICE_MAPLE 1
 #define UNLOCK_NOTICE_METAL_MARIO 2
-#define UNLOCK_NOTICE_RING_SHOT_COURSE_BASE 2 /* Plus the course's index */
+/* Plus the course's index */
+#define UNLOCK_NOTICE_RING_SHOT_COURSE_BASE 2
 
 #define PLAYER_CHARACTER_SLOT 0
-#define TOURNAMENT_HALF_TURN_HOLE 9 /* The hole index after the front nine */
+/* The hole index after the front nine */
+#define TOURNAMENT_HALF_TURN_HOLE 9
 
 /* How long the hole's intro waits before it moves on by itself */
 #define HOLE_INTRO_FRAMES 240
@@ -830,7 +832,8 @@ enum HoleMenuChoice {
 #define DEBUG_CUP_TEXT_ROW 3
 
 /* The hole intro camera circles the hole at these distances */
-#define INTRO_ORBIT_ANGLE_PER_FRAME 256 /* In binary angle units */
+/* In binary angle units */
+#define INTRO_ORBIT_ANGLE_PER_FRAME 256
 #define IntroOrbitAngle() \
   (((f_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & \
        BINARY_ANGLE_MASK) * \
