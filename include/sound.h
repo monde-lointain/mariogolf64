@@ -195,7 +195,7 @@ enum Sound {
   SOUND_IMPACT_OFF_MARK = 0x6E,
   SOUND_OPTION_TOGGLED,
   SOUND_LONG_SHOT,
-  SOUND_LONG_SHOT_HEAVY,
+  SOUND_SPARK_TRAIL,
   SOUND_CONTROLS_OPEN,
   /* Also played when the main menu shows the transmit option */
   SOUND_CONTROLS_CLOSE,

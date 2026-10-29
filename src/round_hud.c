@@ -317,13 +317,13 @@ enum LandingGlyphGroup {
 
 /*
  * StartShotEffect's long shot effect, which DrawShotEffect draws, plays a
- * sound, and a different, louder one for the Wario and Game Boy ball 7
- * contact styles.
+ * sound. For the Wario and Game Boy ball 7 contact styles it is instead the
+ * spark trail, with a different, louder sound.
  */
 #define SHOT_EFFECT_TIME_OFF (-1.0f)
 #define LONG_SHOT_SOUND_CHANNEL 14
 #define LONG_SHOT_SOUND_VOLUME 0x40
-#define LONG_SHOT_HEAVY_SOUND_VOLUME 0x60
+#define SPARK_TRAIL_SOUND_VOLUME 0x60
 #define LONG_SHOT_SOUND_REVERB 30
 
 /* The distance font's unit and point glyphs, after its digits */
@@ -432,9 +432,9 @@ void func_80216F8C(void);
 #define INITIAL_HUD_OFFSET_Y (-2)
 /* The green grid's alpha while it shows */
 #define GREEN_GRID_ALPHA 0x7F
-/* The long shot effect's vertex groups, and the heavy long shot's frames */
+/* The long shot effect's vertex groups, and the spark trail's frames */
 #define LONG_SHOT_GROUP_COUNT 4
-#define HEAVY_LONG_SHOT_FRAME_COUNT 6
+#define SPARK_TRAIL_FRAME_COUNT 6
 /* The icon cycles through ANIMATED_ICON_FRAME_COUNT images, a new one every few
  * frames */
 #define ANIMATED_ICON_FRAME_COUNT 8
@@ -596,7 +596,7 @@ static s32 f_HudOffsetY = INITIAL_HUD_OFFSET_Y;
 /* The name image of each club slot */
 static AssetId f_ClubNameAssets[CLUB_SET_SIZE] = {0x4F1, 0x4F2, 0x4F3, 0x4F4,
     0x4F5, 0x4F6, 0x4F7, 0x4F8, 0x4F9, 0x4FA, 0x4FB, 0x4FC, 0x4FD, 0x4FE};
-static Vtx f_HeavyLongShotVertices[16] = {
+static Vtx f_SparkTrailVertices[16] = {
     {{{-32, -512, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{-32, 0, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{32, 0, 0}, 0, {0xC00, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
@@ -649,13 +649,13 @@ static Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8] = {
     {{{-192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}}};
 static f32 f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
 static s32 f_ShotEffect = SHOT_EFFECT_LONG_SHOT;
-static s32 f_HeavyLongShotFrameAssets[HEAVY_LONG_SHOT_FRAME_COUNT] = {
+static s32 f_SparkTrailFrameAssets[SPARK_TRAIL_FRAME_COUNT] = {
     0x6A7, 0x6A8, 0x6A9, 0x6AA, 0x6AB, 0x6AC};
-static s32 f_HeavyLongShotFrame = 1;
-static s32 f_HeavyLongShotFrameTimer = 0;
+static s32 f_SparkTrailFrame = 1;
+static s32 f_SparkTrailFrameTimer = 0;
 /* The two frame buffers in g_SharedEffectImages, each loaded in turn and both
  * drawn */
-static s32 f_HeavyLongShotBufferIndex = 0;
+static s32 f_SparkTrailBufferIndex = 0;
 /* Read by no routine */
 static s32 D_800C5E1C = 0;
 static f32 f_HoleFlagWavePhase = 0.0f;
@@ -2817,9 +2817,8 @@ void StartShotEffect(s32 effect) {
       PlaySoundWithEffects(SOUND_LONG_SHOT, LONG_SHOT_SOUND_CHANNEL,
           LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB, SOUND_FULL_SCALE);
     } else {
-      PlaySoundWithEffects(SOUND_LONG_SHOT_HEAVY, LONG_SHOT_SOUND_CHANNEL,
-          LONG_SHOT_HEAVY_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB,
-          SOUND_FULL_SCALE);
+      PlaySoundWithEffects(SOUND_SPARK_TRAIL, LONG_SHOT_SOUND_CHANNEL,
+          SPARK_TRAIL_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB, SOUND_FULL_SCALE);
     }
   }
 
@@ -2833,16 +2832,16 @@ void StartShotEffect(s32 effect) {
 #define SHOT_EFFECT_SPIN_START 0.7f
 #define SHOT_EFFECT_SPIN_RATE 0.5f
 #define SHOT_EFFECT_Z -100.0f
-/* The heavy long shot of the Wario and Game Boy ball 7 contact styles, an
- * animation that flickers round */
-#define HEAVY_LONG_SHOT_SCALE 0.4f
-#define HEAVY_LONG_SHOT_FRAME_TICKS 4
-#define HEAVY_LONG_SHOT_FRAMES_OFFSET 0x970
-#define HEAVY_LONG_SHOT_FRAME_SIZE 0xC08
-#define HEAVY_LONG_SHOT_FRAME_WIDTH 48
-#define HEAVY_LONG_SHOT_FRAME_HEIGHT 128
-#define HEAVY_LONG_SHOT_ALPHA 191
-#define HEAVY_LONG_SHOT_QUAD_COUNT 2
+/* The spark trail of the Wario and Game Boy ball 7 contact styles: six frames
+ * of a lightning bolt, tinted purple or a random color, that flicker round */
+#define SPARK_TRAIL_SCALE 0.4f
+#define SPARK_TRAIL_FRAME_TICKS 4
+#define SPARK_TRAIL_FRAMES_OFFSET 0x970
+#define SPARK_TRAIL_FRAME_SIZE 0xC08
+#define SPARK_TRAIL_FRAME_WIDTH 48
+#define SPARK_TRAIL_FRAME_HEIGHT 128
+#define SPARK_TRAIL_ALPHA 191
+#define SPARK_TRAIL_QUAD_COUNT 2
 
 /* Draws the effect that StartShotEffect started at the ball, until its time
  * runs out */
@@ -2882,7 +2881,7 @@ void DrawShotEffect(Gfx** displayListHead) {
     f_ShotEffectRotation[AXIS_Z] =
         (f_ShotEffectTime + SHOT_EFFECT_SPIN_START) * SHOT_EFFECT_SPIN_RATE;
   } else {
-    scale = sinf(f_ShotEffectTime) * HEAVY_LONG_SHOT_SCALE;
+    scale = sinf(f_ShotEffectTime) * SPARK_TRAIL_SCALE;
     f_ShotEffectRotation[AXIS_X] = 0.0f;
     f_ShotEffectRotation[AXIS_Y] = 0.0f;
     f_ShotEffectRotation[AXIS_Z] = (guRandom() % 360) * (M_PI / 180);
@@ -2942,16 +2941,14 @@ void DrawShotEffect(Gfx** displayListHead) {
           (i * 8) + 4, (i * 8) + 7, (i * 8) + 5, 0);
     }
   } else {
-    if (++f_HeavyLongShotFrameTimer == HEAVY_LONG_SHOT_FRAME_TICKS) {
-      f_HeavyLongShotFrameTimer = 0;
-      f_HeavyLongShotFrame =
-          (f_HeavyLongShotFrame + 1) % HEAVY_LONG_SHOT_FRAME_COUNT;
-      OpenEncodedAsset(
-          f_HeavyLongShotFrameAssets[f_HeavyLongShotFrame], &asset);
-      ReadEncodedAsset(g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET +
-              (f_HeavyLongShotBufferIndex * HEAVY_LONG_SHOT_FRAME_SIZE),
+    if (++f_SparkTrailFrameTimer == SPARK_TRAIL_FRAME_TICKS) {
+      f_SparkTrailFrameTimer = 0;
+      f_SparkTrailFrame = (f_SparkTrailFrame + 1) % SPARK_TRAIL_FRAME_COUNT;
+      OpenEncodedAsset(f_SparkTrailFrameAssets[f_SparkTrailFrame], &asset);
+      ReadEncodedAsset(g_SharedEffectImages + SPARK_TRAIL_FRAMES_OFFSET +
+              (f_SparkTrailBufferIndex * SPARK_TRAIL_FRAME_SIZE),
           &asset);
-      f_HeavyLongShotBufferIndex ^= 1;
+      f_SparkTrailBufferIndex ^= 1;
     }
 
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
@@ -2962,9 +2959,9 @@ void DrawShotEffect(Gfx** displayListHead) {
     if (contactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
       gDPSetEnvColor(gfx++, 255, 255, 127, 255);
       gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255,
-          guRandom() % 255, HEAVY_LONG_SHOT_ALPHA);
+          guRandom() % 255, SPARK_TRAIL_ALPHA);
     } else {
-      gDPSetPrimColor(gfx++, 0, 0, 191, 0, 191, HEAVY_LONG_SHOT_ALPHA);
+      gDPSetPrimColor(gfx++, 0, 0, 191, 0, 191, SPARK_TRAIL_ALPHA);
       gDPSetEnvColor(gfx++, 255, 255, 255, 255);
     }
 
@@ -2976,15 +2973,14 @@ void DrawShotEffect(Gfx** displayListHead) {
     gSPMatrix(gfx++,
         OS_K0_TO_PHYSICAL(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_HeavyLongShotVertices, 16, 0);
+    gSPVertex(gfx++, f_SparkTrailVertices, 16, 0);
     gDPLoadTextureBlock_4b(gfx++,
         TextureAddress(
-            ImageBody(g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET)),
-        G_IM_FMT_I, HEAVY_LONG_SHOT_FRAME_WIDTH, HEAVY_LONG_SHOT_FRAME_HEIGHT,
-        0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
+            ImageBody(g_SharedEffectImages + SPARK_TRAIL_FRAMES_OFFSET)),
+        G_IM_FMT_I, SPARK_TRAIL_FRAME_WIDTH, SPARK_TRAIL_FRAME_HEIGHT, 0,
+        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    for (i = 0; i != HEAVY_LONG_SHOT_QUAD_COUNT; i++) {
+    for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
       gSP2Triangles(gfx++, i * 4, (i * 4) + 1, (i * 4) + 2, 0, i * 4,
           (i * 4) + 2, (i * 4) + 3, 0);
     }
@@ -2992,12 +2988,11 @@ void DrawShotEffect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
         TextureAddress(ImageBody(g_SharedEffectImages +
-            HEAVY_LONG_SHOT_FRAMES_OFFSET + HEAVY_LONG_SHOT_FRAME_SIZE)),
-        G_IM_FMT_I, HEAVY_LONG_SHOT_FRAME_WIDTH, HEAVY_LONG_SHOT_FRAME_HEIGHT,
-        0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
+            SPARK_TRAIL_FRAMES_OFFSET + SPARK_TRAIL_FRAME_SIZE)),
+        G_IM_FMT_I, SPARK_TRAIL_FRAME_WIDTH, SPARK_TRAIL_FRAME_HEIGHT, 0,
+        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    for (i = 0; i != HEAVY_LONG_SHOT_QUAD_COUNT; i++) {
+    for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
       gSP2Triangles(gfx++, i * 4, (i * 4) + 1, (i * 4) + 2, 0, i * 4,
           (i * 4) + 2, (i * 4) + 3, 0);
     }
