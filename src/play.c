@@ -8,6 +8,7 @@
 
 #include "play.h"
 
+#include "ball_simulation.h"
 #include "camera.h"
 #include "character.h"
 #include "club.h"
@@ -175,14 +176,14 @@ void func_8005F1C8(void) {
 }
 
 /*
- * How full the swing gauge is at the current gaugeFrame: it fills for 30
- * frames, then empties until the impact mark
+ * How full the swing gauge is at the current gaugeFrame: it fills until
+ * GAUGE_FULL_FRAME, then empties until the impact mark
  */
 s32 GetGaugeFill(void) {
   s32 value = g_CurrentShot.gaugeFrame;
 
-  if (value >= 31) {
-    value = 60 - value;
+  if (value > GAUGE_FULL_FRAME) {
+    value = GAUGE_IMPACT_FRAME - value;
   }
 
   return value;
@@ -190,15 +191,15 @@ s32 GetGaugeFill(void) {
 
 /* The launch power, out of 256, of the gauge's fill at a gauge frame */
 s32 GetGaugeFramePower(s32 value) {
-  if (value >= 31) {
-    value = 60 - value;
+  if (value > GAUGE_FULL_FRAME) {
+    value = GAUGE_IMPACT_FRAME - value;
   }
 
   if (value < 0) {
     value = 0;
   }
 
-  return (value << 8) / 30;
+  return (value * MAX_LAUNCH_POWER) / GAUGE_FULL_FRAME;
 }
 
 /*

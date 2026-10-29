@@ -42,7 +42,6 @@
 #define SHOT_OFFSET_COUNT 8
 /* The evaluation of a lost ball, and the one that the best starts at */
 #define LOST_BALL_EVALUATION 0x10000000
-#define SHOT_UNK4_MAX 30
 #define SORT_DESCENDING 1
 /* How far below the paths the ground test starts */
 #define PATH_GROUND_CLEARANCE 0x600
@@ -435,7 +434,7 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 
 /* f_Shot.powerGaugeFrame's range, which GetPowerGaugeFrame maps 0 to 256 onto
  */
-#define SHOT_UNK4_MIN 3
+#define MIN_POWER_GAUGE_FRAME 3
 /* The levels that PlanShot always tries, tries while the best evaluation is
  * poor, and tries at most */
 #define MIN_TRIAL_LEVEL_COUNT 4
@@ -471,11 +470,10 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 #define MISS_REPORT_COUNT 40
 /* The whole of a surface's percent range */
 #define FULL_PERCENT 100
-#define DEFAULT_SHOT_UNK8 60
 /* The least f_Shot.powerGaugeFrame that PlanShot plans, and how much it scales
  * it up by for some golfers */
-#define MIN_PLANNED_SHOT_UNK4 2
-#define SHOT_UNK4_BOOST 1.2f
+#define MIN_PLANNED_POWER_GAUGE_FRAME 2
+#define POWER_GAUGE_FRAME_BOOST 1.2f
 /* The trials taken at each level, at a level that aims at the cup, and under
  * GAME_FLAG_UNK3C */
 #define LEVEL_TRIAL_COUNT 4
@@ -624,7 +622,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
             /* The carry per unit of f_Shot.powerGaugeFrame at the least percent
              */
             shortestReach = shortestReach * percentRange[0] /
-                (FULL_PERCENT * SHOT_UNK4_MAX);
+                (FULL_PERCENT * GAUGE_FULL_FRAME);
             if (shortestReach < MIN_CLUB_DOWN_REACH ||
                 targetDistance / shortestReach >= CLUB_DOWN_REACH_COUNT) {
               break;
@@ -701,8 +699,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
         f_Shot.heading += GetSideSlope();
       }
 
-      f_Shot.impactGaugeFrame = DEFAULT_SHOT_UNK8;
-      f_Shot.powerGaugeFrame = SHOT_UNK4_MAX;
+      f_Shot.impactGaugeFrame = GAUGE_IMPACT_FRAME;
+      f_Shot.powerGaugeFrame = GAUGE_FULL_FRAME;
       reach = GetShotWorldDistance(
           GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
           f_Shot.shotMode);
@@ -717,17 +715,17 @@ s32 PlanShot(CurrentShot* plannedShot) {
           percentRange);
       /* The carry per unit of f_Shot.powerGaugeFrame at the mean percent */
       reach = reach * (percentRange[1] + percentRange[0]) /
-          (2 * FULL_PERCENT * SHOT_UNK4_MAX);
+          (2 * FULL_PERCENT * GAUGE_FULL_FRAME);
       /* Holding f_Shot.powerGaugeFrame in distance is there to match */
       distance = (rand() & 3) + (distance / reach);
       if (GetGolferTraitUnk2() >= 2) {
-        distance = distance * SHOT_UNK4_BOOST;
+        distance = distance * POWER_GAUGE_FRAME_BOOST;
       }
 
-      if (distance < MIN_PLANNED_SHOT_UNK4) {
-        distance = MIN_PLANNED_SHOT_UNK4;
-      } else if (distance > SHOT_UNK4_MAX) {
-        distance = SHOT_UNK4_MAX;
+      if (distance < MIN_PLANNED_POWER_GAUGE_FRAME) {
+        distance = MIN_PLANNED_POWER_GAUGE_FRAME;
+      } else if (distance > GAUGE_FULL_FRAME) {
+        distance = GAUGE_FULL_FRAME;
       }
 
       /* Storing through shotPower is there to match */
@@ -2168,7 +2166,7 @@ s32 ChooseApproachClub(s32* targetX, s32* targetZ) {
   return CLUB_TYPE_PITCHING_WEDGE;
 }
 
-#define SHOT_UNK4_SCALE (SHOT_UNK4_MAX / 256.0f)
+#define POWER_TO_GAUGE_FRAME_SCALE (GAUGE_FULL_FRAME / 256.0f)
 
 /* The power gauge frame for a launch power out of 256 */
 s32 GetPowerGaugeFrame(s32 amount) {
@@ -2185,13 +2183,13 @@ s32 GetPowerGaugeFrame(s32 amount) {
    */
   *(&unused) = uninitialized;
 
-  value = (amount * SHOT_UNK4_SCALE) + 0.5f;
-  if (value < SHOT_UNK4_MIN) {
-    value = SHOT_UNK4_MIN;
+  value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
+  if (value < MIN_POWER_GAUGE_FRAME) {
+    value = MIN_POWER_GAUGE_FRAME;
   }
 
-  if (value > SHOT_UNK4_MAX - 1) {
-    value = SHOT_UNK4_MAX;
+  if (value > GAUGE_FULL_FRAME - 1) {
+    value = GAUGE_FULL_FRAME;
   }
 
   return value;
@@ -2572,8 +2570,8 @@ EVALUATE:
           f_Shot.powerGaugeFrame = f_Shot.powerGaugeFrame + 1 + (rand() & 1);
         }
 
-        if (f_Shot.powerGaugeFrame > SHOT_UNK4_MAX) {
-          f_Shot.powerGaugeFrame = SHOT_UNK4_MAX;
+        if (f_Shot.powerGaugeFrame > GAUGE_FULL_FRAME) {
+          f_Shot.powerGaugeFrame = GAUGE_FULL_FRAME;
         }
 
         if (f_Shot.powerGaugeFrame < 2) {
@@ -2583,7 +2581,7 @@ EVALUATE:
         if (f_TrialLaunch->power < launchPower) {
           if (GetGaugeFramePower(f_Shot.powerGaugeFrame) <=
                   f_TrialLaunch->power &&
-              f_Shot.powerGaugeFrame < SHOT_UNK4_MAX) {
+              f_Shot.powerGaugeFrame < GAUGE_FULL_FRAME) {
             f_Shot.powerGaugeFrame++;
           }
         } else if (launchPower < f_TrialLaunch->power) {

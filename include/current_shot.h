@@ -40,6 +40,13 @@ enum ImpactPointState {
   IMPACT_POINT_SETTING
 };
 
+/*
+ * The swing gauge fills until gaugeFrame reaches GAUGE_FULL_FRAME, then empties
+ * until it reaches the impact mark at GAUGE_IMPACT_FRAME
+ */
+#define GAUGE_FULL_FRAME 30
+#define GAUGE_IMPACT_FRAME (2 * GAUGE_FULL_FRAME)
+
 extern CurrentShot g_CurrentShot;
 /* An IMPACT_POINT_* value */
 extern s32 g_ImpactPointState;

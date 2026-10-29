@@ -250,6 +250,23 @@
 #define AIM_CAMERA_BUTTON_DISTANCE_STEP 42670.0810546875
 #define AIM_CAMERA_BUTTON_HEIGHT_STEP 28446.720703125
 #define AIM_CAMERA_BUTTON_PUTT_STEP 4267.00810546875
+/* The last gauge frames at which power, and impact, can be set */
+#define LAST_POWER_GAUGE_FRAME (GAUGE_IMPACT_FRAME - 1)
+#define LAST_IMPACT_GAUGE_FRAME (GAUGE_IMPACT_FRAME + 9)
+/* How far either side of the impact mark the impact counts */
+#define MAX_IMPACT_OFFSET 6
+/*
+ * The swing animation starts once fewer gauge frames are left before this one
+ * than its event frame, D_80224000_ovl_00
+ */
+#define SWING_TIMING_GAUGE_FRAME 71
+/*
+ * A shot that the player isn't taking tilts the stick toward its offset over
+ * STICK_TILT_FRAME_COUNT frames, then holds it for the last
+ * STICK_HOLD_FRAME_COUNT frames before impact
+ */
+#define STICK_TILT_FRAME_COUNT 10
+#define STICK_HOLD_FRAME_COUNT 10
 /* While putting, the crane's steps are this times a count that grows with the
  * putt's length */
 #define AIM_CAMERA_PUTT_STEP_UNIT 426.700810546875
@@ -3912,7 +3929,7 @@ void UpdateTurns(void) {
           }
 
           PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
-        } else if (g_CurrentShot.gaugeFrame >= 59 ||
+        } else if (g_CurrentShot.gaugeFrame >= LAST_POWER_GAUGE_FRAME ||
             (f_ShotSource == SHOT_SOURCE_PLAYER &&
                 (g_TurnController.pressedButtons & B_BUTTON))) {
           UpdateGolferTranslucency();
@@ -3946,18 +3963,20 @@ void UpdateTurns(void) {
           g_CurrentShot.unk14 = GetTurnStickX();
           g_CurrentShot.unk18 = GetTurnStickY();
         } else {
-          s32 framesLeft =
-              D_80104F78.impactGaugeFrame - g_CurrentShot.gaugeFrame - 10;
+          s32 framesLeft = D_80104F78.impactGaugeFrame -
+              g_CurrentShot.gaugeFrame - STICK_HOLD_FRAME_COUNT;
 
-          if (framesLeft > 10) {
+          if (framesLeft > STICK_TILT_FRAME_COUNT) {
             g_CurrentShot.unk14 = 0;
             g_CurrentShot.unk18 = 0;
           } else if (framesLeft <= 0) {
             g_CurrentShot.unk14 = D_80104F78.unk14;
             g_CurrentShot.unk18 = D_80104F78.unk18;
           } else {
-            g_CurrentShot.unk14 = D_80104F78.unk14 * (10 - framesLeft) / 10;
-            g_CurrentShot.unk18 = D_80104F78.unk18 * (10 - framesLeft) / 10;
+            g_CurrentShot.unk14 = D_80104F78.unk14 *
+                (STICK_TILT_FRAME_COUNT - framesLeft) / STICK_TILT_FRAME_COUNT;
+            g_CurrentShot.unk18 = D_80104F78.unk18 *
+                (STICK_TILT_FRAME_COUNT - framesLeft) / STICK_TILT_FRAME_COUNT;
           }
         }
 
@@ -3967,15 +3986,16 @@ void UpdateTurns(void) {
         if (((f_ShotSource != SHOT_SOURCE_PLAYER)
                     ? (g_CurrentShot.gaugeFrame == D_80104F78.impactGaugeFrame)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||
-            g_CurrentShot.gaugeFrame >= 69) {
+            g_CurrentShot.gaugeFrame >= LAST_IMPACT_GAUGE_FRAME) {
           g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
-          D_80227150_ovl_00.unkC = g_CurrentShot.gaugeFrame - 60;
-          if (D_80227150_ovl_00.unkC > 6) {
-            D_80227150_ovl_00.unkC = 6;
+          D_80227150_ovl_00.unkC =
+              g_CurrentShot.gaugeFrame - GAUGE_IMPACT_FRAME;
+          if (D_80227150_ovl_00.unkC > MAX_IMPACT_OFFSET) {
+            D_80227150_ovl_00.unkC = MAX_IMPACT_OFFSET;
           }
 
-          if (D_80227150_ovl_00.unkC < -6) {
-            D_80227150_ovl_00.unkC = -6;
+          if (D_80227150_ovl_00.unkC < -MAX_IMPACT_OFFSET) {
+            D_80227150_ovl_00.unkC = -MAX_IMPACT_OFFSET;
           }
 
           PlayImpactClickSound();
@@ -3994,7 +4014,8 @@ void UpdateTurns(void) {
           }
         } else {
           g_CurrentShot.gaugeFrame++;
-          if (71 - g_CurrentShot.gaugeFrame < D_80224000_ovl_00 &&
+          if (SWING_TIMING_GAUGE_FRAME - g_CurrentShot.gaugeFrame <
+                  D_80224000_ovl_00 &&
               !D_80224004_ovl_00) {
             D_80227170_ovl_00[playerIndex] = 0;
             D_80224004_ovl_00 = 1;
@@ -4015,12 +4036,12 @@ void UpdateTurns(void) {
           }
 
           D_80227150_ovl_00.unkC = 0;
-          if (D_80227150_ovl_00.unkC > 6) {
-            D_80227150_ovl_00.unkC = 6;
+          if (D_80227150_ovl_00.unkC > MAX_IMPACT_OFFSET) {
+            D_80227150_ovl_00.unkC = MAX_IMPACT_OFFSET;
           }
 
-          if (D_80227150_ovl_00.unkC < -6) {
-            D_80227150_ovl_00.unkC = -6;
+          if (D_80227150_ovl_00.unkC < -MAX_IMPACT_OFFSET) {
+            D_80227150_ovl_00.unkC = -MAX_IMPACT_OFFSET;
           }
 
           PlayImpactClickSound();
