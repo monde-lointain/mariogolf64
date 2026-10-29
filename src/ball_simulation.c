@@ -438,6 +438,8 @@ void ResetBallSimulations(void) {
 #define CUP_RIM_CURVE_RADIUS 614.4f
 #define CUP_RIM_OUTER_RADIUS (CUP_RADIUS + CUP_RIM_CURVE_RADIUS)
 #define CUP_RIM_SINK_SCALE 0.5f
+/* 300 m: the ball goes no higher above the course's zero height */
+#define MAX_BALL_ALTITUDE 0x465000
 
 /*
  * 3 m: a ball that has been in the water stops once it sinks this far below
@@ -2411,8 +2413,8 @@ SETTLE:
         simulation->position[AXIS_Y] = floor;
       }
 
-      if (simulation->position[AXIS_Y] < -0x465000) {
-        simulation->position[AXIS_Y] = -0x465000;
+      if (simulation->position[AXIS_Y] < -MAX_BALL_ALTITUDE) {
+        simulation->position[AXIS_Y] = -MAX_BALL_ALTITUDE;
       }
 
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
