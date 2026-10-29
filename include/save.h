@@ -154,7 +154,7 @@ typedef s32 GameStateStep;
 /* GameState.replayKind's values: the replay that leaving the menus starts */
 enum ReplayKind {
   REPLAY_KIND_NONE,
-  REPLAY_KIND_SUPER_SHOT,
+  REPLAY_KIND_BEST_SHOT,
   REPLAY_KIND_RING_SHOT
 };
 

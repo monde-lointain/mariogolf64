@@ -1,6 +1,6 @@
 /*
  * Play: setting up the players, their tee order and the clubs usable on the
- * surface, replays of super shots and Ring Shot records, and UpdatePlay, which
+ * surface, replays of Best Shots and Ring Shot records, and UpdatePlay, which
  * runs each hole and what comes between holes. It also sets the scene's fog and
  * draws the ground.
  */
@@ -291,7 +291,7 @@ void FormatDefaultPlayerName(s32 index, char* name) {
 /*
  * Sets up the players for a round. In SCENE_PLAY_UNK13, in
  * GAME_MODE_UNK8 or during a replay, only the first player
- * is set up, from the Ring Shot record or the super shot replay record;
+ * is set up, from the Ring Shot record or the Best Shot replay record;
  * otherwise all four get default names, their own character's clubs and
  * cleared scores.
  */
@@ -659,7 +659,7 @@ s32 GetRecordedScoreKind(s32 strokes) {
   return 0;
 }
 
-/* Sets play up to replay a super shot record */
+/* Sets play up to replay a Best Shot record */
 void LoadSuperShotReplay(PlayRecord* record) {
   D_800FEDD8[0] = *record;
   g_GameState.gameMode = record->gameMode;

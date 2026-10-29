@@ -1906,7 +1906,7 @@ void func_8021D0B8_ovl_01(void) {
       if (GetWipeProgress() == 0) {
         g_MenuScreen = MENU_SCREEN_EXIT;
         D_800FE334 = 0;
-        g_GameState.replayKind = REPLAY_KIND_SUPER_SHOT;
+        g_GameState.replayKind = REPLAY_KIND_BEST_SHOT;
         SetGameFlag(GAME_FLAG_UNK1E);
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
