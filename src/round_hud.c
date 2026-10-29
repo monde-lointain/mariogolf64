@@ -4216,8 +4216,7 @@ void LoadHoleIntroImages(void) {
     f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
   }
 
-  if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-      g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+  if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
     if (g_GameState.isSuddenDeath) {
       f_MatchStandingImage =
           AllocMemory(OpenEncodedAsset(ASSET_SUDDEN_DEATH_IMAGE, &asset));
@@ -4300,8 +4299,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
         }
       }
 
-      if ((g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-              g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
+      if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
           (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
         gDPLoadTLUT_pal256(
             gfx++, (u32)f_MatchStandingImage + IMAGE_HEADER_SIZE & ~7);

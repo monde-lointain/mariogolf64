@@ -117,6 +117,10 @@ enum GameMode {
   GAME_MODE_STAFF_ROLL = 13
 };
 
+/* Whether a game mode is a one-on-one match: Match Game or Get Character */
+#define IsOneOnOneMatchMode(mode) \
+  ((mode) == GAME_MODE_MATCH_GAME || (mode) == GAME_MODE_GET_CHARACTER)
+
 /*
  * The scene that last led to the title screen. The title screen fades in from
  * white after the opening and from black otherwise.

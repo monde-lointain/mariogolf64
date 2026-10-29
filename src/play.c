@@ -520,8 +520,7 @@ s32 func_8005FCB8(void) {
       return i == g_GameState.playerCount;
     }
 
-    if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-        g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+    if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
       if (!GetMatchHoleResult(0, 1)) {
         return FALSE;
       }
@@ -1371,8 +1370,7 @@ DIM_BACKDROP:
               clearHud = FALSE;
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               StartWipe(WIPE_CLOSING);
-            } else if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+            } else if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
               f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
               g_SubModuleState = SUB_MODULE_SWAP_PENDING;
               g_PendingSubModuleId = MODULE_SCORECARD;
@@ -1503,8 +1501,7 @@ DIM_BACKDROP:
 
             if (f_PlayExit == PLAY_EXIT_NONE) {
               if (!g_GameState.unk31 &&
-                  (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                      g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
+                  IsOneOnOneMatchMode(g_GameState.gameMode) &&
                   HAS_PLAYED_LAST_HOLE()) {
                 g_GameState.holeIndex = GetFirstHoleIndex();
                 g_GameState.isSuddenDeath = TRUE;

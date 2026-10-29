@@ -696,8 +696,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
         case MESSAGE_CODE_SCORE:
           score = (s16)g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
           isPrinted = TRUE;
-          if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-              g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+          if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
             if (score == 0) {
               sprintf(g_PrintBuffer, g_MatchScoreEvenText);
             } else if (score < 0) {
@@ -957,8 +956,7 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
         case MESSAGE_CODE_SCORE:
           score = (s16)g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
           isPrinted = TRUE;
-          if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-              g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+          if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
             if (score == 0) {
               sprintf(g_PrintBuffer, g_MatchScoreEvenText);
             } else if (score < 0) {

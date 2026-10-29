@@ -492,8 +492,7 @@ void LoadRoundResults(void) {
   }
 
   if (!g_GameState.isClubTournament) {
-    if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-        g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+    if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
       f_ResultsPlacesImage =
           AllocMemory(OpenEncodedAsset(MATCH_PLACES_IMAGE_ASSET, &asset));
       ReadEncodedAsset(f_ResultsPlacesImage, &asset);
@@ -890,8 +889,7 @@ void FreeRoundResults(void) {
     }
 
     if (!g_GameState.isClubTournament) {
-      if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-          g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+      if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
         FreeMemory(&f_ResultsPlacesImage);
         FreeMemory(&D_80225708_ovl_00);
         FreeMemory(&f_NameplateImage);

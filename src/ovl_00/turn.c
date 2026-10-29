@@ -3041,9 +3041,7 @@ void UpdateTurns(void) {
   void GiveUpHole(s32 playerIndex) {
     s32 opponentIndex;
 
-    if (!g_GameState.unk31 &&
-        (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-            g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
+    if (!g_GameState.unk31 && IsOneOnOneMatchMode(g_GameState.gameMode) &&
         g_Players[playerIndex ^ 1].holeStatus == HOLE_STATUS_HOLED_OUT) {
       g_Players[playerIndex]
           .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
@@ -3071,8 +3069,7 @@ void UpdateTurns(void) {
     UpdateContest(FALSE);
     if (!g_GameState.unk31) {
       opponentIndex = playerIndex ^ 1;
-      if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-          g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+      if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
         g_Players[opponentIndex].holeStatus = HOLE_STATUS_HOLED_OUT;
         g_Players[opponentIndex]
             .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
@@ -3253,9 +3250,7 @@ void UpdateTurns(void) {
 
         f_AimFrameCount = 0;
         f_ReplayAimSettledFrameCount = 0;
-        if (!g_GameState.unk31 &&
-            (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
+        if (!g_GameState.unk31 && IsOneOnOneMatchMode(g_GameState.gameMode)) {
           s32 scoreToPar = GetNetScoreToPar(g_GameState.holeIndex, playerIndex);
 
           g_RoundHud.skinsTotals[playerIndex] = scoreToPar -
@@ -3365,8 +3360,7 @@ void UpdateTurns(void) {
               } else if (GetLastHoleIndex() == g_GameState.holeIndex &&
                   g_GameState.playerCount != 1) {
                 song = SONG_ROUND_FINAL;
-              } else if ((g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                             g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
+              } else if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
                   GetMatchStanding(0, 1) != MATCH_STANDING_OPEN) {
                 song = SONG_ROUND_FINAL;
               } else if (IsYoshiAndDonkeyKongRound()) {
@@ -3515,8 +3509,7 @@ void UpdateTurns(void) {
             } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
               SetScorecardLayout(SCORECARD_LAYOUT_SKINS);
-            } else if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+            } else if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
               SetScorecardLayout(SCORECARD_LAYOUT_MATCH);
             } else {
               SetScorecardLayout(SCORECARD_LAYOUT_STROKE);
@@ -4361,8 +4354,7 @@ void UpdateTurns(void) {
                 .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                 .strokes = g_Players[playerIndex].strokeCount;
             if (!g_GameState.unk31 &&
-                ((g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                     g_GameState.gameMode == GAME_MODE_GET_CHARACTER) ||
+                (IsOneOnOneMatchMode(g_GameState.gameMode) ||
                     (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS))) {
               g_Players[playerIndex]
@@ -4397,8 +4389,7 @@ void UpdateTurns(void) {
                       ? CHOICE_BOX_ID_DRIVING_RANGE
                       : CHOICE_BOX_ID_TRAINING_SHOT);
             } else if (!g_GameState.unk31 &&
-                (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                    g_GameState.gameMode == GAME_MODE_GET_CHARACTER)) {
+                IsOneOnOneMatchMode(g_GameState.gameMode)) {
               if (g_Players[playerIndex].strokeCount >=
                       g_HoleSetup.par * STROKE_LIMIT_PER_PAR ||
                   GetMatchHoleResult(0, 1)) {
@@ -4722,8 +4713,7 @@ void UpdateTurns(void) {
                 : PLAYER_STATE_HOLE_DONE;
           } else {
             nextState = PLAYER_STATE_HOLE_DONE;
-            if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+            if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
               s32 result;
 
               GetHandicapOffset(g_GameState.courseIndex, g_GameState.holeIndex,

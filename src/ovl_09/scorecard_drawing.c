@@ -2751,8 +2751,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     backTotal = 0;
     frontTotal = 0;
     shownHoleCount = g_Scorecard.content.holeIndex;
-    if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-        g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+    if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
       /* A hole shows once both players have finished it */
       if (g_Players[i].holeStatus != HOLE_STATUS_PLAYING) {
         shownHoleCount = g_Scorecard.content.holeIndex +
