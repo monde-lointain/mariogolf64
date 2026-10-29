@@ -777,11 +777,11 @@ void PrepareHoleDisplay(void) {
   g_MatrixBufferIndex = 0;
   for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
     f_Arrows[0].body[i].v.tc[1] =
-        ((f_Arrows[0].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW) +
+        ((f_Arrows[0].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
             ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
     f_Arrows[1].body[i].v.tc[1] =
-        ((f_Arrows[1].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW) +
+        ((f_Arrows[1].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
             ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
   }
@@ -803,9 +803,9 @@ void InitRoundHud(void) {
     vertex = f_HoleFlagVertices[0][grid];
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
-        vertex->v.ob[0] = column * HOLE_FLAG_CELL_SIZE;
-        vertex->v.ob[1] = -row * HOLE_FLAG_CELL_SIZE;
-        vertex->v.ob[2] = 0;
+        vertex->v.ob[AXIS_X] = column * HOLE_FLAG_CELL_SIZE;
+        vertex->v.ob[AXIS_Y] = -row * HOLE_FLAG_CELL_SIZE;
+        vertex->v.ob[AXIS_Z] = 0;
         vertex->v.tc[0] = column * HOLE_FLAG_TEXEL_COLUMN_STEP;
         vertex->v.tc[1] = row * HOLE_FLAG_TEXEL_ROW_STEP;
         vertex->v.cn[0] = HOLE_FLAG_START_SHADE;
@@ -3054,14 +3054,14 @@ void WaveHoleFlag(void) {
   otherFactor = factor;
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
     for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
-      HOLE_FLAG_VERTEX(row, column).v.ob[0] =
+      HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] =
           (s16)((column * HOLE_FLAG_CELL_SIZE) - (column * factor)) -
           (row * otherFactor * HOLE_FLAG_ROW_SKEW_SCALE);
-      if (HOLE_FLAG_VERTEX(row, column).v.ob[0] < column * otherFactor) {
-        HOLE_FLAG_VERTEX(row, column).v.ob[0] = column * otherFactor;
+      if (HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] < column * otherFactor) {
+        HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] = column * otherFactor;
       }
 
-      HOLE_FLAG_VERTEX(row, column).v.ob[1] =
+      HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Y] =
           (-row * HOLE_FLAG_CELL_SIZE) - (column * factor);
     }
   }
@@ -3139,7 +3139,7 @@ void WaveHoleFlag(void) {
           (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
           (f32)(HOLE_FLAG_BULGE_COLUMN_BASE - column) * factor;
       otherFactor = HOLE_FLAG_BULGE_SCALE;
-      HOLE_FLAG_VERTEX(row, column).v.ob[2] = bulge * otherFactor *
+      HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Z] = bulge * otherFactor *
           (f32)(HOLE_FLAG_BULGE_ROW_BASE - row) * HOLE_FLAG_BULGE_ROW_SCALE;
     }
   }
@@ -3148,13 +3148,13 @@ void WaveHoleFlag(void) {
     pull = 0;
     for (column = HOLE_FLAG_FIRST_PULLED_COLUMN;
         column != HOLE_FLAG_COLUMN_COUNT; column++) {
-      depth = HOLE_FLAG_VERTEX(row, column).v.ob[2];
+      depth = HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Z];
       if (depth < 0) {
         depth = -depth;
       }
 
       pull += depth / HOLE_FLAG_DEPTH_PER_PULL;
-      HOLE_FLAG_VERTEX(row, column).v.ob[0] =
+      HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] =
           (column * HOLE_FLAG_CELL_SIZE) - pull;
     }
   }

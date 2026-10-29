@@ -692,8 +692,8 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
 
   vertex = &f_SpinVertices[g_DrawBufferIndex];
   for (rowIndex = 0; rowIndex != SPIN_MESH_ROW_COUNT; rowIndex++) {
-    vertex[0].v.ob[0] = -SPIN_MESH_HALF_WIDTH;
-    vertex[1].v.ob[0] = SPIN_MESH_HALF_WIDTH;
+    vertex[0].v.ob[AXIS_X] = -SPIN_MESH_HALF_WIDTH;
+    vertex[1].v.ob[AXIS_X] = SPIN_MESH_HALF_WIDTH;
     vertex += 2;
   }
 

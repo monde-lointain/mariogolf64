@@ -787,37 +787,38 @@ void DrawBandHeights(s16* heights, s32 band) {
       }
     }
 
-    totalSpan = corners[2]->v.ob[2] - corners[0]->v.ob[2];
+    totalSpan = corners[2]->v.ob[AXIS_Z] - corners[0]->v.ob[AXIS_Z];
     if (cachedSpan != totalSpan) {
       cachedSpan = totalSpan;
       cachedReciprocal = 1.0f / totalSpan;
     }
 
-    longSlopeX = (corners[2]->v.ob[0] - corners[0]->v.ob[0]) * cachedReciprocal;
-    longSlopeHeight =
-        (corners[2]->v.ob[1] - corners[0]->v.ob[1]) * cachedReciprocal;
-    span = corners[1]->v.ob[2] - corners[0]->v.ob[2];
+    longSlopeX = (corners[2]->v.ob[AXIS_X] - corners[0]->v.ob[AXIS_X]) *
+        cachedReciprocal;
+    longSlopeHeight = (corners[2]->v.ob[AXIS_Y] - corners[0]->v.ob[AXIS_Y]) *
+        cachedReciprocal;
+    span = corners[1]->v.ob[AXIS_Z] - corners[0]->v.ob[AXIS_Z];
     if (span != 0) {
       if (cachedSpan != span) {
         cachedSpan = span;
         cachedReciprocal = 1.0f / span;
       }
 
-      shortSlopeX =
-          (corners[1]->v.ob[0] - corners[0]->v.ob[0]) * cachedReciprocal;
-      shortSlopeHeight =
-          (corners[1]->v.ob[1] - corners[0]->v.ob[1]) * cachedReciprocal;
+      shortSlopeX = (corners[1]->v.ob[AXIS_X] - corners[0]->v.ob[AXIS_X]) *
+          cachedReciprocal;
+      shortSlopeHeight = (corners[1]->v.ob[AXIS_Y] - corners[0]->v.ob[AXIS_Y]) *
+          cachedReciprocal;
       longXStep = longSlopeX * HEIGHT_ROW_STEP_SCALE;
       shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
       longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
       shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
-      shortX = corners[0]->v.ob[0] << HEIGHT_FRACTION_BITS;
+      shortX = corners[0]->v.ob[AXIS_X] << HEIGHT_FRACTION_BITS;
       longX = shortX;
-      shortHeight = corners[0]->v.ob[1] << HEIGHT_FRACTION_BITS;
+      shortHeight = corners[0]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
       longHeight = shortHeight;
       for (z = 0; z < span + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
-        DrawHeightRow(
-            longX, longHeight, shortX, shortHeight, corners[0]->v.ob[2] + z);
+        DrawHeightRow(longX, longHeight, shortX, shortHeight,
+            corners[0]->v.ob[AXIS_Z] + z);
         longX += longXStep;
         shortX += shortXStep;
         longHeight += longHeightStep;
@@ -825,30 +826,30 @@ void DrawBandHeights(s16* heights, s32 band) {
       }
     }
 
-    lowerSpan = corners[2]->v.ob[2] - corners[1]->v.ob[2];
+    lowerSpan = corners[2]->v.ob[AXIS_Z] - corners[1]->v.ob[AXIS_Z];
     if (lowerSpan != 0) {
       if (cachedSpan != lowerSpan) {
         cachedSpan = lowerSpan;
         cachedReciprocal = 1.0f / lowerSpan;
       }
 
-      longX = ((s32)(longSlopeX * span) + corners[0]->v.ob[0])
+      longX = ((s32)(longSlopeX * span) + corners[0]->v.ob[AXIS_X])
           << HEIGHT_FRACTION_BITS;
-      longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[1])
+      longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[AXIS_Y])
           << HEIGHT_FRACTION_BITS;
-      shortSlopeX =
-          (corners[2]->v.ob[0] - corners[1]->v.ob[0]) * cachedReciprocal;
-      shortSlopeHeight =
-          (corners[2]->v.ob[1] - corners[1]->v.ob[1]) * cachedReciprocal;
+      shortSlopeX = (corners[2]->v.ob[AXIS_X] - corners[1]->v.ob[AXIS_X]) *
+          cachedReciprocal;
+      shortSlopeHeight = (corners[2]->v.ob[AXIS_Y] - corners[1]->v.ob[AXIS_Y]) *
+          cachedReciprocal;
       longXStep = longSlopeX * HEIGHT_ROW_STEP_SCALE;
       shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
       longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
       shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
-      shortX = corners[1]->v.ob[0] << HEIGHT_FRACTION_BITS;
-      shortHeight = corners[1]->v.ob[1] << HEIGHT_FRACTION_BITS;
+      shortX = corners[1]->v.ob[AXIS_X] << HEIGHT_FRACTION_BITS;
+      shortHeight = corners[1]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
       for (z = 0; z < lowerSpan + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
-        DrawHeightRow(
-            longX, longHeight, shortX, shortHeight, corners[1]->v.ob[2] + z);
+        DrawHeightRow(longX, longHeight, shortX, shortHeight,
+            corners[1]->v.ob[AXIS_Z] + z);
         longX += longXStep;
         shortX += shortXStep;
         longHeight += longHeightStep;
@@ -875,19 +876,19 @@ void DrawBandHeights(s16* heights, s32 band) {
         corners[1] = GetGroundPoint(column + 1, row);
         corners[2] = GetGroundPoint(column, row + 1);
         corners[3] = GetGroundPoint(column + 1, row + 1);
-        if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
+        if (corners[1]->v.ob[AXIS_Z] < corners[0]->v.ob[AXIS_Z]) {
           corners[4] = corners[0];
           corners[0] = corners[1];
           corners[1] = corners[4];
         }
 
-        if (corners[2]->v.ob[2] < corners[1]->v.ob[2]) {
+        if (corners[2]->v.ob[AXIS_Z] < corners[1]->v.ob[AXIS_Z]) {
           corners[4] = corners[1];
           corners[1] = corners[2];
           corners[2] = corners[4];
         }
 
-        if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
+        if (corners[1]->v.ob[AXIS_Z] < corners[0]->v.ob[AXIS_Z]) {
           corners[4] = corners[0];
           corners[0] = corners[1];
           corners[1] = corners[4];
@@ -901,19 +902,19 @@ void DrawBandHeights(s16* heights, s32 band) {
 
         /* The second triangle has the far corner in place of the first */
         corners[0] = corners[3];
-        if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
+        if (corners[1]->v.ob[AXIS_Z] < corners[0]->v.ob[AXIS_Z]) {
           corners[4] = corners[0];
           corners[0] = corners[1];
           corners[1] = corners[4];
         }
 
-        if (corners[2]->v.ob[2] < corners[1]->v.ob[2]) {
+        if (corners[2]->v.ob[AXIS_Z] < corners[1]->v.ob[AXIS_Z]) {
           corners[4] = corners[1];
           corners[1] = corners[2];
           corners[2] = corners[4];
         }
 
-        if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
+        if (corners[1]->v.ob[AXIS_Z] < corners[0]->v.ob[AXIS_Z]) {
           corners[4] = corners[0];
           corners[0] = corners[1];
           corners[1] = corners[4];
@@ -2291,15 +2292,15 @@ f32 MeasureGroundTiles(void) {
           point = GetGroundPoint(
               (tileColumn * GROUND_TILE_POINT_SPAN) + pointColumn,
               (tileRow * GROUND_TILE_POINT_SPAN) + pointRow);
-          sumX += point->v.ob[0];
-          sumY += point->v.ob[1];
-          sumZ += point->v.ob[2];
-          if (point->v.ob[1] < lowest) {
-            lowest = point->v.ob[1];
+          sumX += point->v.ob[AXIS_X];
+          sumY += point->v.ob[AXIS_Y];
+          sumZ += point->v.ob[AXIS_Z];
+          if (point->v.ob[AXIS_Y] < lowest) {
+            lowest = point->v.ob[AXIS_Y];
           }
 
-          if (point->v.ob[1] > highest) {
-            highest = point->v.ob[1];
+          if (point->v.ob[AXIS_Y] > highest) {
+            highest = point->v.ob[AXIS_Y];
           }
         }
       }
@@ -4036,9 +4037,9 @@ void BuildGroundTileDisplayList(
    * SetTileVertexMidpoint is a nested function, a GNU C extension.
    */
   void SetTileVertexMidpoint(Vtx_t * from, Vtx_t * to, Vtx_t * midpoint) {
-    midpoint->ob[0] = (from->ob[0] + to->ob[0]) / 2;
-    midpoint->ob[1] = (from->ob[1] + to->ob[1]) / 2;
-    midpoint->ob[2] = (from->ob[2] + to->ob[2]) / 2;
+    midpoint->ob[AXIS_X] = (from->ob[AXIS_X] + to->ob[AXIS_X]) / 2;
+    midpoint->ob[AXIS_Y] = (from->ob[AXIS_Y] + to->ob[AXIS_Y]) / 2;
+    midpoint->ob[AXIS_Z] = (from->ob[AXIS_Z] + to->ob[AXIS_Z]) / 2;
     midpoint->flag = 0;
     midpoint->tc[0] = (from->tc[0] + to->tc[0]) / 2;
     midpoint->tc[1] = (from->tc[1] + to->tc[1]) / 2;

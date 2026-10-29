@@ -943,9 +943,9 @@ Boolean IsInWater(s32 x, s32 y, s32 z) {
 
 /* Sets a vertex halfway between two others */
 void SetVertexMidpoint(Vtx* first, Vtx* second, Vtx* midpoint) {
-  midpoint->v.ob[0] = (first->v.ob[0] + second->v.ob[0]) / 2;
-  midpoint->v.ob[1] = (first->v.ob[1] + second->v.ob[1]) / 2;
-  midpoint->v.ob[2] = (first->v.ob[2] + second->v.ob[2]) / 2;
+  midpoint->v.ob[AXIS_X] = (first->v.ob[AXIS_X] + second->v.ob[AXIS_X]) / 2;
+  midpoint->v.ob[AXIS_Y] = (first->v.ob[AXIS_Y] + second->v.ob[AXIS_Y]) / 2;
+  midpoint->v.ob[AXIS_Z] = (first->v.ob[AXIS_Z] + second->v.ob[AXIS_Z]) / 2;
   midpoint->v.flag = 0;
   midpoint->v.tc[0] = (first->v.tc[0] + second->v.tc[0]) / 2;
   midpoint->v.tc[1] = (first->v.tc[1] + second->v.tc[1]) / 2;
@@ -962,14 +962,14 @@ void SetVertexMidpoint(Vtx* first, Vtx* second, Vtx* midpoint) {
 void BlendVertices(Vtx* first, Vtx* second, Vtx* result, s32 weight) {
   s32 firstWeight = EDGE_WEIGHT_MAX - weight;
 
-  result->v.ob[0] =
-      ((first->v.ob[0] * firstWeight) + (second->v.ob[0] * weight)) /
+  result->v.ob[AXIS_X] =
+      ((first->v.ob[AXIS_X] * firstWeight) + (second->v.ob[AXIS_X] * weight)) /
       EDGE_WEIGHT_MAX;
-  result->v.ob[1] =
-      ((first->v.ob[1] * firstWeight) + (second->v.ob[1] * weight)) /
+  result->v.ob[AXIS_Y] =
+      ((first->v.ob[AXIS_Y] * firstWeight) + (second->v.ob[AXIS_Y] * weight)) /
       EDGE_WEIGHT_MAX;
-  result->v.ob[2] =
-      ((first->v.ob[2] * firstWeight) + (second->v.ob[2] * weight)) /
+  result->v.ob[AXIS_Z] =
+      ((first->v.ob[AXIS_Z] * firstWeight) + (second->v.ob[AXIS_Z] * weight)) /
       EDGE_WEIGHT_MAX;
   result->v.flag = 0;
   result->v.tc[0] =
@@ -1009,7 +1009,7 @@ Vtx* GetGridVertex(u32 column, u32 row) {
 }
 
 s16 GetGridVertexHeight(s32 column, s32 row) {
-  return GetGridVertex(column, row)->v.ob[1];
+  return GetGridVertex(column, row)->v.ob[AXIS_Y];
 }
 
 /* Grid vertices are half a tile apart, in world units */
@@ -1046,7 +1046,7 @@ void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
 }
 
 void SetGridVertexHeight(s32 column, s32 row, s32 height) {
-  GetGridVertex(column, row)->v.ob[1] = height & ~1;
+  GetGridVertex(column, row)->v.ob[AXIS_Y] = height & ~1;
 }
 
 void SetGridVertexShade(s32 column, s32 row, s8 shade) {
@@ -1162,7 +1162,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
-        point->v.ob[1] = height;
+        point->v.ob[AXIS_Y] = height;
 
         /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
@@ -1176,7 +1176,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point =
             &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
-        point->v.ob[1] = height;
+        point->v.ob[AXIS_Y] = height;
 
         /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
@@ -1190,7 +1190,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point =
             &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
-        point->v.ob[1] = height;
+        point->v.ob[AXIS_Y] = height;
 
         /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
@@ -1298,9 +1298,9 @@ void BuildAllTileMidpoints(void) {
       g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex = tileIndex;
       midpoints = g_WorkArea.hole.midpoints[tileIndex];
       center = TileGridVertex(tileColumn, tileRow, 1, 1);
-      g_WorkArea.hole.tiles[tileIndex].center[0] = center->v.ob[0];
-      g_WorkArea.hole.tiles[tileIndex].center[1] = center->v.ob[1];
-      g_WorkArea.hole.tiles[tileIndex].center[2] = center->v.ob[2];
+      g_WorkArea.hole.tiles[tileIndex].center[0] = center->v.ob[AXIS_X];
+      g_WorkArea.hole.tiles[tileIndex].center[1] = center->v.ob[AXIS_Y];
+      g_WorkArea.hole.tiles[tileIndex].center[2] = center->v.ob[AXIS_Z];
       if (g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
         BuildTileMidpoints(midpoints, tileColumn, tileRow);
       }
@@ -1896,15 +1896,15 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
       return FALSE;
     }
 
-    triangle->corners[AXIS_X][0] = first->v.ob[0];
-    triangle->corners[AXIS_X][1] = second->v.ob[0];
-    triangle->corners[AXIS_X][2] = third->v.ob[0];
-    triangle->corners[AXIS_Y][0] = first->v.ob[1];
-    triangle->corners[AXIS_Y][1] = second->v.ob[1];
-    triangle->corners[AXIS_Y][2] = third->v.ob[1];
-    triangle->corners[AXIS_Z][0] = first->v.ob[2];
-    triangle->corners[AXIS_Z][1] = second->v.ob[2];
-    triangle->corners[AXIS_Z][2] = third->v.ob[2];
+    triangle->corners[AXIS_X][0] = first->v.ob[AXIS_X];
+    triangle->corners[AXIS_X][1] = second->v.ob[AXIS_X];
+    triangle->corners[AXIS_X][2] = third->v.ob[AXIS_X];
+    triangle->corners[AXIS_Y][0] = first->v.ob[AXIS_Y];
+    triangle->corners[AXIS_Y][1] = second->v.ob[AXIS_Y];
+    triangle->corners[AXIS_Y][2] = third->v.ob[AXIS_Y];
+    triangle->corners[AXIS_Z][0] = first->v.ob[AXIS_Z];
+    triangle->corners[AXIS_Z][1] = second->v.ob[AXIS_Z];
+    triangle->corners[AXIS_Z][2] = third->v.ob[AXIS_Z];
     return TRUE;
   }
 

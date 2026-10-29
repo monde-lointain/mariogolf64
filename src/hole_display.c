@@ -1520,52 +1520,52 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   /* Vertices 1, 2, 6 and 7 follow the horizon level; 0, 3 and 4 follow the
    * pitch alone */
   if (g_SkyState.pitches[viewIndex] < 0.0f) {
-    vertices[0].v.ob[1] = (SCREEN_HEIGHT / 2) -
+    vertices[0].v.ob[AXIS_Y] = (SCREEN_HEIGHT / 2) -
         (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
-    vertices[3].v.ob[1] = (SCREEN_HEIGHT / 2) -
+    vertices[3].v.ob[AXIS_Y] = (SCREEN_HEIGHT / 2) -
         (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
-    vertices[4].v.ob[1] = (SCREEN_HEIGHT / 2) -
+    vertices[4].v.ob[AXIS_Y] = (SCREEN_HEIGHT / 2) -
         (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
   } else {
-    vertices[0].v.ob[1] = SCREEN_HEIGHT / 2;
-    vertices[3].v.ob[1] = SCREEN_HEIGHT / 2;
-    vertices[4].v.ob[1] = SCREEN_HEIGHT / 2;
+    vertices[0].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
+    vertices[3].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
+    vertices[4].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
   }
 
-  vertices[1].v.ob[1] =
+  vertices[1].v.ob[AXIS_Y] =
       (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) *
       SKY_HORIZON_TO_HEIGHT;
-  vertices[2].v.ob[1] =
+  vertices[2].v.ob[AXIS_Y] =
       (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) *
       SKY_HORIZON_TO_HEIGHT;
-  vertices[1].v.ob[2] =
+  vertices[1].v.ob[AXIS_Z] =
       SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-  vertices[2].v.ob[2] =
+  vertices[2].v.ob[AXIS_Z] =
       SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-  vertices[6].v.ob[2] =
+  vertices[6].v.ob[AXIS_Z] =
       SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-  vertices[7].v.ob[2] =
+  vertices[7].v.ob[AXIS_Z] =
       SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-  if (vertices[1].v.ob[1] < -SKY_HEIGHT_LIMIT) {
-    clippedHeight = (vertices[1].v.ob[1] + SKY_HEIGHT_LIMIT) /
+  if (vertices[1].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
+    clippedHeight = (vertices[1].v.ob[AXIS_Y] + SKY_HEIGHT_LIMIT) /
         (1 << SKY_CLIPPED_HEIGHT_SHIFT);
-    vertices[1].v.ob[1] = -SKY_HEIGHT_LIMIT;
+    vertices[1].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
   }
 
-  if (vertices[2].v.ob[1] < -SKY_HEIGHT_LIMIT) {
-    vertices[2].v.ob[1] = -SKY_HEIGHT_LIMIT;
+  if (vertices[2].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
+    vertices[2].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
   }
 
-  if (vertices[1].v.ob[1] > SKY_HEIGHT_LIMIT) {
-    vertices[1].v.ob[1] = SKY_HEIGHT_LIMIT;
+  if (vertices[1].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
+    vertices[1].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
   }
 
-  if (vertices[2].v.ob[1] > SKY_HEIGHT_LIMIT) {
-    vertices[2].v.ob[1] = SKY_HEIGHT_LIMIT;
+  if (vertices[2].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
+    vertices[2].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
   }
 
-  vertices[6].v.ob[1] = vertices[1].v.ob[1];
-  vertices[7].v.ob[1] = vertices[2].v.ob[1];
+  vertices[6].v.ob[AXIS_Y] = vertices[1].v.ob[AXIS_Y];
+  vertices[7].v.ob[AXIS_Y] = vertices[2].v.ob[AXIS_Y];
 
   /* Each row of texture coordinates lies at a distance along the viewed wind
    * direction */
@@ -2983,12 +2983,12 @@ void CaptureHudAnimationFrame(void) {
         row++, y -= TILE_GRID_ROW_SPACING) {
       for (column = 0, x = TILE_GRID_LEFT; column != TILE_GRID_COLUMN_COUNT - 1;
           column++, x += TILE_GRID_SPACING) {
-        vertex->v.ob[0] = x;
-        vertex->v.ob[1] = y;
-        vertex->v.ob[2] = 0;
-        nextVertex->v.ob[0] = x;
-        nextVertex->v.ob[1] = y;
-        nextVertex->v.ob[2] = 0;
+        vertex->v.ob[AXIS_X] = x;
+        vertex->v.ob[AXIS_Y] = y;
+        vertex->v.ob[AXIS_Z] = 0;
+        nextVertex->v.ob[AXIS_X] = x;
+        nextVertex->v.ob[AXIS_Y] = y;
+        nextVertex->v.ob[AXIS_Z] = 0;
         vertex++;
         nextVertex++;
       }
@@ -2996,12 +2996,12 @@ void CaptureHudAnimationFrame(void) {
       /* The last column is narrower, ending inside the HUD's margin */
       for (column = TILE_GRID_COLUMN_COUNT - 1, x = TILE_GRID_RIGHT;
           column != TILE_GRID_COLUMN_COUNT; column++, x += TILE_GRID_SPACING) {
-        vertex->v.ob[0] = x;
-        vertex->v.ob[1] = y;
-        vertex->v.ob[2] = 0;
-        nextVertex->v.ob[0] = x;
-        nextVertex->v.ob[1] = y;
-        nextVertex->v.ob[2] = 0;
+        vertex->v.ob[AXIS_X] = x;
+        vertex->v.ob[AXIS_Y] = y;
+        vertex->v.ob[AXIS_Z] = 0;
+        nextVertex->v.ob[AXIS_X] = x;
+        nextVertex->v.ob[AXIS_Y] = y;
+        nextVertex->v.ob[AXIS_Z] = 0;
         vertex++;
         nextVertex++;
       }

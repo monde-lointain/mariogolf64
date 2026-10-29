@@ -1083,23 +1083,23 @@ void ShowFlipMessage(MessageId messageId) {
       FLIP_MESSAGE_GLYPH_GROUP, FONT_SIZE_LARGE, 0, 0, messageId);
   halfWidth = (u32)halfSize >> 16;
   f_FlipMessageHalfWidth = halfWidth;
-  f_FlipMessageBoardVertices[0].v.ob[0] =
+  f_FlipMessageBoardVertices[0].v.ob[AXIS_X] =
       -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
-  f_FlipMessageBoardVertices[1].v.ob[0] =
+  f_FlipMessageBoardVertices[1].v.ob[AXIS_X] =
       -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
-  f_FlipMessageBoardVertices[2].v.ob[0] =
+  f_FlipMessageBoardVertices[2].v.ob[AXIS_X] =
       halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
-  f_FlipMessageBoardVertices[3].v.ob[0] =
+  f_FlipMessageBoardVertices[3].v.ob[AXIS_X] =
       halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
   halfHeight = halfSize & 0xFFFF;
   f_FlipMessageHalfHeight = halfHeight;
-  f_FlipMessageBoardVertices[0].v.ob[1] =
+  f_FlipMessageBoardVertices[0].v.ob[AXIS_Y] =
       halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
-  f_FlipMessageBoardVertices[3].v.ob[1] =
+  f_FlipMessageBoardVertices[3].v.ob[AXIS_Y] =
       halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
-  f_FlipMessageBoardVertices[1].v.ob[1] =
+  f_FlipMessageBoardVertices[1].v.ob[AXIS_Y] =
       -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
-  f_FlipMessageBoardVertices[2].v.ob[1] =
+  f_FlipMessageBoardVertices[2].v.ob[AXIS_Y] =
       -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
   SetTextSlot(FLIP_MESSAGE_X, FLIP_MESSAGE_Y, f_FlipMessageId,
       TEXT_SLOT_LARGE_FONT, FLIP_MESSAGE_TEXT_SLOT,
@@ -2431,8 +2431,8 @@ void StartContactEffect(s32 effect) {
 
     g_ContactEffect = 0;
     f_IsContactEffectFading = FALSE;
-    f_ContactVertices[0].v.ob[1] = 0;
-    f_ContactVertices[1].v.ob[1] = 0;
+    f_ContactVertices[0].v.ob[AXIS_Y] = 0;
+    f_ContactVertices[1].v.ob[AXIS_Y] = 0;
     if (effect == CONTACT_EFFECT_POWER_IRON) {
       f_ContactStyle = CONTACT_STYLE_POWER_IRON;
     } else if (effect == CONTACT_EFFECT_SHOT) {
@@ -2450,62 +2450,62 @@ void StartContactEffect(s32 effect) {
     /* Each style sets its quad's half width, its texture's far corner and its
      * sound */
     if (f_ContactStyle == CONTACT_STYLE_POWER_IRON) {
-      f_ContactVertices[0].v.ob[0] = -20;
-      f_ContactVertices[1].v.ob[0] = 20;
+      f_ContactVertices[0].v.ob[AXIS_X] = -20;
+      f_ContactVertices[1].v.ob[AXIS_X] = 20;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0xD6;
       PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_SHOT) {
-      f_ContactVertices[0].v.ob[0] = -10;
-      f_ContactVertices[1].v.ob[0] = 10;
+      f_ContactVertices[0].v.ob[AXIS_X] = -10;
+      f_ContactVertices[1].v.ob[AXIS_X] = 10;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0xD6;
     } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
-      f_ContactVertices[0].v.ob[0] = -18;
-      f_ContactVertices[1].v.ob[0] = 18;
-      f_ContactVertices[0].v.ob[1] = CONTACT_PUTT_Y;
-      f_ContactVertices[1].v.ob[1] = CONTACT_PUTT_Y;
+      f_ContactVertices[0].v.ob[AXIS_X] = -18;
+      f_ContactVertices[1].v.ob[AXIS_X] = 18;
+      f_ContactVertices[0].v.ob[AXIS_Y] = CONTACT_PUTT_Y;
+      f_ContactVertices[1].v.ob[AXIS_Y] = CONTACT_PUTT_Y;
       f_ContactTextureS = 0x1FF;
       f_ContactTextureT = 0x2A;
     } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
       StartShotEffect(0);
-      f_ContactVertices[0].v.ob[0] = -120;
-      f_ContactVertices[1].v.ob[0] = 120;
+      f_ContactVertices[0].v.ob[AXIS_X] = -120;
+      f_ContactVertices[1].v.ob[AXIS_X] = 120;
       f_ContactTextureS = 0x5FF;
       f_ContactTextureT = 0x7FF;
       PlaySound(
           SOUND_CONTACT_WARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
-      f_ContactVertices[0].v.ob[0] = -60;
-      f_ContactVertices[1].v.ob[0] = 60;
+      f_ContactVertices[0].v.ob[AXIS_X] = -60;
+      f_ContactVertices[1].v.ob[AXIS_X] = 60;
       f_ContactTextureS = 0x7FF;
       f_ContactTextureT = 0;
       PlaySound(SOUND_CONTACT_HEAVY_HITTER, CONTACT_STYLE_SOUND_CHANNEL,
           SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
-      f_ContactVertices[0].v.ob[0] = -20;
-      f_ContactVertices[1].v.ob[0] = 20;
+      f_ContactVertices[0].v.ob[AXIS_X] = -20;
+      f_ContactVertices[1].v.ob[AXIS_X] = 20;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0x54;
       PlaySound(
           SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-      f_ContactVertices[0].v.ob[0] = -160;
-      f_ContactVertices[1].v.ob[0] = 160;
+      f_ContactVertices[0].v.ob[AXIS_X] = -160;
+      f_ContactVertices[1].v.ob[AXIS_X] = 160;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0x2A;
       PlaySound(
           SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
-      f_ContactVertices[0].v.ob[0] = -30;
-      f_ContactVertices[1].v.ob[0] = 30;
+      f_ContactVertices[0].v.ob[AXIS_X] = -30;
+      f_ContactVertices[1].v.ob[AXIS_X] = 30;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0x2A;
       PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else {
-      f_ContactVertices[0].v.ob[0] = -20;
-      f_ContactVertices[1].v.ob[0] = 20;
+      f_ContactVertices[0].v.ob[AXIS_X] = -20;
+      f_ContactVertices[1].v.ob[AXIS_X] = 20;
       f_ContactTextureS = 0x3FF;
       f_ContactTextureT = 0x2A;
       PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -2993,9 +2993,9 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
 
   if (f_WindFlyGuyFrame == WIND_FLY_GUY_STARTING) {
     f_WindFlyGuyLastPosition = f_WindFlyGuyPath[0];
-    f_ContactVertices[0].v.ob[0] = -WIND_STREAK_HALF_WIDTH;
+    f_ContactVertices[0].v.ob[AXIS_X] = -WIND_STREAK_HALF_WIDTH;
     f_WindStreakHead = 0;
-    f_ContactVertices[1].v.ob[0] = WIND_STREAK_HALF_WIDTH;
+    f_ContactVertices[1].v.ob[AXIS_X] = WIND_STREAK_HALF_WIDTH;
     for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
       guTranslate(&f_ContactMatrices[i], position.x - (SCREEN_WIDTH / 2),
           (SCREEN_HEIGHT / 2) - position.y, WIND_STREAK_DEPTH);

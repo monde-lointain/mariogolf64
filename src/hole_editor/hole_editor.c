@@ -789,8 +789,10 @@ void func_8040000C_hole_editor(void) {
 
   corner = GetGroundPoint(f_CellCursorColumn, f_CellCursorRow);
   oppositeCorner = GetGroundPoint(f_CellCursorColumn + 1, f_CellCursorRow + 1);
-  g_MapCamera.view.eye[0] = (corner->v.ob[0] + oppositeCorner->v.ob[0]) / 2;
-  g_MapCamera.view.eye[2] = (corner->v.ob[2] + oppositeCorner->v.ob[2]) / 2;
+  g_MapCamera.view.eye[0] =
+      (corner->v.ob[AXIS_X] + oppositeCorner->v.ob[AXIS_X]) / 2;
+  g_MapCamera.view.eye[2] =
+      (corner->v.ob[AXIS_Z] + oppositeCorner->v.ob[AXIS_Z]) / 2;
 }
 
 /*
@@ -2846,8 +2848,8 @@ void func_80405B80_hole_editor(Vtx* vertices, s32 column, s32 row, s32 weight) {
   for (i = 0; i < EDGE_POINT_COUNT; i++) {
     Vtx* vertex = &vertices[D_8040C580_hole_editor[i][((column & 1) * 2) + 1]];
 
-    vertex->v.ob[0] =
-        ((ends[0]->v.ob[0] * firstWeight) + (ends[1]->v.ob[0] * weight)) /
+    vertex->v.ob[AXIS_X] = ((ends[0]->v.ob[AXIS_X] * firstWeight) +
+                               (ends[1]->v.ob[AXIS_X] * weight)) /
         EDGE_WEIGHT_MAX;
     vertex->v.tc[0] =
         ((ends[0]->v.tc[0] * firstWeight) + (ends[1]->v.tc[0] * weight)) /
@@ -2868,8 +2870,8 @@ void func_80405C94_hole_editor(Vtx* vertices, s32 column, s32 row, s32 weight) {
   for (i = 0; i < EDGE_POINT_COUNT; i++) {
     Vtx* vertex = &vertices[D_8040C580_hole_editor[((row & 1) * 2) + 1][i]];
 
-    vertex->v.ob[2] =
-        ((ends[0]->v.ob[2] * firstWeight) + (ends[1]->v.ob[2] * weight)) /
+    vertex->v.ob[AXIS_Z] = ((ends[0]->v.ob[AXIS_Z] * firstWeight) +
+                               (ends[1]->v.ob[AXIS_Z] * weight)) /
         EDGE_WEIGHT_MAX;
     vertex->v.tc[1] =
         ((ends[0]->v.tc[1] * firstWeight) + (ends[1]->v.tc[1] * weight)) /
@@ -3154,10 +3156,10 @@ void func_80406570_hole_editor(void) {
               (tileColumn * GROUND_TILE_POINT_SPAN) + cellColumn + 1,
               (tileRow * GROUND_TILE_POINT_SPAN) + cellRow + 1);
           cellBits |= func_80405870_hole_editor(
-                          corners[0]->v.ob[0] / VERTEX_UNITS_PER_CODE,
-                          corners[0]->v.ob[2] / VERTEX_UNITS_PER_CODE,
-                          corners[1]->v.ob[0] / VERTEX_UNITS_PER_CODE,
-                          corners[1]->v.ob[2] / VERTEX_UNITS_PER_CODE)
+                          corners[0]->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
+                          corners[0]->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE,
+                          corners[1]->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
+                          corners[1]->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE)
               << ((cellRow * GROUND_TILE_POINT_SPAN) + cellColumn);
         }
       }
@@ -3866,9 +3868,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
 
   /* Sets a vertex halfway between two others */
   void GetMidpointVertex(Vtx_t * first, Vtx_t * second, Vtx_t * midpoint) {
-    midpoint->ob[0] = (first->ob[0] + second->ob[0]) / 2;
-    midpoint->ob[1] = (first->ob[1] + second->ob[1]) / 2;
-    midpoint->ob[2] = (first->ob[2] + second->ob[2]) / 2;
+    midpoint->ob[AXIS_X] = (first->ob[AXIS_X] + second->ob[AXIS_X]) / 2;
+    midpoint->ob[AXIS_Y] = (first->ob[AXIS_Y] + second->ob[AXIS_Y]) / 2;
+    midpoint->ob[AXIS_Z] = (first->ob[AXIS_Z] + second->ob[AXIS_Z]) / 2;
     midpoint->flag = 0;
     midpoint->tc[0] = (first->tc[0] + second->tc[0]) / 2;
     midpoint->tc[1] = (first->tc[1] + second->tc[1]) / 2;

@@ -334,8 +334,8 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
       G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
 
   gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_FrameDisplayList));
-  f_FrameVertices[1].v.ob[0] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
-  f_FrameVertices[2].v.ob[0] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
+  f_FrameVertices[1].v.ob[AXIS_X] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
+  f_FrameVertices[2].v.ob[AXIS_X] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
   for (i = 0; i < extraFrameCount + 1; i++) {
     vertexIndex = (i * 4) + 4;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 1, vertexIndex + 2, 0,
@@ -357,10 +357,10 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     f_CpuBarMaximum = barLength;
   }
 
-  f_CpuBarVertices[0].v.ob[0] = startX;
-  f_CpuBarVertices[1].v.ob[0] = startX + barLength;
-  f_CpuBarVertices[2].v.ob[0] = startX + barLength;
-  f_CpuBarVertices[3].v.ob[0] = startX;
+  f_CpuBarVertices[0].v.ob[AXIS_X] = startX;
+  f_CpuBarVertices[1].v.ob[AXIS_X] = startX + barLength;
+  f_CpuBarVertices[2].v.ob[AXIS_X] = startX + barLength;
+  f_CpuBarVertices[3].v.ob[AXIS_X] = startX;
   gSP2Triangles(gfx++, 0, 2, 1, 0, 0, 3, 2, 0);
 
   gSPVertex(gfx++, f_AudioBarVertices, 16, 0);
@@ -381,10 +381,10 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
       f_AudioBarMaximum = barLength;
     }
 
-    f_AudioBarVertices[vertexIndex + 0].v.ob[0] = startX;
-    f_AudioBarVertices[vertexIndex + 1].v.ob[0] = startX + barLength;
-    f_AudioBarVertices[vertexIndex + 2].v.ob[0] = startX + barLength;
-    f_AudioBarVertices[vertexIndex + 3].v.ob[0] = startX;
+    f_AudioBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
+    f_AudioBarVertices[vertexIndex + 1].v.ob[AXIS_X] = startX + barLength;
+    f_AudioBarVertices[vertexIndex + 2].v.ob[AXIS_X] = startX + barLength;
+    f_AudioBarVertices[vertexIndex + 3].v.ob[AXIS_X] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
         vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
@@ -408,10 +408,10 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
       f_RspBarMaximum = barLength;
     }
 
-    f_RspBarVertices[vertexIndex + 0].v.ob[0] = startX;
-    f_RspBarVertices[vertexIndex + 1].v.ob[0] = startX + barLength;
-    f_RspBarVertices[vertexIndex + 2].v.ob[0] = startX + barLength;
-    f_RspBarVertices[vertexIndex + 3].v.ob[0] = startX;
+    f_RspBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
+    f_RspBarVertices[vertexIndex + 1].v.ob[AXIS_X] = startX + barLength;
+    f_RspBarVertices[vertexIndex + 2].v.ob[AXIS_X] = startX + barLength;
+    f_RspBarVertices[vertexIndex + 3].v.ob[AXIS_X] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
         vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
@@ -435,10 +435,10 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
       f_RdpBarMaximum = barLength;
     }
 
-    f_RdpBarVertices[vertexIndex + 0].v.ob[0] = startX;
-    f_RdpBarVertices[vertexIndex + 1].v.ob[0] = barLength;
-    f_RdpBarVertices[vertexIndex + 2].v.ob[0] = barLength;
-    f_RdpBarVertices[vertexIndex + 3].v.ob[0] = startX;
+    f_RdpBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
+    f_RdpBarVertices[vertexIndex + 1].v.ob[AXIS_X] = barLength;
+    f_RdpBarVertices[vertexIndex + 2].v.ob[AXIS_X] = barLength;
+    f_RdpBarVertices[vertexIndex + 3].v.ob[AXIS_X] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
         vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
@@ -462,10 +462,10 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
       f_RdpCommandBarMaximum = barLength;
     }
 
-    f_RdpCommandBarVertices[vertexIndex + 0].v.ob[0] = startX;
-    f_RdpCommandBarVertices[vertexIndex + 1].v.ob[0] = barLength;
-    f_RdpCommandBarVertices[vertexIndex + 2].v.ob[0] = barLength;
-    f_RdpCommandBarVertices[vertexIndex + 3].v.ob[0] = startX;
+    f_RdpCommandBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
+    f_RdpCommandBarVertices[vertexIndex + 1].v.ob[AXIS_X] = barLength;
+    f_RdpCommandBarVertices[vertexIndex + 2].v.ob[AXIS_X] = barLength;
+    f_RdpCommandBarVertices[vertexIndex + 3].v.ob[AXIS_X] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
         vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
@@ -489,10 +489,10 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
       f_RdpPipeBarMaximum = barLength;
     }
 
-    f_RdpPipeBarVertices[vertexIndex + 0].v.ob[0] = startX;
-    f_RdpPipeBarVertices[vertexIndex + 1].v.ob[0] = barLength;
-    f_RdpPipeBarVertices[vertexIndex + 2].v.ob[0] = barLength;
-    f_RdpPipeBarVertices[vertexIndex + 3].v.ob[0] = startX;
+    f_RdpPipeBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
+    f_RdpPipeBarVertices[vertexIndex + 1].v.ob[AXIS_X] = barLength;
+    f_RdpPipeBarVertices[vertexIndex + 2].v.ob[AXIS_X] = barLength;
+    f_RdpPipeBarVertices[vertexIndex + 3].v.ob[AXIS_X] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
         vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;
@@ -516,10 +516,10 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
       f_RdpTmemBarMaximum = barLength;
     }
 
-    f_RdpTmemBarVertices[vertexIndex + 0].v.ob[0] = startX;
-    f_RdpTmemBarVertices[vertexIndex + 1].v.ob[0] = barLength;
-    f_RdpTmemBarVertices[vertexIndex + 2].v.ob[0] = barLength;
-    f_RdpTmemBarVertices[vertexIndex + 3].v.ob[0] = startX;
+    f_RdpTmemBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
+    f_RdpTmemBarVertices[vertexIndex + 1].v.ob[AXIS_X] = barLength;
+    f_RdpTmemBarVertices[vertexIndex + 2].v.ob[AXIS_X] = barLength;
+    f_RdpTmemBarVertices[vertexIndex + 3].v.ob[AXIS_X] = startX;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 2, vertexIndex + 1, 0,
         vertexIndex + 0, vertexIndex + 3, vertexIndex + 2, 0);
     startX += barLength;

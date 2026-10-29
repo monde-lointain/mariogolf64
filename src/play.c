@@ -1853,7 +1853,7 @@ void func_800628C4(void) {
   for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
     for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
       point = GetGroundPoint(column, row)->v;
-      offset = GetMirroredOffset(point.ob[0]);
+      offset = GetMirroredOffset(point.ob[AXIS_X]);
       if (offset != 512) {
         point.tc[0] = TexelCoordinate(offset);
       } else {
@@ -1861,7 +1861,7 @@ void func_800628C4(void) {
       }
 
       point.tc[0] += 0x100;
-      offset = GetMirroredOffset(point.ob[2]);
+      offset = GetMirroredOffset(point.ob[AXIS_Z]);
       if (offset != 512) {
         point.tc[1] = TexelCoordinate(offset);
       } else {
@@ -1887,9 +1887,12 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 /* Sets a vertex halfway between two others */
 #define SetAverageVertex(midpoint, from, to) \
   { \
-    (midpoint)->v.ob[0] = ((from)->v.ob[0] + (to)->v.ob[0]) / 2; \
-    (midpoint)->v.ob[1] = ((from)->v.ob[1] + (to)->v.ob[1]) / 2; \
-    (midpoint)->v.ob[2] = ((from)->v.ob[2] + (to)->v.ob[2]) / 2; \
+    (midpoint)->v.ob[AXIS_X] = \
+        ((from)->v.ob[AXIS_X] + (to)->v.ob[AXIS_X]) / 2; \
+    (midpoint)->v.ob[AXIS_Y] = \
+        ((from)->v.ob[AXIS_Y] + (to)->v.ob[AXIS_Y]) / 2; \
+    (midpoint)->v.ob[AXIS_Z] = \
+        ((from)->v.ob[AXIS_Z] + (to)->v.ob[AXIS_Z]) / 2; \
     (midpoint)->v.flag = 0; \
     (midpoint)->v.tc[0] = ((from)->v.tc[0] + (to)->v.tc[0]) / 2; \
     (midpoint)->v.tc[1] = ((from)->v.tc[1] + (to)->v.tc[1]) / 2; \

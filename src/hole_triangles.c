@@ -169,11 +169,11 @@ void DrawHoleTriangles(
         for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
             vertexIndex++) {
           f_HoleTriangles[index].vertices[vertexIndex].v.tc[0] =
-              f_HoleTriangles[index].vertices[vertexIndex].v.ob[0] *
+              f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] *
               TEXTURE_COORDINATE_SCALE;
           f_HoleTriangles[index].vertices[vertexIndex].v.tc[1] =
-              (f_HoleTriangles[index].vertices[vertexIndex].v.ob[2] +
-                  f_HoleTriangles[index].vertices[vertexIndex].v.ob[1]) *
+              (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z] +
+                  f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Y]) *
               TEXTURE_COORDINATE_SCALE;
         }
 
@@ -185,11 +185,11 @@ void DrawHoleTriangles(
         for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
             vertexIndex++) {
           f_HoleTriangles[index].vertices[vertexIndex].v.tc[0] =
-              (f_HoleTriangles[index].vertices[vertexIndex].v.ob[0] +
-                  f_HoleTriangles[index].vertices[vertexIndex].v.ob[2]) *
+              (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] +
+                  f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z]) *
               TEXTURE_COORDINATE_SCALE;
           f_HoleTriangles[index].vertices[vertexIndex].v.tc[1] =
-              f_HoleTriangles[index].vertices[vertexIndex].v.ob[1] *
+              f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Y] *
               TEXTURE_COORDINATE_SCALE;
         }
 
@@ -205,10 +205,10 @@ void DrawHoleTriangles(
         }
 
         edgeY = 0.0f;
-        edgeX = f_HoleTriangles[index].vertices[1].v.ob[0] -
-            f_HoleTriangles[index].vertices[2].v.ob[0];
-        edgeZ = f_HoleTriangles[index].vertices[1].v.ob[2] -
-            f_HoleTriangles[index].vertices[2].v.ob[2];
+        edgeX = f_HoleTriangles[index].vertices[1].v.ob[AXIS_X] -
+            f_HoleTriangles[index].vertices[2].v.ob[AXIS_X];
+        edgeZ = f_HoleTriangles[index].vertices[1].v.ob[AXIS_Z] -
+            f_HoleTriangles[index].vertices[2].v.ob[AXIS_Z];
         if (fabsf(edgeX) + fabsf(edgeZ) < MIN_SHADED_EDGE_LENGTH) {
           break;
         }
@@ -440,9 +440,9 @@ static void BuildRingVertices(void) {
     x = (cosf(angle) * RING_RADIUS) + offsetX;
     y = (sinf(angle) * RING_RADIUS) + offsetZ;
     offsetY = (isRaised - 0.5f) * RING_THICKNESS;
-    vertex->n.ob[0] = x;
-    vertex->n.ob[1] = y;
-    vertex->n.ob[2] = offsetY;
+    vertex->n.ob[AXIS_X] = x;
+    vertex->n.ob[AXIS_Y] = y;
+    vertex->n.ob[AXIS_Z] = offsetY;
     guNormalize(&offsetX, &offsetY, &offsetZ);
     vertex->n.n[0] = offsetX * RING_NORMAL_SCALE;
     vertex->n.n[1] = offsetZ * RING_NORMAL_SCALE;
@@ -454,15 +454,15 @@ static void BuildRingVertices(void) {
 /* Puts a ring at a fixed place in the first triangle */
 static void AddTestRing(void) {
   f_HoleTriangles[0].kind = HOLE_TRIANGLE_KIND_RING;
-  f_HoleTriangles[0].vertices[0].v.ob[0] = 0x800;
-  f_HoleTriangles[0].vertices[0].v.ob[1] = -0x100;
-  f_HoleTriangles[0].vertices[0].v.ob[2] = 0x1000;
-  f_HoleTriangles[0].vertices[1].v.ob[0] = 0x800;
-  f_HoleTriangles[0].vertices[1].v.ob[1] = -0x100;
-  f_HoleTriangles[0].vertices[1].v.ob[2] = 0xF00;
-  f_HoleTriangles[0].vertices[2].v.ob[0] = 0x700;
-  f_HoleTriangles[0].vertices[2].v.ob[1] = -0x100;
-  f_HoleTriangles[0].vertices[2].v.ob[2] = 0xF00;
+  f_HoleTriangles[0].vertices[0].v.ob[AXIS_X] = 0x800;
+  f_HoleTriangles[0].vertices[0].v.ob[AXIS_Y] = -0x100;
+  f_HoleTriangles[0].vertices[0].v.ob[AXIS_Z] = 0x1000;
+  f_HoleTriangles[0].vertices[1].v.ob[AXIS_X] = 0x800;
+  f_HoleTriangles[0].vertices[1].v.ob[AXIS_Y] = -0x100;
+  f_HoleTriangles[0].vertices[1].v.ob[AXIS_Z] = 0xF00;
+  f_HoleTriangles[0].vertices[2].v.ob[AXIS_X] = 0x700;
+  f_HoleTriangles[0].vertices[2].v.ob[AXIS_Y] = -0x100;
+  f_HoleTriangles[0].vertices[2].v.ob[AXIS_Z] = 0xF00;
   InitRings();
 }
 
@@ -487,15 +487,15 @@ static s32 BuildRingMatrices(void) {
       continue;
     }
 
-    corners.coordinates[0][0] = triangle->vertices[0].v.ob[0];
-    corners.coordinates[0][1] = triangle->vertices[1].v.ob[0];
-    corners.coordinates[0][2] = triangle->vertices[2].v.ob[0];
-    corners.coordinates[1][0] = triangle->vertices[0].v.ob[1];
-    corners.coordinates[1][1] = triangle->vertices[1].v.ob[1];
-    corners.coordinates[1][2] = triangle->vertices[2].v.ob[1];
-    corners.coordinates[2][0] = triangle->vertices[0].v.ob[2];
-    corners.coordinates[2][1] = triangle->vertices[1].v.ob[2];
-    corners.coordinates[2][2] = triangle->vertices[2].v.ob[2];
+    corners.coordinates[0][0] = triangle->vertices[0].v.ob[AXIS_X];
+    corners.coordinates[0][1] = triangle->vertices[1].v.ob[AXIS_X];
+    corners.coordinates[0][2] = triangle->vertices[2].v.ob[AXIS_X];
+    corners.coordinates[1][0] = triangle->vertices[0].v.ob[AXIS_Y];
+    corners.coordinates[1][1] = triangle->vertices[1].v.ob[AXIS_Y];
+    corners.coordinates[1][2] = triangle->vertices[2].v.ob[AXIS_Y];
+    corners.coordinates[2][0] = triangle->vertices[0].v.ob[AXIS_Z];
+    corners.coordinates[2][1] = triangle->vertices[1].v.ob[AXIS_Z];
+    corners.coordinates[2][2] = triangle->vertices[2].v.ob[AXIS_Z];
     if (corners.coordinates[0][1] | corners.coordinates[1][1] |
         corners.coordinates[2][1]) {
       triangle->center[0] =

@@ -316,13 +316,15 @@ void LoadClubSlots(void) {
   f_Slots->pressCount = 0;
   f_Slots->playerIndex = 0;
   for (index = 0; index != REEL_EDGE_COUNT; index++) {
-    f_Slots->reelVertices[index * 2].v.ob[0] = -REEL_HALF_WIDTH;
-    f_Slots->reelVertices[(index * 2) + 1].v.ob[0] = REEL_HALF_WIDTH;
+    f_Slots->reelVertices[index * 2].v.ob[AXIS_X] = -REEL_HALF_WIDTH;
+    f_Slots->reelVertices[(index * 2) + 1].v.ob[AXIS_X] = REEL_HALF_WIDTH;
     angle = DegreesToRadians((f32)((index - 1) * REEL_EDGE_SPACING));
-    f_Slots->reelVertices[index * 2].v.ob[1] = cosf(angle) * REEL_RADIUS;
-    f_Slots->reelVertices[(index * 2) + 1].v.ob[1] = cosf(angle) * REEL_RADIUS;
-    f_Slots->reelVertices[index * 2].v.ob[2] = sinf(angle) * REEL_RADIUS;
-    f_Slots->reelVertices[(index * 2) + 1].v.ob[2] = sinf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[index * 2].v.ob[AXIS_Y] = cosf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[(index * 2) + 1].v.ob[AXIS_Y] =
+        cosf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[index * 2].v.ob[AXIS_Z] = sinf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[(index * 2) + 1].v.ob[AXIS_Z] =
+        sinf(angle) * REEL_RADIUS;
     f_Slots->reelVertices[index * 2].v.cn[0] = 0xFF;
     f_Slots->reelVertices[(index * 2) + 1].v.cn[0] = 0xFF;
     f_Slots->reelVertices[index * 2].v.cn[1] = 0xFF;
@@ -335,26 +337,26 @@ void LoadClubSlots(void) {
 
   for (index = 0; index != SHADE_VERTEX_COUNT; index++) {
     if (index & 2) {
-      f_Slots->shadeVertices[index].v.ob[0] = SHADE_HALF_WIDTH;
+      f_Slots->shadeVertices[index].v.ob[AXIS_X] = SHADE_HALF_WIDTH;
     } else {
-      f_Slots->shadeVertices[index].v.ob[0] = -SHADE_HALF_WIDTH;
+      f_Slots->shadeVertices[index].v.ob[AXIS_X] = -SHADE_HALF_WIDTH;
     }
 
-    f_Slots->shadeVertices[index].v.ob[2] = SHADE_Z;
+    f_Slots->shadeVertices[index].v.ob[AXIS_Z] = SHADE_Z;
     f_Slots->shadeVertices[index].v.cn[0] = 0;
     f_Slots->shadeVertices[index].v.cn[1] = 0;
     f_Slots->shadeVertices[index].v.cn[2] = 0;
     f_Slots->shadeVertices[index].v.cn[3] = 0;
   }
 
-  f_Slots->shadeVertices[0].v.ob[1] = 48;
-  f_Slots->shadeVertices[1].v.ob[1] = 16;
-  f_Slots->shadeVertices[2].v.ob[1] = 16;
-  f_Slots->shadeVertices[3].v.ob[1] = 48;
-  f_Slots->shadeVertices[4].v.ob[1] = -16;
-  f_Slots->shadeVertices[5].v.ob[1] = -48;
-  f_Slots->shadeVertices[6].v.ob[1] = -48;
-  f_Slots->shadeVertices[7].v.ob[1] = -16;
+  f_Slots->shadeVertices[0].v.ob[AXIS_Y] = 48;
+  f_Slots->shadeVertices[1].v.ob[AXIS_Y] = 16;
+  f_Slots->shadeVertices[2].v.ob[AXIS_Y] = 16;
+  f_Slots->shadeVertices[3].v.ob[AXIS_Y] = 48;
+  f_Slots->shadeVertices[4].v.ob[AXIS_Y] = -16;
+  f_Slots->shadeVertices[5].v.ob[AXIS_Y] = -48;
+  f_Slots->shadeVertices[6].v.ob[AXIS_Y] = -48;
+  f_Slots->shadeVertices[7].v.ob[AXIS_Y] = -16;
   f_Slots->shadeVertices[0].v.cn[3] = SHADE_ALPHA;
   f_Slots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
   f_Slots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
