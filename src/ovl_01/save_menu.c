@@ -62,6 +62,8 @@ enum SaveMenuGame {
 /* The images of g_CourseIconAssets that LoadRingShotCourseIcons reads, before
  * one of its own */
 #define SAVE_MENU_IMAGE_COUNT 6
+/* A 64x64 blue movie camera, read after the course icons */
+#define ASSET_MOVIE_CAMERA_ICON 0x944
 /* The 64x64 CI8 icons of D_8023B680, which func_802213C8 shrinks to 32x24 in
  * two strips */
 #define SAVE_ICON_WIDTH 64
@@ -315,7 +317,7 @@ void LoadRingShotCourseIcons(void** buffers) {
     ReadEncodedAsset(D_8023B680_ovl_01[imageIndex], &asset);
   }
 
-  OpenEncodedAsset(0x944, &asset);
+  OpenEncodedAsset(ASSET_MOVIE_CAMERA_ICON, &asset);
   ReadEncodedAsset(D_8023B680_ovl_01[SAVE_MENU_IMAGE_COUNT], &asset);
 }
 
