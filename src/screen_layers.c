@@ -824,10 +824,14 @@ void MarkHalfTurnCircle(
 INCLUDE_ASM("asm/nonmatchings/screen_layers", MarkHalfTurnCircle);
 #endif
 
+/* Whether A is pressed to dismiss the picture once its time is up */
+#define IsDismissPressed(controller) \
+  (f_HalfTurnTimer < 0 && ((controller)->pressedButtons & A_BUTTON))
+
 /* The picture can be dismissed with A once its time is up */
 Boolean IsHalfTurnDismissed(ControllerState* controller) {
   if (f_IsHalfTurnShown && f_HalfTurnState == HALF_TURN_STATE_SHOWING &&
-      !(f_HalfTurnTimer < 0 && (controller->pressedButtons & A_BUTTON))) {
+      !IsDismissPressed(controller)) {
     return FALSE;
   }
 
