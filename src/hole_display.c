@@ -645,7 +645,7 @@ static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] =
 static Boolean f_IsFrameCapturePending = FALSE;
 static s32 f_HudAnimationFrame = 0;
 s32 g_CapturedSliceCount = 0;
-s32 g_MenuBackdropStyle = MENU_BACKDROP_STYLE_NONE;
+s32 g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
 static s32 D_800C7308 = 0;
 static s32 f_MenuBackdrop = MENU_BACKDROP_STILL;
 static s32 f_BackdropFadeLevel = 0;
@@ -2243,7 +2243,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
-    if (g_MenuBackdropStyle == MENU_BACKDROP_STYLE_NONE) {
+    if (g_MenuBackdropState == MENU_BACKDROP_STATE_NONE) {
       if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
@@ -2501,17 +2501,17 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
  * the course again */
 void SetMenuBackdrop(s32 backdrop) {
   if (backdrop == MENU_BACKDROP_NONE) {
-    g_MenuBackdropStyle = MENU_BACKDROP_STYLE_NONE;
+    g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
     return;
   }
 
   if (backdrop == MENU_BACKDROP_PATTERN) {
     f_MenuBackdrop = backdrop;
-    g_MenuBackdropStyle = MENU_BACKDROP_STYLE_UNK2;
+    g_MenuBackdropState = MENU_BACKDROP_STATE_SHOWN;
     return;
   }
 
-  g_MenuBackdropStyle = MENU_BACKDROP_STYLE_PLAIN;
+  g_MenuBackdropState = MENU_BACKDROP_STATE_CAPTURING;
   f_MenuBackdrop = backdrop;
 }
 
@@ -2542,8 +2542,8 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  if (g_MenuBackdropStyle == MENU_BACKDROP_STYLE_PLAIN) {
-    g_MenuBackdropStyle = MENU_BACKDROP_STYLE_UNK2;
+  if (g_MenuBackdropState == MENU_BACKDROP_STATE_CAPTURING) {
+    g_MenuBackdropState = MENU_BACKDROP_STATE_SHOWN;
     f_BackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,

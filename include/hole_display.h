@@ -14,11 +14,12 @@ enum MenuBackdrop {
   MENU_BACKDROP_PATTERN /* A scrolling pattern */
 };
 
-/* The styles that DrawGame draws the backdrops in */
-enum MenuBackdropStyle {
-  MENU_BACKDROP_STYLE_NONE,
-  MENU_BACKDROP_STYLE_PLAIN,
-  MENU_BACKDROP_STYLE_UNK2
+/* Whether DrawGame draws a menu backdrop in place of the course */
+enum MenuBackdropState {
+  MENU_BACKDROP_STATE_NONE,
+  /* A backdrop of the last frame waits for CaptureMenuBackdrop to capture it */
+  MENU_BACKDROP_STATE_CAPTURING,
+  MENU_BACKDROP_STATE_SHOWN
 };
 
 /* StartHudAnimation's animations, which DrawHudAnimation draws */
@@ -86,8 +87,8 @@ typedef struct Unk800C5F34 {
   /* 0x1C */ u8 imageKind; /* A SKY_IMAGE_KIND_* value */
 } Unk800C5F34;
 
-/* A MENU_BACKDROP_STYLE_* value */
-extern s32 g_MenuBackdropStyle;
+/* A MENU_BACKDROP_STATE_* value */
+extern s32 g_MenuBackdropState;
 
 void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused);
 void DrawMenuBackdrop(Gfx** displayListHead);
