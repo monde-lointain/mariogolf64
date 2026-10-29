@@ -1724,6 +1724,14 @@ void HandleClubInput(void) {
 }
 
 /*
+ * The limit is a parameter, not a constant, so that the comparison loads it
+ * into a register as in the original
+ */
+static inline Boolean IsFartherThan(s32 distance, s32 limit) {
+  return distance > limit;
+}
+
+/*
  * B changes the shot mode. With a club usable on the green it goes from a
  * middle putt to a long putt to a short putt and back. With other clubs,
  * further than APPROACH_SHOT_DISTANCE yards from the cup, it switches between
@@ -1731,7 +1739,6 @@ void HandleClubInput(void) {
  * normal and approach. Modes that don't fit the distance are then put back to
  * normal.
  */
-#ifdef NON_MATCHING
 void HandleShotModeInput(void) {
   Club* club = GetSelectedClub();
   s32 cupDistance =
@@ -1753,7 +1760,7 @@ void HandleShotModeInput(void) {
 
       sound = CLUB_CHANGE_SOUND;
       PlaySound(sound, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    } else if (cupDistance > APPROACH_SHOT_DISTANCE) {
+    } else if (IsFartherThan(cupDistance, APPROACH_SHOT_DISTANCE)) {
       if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
         sound = POWER_SHOT_REFUSED_SOUND;
         if (g_CurrentShot.unk54) {
@@ -1792,6 +1799,3 @@ void HandleShotModeInput(void) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/club", HandleShotModeInput);
-#endif
