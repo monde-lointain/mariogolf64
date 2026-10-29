@@ -2809,7 +2809,7 @@ void UpdateOpening(void) {
 
   UpdateCameraEditor();
   EaseOpeningLookAt();
-  g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+  g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[0].view.eye[0] = g_CameraEditor.points[0][0];
   g_Cameras[0].view.eye[1] = g_CameraEditor.points[0][1];
   g_Cameras[0].view.eye[2] = g_CameraEditor.points[0][2];

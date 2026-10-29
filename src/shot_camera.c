@@ -1591,8 +1591,8 @@ void StartHoleFlyover(void) {
   g_InsetView.animation = INSET_VIEW_STILL;
   g_InsetView.step = 0;
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
-  g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
-  g_Cameras[INSET_CAMERA].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+  g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
+  g_Cameras[INSET_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[0].view.fieldOfView = FLYOVER_FIELD_OF_VIEW;
   SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK0, 0, 0, 0, 0, 0);
   SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);

@@ -233,7 +233,7 @@ void DrawShotLabels(Gfx** displayListHead) {
   }
 
   players = SHOT_LABELS_NONE;
-  if (g_Cameras[0].view.mode == CAMERA_MODE_UNK2) {
+  if (g_Cameras[0].mode == CAMERA_MODE_UNK2) {
     players = SHOT_LABELS_OVERHEAD;
   } else if (g_GameState.unk0 == GAME_STATE_UNK6 &&
       g_CurrentShot.playerIndex >= 0 &&

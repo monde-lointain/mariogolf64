@@ -7,11 +7,11 @@
 #include "menu_memory.h"
 
 /*
- * The menus set the top byte of g_MapCamera's view mode. Reading it as a
+ * The menus set the top byte of g_MapCamera's mode. Reading it as a
  * byte of the field rather than of the whole camera lets the compiler move
  * the read past display list words, as the original does.
  */
-#define MAP_CAMERA_MODE_TOP_BYTE (*(u8*)&g_MapCamera.view.mode)
+#define MAP_CAMERA_MODE_TOP_BYTE (*(u8*)&g_MapCamera.mode)
 
 extern void* D_8012D420[2];
 extern s16 D_800FE33C;

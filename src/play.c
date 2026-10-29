@@ -1145,7 +1145,7 @@ void UpdatePlay(void) {
             }
           }
 
-          g_Cameras[0].view.mode = CAMERA_MODE_UNK8;
+          g_Cameras[0].mode = CAMERA_MODE_UNK8;
           g_Cameras[0].view.eye[AXIS_X] = eye[AXIS_X];
           g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
           g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
@@ -1176,8 +1176,8 @@ void UpdatePlay(void) {
       case GAME_STATE_FLYOVER:
         g_RoundHud.isHoleIntroTextShown = FALSE;
         g_IsTrainingHeadingKept = 0;
-        g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
-        g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+        g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
+        g_Cameras[1].mode = CAMERA_MODE_BEHIND_GOLFER;
         if (StepHoleFlyover() ||
             (IsHudAnimationDone() && (IS_A_PRESSED() || func_8005F180()))) {
           g_GameState.unk0 = GAME_STATE_UNK6;
@@ -1205,8 +1205,8 @@ void UpdatePlay(void) {
         }
 
         g_GameState.unk30 = 0;
-        g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
-        g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+        g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
+        g_Cameras[1].mode = CAMERA_MODE_BEHIND_GOLFER;
         if (g_IsModuleAlive[MODULE_PLAY] || ReportModuleNotAlive(MODULE_PLAY)) {
           UpdateTurns();
         }
@@ -2082,8 +2082,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   g_GroundFarthestDepth = 0.0f;
   g_GroundNearDepthEighth = NO_NEAR_DEPTH;
   fineScale = FINE_DEPTH_SCALE;
-  if (g_Cameras[0].view.mode == CAMERA_MODE_UNK2 ||
-      g_Cameras[0].view.mode == CAMERA_MODE_UNK8) {
+  if (g_Cameras[0].mode == CAMERA_MODE_UNK2 ||
+      g_Cameras[0].mode == CAMERA_MODE_UNK8) {
     fineScale = ZOOMED_FINE_DEPTH_SCALE;
   }
 

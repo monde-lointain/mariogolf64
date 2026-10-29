@@ -560,7 +560,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       }
     }
 
-    if (g_Cameras[cameraIndex].view.mode != CAMERA_MODE_UNK2) {
+    if (g_Cameras[cameraIndex].mode != CAMERA_MODE_UNK2) {
       gSP2Triangles(g_DisplayListHead++, 2, 1, 0, 0, 3, 2, 0, 0);
     }
 
@@ -587,7 +587,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
       gDPPipeSync(g_DisplayListHead++);
-      if (g_Cameras[cameraIndex].view.mode != CAMERA_MODE_UNK2) {
+      if (g_Cameras[cameraIndex].mode != CAMERA_MODE_UNK2) {
         gSP2Triangles(g_DisplayListHead++, 6, 5, 4, 0, 7, 6, 4, 0);
       }
     }

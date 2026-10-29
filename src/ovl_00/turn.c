@@ -504,7 +504,7 @@ void PlaceShotCamera(void) {
   }
 
   if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
-    g_Cameras[0].view.mode = CAMERA_MODE_UNK2;
+    g_Cameras[0].mode = CAMERA_MODE_UNK2;
     point[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     point[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];

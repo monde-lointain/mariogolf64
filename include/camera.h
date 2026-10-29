@@ -29,12 +29,12 @@ typedef struct CameraView {
   /* 0x3C */ f32 zoom;
   /* 0x40 */ s32 drawFlags; /* CAMERA_DRAW_* bits */
   /* 0x44 */ f32 fieldOfView; /* In degrees */
-  /* 0x48 */ s32 mode;
-} CameraView; /* size = 0x4C */
+} CameraView; /* size = 0x48 */
 
 typedef struct Camera {
   /* 0x00 */ s32 unk0;
   /* 0x04 */ CameraView view;
+  /* 0x4C */ s32 mode; /* A CAMERA_MODE_* value */
 } Camera; /* size = 0x50 */
 
 /* The main view's camera and INSET_CAMERA */

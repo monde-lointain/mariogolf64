@@ -341,7 +341,7 @@ void StartGame(void) {
   g_SpareCamera.view.viewportCenterX = 416;
   g_SpareCamera.view.viewportCenterY = 248;
   g_SpareCamera.view.zoom = 0.5f;
-  g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+  g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[0].view.eye[0] = 0.0f;
   g_Cameras[0].view.eye[1] = 0.0f;
   g_Cameras[0].view.eye[2] = 0.0f;
@@ -359,7 +359,7 @@ void StartGame(void) {
   g_Cameras[0].view.viewportCenterY = SCREEN_HEIGHT;
   g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
   g_Cameras[0].view.fieldOfView = 45.0f;
-  g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+  g_Cameras[1].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[1].view.eye[0] = 0.0f;
   g_Cameras[1].view.eye[1] = 0.0f;
   g_Cameras[1].view.eye[2] = 0.0f;
@@ -1534,8 +1534,8 @@ s32 DrawGame(void) {
           if (g_Cameras[viewIndex].view.drawFlags != 0) {
             nearZ = -COURSE_NEAR_CLIP;
             farClip = -g_GroundFarthestDepth * 1.2f;
-            if (g_Cameras[viewIndex].view.mode == CAMERA_MODE_UNK8 ||
-                g_Cameras[viewIndex].view.mode == CAMERA_MODE_UNK2) {
+            if (g_Cameras[viewIndex].mode == CAMERA_MODE_UNK8 ||
+                g_Cameras[viewIndex].mode == CAMERA_MODE_UNK2) {
               nearZ = -CLOSE_UP_NEAR_CLIP;
             }
 
@@ -1803,7 +1803,7 @@ s32 DrawGame(void) {
             }
 
             if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
-              mode = g_Cameras[viewIndex].view.mode;
+              mode = g_Cameras[viewIndex].mode;
               if (mode != 8 && mode != 2) {
                 if (!IsGameFlagSet(0x18) && g_IsModuleAlive[1]) {
                   DrawGolfBalls(matrices);
