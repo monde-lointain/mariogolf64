@@ -192,6 +192,9 @@ enum ListingState {
 #define POINTER_HEIGHT 24
 #define POINTER_IMAGE_HEIGHT 76
 #define POINTER_TOP 76
+/* Both pointers swing out and back over half a turn of their angle */
+#define POINTER_SWING_STEP DegreesToRadians(10)
+#define POINTER_SWING_DISTANCE 8.0f
 #define EXPERIENCE_LEFT 20 /* Below each face */
 #define EXPERIENCE_TOP 174
 /* The options, centered above the hint, with the pointer at the left of the
@@ -1878,13 +1881,12 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
   if (transfer->taggedCartridgeCount != 0) {
     /* An if-chain rather than a switch is there to match */
     if (transfer->screenStep == SEND_STATUS_CHOOSING) {
-      /* The pointer swings in and out over half a turn of the angle */
-      f_StatusPointerAngle += DegreesToRadians(10);
+      f_StatusPointerAngle += POINTER_SWING_STEP;
       if (f_StatusPointerAngle > M_PI) {
         f_StatusPointerAngle -= M_PI;
       }
 
-      pointerSwing = sinf(f_StatusPointerAngle) * 8.0f;
+      pointerSwing = sinf(f_StatusPointerAngle) * POINTER_SWING_DISTANCE;
       gDPPipeSync(displayList++);
       gDPSetTextureLUT(displayList++, G_TT_RGBA16);
       LoadSmallPalette(&displayList, 0, ImageBody(transfer->pointerImage));
@@ -2271,12 +2273,12 @@ void DrawTransmitMenu(Gfx** displayListHead) {
             TRANSMIT_OPTION_MESSAGES,
         FONT_SIZE_LARGE, &width, &height, 0);
     /* The pointer swings in and out over half a turn of the angle */
-    f_OptionPointerAngle += DegreesToRadians(10);
+    f_OptionPointerAngle += POINTER_SWING_STEP;
     if (f_OptionPointerAngle > M_PI) {
       f_OptionPointerAngle -= M_PI;
     }
 
-    pointerSwing = sinf(f_OptionPointerAngle) * 8.0f;
+    pointerSwing = sinf(f_OptionPointerAngle) * POINTER_SWING_DISTANCE;
     gDPPipeSync(displayList++);
     gDPSetTextureLUT(displayList++, G_TT_RGBA16);
     LoadSmallPalette(&displayList, 0, ImageBody(transfer->pointerImage));
