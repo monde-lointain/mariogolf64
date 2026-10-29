@@ -114,7 +114,7 @@ extern void* D_8012D430[CHARACTER_COUNT];
  * narrowing the argument */
 void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s32 character, u8 drawMode);
-void func_80210DF4_ovl_01(
+void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
@@ -677,7 +677,7 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
     index = 4;
   }
 
-  func_80210DF4_ovl_01(&gfx, D_80230190_ovl_01 + index,
+  DrawUnalignedMenuNumber(&gfx, D_80230190_ovl_01 + index,
       D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, rowWins, MENU_NUMBER_RED_TINT);
   if (columnWins < 10) {
     index = 80;
@@ -689,7 +689,7 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
     index = 58;
   }
 
-  func_80210DF4_ovl_01(&gfx, D_80230190_ovl_01 + index,
+  DrawUnalignedMenuNumber(&gfx, D_80230190_ovl_01 + index,
       D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, columnWins,
       MENU_NUMBER_GREEN_TINT);
   func_802123E0_ovl_01(&gfx, D_80230190_ovl_01 + TABLE_POPUP_SIGN_X,

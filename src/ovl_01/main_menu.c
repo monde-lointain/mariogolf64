@@ -4564,7 +4564,7 @@ void func_802047F0_ovl_01(Gfx** displayListHead);
 void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
 void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
     u8 starCount, u8 enlargesChosenHole);
-void func_80210DF4_ovl_01(
+void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_8021826C_ovl_01(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled);
@@ -4952,7 +4952,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
     func_80207E28_ovl_01(
         &gfx, D_800FC898, WON_COUNT_ICON_X + countShift, WON_COUNT_ICON_Y);
     gDPPipeSync(gfx++);
-    func_80210DF4_ovl_01(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
+    DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
         badgeCount, MENU_NUMBER_TIMES);
     gDPPipeSync(gfx++);
   }
@@ -4986,8 +4986,8 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
     func_802081E8_ovl_01(
         &gfx, WON_COUNT_ICON_X + countShift, WON_COUNT_ICON_Y, 1, FALSE);
     gDPPipeSync(gfx++);
-    func_80210DF4_ovl_01(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y, starCount,
-        MENU_NUMBER_TIMES);
+    DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
+        starCount, MENU_NUMBER_TIMES);
     gDPPipeSync(gfx++);
   }
 
@@ -5974,7 +5974,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
       }
 
       gDPPipeSync(gfx++);
-      func_80210DF4_ovl_01(&gfx, otherIndex + COURSE_BADGE_COUNT_X,
+      DrawUnalignedMenuNumber(&gfx, otherIndex + COURSE_BADGE_COUNT_X,
           COURSE_BADGE_COUNT_Y, badgeCount, MENU_NUMBER_TIMES);
       gDPPipeSync(gfx++);
     }

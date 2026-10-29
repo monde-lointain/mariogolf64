@@ -125,7 +125,7 @@ extern s32 D_800FE334;
 s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward);
 s16 func_80220DF8_ovl_01(void);
 s32 func_8022181C_ovl_01(void);
-void func_80210C74_ovl_01(
+void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
@@ -643,7 +643,7 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
 
   if (memory->ringShotRow != RING_SHOT_REPLAY_ROW) {
     for (column = 0; column != RING_SHOT_HOLE_COUNT; column++) {
-      func_80210C74_ovl_01(&gfx,
+      DrawOneDigitMenuNumber(&gfx,
           RING_SHOT_HOLE_NUMBER_X + (column * RING_SHOT_COLUMN_SPACING),
           RING_SHOT_HOLE_NUMBER_Y, column + 1, MENU_NUMBER_PLAIN);
 
@@ -713,7 +713,7 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
         }
       }
 
-      func_80210C74_ovl_01(&gfx, RING_SHOT_SLOT_NUMBER_X,
+      DrawOneDigitMenuNumber(&gfx, RING_SHOT_SLOT_NUMBER_X,
           RING_SHOT_SLOT_NUMBER_Y + (index * RING_SHOT_SLOT_SPACING), index + 1,
           MENU_NUMBER_PLAIN);
     }

@@ -174,9 +174,9 @@ s16 func_8021E468_ovl_01(void);
 void func_8021E97C_ovl_01(Gfx** displayListHead);
 void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
-void func_80210C74_ovl_01(
+void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_80210DF4_ovl_01(
+void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_80219460_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
@@ -781,7 +781,7 @@ void func_8021826C_ovl_01(
       gDPPipeSync(gfx++);
     }
 
-    func_80210DF4_ovl_01(&gfx,
+    DrawUnalignedMenuNumber(&gfx,
         D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide +
             BET_AMOUNT_OFFSET_X,
         BET_AMOUNT_Y,
@@ -1100,7 +1100,7 @@ s32 func_80219948_ovl_01(void) {
 #define OPTION_PROMPT_Y 200
 #define OPTION_PROMPT_MESSAGE 0x1D
 
-void func_80210CD4_ovl_01(
+void DrawTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 
 /*
@@ -1405,7 +1405,7 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
   }
 
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
-    func_80210CD4_ovl_01(&gfx,
+    DrawTwoDigitMenuNumber(&gfx,
         D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
             (slide + OPTION_NUMBER_OFFSET_X),
         OPTION_NUMBER_Y, D_8023BFDC_ovl_01[columnIndex], MENU_NUMBER_PLAIN);
@@ -2078,7 +2078,7 @@ void func_8021D3AC_ovl_01(Gfx** displayListHead) {
             FACE_PLAIN);
       }
 
-      func_80210C74_ovl_01(&gfx,
+      DrawOneDigitMenuNumber(&gfx,
           RECORD_PLACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
           RECORD_PLACE_Y + (row * STATS_CURSOR_ROW_HEIGHT), column + 1,
           MENU_NUMBER_PLAIN);

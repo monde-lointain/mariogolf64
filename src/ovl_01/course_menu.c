@@ -150,11 +150,11 @@ extern const char D_802318AC_ovl_01[];
 s32 GetOpenCourseCount(void);
 void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row);
 void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
-void func_80210D34_ovl_01(
+void DrawThreeDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_80210D94_ovl_01(
+void DrawFourDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_80210DF4_ovl_01(
+void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(
@@ -658,22 +658,22 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
 
   switch (statIndex) {
     case STAT_ROUND_COUNT:
-      func_80210D94_ovl_01(&gfx, STATS_ROUND_COUNT_X,
+      DrawFourDigitMenuNumber(&gfx, STATS_ROUND_COUNT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].roundCount, MENU_NUMBER_PLAIN);
       break;
     case STAT_BEST_SCORE:
       bestScore = D_80105C38[courseIndex].bestScore;
       if (IsOneDigitNumber(bestScore)) {
-        func_80210DF4_ovl_01(&gfx, STATS_ONE_DIGIT_X,
+        DrawUnalignedMenuNumber(&gfx, STATS_ONE_DIGIT_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_SIGNED);
       } else if (IsTwoDigitNumber(bestScore)) {
-        func_80210DF4_ovl_01(&gfx, STATS_TWO_DIGIT_X,
+        DrawUnalignedMenuNumber(&gfx, STATS_TWO_DIGIT_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_SIGNED);
       } else {
-        func_80210D34_ovl_01(&gfx, STATS_VALUE_X,
+        DrawThreeDigitMenuNumber(&gfx, STATS_VALUE_X,
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_SIGNED);
       }
@@ -817,8 +817,8 @@ void func_8020FEF8_ovl_01(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   func_80207E28_ovl_01(
       &gfx, D_8023A810_ovl_01, BADGE_ICON_X + index, BADGE_ICON_Y);
-  func_80210DF4_ovl_01(&gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y, badgeCount,
-      MENU_NUMBER_TIMES);
+  DrawUnalignedMenuNumber(&gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y,
+      badgeCount, MENU_NUMBER_TIMES);
   *displayListHead = gfx;
 }
 #else
@@ -1000,6 +1000,16 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802104F0_ovl_01);
 #endif
 
+/* The smallest number of each length */
+#define TWO_DIGIT_FIRST DECIMAL_BASE
+#define THREE_DIGIT_FIRST (TWO_DIGIT_FIRST * DECIMAL_BASE)
+#define FOUR_DIGIT_FIRST (THREE_DIGIT_FIRST * DECIMAL_BASE)
+/* The largest number of each length */
+#define ONE_DIGIT_MAX (TWO_DIGIT_FIRST - 1)
+#define TWO_DIGIT_MAX (THREE_DIGIT_FIRST - 1)
+#define THREE_DIGIT_MAX (FOUR_DIGIT_FIRST - 1)
+#define FOUR_DIGIT_MAX (FOUR_DIGIT_FIRST * DECIMAL_BASE - 1)
+
 /* DrawMenuNumber's sixth argument: the field it right-aligns the number in */
 enum NumberField {
   NUMBER_FIELD_TWO_NARROW,
@@ -1010,87 +1020,98 @@ enum NumberField {
   NUMBER_FIELD_NONE
 };
 
-void func_80210C18_ovl_01(
+/* Draws a number right-aligned in a two-digit field, with narrower spacing,
+ * clamped to the digits it holds */
+void DrawNarrowTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
-  if (value > 99) {
-    value = 99;
+  if (value > TWO_DIGIT_MAX) {
+    value = TWO_DIGIT_MAX;
   }
 
-  if (value < -99) {
-    value = -99;
+  if (value < -TWO_DIGIT_MAX) {
+    value = -TWO_DIGIT_MAX;
   }
 
   DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_TWO_NARROW);
   *displayListHead = gfx;
 }
 
-void func_80210C74_ovl_01(
+/* Draws a number right-aligned in a one-digit field, clamped to the
+ * digits it holds */
+void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
-  if (value > 9) {
-    value = 9;
+  if (value > ONE_DIGIT_MAX) {
+    value = ONE_DIGIT_MAX;
   }
 
-  if (value < -9) {
-    value = -9;
+  if (value < -ONE_DIGIT_MAX) {
+    value = -ONE_DIGIT_MAX;
   }
 
   DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_ONE);
   *displayListHead = gfx;
 }
 
-void func_80210CD4_ovl_01(
+/* Draws a number right-aligned in a two-digit field, clamped to the
+ * digits it holds */
+void DrawTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
-  if (value > 99) {
-    value = 99;
+  if (value > TWO_DIGIT_MAX) {
+    value = TWO_DIGIT_MAX;
   }
 
-  if (value < -99) {
-    value = -99;
+  if (value < -TWO_DIGIT_MAX) {
+    value = -TWO_DIGIT_MAX;
   }
 
   DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_TWO);
   *displayListHead = gfx;
 }
 
-void func_80210D34_ovl_01(
+/* Draws a number right-aligned in a three-digit field, clamped to the
+ * digits it holds */
+void DrawThreeDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
-  if (value > 999) {
-    value = 999;
+  if (value > THREE_DIGIT_MAX) {
+    value = THREE_DIGIT_MAX;
   }
 
-  if (value < -999) {
-    value = -999;
+  if (value < -THREE_DIGIT_MAX) {
+    value = -THREE_DIGIT_MAX;
   }
 
   DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_THREE);
   *displayListHead = gfx;
 }
 
-void func_80210D94_ovl_01(
+/* Draws a number right-aligned in a four-digit field, clamped to the
+ * digits it holds */
+void DrawFourDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
-  if (value > 9999) {
-    value = 9999;
+  if (value > FOUR_DIGIT_MAX) {
+    value = FOUR_DIGIT_MAX;
   }
 
-  if (value < -9999) {
-    value = -9999;
+  if (value < -FOUR_DIGIT_MAX) {
+    value = -FOUR_DIGIT_MAX;
   }
 
   DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_FOUR);
   *displayListHead = gfx;
 }
 
-void func_80210DF4_ovl_01(
+/* Draws a number without right-aligning it in a field */
+void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark) {
   Gfx* gfx = *displayListHead;
 
@@ -1100,11 +1121,7 @@ void func_80210DF4_ovl_01(
 
 #define NARROW_DIGIT_SPACING 12
 #define MENU_NUMBER_DIGIT_LIMIT 4
-#define MENU_NUMBER_LIMIT 9999
-/* The smallest number of each length */
-#define TWO_DIGIT_FIRST DECIMAL_BASE
-#define THREE_DIGIT_FIRST (TWO_DIGIT_FIRST * DECIMAL_BASE)
-#define FOUR_DIGIT_FIRST (THREE_DIGIT_FIRST * DECIMAL_BASE)
+#define MENU_NUMBER_LIMIT FOUR_DIGIT_MAX
 
 /*
  * Draws a number of up to four digits with the glyphs of ASSET_LARGE_DIGITS,

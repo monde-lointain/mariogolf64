@@ -67,7 +67,7 @@ s32 GetOpenCourseCount(void);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);
 void func_8020F2D0_ovl_01(
     Gfx** displayListHead, u8 useCourseNames, s32 courseIndex);
-void func_80210C18_ovl_01(
+void DrawNarrowTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
@@ -380,7 +380,7 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
     if (time > 0) {
       func_8021508C_ovl_01(&gfx, BEST_TIME_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING), time);
-      func_80210C18_ovl_01(&gfx, BEST_TIME_UNKD78_X,
+      DrawNarrowTwoDigitMenuNumber(&gfx, BEST_TIME_UNKD78_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING),
           save->unkD78[memory->bestTimesCourse][otherIndex],
           MENU_NUMBER_SIGNED);
