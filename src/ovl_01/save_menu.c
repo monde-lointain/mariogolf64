@@ -275,8 +275,9 @@ static u8 D_8023BD94_ovl_01[0x4];
 static void* f_GameBoards[SAVED_GAME_COUNT];
 /* The chosen saved game's human players, in the order they take controllers */
 static s16 f_HumanPlayerIndices[MAX_PLAYER_COUNT];
-static s32 D_8023BDAC_ovl_01;
-static s32 D_8023BDB0_ovl_01;
+/* The drawn board's mode icon size, which DrawChosenGameBoard reads */
+static s32 f_ChosenModeIconScale;
+static s32 f_ChosenModeIconHalfSize;
 
 /* Read by no routine; 2 objects, as one would be aligned past its start */
 static u8 D_8023BDB4_ovl_01[0x4];
@@ -1922,9 +1923,9 @@ void DrawSavedGames(Gfx** displayListHead) {
     slot = drawOrder[index];
     iconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
     halfSize = boardScale[slot] * GAME_BOARD_HALF_SIZE;
-    D_8023BDB0_ovl_01 = iconHalfSize;
+    f_ChosenModeIconHalfSize = iconHalfSize;
     iconStep = (f32)(MODE_ICON_STRIP_HEIGHT << 10) / iconHalfSize;
-    D_8023BDAC_ovl_01 = iconStep;
+    f_ChosenModeIconScale = iconStep;
     step = (f32)(GAME_BOARD_STRIP_HEIGHT << 10) / halfSize;
     /* The loop stops before SAVED_GAME_COUNT, so no board bobs */
     if (index == SAVED_GAME_COUNT) {
@@ -2159,8 +2160,8 @@ void DrawChosenGameBoard(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
   MenuMemory* memory = func_8005AF74();
   Gfx* gfx = *displayListHead;
-  s32 iconHalfSize = D_8023BDB0_ovl_01;
-  s32 iconScale = D_8023BDAC_ovl_01;
+  s32 iconHalfSize = f_ChosenModeIconHalfSize;
+  s32 iconScale = f_ChosenModeIconScale;
   EncodedAsset asset;
   s32 stripIndex;
   void* image;
