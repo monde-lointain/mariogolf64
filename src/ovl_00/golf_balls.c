@@ -777,7 +777,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     return;
   }
   {
-    g_ModuleRdpRequestFrames[MODULE_UNK1] = g_FrameCount;
+    g_ModuleRdpRequestFrames[MODULE_GOLF_BALLS] = g_FrameCount;
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);

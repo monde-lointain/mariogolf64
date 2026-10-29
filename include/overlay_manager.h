@@ -25,7 +25,8 @@
  * it in or for the code that checks it; the rest are known only by number.
  */
 enum ModuleId {
-  MODULE_UNK1 = 0x01, /* Holds the golf balls' afterimages */
+  /* Holds the golf balls and their afterimages (golf_balls.c) */
+  MODULE_GOLF_BALLS = 0x01,
   MODULE_MENU,
   MODULE_OPENING,
   MODULE_TITLE_SCREEN,
@@ -33,23 +34,24 @@ enum ModuleId {
   MODULE_HOLE_BUILDER,
   MODULE_COMPUTER_GOLFER,
   MODULE_SHOT_SIMULATION,
-  MODULE_UNK9,
+  /* Holds the Boo that the wind indicator draws (golf_balls.c's data) */
+  MODULE_WIND_BOO,
   MODULE_PLAY,
-  MODULE_UNK11,
+  MODULE_HOLE_OBJECTS,
   MODULE_BOOT_LOGOS,
   MODULE_CONFIRM_WAIT,
   MODULE_UNK14,
-  MODULE_UNK15,
+  MODULE_ROUND_RESULTS,
   MODULE_UNK16,
-  MODULE_UNK17,
-  MODULE_UNK18,
+  MODULE_ROUND_EVENTS,
+  MODULE_SHOT_EFFECTS,
   MODULE_UNK19,
   MODULE_PAUSE_MENU,
   MODULE_COURSE_SELECT,
   MODULE_SAVE_MENU,
-  MODULE_UNK23,
+  MODULE_SHOT_LABELS,
   MODULE_UNK24,
-  MODULE_UNK25,
+  MODULE_CLUB_PANEL,
   MODULE_CLUB_SLOTS,
   MODULE_TRANSMIT,
   MODULE_UNK28,

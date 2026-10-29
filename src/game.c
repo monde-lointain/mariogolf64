@@ -1821,7 +1821,7 @@ s32 DrawGame(void) {
               mode = g_Cameras[viewIndex].mode;
               if (mode != 8 && mode != 2) {
                 if (!IsGameFlagSet(GAME_FLAG_HIDE_GOLF_BALLS) &&
-                    g_IsModuleAlive[1]) {
+                    g_IsModuleAlive[MODULE_GOLF_BALLS]) {
                   DrawGolfBalls(matrices);
                 }
 
@@ -1834,7 +1834,7 @@ s32 DrawGame(void) {
                   }
                 }
 
-                if (g_IsModuleAlive[11]) {
+                if (g_IsModuleAlive[MODULE_HOLE_OBJECTS]) {
                   if (viewIndex == 0) {
                     DrawHoleCreatures(&g_DisplayListHead);
                   }
@@ -1843,16 +1843,17 @@ s32 DrawGame(void) {
             }
 
             if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
-              if (g_IsModuleAlive[23] && !IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
+              if (g_IsModuleAlive[MODULE_SHOT_LABELS] &&
+                  !IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
                 DrawAimGuides(matrices);
               }
 
-              if (g_IsModuleAlive[17]) {
+              if (g_IsModuleAlive[MODULE_ROUND_EVENTS]) {
                 DrawContactEffect(&g_DisplayListHead, matrices);
               }
 
               DrawEffects(matrices, &g_DisplayListHead);
-              if (viewIndex == 0 && g_IsModuleAlive[18]) {
+              if (viewIndex == 0 && g_IsModuleAlive[MODULE_SHOT_EFFECTS]) {
                 DrawSwingTrail(&g_DisplayListHead, matrices);
               }
             }
@@ -1862,7 +1863,7 @@ s32 DrawGame(void) {
               if (viewIndex == 0) {
                 DrawBallTrail(&g_DisplayListHead, matrices);
                 DrawShotEffect(&g_DisplayListHead);
-                if (g_IsModuleAlive[18]) {
+                if (g_IsModuleAlive[MODULE_SHOT_EFFECTS]) {
                   DrawSparks(&g_DisplayListHead);
                 }
               }
@@ -1921,7 +1922,7 @@ s32 DrawGame(void) {
         DrawBillboards(matrices, viewIndex);
       }
 
-      if (g_IsModuleAlive[1]) {
+      if (g_IsModuleAlive[MODULE_GOLF_BALLS]) {
         DrawGolfBalls(matrices);
       }
 
@@ -1942,7 +1943,7 @@ s32 DrawGame(void) {
       DrawInsetViewFrame();
     }
 
-    if (g_IsModuleAlive[20]) {
+    if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
       DrawPauseMenu(&g_DisplayListHead);
     }
 
@@ -1951,15 +1952,15 @@ s32 DrawGame(void) {
       DrawRoundHud(&g_Cameras[0].view);
     }
 
-    if (g_IsModuleAlive[17]) {
+    if (g_IsModuleAlive[MODULE_ROUND_EVENTS]) {
       DrawMovie(&g_DisplayListHead);
     }
 
-    if (g_IsModuleAlive[17]) {
+    if (g_IsModuleAlive[MODULE_ROUND_EVENTS]) {
       DrawBanner(&g_DisplayListHead);
     }
 
-    if (g_IsModuleAlive[17]) {
+    if (g_IsModuleAlive[MODULE_ROUND_EVENTS]) {
       DrawWindFlyGuy(&g_DisplayListHead);
     }
 
@@ -1968,7 +1969,7 @@ s32 DrawGame(void) {
       DrawScorecard(&g_DisplayListHead);
     }
 
-    if (g_IsModuleAlive[15]) {
+    if (g_IsModuleAlive[MODULE_ROUND_RESULTS]) {
       DrawRoundResults(&g_DisplayListHead);
       func_801FD578(&g_DisplayListHead);
     }
@@ -2080,12 +2081,12 @@ s32 DrawGame(void) {
   }
 
   DrawPrompt(&g_DisplayListHead);
-  if (g_IsModuleAlive[20]) {
+  if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
     DrawChoiceBox(&g_DisplayListHead);
   }
 
   DrawTextSlots(&g_DisplayListHead);
-  if (g_IsModuleAlive[17]) {
+  if (g_IsModuleAlive[MODULE_ROUND_EVENTS]) {
     DrawFlipMessage(&g_DisplayListHead);
   }
 
@@ -2097,7 +2098,7 @@ s32 DrawGame(void) {
   }
 
   DrawHudAnimation();
-  if (g_IsModuleAlive[3]) {
+  if (g_IsModuleAlive[MODULE_OPENING]) {
     DrawOpeningLogo(&g_DisplayListHead, 1);
   }
 

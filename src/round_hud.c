@@ -2453,8 +2453,8 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
       OS_K0_TO_PHYSICAL(&f_WindIndicatorMatrices[g_MatrixBufferIndex]),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPSetLights1(gfx++, f_WindArrowLights);
-  if (g_IsModuleAlive[MODULE_UNK9]) {
-    g_ModuleRdpRequestFrames[MODULE_UNK9] = g_FrameCount;
+  if (g_IsModuleAlive[MODULE_WIND_BOO]) {
+    g_ModuleRdpRequestFrames[MODULE_WIND_BOO] = g_FrameCount;
     gSPDisplayList(gfx++, D_80222400);
   }
 
@@ -2560,7 +2560,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
   gDPPipeSync(gfx++);
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK);
-  if (g_IsCupViewShown == 0 && g_IsModuleAlive[MODULE_UNK25]) {
+  if (g_IsCupViewShown == 0 && g_IsModuleAlive[MODULE_CLUB_PANEL]) {
     DrawClubPanelIfShown(&gfx);
   }
 
@@ -3918,7 +3918,7 @@ void DrawRoundHud(CameraView* view) {
     gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
-    if (g_IsModuleAlive[MODULE_UNK25]) {
+    if (g_IsModuleAlive[MODULE_CLUB_PANEL]) {
       UpdateClubPanelImages();
     }
 
@@ -4003,7 +4003,7 @@ void DrawRoundHud(CameraView* view) {
         f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
     if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
         !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN) &&
-        g_IsModuleAlive[MODULE_UNK25] && IsShotModeChangeDone() &&
+        g_IsModuleAlive[MODULE_CLUB_PANEL] && IsShotModeChangeDone() &&
         player->unk28 != -1) {
       sprintf(g_PrintBuffer, "%d", player->unk28);
       DrawShadowedText(&g_DisplayListHead, UNK28_TEXT_X - g_ShotPanelOffsetX,
@@ -4161,7 +4161,7 @@ void DrawRoundHud(CameraView* view) {
     gDPPipeSync(g_DisplayListHead++);
   }
 
-  if (g_IsModuleAlive[MODULE_UNK18]) {
+  if (g_IsModuleAlive[MODULE_SHOT_EFFECTS]) {
     func_80217F54(&g_DisplayListHead);
   }
 

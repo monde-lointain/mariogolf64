@@ -1667,7 +1667,8 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
   simulation->purpose = LAUNCH_PURPOSE_UNK3;
   simulation->unkA1 = 0;
   PrepareShotEffects(simulation);
-  if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
+  if (g_IsModuleAlive[MODULE_GOLF_BALLS] ||
+      ReportModuleNotAlive(MODULE_GOLF_BALLS)) {
     ResetBallAfterimage();
   }
 }
@@ -3109,7 +3110,7 @@ void UpdateTurns(void) {
     switch (state) {
       case PLAYER_STATE_STARTING_TURN:
         f_ShouldUpdateReaction = 0;
-        UnloadOverlay(GetOverlayOfModule(8));
+        UnloadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
         f_ShotFlightCount = 0;
         D_80227184_ovl_00 = 127.0f;
         UpdateContest(FALSE);
@@ -3175,7 +3176,7 @@ void UpdateTurns(void) {
         } else if (IsGameFlagSet(GAME_FLAG_UNK32) ||
             g_Players[playerIndex].unk1E[0] || IsGameFlagSet(GAME_FLAG_UNK9B)) {
           g_Players[playerIndex].unk1E[1] = -9;
-          LoadOverlay(GetOverlayOfModule(7));
+          LoadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           ListOffsetsByDistance();
           D_800B7D9C = 0;
           D_80223E58_ovl_00 = 30;
@@ -3610,7 +3611,7 @@ void UpdateTurns(void) {
             break;
           }
 
-          UnloadOverlay(GetOverlayOfModule(7));
+          UnloadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           if (D_80227194_ovl_00 == 1) {
             isReady = StepToClubChoice(&D_80104F78);
           } else {
@@ -3942,7 +3943,7 @@ void UpdateTurns(void) {
         SetCharacterTranslucent(0, FALSE);
         SetFramebufferCount(3);
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
-        LoadOverlay(GetOverlayOfModule(8));
+        LoadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
         SetPaintSeed(&D_80227150_ovl_00);
         if (IsRecordableHoleOut(playerIndex)) {
           RecordHoleOut(playerIndex);
@@ -4048,7 +4049,8 @@ void UpdateTurns(void) {
             D_80223FFC_ovl_00 = 1;
           }
 
-          if (g_IsModuleAlive[1] || ReportModuleNotAlive(1)) {
+          if (g_IsModuleAlive[MODULE_GOLF_BALLS] ||
+              ReportModuleNotAlive(MODULE_GOLF_BALLS)) {
             ResetBallRotation();
           }
 

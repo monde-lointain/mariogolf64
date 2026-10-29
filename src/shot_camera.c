@@ -3094,7 +3094,8 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   D_800BE698 = TRUE;
   g_IsCupViewShown = FALSE;
   if (g_SimulatedShot.unk2E0C) {
-    if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
+    if (g_IsModuleAlive[MODULE_GOLF_BALLS] ||
+        ReportModuleNotAlive(MODULE_GOLF_BALLS)) {
       StartFastBallAfterimage();
     }
 
@@ -3107,7 +3108,8 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   } else if (g_SimulatedShot.pathFlags[step]) {
     D_800C5AAC = 2;
     StartContactEffect(CONTACT_EFFECT_FADE);
-    if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
+    if (g_IsModuleAlive[MODULE_GOLF_BALLS] ||
+        ReportModuleNotAlive(MODULE_GOLF_BALLS)) {
       StartFastBallAfterimage();
     }
   }
