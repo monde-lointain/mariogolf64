@@ -1876,7 +1876,7 @@ void DrawEffectShadow(Gfx** displayListHead, Effect* effect) {
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, (shadow.x - 1) << 2, (shadow.y - 1) << 2,
           (shadow.x + 1) << 2, (shadow.y + 1) << 2, G_TX_RENDERTILE, 0, 0,
-          1 << 10, 1 << 10);
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
   }
@@ -2642,7 +2642,7 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
     DrawTextureRect(&gfx, BADGE_LEFT << 2, (offsetY + BADGE_RESTING_TOP) << 2,
         (BADGE_LEFT + BADGE_SIZE) << 2,
         (offsetY + BADGE_RESTING_TOP + BADGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-        1 << 10, 1 << 10);
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     LoadSmallPalette(&gfx, 0, ImageBody(f_ClumpImage));
     LoadNibbleTextureBlock(&gfx, ImageTexels(f_ClumpImage), G_IM_FMT_CI, 16,
         COUNT_GLYPHS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);

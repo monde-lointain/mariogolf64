@@ -3874,7 +3874,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
         gSPScisTextureRectangle(gfx++, IMPACT_LINES_LEFT << 2,
             (bottom - IMPACT_LINES_STRIP_HEIGHT) << 2,
             (IMPACT_LINES_LEFT + width) << 2, bottom << 2, G_TX_RENDERTILE, 0,
-            0, 1 << 10, 1 << 10);
+            0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
         texelOffset += IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT;
         row--;

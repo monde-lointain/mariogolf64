@@ -836,10 +836,10 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
   gDPPipeSync(gfx++);
   DrawTextureRect(&gfx, (x - (gap / 2) - (PAUSE_ARROW_SIZE / 2)) << 2, top,
       (x - (gap / 2) + (PAUSE_ARROW_SIZE / 2)) << 2, bottom, G_TX_RENDERTILE, 0,
-      PAUSE_LEFT_ARROW_T, 1 << 10, 1 << 10);
+      PAUSE_LEFT_ARROW_T, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   DrawTextureRect(&gfx, (x + (gap / 2) - (PAUSE_ARROW_SIZE / 2)) << 2, top,
       (x + (gap / 2) + (PAUSE_ARROW_SIZE / 2)) << 2, bottom, G_TX_RENDERTILE, 0,
-      PAUSE_RIGHT_ARROW_T, 1 << 10, 1 << 10);
+      PAUSE_RIGHT_ARROW_T, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   *displayListHead = gfx;
@@ -927,15 +927,15 @@ void DrawPauseMenu(Gfx** displayListHead) {
       G_TX_CLAMP, 0, 0, 0, 0);
   cloudMiddle = (labelsHeight + PAUSE_CLOUD_TOP) * 4;
   DrawTextureRect(&gfx, PAUSE_CLOUD_LEFT * 4, PAUSE_CLOUD_TOP * 4,
-      PAUSE_CLOUD_RIGHT * 4, cloudMiddle, G_TX_RENDERTILE, 0, 0, 1 << 10,
-      1 << 10);
+      PAUSE_CLOUD_RIGHT * 4, cloudMiddle, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   LoadNibbleTextureBlock(&gfx,
       ImageBody(f_MenuCloudImage) + PAUSE_CLOUD_PART_SIZE, G_IM_FMT_I,
       PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&gfx, PAUSE_CLOUD_LEFT * 4, cloudMiddle,
       PAUSE_CLOUD_RIGHT * 4,
       (labelsHeight + PAUSE_CLOUD_TOP + PAUSE_CLOUD_PART_HEIGHT) * 4,
-      G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1025,7 +1025,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
             4,
         G_TX_RENDERTILE, 0,
         PAUSE_TEES_T + (teeFrame * (TexelCoordinate(PAUSE_CURSOR_SIZE))),
-        1 << 10, 1 << 10);
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   } else {
     DrawTextureRect(&gfx, (PAUSE_TEE_X - sway) * 4,
         ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4) * 4,
@@ -1033,7 +1033,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
         ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4 +
             PAUSE_CURSOR_SIZE) *
             4,
-        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   f_PauseMenuDrawnMarker = 0xFFFFFF;
@@ -1237,7 +1237,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
       DrawTextureRect(&gfx, cursorX << 2, (cursorY - 2) << 2,
           (cursorX + CHOICE_CURSOR_SIZE) << 2,
           (cursorY + CHOICE_CURSOR_SIZE - 2) << 2, G_TX_RENDERTILE, 0, 0,
-          1 << 10, 1 << 10);
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 

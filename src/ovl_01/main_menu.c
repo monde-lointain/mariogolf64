@@ -5016,7 +5016,7 @@ void func_802004A0_ovl_01(Gfx** displayListHead) {
         (MODE_ICON_TOP + MODE_ICON_STRIP_HEIGHT +
             (stripIndex * MODE_ICON_STRIP_HEIGHT))
             << 2,
-        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 

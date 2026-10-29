@@ -2115,7 +2115,7 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
         (MONTY_MOLE_X + MONTY_MOLE_WIDTH) << 2,
         (MONTY_MOLE_Y + MONTY_MOLE_STRIP_HEIGHT + (i * MONTY_MOLE_STRIP_HEIGHT))
             << 2,
-        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPPipeSync(gfx++);
@@ -2168,7 +2168,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
         (GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT)) << 2,
         (GOOMBA_X + GOOMBA_WIDTH) << 2,
         (GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT) + height) << 2, G_TX_RENDERTILE,
-        0, 0, 1 << 10, 1 << 10);
+        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPPipeSync(gfx++);
@@ -2339,7 +2339,7 @@ void DrawToadMovie(Gfx** displayListHead) {
     DrawTextureRect(&gfx, TOAD_X << 2, (TOAD_Y + (i * TOAD_STRIP_HEIGHT)) << 2,
         (TOAD_X + TOAD_WIDTH) << 2,
         (TOAD_Y + TOAD_STRIP_HEIGHT + (i * TOAD_STRIP_HEIGHT)) << 2,
-        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPPipeSync(gfx++);

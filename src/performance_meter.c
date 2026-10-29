@@ -248,8 +248,8 @@ static void DrawDigits(Gfx** gfxP, u16 x, u16 y, char* text) {
     if (character != ' ') {
       gSPTextureRectangle(gfx++, x << 2, y << 2, (x + DIGIT_WIDTH) << 2,
           (y + DIGIT_HEIGHT) << 2, G_TX_RENDERTILE,
-          TexelCoordinate(((character - '0') & 0xF) * DIGIT_WIDTH), 0, 1 << 10,
-          1 << 10);
+          TexelCoordinate(((character - '0') & 0xF) * DIGIT_WIDTH), 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -599,7 +599,7 @@ void DrawMemoryMeter(u32 y, s32 taskFlags) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, 250 << 2, (y - 8) << 2, 302 << 2, (y + 20) << 2,
-      G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   sprintf(f_ReadoutText, "% 8d", nuGfxCfbNum);
   DrawDigits(&gfx, 252, y - 7, f_ReadoutText);
   sprintf(f_ReadoutText, "%08d", GetFreeMemorySize());

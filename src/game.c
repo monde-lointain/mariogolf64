@@ -613,7 +613,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
             1)
             << 2,
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
-        TexelCoordinate(SCREEN_BORDER), 4 << 10, 1 << 10);
+        TexelCoordinate(SCREEN_BORDER), 4 << 10, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -640,7 +640,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
             1)
             << 2,
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
-        TexelCoordinate(SCREEN_BORDER), 4 << 10, 1 << 10);
+        TexelCoordinate(SCREEN_BORDER), 4 << 10, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -856,7 +856,7 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
                 MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
             TexelCoordinate(sourceTop + HORIZON_FIRST_ROW +
                 (rowIndex * HORIZON_ROW_SPACING)),
-            1 << 10, 1 << 10);
+            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
     }
   }
@@ -880,8 +880,8 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
         (DYNAMIC_TEXTURE_SIZE - destOffset - rowCount) << 2,
         DYNAMIC_TEXTURE_SIZE << 2, (DYNAMIC_TEXTURE_SIZE - destOffset) << 2,
         G_TX_RENDERTILE, 0,
-        TexelCoordinate(DYNAMIC_TEXTURE_SIZE - destOffset - rowCount), 1 << 10,
-        1 << 10);
+        TexelCoordinate(DYNAMIC_TEXTURE_SIZE - destOffset - rowCount),
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
@@ -901,7 +901,8 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
       f_HorizonTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       RenderTargetAddress(osVirtualToPhysical(g_BlendedTexture)));
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, BLENDED_TEXTURE_ALPHA);
@@ -918,7 +919,8 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
       f_HorizonTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
       RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
   gDPPipeSync(gfx++);
@@ -984,7 +986,7 @@ void BuildDynamicTextures(Gfx** displayListHead) {
           TexelCoordinate(
               MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
           TexelCoordinate(MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING)),
-          1 << 10, 1 << 10);
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -998,7 +1000,8 @@ void BuildDynamicTextures(Gfx** displayListHead) {
       0, 0, 0, PRIMITIVE);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, MIRROR_NOISE_ALPHA);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_2CYCLE);
   gDPPipeSync(gfx++);
@@ -1020,7 +1023,8 @@ void BuildDynamicTextures(Gfx** displayListHead) {
       f_DynamicTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       RenderTargetAddress(osVirtualToPhysical(g_BlendedTexture)));
   gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
@@ -1037,7 +1041,8 @@ void BuildDynamicTextures(Gfx** displayListHead) {
       f_DynamicTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
-      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
       RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
   gDPPipeSync(gfx++);
@@ -2048,7 +2053,7 @@ s32 DrawGame(void) {
           g_Cameras[0].view.scissorY << 2,
           (g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth) << 2,
           (g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight) << 2,
-          G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -2274,7 +2279,7 @@ void CopyPreviousFrame(Gfx** displayListHead) {
             1)
             << 2,
         G_TX_RENDERTILE, TexelCoordinate(SCREEN_BORDER),
-        TexelCoordinate(SCREEN_BORDER), 4 << 10, 1 << 10);
+        TexelCoordinate(SCREEN_BORDER), 4 << 10, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -2314,7 +2319,7 @@ void DrawResetFade(void) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
     gSPTextureRectangle(gfx++, 0, 0, SCREEN_WIDTH << 2, SCREEN_HEIGHT << 2,
-        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPFullSync(gfx++);
     gSPEndDisplayList(gfx++);
     nuGfxTaskStart(displayList, (s32)(gfx - displayList) * sizeof(Gfx),

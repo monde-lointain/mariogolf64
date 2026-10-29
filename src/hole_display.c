@@ -2271,7 +2271,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               (BACKDROP_RIGHT + 1) << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
               G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-              TexelCoordinate(BACKDROP_BORDER), 1 << 10, 1 << 10);
+              TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
         }
 
@@ -2298,14 +2298,14 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
               G_TX_RENDERTILE,
               TexelCoordinate((SCREEN_WIDTH / 2) - f_HudAnimationFramesLeft), 0,
-              1 << 10, 1 << 10);
+              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gSPScisTextureRectangle(gfx++,
               (SCREEN_WIDTH - f_HudAnimationFramesLeft) << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
               (BACKDROP_RIGHT + 1) << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
               G_TX_RENDERTILE, TexelCoordinate(FADE_FRAME_WIDTH / 2), 0,
-              1 << 10, 1 << 10);
+              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }
 
@@ -2325,7 +2325,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
       LoadFadeFrameStrip(gfx, frame, height, isTileSet);
       gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, row << 2,
           (BACKDROP_RIGHT + 1) << 2, (row + height) << 2, G_TX_RENDERTILE, 0, 0,
-          1 << 10, 1 << 10);
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       frame += BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW;
     }
 
@@ -2449,7 +2449,8 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
               SPIRAL_TILE_HEIGHT)
               << 2,
           G_TX_RENDERTILE, TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
-          TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), 1 << 10, 1 << 10);
+          TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       StepSpiral();
     }
@@ -2485,7 +2486,8 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
               SPIRAL_TILE_HEIGHT)
               << 2,
           G_TX_RENDERTILE, TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
-          TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), 1 << 10, 1 << 10);
+          TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       StepSpiral();
     }
@@ -2561,7 +2563,7 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
           BACKDROP_RIGHT << 2,
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height - 1) << 2,
           G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-          TexelCoordinate(BACKDROP_BORDER), COPY_MODE_DSDX, 1 << 10);
+          TexelCoordinate(BACKDROP_BORDER), COPY_MODE_DSDX, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
     }
@@ -2625,7 +2627,8 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
         (SCREEN_WIDTH - BACKDROP_BORDER) << 2,
         (SCREEN_HEIGHT - BACKDROP_BORDER) << 2, G_TX_RENDERTILE,
         TexelCoordinate(f_BackdropPatternScroll),
-        TexelCoordinate(f_BackdropPatternScroll), 1 << 10, 1 << 10);
+        TexelCoordinate(f_BackdropPatternScroll), TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -2656,7 +2659,7 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
           (BACKDROP_RIGHT + 1) << 2,
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
           G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-          TexelCoordinate(BACKDROP_BORDER), 1 << 10, 1 << 10);
+          TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
   } else {
@@ -2677,7 +2680,7 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
           (BACKDROP_RIGHT + 1) << 2,
           (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
           G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-          TexelCoordinate(BACKDROP_BORDER), 1 << 10, 1 << 10);
+          TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
   }
@@ -3095,8 +3098,8 @@ void DrawSliceAnimation(void) {
       wordIndex += SLICE_STRIP_WORD_COUNT;
       gSPTextureRectangle(g_DisplayListHead++, column * SLICE_WIDTH << 2,
           y << 2, (column * SLICE_WIDTH + SLICE_WIDTH) << 2,
-          (y + SLICE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
-          1 << 10);
+          (y + SLICE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       gDPPipeSync(g_DisplayListHead++);
       y += SLICE_STRIP_HEIGHT;
     }

@@ -963,8 +963,8 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
       gSPScisTextureRectangle(gfx++, (x + offset) << 2, y << 2,
           (x + offset + RESULTS_DIGIT_WIDTH) << 2,
           (y + RESULTS_DIGIT_HEIGHT) << 2, G_TX_RENDERTILE,
-          TexelCoordinate((ch - '0') * RESULTS_DIGIT_WIDTH), 0, 1 << 10,
-          1 << 10);
+          TexelCoordinate((ch - '0') * RESULTS_DIGIT_WIDTH), 0, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
       /* The empty do-while is there to match */
       do {
       } while (0);

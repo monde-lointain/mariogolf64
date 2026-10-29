@@ -260,7 +260,8 @@ void DrawDebugText(Gfx** displayListHead) {
           (row * GLYPH_SIZE) << 2, ((column * GLYPH_SIZE) + GLYPH_SIZE) << 2,
           ((row * GLYPH_SIZE) + GLYPH_SIZE) << 2, G_TX_RENDERTILE,
           TexelCoordinate((glyph & 0x1F) * GLYPH_SIZE),
-          TexelCoordinate((glyph >> 5) * GLYPH_SIZE), 1 << 10, 1 << 10);
+          TexelCoordinate((glyph >> 5) * GLYPH_SIZE), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
 

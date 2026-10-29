@@ -7,13 +7,11 @@
 
 #include "animated_box.h"
 
+#include "screen.h"
 #include "variables.h"
 
 /* Frames that opening and closing each take */
 #define BOX_ANIMATION_FRAME_COUNT 4
-/* Texture rectangle steps in s5.10: the boxes are flat color, so any step will
- * do */
-#define ONE_TEXEL_PER_PIXEL (1 << 10)
 
 static s32 f_QueuedBoxCount = 0;
 
@@ -65,9 +63,9 @@ static void DrawAnimatedBox(Gfx** gfxHead, AnimatedBox* box) {
   }
 
   gDPSetPrimColor(gfx++, 0, 0, box->red, box->green, box->blue, box->alpha);
+  /* The boxes are flat color, so any texel step will do */
   gSPTextureRectangle(gfx++, left << 2, box->top << 2, right << 2,
-      box->bottom << 2, G_TX_RENDERTILE, 0, 0, ONE_TEXEL_PER_PIXEL,
-      ONE_TEXEL_PER_PIXEL);
+      box->bottom << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *gfxHead = gfx;
 }
 

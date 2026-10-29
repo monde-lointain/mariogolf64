@@ -367,7 +367,7 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, TABLE_PANEL_LEFT << 2, TABLE_PANEL_TOP << 2,
       TABLE_PANEL_RIGHT << 2, TABLE_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0, 0,
-      1 << 10, 1 << 10);
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   func_802169CC_ovl_01(&gfx);
   gDPPipeSync(gfx++);
@@ -565,8 +565,8 @@ void func_802169CC_ovl_01(Gfx** displayListHead) {
   for (index = 0; index != TABLE_LINE_COUNT * 2; index += 2) {
     gSPScisTextureRectangle(gfx++, D_80230248_ovl_01[index].x << 2,
         D_80230248_ovl_01[index].y << 2, D_80230248_ovl_01[index + 1].x << 2,
-        D_80230248_ovl_01[index + 1].y << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
-        1 << 10);
+        D_80230248_ovl_01[index + 1].y << 2, G_TX_RENDERTILE, 0, 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 

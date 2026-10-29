@@ -1300,7 +1300,7 @@ void DrawInsetViewFrame(void) {
             << 2,
         (g_Cameras[INSET_CAMERA].view.scissorY + INSET_FRAME_BORDER_INSIDE)
             << 2,
-        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gSPTextureRectangle(g_DisplayListHead++,
         g_Cameras[INSET_CAMERA].view.scissorX << 2,
         (g_Cameras[INSET_CAMERA].view.scissorY +
@@ -1314,7 +1314,7 @@ void DrawInsetViewFrame(void) {
             g_Cameras[INSET_CAMERA].view.scissorHeight +
             INSET_FRAME_BORDER_OUTSIDE)
             << 2,
-        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPPipeSync(g_DisplayListHead++);
@@ -1334,8 +1334,8 @@ void DrawInsetViewFrame(void) {
         (g_Cameras[INSET_CAMERA].view.scissorY +
             g_Cameras[INSET_CAMERA].view.scissorHeight)
             << 2,
-        G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0, 1 << 10,
-        1 << 10);
+        G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gSPTextureRectangle(g_DisplayListHead++,
         (g_Cameras[INSET_CAMERA].view.scissorX +
             g_Cameras[INSET_CAMERA].view.scissorWidth -
@@ -1349,8 +1349,8 @@ void DrawInsetViewFrame(void) {
         (g_Cameras[INSET_CAMERA].view.scissorY +
             g_Cameras[INSET_CAMERA].view.scissorHeight)
             << 2,
-        G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0, 1 << 10,
-        1 << 10);
+        G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPPipeSync(g_DisplayListHead++);
@@ -2283,7 +2283,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
       gSPScisTextureRectangle(gfx++, (textX + offsetX) << 2,
           (textY - WIND_TEXT_RAISE) << 2, (textX + offsetX + glyphWidth) << 2,
           (textY - WIND_TEXT_RAISE + WIND_FONT_HEIGHT) << 2, G_TX_RENDERTILE,
-          TexelCoordinate(glyphS), 0, 1 << 10, 1 << 10);
+          TexelCoordinate(glyphS), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -3236,7 +3236,7 @@ void DrawShotOffsetMarker(void) {
               SHOT_OFFSET_MARKER_SIZE) +
           f_HudOffsetY)
           << 2,
-      G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/round_hud", DrawShotOffsetMarker);
@@ -3306,7 +3306,7 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
         (s32)f_AnimatedIconY << 2,
         ((s32)f_AnimatedIconX + ANIMATED_ICON_SIZE) << 2,
         ((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-        1 << 10, 1 << 10);
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     if (g_LetterboxState == LETTERBOX_STATE_MOVING_CAMERA) {
       label = ANIMATED_ICON_LABEL_UNK1;
@@ -3331,7 +3331,7 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
             ANIMATED_ICON_LABEL_WIDTH)
             << 2,
         ((s32)f_AnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT) << 2,
-        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     *displayListHead = gfx;
   }
 }
@@ -3356,11 +3356,11 @@ s32 DrawLetterbox(Gfx** gfxP, s32 height) {
       if (height > 0) {
         gSPScisTextureRectangle(gfx++, HUD_MARGIN << 2, HUD_MARGIN << 2,
             (SCREEN_WIDTH - HUD_MARGIN) << 2, (HUD_MARGIN + height) << 2,
-            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gSPScisTextureRectangle(gfx++, HUD_MARGIN << 2,
             (SCREEN_HEIGHT - HUD_MARGIN - height) << 2,
             (SCREEN_WIDTH - HUD_MARGIN) << 2, (SCREEN_HEIGHT - HUD_MARGIN) << 2,
-            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
 
       gDPPipeSync(gfx++);
@@ -3414,7 +3414,7 @@ void DrawDistanceText(Gfx** gfxP, s32 x, s32 y, char* text) {
 
     gSPTextureRectangle(gfx++, x << 2, y << 2, (x + width) << 2,
         (y + DISTANCE_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE,
-        TexelCoordinate(glyphS), 0, 1 << 10, 1 << 10);
+        TexelCoordinate(glyphS), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     x += width;
   }
 
@@ -3545,7 +3545,7 @@ void DrawColorTest(Gfx** displayListHead) {
 #define SMALL_FACE_WIDTH 24
 #define SMALL_FACE_HEIGHT 16
 /* The others are shrunk to two-thirds, a texel and a half to a pixel */
-#define SMALL_FACE_STEP ((1 << 10) * 3 / 2)
+#define SMALL_FACE_STEP (TEXEL_STEP_ONE * 3 / 2)
 /* The pin flag beside the distance to the cup waves through four frames side by
  * side */
 #define PIN_FLAG_TIME_COUNT 16
@@ -3722,7 +3722,7 @@ void DrawRoundHud(CameraView* view) {
             (SCOREBOARD_Y - FACE_INSET_Y + FACE_HEIGHT +
                 i * SCOREBOARD_ROW_HEIGHT)
                 << 2,
-            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       } else {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
@@ -3777,7 +3777,7 @@ void DrawRoundHud(CameraView* view) {
         (PIN_FLAG_Y + PIN_FLAG_HEIGHT) << 2, G_TX_RENDERTILE,
         (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) *
             (TexelCoordinate(PIN_FLAG_WIDTH)),
-        TexelCoordinate(PIN_FLAG_IMAGE_T), 1 << 10, 1 << 10);
+        TexelCoordinate(PIN_FLAG_IMAGE_T), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(
         g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RestLabelImage)));
@@ -3791,7 +3791,7 @@ void DrawRoundHud(CameraView* view) {
         (SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX) << 2, REST_LABEL_Y << 2,
         (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
         (REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        1 << 10, 1 << 10);
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
 
     /* A putt's height is labeled by its height in meters, which the feet are
@@ -3811,7 +3811,7 @@ void DrawRoundHud(CameraView* view) {
         (SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX) << 2, HEIGHT_LABEL_Y << 2,
         (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
         (HEIGHT_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        1 << 10, 1 << 10);
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       if (f_RingFrameTime++ % RING_FRAME_LENGTH == 0) {
@@ -3833,8 +3833,8 @@ void DrawRoundHud(CameraView* view) {
       gSPScisTextureRectangle(g_DisplayListHead++,
           (RING_ICON_X - g_ShotPanelOffsetX) << 2, RING_ICON_Y << 2,
           (RING_ICON_X + RING_IMAGE_SIZE - g_ShotPanelOffsetX) << 2,
-          (RING_ICON_Y + RING_IMAGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
-          1 << 10);
+          (RING_ICON_Y + RING_IMAGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(g_DisplayListHead++);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -3944,7 +3944,7 @@ void DrawRoundHud(CameraView* view) {
         (f_HudOffsetY + CLUB_PANEL_Y) << 2,
         (CLUB_PANEL_X + CLUB_PANEL_WIDTH - g_ShotPanelOffsetX) << 2,
         (f_HudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT) << 2, G_TX_RENDERTILE,
-        0, 0, 1 << 10, 1 << 10);
+        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
         TextureAddress(ImageBody(f_ClubNameImages[f_ClubNameImageIndex])));
@@ -3959,7 +3959,7 @@ void DrawRoundHud(CameraView* view) {
         (f_HudOffsetY + CLUB_NAME_Y) << 2,
         (CLUB_NAME_X + CLUB_NAME_WIDTH - g_ShotPanelOffsetX) << 2,
         (f_HudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT) << 2, G_TX_RENDERTILE,
-        0, 0, 1 << 10, 1 << 10);
+        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
   }
 
@@ -3976,7 +3976,7 @@ void DrawRoundHud(CameraView* view) {
         (PAR_IMAGE_X - g_ShotPanelOffsetX) << 2, PAR_IMAGE_Y << 2,
         (PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX) << 2,
         (PAR_IMAGE_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
-        1 << 10, 1 << 10);
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
   }
 
@@ -4166,7 +4166,7 @@ void DrawRoundHud(CameraView* view) {
     gSPScisTextureRectangle(g_DisplayListHead++, MIRROR_TEXTURE_X << 2,
         MIRROR_TEXTURE_Y << 2, (MIRROR_TEXTURE_X + MIRROR_TEXTURE_SIZE) << 2,
         (MIRROR_TEXTURE_Y + MIRROR_TEXTURE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
-        1 << 10, 1 << 10);
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
   }
 
@@ -4300,7 +4300,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
               (CONTEST_IMAGE_Y + strip * CONTEST_IMAGE_STRIP_HEIGHT) << 2,
               (CONTEST_IMAGE_X + CONTEST_IMAGE_WIDTH) << 2,
               (CONTEST_IMAGE_Y + (strip + 1) * CONTEST_IMAGE_STRIP_HEIGHT) << 2,
-              G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }
       }
@@ -4322,7 +4322,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
               (MATCH_IMAGE_Y + strip * MATCH_IMAGE_STRIP_HEIGHT) << 2,
               (MATCH_IMAGE_X + MATCH_IMAGE_WIDTH) << 2,
               (MATCH_IMAGE_Y + (strip + 1) * MATCH_IMAGE_STRIP_HEIGHT) << 2,
-              G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }
       }
