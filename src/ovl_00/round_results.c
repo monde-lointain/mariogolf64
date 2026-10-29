@@ -1698,12 +1698,10 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         DrawTextureRect(&gfx,
             QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT),
             QuarterPixels(f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP),
-            (f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT +
-                NOTICE_CHARACTER_TITLE_WIDTH) *
-                4,
-            (f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP +
-                NOTICE_CHARACTER_SHINE_HEIGHT) *
-                4,
+            QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT +
+                NOTICE_CHARACTER_TITLE_WIDTH),
+            QuarterPixels(f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP +
+                NOTICE_CHARACTER_SHINE_HEIGHT),
             G_TX_RENDERTILE,
             TexelCoordinate(NOTICE_SHINE_SIZE -
                 ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)),
@@ -1971,21 +1969,19 @@ void DrawResultsBanner(Gfx** displayListHead) {
         G_TX_CLAMP, 0, 0, 0, 0);
     if (f_BannerKind == BANNER_KIND_POINTS) {
       DrawTextureRect(&gfx, QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
-          (f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT)) *
-              4,
+          QuarterPixels(f_BannerY + TALL_BANNER_CLOUD_TOP +
+              (i * TALL_BANNER_CLOUD_HEIGHT)),
           QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
-          (f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT) +
-              TALL_BANNER_CLOUD_HEIGHT) *
-              4,
+          QuarterPixels(f_BannerY + TALL_BANNER_CLOUD_TOP +
+              (i * TALL_BANNER_CLOUD_HEIGHT) + TALL_BANNER_CLOUD_HEIGHT),
           G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TALL_BANNER_CLOUD_DTDY);
     } else {
       DrawTextureRect(&gfx, QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
           QuarterPixels(
               f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT)),
           QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
-          (f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT) +
-              BANNER_CLOUD_HEIGHT) *
-              4,
+          QuarterPixels(f_BannerY + BANNER_CLOUD_TOP +
+              (i * BANNER_CLOUD_HEIGHT) + BANNER_CLOUD_HEIGHT),
           G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TEXEL_STEP_ONE);
     }
   }
@@ -2030,16 +2026,13 @@ void DrawResultsBanner(Gfx** displayListHead) {
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0, 0, 0,
             0, 0);
         DrawTextureRect(&gfx,
-            (TROPHY_CENTER_X + f_BannerX -
-                (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
-                4,
+            QuarterPixels(TROPHY_CENTER_X + f_BannerX -
+                (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
             QuarterPixels(top + TROPHY_BOTTOM),
-            (TROPHY_CENTER_X + f_BannerX +
-                (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
-                4,
-            (f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] + TROPHY_BOTTOM +
-                top) *
-                4,
+            QuarterPixels(TROPHY_CENTER_X + f_BannerX +
+                (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
+            QuarterPixels(f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] +
+                TROPHY_BOTTOM + top),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
       }
@@ -2067,16 +2060,13 @@ void DrawResultsBanner(Gfx** displayListHead) {
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0, 0, 0,
             0, 0);
         DrawTextureRect(&gfx,
-            (TROPHY_CENTER_X + f_BannerX -
-                (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
-                4,
+            QuarterPixels(TROPHY_CENTER_X + f_BannerX -
+                (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
             QuarterPixels(top + TROPHY_BOTTOM),
-            (TROPHY_CENTER_X + f_BannerX +
-                (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
-                4,
-            (f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] + TROPHY_BOTTOM +
-                top) *
-                4,
+            QuarterPixels(TROPHY_CENTER_X + f_BannerX +
+                (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
+            QuarterPixels(f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] +
+                TROPHY_BOTTOM + top),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
       }
@@ -2107,16 +2097,13 @@ void DrawResultsBanner(Gfx** displayListHead) {
           top = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
               f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
           DrawTextureRect(&gfx,
-              (TROPHY_CENTER_X + f_BannerX -
-                  (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
-                  4,
+              QuarterPixels(TROPHY_CENTER_X + f_BannerX -
+                  (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
               QuarterPixels(TROPHY_BOTTOM - top),
-              (TROPHY_CENTER_X + f_BannerX +
-                  (f_TrophySizes[course][TROPHY_WIDTH] / 2)) *
-                  4,
-              (TROPHY_BOTTOM - top +
-                  f_TrophySizes[course][TROPHY_SHINE_HEIGHT]) *
-                  4,
+              QuarterPixels(TROPHY_CENTER_X + f_BannerX +
+                  (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
+              QuarterPixels(TROPHY_BOTTOM - top +
+                  f_TrophySizes[course][TROPHY_SHINE_HEIGHT]),
               G_TX_RENDERTILE,
               TexelCoordinate(NOTICE_SHINE_SIZE -
                   ((f_TrophyShineFrame - TROPHY_SHINE_START) *
@@ -3306,9 +3293,8 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
         QuarterPixels(
             (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + (f_ResultsTop + 104)),
         QuarterPixels(f_ResultsSlide + 28 + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH),
-        ((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) +
-            (f_ResultsTop + 104 + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT)) *
-            4,
+        QuarterPixels((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) +
+            (f_ResultsTop + 104 + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -3326,9 +3312,8 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
       DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 88),
           QuarterPixels(f_ResultsTop + 54 + (i * NINTENDO_BADGE_STRIP_HEIGHT)),
           QuarterPixels(f_ResultsSlide + 88 + NINTENDO_BADGE_STRIP_WIDTH),
-          (f_ResultsTop + 54 + (i * NINTENDO_BADGE_STRIP_HEIGHT) +
-              NINTENDO_BADGE_STRIP_HEIGHT) *
-              4,
+          QuarterPixels(f_ResultsTop + 54 + (i * NINTENDO_BADGE_STRIP_HEIGHT) +
+              NINTENDO_BADGE_STRIP_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   } else {
@@ -3488,13 +3473,12 @@ void DrawRoundResults(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
           CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 16),
-          (f_ResultsTop + ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + 8)) *
-              4,
+          QuarterPixels(
+              f_ResultsTop + ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + 8)),
           QuarterPixels(f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH),
-          (f_ResultsTop +
+          QuarterPixels(f_ResultsTop +
               ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + 8 +
-                  CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT)) *
-              4,
+                  CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   } else {
@@ -3507,9 +3491,8 @@ void DrawRoundResults(Gfx** displayListHead) {
       DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 16),
           QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + 24 + f_ResultsTop),
           QuarterPixels(f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH),
-          ((i * BACKDROP_STRIP_HEIGHT) + 24 + BACKDROP_STRIP_HEIGHT +
-              f_ResultsTop) *
-              4,
+          QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + 24 +
+              BACKDROP_STRIP_HEIGHT + f_ResultsTop),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
@@ -3589,9 +3572,8 @@ void DrawRoundResults(Gfx** displayListHead) {
           QuarterPixels(
               i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top),
           QuarterPixels(right - f_ResultsSlide),
-          (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight + f_ResultsTop +
-              top) *
-              4,
+          QuarterPixels(i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight +
+              f_ResultsTop + top),
           G_TX_RENDERTILE, textureS, textureT, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }

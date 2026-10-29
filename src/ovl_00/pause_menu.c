@@ -1021,9 +1021,8 @@ void DrawPauseMenu(Gfx** displayListHead) {
         QuarterPixels(
             (f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8),
         QuarterPixels(PAUSE_CURSOR_RIGHT),
-        ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8 +
-            PAUSE_CURSOR_SIZE) *
-            4,
+        QuarterPixels((f_PauseSelection * PAUSE_LABEL_SPACING) +
+            PAUSE_LABELS_TOP - 8 + PAUSE_CURSOR_SIZE),
         G_TX_RENDERTILE, 0,
         PAUSE_TEES_T + (teeFrame * TexelCoordinate(PAUSE_CURSOR_SIZE)),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1032,9 +1031,8 @@ void DrawPauseMenu(Gfx** displayListHead) {
         QuarterPixels(
             (f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4),
         QuarterPixels(PAUSE_CURSOR_RIGHT - sway),
-        ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4 +
-            PAUSE_CURSOR_SIZE) *
-            4,
+        QuarterPixels((f_PauseSelection * PAUSE_LABEL_SPACING) +
+            PAUSE_LABELS_TOP - 4 + PAUSE_CURSOR_SIZE),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
