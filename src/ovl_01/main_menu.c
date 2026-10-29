@@ -693,7 +693,7 @@ static f32 D_8022FA58_ovl_01 = 0.0f;
 static f32 D_8022FA5C_ovl_01 = 0.0f;
 /* Read by no routine */
 static s32 D_8022FA60_ovl_01[2] = {0, 0};
-static f32 D_8022FA68_ovl_01
+static f32 f_MenuCharacterPositions
     [MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT][3] = {
         {{-84.0f, -43.0f, -1000.0f}, {106.0f, -32.0f, -1000.0f},
             {64.0f, 0.0f, -1000.0f}, {64.0f, 0.0f, -1000.0f},
@@ -5240,10 +5240,10 @@ void DrawMenuCharacters(Gfx** displayListHead) {
     rotation[0] = DegreesToRadians(D_8022FA54_ovl_01);
     rotation[1] = DegreesToRadians(D_8022FA58_ovl_01);
     rotation[2] = 0.0f;
-    translation[0] = D_8022FA68_ovl_01[layout][slot][0];
+    translation[0] = f_MenuCharacterPositions[layout][slot][0];
     raise = (character == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
-    translation[1] = D_8022FA68_ovl_01[layout][slot][1] + raise;
-    translation[2] = D_8022FA68_ovl_01[layout][slot][2];
+    translation[1] = f_MenuCharacterPositions[layout][slot][1] + raise;
+    translation[2] = f_MenuCharacterPositions[layout][slot][2];
     scale[0] = f_MenuCharacterScales[slot];
     scale[1] = f_MenuCharacterScales[slot];
     scale[2] = f_MenuCharacterScales[slot];
