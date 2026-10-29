@@ -2359,8 +2359,6 @@ void UpdateRain(void) {
 /* ProjectPoint depths that rain is drawn at, nearest first */
 #define RAINDROP_NEAREST_DEPTH (-15.0f)
 #define RAIN_SPLASH_NEAREST_DEPTH (-7.5f)
-/* Screen coordinates in display lists are in quarter pixels */
-#define QUARTER_PIXELS_PER_PIXEL 4
 /* How far a streak's second edge is offset from its first, in quarter pixels */
 #define RAINDROP_WIDTH 5.0f
 #define RAIN_ALPHA_THRESHOLD 1

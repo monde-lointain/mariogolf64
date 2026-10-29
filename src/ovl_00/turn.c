@@ -2052,10 +2052,10 @@ void DrawShotPreview(CameraMatrices* matrices) {
     }
 
     guMtxIdent(&D_80227110_ovl_00);
-    ball.x *= 4;
-    ball.y *= 4;
-    end.x *= 4;
-    end.y *= 4;
+    ball.x *= QUARTER_PIXELS_PER_PIXEL;
+    ball.y *= QUARTER_PIXELS_PER_PIXEL;
+    end.x *= QUARTER_PIXELS_PER_PIXEL;
+    end.y *= QUARTER_PIXELS_PER_PIXEL;
     dx = end.x - ball.x;
     dy = end.y - ball.y;
     if (fabsf(dx) > 1.0f || fabsf(dy) > 1.0f) {

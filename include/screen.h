@@ -10,6 +10,9 @@
 /* The border around the main camera's scissor rectangle, in pixels */
 #define SCREEN_BORDER 8
 
+/* Screen coordinates in display lists are in quarter pixels */
+#define QUARTER_PIXELS_PER_PIXEL 4
+
 /* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
 #define TEXEL_STEP_ONE (1 << 10)
 
