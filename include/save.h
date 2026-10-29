@@ -370,6 +370,17 @@ enum PlayerState {
   PLAYER_STATE_SHOWING_OUT_PLAYER
 };
 
+/* Where a player stands on the current hole */
+enum HoleStatus {
+  HOLE_STATUS_PLAYING,
+  HOLE_STATUS_HOLED_OUT,
+  /* Put out by the group's result, until PLAYER_STATE_FINDING_OUT_PLAYER
+   * shows it and makes it HOLE_STATUS_OUT */
+  HOLE_STATUS_NEWLY_OUT,
+  /* Out of the hole without holing out */
+  HOLE_STATUS_OUT
+};
+
 typedef struct UnkB8 {
   /* 0x00 */ char name[PLAYER_NAME_SIZE];
   /* 0x0C */ s32 state; /* A PLAYER_STATE_* value */
@@ -381,7 +392,7 @@ typedef struct UnkB8 {
   /* 0x23 */ s8 strokeCount; /* On the current hole */
   /* 0x24 */ s8 puttCount; /* Strokes from the green on the current hole */
   /* 0x25 */ s8 teeOrder; /* From 0, the player's turn on the next tee */
-  /* 0x26 */ s8 unk26;
+  /* 0x26 */ s8 unk26; /* A HOLE_STATUS_* value */
   /* 0x27 */ s8 controllerIndex; /* Into g_PlayerControllerPorts, when below
                                     MAXCONTROLLERS */
   /* 0x28 */ s8 unk28;

@@ -295,7 +295,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
       g_Scorecard.placeArrowImage =
           AllocMemory(OpenEncodedAsset(PLACE_ARROW_IMAGE_ASSET, &asset));
       ReadEncodedAsset(g_Scorecard.placeArrowImage, &asset);
-      shownHoleCount += g_Players[0].unk26 != 0;
+      shownHoleCount += g_Players[0].unk26 != HOLE_STATUS_PLAYING;
       pageTitlesRow = PAGE_TITLES_TOURNAMENT;
       if (shownHoleCount > 0) {
         if (g_Scorecard.content.holeIndex == 1) {

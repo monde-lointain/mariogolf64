@@ -272,7 +272,7 @@ void DrawShotLabels(Gfx** displayListHead) {
         continue;
       }
 
-      if (g_Players[i].unk26 != 0) {
+      if (g_Players[i].unk26 != HOLE_STATUS_PLAYING) {
         label->corner = NO_CORNER;
         continue;
       }

@@ -60,7 +60,7 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
   s32 hole;
 
   if (g_GameState.holeIndex == endHole) {
-    endHole += g_Players[playerIndex].unk26 != 0;
+    endHole += g_Players[playerIndex].unk26 != HOLE_STATUS_PLAYING;
   }
 
   for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
@@ -94,7 +94,7 @@ void TallySkins(s32 endHole) {
 
   isAnyUnk26Clear = FALSE;
   for (player = 0; player != g_GameState.playerCount; player++) {
-    if (g_Players[player].unk26 == 0) {
+    if (g_Players[player].unk26 == HOLE_STATUS_PLAYING) {
       isAnyUnk26Clear = TRUE;
     }
   }
@@ -365,7 +365,7 @@ void RecordCourseRound(void) {
     isAtRoundLimit = TRUE;
   }
 
-  g_Players[0].unk26 = 0;
+  g_Players[0].unk26 = HOLE_STATUS_PLAYING;
   score = GetNetScoreToPar(COURSE_HOLE_COUNT, 0);
   if (score < record->bestScore) {
     record->bestScore = score;

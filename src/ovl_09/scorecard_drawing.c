@@ -1438,8 +1438,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C86C_ovl_09);
  */
 #ifdef NON_MATCHING
 void DrawSpeedGolfPage(Gfx** displayListHead) {
-  s32 shownHoleCount =
-      g_Scorecard.content.holeIndex + (g_Players[0].unk26 != 0);
+  s32 shownHoleCount = g_Scorecard.content.holeIndex +
+      (g_Players[0].unk26 != HOLE_STATUS_PLAYING);
   Gfx* gfx = *displayListHead;
   s32 i;
   s32 minutes;
@@ -2755,9 +2755,9 @@ void DrawScoresPage(Gfx** displayListHead) {
     if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
         g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
       /* A hole shows once both players have finished it */
-      if (g_Players[i].unk26 != 0) {
-        shownHoleCount =
-            g_Scorecard.content.holeIndex + (g_Players[i ^ 1].unk26 != 0);
+      if (g_Players[i].unk26 != HOLE_STATUS_PLAYING) {
+        shownHoleCount = g_Scorecard.content.holeIndex +
+            (g_Players[i ^ 1].unk26 != HOLE_STATUS_PLAYING);
       }
 
       SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
@@ -2856,7 +2856,7 @@ void DrawScoresPage(Gfx** displayListHead) {
             g_PrintBuffer);
       }
     } else {
-      shownHoleCount += g_Players[i].unk26 != 0;
+      shownHoleCount += g_Players[i].unk26 != HOLE_STATUS_PLAYING;
       for (hole = firstHole; hole != shownHoleCount; hole++) {
         overPar = g_Players[i].holes[hole].strokes - course->holes[hole].par;
         if (hole < HOLES_PER_NINE) {

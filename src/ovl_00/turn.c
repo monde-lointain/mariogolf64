@@ -185,9 +185,6 @@
 #define LOOK_BACK_HEIGHT_SCALE 0.5f
 #define SHOT_CAMERA_FIELD_OF_VIEW 45.0f
 /* A replay turns the aim at once, rather than easing it round */
-/* UnkB8.unk26: whether the player is still playing the hole */
-#define HOLE_STATUS_HOLED_OUT 1
-#define HOLE_STATUS_OUT 3
 /* A hole given up outside a match counts as this many times its par */
 #define GIVE_UP_PAR_MULTIPLE 3
 #define GAME_FLAG_SNAP_REPLAY_AIM 0xF
@@ -2452,7 +2449,7 @@ void PickNextPlayer(void) {
   nextPlayer = 0;
   for (i = 0; i < g_GameState.playerCount; i++) {
     priority = LIE_PRIORITY_TEE;
-    if (g_Players[i].unk26 != 0) {
+    if (g_Players[i].unk26 != HOLE_STATUS_PLAYING) {
       continue;
     }
 
@@ -4601,7 +4598,7 @@ void UpdateTurns(void) {
       case PLAYER_STATE_CHOOSING:
         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
           if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) &&
-              g_Players[playerIndex].unk26 != 0) {
+              g_Players[playerIndex].unk26 != HOLE_STATUS_PLAYING) {
             DebugTestGutsMotion();
           }
 
@@ -4690,8 +4687,9 @@ void UpdateTurns(void) {
             s32 holeResult = GetGroupHoleResult(results);
 
             for (i = 0; i < g_GameState.playerCount; i++) {
-              if (results[i] == GROUP_PLAYER_OUT && g_Players[i].unk26 == 0) {
-                g_Players[i].unk26 = 2;
+              if (results[i] == GROUP_PLAYER_OUT &&
+                  g_Players[i].unk26 == HOLE_STATUS_PLAYING) {
+                g_Players[i].unk26 = HOLE_STATUS_NEWLY_OUT;
                 isAnyOut = TRUE;
               }
             }
@@ -4744,7 +4742,8 @@ void UpdateTurns(void) {
                         GetCourseRecordIndex(g_GameState.gameMode),
                         g_GameState.holeIndex,
                         g_Players[playerIndex ^ 1].handicap);
-              } else if (result == 3 && g_Players[playerIndex ^ 1].unk26 == 0) {
+              } else if (result == 3 &&
+                  g_Players[playerIndex ^ 1].unk26 == HOLE_STATUS_PLAYING) {
                 g_Players[playerIndex ^ 1]
                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                     .strokes =
@@ -4768,7 +4767,7 @@ void UpdateTurns(void) {
         break;
       case PLAYER_STATE_FINDING_OUT_PLAYER:
         for (i = 0; i < g_GameState.playerCount; i++) {
-          if (g_Players[i].unk26 == 2) {
+          if (g_Players[i].unk26 == HOLE_STATUS_NEWLY_OUT) {
             break;
           }
         }
@@ -4784,7 +4783,7 @@ void UpdateTurns(void) {
         }
 
         for (i = 0; i < g_GameState.playerCount; i++) {
-          if (g_Players[i].unk26 == 2) {
+          if (g_Players[i].unk26 == HOLE_STATUS_NEWLY_OUT) {
             g_Players[i].unk26 = HOLE_STATUS_OUT;
             break;
           }
