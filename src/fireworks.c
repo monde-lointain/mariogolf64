@@ -42,7 +42,7 @@ struct FireworkShape {
 };
 
 struct FireworkParticle {
-  /* 0x00 */ Mtx matrices[2]; /* Indexed by g_MatrixBufferIndex */
+  /* 0x00 */ Mtx matrices[MATRIX_BUFFER_COUNT];
   /* 0x80 */ f32 x;
   /* 0x84 */ f32 y;
   /* 0x88 */ f32 velocityX;

@@ -492,7 +492,8 @@ static LensFlare f_LensFlares[LENS_FLARE_COUNT] = {
     {{0xBF, 0xFF, 0xBF}, {0xFF, 0xFF, 0xFF}, 8, 2048, 1.0f},
     {{0xDF, 0xFF, 0xDF}, {0xFF, 0xFF, 0xFF}, 48, 1024, 1.3f},
     {{0xBF, 0xFF, 0xBF}, {0xFF, 0x00, 0x00}, 32, 2728, 1.7f}};
-static Vtx f_SkyVertices[SKY_VIEW_COUNT * 2][SKY_VERTEX_COUNT] = {
+static Vtx f_SkyVertices[SKY_VIEW_COUNT *
+    MATRIX_BUFFER_COUNT][SKY_VERTEX_COUNT] = {
     {{{{-1200, 0, 0}, 0, {0, 0}, {0xFF, 0xE7, 0x90, 0xFF}}},
         {{{-1200, -160, -2048}, 0, {0, 0x3C00}, {0xC0, 0x40, 0x00, 0xFF}}},
         {{{1200, -160, -2048}, 0, {0x5000, 0x3C00}, {0xC0, 0x40, 0x00, 0xFF}}},
@@ -885,7 +886,7 @@ void BlendSkyColors(void) {
   to = &g_SkyColors[GetCourseRecordIndex()]
                    [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                        f_SkyTimeIndex + 1];
-  for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
+  for (group = 0; group != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; group++) {
     for (channel = 0; channel != 3; channel++) {
       f_SkyVertices[group][0].v.cn[channel] = from->unk4[channel] +
           ((to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
@@ -976,7 +977,7 @@ void InitSkyColors(void) {
                        f_SkyTimeIndex + 1];
   g_SkyState.scrollX = 0.0f;
   g_SkyState.scrollY = 0.0f;
-  for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
+  for (group = 0; group != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; group++) {
     for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
       f_SkyVertices[group][0].v.cn[channel] = colors->unk4[channel];
       f_SkyVertices[group][1].v.cn[channel] = colors->unk7[channel];
@@ -1288,7 +1289,7 @@ s32 UpdateSkyEditor(void) {
     g_DebugFog.far = 0;
   }
 
-  for (index = 0; index != SKY_VIEW_COUNT * 2; index++) {
+  for (index = 0; index != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; index++) {
     for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
       f_SkyVertices[index][0].v.cn[channel] = f_EditedSkyColors->unk4[channel];
       f_SkyVertices[index][1].v.cn[channel] = f_EditedSkyColors->unk7[channel];
@@ -1456,7 +1457,8 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   direction[0] = view->lookAt[0] - view->eye[0];
   direction[1] = view->lookAt[1] - view->eye[1];
   direction[2] = view->lookAt[2] - view->eye[2];
-  vertices = f_SkyVertices[g_MatrixBufferIndex + (viewIndex * 2)];
+  vertices =
+      f_SkyVertices[g_MatrixBufferIndex + (viewIndex * MATRIX_BUFFER_COUNT)];
   g_SkyState.yaws[viewIndex] = atan2(direction[0], direction[2]);
   g_SkyState.pitches[viewIndex] = -atan2(direction[1],
       sqrtf((direction[0] * direction[0]) + (direction[2] * direction[2])));
@@ -1670,7 +1672,7 @@ static Mtx f_SkyModelMatrix;
 /* Read by no routine */
 static u8 D_800E39C8[0x88];
 
-static Mtx f_TileMatrices[2][FRAME_TILE_COUNT];
+static Mtx f_TileMatrices[MATRIX_BUFFER_COUNT][FRAME_TILE_COUNT];
 
 /*
  * Draws the sky dome around the camera and, when the scene has one, the sun.
@@ -1745,7 +1747,8 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SkyModelMatrix),
       G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
   gSPPerspNormalize(gfx++, g_ScreenEffectPerspNorm);
-  gSPVertex(gfx++, f_SkyVertices[g_MatrixBufferIndex + (cameraIndex * 2)],
+  gSPVertex(gfx++,
+      f_SkyVertices[g_MatrixBufferIndex + (cameraIndex * MATRIX_BUFFER_COUNT)],
       SKY_VERTEX_COUNT, 0);
   gDPPipeSync(gfx++);
   gSP1Triangle(gfx++, 0, 1, 4, 0);
@@ -2805,7 +2808,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTileAnimation);
 /* The lower rows' texture coordinates stop a quarter texel short, in 10.5 fixed
  * point */
 #define LOWER_TILE_TEXCOORD_INSET 8
-static Mtx f_TurnAwayMatrices[2];
+static Mtx f_TurnAwayMatrices[MATRIX_BUFFER_COUNT];
 
 /*
  * Draws HUD_ANIMATION_TURN_AWAY.

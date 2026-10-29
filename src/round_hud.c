@@ -719,11 +719,11 @@ typedef struct TrailPoint {
 static Mtx f_LandingPanelMatrices[MATRIX_BUFFER_COUNT];
 static Mtx f_GreenGridMatrix;
 static Mtx f_BallTrailMatrix;
-static Mtx f_WindIndicatorMatrices[2];
-static Mtx f_ClubHeadIconMatrices[2];
-static Mtx f_LieIconMatrices[2];
+static Mtx f_WindIndicatorMatrices[MATRIX_BUFFER_COUNT];
+static Mtx f_ClubHeadIconMatrices[MATRIX_BUFFER_COUNT];
+static Mtx f_LieIconMatrices[MATRIX_BUFFER_COUNT];
 static Mtx f_HoleImageMatrix;
-static Mtx f_ShotEffectMatrices[2];
+static Mtx f_ShotEffectMatrices[MATRIX_BUFFER_COUNT];
 static Vec3 f_ShotEffectTranslation;
 static Vec3 f_ShotEffectScale;
 static Vec3 f_ShotEffectRotation;

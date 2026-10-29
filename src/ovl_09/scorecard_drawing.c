@@ -222,7 +222,7 @@ void DrawSmallFace(Gfx** displayListHead, s32 left, s32 top, s32 playerIndex,
 
 static Mtx f_ResultCharacterMatrices[MATCH_PLAYER_COUNT];
 /* A turning flap's matrix, one for each draw buffer */
-static Mtx f_FlapMatrices[LEADERBOARD_ROW_COUNT][2];
+static Mtx f_FlapMatrices[LEADERBOARD_ROW_COUNT][MATRIX_BUFFER_COUNT];
 
 /* Draws a place, from 0 for first, as the left and right halves of its image */
 void DrawPlace(Gfx** displayListHead, s32 left, s32 top, s32 place) {

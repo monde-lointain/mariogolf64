@@ -543,12 +543,12 @@ static s32 D_80224850_ovl_00 = 0;
  * ring behind it */
 static s32 f_WindStreakHead = 0;
 
-static Mtx f_FlipMessageMatrices[2];
+static Mtx f_FlipMessageMatrices[MATRIX_BUFFER_COUNT];
 static Mtx f_ReadyGoMatrices[2];
 static Mtx f_ContactRibbonMatrices[DRAW_BUFFER_COUNT];
-static Mtx f_ContactSpinMatrices[2];
+static Mtx f_ContactSpinMatrices[MATRIX_BUFFER_COUNT];
 static FlyGuyPoint f_WindFlyGuyLastPosition;
-static Mtx f_BannerMatrices[2];
+static Mtx f_BannerMatrices[MATRIX_BUFFER_COUNT];
 /* Read by no routine */
 static u8 D_80227F30_ovl_00[0xD0];
 
