@@ -1288,9 +1288,9 @@ void func_80222038_ovl_01(void* buffer, u8 bufferIndex) {
   OpenEncodedAsset( \
       g_ModeIconAnimations[( \
           u8)D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]]] \
-                          [D_8022F8C0_ovl_01], \
+                          [g_AnimatedIconFrameIndex], \
       &asset); \
-  ReadEncodedAsset(D_8023BD74_ovl_01[D_8022F8C4_ovl_01], &asset); \
+  ReadEncodedAsset(D_8023BD74_ovl_01[g_AnimatedIconBufferIndex], &asset); \
   if (CHOSEN_GAME.isValid) { \
     if (!CHOSEN_GAME.state.isMiniGolf) { \
       OpenEncodedAsset( \
@@ -1521,7 +1521,7 @@ void func_8022209C_ovl_01(void) {
         }
 
         memory->savedGameTurn = SAVED_GAME_TURN_FRAMES;
-        D_8022F8C0_ovl_01 = 0;
+        g_AnimatedIconFrameIndex = 0;
         func_80221CC0_ovl_01();
         LoadChosenGameImages();
       } else if (g_MenuRepeatButtons & R_JPAD) {
@@ -1538,7 +1538,7 @@ void func_8022209C_ovl_01(void) {
 
         memory->savedGameTurn = -SAVED_GAME_TURN_FRAMES;
         func_80221CC0_ovl_01();
-        D_8022F8C0_ovl_01 = 0;
+        g_AnimatedIconFrameIndex = 0;
         LoadChosenGameImages();
       }
     } else {
@@ -2120,7 +2120,7 @@ void func_80224AFC_ovl_01(
   }
 
   if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
-    image = D_8023BD74_ovl_01[D_8022F8C4_ovl_01];
+    image = D_8023BD74_ovl_01[g_AnimatedIconBufferIndex];
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureBlock(gfx++,
@@ -2140,24 +2140,24 @@ void func_80224AFC_ovl_01(
       gDPPipeSync(gfx++);
     }
 
-    D_8022F8C5_ovl_01++;
-    if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
+    g_AnimatedIconFrameTime++;
+    if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
       iconIndex = D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]];
-      D_8022F8C5_ovl_01 = 0;
-      D_8022F8C0_ovl_01++;
-      if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
-        D_8022F8C0_ovl_01 = 0;
+      g_AnimatedIconFrameTime = 0;
+      g_AnimatedIconFrameIndex++;
+      if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
+        g_AnimatedIconFrameIndex = 0;
       }
 
-      if (g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01] ==
+      if (g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex] ==
           END_OF_ICON_FRAMES) {
-        D_8022F8C0_ovl_01 = 0;
+        g_AnimatedIconFrameIndex = 0;
       }
 
-      D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
+      g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
       OpenEncodedAsset(
-          g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01], &asset);
-      ReadEncodedAsset(D_8023BD74_ovl_01[D_8022F8C4_ovl_01], &asset);
+          g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex], &asset);
+      ReadEncodedAsset(D_8023BD74_ovl_01[g_AnimatedIconBufferIndex], &asset);
     }
   }
 

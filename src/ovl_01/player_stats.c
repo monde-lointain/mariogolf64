@@ -520,9 +520,9 @@ void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
       break;
   }
 
-  D_8022F8C5_ovl_01 = 0;
-  D_8022F8C0_ovl_01 = 0;
-  D_8022F8C4_ovl_01 = 0;
+  g_AnimatedIconFrameTime = 0;
+  g_AnimatedIconFrameIndex = 0;
+  g_AnimatedIconBufferIndex = 0;
   D_802303A0_ovl_01 = 0;
   D_802303A1_ovl_01 = 0;
 }
@@ -651,10 +651,10 @@ void func_80217D20_ovl_01(void) {
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
         D_802303CC_ovl_01[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]]
-                         [D_8022F8C0_ovl_01],
+                         [g_AnimatedIconFrameIndex],
         &asset);
-    ReadEncodedAsset(D_8023B350_ovl_01[D_8022F8C4_ovl_01 ^ 1], &asset);
-    D_8022F8C4_ovl_01 ^= 1;
+    ReadEncodedAsset(D_8023B350_ovl_01[g_AnimatedIconBufferIndex ^ 1], &asset);
+    g_AnimatedIconBufferIndex ^= 1;
   } else if (g_MenuRepeatButtons & R_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     memory->unkD++;
@@ -667,10 +667,10 @@ void func_80217D20_ovl_01(void) {
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
         D_802303CC_ovl_01[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]]
-                         [D_8022F8C0_ovl_01],
+                         [g_AnimatedIconFrameIndex],
         &asset);
-    ReadEncodedAsset(D_8023B350_ovl_01[D_8022F8C4_ovl_01 ^ 1], &asset);
-    D_8022F8C4_ovl_01 ^= 1;
+    ReadEncodedAsset(D_8023B350_ovl_01[g_AnimatedIconBufferIndex ^ 1], &asset);
+    g_AnimatedIconBufferIndex ^= 1;
   }
 }
 #else
@@ -939,7 +939,7 @@ void func_80219460_ovl_01(
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
-  image = D_8023B350_ovl_01[D_8022F8C4_ovl_01];
+  image = D_8023B350_ovl_01[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(image)), G_IM_FMT_CI,
       STATS_ICON_SIZE, STATS_ICON_SIZE, 0, 0, STATS_ICON_SIZE - 1,
@@ -949,19 +949,20 @@ void func_80219460_ovl_01(
   gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
       QuarterPixels(left + size), QuarterPixels(top + size), G_TX_RENDERTILE, 0,
       0, textureStep, textureStep);
-  D_8022F8C5_ovl_01++;
+  g_AnimatedIconFrameTime++;
   gDPPipeSync(gfx++);
-  if (D_8022F8C5_ovl_01 == STATS_ICON_FRAME_DURATION) {
-    D_8022F8C5_ovl_01 = 0;
-    D_8022F8C0_ovl_01++;
-    if (D_8022F8C0_ovl_01 >= STATS_ICON_FRAME_COUNT) {
-      D_8022F8C0_ovl_01 = 0;
+  if (g_AnimatedIconFrameTime == STATS_ICON_FRAME_DURATION) {
+    g_AnimatedIconFrameTime = 0;
+    g_AnimatedIconFrameIndex++;
+    if (g_AnimatedIconFrameIndex >= STATS_ICON_FRAME_COUNT) {
+      g_AnimatedIconFrameIndex = 0;
     }
 
-    D_8022F8C4_ovl_01 = !D_8022F8C4_ovl_01;
+    g_AnimatedIconBufferIndex = !g_AnimatedIconBufferIndex;
     iconIndex = D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD];
-    OpenEncodedAsset(D_802303CC_ovl_01[iconIndex][D_8022F8C0_ovl_01], &asset);
-    ReadEncodedAsset(D_8023B350_ovl_01[D_8022F8C4_ovl_01], &asset);
+    OpenEncodedAsset(
+        D_802303CC_ovl_01[iconIndex][g_AnimatedIconFrameIndex], &asset);
+    ReadEncodedAsset(D_8023B350_ovl_01[g_AnimatedIconBufferIndex], &asset);
   }
 
   *displayListHead = gfx;

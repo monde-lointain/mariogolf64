@@ -646,9 +646,13 @@ static s32 f_MenuStarFrameAssets[STAR_FRAME_COUNT] = {0x05BE, 0x05BF, 0x05C0,
 static s32 f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {0x05E5, 0x05E6,
     0x05E7, 0x05E8, 0x05E9, 0x05EA, 0x05EB, 0x05EC, 0x05ED, 0x05EE, 0x05EF,
     0x05F0, 0x05F1, 0x05F2, 0x05F3};
-s32 D_8022F8C0_ovl_01 = 0;
-u8 D_8022F8C4_ovl_01 = 0;
-s8 D_8022F8C5_ovl_01 = 0;
+/*
+ * The menus' animated icons, such as the mode icons and the Ring Shot stars,
+ * read each frame into the buffer not shown, then swap
+ */
+s32 g_AnimatedIconFrameIndex = 0;
+u8 g_AnimatedIconBufferIndex = 0;
+s8 g_AnimatedIconFrameTime = 0;
 static s32 f_SpinningStarFrameIndex = 0;
 /* Which of D_801B93E0's buffers holds the star frame shown */
 static u8 f_SpinningStarBufferIndex = 0;
@@ -1195,11 +1199,11 @@ void func_801F4C78_ovl_01(void) {
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
         iconIndex =
             D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
-        D_8022F8C0_ovl_01 = 0;
-        D_8022F8C4_ovl_01 = 0;
-        D_8022F8C5_ovl_01 = 0;
+        g_AnimatedIconFrameIndex = 0;
+        g_AnimatedIconBufferIndex = 0;
+        g_AnimatedIconFrameTime = 0;
         OpenEncodedAsset(g_ModeIconAnimations[iconIndex][0], &asset);
-        ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
+        ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
         func_802178B0_ovl_01(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK13);
         D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
         D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
@@ -1215,7 +1219,8 @@ void func_801F4C78_ovl_01(void) {
         f_SpinningStarFrameIndex = 0;
         f_SpinningStarBufferIndex = 0;
         f_SpinningStarFrameTime = 0;
-        OpenEncodedAsset(f_MenuStarFrameAssets[D_8022F8C0_ovl_01], &asset);
+        OpenEncodedAsset(
+            f_MenuStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
         ReadEncodedAsset(D_801B93E0[0], &asset);
         break;
 
@@ -1268,9 +1273,9 @@ void func_801F4C78_ovl_01(void) {
         D_8022BE92_ovl_01 ^= 1;
         func_802178B0_ovl_01(
             D_800FF420[D_8022BE92_ovl_01], PLAYER_STATS_BUFFER_UNK12);
-        D_8022F8C0_ovl_01 = 0;
-        D_8022F8C4_ovl_01 = 0;
-        D_8022F8C5_ovl_01 = 0;
+        g_AnimatedIconFrameIndex = 0;
+        g_AnimatedIconBufferIndex = 0;
+        g_AnimatedIconFrameTime = 0;
         func_80221B20_ovl_01();
         func_80221EBC_ovl_01(D_801049A0[0], SAVE_MENU_BUFFER_SLOTS);
         func_80221EBC_ovl_01(D_8010526C, SAVE_MENU_BUFFER_CHOSEN);
@@ -1353,9 +1358,9 @@ void func_801F4C78_ovl_01(void) {
           D_8022BE92_ovl_01 ^= 1;
           OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
           ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
-          D_8022F8C0_ovl_01 = 0;
-          D_8022F8C4_ovl_01 = 0;
-          D_8022F8C5_ovl_01 = 0;
+          g_AnimatedIconFrameIndex = 0;
+          g_AnimatedIconBufferIndex = 0;
+          g_AnimatedIconFrameTime = 0;
           D_8022BE94_ovl_01 = 0;
         } else {
           LoadHelpBoardImage(D_801049A0[0][0], HELP_BOARD_IMAGE_HAND);
@@ -2095,14 +2100,14 @@ void func_801F7CD0_ovl_01(void) {
  * the buffers swap.
  */
 #define LoadChosenModeIcon() \
-  D_8022F8C0_ovl_01 = 0; \
-  D_8022F8C5_ovl_01 = 0; \
+  g_AnimatedIconFrameIndex = 0; \
+  g_AnimatedIconFrameTime = 0; \
   OpenEncodedAsset( \
       g_ModeIconAnimations[D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1] \
                                             [D_801323A0.modeChoice]][0], \
       &asset); \
-  ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01 ^ 1], &asset); \
-  D_8022F8C4_ovl_01 ^= 1
+  ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex ^ 1], &asset); \
+  g_AnimatedIconBufferIndex ^= 1
 
 /*
  * Updates the mode select (MENU_SCREEN_UNK5), the wheel of the modes that
@@ -2391,8 +2396,8 @@ void func_801F7D28_ovl_01(void) {
 
       D_801323A0.modeSpin = AmountPerMode(MODE_SELECT_TURN);
       if (g_ChosenPlayerCount == 1) {
-        D_8022F8C5_ovl_01 = 0;
-        D_8022F8C0_ovl_01 = 0;
+        g_AnimatedIconFrameTime = 0;
+        g_AnimatedIconFrameIndex = 0;
         f_SpinningStarFrameTime = 0;
         f_SpinningStarFrameIndex = 0;
       }
@@ -2405,8 +2410,8 @@ void func_801F7D28_ovl_01(void) {
 
       D_801323A0.modeSpin = AmountPerMode(-MODE_SELECT_TURN);
       if (g_ChosenPlayerCount == 1) {
-        D_8022F8C5_ovl_01 = 0;
-        D_8022F8C0_ovl_01 = 0;
+        g_AnimatedIconFrameTime = 0;
+        g_AnimatedIconFrameIndex = 0;
         f_SpinningStarFrameTime = 0;
         f_SpinningStarFrameIndex = 0;
       }
@@ -5022,7 +5027,7 @@ void func_802004A0_ovl_01(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  image = D_8010526C[D_8022F8C4_ovl_01];
+  image = D_8010526C[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
@@ -5041,25 +5046,25 @@ void func_802004A0_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
   }
 
-  D_8022F8C5_ovl_01++;
-  if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
+  g_AnimatedIconFrameTime++;
+  if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
     iconIndex =
         D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
-    D_8022F8C5_ovl_01 = 0;
-    D_8022F8C0_ovl_01++;
-    if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
-      D_8022F8C0_ovl_01 = 0;
+    g_AnimatedIconFrameTime = 0;
+    g_AnimatedIconFrameIndex++;
+    if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
+      g_AnimatedIconFrameIndex = 0;
     }
 
-    if (g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01] ==
+    if (g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex] ==
         END_OF_ICON_FRAMES) {
-      D_8022F8C0_ovl_01 = 0;
+      g_AnimatedIconFrameIndex = 0;
     }
 
-    D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
+    g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
     OpenEncodedAsset(
-        g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01], &asset);
-    ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
+        g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex], &asset);
+    ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
   }
 
   *displayListHead = gfx;
@@ -5074,7 +5079,7 @@ void func_80200A40_ovl_01(
   u8 iconIndex;
 
   gDPPipeSync(gfx++);
-  image = D_8010526C[D_8022F8C4_ovl_01];
+  image = D_8010526C[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
@@ -5092,25 +5097,25 @@ void func_80200A40_ovl_01(
     gDPPipeSync(gfx++);
   }
 
-  D_8022F8C5_ovl_01++;
-  if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
+  g_AnimatedIconFrameTime++;
+  if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
     iconIndex =
         D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
-    D_8022F8C5_ovl_01 = 0;
-    D_8022F8C0_ovl_01++;
-    if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
-      D_8022F8C0_ovl_01 = 0;
+    g_AnimatedIconFrameTime = 0;
+    g_AnimatedIconFrameIndex++;
+    if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
+      g_AnimatedIconFrameIndex = 0;
     }
 
-    if (g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01] ==
+    if (g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex] ==
         END_OF_ICON_FRAMES) {
-      D_8022F8C0_ovl_01 = 0;
+      g_AnimatedIconFrameIndex = 0;
     }
 
-    D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
+    g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
     OpenEncodedAsset(
-        g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01], &asset);
-    ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
+        g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex], &asset);
+    ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
   }
 
   *displayListHead = gfx;
@@ -7182,14 +7187,14 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
   s32 left;
   s32 top;
 
-  image = D_8010526C[D_8022F8C4_ovl_01];
+  image = D_8010526C[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal16(gfx++, GOLD_STAR_PALETTE, TextureAddress(ImageBody(image)));
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(image)), G_IM_FMT_CI,
       RING_SHOT_STAR_WIDTH, RING_SHOT_STAR_HEIGHT, GOLD_STAR_PALETTE,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  image = D_800FF180[D_8022F8C4_ovl_01];
+  image = D_800FF180[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal16(
       gfx++, SILVER_STAR_PALETTE, TextureAddress(ImageBody(image)));
   gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageTexels(image)),
@@ -7223,19 +7228,20 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
     gDPPipeSync(gfx++);
   }
 
-  D_8022F8C5_ovl_01++;
-  if (D_8022F8C5_ovl_01 == RING_SHOT_STAR_FRAME_DURATION) {
-    D_8022F8C5_ovl_01 = 0;
-    D_8022F8C0_ovl_01++;
-    if (D_8022F8C0_ovl_01 >= STAR_FRAME_COUNT) {
-      D_8022F8C0_ovl_01 = 0;
+  g_AnimatedIconFrameTime++;
+  if (g_AnimatedIconFrameTime == RING_SHOT_STAR_FRAME_DURATION) {
+    g_AnimatedIconFrameTime = 0;
+    g_AnimatedIconFrameIndex++;
+    if (g_AnimatedIconFrameIndex >= STAR_FRAME_COUNT) {
+      g_AnimatedIconFrameIndex = 0;
     }
 
-    D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
-    OpenEncodedAsset(f_MenuStarFrameAssets[D_8022F8C0_ovl_01], &asset);
-    ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
-    OpenEncodedAsset(f_MenuEmptyStarFrameAssets[D_8022F8C0_ovl_01], &asset);
-    ReadEncodedAsset(D_800FF180[D_8022F8C4_ovl_01], &asset);
+    g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
+    OpenEncodedAsset(f_MenuStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
+    ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
+    OpenEncodedAsset(
+        f_MenuEmptyStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
+    ReadEncodedAsset(D_800FF180[g_AnimatedIconBufferIndex], &asset);
   }
 
   *displayListHead = gfx;

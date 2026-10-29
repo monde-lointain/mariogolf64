@@ -39,9 +39,9 @@ extern void* D_801B60D0;
 extern s32 g_ChosenPlayerCount;
 extern u8 D_8022BE88_ovl_01;
 extern u8 D_8022BE89_ovl_01;
-extern s32 D_8022F8C0_ovl_01;
-extern u8 D_8022F8C4_ovl_01;
-extern s8 D_8022F8C5_ovl_01;
+extern s32 g_AnimatedIconFrameIndex;
+extern u8 g_AnimatedIconBufferIndex;
+extern s8 g_AnimatedIconFrameTime;
 /* Updates until each character fidgets, or -1 while it does */
 extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
 extern s32 D_8023BFD0_ovl_01;
