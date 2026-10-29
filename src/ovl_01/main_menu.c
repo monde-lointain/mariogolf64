@@ -95,7 +95,8 @@
 /* Where the options' lit values follow their lit labels in D_8012D420 */
 #define OPTION_VALUES_OFFSET 0x3228
 
-/* Where the course select's images follow the sky in D_801F4A20 */
+/* Where the course select's images follow the sky in g_MenuCourseSceneryAsset
+ */
 #define COURSE_SELECT_WATER_OFFSET 0x1E88
 #define COURSE_SELECT_LAYER_OFFSET 0x2E90
 
@@ -232,9 +233,9 @@ typedef struct ImageCorner {
 #define NARROW_BOARD_SHOWN_WIDTH 170
 
 /*
- * func_801FC754 draws the course backdrop of D_801F4A20 at double size. Each
- * strip loads a row either side of the rows it shows, so that the filtering
- * blends across the seams.
+ * func_801FC754 draws the course backdrop of g_MenuCourseSceneryAsset at double
+ * size. Each strip loads a row either side of the rows it shows, so that the
+ * filtering blends across the seams.
  */
 #define BACKDROP_WIDTH 152
 #define BACKDROP_SCALE 2
@@ -249,7 +250,7 @@ typedef struct ImageCorner {
 extern void* D_800FF420[2];
 extern s32 D_801051F0;
 extern void* D_801052BC[2];
-extern void* D_801F4A20;
+extern void* g_MenuCourseSceneryAsset;
 extern const char D_80231514_ovl_01[];
 /* The parts of the menu backdrop that func_801FC60C and func_801FB54C draw */
 #define MENU_LAYER_UNK1 (1 << 0)
@@ -1151,7 +1152,7 @@ void func_801F4C78_ovl_01(void) {
         OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-        ReadEncodedAsset(D_801F4A20, &asset);
+        ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         D_8022BE92_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
@@ -1170,7 +1171,7 @@ void func_801F4C78_ovl_01(void) {
         OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-        ReadEncodedAsset(D_801F4A20, &asset);
+        ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         D_8022BE92_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
@@ -1191,7 +1192,7 @@ void func_801F4C78_ovl_01(void) {
         OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-        ReadEncodedAsset(D_801F4A20, &asset);
+        ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         D_8022BE92_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
@@ -1239,7 +1240,7 @@ void func_801F4C78_ovl_01(void) {
         func_8005C674(1, 0);
         func_80209500_ovl_01();
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-        ReadEncodedAsset(D_801F4A20, &asset);
+        ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         D_8022BE92_ovl_01 ^= 1;
         func_8020B2C4_ovl_01(D_800FF420[D_8022BE92_ovl_01], 2);
         D_8022BE8E_ovl_01 ^= 1;
@@ -1258,7 +1259,7 @@ void func_801F4C78_ovl_01(void) {
         OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-        ReadEncodedAsset(D_801F4A20, &asset);
+        ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         D_8022BE92_ovl_01 ^= 1;
         func_802178B0_ovl_01(
             D_800FF420[D_8022BE92_ovl_01], PLAYER_STATS_BUFFER_UNK12);
@@ -1340,7 +1341,7 @@ void func_801F4C78_ovl_01(void) {
           OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
           ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
           OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
-          ReadEncodedAsset(D_801F4A20, &asset);
+          ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
           D_8022BE92_ovl_01 ^= 1;
           OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
           ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
@@ -1401,11 +1402,13 @@ void func_801F4C78_ovl_01(void) {
         }
 
         OpenEncodedAsset(ASSET_SKY, &asset);
-        ReadEncodedAsset(D_801F4A20, &asset);
+        ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         OpenEncodedAsset(ASSET_WATER, &asset);
-        ReadEncodedAsset((u8*)D_801F4A20 + COURSE_SELECT_WATER_OFFSET, &asset);
+        ReadEncodedAsset(
+            (u8*)g_MenuCourseSceneryAsset + COURSE_SELECT_WATER_OFFSET, &asset);
         OpenEncodedAsset(ASSET_BLENDED_TEXTURE_SCROLLING_LAYER, &asset);
-        ReadEncodedAsset((u8*)D_801F4A20 + COURSE_SELECT_LAYER_OFFSET, &asset);
+        ReadEncodedAsset(
+            (u8*)g_MenuCourseSceneryAsset + COURSE_SELECT_LAYER_OFFSET, &asset);
         D_8022BE80_ovl_01 = 0;
         OpenEncodedAsset(
             g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
@@ -3730,7 +3733,8 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, ((u32)D_801F4A20 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(
+      gfx++, ((u32)g_MenuCourseSceneryAsset + IMAGE_HEADER_SIZE) & ~7);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -3744,7 +3748,8 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
           stripIndex++) {
         if (stripIndex == 0) {
           gDPLoadTextureBlock(gfx++,
-              ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+              ((u32)g_MenuCourseSceneryAsset + LARGE_PALETTED_TEXELS_OFFSET) &
+                  ~7,
               G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
               BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -3762,7 +3767,7 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
         } else {
           gDPPipeSync(gfx++);
           gDPLoadTextureBlock(gfx++,
-              ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET +
+              ((u32)g_MenuCourseSceneryAsset + LARGE_PALETTED_TEXELS_OFFSET +
                   (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)) &
                   ~7,
               G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
@@ -3801,7 +3806,8 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
           /* The first strip has no row above it, so it shows its first row
            * too */
           gDPLoadTextureBlock(gfx++,
-              ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+              ((u32)g_MenuCourseSceneryAsset + LARGE_PALETTED_TEXELS_OFFSET) &
+                  ~7,
               G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
               BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -3819,7 +3825,7 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
         } else {
           gDPPipeSync(gfx++);
           gDPLoadTextureBlock(gfx++,
-              ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET +
+              ((u32)g_MenuCourseSceneryAsset + LARGE_PALETTED_TEXELS_OFFSET +
                   (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)) &
                   ~7,
               G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
@@ -3987,7 +3993,8 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, ((u32)D_801F4A20 + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(
+      gfx++, ((u32)g_MenuCourseSceneryAsset + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != BACKDROP_STRIP_COUNT; stripIndex++) {
     /* The image ends in a strip of one row */
     shownRowCount =
@@ -3995,8 +4002,8 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
     if (stripIndex == 0) {
       /* The first strip has no row above it, so it shows its first row too */
       gDPLoadTextureBlock(gfx++,
-          ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
-          G_IM_SIZ_8b, BACKDROP_WIDTH,
+          ((u32)g_MenuCourseSceneryAsset + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+          G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
           BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -4012,7 +4019,7 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
     } else {
       gDPPipeSync(gfx++);
       gDPLoadTextureBlock(gfx++,
-          ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET +
+          ((u32)g_MenuCourseSceneryAsset + LARGE_PALETTED_TEXELS_OFFSET +
               (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
@@ -5593,13 +5600,17 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         1, SHADE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, WATER_BLEND_ALPHA);
     gDPLoadTextureBlock(gfx++,
-        ((u32)D_801F4A20 + COURSE_SELECT_WATER_OFFSET + IMAGE_HEADER_SIZE) & ~7,
+        ((u32)g_MenuCourseSceneryAsset + COURSE_SELECT_WATER_OFFSET +
+            IMAGE_HEADER_SIZE) &
+            ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, WATER_TEXTURE_SIZE, WATER_TEXTURE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         WATER_TEXTURE_MASK, WATER_TEXTURE_MASK, WATER_TEXTURE_SHIFT,
         WATER_TEXTURE_SHIFT);
     gDPLoadMultiBlock(gfx++,
-        ((u32)D_801F4A20 + COURSE_SELECT_LAYER_OFFSET + IMAGE_HEADER_SIZE) & ~7,
+        ((u32)g_MenuCourseSceneryAsset + COURSE_SELECT_LAYER_OFFSET +
+            IMAGE_HEADER_SIZE) &
+            ~7,
         WATER_LAYER_TMEM, WATER_LAYER_TILE, G_IM_FMT_RGBA, G_IM_SIZ_16b,
         WATER_TEXTURE_SIZE, WATER_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, WATER_TEXTURE_MASK, WATER_TEXTURE_MASK,

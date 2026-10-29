@@ -2634,7 +2634,7 @@ __asm__(".section .rodata");
 s32 FreeCharacterSlot(u32 slotIndex) {
   osSyncPrintf("D PC[%d]\n", slotIndex);
   if (slotIndex < CHARACTER_SLOT_COUNT) {
-    g_CharacterSlots[slotIndex].modelIndex = NO_CHARACTER_MODEL;
+    g_ResidentCharacterSlotList[slotIndex].modelIndex = NO_CHARACTER_MODEL;
   }
 }
 
@@ -2648,8 +2648,8 @@ Boolean IsCharacterSlotBusy(u32 slotIndex) {
   }
 
   isBusy = FALSE;
-  if (g_CharacterSlots[slotIndex].modelIndex != NO_CHARACTER_MODEL ||
-      g_FrameCount - g_CharacterSlots[slotIndex].lastDrawnFrame <
+  if (g_ResidentCharacterSlotList[slotIndex].modelIndex != NO_CHARACTER_MODEL ||
+      g_FrameCount - g_ResidentCharacterSlotList[slotIndex].lastDrawnFrame <
           BUSY_FRAME_COUNT) {
     isBusy = TRUE;
   }
@@ -2672,8 +2672,8 @@ Boolean IsAnyCharacterSlotBusy(void) {
 /* Returns the slot, or NULL if it is out of range or empty */
 CharacterSlot* GetUsedCharacterSlot(u32 slotIndex) {
   if (slotIndex < CHARACTER_SLOT_COUNT &&
-      g_CharacterSlots[slotIndex].modelIndex != NO_CHARACTER_MODEL) {
-    return &g_CharacterSlots[slotIndex];
+      g_ResidentCharacterSlotList[slotIndex].modelIndex != NO_CHARACTER_MODEL) {
+    return &g_ResidentCharacterSlotList[slotIndex];
   }
 
   return NULL;

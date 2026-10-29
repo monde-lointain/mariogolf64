@@ -78,7 +78,7 @@ extern s32 D_801B7070;
 extern s16 D_801B71CC;
 extern s8 D_801B9410;
 extern u8 g_MapCamera[];
-extern void* D_801F4A20;
+extern void* g_MenuCourseSceneryAsset;
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
 extern void* D_801049A0[7];
@@ -471,8 +471,9 @@ void LoadMenuResources(void) {
     return;
   }
 
-  D_801F4A20 = AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
-  ReadEncodedAsset(D_801F4A20, &asset);
+  g_MenuCourseSceneryAsset =
+      AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
+  ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
   D_8012D3AC = AllocMemory(OpenEncodedAsset(0x721, &asset));
   ReadEncodedAsset(D_8012D3AC, &asset);
   D_800FF420[0] = AllocMemory(OpenEncodedAsset(0x520, &asset));
@@ -604,7 +605,7 @@ void FreeMenuResources(void) {
   s32 index;
 
   g_LoadedMenuScreen = NO_MENU_SCREEN;
-  FreeMemory(&D_801F4A20);
+  FreeMemory(&g_MenuCourseSceneryAsset);
   FreeMemory(&D_8012D3AC);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
     FreeMemory(&D_801049A0[index]);

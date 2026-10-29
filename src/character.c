@@ -618,7 +618,8 @@ void WriteBallDistances(void) {
     s32 distances[BALL_DISTANCE_COUNT];
 
     LoadCharacter(MEASURED_SLOT, modelIndex, 0);
-    g_CharacterModelIndex = g_CharacterSlots[MEASURED_SLOT].modelIndex;
+    g_CharacterModelIndex =
+        g_ResidentCharacterSlotList[MEASURED_SLOT].modelIndex;
     for (column = 0; column < BALL_DISTANCE_COUNT; column++) {
       switch (column) {
         case CLUB_KIND_WOOD:
@@ -957,7 +958,7 @@ static const char f_UnusedCompleteText[] = "complete\n";
 
 void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
   Boolean isPatched = FALSE;
-  CharacterSlot* slot = &g_CharacterSlots[slotIndex];
+  CharacterSlot* slot = &g_ResidentCharacterSlotList[slotIndex];
   JointAnimation* joint;
   CharacterAnimation* animation;
   u32 frameDataSize;
@@ -1796,18 +1797,18 @@ void SetCharacterBuffer(s32 slotIndex, u8* buffer) {
   s32 warningCount;
   s32 i;
 
-  if (g_CharacterSlots[slotIndex].modelIndex != NO_CHARACTER_MODEL) {
+  if (g_ResidentCharacterSlotList[slotIndex].modelIndex != NO_CHARACTER_MODEL) {
     for (warningCount = 0; warningCount < WARNING_REPEAT_COUNT;
         warningCount++) {
       osSyncPrintf(
           "Polychara %d still alive. You can't change buffer.\n", slotIndex);
     }
   } else {
-    g_CharacterSlots[slotIndex].modelBuffer = (void*)alignedBuffer;
+    g_ResidentCharacterSlotList[slotIndex].modelBuffer = (void*)alignedBuffer;
     for (i = 0; i < FRAME_DATA_COPY_COUNT; i++) {
-      g_CharacterSlots[slotIndex].frameData[i] =
-          (u8*)g_CharacterSlots[slotIndex].modelBuffer + FRAME_DATA_OFFSET +
-          (i * FRAME_DATA_COPY_SIZE);
+      g_ResidentCharacterSlotList[slotIndex].frameData[i] =
+          (u8*)g_ResidentCharacterSlotList[slotIndex].modelBuffer +
+          FRAME_DATA_OFFSET + (i * FRAME_DATA_COPY_SIZE);
     }
   }
 }
@@ -1817,7 +1818,7 @@ void ResetCharacterSlots(void) {
 
   FreeAllCharacterSlots();
   for (i = 0; i < CHARACTER_SLOT_COUNT; i++) {
-    g_CharacterSlots[i].lastDrawnFrame = LONG_AGO_FRAME;
+    g_ResidentCharacterSlotList[i].lastDrawnFrame = LONG_AGO_FRAME;
     SetCharacterBuffer(i, (u8*)DEFAULT_CHARACTER_BUFFER);
   }
 }
