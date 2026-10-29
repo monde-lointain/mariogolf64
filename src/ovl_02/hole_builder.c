@@ -196,6 +196,9 @@ typedef struct GroundLightColor {
  */
 #define GROUND_TILE_AVERAGED_POINT_COUNT \
   ((GROUND_TILE_POINT_SPAN + 1) * (GROUND_TILE_POINT_SPAN + 1))
+/* A tile's lowest and highest heights start past any point's */
+#define UNMEASURED_LOWEST_HEIGHT 0x40000000
+#define UNMEASURED_HIGHEST_HEIGHT (-0x40000000)
 #define MIN_GROUND_TILE_HEIGHT_RANGE 32
 #define FLAT_GROUND_TILE_HEIGHT_RANGE 30
 /* Splits a map column or row into a tile and a texel within it */
@@ -2284,8 +2287,8 @@ f32 MeasureGroundTiles(void) {
       sumX = 0;
       sumY = 0;
       sumZ = 0;
-      lowest = 0x40000000;
-      highest = -0x40000000;
+      lowest = UNMEASURED_LOWEST_HEIGHT;
+      highest = UNMEASURED_HIGHEST_HEIGHT;
       for (pointRow = 0; pointRow <= GROUND_TILE_POINT_SPAN; pointRow++) {
         for (pointColumn = 0; pointColumn <= GROUND_TILE_POINT_SPAN;
             pointColumn++) {
