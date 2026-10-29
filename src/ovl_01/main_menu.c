@@ -251,13 +251,6 @@ extern void* D_800FF420[2];
 extern s32 D_801051F0;
 extern void* D_801052BC[2];
 extern const char D_80231514_ovl_01[];
-/* The parts of the menu backdrop that func_801FC60C and func_801FB54C draw */
-#define MENU_LAYER_SCENERY (1 << 0)
-#define MENU_LAYER_BOARD (1 << 2)
-#define MENU_LAYER_BANNER (1 << 3)
-#define MENU_LAYER_LARGE_BANNER (1 << 4)
-#define MENU_LAYER_UNK20 (1 << 5)
-#define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
 
 #define PLAYER_UNK28_TRAINING (-1)
 #define PLAYER_UNK28_NINE_HOLES 3
@@ -4554,7 +4547,6 @@ extern const char D_8023176C_ovl_01[];
 #define BET_SLIDE_DISTANCE 512
 
 void StartLoadingChosenHole(void);
-void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
 void func_80200A40_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void func_80200EF0_ovl_01(Gfx** displayListHead);

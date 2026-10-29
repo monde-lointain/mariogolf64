@@ -1734,7 +1734,6 @@ const char D_80231A3C_ovl_01[] = "%s";
 #define EMPTY_GAME_TEXT_Y 186
 #define MESSAGE_EMPTY_SAVED_GAME 0x26
 
-void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
 void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
 void func_80224AFC_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);

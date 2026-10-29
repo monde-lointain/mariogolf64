@@ -7,6 +7,7 @@
 #include "asset.h"
 #include "character.h"
 #include "hole_display.h"
+#include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
@@ -116,7 +117,6 @@ void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, CharacterId character, u8 drawMode);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);
 void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);

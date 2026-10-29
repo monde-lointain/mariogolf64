@@ -12,6 +12,7 @@
 #include "game_flags.h"
 #include "hole_display.h"
 #include "libc.h"
+#include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "password.h"
@@ -318,7 +319,6 @@ static f32 D_80231180_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
 Boolean IsNintendoClubTournament(void);
 s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentModeMessage(void);
-void func_801FB54C_ovl_01(Gfx** displayListHead, s32);
 void func_8022747C_ovl_01(Gfx** displayListHead, s32 width, s32 height,
     s32 centerX, s32 centerY, s32 okTextShown, s32 chosenButton,
     s32 windowStyle);

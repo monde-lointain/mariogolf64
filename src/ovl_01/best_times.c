@@ -63,7 +63,6 @@
 extern void* D_8012D430[CHARACTER_COUNT];
 
 s32 GetOpenCourseCount(void);
-void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);
 void func_8020F2D0_ovl_01(
     Gfx** displayListHead, u8 useCourseNames, s32 courseIndex);
 void DrawNarrowTwoDigitMenuNumber(
