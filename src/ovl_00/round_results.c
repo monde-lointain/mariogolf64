@@ -2808,6 +2808,17 @@ s32 UpdateMatchResults(ControllerState* controller) {
   return FALSE;
 }
 
+/* Where the tournament results draw their parts */
+#define TOURNAMENT_PLACE_X 40
+#define TOURNAMENT_PORTRAIT_X 100
+#define TOURNAMENT_ICON_Y 80
+#define TOURNAMENT_SCORE_LABEL_X 144
+#define TOURNAMENT_POINTS_LABEL_X 232
+#define TOURNAMENT_LABEL_Y 60
+#define TOURNAMENT_SCORE_X 152
+#define TOURNAMENT_POINTS_X 232
+#define TOURNAMENT_NUMBER_Y 88
+
 /* The tournament results: place, portrait, score, Course Points and the points
  * to the next course */
 void DrawTournamentResults(Gfx** displayListHead) {
@@ -2817,13 +2828,14 @@ void DrawTournamentResults(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  DrawRank(&gfx, f_ResultsSlide + 40, f_ResultsTop + 80,
-      (f_PlayerRanks[0] - 1) | RANK_AS_PLACE);
-  DrawPlayerPortrait(&gfx, f_ResultsSlide + 100, f_ResultsTop + 80, 0, FALSE);
-  DrawResultsLabel(
-      &gfx, f_ResultsSlide + 144, f_ResultsTop + 60, RESULTS_LABEL_SCORE);
-  DrawResultsLabel(
-      &gfx, f_ResultsSlide + 232, f_ResultsTop + 60, RESULTS_LABEL_POINTS);
+  DrawRank(&gfx, f_ResultsSlide + TOURNAMENT_PLACE_X,
+      f_ResultsTop + TOURNAMENT_ICON_Y, (f_PlayerRanks[0] - 1) | RANK_AS_PLACE);
+  DrawPlayerPortrait(&gfx, f_ResultsSlide + TOURNAMENT_PORTRAIT_X,
+      f_ResultsTop + TOURNAMENT_ICON_Y, 0, FALSE);
+  DrawResultsLabel(&gfx, f_ResultsSlide + TOURNAMENT_SCORE_LABEL_X,
+      f_ResultsTop + TOURNAMENT_LABEL_Y, RESULTS_LABEL_SCORE);
+  DrawResultsLabel(&gfx, f_ResultsSlide + TOURNAMENT_POINTS_LABEL_X,
+      f_ResultsTop + TOURNAMENT_LABEL_Y, RESULTS_LABEL_POINTS);
   if (f_OpenCourseCount == COURSE_COUNT) {
     SetTextSlot(f_ResultsSlide + ALL_COURSES_OPEN_X,
         f_ResultsTop + SOLO_ALL_COURSES_OPEN_Y, MESSAGE_ALL_COURSES_OPEN,
@@ -2847,9 +2859,11 @@ void DrawTournamentResults(Gfx** displayListHead) {
     sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
   }
 
-  DrawDigitText(&gfx, f_ResultsSlide + 152, f_ResultsTop + 88, g_PrintBuffer);
+  DrawDigitText(&gfx, f_ResultsSlide + TOURNAMENT_SCORE_X,
+      f_ResultsTop + TOURNAMENT_NUMBER_Y, g_PrintBuffer);
   sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
-  DrawDigitText(&gfx, f_ResultsSlide + 232, f_ResultsTop + 88, g_PrintBuffer);
+  DrawDigitText(&gfx, f_ResultsSlide + TOURNAMENT_POINTS_X,
+      f_ResultsTop + TOURNAMENT_NUMBER_Y, g_PrintBuffer);
   *displayListHead = gfx;
 }
 
@@ -2866,6 +2880,24 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_TimeLabel);
 #define RESULTS_HEADING_ENV_COLOR 0xFFFF0000
 #define RESULTS_HEADING_PRIM_COLOR 0x30FF0000
 
+/*
+ * Where the Speed Golf results draw their parts: the time and the strokes
+ * each sit under a heading
+ */
+#define SPEED_GOLF_PORTRAIT_X 40
+#define SPEED_GOLF_PORTRAIT_Y 88
+#define SPEED_GOLF_SCORE_LABEL_X 82
+#define SPEED_GOLF_POINTS_LABEL_X 232
+#define SPEED_GOLF_LABEL_Y 56
+#define SPEED_GOLF_HEADING_X 86
+#define SPEED_GOLF_TIME_HEADING_Y 76
+#define SPEED_GOLF_STROKE_HEADING_Y 114
+#define SPEED_GOLF_VALUE_X 90
+#define SPEED_GOLF_TIME_Y 94
+#define SPEED_GOLF_SCORE_Y 132
+#define SPEED_GOLF_POINTS_X 228
+#define SPEED_GOLF_POINTS_Y 88
+
 /* The Speed Golf results: portrait, time, strokes, Course Points and the points
  * to the next course */
 void DrawSpeedGolfResults(Gfx** displayListHead) {
@@ -2877,11 +2909,12 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  DrawPlayerPortrait(&gfx, f_ResultsSlide + 40, f_ResultsTop + 88, 0, FALSE);
-  DrawResultsLabel(
-      &gfx, f_ResultsSlide + 82, f_ResultsTop + 56, RESULTS_LABEL_SCORE);
-  DrawResultsLabel(
-      &gfx, f_ResultsSlide + 232, f_ResultsTop + 56, RESULTS_LABEL_POINTS);
+  DrawPlayerPortrait(&gfx, f_ResultsSlide + SPEED_GOLF_PORTRAIT_X,
+      f_ResultsTop + SPEED_GOLF_PORTRAIT_Y, 0, FALSE);
+  DrawResultsLabel(&gfx, f_ResultsSlide + SPEED_GOLF_SCORE_LABEL_X,
+      f_ResultsTop + SPEED_GOLF_LABEL_Y, RESULTS_LABEL_SCORE);
+  DrawResultsLabel(&gfx, f_ResultsSlide + SPEED_GOLF_POINTS_LABEL_X,
+      f_ResultsTop + SPEED_GOLF_LABEL_Y, RESULTS_LABEL_POINTS);
   if (f_OpenCourseCount == COURSE_COUNT) {
     SetTextSlot(f_ResultsSlide + ALL_COURSES_OPEN_X,
         f_ResultsTop + SOLO_ALL_COURSES_OPEN_Y, MESSAGE_ALL_COURSES_OPEN,
@@ -2905,7 +2938,8 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
     sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
   }
 
-  DrawDigitText(&gfx, f_ResultsSlide + 90, f_ResultsTop + 132, g_PrintBuffer);
+  DrawDigitText(&gfx, f_ResultsSlide + SPEED_GOLF_VALUE_X,
+      f_ResultsTop + SPEED_GOLF_SCORE_Y, g_PrintBuffer);
   seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
   hundredths = (s32)(g_GameState.stopwatchFrameCount *
                    ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
@@ -2913,16 +2947,20 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
   sprintf(g_PrintBuffer, f_TimeFormat,
       seconds / SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT,
       seconds % SECONDS_PER_MINUTE, hundredths);
-  DrawDigitText(&gfx, f_ResultsSlide + 90, f_ResultsTop + 94, g_PrintBuffer);
+  DrawDigitText(&gfx, f_ResultsSlide + SPEED_GOLF_VALUE_X,
+      f_ResultsTop + SPEED_GOLF_TIME_Y, g_PrintBuffer);
   sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
-  DrawDigitText(&gfx, f_ResultsSlide + 228, f_ResultsTop + 88, g_PrintBuffer);
+  DrawDigitText(&gfx, f_ResultsSlide + SPEED_GOLF_POINTS_X,
+      f_ResultsTop + SPEED_GOLF_POINTS_Y, g_PrintBuffer);
   SetUpGradientTextDrawing(&gfx, 0);
   sprintf(g_PrintBuffer, f_TimeLabel);
-  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 86, f_ResultsTop + 76,
-      g_PrintBuffer, RESULTS_HEADING_ENV_COLOR, RESULTS_HEADING_PRIM_COLOR, 0);
+  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + SPEED_GOLF_HEADING_X,
+      f_ResultsTop + SPEED_GOLF_TIME_HEADING_Y, g_PrintBuffer,
+      RESULTS_HEADING_ENV_COLOR, RESULTS_HEADING_PRIM_COLOR, 0);
   sprintf(g_PrintBuffer, "Stroke");
-  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 86, f_ResultsTop + 114,
-      g_PrintBuffer, RESULTS_HEADING_ENV_COLOR, RESULTS_HEADING_PRIM_COLOR, 0);
+  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + SPEED_GOLF_HEADING_X,
+      f_ResultsTop + SPEED_GOLF_STROKE_HEADING_Y, g_PrintBuffer,
+      RESULTS_HEADING_ENV_COLOR, RESULTS_HEADING_PRIM_COLOR, 0);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
