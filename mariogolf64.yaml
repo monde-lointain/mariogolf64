@@ -694,11 +694,12 @@ segments:
     bss_size: 0x2E60
     exclusive_ram_id: overlay_8024D800
     symbol_name_format: $VRAM_$SEG
+    bss_contains_common: True
     subsegments:
       - [0x136BA0, c, ovl_04/shot_simulation]
       - [0x137090, .rodata, ovl_04/shot_simulation]
       - [0x1370AC, pad]
-      - { start: 0x1370B0, type: bss, vram: 0x8024DD10 }
+      - { start: 0x1370B0, type: .bss, vram: 0x8024DD10, name: ovl_04/shot_simulation }
 
   - name: ovl_05
     type: code
