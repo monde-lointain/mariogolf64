@@ -252,12 +252,12 @@ extern s32 D_801051F0;
 extern void* D_801052BC[2];
 extern const char D_80231514_ovl_01[];
 /* The parts of the menu backdrop that func_801FC60C and func_801FB54C draw */
-#define MENU_LAYER_UNK1 (1 << 0)
-#define MENU_LAYER_UNK4 (1 << 2)
-#define MENU_LAYER_UNK8 (1 << 3)
-#define MENU_LAYER_UNK10 (1 << 4)
+#define MENU_LAYER_SCENERY (1 << 0)
+#define MENU_LAYER_BOARD (1 << 2)
+#define MENU_LAYER_BANNER (1 << 3)
+#define MENU_LAYER_LARGE_BANNER (1 << 4)
 #define MENU_LAYER_UNK20 (1 << 5)
-#define MENU_LAYER_UNK80 (1 << 7)
+#define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
 
 #define PLAYER_UNK28_TRAINING (-1)
 #define PLAYER_UNK28_NINE_HOLES 3
@@ -3739,7 +3739,8 @@ void DrawMenuScreen(Gfx** displayListHead) {
 #define BOARD_STRIP_SPACING 9
 #define BOARD_LEFT 32
 #define BOARD_TOP 44
-/* MENU_LAYER_UNK80 reads the buffer as NARROW_BOARD_WIDTH texels wide */
+/* MENU_LAYER_TALL_NARROW_BOARD reads the buffer as NARROW_BOARD_WIDTH texels
+ * wide */
 #define TALL_NARROW_BOARD_LEFT 16
 
 /*
@@ -3782,7 +3783,7 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
 
-  if (layers & MENU_LAYER_UNK1) {
+  if (layers & MENU_LAYER_SCENERY) {
     if (g_MenuScreen == MENU_SCREEN_UNK6 || g_MenuScreen == MENU_SCREEN_UNK22 ||
         g_MenuScreen == MENU_SCREEN_UNK20) {
       for (stripIndex = 0; stripIndex != CLAMPED_BACKDROP_STRIP_COUNT;
@@ -3888,7 +3889,7 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
     }
   }
 
-  if (layers & MENU_LAYER_UNK4) {
+  if (layers & MENU_LAYER_BOARD) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
@@ -3917,7 +3918,7 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
     }
   }
 
-  if (layers & MENU_LAYER_UNK80) {
+  if (layers & MENU_LAYER_TALL_NARROW_BOARD) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
@@ -3954,7 +3955,7 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
     bobOffset = (f_MenuBobOffset + BANNER_BOB_LOWERING) - BANNER_BOB_RAISING;
   }
 
-  if (layers & MENU_LAYER_UNK8) {
+  if (layers & MENU_LAYER_BANNER) {
     image = D_801052BC[D_8022BE8C_ovl_01];
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
 
@@ -3999,19 +4000,19 @@ void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  if (layers & MENU_LAYER_UNK1) {
+  if (layers & MENU_LAYER_SCENERY) {
     func_801FC754_ovl_01(&gfx);
   }
 
-  if (layers & MENU_LAYER_UNK4) {
+  if (layers & MENU_LAYER_BOARD) {
     func_801FCB74_ovl_01(&gfx);
   }
 
-  if (layers & MENU_LAYER_UNK10) {
+  if (layers & MENU_LAYER_LARGE_BANNER) {
     func_801FD4F0_ovl_01(&gfx);
   }
 
-  if (layers & MENU_LAYER_UNK8) {
+  if (layers & MENU_LAYER_BANNER) {
     func_801FD7B0_ovl_01(&gfx);
   }
 
