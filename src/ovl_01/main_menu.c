@@ -1403,7 +1403,7 @@ void func_801F4C78_ovl_01(void) {
             ReadAssetFile(D_801052C4[index], GetAssetFileSize(&file), &file);
           }
         } else {
-          for (index = 0; index != 6; index++) {
+          for (index = 0; index != COURSE_COUNT; index++) {
             OpenEncodedAsset(g_CourseIconAssets[index], &asset);
             ReadEncodedAsset(D_801049A0[0][index], &asset);
           }
