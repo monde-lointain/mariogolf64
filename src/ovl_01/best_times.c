@@ -144,7 +144,7 @@ void func_80213464_ovl_01(void* buffer, s16 bufferKind) {
   }
 }
 
-void func_80213558_ovl_01(void) {
+void UpdateBestTimes(void) {
   MenuMemory* memory = func_8005AF74();
   s32 courseCount = GetOpenCourseCount();
   s32 direction;
@@ -201,7 +201,7 @@ void func_80213558_ovl_01(void) {
 }
 
 /*
- * func_80213748 turns the open courses' images on the wheel of menu.h, with
+ * DrawBestTimes turns the open courses' images on the wheel of menu.h, with
  * the chosen course's name on the banner below, then lists that course's best
  * times on a shaded panel: each with its place, its unkD78 as a signed number
  * and its holder's face. A row of dashes stands in for each unset time.
@@ -229,7 +229,7 @@ void func_80213558_ovl_01(void) {
  * uses, five instructions more than GCC's single lb and product.
  */
 #ifdef NON_MATCHING
-void func_80213748_ovl_01(Gfx** displayListHead) {
+void DrawBestTimes(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u16 perspNorm;
   f32 iconX[COURSE_COUNT];
@@ -411,7 +411,7 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", func_80213748_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", DrawBestTimes);
 #endif
 
 void func_802144E4_ovl_01(Gfx** displayListHead, s32 left, s32 top,

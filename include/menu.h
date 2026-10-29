@@ -258,7 +258,7 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT]
 #define FACE_NAME_OFFSET_Y 12
 
 /*
- * The wheel that DrawCourseStats and func_80213748 turn the open courses' 64 by
+ * The wheel that DrawCourseStats and DrawBestTimes turn the open courses' 64 by
  * 64 images on, seen from above, with the blinking arrows either side
  */
 #define WHEEL_FIELD_OF_VIEW 120.0f

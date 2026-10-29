@@ -360,7 +360,7 @@ void UpdateCourseStats(void);
 void func_80213390_ovl_01(void** buffers);
 void func_8021342C_ovl_01(void* buffer);
 void func_80213464_ovl_01(void* buffer, s16 bufferKind);
-void func_80213558_ovl_01(void);
+void UpdateBestTimes(void);
 void func_8021585C_ovl_01(void);
 void func_802159C0_ovl_01(void* buffer, s16 bufferKind);
 void func_80215B84_ovl_01(void);
@@ -406,7 +406,7 @@ void DrawMenuBanner(Gfx** displayListHead);
 void DrawMenuTitleScreen(Gfx** displayListHead);
 void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
 void DrawCourseStats(Gfx** displayListHead);
-void func_80213748_ovl_01(Gfx** displayListHead);
+void DrawBestTimes(Gfx** displayListHead);
 void func_80215DC4_ovl_01(Gfx** displayListHead);
 void func_8021D3AC_ovl_01(Gfx** displayListHead);
 void DrawRingShotRecords(Gfx** displayListHead);
@@ -1082,7 +1082,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_BEST_TIMES:
-      func_80213558_ovl_01();
+      UpdateBestTimes();
       break;
 
     case MENU_SCREEN_BIRDIE_BADGES:
@@ -3710,7 +3710,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       DrawCourseStats(&gfx);
       break;
     case MENU_SCREEN_BEST_TIMES:
-      func_80213748_ovl_01(&gfx);
+      DrawBestTimes(&gfx);
       break;
     case MENU_SCREEN_BIRDIE_BADGES:
       DrawBirdieBadgeLabel(&gfx);
