@@ -58,6 +58,14 @@ enum SkyImageKind {
  */
 #define SUN_DEPTH_MARGIN 16.0f
 #define SUN_GLARE_MARGIN 120.0f
+/* Whether a point lies at least inset within each of the screen's edges */
+#define IsInsetOnScreen(x, y, inset) \
+  ((x) >= (inset) && (x) <= SCREEN_WIDTH - (inset) && (y) >= (inset) && \
+      (y) <= SCREEN_HEIGHT - (inset))
+/* Whether a point lies less than margin beyond each of the screen's edges */
+#define IsNearScreen(x, y, margin) \
+  ((x) > -(margin) && (x) < SCREEN_WIDTH + (margin) && (y) > -(margin) && \
+      (y) < SCREEN_HEIGHT + (margin))
 #define SUN_SKY_DEPTH 0xFFFC /* The z-buffer value of the sky */
 #define SUN_GLARE_FADE_STEP 0.1f
 #define SUN_GLARE_GROWTH_STEP 0.3f
@@ -689,10 +697,7 @@ void SetUpTitleHole(void) {
 void UpdateSunGlare(void) {
   u16* zBuffer;
 
-  if (f_SunScreenX[0] >= SUN_DEPTH_MARGIN &&
-      f_SunScreenX[0] <= SCREEN_WIDTH - SUN_DEPTH_MARGIN &&
-      f_SunScreenY[0] >= SUN_DEPTH_MARGIN &&
-      f_SunScreenY[0] <= SCREEN_HEIGHT - SUN_DEPTH_MARGIN) {
+  if (IsInsetOnScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_DEPTH_MARGIN)) {
     zBuffer = nuGfxZBuffer;
     f_SunDepth =
         zBuffer[((s32)f_SunScreenY[0] * SCREEN_WIDTH) + (s32)f_SunScreenX[0]];
@@ -705,10 +710,7 @@ void UpdateSunGlare(void) {
     if (f_SunGlareStrength < 0.0f) {
       f_SunGlareStrength = 0.0f;
     }
-  } else if (f_SunScreenX[0] > -SUN_GLARE_MARGIN &&
-      f_SunScreenX[0] < SCREEN_WIDTH + SUN_GLARE_MARGIN &&
-      f_SunScreenY[0] > -SUN_GLARE_MARGIN &&
-      f_SunScreenY[0] < SCREEN_HEIGHT + SUN_GLARE_MARGIN) {
+  } else if (IsNearScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_GLARE_MARGIN)) {
 GROW:
 
     if (!f_IsSunGlareSettled) {
@@ -1771,10 +1773,8 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
       f_SunScreenX[cameraIndex] -= SUN_TURN_WIDTH;
     }
 
-    if (f_SunScreenX[cameraIndex] > -SUN_CULL_MARGIN &&
-        f_SunScreenX[cameraIndex] < SCREEN_WIDTH + SUN_CULL_MARGIN &&
-        f_SunScreenY[cameraIndex] > -SUN_CULL_MARGIN &&
-        f_SunScreenY[cameraIndex] < SCREEN_HEIGHT + SUN_CULL_MARGIN) {
+    if (IsNearScreen(f_SunScreenX[cameraIndex], f_SunScreenY[cameraIndex],
+            SUN_CULL_MARGIN)) {
       gDPPipeSync(gfx++);
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPPipeSync(gfx++);
