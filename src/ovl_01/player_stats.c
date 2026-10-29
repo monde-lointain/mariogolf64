@@ -575,7 +575,7 @@ void func_80217D20_ovl_01(void) {
   memory = func_8005AF74();
   if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
     PlaySong(SONG_TITLE, 0);
-    g_MenuScreen = MENU_SCREEN_UNK6;
+    g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
     D_8022BE89_ovl_01 = MENU_UNK89_UNK3;
   }
 
@@ -975,7 +975,7 @@ s32 func_80219948_ovl_01(void) {
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
     PlaySong(SONG_TITLE, 0);
-    g_MenuScreen = MENU_SCREEN_UNK6;
+    g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
     D_8022BE89_ovl_01 = MENU_UNK89_UNK4;
     FreeAllCharacterSlots();
   }

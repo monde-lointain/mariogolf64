@@ -2036,7 +2036,7 @@ void func_8005DAFC(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_MenuScreen = MENU_SCREEN_UNK6;
+  g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
 }
 
 void func_8005DC50(void) {

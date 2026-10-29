@@ -950,7 +950,7 @@ void UpdateMenus(void) {
     g_MenuPressedButtons |= g_MenuControllerData[index].trigger;
   }
 
-  if (g_MenuScreen == MENU_SCREEN_UNK6) {
+  if (g_MenuScreen == MENU_SCREEN_COURSE_SELECT) {
     if ((GetChosenCourseIndex() != g_GameState.courseIndex) || !D_800FE334) {
       StartLoadingChosenHole();
     }
@@ -1049,7 +1049,7 @@ void UpdateMenus(void) {
 
       break;
 
-    case MENU_SCREEN_UNK6:
+    case MENU_SCREEN_COURSE_SELECT:
       if (!g_GameState.isMiniGolf) {
         func_801F8BAC_ovl_01();
       } else {
@@ -1397,7 +1397,7 @@ void UpdateMenus(void) {
         ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         break;
 
-      case MENU_SCREEN_UNK6:
+      case MENU_SCREEN_COURSE_SELECT:
         if (g_GameState.isMiniGolf) {
           for (index = 0; index != MINI_GOLF_DISC_IMAGE_COUNT; index++) {
             OpenEncodedAsset(
@@ -1579,7 +1579,7 @@ void UpdateMenus(void) {
   if (g_MenuScreen == MENU_SCREEN_EXIT) {
     TransferSaveData(save, TRUE);
     if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-      g_MenuScreen = MENU_SCREEN_UNK6;
+      g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
     } else {
       g_MenuScreen = MENU_SCREEN_UNK18;
     }
@@ -2173,7 +2173,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_TOURNAMENT;
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 2;
         MAP_CAMERA_MODE_TOP_BYTE = 0;
         D_801B5634 = 0;
@@ -2202,7 +2202,7 @@ void UpdateModeSelect(void) {
       case MODE_ICON_STROKE:
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         D_800FF4C0 = 1;
@@ -2231,7 +2231,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_MATCH_GAME;
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 3;
@@ -2242,7 +2242,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_SKINS_MATCH;
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 4;
@@ -2253,7 +2253,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_SPEED_GOLF;
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
@@ -2275,7 +2275,7 @@ void UpdateModeSelect(void) {
 
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_801323A0.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         g_GameState.isMiniGolf = TRUE;
@@ -2318,7 +2318,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_UNK1;
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         D_801B5634 = 0;
@@ -2351,7 +2351,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_CLUB_SLOTS;
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         D_801B5634 = 5;
@@ -3536,7 +3536,7 @@ void func_801FADBC_ovl_01(void) {
     if (D_801323A0.modeChoice == MENU_SCREEN_MODE_SELECT) {
       g_MenuScreen = D_801323A0.modeChoice;
     } else {
-      g_MenuScreen = MENU_SCREEN_UNK6;
+      g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
     }
 
     return;
@@ -3697,7 +3697,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
     case MENU_SCREEN_UNK8:
       func_80207D08_ovl_01(&gfx);
       break;
-    case MENU_SCREEN_UNK6:
+    case MENU_SCREEN_COURSE_SELECT:
     case MENU_SCREEN_UNK20:
     case MENU_SCREEN_UNK22:
       func_80202000_ovl_01(&gfx);
@@ -3802,7 +3802,8 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
 
   if (layers & MENU_LAYER_SCENERY) {
-    if (g_MenuScreen == MENU_SCREEN_UNK6 || g_MenuScreen == MENU_SCREEN_UNK22 ||
+    if (g_MenuScreen == MENU_SCREEN_COURSE_SELECT ||
+        g_MenuScreen == MENU_SCREEN_UNK22 ||
         g_MenuScreen == MENU_SCREEN_UNK20) {
       for (stripIndex = 0; stripIndex != CLAMPED_BACKDROP_STRIP_COUNT;
           stripIndex++) {
@@ -5582,10 +5583,10 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
 }
 
 /*
- * Draws screen 6, the course select, or the bet settings and screen 20's
- * columns as screens 20 and 22 slide between them. The course select draws
- * the water plane, then the wheel of the open courses and the next one, or
- * of the mini-golf disc's images, the front one bobbing. While the holes are
+ * Draws the course select, or the bet settings and screen 20's columns as
+ * screens 20 and 22 slide between them. The course select draws the water
+ * plane, then the wheel of the open courses and the next one, or of the
+ * mini-golf disc's images, the front one bobbing. While the holes are
  * chosen (MAP_CAMERA_MODE_TOP_BYTE is 1) it draws the holes badges;
  * otherwise the course's birdie badge count and tournament trophies. Then
  * func_8021B618 slides the stats panel's rows the way D_8022BE89 picks; when
@@ -5639,7 +5640,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
 
   save = GetSaveData();
   gfx = *displayListHead;
-  if (g_MenuScreen == MENU_SCREEN_UNK6) {
+  if (g_MenuScreen == MENU_SCREEN_COURSE_SELECT) {
     DrawMenuBackdropLayers(&gfx, COURSE_SELECT_BACK_LAYERS);
     guTranslate(&D_802321F0_ovl_01, 0.0f, 0.0f, -WATER_PLANE_DISTANCE);
     guPerspective(&D_80232230_ovl_01, &perspNorm, WATER_FIELD_OF_VIEW,

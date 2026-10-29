@@ -891,7 +891,7 @@ s32 UpdateCharacterSelect(
         }
       } else {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_MenuScreen = MENU_SCREEN_UNK6;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = MAP_CAMERA_TOP_BYTE_UNK2;
         D_801B5634 = 0;
