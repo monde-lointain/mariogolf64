@@ -36,6 +36,18 @@ typedef struct MemoryBlock {
   /* 0x0C */ struct MemoryBlock* prev;
 } MemoryBlock; /* size = 0x10 */
 
+/* The bytes from start up to end */
+#define RegionSize(start, end) ((u8*)(end) - (u8*)(start))
+/* The block that starts offset bytes into block */
+#define BlockAt(block, offset) ((MemoryBlock*)((u8*)(block) + (offset)))
+/* Whether second starts where first ends, so that freeing can merge them */
+#define IsBlockFollowedBy(first, second) \
+  (BlockAt((first), (first)->size) == (second))
+/* The memory that a block's header precedes, which the caller gets */
+#define BlockMemory(block) ((block) + 1)
+/* The header of the block whose memory pointer is */
+#define BlockOfMemory(pointer) ((MemoryBlock*)(pointer) - 1)
+
 typedef struct Heap {
   /* 0x00 */ MemoryBlock sentinel;
   /* 0x10 */ u32 freeSize;
@@ -48,7 +60,7 @@ static Heap f_Memory;
 
 void AddHeapRegion(s32 heapIndex, void* start, void* end) {
   MemoryBlock* block = start;
-  u32 size = (u8*)end - (u8*)start;
+  u32 size = RegionSize(start, end);
 
   block->size = size;
   f_Heaps[heapIndex].freeSize += size;
@@ -130,7 +142,7 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
 
   if (bestBlock->size - size > sizeof(MemoryBlock)) {
     f_Heaps[heapIndex].freeSize -= size;
-    rest = (MemoryBlock*)((u8*)bestBlock + size);
+    rest = BlockAt(bestBlock, size);
     rest->size = bestBlock->size - size;
     rest->tag = BLOCK_FREE;
     bestBlock->next->prev = rest;
@@ -144,7 +156,7 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
 
   bestBlock->tag = BLOCK_USED;
   osSetIntMask(mask);
-  return bestBlock + 1;
+  return BlockMemory(bestBlock);
 }
 
 /* Frees the block that *pointerToBlock points to and clears the pointer */
@@ -164,18 +176,16 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
     return;
   }
 
-  block = (MemoryBlock*)pointer - 1;
+  block = BlockOfMemory(pointer);
   f_Heaps[heapIndex].freeSize += block->size;
-  if (block->prev->tag == BLOCK_FREE &&
-      (MemoryBlock*)((u8*)block->prev + block->prev->size) == block) {
+  if (block->prev->tag == BLOCK_FREE && IsBlockFollowedBy(block->prev, block)) {
     block->next->prev = block->prev;
     block->prev->next = block->next;
     block->prev->size += block->size;
     block = block->prev;
   }
 
-  if (block->next->tag == BLOCK_FREE &&
-      (MemoryBlock*)((u8*)block + block->size) == block->next) {
+  if (block->next->tag == BLOCK_FREE && IsBlockFollowedBy(block, block->next)) {
     block->next->next->prev = block;
     block->size += block->next->size;
     block->next = block->next->next;
@@ -194,7 +204,7 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
 void InitHeapRegions(Boolean hasExpansionPak) {
   void AddMemoryRegion(void* start, void* end) {
     MemoryBlock* block = start;
-    u32 size = (u8*)end - (u8*)start;
+    u32 size = RegionSize(start, end);
 
     block->size = size;
     block->tag = BLOCK_FREE;
@@ -289,7 +299,7 @@ void* AllocMemory(u32 size) {
   }
 
   if (bestBlock->size - size > sizeof(MemoryBlock)) {
-    rest = (MemoryBlock*)((u8*)bestBlock + size);
+    rest = BlockAt(bestBlock, size);
     rest->tag = BLOCK_FREE;
     rest->size = bestBlock->size - size;
     bestBlock->next->prev = rest;
@@ -305,7 +315,7 @@ void* AllocMemory(u32 size) {
 
   bestBlock->tag = BLOCK_USED;
   osSetIntMask(mask);
-  return bestBlock + 1;
+  return BlockMemory(bestBlock);
 }
 
 #else
@@ -334,19 +344,17 @@ void FreeMemory(void* pointerToBlock) {
     return;
   }
 
-  block = (MemoryBlock*)pointer - 1;
+  block = BlockOfMemory(pointer);
   prev = block->prev;
   f_Memory.freeSize += block->size;
-  if (prev->tag == BLOCK_FREE &&
-      (MemoryBlock*)((u8*)prev + prev->size) == block) {
+  if (prev->tag == BLOCK_FREE && IsBlockFollowedBy(prev, block)) {
     block->next->prev = prev;
     block->prev->next = block->next;
     block->prev->size += block->size;
     block = block->prev;
   }
 
-  if (block->next->tag == BLOCK_FREE &&
-      (MemoryBlock*)((u8*)block + block->size) == block->next) {
+  if (block->next->tag == BLOCK_FREE && IsBlockFollowedBy(block, block->next)) {
     block->next->next->prev = block;
     block->size += block->next->size;
     block->next = block->next->next;
