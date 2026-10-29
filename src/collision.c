@@ -171,6 +171,13 @@ enum TriangleFacing {
       ((corners)[1] * COURSE_UNITS_PER_UNIT < (value)) && \
       ((corners)[2] * COURSE_UNITS_PER_UNIT < (value)))
 
+/*
+ * IsOffGround's test with signed bounds, which FindRingHit's draft comes
+ * closer to matching with
+ */
+#define IsOffGroundSigned(x, z) \
+  ((x) < 0 || (x) >= GROUND_WIDTH || (z) < 0 || (z) >= GROUND_LENGTH)
+
 /* Whether a point is off the ground; a negative x or z is too, as an unsigned
  * one is big */
 static inline Boolean IsOffGround(s32 x, s32 z) {
@@ -2048,11 +2055,11 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     return FALSE;
   }
 
-  if ((u32)startX >= GROUND_WIDTH || (u32)startZ >= GROUND_LENGTH) {
+  if (IsOffGround(startX, startZ)) {
     return FALSE;
   }
 
-  if ((u32)endX >= GROUND_WIDTH || (u32)endZ >= GROUND_LENGTH) {
+  if (IsOffGround(endX, endZ)) {
     return FALSE;
   }
 
@@ -2278,11 +2285,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
   }
 
-  if ((u32)startX >= GROUND_WIDTH || (u32)startZ >= GROUND_LENGTH) {
+  if (IsOffGround(startX, startZ)) {
     return FALSE;
   }
 
-  if ((u32)endX >= GROUND_WIDTH || (u32)endZ >= GROUND_LENGTH) {
+  if (IsOffGround(endX, endZ)) {
     return FALSE;
   }
 
@@ -3012,14 +3019,11 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
   }
 
-  /* IsOffGround's tests, written out with signed bounds; they are there to
-   * match */
-  if (startX < 0 || startX >= GROUND_WIDTH || startZ < 0 ||
-      startZ >= GROUND_LENGTH) {
+  if (IsOffGroundSigned(startX, startZ)) {
     return -1;
   }
 
-  if (endX < 0 || endX >= GROUND_WIDTH || endZ < 0 || endZ >= GROUND_LENGTH) {
+  if (IsOffGroundSigned(endX, endZ)) {
     return -1;
   }
 
