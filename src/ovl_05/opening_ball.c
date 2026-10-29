@@ -1587,9 +1587,9 @@ SETTLE:
             (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
                     (plane.normal[AXIS_Z] * plane.normal[AXIS_Z]) <
                 plane.normal[AXIS_Y] * plane.normal[AXIS_Y] * 0.25f) {
-          simulation->unkC[AXIS_X] = simulation->position[AXIS_X];
-          simulation->unkC[AXIS_Y] = simulation->position[AXIS_Y];
-          simulation->unkC[AXIS_Z] = simulation->position[AXIS_Z];
+          simulation->dropPosition[AXIS_X] = simulation->position[AXIS_X];
+          simulation->dropPosition[AXIS_Y] = simulation->position[AXIS_Y];
+          simulation->dropPosition[AXIS_Z] = simulation->position[AXIS_Z];
         }
       }
     }
@@ -1656,12 +1656,12 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     }
   }
 
-  simulation->unkC[AXIS_X] = simulation->position[AXIS_X];
-  simulation->startPosition[AXIS_X] = simulation->unkC[AXIS_X];
-  simulation->unkC[AXIS_Y] = simulation->position[AXIS_Y];
-  simulation->startPosition[AXIS_Y] = simulation->unkC[AXIS_Y];
-  simulation->unkC[AXIS_Z] = simulation->position[AXIS_Z];
-  simulation->startPosition[AXIS_Z] = simulation->unkC[AXIS_Z];
+  simulation->dropPosition[AXIS_X] = simulation->position[AXIS_X];
+  simulation->startPosition[AXIS_X] = simulation->dropPosition[AXIS_X];
+  simulation->dropPosition[AXIS_Y] = simulation->position[AXIS_Y];
+  simulation->startPosition[AXIS_Y] = simulation->dropPosition[AXIS_Y];
+  simulation->dropPosition[AXIS_Z] = simulation->position[AXIS_Z];
+  simulation->startPosition[AXIS_Z] = simulation->dropPosition[AXIS_Z];
   simulation->unkA2 = simulation->surface;
   simulation->unkA7 = simulation->unkA2;
   simulation->unkA1 = 0;

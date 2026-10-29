@@ -4309,8 +4309,10 @@ void UpdateTurns(void) {
                   player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
             }
           } else if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
-            player->ballPosition[AXIS_X] = g_TurnBallSimulation.unkC[AXIS_X];
-            player->ballPosition[AXIS_Z] = g_TurnBallSimulation.unkC[AXIS_Z];
+            player->ballPosition[AXIS_X] =
+                g_TurnBallSimulation.dropPosition[AXIS_X];
+            player->ballPosition[AXIS_Z] =
+                g_TurnBallSimulation.dropPosition[AXIS_Z];
             player->ballPosition[AXIS_Y] = GetGroundHeight(
                 player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
             player->ballSurface = GetSurface(

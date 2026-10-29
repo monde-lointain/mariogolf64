@@ -82,7 +82,12 @@ enum LaunchPurpose {
 
 typedef struct BallSimulation {
   /* 0x00 */ s32 startPosition[3];
-  /* 0x0C */ s32 unkC[3];
+  /*
+   * The last point the ball crossed over gently sloping ground that is not
+   * lost (IsLostBallKind) or SURFACE_KIND_BARE_GROUND_UNK20; a ball in a
+   * water hazard is dropped there. Launching sets it to the start.
+   */
+  /* 0x0C */ s32 dropPosition[3];
   /* 0x18 */ s32 position[3]; /* Where the ball is, in course units */
   /* 0x24 */ s32 velocity[3];
   /* 0x30 */ s32 unk30;
