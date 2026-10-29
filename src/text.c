@@ -138,22 +138,7 @@ static void* f_MessageGlyphs;
 static MessageTable* f_Messages;
 static void* f_TextIconImage;
 
-/*
- * A glyph drawn with its own matrix, so text can be moved a glyph at a
- * time. Glyphs are placed in groups.
- */
-typedef struct GlyphSprite {
-  /* 0x00 */ Mtx matrix;
-  /* 0x40 */ u16 code;
-  /* 0x42 */ u8 fontSize;
-  /* 0x43 */ s8 group; /* NO_GLYPH_GROUP when the sprite is free */
-  /* 0x44 */ u8 flags;
-} GlyphSprite; /* size = 0x48 */
-
-#define GLYPH_SPRITE_COUNT 300
 #define NO_GLYPH_GROUP (-1)
-/* The scorecard's leaderboard uses all of them */
-#define GLYPH_GROUP_COUNT 20
 /* The texel row where a large glyph's bottom part starts */
 #define LARGE_GLYPH_PART_ROW 7
 /*

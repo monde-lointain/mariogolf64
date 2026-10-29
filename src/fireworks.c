@@ -16,9 +16,6 @@
 #include "sound.h"
 #include "variables.h"
 
-/* How many fireworks f_Fireworks has room for */
-#define FIREWORK_CAPACITY 4
-
 /* How many of them LoadFireworks sets up */
 #define FIREWORK_COUNT 1
 
@@ -33,16 +30,16 @@
 #define PARTICLE_FADE_LIFE 128
 
 /* An image whose zero cells each become a particle of a firework */
-typedef struct FireworkShape {
+struct FireworkShape {
   /* 0x0 */ u8 unk0[3];
   /* 0x3 */ u8 width;
   /* 0x4 */ u8 unk4;
   /* 0x5 */ u8 height;
   /* 0x6 */ u8 unk6[2];
   /* 0x8 */ u8 cells[1]; /* width * height, by rows */
-} FireworkShape;
+};
 
-typedef struct FireworkParticle {
+struct FireworkParticle {
   /* 0x00 */ Mtx matrices[2]; /* Indexed by g_MatrixBufferIndex */
   /* 0x80 */ f32 x;
   /* 0x84 */ f32 y;
@@ -50,18 +47,7 @@ typedef struct FireworkParticle {
   /* 0x8C */ f32 velocityY;
   /* 0x90 */ u8 unk90[4];
   /* 0x94 */ s16 life; /* Drawn while above 0 */
-} FireworkParticle; /* size = 0x98 */
-
-typedef struct Firework {
-  /* 0x00 */ FireworkParticle* particles;
-  /* 0x04 */ s32 particleCount;
-  /* 0x08 */ s32 timer;
-  /* 0x0C */ s32 unkC;
-  /* 0x10 */ u8 unk10[0x14];
-  /* 0x24 */ u8 unk24;
-  /* 0x25 */ u8 isActive;
-  /* 0x28 */ FireworkShape* shape;
-} Firework; /* size = 0x2C */
+}; /* size = 0x98 */
 
 static s32 f_FireworkCount = 0;
 static s32 f_FireworkState = 0;

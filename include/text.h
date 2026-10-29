@@ -61,6 +61,22 @@
 #define LOWERCASE_CODE_OFFSET 0x80
 #define TEXT_PALETTE_COLOR_COUNT 4
 
+/*
+ * A glyph drawn with its own matrix, so text can be moved a glyph at a
+ * time. Glyphs are placed in groups.
+ */
+typedef struct GlyphSprite {
+  /* 0x00 */ Mtx matrix;
+  /* 0x40 */ u16 code;
+  /* 0x42 */ u8 fontSize;
+  /* 0x43 */ s8 group; /* NO_GLYPH_GROUP when the sprite is free */
+  /* 0x44 */ u8 flags;
+} GlyphSprite; /* size = 0x48 */
+
+#define GLYPH_SPRITE_COUNT 300
+/* The scorecard's leaderboard uses all of them */
+#define GLYPH_GROUP_COUNT 20
+
 typedef struct TextSlot {
   /* 0x00 */ s32 x;
   /* 0x04 */ s32 y;

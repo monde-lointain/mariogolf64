@@ -61,25 +61,6 @@
  * wind speed */
 #define RAIN_DRIFT_PER_WIND_SPEED 0.1f
 
-/* The particle effects drawn in the scene, such as the sparkles of a passed
- * ring */
-typedef struct Effect {
-  /* 0x00 */ Vec3 position; /* In world units */
-  /* 0x0C */ Vec3 velocity; /* In world units a frame */
-  /* 0x18 */ u8 unk18[0xC];
-  /* 0x24 */ f32 unk24; /* An angle about x and z */
-  /* 0x28 */ f32 alpha;
-  /* 0x2C */ f32 alphaStep;
-  /* 0x30 */ f32 scale;
-  /* 0x34 */ f32 scaleStep;
-  /* 0x38 */ s16 unk38;
-  /* 0x3A */ s8 kind;
-  /* 0x3B */ s8 unk3B;
-  /* 0x3C */ s8 matrixIndex; /* Of the effects' transform matrices */
-} Effect; /* size = 0x40 */
-
-#define EFFECT_COUNT 40
-
 #define RAINDROP_COUNT 48
 #define RAINDROP_FALLING (-1)
 
@@ -89,7 +70,7 @@ typedef struct Effect {
 #define RAINDROP_HEAD_GROUNDED (1 << 4)
 #define RAIN_SPLASH_COUNT 32
 
-typedef struct Raindrop {
+struct Raindrop {
   /* 0x00 */ Vec3 head;
   /* 0x0C */ Vec3 tail;
   /* 0x18 */ f32 groundHeight; /* Under the drop; UpdateRain refreshes one drop
@@ -105,29 +86,16 @@ typedef struct Raindrop {
       landedFrameCount; /* RAINDROP_FALLING until the drop reaches the ground */
   /* 0x2D */ u8
       splashColumn; /* The column of f_RainSplashImage frames it lands with */
-} Raindrop; /* size = 0x30 */
+}; /* size = 0x30 */
 
-typedef struct RainSplash {
+struct RainSplash {
   /* 0x00 */ Vec3 position;
   /* 0x0C */ f32 unkC;
   /* 0x10 */ u8 unk10[6];
   /* 0x16 */ s8 frameCount;
   /* 0x17 */ s8 unk17;
   /* 0x18 */ u8 column; /* The column of f_RainSplashImage frames it shows */
-} RainSplash; /* size = 0x1C */
-
-/*
- * Set up for each shot's debris. Keeping the club kind in a struct is there to
- * match, as it keeps its loads from moving above the effects' stores.
- */
-typedef struct ShotDebris {
-  /* 0x00 */ s32 unk0;
-  /* 0x04 */ s32 unk4;
-  /* 0x08 */ f32 unk8;
-  /* 0x0C */ f32 unkC;
-  /* 0x10 */ s32 clubKind;
-  /* 0x14 */ s32 unk14;
-} ShotDebris; /* size = 0x18 */
+}; /* size = 0x1C */
 
 enum EffectKind {
   EFFECT_KIND_NONE = -1,
