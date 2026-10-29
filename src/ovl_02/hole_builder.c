@@ -26,8 +26,6 @@
 
 /* A ground tile's vertices start at its column and row shifted by this */
 #define TILE_ORIGIN_SHIFT 9
-/* Texture coordinates are S10.5 fixed point */
-#define TEXTURE_COORD_FRACTION_BITS 5
 /* Where texture coordinates start at a tile's origin */
 #define TILE_TEXTURE_ORIGIN 0x100
 /* How much mini golf vertices are scaled along x and z for their textures */
@@ -41,7 +39,7 @@
   (GRID_ROW_VERTEX_COUNT * ((GROUND_TILE_ROW_COUNT * 2) + 1))
 /* Grid texture coordinates: four per unit, starting one texel in */
 #define GRID_TEXTURE_SCALE 4
-#define GRID_TEXTURE_BORDER (1 << TEXTURE_COORD_FRACTION_BITS)
+#define GRID_TEXTURE_BORDER TexelCoordinate(1)
 /* Vertex flags in the hole's vertex file */
 #define VERTEX_FLAG_SAME_X 0x40
 #define VERTEX_FLAG_SAME_Z 0x80
@@ -3947,16 +3945,15 @@ void SetMiniGolfTileTextureCoords(
   s32 coord;
 
   for (vertex = start; vertex < end; vertex++) {
-    coord = (((vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X) -
-                 (column << TILE_ORIGIN_SHIFT))
-                << TEXTURE_COORD_FRACTION_BITS) +
+    coord = TexelCoordinate((vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X) -
+                (column << TILE_ORIGIN_SHIFT)) +
         TILE_TEXTURE_ORIGIN;
     vertex->tc[0] = coord;
 
     /* The second coordinate's two steps are there to match */
     coord = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) -
         (row << TILE_ORIGIN_SHIFT);
-    coord = (coord << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
+    coord = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
     vertex->tc[1] = coord;
   }
 }
@@ -3975,14 +3972,14 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t* start, Vtx_t* end) {
   }
 
   for (vertex = start; vertex < end; vertex++) {
-    coord = ((vertex->ob[AXIS_X] - (column << TILE_ORIGIN_SHIFT))
-                << TEXTURE_COORD_FRACTION_BITS) +
+    coord =
+        TexelCoordinate(vertex->ob[AXIS_X] - (column << TILE_ORIGIN_SHIFT)) +
         TILE_TEXTURE_ORIGIN;
     vertex->tc[0] = coord;
 
     /* The second coordinate's two steps are there to match */
     coord = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
-    coord = (coord << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
+    coord = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
     vertex->tc[1] = coord;
   }
 }

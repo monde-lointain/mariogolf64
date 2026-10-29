@@ -59,11 +59,6 @@
 #define SMALL_FACE_HEIGHT 24
 /* With G_TX_MIRROR, texels from this column on mirror the face */
 #define MIRRORED_FACE_MASK 5
-/*
- * Texture coordinates have this many fraction bits. Mirrored faces start one
- * face width in, where the mirrored tile reads the face backwards.
- */
-#define TEXTURE_COORD_FRACTION_BITS 5
 
 #define HOLE_NUMBER_ENV_COLOR 0xFFFF0000
 #define HOLE_NUMBER_PRIM_COLOR 0x30FF0000
@@ -215,10 +210,12 @@ void DrawSmallFace(Gfx** displayListHead, s32 left, s32 top, s32 playerIndex,
   LoadTextureBlock(&gfx, g_PlayerFaceImages[playerIndex], G_IM_FMT_CI,
       G_IM_SIZ_8b, FACE_SIZE, SMALL_FACE_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR,
       isMirrored * MIRRORED_FACE_MASK, 0, 0, 0);
+  /* Mirrored faces start one face width in, where the mirrored tile reads the
+   * face backwards */
   DrawTextureRect(&gfx, left << 2, top << 2, (left + FACE_SIZE) << 2,
       (top + SMALL_FACE_HEIGHT) << 2, G_TX_RENDERTILE,
-      isMirrored * (FACE_SIZE << TEXTURE_COORD_FRACTION_BITS), 0,
-      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      isMirrored * TexelCoordinate(FACE_SIZE), 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
 
@@ -726,10 +723,9 @@ void DrawMatchPage(Gfx** displayListHead) {
             (g_Scorecard.x + WIDE_TILE_LEFT + (TILE_PIECE_WIDTH * 3)) << 2,
             (g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT) << 2,
             G_TX_RENDERTILE,
-            (WIDE_TILE_IMAGE_COLUMN * TILE_PIECE_WIDTH)
-                << TEXTURE_COORD_FRACTION_BITS,
-            (WIDE_TILE_IMAGE_ROW * TILE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            TexelCoordinate(WIDE_TILE_IMAGE_COLUMN * TILE_PIECE_WIDTH),
+            TexelCoordinate(WIDE_TILE_IMAGE_ROW * TILE_HEIGHT), TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE);
       } else {
         DrawTextureRect(&gfx,
             (g_Scorecard.x + (j * TILE_SPACING) + TILE_LEFT) << 2,
@@ -738,8 +734,8 @@ void DrawMatchPage(Gfx** displayListHead) {
                 << 2,
             (g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT) << 2,
             G_TX_RENDERTILE, 0,
-            (TILE_EDGE_IMAGE_ROW * TILE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT), TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE);
         DrawTextureRect(&gfx,
             (g_Scorecard.x + (j * TILE_SPACING) + TILE_LEFT + TILE_PIECE_WIDTH)
                 << 2,
@@ -748,10 +744,9 @@ void DrawMatchPage(Gfx** displayListHead) {
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2)))
                 << 2,
             (g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT) << 2,
-            G_TX_RENDERTILE,
-            (column * TILE_PIECE_WIDTH) << TEXTURE_COORD_FRACTION_BITS,
-            (imageRow * TILE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            G_TX_RENDERTILE, TexelCoordinate(column * TILE_PIECE_WIDTH),
+            TexelCoordinate(imageRow * TILE_HEIGHT), TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE);
         DrawTextureRect(&gfx,
             ((j * TILE_SPACING) +
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2)))
@@ -761,9 +756,9 @@ void DrawMatchPage(Gfx** displayListHead) {
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 3)))
                 << 2,
             (g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT) << 2,
-            G_TX_RENDERTILE, TILE_PIECE_WIDTH << TEXTURE_COORD_FRACTION_BITS,
-            (TILE_EDGE_IMAGE_ROW * TILE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            G_TX_RENDERTILE, TexelCoordinate(TILE_PIECE_WIDTH),
+            TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT), TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE);
       }
     }
   }
@@ -794,8 +789,7 @@ void DrawMatchPage(Gfx** displayListHead) {
               WIN_MARK_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0,
-          (j < wins[i ^ 1]) ? WIN_MARK_HEIGHT << TEXTURE_COORD_FRACTION_BITS
-                            : 0,
+          (j < wins[i ^ 1]) ? TexelCoordinate(WIN_MARK_HEIGHT) : 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
@@ -823,8 +817,7 @@ void DrawMatchPage(Gfx** displayListHead) {
               << 2,
           (g_Scorecard.y + bounce + WIN_MARK_TOP + WIN_MARK_HEIGHT) << 2,
           G_TX_RENDERTILE, 0,
-          (wins[1] < wins[0]) ? WIN_MARK_HEIGHT << TEXTURE_COORD_FRACTION_BITS
-                              : 0,
+          (wins[1] < wins[0]) ? TexelCoordinate(WIN_MARK_HEIGHT) : 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else if (g_Players[1].holes[holeIndex].strokes <
         g_Players[0].holes[holeIndex].strokes) {
@@ -838,8 +831,7 @@ void DrawMatchPage(Gfx** displayListHead) {
               WIN_MARK_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0,
-          (wins[0] < wins[1]) ? WIN_MARK_HEIGHT << TEXTURE_COORD_FRACTION_BITS
-                              : 0,
+          (wins[0] < wins[1]) ? TexelCoordinate(WIN_MARK_HEIGHT) : 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
 
@@ -1128,8 +1120,8 @@ void DrawBetsPage(Gfx** displayListHead) {
       (g_Scorecard.y + GRID_HEADER_LINE_TOP) << 2,
       (g_Scorecard.x + GRID_RIGHT) << 2,
       (g_Scorecard.y + GRID_HEADER_LINE_TOP + GRID_LINE_WIDTH) << 2,
-      G_TX_RENDERTILE, GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS, 0,
-      GRID_STRETCHED_STEP, TEXEL_STEP_ONE);
+      G_TX_RENDERTILE, TexelCoordinate(GRID_TEXEL_LINE), 0, GRID_STRETCHED_STEP,
+      TEXEL_STEP_ONE);
   for (i = 0; i != GRID_ROW_COUNT; i++) {
     DrawTextureRect(&gfx, (g_Scorecard.x + GRID_ROW_LINE_LEFT) << 2,
         (g_Scorecard.y + (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP) << 2,
@@ -1137,7 +1129,7 @@ void DrawBetsPage(Gfx** displayListHead) {
         (g_Scorecard.y + (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP +
             GRID_LINE_WIDTH)
             << 2,
-        G_TX_RENDERTILE, GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS, 0,
+        G_TX_RENDERTILE, TexelCoordinate(GRID_TEXEL_LINE), 0,
         GRID_STRETCHED_STEP, TEXEL_STEP_ONE);
     DrawTextureRect(&gfx, (g_Scorecard.x + GRID_ROW_LINE_LEFT) << 2,
         (g_Scorecard.y + (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP) << 2,
@@ -1152,8 +1144,8 @@ void DrawBetsPage(Gfx** displayListHead) {
         (g_Scorecard.y + (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP +
             GRID_LINE_WIDTH)
             << 2,
-        G_TX_RENDERTILE, 0, GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, 0, TexelCoordinate(GRID_TEXEL_LINE), TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
   }
 
   for (i = 0, left = 0; i != GRID_COLUMN_COUNT;
@@ -1162,21 +1154,18 @@ void DrawBetsPage(Gfx** displayListHead) {
         (g_Scorecard.y + GRID_TOP) << 2,
         (g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH) << 2,
         (g_Scorecard.y + GRID_BOTTOM) << 2, G_TX_RENDERTILE,
-        GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS,
-        GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-        GRID_COLUMN_STEP);
+        TexelCoordinate(GRID_TEXEL_LINE), TexelCoordinate(GRID_TEXEL_LINE),
+        TEXEL_STEP_ONE, GRID_COLUMN_STEP);
     DrawTextureRect(&gfx, (g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT) << 2,
         (g_Scorecard.y + GRID_TOP) << 2,
         (g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH) << 2,
         (g_Scorecard.y + GRID_TOP + GRID_LINE_WIDTH) << 2, G_TX_RENDERTILE, 0,
-        GRID_TEXEL_TOP_END << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+        TexelCoordinate(GRID_TEXEL_TOP_END), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     DrawTextureRect(&gfx, (g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT) << 2,
         (g_Scorecard.y + GRID_BOTTOM - GRID_LINE_WIDTH) << 2,
         (g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH) << 2,
         (g_Scorecard.y + GRID_BOTTOM) << 2, G_TX_RENDERTILE, 0,
-        GRID_TEXEL_BOTTOM_END << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+        TexelCoordinate(GRID_TEXEL_BOTTOM_END), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   /* Where the lines cross */
@@ -1186,7 +1175,7 @@ void DrawBetsPage(Gfx** displayListHead) {
         (g_Scorecard.y + GRID_HEADER_LINE_TOP) << 2,
         (g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH) << 2,
         (g_Scorecard.y + GRID_HEADER_LINE_TOP + GRID_LINE_WIDTH) << 2,
-        G_TX_RENDERTILE, 0, GRID_TEXEL_CROSSING << TEXTURE_COORD_FRACTION_BITS,
+        G_TX_RENDERTILE, 0, TexelCoordinate(GRID_TEXEL_CROSSING),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     for (j = 0; j != GRID_ROW_COUNT; j++) {
       DrawTextureRect(&gfx, (g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT) << 2,
@@ -1195,9 +1184,8 @@ void DrawBetsPage(Gfx** displayListHead) {
           (g_Scorecard.y + (j * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP +
               GRID_LINE_WIDTH)
               << 2,
-          G_TX_RENDERTILE, 0,
-          GRID_TEXEL_CROSSING << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, TexelCoordinate(GRID_TEXEL_CROSSING),
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -1266,8 +1254,7 @@ void DrawBetsPage(Gfx** displayListHead) {
             (g_Scorecard.x + left + BET_SUBTITLE_LEFT + BET_SUBTITLE_WIDTH)
                 << 2,
             (BET_SUBTITLE_TOP + BET_SUBTITLE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-            (f_BetSubtitleRows[i] * BET_SUBTITLE_HEIGHT)
-                << TEXTURE_COORD_FRACTION_BITS,
+            TexelCoordinate(f_BetSubtitleRows[i] * BET_SUBTITLE_HEIGHT),
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
 
@@ -1778,9 +1765,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
           (g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
               ROW_IMAGE_HEIGHT)
               << 2,
-          G_TX_RENDERTILE, 0,
-          ROW_BOTTOM_HALF_ROW << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, TexelCoordinate(ROW_BOTTOM_HALF_ROW),
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -1810,9 +1796,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
           (g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
               ROW_IMAGE_HEIGHT)
               << 2,
-          G_TX_RENDERTILE, 0,
-          ROW_BOTTOM_HALF_ROW << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, TexelCoordinate(ROW_BOTTOM_HALF_ROW),
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -1967,8 +1952,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
             (g_Scorecard.x + (roundedHalfSize + ARROW_CENTER_X)) << 2,
             (top + roundedHalfSize) << 2, G_TX_RENDERTILE, texelStart,
             texelStart +
-                (g_Scorecard.placeChange * ARROW_IMAGE_SIZE
-                    << TEXTURE_COORD_FRACTION_BITS),
+                TexelCoordinate(g_Scorecard.placeChange * ARROW_IMAGE_SIZE),
             texelStep, texelStep);
       }
     }
@@ -2265,8 +2249,8 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.y + LABEL_PANEL_TOP) << 2,
         (g_Scorecard.x + LABEL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
         (g_Scorecard.y + LABEL_PANEL_TOP + LABEL_PANEL_HEIGHT) << 2,
-        G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
-        0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
+        G_TX_RENDERTILE, TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0,
+        TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
 
   if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
@@ -2275,8 +2259,8 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.x + LABEL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
         (g_Scorecard.y + LABEL_PANEL_TOP + NINE_SPACING + LABEL_PANEL_HEIGHT)
             << 2,
-        G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
-        0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
+        G_TX_RENDERTILE, TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0,
+        TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
 
   if (IsMatchPlayMode()) {
@@ -2285,43 +2269,43 @@ void DrawScoresPage(Gfx** displayListHead) {
           (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
           (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
           (g_Scorecard.y + TOTAL_PANEL_BOTTOM + NINE_SPACING) << 2,
-          G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
-          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else {
       DrawTextureRect(&gfx, (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
           (g_Scorecard.y + TOTAL_PANEL_TOP) << 2,
           (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
           (g_Scorecard.y + TOTAL_PANEL_BOTTOM) << 2, G_TX_RENDERTILE,
-          PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS, 0,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   } else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM + NINE_SPACING) << 2,
-        G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
-        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   } else if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP) << 2,
         (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM) << 2, G_TX_RENDERTILE,
-        PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS, 0, TEXEL_STEP_ONE,
+        TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
   } else {
     DrawTextureRect(&gfx, (g_Scorecard.x + FRONT_TOTAL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP) << 2,
         (g_Scorecard.x + FRONT_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM) << 2, G_TX_RENDERTILE,
-        PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS, 0, TEXEL_STEP_ONE,
+        TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     DrawTextureRect(&gfx, (g_Scorecard.x + BACK_TOTAL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + BACK_TOTAL_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM + NINE_SPACING) << 2,
-        G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
-        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   /* Two players in stroke play take every other row, so their handicap strokes
@@ -2366,9 +2350,8 @@ void DrawScoresPage(Gfx** displayListHead) {
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP) << 2,
               (g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH) << 2,
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT) << 2,
-              G_TX_RENDERTILE, 0,
-              i * CELL_HEIGHT << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-              TEXEL_STEP_ONE);
+              G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),
+              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
@@ -2380,9 +2363,8 @@ void DrawScoresPage(Gfx** displayListHead) {
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + NINE_SPACING +
                   CELL_HEIGHT)
                   << 2,
-              G_TX_RENDERTILE, 0,
-              i * CELL_HEIGHT << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-              TEXEL_STEP_ONE);
+              G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),
+              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
       }
     }
@@ -2417,8 +2399,8 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.y + TOTAL_PANEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + NET_PANEL_RIGHT + PANEL_EDGE_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM + NINE_SPACING) << 2,
-        G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
-        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, TexelCoordinate(PANEL_EDGE_TEXEL_LEFT), 0,
+        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   for (i = 0; i != CELL_ROW_COUNT; i++) {
@@ -2436,9 +2418,8 @@ void DrawScoresPage(Gfx** displayListHead) {
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP) << 2,
               (g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH) << 2,
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT) << 2,
-              G_TX_RENDERTILE, 0,
-              i * CELL_HEIGHT << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-              TEXEL_STEP_ONE);
+              G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),
+              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
@@ -2450,9 +2431,8 @@ void DrawScoresPage(Gfx** displayListHead) {
               (g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + NINE_SPACING +
                   CELL_HEIGHT)
                   << 2,
-              G_TX_RENDERTILE, 0,
-              i * CELL_HEIGHT << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
-              TEXEL_STEP_ONE);
+              G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),
+              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
       }
     }
@@ -2475,8 +2455,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           (g_Scorecard.y + TOTAL_LABEL_TOP) << 2,
           (g_Scorecard.x + ROUND_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
           (g_Scorecard.y + TOTAL_LABEL_TOP + TOTAL_LABEL_HEIGHT) << 2,
-          G_TX_RENDERTILE, 0,
-          ROUND_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
+          G_TX_RENDERTILE, 0, TexelCoordinate(ROUND_LABEL * TOTAL_LABEL_HEIGHT),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else {
       DrawTextureRect(&gfx, (g_Scorecard.x + ROUND_LABEL_LEFT) << 2,
@@ -2484,8 +2463,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           (g_Scorecard.x + ROUND_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
           (g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING + TOTAL_LABEL_HEIGHT)
               << 2,
-          G_TX_RENDERTILE, 0,
-          ROUND_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
+          G_TX_RENDERTILE, 0, TexelCoordinate(ROUND_LABEL * TOTAL_LABEL_HEIGHT),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   } else if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
@@ -2493,8 +2471,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.y + TOTAL_LABEL_TOP) << 2,
         (g_Scorecard.x + ROUND_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP + TOTAL_LABEL_HEIGHT) << 2,
-        G_TX_RENDERTILE, 0,
-        ROUND_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
+        G_TX_RENDERTILE, 0, TexelCoordinate(ROUND_LABEL * TOTAL_LABEL_HEIGHT),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   } else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
     DrawTextureRect(&gfx, (g_Scorecard.x + ROUND_LABEL_LEFT) << 2,
@@ -2502,8 +2479,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.x + ROUND_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING + TOTAL_LABEL_HEIGHT)
             << 2,
-        G_TX_RENDERTILE, 0,
-        ROUND_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
+        G_TX_RENDERTILE, 0, TexelCoordinate(ROUND_LABEL * TOTAL_LABEL_HEIGHT),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   } else {
     DrawTextureRect(&gfx, (g_Scorecard.x + FRONT_NINE_LABEL_LEFT) << 2,
@@ -2511,23 +2487,22 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.x + FRONT_NINE_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP + TOTAL_LABEL_HEIGHT) << 2,
         G_TX_RENDERTILE, 0,
-        FRONT_NINE_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        TexelCoordinate(FRONT_NINE_LABEL * TOTAL_LABEL_HEIGHT), TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     DrawTextureRect(&gfx, (g_Scorecard.x + BACK_NINE_LABEL_LEFT) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + BACK_NINE_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING + TOTAL_LABEL_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0,
-        BACK_NINE_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        TexelCoordinate(BACK_NINE_LABEL * TOTAL_LABEL_HEIGHT), TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     DrawTextureRect(&gfx, (g_Scorecard.x + NET_ROUND_LABEL_LEFT) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING) << 2,
         (g_Scorecard.x + NET_ROUND_LABEL_LEFT + TOTAL_LABEL_WIDTH) << 2,
         (g_Scorecard.y + TOTAL_LABEL_TOP + NINE_SPACING + TOTAL_LABEL_HEIGHT)
             << 2,
-        G_TX_RENDERTILE, 0,
-        ROUND_LABEL * TOTAL_LABEL_HEIGHT << TEXTURE_COORD_FRACTION_BITS,
+        G_TX_RENDERTILE, 0, TexelCoordinate(ROUND_LABEL * TOTAL_LABEL_HEIGHT),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
