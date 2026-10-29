@@ -657,6 +657,7 @@ static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
                                     [OPENING_SHOT_MAX_DASH_COUNT];
 
 /* Not static: the original left these to the linker's common block */
+CameraEditor g_CameraEditor;
 /*
  * The cue that the opening's script has given for setting up its characters,
  * from 0 to OPENING_CUE_COUNT - 1, or OPENING_CUE_INVALID,

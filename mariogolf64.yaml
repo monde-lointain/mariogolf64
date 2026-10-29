@@ -721,7 +721,8 @@ segments:
       - [0x14E810, .rodata, ovl_05/opening_ball]
       - { start: 0x14EA70, type: .bss, vram: 0x8020C3F0, name: ovl_05/opening }
       - { type: .bss, vram: 0x8022BE10, name: ovl_05/opening_ball }
-      - { type: bss, vram: 0x8022BE30, name: bss_8022BE30 }
+      - { type: .bss, vram: 0x8022BE30, name: ovl_05/opening, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022BFB0, name: ovl_05/opening_camera_editor, linker_section: COMMON .scommon }
 
   - name: ovl_06
     type: code
