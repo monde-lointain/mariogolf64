@@ -177,6 +177,10 @@ enum TerrainStyle {
   TERRAIN_STYLE_TOP_DOWN_MAP
 };
 
+/* Whether a terrain style is one of the map views */
+#define IsMapTerrainStyle(style) \
+  ((style) == TERRAIN_STYLE_MAP || (style) == TERRAIN_STYLE_TOP_DOWN_MAP)
+
 /* The vertex cache slots of a row's three vertex rows, which rotate from row to
  * row */
 #define FIRST_TOP_SLOT 9

@@ -55,6 +55,10 @@ enum Scene {
   SCENE_STAFF_ROLL = 30
 };
 
+/* Whether a scene is one of the editor's top-down ground maps */
+#define IsGroundEditorScene(scene) \
+  ((scene) == SCENE_CELL_EDITOR || (scene) == SCENE_POINT_EDITOR)
+
 /* g_SubModuleState values */
 enum SubModuleState {
   SUB_MODULE_LOADED,

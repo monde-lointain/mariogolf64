@@ -4044,8 +4044,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
   gDPSetTextureDetail(gfx++, G_TD_CLAMP);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-  if (terrainStyle == TERRAIN_STYLE_MAP ||
-      terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) {
+  if (IsMapTerrainStyle(terrainStyle)) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_2CYCLE);
@@ -4131,9 +4130,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
     }
 
     /* The map scenes draw every visible tile finely */
-    if ((g_Scene == SCENE_CELL_EDITOR || g_Scene == SCENE_POINT_EDITOR) &&
-        (terrainStyle == TERRAIN_STYLE_MAP ||
-            terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) &&
+    if (IsGroundEditorScene(g_Scene) && IsMapTerrainStyle(terrainStyle) &&
         detail != GROUND_DETAIL_HIDDEN) {
       detail = GROUND_DETAIL_FINE;
     }
@@ -4211,8 +4208,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
               MIRROR_S_SCALE;
 
           /* The maps tell each tile from its neighbors by color */
-          if (terrainStyle == TERRAIN_STYLE_MAP ||
-              terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) {
+          if (IsMapTerrainStyle(terrainStyle)) {
             Boolean isOdd = (row + k) & 1;
 
             gDPSetEnvColor(gfx++, isOdd * 0xFF, 0, 0xFF - (isOdd * 0xFF), 0xFF);
