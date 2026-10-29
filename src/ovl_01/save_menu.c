@@ -67,8 +67,8 @@ enum SaveMenuGame {
 #define SAVE_MENU_IMAGE_COUNT 6
 /* A 64x64 blue movie camera, read after the course icons */
 #define ASSET_MOVIE_CAMERA_ICON 0x944
-/* The 64x64 CI8 icons of f_RingShotCourseIcons, which func_802213C8 shrinks to
- * 32x24 in two strips */
+/* The 64x64 CI8 icons of f_RingShotCourseIcons, which DrawRingShotRowIcon
+ * shrinks to 32x24 in two strips */
 #define SAVE_ICON_WIDTH 64
 #define SAVE_ICON_STRIP_HEIGHT 32
 #define SAVE_ICON_STRIP_COUNT 2
@@ -92,7 +92,7 @@ void ResetSavedGameControllers(void);
 #define ASSET_SAVE_MENU_FRAME 0x70D
 /*
  * f_RingShotCourseNumbers holds the digits 1 to 6, 16 wide each, followed by
- * the word COURSE. func_80220E34 draws the word, then the course's digit
+ * the word COURSE. DrawCourseLabel draws the word, then the course's digit
  * overlapping its end.
  */
 #define COURSE_LABEL_WIDTH 136
@@ -141,9 +141,9 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
  * the argument */
 void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, s32 drawMode);
-void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
-    s32 top, u8 showsCourseWord);
-void func_802213C8_ovl_01(
+void DrawCourseLabel(Gfx** displayListHead, s32 courseIndex, s32 left, s32 top,
+    u8 showsCourseWord);
+void DrawRingShotRowIcon(
     Gfx** displayListHead, s32 imageIndex, s32 left, s32 top);
 
 static s32 D_80230A90_ovl_01 = 0;
@@ -618,13 +618,13 @@ void DrawRingShotRecords(Gfx** displayListHead) {
         for (drawIndex = 0; drawIndex != RING_SHOT_ICON_DRAW_COUNT;
             drawIndex++) {
           if (row == 0) {
-            func_802213C8_ovl_01(
+            DrawRingShotRowIcon(
                 &gfx, 0, RING_SHOT_FIRST_ICON_X, RING_SHOT_ICON_TOP + drop);
           } else if (row == RING_SHOT_REPLAY_ROW) {
-            func_802213C8_ovl_01(&gfx, RING_SHOT_REPLAY_ROW,
+            DrawRingShotRowIcon(&gfx, RING_SHOT_REPLAY_ROW,
                 RING_SHOT_REPLAY_ICON_X, RING_SHOT_ICON_TOP + drop);
           } else {
-            func_802213C8_ovl_01(&gfx, row,
+            DrawRingShotRowIcon(&gfx, row,
                 (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ICON_OFFSET_X,
                 RING_SHOT_ICON_TOP + drop);
           }
@@ -709,7 +709,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
             D_8023E3F0_ovl_01[index], RING_SHOT_REPLAY_FACE_X,
             RING_SHOT_REPLAY_FACE_Y + (index * RING_SHOT_SLOT_SPACING),
             replayCharacter, FACE_PLAIN);
-        func_80220E34_ovl_01(&gfx,
+        DrawCourseLabel(&gfx,
             (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex,
             RING_SHOT_REPLAY_COURSE_X,
             RING_SHOT_REPLAY_COURSE_Y + (index * RING_SHOT_SLOT_SPACING), TRUE);
@@ -920,8 +920,8 @@ s32 IsRingShotRecorded(RingShotRecord* record) {
   return (u8)record->scoreKind >> 7;
 }
 
-void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
-    s32 top, u8 showsCourseWord) {
+void DrawCourseLabel(Gfx** displayListHead, s32 courseIndex, s32 left, s32 top,
+    u8 showsCourseWord) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
@@ -962,7 +962,11 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
   *displayListHead = gfx;
 }
 
-void func_802213C8_ovl_01(
+/*
+ * Draws a Ring Shot records row's icon, a course's or the replays' camera, from
+ * f_RingShotCourseIcons, shrunk to 32 by 24
+ */
+void DrawRingShotRowIcon(
     Gfx** displayListHead, s32 imageIndex, s32 left, s32 top) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
