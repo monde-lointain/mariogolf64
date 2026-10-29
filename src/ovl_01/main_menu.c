@@ -186,7 +186,7 @@ typedef struct ImageCorner {
  * the menus have set them up already */
 #define PLAY_KIND_WITHOUT_HOLE_DISPLAY 3
 
-/* The title screen's rows, which func_801F70F0 moves between */
+/* The title screen's rows, which UpdateMenuTitleScreen moves between */
 #define TITLE_CHOICE_NEW_GAME 0
 #define TITLE_CHOICE_SAVED_GAMES 1
 #define TITLE_CHOICE_MENUS 2
@@ -335,7 +335,7 @@ void func_8005C674(s32 arg0, s32 arg1);
 void func_8005D334(void);
 void func_801F6B20_ovl_01(void);
 void func_801F6B28_ovl_01(void);
-void func_801F70F0_ovl_01(void);
+void UpdateMenuTitleScreen(void);
 void func_801F7CD0_ovl_01(void);
 void UpdateModeSelect(void);
 void func_801F8BAC_ovl_01(void);
@@ -403,7 +403,7 @@ void DrawMenuScenery(Gfx** displayListHead);
 void DrawNarrowMenuBoard(Gfx** displayListHead);
 void DrawLargeMenuBanner(Gfx** displayListHead);
 void DrawMenuBanner(Gfx** displayListHead);
-void func_801FDA40_ovl_01(Gfx** displayListHead);
+void DrawMenuTitleScreen(Gfx** displayListHead);
 void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
 void func_8020E898_ovl_01(Gfx** displayListHead);
 void func_80213748_ovl_01(Gfx** displayListHead);
@@ -491,7 +491,7 @@ static s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_BEST_TIMES, CLUBHOUSE_ROOM_UNK13, CLUBHOUSE_ROOM_UNK12};
 /* Read by no routine; the one room that D_8022BF1C leaves out */
 static s16 D_8022BF26_ovl_01 = CLUBHOUSE_ROOM_BIRDIE_BADGES;
-/* The plain-text menu's names; func_801FDA40 prints the first three */
+/* The plain-text menu's names; DrawMenuTitleScreen prints the first three */
 static const char* D_8022BF28_ovl_01[] = {
     "1P GAME", "2P GAME", "3P GAME", "4P GAME", "CONTINUE", "HOUISE"};
 /* Read by no routine */
@@ -992,7 +992,7 @@ void UpdateMenus(void) {
     case MENU_SCREEN_TITLE:
       memset(&g_GameState, -1, sizeof(GameState));
       g_GameState.isClubTournament = FALSE;
-      func_801F70F0_ovl_01();
+      UpdateMenuTitleScreen();
       break;
 
     case MENU_SCREEN_UNK5:
@@ -1800,7 +1800,7 @@ void func_801F6B28_ovl_01(void) {
   }
 }
 
-void func_801F70F0_ovl_01(void) {
+void UpdateMenuTitleScreen(void) {
   MenuMemory* memory = func_8005AF74();
   s32 index;
   s8 titleChoice;
@@ -3654,7 +3654,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
     case MENU_SCREEN_TITLE:
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           255, 255, 255, 255);
-      func_801FDA40_ovl_01(&gfx);
+      DrawMenuTitleScreen(&gfx);
       break;
     case MENU_SCREEN_CHARACTER_SELECT:
     case MENU_SCREEN_UNK24:
@@ -4305,7 +4305,7 @@ const char D_80231640_ovl_01[] = "%8d:%8d:%8d";
               (labelIndex) && \
           D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME))
 
-void func_801FDA40_ovl_01(Gfx** displayListHead) {
+void DrawMenuTitleScreen(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 labelIndex;
   s32 labelOffset;
@@ -4423,7 +4423,7 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
 /* Nothing reads this */
 const char D_8023164C_ovl_01[] = "";
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 #endif
 
 /*
