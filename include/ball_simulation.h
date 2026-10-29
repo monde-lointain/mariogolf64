@@ -131,7 +131,7 @@ typedef struct BallSimulation {
   /* 0x34 */ s32 spinSpeed;
   /* Curves the ball in flight; the debug display calls it SpinY */
   /* 0x38 */ s32 sideSpin;
-  /* 0x3C */ f32 spinHeading; /* In radians; launching sets it to the yaw */
+  /* 0x3C */ Radians spinHeading; /* Launching sets it to the yaw */
   /* 0x40 */ f32 unk40;
   /* 0x44 */ u8 unk44[0x84 - 0x44];
   /* 0x84 */ f32 windVelocityX;
