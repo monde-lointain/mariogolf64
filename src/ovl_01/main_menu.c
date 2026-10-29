@@ -4457,8 +4457,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 #define MAIN_CHOICE_LABEL_IMAGE_SIZE \
   (MAIN_CHOICE_LABEL_WIDTH * MAIN_CHOICE_LABEL_HEIGHT / 2)
 
-/* The 24x24 icon that func_80207E28 animates, such as the birdie badge; each
- * frame shows for two calls */
+/* The 24x24 icon that DrawSpinningBadge animates, such as the birdie badge;
+ * each frame shows for two calls */
 #define ANIMATED_ICON_SIZE 24
 #define ANIMATED_ICON_IMAGE_SIZE (ANIMATED_ICON_SIZE * ANIMATED_ICON_SIZE / 2)
 #define ANIMATED_ICON_FRAME_COUNT 6
@@ -4607,7 +4607,7 @@ void func_80200A40_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void DrawMenuCharacters(Gfx** displayListHead);
 void DrawCourseSelectBanners(Gfx** displayListHead);
-void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
+void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y);
 void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     u8 enlargesChosenHole);
 void DrawUnalignedMenuNumber(
@@ -4992,7 +4992,7 @@ void DrawModeSelect(Gfx** displayListHead) {
       countShift = -WON_COUNT_DIGIT_WIDTH;
     }
 
-    func_80207E28_ovl_01(
+    DrawSpinningBadge(
         &gfx, D_800FC898, WON_COUNT_ICON_X + countShift, WON_COUNT_ICON_Y);
     gDPPipeSync(gfx++);
     DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
@@ -5879,7 +5879,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         otherIndex = -WON_COUNT_DIGIT_WIDTH;
       }
 
-      func_80207E28_ovl_01(&gfx, D_800FC898, otherIndex + COURSE_BADGE_ICON_X,
+      DrawSpinningBadge(&gfx, D_800FC898, otherIndex + COURSE_BADGE_ICON_X,
           COURSE_BADGE_ICON_Y);
     }
 
@@ -7083,7 +7083,11 @@ void func_80207E18_ovl_01(Gfx** displayListHead) {}
 
 void func_80207E20_ovl_01(void) {}
 
-void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y) {
+/*
+ * Draws the current frame of a spinning badge's image at (x, y), and turns it
+ * on through the frames that the spinning stars count too.
+ */
+void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y) {
   Gfx* gfx = *displayListHead;
   s32 unused[8];
 

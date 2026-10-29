@@ -143,7 +143,7 @@ extern const char D_802318AC_ovl_01[];
 
 s32 GetOpenCourseCount(void);
 void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row);
-void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y);
+void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y);
 void DrawThreeDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawFourDigitMenuNumber(
@@ -808,7 +808,7 @@ void func_8020FEF8_ovl_01(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  func_80207E28_ovl_01(
+  DrawSpinningBadge(
       &gfx, D_8023A810_ovl_01, BADGE_ICON_X + index, BADGE_ICON_Y);
   DrawUnalignedMenuNumber(&gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y,
       badgeCount, MENU_NUMBER_TIMES);
