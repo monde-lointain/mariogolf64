@@ -1998,9 +1998,8 @@ void DrawBringCharactersScreen(
     f_CharacterArrowFrame = (f_CharacterArrowFrame + 1) % ARROW_FRAME_COUNT;
     LoadSmallPalette(&displayList, 0, ImageBody(transfer->arrowsImage));
     LoadNibbleTextureBlock(&displayList,
-        (u8*)transfer->arrowsImage +
-            ((f_CharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE) +
-                PALETTED_TEXELS_OFFSET),
+        ImageTexelsAt(transfer->arrowsImage,
+            f_CharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE),
         G_IM_FMT_CI, ARROW_SIZE, ARROW_SIZE * 4, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(displayList++);
     if (transfer->unk7B8 > 0) {

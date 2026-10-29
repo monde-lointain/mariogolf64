@@ -482,7 +482,8 @@ void DrawChalkboard(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_ChalkboardImage)));
   for (stripIndex = 0; stripIndex != CHALKBOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)f_ChalkboardImage + CHALKBOARD_TEXELS_OFFSET +
+        TextureAddress(
+            AddressPast(f_ChalkboardImage, CHALKBOARD_TEXELS_OFFSET) +
             (stripIndex * CHALKBOARD_WIDTH * CHALKBOARD_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, CHALKBOARD_WIDTH, CHALKBOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

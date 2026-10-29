@@ -697,7 +697,7 @@ void DrawPrompt(Gfx** displayListHead) {
       halfHeight = cloudHeight * f_PromptFrame / PROMPT_GROWTH_FRAMES;
     }
 
-    LoadNibbleTextureBlock(&gfx, (u8*)f_PromptCloudImage + texelOffset,
+    LoadNibbleTextureBlock(&gfx, AddressPast(f_PromptCloudImage, texelOffset),
         G_IM_FMT_I, PROMPT_CLOUD_WIDTH, PROMPT_CLOUD_HALF_TEXELS, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -731,8 +731,8 @@ void DrawPrompt(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     LoadLargePalette(&gfx, ImageBody(f_YesNoImage));
-    LoadTextureBlock(&gfx, (u8*)f_YesNoImage + YES_TEXELS_OFFSET, G_IM_FMT_CI,
-        G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
+    LoadTextureBlock(&gfx, AddressPast(f_YesNoImage, YES_TEXELS_OFFSET),
+        G_IM_FMT_CI, G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, (YES_CENTER_X - halfWidth) << 2,
@@ -752,8 +752,8 @@ void DrawPrompt(Gfx** displayListHead) {
       halfHeight = CHOICE_HALF_HEIGHT;
     }
 
-    LoadTextureBlock(&gfx, (u8*)f_YesNoImage + NO_TEXELS_OFFSET, G_IM_FMT_CI,
-        G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
+    LoadTextureBlock(&gfx, AddressPast(f_YesNoImage, NO_TEXELS_OFFSET),
+        G_IM_FMT_CI, G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, (NO_CENTER_X - halfWidth) << 2,

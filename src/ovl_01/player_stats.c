@@ -444,7 +444,7 @@ void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
       for (iconIndex = 0; iconIndex != PLAYER_STATS_ICON_COUNT; iconIndex++) {
         OpenEncodedAsset(D_802303AC_ovl_01[iconIndex], &asset);
         ReadEncodedAsset(
-            (u8*)D_8023B340_ovl_01 + (iconIndex * PLAYER_STATS_ICON_SIZE),
+            ImageAt(D_8023B340_ovl_01, iconIndex * PLAYER_STATS_ICON_SIZE),
             &asset);
       }
 
@@ -753,7 +753,7 @@ void func_8021826C_ovl_01(
     }
 
     if (columnIndex != memory->unkD) {
-      icon = (u8*)D_8023B340_ovl_01 + (betIndex * PLAYER_STATS_ICON_SIZE);
+      icon = ImageAt(D_8023B340_ovl_01, betIndex * PLAYER_STATS_ICON_SIZE);
       gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
       /* Bets without a stake are dimmed */
       if (memory->unkE[D_80230460_ovl_01[D_801B5634 - 1][columnIndex]] == 0) {

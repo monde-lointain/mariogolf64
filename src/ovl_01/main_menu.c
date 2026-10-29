@@ -1109,7 +1109,8 @@ void func_801F4C78_ovl_01(void) {
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_OPTION_VALUES, &asset);
         ReadEncodedAsset(
-            (u8*)D_8012D420[D_8022BE8E_ovl_01] + OPTION_VALUES_OFFSET, &asset);
+            ImageAt(D_8012D420[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET),
+            &asset);
         D_8022BE92_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
@@ -1412,10 +1413,12 @@ void func_801F4C78_ovl_01(void) {
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         OpenEncodedAsset(ASSET_WATER, &asset);
         ReadEncodedAsset(
-            (u8*)g_MenuCourseSceneryAsset + COURSE_SELECT_WATER_OFFSET, &asset);
+            ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_WATER_OFFSET),
+            &asset);
         OpenEncodedAsset(ASSET_BLENDED_TEXTURE_SCROLLING_LAYER, &asset);
         ReadEncodedAsset(
-            (u8*)g_MenuCourseSceneryAsset + COURSE_SELECT_LAYER_OFFSET, &asset);
+            ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_LAYER_OFFSET),
+            &asset);
         D_8022BE80_ovl_01 = 0;
         OpenEncodedAsset(
             g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
@@ -5756,7 +5759,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
       stripOffset = texelsOffset;
       for (otherIndex = 0; otherIndex != COURSE_ICON_STRIP_COUNT;
           otherIndex++) {
-        gDPLoadTextureBlock(gfx++, TextureAddress((u32)texels + stripOffset),
+        gDPLoadTextureBlock(gfx++, TextureAddress(texels + stripOffset),
             G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH,
             COURSE_ICON_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,

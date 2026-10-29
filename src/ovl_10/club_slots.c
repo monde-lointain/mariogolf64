@@ -770,7 +770,7 @@ void DrawClubSlots(Gfx** displayListHead) {
     } else {
       /* The tiles stay as the first strip set them */
       gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-          TextureAddress((u32)f_Slots->machineImage + texelOffset));
+          TextureAddress(f_Slots->machineImage + texelOffset));
       gDPLoadSync(gfx++);
       gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
           ((stripHeight * MACHINE_WIDTH + G_IM_SIZ_8b_INCR) >>
@@ -850,7 +850,7 @@ void DrawClubSlots(Gfx** displayListHead) {
           ? START_STRIP_HEIGHT
           : START_LAST_STRIP_HEIGHT;
       gDPLoadTextureTile(gfx++,
-          TextureAddress((u32)f_Slots->startImage + texelOffset), G_IM_FMT_CI,
+          TextureAddress(f_Slots->startImage + texelOffset), G_IM_FMT_CI,
           G_IM_SIZ_8b, START_WIDTH, stripHeight, 0, 0, START_WIDTH - 1,
           stripHeight - 1, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
