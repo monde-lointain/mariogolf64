@@ -268,12 +268,12 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     f32 axisX;
     f32 axisZ;
 
-    if (simulation->unk34 != 0) {
-      axisZ = cosf(simulation->unk3C) * simulation->unk34;
-      axisX = sinf(simulation->unk3C) * simulation->unk34;
-      if (simulation->unk34 < 0) {
-        simulation->unk3C += 3.1415927f;
-        simulation->unk34 = -simulation->unk34;
+    if (simulation->spinSpeed != 0) {
+      axisZ = cosf(simulation->spinHeading) * simulation->spinSpeed;
+      axisX = sinf(simulation->spinHeading) * simulation->spinSpeed;
+      if (simulation->spinSpeed < 0) {
+        simulation->spinHeading += 3.1415927f;
+        simulation->spinSpeed = -simulation->spinSpeed;
       }
     } else {
       axisZ = 1.0f;
@@ -523,12 +523,13 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                     simulation->velocity[AXIS_Z]) *
                 0.5f;
             contact = 0;
-            simulation->unk3C = atan2(pinVelocity[AXIS_Z], pinVelocity[AXIS_X]);
-            simulation->unk34 =
+            simulation->spinHeading =
+                atan2(pinVelocity[AXIS_Z], pinVelocity[AXIS_X]);
+            simulation->spinSpeed =
                 IntLength2D(pinVelocity[AXIS_X], pinVelocity[AXIS_Z]);
           } else {
             simulation->velocity[AXIS_Y] = pinVelocity[AXIS_Y];
-            simulation->unk34 = simulation->unk34 * 0.3f;
+            simulation->spinSpeed = simulation->spinSpeed * 0.3f;
           }
 
           {
@@ -664,10 +665,11 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                   simulation->velocity[AXIS_Z] =
                       simulation->velocity[AXIS_Z] * keep;
                   simulation->velocity[AXIS_Y] = fallSpeed;
-                  simulation->unk3C = atan2(simulation->velocity[AXIS_Z],
+                  simulation->spinHeading = atan2(simulation->velocity[AXIS_Z],
                       simulation->velocity[AXIS_X]);
-                  simulation->unk34 = IntLength2D(simulation->velocity[AXIS_X],
-                                          simulation->velocity[AXIS_Z]) *
+                  simulation->spinSpeed =
+                      IntLength2D(simulation->velocity[AXIS_X],
+                          simulation->velocity[AXIS_Z]) *
                       0.5f;
                   flags |= STEP_FLAG_LIPPED_OUT;
                   contact = 0;
@@ -779,9 +781,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     if (contact == STEP_FLAG_BILLBOARD_HIT &&
         simulation->state == BALL_STATE_FLYING) {
       simulation->unk94++;
-      simulation->unk34 /= 2;
+      simulation->spinSpeed /= 2;
       simulation->unk9C = simulation->unk98;
-      simulation->unk38 /= 2;
+      simulation->sideSpin /= 2;
       simulation->position[AXIS_X] =
           startX + (fraction * simulation->velocity[AXIS_X]);
       simulation->position[AXIS_Y] =
@@ -872,7 +874,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         reflected[AXIS_Z] = simulation->velocity[AXIS_Z] - (normalX * push);
         simulation->velocity[AXIS_X] = reflected[AXIS_X];
         simulation->velocity[AXIS_Y] = reflected[AXIS_Y];
-        simulation->unk34 = 0;
+        simulation->spinSpeed = 0;
         simulation->velocity[AXIS_Z] = reflected[AXIS_Z];
       }
       BuildUnk44Rotation();
@@ -983,26 +985,30 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       simulation->unk9C = simulation->unk98;
       simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
       if (simulation->state == BALL_STATE_FLYING) {
-        s32 unk34X = simulation->unk34 * cosf(simulation->unk3C);
-        s32 unk34Z = simulation->unk34 * sinf(simulation->unk3C);
+        s32 spinVelocityX =
+            simulation->spinSpeed * cosf(simulation->spinHeading);
+        s32 spinVelocityZ =
+            simulation->spinSpeed * sinf(simulation->spinHeading);
         f32 grip = 1.0f - bounce;
 
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] +
-            ((unk34X - simulation->velocity[AXIS_X]) * grip *
+            ((spinVelocityX - simulation->velocity[AXIS_X]) * grip *
                 AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f);
         simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
-            ((unk34Z - simulation->velocity[AXIS_Z]) * grip *
+            ((spinVelocityZ - simulation->velocity[AXIS_Z]) * grip *
                 AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f);
-        unk34X = unk34X * 0.9f;
-        unk34Z = unk34Z * 0.9f;
-        unk34X = unk34X + ((previousVelocityX - unk34X) * 0.25f);
-        unk34Z = unk34Z + ((previousVelocityZ - unk34Z) * 0.25f);
-        simulation->unk3C = atan2(unk34Z, unk34X);
-        simulation->unk34 = IntLength2D(unk34X, unk34Z);
+        spinVelocityX = spinVelocityX * 0.9f;
+        spinVelocityZ = spinVelocityZ * 0.9f;
+        spinVelocityX =
+            spinVelocityX + ((previousVelocityX - spinVelocityX) * 0.25f);
+        spinVelocityZ =
+            spinVelocityZ + ((previousVelocityZ - spinVelocityZ) * 0.25f);
+        simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
+        simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
         BuildUnk44Rotation();
       }
 
-      simulation->unk38 = 0;
+      simulation->sideSpin = 0;
       simulation->velocity[AXIS_Y] += 0x106;
     }
 
@@ -1119,8 +1125,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       if (simulation->state != BALL_STATE_ROLLING &&
           impactSpeed < KilometersPerHour(50) &&
           simulation->unk98 - 1 == simulation->unk9C) {
-        s32 unk34X;
-        s32 unk34Z;
+        s32 spinVelocityX;
+        s32 spinVelocityZ;
 
         simulation->state = BALL_STATE_ROLLING;
         if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
@@ -1130,21 +1136,21 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
               simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         }
 
-        unk34X = simulation->unk34 * cosf(simulation->unk3C);
-        unk34Z = simulation->unk34 * sinf(simulation->unk3C);
+        spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
+        spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] +
-            ((unk34X - simulation->velocity[AXIS_X]) *
+            ((spinVelocityX - simulation->velocity[AXIS_X]) *
                 AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.5f);
-        simulation->unk34 = 0;
+        simulation->spinSpeed = 0;
         simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
-            ((unk34Z - simulation->velocity[AXIS_Z]) *
+            ((spinVelocityZ - simulation->velocity[AXIS_Z]) *
                 AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.5f);
       } else {
         f32 keep = 1.0f - spin;
         s32 bounced[3];
         f32 push;
-        s32 unk34X;
-        s32 unk34Z;
+        s32 spinVelocityX;
+        s32 spinVelocityZ;
         f32 grip;
         s32 driftX;
         s32 driftZ;
@@ -1175,12 +1181,12 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
         simulation->unk9C = simulation->unk98;
         simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
-        unk34X = simulation->unk34 * cosf(simulation->unk3C);
-        unk34Z = simulation->unk34 * sinf(simulation->unk3C);
+        spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
+        spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         grip = 1.0f - restitution;
-        driftX = (unk34X - simulation->velocity[AXIS_X]) * grip *
+        driftX = (spinVelocityX - simulation->velocity[AXIS_X]) * grip *
             AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f;
-        driftZ = (unk34Z - simulation->velocity[AXIS_Z]) * grip *
+        driftZ = (spinVelocityZ - simulation->velocity[AXIS_Z]) * grip *
             AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f;
         driftLimit = impactSpeed * 0.2f;
         drift = (s32)IntLength2D(driftX, driftZ);
@@ -1191,25 +1197,27 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           driftZ = driftZ * scale;
         }
 
-        unk34X = unk34X * 0.9f;
-        unk34Z = unk34Z * 0.9f;
+        spinVelocityX = spinVelocityX * 0.9f;
+        spinVelocityZ = spinVelocityZ * 0.9f;
         simulation->velocity[AXIS_X] += driftX;
         simulation->velocity[AXIS_Z] += driftZ;
-        unk34X = unk34X + ((previousVelocityX - unk34X) * 0.2f);
-        unk34Z = unk34Z + ((previousVelocityZ - unk34Z) * 0.2f);
-        simulation->unk3C = atan2(unk34Z, unk34X);
-        simulation->unk34 = IntLength2D(unk34X, unk34Z);
+        spinVelocityX =
+            spinVelocityX + ((previousVelocityX - spinVelocityX) * 0.2f);
+        spinVelocityZ =
+            spinVelocityZ + ((previousVelocityZ - spinVelocityZ) * 0.2f);
+        simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
+        simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
         BuildUnk44Rotation();
-        simulation->unk38 = 0;
+        simulation->sideSpin = 0;
         simulation->velocity[AXIS_Y] += 0x106;
       }
     }
 
     if (simulation->state == BALL_STATE_ROLLING && contact == 0) {
       simulation->state = BALL_STATE_FLYING;
-      simulation->unk3C =
+      simulation->spinHeading =
           atan2(simulation->velocity[AXIS_Z], simulation->velocity[AXIS_X]);
-      simulation->unk34 = IntLength2D(
+      simulation->spinSpeed = IntLength2D(
           simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
       BuildUnk44Rotation();
     }
@@ -1307,10 +1315,10 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         if (simulation->position[AXIS_Y] + 307.2f < groundHeight) {
           simulation->state = BALL_STATE_FLYING;
-          simulation->unk3C =
+          simulation->spinHeading =
               atan2(simulation->velocity[AXIS_Z], simulation->velocity[AXIS_X]);
           contact = 0;
-          simulation->unk34 = IntLength2D(
+          simulation->spinSpeed = IntLength2D(
               simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
           BuildUnk44Rotation();
           goto ROLLED;
@@ -1406,13 +1414,13 @@ ROLLED:
       f32 turned[3];
       BallSpeed airSpeed;
       f32 drag;
-      f32 unk38;
+      f32 sideSpin;
       BallSpeed horizontalSpeed;
-      f32 unk38Speed;
+      f32 sideSpinMagnitude;
       f32 ratio;
       f32 weight;
       f32 curve;
-      f32 unk34Speed;
+      f32 spinMagnitude;
       f32 lift;
       f32 height;
       f32 windX;
@@ -1426,12 +1434,12 @@ ROLLED:
       airSpeed =
           GetLength3D(relative[AXIS_X], relative[AXIS_Y], relative[AXIS_Z]);
       drag = (sqrtf(airSpeed * 0.0140613755f) * 0.0011f) + 0.004f;
-      unk38 = simulation->unk38;
-      unk38Speed = AbsoluteValueExpression(unk38 * 8.0f);
+      sideSpin = simulation->sideSpin;
+      sideSpinMagnitude = AbsoluteValueExpression(sideSpin * 8.0f);
       horizontalSpeed = GetLength2D(relative[AXIS_X], relative[AXIS_Z]);
       ratio = 0.0f;
-      if (unk38Speed != 0.0f) {
-        ratio = horizontalSpeed / unk38Speed;
+      if (sideSpinMagnitude != 0.0f) {
+        ratio = horizontalSpeed / sideSpinMagnitude;
       }
 
       weight = 1.0f - (AbsoluteValueExpression(ratio - 1.0f) * 0.8f);
@@ -1439,10 +1447,10 @@ ROLLED:
         weight = 0.0f;
       }
 
-      curve = unk38 * (weight * 0.038146973f);
+      curve = sideSpin * (weight * 0.038146973f);
       if (horizontalSpeed < AbsoluteValueExpression(curve) * 100.0f) {
         curve = horizontalSpeed * 0.01f;
-        if (simulation->unk38 < 0) {
+        if (simulation->sideSpin < 0) {
           curve = -curve;
         }
       }
@@ -1456,11 +1464,11 @@ ROLLED:
             simulation->velocity[AXIS_Z] + (relative[AXIS_X] * scale);
       }
 
-      simulation->unk38 = simulation->unk38 * 0.995f;
-      unk34Speed = AbsoluteValueExpression(simulation->unk34 * 8.0f);
+      simulation->sideSpin = simulation->sideSpin * 0.995f;
+      spinMagnitude = AbsoluteValueExpression(simulation->spinSpeed * 8.0f);
       ratio = 0.0f;
-      if (unk34Speed != 0.0f) {
-        ratio = airSpeed / unk34Speed;
+      if (spinMagnitude != 0.0f) {
+        ratio = airSpeed / spinMagnitude;
       }
 
       weight = 1.0f - (AbsoluteValueExpression(ratio - 1.0f) * 0.8f);
@@ -1468,8 +1476,8 @@ ROLLED:
         weight = 0.0f;
       }
 
-      lift = (simulation->unk34 * 10) * (weight * 0.0061035156f);
-      if (simulation->unk34 != 0 && airSpeed > KilometersPerHour(1)) {
+      lift = (simulation->spinSpeed * 10) * (weight * 0.0061035156f);
+      if (simulation->spinSpeed != 0 && airSpeed > KilometersPerHour(1)) {
         guMtxXFMF(simulation->unk44, relative[AXIS_X], relative[AXIS_Y],
             relative[AXIS_Z], &turned[AXIS_X], &turned[AXIS_Y],
             &turned[AXIS_Z]);
@@ -1482,7 +1490,7 @@ ROLLED:
             simulation->velocity[AXIS_X] + turned[AXIS_X];
         simulation->velocity[AXIS_Y] =
             simulation->velocity[AXIS_Y] + turned[AXIS_Y];
-        simulation->unk34 = simulation->unk34 * 0.995f;
+        simulation->spinSpeed = simulation->spinSpeed * 0.995f;
         simulation->velocity[AXIS_Z] =
             simulation->velocity[AXIS_Z] + turned[AXIS_Z];
       }
@@ -1623,7 +1631,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
  * prints the launch velocity to the debug output.
  *
  * Doesn't match: GCC schedules the block that sets the spin differently, which
- * moves the unk40 and unk38 stores and swaps two float registers there.
+ * moves the unk40 and sideSpin stores and swaps two float registers there.
  */
 #ifdef NON_MATCHING
 s32 func_8020A488_ovl_05(
@@ -1706,7 +1714,7 @@ s32 func_8020A488_ovl_05(
     pitch = 0.0f;
   }
 
-  simulation->unk38 =
+  simulation->sideSpin =
       (((((sideSign * entry->sideSpinChange) + shot->offsetX) * 2) +
            ((club->sideSpin * 2) * sideSign)) *
           speed) *
@@ -1714,13 +1722,13 @@ s32 func_8020A488_ovl_05(
   pitch += (f32)club->offsetPitch * shot->offsetY * 0.00054541545f;
   yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
   spinBase = club->spin * 0.5f;
-  simulation->unk34 =
+  simulation->spinSpeed =
       (((spinBase + 25.0f) * (shot->offsetY * 0.006f)) - spinBase) * speed *
       0.0078125f;
   simulation->unk40 = 0.0f;
-  simulation->unk3C = yawRadians;
+  simulation->spinHeading = yawRadians;
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
-    spinLoss = simulation->unk34 * 0.2f;
+    spinLoss = simulation->spinSpeed * 0.2f;
     if (spinLoss < 0.0f) {
       spinLoss = -spinLoss;
     }
@@ -1777,20 +1785,21 @@ s32 func_8020A488_ovl_05(
       sprintf(text, "Velocity = %fm/s     ",
           speed * (1.0f / SPEED_UNITS_PER_METER_PER_SECOND));
       PrintDebugText(text, 3, 8);
-      sprintf(text, "SpinY = %d", simulation->unk38);
+      sprintf(text, "SpinY = %d", simulation->sideSpin);
       PrintDebugText(text, 3, 9);
-      sprintf(text, "SpinX = %d", simulation->unk34);
+      sprintf(text, "SpinX = %d", simulation->spinSpeed);
       PrintDebugText(text, 3, 10);
-      sprintf(text, "SpinVel = %fRPM      ", simulation->unk34 * 0.8741959f);
+      sprintf(
+          text, "SpinVel = %fRPM      ", simulation->spinSpeed * 0.8741959f);
       PrintDebugText(text, 3, 11);
-      sprintf(
-          text, "SpinAngle = %3.3d/360", (s32)(simulation->unk3C * 57.295776f));
+      sprintf(text, "SpinAngle = %3.3d/360",
+          (s32)(simulation->spinHeading * 57.295776f));
       PrintDebugText(text, 3, 12);
-      sprintf(
-          text, "SpinVelX = %fkm/h      ", simulation->unk34 * 0.0070306873f);
+      sprintf(text, "SpinVelX = %fkm/h      ",
+          simulation->spinSpeed * 0.0070306873f);
       PrintDebugText(text, 3, 13);
-      sprintf(
-          text, "SpinVelY = %fkm/h      ", simulation->unk38 * 0.0070306873f);
+      sprintf(text, "SpinVelY = %fkm/h      ",
+          simulation->sideSpin * 0.0070306873f);
       PrintDebugText(text, 3, 14);
     }
   }
