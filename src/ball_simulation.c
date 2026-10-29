@@ -93,9 +93,11 @@ static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
 };
 
 /* For impactTiming values below and above the entries of D_800B7C10 */
-static Unk6 D_800B7C00 = {-90, -64, -40, -10, 100, 1};
-static Unk6 D_800B7C08 = {-80, 64, 30, 10, -5, 1};
-static Unk6 D_800B7C10[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
+static ImpactEffect D_800B7C00 = {-90, -64, -40, -10, 100, 1};
+static ImpactEffect D_800B7C08 = {-80, 64, 30, 10, -5, 1};
+// clang-format off
+static ImpactEffect
+    D_800B7C10[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
@@ -175,6 +177,7 @@ static Unk6 D_800B7C10[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
         {-12, 3, -2, 10, 4, 0},
     },
 };
+// clang-format on
 
 s32 D_800B7D9C = 0;
 /* Read by no routine */
@@ -2042,8 +2045,8 @@ INCLUDE_ASM("asm/nonmatchings/ball_simulation", GetPositionNoise);
 INCLUDE_ASM("asm/nonmatchings/ball_simulation", StepBallSimulation);
 #endif
 
-/* Returns the Unk6 entry for the club's lie rating and impactTiming */
-Unk6* GetImpactTimingEntry(
+/* Returns the ImpactEffect entry for the club's lie rating and impactTiming */
+ImpactEffect* GetImpactTimingEntry(
     Club* club, Surface surface, s32 shotMode, s32 impactTiming) {
   s32 row;
 
@@ -2079,7 +2082,7 @@ s32 LaunchBallSimulation(
     BallSimulation* simulation, s32 purpose, ShotLaunch* shot) {
   s32 percentRange[2];
   Club* club;
-  Unk6* entry;
+  ImpactEffect* entry;
   s32 impactTiming;
   s32 groundHeight;
   s32 speed;
@@ -2159,7 +2162,7 @@ s32 LaunchBallSimulation(
 
   if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
     entry = &D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT];
-    rumbles = D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT].unk5;
+    rumbles = D_800B7C10[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
   } else {
     /* The same as GetImpactTimingEntry; writing it out is there to match */
     s32 row = GetLieRating(club, simulation->surface, shot->shotMode) - 1;
@@ -2180,7 +2183,7 @@ s32 LaunchBallSimulation(
       entry = &D_800B7C10[row][impactTiming + IMPACT_TIMING_ENTRY_LIMIT];
     }
 
-    rumbles = entry->unk5;
+    rumbles = entry->rumbles;
   }
 
   if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
@@ -2188,7 +2191,8 @@ s32 LaunchBallSimulation(
     speed = GetPuttPower(shot->power, shot->shotMode);
   } else {
     speed = GetClubPower(club, shot->shotMode);
-    speed = speed * (shot->power * ((entry->unk0 * 2) + 0x100) / 256) / 256;
+    speed =
+        speed * (shot->power * ((entry->speedChange * 2) + 0x100) / 256) / 256;
     if (speed <= 0) {
       speed = 10;
     }
@@ -2207,7 +2211,7 @@ s32 LaunchBallSimulation(
     speed = speed * percent / 200;
   }
 
-  pitch = (club->pitch + entry->unk2) * 0.017453294f;
+  pitch = (club->pitch + entry->pitchChange) * 0.017453294f;
   if (pitch >= 0.0f) {
     pitch = 0.0f;
   }
@@ -2259,7 +2263,7 @@ s32 LaunchBallSimulation(
         (sideSign *
             ((club->deflection[shot->shotMode] * shot->power /
                  MAX_LAUNCH_POWER) +
-                (entry->unk1 * club->unk0)));
+                (entry->yawChange * club->unk0)));
     yawRadians = (u16)yaw * BINARY_ANGLE_TO_RADIANS;
   }
 
@@ -2280,13 +2284,14 @@ s32 LaunchBallSimulation(
     }
   } else {
     GetSurfaceInfo(simulation->unkA2); /* The original has it */
-    simulation->unk38 = (((sideSign * entry->unk3 * club->unk0) / 64) +
-                            (shot->offsetX * (club->unk0 * 0.0078125f)) +
-                            slopeSpin + (sideSign * 2 * club->sideSpin)) *
+    simulation->unk38 =
+        (((sideSign * entry->sideSpinChange * club->unk0) / 64) +
+            (shot->offsetX * (club->unk0 * 0.0078125f)) + slopeSpin +
+            (sideSign * 2 * club->sideSpin)) *
         (speed * launchScale * launchScale) * 0.00078125f;
     if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
       simulation->unk34 = ((((club->spin * 0.8f) + 10.0f) * 0.004f *
-                               (entry->unk4 + shot->offsetY)) -
+                               (entry->spinChange + shot->offsetY)) -
                               (club->spin * 0.5f)) *
           speed * 0.0078125f;
       speed = speed * launchScale;

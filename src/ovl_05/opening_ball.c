@@ -107,10 +107,12 @@ static SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT] = {
 static s32 D_8020B858_ovl_05 = 0;
 /* The opening's copies of D_800B7C00 and D_800B7C08, which its copy of
  * GetImpactTimingEntry doesn't read */
-static Unk6 D_8020B85C_ovl_05 = {-90, -64, -40, -10, 100, 1};
-static Unk6 D_8020B864_ovl_05 = {-80, 64, 30, 10, -5, 1};
+static ImpactEffect D_8020B85C_ovl_05 = {-90, -64, -40, -10, 100, 1};
+static ImpactEffect D_8020B864_ovl_05 = {-80, 64, 30, 10, -5, 1};
 /* The opening's copy of D_800B7C10 */
-static Unk6 D_8020B86C_ovl_05[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
+// clang-format off
+static ImpactEffect
+    D_8020B86C_ovl_05[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {{-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1}, {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1}, {0, 0, 0, 0, 0, 0},
@@ -140,6 +142,7 @@ static Unk6 D_8020B86C_ovl_05[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
         {-1, 0, 0, -2, 1, 0}, {0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0}, {-2, 0, 0, 2, 1, 0}, {-4, 1, 0, 3, 2, 0},
         {-8, 2, -1, 5, 4, 0}, {-12, 8, -2, 10, 4, 0}}};
+// clang-format on
 
 /* The opening's clubs: two drivers that differ only in pitch */
 static Club D_8020B9F8_ovl_05[OPENING_CLUB_COUNT] = {
@@ -1622,7 +1625,7 @@ s32 func_8020A488_ovl_05(
     BallSimulation* simulation, s32 purpose, ShotLaunch* shot) {
   s32 percentRange[2];
   Club* club;
-  Unk6* entry;
+  ImpactEffect* entry;
   s32 groundHeight;
   s32 speed;
   s32 sideSign;
@@ -1668,13 +1671,13 @@ s32 func_8020A488_ovl_05(
 
   club = &D_8020B9F8_ovl_05[shot->clubIndex];
   entry = &D_8020B86C_ovl_05[0][IMPACT_TIMING_ENTRY_LIMIT];
-  rumbles = D_8020B86C_ovl_05[0][IMPACT_TIMING_ENTRY_LIMIT].unk5;
+  rumbles = D_8020B86C_ovl_05[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
   if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
       simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     speed = GetPuttPower(shot->power, shot->shotMode);
   } else {
     speed = GetClubPower(club, shot->shotMode) *
-        (shot->power + (entry->unk0 * 2)) / 256;
+        (shot->power + (entry->speedChange * 2)) / 256;
     if (speed <= 0) {
       speed = 10;
     }
@@ -1693,14 +1696,15 @@ s32 func_8020A488_ovl_05(
     speed = speed * percent / 200;
   }
 
-  pitch = (club->pitch + entry->unk2) * 0.017453294f;
+  pitch = (club->pitch + entry->pitchChange) * 0.017453294f;
   if (pitch >= 0.0f) {
     pitch = 0.0f;
   }
 
-  simulation->unk38 = (((((sideSign * entry->unk3) + shot->offsetX) * 2) +
-                           ((club->sideSpin * 2) * sideSign)) *
-                          speed) *
+  simulation->unk38 =
+      (((((sideSign * entry->sideSpinChange) + shot->offsetX) * 2) +
+           ((club->sideSpin * 2) * sideSign)) *
+          speed) *
       0.00078125f;
   pitch += (f32)club->unk10 * shot->offsetY * 0.00054541545f;
   yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;

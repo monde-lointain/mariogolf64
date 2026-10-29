@@ -67,7 +67,7 @@ void SimulateShot(ShotLaunch* shot) {
       GetClub(
           g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
       g_CurrentShot.surface, g_CurrentShot.shotMode, shot->impactTiming)
-                                ->unk5;
+                                ->rumbles;
   LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
   g_SimulatedShot.startsOnGreen = g_GameState.isMiniGolf ||
       GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;

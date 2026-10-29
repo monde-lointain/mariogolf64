@@ -3143,7 +3143,7 @@ void UpdateTurns(void) {
   Boolean DoesImpactRumble(void) {
     return GetImpactTimingEntry(GetSelectedClub(), g_CurrentShot.surface,
         g_CurrentShot.shotMode, f_ShotLaunch.impactTiming)
-        ->unk5;
+        ->rumbles;
   }
 
   /* Plays the impact click: a mishit, a stop right on the mark, or one off it

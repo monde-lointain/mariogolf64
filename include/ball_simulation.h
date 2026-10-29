@@ -39,7 +39,7 @@ enum BallState {
 #define RESET_BALL_VELOCITY_Y (-100)
 
 /* ShotLaunch impactTiming values from -IMPACT_TIMING_ENTRY_LIMIT to
- * IMPACT_TIMING_ENTRY_LIMIT have an Unk6 per lie rating */
+ * IMPACT_TIMING_ENTRY_LIMIT have an ImpactEffect per lie rating */
 #define IMPACT_TIMING_ENTRY_LIMIT 5
 #define IMPACT_TIMING_ENTRY_COUNT ((IMPACT_TIMING_ENTRY_LIMIT * 2) + 1)
 
@@ -61,14 +61,15 @@ enum BallState {
       (plane).normal[AXIS_Y] * (plane).normal[AXIS_Y] * \
           DROP_MAX_SLOPE_SQUARED)
 
-typedef struct Unk6 {
-  /* 0x0 */ s8 unk0;
-  /* 0x1 */ s8 unk1;
-  /* 0x2 */ s8 unk2;
-  /* 0x3 */ s8 unk3;
-  /* 0x4 */ s8 unk4;
-  /* 0x5 */ s8 unk5;
-} Unk6; /* size = 0x6 */
+/* How a lie rating and an impact timing change a launch */
+typedef struct ImpactEffect {
+  /* 0x0 */ s8 speedChange; /* In 128ths of the speed */
+  /* 0x1 */ s8 yawChange; /* Times the club's unk0 */
+  /* 0x2 */ s8 pitchChange; /* In degrees */
+  /* 0x3 */ s8 sideSpinChange;
+  /* 0x4 */ s8 spinChange; /* Added to the shot's offsetY */
+  /* 0x5 */ s8 rumbles; /* Whether the mishit rumbles */
+} ImpactEffect; /* size = 0x6 */
 
 /* The largest launch power a club can give */
 #define MAX_LAUNCH_POWER 256
@@ -150,7 +151,7 @@ typedef struct BallSimulation {
 extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 
 void ResetBallSimulations(void);
-Unk6* GetImpactTimingEntry(
+ImpactEffect* GetImpactTimingEntry(
     Club* club, Surface surface, s32 shotMode, s32 impactTiming);
 s32 StepBallSimulation(BallSimulation* simulation);
 s32 LaunchBallSimulation(
