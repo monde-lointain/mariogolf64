@@ -207,10 +207,6 @@ typedef struct ImageCorner {
 #define MENU_BOB_PHASE_STEP 0.13f
 #define MENU_BOB_HEIGHT 5.0f
 
-/* The bobbing of the menus' items: its phase, and the offset that it gives */
-/* g_GameState.gameMode under a symbol of its own, which func_801F6B28_ovl_01
- * needs to match */
-
 /* Where func_801FD7B0 and func_801FCEF8 draw the banners of D_801052BC and
  * D_801B60D0 */
 #define MENU_BANNER_TOP 18
@@ -462,6 +458,7 @@ static s16 D_8022BE92_ovl_01 = 0;
 static u8 D_8022BE94_ovl_01 = 0;
 /* Whether the options screen's erase window is up */
 static u8 f_IsEraseWindowUp = FALSE;
+/* The bobbing of the menus' items: the offset that it gives, and its phase */
 static f32 f_MenuBobOffset = 0.0f;
 static f32 f_MenuBobPhase = 0.0f;
 /* The sound test's sound, song and settings */
@@ -4178,7 +4175,7 @@ void func_801FD1B4_ovl_01(Gfx** displayListHead, s16 left, s16 top) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FD1B4_ovl_01);
 #endif
 
-/* Nothing in the menu calls this either */
+/* Draws the large banner, for func_801FC60C's MENU_LAYER_LARGE_BANNER */
 void func_801FD4F0_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
