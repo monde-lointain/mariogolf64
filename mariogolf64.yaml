@@ -640,7 +640,7 @@ segments:
       - [0x11B920, .rodata, ovl_01/player_stats]
       - [0x11B980, .rodata, ovl_01/save_menu]
       - [0x11B9D0, .rodata, ovl_01/tournament_menu]
-      - { start: 0x11BA50, type: bss, vram: 0x80231AD0, name: bss_80231AD0 }
+      - { start: 0x11BA50, type: .bss, vram: 0x80231AD0, name: ovl_01/main_menu }
       - { type: .bss, vram: 0x8023A3A0, name: ovl_01/character_select }
       - { type: .bss, vram: 0x8023A790, name: ovl_01/course_menu }
       - { type: .bss, vram: 0x8023A9C0, name: ovl_01/best_times }

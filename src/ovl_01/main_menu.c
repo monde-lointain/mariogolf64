@@ -150,6 +150,8 @@
 #define NO_VIEWER_CHARACTER -1
 /* A club mask with a bit set for every slot */
 #define ALL_CLUB_SLOTS ((1 << CLUB_SLOT_COUNT) - 1)
+/* The size of the image buffer that GetMenuImageBuffer returns */
+#define MENU_IMAGE_BUFFER_SIZE 0x80A0
 
 /* Divides a turn among the player count's modes, keeping it whole should a
  * count be zero */
@@ -274,8 +276,6 @@ extern s32 D_800FE334;
 extern u8 g_OptionBits;
 extern s32 D_800FBD40[];
 extern void* D_8010526C[2];
-extern s32 D_802322F0_ovl_01;
-extern s32 D_802322F4_ovl_01;
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
@@ -802,6 +802,27 @@ static u8 D_8022FEBC_ovl_01[3][20] = {
 /* Read by no routine */
 static s32 D_8022FEF8_ovl_01 = 0;
 static s32 D_8022FEFC_ovl_01 = 0;
+
+/* Read by no routine */
+static u8 D_80231AD0_ovl_01[0x1D0];
+static Mat4 D_80231CA0_ovl_01;
+static Mat4 D_80231CE0_ovl_01;
+static LookAt D_80231D20_ovl_01[2];
+static Mtx D_80231D60_ovl_01[MAX_PLAYER_COUNT][2];
+static Mtx D_80231F60_ovl_01;
+static f32 D_80231FA0_ovl_01[MAX_PLAYER_COUNT];
+static Mtx D_80231FB0_ovl_01[2];
+static Mtx D_80232030_ovl_01;
+/* Read by no routine */
+static u8 D_80232070_ovl_01[0x180];
+static Mtx D_802321F0_ovl_01;
+static Mtx D_80232230_ovl_01;
+static Mat4 D_80232270_ovl_01;
+static Mat4 D_802322B0_ovl_01;
+static s32 D_802322F0_ovl_01;
+static s32 D_802322F4_ovl_01;
+/* An image buffer of the menu overlay */
+static u8 f_MenuImageBuffer[MENU_IMAGE_BUFFER_SIZE];
 
 void* GetMenuImageBuffer(void) {
   return f_MenuImageBuffer;
@@ -4384,10 +4405,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
 #define RIVAL_SLOT 1
 #define RIVAL_SPIN_STEP 10.0f
 
-extern Mtx D_80231D60_ovl_01[MAX_PLAYER_COUNT][2];
-extern Mtx D_80231F60_ovl_01;
-extern f32 D_80231FA0_ovl_01[MAX_PLAYER_COUNT];
-
 /* func_80208F8C draws a frame of the waving Toad (assets 0x710 onward), 48x51
  * CI8, in two strips */
 #define TOAD_WIDTH 48
@@ -4450,10 +4467,6 @@ extern const char D_8023176C_ovl_01[];
 #define WON_COUNT_Y 72
 #define WON_COUNT_DIGIT_WIDTH 16
 
-extern Mat4 D_80231CA0_ovl_01;
-extern Mat4 D_80231CE0_ovl_01;
-extern LookAt D_80231D20_ovl_01[2];
-
 /*
  * The course select's water plane, D_8022FD48, blends the water image and the
  * scrolling layer, which scroll different ways, and is fogged white
@@ -4508,11 +4521,6 @@ extern LookAt D_80231D20_ovl_01[2];
 /* Screens 20 and 22 slide their pages this far, a step per update */
 #define BET_SLIDE_STEP 32
 #define BET_SLIDE_DISTANCE 512
-
-extern Mtx D_802321F0_ovl_01;
-extern Mtx D_80232230_ovl_01;
-extern Mat4 D_80232270_ovl_01;
-extern Mat4 D_802322B0_ovl_01;
 
 void StartLoadingChosenHole(void);
 void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
@@ -5262,9 +5270,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80200EF0_ovl_01);
 #define VIEWER_BASE_SCALE 5.0f
 #define VIEWER_BASE_OFFSET -64.0f
 #define VIEWER_DEPTH -1000.0f
-
-extern Mtx D_80231FB0_ovl_01[2];
-extern Mtx D_80232030_ovl_01;
 
 const char D_80231660_ovl_01[] = "%d:%s";
 const char D_80231668_ovl_01[] = "%d:";

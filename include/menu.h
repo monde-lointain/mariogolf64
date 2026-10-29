@@ -125,8 +125,7 @@ extern AssetId g_MiniGolfCourseIconAssets[];
 /* The file read with each mini-golf course's disc image */
 extern s16 g_MiniGolfDiscFiles[];
 
-/* An image buffer of the menu overlay */
-extern u8 f_MenuImageBuffer[];
+/* Returns an image buffer of the menu overlay */
 void* GetMenuImageBuffer(void);
 
 /* The states of the menus' popup window, which opens and closes by scaling */
