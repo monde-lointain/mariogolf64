@@ -3242,6 +3242,7 @@ DrawSpinningStars = 0x802081E8; // type:func segment:ovl_01
 DrawMenuCharacters = 0x80200EF0; // type:func segment:ovl_01
 DrawCourseSelectBanners = 0x802047F0; // type:func segment:ovl_01
 UpdateMenus = 0x801F4C78; // type:func segment:ovl_01
+DrawMenuBackdropLayers = 0x801FB54C; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01

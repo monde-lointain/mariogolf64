@@ -544,7 +544,7 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
   s16 replayCourse;
   s16 replayHole;
 
-  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
 
   gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
   gDPPipeSync(gfx++);

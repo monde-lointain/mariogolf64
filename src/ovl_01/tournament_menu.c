@@ -1532,7 +1532,7 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
   u16 buttons;
   s32 pressedButtons;
 
-  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
   func_8022A43C_ovl_01(&gfx);
   func_8022A090_ovl_01(&gfx);
   func_8022ADE8_ovl_01(&gfx);

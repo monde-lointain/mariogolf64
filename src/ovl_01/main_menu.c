@@ -3767,7 +3767,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
 /* Draws the chosen layers of the menu's backdrop: the course backdrop, the
  * board and the banner */
 #ifdef NON_MATCHING
-void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
+void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 shownRowCount;
@@ -3992,7 +3992,7 @@ void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FB54C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuBackdropLayers);
 #endif
 
 void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers) {
@@ -4307,7 +4307,7 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
       MemberSize(SaveData, ringShotRecords), (s32)sizeof(SaveData));
   DrawShadowedText(
       &gfx, PLAIN_MENU_FIGURES_X, PLAIN_MENU_FIGURES_Y, g_PrintBuffer);
-  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
   if (g_ControllerStates[0].buttons & B_BUTTON) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
@@ -4558,8 +4558,8 @@ extern const char D_8023176C_ovl_01[];
 #define BET_BADGE_COLOR_MIDPOINT 127
 #define BET_BADGE_COLOR_SWING 127.0f
 #define BET_BADGE_ENV_DIVISOR 4
-/* func_801FB54C's layers drawn behind the course select, and in front of it
- * and of screens 20 and 22 */
+/* DrawMenuBackdropLayers's layers drawn behind the course select, and in front
+ * of it and of screens 20 and 22 */
 #define COURSE_SELECT_BACK_LAYERS MENU_LAYER_SCENERY
 #define COURSE_SELECT_FRONT_LAYERS (MENU_LAYER_UNK2 | MENU_LAYER_BANNER)
 /* Screens 20 and 22 slide their pages this far, a step per update */
@@ -5336,7 +5336,7 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
   }
 
   if (D_8022BE28_ovl_01 == 0) {
-    func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
+    DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
   }
 
   SetUpTextDrawing(&gfx);
@@ -5616,7 +5616,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
   save = GetSaveData();
   gfx = *displayListHead;
   if (g_MenuScreen == MENU_SCREEN_UNK6) {
-    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_BACK_LAYERS);
+    DrawMenuBackdropLayers(&gfx, COURSE_SELECT_BACK_LAYERS);
     guTranslate(&D_802321F0_ovl_01, 0.0f, 0.0f, -WATER_PLANE_DISTANCE);
     guPerspective(&D_80232230_ovl_01, &perspNorm, WATER_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE,
@@ -6061,7 +6061,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         break;
     }
 
-    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_LAYERS);
+    DrawMenuBackdropLayers(&gfx, COURSE_SELECT_FRONT_LAYERS);
   }
 
   if ((g_MenuScreen == MENU_SCREEN_UNK22) ||
@@ -6140,7 +6140,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
       DrawCourseSelectBanners(&gfx);
     }
 
-    func_801FB54C_ovl_01(&gfx, COURSE_SELECT_FRONT_LAYERS);
+    DrawMenuBackdropLayers(&gfx, COURSE_SELECT_FRONT_LAYERS);
     switch (D_8022BE88_ovl_01) {
       case BET_PHASE_OPENING:
         func_8021826C_ovl_01(
@@ -6326,7 +6326,7 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 choiceIndex;
 
-  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_COUNT; choiceIndex++) {
@@ -6396,7 +6396,7 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
   s32 choiceIndex;
   s32 labelOffset;
 
-  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT;
@@ -6483,7 +6483,7 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
   s32 choiceIndex;
   s32 labelOffset;
 
-  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != CLUBHOUSE_CHOICE_COUNT; choiceIndex++) {
@@ -6549,7 +6549,7 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
 void func_80206A2C_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
-  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
   *displayListHead = gfx;
 }
 
@@ -6680,7 +6680,7 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   s32 rowTop;
   s32 frameIndex;
 
-  func_801FB54C_ovl_01(&gfx, OPTIONS_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, OPTIONS_BACKDROP_LAYERS);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
@@ -7020,7 +7020,7 @@ void func_80207D08_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 caddyIndex;
 
-  func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   DrawShadowedText(

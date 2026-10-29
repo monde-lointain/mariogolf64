@@ -14,8 +14,8 @@
 #define MAP_CAMERA_MODE_TOP_BYTE (*(u8*)&g_MapCamera.mode)
 
 /*
- * The parts of the menu backdrop that func_801FC60C and func_801FB54C draw.
- * The screens also pass MENU_LAYER_UNK2, which neither tests.
+ * The parts of the menu backdrop that func_801FC60C and DrawMenuBackdropLayers
+ * draw. The screens also pass MENU_LAYER_UNK2, which neither tests.
  */
 #define MENU_LAYER_SCENERY (1 << 0)
 #define MENU_LAYER_UNK2 (1 << 1)
@@ -52,7 +52,7 @@ extern char D_8022BF70_ovl_01[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 
 s32 GetOpenCourseCount(void);
 void func_801F6A38_ovl_01(void);
-void func_801FB54C_ovl_01(Gfx** displayListHead, s32 layers);
+void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers);
 void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers);
 
 #endif

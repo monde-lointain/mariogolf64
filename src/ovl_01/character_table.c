@@ -358,7 +358,7 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
   s32 rowWins;
   u8 drawMode;
 
-  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
   gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);

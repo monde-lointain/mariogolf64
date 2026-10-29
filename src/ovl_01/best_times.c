@@ -259,7 +259,7 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
   s16 dashIndex;
   u8(*holderPalettes)[MENU_PALETTE_FILE_SIZE];
 
-  func_801FB54C_ovl_01(&gfx, PLAIN_BACKDROP_LAYERS);
+  DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
   guPerspectiveF(D_8023A9C0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
   guLookAtF(D_8023AA00_ovl_01, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE, 0.0f,

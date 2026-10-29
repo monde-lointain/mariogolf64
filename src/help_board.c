@@ -107,7 +107,7 @@ static TextListLayout f_HelpListLayout = {84, 22};
 static TextListLayout D_800C4350[8] = {{86, 18}, {108, 32}, {98, 24}, {104, 24},
     {106, 32}, {98, 21}, {80, 20}, {0, 0}};
 
-void func_801FB54C(Gfx** displayListHead, s32);
+void DrawMenuBackdropLayers(Gfx** displayListHead, s32);
 void DrawChalkboard(Gfx** displayListHead);
 
 /* Reads one of the help board's images into buffer */
@@ -303,7 +303,7 @@ void DrawHelpBoard(Gfx** displayListHead) {
   s32 blue;
   s32 topic;
 
-  func_801FB54C(&gfx, 0xB);
+  DrawMenuBackdropLayers(&gfx, 0xB);
   DrawChalkboard(&gfx);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
