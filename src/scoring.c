@@ -192,27 +192,27 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
 
 /*
  * Whether the hole is halved for the side that the standing says is
- * dormie: it is when that side's unk26 is set and its net score is no
+ * dormie: it is when that side is done with the hole and its net score is no
  * more than one over the other side's. It is a macro, as an inline
  * function compiles differently from the original.
  */
 #define IsHalvedForDormie(standing, dormieStanding, dormieIndex, otherIndex) \
   (((standing) == (dormieStanding)) && \
-      (g_Players[dormieIndex].unk26 != HOLE_STATUS_PLAYING) && \
+      (g_Players[dormieIndex].holeStatus != HOLE_STATUS_PLAYING) && \
       !(GetNetScore(dormieIndex) > GetNetScore(otherIndex) + 1))
 
 /*
- * Scores a player whose unk26 is 0 as if they need at least one more
+ * Scores a player still HOLE_STATUS_PLAYING as if they need at least one more
  * stroke. When a dormie lead means a halve wins the match, the hole counts
  * as halved once the trailing player can't win it.
  */
 s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
   s32 standing;
 
-  if (g_Players[playerIndex].unk26 != HOLE_STATUS_PLAYING ||
-      g_Players[opponentIndex].unk26 != HOLE_STATUS_PLAYING) {
-    if (g_Players[playerIndex].unk26 != HOLE_STATUS_PLAYING) {
-      if (g_Players[opponentIndex].unk26 != HOLE_STATUS_PLAYING) {
+  if (g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING ||
+      g_Players[opponentIndex].holeStatus != HOLE_STATUS_PLAYING) {
+    if (g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING) {
+      if (g_Players[opponentIndex].holeStatus != HOLE_STATUS_PLAYING) {
         if (GetNetScore(playerIndex) < GetNetScore(opponentIndex)) {
           return MATCH_SIDE_PLAYER;
         }
@@ -227,7 +227,7 @@ s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
       }
     }
 
-    if (g_Players[opponentIndex].unk26 != HOLE_STATUS_PLAYING &&
+    if (g_Players[opponentIndex].holeStatus != HOLE_STATUS_PLAYING &&
         GetNetScore(opponentIndex) < GetNetScore(playerIndex) + 1) {
       return MATCH_SIDE_OPPONENT;
     }
@@ -249,8 +249,8 @@ s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
 
 /*
  * Decides the hole among all the players, marking each in playerResults
- * when it isn't NULL. Players whose unk26 is 1 set the best score, and
- * those whose unk26 is 0 are scored as if they need another stroke.
+ * when it isn't NULL. Players who have holed out set the best score, and
+ * those still playing are scored as if they need another stroke.
  */
 s32 GetGroupHoleResult(s8* playerResults) {
   s8 ignoredResults[MAX_PLAYER_COUNT];
@@ -271,7 +271,7 @@ s32 GetGroupHoleResult(s8* playerResults) {
   }
 
   for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
-    if (g_Players[playerIndex].unk26 == HOLE_STATUS_HOLED_OUT) {
+    if (g_Players[playerIndex].holeStatus == HOLE_STATUS_HOLED_OUT) {
       if (GetNetScore(playerIndex) < bestScore) {
         bestScore = GetNetScore(playerIndex);
         bestPlayerIndex = playerIndex;
@@ -280,7 +280,7 @@ s32 GetGroupHoleResult(s8* playerResults) {
         tieCount += (bestScore == GetNetScore(playerIndex));
       }
     } else {
-      outCount += (g_Players[playerIndex].unk26 == HOLE_STATUS_OUT);
+      outCount += (g_Players[playerIndex].holeStatus == HOLE_STATUS_OUT);
     }
   }
 
@@ -300,7 +300,7 @@ s32 GetGroupHoleResult(s8* playerResults) {
   isDecided = TRUE;
   for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
     playerResults[playerIndex] = GROUP_PLAYER_CONTENDING;
-    if (g_Players[playerIndex].unk26 == HOLE_STATUS_PLAYING) {
+    if (g_Players[playerIndex].holeStatus == HOLE_STATUS_PLAYING) {
       if (GetNetScore(playerIndex) >= bestScore) {
         playerResults[playerIndex] = GROUP_PLAYER_OUT;
       } else if (GetNetScore(playerIndex) < bestScore - 1) {
@@ -310,7 +310,7 @@ s32 GetGroupHoleResult(s8* playerResults) {
         isDecided = FALSE;
       }
     } else if (bestScore < GetNetScore(playerIndex) ||
-        g_Players[playerIndex].unk26 >= HOLE_STATUS_NEWLY_OUT) {
+        g_Players[playerIndex].holeStatus >= HOLE_STATUS_NEWLY_OUT) {
       playerResults[playerIndex] = GROUP_PLAYER_OUT;
     }
   }
@@ -324,7 +324,7 @@ s32 GetGroupHoleResult(s8* playerResults) {
   }
 
   for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
-    if (g_Players[playerIndex].unk26 == HOLE_STATUS_HOLED_OUT &&
+    if (g_Players[playerIndex].holeStatus == HOLE_STATUS_HOLED_OUT &&
         GetNetScore(playerIndex) == bestScore) {
       playerResults[playerIndex] = GROUP_PLAYER_WINNER;
     }
@@ -352,7 +352,7 @@ s32 GetHolingOutStakes(s32 playerIndex) {
     case GAME_MODE_GET_CHARACTER:
       opponentIndex = playerIndex ^ 1;
       if (GetNetScore(playerIndex) == GetNetScore(opponentIndex) - 1 &&
-          g_Players[opponentIndex].unk26 != HOLE_STATUS_PLAYING) {
+          g_Players[opponentIndex].holeStatus != HOLE_STATUS_PLAYING) {
         stakes = HOLING_OUT_HALVES_HOLE;
         if (GetMatchStanding(playerIndex, opponentIndex) ==
             MATCH_STANDING_PLAYER_DORMIE) {
@@ -364,7 +364,7 @@ s32 GetHolingOutStakes(s32 playerIndex) {
             ? HOLING_OUT_WINS_MATCH
             : HOLING_OUT_WINS_HOLE;
       } else if (GetNetScore(playerIndex) < GetNetScore(opponentIndex) + 1 &&
-          g_Players[opponentIndex].unk26 != HOLE_STATUS_HOLED_OUT &&
+          g_Players[opponentIndex].holeStatus != HOLE_STATUS_HOLED_OUT &&
           GetMatchStanding(playerIndex, opponentIndex) ==
               MATCH_STANDING_PLAYER_DORMIE) {
         stakes = HOLING_OUT_WINS_MATCH;
@@ -377,7 +377,7 @@ s32 GetHolingOutStakes(s32 playerIndex) {
       bestScore = NO_BEST_SCORE;
       stakes = HOLING_OUT_WINS_HOLE;
       for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
-        if (g_Players[otherIndex].unk26 == HOLE_STATUS_HOLED_OUT) {
+        if (g_Players[otherIndex].holeStatus == HOLE_STATUS_HOLED_OUT) {
           hasAnyFinished = TRUE;
           if (GetNetScore(otherIndex) < bestScore) {
             bestScore = GetNetScore(otherIndex);
@@ -387,7 +387,7 @@ s32 GetHolingOutStakes(s32 playerIndex) {
 
       for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
         if (otherIndex != playerIndex &&
-            g_Players[otherIndex].unk26 == HOLE_STATUS_PLAYING) {
+            g_Players[otherIndex].holeStatus == HOLE_STATUS_PLAYING) {
           if (GetNetScore(otherIndex) < GetNetScore(playerIndex)) {
             stakes = HOLING_OUT_STAKES_NONE;
             break;

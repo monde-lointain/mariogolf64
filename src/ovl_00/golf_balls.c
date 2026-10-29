@@ -468,7 +468,7 @@ void UpdateGolfBalls(void) {
 
   for (i = 0, player = g_Players, ball = f_GolfBalls;
       i < g_GameState.playerCount; i++, player++, ball++) {
-    if (player->unk26 != HOLE_STATUS_PLAYING || player->strokeCount == 0) {
+    if (player->holeStatus != HOLE_STATUS_PLAYING || player->strokeCount == 0) {
       ball->alpha = BALL_HIDDEN;
     }
 
@@ -491,7 +491,7 @@ void UpdateGolfBalls(void) {
       simulation = &g_BallSimulations[i];
       ball->isInCup = FALSE;
       if (simulation->playerIndex >= 0 &&
-          g_Players[currentIndex].unk26 == HOLE_STATUS_PLAYING) {
+          g_Players[currentIndex].holeStatus == HOLE_STATUS_PLAYING) {
         if (g_IsCupViewShown == TRUE) {
           ball->position[0] =
               (simulation->position[0] -

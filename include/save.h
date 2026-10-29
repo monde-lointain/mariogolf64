@@ -392,7 +392,7 @@ typedef struct UnkB8 {
   /* 0x23 */ s8 strokeCount; /* On the current hole */
   /* 0x24 */ s8 puttCount; /* Strokes from the green on the current hole */
   /* 0x25 */ s8 teeOrder; /* From 0, the player's turn on the next tee */
-  /* 0x26 */ s8 unk26; /* A HOLE_STATUS_* value */
+  /* 0x26 */ s8 holeStatus; /* A HOLE_STATUS_* value */
   /* 0x27 */ s8 controllerIndex; /* Into g_PlayerControllerPorts, when below
                                     MAXCONTROLLERS */
   /* 0x28 */ s8 unk28;

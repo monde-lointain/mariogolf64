@@ -51,8 +51,8 @@ static void* D_800C4148[6] = {NULL, NULL, guPosition, NULL, NULL, NULL};
 
 /*
  * Sums the player's net strokes over par from the round's first hole to
- * endHole, leaving endHole out. The current hole is put in when the
- * player's unk26 is set
+ * endHole, leaving endHole out. The current hole is put in once the
+ * player is no longer HOLE_STATUS_PLAYING
  */
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
   s32 score = 0;
@@ -60,7 +60,7 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
   s32 hole;
 
   if (g_GameState.holeIndex == endHole) {
-    endHole += g_Players[playerIndex].unk26 != HOLE_STATUS_PLAYING;
+    endHole += g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING;
   }
 
   for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
@@ -78,7 +78,7 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
  * In the skins modes a hole's strokes are the skins that its winner took,
  * and zero for the other players. A hole with no winner carries its skins
  * over to the next. The holes from the round's first to endHole are
- * tallied, with endHole itself once every player's unk26 is set
+ * tallied, with endHole itself once no player is HOLE_STATUS_PLAYING
  */
 #ifdef NON_MATCHING
 void TallySkins(s32 endHole) {
@@ -94,7 +94,7 @@ void TallySkins(s32 endHole) {
 
   isAnyUnk26Clear = FALSE;
   for (player = 0; player != g_GameState.playerCount; player++) {
-    if (g_Players[player].unk26 == HOLE_STATUS_PLAYING) {
+    if (g_Players[player].holeStatus == HOLE_STATUS_PLAYING) {
       isAnyUnk26Clear = TRUE;
     }
   }
@@ -365,7 +365,7 @@ void RecordCourseRound(void) {
     isAtRoundLimit = TRUE;
   }
 
-  g_Players[0].unk26 = HOLE_STATUS_PLAYING;
+  g_Players[0].holeStatus = HOLE_STATUS_PLAYING;
   score = GetNetScoreToPar(COURSE_HOLE_COUNT, 0);
   if (score < record->bestScore) {
     record->bestScore = score;

@@ -428,7 +428,7 @@ void PlacePlayersOnTee(void) {
       g_Players[i].ballPosition[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
       g_Players[i].strokeCount = 0;
       g_Players[i].puttCount = 0;
-      g_Players[i].unk26 = HOLE_STATUS_PLAYING;
+      g_Players[i].holeStatus = HOLE_STATUS_PLAYING;
       g_Players[i].ballSurface = SURFACE_TEE_UP;
       if (g_GameState.isMiniGolf) {
         g_Players[i].ballSurface = GetSurface(g_Players[i].ballPosition[AXIS_X],
@@ -1225,7 +1225,7 @@ void UpdatePlay(void) {
           SetNextTeeOrder();
           UpdateContest(TRUE);
           if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
-              g_Players[0].unk26 == HOLE_STATUS_HOLED_OUT) {
+              g_Players[0].holeStatus == HOLE_STATUS_HOLED_OUT) {
             RecordHoleStats();
             if (g_Players[0].strokeCount < g_HoleSetup.par) {
               AddBirdieBadge();
@@ -1265,7 +1265,7 @@ void UpdatePlay(void) {
             g_RoundHud.isHoleIntroTextShown = FALSE;
             EndHoleIntro();
             for (i = 0; i < g_GameState.playerCount; i++) {
-              g_Players[i].unk26 = HOLE_STATUS_PLAYING;
+              g_Players[i].holeStatus = HOLE_STATUS_PLAYING;
             }
 
             if (g_GameState.gameMode == GAME_MODE_TRAINING) {
