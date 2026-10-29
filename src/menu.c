@@ -468,9 +468,6 @@ s32 D_8012F48C;
 s8 D_801B70F1;
 s8 D_801B70F2;
 s8 D_801B70F3;
-void* D_8012D424; /* D_8012D420[1], named apart to match */
-void* D_80105BB0[4];
-void* D_8012D468[4];
 
 /*
  * Allocates and reads the menu's assets, then reads the save. Overlay 3
@@ -502,12 +499,12 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_801B60D0, &asset);
   D_8012D420[0] = AllocMemory(0x70A8);
   D_801B5CD0[0] = AllocMemory(0x70A8);
-  D_8012D424 = AllocMemory(0x70A8);
+  D_8012D420[1] = AllocMemory(0x70A8);
   D_801B5CD0[1] = AllocMemory(0x70A8);
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(D_8012D420[0], &asset);
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
-  ReadEncodedAsset(D_8012D424, &asset);
+  ReadEncodedAsset(D_8012D420[1], &asset);
   if (g_MenuScreen == 5) {
     OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
     ReadEncodedAsset(D_801B5CD0[0], &asset);
@@ -1414,9 +1411,10 @@ void func_8005C674(s32 arg0, s32 arg1) {
       if (recordIndex >= 0) {
         arg0 = g_ImportedCharacters[index].character;
         OpenEncodedAsset(g_FaceAnimationAssets[arg0][0], &asset);
-        ReadEncodedAsset(D_8012D468[index], &asset);
+        ReadEncodedAsset(D_8012D430[FIRST_IMPORTED_CHARACTER + index], &asset);
         OpenAssetFile(g_CharacterFacePaletteFiles[arg0][0], &file);
-        ReadAssetFile(D_80105BB0[index], GetAssetFileSize(&file), &file);
+        ReadAssetFile(D_80105B78[FIRST_IMPORTED_CHARACTER + index],
+            GetAssetFileSize(&file), &file);
       }
     }
   }
