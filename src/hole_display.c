@@ -1065,7 +1065,8 @@ void InitSkyColors(void) {
     }
 
     ((u16*)g_CourseSkyImage)[PALETTE_START + colorIndex] =
-        (red << 11) | (green << 6) | (blue << 1) | alpha;
+        (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) |
+        (blue << RGBA16_BLUE_SHIFT) | alpha;
   }
 
   DeriveSceneColors();
@@ -1361,7 +1362,8 @@ s32 UpdateSkyEditor(void) {
       }
 
       ((u16*)g_CourseSkyImage)[PALETTE_START + index] =
-          (red << 11) | (green << 6) | (blue << 1) | alpha;
+          (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) |
+          (blue << RGBA16_BLUE_SHIFT) | alpha;
     }
   }
 

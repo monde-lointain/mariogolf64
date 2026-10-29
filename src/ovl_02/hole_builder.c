@@ -961,9 +961,9 @@ s32 PaintMainCourse(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
-          color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
+          color = (((fairwayRandom & 3) + 9) << RGBA16_RED_SHIFT) | 0x4C4;
         } else {
-          color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
+          color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x584;
         }
 
         paintedCode = TERRAIN_CODE_FAIRWAY;
@@ -978,7 +978,7 @@ s32 PaintMainCourse(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
-        color = (red << 11) | (green << 6) | 1;
+        color = (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) | 1;
         paintedCode = TERRAIN_CODE_ROUGH;
       } else {
         color = 0xC81;
@@ -994,7 +994,8 @@ s32 PaintMainCourse(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+      color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1064,9 +1065,9 @@ s32 PaintPaleRoughCourse(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
-          color = (((fairwayRandom & 3) + 14) << 11) | 0x4CE;
+          color = (((fairwayRandom & 3) + 14) << RGBA16_RED_SHIFT) | 0x4CE;
         } else {
-          color = ((fairwayRandom & 3) << 11) | 0x658E;
+          color = ((fairwayRandom & 3) << RGBA16_RED_SHIFT) | 0x658E;
         }
 
         paintedCode = TERRAIN_CODE_FAIRWAY;
@@ -1179,9 +1180,9 @@ s32 PaintShyGuyDesert(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
-          color = (((fairwayRandom & 3) + 19) << 11) | 0x688;
+          color = (((fairwayRandom & 3) + 19) << RGBA16_RED_SHIFT) | 0x688;
         } else {
-          color = (((fairwayRandom & 3) + 14) << 11) | 0x5C6;
+          color = (((fairwayRandom & 3) + 14) << RGBA16_RED_SHIFT) | 0x5C6;
         }
 
         paintedCode = TERRAIN_CODE_FAIRWAY;
@@ -1196,7 +1197,7 @@ s32 PaintShyGuyDesert(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         red = ((f_PaintSeed >> 16) & 3) + 10;
         green = red + 3;
-        color = (red << 11) | (green << 6) | 5;
+        color = (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) | 5;
         paintedCode = TERRAIN_CODE_ROUGH;
       } else {
         color = 0xC81;
@@ -1212,7 +1213,8 @@ s32 PaintShyGuyDesert(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+      color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1279,9 +1281,9 @@ s32 PaintBooValley(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
-          color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
+          color = (((fairwayRandom & 3) + 9) << RGBA16_RED_SHIFT) | 0x4C4;
         } else {
-          color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
+          color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x584;
         }
 
         paintedCode = TERRAIN_CODE_FAIRWAY;
@@ -1296,7 +1298,7 @@ s32 PaintBooValley(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
-        color = (red << 11) | (green << 6) | 1;
+        color = (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) | 1;
         paintedCode = TERRAIN_CODE_ROUGH;
       } else {
         color = 0xC81;
@@ -1312,7 +1314,8 @@ s32 PaintBooValley(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+      color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1378,9 +1381,9 @@ s32 PaintYoshisIsland(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
-          color = (((fairwayRandom & 3) + 7) << 11) | 0x4D4;
+          color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x4D4;
         } else {
-          color = (((fairwayRandom & 3) + 7) << 11) | 0x590;
+          color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x590;
         }
 
         paintedCode = TERRAIN_CODE_FAIRWAY;
@@ -1395,7 +1398,7 @@ s32 PaintYoshisIsland(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
-        color = (red << 11) | (green << 6) | 0xD;
+        color = (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) | 0xD;
         paintedCode = TERRAIN_CODE_ROUGH;
       } else {
         color = 0xC81;
@@ -1411,7 +1414,8 @@ s32 PaintYoshisIsland(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+      color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1480,9 +1484,9 @@ s32 PaintUnlistedCourse(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
-          color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
+          color = (((fairwayRandom & 3) + 9) << RGBA16_RED_SHIFT) | 0x4C4;
         } else {
-          color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
+          color = (((fairwayRandom & 3) + 7) << RGBA16_RED_SHIFT) | 0x584;
         }
 
         paintedCode = TERRAIN_CODE_FAIRWAY;
@@ -1497,7 +1501,7 @@ s32 PaintUnlistedCourse(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
-        color = (red << 11) | (green << 6) | 1;
+        color = (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) | 1;
         paintedCode = TERRAIN_CODE_ROUGH;
       } else {
         color = 0xC81;
@@ -1513,7 +1517,8 @@ s32 PaintUnlistedCourse(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 7) + 4) << 11) | ((4 - ((random >> 5) & 3)) << 6);
+      color = (((random & 7) + 4) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT);
       break;
     case TERRAIN_CODE_GREEN:
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -1573,7 +1578,8 @@ s32 PaintFirstMiniGolfCourse(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 7) + 4) << 11) | ((4 - ((random >> 5) & 3)) << 6);
+      color = (((random & 7) + 4) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT);
       break;
     case TERRAIN_CODE_GREEN:
       /* The assignment in the test is there to match */
@@ -1625,7 +1631,8 @@ s32 PaintSecondMiniGolfCourse(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+      color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
       /* The assignment in the test is there to match */
@@ -1676,7 +1683,8 @@ s32 PaintThirdMiniGolfCourse(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+      color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
       if (nearestCode != TERRAIN_CODE_GREEN && nearestDistance < 2) {
@@ -1738,7 +1746,7 @@ s32 PaintDrivingRange(
         f_PaintSeed = NextRandomSeed(f_PaintSeed);
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
-        color = (red << 11) | (green << 6) | 1;
+        color = (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) | 1;
         paintedCode = TERRAIN_CODE_ROUGH;
       } else {
         color = 0xC81;
@@ -1754,7 +1762,8 @@ s32 PaintDrivingRange(
       paintedCode = TERRAIN_CODE_UNK3;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> 16;
-      color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+      color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
+          ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
