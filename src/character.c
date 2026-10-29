@@ -2056,12 +2056,12 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
 
 /*
  * Whether DrawCharacterAndShadow draws for a camera: CAMERA_UNK2, or any
- * but the inset while D_800BE698 is set. It is a macro, as an inline
+ * but the inset while g_AreCharactersDrawn is set. It is a macro, as an inline
  * function compiles differently from the original.
  */
 #define IsCharacterDrawnForCamera(cameraIndex) \
   (((cameraIndex) == CAMERA_UNK2) || \
-      (((cameraIndex) != INSET_CAMERA) && (D_800BE698 != 0)))
+      (((cameraIndex) != INSET_CAMERA) && g_AreCharactersDrawn))
 
 /*
  * Draws the character in the slot and its shadow, for cameraIndex's view.
