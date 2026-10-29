@@ -58,12 +58,12 @@ def decode_rgba16(data: bytes, width: int, height: int) -> Image.Image:
 
 
 def decode_i8(data: bytes, width: int, height: int) -> Image.Image:
-    """Read I8 texels into a greyscale image."""
+    """Read I8 texels into a grayscale image."""
     return Image.frombytes("L", (width, height), data[: width * height])
 
 
 def decode_i4(data: bytes, width: int, height: int) -> Image.Image:
-    """Read I4 texels into a greyscale image."""
+    """Read I4 texels into a grayscale image."""
     pixels = bytearray()
     for byte in data[: width * height // 2]:
         for texel in (byte >> NIBBLE_SHIFT, byte & NIBBLE_MASK):
@@ -72,7 +72,7 @@ def decode_i4(data: bytes, width: int, height: int) -> Image.Image:
 
 
 def decode_ia4(data: bytes, width: int, height: int) -> Image.Image:
-    """Read IA4 texels into a greyscale image with alpha."""
+    """Read IA4 texels into a grayscale image with alpha."""
     pixels = bytearray()
     for byte in data[: width * height // 2]:
         for texel in (byte >> NIBBLE_SHIFT, byte & NIBBLE_MASK):
