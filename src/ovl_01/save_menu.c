@@ -264,11 +264,11 @@ static u8 D_8023B690_ovl_01[0x3D0];
 static Mat4 f_BoardProjection;
 static Mat4 f_BoardViewing;
 /* The camera and placement that DrawSavedGolfers draws each golfer with */
-static Mtx f_SavedGolferTransforms[MAX_PLAYER_COUNT][2];
+static Mtx f_SavedGolferTransforms[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_SavedGolfersProjection;
 /* Each golfer's scale, which DrawSavedGolfers sets by the player count */
 static f32 f_SavedGolferScales[MAX_PLAYER_COUNT];
-static LookAt f_SavedGolfersLookAts[2];
+static LookAt f_SavedGolfersLookAts[DRAW_BUFFER_COUNT];
 static void** f_SavedGameModeImages;
 static void** f_ChosenModeIconBuffers;
 static void* f_SavedGamesNamePlate;
