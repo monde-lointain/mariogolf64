@@ -66,6 +66,19 @@ enum FlightPhase {
 /* An enum FlightPhase value */
 typedef s32 FlightPhase;
 
+/*
+ * Whether a holed shot is a chip-in: from off the green, after the first
+ * stroke and without hitting the flag
+ */
+#define IsChipIn() \
+  (!g_SimulatedShot.startsOnGreen && \
+      g_Players[g_CurrentShot.playerIndex].strokeCount > 1 && \
+      g_SimulatedShot.flagHitStep == NO_STEP)
+/* Whether the pin is hit at the step, is about to be, or the monkey shows */
+#define IsPinHitViewed(step) \
+  ((g_SimulatedShot.pathFlags[step] & STEP_FLAG_PIN_HIT) || IsMonkeyShown() || \
+      f_IsPinHitComing == TRUE)
+
 /* Bits of f_ComingFlightEvents */
 #define FLIGHT_EVENT_BILLBOARD_HIT (1 << 0)
 #define FLIGHT_EVENT_CUP_PASS (1 << 1)
@@ -958,7 +971,7 @@ s32 GetEndReaction(void) {
 #define EARLY_STEP_COUNT 10
 /* Sounds that play this many steps before the end of the flight */
 #define LANDING_SOUND_STEP_COUNT 3
-#define UNK92_SOUND_STEP_COUNT 10
+#define CHIP_IN_CALL_STEP_COUNT 10
 #define FLAG_SHOT_CALL_STEP_COUNT 15
 
 /* Distances that PlayFlightSounds tests, in course units */
@@ -1177,10 +1190,8 @@ void PlayFlightSounds(s32 step) {
     }
 
     if (g_BallFlightStep >=
-            g_SimulatedShot.stepCount - UNK92_SOUND_STEP_COUNT &&
-        f_EndReaction == END_REACTION_NONE && !g_SimulatedShot.startsOnGreen &&
-        g_Players[g_CurrentShot.playerIndex].strokeCount >= 2 &&
-        g_SimulatedShot.flagHitStep == NO_STEP) {
+            g_SimulatedShot.stepCount - CHIP_IN_CALL_STEP_COUNT &&
+        f_EndReaction == END_REACTION_NONE && IsChipIn()) {
       StartBanner(BANNER_CHIP_IN);
       PlaySound(
           SOUND_CALL_CHIP_IN, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
@@ -3191,8 +3202,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
 
     if (!g_GameState.isMiniGolf && !g_SimulatedShot.endsInCup &&
-        ((g_SimulatedShot.pathFlags[step] & STEP_FLAG_PIN_HIT) ||
-            IsMonkeyShown() || f_IsPinHitComing == TRUE)) {
+        IsPinHitViewed(step)) {
       g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
       StartHudAnimation(HUD_ANIMATION_NONE);
       g_InsetView.animation = INSET_VIEW_STILL;
