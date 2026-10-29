@@ -432,7 +432,8 @@ static void** D_8023B630_ovl_01;
 static void* D_8023B634_ovl_01;
 static void* D_8023B638_ovl_01;
 static u8* D_8023B63C_ovl_01;
-static s16 D_8023B640_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
+/* Each Best Shots cell's ranked record, or STATS_CELL_EMPTY; a row per kind */
+static s16 f_BestShotRecords[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
 /* Not static: the original left it to the linker's common block */
 s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
@@ -1920,7 +1921,7 @@ void UpdateBestShots(void) {
           D_801B9410 = 0;
           column = memory->bestShotColumn;
           LoadWipeShape((s8)save
-                  ->rankedRecords[D_8023B640_ovl_01[memory->bestShotRow]
+                  ->rankedRecords[f_BestShotRecords[memory->bestShotRow]
                                                    [column]]
                   .courseIndex);
           StartWipe(WIPE_CLOSING);
@@ -2067,8 +2068,8 @@ void DrawBestShots(Gfx** displayListHead) {
 
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
     for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
-      if (D_8023B640_ovl_01[row][column] != STATS_CELL_EMPTY) {
-        character = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]]
+      if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
+        character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
                         .characterIndex;
         DrawCharacterFace(&gfx, D_8012D430[character],
             D_8023B5E0_ovl_01[row][column],
@@ -2084,7 +2085,7 @@ void DrawBestShots(Gfx** displayListHead) {
     }
   }
 
-  if (D_8023B640_ovl_01[memory->bestShotRow][memory->bestShotColumn] !=
+  if (f_BestShotRecords[memory->bestShotRow][memory->bestShotColumn] !=
       STATS_CELL_EMPTY) {
     DrawBestShotsCursor(&gfx);
   }
@@ -2105,18 +2106,18 @@ void DrawBestShots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   chosenRow = memory->bestShotRow;
   chosenColumn = memory->bestShotColumn;
-  if (D_8023B640_ovl_01[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
+  if (f_BestShotRecords[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
     gDPLoadTLUT_pal256(gfx++,
         TextureAddress(
             (u32)D_8023B630_ovl_01[(s8)save
-                    ->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
+                    ->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
                     .courseIndex] +
             IMAGE_HEADER_SIZE));
     for (index = 0; index != RECORD_COURSE_STRIP_COUNT; index++) {
       gDPLoadTextureBlock(gfx++,
           TextureAddress(
               (u32)D_8023B630_ovl_01[(s8)save
-                      ->rankedRecords[D_8023B640_ovl_01[chosenRow]
+                      ->rankedRecords[f_BestShotRecords[chosenRow]
                                                        [chosenColumn]]
                       .courseIndex] +
               LARGE_PALETTED_TEXELS_OFFSET +
@@ -2150,16 +2151,16 @@ void DrawBestShots(Gfx** displayListHead) {
 
   chosenRow = memory->bestShotRow;
   chosenColumn = memory->bestShotColumn;
-  if (D_8023B640_ovl_01[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
+  if (f_BestShotRecords[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
     sprintf(g_PrintBuffer, D_802319E0_ovl_01,
         g_CourseRecords
-            [(s8)save->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
+            [(s8)save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
                     .courseIndex]
                 .name);
     DrawLargeText(
         &gfx, RECORD_COURSE_NAME_X, RECORD_COURSE_NAME_Y, g_PrintBuffer);
     SetTextSlotValue(
-        (s8)save->rankedRecords[D_8023B640_ovl_01[chosenRow][chosenColumn]]
+        (s8)save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
                 .holeIndex +
             1,
         1, 0);
@@ -2305,17 +2306,17 @@ void ReadBestShots(void) {
   memory->bestShotColumn = column;
   memory->bestShotRow = row;
   for (recordIndex = 0; recordIndex != STATS_GRID_COLUMN_COUNT; recordIndex++) {
-    D_8023B640_ovl_01[0][recordIndex] = kindRecords[0][recordIndex];
-    D_8023B640_ovl_01[1][recordIndex] = kindRecords[1][recordIndex];
-    D_8023B640_ovl_01[2][recordIndex] = kindRecords[3][recordIndex];
-    D_8023B640_ovl_01[3][recordIndex] = kindRecords[2][recordIndex];
+    f_BestShotRecords[0][recordIndex] = kindRecords[0][recordIndex];
+    f_BestShotRecords[1][recordIndex] = kindRecords[1][recordIndex];
+    f_BestShotRecords[2][recordIndex] = kindRecords[3][recordIndex];
+    f_BestShotRecords[3][recordIndex] = kindRecords[2][recordIndex];
   }
 
   recordIndex = 0;
   D_802308A0_ovl_01 = 0;
   for (; recordIndex != STATS_GRID_ROW_COUNT; recordIndex++) {
     for (index = 0; index != STATS_GRID_COLUMN_COUNT; index++) {
-      if (D_8023B640_ovl_01[recordIndex][index] != STATS_CELL_EMPTY) {
+      if (f_BestShotRecords[recordIndex][index] != STATS_CELL_EMPTY) {
         D_802308A0_ovl_01++;
         break;
       }
@@ -2366,7 +2367,7 @@ s8 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
       row = 0;
     }
 
-    if (D_8023B640_ovl_01[row][column] != STATS_CELL_EMPTY) {
+    if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
       break;
     }
   }
@@ -2389,7 +2390,7 @@ s8 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
 s16 GetChosenBestShot(void) {
   MenuMemory* memory = func_8005AF74();
 
-  return D_8023B640_ovl_01[memory->bestShotRow][memory->bestShotColumn];
+  return f_BestShotRecords[memory->bestShotRow][memory->bestShotColumn];
 }
 
 /* Draws one of the Japanese score labels at (left, top); nothing calls it */
@@ -2540,10 +2541,10 @@ void LoadBestShotFaces(void) {
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
     cell = row * STATS_GRID_COLUMN_COUNT;
     for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++, cell++) {
-      if (D_8023B640_ovl_01[row][column] != STATS_CELL_EMPTY) {
-        character = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]]
+      if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
+        character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
                         .characterIndex;
-        palette = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]]
+        palette = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
                       .paletteIndex;
         if (character < 0) {
           character = 0;
