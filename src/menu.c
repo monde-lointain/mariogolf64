@@ -1354,7 +1354,7 @@ void func_8005C674(s32 arg0, s32 arg1) {
     recordIndex = 0;
     arg0 = 0;
     for (; recordIndex != CHARACTER_COUNT; recordIndex++) {
-      if (save->unk990.matchups[recordIndex][index].winBits & 0x7F) {
+      if (save->unk990.matchups[recordIndex][index].winBits & WIN_COUNT_MASK) {
         arg0++;
         break;
       }
