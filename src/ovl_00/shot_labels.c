@@ -45,6 +45,10 @@ enum ShotLabels {
 
 #define TAG_WIDTH 16
 #define TAG_HEIGHT 8
+/* Whether a tag at tagX and tagY would overlap a spot with a tag's size */
+#define IsTagOverlapping(spot, tagX, tagY) \
+  ((spot).x - TAG_WIDTH < (tagX) && (tagX) < (spot).x + TAG_WIDTH && \
+      (spot).y - TAG_HEIGHT < (tagY) && (tagY) < (spot).y + TAG_HEIGHT)
 /* In bytes, at four bits a texel */
 #define TAG_IMAGE_SIZE (TAG_WIDTH * TAG_HEIGHT / 2)
 /* Balls this far off the screen are not tagged */
@@ -312,14 +316,9 @@ void DrawShotLabels(Gfx** displayListHead) {
           corner = (label->corner + tries) % CORNER_COUNT;
           for (j = 0; j != i; j++) {
             if (f_ShotLabels[j].corner != NO_CORNER &&
-                f_ShotLabels[j].x - TAG_WIDTH <
-                    point.x + f_TagOffsetsX[corner] &&
-                point.x + f_TagOffsetsX[corner] <
-                    f_ShotLabels[j].x + TAG_WIDTH &&
-                f_ShotLabels[j].y - TAG_HEIGHT <
-                    point.y + f_TagOffsetsY[corner] &&
-                point.y + f_TagOffsetsY[corner] <
-                    f_ShotLabels[j].y + TAG_HEIGHT) {
+                IsTagOverlapping(f_ShotLabels[j],
+                    point.x + f_TagOffsetsX[corner],
+                    point.y + f_TagOffsetsY[corner])) {
               overlaps = TRUE;
             }
           }
@@ -340,10 +339,8 @@ void DrawShotLabels(Gfx** displayListHead) {
           corner = ((f_ShotLabels[i].corner + tries) % UPPER_CORNER_COUNT) +
               CORNER_UPPER_LEFT;
           if (cup.state == SPOT_SHOWN &&
-              cup.x - TAG_WIDTH < point.x + f_TagOffsetsX[corner] &&
-              point.x + f_TagOffsetsX[corner] < cup.x + TAG_WIDTH &&
-              cup.y - TAG_HEIGHT < point.y + f_TagOffsetsY[corner] &&
-              point.y + f_TagOffsetsY[corner] < cup.y + TAG_HEIGHT) {
+              IsTagOverlapping(cup, point.x + f_TagOffsetsX[corner],
+                  point.y + f_TagOffsetsY[corner])) {
             /* The tag would cover the cup, so it goes to the other upper corner
              */
             if (corner == CORNER_UPPER_LEFT) {
@@ -359,14 +356,9 @@ void DrawShotLabels(Gfx** displayListHead) {
 
           for (j = 0; j != i; j++) {
             if (f_ShotLabels[j].corner != NO_CORNER &&
-                f_ShotLabels[j].x - TAG_WIDTH <
-                    point.x + f_TagOffsetsX[corner] &&
-                point.x + f_TagOffsetsX[corner] <
-                    f_ShotLabels[j].x + TAG_WIDTH &&
-                f_ShotLabels[j].y - TAG_HEIGHT <
-                    point.y + f_TagOffsetsY[corner] &&
-                point.y + f_TagOffsetsY[corner] <
-                    f_ShotLabels[j].y + TAG_HEIGHT) {
+                IsTagOverlapping(f_ShotLabels[j],
+                    point.x + f_TagOffsetsX[corner],
+                    point.y + f_TagOffsetsY[corner])) {
               overlaps = TRUE;
             }
           }
