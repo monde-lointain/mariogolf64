@@ -242,31 +242,35 @@ s32 GetTerrainCode(s32 column, s32 row) {
 
   if (column < 0) {
     column = 0;
-  } else if (column >= 256) {
-    column = 255;
+  } else if (column >= CODE_GRID_COLUMN_COUNT) {
+    column = CODE_GRID_COLUMN_COUNT - 1;
   }
 
   if (row < 0) {
     row = 0;
-  } else if (row >= 512) {
-    row = 511;
+  } else if (row >= CODE_GRID_ROW_COUNT) {
+    row = CODE_GRID_ROW_COUNT - 1;
   }
 
-  block = (g_TerrainCodeCells[0] + (column / 16))[(row / 16) * 16];
-  if (block == -1) {
-    return -1;
+  block = (g_TerrainCodeCells[0] +
+      (column / TERRAIN_CODE_CELL_SPAN))[(row / TERRAIN_CODE_CELL_SPAN) *
+      TERRAIN_CODE_CELL_COLUMN_COUNT];
+  if (block == NO_CELL_TERRAIN_CODE) {
+    return NO_CELL_TERRAIN_CODE;
   }
 
   if (block >= 0) {
     return block;
   }
 
-  offset = ((column & 0xF) >> 1) + ((row & 0xF) * 8) + ((block & 0x7FFF) * 128);
+  offset = ((column & (TERRAIN_CODE_CELL_SPAN - 1)) >> 1) +
+      ((row & (TERRAIN_CODE_CELL_SPAN - 1)) * (TERRAIN_CODE_CELL_SPAN / 2)) +
+      ((block & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
   if (!(column & 1)) {
-    return g_WorkArea.hole.terrainCodes[offset] >> 4;
+    return g_WorkArea.hole.terrainCodes[offset] >> TERRAIN_CODE_BITS;
   }
 
-  return g_WorkArea.hole.terrainCodes[offset] & 0xF;
+  return g_WorkArea.hole.terrainCodes[offset] & TERRAIN_CODE_MASK;
 }
 
 #else

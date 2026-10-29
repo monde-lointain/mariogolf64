@@ -105,6 +105,11 @@ extern u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
 #define TERRAIN_CODE_CELL_COLUMN_COUNT 16
 /* The map texels a terrain code cell covers each way */
 #define TERRAIN_CODE_CELL_SPAN 16
+/* The terrain code grid's columns and rows */
+#define CODE_GRID_COLUMN_COUNT \
+  (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SPAN)
+#define CODE_GRID_ROW_COUNT \
+  (TERRAIN_CODE_CELL_ROW_COUNT * TERRAIN_CODE_CELL_SPAN)
 /* Marks a cell with no terrain code */
 #define NO_CELL_TERRAIN_CODE -1
 /* Marks a cell whose codes are in a block, with the block's index */

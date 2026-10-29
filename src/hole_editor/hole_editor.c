@@ -52,11 +52,6 @@
 #define SHAPE_OFFSET_COUNT 1600
 #define SHAPE_OFFSET_SPAN 20
 #define HOLE_EDITOR_SHAPE_ASSERT_LINE 2191
-/* The terrain code grid's columns and rows */
-#define CODE_GRID_COLUMN_COUNT \
-  (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SPAN)
-#define CODE_GRID_ROW_COUNT \
-  (TERRAIN_CODE_CELL_ROW_COUNT * TERRAIN_CODE_CELL_SPAN)
 #define GREEN_NOISE_MASK 3
 #define GROUND_NOISE_MASK 0xF
 /* A point's y changes by this per course unit between its code and the green's
