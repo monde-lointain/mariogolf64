@@ -68,6 +68,8 @@
 #define PointTile(point) ((point) / GROUND_TILE_POINT_SPAN)
 /* A ground point column or row's slot within its tile */
 #define PointSlot(point) ((point) & (GROUND_TILE_POINT_SPAN - 1))
+/* GROUND_TILE_POINT_SPAN as a shift */
+#define TILE_POINT_SPAN_SHIFT 2
 /* The index in g_WorkArea.hole.tiles of a tile column and row */
 #define TileIndex(tileColumn, tileRow) \
   (((tileRow) * GROUND_TILE_COLUMN_COUNT) + (tileColumn))
@@ -244,7 +246,7 @@ s32 D_800BB0E8 = 0;
  * The order in which to search a point's cells: its own, the next, the one
  * before (3 being -1 in four), then the one across
  */
-static s8 f_CellSearchOffsets[4] = {0, 1, 3, 2};
+static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 
 static s32 f_SceneMenuSelection;
 
@@ -1821,6 +1823,10 @@ s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ,
       ((firstZ - originZ) * (secondX - originX));
 }
 
+/* Where FindGroundTriangle reports a point that is in no triangle */
+#define GROUND_ERROR_COLUMN 10
+#define GROUND_ERROR_ROW 11
+
 /*
  * Finds the ground triangle under a point and copies its corners. Returns
  * 0, or -1 off the ground.
@@ -1875,24 +1881,25 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   }
 
   if (g_GameState.isMiniGolf) {
-    baseColumn = (x >> 17) * 4;
-    baseRow = (z >> 16) * 4;
-    slotColumn = (x >> 15) & 3;
-    slotRow = (z >> 14) & 3;
+    baseColumn = (x >> MINI_GOLF_TILE_X_SHIFT) * GROUND_TILE_POINT_SPAN;
+    baseRow = (z >> MINI_GOLF_TILE_Z_SHIFT) * GROUND_TILE_POINT_SPAN;
+    slotColumn =
+        PointSlot(x >> (MINI_GOLF_TILE_X_SHIFT - TILE_POINT_SPAN_SHIFT));
+    slotRow = PointSlot(z >> (MINI_GOLF_TILE_Z_SHIFT - TILE_POINT_SPAN_SHIFT));
   } else {
     baseColumn = (x >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN;
     baseRow = (z >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN;
-    slotColumn = (x >> 17) & 3;
-    slotRow = (z >> 17) & 3;
+    slotColumn = PointSlot(x >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
+    slotRow = PointSlot(z >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
   }
 
-  for (rowIndex = 0; rowIndex < 4; rowIndex++) {
+  for (rowIndex = 0; rowIndex < GROUND_TILE_POINT_SPAN; rowIndex++) {
     Vtx* corners[4];
 
-    row = baseRow + ((slotRow + f_CellSearchOffsets[rowIndex]) & 3);
-    for (columnIndex = 0; columnIndex < 4; columnIndex++) {
+    row = baseRow + PointSlot(slotRow + f_CellSearchOffsets[rowIndex]);
+    for (columnIndex = 0; columnIndex < GROUND_TILE_POINT_SPAN; columnIndex++) {
       column =
-          baseColumn + ((slotColumn + f_CellSearchOffsets[columnIndex]) & 3);
+          baseColumn + PointSlot(slotColumn + f_CellSearchOffsets[columnIndex]);
       corners[0] = GetGroundPoint(column, row);
       corners[1] = GetGroundPoint(column + 1, row);
       corners[2] = GetGroundPoint(column, row + 1);
@@ -1907,7 +1914,7 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
     }
   }
 
-  PrintDebugText("GetHeightInfo", 10, 11);
+  PrintDebugText("GetHeightInfo", GROUND_ERROR_COLUMN, GROUND_ERROR_ROW);
   return -1;
 }
 

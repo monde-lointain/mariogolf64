@@ -38,6 +38,9 @@
 #define GROUND_GRID_EVEN_COLUMN_COUNT ((GROUND_GRID_COLUMN_COUNT + 1) / 2)
 /* A tile spans this many grid columns and rows */
 #define GROUND_TILE_GRID_SPAN (GROUND_TILE_POINT_SPAN / 2)
+/* The mini-golf ground's tiles span 1 << these course units */
+#define MINI_GOLF_TILE_X_SHIFT 17
+#define MINI_GOLF_TILE_Z_SHIFT 16
 /* An interpolation weight runs from 0, all the first end, to this, all the
  * second */
 #define EDGE_WEIGHT_MAX 16
