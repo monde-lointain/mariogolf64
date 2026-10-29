@@ -271,7 +271,11 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     *z *= scale;
   }
 
-  void BuildUnk44Rotation(void) {
+  /*
+   * Points the lift rotation about the ball\'s spin axis, the level axis across
+   * spinHeading, turning a negative spin into a positive one the other way
+   */
+  void BuildLiftRotation(void) {
     f32 axisX;
     f32 axisZ;
 
@@ -355,7 +359,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     }
 
     if (simulation->stepCount == 0) {
-      BuildUnk44Rotation();
+      BuildLiftRotation();
     }
 
     simulation->stepCount++;
@@ -554,7 +558,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           }
 
           MoveBallToCupEdge(simulation);
-          BuildUnk44Rotation();
+          BuildLiftRotation();
         }
       }
 
@@ -680,7 +684,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                       0.5f;
                   flags |= STEP_FLAG_LIPPED_OUT;
                   contact = 0;
-                  BuildUnk44Rotation();
+                  BuildLiftRotation();
                 }
               }
             }
@@ -885,7 +889,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         simulation->spinSpeed = 0;
         simulation->velocity[AXIS_Z] = reflected[AXIS_Z];
       }
-      BuildUnk44Rotation();
+      BuildLiftRotation();
       contact &= ~STEP_FLAG_HOLE_TRIANGLE_HIT;
     }
 
@@ -1013,7 +1017,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             spinVelocityZ + ((previousVelocityZ - spinVelocityZ) * 0.25f);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
-        BuildUnk44Rotation();
+        BuildLiftRotation();
       }
 
       simulation->sideSpin = 0;
@@ -1216,7 +1220,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             spinVelocityZ + ((previousVelocityZ - spinVelocityZ) * 0.2f);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
-        BuildUnk44Rotation();
+        BuildLiftRotation();
         simulation->sideSpin = 0;
         simulation->velocity[AXIS_Y] += (s32)GRAVITY;
       }
@@ -1228,7 +1232,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           atan2(simulation->velocity[AXIS_Z], simulation->velocity[AXIS_X]);
       simulation->spinSpeed = IntLength2D(
           simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
-      BuildUnk44Rotation();
+      BuildLiftRotation();
     }
 
     if (simulation->state == BALL_STATE_ROLLING && !isNearCup) {
@@ -1329,7 +1333,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           contact = 0;
           simulation->spinSpeed = IntLength2D(
               simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
-          BuildUnk44Rotation();
+          BuildLiftRotation();
           goto ROLLED;
         }
       }

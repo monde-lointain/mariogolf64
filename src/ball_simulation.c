@@ -586,7 +586,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     }
   }
 
-  void BuildUnk44Rotation(void) {
+  /*
+   * Points the lift rotation about the ball\'s spin axis, the level axis across
+   * spinHeading, turning a negative spin into a positive one the other way
+   */
+  void BuildLiftRotation(void) {
     f32 axisX;
     f32 axisZ;
 
@@ -680,7 +684,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     }
 
     if (simulation->stepCount == 0) {
-      BuildUnk44Rotation();
+      BuildLiftRotation();
     }
 
     if (++simulation->stepCount >= MAX_STEP_COUNT) {
@@ -925,7 +929,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
           flags |= STEP_FLAG_PIN_HIT;
           MoveBallToCupEdge(simulation);
-          BuildUnk44Rotation();
+          BuildLiftRotation();
         }
       }
 
@@ -1071,7 +1075,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                     atan2(velocity[AXIS_Z], velocity[AXIS_X]);
                 simulation->spinSpeed =
                     IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]) * 0.5f;
-                BuildUnk44Rotation();
+                BuildLiftRotation();
                 contact = 0;
                 flags |= STEP_FLAG_LIPPED_OUT;
                 if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -1357,7 +1361,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->spinSpeed = 0;
         simulation->position[AXIS_Z] =
             simulation->position[AXIS_Z] + (velocity[AXIS_Z] * slide);
-        BuildUnk44Rotation();
+        BuildLiftRotation();
         PushBallOutOfWalls(simulation, FALSE);
         goto SETTLE;
       }
@@ -1531,7 +1535,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             ((previousVelocityZ - spinVelocityZ) * TRIANGLE_SPIN_FOLLOW);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
-        BuildUnk44Rotation();
+        BuildLiftRotation();
       }
 
       simulation->sideSpin = 0;
@@ -1889,7 +1893,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             ((previousVelocityZ - spinVelocityZ) * GROUND_SPIN_FOLLOW);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
-        BuildUnk44Rotation();
+        BuildLiftRotation();
         simulation->sideSpin = 0;
         velocity[AXIS_Y] += GRAVITY;
       }
@@ -1900,7 +1904,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->state = BALL_STATE_FLYING;
       simulation->spinHeading = atan2(velocity[AXIS_Z], velocity[AXIS_X]);
       simulation->spinSpeed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
-      BuildUnk44Rotation();
+      BuildLiftRotation();
     }
 
     if (simulation->hasEnteredWater &&
@@ -2044,7 +2048,7 @@ TAKE_OFF:
           contact = 0;
           simulation->spinSpeed =
               IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
-          BuildUnk44Rotation();
+          BuildLiftRotation();
           goto ROLLED;
         }
       }
@@ -2406,7 +2410,7 @@ NEXT:
 #else
 INCLUDE_ASM("asm/nonmatchings/ball_simulation", PlayStrokeImpactSound);
 
-INCLUDE_ASM("asm/nonmatchings/ball_simulation", BuildUnk44Rotation);
+INCLUDE_ASM("asm/nonmatchings/ball_simulation", BuildLiftRotation);
 
 INCLUDE_ASM("asm/nonmatchings/ball_simulation", PlayImpactSound);
 
