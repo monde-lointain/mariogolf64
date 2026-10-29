@@ -1084,11 +1084,6 @@ void RecordDisplayListLength(u32 commandCount) {
   }
 }
 
-/*
- * The longest time accepted. The overlay at ADD30 adds 18000 to the time
- * that is passed in here (g_GameState.stopwatchFrameCount) and caps it at this.
- */
-#define MAX_TIME 108000
 #define UNKE50_MAX 3
 
 void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
@@ -1110,7 +1105,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
   }
 
   if (time >= 0) {
-    if (time <= MAX_TIME) {
+    if (time <= STOPWATCH_MAX_FRAMES) {
       if (arg4 < 0) {
         arg4 = 0;
       }

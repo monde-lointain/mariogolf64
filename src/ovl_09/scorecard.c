@@ -467,7 +467,6 @@ void FreeScorecard(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", FreeScorecard);
 #endif
 
-#define STOPWATCH_HOUR (60 * SECONDS_PER_MINUTE * FRAMES_PER_SECOND)
 /* A hole time of this many minutes or more shows as dashes */
 #define SHOWN_MINUTE_LIMIT 60
 
@@ -557,7 +556,7 @@ HALVED:
       break;
     case SCORECARD_LAYOUT_SPEED_GOLF:
       if (IsGameFlagSet(GAME_FLAG_STOPWATCH_HOUR)) {
-        g_GameState.stopwatchFrameCount = STOPWATCH_HOUR;
+        g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
       }
 
       for (i = 0, timedHoleCount = 0; i != COURSE_HOLE_COUNT; i++) {
@@ -569,8 +568,7 @@ HALVED:
          * first takes all of it */
         g_HoleTimeFrames[timedHoleCount - 1] = g_GameState.stopwatchFrameCount;
         g_HoleTimeMinutes[timedHoleCount - 1] =
-            g_GameState.stopwatchFrameCount /
-            (FRAMES_PER_SECOND * SECONDS_PER_MINUTE);
+            g_GameState.stopwatchFrameCount / FRAMES_PER_MINUTE;
         g_HoleTimeSeconds[timedHoleCount - 1] =
             g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND %
             SECONDS_PER_MINUTE;

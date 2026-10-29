@@ -234,8 +234,6 @@
 #define GAME_FLAG_AIM_DOWN_RANGE 0x24
 /* Only hole-outs in fewer strokes than this enter the records */
 #define MAX_RECORDED_STROKE_COUNT 4
-/* The stopwatches stop at an hour */
-#define STOPWATCH_MAX_FRAMES 108000
 /* Where the aim camera starts, in course units */
 #define AIM_CAMERA_START_DISTANCE (-0xF000)
 #define AIM_CAMERA_START_HEIGHT (-0x4E00)

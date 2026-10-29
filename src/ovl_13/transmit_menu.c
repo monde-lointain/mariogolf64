@@ -21,6 +21,7 @@
 #include "sound.h"
 #include "text.h"
 #include "transfer_pak.h"
+#include "variables.h"
 
 /* The options of each transfer mode */
 #define TRANSFER_MODE_COUNT 2
@@ -266,8 +267,6 @@ enum ListingState {
 #define STATUS_SECOND_PLACE (1 << 1)
 #define STATUS_FIRST_PLACE (1 << 2)
 #define STATUS_UNKAF0_COLUMN_COUNT 14
-#define FRAMES_PER_SECOND 30
-#define FRAMES_PER_MINUTE (60 * FRAMES_PER_SECOND)
 
 typedef struct StatusTime {
   /* 0x0 */ u8 minutes;
@@ -3507,11 +3506,12 @@ void BuildStatusData(u8* status) {
         /* Passing the parts through value is there to match */
         value = records->bestTimes[courseIndex][index] / FRAMES_PER_MINUTE;
         course->bestTimes[index].minutes = value;
-        value = records->bestTimes[courseIndex][index] / FRAMES_PER_SECOND % 60;
+        value = records->bestTimes[courseIndex][index] / FRAMES_PER_SECOND %
+            SECONDS_PER_MINUTE;
         course->bestTimes[index].seconds = value;
         value = (s32)(records->bestTimes[courseIndex][index] *
-                    (100.0f / FRAMES_PER_SECOND)) %
-            100;
+                    ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+            HUNDREDTHS_PER_SECOND;
         course->bestTimes[index].hundredths = value;
         course->bestTimes[index].unk3 = records->unkE08[courseIndex][index];
         course->bestTimes[index].unk4 =
