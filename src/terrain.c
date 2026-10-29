@@ -981,17 +981,31 @@ s16 GetGridVertexHeight(s32 column, s32 row) {
   return GetGridVertex(column, row)->v.ob[1];
 }
 
+/* Grid vertices are half a tile apart, in world units */
+#define GRID_VERTEX_WORLD_SHIFT \
+  ((GROUND_TILE_SHIFT - WORLD_TO_COURSE_SHIFT) - 1)
+/* Texture coordinates step this many texels from one grid vertex to the next */
+#define GRID_VERTEX_TEXEL_SPAN 32
+/*
+ * The last row's t would be past the largest texture coordinate a vertex holds,
+ * so it is clamped to that
+ */
+#define MAX_TEXTURE_COORDINATE 0x7FFF
+
+/* Places a grid vertex flat on the grid at a height, with a gray shade */
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
   Vtx* vertex = GetGridVertex(column, row);
 
-  vertex->v.ob[0] = column << 8;
-  vertex->v.ob[2] = row << 8;
-  vertex->v.ob[1] = height & ~1;
+  vertex->v.ob[AXIS_X] = column << GRID_VERTEX_WORLD_SHIFT;
+  vertex->v.ob[AXIS_Z] = row << GRID_VERTEX_WORLD_SHIFT;
+  vertex->v.ob[AXIS_Y] = height & ~1;
   vertex->v.flag = 0;
-  vertex->v.tc[0] = (column << 10) + 0x20;
-  vertex->v.tc[1] = (row << 10) + 0x20;
+  vertex->v.tc[0] =
+      TexelCoordinate(column * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
+  vertex->v.tc[1] =
+      TexelCoordinate(row * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
   if (row == GROUND_GRID_ROW_COUNT - 1) {
-    vertex->v.tc[1] = 0x7FFF;
+    vertex->v.tc[1] = MAX_TEXTURE_COORDINATE;
   }
 
   vertex->v.cn[0] = shade;
