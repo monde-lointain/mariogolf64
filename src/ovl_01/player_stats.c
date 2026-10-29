@@ -160,8 +160,8 @@ enum StatsDirection {
 #define BET_HELP_MESSAGE 0x15
 
 /* Each player's choice of handicap, and where the screen's slide starts */
-#define PLAYER_OPTION_COUNT 37
-#define PLAYER_OPTION_SLIDE_START -512
+#define HANDICAP_CHOICE_COUNT 37
+#define HANDICAP_SLIDE_START -512
 
 extern void* D_8012D430[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
@@ -986,7 +986,7 @@ s32 UpdateHandicaps(void) {
       PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
-      D_8023BFD0_ovl_01 = PLAYER_OPTION_SLIDE_START;
+      D_8023BFD0_ovl_01 = HANDICAP_SLIDE_START;
       D_802303A1_ovl_01 = 0;
       D_8022BE88_ovl_01 = MENU_PHASE_CONFIRMED;
       return;
@@ -1027,7 +1027,7 @@ s32 UpdateHandicaps(void) {
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       g_ChosenHandicaps[memory->unk29]++;
-      if (g_ChosenHandicaps[memory->unk29] >= PLAYER_OPTION_COUNT) {
+      if (g_ChosenHandicaps[memory->unk29] >= HANDICAP_CHOICE_COUNT) {
         g_ChosenHandicaps[memory->unk29] = 0;
       }
 
@@ -1038,7 +1038,7 @@ s32 UpdateHandicaps(void) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       g_ChosenHandicaps[memory->unk29]--;
       if (g_ChosenHandicaps[memory->unk29] < 0) {
-        g_ChosenHandicaps[memory->unk29] = PLAYER_OPTION_COUNT - 1;
+        g_ChosenHandicaps[memory->unk29] = HANDICAP_CHOICE_COUNT - 1;
       }
     }
   }
@@ -1046,50 +1046,51 @@ s32 UpdateHandicaps(void) {
 
 /* The 200x30 CI8 banner along the handicap screen's foot, drawn in strips of 10
  * rows, each stretched across the screen */
-#define OPTION_BANNER_WIDTH 200
-#define OPTION_BANNER_STRIP_HEIGHT 10
-#define OPTION_BANNER_STRIP_COUNT 3
-#define OPTION_BANNER_STRIP_SIZE \
-  (OPTION_BANNER_WIDTH * OPTION_BANNER_STRIP_HEIGHT)
-#define OPTION_BANNER_LEFT 26
-#define OPTION_BANNER_RIGHT 296
-#define OPTION_BANNER_TOP 190
-#define OPTION_BANNER_STEP_X \
-  ((OPTION_BANNER_WIDTH << 10) / (OPTION_BANNER_RIGHT - OPTION_BANNER_LEFT))
+#define HANDICAP_BANNER_WIDTH 200
+#define HANDICAP_BANNER_STRIP_HEIGHT 10
+#define HANDICAP_BANNER_STRIP_COUNT 3
+#define HANDICAP_BANNER_STRIP_SIZE \
+  (HANDICAP_BANNER_WIDTH * HANDICAP_BANNER_STRIP_HEIGHT)
+#define HANDICAP_BANNER_LEFT 26
+#define HANDICAP_BANNER_RIGHT 296
+#define HANDICAP_BANNER_TOP 190
+#define HANDICAP_BANNER_STEP_X \
+  ((HANDICAP_BANNER_WIDTH << 10) / \
+      (HANDICAP_BANNER_RIGHT - HANDICAP_BANNER_LEFT))
 
 /* Each player's 64x44 CI4 column, drawn in strips of 22 rows, with the
  * player's label and choice on it */
-#define OPTION_COLUMN_WIDTH 64
-#define OPTION_COLUMN_STRIP_HEIGHT 22
-#define OPTION_COLUMN_STRIP_COUNT 2
-#define OPTION_COLUMN_STRIP_SIZE \
-  (OPTION_COLUMN_WIDTH * OPTION_COLUMN_STRIP_HEIGHT / 2)
-#define OPTION_COLUMN_TOP 150
+#define HANDICAP_COLUMN_WIDTH 64
+#define HANDICAP_COLUMN_STRIP_HEIGHT 22
+#define HANDICAP_COLUMN_STRIP_COUNT 2
+#define HANDICAP_COLUMN_STRIP_SIZE \
+  (HANDICAP_COLUMN_WIDTH * HANDICAP_COLUMN_STRIP_HEIGHT / 2)
+#define HANDICAP_COLUMN_TOP 150
 /* The columns of the players other than the chosen one are dimmed */
 #define UNCHOSEN_COLUMN_SHADE 200
-#define OPTION_LABEL_OFFSET_X 4
-#define OPTION_LABEL_TOP 154
-#define OPTION_LABEL_TMEM 0x80
-#define OPTION_LABEL_TILE 1
-#define OPTION_LABEL_PALETTE 1
-#define OPTION_NUMBER_OFFSET_X 16
-#define OPTION_NUMBER_Y 166
+#define HANDICAP_LABEL_OFFSET_X 4
+#define HANDICAP_LABEL_TOP 154
+#define HANDICAP_LABEL_TMEM 0x80
+#define HANDICAP_LABEL_TILE 1
+#define HANDICAP_LABEL_PALETTE 1
+#define HANDICAP_NUMBER_OFFSET_X 16
+#define HANDICAP_NUMBER_Y 166
 
 /* The arrows around the chosen column, each pushed outward while its D-Pad
  * button is held. The left arrow is the right one's image mirrored. */
-#define OPTION_ARROW_MASK 4
-#define OPTION_ARROW_PUSH 6
-#define OPTION_ARROW_MIDDLE_X 24
-#define OPTION_ARROW_MIDDLE_Y 15
-#define OPTION_ARROW_UP_Y 0
-#define OPTION_ARROW_DOWN_Y 30
-#define OPTION_ARROW_RIGHT_X 48
-#define OPTION_ARROW_LEFT_X (-1)
+#define HANDICAP_ARROW_MASK 4
+#define HANDICAP_ARROW_PUSH 6
+#define HANDICAP_ARROW_MIDDLE_X 24
+#define HANDICAP_ARROW_MIDDLE_Y 15
+#define HANDICAP_ARROW_UP_Y 0
+#define HANDICAP_ARROW_DOWN_Y 30
+#define HANDICAP_ARROW_RIGHT_X 48
+#define HANDICAP_ARROW_LEFT_X (-1)
 
 /* The prompt, which names the chosen player */
-#define OPTION_PROMPT_X 36
-#define OPTION_PROMPT_Y 200
-#define OPTION_PROMPT_MESSAGE 0x1D
+#define HANDICAP_PROMPT_X 36
+#define HANDICAP_PROMPT_Y 200
+#define HANDICAP_PROMPT_MESSAGE 0x1D
 
 void DrawTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
@@ -1236,27 +1237,28 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     offsetY = -slide;
   }
 
-  for (stripIndex = 0; stripIndex != OPTION_BANNER_STRIP_COUNT; stripIndex++) {
+  for (stripIndex = 0; stripIndex != HANDICAP_BANNER_STRIP_COUNT;
+      stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         TextureAddress(LargeImageTexels(D_8023B34C_ovl_01) +
-            (stripIndex * OPTION_BANNER_STRIP_SIZE)),
-        G_IM_FMT_CI, G_IM_SIZ_8b, OPTION_BANNER_WIDTH,
-        OPTION_BANNER_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            (stripIndex * HANDICAP_BANNER_STRIP_SIZE)),
+        G_IM_FMT_CI, G_IM_SIZ_8b, HANDICAP_BANNER_WIDTH,
+        HANDICAP_BANNER_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
-    gSPScisTextureRectangle(gfx++, QuarterPixels(OPTION_BANNER_LEFT),
-        QuarterPixels(offsetY + OPTION_BANNER_TOP +
-            (stripIndex * OPTION_BANNER_STRIP_HEIGHT)),
-        QuarterPixels(OPTION_BANNER_RIGHT),
-        QuarterPixels(offsetY + OPTION_BANNER_TOP +
-            (stripIndex * OPTION_BANNER_STRIP_HEIGHT) +
-            OPTION_BANNER_STRIP_HEIGHT),
-        G_TX_RENDERTILE, 0, 0, OPTION_BANNER_STEP_X, TEXEL_STEP_ONE);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(HANDICAP_BANNER_LEFT),
+        QuarterPixels(offsetY + HANDICAP_BANNER_TOP +
+            (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT)),
+        QuarterPixels(HANDICAP_BANNER_RIGHT),
+        QuarterPixels(offsetY + HANDICAP_BANNER_TOP +
+            (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT) +
+            HANDICAP_BANNER_STRIP_HEIGHT),
+        G_TX_RENDERTILE, 0, 0, HANDICAP_BANNER_STEP_X, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B360_ovl_01)));
-  gDPLoadTLUT_pal16(gfx++, OPTION_LABEL_PALETTE,
+  gDPLoadTLUT_pal16(gfx++, HANDICAP_LABEL_PALETTE,
       TextureAddress(ImageBody(D_8023B368_ovl_01)));
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
     if (columnIndex == memory->unk29) {
@@ -1267,26 +1269,26 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
           UNCHOSEN_COLUMN_SHADE, 255);
     }
 
-    for (stripIndex = 0; stripIndex != OPTION_COLUMN_STRIP_COUNT;
+    for (stripIndex = 0; stripIndex != HANDICAP_COLUMN_STRIP_COUNT;
         stripIndex++) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(ImageTexels(D_8023B360_ovl_01) +
-              (stripIndex * OPTION_COLUMN_STRIP_SIZE)),
-          G_IM_FMT_CI, OPTION_COLUMN_WIDTH, OPTION_COLUMN_STRIP_HEIGHT, 0,
+              (stripIndex * HANDICAP_COLUMN_STRIP_SIZE)),
+          G_IM_FMT_CI, HANDICAP_COLUMN_WIDTH, HANDICAP_COLUMN_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
           QuarterPixels(
               D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] + slide),
-          QuarterPixels(
-              OPTION_COLUMN_TOP + (stripIndex * OPTION_COLUMN_STRIP_HEIGHT)),
+          QuarterPixels(HANDICAP_COLUMN_TOP +
+              (stripIndex * HANDICAP_COLUMN_STRIP_HEIGHT)),
           QuarterPixels(
               D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] + slide +
-              OPTION_COLUMN_WIDTH),
-          QuarterPixels(OPTION_COLUMN_TOP +
-              (stripIndex * OPTION_COLUMN_STRIP_HEIGHT) +
-              OPTION_COLUMN_STRIP_HEIGHT),
+              HANDICAP_COLUMN_WIDTH),
+          QuarterPixels(HANDICAP_COLUMN_TOP +
+              (stripIndex * HANDICAP_COLUMN_STRIP_HEIGHT) +
+              HANDICAP_COLUMN_STRIP_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -1299,19 +1301,19 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     gDPLoadMultiBlock_4b(gfx++,
         TextureAddress(ImageTexelsAt(
             D_8023B368_ovl_01, labelIndex * PLAYER_LABEL_IMAGE_SIZE)),
-        OPTION_LABEL_TMEM, OPTION_LABEL_TILE, G_IM_FMT_CI, PLAYER_LABEL_WIDTH,
-        PLAYER_LABEL_HEIGHT, OPTION_LABEL_PALETTE, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
+        HANDICAP_LABEL_TMEM, HANDICAP_LABEL_TILE, G_IM_FMT_CI,
+        PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, HANDICAP_LABEL_PALETTE,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
         QuarterPixels(D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
-            (slide + OPTION_LABEL_OFFSET_X)),
-        QuarterPixels(OPTION_LABEL_TOP),
+            (slide + HANDICAP_LABEL_OFFSET_X)),
+        QuarterPixels(HANDICAP_LABEL_TOP),
         QuarterPixels(D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
-            (slide + OPTION_LABEL_OFFSET_X) + PLAYER_LABEL_WIDTH),
-        QuarterPixels(OPTION_LABEL_TOP + PLAYER_LABEL_HEIGHT),
-        OPTION_LABEL_TILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            (slide + HANDICAP_LABEL_OFFSET_X) + PLAYER_LABEL_WIDTH),
+        QuarterPixels(HANDICAP_LABEL_TOP + PLAYER_LABEL_HEIGHT),
+        HANDICAP_LABEL_TILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -1332,8 +1334,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
                   (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE))),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
           GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
-          G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, OPTION_ARROW_MASK,
-          OPTION_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD);
+          G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, HANDICAP_ARROW_MASK,
+          HANDICAP_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)D_8023B358_ovl_01 +
@@ -1348,25 +1350,25 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
     gDPPipeSync(gfx++);
     if (arrowIndex == MENU_ARROW_UP) {
-      arrowX = OPTION_ARROW_MIDDLE_X;
+      arrowX = HANDICAP_ARROW_MIDDLE_X;
       arrowY = (g_MenuRepeatButtons & U_JPAD)
-          ? (OPTION_ARROW_UP_Y - OPTION_ARROW_PUSH)
-          : OPTION_ARROW_UP_Y;
+          ? (HANDICAP_ARROW_UP_Y - HANDICAP_ARROW_PUSH)
+          : HANDICAP_ARROW_UP_Y;
     } else if (arrowIndex == MENU_ARROW_DOWN) {
-      arrowX = OPTION_ARROW_MIDDLE_X;
+      arrowX = HANDICAP_ARROW_MIDDLE_X;
       arrowY = (g_MenuRepeatButtons & D_JPAD)
-          ? (OPTION_ARROW_DOWN_Y + OPTION_ARROW_PUSH)
-          : OPTION_ARROW_DOWN_Y;
+          ? (HANDICAP_ARROW_DOWN_Y + HANDICAP_ARROW_PUSH)
+          : HANDICAP_ARROW_DOWN_Y;
     } else if (arrowIndex == MENU_ARROW_RIGHT) {
-      arrowY = OPTION_ARROW_MIDDLE_Y;
+      arrowY = HANDICAP_ARROW_MIDDLE_Y;
       arrowX = (g_MenuRepeatButtons & R_JPAD)
-          ? (OPTION_ARROW_RIGHT_X + OPTION_ARROW_PUSH)
-          : OPTION_ARROW_RIGHT_X;
+          ? (HANDICAP_ARROW_RIGHT_X + HANDICAP_ARROW_PUSH)
+          : HANDICAP_ARROW_RIGHT_X;
     } else if (arrowIndex == MENU_ARROW_LEFT) {
-      arrowY = OPTION_ARROW_MIDDLE_Y;
+      arrowY = HANDICAP_ARROW_MIDDLE_Y;
       arrowX = (g_MenuRepeatButtons & L_JPAD)
-          ? (OPTION_ARROW_LEFT_X - OPTION_ARROW_PUSH)
-          : OPTION_ARROW_LEFT_X;
+          ? (HANDICAP_ARROW_LEFT_X - HANDICAP_ARROW_PUSH)
+          : HANDICAP_ARROW_LEFT_X;
     }
 
     /* The left arrow starts at the right edge of its mirrored image */
@@ -1374,11 +1376,12 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
         QuarterPixels(
             D_802306D8_ovl_01[g_ChosenPlayerCount - 1][memory->unk29] + arrowX +
             slide),
-        QuarterPixels(offsetY + OPTION_COLUMN_TOP + arrowY),
+        QuarterPixels(offsetY + HANDICAP_COLUMN_TOP + arrowY),
         QuarterPixels(
             D_802306D8_ovl_01[g_ChosenPlayerCount - 1][memory->unk29] + arrowX +
             slide + GREEN_ARROW_SIZE),
-        QuarterPixels(offsetY + OPTION_COLUMN_TOP + arrowY + GREEN_ARROW_SIZE),
+        QuarterPixels(
+            offsetY + HANDICAP_COLUMN_TOP + arrowY + GREEN_ARROW_SIZE),
         G_TX_RENDERTILE,
         (arrowIndex == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0,
         0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1388,8 +1391,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
     DrawTwoDigitMenuNumber(&gfx,
         D_802306D8_ovl_01[g_ChosenPlayerCount - 1][columnIndex] +
-            (slide + OPTION_NUMBER_OFFSET_X),
-        OPTION_NUMBER_Y, g_ChosenHandicaps[columnIndex], MENU_NUMBER_PLAIN);
+            (slide + HANDICAP_NUMBER_OFFSET_X),
+        HANDICAP_NUMBER_Y, g_ChosenHandicaps[columnIndex], MENU_NUMBER_PLAIN);
   }
 
   if ((D_802303A1_ovl_01 == FALSE) & (canShowPrompt == TRUE)) {
@@ -1412,7 +1415,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
       SetTextPaletteColor(63, 255, 63, 0);
     }
 
-    SetTextSlot(OPTION_PROMPT_X, OPTION_PROMPT_Y, OPTION_PROMPT_MESSAGE,
+    SetTextSlot(HANDICAP_PROMPT_X, HANDICAP_PROMPT_Y, HANDICAP_PROMPT_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     D_802303A1_ovl_01 = TRUE;
   }
