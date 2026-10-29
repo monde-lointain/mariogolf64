@@ -60,8 +60,10 @@
 /* The buttons that hold the impact point mode */
 #define IMPACT_POINT_BUTTONS (Z_TRIG | L_TRIG)
 
-#define SHOT_UNK50_SCALE (1.0f / 1536)
-#define SHOT_UNK8_MAX_UNK50 600.0f
+/* Course units to tenths of a meter, as METERS_PER_UNIT * 10 */
+#define DECIMETERS_PER_UNIT (1.0f / 1536)
+/* Sixty meters */
+#define NEAR_CUP_MAX_DECIMETERS 600.0f
 
 /* The kinds of notable shot that earn Course Points, as counted in unkAA */
 #define SHOT_KIND_COUNT PLAYER_UNKAA_COUNT
@@ -846,7 +848,7 @@ void EaseAimCamera(void) {
   if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     targetDistance = AIM_CAMERA_PUTT_DISTANCE;
   } else if (g_ShotFlags & SHOT_FLAG_APPROACH) {
-    targetDistance = g_CurrentShot.unk50 - AIM_CAMERA_APPROACH_BACKOFF;
+    targetDistance = g_CurrentShot.cupDistance - AIM_CAMERA_APPROACH_BACKOFF;
   } else {
     targetDistance =
         (GetSelectedShotDistance() - AIM_CAMERA_SHOT_BACKOFF_YARDS) *
@@ -1176,7 +1178,7 @@ s32 UpdateAimControls(void) {
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(
               SOUND_LOOK_DOWN_RANGE, g_NextSoundChannel, LOOK_SOUND_VOLUME);
-          if (g_ShotFlags & SHOT_FLAG_UNK8) {
+          if (g_ShotFlags & SHOT_FLAG_NEAR_CUP) {
             g_LetterboxState = LETTERBOX_STATE_STARTING_LOOK_BACK;
             toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                 g_CurrentShot.ballPosition[AXIS_X];
@@ -1291,8 +1293,9 @@ s32 UpdateAimControls(void) {
           ResetAimCamera();
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(SOUND_LOOK_AT_CUP, g_NextSoundChannel, LOOK_SOUND_VOLUME);
-          if ((g_ShotFlags & (SHOT_FLAG_UNK8 | SHOT_FLAG_NO_IMPACT_POINT)) ==
-              (SHOT_FLAG_UNK8 | SHOT_FLAG_NO_IMPACT_POINT)) {
+          if ((g_ShotFlags &
+                  (SHOT_FLAG_NEAR_CUP | SHOT_FLAG_NO_IMPACT_POINT)) ==
+              (SHOT_FLAG_NEAR_CUP | SHOT_FLAG_NO_IMPACT_POINT)) {
             toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                 g_CurrentShot.ballPosition[AXIS_X];
             toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
@@ -1513,8 +1516,9 @@ void UpdateShotFlags(void) {
     g_ShotFlags |= SHOT_FLAG_APPROACH;
   }
 
-  if (g_CurrentShot.unk50 * SHOT_UNK50_SCALE <= SHOT_UNK8_MAX_UNK50) {
-    g_ShotFlags |= SHOT_FLAG_UNK8;
+  if (g_CurrentShot.cupDistance * DECIMETERS_PER_UNIT <=
+      NEAR_CUP_MAX_DECIMETERS) {
+    g_ShotFlags |= SHOT_FLAG_NEAR_CUP;
   }
 }
 
@@ -2314,7 +2318,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.unk14 = 0;
   g_CurrentShot.unk54 = player->unk28;
   g_CurrentShot.unk40 = 0;
-  g_CurrentShot.unk50 = GetCupDistance(
+  g_CurrentShot.cupDistance = GetCupDistance(
       x - g_HoleSetup.cupPosition[AXIS_X], z - g_HoleSetup.cupPosition[AXIS_Z]);
   if (!g_IsTrainingHeadingKept || g_GameState.gameMode != GAME_MODE_TRAINING) {
     s32 surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
@@ -3142,7 +3146,7 @@ void UpdateTurns(void) {
             GetCrossSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
         UpdateShotFlags();
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
-        g_CurrentShot.unk50 = GetCupDistance(
+        g_CurrentShot.cupDistance = GetCupDistance(
             g_TurnBallSimulation.position[0] - g_HoleSetup.cupPosition[0],
             g_TurnBallSimulation.position[2] - g_HoleSetup.cupPosition[AXIS_Z]);
         g_RoundHud.greenGridState = 1;

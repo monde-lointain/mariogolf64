@@ -7,8 +7,9 @@
 #define SHOT_FLAG_ON_GREEN 1
 #define SHOT_FLAG_NO_IMPACT_POINT 2 /* For a putter, or in mini golf */
 #define SHOT_FLAG_APPROACH 4
-/* Set while g_CurrentShot.unk50 is at most turn.c's SHOT_UNK8_MAX_UNK50 */
-#define SHOT_FLAG_UNK8 8
+/* Set while the ball is at most turn.c's NEAR_CUP_MAX_DECIMETERS from the
+ * cup */
+#define SHOT_FLAG_NEAR_CUP 8
 
 /* Which pause screen is shown over the round */
 enum PauseScreen {

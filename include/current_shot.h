@@ -23,7 +23,7 @@ typedef struct CurrentShot {
                                      ball's heights */
   /* 0x40 */ s32 unk40;
   /* 0x44 */ CoursePoint unk44;
-  /* 0x50 */ s32 unk50;
+  /* 0x50 */ s32 cupDistance; /* From GetCupDistance */
   /* 0x54 */ s8 unk54;
 } CurrentShot; /* size = 0x58 */
 
