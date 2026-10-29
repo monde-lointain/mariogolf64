@@ -37,6 +37,14 @@
 /* The text columns of the menu's cursor and of its scenes' labels */
 #define SCENE_MENU_CURSOR_COLUMN 10
 #define SCENE_MENU_LABEL_COLUMN 12
+/* Text cells of the current scene's label and the shot's surface name */
+#define SCENE_LABEL_COLUMN 2
+#define SCENE_LABEL_ROW 3
+#define SURFACE_NAME_COLUMN 2
+#define SURFACE_NAME_ROW 4
+/* The light that the map overview's C-up resets to, as binary angles */
+#define RESET_LIGHT_PITCH 0x3000
+#define RESET_LIGHT_YAW 0x2000
 /* The scene menu's box, in screen pixels */
 #define SCENE_MENU_BOX_LEFT 72
 #define SCENE_MENU_BOX_TOP 32
@@ -1618,7 +1626,7 @@ void UpdateDebugScenes(void) {
     PrintDebugText(GetSurfaceInfoAt(
                        g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z])
                        ->name,
-        2, 4);
+        SURFACE_NAME_COLUMN, SURFACE_NAME_ROW);
   }
 
   if (f_IsSceneMenuOpen && f_SceneMenuBox.state == openState) {
@@ -1658,7 +1666,8 @@ void UpdateDebugScenes(void) {
   QueueAnimatedBox(&f_SceneMenuBox);
   if ((g_Scene != SCENE_PLAY_UNK12) & (g_Scene != SCENE_MENU)) {
     SetDebugTextHighlight(TRUE);
-    PrintDebugText(GetDebugSceneLabel(g_Scene), 2, 3);
+    PrintDebugText(
+        GetDebugSceneLabel(g_Scene), SCENE_LABEL_COLUMN, SCENE_LABEL_ROW);
   }
 
   if (g_Scene == SCENE_UNK11) {
@@ -1764,8 +1773,8 @@ void UpdateDebugScenes(void) {
     }
 
     if (g_MenuControllerData[0].trigger & U_CBUTTONS) {
-      g_HoleSetup.conditions.lightPitch = 0x3000;
-      g_HoleSetup.conditions.lightYaw = 0x2000;
+      g_HoleSetup.conditions.lightPitch = RESET_LIGHT_PITCH;
+      g_HoleSetup.conditions.lightYaw = RESET_LIGHT_YAW;
       func_80253234(1);
     }
 
