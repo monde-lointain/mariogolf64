@@ -854,8 +854,11 @@ segments:
       - { start: 0x171770, type: .bss, vram: 0x801F8B50, name: ovl_14/staff_roll }
 
   - name: build_date
-    type: bin
+    type: code
     start: 0x171770
+    vram: 0xB0171770
+    subsegments:
+      - [0x171770, hasm, build_date]
 
   - name: assets
     type: bin
