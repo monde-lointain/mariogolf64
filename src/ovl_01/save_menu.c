@@ -1801,7 +1801,7 @@ const char D_80231A3C_ovl_01[] = "%s";
 #define EMPTY_GAME_TEXT_Y 186
 #define MESSAGE_EMPTY_SAVED_GAME 0x26
 
-void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
+void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY);
 void func_80224AFC_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void DrawSavedGolfers(Gfx** displayListHead);
@@ -2046,7 +2046,7 @@ void DrawSavedGames(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
   }
 
-  func_8021C200_ovl_01(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
+  DrawCenteredPageArrows(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
   chosenMode = &D_80230B50_ovl_01[memory->savedGameIndex];
   if (*chosenMode != -1) {
     labelOffset = &D_80230CEC_ovl_01[D_80230BB0_ovl_01[*chosenMode]];

@@ -4637,9 +4637,9 @@ void DrawBetSettings(
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     u8 canShowPrompt);
 s32 SlideBrickWall(Gfx** displayListHead, u8 slide);
-void func_8021BE88_ovl_01(Gfx** displayListHead);
-void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY);
-void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY);
+void DrawPageArrows(Gfx** displayListHead);
+void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY);
+void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
 
 /*
  * Draws the mode select of screens 5, 23 and 26: the characters, the modes'
@@ -4985,7 +4985,7 @@ void DrawModeSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
   }
 
-  func_8021C200_ovl_01(&gfx, MODE_ARROW_GAP, MODE_ARROW_Y);
+  DrawCenteredPageArrows(&gfx, MODE_ARROW_GAP, MODE_ARROW_Y);
 
   if ((g_ChosenPlayerCount == 1) &&
       (D_8022BEBC_ovl_01[0][D_801323A0.modeChoice] == MODE_ICON_TOURNAMENT)) {
@@ -5876,7 +5876,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
           D_8022FD44_ovl_01 = iconY[slot];
         }
 
-        func_8021CBDC_ovl_01(&gfx, D_8022FD44_ovl_01 + bob);
+        DrawUpDownArrows(&gfx, D_8022FD44_ovl_01 + bob);
       }
     }
 
@@ -6058,7 +6058,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
     }
 
-    func_8021BE88_ovl_01(&gfx);
+    DrawPageArrows(&gfx);
     DrawCourseSelectBanners(&gfx);
     if (!g_GameState.isMiniGolf &&
         (D_801323A0.courseChoice == (courseCount - 1)) &&

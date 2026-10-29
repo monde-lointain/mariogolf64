@@ -82,7 +82,7 @@
 /* The text slots that screen 12 clears on leaving */
 #define STATS_TEXT_SLOT_COUNT 4
 
-/* The animated arrows that func_8021BE88 draws either side of the page */
+/* The animated arrows that DrawPageArrows draws either side of the page */
 #define PAGE_ARROW_COUNT 2
 #define PAGE_ARROW_RIGHT 1
 #define PAGE_ARROW_SIZE 32
@@ -99,16 +99,15 @@
  */
 #define MirroredArrowStart(arrowIndex) \
   TexelCoordinate(((arrowIndex) == PAGE_ARROW_RIGHT) * PAGE_ARROW_SIZE)
-/* func_8021C67C turns the page arrows a quarter turn each way, and draws them
- * as squares away from the camera */
+/* DrawTurnedPageArrows turns the page arrows a quarter turn each way, and draws
+ * them as squares away from the camera */
 #define TURNED_ARROW_ANGLE 90.0f
 #define TURNED_ARROW_Z -100.0f
 #define TURNED_ARROW_NEAR 10.0f
 #define TURNED_ARROW_FAR 2000.0f
 #define TURNED_ARROW_VERTEX_COUNT 4
 
-/* The blinking pair of arrows that func_8021CBDC draws above and below a point
- */
+/* The blinking arrows that DrawUpDownArrows draws above and below a point */
 #define STATS_ARROW_COUNT 2
 #define STATS_ARROW_BLINK_FRAME_COUNT 4
 #define STATS_ARROW_LEFT 152
@@ -1598,12 +1597,13 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
   *displayListHead = gfx;
 }
 
+/* Draws the animated page arrows either side of the course select screen */
 /*
  * Doesn't match: the original computes the mirrored arrow's start without a
  * branch, and keeps the display list head in its argument slot.
  */
 #ifdef NON_MATCHING
-void func_8021BE88_ovl_01(Gfx** displayListHead) {
+void DrawPageArrows(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 arrowIndex;
   s32 left;
@@ -1655,15 +1655,19 @@ void func_8021BE88_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021BE88_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawPageArrows);
 #endif
 
+/*
+ * Draws the animated page arrows gap apart about the screen's middle, centered
+ * on centerY
+ */
 /*
  * Doesn't match: the original keeps the mirrored arrow's texture start in
  * the register it computes it in, where this moves it to another.
  */
 #ifdef NON_MATCHING
-void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY) {
+void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 arrowIndex;
   s32 left;
@@ -1715,11 +1719,11 @@ void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C200_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawCenteredPageArrows);
 #endif
 
-/* Nothing calls this */
-void func_8021C67C_ovl_01(Gfx** displayListHead, s32 spacing, s32 y) {
+/* Draws the page arrows spacing apart at y, turned; nothing calls it */
+void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
   Gfx* gfx = *displayListHead;
   s32 arrowIndex;
   s32 x;
@@ -1785,12 +1789,13 @@ void func_8021C67C_ovl_01(Gfx** displayListHead, s32 spacing, s32 y) {
   *displayListHead = gfx;
 }
 
+/* Draws the blinking green up and down arrows about centerY */
 /*
  * Doesn't match: the original adds the texel offset to the blink frame's
  * offset before the arrow's, and adds the arrow size to the center first.
  */
 #ifdef NON_MATCHING
-void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY) {
+void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 left = 0;
   s32 offsetY = 0;
@@ -1833,7 +1838,7 @@ void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021CBDC_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawUpDownArrows);
 #endif
 
 /* Reads every course's icon into the Best Shots screen's buffers */
