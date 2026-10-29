@@ -1854,7 +1854,7 @@ void func_801F70F0_ovl_01(void) {
 
       D_801B7070 = 0;
       for (index = 0; index != D_8022BE0C_ovl_01; index++) {
-        D_800FBD40.isCharacterTaken[index] = 0;
+        g_TakenCharacters.isCharacterTaken[index] = 0;
       }
     } else if (titleChoice == TITLE_CHOICE_SAVED_GAMES) {
       if (g_HasBroughtOverCharacter) {
@@ -1884,7 +1884,7 @@ void func_801F70F0_ovl_01(void) {
     if (D_801B71CC != g_MenuScreen ||
         D_800FBE2C != D_801323A0.playerCountChoice) {
       D_801323A0.modeChoice = 0;
-      D_800FBD40.unk0 = 0;
+      g_TakenCharacters.unk0 = 0;
     }
 
     D_801052E8 = 0;
@@ -1945,13 +1945,13 @@ void func_801F70F0_ovl_01(void) {
 
 void func_801F75EC_ovl_01(void) {
   D_801323A0.unk2 = 0;
-  if (D_800FBD40.isCharacterTaken[0] == 1) {
+  if (g_TakenCharacters.isCharacterTaken[0] == 1) {
     do {
       D_801323A0.unk2++;
       if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
         D_801323A0.unk2 = 0;
       }
-    } while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1);
+    } while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1);
   }
 }
 
@@ -1961,7 +1961,7 @@ void func_801F75EC_ovl_01(void) {
  */
 s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
   if (D_8022BE28_ovl_01 != 0) {
-    while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+    while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
       D_801323A0.unk2++;
       if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
         D_801323A0.unk2 = 0;
@@ -1971,7 +1971,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
     if (g_ControllerStates[0].pressedButtons & U_JPAD) {
       D_801323A0.unk2--;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+      while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
         D_801323A0.unk2--;
         if (D_801323A0.unk2 < 0) {
           D_801323A0.unk2 = D_8022BE0C_ovl_01 - 1;
@@ -1980,7 +1980,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
     } else if (g_ControllerStates[0].pressedButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       D_801323A0.unk2++;
-      while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+      while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
         D_801323A0.unk2++;
         if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
           D_801323A0.unk2 = 0;
@@ -1990,14 +1990,14 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
 
     if (D_801323A0.unk2 < 0) {
       D_801323A0.unk2 = D_8022BE0C_ovl_01 - 1;
-      while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+      while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
         D_801323A0.unk2--;
       }
     }
 
     if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
       D_801323A0.unk2 = 0;
-      while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+      while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
         D_801323A0.unk2++;
       }
     }
@@ -2010,7 +2010,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
     }
   } else if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
     if ((g_MenuPressedButtons & (A_BUTTON | R_TRIG)) &&
-        D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 0) {
+        g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 0) {
       PlayCharacterSound(D_801323A0.unk2, 0, CHARACTER_SOUND_CHOSEN,
           MENU_VOLUME_SOFT, SOUND_FULL_SCALE);
       D_8022BE2C_ovl_01 = 1;
@@ -2022,7 +2022,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
       PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       return -1;
     }
-    while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+    while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
       D_801323A0.unk2++;
       if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
         D_801323A0.unk2 = 0;
@@ -2032,7 +2032,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
     if (g_MenuRepeatButtons & U_JPAD) {
       D_801323A0.unk2--;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+      while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
         D_801323A0.unk2--;
         if (D_801323A0.unk2 < 0) {
           D_801323A0.unk2 = D_8022BE0C_ovl_01 - 1;
@@ -2041,7 +2041,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_801323A0.unk2++;
-      while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+      while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
         D_801323A0.unk2++;
         if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
           D_801323A0.unk2 = 0;
@@ -2051,14 +2051,14 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
 
     if (D_801323A0.unk2 < 0) {
       D_801323A0.unk2 = D_8022BE0C_ovl_01 - 1;
-      while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+      while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
         D_801323A0.unk2--;
       }
     }
 
     if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
       D_801323A0.unk2 = 0;
-      while (D_800FBD40.isCharacterTaken[D_801323A0.unk2] == 1) {
+      while (g_TakenCharacters.isCharacterTaken[D_801323A0.unk2] == 1) {
         D_801323A0.unk2++;
       }
     }
@@ -2368,7 +2368,7 @@ void func_801F7D28_ovl_01(void) {
     g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
     D_801B7070--;
     D_800FBE08[D_801B7070] = 0;
-    D_800FBD40.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
+    g_TakenCharacters.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
     g_PlayerControllerIndices[D_801B7070] = 0;
     slot = g_CharacterGrid[D_801323A0.characterRows[D_801B7070]]
                           [D_801323A0.characterColumns[D_801B7070]];
@@ -2549,7 +2549,7 @@ void func_801F8BAC_ovl_01(void) {
         MODE_ICON_GET_CHARACTER) {
       g_MenuScreen = MENU_SCREEN_UNK16;
       D_801B7070--;
-      D_800FBD40.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
+      g_TakenCharacters.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
     } else {
       g_MenuScreen = MENU_SCREEN_UNK5;
     }

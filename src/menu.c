@@ -1961,7 +1961,7 @@ void func_8005D9A0(void) {
   D_801B70F0[2] = FALSE;
   D_801B70F0[3] = FALSE;
   memset(&D_801323A0, 0, sizeof(D_801323A0));
-  D_800FBD40.unk0 = 0;
+  g_TakenCharacters.unk0 = 0;
   D_801B71CC = 0;
   D_800FBE2C = 0;
   D_800FBDB9 = 0;

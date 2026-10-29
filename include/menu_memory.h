@@ -104,7 +104,7 @@ typedef struct TakenCharacters {
   /* 0x50 */ u8 unk50[0x54 - 0x50];
 } TakenCharacters; /* size = 0x54 */
 
-extern TakenCharacters D_800FBD40;
+extern TakenCharacters g_TakenCharacters;
 
 /* The character each player has chosen, or NO_CHOSEN_CHARACTER */
 #define NO_CHOSEN_CHARACTER -1
