@@ -16,6 +16,11 @@
 typedef f32 Radians;
 typedef f32 Degrees;
 
+/* An angle where BINARY_ANGLE_TURN is a full turn, as the game stores them */
+typedef u16 BinaryAngle;
+/* A binary angle stored signed, from minus a half turn to under a half turn */
+typedef s16 SignedBinaryAngle;
+
 /* The radians to degrees factor of rotations */
 #define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))

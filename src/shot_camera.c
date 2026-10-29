@@ -328,7 +328,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
   Vec3 groundPoint;
   Mat4 unusedMatrices[2]; /* Unused; it is there to match */
   UnkB8* player;
-  s16 aimYaw;
+  SignedBinaryAngle aimYaw;
   f32 distance;
   Radians angle;
   f32 reach;
@@ -391,10 +391,10 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
  * CROSS_SLOPE_DISTANCE away, a quarter turn from the shot's yaw. The point is
  * on the other side when player->unk22 is set, and the slope is then negated.
  */
-s16 GetCrossSlopeAngle(UnkB8* player, Unk20* shot) {
+SignedBinaryAngle GetCrossSlopeAngle(UnkB8* player, Unk20* shot) {
   SurfaceInfo* surfaceInfo;
   s32 sampleDistance;
-  s16 aimYaw;
+  SignedBinaryAngle aimYaw;
   s32 yaw;
   Radians angle;
   s32 height;
@@ -447,7 +447,7 @@ s16 GetCrossSlopeAngle(UnkB8* player, Unk20* shot) {
  * points half an AIM_SLOPE_STEP ahead of the ball and an AIM_SLOPE_STEP behind
  * it.
  */
-s16 GetAimSlopeAngle(UnkB8* player, Unk20* shot) {
+SignedBinaryAngle GetAimSlopeAngle(UnkB8* player, Unk20* shot) {
   Radians angle;
   f32 step[2]; /* On x, then z */
   s32 aheadHeight;

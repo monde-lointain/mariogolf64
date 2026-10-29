@@ -2072,8 +2072,8 @@ Unk6* GetUnkCEntry(Club* club, s32 surface, s32 shotMode, s32 unkC) {
   return &D_800B7C08;
 }
 
-s16 GetCrossSlopeAngle(UnkB8* player, Unk20* shot);
-/* It returns s16; declaring it s32 here is there to match */
+SignedBinaryAngle GetCrossSlopeAngle(UnkB8* player, Unk20* shot);
+/* It returns a SignedBinaryAngle; declaring it s32 here is there to match */
 s32 GetAimSlopeAngle(UnkB8* player, Unk20* shot);
 
 /*

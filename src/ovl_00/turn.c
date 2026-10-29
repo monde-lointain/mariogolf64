@@ -1054,7 +1054,7 @@ void MoveAimCameraDistance(void) {
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
   s32 stickX = g_TurnController.stickX;
-  s16 heading = g_CurrentShot.unk0;
+  SignedBinaryAngle heading = g_CurrentShot.unk0;
   s32 speed;
   s32 step;
   s32 dpad;

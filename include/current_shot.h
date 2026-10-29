@@ -3,9 +3,11 @@
 
 #include <ultra64.h>
 
+#include "math_util.h"
+
 /* The state of the shot being set up by the player whose turn it is */
 typedef struct CurrentShot {
-  /* 0x00 */ s16 unk0;
+  /* 0x00 */ SignedBinaryAngle unk0;
   /* 0x04 */ s32 unk4;
   /* 0x08 */ s32 unk8;
   /* 0x0C */ s32 shotMode;

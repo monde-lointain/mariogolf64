@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
+#include "math_util.h"
 #include "save.h"
 
 /* The effects over a shot in flight that StartShotEffect starts */
@@ -97,8 +98,8 @@ typedef struct RoundHud {
   /* 0x78 */ u16
       skinsTotals[MAX_PLAYER_COUNT]; /* The skins each player has won, as
                                         TallySkins counts them */
-  /* 0x80 */ u16 clubHeadTilt; /* Binary angles; the icons tilt by half */
-  /* 0x82 */ u16 lieTilt; /* The slope under the ball */
+  /* 0x80 */ BinaryAngle clubHeadTilt; /* The icons tilt by half */
+  /* 0x82 */ BinaryAngle lieTilt; /* The slope under the ball */
   /* 0x84 */ u8 unk84[3];
   /* 0x87 */ s8 unk87;
   /* 0x88 */ u8 flags; /* HUD_FLAG_* bits */

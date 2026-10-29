@@ -35,13 +35,13 @@ extern Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 /* The weather and light that a hole is played in */
 typedef struct HoleConditions {
   /* 0x00 */ s32 windSpeed; /* As the ball's flight feels it */
-  /* 0x04 */ u16 windDirection; /* A full turn is 0x10000 */
+  /* 0x04 */ BinaryAngle windDirection;
   /* Shortens shots and changes the scene's colors */
   /* 0x08 */ Boolean isRaining;
   /* 0x0C */ u32
       sceneColorIndex; /* With isRaining, picks DeriveSceneColors' colors */
-  /* 0x10 */ u16 lightYaw;
-  /* 0x12 */ u16 lightPitch;
+  /* 0x10 */ BinaryAngle lightYaw;
+  /* 0x12 */ BinaryAngle lightPitch;
 } HoleConditions; /* size = 0x14 */
 
 /* The game counts time in frames */

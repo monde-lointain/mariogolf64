@@ -5,6 +5,7 @@
 
 #include "character.h"
 #include "club.h"
+#include "math_util.h"
 #include "variables.h"
 
 /* Marks save data that has been written at least once */
@@ -190,7 +191,7 @@ typedef struct HoleSetup {
 
 /* A shot as a record keeps it, from the CurrentShot it was played with */
 typedef struct RecordedShot {
-  /* 0x0 */ u16 heading;
+  /* 0x0 */ BinaryAngle heading;
   /* 0x2 */ s8 unk2;
   /* 0x3 */ s8 unk3;
   /* 0x4 */ s8 shotMode;

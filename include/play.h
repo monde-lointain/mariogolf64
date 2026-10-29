@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#include "math_util.h"
+
 /* g_ShotFlags's bits, which UpdateShotFlags sets for the shot being set up */
 #define SHOT_FLAG_ON_GREEN 1
 #define SHOT_FLAG_NO_IMPACT_POINT 2 /* For a putter, or in mini golf */
@@ -58,9 +60,9 @@ extern s32 D_800C3070;
 /* Set once A has been pressed to take the shot */
 extern Boolean g_HasPressedShotButton;
 /* A heading that TurnAim can turn in place of the shot's */
-extern s16 g_AltHeading;
+extern SignedBinaryAngle g_AltHeading;
 /* The free-look camera's heading, in binary angle units */
-extern s16 g_FreeLookHeading;
+extern SignedBinaryAngle g_FreeLookHeading;
 /* Frames, up to shot_labels.c's PIN_FLAG_HIDE_FRAME, since the shot was set up
  */
 extern s32 g_ShotSetupFrameCount;
