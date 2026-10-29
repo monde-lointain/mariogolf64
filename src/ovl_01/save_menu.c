@@ -148,8 +148,9 @@ void DrawCourseLabel(Gfx** displayListHead, s32 courseIndex, s32 left, s32 top,
 void DrawRingShotRowIcon(
     Gfx** displayListHead, s32 imageIndex, s32 left, s32 top);
 
-static s32 D_80230A90_ovl_01 = 0;
-static s32 D_80230A94_ovl_01 = 0;
+/* The Ring Shot records' blinking arrows' frame and its time shown */
+static s32 f_RingShotArrowFrame = 0;
+static s32 f_RingShotArrowTimer = 0;
 static s32 D_80230A98_ovl_01 = 0;
 /* Read by no routine */
 static s32 D_80230A9C_ovl_01 = 0;
@@ -205,7 +206,8 @@ static s32 D_80230BDC_ovl_01[4] = {0, 0, 0, 0};
 /* Read by no routine; the values of main_menu.c's D_8022F8F4 */
 static s32 D_80230BEC_ovl_01[18] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
-static f32 D_80230C34_ovl_01 = 0.0f;
+/* The angle, in radians, of the sine wave that bobs the saved games' boards */
+static f32 f_BoardBobPhase = 0.0f;
 /* Read by no routine; the values of D_80230DE8 */
 static s32 D_80230C38_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
@@ -313,8 +315,8 @@ void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind) {
       f_RingShotGreenArrows = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(f_RingShotGreenArrows, &asset);
-      D_80230A90_ovl_01 = 0;
-      D_80230A94_ovl_01 = 0;
+      f_RingShotArrowFrame = 0;
+      f_RingShotArrowTimer = 0;
       D_80230A98_ovl_01 = 0;
       break;
   }
@@ -641,16 +643,16 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
     if (row == memory->ringShotRow) {
       if (row == 0) {
-        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
-            &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH, RING_SHOT_FIRST_ARROW_X,
-            RING_SHOT_ARROW_Y);
+        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows,
+            &f_RingShotArrowFrame, &f_RingShotArrowTimer, RING_SHOT_ARROW_WIDTH,
+            RING_SHOT_FIRST_ARROW_X, RING_SHOT_ARROW_Y);
       } else if (row == RING_SHOT_REPLAY_ROW) {
-        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
-            &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH, RING_SHOT_REPLAY_ARROW_X,
-            RING_SHOT_ARROW_Y);
+        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows,
+            &f_RingShotArrowFrame, &f_RingShotArrowTimer, RING_SHOT_ARROW_WIDTH,
+            RING_SHOT_REPLAY_ARROW_X, RING_SHOT_ARROW_Y);
       } else {
-        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows, &D_80230A90_ovl_01,
-            &D_80230A94_ovl_01, RING_SHOT_ARROW_WIDTH,
+        DrawBlinkingSideArrows(&gfx, f_RingShotGreenArrows,
+            &f_RingShotArrowFrame, &f_RingShotArrowTimer, RING_SHOT_ARROW_WIDTH,
             (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ARROW_OFFSET_X,
             RING_SHOT_ARROW_Y);
       }
@@ -691,7 +693,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
     for (column = 0; column != RING_SHOT_SCROLL_COLUMN_COUNT; column++) {
       if (memory->ringShotFirstCharacters[memory->ringShotRow] > 0) {
-        DrawGreenArrow(&gfx, f_RingShotGreenArrows, D_80230A90_ovl_01,
+        DrawGreenArrow(&gfx, f_RingShotGreenArrows, f_RingShotArrowFrame,
             MENU_ARROW_UP,
             RING_SHOT_SCROLL_ARROW_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_UP_ARROW_Y);
@@ -699,7 +701,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 
       if (memory->ringShotFirstCharacters[memory->ringShotRow] <
           RING_SHOT_LAST_FIRST_CHARACTER) {
-        DrawGreenArrow(&gfx, f_RingShotGreenArrows, D_80230A90_ovl_01,
+        DrawGreenArrow(&gfx, f_RingShotGreenArrows, f_RingShotArrowFrame,
             MENU_ARROW_DOWN,
             RING_SHOT_SCROLL_ARROW_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_DOWN_ARROW_Y);
@@ -1923,7 +1925,7 @@ void DrawSavedGames(Gfx** displayListHead) {
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
-  D_80230C34_ovl_01 += BOARD_BOB_PHASE_STEP;
+  f_BoardBobPhase += BOARD_BOB_PHASE_STEP;
   for (index = 0; index != SAVED_GAME_COUNT; index++) {
     slot = drawOrder[index];
     iconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
@@ -1934,7 +1936,7 @@ void DrawSavedGames(Gfx** displayListHead) {
     step = (f32)(GAME_BOARD_STRIP_HEIGHT << 10) / halfSize;
     /* The loop stops before SAVED_GAME_COUNT, so no board bobs */
     if (index == SAVED_GAME_COUNT) {
-      bob = sinf(D_80230C34_ovl_01) * BOARD_BOB_HEIGHT;
+      bob = sinf(f_BoardBobPhase) * BOARD_BOB_HEIGHT;
     } else {
       bob = 0.0f;
     }
