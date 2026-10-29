@@ -132,6 +132,8 @@ enum PortraitAnimation {
 #define RESULTS_LABEL_HEIGHT 18
 
 #define PORTRAIT_SIZE 32
+/* The portrait's mirrored wrap masks its S at its width, 1 << 5 */
+#define PORTRAIT_SIZE_LOG2 5
 
 /* Course points are clamped there rather than overflow */
 #define MAX_COURSE_POINTS S32_MAX
@@ -1278,7 +1280,7 @@ void DrawPlayerPortrait(
   LoadLargePalette(&gfx, f_PlayerPortraitPalettes[playerIndex]);
   LoadTextureBlock(&gfx, f_PlayerPortraitImages[playerIndex], G_IM_FMT_CI,
       G_IM_SIZ_8b, PORTRAIT_SIZE, PORTRAIT_SIZE, 0, G_TX_MIRROR, G_TX_NOMIRROR,
-      5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      PORTRAIT_SIZE_LOG2, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
       QuarterPixels(x + PORTRAIT_SIZE), QuarterPixels(y + PORTRAIT_SIZE),
       G_TX_RENDERTILE, isMirrored * TexelCoordinate(PORTRAIT_SIZE), 0,
