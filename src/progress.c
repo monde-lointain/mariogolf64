@@ -20,8 +20,9 @@
 void ShowBirdieBadgeCount(s32 badgeCount);
 
 /*
- * Counts a win or a loss in unkAF0[row][column], and saves. A win also sets
- * the top bit unless g_GameState.saveCount is set, and prints "Win Com Chara".
+ * Counts a win or a loss in matchups[row][column], and saves. A win also sets
+ * WON_UNSAVED_FLAG unless g_GameState.saveCount is set, and prints "Win Com
+ * Chara".
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
@@ -32,24 +33,24 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
 
   unk990 = &GetSaveData()->unk990;
   if (isWin) {
-    value = unk990->unkAF0[row][column].unk1;
+    value = unk990->matchups[row][column].winBits;
     count = value & WIN_COUNT_MASK;
     if (count < MAX_SAVED_COUNT) {
       count = (value & WIN_COUNT_MASK) + 1;
     }
 
-    value = count | (value & UNKAF0_FLAG);
+    value = count | (value & WON_UNSAVED_FLAG);
     if (!g_GameState.saveCount) {
-      value |= UNKAF0_FLAG;
+      value |= WON_UNSAVED_FLAG;
     }
 
     newValue = value; /* Passed on unmasked, to match */
-    unk990->unkAF0[row][column].unk1 = newValue;
+    unk990->matchups[row][column].winBits = newValue;
     osSyncPrintf("Win Com Chara[%d]\n", newValue);
   } else {
-    unk990->unkAF0[row][column].unk0++;
-    if (unk990->unkAF0[row][column].unk0 > MAX_SAVED_COUNT) {
-      unk990->unkAF0[row][column].unk0 = MAX_SAVED_COUNT;
+    unk990->matchups[row][column].lossCount++;
+    if (unk990->matchups[row][column].lossCount > MAX_SAVED_COUNT) {
+      unk990->matchups[row][column].lossCount = MAX_SAVED_COUNT;
     }
   }
 

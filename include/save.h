@@ -450,17 +450,17 @@ typedef struct Player {
 /* The best times kept for each course, with what was recorded alongside */
 #define BEST_TIME_COUNT 3
 
-#define SAVE_UNKAF0_ROW_COUNT 18
-#define SAVE_UNKAF0_COLUMN_COUNT 18
-
-/* UnkAF0.unk1 keeps a count of wins in these bits, and a flag in the top one */
+/* MatchupRecord.winBits keeps a count of wins in these bits */
 #define WIN_COUNT_MASK 0x7F
-#define UNKAF0_FLAG 0x80
+/* Set by a win in a game that was never saved partway; the character table
+ * shows such a matchup with a star */
+#define WON_UNSAVED_FLAG 0x80
 
-typedef struct UnkAF0 {
-  /* 0x0 */ u8 unk0;
-  /* 0x1 */ u8 unk1;
-} UnkAF0; /* size = 0x2 */
+/* A character's record against a computer character in Get Character */
+typedef struct MatchupRecord {
+  /* 0x0 */ u8 lossCount;
+  /* 0x1 */ u8 winBits; /* The win count, and WON_UNSAVED_FLAG */
+} MatchupRecord; /* size = 0x2 */
 
 /*
  * Routines that update the birdie badges reach them through a pointer to
@@ -471,7 +471,8 @@ typedef struct Unk990 {
   /* 0x0F4 */ s8
       birdieBadgeCounts[COURSE_COUNT]
                        [COURSE_HOLE_COUNT]; /* Nonzero holds the badge */
-  /* 0x160 */ UnkAF0 unkAF0[SAVE_UNKAF0_ROW_COUNT][SAVE_UNKAF0_COLUMN_COUNT];
+  /* By the player's character, then the computer's */
+  /* 0x160 */ MatchupRecord matchups[CHARACTER_COUNT][CHARACTER_COUNT];
 } Unk990; /* size = 0x3E8 */
 
 typedef struct SaveData {

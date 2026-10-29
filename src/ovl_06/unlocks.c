@@ -13,7 +13,7 @@
 #include "sram.h"
 
 /* GrantWinsStarsAndBadges gives a win, where there is none, in this many of the
- * first rows of unkAF0 */
+ * first rows of the matchups */
 #define GRANTED_WIN_ROW_COUNT 14
 /* GrantRingShotProgressAndPoints sets this many of each hole's unk1344 entries
  */
@@ -86,9 +86,9 @@ void GrantWinsStarsAndBadges(void) {
   s32 column;
 
   for (row = 0; row != GRANTED_WIN_ROW_COUNT; row++) {
-    for (column = 0; column != SAVE_UNKAF0_COLUMN_COUNT; column++) {
-      if (!(save->unk990.unkAF0[row][column].unk1 & WIN_COUNT_MASK)) {
-        save->unk990.unkAF0[row][column].unk1 = 1;
+    for (column = 0; column != CHARACTER_COUNT; column++) {
+      if (!(save->unk990.matchups[row][column].winBits & WIN_COUNT_MASK)) {
+        save->unk990.matchups[row][column].winBits = 1;
       }
     }
   }

@@ -1353,8 +1353,8 @@ void func_8005C674(s32 arg0, s32 arg1) {
   for (index = 0; index != RECORD_CHARACTER_COUNT; index++) {
     recordIndex = 0;
     arg0 = 0;
-    for (; recordIndex != SAVE_UNKAF0_ROW_COUNT; recordIndex++) {
-      if (save->unk990.unkAF0[recordIndex][index].unk1 & 0x7F) {
+    for (; recordIndex != CHARACTER_COUNT; recordIndex++) {
+      if (save->unk990.matchups[recordIndex][index].winBits & 0x7F) {
         arg0++;
         break;
       }

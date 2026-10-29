@@ -1245,14 +1245,14 @@ s32 ChooseHoleStrokeTarget(void) {
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     lossCount = GetSaveData()
                     ->unk990
-                    .unkAF0[(s8)g_Players[0].characterIndex]
-                           [(s8)g_Players[f_Shot.playerIndex].characterIndex]
-                    .unk0;
+                    .matchups[(s8)g_Players[0].characterIndex]
+                             [(s8)g_Players[f_Shot.playerIndex].characterIndex]
+                    .lossCount;
     winBits = GetSaveData()
                   ->unk990
-                  .unkAF0[(s8)g_Players[0].characterIndex]
-                         [(s8)g_Players[f_Shot.playerIndex].characterIndex]
-                  .unk1;
+                  .matchups[(s8)g_Players[0].characterIndex]
+                           [(s8)g_Players[f_Shot.playerIndex].characterIndex]
+                  .winBits;
     if ((winBits & WIN_COUNT_MASK) < (lossCount & WIN_COUNT_MASK)) {
       luckyBonus = g_GameState.unk2C & 3;
     }

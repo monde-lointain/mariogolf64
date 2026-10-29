@@ -410,14 +410,15 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
             TABLE_COLUMN_FACE_Y, columnCharacter, drawMode);
       }
 
-      columnWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk0 &
+      columnWins =
+          save->unk990.matchups[rowCharacter][columnCharacter].lossCount &
           WIN_COUNT_MASK;
-      rowWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk1 &
+      rowWins = save->unk990.matchups[rowCharacter][columnCharacter].winBits &
           WIN_COUNT_MASK;
       /* A pairing with the flag set shows the star, and the others show who has
        * won more */
-      if (save->unk990.unkAF0[rowCharacter][columnCharacter].unk1 &
-          UNKAF0_FLAG) {
+      if (save->unk990.matchups[rowCharacter][columnCharacter].winBits &
+          WON_UNSAVED_FLAG) {
         func_80217464_ovl_01(&gfx,
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
             (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_STAR_Y);
@@ -644,8 +645,9 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
   rowCharacter = D_802301A8_ovl_01[rowIndex];
   columnCharacter =
       D_802301A8_ovl_01[memory->tableFirstColumn + memory->tableColumn];
-  columnWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk0 & 0x7F;
-  rowWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk1 & 0x7F;
+  columnWins =
+      save->unk990.matchups[rowCharacter][columnCharacter].lossCount & 0x7F;
+  rowWins = save->unk990.matchups[rowCharacter][columnCharacter].winBits & 0x7F;
   faceMode = FACE_DARKENED;
   if (D_8023AC78_ovl_01[rowIndex] != TABLE_CHARACTER_HIDDEN) {
     faceMode = FACE_PLAIN;
@@ -741,8 +743,8 @@ void func_8021730C_ovl_01(void) {
   for (row = GRID_CHARACTER_COUNT; row != CHARACTER_COUNT; row++) {
     column = 0;
     recordCount = 0;
-    for (; column != SAVE_UNKAF0_COLUMN_COUNT; column++) {
-      recordCount += (save->unk990.unkAF0[row][column].unk1 & 0x7F) != 0;
+    for (; column != CHARACTER_COUNT; column++) {
+      recordCount += (save->unk990.matchups[row][column].winBits & 0x7F) != 0;
     }
 
     /* The original stores these one entry early, over the grid's last character

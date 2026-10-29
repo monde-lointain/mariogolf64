@@ -266,7 +266,8 @@ enum ListingState {
 #define STATUS_THIRD_PLACE (1 << 0)
 #define STATUS_SECOND_PLACE (1 << 1)
 #define STATUS_FIRST_PLACE (1 << 2)
-#define STATUS_UNKAF0_COLUMN_COUNT 14
+/* The computer characters sent, those before the Game Boy characters */
+#define STATUS_MATCHUP_COLUMN_COUNT 14
 
 typedef struct StatusTime {
   /* 0x0 */ u8 minutes;
@@ -295,17 +296,18 @@ typedef struct StatusCourse {
       birdieBadges[3]; /* One bit per hole, from the first hole's top bit */
 } StatusCourse; /* size = 0x32 */
 
-typedef struct StatusUnkAF0Bits {
-  /* 0x0 */ u8 nonzeroBits[2];
-  /* 0x2 */ u8 flagBits[2];
-} StatusUnkAF0Bits; /* size = 0x4 */
+/* One bit per computer character, for one of the player's characters */
+typedef struct StatusMatchupBits {
+  /* 0x0 */ u8 wonBits[2];
+  /* 0x2 */ u8 wonUnsavedBits[2];
+} StatusMatchupBits; /* size = 0x4 */
 
 /* What the player has opened and won, in the status data */
 typedef struct StatusProgress {
   /* 0x00 */ u8 openCourses;
   /* 0x01 */ u8 ringShotStars[RING_SHOT_COURSE_COUNT]; /* One bit per hole */
   /* 0x07 */ u8 birdieBadgeCount;
-  /* 0x08 */ StatusUnkAF0Bits unkAF0Bits[SAVE_UNKAF0_ROW_COUNT];
+  /* 0x08 */ StatusMatchupBits matchupBits[CHARACTER_COUNT];
 } StatusProgress; /* size = 0x50 */
 
 typedef struct StatusData {
@@ -1475,7 +1477,8 @@ static MessageId f_NoticeMessage = 0;
 static s32 f_NoticeSize = 0;
 static s32 f_PressingHandFrame = 0;
 static s32 f_UnusedZeros[2] = {0, 0};
-static s32 f_StatusHoleOrder[COURSE_HOLE_COUNT] = {
+/* The order in which the status data lists the player's characters */
+static s32 f_StatusCharacterOrder[CHARACTER_COUNT] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
 void BringOverCharacter(s32 listedIndex, s32 slot) {
@@ -3629,26 +3632,26 @@ void BuildStatusData(u8* status) {
     }
   }
 
-  for (courseIndex = 0; courseIndex != SAVE_UNKAF0_ROW_COUNT; courseIndex++) {
+  for (courseIndex = 0; courseIndex != CHARACTER_COUNT; courseIndex++) {
     /* The bits array, zeroed from its end, and courseIndex as row index are
      * there to match */
-    row = f_StatusHoleOrder[courseIndex];
+    row = f_StatusCharacterOrder[courseIndex];
     bits[1] = 0;
     bits[0] = 0;
-    for (index = 0; index != STATUS_UNKAF0_COLUMN_COUNT; index++) {
-      if (records->unk990.unkAF0[row][index].unk1 != 0) {
+    for (index = 0; index != STATUS_MATCHUP_COLUMN_COUNT; index++) {
+      if (records->unk990.matchups[row][index].winBits != 0) {
         bits[0] |= 1 << index;
       }
 
-      if (records->unk990.unkAF0[row][index].unk1 & UNKAF0_FLAG) {
+      if (records->unk990.matchups[row][index].winBits & WON_UNSAVED_FLAG) {
         bits[1] |= 1 << index;
       }
     }
 
-    progress->unkAF0Bits[courseIndex].nonzeroBits[0] = bits[0];
-    progress->unkAF0Bits[courseIndex].nonzeroBits[1] = bits[0] >> 8;
-    progress->unkAF0Bits[courseIndex].flagBits[0] = bits[1];
-    progress->unkAF0Bits[courseIndex].flagBits[1] = bits[1] >> 8;
+    progress->matchupBits[courseIndex].wonBits[0] = bits[0];
+    progress->matchupBits[courseIndex].wonBits[1] = bits[0] >> 8;
+    progress->matchupBits[courseIndex].wonUnsavedBits[0] = bits[1];
+    progress->matchupBits[courseIndex].wonUnsavedBits[1] = bits[1] >> 8;
   }
 }
 
