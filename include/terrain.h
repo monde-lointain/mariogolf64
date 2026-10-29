@@ -165,11 +165,17 @@ extern s32 D_800BB0E8;
 extern Gfx* g_GroundTileDisplayLists[GROUND_TILE_COUNT];
 extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
 
-/* The plane through a triangle in fixed point, with a normal of length 256 */
+/*
+ * The plane through a triangle in fixed point, with a normal of length
+ * INTEGER_PLANE_UNIT
+ */
+#define INTEGER_PLANE_SHIFT 8
+#define INTEGER_PLANE_UNIT (1 << INTEGER_PLANE_SHIFT)
+
 typedef struct IntegerPlane {
   /* 0x00 */ s32 normal[AXIS_COUNT];
   /* 0x0C */ s32 distance;
-  /* 0x10 */ s32 unk10; /* Always 256 */
+  /* 0x10 */ s32 unk10; /* Always INTEGER_PLANE_UNIT */
 } IntegerPlane; /* size = 0x14 */
 
 /* Drawing the ground, which DrawGround and the hole editor's copy share */

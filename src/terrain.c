@@ -1937,13 +1937,23 @@ Boolean AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
 }
 
 /*
+ * The longest part of a normal whose squared length still fits in an s32,
+ * and the factor by which a longer normal, and its distance, are shrunk
+ */
+#define MAX_NORMAL_PART 0x4000
+#define NORMAL_REDUCTION 256
+/* Where GetTriangleIntegerPlane reports a triangle with no normal */
+#define NORMAL_ERROR_COLUMN 3
+#define NORMAL_ERROR_ROW 15
+
+/*
  * Whether any of a normal's parts is longer than an integer plane's
  * normals may be. It is a macro, as an inline function compiles
  * differently from the original.
  */
 #define IsNormalTooLong(normalX, normalY, normalZ) \
-  ((Abs(normalX) > 0x4000) || (Abs(normalY) > 0x4000) || \
-      (Abs(normalZ) > 0x4000))
+  ((Abs(normalX) > MAX_NORMAL_PART) || (Abs(normalY) > MAX_NORMAL_PART) || \
+      (Abs(normalZ) > MAX_NORMAL_PART))
 
 /* Integer GetTrianglePlane. Returns 0, or -1 for a degenerate triangle. */
 
@@ -1975,21 +1985,21 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
       (normalY * triangle->corners[AXIS_Y][0]) +
       (normalZ * triangle->corners[AXIS_Z][0]));
   while (IsNormalTooLong(normalX, normalY, normalZ)) {
-    normalX /= 256;
-    normalY /= 256;
-    normalZ /= 256;
-    distance /= 256;
+    normalX /= NORMAL_REDUCTION;
+    normalY /= NORMAL_REDUCTION;
+    normalZ /= NORMAL_REDUCTION;
+    distance /= NORMAL_REDUCTION;
   }
 
   length =
       sqrt((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
   if (length == 0) {
-    PrintDebugText("NormalError", 3, 15);
+    PrintDebugText("NormalError", NORMAL_ERROR_COLUMN, NORMAL_ERROR_ROW);
     plane->normal[AXIS_X] = 0;
-    plane->normal[AXIS_Y] = 256;
+    plane->normal[AXIS_Y] = INTEGER_PLANE_UNIT;
     plane->normal[AXIS_Z] = 0;
     plane->distance = 0;
-    plane->unk10 = 256;
+    plane->unk10 = INTEGER_PLANE_UNIT;
     return -1;
   }
 
@@ -1997,11 +2007,11 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
     length = -length;
   }
 
-  plane->unk10 = 256;
-  plane->normal[AXIS_X] = (normalX << 8) / length;
-  plane->normal[AXIS_Y] = (normalY << 8) / length;
-  plane->normal[AXIS_Z] = (normalZ << 8) / length;
-  plane->distance = (distance << 8) / length;
+  plane->unk10 = INTEGER_PLANE_UNIT;
+  plane->normal[AXIS_X] = (normalX << INTEGER_PLANE_SHIFT) / length;
+  plane->normal[AXIS_Y] = (normalY << INTEGER_PLANE_SHIFT) / length;
+  plane->normal[AXIS_Z] = (normalZ << INTEGER_PLANE_SHIFT) / length;
+  plane->distance = (distance << INTEGER_PLANE_SHIFT) / length;
   return 0;
 }
 
