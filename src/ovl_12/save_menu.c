@@ -654,11 +654,10 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     /* The wave's height is never used */
     sinf(f_PanelWaveAngle);
     f_PanelWaveAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
-    LoadLargePalette(&gfx, (u8*)f_PanelImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_PanelImage));
     for (strip = 0; strip != PANEL_STRIP_COUNT; strip++) {
       LoadTextureBlock(&gfx,
-          (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-              (strip * PANEL_STRIP_SIZE),
+          LargeImageTexels(f_PanelImage) + (strip * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
           G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       for (index = 0; index != SAVED_GAME_COUNT; index++) {
@@ -724,7 +723,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
     f_TitleSwayAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
-    LoadLargePalette(&gfx, (u8*)f_SaveMenuTitleImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_SaveMenuTitleImage));
     imageLeft = TITLE_IMAGE_LEFT;
 
     /* The strips are counted with row; reusing it is there to match */
@@ -735,8 +734,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
       }
 
       gDPLoadTextureTile(gfx++,
-          TextureAddress((u32)f_SaveMenuTitleImage +
-              LARGE_PALETTED_TEXELS_OFFSET + (row * TITLE_STRIP_SIZE)),
+          TextureAddress(LargeImageTexels(f_SaveMenuTitleImage) +
+              (row * TITLE_STRIP_SIZE)),
           G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_IMAGE_WIDTH, TITLE_STRIP_DRAWN_HEIGHT,
           0, 0, TITLE_IMAGE_WIDTH - 1, TITLE_STRIP_DRAWN_HEIGHT - 1, 0, 0, 0, 0,
           0, 0, 0);
@@ -754,8 +753,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
 
     /* Each saved game's mode icon, from the image not being loaded into */
     for (row = 0; row != SAVED_GAME_COUNT; row++) {
-      LoadLargePalette(&gfx,
-          (u8*)f_ModeIconImages[row][f_IconImageIndex ^ 1] + IMAGE_HEADER_SIZE);
+      LoadLargePalette(
+          &gfx, ImageBody(f_ModeIconImages[row][f_IconImageIndex ^ 1]));
       if (save->savedGames[row].isValid) {
         gDPPipeSync(gfx++);
         if (row == f_CursorIndex) {
@@ -769,8 +768,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         for (index = 0; index != MODE_ICON_PART_COUNT; index++) {
           LoadTextureBlock(&gfx,
-              (u8*)f_ModeIconImages[row][f_IconImageIndex ^ 1] +
-                  LARGE_PALETTED_TEXELS_OFFSET +
+              LargeImageTexels(f_ModeIconImages[row][f_IconImageIndex ^ 1]) +
                   (index * MODE_ICON_PART_HEIGHT * MODE_ICON_SIZE),
               G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_SIZE, MODE_ICON_PART_HEIGHT,
               0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
@@ -1401,12 +1399,11 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-    LoadLargePalette(&gfx, (u8*)f_PanelImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_PanelImage));
     for (index = 0; index != PANEL_STRIP_COUNT; index++) {
       stripHeight = RECORD_PANEL_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
-          (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-              (index * PANEL_STRIP_SIZE),
+          LargeImageTexels(f_PanelImage) + (index * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
           G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
@@ -1454,10 +1451,10 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     }
 
     /* Each record's "COURSE" and course number */
-    LoadSmallPalette(&gfx, 0, (u8*)f_CourseNumbersImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, 0, ImageBody(f_CourseNumbersImage));
     gDPLoadTextureTile_4b(gfx++,
-        TextureAddress((u32)f_CourseNumbersImage + PALETTED_TEXELS_OFFSET),
-        G_IM_FMT_CI, COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0,
+        TextureAddress(ImageTexels(f_CourseNumbersImage)), G_IM_FMT_CI,
+        COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0,
         COURSE_NUMBERS_WIDTH - 1, COURSE_NUMBERS_HEIGHT - 1, 0, G_TX_MIRROR,
         G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
@@ -1529,12 +1526,11 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         }
 
         gDPPipeSync(gfx++);
-        LoadSmallPalette(&gfx, 0,
-            (u8*)f_ReplayLabelImages[rowLabels[index]] + IMAGE_HEADER_SIZE);
+        LoadSmallPalette(
+            &gfx, 0, ImageBody(f_ReplayLabelImages[rowLabels[index]]));
         LoadNibbleTextureBlock(&gfx,
-            (u8*)f_ReplayLabelImages[rowLabels[index]] + PALETTED_TEXELS_OFFSET,
-            G_IM_FMT_CI, labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR,
-            0, 0, 0, 0);
+            ImageTexels(f_ReplayLabelImages[rowLabels[index]]), G_IM_FMT_CI,
+            labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
         DrawTextureRect(&gfx, (rowOffsets[index] + LABEL_LEFT) << 2,
             (LABEL_TOP + (index * REPLAY_ROW_SPACING)) << 2,
             (rowOffsets[index] + LABEL_LEFT + labelWidth) << 2,
@@ -1641,13 +1637,12 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     f_ReplayTitleBobAngle += DegreesToRadians(TITLE_BOB_DEGREES_PER_FRAME);
-    LoadLargePalette(&gfx, (u8*)f_PanelImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_PanelImage));
     for (index = 0; index != PANEL_STRIP_COUNT; index++) {
       /* Unused; it is there to match */
       stripHeight = TITLE_PANEL_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
-          (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-              (index * PANEL_STRIP_SIZE),
+          LargeImageTexels(f_PanelImage) + (index * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
           G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       titleHeight = TITLE_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT;
@@ -1762,10 +1757,10 @@ void DrawControlsScreen(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-    LoadLargePalette(&gfx, (u8*)f_PanelImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_PanelImage));
     for (strip = 0; strip != CONTROLS_STRIP_COUNT; strip++) {
       LoadTextureBlock(&gfx,
-          (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
+          LargeImageTexels(f_PanelImage) +
               (strip * CONTROLS_STRIP_HEIGHT * CONTROLS_PICTURE_WIDTH),
           G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLS_PICTURE_WIDTH,
           CONTROLS_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);

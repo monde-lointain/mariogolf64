@@ -450,11 +450,10 @@ void DrawWipe(Gfx** displayListHead) {
   } else {
     texelOffset = (shapeOffset * WIPE_SHAPE_TEXELS << 5) / shapeSize;
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u8*)f_WipeShapeImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-        WIPE_SHAPE_TEXELS, WIPE_SHAPE_TEXELS, 0, G_TX_NOMIRROR | G_TX_CLAMP,
-        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
+    gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_WipeShapeImage)),
+        G_IM_FMT_I, WIPE_SHAPE_TEXELS, WIPE_SHAPE_TEXELS, 0,
+        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, WIPE_SQUARE_LEFT << 2, WIPE_SQUARE_TOP << 2,
         (WIPE_SQUARE_LEFT + WIPE_SQUARE_SIZE) << 2,
@@ -731,7 +730,7 @@ void DrawPrompt(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    LoadLargePalette(&gfx, (u8*)f_YesNoImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_YesNoImage));
     LoadTextureBlock(&gfx, (u8*)f_YesNoImage + YES_TEXELS_OFFSET, G_IM_FMT_CI,
         G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -856,7 +855,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
   if (f_HalfTurnState == HALF_TURN_STATE_SHOWING) {
     if (f_HalfTurnTimer > 0) {
       for (i = 0; i != HALF_TURN_SHOW_STEPS; i++) {
-        MarkHalfTurnCircle((u32*)((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE),
+        MarkHalfTurnCircle((u32*)(ImageBody(f_HalfTurnImage)),
             HALF_TURN_CENTER_COLUMN, HALF_TURN_CENTER_ROW, f_HalfTurnTimer);
         f_HalfTurnTimer--;
       }
@@ -877,7 +876,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
       f_HalfTurnTimer++;
     } else if (f_HalfTurnTimer < HALF_TURN_FRAMES) {
       for (i = 0; i != HALF_TURN_HIDE_STEPS; i++) {
-        MarkHalfTurnCircle((u32*)((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE),
+        MarkHalfTurnCircle((u32*)(ImageBody(f_HalfTurnImage)),
             HALF_TURN_CENTER_COLUMN, HALF_TURN_CENTER_ROW, f_HalfTurnTimer);
         f_HalfTurnTimer++;
       }
@@ -918,8 +917,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
     stripRows = (i == HALF_TURN_STRIP_COUNT - 1) ? HALF_TURN_LAST_STRIP_ROWS
                                                  : HALF_TURN_STRIP_ROWS;
     gDPLoadTextureTile(gfx++,
-        TextureAddress((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE +
-            (i * HALF_TURN_STRIP_SIZE)),
+        TextureAddress(ImageBody(f_HalfTurnImage) + (i * HALF_TURN_STRIP_SIZE)),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, HALF_TURN_WIDTH, stripRows, 0, 0,
         HALF_TURN_WIDTH - 1, stripRows - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,

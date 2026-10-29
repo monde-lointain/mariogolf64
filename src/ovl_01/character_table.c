@@ -519,11 +519,10 @@ void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress((u32)D_8023AC64_ovl_01 + IMAGE_HEADER_SIZE), G_IM_FMT_IA,
-      MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(D_8023AC64_ovl_01)),
+      G_IM_FMT_IA, MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -621,11 +620,10 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress((u32)D_8023AC68_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023AC68_ovl_01)));
   for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)D_8023AC68_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+        TextureAddress(LargeImageTexels(D_8023AC68_ovl_01) +
             index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -760,10 +758,8 @@ void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
 
   gDPPipeSync(gfx++);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress((u32)D_8023AC70_ovl_01 + IMAGE_HEADER_SIZE));
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress((u32)D_8023AC70_ovl_01 + PALETTED_TEXELS_OFFSET),
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023AC70_ovl_01)));
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(D_8023AC70_ovl_01)),
       G_IM_FMT_CI, TABLE_STAR_IMAGE_WIDTH, TABLE_STAR_IMAGE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

@@ -329,14 +329,13 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
     slot = drawOrder[index];
     halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
     step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
-    gDPLoadTLUT_pal256(gfx++,
-        TextureAddress((u8*)D_8023AA40_ovl_01[slot] + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(
+        gfx++, TextureAddress(ImageBody(D_8023AA40_ovl_01[slot])));
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     for (otherIndex = 0; otherIndex != COURSE_ICON_STRIP_COUNT; otherIndex++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress((u8*)D_8023AA40_ovl_01[slot] +
-              LARGE_PALETTED_TEXELS_OFFSET +
+          TextureAddress(LargeImageTexels(D_8023AA40_ovl_01[slot]) +
               otherIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH, COURSE_ICON_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -444,10 +443,9 @@ void func_802144E4_ovl_01(
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   }
 
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress((u32)D_8023AA44_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023AA44_ovl_01)));
   gDPLoadTextureBlock(gfx++,
-      TextureAddress((u32)D_8023AA44_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+      TextureAddress(LargeImageTexels(D_8023AA44_ovl_01) +
           (D_8023013C_ovl_01[character] * FACE_WIDTH * FACE_HEIGHT)),
       G_IM_FMT_CI, G_IM_SIZ_8b, FACE_WIDTH, FACE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -494,8 +492,7 @@ void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress((u32)D_8023AA4C_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023AA4C_ovl_01)));
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock(gfx++,
       TextureAddress((u32)D_8023AA4C_ovl_01 +
@@ -558,12 +555,11 @@ void func_8021508C_ovl_01(
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress((u32)D_8023AA48_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023AA48_ovl_01)));
   for (group = 0; group != TIME_GROUP_COUNT; group++) {
     for (digit = 0; digit != TIME_GROUP_DIGIT_COUNT; digit++) {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress((u32)D_8023AA48_ovl_01 + PALETTED_TEXELS_OFFSET +
+          TextureAddress(ImageTexels(D_8023AA48_ovl_01) +
               ((digits[group][digit] + TIME_FIRST_DIGIT_GLYPH) *
                   TIME_GLYPH_BYTES)),
           G_IM_FMT_CI, TIME_GLYPH_SIZE, TIME_GLYPH_SIZE, 0,

@@ -220,8 +220,7 @@ void DrawShotLabels(Gfx** displayListHead) {
   void DrawPlayerTag(s32 x, s32 y, s32 corner, s32 tag) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u32)g_PlayerTagImages + PALETTED_TEXELS_OFFSET +
-            tag * TAG_IMAGE_SIZE),
+        TextureAddress(ImageTexels(g_PlayerTagImages) + tag * TAG_IMAGE_SIZE),
         G_IM_FMT_CI, TAG_WIDTH, TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
@@ -401,9 +400,8 @@ NEXT:;
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetCombineMode(
         gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u32)g_LeaderLineImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-        TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
+    gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(g_LeaderLineImage)),
+        G_IM_FMT_I, TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 3, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
@@ -421,8 +419,7 @@ NEXT:;
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(
-        gfx++, 0, TextureAddress((u32)g_PlayerTagImages + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_PlayerTagImages)));
     gDPPipeSync(gfx++);
     for (i = 0; i != g_GameState.playerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
@@ -440,9 +437,8 @@ NEXT:;
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
         TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u32)g_LeaderLineImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-        TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
+    gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(g_LeaderLineImage)),
+        G_IM_FMT_I, TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 3, G_TX_NOLOD, G_TX_NOLOD);
     for (i = 0; i != g_GameState.playerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
@@ -460,8 +456,7 @@ NEXT:;
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TAG_SHADOW_ALPHA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(
-        gfx++, 0, TextureAddress((u32)g_PlayerTagImages + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_PlayerTagImages)));
     gDPPipeSync(gfx++);
     for (i = 0; i != g_GameState.playerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
@@ -580,13 +575,12 @@ OPAQUE:
       gDPSetAlphaCompare(g_DisplayListHead++, G_AC_THRESHOLD);
       gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-          TextureAddress((u32)g_DistanceSignImage + IMAGE_HEADER_SIZE));
+          TextureAddress(ImageBody(g_DistanceSignImage)));
       gDPLoadTextureTile_4b(g_DisplayListHead++,
-          TextureAddress((u32)g_DistanceSignImage + PALETTED_TEXELS_OFFSET),
-          G_IM_FMT_CI, SIGN_WIDTH, SIGN_HEIGHT, 0, 0, SIGN_WIDTH - 1,
-          SIGN_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-          G_TX_NOLOD);
+          TextureAddress(ImageTexels(g_DistanceSignImage)), G_IM_FMT_CI,
+          SIGN_WIDTH, SIGN_HEIGHT, 0, 0, SIGN_WIDTH - 1, SIGN_HEIGHT - 1, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, alpha);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(g_DisplayListHead++,
@@ -609,8 +603,8 @@ OPAQUE:
       gDPSetCombineMode(
           g_DisplayListHead++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
       gDPLoadTextureBlock_4b(g_DisplayListHead++,
-          TextureAddress((u32)g_ShadowedFontImage + IMAGE_HEADER_SIZE),
-          G_IM_FMT_IA, SHADOWED_FONT_IMAGE_WIDTH, SHADOWED_FONT_IMAGE_HEIGHT, 0,
+          TextureAddress(ImageBody(g_ShadowedFontImage)), G_IM_FMT_IA,
+          SHADOWED_FONT_IMAGE_WIDTH, SHADOWED_FONT_IMAGE_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       if (club->surfaceMask & CLUB_SURFACE_GREEN) {
@@ -778,11 +772,11 @@ OPAQUE:
         if (flagImage != PIN_FLAG_HIDDEN) {
           gDPPipeSync(g_DisplayListHead++);
           gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-              TextureAddress((u32)g_PinFlagImages + IMAGE_HEADER_SIZE));
+              TextureAddress(ImageBody(g_PinFlagImages)));
           gDPPipeSync(g_DisplayListHead++);
           gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
           gDPLoadTextureBlock_4b(g_DisplayListHead++,
-              TextureAddress((u32)g_PinFlagImages + PALETTED_TEXELS_OFFSET +
+              TextureAddress(ImageTexels(g_PinFlagImages) +
                   (flagImage * PIN_FLAG_IMAGE_SIZE)),
               G_IM_FMT_CI, PIN_FLAG_IMAGE_WIDTH, PIN_FLAG_IMAGE_HEIGHT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

@@ -951,9 +951,8 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   LoadSmallPalette(&gfx, 0, f_DigitsImage + IMAGE_HEADER_SIZE);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress((u32)f_DigitsImage + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
-      128, RESULTS_DIGIT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(f_DigitsImage)),
+      G_IM_FMT_CI, 128, RESULTS_DIGIT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   c = (u8*)g_PrintBuffer;

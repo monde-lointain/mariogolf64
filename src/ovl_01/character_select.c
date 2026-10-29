@@ -1574,11 +1574,10 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
   u8* labelImage;
 
   GetMenuImageBuffer();
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress((u32)D_8023A568_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A568_ovl_01)));
   for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u32)D_8023A568_ovl_01 + PALETTED_TEXELS_OFFSET +
+        TextureAddress(ImageTexels(D_8023A568_ovl_01) +
             (stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT / 2)),
         G_IM_FMT_CI, BOARD_WIDTH, BOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1646,8 +1645,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress((u32)D_8023A570_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A570_ovl_01)));
   if (g_MenuScreen == MENU_SCREEN_UNK24) {
     tagCount = 1;
   }
@@ -1769,11 +1767,10 @@ void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress((u32)D_8023A574_ovl_01 + IMAGE_HEADER_SIZE), G_IM_FMT_IA,
-      MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(D_8023A574_ovl_01)),
+      G_IM_FMT_IA, MENU_CURSOR_SIZE, MENU_CURSOR_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1818,14 +1815,12 @@ void func_8020D338_ovl_01(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress((u32)D_801B69EC + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_801B69EC)));
   gDPPipeSync(gfx++);
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress((u32)D_801B69EC + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
-      BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(D_801B69EC)),
+      G_IM_FMT_CI, BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, COMPUTER_ICON_LEFT << 2, BUTTON_ICON_TOP << 2,
       (COMPUTER_ICON_LEFT + BUTTON_ICON_WIDTH) << 2,
@@ -1852,15 +1847,13 @@ void func_8020D734_ovl_01(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress((u32)D_801B69EC + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_801B69EC)));
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(
-          (u32)D_801B69EC + PALETTED_TEXELS_OFFSET + LEFTY_ICON_OFFSET),
-      G_IM_FMT_CI, BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      TextureAddress(ImageTexels(D_801B69EC) + LEFTY_ICON_OFFSET), G_IM_FMT_CI,
+      BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, LEFTY_ICON_LEFT << 2, BUTTON_ICON_TOP << 2,
       (LEFTY_ICON_LEFT + BUTTON_ICON_WIDTH) << 2,
@@ -1902,11 +1895,10 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress((u32)D_8023A584_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023A584_ovl_01)));
   for (cellIndex = firstCell; cellIndex != endCell; cellIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)D_8023A584_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+        TextureAddress(LargeImageTexels(D_8023A584_ovl_01) +
             (cellIndex * CURVE_METER_CELL_SIZE * CURVE_METER_CELL_SIZE)),
         G_IM_FMT_CI, G_IM_SIZ_8b, CURVE_METER_CELL_SIZE, CURVE_METER_CELL_SIZE,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

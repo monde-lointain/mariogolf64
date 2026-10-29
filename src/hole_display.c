@@ -1807,10 +1807,10 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
         gDPSetCycleType(gfx++, G_CYC_2CYCLE);
         gDPSetCombineLERP(gfx++, TEXEL1, 0, TEXEL0, 0, 0, 0, 0, TEXEL1, TEXEL1,
             0, COMBINED, 0, 0, 0, 0, COMBINED);
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress((u32)g_SkyImage + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
-            G_IM_SIZ_16b, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0, G_TX_WRAP,
-            G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_SkyImage)),
+            G_IM_FMT_RGBA, G_IM_SIZ_16b, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0,
+            G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPLoadMultiBlock_4b(gfx++,
             TextureAddress(
                 (u32)g_SkyImage + SKY_IMAGE_HALF_OFFSET + IMAGE_HEADER_SIZE),
@@ -1834,11 +1834,10 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
         gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0,
             0, 0, TEXEL0, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0,
             TEXEL0);
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress((u32)g_SkyImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-            G_IM_SIZ_8b, SUN_GLOW_IMAGE_SIZE, SUN_GLOW_IMAGE_SIZE, 0,
-            G_TX_MIRROR, G_TX_MIRROR, SUN_GLOW_MASK, SUN_GLOW_MASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+        gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_SkyImage)),
+            G_IM_FMT_I, G_IM_SIZ_8b, SUN_GLOW_IMAGE_SIZE, SUN_GLOW_IMAGE_SIZE,
+            0, G_TX_MIRROR, G_TX_MIRROR, SUN_GLOW_MASK, SUN_GLOW_MASK,
+            G_TX_NOLOD, G_TX_NOLOD);
         gDPSetPrimColor(gfx++, 0, 0, colors->unk14->sunPrimColor[0],
             colors->unk14->sunPrimColor[1], colors->unk14->sunPrimColor[2],
             255);
@@ -1934,8 +1933,7 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress((u32)g_CourseSkyImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_CourseSkyImage)));
   f_BackdropStripCount = COURSE_BACKDROP_STRIP_COUNT;
   f_BackdropStripHeight = COURSE_BACKDROP_STRIP_HEIGHT;
   f_BackdropImageWidth = BACKDROP_IMAGE_WIDTH;
@@ -2614,14 +2612,14 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u32)g_BackdropPatternImage + PALETTED_TEXELS_OFFSET),
-        G_IM_FMT_CI, BACKDROP_PATTERN_SIZE, BACKDROP_PATTERN_SIZE, 0,
+        TextureAddress(ImageTexels(g_BackdropPatternImage)), G_IM_FMT_CI,
+        BACKDROP_PATTERN_SIZE, BACKDROP_PATTERN_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         BACKDROP_PATTERN_MASK, BACKDROP_PATTERN_MASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0,
-        TextureAddress((u32)g_BackdropPatternImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(
+        gfx++, 0, TextureAddress(ImageBody(g_BackdropPatternImage)));
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, BACKDROP_BORDER << 2,
         (SCREEN_WIDTH - BACKDROP_BORDER) << 2,

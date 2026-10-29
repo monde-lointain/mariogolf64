@@ -930,9 +930,9 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(g_DisplayListHead++,
-      TextureAddress((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
-      G_IM_FMT_I, G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE,
-      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
+      TextureAddress(ImageBody(g_ShotPreviewDashImage)), G_IM_FMT_I,
+      G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
       G_TX_NOLOD);
   gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, f_OpeningShotPathScroll,
       0,

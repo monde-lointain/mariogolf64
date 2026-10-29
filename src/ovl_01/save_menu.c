@@ -568,11 +568,10 @@ void func_8021FC5C_ovl_01(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
 
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress((u32)D_8023B670_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023B670_ovl_01)));
   do {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)D_8023B670_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+        TextureAddress(LargeImageTexels(D_8023B670_ovl_01) +
             (index * RING_SHOT_STRIP_WIDTH * RING_SHOT_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, RING_SHOT_STRIP_WIDTH, RING_SHOT_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -906,10 +905,8 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress((u32)D_8023B678_ovl_01 + IMAGE_HEADER_SIZE));
-  gDPLoadTextureTile_4b(gfx++,
-      TextureAddress((u32)D_8023B678_ovl_01 + PALETTED_TEXELS_OFFSET),
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B678_ovl_01)));
+  gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(D_8023B678_ovl_01)),
       G_IM_FMT_CI, COURSE_LABEL_WIDTH, COURSE_LABEL_HEIGHT, 0, 0,
       COURSE_LABEL_WIDTH - 1, COURSE_LABEL_HEIGHT - 1, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -946,12 +943,11 @@ void func_802213C8_ovl_01(
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++,
-      TextureAddress((u32)D_8023B680_ovl_01[imageIndex] + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(
+      gfx++, TextureAddress(ImageBody(D_8023B680_ovl_01[imageIndex])));
   for (stripIndex = 0; stripIndex != SAVE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)D_8023B680_ovl_01[imageIndex] +
-            LARGE_PALETTED_TEXELS_OFFSET +
+        TextureAddress(LargeImageTexels(D_8023B680_ovl_01[imageIndex]) +
             (stripIndex * SAVE_ICON_WIDTH * SAVE_ICON_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, SAVE_ICON_WIDTH, SAVE_ICON_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1906,13 +1902,12 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
       }
 
       if (D_80230B50_ovl_01[slot] != -1) {
-        gDPLoadTLUT_pal256(gfx++,
-            TextureAddress((u32)D_8023BD70_ovl_01[slot] + IMAGE_HEADER_SIZE));
+        gDPLoadTLUT_pal256(
+            gfx++, TextureAddress(ImageBody(D_8023BD70_ovl_01[slot])));
         for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT;
             otherIndex++) {
           gDPLoadTextureBlock(gfx++,
-              TextureAddress((u32)D_8023BD70_ovl_01[slot] +
-                  LARGE_PALETTED_TEXELS_OFFSET +
+              TextureAddress(LargeImageTexels(D_8023BD70_ovl_01[slot]) +
                   (otherIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
               G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
               0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1953,8 +1948,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress((u32)D_8023BD78_ovl_01 + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023BD78_ovl_01)));
   for (index = 0; index != SAVED_GAME_STRIP_COUNT; index++) {
     if (playerCount == 1) {
       stripLeft = SAVED_GAME_STRIP_LEFT;
@@ -1968,7 +1962,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
     }
 
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)D_8023BD78_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+        TextureAddress(LargeImageTexels(D_8023BD78_ovl_01) +
             (index * SAVED_GAME_STRIP_WIDTH * SAVED_GAME_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, SAVED_GAME_STRIP_WIDTH,
         SAVED_GAME_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1990,10 +1984,9 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
   chosenMode = &D_80230B50_ovl_01[memory->savedGameIndex];
   if (*chosenMode != -1) {
     labelOffset = &D_80230CEC_ovl_01[D_80230BB0_ovl_01[*chosenMode]];
-    gDPLoadTLUT_pal16(
-        gfx++, 0, TextureAddress((u32)D_8023BD7C_ovl_01 + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023BD7C_ovl_01)));
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u32)D_8023BD7C_ovl_01 + PALETTED_TEXELS_OFFSET +
+        TextureAddress(ImageTexels(D_8023BD7C_ovl_01) +
             (D_80230BB0_ovl_01[*chosenMode] * GAME_MODE_LABEL_IMAGE_SIZE)),
         G_IM_FMT_CI, GAME_MODE_LABEL_WIDTH, GAME_MODE_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -2127,10 +2120,10 @@ void func_80224AFC_ovl_01(
 
   if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
     image = D_8023BD74_ovl_01[D_8022F8C4_ovl_01];
-    gDPLoadTLUT_pal256(gfx++, TextureAddress((u32)image + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+          TextureAddress(LargeImageTexels(image) +
               (stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
           G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -2314,7 +2307,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   image = D_8023BD80_ovl_01;
-  gDPLoadTLUT_pal256(gfx++, TextureAddress((u32)image + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (D_80230B40_ovl_01[playerIndex] != NO_CONTROLLER) {
       position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
@@ -2322,7 +2315,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
       controller = D_80230B40_ovl_01[playerIndex];
       if (controller != COMPUTER_CONTROLLER) {
         gDPLoadTextureBlock(gfx++,
-            TextureAddress((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+            TextureAddress(LargeImageTexels(image) +
                 (controller * CONTROLLER_ICON_IMAGE_SIZE)),
             G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLLER_ICON_SIZE,
             CONTROLLER_ICON_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2340,7 +2333,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
   }
 
   image = D_8023BD84_ovl_01;
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress((u32)image + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     position[AXIS_X] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
     position[AXIS_Y] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
@@ -2353,15 +2346,15 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
       }
 
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress((u32)image + PALETTED_TEXELS_OFFSET +
-              (labelIndex * PLAYER_LABEL_IMAGE_SIZE)),
+          TextureAddress(
+              ImageTexels(image) + (labelIndex * PLAYER_LABEL_IMAGE_SIZE)),
           G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress((u32)image + PALETTED_TEXELS_OFFSET +
-              (playerIndex * PLAYER_LABEL_IMAGE_SIZE)),
+          TextureAddress(
+              ImageTexels(image) + (playerIndex * PLAYER_LABEL_IMAGE_SIZE)),
           G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

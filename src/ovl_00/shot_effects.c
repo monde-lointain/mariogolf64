@@ -414,9 +414,8 @@ void DrawSparks(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress((u32)f_SparkImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-      SPARK_IMAGE_SIZE, SPARK_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP,
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_SparkImage)),
+      G_IM_FMT_I, SPARK_IMAGE_SIZE, SPARK_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP,
       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   for (i = 0; i != SPARK_COUNT; i++) {
@@ -716,14 +715,12 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress((u32)f_SwingTrailImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_SwingTrailImage)));
   gDPLoadTextureBlock(gfx++,
-      TextureAddress((u32)f_SwingTrailImage + LARGE_PALETTED_TEXELS_OFFSET),
-      G_IM_FMT_CI, G_IM_SIZ_8b, SWING_TRAIL_IMAGE_WIDTH,
-      SWING_TRAIL_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+      TextureAddress(LargeImageTexels(f_SwingTrailImage)), G_IM_FMT_CI,
+      G_IM_SIZ_8b, SWING_TRAIL_IMAGE_WIDTH, SWING_TRAIL_IMAGE_HEIGHT, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (f_SwingTrailKind == SWING_TRAIL_KIND_POWER_SHOT) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, SHADE, 0, 0, 0, 0,
         TEXEL0, TEXEL0, 0, SHADE, 0);

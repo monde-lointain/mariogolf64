@@ -2329,9 +2329,8 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
       PRIMITIVE, 0, 0, 0, TEXEL0);
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress((u32)f_WindIconImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
-      WIND_ICON_TEXTURE_WIDTH, WIND_ICON_TEXTURE_HEIGHT, 0,
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_WindIconImage)),
+      G_IM_FMT_I, WIND_ICON_TEXTURE_WIDTH, WIND_ICON_TEXTURE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
@@ -2370,12 +2369,10 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   gDPSetEnvColor(
       gfx++, WIND_TEXT_ENV_RED, WIND_TEXT_ENV_GREEN, WIND_TEXT_ENV_BLUE, 255);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress((u32)f_WindSpeedFont + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_WindSpeedFont)));
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress((u32)f_WindSpeedFont + PALETTED_TEXELS_OFFSET),
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(f_WindSpeedFont)),
       G_IM_FMT_CI, WIND_FONT_WIDTH, WIND_FONT_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2620,10 +2617,10 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
 
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)f_ClubHeadImage + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
-        G_IM_SIZ_16b, CLUB_HEAD_IMAGE_SIZE, CLUB_HEAD_IMAGE_SIZE, 0, G_TX_WRAP,
-        G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_ClubHeadImage)),
+        G_IM_FMT_RGBA, G_IM_SIZ_16b, CLUB_HEAD_IMAGE_SIZE, CLUB_HEAD_IMAGE_SIZE,
+        0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++,
         OS_K0_TO_PHYSICAL(&f_ClubHeadIconMatrices[g_MatrixBufferIndex]),
@@ -2669,8 +2666,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPLoadTLUT_pal16(
-        gfx++, 0, TextureAddress((u32)f_LieImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LieImage)));
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
@@ -2679,15 +2675,13 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LieIconMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_LieIconVertices, 8, 0);
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)f_LieImage + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
-        G_IM_SIZ_16b, LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0, G_TX_WRAP,
-        G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_LieImage)),
+        G_IM_FMT_RGBA, G_IM_SIZ_16b, LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0,
+        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(
-            (u32)f_LieImage + IMAGE_HEADER_SIZE + LIE_IMAGE_HALF_SIZE),
+        TextureAddress(ImageBody(f_LieImage) + LIE_IMAGE_HALF_SIZE),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0,
         G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
@@ -2723,8 +2717,8 @@ void DrawHoleFlag(Boolean isBackDrawn) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
   gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
-  gDPLoadTLUT_pal256(g_DisplayListHead++,
-      TextureAddress((u32)f_HoleImage + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(
+      g_DisplayListHead++, TextureAddress(ImageBody(f_HoleImage)));
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
   gDPPipeSync(g_DisplayListHead++);
@@ -2733,10 +2727,10 @@ void DrawHoleFlag(Boolean isBackDrawn) {
   gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(g_DisplayListHead++,
-      TextureAddress((u32)f_HoleImage + LARGE_PALETTED_TEXELS_OFFSET),
-      G_IM_FMT_CI, G_IM_SIZ_8b, HOLE_IMAGE_WIDTH, HOLE_IMAGE_HEIGHT, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      TextureAddress(LargeImageTexels(f_HoleImage)), G_IM_FMT_CI, G_IM_SIZ_8b,
+      HOLE_IMAGE_WIDTH, HOLE_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPPipeSync(g_DisplayListHead++);
   gSPVertex(g_DisplayListHead++, f_HoleFlagVertices[0][g_MatrixBufferIndex],
       HOLE_FLAG_VERTEX_COUNT, 0);
@@ -3209,7 +3203,7 @@ void SetShotOffsetMarker(s32 x, s32 y) {
 void DrawShotOffsetMarker(void) {
   gDPPipeSync(g_DisplayListHead++);
   gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-      TextureAddress((u32)f_ShotOffsetMarkerImage + IMAGE_HEADER_SIZE));
+      TextureAddress(ImageBody(f_ShotOffsetMarkerImage)));
   f_ShotOffsetMarkerFrame =
       (f_ShotOffsetMarkerFrame + 1) % SHOT_OFFSET_MARKER_FRAME_COUNT;
   if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
@@ -3221,8 +3215,8 @@ void DrawShotOffsetMarker(void) {
   }
 
   gDPLoadTextureBlock_4b(g_DisplayListHead++,
-      TextureAddress((u32)f_ShotOffsetMarkerImage + PALETTED_TEXELS_OFFSET +
-          f_ShotOffsetMarkerTexelOffset),
+      TextureAddress(
+          ImageTexels(f_ShotOffsetMarkerImage) + f_ShotOffsetMarkerTexelOffset),
       G_IM_FMT_CI, SHOT_OFFSET_MARKER_SIZE, SHOT_OFFSET_MARKER_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3294,15 +3288,15 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
-        TextureAddress((u32)f_AnimatedIconImages[f_AnimatedIconImageIndex] +
-            IMAGE_HEADER_SIZE));
+        TextureAddress(
+            ImageBody(f_AnimatedIconImages[f_AnimatedIconImageIndex])));
     gDPPipeSync(gfx++);
     gDPSetRenderMode(
         gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)f_AnimatedIconImages[f_AnimatedIconImageIndex] +
-            LARGE_PALETTED_TEXELS_OFFSET),
+        TextureAddress(
+            LargeImageTexels(f_AnimatedIconImages[f_AnimatedIconImageIndex])),
         G_IM_FMT_CI, G_IM_SIZ_8b, ANIMATED_ICON_SIZE, ANIMATED_ICON_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3321,12 +3315,10 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
       label = ANIMATED_ICON_LABEL_UNK2;
     }
 
-    gDPLoadTLUT_pal16(gfx++, 0,
-        TextureAddress(
-            (u32)f_AnimatedIconLabelImages[label] + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(
+        gfx++, 0, TextureAddress(ImageBody(f_AnimatedIconLabelImages[label])));
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(
-            (u32)f_AnimatedIconLabelImages[label] + PALETTED_TEXELS_OFFSET),
+        TextureAddress(ImageTexels(f_AnimatedIconLabelImages[label])),
         G_IM_FMT_CI, ANIMATED_ICON_LABEL_WIDTH, ANIMATED_ICON_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3770,13 +3762,13 @@ void DrawRoundHud(CameraView* view) {
   if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
     f_PinFlagTime = (f_PinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
     gDPPipeSync(g_DisplayListHead++);
-    gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-        TextureAddress((u32)g_PinFlagImages + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(
+        g_DisplayListHead++, 0, TextureAddress(ImageBody(g_PinFlagImages)));
     gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        TextureAddress((u32)g_PinFlagImages + PALETTED_TEXELS_OFFSET),
-        G_IM_FMT_CI, PIN_FLAG_IMAGE_SIZE, PIN_FLAG_IMAGE_SIZE, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        TextureAddress(ImageTexels(g_PinFlagImages)), G_IM_FMT_CI,
+        PIN_FLAG_IMAGE_SIZE, PIN_FLAG_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
         (PIN_FLAG_X - g_ShotPanelOffsetX) << 2, PIN_FLAG_Y << 2,
@@ -3785,11 +3777,11 @@ void DrawRoundHud(CameraView* view) {
         (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) * (PIN_FLAG_WIDTH << 5),
         PIN_FLAG_IMAGE_T << 5, 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
-    gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-        TextureAddress((u32)f_RestLabelImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(
+        g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RestLabelImage)));
     gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        TextureAddress((u32)f_RestLabelImage + PALETTED_TEXELS_OFFSET),
-        G_IM_FMT_CI, SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0,
+        TextureAddress(ImageTexels(f_RestLabelImage)), G_IM_FMT_CI,
+        SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
@@ -3827,11 +3819,11 @@ void DrawRoundHud(CameraView* view) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(
           g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
-      gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-          TextureAddress((u32)f_RingImages + IMAGE_HEADER_SIZE));
+      gDPLoadTLUT_pal16(
+          g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RingImages)));
       gDPLoadTextureBlock_4b(g_DisplayListHead++,
-          TextureAddress((u32)f_RingImages + PALETTED_TEXELS_OFFSET +
-              f_RingFrame * RING_FRAME_SIZE),
+          TextureAddress(
+              ImageTexels(f_RingImages) + f_RingFrame * RING_FRAME_SIZE),
           G_IM_FMT_CI, RING_IMAGE_SIZE, RING_IMAGE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3847,10 +3839,10 @@ void DrawRoundHud(CameraView* view) {
     }
   }
 
-  gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-      TextureAddress((u32)f_DistanceFont + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal16(
+      g_DisplayListHead++, 0, TextureAddress(ImageBody(f_DistanceFont)));
   gDPLoadTextureBlock_4b(g_DisplayListHead++,
-      TextureAddress((u32)f_DistanceFont + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
+      TextureAddress(ImageTexels(f_DistanceFont)), G_IM_FMT_CI,
       DISTANCE_FONT_WIDTH, DISTANCE_GLYPH_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
@@ -3937,11 +3929,11 @@ void DrawRoundHud(CameraView* view) {
       UpdateClubPanelImages();
     }
 
-    gDPLoadTLUT_pal256(g_DisplayListHead++,
-        TextureAddress((u32)g_ClubPanelImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal256(
+        g_DisplayListHead++, TextureAddress(ImageBody(g_ClubPanelImage)));
     gDPLoadTextureBlock(g_DisplayListHead++,
-        TextureAddress((u32)g_ClubPanelImage + LARGE_PALETTED_TEXELS_OFFSET),
-        G_IM_FMT_CI, G_IM_SIZ_8b, CLUB_PANEL_WIDTH, CLUB_PANEL_HEIGHT, 0,
+        TextureAddress(LargeImageTexels(g_ClubPanelImage)), G_IM_FMT_CI,
+        G_IM_SIZ_8b, CLUB_PANEL_WIDTH, CLUB_PANEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
@@ -3953,11 +3945,9 @@ void DrawRoundHud(CameraView* view) {
         0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-        TextureAddress(
-            (u32)f_ClubNameImages[f_ClubNameImageIndex] + IMAGE_HEADER_SIZE));
+        TextureAddress(ImageBody(f_ClubNameImages[f_ClubNameImageIndex])));
     gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        TextureAddress((u32)f_ClubNameImages[f_ClubNameImageIndex] +
-            PALETTED_TEXELS_OFFSET),
+        TextureAddress(ImageTexels(f_ClubNameImages[f_ClubNameImageIndex])),
         G_IM_FMT_CI, CLUB_NAME_WIDTH, CLUB_NAME_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3972,10 +3962,10 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_RoundHud.unk8 && !g_IsCupViewShown && !IsOnDrivingRange()) {
-    gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-        TextureAddress((u32)f_ParImage + IMAGE_HEADER_SIZE));
+    gDPLoadTLUT_pal16(
+        g_DisplayListHead++, 0, TextureAddress(ImageBody(f_ParImage)));
     gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        TextureAddress((u32)f_ParImage + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
+        TextureAddress(ImageTexels(f_ParImage)), G_IM_FMT_CI,
         SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -4295,11 +4285,10 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
           (g_GameState.betRates[BET_NEAREST_PIN] > 0 &&
               IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex))) {
         gDPLoadTLUT_pal256(
-            gfx++, TextureAddress((u32)f_HoleContestImage + IMAGE_HEADER_SIZE));
+            gfx++, TextureAddress(ImageBody(f_HoleContestImage)));
         for (strip = 0; strip != CONTEST_IMAGE_STRIP_COUNT; strip++) {
           gDPLoadTextureBlock(gfx++,
-              TextureAddress((u32)f_HoleContestImage +
-                  LARGE_PALETTED_TEXELS_OFFSET +
+              TextureAddress(LargeImageTexels(f_HoleContestImage) +
                   (strip * (CONTEST_IMAGE_WIDTH * CONTEST_IMAGE_STRIP_HEIGHT))),
               G_IM_FMT_CI, G_IM_SIZ_8b, CONTEST_IMAGE_WIDTH,
               CONTEST_IMAGE_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR,
@@ -4316,12 +4305,11 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
 
       if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
           (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
-        gDPLoadTLUT_pal256(gfx++,
-            TextureAddress((u32)f_MatchStandingImage + IMAGE_HEADER_SIZE));
+        gDPLoadTLUT_pal256(
+            gfx++, TextureAddress(ImageBody(f_MatchStandingImage)));
         for (strip = 0; strip != MATCH_IMAGE_STRIP_COUNT; strip++) {
           gDPLoadTextureTile(gfx++,
-              TextureAddress((u32)f_MatchStandingImage +
-                  LARGE_PALETTED_TEXELS_OFFSET +
+              TextureAddress(LargeImageTexels(f_MatchStandingImage) +
                   (strip * (MATCH_IMAGE_WIDTH * MATCH_IMAGE_STRIP_HEIGHT))),
               G_IM_FMT_CI, G_IM_SIZ_8b, MATCH_IMAGE_WIDTH,
               MATCH_IMAGE_STRIP_HEIGHT, 0, 0, MATCH_IMAGE_WIDTH - 1,
