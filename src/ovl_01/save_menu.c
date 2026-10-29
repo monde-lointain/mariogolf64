@@ -1352,7 +1352,7 @@ void UpdateSavedGames(void) {
         g_PlayerControllerIndices[slot] = D_80230B40_ovl_01[slot];
       }
 
-      func_801F6A38_ovl_01();
+      CheckControllersAndSetPans();
       ResumeBets();
     }
   } else if (IsHudAnimationDone() == TRUE) {

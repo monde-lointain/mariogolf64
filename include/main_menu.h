@@ -53,7 +53,7 @@ extern s32 D_801B7070;
 extern char D_8022BF70_ovl_01[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 
 s32 GetOpenCourseCount(void);
-void func_801F6A38_ovl_01(void);
+void CheckControllersAndSetPans(void);
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers);
 void DrawLargeBannerBackdropLayers(Gfx** displayListHead, s32 layers);
 

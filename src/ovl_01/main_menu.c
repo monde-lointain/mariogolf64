@@ -338,7 +338,7 @@ s32 IsSimpleCameraChosen(void);
 void func_8005C674(s32 arg0, s32 arg1);
 void func_8005D334(void);
 void func_801F6B20_ovl_01(void);
-void func_801F6B28_ovl_01(void);
+void SetUpChosenGame(void);
 void UpdateMenuTitleScreen(void);
 void UpdateAnimationViewer(void);
 void UpdateModeSelect(void);
@@ -1591,7 +1591,7 @@ void UpdateMenus(void) {
     } else {
       g_GameState.saveCount = FALSE;
       InitPlay(PLAY_KIND_WITHOUT_HOLE_DISPLAY);
-      func_801F6B28_ovl_01();
+      SetUpChosenGame();
       InitRoundHud();
     }
 
@@ -1610,11 +1610,16 @@ void UpdateMenus(void) {
 }
 
 /*
+ * Sets g_HasOwnControllers unless two players share a controller, as rumble
+ * and the waiting players' calls need one each, and gives each player a sound
+ * pan for the player count.
+ */
+/*
  * Doesn't match: the original reloads g_GameState.playerCount for each pass of
  * the outer loop, where this keeps it in a register.
  */
 #ifdef NON_MATCHING
-void func_801F6A38_ovl_01(void) {
+void CheckControllersAndSetPans(void) {
   s32 playerIndex;
   s32 otherIndex;
 
@@ -1637,7 +1642,7 @@ void func_801F6A38_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F6A38_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", CheckControllersAndSetPans);
 #endif
 
 void func_801F6B20_ovl_01(void) {}
@@ -1650,7 +1655,12 @@ const char D_80231514_ovl_01[] = "%s";
       (mode) == GAME_MODE_RING_SHOT || (mode) == GAME_MODE_SKINS_MATCH || \
       (mode) == GAME_MODE_CLUB_SLOTS)
 
-void func_801F6B28_ovl_01(void) {
+/*
+ * Fills g_GameState and g_Players from the menus' choices as the menus exit:
+ * a chosen replay's record, or the course, holes, bets, handicaps, characters,
+ * controllers and clubs of a new game.
+ */
+void SetUpChosenGame(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   Player* player;
@@ -1735,7 +1745,7 @@ void func_801F6B28_ovl_01(void) {
   }
 
   g_GameState.step = GAME_STATE_RELOAD_HOLE;
-  func_801F6A38_ovl_01();
+  CheckControllersAndSetPans();
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     StartRoundStats();
   }
