@@ -7,15 +7,18 @@
  * The courses' layouts are kept as course records. The six main courses
  * have one each, as do the two mini-golf courses and the driving range.
  */
-#define COURSE_RECORD_COUNT 9
-#define COURSE_RECORD_TOAD_HIGHLANDS 0
-#define COURSE_RECORD_KOOPA_PARK 1
-#define COURSE_RECORD_YOSHIS_ISLAND 3
-#define COURSE_RECORD_BOO_VALLEY 4
-#define COURSE_RECORD_MARIOS_STAR 5
-#define COURSE_RECORD_LUIGIS_GARDEN 6
-#define COURSE_RECORD_PEACHS_CASTLE 7
-#define COURSE_RECORD_DRIVING_RANGE 8
+enum CourseRecordIndex {
+  COURSE_RECORD_TOAD_HIGHLANDS,
+  COURSE_RECORD_KOOPA_PARK,
+  COURSE_RECORD_SHY_GUY_DESERT,
+  COURSE_RECORD_YOSHIS_ISLAND,
+  COURSE_RECORD_BOO_VALLEY,
+  COURSE_RECORD_MARIOS_STAR,
+  COURSE_RECORD_LUIGIS_GARDEN,
+  COURSE_RECORD_PEACHS_CASTLE,
+  COURSE_RECORD_DRIVING_RANGE,
+  COURSE_RECORD_COUNT
+};
 
 /*
  * GameState.courseIndex numbers the main courses from 0, then the mini-golf
