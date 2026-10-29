@@ -207,8 +207,8 @@ typedef struct ImageCorner {
 #define MENU_BOB_PHASE_STEP 0.13f
 #define MENU_BOB_HEIGHT 5.0f
 
-/* Where DrawMenuBanner and DrawNamePlateBanner draw the banners of D_801052BC
- * and g_NamePlateImage */
+/* Where DrawMenuBanner and DrawNamePlateBanner draw the banners of
+ * g_MenuTitleImages and g_NamePlateImage */
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
 
@@ -255,7 +255,7 @@ typedef struct ImageCorner {
 
 extern void* D_800FF420[2];
 extern s32 D_801051F0;
-extern void* D_801052BC[2];
+extern void* g_MenuTitleImages[2];
 extern const char D_80231514_ovl_01[];
 
 #define PLAYER_UNK28_TRAINING (-1)
@@ -451,7 +451,9 @@ static s32 D_8022BE84_ovl_01 = 0;
 u8 D_8022BE88_ovl_01 = 0;
 u8 D_8022BE89_ovl_01 = 0;
 static s16 D_8022BE8A_ovl_01 = 0;
-static s16 D_8022BE8C_ovl_01 = 0;
+/* Which of g_MenuTitleImages is shown; a new screen's title is read into the
+ * other */
+static s16 f_MenuTitleImageIndex = 0;
 static s16 D_8022BE8E_ovl_01 = 0;
 static s16 D_8022BE90_ovl_01 = 0;
 static s16 D_8022BE92_ovl_01 = 0;
@@ -1095,9 +1097,9 @@ void UpdateMenus(void) {
   if (g_LoadedMenuScreen != g_MenuScreen) {
     g_LoadedMenuScreen = g_MenuScreen;
     if (g_MenuScreen < MENU_SCREEN_COUNT) {
-      D_8022BE8C_ovl_01 ^= 1;
+      f_MenuTitleImageIndex ^= 1;
       OpenEncodedAsset(g_MenuScreenImageAssets[g_MenuScreen], &asset);
-      ReadEncodedAsset(D_801052BC[D_8022BE8C_ovl_01], &asset);
+      ReadEncodedAsset(g_MenuTitleImages[f_MenuTitleImageIndex], &asset);
     }
 
     switch (g_MenuScreen) {
@@ -3958,7 +3960,7 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   }
 
   if (layers & MENU_LAYER_BANNER) {
-    image = D_801052BC[D_8022BE8C_ovl_01];
+    image = g_MenuTitleImages[f_MenuTitleImageIndex];
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
 
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
@@ -4215,7 +4217,7 @@ void DrawLargeMenuBanner(Gfx** displayListHead) {
 void DrawMenuBanner(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
-  u8* image = D_801052BC[D_8022BE8C_ovl_01];
+  u8* image = g_MenuTitleImages[f_MenuTitleImageIndex];
   s32 stripTop;
 
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));

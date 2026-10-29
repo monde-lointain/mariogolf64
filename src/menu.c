@@ -87,7 +87,7 @@ extern void* D_801052C4[2];
 extern void* D_800FF420[2];
 extern void* g_NamePlateImage;
 extern void* D_8012D420[2];
-extern void* D_801052BC[2];
+extern void* g_MenuTitleImages[2];
 extern void* D_800FBDFC[2];
 extern void* D_800FF4C4[2];
 extern void* D_801B93E0[5];
@@ -515,12 +515,12 @@ void LoadMenuResources(void) {
     ReadEncodedAsset(D_801B5CD0[1], &asset);
   }
 
-  D_801052BC[0] =
+  g_MenuTitleImages[0] =
       AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
-  ReadEncodedAsset(D_801052BC[0], &asset);
-  D_801052BC[1] =
+  ReadEncodedAsset(g_MenuTitleImages[0], &asset);
+  g_MenuTitleImages[1] =
       AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
-  ReadEncodedAsset(D_801052BC[1], &asset);
+  ReadEncodedAsset(g_MenuTitleImages[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
     if (g_MenuScreen == MENU_SCREEN_UNK5) {
       size = OpenEncodedAsset(
@@ -634,8 +634,8 @@ void FreeMenuResources(void) {
   FreeMemory(&D_801B5CD0[0]);
   FreeMemory(&D_8012D420[1]);
   FreeMemory(&D_801B5CD0[1]);
-  FreeMemory(&D_801052BC[0]);
-  FreeMemory(&D_801052BC[1]);
+  FreeMemory(&g_MenuTitleImages[0]);
+  FreeMemory(&g_MenuTitleImages[1]);
   FreeMemory(&D_800FBDFC[0]);
   FreeMemory(&D_800FBDFC[1]);
   for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {

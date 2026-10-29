@@ -46,7 +46,7 @@ enum MenuScreen {
 #define NO_MENU_SCREEN (-1)
 /* The screen whose assets UpdateMenus last read */
 extern s8 g_LoadedMenuScreen;
-/* Each screen's image */
+/* Each screen's title, which its banner shows */
 extern AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT];
 extern s32 g_MenuScreen;
 
