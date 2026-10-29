@@ -909,13 +909,13 @@ void StartHoleIntro(void) {
   switch ((s8)g_CourseRecords[GetCourseRecordIndex()]
           .holes[GetHoleRecordIndex()]
           .par) {
-    case 3:
+    case PAR_THREE:
       OpenEncodedAsset(ASSET_PAR_THREE_IMAGE, &asset);
       break;
-    case 4:
+    case PAR_FOUR:
       OpenEncodedAsset(ASSET_PAR_FOUR_IMAGE, &asset);
       break;
-    case 5:
+    case PAR_FIVE:
       OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset);
       break;
   }
