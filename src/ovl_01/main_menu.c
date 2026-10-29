@@ -399,7 +399,7 @@ s32 func_8022BDC4_ovl_01(void);
 s32 func_8022BDD0_ovl_01(void);
 s32 func_8021E468_ovl_01(void);
 void LoadRingShotRecord(RingShotRecord* record);
-void LoadSuperShotReplay(PlayRecord* record);
+void LoadBestShotReplay(PlayRecord* record);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
 s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber);
 void func_80217B88_ovl_01(s32 requestedPreset);
@@ -1646,7 +1646,7 @@ void func_801F6B28_ovl_01(void) {
     if (g_GameState.replayKind == REPLAY_KIND_RING_SHOT) {
       LoadRingShotRecord(&save->ringShotRecords[memory->ringShotReplaySlot]);
     } else {
-      LoadSuperShotReplay(&save->rankedRecords[func_8021E468_ovl_01()]);
+      LoadBestShotReplay(&save->rankedRecords[func_8021E468_ovl_01()]);
     }
 
     g_GameState.unk14 = 0;

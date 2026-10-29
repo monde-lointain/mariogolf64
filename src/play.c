@@ -145,7 +145,7 @@ void FillRandomGrid(s32 range, s32 base);
 void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
-void LoadSuperShotReplay(PlayRecord* record);
+void LoadBestShotReplay(PlayRecord* record);
 
 /* Defined in main_bss.c, at their addresses in the original */
 extern u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
@@ -378,7 +378,7 @@ void InitPlay(s32 kind) {
   } else if (kind == 0) {
     func_8005F4AC();
   } else if (kind == 2) {
-    LoadSuperShotReplay(&D_800FED40);
+    LoadBestShotReplay(&D_800FED40);
     g_GameState.unk14 = 0;
     g_GameState.playerCount = 1;
     g_GameState.step = GAME_STATE_START;
@@ -660,7 +660,7 @@ s32 GetRecordedScoreKind(s32 strokes) {
 }
 
 /* Sets play up to replay a Best Shot record */
-void LoadSuperShotReplay(PlayRecord* record) {
+void LoadBestShotReplay(PlayRecord* record) {
   D_800FEDD8[0] = *record;
   g_GameState.gameMode = record->gameMode;
   g_GameState.courseIndex = record->courseIndex;
