@@ -1366,22 +1366,22 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       info = GetSurfaceInfo(simulation->surface);
       friction = (THOUSANDTHS_PER_ONE - info->bounciness) * ONE_PER_THOUSANDTH;
       if (simulation->surface == SURFACE_BUNKER) {
-        s32 burial = 0;
+        BunkerBurial burial = BUNKER_BURIAL_NONE;
 
         if (impactSpeed >= POOR_LIE_BUNKER_SPEED) {
-          burial = 2;
+          burial = BUNKER_BURIAL_MOSTLY;
         } else if (impactSpeed >= FAIR_LIE_BUNKER_SPEED) {
-          burial = 1;
+          burial = BUNKER_BURIAL_HALF;
         }
 
         switch (burial) {
-          case 1:
+          case BUNKER_BURIAL_HALF:
             simulation->surface = SURFACE_BUNKER_FAIR_LIE;
             simulation->position[AXIS_Y] = GetGroundHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z]);
             simulation->state = BALL_STATE_STOPPED;
             break;
-          case 2:
+          case BUNKER_BURIAL_MOSTLY:
             simulation->surface = SURFACE_BUNKER_POOR_LIE;
             simulation->position[AXIS_Y] = GetGroundHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z]);

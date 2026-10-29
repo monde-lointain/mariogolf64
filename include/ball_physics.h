@@ -206,6 +206,17 @@
 /* A slower ball takes a fixed slide along the ground */
 #define MIN_SLIDE_SPEED 0.0001f
 #define STILL_BALL_SLIDE 0.1f
+
+/* How deep a ball that lands in a bunker is buried */
+enum BunkerBurial {
+  BUNKER_BURIAL_NONE,
+  BUNKER_BURIAL_HALF, /* SURFACE_BUNKER_FAIR_LIE */
+  BUNKER_BURIAL_MOSTLY /* SURFACE_BUNKER_POOR_LIE */
+};
+
+/* An enum BunkerBurial value */
+typedef s32 BunkerBurial;
+
 /*
  * A ball landing in a bunker faster than these is half or mostly buried;
  * the faster is about 70 km/h

@@ -1003,22 +1003,22 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       }
 
       if (simulation->surface == SURFACE_BUNKER) {
-        s32 burial = 0;
+        BunkerBurial burial = BUNKER_BURIAL_NONE;
 
         if (impactSpeed >= POOR_LIE_BUNKER_SPEED) {
-          burial = 2;
+          burial = BUNKER_BURIAL_MOSTLY;
         } else if (impactSpeed >= FAIR_LIE_BUNKER_SPEED) {
-          burial = 1;
+          burial = BUNKER_BURIAL_HALF;
         }
 
         switch (burial) {
-          case 1:
+          case BUNKER_BURIAL_HALF:
             simulation->surface = SURFACE_BUNKER_FAIR_LIE;
             simulation->position[AXIS_Y] = GetGroundHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z]);
             simulation->state = BALL_STATE_STOPPED;
             break;
-          case 2:
+          case BUNKER_BURIAL_MOSTLY:
             simulation->surface = SURFACE_BUNKER_POOR_LIE;
             simulation->position[AXIS_Y] = GetGroundHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z]);
@@ -1142,22 +1142,22 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       friction =
           (1000 - GetSurfaceInfo(simulation->surface)->bounciness) * 0.001f;
       if (simulation->surface == SURFACE_BUNKER) {
-        s32 burial = 0;
+        BunkerBurial burial = BUNKER_BURIAL_NONE;
 
         if (impactSpeed >= 9956.353f) {
-          burial = 2;
+          burial = BUNKER_BURIAL_MOSTLY;
         } else if (impactSpeed >= KilometersPerHour(50)) {
-          burial = 1;
+          burial = BUNKER_BURIAL_HALF;
         }
 
         switch (burial) {
-          case 1:
+          case BUNKER_BURIAL_HALF:
             simulation->surface = SURFACE_BUNKER_FAIR_LIE;
             simulation->position[AXIS_Y] = GetGroundHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z]);
             simulation->state = BALL_STATE_STOPPED;
             break;
-          case 2:
+          case BUNKER_BURIAL_MOSTLY:
             simulation->surface = SURFACE_BUNKER_POOR_LIE;
             simulation->position[AXIS_Y] = GetGroundHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z]);
