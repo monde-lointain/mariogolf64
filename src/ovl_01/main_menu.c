@@ -1074,7 +1074,7 @@ void UpdateMenus(void) {
       func_801FB15C_ovl_01();
       break;
 
-    case MENU_SCREEN_UNK12:
+    case MENU_SCREEN_BEST_SHOTS:
       func_8021D0B8_ovl_01();
       break;
 
@@ -1537,7 +1537,7 @@ void UpdateMenus(void) {
         func_802177D0_ovl_01();
         break;
 
-      case MENU_SCREEN_UNK12:
+      case MENU_SCREEN_BEST_SHOTS:
         func_80221B20_ovl_01();
         func_8021CF10_ovl_01(D_801049A0[0]);
         f_MenuBoardImageIndex ^= 1;
@@ -3069,7 +3069,7 @@ void UpdateClubhouse(void) {
           break;
         case CLUBHOUSE_ROOM_BEST_SHOTS:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-          g_MenuScreen = MENU_SCREEN_UNK12;
+          g_MenuScreen = MENU_SCREEN_BEST_SHOTS;
           break;
         case CLUBHOUSE_ROOM_RING_SHOT:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
@@ -3705,7 +3705,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
     case MENU_SCREEN_UNK18:
       func_80207E18_ovl_01(&gfx);
       break;
-    case MENU_SCREEN_UNK12:
+    case MENU_SCREEN_BEST_SHOTS:
       func_8021D3AC_ovl_01(&gfx);
       break;
     case MENU_SCREEN_RING_SHOT_RECORDS:

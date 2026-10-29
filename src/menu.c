@@ -2095,7 +2095,7 @@ void func_8005DDAC(void) {
   D_801B9410 = 1;
   g_GameState.replayKind = REPLAY_KIND_NONE;
   ClearGameFlag(GAME_FLAG_UNK1E);
-  g_MenuScreen = MENU_SCREEN_UNK12;
+  g_MenuScreen = MENU_SCREEN_BEST_SHOTS;
 }
 
 /* Returns whether the music is turned off in the options */
