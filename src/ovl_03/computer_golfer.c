@@ -2395,8 +2395,7 @@ EVALUATE:
       if (GetLandingRating(surfaceInfo->kind) < targetRating) {
         kind = surfaceInfo->kind;
         f_TrialEvaluation += POOR_LANDING_EVALUATION;
-        if (kind == SURFACE_KIND_OUT_OF_BOUNDS ||
-            kind == SURFACE_KIND_OUT_OF_COURSE) {
+        if (IsOutOfBoundsKind(kind)) {
           f_TrialEvaluation = LOST_BALL_EVALUATION;
           f_IsTrialLost = TRUE;
         }
@@ -2886,13 +2885,6 @@ s32 RollClubKindChance(s32 chanceSetIndex) {
 /* The fraction of a line's points past which the line counts as lost */
 #define LOST_LINE_FRACTION 0.5f
 
-/* It is a macro, as an inline function compiles differently from the original
- */
-#define IsLostBallKind(surfaceKind) \
-  ((surfaceKind) == SURFACE_KIND_WATER_HAZARD || \
-      (surfaceKind) == SURFACE_KIND_OUT_OF_BOUNDS || \
-      (surfaceKind) == SURFACE_KIND_OUT_OF_COURSE)
-
 /*
  * Returns whether more than half of the points a yard apart on the first tenth
  * of the line from from to to lie in water, out of bounds or out of the course.
@@ -2978,8 +2970,7 @@ Boolean IsTrialShotSafe(void) {
 
   if (!f_TrialSimulation.state) {
     kind = GetSurfaceInfo(f_TrialSimulation.surface)->kind;
-    if (kind == SURFACE_KIND_OUT_OF_BOUNDS ||
-        kind == SURFACE_KIND_OUT_OF_COURSE) {
+    if (IsOutOfBoundsKind(kind)) {
     } else if (kind != SURFACE_KIND_WATER_HAZARD) {
       osSyncPrintf("nmResultCheck: TRUE\n");
       return TRUE;

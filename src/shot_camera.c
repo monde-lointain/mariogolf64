@@ -1233,9 +1233,7 @@ void PlayFlightSounds(s32 step) {
     } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WASTE_AREA) {
       PlaySound(SOUND_WASTE_AREA_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
           SOUND_FULL_SCALE);
-    } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WATER_HAZARD ||
-        f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
-        f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) {
+    } else if (IsLostBallKind(f_EndSurfaceInfo->kind)) {
       f_IsLandingSoundPlayed = TRUE;
       PlaySound(
           SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FULL_SCALE);

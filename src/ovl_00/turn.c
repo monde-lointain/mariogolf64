@@ -4285,8 +4285,7 @@ void UpdateTurns(void) {
           surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
           func_80207660_ovl_00(player);
           ClearPassedRings(player);
-          if ((surfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
-                  surfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) &&
+          if (IsOutOfBoundsKind(surfaceInfo->kind) &&
               !IsGameFlagSet(GAME_FLAG_NO_OUT_OF_BOUNDS_PENALTY)) {
             g_Players[playerIndex].strokeCount++;
             if (g_GameState.gameMode == GAME_MODE_TRAINING) {

@@ -78,6 +78,19 @@ enum SurfaceKind {
 /* An enum SurfaceKind value */
 typedef s32 SurfaceKind;
 
+/*
+ * Whether a ball on a surface kind is out of bounds, which costs a stroke.
+ * These are macros, as an inline function compiles differently from the
+ * original in computer_golfer.c.
+ */
+#define IsOutOfBoundsKind(kind) \
+  ((kind) == SURFACE_KIND_OUT_OF_BOUNDS || (kind) == SURFACE_KIND_OUT_OF_COURSE)
+/* Whether a ball on a surface kind is lost: in water or out of bounds */
+#define IsLostBallKind(kind) \
+  ((kind) == SURFACE_KIND_WATER_HAZARD || \
+      (kind) == SURFACE_KIND_OUT_OF_BOUNDS || \
+      (kind) == SURFACE_KIND_OUT_OF_COURSE)
+
 typedef struct SurfaceInfo {
   /* 0x00 */ SurfaceKind kind;
   /* 0x04 */ char* name; /* As the lie is shown */
