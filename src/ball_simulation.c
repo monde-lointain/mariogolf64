@@ -281,6 +281,21 @@ void ResetBallSimulations(void) {
 #define CUP_WALL_REFLECTION 1.5f
 /* The floor sends a ball back up at this much of its falling speed */
 #define CUP_FLOOR_BOUNCE 0.5f
+
+/*
+ * Walls. A ball that hits one is put this share of the way along its step
+ * to the wall, short of it.
+ */
+#define WALL_HIT_STEP_SHARE 0.9f
+/*
+ * 1.5 cm a frame: a ball already past a wall and slower into it is sent back
+ * this much faster, and keeps less of its speed the slower it was
+ */
+#define WALL_ESCAPE_SPEED 230.40001f
+/* 1 cm a frame: a faster ball throws sparks off a wall */
+#define MIN_WALL_SPARK_SPEED 153.6f
+/* A ball that hits a hole triangle is put this share of the way to it */
+#define TRIANGLE_HIT_STEP_SHARE 0.995f
 /*
  * 30 cm: a ball in the cup, or holed out, may settle this far below the
  * ground, deeper than the cup's floor
@@ -1228,19 +1243,22 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           along = 0.0f;
         }
 
-        hitPosition[AXIS_X] = startX + (along * (velocity[AXIS_X] * 0.9f));
-        hitPosition[AXIS_Y] = startY + (along * (velocity[AXIS_Y] * 0.9f));
-        hitPosition[AXIS_Z] = startZ + (along * (velocity[AXIS_Z] * 0.9f));
-        if (wallFraction < 0.0f && fabsf(inwardSpeed) < 230.40001f) {
+        hitPosition[AXIS_X] =
+            startX + (along * (velocity[AXIS_X] * WALL_HIT_STEP_SHARE));
+        hitPosition[AXIS_Y] =
+            startY + (along * (velocity[AXIS_Y] * WALL_HIT_STEP_SHARE));
+        hitPosition[AXIS_Z] =
+            startZ + (along * (velocity[AXIS_Z] * WALL_HIT_STEP_SHARE));
+        if (wallFraction < 0.0f && fabsf(inwardSpeed) < WALL_ESCAPE_SPEED) {
           BallSpeed speed = sqrtf(squareX + squareZ);
 
           if (inwardSpeed < 0.0f) {
-            inwardSpeed -= 230.40001f;
+            inwardSpeed -= WALL_ESCAPE_SPEED;
           } else {
-            inwardSpeed += 230.40001f;
+            inwardSpeed += WALL_ESCAPE_SPEED;
           }
 
-          bounce = speed / (speed + 230.40001f);
+          bounce = speed / (speed + WALL_ESCAPE_SPEED);
           osSyncPrintf("SpecialWallRefrect\n");
         }
 
@@ -1248,7 +1266,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->position[AXIS_Y] = hitPosition[AXIS_Y];
         simulation->position[AXIS_Z] = hitPosition[AXIS_Z];
         if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
-            fabsf(inwardSpeed) > 153.6f) {
+            fabsf(inwardSpeed) > MIN_WALL_SPARK_SPEED) {
           StartFlagstickSparks(simulation->position);
         }
 
@@ -1293,11 +1311,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->unk94++;
       GetTrianglePlane(&triangle, &plane);
       simulation->position[AXIS_X] =
-          startX + (fraction * (velocity[AXIS_X] * 0.995f));
+          startX + (fraction * (velocity[AXIS_X] * TRIANGLE_HIT_STEP_SHARE));
       simulation->position[AXIS_Y] =
-          startY + (fraction * (velocity[AXIS_Y] * 0.995f));
+          startY + (fraction * (velocity[AXIS_Y] * TRIANGLE_HIT_STEP_SHARE));
       simulation->position[AXIS_Z] =
-          startZ + (fraction * (velocity[AXIS_Z] * 0.995f));
+          startZ + (fraction * (velocity[AXIS_Z] * TRIANGLE_HIT_STEP_SHARE));
       substepCount += (fraction < 0.4f) & (substepCount == 1);
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->surface = SURFACE_FAIRWAY;
