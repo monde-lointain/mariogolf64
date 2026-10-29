@@ -43,6 +43,24 @@ enum BallState {
 #define UNKC_ENTRY_LIMIT 5
 #define UNKC_ENTRY_COUNT ((UNKC_ENTRY_LIMIT * 2) + 1)
 
+/*
+ * The steepest ground that a ball is dropped on, as the square of its
+ * slope: a rise of less than one in two
+ */
+#define DROP_MAX_SLOPE_SQUARED 0.25f
+/* Whether dropPosition may be on a surface kind */
+#define IsDropKind(kind) \
+  ((kind) != SURFACE_KIND_WATER_HAZARD && \
+      (kind) != SURFACE_KIND_OUT_OF_BOUNDS && \
+      (kind) != SURFACE_KIND_BARE_GROUND_UNK20 && \
+      (kind) != SURFACE_KIND_OUT_OF_COURSE)
+/* Whether a ground plane is gentle enough for dropPosition */
+#define IsDropSlope(plane) \
+  (((plane).normal[AXIS_X] * (plane).normal[AXIS_X]) + \
+          ((plane).normal[AXIS_Z] * (plane).normal[AXIS_Z]) < \
+      (plane).normal[AXIS_Y] * (plane).normal[AXIS_Y] * \
+          DROP_MAX_SLOPE_SQUARED)
+
 typedef struct Unk6 {
   /* 0x0 */ s8 unk0;
   /* 0x1 */ s8 unk1;

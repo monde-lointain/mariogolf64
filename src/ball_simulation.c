@@ -1980,16 +1980,10 @@ SETTLE:
         simulation->unkA4 = FindSurface(
             simulation->position[AXIS_X], simulation->position[AXIS_Z], TRUE);
         kind = GetSurfaceInfo(simulation->unkA4)->kind;
-        if (kind != SURFACE_KIND_WATER_HAZARD &&
-            kind != SURFACE_KIND_OUT_OF_BOUNDS &&
-            kind != SURFACE_KIND_BARE_GROUND_UNK20 &&
-            kind != SURFACE_KIND_OUT_OF_COURSE &&
+        if (IsDropKind(kind) &&
             FindGroundTriangle(simulation->position[AXIS_X],
                 simulation->position[AXIS_Z], &ground) == 0 &&
-            GetTrianglePlane(&ground, &plane) == 0 &&
-            (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
-                    (plane.normal[AXIS_Z] * plane.normal[AXIS_Z]) <
-                plane.normal[AXIS_Y] * plane.normal[AXIS_Y] * 0.25f) {
+            GetTrianglePlane(&ground, &plane) == 0 && IsDropSlope(plane)) {
           simulation->dropPosition[AXIS_X] = simulation->position[AXIS_X];
           simulation->dropPosition[AXIS_Y] = simulation->position[AXIS_Y];
           simulation->dropPosition[AXIS_Z] = simulation->position[AXIS_Z];
