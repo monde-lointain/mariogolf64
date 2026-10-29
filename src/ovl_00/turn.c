@@ -1687,7 +1687,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
   simulation->position[AXIS_Y] = player->ballPosition[AXIS_Y];
   simulation->position[AXIS_Z] = player->ballPosition[AXIS_Z];
   simulation->playerIndex = playerIndex;
-  simulation->unkA0 = 0;
+  simulation->isHoledOut = 0;
   simulation->state = FALSE;
   groundHeight = GetGroundHeight(
       simulation->position[AXIS_X], simulation->position[AXIS_Z]);
@@ -2558,7 +2558,7 @@ void MeasureTeeShot(s32 playerIndex) {
 
     g_Players[playerIndex].driveDistance = distance;
     distance = UNCOUNTED_DISTANCE;
-    if (g_SimulatedShot.unk2E10) {
+    if (g_SimulatedShot.endsInCup) {
       distance = 0;
     } else if (info->kind == SURFACE_KIND_GREEN) {
       distance = GetCupDistance(
@@ -4255,7 +4255,7 @@ void UpdateTurns(void) {
         Boolean isCameraDone =
             UpdateFlightCamera(TRUE, g_TurnController.buttons);
 
-        if (g_TurnBallSimulation.unkA0) {
+        if (g_TurnBallSimulation.isHoledOut) {
           if (GetEndReaction() == 1) {
             if (D_80227170_ovl_00[playerIndex] == 1) {
               PlayHoleOutSong(playerIndex);
@@ -4355,7 +4355,7 @@ void UpdateTurns(void) {
           }
 
           D_80227170_ovl_00[playerIndex] = 0;
-          if (g_TurnBallSimulation.unkA0) {
+          if (g_TurnBallSimulation.isHoledOut) {
             g_Players[playerIndex].holeStatus = HOLE_STATUS_HOLED_OUT;
             g_Players[playerIndex]
                 .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
@@ -4512,7 +4512,7 @@ void UpdateTurns(void) {
         LoadCharacter(0, character + CHARACTER_COUNT, palette);
         SetCharacterLighting(0, 1);
         memset(&g_RoundHud, 0, sizeof(g_RoundHud));
-        if (!g_TurnBallSimulation.unkA0) {
+        if (!g_TurnBallSimulation.isHoledOut) {
           PlaySong(SONG_HOLE_LOST, 0);
           reaction = REACTION_ANIMATION_BOGEY;
         } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
@@ -4606,7 +4606,7 @@ void UpdateTurns(void) {
               OpenChoiceBox(CHOICE_BOX_ID_TRAINING_HOLE_END);
             }
           } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
-              (!g_TurnBallSimulation.unkA0 ||
+              (!g_TurnBallSimulation.isHoledOut ||
                   !HasNoRingsLeft(&g_Players[playerIndex]))) {
             nextState = PLAYER_STATE_CHOOSING;
             OpenChoiceBox(CHOICE_BOX_ID_RING_SHOT);

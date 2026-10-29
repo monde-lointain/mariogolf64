@@ -864,7 +864,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
         velocity[AXIS_Y] = (-fallSpeed * 0.5f) + 131.0f;
         if (velocity[AXIS_Y] > 0.0f) {
-          simulation->unkA0 = 1;
+          simulation->isHoledOut = 1;
           simulation->state = BALL_STATE_STOPPED;
         }
 
@@ -1934,7 +1934,7 @@ SETTLE:
 
         floor = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        if (state == BALL_STATE_IN_CUP || simulation->unkA0) {
+        if (state == BALL_STATE_IN_CUP || simulation->isHoledOut) {
           floor += 0x1200;
         } else if (state == BALL_STATE_ROLLING) {
           s32 cupOffsetX =
@@ -2325,7 +2325,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   simulation->unk94 = 0;
   simulation->unk98 = 0;
   simulation->unk9C = -2;
-  simulation->unkA0 = 0;
+  simulation->isHoledOut = 0;
   simulation->unkB0 = 0;
   simulation->unkB2 = 0;
   for (index = 0; index < UNKA8_COUNT; index++) {

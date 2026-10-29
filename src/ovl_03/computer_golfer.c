@@ -2378,7 +2378,7 @@ s32 StepTrialShot(void) {
       }
     }
 
-    if (f_TrialSimulation.unkA0) {
+    if (f_TrialSimulation.isHoledOut) {
       f_TrialEvaluation = 0;
     } else {
 EVALUATE:

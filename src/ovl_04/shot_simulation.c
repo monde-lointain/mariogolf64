@@ -58,7 +58,7 @@ void SimulateShot(Unk20* shot) {
   simulation->surface = g_CurrentShot.surface;
   hasGroundHit = FALSE;
   hasUnk40Flag = FALSE;
-  g_SimulatedShot.unk2E0C =
+  g_SimulatedShot.usesPutter =
       GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
   g_SimulatedShot.unk2E14 = shot->unkC == 0 &&
       shot->power >= MAX_LAUNCH_POWER &&
@@ -69,7 +69,7 @@ void SimulateShot(Unk20* shot) {
       g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
                                 ->unk5;
   LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
-  g_SimulatedShot.unk2E08 = g_GameState.isMiniGolf ||
+  g_SimulatedShot.startsOnGreen = g_GameState.isMiniGolf ||
       GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
   step = 0;
   while (simulation->state) {
@@ -137,7 +137,7 @@ void SimulateShot(Unk20* shot) {
   g_SimulatedShot.endPosition[AXIS_X] = simulation->position[AXIS_X];
   g_SimulatedShot.endPosition[AXIS_Y] = simulation->position[AXIS_Y];
   g_SimulatedShot.endPosition[AXIS_Z] = simulation->position[AXIS_Z];
-  g_SimulatedShot.unk2E10 = simulation->unkA0;
+  g_SimulatedShot.endsInCup = simulation->isHoledOut;
   g_SimulatedShot.endSurface = simulation->surface;
   g_SimulatedShot.endsOnGreen =
       GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN;

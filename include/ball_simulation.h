@@ -121,7 +121,7 @@ typedef struct BallSimulation {
   /* 0x94 */ s32 unk94;
   /* 0x98 */ s32 unk98;
   /* 0x9C */ s32 unk9C;
-  /* 0xA0 */ s8 unkA0;
+  /* 0xA0 */ s8 isHoledOut; /* Set as the ball stops in the cup */
   /* 0xA1 */ s8 unkA1;
   /* 0xA2 */ s8 unkA2; /* A SURFACE_* value */
   /* 0xA3 */ s8 surface; /* The SURFACE_* that the ball is on */

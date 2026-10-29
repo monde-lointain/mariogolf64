@@ -23,9 +23,9 @@ typedef struct SimulatedShot {
   /* 0x2DF4 */ s32 minPositionStep[3];
   /* 0x2E00 */ s32 unk2E00;
   /* 0x2E04 */ s32 endsOnGreen;
-  /* 0x2E08 */ s32 unk2E08;
-  /* 0x2E0C */ s32 unk2E0C;
-  /* 0x2E10 */ s32 unk2E10;
+  /* 0x2E08 */ Boolean startsOnGreen; /* Always, in mini-golf */
+  /* 0x2E0C */ Boolean usesPutter;
+  /* 0x2E10 */ Boolean endsInCup;
   /* 0x2E14 */ s32 unk2E14;
   /* 0x2E18 */ s32 unk2E18;
   /* 0x2E1C */ Unk20 shot;

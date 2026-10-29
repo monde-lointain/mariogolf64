@@ -628,7 +628,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
 
   /* The nested ifs are there to match */
-  if (!g_SimulatedShot.unk2E08) {
+  if (!g_SimulatedShot.startsOnGreen) {
     if (earlierFlightCount != 0 && g_ContactEffect == CONTACT_EFFECT_NONE) {
       g_RoundHud.unk17 = TRUE;
     } else {
@@ -656,7 +656,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
   }
 
   D_800BE678 = 0;
-  if (g_SimulatedShot.unk2E08) {
+  if (g_SimulatedShot.startsOnGreen) {
     D_800BE678 = 1;
   } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
     D_800BE678 = 3;
@@ -1020,7 +1020,7 @@ void PlayFlightSounds(s32 step) {
     greenSoundCount = &f_GreenSoundCount;
     if (!*greenSoundCount && !shownRingCount &&
         (g_SimulatedShot.pathFlags[step - 2] & PATH_FLAG_UNK1) &&
-        !g_SimulatedShot.unk2E0C && !g_SimulatedShot.unk2E08 &&
+        !g_SimulatedShot.usesPutter && !g_SimulatedShot.startsOnGreen &&
         g_SimulatedShot.endsOnGreen &&
         f_EndSurfaceInfo->kind == SURFACE_KIND_GREEN) {
       if (g_HoleSetup.par >
@@ -1051,15 +1051,15 @@ void PlayFlightSounds(s32 step) {
     }
 
     if ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) &&
-        !g_SimulatedShot.unk2E10 && g_SimulatedShot.unkB0Step == NO_STEP) {
+        !g_SimulatedShot.endsInCup && g_SimulatedShot.unkB0Step == NO_STEP) {
       D_800BE680 = 0;
       StartMonkeyDrop(D_800BE684);
     }
   }
 
   if (!shownRingCount && g_BallFlightStep == g_SimulatedShot.stepCount - 1 &&
-      !g_SimulatedShot.unk2E10) {
-    if (g_SimulatedShot.unk2E08) {
+      !g_SimulatedShot.endsInCup) {
+    if (g_SimulatedShot.startsOnGreen) {
       if (f_LandingCupDistance < CLOSE_LANDING_DISTANCE &&
           f_StartCupDistance > LONG_PUTT_MIN_DISTANCE &&
           !(f_PassedPathFlags & (PATH_FLAG_UNK4 | PATH_FLAG_UNK8)) &&
@@ -1099,7 +1099,7 @@ void PlayFlightSounds(s32 step) {
           QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
           f_PendingResultSound = RESULT_SOUND_UNK1;
         } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
-            g_SimulatedShot.unk2E0C) {
+            g_SimulatedShot.usesPutter) {
           if (f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
             StartBanner(BANNER_NICE_APPROACH);
             PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_UNK3,
@@ -1118,7 +1118,7 @@ void PlayFlightSounds(s32 step) {
       } else if (g_HoleSetup.par + SCORE_TO_PAR_BIRDIE ==
               g_Players[g_CurrentShot.playerIndex].strokeCount &&
           (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
-              g_SimulatedShot.unk2E0C) &&
+              g_SimulatedShot.usesPutter) &&
           f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
         StartBanner(BANNER_NICE_APPROACH);
         PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_UNK3,
@@ -1127,7 +1127,7 @@ void PlayFlightSounds(s32 step) {
     }
   }
 
-  if (g_SimulatedShot.unk2E10) {
+  if (g_SimulatedShot.endsInCup) {
     if (g_BallFlightStep >=
             g_SimulatedShot.stepCount - UNKB0_SOUND_STEP_COUNT &&
         f_EndReaction == END_REACTION_NONE &&
@@ -1143,7 +1143,7 @@ void PlayFlightSounds(s32 step) {
 
     if (g_BallFlightStep >=
             g_SimulatedShot.stepCount - UNK92_SOUND_STEP_COUNT &&
-        f_EndReaction == END_REACTION_NONE && !g_SimulatedShot.unk2E08 &&
+        f_EndReaction == END_REACTION_NONE && !g_SimulatedShot.startsOnGreen &&
         g_Players[g_CurrentShot.playerIndex].strokeCount >= 2 &&
         g_SimulatedShot.unkB0Step == NO_STEP) {
       StartBanner(BANNER_CHIP_IN);
@@ -1157,7 +1157,7 @@ void PlayFlightSounds(s32 step) {
   isPlayed = &f_IsLandingSoundPlayed;
   if (!*isPlayed) {
     if (g_BallFlightStep == g_SimulatedShot.stepCount && !shownRingCount &&
-        g_SimulatedShot.unk2E10) {
+        g_SimulatedShot.endsInCup) {
       *isPlayed = TRUE;
       if (IsGameFlagSet(GAME_FLAG_UNK48)) {
         if (g_IsCupViewShown == TRUE &&
@@ -1176,7 +1176,7 @@ void PlayFlightSounds(s32 step) {
         }
       }
 
-      if (g_SimulatedShot.unk2E08) {
+      if (g_SimulatedShot.startsOnGreen) {
         if (f_StartCupDistance > LONG_SHOT_SOUND_MIN_DISTANCE ||
             IsGameFlagSet(GAME_FLAG_UNK48)) {
           PlaySound(SOUND_UNK155, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
@@ -1184,7 +1184,7 @@ void PlayFlightSounds(s32 step) {
         }
       }
 
-      if (!g_SimulatedShot.unk2E08) {
+      if (!g_SimulatedShot.startsOnGreen) {
         if (f_StartCupDistance > LONG_LANDING_MIN_DISTANCE) {
           CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_LONG_CHIP_IN);
           f_PendingResultSound = RESULT_SOUND_UNK2;
@@ -1391,7 +1391,7 @@ void PlaceCameraAroundShotEnd(void) {
   f32 distance;
   Radians yaw;
 
-  if (g_SimulatedShot.unk2E08) {
+  if (g_SimulatedShot.startsOnGreen) {
     height = RandomBelow(f_ShotLength * UNK2E08_HEIGHT_SPREAD_FRACTION) +
         UNK2E08_MIN_HEIGHT;
     distance =
@@ -2113,7 +2113,7 @@ void PlaceFlightCamera(s32 step) {
           /* Computing extraRise before GetGroundHeight is there to match */
           extraRise = f_ShotLength * SIDE_VIEW_RISE_FRACTION;
           point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
-          if (!g_SimulatedShot.unk2E08) {
+          if (!g_SimulatedShot.startsOnGreen) {
             point[AXIS_Y] -= extraRise + SIDE_VIEW_RISE;
           }
 
@@ -2503,14 +2503,14 @@ void ChooseFlightCameraKind(void) {
   animation = HUD_ANIMATION_NONE;
   f_HasFlightPhaseChanged = FALSE;
   kind = 0;
-  if (g_SimulatedShot.unk2E08) {
+  if (g_SimulatedShot.startsOnGreen) {
     switch (f_FlightPhase) {
       case 1:
         if (!(f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_UNK2) &&
             RandomBelow(2) == 0 && !IsPinInCup() &&
             f_StartCupDistance >= CUP_LANDING_MIN_DISTANCE &&
             f_StartCupDistance <= CUP_LANDING_MAX_DISTANCE &&
-            (g_SimulatedShot.unk2E10 ||
+            (g_SimulatedShot.endsInCup ||
                 f_LandingCupDistance < NEAR_CUP_DISTANCE)) {
           kind = FLIGHT_CAMERA_FRAMING_CUP;
         } else if (g_GameState.isMiniGolf) {
@@ -2565,7 +2565,7 @@ void ChooseFlightCameraKind(void) {
 
         break;
       case 7:
-        if (!g_SimulatedShot.unk2E10 && RandomBelow(2) == 0) {
+        if (!g_SimulatedShot.endsInCup && RandomBelow(2) == 0) {
           kind = FLIGHT_CAMERA_UNKD;
         }
 
@@ -2628,7 +2628,7 @@ void ChooseFlightCameraKind(void) {
         } else if (f_FlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER) {
           if (g_SimulatedShot.stepCount < 120) {
             kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
-          } else if (g_SimulatedShot.unk2E0C) {
+          } else if (g_SimulatedShot.usesPutter) {
             kind = FLIGHT_CAMERA_BEHIND_START;
           } else if (f_ShotLength < LONG_SHOT_MIN_LENGTH) {
             kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
@@ -2644,7 +2644,7 @@ void ChooseFlightCameraKind(void) {
         if (f_FlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER) {
           if (g_SimulatedShot.stepCount < 120) {
             kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
-          } else if (g_SimulatedShot.unk2E0C) {
+          } else if (g_SimulatedShot.usesPutter) {
             kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
           }
         } else if (f_FlightCameraKind != FLIGHT_CAMERA_TRAILING_BALL) {
@@ -2706,7 +2706,7 @@ void ChooseFlightCameraKind(void) {
 
         break;
       case 7:
-        if (IsTroubleSurface(f_EndSurfaceInfo) || g_SimulatedShot.unk2E10) {
+        if (IsTroubleSurface(f_EndSurfaceInfo) || g_SimulatedShot.endsInCup) {
           /* The empty branch is there to match */
         } else {
           if (D_800BE674 || g_SimulatedShot.stepCount < 21) {
@@ -2770,7 +2770,7 @@ void ChooseFlightCameraKind(void) {
     D_800BE628 = TRUE;
     StartHudAnimation(HUD_ANIMATION_NONE);
     if (animation == HUD_ANIMATION_NONE) {
-      if (f_FlightPhase >= 4 && !g_SimulatedShot.unk2E08 &&
+      if (f_FlightPhase >= 4 && !g_SimulatedShot.startsOnGreen &&
           f_ShotLength > SHORT_SHOT_MAX_LENGTH) {
         if (kind == FLIGHT_CAMERA_AROUND_END) {
           if (RandomBelow(16) == 0 &&
@@ -2900,7 +2900,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   f_BallCupGroundDistance = IntLength2D(
       f_FlightBallPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
       f_FlightBallPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
-  if (g_SimulatedShot.unk2E08) {
+  if (g_SimulatedShot.startsOnGreen) {
     switch (f_FlightPhase) {
       case 1:
         if (isAdvancing == TRUE && step == 10 &&
@@ -3053,7 +3053,8 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     StartShotEffect(SHOT_EFFECT_LONG_SHOT);
   }
 
-  if (f_ShotLength > BALL_SOUND_MIN_SHOT_LENGTH && !g_SimulatedShot.unk2E0C) {
+  if (f_ShotLength > BALL_SOUND_MIN_SHOT_LENGTH &&
+      !g_SimulatedShot.usesPutter) {
     volume = (f_ShotLength / BALL_SOUND_VOLUME_LENGTH) + BALL_SOUND_MIN_VOLUME;
     if (volume > BALL_SOUND_MAX_VOLUME) {
       volume = BALL_SOUND_MAX_VOLUME;
@@ -3100,7 +3101,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   PlaceFlightCamera(step);
   D_800BE698 = TRUE;
   g_IsCupViewShown = FALSE;
-  if (g_SimulatedShot.unk2E0C) {
+  if (g_SimulatedShot.usesPutter) {
     if (g_IsModuleAlive[MODULE_GOLF_BALLS] ||
         ReportModuleNotAlive(MODULE_GOLF_BALLS)) {
       StartFastBallAfterimage();
@@ -3132,7 +3133,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
       D_800BE650--;
     }
 
-    if (!g_GameState.isMiniGolf && !g_SimulatedShot.unk2E10 &&
+    if (!g_GameState.isMiniGolf && !g_SimulatedShot.endsInCup &&
         ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) ||
             IsMonkeyShown() || D_800BE680 == TRUE)) {
       g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
@@ -3257,7 +3258,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   if (isAdvancing == TRUE) {
     flightStep = &g_BallFlightStep;
     if (*flightStep == g_SimulatedShot.stepCount) {
-      if (waitFrame == 0 && !g_TurnBallSimulation.unkA0) {
+      if (waitFrame == 0 && !g_TurnBallSimulation.isHoledOut) {
         StartLandingReaction(LANDING_REACTION_REST);
       }
 
