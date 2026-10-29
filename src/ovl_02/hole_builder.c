@@ -4058,31 +4058,41 @@ void BuildGroundTileDisplayList(
   vertex += 4;
 
   /* The midpoints inside the tile, then those on its edges */
-  gSPVertex(gfx++, &midpoints[8], 8, 4);
-  gSPVertex(gfx++, SegmentedVertex(1, &midpoints[0]), 2, 12);
+  gSPVertex(gfx++, &midpoints[TILE_FIRST_INNER_MIDPOINT],
+      TILE_INNER_MIDPOINT_COUNT, 4);
+  gSPVertex(gfx++, SegmentedVertex(1, &midpoints[TILE_MIDPOINT_ROW0_COLUMN1]),
+      TILE_SIDE_MIDPOINT_COUNT, 12);
   coarseOffsets[segmentIndex++] = BytesBetween(midpoints, vertex);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 0)->v,
       &TileGridVertex(column, row, 1, 0)->v, &vertex++->v);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 1, 0)->v,
       &TileGridVertex(column, row, 2, 0)->v, &vertex++->v);
-  gSPVertex(gfx++, SegmentedVertex(2, &midpoints[2]), 1, 14);
-  gSPVertex(gfx++, SegmentedVertex(2, &midpoints[4]), 1, 15);
-  gSPVertex(gfx++, SegmentedVertex(3, &midpoints[3]), 1, 16);
-  gSPVertex(gfx++, SegmentedVertex(3, &midpoints[5]), 1, 17);
-  coarseOffsets[segmentIndex++] = BytesBetween(&midpoints[2], vertex);
+  gSPVertex(
+      gfx++, SegmentedVertex(2, &midpoints[TILE_MIDPOINT_ROW1_COLUMN0]), 1, 14);
+  gSPVertex(
+      gfx++, SegmentedVertex(2, &midpoints[TILE_MIDPOINT_ROW3_COLUMN0]), 1, 15);
+  gSPVertex(
+      gfx++, SegmentedVertex(3, &midpoints[TILE_MIDPOINT_ROW1_COLUMN4]), 1, 16);
+  gSPVertex(
+      gfx++, SegmentedVertex(3, &midpoints[TILE_MIDPOINT_ROW3_COLUMN4]), 1, 17);
+  coarseOffsets[segmentIndex++] =
+      BytesBetween(&midpoints[TILE_MIDPOINT_ROW1_COLUMN0], vertex);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 0)->v,
       &TileGridVertex(column, row, 0, 1)->v, &vertex[0].v);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 1)->v,
       &TileGridVertex(column, row, 0, 2)->v, &vertex[2].v);
   vertex++;
-  coarseOffsets[segmentIndex++] = BytesBetween(&midpoints[3], vertex);
+  coarseOffsets[segmentIndex++] =
+      BytesBetween(&midpoints[TILE_MIDPOINT_ROW1_COLUMN4], vertex);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 2, 0)->v,
       &TileGridVertex(column, row, 2, 1)->v, &vertex[0].v);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 2, 1)->v,
       &TileGridVertex(column, row, 2, 2)->v, &vertex[2].v);
   vertex += 3;
-  gSPVertex(gfx++, SegmentedVertex(4, &midpoints[6]), 2, 18);
-  coarseOffsets[segmentIndex++] = BytesBetween(&midpoints[6], vertex);
+  gSPVertex(gfx++, SegmentedVertex(4, &midpoints[TILE_MIDPOINT_ROW4_COLUMN1]),
+      TILE_SIDE_MIDPOINT_COUNT, 18);
+  coarseOffsets[segmentIndex++] =
+      BytesBetween(&midpoints[TILE_MIDPOINT_ROW4_COLUMN1], vertex);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 2)->v,
       &TileGridVertex(column, row, 1, 2)->v, &vertex++->v);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 1, 2)->v,

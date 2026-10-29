@@ -1248,22 +1248,38 @@ void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow) {
     }
   }
 
-  SetVertexMidpoint(CORNER(0, 0), CORNER(0, 1), &midpoints[0]);
-  SetVertexMidpoint(CORNER(0, 1), CORNER(0, 2), &midpoints[1]);
-  SetVertexMidpoint(CORNER(0, 0), CORNER(1, 0), &midpoints[2]);
-  SetVertexMidpoint(CORNER(0, 1), CORNER(1, 1), &midpoints[9]);
-  SetVertexMidpoint(CORNER(0, 2), CORNER(1, 2), &midpoints[3]);
-  SetVertexMidpoint(CORNER(1, 0), CORNER(1, 1), &midpoints[11]);
-  SetVertexMidpoint(CORNER(1, 1), CORNER(1, 2), &midpoints[12]);
-  SetVertexMidpoint(CORNER(1, 0), CORNER(2, 0), &midpoints[4]);
-  SetVertexMidpoint(CORNER(1, 1), CORNER(2, 1), &midpoints[14]);
-  SetVertexMidpoint(CORNER(1, 2), CORNER(2, 2), &midpoints[5]);
-  SetVertexMidpoint(CORNER(2, 0), CORNER(2, 1), &midpoints[6]);
-  SetVertexMidpoint(CORNER(2, 1), CORNER(2, 2), &midpoints[7]);
-  SetVertexMidpoint(CORNER(0, 1), CORNER(1, 0), &midpoints[8]);
-  SetVertexMidpoint(CORNER(0, 2), CORNER(1, 1), &midpoints[10]);
-  SetVertexMidpoint(CORNER(1, 1), CORNER(2, 0), &midpoints[13]);
-  SetVertexMidpoint(CORNER(1, 2), CORNER(2, 1), &midpoints[15]);
+  SetVertexMidpoint(
+      CORNER(0, 0), CORNER(0, 1), &midpoints[TILE_MIDPOINT_ROW0_COLUMN1]);
+  SetVertexMidpoint(
+      CORNER(0, 1), CORNER(0, 2), &midpoints[TILE_MIDPOINT_ROW0_COLUMN3]);
+  SetVertexMidpoint(
+      CORNER(0, 0), CORNER(1, 0), &midpoints[TILE_MIDPOINT_ROW1_COLUMN0]);
+  SetVertexMidpoint(
+      CORNER(0, 1), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW1_COLUMN2]);
+  SetVertexMidpoint(
+      CORNER(0, 2), CORNER(1, 2), &midpoints[TILE_MIDPOINT_ROW1_COLUMN4]);
+  SetVertexMidpoint(
+      CORNER(1, 0), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW2_COLUMN1]);
+  SetVertexMidpoint(
+      CORNER(1, 1), CORNER(1, 2), &midpoints[TILE_MIDPOINT_ROW2_COLUMN3]);
+  SetVertexMidpoint(
+      CORNER(1, 0), CORNER(2, 0), &midpoints[TILE_MIDPOINT_ROW3_COLUMN0]);
+  SetVertexMidpoint(
+      CORNER(1, 1), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW3_COLUMN2]);
+  SetVertexMidpoint(
+      CORNER(1, 2), CORNER(2, 2), &midpoints[TILE_MIDPOINT_ROW3_COLUMN4]);
+  SetVertexMidpoint(
+      CORNER(2, 0), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW4_COLUMN1]);
+  SetVertexMidpoint(
+      CORNER(2, 1), CORNER(2, 2), &midpoints[TILE_MIDPOINT_ROW4_COLUMN3]);
+  SetVertexMidpoint(
+      CORNER(0, 1), CORNER(1, 0), &midpoints[TILE_MIDPOINT_ROW1_COLUMN1]);
+  SetVertexMidpoint(
+      CORNER(0, 2), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW1_COLUMN3]);
+  SetVertexMidpoint(
+      CORNER(1, 1), CORNER(2, 0), &midpoints[TILE_MIDPOINT_ROW3_COLUMN1]);
+  SetVertexMidpoint(
+      CORNER(1, 2), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW3_COLUMN3]);
 }
 
 /* Gives every tile its own midpoints and center, and builds them */

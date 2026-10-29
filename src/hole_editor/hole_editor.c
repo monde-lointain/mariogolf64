@@ -4281,8 +4281,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
               if (tileColumn == 0 ||
                   g_WorkArea.hole.tiles[tileIndex - 1].detail !=
                       GROUND_DETAIL_MEDIUM) {
-                CopyDoublePair((f64*)&midpoints[2], (f64*)&vertices[1]);
-                CopyDoublePair((f64*)&midpoints[4], (f64*)&vertices[3]);
+                CopyDoublePair((f64*)&midpoints[TILE_MIDPOINT_ROW1_COLUMN0],
+                    (f64*)&vertices[1]);
+                CopyDoublePair((f64*)&midpoints[TILE_MIDPOINT_ROW3_COLUMN0],
+                    (f64*)&vertices[3]);
               } else {
                 GetMidpointVertex(
                     &vertices[0].v, &vertices[2].v, &vertices[1].v);
@@ -4293,8 +4295,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
               if (row == 0 ||
                   g_WorkArea.hole.tiles[tileIndex - GROUND_TILE_COLUMN_COUNT]
                           .detail != GROUND_DETAIL_MEDIUM) {
-                CopyDoublePair((f64*)&midpoints[0], (f64*)&vertices[5]);
-                CopyDoublePair((f64*)&midpoints[1], (f64*)&vertices[10]);
+                CopyDoublePair((f64*)&midpoints[TILE_MIDPOINT_ROW0_COLUMN1],
+                    (f64*)&vertices[5]);
+                CopyDoublePair((f64*)&midpoints[TILE_MIDPOINT_ROW0_COLUMN3],
+                    (f64*)&vertices[10]);
               } else {
                 GetMidpointVertex(
                     &vertices[0].v, &vertices[7].v, &vertices[5].v);
@@ -4305,8 +4309,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
               if (row == GROUND_TILE_ROW_COUNT - 1 ||
                   g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
                           .detail != GROUND_DETAIL_MEDIUM) {
-                CopyDoublePair((f64*)&midpoints[6], (f64*)&vertices[6]);
-                CopyDoublePair((f64*)&midpoints[7], (f64*)&vertices[11]);
+                CopyDoublePair((f64*)&midpoints[TILE_MIDPOINT_ROW4_COLUMN1],
+                    (f64*)&vertices[6]);
+                CopyDoublePair((f64*)&midpoints[TILE_MIDPOINT_ROW4_COLUMN3],
+                    (f64*)&vertices[11]);
               } else {
                 GetMidpointVertex(
                     &vertices[4].v, &vertices[9].v, &vertices[6].v);
@@ -4317,8 +4323,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
               if (tileColumn == GROUND_TILE_COLUMN_COUNT - 1 ||
                   g_WorkArea.hole.tiles[tileIndex + 1].detail !=
                       GROUND_DETAIL_MEDIUM) {
-                CopyDoublePair((f64*)&midpoints[3], (f64*)&vertices[13]);
-                CopyDoublePair((f64*)&midpoints[5], (f64*)&vertices[15]);
+                CopyDoublePair((f64*)&midpoints[TILE_MIDPOINT_ROW1_COLUMN4],
+                    (f64*)&vertices[13]);
+                CopyDoublePair((f64*)&midpoints[TILE_MIDPOINT_ROW3_COLUMN4],
+                    (f64*)&vertices[15]);
               } else {
                 GetMidpointVertex(
                     &vertices[12].v, &vertices[14].v, &vertices[13].v);
@@ -4328,7 +4336,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
 
               gSPVertex(gfx++, &vertices[0], 5, 0);
               gSPVertex(gfx++, &vertices[5], 7, 5);
-              gSPVertex(gfx++, &midpoints[8], 8, 12);
+              gSPVertex(gfx++, &midpoints[TILE_FIRST_INNER_MIDPOINT],
+                  TILE_INNER_MIDPOINT_COUNT, 12);
               gSPVertex(gfx++, &vertices[12], 5, 20);
               vertices += FINE_TILE_BUILT_VERTEX_COUNT;
               for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {

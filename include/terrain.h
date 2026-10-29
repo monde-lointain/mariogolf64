@@ -32,6 +32,36 @@
  * edges included, that aren't grid vertices
  */
 #define TILE_MIDPOINT_COUNT 16
+
+/*
+ * The midpoints' slots, by each point's row and column within the tile: the
+ * edges' first, then the inner ones, which are drawn as one run
+ */
+enum TileMidpointSlot {
+  TILE_MIDPOINT_ROW0_COLUMN1,
+  TILE_MIDPOINT_ROW0_COLUMN3,
+  TILE_MIDPOINT_ROW1_COLUMN0,
+  TILE_MIDPOINT_ROW1_COLUMN4,
+  TILE_MIDPOINT_ROW3_COLUMN0,
+  TILE_MIDPOINT_ROW3_COLUMN4,
+  TILE_MIDPOINT_ROW4_COLUMN1,
+  TILE_MIDPOINT_ROW4_COLUMN3,
+  TILE_MIDPOINT_ROW1_COLUMN1,
+  TILE_MIDPOINT_ROW1_COLUMN2,
+  TILE_MIDPOINT_ROW1_COLUMN3,
+  TILE_MIDPOINT_ROW2_COLUMN1,
+  TILE_MIDPOINT_ROW2_COLUMN3,
+  TILE_MIDPOINT_ROW3_COLUMN1,
+  TILE_MIDPOINT_ROW3_COLUMN2,
+  TILE_MIDPOINT_ROW3_COLUMN3
+};
+
+/* The inner midpoints' run */
+#define TILE_FIRST_INNER_MIDPOINT TILE_MIDPOINT_ROW1_COLUMN1
+#define TILE_INNER_MIDPOINT_COUNT \
+  (TILE_MIDPOINT_COUNT - TILE_FIRST_INNER_MIDPOINT)
+/* Each side of a tile has a midpoint between each pair of its grid vertices */
+#define TILE_SIDE_MIDPOINT_COUNT GROUND_TILE_GRID_SPAN
 /*
  * The grid's vertices are every other ground point each way. Each row of them
  * is kept as its even columns, then its odd ones.
