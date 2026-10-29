@@ -282,6 +282,26 @@ void ResetBallSimulations(void) {
 /* The floor sends a ball back up at this much of its falling speed */
 #define CUP_FLOOR_BOUNCE 0.5f
 /*
+ * 30 cm: a ball in the cup, or holed out, may settle this far below the
+ * ground, deeper than the cup's floor
+ */
+#define IN_CUP_FLOOR_DEPTH 0x1200
+/*
+ * 20 cm: only a rolling ball within this of the cup along both x and z
+ * settles into it
+ */
+#define CUP_FLOOR_SEARCH_SPAN 0xC00
+/* 4 cm: a rolling ball this near the cup's middle settles to its floor */
+#define CUP_DROP_RADIUS 614.4f
+/*
+ * 4 cm: beyond the cup's edge the ground dips along a circle of this radius
+ * out to CUP_RIM_OUTER_RADIUS, sinking a rolling ball by half the circle's
+ * depth
+ */
+#define CUP_RIM_CURVE_RADIUS 614.4f
+#define CUP_RIM_OUTER_RADIUS (CUP_RADIUS + CUP_RIM_CURVE_RADIUS)
+#define CUP_RIM_SINK_SCALE 0.5f
+/*
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
  */
@@ -2047,27 +2067,30 @@ SETTLE:
         floor = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         if (state == BALL_STATE_IN_CUP || simulation->isHoledOut) {
-          floor += 0x1200;
+          floor += IN_CUP_FLOOR_DEPTH;
         } else if (state == BALL_STATE_ROLLING) {
           s32 cupOffsetX =
               simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
 
-          if (Abs(cupOffsetX) < 0xC00) {
+          if (Abs(cupOffsetX) < CUP_FLOOR_SEARCH_SPAN) {
             s32 cupOffsetZ =
                 simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
 
-            if (Abs(cupOffsetZ) < 0xC00) {
+            if (Abs(cupOffsetZ) < CUP_FLOOR_SEARCH_SPAN) {
               f32 cupDistance = (s32)IntLength2D(cupOffsetX, cupOffsetZ);
 
-              if (cupDistance < 614.4f) {
-                floor += 0xC00;
+              if (cupDistance < CUP_DROP_RADIUS) {
+                floor += CUP_DEPTH;
                 simulation->unkB4 = 1;
-              } else if (cupDistance < 1843.2001f) {
-                f32 rimDistance = 1843.2001f - cupDistance;
-                f32 rest = 377487.38f - (rimDistance * rimDistance);
+              } else if (cupDistance < CUP_RIM_OUTER_RADIUS) {
+                f32 rimDistance = CUP_RIM_OUTER_RADIUS - cupDistance;
+                f32 rest = (CUP_RIM_CURVE_RADIUS * CUP_RIM_CURVE_RADIUS) -
+                    (rimDistance * rimDistance);
 
                 if (rest > 0.0f) {
-                  floor = floor + ((614.4f - sqrtf(rest)) * 0.5f);
+                  floor = floor +
+                      ((CUP_RIM_CURVE_RADIUS - sqrtf(rest)) *
+                          CUP_RIM_SINK_SCALE);
                   simulation->unkB4 = 1;
                 }
               }
