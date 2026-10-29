@@ -5,22 +5,24 @@
 
 #include "save.h"
 
-/* The values of betStakeLevels, which ApplyBetPreset also turns into
- * GameState's betRates */
-#define MENU_UNKE_COUNT 8
+/*
+ * The values of betStakeLevels, which ApplyBetPreset also turns into
+ * GameState's betRates: one past the BET_COUNT bets
+ */
+#define BET_STAKE_SLOT_COUNT (BET_COUNT + 1)
 
 /* The presets of ApplyBetPreset; two of them have a variant that four players
  * take instead */
-#define MENU_UNKE_PRESET_COUNT 7
-#define MENU_UNKE_PRESET_STROKE 0
-#define MENU_UNKE_PRESET_STROKE_FOUR_PLAYER 1
-#define MENU_UNKE_PRESET_MATCH_GAME 2
-#define MENU_UNKE_PRESET_SKINS_MATCH 3
-#define MENU_UNKE_PRESET_CLUB_SLOTS 4
-#define MENU_UNKE_PRESET_MINI_GOLF 5
-#define MENU_UNKE_PRESET_MINI_GOLF_FOUR_PLAYER 6
+#define BET_PRESET_COUNT 7
+#define BET_PRESET_STROKE 0
+#define BET_PRESET_STROKE_FOUR_PLAYER 1
+#define BET_PRESET_MATCH_GAME 2
+#define BET_PRESET_SKINS_MATCH 3
+#define BET_PRESET_CLUB_SLOTS 4
+#define BET_PRESET_MINI_GOLF 5
+#define BET_PRESET_MINI_GOLF_FOUR_PLAYER 6
 /* Past ApplyBetPreset's presets, so that it clears the values instead */
-#define MENU_UNKE_PRESET_NONE 10
+#define BET_PRESET_NONE 10
 
 /* What holesChoice holds once the C buttons choose the holes to play */
 enum HolesChoice {
@@ -44,7 +46,7 @@ typedef struct MenuMemory {
                                count's modes */
   /* 0x0C */ s8 modeSpin; /* How far the modes still have to turn to reach it */
   /* 0x0D */ s8 unkD;
-  /* 0x0E */ s8 betStakeLevels[MENU_UNKE_COUNT]; /* Set from one of
+  /* 0x0E */ s8 betStakeLevels[BET_STAKE_SLOT_COUNT]; /* Set from one of
                                                     ApplyBetPreset's presets */
   /* 0x16 */ s8 courseChoice; /* The course select's course: an open one, or the
                                  next one still shut */

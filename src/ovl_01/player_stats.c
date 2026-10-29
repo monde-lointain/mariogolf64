@@ -238,8 +238,8 @@ static s16 D_80230460_ovl_01[STATS_INDEX_ROW_COUNT]
 /* How many columns of D_8023040C each row uses */
 static u8 D_802304B4_ovl_01[STATS_INDEX_ROW_COUNT] = {5, 6, 3, 3, 3, 3, 4};
 // clang-format off
-static u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT]
-                            [MENU_UNKE_COUNT] = {
+static u8 D_802304BC_ovl_01[BET_PRESET_COUNT]
+                            [BET_STAKE_SLOT_COUNT] = {
   { 4, 4, 1, 0, 0, NO_BET, NO_BET, NO_BET },
   { 4, 4, 0, 0, 0, NO_BET, 0, NO_BET },
   { 4, 4, NO_BET, NO_BET, NO_BET, 1, NO_BET, NO_BET },
@@ -539,24 +539,24 @@ void ApplyBetPreset(s32 requestedPreset) {
   MenuMemory* memory = func_8005AF74();
   s16 index;
 
-  if ((u8)requestedPreset < MENU_UNKE_PRESET_COUNT) {
-    if ((s8)requestedPreset == MENU_UNKE_PRESET_STROKE &&
+  if ((u8)requestedPreset < BET_PRESET_COUNT) {
+    if ((s8)requestedPreset == BET_PRESET_STROKE &&
         g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
-      presetIndex = MENU_UNKE_PRESET_STROKE_FOUR_PLAYER;
+      presetIndex = BET_PRESET_STROKE_FOUR_PLAYER;
     }
 
-    if (presetIndex == MENU_UNKE_PRESET_MINI_GOLF &&
+    if (presetIndex == BET_PRESET_MINI_GOLF &&
         g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
-      presetIndex = MENU_UNKE_PRESET_MINI_GOLF_FOUR_PLAYER;
+      presetIndex = BET_PRESET_MINI_GOLF_FOUR_PLAYER;
     }
 
-    for (index = 0; index != MENU_UNKE_COUNT; index++) {
+    for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       memory->betStakeLevels[index] = D_802304BC_ovl_01[presetIndex][index];
       g_GameState.betRates[index] =
           D_802304F4_ovl_01[memory->betStakeLevels[index]];
     }
   } else {
-    for (index = 0; index != MENU_UNKE_COUNT; index++) {
+    for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       memory->betStakeLevels[index] = NO_BET;
       g_GameState.betRates[index] = -1;
     }
@@ -607,7 +607,7 @@ void UpdateBetSettings(void) {
     D_802303A0_ovl_01 = 0;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
-    for (index = 0; index != MENU_UNKE_COUNT; index++) {
+    for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       if (memory->betStakeLevels[index] != NO_BET) {
         g_GameState.betRates[index] =
             D_802304F4_ovl_01[memory->betStakeLevels[index]];
@@ -625,7 +625,7 @@ void UpdateBetSettings(void) {
     D_802303A0_ovl_01 = 0;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
-    for (index = 0; index != MENU_UNKE_COUNT; index++) {
+    for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       if (memory->betStakeLevels[index] != NO_BET) {
         g_GameState.betRates[index] =
             D_802304F4_ovl_01[memory->betStakeLevels[index]];
