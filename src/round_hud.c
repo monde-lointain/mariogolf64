@@ -1850,8 +1850,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       if (ProjectPoint(points[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
               points[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
               points[i][AXIS_Z] * COURSE_TO_WORLD_SCALE, &projected) < 0) {
-        screenPoints[i].x = projected.x * 4;
-        screenPoints[i].y = projected.y * 4;
+        screenPoints[i].x = projected.x * QUARTER_PIXELS_PER_PIXEL;
+        screenPoints[i].y = projected.y * QUARTER_PIXELS_PER_PIXEL;
         screenPoints[i].isVisible = TRUE;
         screenPoints[i].depth =
             projected.depth - (projected.depthStep * GREEN_GRID_DEPTH_BIAS);
@@ -2140,8 +2140,8 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
 
         if (ProjectPoint(f_BallTrail[index][AXIS_X], f_BallTrail[index][AXIS_Y],
                 f_BallTrail[index][AXIS_Z], &point) < 0) {
-          f_BallTrailPoints[i].x = point.x * 4;
-          f_BallTrailPoints[i].y = point.y * 4;
+          f_BallTrailPoints[i].x = point.x * QUARTER_PIXELS_PER_PIXEL;
+          f_BallTrailPoints[i].y = point.y * QUARTER_PIXELS_PER_PIXEL;
           f_BallTrailPoints[i].depth = point.depth -
               (point.depthStep * (g_PinVertexScale * BALL_TRAIL_DEPTH_BIAS));
         } else {
