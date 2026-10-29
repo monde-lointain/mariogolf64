@@ -52,8 +52,11 @@ enum Sound {
   /* Hole objects' splash; also the opening camera editor's choice sound */
   SOUND_SPLASH = 8,
   SOUND_LAND_WATER,
-  /* Played four times in the opening, each lower in pitch */
-  SOUND_UNK11 = 0xB,
+  /* The ball's hits on billboards, by their BillboardCell */
+  SOUND_HIT_TRUNK = 0xA,
+  /* Also played four times in the opening, each lower in pitch */
+  SOUND_HIT_FOLIAGE,
+  SOUND_HIT_SOLID,
   SOUND_HIT_FLAGSTICK = 0xE,
   SOUND_HIT_FLAG,
   SOUND_HIT_CUP_WALL,
@@ -62,6 +65,7 @@ enum Sound {
   /* For a ball that comes into the cup slowly enough to stay */
   SOUND_CUP_IN,
   SOUND_ROLL = 0x14, /* Also played in the opening */
+  SOUND_HIT_WALL,
   /* SOUND_UNK23, SOUND_UNK151 and SOUND_UNK155 play in a shot's flight */
   SOUND_UNK23 = 0x17,
   SOUND_FLAG_SWISH = 0x1F, /* Also played in the opening */
@@ -79,6 +83,7 @@ enum Sound {
    */
   SOUND_UNK39,
   SOUND_WIND_FLY_GUY, /* Also played in the opening */
+  SOUND_HIT_SHELL,
   SOUND_GOOMBA = 0x2A, /* Also the Monty Mole's and in the opening */
   SOUND_MONKEY = 0x2C,
   SOUND_CONTACT_MARIO = 0x2E, /* Also Bowser's */

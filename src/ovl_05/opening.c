@@ -1916,28 +1916,28 @@ void UpdateOpening(void) {
       case 0x71:
         if (f_OpeningSceneFramesLeft == 0x37) {
           PlaySoundWithEffects(
-              SOUND_UNK11, f_OpeningSoundChannel, 0x50, 0xA, 0x9F);
+              SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0xA, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -9.0f);
           AdvanceOpeningSoundChannel();
         }
 
         if (f_OpeningSceneFramesLeft == 0x2D) {
           PlaySoundWithEffects(
-              SOUND_UNK11, f_OpeningSoundChannel, 0x50, 0x14, 0x9F);
+              SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x14, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -10.0f);
           AdvanceOpeningSoundChannel();
         }
 
         if (f_OpeningSceneFramesLeft == 0x23) {
           PlaySoundWithEffects(
-              SOUND_UNK11, f_OpeningSoundChannel, 0x50, 0x1E, 0x9F);
+              SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x1E, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -11.0f);
           AdvanceOpeningSoundChannel();
         }
 
         if (f_OpeningSceneFramesLeft == 0x19) {
           PlaySoundWithEffects(
-              SOUND_UNK11, f_OpeningSoundChannel, 0x50, 0x28, 0x9F);
+              SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x28, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -12.0f);
           AdvanceOpeningSoundChannel();
         }

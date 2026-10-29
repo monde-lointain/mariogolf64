@@ -304,17 +304,17 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
     switch (cell) {
       case BILLBOARD_CELL_TRUNK:
-        PlayImpactSound(0xA, 2844.672f, speed);
+        PlayImpactSound(SOUND_HIT_TRUNK, 2844.672f, speed);
         break;
       case BILLBOARD_CELL_FOLIAGE:
-        PlayImpactSound(0xB, 2844.672f, speed);
+        PlayImpactSound(SOUND_HIT_FOLIAGE, 2844.672f, speed);
         break;
       case BILLBOARD_CELL_SHELL:
-        PlayImpactSound(0x29, 2844.672f, speed);
+        PlayImpactSound(SOUND_HIT_SHELL, 2844.672f, speed);
         break;
       case BILLBOARD_CELL_SOLID:
       default:
-        PlayImpactSound(0xC, 2844.672f, speed);
+        PlayImpactSound(SOUND_HIT_SOLID, 2844.672f, speed);
         break;
     }
   }
@@ -752,7 +752,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   StartFlagstickSparks(simulation->position);
                 }
 
-                PlayStrokeImpactSound(0x10, 711.168f, outwardSpeed);
+                PlayStrokeImpactSound(
+                    SOUND_HIT_CUP_WALL, 711.168f, outwardSpeed);
               }
             }
           }
@@ -978,7 +979,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         inwardSpeed = (-normalZ * velocity[AXIS_X]) +
             (normalY * velocity[AXIS_Y]) + (normalX * velocity[AXIS_Z]);
         PlayStrokeImpactSound(
-            0x15, 1422.336f, AbsoluteValueExpression(inwardSpeed));
+            SOUND_HIT_WALL, 1422.336f, AbsoluteValueExpression(inwardSpeed));
         squareX = velocity[AXIS_X] * velocity[AXIS_X];
         squareZ = velocity[AXIS_Z] * velocity[AXIS_Z];
         along = wallFraction;
@@ -1304,13 +1305,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       switch (GetSurfaceInfo(simulation->surface)->kind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
-          PlayStrokeImpactSound(5, 2844.672f, impactSpeed);
+          PlayStrokeImpactSound(SOUND_LAND_GREEN, 2844.672f, impactSpeed);
           break;
         case SURFACE_KIND_FAIRWAY:
         case SURFACE_KIND_FAIRWAY_FAIR_LIE:
         case SURFACE_KIND_FAIRWAY_POOR_LIE:
         case SURFACE_KIND_SEMI_ROUGH:
-          PlayStrokeImpactSound(2, 2844.672f, impactSpeed);
+          PlayStrokeImpactSound(SOUND_LAND_FAIRWAY, 2844.672f, impactSpeed);
           break;
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
@@ -1318,7 +1319,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_BUNKER_UNK9:
         case SURFACE_KIND_BARE_GROUND:
         case SURFACE_KIND_WASTE_AREA:
-          PlayStrokeImpactSound(4, 2844.672f, impactSpeed);
+          PlayStrokeImpactSound(SOUND_LAND_SAND, 2844.672f, impactSpeed);
           break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROUGH_POOR_LIE:
@@ -1328,7 +1329,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_TEE_GROUND:
         case SURFACE_KIND_ROCK:
         case SURFACE_KIND_DEEP_ROUGH:
-          PlayStrokeImpactSound(3, 2844.672f, impactSpeed);
+          PlayStrokeImpactSound(SOUND_LAND_ROUGH, 2844.672f, impactSpeed);
           break;
       }
 
