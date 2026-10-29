@@ -597,13 +597,11 @@ segments:
       - [0xDE900, .rodata, ovl_00/shot_labels]
       - [0xDE940, .rodata, ovl_00/hole_intro]
       - [0xDE990, .rodata, ovl_00/club_panel]
-      - { start: 0xDE9B0, type: bss, vram: 0x802256B0, name: bss_802256B0 }
-      - { type: .bss, vram: 0x802256C0, name: ovl_00/round_results }
+      - { start: 0xDE9B0, type: .bss, vram: 0x802256B0, name: ovl_00/round_results }
       - { type: .bss, vram: 0x80225810, name: ovl_00/golf_balls }
       - { type: .bss, vram: 0x80227110, name: ovl_00/turn }
       - { type: .bss, vram: 0x80227C90, name: ovl_00/hole_objects }
       - { type: .bss, vram: 0x80227CA0, name: ovl_00/round_events }
-      - { type: bss, vram: 0x80227F30, name: bss_80227F30 }
       - { type: .bss, vram: 0x80228000, name: ovl_00/shot_effects }
       - { type: .bss, vram: 0x8022B530, name: ovl_00/pause_menu }
       - { type: .bss, vram: 0x8022B540, name: ovl_00/club_panel }
@@ -720,8 +718,7 @@ segments:
       - [0x14E0F0, .rodata, ovl_05/opening]
       - [0x14E710, .rodata, ovl_05/opening_camera_editor]
       - [0x14E810, .rodata, ovl_05/opening_ball]
-      - { start: 0x14EA70, type: bss, vram: 0x8020C3F0, name: bss_8020C3F0 }
-      - { type: .bss, vram: 0x8020C400, name: ovl_05/opening }
+      - { start: 0x14EA70, type: .bss, vram: 0x8020C3F0, name: ovl_05/opening }
       - { type: .bss, vram: 0x8022BE10, name: ovl_05/opening_ball }
       - { type: bss, vram: 0x8022BE30, name: bss_8022BE30 }
 
@@ -739,8 +736,7 @@ segments:
       - [0x14F960, .data, ovl_06/title_screen]
       - [0x14F9A0, .data, ovl_06/unlocks]
       - [0x14FA10, .rodata, ovl_06/title_screen]
-      - { start: 0x14FB50, type: bss, vram: 0x801F5B10, name: bss_801F5B10 }
-      - { type: .bss, vram: 0x801F5B30, name: ovl_06/title_screen }
+      - { start: 0x14FB50, type: .bss, vram: 0x801F5B10, name: ovl_06/title_screen }
 
   - name: ovl_07
     type: code
@@ -754,8 +750,7 @@ segments:
       - [0x14FB60, c, ovl_07/boot_logos]
       - [0x150890, .data, ovl_07/boot_logos]
       - [0x1508A0, .rodata, ovl_07/boot_logos]
-      - { start: 0x1508D0, type: bss, vram: 0x801F57B0, name: bss_801F57B0 }
-      - { type: .bss, vram: 0x801F57D0, name: ovl_07/boot_logos }
+      - { start: 0x1508D0, type: .bss, vram: 0x801F57B0, name: ovl_07/boot_logos }
 
   - name: ovl_08
     type: code
@@ -767,7 +762,7 @@ segments:
     subsegments:
       - [0x1508D0, hasm, ovl_08/padding]
       - [0x1508E0, c, ovl_08/confirm_wait]
-      - { start: 0x150990, type: bss, vram: 0x801F4AF0 }
+      - { start: 0x150990, type: .bss, vram: 0x801F4AF0, name: ovl_08/confirm_wait }
 
   - name: ovl_09
     type: code
@@ -810,7 +805,6 @@ segments:
       - [0x161870, .data, ovl_11/course_select]
       - [0x161940, .rodata, ovl_11/course_select]
       - { start: 0x1619A0, type: .bss, vram: 0x80243F50, name: ovl_11/course_select }
-      - { type: bss, vram: 0x80243FC0, name: bss_80243FC0 }
 
   - name: ovl_12
     type: code
@@ -840,8 +834,7 @@ segments:
       - [0x16CD70, .data, ovl_13/cursor_box]
       - [0x16CDD0, .rodata, ovl_13/transmit_menu]
       - [0x16D640, .rodata, ovl_13/cursor_box]
-      - { start: 0x16D650, type: bss, vram: 0x801FC4C0, name: bss_801FC4C0 }
-      - { type: .bss, vram: 0x801FC500, name: ovl_13/cursor_box }
+      - { start: 0x16D650, type: .bss, vram: 0x801FC4C0, name: ovl_13/cursor_box }
       - { type: .bss, vram: 0x801FC5C0, name: ovl_13/transmit_menu }
 
   - name: ovl_14
@@ -856,8 +849,7 @@ segments:
       - [0x16D660, c, ovl_14/staff_roll]
       - [0x1715C0, .data, ovl_14/staff_roll]
       - [0x171700, .rodata, ovl_14/staff_roll]
-      - { start: 0x171770, type: bss, vram: 0x801F8B50, name: bss_801F8B50 }
-      - { type: .bss, vram: 0x801F8B60, name: ovl_14/staff_roll }
+      - { start: 0x171770, type: .bss, vram: 0x801F8B50, name: ovl_14/staff_roll }
 
   - name: build_date
     type: bin

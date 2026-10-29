@@ -121,6 +121,8 @@ static s32 f_TitleUnusedWord = 0;
 /* "PRESS START" turns from red to green and back as this goes round */
 static f32 f_PressStartPhase = 0.0f;
 
+/* Read by no routine */
+static u8 D_801F5B10_ovl_06[0x20];
 static TitleImage f_TitleImage;
 /* Read by no routine; two objects, as one would be aligned to 16 bytes */
 static u8 D_80216F38_ovl_06[8];

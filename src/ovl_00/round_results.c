@@ -279,6 +279,8 @@ static u8 f_TextSlotColors[][3] = {{0xFF, 0xFF, 0xFF}, {0x7F, 0xBF, 0xFF},
 static s32 f_HandFrame = 0;
 static Radians f_TitleBobAngle = 0.0f;
 
+/* Read by no routine */
+static u8 D_802256B0_ovl_00[0x10];
 static u8* f_ResultsBackdropImage;
 static u8* f_FinalResultsTitleImage;
 static u8* f_ResultsCourseImage;

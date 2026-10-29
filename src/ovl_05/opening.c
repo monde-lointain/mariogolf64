@@ -537,6 +537,8 @@ static Vtx f_OpeningSparkVertices[3] = {
     {{{-1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
     {{{1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
 
+/* Read by no routine */
+static u8 D_8020C3F0_ovl_05[0x10];
 static s32 f_CueSlotIndex;
 static CoursePoint D_8020C404_ovl_05;
 

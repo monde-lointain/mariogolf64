@@ -559,6 +559,8 @@ static Mtx f_ContactRibbonMatrices[2];
 static Mtx f_ContactSpinMatrices[2];
 static FlyGuyPoint f_WindFlyGuyLastPosition;
 static Mtx f_BannerMatrices[2];
+/* Read by no routine */
+static u8 D_80227F30_ovl_00[0xD0];
 
 /* Not static: the original left these to the linker's common block */
 BannerLetter f_BannerLetters[BANNER_LETTER_SLOT_COUNT];

@@ -107,6 +107,8 @@ static s32 f_BootLogoUnusedWord = 0;
 /* Whether SetUpTitleHole has reset g_GameState during the Camelot logo */
 static Boolean f_HasResetGameState = FALSE;
 
+/* Read by no routine */
+static u8 D_801F57B0_ovl_07[0x20];
 static CamelotLogo f_CamelotLogo;
 static NintendoLogo f_NintendoLogo;
 static N64Logo f_N64Logo;

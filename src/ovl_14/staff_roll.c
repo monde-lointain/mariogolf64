@@ -561,6 +561,8 @@ static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
     0,
 };
 
+/* Read by no routine */
+static u8 D_801F8B50_ovl_14[0x10];
 static s32 f_CastSlot; /* The slot of the character shown, 0 or 1 */
 static CoursePoint f_NearCupPoint;
 /* Read by no routine */
