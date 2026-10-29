@@ -2933,7 +2933,6 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
 #define RESULTS_ICON_ROW_Y 68
 #define RESULTS_TEXT_ROW_Y 80
 
-#ifdef NON_MATCHING
 /* The results of several players: place, portrait, score, any bet totals and
  * Course Points */
 void DrawPlayersResults(Gfx** displayListHead) {
@@ -3065,9 +3064,6 @@ void DrawPlayersResults(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawPlayersResults);
-#endif
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 
