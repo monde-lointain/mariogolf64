@@ -130,7 +130,7 @@ s32 g_CupViewDepth BSS = {0};
 GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT] BSS ALIGNED(
     8) = {0};
 s32 f_RainCenter[2] BSS = {0};
-void* D_800FF420[2] BSS = {0};
+void* g_MenuBoardImages[2] BSS = {0};
 char f_FaultText[FAULT_TEXT_SIZE] BSS ALIGNED(8) = {0};
 s32 g_PerspectiveNormalization BSS = {0};
 OSMesg __osGbpakTimerMsg BSS = {0};

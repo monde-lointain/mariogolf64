@@ -225,9 +225,9 @@ typedef struct ImageCorner {
 #define LARGE_BANNER_STRIP_SPACING 16
 
 /*
- * DrawNarrowMenuBoard reads D_800FF420's buffer as a 160 texel wide image,
- * though menu.c loads the 256 texel wide board into it; its strips overlap, as
- * each samples its rows at 8/9 of a texel
+ * DrawNarrowMenuBoard reads g_MenuBoardImages's buffer as a 160 texel wide
+ * image, though menu.c loads the 256 texel wide board into it; its strips
+ * overlap, as each samples its rows at 8/9 of a texel
  */
 #define NARROW_BOARD_WIDTH 160
 #define NARROW_BOARD_STRIP_HEIGHT 8
@@ -253,7 +253,7 @@ typedef struct ImageCorner {
 #define BACKDROP_FIRST_TOP 8
 #define BACKDROP_TOP 10
 
-extern void* D_800FF420[2];
+extern void* g_MenuBoardImages[2];
 extern s32 D_801051F0;
 extern void* g_MenuTitleImages[2];
 extern const char D_80231514_ovl_01[];
@@ -456,7 +456,9 @@ static s16 D_8022BE8A_ovl_01 = 0;
 static s16 f_MenuTitleImageIndex = 0;
 static s16 D_8022BE8E_ovl_01 = 0;
 static s16 D_8022BE90_ovl_01 = 0;
-static s16 D_8022BE92_ovl_01 = 0;
+/* Which of g_MenuBoardImages is shown; a new screen's board, or other images
+ * in its place, are read into the other */
+static s16 f_MenuBoardImageIndex = 0;
 static u8 D_8022BE94_ovl_01 = 0;
 /* Whether the options screen's erase window is up */
 static u8 f_IsEraseWindowUp = FALSE;
@@ -1114,9 +1116,9 @@ void UpdateMenus(void) {
         ReadEncodedAsset(
             ImageAt(D_8012D420[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET),
             &asset);
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
-        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         func_802267B0_ovl_01(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
         func_802267B0_ovl_01(D_800FBE30[0], TOURNAMENT_BUFFER_YES_NO);
         imageBuffer = GetMenuImageBuffer();
@@ -1153,9 +1155,9 @@ void UpdateMenus(void) {
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
-        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         g_ImportedCharacterColumns[0] = NO_IMPORTED_COLUMN;
         g_ImportedCharacterColumns[1] = NO_IMPORTED_COLUMN;
         g_ImportedCharacterColumns[2] = NO_IMPORTED_COLUMN;
@@ -1172,9 +1174,9 @@ void UpdateMenus(void) {
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
-        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         break;
 
       case MENU_SCREEN_UNK5:
@@ -1193,9 +1195,9 @@ void UpdateMenus(void) {
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
-        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         iconIndex =
             D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
         g_AnimatedIconFrameIndex = 0;
@@ -1226,9 +1228,9 @@ void UpdateMenus(void) {
       case MENU_SCREEN_CHARACTER_SELECT:
       case MENU_SCREEN_UNK24:
         func_8005C674(g_ChosenPlayerCount, 0);
-        D_8022BE92_ovl_01 ^= 1;
-        func_8020B2C4_ovl_01(
-            D_800FF420[D_8022BE92_ovl_01], CHARACTER_SELECT_BUFFER_BOARD);
+        f_MenuBoardImageIndex ^= 1;
+        func_8020B2C4_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
+            CHARACTER_SELECT_BUFFER_BOARD);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01],
@@ -1246,9 +1248,9 @@ void UpdateMenus(void) {
         func_80209500_ovl_01();
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-        D_8022BE92_ovl_01 ^= 1;
-        func_8020B2C4_ovl_01(
-            D_800FF420[D_8022BE92_ovl_01], CHARACTER_SELECT_BUFFER_BOARD);
+        f_MenuBoardImageIndex ^= 1;
+        func_8020B2C4_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
+            CHARACTER_SELECT_BUFFER_BOARD);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01],
@@ -1269,9 +1271,9 @@ void UpdateMenus(void) {
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-        D_8022BE92_ovl_01 ^= 1;
-        func_802178B0_ovl_01(
-            D_800FF420[D_8022BE92_ovl_01], PLAYER_STATS_BUFFER_UNK12);
+        f_MenuBoardImageIndex ^= 1;
+        func_802178B0_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
+            PLAYER_STATS_BUFFER_UNK12);
         g_AnimatedIconFrameIndex = 0;
         g_AnimatedIconBufferIndex = 0;
         g_AnimatedIconFrameTime = 0;
@@ -1305,9 +1307,9 @@ void UpdateMenus(void) {
         ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_MAIN_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
-        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         break;
 
       case MENU_SCREEN_MAIN_WITHOUT_TRANSMIT:
@@ -1317,20 +1319,20 @@ void UpdateMenus(void) {
         ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_MAIN_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
-        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         break;
 
       case MENU_SCREEN_CLUB_TOURNAMENT:
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         D_8022BE8E_ovl_01 ^= 1;
         tournamentImage = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_PLACE_DIGITS, &asset);
         ReadEncodedAsset(tournamentImage, &asset);
         func_80228A80_ovl_01(g_NamePlateImage, CODE_ENTRY_BUFFER_NAME_PLATE);
         func_80228A80_ovl_01(
-            D_800FF420[D_8022BE92_ovl_01], CODE_ENTRY_BUFFER_BAR);
+            g_MenuBoardImages[f_MenuBoardImageIndex], CODE_ENTRY_BUFFER_BAR);
         func_80228A80_ovl_01(
             D_8012D420[D_8022BE8E_ovl_01], CODE_ENTRY_BUFFER_GLYPHS);
         func_80228A80_ovl_01(D_800FBE30[0], CODE_ENTRY_BUFFER_POINTING_HAND);
@@ -1354,9 +1356,9 @@ void UpdateMenus(void) {
           ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
           OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
           ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-          D_8022BE92_ovl_01 ^= 1;
+          f_MenuBoardImageIndex ^= 1;
           OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
-          ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+          ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
           g_AnimatedIconFrameIndex = 0;
           g_AnimatedIconBufferIndex = 0;
           g_AnimatedIconFrameTime = 0;
@@ -1364,9 +1366,9 @@ void UpdateMenus(void) {
         } else {
           LoadHelpBoardImage(D_801049A0[0][0], HELP_BOARD_IMAGE_HAND);
           LoadHelpBoardImage(D_801B93E0[1], HELP_BOARD_IMAGE_ARROWS);
-          D_8022BE92_ovl_01 ^= 1;
-          LoadHelpBoardImage(
-              D_800FF420[D_8022BE92_ovl_01], HELP_BOARD_IMAGE_CHALKBOARD);
+          f_MenuBoardImageIndex ^= 1;
+          LoadHelpBoardImage(g_MenuBoardImages[f_MenuBoardImageIndex],
+              HELP_BOARD_IMAGE_CHALKBOARD);
           D_8022F8CE_ovl_01 = 0;
         }
 
@@ -1379,9 +1381,9 @@ void UpdateMenus(void) {
         ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_CLUBHOUSE_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_WIDE_BOARD, &asset);
-        ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         break;
 
       case MENU_SCREEN_UNK6:
@@ -1447,9 +1449,9 @@ void UpdateMenus(void) {
         f_SpinningStarBufferIndex = 0;
         f_SpinningStarFrameTime = 0;
         D_8022BE8A_ovl_01 = 0;
-        D_8022BE92_ovl_01 ^= 1;
-        func_802178B0_ovl_01(
-            D_800FF420[D_8022BE92_ovl_01], PLAYER_STATS_BUFFER_ICONS);
+        f_MenuBoardImageIndex ^= 1;
+        func_802178B0_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex],
+            PLAYER_STATS_BUFFER_ICONS);
         func_802178B0_ovl_01(D_801B93E0[0], PLAYER_STATS_BUFFER_UNK2);
         func_802178B0_ovl_01(g_NamePlateImage, PLAYER_STATS_BUFFER_UNK3);
         func_802178B0_ovl_01(D_8010526C[0], PLAYER_STATS_BUFFER_UNK4);
@@ -1501,9 +1503,9 @@ void UpdateMenus(void) {
         func_80213464_ovl_01(
             D_801B5CD0[D_8022BE90_ovl_01], BEST_TIMES_BUFFER_UNREAD);
         func_8020E26C_ovl_01(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
-        D_8022BE92_ovl_01 ^= 1;
+        f_MenuBoardImageIndex ^= 1;
         func_80213464_ovl_01(
-            D_800FF420[D_8022BE92_ovl_01], BEST_TIMES_BUFFER_PLACES);
+            g_MenuBoardImages[f_MenuBoardImageIndex], BEST_TIMES_BUFFER_PLACES);
         func_80213464_ovl_01(D_800FBE30[0], BEST_TIMES_BUFFER_GREEN_ARROWS);
         func_8021585C_ovl_01();
         break;
@@ -1527,8 +1529,8 @@ void UpdateMenus(void) {
       case MENU_SCREEN_UNK12:
         func_80221B20_ovl_01();
         func_8021CF10_ovl_01(D_801049A0[0]);
-        D_8022BE92_ovl_01 ^= 1;
-        func_8021342C_ovl_01(D_800FF420[D_8022BE92_ovl_01]);
+        f_MenuBoardImageIndex ^= 1;
+        func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         func_8020E26C_ovl_01(
@@ -1543,8 +1545,8 @@ void UpdateMenus(void) {
 
       case MENU_SCREEN_RING_SHOT_RECORDS:
         func_80221B20_ovl_01();
-        D_8022BE92_ovl_01 ^= 1;
-        func_8021342C_ovl_01(D_800FF420[D_8022BE92_ovl_01]);
+        f_MenuBoardImageIndex ^= 1;
+        func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         func_8020E26C_ovl_01(
@@ -3734,7 +3736,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
 #define CLAMPED_BACKDROP_BOTTOM 162
 
 /*
- * The 256 texel wide board in D_800FF420's buffer, each strip of rows
+ * The 256 texel wide board in g_MenuBoardImages's buffer, each strip of rows
  * stretched to the strips' spacing
  */
 #define BOARD_WIDTH 256
@@ -3901,12 +3903,13 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(ImageBody(D_800FF420[D_8022BE92_ovl_01])));
+    gDPLoadTLUT_pal256(gfx++,
+        TextureAddress(ImageBody(g_MenuBoardImages[f_MenuBoardImageIndex])));
 
     for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress(LargeImageTexels(D_800FF420[D_8022BE92_ovl_01]) +
+          TextureAddress(
+              LargeImageTexels(g_MenuBoardImages[f_MenuBoardImageIndex]) +
               (stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT)),
           G_IM_FMT_CI, G_IM_SIZ_8b, BOARD_WIDTH, BOARD_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -3930,12 +3933,13 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(ImageBody(D_800FF420[D_8022BE92_ovl_01])));
+    gDPLoadTLUT_pal256(gfx++,
+        TextureAddress(ImageBody(g_MenuBoardImages[f_MenuBoardImageIndex])));
 
     for (stripIndex = 0; stripIndex != NARROW_BOARD_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress(LargeImageTexels(D_800FF420[D_8022BE92_ovl_01]) +
+          TextureAddress(
+              LargeImageTexels(g_MenuBoardImages[f_MenuBoardImageIndex]) +
               (stripIndex * NARROW_BOARD_WIDTH * NARROW_BOARD_STRIP_HEIGHT)),
           G_IM_FMT_CI, G_IM_SIZ_8b, NARROW_BOARD_WIDTH,
           NARROW_BOARD_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -4099,11 +4103,12 @@ void DrawNarrowMenuBoard(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(ImageBody(D_800FF420[D_8022BE92_ovl_01])));
+  gDPLoadTLUT_pal256(gfx++,
+      TextureAddress(ImageBody(g_MenuBoardImages[f_MenuBoardImageIndex])));
   for (stripIndex = 0; stripIndex != NARROW_BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_800FF420[D_8022BE92_ovl_01]) +
+        TextureAddress(
+            LargeImageTexels(g_MenuBoardImages[f_MenuBoardImageIndex]) +
             (stripIndex * NARROW_BOARD_WIDTH * NARROW_BOARD_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, NARROW_BOARD_WIDTH, NARROW_BOARD_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
