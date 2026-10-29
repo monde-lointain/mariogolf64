@@ -1095,7 +1095,7 @@ void TurnAim(s32 turnsAltHeading) {
         g_LetterboxState == LETTERBOX_STATE_UNK5) {
       if (heading == (s16)g_CurrentShot.unk0) {
         if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
-          SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
+          SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
           SetFramebufferCount(2);
         }
       } else if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
@@ -1140,7 +1140,7 @@ s32 UpdateAimControls(void) {
         ABS(headingLeft) < REPLAY_AIM_MIN_STEP) {
       g_CurrentShot.unk0 = D_80104F78.unk0;
       if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
-        SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
+        SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
         SetFramebufferCount(REPLAY_FRAMEBUFFER_COUNT);
       }
 
@@ -3066,7 +3066,7 @@ void UpdateTurns(void) {
 
   f_IsShotPreviewBuilt = 0;
   if (!(g_LetterboxState == 0 || g_LetterboxState == 5)) {
-    SetScreenEffect(4, 0);
+    SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   }
 
   if (IsGameFlagSet(GAME_FLAG_SHOW_PLAYER_UNKC)) {
@@ -3392,9 +3392,9 @@ void UpdateTurns(void) {
 
         TurnAim(0);
         PlaceCharacterForShot(0);
-        if (g_ScreenEffect == 3) {
+        if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
           SetFramebufferCount(3);
-          SetScreenEffect(4, 0);
+          SetScreenEffect(SCREEN_EFFECT_NONE, 0);
         }
 
         break;
@@ -3523,7 +3523,7 @@ void UpdateTurns(void) {
             g_PauseScreen = PAUSE_SCREEN_NONE;
             SetMenuBackdrop(-1);
             SetFramebufferCount(3);
-            SetScreenEffect(4, 0);
+            SetScreenEffect(SCREEN_EFFECT_NONE, 0);
             g_LetterboxState = 0;
             PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
             ResetAimCamera();
@@ -3541,7 +3541,7 @@ void UpdateTurns(void) {
             UpdateAimControls();
             PlaceShotCamera();
             SetFramebufferCount(3);
-            SetScreenEffect(4, 0);
+            SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
 
           D_80227150_ovl_00.unk10 = 0;
@@ -3586,8 +3586,9 @@ void UpdateTurns(void) {
           SetSongTempo(tempo);
           replayKind = D_80227194_ovl_00;
           if (replayKind == 2) {
-            if (g_ScreenEffect != 3) {
-              SetScreenEffect(3, 2);
+            if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+              SetScreenEffect(
+                  SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
               SetFramebufferCount(2);
             }
 
@@ -3644,8 +3645,8 @@ void UpdateTurns(void) {
           PlaceCharacterForShot(0);
           UpdateGolferTranslucency();
           if (!(g_LetterboxState == 0 || g_LetterboxState == 5) &&
-              g_ScreenEffect == 3) {
-            SetScreenEffect(4, 0);
+              g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+            SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
 
           if (g_LetterboxState == 0 || g_LetterboxState == 5) {
@@ -3678,8 +3679,9 @@ void UpdateTurns(void) {
                 SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
             SetFramebufferCount(2);
             nextState = PLAYER_STATE_SETTING_POWER;
-            if (g_ScreenEffect != 3) {
-              SetScreenEffect(3, 2);
+            if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+              SetScreenEffect(
+                  SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
             }
           }
 
@@ -3800,8 +3802,8 @@ void UpdateTurns(void) {
             D_80227150_ovl_00.unk10 = 0;
             D_80227150_ovl_00.unk14 = 0;
             nextState = PLAYER_STATE_STARTING_SWING;
-            if (g_ScreenEffect == 3) {
-              SetScreenEffect(4, 0);
+            if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+              SetScreenEffect(SCREEN_EFFECT_NONE, 0);
             }
 
             sound = SOUND_IMPACT_OFF_MARK;
@@ -3891,8 +3893,8 @@ void UpdateTurns(void) {
             }
           }
 
-          if (g_ScreenEffect == 3) {
-            SetScreenEffect(4, 0);
+          if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+            SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
         } else {
           g_CurrentShot.unk40++;
@@ -3928,8 +3930,8 @@ void UpdateTurns(void) {
           PlayImpactClickSound();
           StopSound(8);
           nextState = PLAYER_STATE_STARTING_SWING;
-          if (g_ScreenEffect == 3) {
-            SetScreenEffect(4, 0);
+          if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+            SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
         }
 

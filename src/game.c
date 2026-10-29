@@ -234,6 +234,9 @@ static u8 D_800DAC30[16];
 #define FLYOVER_FADE_ALPHA_STEP 16
 #define FLYOVER_FADE_LIFT_ALPHA_STEP 32
 #define FLYOVER_SPIN_FRAME_COUNT 30
+/* How long the screen test's effects last, from the second controller */
+#define SCREEN_TEST_SPIN_FRAME_COUNT 16
+#define SCREEN_TEST_FRAME_COUNT 64
 
 /* The scenes are still known only by number */
 
@@ -568,7 +571,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
   s32 stripIndex;
   s16 stripHeight;
 
-  f_ScreenEffectFrameCount = 1;
+  f_ScreenEffectFrameCount = SAVED_FRAME_STEP_SHOWING;
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
@@ -1600,7 +1603,7 @@ s32 DrawGame(void) {
             if (g_Cameras[0].view.drawFlags ==
                 (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT)) {
               if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&
-                  f_ScreenEffectFrameCount == 2) {
+                  f_ScreenEffectFrameCount == SAVED_FRAME_STEP_SAVING) {
                 gDPPipeSync(g_DisplayListHead++);
                 gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
                 gDPPipeSync(g_DisplayListHead++);
@@ -1646,7 +1649,7 @@ s32 DrawGame(void) {
             if ((g_Cameras[0].view.drawFlags !=
                         (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) ||
                     g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME ||
-                    f_ScreenEffectFrameCount != 1) &&
+                    f_ScreenEffectFrameCount != SAVED_FRAME_STEP_SHOWING) &&
                 g_PauseScreen != PAUSE_SCREEN_FREE_LOOK) {
               UsePrimitiveDepth(0);
               if (!IsGameFlagSet(GAME_FLAG_HIDE_BACKDROP)) {
@@ -1756,7 +1759,7 @@ s32 DrawGame(void) {
               g_PauseScreen == PAUSE_SCREEN_FREE_LOOK)) {
         if (g_Cameras[viewIndex].view.drawFlags != 0) {
           if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&
-              f_ScreenEffectFrameCount == 1) {
+              f_ScreenEffectFrameCount == SAVED_FRAME_STEP_SHOWING) {
             gDPPipeSync(g_DisplayListHead++);
             gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b,
                 SCREEN_WIDTH, osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
@@ -1804,7 +1807,7 @@ s32 DrawGame(void) {
             }
 
             if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&
-                f_ScreenEffectFrameCount == 1) {
+                f_ScreenEffectFrameCount == SAVED_FRAME_STEP_SHOWING) {
               DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
               if (viewIndex == 0) {
                 BuildHorizonDynamicTextures(&g_DisplayListHead);
@@ -2036,19 +2039,19 @@ s32 DrawGame(void) {
 
   if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
     if (g_ControllerStates[1].buttons & D_CBUTTONS) {
-      SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
+      SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
     }
 
     if (g_ControllerStates[1].buttons & U_CBUTTONS) {
-      SetScreenEffect(SCREEN_EFFECT_SPIN, 16);
+      SetScreenEffect(SCREEN_EFFECT_SPIN, SCREEN_TEST_SPIN_FRAME_COUNT);
     }
 
     if (g_ControllerStates[1].buttons & L_CBUTTONS) {
-      SetScreenEffect(SCREEN_EFFECT_TILED_IMAGE, 64);
+      SetScreenEffect(SCREEN_EFFECT_TILED_IMAGE, SCREEN_TEST_FRAME_COUNT);
     }
 
     if (g_ControllerStates[1].buttons & R_CBUTTONS) {
-      SetScreenEffect(SCREEN_EFFECT_EMPTY, 64);
+      SetScreenEffect(SCREEN_EFFECT_EMPTY, SCREEN_TEST_FRAME_COUNT);
     }
 
     if (g_ControllerStates[1].buttons & D_CBUTTONS) {

@@ -22,6 +22,14 @@ enum ScreenEffect {
   SCREEN_EFFECT_NONE
 };
 
+/* SCREEN_EFFECT_SAVED_FRAME's steps, which its frame count holds */
+enum SavedFrameStep {
+  /* Copies the frame kept in the saved frame buffer to the screen */
+  SAVED_FRAME_STEP_SHOWING = 1,
+  /* Clears the saved frame buffer and draws the scene into it */
+  SAVED_FRAME_STEP_SAVING
+};
+
 extern s32 g_ScreenEffect; /* The effect SetScreenEffect last set */
 
 /* An orthographic projection of one unit per pixel, centered on the screen,
