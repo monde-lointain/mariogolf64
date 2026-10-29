@@ -79,7 +79,7 @@ enum SaveMenuGame {
 
 extern const char D_80231A3C_ovl_01[];
 
-void func_80221CC0_ovl_01(void);
+void ResetSavedGameControllers(void);
 
 /* The Ring Shot stars that each level of func_8022181C takes */
 #define RING_SHOT_STARS_PER_LEVEL 4
@@ -1119,7 +1119,12 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveGameBuffer);
 #endif
 
-void func_80221B20_ovl_01(void) {
+/*
+ * Reads the save data from SRAM, finds each saved game's mode image, chooses
+ * the first saved game and clears its players' controllers. The records screens
+ * run it too, for the save data.
+ */
+void ReadSavedGames(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   s8 gameIndex;
@@ -1160,13 +1165,17 @@ void func_80221B20_ovl_01(void) {
     memory->savedGameIndex = gameIndex;
   }
 
-  func_80221CC0_ovl_01();
+  ResetSavedGameControllers();
 }
 
+/*
+ * Marks the chosen saved game's computer players as such and its other players
+ * as having no controller yet, and lists those other players in order.
+ */
 /* Doesn't match: the original sets the first loop's counter later and keeps the
  * player count in other registers */
 #ifdef NON_MATCHING
-void func_80221CC0_ovl_01(void) {
+void ResetSavedGameControllers(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   s8 playerIndex;
@@ -1209,7 +1218,7 @@ void func_80221CC0_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80221CC0_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", ResetSavedGameControllers);
 #endif
 
 /*
@@ -1526,7 +1535,7 @@ void UpdateSavedGames(void) {
 
         memory->savedGameTurn = SAVED_GAME_TURN_FRAMES;
         g_AnimatedIconFrameIndex = 0;
-        func_80221CC0_ovl_01();
+        ResetSavedGameControllers();
         LoadChosenGameImages();
       } else if (g_MenuRepeatButtons & R_JPAD) {
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
@@ -1541,7 +1550,7 @@ void UpdateSavedGames(void) {
         }
 
         memory->savedGameTurn = -SAVED_GAME_TURN_FRAMES;
-        func_80221CC0_ovl_01();
+        ResetSavedGameControllers();
         g_AnimatedIconFrameIndex = 0;
         LoadChosenGameImages();
       }

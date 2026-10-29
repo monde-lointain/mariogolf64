@@ -384,7 +384,7 @@ void LoadRingShotCourseIcons(void** buffers);
 void UpdateRingShotRecords(void);
 void func_80220A30_ovl_01(void);
 void func_80220BB0_ovl_01(void);
-void func_80221B20_ovl_01(void);
+void ReadSavedGames(void);
 void LoadSaveGameBuffer(void* buffer, u8 bufferKind);
 void func_80221EBC_ovl_01(void** buffers, u8 bufferKind);
 void func_80222038_ovl_01(void* buffer, u8 bufferIndex);
@@ -1290,7 +1290,7 @@ void UpdateMenus(void) {
         g_AnimatedIconFrameIndex = 0;
         g_AnimatedIconBufferIndex = 0;
         g_AnimatedIconFrameTime = 0;
-        func_80221B20_ovl_01();
+        ReadSavedGames();
         func_80221EBC_ovl_01(D_801049A0[0], SAVE_MENU_BUFFER_SLOTS);
         func_80221EBC_ovl_01(D_8010526C, SAVE_MENU_BUFFER_CHOSEN);
         func_80222038_ovl_01(g_NamePlateImage, 1);
@@ -1488,7 +1488,7 @@ void UpdateMenus(void) {
         f_SpinningStarFrameTime = 0;
         f_SpinningStarFrameIndex = 0;
         if (g_IsDebugEnabled) {
-          func_80221B20_ovl_01();
+          ReadSavedGames();
         }
 
         LoadCourseStatsIcons(D_801049A0[0]);
@@ -1507,7 +1507,7 @@ void UpdateMenus(void) {
         break;
 
       case MENU_SCREEN_BEST_TIMES:
-        func_80221B20_ovl_01();
+        ReadSavedGames();
         LoadBestTimesCourseIcons(D_801049A0[0]);
         LoadBestTimesBuffer(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
         D_8022BE90_ovl_01 ^= 1;
@@ -1524,7 +1524,7 @@ void UpdateMenus(void) {
         break;
 
       case MENU_SCREEN_CHARACTER_TABLE:
-        func_80221B20_ovl_01();
+        ReadSavedGames();
         LoadBestTimesBuffer(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
         D_8022BE90_ovl_01 ^= 1;
         LoadCourseMenuBuffer(
@@ -1540,7 +1540,7 @@ void UpdateMenus(void) {
         break;
 
       case MENU_SCREEN_BEST_SHOTS:
-        func_80221B20_ovl_01();
+        ReadSavedGames();
         LoadBestShotsCourseIcons(D_801049A0[0]);
         f_MenuBoardImageIndex ^= 1;
         func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
@@ -1557,7 +1557,7 @@ void UpdateMenus(void) {
         break;
 
       case MENU_SCREEN_RING_SHOT_RECORDS:
-        func_80221B20_ovl_01();
+        ReadSavedGames();
         f_MenuBoardImageIndex ^= 1;
         func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
         D_8022BE8E_ovl_01 ^= 1;
