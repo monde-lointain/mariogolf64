@@ -56,7 +56,7 @@ typedef struct Unk6 {
 #define MAX_LAUNCH_POWER 256
 
 typedef struct Unk20 {
-  /* 0x00 */ SignedBinaryAngle unk0;
+  /* 0x00 */ SignedBinaryAngle heading;
   /* 0x04 */ s32 clubIndex;
   /* 0x08 */ s32 power; /* Out of MAX_LAUNCH_POWER */
   /* 0x0C */ s32 unkC;

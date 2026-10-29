@@ -1424,7 +1424,7 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   CoursePoint spot;
   u8 unusedBuffer[0x80]; /* Unused; it is there to match */
   Radians heading =
-      ((g_CurrentShot.unk0 + QUARTER_BINARY_TURN) & BINARY_ANGLE_MASK) *
+      ((g_CurrentShot.heading + QUARTER_BINARY_TURN) & BINARY_ANGLE_MASK) *
       BINARY_ANGLE_TO_RADIANS;
   Radians pitch;
   f32 distance;
@@ -1461,7 +1461,7 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   rotation[AXIS_X] = 0.0f;
   rotation[AXIS_Z] = 0;
   rotation[AXIS_Y] =
-      ((-g_CurrentShot.unk0) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
+      ((-g_CurrentShot.heading) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
 }
 
 #else

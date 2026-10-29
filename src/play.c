@@ -611,7 +611,7 @@ void SetNextTeeOrder(void) {
 }
 
 void func_800600C0(s32 index) {
-  D_80104F78.unk0 = D_800FEDD8->shots[index].heading;
+  D_80104F78.heading = D_800FEDD8->shots[index].heading;
   D_80104F78.unk4 = D_800FEDD8->shots[index].unk2;
   D_80104F78.unk8 = D_800FEDD8->shots[index].unk3;
   D_80104F78.shotMode = D_800FEDD8->shots[index].shotMode;
@@ -621,7 +621,7 @@ void func_800600C0(s32 index) {
 }
 
 void func_80060128(s32 index) {
-  D_80104F78.unk0 = D_80105F40->shots[index].heading;
+  D_80104F78.heading = D_80105F40->shots[index].heading;
   D_80104F78.unk4 = D_80105F40->shots[index].unk2;
   D_80104F78.unk8 = D_80105F40->shots[index].unk3;
   D_80104F78.shotMode = D_80105F40->shots[index].shotMode;

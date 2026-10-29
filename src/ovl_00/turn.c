@@ -436,7 +436,7 @@ void KeepAimCameraOnCourse(void) {
     maxZ = AIM_CAMERA_COURSE_MAX_Z;
   }
 
-  heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+  heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
   offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
   eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
   minCoord = AIM_CAMERA_MIN_COORD;
@@ -579,7 +579,7 @@ void PlaceShotCamera(void) {
     s32 rise;
     f32 tilt;
 
-    heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+    heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
     KeepAimCameraOnCourse();
     point[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
         g_CurrentShot.ballPosition[AXIS_X];
@@ -736,7 +736,7 @@ void AimDownRange(void) {
     g_CurrentShot.aimCameraDistance = DOWN_RANGE_DISTANCE;
   }
 
-  heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+  heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
   lookAt[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_X];
   if (lookAt[AXIS_X] < 0.0f) {
@@ -774,7 +774,7 @@ void AimDownRange(void) {
 #ifdef NON_MATCHING
 void PlaceAimCamera(void) {
   Vec3 eye;
-  Radians heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+  Radians heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
 
   eye[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_X];
@@ -827,7 +827,7 @@ void StartFreeLook(void) {
   g_ImpactPointState = IMPACT_POINT_OFF;
   g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
       HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
-  g_FreeLookHeading = g_CurrentShot.unk0;
+  g_FreeLookHeading = g_CurrentShot.heading;
   SetMenuBackdrop(MENU_BACKDROP_PATTERN);
   g_PauseScreen = PAUSE_SCREEN_FREE_LOOK;
   g_RoundHud.isLetterboxShown = FALSE;
@@ -1054,7 +1054,7 @@ void MoveAimCameraDistance(void) {
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
   s32 stickX = g_TurnController.stickX;
-  SignedBinaryAngle heading = g_CurrentShot.unk0;
+  SignedBinaryAngle heading = g_CurrentShot.heading;
   s32 speed;
   s32 step;
   s32 dpad;
@@ -1075,7 +1075,7 @@ void TurnAim(s32 turnsAltHeading) {
       step *= speed;
     }
 
-    g_CurrentShot.unk0 -= step;
+    g_CurrentShot.heading -= step;
   } else {
     step = stickX / 2;
     speed = stickX / ALT_HEADING_STICK_SPEED_DIVISOR;
@@ -1117,12 +1117,12 @@ void TurnAim(s32 turnsAltHeading) {
 
   dpad = f_AimTurnFrameCount;
   dpadSpeed = (dpad < 0) ? -dpad : dpad;
-  g_CurrentShot.unk0 +=
+  g_CurrentShot.heading +=
       dpad * ((dpadSpeed / AIM_DPAD_SPEED_DIVISOR) + AIM_DPAD_BASE_SPEED);
   if (!IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
     if (g_LetterboxState == LETTERBOX_STATE_NONE ||
         g_LetterboxState == LETTERBOX_STATE_UNK5) {
-      if (heading == (s16)g_CurrentShot.unk0) {
+      if (heading == (s16)g_CurrentShot.heading) {
         if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
           SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
           SetFramebufferCount(DOUBLE_BUFFERING);
@@ -1164,10 +1164,10 @@ s32 UpdateAimControls(void) {
   s32 heading;
 
   if (f_ShotSource != SHOT_SOURCE_PLAYER) {
-    headingLeft = (s16)(D_80104F78.unk0 - g_CurrentShot.unk0);
+    headingLeft = (s16)(D_80104F78.heading - g_CurrentShot.heading);
     if (IsGameFlagSet(GAME_FLAG_SNAP_REPLAY_AIM) ||
         ABS(headingLeft) < REPLAY_AIM_MIN_STEP) {
-      g_CurrentShot.unk0 = D_80104F78.unk0;
+      g_CurrentShot.heading = D_80104F78.heading;
       if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
         SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
         SetFramebufferCount(DOUBLE_BUFFERING);
@@ -1178,8 +1178,8 @@ s32 UpdateAimControls(void) {
 
     step = headingLeft / REPLAY_AIM_STEP_DIVISOR;
     turn = ABS(step) + REPLAY_AIM_MIN_STEP;
-    heading = g_CurrentShot.unk0;
-    g_CurrentShot.unk0 = (headingLeft < 0) ? heading - turn : heading + turn;
+    heading = g_CurrentShot.heading;
+    g_CurrentShot.heading = (headingLeft < 0) ? heading - turn : heading + turn;
     if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
       SetFramebufferCount(TRIPLE_BUFFERING);
       SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -1190,10 +1190,10 @@ s32 UpdateAimControls(void) {
 
   g_HasPressedShotButton = 0;
   if (g_TurnController.buttons == AIM_RESET_BUTTONS) {
-    g_CurrentShot.unk0 = atan2(g_HoleSetup.cupPosition[AXIS_Z] -
-                                 g_CurrentShot.ballPosition[AXIS_Z],
-                             g_HoleSetup.cupPosition[AXIS_X] -
-                                 g_CurrentShot.ballPosition[AXIS_X]) *
+    g_CurrentShot.heading = atan2(g_HoleSetup.cupPosition[AXIS_Z] -
+                                    g_CurrentShot.ballPosition[AXIS_Z],
+                                g_HoleSetup.cupPosition[AXIS_X] -
+                                    g_CurrentShot.ballPosition[AXIS_X]) *
         RADIANS_TO_BINARY_ANGLE;
   }
 
@@ -1331,7 +1331,7 @@ s32 UpdateAimControls(void) {
                 g_CurrentShot.ballPosition[AXIS_Z];
             g_LetterboxState = LETTERBOX_STATE_STARTING_LOOK_BACK;
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
-            g_AltHeading = g_CurrentShot.unk0;
+            g_AltHeading = g_CurrentShot.heading;
             g_CurrentShot.aimCameraDistance =
                 -sqrtf((toCup[AXIS_X] * toCup[AXIS_X]) +
                     (toCup[AXIS_Z] * toCup[AXIS_Z])) -
@@ -1394,7 +1394,7 @@ s32 UpdateAimControls(void) {
         }
 
         TurnAim(0);
-        g_AltHeading = g_CurrentShot.unk0;
+        g_AltHeading = g_CurrentShot.heading;
         break;
       case LETTERBOX_STATE_LOOKING_BACK:
         if (g_TurnController.pressedButtons & A_BUTTON) {
@@ -1410,7 +1410,7 @@ s32 UpdateAimControls(void) {
         }
 
         TurnAim(0);
-        g_AltHeading = g_CurrentShot.unk0;
+        g_AltHeading = g_CurrentShot.heading;
         break;
     }
   }
@@ -1841,7 +1841,7 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
   }
 
   f_IsShotPreviewBuilt = TRUE;
-  shot.unk0 = g_CurrentShot.unk0;
+  shot.heading = g_CurrentShot.heading;
   shot.clubIndex = g_CurrentShot.clubSlot;
   if (IsGameFlagSet(GAME_FLAG_TUNE_SHOT_PREVIEW)) {
     PrintDebugText("               ", 10, 10);
@@ -2162,7 +2162,7 @@ void RecordHoleOut(s32 playerIndex) {
     record->strokeCount = g_Players[playerIndex].strokeCount;
     record->unk40 = g_Players[playerIndex].unk88;
     record->hole = g_HoleSetup;
-    record->shots[shotIndex].heading = g_CurrentShot.unk0;
+    record->shots[shotIndex].heading = g_CurrentShot.heading;
     record->shots[shotIndex].unk2 = g_CurrentShot.unk4;
     record->shots[shotIndex].unk3 = g_CurrentShot.unk8;
     record->shots[shotIndex].shotMode = g_CurrentShot.shotMode;
@@ -2190,7 +2190,7 @@ void RecordRingShotHole(s32 playerIndex) {
     record->strokeCount = g_Players[playerIndex].strokeCount;
     record->unk3C = g_Players[playerIndex].unk88;
     record->hole = g_HoleSetup;
-    record->shots[shotIndex].heading = g_CurrentShot.unk0;
+    record->shots[shotIndex].heading = g_CurrentShot.heading;
     record->shots[shotIndex].unk2 = g_CurrentShot.unk4;
     record->shots[shotIndex].unk3 = g_CurrentShot.unk8;
     record->shots[shotIndex].shotMode = g_CurrentShot.shotMode;
@@ -2375,8 +2375,8 @@ void StartPlayerShot(s32 playerIndex) {
       target[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
     }
 
-    g_CurrentShot.unk0 = atan2(target[AXIS_Z] - player->ballPosition[AXIS_Z],
-                             target[AXIS_X] - player->ballPosition[AXIS_X]) *
+    g_CurrentShot.heading = atan2(target[AXIS_Z] - player->ballPosition[AXIS_Z],
+                                target[AXIS_X] - player->ballPosition[AXIS_X]) *
         RADIANS_TO_BINARY_ANGLE;
     PickStartingClub(&g_HoleSetup);
   }
@@ -3172,7 +3172,7 @@ void UpdateTurns(void) {
         SetCharacterLighting(0, 1);
         ClearGameFlag(GAME_FLAG_FAST_FLIGHT);
         StartPlayerShot(playerIndex);
-        D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
+        D_80227150_ovl_00.heading = g_CurrentShot.heading;
         g_RoundHud.clubHeadTilt =
             GetAimSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
         g_RoundHud.lieTilt =
@@ -3400,7 +3400,7 @@ void UpdateTurns(void) {
       case PLAYER_STATE_PREPARING_AIM:
         D_80227150_ovl_00.clubIndex = g_CurrentShot.clubSlot;
         D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
-        D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
+        D_80227150_ovl_00.heading = g_CurrentShot.heading;
         if (f_ShotSource == SHOT_SOURCE_PLANNING) {
           StartTurnTimer();
           for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
@@ -3587,7 +3587,7 @@ void UpdateTurns(void) {
 
           D_80227150_ovl_00.unk10 = 0;
           D_80227150_ovl_00.unk14 = 0;
-          D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
+          D_80227150_ovl_00.heading = g_CurrentShot.heading;
           BuildShotPreview(&D_80227150_ovl_00, state);
         } else if (g_PauseScreen == PAUSE_SCREEN_NONE) {
           Boolean isReady;
@@ -3688,7 +3688,7 @@ void UpdateTurns(void) {
             isReady = UpdateAimControls() && isReady;
           }
 
-          D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
+          D_80227150_ovl_00.heading = g_CurrentShot.heading;
           PlaceCharacterForShot(0);
           UpdateGolferTranslucency();
           if (!(g_LetterboxState == LETTERBOX_STATE_NONE ||
@@ -4862,7 +4862,7 @@ void UpdateTurns(void) {
 
   if (g_RoundHud.unkF) {
     s32 distance = GetSelectedShotDistance();
-    Radians angle = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+    Radians angle = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
     f32 cosine;
     f32 scale;
     f32 length;

@@ -1708,7 +1708,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
                           speed) *
       0.00078125f;
   pitch += (f32)club->unk10 * shot->unk14 * 0.00054541545f;
-  yawRadians = (u16)shot->unk0 * BINARY_ANGLE_TO_RADIANS;
+  yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
   spinBase = club->spin * 0.5f;
   simulation->unk34 =
       (((spinBase + 25.0f) * (shot->unk14 * 0.006f)) - spinBase) * speed *

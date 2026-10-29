@@ -69,10 +69,11 @@ void StartHoleIntroCamera(void) {
       (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * scale;
   (*lookAt)[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * scale;
   if (g_GameState.holeIndex == GetFirstHoleIndex()) {
-    heading = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
-  } else {
     heading =
-        ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) - M_PI;
+        ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
+  } else {
+    heading = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
+        (M_PI / 2) - M_PI;
   }
 
   offsetX = -sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE;
@@ -119,7 +120,7 @@ s32 UpdateHoleIntroCamera(void) {
     }
 
     heading = heading +
-        (((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2));
+        (((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2));
   } else {
     if (f_IntroFrame < LATER_HOLE_INTRO_FRAMES) {
       f_IntroCameraDistance = LATER_HOLE_INTRO_START_DISTANCE -
@@ -135,8 +136,8 @@ s32 UpdateHoleIntroCamera(void) {
       f_IntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
     }
 
-    heading = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) +
-        -(f32)M_PI;
+    heading = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
+        (M_PI / 2) + -(f32)M_PI;
   }
 
   g_Cameras[1].view.lookAt[AXIS_X] =

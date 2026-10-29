@@ -1704,7 +1704,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   }
 
   club = GetSelectedClub();
-  yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+  yaw = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
   distance = GetSelectedShotDistance();
   worldDistance = GetSelectedShotWorldDistance();
   if (club->surfaceMask & CLUB_SURFACE_GREEN) {

@@ -649,7 +649,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
                 3;
             missAngle =
                 ((rand() * 4) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
-            aimAngle = (u16)f_Shot.unk0 * BINARY_ANGLE_TO_RADIANS;
+            aimAngle = (u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS;
             if (missDistance >= MAX_MISS_DISTANCE) {
               missDistance = MAX_MISS_DISTANCE;
             }
@@ -682,13 +682,13 @@ s32 PlanShot(CurrentShot* plannedShot) {
 
       f_PlanTarget[AXIS_Y] =
           GetGroundHeight(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z]);
-      f_Shot.unk0 = atan2(f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
-                        f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
+      f_Shot.heading = atan2(f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
+                           f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
           RADIANS_TO_BINARY_ANGLE;
       if (GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])
               ->surfaceMask &
           CLUB_SURFACE_GREEN) {
-        f_Shot.unk0 += GetSideSlope();
+        f_Shot.heading += GetSideSlope();
       }
 
       f_Shot.unk8 = DEFAULT_SHOT_UNK8;
@@ -2245,7 +2245,7 @@ s32 StepTrialShot(void) {
     f_HasLanded = FALSE;
     f_Shot.unk14 = f_ShotOffsets[f_ShotOffset].unk14 + (rand() & 7) - 3;
     f_Shot.unk18 = f_ShotOffsets[f_ShotOffset].unk18 + (rand() & 7) - 3;
-    f_TrialLaunch->unk0 = f_Shot.unk0;
+    f_TrialLaunch->heading = f_Shot.heading;
     f_TrialLaunch->clubIndex = f_Shot.clubSlot;
     f_ClosestTargetDistance = FAR_FROM_TARGET;
     f_TrialLaunch->power = func_8005F248(f_Shot.unk4);
@@ -2476,8 +2476,8 @@ EVALUATE:
           IntLength2D(f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X],
               f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]);
     } else {
-      aimCos = cosf((u16)f_Shot.unk0 * BINARY_ANGLE_TO_RADIANS);
-      aimSin = sinf((u16)f_Shot.unk0 * BINARY_ANGLE_TO_RADIANS);
+      aimCos = cosf((u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS);
+      aimSin = sinf((u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS);
       flyDistance = (aimCos *
                         ((((f_TrialSimulation.position[AXIS_X] * 3) +
                               f_TrialEndPoint[AXIS_X]) /
@@ -2534,13 +2534,14 @@ EVALUATE:
           return 1;
         } else if (f_HasUnk3Contact || ratio >= 10.0f) {
           f_AimChangeCount++;
-          f_Shot.unk0 = !(f_AimChangeCount & 1)
-              ? f_Shot.unk0 - (f_AimChangeCount * AIM_CHANGE_STEP)
-              : f_Shot.unk0 + (f_AimChangeCount * AIM_CHANGE_STEP);
+          f_Shot.heading = !(f_AimChangeCount & 1)
+              ? f_Shot.heading - (f_AimChangeCount * AIM_CHANGE_STEP)
+              : f_Shot.heading + (f_AimChangeCount * AIM_CHANGE_STEP);
           osSyncPrintf("Angle Change3\n");
           for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
-            f_IsDirectionExcluded[(u8)((f_Shot.unk0 >> DIRECTION_SECTOR_SHIFT) +
-                index - (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
+            f_IsDirectionExcluded[(
+                u8)((f_Shot.heading >> DIRECTION_SECTOR_SHIFT) + index -
+                (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
           }
 
           if (f_AimChangeCount >= 17) {
@@ -2583,7 +2584,7 @@ EVALUATE:
       }
     }
 
-    f_Shot.unk0 +=
+    f_Shot.heading +=
         (s32)(atan2(f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
                   f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
             RADIANS_TO_BINARY_ANGLE) -
@@ -2608,15 +2609,15 @@ EVALUATE:
 
   f_AimChangeCount++;
   for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
-    f_IsDirectionExcluded[(u8)((f_Shot.unk0 >> DIRECTION_SECTOR_SHIFT) + index -
-        (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
+    f_IsDirectionExcluded[(u8)((f_Shot.heading >> DIRECTION_SECTOR_SHIFT) +
+        index - (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
   }
 
   f_ShotOffset = SHOT_OFFSET_MINUS_LARGE;
   if (!(f_AimChangeCount & 1)) {
-    f_Shot.unk0 -= f_AimChangeCount * AIM_CHANGE_STEP;
+    f_Shot.heading -= f_AimChangeCount * AIM_CHANGE_STEP;
   } else {
-    f_Shot.unk0 += f_AimChangeCount * AIM_CHANGE_STEP;
+    f_Shot.heading += f_AimChangeCount * AIM_CHANGE_STEP;
   }
 
   osSyncPrintf("Angle Change4\n");
@@ -2776,7 +2777,7 @@ s32 ChooseShotOffset(void) {
     return SHOT_OFFSET_MINUS_LARGE;
   }
 
-  aimYaw = (u16)f_Shot.unk0;
+  aimYaw = (u16)f_Shot.heading;
   windDirection = g_HoleSetup.conditions.windDirection;
   osSyncPrintf("skSCAI.angy = %ld\n", aimYaw);
   osSyncPrintf("wind_ang = %ld\n", windDirection);
@@ -2947,7 +2948,7 @@ Boolean IsTrialShotSafe(void) {
   u32 kind;
   s32 flags;
 
-  f_TrialLaunch->unk0 = f_TrialShot.unk0;
+  f_TrialLaunch->heading = f_TrialShot.heading;
   f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
   f_TrialLaunch->power = func_8005F248(f_TrialShot.unk4);
   f_TrialLaunch->unkC = f_TrialShot.unk8 - 60;

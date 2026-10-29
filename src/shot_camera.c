@@ -337,7 +337,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
   s32 passIndex;
 
   player = &g_Players[g_CurrentShot.playerIndex];
-  aimYaw = g_CurrentShot.unk0;
+  aimYaw = g_CurrentShot.heading;
   distance = GetBallDistance(
       0, player->clubs[g_CurrentShot.clubSlot], FALSE, g_CurrentShot.shotMode);
   angle = ((aimYaw + (BINARY_ANGLE_TURN / 4)) & BINARY_ANGLE_MASK) *
@@ -400,7 +400,7 @@ SignedBinaryAngle GetCrossSlopeAngle(UnkB8* player, Unk20* shot) {
   s32 height;
   s32 rise;
 
-  aimYaw = shot->unk0;
+  aimYaw = shot->heading;
 
   /* The (s8) cast is there to match */
   surfaceInfo = GetSurfaceInfo((s8)player->ballSurface);
@@ -453,7 +453,7 @@ SignedBinaryAngle GetAimSlopeAngle(UnkB8* player, Unk20* shot) {
   s32 aheadHeight;
   s32 behindHeight;
 
-  angle = (u16)shot->unk0 * BINARY_ANGLE_TO_RADIANS;
+  angle = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
   step[0] = cosf(angle) * AIM_SLOPE_STEP;
   step[1] = sinf(angle) * AIM_SLOPE_STEP;
   aheadHeight =
@@ -728,10 +728,10 @@ void StartFlightCamera(s32 earlierFlightCount) {
   D_800BE690 = TRUE;
   for (i = 0; i != GROUND_PROBE_COUNT; i++) {
     if (g_Players[g_CurrentShot.playerIndex].unk22 == 1) {
-      yaw = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) +
+      yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
           ((f32)i * GROUND_PROBE_ANGLE_STEP);
     } else {
-      yaw = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) -
+      yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) -
           ((f32)i * GROUND_PROBE_ANGLE_STEP);
     }
 
@@ -1973,7 +1973,7 @@ void PlaceFlightCamera(s32 step) {
     case FLIGHT_CAMERA_BESIDE_TEE:
       if (D_800BE628 == TRUE) {
         D_800BE628 = FALSE;
-        yaw = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) -
+        yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) -
             TEE_VIEW_YAW_OFFSET;
         point[AXIS_X] =
             (cosf(yaw) * TEE_VIEW_DISTANCE) + f_ShotStartPosition[AXIS_X];
@@ -2321,8 +2321,8 @@ void PlaceFlightCamera(s32 step) {
         }
       }
 
-      circleYaw =
-          ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + f_CircleAngle;
+      circleYaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
+          f_CircleAngle;
       f_CameraPosition[AXIS_X] = (cosf(circleYaw) * CIRCLE_DISTANCE) +
           g_CurrentShot.ballPosition[AXIS_X];
       f_CameraPosition[AXIS_Z] = (sinf(circleYaw) * CIRCLE_DISTANCE) +
@@ -2348,11 +2348,11 @@ void PlaceFlightCamera(s32 step) {
         GetCharacterPointPosition(0, 1, position);
         D_800BE628 = FALSE;
         if (g_Players[g_CurrentShot.playerIndex].unk22 == TRUE) {
-          yaw =
-              ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
+          yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
+              (M_PI / 2);
         } else {
-          yaw =
-              ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) - (M_PI / 2);
+          yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) -
+              (M_PI / 2);
         }
 
         for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT;

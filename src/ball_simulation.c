@@ -2243,7 +2243,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
 
   if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST ||
       (club->surfaceMask & CLUB_SURFACE_GREEN)) {
-    yawRadians = (u16)shot->unk0 * BINARY_ANGLE_TO_RADIANS;
+    yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
   } else {
     crossSlope = GetCrossSlopeAngle(&g_Players[shot->unk18], shot);
     crossSlopeSize = crossSlope;
@@ -2258,7 +2258,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     }
 
     slopeSpin = curve;
-    yaw = shot->unk0 + (crossSlope / 2) +
+    yaw = shot->heading + (crossSlope / 2) +
         (sideSign *
             ((club->deflection[shot->shotMode] * shot->power /
                  MAX_LAUNCH_POWER) +

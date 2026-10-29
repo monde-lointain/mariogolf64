@@ -1999,8 +1999,8 @@ void PlaceCharacterForShot(u32 slotIndex) {
 
   if (slot != NULL) {
     PlaceGolferAtBall(slot->position, slot->rotation, slot->scale);
-    slot->rotation[AXIS_Y] =
-        ((-g_CurrentShot.unk0) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
+    slot->rotation[AXIS_Y] = ((-g_CurrentShot.heading) & BINARY_ANGLE_MASK) *
+        BINARY_ANGLE_TO_RADIANS;
   }
 }
 

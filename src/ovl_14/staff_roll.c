@@ -978,8 +978,8 @@ void RunStaffRollTimeline(s32 frame) {
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
     slot = f_CastSlot ^ 1;
-    g_CurrentShot.unk0 = -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
-        RADIANS_TO_BINARY_ANGLE;
+    g_CurrentShot.heading = -(f_CastIndex * CAST_YAW_STEP) *
+        DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
     if (frame == TEE_REACTIONS_FRAME) {
       f_CastIndex -= SHOTS_PER_STAGE;
     }
@@ -1055,8 +1055,8 @@ void RunStaffRollTimeline(s32 frame) {
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
     slot = f_CastSlot ^ 1;
-    g_CurrentShot.unk0 = -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
-        RADIANS_TO_BINARY_ANGLE;
+    g_CurrentShot.heading = -(f_CastIndex * CAST_YAW_STEP) *
+        DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
     if (frame == FAIRWAY_REACTIONS_FRAME) {
       f_CastIndex -= SHOTS_PER_STAGE;
     }
@@ -1132,8 +1132,8 @@ void RunStaffRollTimeline(s32 frame) {
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
     slot = f_CastSlot ^ 1;
-    g_CurrentShot.unk0 = -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
-        RADIANS_TO_BINARY_ANGLE;
+    g_CurrentShot.heading = -(f_CastIndex * CAST_YAW_STEP) *
+        DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
     if (frame == APPROACH_REACTIONS_FRAME) {
       f_CastIndex -= SHOTS_PER_STAGE;
     }
@@ -1210,8 +1210,8 @@ void RunStaffRollTimeline(s32 frame) {
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
     slot = f_CastSlot ^ 1;
-    g_CurrentShot.unk0 = -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
-        RADIANS_TO_BINARY_ANGLE;
+    g_CurrentShot.heading = -(f_CastIndex * CAST_YAW_STEP) *
+        DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
     if (frame == PUTT_REACTIONS_FRAME) {
       f_CastIndex -= SHOTS_PER_STAGE;
     }

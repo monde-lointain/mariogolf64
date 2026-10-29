@@ -1111,9 +1111,9 @@ void SpawnShotDebris(
       effect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
       effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-      headingIndex = g_CurrentShot.unk0 & (DROP_HEADING_COUNT - 1);
+      headingIndex = g_CurrentShot.heading & (DROP_HEADING_COUNT - 1);
       speed = (headingIndex * DROP_SPEED_STEP) + DROP_SLOWEST_SPEED;
-      heading = (f32)((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) +
+      heading = (f32)((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
           (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) - (M_PI / 4);
       effect->velocity[AXIS_X] = cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
       effect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
@@ -1159,9 +1159,9 @@ void SpawnShotDebris(
       divotEffect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
       divotEffect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       divotEffect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-      headingIndex = g_CurrentShot.unk0 & (DROP_HEADING_COUNT - 1);
+      headingIndex = g_CurrentShot.heading & (DROP_HEADING_COUNT - 1);
       speed = (headingIndex * DROP_SPEED_STEP) + DROP_SLOWEST_SPEED;
-      heading = (f32)((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) -
+      heading = (f32)((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) -
           (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) + (M_PI / 4);
       divotEffect->velocity[AXIS_X] =
           cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
