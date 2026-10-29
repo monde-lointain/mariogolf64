@@ -257,6 +257,21 @@ static void ResetBallSimulations(void) {
 #define OPENING_MIN_SKIP_IMPACT_SPEED KilometersPerHour(10)
 #define OPENING_SKIP_SPEED_RATIO 0.5f
 #define OPENING_EARLY_BOUNCE_STEP_COUNT 3
+/*
+ * Its ground landing: a ball that lands in the water this fast stops on the
+ * ground below. The green's friction grows with the speed from its base; a
+ * landing's spin grows from nothing at OPENING_SPINLESS_LANDING_SPEED by one
+ * per OPENING_LANDING_SPIN_SPEED_RANGE of the speed into the ground. The spin
+ * drifts the ball with less grip, and at most this share of its speed into
+ * the ground.
+ */
+#define OPENING_WATER_STOP_IMPACT_SPEED KilometersPerHour(20)
+#define OPENING_GREEN_LANDING_FRICTION_BASE 0.5f
+#define OPENING_GREEN_LANDING_FRICTION_PER_SPEED (1.6f / KilometersPerHour(100))
+#define OPENING_SPINLESS_LANDING_SPEED KilometersPerHour(10)
+#define OPENING_LANDING_SPIN_SPEED_RANGE KilometersPerHour(200)
+#define OPENING_GROUND_SPIN_DRIFT_GRIP 0.25f
+#define OPENING_MAX_SPIN_DRIFT_SHARE 0.2f
 
 /*
  * The opening calls FindBillboardHit with a ninth argument, the simulation,
@@ -1110,7 +1125,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           startY + (fraction * simulation->velocity[AXIS_Y]);
       simulation->position[AXIS_Z] =
           startZ + (fraction * simulation->velocity[AXIS_Z]);
-      substepCount += (fraction < 0.4f) & (substepCount == 1);
+      substepCount += (fraction < EARLY_HIT_FRACTION) & (substepCount == 1);
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->surface = SURFACE_FAIRWAY;
       } else {
@@ -1122,7 +1137,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         if (simulation->surface == SURFACE_GREEN ||
             simulation->surface == SURFACE_GREEN_EDGE) {
-          plane.normal[AXIS_Y] = (plane.normal[AXIS_Y] * 0.5f) + 0.5f;
+          plane.normal[AXIS_Y] =
+              (plane.normal[AXIS_Y] * (1.0f - GREEN_TRIANGLE_LEVELING)) +
+              GREEN_TRIANGLE_LEVELING;
           guNormalize(&plane.normal[AXIS_X], &plane.normal[AXIS_Y],
               &plane.normal[AXIS_Z]);
         }
@@ -1139,14 +1156,15 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         steepness = 1.0f;
       }
 
-      friction =
-          (1000 - GetSurfaceInfo(simulation->surface)->bounciness) * 0.001f;
+      friction = (THOUSANDTHS_PER_ONE -
+                     GetSurfaceInfo(simulation->surface)->bounciness) *
+          ONE_PER_THOUSANDTH;
       if (simulation->surface == SURFACE_BUNKER) {
         BunkerBurial burial = BUNKER_BURIAL_NONE;
 
-        if (impactSpeed >= 9956.353f) {
+        if (impactSpeed >= POOR_LIE_BUNKER_SPEED) {
           burial = BUNKER_BURIAL_MOSTLY;
-        } else if (impactSpeed >= KilometersPerHour(50)) {
+        } else if (impactSpeed >= FAIR_LIE_BUNKER_SPEED) {
           burial = BUNKER_BURIAL_HALF;
         }
 
@@ -1165,7 +1183,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             break;
         }
       } else if (simulation->surface == SURFACE_WATER_HAZARD) {
-        if (impactSpeed >= KilometersPerHour(20)) {
+        if (impactSpeed >= OPENING_WATER_STOP_IMPACT_SPEED) {
           simulation->state = BALL_STATE_STOPPED;
           simulation->position[AXIS_Y] = GetGroundHeight(
               simulation->position[AXIS_X], simulation->position[AXIS_Z]);
@@ -1176,17 +1194,19 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         case SURFACE_GREEN:
         case SURFACE_GREEN_EDGE:
           friction *=
-              ((impactSpeed + (impactSpeed * GetPositionNoise() * 0.1f)) *
-                  0.000112491f) +
-              0.5f;
-          spin = ((impactSpeed * steepness) - KilometersPerHour(10)) *
-              (1.0f / KilometersPerHour(200));
+              ((impactSpeed +
+                   (impactSpeed * GetPositionNoise() * LANDING_NOISE_SCALE)) *
+                  OPENING_GREEN_LANDING_FRICTION_PER_SPEED) +
+              OPENING_GREEN_LANDING_FRICTION_BASE;
+          spin = ((impactSpeed * steepness) - OPENING_SPINLESS_LANDING_SPEED) *
+              (1.0f / OPENING_LANDING_SPIN_SPEED_RANGE);
           break;
         default:
-          friction *= (impactSpeed * (1.0f / KilometersPerHour(100))) + 0.3f;
-          friction += friction * GetPositionNoise() * 0.1f;
-          spin = ((impactSpeed * steepness) - KilometersPerHour(10)) *
-              (1.0f / KilometersPerHour(200));
+          friction *= (impactSpeed * OTHER_LANDING_FRICTION_PER_SPEED) +
+              LANDING_FRICTION_BASE;
+          friction += friction * GetPositionNoise() * LANDING_NOISE_SCALE;
+          spin = ((impactSpeed * steepness) - OPENING_SPINLESS_LANDING_SPEED) *
+              (1.0f / OPENING_LANDING_SPIN_SPEED_RANGE);
           break;
       }
 
@@ -1197,12 +1217,12 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       restitution = 1.0f - friction;
       if (restitution < 0.0f) {
         restitution = 0.0f;
-      } else if (restitution > 1.5f) {
-        restitution = 1.5f;
+      } else if (restitution > MAX_RESTITUTION) {
+        restitution = MAX_RESTITUTION;
       }
 
       if (simulation->state != BALL_STATE_ROLLING &&
-          impactSpeed < KilometersPerHour(50) &&
+          impactSpeed < MAX_ROLL_START_SPEED &&
           simulation->stepCount - 1 == simulation->lastBounceStep) {
         s32 spinVelocityX;
         s32 spinVelocityZ;
@@ -1219,11 +1239,13 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] +
             ((spinVelocityX - simulation->velocity[AXIS_X]) *
-                AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.5f);
+                AbsoluteValueExpression(plane.normal[AXIS_Y]) *
+                GROUND_SPIN_GRIP);
         simulation->spinSpeed = 0;
         simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
             ((spinVelocityZ - simulation->velocity[AXIS_Z]) *
-                AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.5f);
+                AbsoluteValueExpression(plane.normal[AXIS_Y]) *
+                GROUND_SPIN_GRIP);
       } else {
         f32 keep = 1.0f - spin;
         s32 bounced[3];
@@ -1236,16 +1258,17 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         f32 driftLimit;
         f32 drift;
 
-        if (keep <= 0.1f) {
-          keep = 0.1f;
+        if (keep <= MIN_BOUNCE_SPEED_KEPT) {
+          keep = MIN_BOUNCE_SPEED_KEPT;
         }
 
         if (keep > 1.0f) {
           keep = 1.0f;
         }
 
-        if (simulation->stepCount < 2 && !g_GameState.isMiniGolf) {
-          keep *= 0.25;
+        if (simulation->stepCount < EARLY_BOUNCE_STEP_COUNT &&
+            !g_GameState.isMiniGolf) {
+          keep *= EARLY_BOUNCE_SPEED_SCALE;
           osSyncPrintf("Ouch! %d, %d\n", startY, simulation->position[AXIS_Y]);
         }
 
@@ -1264,10 +1287,12 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         grip = 1.0f - restitution;
         driftX = (spinVelocityX - simulation->velocity[AXIS_X]) * grip *
-            AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f;
+            AbsoluteValueExpression(plane.normal[AXIS_Y]) *
+            OPENING_GROUND_SPIN_DRIFT_GRIP;
         driftZ = (spinVelocityZ - simulation->velocity[AXIS_Z]) * grip *
-            AbsoluteValueExpression(plane.normal[AXIS_Y]) * 0.25f;
-        driftLimit = impactSpeed * 0.2f;
+            AbsoluteValueExpression(plane.normal[AXIS_Y]) *
+            OPENING_GROUND_SPIN_DRIFT_GRIP;
+        driftLimit = impactSpeed * OPENING_MAX_SPIN_DRIFT_SHARE;
         drift = (s32)IntLength2D(driftX, driftZ);
         if (driftLimit < drift && impactSpeed > 1.0f) {
           f32 scale = driftLimit / drift;
@@ -1276,14 +1301,14 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           driftZ = driftZ * scale;
         }
 
-        spinVelocityX = spinVelocityX * 0.9f;
-        spinVelocityZ = spinVelocityZ * 0.9f;
+        spinVelocityX = spinVelocityX * BOUNCE_SPIN_DECAY;
+        spinVelocityZ = spinVelocityZ * BOUNCE_SPIN_DECAY;
         simulation->velocity[AXIS_X] += driftX;
         simulation->velocity[AXIS_Z] += driftZ;
-        spinVelocityX =
-            spinVelocityX + ((previousVelocityX - spinVelocityX) * 0.2f);
-        spinVelocityZ =
-            spinVelocityZ + ((previousVelocityZ - spinVelocityZ) * 0.2f);
+        spinVelocityX = spinVelocityX +
+            ((previousVelocityX - spinVelocityX) * GROUND_SPIN_FOLLOW);
+        spinVelocityZ = spinVelocityZ +
+            ((previousVelocityZ - spinVelocityZ) * GROUND_SPIN_FOLLOW);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
         BuildLiftRotation();
