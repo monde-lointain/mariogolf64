@@ -44,6 +44,9 @@
 #include "variables.h"
 
 #define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
+/* Bits of f_ComingFlightEvents */
+#define FLIGHT_EVENT_BILLBOARD_HIT (1 << 0)
+#define FLIGHT_EVENT_CUP_PASS (1 << 1)
 #define RANDOM_YAW_MASK 0x7FFF
 #define SHORT_SHOT_MAX_LENGTH 0xBB7FF
 #define CAMERA_CHANGE_HOLD_COUNT 20
@@ -67,7 +70,8 @@ extern s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
 
 static s32 D_800BE620 = 0;
 static s32 D_800BE624 = 0;
-static s32 D_800BE628 = 0;
+/* Set as the camera kind changes, for PlaceFlightCamera to set it up */
+static Boolean f_IsCameraKindNew = FALSE;
 static s32 f_FlightCameraKind = 0;
 /* Set as f_FlightPhase changes, and cleared as a camera kind is chosen */
 static Boolean f_HasFlightPhaseChanged = FALSE;
@@ -78,27 +82,33 @@ static s32 f_LandingCupDistance = 0;
 static s32 f_ShotLength = 0;
 /* How far the shot starts from the cup */
 static s32 f_StartCupDistance = 0;
-static s32 D_800BE648 = 0;
+/* Whether a billboard is hit in the first SCANNED_STEP_COUNT steps */
+static Boolean f_HitsBillboardEarly = FALSE;
 /* The first step of the path with STEP_FLAG_BILLBOARD_HIT set, or NO_STEP */
 static s32 f_BillboardHitStep = 0;
-static s32 D_800BE650 = 0;
+/* Counted down from a billboard hit's discovery, but read by no routine */
+static s32 f_BillboardHitCountdown = 0;
 static Radians f_CameraYaw = 0.0f;
-static s32 D_800BE658 = 0;
+/* FLIGHT_EVENT_* bits for what the path comes to ahead of the ball */
+static s32 f_ComingFlightEvents = 0;
 static f32 D_800BE65C = 0.0f;
 static s32 f_CupViewHoldCount = 0;
 static s32 f_FlightCameraFlags = 0;
 /* Read by no routine */
 static u8 D_800BE668[8] = {0};
 static s8 f_PendingResultSound = 0;
-static s32 D_800BE674 = 0;
+/* Frames left before ChooseFlightCameraKind may change the camera again */
+static s32 f_CameraChangeHoldCount = 0;
 static s32 D_800BE678 = 0;
 static s32 D_800BE67C = 0;
-static s32 D_800BE680 = 0;
+/* Set from five steps ahead of a pin hit until the hit */
+static Boolean f_IsPinHitComing = FALSE;
 static f32 D_800BE684 = 0.0f;
 static s32 f_EndReaction = 0;
 /* How many frames the flight camera waits after the ball's path ends */
 static s32 f_LandingWaitFrameCount = 0;
-static s32 D_800BE690 = TRUE;
+/* Whether the ground around the ball and the lie are level */
+static Boolean f_IsBallGroundLevel = TRUE;
 s32 g_HoleFlyoverFrame = 0;
 s32 D_800BE698 = TRUE;
 Boolean g_IsCupViewShown = FALSE;
@@ -594,7 +604,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
   D_800BE624 = earlierFlightCount;
   ClearShotEffects(CLEAR_KIND_ALL);
   ResetBallTrail();
-  D_800BE674 = 0;
+  f_CameraChangeHoldCount = 0;
   f_EndSurfaceInfo = GetSurfaceInfo(g_SimulatedShot.endSurface);
   if (earlierFlightCount == 0) {
     NextCameraPick(FALSE);
@@ -632,7 +642,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
 
   g_BallFlightStep = 0;
   D_800BE620 = 0;
-  D_800BE628 = FALSE;
+  f_IsCameraKindNew = FALSE;
   f_CupViewHoldCount = 0;
   f_GreenSoundCount = 0;
   f_IsLandingSoundPlayed = FALSE;
@@ -699,7 +709,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
   f_LandingCupDistance = GetCupDistance(
       f_ShotEndPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
       f_ShotEndPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
-  D_800BE658 = 0;
+  f_ComingFlightEvents = 0;
 
   /* The != tests are there to match */
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
@@ -709,26 +719,26 @@ void StartFlightCamera(s32 earlierFlightCount) {
                            g_SimulatedShot.path[i][AXIS_Z] -
                                g_HoleSetup.cupPosition[AXIS_Z]),
             g_SimulatedShot.path[i][AXIS_Y])) {
-      D_800BE658 |= 2;
+      f_ComingFlightEvents |= FLIGHT_EVENT_CUP_PASS;
     }
   }
 
-  D_800BE648 = FALSE;
+  f_HitsBillboardEarly = FALSE;
   f_BillboardHitStep = NO_STEP;
-  D_800BE650 = -1;
+  f_BillboardHitCountdown = -1;
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
     if (i < g_SimulatedShot.stepCount &&
         (g_SimulatedShot.pathFlags[i] & STEP_FLAG_BILLBOARD_HIT)) {
-      D_800BE648 = TRUE;
-      D_800BE658 |= 1;
+      f_HitsBillboardEarly = TRUE;
+      f_ComingFlightEvents |= FLIGHT_EVENT_BILLBOARD_HIT;
       if (f_BillboardHitStep == NO_STEP) {
         f_BillboardHitStep = i;
-        D_800BE650 = 40;
+        f_BillboardHitCountdown = 40;
       }
     }
   }
 
-  D_800BE690 = TRUE;
+  f_IsBallGroundLevel = TRUE;
   for (i = 0; i != GROUND_PROBE_COUNT; i++) {
     if (g_Players[g_CurrentShot.playerIndex].unk22 == 1) {
       yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
@@ -745,32 +755,32 @@ void StartFlightCamera(s32 earlierFlightCount) {
     probe[AXIS_Y] = GetGroundHeight(probe[AXIS_X], probe[AXIS_Z]);
     if (probe[AXIS_Y] <
         g_CurrentShot.ballPosition[AXIS_Y] - GROUND_PROBE_MAX_RISE) {
-      D_800BE690 = FALSE;
+      f_IsBallGroundLevel = FALSE;
     }
 
     if (probe[AXIS_Y] >
         g_CurrentShot.ballPosition[AXIS_Y] + GROUND_PROBE_MAX_RISE) {
-      D_800BE690 = FALSE;
+      f_IsBallGroundLevel = FALSE;
     }
   }
 
   degrees = g_RoundHud.lieTilt * (360.0f * BINARY_ANGLE_TO_RADIANS) *
       (1.0 / (2 * M_PI));
   if (degrees < 350.0f && degrees > 10.0f) {
-    D_800BE690 = FALSE;
+    f_IsBallGroundLevel = FALSE;
   }
 
-  D_800BE628 = FALSE;
+  f_IsCameraKindNew = FALSE;
   f_HasFlightPhaseChanged = FALSE;
   f_FlightPhase = 1;
   f_FlightCameraKind = NO_FLIGHT_CAMERA;
-  D_800BE680 = 0;
+  f_IsPinHitComing = FALSE;
   g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
   f_FlightBallPosition[AXIS_X] = f_ShotStartPosition[AXIS_X];
   f_FlightBallPosition[AXIS_Y] = f_ShotStartPosition[AXIS_Y];
   f_FlightBallPosition[AXIS_Z] = f_ShotStartPosition[AXIS_Z];
   ChooseFlightCameraKind();
-  D_800BE628 = TRUE;
+  f_IsCameraKindNew = TRUE;
   PlaceFlightCamera(0);
   g_Cameras[0].view.eye[AXIS_X] = f_CameraPosition[AXIS_X];
   g_Cameras[0].view.eye[AXIS_Y] = f_CameraPosition[AXIS_Y];
@@ -870,8 +880,9 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
  */
 #define IsShotLengthRated(endKind) \
   ((endKind) != SURFACE_KIND_WATER_HAZARD && \
-      f_StartCupDistance >= f_LandingCupDistance && D_800BE648 != 1 && \
-      g_SimulatedShot.unk2E14 && !g_SimulatedShot.unk2E00 && \
+      f_StartCupDistance >= f_LandingCupDistance && \
+      f_HitsBillboardEarly != TRUE && g_SimulatedShot.unk2E14 && \
+      !g_SimulatedShot.unk2E00 && \
       g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
 
 /*
@@ -1055,12 +1066,12 @@ void PlayFlightSounds(s32 step) {
   if (!g_GameState.isMiniGolf) {
     if ((g_SimulatedShot.pathFlags[step + 5] & STEP_FLAG_PIN_HIT) &&
         g_SimulatedShot.unkB0Step == NO_STEP) {
-      D_800BE680 = 1;
+      f_IsPinHitComing = TRUE;
     }
 
     if ((g_SimulatedShot.pathFlags[step] & STEP_FLAG_PIN_HIT) &&
         !g_SimulatedShot.endsInCup && g_SimulatedShot.unkB0Step == NO_STEP) {
-      D_800BE680 = 0;
+      f_IsPinHitComing = FALSE;
       StartMonkeyDrop(D_800BE684);
     }
   }
@@ -1793,8 +1804,8 @@ void PlaceAimCamera(void);
 /*
  * Places the flight camera's eye and look-at point for f_FlightCameraKind at a
  * step of the ball's flight, then keeps the eye above the ground and over the
- * course. The kinds that test D_800BE628 do their setup once when it is set,
- * then clear it. Doesn't match: the original allocates some registers
+ * course. The kinds that test f_IsCameraKindNew do their setup once when it is
+ * set, then clear it. Doesn't match: the original allocates some registers
  * differently, and orders three spots differently: the load of
  * CHASE_FIELD_OF_VIEW, the move of cosf's argument for
  * FLIGHT_CAMERA_BEHIND_START, and the stores of point for FLIGHT_CAMERA_UNKD.
@@ -1901,8 +1912,8 @@ void PlaceFlightCamera(s32 step) {
       GetFramedView(f_CameraPosition, f_LookAtPoint);
       break;
     case FLIGHT_CAMERA_NEAR_LAUNCH:
-      if (D_800BE628 == TRUE) {
-        D_800BE628 = FALSE;
+      if (f_IsCameraKindNew == TRUE) {
+        f_IsCameraKindNew = FALSE;
         f_CameraPosition[AXIS_X] =
             g_SimulatedShot.path[LAUNCH_VIEW_STEP][AXIS_X];
         f_CameraPosition[AXIS_Y] =
@@ -1979,8 +1990,8 @@ void PlaceFlightCamera(s32 step) {
       EaseLookAtFlyingBall();
       break;
     case FLIGHT_CAMERA_BESIDE_TEE:
-      if (D_800BE628 == TRUE) {
-        D_800BE628 = FALSE;
+      if (f_IsCameraKindNew == TRUE) {
+        f_IsCameraKindNew = FALSE;
         yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) -
             TEE_VIEW_YAW_OFFSET;
         point[AXIS_X] =
@@ -2008,8 +2019,8 @@ void PlaceFlightCamera(s32 step) {
       g_Cameras[0].view.fieldOfView = TEE_VIEW_FIELD_OF_VIEW;
       break;
     case FLIGHT_CAMERA_BEHIND_START:
-      if (D_800BE628 == TRUE) {
-        D_800BE628 = FALSE;
+      if (f_IsCameraKindNew == TRUE) {
+        f_IsCameraKindNew = FALSE;
         f_IsBehindViewFar ^= TRUE;
         yaw = f_ShotFlightYaw + M_PI;
         g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
@@ -2046,8 +2057,8 @@ void PlaceFlightCamera(s32 step) {
       EaseLookAtBelowBall(BEHIND_LOOK_AT_EASED_RISE);
       break;
     case FLIGHT_CAMERA_SIDE_OF_FLIGHT:
-      if (D_800BE628 == TRUE) {
-        D_800BE628 = FALSE;
+      if (f_IsCameraKindNew == TRUE) {
+        f_IsCameraKindNew = FALSE;
         f_SideViewCount++;
         if (f_SideViewCount & 1) {
           /* Beside the path's highest point */
@@ -2149,8 +2160,8 @@ void PlaceFlightCamera(s32 step) {
       EaseLookAtFlyingBall();
       break;
     case FLIGHT_CAMERA_AROUND_END:
-      if (D_800BE628 == TRUE) {
-        D_800BE628 = FALSE;
+      if (f_IsCameraKindNew == TRUE) {
+        f_IsCameraKindNew = FALSE;
         PlaceCameraAroundShotEnd();
         AimCameraYaw();
       }
@@ -2159,9 +2170,9 @@ void PlaceFlightCamera(s32 step) {
       EaseLookAtFlyingBall();
       break;
     case FLIGHT_CAMERA_TRAILING_BALL:
-      if (D_800BE628 == TRUE) {
+      if (f_IsCameraKindNew == TRUE) {
         SnapLookAtPoint();
-        D_800BE628 = FALSE;
+        f_IsCameraKindNew = FALSE;
         AimCameraYaw();
         f_IsTrailViewClose ^= TRUE;
       }
@@ -2292,8 +2303,8 @@ void PlaceFlightCamera(s32 step) {
       g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
       break;
     case FLIGHT_CAMERA_UNK3:
-      if (D_800BE628 == TRUE) {
-        D_800BE628 = FALSE;
+      if (f_IsCameraKindNew == TRUE) {
+        f_IsCameraKindNew = FALSE;
         PlaceAimCamera();
         f_CameraPosition[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
         f_CameraPosition[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
@@ -2306,8 +2317,8 @@ void PlaceFlightCamera(s32 step) {
 
       break;
     case FLIGHT_CAMERA_CIRCLING_BALL:
-      if (D_800BE628 == TRUE) {
-        D_800BE628 = FALSE;
+      if (f_IsCameraKindNew == TRUE) {
+        f_IsCameraKindNew = FALSE;
         if (D_800BE624 < CIRCLE_START_FLIGHT_COUNT) {
           f_CircleAngle = 0.0f;
         } else if (g_Players[g_CurrentShot.playerIndex].unk22 == TRUE) {
@@ -2351,10 +2362,10 @@ void PlaceFlightCamera(s32 step) {
           (f32)g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       break;
     case FLIGHT_CAMERA_BESIDE_GOLFER:
-      if (D_800BE628 == TRUE) {
+      if (f_IsCameraKindNew == TRUE) {
         g_Cameras[0].view.fieldOfView = BESIDE_GOLFER_FIELD_OF_VIEW;
         GetCharacterPointPosition(0, 1, position);
-        D_800BE628 = FALSE;
+        f_IsCameraKindNew = FALSE;
         if (g_Players[g_CurrentShot.playerIndex].unk22 == TRUE) {
           yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
               (M_PI / 2);
@@ -2536,7 +2547,8 @@ void ChooseFlightCameraKind(void) {
           if (pick < 3) {
             kind = FLIGHT_CAMERA_UNK3;
           } else if (pick == 3) {
-            if ((D_800BE658 & 2) || g_SimulatedShot.stepCount > 120) {
+            if ((f_ComingFlightEvents & FLIGHT_EVENT_CUP_PASS) ||
+                g_SimulatedShot.stepCount > 120) {
               kind = FLIGHT_CAMERA_BEHIND_START;
             } else {
               kind = FLIGHT_CAMERA_BESIDE_GOLFER;
@@ -2587,7 +2599,7 @@ void ChooseFlightCameraKind(void) {
           }
         } else if (pick == 5) {
           kind = FLIGHT_CAMERA_UNK3;
-          if (D_800BE690 == 1 && g_SimulatedShot.stepCount >= 61) {
+          if (f_IsBallGroundLevel == TRUE && g_SimulatedShot.stepCount >= 61) {
             kind = FLIGHT_CAMERA_BESIDE_GOLFER;
           }
         } else if (pick == 6) {
@@ -2668,7 +2680,7 @@ void ChooseFlightCameraKind(void) {
 
         break;
       case 4:
-        if (D_800BE674) {
+        if (f_CameraChangeHoldCount) {
           f_HasFlightPhaseChanged = TRUE;
         } else if (f_FlightCameraKind == FLIGHT_CAMERA_TRAILING_BALL) {
           /* The empty branches are there to match */
@@ -2698,7 +2710,7 @@ void ChooseFlightCameraKind(void) {
 
         break;
       case 6:
-        if (!D_800BE674) {
+        if (!f_CameraChangeHoldCount) {
           kind = FLIGHT_CAMERA_AROUND_END;
         } else {
           f_HasFlightPhaseChanged = TRUE;
@@ -2709,7 +2721,7 @@ void ChooseFlightCameraKind(void) {
         if (IsTroubleSurface(f_EndSurfaceInfo) || g_SimulatedShot.endsInCup) {
           /* The empty branch is there to match */
         } else {
-          if (D_800BE674 || g_SimulatedShot.stepCount < 21) {
+          if (f_CameraChangeHoldCount || g_SimulatedShot.stepCount < 21) {
             f_HasFlightPhaseChanged = TRUE;
           } else if (f_LandingCupDistance <= SHORT_SHOT_MAX_LENGTH ||
               f_FlightCameraKind == FLIGHT_CAMERA_AROUND_END) {
@@ -2741,7 +2753,8 @@ void ChooseFlightCameraKind(void) {
             break;
           case 6:
             kind = FLIGHT_CAMERA_UNK3;
-            if (D_800BE690 == 1 && g_SimulatedShot.stepCount >= 61) {
+            if (f_IsBallGroundLevel == TRUE &&
+                g_SimulatedShot.stepCount >= 61) {
               kind = FLIGHT_CAMERA_BESIDE_GOLFER;
             }
 
@@ -2767,7 +2780,7 @@ void ChooseFlightCameraKind(void) {
   }
 
   if (f_FlightCameraKind < kind) {
-    D_800BE628 = TRUE;
+    f_IsCameraKindNew = TRUE;
     StartHudAnimation(HUD_ANIMATION_NONE);
     if (animation == HUD_ANIMATION_NONE) {
       if (f_FlightPhase >= 4 && !g_SimulatedShot.startsOnGreen &&
@@ -2788,7 +2801,7 @@ void ChooseFlightCameraKind(void) {
     }
 
     f_FlightCameraKind = kind;
-    D_800BE674 = CAMERA_CHANGE_HOLD_COUNT;
+    f_CameraChangeHoldCount = CAMERA_CHANGE_HOLD_COUNT;
   }
 
   if (g_IsDebugEnabled) {
@@ -3000,20 +3013,20 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
                          g_SimulatedShot.path[aheadStep][AXIS_Z] -
                              g_HoleSetup.cupPosition[AXIS_Z]),
           g_SimulatedShot.path[aheadStep][AXIS_Y])) {
-    D_800BE658 |= 2;
+    f_ComingFlightEvents |= FLIGHT_EVENT_CUP_PASS;
   }
 
   aheadStep = step + PATH_FLAG_LOOKAHEAD_STEP_COUNT;
   if (g_SimulatedShot.stepCount >= aheadStep &&
       (g_SimulatedShot.pathFlags[aheadStep] & STEP_FLAG_BILLBOARD_HIT)) {
-    D_800BE658 |= 1;
+    f_ComingFlightEvents |= FLIGHT_EVENT_BILLBOARD_HIT;
     if (f_BillboardHitStep == NO_STEP) {
       f_BillboardHitStep = aheadStep;
-      D_800BE650 = 70;
+      f_BillboardHitCountdown = 70;
     }
   }
 
-  if (step > 60 && step < f_BillboardHitStep && !D_800BE674) {
+  if (step > 60 && step < f_BillboardHitStep && !f_CameraChangeHoldCount) {
     f_FlightCameraKind = FLIGHT_CAMERA_BILLBOARD_HIT;
   }
 
@@ -3022,26 +3035,27 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
       (s32)IntLength3D(f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
           f_FlightBallPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
           f_FlightBallPosition[AXIS_Z] - f_ShotEndPosition[AXIS_Z]) > 0x25800) {
-    D_800BE628 = TRUE;
+    f_IsCameraKindNew = TRUE;
     f_FlightCameraKind = FLIGHT_CAMERA_AROUND_END;
   }
 
   if (f_BillboardHitStep < step &&
       (g_BallFlightStep + 40 < g_SimulatedShot.stepCount ||
           f_FlightPhase == 7) &&
-      f_HasFlightPhaseChanged == TRUE && !g_IsCupViewShown && !D_800BE658) {
-    if (!D_800BE674) {
+      f_HasFlightPhaseChanged == TRUE && !g_IsCupViewShown &&
+      f_ComingFlightEvents == 0) {
+    if (!f_CameraChangeHoldCount) {
       ChooseFlightCameraKind();
     }
   }
 
-  if (D_800BE674 > 0) {
-    D_800BE674--;
+  if (f_CameraChangeHoldCount > 0) {
+    f_CameraChangeHoldCount--;
   }
 
   if (g_IsDebugEnabled && IsGameFlagSet(GAME_FLAG_UNK5F)) {
     sprintf(g_PrintBuffer, "C:%d F:%2d %3d %3d ", f_HasFlightPhaseChanged,
-        D_800BE674, step, g_BallFlightStep);
+        f_CameraChangeHoldCount, step, g_BallFlightStep);
     PrintDebugText(g_PrintBuffer, 8, 2);
     sprintf(
         g_PrintBuffer, "TYPE:%2d TIME:%2d", f_FlightCameraKind, f_FlightPhase);
@@ -3129,13 +3143,13 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   }
 
   if (isAdvancing == TRUE) {
-    if (D_800BE650 > 0) {
-      D_800BE650--;
+    if (f_BillboardHitCountdown > 0) {
+      f_BillboardHitCountdown--;
     }
 
     if (!g_GameState.isMiniGolf && !g_SimulatedShot.endsInCup &&
         ((g_SimulatedShot.pathFlags[step] & STEP_FLAG_PIN_HIT) ||
-            IsMonkeyShown() || D_800BE680 == TRUE)) {
+            IsMonkeyShown() || f_IsPinHitComing == TRUE)) {
       g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
       StartHudAnimation(HUD_ANIMATION_NONE);
       g_InsetView.animation = INSET_VIEW_STILL;
@@ -3161,12 +3175,12 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
       StartHudAnimation(HUD_ANIMATION_NONE);
       g_IsCupViewShown = TRUE;
       D_800BE698 = FALSE;
-      D_800BE658 &= ~2;
+      f_ComingFlightEvents &= ~FLIGHT_EVENT_CUP_PASS;
       if (f_CupViewHoldCount == 0) {
         f_CupViewHoldCount = CUP_VIEW_HOLD_COUNT;
       }
 
-      D_800BE674 = CAMERA_CHANGE_HOLD_COUNT;
+      f_CameraChangeHoldCount = CAMERA_CHANGE_HOLD_COUNT;
       g_InsetView.animation = INSET_VIEW_STILL;
       g_InsetView.step = 0;
       g_Cameras[INSET_CAMERA].view.drawFlags = 0;
