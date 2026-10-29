@@ -66,6 +66,49 @@ enum FlightPhase {
 /* An enum FlightPhase value */
 typedef s32 FlightPhase;
 
+/* The flight camera kinds, which f_FlightCameraKind holds */
+enum FlightCameraKind {
+  /* None yet, as set when the flight camera starts and ends */
+  FLIGHT_CAMERA_NONE = -1,
+  FLIGHT_CAMERA_UNK0,
+  FLIGHT_CAMERA_UNK1,
+  /* Beside the tee, looking at it */
+  FLIGHT_CAMERA_BESIDE_TEE,
+  /* The aim camera, placed by PlaceAimCamera */
+  FLIGHT_CAMERA_AIM_VIEW,
+  /* Picked by the B button in debug builds */
+  FLIGHT_CAMERA_BESIDE_GOLFER,
+  /* Picked by the A button in debug builds */
+  FLIGHT_CAMERA_CIRCLING_BALL,
+  FLIGHT_CAMERA_TRAILING_BALL,
+  /* At an early step of the path */
+  FLIGHT_CAMERA_NEAR_LAUNCH,
+  FLIGHT_CAMERA_CHASING_BALL,
+  /* At a step of the path behind the ball */
+  FLIGHT_CAMERA_FOLLOWING_PATH,
+  FLIGHT_CAMERA_SIDE_OF_FLIGHT,
+  FLIGHT_CAMERA_BEHIND_START,
+  /* Placed by PlaceCameraAroundShotEnd */
+  FLIGHT_CAMERA_AROUND_END,
+  /* Beyond the ball on the line from the cup, looking at the ball and the cup
+   */
+  FLIGHT_CAMERA_FACING_CUP,
+  FLIGHT_CAMERA_UNKE,
+  FLIGHT_CAMERA_UNKF,
+  FLIGHT_CAMERA_UNK10,
+  FLIGHT_CAMERA_UNK11,
+  /* Frames the path's extreme points on x and z */
+  FLIGHT_CAMERA_FRAMING_PATH,
+  /* Frames the cup and the ball; it keeps the putter's contact from calling
+   * StartContactEffect */
+  FLIGHT_CAMERA_FRAMING_CUP,
+  /* Looks along the path at f_BillboardHitStep */
+  FLIGHT_CAMERA_BILLBOARD_HIT
+};
+
+/* An enum FlightCameraKind value */
+typedef s32 FlightCameraKind;
+
 /*
  * Whether a holed shot is a chip-in: from off the green, after the first
  * stroke and without hitting the flag
@@ -109,7 +152,7 @@ static s32 f_LandingWaitFrame = 0;
 static s32 f_EarlierFlightCount = 0;
 /* Set as the camera kind changes, for PlaceFlightCamera to set it up */
 static Boolean f_IsCameraKindNew = FALSE;
-static s32 f_FlightCameraKind = 0;
+static FlightCameraKind f_FlightCameraKind = 0;
 /* Set as f_FlightPhase changes, and cleared as a camera kind is chosen */
 static Boolean f_HasFlightPhaseChanged = FALSE;
 static s32 f_BallCupDistance = 0;
@@ -185,46 +228,12 @@ extern s32 g_BallFlightStep;
 /* Unused; the original has it */
 static const char f_UnusedFloatFormat[] = "            %f";
 
-/* The flight camera kinds, which f_FlightCameraKind holds */
-#define FLIGHT_CAMERA_UNK0 0
-#define FLIGHT_CAMERA_UNK1 1
-#define FLIGHT_CAMERA_BESIDE_TEE 2 /* Beside the tee, looking at it */
-/* The aim camera, placed by PlaceAimCamera */
-#define FLIGHT_CAMERA_AIM_VIEW 3
-/* Picked by the B button in debug builds */
-#define FLIGHT_CAMERA_BESIDE_GOLFER 4
-/* Picked by the A button in debug builds */
-#define FLIGHT_CAMERA_CIRCLING_BALL 5
-#define FLIGHT_CAMERA_TRAILING_BALL 6
-#define FLIGHT_CAMERA_NEAR_LAUNCH 7 /* At an early step of the path */
-#define FLIGHT_CAMERA_CHASING_BALL 8
-/* At a step of the path behind the ball */
-#define FLIGHT_CAMERA_FOLLOWING_PATH 9
-#define FLIGHT_CAMERA_SIDE_OF_FLIGHT 0xA
-#define FLIGHT_CAMERA_BEHIND_START 0xB
-#define FLIGHT_CAMERA_AROUND_END 0xC /* Placed by PlaceCameraAroundShotEnd */
-/* Beyond the ball on the line from the cup, looking at the ball and the cup */
-#define FLIGHT_CAMERA_FACING_CUP 0xD
-#define FLIGHT_CAMERA_UNKE 0xE
-#define FLIGHT_CAMERA_UNKF 0xF
-#define FLIGHT_CAMERA_UNK10 0x10
-#define FLIGHT_CAMERA_UNK11 0x11
-/* Frames the path's extreme points on x and z */
-#define FLIGHT_CAMERA_FRAMING_PATH 0x12
-/* Frames the cup and the ball; it keeps the putter's contact from calling
- * StartContactEffect */
-#define FLIGHT_CAMERA_FRAMING_CUP 0x13
-/* Looks along the path at f_BillboardHitStep */
-#define FLIGHT_CAMERA_BILLBOARD_HIT 0x14
-
 /* The values 0 to CAMERA_PICK_COUNT - 1, shuffled; NextCameraPick deals them in
  * turn */
 #define CAMERA_PICK_COUNT 10
 /* How many swaps a shuffle makes */
 #define CAMERA_PICK_SWAP_COUNT 5
 #define NO_CAMERA_PICK (-1)
-
-#define NO_FLIGHT_CAMERA (-1)
 
 /* The field of view, in degrees, of the main camera between shots */
 #define DEFAULT_FIELD_OF_VIEW 45.0f
@@ -609,7 +618,7 @@ void EndFlightCamera(void) {
   FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FADE_FRAME_COUNT);
   FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKF, SOUND_FADE_FRAME_COUNT);
   ClearShotEffects(CLEAR_KIND_EFFECTS);
-  f_FlightCameraKind = NO_FLIGHT_CAMERA;
+  f_FlightCameraKind = FLIGHT_CAMERA_NONE;
   if (g_BallFlightStep == g_SimulatedShot.stepCount) {
     osSyncPrintf("\nCheckWater1\n");
     if (g_SimulatedShot.unk2E41) {
@@ -817,7 +826,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
   f_IsCameraKindNew = FALSE;
   f_HasFlightPhaseChanged = FALSE;
   f_FlightPhase = FLIGHT_PHASE_LAUNCH;
-  f_FlightCameraKind = NO_FLIGHT_CAMERA;
+  f_FlightCameraKind = FLIGHT_CAMERA_NONE;
   f_IsPinHitComing = FALSE;
   g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
   f_FlightBallPosition[AXIS_X] = f_ShotStartPosition[AXIS_X];
