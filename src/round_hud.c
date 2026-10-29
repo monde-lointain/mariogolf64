@@ -1137,7 +1137,7 @@ void StartShotPanel(void) {
     ReadEncodedAsset(f_LieImage, &asset);
   }
 
-  if (g_GameState.unk31) {
+  if (g_GameState.replayKind) {
     g_RoundHud.skinsTotals[0] = 0;
   } else {
     switch (g_GameState.gameMode) {
@@ -4048,7 +4048,7 @@ void DrawRoundHud(CameraView* view) {
       }
 
       SetTextColor(&g_DisplayListHead, 255, 230, 0);
-      if (g_GameState.unk31 != 0) {
+      if (g_GameState.replayKind != 0) {
         sprintf(g_PrintBuffer, f_BlankText);
       } else {
         switch (g_GameState.gameMode) {
@@ -4129,7 +4129,8 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_RoundHud.unkD && !IsOnDrivingRange() &&
-      g_GameState.gameMode == GAME_MODE_SPEED_GOLF && g_GameState.unk31 == 0) {
+      g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
+      g_GameState.replayKind == 0) {
     hundredths = (s32)(g_GameState.stopwatchFrameCount *
                      ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
         HUNDREDTHS_PER_SECOND;
@@ -4352,7 +4353,7 @@ void DrawHoleIntroText(Gfx** displayListHead) {
         func_80242D40(&gfx);
       }
     } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
-        g_GameState.unk31 == 0) {
+        g_GameState.replayKind == 0) {
       hundredths = (s32)(g_GameState.stopwatchFrameCount *
                        ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
           HUNDREDTHS_PER_SECOND;

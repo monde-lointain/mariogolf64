@@ -768,7 +768,7 @@ s32 ChooseHoleConditions(void) {
 
   g_TurnBallSimulation.playerIndex = -1;
   if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
-      g_GameState.unk31 != 0) {
+      g_GameState.replayKind != 0) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       g_HoleSetup = D_80105F40[0].hole;
     } else {

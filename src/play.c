@@ -290,7 +290,7 @@ void FormatDefaultPlayerName(s32 index, char* name) {
 
 /*
  * Sets up the players for a round. In SCENE_PLAY_UNK13, in
- * GAME_MODE_UNK8 or when g_GameState.unk31 is set, only the first player
+ * GAME_MODE_UNK8 or when g_GameState.replayKind is set, only the first player
  * is set up, from the Ring Shot record or the super shot replay record;
  * otherwise all four get default names, their own character's clubs and
  * cleared scores.
@@ -301,7 +301,7 @@ void SetUpPlayers(void) {
   s32 slot;
 
   if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
-      g_GameState.unk31) {
+      g_GameState.replayKind) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       g_Players[0].unk1E[0] = 0;
       g_Players[0].teeOrder = 0;
@@ -472,7 +472,7 @@ void PlayContestMovies(void) {
       }
     }
 
-    if (!g_GameState.unk31 && i == g_GameState.playerCount) {
+    if (!g_GameState.replayKind && i == g_GameState.playerCount) {
       if (IsMarkedParFive(g_GameState.courseIndex, g_GameState.holeIndex) &&
           GetContestWinner() != NO_CONTEST_WINNER) {
         StartMovie(MOVIE_LONGEST_DRIVE);
@@ -503,7 +503,7 @@ s32 func_8005FCB8(void) {
     return FALSE;
   }
 
-  if (!g_GameState.unk31) {
+  if (!g_GameState.replayKind) {
     if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
       if (!GetGroupHoleResult(NULL)) {
@@ -574,7 +574,7 @@ void SetNextTeeOrder(void) {
   s32 i;
   s32 j;
 
-  if (!g_GameState.unk31 &&
+  if (!g_GameState.replayKind &&
       (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
           g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
     if (GetGroupHoleResult(results) != GROUP_HOLE_WON) {
@@ -952,7 +952,8 @@ void UpdatePlay(void) {
               repeat = TRUE;
             }
           } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
-              !g_GameState.unk31 && g_IsModuleAlive[MODULE_COURSE_SELECT]) {
+              !g_GameState.replayKind &&
+              g_IsModuleAlive[MODULE_COURSE_SELECT]) {
             result = func_80241DF0(g_MergedController.pressedButtons,
                 g_MergedController.repeatedButtons);
             if (result == HOLE_MENU_RELOAD) {
@@ -1000,7 +1001,7 @@ void UpdatePlay(void) {
             }
           }
         } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
-            !g_GameState.unk31) {
+            !g_GameState.replayKind) {
           if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
             result = func_80241DF0(g_MergedController.pressedButtons,
                 g_MergedController.repeatedButtons);
@@ -1043,7 +1044,7 @@ void UpdatePlay(void) {
               g_GameState.step = GAME_STATE_END_INTRO;
             }
           }
-        } else if (g_GameState.unk31) {
+        } else if (g_GameState.replayKind) {
           if (f_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
               IS_A_PRESSED()) {
             if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
@@ -1231,7 +1232,7 @@ void UpdatePlay(void) {
             }
           }
 
-          if (!g_GameState.unk31 &&
+          if (!g_GameState.replayKind &&
               (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                   g_GameState.gameMode == GAME_MODE_CLUB_SLOTS)) {
             s8 results[MAX_PLAYER_COUNT];
@@ -1276,8 +1277,9 @@ void UpdatePlay(void) {
               g_GameState.holeIndex++;
             }
 
-            if (g_GameState.gameMode == GAME_MODE_UNK8 || g_GameState.unk31) {
-              g_GameState.unk31 = 0;
+            if (g_GameState.gameMode == GAME_MODE_UNK8 ||
+                g_GameState.replayKind) {
+              g_GameState.replayKind = 0;
               func_80060358();
               if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
                 f_PlayExit = PLAY_EXIT_RING_SHOT;
@@ -1500,7 +1502,7 @@ DIM_BACKDROP:
             }
 
             if (f_PlayExit == PLAY_EXIT_NONE) {
-              if (!g_GameState.unk31 &&
+              if (!g_GameState.replayKind &&
                   IsOneOnOneMatchMode(g_GameState.gameMode) &&
                   HAS_PLAYED_LAST_HOLE()) {
                 g_GameState.holeIndex = GetFirstHoleIndex();

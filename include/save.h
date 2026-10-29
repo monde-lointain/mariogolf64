@@ -170,7 +170,7 @@ typedef struct GameState {
       stopwatchFrameCount; /* The time the stopwatch modes show, in frames */
   /* 0x2C */ s32 unk2C;
   /* 0x30 */ s8 unk30;
-  /* 0x31 */ s8 unk31;
+  /* 0x31 */ s8 replayKind; /* The replay that leaving the menus starts */
   /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth; the
                                         menus also set one past the end */
   /* 0x39 */ u8 unk39;
