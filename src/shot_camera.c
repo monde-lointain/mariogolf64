@@ -960,6 +960,21 @@ static inline void QueueOnlookerSounds(s32 kind) {
   }
 }
 
+/* Whether the shot counts as an approach: in that mode, or with the putter */
+#define IsApproachShot() \
+  (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH || \
+      g_SimulatedShot.usesPutter)
+
+/*
+ * Whether a putt earns the Nice Touch call: from far, stopping close, with no
+ * PATH_FLAG_UNK4 or UNK8 step passed, and before par
+ */
+#define IsNiceTouchPutt() \
+  (f_LandingCupDistance < CLOSE_LANDING_DISTANCE && \
+      f_StartCupDistance > LONG_PUTT_MIN_DISTANCE && \
+      !(f_PassedPathFlags & (PATH_FLAG_UNK4 | PATH_FLAG_UNK8)) && \
+      g_HoleSetup.par > g_Players[g_CurrentShot.playerIndex].strokeCount)
+
 /* Whether the shot reaches the green from off it, without the putter */
 #define IsShotOntoGreen() \
   (!g_SimulatedShot.usesPutter && !g_SimulatedShot.startsOnGreen && \
@@ -1064,10 +1079,7 @@ void PlayFlightSounds(s32 step) {
   if (!shownRingCount && g_BallFlightStep == g_SimulatedShot.stepCount - 1 &&
       !g_SimulatedShot.endsInCup) {
     if (g_SimulatedShot.startsOnGreen) {
-      if (f_LandingCupDistance < CLOSE_LANDING_DISTANCE &&
-          f_StartCupDistance > LONG_PUTT_MIN_DISTANCE &&
-          !(f_PassedPathFlags & (PATH_FLAG_UNK4 | PATH_FLAG_UNK8)) &&
-          g_HoleSetup.par > g_Players[g_CurrentShot.playerIndex].strokeCount) {
+      if (IsNiceTouchPutt()) {
         StartBanner(BANNER_NICE_TOUCH);
         PlaySound(
             SOUND_CALL_NICE_TOUCH, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
@@ -1102,8 +1114,7 @@ void PlayFlightSounds(s32 step) {
               SOUND_FULL_SCALE);
           QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
           f_PendingResultSound = RESULT_SOUND_UNK1;
-        } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
-            g_SimulatedShot.usesPutter) {
+        } else if (IsApproachShot()) {
           if (f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
             StartBanner(BANNER_NICE_APPROACH);
             PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_UNK3,
@@ -1121,9 +1132,7 @@ void PlayFlightSounds(s32 step) {
         }
       } else if (g_HoleSetup.par + SCORE_TO_PAR_BIRDIE ==
               g_Players[g_CurrentShot.playerIndex].strokeCount &&
-          (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH ||
-              g_SimulatedShot.usesPutter) &&
-          f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
+          IsApproachShot() && f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
         StartBanner(BANNER_NICE_APPROACH);
         PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_UNK3,
             SOUND_FULL_SCALE);
