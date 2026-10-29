@@ -322,7 +322,7 @@ extern void* D_801B93E0[5];
 
 void InitPlay(s32 kind);
 void DrawModeSelect(Gfx** displayListHead);
-void func_80201574_ovl_01(Gfx** displayListHead);
+void DrawAnimationViewer(Gfx** displayListHead);
 void DrawCourseSelect(Gfx** displayListHead);
 void DrawMainMenu(Gfx** displayListHead);
 void DrawMainMenuWithoutTransmit(Gfx** displayListHead);
@@ -340,7 +340,7 @@ void func_8005D334(void);
 void func_801F6B20_ovl_01(void);
 void func_801F6B28_ovl_01(void);
 void UpdateMenuTitleScreen(void);
-void func_801F7CD0_ovl_01(void);
+void UpdateAnimationViewer(void);
 void UpdateModeSelect(void);
 void UpdateCourseSelect(void);
 void UpdateMiniGolfCourseSelect(void);
@@ -1042,7 +1042,7 @@ void UpdateMenus(void) {
 
     case MENU_SCREEN_HELP:
       if (IsGameFlagSet(GAME_FLAG_UNK56)) {
-        func_801F7CD0_ovl_01();
+        UpdateAnimationViewer();
       } else {
         UpdateHelpBoard();
       }
@@ -2084,7 +2084,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
   return 0;
 }
 
-void func_801F7CD0_ovl_01(void) {
+void UpdateAnimationViewer(void) {
   Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE && func_801F7660_ovl_01(1, 2) == -1) {
@@ -3688,7 +3688,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       break;
     case MENU_SCREEN_HELP:
       if (IsGameFlagSet(GAME_FLAG_UNK56)) {
-        func_80201574_ovl_01(&gfx);
+        DrawAnimationViewer(&gfx);
       } else {
         DrawHelpBoard(&gfx);
       }
@@ -5348,7 +5348,7 @@ const char D_8023166C_ovl_01[] = "%d";
 const char D_80231670_ovl_01[] = "POWER:%3d";
 const char D_8023167C_ovl_01[] = "SPIN :%3d";
 
-void func_80201574_ovl_01(Gfx** displayListHead) {
+void DrawAnimationViewer(Gfx** displayListHead) {
   Gfx* gfx;
   s32 index;
   s32 stickX;
