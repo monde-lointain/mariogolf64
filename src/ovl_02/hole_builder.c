@@ -2013,6 +2013,10 @@ static inline s32 GetCellOffset(u32 column, u32 row) {
       ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE);
 }
 
+/* The cell at a byte offset from GetCellOffset */
+#define CellAt(cellOffset) \
+  (*(s16*)AddressPast(g_TerrainCodeCells, (cellOffset)))
+
 /* The offset of a map texel's code in the packed codes */
 static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
   return ((column % TERRAIN_CODE_CELL_SPAN) / 2) +
@@ -2056,7 +2060,7 @@ static inline void SetPackedTerrainCode(
  */
 static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
   s32 cellOffset = GetCellOffset(column, row);
-  s32 cell = *(s16*)((u8*)g_TerrainCodeCells + cellOffset);
+  s32 cell = CellAt(cellOffset);
   s32 block;
   u32 fill;
   s32 i;
@@ -2067,7 +2071,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
   }
 
   if (cell == NO_CELL_TERRAIN_CODE) {
-    *(s16*)((u8*)g_TerrainCodeCells + cellOffset) = code;
+    CellAt(cellOffset) = code;
   } else if (cell >= 0) {
     if (g_TerrainCodeBlockCount < TERRAIN_CODE_BLOCK_COUNT) {
       /* Repeats the cell's code in every half byte of a word */
@@ -2083,8 +2087,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
 
       /* Computing the offset again is there to match */
       cellOffset = GetCellOffset(column, row);
-      *(s16*)((u8*)g_TerrainCodeCells + cellOffset) =
-          block | TERRAIN_CODE_CELL_BLOCK;
+      CellAt(cellOffset) = block | TERRAIN_CODE_CELL_BLOCK;
       SetPackedTerrainCode(block, column, row, code);
     }
   } else {

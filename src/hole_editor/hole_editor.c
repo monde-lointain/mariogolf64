@@ -350,6 +350,8 @@ enum TriangleEdit {
 /* Adds to a cached KSEG0 address to read the same memory uncached through KSEG1
  */
 #define KSEG1_OFFSET 0x20000000
+/* The same memory read uncached, to see what the RDP wrote */
+#define UncachedAddress(address) AddressPast((address), KSEG1_OFFSET)
 
 /* A plain if leaves GCC to invert the condition, which the game's code does not
  */
@@ -4713,7 +4715,7 @@ void func_8040C124_hole_editor(void) {
   s32 row;
   s32 column;
 
-  frame = (u16*)((u8*)nuGfxCfb_ptr + KSEG1_OFFSET);
+  frame = (u16*)UncachedAddress(nuGfxCfb_ptr);
   capture = AllocMemory(SCREEN_CAPTURE_SIZE);
   for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
     capture[byteIndex] = f_ScreenCaptureHeader[byteIndex];
@@ -4755,7 +4757,7 @@ void func_8040C260_hole_editor(s32 captureIndex) {
   s32 column;
 
   capture = g_WorkArea.bytes;
-  frame = (u16*)((u8*)nuGfxCfb_ptr + KSEG1_OFFSET);
+  frame = (u16*)UncachedAddress(nuGfxCfb_ptr);
   for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
     capture[byteIndex] = f_CornerCaptureHeader[byteIndex];
   }
