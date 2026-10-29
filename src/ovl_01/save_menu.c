@@ -2151,11 +2151,11 @@ void func_80224AFC_ovl_01(
 }
 
 /*
- * Doesn't match: the original computes each fidget timer's address with
- * the table's address in $v1 and the scaled index in $v0, the other way
- * round.
+ * Draws the golfers of the selected saved game, loading each one's model
+ * once its character slot is free. A golfer stands and, when its fidget
+ * timer runs out, plays the fidget animation once before waiting a random
+ * while again.
  */
-#ifdef NON_MATCHING
 void func_80225358_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
@@ -2163,7 +2163,6 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
   UnkB8* players = save->savedPlayers[memory->savedGameIndex];
   u16 playerIndex;
-  s32* fidgetTimer;
   s32 raise;
   Vec3 translation;
   Vec3 rotation;
@@ -2207,23 +2206,22 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
       1.0f, 0.0f);
   gSPLookAt(gfx++, &D_8023BD30_ovl_01[g_DrawBufferIndex]);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    fidgetTimer = &D_8023BFC0_ovl_01[playerIndex];
-    if (*fidgetTimer > 0) {
-      (*fidgetTimer)--;
+    if (D_8023BFC0_ovl_01[playerIndex] > 0) {
+      D_8023BFC0_ovl_01[playerIndex]--;
     }
 
-    if (*fidgetTimer == 0) {
-      *fidgetTimer = -1;
+    if (D_8023BFC0_ovl_01[playerIndex] == 0) {
+      D_8023BFC0_ovl_01[playerIndex] = -1;
       SetAnimationLooping(playerIndex, FALSE);
       SetNextAnimation(playerIndex, MENU_ANIMATION_FIDGET);
     }
 
-    if (*fidgetTimer == -1) {
+    if (D_8023BFC0_ovl_01[playerIndex] == -1) {
       if (GetAnimationEndFrame(playerIndex, MENU_ANIMATION_FIDGET) ==
           GetAnimationFrame(playerIndex)) {
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
         SetAnimationLooping(playerIndex, TRUE);
-        *fidgetTimer = guRandom() % FIDGET_DELAY_RANGE;
+        D_8023BFC0_ovl_01[playerIndex] = guRandom() % FIDGET_DELAY_RANGE;
       }
     }
 
@@ -2273,9 +2271,6 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
     gfx = *displayListHead;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225358_ovl_01);
-#endif
 
 void func_80225960_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
