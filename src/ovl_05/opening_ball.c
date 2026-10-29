@@ -974,7 +974,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         }
       }
 
-      softness = 1000 - GetSurfaceInfo(simulation->surface)->unkE;
+      softness = 1000 - GetSurfaceInfo(simulation->surface)->bounciness;
       keep = (1000.0f - (softness * (steepness * 0.1f) * steepness)) * 0.001f;
       if (simulation->stepCount < 3) {
         keep *= 0.25;
@@ -1069,7 +1069,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         steepness = 1.0f;
       }
 
-      friction = (1000 - GetSurfaceInfo(simulation->surface)->unkE) * 0.001f;
+      friction =
+          (1000 - GetSurfaceInfo(simulation->surface)->bounciness) * 0.001f;
       if (simulation->surface == SURFACE_BUNKER) {
         s32 burial = 0;
 
@@ -1344,7 +1345,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         isSteep = TRUE;
       }
 
-      friction = info->unkC * 0.001f;
+      friction = info->rollSpeedKept * 0.001f;
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_HoleSetup.conditions.isRaining == TRUE) {
         friction *= 0.993f;

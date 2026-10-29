@@ -110,8 +110,10 @@ typedef struct SurfaceInfo {
   /* 0x09 */ s8 maxPercent;
   /* 0x0A */ s8 wrongClubPenalty; /* Taken off both percents for a club not
                                      meant for the surface */
-  /* 0x0C */ s16 unkC;
-  /* 0x0E */ s16 unkE;
+  /* In thousandths: the share of a rolling ball's speed kept each frame, and
+     how much a landing ball bounces */
+  /* 0x0C */ s16 rollSpeedKept;
+  /* 0x0E */ s16 bounciness;
   /* 0x10 */ s32 unk10;
   /* 0x14 */ s32 unk14;
   /* 0x18 */ s32 unk18;

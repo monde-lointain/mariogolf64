@@ -1351,7 +1351,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         velocity[AXIS_X] = velocity[AXIS_X] * 0.2f * 0.2f;
       }
 
-      softness = 1000 - GetSurfaceInfo(simulation->surface)->unkE;
+      softness = 1000 - GetSurfaceInfo(simulation->surface)->bounciness;
       bounce = 1.0f - (softness * steepness * 0.001f);
       push = (bounce + 1.0f) * impactSpeed;
       bounced[AXIS_X] = velocity[AXIS_X] - (plane.normal[AXIS_X] * push);
@@ -1539,7 +1539,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       }
 
       info = GetSurfaceInfo(simulation->surface);
-      friction = (1000 - info->unkE) * 0.001f;
+      friction = (1000 - info->bounciness) * 0.001f;
       if (simulation->surface == SURFACE_BUNKER) {
         s32 burial = 0;
 
@@ -1921,7 +1921,7 @@ TAKE_OFF:
         isSteep = TRUE;
       }
 
-      friction = info->unkC * SURFACE_FRICTION_SCALE;
+      friction = info->rollSpeedKept * SURFACE_FRICTION_SCALE;
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_HoleSetup.conditions.isRaining == TRUE) {
         friction *= RAIN_FRICTION_SCALE;
