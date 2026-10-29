@@ -44,11 +44,12 @@ u8* GetGameBoyCharacterName(s32 characterIndex) {
 
 /* Records the transfer mode; mode 0 also empties every Game Boy character slot
  */
-#ifdef NON_MATCHING
 void ResetGameBoyTransfer(s32 transferMode) {
+  /* Storing the mode through a pointer is there to match */
+  GameBoyTransfer* transfer = &g_GameBoyTransfer;
   s32 index;
 
-  g_GameBoyTransfer.transferMode = transferMode;
+  transfer->transferMode = transferMode;
   g_GameBoyTransfer.screen = TRANSMIT_SCREEN_OPTIONS;
   if (transferMode == TRANSFER_MODE_AT_BOOT) {
     for (index = 0; index != GAME_BOY_CHARACTER_COUNT; index++) {
@@ -66,10 +67,6 @@ void ResetGameBoyTransfer(s32 transferMode) {
     g_GameBoyTransfer.listedCharacterIndex = 0;
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/controller_paks", ResetGameBoyTransfer);
-#endif
 
 void ClearBootTransmitPending(void) {
   f_IsBootTransmitPending = FALSE;
