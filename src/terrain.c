@@ -1880,8 +1880,10 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   /* Whether x and z are on the outer side of a triangle's edge from start to
    * end */
   inline Boolean IsOutsideEdge(Vtx * start, Vtx * end) {
-    return (end->v.ob[0] - start->v.ob[0]) * (z - (start->v.ob[2] << 10)) -
-        (end->v.ob[2] - start->v.ob[2]) * (x - (start->v.ob[0] << 10)) <
+    return (end->v.ob[AXIS_X] - start->v.ob[AXIS_X]) *
+            (z - (start->v.ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT)) -
+        (end->v.ob[AXIS_Z] - start->v.ob[AXIS_Z]) *
+            (x - (start->v.ob[AXIS_X] << WORLD_TO_COURSE_SHIFT)) <
         0;
   }
 
@@ -2176,9 +2178,9 @@ s32 GetTerrainHeight(s32 x, s32 z) {
   normalX = (firstY * secondZ) + (secondY * -firstZ);
   normalY = (firstX * -secondZ) + (secondX * firstZ);
   normalZ = (firstY * -secondX) + (secondY * firstX);
-  height = triangle.corners[AXIS_Y][0] << 10;
-  offsetX = x - (triangle.corners[AXIS_X][0] << 10);
-  offsetZ = z - (triangle.corners[AXIS_Z][0] << 10);
+  height = triangle.corners[AXIS_Y][0] << WORLD_TO_COURSE_SHIFT;
+  offsetX = x - (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT);
+  offsetZ = z - (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT);
   if ((s32)normalY != 0) {
     return height +
         (s32)(((-normalX * offsetX) - (normalZ * offsetZ)) / normalY);
