@@ -54,7 +54,7 @@ options:
   named_regs_for_c_funcs: True
   hasm_in_src_path: True
   ld_bss_is_noload: True
-  ld_align_section_vram_end: False
+  ld_align_section_vram_end: True
   ld_align_segment_vram_end: False
   ld_generate_symbol_per_data_segment: True
 
