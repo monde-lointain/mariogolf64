@@ -62,11 +62,6 @@ extern s32 g_MenuCourseCount;
 /* The holes choice's Bet badge cycles its color unless this is set */
 extern u8 D_800C2BD5;
 
-/* The menus' sound channel, and how loud each of their sounds plays */
-#define MENU_SOUND_CHANNEL 15
-#define MENU_VOLUME_SOFT 80
-#define MENU_VOLUME_MEDIUM 100
-
 /* Each course's images for the menus' turning wheel of courses, and the trophy
  * files read with them */
 #define COURSE_IMAGE_COUNT 16

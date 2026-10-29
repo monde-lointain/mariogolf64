@@ -57,8 +57,6 @@ enum SaveMenuState {
 #define CONTROLS_STRIP_HEIGHT 7
 #define CONTROLS_STRIP_COUNT 32
 
-#define MENU_SOUND_CHANNEL 15
-#define MENU_SOUND_VOLUME 0x64
 #define MENU_SOUND_REVERB 0x14
 
 /* The frames that a slide takes, and the frame of its sound */
@@ -390,7 +388,7 @@ void OpenSaveMenu(s32 kind) {
   ReadEncodedAsset(f_SaveMenuTitleImage = AllocMemory(
                        OpenEncodedAsset(SAVE_MENU_TITLE_IMAGE, &encodedAsset)),
       &encodedAsset);
-  PlaySoundWithEffects(SOUND_PANEL_OPEN, g_NextSoundChannel, MENU_SOUND_VOLUME,
+  PlaySoundWithEffects(SOUND_PANEL_OPEN, g_NextSoundChannel, MENU_VOLUME_MEDIUM,
       MENU_SOUND_REVERB, SAVE_MENU_SOUND_PAN);
   for (slot = 0; slot != CHARACTER_IMAGE_COUNT; slot++) {
     ReadEncodedAsset(f_CharacterImages[slot] = AllocMemory(OpenEncodedAsset(
@@ -1136,7 +1134,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
 
       if (controller->pressedButtons & B_BUTTON) {
         PlaySoundWithEffects(SOUND_PANEL_CLOSE, g_NextSoundChannel,
-            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
+            MENU_VOLUME_MEDIUM, MENU_SOUND_REVERB, 0);
         AnimateModeIcons(TRUE);
         f_StateFrame = 0;
         f_MenuState = SAVE_MENU_STATE_BACKING_OUT;
@@ -1149,10 +1147,10 @@ void UpdateGameSaveMenu(ControllerState* controller) {
             g_PauseScreen = PAUSE_SCREEN_UNK6;
             OpenPrompt(PROMPT_OVERWRITE_GAME);
             PlaySound(
-                SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+                SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           } else {
             SaveGameToSlot();
-            PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+            PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
           }
         } else {
           g_PauseScreen = PAUSE_SCREEN_UNK6;
@@ -1165,11 +1163,11 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       if (controller->repeatedButtons & U_JPAD) {
         f_CursorIndex--;
         AnimateModeIcons(TRUE);
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       } else if (controller->repeatedButtons & D_JPAD) {
         f_CursorIndex++;
         AnimateModeIcons(TRUE);
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       }
 
       if (f_CursorIndex < 0) {
@@ -1194,7 +1192,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
 
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_PANEL_CLOSE, g_NextSoundChannel,
-            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
+            MENU_VOLUME_MEDIUM, MENU_SOUND_REVERB, 0);
       }
 
       if (f_StateFrame == SLIDE_FRAMES) {
@@ -1238,7 +1236,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
 
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_PANEL_CLOSE, g_NextSoundChannel,
-            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
+            MENU_VOLUME_MEDIUM, MENU_SOUND_REVERB, 0);
       }
 
       if (f_StateFrame == SLIDE_FRAMES) {
@@ -1291,26 +1289,26 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
             g_PauseScreen = PAUSE_SCREEN_UNK6;
             OpenPrompt(PROMPT_OVERWRITE_REPLAY);
             PlaySound(
-                SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+                SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
             return REPLAY_MENU_PROMPTING;
           }
 
           SaveReplayToSlot();
-          PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+          PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         } else {
           g_PauseScreen = PAUSE_SCREEN_UNK6;
           OpenPrompt(PROMPT_SKIP_REPLAY);
           return REPLAY_MENU_PROMPTING;
         }
       } else if (controller->pressedButtons & B_BUTTON) {
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         f_CursorIndex = SKIP_REPLAY_ROW;
       } else if (controller->repeatedButtons & U_JPAD) {
         f_CursorIndex--;
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       } else if (controller->repeatedButtons & D_JPAD) {
         f_CursorIndex++;
-        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       }
 
       if (f_CursorIndex < 0) {
@@ -1797,7 +1795,7 @@ void UpdateControlsScreen(ControllerState* controller) {
 
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_CONTROLS_OPEN, g_NextSoundChannel,
-            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, SOUND_FULL_SCALE);
+            MENU_VOLUME_MEDIUM, MENU_SOUND_REVERB, SOUND_FULL_SCALE);
       }
 
       if (f_StateFrame == SLIDE_FRAMES) {
@@ -1807,7 +1805,7 @@ void UpdateControlsScreen(ControllerState* controller) {
       break;
     case SAVE_MENU_STATE_CHOOSING:
       if (controller->pressedButtons & (A_BUTTON | B_BUTTON)) {
-        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_VOLUME_MEDIUM);
         f_StateFrame = 0;
         f_MenuState = SAVE_MENU_STATE_BACKING_OUT;
       }
@@ -1822,7 +1820,7 @@ void UpdateControlsScreen(ControllerState* controller) {
 
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_CONTROLS_CLOSE, g_NextSoundChannel,
-            MENU_SOUND_VOLUME, MENU_SOUND_REVERB, SOUND_FULL_SCALE);
+            MENU_VOLUME_MEDIUM, MENU_SOUND_REVERB, SOUND_FULL_SCALE);
       }
 
       if (f_StateFrame == SLIDE_FRAMES) {

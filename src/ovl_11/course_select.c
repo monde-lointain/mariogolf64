@@ -48,8 +48,6 @@ enum PlanksState {
   PLANKS_OPENING
 };
 
-#define MENU_SOUND_CHANNEL 15
-
 /* Each four stars open one more Ring Shot course */
 #define STARS_PER_OPENED_COURSE 4
 #define STARS_TO_OPEN(courseCount) \

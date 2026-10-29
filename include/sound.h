@@ -12,6 +12,11 @@
  */
 #define SOUND_FULL_SCALE 0x7F
 
+/* The menus' sound channel, and how loud each of their sounds plays */
+#define MENU_SOUND_CHANNEL 15
+#define MENU_VOLUME_SOFT 80
+#define MENU_VOLUME_MEDIUM 100
+
 /*
  * The sound effects that PlaySound and PlaySoundWithEffects play. Many play
  * in more than one place; each is named for one use, and the comments name
