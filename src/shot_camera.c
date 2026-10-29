@@ -634,6 +634,9 @@ void EndFlightCamera(void) {
 #define MIN_SHOT_LENGTH 0x7800
 /* The path steps searched for cup passes and for path flags */
 #define SCANNED_STEP_COUNT 30
+/* f_BillboardHitCountdown's start for a hit found early, or found ahead */
+#define EARLY_BILLBOARD_HIT_COUNTDOWN 40
+#define AHEAD_BILLBOARD_HIT_COUNTDOWN 70
 /* The ground is probed at five points, 45 degrees apart, around the ball */
 #define GROUND_PROBE_COUNT 5
 #define GROUND_PROBE_ANGLE_STEP (M_PI / 4)
@@ -786,7 +789,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
       f_ComingFlightEvents |= FLIGHT_EVENT_BILLBOARD_HIT;
       if (f_BillboardHitStep == NO_STEP) {
         f_BillboardHitStep = i;
-        f_BillboardHitCountdown = 40;
+        f_BillboardHitCountdown = EARLY_BILLBOARD_HIT_COUNTDOWN;
       }
     }
   }
@@ -997,6 +1000,8 @@ s32 GetEndReaction(void) {
 #define LANDING_SOUND_STEP_COUNT 3
 #define CHIP_IN_CALL_STEP_COUNT 10
 #define FLAG_SHOT_CALL_STEP_COUNT 15
+/* f_IsPinHitComing is set this many steps before a pin hit */
+#define PIN_HIT_LOOKAHEAD_STEP_COUNT 5
 
 /* Distances that PlayFlightSounds tests, in course units */
 #define CLOSE_LANDING_DISTANCE 0x3C00
@@ -1123,7 +1128,8 @@ void PlayFlightSounds(s32 step) {
   }
 
   if (!g_GameState.isMiniGolf) {
-    if ((g_SimulatedShot.pathFlags[step + 5] & STEP_FLAG_PIN_HIT) &&
+    if ((g_SimulatedShot.pathFlags[step + PIN_HIT_LOOKAHEAD_STEP_COUNT] &
+            STEP_FLAG_PIN_HIT) &&
         g_SimulatedShot.flagHitStep == NO_STEP) {
       f_IsPinHitComing = TRUE;
     }
@@ -2885,6 +2891,15 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 #define END_VIEW_MIN_DISTANCE 0x25800
 /* Fewer steps left than this leave no time for a new camera kind */
 #define CAMERA_CHOICE_MIN_STEP_COUNT 40
+/* The steps at which the launch phase, and the early climb, end */
+#define LAUNCH_END_STEP 10
+#define EARLY_CLIMB_END_STEP 15
+/* A shot from the green climbs until this step */
+#define GREEN_CLIMB_END_STEP 40
+/* The fall nears contact once a step flag is this many steps ahead */
+#define CONTACT_LOOKAHEAD_STEP_COUNT 40
+/* The end phase covers the path's last steps */
+#define END_PHASE_STEP_COUNT 10
 
 /* Whether the ball has passed the billboard hit and its view */
 #define IsPastBillboardHitView(step) \
@@ -2999,22 +3014,26 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   if (g_SimulatedShot.startsOnGreen) {
     switch (f_FlightPhase) {
       case FLIGHT_PHASE_LAUNCH:
-        if (isAdvancing == TRUE && step == 10 &&
-            g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
+        if (isAdvancing == TRUE && step == LAUNCH_END_STEP &&
+            g_BallFlightStep <
+                g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT) {
           f_FlightPhase = FLIGHT_PHASE_CLIMB;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case FLIGHT_PHASE_CLIMB:
-        if (step == 40 && g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
+        if (step == GREEN_CLIMB_END_STEP &&
+            g_BallFlightStep <
+                g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT) {
           f_FlightPhase = FLIGHT_PHASE_CONTACT;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case FLIGHT_PHASE_CONTACT:
-        if (g_SimulatedShot.stepCount - 10 < g_BallFlightStep) {
+        if (g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT <
+            g_BallFlightStep) {
           f_FlightPhase = FLIGHT_PHASE_END;
           f_HasFlightPhaseChanged = TRUE;
         }
@@ -3028,14 +3047,14 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         f_HasFlightPhaseChanged = TRUE;
         break;
       case FLIGHT_PHASE_LAUNCH:
-        if (isAdvancing == TRUE && step == 10) {
+        if (isAdvancing == TRUE && step == LAUNCH_END_STEP) {
           f_FlightPhase = FLIGHT_PHASE_EARLY_CLIMB;
           f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case FLIGHT_PHASE_EARLY_CLIMB:
-        if (step == 15) {
+        if (step == EARLY_CLIMB_END_STEP) {
           f_FlightPhase = FLIGHT_PHASE_CLIMB;
           f_HasFlightPhaseChanged = TRUE;
         }
@@ -3049,7 +3068,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
         break;
       case FLIGHT_PHASE_FALL:
-        if (g_SimulatedShot.pathFlags[step + 40]) {
+        if (g_SimulatedShot.pathFlags[step + CONTACT_LOOKAHEAD_STEP_COUNT]) {
           f_FlightPhase = FLIGHT_PHASE_NEARING_CONTACT;
           f_HasFlightPhaseChanged = TRUE;
         }
@@ -3063,7 +3082,8 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
         break;
       case FLIGHT_PHASE_CONTACT:
-        if (g_SimulatedShot.stepCount - 10 < g_BallFlightStep) {
+        if (g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT <
+            g_BallFlightStep) {
           f_FlightPhase = FLIGHT_PHASE_END;
           f_HasFlightPhaseChanged = TRUE;
         }
@@ -3105,7 +3125,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     f_ComingFlightEvents |= FLIGHT_EVENT_BILLBOARD_HIT;
     if (f_BillboardHitStep == NO_STEP) {
       f_BillboardHitStep = aheadStep;
-      f_BillboardHitCountdown = 70;
+      f_BillboardHitCountdown = AHEAD_BILLBOARD_HIT_COUNTDOWN;
     }
   }
 
