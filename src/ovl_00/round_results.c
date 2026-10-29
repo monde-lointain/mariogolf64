@@ -22,6 +22,7 @@
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
+#include "scorecard.h"
 #include "scoring.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -3054,7 +3055,6 @@ void DrawPlayersResults(Gfx** displayListHead) {
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 
-#define MATCH_PLAYER_COUNT 2
 #define MATCH_ROW_HEIGHT 72
 /* The standing words are 48x48, holding UP, DOWN and EVEN in rows of 16 */
 #define STANDING_WORDS_SIZE 48

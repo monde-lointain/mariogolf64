@@ -16,7 +16,6 @@
 
 /* A computer contestant's final score stays within this many strokes of par */
 #define SCORE_LIMIT 18
-#define COURSE_HOLE_COUNT 18
 
 /* Half a sine wave over a round */
 #define RADIANS_PER_HOLE ((f64)(3.1416f / COURSE_HOLE_COUNT))
