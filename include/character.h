@@ -31,6 +31,9 @@ enum CharacterId {
   CHARACTER_JOE
 };
 
+/* An enum CharacterId value; fields kept narrower say so in comments */
+typedef s32 CharacterId;
+
 /*
  * The playable characters in the order that the menus' character grids,
  * g_CharacterNames and the character name messages use, which swaps three

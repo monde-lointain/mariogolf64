@@ -133,7 +133,7 @@ static s32 D_8023019C_ovl_01 = 0;
 static s32 D_802301A0_ovl_01 = 0;
 static s32 D_802301A4_ovl_01 = 0;
 /* The character in each place of the table */
-static s32 D_802301A8_ovl_01[CHARACTER_COUNT] = {
+static CharacterId D_802301A8_ovl_01[CHARACTER_COUNT] = {
     0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
 static Vtx D_802301F0_ovl_01[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -579,8 +579,8 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
   s32 index; /* Counts the banner strips, then holds the x of each count of wins
               */
   s32 rowIndex;
-  s32 rowCharacter;
-  s32 columnCharacter;
+  CharacterId rowCharacter;
+  CharacterId columnCharacter;
   s32 rowWins;
   s32 columnWins;
   u8 faceMode;
@@ -771,7 +771,7 @@ void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
 void func_802177D0_ovl_01(void) {
   EncodedAsset asset;
   AssetFile file;
-  s32 characterIndex;
+  CharacterId characterIndex;
 
   GetSaveData();
   for (characterIndex = 0; characterIndex != CHARACTER_COUNT;

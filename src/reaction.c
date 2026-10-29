@@ -303,7 +303,7 @@ s32 AddReactionLight(Gfx** displayListHead, Lights2* lights) {
 }
 
 /* Starts the character's reaction in the slot with the animation */
-void StartReaction(u32 slotIndex, s32 character, s32 animation) {
+void StartReaction(u32 slotIndex, CharacterId character, s32 animation) {
   f_ReactionCharacter = character;
   f_HasReactionLight = FALSE;
   f_ReactionFrame = 0;

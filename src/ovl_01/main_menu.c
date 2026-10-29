@@ -5126,7 +5126,7 @@ void func_80200EF0_ovl_01(Gfx** displayListHead) {
   s32 row;
   s32 column;
   s32 layout;
-  s32 character;
+  CharacterId character;
   s32 palette;
   s32 raise;
   u16 slot;

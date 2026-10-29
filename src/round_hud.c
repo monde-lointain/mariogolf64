@@ -854,7 +854,7 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", InitRoundHud);
 #endif
 
 /* Loads the face of a player's character in the colors of the given palette */
-void LoadPlayerFace(s32 playerIndex, s32 character, s32 paletteIndex) {
+void LoadPlayerFace(s32 playerIndex, CharacterId character, s32 paletteIndex) {
   EncodedAsset asset;
   AssetFile file;
 

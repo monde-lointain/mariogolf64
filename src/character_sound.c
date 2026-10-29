@@ -206,8 +206,8 @@ static s32 D_800C35F8[2] = {0};
 
 /* Plays a character's sound, where soundIndex is the sound's pair's first value
  */
-void PlayCharacterSound(
-    s32 character, s32 slot, s32 soundIndex, SoundVolume volume, SoundPan pan) {
+void PlayCharacterSound(CharacterId character, s32 slot, s32 soundIndex,
+    SoundVolume volume, SoundPan pan) {
   SoundReverb reverb =
       (character != DRY_CHARACTER) ? CHARACTER_SOUND_REVERB : 0;
 

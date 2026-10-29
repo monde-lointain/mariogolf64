@@ -158,7 +158,7 @@ static s32 D_8022FF1C_ovl_01[GAME_BOY_CHARACTER_COUNT] = {
 static s32 D_8022FF2C_ovl_01[CHARACTER_SELECT_IMAGE_KIND_COUNT] = {
     0x08E8, 0x05E3, 0x08EF, 0x050F, 0x0521, 0x06EF, 0x05FF, 0x0600, 0x08EE};
 /* The CharacterId of each CharacterChoice */
-static s32 D_8022FF50_ovl_01[CHARACTER_COUNT] = {CHARACTER_PLUM,
+static CharacterId D_8022FF50_ovl_01[CHARACTER_COUNT] = {CHARACTER_PLUM,
     CHARACTER_CHARLIE, CHARACTER_PEACH, CHARACTER_BABY_MARIO, CHARACTER_LUIGI,
     CHARACTER_YOSHI, CHARACTER_SONNY, CHARACTER_WARIO, CHARACTER_HARRY,
     CHARACTER_MARIO, CHARACTER_MAPLE, CHARACTER_DONKEY_KONG, CHARACTER_BOWSER,
@@ -1532,7 +1532,7 @@ s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
   s32 freePalette = 0;
   s32 playerIndex = 0;
   s32 sameCount = 0;
-  s32 character = D_8022FF50_ovl_01[choiceIndex];
+  CharacterId character = D_8022FF50_ovl_01[choiceIndex];
   s32 unused[4];
   s32 samePlayers[MAX_PLAYER_COUNT];
   s32 palette;

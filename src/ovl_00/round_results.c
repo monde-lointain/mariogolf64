@@ -265,7 +265,7 @@ static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {{40, 24, 24, 38},
     {36, 40, 11, 40}};
 static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
-static s32 f_DebugUnlockCharacter = 0;
+static CharacterId f_DebugUnlockCharacter = 0;
 /* Read by no routine */
 static void* D_8021FE40_ovl_00[2] = {NULL, D_80224E10_ovl_00};
 /* The text color of each text slot, from slot 1 */
@@ -304,7 +304,7 @@ static u8* f_DigitsImage;
 static u8* f_PlaceDigitsImage;
 static s32 f_UnlockNoticeKind;
 static Boolean f_HasBets;
-static s32 f_PortraitCharacterIndex;
+static CharacterId f_PortraitCharacterIndex;
 static s32 f_NoticeStage;
 static s32 f_NoticeFrameCount;
 static s32 f_NoticeSwing;

@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#include "character.h"
+
 /* Sound effects play on channels, each holding one effect at a time */
 #define SOUND_CHANNEL_COUNT 16
 
@@ -491,10 +493,10 @@ void SetSoundVolume(SoundChannel channel, SoundVolume volume);
 void SetSoundReverb(SoundChannel channel, SoundReverb reverb);
 void FadeOutSound(SoundChannel channel, u32 frameCount);
 void SetSoundTempo(SoundChannel channel, s32 tempo);
-void PlayCharacterSound(
-    s32 character, s32 slot, s32 soundIndex, SoundVolume volume, SoundPan pan);
-void QueueCharacterSound(
-    s32 character, s32 slot, s32 kind, SoundVolume volume, SoundPan pan);
+void PlayCharacterSound(CharacterId character, s32 slot, s32 soundIndex,
+    SoundVolume volume, SoundPan pan);
+void QueueCharacterSound(CharacterId character, s32 slot, s32 kind,
+    SoundVolume volume, SoundPan pan);
 void SetSoundFrequencyOffset(SoundChannel channel, f32 offset);
 s32 UpdateAudio(void);
 void StopSong(s32 fadeFrameCount);

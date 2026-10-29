@@ -55,7 +55,7 @@
 #define PLAYED_DELAY (-1)
 
 typedef struct QueuedCharacterSound {
-  /* 0x00 */ s32 character;
+  /* 0x00 */ CharacterId character;
   /* 0x04 */ s32 delay; /* Frames until it plays; negative once played */
   /* 0x08 */ s32 kind;
   /* 0x0C */ SoundVolume volume;
@@ -115,7 +115,7 @@ static u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT] = {
     CHARACTER_SOUND_CALL_OUT_RIGHT, CHARACTER_SOUND_CALL_OUT_C_UP,
     CHARACTER_SOUND_CALL_OUT_C_DOWN, CHARACTER_SOUND_CALL_OUT_C_LEFT,
     CHARACTER_SOUND_CALL_OUT_C_RIGHT};
-static s32 f_DelayEditorCharacter = 0;
+static CharacterId f_DelayEditorCharacter = 0;
 static s32 f_DelayEditorKind = 0;
 static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};
 static SongId f_SongId = NO_SONG;
@@ -401,8 +401,8 @@ void SetSoundTempo(SoundChannel channel, s32 tempo) {
   osSetIntMask(mask);
 }
 
-void QueueCharacterSound(
-    s32 character, s32 slot, s32 kind, SoundVolume volume, SoundPan pan) {
+void QueueCharacterSound(CharacterId character, s32 slot, s32 kind,
+    SoundVolume volume, SoundPan pan) {
   f_QueuedCharacterSounds[slot].delay = f_CharacterSoundDelays[kind][character];
   f_QueuedCharacterSounds[slot].character = character;
   f_QueuedCharacterSounds[slot].kind = kind;

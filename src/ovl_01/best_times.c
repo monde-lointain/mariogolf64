@@ -622,7 +622,7 @@ void func_8021585C_ovl_01(void) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save = GetSaveData();
-  s32 characterIndex;
+  CharacterId characterIndex;
   s32 courseIndex;
   s32 rank;
   s32 character;
