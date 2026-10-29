@@ -106,4 +106,8 @@ typedef struct Unk800FBD40 {
 
 extern Unk800FBD40 D_800FBD40;
 
+/* The character each player has chosen, or NO_CHOSEN_CHARACTER */
+#define NO_CHOSEN_CHARACTER -1
+extern s32 D_8012F480[MAX_PLAYER_COUNT];
+
 #endif

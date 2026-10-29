@@ -74,7 +74,6 @@ extern s32 D_80105DC8;
 extern s32 D_80105DCC;
 /* The code of the tournament whose password was entered */
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
-extern s32 D_8012F480;
 extern s32 D_801B7070;
 extern s8 D_801B70F0;
 extern s16 D_801B71CC;
@@ -456,9 +455,6 @@ static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
 static s32 D_800C2C00[4] = {0};
 
 /* Not static: the original left these to the linker's common block */
-s32 D_8012F484;
-s32 D_8012F488;
-s32 D_8012F48C;
 s8 D_801B70F1;
 s8 D_801B70F2;
 s8 D_801B70F3;
@@ -1932,10 +1928,10 @@ void func_8005D9A0(void) {
   g_MenuScreen = 0;
   g_ChosenPlayerCount = 0;
   D_801B7070 = 0;
-  D_8012F480 = -1;
-  D_8012F484 = -1;
-  D_8012F488 = -1;
-  D_8012F48C = -1;
+  D_8012F480[0] = NO_CHOSEN_CHARACTER;
+  D_8012F480[1] = NO_CHOSEN_CHARACTER;
+  D_8012F480[2] = NO_CHOSEN_CHARACTER;
+  D_8012F480[3] = NO_CHOSEN_CHARACTER;
   D_801B70F0 = 0;
   D_801B70F1 = 0;
   D_801B70F2 = 0;

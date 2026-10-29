@@ -32,7 +32,6 @@ extern s32 D_8023BFD0_ovl_01;
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
 extern s32 D_801B7070;
-extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern char D_8022BF70_ovl_01[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 
 s32 GetOpenCourseCount(void);
