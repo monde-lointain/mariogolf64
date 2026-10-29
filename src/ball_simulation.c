@@ -912,19 +912,19 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->position[AXIS_Y] = startY + (fraction * velocity[AXIS_Y]);
       simulation->position[AXIS_Z] = startZ + (fraction * velocity[AXIS_Z]);
       simulation->lastBounceStep = simulation->stepCount;
-      simulation->spinSpeed /= 2;
-      simulation->sideSpin /= 2;
+      simulation->spinSpeed /= BILLBOARD_HIT_SPIN_DIVISOR;
+      simulation->sideSpin /= BILLBOARD_HIT_SPIN_DIVISOR;
       switch (triangle.unk0) {
         case BILLBOARD_CELL_TRUNK:
         case BILLBOARD_CELL_SOLID:
         case BILLBOARD_CELL_SHELL:
-          velocity[AXIS_X] = -velocity[AXIS_Z] * 0.5f;
-          velocity[AXIS_Z] = -velocity[AXIS_X] * 0.5f;
+          velocity[AXIS_X] = -velocity[AXIS_Z] * BILLBOARD_HIT_SPEED_KEPT;
+          velocity[AXIS_Z] = -velocity[AXIS_X] * BILLBOARD_HIT_SPEED_KEPT;
           break;
         case BILLBOARD_CELL_FOLIAGE:
         default:
-          velocity[AXIS_X] *= 0.5f;
-          velocity[AXIS_Z] *= 0.5f;
+          velocity[AXIS_X] *= BILLBOARD_HIT_SPEED_KEPT;
+          velocity[AXIS_Z] *= BILLBOARD_HIT_SPEED_KEPT;
           break;
       }
 

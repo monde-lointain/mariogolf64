@@ -240,6 +240,15 @@ static void ResetBallSimulations(void) {
 #define OPENING_WATER_STOP_DEPTH 0x12C00
 /* Its cup floor halves the ball's falling speed in whole units */
 #define OPENING_CUP_FLOOR_BOUNCE_DIVISOR 2
+/*
+ * A billboard halves the ball's speed in whole units, and foliage speeds up
+ * a rising ball. A wall puts the ball 4 cm back along its path from the hit,
+ * then this share of the way there.
+ */
+#define OPENING_BILLBOARD_HIT_SPEED_DIVISOR 2
+#define OPENING_FOLIAGE_RISE_SCALE 1.2f
+#define OPENING_WALL_BACK_OFF 614.4f
+#define OPENING_WALL_HIT_STEP_SHARE 0.99f
 
 /*
  * The opening calls FindBillboardHit with a ninth argument, the simulation,
@@ -828,9 +837,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     if (contact == STEP_FLAG_BILLBOARD_HIT &&
         simulation->state == BALL_STATE_FLYING) {
       simulation->bounceCount++;
-      simulation->spinSpeed /= 2;
+      simulation->spinSpeed /= BILLBOARD_HIT_SPIN_DIVISOR;
       simulation->lastBounceStep = simulation->stepCount;
-      simulation->sideSpin /= 2;
+      simulation->sideSpin /= BILLBOARD_HIT_SPIN_DIVISOR;
       simulation->position[AXIS_X] =
           startX + (fraction * simulation->velocity[AXIS_X]);
       simulation->position[AXIS_Y] =
@@ -840,15 +849,18 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       switch (triangle.unk0) {
         case BILLBOARD_CELL_TRUNK:
         case BILLBOARD_CELL_SOLID:
-          simulation->velocity[AXIS_X] = -simulation->velocity[AXIS_Z] / 2;
-          simulation->velocity[AXIS_Z] = -simulation->velocity[AXIS_X] / 2;
+          simulation->velocity[AXIS_X] = -simulation->velocity[AXIS_Z] /
+              OPENING_BILLBOARD_HIT_SPEED_DIVISOR;
+          simulation->velocity[AXIS_Z] = -simulation->velocity[AXIS_X] /
+              OPENING_BILLBOARD_HIT_SPEED_DIVISOR;
           break;
         case BILLBOARD_CELL_FOLIAGE:
         default:
-          simulation->velocity[AXIS_X] /= 2;
-          simulation->velocity[AXIS_Z] /= 2;
+          simulation->velocity[AXIS_X] /= OPENING_BILLBOARD_HIT_SPEED_DIVISOR;
+          simulation->velocity[AXIS_Z] /= OPENING_BILLBOARD_HIT_SPEED_DIVISOR;
           if (simulation->velocity[AXIS_Y] < 0) {
-            simulation->velocity[AXIS_Y] = simulation->velocity[AXIS_Y] * 1.2f;
+            simulation->velocity[AXIS_Y] =
+                simulation->velocity[AXIS_Y] * OPENING_FOLIAGE_RISE_SCALE;
           }
 
           break;
@@ -892,19 +904,22 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       approach = (-normalZ * simulation->velocity[AXIS_X]) +
           (normalY * simulation->velocity[AXIS_Y]) +
           (normalX * simulation->velocity[AXIS_Z]);
-      D_8022BE28_ovl_05 -= 614.4f /
+      D_8022BE28_ovl_05 -= OPENING_WALL_BACK_OFF /
           GetLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]);
       if (D_8022BE28_ovl_05 < 0.0f) {
         D_8022BE28_ovl_05 = 0.0f;
       }
 
-      hitPosition[AXIS_X] =
-          startX + (D_8022BE28_ovl_05 * (simulation->velocity[AXIS_X] * 0.99f));
-      hitPosition[AXIS_Y] =
-          startY + (D_8022BE28_ovl_05 * (simulation->velocity[AXIS_Y] * 0.99f));
-      hitPosition[AXIS_Z] =
-          startZ + (D_8022BE28_ovl_05 * (simulation->velocity[AXIS_Z] * 0.99f));
+      hitPosition[AXIS_X] = startX +
+          (D_8022BE28_ovl_05 *
+              (simulation->velocity[AXIS_X] * OPENING_WALL_HIT_STEP_SHARE));
+      hitPosition[AXIS_Y] = startY +
+          (D_8022BE28_ovl_05 *
+              (simulation->velocity[AXIS_Y] * OPENING_WALL_HIT_STEP_SHARE));
+      hitPosition[AXIS_Z] = startZ +
+          (D_8022BE28_ovl_05 *
+              (simulation->velocity[AXIS_Z] * OPENING_WALL_HIT_STEP_SHARE));
       simulation->position[AXIS_X] = hitPosition[AXIS_X];
       simulation->position[AXIS_Y] = hitPosition[AXIS_Y];
       simulation->position[AXIS_Z] = hitPosition[AXIS_Z];

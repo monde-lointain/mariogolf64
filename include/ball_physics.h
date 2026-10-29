@@ -128,6 +128,13 @@
 /* A ball that hits a hole triangle is put this share of the way to it */
 #define TRIANGLE_HIT_STEP_SHARE 0.995f
 /*
+ * A flying ball that hits a billboard has its spins divided by this and
+ * keeps this share of its speed along the ground; a trunk or other solid one
+ * turns it aside
+ */
+#define BILLBOARD_HIT_SPIN_DIVISOR 2
+#define BILLBOARD_HIT_SPEED_KEPT 0.5f
+/*
  * A flying ball that hits the pin keeps this much of its spin, and a rolling
  * one is thrown up at this share of its speed along the ground. Either moves
  * on from the hit to this share of the step's length.
