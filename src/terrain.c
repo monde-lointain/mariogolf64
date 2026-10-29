@@ -344,9 +344,15 @@ s32 GetTerrainCode(s32 column, s32 row) {
 INCLUDE_ASM("asm/nonmatchings/terrain", GetTerrainCode);
 #endif
 
+/*
+ * Starts the search for the nearest color past any squared distance
+ * between RGBA16 colors
+ */
+#define BEYOND_ANY_COLOR_DISTANCE 1000000
+
 /* Returns the index of the terrain color nearest an RGBA16 color */
 s32 FindNearestTerrainColor(s32 color) {
-  s32 nearestDistance = 1000000;
+  s32 nearestDistance = BEYOND_ANY_COLOR_DISTANCE;
   s32 nearestIndex = 0;
   s32 colorRed = (color >> RGBA16_RED_SHIFT) & RGBA16_CHANNEL_MASK;
   s32 colorGreen = (color >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
@@ -449,9 +455,13 @@ s32 GetColorTerrainCode(s32 color) {
   return TERRAIN_CODE_OUT_OF_BOUNDS;
 }
 
+/* The wrong club's penalty leaves at least this percent of a shot */
+#define MIN_SURFACE_PERCENT 5
+
 /*
  * Writes a surface's two percents for a club. A club not meant for the
- * surface loses the penalty from each, down to no less than 5.
+ * surface loses the penalty from each, down to no less than
+ * MIN_SURFACE_PERCENT.
  */
 void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range) {
   if (club->surfaceMask & GetSurfaceClubMask(TRUE, info)) {
@@ -459,16 +469,20 @@ void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range) {
     range[1] = info->maxPercent;
   } else {
     range[0] = info->minPercent - info->wrongClubPenalty;
-    if (range[0] < 5) {
-      range[0] = 5;
+    if (range[0] < MIN_SURFACE_PERCENT) {
+      range[0] = MIN_SURFACE_PERCENT;
     }
 
     range[1] = info->maxPercent - info->wrongClubPenalty;
-    if (range[1] < 5) {
-      range[1] = 5;
+    if (range[1] < MIN_SURFACE_PERCENT) {
+      range[1] = MIN_SURFACE_PERCENT;
     }
   }
 }
+
+/* Where GetMiniGolfSurface shows its water probe's result for debugging */
+#define WATER_RATIO_COLUMN 10
+#define WATER_RATIO_ROW 11
 
 /*
  * Mini-golf's GetSurface. It weighs the four nearest codes like
@@ -512,7 +526,7 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
       sprintf(text, "ratio %f,%x", fraction,
           (s32)(WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) +
               waterBias));
-      PrintDebugText(text, 10, 11);
+      PrintDebugText(text, WATER_RATIO_COLUMN, WATER_RATIO_ROW);
     }
 
     if (hit.unk0 == HOLE_TRIANGLE_KIND_FLAT) {
