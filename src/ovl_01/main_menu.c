@@ -328,7 +328,7 @@ void DrawMainMenu(Gfx** displayListHead);
 void DrawMainMenuWithoutTransmit(Gfx** displayListHead);
 void DrawClubhouse(Gfx** displayListHead);
 void DrawOptionsScreen(Gfx** displayListHead);
-void func_80207D08_ovl_01(Gfx** displayListHead);
+void DrawCaddySelect(Gfx** displayListHead);
 void func_80207E18_ovl_01(Gfx** displayListHead);
 void DrawBirdieBadgeLabel(Gfx** displayListHead);
 /* Defined as returning s8, but their callers here use the whole register */
@@ -348,7 +348,7 @@ void UpdateMainMenu(void);
 void UpdateMainMenuWithoutTransmit(void);
 void UpdateClubhouse(void);
 void UpdateOptionsScreen(void);
-void func_801FADBC_ovl_01(void);
+void UpdateCaddySelect(void);
 void LeaveMenuWithWipe(void);
 void LeaveMenuWithCourseWipe(void);
 void UpdateBirdieBadges(void);
@@ -1059,7 +1059,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_CADDY_SELECT:
-      func_801FADBC_ovl_01();
+      UpdateCaddySelect();
       break;
 
     case MENU_SCREEN_UNK20:
@@ -3512,7 +3512,7 @@ void UpdateOptionsScreen(void) {
   SetSongFrequencyOffset(f_SoundTestSongFrequency);
 }
 
-void func_801FADBC_ovl_01(void) {
+void UpdateCaddySelect(void) {
   if (IsHudAnimationDone() != TRUE) {
     return;
   }
@@ -3695,7 +3695,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
 
       break;
     case MENU_SCREEN_CADDY_SELECT:
-      func_80207D08_ovl_01(&gfx);
+      DrawCaddySelect(&gfx);
       break;
     case MENU_SCREEN_COURSE_SELECT:
     case MENU_SCREEN_UNK20:
@@ -7042,7 +7042,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawOptionsScreen);
 #endif
 
-void func_80207D08_ovl_01(Gfx** displayListHead) {
+void DrawCaddySelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 caddyIndex;
 
