@@ -1949,12 +1949,10 @@ void DrawSavedGames(Gfx** displayListHead) {
             UNCHOSEN_BOARD_SHADE, 255);
       }
 
-      gDPLoadTLUT_pal256(
-          gfx++, TextureAddress((u32)f_GameBoards[slot] + IMAGE_HEADER_SIZE));
+      gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_GameBoards[slot])));
       for (otherIndex = 0; otherIndex != GAME_BOARD_STRIP_COUNT; otherIndex++) {
         gDPLoadTextureBlock(gfx++,
-            TextureAddress((u32)f_GameBoards[slot] +
-                LARGE_PALETTED_TEXELS_OFFSET +
+            TextureAddress(LargeImageTexels(f_GameBoards[slot]) +
                 (otherIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT,
             0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2164,13 +2162,11 @@ void func_80224AFC_ovl_01(
   u8 iconIndex;
 
   gDPPipeSync(gfx++);
-  gDPLoadTLUT_pal256(gfx++,
-      TextureAddress(
-          (u32)f_GameBoards[memory->savedGameIndex] + IMAGE_HEADER_SIZE));
+  gDPLoadTLUT_pal256(
+      gfx++, TextureAddress(ImageBody(f_GameBoards[memory->savedGameIndex])));
   for (stripIndex = 0; stripIndex != GAME_BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)f_GameBoards[memory->savedGameIndex] +
-            LARGE_PALETTED_TEXELS_OFFSET +
+        TextureAddress(LargeImageTexels(f_GameBoards[memory->savedGameIndex]) +
             (stripIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
