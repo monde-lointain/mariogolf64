@@ -69,9 +69,7 @@
 /* The triangles in a ground tile: two for each cell */
 #define GROUND_TILE_TRIANGLE_COUNT \
   (GROUND_TILE_POINT_SPAN * GROUND_TILE_POINT_SPAN * 2)
-/* The mini-golf ground is this many course units a side, in tiles of 1 << the
- * shifts below */
-#define MINI_GOLF_GROUND_SIZE 0x100000
+/* The mini-golf ground's tiles span 1 << these course units */
 #define MINI_GOLF_TILE_X_SHIFT 17
 #define MINI_GOLF_TILE_Z_SHIFT 16
 /* FindMiniGolfGroundHit takes sides of a plane closer than this as a path

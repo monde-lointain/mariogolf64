@@ -743,11 +743,11 @@ u16 GetMapColor(s32 x, s32 z) {
   u32 row;
   s32 color;
 
-  if ((u32)x >= 0x400000) {
+  if ((u32)x >= GROUND_WIDTH) {
     return 0;
   }
 
-  if ((u32)z >= 0x800000) {
+  if ((u32)z >= GROUND_LENGTH) {
     return 0;
   }
 
@@ -1731,14 +1731,14 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   }
 
   if (g_GameState.isMiniGolf) {
-    if ((u32)x > 0xFFFFF) {
+    if ((u32)x > MINI_GOLF_GROUND_SIZE - 1) {
       return -1;
     }
 
-    if ((u32)z > 0xFFFFF) {
+    if ((u32)z > MINI_GOLF_GROUND_SIZE - 1) {
       return -1;
     }
-  } else if ((u32)x > 0x3FFFFF || (u32)z > 0x7FFFFF) {
+  } else if ((u32)x > GROUND_WIDTH - 1 || (u32)z > GROUND_LENGTH - 1) {
     return -1;
   }
 
@@ -1940,35 +1940,35 @@ s32 GetTerrainHeight(s32 x, s32 z) {
   s32 height;
 
   if (g_GameState.isMiniGolf) {
-    if ((u32)x > 0xFFFFF) {
+    if ((u32)x > MINI_GOLF_GROUND_SIZE - 1) {
       if (x < 0) {
         x = 0;
       } else {
-        x = 0xFFFFF;
+        x = MINI_GOLF_GROUND_SIZE - 1;
       }
     }
 
-    if ((u32)z > 0xFFFFF) {
+    if ((u32)z > MINI_GOLF_GROUND_SIZE - 1) {
       if (z < 0) {
         z = 0;
       } else {
-        z = 0xFFFFF;
+        z = MINI_GOLF_GROUND_SIZE - 1;
       }
     }
   } else {
-    if ((u32)x > 0x3FFFFF) {
+    if ((u32)x > GROUND_WIDTH - 1) {
       if (x < 0) {
         x = 0;
       } else {
-        x = 0x3FFFFF;
+        x = GROUND_WIDTH - 1;
       }
     }
 
-    if ((u32)z > 0x7FFFFF) {
+    if ((u32)z > GROUND_LENGTH - 1) {
       if (z < 0) {
         z = 0;
       } else {
-        z = 0x7FFFFF;
+        z = GROUND_LENGTH - 1;
       }
     }
   }

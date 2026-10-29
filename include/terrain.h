@@ -25,6 +25,8 @@
 #define GROUND_TILE_SHIFT 19
 #define GROUND_WIDTH (GROUND_TILE_COLUMN_COUNT << GROUND_TILE_SHIFT)
 #define GROUND_LENGTH (GROUND_TILE_ROW_COUNT << GROUND_TILE_SHIFT)
+/* The mini-golf ground is this many course units a side */
+#define MINI_GOLF_GROUND_SIZE 0x100000
 /* Each tile's midpoints: the odd points of its top-left 4 by 4 */
 #define TILE_MIDPOINT_COUNT 16
 /* Grid vertices kept, with room for one more column and row than the grid has
