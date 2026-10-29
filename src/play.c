@@ -427,7 +427,7 @@ void PlacePlayersOnTee(void) {
           !g_GameState.isMiniGolf ? teeHeight - TEE_HEIGHT : teeHeight;
       g_Players[i].ballPosition[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
       g_Players[i].strokeCount = 0;
-      g_Players[i].unk24 = 0;
+      g_Players[i].puttCount = 0;
       g_Players[i].unk26 = 0;
       g_Players[i].ballSurface = SURFACE_TEE_UP;
       if (g_GameState.isMiniGolf) {

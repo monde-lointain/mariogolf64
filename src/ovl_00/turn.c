@@ -3799,9 +3799,9 @@ void UpdateTurns(void) {
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
             if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
                 SURFACE_KIND_GREEN) {
-              g_Players[playerIndex].unk24++;
-              if (g_Players[playerIndex].unk24 >= 100) {
-                g_Players[playerIndex].unk24 = 99;
+              g_Players[playerIndex].puttCount++;
+              if (g_Players[playerIndex].puttCount >= 100) {
+                g_Players[playerIndex].puttCount = 99;
               }
             }
 
@@ -4299,7 +4299,7 @@ void UpdateTurns(void) {
             nextState = PLAYER_STATE_STARTING_REACTION;
             g_Players[playerIndex]
                 .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                .putts = g_Players[playerIndex].unk24;
+                .putts = g_Players[playerIndex].puttCount;
             FreeCharacterAndReactionLight(0);
           } else {
             FreeCharacterAndReactionLight(0);
