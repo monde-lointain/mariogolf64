@@ -86,7 +86,7 @@
 #define SYMBOL_SIZE 32
 #define SYMBOL_IMAGE_SIZE (IMAGE_HEADER_SIZE + (SYMBOL_SIZE * SYMBOL_SIZE * 2))
 /* The texture coordinate of a symbol's last texel */
-#define SYMBOL_ST_END ((TexelCoordinate(SYMBOL_SIZE)) - 1)
+#define SYMBOL_ST_END (TexelCoordinate(SYMBOL_SIZE) - 1)
 
 /* The slot machine, 304 by 224 texels drawn in strips 6 high, the last one 2 */
 #define MACHINE_WIDTH 304

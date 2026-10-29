@@ -1854,8 +1854,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawPuttCaption);
 #define GO_WIDTH 144
 #define GO_STRIP_HEIGHT 14
 #define READY_GO_LAST_STRIP_HEIGHT 8
-/* Texture coordinates are in 10.5 fixed point */
-#define TexelCoord(texels) (TexelCoordinate(texels))
 
 void DrawReadyGoMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1969,11 +1967,12 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
           G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
       gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-          (TexelCoord(READY_WIDTH) - 1) << 16);
+          (TexelCoordinate(READY_WIDTH) - 1) << 16);
       gSPModifyVertex(
-          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoord(stripHeight));
+          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoordinate(stripHeight));
       gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
-          ((TexelCoord(READY_WIDTH) - 1) << 16) + TexelCoord(stripHeight));
+          ((TexelCoordinate(READY_WIDTH) - 1) << 16) +
+              TexelCoordinate(stripHeight));
     } else {
       stripHeight = (i != READY_GO_STRIP_COUNT - 1)
           ? GO_STRIP_HEIGHT
@@ -1986,12 +1985,13 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
           stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR,
           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
+      gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
+          (TexelCoordinate(GO_WIDTH) - 1) << 16);
       gSPModifyVertex(
-          gfx++, (i * 2) + 1, G_MWO_POINT_ST, (TexelCoord(GO_WIDTH) - 1) << 16);
-      gSPModifyVertex(
-          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoord(stripHeight));
+          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoordinate(stripHeight));
       gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
-          ((TexelCoord(GO_WIDTH) - 1) << 16) + TexelCoord(stripHeight));
+          ((TexelCoordinate(GO_WIDTH) - 1) << 16) +
+              TexelCoordinate(stripHeight));
     }
 
     gSP2Triangles(gfx++, i * 2, (i * 2) + 2, (i * 2) + 3, 0, i * 2, (i * 2) + 3,

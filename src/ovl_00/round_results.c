@@ -1243,7 +1243,7 @@ void DrawPlayerPortrait(
       5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, x * 4, y * 4, (x + PORTRAIT_SIZE) * 4,
       (y + PORTRAIT_SIZE) * 4, G_TX_RENDERTILE,
-      isMirrored * (TexelCoordinate(PORTRAIT_SIZE)), 0, TEXEL_STEP_ONE,
+      isMirrored * TexelCoordinate(PORTRAIT_SIZE), 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }

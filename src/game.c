@@ -546,10 +546,10 @@ void DrawSpinMesh(Gfx** displayListHead) {
       gSPModifyVertex(gfx++, (stripIndex * 2) + 1, G_MWO_POINT_ST,
           (SCREEN_WIDTH - SCREEN_BORDER) << 21);
       gSPModifyVertex(gfx++, (stripIndex * 2) + 2, G_MWO_POINT_ST,
-          (SCREEN_BORDER << 21) + (TexelCoordinate(stripHeight)));
+          (SCREEN_BORDER << 21) + TexelCoordinate(stripHeight));
       gSPModifyVertex(gfx++, (stripIndex * 2) + 3, G_MWO_POINT_ST,
           ((SCREEN_WIDTH - SCREEN_BORDER) << 21) +
-              (TexelCoordinate(stripHeight)));
+              TexelCoordinate(stripHeight));
       gSP2Triangles(gfx++, stripIndex * 2, (stripIndex * 2) + 2,
           (stripIndex * 2) + 1, 0, (stripIndex * 2) + 1, (stripIndex * 2) + 2,
           (stripIndex * 2) + 3, 0);

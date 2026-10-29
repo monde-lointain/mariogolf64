@@ -3776,7 +3776,7 @@ void DrawRoundHud(CameraView* view) {
         (PIN_FLAG_X + PIN_FLAG_WIDTH - g_ShotPanelOffsetX) << 2,
         (PIN_FLAG_Y + PIN_FLAG_HEIGHT) << 2, G_TX_RENDERTILE,
         (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) *
-            (TexelCoordinate(PIN_FLAG_WIDTH)),
+            TexelCoordinate(PIN_FLAG_WIDTH),
         TexelCoordinate(PIN_FLAG_IMAGE_T), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(

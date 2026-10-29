@@ -3927,9 +3927,9 @@ void LoadLakitu(void) {
 #define LAKITU_TRAIL_DRAWN_SEGMENT_COUNT 31
 #define LAKITU_TRAIL_ROWS_PER_SEGMENT 8
 /* Texture coordinates, in 10.5, of the trail's right edge and of a segment */
-#define LAKITU_TRAIL_RIGHT_S ((TexelCoordinate(LAKITU_TRAIL_IMAGE_WIDTH)) - 1)
+#define LAKITU_TRAIL_RIGHT_S (TexelCoordinate(LAKITU_TRAIL_IMAGE_WIDTH) - 1)
 #define LakituTrailT(segment) \
-  (TexelCoordinate((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT))
+  TexelCoordinate((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT)
 /* First vertex buffer slot of a segment in the second batch */
 #define LakituTrailSecondBatchSlot(segment) \
   (((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2) - \

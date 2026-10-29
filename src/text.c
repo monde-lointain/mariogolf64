@@ -1950,7 +1950,7 @@ s32 PlaceMessageGlyphGroup(
  * Packs texel coordinates into a vertex's texture coordinates. It is a
  * macro, as an inline function compiles differently from the original.
  */
-#define PackTextureCoords(s, t) (((s) << 21) | (TexelCoordinate(t)))
+#define PackTextureCoords(s, t) (((s) << 21) | TexelCoordinate(t))
 
 /*
  * Draws the sprites of a group of glyphs. The fonts are four-bit images

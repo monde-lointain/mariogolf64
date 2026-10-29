@@ -240,7 +240,7 @@ typedef struct ImageCorner {
 #define BACKDROP_WIDTH 152
 #define BACKDROP_SCALE 2
 #define BACKDROP_SEAM_ROW_COUNT 2
-#define BACKDROP_SECOND_ROW_START (TexelCoordinate(1))
+#define BACKDROP_SECOND_ROW_START TexelCoordinate(1)
 #define BACKDROP_STRIP_ROW_COUNT 11
 #define BACKDROP_STRIP_COUNT 11
 #define BACKDROP_LEFT 8
