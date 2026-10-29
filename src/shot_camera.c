@@ -960,6 +960,12 @@ static inline void QueueOnlookerSounds(s32 kind) {
   }
 }
 
+/* Whether the shot reaches the green from off it, without the putter */
+#define IsShotOntoGreen() \
+  (!g_SimulatedShot.usesPutter && !g_SimulatedShot.startsOnGreen && \
+      g_SimulatedShot.endsOnGreen && \
+      f_EndSurfaceInfo->kind == SURFACE_KIND_GREEN)
+
 /*
  * Plays the sounds and the other players' reactions that go with the ball's
  * flight: after a full shot, on landing in trouble and, at the end of the
@@ -1020,9 +1026,7 @@ void PlayFlightSounds(s32 step) {
     greenSoundCount = &f_GreenSoundCount;
     if (!*greenSoundCount && !shownRingCount &&
         (g_SimulatedShot.pathFlags[step - 2] & PATH_FLAG_UNK1) &&
-        !g_SimulatedShot.usesPutter && !g_SimulatedShot.startsOnGreen &&
-        g_SimulatedShot.endsOnGreen &&
-        f_EndSurfaceInfo->kind == SURFACE_KIND_GREEN) {
+        IsShotOntoGreen()) {
       if (g_HoleSetup.par >
           g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
         (*greenSoundCount)++;
