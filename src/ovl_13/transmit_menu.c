@@ -1385,7 +1385,7 @@ void DecodeCartridgeCharacter(
   character->unk1C = save[0x1C];
   character->shotCurve = save[0x1D];
   character->unk1E = save[0x1E];
-  character->unk1F = save[0x1F];
+  character->mishitResistance = save[0x1F];
   if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_1)) {
     character->ballType = 1;
   } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_2)) {

@@ -83,14 +83,15 @@ typedef struct ClubParameters {
 } ClubParameters; /* size = 0x18 */
 
 typedef struct Club {
-  /* 0x00 */ u8 unk0;
+  /* 0x00 */ u8 mishitScale; /* Scales a mishit's yaw and side spin, and the
+                               impact point's side spin */
   /* 0x01 */ char name[4]; /* Its short name, such as "1W" or "PT" */
   /* 0x05 */ u8 unk5;
   /* 0x06 */ u8 unk6[2];
   /* 0x08 */ s32 surfaceMask;
   /* 0x0C */ s16 distance; /* In yards */
   /* 0x0E */ s16 pitch; /* In degrees, from -45 to -7 */
-  /* 0x10 */ s16 unk10;
+  /* 0x10 */ s16 offsetPitch; /* In degrees per 32 of offsetY */
   /* 0x12 */ s16 spin; /* Shown as SPIN beside the debug character viewer */
   /* 0x14 */ s16 unk14;
   /* 0x16 */ s16 type; /* The club's place in its set */

@@ -2218,8 +2218,8 @@ s32 LaunchBallSimulation(
 
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
     sinf(pitch); /* The original has it */
-    along = pitch - (club->unk10 * 0.017453294f);
-    pitch += (f32)club->unk10 * shot->offsetY * 0.00054541545f;
+    along = pitch - (club->offsetPitch * 0.017453294f);
+    pitch += (f32)club->offsetPitch * shot->offsetY * 0.00054541545f;
     sinf(pitch); /* The original has it */
     launchScale = (cosf(along) - 0.86f) * shot->offsetY * 0.008300781f;
     if (club->kind == CLUB_KIND_WOOD) {
@@ -2263,7 +2263,7 @@ s32 LaunchBallSimulation(
         (sideSign *
             ((club->deflection[shot->shotMode] * shot->power /
                  MAX_LAUNCH_POWER) +
-                (entry->yawChange * club->unk0)));
+                (entry->yawChange * club->mishitScale)));
     yawRadians = (u16)yaw * BINARY_ANGLE_TO_RADIANS;
   }
 
@@ -2285,8 +2285,8 @@ s32 LaunchBallSimulation(
   } else {
     GetSurfaceInfo(simulation->unkA2); /* The original has it */
     simulation->unk38 =
-        (((sideSign * entry->sideSpinChange * club->unk0) / 64) +
-            (shot->offsetX * (club->unk0 * 0.0078125f)) + slopeSpin +
+        (((sideSign * entry->sideSpinChange * club->mishitScale) / 64) +
+            (shot->offsetX * (club->mishitScale * 0.0078125f)) + slopeSpin +
             (sideSign * 2 * club->sideSpin)) *
         (speed * launchScale * launchScale) * 0.00078125f;
     if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {

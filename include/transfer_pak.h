@@ -45,7 +45,7 @@ typedef struct GameBoyCharacter {
   /* 0x1D */ s8
       shotCurve; /* Positive for a draw, negative for a fade, 0 for straight */
   /* 0x1E */ u8 unk1E;
-  /* 0x1F */ u8 unk1F;
+  /* 0x1F */ u8 mishitResistance; /* As ClubSetStats' */
   /* 0x20 */ s8 ballType;
   /* 0x24 */ s32 unk24;
   /* 0x28 */ s32 experience;

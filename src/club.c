@@ -71,11 +71,11 @@
 #define LIE_RATING_LENGTH CLUB_TYPE_PUTTER
 
 /* A stock club, whose power and deflection GenerateClub fills in */
-#define CLUB_ENTRY(type, name, kind, surfaceMask, unk0, distance, pitch, \
-    unk10, spin, unk14, sideSpin) \
-  {(unk0), (name), 0, {0}, (surfaceMask), (distance), (pitch), (unk10), \
-      (spin), (unk14), (type), {0, 0, 0}, (kind), (sideSpin), {0, 0, 0}, \
-      ASSET_DRIVER_HEAD_IMAGE + (type), 0, {0}}
+#define CLUB_ENTRY(type, name, kind, surfaceMask, mishitScale, distance, \
+    pitch, offsetPitch, spin, unk14, sideSpin) \
+  {(mishitScale), (name), 0, {0}, (surfaceMask), (distance), (pitch), \
+      (offsetPitch), (spin), (unk14), (type), {0, 0, 0}, (kind), (sideSpin), \
+      {0, 0, 0}, ASSET_DRIVER_HEAD_IMAGE + (type), 0, {0}}
 
 /* A club's stats, as GenerateClubSet takes them */
 typedef struct ClubStats {
@@ -90,7 +90,7 @@ typedef struct ClubSetStats {
   /* 0x1C */ s8 pitch; /* In degrees, added to each club's */
   /* 0x1D */ s8 curve; /* Positive draws, negative fades */
   /* 0x1E */ s8 unk1E;
-  /* 0x1F */ s8 unk1F;
+  /* 0x1F */ s8 mishitResistance; /* Lowers the clubs' mishitScale */
   /* 0x20 */ u8 unk20[0x3C - 0x20];
   /* 0x3C */ ClubStats clubs[CLUB_SET_SIZE]; /* The putter's run 4 bytes into
                                                 the next set's stats */
@@ -1202,7 +1202,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->unk14 = f_Unk14Values[stats->unk1E + 4];
     }
 
-    club->unk0 = 110 - (stats->unk1F * 9);
+    club->mishitScale = 110 - (stats->mishitResistance * 9);
     club->curve = stats->curve;
     if (club->curve < -4) {
       club->curve = -4;
@@ -1212,12 +1212,12 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->curve = 4;
     }
 
-    if (club->unk0 > 145) {
-      club->unk0 = 145;
+    if (club->mishitScale > 145) {
+      club->mishitScale = 145;
     }
 
-    if (club->unk0 < 70) {
-      club->unk0 = 70;
+    if (club->mishitScale < 70) {
+      club->mishitScale = 70;
     }
 
     g_GameState.isMiniGolf = FALSE;

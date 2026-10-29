@@ -1706,7 +1706,7 @@ s32 func_8020A488_ovl_05(
            ((club->sideSpin * 2) * sideSign)) *
           speed) *
       0.00078125f;
-  pitch += (f32)club->unk10 * shot->offsetY * 0.00054541545f;
+  pitch += (f32)club->offsetPitch * shot->offsetY * 0.00054541545f;
   yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
   spinBase = club->spin * 0.5f;
   simulation->unk34 =
