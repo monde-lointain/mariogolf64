@@ -35,6 +35,17 @@ enum GroupPlayerMark {
   GROUP_PLAYER_OUT
 };
 
+/* A hole's strokes against its par */
+enum ScoreToPar {
+  SCORE_TO_PAR_ALBATROSS = -3,
+  SCORE_TO_PAR_EAGLE,
+  SCORE_TO_PAR_BIRDIE,
+  SCORE_TO_PAR_PAR,
+  SCORE_TO_PAR_BOGEY,
+  SCORE_TO_PAR_DOUBLE_BOGEY,
+  SCORE_TO_PAR_TRIPLE_BOGEY
+};
+
 /* What GetHolingOutStakes says the player's next stroke would do if holed */
 enum HolingOutStakes {
   HOLING_OUT_WINS_HOLE,

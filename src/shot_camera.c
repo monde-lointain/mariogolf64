@@ -1152,11 +1152,14 @@ void PlayFlightSounds(s32 step) {
         g_SimulatedShot.unk2E10) {
       *isPlayed = TRUE;
       if (IsGameFlagSet(GAME_FLAG_UNK48)) {
-        if (g_IsCupViewShown == 1 && (scoreToPar >= -2 && scoreToPar <= 1) &&
+        if (g_IsCupViewShown == 1 &&
+            (scoreToPar >= SCORE_TO_PAR_EAGLE &&
+                scoreToPar <= SCORE_TO_PAR_BOGEY) &&
             !IsPinInCup()) {
           StartMovie(MOVIE_GOOMBA);
         }
-      } else if (scoreToPar >= -2 && scoreToPar <= 0 && !IsPinInCup() &&
+      } else if (scoreToPar >= SCORE_TO_PAR_EAGLE &&
+          scoreToPar <= SCORE_TO_PAR_PAR && !IsPinInCup() &&
           g_IsCupViewShown == 1) {
         if (g_SimulatedShot.shot.shotMode == SHOT_MODE_NORMAL) {
           StartMovie(MOVIE_MONTY_MOLE);

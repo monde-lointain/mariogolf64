@@ -29,6 +29,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "movie.h"
 #include "overlay_manager.h"
 #include "pause_menu.h"
 #include "pin.h"
@@ -2645,23 +2646,23 @@ void PlayHoleOutSong(s32 playerIndex) {
     PlaySong(SONG_HOLE_OUT_BIRDIE, 0);
   } else {
     switch (scoreToPar) {
-      case -1:
+      case SCORE_TO_PAR_BIRDIE:
         PlaySong(SONG_HOLE_OUT_BIRDIE, 0);
         break;
-      case -2:
+      case SCORE_TO_PAR_EAGLE:
         PlaySong(SONG_HOLE_OUT_EAGLE, 0);
         break;
-      case -3:
+      case SCORE_TO_PAR_ALBATROSS:
         PlaySong(SONG_HOLE_OUT_EAGLE, 0);
         break;
-      case 0:
+      case SCORE_TO_PAR_PAR:
         PlaySong(SONG_HOLE_OUT_PAR, 0);
         break;
-      case 1:
+      case SCORE_TO_PAR_BOGEY:
         PlaySong(SONG_HOLE_OUT_BOGEY, 0);
         break;
-      case 2:
-      case 3:
+      case SCORE_TO_PAR_DOUBLE_BOGEY:
+      case SCORE_TO_PAR_TRIPLE_BOGEY:
       default:
         PlaySong(SONG_HOLE_OUT_OVER_BOGEY, 0);
         break;
@@ -2687,32 +2688,32 @@ void ShowHoleOutBanner(s32 playerIndex) {
     PlaySound(SOUND_CALL_HOLE_IN_ONE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
   } else {
     switch (scoreToPar) {
-      case -1:
+      case SCORE_TO_PAR_BIRDIE:
         banner = BANNER_BIRDIE;
         PlaySound(SOUND_CALL_BIRDIE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
-      case -2:
+      case SCORE_TO_PAR_EAGLE:
         banner = BANNER_EAGLE;
         PlaySound(SOUND_CALL_EAGLE, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
-      case -3:
+      case SCORE_TO_PAR_ALBATROSS:
         banner = BANNER_ALBATROSS;
         PlaySound(
             SOUND_CALL_ALBATROSS, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
-      case 0:
+      case SCORE_TO_PAR_PAR:
         banner = BANNER_PAR;
         PlaySound(SOUND_CALL_PAR, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
-      case 1:
+      case SCORE_TO_PAR_BOGEY:
         banner = BANNER_BOGEY;
         PlaySound(SOUND_CALL_BOGEY, HOLE_OUT_CALL_CHANNEL, SOUND_FULL_SCALE);
         break;
-      case 2:
-        banner = BANNER_STROKES_OVER_PAR + 2;
+      case SCORE_TO_PAR_DOUBLE_BOGEY:
+        banner = BANNER_STROKES_OVER_PAR + SCORE_TO_PAR_DOUBLE_BOGEY;
         break;
-      case 3:
-        banner = BANNER_STROKES_OVER_PAR + 3;
+      case SCORE_TO_PAR_TRIPLE_BOGEY:
+        banner = BANNER_STROKES_OVER_PAR + SCORE_TO_PAR_TRIPLE_BOGEY;
         break;
       default:
         banner = BANNER_STROKES_OVER_PAR + scoreToPar;
@@ -2770,16 +2771,16 @@ static inline void DebugTestGutsMotion(void) {
   char* motionName;
   char text[128];
   switch (f_GutsTestMotion) {
-    case 12:
+    case REACTION_ANIMATION_EAGLE:
       motionName = "EAGLE ";
       break;
-    case 13:
+    case REACTION_ANIMATION_BIRDIE:
       motionName = "BIRDIE";
       break;
-    case 14:
+    case REACTION_ANIMATION_PAR:
       motionName = "PAR   ";
       break;
-    case 15:
+    case REACTION_ANIMATION_BOGEY:
       motionName = "BOGEY ";
       break;
     default:
@@ -3200,18 +3201,19 @@ void UpdateTurns(void) {
         }
 
         switch (GetHolingOutStakes(playerIndex)) {
-          case 3:
+          case HOLING_OUT_STAKES_NONE:
             break;
-          case 1:
-            StartMovie(10);
+          case HOLING_OUT_TIES:
+            StartMovie(MOVIE_SINK_TO_TIE);
             break;
-          case 4:
-            StartMovie(11);
+          case HOLING_OUT_HALVES_HOLE:
+            StartMovie(MOVIE_MISS_AND_LOSE);
             break;
-          case 0:
-          case 2:
-            if (GetSurfaceInfo(g_CurrentShot.surface)->kind == 0xB) {
-              StartMovie(9);
+          case HOLING_OUT_WINS_HOLE:
+          case HOLING_OUT_WINS_MATCH:
+            if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
+                SURFACE_KIND_GREEN) {
+              StartMovie(MOVIE_SINK_TO_WIN);
             }
 
             break;
@@ -3221,7 +3223,8 @@ void UpdateTurns(void) {
 
           if (g_GameState.unk31) {
             PlaySong(song, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
-          } else if (GetSurfaceInfo(g_CurrentShot.surface)->kind == 0xB) {
+          } else if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
+              SURFACE_KIND_GREEN) {
             song = SONG_MINI_GOLF;
             if (g_GameState.isMiniGolf) {
               PlaySong(song, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
@@ -3230,32 +3233,36 @@ void UpdateTurns(void) {
               s32 scoreToPar =
                   g_Players[playerIndex].strokeCount - (g_HoleSetup.par - 1);
 
-              if (scoreToPar > 0) {
-                PlaySong(SONG_CUP_IN_OVER_PAR, 0x11);
+              if (scoreToPar > SCORE_TO_PAR_PAR) {
+                PlaySong(
+                    SONG_CUP_IN_OVER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
                 osSyncPrintf("BOGEY\n");
-              } else if (scoreToPar < -2) {
-                PlaySong(SONG_CUP_IN_UNDER_PAR, 0x11);
+              } else if (scoreToPar < SCORE_TO_PAR_EAGLE) {
+                PlaySong(
+                    SONG_CUP_IN_UNDER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
                 osSyncPrintf("EAGLE\n");
-                if (GetHolingOutStakes(playerIndex) == 3 &&
+                if (GetHolingOutStakes(playerIndex) == HOLING_OUT_STAKES_NONE &&
                     !g_GameState.isMiniGolf) {
-                  StartMovie(6);
+                  StartMovie(MOVIE_ALBATROSS_PUTT);
                 }
-              } else if (scoreToPar < -1) {
-                PlaySong(SONG_CUP_IN_UNDER_PAR, 0x11);
+              } else if (scoreToPar < SCORE_TO_PAR_BIRDIE) {
+                PlaySong(
+                    SONG_CUP_IN_UNDER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
                 osSyncPrintf("EAGLE\n");
-                if (GetHolingOutStakes(playerIndex) == 3 &&
+                if (GetHolingOutStakes(playerIndex) == HOLING_OUT_STAKES_NONE &&
                     !g_GameState.isMiniGolf) {
-                  StartMovie(7);
+                  StartMovie(MOVIE_EAGLE_PUTT);
                 }
-              } else if (scoreToPar == 0) {
-                PlaySong(SONG_CUP_IN_PAR, 0x11);
+              } else if (scoreToPar == SCORE_TO_PAR_PAR) {
+                PlaySong(SONG_CUP_IN_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
                 osSyncPrintf("PAR\n");
               } else {
-                PlaySong(SONG_CUP_IN_UNDER_PAR, 0x11);
+                PlaySong(
+                    SONG_CUP_IN_UNDER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
                 osSyncPrintf("BIRDIE\n");
-                if (GetHolingOutStakes(playerIndex) == 3 &&
+                if (GetHolingOutStakes(playerIndex) == HOLING_OUT_STAKES_NONE &&
                     !g_GameState.isMiniGolf) {
-                  StartMovie(8);
+                  StartMovie(MOVIE_BIRDIE_PUTT);
                 }
               }
             }
@@ -3554,7 +3561,8 @@ void UpdateTurns(void) {
                   64.0f);
           isReady = TRUE;
           tempo = 0x7F;
-          if (GetSurfaceInfo(g_CurrentShot.surface)->kind == 0xB &&
+          if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
+                  SURFACE_KIND_GREEN &&
               !g_GameState.isMiniGolf) {
             D_80227184_ovl_00 += 0.04f;
             if (D_80227184_ovl_00 > 155.0f) {
@@ -3774,7 +3782,8 @@ void UpdateTurns(void) {
           }
 
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
-            if (GetSurfaceInfo(g_CurrentShot.surface)->kind == 0xB) {
+            if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
+                SURFACE_KIND_GREEN) {
               g_Players[playerIndex].unk24++;
               if (g_Players[playerIndex].unk24 >= 100) {
                 g_Players[playerIndex].unk24 = 99;
@@ -4013,7 +4022,7 @@ void UpdateTurns(void) {
       case PLAYER_STATE_SWINGING:
         if (D_80227170_ovl_00[playerIndex] == D_80224000_ovl_00 - 3 &&
             GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])
-                    ->kind == 0) {
+                    ->kind == CLUB_KIND_WOOD) {
           if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
             StartSwingTrail(2);
           } else if (g_CurrentShot.shotMode == SHOT_MODE_POWER) {
@@ -4094,7 +4103,8 @@ void UpdateTurns(void) {
 
             if (g_TurnBallSimulation.state != BALL_STATE_ROLLING ||
                 g_GameState.isMiniGolf ||
-                (GetSurfaceInfo(g_TurnBallSimulation.unkA4)->kind == 0xB &&
+                (GetSurfaceInfo(g_TurnBallSimulation.unkA4)->kind ==
+                        SURFACE_KIND_GREEN &&
                     (s32)distance < (s32)previousDistance)) {
               break;
             }
@@ -4205,7 +4215,8 @@ void UpdateTurns(void) {
           surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
           func_80207660_ovl_00(player);
           ClearPassedRings(player);
-          if ((surfaceInfo->kind == 0xD || surfaceInfo->kind == 0x15) &&
+          if ((surfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS ||
+                  surfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) &&
               !IsGameFlagSet(GAME_FLAG_NO_OUT_OF_BOUNDS_PENALTY)) {
             g_Players[playerIndex].strokeCount++;
             if (g_GameState.gameMode == GAME_MODE_TRAINING) {
@@ -4221,7 +4232,7 @@ void UpdateTurns(void) {
               player->ballSurface =
                   GetSurface(player->ballPosition[0], player->ballPosition[2]);
             }
-          } else if (surfaceInfo->kind == 0xA) {
+          } else if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
             player->ballPosition[0] = g_TurnBallSimulation.unkC[0];
             player->ballPosition[2] = g_TurnBallSimulation.unkC[2];
             player->ballPosition[1] = GetGroundHeight(
@@ -4244,8 +4255,10 @@ void UpdateTurns(void) {
             player->ballSurface = g_TurnBallSimulation.surface;
           }
 
-          if ((surfaceInfo->kind == 6 || surfaceInfo->kind == 7) ||
-              (surfaceInfo->kind == 8 || surfaceInfo->kind == 9)) {
+          if ((surfaceInfo->kind == SURFACE_KIND_BUNKER ||
+                  surfaceInfo->kind == SURFACE_KIND_BUNKER_FAIR_LIE) ||
+              (surfaceInfo->kind == SURFACE_KIND_BUNKER_POOR_LIE ||
+                  surfaceInfo->kind == SURFACE_KIND_BUNKER_UNK9)) {
             player->unk9C = 1;
           }
 
@@ -4402,29 +4415,29 @@ void UpdateTurns(void) {
         memset(&g_RoundHud, 0, sizeof(g_RoundHud));
         if (!g_TurnBallSimulation.unkA0) {
           PlaySong(SONG_HOLE_LOST, 0);
-          reaction = 0xF;
+          reaction = REACTION_ANIMATION_BOGEY;
         } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-          reaction = 0xF;
+          reaction = REACTION_ANIMATION_BOGEY;
           if (HasNoRingsLeft(&g_Players[playerIndex])) {
             func_8006034C(1);
-            reaction = 0xC;
+            reaction = REACTION_ANIMATION_EAGLE;
           }
         } else if (g_Players[playerIndex].strokeCount == 1) {
-          reaction = 0xC;
+          reaction = REACTION_ANIMATION_EAGLE;
         } else {
           switch (g_Players[playerIndex].strokeCount - g_HoleSetup.par) {
-            case -3:
-            case -2:
-              reaction = 0xC;
+            case SCORE_TO_PAR_ALBATROSS:
+            case SCORE_TO_PAR_EAGLE:
+              reaction = REACTION_ANIMATION_EAGLE;
               break;
-            case -1:
-              reaction = 0xD;
+            case SCORE_TO_PAR_BIRDIE:
+              reaction = REACTION_ANIMATION_BIRDIE;
               break;
-            case 0:
-              reaction = 0xE;
+            case SCORE_TO_PAR_PAR:
+              reaction = REACTION_ANIMATION_PAR;
               break;
             default:
-              reaction = 0xF;
+              reaction = REACTION_ANIMATION_BOGEY;
               break;
           }
         }
@@ -4446,23 +4459,24 @@ void UpdateTurns(void) {
         f_ShouldUpdateReaction = 1;
         if (g_Players[playerIndex].unk26 == HOLE_STATUS_HOLED_OUT) {
           if (g_Players[playerIndex].strokeCount == 1) {
-            CountNotableShot(playerIndex, 7);
+            CountNotableShot(playerIndex, SHOT_KIND_HOLE_IN_ONE);
           } else {
             switch (g_Players[playerIndex].strokeCount - g_HoleSetup.par) {
-              case -3:
-                CountNotableShot(playerIndex, 8);
+              case SCORE_TO_PAR_ALBATROSS:
+                CountNotableShot(playerIndex, SHOT_KIND_ALBATROSS);
                 break;
-              case -2:
-                CountNotableShot(playerIndex, 9);
+              case SCORE_TO_PAR_EAGLE:
+                CountNotableShot(playerIndex, SHOT_KIND_EAGLE);
                 break;
-              case -1:
-                CountNotableShot(playerIndex, 10);
+              case SCORE_TO_PAR_BIRDIE:
+                CountNotableShot(playerIndex, SHOT_KIND_BIRDIE);
                 break;
             }
           }
         }
 
-        if (g_Players[playerIndex].strokeCount - g_HoleSetup.par < 0) {
+        if (g_Players[playerIndex].strokeCount - g_HoleSetup.par <
+            SCORE_TO_PAR_PAR) {
           ReportBirdieBadgeCount();
         }
 
@@ -4706,8 +4720,9 @@ void UpdateTurns(void) {
           ConsiderReactionSpot(g_HoleSetup.teePosition);
           SetCharacterLighting(0, 1);
           memset(&g_RoundHud, 0, sizeof(g_RoundHud));
-          StartReaction(0, g_Players[i].characterIndex, 0xF);
-          SetCharacterAnimation(0, 0xF);
+          StartReaction(
+              0, g_Players[i].characterIndex, REACTION_ANIMATION_BOGEY);
+          SetCharacterAnimation(0, REACTION_ANIMATION_BOGEY);
           PlaySong(SONG_HOLE_LOST, 0);
           PlaceAndViewCharacter(0);
           f_ShouldUpdateReaction = 1;
