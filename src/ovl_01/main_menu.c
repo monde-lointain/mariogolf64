@@ -807,11 +807,11 @@ static s32 D_8022FEFC_ovl_01 = 0;
 static u8 D_80231AD0_ovl_01[0x1D0];
 static Mat4 D_80231CA0_ovl_01;
 static Mat4 D_80231CE0_ovl_01;
-static LookAt D_80231D20_ovl_01[2];
-static Mtx D_80231D60_ovl_01[MAX_PLAYER_COUNT][2];
+static LookAt D_80231D20_ovl_01[DRAW_BUFFER_COUNT];
+static Mtx D_80231D60_ovl_01[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
 static Mtx D_80231F60_ovl_01;
 static f32 f_MenuCharacterScales[MAX_PLAYER_COUNT];
-static Mtx D_80231FB0_ovl_01[2];
+static Mtx D_80231FB0_ovl_01[DRAW_BUFFER_COUNT];
 static Mtx D_80232030_ovl_01;
 /* Read by no routine */
 static u8 D_80232070_ovl_01[0x180];

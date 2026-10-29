@@ -413,9 +413,9 @@ static f32 f_BestShotsCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
 static s32 D_80230A48_ovl_01[CHARACTER_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 
-static Mtx D_8023ACC0_ovl_01[MAX_PLAYER_COUNT][2];
+static Mtx D_8023ACC0_ovl_01[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
 static Mtx D_8023AEC0_ovl_01;
-static LookAt D_8023AF00_ovl_01[2];
+static LookAt D_8023AF00_ovl_01[DRAW_BUFFER_COUNT];
 
 /* Read by no routine */
 static u8 D_8023AF40_ovl_01[0x100];

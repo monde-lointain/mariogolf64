@@ -545,7 +545,7 @@ static s32 f_WindStreakHead = 0;
 
 static Mtx f_FlipMessageMatrices[2];
 static Mtx f_ReadyGoMatrices[2];
-static Mtx f_ContactRibbonMatrices[2];
+static Mtx f_ContactRibbonMatrices[DRAW_BUFFER_COUNT];
 static Mtx f_ContactSpinMatrices[2];
 static FlyGuyPoint f_WindFlyGuyLastPosition;
 static Mtx f_BannerMatrices[2];

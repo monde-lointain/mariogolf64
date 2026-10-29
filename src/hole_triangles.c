@@ -89,7 +89,7 @@ static Degrees f_RingAngle = 0.0f;
 static s32 D_800C3114 = 0;
 static Lights1 f_RingLights =
     gdSPDefLights1(0x7F, 0x7F, 0x7F, 0xFF, 0xFF, 0xFF, -73, 73, 73);
-static Mtx f_RingSpinMatrices[2];
+static Mtx f_RingSpinMatrices[DRAW_BUFFER_COUNT];
 static Vtx f_RingVertices[RING_VERTEX_COUNT];
 
 void SpawnSparkle(s32* position);

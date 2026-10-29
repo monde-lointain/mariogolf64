@@ -489,7 +489,7 @@ static s32 f_SkippedSwingFrames;
 static s32 f_ShotSource; /* A SHOT_SOURCE_* value */
 static s32 f_TurnTimerStart; /* Nothing reads it */
 /* The shot preview's matrices, by draw buffer */
-static Mtx D_802271A0_ovl_00[2][SHOT_PREVIEW_MAX_STEPS];
+static Mtx D_802271A0_ovl_00[DRAW_BUFFER_COUNT][SHOT_PREVIEW_MAX_STEPS];
 /* The shot preview's points */
 static f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
 
