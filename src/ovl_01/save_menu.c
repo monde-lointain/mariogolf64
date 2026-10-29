@@ -1185,7 +1185,7 @@ void func_80221CC0_ovl_01(void) {
   savedPlayers = save->savedPlayers[gameIndex];
   D_80230B4A_ovl_01 = save->savedGames[gameIndex].state.playerCount;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    if ((s8)savedPlayers[playerIndex].unk1E[0]) {
+    if (savedPlayers[playerIndex].isComputer) {
       D_80230B40_ovl_01[playerIndex] = MAXCONTROLLERS;
       D_80230B4A_ovl_01--;
     } else {

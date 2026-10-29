@@ -404,7 +404,9 @@ typedef struct UnkB8 {
   /* 0x10 */ CoursePoint ballPosition;
   /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
   /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */
-  /* 0x1E */ u8 unk1E[0x22 - 0x1E];
+  /* 0x1E */ s8 isComputer; /* Played by the computer, with no controller */
+  /* 0x1F */ s8 unk1F;
+  /* 0x20 */ u8 unk20[0x22 - 0x20];
   /* 0x22 */ s8 unk22;
   /* 0x23 */ s8 strokeCount; /* On the current hole */
   /* 0x24 */ s8 puttCount; /* Strokes from the green on the current hole */

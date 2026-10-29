@@ -430,7 +430,7 @@ NEXT:;
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         DrawPlayerTag(f_ShotLabels[i].x, f_ShotLabels[i].y,
             f_ShotLabels[i].corner,
-            g_Players[i].unk1E[0] ? i + COMPUTER_TAG_OFFSET : i);
+            g_Players[i].isComputer ? i + COMPUTER_TAG_OFFSET : i);
       }
     }
 
@@ -469,7 +469,7 @@ NEXT:;
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);
         DrawPlayerTag(f_ShotLabels[i].x, f_ShotLabels[i].y,
             f_ShotLabels[i].corner,
-            g_Players[i].unk1E[0] ? i + COMPUTER_TAG_OFFSET : i);
+            g_Players[i].isComputer ? i + COMPUTER_TAG_OFFSET : i);
       }
     }
 

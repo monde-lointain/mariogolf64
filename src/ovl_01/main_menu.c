@@ -1744,9 +1744,9 @@ void func_801F6B28_ovl_01(void) {
     }
 
     if (player->controllerIndex == MAXCONTROLLERS) {
-      g_Players[index].unk1E[0] = 1;
+      g_Players[index].isComputer = TRUE;
     } else {
-      g_Players[index].unk1E[0] = 0;
+      g_Players[index].isComputer = FALSE;
     }
 
     for (slot = 0; slot != CLUB_SET_SIZE; slot++) {
@@ -1780,7 +1780,7 @@ void func_801F6B28_ovl_01(void) {
   }
 
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-    g_Players[1].unk1E[0] = 1;
+    g_Players[1].isComputer = TRUE;
     g_Players[1].controllerIndex = MAXCONTROLLERS;
   }
 }

@@ -441,13 +441,13 @@ void GiveSlotClubs(s32 playerIndex) {
 
 /*
  * Whether the next reel stops: on A, once the wait is too long, when the
- * player's unk1E is set, or while GAME_FLAG_UNK32 is. It is a macro, as
+ * player is the computer, or while GAME_FLAG_UNK32 is. It is a macro, as
  * an inline function compiles differently from the original.
  */
 #define IsReelStopping(controllerIndex, player) \
   ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) || \
-      (f_StopWaitTime > REEL_STOP_WAIT_TIME) || \
-      ((s8)(player)->unk1E[0] != 0) || IsGameFlagSet(GAME_FLAG_UNK32))
+      (f_StopWaitTime > REEL_STOP_WAIT_TIME) || ((player)->isComputer) || \
+      IsGameFlagSet(GAME_FLAG_UNK32))
 
 /* Returns TRUE once every player has spun */
 s32 UpdateClubSlots(void) {

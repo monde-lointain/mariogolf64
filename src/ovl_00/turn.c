@@ -1709,7 +1709,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
 void CountNotableShot(s32 playerIndex, s32 shotKind) {
   u8* count;
 
-  if ((s8)g_Players[playerIndex].unk1E[0] != 0 ||
+  if (g_Players[playerIndex].isComputer ||
       g_GameState.replayKind != REPLAY_KIND_NONE ||
       g_GameState.gameMode == GAME_MODE_TRAINING) {
     return;
@@ -2096,7 +2096,7 @@ Boolean IsRecordableHoleOut(s32 playerIndex) {
   }
 
   if (!IsGameFlagSet(GAME_FLAG_RECORD_ALL_HOLE_OUTS)) {
-    if ((s8)g_Players[playerIndex].unk1E[0] != 0) {
+    if (g_Players[playerIndex].isComputer) {
       return FALSE;
     }
 
@@ -2259,7 +2259,7 @@ void RecordRingShotClear(s32 playerIndex) {
 void CheckRingShotClear(s32 playerIndex) {
   if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
       g_Players[playerIndex].strokeCount <= g_HoleSetup.par &&
-      (s8)g_Players[playerIndex].unk1E[0] == 0 &&
+      !g_Players[playerIndex].isComputer &&
       HasNoRingsLeft(&g_Players[playerIndex])) {
     RecordRingShotClear(playerIndex);
   }
@@ -3236,8 +3236,9 @@ void UpdateTurns(void) {
 
           f_ShotSource = SHOT_SOURCE_PREPARED;
         } else if (IsGameFlagSet(GAME_FLAG_UNK32) ||
-            g_Players[playerIndex].unk1E[0] || IsGameFlagSet(GAME_FLAG_UNK9B)) {
-          g_Players[playerIndex].unk1E[1] = -9;
+            g_Players[playerIndex].isComputer ||
+            IsGameFlagSet(GAME_FLAG_UNK9B)) {
+          g_Players[playerIndex].unk1F = -9;
           LoadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           StartShotPlan();
           D_800B7D9C = 0;

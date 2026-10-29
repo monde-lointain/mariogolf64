@@ -483,8 +483,7 @@ void LoadRoundResults(void) {
     size = GetAssetFileSize(&file);
     f_PlayerPortraitPalettes[i] = AllocMemory(size);
     ReadAssetFile(f_PlayerPortraitPalettes[i], size, &file);
-    f_PlayerPoints[i] =
-        (s8)g_Players[i].unk1E[0] == 0 ? g_Players[i].points : -1;
+    f_PlayerPoints[i] = !g_Players[i].isComputer ? g_Players[i].points : -1;
     f_PlayerBetTotals[i] = 0;
     for (j = 0; j != BET_COUNT; j++) {
       f_PlayerBetTotals[i] += g_Players[i].betTallies[j];

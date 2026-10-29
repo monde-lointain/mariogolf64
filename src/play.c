@@ -303,14 +303,14 @@ void SetUpPlayers(void) {
   if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
       g_GameState.replayKind != REPLAY_KIND_NONE) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      g_Players[0].unk1E[0] = 0;
+      g_Players[0].isComputer = FALSE;
       g_Players[0].teeOrder = 0;
       g_Players[0].characterIndex = D_80105F40->characterIndex;
       g_Players[0].unk22 = D_80105F40->unk38;
       g_Players[0].paletteIndex = D_80105F40->paletteIndex;
       g_Players[0].unk88 = D_80105F40->unk3C;
     } else {
-      g_Players[0].unk1E[0] = 0;
+      g_Players[0].isComputer = FALSE;
       g_Players[0].teeOrder = 0;
       g_Players[0].characterIndex = D_800FEDD8->characterIndex;
       g_Players[0].unk22 = D_800FEDD8->unk3C;
@@ -345,7 +345,7 @@ void SetUpPlayers(void) {
       FormatDefaultPlayerName(i, g_Players[i].name);
       g_Players[i].characterIndex = i;
       g_Players[i].unk22 = 0;
-      g_Players[i].unk1E[0] = 0;
+      g_Players[i].isComputer = FALSE;
       g_Players[i].teeOrder = 0;
       g_Players[i].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
       for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
@@ -395,7 +395,7 @@ void InitPlay(s32 kind) {
   if ((IsGameFlagSet(GAME_FLAG_ROUND_KIND_HIGH_BIT) * 2) +
           IsGameFlagSet(GAME_FLAG_ROUND_KIND_LOW_BIT) ==
       2) {
-    g_Players[1].unk1E[0] = 1;
+    g_Players[1].isComputer = TRUE;
   }
 
   InitExpansionPakFeatures();
