@@ -2193,10 +2193,10 @@ void ReadBestShots(void) {
   s32 kindRecords[STATS_GRID_ROW_COUNT][STATS_KIND_LIST_SIZE];
   s32 index;
   s32 recordIndex;
-  s32 kindThreeCount;
-  s32 kindTwoCount;
-  s32 kindOneCount;
-  s32 kindZeroCount;
+  s32 birdieCount;
+  s32 eagleCount;
+  s32 albatrossCount;
+  s32 holeInOneCount;
   s32 flags;
   u8 row;
   s32 column;
@@ -2211,35 +2211,35 @@ void ReadBestShots(void) {
     kindRecords[3][recordIndex] = STATS_CELL_EMPTY;
   }
 
-  kindThreeCount = 0;
-  kindTwoCount = 0;
-  kindZeroCount = 0;
-  kindOneCount = 0;
+  birdieCount = 0;
+  eagleCount = 0;
+  holeInOneCount = 0;
+  albatrossCount = 0;
   for (recordIndex = 0; recordIndex != RANKED_RECORD_COUNT; recordIndex++) {
     flags = (s8)save->rankedRecords[recordIndex].scoreKind;
     if (flags & SCORE_KIND_RECORDED) {
       switch (flags & SCORE_KIND_MASK) {
         case SCORE_KIND_BIRDIE:
-          if (kindThreeCount < STATS_GRID_COLUMN_COUNT) {
-            kindRecords[0][kindThreeCount++] = recordIndex;
+          if (birdieCount < STATS_GRID_COLUMN_COUNT) {
+            kindRecords[0][birdieCount++] = recordIndex;
           }
 
           break;
         case SCORE_KIND_EAGLE:
-          if (kindTwoCount < STATS_GRID_COLUMN_COUNT) {
-            kindRecords[1][kindTwoCount++] = recordIndex;
+          if (eagleCount < STATS_GRID_COLUMN_COUNT) {
+            kindRecords[1][eagleCount++] = recordIndex;
           }
 
           break;
         case SCORE_KIND_ALBATROSS:
-          if (kindOneCount < STATS_GRID_COLUMN_COUNT) {
-            kindRecords[3][kindOneCount++] = recordIndex;
+          if (albatrossCount < STATS_GRID_COLUMN_COUNT) {
+            kindRecords[3][albatrossCount++] = recordIndex;
           }
 
           break;
         case SCORE_KIND_HOLE_IN_ONE:
-          if (kindZeroCount < STATS_GRID_COLUMN_COUNT) {
-            kindRecords[2][kindZeroCount++] = recordIndex;
+          if (holeInOneCount < STATS_GRID_COLUMN_COUNT) {
+            kindRecords[2][holeInOneCount++] = recordIndex;
           }
 
           break;
@@ -2250,21 +2250,21 @@ void ReadBestShots(void) {
   row = 0;
   memory = func_8005AF74();
   column = row;
-  if (kindThreeCount == 0) {
-    if (kindTwoCount != 0) {
+  if (birdieCount == 0) {
+    if (eagleCount != 0) {
       row = 1;
-    } else if (kindOneCount != 0) {
+    } else if (albatrossCount != 0) {
       row = 2;
-    } else if (kindZeroCount != 0) {
+    } else if (holeInOneCount != 0) {
       row = 3;
     }
   }
 
   switch (memory->bestShotRow) {
     case 0:
-      if (kindThreeCount != 0) {
+      if (birdieCount != 0) {
         row = 0;
-        if (memory->bestShotColumn < kindThreeCount &&
+        if (memory->bestShotColumn < birdieCount &&
             memory->bestShotColumn >= 0) {
           column = memory->bestShotColumn;
         }
@@ -2272,9 +2272,9 @@ void ReadBestShots(void) {
 
       break;
     case 1:
-      if (kindTwoCount != 0) {
+      if (eagleCount != 0) {
         row = 1;
-        if (memory->bestShotColumn < kindTwoCount &&
+        if (memory->bestShotColumn < eagleCount &&
             memory->bestShotColumn >= 0) {
           column = memory->bestShotColumn;
         }
@@ -2282,9 +2282,9 @@ void ReadBestShots(void) {
 
       break;
     case 2:
-      if (kindOneCount != 0) {
+      if (albatrossCount != 0) {
         row = 2;
-        if (memory->bestShotColumn < kindOneCount &&
+        if (memory->bestShotColumn < albatrossCount &&
             memory->bestShotColumn >= 0) {
           column = memory->bestShotColumn;
         }
@@ -2292,9 +2292,9 @@ void ReadBestShots(void) {
 
       break;
     case 3:
-      if (kindZeroCount != 0) {
+      if (holeInOneCount != 0) {
         row = 3;
-        if (memory->bestShotColumn < kindZeroCount &&
+        if (memory->bestShotColumn < holeInOneCount &&
             memory->bestShotColumn >= 0) {
           column = memory->bestShotColumn;
         }
