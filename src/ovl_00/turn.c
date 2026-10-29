@@ -257,7 +257,7 @@
 #define MAX_IMPACT_TIMING 6
 /*
  * The swing animation starts once fewer gauge frames are left before this one
- * than its event frame, D_80224000_ovl_00
+ * than its event frame, f_StateEventFrame
  */
 #define SWING_TIMING_GAUGE_FRAME 71
 /*
@@ -298,6 +298,8 @@
 #define INITIAL_PLAN_TIME_BUDGET 10
 /* A prepared shot waits this many frames of aiming before it is played */
 #define PREPARED_SHOT_MIN_AIM_FRAMES 30
+/* The latest frame of a skipped swing animation at which its impact comes */
+#define SKIPPED_SWING_IMPACT_FRAME 15
 
 /* The song's tempo while aiming, a step below NORMAL_SONG_TEMPO; on the green,
  * f_GreenSongTempo rises from it by GREEN_SONG_TEMPO_STEP each frame */
@@ -388,10 +390,16 @@ static s8 f_GutsTestMotion = 0;
 static s8 f_ShouldUpdateReaction = FALSE;
 static s32 D_80223FF8_ovl_00 = 0;
 static s32 D_80223FFC_ovl_00 = 0;
-static s32 D_80224000_ovl_00 = 0;
-static s32 D_80224004_ovl_00 = 0;
-static s32 D_80224008_ovl_00 = 0;
-static s32 D_8022400C_ovl_00 = 0;
+/* The f_StateFrameCounts count at which the state acts: a swing's impact, or
+ * a reaction's end */
+static s32 f_StateEventFrame = 0;
+/* Whether the swing animation has started while the impact is set */
+static Boolean f_IsSwingAnimationStarted = FALSE;
+/* How many frames before the impact a short putt's swing slows to
+ * f_PuttSwingSpeed, or 0 */
+static s32 f_PuttSlowdownLead = 0;
+/* The frames by which the slowed swing puts off the impact */
+static s32 f_ImpactDelay = 0;
 /* Read by no routine */
 static s32 D_80224010_ovl_00 = 0;
 /* The angles of FrameBallAndShot's camera */
@@ -417,14 +425,18 @@ static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
  * shot mode that the golfer was last posed with.
  */
 static ShotLaunch f_ShotLaunch;
-static s32 D_80227170_ovl_00[MAX_PLAYER_COUNT];
-static f32 D_80227180_ovl_00;
+/* Each player's frames since the start of a state or step of one */
+static s32 f_StateFrameCounts[MAX_PLAYER_COUNT];
+/* The speed of a short putt's slowed swing animation */
+static f32 f_PuttSwingSpeed;
 /* The song's tempo while aiming on the green, which rises the longer the
  * player aims */
 static f32 f_GreenSongTempo;
 static s32 D_80227188_ovl_00;
 static s32 D_8022718C_ovl_00;
-static s32 D_80227190_ovl_00;
+/* The frames of the swing animation skipped so that, when D_80223FF8_ovl_00 is
+ * 3, the impact comes at most SKIPPED_SWING_IMPACT_FRAME frames in */
+static s32 f_SkippedSwingFrames;
 static s32 f_ShotSource; /* A SHOT_SOURCE_* value */
 static s32 f_TurnTimerStart; /* Nothing reads it */
 /* The shot preview's matrices, by draw buffer */
@@ -3207,7 +3219,7 @@ void UpdateTurns(void) {
       g_TurnController.pressedButtons = 0;
     }
 
-    D_80227170_ovl_00[playerIndex]++;
+    f_StateFrameCounts[playerIndex]++;
     nextState = state;
     f_ShotLaunch.playerIndex = playerIndex;
     if (IsTimedState(state) && IsPlayGoingOn(g_PauseScreen)) {
@@ -3740,13 +3752,13 @@ void UpdateTurns(void) {
           }
 
           PoseGolferForShot();
-          D_80224000_ovl_00 = GetAnimationEventFrame(0,
+          f_StateEventFrame = GetAnimationEventFrame(0,
               GetAnimationIndex(0,
                   GetSwingAnimation(0,
                       g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
                       g_CurrentShot.shotMode)),
               6);
-          D_80224004_ovl_00 = 0;
+          f_IsSwingAnimationStarted = FALSE;
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
             DebugPlaceBall(playerIndex);
           }
@@ -4031,10 +4043,10 @@ void UpdateTurns(void) {
         } else {
           g_CurrentShot.gaugeFrame++;
           if (SWING_TIMING_GAUGE_FRAME - g_CurrentShot.gaugeFrame <
-                  D_80224000_ovl_00 &&
-              !D_80224004_ovl_00) {
-            D_80227170_ovl_00[playerIndex] = 0;
-            D_80224004_ovl_00 = 1;
+                  f_StateEventFrame &&
+              !f_IsSwingAnimationStarted) {
+            f_StateFrameCounts[playerIndex] = 0;
+            f_IsSwingAnimationStarted = TRUE;
             SetCharacterAnimation(0,
                 GetSwingAnimation(0,
                     g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
@@ -4094,10 +4106,10 @@ void UpdateTurns(void) {
           SetGameFlag(GAME_FLAG_FAST_FLIGHT);
         }
 
-        D_8022400C_ovl_00 = 0;
-        D_80224008_ovl_00 = 0;
-        if (!D_80224004_ovl_00) {
-          D_80227170_ovl_00[playerIndex] = 0;
+        f_ImpactDelay = 0;
+        f_PuttSlowdownLead = 0;
+        if (!f_IsSwingAnimationStarted) {
+          f_StateFrameCounts[playerIndex] = 0;
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
             s32 power = f_ShotLaunch.power;
 
@@ -4116,14 +4128,14 @@ void UpdateTurns(void) {
               if (power < 0x40) {
                 f32 speed = (f32)GetPuttPower(power, 2) / GetPuttPower(0x40, 2);
 
-                D_80224008_ovl_00 = 3;
-                D_80227180_ovl_00 = speed;
-                D_8022400C_ovl_00 = (3.0f / speed) - 3.0f;
+                f_PuttSlowdownLead = 3;
+                f_PuttSwingSpeed = speed;
+                f_ImpactDelay = (3.0f / speed) - 3.0f;
               }
             }
 
             if (D_80223FF8_ovl_00 < 2) {
-              D_80224000_ovl_00 = GetAnimationEventFrame(0,
+              f_StateEventFrame = GetAnimationEventFrame(0,
                   GetAnimationIndex(0,
                       GetSwingAnimation(0,
                           g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
@@ -4141,19 +4153,20 @@ void UpdateTurns(void) {
           SetPlaysRandomTextureAnimation(0, 0);
           if (D_80223FF8_ovl_00 >= 3) {
             if (D_80223FF8_ovl_00 == 3) {
-              if (D_80224000_ovl_00 > 15) {
-                D_80227190_ovl_00 = D_80224000_ovl_00 - 15;
-                D_80224000_ovl_00 -= D_80227190_ovl_00;
+              if (f_StateEventFrame > SKIPPED_SWING_IMPACT_FRAME) {
+                f_SkippedSwingFrames =
+                    f_StateEventFrame - SKIPPED_SWING_IMPACT_FRAME;
+                f_StateEventFrame -= f_SkippedSwingFrames;
               } else {
-                D_80227190_ovl_00 = 0;
+                f_SkippedSwingFrames = 0;
               }
             }
 
-            AdvanceAnimation(0, D_80227190_ovl_00);
+            AdvanceAnimation(0, f_SkippedSwingFrames);
           }
         }
 
-        D_80224004_ovl_00 = 0;
+        f_IsSwingAnimationStarted = FALSE;
         SetAnimationSpeed(0, 1.0f);
         nextState = PLAYER_STATE_SWINGING;
         StartFlightCamera(f_ShotFlightCount++);
@@ -4161,7 +4174,7 @@ void UpdateTurns(void) {
         break;
       }
       case PLAYER_STATE_SWINGING:
-        if (D_80227170_ovl_00[playerIndex] == D_80224000_ovl_00 - 3 &&
+        if (f_StateFrameCounts[playerIndex] == f_StateEventFrame - 3 &&
             GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])
                     ->kind == CLUB_KIND_WOOD) {
           if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
@@ -4172,16 +4185,16 @@ void UpdateTurns(void) {
         }
 
         ReuseLastCharacterMatrices(0);
-        if (D_80224008_ovl_00 != 0 &&
-            D_80227170_ovl_00[playerIndex] + D_80224008_ovl_00 ==
-                D_80224000_ovl_00) {
-          SetAnimationSpeed(0, D_80227180_ovl_00);
+        if (f_PuttSlowdownLead != 0 &&
+            f_StateFrameCounts[playerIndex] + f_PuttSlowdownLead ==
+                f_StateEventFrame) {
+          SetAnimationSpeed(0, f_PuttSwingSpeed);
         }
 
-        if (D_80227170_ovl_00[playerIndex] >=
-                D_80224000_ovl_00 + D_8022400C_ovl_00 ||
+        if (f_StateFrameCounts[playerIndex] >=
+                f_StateEventFrame + f_ImpactDelay ||
             (IsGameFlagSet(GAME_FLAG_FAST_FLIGHT) &&
-                D_80227170_ovl_00[playerIndex] >= 4)) {
+                f_StateFrameCounts[playerIndex] >= 4)) {
           if (IsBButtonHeld()) {
             D_80223FFC_ovl_00 = 1;
           }
@@ -4208,7 +4221,7 @@ void UpdateTurns(void) {
         Boolean isCameraDone;
         s32 previousPosition[3];
 
-        if (D_80224000_ovl_00 + 10 == D_80227170_ovl_00[playerIndex]) {
+        if (f_StateEventFrame + 10 == f_StateFrameCounts[playerIndex]) {
           StartSwingTrail(SWING_TRAIL_KIND_FADE);
         }
 
@@ -4219,7 +4232,7 @@ void UpdateTurns(void) {
         StepBallSimulation(&g_TurnBallSimulation);
         func_80207660_ovl_00(&g_Players[playerIndex]);
         isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
-        if (D_80227170_ovl_00[playerIndex] == 30) {
+        if (f_StateFrameCounts[playerIndex] == 30) {
           SetPlaysRandomTextureAnimation(0, 1);
         }
 
@@ -4227,7 +4240,7 @@ void UpdateTurns(void) {
           D_80223FFC_ovl_00 = 1;
         }
 
-        if (D_80223FF8_ovl_00 >= 2 && D_80227170_ovl_00[playerIndex] >= 40 &&
+        if (D_80223FF8_ovl_00 >= 2 && f_StateFrameCounts[playerIndex] >= 40 &&
             D_80223FFC_ovl_00) {
           nextState = PLAYER_STATE_STARTING_SWING;
         }
@@ -4301,7 +4314,7 @@ void UpdateTurns(void) {
           ClearShotEffects(CLEAR_KIND_EFFECTS);
           nextState = PLAYER_STATE_BALL_AT_REST;
           D_800C3094 = 1;
-          D_80227170_ovl_00[playerIndex] = 0;
+          f_StateFrameCounts[playerIndex] = 0;
           ForceStopRumble();
         }
 
@@ -4313,26 +4326,26 @@ void UpdateTurns(void) {
 
         if (g_TurnBallSimulation.isHoledOut) {
           if (GetEndReaction() == 1) {
-            if (D_80227170_ovl_00[playerIndex] == 1) {
+            if (f_StateFrameCounts[playerIndex] == 1) {
               PlayHoleOutSong(playerIndex);
             }
 
-            if (D_80227170_ovl_00[playerIndex] == 29) {
+            if (f_StateFrameCounts[playerIndex] == 29) {
               StartBanner(-1);
             }
 
-            if (D_80227170_ovl_00[playerIndex] == 30) {
+            if (f_StateFrameCounts[playerIndex] == 30) {
               ShowHoleOutBanner(playerIndex);
             }
           } else if (GetEndReaction() == 2) {
-            if (D_80227170_ovl_00[playerIndex] == 1) {
+            if (f_StateFrameCounts[playerIndex] == 1) {
               PlayHoleOutSong(playerIndex);
             }
 
-            if (D_80227170_ovl_00[playerIndex] == 29) {
+            if (f_StateFrameCounts[playerIndex] == 29) {
               ShowHoleOutBanner(playerIndex);
             }
-          } else if (D_80227170_ovl_00[playerIndex] == 1) {
+          } else if (f_StateFrameCounts[playerIndex] == 1) {
             PlayHoleOutSong(playerIndex);
             ShowHoleOutBanner(playerIndex);
           }
@@ -4408,7 +4421,7 @@ void UpdateTurns(void) {
             player->hasBeenInBunker = TRUE;
           }
 
-          D_80227170_ovl_00[playerIndex] = 0;
+          f_StateFrameCounts[playerIndex] = 0;
           if (g_TurnBallSimulation.isHoledOut) {
             g_Players[playerIndex].holeStatus = HOLE_STATUS_HOLED_OUT;
             g_Players[playerIndex]
@@ -4600,10 +4613,10 @@ void UpdateTurns(void) {
           StartReaction(0, f_GutsTestCharacter, f_GutsTestMotion);
         }
 
-        D_80224000_ovl_00 =
+        f_StateEventFrame =
             GetCurrentAnimationEndFrame(0) - GetAnimationFrame(0) + 10;
         if (IsGameFlagSet(GAME_FLAG_UNK32)) {
-          D_80224000_ovl_00 = 15;
+          f_StateEventFrame = 15;
         }
 
         PlaceAndViewCharacter(0);
@@ -4632,23 +4645,23 @@ void UpdateTurns(void) {
         }
 
         nextState = PLAYER_STATE_REACTING;
-        D_80227170_ovl_00[playerIndex] = 0;
+        f_StateFrameCounts[playerIndex] = 0;
         break;
       }
       case PLAYER_STATE_REACTING:
         PlaceAndViewCharacter(0);
         areCallsAllowed = FALSE;
         f_ShouldUpdateReaction = 1;
-        if (D_80227170_ovl_00[playerIndex] == D_80224000_ovl_00 - 10) {
+        if (f_StateFrameCounts[playerIndex] == f_StateEventFrame - 10) {
           StartBanner(-1);
         }
 
         if (g_HoleSetup.conditions.sceneColorIndex ==
             SCENE_COLOR_INDEX_SUDDEN_DEATH) {
-          D_80224000_ovl_00 = 160;
+          f_StateEventFrame = 160;
         }
 
-        if (D_80227170_ovl_00[playerIndex] >= D_80224000_ovl_00) {
+        if (f_StateFrameCounts[playerIndex] >= f_StateEventFrame) {
           StopFireworks();
           if (g_GameState.gameMode == GAME_MODE_TRAINING) {
             nextState = PLAYER_STATE_CHOOSING;
@@ -4666,7 +4679,7 @@ void UpdateTurns(void) {
             nextState = PLAYER_STATE_FINISHING_HOLE;
           }
 
-          D_80227170_ovl_00[playerIndex] = 0;
+          f_StateFrameCounts[playerIndex] = 0;
         }
 
         break;
@@ -4750,7 +4763,7 @@ void UpdateTurns(void) {
         }
 
         CheckRingShotClear(playerIndex);
-        if (D_80227170_ovl_00[playerIndex] == 1) {
+        if (f_StateFrameCounts[playerIndex] == 1) {
           StartBanner(-1);
           g_IsHudTurnAwayRequested = TRUE;
           if (g_GameState.replayKind != REPLAY_KIND_NONE) {
@@ -4882,7 +4895,7 @@ void UpdateTurns(void) {
           f_ShouldUpdateReaction = 1;
           ShowFlipMessage(0);
           nextState = PLAYER_STATE_SHOWING_OUT_PLAYER;
-          D_80227170_ovl_00[playerIndex] = 0;
+          f_StateFrameCounts[playerIndex] = 0;
         }
 
         break;
@@ -4890,15 +4903,15 @@ void UpdateTurns(void) {
         PlaceAndViewCharacter(0);
         f_ShouldUpdateReaction = 1;
         areCallsAllowed = FALSE;
-        if (D_80227170_ovl_00[playerIndex] == 80) {
+        if (f_StateFrameCounts[playerIndex] == 80) {
           ShowFlipMessage(-1);
         }
 
-        if (D_80227170_ovl_00[playerIndex] == 90) {
+        if (f_StateFrameCounts[playerIndex] == 90) {
           StartBanner(-1);
           nextState = PLAYER_STATE_FINDING_OUT_PLAYER;
           ClearDebugText();
-          D_80227170_ovl_00[playerIndex] = 0;
+          f_StateFrameCounts[playerIndex] = 0;
         }
 
         break;
