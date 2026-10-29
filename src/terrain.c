@@ -155,6 +155,9 @@ enum TerrainColorIndex {
  * within the tile. The points with the top bit set are grid vertices, which
  * GetGridVertex returns instead.
  */
+#define GRID_VERTEX_SLOT_FLAG 0x80
+/* A grid vertex's slot holds its grid column within the tile above its row */
+#define SLOT_GRID_COLUMN_SHIFT 2
 static u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8] = {
     {0x80, 0x00, 0x84, 0x01, 0x88},
     {0x02, 0x08, 0x09, 0x0A, 0x03},
@@ -1158,19 +1161,19 @@ void InitTerrainTextures(void) {
 }
 
 /* A tile's three by three grid vertices, by row and column */
-#define CORNER(row, column) corners[((row) * 3) + (column)]
+#define TILE_CORNER_SPAN (GROUND_TILE_GRID_SPAN + 1)
+#define CORNER(row, column) corners[((row) * TILE_CORNER_SPAN) + (column)]
 
 /* Sets a tile's midpoints between its grid vertices */
 void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow) {
-  Vtx* corners[9];
+  Vtx* corners[TILE_CORNER_SPAN * TILE_CORNER_SPAN];
   s32 cornerIndex = 0;
   s32 row;
   s32 column;
 
-  for (row = 0; row < 3; row++) {
-    for (column = 0; column < 3; column++) {
-      corners[cornerIndex++] =
-          GetGridVertex((tileColumn * 2) + column, (tileRow * 2) + row);
+  for (row = 0; row < TILE_CORNER_SPAN; row++) {
+    for (column = 0; column < TILE_CORNER_SPAN; column++) {
+      corners[cornerIndex++] = TileGridVertex(tileColumn, tileRow, column, row);
     }
   }
 
@@ -1200,11 +1203,11 @@ void BuildAllTileMidpoints(void) {
   Vtx* midpoints;
   Vtx* center;
 
-  for (tileRow = 0; tileRow < 16; tileRow++) {
-    for (tileColumn = 0; tileColumn < 8; tileColumn++) {
+  for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
+    for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
       g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex = tileIndex;
       midpoints = g_WorkArea.hole.midpoints[tileIndex];
-      center = GetGridVertex((tileColumn * 2) + 1, (tileRow * 2) + 1);
+      center = TileGridVertex(tileColumn, tileRow, 1, 1);
       g_WorkArea.hole.tiles[tileIndex].center[0] = center->v.ob[0];
       g_WorkArea.hole.tiles[tileIndex].center[1] = center->v.ob[1];
       g_WorkArea.hole.tiles[tileIndex].center[2] = center->v.ob[2];
@@ -1733,9 +1736,9 @@ void UpdateDebugScenes(void) {
 Vtx* GetTileCellPoint(Vtx* midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
   Vtx* vertex;
 
-  if (slot & 0x80) {
-    vertex = GetGridVertex(
-        (tileColumn * 2) + ((slot >> 2) & 3), (tileRow * 2) + (slot & 3));
+  if (slot & GRID_VERTEX_SLOT_FLAG) {
+    vertex = TileGridVertex(
+        tileColumn, tileRow, (slot >> SLOT_GRID_COLUMN_SHIFT) & 3, slot & 3);
   } else {
     vertex = &midpoints[slot];
   }

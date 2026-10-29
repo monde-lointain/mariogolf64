@@ -36,6 +36,12 @@
 #define GROUND_GRID_COLUMN_COUNT ((GROUND_POINT_COLUMN_COUNT + 1) / 2)
 #define GROUND_GRID_ROW_COUNT ((GROUND_POINT_ROW_COUNT + 1) / 2)
 #define GROUND_GRID_EVEN_COLUMN_COUNT ((GROUND_GRID_COLUMN_COUNT + 1) / 2)
+/* A tile spans this many grid columns and rows */
+#define GROUND_TILE_GRID_SPAN (GROUND_TILE_POINT_SPAN / 2)
+/* The grid vertex at a grid column and row within a tile */
+#define TileGridVertex(tileColumn, tileRow, gridColumn, gridRow) \
+  GetGridVertex(((tileColumn) * GROUND_TILE_GRID_SPAN) + (gridColumn), \
+      ((tileRow) * GROUND_TILE_GRID_SPAN) + (gridRow))
 /* Grid vertices kept, with room for one more column and row than the grid has
  */
 #define GROUND_GRID_VERTEX_COLUMN_COUNT 18
