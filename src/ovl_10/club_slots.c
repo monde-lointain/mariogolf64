@@ -384,7 +384,7 @@ void FreeClubSlots(void) {
 
 /* Fills the player's bag from the stopped reels */
 void GiveSlotClubs(s32 playerIndex) {
-  UnkB8* player;
+  Player* player;
   s32 starCount;
   s32 index; /* Counts the slots, then the reels; it is reused to match */
   s32 slot;
@@ -451,7 +451,7 @@ void GiveSlotClubs(s32 playerIndex) {
 
 /* Returns TRUE once every player has spun */
 s32 UpdateClubSlots(void) {
-  UnkB8* player;
+  Player* player;
   s32 controllerIndex;
 
   player = &g_Players[f_Slots->playerIndex];

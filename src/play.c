@@ -95,7 +95,7 @@ extern CurrentShot D_80104F78; /* The replayed shot */
 extern u8 D_800FE330;
 extern s8 D_800FBDB8;
 extern GameState D_801B55F0;
-extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
+extern Player D_8012D0C8[MAX_PLAYER_COUNT];
 
 /* Read by no routine */
 static s32 D_800C3060[2] = {0};

@@ -1170,7 +1170,7 @@ void func_80221CC0_ovl_01(void) {
   s8 playerCount;
   s8 humanCount;
   s8 gameIndex;
-  UnkB8* savedPlayers;
+  Player* savedPlayers;
 
   for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
     D_80230B40_ovl_01[playerIndex] = -1;
@@ -1569,7 +1569,7 @@ s32 func_80222CDC_ovl_01(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   SavedGame* game;
-  UnkB8* players;
+  Player* players;
   PlayRecord* records;
   s32 playerCount = 0;
   s32 index;
@@ -1620,7 +1620,7 @@ s32 func_80222CDC_ovl_01(void) {
 s32 func_80222F2C_ovl_01(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
-  UnkB8* savedPlayer;
+  Player* savedPlayer;
   s32 playerIndex;
   CharacterId character;
   u16 controller;
@@ -2176,7 +2176,7 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
-  UnkB8* players = save->savedPlayers[memory->savedGameIndex];
+  Player* players = save->savedPlayers[memory->savedGameIndex];
   u16 playerIndex;
   s32 raise;
   Vec3 translation;

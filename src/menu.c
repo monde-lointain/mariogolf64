@@ -64,7 +64,7 @@ extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern s16 D_800FE33C;
 extern GameState D_801B55F0;
-extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
+extern Player D_8012D0C8[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_801052E8;
@@ -901,7 +901,7 @@ void InsertRankedRecord(PlayRecord* record) {
 }
 
 s32 SaveOrContinueGameByMode(Boolean isContinuing) {
-  UnkB8* players;
+  Player* players;
   PlayRecord* records;
   SavedGame* game;
   s32 playerCount;
@@ -999,7 +999,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
 #define MAX_SAVE_COUNT 99
 
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
-  UnkB8* players;
+  Player* players;
   SavedGame* game;
   s32 playerCount;
   Boolean hasIllegalState;
@@ -1529,7 +1529,7 @@ void InvalidateBrokenSavedGames(void) {
   s32 entryIndex;
   SavedGame* unk;
   GameState* sub;
-  UnkB8* player;
+  Player* player;
 
   save = GetSaveData();
   for (index = 0; index != SAVED_GAME_COUNT; index++) {

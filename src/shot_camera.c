@@ -389,7 +389,7 @@ static inline f32 AbsoluteF32(f32 value) {
 void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
   Vec3 groundPoint;
   Mat4 unusedMatrices[2]; /* Unused; it is there to match */
-  UnkB8* player;
+  Player* player;
   SignedBinaryAngle aimYaw;
   f32 distance;
   Radians angle;
@@ -453,7 +453,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
  * CROSS_SLOPE_DISTANCE away, a quarter turn from the shot's yaw. The point is
  * on the other side when player->unk22 is set, and the slope is then negated.
  */
-SignedBinaryAngle GetCrossSlopeAngle(UnkB8* player, ShotLaunch* shot) {
+SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot) {
   SurfaceInfo* surfaceInfo;
   s32 sampleDistance;
   SignedBinaryAngle aimYaw;
@@ -509,7 +509,7 @@ SignedBinaryAngle GetCrossSlopeAngle(UnkB8* player, ShotLaunch* shot) {
  * points half an AIM_SLOPE_STEP ahead of the ball and an AIM_SLOPE_STEP behind
  * it.
  */
-SignedBinaryAngle GetAimSlopeAngle(UnkB8* player, ShotLaunch* shot) {
+SignedBinaryAngle GetAimSlopeAngle(Player* player, ShotLaunch* shot) {
   Radians angle;
   f32 step[2]; /* On x, then z */
   s32 aheadHeight;
@@ -547,7 +547,7 @@ SignedBinaryAngle GetAimSlopeAngle(UnkB8* player, ShotLaunch* shot) {
 static const f64 f_UnusedZero = 0.0;
 
 /* The surface under the player's ball */
-SurfaceInfo* GetBallSurfaceInfo(UnkB8* player) {
+SurfaceInfo* GetBallSurfaceInfo(Player* player) {
   return GetSurfaceInfoAt(
       player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
 }
@@ -1053,7 +1053,7 @@ void PlayFlightSounds(s32 step) {
   s32 scoreToPar;
   s32 i;
   SurfaceInfo* info;
-  UnkB8* player;
+  Player* player;
   s32* greenSoundCount; /* The pointers are there to match */
   s32* isPlayed;
   s32* isStillPlayed;

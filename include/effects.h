@@ -64,8 +64,8 @@ void PrepareShotEffects(BallSimulation* simulation);
 void SpawnImpactEffects(BallSimulation* simulation);
 void SpawnShotDebris(
     CoursePoint point, Radians pitch, Radians yaw, s32 launchSpeed);
-void StartPlayerRumble(UnkB8* player);
-void StartRingPassRumble(UnkB8* player);
+void StartPlayerRumble(Player* player);
+void StartRingPassRumble(Player* player);
 void LoadEffectImages(void);
 void FreeEffectImages(void);
 void ClearEffects(void);

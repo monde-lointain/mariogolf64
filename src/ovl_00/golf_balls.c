@@ -451,7 +451,7 @@ void ResetGolfBalls(void) {
 void UpdateGolfBalls(void) {
   s32 currentIndex;
   s32 i;
-  UnkB8* player;
+  Player* player;
   GolfBall* ball;
   BallSimulation* simulation;
   BallAfterimage* head;

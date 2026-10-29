@@ -232,7 +232,7 @@ enum ModeName {
 
 /*
  * This overlay reads the characters and variants of saved players and
- * records as signed, though UnkB8 and RingShotRecord keep them unsigned; the
+ * records as signed, though Player and RingShotRecord keep them unsigned; the
  * casts are there to match.
  */
 void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record);
@@ -363,7 +363,7 @@ void OpenSaveMenu(s32 kind) {
   s32 playerIndex;
   s32 iconIndex;
   RingShotRecord* record;
-  UnkB8* player;
+  Player* player;
   GameState* state;
   u16 frameId;
   void* picture;
@@ -1029,7 +1029,7 @@ void SaveGameToSlot(void) {
   SaveData* save;
   SavedGame* game;
   GameState* state;
-  UnkB8* player;
+  Player* player;
   s32 playerIndex;
 
   save = GetSaveData();

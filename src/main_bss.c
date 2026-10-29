@@ -157,7 +157,7 @@ Mtx f_RingMatrices[RING_COUNT] BSS ALIGNED(8) = {0};
 s32 f_GroundCheckDropIndex BSS = {0};
 BallSimulation g_TurnBallSimulation BSS ALIGNED(8) = {0};
 s32 g_CurrentAnimationStartFrame BSS = {0};
-UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
+Player g_SavedPlayers[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 volatile u32 nuScRetraceCounter BSS = {0};
 u32 nuGfxDisplay BSS = {0};
 s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT] BSS ALIGNED(8) = {0};
@@ -236,7 +236,7 @@ u8 nuRDPOutputBuf[NU_GFX_RDP_OUTPUTBUFF_SIZE] BSS ALIGNED(16) = {0};
 s32 g_ModuleRdpRequestFrames[MODULE_COUNT] BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_8012D0C0[0x8] BSS = {0};
-UnkB8 D_8012D0C8[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
+Player D_8012D0C8[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 s32 f_LastOpenedAssetId BSS = {0};
 void* D_8012D3AC BSS = {0};
 Boolean f_HasRumblePak[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
@@ -337,7 +337,7 @@ u16** nuGfxCfb BSS = {0};
 TournamentStanding g_TournamentStandings[TOURNAMENT_CONTESTANT_COUNT] BSS
     ALIGNED(8) = {0};
 s16 D_801B71CC BSS = {0};
-UnkB8 g_Players[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
+Player g_Players[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 REVERB_MEM gReverbFx BSS ALIGNED(8) = {0};
 u32 __osFinalrom BSS = {0};
 Effect f_Effects[EFFECT_COUNT] BSS ALIGNED(16) = {0};

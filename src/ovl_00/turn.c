@@ -462,7 +462,7 @@ void PlaceShotCamera(void);
 s32 func_8005F30C(s32 x, s32 z);
 void func_8006034C(s8 value);
 s32 GetRecordedScoreKind(s32 strokes);
-Boolean HasNoRingsLeft(UnkB8* player);
+Boolean HasNoRingsLeft(Player* player);
 void RecordRingShotClear(s32 playerIndex);
 
 static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
@@ -498,7 +498,7 @@ s32 f_AimFrameCount;
 
 /* Defined in main_bss.c, at their addresses in the original */
 extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
-extern UnkB8 g_SavedPlayers[MAX_PLAYER_COUNT];
+extern Player g_SavedPlayers[MAX_PLAYER_COUNT];
 extern ShotLaunch g_LastShotLaunch;
 
 /* Lets the Rumble Paks run again after nuContRmbForceStop */
@@ -1767,7 +1767,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PickStartingClub);
 /* Puts the simulated ball at rest on the player's ball, and shows the player's
  * passed rings again */
 void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
-  UnkB8* player = &g_Players[playerIndex];
+  Player* player = &g_Players[playerIndex];
   s32 i;
   s32 groundHeight;
 
@@ -2313,7 +2313,7 @@ void RecordRingShotHole(s32 playerIndex) {
   }
 }
 
-Boolean HasNoRingsLeft(UnkB8* player) {
+Boolean HasNoRingsLeft(Player* player) {
   s32 i;
 
   for (i = 0; i < RING_COUNT; i++) {
@@ -2325,7 +2325,7 @@ Boolean HasNoRingsLeft(UnkB8* player) {
   return TRUE;
 }
 
-Boolean AreAllRingsPassed(UnkB8* player) {
+Boolean AreAllRingsPassed(Player* player) {
   s32 i;
 
   for (i = 0; i < RING_COUNT; i++) {
@@ -2447,7 +2447,7 @@ static void SetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
  * position for it.
  */
 void StartPlayerShot(s32 playerIndex) {
-  UnkB8* player = &g_Players[playerIndex];
+  Player* player = &g_Players[playerIndex];
   CoursePoint target;
   s32 x;
   s32 z;
@@ -2521,7 +2521,7 @@ void StartPlayerShot(s32 playerIndex) {
   ResetShotOffsetMarker();
 }
 
-void func_80207660_ovl_00(UnkB8* player) {}
+void func_80207660_ovl_00(Player* player) {}
 
 /*
  * Once every player's shot has finished, picks who plays next. Players still on
@@ -2611,7 +2611,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PickNextPlayer);
 #endif
 
 /* Hides the rings the ball passed, so that a new shot can pass them again */
-void ClearPassedRings(UnkB8* player) {
+void ClearPassedRings(Player* player) {
   s32 i;
 
   for (i = 0; i < RING_COUNT; i++) {
@@ -4414,7 +4414,7 @@ void UpdateTurns(void) {
           StartLandingReaction(-1);
           StartBanner(-1);
         } else if (isCameraDone) {
-          UnkB8* player;
+          Player* player;
           SurfaceInfo* surfaceInfo;
 
           MeasureTeeShot(playerIndex);

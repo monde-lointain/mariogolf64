@@ -2359,7 +2359,7 @@ Boolean IsContactEffectShown(void) {
 
 /* Returns the CONTACT_STYLE_* of the player's character, or for a Game Boy one,
  * of its ball */
-s32 GetContactStyle(UnkB8* player) {
+s32 GetContactStyle(Player* player) {
   GameBoyCharacter* gameBoyCharacter;
   s8 character = player->characterIndex;
 
@@ -2514,7 +2514,7 @@ void StartContactEffect(s32 effect) {
 }
 
 /* Reads the images of the player's contact effect */
-void LoadContactImages(UnkB8* player) {
+void LoadContactImages(Player* player) {
   EncodedAsset asset;
 
   switch (GetContactStyle(player)) {

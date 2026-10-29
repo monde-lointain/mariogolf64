@@ -3632,8 +3632,8 @@ void DrawRoundHud(CameraView* view) {
   s32 ringCount;
   s32 hundredths;
   s32 height;
-  UnkB8* player;
-  UnkB8* shooter;
+  Player* player;
+  Player* shooter;
   Club* selectedClub;
   SurfaceInfo* surface;
   f32 shotLength;

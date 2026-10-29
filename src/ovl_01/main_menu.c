@@ -1636,7 +1636,7 @@ const char D_80231514_ovl_01[] = "%s";
 void func_801F6B28_ovl_01(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
-  UnkB8* player;
+  Player* player;
   s32 index;
   s32 slot;
   s32 clubSet;

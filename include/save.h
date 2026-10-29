@@ -63,7 +63,7 @@ extern u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 /* Indices of SaveData's options */
 #define SAVE_OPTION_MUSIC_OFF 0 /* The options screen's MUSIC set to OFF */
 #define SAVE_OPTION_MONO 1 /* Plays the sound in mono instead of stereo */
-/* Copied into each player's UnkB8.gridColor */
+/* Copied into each player's Player.gridColor */
 #define SAVE_OPTION_GRID_COLOR 2
 /* The options screen's CAMERA set to SIMPLE instead of DYNAMIC */
 #define SAVE_OPTION_SIMPLE_CAMERA 3
@@ -103,7 +103,7 @@ enum SaveReadResult {
 #define HOLE_SELECTION_BACK_NINE (1 << 1)
 #define HOLE_SELECTION_FRONT_NINE (1 << 2)
 
-/* The bets of a game, indexing GameState.betRates and UnkB8.betTallies */
+/* The bets of a game, indexing GameState.betRates and Player.betTallies */
 #define BET_LONGEST_DRIVE 0 /* On marked par 5 holes */
 #define BET_NEAREST_PIN 1 /* On par 3 holes */
 #define BET_STROKES 2 /* Paid per stroke, between each pair of players */
@@ -334,13 +334,13 @@ typedef struct PlayerHole {
   /* 0x1 */ s8 putts; /* Or UNCOUNTED_PUTTS */
 } PlayerHole; /* size = 0x2 */
 
-/* The size of UnkB8.name, with its terminator */
+/* The size of Player.name, with its terminator */
 #define PLAYER_NAME_SIZE 12
 
 #define PLAYER_UNKAA_COUNT 12
 
 /*
- * UnkB8.state's values, which the game's messages call the PlayerState. A
+ * Player.state's values, which the game's messages call the PlayerState. A
  * saved game keeps PLAYER_STATE_WAITING and PLAYER_STATE_HOLE_DONE, restarts
  * STARTING_TURN, AIMING, UNK3 and PREPARING_AIM as STARTING_TURN, and calls
  * the rest illegal.
@@ -398,7 +398,8 @@ enum HoleStatus {
   HOLE_STATUS_OUT
 };
 
-typedef struct UnkB8 {
+/* A golfer in the round, human or computer, and their round so far */
+typedef struct Player {
   /* 0x00 */ char name[PLAYER_NAME_SIZE];
   /* 0x0C */ s32 state; /* A PLAYER_STATE_* value */
   /* 0x10 */ CoursePoint ballPosition;
@@ -443,7 +444,7 @@ typedef struct UnkB8 {
   /* 0xA8 */ s16 unkA8;
   /* 0xAA */ s8 unkAA[PLAYER_UNKAA_COUNT];
   /* 0xB6 */ u8 unkB6[0xB8 - 0xB6];
-} UnkB8; /* size = 0xB8 */
+} Player; /* size = 0xB8 */
 
 /* The best times kept for each course, with what was recorded alongside */
 #define BEST_TIME_COUNT 3
@@ -481,7 +482,7 @@ typedef struct SaveData {
   /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
   /* 0x002C */ u8 unk2C[0x38 - 0x2C];
   /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
-  /* 0x0218 */ UnkB8 modePlayers[MODE_PLAYER_COUNT];
+  /* 0x0218 */ Player modePlayers[MODE_PLAYER_COUNT];
   /* 0x0720 */ PlayRecord modeRecords[MODE_RECORD_COUNT];
   /* 0x0990 */ Unk990 unk990;
   /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
@@ -498,7 +499,7 @@ typedef struct SaveData {
   /* 0x15D0 */ PlayRecord rankedRecords[RANKED_RECORD_COUNT];
   /* 0x1DF0 */ RingShotRecord ringShotRecords[RING_SHOT_RECORD_COUNT];
   /* 0x1FF8 */ SavedGame savedGames[SAVED_GAME_COUNT];
-  /* 0x21D8 */ UnkB8 savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
+  /* 0x21D8 */ Player savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
 } SaveData; /* size = 0x2A78 */
 
 /* Each copy is stored with this, to check that it was read back intact */
@@ -520,7 +521,7 @@ extern SaveData g_SaveData;
 extern GameState g_GameState;
 
 /* The current game's, which a saved game is loaded into and stored from */
-extern UnkB8 g_Players[MAX_PLAYER_COUNT];
+extern Player g_Players[MAX_PLAYER_COUNT];
 
 /* The figures D_80105C38 holds for each course, then for all of them */
 typedef struct Unk80105C38 {
