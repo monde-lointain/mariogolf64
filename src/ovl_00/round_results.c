@@ -1349,7 +1349,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   s32 lift;
   s32 top;
   s32 pan;
-  s32 centreX;
+  s32 centerX;
   s32 i;
 
   gSPDisplayList(gfx++, g_DecalTextureSetup);
@@ -1380,9 +1380,9 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_COURSE_STRIP_WIDTH,
         NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     top = (i * size) + NOTICE_COURSE_CENTRE_Y - size;
-    centreX = f_NoticeSwing + NOTICE_COURSE_CENTRE_X;
-    DrawTextureRect(&gfx, (centreX - size) * 4, (top + f_NoticeUnk54) * 4,
-        (size + centreX) * 4, (top + size + f_NoticeUnk54) * 4, G_TX_RENDERTILE,
+    centerX = f_NoticeSwing + NOTICE_COURSE_CENTRE_X;
+    DrawTextureRect(&gfx, (centerX - size) * 4, (top + f_NoticeUnk54) * 4,
+        (size + centerX) * 4, (top + size + f_NoticeUnk54) * 4, G_TX_RENDERTILE,
         0, 0, step, step);
   }
 
@@ -1566,8 +1566,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   s32 width;
   s32 height;
   s32 top;
-  s32 centreX;
-  s32 centreY;
+  s32 centerX;
+  s32 centerY;
   s32 i;
 
   if (f_NoticeTime < NOTICE_POP_FRAMES) {
@@ -1590,10 +1590,10 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         G_IM_FMT_CI, NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0,
         0, 0, 0);
     step = ((NOTICE_NAMEPLATE_SIZE / 2) << 10) / size;
-    centreX = f_NoticeLift + NOTICE_CENTRE_X;
-    centreY = f_NoticeUnk6C + NOTICE_CENTRE_Y;
-    DrawTextureRect(&gfx, (centreX - size) * 4, (centreY - size) * 4,
-        (size + centreX) * 4, (size + centreY) * 4, G_TX_RENDERTILE, 0, 0, step,
+    centerX = f_NoticeLift + NOTICE_CENTRE_X;
+    centerY = f_NoticeUnk6C + NOTICE_CENTRE_Y;
+    DrawTextureRect(&gfx, (centerX - size) * 4, (centerY - size) * 4,
+        (size + centerX) * 4, (size + centerY) * 4, G_TX_RENDERTILE, 0, 0, step,
         step);
   }
 
@@ -1603,10 +1603,10 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
         NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((NOTICE_PORTRAIT_SIZE / 2) << 10) / size;
-    centreX = f_NoticeLift + NOTICE_CENTRE_X;
-    centreY = f_NoticeUnk6C + NOTICE_CENTRE_Y;
-    DrawTextureRect(&gfx, (centreX - size) * 4, (centreY - size) * 4,
-        (size + centreX) * 4, (size + centreY) * 4, G_TX_RENDERTILE, 0, 0, step,
+    centerX = f_NoticeLift + NOTICE_CENTRE_X;
+    centerY = f_NoticeUnk6C + NOTICE_CENTRE_Y;
+    DrawTextureRect(&gfx, (centerX - size) * 4, (centerY - size) * 4,
+        (size + centerX) * 4, (size + centerY) * 4, G_TX_RENDERTILE, 0, 0, step,
         step);
   }
 
@@ -1654,9 +1654,9 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       top = NOTICE_CHARACTER_TITLE_TOP -
           (height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + (i * height);
-      centreX = f_NoticeLift + NOTICE_CENTRE_X;
-      DrawTextureRect(&gfx, (centreX - width) * 4, (top + f_NoticeUnk6C) * 4,
-          (width + centreX) * 4, (top + height + f_NoticeUnk6C) * 4,
+      centerX = f_NoticeLift + NOTICE_CENTRE_X;
+      DrawTextureRect(&gfx, (centerX - width) * 4, (top + f_NoticeUnk6C) * 4,
+          (width + centerX) * 4, (top + height + f_NoticeUnk6C) * 4,
           G_TX_RENDERTILE, 0, 0,
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);

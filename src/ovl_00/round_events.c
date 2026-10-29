@@ -1421,7 +1421,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
   s32 halfWidth;
   s32 stripHeight;
   s32 slide;
-  s32 centreX;
+  s32 centerX;
   s32 bottom;
   s32 i;
   s32 frame;
@@ -1517,10 +1517,10 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
                   MOVIE_IMAGE_PIXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
-      centreX = CONTEST_IMAGE_CENTRE_X + slide;
-      DrawTextureRect(&gfx, (centreX - halfWidth) << 2,
+      centerX = CONTEST_IMAGE_CENTRE_X + slide;
+      DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
           (bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTRE)) << 2,
-          (centreX + halfWidth) << 2,
+          (centerX + halfWidth) << 2,
           (bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTRE) +
               MOVIE_IMAGE_STRIP_HEIGHT)
               << 2,
@@ -1626,7 +1626,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
   s32 halfWidth;
   s32 stripHeight;
   s32 slide;
-  s32 centreX;
+  s32 centerX;
   s32 bottom;
   s32 copyTop;
   s32 i;
@@ -1693,20 +1693,20 @@ void DrawDriveRecord(Gfx** displayListHead) {
                   MOVIE_IMAGE_PIXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
-      centreX = SHRINKING_IMAGE_CENTRE_X + slide;
-      DrawTextureRect(&gfx, (centreX - halfWidth) << 2,
+      centerX = SHRINKING_IMAGE_CENTRE_X + slide;
+      DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
           (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE)) << 2,
-          (centreX + halfWidth) << 2,
+          (centerX + halfWidth) << 2,
           (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE) +
               stripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
       if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-        centreX = SHRINKING_IMAGE_CENTRE_X - slide;
+        centerX = SHRINKING_IMAGE_CENTRE_X - slide;
         copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-        DrawTextureRect(&gfx, (centreX - (s32)(width >> 1)) << 2, copyTop << 2,
-            (centreX + (s32)(width >> 1)) << 2,
+        DrawTextureRect(&gfx, (centerX - (s32)(width >> 1)) << 2, copyTop << 2,
+            (centerX + (s32)(width >> 1)) << 2,
             (copyTop + MOVIE_IMAGE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
@@ -1740,7 +1740,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
   s32 halfWidth;
   s32 stripHeight;
   s32 slide;
-  s32 centreX;
+  s32 centerX;
   s32 bottom;
   s32 copyTop;
   s32 i;
@@ -1807,20 +1807,20 @@ void DrawPuttCaption(Gfx** displayListHead) {
                   MOVIE_IMAGE_PIXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
-      centreX = SHRINKING_IMAGE_CENTRE_X + slide;
-      DrawTextureRect(&gfx, (centreX - halfWidth) << 2,
+      centerX = SHRINKING_IMAGE_CENTRE_X + slide;
+      DrawTextureRect(&gfx, (centerX - halfWidth) << 2,
           (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE)) << 2,
-          (centreX + halfWidth) << 2,
+          (centerX + halfWidth) << 2,
           (bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE) +
               stripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
       if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-        centreX = SHRINKING_IMAGE_CENTRE_X - slide;
+        centerX = SHRINKING_IMAGE_CENTRE_X - slide;
         copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-        DrawTextureRect(&gfx, (centreX - (s32)(width >> 1)) << 2, copyTop << 2,
-            (centreX + (s32)(width >> 1)) << 2,
+        DrawTextureRect(&gfx, (centerX - (s32)(width >> 1)) << 2, copyTop << 2,
+            (centerX + (s32)(width >> 1)) << 2,
             (copyTop + MOVIE_IMAGE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }

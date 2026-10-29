@@ -1882,7 +1882,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   Gfx* gfx;
   Boolean isNibbleImage;
-  s32 centreShift;
+  s32 centerShift;
   s32 yawOffset;
   s32 y;
   s32 row;
@@ -1901,7 +1901,7 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_BAYER);
-  centreShift = ((view->zoom * FULL_VIEW_HEIGHT) -
+  centerShift = ((view->zoom * FULL_VIEW_HEIGHT) -
                     (view->viewportCenterY - (view->scissorY * 2))) *
       0.5f;
   DrawSky(&gfx, view->eye[1], 1, cameraIndex);
@@ -2044,9 +2044,9 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
     zoom = view->zoom;
     textureX = yawOffset +
         (s32)(((zoom * FULL_VIEW_WIDTH) - view->scissorWidth) * 16.0f / zoom);
-    top = y + view->scissorY - centreShift;
+    top = y + view->scissorY - centerShift;
     bottom =
-        (f32)y + (f_BackdropStripHeight * zoom) + view->scissorY - centreShift;
+        (f32)y + (f_BackdropStripHeight * zoom) + view->scissorY - centerShift;
     for (row = 0;; row++, top = bottom,
         bottom = bottom + (f_BackdropStripHeight * view->zoom)) {
       if (top < view->scissorY - (f_BackdropStripHeight * view->zoom)) {
