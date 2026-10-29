@@ -3992,7 +3992,13 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuBackdropLayers);
 #endif
 
-void func_801FC60C_ovl_01(Gfx** displayListHead, s32 layers) {
+/*
+ * Draws the chosen layers of the backdrop from their own routines, unlike
+ * DrawMenuBackdropLayers: the scenery, the narrow board, the large banner,
+ * which only the mode select and the saved games ask for, and the banner,
+ * which does not bob
+ */
+void DrawLargeBannerBackdropLayers(Gfx** displayListHead, s32 layers) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
@@ -4175,7 +4181,8 @@ void func_801FD1B4_ovl_01(Gfx** displayListHead, s16 left, s16 top) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FD1B4_ovl_01);
 #endif
 
-/* Draws the large banner, for func_801FC60C's MENU_LAYER_LARGE_BANNER */
+/* Draws the large banner, for DrawLargeBannerBackdropLayers's
+ * MENU_LAYER_LARGE_BANNER */
 void DrawLargeMenuBanner(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
@@ -4628,7 +4635,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
 
   g_HoleSetup.conditions.lightYaw = MODE_SELECT_LIGHT_YAW;
   g_HoleSetup.conditions.lightPitch = MODE_SELECT_LIGHT_PITCH;
-  func_801FC60C_ovl_01(&gfx, MODE_SELECT_BACKDROP_LAYERS);
+  DrawLargeBannerBackdropLayers(&gfx, MODE_SELECT_BACKDROP_LAYERS);
   guPerspectiveF(D_80231CA0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
   guLookAtReflectF(D_80231CE0_ovl_01, &D_80231D20_ovl_01[g_DrawBufferIndex],

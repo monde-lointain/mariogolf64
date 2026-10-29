@@ -1655,7 +1655,8 @@ s32 func_80222F2C_ovl_01(void) {
 
 const char D_80231A3C_ovl_01[] = "%s";
 
-/* The backdrop layers that func_801FC60C draws behind the saved games */
+/* The backdrop layers that DrawLargeBannerBackdropLayers draws behind the saved
+ * games */
 #define SAVED_GAMES_BACKDROP_LAYERS \
   (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER | \
       MENU_LAYER_LARGE_BANNER)
@@ -1789,7 +1790,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
   f32 radiusX;
   s32 boardDegrees;
 
-  func_801FC60C_ovl_01(&gfx, SAVED_GAMES_BACKDROP_LAYERS);
+  DrawLargeBannerBackdropLayers(&gfx, SAVED_GAMES_BACKDROP_LAYERS);
   BuildDynamicTextures(&gfx);
   func_80225358_ovl_01(&gfx);
   gDPPipeSync(gfx++);
