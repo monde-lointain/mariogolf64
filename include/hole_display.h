@@ -62,7 +62,7 @@ typedef struct SkyColors {
                           g_CourseSkyImage */
   /* 0x11 */ u8 hasLensFlare;
   /* 0x12 */ u8 unk12[2];
-  /* 0x14 */ struct Sun* unk14;
+  /* 0x14 */ struct Sun* sun;
   /* 0x18 */ u8 fogColor[3];
   /* 0x1C */ s16 fogNear;
   /* 0x1E */ s16 fogFar;

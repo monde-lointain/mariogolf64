@@ -802,8 +802,8 @@ void DrawLensFlare(Gfx** displayListHead) {
     return;
   }
 
-  if (glare > colors->unk14->maxSunGlare) {
-    glare = colors->unk14->maxSunGlare;
+  if (glare > colors->sun->maxSunGlare) {
+    glare = colors->sun->maxSunGlare;
   }
 
   gDPPipeSync(gfx++);
@@ -992,10 +992,10 @@ void InitSkyColors(void) {
     }
   }
 
-  if (colors->unk14->imageKind == SKY_IMAGE_KIND_0) {
+  if (colors->sun->imageKind == SKY_IMAGE_KIND_0) {
     OpenEncodedAsset(ASSET_SKY_IMAGE_0, &asset);
     ReadEncodedAsset(g_SkyImage, &asset);
-  } else if (colors->unk14->imageKind == SKY_IMAGE_KIND_1) {
+  } else if (colors->sun->imageKind == SKY_IMAGE_KIND_1) {
     OpenEncodedAsset(ASSET_SKY_IMAGE_1, &asset);
     ReadEncodedAsset(g_SkyImage, &asset);
   } else {
@@ -1769,7 +1769,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
 
     f_SunScreenX[cameraIndex] = angle * SUN_TURN_WIDTH * (1 / (2 * M_PI));
     f_SunScreenY[cameraIndex] = -g_SkyState.horizonLevels[cameraIndex] -
-        colors->unk14->sunHeight + SUN_HORIZON_Y;
+        colors->sun->sunHeight + SUN_HORIZON_Y;
     if (f_SunScreenX[cameraIndex] > SUN_TURN_WIDTH / 2) {
       f_SunScreenX[cameraIndex] -= SUN_TURN_WIDTH;
     }
@@ -1799,7 +1799,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
       }
 
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-      if (colors->unk14->imageKind == SKY_IMAGE_KIND_TWO_TEXTURES) {
+      if (colors->sun->imageKind == SKY_IMAGE_KIND_TWO_TEXTURES) {
         gDPPipeSync(gfx++);
         gDPSetAlphaDither(gfx++, G_AD_PATTERN);
         gDPPipeSync(gfx++);
@@ -1818,14 +1818,12 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
             G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
-            ((s32)f_SunScreenX[cameraIndex] - colors->unk14->sunRadius + 1)
-                << 2,
-            ((s32)f_SunScreenY[cameraIndex] - colors->unk14->sunRadius + 1)
-                << 2,
-            ((s32)f_SunScreenX[cameraIndex] + colors->unk14->sunRadius) << 2,
-            ((s32)f_SunScreenY[cameraIndex] + colors->unk14->sunRadius) << 2,
-            G_TX_RENDERTILE, 0, 0, colors->unk14->sunTexelStep,
-            colors->unk14->sunTexelStep);
+            ((s32)f_SunScreenX[cameraIndex] - colors->sun->sunRadius + 1) << 2,
+            ((s32)f_SunScreenY[cameraIndex] - colors->sun->sunRadius + 1) << 2,
+            ((s32)f_SunScreenX[cameraIndex] + colors->sun->sunRadius) << 2,
+            ((s32)f_SunScreenY[cameraIndex] + colors->sun->sunRadius) << 2,
+            G_TX_RENDERTILE, 0, 0, colors->sun->sunTexelStep,
+            colors->sun->sunTexelStep);
         gDPPipeSync(gfx++);
       } else {
         gDPPipeSync(gfx++);
@@ -1837,21 +1835,18 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
             G_IM_FMT_I, G_IM_SIZ_8b, SUN_GLOW_IMAGE_SIZE, SUN_GLOW_IMAGE_SIZE,
             0, G_TX_MIRROR, G_TX_MIRROR, SUN_GLOW_MASK, SUN_GLOW_MASK,
             G_TX_NOLOD, G_TX_NOLOD);
-        gDPSetPrimColor(gfx++, 0, 0, colors->unk14->sunPrimColor[0],
-            colors->unk14->sunPrimColor[1], colors->unk14->sunPrimColor[2],
-            255);
-        gDPSetEnvColor(gfx++, colors->unk14->sunEnvColor[0],
-            colors->unk14->sunEnvColor[1], colors->unk14->sunEnvColor[2], 255);
+        gDPSetPrimColor(gfx++, 0, 0, colors->sun->sunPrimColor[0],
+            colors->sun->sunPrimColor[1], colors->sun->sunPrimColor[2], 255);
+        gDPSetEnvColor(gfx++, colors->sun->sunEnvColor[0],
+            colors->sun->sunEnvColor[1], colors->sun->sunEnvColor[2], 255);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
-            ((s32)f_SunScreenX[cameraIndex] - colors->unk14->sunRadius + 1)
-                << 2,
-            ((s32)f_SunScreenY[cameraIndex] - colors->unk14->sunRadius + 1)
-                << 2,
-            ((s32)f_SunScreenX[cameraIndex] + colors->unk14->sunRadius) << 2,
-            ((s32)f_SunScreenY[cameraIndex] + colors->unk14->sunRadius) << 2,
-            G_TX_RENDERTILE, 0, 0, colors->unk14->sunTexelStep,
-            colors->unk14->sunTexelStep);
+            ((s32)f_SunScreenX[cameraIndex] - colors->sun->sunRadius + 1) << 2,
+            ((s32)f_SunScreenY[cameraIndex] - colors->sun->sunRadius + 1) << 2,
+            ((s32)f_SunScreenX[cameraIndex] + colors->sun->sunRadius) << 2,
+            ((s32)f_SunScreenY[cameraIndex] + colors->sun->sunRadius) << 2,
+            G_TX_RENDERTILE, 0, 0, colors->sun->sunTexelStep,
+            colors->sun->sunTexelStep);
         gDPPipeSync(gfx++);
       }
     }
