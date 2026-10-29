@@ -930,9 +930,8 @@ Vtx* GetGridVertex(u32 column, u32 row) {
       row >= GROUND_GRID_VERTEX_ROW_COUNT) {
     vertex = &g_WorkArea.hole.gridVertices[0];
   } else {
-    vertex =
-        &g_WorkArea.hole
-             .gridVertices[(row * 17) + (column >> 1) + ((column & 1) * 9)];
+    vertex = &g_WorkArea.hole.gridVertices[(row * GROUND_GRID_COLUMN_COUNT) +
+        (column >> 1) + ((column & 1) * GROUND_GRID_EVEN_COLUMN_COUNT)];
   }
 
   return vertex;
@@ -951,7 +950,7 @@ void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
   vertex->v.flag = 0;
   vertex->v.tc[0] = (column << 10) + 0x20;
   vertex->v.tc[1] = (row << 10) + 0x20;
-  if (row == 32) {
+  if (row == GROUND_GRID_ROW_COUNT - 1) {
     vertex->v.tc[1] = 0x7FFF;
   }
 
@@ -1132,8 +1131,8 @@ void InitTerrainTextures(void) {
     }
   }
 
-  for (row = 0; row < 33; row++) {
-    for (column = 0; column < 17; column++) {
+  for (row = 0; row < GROUND_GRID_ROW_COUNT; row++) {
+    for (column = 0; column < GROUND_GRID_COLUMN_COUNT; column++) {
       InitGridVertex(column, row, 0, 0x80);
     }
   }

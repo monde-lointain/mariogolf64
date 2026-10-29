@@ -29,6 +29,13 @@
 #define MINI_GOLF_GROUND_SIZE 0x100000
 /* Each tile's midpoints: the odd points of its top-left 4 by 4 */
 #define TILE_MIDPOINT_COUNT 16
+/*
+ * The grid's vertices are every other ground point each way. Each row of them
+ * is kept as its even columns, then its odd ones.
+ */
+#define GROUND_GRID_COLUMN_COUNT ((GROUND_POINT_COLUMN_COUNT + 1) / 2)
+#define GROUND_GRID_ROW_COUNT ((GROUND_POINT_ROW_COUNT + 1) / 2)
+#define GROUND_GRID_EVEN_COLUMN_COUNT ((GROUND_GRID_COLUMN_COUNT + 1) / 2)
 /* Grid vertices kept, with room for one more column and row than the grid has
  */
 #define GROUND_GRID_VERTEX_COLUMN_COUNT 18
@@ -217,8 +224,9 @@ enum TerrainStyle {
 
 /* The grid vertex at a vertex column and row, as GetGridVertex finds it */
 #define GridVertex(column, row) \
-  (&g_WorkArea.hole.gridVertices[((row) * 17) + ((u32)(column) >> 1) + \
-      (((u32)(column) & 1) * 9)])
+  (&g_WorkArea.hole.gridVertices[((row) * GROUND_GRID_COLUMN_COUNT) + \
+      ((u32)(column) >> 1) + \
+      (((u32)(column) & 1) * GROUND_GRID_EVEN_COLUMN_COUNT)])
 
 /* Whether a fine tile's neighbor makes it snap the vertices of their shared
  * edge's middle */
