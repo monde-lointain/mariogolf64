@@ -261,6 +261,20 @@ enum ListingState {
 #define CARTRIDGE_RAM_ADDRESS 0xA000
 #define CARTRIDGE_RAM_SIZE 0x2000
 
+/*
+ * ReadCartridgeCharacters takes a phase of steps for each controller: it opens
+ * the cartridge, then reads one save a step
+ */
+#define CARTRIDGE_READ_PHASE_SIZE (CARTRIDGE_SAVE_COUNT + 1)
+#define CARTRIDGE_OPENING_STEP 0
+#define CARTRIDGE_FIRST_SAVE_STEP 1
+#define CartridgeReadController(readStep) \
+  ((readStep) / CARTRIDGE_READ_PHASE_SIZE)
+#define CartridgeReadPhaseStep(readStep) \
+  ((readStep) % CARTRIDGE_READ_PHASE_SIZE)
+#define LastCartridgeReadStep(controllerCount) \
+  (((controllerCount) * CARTRIDGE_READ_PHASE_SIZE) - 1)
+
 /* The largest value the status sends for each figure */
 #define MAX_STATUS_VALUE 999
 
@@ -1750,7 +1764,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   }
 
   SetUpTextDrawing(&displayList);
-  if (transfer->readStep == (g_ControllerCount * 4) - 1) {
+  if (transfer->readStep == LastCartridgeReadStep(g_ControllerCount)) {
     message = NO_MESSAGE;
     switch (transfer->screenStep) {
       case BRING_CHOOSING:
@@ -2817,8 +2831,8 @@ s32 ReadCartridgeCharacters(void) {
     transfer->hasUninitializedCartridge = FALSE;
   }
 
-  if (transfer->readStep % 4 == 0) {
-    port = g_PlayerControllerPorts[transfer->readStep / 4];
+  if (CartridgeReadPhaseStep(transfer->readStep) == CARTRIDGE_OPENING_STEP) {
+    port = g_PlayerControllerPorts[CartridgeReadController(transfer->readStep)];
     transfer->transferResult = OpenGameBoyPakWithRetries(
         port, &transfer->cartridgeHeader, &transfer->pakFile);
     osSyncPrintf("loadres %d  cont %d\n", transfer->transferResult, port);
@@ -2838,7 +2852,8 @@ s32 ReadCartridgeCharacters(void) {
       transfer->hasWrongCartridge = TRUE;
     }
   } else if (transfer->transferResult == PAK_RESULT_OK) {
-    saveIndex = (transfer->readStep % 4) - 1;
+    saveIndex =
+        CartridgeReadPhaseStep(transfer->readStep) - CARTRIDGE_FIRST_SAVE_STEP;
 
     /* The original starts the offset at 0xA042, which every save index replaces
      */
@@ -2932,7 +2947,8 @@ s32 ReadCartridgeCharacters(void) {
                     &g_GameBoyCharacters[slot], characterData)) {
               isAlreadyBrought = TRUE;
               transfer
-                  ->cartridgeCharacters[(transfer->readStep / 4 *
+                  ->cartridgeCharacters[(CartridgeReadController(
+                                             transfer->readStep) *
                                             CARTRIDGE_SAVE_COUNT) +
                       saveIndex]
                   .status = GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER;
@@ -2944,17 +2960,20 @@ s32 ReadCartridgeCharacters(void) {
           if (!isAlreadyBrought) {
             /* transferResult is OK here, so the original never skips a save */
             if (transfer->transferResult == PAK_RESULT_NO_CHARACTERS) {
-              SkipCartridgeSave(characterData, transfer->readStep / 4,
-                  saveIndex, transfer->cartridgeHeader.game_title,
+              SkipCartridgeSave(characterData,
+                  CartridgeReadController(transfer->readStep), saveIndex,
+                  transfer->cartridgeHeader.game_title,
                   transfer->cartridgeHeader.company_code);
             } else {
-              DecodeCartridgeCharacter(characterData, transfer->readStep / 4,
-                  saveIndex, transfer->cartridgeHeader.company_code);
+              DecodeCartridgeCharacter(characterData,
+                  CartridgeReadController(transfer->readStep), saveIndex,
+                  transfer->cartridgeHeader.company_code);
             }
 
-            transfer->listingStates[(transfer->readStep / 4 *
-                                        CARTRIDGE_SAVE_COUNT) +
-                saveIndex] = LISTING_SHOWN;
+            transfer
+                ->listingStates[(CartridgeReadController(transfer->readStep) *
+                                    CARTRIDGE_SAVE_COUNT) +
+                    saveIndex] = LISTING_SHOWN;
             transfer->listedCharacterCount++;
             ListPresentCharacters();
           }
@@ -2983,11 +3002,12 @@ s32 ReadCartridgeCharacters(void) {
     }
   }
 
-  if (transfer->readStep % 4 == 3) {
+  if (CartridgeReadPhaseStep(transfer->readStep) ==
+      CARTRIDGE_READ_PHASE_SIZE - 1) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   }
 
-  if (transfer->readStep == (g_ControllerCount * 4) - 1) {
+  if (transfer->readStep == LastCartridgeReadStep(g_ControllerCount)) {
     /* Repeating the results for one cartridge is there to match */
     if (transfer->openedCartridgeCount == 1) {
       if (transfer->hasUninitializedCartridge == TRUE) {
