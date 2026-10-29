@@ -2993,8 +2993,8 @@ void DrawShotEffect(Gfx** displayListHead) {
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_HeavyLongShotVertices, 16, 0);
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u32)g_SharedEffectImages +
-            HEAVY_LONG_SHOT_FRAMES_OFFSET + IMAGE_HEADER_SIZE),
+        TextureAddress(
+            ImageBody(g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET)),
         G_IM_FMT_I, HEAVY_LONG_SHOT_FRAME_WIDTH, HEAVY_LONG_SHOT_FRAME_HEIGHT,
         0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
@@ -3006,9 +3006,8 @@ void DrawShotEffect(Gfx** displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress((u32)g_SharedEffectImages +
-            HEAVY_LONG_SHOT_FRAMES_OFFSET + HEAVY_LONG_SHOT_FRAME_SIZE +
-            IMAGE_HEADER_SIZE),
+        TextureAddress(ImageBody(g_SharedEffectImages +
+            HEAVY_LONG_SHOT_FRAMES_OFFSET + HEAVY_LONG_SHOT_FRAME_SIZE)),
         G_IM_FMT_I, HEAVY_LONG_SHOT_FRAME_WIDTH, HEAVY_LONG_SHOT_FRAME_HEIGHT,
         0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);

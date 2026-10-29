@@ -5611,15 +5611,15 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
         1, SHADE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, WATER_BLEND_ALPHA);
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)g_MenuCourseSceneryAsset +
-            COURSE_SELECT_WATER_OFFSET + IMAGE_HEADER_SIZE),
+        TextureAddress(ImageBody(
+            ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_WATER_OFFSET))),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, WATER_TEXTURE_SIZE, WATER_TEXTURE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         WATER_TEXTURE_MASK, WATER_TEXTURE_MASK, WATER_TEXTURE_SHIFT,
         WATER_TEXTURE_SHIFT);
     gDPLoadMultiBlock(gfx++,
-        TextureAddress((u32)g_MenuCourseSceneryAsset +
-            COURSE_SELECT_LAYER_OFFSET + IMAGE_HEADER_SIZE),
+        TextureAddress(ImageBody(
+            ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_LAYER_OFFSET))),
         WATER_LAYER_TMEM, WATER_LAYER_TILE, G_IM_FMT_RGBA, G_IM_SIZ_16b,
         WATER_TEXTURE_SIZE, WATER_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, WATER_TEXTURE_MASK, WATER_TEXTURE_MASK,
@@ -6646,11 +6646,11 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
       PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   gDPLoadTextureTile_4b(gfx++,
-      TextureAddress((u32)shadow + OPTIONS_SHADOW_OFFSET + IMAGE_HEADER_SIZE),
-      G_IM_FMT_I, MARIO_SHADOW_WIDTH, MARIO_SHADOW_HEIGHT, 0, 0,
-      MARIO_SHADOW_WIDTH - 1, MARIO_SHADOW_HEIGHT - 1, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      TextureAddress(ImageBody(shadow + OPTIONS_SHADOW_OFFSET)), G_IM_FMT_I,
+      MARIO_SHADOW_WIDTH, MARIO_SHADOW_HEIGHT, 0, 0, MARIO_SHADOW_WIDTH - 1,
+      MARIO_SHADOW_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+      G_TX_NOLOD);
   DrawTextureRect(&gfx, MARIO_SHADOW_LEFT << 2, MARIO_SHADOW_TOP << 2,
       (MARIO_SHADOW_LEFT + MARIO_SHADOW_WIDTH) << 2,
       (MARIO_SHADOW_TOP + MARIO_SHADOW_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
@@ -6769,8 +6769,8 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0, PRIMITIVE,
       0, TEXEL0, 0, 0, 0, 0, TEXEL0);
   gDPLoadTLUT_pal16(gfx++, 0,
-      TextureAddress((u32)D_8012D420[D_8022BE8E_ovl_01] + OPTION_VALUES_OFFSET +
-          IMAGE_HEADER_SIZE));
+      TextureAddress(ImageBody(
+          ImageAt(D_8012D420[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET))));
   for (loopIndex = 0; loopIndex != OPTION_TOGGLE_COUNT; loopIndex++) {
     /* Each toggle has two values, the second shown while its bit is set */
     valueOffset = loopIndex * 2 * OPTION_LABEL_IMAGE_SIZE;
@@ -6796,8 +6796,9 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
     }
 
     LoadNibbleTextureBlock(&gfx,
-        (u8*)D_8012D420[D_8022BE8E_ovl_01] + OPTION_VALUES_OFFSET +
-            PALETTED_TEXELS_OFFSET + valueOffset,
+        ImageTexels(
+            ImageAt(D_8012D420[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET)) +
+            valueOffset,
         G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0, 0,
         0);
     if (D_801323A0.optionsChoice == loopIndex) {

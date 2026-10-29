@@ -1812,8 +1812,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
             G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
         gDPLoadMultiBlock_4b(gfx++,
-            TextureAddress(
-                (u32)g_SkyImage + SKY_IMAGE_HALF_OFFSET + IMAGE_HEADER_SIZE),
+            TextureAddress(ImageBody(g_SkyImage + SKY_IMAGE_HALF_OFFSET)),
             SUN_MASK_TMEM, 1, G_IM_FMT_I, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0,
             G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);

@@ -241,8 +241,7 @@ void DrawPlace(Gfx** displayListHead, s32 left, s32 top, s32 place) {
       (top + PLACE_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
   LoadTextureBlock(&gfx,
-      g_Scorecard.placesImage +
-          ((place * PLACE_HALF_SIZE) + LARGE_PALETTED_TEXELS_OFFSET),
+      LargeImageTexelsAt(g_Scorecard.placesImage, place * PLACE_HALF_SIZE),
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0, 0, 0,
       0, 0);
   DrawTextureRect(&gfx, left << 2, top << 2, (left + PLACE_HALF_WIDTH) << 2,
@@ -257,11 +256,10 @@ void DrawScorecardLabel(
     Gfx** displayListHead, s32 left, s32 top, s32 labelIndex) {
   Gfx* gfx = *displayListHead;
 
-  LoadSmallPalette(&gfx, 0, g_Scorecard.labelsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.labelsImage));
   gDPLoadTextureTile_4b(gfx++,
-      (u32)(g_Scorecard.labelsImage + PALETTED_TEXELS_OFFSET +
-          (labelIndex * LABEL_SIZE)) &
-          ~7,
+      TextureAddress(
+          ImageTexels(g_Scorecard.labelsImage) + labelIndex * LABEL_SIZE),
       G_IM_FMT_CI, LABEL_WIDTH, LABEL_HEIGHT, 0, 0, LABEL_WIDTH - 1,
       LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

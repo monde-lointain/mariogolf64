@@ -805,8 +805,8 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     f_BallRollFrame = (f_BallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
     f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(f_RollingBallImage +
-            ((f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE) + IMAGE_HEADER_SIZE)),
+        TextureAddress(ImageBodyAt(
+            f_RollingBallImage, f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE)),
         G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
         G_TX_NOLOD, G_TX_NOLOD);

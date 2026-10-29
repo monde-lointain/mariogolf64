@@ -1607,13 +1607,18 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
 #define PLAYER_TAG_LINED_UP 0
 #define PLAYER_TAG_SINGLE_PLAYER 2 /* The second tag then reads "Com" */
 /* The player tag images: 1P to 4P, then 1C to 4C, then Com */
+#define PLAYER_TAG_FIRST_PLAYER 0
 #define PLAYER_TAG_FIRST_COMPUTER 4
 #define PLAYER_TAG_COM 8
 #define PLAYER_TAG_IMAGE_SIZE 64 /* Bytes, as 16 by 8 nibbles */
-#define COMPUTER_TAG_TEXELS_OFFSET \
-  (PALETTED_TEXELS_OFFSET + (PLAYER_TAG_FIRST_COMPUTER * PLAYER_TAG_IMAGE_SIZE))
-#define PlayerTagTexels(offset) \
-  (TextureAddress((u8*)D_8023A570_ovl_01 + (offset)))
+/*
+ * The texels of the tag playerIndex tags past firstTag, as the tags sit side
+ * by side in one image. The two offsets are scaled apart, to match.
+ */
+#define PlayerTagTexels(firstTag, playerIndex) \
+  (TextureAddress(ImageTexelsAt(D_8023A570_ovl_01, \
+      ((playerIndex) * PLAYER_TAG_IMAGE_SIZE) + \
+          ((firstTag) * PLAYER_TAG_IMAGE_SIZE))))
 #define PLAYER_TAG_WIDTH 16
 #define PLAYER_TAG_HEIGHT 8
 #define PLAYER_TAG_SHIFT_LEFT 4
@@ -1668,33 +1673,28 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
     }
 
     if ((tagMode == PLAYER_TAG_SINGLE_PLAYER) & (playerIndex == 1)) {
-      gDPLoadTextureBlock_4b(gfx++,
-          PlayerTagTexels(PALETTED_TEXELS_OFFSET +
-              (PLAYER_TAG_COM * PLAYER_TAG_IMAGE_SIZE)),
+      gDPLoadTextureBlock_4b(gfx++, PlayerTagTexels(PLAYER_TAG_COM, 0),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (g_PlayerControllerIndices[playerIndex] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
-          PlayerTagTexels((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
-              COMPUTER_TAG_TEXELS_OFFSET),
-          G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          PlayerTagTexels(PLAYER_TAG_FIRST_COMPUTER, playerIndex), G_IM_FMT_CI,
+          PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
     } else if (D_8022FF07_ovl_01 == TRUE && playerIndex == D_801B7070) {
       gDPLoadTextureBlock_4b(gfx++,
-          PlayerTagTexels((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
-              COMPUTER_TAG_TEXELS_OFFSET),
-          G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          PlayerTagTexels(PLAYER_TAG_FIRST_COMPUTER, playerIndex), G_IM_FMT_CI,
+          PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
     } else {
       gDPLoadTextureBlock_4b(gfx++,
-          PlayerTagTexels(
-              (playerIndex * PLAYER_TAG_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET),
-          G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          PlayerTagTexels(PLAYER_TAG_FIRST_PLAYER, playerIndex), G_IM_FMT_CI,
+          PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
     }
 
     left = shiftX + (s16)(left + GRID_LEFT);

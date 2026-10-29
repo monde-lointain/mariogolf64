@@ -1303,8 +1303,8 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
     }
 
     gDPLoadMultiBlock_4b(gfx++,
-        TextureAddress((u32)D_8023B368_ovl_01 +
-            (labelIndex * PLAYER_LABEL_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET),
+        TextureAddress(ImageTexelsAt(
+            D_8023B368_ovl_01, labelIndex * PLAYER_LABEL_IMAGE_SIZE)),
         OPTION_LABEL_TMEM, OPTION_LABEL_TILE, G_IM_FMT_CI, PLAYER_LABEL_WIDTH,
         PLAYER_LABEL_HEIGHT, OPTION_LABEL_PALETTE, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,

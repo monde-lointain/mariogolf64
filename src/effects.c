@@ -1757,9 +1757,9 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
       textureStep = ((BILLBOARD_IMAGE_SIZE / 2) << 10) / halfSize;
       if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
         gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_ClumpImage + (frameOffset + IMAGE_HEADER_SIZE)),
-            G_IM_FMT_I, G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE,
-            0, G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            TextureAddress(ImageBodyAt(f_ClumpImage, frameOffset)), G_IM_FMT_I,
+            G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0,
+            G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
       } else if (effect->kind == EFFECT_KIND_SPARKLE) {
         s32 sparkleFrames[SPARKLE_STEP_COUNT] = {2, 1, 0, 0, 1, 1, 2};
 
@@ -1779,9 +1779,9 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         }
 
         gDPLoadTextureBlock_4b(gfx++,
-            TextureAddress(f_StarImage + (frameOffset + IMAGE_HEADER_SIZE)),
-            G_IM_FMT_I, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0,
-            G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            TextureAddress(ImageBodyAt(f_StarImage, frameOffset)), G_IM_FMT_I,
+            BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP,
+            6, 6, G_TX_NOLOD, G_TX_NOLOD);
       } else if (effect->kind == EFFECT_KIND_TEAR) {
         if (effect->unk3B < TEAR_SECOND_FRAME_START) {
           frameOffset = 0 * DROPLET_FRAME_SIZE;
@@ -1792,8 +1792,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         }
 
         gDPLoadTextureBlock_4b(gfx++,
-            TextureAddress(
-                f_DropletImage + (frameOffset + PALETTED_TEXELS_OFFSET)),
+            TextureAddress(ImageTexelsAt(f_DropletImage, frameOffset)),
             G_IM_FMT_CI, DROPLET_IMAGE_SIZE, DROPLET_IMAGE_SIZE, 0, G_TX_MIRROR,
             G_TX_WRAP, 4, 0, 2, 2);
       } else if (effect->kind == EFFECT_KIND_UNKE) {
@@ -1802,9 +1801,9 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
             G_TX_WRAP, 6, 6, 1, 1);
       } else {
         gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_DebrisImage + (frameOffset + IMAGE_HEADER_SIZE)),
-            G_IM_FMT_I, G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE,
-            0, G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            TextureAddress(ImageBodyAt(f_DebrisImage, frameOffset)), G_IM_FMT_I,
+            G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0,
+            G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
       }
 
       gDPPipeSync(gfx++);
@@ -2000,10 +1999,9 @@ void DrawDivotMark(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
 
-  /* Grouping the frame's offset is there to match */
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(f_DivotImage +
-          ((DIVOT_MARK_FRAME * DIVOT_FRAME_SIZE) + PALETTED_TEXELS_OFFSET)),
+      TextureAddress(
+          ImageTexelsAt(f_DivotImage, DIVOT_MARK_FRAME * DIVOT_FRAME_SIZE)),
       G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP,
       G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_DivotMarkMatrix),
@@ -2636,10 +2634,9 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
 
     LoadSmallPalette(&gfx, 0, ImageBody(f_CloudImage));
 
-    /* Grouping the frame's offset is there to match */
     gDPLoadTextureTile_4b(gfx++,
-        TextureAddress(f_CloudImage +
-            ((spinFrame * BADGE_FRAME_SIZE) + PALETTED_TEXELS_OFFSET)),
+        TextureAddress(
+            ImageTexelsAt(f_CloudImage, spinFrame * BADGE_FRAME_SIZE)),
         G_IM_FMT_CI, BADGE_SIZE, BADGE_SIZE, 0, 0, BADGE_SIZE - 1,
         BADGE_SIZE - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, BADGE_LEFT << 2, (offsetY + BADGE_RESTING_TOP) << 2,

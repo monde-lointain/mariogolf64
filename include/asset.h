@@ -63,12 +63,24 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 /* Where an eight-bit image's texels start, after its header and palette */
 #define LARGE_PALETTED_TEXELS_OFFSET \
   (IMAGE_HEADER_SIZE + (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
+/* The image that starts offset bytes into a buffer holding several */
+#define ImageAt(buffer, offset) ((u8*)(buffer) + (offset))
 /* What follows an image's header: a CI image's palette, any other's texels */
 #define ImageBody(image) ((u8*)(image) + IMAGE_HEADER_SIZE)
 /* A four-bit CI image's texels */
 #define ImageTexels(image) ((u8*)(image) + PALETTED_TEXELS_OFFSET)
 /* An eight-bit CI image's texels */
 #define LargeImageTexels(image) ((u8*)(image) + LARGE_PALETTED_TEXELS_OFFSET)
+/*
+ * The same, offset bytes in, as for a frame of an image that holds several.
+ * They add the two offsets first, as the original does.
+ */
+#define ImageBodyAt(image, offset) \
+  ((u8*)(image) + ((offset) + IMAGE_HEADER_SIZE))
+#define ImageTexelsAt(image, offset) \
+  ((u8*)(image) + ((offset) + PALETTED_TEXELS_OFFSET))
+#define LargeImageTexelsAt(image, offset) \
+  ((u8*)(image) + ((offset) + LARGE_PALETTED_TEXELS_OFFSET))
 
 /* The assets that more than one overlay loads */
 #define ASSET_SHADOW_TEXTURE 0x4C3

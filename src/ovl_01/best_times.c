@@ -495,8 +495,8 @@ void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023AA4C_ovl_01)));
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock(gfx++,
-      TextureAddress((u32)D_8023AA4C_ovl_01 +
-          (place - 1) * PLACE_LABEL_FRAME_BYTES + LARGE_PALETTED_TEXELS_OFFSET),
+      TextureAddress(LargeImageTexelsAt(
+          D_8023AA4C_ovl_01, (place - 1) * PLACE_LABEL_FRAME_BYTES)),
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_FRAME_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -507,9 +507,8 @@ void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place) {
       (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE);
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock(gfx++,
-      TextureAddress((u32)D_8023AA4C_ovl_01 +
-          (place + PLACE_LABEL_DIGIT_COUNT - 1) * PLACE_LABEL_FRAME_BYTES +
-          LARGE_PALETTED_TEXELS_OFFSET),
+      TextureAddress(LargeImageTexelsAt(D_8023AA4C_ovl_01,
+          (place + PLACE_LABEL_DIGIT_COUNT - 1) * PLACE_LABEL_FRAME_BYTES)),
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_FRAME_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
