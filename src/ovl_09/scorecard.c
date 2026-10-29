@@ -1315,7 +1315,7 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
     tabStrips[2] = FIRST_OF_THREE_TAB_STRIP;
   }
 
-  LoadLargePalette(&gfx, g_Scorecard.tableImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(g_Scorecard.tableImage));
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
   gDPSetPrimColor(
       gfx++, 0, 0, TAB_BACK_GRAY, TAB_BACK_GRAY, TAB_BACK_GRAY, 0xFF);

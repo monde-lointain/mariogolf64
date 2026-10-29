@@ -702,9 +702,8 @@ void DrawClubSlots(Gfx** displayListHead) {
       }
 
       LoadTextureBlock(&gfx,
-          f_Slots->symbolImages +
-              (f_ReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE) +
-              IMAGE_HEADER_SIZE,
+          ImageBody(f_Slots->symbolImages +
+              (f_ReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE)),
           G_IM_FMT_RGBA, G_IM_SIZ_16b, SYMBOL_SIZE, SYMBOL_SIZE, 0, 0, 0, 0, 0,
           0, 0);
       gDPPipeSync(gfx++);
@@ -757,7 +756,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, f_Slots->machineImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_Slots->machineImage));
   for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, top = SCREEN_BORDER;
       top < MACHINE_BOTTOM; top += MACHINE_STRIP_HEIGHT,
       texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH) {
@@ -788,7 +787,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   }
 
   /* The stop buttons pushed so far */
-  LoadLargePalette(&gfx, f_Slots->buttonsImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, ImageBody(f_Slots->buttonsImage));
   for (buttonIndex = 0; buttonIndex != REEL_COUNT; buttonIndex++) {
     if (buttonIndex > f_Slots->pressCount - 1) {
       break;
@@ -843,7 +842,7 @@ void DrawClubSlots(Gfx** displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    LoadLargePalette(&gfx, f_Slots->startImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, ImageBody(f_Slots->startImage));
     for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, stripIndex = 0;
         stripIndex != START_STRIP_COUNT;
         stripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {

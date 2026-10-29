@@ -3037,7 +3037,7 @@ void DrawNameLogos(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
-          gfx++, TextureAddress(f_NameSlotImages[slot] + IMAGE_HEADER_SIZE));
+          gfx++, TextureAddress(ImageBody(f_NameSlotImages[slot])));
       gDPPipeSync(gfx++);
       for (strip = 0; strip != NAME_LOGO_STRIP_COUNT; strip++) {
         texelsOffset = LARGE_PALETTED_TEXELS_OFFSET +
@@ -3340,8 +3340,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPLoadTLUT_pal256(
               gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
         } else {
-          gDPLoadTLUT_pal256(gfx++,
-              TextureAddress(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
+          gDPLoadTLUT_pal256(
+              gfx++, TextureAddress(ImageBody(f_OpeningBallImages[slot])));
         }
 
         for (stripIndex = 0; stripIndex < OPENING_BALL_STRIP_COUNT;
@@ -3368,8 +3368,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 G_TX_NOLOD);
           } else {
             gDPLoadTextureBlock(gfx++,
-                TextureAddress(f_OpeningBallImages[slot] +
-                    LARGE_PALETTED_TEXELS_OFFSET +
+                TextureAddress(LargeImageTexels(f_OpeningBallImages[slot]) +
                     (stripIndex * OPENING_BALL_STRIP_SIZE)),
                 G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                 OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -3611,8 +3610,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPLoadTLUT_pal256(
                 gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
           } else {
-            gDPLoadTLUT_pal256(gfx++,
-                TextureAddress(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
+            gDPLoadTLUT_pal256(
+                gfx++, TextureAddress(ImageBody(f_OpeningBallImages[slot])));
           }
 
           gDPPipeSync(gfx++);
@@ -3630,8 +3629,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                   G_TX_NOLOD, G_TX_NOLOD);
             } else {
               gDPLoadTextureBlock(gfx++,
-                  TextureAddress(f_OpeningBallImages[slot] +
-                      LARGE_PALETTED_TEXELS_OFFSET +
+                  TextureAddress(LargeImageTexels(f_OpeningBallImages[slot]) +
                       (stripIndex * OPENING_BALL_STRIP_SIZE)),
                   G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                   OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
