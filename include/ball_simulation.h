@@ -82,7 +82,7 @@ enum LaunchPurpose {
 typedef struct BallSimulation {
   /* 0x00 */ s32 startPosition[3];
   /* 0x0C */ s32 unkC[3];
-  /* 0x18 */ s32 position[3];
+  /* 0x18 */ s32 position[3]; /* Where the ball is, in course units */
   /* 0x24 */ s32 velocity[3];
   /* 0x30 */ s32 unk30;
   /* 0x34 */ s32 unk34;
@@ -100,7 +100,7 @@ typedef struct BallSimulation {
   /* 0xA0 */ s8 unkA0;
   /* 0xA1 */ s8 unkA1;
   /* 0xA2 */ s8 unkA2;
-  /* 0xA3 */ s8 surface;
+  /* 0xA3 */ s8 surface; /* The SURFACE_* that the ball is on */
   /* 0xA4 */ u8 unkA4;
   /* 0xA5 */ s8 playerIndex;
   /* 0xA6 */ s8 unkA6;

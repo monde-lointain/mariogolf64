@@ -2857,9 +2857,9 @@ static inline void FrameBallAndShot(void) {
   f_DebugFramingPitch += g_ControllerStates[1].stickY * 0.002f;
   ClearFramedSpheres();
   SetFramingAngles(f_DebugFramingPitch, f_DebugFramingYaw);
-  center[0] = g_BallPosition[0] * COURSE_TO_WORLD_SCALE;
-  center[1] = g_BallPosition[1] * COURSE_TO_WORLD_SCALE;
-  center[2] = g_BallPosition[2] * COURSE_TO_WORLD_SCALE;
+  center[0] = g_TurnBallSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+  center[1] = g_TurnBallSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+  center[2] = g_TurnBallSimulation.position[2] * COURSE_TO_WORLD_SCALE;
   AddFramedSphere(center, 7.5f);
   center[0] = g_CurrentShot.ballPosition[0] * COURSE_TO_WORLD_SCALE;
   center[1] = g_CurrentShot.ballPosition[1] * COURSE_TO_WORLD_SCALE;
@@ -3148,9 +3148,9 @@ void UpdateTurns(void) {
             GetCrossSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
         UpdateShotFlags();
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
-        g_CurrentShot.unk50 =
-            GetCupDistance(g_BallPosition[0] - g_HoleSetup.cupPosition[0],
-                g_BallPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
+        g_CurrentShot.unk50 = GetCupDistance(
+            g_TurnBallSimulation.position[0] - g_HoleSetup.cupPosition[0],
+            g_TurnBallSimulation.position[2] - g_HoleSetup.cupPosition[AXIS_Z]);
         g_RoundHud.greenGridState = 1;
         g_RoundHud.unkF = 1;
         g_RoundHud.unk12 = 1;
@@ -4072,9 +4072,9 @@ void UpdateTurns(void) {
         }
 
         ReuseLastCharacterMatrices(0);
-        previousPosition[0] = g_BallPosition[0];
-        previousPosition[1] = g_BallPosition[1];
-        previousPosition[2] = g_BallPosition[2];
+        previousPosition[0] = g_TurnBallSimulation.position[0];
+        previousPosition[1] = g_TurnBallSimulation.position[1];
+        previousPosition[2] = g_TurnBallSimulation.position[2];
         StepBallSimulation(&g_TurnBallSimulation);
         func_80207660_ovl_00(&g_Players[playerIndex]);
         isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
@@ -4097,9 +4097,10 @@ void UpdateTurns(void) {
                   previousPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
 
           for (i = 0; i < 4; i++) {
-            u32 distance =
-                IntLength2D(g_BallPosition[0] - g_HoleSetup.cupPosition[0],
-                    g_BallPosition[2] - g_HoleSetup.cupPosition[AXIS_Z]);
+            u32 distance = IntLength2D(
+                g_TurnBallSimulation.position[0] - g_HoleSetup.cupPosition[0],
+                g_TurnBallSimulation.position[2] -
+                    g_HoleSetup.cupPosition[AXIS_Z]);
 
             if (g_TurnBallSimulation.state != BALL_STATE_ROLLING ||
                 g_GameState.isMiniGolf ||
@@ -4211,7 +4212,7 @@ void UpdateTurns(void) {
           UpdateContest(FALSE);
           StartLandingReaction(-1);
           player = &g_Players[playerIndex];
-          surfaceInfo = GetSurfaceInfo(g_BallSurface);
+          surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
           func_80207660_ovl_00(player);
           ClearPassedRings(player);
           if ((surfaceInfo->kind == 0xD || surfaceInfo->kind == 0x15) &&
@@ -4247,10 +4248,10 @@ void UpdateTurns(void) {
               g_Players[playerIndex].strokeCount = g_HoleSetup.par * 3;
             }
           } else {
-            player->ballPosition[0] = g_BallPosition[0];
-            player->ballPosition[1] = g_BallPosition[1];
-            player->ballPosition[2] = g_BallPosition[2];
-            player->ballSurface = g_BallSurface;
+            player->ballPosition[0] = g_TurnBallSimulation.position[0];
+            player->ballPosition[1] = g_TurnBallSimulation.position[1];
+            player->ballPosition[2] = g_TurnBallSimulation.position[2];
+            player->ballSurface = g_TurnBallSimulation.surface;
           }
 
           if ((surfaceInfo->kind == 6 || surfaceInfo->kind == 7) ||

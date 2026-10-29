@@ -21,10 +21,6 @@ extern u16* nuGfxZBuffer;
 #define DRAW_BUFFER_COUNT 2
 
 /* The scene light's direction, in binary angles */
-/* Where the ball is, in course units */
-extern s32 g_BallPosition[3];
-/* The SURFACE_* that the ball is on */
-extern s8 g_BallSurface;
 
 /* A 45-degree perspective projection for the screen effects */
 extern Mtx g_ScreenEffectProjection;

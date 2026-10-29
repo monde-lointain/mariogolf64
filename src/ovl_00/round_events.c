@@ -30,6 +30,7 @@
 #include "sound.h"
 #include "text.h"
 #include "transfer_pak.h"
+#include "turn.h"
 #include "variables.h"
 
 /* The buffer that a movie's images, or the wind Fly Guy's, are read into */
@@ -2720,10 +2721,10 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     }
   } else {
     guTranslate(&f_ContactMatrices[f_ContactTrailHead],
-        g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-        (g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+        g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
+        (g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
             (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
-        g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+        g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
   }
 
   gDPPipeSync(gfx++);

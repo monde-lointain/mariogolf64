@@ -23,6 +23,7 @@
 #include "scene.h"
 #include "scoring.h"
 #include "terrain.h"
+#include "turn.h"
 #include "variables.h"
 #include "work_area.h"
 
@@ -145,9 +146,6 @@ void func_80253234(s32);
 void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
 s32 ChooseHoleConditions(void);
-
-/* Not static: the original left it to the linker's common block */
-s8 D_80104B6D;
 
 /*
  * Decodes the compressed words from stream->input to stream->inputEnd onto
@@ -759,7 +757,7 @@ s32 ChooseHoleConditions(void) {
   u32 random;
   s32 courseRecordIndex;
 
-  D_80104B6D = -1;
+  g_TurnBallSimulation.playerIndex = -1;
   if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
       g_GameState.unk31 != 0) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {

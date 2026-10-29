@@ -19,6 +19,7 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "terrain.h"
+#include "turn.h"
 #include "variables.h"
 
 #define HOLE_CREATURE_COUNT 10
@@ -238,12 +239,13 @@ void StartCheepCheepLeap(s32 arg0) {
       s32 random = guRandom();
 
       creature->state = HOLE_CREATURE_CHEEP_CHEEP;
-      creature->position[0] = g_BallPosition[0];
-      creature->position[1] = g_BallPosition[1] + CHEEP_CHEEP_DEPTH;
-      creature->position[2] = g_BallPosition[2];
+      creature->position[0] = g_TurnBallSimulation.position[0];
+      creature->position[1] =
+          g_TurnBallSimulation.position[1] + CHEEP_CHEEP_DEPTH;
+      creature->position[2] = g_TurnBallSimulation.position[2];
       speed = (random % CHEEP_CHEEP_SPEED_RANGE) + CHEEP_CHEEP_MIN_SPEED;
-      creature->groundHeight =
-          GetGroundOrWaterHeight(g_BallPosition[0], g_BallPosition[2]);
+      creature->groundHeight = GetGroundOrWaterHeight(
+          g_TurnBallSimulation.position[0], g_TurnBallSimulation.position[2]);
       creature->isFacingBack = guRandom() % 2;
       creature->isGold = guRandom() % 2;
       if (!creature->isGold) {
@@ -321,7 +323,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
     creature = &f_HoleCreatures[i];
     if (creature->state == HOLE_CREATURE_NONE) {
     } else if (creature->state == HOLE_CREATURE_CHEEP_CHEEP) {
-      wasUnderwater = g_BallPosition[1] < creature->position[1];
+      wasUnderwater = g_TurnBallSimulation.position[1] < creature->position[1];
       creature->velocity[1] += CHEEP_CHEEP_GRAVITY;
       creature->position[0] += creature->velocity[0];
       creature->position[1] += creature->velocity[1];
@@ -357,14 +359,14 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       guMtxCatF(roll, transform, transform);
       ConvertMatrixToFixed(transform, &creature->matrices[g_MatrixBufferIndex]);
       if (wasUnderwater == TRUE) {
-        if (creature->position[1] < g_BallPosition[1]) {
+        if (creature->position[1] < g_TurnBallSimulation.position[1]) {
           splashPosition[0] = creature->position[0];
           splashPosition[2] = creature->position[2];
           splashPosition[1] = creature->groundHeight;
           SpawnRipple(splashPosition);
           PlaySound(SPLASH_SOUND, SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
         }
-      } else if (creature->position[1] > g_BallPosition[1]) {
+      } else if (creature->position[1] > g_TurnBallSimulation.position[1]) {
         splashPosition[0] = creature->position[0];
         splashPosition[2] = creature->position[2];
         splashPosition[1] = creature->groundHeight;
@@ -372,16 +374,17 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         PlaySound(SPLASH_SOUND, SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
       }
 
-      if (creature->position[1] < g_BallPosition[1]) {
+      if (creature->position[1] < g_TurnBallSimulation.position[1]) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       } else {
-        s32 alpha = (g_BallPosition[1] - creature->position[1]) * 0xFF /
-            CHEEP_CHEEP_FADE_DEPTH;
+        s32 alpha = (g_TurnBallSimulation.position[1] - creature->position[1]) *
+            0xFF / CHEEP_CHEEP_FADE_DEPTH;
 
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, alpha);
       }
 
-      if (g_BallPosition[1] + CHEEP_CHEEP_DEPTH < creature->position[1]) {
+      if (g_TurnBallSimulation.position[1] + CHEEP_CHEEP_DEPTH <
+          creature->position[1]) {
         creature->state = HOLE_CREATURE_NONE;
       }
 

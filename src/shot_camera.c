@@ -1245,7 +1245,8 @@ void PlayFlightSounds(s32 step) {
         (g_SimulatedShot.pathFlags[step - EARLY_STEP_COUNT] & PATH_FLAG_UNK1) &&
         GetSelectedShotDistance() * FULL_SHOT_FRACTION <
             D_800BE640 * YARDS_PER_UNIT &&
-        (info = GetSurfaceInfo(g_BallSurface), IsFairwayKind(info->kind)) &&
+        (info = GetSurfaceInfo(g_TurnBallSimulation.surface),
+            IsFairwayKind(info->kind)) &&
         !g_GameState.isMiniGolf && D_800BE644 > f_LandingCupDistance &&
         g_HoleSetup.par - 3 >=
             g_Players[g_CurrentShot.playerIndex].strokeCount) {
@@ -2859,8 +2860,6 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 /* Keeps the eye from sitting straight above the point it looks at */
 #define LOOK_AT_NUDGE 0.1f
 
-extern s8 D_80104B68;
-
 /*
  * Updates the flight camera, the inset view and the ball's sounds for one frame
  * of the ball's flight, and advances g_BallFlightStep when isAdvancing is 1.
@@ -3285,7 +3284,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   if (isAdvancing == 1) {
     flightStep = &g_BallFlightStep;
     if (*flightStep == g_SimulatedShot.stepCount) {
-      if (waitFrame == 0 && !D_80104B68) {
+      if (waitFrame == 0 && !g_TurnBallSimulation.unkA0) {
         StartLandingReaction(LANDING_REACTION_REST);
       }
 

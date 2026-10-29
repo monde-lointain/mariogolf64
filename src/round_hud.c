@@ -46,6 +46,7 @@
 #include "surface.h"
 #include "terrain.h"
 #include "text.h"
+#include "turn.h"
 #include "variables.h"
 
 /* f_SceneryState values */
@@ -1385,7 +1386,7 @@ void StartLandingReaction(s32 reaction) {
   }
 
   f_LandingReaction = reaction;
-  switch ((u32)GetSurfaceInfo(g_BallSurface)->kind) {
+  switch ((u32)GetSurfaceInfo(g_TurnBallSimulation.surface)->kind) {
     case SURFACE_KIND_OUT_OF_BOUNDS:
       g_InsetView.animation = INSET_VIEW_OPENING;
       g_InsetView.unk8 = LANDING_INSET_UNK8;
@@ -1440,16 +1441,17 @@ void DrawLandingReaction(Gfx** displayListHead) {
   f32 size;
 
   if (f_LandingReaction != LANDING_REACTION_NONE) {
-    surface = GetSurfaceInfo(g_BallSurface);
+    surface = GetSurfaceInfo(g_TurnBallSimulation.surface);
     if (f_LandingReactionFrame == 1) {
       PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, FONT_SIZE_LARGE, 0, 0,
           LANDING_NAME_GLYPH_Y, surface->name);
     }
 
     if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
-      distance = GetCupDistance(
-          g_BallPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
-          g_BallPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
+      distance = GetCupDistance(g_TurnBallSimulation.position[AXIS_X] -
+              g_HoleSetup.cupPosition[AXIS_X],
+          g_TurnBallSimulation.position[AXIS_Z] -
+              g_HoleSetup.cupPosition[AXIS_Z]);
       /* Mini golf and the green measure in feet */
       if (g_GameState.isMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
         hundredths =
@@ -2058,9 +2060,12 @@ void ResetBallTrail(void) {
 
   f_BallTrailHead = 0;
   for (i = 0; i != BALL_TRAIL_LENGTH; i++) {
-    f_BallTrail[i][AXIS_X] = g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    f_BallTrail[i][AXIS_Y] = g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-    f_BallTrail[i][AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    f_BallTrail[i][AXIS_X] =
+        g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    f_BallTrail[i][AXIS_Y] =
+        g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    f_BallTrail[i][AXIS_Z] =
+        g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   }
 }
 
@@ -2110,12 +2115,12 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       }
 
       f_BallTrail[f_BallTrailHead][AXIS_X] =
-          g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+          g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
       f_BallTrail[f_BallTrailHead][AXIS_Y] =
-          (g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+          (g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
           (g_PinVertexScale * BALL_TRAIL_DROP);
       f_BallTrail[f_BallTrailHead][AXIS_Z] =
-          g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+          g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
 
     if (g_IsCupViewShown != 1) {
@@ -2865,9 +2870,11 @@ void DrawShotEffect(Gfx** displayListHead) {
     return;
   }
 
-  if (ProjectPoint(g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-          g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-          g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE, &point) >= 0) {
+  if (ProjectPoint(
+          g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
+          g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+          g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE,
+          &point) >= 0) {
     return;
   }
 
@@ -4006,9 +4013,10 @@ void DrawRoundHud(CameraView* view) {
 
   if (g_RoundHud.unk13 && !g_IsCupViewShown) {
     player = &g_Players[g_RoundHud.unk87];
-    shotLength =
-        IntLength2D(g_CurrentShot.ballPosition[AXIS_X] - g_BallPosition[AXIS_X],
-            g_CurrentShot.ballPosition[AXIS_Z] - g_BallPosition[AXIS_Z]);
+    shotLength = IntLength2D(g_CurrentShot.ballPosition[AXIS_X] -
+            g_TurnBallSimulation.position[AXIS_X],
+        g_CurrentShot.ballPosition[AXIS_Z] -
+            g_TurnBallSimulation.position[AXIS_Z]);
     SetTextColor(&g_DisplayListHead, 255, 255, 63);
     if (GetClub(player->clubs[g_CurrentShot.clubSlot])->surfaceMask &
         CLUB_SURFACE_GREEN) {
