@@ -301,6 +301,14 @@ void ResetBallSimulations(void) {
 #define CUP_RIM_CURVE_RADIUS 614.4f
 #define CUP_RIM_OUTER_RADIUS (CUP_RADIUS + CUP_RIM_CURVE_RADIUS)
 #define CUP_RIM_SINK_SCALE 0.5f
+
+/*
+ * 3 m: a ball that has been in the water stops once it sinks this far below
+ * the ground or water's surface
+ */
+#define WATER_STOP_DEPTH 0xB400
+/* The water keeps this much of the ball's velocity each frame */
+#define WATER_DRAG 0.7f
 /*
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
@@ -867,13 +875,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
     if (simulation->state == BALL_STATE_IN_WATER) {
       simulation->unkA1 = TRUE;
-      velocity[AXIS_X] *= 0.7f;
-      velocity[AXIS_Z] *= 0.7f;
-      velocity[AXIS_Y] = (velocity[AXIS_Y] + GRAVITY) * 0.7f;
+      velocity[AXIS_X] *= WATER_DRAG;
+      velocity[AXIS_Z] *= WATER_DRAG;
+      velocity[AXIS_Y] = (velocity[AXIS_Y] + GRAVITY) * WATER_DRAG;
       if (simulation->position[AXIS_Y] <=
           GetGroundOrWaterHeight(
               simulation->position[AXIS_X], simulation->position[AXIS_Z]) +
-              0xB400) {
+              WATER_STOP_DEPTH) {
         if (simulation->position[AXIS_Y] >=
             GetGroundHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z])) {
@@ -890,7 +898,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->position[AXIS_Y] >
             GetGroundOrWaterHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z]) +
-                0xB400) {
+                WATER_STOP_DEPTH) {
       simulation->state = BALL_STATE_STOPPED;
     }
 
