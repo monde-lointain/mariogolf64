@@ -36,7 +36,7 @@ typedef struct MenuMemory {
       playerCountChoice; /* The title screen's player count, less one */
   /* 0x01 */ s8 titleChoice; /* The title screen's row: a new game, the saved
                                 games or the menus */
-  /* 0x02 */ s8 unk2;
+  /* 0x02 */ s8 viewerCharacter; /* The animation viewer's character */
   /* 0x03 */ s8 characterColumns[MAX_PLAYER_COUNT]; /* Each player's character
                                                        select cursor column */
   /* 0x07 */ s8 characterRows[MAX_PLAYER_COUNT]; /* And row */
