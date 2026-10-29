@@ -2089,7 +2089,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
 #define SECOND_HANDICAP_STROKE_LEFT 84
 #define BADGE_LEFT 87
 #define BADGE_TOP 66
-#define PAR_FIVE 5
 /* Codes of the shadowed font */
 #define NO_SCORE_CODE 0x83
 #define HOLE_WON_CODE 0x82

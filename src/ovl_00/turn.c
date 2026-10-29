@@ -2363,7 +2363,7 @@ void StartPlayerShot(s32 playerIndex) {
       g_HolePoints.unk60[0][AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
     }
 
-    if (g_HoleSetup.par != 3 &&
+    if (g_HoleSetup.par != PAR_THREE &&
         (surfaceKind == SURFACE_KIND_TEE_UP ||
             surfaceKind == SURFACE_KIND_TEE_GROUND)) {
       target[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
@@ -3343,9 +3343,9 @@ void UpdateTurns(void) {
                 song = SONG_ROUND_FINAL;
               } else if ((g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
                              g_GameState.gameMode == GAME_MODE_GET_CHARACTER) &&
-                  GetMatchStanding(0, 1) != 0) {
+                  GetMatchStanding(0, 1) != MATCH_STANDING_OPEN) {
                 song = SONG_ROUND_FINAL;
-              } else if (g_GameState.playerCount == 4 &&
+              } else if (g_GameState.playerCount == MAX_PLAYER_COUNT &&
                   (g_Players[0].characterIndex == CHARACTER_YOSHI ||
                       g_Players[0].characterIndex == CHARACTER_DONKEY_KONG) &&
                   (g_Players[1].characterIndex == CHARACTER_YOSHI ||

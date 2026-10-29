@@ -47,6 +47,10 @@ extern s32 g_CourseNamePrimColors[];
 #define HOLE_FLAG_MARKED_PAR_FIVE (1 << 0)
 #define HOLE_FLAG_PAR_THREE (1 << 1)
 
+/* The pars that play differently from the par 4 */
+#define PAR_THREE 3
+#define PAR_FIVE 5
+
 /* Each main course's tournament, then the tournaments' total */
 #define TOURNAMENT_NAME_COUNT 7
 #define TOURNAMENT_NAME_SIZE 25
