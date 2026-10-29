@@ -43,7 +43,8 @@ enum HoleCreatureKind {
 /* Below the ball where a Cheep Cheep starts and ends */
 #define CHEEP_CHEEP_DEPTH 0x7800
 #define CHEEP_CHEEP_LEAP_SPEED 9216.0f /* Upwards */
-#define CHEEP_CHEEP_GRAVITY 524.0f
+/* Twice the course's gravity */
+#define CHEEP_CHEEP_GRAVITY (GRAVITY * 2)
 /* And the range of random speeds above it */
 #define CHEEP_CHEEP_MIN_SPEED 0x600
 #define CHEEP_CHEEP_SPEED_RANGE 0x600
@@ -51,7 +52,6 @@ enum HoleCreatureKind {
 /* Below the ball, over which a Cheep Cheep fades out */
 #define CHEEP_CHEEP_FADE_DEPTH 46080
 #define MONKEY_DROP_HEIGHT 0x9600 /* Above the cup */
-#define MONKEY_GRAVITY 262.0f
 /* The frames at which the monkey shows each of its later images */
 #define MONKEY_SECOND_FRAME 16
 #define MONKEY_THIRD_FRAME 20
@@ -405,7 +405,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     } else if (creature->state == HOLE_CREATURE_MONKEY) {
-      creature->velocity[1] += MONKEY_GRAVITY;
+      creature->velocity[1] += GRAVITY;
       creature->position[AXIS_Y] += creature->velocity[1];
       switch (++creature->frameCount) {
         case MONKEY_SECOND_FRAME:

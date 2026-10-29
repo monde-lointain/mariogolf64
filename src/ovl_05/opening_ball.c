@@ -694,7 +694,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] * 0.7f;
       simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] * 0.7f;
       simulation->velocity[AXIS_Y] =
-          (simulation->velocity[AXIS_Y] + 0x106) * 0.7f;
+          (simulation->velocity[AXIS_Y] + (s32)GRAVITY) * 0.7f;
       if (GetGroundOrWaterHeight(
               simulation->position[AXIS_X], simulation->position[AXIS_Z]) +
                   0x12C00 <
@@ -771,7 +771,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       if (simulation->position[AXIS_Y] >=
           g_HoleSetup.cupPosition[AXIS_Y] + 0xC00) {
         simulation->velocity[AXIS_Y] =
-            (f32)(-simulation->velocity[AXIS_Y] / 2) + 131.0f;
+            (f32)(-simulation->velocity[AXIS_Y] / 2) + CUP_GRAVITY;
         /* The chained assignment is there to match */
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_Z] = 0;
         if (simulation->velocity[AXIS_Y] > 0) {
@@ -781,7 +781,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         simulation->position[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y] + 0xC00;
       } else {
-        simulation->velocity[AXIS_Y] = simulation->velocity[AXIS_Y] + 131.0f;
+        simulation->velocity[AXIS_Y] =
+            simulation->velocity[AXIS_Y] + CUP_GRAVITY;
       }
     }
 
@@ -1016,7 +1017,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       }
 
       simulation->sideSpin = 0;
-      simulation->velocity[AXIS_Y] += 0x106;
+      simulation->velocity[AXIS_Y] += (s32)GRAVITY;
     }
 
     if (simulation->state == BALL_STATE_FLYING &&
@@ -1216,7 +1217,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
         BuildUnk44Rotation();
         simulation->sideSpin = 0;
-        simulation->velocity[AXIS_Y] += 0x106;
+        simulation->velocity[AXIS_Y] += (s32)GRAVITY;
       }
     }
 
@@ -1332,9 +1333,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         }
       }
 
-      slopeX = (-plane.normal[AXIS_X] * 262.0f) /
+      slopeX = (-plane.normal[AXIS_X] * GRAVITY) /
           AbsoluteValueExpression(plane.normal[AXIS_Y]);
-      slopeZ = (-plane.normal[AXIS_Z] * 262.0f) /
+      slopeZ = (-plane.normal[AXIS_Z] * GRAVITY) /
           AbsoluteValueExpression(plane.normal[AXIS_Y]);
       if (plane.normal[AXIS_Y] * plane.normal[AXIS_Y] <=
               (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
@@ -1379,15 +1380,16 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_GameState.isMiniGolf) {
         if (groundHeight - startY < simulation->velocity[AXIS_Y]) {
-          simulation->velocity[AXIS_Y] = groundHeight - startY + 0x20C;
+          simulation->velocity[AXIS_Y] =
+              groundHeight - startY + (s32)MINI_GOLF_ROLL_GRAVITY;
         } else {
-          simulation->velocity[AXIS_Y] += 0x20C;
+          simulation->velocity[AXIS_Y] += (s32)MINI_GOLF_ROLL_GRAVITY;
         }
       } else {
         if (groundHeight - startY < simulation->velocity[AXIS_Y]) {
-          simulation->velocity[AXIS_Y] = groundHeight - startY + 0x106;
+          simulation->velocity[AXIS_Y] = groundHeight - startY + (s32)GRAVITY;
         } else {
-          simulation->velocity[AXIS_Y] += 0x106;
+          simulation->velocity[AXIS_Y] += (s32)GRAVITY;
         }
       }
 
@@ -1518,7 +1520,7 @@ ROLLED:
       simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
           ((windZ - simulation->velocity[AXIS_Z]) * drag);
       simulation->velocity[AXIS_Y] = simulation->velocity[AXIS_Y] +
-          ((-simulation->velocity[AXIS_Y] * drag) + 262.0f);
+          ((-simulation->velocity[AXIS_Y] * drag) + GRAVITY);
     }
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {

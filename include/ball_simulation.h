@@ -1,6 +1,8 @@
 #ifndef BALL_SIMULATION_H
 #define BALL_SIMULATION_H
 
+#include "common.h"
+
 #include <ultra64.h>
 
 #include "club.h"
@@ -17,6 +19,11 @@ typedef f32 BallSpeed;
  * rounded to this many meters per second
  */
 #define METERS_PER_SECOND_PER_KILOMETER_PER_HOUR 0.2778
+/* In the cup the ball falls at half gravity */
+#define CUP_GRAVITY (GRAVITY / 2)
+/* Mini golf holds a rolling ball to the ground at twice gravity */
+#define MINI_GOLF_ROLL_GRAVITY (GRAVITY * 2)
+
 #define KilometersPerHour(kmh) \
   ((BallSpeed)((kmh) * METERS_PER_SECOND_PER_KILOMETER_PER_HOUR * \
       SPEED_UNITS_PER_METER_PER_SECOND))

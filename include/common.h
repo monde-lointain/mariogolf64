@@ -35,6 +35,10 @@ typedef s32 CoursePoint[AXIS_COUNT];
 #define METERS_PER_UNIT 0.00006510417f
 #define FEET_PER_YARD 3
 
+/* What a falling ball or creature gains in downward speed each frame, in
+ * course units a frame */
+#define GRAVITY 262.0f
+
 /* A 4 by 4 matrix of floats, indexed by row and then column */
 typedef f32 Mat4[4][4];
 

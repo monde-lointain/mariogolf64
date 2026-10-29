@@ -258,6 +258,10 @@ void ResetBallSimulations(void) {
 #define CUP_PULL_RISE 307.2f
 #define MIN_CUP_PULL 46.079998f
 
+/* Gravity pulls a rolling ball down a slope by up to this */
+#define SLOPE_ACCELERATION (GRAVITY * 3 / 4)
+#define MAX_SLOPE_ACCELERATION (GRAVITY / 2)
+
 /*
  * Moves the simulated ball through one step, with a second substep when the
  * ball bounces within the first 40% of its path. Each substep tests the path
@@ -809,7 +813,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->unkA1 = TRUE;
       velocity[AXIS_X] *= 0.7f;
       velocity[AXIS_Z] *= 0.7f;
-      velocity[AXIS_Y] = (velocity[AXIS_Y] + 262.0f) * 0.7f;
+      velocity[AXIS_Y] = (velocity[AXIS_Y] + GRAVITY) * 0.7f;
       if (simulation->position[AXIS_Y] <=
           GetGroundOrWaterHeight(
               simulation->position[AXIS_X], simulation->position[AXIS_Z]) +
@@ -910,7 +914,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         /* The chained assignment is there to match */
         velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
-        velocity[AXIS_Y] = (-fallSpeed * 0.5f) + 131.0f;
+        velocity[AXIS_Y] = (-fallSpeed * 0.5f) + CUP_GRAVITY;
         if (velocity[AXIS_Y] > 0.0f) {
           simulation->isHoledOut = 1;
           simulation->state = BALL_STATE_STOPPED;
@@ -938,7 +942,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         simulation->position[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y] + 0xC00;
       } else {
-        velocity[AXIS_Y] += 131.0f;
+        velocity[AXIS_Y] += CUP_GRAVITY;
       }
     }
 
@@ -1245,7 +1249,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       }
 
       simulation->sideSpin = 0;
-      velocity[AXIS_Y] += 262.0f;
+      velocity[AXIS_Y] += GRAVITY;
     }
 
     if (simulation->state == BALL_STATE_FLYING &&
@@ -1597,7 +1601,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
         BuildUnk44Rotation();
         simulation->sideSpin = 0;
-        velocity[AXIS_Y] += 262.0f;
+        velocity[AXIS_Y] += GRAVITY;
       }
     }
 
@@ -1755,13 +1759,13 @@ TAKE_OFF:
         }
       }
 
-      slopeX = (-plane.normal[AXIS_X] * 196.5f) /
+      slopeX = (-plane.normal[AXIS_X] * SLOPE_ACCELERATION) /
           AbsoluteValue(plane.normal[AXIS_Y]);
-      slopeZ = (-plane.normal[AXIS_Z] * 196.5f) /
+      slopeZ = (-plane.normal[AXIS_Z] * SLOPE_ACCELERATION) /
           AbsoluteValue(plane.normal[AXIS_Y]);
-      if (fabsf((f32)slopeX) + fabsf((f32)slopeZ) >= 131.0f) {
-        f32 scale =
-            131.0f / sqrtf(((f32)slopeX * slopeX) + ((f32)slopeZ * slopeZ));
+      if (fabsf((f32)slopeX) + fabsf((f32)slopeZ) >= MAX_SLOPE_ACCELERATION) {
+        f32 scale = MAX_SLOPE_ACCELERATION /
+            sqrtf(((f32)slopeX * slopeX) + ((f32)slopeZ * slopeZ));
 
         slopeX = slopeX * scale;
         slopeZ = slopeZ * scale;
@@ -1828,15 +1832,16 @@ TAKE_OFF:
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_GameState.isMiniGolf) {
         if ((f32)(groundHeight - startY) < velocity[AXIS_Y]) {
-          velocity[AXIS_Y] = groundHeight - startY + 0x20C;
+          velocity[AXIS_Y] =
+              groundHeight - startY + (s32)MINI_GOLF_ROLL_GRAVITY;
         } else {
-          velocity[AXIS_Y] += 524.0f;
+          velocity[AXIS_Y] += MINI_GOLF_ROLL_GRAVITY;
         }
       } else {
         if ((f32)(groundHeight - startY) < velocity[AXIS_Y]) {
-          velocity[AXIS_Y] = groundHeight - startY + 0x106;
+          velocity[AXIS_Y] = groundHeight - startY + (s32)GRAVITY;
         } else {
-          velocity[AXIS_Y] += 262.0f;
+          velocity[AXIS_Y] += GRAVITY;
         }
       }
 
@@ -1963,7 +1968,7 @@ ROLLED:
         }
 
         velocity[AXIS_X] += (windX - velocity[AXIS_X]) * drag;
-        velocity[AXIS_Y] += (-velocity[AXIS_Y] * drag) + 262.0f;
+        velocity[AXIS_Y] += (-velocity[AXIS_Y] * drag) + GRAVITY;
         velocity[AXIS_Z] += (windZ - velocity[AXIS_Z]) * drag;
       }
     }
