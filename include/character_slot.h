@@ -290,7 +290,7 @@ enum CharacterLighting {
   CHARACTER_LIGHTING_BLACK
 };
 
-extern CharacterSlot g_ResidentCharacterSlotList[CHARACTER_SLOT_COUNT];
+extern CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT];
 
 /* Display lists drawn before the characters, rebuilt by SetCharacterAlpha and
  * SetCharacterHilite */
