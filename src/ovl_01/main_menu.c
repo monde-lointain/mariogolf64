@@ -793,7 +793,7 @@ static Mat4 D_80231CE0_ovl_01;
 static LookAt D_80231D20_ovl_01[2];
 static Mtx D_80231D60_ovl_01[MAX_PLAYER_COUNT][2];
 static Mtx D_80231F60_ovl_01;
-static f32 D_80231FA0_ovl_01[MAX_PLAYER_COUNT];
+static f32 f_MenuCharacterScales[MAX_PLAYER_COUNT];
 static Mtx D_80231FB0_ovl_01[2];
 static Mtx D_80232030_ovl_01;
 /* Read by no routine */
@@ -5151,24 +5151,24 @@ void func_80200EF0_ovl_01(Gfx** displayListHead) {
   characterCount += (rival >= 0);
   switch (characterCount) {
     case 1:
-      D_80231FA0_ovl_01[0] = 5.0f;
+      f_MenuCharacterScales[0] = 5.0f;
       break;
     case 2:
-      D_80231FA0_ovl_01[0] = (rival >= 0) ? 5.0f : 4.0f;
-      D_80231FA0_ovl_01[1] = 4.0f;
+      f_MenuCharacterScales[0] = (rival >= 0) ? 5.0f : 4.0f;
+      f_MenuCharacterScales[1] = 4.0f;
       break;
     case 3:
     case 4:
-      D_80231FA0_ovl_01[0] = 3.5f;
-      D_80231FA0_ovl_01[1] = 3.4f;
-      D_80231FA0_ovl_01[2] = 3.4f;
-      D_80231FA0_ovl_01[3] = 3.5f;
+      f_MenuCharacterScales[0] = 3.5f;
+      f_MenuCharacterScales[1] = 3.4f;
+      f_MenuCharacterScales[2] = 3.4f;
+      f_MenuCharacterScales[3] = 3.5f;
       break;
     default:
-      D_80231FA0_ovl_01[0] = 4.0f;
-      D_80231FA0_ovl_01[1] = 4.0f;
-      D_80231FA0_ovl_01[2] = 4.0f;
-      D_80231FA0_ovl_01[3] = 4.0f;
+      f_MenuCharacterScales[0] = 4.0f;
+      f_MenuCharacterScales[1] = 4.0f;
+      f_MenuCharacterScales[2] = 4.0f;
+      f_MenuCharacterScales[3] = 4.0f;
       break;
   }
 
@@ -5236,9 +5236,9 @@ void func_80200EF0_ovl_01(Gfx** displayListHead) {
     raise = (character == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
     translation[1] = D_8022FA68_ovl_01[layout][slot][1] + raise;
     translation[2] = D_8022FA68_ovl_01[layout][slot][2];
-    scale[0] = D_80231FA0_ovl_01[slot];
-    scale[1] = D_80231FA0_ovl_01[slot];
-    scale[2] = D_80231FA0_ovl_01[slot];
+    scale[0] = f_MenuCharacterScales[slot];
+    scale[1] = f_MenuCharacterScales[slot];
+    scale[2] = f_MenuCharacterScales[slot];
     BuildTransformMatrix(transform, rotation, translation, scale);
     ConvertMatrixToFixed(
         transform, &D_80231D60_ovl_01[slot][g_DrawBufferIndex]);

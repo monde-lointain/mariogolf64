@@ -54,21 +54,21 @@ rom:0xE9F64 reloc:MIPS_LO16 symbol:D_8022F97C_ovl_01 addend:0x4
 // func_80202000_ovl_01 reads each D_8022FC48_ovl_01 corner's y; name the table, not the field
 rom:0xEDDBC reloc:MIPS_HI16 symbol:D_8022FC48_ovl_01 addend:0x2
 rom:0xEDDC4 reloc:MIPS_LO16 symbol:D_8022FC48_ovl_01 addend:0x2
-// func_80200EF0_ovl_01 sets D_80231FA0_ovl_01's later elements; name the table, not the element
-rom:0xEAFD4 reloc:MIPS_HI16 symbol:D_80231FA0_ovl_01 addend:0x4
-rom:0xEAFDC reloc:MIPS_LO16 symbol:D_80231FA0_ovl_01 addend:0x4
-rom:0xEAFFC reloc:MIPS_HI16 symbol:D_80231FA0_ovl_01 addend:0x4
-rom:0xEB000 reloc:MIPS_LO16 symbol:D_80231FA0_ovl_01 addend:0x4
-rom:0xEB004 reloc:MIPS_HI16 symbol:D_80231FA0_ovl_01 addend:0x8
-rom:0xEB008 reloc:MIPS_LO16 symbol:D_80231FA0_ovl_01 addend:0x8
-rom:0xEB00C reloc:MIPS_HI16 symbol:D_80231FA0_ovl_01 addend:0xC
-rom:0xEB014 reloc:MIPS_LO16 symbol:D_80231FA0_ovl_01 addend:0xC
-rom:0xEB028 reloc:MIPS_HI16 symbol:D_80231FA0_ovl_01 addend:0x4
-rom:0xEB02C reloc:MIPS_LO16 symbol:D_80231FA0_ovl_01 addend:0x4
-rom:0xEB030 reloc:MIPS_HI16 symbol:D_80231FA0_ovl_01 addend:0x8
-rom:0xEB034 reloc:MIPS_LO16 symbol:D_80231FA0_ovl_01 addend:0x8
-rom:0xEB038 reloc:MIPS_HI16 symbol:D_80231FA0_ovl_01 addend:0xC
-rom:0xEB03C reloc:MIPS_LO16 symbol:D_80231FA0_ovl_01 addend:0xC
+// func_80200EF0_ovl_01 sets f_MenuCharacterScales's later elements; name the table, not the element
+rom:0xEAFD4 reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0x4
+rom:0xEAFDC reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0x4
+rom:0xEAFFC reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0x4
+rom:0xEB000 reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0x4
+rom:0xEB004 reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0x8
+rom:0xEB008 reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0x8
+rom:0xEB00C reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0xC
+rom:0xEB014 reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0xC
+rom:0xEB028 reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0x4
+rom:0xEB02C reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0x4
+rom:0xEB030 reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0x8
+rom:0xEB034 reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0x8
+rom:0xEB038 reloc:MIPS_HI16 symbol:f_MenuCharacterScales addend:0xC
+rom:0xEB03C reloc:MIPS_LO16 symbol:f_MenuCharacterScales addend:0xC
 // func_80217D20_ovl_01 sets D_8023BFC0_ovl_01's later elements; name the table, not the element
 rom:0x101D68 reloc:MIPS_HI16 symbol:D_8023BFC0_ovl_01 addend:0x4
 rom:0x101D70 reloc:MIPS_LO16 symbol:D_8023BFC0_ovl_01 addend:0x4
