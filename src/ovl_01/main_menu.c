@@ -323,7 +323,7 @@ extern void* D_801B93E0[5];
 void InitPlay(s32 kind);
 void DrawModeSelect(Gfx** displayListHead);
 void func_80201574_ovl_01(Gfx** displayListHead);
-void func_80202000_ovl_01(Gfx** displayListHead);
+void DrawCourseSelect(Gfx** displayListHead);
 void DrawMainMenu(Gfx** displayListHead);
 void DrawMainMenuWithoutTransmit(Gfx** displayListHead);
 void DrawClubhouse(Gfx** displayListHead);
@@ -342,8 +342,8 @@ void func_801F6B28_ovl_01(void);
 void UpdateMenuTitleScreen(void);
 void func_801F7CD0_ovl_01(void);
 void UpdateModeSelect(void);
-void func_801F8BAC_ovl_01(void);
-void func_801F93D8_ovl_01(void);
+void UpdateCourseSelect(void);
+void UpdateMiniGolfCourseSelect(void);
 void UpdateMainMenu(void);
 void UpdateMainMenuWithoutTransmit(void);
 void UpdateClubhouse(void);
@@ -1051,9 +1051,9 @@ void UpdateMenus(void) {
 
     case MENU_SCREEN_COURSE_SELECT:
       if (!g_GameState.isMiniGolf) {
-        func_801F8BAC_ovl_01();
+        UpdateCourseSelect();
       } else {
-        func_801F93D8_ovl_01();
+        UpdateMiniGolfCourseSelect();
       }
 
       break;
@@ -2477,7 +2477,7 @@ void UpdateModeSelect(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", UpdateModeSelect);
 #endif
 
-void func_801F8BAC_ovl_01(void) {
+void UpdateCourseSelect(void) {
   EncodedAsset asset;
   AssetFile file;
 
@@ -2673,7 +2673,7 @@ void func_801F8BAC_ovl_01(void) {
  * (4 opcodes).
  */
 #ifdef NON_MATCHING
-void func_801F93D8_ovl_01(void) {
+void UpdateMiniGolfCourseSelect(void) {
   EncodedAsset asset;
   s32 unused[4];
   Boolean isDone;
@@ -2916,7 +2916,7 @@ void func_801F93D8_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F93D8_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", UpdateMiniGolfCourseSelect);
 #endif
 
 void func_801F9BCC_ovl_01(void) {
@@ -3700,7 +3700,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
     case MENU_SCREEN_COURSE_SELECT:
     case MENU_SCREEN_UNK20:
     case MENU_SCREEN_UNK22:
-      func_80202000_ovl_01(&gfx);
+      DrawCourseSelect(&gfx);
       break;
     case MENU_SCREEN_UNK18:
       func_80207E18_ovl_01(&gfx);
@@ -5598,7 +5598,7 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
  * trophies' loads differently.
  */
 #ifdef NON_MATCHING
-void func_80202000_ovl_01(Gfx** displayListHead) {
+void DrawCourseSelect(Gfx** displayListHead) {
   Gfx* gfx;
   u16 perspNorm;
   u16 wheelPerspNorm;
@@ -6206,7 +6206,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80202000_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelect);
 #endif
 
 /*
