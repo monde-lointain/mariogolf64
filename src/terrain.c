@@ -100,6 +100,19 @@ typedef struct MapOverviewControls {
 #define WATER_BIAS 0x266
 #define LOWERED_WATER_BIAS (-0x600)
 
+/* A point within this of the ground's edges, 1 m, has no surface */
+#define SURFACE_EDGE_MARGIN ((s32)UNITS_PER_METER)
+/*
+ * Whether a coordinate lies within SURFACE_EDGE_MARGIN of either end of a
+ * ground side; the unsigned compare catches both ends at once
+ */
+#define IsInSurfaceEdgeMargin(coordinate, sideSize) \
+  ((u32)((coordinate) - SURFACE_EDGE_MARGIN) > \
+      (sideSize) - (SURFACE_EDGE_MARGIN * 2) - 1)
+/* Mini golf spreads the terrain code grid over its smaller ground */
+#define MINI_GOLF_TEXEL_WIDTH (MINI_GOLF_GROUND_SIZE / CODE_GRID_COLUMN_COUNT)
+#define MINI_GOLF_TEXEL_LENGTH (MINI_GOLF_GROUND_SIZE / CODE_GRID_ROW_COUNT)
+
 /* f_TerrainColors' entries, named for the terrain codes drawn in them */
 enum TerrainColorIndex {
   TERRAIN_COLOR_FAIRWAY,
@@ -425,10 +438,10 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
 
   shiftedX = x;
   shiftedZ = z;
-  shiftedX -= 0x800;
-  shiftedZ -= 0x400;
-  if ((u32)(shiftedX - 0x3C00) > 0xF87FF ||
-      (u32)(shiftedZ - 0x3C00) > 0xF87FF) {
+  shiftedX -= MINI_GOLF_TEXEL_WIDTH / 2;
+  shiftedZ -= MINI_GOLF_TEXEL_LENGTH / 2;
+  if (IsInSurfaceEdgeMargin(shiftedX, MINI_GOLF_GROUND_SIZE) ||
+      IsInSurfaceEdgeMargin(shiftedZ, MINI_GOLF_GROUND_SIZE)) {
     return SURFACE_OUT_OF_COURSE;
   }
 
@@ -457,10 +470,16 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     }
   }
 
-  column = shiftedX / 4096;
-  row = shiftedZ / 2048;
-  stepColumn = ((shiftedX & 0xFFF) < 0x800) ? -1 : 1;
-  stepRow = ((shiftedZ & 0x7FF) < 0x400) ? -1 : 1;
+  column = shiftedX / MINI_GOLF_TEXEL_WIDTH;
+  row = shiftedZ / MINI_GOLF_TEXEL_LENGTH;
+  stepColumn =
+      ((shiftedX & (MINI_GOLF_TEXEL_WIDTH - 1)) < MINI_GOLF_TEXEL_WIDTH / 2)
+      ? -1
+      : 1;
+  stepRow =
+      ((shiftedZ & (MINI_GOLF_TEXEL_LENGTH - 1)) < MINI_GOLF_TEXEL_LENGTH / 2)
+      ? -1
+      : 1;
   for (i = 0; i < 4; i++) {
     switch (GetTerrainCode((i & 1) ? column + stepColumn : column,
         (i & 2) ? row + stepRow : row)) {
@@ -567,11 +586,11 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     return GetMiniGolfSurface(x, z, lowersWaterLevel);
   }
 
-  if ((u32)(x - 0x3C00) > 0x3F87FF) {
+  if (IsInSurfaceEdgeMargin(x, GROUND_WIDTH)) {
     return SURFACE_OUT_OF_COURSE;
   }
 
-  if ((u32)(z - 0x3C00) > 0x7F87FF) {
+  if (IsInSurfaceEdgeMargin(z, GROUND_LENGTH)) {
     return SURFACE_OUT_OF_COURSE;
   }
 
