@@ -53,6 +53,23 @@
 #define STATS_GRID_COLUMN_COUNT 5
 #define STATS_GRID_ROW_COUNT 4
 #define STATS_CELL_EMPTY -1
+
+/* The rows of the Best Shots grid, by score kind */
+enum BestShotRow {
+  BEST_SHOT_ROW_BIRDIE,
+  BEST_SHOT_ROW_EAGLE,
+  BEST_SHOT_ROW_ALBATROSS,
+  BEST_SHOT_ROW_HOLE_IN_ONE
+};
+
+/* The order in which ReadBestShots gathers the kinds before laying them out */
+enum GatheredBestShots {
+  GATHERED_BIRDIES,
+  GATHERED_EAGLES,
+  GATHERED_HOLES_IN_ONE,
+  GATHERED_ALBATROSSES
+};
+
 /* ReadBestShots lists each kind's records in rows one longer than the grid */
 #define STATS_KIND_LIST_SIZE (STATS_GRID_COLUMN_COUNT + 1)
 
@@ -2205,10 +2222,10 @@ void ReadBestShots(void) {
   InitSram();
   TransferSaveData(save, FALSE);
   for (recordIndex = 0; recordIndex != STATS_GRID_COLUMN_COUNT; recordIndex++) {
-    kindRecords[0][recordIndex] = STATS_CELL_EMPTY;
-    kindRecords[1][recordIndex] = STATS_CELL_EMPTY;
-    kindRecords[2][recordIndex] = STATS_CELL_EMPTY;
-    kindRecords[3][recordIndex] = STATS_CELL_EMPTY;
+    kindRecords[GATHERED_BIRDIES][recordIndex] = STATS_CELL_EMPTY;
+    kindRecords[GATHERED_EAGLES][recordIndex] = STATS_CELL_EMPTY;
+    kindRecords[GATHERED_HOLES_IN_ONE][recordIndex] = STATS_CELL_EMPTY;
+    kindRecords[GATHERED_ALBATROSSES][recordIndex] = STATS_CELL_EMPTY;
   }
 
   birdieCount = 0;
@@ -2221,25 +2238,25 @@ void ReadBestShots(void) {
       switch (flags & SCORE_KIND_MASK) {
         case SCORE_KIND_BIRDIE:
           if (birdieCount < STATS_GRID_COLUMN_COUNT) {
-            kindRecords[0][birdieCount++] = recordIndex;
+            kindRecords[GATHERED_BIRDIES][birdieCount++] = recordIndex;
           }
 
           break;
         case SCORE_KIND_EAGLE:
           if (eagleCount < STATS_GRID_COLUMN_COUNT) {
-            kindRecords[1][eagleCount++] = recordIndex;
+            kindRecords[GATHERED_EAGLES][eagleCount++] = recordIndex;
           }
 
           break;
         case SCORE_KIND_ALBATROSS:
           if (albatrossCount < STATS_GRID_COLUMN_COUNT) {
-            kindRecords[3][albatrossCount++] = recordIndex;
+            kindRecords[GATHERED_ALBATROSSES][albatrossCount++] = recordIndex;
           }
 
           break;
         case SCORE_KIND_HOLE_IN_ONE:
           if (holeInOneCount < STATS_GRID_COLUMN_COUNT) {
-            kindRecords[2][holeInOneCount++] = recordIndex;
+            kindRecords[GATHERED_HOLES_IN_ONE][holeInOneCount++] = recordIndex;
           }
 
           break;
@@ -2247,23 +2264,23 @@ void ReadBestShots(void) {
     }
   }
 
-  row = 0;
+  row = BEST_SHOT_ROW_BIRDIE;
   memory = func_8005AF74();
   column = row;
   if (birdieCount == 0) {
     if (eagleCount != 0) {
-      row = 1;
+      row = BEST_SHOT_ROW_EAGLE;
     } else if (albatrossCount != 0) {
-      row = 2;
+      row = BEST_SHOT_ROW_ALBATROSS;
     } else if (holeInOneCount != 0) {
-      row = 3;
+      row = BEST_SHOT_ROW_HOLE_IN_ONE;
     }
   }
 
   switch (memory->bestShotRow) {
-    case 0:
+    case BEST_SHOT_ROW_BIRDIE:
       if (birdieCount != 0) {
-        row = 0;
+        row = BEST_SHOT_ROW_BIRDIE;
         if (memory->bestShotColumn < birdieCount &&
             memory->bestShotColumn >= 0) {
           column = memory->bestShotColumn;
@@ -2271,9 +2288,9 @@ void ReadBestShots(void) {
       }
 
       break;
-    case 1:
+    case BEST_SHOT_ROW_EAGLE:
       if (eagleCount != 0) {
-        row = 1;
+        row = BEST_SHOT_ROW_EAGLE;
         if (memory->bestShotColumn < eagleCount &&
             memory->bestShotColumn >= 0) {
           column = memory->bestShotColumn;
@@ -2281,9 +2298,9 @@ void ReadBestShots(void) {
       }
 
       break;
-    case 2:
+    case BEST_SHOT_ROW_ALBATROSS:
       if (albatrossCount != 0) {
-        row = 2;
+        row = BEST_SHOT_ROW_ALBATROSS;
         if (memory->bestShotColumn < albatrossCount &&
             memory->bestShotColumn >= 0) {
           column = memory->bestShotColumn;
@@ -2291,9 +2308,9 @@ void ReadBestShots(void) {
       }
 
       break;
-    case 3:
+    case BEST_SHOT_ROW_HOLE_IN_ONE:
       if (holeInOneCount != 0) {
-        row = 3;
+        row = BEST_SHOT_ROW_HOLE_IN_ONE;
         if (memory->bestShotColumn < holeInOneCount &&
             memory->bestShotColumn >= 0) {
           column = memory->bestShotColumn;
@@ -2306,10 +2323,14 @@ void ReadBestShots(void) {
   memory->bestShotColumn = column;
   memory->bestShotRow = row;
   for (recordIndex = 0; recordIndex != STATS_GRID_COLUMN_COUNT; recordIndex++) {
-    f_BestShotRecords[0][recordIndex] = kindRecords[0][recordIndex];
-    f_BestShotRecords[1][recordIndex] = kindRecords[1][recordIndex];
-    f_BestShotRecords[2][recordIndex] = kindRecords[3][recordIndex];
-    f_BestShotRecords[3][recordIndex] = kindRecords[2][recordIndex];
+    f_BestShotRecords[BEST_SHOT_ROW_BIRDIE][recordIndex] =
+        kindRecords[GATHERED_BIRDIES][recordIndex];
+    f_BestShotRecords[BEST_SHOT_ROW_EAGLE][recordIndex] =
+        kindRecords[GATHERED_EAGLES][recordIndex];
+    f_BestShotRecords[BEST_SHOT_ROW_ALBATROSS][recordIndex] =
+        kindRecords[GATHERED_ALBATROSSES][recordIndex];
+    f_BestShotRecords[BEST_SHOT_ROW_HOLE_IN_ONE][recordIndex] =
+        kindRecords[GATHERED_HOLES_IN_ONE][recordIndex];
   }
 
   recordIndex = 0;
