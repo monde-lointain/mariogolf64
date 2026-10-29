@@ -2166,8 +2166,8 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
       /* Repeats the cell's code in every half byte of a word */
       fill = (cell << TERRAIN_CODE_BITS) | cell;
       block = g_TerrainCodeBlockCount++;
-      fill |= fill << 8;
-      fill |= fill << 16;
+      fill |= fill << BITS_PER_BYTE;
+      fill |= fill << (BITS_PER_BYTE * 2);
       word =
           (u32*)&g_WorkArea.hole.terrainCodes[block * TERRAIN_CODE_BLOCK_SIZE];
       for (i = 0; i < TERRAIN_CODE_BLOCK_WORD_COUNT; i++) {
