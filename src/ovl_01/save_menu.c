@@ -2446,13 +2446,13 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
   GetSaveData();
   func_8005AF74();
   gDPLoadTLUT_pal256(gfx++,
-      TextureAddress((u32)f_CourseImageBuffers[f_ShownCourseBufferIndex] +
-          IMAGE_HEADER_SIZE));
+      TextureAddress(
+          ImageBody(f_CourseImageBuffers[f_ShownCourseBufferIndex])));
   for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT;
       stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)f_CourseImageBuffers[f_ShownCourseBufferIndex] +
-            LARGE_PALETTED_TEXELS_OFFSET +
+        TextureAddress(
+            LargeImageTexels(f_CourseImageBuffers[f_ShownCourseBufferIndex]) +
             (stripIndex * COURSE_THUMBNAIL_WIDTH *
                 COURSE_THUMBNAIL_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_THUMBNAIL_WIDTH,
@@ -2487,8 +2487,6 @@ void func_8022644C_ovl_01(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
   for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT;
       stripIndex++) {
-    /* The course and chosen course buffers are adjacent; D_80230B4E picks one
-     */
     gDPLoadTextureBlock(gfx++,
         TextureAddress((u32)f_CourseImageBuffers[f_ShownCourseBufferIndex] +
             (stripIndex * COURSE_THUMBNAIL_WIDTH *
