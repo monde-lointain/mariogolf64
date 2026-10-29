@@ -137,7 +137,7 @@ void GrantEveryTournamentPlace(void) {
   TransferSaveData(save, FALSE);
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (place = 0; place != TOURNAMENT_PLACE_COUNT; place++) {
-      save->unkE98[courseIndex].hasPlace[place] = TRUE;
+      save->courseStats[courseIndex].hasPlace[place] = TRUE;
     }
   }
 

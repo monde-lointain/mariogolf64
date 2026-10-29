@@ -1787,7 +1787,7 @@ void ComputeRoundStatistics(void) {
   f32 emptyCount; /* Only ever zero */
   f32 holeCount;
 
-  saved = GetSaveData()->unkE98;
+  saved = GetSaveData()->courseStats;
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     entry = &saved[courseIndex];
     D_80105C38[courseIndex].roundCount = entry->roundCount;

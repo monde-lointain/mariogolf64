@@ -491,7 +491,7 @@ typedef struct SaveData {
                             [BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
   /* 0x0E08 */ s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
   /* 0x0E50 */ s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x0E98 */ CourseStats unkE98[COURSE_COUNT];
+  /* 0x0E98 */ CourseStats courseStats[COURSE_COUNT];
   /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
   /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
   /* 0x1344 */ s8 unk1344[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT]

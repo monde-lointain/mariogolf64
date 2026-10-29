@@ -114,7 +114,7 @@ void RecordTournamentPlace(void) {
   s32 index;
   TournamentStanding* standing;
 
-  stats = &GetSaveData()->unkE98[g_GameState.courseIndex];
+  stats = &GetSaveData()->courseStats[g_GameState.courseIndex];
   hasPlace = FALSE;
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     RankTournament(GetLastHoleIndex() + 1, 0,

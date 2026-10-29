@@ -3374,7 +3374,7 @@ typedef struct SaveRecords {
   s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
   s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
   s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
-  CourseStats unkE98[COURSE_COUNT];
+  CourseStats courseStats[COURSE_COUNT];
   u8 unk1150[0x1320 - 0x1150];
   s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
 } SaveRecords;
@@ -3427,7 +3427,7 @@ void BuildStatusData(u8* status) {
 
   memset(status, 0, STATUS_CLEARED_SIZE);
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-    entry = &save->unkE98[courseIndex];
+    entry = &save->courseStats[courseIndex];
     course = &data->courses[courseIndex];
 
     /* Testing for zero first is there to match */
@@ -3563,7 +3563,7 @@ void BuildStatusData(u8* status) {
     course->places = 0;
     for (index = 0; index != CHARACTER_COUNT; index++) {
       for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-        scores = &save->unkE98[courseIndex];
+        scores = &save->courseStats[courseIndex];
         if (scores->hasCharacterBestScore[index] == TRUE) {
           course->characterBestScores[index] =
               scores->characterBestScores[index] + STATUS_SCORE_BIAS;
@@ -3573,7 +3573,7 @@ void BuildStatusData(u8* status) {
 
       if (courseIndex < COURSE_COUNT) {
         for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-          scores = &save->unkE98[courseIndex];
+          scores = &save->courseStats[courseIndex];
           if (scores->hasCharacterBestScore[index] == TRUE &&
               course->characterBestScores[index] >
                   scores->characterBestScores[index] + STATUS_SCORE_BIAS) {

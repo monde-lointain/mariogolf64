@@ -333,7 +333,7 @@ void UpdateContest(Boolean isHoleOver) {
  * moving.
  */
 void RecordCourseRound(void) {
-  CourseStats* record = &GetSaveData()->unkE98[g_GameState.courseIndex];
+  CourseStats* record = &GetSaveData()->courseStats[g_GameState.courseIndex];
   RoundStats* stats = &g_RoundStats;
   CourseRecord* course = &g_CourseRecords[g_GameState.courseIndex];
   Boolean isAtRoundLimit;
@@ -509,7 +509,7 @@ void StartRoundStats(void) {
 
   /* The pointer arithmetic is there to match */
   g_RoundStats.longestDrive =
-      (save->unkE98 + g_GameState.courseIndex)->longestDrive;
+      (save->courseStats + g_GameState.courseIndex)->longestDrive;
   g_RoundStats.averagedDriveTotal = 0;
   g_RoundStats.isDriveAveraged = FALSE;
 }
@@ -526,7 +526,7 @@ void RestartRoundStats(void) {
 
   /* The pointer arithmetic is there to match */
   g_RoundStats.longestDrive =
-      (save->unkE98 + g_GameState.courseIndex)->longestDrive;
+      (save->courseStats + g_GameState.courseIndex)->longestDrive;
   g_RoundStats.isDriveAveraged = FALSE;
 }
 

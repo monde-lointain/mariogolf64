@@ -2172,7 +2172,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
 
       switch (f_ResultsUnk78) {
         case TOURNAMENT_STEP_START:
-          record = &GetSaveData()->unkE98[g_GameState.courseIndex];
+          record = &GetSaveData()->courseStats[g_GameState.courseIndex];
           f_ResultsUnk78 = TOURNAMENT_STEP_SHOWN;
           if (record->roundCount <= 0 ||
               record->bestScore >= f_PlayerResults[0]) {
