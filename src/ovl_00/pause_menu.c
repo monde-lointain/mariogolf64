@@ -181,6 +181,10 @@ typedef struct ChoiceBox {
 #define COLOR_WAVE_MIDDLE 127
 #define COLOR_WAVE_AMPLITUDE 127.0f
 
+/* Not static: the original left these to the linker's common block */
+f32 g_LiePanelPosition[2];
+f32 g_WindPanelPosition[2];
+
 /* Written once the menu is drawn and cleared by its input, but never read */
 static s32 f_PauseMenuDrawnMarker = 0;
 static s32 f_PauseSelection = 0;

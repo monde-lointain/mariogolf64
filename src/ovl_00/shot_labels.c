@@ -148,6 +148,10 @@ static s8 f_TagOffsetsY[CORNER_COUNT] = {12, 12, -12, -12};
 static Radians f_OutOfBoundsPulseAngle = 0.0f;
 static s32 f_PinFlagWaveFrame = 0;
 
+/* Read by no routine */
+/* Not static: the original left it to the linker's common block */
+u8 D_8022D68C_ovl_00[4];
+
 void DrawShotLabels(Gfx** displayListHead);
 void DrawShotPreview(CameraMatrices* matrices);
 /*

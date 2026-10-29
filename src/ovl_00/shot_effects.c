@@ -145,6 +145,10 @@ static Mtx f_SwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
 static f32 f_SwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH][3];
 static f32 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 
+/* Read by no routine */
+/* Not static: the original left it to the linker's common block */
+u8 D_8022D660_ovl_00[0x18];
+
 void ResetShotEffects(void) {
   s32 i;
 

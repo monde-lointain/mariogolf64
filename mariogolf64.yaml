@@ -605,7 +605,13 @@ segments:
       - { type: .bss, vram: 0x80228000, name: ovl_00/shot_effects }
       - { type: .bss, vram: 0x8022B530, name: ovl_00/pause_menu }
       - { type: .bss, vram: 0x8022B540, name: ovl_00/club_panel }
-      - { type: bss, vram: 0x8022B5C0, name: bss_8022B5C0 }
+      - { type: .bss, vram: 0x8022B5C0, name: ovl_00/turn, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022B5D0, name: ovl_00/hole_objects, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022BC60, name: ovl_00/round_events, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022D660, name: ovl_00/shot_effects, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022D678, name: ovl_00/pause_menu, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022D68C, name: ovl_00/shot_labels, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022D690, name: ovl_00/club_panel, linker_section: COMMON .scommon }
 
   - name: ovl_01
     type: code
