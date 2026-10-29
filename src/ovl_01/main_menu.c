@@ -62,11 +62,15 @@
 #define MAIN_CHOICE_FULL_OPTIONS 3
 #define MAIN_CHOICE_COUNT 4
 
-/* The clubhouse's rows, and the rooms that D_8022BF1C gives each of them */
+/*
+ * The clubhouse's rows, and the rooms that D_8022BF1C gives each of them. The
+ * rooms index ASSET_CLUBHOUSE_LABELS, whose labels read Tournament, Best
+ * Shots, Ring Shot, a blank for the birdie badges, VS. Records and Speed Golf.
+ */
 #define CLUBHOUSE_CHOICE_COUNT 5
 #define CLUBHOUSE_ROOM_COURSE_STATS 0
-#define CLUBHOUSE_ROOM_UNK12 1
-#define CLUBHOUSE_ROOM_UNK13 2
+#define CLUBHOUSE_ROOM_BEST_SHOTS 1
+#define CLUBHOUSE_ROOM_RING_SHOT 2
 #define CLUBHOUSE_ROOM_BIRDIE_BADGES 3
 #define CLUBHOUSE_ROOM_CHARACTER_TABLE 4
 #define CLUBHOUSE_ROOM_BEST_TIMES 5
@@ -488,7 +492,8 @@ static u8 D_8022BEEC_ovl_01[4][12] = {
     {2, 8, 3}, {2, 6, 7, 10, 5}, {2, 7, 10, 5}, {2, 7, 10, 5}};
 static s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_COURSE_STATS, CLUBHOUSE_ROOM_CHARACTER_TABLE,
-    CLUBHOUSE_ROOM_BEST_TIMES, CLUBHOUSE_ROOM_UNK13, CLUBHOUSE_ROOM_UNK12};
+    CLUBHOUSE_ROOM_BEST_TIMES, CLUBHOUSE_ROOM_RING_SHOT,
+    CLUBHOUSE_ROOM_BEST_SHOTS};
 /* Read by no routine; the one room that D_8022BF1C leaves out */
 static s16 D_8022BF26_ovl_01 = CLUBHOUSE_ROOM_BIRDIE_BADGES;
 /* The plain-text menu's names; DrawMenuTitleScreen prints the first three */
@@ -3062,11 +3067,11 @@ void UpdateClubhouse(void) {
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_COURSE_STATS;
           break;
-        case CLUBHOUSE_ROOM_UNK12:
+        case CLUBHOUSE_ROOM_BEST_SHOTS:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_UNK12;
           break;
-        case CLUBHOUSE_ROOM_UNK13:
+        case CLUBHOUSE_ROOM_RING_SHOT:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
           break;
