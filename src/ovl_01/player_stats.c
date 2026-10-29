@@ -46,9 +46,6 @@
 #define STATS_GRID_COLUMN_COUNT 5
 #define STATS_GRID_ROW_COUNT 4
 #define STATS_CELL_EMPTY -1
-/* The bit and the kind field in a ranked record's unk3A */
-#define RANKED_RECORD_SAVED 0x80
-#define RANKED_RECORD_KIND_MASK 0xF
 /* func_8021E01C lists each kind's records in rows one longer than the grid */
 #define STATS_KIND_LIST_SIZE (STATS_GRID_COLUMN_COUNT + 1)
 
@@ -2205,27 +2202,27 @@ void func_8021E01C_ovl_01(void) {
   kindOneCount = 0;
   for (recordIndex = 0; recordIndex != RANKED_RECORD_COUNT; recordIndex++) {
     flags = (s8)save->rankedRecords[recordIndex].scoreKind;
-    if (flags & RANKED_RECORD_SAVED) {
-      switch (flags & RANKED_RECORD_KIND_MASK) {
-        case 3:
+    if (flags & SCORE_KIND_RECORDED) {
+      switch (flags & SCORE_KIND_MASK) {
+        case SCORE_KIND_BIRDIE:
           if (kindThreeCount < STATS_GRID_COLUMN_COUNT) {
             kindRecords[0][kindThreeCount++] = recordIndex;
           }
 
           break;
-        case 2:
+        case SCORE_KIND_EAGLE:
           if (kindTwoCount < STATS_GRID_COLUMN_COUNT) {
             kindRecords[1][kindTwoCount++] = recordIndex;
           }
 
           break;
-        case 1:
+        case SCORE_KIND_ALBATROSS:
           if (kindOneCount < STATS_GRID_COLUMN_COUNT) {
             kindRecords[3][kindOneCount++] = recordIndex;
           }
 
           break;
-        case 0:
+        case SCORE_KIND_HOLE_IN_ONE:
           if (kindZeroCount < STATS_GRID_COLUMN_COUNT) {
             kindRecords[2][kindZeroCount++] = recordIndex;
           }

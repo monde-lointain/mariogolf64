@@ -68,9 +68,6 @@ enum SaveMenuState {
 #define SLIDE_OUT_START_OFFSET -1
 #define SLIDE_OUT_START_STEP 4
 
-/* The replay records keep their character's image when this bit of unk36 is set
- */
-#define RECORD_IN_USE 0x80
 /* A character image for each player of each saved game, or for each replay
  * record */
 #define CHARACTER_IMAGE_COUNT (SAVED_GAME_COUNT * MAX_PLAYER_COUNT)
@@ -227,15 +224,7 @@ enum ModeName {
 #define FIRST_RECORD_TEXT_SLOT 2
 /* The same hole texts that the course select shows for Ring Shot */
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
-#define RING_SHOT_HOLE_COUNT 6
 
-/* RingShotRecord.scoreKind's low bits: the kind of shot the record replays */
-#define RECORD_KIND_MASK 0xF
-#define RECORD_KIND_HOLE_IN_ONE 0
-#define RECORD_KIND_ALBATROSS 1
-#define RECORD_KIND_EAGLE 2
-#define RECORD_KIND_BIRDIE 3
-#define RECORD_KIND_PAR 4
 /* Indices of f_ReplayLabelImages */
 #define REPLAY_LABEL_ALBATROSS 0
 #define REPLAY_LABEL_HOLE_IN_ONE 1
@@ -474,7 +463,7 @@ void OpenSaveMenu(s32 kind) {
   } else {
     for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
       record = &save->unk1DF0[slot];
-      if (record->scoreKind & RECORD_IN_USE) {
+      if (record->scoreKind & SCORE_KIND_RECORDED) {
         OpenEncodedAsset(g_CharacterImageAssets[(s8)record->characterIndex] +
                 CHARACTER_FACE_IMAGE_OFFSET,
             &encodedAsset);
@@ -502,7 +491,7 @@ void OpenSaveMenu(s32 kind) {
   } else {
     f_CursorIndex = SKIP_REPLAY_ROW;
     for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
-      if (!(save->unk1DF0[slot].scoreKind & RECORD_IN_USE)) {
+      if (!(save->unk1DF0[slot].scoreKind & SCORE_KIND_RECORDED)) {
         f_CursorIndex = slot;
         break;
       }
@@ -1092,7 +1081,7 @@ void SaveReplayToSlot(void) {
   func_8005B28C(f_CursorIndex, D_80105F40);
   f_StateFrame = 0;
   func_8005D0D8();
-  if (record->scoreKind & RECORD_IN_USE) {
+  if (record->scoreKind & SCORE_KIND_RECORDED) {
     OpenEncodedAsset(g_CharacterImageAssets[(s8)record->characterIndex] +
             CHARACTER_FACE_IMAGE_OFFSET,
         &encodedAsset);
@@ -1297,7 +1286,8 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
       if (controller->pressedButtons & A_BUTTON) {
         if (f_CursorIndex >= 0 && f_CursorIndex < SAVE_RECORD_COUNT) {
           /* The pointer arithmetic is there to match */
-          if ((save->unk1DF0 + f_CursorIndex)->scoreKind & RECORD_IN_USE) {
+          if ((save->unk1DF0 + f_CursorIndex)->scoreKind &
+              SCORE_KIND_RECORDED) {
             g_PauseScreen = PAUSE_SCREEN_UNK6;
             OpenPrompt(PROMPT_OVERWRITE_REPLAY);
             PlaySound(
@@ -1473,7 +1463,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     for (index = 0; index != SAVE_RECORD_COUNT; index++) {
       RingShotRecord* record = &save->unk1DF0[index];
 
-      if (!(record->scoreKind & RECORD_IN_USE)) {
+      if (!(record->scoreKind & SCORE_KIND_RECORDED)) {
         rowLabels[index] = NO_REPLAY_LABEL;
       } else {
         gDPPipeSync(gfx++);
@@ -1503,20 +1493,20 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             G_TX_RENDERTILE,
             ((s8)record->courseIndex * COURSE_DIGIT_WIDTH) << 5, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        switch (record->scoreKind & RECORD_KIND_MASK) {
-          case RECORD_KIND_ALBATROSS:
+        switch (record->scoreKind & SCORE_KIND_MASK) {
+          case SCORE_KIND_ALBATROSS:
             rowLabels[index] = REPLAY_LABEL_ALBATROSS;
             break;
-          case RECORD_KIND_HOLE_IN_ONE:
+          case SCORE_KIND_HOLE_IN_ONE:
             rowLabels[index] = REPLAY_LABEL_HOLE_IN_ONE;
             break;
-          case RECORD_KIND_EAGLE:
+          case SCORE_KIND_EAGLE:
             rowLabels[index] = REPLAY_LABEL_EAGLE;
             break;
-          case RECORD_KIND_BIRDIE:
+          case SCORE_KIND_BIRDIE:
             rowLabels[index] = REPLAY_LABEL_BIRDIE;
             break;
-          case RECORD_KIND_PAR:
+          case SCORE_KIND_PAR:
             rowLabels[index] = REPLAY_LABEL_PAR;
             break;
         }
@@ -1559,7 +1549,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     for (index = 0; index != SAVE_RECORD_COUNT; index++) {
       RingShotRecord* record = &save->unk1DF0[index];
 
-      if (record->scoreKind & RECORD_IN_USE) {
+      if (record->scoreKind & SCORE_KIND_RECORDED) {
         gDPPipeSync(gfx++);
         if (index == f_CursorIndex) {
           gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -1687,7 +1677,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       }
 
       gDPPipeSync(gfx++);
-      if (!(record->scoreKind & RECORD_IN_USE)) {
+      if (!(record->scoreKind & SCORE_KIND_RECORDED)) {
         SetUpGradientTextDrawing(&gfx, 0);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);

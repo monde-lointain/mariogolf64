@@ -199,6 +199,23 @@ typedef struct RecordedShot {
   /* 0x7 */ s8 unk7;
 } RecordedShot; /* size = 0x8 */
 
+/*
+ * A record's scoreKind: SCORE_KIND_RECORDED marks a score worth keeping, and
+ * the low bits hold its ScoreKind
+ */
+#define SCORE_KIND_MASK 0xF
+#define SCORE_KIND_UNK40 0x40
+#define SCORE_KIND_RECORDED 0x80
+
+enum ScoreKind {
+  SCORE_KIND_HOLE_IN_ONE,
+  SCORE_KIND_ALBATROSS,
+  SCORE_KIND_EAGLE,
+  SCORE_KIND_BIRDIE,
+  SCORE_KIND_PAR, /* Recorded in Ring Shot alone */
+  SCORE_KIND_COUNT
+};
+
 /* A hole that a player finished in few strokes, kept to be replayed */
 typedef struct PlayRecord {
   /* 0x00 */ HoleSetup hole;

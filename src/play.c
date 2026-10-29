@@ -629,19 +629,19 @@ s32 func_80060190(s32 strokes) {
   s32 toPar = strokes - g_HoleSetup.par;
 
   if (strokes == 1) {
-    return 0x80;
+    return SCORE_KIND_RECORDED | SCORE_KIND_HOLE_IN_ONE;
   }
 
   switch (toPar) {
     case -3:
-      return 0x81;
+      return SCORE_KIND_RECORDED | SCORE_KIND_ALBATROSS;
     case -2:
-      return 0x82;
+      return SCORE_KIND_RECORDED | SCORE_KIND_EAGLE;
     case -1:
-      return 0x83;
+      return SCORE_KIND_RECORDED | SCORE_KIND_BIRDIE;
     case 0:
       if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-        return 0x84;
+        return SCORE_KIND_RECORDED | SCORE_KIND_PAR;
       }
 
       break;

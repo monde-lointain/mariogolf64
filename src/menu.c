@@ -724,22 +724,22 @@ s32 GetRecordPriority(PlayRecord* record) {
   s32 maxValue;
 
   bits = record->scoreKind;
-  kind = bits & 0xF;
+  kind = bits & SCORE_KIND_MASK;
   value = 0;
   unk2C = record->hole.par;
   maxValue = 0x64;
-  if (bits & 0x80) {
+  if (bits & SCORE_KIND_RECORDED) {
     switch (kind) {
-      case 3:
+      case SCORE_KIND_BIRDIE:
         value = 0x32;
-        if (bits & 0x40) {
+        if (bits & SCORE_KIND_UNK40) {
           value = 0x3C;
         }
 
         break;
-      case 2:
+      case SCORE_KIND_EAGLE:
         value = 0x3C;
-        if (bits & 0x40) {
+        if (bits & SCORE_KIND_UNK40) {
           value = 0x46;
         }
 
@@ -748,14 +748,14 @@ s32 GetRecordPriority(PlayRecord* record) {
         }
 
         break;
-      case 0:
+      case SCORE_KIND_HOLE_IN_ONE:
         value = 0x5A;
         if (unk2C < 4) {
           break;
         }
 
         /* fallthrough */
-      case 1:
+      case SCORE_KIND_ALBATROSS:
         value = maxValue;
         break;
     }
@@ -824,27 +824,27 @@ void InsertRankedRecord(PlayRecord* record) {
   s32 groupLength;
 
   osSyncPrintf("Checking SuperShot");
-  if ((s8)record->scoreKind & 0x80) {
+  if ((s8)record->scoreKind & SCORE_KIND_RECORDED) {
     records = g_SaveData.rankedRecords;
     newPriority = GetRecordPriority(record);
     lowestPriority = 0x40000000; /* Above any priority */
     lowestIndex = 0;
 
     /* Every case sets the length, which the original needs to match */
-    switch (record->scoreKind & 0xF) {
-      case 3:
+    switch (record->scoreKind & SCORE_KIND_MASK) {
+      case SCORE_KIND_BIRDIE:
         firstIndex = 0 * RANKED_GROUP_LENGTH;
         groupLength = RANKED_GROUP_LENGTH;
         break;
-      case 2:
+      case SCORE_KIND_EAGLE:
         firstIndex = 1 * RANKED_GROUP_LENGTH;
         groupLength = RANKED_GROUP_LENGTH;
         break;
-      case 0:
+      case SCORE_KIND_HOLE_IN_ONE:
         firstIndex = 2 * RANKED_GROUP_LENGTH;
         groupLength = RANKED_GROUP_LENGTH;
         break;
-      case 1:
+      case SCORE_KIND_ALBATROSS:
       default:
         firstIndex = 3 * RANKED_GROUP_LENGTH;
         groupLength = RANKED_GROUP_LENGTH;
@@ -1606,26 +1606,26 @@ void func_8005D0D8(void) {
   for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
     record = &save->unk1DF0[recordIndex];
     kind = record->scoreKind;
-    if (record->scoreKind & 0x80) {
-      kind &= 0xF;
-      if (kind >= 5 || kind < 0) {
+    if (record->scoreKind & SCORE_KIND_RECORDED) {
+      kind &= SCORE_KIND_MASK;
+      if (kind >= SCORE_KIND_COUNT || kind < 0) {
         isInvalid[recordIndex] = TRUE;
       }
     }
 
-    if (record->characterIndex >= COURSE_HOLE_COUNT) {
+    if (record->characterIndex >= CHARACTER_COUNT) {
       isInvalid[recordIndex] = TRUE;
     }
 
-    if (record->paletteIndex >= 4) {
+    if (record->paletteIndex >= CHARACTER_PALETTE_COUNT) {
       isInvalid[recordIndex] = TRUE;
     }
 
-    if ((u8)record->courseIndex >= 6) {
+    if ((u8)record->courseIndex >= RING_SHOT_COURSE_COUNT) {
       isInvalid[recordIndex] = TRUE;
     }
 
-    if ((u8)record->holeIndex >= 6) {
+    if ((u8)record->holeIndex >= RING_SHOT_HOLE_COUNT) {
       isInvalid[recordIndex] = TRUE;
     }
   }
@@ -1635,7 +1635,7 @@ void func_8005D0D8(void) {
   for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
     record = &save->unk1DF0[recordIndex];
     if (isInvalid[recordIndex] == TRUE) {
-      record->scoreKind ^= 0x80;
+      record->scoreKind ^= SCORE_KIND_RECORDED;
     }
   }
 }
