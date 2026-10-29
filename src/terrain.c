@@ -1942,7 +1942,7 @@ Boolean AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
  */
 #define MAX_NORMAL_PART 0x4000
 #define NORMAL_REDUCTION 256
-/* Where GetTriangleIntegerPlane reports a triangle with no normal */
+/* Where the plane routines report a triangle with no normal */
 #define NORMAL_ERROR_COLUMN 3
 #define NORMAL_ERROR_ROW 15
 
@@ -2047,7 +2047,7 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
       (normalZ * triangle->corners[AXIS_Z][0]));
   if (length == 0.0f) {
     if (g_IsDebugEnabled) {
-      PrintDebugText("NormalFError", 3, 15);
+      PrintDebugText("NormalFError", NORMAL_ERROR_COLUMN, NORMAL_ERROR_ROW);
     }
 
     plane->normal[AXIS_X] = 0.0f;
@@ -2071,7 +2071,13 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
   return 0;
 }
 
-/* Returns the ground's height at a point, or -300 off the ground */
+/* GetTerrainHeight's height for a point in no ground triangle */
+#define NO_GROUND_HEIGHT (-300)
+
+/*
+ * Returns the ground's height at a point, clamped to the ground, or
+ * NO_GROUND_HEIGHT where no ground triangle holds it
+ */
 #ifdef NON_MATCHING
 s32 GetTerrainHeight(s32 x, s32 z) {
   PlaneTriangle triangle;
@@ -2123,7 +2129,7 @@ s32 GetTerrainHeight(s32 x, s32 z) {
   }
 
   if (FindGroundTriangle(x, z, &triangle) < 0) {
-    return -300;
+    return NO_GROUND_HEIGHT;
   }
 
   firstY = triangle.corners[AXIS_Y][1] - triangle.corners[AXIS_Y][0];
