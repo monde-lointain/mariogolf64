@@ -2202,12 +2202,12 @@ void RecordHoleOut(s32 playerIndex) {
     record->unk40 = g_Players[playerIndex].unk88;
     record->hole = g_HoleSetup;
     record->shots[shotIndex].heading = g_CurrentShot.heading;
-    record->shots[shotIndex].unk2 = g_CurrentShot.powerGaugeFrame;
-    record->shots[shotIndex].unk3 = g_CurrentShot.impactGaugeFrame;
+    record->shots[shotIndex].powerGaugeFrame = g_CurrentShot.powerGaugeFrame;
+    record->shots[shotIndex].impactGaugeFrame = g_CurrentShot.impactGaugeFrame;
     record->shots[shotIndex].shotMode = g_CurrentShot.shotMode;
     record->shots[shotIndex].clubSlot = g_CurrentShot.clubSlot;
-    record->shots[shotIndex].unk6 = g_CurrentShot.unk14;
-    record->shots[shotIndex].unk7 = g_CurrentShot.unk18;
+    record->shots[shotIndex].offsetX = g_CurrentShot.offsetX;
+    record->shots[shotIndex].offsetY = g_CurrentShot.offsetY;
   }
 }
 
@@ -2230,12 +2230,12 @@ void RecordRingShotHole(s32 playerIndex) {
     record->unk3C = g_Players[playerIndex].unk88;
     record->hole = g_HoleSetup;
     record->shots[shotIndex].heading = g_CurrentShot.heading;
-    record->shots[shotIndex].unk2 = g_CurrentShot.powerGaugeFrame;
-    record->shots[shotIndex].unk3 = g_CurrentShot.impactGaugeFrame;
+    record->shots[shotIndex].powerGaugeFrame = g_CurrentShot.powerGaugeFrame;
+    record->shots[shotIndex].impactGaugeFrame = g_CurrentShot.impactGaugeFrame;
     record->shots[shotIndex].shotMode = g_CurrentShot.shotMode;
     record->shots[shotIndex].clubSlot = g_CurrentShot.clubSlot;
-    record->shots[shotIndex].unk6 = g_CurrentShot.unk14;
-    record->shots[shotIndex].unk7 = g_CurrentShot.unk18;
+    record->shots[shotIndex].offsetX = g_CurrentShot.offsetX;
+    record->shots[shotIndex].offsetY = g_CurrentShot.offsetY;
   }
 }
 
@@ -2386,8 +2386,8 @@ void StartPlayerShot(s32 playerIndex) {
   z = player->ballPosition[AXIS_Z];
   g_CurrentShot.ballPosition[AXIS_Z] = z;
   g_CurrentShot.surface = (s8)player->ballSurface;
-  g_CurrentShot.unk18 = 0;
-  g_CurrentShot.unk14 = 0;
+  g_CurrentShot.offsetY = 0;
+  g_CurrentShot.offsetX = 0;
   g_CurrentShot.unk54 = player->unk28;
   g_CurrentShot.gaugeFrame = 0;
   g_CurrentShot.cupDistance = GetCupDistance(
@@ -3798,15 +3798,15 @@ void UpdateTurns(void) {
 
           if (g_ImpactPointState == IMPACT_POINT_SETTING) {
             if (f_ShotSource == SHOT_SOURCE_PLAYER) {
-              g_CurrentShot.unk14 = GetTurnStickX();
-              g_CurrentShot.unk18 = GetTurnStickY();
+              g_CurrentShot.offsetX = GetTurnStickX();
+              g_CurrentShot.offsetY = GetTurnStickY();
             } else {
-              g_CurrentShot.unk14 = 0;
-              g_CurrentShot.unk18 = 0;
+              g_CurrentShot.offsetX = 0;
+              g_CurrentShot.offsetY = 0;
             }
           } else if (g_ImpactPointState == IMPACT_POINT_OFF) {
-            g_CurrentShot.unk14 = 0;
-            g_CurrentShot.unk18 = 0;
+            g_CurrentShot.offsetX = 0;
+            g_CurrentShot.offsetY = 0;
           }
 
           g_CurrentShot.gaugeFrame = 0;
@@ -3814,9 +3814,9 @@ void UpdateTurns(void) {
             g_CurrentShot.gaugeFrame = D_80104F78.powerGaugeFrame;
           }
 
-          SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
-          D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
-          D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
+          SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
+          D_80227150_ovl_00.unk10 = g_CurrentShot.offsetX;
+          D_80227150_ovl_00.unk14 = g_CurrentShot.offsetY;
           PlaceShotCamera();
           if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
             if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
@@ -3876,16 +3876,16 @@ void UpdateTurns(void) {
         }
 
         if (f_ShotSource == SHOT_SOURCE_PLAYER) {
-          g_CurrentShot.unk14 = GetTurnStickX();
-          g_CurrentShot.unk18 = GetTurnStickY();
+          g_CurrentShot.offsetX = GetTurnStickX();
+          g_CurrentShot.offsetY = GetTurnStickY();
         } else {
-          g_CurrentShot.unk14 = 0;
-          g_CurrentShot.unk18 = 0;
+          g_CurrentShot.offsetX = 0;
+          g_CurrentShot.offsetY = 0;
         }
 
-        SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
-        D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
-        D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
+        SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
+        D_80227150_ovl_00.unk10 = g_CurrentShot.offsetX;
+        D_80227150_ovl_00.unk14 = g_CurrentShot.offsetY;
         if ((f_ShotSource != SHOT_SOURCE_PLAYER)
                 ? (D_80104F78.powerGaugeFrame == g_CurrentShot.gaugeFrame)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
@@ -3960,29 +3960,29 @@ void UpdateTurns(void) {
         }
 
         if (f_ShotSource == SHOT_SOURCE_PLAYER) {
-          g_CurrentShot.unk14 = GetTurnStickX();
-          g_CurrentShot.unk18 = GetTurnStickY();
+          g_CurrentShot.offsetX = GetTurnStickX();
+          g_CurrentShot.offsetY = GetTurnStickY();
         } else {
           s32 framesLeft = D_80104F78.impactGaugeFrame -
               g_CurrentShot.gaugeFrame - STICK_HOLD_FRAME_COUNT;
 
           if (framesLeft > STICK_TILT_FRAME_COUNT) {
-            g_CurrentShot.unk14 = 0;
-            g_CurrentShot.unk18 = 0;
+            g_CurrentShot.offsetX = 0;
+            g_CurrentShot.offsetY = 0;
           } else if (framesLeft <= 0) {
-            g_CurrentShot.unk14 = D_80104F78.unk14;
-            g_CurrentShot.unk18 = D_80104F78.unk18;
+            g_CurrentShot.offsetX = D_80104F78.offsetX;
+            g_CurrentShot.offsetY = D_80104F78.offsetY;
           } else {
-            g_CurrentShot.unk14 = D_80104F78.unk14 *
+            g_CurrentShot.offsetX = D_80104F78.offsetX *
                 (STICK_TILT_FRAME_COUNT - framesLeft) / STICK_TILT_FRAME_COUNT;
-            g_CurrentShot.unk18 = D_80104F78.unk18 *
+            g_CurrentShot.offsetY = D_80104F78.offsetY *
                 (STICK_TILT_FRAME_COUNT - framesLeft) / STICK_TILT_FRAME_COUNT;
           }
         }
 
-        SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
-        D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
-        D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
+        SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
+        D_80227150_ovl_00.unk10 = g_CurrentShot.offsetX;
+        D_80227150_ovl_00.unk14 = g_CurrentShot.offsetY;
         if (((f_ShotSource != SHOT_SOURCE_PLAYER)
                     ? (g_CurrentShot.gaugeFrame == D_80104F78.impactGaugeFrame)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||

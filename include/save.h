@@ -206,12 +206,12 @@ typedef struct HoleSetup {
 /* A shot as a record keeps it, from the CurrentShot it was played with */
 typedef struct RecordedShot {
   /* 0x0 */ BinaryAngle heading;
-  /* 0x2 */ s8 unk2;
-  /* 0x3 */ s8 unk3;
+  /* 0x2 */ s8 powerGaugeFrame;
+  /* 0x3 */ s8 impactGaugeFrame;
   /* 0x4 */ s8 shotMode;
   /* 0x5 */ s8 clubSlot;
-  /* 0x6 */ s8 unk6;
-  /* 0x7 */ s8 unk7;
+  /* 0x6 */ s8 offsetX;
+  /* 0x7 */ s8 offsetY;
 } RecordedShot; /* size = 0x8 */
 
 /*

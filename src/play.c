@@ -618,22 +618,22 @@ void SetNextTeeOrder(void) {
 
 void func_800600C0(s32 index) {
   D_80104F78.heading = D_800FEDD8->shots[index].heading;
-  D_80104F78.powerGaugeFrame = D_800FEDD8->shots[index].unk2;
-  D_80104F78.impactGaugeFrame = D_800FEDD8->shots[index].unk3;
+  D_80104F78.powerGaugeFrame = D_800FEDD8->shots[index].powerGaugeFrame;
+  D_80104F78.impactGaugeFrame = D_800FEDD8->shots[index].impactGaugeFrame;
   D_80104F78.shotMode = D_800FEDD8->shots[index].shotMode;
   D_80104F78.clubSlot = D_800FEDD8->shots[index].clubSlot;
-  D_80104F78.unk14 = D_800FEDD8->shots[index].unk6;
-  D_80104F78.unk18 = D_800FEDD8->shots[index].unk7;
+  D_80104F78.offsetX = D_800FEDD8->shots[index].offsetX;
+  D_80104F78.offsetY = D_800FEDD8->shots[index].offsetY;
 }
 
 void func_80060128(s32 index) {
   D_80104F78.heading = D_80105F40->shots[index].heading;
-  D_80104F78.powerGaugeFrame = D_80105F40->shots[index].unk2;
-  D_80104F78.impactGaugeFrame = D_80105F40->shots[index].unk3;
+  D_80104F78.powerGaugeFrame = D_80105F40->shots[index].powerGaugeFrame;
+  D_80104F78.impactGaugeFrame = D_80105F40->shots[index].impactGaugeFrame;
   D_80104F78.shotMode = D_80105F40->shots[index].shotMode;
   D_80104F78.clubSlot = D_80105F40->shots[index].clubSlot;
-  D_80104F78.unk14 = D_80105F40->shots[index].unk6;
-  D_80104F78.unk18 = D_80105F40->shots[index].unk7;
+  D_80104F78.offsetX = D_80105F40->shots[index].offsetX;
+  D_80104F78.offsetY = D_80105F40->shots[index].offsetY;
 }
 
 /*

@@ -13,8 +13,8 @@ typedef struct CurrentShot {
   /* 0x08 */ s32 impactGaugeFrame; /* The gaugeFrame at which impact is set */
   /* 0x0C */ s32 shotMode;
   /* 0x10 */ s32 clubSlot; /* Index into the player's clubs */
-  /* 0x14 */ s32 unk14;
-  /* 0x18 */ s32 unk18;
+  /* 0x14 */ s32 offsetX; /* The shot offset that the stick sets */
+  /* 0x18 */ s32 offsetY;
   /* 0x1C */ CoursePoint ballPosition;
   /* 0x28 */ Surface surface;
   /* 0x2C */ s32 playerIndex;

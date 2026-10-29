@@ -73,8 +73,8 @@ enum WindPlay {
 
 /* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
 typedef struct ShotOffset {
-  /* 0x0 */ s8 unk14; /* Becomes f_Shot.unk14 */
-  /* 0x1 */ s8 unk18; /* Becomes f_Shot.unk18 */
+  /* 0x0 */ s8 offsetX; /* Becomes f_Shot.offsetX */
+  /* 0x1 */ s8 offsetY; /* Becomes f_Shot.offsetY */
 } ShotOffset; /* size = 0x2 */
 
 #define APPROACH_BAND_COUNT 4
@@ -732,8 +732,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
       shotPower = &f_Shot.powerGaugeFrame;
       *shotPower = distance;
       if (f_ShotOffset == SHOT_OFFSET_NONE) {
-        f_Shot.unk14 = 0;
-        f_Shot.unk18 = 0;
+        f_Shot.offsetX = 0;
+        f_Shot.offsetY = 0;
         f_ShotOffset = ChooseShotOffset();
       }
 
@@ -2252,15 +2252,15 @@ s32 StepTrialShot(void) {
     f_TrialEvaluation = 0;
     f_IsPutting = FALSE;
     f_HasLanded = FALSE;
-    f_Shot.unk14 = f_ShotOffsets[f_ShotOffset].unk14 + (rand() & 7) - 3;
-    f_Shot.unk18 = f_ShotOffsets[f_ShotOffset].unk18 + (rand() & 7) - 3;
+    f_Shot.offsetX = f_ShotOffsets[f_ShotOffset].offsetX + (rand() & 7) - 3;
+    f_Shot.offsetY = f_ShotOffsets[f_ShotOffset].offsetY + (rand() & 7) - 3;
     f_TrialLaunch->heading = f_Shot.heading;
     f_TrialLaunch->clubIndex = f_Shot.clubSlot;
     f_ClosestTargetDistance = FAR_FROM_TARGET;
     f_TrialLaunch->power = GetGaugeFramePower(f_Shot.powerGaugeFrame);
     f_TrialLaunch->unkC = 0;
-    f_TrialLaunch->unk10 = f_Shot.unk14;
-    f_TrialLaunch->unk14 = f_Shot.unk18;
+    f_TrialLaunch->unk10 = f_Shot.offsetX;
+    f_TrialLaunch->unk14 = f_Shot.offsetY;
     f_TrialLaunch->unk18 = f_Shot.playerIndex;
     f_TrialLaunch->shotMode = f_Shot.shotMode;
     f_IsPutting = GetClub(f_Shot.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN;
@@ -2955,8 +2955,8 @@ Boolean IsTrialShotSafe(void) {
   f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
   f_TrialLaunch->power = GetGaugeFramePower(f_TrialShot.powerGaugeFrame);
   f_TrialLaunch->unkC = f_TrialShot.impactGaugeFrame - 60;
-  f_TrialLaunch->unk10 = f_TrialShot.unk14;
-  f_TrialLaunch->unk14 = f_TrialShot.unk18;
+  f_TrialLaunch->unk10 = f_TrialShot.offsetX;
+  f_TrialLaunch->unk14 = f_TrialShot.offsetY;
   f_TrialLaunch->unk18 = f_TrialShot.playerIndex;
   f_TrialLaunch->shotMode = f_TrialShot.shotMode;
   f_TrialSimulation.position[AXIS_X] = f_TrialShot.ballPosition[AXIS_X];
