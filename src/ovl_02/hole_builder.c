@@ -67,7 +67,7 @@
 #define UNK12_TRIANGLES_ASSET 0x3F5
 #define UNK12_ATTRIBUTES_ASSET 0x3F6
 /* The paint logic of the last mini-golf course; later courses use it too */
-#define LAST_MINI_GOLF_PAINT_LOGIC 11
+#define LAST_MINI_GOLF_PAINT_LOGIC PAINT_LOGIC_PEACHS_CASTLE_THIRD
 
 /* The size of a terrain code cell, and of a row of them */
 #define TERRAIN_CODE_CELL_SIZE 2
@@ -104,6 +104,26 @@
 #define IsGreenEdge(code, nearestCode, nearestDistance) \
   ((code) == TERRAIN_CODE_GREEN && (code) != (nearestCode) && \
       (nearestDistance) < 2)
+
+/*
+ * Indices of f_PaintLogics. They follow GameState.courseIndex's numbering,
+ * which BuildHole uses as the paint logic of a mini-golf course.
+ */
+enum PaintLogicIndex {
+  PAINT_LOGIC_TOAD_HIGHLANDS,
+  PAINT_LOGIC_KOOPA_PARK,
+  PAINT_LOGIC_SHY_GUY_DESERT,
+  PAINT_LOGIC_YOSHIS_ISLAND,
+  PAINT_LOGIC_BOO_VALLEY,
+  PAINT_LOGIC_MARIOS_STAR,
+  PAINT_LOGIC_LUIGIS_GARDEN_FIRST,
+  PAINT_LOGIC_LUIGIS_GARDEN_SECOND,
+  PAINT_LOGIC_LUIGIS_GARDEN_THIRD,
+  PAINT_LOGIC_PEACHS_CASTLE_FIRST,
+  PAINT_LOGIC_PEACHS_CASTLE_SECOND,
+  PAINT_LOGIC_PEACHS_CASTLE_THIRD,
+  PAINT_LOGIC_DRIVING_RANGE
+};
 
 /*
  * Paints a map texel of a code, given the nearest other code and its
@@ -228,7 +248,10 @@ s32 PaintDrivingRange(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 
 static u32 f_PaintSeed = 0;
-/* The paint logics, which f_HolePaintLogics and GetCoursePaintLogic index */
+/*
+ * The paint logics, which enum PaintLogicIndex indexes. The mini-golf ones
+ * repeat, one per course of each record.
+ */
 static PaintLogic f_PaintLogics[] = {
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
     {{2, 0, 0, 0, 0, -1, 3, -1, -1, -1, 0, 0, 0, 0, 0, 0}, PaintMainCourse},
@@ -445,7 +468,11 @@ static HoleAssetIds f_HoleAssetIds[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT] =
         },
 };
 Vec3 g_MiniGolfScale = {1.0f, 1.0f, 1.0f};
-/* The paint logic of each host hole, by course and hole numbers from 1 */
+/*
+ * The paint logic of each host hole, by course and hole numbers from 1. The
+ * entries are enum PaintLogicIndex values, left as numbers because the hole
+ * editor's flags step them to the next logic.
+ */
 static s32 f_HolePaintLogics[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT] = {
     {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
@@ -521,6 +548,7 @@ void CastBillboardShadows(void);
 void MoveRingsToEnd(void);
 void FillRandomGrid(s32 range, s32 base);
 
+/* A PAINT_LOGIC_* value */
 static s32 f_PaintLogic;
 
 /* Read by no routine */
@@ -2313,30 +2341,34 @@ void ScaleMiniGolfHole(void) {
   g_HoleSetup.cupPosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
 }
 
-/* Returns the paint logic that a course's terrain is painted with */
+/*
+ * Returns the paint logic (a PAINT_LOGIC_* value) that a course record's
+ * terrain is painted with. BuildHole picks the mini-golf courses' logics
+ * itself, so the mini-golf records' cases take their logics' numbers.
+ */
 s32 GetCoursePaintLogic(CourseRecordIndex course) {
   switch (course) {
-    case 0:
-      return 0;
-    case 1:
-      return 1;
-    case 2:
-      return 2;
-    case 3:
-      return 3;
-    case 4:
-      return 4;
-    case 5:
-      return 5;
-    case 6:
-      return 6;
-    case 7:
-      return 7;
-    case 8:
-      return 12;
+    case COURSE_RECORD_TOAD_HIGHLANDS:
+      return PAINT_LOGIC_TOAD_HIGHLANDS;
+    case COURSE_RECORD_KOOPA_PARK:
+      return PAINT_LOGIC_KOOPA_PARK;
+    case COURSE_RECORD_SHY_GUY_DESERT:
+      return PAINT_LOGIC_SHY_GUY_DESERT;
+    case COURSE_RECORD_YOSHIS_ISLAND:
+      return PAINT_LOGIC_YOSHIS_ISLAND;
+    case COURSE_RECORD_BOO_VALLEY:
+      return PAINT_LOGIC_BOO_VALLEY;
+    case COURSE_RECORD_MARIOS_STAR:
+      return PAINT_LOGIC_MARIOS_STAR;
+    case COURSE_RECORD_LUIGIS_GARDEN:
+      return PAINT_LOGIC_LUIGIS_GARDEN_FIRST;
+    case COURSE_RECORD_PEACHS_CASTLE:
+      return PAINT_LOGIC_LUIGIS_GARDEN_SECOND;
+    case COURSE_RECORD_DRIVING_RANGE:
+      return PAINT_LOGIC_DRIVING_RANGE;
   }
 
-  return 0;
+  return PAINT_LOGIC_TOAD_HIGHLANDS;
 }
 
 /* Does nothing; the course and hole are not read */
@@ -2354,9 +2386,9 @@ void BuildHole(s32 course, s32 hole) {
   s32 pointsSize;
 
   /* The repeated case is there to match */
-  if (course == 2) {
+  if (course == COURSE_RECORD_SHY_GUY_DESERT) {
     FillRandomGrid(0x60, 0xC8);
-  } else if (course == 3) {
+  } else if (course == COURSE_RECORD_YOSHIS_ISLAND) {
     FillRandomGrid(0x60, 0xC8);
   } else {
     FillRandomGrid(0x60, 0xBE);
