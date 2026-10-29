@@ -881,7 +881,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
       }
 
       mishit = rand() % MISHIT_ROLL_RANGE / mishitDivisor;
-      if (maxMishit < ABS(mishit) &&
+      if (maxMishit < Abs(mishit) &&
           (f_HoleTargetToPar < 0 || strokes >= par + f_HoleTargetToPar - 3)) {
         mishit = maxMishit;
       }
@@ -2059,7 +2059,7 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
   angle =
       atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
   peakHeight = GetGroundHeight(from[AXIS_X], from[AXIS_Z]);
-  peakHeight = ABS(peakHeight);
+  peakHeight = Abs(peakHeight);
   peak[AXIS_X] = from[AXIS_X];
   peak[AXIS_Z] = from[AXIS_Z];
   for (step = 1; step < distance * YARDS_PER_UNIT; step++) {
@@ -2068,7 +2068,7 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
     x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
     z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
     height = GetGroundHeight(x, z);
-    height = ABS(height);
+    height = Abs(height);
     if (peakHeight < height) {
       peak[AXIS_X] = x;
       peak[AXIS_Y] = GetGroundHeight(x, z);
@@ -2417,7 +2417,7 @@ EVALUATE:
 
       heightMiss = f_PlanTarget[AXIS_Y] - f_TrialSimulation.position[AXIS_Y];
       f_TrialEvaluation +=
-          (targetMiss + (ABS(heightMiss) / 2)) * MISS_EVALUATION_SCALE;
+          (targetMiss + (Abs(heightMiss) / 2)) * MISS_EVALUATION_SCALE;
     }
 
     osSyncPrintf("BestEval = %d\n", f_BestEvaluation);

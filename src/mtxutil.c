@@ -7,8 +7,8 @@
 #include "common.h"
 
 /* Converts between floats and the 16.16 fixed point of a Mtx */
-#define FLOAT_TO_FIXED(value) (s32)((value) * (f32)0x10000)
-#define FIXED_TO_FLOAT(value) ((f32)(value) / (f32)0x10000)
+#define FloatToFixed(value) (s32)((value) * (f32)0x10000)
+#define FixedToFloat(value) ((f32)(value) / (f32)0x10000)
 
 /* The range guMtxF2L clamps elements to */
 #define MIN_FIXED_ELEMENT (-32768.0f)
@@ -44,8 +44,8 @@ void guMtxF2L(f32 mf[4][4], Mtx* m) {
         mf[row][(pair * 2) + 1] = MAX_FIXED_ELEMENT;
       }
 
-      first = FLOAT_TO_FIXED(mf[row][pair * 2]);
-      second = FLOAT_TO_FIXED(mf[row][(pair * 2) + 1]);
+      first = FloatToFixed(mf[row][pair * 2]);
+      second = FloatToFixed(mf[row][(pair * 2) + 1]);
       *(integerParts++) = (first & 0xFFFF0000) | ((second >> 16) & 0xFFFF);
       *(fractionParts++) = ((first << 16) & 0xFFFF0000) | (second & 0xFFFF);
     }
@@ -72,8 +72,8 @@ void guMtxL2F(f32 mf[4][4], Mtx* m) {
           (*(fractionParts++) & 0xFFFF);
       signedFirst = *((s32*)&first);
       signedSecond = *((s32*)&second);
-      mf[row][pair * 2] = FIXED_TO_FLOAT(signedFirst);
-      mf[row][(pair * 2) + 1] = FIXED_TO_FLOAT(signedSecond);
+      mf[row][pair * 2] = FixedToFloat(signedFirst);
+      mf[row][(pair * 2) + 1] = FixedToFloat(signedSecond);
     }
   }
 }

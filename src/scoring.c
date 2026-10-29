@@ -112,7 +112,7 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
     }
   }
 
-  if (ABS(lead) == holesAfterCurrent + 1) {
+  if (Abs(lead) == holesAfterCurrent + 1) {
     if (lead < 0) {
       return MATCH_STANDING_OPPONENT_DORMIE;
     }
@@ -120,11 +120,11 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
     return MATCH_STANDING_PLAYER_DORMIE;
   }
 
-  if (holesAfterCurrent + 1 < ABS(lead)) {
+  if (holesAfterCurrent + 1 < Abs(lead)) {
     return MATCH_STANDING_DECIDED;
   }
 
-  if (ABS(lead) == holesAfterCurrent && holesAfterCurrent == 0) {
+  if (Abs(lead) == holesAfterCurrent && holesAfterCurrent == 0) {
     return MATCH_STANDING_DECIDING_HOLE;
   }
 
@@ -179,7 +179,7 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
     lead -= opponentScore < playerScore;
   }
 
-  if (ABS(lead) > holesAfterCurrent + 1) {
+  if (Abs(lead) > holesAfterCurrent + 1) {
     if (lead > 0) {
       return MATCH_SIDE_PLAYER;
     }

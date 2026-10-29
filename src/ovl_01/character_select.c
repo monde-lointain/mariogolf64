@@ -1614,8 +1614,7 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
 #define PLAYER_TAG_IMAGE_SIZE 64 /* Bytes, as 16 by 8 nibbles */
 #define COMPUTER_TAG_TEXELS_OFFSET \
   (PALETTED_TEXELS_OFFSET + (PLAYER_TAG_FIRST_COMPUTER * PLAYER_TAG_IMAGE_SIZE))
-#define PLAYER_TAG_TEXELS(offset) \
-  ((u32)((u8*)D_8023A570_ovl_01 + (offset)) & ~7)
+#define PlayerTagTexels(offset) ((u32)((u8*)D_8023A570_ovl_01 + (offset)) & ~7)
 #define PLAYER_TAG_WIDTH 16
 #define PLAYER_TAG_HEIGHT 8
 #define PLAYER_TAG_SHIFT_LEFT 4
@@ -1672,28 +1671,28 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
 
     if ((tagMode == PLAYER_TAG_SINGLE_PLAYER) & (playerIndex == 1)) {
       gDPLoadTextureBlock_4b(gfx++,
-          PLAYER_TAG_TEXELS(PALETTED_TEXELS_OFFSET +
+          PlayerTagTexels(PALETTED_TEXELS_OFFSET +
               (PLAYER_TAG_COM * PLAYER_TAG_IMAGE_SIZE)),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (g_PlayerControllerIndices[playerIndex] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
-          PLAYER_TAG_TEXELS((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
+          PlayerTagTexels((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
               COMPUTER_TAG_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (D_8022FF07_ovl_01 == TRUE && playerIndex == D_801B7070) {
       gDPLoadTextureBlock_4b(gfx++,
-          PLAYER_TAG_TEXELS((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
+          PlayerTagTexels((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
               COMPUTER_TAG_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureBlock_4b(gfx++,
-          PLAYER_TAG_TEXELS(
+          PlayerTagTexels(
               (playerIndex * PLAYER_TAG_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

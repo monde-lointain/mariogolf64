@@ -394,7 +394,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       }
 
       gDPLoadTextureBlock(gfx++,
-          TEXTURE_ADDRESS(
+          TextureAddress(
               f_CheepCheepImages[creature->isGold] + IMAGE_HEADER_SIZE),
           G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
@@ -450,7 +450,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_MonkeyVertices, 8, 0);
       gDPLoadTextureBlock(gfx++,
-          TEXTURE_ADDRESS(f_MonkeyImage + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
+          TextureAddress(f_MonkeyImage + IMAGE_HEADER_SIZE), G_IM_FMT_RGBA,
           G_IM_SIZ_16b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOLOD);
@@ -458,7 +458,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gDPPipeSync(gfx++);
       gDPLoadTextureBlock(gfx++,
-          TEXTURE_ADDRESS(
+          TextureAddress(
               f_MonkeyImage + IMAGE_HEADER_SIZE + MONKEY_HALF_IMAGE_SIZE),
           G_IM_FMT_RGBA, G_IM_SIZ_16b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,

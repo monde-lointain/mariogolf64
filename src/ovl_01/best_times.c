@@ -185,7 +185,7 @@ void func_80213558_ovl_01(void) {
       }
     }
 
-    if (ABS(memory->bestTimesSpin) != 0) {
+    if (Abs(memory->bestTimesSpin) != 0) {
       direction = memory->bestTimesSpin < 0 ? -1 : 1;
       step = BEST_TIMES_SPIN_SPEED / courseCount;
       if (step == 0) {
@@ -296,7 +296,7 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
   for (index = 0; index != courseCount; index++) {
     ScreenPoint point;
 
-    angle = -DEGREES_TO_RADIANS(
+    angle = -DegreesToRadians(
         (((bestTimesCourse - index) % courseCount) * angleStep) +
         (spin * DEGREES_PER_SPIN_STEP));
     wheelX = sinf(angle) * WHEEL_RADIUS_X;

@@ -327,7 +327,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  f_FireworkHue += DEGREES_TO_RADIANS(3);
+  f_FireworkHue += DegreesToRadians(3);
 
   /* index is f_FireworkCount here, so every firework shares one color */
   red = (s32)(sinf(f_FireworkHue + index) * 64.0f) + 127;

@@ -93,7 +93,7 @@ typedef struct MapOverviewControls {
  */
 #define WATER_PROBE_REACH 3072000
 #define MINI_GOLF_WATER_PROBE_REACH 614400
-#define WATER_PROBE_HEIGHT(fraction, reach) \
+#define WaterProbeHeight(fraction, reach) \
   (((fraction) * (2.0f * (reach))) + -(f32)(reach))
 /* Raises the water's height for the surface test, or lowers it when asked */
 #define WATER_BIAS 0x266
@@ -297,7 +297,7 @@ s32 FindNearestTerrainColor(s32 color) {
     }
 
     blue = colorBlue - f_TerrainColors[i].blue;
-    distance = red + green + ABS(blue);
+    distance = red + green + Abs(blue);
     if (distance < nearestDistance) {
       nearestDistance = distance;
       nearestIndex = i;
@@ -438,14 +438,14 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
       char text[0x80];
 
       sprintf(text, "ratio %f,%x", fraction,
-          (s32)(WATER_PROBE_HEIGHT(fraction, MINI_GOLF_WATER_PROBE_REACH) +
+          (s32)(WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) +
               waterBias));
       PrintDebugText(text, 10, 11);
     }
 
     if (hit.unk0 == HOLE_TRIANGLE_KIND_FLAT) {
       /* Reuses i as the water height to match */
-      i = WATER_PROBE_HEIGHT(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
+      i = WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
       if (i < GetTerrainHeight(x, z)) {
         return SURFACE_WATER_HAZARD;
       }
@@ -580,7 +580,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
       waterBias = LOWERED_WATER_BIAS;
     }
 
-    if ((s32)(WATER_PROBE_HEIGHT(fraction, WATER_PROBE_REACH) + waterBias) <
+    if ((s32)(WaterProbeHeight(fraction, WATER_PROBE_REACH) + waterBias) <
         GetTerrainHeight(x, z)) {
       return SURFACE_WATER_HAZARD;
     }
@@ -671,8 +671,8 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     return surface;
   }
 
-  distanceX = ABS(0x2000 - fractionX);
-  distanceZ = ABS(0x2000 - fractionZ);
+  distanceX = Abs(0x2000 - fractionX);
+  distanceZ = Abs(0x2000 - fractionZ);
   if (((stepColumn + 1) ^ (stepRow + 1)) == 0) {
     weights[0] = weights[0] *
         (3.7252903e-9f *
@@ -1803,8 +1803,8 @@ Boolean AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
  * differently from the original.
  */
 #define IsNormalTooLong(normalX, normalY, normalZ) \
-  ((ABS(normalX) > 0x4000) || (ABS(normalY) > 0x4000) || \
-      (ABS(normalZ) > 0x4000))
+  ((Abs(normalX) > 0x4000) || (Abs(normalY) > 0x4000) || \
+      (Abs(normalZ) > 0x4000))
 
 /* Integer GetTrianglePlane. Returns 0, or -1 for a degenerate triangle. */
 
@@ -2017,7 +2017,7 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
     char unusedText[0x80]; /* Unused, but keeps the stack frame the same size as
                               the original */
 
-    waterHeight = WATER_PROBE_HEIGHT(fraction, WATER_PROBE_REACH);
+    waterHeight = WaterProbeHeight(fraction, WATER_PROBE_REACH);
     if (waterHeight < height) {
       height = waterHeight;
     }

@@ -4035,7 +4035,7 @@ void BuildGroundTileDisplayList(
           .midpoints[g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex];
   g_GroundTileDisplayLists[tileIndex] = gfx;
   gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
-      TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]));
+      TextureAddress(&g_WorkArea.hole.tiles[tileIndex]));
   gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0,
       G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, 3, G_TX_MIRROR | G_TX_WRAP, 6,
       3);

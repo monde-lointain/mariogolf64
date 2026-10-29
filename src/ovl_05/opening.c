@@ -930,7 +930,7 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(g_DisplayListHead++,
-      TEXTURE_ADDRESS((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
+      TextureAddress((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
       G_IM_FMT_I, G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
       G_TX_NOLOD);
@@ -978,10 +978,10 @@ enum OpeningModel {
 s32 func_80206680_ovl_05(u32 slotIndex, s32 character);
 
 /* Places the cue slot's character, leaving the point's height unset */
-#define PLACE_CUE_CHARACTER(point, x, z, heading) \
+#define PlaceCueCharacter(point, x, z, heading) \
   point[0] = x; \
   point[2] = z; \
-  PlaceCharacter(f_CueSlotIndex, point, DEGREES_TO_RADIANS(heading))
+  PlaceCharacter(f_CueSlotIndex, point, DegreesToRadians(heading))
 
 /*
  * Sets up the opening's characters for the cue that its script has given, and
@@ -1029,7 +1029,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
-        PLACE_CUE_CHARACTER(point0, 0xF3400, 0x490000, -30);
+        PlaceCueCharacter(point0, 0xF3400, 0x490000, -30);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1039,7 +1039,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
-        PLACE_CUE_CHARACTER(point1, 0xA0B58, 0x4A28BF, 80);
+        PlaceCueCharacter(point1, 0xA0B58, 0x4A28BF, 80);
         f_OpeningCue = OPENING_CUE_DONE;
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
@@ -1050,7 +1050,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, OPENING_MODEL_LUIGI)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
-        PLACE_CUE_CHARACTER(point2, 0x1368A0, 0x49D208, 0);
+        PlaceCueCharacter(point2, 0x1368A0, 0x49D208, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1063,7 +1063,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
-        PLACE_CUE_CHARACTER(point3, 0xF3400, 0x490000, -30);
+        PlaceCueCharacter(point3, 0xF3400, 0x490000, -30);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1073,7 +1073,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
-        PLACE_CUE_CHARACTER(point4, 0xB2A34, 0x4F9800, 10);
+        PlaceCueCharacter(point4, 0xB2A34, 0x4F9800, 10);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1085,7 +1085,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
-        PLACE_CUE_CHARACTER(point5, 0xF3400, 0x490000, 0);
+        PlaceCueCharacter(point5, 0xF3400, 0x490000, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1095,7 +1095,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
-        PLACE_CUE_CHARACTER(point6, 0x1610CF, 0x4AFA34, 0);
+        PlaceCueCharacter(point6, 0x1610CF, 0x4AFA34, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1107,7 +1107,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, OPENING_MODEL_LUIGI)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
-        PLACE_CUE_CHARACTER(point7, 0xF3400, 0x490000, -45);
+        PlaceCueCharacter(point7, 0xF3400, 0x490000, -45);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1118,13 +1118,13 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
-        PLACE_CUE_CHARACTER(point8, 0x29EB94, 0x26DDDA, 0);
+        PlaceCueCharacter(point8, 0x29EB94, 0x26DDDA, 0);
       }
 
       f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
-        PLACE_CUE_CHARACTER(point9, 0x29EB94, 0x26DDDA, 0);
+        PlaceCueCharacter(point9, 0x29EB94, 0x26DDDA, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1136,13 +1136,13 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
-        PLACE_CUE_CHARACTER(point10, 0x2709F8, 0x1CF4B4, 10);
+        PlaceCueCharacter(point10, 0x2709F8, 0x1CF4B4, 10);
       }
 
       f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, OPENING_MODEL_LUIGI)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
-        PLACE_CUE_CHARACTER(point11, 0x2709F8, 0x1CF4B4, 55);
+        PlaceCueCharacter(point11, 0x2709F8, 0x1CF4B4, 55);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1153,7 +1153,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
-        PLACE_CUE_CHARACTER(point12, 0x2709F8, 0x1CF4B4, 10);
+        PlaceCueCharacter(point12, 0x2709F8, 0x1CF4B4, 10);
       }
 
       f_OpeningCue = OPENING_CUE_DONE;
@@ -1164,13 +1164,13 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
-        PLACE_CUE_CHARACTER(point13, 0x2CA5D3, 0x22A928, -98);
+        PlaceCueCharacter(point13, 0x2CA5D3, 0x22A928, -98);
       }
 
       f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x14);
-        PLACE_CUE_CHARACTER(point14, 0x2C42D6, 0x22A832, -98);
+        PlaceCueCharacter(point14, 0x2C42D6, 0x22A832, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1182,13 +1182,13 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x14);
-        PLACE_CUE_CHARACTER(point15, 0x2B1194, 0x249320, -98);
+        PlaceCueCharacter(point15, 0x2B1194, 0x249320, -98);
       }
 
       f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x15);
-        PLACE_CUE_CHARACTER(point16, 0x2B1194, 0x249320, -98);
+        PlaceCueCharacter(point16, 0x2B1194, 0x249320, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1200,13 +1200,13 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x15);
-        PLACE_CUE_CHARACTER(point17, 0x2B1194, 0x249320, -98);
+        PlaceCueCharacter(point17, 0x2B1194, 0x249320, -98);
       }
 
       f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x16);
-        PLACE_CUE_CHARACTER(point18, 0x2B1194, 0x249320, -98);
+        PlaceCueCharacter(point18, 0x2B1194, 0x249320, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -1217,7 +1217,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 1;
       func_80206680_ovl_05(1, OPENING_MODEL_MARIO);
       SetCharacterAnimation(f_CueSlotIndex, 0x17);
-      PLACE_CUE_CHARACTER(point19, 0x2B1194, 0x249320, -98);
+      PlaceCueCharacter(point19, 0x2B1194, 0x249320, -98);
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
@@ -1248,7 +1248,7 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
       }
 
-      PLACE_CUE_CHARACTER(point20, 0x202B29, 0xCE7DA, -165);
+      PlaceCueCharacter(point20, 0x202B29, 0xCE7DA, -165);
       f_CueSlotIndex = 3;
       func_80206680_ovl_05(3, OPENING_MODEL_BABY_MARIO);
       SetAnimationSpeed(3, 0.0f);
@@ -1258,7 +1258,7 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
       }
 
-      PLACE_CUE_CHARACTER(point21, 0x202B29, 0xCE7DA, -165);
+      PlaceCueCharacter(point21, 0x202B29, 0xCE7DA, -165);
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
@@ -1270,11 +1270,11 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       func_80206680_ovl_05(0, OPENING_MODEL_PEACH);
       SetCharacterAnimation(f_CueSlotIndex, 0x16);
-      PLACE_CUE_CHARACTER(point22, 0x2B1194, 0x249320, -98);
+      PlaceCueCharacter(point22, 0x2B1194, 0x249320, -98);
       f_CueSlotIndex = 1;
       func_80206680_ovl_05(1, OPENING_MODEL_MARIO);
       SetCharacterAnimation(f_CueSlotIndex, 0x18);
-      PLACE_CUE_CHARACTER(point23, 0x2B1194, 0x249320, -98);
+      PlaceCueCharacter(point23, 0x2B1194, 0x249320, -98);
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
@@ -1286,7 +1286,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       func_80206680_ovl_05(0, OPENING_MODEL_LUIGI);
       SetCharacterAnimation(f_CueSlotIndex, 0x13);
-      PLACE_CUE_CHARACTER(point24, 0x16308C, 0x183EDA, 170);
+      PlaceCueCharacter(point24, 0x16308C, 0x183EDA, 170);
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
@@ -1294,7 +1294,7 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 1;
       func_80206680_ovl_05(1, OPENING_MODEL_UNK16);
       SetCharacterAnimation(f_CueSlotIndex, 0x10);
-      PLACE_CUE_CHARACTER(point25, 0xE3F2C, 0x1D98E6, 70);
+      PlaceCueCharacter(point25, 0xE3F2C, 0x1D98E6, 70);
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
@@ -1304,12 +1304,12 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 2;
       func_80206680_ovl_05(2, OPENING_MODEL_LUIGI);
       SetCharacterAnimation(f_CueSlotIndex, 0x14);
-      PLACE_CUE_CHARACTER(point26, 0x16308C, 0x183EDA, 185);
+      PlaceCueCharacter(point26, 0x16308C, 0x183EDA, 185);
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x17);
-        PLACE_CUE_CHARACTER(point27, 0x16806D, 0x17E632, 200);
+        PlaceCueCharacter(point27, 0x16806D, 0x17E632, 200);
       }
 
       f_OpeningCue++;
@@ -1318,13 +1318,13 @@ s32 UpdateOpeningCharacters(void) {
       f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x19);
-        PLACE_CUE_CHARACTER(point28, 0x15E14D, 0x18155C, 170);
+        PlaceCueCharacter(point28, 0x15E14D, 0x18155C, 170);
       }
 
       f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
-        PLACE_CUE_CHARACTER(point29, 0x166EDF, 0x1838C7, 200);
+        PlaceCueCharacter(point29, 0x166EDF, 0x1838C7, 200);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
 
@@ -3036,7 +3036,7 @@ void DrawNameLogos(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
-          gfx++, TEXTURE_ADDRESS(f_NameSlotImages[slot] + IMAGE_HEADER_SIZE));
+          gfx++, TextureAddress(f_NameSlotImages[slot] + IMAGE_HEADER_SIZE));
       gDPPipeSync(gfx++);
       for (strip = 0; strip != NAME_LOGO_STRIP_COUNT; strip++) {
         texelsOffset = LARGE_PALETTED_TEXELS_OFFSET +
@@ -3054,7 +3054,7 @@ void DrawNameLogos(Gfx** displayListHead) {
           s32 drawnHeight;
 
           gDPLoadTextureBlock(gfx++,
-              TEXTURE_ADDRESS(f_NameSlotImages[slot] + texelsOffset),
+              TextureAddress(f_NameSlotImages[slot] + texelsOffset),
               G_IM_FMT_CI, G_IM_SIZ_8b, SLOT_LOGO.width,
               SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -3081,7 +3081,7 @@ void DrawNameLogos(Gfx** displayListHead) {
           s32 drawnHeight;
 
           gDPLoadTextureBlock(gfx++,
-              TEXTURE_ADDRESS(f_NameSlotImages[slot] + texelsOffset),
+              TextureAddress(f_NameSlotImages[slot] + texelsOffset),
               G_IM_FMT_CI, G_IM_SIZ_8b, SLOT_LOGO.width,
               SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -3291,7 +3291,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_NONE);
         gDPLoadTextureBlock(gfx++,
-            TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+            TextureAddress(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
             G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3338,10 +3338,10 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
         if (f_IsLogoBallSlot[slot]) {
           gDPLoadTLUT_pal256(
-              gfx++, TEXTURE_ADDRESS(f_LogoBallImages + IMAGE_HEADER_SIZE));
+              gfx++, TextureAddress(f_LogoBallImages + IMAGE_HEADER_SIZE));
         } else {
           gDPLoadTLUT_pal256(gfx++,
-              TEXTURE_ADDRESS(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
+              TextureAddress(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
         }
 
         for (stripIndex = 0; stripIndex < OPENING_BALL_STRIP_COUNT;
@@ -3359,8 +3359,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           if (f_IsLogoBallSlot[slot]) {
             gDPLoadTextureBlock(gfx++,
-                TEXTURE_ADDRESS(f_LogoBallImages +
-                    LARGE_PALETTED_TEXELS_OFFSET +
+                TextureAddress(f_LogoBallImages + LARGE_PALETTED_TEXELS_OFFSET +
                     ((stripIndex * OPENING_BALL_STRIP_SIZE) +
                         (f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE))),
                 G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
@@ -3369,7 +3368,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 G_TX_NOLOD);
           } else {
             gDPLoadTextureBlock(gfx++,
-                TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
+                TextureAddress(f_OpeningBallImages[slot] +
                     LARGE_PALETTED_TEXELS_OFFSET +
                     (stripIndex * OPENING_BALL_STRIP_SIZE)),
                 G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
@@ -3448,9 +3447,9 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPPipeSync(gfx++);
           gDPSetTextureLUT(gfx++, G_TT_RGBA16);
           gDPLoadTLUT_pal256(
-              gfx++, TEXTURE_ADDRESS(f_LogoMarioImage + IMAGE_HEADER_SIZE));
+              gfx++, TextureAddress(f_LogoMarioImage + IMAGE_HEADER_SIZE));
           gDPLoadTextureBlock(gfx++,
-              TEXTURE_ADDRESS(f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
+              TextureAddress(f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
               G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
               LOGO_MARIO_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -3576,7 +3575,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPPipeSync(gfx++);
           gDPSetTextureLUT(gfx++, G_TT_NONE);
           gDPLoadTextureBlock(gfx++,
-              TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+              TextureAddress(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
               G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3612,10 +3611,10 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetTextureLUT(gfx++, G_TT_RGBA16);
           if (f_IsLogoBallSlot[slot]) {
             gDPLoadTLUT_pal256(
-                gfx++, TEXTURE_ADDRESS(f_LogoBallImages + IMAGE_HEADER_SIZE));
+                gfx++, TextureAddress(f_LogoBallImages + IMAGE_HEADER_SIZE));
           } else {
             gDPLoadTLUT_pal256(gfx++,
-                TEXTURE_ADDRESS(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
+                TextureAddress(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
           }
 
           gDPPipeSync(gfx++);
@@ -3623,7 +3622,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               stripIndex++) {
             if (f_IsLogoBallSlot[slot]) {
               gDPLoadTextureBlock(gfx++,
-                  TEXTURE_ADDRESS(f_LogoBallImages +
+                  TextureAddress(f_LogoBallImages +
                       LARGE_PALETTED_TEXELS_OFFSET +
                       ((stripIndex * OPENING_BALL_STRIP_SIZE) +
                           (f_ProjectedLogoBallFrameIndex *
@@ -3634,7 +3633,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                   G_TX_NOLOD, G_TX_NOLOD);
             } else {
               gDPLoadTextureBlock(gfx++,
-                  TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
+                  TextureAddress(f_OpeningBallImages[slot] +
                       LARGE_PALETTED_TEXELS_OFFSET +
                       (stripIndex * OPENING_BALL_STRIP_SIZE)),
                   G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
@@ -3751,10 +3750,9 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
             gDPLoadTLUT_pal256(
-                gfx++, TEXTURE_ADDRESS(f_LogoMarioImage + IMAGE_HEADER_SIZE));
+                gfx++, TextureAddress(f_LogoMarioImage + IMAGE_HEADER_SIZE));
             gDPLoadTextureBlock(gfx++,
-                TEXTURE_ADDRESS(
-                    f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
+                TextureAddress(f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
                 G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
                 LOGO_MARIO_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -3935,10 +3933,9 @@ void LoadLakitu(void) {
 #define LAKITU_TRAIL_ROWS_PER_SEGMENT 8
 /* Texture coordinates, in 10.5, of the trail's right edge and of a segment */
 #define LAKITU_TRAIL_RIGHT_S ((LAKITU_TRAIL_IMAGE_WIDTH << 5) - 1)
-#define LAKITU_TRAIL_T(segment) \
-  (((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT) << 5)
+#define LakituTrailT(segment) (((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT) << 5)
 /* First vertex buffer slot of a segment in the second batch */
-#define LAKITU_TRAIL_SECOND_BATCH_SLOT(segment) \
+#define LakituTrailSecondBatchSlot(segment) \
   (((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2) - \
       (((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2))
 #define LAKITU_TRAIL_FADE_STEP 4
@@ -3977,10 +3974,10 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(
-        gfx++, TEXTURE_ADDRESS(f_LakituImage + IMAGE_HEADER_SIZE));
+        gfx++, TextureAddress(f_LakituImage + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock(gfx++,
-        TEXTURE_ADDRESS(f_LakituImage + LARGE_PALETTED_TEXELS_OFFSET),
+        TextureAddress(f_LakituImage + LARGE_PALETTED_TEXELS_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_IMAGE_SIZE, LAKITU_IMAGE_SIZE, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOMASK,
         G_TX_NOLOD, G_TX_NOLOD);
@@ -4022,7 +4019,7 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
         0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
     gDPLoadTextureBlock_4b(gfx++,
-        TEXTURE_ADDRESS(f_LakituTrailImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+        TextureAddress(f_LakituTrailImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
         LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, 7,
         G_TX_NOLOD, G_TX_NOLOD);
@@ -4036,9 +4033,9 @@ void DrawLakitu(Gfx** displayListHead) {
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_LakituTrailVertices, 2, drawnIndex * 2);
       gSPModifyVertex(
-          gfx++, drawnIndex * 2, G_MWO_POINT_ST, LAKITU_TRAIL_T(drawnIndex));
+          gfx++, drawnIndex * 2, G_MWO_POINT_ST, LakituTrailT(drawnIndex));
       gSPModifyVertex(gfx++, (drawnIndex * 2) + 1, G_MWO_POINT_ST,
-          (LAKITU_TRAIL_RIGHT_S << 16) + LAKITU_TRAIL_T(drawnIndex));
+          (LAKITU_TRAIL_RIGHT_S << 16) + LakituTrailT(drawnIndex));
       segmentIndex--;
       if (segmentIndex < 0) {
         segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
@@ -4062,12 +4059,12 @@ void DrawLakitu(Gfx** displayListHead) {
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_LakituTrailVertices, 2,
-          LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex));
-      gSPModifyVertex(gfx++, LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex),
-          G_MWO_POINT_ST, LAKITU_TRAIL_T(drawnIndex));
-      gSPModifyVertex(gfx++, LAKITU_TRAIL_SECOND_BATCH_SLOT(drawnIndex) + 1,
+          LakituTrailSecondBatchSlot(drawnIndex));
+      gSPModifyVertex(gfx++, LakituTrailSecondBatchSlot(drawnIndex),
+          G_MWO_POINT_ST, LakituTrailT(drawnIndex));
+      gSPModifyVertex(gfx++, LakituTrailSecondBatchSlot(drawnIndex) + 1,
           G_MWO_POINT_ST,
-          (LAKITU_TRAIL_RIGHT_S << 16) + LAKITU_TRAIL_T(drawnIndex));
+          (LAKITU_TRAIL_RIGHT_S << 16) + LakituTrailT(drawnIndex));
       segmentIndex--;
       if (segmentIndex < 0) {
         segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
@@ -4113,7 +4110,7 @@ void MoveLakitu(void) {
   Radians angle;
 
   if (f_IsLakituFlying) {
-    angle = DEGREES_TO_RADIANS(f_LakituAngle);
+    angle = DegreesToRadians(f_LakituAngle);
     f_LakituAngle += LAKITU_TURN_STEP;
     if (f_LakituAngle > LAKITU_LAST_ANGLE) {
       f_IsLakituFlying = FALSE;
@@ -4303,7 +4300,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
       gDPLoadTextureBlock(gfx++,
-          TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+          TextureAddress(g_ShadowTexture + IMAGE_HEADER_SIZE), G_IM_FMT_I,
           G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -4337,11 +4334,11 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
-          gfx++, TEXTURE_ADDRESS(f_ShotBallImage + IMAGE_HEADER_SIZE));
+          gfx++, TextureAddress(f_ShotBallImage + IMAGE_HEADER_SIZE));
       gDPPipeSync(gfx++);
       for (stripIndex = 0; stripIndex != SHOT_BALL_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(gfx++,
-            TEXTURE_ADDRESS(f_ShotBallImage + LARGE_PALETTED_TEXELS_OFFSET +
+            TextureAddress(f_ShotBallImage + LARGE_PALETTED_TEXELS_OFFSET +
                 (stripIndex * SHOT_BALL_IMAGE_SIZE * SHOT_BALL_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, SHOT_BALL_IMAGE_SIZE,
             SHOT_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -4787,12 +4784,12 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPSetTextureLOD(gfx++, G_TL_TILE);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
     gDPLoadTLUT_pal256(
-        gfx++, TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
+        gfx++, TextureAddress(f_LogoLetterImages + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
         gDPLoadTextureBlock(gfx++,
-            TEXTURE_ADDRESS(f_LogoLetterImages +
+            TextureAddress(f_LogoLetterImages +
                 (((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
                      LOGO_LETTER_HALF_HEIGHT) +
                     LARGE_PALETTED_TEXELS_OFFSET)),
@@ -4819,11 +4816,11 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
 
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
     gDPLoadTLUT_pal256(
-        gfx++, TEXTURE_ADDRESS(f_LogoClubImage + IMAGE_HEADER_SIZE));
+        gfx++, TextureAddress(f_LogoClubImage + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_CLUB_STRIP_COUNT; i++) {
       gDPLoadTextureBlock(gfx++,
-          TEXTURE_ADDRESS(f_LogoClubImage +
+          TextureAddress(f_LogoClubImage +
               ((i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
                   LARGE_PALETTED_TEXELS_OFFSET)),
           G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
@@ -4871,11 +4868,11 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
             ALPHA_CVG_SEL |
             GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM));
     gDPLoadTLUT_pal256(
-        gfx++, TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
+        gfx++, TextureAddress(f_LogoLetterImages + IMAGE_HEADER_SIZE));
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
         gDPLoadTextureBlock(gfx++,
-            TEXTURE_ADDRESS(f_LogoLetterImages +
+            TextureAddress(f_LogoLetterImages +
                 (((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
                      LOGO_LETTER_HALF_HEIGHT) +
                     LARGE_PALETTED_TEXELS_OFFSET)),
@@ -4915,7 +4912,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
       gDPLoadTextureBlock(gfx++,
-          TEXTURE_ADDRESS(f_LogoShineImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+          TextureAddress(f_LogoShineImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
           G_IM_SIZ_8b, LOGO_SHINE_IMAGE_SIZE, LOGO_SHINE_IMAGE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -5177,7 +5174,7 @@ void DrawOpeningSparks(Gfx** displayListHead) {
         f_OpeningSparkPositions[sparkIndex][1] = (SCREEN_HEIGHT / 2) - origin.y;
         f_OpeningSparkAngles[sparkIndex] =
             ((f32)sparkIndex * SPARK_ANGLE_STEP) +
-            (f32)DEGREES_TO_RADIANS((guRandom() % SPARK_ANGLE_JITTER_RANGE) -
+            (f32)DegreesToRadians((guRandom() % SPARK_ANGLE_JITTER_RANGE) -
                 (SPARK_ANGLE_JITTER_RANGE / 2));
         speed = ((guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale) +
             SPARK_MIN_SPEED;

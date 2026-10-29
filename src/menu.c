@@ -39,7 +39,7 @@
  * line */
 #define DMA_ALIGNMENT 0x10
 
-#define ALIGN_FOR_DMA(address) \
+#define DmaAlignedAddress(address) \
   (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
 
 /* The records that unlock two of the characters */
@@ -2166,7 +2166,7 @@ s32 ReadSaveCopies(SaveData* save, u8 isInSram) {
   s32 copyIndex;
   u16 crc;
 
-  check = (SaveCheck*)ALIGN_FOR_DMA(checkBuffer);
+  check = (SaveCheck*)DmaAlignedAddress(checkBuffer);
   unmarkedCount = 0;
   for (copyIndex = 0; copyIndex < SAVE_COPY_COUNT; copyIndex++) {
     if (!isInSram) {
@@ -2219,7 +2219,7 @@ s32 WriteSaveCopies(SaveData* save, u8 isInSram) {
   s32 dateIndex;
   s32 copyIndex;
 
-  check = (SaveCheck*)ALIGN_FOR_DMA(checkBuffer);
+  check = (SaveCheck*)DmaAlignedAddress(checkBuffer);
   for (dateIndex = 0; dateIndex < ARRAY_COUNT(save->invertedBuildDate);
       dateIndex++) {
     save->invertedBuildDate[dateIndex] = ~g_RomBuildDate[dateIndex];

@@ -104,7 +104,7 @@ extern SkyState g_SkyState;
  * The wind's direction as seen from a camera: the arrow turns with the
  * camera's direction of view
  */
-#define VIEWED_WIND_ANGLE(windDirection, view) \
+#define ViewedWindAngle(windDirection, view) \
   (((windDirection) * WIND_DIRECTION_TO_RADIANS) + M_PI - \
       atan2((view)->eye[2] - (view)->lookAt[2], \
           (view)->eye[0] - (view)->lookAt[0]))

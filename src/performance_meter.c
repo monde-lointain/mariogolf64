@@ -19,7 +19,7 @@
 #define MAX_EXTRA_FRAME_COUNT 5
 
 /* Converts an RDP counter value to microseconds, as NuSystem does */
-#define RDP_COUNT_TO_MICROSECONDS(count) ((count) * 1643 / 100000)
+#define RdpCountToMicroseconds(count) ((count) * 1643 / 100000)
 
 #define BAR_START_X 1
 /* The meter's top edge, measured up from the bottom of the screen */
@@ -447,7 +447,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
     vertexIndex = i * 4;
     taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_CMD_CTR];
-    taskTime = RDP_COUNT_TO_MICROSECONDS(taskTime);
+    taskTime = RdpCountToMicroseconds(taskTime);
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rdpCommandBarLength = barLength;
     if (f_RdpCommandBarAverage == 0) {
@@ -474,7 +474,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
     vertexIndex = i * 4;
     taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_PIPE_CTR];
-    taskTime = RDP_COUNT_TO_MICROSECONDS(taskTime);
+    taskTime = RdpCountToMicroseconds(taskTime);
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rdpPipeBarLength = barLength;
     if (f_RdpPipeBarAverage == 0) {
@@ -501,7 +501,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
     vertexIndex = i * 4;
     taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_TMEM_CTR];
-    taskTime = RDP_COUNT_TO_MICROSECONDS(taskTime);
+    taskTime = RdpCountToMicroseconds(taskTime);
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rdpTmemBarLength = barLength;
     if (f_RdpTmemBarAverage == 0) {

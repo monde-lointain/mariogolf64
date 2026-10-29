@@ -114,7 +114,7 @@ s32 UpdateHoleIntroCamera(void) {
 
     /* The swing comes first, then the shot's heading is added to it */
     heading =
-        -(f32)f_IntroFrame * DEGREES_TO_RADIANS(FIRST_HOLE_INTRO_SWING_DEGREES);
+        -(f32)f_IntroFrame * DegreesToRadians(FIRST_HOLE_INTRO_SWING_DEGREES);
     if (heading < -M_PI) {
       heading = -(f32)M_PI;
     }

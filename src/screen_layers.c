@@ -72,7 +72,7 @@
  * Marks the eight octants' points two rows deep, then steps the circle.
  * The offsets are clamped to keep the points on the picture.
  */
-#define MARK_CIRCLE_POINTS(operation) \
+#define MarkCirclePoints(operation) \
   do { \
     radiusOffset = radius; \
     stepOffset = step; \
@@ -82,7 +82,7 @@
     if (step > HALF_TURN_LAST_ROW_OFFSET) { \
       stepOffset = HALF_TURN_LAST_ROW_OFFSET; \
     } \
-    MARK_OCTANT_POINTS(radiusOffset, stepOffset, operation); \
+    MarkOctantPoints(radiusOffset, stepOffset, operation); \
     stepOffset = step; \
     radiusOffset = radius; \
     if (radius > HALF_TURN_LAST_ROW_OFFSET - 1) { \
@@ -91,7 +91,7 @@
     if (step > HALF_TURN_LAST_COLUMN_OFFSET) { \
       stepOffset = HALF_TURN_LAST_COLUMN_OFFSET; \
     } \
-    MARK_OCTANT_POINTS(stepOffset, radiusOffset, operation); \
+    MarkOctantPoints(stepOffset, radiusOffset, operation); \
     error = error - 1 - (step * 2); \
     if (error < 0) { \
       error += (radius - 1) * 2; \
@@ -99,7 +99,7 @@
     } \
     step++; \
   } while (0)
-#define MARK_OCTANT_POINTS(column, row, operation) \
+#define MarkOctantPoints(column, row, operation) \
   do { \
     HALF_TURN_PAIR(centerColumn + (column), centerRow + (row)) operation; \
     HALF_TURN_PAIR(centerColumn + (column), centerRow - (row)) operation; \
@@ -254,14 +254,14 @@ void DrawTextureRect(Gfx** displayListHead, s32 xl, s32 yl, s32 xh, s32 yh,
 void LoadSmallPalette(Gfx** displayListHead, s32 palette, void* tlut) {
   Gfx* gfx = *displayListHead;
 
-  gDPLoadTLUT_pal16(gfx++, palette, TEXTURE_ADDRESS(tlut));
+  gDPLoadTLUT_pal16(gfx++, palette, TextureAddress(tlut));
   *displayListHead = gfx;
 }
 
 void LoadLargePalette(Gfx** displayListHead, void* tlut) {
   Gfx* gfx = *displayListHead;
 
-  gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(tlut));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(tlut));
   *displayListHead = gfx;
 }
 
@@ -270,7 +270,7 @@ void LoadNibbleTextureBlock(Gfx** displayListHead, void* texels, s32 format,
     s32 shifts, s32 shiftt) {
   Gfx* gfx = *displayListHead;
 
-  gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(texels), format, width, height,
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(texels), format, width, height,
       palette, cms, cmt, masks, maskt, shifts, shiftt);
   *displayListHead = gfx;
 }
@@ -280,11 +280,11 @@ void LoadNibbleTextureBlock(Gfx** displayListHead, void* texels, s32 format,
  * whose loading parameters are used, and as the value set in the render
  * tile
  */
-#define LOAD_TEXTURE_BLOCK(pkt, timg, fmt, loadSiz, siz, width, height, pal, \
-    cms, cmt, masks, maskt, shifts, shiftt) \
+#define LoadTextureBlockWithLoadSize(pkt, timg, fmt, loadSiz, siz, width, \
+    height, pal, cms, cmt, masks, maskt, shifts, shiftt) \
   { \
     gDPSetTextureImage( \
-        pkt++, fmt, loadSiz##_LOAD_BLOCK, 1, TEXTURE_ADDRESS(timg)); \
+        pkt++, fmt, loadSiz##_LOAD_BLOCK, 1, TextureAddress(timg)); \
     gDPSetTile(pkt++, fmt, loadSiz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE, 0, cmt, \
         maskt, shiftt, cms, masks, shifts); \
     gDPLoadSync(pkt++); \
@@ -305,11 +305,11 @@ void LoadTextureBlock(Gfx** displayListHead, void* texels, s32 format, s32 size,
   Gfx* gfx = *displayListHead;
 
   if (size == G_IM_SIZ_8b) {
-    LOAD_TEXTURE_BLOCK(gfx, texels, format, G_IM_SIZ_8b, size, width, height,
-        palette, cms, cmt, masks, maskt, shifts, shiftt);
+    LoadTextureBlockWithLoadSize(gfx, texels, format, G_IM_SIZ_8b, size, width,
+        height, palette, cms, cmt, masks, maskt, shifts, shiftt);
   } else {
-    LOAD_TEXTURE_BLOCK(gfx, texels, format, G_IM_SIZ_16b, size, width, height,
-        palette, cms, cmt, masks, maskt, shifts, shiftt);
+    LoadTextureBlockWithLoadSize(gfx, texels, format, G_IM_SIZ_16b, size, width,
+        height, palette, cms, cmt, masks, maskt, shifts, shiftt);
   }
 
   *displayListHead = gfx;
@@ -451,7 +451,7 @@ void DrawWipe(Gfx** displayListHead) {
     texelOffset = (shapeOffset * WIPE_SHAPE_TEXELS << 5) / shapeSize;
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPLoadTextureBlock_4b(gfx++,
-        TEXTURE_ADDRESS((u8*)f_WipeShapeImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+        TextureAddress((u8*)f_WipeShapeImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
         WIPE_SHAPE_TEXELS, WIPE_SHAPE_TEXELS, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
@@ -715,7 +715,7 @@ void DrawPrompt(Gfx** displayListHead) {
   if (f_PromptState == PROMPT_STATE_CHOOSING) {
     s32 unused[2]; /* Unused; it is there to match */
 
-    f_ChoiceBobAngle += DEGREES_TO_RADIANS(CHOICE_BOB_STEP_DEGREES);
+    f_ChoiceBobAngle += DegreesToRadians(CHOICE_BOB_STEP_DEGREES);
     if (f_PromptChoice == PROMPT_CHOICE_YES) {
       halfWidth =
           (sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB) + CHOSEN_HALF_WIDTH;
@@ -811,11 +811,11 @@ void MarkHalfTurnCircle(
 
   if (f_HalfTurnState == HALF_TURN_STATE_SHOWING) {
     while (radius >= step) {
-      MARK_CIRCLE_POINTS(&= ~HALF_TURN_ALPHA_BITS);
+      MarkCirclePoints(&= ~HALF_TURN_ALPHA_BITS);
     }
   } else {
     while (radius >= step) {
-      MARK_CIRCLE_POINTS(|= HALF_TURN_ALPHA_BITS);
+      MarkCirclePoints(|= HALF_TURN_ALPHA_BITS);
     }
   }
 }
@@ -918,7 +918,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
     stripRows = (i == HALF_TURN_STRIP_COUNT - 1) ? HALF_TURN_LAST_STRIP_ROWS
                                                  : HALF_TURN_STRIP_ROWS;
     gDPLoadTextureTile(gfx++,
-        TEXTURE_ADDRESS((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE +
+        TextureAddress((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE +
             (i * HALF_TURN_STRIP_SIZE)),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, HALF_TURN_WIDTH, stripRows, 0, 0,
         HALF_TURN_WIDTH - 1, stripRows - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,

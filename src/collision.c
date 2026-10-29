@@ -1224,7 +1224,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
             (s32)((deltaX * hitFraction) + startX) >> MINI_GOLF_TILE_X_SHIFT;
         nextTileZ =
             (s32)((deltaZ * hitFraction) + startZ) >> MINI_GOLF_TILE_Z_SHIFT;
-        tileDistance = ABS(nextTileX - tileX) + ABS(nextTileZ - tileZ);
+        tileDistance = Abs(nextTileX - tileX) + Abs(nextTileZ - tileZ);
         if (tileDistance == 1) {
           break;
         }
@@ -1488,7 +1488,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       for (steps = 0; steps < TILE_SEARCH_STEP_COUNT; steps++) {
         nextTileX = (s32)((deltaX * hitFraction) + startX) >> GROUND_TILE_SHIFT;
         nextTileZ = (s32)((deltaZ * hitFraction) + startZ) >> GROUND_TILE_SHIFT;
-        tileDistance = ABS(nextTileX - tileX) + ABS(nextTileZ - tileZ);
+        tileDistance = Abs(nextTileX - tileX) + Abs(nextTileZ - tileZ);
         if (tileDistance == 1) {
           break;
         }
@@ -1641,8 +1641,8 @@ s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       continue;
     }
 
-    if (ABS(endSide) + ABS(startSide) != 0) {
-      hitFraction = fabsf(startSide) / (ABS(endSide) + ABS(startSide));
+    if (Abs(endSide) + Abs(startSide) != 0) {
+      hitFraction = fabsf(startSide) / (Abs(endSide) + Abs(startSide));
     } else {
       hitFraction = 0.0f;
     }
@@ -1790,8 +1790,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
         continue;
       }
     } else {
-      if (ABS(endSide) + ABS(startSide) != 0) {
-        hitFraction = fabsf(startSide) / (ABS(endSide) + ABS(startSide));
+      if (Abs(endSide) + Abs(startSide) != 0) {
+        hitFraction = fabsf(startSide) / (Abs(endSide) + Abs(startSide));
       } else {
         hitFraction = 0.0f;
       }
@@ -1868,7 +1868,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       velocity[AXIS_Y] = FLAG_HIT_SPEED_Y;
       velocity[AXIS_Z] = 0;
     } else {
-      bounceSpeed = (speed * FLAGSTICK_MOST_BOUNCE) - (ABS(deltaY) * 2);
+      bounceSpeed = (speed * FLAGSTICK_MOST_BOUNCE) - (Abs(deltaY) * 2);
       if (simulation->state == BALL_STATE_FLYING) {
         bounceSpeed *= 0.5f;
       }

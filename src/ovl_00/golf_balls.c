@@ -744,14 +744,14 @@ enum BallSprite {
 
 /* The texture coordinate step that stretches texelCount texels from from to to,
  * in quarter pixels */
-#define TEXEL_STEP(texelCount, from, to) \
+#define TexelStep(texelCount, from, to) \
   ((to) - (from) != 0 ? ((((texelCount) << 13) / ((to) - (from))) + 1) >> 1 : 0)
 #define gSPStretchedTextureRectangle( \
     pkt, xl, yl, xh, yh, tile, s, t, width, height) \
   gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, \
-      TEXEL_STEP(width, xl, xh), TEXEL_STEP(height, yl, yh))
+      TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
-#define ABSF(value) \
+#define AbsFloat(value) \
   ({ \
     f32 absValue = (value); \
     (absValue < 0.0f) ? -absValue : absValue; \
@@ -805,30 +805,30 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     f_BallRollFrame = (f_BallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
     f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
     gDPLoadTextureBlock(gfx++,
-        TEXTURE_ADDRESS(f_RollingBallImage +
+        TextureAddress(f_RollingBallImage +
             ((f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE) + IMAGE_HEADER_SIZE)),
         G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
         G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock(gfx++,
-        TEXTURE_ADDRESS(f_RollingBallImage + IMAGE_HEADER_SIZE), 0x80,
+        TextureAddress(f_RollingBallImage + IMAGE_HEADER_SIZE), 0x80,
         BALL_TILE_STILL, G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE,
         BALL_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TEXTURE_ADDRESS(f_BallSparkleImage + IMAGE_HEADER_SIZE), 0x100,
+        TextureAddress(f_BallSparkleImage + IMAGE_HEADER_SIZE), 0x100,
         BALL_TILE_SHADOW, G_IM_FMT_I, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TEXTURE_ADDRESS(f_BallMarkerImage + IMAGE_HEADER_SIZE), 0x140,
+        TextureAddress(f_BallMarkerImage + IMAGE_HEADER_SIZE), 0x140,
         BALL_TILE_MARKER, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TEXTURE_ADDRESS(f_BallShadowImage + IMAGE_HEADER_SIZE), 0x150,
+        TextureAddress(f_BallShadowImage + IMAGE_HEADER_SIZE), 0x150,
         BALL_TILE_SMALL, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(gfx++,
-        TEXTURE_ADDRESS(f_BallAfterimageImage + IMAGE_HEADER_SIZE), 0x190,
+        TextureAddress(f_BallAfterimageImage + IMAGE_HEADER_SIZE), 0x190,
         BALL_TILE_AFTERIMAGE, G_IM_FMT_I, 16, 64, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
@@ -950,7 +950,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
 
             gDPSetPrimDepth(gfx++, primDepth, 0);
             gDPPipeSync(gfx++);
-            size = (s32)(ABSF(ballPoint.scaleX) *
+            size = (s32)(AbsFloat(ballPoint.scaleX) *
                 (0.6f * (2.0f * g_PinVertexScale)) * 0.25f);
             if (size <= 0) {
               size = 1;
@@ -1012,9 +1012,9 @@ void DrawGolfBalls(CameraMatrices* matrices) {
               gSPScisTextureRectangle(gfx++, (ballPoint.x << 2) - 4,
                   (ballPoint.y << 2) - 8, ballPoint.x << 2, ballPoint.y << 2,
                   BALL_TILE_SMALL, 0, 0,
-                  TEXEL_STEP(SMALL_BALL_TEXTURE_SIZE, (ballPoint.x << 2) - 4,
+                  TexelStep(SMALL_BALL_TEXTURE_SIZE, (ballPoint.x << 2) - 4,
                       ballPoint.x << 2),
-                  TEXEL_STEP(SMALL_BALL_TEXTURE_SIZE, (ballPoint.y - 1) << 2,
+                  TexelStep(SMALL_BALL_TEXTURE_SIZE, (ballPoint.y - 1) << 2,
                       (ballPoint.y + 1) << 2));
               gDPPipeSync(gfx++);
               gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0xFF);
@@ -1034,7 +1034,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
 
           if (exposure == BALL_EXPOSED && shadowDepth < BALL_NEAREST_DEPTH &&
               !isAboveCup && !ball->unk9E) {
-            size = (s32)(ABSF(shadowPoint.scaleX) *
+            size = (s32)(AbsFloat(shadowPoint.scaleX) *
                 (0.6f * (2.0f * g_PinVertexScale)) * 0.25f);
             if (g_IsCupViewShown == TRUE) {
               if (shadowDepth < g_CupViewDepth) {
@@ -1118,8 +1118,8 @@ void DrawGolfBalls(CameraMatrices* matrices) {
         } else if (shadowDepth < BALL_NEAREST_DEPTH) {
           f32 depth;
 
-          size = ABSF(shadowPoint.scaleX) * (0.6f * (2.0f * g_PinVertexScale)) *
-              0.25f;
+          size = AbsFloat(shadowPoint.scaleX) *
+              (0.6f * (2.0f * g_PinVertexScale)) * 0.25f;
           if (g_IsCupViewShown != TRUE) {
             if (shadowDepth < g_CupViewDepth) {
               depth = shadowPoint.depth -
@@ -1213,11 +1213,11 @@ void DrawGolfBalls(CameraMatrices* matrices) {
           gDPSetPrimDepth(gfx++, afterimageDepth & ~3, 0);
           gDPPipeSync(gfx++);
           halfWidth =
-              (ABSF(ballPoint.scaleX) *
+              (AbsFloat(ballPoint.scaleX) *
                   ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2))) -
               1.0;
           halfHeight =
-              (ABSF(ballPoint.scaleY) *
+              (AbsFloat(ballPoint.scaleY) *
                   ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2))) -
               1.0;
           if (halfWidth < 4) {
@@ -1282,11 +1282,11 @@ void DrawGolfBalls(CameraMatrices* matrices) {
           gDPSetPrimDepth(gfx++, afterimageDepth & ~3, 0);
           gDPPipeSync(gfx++);
           halfWidth =
-              (ABSF(shadowPoint.scaleX) *
+              (AbsFloat(shadowPoint.scaleX) *
                   ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2))) -
               1.0;
           halfHeight =
-              (ABSF(shadowPoint.scaleY) *
+              (AbsFloat(shadowPoint.scaleY) *
                   ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2))) -
               1.0;
           if (halfWidth < 4) {

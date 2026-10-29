@@ -1002,7 +1002,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
   teeFrame = sway >= PAUSE_TEE_LEAN_SWAY;
   LoadSmallPalette(&gfx, 0, f_PauseCursorImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(gfx++,
-      TEXTURE_ADDRESS(f_PauseCursorImage + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
+      TextureAddress(f_PauseCursorImage + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
       PAUSE_CURSOR_SIZE, 0, 0, 0, PAUSE_CURSOR_SIZE - 1,
       PAUSE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);
@@ -1232,7 +1232,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
       LoadSmallPalette(&gfx, 0, f_ChoiceBoxCursorImage + IMAGE_HEADER_SIZE);
       cursorY = labelsTop + (f_ChoiceBoxSelection * CHOICE_LABEL_SPACING);
       gDPLoadTextureTile_4b(gfx++,
-          TEXTURE_ADDRESS(f_ChoiceBoxCursorImage + PALETTED_TEXELS_OFFSET),
+          TextureAddress(f_ChoiceBoxCursorImage + PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, CHOICE_CURSOR_SIZE, 0, 0, 0, CHOICE_CURSOR_SIZE - 1,
           CHOICE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&gfx, cursorX << 2, (cursorY - 2) << 2,

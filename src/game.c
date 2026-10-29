@@ -1144,7 +1144,7 @@ void func_8040BFC8(void);
 void func_8040C124(void);
 void func_8040C360(CameraMatrices* matrices, Gfx** displayListHead);
 
-#define SET_CAMERA_SCISSOR(view) \
+#define SetCameraScissor(view) \
   gDPSetScissor(g_DisplayListHead++, G_SC_NON_INTERLACE, (view).scissorX, \
       (view).scissorY, (view).scissorX + (view).scissorWidth, \
       (view).scissorY + (view).scissorHeight)
@@ -1435,7 +1435,7 @@ s32 DrawGame(void) {
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
-          SET_CAMERA_SCISSOR(g_Cameras[0].view);
+          SetCameraScissor(g_Cameras[0].view);
           func_801F4AD8(&g_DisplayListHead);
         }
 
@@ -1444,7 +1444,7 @@ s32 DrawGame(void) {
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
-          SET_CAMERA_SCISSOR(g_Cameras[0].view);
+          SetCameraScissor(g_Cameras[0].view);
           DrawBootLogos(&g_DisplayListHead);
         }
 
@@ -1453,7 +1453,7 @@ s32 DrawGame(void) {
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
-          SET_CAMERA_SCISSOR(g_Cameras[0].view);
+          SetCameraScissor(g_Cameras[0].view);
           DrawOpening(matrices, &g_DisplayListHead);
         }
 
@@ -1463,7 +1463,7 @@ s32 DrawGame(void) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           FillScreen();
           gDPPipeSync(g_DisplayListHead++);
-          SET_CAMERA_SCISSOR(g_Cameras[0].view);
+          SetCameraScissor(g_Cameras[0].view);
           DrawTitleScreen(&g_DisplayListHead);
         }
 
@@ -1473,7 +1473,7 @@ s32 DrawGame(void) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           FillScreen();
           gDPPipeSync(g_DisplayListHead++);
-          SET_CAMERA_SCISSOR(g_Cameras[0].view);
+          SetCameraScissor(g_Cameras[0].view);
           DrawStaffRoll(&g_DisplayListHead);
         }
 
@@ -1482,7 +1482,7 @@ s32 DrawGame(void) {
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
-          SET_CAMERA_SCISSOR(g_Cameras[0].view);
+          SetCameraScissor(g_Cameras[0].view);
           func_801F8110(&g_DisplayListHead);
         }
 
@@ -1491,7 +1491,7 @@ s32 DrawGame(void) {
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
-          SET_CAMERA_SCISSOR(g_Cameras[0].view);
+          SetCameraScissor(g_Cameras[0].view);
           func_801FB198(&g_DisplayListHead);
           g_Cameras[0].view.eye[0] = 0.0f;
           g_Cameras[0].view.lookAt[0] = 0.0f;
@@ -1524,7 +1524,7 @@ s32 DrawGame(void) {
           LoadProjection();
           gSPPerspNormalize(g_DisplayListHead++, insetPerspNorm);
           gDPPipeSync(g_DisplayListHead++);
-          SET_CAMERA_SCISSOR(g_Cameras[INSET_CAMERA].view);
+          SetCameraScissor(g_Cameras[INSET_CAMERA].view);
           gDPPipeSync(g_DisplayListHead++);
           gDPPipeSync(g_DisplayListHead++);
           gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
@@ -1648,7 +1648,7 @@ s32 DrawGame(void) {
             }
 
             gDPPipeSync(g_DisplayListHead++);
-            SET_CAMERA_SCISSOR(g_Cameras[0].view);
+            SetCameraScissor(g_Cameras[0].view);
             if ((g_Cameras[0].view.drawFlags !=
                         (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) ||
                     g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME ||
@@ -1725,7 +1725,7 @@ s32 DrawGame(void) {
               gDPPipeSync(g_DisplayListHead++);
               gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
               gDPPipeSync(g_DisplayListHead++);
-              SET_CAMERA_SCISSOR(g_Cameras[INSET_CAMERA].view);
+              SetCameraScissor(g_Cameras[INSET_CAMERA].view);
               UsePrimitiveDepth(0);
               DrawBackdrop(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view,
                   INSET_CAMERA);
@@ -1914,7 +1914,7 @@ s32 DrawGame(void) {
 
         DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
         gDPPipeSync(g_DisplayListHead++);
-        SET_CAMERA_SCISSOR(g_Cameras[0].view);
+        SetCameraScissor(g_Cameras[0].view);
       }
     } else if (drawsScene && IsOverlayInExpansionMemory()) {
       if (!IsGameFlagSet(GAME_FLAG_SKIP_GROUND_DRAWING)) {
@@ -1943,7 +1943,7 @@ s32 DrawGame(void) {
   if (drawMode == DRAW_MODE_COURSE) {
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);
-    SET_CAMERA_SCISSOR(g_Cameras[0].view);
+    SetCameraScissor(g_Cameras[0].view);
     gSPViewport(g_DisplayListHead++, &g_Viewports[g_DrawBufferIndex]);
     if (g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
       DrawInsetViewFrame();
@@ -2354,7 +2354,7 @@ void UpdateGame(void) {
 
   if (g_Scene == SCENE_OPENING) {
     StepNoiseTexture();
-    g_SkyState.viewedWindAngles[0] = VIEWED_WIND_ANGLE(
+    g_SkyState.viewedWindAngles[0] = ViewedWindAngle(
         g_HoleSetup.conditions.windDirection, &g_Cameras[0].view);
     if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
       g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
@@ -2399,9 +2399,9 @@ void UpdateGame(void) {
     UpdatePlay();
     windDirection = &g_HoleSetup.conditions.windDirection;
     g_SkyState.viewedWindAngles[0] =
-        VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[0].view);
+        ViewedWindAngle(*windDirection, &g_Cameras[0].view);
     g_SkyState.viewedWindAngles[1] =
-        VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[INSET_CAMERA].view);
+        ViewedWindAngle(*windDirection, &g_Cameras[INSET_CAMERA].view);
     if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
       g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
     }

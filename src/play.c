@@ -827,7 +827,7 @@ enum HoleMenuChoice {
 
 /* The hole intro camera circles the hole at these distances */
 #define INTRO_ORBIT_ANGLE_PER_FRAME 256 /* In binary angle units */
-#define INTRO_ORBIT_ANGLE() \
+#define IntroOrbitAngle() \
   (((f_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & \
        BINARY_ANGLE_MASK) * \
       BINARY_ANGLE_TO_RADIANS)
@@ -1114,11 +1114,11 @@ void UpdatePlay(void) {
                 g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
             lookAt[AXIS_Z] =
                 g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-            eye[AXIS_X] = (cosf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS) +
-                lookAt[AXIS_X];
+            eye[AXIS_X] =
+                (cosf(IntroOrbitAngle()) * DEBUG_ORBIT_RADIUS) + lookAt[AXIS_X];
             eye[AXIS_Y] = lookAt[AXIS_Y] + DEBUG_ORBIT_HEIGHT;
-            eye[AXIS_Z] = (sinf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS) +
-                lookAt[AXIS_Z];
+            eye[AXIS_Z] =
+                (sinf(IntroOrbitAngle()) * DEBUG_ORBIT_RADIUS) + lookAt[AXIS_Z];
           } else {
             lookAt[AXIS_X] = (g_HoleSetup.cupPosition[AXIS_X] +
                                  g_HoleSetup.teePosition[AXIS_X]) *
@@ -1130,18 +1130,16 @@ void UpdatePlay(void) {
                                  g_HoleSetup.teePosition[AXIS_Z]) *
                 (COURSE_TO_WORLD_SCALE / 2);
             if (!g_GameState.isMiniGolf) {
-              eye[AXIS_X] = (cosf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS) +
+              eye[AXIS_X] = (cosf(IntroOrbitAngle()) * INTRO_ORBIT_RADIUS) +
                   lookAt[AXIS_X];
               eye[AXIS_Y] = lookAt[AXIS_Y] + INTRO_ORBIT_HEIGHT;
-              eye[AXIS_Z] = (sinf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS) +
+              eye[AXIS_Z] = (sinf(IntroOrbitAngle()) * INTRO_ORBIT_RADIUS) +
                   lookAt[AXIS_Z];
             } else {
-              eye[AXIS_X] =
-                  (cosf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS) +
+              eye[AXIS_X] = (cosf(IntroOrbitAngle()) * MINI_GOLF_ORBIT_RADIUS) +
                   lookAt[AXIS_X];
               eye[AXIS_Y] = lookAt[AXIS_Y] + MINI_GOLF_ORBIT_HEIGHT;
-              eye[AXIS_Z] =
-                  (sinf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS) +
+              eye[AXIS_Z] = (sinf(IntroOrbitAngle()) * MINI_GOLF_ORBIT_RADIUS) +
                   lookAt[AXIS_Z];
             }
           }
@@ -1883,7 +1881,7 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
       g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
 
 /* Sets a vertex halfway between two others */
-#define SET_AVERAGE_VERTEX(midpoint, from, to) \
+#define SetAverageVertex(midpoint, from, to) \
   { \
     (midpoint)->v.ob[0] = ((from)->v.ob[0] + (to)->v.ob[0]) / 2; \
     (midpoint)->v.ob[1] = ((from)->v.ob[1] + (to)->v.ob[1]) / 2; \
@@ -1895,22 +1893,22 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 
 /* Loads a row's odd vertices as averages of its even ones, so that they line up
  * with a coarse row */
-#define LOAD_AVERAGED_ROW(row, slot) \
+#define LoadAveragedRow(row, slot) \
   { \
     Vtx* even = (row); \
-    SET_AVERAGE_VERTEX(&vertices[0], &even[0], &even[1]); \
-    SET_AVERAGE_VERTEX(&vertices[1], &even[1], &even[2]); \
-    SET_AVERAGE_VERTEX(&vertices[2], &even[2], &even[3]); \
-    SET_AVERAGE_VERTEX(&vertices[3], &even[3], &even[4]); \
+    SetAverageVertex(&vertices[0], &even[0], &even[1]); \
+    SetAverageVertex(&vertices[1], &even[1], &even[2]); \
+    SetAverageVertex(&vertices[2], &even[2], &even[3]); \
+    SetAverageVertex(&vertices[3], &even[3], &even[4]); \
     gSPVertex(gfx++, vertices, 4, slot); \
     vertices += 4; \
   }
 
 /* Loads a tile's texture, skipping its one-texel border */
-#define LOAD_TILE_TEXTURE(tileIndex, column, row) \
+#define LoadTileTexture(tileIndex, column, row) \
   { \
     gDPLoadMultiBlock(gfx++, \
-        TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
+        TextureAddress(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
         G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, \
         GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP, \
         G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
@@ -1919,8 +1917,8 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
   }
 
 /* Loads the noise texture that DrawGround blends over the tiles */
-#define LOAD_NOISE_TEXTURE(shiftS, shiftT) \
-  gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_800E12B0), NOISE_TMEM, \
+#define LoadNoiseTexture(shiftS, shiftT) \
+  gDPLoadMultiBlock(gfx++, TextureAddress(D_800E12B0), NOISE_TMEM, \
       G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, RANDOM_GRID_SIZE, \
       RANDOM_GRID_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
@@ -2065,12 +2063,12 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
     if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
       if (g_GameState.isMiniGolf) {
-        LOAD_NOISE_TEXTURE(15, G_TX_NOLOD);
+        LoadNoiseTexture(15, G_TX_NOLOD);
       } else {
-        LOAD_NOISE_TEXTURE(13, 13);
+        LoadNoiseTexture(13, 13);
       }
     } else {
-      LOAD_NOISE_TEXTURE(13, 15);
+      LoadNoiseTexture(13, 15);
     }
 
     SetGroundCombineMode(0, 0);
@@ -2252,19 +2250,17 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
             }
           } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             /* A medium tile among fine ones loads only its own vertices */
-            gSPVertex(gfx++, GRID_VERTEX(column + (k * 2), row * 2), 2, 0);
-            gSPVertex(gfx++, GRID_VERTEX(column + (k * 2) + 1, row * 2), 1, 2);
+            gSPVertex(gfx++, GridVertex(column + (k * 2), row * 2), 2, 0);
+            gSPVertex(gfx++, GridVertex(column + (k * 2) + 1, row * 2), 1, 2);
+            gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 1), 2, 3);
             gSPVertex(
-                gfx++, GRID_VERTEX(column + (k * 2), (row * 2) + 1), 2, 3);
+                gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 1), 1, 5);
+            gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 2), 2, 6);
             gSPVertex(
-                gfx++, GRID_VERTEX(column + (k * 2) + 1, (row * 2) + 1), 1, 5);
-            gSPVertex(
-                gfx++, GRID_VERTEX(column + (k * 2), (row * 2) + 2), 2, 6);
-            gSPVertex(
-                gfx++, GRID_VERTEX(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
+                gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LOAD_TILE_TEXTURE(tileIndex, tileColumn, row);
-              DRAW_TILE_QUADS(0, 2, 1, 3, 5, 4, 6, 8, 7);
+              LoadTileTexture(tileIndex, tileColumn, row);
+              DrawTileQuads(0, 2, 1, 3, 5, 4, 6, 8, 7);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
                 break;
               }
@@ -2283,36 +2279,36 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
         /* The last row's bottom vertices are still in the cache, unless it was
          * fine or skipped */
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
-          gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
+          gSPVertex(gfx++, GridVertex(column, row * 2),
               GROUND_TILE_GROUP_SIZE + 1, topSlot);
-          gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2),
+          gSPVertex(gfx++, GridVertex(column + 1, row * 2),
               GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
         } else if (previousDetail == GROUND_DETAIL_COARSE) {
-          LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2), topSlot + ODD_SLOT);
+          LoadAveragedRow(GridVertex(column, row * 2), topSlot + ODD_SLOT);
         }
 
-        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 1),
+        gSPVertex(gfx++, GridVertex(column, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE + 1, middleSlot);
-        gSPVertex(gfx++, GRID_VERTEX(column + 1, (row * 2) + 1),
+        gSPVertex(gfx++, GridVertex(column + 1, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
-        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 2),
+        gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         if (row != GROUND_TILE_ROW_COUNT - 1 &&
             g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
                     .detail == GROUND_DETAIL_COARSE) {
-          LOAD_AVERAGED_ROW(
-              GRID_VERTEX(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
+          LoadAveragedRow(
+              GridVertex(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
         } else {
-          gSPVertex(gfx++, GRID_VERTEX(column + 1, (row * 2) + 2),
+          gSPVertex(gfx++, GridVertex(column + 1, (row * 2) + 2),
               GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
         }
 
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LOAD_TILE_TEXTURE(
+              LoadTileTexture(
                   tileIndex, (half * GROUND_TILE_GROUP_SIZE) + k, row);
-              DRAW_TILE_QUADS(topSlot, topSlot + ODD_SLOT, topSlot + 1,
+              DrawTileQuads(topSlot, topSlot + ODD_SLOT, topSlot + 1,
                   middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
                   bottomSlot + ODD_SLOT, bottomSlot + 1);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
@@ -2338,16 +2334,16 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
         topSlot = bottomSlot;
         bottomSlot = spareSlot;
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
-          gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
+          gSPVertex(gfx++, GridVertex(column, row * 2),
               GROUND_TILE_GROUP_SIZE + 1, topSlot);
         }
 
-        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 2),
+        gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LOAD_TILE_TEXTURE(
+              LoadTileTexture(
                   tileIndex, (half * GROUND_TILE_GROUP_SIZE) + k, row);
               gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
                   topSlot + 1, bottomSlot + 1, bottomSlot, 0);

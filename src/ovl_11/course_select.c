@@ -50,8 +50,7 @@ enum PlanksState {
 
 /* Each four stars open one more Ring Shot course */
 #define STARS_PER_OPENED_COURSE 4
-#define STARS_TO_OPEN(courseCount) \
-  (((courseCount) - 1) * STARS_PER_OPENED_COURSE)
+#define StarsToOpen(courseCount) (((courseCount) - 1) * STARS_PER_OPENED_COURSE)
 
 /* The asset IDs of the images */
 #define HOLE_SIGN_ASSET 0x739
@@ -271,23 +270,23 @@ s32 CountOpenRingShotCourses(void) {
     return RING_SHOT_COURSE_COUNT;
   }
 
-  if (starCount >= STARS_TO_OPEN(6)) {
+  if (starCount >= StarsToOpen(6)) {
     return 6;
   }
 
-  if (starCount >= STARS_TO_OPEN(5)) {
+  if (starCount >= StarsToOpen(5)) {
     return 5;
   }
 
-  if (starCount >= STARS_TO_OPEN(4)) {
+  if (starCount >= StarsToOpen(4)) {
     return 4;
   }
 
-  if (starCount >= STARS_TO_OPEN(3)) {
+  if (starCount >= StarsToOpen(3)) {
     return 3;
   }
 
-  if (starCount >= STARS_TO_OPEN(2)) {
+  if (starCount >= StarsToOpen(2)) {
     return 2;
   }
 

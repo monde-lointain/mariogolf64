@@ -353,7 +353,7 @@ enum TriangleEdit {
 
 /* A plain if leaves GCC to invert the condition, which the game's code does not
  */
-#define EDITOR_ASSERT(condition, lineNumber) \
+#define AssertInEditor(condition, lineNumber) \
   ((condition) ? (void)0 \
                : ReportFailedAssertion( \
                      f_EditorAssertionText, f_EditorFileName, lineNumber))
@@ -482,15 +482,15 @@ enum EditorCombineMode {
   (g_WorkArea.hole.tiles[tileIndex].detail < GROUND_DETAIL_FINE)
 
 /* Loads the wave texture where DrawGround loads its noise texture */
-#define LOAD_WAVE_TEXTURE() \
-  gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_80491A60), WAVE_TMEM, \
+#define LoadWaveTexture() \
+  gDPLoadMultiBlock(gfx++, TextureAddress(D_80491A60), WAVE_TMEM, \
       G_TX_RENDERTILE, G_IM_FMT_IA, G_IM_SIZ_8b, WAVE_TEXTURE_WIDTH, \
       WAVE_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, \
       G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 15, 15)
 
 /* Loads the white texture where DrawGround loads its noise texture */
-#define LOAD_WHITE_NOISE_TEXTURE(shiftS, shiftT) \
-  gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(f_WhiteNoiseTexels), NOISE_TMEM, \
+#define LoadWhiteNoiseTexture(shiftS, shiftT) \
+  gDPLoadMultiBlock(gfx++, TextureAddress(f_WhiteNoiseTexels), NOISE_TMEM, \
       G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, WHITE_TEXTURE_SIZE, \
       WHITE_TEXTURE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
@@ -498,7 +498,7 @@ enum EditorCombineMode {
  * Loads a tile's texture in either layout. A bordered tile picks its combiner
  * mode for the pass, and its second pass reuses the loaded texels.
  */
-#define LOAD_EDITOR_TILE_TEXTURE(tileIndex, tileColumn, row, pass, overlay) \
+#define LoadEditorTileTexture(tileIndex, tileColumn, row, pass, overlay) \
   { \
     s32 tileS = (tileColumn) * TILE_COORDINATE_SPAN; \
     s32 tileT = (row) * TILE_COORDINATE_SPAN; \
@@ -510,7 +510,7 @@ enum EditorCombineMode {
                 : TILE_PASS_ONLY, \
             overlay); \
         gDPLoadMultiBlock(gfx++, \
-            TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
+            TextureAddress(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
             G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, \
             GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP, \
             G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, \
@@ -521,7 +521,7 @@ enum EditorCombineMode {
 \
       if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) { \
         gDPLoadMultiBlock(gfx++, \
-            TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
+            TextureAddress(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
             G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, \
             GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP, \
             G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, 3, 3); \
@@ -533,7 +533,7 @@ enum EditorCombineMode {
       } \
     } else { \
       gDPLoadMultiBlock(gfx++, \
-          TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
+          TextureAddress(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
           G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_SPAN, \
           GROUND_TILE_TEXEL_SPAN, 0, G_TX_MIRROR | G_TX_WRAP, \
           G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
@@ -546,7 +546,7 @@ enum EditorCombineMode {
 
 /* Loads a row's odd vertices as midpoints of its even ones, so that they line
  * up with a coarse row */
-#define LOAD_EDITOR_AVERAGED_ROW(row, slot) \
+#define LoadEditorAveragedRow(row, slot) \
   { \
     Vtx* even = (row); \
 \
@@ -2777,7 +2777,7 @@ s32 func_80405870_hole_editor(s32 column, s32 row, s32 endColumn, s32 endRow) {
 
   width = endColumn - column;
   height = endRow - row;
-  EDITOR_ASSERT(width > 0 && height > 0, HOLE_EDITOR_DIAGONAL_ASSERT_LINE);
+  AssertInEditor(width > 0 && height > 0, HOLE_EDITOR_DIAGONAL_ASSERT_LINE);
   for (i = 0; i < DIAGONAL_SIDE_COUNT; i++) {
     sideCodes[i][0] = NO_TERRAIN_CODE;
     sideCodes[i][1] = NO_TERRAIN_CODE;
@@ -2923,7 +2923,7 @@ void func_80405DB0_hole_editor(void) {
   Vtx* point;
 
   offsets = AllocMemory(SHAPE_OFFSET_COUNT * sizeof(GridOffset));
-  EDITOR_ASSERT(offsets != NULL, HOLE_EDITOR_SHAPE_ASSERT_LINE);
+  AssertInEditor(offsets != NULL, HOLE_EDITOR_SHAPE_ASSERT_LINE);
   offsetCount =
       ListOffsetsByDistance(SHAPE_OFFSET_SPAN, offsets, SHAPE_OFFSET_COUNT);
   greenCount = 0;
@@ -3797,7 +3797,7 @@ void func_80407F08_hole_editor(u32* words, s32 byteCount, char* fileName) {
   buffer = AllocMemory(HEX_DUMP_BUFFER_SIZE);
   cursor = buffer;
   end = buffer + HEX_DUMP_BUFFER_SIZE;
-  EDITOR_ASSERT(buffer != NULL, HOLE_EDITOR_HEX_DUMP_ASSERT_LINE);
+  AssertInEditor(buffer != NULL, HOLE_EDITOR_HEX_DUMP_ASSERT_LINE);
   for (line = 0;
       line < (byteCount + HEX_DUMP_LINE_BYTES - 1) / HEX_DUMP_LINE_BYTES;
       line++) {
@@ -4057,13 +4057,13 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
         gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
     gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, MAP_BLEND_ALPHA);
     if (g_ShowsGroundWaves) {
-      LOAD_WAVE_TEXTURE();
+      LoadWaveTexture();
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, PRIMITIVE, 0, TEXEL0, 0,
           PRIMITIVE, COMBINED, COMBINED_ALPHA, COMBINED, 0, 0, 0, 1);
       gDPPipeSync(gfx++);
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
     } else {
-      gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(f_WhiteNoiseTexels), NOISE_TMEM,
+      gDPLoadMultiBlock(gfx++, TextureAddress(f_WhiteNoiseTexels), NOISE_TMEM,
           G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, WHITE_TEXTURE_SIZE,
           WHITE_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 12, 12);
@@ -4089,7 +4089,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
     gDPPipeSync(gfx++);
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
     if (g_ShowsGroundWaves) {
-      LOAD_WAVE_TEXTURE();
+      LoadWaveTexture();
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, PRIMITIVE, 0, TEXEL0, 0,
           PRIMITIVE, COMBINED, COMBINED_ALPHA, COMBINED, 0, 0, 0, COMBINED);
       gDPPipeSync(gfx++);
@@ -4097,9 +4097,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
       SetEditorCombineMode(TILE_PASS_ONLY, GROUND_OVERLAY_WAVES);
     } else {
       if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
-        LOAD_WHITE_NOISE_TEXTURE(13, 13);
+        LoadWhiteNoiseTexture(13, 13);
       } else {
-        LOAD_WHITE_NOISE_TEXTURE(13, 15);
+        LoadWhiteNoiseTexture(13, 15);
       }
 
       SetEditorCombineMode(TILE_PASS_ONLY, GROUND_OVERLAY_NOISE);
@@ -4272,22 +4272,22 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
                * edge midpoints, which line up with a medium neighbor */
               vertexColumn = column + (k * 2);
               CopyDoublePair(
-                  (f64*)GRID_VERTEX(vertexColumn, row * 2), (f64*)&vertices[0]);
-              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn, (row * 2) + 1),
+                  (f64*)GridVertex(vertexColumn, row * 2), (f64*)&vertices[0]);
+              CopyDoublePair((f64*)GridVertex(vertexColumn, (row * 2) + 1),
                   (f64*)&vertices[2]);
-              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn, (row * 2) + 2),
+              CopyDoublePair((f64*)GridVertex(vertexColumn, (row * 2) + 2),
                   (f64*)&vertices[4]);
-              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 1, row * 2),
+              CopyDoublePair((f64*)GridVertex(vertexColumn + 1, row * 2),
                   (f64*)&vertices[7]);
-              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 1, (row * 2) + 1),
+              CopyDoublePair((f64*)GridVertex(vertexColumn + 1, (row * 2) + 1),
                   (f64*)&vertices[8]);
-              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 1, (row * 2) + 2),
+              CopyDoublePair((f64*)GridVertex(vertexColumn + 1, (row * 2) + 2),
                   (f64*)&vertices[9]);
-              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 2, row * 2),
+              CopyDoublePair((f64*)GridVertex(vertexColumn + 2, row * 2),
                   (f64*)&vertices[12]);
-              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 2, (row * 2) + 1),
+              CopyDoublePair((f64*)GridVertex(vertexColumn + 2, (row * 2) + 1),
                   (f64*)&vertices[14]);
-              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 2, (row * 2) + 2),
+              CopyDoublePair((f64*)GridVertex(vertexColumn + 2, (row * 2) + 2),
                   (f64*)&vertices[16]);
               if (tileColumn == 0 ||
                   g_WorkArea.hole.tiles[tileIndex - 1].detail !=
@@ -4343,7 +4343,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
               gSPVertex(gfx++, &vertices[12], 5, 20);
               vertices += FINE_TILE_BUILT_VERTEX_COUNT;
               for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-                LOAD_EDITOR_TILE_TEXTURE(
+                LoadEditorTileTexture(
                     tileIndex, tileColumn, row, pass, g_ShowsGroundWaves);
 
                 /* Goes over the 4 by 4 cells in blocks of 2 by 2 */
@@ -4496,18 +4496,16 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
             }
           } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             /* A medium tile among fine ones loads only its own vertices */
-            gSPVertex(gfx++, GRID_VERTEX(column + (k * 2), row * 2), 2, 0);
-            gSPVertex(gfx++, GRID_VERTEX(column + (k * 2) + 1, row * 2), 1, 2);
+            gSPVertex(gfx++, GridVertex(column + (k * 2), row * 2), 2, 0);
+            gSPVertex(gfx++, GridVertex(column + (k * 2) + 1, row * 2), 1, 2);
+            gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 1), 2, 3);
             gSPVertex(
-                gfx++, GRID_VERTEX(column + (k * 2), (row * 2) + 1), 2, 3);
+                gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 1), 1, 5);
+            gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 2), 2, 6);
             gSPVertex(
-                gfx++, GRID_VERTEX(column + (k * 2) + 1, (row * 2) + 1), 1, 5);
-            gSPVertex(
-                gfx++, GRID_VERTEX(column + (k * 2), (row * 2) + 2), 2, 6);
-            gSPVertex(
-                gfx++, GRID_VERTEX(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
+                gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LOAD_EDITOR_TILE_TEXTURE(
+              LoadEditorTileTexture(
                   tileIndex, tileColumn, row, pass, GROUND_OVERLAY_NOISE);
               gSP2Triangles(gfx++, 0, 2, 3, 0, 2, 5, 3, 0);
               gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
@@ -4535,38 +4533,38 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
         /* The last row's bottom vertices are still in the cache, unless it was
          * fine or skipped */
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
-          gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
+          gSPVertex(gfx++, GridVertex(column, row * 2),
               GROUND_TILE_GROUP_SIZE + 1, topSlot);
-          gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2),
+          gSPVertex(gfx++, GridVertex(column + 1, row * 2),
               GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
         } else if (previousDetail == GROUND_DETAIL_COARSE) {
-          LOAD_EDITOR_AVERAGED_ROW(
-              GRID_VERTEX(column, row * 2), topSlot + ODD_SLOT);
+          LoadEditorAveragedRow(
+              GridVertex(column, row * 2), topSlot + ODD_SLOT);
         }
 
-        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 1),
+        gSPVertex(gfx++, GridVertex(column, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE + 1, middleSlot);
-        gSPVertex(gfx++, GRID_VERTEX(column + 1, (row * 2) + 1),
+        gSPVertex(gfx++, GridVertex(column + 1, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
-        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 2),
+        gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         if (row != GROUND_TILE_ROW_COUNT - 1 &&
             g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
                     .detail == GROUND_DETAIL_COARSE) {
-          LOAD_EDITOR_AVERAGED_ROW(
-              GRID_VERTEX(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
+          LoadEditorAveragedRow(
+              GridVertex(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
         } else {
-          gSPVertex(gfx++, GRID_VERTEX(column + 1, (row * 2) + 2),
+          gSPVertex(gfx++, GridVertex(column + 1, (row * 2) + 2),
               GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
         }
 
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LOAD_EDITOR_TILE_TEXTURE(tileIndex,
+              LoadEditorTileTexture(tileIndex,
                   (half * GROUND_TILE_GROUP_SIZE) + k, row, pass,
                   GROUND_OVERLAY_NOISE);
-              DRAW_TILE_QUADS(topSlot, topSlot + ODD_SLOT, topSlot + 1,
+              DrawTileQuads(topSlot, topSlot + ODD_SLOT, topSlot + 1,
                   middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
                   bottomSlot + ODD_SLOT, bottomSlot + 1);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
@@ -4594,16 +4592,16 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
         topSlot = bottomSlot;
         bottomSlot = spareSlot;
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
-          gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
+          gSPVertex(gfx++, GridVertex(column, row * 2),
               GROUND_TILE_GROUP_SIZE + 1, topSlot);
         }
 
-        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 2),
+        gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LOAD_EDITOR_TILE_TEXTURE(tileIndex,
+              LoadEditorTileTexture(tileIndex,
                   (half * GROUND_TILE_GROUP_SIZE) + k, row, pass,
                   GROUND_OVERLAY_NOISE);
               gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,

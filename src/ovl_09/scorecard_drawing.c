@@ -2102,9 +2102,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
 #define EAGLE_COLOR 3 /* On a par five */
 #define BOGEY_COLOR 4
 #define PULSING_COLOR 5 /* An eagle on a shorter hole, or better */
-#define PULSE_STEP DEGREES_TO_RADIANS(20)
+#define PULSE_STEP DegreesToRadians(20)
 #define PULSE_RANGE 127
-#define BADGE_GLOW_STEP DEGREES_TO_RADIANS(10)
+#define BADGE_GLOW_STEP DegreesToRadians(10)
 #define BADGE_GLOW_RANGE 30
 
 /*

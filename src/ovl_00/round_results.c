@@ -991,7 +991,7 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
 #define PLACE_NUMBER_X_OFFSET (-12)
 
 /* Loads glyph from f_PlaceDigitsImage and draws it at x, y */
-#define DRAW_PLACE_GLYPH(gfx, x, y, glyph) \
+#define DrawPlaceGlyph(gfx, x, y, glyph) \
   { \
     gDPLoadTextureTile(gfx++, \
         (u32)(f_PlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, \
@@ -1034,7 +1034,7 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
     character = *c;
     if (character != ' ') {
       glyph = character - '0';
-      DRAW_PLACE_GLYPH(gfx, left + width, y, glyph);
+      DrawPlaceGlyph(gfx, left + width, y, glyph);
     }
 
     width += PLACE_GLYPH_SPACING;
@@ -1059,7 +1059,7 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
     }
   }
 
-  DRAW_PLACE_GLYPH(gfx, left + width, y, suffix + PLACE_SUFFIX_GLYPH_FIRST);
+  DrawPlaceGlyph(gfx, left + width, y, suffix + PLACE_SUFFIX_GLYPH_FIRST);
   *displayListHead = gfx;
 }
 #else

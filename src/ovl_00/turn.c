@@ -1018,7 +1018,7 @@ void MoveAimCameraDistanceByUpDown(void) {
 
 /* Raises or lowers the aim camera with the stick's Y */
 void MoveAimCameraHeight(void) {
-  if (ABS(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
+  if (Abs(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
     g_CurrentShot.aimCameraHeight -=
         g_TurnController.stickY / AIM_STICK_STEP * AIM_CAMERA_HEIGHT_STEP;
   }
@@ -1028,12 +1028,12 @@ void MoveAimCameraHeight(void) {
  * for a putt */
 void MoveAimCameraDistance(void) {
   if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
-    if (ABS(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
+    if (Abs(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
       g_CurrentShot.aimCameraDistance += g_TurnController.stickY /
           AIM_DISTANCE_STICK_STEP * AIM_CAMERA_PUTT_DISTANCE_STEP;
     }
   } else {
-    if (ABS(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
+    if (Abs(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
       g_CurrentShot.aimCameraDistance += g_TurnController.stickY /
           AIM_DISTANCE_STICK_STEP * AIM_CAMERA_DISTANCE_STEP;
     }
@@ -1161,7 +1161,7 @@ s32 UpdateAimControls(void) {
   if (f_ShotSource != SHOT_SOURCE_PLAYER) {
     headingLeft = (s16)(D_80104F78.heading - g_CurrentShot.heading);
     if (IsGameFlagSet(GAME_FLAG_SNAP_REPLAY_AIM) ||
-        ABS(headingLeft) < REPLAY_AIM_MIN_STEP) {
+        Abs(headingLeft) < REPLAY_AIM_MIN_STEP) {
       g_CurrentShot.heading = D_80104F78.heading;
       if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
         SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
@@ -1172,7 +1172,7 @@ s32 UpdateAimControls(void) {
     }
 
     step = headingLeft / REPLAY_AIM_STEP_DIVISOR;
-    turn = ABS(step) + REPLAY_AIM_MIN_STEP;
+    turn = Abs(step) + REPLAY_AIM_MIN_STEP;
     heading = g_CurrentShot.heading;
     g_CurrentShot.heading = (headingLeft < 0) ? heading - turn : heading + turn;
     if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
@@ -1649,9 +1649,9 @@ void PickStartingClub(HoleSetup* hole) {
       }
 
       gap = distance - cupDistance;
-      if (ABS(gap) < bestGap && (!reaches || distance >= cupDistance)) {
+      if (Abs(gap) < bestGap && (!reaches || distance >= cupDistance)) {
         bestSlot = slot;
-        bestGap = ABS(gap);
+        bestGap = Abs(gap);
         if (distance >= cupDistance) {
           reaches = TRUE;
         }
@@ -1976,7 +1976,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(g_DisplayListHead++,
-      TEXTURE_ADDRESS((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
+      TextureAddress((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
       G_IM_FMT_I, G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
       G_TX_NOLOD);
@@ -2797,9 +2797,9 @@ static inline void DebugPlaceBall(s32 playerIndex) {
   ClearGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
   if (g_ControllerData[1].button & Z_TRIG) {
     g_CurrentShot.ballPosition[AXIS_X] += g_ControllerStates[1].stickX *
-        ((ABS(g_ControllerStates[1].stickX) * 2) + 1);
+        ((Abs(g_ControllerStates[1].stickX) * 2) + 1);
     g_CurrentShot.ballPosition[AXIS_Z] += g_ControllerStates[1].stickY *
-        ((ABS(g_ControllerStates[1].stickY) * 2) + 1);
+        ((Abs(g_ControllerStates[1].stickY) * 2) + 1);
     g_CurrentShot.ballPosition[AXIS_Y] = GetGroundHeight(
         g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
     g_Players[playerIndex].ballPosition[AXIS_X] =

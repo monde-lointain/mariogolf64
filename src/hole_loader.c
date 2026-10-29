@@ -104,7 +104,7 @@
 #define LZ_PATCH_KIND_LITERALS 0x8000
 /* The DMA buffers' alignment, in bytes */
 #define LZ_BUFFER_ALIGNMENT 16
-#define ALIGN_BUFFER(address) \
+#define AlignedLzBuffer(address) \
   (((u32)(address) + LZ_BUFFER_ALIGNMENT - 1) & ~(LZ_BUFFER_ALIGNMENT - 1))
 
 /* A reference word holds a distance back into the output, then a length less
@@ -450,8 +450,8 @@ s32 LoadLzData(u32 romAddress, void* destination, u32 size) {
   dmaIndex = 0;
   pendingCount = 0;
   receiveIndex = 0;
-  buffers[0] = (u16*)(ALIGN_BUFFER(rawBuffers[0]) + LZ_CARRY_SIZE);
-  buffers[1] = (u16*)(ALIGN_BUFFER(rawBuffers[1]) + LZ_CARRY_SIZE);
+  buffers[0] = (u16*)(AlignedLzBuffer(rawBuffers[0]) + LZ_CARRY_SIZE);
+  buffers[1] = (u16*)(AlignedLzBuffer(rawBuffers[1]) + LZ_CARRY_SIZE);
   stream.input = buffers[0];
   stream.outputStart = destination;
   stream.nextInput = buffers[1];
@@ -539,8 +539,8 @@ s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size) {
   dmaIndex = 0;
   pendingCount = 0;
   receiveIndex = 0;
-  buffers[0] = (u16*)(ALIGN_BUFFER(rawBuffers[0]) + LZ_CARRY_SIZE);
-  buffers[1] = (u16*)(ALIGN_BUFFER(rawBuffers[1]) + LZ_CARRY_SIZE);
+  buffers[0] = (u16*)(AlignedLzBuffer(rawBuffers[0]) + LZ_CARRY_SIZE);
+  buffers[1] = (u16*)(AlignedLzBuffer(rawBuffers[1]) + LZ_CARRY_SIZE);
   stream.input = buffers[0];
   stream.outputStart = destination;
   stream.nextInput = buffers[1];

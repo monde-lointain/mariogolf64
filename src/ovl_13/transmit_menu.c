@@ -1820,7 +1820,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
     /* An if-chain rather than a switch is there to match */
     if (transfer->screenStep == SEND_STATUS_CHOOSING) {
       /* The pointer swings in and out over half a turn of the angle */
-      f_StatusPointerAngle += DEGREES_TO_RADIANS(10);
+      f_StatusPointerAngle += DegreesToRadians(10);
       if (f_StatusPointerAngle > M_PI) {
         f_StatusPointerAngle -= M_PI;
       }
@@ -2206,7 +2206,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
             TRANSMIT_OPTION_MESSAGES,
         FONT_SIZE_LARGE, &width, &height, 0);
     /* The pointer swings in and out over half a turn of the angle */
-    f_OptionPointerAngle += DEGREES_TO_RADIANS(10);
+    f_OptionPointerAngle += DegreesToRadians(10);
     if (f_OptionPointerAngle > M_PI) {
       f_OptionPointerAngle -= M_PI;
     }

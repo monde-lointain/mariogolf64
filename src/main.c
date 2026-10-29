@@ -41,7 +41,7 @@
 #define FRAMEBUFFER_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(u16))
 
 /* The frame buffers fill the end of the base RDRAM, in order */
-#define FRAMEBUFFER_ADDRESS(index) \
+#define FramebufferAddress(index) \
   ((u16*)(BASE_RDRAM_END - ((FRAMEBUFFER_COUNT - (index)) * FRAMEBUFFER_SIZE)))
 
 /* Character slots that get a buffer in g_WorkArea */
@@ -107,9 +107,9 @@ s32 g_FramesPerSecond = 0;
 static u8 D_800B67D4[4] = {0};
 
 static u16* f_Framebuffers[FRAMEBUFFER_COUNT] = {
-    FRAMEBUFFER_ADDRESS(0),
-    FRAMEBUFFER_ADDRESS(1),
-    FRAMEBUFFER_ADDRESS(2),
+    FramebufferAddress(0),
+    FramebufferAddress(1),
+    FramebufferAddress(2),
 };
 static s32 f_RetraceCount = 0;
 static s32 f_FramesThisSecond = 0;
@@ -350,7 +350,7 @@ HAS_DIRECTION:
 void UpdateMenuController(
     NUContData* pad, NUContData* previousMenuPad, s32 portIndex) {
   s32 ApplyStickDeadZone(s32 stick) {
-    s32 magnitude = ABS(stick);
+    s32 magnitude = Abs(stick);
 
     if (magnitude < STICK_DEAD_ZONE) {
       return 0;

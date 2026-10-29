@@ -208,7 +208,7 @@ enum TerrainStyle {
 #define GROUND_TIMING_ROW 11
 
 /* The grid vertex at a vertex column and row, as GetGridVertex finds it */
-#define GRID_VERTEX(column, row) \
+#define GridVertex(column, row) \
   (&g_WorkArea.hole.gridVertices[((row) * 17) + ((u32)(column) >> 1) + \
       (((u32)(column) & 1) * 9)])
 
@@ -218,7 +218,7 @@ enum TerrainStyle {
   (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
 
 /* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
-#define DRAW_TILE_QUADS( \
+#define DrawTileQuads( \
     top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
   { \
     gSP2Triangles( \

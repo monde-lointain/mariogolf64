@@ -49,13 +49,13 @@
 #define SHOWN_SYMBOL_OFFSET 3
 
 /* A reel moves on a symbol each time it turns this far */
-#define SYMBOL_ANGLE DEGREES_TO_RADIANS(35)
+#define SYMBOL_ANGLE DegreesToRadians(35)
 /* A stopping reel turns this far each frame until its next symbol */
-#define STOPPING_REEL_SPEED DEGREES_TO_RADIANS(2)
+#define STOPPING_REEL_SPEED DegreesToRadians(2)
 /* A spinning reel speeds up by this many degrees a frame, times the reels from
  * its right */
 #define REEL_SPEED_STEP 0.5f
-#define MAX_REEL_SPEED DEGREES_TO_RADIANS(18)
+#define MAX_REEL_SPEED DegreesToRadians(18)
 /* A reel clicks each time f_TickTime reaches this */
 #define REEL_TICK_TIME 8
 
@@ -112,8 +112,8 @@
 #define START_SHOWN_HEIGHT 50
 /* START! grows as f_StartAngle turns this far each frame, up to START_MAX_ANGLE
  */
-#define START_ANGLE_STEP DEGREES_TO_RADIANS(20)
-#define START_MAX_ANGLE DEGREES_TO_RADIANS(120)
+#define START_ANGLE_STEP DegreesToRadians(20)
+#define START_MAX_ANGLE DegreesToRadians(120)
 
 /* The faces of the players, the one spinning brighter and larger */
 #define FACE_SIZE 32
@@ -307,18 +307,18 @@ void LoadClubSlots(void) {
   f_Slots->stoppedSymbols[1] = NO_SYMBOL;
   f_Slots->stoppedSymbols[2] = NO_SYMBOL;
   f_Slots->stoppedReelCount = 0;
-  f_Slots->reelAngles[0] = DEGREES_TO_RADIANS(10);
-  f_Slots->reelAngles[1] = DEGREES_TO_RADIANS(20);
-  f_Slots->reelAngles[2] = DEGREES_TO_RADIANS(30);
-  f_Slots->reelSpeeds[0] = DEGREES_TO_RADIANS(4);
-  f_Slots->reelSpeeds[1] = DEGREES_TO_RADIANS(2);
+  f_Slots->reelAngles[0] = DegreesToRadians(10);
+  f_Slots->reelAngles[1] = DegreesToRadians(20);
+  f_Slots->reelAngles[2] = DegreesToRadians(30);
+  f_Slots->reelSpeeds[0] = DegreesToRadians(4);
+  f_Slots->reelSpeeds[1] = DegreesToRadians(2);
   f_Slots->reelSpeeds[2] = 0;
   f_Slots->pressCount = 0;
   f_Slots->playerIndex = 0;
   for (index = 0; index != REEL_EDGE_COUNT; index++) {
     f_Slots->reelVertices[index * 2].v.ob[0] = -REEL_HALF_WIDTH;
     f_Slots->reelVertices[(index * 2) + 1].v.ob[0] = REEL_HALF_WIDTH;
-    angle = DEGREES_TO_RADIANS((f32)((index - 1) * REEL_EDGE_SPACING));
+    angle = DegreesToRadians((f32)((index - 1) * REEL_EDGE_SPACING));
     f_Slots->reelVertices[index * 2].v.ob[1] = cosf(angle) * REEL_RADIUS;
     f_Slots->reelVertices[(index * 2) + 1].v.ob[1] = cosf(angle) * REEL_RADIUS;
     f_Slots->reelVertices[index * 2].v.ob[2] = sinf(angle) * REEL_RADIUS;
@@ -608,7 +608,7 @@ void DrawClubSlots(Gfx** displayListHead) {
 
       f_Slots->reelAngles[reelIndex] += f_Slots->reelSpeeds[reelIndex];
       f_Slots->reelSpeeds[reelIndex] +=
-          DEGREES_TO_RADIANS((REEL_COUNT - reelIndex) * REEL_SPEED_STEP);
+          DegreesToRadians((REEL_COUNT - reelIndex) * REEL_SPEED_STEP);
       if (f_Slots->reelSpeeds[reelIndex] > MAX_REEL_SPEED) {
         f_Slots->reelSpeeds[reelIndex] = MAX_REEL_SPEED;
       }

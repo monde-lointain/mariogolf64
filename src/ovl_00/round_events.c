@@ -1039,7 +1039,7 @@ void DrawBanner(Gfx** displayListHead) {
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPLoadTLUT_pal256(
-      gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
@@ -1142,9 +1142,9 @@ void DrawFlipMessage(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, FLIP_MESSAGE_BOARD_ALPHA);
     gDPPipeSync(gfx++);
-    angle = DEGREES_TO_RADIANS(
-        (f_FlipMessageFrame * FLIP_MESSAGE_DEGREES_PER_FRAME) +
-        FLIP_MESSAGE_START_DEGREES);
+    angle =
+        DegreesToRadians((f_FlipMessageFrame * FLIP_MESSAGE_DEGREES_PER_FRAME) +
+            FLIP_MESSAGE_START_DEGREES);
     if (angle > 2 * M_PI) {
       angle = 2 * M_PI;
     }
@@ -1503,7 +1503,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
 
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPLoadTLUT_pal256(
-      gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
     bottom = CONTEST_IMAGE_CENTER_Y;
     for (i = 0; i != stripCount; i++) {
@@ -1673,7 +1673,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
 
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPLoadTLUT_pal256(
-      gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
     bottom = SHRINKING_IMAGE_CENTER_Y;
     for (i = 0; i != stripCount; i++) {
@@ -1787,7 +1787,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
 
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPLoadTLUT_pal256(
-      gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
     bottom = SHRINKING_IMAGE_CENTER_Y;
     for (i = 0; i != stripCount; i++) {
@@ -1857,7 +1857,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawPuttCaption);
 #define GO_STRIP_HEIGHT 14
 #define READY_GO_LAST_STRIP_HEIGHT 8
 /* Texture coordinates are in 10.5 fixed point */
-#define TEXEL_COORD(texels) ((texels) << 5)
+#define TexelCoord(texels) ((texels) << 5)
 
 void DrawReadyGoMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1945,10 +1945,10 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
 
   if (f_MovieDrawCount < GO_DRAW) {
     gDPLoadTLUT_pal256(
-        gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+        gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   } else {
     gDPLoadTLUT_pal256(gfx++,
-        TEXTURE_ADDRESS(
+        TextureAddress(
             f_MovieBuffer + GO_TEXT_OFFSET + MOVIE_IMAGE_PALETTE_OFFSET));
   }
 
@@ -1963,7 +1963,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
           ? READY_STRIP_HEIGHT
           : READY_GO_LAST_STRIP_HEIGHT;
       gDPLoadTextureTile(gfx++,
-          TEXTURE_ADDRESS(f_MovieBuffer +
+          TextureAddress(f_MovieBuffer +
               (MOVIE_IMAGE_PIXELS_OFFSET +
                   (i * READY_WIDTH * READY_STRIP_HEIGHT))),
           G_IM_FMT_CI, G_IM_SIZ_8b, READY_WIDTH, stripHeight, 0, 0,
@@ -1971,29 +1971,29 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
           G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
       gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-          (TEXEL_COORD(READY_WIDTH) - 1) << 16);
+          (TexelCoord(READY_WIDTH) - 1) << 16);
       gSPModifyVertex(
-          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TEXEL_COORD(stripHeight));
+          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoord(stripHeight));
       gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
-          ((TEXEL_COORD(READY_WIDTH) - 1) << 16) + TEXEL_COORD(stripHeight));
+          ((TexelCoord(READY_WIDTH) - 1) << 16) + TexelCoord(stripHeight));
     } else {
       stripHeight = (i != READY_GO_STRIP_COUNT - 1)
           ? GO_STRIP_HEIGHT
           : READY_GO_LAST_STRIP_HEIGHT;
       gDPLoadTextureTile(gfx++,
-          TEXTURE_ADDRESS(f_MovieBuffer +
+          TextureAddress(f_MovieBuffer +
               (GO_TEXT_OFFSET + MOVIE_IMAGE_PIXELS_OFFSET +
                   (i * GO_WIDTH * GO_STRIP_HEIGHT))),
           G_IM_FMT_CI, G_IM_SIZ_8b, GO_WIDTH, stripHeight, 0, 0, GO_WIDTH - 1,
           stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR,
           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
-      gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-          (TEXEL_COORD(GO_WIDTH) - 1) << 16);
       gSPModifyVertex(
-          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TEXEL_COORD(stripHeight));
+          gfx++, (i * 2) + 1, G_MWO_POINT_ST, (TexelCoord(GO_WIDTH) - 1) << 16);
+      gSPModifyVertex(
+          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoord(stripHeight));
       gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
-          ((TEXEL_COORD(GO_WIDTH) - 1) << 16) + TEXEL_COORD(stripHeight));
+          ((TexelCoord(GO_WIDTH) - 1) << 16) + TexelCoord(stripHeight));
     }
 
     gSP2Triangles(gfx++, i * 2, (i * 2) + 2, (i * 2) + 3, 0, i * 2, (i * 2) + 3,
@@ -2040,7 +2040,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
       ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
       ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
   gDPLoadTLUT_pal256(
-      gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < SHRINKING_IMAGE_DRAW_COUNT) {
     angle = (f32)f_MovieDrawCount * SHRINKING_IMAGE_TURN_PER_FRAME;
     if (angle > M_PI / 2) {
@@ -2103,10 +2103,10 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
 
   gSPDisplayList(gfx++, f_MovieSetupDisplayList);
   gDPLoadTLUT_pal256(
-      gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
+      gfx++, TextureAddress(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
   for (i = 0; i != MONTY_MOLE_STRIP_COUNT; i++) {
     gDPLoadTextureTile(gfx++,
-        TEXTURE_ADDRESS(
+        TextureAddress(
             f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * MONTY_MOLE_STRIP_SIZE))),
         G_IM_FMT_CI, G_IM_SIZ_8b, MONTY_MOLE_WIDTH, MONTY_MOLE_STRIP_HEIGHT, 0,
         0, MONTY_MOLE_WIDTH - 1, MONTY_MOLE_STRIP_HEIGHT - 1, 0,
@@ -2152,7 +2152,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
 
   gSPDisplayList(gfx++, f_MovieSetupDisplayList);
   gDPLoadTLUT_pal256(
-      gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
+      gfx++, TextureAddress(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
   for (i = 0; i != GOOMBA_STRIP_COUNT; i++) {
     if (i == GOOMBA_STRIP_COUNT - 1) {
       height = GOOMBA_LAST_STRIP_HEIGHT;
@@ -2161,7 +2161,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
     }
 
     gDPLoadTextureTile(gfx++,
-        TEXTURE_ADDRESS(
+        TextureAddress(
             f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * GOOMBA_STRIP_SIZE))),
         G_IM_FMT_CI, G_IM_SIZ_8b, GOOMBA_WIDTH, height, 0, 0, GOOMBA_WIDTH - 1,
         height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2242,7 +2242,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPLoadTLUT_pal256(gfx++,
-      TEXTURE_ADDRESS(f_MovieBuffer +
+      TextureAddress(f_MovieBuffer +
           ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) +
               MOVIE_IMAGE_PALETTE_OFFSET)));
   offset = MOVIE_IMAGE_PIXELS_OFFSET;
@@ -2250,7 +2250,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
     halfWidth = f_Lakitu.scale * (LAKITU_WIDTH / 2);
     halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
     gDPLoadTextureTile(gfx++,
-        TEXTURE_ADDRESS(
+        TextureAddress(
             f_MovieBuffer + ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) + offset)),
         G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_WIDTH, LAKITU_STRIP_HEIGHT, 0, 0,
         LAKITU_WIDTH - 1, LAKITU_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2329,10 +2329,10 @@ void DrawToadMovie(Gfx** displayListHead) {
           g_Cameras[INSET_VIEW_CAMERA].view.scissorWidth - INSET_FRAME_WIDTH,
       g_Cameras[INSET_VIEW_CAMERA].view.scissorY +
           g_Cameras[INSET_VIEW_CAMERA].view.scissorHeight - INSET_FRAME_HEIGHT);
-  gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(f_MovieBuffer));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer));
   for (i = 0; i != TOAD_STRIP_COUNT; i++) {
     gDPLoadTextureTile(gfx++,
-        TEXTURE_ADDRESS(f_MovieBuffer + TOAD_FRAME_OFFSET +
+        TextureAddress(f_MovieBuffer + TOAD_FRAME_OFFSET +
             ((f_MovieBackBuffer * TOAD_FRAME_SIZE) + (i * TOAD_STRIP_SIZE))),
         G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, TOAD_STRIP_HEIGHT, 0, 0,
         TOAD_WIDTH - 1, TOAD_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2576,7 +2576,7 @@ void LoadContactImages(UnkB8* player) {
 
 /* Draws the ribbon segment between two of the ball's positions, as vertex pair
  * firstVertex */
-#define DRAW_CONTACT_SEGMENT(segment, firstVertex) \
+#define DrawContactSegment(segment, firstVertex) \
   gSPMatrix(gfx++, \
       OS_K0_TO_PHYSICAL(&f_ContactMatrices[(f_ContactTrailHead + (segment)) % \
           CONTACT_TRAIL_LENGTH]), \
@@ -2591,28 +2591,28 @@ void LoadContactImages(UnkB8* player) {
   gSPModifyVertex(gfx++, (firstVertex) + 1, G_MWO_POINT_ST, \
       (f_ContactTextureS << 16) + (f_ContactTextureT * (segment)))
 
-#define DRAW_CONTACT_TRIANGLES() \
+#define DrawContactTriangles() \
   for (i = 0; i != CONTACT_RIBBON_RELOAD_SEGMENTS; i++) { \
     gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1, \
         (i * 2) + 2, (i * 2) + 3, 0); \
   }
 
 /* The shot style draws only the first segments */
-#define DRAW_CONTACT_RIBBON() \
+#define DrawContactRibbon() \
   for (i = 0; i != CONTACT_RIBBON_FIRST_SEGMENTS; i++) { \
-    DRAW_CONTACT_SEGMENT(i, i * 2); \
+    DrawContactSegment(i, i * 2); \
   } \
-  DRAW_CONTACT_TRIANGLES(); \
+  DrawContactTriangles(); \
   if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
     for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
       for (i = (pass * 30) + 16; i != (pass * 30) + 31; i++) { \
-        DRAW_CONTACT_SEGMENT(i, 28 - ((i - (pass * 30) - 16) * 2)); \
+        DrawContactSegment(i, 28 - ((i - (pass * 30) - 16) * 2)); \
       } \
-      DRAW_CONTACT_TRIANGLES(); \
+      DrawContactTriangles(); \
       for (i = (pass * 30) + 31; i != (pass * 30) + 46; i++) { \
-        DRAW_CONTACT_SEGMENT(i, ((i - (pass * 30) - 31) * 2) + 2); \
+        DrawContactSegment(i, ((i - (pass * 30) - 31) * 2) + 2); \
       } \
-      DRAW_CONTACT_TRIANGLES(); \
+      DrawContactTriangles(); \
     } \
   }
 
@@ -2775,10 +2775,10 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
-        TEXTURE_ADDRESS(
+        TextureAddress(
             g_SharedEffectImages + CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE));
     gDPLoadTextureBlock(gfx++,
-        TEXTURE_ADDRESS(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+        TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, 64, 8, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
   } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
@@ -2788,16 +2788,16 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
-        TEXTURE_ADDRESS(
+        TextureAddress(
             g_SharedEffectImages + CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE));
     gDPLoadTextureBlock(gfx++,
-        TEXTURE_ADDRESS(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+        TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, 16, 100, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, 4, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
       f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
     gDPLoadTextureBlock_4b(gfx++,
-        TEXTURE_ADDRESS(
+        TextureAddress(
             g_SharedEffectImages + CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE),
         G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
@@ -2805,19 +2805,19 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
       f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6 ||
       f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
     gDPLoadTextureBlock_4b(gfx++,
-        TEXTURE_ADDRESS(g_SharedEffectImages + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+        TextureAddress(g_SharedEffectImages + IMAGE_HEADER_SIZE), G_IM_FMT_I,
         32, 100, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
     gDPLoadTextureBlock_4b(gfx++,
-        TEXTURE_ADDRESS(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET +
+        TextureAddress(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET +
             IMAGE_HEADER_SIZE),
         G_IM_FMT_I, 16, 100, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
   } else {
     gDPLoadTextureBlock_4b(gfx++,
-        TEXTURE_ADDRESS(g_SharedEffectImages + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+        TextureAddress(g_SharedEffectImages + IMAGE_HEADER_SIZE), G_IM_FMT_I,
         32, 100, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   }
@@ -2829,16 +2829,16 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   guMtxF2L(ribbon, &f_ContactRibbonMatrices[g_DrawBufferIndex]);
   if (f_ContactStyle != CONTACT_STYLE_MARIO) {
     gDPPipeSync(gfx++);
-    DRAW_CONTACT_RIBBON();
+    DrawContactRibbon();
     if (f_ContactStyle == CONTACT_STYLE_WARIO ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
       gDPLoadTextureBlock_4b(gfx++,
-          TEXTURE_ADDRESS(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET +
+          TextureAddress(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET +
               IMAGE_HEADER_SIZE),
           G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      DRAW_CONTACT_RIBBON();
+      DrawContactRibbon();
     }
   }
 
@@ -2857,11 +2857,11 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
-        TEXTURE_ADDRESS(
+        TextureAddress(
             g_SharedEffectImages + CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE));
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, CONTACT_SPIN_ALPHA);
     gDPLoadTextureBlock(gfx++,
-        TEXTURE_ADDRESS(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+        TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);

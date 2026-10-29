@@ -16,10 +16,10 @@
 #define ASSET_CHUNK_SIZE 0x2000
 
 /* Rounds a stack buffer up to the 16-byte alignment that ROM reads need */
-#define ALIGN_BUFFER(buffer) ((void*)(((u32)(buffer) + 0xF) & ~0xF))
+#define AlignedReadBuffer(buffer) ((void*)(((u32)(buffer) + 0xF) & ~0xF))
 
 /* Reads the next chunk of the asset into chunk */
-#define READ_CHUNK(chunk, remaining, asset) \
+#define ReadNextChunk(chunk, remaining, asset) \
   if ((remaining) < ASSET_CHUNK_SIZE) { \
     ReadAssetFile(chunk, remaining, &(asset)->file); \
     (remaining) = 0; \
@@ -28,10 +28,10 @@
     (remaining) -= ASSET_CHUNK_SIZE; \
   }
 /* Moves past a byte of chunk, reading the next chunk at its end */
-#define ADVANCE(chunk, position, remaining, asset) \
+#define AdvanceChunkPosition(chunk, position, remaining, asset) \
   (position)++; \
   if ((remaining) != 0 && (position) == ASSET_CHUNK_SIZE) { \
-    READ_CHUNK(chunk, remaining, asset); \
+    ReadNextChunk(chunk, remaining, asset); \
     (position) = 0; \
   }
 
@@ -67,8 +67,8 @@ void InitAssetFiles(void) {
 void ReadAssetFileBounds(s32 assetId, AssetFile* file) {
   u8 rawOffset[0x40];
   u8 rawSize[0x40];
-  u32* offset = ALIGN_BUFFER(rawOffset);
-  s32* size = ALIGN_BUFFER(rawSize);
+  u32* offset = AlignedReadBuffer(rawOffset);
+  s32* size = AlignedReadBuffer(rawSize);
 
   nuPiReadRom((u32)&ASSET_TABLE[assetId].size, size, sizeof(*size));
   nuPiReadRom((u32)&ASSET_TABLE[assetId].offset, offset, sizeof(*offset));
@@ -130,7 +130,7 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file) {
 
 s32 OpenEncodedAsset(AssetId assetId, EncodedAsset* asset) {
   u8 rawHeader[0x80];
-  u32* header = ALIGN_BUFFER(rawHeader);
+  u32* header = AlignedReadBuffer(rawHeader);
 
   if (IsGameFlagSet(GAME_FLAG_LOG_ENCODED_ASSETS)) {
     osSyncPrintf("OP:%d\n", assetId);
@@ -177,12 +177,12 @@ void DecodeByteRuns(u8* buffer, EncodedAsset* asset) {
   s32 index;
 
   reader.remaining = asset->encodedSize - sizeof(u32);
-  chunk = ALIGN_BUFFER(reader.rawChunk);
-  READ_CHUNK(chunk, reader.remaining, asset);
+  chunk = AlignedReadBuffer(reader.rawChunk);
+  ReadNextChunk(chunk, reader.remaining, asset);
   reader.position = 0;
   while (TRUE) {
     count = (s8)chunk[reader.position];
-    ADVANCE(chunk, reader.position, reader.remaining, asset);
+    AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
     if (count == 0) {
       break;
     }
@@ -192,12 +192,12 @@ void DecodeByteRuns(u8* buffer, EncodedAsset* asset) {
         *buffer++ = chunk[reader.position];
       }
 
-      ADVANCE(chunk, reader.position, reader.remaining, asset);
+      AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
     } else {
       count = -count;
       for (index = 0; index != count; index++) {
         *buffer++ = chunk[reader.position];
-        ADVANCE(chunk, reader.position, reader.remaining, asset);
+        AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
       }
     }
   }
@@ -214,22 +214,22 @@ void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset) {
   u8 low;
 
   reader.remaining = asset->encodedSize - sizeof(u32);
-  chunk = ALIGN_BUFFER(reader.rawChunk);
-  READ_CHUNK(chunk, reader.remaining, asset);
+  chunk = AlignedReadBuffer(reader.rawChunk);
+  ReadNextChunk(chunk, reader.remaining, asset);
   reader.position = 0;
   while (TRUE) {
     count = (s8)chunk[reader.position];
-    ADVANCE(chunk, reader.position, reader.remaining, asset);
+    AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
     if (count == 0) {
       break;
     }
 
     if (count > 0) {
       high = chunk[reader.position];
-      ADVANCE(chunk, reader.position, reader.remaining, asset);
+      AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
       low = chunk[reader.position];
       repeatCount = count; /* Copied here, rather than count used, to match */
-      ADVANCE(chunk, reader.position, reader.remaining, asset);
+      AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
       for (index = 0; index != repeatCount; index++) {
         *buffer++ = high;
         *buffer++ = low;
@@ -238,9 +238,9 @@ void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset) {
       count = -count;
       for (index = 0; index != count; index++) {
         high = chunk[reader.position];
-        ADVANCE(chunk, reader.position, reader.remaining, asset);
+        AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
         low = chunk[reader.position];
-        ADVANCE(chunk, reader.position, reader.remaining, asset);
+        AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
         *buffer++ = high;
         *buffer++ = low;
       }

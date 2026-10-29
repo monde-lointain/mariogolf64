@@ -1007,9 +1007,9 @@ void ScrollLeaderboard(u16 buttons) {
     if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
         g_Scorecard.content.isRowFlipping[row] == TRUE) {
       g_Scorecard.content.rowFlipAngles[row] +=
-          DEGREES_TO_RADIANS(ROW_FLIP_DEGREES_PER_FRAME);
+          DegreesToRadians(ROW_FLIP_DEGREES_PER_FRAME);
       if (g_Scorecard.content.rowFlipAngles[row] >
-          DEGREES_TO_RADIANS(ROW_FLIP_END_DEGREES)) {
+          DegreesToRadians(ROW_FLIP_END_DEGREES)) {
         g_Scorecard.content.rowFlipAngles[row] = 0.0f;
         g_Scorecard.content.isRowFlipping[row] = FALSE;
         PlaySound(SOUND_LOOK_DOWN_RANGE, ROW_FLIP_SOUND_CHANNEL,

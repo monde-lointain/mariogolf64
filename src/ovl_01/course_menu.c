@@ -379,7 +379,7 @@ void func_8020E390_ovl_01(void) {
       }
     }
 
-    if (ABS(memory->statsSpin) != 0) {
+    if (Abs(memory->statsSpin) != 0) {
       direction = memory->statsSpin < 0 ? -1 : 1;
       step = STATS_SPIN_SPEED / (courseCount + 1);
       if (step == 0) {
@@ -465,7 +465,7 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   for (index = 0; index != courseCount + 1; index++) {
     ScreenPoint point;
 
-    angle = -DEGREES_TO_RADIANS(
+    angle = -DegreesToRadians(
         (((statsCourse - index) % (courseCount + 1)) * angleStep) +
         (spin * DEGREES_PER_SPIN_STEP));
     wheelX = sinf(angle) * WHEEL_RADIUS_X;

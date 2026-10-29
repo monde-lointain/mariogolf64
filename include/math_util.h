@@ -22,7 +22,7 @@ typedef u16 BinaryAngle;
 typedef s16 SignedBinaryAngle;
 
 /* The radians to degrees factor of rotations */
-#define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
+#define DegreesToRadians(degrees) ((degrees) * (M_PI / 180))
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))
 
 /*

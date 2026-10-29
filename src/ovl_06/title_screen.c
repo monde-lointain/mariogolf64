@@ -407,7 +407,7 @@ void DrawTitleScreen(Gfx** displayListHead) {
   }
 
   if (g_ControllerCount != 0) {
-    f_PressStartPhase += DEGREES_TO_RADIANS(20);
+    f_PressStartPhase += DegreesToRadians(20);
     red = (sinf(f_PressStartPhase) * 127.0f) + 127.0f;
     green = (sinf(f_PressStartPhase + M_PI) * 127.0f) + 127.0f;
     gDPSetPrimColor(gfx++, 0, 0, red, green, 64, 255);

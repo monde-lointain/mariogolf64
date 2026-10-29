@@ -1626,9 +1626,9 @@ s32 StepHoleFlyover(void) {
   halfTurns = g_HoleFlyoverFrame * (1.0f / FLYOVER_HALF_TURN_FRAME_COUNT);
   if (g_HoleFlyoverFrame > FLYOVER_HALF_TURN_FRAME_COUNT) {
     widening = 0.0f;
-    approach = 1.0f - sinf(DEGREES_TO_RADIANS(g_HoleFlyoverFrame));
+    approach = 1.0f - sinf(DegreesToRadians(g_HoleFlyoverFrame));
   } else {
-    approach = (1.0f - sinf(DEGREES_TO_RADIANS(g_HoleFlyoverFrame))) * 0.5f;
+    approach = (1.0f - sinf(DegreesToRadians(g_HoleFlyoverFrame))) * 0.5f;
     widening = (FLYOVER_HALF_TURN_FRAME_COUNT - g_HoleFlyoverFrame) *
         (1.0f / FLYOVER_HALF_TURN_FRAME_COUNT);
   }
@@ -1784,7 +1784,7 @@ void PlaceAimCamera(void);
 /* While D_800BE624 is below this, the circle starts at angle 0 rather than at a
  * side */
 #define CIRCLE_START_FLIGHT_COUNT 2
-#define CIRCLE_ANGLE_STEP DEGREES_TO_RADIANS(2)
+#define CIRCLE_ANGLE_STEP DegreesToRadians(2)
 #define CIRCLE_DISTANCE 30720.0f
 #define CIRCLE_RISE 23040.0f
 #define CIRCLE_LOOK_AT_RISE 15360.0f
@@ -3598,7 +3598,7 @@ void StepNoiseTexture(void) {
                  (NOISE_MAX_BLEND_WEIGHT - weight)) +
                 (f_NoiseGrids[f_NoiseGridIndex ^ 1][row][column] * weight)) >>
             NOISE_INTENSITY_SHIFT;
-        intensity = ABS(blend);
+        intensity = Abs(blend);
         if (intensity > NOISE_MAX_INTENSITY) {
           intensity = NOISE_MAX_INTENSITY;
         }

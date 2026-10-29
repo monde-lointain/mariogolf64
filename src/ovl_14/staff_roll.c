@@ -208,7 +208,7 @@
 /* The putts are framed from three steps to the left of straight on */
 #define PUTT_YAW_OFFSET 15
 #define DEGREES_TO_RADIANS_F ((f32)M_PI / 180)
-#define GOLFER_HEADING ((f32)DEGREES_TO_RADIANS(-30))
+#define GOLFER_HEADING ((f32)DegreesToRadians(-30))
 /* The putts are taken from this far along the x axis from the cup */
 #define NEAR_CUP_DISTANCE (150 * 1024)
 
@@ -217,7 +217,7 @@
 #define RANDOM_PITCH_MASK 0x7F
 #define RANDOM_PITCH_BIAS 0x20
 #define RANDOM_PITCH_SCALE 70
-#define PITCH_UNIT_TO_RADIANS ((f32)DEGREES_TO_RADIANS(1.0 / 127))
+#define PITCH_UNIT_TO_RADIANS ((f32)DegreesToRadians(1.0 / 127))
 #define PITCH_CONTROLLER 1
 #define PITCH_STICK_RATE 0.002f
 
@@ -240,7 +240,7 @@
 
 /* Sets frames to count clamped to 0 through limit; its do-while is there to
  * match */
-#define CLAMP_FRAMES(frames, count, limit) \
+#define ClampFrames(frames, count, limit) \
   do { \
     (frames) = (count); \
     if ((frames) < 0) { \
@@ -256,7 +256,7 @@
  * its shrink to the screen's upper right. Its do-while is there to
  * match.
  */
-#define SHRINK_VIEW(view, frames) \
+#define ShrinkView(view, frames) \
   do { \
     f32 progress = (frames); \
     s32 left = progress * SHRINK_LEFT_STEP; \
@@ -1026,7 +1026,7 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = g_HoleSetup.teePosition[AXIS_Y];
     point[AXIS_Z] = g_HoleSetup.teePosition[AXIS_Z];
     PlaceCharacter(
-        slot, point, DEGREES_TO_RADIANS(-(f_CastIndex * CAST_YAW_STEP)));
+        slot, point, DegreesToRadians(-(f_CastIndex * CAST_YAW_STEP)));
     f_CastSlot = slot;
     f_CastIndex++;
   }
@@ -1252,7 +1252,7 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
     point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
     PlaceCharacter(
-        slot, point, DEGREES_TO_RADIANS(-(f_CastIndex * CAST_YAW_STEP)));
+        slot, point, DegreesToRadians(-(f_CastIndex * CAST_YAW_STEP)));
     f_CastSlot = slot;
     f_CastIndex++;
   }
@@ -1488,8 +1488,8 @@ void RunStaffRollTimeline(s32 frame) {
   }
 
   g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
-  CLAMP_FRAMES(shrink, frame - f_ViewShrinkStartFrame, VIEW_SHRINK_FRAMES);
-  SHRINK_VIEW(g_Cameras[0].view, shrink);
+  ClampFrames(shrink, frame - f_ViewShrinkStartFrame, VIEW_SHRINK_FRAMES);
+  ShrinkView(g_Cameras[0].view, shrink);
   g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vscale[0] =
       g_Cameras[0].view.scissorWidth * 4;
   g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vscale[1] =
@@ -1593,7 +1593,7 @@ void UpdateStaffRoll(void) {
     sprintf(g_PrintBuffer, "MAX:%d    ", lineCount);
     PrintDebugText(g_PrintBuffer, LINE_COUNT_TEXT_COLUMN, LINE_COUNT_TEXT_ROW);
     StepNoiseTexture();
-    g_SkyState.viewedWindAngles[0] = VIEWED_WIND_ANGLE(
+    g_SkyState.viewedWindAngles[0] = ViewedWindAngle(
         g_HoleSetup.conditions.windDirection, &g_Cameras[0].view);
     if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
       g_SkyState.viewedWindAngles[0] -= 2 * M_PI;

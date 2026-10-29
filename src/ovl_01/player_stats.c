@@ -1191,8 +1191,8 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
       }
     }
 
-    rotation[0] = DEGREES_TO_RADIANS(D_802305F4_ovl_01[0]);
-    rotation[1] = DEGREES_TO_RADIANS(D_802305F4_ovl_01[1]);
+    rotation[0] = DegreesToRadians(D_802305F4_ovl_01[0]);
+    rotation[1] = DegreesToRadians(D_802305F4_ovl_01[1]);
     rotation[2] = 0.0f;
     translation[0] =
         D_80230618_ovl_01[g_ChosenPlayerCount - 1][playerIndex][0] + slide;

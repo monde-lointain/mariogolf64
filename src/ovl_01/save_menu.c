@@ -511,7 +511,7 @@ void func_8021F79C_ovl_01(void) {
 #define RING_SHOT_REPLAY_TEXT_FONT 2
 /* The chosen replay's colors run around a circle of hues, a step per update,
  * with its glow a quarter as bright */
-#define REPLAY_HUE_STEP DEGREES_TO_RADIANS(5)
+#define REPLAY_HUE_STEP DegreesToRadians(5)
 #define REPLAY_HUE_MIDDLE 127
 #define REPLAY_HUE_SWING 127.0f
 #define REPLAY_GLOW_DIVISOR 4
@@ -1287,7 +1287,7 @@ void func_80222038_ovl_01(void* buffer, u8 bufferIndex) {
  * Reads the chosen saved game's mode icon, then its course image into the
  * course buffer not on screen, which then becomes the one on screen
  */
-#define LOAD_CHOSEN_GAME_IMAGES() \
+#define LoadChosenGameImages() \
   OpenEncodedAsset( \
       g_ModeIconAnimations[( \
           u8)D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]]] \
@@ -1526,7 +1526,7 @@ void func_8022209C_ovl_01(void) {
         memory->savedGameTurn = SAVED_GAME_TURN_FRAMES;
         D_8022F8C0_ovl_01 = 0;
         func_80221CC0_ovl_01();
-        LOAD_CHOSEN_GAME_IMAGES();
+        LoadChosenGameImages();
       } else if (g_MenuRepeatButtons & R_JPAD) {
         for (slot = 0; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
@@ -1542,7 +1542,7 @@ void func_8022209C_ovl_01(void) {
         memory->savedGameTurn = -SAVED_GAME_TURN_FRAMES;
         func_80221CC0_ovl_01();
         D_8022F8C0_ovl_01 = 0;
-        LOAD_CHOSEN_GAME_IMAGES();
+        LoadChosenGameImages();
       }
     } else {
       if (memory->savedGameTurn < 0) {
@@ -1824,7 +1824,7 @@ void func_802230C0_ovl_01(Gfx** displayListHead) {
   for (index = 0; index != SAVED_GAME_COUNT; index++) {
     ScreenPoint point;
 
-    angle = -DEGREES_TO_RADIANS(
+    angle = -DegreesToRadians(
         (((memory->savedGameIndex - index) % SAVED_GAME_COUNT) * boardDegrees) +
         (memory->savedGameTurn * BOARD_TURN_STEP_DEGREES));
     circleX = sinf(angle) * radiusX;
@@ -2261,8 +2261,8 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
       }
     }
 
-    rotation[0] = DEGREES_TO_RADIANS(D_80230D18_ovl_01[0]);
-    rotation[1] = DEGREES_TO_RADIANS(D_80230D18_ovl_01[1]);
+    rotation[0] = DegreesToRadians(D_80230D18_ovl_01[0]);
+    rotation[1] = DegreesToRadians(D_80230D18_ovl_01[1]);
     rotation[2] = 0.0f;
     raise = ((s8)players[playerIndex].characterIndex == CHARACTER_BABY_MARIO)
         ? BABY_MARIO_RAISE

@@ -43,13 +43,13 @@ typedef s32 Boolean;
 
 /* The magnitude of an integer. The game's code evaluates the value once,
    into a variable of its own, as a GNU statement expression does. */
-#define ABS(value) \
+#define Abs(value) \
   ({ \
     s32 absValue = (value); \
     (absValue < 0) ? -absValue : absValue; \
   })
 
 /* The RDP loads textures from 8-byte boundaries */
-#define TEXTURE_ADDRESS(address) ((u32)(address) & ~7)
+#define TextureAddress(address) ((u32)(address) & ~7)
 
 #endif

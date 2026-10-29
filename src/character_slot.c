@@ -30,9 +30,9 @@
 #define HILITE_TEXTURE_SIZE 32
 #define HILITE_SECOND_TILE 1
 
-#define CHOSEN_DISPLAY_LIST(model) \
+#define ModelChosenDisplayList(model) \
   ((Gfx*)(model)->segmentAddresses[CHARACTER_MODEL_CHOSEN_DISPLAY_LIST])
-#define DISPLAY_LIST_CHOICES(model) \
+#define ModelDisplayListChoices(model) \
   ((u32*)(model)->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST_CHOICES])
 
 /* osMapTLB's physical address for a page left unmapped */
@@ -2700,24 +2700,26 @@ s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
   if (slot != NULL) {
     i = 0;
     if (choiceIndex == NO_DISPLAY_LIST_CHOICE) {
-      CHOSEN_DISPLAY_LIST(slot->model)->words.w0 = G_ENDDL << 24;
-      CHOSEN_DISPLAY_LIST(slot->model)->words.w1 = 0;
+      ModelChosenDisplayList(slot->model)->words.w0 = G_ENDDL << 24;
+      ModelChosenDisplayList(slot->model)->words.w1 = 0;
       return 0;
     }
 
     for (; i < choiceIndex; i++) {
-      if (DISPLAY_LIST_CHOICES(slot->model)[i] == END_OF_DISPLAY_LIST_CHOICES) {
+      if (ModelDisplayListChoices(slot->model)[i] ==
+          END_OF_DISPLAY_LIST_CHOICES) {
         return -1;
       }
     }
 
-    if (DISPLAY_LIST_CHOICES(slot->model)[i] == END_OF_DISPLAY_LIST_CHOICES) {
+    if (ModelDisplayListChoices(slot->model)[i] ==
+        END_OF_DISPLAY_LIST_CHOICES) {
       return -1;
     }
 
-    CHOSEN_DISPLAY_LIST(slot->model)->words.w0 = G_DL << 24;
-    CHOSEN_DISPLAY_LIST(slot->model)->words.w1 =
-        DISPLAY_LIST_CHOICES(slot->model)[i];
+    ModelChosenDisplayList(slot->model)->words.w0 = G_DL << 24;
+    ModelChosenDisplayList(slot->model)->words.w1 =
+        ModelDisplayListChoices(slot->model)[i];
     return 0;
   }
 

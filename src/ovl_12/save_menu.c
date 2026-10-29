@@ -653,7 +653,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
 
     /* The wave's height is never used */
     sinf(f_PanelWaveAngle);
-    f_PanelWaveAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
+    f_PanelWaveAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
     LoadLargePalette(&gfx, (u8*)f_PanelImage + IMAGE_HEADER_SIZE);
     for (strip = 0; strip != PANEL_STRIP_COUNT; strip++) {
       LoadTextureBlock(&gfx,
@@ -723,7 +723,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         ((titleTopExact - titleTop) * HALF_TEXEL_COORDINATE));
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
-    f_TitleSwayAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
+    f_TitleSwayAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
     LoadLargePalette(&gfx, (u8*)f_SaveMenuTitleImage + IMAGE_HEADER_SIZE);
     imageLeft = TITLE_IMAGE_LEFT;
 
@@ -841,7 +841,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
       s32 centerX;
       s32 rowTop;
 
-      f_CursorPulseAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
+      f_CursorPulseAngle += DegreesToRadians(SWAY_DEGREES_PER_FRAME);
       centerX = SCREEN_WIDTH / 2;
       rowTop = FIRST_GAME_ROW_TOP;
       gDPSetPrimColor(gfx++, 0, 0, 0x00, 0xBF, 0xFF,
@@ -1641,7 +1641,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    f_ReplayTitleBobAngle += DEGREES_TO_RADIANS(TITLE_BOB_DEGREES_PER_FRAME);
+    f_ReplayTitleBobAngle += DegreesToRadians(TITLE_BOB_DEGREES_PER_FRAME);
     LoadLargePalette(&gfx, (u8*)f_PanelImage + IMAGE_HEADER_SIZE);
     for (index = 0; index != PANEL_STRIP_COUNT; index++) {
       /* Unused; it is there to match */

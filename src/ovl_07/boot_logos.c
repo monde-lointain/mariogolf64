@@ -41,8 +41,8 @@ enum BootLogo {
 #define FADE_OUT_FIRST_FRAME 24
 #define FADE_OUT_ALPHA_STEP 16
 
-#define FADE_IN_ALPHA(frame) ((frame) * FADE_IN_ALPHA_STEP)
-#define FADE_OUT_ALPHA(frame) \
+#define FadeInAlpha(frame) ((frame) * FADE_IN_ALPHA_STEP)
+#define FadeOutAlpha(frame) \
   (255 - (((frame) - FADE_OUT_FIRST_FRAME) * FADE_OUT_ALPHA_STEP))
 
 /* The Nintendo logo's sound plays on this frame, on this channel */
@@ -297,11 +297,11 @@ void DrawBootLogos(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_NONE);
       if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
-        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-            MAX(FADE_OUT_ALPHA(f_BootLogoFrame), 0));
+        gDPSetPrimColor(
+            gfx++, 0, 0, 255, 255, 255, MAX(FadeOutAlpha(f_BootLogoFrame), 0));
       } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
-        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-            MIN(FADE_IN_ALPHA(f_BootLogoFrame), 255));
+        gDPSetPrimColor(
+            gfx++, 0, 0, 255, 255, 255, MIN(FadeInAlpha(f_BootLogoFrame), 255));
       }
 
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
@@ -326,9 +326,9 @@ void DrawBootLogos(Gfx** displayListHead) {
       if (f_BootLogoStage == BOOT_LOGO_NINTENDO) {
         if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
           gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-              MAX(FADE_OUT_ALPHA(f_BootLogoFrame), 0));
+              MAX(FadeOutAlpha(f_BootLogoFrame), 0));
         } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
-          alpha = FADE_IN_ALPHA(f_BootLogoFrame);
+          alpha = FadeInAlpha(f_BootLogoFrame);
           if (alpha > 255) {
             alpha = 255;
           }
@@ -363,7 +363,7 @@ void DrawBootLogos(Gfx** displayListHead) {
     case BOOT_LOGO_LEAVING_CAMELOT:
       if (f_BootLogoStage == BOOT_LOGO_CAMELOT &&
           f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
-        alpha = FADE_IN_ALPHA(f_BootLogoFrame);
+        alpha = FadeInAlpha(f_BootLogoFrame);
         if (alpha > 255) {
           alpha = 255;
         }

@@ -38,31 +38,31 @@
 /* Long enough ago that IsCharacterSlotBusy finds a slot not busy */
 #define LONG_AGO_FRAME -4
 
-#define ANIMATIONS(model) \
+#define ModelAnimations(model) \
   ((CharacterAnimation*)(model)->segmentAddresses[CHARACTER_MODEL_ANIMATIONS])
-#define JOINT_ANIMATIONS(model) \
+#define ModelJointAnimations(model) \
   ((JointAnimation*)(model)->segmentAddresses[CHARACTER_MODEL_JOINTS])
-#define ANIMATED_TRIANGLES(model) \
+#define ModelAnimatedTriangles(model) \
   ((AnimatedTriangle**)(model) \
           ->segmentAddresses[CHARACTER_MODEL_ANIMATED_TRIANGLES])
-#define TEXTURE_ANIMATIONS(model) \
+#define ModelTextureAnimations(model) \
   ((TextureAnimation*)(model) \
           ->segmentAddresses[CHARACTER_MODEL_TEXTURE_ANIMATIONS])
-#define ANIMATED_TEXTURES(model) \
+#define ModelAnimatedTextures(model) \
   ((AnimatedTexture*)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURES])
 
 /* Where a segment address into the frame data points in the slot's copy being
  * written */
-#define FRAME_DATA_POINTER(slot, address) \
+#define FrameDataAddress(slot, address) \
   ((u8*)(slot)->frameData[(slot)->frameDataIndex] + SEGMENT_OFFSET(address))
 
 /*
  * Patches the slot's frame data copy being written so the triangle shows the
  * texture with the texture coordinates. Uses the locals gfx, vertex and i.
  */
-#define SET_TRIANGLE_TEXTURE( \
+#define SetTriangleTexture( \
     slot, triangle, texture, sCoordinates, tCoordinates) \
-  gfx = (Gfx*)FRAME_DATA_POINTER( \
+  gfx = (Gfx*)FrameDataAddress( \
       slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET); \
   gDPLoadTextureBlock(gfx++, (texture)->address & ~(TEXTURE_ALIGNMENT - 1), \
       G_IM_FMT_RGBA, G_IM_SIZ_16b, (texture)->width, (texture)->height, 0, \
@@ -70,7 +70,7 @@
       ANIMATED_TEXTURE_MASK, ANIMATED_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD); \
   for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) { \
     vertex = \
-        (Vtx*)FRAME_DATA_POINTER(slot, (triangle)->vertices + (i * VTX_SIZE)); \
+        (Vtx*)FrameDataAddress(slot, (triangle)->vertices + (i * VTX_SIZE)); \
     vertex->v.tc[0] = (sCoordinates)[i]; \
     vertex->v.tc[1] = (tCoordinates)[i]; \
   }
@@ -87,7 +87,7 @@
 
 /* Makes a slot's model readable at CHARACTER_MODEL_ADDRESS, where its segment
  * addresses point */
-#define MAP_MODEL_BUFFER(slot) \
+#define MapModelBuffer(slot) \
   SetMultiTlb(0, TLB_PAGE_MODE_4K, CHARACTER_MODEL_PAGE_COUNT, \
       CHARACTER_MODEL_ADDRESS, osVirtualToPhysical((slot)->modelBuffer))
 
@@ -204,7 +204,7 @@ extern u8* g_ShadowTexture;
 /* The square's texture coordinates, in s10.5, span the texture and the mirror
  * image its tile wraps to */
 #define SHADOW_QUAD_TEXEL_SPAN ((SHADOW_TEXTURE_SIZE * 2) << 5)
-#define SHADOW_TEXTURE_PIXELS(texture) (((u32)(texture) + 8) & ~7)
+#define ShadowTexturePixels(texture) (((u32)(texture) + 8) & ~7)
 /* The camera index DrawCharacterAndShadow always draws for */
 #define CAMERA_UNK2 2
 #define SECOND_LIGHT_DIRECTION_LENGTH 64.0f
@@ -711,7 +711,7 @@ void SetCharacterClub(u32 slotIndex, s32 clubIndex) {
         break;
     }
 
-    MAP_MODEL_BUFFER(slot);
+    MapModelBuffer(slot);
     SelectCharacterDisplayList(slotIndex, choice);
   }
 }
@@ -729,7 +729,7 @@ s32 GetAnimationEventActions(u32 slotIndex, s32 animationIndex, s32 frame,
   s32 i;
 
   if (slot != NULL && animationIndex < slot->animationCount) {
-    event = ANIMATIONS(slot->model)[animationIndex].events;
+    event = ModelAnimations(slot->model)[animationIndex].events;
     if (event != NULL) {
       for (i = 0; event[i].frame != END_OF_ANIMATION_EVENTS; i++) {
         if (event[i].frame == frame) {
@@ -755,12 +755,12 @@ s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, s32 kind) {
   s32 i;
 
   if (slot != NULL && animationIndex < slot->animationCount) {
-    event = ANIMATIONS(slot->model)[animationIndex].events;
+    event = ModelAnimations(slot->model)[animationIndex].events;
     if (event != NULL) {
       for (i = 0; event[i].frame != END_OF_ANIMATION_EVENTS; i++) {
         if (event[i].kind == kind) {
           frame = event[i].frame -
-              ANIMATIONS(slot->model)[animationIndex].startFrame;
+              ModelAnimations(slot->model)[animationIndex].startFrame;
           break;
         }
       }
@@ -788,15 +788,15 @@ void ResetTriangleTextures(u32 slotIndex) {
   s32 i;
 
   if (slot != NULL) {
-    MAP_MODEL_BUFFER(slot);
-    for (triangle = ANIMATED_TRIANGLES(slot->model)[0]; triangle != NULL;
-        triangle = ANIMATED_TRIANGLES(slot->model)[++triangleIndex]) {
-      texture = ANIMATED_TEXTURES(slot->model);
+    MapModelBuffer(slot);
+    for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
+        triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
+      texture = ModelAnimatedTextures(slot->model);
       if (triangle->textureIndex >= 0) {
         texture += triangle->textureIndex;
       }
 
-      SET_TRIANGLE_TEXTURE(slot, triangle, texture, triangle->s, triangle->t);
+      SetTriangleTexture(slot, triangle, texture, triangle->s, triangle->t);
     }
   }
 }
@@ -827,9 +827,9 @@ void AdvanceTextureAnimations(
   s32 i;
 
   if (slot != NULL) {
-    MAP_MODEL_BUFFER(slot);
-    for (triangle = ANIMATED_TRIANGLES(slot->model)[0]; triangle != NULL;
-        triangle = ANIMATED_TRIANGLES(slot->model)[++triangleIndex]) {
+    MapModelBuffer(slot);
+    for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
+        triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
       for (keySetIndex = 0; keySetIndex < triangle->keySetCount;
           keySetIndex++) {
         keySet = &triangle->keySets[keySetIndex];
@@ -838,8 +838,8 @@ void AdvanceTextureAnimations(
           for (keyIndex = 0; keyIndex < keySet->count; keyIndex++) {
             key = &keySet->keys[keyIndex];
             if (state->frame >= key->frame) {
-              texture = &ANIMATED_TEXTURES(slot->model)[key->textureIndex];
-              SET_TRIANGLE_TEXTURE(slot, triangle, texture, key->s, key->t);
+              texture = &ModelAnimatedTextures(slot->model)[key->textureIndex];
+              SetTriangleTexture(slot, triangle, texture, key->s, key->t);
             }
           }
         }
@@ -847,7 +847,7 @@ void AdvanceTextureAnimations(
     }
 
     for (i = 0; i < TEXTURE_ANIMATION_COUNT; i++) {
-      animation = &TEXTURE_ANIMATIONS(slot->model)[i];
+      animation = &ModelTextureAnimations(slot->model)[i];
       if (animation->index < 0) {
         break;
       }
@@ -921,16 +921,15 @@ void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
   s32 i;
 
   if (slot != NULL) {
-    MAP_MODEL_BUFFER(slot);
-    for (triangle = ANIMATED_TRIANGLES(slot->model)[0]; triangle != NULL;
-        triangle = ANIMATED_TRIANGLES(slot->model)[++triangleIndex]) {
-      texture = &ANIMATED_TEXTURES(slot->model)[triangle->textureIndex];
+    MapModelBuffer(slot);
+    for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
+        triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
+      texture = &ModelAnimatedTextures(slot->model)[triangle->textureIndex];
       for (keySetIndex = 0; keySetIndex < triangle->keySetCount;
           keySetIndex++) {
         if (triangle->keySets[keySetIndex].textureAnimationIndex ==
             textureAnimationIndex) {
-          SET_TRIANGLE_TEXTURE(
-              slot, triangle, texture, triangle->s, triangle->t);
+          SetTriangleTexture(slot, triangle, texture, triangle->s, triangle->t);
         }
       }
     }
@@ -1025,13 +1024,14 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
     D_800C1DF0 = slot->animationIndex;
     if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
-      osSyncPrintf("complete2 anims_addr %x\n", ANIMATIONS(slot->model));
+      osSyncPrintf("complete2 anims_addr %x\n", ModelAnimations(slot->model));
     }
 
-    slot->animationStartFrame = ANIMATIONS(slot->model)[D_800C1DF0].startFrame;
+    slot->animationStartFrame =
+        ModelAnimations(slot->model)[D_800C1DF0].startFrame;
     slot->animationFrame = slot->animationStartFrame;
     slot->animationEndFrame = slot->animationStartFrame +
-        ANIMATIONS(slot->model)[D_800C1DF0].frameCount;
+        ModelAnimations(slot->model)[D_800C1DF0].frameCount;
     g_CurrentAnimationFrame = slot->animationFrame;
     g_CurrentAnimationStartFrame = slot->animationStartFrame;
     g_CurrentAnimationEndFrame = slot->animationEndFrame;
@@ -1048,7 +1048,7 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     slot->frameDataIndex = 0;
     StopTextureAnimations(slotIndex);
     AnimateCharacterJoints(slotIndex);
-    joint = JOINT_ANIMATIONS(slot->model);
+    joint = ModelJointAnimations(slot->model);
     for (; joint->translationKeyCount != END_OF_JOINT_ANIMATIONS; joint++) {
       joint->translationSpan.endFrame = UNSET_KEYFRAME_SPAN;
       joint->translationSpan.startFrame = UNSET_KEYFRAME_SPAN;
@@ -1075,7 +1075,7 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
         *(f32*)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 5];
     slot->shadowScale = slot->model->shadowScale;
     count = 0;
-    for (animation = ANIMATIONS(slot->model); animation->events != NULL;
+    for (animation = ModelAnimations(slot->model); animation->events != NULL;
         animation++) {
       count++;
     }
@@ -1099,7 +1099,7 @@ s32 GetAnimationIndex(u32 slotIndex, s32 id) {
   s32 i;
 
   if (slot != NULL) {
-    animation = ANIMATIONS(slot->model);
+    animation = ModelAnimations(slot->model);
     for (i = 0; animation->events != NULL; i++, animation++) {
       if (animation->id == id) {
         foundIndex = i;
@@ -1120,13 +1120,13 @@ CharacterAnimation* FindAnimation(u32 slotIndex, s32 id) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
 
   if (slot != NULL) {
-    MAP_MODEL_BUFFER(slot);
+    MapModelBuffer(slot);
     id = GetAnimationIndex(slotIndex, id);
-    if (ANIMATIONS(slot->model)[id].events == NULL) {
+    if (ModelAnimations(slot->model)[id].events == NULL) {
       return NULL;
     }
 
-    return &ANIMATIONS(slot->model)[id];
+    return &ModelAnimations(slot->model)[id];
   }
 
   return NULL;
@@ -1137,18 +1137,18 @@ void SetCharacterAnimation(u32 slotIndex, s32 id) {
   JointAnimation* joint;
 
   if (slot != NULL) {
-    MAP_MODEL_BUFFER(slot);
+    MapModelBuffer(slot);
     slot->animationIndex = GetAnimationIndex(slotIndex, id);
-    if (ANIMATIONS(slot->model)[slot->animationIndex].events == NULL) {
+    if (ModelAnimations(slot->model)[slot->animationIndex].events == NULL) {
       slot->animationIndex = 0;
     }
 
     slot->animationStartFrame =
-        ANIMATIONS(slot->model)[slot->animationIndex].startFrame;
+        ModelAnimations(slot->model)[slot->animationIndex].startFrame;
     slot->animationFrame = slot->animationStartFrame;
     slot->animationEndFrame = slot->animationStartFrame +
-        ANIMATIONS(slot->model)[slot->animationIndex].frameCount;
-    joint = JOINT_ANIMATIONS(slot->model);
+        ModelAnimations(slot->model)[slot->animationIndex].frameCount;
+    joint = ModelJointAnimations(slot->model);
     for (; joint->translationKeyCount != END_OF_JOINT_ANIMATIONS; joint++) {
       joint->translationSpan.endFrame = UNSET_KEYFRAME_SPAN;
       joint->translationSpan.startFrame = UNSET_KEYFRAME_SPAN;
@@ -1317,7 +1317,7 @@ void AnimateCharacter(u32 slotIndex) {
 
   if (slot != NULL) {
     hasLooped = FALSE;
-    MAP_MODEL_BUFFER(slot);
+    MapModelBuffer(slot);
     actionCount = GetAnimationEventActions(
         slotIndex, slot->animationIndex, slot->animationFrame, actions);
     for (; i < actionCount; i++) {
@@ -1330,7 +1330,7 @@ void AnimateCharacter(u32 slotIndex) {
             slot->animationFrame =
                 GetAnimationEventFrame(slotIndex, slot->animationIndex,
                     ANIMATION_EVENT_LOOP_START) +
-                ANIMATIONS(slot->model)[slot->animationIndex].startFrame;
+                ModelAnimations(slot->model)[slot->animationIndex].startFrame;
           }
 
           break;
@@ -1707,7 +1707,7 @@ void AnimateCharacterInSameCopy(u32 slotIndex) {
 
   if (slot != NULL) {
     hasLooped = FALSE;
-    MAP_MODEL_BUFFER(slot);
+    MapModelBuffer(slot);
     actionCount = GetAnimationEventActions(
         slotIndex, slot->animationIndex, slot->animationFrame, actions);
     for (; i < actionCount; i++) {
@@ -1720,7 +1720,7 @@ void AnimateCharacterInSameCopy(u32 slotIndex) {
             slot->animationFrame =
                 GetAnimationEventFrame(slotIndex, slot->animationIndex,
                     ANIMATION_EVENT_LOOP_START) +
-                ANIMATIONS(slot->model)[slot->animationIndex].startFrame;
+                ModelAnimations(slot->model)[slot->animationIndex].startFrame;
           }
 
           break;
@@ -1876,7 +1876,7 @@ void SetCharacterLights(void) {
 }
 
 /* Copies the ambient and first light into both of f_SavedLights */
-#define SAVE_LIGHTS(lights) \
+#define SaveLights(lights) \
   f_SavedLights[0].l[0].l = (lights).l[0].l; \
   f_SavedLights[1].l[0].l = (lights).l[0].l; \
   f_SavedLights[0].a.l = (lights).a.l; \
@@ -1906,16 +1906,16 @@ void DrawCharacter(u32 slotIndex) {
       switch (slot->lighting) {
         case CHARACTER_LIGHTING_FIXED:
           gSPSetLights2(gfx++, f_FixedLights);
-          SAVE_LIGHTS(f_FixedLights);
+          SaveLights(f_FixedLights);
           break;
         default:
         case CHARACTER_LIGHTING_SCENE:
           if (g_HoleSetup.conditions.isRaining) {
             gSPSetLights2(gfx++, f_RainLights[g_DrawBufferIndex]);
-            SAVE_LIGHTS(f_RainLights[g_DrawBufferIndex]);
+            SaveLights(f_RainLights[g_DrawBufferIndex]);
           } else {
             gSPSetLights2(gfx++, f_DryLights[g_DrawBufferIndex]);
-            SAVE_LIGHTS(f_DryLights[g_DrawBufferIndex]);
+            SaveLights(f_DryLights[g_DrawBufferIndex]);
           }
 
           break;
@@ -1924,20 +1924,20 @@ void DrawCharacter(u32 slotIndex) {
               g_HoleSetup.conditions.isRaining ? f_RainLights : f_DryLights;
           if (!AddReactionLight(&gfx, &lights[g_DrawBufferIndex])) {
             gSPSetLights2(gfx++, lights[g_DrawBufferIndex]);
-            SAVE_LIGHTS(lights[g_DrawBufferIndex]);
+            SaveLights(lights[g_DrawBufferIndex]);
           }
 
           break;
         case CHARACTER_LIGHTING_BLACK:
           gSPSetLights2(gfx++, f_BlackLights);
-          SAVE_LIGHTS(f_BlackLights);
+          SaveLights(f_BlackLights);
           break;
       }
     } else {
       gSPSetLights2(gfx++, f_SavedLights[g_DrawBufferIndex]);
     }
 
-    MAP_MODEL_BUFFER(slot);
+    MapModelBuffer(slot);
     gSPMatrix(
         gfx++, &f_ModelScaleMatrix, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPSegment(
@@ -2238,8 +2238,8 @@ void DrawCharacterAndShadow(
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
-    gDPLoadTextureBlock(gfx++, SHADOW_TEXTURE_PIXELS(g_ShadowTexture),
-        G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
+    gDPLoadTextureBlock(gfx++, ShadowTexturePixels(g_ShadowTexture), G_IM_FMT_I,
+        G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
         SHADOW_TEXTURE_SIZE_LOG2, SHADOW_TEXTURE_SIZE_LOG2, G_TX_NOLOD,
         G_TX_NOLOD);

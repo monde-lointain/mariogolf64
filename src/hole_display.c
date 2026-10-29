@@ -151,7 +151,7 @@ enum SkyImageKind {
 #define BACKDROP_LAST_STRIP_HEIGHT 2
 /* Written with | because the target computes it without a branch, and + or a
  * plain ?: branches */
-#define STRIP_HEIGHT(strip) \
+#define StripHeight(strip) \
   (BACKDROP_LAST_STRIP_HEIGHT | \
       ((strip) != BACKDROP_STRIP_COUNT - 1 \
               ? BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT \
@@ -2180,7 +2180,7 @@ void HandleFrameBufferSwap(void) {}
 #define RM_FORCED_PASS2 GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 #define FADE_COUNT_PERIOD 8
 
-#define LOAD_FADE_FRAME_STRIP(gfx, texels, height, isTileSet) \
+#define LoadFadeFrameStrip(gfx, texels, height, isTileSet) \
   { \
     if (!(isTileSet)) { \
       gDPSetTextureImage( \
@@ -2258,7 +2258,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
         source = f_LastFrameBuffer;
         for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
-          height = STRIP_HEIGHT(strip);
+          height = StripHeight(strip);
           gDPLoadTextureTile(gfx++, (u32)source & ~7, G_IM_FMT_RGBA,
               G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
               BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
@@ -2285,8 +2285,8 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
         gDPPipeSync(gfx++);
         for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
-          height = STRIP_HEIGHT(strip);
-          LOAD_FADE_FRAME_STRIP(gfx,
+          height = StripHeight(strip);
+          LoadFadeFrameStrip(gfx,
               &frame[strip * BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW],
               height, isTileSet);
           gDPPipeSync(gfx++);
@@ -2320,7 +2320,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
       height = row + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER
           ? BACKDROP_STRIP_HEIGHT
           : BACKDROP_LAST_STRIP_HEIGHT;
-      LOAD_FADE_FRAME_STRIP(gfx, frame, height, isTileSet);
+      LoadFadeFrameStrip(gfx, frame, height, isTileSet);
       gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, row << 2,
           (BACKDROP_RIGHT + 1) << 2, (row + height) << 2, G_TX_RENDERTILE, 0, 0,
           1 << 10, 1 << 10);
@@ -2548,7 +2548,7 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
     gDPPipeSync(gfx++);
     source = f_LastFrameBuffer;
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
-      height = STRIP_HEIGHT(strip);
+      height = StripHeight(strip);
       gDPLoadTextureTile(gfx++, (u32)source & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
           SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER, BACKDROP_RIGHT,
           BACKDROP_BORDER + height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -2640,7 +2640,7 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     }
 
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
-      height = STRIP_HEIGHT(strip);
+      height = StripHeight(strip);
       gDPLoadTextureTile(gfx++,
           (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP *
               FRAME_WORDS_PER_ROW] &
@@ -2661,7 +2661,7 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, BACKDROP_TINT_RED, BACKDROP_TINT_GREEN,
         BACKDROP_TINT_BLUE, 255);
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
-      height = STRIP_HEIGHT(strip);
+      height = StripHeight(strip);
       gDPLoadTextureTile(gfx++,
           (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP *
               FRAME_WORDS_PER_ROW] &

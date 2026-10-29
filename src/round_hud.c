@@ -1487,7 +1487,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, LANDING_PANEL_ALPHA);
     gDPPipeSync(gfx++);
-    angle = DEGREES_TO_RADIANS(
+    angle = DegreesToRadians(
         (f_LandingReactionFrame * LANDING_PANEL_DEGREES_PER_FRAME) +
         LANDING_PANEL_START_DEGREES);
     if (angle > 2 * M_PI) {
@@ -1617,7 +1617,7 @@ typedef struct GridScreenPoint {
  * lines warm towards red where the ground rises and cool towards blue where
  * it falls; black lines turn red or blue.
  */
-#define SET_GREEN_GRID_TINT(slope) \
+#define SetGreenGridTint(slope) \
   if ((s8)g_Players[g_CurrentShot.playerIndex].gridColor == \
       GRID_COLOR_WHITE) { \
     blue = TINT_CHANNEL_MAX; \
@@ -1926,7 +1926,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
         dx *= scale;
         dy *= scale;
-        SET_GREEN_GRID_TINT(slopes[point]);
+        SetGreenGridTint(slopes[point]);
         if (column & 1) {
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
               (screenPoints[point].x << 16) + screenPoints[point].y);
@@ -2004,12 +2004,12 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
         dx *= scale;
         dy *= scale;
-        SET_GREEN_GRID_TINT(slopes[point]);
+        SetGreenGridTint(slopes[point]);
         gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
             (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
         gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
             (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
-        SET_GREEN_GRID_TINT(slopes[point + columnCount]);
+        SetGreenGridTint(slopes[point + columnCount]);
         gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
             (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
         gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
@@ -2083,7 +2083,7 @@ void ResetBallTrail(void) {
 #define BALL_TRAIL_COLOR 0xFFFFFF00
 #define BALL_TRAIL_ALPHA 64
 #define BALL_TRAIL_SEGMENTS_PER_FADE 4
-#define BALL_TRAIL_SEGMENT_COLOR(segment) \
+#define BallTrailSegmentColor(segment) \
   ((BALL_TRAIL_ALPHA - ((segment) / BALL_TRAIL_SEGMENTS_PER_FADE)) | \
       BALL_TRAIL_COLOR)
 
@@ -2183,13 +2183,13 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPSetPrimDepth(gfx++, f_BallTrailPoints[i].depth, 0);
             gDPPipeSync(gfx++);
             gSPModifyVertex(
-                gfx++, 0, G_MWO_POINT_RGBA, BALL_TRAIL_SEGMENT_COLOR(i));
+                gfx++, 0, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
             gSPModifyVertex(
-                gfx++, 1, G_MWO_POINT_RGBA, BALL_TRAIL_SEGMENT_COLOR(i));
+                gfx++, 1, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
             gSPModifyVertex(
-                gfx++, 2, G_MWO_POINT_RGBA, BALL_TRAIL_SEGMENT_COLOR(i));
+                gfx++, 2, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
             gSPModifyVertex(
-                gfx++, 3, G_MWO_POINT_RGBA, BALL_TRAIL_SEGMENT_COLOR(i));
+                gfx++, 3, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
             gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
                 ((f_BallTrailPoints[i].x + (s32)offsetX) << 16) +
                     (f_BallTrailPoints[i].y - (s32)offsetY));
@@ -3092,7 +3092,7 @@ void WaveHoleFlag(void) {
 
   f_HoleFlagWavePhase += ((HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed) +
                              HOLE_FLAG_MIN_SWING_DEGREES) *
-      DEGREES_TO_RADIANS(1);
+      DegreesToRadians(1);
   if (f_HoleFlagWavePhase > 2 * M_PI) {
     f_HoleFlagWavePhase -= 2 * M_PI;
   }
@@ -3605,7 +3605,7 @@ void func_80217F54(Gfx** displayListHead);
 
 /* Loads one of the shot panel's labels, which DrawRoundHud does in each branch
  * that picks one */
-#define LOAD_SHOT_PANEL_LABEL(image) \
+#define LoadShotPanelLabel(image) \
   gDPLoadTLUT_pal16( \
       g_DisplayListHead++, 0, ((u32)(image) + IMAGE_HEADER_SIZE) & ~7); \
   gDPLoadTextureBlock_4b(g_DisplayListHead++, \
@@ -3791,11 +3791,11 @@ void DrawRoundHud(CameraView* view) {
     if ((club->surfaceMask & CLUB_SURFACE_GREEN)
             ? g_RoundHud.ballHeightMetersDirection == HEIGHT_LEVEL
             : g_RoundHud.ballHeightYardsDirection == HEIGHT_LEVEL) {
-      LOAD_SHOT_PANEL_LABEL(f_FlatLabelImage);
+      LoadShotPanelLabel(f_FlatLabelImage);
     } else if (g_RoundHud.ballHeightMetersDirection == HEIGHT_ABOVE) {
-      LOAD_SHOT_PANEL_LABEL(f_UpLabelImage);
+      LoadShotPanelLabel(f_UpLabelImage);
     } else {
-      LOAD_SHOT_PANEL_LABEL(f_DownLabelImage);
+      LoadShotPanelLabel(f_DownLabelImage);
     }
 
     gDPPipeSync(g_DisplayListHead++);

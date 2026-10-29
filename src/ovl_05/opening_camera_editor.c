@@ -72,10 +72,10 @@ void ResetCameraEditor(void) {
   g_CameraEditor.tiltBrakingAngle = 0.0f;
   g_CameraEditor.turnBrakingAngle = 0.0f;
   g_CameraEditor.zoomBrakingDistance = 0.0f;
-  g_CameraEditor.turnTopSpeed = DEGREES_TO_RADIANS(6.0f);
-  g_CameraEditor.turnAcceleration = DEGREES_TO_RADIANS(2.0f);
-  g_CameraEditor.tiltTopSpeed = DEGREES_TO_RADIANS(3.0f);
-  g_CameraEditor.tiltAcceleration = DEGREES_TO_RADIANS(1.0f);
+  g_CameraEditor.turnTopSpeed = DegreesToRadians(6.0f);
+  g_CameraEditor.turnAcceleration = DegreesToRadians(2.0f);
+  g_CameraEditor.tiltTopSpeed = DegreesToRadians(3.0f);
+  g_CameraEditor.tiltAcceleration = DegreesToRadians(1.0f);
   g_CameraEditor.zoomTopSpeed = 10.0f;
   g_CameraEditor.zoomAcceleration = 1.0f;
   MeasureEditorCamera();
@@ -415,10 +415,10 @@ void StopEditorMoves(void) {
   g_CameraEditor.tiltBrakingAngle = 0.0f;
   g_CameraEditor.turnBrakingAngle = 0.0f;
   g_CameraEditor.zoomBrakingDistance = 0.0f;
-  g_CameraEditor.turnTopSpeed = DEGREES_TO_RADIANS(6.0f);
-  g_CameraEditor.turnAcceleration = DEGREES_TO_RADIANS(2.0f);
-  g_CameraEditor.tiltTopSpeed = DEGREES_TO_RADIANS(3.0f);
-  g_CameraEditor.tiltAcceleration = DEGREES_TO_RADIANS(1.0f);
+  g_CameraEditor.turnTopSpeed = DegreesToRadians(6.0f);
+  g_CameraEditor.turnAcceleration = DegreesToRadians(2.0f);
+  g_CameraEditor.tiltTopSpeed = DegreesToRadians(3.0f);
+  g_CameraEditor.tiltAcceleration = DegreesToRadians(1.0f);
   g_CameraEditor.zoomTopSpeed = 10.0f;
   g_CameraEditor.zoomAcceleration = 1.0f;
   MeasureEditorCamera();
@@ -436,7 +436,7 @@ void StopEditorMoves(void) {
 #define EDITOR_MIN_DISTANCE 1.0f
 
 /* Braking lowers a top speed no further than the acceleration */
-#define KEEP_TOP_SPEED(topSpeed, acceleration) \
+#define KeepTopSpeed(topSpeed, acceleration) \
   do { \
     if (fabsf(topSpeed) < fabsf(acceleration)) { \
       (topSpeed) = (acceleration); \
@@ -667,7 +667,7 @@ void UpdateCameraEditor(void) {
         if (gap < g_CameraEditor.zoomBrakingDistance) {
           g_CameraEditor.zoomTopSpeed -=
               g_CameraEditor.zoomAcceleration * EDITOR_BRAKING_RATE;
-          KEEP_TOP_SPEED(
+          KeepTopSpeed(
               g_CameraEditor.zoomTopSpeed, g_CameraEditor.zoomAcceleration);
         }
 
@@ -711,7 +711,7 @@ void UpdateCameraEditor(void) {
         if (fabsf(left) < fabsf(g_CameraEditor.turnBrakingAngle)) {
           g_CameraEditor.turnTopSpeed -=
               g_CameraEditor.turnAcceleration * EDITOR_BRAKING_RATE;
-          KEEP_TOP_SPEED(
+          KeepTopSpeed(
               g_CameraEditor.turnTopSpeed, g_CameraEditor.turnAcceleration);
         }
 
@@ -755,7 +755,7 @@ void UpdateCameraEditor(void) {
         if (fabsf(left) < fabsf(g_CameraEditor.tiltBrakingAngle)) {
           g_CameraEditor.tiltTopSpeed -=
               g_CameraEditor.tiltAcceleration * EDITOR_BRAKING_RATE;
-          KEEP_TOP_SPEED(
+          KeepTopSpeed(
               g_CameraEditor.tiltTopSpeed, g_CameraEditor.tiltAcceleration);
         }
 
@@ -890,7 +890,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
 #define FAST_PAD_STEP 20.0f
 
 /* Moves the eye along its line to the look-at point, scaling their distance */
-#define ZOOM_EDITOR_EYE(scale) \
+#define ZoomEditorEye(scale) \
   do { \
     g_CameraEditor.points[EDITOR_POINT_EYE][0] = \
         ((g_CameraEditor.points[EDITOR_POINT_EYE][0] - \
@@ -911,7 +911,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
 
 /* Steps one coordinate of a point while the second controller holds a
  * button; step is += or -= */
-#define STEP_EDITOR_COORDINATE(button, point, axis, step) \
+#define StepEditorCoordinate(button, point, axis, step) \
   do { \
     if (g_ControllerStates[SECOND_EDITOR_PAD].buttons & (button)) { \
       if (g_ControllerStates[SECOND_EDITOR_PAD].buttons & START_BUTTON) { \
@@ -927,14 +927,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
 
 /* The control pad moves a point across the ground and the C buttons up and
  * down */
-#define STEP_EDITOR_POINT(point) \
+#define StepEditorPoint(point) \
   do { \
-    STEP_EDITOR_COORDINATE(R_JPAD, point, 0, +=); \
-    STEP_EDITOR_COORDINATE(L_JPAD, point, 0, -=); \
-    STEP_EDITOR_COORDINATE(U_JPAD, point, 2, +=); \
-    STEP_EDITOR_COORDINATE(D_JPAD, point, 2, -=); \
-    STEP_EDITOR_COORDINATE(U_CBUTTONS, point, 1, -=); \
-    STEP_EDITOR_COORDINATE(D_CBUTTONS, point, 1, +=); \
+    StepEditorCoordinate(R_JPAD, point, 0, +=); \
+    StepEditorCoordinate(L_JPAD, point, 0, -=); \
+    StepEditorCoordinate(U_JPAD, point, 2, +=); \
+    StepEditorCoordinate(D_JPAD, point, 2, -=); \
+    StepEditorCoordinate(U_CBUTTONS, point, 1, -=); \
+    StepEditorCoordinate(D_CBUTTONS, point, 1, +=); \
   } while (0)
 
 /*
@@ -1183,7 +1183,7 @@ void EditOpeningCamera(void) {
   /* R zooms out, and L or Z with R zooms in */
   if ((g_ControllerStates[EDITOR_PAD].buttons & (Z_TRIG | R_TRIG)) == R_TRIG) {
     if (g_CameraEditor.distance < MAX_ZOOM_OUT_DISTANCE) {
-      ZOOM_EDITOR_EYE(ZOOM_OUT_SCALE);
+      ZoomEditorEye(ZOOM_OUT_SCALE);
     }
   }
 
@@ -1191,7 +1191,7 @@ void EditOpeningCamera(void) {
       (g_ControllerStates[EDITOR_PAD].buttons & (Z_TRIG | R_TRIG)) ==
           (Z_TRIG | R_TRIG)) {
     if (g_CameraEditor.distance > MIN_ZOOM_IN_DISTANCE) {
-      ZOOM_EDITOR_EYE(ZOOM_IN_SCALE);
+      ZoomEditorEye(ZOOM_IN_SCALE);
     }
   }
 
@@ -1345,9 +1345,9 @@ void EditOpeningCamera(void) {
   }
 
   if (!f_IsSecondPadOnEye) {
-    STEP_EDITOR_POINT(EDITOR_POINT_LOOK_AT);
+    StepEditorPoint(EDITOR_POINT_LOOK_AT);
   } else {
-    STEP_EDITOR_POINT(EDITOR_POINT_EYE);
+    StepEditorPoint(EDITOR_POINT_EYE);
   }
 }
 

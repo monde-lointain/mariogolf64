@@ -107,10 +107,10 @@
 #define LARGE_FLAGSTICK_PRIM_DEPTH 0x4027
 
 /* Texture coordinates in texels, packed as s10.5 */
-#define SMALL_CUP_TEXCOORDS(s, t) ((((s) << 5) << 16) | ((t) << 5))
+#define SmallCupTexcoords(s, t) ((((s) << 5) << 16) | ((t) << 5))
 /* Screen coordinates are in quarter pixels */
 #define SCREEN_SUBPIXEL_COUNT 4
-#define SCREEN_XY(x, y) \
+#define ScreenXY(x, y) \
   ((((x) * SCREEN_SUBPIXEL_COUNT) << 16) + (s32)((y) * SCREEN_SUBPIXEL_COUNT))
 /* Half the screen-space flagstick's width, in quarter pixels */
 #define SCREEN_FLAGSTICK_HALF_WIDTH 2
@@ -520,11 +520,11 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
           G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
           G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(
-          g_DisplayListHead++, 1, G_MWO_POINT_ST, SMALL_CUP_TEXCOORDS(0, 4));
+          g_DisplayListHead++, 1, G_MWO_POINT_ST, SmallCupTexcoords(0, 4));
       gSPModifyVertex(
-          g_DisplayListHead++, 2, G_MWO_POINT_ST, SMALL_CUP_TEXCOORDS(8, 4));
+          g_DisplayListHead++, 2, G_MWO_POINT_ST, SmallCupTexcoords(8, 4));
       gSPModifyVertex(
-          g_DisplayListHead++, 3, G_MWO_POINT_ST, SMALL_CUP_TEXCOORDS(8, 0));
+          g_DisplayListHead++, 3, G_MWO_POINT_ST, SmallCupTexcoords(8, 0));
     } else {
       gDPLoadTextureBlock(g_DisplayListHead++,
           ((u32)f_CupTexture + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_RGBA,
@@ -542,22 +542,21 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       if ((f32)(cupScreenScale * (CUP_SCREEN_RADIUS * g_PinVertexScale)) <
           SCREEN_CUP_MAX_SIZE) {
         gSPModifyVertex(g_DisplayListHead++, 0, G_MWO_POINT_XYSCREEN,
-            SCREEN_XY(cup.x + SCREEN_CUP_RIGHT, cup.y - cupHalfHeight));
+            ScreenXY(cup.x + SCREEN_CUP_RIGHT, cup.y - cupHalfHeight));
         gSPModifyVertex(g_DisplayListHead++, 1, G_MWO_POINT_XYSCREEN,
-            SCREEN_XY(cup.x + SCREEN_CUP_RIGHT, cup.y + cupHalfHeight));
+            ScreenXY(cup.x + SCREEN_CUP_RIGHT, cup.y + cupHalfHeight));
         gSPModifyVertex(g_DisplayListHead++, 2, G_MWO_POINT_XYSCREEN,
-            SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y + cupHalfHeight));
+            ScreenXY(cup.x + SCREEN_CUP_LEFT, cup.y + cupHalfHeight));
         gSPModifyVertex(g_DisplayListHead++, 3, G_MWO_POINT_XYSCREEN,
-            SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y - cupHalfHeight));
+            ScreenXY(cup.x + SCREEN_CUP_LEFT, cup.y - cupHalfHeight));
         gSPModifyVertex(g_DisplayListHead++, 4, G_MWO_POINT_XYSCREEN,
-            SCREEN_XY(cup.x + SCREEN_CUP_RIGHT, cup.y));
+            ScreenXY(cup.x + SCREEN_CUP_RIGHT, cup.y));
         gSPModifyVertex(g_DisplayListHead++, 5, G_MWO_POINT_XYSCREEN,
-            SCREEN_XY(
-                cup.x + SCREEN_CUP_RIGHT, cup.y + SCREEN_CUP_WALL_HEIGHT));
+            ScreenXY(cup.x + SCREEN_CUP_RIGHT, cup.y + SCREEN_CUP_WALL_HEIGHT));
         gSPModifyVertex(g_DisplayListHead++, 6, G_MWO_POINT_XYSCREEN,
-            SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y + SCREEN_CUP_WALL_HEIGHT));
+            ScreenXY(cup.x + SCREEN_CUP_LEFT, cup.y + SCREEN_CUP_WALL_HEIGHT));
         gSPModifyVertex(g_DisplayListHead++, 7, G_MWO_POINT_XYSCREEN,
-            SCREEN_XY(cup.x + SCREEN_CUP_LEFT, cup.y));
+            ScreenXY(cup.x + SCREEN_CUP_LEFT, cup.y));
       }
     }
 
@@ -689,7 +688,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
 
   if (!isPinOut) {
     if (g_HoleSetup.conditions.windSpeed != 0) {
-      f_FlagWavePhase += DEGREES_TO_RADIANS(FLAG_WAVE_STEP_DEGREES);
+      f_FlagWavePhase += DegreesToRadians(FLAG_WAVE_STEP_DEGREES);
       if (f_FlagWavePhase > 2 * M_PI) {
         f_FlagWavePhase -= 2 * M_PI;
       }

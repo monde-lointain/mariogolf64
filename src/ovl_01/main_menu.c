@@ -156,7 +156,7 @@
 
 /* Divides a turn among the player count's modes, keeping it whole should a
  * count be zero */
-#define SPREAD_OVER_MODES(amount) \
+#define AmountPerMode(amount) \
   (D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] != 0 \
           ? (amount) / D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] \
           : (amount))
@@ -2091,7 +2091,7 @@ void func_801F7CD0_ovl_01(void) {
  * chosen mode's first icon frame is read into the buffer not shown, and then
  * the buffers swap.
  */
-#define LOAD_CHOSEN_MODE_ICON() \
+#define LoadChosenModeIcon() \
   D_8022F8C0_ovl_01 = 0; \
   D_8022F8C5_ovl_01 = 0; \
   OpenEncodedAsset( \
@@ -2131,7 +2131,7 @@ void func_801F7D28_ovl_01(void) {
   if (g_MenuPressedButtons & A_BUTTON) {
     if (D_801323A0.modeSpin != 0) {
       D_801323A0.modeSpin = 0;
-      LOAD_CHOSEN_MODE_ICON();
+      LoadChosenModeIcon();
       return;
     }
 
@@ -2354,7 +2354,7 @@ void func_801F7D28_ovl_01(void) {
   if (g_MenuPressedButtons & B_BUTTON) {
     if (D_801323A0.modeSpin != 0) {
       D_801323A0.modeSpin = 0;
-      LOAD_CHOSEN_MODE_ICON();
+      LoadChosenModeIcon();
     }
 
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
@@ -2386,7 +2386,7 @@ void func_801F7D28_ovl_01(void) {
         D_801323A0.modeChoice = D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1;
       }
 
-      D_801323A0.modeSpin = SPREAD_OVER_MODES(MODE_SELECT_TURN);
+      D_801323A0.modeSpin = AmountPerMode(MODE_SELECT_TURN);
       if (g_ChosenPlayerCount == 1) {
         D_8022F8C5_ovl_01 = 0;
         D_8022F8C0_ovl_01 = 0;
@@ -2400,7 +2400,7 @@ void func_801F7D28_ovl_01(void) {
         D_801323A0.modeChoice = 0;
       }
 
-      D_801323A0.modeSpin = SPREAD_OVER_MODES(-MODE_SELECT_TURN);
+      D_801323A0.modeSpin = AmountPerMode(-MODE_SELECT_TURN);
       if (g_ChosenPlayerCount == 1) {
         D_8022F8C5_ovl_01 = 0;
         D_8022F8C0_ovl_01 = 0;
@@ -2410,8 +2410,8 @@ void func_801F7D28_ovl_01(void) {
     }
   }
 
-  if (ABS(D_801323A0.modeSpin) != 0) {
-    step = SPREAD_OVER_MODES(MODE_SELECT_SPIN_SPEED);
+  if (Abs(D_801323A0.modeSpin) != 0) {
+    step = AmountPerMode(MODE_SELECT_SPIN_SPEED);
     direction = D_801323A0.modeSpin < 0 ? -1 : 1;
     if (step == 0) {
       step = 1;
@@ -2425,7 +2425,7 @@ void func_801F7D28_ovl_01(void) {
     }
 
     if (D_801323A0.modeSpin == 0) {
-      LOAD_CHOSEN_MODE_ICON();
+      LoadChosenModeIcon();
     }
   }
 
@@ -2617,7 +2617,7 @@ void func_801F8BAC_ovl_01(void) {
     }
   }
 
-  if (ABS(D_801323A0.courseSpin) != 0) {
+  if (Abs(D_801323A0.courseSpin) != 0) {
     step = COURSE_SELECT_SPIN_SPEED / courseCount;
     direction = D_801323A0.courseSpin < 0 ? -1 : 1;
     if (step == 0) {
@@ -2883,7 +2883,7 @@ void func_801F93D8_ovl_01(void) {
     }
   }
 
-  if (ABS(D_801323A0.unk2D) != 0) {
+  if (Abs(D_801323A0.unk2D) != 0) {
     direction = D_801323A0.unk2D >= 0 ? 1 : -1;
     step = MINI_GOLF_RECORD_SLIDE_STEP;
     D_801323A0.unk2D -= direction * step;
@@ -4658,7 +4658,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
       angleStep = DEGREES_PER_TURN;
     }
 
-    angle = -DEGREES_TO_RADIANS(
+    angle = -DegreesToRadians(
         (slot * angleStep) + (D_801323A0.modeSpin * DEGREES_PER_SPIN_STEP));
     circleX = sinf(angle) * radiusX;
     if (ProjectPoint(circleX, 0.0f, cosf(angle) * MODE_BOARD_RADIUS_Z, &point) <
@@ -5235,8 +5235,8 @@ void func_80200EF0_ovl_01(Gfx** displayListHead) {
       D_8022FA58_ovl_01 = 0.0f;
     }
 
-    rotation[0] = DEGREES_TO_RADIANS(D_8022FA54_ovl_01);
-    rotation[1] = DEGREES_TO_RADIANS(D_8022FA58_ovl_01);
+    rotation[0] = DegreesToRadians(D_8022FA54_ovl_01);
+    rotation[1] = DegreesToRadians(D_8022FA58_ovl_01);
     rotation[2] = 0.0f;
     translation[0] = D_8022FA68_ovl_01[layout][slot][0];
     raise = (character == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
@@ -5518,8 +5518,8 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
     Mat4 matrix;
 
     rotation[2] = 0;
-    rotation[0] = DEGREES_TO_RADIANS(D_8022FBA8_ovl_01);
-    rotation[1] = DEGREES_TO_RADIANS(D_8022FBAC_ovl_01);
+    rotation[0] = DegreesToRadians(D_8022FBA8_ovl_01);
+    rotation[1] = DegreesToRadians(D_8022FBAC_ovl_01);
     translation[0] = D_8022FBB8_ovl_01 + VIEWER_BASE_OFFSET;
     translation[1] = D_8022FBBC_ovl_01 + VIEWER_BASE_OFFSET;
     translation[2] = VIEWER_DEPTH;
@@ -5706,9 +5706,8 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     for (index = 0; index != courseCount; index++) {
       ScreenPoint point;
 
-      angle =
-          -DEGREES_TO_RADIANS((((choice - index) % courseCount) * angleStep) +
-              (spin * DEGREES_PER_SPIN_STEP));
+      angle = -DegreesToRadians((((choice - index) % courseCount) * angleStep) +
+          (spin * DEGREES_PER_SPIN_STEP));
       wheelX = sinf(angle) * WHEEL_RADIUS_X;
       if (ProjectPoint(wheelX, 0.0f, cosf(angle) * WHEEL_RADIUS_Z, &point) <
           0) {

@@ -411,7 +411,7 @@ void DrawHelpBoard(Gfx** displayListHead) {
   if (f_OpenTopic == 0) {
     for (index = 0, topic = f_FirstListedTopic; index != LISTED_TOPIC_COUNT;
         index++, topic++) {
-      f_ListColorPhase += DEGREES_TO_RADIANS(5);
+      f_ListColorPhase += DegreesToRadians(5);
       red = (s32)(sinf(f_ListColorPhase) * 127.0f) + 127;
       blue = (s32)(sinf(f_ListColorPhase + (M_PI / 2)) * 127.0f) + 127;
       green = (s32)(sinf(f_ListColorPhase + M_PI) * 127.0f) + 127;

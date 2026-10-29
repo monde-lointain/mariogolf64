@@ -19,7 +19,7 @@
 
 /* The pi of these angles' conversions, rounded to six places */
 #define FRAMING_PI 3.141593f
-#define FRAMING_DEGREES_TO_RADIANS(degrees) ((degrees) * (FRAMING_PI / 180))
+#define FramingDegreesToRadians(degrees) ((degrees) * (FRAMING_PI / 180))
 
 /* The starting x and y bounds */
 #define FAR_EXTENT 30000.0f
@@ -83,7 +83,7 @@ void SetFramingAngles(Radians pitch, Radians yaw) {
   Mat4 yawRotation;
 
   if (fabsf(cosf(pitch)) < STEEP_PITCH_COSINE) {
-    pitch += FRAMING_DEGREES_TO_RADIANS(20);
+    pitch += FramingDegreesToRadians(20);
   }
 
   f_FramingPitch = pitch;
@@ -201,23 +201,23 @@ void FrameSpheres(f32 depthOffset) {
     osSyncPrintf("maxx %f minx %f maxy %f miny %f\n", maxX, minX, maxY, minY);
   }
 
-  angle = FRAMING_DEGREES_TO_RADIANS(rightAngle - leftAngle) -
-      FRAMING_DEGREES_TO_RADIANS(90);
+  angle = FramingDegreesToRadians(rightAngle - leftAngle) -
+      FramingDegreesToRadians(90);
   distance = -minX / cosf(angle);
-  eyeX = sinf(FRAMING_DEGREES_TO_RADIANS(leftAngle)) * distance;
-  horizontalEyeZ = cosf(FRAMING_DEGREES_TO_RADIANS(leftAngle)) * distance;
+  eyeX = sinf(FramingDegreesToRadians(leftAngle)) * distance;
+  horizontalEyeZ = cosf(FramingDegreesToRadians(leftAngle)) * distance;
   distance = maxX / cosf(angle);
-  eyeX += sinf(FRAMING_DEGREES_TO_RADIANS(rightAngle)) * distance;
-  horizontalEyeZ += cosf(FRAMING_DEGREES_TO_RADIANS(rightAngle)) * distance;
+  eyeX += sinf(FramingDegreesToRadians(rightAngle)) * distance;
+  horizontalEyeZ += cosf(FramingDegreesToRadians(rightAngle)) * distance;
 
-  angle = FRAMING_DEGREES_TO_RADIANS(topAngle - bottomAngle) -
-      FRAMING_DEGREES_TO_RADIANS(90);
+  angle = FramingDegreesToRadians(topAngle - bottomAngle) -
+      FramingDegreesToRadians(90);
   distance = -minY / cosf(angle);
-  eyeY = sinf(FRAMING_DEGREES_TO_RADIANS(bottomAngle)) * distance;
-  verticalEyeZ = cosf(FRAMING_DEGREES_TO_RADIANS(bottomAngle)) * distance;
+  eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * distance;
+  verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * distance;
   distance = maxY / cosf(-angle);
-  eyeY += sinf(FRAMING_DEGREES_TO_RADIANS(topAngle)) * distance;
-  verticalEyeZ += cosf(FRAMING_DEGREES_TO_RADIANS(topAngle)) * distance;
+  eyeY += sinf(FramingDegreesToRadians(topAngle)) * distance;
+  verticalEyeZ += cosf(FramingDegreesToRadians(topAngle)) * distance;
   if (g_ControllerData[1].trigger & D_CBUTTONS) {
     osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ,
         verticalEyeZ);
@@ -269,13 +269,13 @@ void FrameSpheres(f32 depthOffset) {
 
   depth = (Z_MARGIN - minZ) + eyeZ;
   frontDistance = depth - horizontalEyeZ;
-  right = frontDistance * tan(FRAMING_DEGREES_TO_RADIANS(rightAngle));
-  left = frontDistance * tan(FRAMING_DEGREES_TO_RADIANS(leftAngle));
+  right = frontDistance * tan(FramingDegreesToRadians(rightAngle));
+  left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
   frontDistance = depth - verticalEyeZ;
-  top = frontDistance * tan(FRAMING_DEGREES_TO_RADIANS(topAngle));
+  top = frontDistance * tan(FramingDegreesToRadians(topAngle));
   centerX = (minX + maxX) * 0.5f;
   centerY = (minY + maxY) * 0.5f;
-  bottom = frontDistance * tan(FRAMING_DEGREES_TO_RADIANS(bottomAngle));
+  bottom = frontDistance * tan(FramingDegreesToRadians(bottomAngle));
   if (centerX < left) {
     centerX = left;
   }
