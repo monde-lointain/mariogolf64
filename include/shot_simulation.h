@@ -37,4 +37,6 @@ typedef struct SimulatedShot {
 
 extern SimulatedShot g_SimulatedShot;
 
+void SimulateShot(Unk20* shot);
+
 #endif

@@ -4,6 +4,8 @@
  */
 #include "common.h"
 
+#include "computer_golfer.h"
+
 #include "ball_simulation.h"
 #include "club.h"
 #include "course.h"
@@ -350,7 +352,7 @@ s32 GetPlannedShot(CurrentShot* shot) {
     return 0;
   }
 
-  return -1;
+  return PLANNED_SHOT_UNFINISHED;
 }
 
 s32 GetGolferTraitUnk2(void) {

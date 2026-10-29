@@ -76,3 +76,7 @@ rom:0x101D8C reloc:MIPS_HI16 symbol:D_8023BFC0_ovl_01 addend:0x8
 rom:0x101D94 reloc:MIPS_LO16 symbol:D_8023BFC0_ovl_01 addend:0x8
 rom:0x101DB0 reloc:MIPS_HI16 symbol:D_8023BFC0_ovl_01 addend:0xC
 rom:0x101DB4 reloc:MIPS_LO16 symbol:D_8023BFC0_ovl_01 addend:0xC
+// UpdateTurns calls into ovl_03 and ovl_04 after loading them; other
+// overlays at the same vram name those addresses too
+rom:0xC22B8 reloc:MIPS_26 symbol:StartShotPlan
+rom:0xC41A8 reloc:MIPS_26 symbol:SimulateShot

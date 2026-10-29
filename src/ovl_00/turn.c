@@ -14,6 +14,7 @@
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
+#include "computer_golfer.h"
 #include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
@@ -3187,7 +3188,7 @@ void UpdateTurns(void) {
             g_Players[playerIndex].unk1E[0] || IsGameFlagSet(GAME_FLAG_UNK9B)) {
           g_Players[playerIndex].unk1E[1] = -9;
           LoadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
-          ListOffsetsByDistance();
+          StartShotPlan();
           D_800B7D9C = 0;
           D_80223E58_ovl_00 = 30;
           D_80227194_ovl_00 = 2;
@@ -3376,7 +3377,9 @@ void UpdateTurns(void) {
         if (D_80227194_ovl_00 == 2) {
           StartTurnTimer();
           for (i = 0; D_80227194_ovl_00 == 2 && i < 100; i++) {
-            D_80227194_ovl_00 = (GetPlannedShot(&D_80104F78) != -1) ? 1 : 2;
+            D_80227194_ovl_00 =
+                (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED) ? 1
+                                                                         : 2;
             if (!func_8020561C_ovl_00(10)) {
               break;
             }
@@ -3602,7 +3605,9 @@ void UpdateTurns(void) {
 
             StartTurnTimer();
             for (i = 0; D_80227194_ovl_00 == 2 && i < 400; i++) {
-              D_80227194_ovl_00 = (GetPlannedShot(&D_80104F78) != -1) ? 1 : 2;
+              D_80227194_ovl_00 =
+                  (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED) ? 1
+                                                                           : 2;
               if (!func_8020561C_ovl_00(D_80223E58_ovl_00)) {
                 break;
               }
@@ -3969,7 +3974,7 @@ void UpdateTurns(void) {
         SetFramebufferCount(TRIPLE_BUFFERING);
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
         LoadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
-        SetPaintSeed(&D_80227150_ovl_00);
+        SimulateShot(&D_80227150_ovl_00);
         if (IsRecordableHoleOut(playerIndex)) {
           RecordHoleOut(playerIndex);
         }
