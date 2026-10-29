@@ -1657,6 +1657,7 @@ DisplaceNoiseSquare = 0x8004C958; // type:func
 StepNoiseTexture = 0x8004CDA0; // type:func
 BuildNoiseTexture = 0x8004D148; // type:func
 f_FlightCameraKind = 0x800BE62C; // size:0x4
+f_HasFlightPhaseChanged = 0x800BE630; // size:0x4
 f_BallCupDistance = 0x800BE634; // size:0x4
 f_BallCupGroundDistance = 0x800BE638; // size:0x4
 f_LandingCupDistance = 0x800BE63C; // size:0x4
@@ -1694,6 +1695,7 @@ f_GreenSoundCount = 0x800DAF3C; // size:0x4
 f_IsLandingSoundPlayed = 0x800DAF40; // size:0x4
 f_PassedPathFlags = 0x800DAF48; // size:0x1
 f_EndSurfaceInfo = 0x800DAF4C; // size:0x4
+f_FlightPhase = 0x800DAF50; // size:0x4
 
 DimNextTranslucentTriangles = 0x800660A0; // type:func
 DrawHoleTriangles = 0x800660B0; // type:func

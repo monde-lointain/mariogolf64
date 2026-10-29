@@ -78,7 +78,8 @@ static s32 D_800BE620 = 0;
 static s32 D_800BE624 = 0;
 static s32 D_800BE628 = 0;
 static s32 f_FlightCameraKind = 0;
-static s32 D_800BE630 = 0;
+/* Set as f_FlightPhase changes, and cleared as a camera kind is chosen */
+static Boolean f_HasFlightPhaseChanged = FALSE;
 static s32 f_BallCupDistance = 0;
 static s32 f_BallCupGroundDistance = 0;
 static s32 f_LandingCupDistance = 0;
@@ -312,7 +313,8 @@ static Boolean f_IsLandingSoundPlayed;
 static s32 D_800DAF44;
 static s8 f_PassedPathFlags;
 static SurfaceInfo* f_EndSurfaceInfo;
-static s32 D_800DAF50;
+/* How far the flight camera has followed the shot */
+static s32 f_FlightPhase;
 
 /* How far the golfer stands along the shot's yaw from the ball */
 #define STANCE_AIM_OFFSET -921.60004f
@@ -766,8 +768,8 @@ void StartFlightCamera(s32 earlierFlightCount) {
   }
 
   D_800BE628 = FALSE;
-  D_800BE630 = FALSE;
-  D_800DAF50 = 1;
+  f_HasFlightPhaseChanged = FALSE;
+  f_FlightPhase = 1;
   f_FlightCameraKind = NO_FLIGHT_CAMERA;
   D_800BE680 = 0;
   g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
@@ -2481,15 +2483,15 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
       (info)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
 
 /*
- * Picks a flight camera kind for the value of D_800DAF50, and switches to it if
- * it is greater than the current kind. The picks depend on the simulated shot,
- * save option 3 and chance. A switch ends StartHudAnimation's effect and may
- * start another one. In debug builds, the second controller's B and A buttons
- * pick FLIGHT_CAMERA_BESIDE_GOLFER and FLIGHT_CAMERA_CIRCLING_BALL. It does not
- * match: cross-jumping sends the second switch's case 5 trouble-surface branch
- * through the identical "kind = FLIGHT_CAMERA_AROUND_END" tail of the first
- * switch's case 3, where the original branches straight to the end. The other
- * instructions are the same.
+ * Picks a flight camera kind for the value of f_FlightPhase, and switches to it
+ * if it is greater than the current kind. The picks depend on the simulated
+ * shot, save option 3 and chance. A switch ends StartHudAnimation's effect and
+ * may start another one. In debug builds, the second controller's B and A
+ * buttons pick FLIGHT_CAMERA_BESIDE_GOLFER and FLIGHT_CAMERA_CIRCLING_BALL. It
+ * does not match: cross-jumping sends the second switch's case 5
+ * trouble-surface branch through the identical "kind =
+ * FLIGHT_CAMERA_AROUND_END" tail of the first switch's case 3, where the
+ * original branches straight to the end. The other instructions are the same.
  */
 #ifdef NON_MATCHING
 void ChooseFlightCameraKind(void) {
@@ -2499,10 +2501,10 @@ void ChooseFlightCameraKind(void) {
   s32 pick;
 
   animation = HUD_ANIMATION_NONE;
-  D_800BE630 = FALSE;
+  f_HasFlightPhaseChanged = FALSE;
   kind = 0;
   if (g_SimulatedShot.unk2E08) {
-    switch (D_800DAF50) {
+    switch (f_FlightPhase) {
       case 1:
         if (!(f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_UNK2) &&
             RandomBelow(2) == 0 && !IsPinInCup() &&
@@ -2570,7 +2572,7 @@ void ChooseFlightCameraKind(void) {
         break;
     }
   } else if (!func_8005DE40()) {
-    switch (D_800DAF50) {
+    switch (f_FlightPhase) {
       case 1:
         pick = NextCameraPick(1);
         if (D_800BE64C != -1) {
@@ -2667,7 +2669,7 @@ void ChooseFlightCameraKind(void) {
         break;
       case 4:
         if (D_800BE674) {
-          D_800BE630 = TRUE;
+          f_HasFlightPhaseChanged = TRUE;
         } else if (f_FlightCameraKind == FLIGHT_CAMERA_TRAILING_BALL) {
           /* The empty branches are there to match */
         } else if (f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
@@ -2699,7 +2701,7 @@ void ChooseFlightCameraKind(void) {
         if (!D_800BE674) {
           kind = FLIGHT_CAMERA_AROUND_END;
         } else {
-          D_800BE630 = TRUE;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
@@ -2708,7 +2710,7 @@ void ChooseFlightCameraKind(void) {
           /* The empty branch is there to match */
         } else {
           if (D_800BE674 || g_SimulatedShot.stepCount < 21) {
-            D_800BE630 = TRUE;
+            f_HasFlightPhaseChanged = TRUE;
           } else if (f_LandingCupDistance <= SHORT_SHOT_MAX_LENGTH ||
               f_FlightCameraKind == FLIGHT_CAMERA_AROUND_END) {
             kind = FLIGHT_CAMERA_UNKD;
@@ -2718,7 +2720,7 @@ void ChooseFlightCameraKind(void) {
         break;
     }
   } else {
-    switch (D_800DAF50) {
+    switch (f_FlightPhase) {
       case 1:
         pick = RandomBelow(9);
         switch (pick) {
@@ -2752,11 +2754,11 @@ void ChooseFlightCameraKind(void) {
             break;
         }
 
-        D_800BE630 = TRUE;
+        f_HasFlightPhaseChanged = TRUE;
         break;
       case 5:
         kind = FLIGHT_CAMERA_AROUND_END;
-        D_800BE630 = TRUE;
+        f_HasFlightPhaseChanged = TRUE;
         break;
       case 6:
         /* The empty case is there to match */
@@ -2768,7 +2770,7 @@ void ChooseFlightCameraKind(void) {
     D_800BE628 = TRUE;
     StartHudAnimation(HUD_ANIMATION_NONE);
     if (animation == HUD_ANIMATION_NONE) {
-      if (D_800DAF50 >= 4 && !g_SimulatedShot.unk2E08 &&
+      if (f_FlightPhase >= 4 && !g_SimulatedShot.unk2E08 &&
           f_ShotLength > SHORT_SHOT_MAX_LENGTH) {
         if (kind == FLIGHT_CAMERA_AROUND_END) {
           if (RandomBelow(16) == 0 &&
@@ -2899,88 +2901,88 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
       f_FlightBallPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
       f_FlightBallPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
   if (g_SimulatedShot.unk2E08) {
-    switch (D_800DAF50) {
+    switch (f_FlightPhase) {
       case 1:
         if (isAdvancing == TRUE && step == 10 &&
             g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
-          D_800DAF50 = 3;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 3;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case 3:
         if (step == 40 && g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
-          D_800DAF50 = 6;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 6;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case 6:
         if (g_SimulatedShot.stepCount - 10 < g_BallFlightStep) {
-          D_800DAF50 = 7;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 7;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
     }
   } else if (func_8005DE40() == 0) {
-    switch (D_800DAF50) {
+    switch (f_FlightPhase) {
       case 0:
-        D_800DAF50 = 1;
-        D_800BE630 = TRUE;
+        f_FlightPhase = 1;
+        f_HasFlightPhaseChanged = TRUE;
         break;
       case 1:
         if (isAdvancing == TRUE && step == 10) {
-          D_800DAF50 = 2;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 2;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case 2:
         if (step == 15) {
-          D_800DAF50 = 3;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 3;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case 3:
         if (g_BallFlightStep > g_SimulatedShot.minPositionStep[AXIS_Y]) {
-          D_800DAF50 = 4;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 4;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case 4:
         if (g_SimulatedShot.pathFlags[step + 40]) {
-          D_800DAF50 = 5;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 5;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case 5:
         if (g_SimulatedShot.pathFlags[step]) {
-          D_800DAF50 = 6;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 6;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
       case 6:
         if (g_SimulatedShot.stepCount - 10 < g_BallFlightStep) {
-          D_800DAF50 = 7;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 7;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
     }
   } else {
-    switch (D_800DAF50) {
+    switch (f_FlightPhase) {
       case 1:
-        D_800DAF50 = 3;
+        f_FlightPhase = 3;
         break;
       case 3:
         if (g_BallFlightStep > g_SimulatedShot.minPositionStep[AXIS_Y]) {
-          D_800DAF50 = 5;
-          D_800BE630 = TRUE;
+          f_FlightPhase = 5;
+          f_HasFlightPhaseChanged = TRUE;
         }
 
         break;
@@ -3025,8 +3027,9 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   }
 
   if (D_800BE64C < step &&
-      (g_BallFlightStep + 40 < g_SimulatedShot.stepCount || D_800DAF50 == 7) &&
-      D_800BE630 == TRUE && !g_IsCupViewShown && !D_800BE658) {
+      (g_BallFlightStep + 40 < g_SimulatedShot.stepCount ||
+          f_FlightPhase == 7) &&
+      f_HasFlightPhaseChanged == TRUE && !g_IsCupViewShown && !D_800BE658) {
     if (!D_800BE674) {
       ChooseFlightCameraKind();
     }
@@ -3037,10 +3040,11 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   }
 
   if (g_IsDebugEnabled && IsGameFlagSet(GAME_FLAG_UNK5F)) {
-    sprintf(g_PrintBuffer, "C:%d F:%2d %3d %3d ", D_800BE630, D_800BE674, step,
-        g_BallFlightStep);
+    sprintf(g_PrintBuffer, "C:%d F:%2d %3d %3d ", f_HasFlightPhaseChanged,
+        D_800BE674, step, g_BallFlightStep);
     PrintDebugText(g_PrintBuffer, 8, 2);
-    sprintf(g_PrintBuffer, "TYPE:%2d TIME:%2d", f_FlightCameraKind, D_800DAF50);
+    sprintf(
+        g_PrintBuffer, "TYPE:%2d TIME:%2d", f_FlightCameraKind, f_FlightPhase);
     PrintDebugText(g_PrintBuffer, 10, 3);
   }
 
