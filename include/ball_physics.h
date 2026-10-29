@@ -97,10 +97,11 @@
 /* 20 cm: the depth of the cup's floor below the cup's position */
 #define CUP_DEPTH 0xC00
 /*
- * 5 cm: a ball in the cup that rises faster than 5 km/h above this depth is
- * held to it and sent toward the cup's middle
+ * 5 cm: a ball in the cup that rises faster than MIN_CUP_CEILING_SPEED above
+ * this depth is held to it and sent toward the cup's middle
  */
 #define CUP_CEILING_DEPTH 768.0f
+#define MIN_CUP_CEILING_SPEED KilometersPerHour(5)
 /*
  * The wall takes this much of the ball's speed toward it: all of it, and
  * half again back
@@ -108,6 +109,9 @@
 #define CUP_WALL_REFLECTION 1.5f
 /* The floor sends a ball back up at this much of its falling speed */
 #define CUP_FLOOR_BOUNCE 0.5f
+/* Slower hits on the cup's wall and floor play no sound */
+#define MIN_CUP_WALL_SOUND_SPEED KilometersPerHour(5)
+#define MIN_CUP_FLOOR_SOUND_SPEED KilometersPerHour(2)
 
 /*
  * Walls. A ball that hits one is put this share of the way along its step

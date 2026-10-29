@@ -226,7 +226,8 @@ static void ResetBallSimulations(void) {
  * ball that drops in plays the cup-in sound only below 1.75 cm a frame and
  * falling no faster than 5 km/h; its pull's direction tilts four times as
  * much; a ball crossing the cup's edge within 2 cm of its height and slower
- * than 28 cm a frame lips out; and a ball in the water stops 5 m down
+ * than 28 cm a frame lips out; a ball in the water stops 5 m down; and its
+ * cup's floor bounce is an integer division
  */
 #define OPENING_LIFT_ANGLE_DEGREES 90.0f
 #define OPENING_CUP_SEARCH_SPAN 0xC00
@@ -236,6 +237,8 @@ static void ResetBallSimulations(void) {
 #define OPENING_MAX_LIP_OUT_HEIGHT 307.2f
 #define OPENING_MAX_LIP_OUT_SPEED 4300.8f
 #define OPENING_WATER_STOP_DEPTH 0x12C00
+/* Its cup floor halves the ball's falling speed in whole units */
+#define OPENING_CUP_FLOOR_BOUNCE_DIVISOR 2
 
 /*
  * The opening calls FindBillboardHit with a ninth argument, the simulation,
@@ -748,7 +751,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       cupDistance = (s32)IntLength2D(
           simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
           simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
-      if (cupDistance >= 1228.8f) {
+      if (cupDistance >= CUP_RADIUS) {
         f32 toCupX;
         f32 toCupY;
         f32 toCupZ;
@@ -762,8 +765,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         push = ((toCupX * simulation->velocity[AXIS_X]) +
                    (toCupY * simulation->velocity[AXIS_Y]) +
                    (toCupZ * simulation->velocity[AXIS_Z])) *
-            1.5f;
-        scale = 1075.2f / cupDistance;
+            CUP_WALL_REFLECTION;
+        scale = CUP_WALL_REBOUND_RADIUS / cupDistance;
         simulation->velocity[AXIS_X] =
             simulation->velocity[AXIS_X] - (toCupX * push);
         simulation->velocity[AXIS_Y] =
@@ -781,8 +784,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       }
 
       if (simulation->position[AXIS_Y] <
-              g_HoleSetup.cupPosition[AXIS_Y] + 768.0f &&
-          simulation->velocity[AXIS_Y] < -KilometersPerHour(5)) {
+              g_HoleSetup.cupPosition[AXIS_Y] + CUP_CEILING_DEPTH &&
+          simulation->velocity[AXIS_Y] < -MIN_CUP_CEILING_SPEED) {
         s32 toCupX =
             g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
         s32 toCupZ =
@@ -795,16 +798,17 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           simulation->velocity[AXIS_X] = toCupX * scale;
           simulation->velocity[AXIS_Z] = toCupZ * scale;
           simulation->position[AXIS_Y] =
-              g_HoleSetup.cupPosition[AXIS_Y] + 768.0f;
+              g_HoleSetup.cupPosition[AXIS_Y] + CUP_CEILING_DEPTH;
         }
 
         simulation->velocity[AXIS_Y] = Abs(simulation->velocity[AXIS_Y]);
       }
 
       if (simulation->position[AXIS_Y] >=
-          g_HoleSetup.cupPosition[AXIS_Y] + 0xC00) {
-        simulation->velocity[AXIS_Y] =
-            (f32)(-simulation->velocity[AXIS_Y] / 2) + CUP_GRAVITY;
+          g_HoleSetup.cupPosition[AXIS_Y] + CUP_DEPTH) {
+        simulation->velocity[AXIS_Y] = (f32)(-simulation->velocity[AXIS_Y] /
+                                           OPENING_CUP_FLOOR_BOUNCE_DIVISOR) +
+            CUP_GRAVITY;
         /* The chained assignment is there to match */
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_Z] = 0;
         if (simulation->velocity[AXIS_Y] > 0) {
@@ -812,7 +816,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           simulation->state = BALL_STATE_STOPPED;
         }
 
-        simulation->position[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y] + 0xC00;
+        simulation->position[AXIS_Y] =
+            g_HoleSetup.cupPosition[AXIS_Y] + CUP_DEPTH;
       } else {
         simulation->velocity[AXIS_Y] =
             simulation->velocity[AXIS_Y] + CUP_GRAVITY;

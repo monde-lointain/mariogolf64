@@ -831,7 +831,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             ((simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]) *
                 scale) +
             g_HoleSetup.cupPosition[AXIS_Z];
-        if (speed >= KilometersPerHour(5)) {
+        if (speed >= MIN_CUP_WALL_SOUND_SPEED) {
           SoundVolume volume = speed * CUP_SOUND_VOLUME_PER_SPEED;
 
           if (volume >= SOUND_FULL_SCALE) {
@@ -846,7 +846,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       if (simulation->position[AXIS_Y] <
               g_HoleSetup.cupPosition[AXIS_Y] + CUP_CEILING_DEPTH &&
-          velocity[AXIS_Y] < -KilometersPerHour(5)) {
+          velocity[AXIS_Y] < -MIN_CUP_CEILING_SPEED) {
         s32 toCupX =
             g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
         s32 toCupZ =
@@ -884,7 +884,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
           simulation->unkA8[0] = 2;
         } else if (simulation->unkA8[0] == 0) {
-          if (fallSpeed >= KilometersPerHour(2)) {
+          if (fallSpeed >= MIN_CUP_FLOOR_SOUND_SPEED) {
             SoundVolume volume = fallSpeed * CUP_SOUND_VOLUME_PER_SPEED;
 
             if (volume > SOUND_FULL_SCALE) {
