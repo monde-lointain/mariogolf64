@@ -88,7 +88,8 @@ static s32 f_ShotLength = 0;
 /* How far the shot starts from the cup */
 static s32 f_StartCupDistance = 0;
 static s32 D_800BE648 = 0;
-static s32 D_800BE64C = 0;
+/* The first step of the path with PATH_FLAG_UNK2 set, or NO_STEP */
+static s32 f_FlaggedStep = 0;
 static s32 D_800BE650 = 0;
 static Radians f_CameraYaw = 0.0f;
 static s32 D_800BE658 = 0;
@@ -168,7 +169,7 @@ static const char f_UnusedFloatFormat[] = "            %f";
 /* Frames the cup and the ball; it keeps the putter's contact from calling
  * StartContactEffect */
 #define FLIGHT_CAMERA_FRAMING_CUP 0x13
-/* Looks along the path at D_800BE64C */
+/* Looks along the path at f_FlaggedStep */
 #define FLIGHT_CAMERA_FLAGGED_STEP 0x14
 
 /* The values 0 to CAMERA_PICK_COUNT - 1, shuffled; NextCameraPick deals them in
@@ -722,14 +723,14 @@ void StartFlightCamera(s32 earlierFlightCount) {
   }
 
   D_800BE648 = FALSE;
-  D_800BE64C = -1;
+  f_FlaggedStep = -1;
   D_800BE650 = -1;
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
     if (i < g_SimulatedShot.stepCount && (g_SimulatedShot.pathFlags[i] & 2)) {
       D_800BE648 = TRUE;
       D_800BE658 |= 1;
-      if (D_800BE64C == -1) {
-        D_800BE64C = i;
+      if (f_FlaggedStep == -1) {
+        f_FlaggedStep = i;
         D_800BE650 = 40;
       }
     }
@@ -2280,19 +2281,19 @@ void PlaceFlightCamera(s32 step) {
       EaseLookAtPoint(f_EndYawFromCup);
       break;
     case FLIGHT_CAMERA_FLAGGED_STEP:
-      if (D_800BE64C == 0) {
-        D_800BE64C = 1;
+      if (f_FlaggedStep == 0) {
+        f_FlaggedStep = 1;
       }
 
       f_FlaggedStepYaw =
-          -atan2((f32)(g_SimulatedShot.path[D_800BE64C][AXIS_X] -
-                     g_SimulatedShot.path[D_800BE64C - 1][AXIS_X]),
-              (f32)(g_SimulatedShot.path[D_800BE64C][AXIS_Z] -
-                  g_SimulatedShot.path[D_800BE64C - 1][AXIS_Z]));
+          -atan2((f32)(g_SimulatedShot.path[f_FlaggedStep][AXIS_X] -
+                     g_SimulatedShot.path[f_FlaggedStep - 1][AXIS_X]),
+              (f32)(g_SimulatedShot.path[f_FlaggedStep][AXIS_Z] -
+                  g_SimulatedShot.path[f_FlaggedStep - 1][AXIS_Z]));
       point[AXIS_X] = (-sinf(f_FlaggedStepYaw) * FLAGGED_VIEW_DISTANCE) +
-          g_SimulatedShot.path[D_800BE64C][AXIS_X];
+          g_SimulatedShot.path[f_FlaggedStep][AXIS_X];
       point[AXIS_Z] = (cosf(f_FlaggedStepYaw) * FLAGGED_VIEW_DISTANCE) +
-          g_SimulatedShot.path[D_800BE64C][AXIS_Z];
+          g_SimulatedShot.path[f_FlaggedStep][AXIS_Z];
       point[AXIS_Y] =
           GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - FLAGGED_VIEW_RISE;
       f_CameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
@@ -2588,7 +2589,7 @@ void ChooseFlightCameraKind(void) {
     switch (f_FlightPhase) {
       case 1:
         pick = NextCameraPick(1);
-        if (D_800BE64C != -1) {
+        if (f_FlaggedStep != -1) {
           kind = FLIGHT_CAMERA_UNK3;
         } else if (pick < 4) {
           kind = FLIGHT_CAMERA_UNK3;
@@ -3020,17 +3021,17 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   if (g_SimulatedShot.stepCount >= aheadStep &&
       (g_SimulatedShot.pathFlags[aheadStep] & PATH_FLAG_UNK2)) {
     D_800BE658 |= 1;
-    if (D_800BE64C == -1) {
-      D_800BE64C = aheadStep;
+    if (f_FlaggedStep == -1) {
+      f_FlaggedStep = aheadStep;
       D_800BE650 = 70;
     }
   }
 
-  if (step > 60 && step < D_800BE64C && !D_800BE674) {
+  if (step > 60 && step < f_FlaggedStep && !D_800BE674) {
     f_FlightCameraKind = FLIGHT_CAMERA_FLAGGED_STEP;
   }
 
-  if (D_800BE64C != -1 && D_800BE64C + 10 < step &&
+  if (f_FlaggedStep != -1 && f_FlaggedStep + 10 < step &&
       f_FlightCameraKind != FLIGHT_CAMERA_AROUND_END &&
       (s32)IntLength3D(f_FlightBallPosition[AXIS_X] - f_ShotEndPosition[AXIS_X],
           f_FlightBallPosition[AXIS_Y] - f_ShotEndPosition[AXIS_Y],
@@ -3039,7 +3040,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     f_FlightCameraKind = FLIGHT_CAMERA_AROUND_END;
   }
 
-  if (D_800BE64C < step &&
+  if (f_FlaggedStep < step &&
       (g_BallFlightStep + 40 < g_SimulatedShot.stepCount ||
           f_FlightPhase == 7) &&
       f_HasFlightPhaseChanged == TRUE && !g_IsCupViewShown && !D_800BE658) {

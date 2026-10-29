@@ -1662,6 +1662,7 @@ f_BallCupDistance = 0x800BE634; // size:0x4
 f_BallCupGroundDistance = 0x800BE638; // size:0x4
 f_LandingCupDistance = 0x800BE63C; // size:0x4
 f_ShotLength = 0x800BE640; // size:0x4
+f_FlaggedStep = 0x800BE64C; // size:0x4
 f_StartCupDistance = 0x800BE644; // size:0x4
 f_CameraYaw = 0x800BE654; // size:0x4
 f_CupViewHoldCount = 0x800BE660; // size:0x4
