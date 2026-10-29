@@ -245,7 +245,7 @@ void ResetBallSimulations(void) {
 s32 StepBallSimulation(BallSimulation* simulation) {
   PlaneTriangle hit;
   PlaneTriangle triangle;
-  f32 velocity[3];
+  BallSpeed velocity[AXIS_COUNT];
   f32 hitFraction;
   f32 fraction;
   s32 previousVelocityX;
@@ -263,7 +263,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   s32 rollSpeed;
   Boolean isSteep;
 
-  void PlayStrokeImpactSound(SoundId sound, f32 fullSpeed, f32 speed) {
+  void PlayStrokeImpactSound(
+      SoundId sound, BallSpeed fullSpeed, BallSpeed speed) {
     SoundVolume volume = speed * SOUND_FULL_SCALE / fullSpeed;
 
     if (volume >= MIN_HIT_SOUND_VOLUME) {
@@ -297,7 +298,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   }
 
   void PlayBillboardHitSound(BillboardCell cell, s32 speed) {
-    void PlayImpactSound(SoundId sound, f32 fullSpeed, f32 speed) {
+    void PlayImpactSound(SoundId sound, BallSpeed fullSpeed, BallSpeed speed) {
       SoundVolume volume = speed * SOUND_FULL_SCALE / fullSpeed;
 
       if (volume >= MIN_HIT_SOUND_VOLUME) {
@@ -570,7 +571,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           }
 
           if (pinHit == PIN_HIT_FLAGSTICK) {
-            f32 speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
+            BallSpeed speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                 (velocity[AXIS_Z] * velocity[AXIS_Z]));
 
             if (speed > KilometersPerHour(1)) {
@@ -708,8 +709,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 (f32)Abs(startY - g_HoleSetup.cupPosition[AXIS_Y]) < 614.4f) {
               f32 fromCup[3];
               f32 direction[3];
-              f32 speed;
-              f32 outwardSpeed;
+              BallSpeed speed;
+              BallSpeed outwardSpeed;
               f32 alignment;
 
               fromCup[AXIS_X] = simulation->position[AXIS_X] -
@@ -799,7 +800,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     }
 
     if (simulation->state == BALL_STATE_IN_CUP) {
-      f32 speed;
+      BallSpeed speed;
       f32 cupDistance;
 
       simulation->surface = SURFACE_GREEN;
@@ -870,7 +871,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
       if (simulation->position[AXIS_Y] >=
           g_HoleSetup.cupPosition[AXIS_Y] + 0xC00) {
-        f32 fallSpeed = velocity[AXIS_Y];
+        BallSpeed fallSpeed = velocity[AXIS_Y];
 
         /* The chained assignment is there to match */
         velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
@@ -958,7 +959,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               &wallFraction) == TRUE &&
           wall.unk0 == 3) {
         f32 bounce = 1.0f;
-        f32 inwardSpeed;
+        BallSpeed inwardSpeed;
         f32 slide;
         f32 along;
         f32 edgeX;
@@ -999,7 +1000,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         hitPosition[AXIS_Y] = startY + (along * (velocity[AXIS_Y] * 0.9f));
         hitPosition[AXIS_Z] = startZ + (along * (velocity[AXIS_Z] * 0.9f));
         if (wallFraction < 0.0f && fabsf(inwardSpeed) < 230.40001f) {
-          f32 speed = sqrtf(squareX + squareZ);
+          BallSpeed speed = sqrtf(squareX + squareZ);
 
           if (inwardSpeed < 0.0f) {
             inwardSpeed -= 230.40001f;
@@ -1049,7 +1050,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       CoursePoint bounced;
       TrianglePlane plane;
       BallSimulation impact;
-      f32 impactSpeed;
+      BallSpeed impactSpeed;
       f32 steepness;
       s32 speed;
       f32 softness;
@@ -1211,9 +1212,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     if (simulation->state == BALL_STATE_FLYING &&
         contact == STEP_FLAG_GROUND_HIT) {
       TrianglePlane plane;
-      f32 speed;
+      BallSpeed speed;
       s32 cupDistance;
-      f32 impactSpeed;
+      BallSpeed impactSpeed;
       f32 slide;
       SurfaceInfo* info;
       f32 friction;
@@ -1581,7 +1582,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       s32 slopeX;
       s32 slopeZ;
       f32 friction;
-      f32 speed;
+      BallSpeed speed;
 
       speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
           (velocity[AXIS_Z] * velocity[AXIS_Z]));
@@ -1608,7 +1609,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         GetTrianglePlane(&triangle, &plane);
         if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
             !simulation->unkA1) {
-          f32 pressing = (plane.normal[AXIS_X] * velocity[AXIS_X]) +
+          BallSpeed pressing = (plane.normal[AXIS_X] * velocity[AXIS_X]) +
               (plane.normal[AXIS_Y] * velocity[AXIS_Y]) +
               (plane.normal[AXIS_Z] * velocity[AXIS_Z]);
 
@@ -1830,10 +1831,10 @@ ROLLED:
         contact == 0) {
       {
         f32 relative[3];
-        f32 airSpeed;
+        BallSpeed airSpeed;
         f32 drag;
         f32 unk38;
-        f32 horizontalSpeed;
+        BallSpeed horizontalSpeed;
         f32 unk38Speed;
         f32 ratio;
         f32 weight;

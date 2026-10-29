@@ -566,7 +566,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                         g_HoleSetup.cupPosition[AXIS_Y] >=
                     -0x2FF &&
                 (f32)cupDistance < 1228.8f) {
-              f32 speed = (s32)IntLength2D(
+              BallSpeed speed = (s32)IntLength2D(
                   simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
 
               if (speed < 1075.2f &&
@@ -647,7 +647,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                 if ((f32)speed < 4300.8f &&
                     simulation->state == BALL_STATE_ROLLING) {
                   f32 keep = speed * 0.0004650298f;
-                  f32 fallSpeed;
+                  BallSpeed fallSpeed;
 
                   if (keep < 0.0f) {
                     keep = 0.0f;
@@ -884,7 +884,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             simulation->state == BALL_STATE_ROLLING)) {
       TrianglePlane plane;
       s32 bounced[3];
-      f32 impactSpeed;
+      BallSpeed impactSpeed;
       f32 steepness;
       s32 speed;
       f32 softness;
@@ -1009,7 +1009,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     if (simulation->state == BALL_STATE_FLYING &&
         contact == STEP_FLAG_GROUND_HIT) {
       TrianglePlane plane;
-      f32 impactSpeed;
+      BallSpeed impactSpeed;
       f32 steepness;
       s32 speed;
       f32 friction;
@@ -1248,7 +1248,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         GetTrianglePlane(&triangle, &plane);
         if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
             g_GameState.isMiniGolf) {
-          f32 pressing = (plane.normal[AXIS_X] * simulation->velocity[AXIS_X]) +
+          BallSpeed pressing =
+              (plane.normal[AXIS_X] * simulation->velocity[AXIS_X]) +
               (plane.normal[AXIS_Y] * simulation->velocity[AXIS_Y]) +
               (plane.normal[AXIS_Z] * simulation->velocity[AXIS_Z]);
 
@@ -1403,10 +1404,10 @@ ROLLED:
         contact == 0) {
       f32 relative[3];
       f32 turned[3];
-      f32 airSpeed;
+      BallSpeed airSpeed;
       f32 drag;
       f32 unk38;
-      f32 horizontalSpeed;
+      BallSpeed horizontalSpeed;
       f32 unk38Speed;
       f32 ratio;
       f32 weight;
