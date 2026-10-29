@@ -176,7 +176,7 @@ typedef struct BallSimulation {
   /* 0x98 */ s32 unk98;
   /* 0x9C */ s32 unk9C;
   /* 0xA0 */ s8 isHoledOut; /* Set as the ball stops in the cup */
-  /* 0xA1 */ s8 unkA1;
+  /* 0xA1 */ s8 hasEnteredWater; /* Set once the ball is in the water */
   /* 0xA2 */ s8 unkA2; /* A SURFACE_* value */
   /* 0xA3 */ s8 surface; /* The SURFACE_* that the ball is on */
   /* 0xA4 */ u8 unkA4; /* A SURFACE_* value */
@@ -187,7 +187,7 @@ typedef struct BallSimulation {
   /* Keeps the flag from being hit twice */
   /* 0xB0 */ s8 hasHitFlag;
   /* 0xB1 */ u8 unkB1;
-  /* 0xB2 */ s16 unkB2;
+  /* 0xB2 */ s16 rollFrameCount; /* Frames since the ball began rolling */
   /* 0xB4 */ s8 unkB4;
   /* 0xB5 */ u8 unkB5[0xB8 - 0xB5];
 } BallSimulation; /* size = 0xB8 */

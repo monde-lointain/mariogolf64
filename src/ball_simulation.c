@@ -486,7 +486,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     }
 
     if (simulation->state == BALL_STATE_ROLLING) {
-      simulation->unkB2++;
+      simulation->rollFrameCount++;
     }
 
     simulation->position[AXIS_X] =
@@ -608,7 +608,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         }
 
         holeHit = FALSE;
-        if (!simulation->unkA1) {
+        if (!simulation->hasEnteredWater) {
           if (simulation->state == BALL_STATE_FLYING ||
               simulation->state == BALL_STATE_ROLLING) {
             holeHit = FindHoleTriangleHit(startX, startY, startZ,
@@ -883,7 +883,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     }
 
     if (simulation->state == BALL_STATE_IN_WATER) {
-      simulation->unkA1 = TRUE;
+      simulation->hasEnteredWater = TRUE;
       velocity[AXIS_X] *= WATER_DRAG;
       velocity[AXIS_Z] *= WATER_DRAG;
       velocity[AXIS_Y] = (velocity[AXIS_Y] + GRAVITY) * WATER_DRAG;
@@ -895,7 +895,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             GetGroundHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z])) {
           simulation->state = BALL_STATE_ROLLING;
-          simulation->unkB2 = 0;
+          simulation->rollFrameCount = 0;
           goto SETTLE;
         }
       } else {
@@ -903,7 +903,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       }
     }
 
-    if (simulation->state == BALL_STATE_ROLLING && simulation->unkA1 &&
+    if (simulation->state == BALL_STATE_ROLLING &&
+        simulation->hasEnteredWater &&
         simulation->position[AXIS_Y] >
             GetGroundOrWaterHeight(
                 simulation->position[AXIS_X], simulation->position[AXIS_Z]) +
@@ -1156,7 +1157,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       PushBallOutOfWalls(simulation, FALSE);
     }
 
-    if (!simulation->unkA1 &&
+    if (!simulation->hasEnteredWater &&
         ((contact == STEP_FLAG_HOLE_TRIANGLE_HIT &&
              simulation->state == BALL_STATE_FLYING) ||
             (simulation->state == BALL_STATE_ROLLING && hitsHoleTriangle))) {
@@ -1465,7 +1466,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           break;
       }
 
-      if (simulation->purpose == LAUNCH_PURPOSE_STROKE && !simulation->unkA1) {
+      if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
+          !simulation->hasEnteredWater) {
         SpawnImpactEffects(simulation);
       }
 
@@ -1599,7 +1601,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         s32 spinVelocityZ;
 
         simulation->state = BALL_STATE_ROLLING;
-        simulation->unkB2 = 0;
+        simulation->rollFrameCount = 0;
         if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
           simulation->position[AXIS_Y] = 0;
         } else {
@@ -1679,16 +1681,16 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       }
     }
 
-    if (!simulation->unkA1 && simulation->state == BALL_STATE_ROLLING &&
-        contact == 0 && !isNearCup) {
+    if (!simulation->hasEnteredWater &&
+        simulation->state == BALL_STATE_ROLLING && contact == 0 && !isNearCup) {
       simulation->state = BALL_STATE_FLYING;
       simulation->spinHeading = atan2(velocity[AXIS_Z], velocity[AXIS_X]);
       simulation->spinSpeed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
       BuildUnk44Rotation();
     }
 
-    if (simulation->unkA1 && simulation->state == BALL_STATE_ROLLING &&
-        contact == 0 &&
+    if (simulation->hasEnteredWater &&
+        simulation->state == BALL_STATE_ROLLING && contact == 0 &&
         FindGroundTriangle(simulation->position[AXIS_X],
             simulation->position[AXIS_Z], &triangle) == 0) {
       contact = STEP_FLAG_GROUND_HIT;
@@ -1728,7 +1730,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       } else {
         GetTrianglePlane(&triangle, &plane);
         if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
-            !simulation->unkA1) {
+            !simulation->hasEnteredWater) {
           BallSpeed pressing = (plane.normal[AXIS_X] * velocity[AXIS_X]) +
               (plane.normal[AXIS_Y] * velocity[AXIS_Y]) +
               (plane.normal[AXIS_Z] * velocity[AXIS_Z]);
@@ -1858,7 +1860,7 @@ TAKE_OFF:
         friction *= 0.993f;
       }
 
-      if (simulation->unkA1 && (u16)simulation->unkB2 < 30) {
+      if (simulation->hasEnteredWater && (u16)simulation->rollFrameCount < 30) {
         slopeX *= 3;
         slopeZ *= 3;
         isSteep = TRUE;
@@ -1924,10 +1926,11 @@ TAKE_OFF:
         osSyncPrintf("V[1] %d\n", velocity[AXIS_Y]);
       }
 
-      if ((u16)simulation->unkB2 >= 16) {
+      if ((u16)simulation->rollFrameCount >= 16) {
         s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
-        if ((u16)simulation->unkB2 >= 61 && simulation->unkA1) {
+        if ((u16)simulation->rollFrameCount >= 61 &&
+            simulation->hasEnteredWater) {
           simulation->state = BALL_STATE_STOPPED;
         } else if (speed < 30) {
           if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < 500.0f) {
@@ -2159,7 +2162,7 @@ NEXT:
         StopSound(ROLL_SOUND_CHANNEL);
         simulation->unkA8[1] = FALSE;
       } else {
-        s32 rollFrames = (u16)simulation->unkB2;
+        s32 rollFrames = (u16)simulation->rollFrameCount;
         SoundVolume volume;
 
         if (rollFrames > 5) {
@@ -2290,7 +2293,7 @@ s32 LaunchBallSimulation(
   simulation->startPosition[AXIS_Z] = simulation->dropPosition[AXIS_Z];
   simulation->unkA2 = surface;
   simulation->unkA7 = surface;
-  simulation->unkA1 = 0;
+  simulation->hasEnteredWater = 0;
   simulation->unkA6 = 0;
   simulation->unkB4 = 0;
 
@@ -2485,7 +2488,7 @@ s32 LaunchBallSimulation(
   simulation->unk9C = -2;
   simulation->isHoledOut = 0;
   simulation->hasHitFlag = FALSE;
-  simulation->unkB2 = 0;
+  simulation->rollFrameCount = 0;
   for (index = 0; index < UNKA8_COUNT; index++) {
     simulation->unkA8[index] = 0;
   }

@@ -538,7 +538,7 @@ void UpdateGolfBalls(void) {
 
         RollGolfBall(ball, simulation);
         ball->state = simulation->state;
-        ball->unk9E = simulation->unkA1;
+        ball->unk9E = simulation->hasEnteredWater;
         ball->purpose = simulation->purpose;
         markerPlayerIndex = BALL_NO_MARKER;
         if (currentIndex != simulation->playerIndex &&

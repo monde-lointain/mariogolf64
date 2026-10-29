@@ -690,7 +690,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     }
 
     if (simulation->state == BALL_STATE_IN_WATER) {
-      simulation->unkA1 = TRUE;
+      simulation->hasEnteredWater = TRUE;
       simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] * 0.7f;
       simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] * 0.7f;
       simulation->velocity[AXIS_Y] =
@@ -1685,7 +1685,7 @@ s32 func_8020A488_ovl_05(
   simulation->startPosition[AXIS_Z] = simulation->dropPosition[AXIS_Z];
   simulation->unkA2 = simulation->surface;
   simulation->unkA7 = simulation->unkA2;
-  simulation->unkA1 = 0;
+  simulation->hasEnteredWater = 0;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     simulation->playerIndex = shot->playerIndex;
   } else {
