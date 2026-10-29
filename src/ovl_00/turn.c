@@ -4304,7 +4304,7 @@ void UpdateTurns(void) {
                   g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
             }
 
-            if ((s8)player->ballSurface != 0x17) {
+            if ((s8)player->ballSurface != SURFACE_TEE_UP) {
               player->ballSurface = GetSurface(
                   player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
             }
