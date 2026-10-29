@@ -2146,7 +2146,7 @@ void DrawSendExperienceScreen(
   s32 slot;
 
   DrawImportedFaces(&displayList, transfer);
-  if (transfer->screenStep == 0) {
+  if (transfer->screenStep == SEND_EXPERIENCE_CHOOSING) {
     DrawCursorBox(&displayList,
         FACES_LEFT - FACE_CURSOR_MARGIN +
             (transfer->characterIndex * FACE_SPACING),
@@ -2165,7 +2165,8 @@ void DrawSendExperienceScreen(
   slot = 0;
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
   for (index = 0; index != transfer->taggedCartridgeCount; index++) {
-    if (transfer->screenStep == 3 && slot != transfer->chosenCartridgeIndex) {
+    if (transfer->screenStep == SEND_EXPERIENCE_SENT &&
+        slot != transfer->chosenCartridgeIndex) {
       gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, 255);
     } else {
       gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
