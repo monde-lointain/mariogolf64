@@ -16,6 +16,7 @@
 #include "course.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
+#include "debug_text.h"
 #include "framebuffer.h"
 #include "game_flags.h"
 #include "hole_display.h"
@@ -1089,7 +1090,7 @@ void UpdatePlay(void) {
         {
           Vec3 lookAt;
           Vec3 eye;
-          char text[0x80];
+          char text[DEBUG_TEXT_BUFFER_SIZE];
 
           /* Debug: circles the chosen cup position instead, and moves the cup
            * there */

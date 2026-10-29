@@ -1162,7 +1162,7 @@ void func_80228C00_ovl_01(void) {
   s32 result;
   Boolean isInvalid;
   TournamentRules* rules;
-  char debugText[128];
+  char debugText[DEBUG_TEXT_BUFFER_SIZE];
 
   if (IsHudAnimationDone() != TRUE) {
     return;

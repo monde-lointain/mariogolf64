@@ -1910,7 +1910,7 @@ s32 TallyCoursePoints(void) {
 }
 
 void PrintCoursePoints(void) {
-  char text[128];
+  char text[DEBUG_TEXT_BUFFER_SIZE];
   s32 playerIndex;
   s32 shotKind;
   s32 points;
@@ -2893,7 +2893,7 @@ extern u8 D_800FE330;
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
  * it while Z is held */
 static inline void DebugPlaceBall(s32 playerIndex) {
-  char text[128];
+  char text[DEBUG_TEXT_BUFFER_SIZE];
 
   D_80227188_ovl_00 = g_GameState.courseIndex;
   D_8022718C_ovl_00 = g_GameState.holeIndex;
@@ -2926,7 +2926,7 @@ static inline void DebugPlaceBall(s32 playerIndex) {
  * place */
 static inline void DebugTestGutsMotion(void) {
   char* motionName;
-  char text[128];
+  char text[DEBUG_TEXT_BUFFER_SIZE];
   switch (f_GutsTestMotion) {
     case REACTION_ANIMATION_EAGLE:
       motionName = "EAGLE ";

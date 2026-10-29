@@ -521,7 +521,7 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     }
 
     if (IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
-      char text[0x80];
+      char text[DEBUG_TEXT_BUFFER_SIZE];
 
       sprintf(text, "ratio %f,%x", fraction,
           (s32)(WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) +

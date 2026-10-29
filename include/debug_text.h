@@ -9,6 +9,9 @@
  */
 extern u16* g_MessageFramebuffer;
 
+/* The size of the buffers that lines of debug text are formatted into */
+#define DEBUG_TEXT_BUFFER_SIZE 128
+
 void SetUpDebugTextDrawing(Gfx** displayListHead);
 void DrawTextIntoTexture(s8* text, s32 length, u16* texture);
 void PrintMessage(s8* text, u32 column, u32 row);

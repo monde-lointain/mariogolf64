@@ -494,7 +494,7 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
  * trial may get a random mis-hit, and it is copied to plannedShot.
  */
 s32 PlanShot(CurrentShot* plannedShot) {
-  char text[0x80];
+  char text[DEBUG_TEXT_BUFFER_SIZE];
   s32 percentRange[2];
   ClubType clubType;
   s32 targetX;

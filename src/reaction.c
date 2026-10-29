@@ -1275,7 +1275,7 @@ void FrameKidReaction(u32 slotIndex, CameraView* view) {
  * first camera. It returns no value; the s32 is there to match.
  */
 s32 UpdateReaction(u32 slotIndex) {
-  char text[0x80];
+  char text[DEBUG_TEXT_BUFFER_SIZE];
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   CameraView* view;
 

@@ -520,6 +520,5 @@ enum LaunchValueRow {
 };
 
 #define LAUNCH_VALUE_COLUMN 3
-#define LAUNCH_VALUE_TEXT_SIZE 128
 
 #endif

@@ -2439,7 +2439,7 @@ s32 LaunchBallSimulation(
     if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
         IsGameFlagSet(GAME_FLAG_SHOW_LAUNCH_VALUES)) {
       /* Declaring it here is there to match */
-      char text[LAUNCH_VALUE_TEXT_SIZE];
+      char text[DEBUG_TEXT_BUFFER_SIZE];
 
       sprintf(text, "ANGLEY = %3.3d/360",
           (s32)(yawRadians * (f32)RADIANS_TO_DEGREES));

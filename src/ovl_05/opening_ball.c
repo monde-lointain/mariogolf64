@@ -212,7 +212,6 @@ static void ResetBallSimulations(void) {
 #define SPEED_TEXT_CLEAR_COLUMN 7
 #define SPEED_TEXT_ROW_COUNT 8
 #define SPEED_TEXT_FIRST_ROW 8
-#define DEBUG_TEXT_SIZE 128
 /*
  * The speed display turns speeds into kilometers per hour with this: 3.6
  * kilometers per hour per meter per second over
@@ -381,8 +380,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         (1.0f / NOISE_BYTE_MIDPOINT);
   }
 
-  char speedText[DEBUG_TEXT_SIZE];
-  char heightText[DEBUG_TEXT_SIZE];
+  char speedText[DEBUG_TEXT_BUFFER_SIZE];
+  char heightText[DEBUG_TEXT_BUFFER_SIZE];
   f32 fraction;
   s32 startX;
   s32 startY;
@@ -1937,7 +1936,7 @@ s32 func_8020A488_ovl_05(
 
     if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
         IsGameFlagSet(GAME_FLAG_SHOW_LAUNCH_VALUES)) {
-      char text[LAUNCH_VALUE_TEXT_SIZE];
+      char text[DEBUG_TEXT_BUFFER_SIZE];
 
       sprintf(text, "ANGLEY = %3.3d/360",
           (s32)(yawRadians * (f32)RADIANS_TO_DEGREES));
