@@ -220,11 +220,6 @@
 #define GAME_FLAG_HIDE_SHOT_PREVIEW 0x4B
 /* Lets the D-pad change how far the shot preview reaches */
 #define GAME_FLAG_TUNE_SHOT_PREVIEW 0x71
-/* Swing meter phases that BuildShotPreview tells apart */
-#define SWING_PHASE_UNK2 2
-#define SWING_PHASE_UNK3 3
-#define SWING_PHASE_UNK4 4
-#define SWING_PHASE_UNK5 5
 /* PickStartingClub settles for clubs with at least this lie rating */
 #define STARTING_CLUB_MIN_LIE_RATING 2
 /* Aims every shot straight down the driving range */
@@ -1825,7 +1820,16 @@ void PrintCoursePoints(void) {
  * that preview its path. Until the swing sets the power, the preview shows a
  * full swing.
  */
-void BuildShotPreview(Unk20* swing, s32 swingPhase) {
+/* Whether the swing has yet to set the power in a player state */
+#define IsBeforePowerSet(state) \
+  ((state) == PLAYER_STATE_AIMING || (state) == PLAYER_STATE_SETTING_POWER || \
+      (state) == PLAYER_STATE_UNK3)
+/* Whether the swing has yet to set the impact in a player state */
+#define IsBeforeImpactSet(state) \
+  ((state) == PLAYER_STATE_AIMING || (state) == PLAYER_STATE_SETTING_POWER || \
+      (state) == PLAYER_STATE_SETTING_IMPACT || (state) == PLAYER_STATE_UNK3)
+
+void BuildShotPreview(Unk20* swing, s32 playerState) {
   BallSimulation simulation;
   Unk20 shot;
   CoursePoint start;
@@ -1869,16 +1873,14 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
     PrintDebugText(g_PrintBuffer, 10, 3);
   }
 
-  if (swingPhase == SWING_PHASE_UNK2 || swingPhase == SWING_PHASE_UNK4 ||
-      swingPhase == SWING_PHASE_UNK3) {
+  if (IsBeforePowerSet(playerState)) {
     shot.power = MAX_LAUNCH_POWER;
   } else {
     shot.power = swing->power;
   }
 
   shot.unkC = 0;
-  if (swingPhase == SWING_PHASE_UNK2 || swingPhase == SWING_PHASE_UNK4 ||
-      swingPhase == SWING_PHASE_UNK5 || swingPhase == SWING_PHASE_UNK3) {
+  if (IsBeforeImpactSet(playerState)) {
     shot.unk10 = swing->unk10;
     shot.unk14 = swing->unk14;
   } else {
