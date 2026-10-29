@@ -339,6 +339,12 @@ enum SaveMenuBuffer {
   SAVE_MENU_BUFFER_CHOSEN
 };
 
+/* The buffers that LoadGameModeLabelBuffer keeps, by its caller's kind */
+enum GameModeLabelBuffer {
+  GAME_MODE_LABEL_BUFFER_NAME_PLATE = 1,
+  GAME_MODE_LABEL_BUFFER_LABELS
+};
+
 /* The buffers that LoadCharacterSelectBuffer keeps, by the kind its caller
  * gives, and the image of D_8022FF2C that it reads into each. Callers pass no
  * kind below 1, nor 3, 4 or 9 */

@@ -387,7 +387,7 @@ void LoadRingShotRecordFaces(void);
 void ReadSavedGames(void);
 void LoadSaveGameBuffer(void* buffer, u8 bufferKind);
 void LoadSaveMenuBuffers(void** buffers, u8 bufferKind);
-void LoadGameModeLabelBuffer(void* buffer, u8 bufferIndex);
+void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind);
 void UpdateSavedGames(void);
 void LoadTournamentBuffer(void* buffer, s16 bufferKind);
 void LoadCodeEntryBuffer(void* buffer, s32 bufferKind);
@@ -1293,8 +1293,10 @@ void UpdateMenus(void) {
         ReadSavedGames();
         LoadSaveMenuBuffers(D_801049A0[0], SAVE_MENU_BUFFER_SLOTS);
         LoadSaveMenuBuffers(D_8010526C, SAVE_MENU_BUFFER_CHOSEN);
-        LoadGameModeLabelBuffer(g_NamePlateImage, 1);
-        LoadGameModeLabelBuffer(D_801B5CD0[D_8022BE90_ovl_01], 2);
+        LoadGameModeLabelBuffer(
+            g_NamePlateImage, GAME_MODE_LABEL_BUFFER_NAME_PLATE);
+        LoadGameModeLabelBuffer(
+            D_801B5CD0[D_8022BE90_ovl_01], GAME_MODE_LABEL_BUFFER_LABELS);
         LoadSaveGameBuffer(D_800FF180[0], SAVE_GAME_BUFFER_CONTROLLER_ICONS);
         LoadSaveGameBuffer(D_800FF180[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
         LoadSaveGameBuffer(D_800FBE30[0], SAVE_GAME_BUFFER_FIRST_BOARD);

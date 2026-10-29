@@ -1294,14 +1294,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveMenuBuffers);
 #endif
 
 /* Keeps the name plate's buffer, or reads the game mode labels into theirs */
-void LoadGameModeLabelBuffer(void* buffer, u8 bufferIndex) {
+void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
   EncodedAsset asset;
 
-  switch (bufferIndex) {
-    case 1:
+  switch (bufferKind) {
+    case GAME_MODE_LABEL_BUFFER_NAME_PLATE:
       D_8023BD78_ovl_01 = buffer;
       break;
-    case 2:
+    case GAME_MODE_LABEL_BUFFER_LABELS:
       D_8023BD7C_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
       ReadEncodedAsset(D_8023BD7C_ovl_01, &asset);
