@@ -3468,13 +3468,13 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
 /*
  * Lights the ground tiles' map texels by the slope of the ground along the
  * light's yaw, from the heights that DrawBandHeights draws a band at a time.
- * Texels at heights below 0 are only lit. When GAME_FLAG_UNK12 is set, the
- * others also fade toward white with height: up to HEIGHT_FADE_LIMIT, fully
- * when GAME_FLAG_UNK60 is set, or not at all when GAME_FLAG_UNK69 is set.
- * Doesn't match: the original computes the leading height row last and
- * keeps a second, spilled copy of the trailing one, and it reads the fade
- * flags from the stack for each tile, where ours extends isHighGroundFaded
- * once per row and keeps it in another stack slot.
+ * Texels at heights below 0 are only lit. When GAME_FLAG_FADE_HIGH_GROUND is
+ * set, the others also fade toward white with height: up to HEIGHT_FADE_LIMIT,
+ * fully when GAME_FLAG_FADE_HIGH_GROUND_FULLY is set, or not at all when
+ * GAME_FLAG_NO_HIGH_GROUND_FADE is set. Doesn't match: the original computes
+ * the leading height row last and keeps a second, spilled copy of the trailing
+ * one, and it reads the fade flags from the stack for each tile, where ours
+ * extends isHighGroundFaded once per row and keeps it in another stack slot.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
@@ -3533,9 +3533,9 @@ void ShadeGroundTiles(void) {
   s32 fadeWeight;
   s32 keptWeight;
 
-  isHighGroundFaded = IsGameFlagSet(GAME_FLAG_UNK12);
-  isFadeUnlimited = IsGameFlagSet(GAME_FLAG_UNK60);
-  isFadeDisabled = IsGameFlagSet(GAME_FLAG_UNK69);
+  isHighGroundFaded = IsGameFlagSet(GAME_FLAG_FADE_HIGH_GROUND);
+  isFadeUnlimited = IsGameFlagSet(GAME_FLAG_FADE_HIGH_GROUND_FULLY);
+  isFadeDisabled = IsGameFlagSet(GAME_FLAG_NO_HIGH_GROUND_FADE);
   heightRows = (s16(*)[MAP_COLUMN_COUNT])HOLE_FILE_BUFFER;
   fadeColor.red = TEXEL_CHANNEL_MAX;
   fadeColor.green = TEXEL_CHANNEL_MAX;

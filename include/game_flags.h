@@ -190,15 +190,17 @@
  * module; they read their resources again instead */
 #define GAME_FLAG_UNK2E 0x2E
 
+/* How ShadeGroundTiles fades the ground above height 0 toward white */
+#define GAME_FLAG_FADE_HIGH_GROUND 0x12
+#define GAME_FLAG_FADE_HIGH_GROUND_FULLY 0x60
+#define GAME_FLAG_NO_HIGH_GROUND_FADE 0x69
+
 /* Flags that the hole loader reads or sets, whose purpose is not yet known */
 #define GAME_FLAG_UNK11 0x11
-#define GAME_FLAG_UNK12 0x12
 #define GAME_FLAG_UNK51 0x51
 #define GAME_FLAG_UNK56 0x56
-#define GAME_FLAG_UNK60 0x60
 #define GAME_FLAG_UNK64 0x64
 #define GAME_FLAG_UNK67 0x67
-#define GAME_FLAG_UNK69 0x69
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66
 #define GAME_FLAG_ADD_9999_POINTS 0x6C

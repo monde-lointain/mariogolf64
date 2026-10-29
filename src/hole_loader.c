@@ -79,8 +79,8 @@
 #define LOADER_THREAD_ID 10
 #define LOADER_THREAD_PRIORITY 20
 
-/* The Koopa Park hole that sets GAME_FLAG_UNK69 */
-#define KOOPA_PARK_UNK69_HOLE_INDEX 7
+/* The Koopa Park hole whose high ground is not faded */
+#define KOOPA_PARK_UNFADED_HOLE_INDEX 7
 
 #define LZ_STREAM_FLAG_FIRST (1 << 0)
 #define LZ_STREAM_FLAG_LAST (1 << 1)
@@ -967,33 +967,33 @@ void RunLoaderThread(void) {
     }
 
     if (IsGameFlagSet(GAME_FLAG_UNK51) && g_GameState.holeIndex == 0) {
-      SetGameFlag(GAME_FLAG_UNK12);
+      SetGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
     } else {
-      ClearGameFlag(GAME_FLAG_UNK12);
+      ClearGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
     }
 
     ClearGameFlag(GAME_FLAG_HOLE_LOADED);
     if (courseRecordIndex == COURSE_RECORD_BOO_VALLEY) {
-      SetGameFlag(GAME_FLAG_UNK12);
-      SetGameFlag(GAME_FLAG_UNK60);
+      SetGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
+      SetGameFlag(GAME_FLAG_FADE_HIGH_GROUND_FULLY);
     } else {
       if (courseRecordIndex == COURSE_RECORD_TOAD_HIGHLANDS ||
           courseRecordIndex == COURSE_RECORD_KOOPA_PARK ||
           courseRecordIndex == COURSE_RECORD_YOSHIS_ISLAND ||
           courseRecordIndex == COURSE_RECORD_MARIOS_STAR) {
-        SetGameFlag(GAME_FLAG_UNK12);
+        SetGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
       } else {
-        ClearGameFlag(GAME_FLAG_UNK12);
+        ClearGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
       }
 
-      ClearGameFlag(GAME_FLAG_UNK60);
+      ClearGameFlag(GAME_FLAG_FADE_HIGH_GROUND_FULLY);
     }
 
     if (courseRecordIndex == COURSE_RECORD_KOOPA_PARK &&
-        g_GameState.holeIndex == KOOPA_PARK_UNK69_HOLE_INDEX) {
-      SetGameFlag(GAME_FLAG_UNK69);
+        g_GameState.holeIndex == KOOPA_PARK_UNFADED_HOLE_INDEX) {
+      SetGameFlag(GAME_FLAG_NO_HIGH_GROUND_FADE);
     } else {
-      ClearGameFlag(GAME_FLAG_UNK69);
+      ClearGameFlag(GAME_FLAG_NO_HIGH_GROUND_FADE);
     }
 
     osSyncPrintf("MP1\n");
