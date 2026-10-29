@@ -51,13 +51,6 @@
 #define CAMERA_CHANGE_HOLD_COUNT 20
 #define NOISE_GRID_MASK (NOISE_GRID_SIZE - 1)
 
-#define IsFairwayKind(kind) \
-  ((kind) == SURFACE_KIND_FAIRWAY || \
-      (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE || \
-      (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
-#define IsBunkerKind(kind) \
-  ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
-      (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
 /* It is a macro, as an inline function compiles differently from the original
  */
 #define IsBallLanding() \
@@ -2490,10 +2483,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
 /* It is a macro, as an inline function compiles differently from the original
  */
 #define IsTroubleSurface(info) \
-  ((info)->kind == SURFACE_KIND_BUNKER || \
-      (info)->kind == SURFACE_KIND_BUNKER_FAIR_LIE || \
-      (info)->kind == SURFACE_KIND_BUNKER_POOR_LIE || \
-      (info)->kind == SURFACE_KIND_WATER_HAZARD || \
+  (IsBunkerKind((info)->kind) || (info)->kind == SURFACE_KIND_WATER_HAZARD || \
       (info)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
 
 /*

@@ -4344,10 +4344,8 @@ void UpdateTurns(void) {
             player->ballSurface = g_TurnBallSimulation.surface;
           }
 
-          if ((surfaceInfo->kind == SURFACE_KIND_BUNKER ||
-                  surfaceInfo->kind == SURFACE_KIND_BUNKER_FAIR_LIE) ||
-              (surfaceInfo->kind == SURFACE_KIND_BUNKER_POOR_LIE ||
-                  surfaceInfo->kind == SURFACE_KIND_BUNKER_UNK9)) {
+          if (IsBunkerKind(surfaceInfo->kind) ||
+              surfaceInfo->kind == SURFACE_KIND_BUNKER_UNK9) {
             player->hasBeenInBunker = TRUE;
           }
 

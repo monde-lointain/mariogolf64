@@ -90,6 +90,18 @@ typedef s32 SurfaceKind;
   ((kind) == SURFACE_KIND_WATER_HAZARD || \
       (kind) == SURFACE_KIND_OUT_OF_BOUNDS || \
       (kind) == SURFACE_KIND_OUT_OF_COURSE)
+/* Whether a surface kind is a fairway, at any of its lies */
+#define IsFairwayKind(kind) \
+  ((kind) == SURFACE_KIND_FAIRWAY || \
+      (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE || \
+      (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
+/*
+ * Whether a surface kind is a bunker with a bunker's ratings, at any of its
+ * lies. BUNKER_UNK9 is left out, having the default ratings.
+ */
+#define IsBunkerKind(kind) \
+  ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
+      (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
 
 typedef struct SurfaceInfo {
   /* 0x00 */ SurfaceKind kind;
