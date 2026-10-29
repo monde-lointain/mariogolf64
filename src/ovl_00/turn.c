@@ -4402,7 +4402,8 @@ void UpdateTurns(void) {
                 g_Players[playerIndex].holeStatus = HOLE_STATUS_OUT;
               }
 
-              if (GetGroupHoleResult(results) || results[playerIndex] == 2) {
+              if (GetGroupHoleResult(results) ||
+                  results[playerIndex] == GROUP_PLAYER_OUT) {
                 g_Players[playerIndex].holeStatus = HOLE_STATUS_OUT;
                 g_Players[playerIndex]
                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
@@ -4469,7 +4470,8 @@ void UpdateTurns(void) {
           break;
         }
 
-        if (g_HoleSetup.conditions.sceneColorIndex == 0xB) {
+        if (g_HoleSetup.conditions.sceneColorIndex ==
+            SCENE_COLOR_INDEX_SUDDEN_DEATH) {
           StartFireworks();
         }
 
@@ -4569,7 +4571,8 @@ void UpdateTurns(void) {
           StartBanner(-1);
         }
 
-        if (g_HoleSetup.conditions.sceneColorIndex == 0xB) {
+        if (g_HoleSetup.conditions.sceneColorIndex ==
+            SCENE_COLOR_INDEX_SUDDEN_DEATH) {
           D_80224000_ovl_00 = 160;
         }
 
@@ -4709,7 +4712,7 @@ void UpdateTurns(void) {
                   g_Players[playerIndex ^ 1].handicap);
               result = GetMatchHoleResult(playerIndex, playerIndex ^ 1);
               osSyncPrintf("CheckHoltOutMatch %d\n", result);
-              if (result == 1) {
+              if (result == MATCH_SIDE_PLAYER) {
                 g_Players[playerIndex ^ 1]
                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                     .strokes =
@@ -4726,7 +4729,7 @@ void UpdateTurns(void) {
                         g_GameState.holeIndex,
                         g_Players[playerIndex ^ 1].handicap);
                 g_Players[playerIndex ^ 1].holeStatus = HOLE_STATUS_OUT;
-              } else if (result == 2) {
+              } else if (result == MATCH_SIDE_OPPONENT) {
                 g_Players[playerIndex ^ 1]
                     .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                     .strokes =
@@ -4742,7 +4745,7 @@ void UpdateTurns(void) {
                         GetCourseRecordIndex(g_GameState.gameMode),
                         g_GameState.holeIndex,
                         g_Players[playerIndex ^ 1].handicap);
-              } else if (result == 3 &&
+              } else if (result == MATCH_HOLE_HALVED &&
                   g_Players[playerIndex ^ 1].holeStatus ==
                       HOLE_STATUS_PLAYING) {
                 g_Players[playerIndex ^ 1]
