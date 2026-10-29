@@ -116,12 +116,44 @@
 #define LABEL_GROWING 0
 #define LABEL_SHRINKING 1
 
+/* The title screen's labels, 128 by 20 each, plain in D_801B5CD0 and lit in
+ * D_8012D420 */
+#define TITLE_LABEL_COUNT 7
+#define TITLE_LABEL_WIDTH 128
+#define TITLE_LABEL_HEIGHT 20
+#define TITLE_LABEL_IMAGE_SIZE (TITLE_LABEL_WIDTH * TITLE_LABEL_HEIGHT / 2)
+/* func_802081E8 draws a row of spinning stars, one per hole, from D_801B93E0,
+ * and enlarges the chosen hole's */
+#define STAR_WIDTH 32
+#define STAR_HEIGHT 24
+#define STAR_FRAME_COUNT 15
+#define MAX_STAR_COUNT 6
+#define CHOSEN_STAR_GROWTH 8
+/* func_80200EF0 places the characters by a layout, chosen by their count, of
+ * five slots */
+#define MENU_CHARACTER_LAYOUT_COUNT 4
+#define MENU_CHARACTER_SLOT_COUNT 5
+/* The course select's water plane's vertices */
+#define WATER_VERTEX_COUNT 5
+/* The holes badges of D_80106100, 24 by 24 CI4 each */
+#define HOLES_BADGE_BET 0
+#define HOLES_BADGE_COUNT 4
+#define HOLES_BADGE_SIZE 24
+#define HOLES_BADGE_IMAGE_SIZE ((HOLES_BADGE_SIZE * HOLES_BADGE_SIZE) / 2)
+/* Places for the clubhouse's rows, three more than it shows */
+#define CLUBHOUSE_ROW_PLACE_COUNT 8
+
 /* Divides a turn among the player count's modes, keeping it whole should a
  * count be zero */
 #define SPREAD_OVER_MODES(amount) \
   (D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] != 0 \
           ? (amount) / D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] \
           : (amount))
+
+typedef struct ImageCorner {
+  s16 x;
+  s16 y;
+} ImageCorner;
 
 /* The wind and light of the hole that loads behind the menus */
 #define CHOSEN_HOLE_WIND_SPEED_MASK 0x3F
@@ -3884,12 +3916,6 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* The title screen's labels, 128 by 20 each, plain in D_801B5CD0 and lit in
- * D_8012D420 */
-#define TITLE_LABEL_COUNT 7
-#define TITLE_LABEL_WIDTH 128
-#define TITLE_LABEL_HEIGHT 20
-#define TITLE_LABEL_IMAGE_SIZE (TITLE_LABEL_WIDTH * TITLE_LABEL_HEIGHT / 2)
 /* NEW GAME comes first, then the player counts, then the saved games and the
  * menus */
 #define TITLE_LABEL_NEW_GAME 0
@@ -4084,13 +4110,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
 #define ANIMATED_ICON_IMAGE_SIZE (ANIMATED_ICON_SIZE * ANIMATED_ICON_SIZE / 2)
 #define ANIMATED_ICON_FRAME_COUNT 6
 #define ANIMATED_ICON_FRAME_DURATION 2
-/* func_802081E8 draws a row of spinning stars, one per hole, from D_801B93E0,
- * and enlarges the chosen hole's */
-#define STAR_WIDTH 32
-#define STAR_HEIGHT 24
-#define STAR_FRAME_COUNT 15
-#define MAX_STAR_COUNT 6
-#define CHOSEN_STAR_GROWTH 8
 /* func_80200A40 draws the chosen mode's icon, 64x64 CI8, in two strips */
 #define MODE_ICON_WIDTH 64
 #define MODE_ICON_STRIP_HEIGHT 32
@@ -4105,8 +4124,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
 #define NO_RIVAL -1
 #define RIVAL_SLOT 1
 #define RIVAL_SPIN_STEP 10.0f
-#define MENU_CHARACTER_LAYOUT_COUNT 4
-#define MENU_CHARACTER_SLOT_COUNT 5
 
 extern f32 D_8022FA54_ovl_01;
 extern f32 D_8022FA58_ovl_01;
@@ -4208,7 +4225,6 @@ extern LookAt D_80231D20_ovl_01[2];
 #define WATER_LAYER_TMEM 0x100
 #define WATER_LAYER_TILE 1
 #define WATER_TILE_SPAN 64
-#define WATER_VERTEX_COUNT 5
 /* The course select's wheel is seen from closer than the other wheels */
 #define COURSE_SELECT_EYE_HEIGHT 50.0f
 #define COURSE_SELECT_EYE_DISTANCE 60.0f
@@ -4233,12 +4249,8 @@ extern LookAt D_80231D20_ovl_01[2];
 #define COURSE_BADGE_ICON_Y 200
 #define COURSE_BADGE_COUNT_X 252
 #define COURSE_BADGE_COUNT_Y 208
-/* The holes badges of D_80106100, 24 by 24 CI4 each: the chosen one is lit,
- * and the Bet badge cycles its color unless D_800C2BD5 is set */
-#define HOLES_BADGE_BET 0
-#define HOLES_BADGE_COUNT 4
-#define HOLES_BADGE_SIZE 24
-#define HOLES_BADGE_IMAGE_SIZE ((HOLES_BADGE_SIZE * HOLES_BADGE_SIZE) / 2)
+/* The chosen holes badge is lit, and the Bet badge cycles its color unless
+ * D_800C2BD5 is set */
 #define UNCHOSEN_HOLES_BADGE_SHADE 127
 #define BET_BADGE_COLOR_STEP (M_PI / 18)
 #define BET_BADGE_COLOR_MIDPOINT 127
@@ -4251,11 +4263,6 @@ extern LookAt D_80231D20_ovl_01[2];
 /* Screens 20 and 22 slide their pages this far, a step per update */
 #define BET_SLIDE_STEP 32
 #define BET_SLIDE_DISTANCE 512
-
-typedef struct ImageCorner {
-  s16 x;
-  s16 y;
-} ImageCorner;
 
 extern Mtx D_802321F0_ovl_01;
 extern Mtx D_80232230_ovl_01;
@@ -6198,9 +6205,6 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
 #define ROOM_LABEL_WIDTH 192
 #define ROOM_LABEL_HEIGHT 20
 #define ROOM_LABEL_IMAGE_SIZE (ROOM_LABEL_WIDTH * ROOM_LABEL_HEIGHT / 2)
-
-/* Places for the clubhouse's rows, three more than it shows */
-#define CLUBHOUSE_ROW_PLACE_COUNT 8
 
 extern s32 D_8022FE2C_ovl_01[CLUBHOUSE_ROW_PLACE_COUNT][2];
 
