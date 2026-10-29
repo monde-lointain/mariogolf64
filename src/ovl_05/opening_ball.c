@@ -272,6 +272,15 @@ static void ResetBallSimulations(void) {
 #define OPENING_LANDING_SPIN_SPEED_RANGE KilometersPerHour(200)
 #define OPENING_GROUND_SPIN_DRIFT_GRIP 0.25f
 #define OPENING_MAX_SPIN_DRIFT_SHARE 0.2f
+/*
+ * Its roll: only on mini golf, a ball pressing into the ground faster than
+ * this, between main's two limits, loses its speed into the ground. A slow
+ * ball's slope pull grows from a smaller least share than main's, at 1/327.68
+ * per unit of speed.
+ */
+#define OPENING_ROLL_JUMP_SPEED KilometersPerHour(10)
+#define OPENING_MIN_SLOW_ROLL_SLOPE_SCALE 0.0625f
+#define OPENING_SLOW_ROLL_SLOPE_SCALE_PER_SPEED 0.0030517578f
 
 /*
  * The opening calls FindBillboardHit with a ninth argument, the simulation,
@@ -1365,7 +1374,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
               (plane.normal[AXIS_Y] * simulation->velocity[AXIS_Y]) +
               (plane.normal[AXIS_Z] * simulation->velocity[AXIS_Z]);
 
-          if (pressing >= KilometersPerHour(10)) {
+          if (pressing >= OPENING_ROLL_JUMP_SPEED) {
             f32 along[3];
 
             along[AXIS_X] = simulation->velocity[AXIS_X] -
@@ -1393,16 +1402,17 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             if (!g_GameState.isMiniGolf) {
               f32 lie = GetStepNoise();
 
-              if (lie < 0.25f) {
+              if (lie < FAIRWAY_POOR_LIE_CHANCE) {
                 simulation->surface = SURFACE_FAIRWAY_POOR_LIE;
-              } else if (lie < 0.5f) {
+              } else if (lie <
+                  FAIRWAY_POOR_LIE_CHANCE + FAIRWAY_FAIR_LIE_CHANCE) {
                 simulation->surface = SURFACE_FAIRWAY_FAIR_LIE;
               }
             }
 
             break;
           case SURFACE_ROUGH:
-            if (GetStepNoise() < 0.35f) {
+            if (GetStepNoise() < ROUGH_POOR_LIE_CHANCE) {
               simulation->surface = SURFACE_ROUGH_POOR_LIE;
             }
 
@@ -1417,7 +1427,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         groundHeight = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        if (simulation->position[AXIS_Y] + 307.2f < groundHeight) {
+        if (simulation->position[AXIS_Y] + TAKE_OFF_HEIGHT < groundHeight) {
           simulation->state = BALL_STATE_FLYING;
           simulation->spinHeading =
               atan2(simulation->velocity[AXIS_Z], simulation->velocity[AXIS_X]);
@@ -1436,42 +1446,43 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       if (plane.normal[AXIS_Y] * plane.normal[AXIS_Y] <=
               (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
                   (plane.normal[AXIS_Z] * plane.normal[AXIS_Z]) &&
-          simulation->stepCount < 800) {
+          simulation->stepCount < STEEP_SLOPE_STEP_LIMIT) {
         isSteep = TRUE;
       }
 
-      friction = info->rollSpeedKept * 0.001f;
+      friction = info->rollSpeedKept * ONE_PER_THOUSANDTH;
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_HoleSetup.conditions.isRaining == TRUE) {
-        friction *= 0.993f;
+        friction *= RAIN_FRICTION_SCALE;
       }
 
       if (isSteep) {
-        slopeX *= 2;
-        slopeZ *= 2;
-        if (friction < 0.9f) {
-          friction = 0.9f;
+        slopeX *= STEEP_SLOPE_SCALE;
+        slopeZ *= STEEP_SLOPE_SCALE;
+        if (friction < MIN_STEEP_FRICTION) {
+          friction = MIN_STEEP_FRICTION;
         }
       } else {
-        if ((f32)rollSpeed < 307.2f) {
-          f32 scale = (rollSpeed * 0.0030517578f) + 0.0625f;
+        if ((f32)rollSpeed < SLOW_ROLL_SPEED) {
+          f32 scale = (rollSpeed * OPENING_SLOW_ROLL_SLOPE_SCALE_PER_SPEED) +
+              OPENING_MIN_SLOW_ROLL_SLOPE_SCALE;
 
           slopeX = slopeX * scale;
           slopeZ = slopeZ * scale;
         }
 
-        if (simulation->stepCount >= 600) {
-          friction *= 0.5f;
-        } else if (simulation->stepCount >= 400) {
-          friction *= 0.9f;
-        } else if (simulation->stepCount >= 150) {
-          friction *= 0.99f;
+        if (simulation->stepCount >= LONGEST_ROLL_STEP_COUNT) {
+          friction *= LONGEST_ROLL_FRICTION_SCALE;
+        } else if (simulation->stepCount >= LONGER_ROLL_STEP_COUNT) {
+          friction *= LONGER_ROLL_FRICTION_SCALE;
+        } else if (simulation->stepCount >= LONG_ROLL_STEP_COUNT) {
+          friction *= LONG_ROLL_FRICTION_SCALE;
         }
       }
 
-      simulation->velocity[AXIS_X] = (slopeX * friction * 0.4f) +
+      simulation->velocity[AXIS_X] = (slopeX * friction * SLOPE_PULL_SCALE) +
           (simulation->velocity[AXIS_X] * friction);
-      simulation->velocity[AXIS_Z] = (slopeZ * friction * 0.4f) +
+      simulation->velocity[AXIS_Z] = (slopeZ * friction * SLOPE_PULL_SCALE) +
           (simulation->velocity[AXIS_Z] * friction);
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_GameState.isMiniGolf) {
@@ -1495,17 +1506,19 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       }
 
       if (IntLength2D(simulation->velocity[AXIS_X],
-              simulation->velocity[AXIS_Z]) < 30) {
-        if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < 500.0f) {
+              simulation->velocity[AXIS_Z]) < MAX_STOP_SPEED) {
+        if (!isSteep &&
+            IntLength2D(slopeX, slopeZ) * friction < MAX_STOP_SLOPE_PULL) {
           simulation->state = BALL_STATE_STOPPED;
         }
       }
 
       if (!isSteep && info->kind != SURFACE_KIND_GREEN &&
-          simulation->lastBounceStep + 90 < simulation->stepCount &&
+          simulation->lastBounceStep + OFF_GREEN_STOP_STEPS <
+              simulation->stepCount &&
           GetLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y],
-              simulation->velocity[AXIS_Z]) < (f64)KilometersPerHour(2)) {
+              simulation->velocity[AXIS_Z]) < (f64)MAX_OFF_GREEN_STOP_SPEED) {
         simulation->state = BALL_STATE_STOPPED;
       }
     }

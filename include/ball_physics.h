@@ -367,9 +367,10 @@ typedef s32 BunkerBurial;
 #define MAX_STOP_SPEED 30
 #define MAX_STOP_SLOPE_PULL 500.0f
 /*
- * Off the green and off a steep slope, a ball slower than 2 km/h this many
+ * Off the green and off a steep slope, a ball slower than this this many
  * steps after its last bounce stops
  */
+#define MAX_OFF_GREEN_STOP_SPEED KilometersPerHour(2)
 #define OFF_GREEN_STOP_STEPS 90
 
 /*

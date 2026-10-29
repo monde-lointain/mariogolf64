@@ -1845,7 +1845,7 @@ TAKE_OFF:
           sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
               (velocity[AXIS_Y] * velocity[AXIS_Y]) +
               (velocity[AXIS_Z] * velocity[AXIS_Z])) <
-              (f64)KilometersPerHour(2)) {
+              (f64)MAX_OFF_GREEN_STOP_SPEED) {
         simulation->state = BALL_STATE_STOPPED;
       }
     }
