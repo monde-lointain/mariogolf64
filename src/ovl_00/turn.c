@@ -268,6 +268,16 @@
 /* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
+/* Where the current turn's shot comes from, as D_80227194_ovl_00 records */
+enum ShotSource {
+  /* The player's controller */
+  SHOT_SOURCE_PLAYER,
+  /* D_80104F78: a replayed shot, or the computer golfer's finished plan */
+  SHOT_SOURCE_PREPARED,
+  /* The computer golfer, which is still planning */
+  SHOT_SOURCE_PLANNING
+};
+
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
 extern CurrentShot D_80104F78; /* The replayed shot */
@@ -371,7 +381,7 @@ static f32 D_80227184_ovl_00;
 static s32 D_80227188_ovl_00;
 static s32 D_8022718C_ovl_00;
 static s32 D_80227190_ovl_00;
-static s32 D_80227194_ovl_00; /* Set while a recorded shot is replayed */
+static s32 D_80227194_ovl_00; /* A SHOT_SOURCE_* value */
 static s32 f_TurnTimerStart; /* Nothing reads it */
 /* The shot preview's matrices, by draw buffer */
 static Mtx D_802271A0_ovl_00[2][SHOT_PREVIEW_MAX_STEPS];
@@ -821,7 +831,8 @@ void StartFreeLook(void) {
 void UpdateImpactPointMode(void) {
   if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
       !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
-    if (g_ImpactPointState == IMPACT_POINT_OFF && D_80227194_ovl_00 == 0) {
+    if (g_ImpactPointState == IMPACT_POINT_OFF &&
+        D_80227194_ovl_00 == SHOT_SOURCE_PLAYER) {
       PlaySoundWithEffects(SOUND_IMPACT_POINT, IMPACT_POINT_SOUND_CHANNEL,
           IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
           IMPACT_POINT_SOUND_PAN);
@@ -1140,7 +1151,7 @@ s32 UpdateAimControls(void) {
   s32 turn;
   s32 heading;
 
-  if (D_80227194_ovl_00 != 0) {
+  if (D_80227194_ovl_00 != SHOT_SOURCE_PLAYER) {
     headingLeft = (s16)(D_80104F78.unk0 - g_CurrentShot.unk0);
     if (IsGameFlagSet(GAME_FLAG_SNAP_REPLAY_AIM) ||
         ABS(headingLeft) < REPLAY_AIM_MIN_STEP) {
@@ -1264,7 +1275,7 @@ s32 UpdateAimControls(void) {
       g_ImpactPointState = IMPACT_POINT_OFF;
     }
   } else {
-    if (D_80227194_ovl_00 == 0) {
+    if (D_80227194_ovl_00 == SHOT_SOURCE_PLAYER) {
       if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) &&
           g_PauseScreen != PAUSE_SCREEN_FREE_LOOK &&
           !(g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT)) {
@@ -3183,7 +3194,7 @@ void UpdateTurns(void) {
             func_800600C0(g_Players[playerIndex].strokeCount);
           }
 
-          D_80227194_ovl_00 = 1;
+          D_80227194_ovl_00 = SHOT_SOURCE_PREPARED;
         } else if (IsGameFlagSet(GAME_FLAG_UNK32) ||
             g_Players[playerIndex].unk1E[0] || IsGameFlagSet(GAME_FLAG_UNK9B)) {
           g_Players[playerIndex].unk1E[1] = -9;
@@ -3191,13 +3202,13 @@ void UpdateTurns(void) {
           StartShotPlan();
           D_800B7D9C = 0;
           D_80223E58_ovl_00 = 30;
-          D_80227194_ovl_00 = 2;
+          D_80227194_ovl_00 = SHOT_SOURCE_PLANNING;
         } else if (f_ShouldReplaySavedShot) {
-          D_80227194_ovl_00 = 1;
+          D_80227194_ovl_00 = SHOT_SOURCE_PREPARED;
           D_80104F78 = g_SavedShots[playerIndex];
           f_ShouldReplaySavedShot = 0;
         } else {
-          D_80227194_ovl_00 = 0;
+          D_80227194_ovl_00 = SHOT_SOURCE_PLAYER;
         }
 
         D_8022B5C0_ovl_00 = 0;
@@ -3374,12 +3385,14 @@ void UpdateTurns(void) {
         D_80227150_ovl_00.clubIndex = g_CurrentShot.clubSlot;
         D_80227150_ovl_00.shotMode = g_CurrentShot.shotMode;
         D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
-        if (D_80227194_ovl_00 == 2) {
+        if (D_80227194_ovl_00 == SHOT_SOURCE_PLANNING) {
           StartTurnTimer();
-          for (i = 0; D_80227194_ovl_00 == 2 && i < 100; i++) {
+          for (i = 0; D_80227194_ovl_00 == SHOT_SOURCE_PLANNING && i < 100;
+              i++) {
             D_80227194_ovl_00 =
-                (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED) ? 1
-                                                                         : 2;
+                (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED)
+                ? SHOT_SOURCE_PREPARED
+                : SHOT_SOURCE_PLANNING;
             if (!func_8020561C_ovl_00(10)) {
               break;
             }
@@ -3414,7 +3427,7 @@ void UpdateTurns(void) {
         UpdateShotFlags();
         D_8022B5C0_ovl_00++;
         if (g_PauseScreen == PAUSE_SCREEN_NONE) {
-          if (D_80227194_ovl_00 == 0 &&
+          if (D_80227194_ovl_00 == SHOT_SOURCE_PLAYER &&
               g_TurnController.pressedButtons == START_BUTTON &&
               (g_TurnController.buttons & START_BUTTON)) {
             ForceStopRumble();
@@ -3426,7 +3439,7 @@ void UpdateTurns(void) {
             HideRoundHud();
           }
         } else if (g_PauseScreen == PAUSE_SCREEN_PAUSE_MENU &&
-            D_80227194_ovl_00 == 0 &&
+            D_80227194_ovl_00 == SHOT_SOURCE_PLAYER &&
             (g_TurnController.pressedButtons & (START_BUTTON | B_BUTTON))) {
           ForceStopRumble();
           PlaySound(SOUND_PAUSE, PAUSE_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -3564,7 +3577,7 @@ void UpdateTurns(void) {
           s32 tempo;
           s32 replayKind;
 
-          if (D_80227194_ovl_00 == 0 &&
+          if (D_80227194_ovl_00 == SHOT_SOURCE_PLAYER &&
               (g_TurnController.buttons & (Z_TRIG | L_TRIG)) &&
               (g_TurnController.pressedButtons & R_TRIG)) {
             StartFreeLook();
@@ -3596,7 +3609,7 @@ void UpdateTurns(void) {
 
           SetSongTempo(tempo);
           replayKind = D_80227194_ovl_00;
-          if (replayKind == 2) {
+          if (replayKind == SHOT_SOURCE_PLANNING) {
             if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
               SetScreenEffect(
                   SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
@@ -3604,10 +3617,12 @@ void UpdateTurns(void) {
             }
 
             StartTurnTimer();
-            for (i = 0; D_80227194_ovl_00 == 2 && i < 400; i++) {
+            for (i = 0; D_80227194_ovl_00 == SHOT_SOURCE_PLANNING && i < 400;
+                i++) {
               D_80227194_ovl_00 =
-                  (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED) ? 1
-                                                                           : 2;
+                  (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED)
+                  ? SHOT_SOURCE_PREPARED
+                  : SHOT_SOURCE_PLANNING;
               if (!func_8020561C_ovl_00(D_80223E58_ovl_00)) {
                 break;
               }
@@ -3618,17 +3633,17 @@ void UpdateTurns(void) {
               D_80223E58_ovl_00 = 0x800;
             }
 
-            if (D_80227194_ovl_00 == 2) {
+            if (D_80227194_ovl_00 == SHOT_SOURCE_PLANNING) {
               break;
             }
           }
 
-          if (replayKind != 0 && D_8022B5C0_ovl_00 < 30) {
+          if (replayKind != SHOT_SOURCE_PLAYER && D_8022B5C0_ovl_00 < 30) {
             break;
           }
 
           UnloadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
-          if (D_80227194_ovl_00 == 1) {
+          if (D_80227194_ovl_00 == SHOT_SOURCE_PREPARED) {
             isReady = StepToClubChoice(&D_80104F78);
           } else {
             if (g_ImpactPointState == IMPACT_POINT_OFF) {
@@ -3680,8 +3695,9 @@ void UpdateTurns(void) {
             SetAnimationSpeed(0, 0.0f);
           }
 
-          if ((D_80227194_ovl_00 != 0 && isReady) ||
-              (D_80227194_ovl_00 == 0 && g_HasPressedShotButton == 1)) {
+          if ((D_80227194_ovl_00 != SHOT_SOURCE_PLAYER && isReady) ||
+              (D_80227194_ovl_00 == SHOT_SOURCE_PLAYER &&
+                  g_HasPressedShotButton == 1)) {
             g_ShowsGroundWaves = 0;
             if (g_CurrentShot.shotMode != SHOT_MODE_APPROACH) {
               SkipToAnimationEnd(0);
@@ -3712,7 +3728,7 @@ void UpdateTurns(void) {
           }
 
           if (g_ImpactPointState == IMPACT_POINT_SETTING) {
-            if (D_80227194_ovl_00 == 0) {
+            if (D_80227194_ovl_00 == SHOT_SOURCE_PLAYER) {
               g_CurrentShot.unk14 = GetTurnStickX();
               g_CurrentShot.unk18 = GetTurnStickY();
             } else {
@@ -3790,7 +3806,7 @@ void UpdateTurns(void) {
               HUD_FLAG_SETTING_POWER | HUD_FLAG_ANIMATE_OFFSET_MARKER;
         }
 
-        if (D_80227194_ovl_00 == 0) {
+        if (D_80227194_ovl_00 == SHOT_SOURCE_PLAYER) {
           g_CurrentShot.unk14 = GetTurnStickX();
           g_CurrentShot.unk18 = GetTurnStickY();
         } else {
@@ -3801,7 +3817,7 @@ void UpdateTurns(void) {
         SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
         D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
         D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
-        if ((D_80227194_ovl_00 != 0)
+        if ((D_80227194_ovl_00 != SHOT_SOURCE_PLAYER)
                 ? (D_80104F78.unk4 == g_CurrentShot.unk40)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
           s32 sound;
@@ -3844,7 +3860,7 @@ void UpdateTurns(void) {
 
           PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
         } else if (g_CurrentShot.unk40 >= 59 ||
-            (D_80227194_ovl_00 == 0 &&
+            (D_80227194_ovl_00 == SHOT_SOURCE_PLAYER &&
                 (g_TurnController.pressedButtons & B_BUTTON))) {
           UpdateGolferTranslucency();
           nextState = PLAYER_STATE_AIMING;
@@ -3873,7 +3889,7 @@ void UpdateTurns(void) {
               HUD_FLAG_SETTING_IMPACT | HUD_FLAG_ANIMATE_OFFSET_MARKER;
         }
 
-        if (D_80227194_ovl_00 == 0) {
+        if (D_80227194_ovl_00 == SHOT_SOURCE_PLAYER) {
           g_CurrentShot.unk14 = GetTurnStickX();
           g_CurrentShot.unk18 = GetTurnStickY();
         } else {
@@ -3894,7 +3910,7 @@ void UpdateTurns(void) {
         SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
         D_80227150_ovl_00.unk10 = g_CurrentShot.unk14;
         D_80227150_ovl_00.unk14 = g_CurrentShot.unk18;
-        if (((D_80227194_ovl_00 != 0)
+        if (((D_80227194_ovl_00 != SHOT_SOURCE_PLAYER)
                     ? (g_CurrentShot.unk40 == D_80104F78.unk8)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||
             g_CurrentShot.unk40 >= 69) {
