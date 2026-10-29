@@ -802,8 +802,8 @@ void DrawLensFlare(Gfx** displayListHead) {
     return;
   }
 
-  if (glare > colors->sun->maxSunGlare) {
-    glare = colors->sun->maxSunGlare;
+  if (glare > colors->sun->maxGlare) {
+    glare = colors->sun->maxGlare;
   }
 
   gDPPipeSync(gfx++);
@@ -1769,7 +1769,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
 
     f_SunScreenX[cameraIndex] = angle * SUN_TURN_WIDTH * (1 / (2 * M_PI));
     f_SunScreenY[cameraIndex] = -g_SkyState.horizonLevels[cameraIndex] -
-        colors->sun->sunHeight + SUN_HORIZON_Y;
+        colors->sun->height + SUN_HORIZON_Y;
     if (f_SunScreenX[cameraIndex] > SUN_TURN_WIDTH / 2) {
       f_SunScreenX[cameraIndex] -= SUN_TURN_WIDTH;
     }
@@ -1818,12 +1818,12 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
             G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
-            ((s32)f_SunScreenX[cameraIndex] - colors->sun->sunRadius + 1) << 2,
-            ((s32)f_SunScreenY[cameraIndex] - colors->sun->sunRadius + 1) << 2,
-            ((s32)f_SunScreenX[cameraIndex] + colors->sun->sunRadius) << 2,
-            ((s32)f_SunScreenY[cameraIndex] + colors->sun->sunRadius) << 2,
-            G_TX_RENDERTILE, 0, 0, colors->sun->sunTexelStep,
-            colors->sun->sunTexelStep);
+            ((s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1) << 2,
+            ((s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1) << 2,
+            ((s32)f_SunScreenX[cameraIndex] + colors->sun->radius) << 2,
+            ((s32)f_SunScreenY[cameraIndex] + colors->sun->radius) << 2,
+            G_TX_RENDERTILE, 0, 0, colors->sun->texelStep,
+            colors->sun->texelStep);
         gDPPipeSync(gfx++);
       } else {
         gDPPipeSync(gfx++);
@@ -1835,18 +1835,18 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
             G_IM_FMT_I, G_IM_SIZ_8b, SUN_GLOW_IMAGE_SIZE, SUN_GLOW_IMAGE_SIZE,
             0, G_TX_MIRROR, G_TX_MIRROR, SUN_GLOW_MASK, SUN_GLOW_MASK,
             G_TX_NOLOD, G_TX_NOLOD);
-        gDPSetPrimColor(gfx++, 0, 0, colors->sun->sunPrimColor[0],
-            colors->sun->sunPrimColor[1], colors->sun->sunPrimColor[2], 255);
-        gDPSetEnvColor(gfx++, colors->sun->sunEnvColor[0],
-            colors->sun->sunEnvColor[1], colors->sun->sunEnvColor[2], 255);
+        gDPSetPrimColor(gfx++, 0, 0, colors->sun->primColor[0],
+            colors->sun->primColor[1], colors->sun->primColor[2], 255);
+        gDPSetEnvColor(gfx++, colors->sun->envColor[0],
+            colors->sun->envColor[1], colors->sun->envColor[2], 255);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
-            ((s32)f_SunScreenX[cameraIndex] - colors->sun->sunRadius + 1) << 2,
-            ((s32)f_SunScreenY[cameraIndex] - colors->sun->sunRadius + 1) << 2,
-            ((s32)f_SunScreenX[cameraIndex] + colors->sun->sunRadius) << 2,
-            ((s32)f_SunScreenY[cameraIndex] + colors->sun->sunRadius) << 2,
-            G_TX_RENDERTILE, 0, 0, colors->sun->sunTexelStep,
-            colors->sun->sunTexelStep);
+            ((s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1) << 2,
+            ((s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1) << 2,
+            ((s32)f_SunScreenX[cameraIndex] + colors->sun->radius) << 2,
+            ((s32)f_SunScreenY[cameraIndex] + colors->sun->radius) << 2,
+            G_TX_RENDERTILE, 0, 0, colors->sun->texelStep,
+            colors->sun->texelStep);
         gDPPipeSync(gfx++);
       }
     }

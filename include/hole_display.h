@@ -77,14 +77,14 @@ extern SkyColors g_SkyColors[][SKY_WEATHER_COUNT * SKY_TIME_COUNT];
 /* The sun of a sky, and which sky images InitSkyColors loads with it */
 typedef struct Sun {
   /* 0x00 */ u8 unk0[4];
-  /* 0x04 */ s32 sunHeight; /* Above the horizon */
-  /* 0x08 */ u8 sunPrimColor[3];
-  /* 0x0B */ u8 sunEnvColor[3];
+  /* 0x04 */ s32 height; /* Above the horizon */
+  /* 0x08 */ u8 primColor[3];
+  /* 0x0B */ u8 envColor[3];
   /* 0x0E */ u8 unkE[2];
-  /* 0x10 */ s32 sunRadius;
+  /* 0x10 */ s32 radius;
   /* 0x14 */ s16 unk14;
-  /* 0x16 */ s16 sunTexelStep;
-  /* 0x18 */ f32 maxSunGlare; /* The most that DrawLensFlare's glare grows to */
+  /* 0x16 */ s16 texelStep;
+  /* 0x18 */ f32 maxGlare; /* The most that DrawLensFlare's glare grows to */
   /* 0x1C */ u8 imageKind; /* A SKY_IMAGE_KIND_* value */
 } Sun;
 
