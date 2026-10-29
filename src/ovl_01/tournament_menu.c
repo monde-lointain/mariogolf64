@@ -102,7 +102,7 @@ enum ClubCodeState {
 #define CODE_GLYPH_FIRST_Y 62
 #define CODE_GLYPH_NONE -1
 
-/* What func_80228C00 is doing, in D_80230F70 */
+/* What UpdateClubTournament is doing, in D_80230F70 */
 enum ClubCodePhase {
   CLUB_CODE_PHASE_TYPING,
   CLUB_CODE_PHASE_DETAILS,
@@ -115,7 +115,7 @@ enum ClubCodePhase {
 #define CLUB_CODE_NINTENDO_SHIFT 7
 #define CLUB_TOURNAMENT_NAME_COUNT 124
 
-/* Where func_80228C00 prints the tournament code when it can be edited */
+/* Where UpdateClubTournament prints the code when it can be edited */
 #define CODE_DEBUG_TEXT_COLUMN 2
 #define CODE_DEBUG_TEXT_FIRST_ROW 3
 
@@ -1147,7 +1147,7 @@ void func_80228B60_ovl_01(void) {
  * address last.
  */
 #ifdef NON_MATCHING
-void func_80228C00_ovl_01(void) {
+void UpdateClubTournament(void) {
   MenuMemory* memory = func_8005AF74();
   s32 index;
   s32 result;
@@ -1321,7 +1321,7 @@ void func_80228C00_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80228C00_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", UpdateClubTournament);
 #endif
 
 void func_80229278_ovl_01(void) {
@@ -1524,7 +1524,7 @@ void func_802296C4_ovl_01(
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802296C4_ovl_01);
 #endif
 
-void func_80229CB0_ovl_01(Gfx** displayListHead) {
+void DrawClubTournament(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 width = 0;
   s32 height = 0;

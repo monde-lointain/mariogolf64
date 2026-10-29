@@ -387,7 +387,7 @@ void func_80222038_ovl_01(void* buffer, u8 bufferIndex);
 void UpdateSavedGames(void);
 void func_802267B0_ovl_01(void* buffer, s16 bufferKind);
 void func_80228A80_ovl_01(void* buffer, s32 bufferKind);
-void func_80228C00_ovl_01(void);
+void UpdateClubTournament(void);
 s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
 s32 func_8022BDC4_ovl_01(void);
@@ -411,7 +411,7 @@ void func_80215DC4_ovl_01(Gfx** displayListHead);
 void func_8021D3AC_ovl_01(Gfx** displayListHead);
 void DrawRingShotRecords(Gfx** displayListHead);
 void DrawSavedGames(Gfx** displayListHead);
-void func_80229CB0_ovl_01(Gfx** displayListHead);
+void DrawClubTournament(Gfx** displayListHead);
 
 /* Not static: the original left these to the linker's common block */
 s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
@@ -1024,7 +1024,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_CLUB_TOURNAMENT:
-      func_80228C00_ovl_01();
+      UpdateClubTournament();
       break;
 
     case MENU_SCREEN_CLUBHOUSE:
@@ -3673,7 +3673,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       DrawMainMenuWithoutTransmit(&gfx);
       break;
     case MENU_SCREEN_CLUB_TOURNAMENT:
-      func_80229CB0_ovl_01(&gfx);
+      DrawClubTournament(&gfx);
       break;
     case MENU_SCREEN_CLUBHOUSE:
       DrawClubhouse(&gfx);
