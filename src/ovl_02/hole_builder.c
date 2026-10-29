@@ -2569,6 +2569,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", SaveHoleFiles);
 #endif
 
 /*
+ * MoveRingsToEnd's debug text cells: its start and end notices share one, and
+ * each move it logs goes to a row before the text's buffer, so PutDebugText
+ * drops it
+ */
+#define RING_MOVE_NOTICE_COLUMN 19
+#define RING_MOVE_NOTICE_ROW 19
+#define RING_MOVE_LOG_COLUMN 4
+#define RING_MOVE_LOG_ROW (-141)
+
+/*
  * Moves the rings, from the first triangle that is one, to the last
  * triangle slots
  */
@@ -2576,18 +2586,19 @@ void MoveRingsToEnd(void) {
   s32 i;
   s32 slot;
 
-  PrintDebugText("Change Start", 19, 19);
+  PrintDebugText("Change Start", RING_MOVE_NOTICE_COLUMN, RING_MOVE_NOTICE_ROW);
   for (i = 0; i != HOLE_TRIANGLE_COUNT - RING_COUNT; i++) {
     if (g_WorkArea.hole.triangles[i].kind == HOLE_TRIANGLE_KIND_RING) {
       for (slot = HOLE_TRIANGLE_COUNT - RING_COUNT; slot != HOLE_TRIANGLE_COUNT;
           slot++, i++) {
         sprintf(g_PrintBuffer, "%d <-- %d", slot, i);
-        PrintDebugText(g_PrintBuffer, 4, -141);
+        PrintDebugText(g_PrintBuffer, RING_MOVE_LOG_COLUMN, RING_MOVE_LOG_ROW);
         g_WorkArea.hole.triangles[slot] = g_WorkArea.hole.triangles[i];
         bzero(&g_WorkArea.hole.triangles[i], sizeof(HoleTriangle));
       }
 
-      PrintDebugText("Change End", 19, 19);
+      PrintDebugText(
+          "Change End", RING_MOVE_NOTICE_COLUMN, RING_MOVE_NOTICE_ROW);
       return;
     }
   }
@@ -2783,6 +2794,12 @@ void InitTileMidpoints(void) {
 }
 
 /*
+ * Spreads a packed byte's two nibbles to the low nibbles of an attribute's two
+ * bytes
+ */
+#define UnpackAttribute(packed) ((((packed) & 0xF0) << 4) | ((packed) & 0xF))
+
+/*
  * Unpacks runs of attributes from the hole file into the build buffer, each
  * a count and a byte whose two nibbles go to the two bytes of an attribute,
  * then clears the rest of the buffer. Nothing calls it.
@@ -2810,7 +2827,7 @@ void ReadAttributeRuns(void) {
       break;
     }
 
-    value = ((packed & 0xF0) << 4) | (packed & 0xF);
+    value = UnpackAttribute(packed);
     while (attribute != runEnd) {
       *attribute++ = value;
     }
