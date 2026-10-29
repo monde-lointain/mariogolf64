@@ -91,6 +91,12 @@
 #define PAGE_ARROW_LEFT_X 76
 #define PAGE_ARROW_RIGHT_X 212
 #define PAGE_ARROW_TOP 122
+/*
+ * The right arrow's texture starts a whole image in, where the mirrored wrap
+ * reads the left arrow's backward
+ */
+#define MirroredArrowStart(arrowIndex) \
+  TexelCoordinate(((arrowIndex) == PAGE_ARROW_RIGHT) * PAGE_ARROW_SIZE)
 /* func_8021C67C turns the page arrows a quarter turn each way, and draws them
  * as squares away from the camera */
 #define TURNED_ARROW_ANGLE 90.0f
@@ -1642,8 +1648,8 @@ void func_8021BE88_ovl_01(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, left << 2, PAGE_ARROW_TOP << 2,
         (left + PAGE_ARROW_SIZE) << 2, (PAGE_ARROW_TOP + PAGE_ARROW_SIZE) << 2,
-        G_TX_RENDERTILE, (arrowIndex == PAGE_ARROW_RIGHT) << 10, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, MirroredArrowStart(arrowIndex), 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -1702,8 +1708,7 @@ void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY) {
     gSPScisTextureRectangle(gfx++, left << 2,
         (centerY - (PAGE_ARROW_SIZE / 2)) << 2, (left + PAGE_ARROW_SIZE) << 2,
         (centerY + (PAGE_ARROW_SIZE / 2)) << 2, G_TX_RENDERTILE,
-        (arrowIndex == PAGE_ARROW_RIGHT) << 10, 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+        MirroredArrowStart(arrowIndex), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
