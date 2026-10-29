@@ -58,7 +58,6 @@ typedef struct Unk800C2B90 {
   /* 0x6 */ s16 row;
 } Unk800C2B90; /* size = 0x8 */
 
-extern s16 D_800FBD40;
 extern s8 D_800FBDB9;
 extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
@@ -1942,7 +1941,7 @@ void func_8005D9A0(void) {
   D_801B70F2 = 0;
   D_801B70F3 = 0;
   memset(&D_801323A0, 0, sizeof(D_801323A0));
-  D_800FBD40 = 0;
+  D_800FBD40.unk0 = 0;
   D_801B71CC = 0;
   D_800FBE2C = 0;
   D_800FBDB9 = 0;
