@@ -5296,6 +5296,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80200EF0_ovl_01);
 #define VIEWER_STICK_DEAD_ZONE 20
 #define VIEWER_STICK_DIVISOR 4
 #define VIEWER_SCALE_STEP 0.05f
+/* With Z held, the left and right C buttons step the animation a frame either
+ * way, and up and down play it fast either way */
+#define VIEWER_STEP_SPEED 1.0f
+#define VIEWER_FAST_SPEED 4.0f
 #define VIEWER_LAST_ANIMATION 34
 /* From this animation on, the character's second model plays it */
 #define VIEWER_FIRST_SECOND_MODEL_ANIMATION 12
@@ -5450,19 +5454,19 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
     if (g_ControllerStates[0].buttons & Z_TRIG) {
       SetAnimationSpeed(D_8022FBB4_ovl_01, 0.0f);
       if (g_ControllerStates[0].repeatedButtons & L_CBUTTONS) {
-        SetAnimationSpeed(D_8022FBB4_ovl_01, -1.0f);
+        SetAnimationSpeed(D_8022FBB4_ovl_01, -VIEWER_STEP_SPEED);
       }
 
       if (g_ControllerStates[0].repeatedButtons & R_CBUTTONS) {
-        SetAnimationSpeed(D_8022FBB4_ovl_01, 1.0f);
+        SetAnimationSpeed(D_8022FBB4_ovl_01, VIEWER_STEP_SPEED);
       }
 
       if (g_ControllerStates[0].buttons & U_CBUTTONS) {
-        SetAnimationSpeed(D_8022FBB4_ovl_01, 4.0f);
+        SetAnimationSpeed(D_8022FBB4_ovl_01, VIEWER_FAST_SPEED);
       }
 
       if (g_ControllerStates[0].buttons & D_CBUTTONS) {
-        SetAnimationSpeed(D_8022FBB4_ovl_01, -4.0f);
+        SetAnimationSpeed(D_8022FBB4_ovl_01, -VIEWER_FAST_SPEED);
       }
 
       AnimateAllCharacters();
