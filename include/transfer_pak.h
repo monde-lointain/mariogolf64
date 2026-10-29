@@ -142,11 +142,11 @@ typedef struct GameBoyTransfer {
   /* 0x7B8 */ s32 firstShownListedIndex; /* The list scrolls to show it first */
   /* The Mario Golf cartridges opened, and which other results some pak gave */
   /* 0x7BC */ s32 openedCartridgeCount;
-  /* 0x7C0 */ s32 hasMissingCartridge;
-  /* 0x7C4 */ s32 hasOtherPak;
-  /* 0x7C8 */ s32 hasMissingPak;
-  /* 0x7CC */ s32 hasWrongCartridge;
-  /* 0x7D0 */ s32 hasUninitializedCartridge;
+  /* 0x7C0 */ Boolean hasMissingCartridge;
+  /* 0x7C4 */ Boolean hasOtherPak;
+  /* 0x7C8 */ Boolean hasMissingPak;
+  /* 0x7CC */ Boolean hasWrongCartridge;
+  /* 0x7D0 */ Boolean hasUninitializedCartridge;
   /* 0x7D4 */ s32 unk7D4;
   /* 0x7D8 */ s8
       listedCharacters[CARTRIDGE_CHARACTER_COUNT]; /* Present ones, then -1 */
