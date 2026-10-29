@@ -1716,15 +1716,19 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C6D8_ovl_01);
 #endif
 
-/* Doesn't match: the original loads the 96 for the cursor's y after
- * g_DrawBufferIndex, not before */
-#ifdef NON_MATCHING
+/*
+ * Draws the menu cursor at (x, y), its vertex colors cycling a little further
+ * each frame. The screen position goes in locals before the call because the
+ * original loads the 96 for its y after g_DrawBufferIndex.
+ */
 void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   Gfx* gfx = *displayListHead;
   s32 vertexIndex;
   s32 red;
   s32 blue;
   s32 green;
+  f32 screenX;
+  f32 screenY;
 
   for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT;
       vertexIndex++) {
@@ -1746,9 +1750,10 @@ void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   guOrtho(&D_8023A3A0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
-  guTranslate(&D_8023A3E0_ovl_01[g_DrawBufferIndex],
-      (f32)(x - CHARACTER_CURSOR_ORIGIN_X) - HALF_PIXEL,
-      (f32)(CHARACTER_CURSOR_ORIGIN_Y - y) + HALF_PIXEL, MENU_CURSOR_Z);
+  screenX = (f32)(x - CHARACTER_CURSOR_ORIGIN_X) - HALF_PIXEL;
+  screenY = (f32)(CHARACTER_CURSOR_ORIGIN_Y - y) + HALF_PIXEL;
+  guTranslate(
+      &D_8023A3E0_ovl_01[g_DrawBufferIndex], screenX, screenY, MENU_CURSOR_Z);
   guRotate(&D_8023A460_ovl_01[g_DrawBufferIndex], 0.0f, 0.0f, 1.0f, 0.0f);
   guScale(&D_8023A4E0_ovl_01[g_DrawBufferIndex], 1.0f, 1.0f, 1.0f);
   gDPPipeSync(gfx++);
@@ -1785,9 +1790,6 @@ void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020CD20_ovl_01);
-#endif
 
 void func_8020D338_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
