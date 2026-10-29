@@ -108,9 +108,6 @@
 /* The blinking pair of arrows that func_8021CBDC draws above and below a point
  */
 #define STATS_ARROW_COUNT 2
-#define STATS_ARROW_SIZE 16
-#define STATS_ARROW_IMAGE_SIZE (STATS_ARROW_SIZE * STATS_ARROW_SIZE / 2)
-#define STATS_ARROW_BLINK_STRIDE (4 * STATS_ARROW_IMAGE_SIZE)
 #define STATS_ARROW_BLINK_FRAME_COUNT 4
 #define STATS_ARROW_LEFT 152
 #define STATS_UP_ARROW_OFFSET (-52)
@@ -1078,11 +1075,6 @@ s32 func_80219948_ovl_01(void) {
 
 /* The arrows around the chosen column, each pushed outward while its D-Pad
  * button is held. The left arrow is the right one's image mirrored. */
-#define OPTION_ARROW_UP 0
-#define OPTION_ARROW_DOWN 1
-#define OPTION_ARROW_RIGHT 2
-#define OPTION_ARROW_LEFT 3
-#define OPTION_ARROW_COUNT 4
 #define OPTION_ARROW_MASK 4
 #define OPTION_ARROW_PUSH 6
 #define OPTION_ARROW_MIDDLE_X 24
@@ -1329,46 +1321,46 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023B358_ovl_01)));
-  for (arrowIndex = 0; arrowIndex != OPTION_ARROW_COUNT; arrowIndex++) {
-    if (arrowIndex == OPTION_ARROW_LEFT) {
+  for (arrowIndex = 0; arrowIndex != MENU_ARROW_COUNT; arrowIndex++) {
+    if (arrowIndex == MENU_ARROW_LEFT) {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)D_8023B358_ovl_01 +
-              ((D_802303A2_ovl_01 * STATS_ARROW_BLINK_STRIDE) +
+              ((D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE) +
                   PALETTED_TEXELS_OFFSET +
-                  (OPTION_ARROW_RIGHT * STATS_ARROW_IMAGE_SIZE))),
-          G_IM_FMT_CI, STATS_ARROW_SIZE, STATS_ARROW_SIZE, 0, 0,
-          STATS_ARROW_SIZE - 1, STATS_ARROW_SIZE - 1, 0,
+                  (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE))),
+          G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
+          GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
           G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, OPTION_ARROW_MASK,
           OPTION_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)D_8023B358_ovl_01 +
-              ((D_802303A2_ovl_01 * STATS_ARROW_BLINK_STRIDE) +
+              ((D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE) +
                   PALETTED_TEXELS_OFFSET +
-                  (arrowIndex * STATS_ARROW_IMAGE_SIZE))),
-          G_IM_FMT_CI, STATS_ARROW_SIZE, STATS_ARROW_SIZE, 0, 0,
-          STATS_ARROW_SIZE - 1, STATS_ARROW_SIZE - 1, 0,
+                  (arrowIndex * GREEN_ARROW_IMAGE_SIZE))),
+          G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
+          GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     }
 
     gDPPipeSync(gfx++);
-    if (arrowIndex == OPTION_ARROW_UP) {
+    if (arrowIndex == MENU_ARROW_UP) {
       arrowX = OPTION_ARROW_MIDDLE_X;
       arrowY = (g_MenuRepeatButtons & U_JPAD)
           ? (OPTION_ARROW_UP_Y - OPTION_ARROW_PUSH)
           : OPTION_ARROW_UP_Y;
-    } else if (arrowIndex == OPTION_ARROW_DOWN) {
+    } else if (arrowIndex == MENU_ARROW_DOWN) {
       arrowX = OPTION_ARROW_MIDDLE_X;
       arrowY = (g_MenuRepeatButtons & D_JPAD)
           ? (OPTION_ARROW_DOWN_Y + OPTION_ARROW_PUSH)
           : OPTION_ARROW_DOWN_Y;
-    } else if (arrowIndex == OPTION_ARROW_RIGHT) {
+    } else if (arrowIndex == MENU_ARROW_RIGHT) {
       arrowY = OPTION_ARROW_MIDDLE_Y;
       arrowX = (g_MenuRepeatButtons & R_JPAD)
           ? (OPTION_ARROW_RIGHT_X + OPTION_ARROW_PUSH)
           : OPTION_ARROW_RIGHT_X;
-    } else if (arrowIndex == OPTION_ARROW_LEFT) {
+    } else if (arrowIndex == MENU_ARROW_LEFT) {
       arrowY = OPTION_ARROW_MIDDLE_Y;
       arrowX = (g_MenuRepeatButtons & L_JPAD)
           ? (OPTION_ARROW_LEFT_X - OPTION_ARROW_PUSH)
@@ -1383,11 +1375,10 @@ void func_80219BD4_ovl_01(Gfx** displayListHead, s32 slide,
         QuarterPixels(offsetY + OPTION_COLUMN_TOP + arrowY),
         QuarterPixels(
             D_802306D8_ovl_01[g_ChosenPlayerCount - 1][memory->unk29] + arrowX +
-            slide + STATS_ARROW_SIZE),
-        QuarterPixels(offsetY + OPTION_COLUMN_TOP + arrowY + STATS_ARROW_SIZE),
+            slide + GREEN_ARROW_SIZE),
+        QuarterPixels(offsetY + OPTION_COLUMN_TOP + arrowY + GREEN_ARROW_SIZE),
         G_TX_RENDERTILE,
-        (arrowIndex == OPTION_ARROW_LEFT) ? TexelCoordinate(STATS_ARROW_SIZE)
-                                          : 0,
+        (arrowIndex == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0,
         0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -1802,10 +1793,10 @@ void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY) {
   for (arrowIndex = 0; arrowIndex != STATS_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
         TextureAddress(ImageTexels(D_8023B358_ovl_01) +
-            (D_802303A2_ovl_01 * STATS_ARROW_BLINK_STRIDE +
-                arrowIndex * STATS_ARROW_IMAGE_SIZE)),
-        G_IM_FMT_CI, STATS_ARROW_SIZE, STATS_ARROW_SIZE, 0, 0,
-        STATS_ARROW_SIZE - 1, STATS_ARROW_SIZE - 1, 0,
+            (D_802303A2_ovl_01 * GREEN_ARROW_FRAME_SIZE +
+                arrowIndex * GREEN_ARROW_IMAGE_SIZE)),
+        G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
+        GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
@@ -1819,8 +1810,8 @@ void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY) {
 
     gSPScisTextureRectangle(gfx++, QuarterPixels(left),
         QuarterPixels(offsetY + centerY),
-        QuarterPixels(left + STATS_ARROW_SIZE),
-        QuarterPixels(offsetY + (centerY + STATS_ARROW_SIZE)), G_TX_RENDERTILE,
+        QuarterPixels(left + GREEN_ARROW_SIZE),
+        QuarterPixels(offsetY + (centerY + GREEN_ARROW_SIZE)), G_TX_RENDERTILE,
         0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }

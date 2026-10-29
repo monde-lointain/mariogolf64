@@ -31,13 +31,6 @@
 #define UNUSED_SWING 8
 #define UNUSED_SWING_STEP 2
 #define ARROW_COUNT 2
-/* A 16x16 arrow takes four bits a texel */
-#define ARROW_IMAGE_SIZE (ARROW_SIZE * ARROW_SIZE / 2)
-/* The arrow image holds each animation frame this many bytes apart */
-#define ARROW_FRAME_SIZE 0x200
-#define ARROW_UP 0
-#define ARROW_DOWN 1
-#define ARROW_SIZE 16
 #define ARROW_LEFT 152
 #define ARROW_UP_TOP 54
 #define ARROW_DOWN_TOP 200
@@ -291,8 +284,8 @@ void UpdateHelpBoard(void) {
  * compiles differently from the original.
  */
 #define IsTopicArrowShown(index) \
-  ((((index) == ARROW_UP) && (f_FirstListedTopic > 0)) || \
-      (((index) == ARROW_DOWN) && \
+  ((((index) == MENU_ARROW_UP) && (f_FirstListedTopic > 0)) || \
+      (((index) == MENU_ARROW_DOWN) && \
           (f_FirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)))
 
 /* Draws the chalkboard, the topic list with its hand and arrows, and the text
@@ -384,21 +377,23 @@ void DrawHelpBoard(Gfx** displayListHead) {
       if (IsTopicArrowShown(index)) {
         gDPLoadTextureTile_4b(gfx++,
             TextureAddress((u8*)f_ArrowImages +
-                (index * ARROW_IMAGE_SIZE + PALETTED_TEXELS_OFFSET +
-                    f_ArrowFrame * ARROW_FRAME_SIZE)),
-            G_IM_FMT_CI, ARROW_SIZE, 0, 0, 0, ARROW_SIZE - 1, ARROW_SIZE - 1, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                (index * GREEN_ARROW_IMAGE_SIZE + PALETTED_TEXELS_OFFSET +
+                    f_ArrowFrame * GREEN_ARROW_FRAME_SIZE)),
+            G_IM_FMT_CI, GREEN_ARROW_SIZE, 0, 0, 0, GREEN_ARROW_SIZE - 1,
+            GREEN_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPPipeSync(gfx++);
         arrowLeft = ARROW_LEFT;
         arrowTop = ARROW_DOWN_TOP;
-        if (index == ARROW_UP) {
+        if (index == MENU_ARROW_UP) {
           arrowTop = ARROW_UP_TOP;
         }
 
         gSPScisTextureRectangle(gfx++, QuarterPixels(arrowLeft),
-            QuarterPixels(arrowTop), QuarterPixels(arrowLeft + ARROW_SIZE),
-            QuarterPixels(arrowTop + ARROW_SIZE), G_TX_RENDERTILE, 0, 0,
+            QuarterPixels(arrowTop),
+            QuarterPixels(arrowLeft + GREEN_ARROW_SIZE),
+            QuarterPixels(arrowTop + GREEN_ARROW_SIZE), G_TX_RENDERTILE, 0, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }

@@ -168,13 +168,9 @@ enum ListingState {
 
 /* The arrows beside the list when it scrolls */
 #define ARROW_FRAME_COUNT 8
-#define ARROWS_IMAGE_SIZE 0x200 /* Of each frame's image */
-#define ARROW_SIZE 16
 #define ARROWS_TOP 92
 #define LEFT_ARROW_LEFT 16
-#define LEFT_ARROW_ROW 48
 #define RIGHT_ARROW_LEFT 288
-#define RIGHT_ARROW_ROW 32
 #define CONTROLLER_ICONS_LEFT 60
 #define CONTROLLER_ICONS_TOP 72
 #define CONTROLLER_ICON_SPACING 56
@@ -2041,24 +2037,27 @@ void DrawBringCharactersScreen(
     LoadSmallPalette(&displayList, 0, ImageBody(transfer->arrowsImage));
     LoadNibbleTextureBlock(&displayList,
         ImageTexelsAt(transfer->arrowsImage,
-            f_CharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE),
-        G_IM_FMT_CI, ARROW_SIZE, ARROW_SIZE * 4, 0, 0, 0, 0, 0, 0, 0);
+            f_CharacterArrowFrame / 4 * GREEN_ARROW_FRAME_SIZE),
+        G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0,
+        0, 0);
     gDPPipeSync(displayList++);
     if (transfer->unk7B8 > 0) {
       DrawTextureRect(&displayList, QuarterPixels(LEFT_ARROW_LEFT),
           QuarterPixels(ARROWS_TOP),
-          QuarterPixels(LEFT_ARROW_LEFT + ARROW_SIZE),
-          QuarterPixels(ARROWS_TOP + ARROW_SIZE), G_TX_RENDERTILE, 0,
-          TexelCoordinate(LEFT_ARROW_ROW), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          QuarterPixels(LEFT_ARROW_LEFT + GREEN_ARROW_SIZE),
+          QuarterPixels(ARROWS_TOP + GREEN_ARROW_SIZE), G_TX_RENDERTILE, 0,
+          TexelCoordinate(GreenArrowRow(MENU_ARROW_LEFT)), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
 
     if (transfer->unk7B8 <
         transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
       DrawTextureRect(&displayList, QuarterPixels(RIGHT_ARROW_LEFT),
           QuarterPixels(ARROWS_TOP),
-          QuarterPixels(RIGHT_ARROW_LEFT + ARROW_SIZE),
-          QuarterPixels(ARROWS_TOP + ARROW_SIZE), G_TX_RENDERTILE, 0,
-          TexelCoordinate(RIGHT_ARROW_ROW), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          QuarterPixels(RIGHT_ARROW_LEFT + GREEN_ARROW_SIZE),
+          QuarterPixels(ARROWS_TOP + GREEN_ARROW_SIZE), G_TX_RENDERTILE, 0,
+          TexelCoordinate(GreenArrowRow(MENU_ARROW_RIGHT)), TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
 

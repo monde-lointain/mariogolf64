@@ -111,14 +111,8 @@
 #define SIDE_ARROW_COUNT 2
 #define SIDE_ARROW_RIGHT 0
 #define SIDE_ARROW_LEFT 1
-#define SIDE_ARROW_SIZE 16
-#define SIDE_ARROW_FIRST_IMAGE 2
-#define SIDE_ARROW_IMAGE_SIZE (SIDE_ARROW_SIZE * SIDE_ARROW_SIZE / 2)
-#define SIDE_ARROW_BLINK_STRIDE (4 * SIDE_ARROW_IMAGE_SIZE)
+#define SIDE_ARROW_FIRST_IMAGE MENU_ARROW_RIGHT
 #define SIDE_ARROW_BLINK_FRAME_COUNT 4
-/* func_80212FEC draws one of the four arrow images, in either blink state */
-#define ARROW_BLINK_STATE_COUNT 2
-#define ARROW_DIRECTION_COUNT 4
 
 /* The birdie badge icon of D_8023A810 and the count beside it */
 #define BADGE_ICON_X 222
@@ -1565,30 +1559,29 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
-  frameOffset =
-      (*blinkFrame * SIDE_ARROW_BLINK_STRIDE) + PALETTED_TEXELS_OFFSET;
+  frameOffset = (*blinkFrame * GREEN_ARROW_FRAME_SIZE) + PALETTED_TEXELS_OFFSET;
   for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
         TextureAddress((u32)image +
-            ((SIDE_ARROW_FIRST_IMAGE + arrowIndex) * SIDE_ARROW_IMAGE_SIZE +
+            ((SIDE_ARROW_FIRST_IMAGE + arrowIndex) * GREEN_ARROW_IMAGE_SIZE +
                 frameOffset)),
-        G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0,
-        SIDE_ARROW_SIZE - 1, SIDE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
+        G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
+        GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     if (arrowIndex == SIDE_ARROW_RIGHT) {
       left = centerX + (width / 2);
     }
 
     if (arrowIndex == SIDE_ARROW_LEFT) {
-      left = centerX - (width / 2) - SIDE_ARROW_SIZE;
+      left = centerX - (width / 2) - GREEN_ARROW_SIZE;
     }
 
     gSPScisTextureRectangle(gfx++, QuarterPixels(left),
-        QuarterPixels(centerY - (SIDE_ARROW_SIZE / 2)),
-        QuarterPixels(left + SIDE_ARROW_SIZE),
-        QuarterPixels(centerY + (SIDE_ARROW_SIZE / 2)), G_TX_RENDERTILE, 0, 0,
+        QuarterPixels(centerY - (GREEN_ARROW_SIZE / 2)),
+        QuarterPixels(left + GREEN_ARROW_SIZE),
+        QuarterPixels(centerY + (GREEN_ARROW_SIZE / 2)), G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -1616,36 +1609,36 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
     blinkFrame = 0;
   }
 
-  if (blinkFrame >= ARROW_BLINK_STATE_COUNT) {
-    blinkFrame = ARROW_BLINK_STATE_COUNT - 1;
+  if (blinkFrame >= GREEN_ARROW_FRAME_COUNT) {
+    blinkFrame = GREEN_ARROW_FRAME_COUNT - 1;
   }
 
   if (direction < 0) {
     direction = 0;
   }
 
-  if (direction >= ARROW_DIRECTION_COUNT) {
-    direction = ARROW_DIRECTION_COUNT - 1;
+  if (direction >= MENU_ARROW_COUNT) {
+    direction = MENU_ARROW_COUNT - 1;
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress((u32)image + headerSize));
   gDPLoadTextureTile_4b(gfx++,
       TextureAddress((u32)image +
-          (direction * SIDE_ARROW_IMAGE_SIZE +
-              (blinkFrame * SIDE_ARROW_BLINK_STRIDE +
+          (direction * GREEN_ARROW_IMAGE_SIZE +
+              (blinkFrame * GREEN_ARROW_FRAME_SIZE +
                   (headerSize +
                       SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)))),
-      G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0, SIDE_ARROW_SIZE - 1,
-      SIDE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+      G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
+      GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  left = centerX - (SIDE_ARROW_SIZE / 2);
-  top = centerY - (SIDE_ARROW_SIZE / 2);
+  left = centerX - (GREEN_ARROW_SIZE / 2);
+  top = centerY - (GREEN_ARROW_SIZE / 2);
   gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
-      QuarterPixels(centerX + (SIDE_ARROW_SIZE / 2)),
-      QuarterPixels(centerY + (SIDE_ARROW_SIZE / 2)), G_TX_RENDERTILE, 0, 0,
+      QuarterPixels(centerX + (GREEN_ARROW_SIZE / 2)),
+      QuarterPixels(centerY + (GREEN_ARROW_SIZE / 2)), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;

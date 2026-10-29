@@ -122,6 +122,27 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define ASSET_GREEN_ARROWS_COPY 0x71E
 /* Green arrows pointing up, down, right and left */
 #define ASSET_GREEN_ARROWS 0x720
+
+/*
+ * ASSET_GREEN_ARROWS holds a frame of small arrows and then one of large
+ * arrows, which the menus alternate between. Each frame is a column of 16 by
+ * 16 arrows, four bits a texel, in MenuArrow order.
+ */
+enum MenuArrow {
+  MENU_ARROW_UP,
+  MENU_ARROW_DOWN,
+  MENU_ARROW_RIGHT,
+  MENU_ARROW_LEFT,
+  MENU_ARROW_COUNT
+};
+
+#define GREEN_ARROW_SIZE 16
+#define GREEN_ARROW_IMAGE_SIZE (GREEN_ARROW_SIZE * GREEN_ARROW_SIZE / 2)
+#define GREEN_ARROW_FRAME_COUNT 2
+#define GREEN_ARROW_FRAME_HEIGHT (GREEN_ARROW_SIZE * MENU_ARROW_COUNT)
+#define GREEN_ARROW_FRAME_SIZE (GREEN_ARROW_IMAGE_SIZE * MENU_ARROW_COUNT)
+/* The texel row of an arrow's image in its frame */
+#define GreenArrowRow(arrow) ((arrow) * GREEN_ARROW_SIZE)
 /* Yellow digits, then m, y, ft and a point */
 #define ASSET_DISTANCE_DIGITS 0x722
 /* Its glyphs sit side by side in a strip DISTANCE_FONT_WIDTH wide */

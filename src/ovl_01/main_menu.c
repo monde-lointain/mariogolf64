@@ -6589,16 +6589,10 @@ const char D_802316FC_ovl_01[] = "Luigi's Garden";
 #define OPTION_TOGGLE_COUNT OPTIONS_CHOICE_ERASE_SAVE_DATA
 
 /*
- * The arrows either side of the chosen toggle switch frames every 5 updates.
- * The left arrow is the fourth of a frame, the right one the third
+ * The arrows either side of the chosen toggle switch frames every 5 updates
  */
-#define ARROW_SIZE 16
-#define ARROW_FRAME_HEIGHT (ARROW_SIZE * 4)
-#define ARROW_FRAME_SIZE (ARROW_SIZE * ARROW_FRAME_HEIGHT / 2)
-#define ARROW_TIMER_PERIOD 10
 #define ARROW_FRAME_DURATION 5
-#define LEFT_ARROW_ROW (ARROW_SIZE * 3)
-#define RIGHT_ARROW_ROW (ARROW_SIZE * 2)
+#define ARROW_TIMER_PERIOD (GREEN_ARROW_FRAME_COUNT * ARROW_FRAME_DURATION)
 #define LEFT_ARROW_LEFT 125
 #define RIGHT_ARROW_LEFT 247
 #define ARROW_TOP 86
@@ -6854,8 +6848,9 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
     D_8022FEFC_ovl_01 = (D_8022FEFC_ovl_01 + 1) % ARROW_TIMER_PERIOD;
     frameIndex = D_8022FEFC_ovl_01 < ARROW_FRAME_DURATION;
     LoadNibbleTextureBlock(&gfx,
-        ImageTexels(arrows) + (frameIndex * ARROW_FRAME_SIZE), G_IM_FMT_CI,
-        ARROW_SIZE, ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        ImageTexels(arrows) + (frameIndex * GREEN_ARROW_FRAME_SIZE),
+        G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0,
+        0, 0);
     /* The first pass draws the arrows' shadows */
     for (loopIndex = 0; loopIndex != ARROW_PASS_COUNT; loopIndex++) {
       shiftX = 0;
@@ -6874,17 +6869,17 @@ void func_80206A68_ovl_01(Gfx** displayListHead) {
       rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
       DrawTextureRect(&gfx, QuarterPixels(LEFT_ARROW_LEFT + shiftX),
           QuarterPixels(rowTop + ARROW_TOP + shiftY),
-          QuarterPixels(LEFT_ARROW_LEFT + ARROW_SIZE + shiftX),
-          QuarterPixels(rowTop + ARROW_TOP + ARROW_SIZE + shiftY),
-          G_TX_RENDERTILE, 0, TexelCoordinate(LEFT_ARROW_ROW), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+          QuarterPixels(LEFT_ARROW_LEFT + GREEN_ARROW_SIZE + shiftX),
+          QuarterPixels(rowTop + ARROW_TOP + GREEN_ARROW_SIZE + shiftY),
+          G_TX_RENDERTILE, 0, TexelCoordinate(GreenArrowRow(MENU_ARROW_LEFT)),
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
       DrawTextureRect(&gfx, QuarterPixels(RIGHT_ARROW_LEFT + shiftX),
           QuarterPixels(rowTop + ARROW_TOP + shiftY),
-          QuarterPixels(RIGHT_ARROW_LEFT + ARROW_SIZE + shiftX),
-          QuarterPixels(rowTop + ARROW_TOP + ARROW_SIZE + shiftY),
-          G_TX_RENDERTILE, 0, TexelCoordinate(RIGHT_ARROW_ROW), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+          QuarterPixels(RIGHT_ARROW_LEFT + GREEN_ARROW_SIZE + shiftX),
+          QuarterPixels(rowTop + ARROW_TOP + GREEN_ARROW_SIZE + shiftY),
+          G_TX_RENDERTILE, 0, TexelCoordinate(GreenArrowRow(MENU_ARROW_RIGHT)),
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
