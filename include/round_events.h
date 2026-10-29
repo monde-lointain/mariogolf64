@@ -20,6 +20,12 @@ enum ContactEffect {
   CONTACT_EFFECT_FADE = 10
 };
 
+/* Whether a ContactEffect shows an effect, in one of the styles */
+#define IsShownContactEffect(effect) \
+  ((effect) == CONTACT_EFFECT_POWER_WOOD || \
+      (effect) == CONTACT_EFFECT_POWER_IRON || \
+      (effect) == CONTACT_EFFECT_SHOT || (effect) == CONTACT_EFFECT_PUTT)
+
 /* The styles of contact effect; each character has one, and Game Boy characters
  * one for their ball */
 enum ContactStyle {

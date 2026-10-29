@@ -2422,9 +2422,7 @@ void StartContactEffect(s32 effect) {
 
   if (effect == CONTACT_EFFECT_NONE) {
     g_ContactEffect = effect;
-  } else if (effect == CONTACT_EFFECT_POWER_WOOD ||
-      effect == CONTACT_EFFECT_POWER_IRON || effect == CONTACT_EFFECT_SHOT ||
-      effect == CONTACT_EFFECT_PUTT) {
+  } else if (IsShownContactEffect(effect)) {
     for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
       guTranslate(&f_ContactMatrices[i],
           g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
@@ -2450,10 +2448,7 @@ void StartContactEffect(s32 effect) {
     f_IsContactEffectFading = TRUE;
   }
 
-  if (effect != CONTACT_EFFECT_NONE &&
-      (effect == CONTACT_EFFECT_POWER_WOOD ||
-          effect == CONTACT_EFFECT_POWER_IRON ||
-          effect == CONTACT_EFFECT_SHOT || effect == CONTACT_EFFECT_PUTT)) {
+  if (effect != CONTACT_EFFECT_NONE && IsShownContactEffect(effect)) {
     /* Each style sets its quad's half width, its texture's far corner and its
      * sound */
     if (f_ContactStyle == CONTACT_STYLE_POWER_IRON) {
