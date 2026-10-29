@@ -1627,6 +1627,12 @@ void func_801F6B20_ovl_01(void) {}
 
 const char D_80231514_ovl_01[] = "%s";
 
+/* Whether a game mode plays the holes chosen on the menu */
+#define IsHoleChoiceMode(mode) \
+  ((mode) == GAME_MODE_STROKE || (mode) == GAME_MODE_MATCH_GAME || \
+      (mode) == GAME_MODE_RING_SHOT || (mode) == GAME_MODE_SKINS_MATCH || \
+      (mode) == GAME_MODE_CLUB_SLOTS)
+
 void func_801F6B28_ovl_01(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
@@ -1679,11 +1685,7 @@ void func_801F6B28_ovl_01(void) {
       g_GameState.courseIndex = GetChosenCourseIndex();
     }
 
-    if (g_GameState.gameMode == GAME_MODE_STROKE ||
-        g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-        g_GameState.gameMode == GAME_MODE_RING_SHOT ||
-        g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
-        g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+    if (IsHoleChoiceMode(g_GameState.gameMode)) {
       /* Through a pointer, as the original keeps the address in a register for
        * every store */
       holeSelection = &g_GameState.holeSelection;
