@@ -430,8 +430,8 @@ void SetTextName(char* name) {
  * Shows a message in a slot at x and y, or around them when it is
  * centered. A new message starts unrevealed.
  */
-void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
-    u8 red, u8 green, u8 blue, u8 alpha) {
+void SetTextSlot(s32 x, s32 y, MessageId messageId, s32 fontSize, s32 slot,
+    TextFlags flags, u8 red, u8 green, u8 blue, u8 alpha) {
   TextSlot* textSlot;
   s32 width;
   s32 height;
@@ -1102,7 +1102,7 @@ void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient) {
  * Measures a string of character codes, at the font size. Only the large
  * font can be proportional. The two loops differ in form to match.
  */
-s32 MeasureText(char* text, s32 fontSize, s32 flags) {
+s32 MeasureText(char* text, s32 fontSize, TextFlags flags) {
   s32 width = 0;
   s32 code;
 
@@ -1167,7 +1167,7 @@ s32 MeasureText(char* text, s32 fontSize, s32 flags) {
  * height of its line breaks.
  */
 void MeasureMessage(
-    s32 messageId, s32 fontSize, s32* width, s32* height, s32 slot) {
+    MessageId messageId, s32 fontSize, s32* width, s32* height, s32 slot) {
   s32 lineWidths[MESSAGE_LINE_COUNT] = {0, 0, 0};
   s32 i;
   s32 lineCount;
@@ -1764,7 +1764,7 @@ void ClearGlyphSprites(void) {
  * the text is centered on x.
  */
 void PlaceGlyphGroup(
-    s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char* text) {
+    s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, char* text) {
   s32 i;
   s32 halfWidth;
   s32 advance;
@@ -1849,7 +1849,7 @@ void PlaceGlyphGroup(
  * high halfword and half its height in the low one.
  */
 s32 PlaceMessageGlyphGroup(
-    s32 group, s32 fontSize, s32 x, s32 y, s32 messageId) {
+    s32 group, s32 fontSize, s32 x, s32 y, MessageId messageId) {
   s32 width;
   s32 height;
   s32 i;
@@ -2195,7 +2195,7 @@ void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text) {
  * ignored.
  */
 void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
-    s32 envColor, s32 primColor, s32 flags) {
+    s32 envColor, s32 primColor, TextFlags flags) {
   Gfx* gfx = *displayListHead;
   u8 env[3];
   u8 prim[3];

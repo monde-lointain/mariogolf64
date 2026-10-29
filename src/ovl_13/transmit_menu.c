@@ -417,7 +417,7 @@ s32 TagCartridges(void);
 s32 CheckStatusCartridge(s32 cartridgeIndex);
 s32 WriteStatusToCartridge(s32 cartridgeIndex);
 s32 WriteExperienceToCartridge(s32 characterIndex);
-void SetNoticeState(s32 state, s32 message);
+void SetNoticeState(s32 state, MessageId message);
 s32 GetNoticeState(void);
 
 /* Results of opening and accessing the Game Boy cartridges, after the notice
@@ -1471,7 +1471,7 @@ static char f_GameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
 /* Begins every save in the Game Boy cartridge RAM */
 static char f_CartridgeSaveSignature[16] = "CAMELOT GAMEBOY";
 static s32 f_NoticeState = NOTICE_HIDDEN;
-static s32 f_NoticeMessage = 0;
+static MessageId f_NoticeMessage = 0;
 static s32 f_NoticeSize = 0;
 static s32 f_PressingHandFrame = 0;
 static s32 f_UnusedZeros[2] = {0, 0};
@@ -1547,7 +1547,7 @@ void ListPresentCharacters(void) {
 
 void DrawSendStatusHint(Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
-  s32 message = NO_MESSAGE;
+  MessageId message = NO_MESSAGE;
 
   switch (transfer->screenStep) {
     case SEND_STATUS_CHOOSING:
@@ -1684,7 +1684,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   GameBoyCharacter* character = g_GameBoyCharacters;
   Gfx* displayList = *displayListHead;
   Boolean isCharacterShown = FALSE;
-  s32 message;
+  MessageId message;
 
   SetUpTextDrawing(&displayList);
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
@@ -1735,7 +1735,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
 void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   s32 slot;
-  s32 message;
+  MessageId message;
 
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
   BeginShadowedText(&displayList);
@@ -3230,7 +3230,7 @@ s32 TagCartridges(void) {
   return PAK_RESULT_LOOSE_PAK;
 }
 
-void SetNoticeState(s32 state, s32 message) {
+void SetNoticeState(s32 state, MessageId message) {
   f_NoticeState = state;
   if (state == NOTICE_OPENING) {
     f_NoticeSize = 0;

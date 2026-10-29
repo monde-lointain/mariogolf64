@@ -166,7 +166,7 @@ enum HalfTurnState {
 
 /* A yes-or-no question; the choices index results */
 typedef struct Prompt {
-  /* 0x0 */ s32 messageId;
+  /* 0x0 */ MessageId messageId;
   /* 0x4 */ s32 defaultChoice;
   /* 0x8 */ s32 results[2];
 } Prompt; /* size = 0x10 */

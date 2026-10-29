@@ -424,7 +424,7 @@ static s32 f_TestBanner = 0;
 static Boolean f_IsFlipMessageLeaving = INITIAL_IS_FLIP_MESSAGE_LEAVING;
 /* FLIP_MESSAGE_FRAME_NONE while no message is shown */
 static s32 f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
-static s32 f_FlipMessageId = 0;
+static MessageId f_FlipMessageId = 0;
 static s32 f_FlipMessageHalfWidth = 0;
 static s32 f_FlipMessageHalfHeight = 0;
 static Vtx f_FlipMessageBoardVertices[4] = {
@@ -1060,7 +1060,7 @@ void DrawBanner(Gfx** displayListHead) {
  * away at once.
  */
 #ifdef NON_MATCHING
-void ShowFlipMessage(s32 messageId) {
+void ShowFlipMessage(MessageId messageId) {
   s32 halfSize;
   s32 halfWidth;
   s32 halfHeight;

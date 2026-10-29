@@ -248,7 +248,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
 void SetUpGradientTextDrawing(Gfx** displayListHead, s32);
 void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
 void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
-    s32 envColor, s32 primColor, s32 flags);
+    s32 envColor, s32 primColor, TextFlags flags);
 /*
  * The call leaves out MeasureText's flags, so this file declares its text
  * routines itself rather than including text.h; it is there to match.

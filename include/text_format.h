@@ -1,12 +1,15 @@
 #ifndef TEXT_FORMAT_H
 #define TEXT_FORMAT_H
 
+#include <ultra64.h>
+
 /*
  * The flags and font sizes that text slots and the text routines take. They
  * are apart from text.h for a file that declares its text routines itself.
  */
 
-/* Flags of a text slot */
+/* Flags of a text slot, and of the routines that draw text */
+typedef s32 TextFlags;
 /* The message appears one code more each time the slot is drawn */
 #define TEXT_FLAG_TYPED 0x01
 /* A typed message plays a sound every few codes */

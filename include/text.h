@@ -24,6 +24,9 @@
 /* Given this as its message, SetTextSlot clears the slot */
 #define NO_MESSAGE (-1)
 
+/* The number of one of the game's messages, or NO_MESSAGE */
+typedef s32 MessageId;
+
 /* The shadowed font's glyphs share one image */
 #define SHADOWED_FONT_IMAGE_WIDTH 256
 #define SHADOWED_FONT_IMAGE_HEIGHT 32
@@ -66,8 +69,8 @@ typedef struct TextSlot {
   /* 0x04 */ s32 y;
   /* 0x08 */ s32 fontSize;
   /* 0x0C */ s32 shownCount;
-  /* 0x10 */ s32 flags;
-  /* 0x14 */ s32 messageId;
+  /* 0x10 */ TextFlags flags;
+  /* 0x14 */ MessageId messageId;
   /* 0x18 */ u8 red;
   /* 0x19 */ u8 green;
   /* 0x1A */ u8 blue;
@@ -107,7 +110,7 @@ void LoadTextAssets(void);
 void FreeTextAssets(void);
 void ClearTextSlots(void);
 void PlaceGlyphGroup(
-    s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char* text);
+    s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, char* text);
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex);
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex);
 void SetTextName(char* name);
@@ -115,8 +118,8 @@ void SetTextName(char* name);
  * colors as ints without narrowing them. text.c, which defines it with u8
  * colors, skips this declaration. */
 #ifndef DEFINES_SET_TEXT_SLOT
-void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
-    s32 red, s32 green, s32 blue, s32 alpha);
+void SetTextSlot(s32 x, s32 y, MessageId messageId, s32 fontSize, s32 slot,
+    TextFlags flags, s32 red, s32 green, s32 blue, s32 alpha);
 #endif
 void SetUpTextDrawing(Gfx** displayListHead);
 void SetTextColor(Gfx** displayListHead, s32 red, s32 green, s32 blue);
@@ -133,9 +136,9 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group);
 void SetUpPerspectiveTextDrawing(Gfx** displayListHead);
 void RevealTextSlot(s32 slot);
 Boolean IsTextSlotRevealed(s32 slot);
-s32 MeasureText(char* text, s32 fontSize, s32 flags);
+s32 MeasureText(char* text, s32 fontSize, TextFlags flags);
 void MeasureMessage(
-    s32 messageId, s32 fontSize, s32* width, s32* height, s32 slot);
+    MessageId messageId, s32 fontSize, s32* width, s32* height, s32 slot);
 void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text);
 void BeginShadowedText(Gfx** displayListHead);
 void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text);
@@ -146,6 +149,6 @@ void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
 s32 GetDigitGlyphTop(char code);
 void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text);
 void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
-    s32 envColor, s32 primColor, s32 flags);
+    s32 envColor, s32 primColor, TextFlags flags);
 
 #endif
