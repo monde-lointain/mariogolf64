@@ -3565,12 +3565,18 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
 #endif
 
+#define BACKDROP_X 16
+#define BACKDROP_Y 24
 #define BACKDROP_STRIP_WIDTH 288
 #define BACKDROP_STRIP_HEIGHT 5
 #define BACKDROP_STRIP_COUNT 40
 /* The club tournament backdrop is taller, so it starts higher */
+#define CLUB_TOURNAMENT_BACKDROP_Y 8
 #define CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT 7
 #define CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT 32
+/* The pressing hand waits in the card's lower right corner */
+#define HAND_X 272
+#define HAND_Y 192
 #define HAND_SIZE 24
 /* The pressing hand shows each of its frames for this many draws */
 #define HAND_FRAME_DRAWS 3
@@ -3629,12 +3635,14 @@ void DrawRoundResults(Gfx** displayListHead) {
                   CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
           CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 16),
-          QuarterPixels(
-              f_ResultsTop + ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + 8)),
-          QuarterPixels(f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH),
+      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + BACKDROP_X),
           QuarterPixels(f_ResultsTop +
-              ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + 8 +
+              ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
+                  CLUB_TOURNAMENT_BACKDROP_Y)),
+          QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
+          QuarterPixels(f_ResultsTop +
+              ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
+                  CLUB_TOURNAMENT_BACKDROP_Y +
                   CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
@@ -3645,10 +3653,11 @@ void DrawRoundResults(Gfx** displayListHead) {
               (i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH, BACKDROP_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 16),
-          QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + 24 + f_ResultsTop),
-          QuarterPixels(f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH),
-          QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + 24 +
+      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + BACKDROP_X),
+          QuarterPixels(
+              (i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + f_ResultsTop),
+          QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
+          QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y +
               BACKDROP_STRIP_HEIGHT + f_ResultsTop),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
@@ -3661,10 +3670,10 @@ void DrawRoundResults(Gfx** displayListHead) {
         LargeImageTexels(f_ResultsHandImage) +
             (f_HandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE),
         G_IM_FMT_CI, G_IM_SIZ_8b, HAND_SIZE, HAND_SIZE, 0, 0, 0, 0, 0, 0, 0);
-    DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + 272),
-        QuarterPixels(f_ResultsTop + 192),
-        QuarterPixels(f_ResultsSlide + 272 + HAND_SIZE),
-        QuarterPixels(f_ResultsTop + 192 + HAND_SIZE), G_TX_RENDERTILE, 0, 0,
+    DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + HAND_X),
+        QuarterPixels(f_ResultsTop + HAND_Y),
+        QuarterPixels(f_ResultsSlide + HAND_X + HAND_SIZE),
+        QuarterPixels(f_ResultsTop + HAND_Y + HAND_SIZE), G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
