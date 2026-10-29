@@ -275,17 +275,17 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_PLUM:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(8, 0x1AC);
-          CueReactionSound(62, 0x3B);
+          CueReactionSound(8, SOUND_PLUM_EAGLE);
+          CueReactionSound(62, SOUND_SAVED);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(32, 0x1B9);
+          CueReactionSound(32, SOUND_PLUM_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(30, 0x1A3);
+          CueReactionSound(30, SOUND_AMBIENT_RANDOM_FIRST);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(25, 0x1B7);
+          CueReactionSound(25, SOUND_PLUM_BOGEY);
           break;
       }
 
@@ -293,17 +293,17 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_CHARLIE:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(0, 0xCC);
+          CueReactionSound(0, SOUND_CHARLIE_EAGLE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(0, 0xE1);
-          CueReactionSound(10, 0x3F);
+          CueReactionSound(0, SOUND_CHARLIE_BIRDIE);
+          CueReactionSound(10, SOUND_CHARLIE_BIRDIE_EFFECT);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(10, 0xD6);
+          CueReactionSound(10, SOUND_CHARLIE_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(34, 0xE0);
+          CueReactionSound(34, SOUND_CHARLIE_BOGEY);
           break;
       }
 
@@ -311,17 +311,17 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_PEACH:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(44, 0x15D);
-          CueReactionSound(92, 0x3D);
+          CueReactionSound(44, SOUND_PEACH_EAGLE);
+          CueReactionSound(92, SOUND_PEACH_EAGLE_EFFECT);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(12, 0x168);
+          CueReactionSound(12, SOUND_PEACH_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(12, 0x169);
+          CueReactionSound(12, SOUND_PEACH_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(8, 0x159);
+          CueReactionSound(8, SOUND_PEACH_BOGEY);
           break;
       }
 
@@ -329,17 +329,17 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_BABY_MARIO:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(15, 0xC6);
+          CueReactionSound(15, SOUND_BABY_MARIO_EAGLE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(9, 0xC9);
-          CueReactionSound(57, 0xCA);
+          CueReactionSound(9, SOUND_BABY_MARIO_PAR);
+          CueReactionSound(57, SOUND_BABY_MARIO_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(32, 0xC9);
+          CueReactionSound(32, SOUND_BABY_MARIO_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(40, 0xCB);
+          CueReactionSound(40, SOUND_BABY_MARIO_BOGEY);
           break;
       }
 
@@ -347,16 +347,16 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_LUIGI:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(2, 0x150);
+          CueReactionSound(2, SOUND_LUIGI_EAGLE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(0, 0x13F);
+          CueReactionSound(0, SOUND_LUIGI_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(18, 0x14E);
+          CueReactionSound(18, SOUND_LUIGI_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(7, 0x140);
+          CueReactionSound(7, SOUND_LUIGI_BOGEY);
           break;
       }
 
@@ -364,19 +364,19 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_YOSHI:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(0, 0x1A0);
-          CueReactionSound(56, 0x3B);
+          CueReactionSound(0, SOUND_YOSHI_EAGLE);
+          CueReactionSound(56, SOUND_SAVED);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(6, 0x194);
-          CueReactionSound(6, 0x3C);
+          CueReactionSound(6, SOUND_YOSHI_BIRDIE);
+          CueReactionSound(6, SOUND_YOSHI_BIRDIE_EFFECT);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(12, 0x18E);
-          CueReactionSound(42, 0x3B);
+          CueReactionSound(12, SOUND_YOSHI_PAR);
+          CueReactionSound(42, SOUND_SAVED);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(16, 0x19F);
+          CueReactionSound(16, SOUND_YOSHI_BOGEY);
           break;
       }
 
@@ -384,16 +384,16 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_SONNY:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(14, 0x1C4);
+          CueReactionSound(14, SOUND_SONNY_EAGLE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(2, 0x1D0);
+          CueReactionSound(2, SOUND_SONNY_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(7, 0x1D1);
+          CueReactionSound(7, SOUND_SONNY_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(0, 0x1C1);
+          CueReactionSound(0, SOUND_SONNY_BOGEY);
           break;
       }
 
@@ -401,19 +401,19 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_WARIO:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(0, 0x1FF);
-          CueReactionSound(21, 0x3C);
-          CueReactionSound(88, 0x3B);
+          CueReactionSound(0, SOUND_WARIO_EAGLE);
+          CueReactionSound(21, SOUND_YOSHI_BIRDIE_EFFECT);
+          CueReactionSound(88, SOUND_SAVED);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(0, 0x1F2);
+          CueReactionSound(0, SOUND_WARIO_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(17, 0x1F3);
+          CueReactionSound(17, SOUND_WARIO_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(0, 0x1EE);
-          CueReactionSound(28, 0x39);
+          CueReactionSound(0, SOUND_WARIO_BOGEY);
+          CueReactionSound(28, SOUND_WARIO_BOGEY_EFFECT);
           break;
       }
 
@@ -421,17 +421,17 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_HARRY:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(20, 0x105);
-          CueReactionSound(55, 0x3B);
+          CueReactionSound(20, SOUND_HARRY_EAGLE);
+          CueReactionSound(55, SOUND_SAVED);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(27, 0xFF);
+          CueReactionSound(27, SOUND_HARRY_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(24, 0x103);
+          CueReactionSound(24, SOUND_HARRY_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(5, 0xF5);
+          CueReactionSound(5, SOUND_HARRY_BOGEY);
           break;
       }
 
@@ -440,18 +440,18 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_METAL_MARIO:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(0, 0x180);
-          CueReactionSound(0, 0x3C);
-          CueReactionSound(68, 0x38);
+          CueReactionSound(0, SOUND_METAL_MARIO_EAGLE);
+          CueReactionSound(0, SOUND_YOSHI_BIRDIE_EFFECT);
+          CueReactionSound(68, SOUND_METAL_MARIO_EAGLE_EFFECT);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(0, 0x173);
+          CueReactionSound(0, SOUND_METAL_MARIO_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(13, 0x182);
+          CueReactionSound(13, SOUND_METAL_MARIO_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(26, 0x17F);
+          CueReactionSound(26, SOUND_METAL_MARIO_BOGEY);
           break;
       }
 
@@ -459,25 +459,25 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_MAPLE:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(66, 0x200);
-          CueReactionSound(38, 0x3E);
-          CueReactionSound(38, 0x35);
-          CueReactionSound(3, 0x4F);
-          CueReactionSound(11, 0x4F);
-          CueReactionSound(18, 0x4F);
-          CueReactionSound(25, 0x4F);
-          CueReactionSound(32, 0x4F);
+          CueReactionSound(66, SOUND_MAPLE_EAGLE);
+          CueReactionSound(38, SOUND_MAPLE_EAGLE_EFFECT);
+          CueReactionSound(38, SOUND_MAPLE_EAGLE_SECOND_EFFECT);
+          CueReactionSound(3, SOUND_MAPLE_REPEATED);
+          CueReactionSound(11, SOUND_MAPLE_REPEATED);
+          CueReactionSound(18, SOUND_MAPLE_REPEATED);
+          CueReactionSound(25, SOUND_MAPLE_REPEATED);
+          CueReactionSound(32, SOUND_MAPLE_REPEATED);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(40, 0x208);
-          CueReactionSound(20, 0x4F);
-          CueReactionSound(38, 0x4F);
+          CueReactionSound(40, SOUND_MAPLE_BIRDIE);
+          CueReactionSound(20, SOUND_MAPLE_REPEATED);
+          CueReactionSound(38, SOUND_MAPLE_REPEATED);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(28, 0x209);
+          CueReactionSound(28, SOUND_MAPLE_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(0, 0x206);
+          CueReactionSound(0, SOUND_MAPLE_BOGEY);
           break;
       }
 
@@ -485,27 +485,27 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_DONKEY_KONG:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(7, 0x42);
-          CueReactionSound(30, 0xE2);
-          CueReactionSound(35, 0x41);
-          CueReactionSound(40, 0x41);
-          CueReactionSound(45, 0x41);
-          CueReactionSound(50, 0x41);
-          CueReactionSound(55, 0x41);
-          CueReactionSound(60, 0x41);
-          CueReactionSound(70, 0xEA);
+          CueReactionSound(7, SOUND_DONKEY_KONG_EAGLE_EFFECT);
+          CueReactionSound(30, SOUND_DONKEY_KONG_EAGLE);
+          CueReactionSound(35, SOUND_DONKEY_KONG_REPEATED);
+          CueReactionSound(40, SOUND_DONKEY_KONG_REPEATED);
+          CueReactionSound(45, SOUND_DONKEY_KONG_REPEATED);
+          CueReactionSound(50, SOUND_DONKEY_KONG_REPEATED);
+          CueReactionSound(55, SOUND_DONKEY_KONG_REPEATED);
+          CueReactionSound(60, SOUND_DONKEY_KONG_REPEATED);
+          CueReactionSound(70, SOUND_DONKEY_KONG_BIRDIE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(35, 0xEA);
-          CueReactionSound(22, 0x41);
+          CueReactionSound(35, SOUND_DONKEY_KONG_BIRDIE);
+          CueReactionSound(22, SOUND_DONKEY_KONG_REPEATED);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(35, 0xEA);
-          CueReactionSound(17, 0x41);
-          CueReactionSound(31, 0x41);
+          CueReactionSound(35, SOUND_DONKEY_KONG_BIRDIE);
+          CueReactionSound(17, SOUND_DONKEY_KONG_REPEATED);
+          CueReactionSound(31, SOUND_DONKEY_KONG_REPEATED);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(0, 0xE8);
+          CueReactionSound(0, SOUND_DONKEY_KONG_BOGEY);
           break;
       }
 
@@ -513,19 +513,19 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_BOWSER:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(29, 0x12F);
+          CueReactionSound(29, SOUND_BOWSER_EAGLE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(42, 0x136);
+          CueReactionSound(42, SOUND_BOWSER_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(0, 0x138);
+          CueReactionSound(0, SOUND_BOWSER_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(0, 0x135);
-          CueReactionSound(10, 0x3A);
-          CueReactionSound(24, 0x3A);
-          CueReactionSound(33, 0x3A);
+          CueReactionSound(0, SOUND_BOWSER_BOGEY);
+          CueReactionSound(10, SOUND_SPREADING_CIRCLE);
+          CueReactionSound(24, SOUND_SPREADING_CIRCLE);
+          CueReactionSound(33, SOUND_SPREADING_CIRCLE);
           break;
       }
 
@@ -533,17 +533,17 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_KID:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(0, 0x123);
-          CueReactionSound(66, 0x12E);
+          CueReactionSound(0, SOUND_KID_EAGLE);
+          CueReactionSound(66, SOUND_KID_BIRDIE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(0, 0x12E);
+          CueReactionSound(0, SOUND_KID_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(32, 0x11E);
+          CueReactionSound(32, SOUND_KID_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(25, 0x120);
+          CueReactionSound(25, SOUND_KID_BOGEY);
           break;
       }
 
@@ -551,17 +551,17 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_SHERRY:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(0, 0x1DE);
-          CueReactionSound(6, 0x3C);
+          CueReactionSound(0, SOUND_SHERRY_EAGLE);
+          CueReactionSound(6, SOUND_YOSHI_BIRDIE_EFFECT);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(20, 0x1D7);
+          CueReactionSound(20, SOUND_SHERRY_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(0, 0x1D4);
+          CueReactionSound(0, SOUND_SHERRY_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(24, 0x1E8);
+          CueReactionSound(24, SOUND_SHERRY_BOGEY);
           break;
       }
 
@@ -569,16 +569,16 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_AZALEA:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(25, 0xA7);
+          CueReactionSound(25, SOUND_AZALEA_EAGLE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(5, 0xB2);
+          CueReactionSound(5, SOUND_AZALEA_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(38, 0xAE);
+          CueReactionSound(38, SOUND_AZALEA_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(0, 0xB1);
+          CueReactionSound(0, SOUND_AZALEA_BOGEY);
           break;
       }
 
@@ -586,16 +586,16 @@ s32 PlayReactionSounds(void) {
     case CHARACTER_JOE:
       switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
-          CueReactionSound(15, 0x11B);
+          CueReactionSound(15, SOUND_JOE_EAGLE);
           break;
         case REACTION_ANIMATION_BIRDIE:
-          CueReactionSound(6, 0x11A);
+          CueReactionSound(6, SOUND_JOE_BIRDIE);
           break;
         case REACTION_ANIMATION_PAR:
-          CueReactionSound(0, 0x109);
+          CueReactionSound(0, SOUND_JOE_PAR);
           break;
         case REACTION_ANIMATION_BOGEY:
-          CueReactionSound(0, 0x10C);
+          CueReactionSound(0, SOUND_JOE_BOGEY);
           break;
       }
 

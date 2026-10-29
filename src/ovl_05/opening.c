@@ -1969,7 +1969,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningFrameCount == 0x375) {
-          PlaySound(0x4F, f_OpeningSoundChannel, 0x3C);
+          PlaySound(SOUND_MAPLE_REPEATED, f_OpeningSoundChannel, 0x3C);
           AdvanceOpeningSoundChannel();
         }
 
@@ -2087,7 +2087,8 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
           case 0x2A:
-            PlaySound(0x35, f_OpeningSoundChannel, 0x46);
+            PlaySound(
+                SOUND_MAPLE_EAGLE_SECOND_EFFECT, f_OpeningSoundChannel, 0x46);
             SetSoundFrequencyOffset(f_OpeningSoundChannel, 7.0f);
             AdvanceOpeningSoundChannel();
             break;
@@ -2345,8 +2346,8 @@ void UpdateOpening(void) {
       case 0xCA:
         if (f_IsDonkeyKongShown) {
           if (f_OpeningSceneFramesLeft == 0x12) {
-            PlaySoundWithEffects(0x41, f_OpeningSoundChannel, SOUND_FULL_SCALE,
-                7, SOUND_FULL_SCALE);
+            PlaySoundWithEffects(SOUND_DONKEY_KONG_REPEATED,
+                f_OpeningSoundChannel, SOUND_FULL_SCALE, 7, SOUND_FULL_SCALE);
             SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
             AdvanceOpeningSoundChannel();
           }
@@ -2354,7 +2355,7 @@ void UpdateOpening(void) {
           switch (f_OpeningSceneFramesLeft) {
             case 0x13:
             case 9:
-              PlaySound(0x4F, f_OpeningSoundChannel, 0x43);
+              PlaySound(SOUND_MAPLE_REPEATED, f_OpeningSoundChannel, 0x43);
               AdvanceOpeningSoundChannel();
               break;
           }
@@ -2386,8 +2387,8 @@ void UpdateOpening(void) {
             case 0x2E:
             case 0x42:
             case 0x56:
-              PlaySoundWithEffects(0x41, f_OpeningSoundChannel,
-                  SOUND_FULL_SCALE, 7, SOUND_FULL_SCALE);
+              PlaySoundWithEffects(SOUND_DONKEY_KONG_REPEATED,
+                  f_OpeningSoundChannel, SOUND_FULL_SCALE, 7, SOUND_FULL_SCALE);
               SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
               AdvanceOpeningSoundChannel();
               break;
@@ -2409,8 +2410,8 @@ void UpdateOpening(void) {
               AdvanceOpeningSoundChannel();
               break;
             case 0x8:
-              PlaySoundWithEffects(
-                  0xEA, f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x6B);
+              PlaySoundWithEffects(SOUND_DONKEY_KONG_BIRDIE,
+                  f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x6B);
               AdvanceOpeningSoundChannel();
               break;
           }
@@ -2419,11 +2420,11 @@ void UpdateOpening(void) {
             case 0x45:
             case 0x4F:
             case 0x59:
-              PlaySound(0x4F, f_OpeningSoundChannel, 0x57);
+              PlaySound(SOUND_MAPLE_REPEATED, f_OpeningSoundChannel, 0x57);
               AdvanceOpeningSoundChannel();
               break;
             case 0x2A:
-              PlaySound(0x4F, f_OpeningSoundChannel, 0x61);
+              PlaySound(SOUND_MAPLE_REPEATED, f_OpeningSoundChannel, 0x61);
               AdvanceOpeningSoundChannel();
               break;
             case 0x3B:
