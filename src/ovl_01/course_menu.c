@@ -243,34 +243,34 @@ void func_8020E26C_ovl_01(void* buffer, s16 bufferKind) {
 
   switch (bufferKind) {
     /* The course menu keeps no buffer of kind 1 */
-    case 1:
+    case COURSE_MENU_BUFFER_UNUSED:
       break;
-    case 2:
+    case COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE:
       D_8023A810_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_HOLE_IN_ONE_BADGE, &asset);
       ReadEncodedAsset(D_8023A810_ovl_01, &asset);
       break;
-    case 3:
+    case COURSE_MENU_BUFFER_NAME_PLATE:
       D_8023A824_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_NAME_PLATE, &asset);
       ReadEncodedAsset(D_8023A824_ovl_01, &asset);
       break;
-    case 4:
+    case COURSE_MENU_BUFFER_SPINNING_BADGE:
       D_8023A810_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
       ReadEncodedAsset(D_8023A810_ovl_01, &asset);
       break;
-    case 5:
+    case COURSE_MENU_BUFFER_DIGITS_AND_ARROWS:
       D_8023A828_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_DIGITS_AND_ARROWS, &asset);
       ReadEncodedAsset(D_8023A828_ovl_01, &asset);
       break;
-    case 6:
+    case COURSE_MENU_BUFFER_LARGE_DIGITS:
       D_8023A82C_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset);
       ReadEncodedAsset(D_8023A82C_ovl_01, &asset);
       break;
-    case 7:
+    case COURSE_MENU_BUFFER_GREEN_ARROWS:
       D_8023A830_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023A830_ovl_01, &asset);

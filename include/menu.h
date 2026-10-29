@@ -337,8 +337,89 @@ enum SaveMenuBuffer {
   SAVE_MENU_BUFFER_CHOSEN
 };
 
-/* The buffer that func_8020B2C4 keeps without reading an image into it */
-#define CHARACTER_SELECT_UNREAD_KIND 10
+/* The buffers that func_8020B2C4 keeps, by the kind its caller gives, and the
+ * image of D_8022FF2C that it reads into each. Callers pass no kind below 1,
+ * nor 3, 4 or 9 */
+enum CharacterSelectBuffer {
+  CHARACTER_SELECT_BUFFER_PLAYER_LABELS = 1,
+  /* The wooden board of character cells */
+  CHARACTER_SELECT_BUFFER_BOARD,
+  /* The CHARACTER SELECT title */
+  CHARACTER_SELECT_BUFFER_TITLE,
+  CHARACTER_SELECT_BUFFER_NAME_PLATE,
+  CHARACTER_SELECT_BUFFER_CURSOR_BOX,
+  /* Small controllers numbered 1 to 4 */
+  CHARACTER_SELECT_BUFFER_CONTROLLER_ICONS,
+  /* A blue bar and a green bar */
+  CHARACTER_SELECT_BUFFER_COLOR_BARS,
+  /* The cells of the shot curve meter */
+  CHARACTER_SELECT_BUFFER_CURVE_CELLS,
+  /* Kept without reading an image into it */
+  CHARACTER_SELECT_BUFFER_UNREAD = 10
+};
+
+/* The buffers that func_80213464 keeps, by the kind its caller gives */
+enum BestTimesBuffer {
+  /* Read into g_WorkArea, whatever buffer the caller gives */
+  BEST_TIMES_BUFFER_FACE_STRIP = 1,
+  /* Kept without reading an image into it */
+  BEST_TIMES_BUFFER_UNREAD,
+  BEST_TIMES_BUFFER_PLACES,
+  BEST_TIMES_BUFFER_GREEN_ARROWS
+};
+
+/* The buffers that func_8020E26C keeps, by the kind its caller gives */
+enum CourseMenuBuffer {
+  /* Neither kept nor read */
+  COURSE_MENU_BUFFER_UNUSED = 1,
+  COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE,
+  COURSE_MENU_BUFFER_NAME_PLATE,
+  /* Kept in the hole-in-one badge's place */
+  COURSE_MENU_BUFFER_SPINNING_BADGE,
+  COURSE_MENU_BUFFER_DIGITS_AND_ARROWS,
+  COURSE_MENU_BUFFER_LARGE_DIGITS,
+  COURSE_MENU_BUFFER_GREEN_ARROWS
+};
+
+/* The buffers that func_8021CFAC keeps, by the kind its caller gives */
+enum ScoreLabelBuffer {
+  /* Kept without reading an image into it */
+  SCORE_LABEL_BUFFER_UNREAD = 1,
+  SCORE_LABEL_BUFFER_CURSOR_BOX,
+  /* The four Japanese score labels, one after another */
+  SCORE_LABEL_BUFFER_LABELS
+};
+
+/* The buffers that func_8021F5F0 keeps, by the kind its caller gives */
+enum RingShotRecordBuffer {
+  /* Kept without reading an image into it */
+  RING_SHOT_RECORD_BUFFER_UNREAD = 1,
+  RING_SHOT_RECORD_BUFFER_RAINBOW_BOX,
+  RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS,
+  RING_SHOT_RECORD_BUFFER_GREEN_ARROWS
+};
+
+/* The buffers that func_802267B0 keeps, by the kind its caller gives */
+enum TournamentBuffer {
+  TOURNAMENT_BUFFER_WIDE_CLOUD = 1,
+  TOURNAMENT_BUFFER_YES_NO,
+  TOURNAMENT_BUFFER_NINTENDO_BADGE,
+  /* The first of g_TournamentIconAssets */
+  TOURNAMENT_BUFFER_ICON,
+  /* The last of f_MenuWindowImageAssets */
+  TOURNAMENT_BUFFER_MENU_WINDOW,
+  /* The file of D_80230EC4's last row */
+  TOURNAMENT_BUFFER_ROW_FILE
+};
+
+/* The buffers that func_80228A80 keeps, by the kind its caller gives */
+enum CodeEntryBuffer {
+  CODE_ENTRY_BUFFER_NAME_PLATE = 1,
+  CODE_ENTRY_BUFFER_BAR,
+  CODE_ENTRY_BUFFER_GLYPHS,
+  CODE_ENTRY_BUFFER_POINTING_HAND,
+  CODE_ENTRY_BUFFER_CURSOR_BOX
+};
 
 /* The buffers that func_802159C0 keeps, by the kind its caller gives */
 enum TableBuffer {

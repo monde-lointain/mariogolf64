@@ -1868,15 +1868,15 @@ void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {
-    case 1:
+    case SCORE_LABEL_BUFFER_UNREAD:
       D_8023B634_ovl_01 = buffer;
       break;
-    case 2:
+    case SCORE_LABEL_BUFFER_CURSOR_BOX:
       D_8023B638_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
       ReadEncodedAsset(D_8023B638_ovl_01, &asset);
       break;
-    case 3:
+    case SCORE_LABEL_BUFFER_LABELS:
       D_8023B63C_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_JAPANESE_BIRDIE_LABEL, &asset);
       ReadEncodedAsset(D_8023B63C_ovl_01, &asset);

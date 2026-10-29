@@ -408,34 +408,34 @@ void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
 
   func_8005AF74();
   switch (bufferKind) {
-    case 1:
+    case TOURNAMENT_BUFFER_WIDE_CLOUD:
       D_80230E70_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset);
       ReadEncodedAsset(D_80230E70_ovl_01, &asset);
       break;
-    case 2:
+    case TOURNAMENT_BUFFER_YES_NO:
       D_80230E74_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_YES_NO, &asset);
       ReadEncodedAsset(D_80230E74_ovl_01, &asset);
       break;
-    case 3:
+    case TOURNAMENT_BUFFER_NINTENDO_BADGE:
       D_80230E78_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_NINTENDO_BADGE, &asset);
       ReadEncodedAsset(D_80230E78_ovl_01, &asset);
       break;
-    case 4:
+    case TOURNAMENT_BUFFER_ICON:
       D_80230E7C_ovl_01 = buffer;
       OpenEncodedAsset(g_TournamentIconAssets[0], &asset);
       ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
       break;
-    case 5:
+    case TOURNAMENT_BUFFER_MENU_WINDOW:
       f_MenuWindowImage = buffer;
       OpenEncodedAsset(
           f_MenuWindowImageAssets[ARRAY_COUNT(f_MenuWindowImageAssets) - 1],
           &asset);
       ReadEncodedAsset(f_MenuWindowImage, &asset);
       break;
-    case 6:
+    case TOURNAMENT_BUFFER_ROW_FILE:
       D_80230E84_ovl_01 = buffer;
       OpenAssetFile(
           D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT - 1][0], &file);
@@ -1099,27 +1099,27 @@ void func_80228A80_ovl_01(void* buffer, s32 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {
-    case 1:
+    case CODE_ENTRY_BUFFER_NAME_PLATE:
       D_80230F44_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_NAME_PLATE, &asset);
       ReadEncodedAsset(D_80230F44_ovl_01, &asset);
       break;
-    case 2:
+    case CODE_ENTRY_BUFFER_BAR:
       D_80230F48_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_CODE_ENTRY_BAR, &asset);
       ReadEncodedAsset(D_80230F48_ovl_01, &asset);
       break;
-    case 3:
+    case CODE_ENTRY_BUFFER_GLYPHS:
       D_80230F4C_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_CODE_ENTRY_GLYPHS, &asset);
       ReadEncodedAsset(D_80230F4C_ovl_01, &asset);
       break;
-    case 4:
+    case CODE_ENTRY_BUFFER_POINTING_HAND:
       D_80230F50_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_POINTING_HAND, &asset);
       ReadEncodedAsset(D_80230F50_ovl_01, &asset);
       break;
-    case 5:
+    case CODE_ENTRY_BUFFER_CURSOR_BOX:
       D_80230F54_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
       ReadEncodedAsset(D_80230F54_ovl_01, &asset);

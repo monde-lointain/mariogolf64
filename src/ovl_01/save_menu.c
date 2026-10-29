@@ -279,20 +279,20 @@ void func_8021F5F0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {
-    case 1:
+    case RING_SHOT_RECORD_BUFFER_UNREAD:
       D_8023B670_ovl_01 = buffer;
       break;
-    case 2:
+    case RING_SHOT_RECORD_BUFFER_RAINBOW_BOX:
       D_8023B674_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_RAINBOW_BOX, &asset);
       ReadEncodedAsset(D_8023B674_ovl_01, &asset);
       break;
-    case 3:
+    case RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS:
       D_8023B678_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_COURSE_NUMBERS, &asset);
       ReadEncodedAsset(D_8023B678_ovl_01, &asset);
       break;
-    case 4:
+    case RING_SHOT_RECORD_BUFFER_GREEN_ARROWS:
       D_8023B67C_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023B67C_ovl_01, &asset);

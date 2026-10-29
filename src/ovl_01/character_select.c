@@ -102,9 +102,9 @@ enum GridMove {
 #define DRIVE_DISTANCE_X 246
 #define DRIVE_DISTANCE_Y 200
 
-/* The buffer kinds that D_8022FF2C has an image for: func_8020B2C4 reads
- * those of kinds 1, 2 and 5 to 8 */
-#define CHARACTER_SELECT_IMAGE_KIND_COUNT 9
+/* The buffer kinds that D_8022FF2C has an image for, from 0 */
+#define CHARACTER_SELECT_IMAGE_KIND_COUNT \
+  (CHARACTER_SELECT_BUFFER_CURVE_CELLS + 1)
 
 /* The palettes that the C buttons choose, which the A button wears and which
  * the faces preview while held */
@@ -1166,34 +1166,34 @@ void func_8020B2C4_ovl_01(void* buffer, s16 bufferKind) {
   void* image = buffer;
 
   switch (bufferKind) {
-    case 1:
+    case CHARACTER_SELECT_BUFFER_PLAYER_LABELS:
       D_8023A570_ovl_01 = buffer;
       break;
-    case 2:
+    case CHARACTER_SELECT_BUFFER_BOARD:
       D_8023A568_ovl_01 = buffer;
       break;
-    case 5:
+    case CHARACTER_SELECT_BUFFER_CURSOR_BOX:
       D_8023A574_ovl_01 = buffer;
       break;
-    case 6:
+    case CHARACTER_SELECT_BUFFER_CONTROLLER_ICONS:
       D_8023A57C_ovl_01 = buffer;
       break;
-    case 7:
+    case CHARACTER_SELECT_BUFFER_COLOR_BARS:
       D_8023A580_ovl_01 = buffer;
       break;
-    case 8:
+    case CHARACTER_SELECT_BUFFER_CURVE_CELLS:
       D_8023A584_ovl_01 = buffer;
       break;
-    case CHARACTER_SELECT_UNREAD_KIND:
+    case CHARACTER_SELECT_BUFFER_UNREAD:
       D_8023A578_ovl_01 = buffer;
       break;
     default:
       D_8023A570_ovl_01 = buffer;
-      bufferKind = CHARACTER_SELECT_UNREAD_KIND;
+      bufferKind = CHARACTER_SELECT_BUFFER_UNREAD;
       break;
   }
 
-  if (bufferKind != CHARACTER_SELECT_UNREAD_KIND) {
+  if (bufferKind != CHARACTER_SELECT_BUFFER_UNREAD) {
     OpenEncodedAsset(D_8022FF2C_ovl_01[bufferKind], &asset);
     ReadEncodedAsset(image, &asset);
   }

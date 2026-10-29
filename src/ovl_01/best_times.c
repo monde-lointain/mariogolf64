@@ -122,20 +122,20 @@ void func_80213464_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
 
   switch (bufferKind) {
-    case 1:
+    case BEST_TIMES_BUFFER_FACE_STRIP:
       D_8023AA44_ovl_01 = &g_WorkArea;
       OpenEncodedAsset(ASSET_CHARACTER_FACE_STRIP, &asset);
       ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
       break;
-    case 2:
+    case BEST_TIMES_BUFFER_UNREAD:
       D_8023AA48_ovl_01 = buffer;
       break;
-    case 3:
+    case BEST_TIMES_BUFFER_PLACES:
       D_8023AA4C_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_PLACES, &asset);
       ReadEncodedAsset(D_8023AA4C_ovl_01, &asset);
       break;
-    case 4:
+    case BEST_TIMES_BUFFER_GREEN_ARROWS:
       D_8023AA50_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023AA50_ovl_01, &asset);

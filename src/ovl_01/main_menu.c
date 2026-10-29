@@ -1116,8 +1116,8 @@ void func_801F4C78_ovl_01(void) {
         D_8022BE92_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
-        func_802267B0_ovl_01(D_800FC6A0, 1);
-        func_802267B0_ovl_01(D_800FBE30[0], 2);
+        func_802267B0_ovl_01(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
+        func_802267B0_ovl_01(D_800FBE30[0], TOURNAMENT_BUFFER_YES_NO);
         imageBuffer = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_OPTIONS_MARIO, &asset);
         ReadEncodedAsset(imageBuffer, &asset);
@@ -1213,7 +1213,7 @@ void func_801F4C78_ovl_01(void) {
 
         OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
         ReadEncodedAsset(D_800FC898, &asset);
-        func_8020E26C_ovl_01(D_800FBE30[1], 6);
+        func_8020E26C_ovl_01(D_800FBE30[1], COURSE_MENU_BUFFER_LARGE_DIGITS);
         D_8022F8C8_ovl_01 = 0;
         D_8022F8CC_ovl_01 = 0;
         D_8022F8CD_ovl_01 = 0;
@@ -1225,13 +1225,17 @@ void func_801F4C78_ovl_01(void) {
       case MENU_SCREEN_UNK24:
         func_8005C674(g_ChosenPlayerCount, 0);
         D_8022BE92_ovl_01 ^= 1;
-        func_8020B2C4_ovl_01(D_800FF420[D_8022BE92_ovl_01], 2);
+        func_8020B2C4_ovl_01(
+            D_800FF420[D_8022BE92_ovl_01], CHARACTER_SELECT_BUFFER_BOARD);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01], 1);
-        func_8020B2C4_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 5);
-        func_8020B2C4_ovl_01(D_801B60D0, CHARACTER_SELECT_UNREAD_KIND);
-        func_8020B2C4_ovl_01(D_800FBE30[0], 8);
+        func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01],
+            CHARACTER_SELECT_BUFFER_PLAYER_LABELS);
+        func_8020B2C4_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], CHARACTER_SELECT_BUFFER_CURSOR_BOX);
+        func_8020B2C4_ovl_01(D_801B60D0, CHARACTER_SELECT_BUFFER_UNREAD);
+        func_8020B2C4_ovl_01(
+            D_800FBE30[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         func_8020B438_ovl_01();
         break;
 
@@ -1241,13 +1245,17 @@ void func_801F4C78_ovl_01(void) {
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         D_8022BE92_ovl_01 ^= 1;
-        func_8020B2C4_ovl_01(D_800FF420[D_8022BE92_ovl_01], 2);
+        func_8020B2C4_ovl_01(
+            D_800FF420[D_8022BE92_ovl_01], CHARACTER_SELECT_BUFFER_BOARD);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01], 1);
-        func_8020B2C4_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 5);
-        func_8020B2C4_ovl_01(D_801B60D0, CHARACTER_SELECT_UNREAD_KIND);
-        func_8020B2C4_ovl_01(D_800FBE30[0], 8);
+        func_8020B2C4_ovl_01(D_8012D420[D_8022BE8E_ovl_01],
+            CHARACTER_SELECT_BUFFER_PLAYER_LABELS);
+        func_8020B2C4_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], CHARACTER_SELECT_BUFFER_CURSOR_BOX);
+        func_8020B2C4_ovl_01(D_801B60D0, CHARACTER_SELECT_BUFFER_UNREAD);
+        func_8020B2C4_ovl_01(
+            D_800FBE30[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         func_8020B438_ovl_01();
         func_8020B3CC_ovl_01();
         break;
@@ -1318,17 +1326,20 @@ void func_801F4C78_ovl_01(void) {
         tournamentImage = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_PLACE_DIGITS, &asset);
         ReadEncodedAsset(tournamentImage, &asset);
-        func_80228A80_ovl_01(D_801B60D0, 1);
-        func_80228A80_ovl_01(D_800FF420[D_8022BE92_ovl_01], 2);
-        func_80228A80_ovl_01(D_8012D420[D_8022BE8E_ovl_01], 3);
-        func_80228A80_ovl_01(D_800FBE30[0], 4);
-        func_80228A80_ovl_01(D_800FBE30[1], 5);
-        func_802267B0_ovl_01(D_800FC6A0, 1);
-        func_802267B0_ovl_01(D_801049A0[0][0], 2);
-        func_802267B0_ovl_01(D_801049A0[0][1], 3);
-        func_802267B0_ovl_01(D_801049A0[1][0], 4);
-        func_802267B0_ovl_01(D_801049A0[1][1], 5);
-        func_802267B0_ovl_01(D_801049A0[2][0], 6);
+        func_80228A80_ovl_01(D_801B60D0, CODE_ENTRY_BUFFER_NAME_PLATE);
+        func_80228A80_ovl_01(
+            D_800FF420[D_8022BE92_ovl_01], CODE_ENTRY_BUFFER_BAR);
+        func_80228A80_ovl_01(
+            D_8012D420[D_8022BE8E_ovl_01], CODE_ENTRY_BUFFER_GLYPHS);
+        func_80228A80_ovl_01(D_800FBE30[0], CODE_ENTRY_BUFFER_POINTING_HAND);
+        func_80228A80_ovl_01(D_800FBE30[1], CODE_ENTRY_BUFFER_CURSOR_BOX);
+        func_802267B0_ovl_01(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
+        func_802267B0_ovl_01(D_801049A0[0][0], TOURNAMENT_BUFFER_YES_NO);
+        func_802267B0_ovl_01(
+            D_801049A0[0][1], TOURNAMENT_BUFFER_NINTENDO_BADGE);
+        func_802267B0_ovl_01(D_801049A0[1][0], TOURNAMENT_BUFFER_ICON);
+        func_802267B0_ovl_01(D_801049A0[1][1], TOURNAMENT_BUFFER_MENU_WINDOW);
+        func_802267B0_ovl_01(D_801049A0[2][0], TOURNAMENT_BUFFER_ROW_FILE);
         break;
 
       case MENU_SCREEN_HELP:
@@ -1426,7 +1437,8 @@ void func_801F4C78_ovl_01(void) {
         OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
         ReadEncodedAsset(D_800FC898, &asset);
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
+        func_8020E26C_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         D_8022F8C8_ovl_01 = 0;
         D_8022F8CC_ovl_01 = 0;
         D_8022F8CD_ovl_01 = 0;
@@ -1462,13 +1474,15 @@ void func_801F4C78_ovl_01(void) {
 
         func_8020E010_ovl_01(D_801049A0[0]);
         func_8020E0AC_ovl_01(D_800FF4C4, COURSE_BUFFER_FIRST);
-        func_8020E26C_ovl_01(D_800FC898, 2);
-        func_8020E26C_ovl_01(D_801B60D0, 3);
-        func_8020E26C_ovl_01(D_8010526C[0], 4);
-        func_8020E26C_ovl_01(D_800FF180[0], 5);
+        func_8020E26C_ovl_01(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
+        func_8020E26C_ovl_01(D_801B60D0, COURSE_MENU_BUFFER_NAME_PLATE);
+        func_8020E26C_ovl_01(D_8010526C[0], COURSE_MENU_BUFFER_SPINNING_BADGE);
+        func_8020E26C_ovl_01(
+            D_800FF180[0], COURSE_MENU_BUFFER_DIGITS_AND_ARROWS);
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
-        func_8020E26C_ovl_01(D_800FBE30[0], 7);
+        func_8020E26C_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
+        func_8020E26C_ovl_01(D_800FBE30[0], COURSE_MENU_BUFFER_GREEN_ARROWS);
         ComputeRoundStatistics();
         D_801323A0.statsCourse = GetOpenCourseCount();
         break;
@@ -1476,22 +1490,26 @@ void func_801F4C78_ovl_01(void) {
       case MENU_SCREEN_BEST_TIMES:
         func_80221B20_ovl_01();
         func_80213390_ovl_01(D_801049A0[0]);
-        func_80213464_ovl_01(NULL, 1);
+        func_80213464_ovl_01(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
-        func_80213464_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 2);
-        func_8020E26C_ovl_01(D_801B60D0, 3);
+        func_8020E26C_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
+        func_80213464_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], BEST_TIMES_BUFFER_UNREAD);
+        func_8020E26C_ovl_01(D_801B60D0, COURSE_MENU_BUFFER_NAME_PLATE);
         D_8022BE92_ovl_01 ^= 1;
-        func_80213464_ovl_01(D_800FF420[D_8022BE92_ovl_01], 3);
-        func_80213464_ovl_01(D_800FBE30[0], 4);
+        func_80213464_ovl_01(
+            D_800FF420[D_8022BE92_ovl_01], BEST_TIMES_BUFFER_PLACES);
+        func_80213464_ovl_01(D_800FBE30[0], BEST_TIMES_BUFFER_GREEN_ARROWS);
         func_8021585C_ovl_01();
         break;
 
       case MENU_SCREEN_CHARACTER_TABLE:
         func_80221B20_ovl_01();
-        func_80213464_ovl_01(NULL, 1);
+        func_80213464_ovl_01(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
+        func_8020E26C_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         D_8022BE90_ovl_01 ^= 1;
         func_802159C0_ovl_01(
             D_801B5CD0[D_8022BE90_ovl_01], TABLE_BUFFER_CURSOR);
@@ -1509,10 +1527,12 @@ void func_801F4C78_ovl_01(void) {
         func_8021342C_ovl_01(D_800FF420[D_8022BE92_ovl_01]);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE8E_ovl_01], 6);
-        func_8021CFAC_ovl_01(D_8012D420[D_8022BE90_ovl_01], 2);
-        func_8021CFAC_ovl_01(D_801B60D0, 1);
-        func_8021CFAC_ovl_01(D_800FBE30[0], 3);
+        func_8020E26C_ovl_01(
+            D_801B5CD0[D_8022BE8E_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
+        func_8021CFAC_ovl_01(
+            D_8012D420[D_8022BE90_ovl_01], SCORE_LABEL_BUFFER_CURSOR_BOX);
+        func_8021CFAC_ovl_01(D_801B60D0, SCORE_LABEL_BUFFER_UNREAD);
+        func_8021CFAC_ovl_01(D_800FBE30[0], SCORE_LABEL_BUFFER_LABELS);
         func_8021E01C_ovl_01();
         func_8021EF64_ovl_01();
         break;
@@ -1523,12 +1543,16 @@ void func_801F4C78_ovl_01(void) {
         func_8021342C_ovl_01(D_800FF420[D_8022BE92_ovl_01]);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        func_8020E26C_ovl_01(D_801B5CD0[D_8022BE90_ovl_01], 6);
-        func_8021F5F0_ovl_01(D_801B60D0, 1);
-        func_8021F5F0_ovl_01(D_8012D420[D_8022BE8E_ovl_01], 2);
-        func_8021F5F0_ovl_01(D_8010526C[0], 3);
+        func_8020E26C_ovl_01(
+            D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
+        func_8021F5F0_ovl_01(D_801B60D0, RING_SHOT_RECORD_BUFFER_UNREAD);
+        func_8021F5F0_ovl_01(
+            D_8012D420[D_8022BE8E_ovl_01], RING_SHOT_RECORD_BUFFER_RAINBOW_BOX);
+        func_8021F5F0_ovl_01(
+            D_8010526C[0], RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS);
         func_8021F6E0_ovl_01(D_801049A0[0]);
-        func_8021F5F0_ovl_01(D_800FBE30[0], 4);
+        func_8021F5F0_ovl_01(
+            D_800FBE30[0], RING_SHOT_RECORD_BUFFER_GREEN_ARROWS);
         func_80220A30_ovl_01();
         func_80220BB0_ovl_01();
         break;
