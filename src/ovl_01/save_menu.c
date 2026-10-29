@@ -155,19 +155,21 @@ static s32 D_80230A98_ovl_01 = 0;
 /* Read by no routine */
 static s32 D_80230A9C_ovl_01 = 0;
 /* The order that the Ring Shot records list the characters in */
-static u8 D_80230AA0_ovl_01[SAVE_UNK1344_ENTRY_COUNT] = {
+static u8 f_RingShotCharacterOrder[SAVE_UNK1344_ENTRY_COUNT] = {
     0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
 /* Read by no routine */
 static s32 D_80230AB4_ovl_01[11] = {0x000000FF, 0x00FF00FF, 0x000000FF,
     0x00FF00FF, 0x00000000, 0x000000FF, 0x000000FF, 0x000000FF, 0x00000000,
     0x00FF00FF, 0x00FF0000};
-static f32 D_80230AE0_ovl_01 = 0.0f;
+/* The angle, in radians, of the sine waves that tint the chosen replay */
+static f32 f_ReplayHuePhase = 0.0f;
 /* Each open course count's icon positions, of which only being nonzero, for
  * a shown icon, is read */
-static s16 D_80230AE4_ovl_01[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT] = {
-    {164, 0, 0, 0, 0, 0, 122}, {102, 144, 0, 0, 0, 0, 186},
-    {78, 120, 162, 0, 0, 0, 204}, {60, 102, 144, 186, 0, 0, 226},
-    {42, 84, 126, 168, 210, 0, 252}, {22, 60, 102, 144, 186, 228, 268}};
+static s16
+    f_RingShotIconPositions[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT] = {
+        {164, 0, 0, 0, 0, 0, 122}, {102, 144, 0, 0, 0, 0, 186},
+        {78, 120, 162, 0, 0, 0, 204}, {60, 102, 144, 186, 0, 0, 226},
+        {42, 84, 126, 168, 210, 0, 252}, {22, 60, 102, 144, 186, 228, 268}};
 /* Read by no routine */
 static s32 D_80230B38_ovl_01[2] = {0, 0};
 /* The controller each of the chosen saved game's players takes */
@@ -258,13 +260,15 @@ static s16 f_RecordedReplaySlots[SAVE_MENU_SLOT_COUNT];
 /* Read by no routine */
 static u8 D_8023B690_ovl_01[0x3D0];
 
-static Mat4 D_8023BA60_ovl_01;
-static Mat4 D_8023BAA0_ovl_01;
-static Mtx D_8023BAE0_ovl_01[MAX_PLAYER_COUNT][2];
-static Mtx D_8023BCE0_ovl_01;
+/* The camera that DrawSavedGames views the boards with */
+static Mat4 f_BoardProjection;
+static Mat4 f_BoardViewing;
+/* The camera and placement that DrawSavedGolfers draws each golfer with */
+static Mtx f_SavedGolferTransforms[MAX_PLAYER_COUNT][2];
+static Mtx f_SavedGolfersProjection;
 /* Each golfer's scale, which DrawSavedGolfers sets by the player count */
 static f32 f_SavedGolferScales[MAX_PLAYER_COUNT];
-static LookAt D_8023BD30_ovl_01[2];
+static LookAt f_SavedGolfersLookAts[2];
 static void** f_SavedGameModeImages;
 static void** f_ChosenModeIconBuffers;
 static void* f_SavedGamesNamePlate;
@@ -624,7 +628,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
   for (row = 0; row != RING_SHOT_ROW_COUNT; row++) {
     drop = (row == memory->ringShotRow) * RING_SHOT_CHOSEN_ICON_DROP;
     if ((row < openCourseCount) || (row == RING_SHOT_REPLAY_ROW)) {
-      if (D_80230AE4_ovl_01[openCourseCount - 1][row] != 0) {
+      if (f_RingShotIconPositions[openCourseCount - 1][row] != 0) {
         for (drawIndex = 0; drawIndex != RING_SHOT_ICON_DRAW_COUNT;
             drawIndex++) {
           if (row == 0) {
@@ -672,7 +676,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
       listIndex = memory->ringShotFirstCharacters[row];
       for (itemIndex = 0; itemIndex != RING_SHOT_SHOWN_CHARACTER_COUNT;
           itemIndex++) {
-        character = D_80230AA0_ovl_01[listIndex];
+        character = f_RingShotCharacterOrder[listIndex];
         index = FACE_PLAIN;
         if (save->unk1344[row][column][character] == 0) {
           index = FACE_DARKENED;
@@ -748,13 +752,13 @@ void DrawRingShotRecords(Gfx** displayListHead) {
   if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
       if (f_RecordedReplaySlots[index] != -1) {
-        D_80230AE0_ovl_01 += REPLAY_HUE_STEP;
+        f_ReplayHuePhase += REPLAY_HUE_STEP;
 
-        redSwing = sinf(D_80230AE0_ovl_01) * REPLAY_HUE_SWING;
-        blueSwing = sinf(D_80230AE0_ovl_01 + (M_PI / 2)) * REPLAY_HUE_SWING;
+        redSwing = sinf(f_ReplayHuePhase) * REPLAY_HUE_SWING;
+        blueSwing = sinf(f_ReplayHuePhase + (M_PI / 2)) * REPLAY_HUE_SWING;
         red = redSwing + REPLAY_HUE_MIDDLE;
         blue = blueSwing + REPLAY_HUE_MIDDLE;
-        greenSwing = sinf(D_80230AE0_ovl_01 + M_PI) * REPLAY_HUE_SWING;
+        greenSwing = sinf(f_ReplayHuePhase + M_PI) * REPLAY_HUE_SWING;
         green = greenSwing + REPLAY_HUE_MIDDLE;
         if (index == memory->ringShotReplaySlot) {
           gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 255);
@@ -1874,11 +1878,11 @@ void DrawSavedGames(Gfx** displayListHead) {
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   DrawPlayerControllers(&gfx);
 
-  guPerspectiveF(D_8023BA60_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
+  guPerspectiveF(f_BoardProjection, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
-  guLookAtF(D_8023BAA0_ovl_01, 0.0f, BOARD_EYE_HEIGHT, BOARD_EYE_DISTANCE, 0.0f,
+  guLookAtF(f_BoardViewing, 0.0f, BOARD_EYE_HEIGHT, BOARD_EYE_DISTANCE, 0.0f,
       0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-  SetCpuProjectionF(D_8023BA60_ovl_01, D_8023BAA0_ovl_01, g_Viewports);
+  SetCpuProjectionF(f_BoardProjection, f_BoardViewing, g_Viewports);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -2290,13 +2294,13 @@ void DrawSavedGolfers(Gfx** displayListHead) {
       break;
   }
 
-  guOrtho(&D_8023BCE0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
+  guOrtho(&f_SavedGolfersProjection, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CHARACTERS_NEAR,
       MENU_CHARACTERS_FAR, MENU_CHARACTERS_ORTHO_SCALE);
-  guLookAtReflectF(viewing, &D_8023BD30_ovl_01[g_DrawBufferIndex], 0.0f,
+  guLookAtReflectF(viewing, &f_SavedGolfersLookAts[g_DrawBufferIndex], 0.0f,
       MENU_CHARACTERS_EYE_Y, MENU_CHARACTERS_EYE_Z, 0.0f, 0.0f, 0.0f, 0.0f,
       1.0f, 0.0f);
-  gSPLookAt(gfx++, &D_8023BD30_ovl_01[g_DrawBufferIndex]);
+  gSPLookAt(gfx++, &f_SavedGolfersLookAts[g_DrawBufferIndex]);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (D_8023BFC0_ovl_01[playerIndex] > 0) {
       D_8023BFC0_ovl_01[playerIndex]--;
@@ -2345,17 +2349,18 @@ void DrawSavedGolfers(Gfx** displayListHead) {
     scale[2] = f_SavedGolferScales[playerIndex];
     BuildTransformMatrix(transform, rotation, translation, scale);
     ConvertMatrixToFixed(
-        transform, &D_8023BAE0_ovl_01[playerIndex][g_DrawBufferIndex]);
+        transform, &f_SavedGolferTransforms[playerIndex][g_DrawBufferIndex]);
     AnimateCharacter(playerIndex);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BCE0_ovl_01),
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SavedGolfersProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&D_8023BAE0_ovl_01[playerIndex][g_DrawBufferIndex]),
+        OS_K0_TO_PHYSICAL(
+            &f_SavedGolferTransforms[playerIndex][g_DrawBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
     g_DisplayListHead = gfx;
