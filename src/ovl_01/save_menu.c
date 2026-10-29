@@ -271,9 +271,8 @@ static void* f_CourseImageBuffers[COURSE_IMAGE_BUFFER_COUNT];
 /* Read by no routine */
 static u8 D_8023BD94_ovl_01[0x4];
 
-static void* f_FirstGameBoard;
-static void* f_SecondGameBoard;
-static void* f_ThirdGameBoard;
+/* Each saved game's numbered board */
+static void* f_GameBoards[SAVED_GAME_COUNT];
 /* The chosen saved game's human players, in the order they take controllers */
 static s16 f_HumanPlayerIndices[MAX_PLAYER_COUNT];
 static s32 D_8023BDAC_ovl_01;
@@ -1065,19 +1064,19 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
       ReadEncodedAsset(f_PlayerLabels, &asset);
       break;
     case SAVE_GAME_BUFFER_FIRST_BOARD:
-      imageSlot = &f_FirstGameBoard;
+      imageSlot = &f_GameBoards[0];
       *imageSlot = buffer;
       OpenEncodedAsset(ASSET_FIRST_GAME_BOARD, &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
     case SAVE_GAME_BUFFER_SECOND_BOARD:
-      imageSlot = &f_SecondGameBoard;
+      imageSlot = &f_GameBoards[1];
       *imageSlot = buffer;
       OpenEncodedAsset(ASSET_SECOND_GAME_BOARD, &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
     case SAVE_GAME_BUFFER_THIRD_BOARD:
-      imageSlot = &f_ThirdGameBoard;
+      imageSlot = &f_GameBoards[2];
       *imageSlot = buffer;
       OpenEncodedAsset(ASSET_THIRD_GAME_BOARD, &asset);
       ReadEncodedAsset(*imageSlot, &asset);
@@ -1726,7 +1725,7 @@ const char D_80231A3C_ovl_01[] = "%s";
   (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER | \
       MENU_LAYER_LARGE_BANNER)
 
-/* The numbered boards of f_FirstGameBoard onward: 64x64 CI8, in two strips */
+/* The numbered boards of f_GameBoards: 64x64 CI8, in two strips */
 #define GAME_BOARD_WIDTH 64
 #define GAME_BOARD_STRIP_HEIGHT 32
 #define GAME_BOARD_STRIP_COUNT 2
@@ -1950,11 +1949,11 @@ void DrawSavedGames(Gfx** displayListHead) {
             UNCHOSEN_BOARD_SHADE, 255);
       }
 
-      gDPLoadTLUT_pal256(gfx++,
-          TextureAddress((u32)(&f_FirstGameBoard)[slot] + IMAGE_HEADER_SIZE));
+      gDPLoadTLUT_pal256(
+          gfx++, TextureAddress((u32)f_GameBoards[slot] + IMAGE_HEADER_SIZE));
       for (otherIndex = 0; otherIndex != GAME_BOARD_STRIP_COUNT; otherIndex++) {
         gDPLoadTextureBlock(gfx++,
-            TextureAddress((u32)(&f_FirstGameBoard)[slot] +
+            TextureAddress((u32)f_GameBoards[slot] +
                 LARGE_PALETTED_TEXELS_OFFSET +
                 (otherIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT,
@@ -2166,11 +2165,11 @@ void func_80224AFC_ovl_01(
 
   gDPPipeSync(gfx++);
   gDPLoadTLUT_pal256(gfx++,
-      TextureAddress((u32)(&f_FirstGameBoard)[memory->savedGameIndex] +
-          IMAGE_HEADER_SIZE));
+      TextureAddress(
+          (u32)f_GameBoards[memory->savedGameIndex] + IMAGE_HEADER_SIZE));
   for (stripIndex = 0; stripIndex != GAME_BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress((u32)(&f_FirstGameBoard)[memory->savedGameIndex] +
+        TextureAddress((u32)f_GameBoards[memory->savedGameIndex] +
             LARGE_PALETTED_TEXELS_OFFSET +
             (stripIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT, 0,
