@@ -178,7 +178,6 @@ typedef struct LakituVelocity {
 #define SHRINKING_IMAGE_STRIPS_ABOVE_CENTER 4
 /* The effect sits a little below the ball's center */
 #define CONTACT_DROP_PER_PIN_SCALE 0.3f
-#define CONTACT_SOUND_CHANNEL 2
 #define CONTACT_STYLE_SOUND_CHANNEL 15
 #define CONTACT_PUTT_Y -2
 /* The banner that shows "+N", which BANNER_STROKES_OVER_PAR + N starts */

@@ -58,7 +58,7 @@ enum HoleCreatureKind {
 #define MONKEY_LAST_FRAME 24
 #define MONKEY_LIFETIME 46
 
-#define SOUND_CHANNEL 15
+#define HOLE_OBJECT_SOUND_CHANNEL 15
 #define SPLASH_SOUND_VOLUME 0x5A
 
 /* The monkey is drawn as two halves, each loaded as one texture */
@@ -362,14 +362,15 @@ void DrawHoleCreatures(Gfx** displayListHead) {
           splashPosition[2] = creature->position[2];
           splashPosition[1] = creature->groundHeight;
           SpawnRipple(splashPosition);
-          PlaySound(SOUND_SPLASH, SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
+          PlaySound(
+              SOUND_SPLASH, HOLE_OBJECT_SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
         }
       } else if (creature->position[1] > g_TurnBallSimulation.position[1]) {
         splashPosition[0] = creature->position[0];
         splashPosition[2] = creature->position[2];
         splashPosition[1] = creature->groundHeight;
         SpawnRipple(splashPosition);
-        PlaySound(SOUND_SPLASH, SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
+        PlaySound(SOUND_SPLASH, HOLE_OBJECT_SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
       }
 
       if (creature->position[1] < g_TurnBallSimulation.position[1]) {
@@ -413,7 +414,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         case MONKEY_LAST_FRAME:
           OpenEncodedAsset(f_MonkeyFrameAssets[3], &asset);
           ReadEncodedAsset(f_MonkeyImage, &asset);
-          PlaySound(SOUND_MONKEY, SOUND_CHANNEL, SOUND_FULL_SCALE);
+          PlaySound(SOUND_MONKEY, HOLE_OBJECT_SOUND_CHANNEL, SOUND_FULL_SCALE);
           break;
       }
 

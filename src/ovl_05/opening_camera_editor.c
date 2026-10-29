@@ -847,8 +847,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
 #define EDITOR_PAD 0
 #define SECOND_EDITOR_PAD 2
 
-#define EDITOR_SOUND_CHANNEL 15
-
 /* The snapshots are shown as two rows of this many */
 #define SNAPSHOT_ROW_LENGTH 16
 

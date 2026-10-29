@@ -15,9 +15,6 @@
 /* The volume argument that asks for the sound's own volume */
 #define CHARACTER_SOUND_VOLUME -1
 
-/* Character sounds play on channels from this one, one for each slot */
-#define FIRST_CHARACTER_SOUND_CHANNEL 4
-
 /* The one character whose sounds play without reverb */
 #define DRY_CHARACTER 3
 #define CHARACTER_SOUND_REVERB 0x14

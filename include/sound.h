@@ -17,6 +17,13 @@
 #define MENU_VOLUME_SOFT 80
 #define MENU_VOLUME_MEDIUM 100
 
+/* Character sounds play on channels from this one, one for each slot */
+#define FIRST_CHARACTER_SOUND_CHANNEL 4
+/* The channel of the club meeting the ball */
+#define CONTACT_SOUND_CHANNEL 2
+/* The channel of the hole editor and the opening camera editor */
+#define EDITOR_SOUND_CHANNEL 15
+
 /*
  * The sound effects that PlaySound and PlaySoundWithEffects play. Many play
  * in more than one place; each is named for one use, and the comments name

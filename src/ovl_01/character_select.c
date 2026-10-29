@@ -521,9 +521,6 @@ s32 func_80209BE0_ovl_01(void) {
 
 #define Z_OR_L_BUTTONS (Z_TRIG | L_TRIG)
 
-/* The chosen character's voice plays on its player's channel */
-#define FIRST_CHARACTER_SOUND_CHANNEL 4
-
 #define MAP_CAMERA_TOP_BYTE_UNK2 2
 
 /* Where pressing up blanks a line of debug text */

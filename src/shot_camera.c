@@ -777,8 +777,6 @@ void StartFlightCamera(s32 earlierFlightCount) {
   g_Cameras[0].view.lookAt[AXIS_Z] = f_LookAtPoint[AXIS_Z];
 }
 
-#define CONTACT_SOUND_CHANNEL 2
-
 /* The clubs in slots below it get CONTACT_EFFECT_POWER_IRON on some power shots
  */
 #define LEADING_CLUB_SLOT_COUNT 6

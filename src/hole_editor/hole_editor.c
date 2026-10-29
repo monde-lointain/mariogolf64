@@ -35,7 +35,6 @@
  * second */
 #define EDGE_WEIGHT_MAX 16
 
-#define EDITOR_SOUND_CHANNEL 15
 /* WORLD_TO_COURSE_SCALE as a shift */
 #define WORLD_TO_COURSE_SHIFT 10
 
