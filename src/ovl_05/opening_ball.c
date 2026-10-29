@@ -1724,7 +1724,7 @@ s32 func_8020A488_ovl_05(
     speed = speed * percent / 200;
   }
 
-  pitch = (club->pitch + entry->pitchChange) * 0.017453294f;
+  pitch = (club->pitch + entry->pitchChange) * DEGREES_TO_RADIANS;
   if (pitch >= 0.0f) {
     pitch = 0.0f;
   }

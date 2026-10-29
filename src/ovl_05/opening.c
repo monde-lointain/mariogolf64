@@ -4517,8 +4517,6 @@ void LoadOpeningLogo(void) {
 #define LOGO_CLUB_SPIN_STEP 23.0f
 #define LOGO_CLUB_UNUSED_ANGLE_STEP 3.0f
 #define LOGO_CLUB_WOBBLE_ANGLE_STEP 6.0f
-/* The original's single-precision approximation of pi / 180 */
-#define LOGO_DEGREES_TO_RADIANS 0.017453294f
 
 /* Where the shine's image starts on the frame given */
 #define LOGO_SHINE_ORIGIN_TEXEL 64
@@ -5002,9 +5000,9 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   }
 
   if (f_LogoState == LOGO_CLUB_STARTING) {
-    angle = f_LogoClubOrbitAngle * LOGO_DEGREES_TO_RADIANS;
-    sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
-    wobble = -sinf(f_LogoClubWobbleAngle * LOGO_DEGREES_TO_RADIANS) *
+    angle = f_LogoClubOrbitAngle * DEGREES_TO_RADIANS;
+    sinf(f_LogoClubUnusedAngle * DEGREES_TO_RADIANS);
+    wobble = -sinf(f_LogoClubWobbleAngle * DEGREES_TO_RADIANS) *
         LOGO_CLUB_FIRST_WOBBLE;
     f_LogoState = LOGO_CLUB_CIRCLING;
     f_LogoClubPosition[AXIS_X] =
@@ -5017,10 +5015,10 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   }
 
   if (f_LogoState == LOGO_CLUB_CIRCLING) {
-    angle = f_LogoClubOrbitAngle * LOGO_DEGREES_TO_RADIANS;
-    sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
-    wobble = -sinf(f_LogoClubWobbleAngle * LOGO_DEGREES_TO_RADIANS) *
-        LOGO_CLUB_WOBBLE;
+    angle = f_LogoClubOrbitAngle * DEGREES_TO_RADIANS;
+    sinf(f_LogoClubUnusedAngle * DEGREES_TO_RADIANS);
+    wobble =
+        -sinf(f_LogoClubWobbleAngle * DEGREES_TO_RADIANS) * LOGO_CLUB_WOBBLE;
     f_LogoClubPosition[AXIS_X] =
         (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_X;

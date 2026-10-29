@@ -2653,14 +2653,14 @@ s32 LaunchBallSimulation(
     speed = speed * percent / 200;
   }
 
-  pitch = (club->pitch + entry->pitchChange) * 0.017453294f;
+  pitch = (club->pitch + entry->pitchChange) * DEGREES_TO_RADIANS;
   if (pitch >= 0.0f) {
     pitch = 0.0f;
   }
 
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
     sinf(pitch); /* The original has it */
-    along = pitch - (club->offsetPitch * 0.017453294f);
+    along = pitch - (club->offsetPitch * DEGREES_TO_RADIANS);
     pitch += (f32)club->offsetPitch * shot->offsetY * 0.00054541545f;
     sinf(pitch); /* The original has it */
     launchScale = (cosf(along) - 0.86f) * shot->offsetY * 0.008300781f;

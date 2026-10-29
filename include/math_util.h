@@ -32,6 +32,11 @@ typedef s16 SignedBinaryAngle;
 /* The radians to degrees factor of rotations */
 #define DegreesToRadians(degrees) ((degrees) * (M_PI / 180))
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))
+/*
+ * The original's single-precision approximation of pi / 180, a step above
+ * the nearest float
+ */
+#define DEGREES_TO_RADIANS 0.017453294f
 
 /*
  * An identity matrix in Mtx's fixed point: the integer halves, two to a word,
