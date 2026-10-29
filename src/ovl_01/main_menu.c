@@ -400,7 +400,7 @@ s32 func_8021E468_ovl_01(void);
 void LoadRingShotRecord(RingShotRecord* record);
 void LoadBestShotReplay(PlayRecord* record);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
-s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber);
+s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber);
 void func_80217B88_ovl_01(s32 requestedPreset);
 void func_80228B60_ovl_01(void);
 void DrawMenuScenery(Gfx** displayListHead);
@@ -1970,7 +1970,9 @@ void UpdateMenuTitleScreen(void) {
   }
 }
 
-void func_801F75EC_ovl_01(void) {
+/* Puts the viewer's cursor on the first character not taken. Nothing calls
+ * it. */
+void ResetViewerCharacter(void) {
   D_801323A0.viewerCharacter = 0;
   if (g_TakenCharacters.isCharacterTaken[0] == 1) {
     do {
@@ -1984,10 +1986,12 @@ void func_801F75EC_ovl_01(void) {
 }
 
 /*
- * func_801F7660 moves the character cursor past the characters marked as taken,
- * and plays the voice of the one chosen. Nothing reads arg0.
+ * UpdateViewerCharacter moves the character cursor past the characters marked
+ * as taken, and plays the voice of the one chosen. It returns -1 when B leaves,
+ * 1 once the chosen character's animation ends while D_801B7070 equals
+ * playerNumber, and 0 otherwise. Nothing reads arg0.
  */
-s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
+s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
   if (D_8022BE28_ovl_01 != 0) {
     while (
         g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
@@ -2108,7 +2112,7 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
 void UpdateAnimationViewer(void) {
   Boolean isDone = IsHudAnimationDone();
 
-  if (isDone == TRUE && func_801F7660_ovl_01(1, 2) == -1) {
+  if (isDone == TRUE && UpdateViewerCharacter(1, 2) == -1) {
     D_801B7070 = isDone;
     g_MenuScreen = MENU_SCREEN_TITLE;
     FreeAllCharacterSlots();
