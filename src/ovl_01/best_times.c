@@ -416,8 +416,8 @@ void func_80213748_ovl_01(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", func_80213748_ovl_01);
 #endif
 
-void func_802144E4_ovl_01(
-    Gfx** displayListHead, s32 left, s32 top, s32 character, u8 drawMode) {
+void func_802144E4_ovl_01(Gfx** displayListHead, s32 left, s32 top,
+    CharacterId character, u8 drawMode) {
   Gfx* gfx = *displayListHead;
 
   if (character < 0) {
@@ -618,7 +618,7 @@ void func_8021585C_ovl_01(void) {
   CharacterId characterIndex;
   CourseIndex courseIndex;
   s32 rank;
-  s32 character;
+  CharacterId character;
   s32 palette;
 
   for (characterIndex = 0; characterIndex != CHARACTER_COUNT;

@@ -2485,7 +2485,7 @@ void func_8021EF64_ovl_01(void) {
   s32 index;
   s32 row;
   s32 column;
-  s32 character;
+  CharacterId character;
   s32 palette;
   s32 cell;
 

@@ -113,7 +113,7 @@ extern void* D_8012D430[CHARACTER_COUNT];
 /* func_8021F124 takes an s16 character, but this file calls it without
  * narrowing the argument */
 void func_8021F124_ovl_01(Gfx** displayListHead, void* texels, void* palette,
-    s32 left, s32 top, s32 character, u8 drawMode);
+    s32 left, s32 top, CharacterId character, u8 drawMode);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void func_801FB54C_ovl_01(Gfx** displayListHead, s32 kind);

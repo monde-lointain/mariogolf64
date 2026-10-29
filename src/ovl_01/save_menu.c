@@ -806,7 +806,7 @@ void func_80220BB0_ovl_01(void) {
   AssetFile file;
   SaveData* save = GetSaveData();
   s32 index;
-  s32 character;
+  CharacterId character;
   s32 palette;
 
   for (index = 0; index != CHARACTER_COUNT; index++) {
@@ -1622,7 +1622,7 @@ s32 func_80222F2C_ovl_01(void) {
   MenuMemory* memory = func_8005AF74();
   UnkB8* savedPlayer;
   s32 playerIndex;
-  s32 character;
+  CharacterId character;
   u16 controller;
 
   if (D_80230B50_ovl_01[memory->savedGameIndex] == -1) {

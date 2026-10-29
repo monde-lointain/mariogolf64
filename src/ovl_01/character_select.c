@@ -1224,7 +1224,7 @@ void func_8020B3CC_ovl_01(void) {
 void func_8020B438_ovl_01(void) {
   EncodedAsset asset;
   AssetFile file;
-  s32 character = 0;
+  CharacterId character = 0;
   u8* images = GetMenuImageBuffer();
   s32 slotIndex;
   void* faceImage;

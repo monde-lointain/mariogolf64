@@ -410,7 +410,7 @@ void QueueCharacterSound(CharacterId character, s32 slot, s32 kind,
   f_QueuedCharacterSounds[slot].pan = pan;
 }
 
-static void PreviewCharacterSound(s32 character, s32 kind) {
+static void PreviewCharacterSound(CharacterId character, s32 kind) {
   f_PreviewSoundDelays[character] = f_CharacterSoundDelays[kind][character];
 }
 
