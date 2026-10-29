@@ -145,6 +145,10 @@ enum GameStateStep {
   GAME_STATE_RELOAD_HOLE
 };
 
+/* Whether a game state step shows the whole hole, rather than a turn */
+#define IsHoleOverviewStep(step) \
+  ((step) == GAME_STATE_HOLE_INTRO || (step) == GAME_STATE_FLYOVER)
+
 /*
  * The current game's settings and place, which a saved game keeps for it
  * to be continued with.

@@ -1654,7 +1654,7 @@ void func_801F6B28_ovl_01(void) {
 
     g_GameState.unk14 = 0;
     g_GameState.playerCount = 1;
-    g_GameState.unk0 = 0;
+    g_GameState.unk0 = GAME_STATE_START;
     return;
   }
 

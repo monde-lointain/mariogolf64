@@ -986,7 +986,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
     }
 
     g_GameState = game->state;
-    g_GameState.unk0 = 1;
+    g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
     SetGameFlag(GAME_FLAG_UNK1E);
     g_HoleSetup = game->hole;
   }
@@ -1061,7 +1061,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
       }
 
       g_GameState = game->state;
-      g_GameState.unk0 = 1;
+      g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
       SetGameFlag(GAME_FLAG_UNK1E);
       g_HoleSetup = game->hole;
       g_RoundStats = game->roundStats;

@@ -238,7 +238,7 @@ void func_8005F360(void) {
       g_GameState.playerCount =
           (IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_HIGH_BIT) * 2) +
           IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_LOW_BIT) + 1;
-      g_GameState.unk0 = 0;
+      g_GameState.unk0 = GAME_STATE_START;
       g_GameState.gameMode = 0;
       break;
     case 1:
@@ -246,7 +246,7 @@ void func_8005F360(void) {
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
       g_GameState.playerCount = 1;
-      g_GameState.unk0 = 0;
+      g_GameState.unk0 = GAME_STATE_START;
       g_GameState.gameMode = 3;
       break;
     case 2:
@@ -254,7 +254,7 @@ void func_8005F360(void) {
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
       g_GameState.playerCount = 2;
-      g_GameState.unk0 = 0;
+      g_GameState.unk0 = GAME_STATE_START;
       g_GameState.gameMode = 2;
 
       /* The original has no break here, so the default case overrides this one
@@ -264,7 +264,7 @@ void func_8005F360(void) {
       g_GameState.courseIndex = 0;
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
-      g_GameState.unk0 = 0;
+      g_GameState.unk0 = GAME_STATE_START;
       g_GameState.gameMode = 10;
       break;
   }
@@ -275,7 +275,7 @@ void func_8005F4AC(void) {
   g_GameState.playerCount = 1;
   g_GameState.holeIndex = 0;
   g_GameState.unk14 = 0;
-  g_GameState.unk0 = 11;
+  g_GameState.unk0 = GAME_STATE_UNK11;
   if (IsGameFlagSet(GAME_FLAG_INIT_RING_SHOT)) {
     g_GameState.gameMode = 9;
   } else {
@@ -381,7 +381,7 @@ void InitPlay(s32 kind) {
     LoadSuperShotReplay(&D_800FED40);
     g_GameState.unk14 = 0;
     g_GameState.playerCount = 1;
-    g_GameState.unk0 = 0;
+    g_GameState.unk0 = GAME_STATE_START;
     g_GameState.gameMode = GAME_MODE_STROKE;
     g_GameState.courseIndex = D_800FEDD8[0].courseIndex;
     g_GameState.holeIndex = D_800FEDD8[0].holeIndex;
@@ -688,7 +688,7 @@ void func_80060358(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
   SaveOrContinueGameByMode(FALSE);
   ClearShotEffects(CLEAR_KIND_EFFECTS);
-  g_GameState.unk0 = 7;
+  g_GameState.unk0 = GAME_STATE_HOLE_END;
   f_PlayExit = 3;
   f_HoleEndStep = 9;
 }
