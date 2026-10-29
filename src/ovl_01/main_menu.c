@@ -1216,7 +1216,8 @@ void UpdateMenus(void) {
         g_AnimatedIconFrameTime = 0;
         OpenEncodedAsset(g_ModeIconAnimations[iconIndex][0], &asset);
         ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
-        LoadPlayerStatsBuffer(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK13);
+        LoadPlayerStatsBuffer(
+            D_800FBE30[0], PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS);
         D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
         D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
         D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
@@ -1286,7 +1287,7 @@ void UpdateMenus(void) {
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         f_MenuBoardImageIndex ^= 1;
         LoadPlayerStatsBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
-            PLAYER_STATS_BUFFER_UNK12);
+            PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS);
         g_AnimatedIconFrameIndex = 0;
         g_AnimatedIconBufferIndex = 0;
         g_AnimatedIconFrameTime = 0;
@@ -1467,18 +1468,20 @@ void UpdateMenus(void) {
         f_MenuBoardImageIndex ^= 1;
         LoadPlayerStatsBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
             PLAYER_STATS_BUFFER_ICONS);
-        LoadPlayerStatsBuffer(D_801B93E0[0], PLAYER_STATS_BUFFER_UNK2);
-        LoadPlayerStatsBuffer(g_NamePlateImage, PLAYER_STATS_BUFFER_UNK3);
+        LoadPlayerStatsBuffer(D_801B93E0[0], PLAYER_STATS_BUFFER_STAKE_MARK);
+        LoadPlayerStatsBuffer(g_NamePlateImage, PLAYER_STATS_BUFFER_NAME_PLATE);
         LoadPlayerStatsBuffer(D_8010526C[0], PLAYER_STATS_BUFFER_UNK4);
         LoadPlayerStatsBuffer(D_8010526C[1], PLAYER_STATS_BUFFER_UNK5);
-        LoadPlayerStatsBuffer(D_801B93E0[1], PLAYER_STATS_BUFFER_UNK7);
+        LoadPlayerStatsBuffer(D_801B93E0[1], PLAYER_STATS_BUFFER_GREEN_ARROWS);
         LoadPlayerStatsBuffer(D_800FF180[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
-        LoadPlayerStatsBuffer(D_800FF180[1], PLAYER_STATS_BUFFER_UNK8);
+        LoadPlayerStatsBuffer(
+            D_800FF180[1], PLAYER_STATS_BUFFER_HANDICAP_PLAQUE);
         D_8022BE8E_ovl_01 ^= 1;
         LoadPlayerStatsBuffer(
-            D_8012D420[D_8022BE8E_ovl_01], PLAYER_STATS_BUFFER_GAME_LABELS);
+            D_8012D420[D_8022BE8E_ovl_01], PLAYER_STATS_BUFFER_BET_LABELS);
         LoadPlayerStatsBuffer(D_8012D3AC, PLAYER_STATS_BUFFER_BRICK_WALL);
-        LoadPlayerStatsBuffer(D_800FBE30[0], PLAYER_STATS_BUFFER_UNK12);
+        LoadPlayerStatsBuffer(
+            D_800FBE30[0], PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS);
         ComputeRoundStatistics();
         D_8022F8D4_ovl_01 = MINI_GOLF_FACING_FRAME;
         D_8022F8D8_ovl_01 = 0;

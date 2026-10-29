@@ -482,12 +482,12 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       }
 
       break;
-    case PLAYER_STATS_BUFFER_UNK2:
+    case PLAYER_STATS_BUFFER_STAKE_MARK:
       D_8023B348_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_STAKE_MARK, &asset);
       ReadEncodedAsset(D_8023B348_ovl_01, &asset);
       break;
-    case PLAYER_STATS_BUFFER_UNK3:
+    case PLAYER_STATS_BUFFER_NAME_PLATE:
       D_8023B34C_ovl_01 = buffer;
       break;
     case PLAYER_STATS_BUFFER_UNK4:
@@ -511,17 +511,17 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
     case PLAYER_STATS_BUFFER_UNK6:
       D_8023B344_ovl_01 = buffer;
       break;
-    case PLAYER_STATS_BUFFER_UNK7:
+    case PLAYER_STATS_BUFFER_GREEN_ARROWS:
       D_8023B358_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023B358_ovl_01, &asset);
       break;
-    case PLAYER_STATS_BUFFER_UNK8:
+    case PLAYER_STATS_BUFFER_HANDICAP_PLAQUE:
       D_8023B360_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_HANDICAP_PLAQUE, &asset);
       ReadEncodedAsset(D_8023B360_ovl_01, &asset);
       break;
-    case PLAYER_STATS_BUFFER_GAME_LABELS:
+    case PLAYER_STATS_BUFFER_BET_LABELS:
       D_8023B364_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_BET_LABELS, &asset);
       ReadEncodedAsset(D_8023B364_ovl_01, &asset);
@@ -536,13 +536,13 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       OpenEncodedAsset(ASSET_STATS_BRICK_WALL, &asset);
       ReadEncodedAsset(D_8023B36C_ovl_01, &asset);
       break;
-    case PLAYER_STATS_BUFFER_UNK12:
+    case PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS:
       assetId = ASSET_TRIPLE_PAGE_ARROWS;
       D_8023B35C_ovl_01 = buffer;
       OpenEncodedAsset(assetId, &asset);
       ReadEncodedAsset(D_8023B35C_ovl_01, &asset);
       break;
-    case PLAYER_STATS_BUFFER_UNK13:
+    case PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS:
       assetId = ASSET_DOUBLE_PAGE_ARROWS;
       D_8023B35C_ovl_01 = buffer;
       OpenEncodedAsset(assetId, &asset);
