@@ -163,6 +163,14 @@ void LoadMenuWindowImage(s32 imageIndex);
 extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
                           [CHARACTER_GRID_COLUMN_COUNT];
 
+/* What FindCharacterOnGrid returns */
+enum GridSearchResult {
+  CHARACTER_OFF_GRID = -1,
+  CHARACTER_ON_GRID
+};
+
+s32 FindCharacterOnGrid(CharacterId character);
+
 /*
  * g_PlayerControllerIndices holds this for a player with no controller of their
  * own. The computer plays them, and they never clash with the others.

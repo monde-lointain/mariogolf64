@@ -1496,8 +1496,8 @@ void func_8005CA48(void) {
 }
 
 /*
- * Rebuilds the character grid and returns 0 if a character has a place on
- * it, or -1 if it has none, which is so while it is locked
+ * Rebuilds the character grid and returns whether a character has a place
+ * on it (a GridSearchResult), which it lacks while it is locked
  */
 s32 FindCharacterOnGrid(CharacterId character) {
   s32 slot;
@@ -1505,18 +1505,19 @@ s32 FindCharacterOnGrid(CharacterId character) {
   s32 column;
 
   if (character < 0) {
-    return -1;
+    return CHARACTER_OFF_GRID;
   }
 
   if (character >= ARRAY_COUNT(f_CharacterSlots)) {
-    return -1;
+    return CHARACTER_OFF_GRID;
   }
 
   func_8005C674(1, 1);
   slot = f_CharacterSlots[character];
   row = f_SlotCells[slot].row;
   column = f_SlotCells[slot].column;
-  return g_CharacterGrid[row][column] < 0 ? -1 : 0;
+  return g_CharacterGrid[row][column] < 0 ? CHARACTER_OFF_GRID
+                                          : CHARACTER_ON_GRID;
 }
 
 /* Marks saved games whose settings or players are out of range as no longer
