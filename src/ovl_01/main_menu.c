@@ -317,7 +317,7 @@ extern void* D_8012F4B0[7];
 extern void* D_801B93E0[5];
 
 void InitPlay(s32 kind);
-void func_801FE4D0_ovl_01(Gfx** displayListHead);
+void DrawModeSelect(Gfx** displayListHead);
 void func_80201574_ovl_01(Gfx** displayListHead);
 void func_80202000_ovl_01(Gfx** displayListHead);
 void func_80205038_ovl_01(Gfx** displayListHead);
@@ -337,7 +337,7 @@ void func_801F6B20_ovl_01(void);
 void func_801F6B28_ovl_01(void);
 void func_801F70F0_ovl_01(void);
 void func_801F7CD0_ovl_01(void);
-void func_801F7D28_ovl_01(void);
+void UpdateModeSelect(void);
 void func_801F8BAC_ovl_01(void);
 void func_801F93D8_ovl_01(void);
 void func_801F9C58_ovl_01(void);
@@ -996,7 +996,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_UNK5:
-      func_801F7D28_ovl_01();
+      UpdateModeSelect();
       break;
 
     case MENU_SCREEN_CHARACTER_SELECT:
@@ -2130,7 +2130,7 @@ void func_801F7CD0_ovl_01(void) {
  * in a register where the original reads it again after the step.
  */
 #ifdef NON_MATCHING
-void func_801F7D28_ovl_01(void) {
+void UpdateModeSelect(void) {
   EncodedAsset asset;
   Boolean isDone = IsHudAnimationDone();
   s32 direction;
@@ -2469,7 +2469,7 @@ void func_801F7D28_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F7D28_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", UpdateModeSelect);
 #endif
 
 void func_801F8BAC_ovl_01(void) {
@@ -3721,7 +3721,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
     case MENU_SCREEN_UNK5:
     case MENU_SCREEN_UNK23:
     case MENU_SCREEN_UNK26:
-      func_801FE4D0_ovl_01(&gfx);
+      DrawModeSelect(&gfx);
       break;
   }
 
@@ -4613,7 +4613,7 @@ void func_8021CBDC_ovl_01(Gfx** displayListHead, s32 centerY);
 /* Doesn't match: the boards' strips and the mode label schedule their
  * address loads differently */
 #ifdef NON_MATCHING
-void func_801FE4D0_ovl_01(Gfx** displayListHead) {
+void DrawModeSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u16 perspNorm;
   /* Sized like the course wheel's */
@@ -5021,7 +5021,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FE4D0_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawModeSelect);
 #endif
 
 /* Nothing calls this */

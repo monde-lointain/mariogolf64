@@ -46,7 +46,7 @@ rom:0xF6DA4 reloc:MIPS_HI16 symbol:D_80230038_ovl_01 addend:0xE
 rom:0xF6DAC reloc:MIPS_LO16 symbol:D_80230038_ovl_01 addend:0xE
 rom:0xF6DC0 reloc:MIPS_HI16 symbol:D_80230038_ovl_01 addend:0xD
 rom:0xF6DC8 reloc:MIPS_LO16 symbol:D_80230038_ovl_01 addend:0xD
-// func_801FE4D0_ovl_01 reads each D_8022F97C_ovl_01 position's y; name the table, not the field
+// DrawModeSelect reads each D_8022F97C_ovl_01 position's y; name the table, not the field
 rom:0xE9C0C reloc:MIPS_HI16 symbol:D_8022F97C_ovl_01 addend:0x4
 rom:0xE9C14 reloc:MIPS_LO16 symbol:D_8022F97C_ovl_01 addend:0x4
 rom:0xE9F5C reloc:MIPS_HI16 symbol:D_8022F97C_ovl_01 addend:0x4
