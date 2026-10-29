@@ -52,6 +52,9 @@ typedef s32 Boolean;
 
 #define ARRAY_COUNT(array) (s32)(sizeof(array) / sizeof((array)[0]))
 
+/* The size of a struct member, without an instance to apply sizeof to */
+#define MemberSize(type, member) (s32)sizeof(((type*)0)->member)
+
 /* The magnitude of an integer. The game's code evaluates the value once,
    into a variable of its own, as a GNU statement expression does. */
 #define Abs(value) \

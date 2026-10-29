@@ -4233,7 +4233,8 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
  * Transmit, and this label takes its place */
 #define TITLE_LABEL_TRANSMIT 7
 /* A plain-text menu under the board: "MAIN MENU", "1P GAME" to "3P GAME" and
- * three figures */
+ * the sizes of the save's ranked records, its ring shot records and the whole
+ * save */
 #define PLAIN_MENU_HEADING_X 64
 #define PLAIN_MENU_HEADING_Y 32
 #define PLAIN_MENU_NAME_COUNT 3
@@ -4290,7 +4291,8 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
         D_8022BF28_ovl_01[labelIndex]);
   }
 
-  sprintf(g_PrintBuffer, D_80231640_ovl_01, 0x820, 0x208, 0x2A78);
+  sprintf(g_PrintBuffer, D_80231640_ovl_01, MemberSize(SaveData, rankedRecords),
+      MemberSize(SaveData, ringShotRecords), (s32)sizeof(SaveData));
   DrawShadowedText(
       &gfx, PLAIN_MENU_FIGURES_X, PLAIN_MENU_FIGURES_Y, g_PrintBuffer);
   func_801FB54C_ovl_01(&gfx, BOARD_BACKDROP_LAYERS);
