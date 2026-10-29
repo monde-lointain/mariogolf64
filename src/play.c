@@ -1379,7 +1379,7 @@ DIM_BACKDROP:
               SetMenuBackdrop(MENU_BACKDROP_DIMMING);
               f_HoleResultsKind = HOLE_RESULTS_MATCH;
               if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
-                  GetMatchWinner(0, 1) != 0) {
+                  GetMatchWinner(0, 1) != MATCH_SIDE_NONE) {
                 f_PlayExit = PLAY_EXIT_ROUND_OVER;
               }
             } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||

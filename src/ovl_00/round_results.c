@@ -2717,7 +2717,8 @@ s32 UpdateMatchResults(ControllerState* controller) {
             }
 
             RecordComCharacterResult((s8)g_Players[0].characterIndex,
-                (s8)g_Players[1].characterIndex, GetMatchWinner(0, 1) == 1);
+                (s8)g_Players[1].characterIndex,
+                GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER);
           }
 
           break;
