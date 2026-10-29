@@ -463,17 +463,17 @@ typedef struct MatchupRecord {
 } MatchupRecord; /* size = 0x2 */
 
 /*
- * Routines that update the birdie badges reach them through a pointer to
- * this; where it ends is unknown
+ * The birdie badges and the Get Character matchups won. Routines that update
+ * them reach them through a pointer to this; where it ends is unknown.
  */
-typedef struct Unk990 {
+typedef struct Awards {
   /* 0x000 */ u8 unk0[0xF4];
   /* 0x0F4 */ s8
       birdieBadgeCounts[COURSE_COUNT]
                        [COURSE_HOLE_COUNT]; /* Nonzero holds the badge */
   /* By the player's character, then the computer's */
   /* 0x160 */ MatchupRecord matchups[CHARACTER_COUNT][CHARACTER_COUNT];
-} Unk990; /* size = 0x3E8 */
+} Awards; /* size = 0x3E8 */
 
 typedef struct SaveData {
   /* 0x0000 */ u32 magic;
@@ -486,7 +486,7 @@ typedef struct SaveData {
   /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
   /* 0x0218 */ Player modePlayers[MODE_PLAYER_COUNT];
   /* 0x0720 */ PlayRecord modeRecords[MODE_RECORD_COUNT];
-  /* 0x0990 */ Unk990 unk990;
+  /* 0x0990 */ Awards awards;
   /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
   /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT]
                             [BEST_TIME_COUNT]; /* Fastest first; unset is -1 */

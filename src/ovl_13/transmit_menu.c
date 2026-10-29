@@ -3369,10 +3369,10 @@ void DrawPressingHand(Gfx** displayListHead) {
   *displayListHead = displayList;
 }
 
-/* The save from unk990 on, which BuildStatusData reads through a pointer to
- * unk990 */
+/* The save from its awards on, which BuildStatusData reads through a pointer
+ * to the awards */
 typedef struct SaveRecords {
-  Unk990 unk990;
+  Awards awards;
   s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
   s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
   s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
@@ -3415,8 +3415,8 @@ void BuildStatusData(u8* status) {
   StatusCourse* course;
   StatusProgress* progress;
 
-  /* Reading the records through a pointer to unk990 is there to match */
-  SaveRecords* records = (SaveRecords*)&save->unk990;
+  /* Reading the records through a pointer to the awards is there to match */
+  SaveRecords* records = (SaveRecords*)&save->awards;
   CourseStats* entry;
   CourseStats* scores;
   f32 reciprocal;
@@ -3521,19 +3521,19 @@ void BuildStatusData(u8* status) {
     course->birdieBadges[1] = 0;
     course->birdieBadges[2] = 0;
     for (index = 0; index != 8; index++) {
-      if (records->unk990.birdieBadgeCounts[courseIndex][index] > 0) {
+      if (records->awards.birdieBadgeCounts[courseIndex][index] > 0) {
         course->birdieBadges[0] |= 1 << (7 - index);
       }
     }
 
     for (index = 0; index != 8; index++) {
-      if (records->unk990.birdieBadgeCounts[courseIndex][8 + index] > 0) {
+      if (records->awards.birdieBadgeCounts[courseIndex][8 + index] > 0) {
         course->birdieBadges[1] |= 1 << (7 - index);
       }
     }
 
     for (index = 0; index != 2; index++) {
-      if (records->unk990.birdieBadgeCounts[courseIndex][16 + index] > 0) {
+      if (records->awards.birdieBadgeCounts[courseIndex][16 + index] > 0) {
         course->birdieBadges[2] |= 1 << (7 - index);
       }
     }
@@ -3626,7 +3626,7 @@ void BuildStatusData(u8* status) {
   progress->birdieBadgeCount = 0;
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (index = 0; index != COURSE_HOLE_COUNT; index++) {
-      if (records->unk990.birdieBadgeCounts[courseIndex][index] != 0) {
+      if (records->awards.birdieBadgeCounts[courseIndex][index] != 0) {
         progress->birdieBadgeCount++;
       }
     }
@@ -3639,11 +3639,11 @@ void BuildStatusData(u8* status) {
     bits[1] = 0;
     bits[0] = 0;
     for (index = 0; index != STATUS_MATCHUP_COLUMN_COUNT; index++) {
-      if (records->unk990.matchups[row][index].winBits != 0) {
+      if (records->awards.matchups[row][index].winBits != 0) {
         bits[0] |= 1 << index;
       }
 
-      if (records->unk990.matchups[row][index].winBits & WON_UNSAVED_FLAG) {
+      if (records->awards.matchups[row][index].winBits & WON_UNSAVED_FLAG) {
         bits[1] |= 1 << index;
       }
     }

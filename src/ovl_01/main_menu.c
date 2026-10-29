@@ -4911,7 +4911,7 @@ void func_801FE4D0_ovl_01(Gfx** displayListHead) {
     badgeCount = 0;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
       for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-        if (save->unk990.birdieBadgeCounts[courseIndex][holeIndex] > 0) {
+        if (save->awards.birdieBadgeCounts[courseIndex][holeIndex] > 0) {
           badgeCount++;
         }
       }
@@ -5791,7 +5791,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
     if (MAP_CAMERA_MODE_TOP_BYTE == 0) {
       badgeCount = 0;
       for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
-        if (save->unk990
+        if (save->awards
                 .birdieBadgeCounts[D_801323A0.courseChoice][otherIndex]) {
           badgeCount++;
         }
@@ -5930,7 +5930,7 @@ void func_80202000_ovl_01(Gfx** displayListHead) {
 
       badgeCount = 0;
       for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
-        if (save->unk990
+        if (save->awards
                 .birdieBadgeCounts[D_801323A0.courseChoice][otherIndex]) {
           badgeCount++;
         }

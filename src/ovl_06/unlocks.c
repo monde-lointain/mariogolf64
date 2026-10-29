@@ -87,8 +87,8 @@ void GrantWinsStarsAndBadges(void) {
 
   for (row = 0; row != GRANTED_WIN_ROW_COUNT; row++) {
     for (column = 0; column != CHARACTER_COUNT; column++) {
-      if (!(save->unk990.matchups[row][column].winBits & WIN_COUNT_MASK)) {
-        save->unk990.matchups[row][column].winBits = 1;
+      if (!(save->awards.matchups[row][column].winBits & WIN_COUNT_MASK)) {
+        save->awards.matchups[row][column].winBits = 1;
       }
     }
   }
@@ -101,7 +101,7 @@ void GrantWinsStarsAndBadges(void) {
 
   for (row = 0; row != COURSE_COUNT; row++) {
     for (column = 0; column != COURSE_HOLE_COUNT; column++) {
-      save->unk990.birdieBadgeCounts[row][column] = 1;
+      save->awards.birdieBadgeCounts[row][column] = 1;
     }
   }
 

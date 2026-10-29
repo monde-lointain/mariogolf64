@@ -1244,12 +1244,12 @@ s32 ChooseHoleStrokeTarget(void) {
 
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     lossCount = GetSaveData()
-                    ->unk990
+                    ->awards
                     .matchups[(s8)g_Players[0].characterIndex]
                              [(s8)g_Players[f_Shot.playerIndex].characterIndex]
                     .lossCount;
     winBits = GetSaveData()
-                  ->unk990
+                  ->awards
                   .matchups[(s8)g_Players[0].characterIndex]
                            [(s8)g_Players[f_Shot.playerIndex].characterIndex]
                   .winBits;

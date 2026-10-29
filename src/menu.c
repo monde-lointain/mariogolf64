@@ -1289,7 +1289,7 @@ Boolean IsMapleUnlocked(void) {
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
       badgeCount +=
-          save->unk990.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
+          save->awards.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
     }
   }
 
@@ -1307,7 +1307,7 @@ Boolean IsMetalMarioUnlocked(void) {
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
       badgeCount +=
-          save->unk990.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
+          save->awards.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
     }
   }
 
@@ -1354,7 +1354,7 @@ void func_8005C674(s32 arg0, s32 arg1) {
     recordIndex = 0;
     arg0 = 0;
     for (; recordIndex != CHARACTER_COUNT; recordIndex++) {
-      if (save->unk990.matchups[recordIndex][index].winBits & WIN_COUNT_MASK) {
+      if (save->awards.matchups[recordIndex][index].winBits & WIN_COUNT_MASK) {
         arg0++;
         break;
       }

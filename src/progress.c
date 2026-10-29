@@ -26,14 +26,14 @@ void ShowBirdieBadgeCount(s32 badgeCount);
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
-  Unk990* unk990;
+  Awards* awards;
   u8 count;
   u8 value;
   s32 newValue;
 
-  unk990 = &GetSaveData()->unk990;
+  awards = &GetSaveData()->awards;
   if (isWin) {
-    value = unk990->matchups[row][column].winBits;
+    value = awards->matchups[row][column].winBits;
     count = value & WIN_COUNT_MASK;
     if (count < MAX_SAVED_COUNT) {
       count = (value & WIN_COUNT_MASK) + 1;
@@ -45,12 +45,12 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
     }
 
     newValue = value; /* Passed on unmasked, to match */
-    unk990->matchups[row][column].winBits = newValue;
+    awards->matchups[row][column].winBits = newValue;
     osSyncPrintf("Win Com Chara[%d]\n", newValue);
   } else {
-    unk990->matchups[row][column].lossCount++;
-    if (unk990->matchups[row][column].lossCount > MAX_SAVED_COUNT) {
-      unk990->matchups[row][column].lossCount = MAX_SAVED_COUNT;
+    awards->matchups[row][column].lossCount++;
+    if (awards->matchups[row][column].lossCount > MAX_SAVED_COUNT) {
+      awards->matchups[row][column].lossCount = MAX_SAVED_COUNT;
     }
   }
 
@@ -62,14 +62,14 @@ INCLUDE_ASM("asm/nonmatchings/progress", RecordComCharacterResult);
 
 /* Adds a birdie badge on the current hole of a tournament, and saves */
 void AddBirdieBadge(void) {
-  Unk990* unk990;
+  Awards* awards;
 
-  unk990 = &GetSaveData()->unk990;
+  awards = &GetSaveData()->awards;
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
-    unk990->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex]++;
-    if (unk990->birdieBadgeCounts[g_GameState.courseIndex]
+    awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex]++;
+    if (awards->birdieBadgeCounts[g_GameState.courseIndex]
                                  [g_GameState.holeIndex] > MAX_SAVED_COUNT) {
-      unk990
+      awards
           ->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] =
           MAX_SAVED_COUNT;
     }
@@ -83,20 +83,20 @@ void AddBirdieBadge(void) {
  * a tournament and the current hole has none yet
  */
 void ReportBirdieBadgeCount(void) {
-  Unk990* unk990;
+  Awards* awards;
   s32 badgeCount;
   CourseIndex courseIndex;
   s32 holeIndex;
 
-  unk990 = &GetSaveData()->unk990;
+  awards = &GetSaveData()->awards;
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
-      unk990->birdieBadgeCounts[g_GameState.courseIndex]
+      awards->birdieBadgeCounts[g_GameState.courseIndex]
                                [g_GameState.holeIndex] == 0) {
     badgeCount = 0;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
       for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
         badgeCount +=
-            unk990->birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
+            awards->birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
       }
     }
 

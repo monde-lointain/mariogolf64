@@ -775,14 +775,14 @@ void func_8020FEF8_ovl_01(Gfx** displayListHead) {
 
   if (GetOpenCourseCount() != memory->statsCourse) {
     for (index = 0; index != COURSE_HOLE_COUNT; index++) {
-      if (save->unk990.birdieBadgeCounts[memory->statsCourse][index]) {
+      if (save->awards.birdieBadgeCounts[memory->statsCourse][index]) {
         badgeCount++;
       }
     }
   } else {
     for (index = 0; index != COURSE_COUNT; index++) {
       for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-        if (save->unk990.birdieBadgeCounts[index][holeIndex]) {
+        if (save->awards.birdieBadgeCounts[index][holeIndex]) {
           badgeCount++;
         }
       }
