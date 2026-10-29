@@ -330,7 +330,7 @@ void FreeAllCharacterSlots(void);
 s32 SetMultiTlb(s32 firstTlbIndex, s32 pageMode, u32 pageCount,
     u32 virtualAddress, u32 physicalAddress);
 s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex);
-s32 GetCharacterClubKind(u32 slotIndex, s32 clubIndex);
+ClubKind GetCharacterClubKind(u32 slotIndex, s32 clubIndex);
 s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32* position);
 void GetCharacterSlotMatrix(CharacterSlot* slot, Mat4 matrix);
 s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32* position);

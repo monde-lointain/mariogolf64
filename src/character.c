@@ -496,7 +496,7 @@ s32 GetBallDistance(
   s32 column;
   s32 modelIndex;
   CharacterSlot* slot;
-  s32 kind;
+  ClubKind kind;
   f32 depth;
 
   f32 GetVectorLength(f32 x, f32 y, f32 z) {
@@ -586,7 +586,7 @@ void WriteBallDistances(void) {
   s32 modelIndex;
   s32 column;
   s32 animationId;
-  s32 kind;
+  ClubKind kind;
 
   void AppendDistanceText(char* text) {
     char character;

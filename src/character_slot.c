@@ -2727,7 +2727,7 @@ s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
 }
 
 /* Returns the club's CLUB_KIND, or -1 if the slot is empty */
-s32 GetCharacterClubKind(u32 slotIndex, s32 clubIndex) {
+ClubKind GetCharacterClubKind(u32 slotIndex, s32 clubIndex) {
   CharacterSlot* slot;
   s32 kind;
 

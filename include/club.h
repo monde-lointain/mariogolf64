@@ -45,6 +45,8 @@ enum ClubType {
   CLUB_TYPE_PUTTER
 };
 
+typedef s32 ClubType;
+
 /* What a club is, from the clubs' initial data */
 enum ClubKind {
   CLUB_KIND_WOOD, /* 1W, 3W and 4W */
@@ -52,6 +54,8 @@ enum ClubKind {
   CLUB_KIND_WEDGE, /* PW and SW */
   CLUB_KIND_PUTTER
 };
+
+typedef s32 ClubKind;
 
 /* A player's bag has this many slots; empty ones hold NO_CLUB */
 #define CLUB_SLOT_COUNT 16

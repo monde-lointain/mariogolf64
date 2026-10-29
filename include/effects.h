@@ -50,7 +50,7 @@ typedef struct ShotDebris {
   /* 0x04 */ s32 unk4;
   /* 0x08 */ f32 unk8;
   /* 0x0C */ f32 unkC;
-  /* 0x10 */ s32 clubKind;
+  /* 0x10 */ ClubKind clubKind;
   /* 0x14 */ s32 unk14;
 } ShotDebris; /* size = 0x18 */
 

@@ -90,7 +90,7 @@ typedef struct ShotOffset {
 /* A club's name in the table that no routine reads */
 typedef struct ClubName {
   /* 0x0 */ char name[4];
-  /* 0x4 */ s32 clubType;
+  /* 0x4 */ ClubType clubType;
 } ClubName; /* size = 0x8 */
 
 /* The directions from the ball, in BINARY_ANGLE_TURN / DIRECTION_SECTOR_COUNT
@@ -210,19 +210,19 @@ static ClubName D_80253CA4_ovl_03[] = {
 s32 PlanShot(CurrentShot* plannedShot);
 s32 PlanCupDistance(s32 arg0);
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
-s32 ChooseClubForDistance(s32 distance);
+ClubType ChooseClubForDistance(s32 distance);
 
 s32 GetGaugeFramePower(s32 value);
 s32 StepTrialShot(void);
 Boolean IsTrialShotSafe(void);
 s32 ChooseShotOffset(void);
-s32 FindClubSlot(s32 unused, s32 clubType);
+s32 FindClubSlot(s32 unused, ClubType clubType);
 s32 PlanRoute(s8* route);
 void ChooseLandingTarget(
     s32 x, s32 z, s32 distance, s32* targetX, s32* targetZ);
 void PlanClubAndTarget(CoursePoint target);
-void ChooseLongShot(
-    s32 unused, s32* clubType, s32* targetX, s32* targetZ, ShotMode* shotMode);
+void ChooseLongShot(s32 unused, ClubType* clubType, s32* targetX, s32* targetZ,
+    ShotMode* shotMode);
 s32 ChooseHoleStrokeTarget(void);
 
 static OSThread f_PlanThread;
@@ -496,7 +496,7 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 s32 PlanShot(CurrentShot* plannedShot) {
   char text[0x80];
   s32 percentRange[2];
-  s32 clubType;
+  ClubType clubType;
   s32 targetX;
   s32 targetZ;
   ShotMode shotMode;
@@ -1000,7 +1000,7 @@ s32 PlanCupDistance(s32 unused) {
 void PlanClubAndTarget(CoursePoint target) {
   s32 targetX;
   s32 targetZ;
-  s32 clubType;
+  ClubType clubType;
   ShotMode shotMode;
   u32 kind;
   s32 rest;
@@ -1926,8 +1926,8 @@ void ChooseLandingTarget(
  * Plans a shot from beyond approach range: aims at the cup with the club whose
  * carry covers PlanCupDistance, in the shot mode for the player's stroke count
  */
-void ChooseLongShot(
-    s32 unused, s32* clubType, s32* targetX, s32* targetZ, ShotMode* shotMode) {
+void ChooseLongShot(s32 unused, ClubType* clubType, s32* targetX, s32* targetZ,
+    ShotMode* shotMode) {
   s32 pad[44]; /* Unused; it is there to match */
   ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
   s32 index;
@@ -2084,7 +2084,7 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
  * line's peak counts when it is on the green, and on the golfer's unk1 trait.
  * A line that crosses rough or hazards takes a wedge.
  */
-s32 ChooseApproachClub(s32* targetX, s32* targetZ) {
+ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
   CoursePoint peak;
   s32 cupDistance;
   s32 edgeDistance;
@@ -2645,7 +2645,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", StepTrialShot);
 
 /* Returns the slot of the golfer's club of type clubType, or 0 if there is none
  */
-s32 FindClubSlot(s32 unused, s32 clubType) {
+s32 FindClubSlot(s32 unused, ClubType clubType) {
   s32 slot;
 
   for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
@@ -2669,9 +2669,9 @@ s32 FindClubSlot(s32 unused, s32 clubType) {
  * more. If no club carries that far, it returns the slot of the longest club
  * that counted, or CLUB_TYPE_SAND_WEDGE if none did.
  */
-s32 ChooseClubForDistance(s32 distance) {
+ClubType ChooseClubForDistance(s32 distance) {
   s32 fallback = CLUB_TYPE_SAND_WEDGE;
-  s32 type;
+  ClubType type;
   s32 slot;
   Club* club;
   s32 carry;
