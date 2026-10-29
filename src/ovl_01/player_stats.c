@@ -149,8 +149,8 @@ enum StatsDirection {
 #define STATS_WALL_IMAGE_WIDTH 152
 #define STATS_WALL_STRIP_HEIGHT 13
 #define STATS_WALL_ROW_HEIGHT 27
-/* Each bet's stake is one of these levels, which D_802304F4 turns into an
- * amount */
+/* Each bet's stake is one of these levels, which f_BetStakeAmounts turns into
+ * an amount */
 #define BET_STAKE_LEVEL_COUNT 6
 /* The betStakeLevels value of a bet that ApplyBetPreset's preset leaves out */
 #define NO_BET -1
@@ -237,8 +237,9 @@ static s16 D_80230460_ovl_01[STATS_INDEX_ROW_COUNT]
 // clang-format on
 /* How many columns of D_8023040C each row uses */
 static u8 D_802304B4_ovl_01[STATS_INDEX_ROW_COUNT] = {5, 6, 3, 3, 3, 3, 4};
+/* Each BET_PRESET_*'s stake level for each bet */
 // clang-format off
-static u8 D_802304BC_ovl_01[BET_PRESET_COUNT]
+static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT]
                             [BET_STAKE_SLOT_COUNT] = {
   { 4, 4, 1, 0, 0, NO_BET, NO_BET, NO_BET },
   { 4, 4, 0, 0, 0, NO_BET, 0, NO_BET },
@@ -249,7 +250,7 @@ static u8 D_802304BC_ovl_01[BET_PRESET_COUNT]
   { NO_BET, NO_BET, 0, 0, 0, NO_BET, 0, NO_BET }
 };
 // clang-format on
-static u8 D_802304F4_ovl_01[BET_STAKE_LEVEL_COUNT] = {0, 1, 2, 3, 5, 10};
+static u8 f_BetStakeAmounts[BET_STAKE_LEVEL_COUNT] = {0, 1, 2, 3, 5, 10};
 // clang-format off
 /* The x of each column of D_8023040C */
 static s32 D_802304FC_ovl_01[STATS_INDEX_ROW_COUNT]
@@ -551,9 +552,10 @@ void ApplyBetPreset(s32 requestedPreset) {
     }
 
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
-      memory->betStakeLevels[index] = D_802304BC_ovl_01[presetIndex][index];
+      memory->betStakeLevels[index] =
+          f_BetPresetStakeLevels[presetIndex][index];
       g_GameState.betRates[index] =
-          D_802304F4_ovl_01[memory->betStakeLevels[index]];
+          f_BetStakeAmounts[memory->betStakeLevels[index]];
     }
   } else {
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
@@ -610,7 +612,7 @@ void UpdateBetSettings(void) {
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       if (memory->betStakeLevels[index] != NO_BET) {
         g_GameState.betRates[index] =
-            D_802304F4_ovl_01[memory->betStakeLevels[index]];
+            f_BetStakeAmounts[memory->betStakeLevels[index]];
       } else {
         g_GameState.betRates[index] = -1;
       }
@@ -628,7 +630,7 @@ void UpdateBetSettings(void) {
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       if (memory->betStakeLevels[index] != NO_BET) {
         g_GameState.betRates[index] =
-            D_802304F4_ovl_01[memory->betStakeLevels[index]];
+            f_BetStakeAmounts[memory->betStakeLevels[index]];
       } else {
         g_GameState.betRates[index] = -1;
       }
@@ -798,7 +800,7 @@ void DrawBetSettings(
         D_802304FC_ovl_01[D_801B5634 - 1][columnIndex] + slide +
             BET_AMOUNT_OFFSET_X,
         BET_AMOUNT_Y,
-        (s8)D_802304F4_ovl_01[memory->betStakeLevels
+        (s8)f_BetStakeAmounts[memory->betStakeLevels
                 [D_80230460_ovl_01[D_801B5634 - 1][columnIndex]]],
         0);
   }
