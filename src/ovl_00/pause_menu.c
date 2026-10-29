@@ -73,7 +73,7 @@ enum PauseOptionKind {
   PAUSE_OPTION_KIND_WIND_SPEED,
   PAUSE_OPTION_KIND_WIND_DIRECTION,
   PAUSE_OPTION_KIND_LIE,
-  /* Shows PAUSE_MESSAGE_FIRST_STROKE while f_CanGiveUp is clear */
+  /* Shows PAUSE_MESSAGE_FIRST_STROKE while f_IsGiveUpAllowed is clear */
   PAUSE_OPTION_KIND_GIVE_UP = 7
 };
 
@@ -85,7 +85,7 @@ enum PauseValueText {
   PAUSE_VALUE_TEXT_WHITE
 };
 
-/* Give Up, which is greyed out while f_CanGiveUp is clear */
+/* Give Up, which is greyed out while f_IsGiveUpAllowed is clear */
 #define PAUSE_OPTION_GIVE_UP 2
 
 #define PAUSE_LAYOUT_MAX_OPTIONS 9
@@ -308,7 +308,7 @@ static u8* f_ChoiceBoxCursorImage;
  * Set while the player has taken a stroke on the hole, as UpdateTurns asks
  * for the menu. Not static: the original left it to the linker's common block.
  */
-Boolean f_CanGiveUp;
+Boolean f_IsGiveUpAllowed;
 
 void SetFramebufferCount(s32 count);
 
@@ -347,7 +347,7 @@ void ResumeRound(void) {
 void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing) {
   f_PauseMenuRequest =
       isClosing == FALSE ? PAUSE_MENU_REQUEST_LOAD : PAUSE_MENU_REQUEST_FREE;
-  f_CanGiveUp = canGiveUp;
+  f_IsGiveUpAllowed = canGiveUp;
 }
 
 void LoadPauseMenu(void) {
@@ -540,7 +540,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         g_PendingSubModuleId = MODULE_SAVE_MENU;
         break;
       case PAUSE_ACTION_GIVE_UP:
-        if (g_IsDebugEnabled || f_CanGiveUp) {
+        if (g_IsDebugEnabled || f_IsGiveUpAllowed) {
           PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           RequestPauseMenu(0, -1);
           g_PauseScreen = PAUSE_SCREEN_UNK6;
@@ -970,7 +970,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
 
     if (f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind ==
         PAUSE_OPTION_KIND_GIVE_UP) {
-      if (!f_CanGiveUp) {
+      if (!f_IsGiveUpAllowed) {
         message = PAUSE_MESSAGE_FIRST_STROKE;
       }
     }
@@ -1014,7 +1014,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   if (f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection] ==
           PAUSE_OPTION_GIVE_UP &&
-      !f_CanGiveUp) {
+      !f_IsGiveUpAllowed) {
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
         TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0);
     gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);

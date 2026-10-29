@@ -13,7 +13,7 @@ enum PauseAction {
   /* "Course View" */
   PAUSE_ACTION_FREE_LOOK,
   PAUSE_ACTION_SCORECARD,
-  /* Only while debugging or with f_CanGiveUp set */
+  /* Only while debugging or with f_IsGiveUpAllowed set */
   PAUSE_ACTION_GIVE_UP,
   PAUSE_ACTION_SAVE_AND_QUIT,
   PAUSE_ACTION_QUIT_GAME,
