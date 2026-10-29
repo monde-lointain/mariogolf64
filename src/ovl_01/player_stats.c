@@ -85,9 +85,9 @@ enum GatheredBestShots {
  * a blank, Skins, Match and Doubles
  */
 #define ASSET_BET_LABELS 0x6E8
-#define GAME_LABEL_WIDTH 128
-#define GAME_LABEL_HEIGHT 20
-#define GAME_LABEL_IMAGE_SIZE (GAME_LABEL_WIDTH * GAME_LABEL_HEIGHT / 2)
+#define BET_LABEL_WIDTH 128
+#define BET_LABEL_HEIGHT 20
+#define BET_LABEL_IMAGE_SIZE (BET_LABEL_WIDTH * BET_LABEL_HEIGHT / 2)
 #define ASSET_STATS_BRICK_WALL 0x721
 /* Eight 32x32 frames of flashing triple arrows pointing left */
 #define ASSET_TRIPLE_PAGE_ARROWS 0x828
@@ -1480,15 +1480,14 @@ void func_8021B1E0_ovl_01(
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_BetLabels)));
   gDPLoadTextureBlock_4b(gfx++,
       TextureAddress(
-          ImageTexels(f_BetLabels) + (labelIndex * GAME_LABEL_IMAGE_SIZE)),
-      G_IM_FMT_CI, GAME_LABEL_WIDTH, GAME_LABEL_HEIGHT, 0,
+          ImageTexels(f_BetLabels) + (labelIndex * BET_LABEL_IMAGE_SIZE)),
+      G_IM_FMT_CI, BET_LABEL_WIDTH, BET_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gSPScisTextureRectangle(gfx++,
-      QuarterPixels(centerX - (GAME_LABEL_WIDTH / 2)), QuarterPixels(top),
-      QuarterPixels(centerX + (GAME_LABEL_WIDTH / 2)),
-      QuarterPixels(top + GAME_LABEL_HEIGHT), G_TX_RENDERTILE, 0, 0,
+  gSPScisTextureRectangle(gfx++, QuarterPixels(centerX - (BET_LABEL_WIDTH / 2)),
+      QuarterPixels(top), QuarterPixels(centerX + (BET_LABEL_WIDTH / 2)),
+      QuarterPixels(top + BET_LABEL_HEIGHT), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
