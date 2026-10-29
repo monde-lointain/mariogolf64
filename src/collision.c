@@ -24,15 +24,12 @@
  * Each billboard texture has a hit mask: BILLBOARD_MASK_SIZE rows of
  * BILLBOARD_MASK_SIZE digits, from the billboard's top down and from its
  * middle out to its side. A digit names what a ball hits there; '0' is
- * nothing.
+ * nothing, and the digits are BillboardCell values.
  */
 #define BILLBOARD_MASK_COUNT 41
 #define BILLBOARD_MASK_CELL_COUNT (BILLBOARD_MASK_SIZE * BILLBOARD_MASK_SIZE)
 #define BILLBOARD_MASK_INDEX_COUNT 64
-#define BILLBOARD_CELL_EMPTY 0
-#define BILLBOARD_CELL_UNK1 1
-/* Cells the masks mark with this are treated as empty */
-#define BILLBOARD_CELL_IGNORED 3
+/* The largest cell that a mask's digit can name */
 #define BILLBOARD_CELL_LAST 15
 /* The center cell counts this many times as much as each neighbor */
 #define BILLBOARD_CENTER_CELL_WEIGHT 4
@@ -1526,10 +1523,10 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindGroundHit);
  * Returns the cell of a billboard texture's hit mask at fractions of the
  * billboard's width out from its middle and of its height down from its top
  */
-s32 GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
+BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
   s32 column = across * BILLBOARD_MASK_SIZE;
   s32 row = down * BILLBOARD_MASK_SIZE;
-  s32 cell;
+  BillboardCell cell;
 
   if (column < 0) {
     column = 0;
@@ -1546,8 +1543,8 @@ s32 GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
   row = BILLBOARD_MASK_SIZE - 1 - row;
   cell = GetBillboardMaskCell(textureIndex, row, column);
   cell -= '0';
-  if (cell < 0) {
-    cell = 0;
+  if (cell < BILLBOARD_CELL_EMPTY) {
+    cell = BILLBOARD_CELL_EMPTY;
   }
 
   if (cell > BILLBOARD_CELL_LAST) {
@@ -1559,7 +1556,7 @@ s32 GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
   }
 
   if (IsGameFlagSet(GAME_FLAG_FILL_BILLBOARD_MASKS)) {
-    cell = BILLBOARD_CELL_UNK1;
+    cell = BILLBOARD_CELL_TRUNK;
   }
 
   return cell;
@@ -1573,7 +1570,7 @@ s32 GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  */
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
-    s32 endZ, s32* cell, f32* fraction) {
+    s32 endZ, BillboardCell* cell, f32* fraction) {
   s32 fromY = startY >> COURSE_UNIT_SHIFT;
   f32 nearestFraction = NO_HIT_FRACTION;
   s32 fromX = startX >> COURSE_UNIT_SHIFT;
@@ -1594,7 +1591,7 @@ s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 hitZ;
   s32 depth;
   s32 distance;
-  s32 hitCell;
+  BillboardCell hitCell;
 
   for (; i < BILLBOARD_COUNT; i++) {
     billboard = &g_Billboards[i];

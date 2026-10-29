@@ -289,7 +289,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     guRotateF(simulation->unk44, 88.0f, -axisX, 0.0f, axisZ);
   }
 
-  void PlayBillboardHitSound(s32 cell, s32 speed) {
+  void PlayBillboardHitSound(BillboardCell cell, s32 speed) {
     void PlayImpactSound(SoundId sound, f32 fullSpeed, f32 speed) {
       SoundVolume volume = speed * 127.0f / fullSpeed;
 
@@ -303,16 +303,16 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     }
 
     switch (cell) {
-      case 1:
+      case BILLBOARD_CELL_TRUNK:
         PlayImpactSound(0xA, 2844.672f, speed);
         break;
-      case 2:
+      case BILLBOARD_CELL_FOLIAGE:
         PlayImpactSound(0xB, 2844.672f, speed);
         break;
-      case 5:
+      case BILLBOARD_CELL_SHELL:
         PlayImpactSound(0x29, 2844.672f, speed);
         break;
-      case 4:
+      case BILLBOARD_CELL_SOLID:
       default:
         PlayImpactSound(0xC, 2844.672f, speed);
         break;
@@ -907,13 +907,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->unk34 /= 2;
       simulation->unk38 /= 2;
       switch (triangle.unk0) {
-        case 1:
-        case 4:
-        case 5:
+        case BILLBOARD_CELL_TRUNK:
+        case BILLBOARD_CELL_SOLID:
+        case BILLBOARD_CELL_SHELL:
           velocity[AXIS_X] = -velocity[AXIS_Z] * 0.5f;
           velocity[AXIS_Z] = -velocity[AXIS_X] * 0.5f;
           break;
-        case 2:
+        case BILLBOARD_CELL_FOLIAGE:
         default:
           velocity[AXIS_X] *= 0.5f;
           velocity[AXIS_Z] *= 0.5f;

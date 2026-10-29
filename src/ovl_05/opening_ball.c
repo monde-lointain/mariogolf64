@@ -216,7 +216,8 @@ static void ResetBallSimulations(void) {
  * which FindBillboardHit does not read
  */
 typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
-    s32 endY, s32 endZ, s32* cell, f32* fraction, BallSimulation* simulation);
+    s32 endY, s32 endZ, BillboardCell* cell, f32* fraction,
+    BallSimulation* simulation);
 
 /*
  * The opening's copy of StepBallSimulation, which moves the ball through one
@@ -788,12 +789,12 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       simulation->position[AXIS_Z] =
           startZ + (fraction * simulation->velocity[AXIS_Z]);
       switch (triangle.unk0) {
-        case 1:
-        case 4:
+        case BILLBOARD_CELL_TRUNK:
+        case BILLBOARD_CELL_SOLID:
           simulation->velocity[AXIS_X] = -simulation->velocity[AXIS_Z] / 2;
           simulation->velocity[AXIS_Z] = -simulation->velocity[AXIS_X] / 2;
           break;
-        case 2:
+        case BILLBOARD_CELL_FOLIAGE:
         default:
           simulation->velocity[AXIS_X] /= 2;
           simulation->velocity[AXIS_Z] /= 2;
