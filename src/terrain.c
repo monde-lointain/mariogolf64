@@ -116,9 +116,6 @@ enum TerrainColorIndex {
 
 #define TERRAIN_COLOR_COUNT 11
 
-extern char g_RomBuildDate[];
-extern char g_SaveBuildDate[];
-
 /*
  * Each grid point's slot among its tile's midpoints, by its row and column
  * within the tile. The points with the top bit set are grid vertices, which

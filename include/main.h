@@ -20,6 +20,13 @@ extern s8 g_FrameStepState;
 /* Frames the game has drawn since boot */
 extern volatile s32 g_FrameCount;
 
+/* The longest build date that fits g_RomBuildDate with its terminator */
+#define BUILD_DATE_LENGTH_MAX 63
+extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
+/* The room before the next object; the game only ever empties it */
+#define SAVE_BUILD_DATE_SIZE 40
+extern char g_SaveBuildDate[SAVE_BUILD_DATE_SIZE];
+
 void ReportFailedAssertion(
     const char* expression, const char* fileName, s32 lineNumber);
 

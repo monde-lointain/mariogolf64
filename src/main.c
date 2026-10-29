@@ -44,9 +44,6 @@
 #define FRAMEBUFFER_ADDRESS(index) \
   ((u16*)(BASE_RDRAM_END - ((FRAMEBUFFER_COUNT - (index)) * FRAMEBUFFER_SIZE)))
 
-/* The longest build date that fits g_RomBuildDate with its terminator */
-#define BUILD_DATE_LENGTH_MAX 63
-
 /* Character slots that get a buffer in g_WorkArea */
 enum CharacterSlotRole {
   CHARACTER_SLOT_PARTNER = 1,
@@ -119,8 +116,6 @@ static s32 f_FramesThisSecond = 0;
 s8 g_FrameStepState = FRAME_STEP_RUNNING;
 volatile s32 g_FrameCount = 0;
 static Boolean f_IsOddRetrace = FALSE;
-extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
-extern char g_SaveBuildDate[];
 
 void HandleGfxRetrace(s32 pendingTaskCount);
 

@@ -108,9 +108,12 @@ extern SkyState g_SkyState;
  * through RSP segments, each DYNAMIC_TEXTURE_SIZE pixels square
  */
 #define DYNAMIC_TEXTURE_SIZE 32
-extern u16 g_MirrorTexture[]; /* Part of the frame, upside down */
-extern u16 g_FlameTexture[]; /* Noise scrolling over a flame gradient */
-extern u16 g_BlendedTexture[]; /* Two loaded textures, one scrolling */
+extern u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE *
+    DYNAMIC_TEXTURE_SIZE]; /* Part of the frame, upside down */
+extern u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE *
+    DYNAMIC_TEXTURE_SIZE]; /* Noise scrolling over a flame gradient */
+extern u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE *
+    DYNAMIC_TEXTURE_SIZE]; /* Two loaded textures, one scrolling */
 
 /* The texture memory that the second texture of a two-texture blend uses */
 #define SECOND_TEXTURE_TMEM 0x100
@@ -123,8 +126,10 @@ extern u8* g_BlendedTextureStillLayer;
 /* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
 extern u8* g_NoiseTexels;
 
-/* Formatted text on its way to the screen */
-extern char g_PrintBuffer[];
+/* Formatted text on its way to the screen. No routine checks the length
+ * against this room, which is all there is before the next object. */
+#define PRINT_BUFFER_SIZE 40
+extern char g_PrintBuffer[PRINT_BUFFER_SIZE];
 
 /*
  * Loaded images: the menus load their title labels into the first two, and

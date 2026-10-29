@@ -18,6 +18,7 @@
 #include "heap.h"
 #include "host_file.h"
 #include "libc.h"
+#include "main.h"
 #include "math_util.h"
 #include "menu_memory.h"
 #include "password.h"
@@ -48,8 +49,6 @@
 #define STARS_PER_RING_SHOT_COURSE 4
 
 /* Mirrors of the save data's options */
-
-extern char g_RomBuildDate[];
 
 typedef struct Unk800C2B90 {
   /* 0x0 */ s16 unk0;
