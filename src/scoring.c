@@ -347,8 +347,8 @@ s32 GetHolingOutStakes(s32 playerIndex) {
 
   stakes = HOLING_OUT_STAKES_NONE;
   switch (g_GameState.gameMode) {
-    case 2:
-    case 4:
+    case GAME_MODE_MATCH_GAME:
+    case GAME_MODE_GET_CHARACTER:
       opponentIndex = playerIndex ^ 1;
       if (GetNetScore(playerIndex) == GetNetScore(opponentIndex) - 1 &&
           g_Players[opponentIndex].unk26 != 0) {
@@ -370,8 +370,8 @@ s32 GetHolingOutStakes(s32 playerIndex) {
       }
 
       break;
-    case 10:
-    case 11:
+    case GAME_MODE_SKINS_MATCH:
+    case GAME_MODE_CLUB_SLOTS:
       hasAnyFinished = FALSE;
       bestScore = NO_BEST_SCORE;
       stakes = HOLING_OUT_WINS_HOLE;

@@ -2540,11 +2540,11 @@ Boolean IsSubModuleLoaded(void) {
 void RequestSubModule(void) {
   g_SubModuleState = SUB_MODULE_SWAP_PENDING;
   switch (g_GameState.gameMode) {
-    case 3:
-    case 9:
+    case GAME_MODE_TRAINING:
+    case GAME_MODE_RING_SHOT:
       g_PendingSubModuleId = MODULE_COURSE_SELECT;
       break;
-    case 11:
+    case GAME_MODE_CLUB_SLOTS:
       g_PendingSubModuleId = MODULE_CLUB_SLOTS;
       break;
     default:

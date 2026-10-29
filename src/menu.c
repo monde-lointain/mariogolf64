@@ -500,7 +500,7 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_8012D420[0], &asset);
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(D_8012D420[1], &asset);
-  if (g_MenuScreen == 5) {
+  if (g_MenuScreen == MENU_SCREEN_UNK5) {
     OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
     ReadEncodedAsset(D_801B5CD0[0], &asset);
     OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
@@ -519,7 +519,7 @@ void LoadMenuResources(void) {
       AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
   ReadEncodedAsset(D_801052BC[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
-    if (g_MenuScreen == 5) {
+    if (g_MenuScreen == MENU_SCREEN_UNK5) {
       size = OpenEncodedAsset(
           g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
     } else {
@@ -528,7 +528,7 @@ void LoadMenuResources(void) {
 
     D_801049A0[index] = AllocMemory(size);
     ReadEncodedAsset(D_801049A0[index], &asset);
-    if (g_MenuScreen == 5) {
+    if (g_MenuScreen == MENU_SCREEN_UNK5) {
       size = OpenEncodedAsset(
           g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
     } else {
@@ -911,22 +911,22 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
 
   playerCount = 0;
   switch (g_GameState.gameMode) {
-    case 0:
-    case 6:
-    case 10:
+    case GAME_MODE_STROKE:
+    case GAME_MODE_UNK6:
+    case GAME_MODE_SKINS_MATCH:
       players = &g_SaveData.modePlayers[MODE0_PLAYER_INDEX];
       records = &g_SaveData.modeRecords[MODE0_RECORD_INDEX];
       game = &g_SaveData.modeGames[MODE0_GAME_INDEX];
       playerCount = MODE0_PLAYER_COUNT;
       break;
-    case 5:
+    case GAME_MODE_TOURNAMENT:
       players = &g_SaveData.modePlayers[MODE5_PLAYER_INDEX];
       records = &g_SaveData.modeRecords[MODE5_RECORD_INDEX];
       game = &g_SaveData.modeGames[MODE5_GAME_INDEX];
       osSyncPrintf("Record/Play -Tour-/\n");
       playerCount = MODE5_PLAYER_COUNT;
       break;
-    case 4:
+    case GAME_MODE_GET_CHARACTER:
       players = &g_SaveData.modePlayers[MODE4_PLAYER_INDEX];
       records = &g_SaveData.modeRecords[MODE4_RECORD_INDEX];
       game = &g_SaveData.modeGames[MODE4_GAME_INDEX];
@@ -1931,7 +1931,7 @@ void func_8005D9A0(void) {
 
   g_MenuCourseCount = 6;
   D_800FE334 = 0;
-  g_MenuScreen = 0;
+  g_MenuScreen = MENU_SCREEN_TITLE;
   g_ChosenPlayerCount = 0;
   D_801B7070 = 0;
   D_8012F480[0] = NO_CHOSEN_CHARACTER;
@@ -1970,12 +1970,12 @@ void func_8005DAD4(void) {
 
 void func_8005DAFC(void) {
   switch (g_GameState.gameMode) {
-    case 5:
+    case GAME_MODE_TOURNAMENT:
       D_800FF4C0 = 2;
       g_MapCamera[0x4C] = 0;
       D_801B5634 = 0;
       break;
-    case 0:
+    case GAME_MODE_STROKE:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
       if (g_ChosenPlayerCount == 4) {
@@ -1986,26 +1986,26 @@ void func_8005DAFC(void) {
 
       D_800C2BD5 = 1;
       break;
-    case 2:
+    case GAME_MODE_MATCH_GAME:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
       D_801B5634 = 3;
       break;
-    case 10:
+    case GAME_MODE_SKINS_MATCH:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
       D_801B5634 = 4;
       break;
-    case 3:
-    case 4:
-    case 6:
-    case 7:
-    case 9:
+    case GAME_MODE_TRAINING:
+    case GAME_MODE_GET_CHARACTER:
+    case GAME_MODE_UNK6:
+    case GAME_MODE_SPEED_GOLF:
+    case GAME_MODE_RING_SHOT:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 2;
       D_801B5634 = 0;
       break;
-    case 11:
+    case GAME_MODE_CLUB_SLOTS:
       D_800FF4C0 = 1;
       g_MapCamera[0x4C] = 1;
       D_801B5634 = 5;
@@ -2016,7 +2016,7 @@ void func_8005DAFC(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_MenuScreen = 6;
+  g_MenuScreen = MENU_SCREEN_UNK6;
 }
 
 void func_8005DC50(void) {
@@ -2033,7 +2033,7 @@ void func_8005DC50(void) {
   g_PlayerControllerIndices[1] = UNCHOSEN_CONTROLLER;
   g_PlayerControllerIndices[2] = UNCHOSEN_CONTROLLER;
   g_PlayerControllerIndices[3] = UNCHOSEN_CONTROLLER;
-  g_MenuScreen = 0;
+  g_MenuScreen = MENU_SCREEN_TITLE;
 }
 
 void func_8005DCDC(void) {
@@ -2041,7 +2041,7 @@ void func_8005DCDC(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_MenuScreen = 0x17;
+  g_MenuScreen = MENU_SCREEN_UNK23;
 }
 
 void func_8005DD10(void) {
@@ -2049,7 +2049,7 @@ void func_8005DD10(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_MenuScreen = 5;
+  g_MenuScreen = MENU_SCREEN_UNK5;
 }
 
 void func_8005DD44(void) {
@@ -2057,7 +2057,7 @@ void func_8005DD44(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_MenuScreen = 0x12;
+  g_MenuScreen = MENU_SCREEN_UNK18;
 }
 
 void func_8005DD78(void) {
@@ -2065,7 +2065,7 @@ void func_8005DD78(void) {
   D_801B9410 = 1;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
-  g_MenuScreen = 0xD;
+  g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
 }
 
 void func_8005DDAC(void) {
@@ -2075,7 +2075,7 @@ void func_8005DDAC(void) {
   D_801B9410 = 1;
   g_GameState.unk31 = 0;
   ClearGameFlag(GAME_FLAG_UNK1E);
-  g_MenuScreen = 0xC;
+  g_MenuScreen = MENU_SCREEN_UNK12;
 }
 
 s8 func_8005DE00(void) {

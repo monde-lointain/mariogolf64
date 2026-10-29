@@ -937,7 +937,7 @@ void func_801F4C78_ovl_01(void) {
     g_MenuPressedButtons |= g_MenuControllerData[index].trigger;
   }
 
-  if (g_MenuScreen == 6) {
+  if (g_MenuScreen == MENU_SCREEN_UNK6) {
     if ((GetChosenCourseIndex() != g_GameState.courseIndex) || !D_800FE334) {
       StartLoadingChosenHole();
     }
@@ -987,7 +987,7 @@ void func_801F4C78_ovl_01(void) {
       func_801F70F0_ovl_01();
       break;
 
-    case 5:
+    case MENU_SCREEN_UNK5:
       func_801F7D28_ovl_01();
       break;
 
@@ -1036,7 +1036,7 @@ void func_801F4C78_ovl_01(void) {
 
       break;
 
-    case 6:
+    case MENU_SCREEN_UNK6:
       if (!g_GameState.isMiniGolf) {
         func_801F8BAC_ovl_01();
       } else {
@@ -1045,7 +1045,7 @@ void func_801F4C78_ovl_01(void) {
 
       break;
 
-    case 8:
+    case MENU_SCREEN_UNK8:
       func_801FADBC_ovl_01();
       break;
 
@@ -1057,7 +1057,7 @@ void func_801F4C78_ovl_01(void) {
       func_80217D20_ovl_01();
       break;
 
-    case 18:
+    case MENU_SCREEN_UNK18:
       func_801FB15C_ovl_01();
       break;
 
@@ -1162,7 +1162,7 @@ void func_801F4C78_ovl_01(void) {
         func_8005D334();
         break;
 
-      case 18:
+      case MENU_SCREEN_UNK18:
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
@@ -1176,7 +1176,7 @@ void func_801F4C78_ovl_01(void) {
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
         break;
 
-      case 5:
+      case MENU_SCREEN_UNK5:
         for (index = 0; index != ARRAY_COUNT(D_8012F4B0); index++) {
           OpenEncodedAsset(
               g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
@@ -1371,7 +1371,7 @@ void func_801F4C78_ovl_01(void) {
         ReadEncodedAsset(D_800FF420[D_8022BE92_ovl_01], &asset);
         break;
 
-      case 6:
+      case MENU_SCREEN_UNK6:
         if (g_GameState.isMiniGolf) {
           for (index = 0; index != MINI_GOLF_DISC_IMAGE_COUNT; index++) {
             OpenEncodedAsset(
@@ -1538,9 +1538,9 @@ void func_801F4C78_ovl_01(void) {
   if (g_MenuScreen == MENU_SCREEN_EXIT) {
     TransferSaveData(save, TRUE);
     if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-      g_MenuScreen = 6;
+      g_MenuScreen = MENU_SCREEN_UNK6;
     } else {
-      g_MenuScreen = 18;
+      g_MenuScreen = MENU_SCREEN_UNK18;
     }
 
     if (g_GameState.unk30) {
@@ -3617,14 +3617,14 @@ void DrawMenuScreen(Gfx** displayListHead) {
           255, 255, 255, 255);
       func_801FDA40_ovl_01(&gfx);
       break;
-    case 1:
-    case 24:
+    case MENU_SCREEN_CHARACTER_SELECT:
+    case MENU_SCREEN_UNK24:
       func_8020B590_ovl_01(&gfx, 0);
       break;
-    case 16:
+    case MENU_SCREEN_UNK16:
       func_8020B590_ovl_01(&gfx, 1);
       break;
-    case 3:
+    case MENU_SCREEN_SAVED_GAMES:
       func_802230C0_ovl_01(&gfx);
       break;
     case MENU_SCREEN_MAIN:
@@ -3650,15 +3650,15 @@ void DrawMenuScreen(Gfx** displayListHead) {
       }
 
       break;
-    case 8:
+    case MENU_SCREEN_UNK8:
       func_80207D08_ovl_01(&gfx);
       break;
-    case 6:
-    case 20:
-    case 22:
+    case MENU_SCREEN_UNK6:
+    case MENU_SCREEN_UNK20:
+    case MENU_SCREEN_UNK22:
       func_80202000_ovl_01(&gfx);
       break;
-    case 18:
+    case MENU_SCREEN_UNK18:
       func_80207E18_ovl_01(&gfx);
       break;
     case MENU_SCREEN_UNK12:
@@ -3679,9 +3679,9 @@ void DrawMenuScreen(Gfx** displayListHead) {
     case MENU_SCREEN_CHARACTER_TABLE:
       func_80215DC4_ovl_01(&gfx);
       break;
-    case 5:
+    case MENU_SCREEN_UNK5:
     case MENU_SCREEN_UNK23:
-    case 26:
+    case MENU_SCREEN_UNK26:
       func_801FE4D0_ovl_01(&gfx);
       break;
   }

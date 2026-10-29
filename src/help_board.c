@@ -233,9 +233,9 @@ void UpdateHelpBoard(void) {
     if (f_OpenTopic <= 0) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       if (!memory->isTransmitShown) {
-        g_MenuScreen = 0x1C;
+        g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
       } else {
-        g_MenuScreen = 2;
+        g_MenuScreen = MENU_SCREEN_MAIN;
       }
 
       StopLoaderThread();
