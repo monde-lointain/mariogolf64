@@ -1773,6 +1773,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
 #endif
 
 /*
+ * The opening's launch doubles the impact's and the aim's side spin, as it
+ * does the club's, and a ball hit by a club that can't putt loses this share
+ * of its spin from its speed
+ */
+#define OPENING_OFFSET_SIDE_SPIN_SCALE 2
+#define OPENING_LAUNCH_SPIN_SPEED_LOSS 0.2f
+
+/*
  * A cut-down copy of LaunchBallSimulation. It always takes the club test's
  * entry, picks a lie blend of 0, leaves out the slopes, rain and wind, and
  * prints the launch velocity to the debug output.
@@ -1808,7 +1816,7 @@ s32 func_8020A488_ovl_05(
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     groundHeight = GetGroundHeight(simulation->position[AXIS_X],
                        simulation->position[AXIS_Z]) -
-        1.536f;
+        LAUNCH_GROUND_CLEARANCE;
     if (groundHeight < simulation->position[AXIS_Y]) {
       simulation->position[AXIS_Y] = groundHeight;
     }
@@ -1837,9 +1845,11 @@ s32 func_8020A488_ovl_05(
     speed = GetPuttPower(shot->power, shot->shotMode);
   } else {
     speed = GetClubPower(club, shot->shotMode) *
-        (shot->power + (entry->speedChange * 2)) / 256;
+        (shot->power +
+            (entry->speedChange * (LAUNCH_SCALE_ONE / SPEED_CHANGE_UNITS))) /
+        MAX_LAUNCH_POWER;
     if (speed <= 0) {
-      speed = 10;
+      speed = MIN_LAUNCH_SPEED;
     }
   }
 
@@ -1849,11 +1859,12 @@ s32 func_8020A488_ovl_05(
     blend = PickLieBlend();
     GetSurfacePercentRange(info, club, percentRange);
     speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) *
-        speed * 0.01f;
+        speed * ONE_PER_PERCENT;
   } else {
-    s32 percent = 198; /* The local is there to match */
+    s32 percent =
+        CLUB_TEST_SPEED_HALF_PERCENTS; /* The local is there to match */
 
-    speed = speed * percent / 200;
+    speed = speed * percent / HALF_PERCENTS_PER_ONE;
   }
 
   pitch = (club->pitch + entry->pitchChange) * DEGREES_TO_RADIANS;
@@ -1862,20 +1873,23 @@ s32 func_8020A488_ovl_05(
   }
 
   simulation->sideSpin =
-      (((((sideSign * entry->sideSpinChange) + shot->offsetX) * 2) +
-           ((club->sideSpin * 2) * sideSign)) *
+      (((((sideSign * entry->sideSpinChange) + shot->offsetX) *
+            OPENING_OFFSET_SIDE_SPIN_SCALE) +
+           ((club->sideSpin * CLUB_SIDE_SPIN_SCALE) * sideSign)) *
           speed) *
-      0.00078125f;
-  pitch += (f32)club->offsetPitch * shot->offsetY * 0.00054541545f;
+      SIDE_SPIN_PER_SPEED;
+  pitch += (f32)club->offsetPitch * shot->offsetY *
+      (DEGREES_TO_RADIANS / OFFSET_Y_PER_PITCH_STEP);
   yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
-  spinBase = club->spin * 0.5f;
-  simulation->spinSpeed =
-      (((spinBase + 25.0f) * (shot->offsetY * 0.006f)) - spinBase) * speed *
-      0.0078125f;
+  spinBase = club->spin * CLUB_SPIN_BASE_SCALE;
+  simulation->spinSpeed = (((spinBase + CLUB_TEST_SPIN_OFFSET) *
+                               (shot->offsetY * CLUB_TEST_SPIN_PER_OFFSET)) -
+                              spinBase) *
+      speed * SPIN_PER_SPEED;
   simulation->unk40 = 0.0f;
   simulation->spinHeading = yawRadians;
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
-    spinLoss = simulation->spinSpeed * 0.2f;
+    spinLoss = simulation->spinSpeed * OPENING_LAUNCH_SPIN_SPEED_LOSS;
     if (spinLoss < 0.0f) {
       spinLoss = -spinLoss;
     }
@@ -1888,7 +1902,7 @@ s32 func_8020A488_ovl_05(
   }
 
   if (speed <= 0) {
-    speed = 10;
+    speed = MIN_LAUNCH_SPEED;
   }
 
   simulation->velocity[AXIS_Y] = sinf(pitch) * speed;
