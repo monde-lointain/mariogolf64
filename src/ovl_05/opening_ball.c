@@ -1778,9 +1778,11 @@ s32 func_8020A488_ovl_05(
         IsGameFlagSet(GAME_FLAG_SHOW_LAUNCH_VALUES)) {
       char text[128];
 
-      sprintf(text, "ANGLEY = %3.3d/360", (s32)(yawRadians * 57.295776f));
+      sprintf(text, "ANGLEY = %3.3d/360",
+          (s32)(yawRadians * (f32)RADIANS_TO_DEGREES));
       PrintDebugText(text, 3, 6);
-      sprintf(text, "ANGLEX = %3.3d/360", (s32)(pitch * 57.295776f));
+      sprintf(
+          text, "ANGLEX = %3.3d/360", (s32)(pitch * (f32)RADIANS_TO_DEGREES));
       PrintDebugText(text, 3, 7);
       sprintf(text, "Velocity = %fm/s     ",
           speed * (1.0f / SPEED_UNITS_PER_METER_PER_SECOND));
@@ -1793,7 +1795,7 @@ s32 func_8020A488_ovl_05(
           text, "SpinVel = %fRPM      ", simulation->spinSpeed * 0.8741959f);
       PrintDebugText(text, 3, 11);
       sprintf(text, "SpinAngle = %3.3d/360",
-          (s32)(simulation->spinHeading * 57.295776f));
+          (s32)(simulation->spinHeading * (f32)RADIANS_TO_DEGREES));
       PrintDebugText(text, 3, 12);
       sprintf(text, "SpinVelX = %fkm/h      ",
           simulation->spinSpeed * 0.0070306873f);
