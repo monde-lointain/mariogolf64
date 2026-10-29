@@ -110,7 +110,7 @@ void GrantWinsStarsAndBadges(void) {
 
 void GrantRingShotProgressAndPoints(void) {
   SaveData* save = GetSaveData();
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 holeIndex;
   s32 index;
 
@@ -130,7 +130,7 @@ void GrantRingShotProgressAndPoints(void) {
 
 void GrantEveryTournamentPlace(void) {
   SaveData* save = GetSaveData();
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 place;
 
   InitSram();

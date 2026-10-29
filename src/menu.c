@@ -701,7 +701,7 @@ void InitSaveData(void) {
 }
 
 s32 CountOpenCourses(s32 coursePoints) {
-  s32 courseIndex;
+  CourseIndex courseIndex;
 
   for (courseIndex = COURSE_COUNT - 1; courseIndex != 0; courseIndex--) {
     if (coursePoints >= f_CoursePointsNeeded[courseIndex]) {
@@ -712,7 +712,7 @@ s32 CountOpenCourses(s32 coursePoints) {
   return courseIndex + 1;
 }
 
-s32 GetCoursePointsNeeded(s32 courseIndex) {
+s32 GetCoursePointsNeeded(CourseIndex courseIndex) {
   return f_CoursePointsNeeded[courseIndex];
 }
 
@@ -1212,7 +1212,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
 Boolean HasEveryRingShotStar(void) {
   SaveData* save;
   s32 starCount;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 holeIndex;
 
   save = GetSaveData();
@@ -1229,7 +1229,7 @@ Boolean HasEveryRingShotStar(void) {
 Boolean IsDonkeyKongUnlocked(void) {
   SaveData* save;
   s32 starCount;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 holeIndex;
 
   save = GetSaveData();
@@ -1248,7 +1248,7 @@ Boolean IsDonkeyKongUnlocked(void) {
 s32 GetRingShotCourseOpenedAtStarCount(void) {
   SaveData* save;
   s32 starCount;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 holeIndex;
 
   save = GetSaveData();
@@ -1277,7 +1277,7 @@ s32 GetRingShotCourseOpenedAtStarCount(void) {
 Boolean IsMapleUnlocked(void) {
   SaveData* save;
   s32 badgeCount;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 holeIndex;
 
   save = GetSaveData();
@@ -1295,7 +1295,7 @@ Boolean IsMapleUnlocked(void) {
 Boolean IsMetalMarioUnlocked(void) {
   SaveData* save;
   s32 badgeCount;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 holeIndex;
 
   save = GetSaveData();
@@ -1767,7 +1767,7 @@ void ComputeRoundStatistics(void) {
   UnkE98* entry;
   f32 reciprocal;
   s32 sum;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   Boolean hasPlayedCourse;
   f32 sum8;
   f32 sum18;

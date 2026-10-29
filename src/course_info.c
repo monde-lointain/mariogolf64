@@ -234,7 +234,7 @@ static RingShotHole
  * The one caller scales the sine and cosine of an angle by this, so it is
  * taken to be a radius
  */
-s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex) {
+s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
   switch (courseRecordIndex) {
     case 0:
       if (holeIndex == 10) {
@@ -344,7 +344,7 @@ s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex) {
   return DEFAULT_HOLE_RADIUS;
 }
 
-s32 GetCourseRecordIndex(void) {
+CourseRecordIndex GetCourseRecordIndex(void) {
   if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     return f_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
         .courseRecordIndex;

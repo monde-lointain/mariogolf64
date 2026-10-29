@@ -623,7 +623,7 @@ void func_8021585C_ovl_01(void) {
   AssetFile file;
   SaveData* save = GetSaveData();
   CharacterId characterIndex;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 rank;
   s32 character;
   s32 palette;

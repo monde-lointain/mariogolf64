@@ -3430,7 +3430,7 @@ void BuildStatusData(u8* status) {
   f32 reciprocal;
   s32 value;
   s32 sum;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 index;
   s32 bits[2];
   s32 row;

@@ -330,7 +330,7 @@ static s32 f_PortraitFrames[MAX_PLAYER_COUNT];
 static s32 f_PortraitTimers[MAX_PLAYER_COUNT];
 
 /* The course points that open the courses up to courseIndex, together */
-s32 SumCoursePointsNeeded(s32 courseIndex) {
+s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
   s32 total = 0;
   s32 i;
 
@@ -719,7 +719,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", LoadRoundResults);
 void LoadUnlockNotice(s32 unlock) {
   EncodedAsset asset;
   AssetFile file;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   u32 size;
 
   GetSaveData();

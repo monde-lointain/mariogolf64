@@ -231,8 +231,8 @@ static s32 f_CourseSelectUnusedWord = 0;
 static s32 f_LoadedScreen = COURSE_SELECT_UNLOADED;
 static s32 f_SlideOffset = 0;
 /* While the course image turns, it turns from f_ShownCourse to f_NextCourse */
-static s32 f_ShownCourse = 0;
-static s32 f_NextCourse = 0;
+static CourseIndex f_ShownCourse = 0;
+static CourseIndex f_NextCourse = 0;
 static s32 f_CourseTurnIndex = 0;
 static s32 f_CourseTurnStep =
     0; /* 1 or -1 through f_CourseTurnFrames, or 0 when still */
@@ -258,7 +258,7 @@ static u8 D_80243FC0_ovl_11[0x40];
 s32 CountOpenRingShotCourses(void) {
   SaveData* save = GetSaveData();
   s32 starCount = 0;
-  s32 course;
+  CourseIndex course;
   s32 hole;
 
   for (course = 0; course != RING_SHOT_COURSE_COUNT; course++) {

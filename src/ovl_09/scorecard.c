@@ -149,7 +149,7 @@ s32 f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
  * g_TournamentStandings after setting up the loops' other registers.
  */
 #ifdef NON_MATCHING
-void OpenScorecard(s32 courseIndex, s32 holeIndex) {
+void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
   EncodedAsset asset;
   AssetFile file;
   s32 pageTitlesRow = PAGE_TITLES_SPEED_GOLF;

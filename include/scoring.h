@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "course.h"
+
 /* GetMatchStanding's results, from the first player's side */
 enum MatchStanding {
   MATCH_STANDING_DECIDED = -1, /* The lead is more than the holes left */
@@ -59,7 +61,7 @@ s32 GetFirstHoleIndex(void);
 s32 GetRoundHoleCount(void);
 s32 GetLastHoleIndex(void);
 Boolean IsOnDrivingRange(void);
-s32 GetHandicapOffset(s32 courseIndex, s32 holeIndex, s32 handicap);
+s32 GetHandicapOffset(CourseIndex courseIndex, s32 holeIndex, s32 handicap);
 s32 GetNetScore(s32 playerIndex);
 void RenumberHoleHandicaps(void);
 s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex);

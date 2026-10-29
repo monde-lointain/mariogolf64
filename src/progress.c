@@ -84,7 +84,7 @@ void AddBirdieBadge(void) {
 void ReportBirdieBadgeCount(void) {
   Unk990* unk990;
   s32 badgeCount;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 holeIndex;
 
   unk990 = &GetSaveData()->unk990;

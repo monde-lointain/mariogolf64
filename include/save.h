@@ -5,6 +5,7 @@
 
 #include "character.h"
 #include "club.h"
+#include "course.h"
 #include "math_util.h"
 #include "variables.h"
 
@@ -152,7 +153,7 @@ typedef struct GameState {
   /* 0x00 */ s32 unk0; /* A GAME_STATE_* value */
   /* 0x04 */ u32 gameMode; /* A GAME_MODE_* value */
   /* 0x08 */ s32 playerCount;
-  /* 0x0C */ s32 courseIndex;
+  /* 0x0C */ CourseIndex courseIndex;
   /* 0x10 */ s32 holeIndex;
   /* 0x14 */ s32 unk14;
   /* 0x18 */ Boolean isSuddenDeath;
@@ -534,7 +535,7 @@ void InitSaveData(void);
 void RecordDisplayListLength(u32 commandCount);
 void WriteSaveData(void);
 s32 CountOpenCourses(s32 coursePoints);
-s32 GetCoursePointsNeeded(s32 courseIndex);
+s32 GetCoursePointsNeeded(CourseIndex courseIndex);
 void ComputeRoundStatistics(void);
 
 #endif

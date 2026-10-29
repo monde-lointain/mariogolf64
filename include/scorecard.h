@@ -39,7 +39,7 @@ typedef struct ScorecardContent {
   /* 0x34 */ s32 flipTime;
   /* 0x38 */ s32 faceImageOffsets[MAX_PLAYER_COUNT]; /* Added to each player's
                                                         first face image */
-  /* 0x48 */ s32 courseIndex;
+  /* 0x48 */ CourseIndex courseIndex;
   /* 0x4C */ s32 holeIndex;
   /* 0x50 */ Boolean isSuddenDeath; /* The page shows SUDDEN DEATH */
 } ScorecardContent; /* size = 0x54 */
@@ -143,7 +143,7 @@ void DrawSpeedGolfPage(Gfx** displayListHead);
 void DrawLeaderboardPage(Gfx** displayListHead);
 void DrawScoresPage(Gfx** displayListHead);
 
-void OpenScorecard(s32 courseIndex, s32 holeIndex);
+void OpenScorecard(CourseIndex courseIndex, s32 holeIndex);
 void SetScorecardLayout(s32 layout);
 void UpdateScorecard(u16 buttons, u16 pressedButtons);
 void DrawScorecard(Gfx** displayListHead);

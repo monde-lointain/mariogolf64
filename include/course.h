@@ -20,6 +20,9 @@ enum CourseRecordIndex {
   COURSE_RECORD_COUNT
 };
 
+/* An enum CourseRecordIndex value */
+typedef s32 CourseRecordIndex;
+
 /*
  * GameState.courseIndex numbers the main courses from 0, then the mini-golf
  * ones, which share a record three at a time, from MINI_GOLF_COURSE_INDEX. From
@@ -29,6 +32,10 @@ enum CourseRecordIndex {
 #define MINI_GOLF_COURSES_PER_RECORD 3
 #define DRIVING_RANGE_COURSE_INDEX 12
 #define COURSE_INDEX_COUNT (DRIVING_RANGE_COURSE_INDEX + 1)
+
+/* A course as GameState.courseIndex numbers it; the main courses are its
+ * enum Course values */
+typedef s32 CourseIndex;
 
 /* The main courses, which keep their records' order */
 enum Course {
@@ -81,12 +88,12 @@ extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];
 extern char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE];
 /* The par of the hole being played */
 
-s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex);
+s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex);
 /*
  * Takes no parameters, but is left unprototyped because GetHandicapOffset
  * passes it a course index, which is not used
  */
-s32 GetCourseRecordIndex();
+CourseRecordIndex GetCourseRecordIndex();
 s32 GetHoleRecordIndex(void);
 s32 GetHoleIndexInRecord(void);
 Boolean IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex);

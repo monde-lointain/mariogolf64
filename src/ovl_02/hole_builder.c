@@ -2314,7 +2314,7 @@ void ScaleMiniGolfHole(void) {
 }
 
 /* Returns the paint logic that a course's terrain is painted with */
-s32 GetCoursePaintLogic(s32 course) {
+s32 GetCoursePaintLogic(CourseRecordIndex course) {
   switch (course) {
     case 0:
       return 0;
@@ -2340,7 +2340,7 @@ s32 GetCoursePaintLogic(s32 course) {
 }
 
 /* Does nothing; the course and hole are not read */
-void FinishHolePoints(s32 course, s32 hole) {}
+void FinishHolePoints(CourseRecordIndex course, s32 hole) {}
 
 /*
  * Builds a hole: reads its files, either from its assets or, with
@@ -2986,7 +2986,7 @@ void ReadVertexZ(s16* coord, s32 flags) {
  * Opens one of a hole's files and reads it to the hole file buffer, or
  * unpacks the attributes into the build buffer
  */
-void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
+void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
   f_ReadCursor = HOLE_FILE_BUFFER;
   switch (kind) {
     case HOLE_ASSET_VERTICES:

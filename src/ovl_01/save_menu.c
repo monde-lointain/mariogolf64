@@ -974,7 +974,7 @@ void func_802213C8_ovl_01(
 s32 func_8022181C_ovl_01(void) {
   SaveData* save = GetSaveData();
   s32 starCount = 0;
-  s32 courseIndex;
+  CourseIndex courseIndex;
   s32 holeIndex;
 
   for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {

@@ -49,7 +49,7 @@ Boolean IsOnDrivingRange(void) {
  * GetCourseRecordIndex ignores the courseIndex passed to it and reads
  * g_GameState.courseIndex.
  */
-s32 GetHandicapOffset(s32 courseIndex, s32 holeIndex, s32 handicap) {
+s32 GetHandicapOffset(CourseIndex courseIndex, s32 holeIndex, s32 handicap) {
   return (-handicap / COURSE_HOLE_COUNT) -
       (handicap % COURSE_HOLE_COUNT >=
           g_CourseRecords[GetCourseRecordIndex(courseIndex)]
