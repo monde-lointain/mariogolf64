@@ -282,6 +282,17 @@ enum ListingState {
 /* The largest value the status sends for each figure */
 #define MAX_STATUS_VALUE 999
 
+/*
+ * The status rounds its figures to tenths through hundredths, rounding the
+ * hundredths half up
+ */
+#define HUNDREDTHS_PER_ONE 100.0f
+#define HUNDREDTHS_PER_TENTH 10
+#define HALF_TENTH_HUNDREDTHS 5
+#define TENTHS_PER_ONE 10
+/* The status sends its rates as percentages */
+#define PERCENTS_PER_ONE 100.0f
+
 /* The status data BuildStatusData fills for the Game Boy cartridge; its values
  * are little-endian */
 #define STATUS_CLEARED_SIZE 0x400
@@ -3526,23 +3537,23 @@ typedef struct SaveRecords {
  * tenths */
 static inline s32 PackTenths(f32 value) {
   s32 wholePart = value;
-  s32 fraction = (value - wholePart) * 100.0f;
+  s32 fraction = (value - wholePart) * HUNDREDTHS_PER_ONE;
 
-  if (fraction % 10 >= 5) {
-    fraction += 10;
+  if (fraction % HUNDREDTHS_PER_TENTH >= HALF_TENTH_HUNDREDTHS) {
+    fraction += HUNDREDTHS_PER_TENTH;
   }
 
-  fraction /= 10;
-  if (fraction >= 10) {
+  fraction /= HUNDREDTHS_PER_TENTH;
+  if (fraction >= TENTHS_PER_ONE) {
     wholePart++;
     fraction = 0;
     if (wholePart >= MAX_STATUS_VALUE + 1) {
       wholePart = MAX_STATUS_VALUE;
-      fraction = 9;
+      fraction = TENTHS_PER_ONE - 1;
     }
   }
 
-  return (wholePart * 10) + fraction;
+  return (wholePart * TENTHS_PER_ONE) + fraction;
 }
 
 /*
@@ -3592,19 +3603,19 @@ void BuildStatusData(u8* status) {
         course->averageDrive[0] = value;
         course->averageDrive[1] = value >> BITS_PER_BYTE;
         course->unk8 = RoundedWholePart(entry->measuredDriveTotal * reciprocal *
-            (100.0f / HOLES_PER_ROUND));
+            (PERCENTS_PER_ONE / HOLES_PER_ROUND));
         course->averagePutts = PackTenths(
             entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
-        course->parOrBetterRate = RoundedWholePart(
-            entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND));
-        course->parOnRate = RoundedWholePart(
-            entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND));
+        course->parOrBetterRate = RoundedWholePart(entry->parOrBetterCount *
+            reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND));
+        course->parOnRate = RoundedWholePart(entry->parOnCount * reciprocal *
+            (PERCENTS_PER_ONE / HOLES_PER_ROUND));
         sum = entry->sandSaveCount + entry->missedSandSaveCount;
         if (sum == 0) {
           course->unkC = 0;
         } else {
-          course->unkC =
-              RoundedWholePart(((f32)entry->sandSaveCount / (f32)sum) * 100.0f);
+          course->unkC = RoundedWholePart(
+              ((f32)entry->sandSaveCount / (f32)sum) * PERCENTS_PER_ONE);
         }
 
         course->places = 0;
@@ -3804,14 +3815,14 @@ s32 RoundedWholePart(f32 value) {
 
   /* The fraction in hundredths, then in tenths; reusing one variable is there
    * to match */
-  s32 fraction = (value - wholePart) * 100.0f;
+  s32 fraction = (value - wholePart) * HUNDREDTHS_PER_ONE;
 
-  if (fraction % 10 >= 5) {
-    fraction += 10;
+  if (fraction % HUNDREDTHS_PER_TENTH >= HALF_TENTH_HUNDREDTHS) {
+    fraction += HUNDREDTHS_PER_TENTH;
   }
 
-  fraction /= 10;
-  if (fraction >= 10) {
+  fraction /= HUNDREDTHS_PER_TENTH;
+  if (fraction >= TENTHS_PER_ONE) {
     wholePart++;
     if (wholePart >= MAX_STATUS_VALUE + 1) {
       wholePart = MAX_STATUS_VALUE;
