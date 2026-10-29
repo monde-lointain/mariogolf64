@@ -2971,6 +2971,24 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
 #define RESULTS_ROW_HEIGHT 32
 #define RESULTS_ICON_ROW_Y 68
 #define RESULTS_TEXT_ROW_Y 80
+/*
+ * The players' results columns. With bets, places and a bet totals column
+ * squeeze the others left; without them, ranks lead the rows.
+ */
+#define BETTING_RESULTS_SCORE_LABEL_X 88
+#define BETTING_RESULTS_BETS_LABEL_X 192
+#define BETTING_RESULTS_POINTS_LABEL_X 248
+#define BETTING_RESULTS_PLACE_X 18
+#define BETTING_RESULTS_PORTRAIT_X 50
+#define BETTING_RESULTS_SCORE_X 96
+#define BETTING_RESULTS_BET_TOTAL_X 156
+#define BETTING_RESULTS_POINTS_X 242
+#define PLAIN_RESULTS_SCORE_LABEL_X 144
+#define PLAIN_RESULTS_POINTS_LABEL_X 234
+#define PLAIN_RESULTS_RANK_X 32
+#define PLAIN_RESULTS_PORTRAIT_X 96
+#define PLAIN_RESULTS_SCORE_X 152
+#define PLAIN_RESULTS_POINTS_X 232
 
 /* The results of several players: place, portrait, score, any bet totals and
  * Course Points */
@@ -2994,36 +3012,36 @@ void DrawPlayersResults(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   if (f_HasBets) {
-    DrawResultsLabel(&gfx, f_ResultsSlide + 88,
+    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_RESULTS_SCORE_LABEL_X,
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
-    DrawResultsLabel(&gfx, f_ResultsSlide + 192,
+    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_RESULTS_BETS_LABEL_X,
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_BETS);
-    DrawResultsLabel(&gfx, f_ResultsSlide + 248,
+    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_RESULTS_POINTS_LABEL_X,
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
     for (i = 0; i != g_GameState.playerCount; i++) {
       if (g_GameState.playerCount >= 2) {
-        DrawPlaceIcon(&gfx, f_ResultsSlide + 18,
+        DrawPlaceIcon(&gfx, f_ResultsSlide + BETTING_RESULTS_PLACE_X,
             f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
             f_PlayerRanks[i]);
       }
 
-      DrawPlayerPortrait(&gfx, f_ResultsSlide + 50,
+      DrawPlayerPortrait(&gfx, f_ResultsSlide + BETTING_RESULTS_PORTRAIT_X,
           f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT), i,
           FALSE);
     }
   } else {
-    DrawResultsLabel(&gfx, f_ResultsSlide + 144,
+    DrawResultsLabel(&gfx, f_ResultsSlide + PLAIN_RESULTS_SCORE_LABEL_X,
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
-    DrawResultsLabel(&gfx, f_ResultsSlide + 234,
+    DrawResultsLabel(&gfx, f_ResultsSlide + PLAIN_RESULTS_POINTS_LABEL_X,
         f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
     for (i = 0; i != g_GameState.playerCount; i++) {
       if (g_GameState.playerCount >= 2) {
-        DrawRank(&gfx, f_ResultsSlide + 32,
+        DrawRank(&gfx, f_ResultsSlide + PLAIN_RESULTS_RANK_X,
             f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
             f_PlayerRanks[i]);
       }
 
-      DrawPlayerPortrait(&gfx, f_ResultsSlide + 96,
+      DrawPlayerPortrait(&gfx, f_ResultsSlide + PLAIN_RESULTS_PORTRAIT_X,
           f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT), i,
           FALSE);
     }
@@ -3043,11 +3061,12 @@ void DrawPlayersResults(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
       }
 
-      DrawDigitText(&gfx, f_ResultsSlide + 96,
+      DrawDigitText(&gfx, f_ResultsSlide + BETTING_RESULTS_SCORE_X,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
       sprintf(g_PrintBuffer, "%5d", f_PlayerBetTotals[i]);
-      DrawDigitText(&gfx, f_ResultsSlide + 156 + betShift,
+      DrawDigitText(&gfx,
+          f_ResultsSlide + BETTING_RESULTS_BET_TOTAL_X + betShift,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
       if (f_PlayerPoints[i] < 0) {
@@ -3056,7 +3075,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
 
-      DrawDigitText(&gfx, f_ResultsSlide + 242,
+      DrawDigitText(&gfx, f_ResultsSlide + BETTING_RESULTS_POINTS_X,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
     }
@@ -3071,7 +3090,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
       }
 
-      DrawDigitText(&gfx, f_ResultsSlide + 152,
+      DrawDigitText(&gfx, f_ResultsSlide + PLAIN_RESULTS_SCORE_X,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
       if (f_PlayerPoints[i] < 0) {
@@ -3080,7 +3099,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
 
-      DrawDigitText(&gfx, f_ResultsSlide + 232,
+      DrawDigitText(&gfx, f_ResultsSlide + PLAIN_RESULTS_POINTS_X,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
     }
