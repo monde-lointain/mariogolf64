@@ -169,8 +169,12 @@ enum TerrainColorIndex {
  * GetGridVertex returns instead.
  */
 #define GRID_VERTEX_SLOT_FLAG 0x80
-/* A grid vertex's slot holds its grid column within the tile above its row */
+/*
+ * A grid vertex's slot holds its grid column within the tile above its row,
+ * each in the bits of SLOT_GRID_MASK
+ */
 #define SLOT_GRID_COLUMN_SHIFT 2
+#define SLOT_GRID_MASK 3
 static u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8] = {
     {0x80, 0x00, 0x84, 0x01, 0x88},
     {0x02, 0x08, 0x09, 0x0A, 0x03},
@@ -1800,15 +1804,16 @@ void UpdateDebugScenes(void) {
 }
 
 /*
- * Returns the point in a tile's slot: a grid vertex when the slot has bit
- * 0x80, otherwise a midpoint
+ * Returns the point in a tile's slot: a grid vertex when the slot has
+ * GRID_VERTEX_SLOT_FLAG, otherwise a midpoint
  */
 Vtx* GetTileCellPoint(Vtx* midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
   Vtx* vertex;
 
   if (slot & GRID_VERTEX_SLOT_FLAG) {
-    vertex = TileGridVertex(
-        tileColumn, tileRow, (slot >> SLOT_GRID_COLUMN_SHIFT) & 3, slot & 3);
+    vertex = TileGridVertex(tileColumn, tileRow,
+        (slot >> SLOT_GRID_COLUMN_SHIFT) & SLOT_GRID_MASK,
+        slot & SLOT_GRID_MASK);
   } else {
     vertex = &midpoints[slot];
   }
