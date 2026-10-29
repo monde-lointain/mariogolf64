@@ -131,7 +131,7 @@ enum PortraitAnimation {
 #define RESULTS_BACKDROP_ASSET 0x6A0
 #define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
 #define FINAL_RESULTS_TITLE_ASSET 0x69F
-#define NOTICE_TITLE_ASSET 0x55F
+#define COURSE_NOTICE_TITLE_ASSET 0x55F
 #define CHARACTER_NOTICE_TITLE_ASSET 0x560
 #define RESULTS_UNK72C_IMAGE_ASSET 0x72C
 #define RESULTS_UNK72D_PALETTE_ASSET 0x72D
@@ -473,7 +473,7 @@ void LoadRoundResults(void) {
         AllocMemory(OpenEncodedAsset(g_TournamentIconAssets[0], &asset));
     ReadEncodedAsset(f_ResultsCourseImage, &asset);
     f_NoticeTitleImage =
-        AllocMemory(OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset));
     ReadEncodedAsset(f_NoticeTitleImage, &asset);
     f_ResultsShineImage =
         AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
@@ -764,7 +764,7 @@ void LoadUnlockNotice(s32 unlock) {
   ReadEncodedAsset(f_ResultsShineImage, &asset);
   if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
     f_NoticeTitleImage =
-        AllocMemory(OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset));
     ReadEncodedAsset(f_NoticeTitleImage, &asset);
     f_ResultsCourseImage = AllocMemory(
         OpenEncodedAsset(f_CourseNoticeAssets[courseIndex], &asset));
@@ -2179,7 +2179,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
         OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
-        OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
+        OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
@@ -2461,7 +2461,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
         OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
-        OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
+        OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
@@ -2628,7 +2628,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
         OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
-        OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
+        OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
