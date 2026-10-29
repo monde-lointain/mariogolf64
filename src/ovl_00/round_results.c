@@ -132,6 +132,7 @@ enum PortraitAnimation {
 #define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
 #define FINAL_RESULTS_TITLE_ASSET 0x69F
 #define NOTICE_TITLE_ASSET 0x55F
+#define CHARACTER_NOTICE_TITLE_ASSET 0x560
 #define RESULTS_UNK72C_IMAGE_ASSET 0x72C
 #define RESULTS_UNK72D_PALETTE_ASSET 0x72D
 #define MATCH_PLACES_IMAGE_ASSET 0x6A2
@@ -771,7 +772,8 @@ void LoadUnlockNotice(s32 unlock) {
   }
 
   if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
-    f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(0x560, &asset));
+    f_NoticeTitleImage =
+        AllocMemory(OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &asset));
     ReadEncodedAsset(f_NoticeTitleImage, &asset);
     f_NameplateImage =
         AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
@@ -2585,7 +2587,6 @@ enum MatchStep {
   MATCH_STEP_START_TALLY
 };
 
-#define CHARACTER_NOTICE_TITLE_ASSET 0x560
 #define CHARACTER_NOTICE_WAIT_FRAMES 8
 /*
  * Whether beating a character in Get Character unlocks them: other feats
