@@ -267,7 +267,7 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
   for (index = firstIndex; index < endIndex; index++) {
     shape = index % 3;
     swing = index % 10;
-    if (g_GameState.courseIndex < 2) {
+    if (g_GameState.courseIndex < COURSE_SHY_GUY_DESERT) {
       swing = 13 - swing;
       if (swing >= 10) {
         swing = 9;

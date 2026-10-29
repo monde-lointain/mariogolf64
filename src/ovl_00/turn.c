@@ -3275,22 +3275,22 @@ void UpdateTurns(void) {
             if (!g_GameState.isMiniGolf) {
               if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
                 switch (g_GameState.courseIndex) {
-                  case 0:
+                  case COURSE_TOAD_HIGHLANDS:
                     song = 0x20;
                     break;
-                  case 1:
+                  case COURSE_KOOPA_PARK:
                     song = 0x21;
                     break;
-                  case 2:
+                  case COURSE_SHY_GUY_DESERT:
                     song = 0x22;
                     break;
-                  case 3:
+                  case COURSE_YOSHIS_ISLAND:
                     song = 0x30;
                     break;
-                  case 4:
+                  case COURSE_BOO_VALLEY:
                     song = 0x23;
                     break;
-                  case 5:
+                  case COURSE_MARIOS_STAR:
                   default:
                     song = 0x24;
                     break;
@@ -3320,22 +3320,22 @@ void UpdateTurns(void) {
                 song = 0x28;
               } else {
                 switch (g_GameState.courseIndex) {
-                  case 0:
+                  case COURSE_TOAD_HIGHLANDS:
                     song = 0xC;
                     break;
-                  case 1:
+                  case COURSE_KOOPA_PARK:
                     song = 0xD;
                     break;
-                  case 2:
+                  case COURSE_SHY_GUY_DESERT:
                     song = 0x11;
                     break;
-                  case 3:
+                  case COURSE_YOSHIS_ISLAND:
                     song = 0x13;
                     break;
-                  case 4:
+                  case COURSE_BOO_VALLEY:
                     song = 0x12;
                     break;
-                  case 5:
+                  case COURSE_MARIOS_STAR:
                   default:
                     song = 0x29;
                     break;

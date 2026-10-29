@@ -26,15 +26,21 @@
 #define MINI_GOLF_COURSES_PER_RECORD 3
 #define DRIVING_RANGE_COURSE_INDEX 12
 #define COURSE_INDEX_COUNT (DRIVING_RANGE_COURSE_INDEX + 1)
-/* The main courses keep their records' order */
-#define COURSE_SHY_GUY_DESERT 2
+
+/* The main courses, which keep their records' order */
+enum Course {
+  COURSE_TOAD_HIGHLANDS,
+  COURSE_KOOPA_PARK,
+  COURSE_SHY_GUY_DESERT,
+  COURSE_YOSHIS_ISLAND,
+  COURSE_BOO_VALLEY,
+  COURSE_MARIOS_STAR
+};
 
 /* The colors of each course's name, which gradients from the first to the
  * second */
 extern s32 g_CourseNameEnvColors[];
 extern s32 g_CourseNamePrimColors[];
-#define COURSE_YOSHIS_ISLAND 3
-#define COURSE_MARIOS_STAR 5
 
 /* HoleRecord.flags; the main courses mark three or four par 5s and every par 3
  */

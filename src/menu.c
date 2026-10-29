@@ -1725,9 +1725,10 @@ s32 GetClubTournamentModeMessage(void) {
 s32 GetClubTournamentCourseTitleMessage(void) {
   s32 value;
 
-  if (D_80105DC0.courseIndex >= 6) {
+  if (D_80105DC0.courseIndex >= MINI_GOLF_COURSE_INDEX) {
     value = 0xC7;
-    if (D_80105DC0.courseIndex >= 9) {
+    if (D_80105DC0.courseIndex >=
+        MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
       value = 0xC8;
     }
   } else {
