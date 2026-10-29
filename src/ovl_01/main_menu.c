@@ -637,14 +637,15 @@ static Vtx D_8022F7C8_ovl_01[8] = {
     {{{-32, -32, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, -32, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, 0, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
-/* The star's frames */
-static s32 D_8022F848_ovl_01[STAR_FRAME_COUNT] = {0x05BE, 0x05BF, 0x05C0,
+/* A gold star with eyes spinning, which also marks a hole's Ring Shot star */
+static s32 f_MenuStarFrameAssets[STAR_FRAME_COUNT] = {0x05BE, 0x05BF, 0x05C0,
     0x05C1, 0x05C2, 0x05C3, 0x05C4, 0x05C5, 0x05C6, 0x05C7, 0x05C8, 0x05C9,
     0x05CA, 0x05CB, 0x05CC};
-/* The silver star's frames */
-static s32 D_8022F884_ovl_01[STAR_FRAME_COUNT] = {0x05E5, 0x05E6, 0x05E7,
-    0x05E8, 0x05E9, 0x05EA, 0x05EB, 0x05EC, 0x05ED, 0x05EE, 0x05EF, 0x05F0,
-    0x05F1, 0x05F2, 0x05F3};
+/* A silver star without eyes spinning, for a hole without its Ring Shot star
+ */
+static s32 f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {0x05E5, 0x05E6,
+    0x05E7, 0x05E8, 0x05E9, 0x05EA, 0x05EB, 0x05EC, 0x05ED, 0x05EE, 0x05EF,
+    0x05F0, 0x05F1, 0x05F2, 0x05F3};
 s32 D_8022F8C0_ovl_01 = 0;
 u8 D_8022F8C4_ovl_01 = 0;
 s8 D_8022F8C5_ovl_01 = 0;
@@ -1214,7 +1215,7 @@ void func_801F4C78_ovl_01(void) {
         D_8022F8C8_ovl_01 = 0;
         D_8022F8CC_ovl_01 = 0;
         D_8022F8CD_ovl_01 = 0;
-        OpenEncodedAsset(D_8022F848_ovl_01[D_8022F8C0_ovl_01], &asset);
+        OpenEncodedAsset(f_MenuStarFrameAssets[D_8022F8C0_ovl_01], &asset);
         ReadEncodedAsset(D_801B93E0[0], &asset);
         break;
 
@@ -7135,7 +7136,7 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     }
 
     D_8022F8CC_ovl_01 = D_8022F8CC_ovl_01 == 0;
-    OpenEncodedAsset(D_8022F848_ovl_01[D_8022F8C8_ovl_01], &asset);
+    OpenEncodedAsset(f_MenuStarFrameAssets[D_8022F8C8_ovl_01], &asset);
     ReadEncodedAsset(D_801B93E0[D_8022F8CC_ovl_01], &asset);
   }
 
@@ -7231,9 +7232,9 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
     }
 
     D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
-    OpenEncodedAsset(D_8022F848_ovl_01[D_8022F8C0_ovl_01], &asset);
+    OpenEncodedAsset(f_MenuStarFrameAssets[D_8022F8C0_ovl_01], &asset);
     ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
-    OpenEncodedAsset(D_8022F884_ovl_01[D_8022F8C0_ovl_01], &asset);
+    OpenEncodedAsset(f_MenuEmptyStarFrameAssets[D_8022F8C0_ovl_01], &asset);
     ReadEncodedAsset(D_800FF180[D_8022F8C4_ovl_01], &asset);
   }
 
