@@ -3,6 +3,9 @@
 
 #include <ultra64.h>
 
+/* The host's hole files are numbered by course from 1 to this */
+#define HOLE_FILE_COURSE_COUNT 9
+
 /* The units per grid step of the distances that ListOffsetsByDistance lists */
 #define OFFSET_DISTANCE_SCALE 256
 

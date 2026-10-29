@@ -224,8 +224,6 @@ enum TriangleEdit {
 #define HOLE_FILE_STEP_COURSE 1
 #define HOLE_FILE_STEP_HOLE 2
 #define HOLE_FILE_STEP_CONFIRM 3
-/* The course numbers it offers run from 1 to this */
-#define HOLE_FILE_COURSE_COUNT 9
 /* The prompt shows highlighted while this bit of its frame count is set */
 #define HOLE_FILE_BLINK_BIT 4
 #define HOLE_FILE_ARROW_COLUMN 7
