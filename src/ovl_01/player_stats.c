@@ -495,7 +495,7 @@ s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
 
 void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 iconIndex;
   BetSet betSet;
   AssetId assetId;
@@ -592,7 +592,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
  */
 void ApplyBetPreset(s32 requestedPreset) {
   s8 presetIndex = requestedPreset;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 index;
 
   if ((u8)requestedPreset < BET_PRESET_COUNT) {
@@ -638,7 +638,7 @@ void UpdateBetSettings(void) {
   s16 index;
 
   GetSaveData();
-  memory = func_8005AF74();
+  memory = GetMenuMemory();
   if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
     PlaySong(SONG_TITLE, 0);
     g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
@@ -797,7 +797,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", UpdateBetSettings);
 void DrawBetSettings(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 columnIndex;
   s16 stakeLevel;
   s16 betIndex;
@@ -1006,7 +1006,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBetSettings);
 void DrawBetIcon(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   EncodedAsset asset;
   void* image;
   u8 iconIndex;
@@ -1045,7 +1045,7 @@ void DrawBetIcon(
 /* Returns nothing, but is declared to return a value, which leaves v0 live at
  * its end */
 s32 UpdateHandicaps(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
 
   if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
     PlaySong(SONG_TITLE, 0);
@@ -1186,7 +1186,7 @@ void DrawTwoDigitMenuNumber(
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     u8 canShowPrompt) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   u16 playerIndex;
   s32 columnIndex;
   s32 stripIndex;
@@ -1961,7 +1961,7 @@ void LoadScoreLabelBuffer(void* buffer, s16 bufferKind) {
  * result from 16 bits, not 8 */
 void UpdateBestShots(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 slot;
   s32 moved;
   s32 column;
@@ -2081,7 +2081,7 @@ void DrawBestShots(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s16 index = 0;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 row;
   s16 column;
   s16 character;
@@ -2312,7 +2312,7 @@ void ReadBestShots(void) {
   }
 
   row = BEST_SHOT_ROW_BIRDIE;
-  memory = func_8005AF74();
+  memory = GetMenuMemory();
   column = row;
   if (birdieCount == 0) {
     if (eagleCount != 0) {
@@ -2456,7 +2456,7 @@ s8 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
 
 /* Returns the ranked record under the Best Shots cursor */
 s16 GetChosenBestShot(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
 
   return f_BestShotRecords[memory->bestShotRow][memory->bestShotColumn];
 }
@@ -2513,7 +2513,7 @@ void DrawScoreLabel(Gfx** displayListHead, s32 left, s32 top, s32 labelIndex) {
 #ifdef NON_MATCHING
 void DrawBestShotsCursor(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 vertexIndex;
   s32 red;
   s32 blue;

@@ -431,7 +431,7 @@ void FreeCourseSelect(void) {
  * Returns SELECT_MOVED, SELECT_BACK for B, or SELECT_IDLE.
  */
 s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 openCourseCount = CountOpenRingShotCourses();
   s32 result = SELECT_IDLE;
 
@@ -502,7 +502,7 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
   s32 result = SELECT_IDLE;
   s32 openCourseCount;
 
-  func_8005AF74();
+  GetMenuMemory();
   openCourseCount = CountOpenCourses(GetSaveData()->coursePoints);
   if (IsGameFlagSet(GAME_FLAG_ALL_COURSES)) {
     openCourseCount = COURSE_COUNT;
@@ -708,7 +708,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
 #ifdef NON_MATCHING
 void DrawRingShotSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 stripIndex;
   s32 arrowFrame;
   s32 push;
@@ -803,7 +803,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
   s32 push;
   s32 colorIndex;
 
-  func_8005AF74();
+  GetMenuMemory();
   f_SlideOffset -= HOLE_SELECT_SLIDE_STEP;
   if (f_SlideOffset < 0) {
     f_SlideOffset = 0;
@@ -981,7 +981,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawNamePlate);
 void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
   EncodedAsset asset;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   Gfx* gfx = *displayListHead;
 
   /* Unused */

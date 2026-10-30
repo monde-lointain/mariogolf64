@@ -672,11 +672,12 @@ void FreeMenuResources(void) {
 }
 
 SaveData* GetSaveData(void) {
-  func_8005AF74();
+  GetMenuMemory();
   return &g_SaveData;
 }
 
-MenuMemory* func_8005AF74(void) {
+/* Returns what the menus keep between visits, for its callers to share */
+MenuMemory* GetMenuMemory(void) {
   return &D_801323A0;
 }
 
@@ -1652,7 +1653,7 @@ INCLUDE_ASM("asm/nonmatchings/menu", func_8005D0D8);
 void func_8005D1E4(void) {
   MenuMemory* memory;
 
-  memory = func_8005AF74();
+  memory = GetMenuMemory();
   memory->holeIndex = g_GameState.holeIndex;
   memory->courseIndex = g_GameState.courseIndex;
 }

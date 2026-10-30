@@ -398,7 +398,7 @@ void LoadTournamentBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
   AssetFile file;
 
-  func_8005AF74();
+  GetMenuMemory();
   switch (bufferKind) {
     case TOURNAMENT_BUFFER_WIDE_CLOUD:
       D_80230E70_ovl_01 = buffer;
@@ -495,7 +495,7 @@ void func_802269AC_ovl_01(s32 row, s32 column) {
 
 void func_80226A34_ovl_01(void) {
   GetSaveData();
-  func_8005AF74();
+  GetMenuMemory();
 }
 
 /* DrawYesNoWindow draws a cloud window with Yes and No buttons, the chosen one
@@ -556,7 +556,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 pulse;
   s32 growth;
 
-  func_8005AF74();
+  GetMenuMemory();
   switch (f_MenuWindowState) {
     case MENU_WINDOW_OPENING:
       f_MenuWindowScaleX += MENU_WINDOW_SCALE_STEP;
@@ -782,7 +782,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 pictureX;
   s32 pictureY;
 
-  func_8005AF74();
+  GetMenuMemory();
   switch (f_MenuWindowState) {
     case MENU_WINDOW_OPENING:
       f_MenuWindowScaleX += MENU_WINDOW_SCALE_STEP;
@@ -1125,7 +1125,7 @@ void LoadCodeEntryBuffer(void* buffer, s32 bufferKind) {
 }
 
 void func_80228B60_ovl_01(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 charIndex;
 
   memory->codeKeyColumn = 0;
@@ -1154,7 +1154,7 @@ void func_80228B60_ovl_01(void) {
  */
 #ifdef NON_MATCHING
 void UpdateClubTournament(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 index;
   s32 result;
   Boolean isInvalid;
@@ -1336,7 +1336,7 @@ void func_80229278_ovl_01(void) {
   u16 buttons;
   s32 pressedButtons;
 
-  func_8005AF74();
+  GetMenuMemory();
   isHudAnimationDone = IsHudAnimationDone();
   if (isHudAnimationDone != TRUE) {
     return;
@@ -1710,7 +1710,7 @@ void func_8022A43C_ovl_01(Gfx** displayListHead) {
 
 void func_8022A8F4_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 left;
   s32 top;
 
@@ -1765,7 +1765,7 @@ void func_8022A8F4_ovl_01(Gfx** displayListHead) {
 
 void func_8022ADE8_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 row;
   s32 column;
   s8 glyph;
@@ -1849,7 +1849,7 @@ void func_8022B360_ovl_01(Gfx** displayListHead) {
  * registers */
 #ifdef NON_MATCHING
 s32 func_8022B46C_ovl_01(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 result = CODE_KEY_RESULT_TYPING;
   u8 key = D_80230F84_ovl_01[memory->codeKeyRow][memory->codeKeyColumn];
 

@@ -227,7 +227,7 @@ static s32 D_8023AC78_ovl_01[CHARACTER_COUNT];
 
 void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 x;
   s32 y;
 
@@ -282,7 +282,7 @@ void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
 }
 
 void UpdateCharacterTable(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s8 firstColumn;
   s8 firstRow;
   s8 column;
@@ -350,7 +350,7 @@ void UpdateCharacterTable(void) {
 void DrawCharacterTable(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 shownRow;
   s16 shownColumn;
   s16 row;
@@ -587,7 +587,7 @@ void func_802169CC_ovl_01(Gfx** displayListHead) {
 void func_80216C14_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 index; /* Counts the banner strips, then holds the x of each count of wins
               */
   s32 rowIndex;

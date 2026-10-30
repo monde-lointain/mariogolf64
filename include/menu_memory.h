@@ -104,7 +104,7 @@ typedef struct MenuMemory {
   /* 0x48 */ s8 codeKeyRow;
 } MenuMemory;
 
-MenuMemory* func_8005AF74(void);
+MenuMemory* GetMenuMemory(void);
 
 extern MenuMemory D_801323A0;
 

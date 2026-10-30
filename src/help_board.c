@@ -113,7 +113,7 @@ void DrawChalkboard(Gfx** displayListHead);
 /* Reads one of the help board's images into buffer */
 void LoadHelpBoardImage(void* buffer, s32 image) {
   EncodedAsset asset;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
 
   switch (image) {
     case HELP_BOARD_IMAGE_HAND:
@@ -191,7 +191,7 @@ static inline void ShowTopicPage(void) {
  * moves through the list */
 void UpdateHelpBoard(void) {
   s32 index;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
 
   if (IsHudAnimationDone() != 1) {
     return;
@@ -292,7 +292,7 @@ void UpdateHelpBoard(void) {
  */
 void DrawHelpBoard(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 index;
   s32 handTop;
   s32 handLeft;

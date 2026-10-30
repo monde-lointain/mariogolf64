@@ -352,7 +352,7 @@ void LoadRingShotCourseIcons(void** buffers) {
 }
 
 void UpdateRingShotRecords(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   SaveData* save = GetSaveData();
   s32 openCourseCount = GetOpenRingShotCourseCount();
   s32 index;
@@ -558,7 +558,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
    * slots, as the original's shared register needs */
   s16 index = 0;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 openCourseCount = GetOpenRingShotCourseCount();
   s16 row;
   s16 column;
@@ -812,7 +812,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawRingShotRecords);
  */
 void ReadRingShotReplays(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s8 slot;
 
   InitSram();
@@ -932,7 +932,7 @@ s16 FindNextReplaySlot(s8 startSlot, u8 isForward) {
 
 /* Returns the chosen replay's record, or -1 if it holds no recording */
 s16 GetChosenReplaySlot(void) {
-  return f_RecordedReplaySlots[func_8005AF74()->ringShotReplaySlot];
+  return f_RecordedReplaySlots[GetMenuMemory()->ringShotReplaySlot];
 }
 
 /* Tells whether the record holds a recording of the shots */
@@ -1067,7 +1067,7 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 gameIndex;
   void** bufferSlot;
   void** imageSlot;
@@ -1179,7 +1179,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveGameBuffer);
  */
 void ReadSavedGames(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s8 gameIndex;
   s8 modeIndex;
 
@@ -1230,7 +1230,7 @@ void ReadSavedGames(void) {
 #ifdef NON_MATCHING
 void ResetSavedGameControllers(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s8 playerIndex;
   s8 playerCount;
   s8 humanCount;
@@ -1281,7 +1281,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", ResetSavedGameControllers);
 #ifdef NON_MATCHING
 void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
   EncodedAsset asset;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 imageIndex;
   s32 mode;
   SaveMenuModeImage* modeImages;
@@ -1392,7 +1392,7 @@ void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
  */
 #ifdef NON_MATCHING
 void UpdateSavedGames(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   SaveData* save = GetSaveData();
   EncodedAsset asset;
   AssetFile file;
@@ -1633,7 +1633,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", UpdateSavedGames);
 /* Returns -1 when the chosen saved game slot holds no game, and 0 otherwise */
 s32 IsChosenGameEmpty(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   SavedGame* game = &save->savedGames[memory->savedGameIndex];
 
   return -(game->isValid == FALSE);
@@ -1646,7 +1646,7 @@ s32 IsChosenGameEmpty(void) {
  */
 s32 ContinueModeGame(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   SavedGame* game;
   Player* players;
   PlayRecord* records;
@@ -1703,7 +1703,7 @@ s32 ContinueModeGame(void) {
  */
 s32 ContinueSavedGame(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   Player* savedPlayer;
   s32 playerIndex;
   CharacterId character;
@@ -1851,7 +1851,7 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32 drawOrder[COURSE_COUNT];
   u8 unusedStack[8];
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
   s32 index;
   s32 otherIndex;
@@ -2178,7 +2178,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawSavedGames);
  */
 void DrawChosenGameBoard(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   Gfx* gfx = *displayListHead;
   s32 iconHalfSize = f_ChosenModeIconHalfSize;
   s32 iconScale = f_ChosenModeIconScale;
@@ -2261,7 +2261,7 @@ void DrawChosenGameBoard(
 void DrawSavedGolfers(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
   Player* players = save->savedPlayers[memory->savedGameIndex];
   u16 playerIndex;
@@ -2383,7 +2383,7 @@ void DrawSavedGolfers(Gfx** displayListHead) {
 void DrawPlayerControllers(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
   s32 position[2];
   s32 playerIndex;
@@ -2481,7 +2481,7 @@ void DrawSavedCourseImage(Gfx** displayListHead) {
   s32 stripTop;
 
   GetSaveData();
-  func_8005AF74();
+  GetMenuMemory();
   gDPLoadTLUT_pal256(gfx++,
       TextureAddress(
           ImageBody(f_CourseImageBuffers[f_ShownCourseBufferIndex])));
@@ -2520,7 +2520,7 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead) {
   void* palette;
 
   GetSaveData();
-  func_8005AF74();
+  GetMenuMemory();
   palette = D_801052C4[0];
   gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
   for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT;

@@ -205,7 +205,7 @@ void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind) {
   EncodedAsset asset;
   AssetFile file;
   s8 bufferKind = requestedKind;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 index;
 
   if ((s8)requestedKind < 0) {
@@ -287,7 +287,7 @@ void LoadCourseMenuBuffer(void* buffer, s16 bufferKind) {
 void UpdateCourseStats(void) {
   EncodedAsset asset;
   AssetFile file;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 courseCount = GetOpenCourseCount();
   Boolean isDone;
   s32 index;
@@ -411,7 +411,7 @@ void DrawCourseStats(Gfx** displayListHead) {
   s32 unusedSlots[WHEEL_SLOT_LIMIT];
   s32 drawOrder[WHEEL_SLOT_LIMIT];
   s32 unused[2];
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 courseCount;
   s32 index;
   s32 sortIndex;
@@ -543,7 +543,7 @@ void func_8020F2D0_ovl_01(
   s32 stripIndex;
   s32 stripTop;
 
-  func_8005AF74();
+  GetMenuMemory();
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPPipeSync(gfx++);
@@ -602,7 +602,7 @@ void func_8020F794_ovl_01(Gfx** displayListHead) {
   s16 statIndex;
 
   GetSaveData();
-  func_8005AF74();
+  GetMenuMemory();
   GetOpenCourseCount();
   gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
   gDPPipeSync(gfx++);
@@ -637,7 +637,7 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
   s32 openCourseCount;
 
   GetSaveData();
-  memory = func_8005AF74();
+  memory = GetMenuMemory();
   openCourseCount = GetOpenCourseCount();
   if (memory->statsCourse != openCourseCount) {
     courseIndex = memory->statsCourse;
@@ -764,7 +764,7 @@ void func_8020FE20_ovl_01(Gfx** displayListHead, s16 x, s16 y) {
 void func_8020FEF8_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 badgeCount = 0;
   s16 index; /* A hole, then a course, then where the count moves to */
   s16 holeIndex;
@@ -894,7 +894,7 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
   EncodedAsset asset;
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   void* palette = NULL;
   s32 openCourseCount;
   s32 left;

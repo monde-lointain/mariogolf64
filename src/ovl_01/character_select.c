@@ -252,7 +252,7 @@ void func_80209500_ovl_01(void) {
 s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
   EncodedAsset asset;
   AssetFile file;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 oldColumn = memory->characterColumns[playerNumber];
   s16 oldRow = memory->characterRows[playerNumber];
   s16 column = oldColumn;
@@ -348,7 +348,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209568_ovl_01);
 s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   EncodedAsset asset;
   AssetFile file;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 retryCount = 0;
   s16 oldRow = memory->characterRows[playerNumber];
   s16 oldColumn = memory->characterColumns[playerNumber];
@@ -467,7 +467,7 @@ s32 func_80209BE0_ovl_01(void) {
   s32 stickY;
   s8 anyStick;
 
-  func_8005AF74();
+  GetMenuMemory();
   anyStick = g_ControllerStates[3].stickX |
       (g_ControllerStates[2].stickX |
           (g_ControllerStates[0].stickX | g_ControllerStates[1].stickX));
@@ -559,7 +559,7 @@ s32 UpdateCharacterSelect(
   EncodedAsset asset;
   AssetFile file;
   s32 sameCharacterPlayers[MAX_PLAYER_COUNT];
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 playerIndex;
   s32 index;
   s32 otherIndex;
@@ -1204,7 +1204,7 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
 }
 
 void func_8020B3CC_ovl_01(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 row;
   s32 column;
 
@@ -1321,8 +1321,8 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   }
 
   column = *(
-      s8*)((s32)&func_8005AF74()->characterColumns[1] + (s16)playerNumber - 1);
-  slot = g_CharacterGrid[*(s8*)((s32)&func_8005AF74()->characterRows[1] +
+      s8*)((s32)&GetMenuMemory()->characterColumns[1] + (s16)playerNumber - 1);
+  slot = g_CharacterGrid[*(s8*)((s32)&GetMenuMemory()->characterRows[1] +
       (s16)playerNumber - 1)][column];
   if (slot < CHOOSABLE_MARK_LIMIT) {
     choiceIndex = slot + MARKED_CHARACTER_OFFSET;
@@ -1404,7 +1404,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   EncodedAsset asset;
   AssetFile file;
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 row;
   s16 column;
   u16 slot;
@@ -1643,7 +1643,7 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
  */
 #ifdef NON_MATCHING
 void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s16 tagCount = D_801B7070 + 1;
   Gfx* gfx = *displayListHead;
   s8 playerIndex;

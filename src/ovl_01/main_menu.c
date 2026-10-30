@@ -839,7 +839,7 @@ void StartLoadingChosenHole(void) {
 
   GetSaveData();
   slotIndex = 0;
-  func_8005AF74();
+  GetMenuMemory();
   do {
     if (IsCharacterSlotBusy(slotIndex)) {
       FreeCharacterSlot(slotIndex);
@@ -948,7 +948,7 @@ void UpdateMenus(void) {
   u8 iconIndex;
 
   save = GetSaveData();
-  func_8005AF74();
+  GetMenuMemory();
   g_MenuRepeatButtons = 0;
   g_MenuPressedButtons = 0;
   for (index = 0; index != g_ControllerCount; index++) {
@@ -1678,7 +1678,7 @@ const char D_80231514_ovl_01[] = "%s";
  */
 void SetUpChosenGame(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   Player* player;
   s32 index;
   s32 slot;
@@ -1832,7 +1832,7 @@ void SetUpChosenGame(void) {
 }
 
 void UpdateMenuTitleScreen(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 index;
   s8 titleChoice;
 
@@ -3196,7 +3196,7 @@ void func_801FA1B8_ovl_01(void) {
  */
 void UpdateOptionsScreen(void) {
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 closedCheck;
   s32 slot;
   u8* optionBits;
@@ -3830,7 +3830,7 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   u8* image;
 
   /* The menu memory goes unused */
-  func_8005AF74();
+  GetMenuMemory();
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -5219,7 +5219,7 @@ void DrawMenuCharacters(Gfx** displayListHead) {
   s32 unused[12];
   Mat4 transform;
 
-  memory = func_8005AF74();
+  memory = GetMenuMemory();
   characterCount = g_ChosenPlayerCount;
   if (D_8022BEBC_ovl_01[characterCount - 1][memory->modeChoice] ==
       MODE_ICON_GET_CHARACTER) {
@@ -6739,7 +6739,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   u8* mario = GetMenuImageBuffer();
   u8* arrows = (u8*)GetMenuImageBuffer() + OPTIONS_ARROWS_OFFSET;
   u8* shadow = GetMenuImageBuffer();

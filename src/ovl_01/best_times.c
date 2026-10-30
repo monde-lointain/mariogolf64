@@ -152,7 +152,7 @@ void LoadBestTimesBuffer(void* buffer, s16 bufferKind) {
 }
 
 void UpdateBestTimes(void) {
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 courseCount = GetOpenCourseCount();
   s32 direction;
   s32 step;
@@ -246,7 +246,7 @@ void DrawBestTimes(Gfx** displayListHead) {
   s32 drawOrder[COURSE_COUNT];
   s32 unused[2];
   SaveData* save = GetSaveData();
-  MenuMemory* memory = func_8005AF74();
+  MenuMemory* memory = GetMenuMemory();
   s32 courseCount;
   /* Every loop but the dashes' counts with one of these two, as the original's
    * registers show */

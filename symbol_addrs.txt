@@ -866,6 +866,7 @@ f_GroundNoiseTexels = 0x800E12B0; // size:0x400
 InitHeapRegions = 0x8004E1E0; // type:func
 InitAssetFiles = 0x80050400; // type:func
 GetSaveData = 0x8005AF50; // type:func
+GetMenuMemory = 0x8005AF74; // type:func
 ResetSaveData = 0x8005AF80; // type:func
 InitSaveData = 0x8005B03C; // type:func
 RecordDisplayListLength = 0x8005C018; // type:func
