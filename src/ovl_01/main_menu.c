@@ -2744,7 +2744,6 @@ void UpdateCourseSelect(void) {
 #ifdef NON_MATCHING
 void UpdateMiniGolfCourseSelect(void) {
   EncodedAsset asset;
-  s32 unused[4] UNUSED;
   Boolean isDone;
   s32 course;
   s32 direction;
