@@ -1724,7 +1724,7 @@ s32 ContinueSavedGame(void) {
     g_Players[playerIndex].controllerIndex = controller;
     sprintf(g_Players[playerIndex].name, D_80231A3C_ovl_01, savedPlayer->name);
     character = (s8)savedPlayer->characterIndex;
-    D_8012F480[playerIndex] = character;
+    g_ChosenCharacters[playerIndex] = character;
     g_Players[playerIndex].characterIndex = character;
     LoadPlayerFace(
         playerIndex, character, (s8)g_Players[playerIndex].paletteIndex);

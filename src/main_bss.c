@@ -262,7 +262,9 @@ volatile u32 nuGfxTaskSpool BSS = {0};
 u8 D_8012D47C[0x1218] BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
 u8 D_8012E694[0xDEC] BSS = {0};
-s32 D_8012F480[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
+/* The character that each player has chosen on the menus, or
+ * NO_CHOSEN_CHARACTER */
+s32 g_ChosenCharacters[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 OSTimer __osGbpakTimer BSS ALIGNED(8) = {0};
 void* D_8012F4B0[7] BSS ALIGNED(8) = {0};
 u8 __osContLastCmd BSS = {0};

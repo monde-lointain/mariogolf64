@@ -782,7 +782,7 @@ s32 UpdateCharacterSelect(
       }
     }
 
-    D_8012F480[playerIndex] = character;
+    g_ChosenCharacters[playerIndex] = character;
     g_Players[playerIndex].characterIndex = character;
     if (g_MenuRepeatButtons & Z_OR_L_BUTTONS) {
       if (character < FIRST_IMPORTED_CHARACTER) {

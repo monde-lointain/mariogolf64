@@ -123,7 +123,7 @@ extern TakenCharacters g_TakenCharacters;
 
 /* The character each player has chosen, or NO_CHOSEN_CHARACTER */
 #define NO_CHOSEN_CHARACTER -1
-extern s32 D_8012F480[MAX_PLAYER_COUNT];
+extern s32 g_ChosenCharacters[MAX_PLAYER_COUNT];
 
 /* Whether the menus have loaded each character slot's character */
 extern u8 D_801B70F0[MAXCONTROLLERS];

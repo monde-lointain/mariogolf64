@@ -1745,7 +1745,7 @@ void SetUpChosenGame(void) {
     }
 
     if (func_8022BDC4_ovl_01() != -1) {
-      D_8012F480[0] = func_8022BDC4_ovl_01();
+      g_ChosenCharacters[0] = func_8022BDC4_ovl_01();
       D_800FBE08[0] = 0;
     }
   } else {
@@ -1799,11 +1799,12 @@ void SetUpChosenGame(void) {
     player = &g_Players[index];
     player->handicap = g_ChosenHandicaps[index];
     player->unk22 = D_800FBE08[index];
-    player->characterIndex = D_8012F480[index];
+    player->characterIndex = g_ChosenCharacters[index];
     player->controllerIndex = g_PlayerControllerIndices[index];
     sprintf(player->name, D_80231514_ovl_01,
-        g_MenuCharacterNames[f_MenuCharacterChoices[D_8012F480[index]]]);
-    if (D_8012F480[index] >= CHARACTER_KID) {
+        g_MenuCharacterNames
+            [f_MenuCharacterChoices[g_ChosenCharacters[index]]]);
+    if (g_ChosenCharacters[index] >= CHARACTER_KID) {
       row = g_MenuMemory.characterRows[index];
       column = g_MenuMemory.characterColumns[index];
       if (row == GAME_BOY_CHARACTER_ROW) {
@@ -1815,7 +1816,8 @@ void SetUpChosenGame(void) {
     } else {
       player->gameBoyCharacterIndex = -1;
       sprintf(player->name, D_80231514_ovl_01,
-          g_MenuCharacterNames[f_MenuCharacterChoices[D_8012F480[index]]]);
+          g_MenuCharacterNames
+              [f_MenuCharacterChoices[g_ChosenCharacters[index]]]);
     }
 
     if (player->controllerIndex == MAXCONTROLLERS) {
@@ -1828,7 +1830,7 @@ void SetUpChosenGame(void) {
       if (!((D_8022BE50_ovl_01[index] >> slot) & 1)) {
         player->clubs[slot] = NO_CLUB;
       } else {
-        clubSet = D_8012F480[index];
+        clubSet = g_ChosenCharacters[index];
         if (clubSet >= CHARACTER_KID) {
           clubSet = player->gameBoyCharacterIndex;
           clubSet += CHARACTER_KID;
@@ -2201,9 +2203,10 @@ void UpdateAnimationViewer(void) {
  */
 /*
  * Doesn't match: the stroke and mini golf cases load their 1 and store
- * g_GameState.gameMode in another order, the B button's path loads D_8012F480
- * and g_CharacterGrid in another order, and the spin's slowing keeps the spin
- * in a register where the original reads it again after the step.
+ * g_GameState.gameMode in another order, the B button's path loads
+ * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
+ * slowing keeps the spin in a register where the original reads it again after
+ * the step.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -2457,7 +2460,7 @@ void UpdateModeSelect(void) {
     g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
     D_801B7070--;
     D_800FBE08[D_801B7070] = 0;
-    g_TakenCharacters.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
+    g_TakenCharacters.isCharacterTaken[g_ChosenCharacters[D_801B7070]] = 0;
     g_PlayerControllerIndices[D_801B7070] = 0;
     slot = g_CharacterGrid[g_MenuMemory.characterRows[D_801B7070]]
                           [g_MenuMemory.characterColumns[D_801B7070]];
@@ -2640,7 +2643,7 @@ void UpdateCourseSelect(void) {
         MODE_ICON_GET_CHARACTER) {
       g_MenuScreen = MENU_SCREEN_OPPONENT_SELECT;
       D_801B7070--;
-      g_TakenCharacters.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
+      g_TakenCharacters.isCharacterTaken[g_ChosenCharacters[D_801B7070]] = 0;
     } else {
       g_MenuScreen = MENU_SCREEN_MODE_SELECT;
     }
@@ -5472,7 +5475,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
 
   for (index = 0; index != D_801B7070; index++) {
     sprintf(g_PrintBuffer, D_80231514_ovl_01,
-        g_MenuCharacterNames[D_8012F480[index]]);
+        g_MenuCharacterNames[g_ChosenCharacters[index]]);
     DrawTextStub(&gfx, VIEWER_PLAYER_NAME_X,
         VIEWER_PLAYER_TOP + (index * VIEWER_PLAYER_SPACING), g_PrintBuffer);
   }
