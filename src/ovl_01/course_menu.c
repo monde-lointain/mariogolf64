@@ -526,7 +526,7 @@ void DrawCourseStats(Gfx** displayListHead) {
   image = (memory->statsCourse == courseCount) ? COURSE_TOTALS_IMAGE
                                                : memory->statsCourse;
   DrawCourseBanner(&gfx, 0, image);
-  func_8020F794_ovl_01(&gfx);
+  DrawStatsPanel(&gfx);
   func_8020FEF8_ovl_01(&gfx);
   func_80210190_ovl_01(&gfx);
   func_802104F0_ovl_01(&gfx);
@@ -601,7 +601,11 @@ void DrawCourseBanner(
 const char D_802318A8_ovl_01[] = "%s";
 const char D_802318AC_ovl_01[] = "%d:%s";
 
-void func_8020F794_ovl_01(Gfx** displayListHead) {
+/*
+ * Draws the dimmed panel of the course's statistics, with the label and figure
+ * of each shown row
+ */
+void DrawStatsPanel(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 row = 0;
   s16 statIndex;
