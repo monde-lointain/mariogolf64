@@ -65,8 +65,8 @@
 #define STAT_PAR_SAVE_PERCENT 7
 #define STAT_PAR_ON_PERCENT 8
 #define STAT_SAND_SAVE_PERCENT 9
-/* Where func_8020F9B8 draws the figures; shorter best scores move right to line
- * up */
+/* Where DrawStatFigure draws the figures; shorter best scores move right to
+ * line up */
 #define STATS_ROUND_COUNT_X 96
 #define STATS_VALUE_X 112
 #define STATS_TWO_DIGIT_X 128
@@ -142,7 +142,7 @@ extern const char D_802318A8_ovl_01[];
 extern const char D_802318AC_ovl_01[];
 
 s32 GetOpenCourseCount(void);
-void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row);
+void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row);
 void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y);
 void DrawThreeDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
@@ -630,7 +630,7 @@ void DrawStatsPanel(Gfx** displayListHead) {
     sprintf(g_PrintBuffer, D_802318A8_ovl_01, D_802300B4_ovl_01[statIndex]);
     DrawLargeText(&gfx, STATS_LABEL_X,
         STATS_FIRST_Y + ((s16)row * STATS_LINE_HEIGHT), g_PrintBuffer);
-    func_8020F9B8_ovl_01(&gfx, statIndex, row);
+    DrawStatFigure(&gfx, statIndex, row);
     row++;
   }
 
@@ -638,7 +638,12 @@ void DrawStatsPanel(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
+/*
+ * Draws the statistic's figure for the chosen course, or for all courses on the
+ * totals, on the panel's row, with its unit; nothing shows before any round has
+ * been played
+ */
+void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory;
   s32 courseIndex;
