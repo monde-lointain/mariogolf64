@@ -1223,8 +1223,8 @@ void ReadSavedGames(void) {
  * Marks the chosen saved game's computer players as such and its other players
  * as having no controller yet, and lists those other players in order.
  */
-/* Doesn't match: the original sets the first loop's counter later and keeps the
- * player count in other registers */
+/* Doesn't match: the original loads the whole player count rather than its low
+ * half, and the second loop's two counters take each other's registers */
 #ifdef NON_MATCHING
 void ResetSavedGameControllers(void) {
   SaveData* save = GetSaveData();
@@ -1243,8 +1243,8 @@ void ResetSavedGameControllers(void) {
   f_AssignedHumanCount = 0;
   gameIndex = memory->savedGameIndex;
   savedPlayers = save->savedPlayers[gameIndex];
-  playerCount = save->savedGames[gameIndex].state.playerCount;
-  f_HumanPlayerCount = save->savedGames[gameIndex].state.playerCount;
+  playerCount = f_HumanPlayerCount =
+      save->savedGames[gameIndex].state.playerCount;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (savedPlayers[playerIndex].isComputer) {
       f_SavedPlayerControllers[playerIndex] = COMPUTER_CONTROLLER;
