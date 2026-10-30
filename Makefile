@@ -55,6 +55,7 @@ FAST_MATH   := -ffast-math
 WARNINGS    ?= -Wall -Wno-unused -Wno-uninitialized -Wno-return-type -Wno-format \
                -Wno-missing-braces
 ULTRALIB_COMPILER := gcc
+LIB_MODERN  :=
 LIBS        :=
 else
 BUILD_DIR   := build/modern
@@ -84,9 +85,10 @@ GAME_DEFINES :=
 FAST_MATH   :=
 # The game's code and libkmc build cleanly with these
 WARNINGS    ?= -Wall -Wextra
-# ultralib's own settings for modern GCC
+# ultralib's own settings for modern GCC. The libraries also take its
+# MODERN_CC where only KMC GCC builds the original's form as the original.
 ULTRALIB_COMPILER := modern_gcc
-ULTRALIB_MODERN := -DMODERN_CC
+LIB_MODERN  := -DMODERN_CC
 # The helpers, such as 64-bit shifts, that GCC calls rather than inlines
 LIBS        := $(shell $(CC) $(TARGETFLAGS) -print-libgcc-file-name)
 endif
@@ -165,7 +167,7 @@ O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(filter-out $(LINKED_O_FILTER),$(s
 # game's copy was compiled with signed chars
 ULTRALIB_DIR      := lib/ultralib
 ULTRALIB_INCLUDES := -I$(ULTRALIB_DIR)/include -I$(ULTRALIB_DIR)/include/compiler/$(ULTRALIB_COMPILER) -I$(ULTRALIB_DIR)/include/PR
-ULTRALIB_DEFINES  := $(ULTRALIB_MODERN) -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI -DBUILD_VERSION=VERSION_J \
+ULTRALIB_DEFINES  := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI -DBUILD_VERSION=VERSION_J \
                      -DBUILD_VERSION_STRING=\"2.0J\" -DNDEBUG -D_FINALROM
 ULTRALIB_CFLAGS    = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS)
 ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc $(TARGETFLAGS) -P \
@@ -175,14 +177,14 @@ ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc $(TARGETFLAGS) -P \
 # makefile built libn_gmus.
 LIBMUS_DIR        := lib/libmus
 LIBMUS_INCLUDES   := -I$(LIBMUS_DIR)/src -I$(LIBMUS_DIR)/include $(ULTRALIB_INCLUDES)
-LIBMUS_DEFINES    := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DSUPPORT_NAUDIO
+LIBMUS_DEFINES    := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DSUPPORT_NAUDIO
 LIBMUS_CFLAGS      = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
 # n_audio, built from the SDK's n_audio_sc sources for the n_aspMain
 # microcode as other games of the time built it
 LIBNAUDIO_DIR      := lib/libnaudio
 LIBNAUDIO_INCLUDES := -I$(LIBNAUDIO_DIR)/src -I$(LIBNAUDIO_DIR)/include $(ULTRALIB_INCLUDES)
-LIBNAUDIO_DEFINES  := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DN_MICRO
+LIBNAUDIO_DEFINES  := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DN_MICRO
 LIBNAUDIO_CFLAGS    = $(LIBMUS_CFLAGS)
 
 # NuSystem, with the defines of the SDK makefile's ROM library. The
@@ -192,7 +194,7 @@ LIBNAUDIO_CFLAGS    = $(LIBMUS_CFLAGS)
 # and a carriage return, so they're compiled from copies without the CRs.
 LIBNUSYS_DIR       := lib/libnusys
 LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR) $(ULTRALIB_INCLUDES)
-LIBNUSYS_DEFINES   := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
+LIBNUSYS_DEFINES   := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
 LIBNUSYS_CFLAGS     = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
 # libkmc, KMC's C library, built like the game's code except without
