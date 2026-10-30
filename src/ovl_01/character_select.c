@@ -28,10 +28,10 @@
 #include "transfer_pak.h"
 #include "variables.h"
 
-/* func_80209568 lets the cursor stop on slots below this only when asked to */
+/* MoveGridCursor lets the cursor stop on slots below this only when asked to */
 #define CHOOSABLE_MARK_LIMIT (-20)
 
-/* The directions that func_80209568 moves a player's cursor through the grid */
+/* The directions MoveGridCursor moves a player's cursor through the grid */
 enum GridMove {
   GRID_MOVE_UP = 1,
   GRID_MOVE_DOWN,
@@ -254,11 +254,14 @@ void HideGameBoyCharacters(void) {
 }
 
 /*
+ * Moves the player's grid cursor a step in the GRID_MOVE_* direction, wrapping
+ * at the edges and skipping slots that can't be chosen, and reads the face of
+ * the character it leaves. Returns -1 if it couldn't move, otherwise 0.
  * Doesn't match: the original sign-extends the slot and character afresh at
  * each use.
  */
 #ifdef NON_MATCHING
-s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
+s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
   EncodedAsset asset;
   AssetFile file;
   MenuMemory* memory = GetMenuMemory();
@@ -346,15 +349,18 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
   return -(column == oldColumn && row == oldRow);
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209568_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", MoveGridCursor);
 #endif
 
 /*
- * Doesn't match: as in func_80209568, the original sign-extends the slot and
+ * Moves the player's grid cursor a step in the STICK_DIAGONAL_* direction, then
+ * sideways only if that slot can't be chosen, as MoveGridCursor does. Returns
+ * -1 if it couldn't move, otherwise 0.
+ * Doesn't match: as in MoveGridCursor, the original sign-extends the slot and
  * character afresh at each use and adds the player number the other way round.
  */
 #ifdef NON_MATCHING
-s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
+s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   EncodedAsset asset;
   AssetFile file;
   MenuMemory* memory = GetMenuMemory();
@@ -468,7 +474,7 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   return -(column == oldColumn && row == oldRow);
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209894_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", MoveGridCursorDiagonal);
 #endif
 
 s32 func_80209BE0_ovl_01(void) {
@@ -607,7 +613,7 @@ s32 UpdateCharacterSelect(
   playerIndex = g_ChoosingPlayerIndex;
   if (g_MenuRepeatButtons == (U_JPAD | L_JPAD)) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (func_80209894_ovl_01(
+    if (MoveGridCursorDiagonal(
             playerIndex, STICK_DIAGONAL_UP_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
@@ -620,7 +626,7 @@ s32 UpdateCharacterSelect(
 
   if (g_MenuRepeatButtons == (U_JPAD | R_JPAD)) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (func_80209894_ovl_01(
+    if (MoveGridCursorDiagonal(
             playerIndex, STICK_DIAGONAL_UP_RIGHT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
@@ -633,7 +639,7 @@ s32 UpdateCharacterSelect(
 
   if (g_MenuRepeatButtons == (D_JPAD | L_JPAD)) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (func_80209894_ovl_01(
+    if (MoveGridCursorDiagonal(
             playerIndex, STICK_DIAGONAL_DOWN_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
@@ -646,7 +652,7 @@ s32 UpdateCharacterSelect(
 
   if (g_MenuRepeatButtons == (D_JPAD | R_JPAD)) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (func_80209894_ovl_01(
+    if (MoveGridCursorDiagonal(
             playerIndex, STICK_DIAGONAL_DOWN_RIGHT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
@@ -661,8 +667,7 @@ s32 UpdateCharacterSelect(
     PrintDebugText(
         "          ", BLANKED_DEBUG_TEXT_COLUMN, BLANKED_DEBUG_TEXT_ROW);
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (func_80209568_ovl_01(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked) ==
-        0) {
+    if (MoveGridCursor(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
             255, 255);
@@ -674,8 +679,7 @@ s32 UpdateCharacterSelect(
 
   if (g_MenuRepeatButtons & D_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (func_80209568_ovl_01(
-            playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked) == 0) {
+    if (MoveGridCursor(playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
             255, 255);
@@ -687,8 +691,7 @@ s32 UpdateCharacterSelect(
 
   if (g_MenuRepeatButtons & L_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (func_80209568_ovl_01(
-            playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked) == 0) {
+    if (MoveGridCursor(playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
             255, 255);
@@ -700,8 +703,8 @@ s32 UpdateCharacterSelect(
 
   if (g_MenuRepeatButtons & R_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (func_80209568_ovl_01(
-            playerIndex, GRID_MOVE_RIGHT, (u8)canChooseMarked) == 0) {
+    if (MoveGridCursor(playerIndex, GRID_MOVE_RIGHT, (u8)canChooseMarked) ==
+        0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
             255, 255);
