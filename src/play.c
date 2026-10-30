@@ -293,6 +293,7 @@ void SetUpFlaggedRound(void) {
 
       /* The original has no break here, so the default case overrides this one
        */
+      /* Falls through */
     default:
       g_GameState.playerCount = 3;
       g_GameState.courseIndex = 0;
@@ -958,6 +959,7 @@ void UpdatePlay(void) {
     switch (g_GameState.step) {
       case GAME_STATE_START:
         g_GameState.step = GAME_STATE_LOAD_HOLE;
+        /* Falls through */
       case GAME_STATE_LOAD_HOLE:
         StopLoaderThread();
         StartLoaderThread();
@@ -1247,6 +1249,7 @@ void UpdatePlay(void) {
         break;
       case GAME_STATE_UNK6:
         UnloadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
+        /* Falls through */
       case GAME_STATE_UNK11:
         if (!f_IsPlayStateBackedUp) {
           D_800FBDB8 = 0;

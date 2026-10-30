@@ -3677,6 +3677,7 @@ void UpdateTurns(void) {
               break;
             case PROMPT_RESULT_END_GAME:
               LeaveGameSaveMenu();
+              /* Falls through */
             case PROMPT_RESULT_STAY_IN_SAVE_MENU:
               g_PauseScreen = PAUSE_SCREEN_SAVE_MENU;
               break;

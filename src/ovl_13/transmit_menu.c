@@ -3218,6 +3218,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
         case PFS_ERR_NEW_GBCART:
           /* "4th The GB cartridge was removed and inserted." */
           osSyncPrintf("4th GBカートリッジの挿抜が行われました。\n");
+          /* Falls through */
         case 0:
           if (!(status & OS_GBPAK_GBCART_ON)) {
             /* "5th No cassette is inserted in the GB pak." */

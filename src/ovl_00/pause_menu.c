@@ -561,6 +561,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
           PlaySound(SOUND_RING_SHOT_RETRY, RING_SHOT_RETRY_SOUND_CHANNEL,
               SOUND_FULL_SCALE);
         }
+        /* Falls through */
       case PAUSE_ACTION_HOLE_OUT:
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         break;
