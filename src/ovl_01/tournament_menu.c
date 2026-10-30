@@ -1937,15 +1937,15 @@ s32 DeleteCodeCharacter(void) {
   Boolean isEmpty = TRUE;
 
   if (D_80230F68_ovl_01 > 0) {
-    if (D_80230F68_ovl_01 == 8) {
-      D_80230F68_ovl_01 = 7;
+    if (D_80230F68_ovl_01 == CLUB_TOURNAMENT_CODE_LENGTH) {
+      D_80230F68_ovl_01 = CLUB_TOURNAMENT_CODE_LENGTH - 1;
     }
 
-    D_80230FD4_ovl_01[D_80230F68_ovl_01] = 0xFF;
+    D_80230FD4_ovl_01[D_80230F68_ovl_01] = CLUB_CODE_NO_CHAR;
     D_80230F68_ovl_01--;
     isEmpty = FALSE;
-  } else if (D_80230FD4_ovl_01[0] != 0xFF) {
-    D_80230FD4_ovl_01[0] = 0xFF;
+  } else if (D_80230FD4_ovl_01[0] != CLUB_CODE_NO_CHAR) {
+    D_80230FD4_ovl_01[0] = CLUB_CODE_NO_CHAR;
     isEmpty = FALSE;
   }
 
