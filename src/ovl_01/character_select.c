@@ -359,11 +359,8 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     ReadEncodedAsset(faceImage, &asset);
     paletteCharacter = character;
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)paletteCharacter][0], &file);
-    /* The do-while is there to match */
-    do {
-      ReadAssetFile(g_CharacterFacePalettes[(s16)slot],
-          (s16)GetAssetFileSize(&file), &file);
-    } while (0);
+    ReadAssetFile(g_CharacterFacePalettes[(s16)slot],
+        (s16)GetAssetFileSize(&file), &file);
   }
 
   return -(column == oldColumn && row == oldRow);

@@ -3912,17 +3912,13 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
 
-          /* The do-while is there to match */
-          do {
-            gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
-                QuarterPixels(BACKDROP_FIRST_TOP),
-                QuarterPixels(
-                    BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
-                QuarterPixels(BACKDROP_FIRST_TOP +
-                    ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)),
-                G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
-                TEXEL_STEP_ONE / BACKDROP_SCALE);
-          } while (0);
+          gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+              QuarterPixels(BACKDROP_FIRST_TOP),
+              QuarterPixels(BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+              QuarterPixels(BACKDROP_FIRST_TOP +
+                  ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)),
+              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
+              TEXEL_STEP_ONE / BACKDROP_SCALE);
         } else {
           gDPPipeSync(gfx++);
           gDPLoadTextureBlock(gfx++,
@@ -4084,16 +4080,12 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
 
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
-      /* The do-while is there to match */
-      do {
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress(LargeImageTexels(image) +
-                (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
-            G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH,
-            MENU_BANNER_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
-      } while (0);
+      gDPLoadTextureBlock(gfx++,
+          TextureAddress(LargeImageTexels(image) +
+              (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
+          G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
 
       stripTop = bobOffset + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
@@ -5888,13 +5880,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     D_8022FBC0_ovl_01 += FRONT_COURSE_BOB_PHASE_STEP;
     for (index = 0; index != courseCount; index++) {
-      /* The do-while is there to match */
-      do {
-        /* The do-while is there to match */
-        do {
-          slot = drawOrder[index];
-        } while (0);
-      } while (0);
+      slot = drawOrder[index];
       halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
       step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
       if (index == (courseCount - 1)) {

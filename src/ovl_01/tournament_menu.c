@@ -622,13 +622,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   buttonHalfHeight = (s32)buttonHeight / 2;
   halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
   halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
-  /* The do-while is there to match */
-  do {
-    /* The do-while is there to match */
-    do {
-      buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
-    } while (0);
-  } while (0);
+  buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
   buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
   windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;
   windowHalfHeight = (windowHalfHeight <= 0.0f) ? 1.0f : windowHalfHeight;

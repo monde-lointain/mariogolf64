@@ -1810,11 +1810,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       isFlagHit &= -(IsGameFlagSet(GAME_FLAG_RISING_FLAG_HITS) != 0);
     }
 
-    /* The do-while is there to match */
-    do {
-      distance = IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - hitX,
-          g_HoleSetup.cupPosition[AXIS_Z] - hitZ);
-    } while (0);
+    distance = IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - hitX,
+        g_HoleSetup.cupPosition[AXIS_Z] - hitZ);
     if (distance > FLAG_REACH) {
       continue;
     }
@@ -1852,11 +1849,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
     direction[AXIS_Z] *= halfChord;
     contactZ =
         (s32)(hitZ + direction[AXIS_Z]) - g_HoleSetup.cupPosition[AXIS_Z];
-    /* The do-while is there to match */
-    do {
-      contactX =
-          (s32)(hitX + direction[AXIS_X]) - g_HoleSetup.cupPosition[AXIS_X];
-    } while (0);
+    contactX =
+        (s32)(hitX + direction[AXIS_X]) - g_HoleSetup.cupPosition[AXIS_X];
     angle = 0.0f;
     if (contactX != 0 || contactZ != 0) {
       angle = atan2(contactZ, contactX);

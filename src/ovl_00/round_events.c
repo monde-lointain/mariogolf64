@@ -1511,10 +1511,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
-    /* The do-while is there to match */
-    do {
-      bottom = CONTEST_IMAGE_CENTER_Y;
-    } while (0);
+    bottom = CONTEST_IMAGE_CENTER_Y;
     for (i = 0; i != stripCount; i++) {
       LoadTextureBlock(&gfx,
           f_MovieBuffer +

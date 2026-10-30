@@ -1938,10 +1938,7 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   }
 
   if (g_GameState.isMiniGolf) {
-    /* The do-while is there to match */
-    do {
-      baseColumn = (x >> MINI_GOLF_TILE_X_SHIFT) * GROUND_TILE_POINT_SPAN;
-    } while (0);
+    baseColumn = (x >> MINI_GOLF_TILE_X_SHIFT) * GROUND_TILE_POINT_SPAN;
     /* The do-while is there to match */
     do {
       baseRow = (z >> MINI_GOLF_TILE_Z_SHIFT) * GROUND_TILE_POINT_SPAN;

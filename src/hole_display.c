@@ -3143,10 +3143,7 @@ void DrawSliceAnimation(void) {
     PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SOUND_FULL_SCALE);
   }
 
-  /* The do-while is there to match */
-  do {
-    sliceY = 0;
-  } while (0);
+  sliceY = 0;
   for (slice = 0; slice != sliceCount; slice++) {
     y = sliceY;
     for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {

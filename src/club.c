@@ -1127,10 +1127,7 @@ void GenerateClub(s32 clubIndex) {
         }
       } else {
         shortDistance = distance;
-        /* The do-while is there to match */
-        do {
-          shortPower = club->power[shotMode];
-        } while (0);
+        shortPower = club->power[shotMode];
         if (longDistance == shortDistance) {
           break;
         }
