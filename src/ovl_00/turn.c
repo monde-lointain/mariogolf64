@@ -508,6 +508,9 @@ void EndRumbleForceStop(void) {
 /*
  * Pulls the aim camera in along the heading, as far as it takes to keep it
  * within the course. Once it has moved, a held C button pushes it on by a step.
+ *
+ * Doesn't match: the original takes both absolute values of the offset
+ * before subtracting the overshoot, where this subtracts between them.
  */
 #ifdef NON_MATCHING
 void KeepAimCameraOnCourse(void) {
@@ -529,6 +532,8 @@ void KeepAimCameraOnCourse(void) {
   }
 
   heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
+  /* Clearing the overshoot here too is needed to match */
+  overshoot = 0.0f;
   offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
   eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
   minCoord = AIM_CAMERA_MIN_COORD;
@@ -540,8 +545,9 @@ void KeepAimCameraOnCourse(void) {
   }
 
   if ((s32)offset != 0) {
+    /* The double fabs keeps the two absolute values apart, to match */
     g_CurrentShot.aimCameraDistance *=
-        (fabsf(offset) - overshoot) / fabsf(offset);
+        (fabsf(offset) - overshoot) / (f32)fabs(offset);
   }
 
   offset = sinf(heading) * g_CurrentShot.aimCameraDistance;
@@ -556,8 +562,9 @@ void KeepAimCameraOnCourse(void) {
   }
 
   if ((s32)offset != 0) {
+    /* The double fabs keeps the two absolute values apart, to match */
     g_CurrentShot.aimCameraDistance *=
-        (fabsf(offset) - overshoot) / fabsf(offset);
+        (fabsf(offset) - overshoot) / (f32)fabs(offset);
   }
 
   if (g_GameState.isMiniGolf) {
