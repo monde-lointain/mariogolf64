@@ -28,7 +28,8 @@
 /* The keys' glyphs: 0 to 9, A to Z, a back arrow and OK, 16 by 16 each */
 #define ASSET_CODE_ENTRY_GLYPHS 0x942
 
-/* The intensity image of D_80230E70 that func_802287EC draws, in two strips */
+/* The intensity image of D_80230E70 that DrawUnusedWideCloud draws, in two
+ * strips */
 #define TOURNAMENT_BANNER_WIDTH 256
 #define TOURNAMENT_BANNER_STRIP_HEIGHT 32
 #define TOURNAMENT_BANNER_STRIP_COUNT 2
@@ -1054,11 +1055,15 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawClubWindow);
 #endif
 
-/* Doesn't match: the original keeps the strip height constant in a saved
- * register instead of the step's numerator */
+/*
+ * Stretches the wide cloud image, in two strips, around a center; no routine
+ * calls it.
+ * Doesn't match: the original keeps the strip height constant in a saved
+ * register instead of the step's numerator.
+ */
 #ifdef NON_MATCHING
 /* The original never stores the list's end back through displayListHead */
-void func_802287EC_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY,
+void DrawUnusedWideCloud(Gfx** displayListHead, s32 centerX, s32 centerY,
     s32 halfWidth, s32 stripHeight, s32 width, s32 shownStripHeight) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
@@ -1094,7 +1099,7 @@ void func_802287EC_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY,
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802287EC_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawUnusedWideCloud);
 #endif
 
 void LoadCodeEntryBuffer(void* buffer, s32 bufferKind) {
