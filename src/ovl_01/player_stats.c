@@ -94,11 +94,14 @@ enum GatheredBestShots {
 #define ASSET_TRIPLE_PAGE_ARROWS 0x828
 /* The same as ASSET_TRIPLE_PAGE_ARROWS, with double arrows */
 #define ASSET_DOUBLE_PAGE_ARROWS 0x829
-#define STATS_INDEX_COLUMN_COUNT 6
-/* g_BetSet counts the index tables' rows from 1; columns past a row's count
- * in f_BetSetColumnCounts hold STATS_INDEX_UNUSED */
-#define STATS_INDEX_ROW_COUNT 7
-#define STATS_INDEX_UNUSED -1
+#define BET_SET_MAX_COLUMN_COUNT 6
+/*
+ * The bet set tables have a row for each set that offers bets, from
+ * BET_SET_STROKE on; columns past a set's count in f_BetSetColumnCounts hold
+ * UNUSED_BET_COLUMN
+ */
+#define OFFERING_BET_SET_COUNT BET_SET_MINI_GOLF_FOUR_PLAYER
+#define UNUSED_BET_COLUMN -1
 /* The bet icons are 24x24, and DrawBetIcon shows each of their two frames
  * for 4 video frames */
 #define BET_ICON_SIZE 24
@@ -237,32 +240,32 @@ static u32 f_BetIconFrameAssets[BET_ICON_COUNT]
 // clang-format on
 /* The bet whose label and icon each column of a bet set shows */
 // clang-format off
-static s16 f_BetSetBets[STATS_INDEX_ROW_COUNT]
-                             [STATS_INDEX_COLUMN_COUNT] = {
-  { 0, 1, 2, 3, 5, STATS_INDEX_UNUSED },
+static s16 f_BetSetBets[OFFERING_BET_SET_COUNT]
+                             [BET_SET_MAX_COLUMN_COUNT] = {
+  { 0, 1, 2, 3, 5, UNUSED_BET_COLUMN },
   { 0, 1, 2, 3, 5, 7 },
-  { 0, 1, 6, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
-  { 0, 1, 5, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
-  { 0, 1, 5, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
-  { 2, 3, 5, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
-  { 2, 3, 5, 7, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED }
+  { 0, 1, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
+  { 0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
+  { 0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
+  { 2, 3, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
+  { 2, 3, 5, 7, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN }
 };
 // clang-format on
 // clang-format off
 /* Which of betStakeLevels' stakes each column of a bet set sets */
-static s16 f_BetSetStakeSlots[STATS_INDEX_ROW_COUNT]
-                             [STATS_INDEX_COLUMN_COUNT] = {
-  { 0, 1, 2, 3, 4, STATS_INDEX_UNUSED },
+static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT]
+                             [BET_SET_MAX_COLUMN_COUNT] = {
+  { 0, 1, 2, 3, 4, UNUSED_BET_COLUMN },
   { 0, 1, 2, 3, 4, 6 },
-  { 0, 1, 5, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
-  { 0, 1, 4, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
-  { 0, 1, 4, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
-  { 2, 3, 4, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED },
-  { 2, 3, 4, 6, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED }
+  { 0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
+  { 0, 1, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
+  { 0, 1, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
+  { 2, 3, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
+  { 2, 3, 4, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN }
 };
 // clang-format on
 /* How many columns each bet set uses */
-static u8 f_BetSetColumnCounts[STATS_INDEX_ROW_COUNT] = {5, 6, 3, 3, 3, 3, 4};
+static u8 f_BetSetColumnCounts[OFFERING_BET_SET_COUNT] = {5, 6, 3, 3, 3, 3, 4};
 /* Each BET_PRESET_*'s stake level for each bet */
 // clang-format off
 static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT]
@@ -279,8 +282,8 @@ static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT]
 static u8 f_BetStakeAmounts[BET_STAKE_LEVEL_COUNT] = {0, 1, 2, 3, 5, 10};
 // clang-format off
 /* The x of each column of a bet set */
-static s32 f_BetSetColumnXs[STATS_INDEX_ROW_COUNT]
-                             [STATS_INDEX_COLUMN_COUNT] = {
+static s32 f_BetSetColumnXs[OFFERING_BET_SET_COUNT]
+                             [BET_SET_MAX_COLUMN_COUNT] = {
   { 68, 108, 148, 188, 228, 228 },
   { 48, 88, 128, 168, 208, 248 },
   { 114, 148, 184, 216, 256, 256 },
