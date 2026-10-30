@@ -1589,8 +1589,12 @@ void InvalidateBrokenSavedGames(void) {
   }
 }
 
+/*
+ * Takes the recorded mark off Ring Shot records whose score, character,
+ * palette, course or hole is out of range
+ */
 #ifdef NON_MATCHING
-void func_8005D0D8(void) {
+void InvalidateBrokenRingShotRecords(void) {
   SaveData* save;
   Boolean isInvalid[RING_SHOT_RECORD_COUNT];
   s32 recordIndex;
@@ -1640,7 +1644,7 @@ void func_8005D0D8(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D0D8);
+INCLUDE_ASM("asm/nonmatchings/menu", InvalidateBrokenRingShotRecords);
 #endif
 
 void func_8005D1E4(void) {

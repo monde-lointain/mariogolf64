@@ -236,7 +236,7 @@ enum ModeName {
  * casts are there to match.
  */
 void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record);
-void func_8005D0D8(void);
+void InvalidateBrokenRingShotRecords(void);
 void SetTextSlot(
     s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void InvalidateBrokenSavedGames(void);
@@ -373,7 +373,7 @@ void OpenSaveMenu(s32 kind) {
   if (kind == SAVE_MENU_GAMES) {
     InvalidateBrokenSavedGames();
   } else {
-    func_8005D0D8();
+    InvalidateBrokenRingShotRecords();
   }
 
   if (kind == SAVE_MENU_GAMES) {
@@ -1065,7 +1065,7 @@ void SaveReplayToSlot(void) {
   record = &GetSaveData()->ringShotRecords[f_CursorIndex];
   SaveRingShotRecord(f_CursorIndex, D_80105F40);
   f_StateFrame = 0;
-  func_8005D0D8();
+  InvalidateBrokenRingShotRecords();
   if (record->scoreKind & SCORE_KIND_RECORDED) {
     OpenEncodedAsset(g_CharacterImageAssets[(s8)record->characterIndex] +
             CHARACTER_FACE_IMAGE_OFFSET,
