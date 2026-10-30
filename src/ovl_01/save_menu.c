@@ -1272,29 +1272,28 @@ void ResetSavedGameControllers(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", ResetSavedGameControllers);
 #endif
 
-/*
- * Doesn't match: the menu memory pointer and the mode image table take
- * each other's saved registers.
- */
-#ifdef NON_MATCHING
+/* Keeps the save menu's buffers of bufferKind and reads the saved games'
+ * mode images, and the frame, or the chosen game's icons into them */
 void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
   EncodedAsset asset;
   MenuMemory* memory = GetMenuMemory();
   s32 imageIndex;
   s32 mode;
+  /* A copy of f_ModeImageAssets for each case, set in its loop, to match */
   SaveMenuModeImage* modeImages;
+  SaveMenuModeImage* slotImages;
 
   switch (bufferKind) {
     case SAVE_MENU_BUFFER_SLOTS:
       f_SavedGameModeImages = buffers;
-      modeImages = f_ModeImageAssets;
       for (imageIndex = 0; imageIndex != SAVED_GAME_COUNT; imageIndex++) {
         mode = f_SavedGameModes[imageIndex];
         if (mode == NO_SAVE_MENU_MODE) {
           mode = 0;
         }
 
-        OpenEncodedAsset(modeImages[mode].assetId, &asset);
+        slotImages = f_ModeImageAssets;
+        OpenEncodedAsset(slotImages[mode].assetId, &asset);
         ReadEncodedAsset(f_SavedGameModeImages[imageIndex], &asset);
       }
 
@@ -1303,7 +1302,6 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
       break;
     case SAVE_MENU_BUFFER_CHOSEN:
       f_ChosenModeIconBuffers = buffers;
-      modeImages = f_ModeImageAssets;
       for (imageIndex = 0; imageIndex != SAVE_MENU_CHOSEN_IMAGE_COUNT;
           imageIndex++) {
         mode = f_SavedGameModes[memory->savedGameIndex];
@@ -1311,6 +1309,7 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
           mode = 0;
         }
 
+        modeImages = f_ModeImageAssets;
         OpenEncodedAsset(modeImages[mode].assetId, &asset);
         ReadEncodedAsset(f_ChosenModeIconBuffers[imageIndex], &asset);
       }
@@ -1318,9 +1317,6 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
       break;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveMenuBuffers);
-#endif
 
 /* Keeps the name plate's buffer, or reads the game mode labels into theirs */
 void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
