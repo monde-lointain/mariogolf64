@@ -238,7 +238,7 @@ void LoadCourseTrophyImages(void** buffers, s32 requestedKind) {
       ReadEncodedAsset(buffers[index], &asset);
     }
 
-    for (index = 0; index != COURSE_FILE_COUNT; index++) {
+    for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
       OpenAssetFile(g_TrophyPaletteFiles[memory->statsCourse][index], &file);
       ReadAssetFile(g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
     }
@@ -334,7 +334,7 @@ void UpdateCourseStats(void) {
           D_802300A4_ovl_01 ^= 1;
           OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
-          for (index = 0; index != COURSE_FILE_COUNT; index++) {
+          for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
             OpenAssetFile(
                 g_TrophyPaletteFiles[memory->statsCourse][index], &file);
             ReadAssetFile(
@@ -357,7 +357,7 @@ void UpdateCourseStats(void) {
           D_802300A4_ovl_01 ^= 1;
           OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
-          for (index = 0; index != COURSE_FILE_COUNT; index++) {
+          for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
             OpenAssetFile(
                 g_TrophyPaletteFiles[memory->statsCourse][index], &file);
             ReadAssetFile(

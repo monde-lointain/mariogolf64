@@ -1487,7 +1487,7 @@ void UpdateMenus(void) {
         OpenEncodedAsset(
             g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
         ReadEncodedAsset(g_CourseWheelImages[1], &asset);
-        for (index = 0; index != COURSE_FILE_COUNT; index++) {
+        for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
           OpenAssetFile(
               g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
           ReadAssetFile(
@@ -2609,7 +2609,7 @@ void UpdateCourseSelect(void) {
           g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
       ReadEncodedAsset(
           g_CourseWheelImages[f_CourseWheelBufferIndex ^ 1], &asset);
-      for (index = 0; index != COURSE_FILE_COUNT; index++) {
+      for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
         OpenAssetFile(
             g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
         ReadAssetFile(g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
@@ -2742,7 +2742,7 @@ void UpdateCourseSelect(void) {
           g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
       ReadEncodedAsset(
           g_CourseWheelImages[f_CourseWheelBufferIndex ^ 1], &asset);
-      for (index = 0; index != COURSE_FILE_COUNT; index++) {
+      for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
         OpenAssetFile(
             g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
         ReadAssetFile(g_TrophyPalettes[index], GetAssetFileSize(&file), &file);

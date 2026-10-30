@@ -76,13 +76,13 @@ extern u8 g_AreBetPagesBlocked;
 /* Each course's frames of its spinning trophy, and the files of the trophy's
  * place palettes */
 #define COURSE_IMAGE_COUNT 16
-#define COURSE_FILE_COUNT 3
+#define TROPHY_PALETTE_COUNT 3
 extern AssetId g_TrophyFrameAssets[][COURSE_IMAGE_COUNT];
 /* Ends a course's images before COURSE_IMAGE_COUNT */
 #define TROPHY_FRAME_END (-1)
-extern s16 g_TrophyPaletteFiles[][COURSE_FILE_COUNT];
+extern s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
 /* The chosen course's trophy palettes, by the place they show */
-extern void* g_TrophyPalettes[COURSE_FILE_COUNT];
+extern void* g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 /* The menus' ASSET_COURSE_SCENE: the sky and the course select's backdrops */
 extern void* g_MenuCourseSceneryAsset;
 
