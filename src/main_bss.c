@@ -267,7 +267,7 @@ u8 g_TournamentCode[TOURNAMENT_CODE_SIZE] BSS = {0};
 OSMesgQueue nuSiMgrMesgQ BSS ALIGNED(8) = {0};
 void* g_MenuLabelImages[2] BSS = {0};
 void* g_ShotPreviewDashImage BSS = {0};
-void* D_8012D430[18] BSS ALIGNED(8) = {0};
+void* g_CharacterFaceImages[18] BSS ALIGNED(8) = {0};
 volatile u32 nuGfxTaskSpool BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
 u8 D_8012D47C[0x1218] BSS = {0};

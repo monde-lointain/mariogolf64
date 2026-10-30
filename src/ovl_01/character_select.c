@@ -118,7 +118,7 @@ enum CButtonPalette {
 };
 
 extern void* D_80105B78[CHARACTER_COUNT];
-extern void* D_8012D430[CHARACTER_COUNT];
+extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 extern void* D_801B69EC;
 
 /* Where the character cursor's translation is measured from, so that it is
@@ -327,7 +327,7 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
       character = slot;
     }
 
-    faceImage = D_8012D430[(s16)slot];
+    faceImage = g_CharacterFaceImages[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
       faceAssets = g_AlternateFaceAnimationAssets;
     } else {
@@ -449,7 +449,7 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
       character = slot;
     }
 
-    faceImage = D_8012D430[(s16)slot];
+    faceImage = g_CharacterFaceImages[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
       faceAssets = g_AlternateFaceAnimationAssets;
     } else {
@@ -874,7 +874,7 @@ s32 UpdateCharacterSelect(
         }
       }
 
-      faceImage = D_8012D430[(s16)slot];
+      faceImage = g_CharacterFaceImages[(s16)slot];
       if (IsGameFlagSet(GAME_FLAG_UNK64)) {
         faceAssets = g_AlternateFaceAnimationAssets;
       } else {
@@ -1026,7 +1026,7 @@ s32 UpdateCharacterSelect(
       }
     }
 
-    faceImage = D_8012D430[(s16)slot];
+    faceImage = g_CharacterFaceImages[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
       faceAssets = g_AlternateFaceAnimationAssets;
     } else {
@@ -1245,7 +1245,7 @@ void func_8020B438_ovl_01(void) {
   OpenEncodedAsset(0x978, &asset);
   ReadEncodedAsset(images + CHARACTER_SELECT_FIRST_IMAGE_SIZE, &asset);
   for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
-    faceImage = D_8012D430[slotIndex];
+    faceImage = g_CharacterFaceImages[slotIndex];
     characterFile = D_80105B78[slotIndex];
     if (slotIndex >= FIRST_IMPORTED_CHARACTER) {
       if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER]
@@ -1435,7 +1435,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
           slot = CHARACTER_COUNT - 1;
         }
 
-        faceImage = D_8012D430[(s16)slot];
+        faceImage = g_CharacterFaceImages[(s16)slot];
         facePalette = D_80105B78[(s16)slot];
         gDPLoadTLUT_pal256(gfx++, TextureAddress(facePalette));
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1453,7 +1453,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
         gDPPipeSync(gfx++);
       } else if (isSinglePlayer == TRUE &&
           g_CharacterGrid[row][column] < HIDDEN_MARK_LIMIT) {
-        faceImage = D_8012D430[(s16)slot + MARKED_CHARACTER_OFFSET];
+        faceImage = g_CharacterFaceImages[(s16)slot + MARKED_CHARACTER_OFFSET];
         facePalette = D_80105B78[(s16)slot + MARKED_CHARACTER_OFFSET];
         gDPLoadTLUT_pal256(gfx++, TextureAddress(facePalette));
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -1499,7 +1499,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
       slot = character;
     }
 
-    faceImage = D_8012D430[(s16)slot];
+    faceImage = g_CharacterFaceImages[(s16)slot];
     facePalette = D_80105B78[(s16)slot];
     if (D_8022FF09_ovl_01 == 0) {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);

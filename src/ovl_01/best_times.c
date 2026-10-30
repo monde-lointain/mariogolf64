@@ -60,7 +60,7 @@
 #define TIME_SEPARATOR_SHIFT_LEFT 4
 #define TIME_SEPARATOR_SPACING 6
 
-extern void* D_8012D430[CHARACTER_COUNT];
+extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 
 s32 GetOpenCourseCount(void);
 void func_8020F2D0_ovl_01(
@@ -399,7 +399,7 @@ void DrawBestTimes(Gfx** displayListHead) {
       gDPSetTextureFilter(gfx++, G_TF_BILERP);
       character = save->bestTimeCharacters[memory->bestTimesCourse][otherIndex];
       holderPalettes = D_8023BFF0_ovl_01;
-      DrawCharacterFace(&gfx, D_8012D430[character],
+      DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
           holderPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) +
               otherIndex],
           BEST_TIME_FACE_X,
@@ -634,7 +634,7 @@ void LoadBestTimesFaces(void) {
   for (characterIndex = 0; characterIndex != CHARACTER_COUNT;
       characterIndex++) {
     OpenEncodedAsset(g_CharacterFaceAssets[characterIndex], &asset);
-    ReadEncodedAsset(D_8012D430[characterIndex], &asset);
+    ReadEncodedAsset(g_CharacterFaceImages[characterIndex], &asset);
   }
 
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {

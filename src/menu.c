@@ -85,7 +85,7 @@ extern void* g_CourseWheelImages[2];
 extern void* D_800FF4C4[2];
 extern void* D_80106100;
 extern void* D_800FC898;
-extern void* D_8012D430[18];
+extern void* g_CharacterFaceImages[18];
 extern void* D_80105B78[18];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
@@ -569,10 +569,10 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(D_80106100, &asset);
   D_800FC898 = AllocMemory(OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset));
   ReadEncodedAsset(D_800FC898, &asset);
-  for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {
-    D_8012D430[index] =
+  for (index = 0; index != ARRAY_COUNT(g_CharacterFaceImages); index++) {
+    g_CharacterFaceImages[index] =
         AllocMemory(OpenEncodedAsset(g_FaceAnimationAssets[index][0], &asset));
-    ReadEncodedAsset(D_8012D430[index], &asset);
+    ReadEncodedAsset(g_CharacterFaceImages[index], &asset);
   }
 
   for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
@@ -650,8 +650,8 @@ void FreeMenuResources(void) {
   FreeMemory(&g_SecondAnimatedIconImages[1]);
   FreeMemory(&D_80106100);
   FreeMemory(&D_800FC898);
-  for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {
-    FreeMemory(&D_8012D430[index]);
+  for (index = 0; index != ARRAY_COUNT(g_CharacterFaceImages); index++) {
+    FreeMemory(&g_CharacterFaceImages[index]);
   }
 
   for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
@@ -1411,7 +1411,8 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
       if (recordIndex >= 0) {
         playerCount = g_ImportedCharacters[index].character;
         OpenEncodedAsset(g_FaceAnimationAssets[playerCount][0], &asset);
-        ReadEncodedAsset(D_8012D430[FIRST_IMPORTED_CHARACTER + index], &asset);
+        ReadEncodedAsset(
+            g_CharacterFaceImages[FIRST_IMPORTED_CHARACTER + index], &asset);
         OpenAssetFile(g_CharacterFacePaletteFiles[playerCount][0], &file);
         ReadAssetFile(D_80105B78[FIRST_IMPORTED_CHARACTER + index],
             GetAssetFileSize(&file), &file);

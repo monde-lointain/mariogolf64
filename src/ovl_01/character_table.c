@@ -110,7 +110,7 @@ typedef struct TableCorner {
 #define TABLE_RIGHT_ARROW_X 296
 #define TABLE_ARROW_BLINK_FRAMES 4
 
-extern void* D_8012D430[CHARACTER_COUNT];
+extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 /* DrawCharacterFace takes an s16 character, but this file calls it without
  * narrowing the argument */
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
@@ -402,7 +402,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
       drawMode = FACE_PLAIN;
     }
 
-    DrawCharacterFace(&gfx, D_8012D430[rowCharacter],
+    DrawCharacterFace(&gfx, g_CharacterFaceImages[rowCharacter],
         D_8023BFF0_ovl_01[rowCharacter], TABLE_ROW_FACE_X,
         (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_ROW_FACE_Y, rowCharacter,
         drawMode);
@@ -416,7 +416,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
       }
 
       if (shownRow == 0) {
-        DrawCharacterFace(&gfx, D_8012D430[columnCharacter],
+        DrawCharacterFace(&gfx, g_CharacterFaceImages[columnCharacter],
             D_8023BFF0_ovl_01[columnCharacter],
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
             TABLE_COLUMN_FACE_Y, columnCharacter, drawMode);
@@ -671,7 +671,7 @@ void DrawTablePopup(Gfx** displayListHead) {
     faceMode = FACE_PLAIN;
   }
 
-  DrawCharacterFace(&gfx, D_8012D430[rowCharacter],
+  DrawCharacterFace(&gfx, g_CharacterFaceImages[rowCharacter],
       D_8023BFF0_ovl_01[rowCharacter],
       f_TablePopupLeft + TABLE_POPUP_ROW_FACE_X,
       f_TablePopupTop + TABLE_POPUP_FACE_Y, rowCharacter, faceMode);
@@ -681,7 +681,7 @@ void DrawTablePopup(Gfx** displayListHead) {
     faceMode = FACE_PLAIN;
   }
 
-  DrawCharacterFace(&gfx, D_8012D430[columnCharacter],
+  DrawCharacterFace(&gfx, g_CharacterFaceImages[columnCharacter],
       D_8023BFF0_ovl_01[columnCharacter],
       f_TablePopupLeft + TABLE_POPUP_COLUMN_FACE_X,
       f_TablePopupTop + TABLE_POPUP_FACE_Y, columnCharacter, faceMode);
@@ -808,7 +808,7 @@ void LoadTableFaces(void) {
   for (characterIndex = 0; characterIndex != CHARACTER_COUNT;
       characterIndex++) {
     OpenEncodedAsset(g_CharacterFaceAssets[characterIndex], &asset);
-    ReadEncodedAsset(D_8012D430[characterIndex], &asset);
+    ReadEncodedAsset(g_CharacterFaceImages[characterIndex], &asset);
     OpenAssetFile(g_CharacterPaletteFiles[characterIndex][0], &file);
     ReadAssetFile(
         D_8023BFF0_ovl_01[characterIndex], GetAssetFileSize(&file), &file);

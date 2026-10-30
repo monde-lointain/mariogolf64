@@ -190,7 +190,7 @@ enum StatsDirection {
 #define HANDICAP_CHOICE_COUNT 37
 #define HANDICAP_SLIDE_START -512
 
-extern void* D_8012D430[CHARACTER_COUNT];
+extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
 extern const char D_802319E0_ovl_01[];
 
@@ -2138,7 +2138,7 @@ void DrawBestShots(Gfx** displayListHead) {
       if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
         character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
                         .characterIndex;
-        DrawCharacterFace(&gfx, D_8012D430[character],
+        DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
             f_BestShotFaces[row][column],
             RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
             RECORD_FACE_Y + (row * STATS_CURSOR_ROW_HEIGHT), character,
@@ -2606,7 +2606,7 @@ void LoadBestShotFaces(void) {
 
   for (index = 0; index != CHARACTER_COUNT; index++) {
     OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
-    ReadEncodedAsset(D_8012D430[index], &asset);
+    ReadEncodedAsset(g_CharacterFaceImages[index], &asset);
   }
 
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {

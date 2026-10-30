@@ -120,7 +120,7 @@ typedef struct {
 #define RING_SHOT_LAST_FIRST_CHARACTER 14
 
 extern void* D_801052C4[2];
-extern void* D_8012D430[CHARACTER_COUNT];
+extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 
 /* What D_80230B40 holds for a player with no controller, or for the computer */
 #define NO_CONTROLLER -1
@@ -684,7 +684,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
           index = FACE_DARKENED;
         }
 
-        DrawCharacterFace(&gfx, D_8012D430[character],
+        DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
             D_8023BFF0_ovl_01[character],
             RING_SHOT_FACE_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_FACE_Y + (itemIndex * RING_SHOT_FACE_SPACING), character,
@@ -721,7 +721,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
       if (f_RecordedReplaySlots[index] != -1) {
         replayCharacter =
             save->ringShotRecords[f_RecordedReplaySlots[index]].characterIndex;
-        DrawCharacterFace(&gfx, D_8012D430[replayCharacter],
+        DrawCharacterFace(&gfx, g_CharacterFaceImages[replayCharacter],
             D_8023E3F0_ovl_01[index], RING_SHOT_REPLAY_FACE_X,
             RING_SHOT_REPLAY_FACE_Y + (index * RING_SHOT_SLOT_SPACING),
             replayCharacter, FACE_PLAIN);
@@ -848,7 +848,7 @@ void LoadRingShotRecordFaces(void) {
 
   for (index = 0; index != CHARACTER_COUNT; index++) {
     OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
-    ReadEncodedAsset(D_8012D430[index], &asset);
+    ReadEncodedAsset(g_CharacterFaceImages[index], &asset);
     OpenAssetFile(g_CharacterPaletteFiles[index][0], &file);
     ReadAssetFile(D_8023BFF0_ovl_01[index], GetAssetFileSize(&file), &file);
   }
