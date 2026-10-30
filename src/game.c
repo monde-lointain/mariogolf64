@@ -1138,7 +1138,8 @@ enum DrawMode {
 
 #define GFX_TASK_FLAGS (NU_SC_TASK_DP_WAIT | NU_SC_SWAPBUFFER)
 
-/* The next free vertex of the frame's vertex buffer */
+/* With the Expansion Pak, the vertex buffers of the frames, one for each draw
+ * buffer, at a fixed place in its memory */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
 extern s32 _mus_cpu_last;
 extern s32 _mus_cpu_worst;
