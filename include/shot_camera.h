@@ -47,5 +47,7 @@ void BuildNoiseTexture(void);
 void StepNoiseTexture(void);
 /* Sets a character's position, rotation and scale for a shot */
 void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale);
+/* Called once PlaceShotCamera has placed the camera, and does nothing */
+void OnShotCameraPlaced(void);
 
 #endif

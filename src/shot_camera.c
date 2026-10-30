@@ -3435,7 +3435,8 @@ void GetViewSidePoints(CoursePoint center, CoursePoint plusQuarterPoint,
       (s32)(cosf(minusQuarterAngle) * VIEW_SIDE_DISTANCE) + center[AXIS_Z];
 }
 
-void func_8004C6A8(void) {}
+/* Left empty in the original, as are the two routines after it */
+void OnShotCameraPlaced(void) {}
 
 void func_8004C6B0(void) {}
 

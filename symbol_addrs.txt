@@ -1684,6 +1684,7 @@ ChooseFlightCameraKind = 0x8004AC04; // type:func
 UpdateFlightCamera = 0x8004B474; // type:func
 SetLandingWaitFrameCount = 0x8004C510; // type:func
 GetViewSidePoints = 0x8004C51C; // type:func
+OnShotCameraPlaced = 0x8004C6A8; // type:func
 BuildSpotTexels = 0x8004C6C0; // type:func
 BuildRingTexels = 0x8004C860; // type:func
 DisplaceNoiseSquare = 0x8004C958; // type:func

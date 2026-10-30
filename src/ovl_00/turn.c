@@ -584,8 +584,6 @@ void KeepAimCameraOnCourse(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
 #endif
 
-void func_8004C6A8(void);
-
 /*
  * Places the camera for the shot being set up: circling the ball on the pause
  * screen, behind the ball while aiming, or looking back at it from past the
@@ -804,7 +802,7 @@ void PlaceShotCamera(void) {
   }
 
   g_Cameras[0].view.fieldOfView = SHOT_CAMERA_FIELD_OF_VIEW;
-  func_8004C6A8();
+  OnShotCameraPlaced();
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceShotCamera);
