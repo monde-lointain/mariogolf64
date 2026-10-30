@@ -157,7 +157,11 @@ extern s8 g_WasMetalMarioUnlocked;
 extern s8 g_HadEveryRingShotStar;
 extern s8 g_RingShotCourseOpenedAtStart;
 
-s32 func_8005F180(void) {
+/*
+ * Whether play's hole intro, flyover and results move on without A, as under
+ * GAME_FLAG_UNK32 or GAME_FLAG_UNK9B
+ */
+s32 IsPlayAdvancingItself(void) {
   return IsGameFlagSet(GAME_FLAG_UNK32) || IsGameFlagSet(GAME_FLAG_UNK9B);
 }
 
@@ -1075,7 +1079,7 @@ void UpdatePlay(void) {
           }
         } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
             (f_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IsAButtonPressed() ||
-                (func_8005F180() &&
+                (IsPlayAdvancingItself() &&
                     f_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
           if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
             StartHoleFlyover();
@@ -1189,7 +1193,8 @@ void UpdatePlay(void) {
         g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
         g_Cameras[1].mode = CAMERA_MODE_BEHIND_GOLFER;
         if (StepHoleFlyover() ||
-            (IsHudAnimationDone() && (IsAButtonPressed() || func_8005F180()))) {
+            (IsHudAnimationDone() &&
+                (IsAButtonPressed() || IsPlayAdvancingItself()))) {
           g_GameState.step = GAME_STATE_UNK6;
           EndHoleFlyover();
         }
@@ -1481,7 +1486,7 @@ DIM_BACKDROP:
             break;
           case HOLE_END_STEP_UNK5:
             if (IsAButtonPressed() ||
-                (func_8005F180() &&
+                (IsPlayAdvancingItself() &&
                     f_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               g_PauseScreen = PAUSE_SCREEN_SCORECARD;
@@ -1604,7 +1609,7 @@ DIM_BACKDROP:
           case HOLE_END_STEP_SCORECARD:
             if (func_802436C8(g_MergedController.repeatedButtons) &&
                 (IsAButtonPressed() ||
-                    (func_8005F180() &&
+                    (IsPlayAdvancingItself() &&
                         f_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
                         f_PlayExit != PLAY_EXIT_ROUND_OVER))) {
               if (f_PlayExit == PLAY_EXIT_ROUND_OVER) {
