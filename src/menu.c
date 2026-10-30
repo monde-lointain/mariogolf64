@@ -74,7 +74,6 @@ extern s32 D_80105DCC;
 /* The code of the tournament whose password was entered */
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 extern s16 D_801B71CC;
-extern s8 g_IsMenuWipeOpening;
 extern u8 g_MapCamera[];
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];

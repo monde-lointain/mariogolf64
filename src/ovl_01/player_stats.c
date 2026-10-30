@@ -196,7 +196,6 @@ extern const char D_802319E0_ovl_01[];
 
 extern s8 D_801052E8;
 extern s32 D_800FE334;
-extern u8 g_IsMenuWipeOpening;
 
 /* A step from one grid cell to its neighbor */
 typedef struct GridStep {

@@ -380,7 +380,7 @@ OSMesgQueue nuGfxTaskMgrMesgQ BSS ALIGNED(8) = {0};
  * Whether the running wipe is the one opening onto the menu, which only holds
  * off input, rather than the menu's closing one, which it waits out to leave
  */
-s8 g_IsMenuWipeOpening BSS = {0};
+u8 g_IsMenuWipeOpening BSS = {0};
 Mtx f_DropMatrices[DRAW_BUFFER_COUNT] BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_801B9498[0x8] BSS = {0};

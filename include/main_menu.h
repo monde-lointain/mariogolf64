@@ -75,6 +75,8 @@ enum CourseSelectKind {
 
 typedef u8 CourseSelectKind;
 extern CourseSelectKind g_CourseSelectKind;
+/* Whether the running wipe is the one opening onto the menu */
+extern u8 g_IsMenuWipeOpening;
 extern s32 g_ChoosingPlayerIndex;
 /* Each character's name, coded, in CharacterChoice order */
 extern char g_MenuCharacterNames[CHARACTER_COUNT]
