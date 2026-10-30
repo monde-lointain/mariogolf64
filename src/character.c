@@ -429,9 +429,7 @@ static Lights2 f_SavedLights[DRAW_BUFFER_COUNT] = {
         0xDC, 126, 0, 1),
 };
 /* The direction of each set's second light, across the main camera's view */
-static s32 f_SecondLightDirectionX = 0;
-static s32 f_SecondLightDirectionY = 0;
-static s32 f_SecondLightDirectionZ = 0;
+static s32 f_SecondLightDirection[AXIS_COUNT] = {0, 0, 0};
 /* Set until the first draw sets up the matrices */
 static Boolean f_IsMatrixSetupPending = TRUE;
 /* Flips between 0 and 1 on each draw */
@@ -1862,17 +1860,18 @@ void SetCharacterLights(void) {
   lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
   lightDirection[2] =
       -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
-  f_DryLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(ambientColor[0],
-      ambientColor[1], ambientColor[2], lightColor[0], lightColor[1],
-      lightColor[2], lightDirection[0], lightDirection[1], lightDirection[2],
-      lightColor[0], lightColor[1], lightColor[2], f_SecondLightDirectionX,
-      f_SecondLightDirectionY, f_SecondLightDirectionZ);
+  f_DryLights[g_DrawBufferIndex] =
+      (Lights2)gdSPDefLights2(ambientColor[0], ambientColor[1], ambientColor[2],
+          lightColor[0], lightColor[1], lightColor[2], lightDirection[0],
+          lightDirection[1], lightDirection[2], lightColor[0], lightColor[1],
+          lightColor[2], f_SecondLightDirection[AXIS_X],
+          f_SecondLightDirection[AXIS_Y], f_SecondLightDirection[AXIS_Z]);
   f_RainLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(RAIN_AMBIENT_LEVEL,
       RAIN_AMBIENT_LEVEL, RAIN_AMBIENT_LEVEL, RAIN_LIGHT_RED, RAIN_LIGHT_GREEN,
       RAIN_LIGHT_BLUE, lightDirection[0], lightDirection[1], lightDirection[2],
       RAIN_SECOND_LIGHT_LEVEL, RAIN_SECOND_LIGHT_LEVEL, RAIN_SECOND_LIGHT_LEVEL,
-      f_SecondLightDirectionX, f_SecondLightDirectionY,
-      f_SecondLightDirectionZ);
+      f_SecondLightDirection[AXIS_X], f_SecondLightDirection[AXIS_Y],
+      f_SecondLightDirection[AXIS_Z]);
 }
 
 /* Copies the ambient and first light into both of f_SavedLights */
@@ -2107,10 +2106,10 @@ void DrawCharacterAndShadow(
       viewDirection[AXIS_Y] *= SECOND_LIGHT_DIRECTION_LENGTH;
       viewDirection[AXIS_Z] *= SECOND_LIGHT_DIRECTION_LENGTH;
       lightDirection[AXIS_X] = -viewDirection[AXIS_Z];
-      f_SecondLightDirectionX = lightDirection[AXIS_X];
-      f_SecondLightDirectionY = 0;
+      f_SecondLightDirection[AXIS_X] = lightDirection[AXIS_X];
+      f_SecondLightDirection[AXIS_Y] = 0;
       lightDirection[AXIS_Z] = viewDirection[AXIS_X];
-      f_SecondLightDirectionZ = lightDirection[AXIS_Z];
+      f_SecondLightDirection[AXIS_Z] = lightDirection[AXIS_Z];
       SetCharacterLights();
     }
 
