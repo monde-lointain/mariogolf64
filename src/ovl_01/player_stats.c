@@ -194,7 +194,7 @@ extern void* D_8012D430[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
 extern const char D_802319E0_ovl_01[];
 
-extern s8 D_801052E8;
+extern s8 g_IsRingShotWipeOpening;
 
 /* A step from one grid cell to its neighbor */
 typedef struct GridStep {
@@ -1994,7 +1994,7 @@ void UpdateBestShots(void) {
                                                    [column]]
                   .courseIndex);
           StartWipe(WIPE_CLOSING);
-          D_801052E8 = 0;
+          g_IsRingShotWipeOpening = 0;
         }
       } else if (g_MenuPressedButtons & B_BUTTON) {
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);

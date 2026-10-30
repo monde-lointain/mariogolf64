@@ -202,7 +202,12 @@ void* g_MenuTitleImages[2] BSS = {0};
 void* D_801052C4[2] BSS = {0};
 volatile s32 g_MainLoopState BSS = {0};
 OSMesgQueue nuGfxMesgQ BSS ALIGNED(8) = {0};
-s8 D_801052E8 BSS = {0};
+/*
+ * Whether the running wipe is the one opening onto the menu, as the Ring Shot
+ * records see it: set and cleared with g_IsMenuWipeOpening, except that
+ * func_8005DAD4 sets it alone
+ */
+s8 g_IsRingShotWipeOpening BSS = {0};
 OSTime __osCurrentTime BSS = {0};
 u8 f_GameFlagBits[GAME_FLAG_COUNT / 8] BSS ALIGNED(8) = {0};
 u32 g_GroundDrawFrame BSS = {0};

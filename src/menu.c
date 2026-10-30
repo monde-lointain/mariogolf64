@@ -65,7 +65,7 @@ extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
-extern s8 D_801052E8;
+extern s8 g_IsRingShotWipeOpening;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC4;
 extern s32 D_80105DC8;
@@ -1970,13 +1970,13 @@ void func_8005D9A0(void) {
   g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
   g_MenuMemory.statsCourse = 6;
-  D_801052E8 = 0;
+  g_IsRingShotWipeOpening = 0;
   D_800C2BD4 = 0;
 }
 
 void func_8005DAD4(void) {
   g_IsChosenHoleLoadStarted = FALSE;
-  D_801052E8 = 1;
+  g_IsRingShotWipeOpening = 1;
   g_IsMenuWipeOpening = FALSE;
   D_800C2BD4 = 0;
 }
@@ -2025,7 +2025,7 @@ void func_8005DAFC(void) {
       break;
   }
 
-  D_801052E8 = 1;
+  g_IsRingShotWipeOpening = 1;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2034,7 +2034,7 @@ void func_8005DAFC(void) {
 
 void func_8005DC50(void) {
   func_8005D9A0();
-  D_801052E8 = 1;
+  g_IsRingShotWipeOpening = 1;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2050,7 +2050,7 @@ void func_8005DC50(void) {
 }
 
 void func_8005DCDC(void) {
-  D_801052E8 = 1;
+  g_IsRingShotWipeOpening = 1;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2058,7 +2058,7 @@ void func_8005DCDC(void) {
 }
 
 void func_8005DD10(void) {
-  D_801052E8 = 1;
+  g_IsRingShotWipeOpening = 1;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2066,7 +2066,7 @@ void func_8005DD10(void) {
 }
 
 void func_8005DD44(void) {
-  D_801052E8 = 1;
+  g_IsRingShotWipeOpening = 1;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2074,7 +2074,7 @@ void func_8005DD44(void) {
 }
 
 void func_8005DD78(void) {
-  D_801052E8 = 1;
+  g_IsRingShotWipeOpening = 1;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2083,7 +2083,7 @@ void func_8005DD78(void) {
 
 void func_8005DDAC(void) {
   g_IsChosenHoleLoadStarted = FALSE;
-  D_801052E8 = 1;
+  g_IsRingShotWipeOpening = 1;
   D_800C2BD4 = 0;
   g_IsMenuWipeOpening = TRUE;
   g_GameState.replayKind = REPLAY_KIND_NONE;

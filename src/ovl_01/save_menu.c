@@ -126,7 +126,7 @@ extern void* D_8012D430[CHARACTER_COUNT];
 #define NO_CONTROLLER -1
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
-extern u8 D_801052E8;
+extern u8 g_IsRingShotWipeOpening;
 
 s16 FindNextReplaySlot(s8 startSlot, u8 isForward);
 s16 GetChosenReplaySlot(void);
@@ -366,7 +366,7 @@ void UpdateRingShotRecords(void) {
   }
 
   if (IsHudAnimationDone() == TRUE) {
-    if (GetWipeKind() != WIPE_NONE && D_801052E8 == 0) {
+    if (GetWipeKind() != WIPE_NONE && g_IsRingShotWipeOpening == 0) {
       if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
@@ -377,7 +377,7 @@ void UpdateRingShotRecords(void) {
         g_GameState.replayKind = REPLAY_KIND_RING_SHOT;
         SetGameFlag(GAME_FLAG_UNK1E);
       }
-    } else if (GetWipeKind() == WIPE_NONE || D_801052E8 != 1) {
+    } else if (GetWipeKind() == WIPE_NONE || g_IsRingShotWipeOpening != 1) {
       if (g_MenuPressedButtons & A_BUTTON) {
         if (memory->ringShotRow == RING_SHOT_REPLAY_ROW &&
             GetChosenReplaySlot() != -1) {
@@ -390,7 +390,7 @@ void UpdateRingShotRecords(void) {
           g_IsChosenHoleLoadStarted = FALSE;
           LoadWipeShape((s8)save->ringShotRecords[index].courseIndex);
           StartWipe(WIPE_CLOSING);
-          D_801052E8 = 0;
+          g_IsRingShotWipeOpening = 0;
         }
       } else if (g_MenuPressedButtons & B_BUTTON) {
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
