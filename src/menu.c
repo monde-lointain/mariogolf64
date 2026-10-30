@@ -444,7 +444,8 @@ static ImportedCharacterCell
 static s16 f_CharacterSlots[] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
 s32 g_MenuCourseCount = 6;
-static s8 D_800C2BD4 = 0;
+/* Cleared by func_8005D9A0 and each menu entry routine, but read by none */
+static s8 f_UnreadMenuEntryFlag = 0;
 u8 g_AreBetPagesBlocked = 0;
 /* Read by no routine */
 static s32 D_800C2BD8[2] = {0};
@@ -1970,14 +1971,14 @@ void func_8005D9A0(void) {
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
   g_MenuMemory.statsCourse = 6;
   g_IsRingShotWipeOpening = FALSE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
 }
 
 void func_8005DAD4(void) {
   g_IsChosenHoleLoadStarted = FALSE;
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = FALSE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
 }
 
 void func_8005DAFC(void) {
@@ -2027,7 +2028,7 @@ void func_8005DAFC(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
   g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
 }
 
@@ -2036,7 +2037,7 @@ void func_8005DC50(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
   g_ImportedCharacters[0].isChosen = 0;
   g_ImportedCharacters[1].isChosen = 0;
   g_ImportedCharacters[2].isChosen = 0;
@@ -2052,7 +2053,7 @@ void func_8005DCDC(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
   g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
 }
 
@@ -2060,7 +2061,7 @@ void func_8005DD10(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
   g_MenuScreen = MENU_SCREEN_MODE_SELECT;
 }
 
@@ -2068,7 +2069,7 @@ void func_8005DD44(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
   g_MenuScreen = MENU_SCREEN_UNK18;
 }
 
@@ -2076,14 +2077,14 @@ void func_8005DD78(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
   g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
 }
 
 void func_8005DDAC(void) {
   g_IsChosenHoleLoadStarted = FALSE;
   g_IsRingShotWipeOpening = TRUE;
-  D_800C2BD4 = 0;
+  f_UnreadMenuEntryFlag = 0;
   g_IsMenuWipeOpening = TRUE;
   g_GameState.replayKind = REPLAY_KIND_NONE;
   ClearGameFlag(GAME_FLAG_UNK1E);
