@@ -3968,9 +3968,8 @@ static inline u16 ReadTileTexel(
   tile = &g_WorkArea.hole.tiles[tileIndex];
   if (g_WorkArea.hole.tiles[tileIndex].texels[GROUND_TILE_TEXEL_ROW_COUNT -
           1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
-    texel = &tile->texels[0][((texelRow + TILE_BORDER_BEFORE) *
-                                 GROUND_TILE_TEXEL_ROW_LENGTH) +
-        texelColumn + TILE_BORDER_BEFORE];
+    texel = &tile->texels[texelRow + TILE_BORDER_BEFORE]
+                         [texelColumn + TILE_BORDER_BEFORE];
   } else {
     texel = &tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn];
   }
