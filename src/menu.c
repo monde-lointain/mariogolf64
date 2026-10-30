@@ -20,6 +20,7 @@
 #include "host_file.h"
 #include "libc.h"
 #include "main.h"
+#include "main_menu.h"
 #include "math_util.h"
 #include "menu_memory.h"
 #include "password.h"
@@ -60,11 +61,9 @@ typedef struct ImportedCharacterCell {
 
 /* Mirrors of the save data's options */
 
-extern s8 g_ChosenLabelGrowthDirection;
 extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
 extern s32 D_800FE334;
-extern s16 g_ChosenLabelGrowth;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
