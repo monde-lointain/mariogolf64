@@ -193,8 +193,9 @@ static f32 f_MenuWindowScaleX = 0.0f;
 static f32 f_MenuWindowScaleY = 0.0f;
 /* Read by no routine */
 static s32 D_80230E94_ovl_01[2] = {0, 0};
-static s32 D_80230E9C_ovl_01 = 0;
-static s32 D_80230EA0_ovl_01 = 0;
+/* How far the chosen Yes or No button has grown, and a YES_NO_PULSE_* value */
+static s32 f_YesNoPulse = 0;
+static s32 f_YesNoPulseDirection = 0;
 /* The images that the window can show */
 static AssetId f_MenuWindowImageAssets[MENU_WINDOW_PICTURE_COUNT] = {0x07C0,
     0x0750, 0x07A4, 0x0742, 0x0788, 0x07B2, 0x07CE, 0x07D8, 0x076C, 0x0796,
@@ -356,13 +357,13 @@ void ResetMenuWindow(void) {
   f_MenuWindowState = MENU_WINDOW_OPENING;
   f_MenuWindowScaleX = 0.0f;
   f_MenuWindowScaleY = 0.0f;
-  D_80230E9C_ovl_01 = 0;
-  D_80230EA0_ovl_01 = 0;
+  f_YesNoPulse = 0;
+  f_YesNoPulseDirection = 0;
 }
 
 void ShowMenuWindow(void) {
-  D_80230E9C_ovl_01 = 0;
-  D_80230EA0_ovl_01 = 0;
+  f_YesNoPulse = 0;
+  f_YesNoPulseDirection = 0;
   f_MenuWindowState = MENU_WINDOW_OPEN;
   f_MenuWindowScaleX = 1.0f;
   f_MenuWindowScaleY = 1.0f;
@@ -686,7 +687,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
     growth = 0;
     if (index == chosenButton) {
-      pulse = D_80230E9C_ovl_01;
+      pulse = f_YesNoPulse;
       growth = pulse / 2;
     } else {
       pulse = 0;
@@ -701,20 +702,20 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     gDPPipeSync(gfx++);
   }
 
-  if (D_80230EA0_ovl_01 == YES_NO_PULSE_GROWING) {
-    D_80230E9C_ovl_01 += YES_NO_PULSE_STEP;
+  if (f_YesNoPulseDirection == YES_NO_PULSE_GROWING) {
+    f_YesNoPulse += YES_NO_PULSE_STEP;
   }
 
-  if (D_80230EA0_ovl_01 == YES_NO_PULSE_SHRINKING) {
-    D_80230E9C_ovl_01 -= YES_NO_PULSE_STEP;
+  if (f_YesNoPulseDirection == YES_NO_PULSE_SHRINKING) {
+    f_YesNoPulse -= YES_NO_PULSE_STEP;
   }
 
-  if (D_80230E9C_ovl_01 == YES_NO_PULSE_LIMIT) {
-    D_80230EA0_ovl_01 = YES_NO_PULSE_SHRINKING;
+  if (f_YesNoPulse == YES_NO_PULSE_LIMIT) {
+    f_YesNoPulseDirection = YES_NO_PULSE_SHRINKING;
   }
 
-  if (D_80230E9C_ovl_01 == 0) {
-    D_80230EA0_ovl_01 = YES_NO_PULSE_GROWING;
+  if (f_YesNoPulse == 0) {
+    f_YesNoPulseDirection = YES_NO_PULSE_GROWING;
   }
 
   if (okTextShown != NO_OK_TEXT && IsMenuWindowOpen()) {
@@ -950,7 +951,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
     growth = 0;
     if (index == chosenButton) {
-      pulse = D_80230E9C_ovl_01;
+      pulse = f_YesNoPulse;
       growth = pulse / 2;
     } else {
       pulse = 0;
@@ -965,20 +966,20 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     gDPPipeSync(gfx++);
   }
 
-  if (D_80230EA0_ovl_01 == YES_NO_PULSE_GROWING) {
-    D_80230E9C_ovl_01 += YES_NO_PULSE_STEP;
+  if (f_YesNoPulseDirection == YES_NO_PULSE_GROWING) {
+    f_YesNoPulse += YES_NO_PULSE_STEP;
   }
 
-  if (D_80230EA0_ovl_01 == YES_NO_PULSE_SHRINKING) {
-    D_80230E9C_ovl_01 -= YES_NO_PULSE_STEP;
+  if (f_YesNoPulseDirection == YES_NO_PULSE_SHRINKING) {
+    f_YesNoPulse -= YES_NO_PULSE_STEP;
   }
 
-  if (D_80230E9C_ovl_01 == YES_NO_PULSE_LIMIT) {
-    D_80230EA0_ovl_01 = YES_NO_PULSE_SHRINKING;
+  if (f_YesNoPulse == YES_NO_PULSE_LIMIT) {
+    f_YesNoPulseDirection = YES_NO_PULSE_SHRINKING;
   }
 
-  if (D_80230E9C_ovl_01 == 0) {
-    D_80230EA0_ovl_01 = YES_NO_PULSE_GROWING;
+  if (f_YesNoPulse == 0) {
+    f_YesNoPulseDirection = YES_NO_PULSE_GROWING;
   }
 
   if (windowStyle == CLUB_WINDOW_STYLE_NINTENDO ||
