@@ -177,16 +177,19 @@ static TrophyPosition D_80230100_ovl_01[COURSE_COUNT] = {
 /* The camera's matrices that the course wheel's points are projected with */
 static Mat4 f_WheelProjection;
 static Mat4 f_WheelView;
-static void* D_8023A810_ovl_01;
+/* The spinning badge, read after the hole-in-one badge over the same pointer */
+static void* f_CourseStatsBadge;
 /* The course stats' TROPHY_FRAME_BUFFER_COUNT buffers for the trophy frame */
 static void** f_StatsTrophyBuffers;
 static void** D_8023A818_ovl_01;
 static void** D_8023A81C_ovl_01;
-static void** D_8023A820_ovl_01;
-static void* D_8023A824_ovl_01;
-static void* D_8023A828_ovl_01;
-static void* D_8023A82C_ovl_01;
-static void* D_8023A830_ovl_01;
+/* The wheel's icons of each course and the totals, from LoadCourseStatsIcons */
+static void** f_CourseStatsIcons;
+/* The images that LoadCourseMenuBuffer reads, by their assets */
+static void* f_CourseStatsNamePlate;
+static void* f_CourseStatsDigitsAndArrows;
+static void* f_MenuGlyphs;
+static void* f_CourseStatsGreenArrows;
 
 /* Read by no routine; 2 objects, as one would be aligned past its start */
 static u8 D_8023A834_ovl_01[0x4];
@@ -198,10 +201,10 @@ void LoadCourseStatsIcons(void** buffers) {
   s32 unused[4];
   s16 imageIndex;
 
-  D_8023A820_ovl_01 = buffers;
+  f_CourseStatsIcons = buffers;
   for (imageIndex = 0; imageIndex != COURSE_MENU_IMAGE_COUNT; imageIndex++) {
     OpenEncodedAsset(g_CourseIconAssets[imageIndex], &asset);
-    ReadEncodedAsset(D_8023A820_ovl_01[imageIndex], &asset);
+    ReadEncodedAsset(f_CourseStatsIcons[imageIndex], &asset);
   }
 }
 
@@ -257,34 +260,34 @@ void LoadCourseMenuBuffer(void* buffer, s16 bufferKind) {
     case COURSE_MENU_BUFFER_UNUSED:
       break;
     case COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE:
-      D_8023A810_ovl_01 = buffer;
+      f_CourseStatsBadge = buffer;
       OpenEncodedAsset(ASSET_HOLE_IN_ONE_BADGE, &asset);
-      ReadEncodedAsset(D_8023A810_ovl_01, &asset);
+      ReadEncodedAsset(f_CourseStatsBadge, &asset);
       break;
     case COURSE_MENU_BUFFER_NAME_PLATE:
-      D_8023A824_ovl_01 = buffer;
+      f_CourseStatsNamePlate = buffer;
       OpenEncodedAsset(ASSET_NAME_PLATE, &asset);
-      ReadEncodedAsset(D_8023A824_ovl_01, &asset);
+      ReadEncodedAsset(f_CourseStatsNamePlate, &asset);
       break;
     case COURSE_MENU_BUFFER_SPINNING_BADGE:
-      D_8023A810_ovl_01 = buffer;
+      f_CourseStatsBadge = buffer;
       OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
-      ReadEncodedAsset(D_8023A810_ovl_01, &asset);
+      ReadEncodedAsset(f_CourseStatsBadge, &asset);
       break;
     case COURSE_MENU_BUFFER_DIGITS_AND_ARROWS:
-      D_8023A828_ovl_01 = buffer;
+      f_CourseStatsDigitsAndArrows = buffer;
       OpenEncodedAsset(ASSET_DIGITS_AND_ARROWS, &asset);
-      ReadEncodedAsset(D_8023A828_ovl_01, &asset);
+      ReadEncodedAsset(f_CourseStatsDigitsAndArrows, &asset);
       break;
     case COURSE_MENU_BUFFER_LARGE_DIGITS:
-      D_8023A82C_ovl_01 = buffer;
+      f_MenuGlyphs = buffer;
       OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset);
-      ReadEncodedAsset(D_8023A82C_ovl_01, &asset);
+      ReadEncodedAsset(f_MenuGlyphs, &asset);
       break;
     case COURSE_MENU_BUFFER_GREEN_ARROWS:
-      D_8023A830_ovl_01 = buffer;
+      f_CourseStatsGreenArrows = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
-      ReadEncodedAsset(D_8023A830_ovl_01, &asset);
+      ReadEncodedAsset(f_CourseStatsGreenArrows, &asset);
       f_StatsArrowFrame = 0;
       f_StatsArrowTimer = 0;
       break;
@@ -506,12 +509,12 @@ void DrawCourseStats(Gfx** displayListHead) {
     halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
     step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
     gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(ImageBody(D_8023A820_ovl_01[image])));
+        gfx++, TextureAddress(ImageBody(f_CourseStatsIcons[image])));
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     for (sortIndex = 0; sortIndex != COURSE_ICON_STRIP_COUNT; sortIndex++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress(LargeImageTexels(D_8023A820_ovl_01[image]) +
+          TextureAddress(LargeImageTexels(f_CourseStatsIcons[image]) +
               sortIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH, COURSE_ICON_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -530,7 +533,7 @@ void DrawCourseStats(Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  DrawBlinkingSideArrows(&gfx, D_8023A830_ovl_01, &f_StatsArrowFrame,
+  DrawBlinkingSideArrows(&gfx, f_CourseStatsGreenArrows, &f_StatsArrowFrame,
       &f_StatsArrowTimer, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
   image = (memory->statsCourse == courseCount) ? COURSE_TOTALS_IMAGE
                                                : memory->statsCourse;
@@ -567,10 +570,10 @@ void DrawCourseBanner(
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023A824_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CourseStatsNamePlate)));
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023A824_ovl_01) +
+        TextureAddress(LargeImageTexels(f_CourseStatsNamePlate) +
             (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -839,7 +842,7 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   DrawSpinningBadge(
-      &gfx, D_8023A810_ovl_01, BADGE_ICON_X + index, BADGE_ICON_Y);
+      &gfx, f_CourseStatsBadge, BADGE_ICON_X + index, BADGE_ICON_Y);
   DrawUnalignedMenuNumber(&gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y,
       badgeCount, MENU_NUMBER_TIMES);
   *displayListHead = gfx;
@@ -883,7 +886,8 @@ void DrawStatsScrollArrows(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A828_ovl_01)));
+    gDPLoadTLUT_pal16(
+        gfx++, 0, TextureAddress(ImageBody(f_CourseStatsDigitsAndArrows)));
     for (arrowIndex = 0; arrowIndex != arrowCount; arrowIndex++) {
       top = (arrowIndex != 0) ? STATS_DOWN_ARROW_TOP : STATS_UP_ARROW_TOP;
       if (arrowCount == 1 && firstArrow) {
@@ -891,7 +895,7 @@ void DrawStatsScrollArrows(Gfx** displayListHead) {
       }
 
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress((u32)D_8023A828_ovl_01 +
+          TextureAddress((u32)f_CourseStatsDigitsAndArrows +
               (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE +
               (PALETTED_TEXELS_OFFSET +
                   (STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE))),
@@ -1183,7 +1187,7 @@ void DrawMenuNumber(
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A82C_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_MenuGlyphs)));
   shift = 0;
   if (mark != MENU_NUMBER_PLAIN) {
     switch (mark) {
@@ -1219,7 +1223,7 @@ void DrawMenuNumber(
     if (mark != MENU_NUMBER_RED_TINT && mark != MENU_NUMBER_GREEN_TINT) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(
-              ImageTexels(D_8023A82C_ovl_01) + (index * MENU_GLYPH_IMAGE_SIZE)),
+              ImageTexels(f_MenuGlyphs) + (index * MENU_GLYPH_IMAGE_SIZE)),
           G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1350,7 +1354,7 @@ void DrawMenuNumber(
 
   for (index = 0; index != digitCount; index++) {
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(D_8023A82C_ovl_01) +
+        TextureAddress(ImageTexels(f_MenuGlyphs) +
             ((digits[index] + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)),
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1430,7 +1434,7 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A82C_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_MenuGlyphs)));
   shift = 0;
   if (whole >= 0 && whole < DECIMAL_BASE) {
     shift = 2 * MENU_GLYPH_SIZE;
@@ -1448,7 +1452,7 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
     }
 
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(D_8023A82C_ovl_01) +
+        TextureAddress(ImageTexels(f_MenuGlyphs) +
             ((digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)),
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1465,7 +1469,7 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   }
 
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(ImageTexels(D_8023A82C_ovl_01) +
+      TextureAddress(ImageTexels(f_MenuGlyphs) +
           (MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE)),
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1481,7 +1485,7 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
       TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(ImageTexels(D_8023A82C_ovl_01) +
+      TextureAddress(ImageTexels(f_MenuGlyphs) +
           ((fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)),
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1528,10 +1532,10 @@ void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A82C_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_MenuGlyphs)));
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(ImageTexels(D_8023A82C_ovl_01) +
-          (glyphIndex * MENU_GLYPH_IMAGE_SIZE)),
+      TextureAddress(
+          ImageTexels(f_MenuGlyphs) + (glyphIndex * MENU_GLYPH_IMAGE_SIZE)),
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1556,10 +1560,10 @@ void DrawOffLabel(Gfx** displayListHead, s32 x, s32 y) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A82C_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_MenuGlyphs)));
   for (glyphIndex = 0; glyphIndex != OFF_GLYPH_COUNT; glyphIndex++) {
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(D_8023A82C_ovl_01) +
+        TextureAddress(ImageTexels(f_MenuGlyphs) +
             ((OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE)),
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
