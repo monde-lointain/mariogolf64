@@ -55,6 +55,8 @@ FAST_MATH   := -ffast-math
 WARNINGS    ?= -Wall -Wno-unused -Wno-uninitialized -Wno-return-type -Wno-format \
                -Wno-missing-braces
 ULTRALIB_COMPILER := gcc
+# The ABI that ultralib's assembly tests for, which modern GCC defines itself
+ULTRALIB_ASM_ABI := -D_MIPS_SIM=1
 LIB_MODERN  :=
 LIBS        :=
 else
@@ -89,6 +91,7 @@ WARNINGS    ?= -Wall -Wextra
 # MODERN_CC where only KMC GCC builds the original's form as the original.
 ULTRALIB_COMPILER := modern_gcc
 LIB_MODERN  := -DMODERN_CC
+ULTRALIB_ASM_ABI :=
 # The helpers, such as 64-bit shifts, that GCC calls rather than inlines
 LIBS        := $(shell $(CC) $(TARGETFLAGS) -print-libgcc-file-name)
 endif
@@ -171,7 +174,7 @@ ULTRALIB_DEFINES  := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI 
                      -DBUILD_VERSION_STRING=\"2.0J\" -DNDEBUG -D_FINALROM
 ULTRALIB_CFLAGS    = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS)
 ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc $(TARGETFLAGS) -P \
-                     -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64
+                     -DMIPSEB -D_LANGUAGE_ASSEMBLY $(ULTRALIB_ASM_ABI) -D_ULTRA64
 
 # libmus, the n_audio build of the Software Creations music library, as its
 # makefile built libn_gmus.
