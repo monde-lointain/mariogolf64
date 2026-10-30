@@ -384,7 +384,7 @@ void UpdateClubTournament(void);
 s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
 s32 GetClubTournamentCharacter(void);
-s32 func_8022BDD0_ovl_01(void);
+s32 TakeClubTournamentEntry(void);
 s32 GetChosenBestShot(void);
 void LoadRingShotRecord(RingShotRecord* record);
 void LoadBestShotReplay(PlayRecord* record);
@@ -1733,7 +1733,7 @@ void SetUpChosenGame(void) {
   }
 
   StartBets();
-  if (func_8022BDD0_ovl_01()) {
+  if (TakeClubTournamentEntry()) {
     g_GameState.holeSelection = HOLE_SELECTION_ALL;
     g_GameState.courseIndex = GetClubTournamentCourse();
     g_GameState.gameMode = GetClubTournamentGameMode();

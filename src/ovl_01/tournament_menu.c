@@ -2111,7 +2111,8 @@ s32 GetClubTournamentCharacter(void) {
   return D_80105DC0.characterIndex;
 }
 
-s32 func_8022BDD0_ovl_01(void) {
+/* Returns, then clears, whether the Club Tournament screen was entered */
+s32 TakeClubTournamentEntry(void) {
   if (D_80230F40_ovl_01) {
     D_80230F40_ovl_01 = FALSE;
     return TRUE;
