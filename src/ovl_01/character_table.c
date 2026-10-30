@@ -130,8 +130,9 @@ static s32 f_TablePopupLeft = TABLE_POPUP_LEFT_X;
 static s32 f_TablePopupTop = TABLE_POPUP_TOP_Y;
 /* The TABLE_POPUP_* corner where the table's popup is */
 static s32 f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
-static s32 D_8023019C_ovl_01 = 0;
-static s32 D_802301A0_ovl_01 = 0;
+/* The arrows' blink frame, flipped every TABLE_ARROW_BLINK_FRAMES frames */
+static s32 f_TableArrowFrame = 0;
+static s32 f_TableArrowTimer = 0;
 static s32 D_802301A4_ovl_01 = 0;
 /*
  * The character in each place of the table: the CharacterId of each
@@ -252,8 +253,8 @@ void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
       f_TableArrows = buffer;
       OpenEncodedAsset(ASSET_TABLE_ARROWS, &asset);
       ReadEncodedAsset(f_TableArrows, &asset);
-      D_8023019C_ovl_01 = 0;
-      D_802301A0_ovl_01 = 0;
+      f_TableArrowFrame = 0;
+      f_TableArrowTimer = 0;
       D_802301A4_ovl_01 = 0;
       break;
     case TABLE_BUFFER_STAR:
@@ -457,30 +458,30 @@ void DrawCharacterTable(Gfx** displayListHead) {
     shownRow++;
   } while (shownRow != TABLE_SHOWN_ROW_COUNT);
   if (memory->tableFirstRow > 0) {
-    DrawGreenArrow(&gfx, f_TableArrows, D_8023019C_ovl_01, MENU_ARROW_UP,
+    DrawGreenArrow(&gfx, f_TableArrows, f_TableArrowFrame, MENU_ARROW_UP,
         TABLE_ROW_ARROW_X, TABLE_UP_ARROW_Y);
   }
 
   if (memory->tableFirstRow < TABLE_ROW_COUNT - TABLE_SHOWN_ROW_COUNT) {
-    DrawGreenArrow(&gfx, f_TableArrows, D_8023019C_ovl_01, MENU_ARROW_DOWN,
+    DrawGreenArrow(&gfx, f_TableArrows, f_TableArrowFrame, MENU_ARROW_DOWN,
         TABLE_ROW_ARROW_X, TABLE_DOWN_ARROW_Y);
   }
 
   if (memory->tableFirstColumn > 0) {
-    DrawGreenArrow(&gfx, f_TableArrows, D_8023019C_ovl_01, MENU_ARROW_LEFT,
+    DrawGreenArrow(&gfx, f_TableArrows, f_TableArrowFrame, MENU_ARROW_LEFT,
         TABLE_LEFT_ARROW_X, TABLE_COLUMN_ARROW_Y);
   }
 
   if (memory->tableFirstColumn <
       TABLE_COLUMN_COUNT - TABLE_SHOWN_COLUMN_COUNT) {
-    DrawGreenArrow(&gfx, f_TableArrows, D_8023019C_ovl_01, MENU_ARROW_RIGHT,
+    DrawGreenArrow(&gfx, f_TableArrows, f_TableArrowFrame, MENU_ARROW_RIGHT,
         TABLE_RIGHT_ARROW_X, TABLE_COLUMN_ARROW_Y);
   }
 
-  D_802301A0_ovl_01++;
-  if (D_802301A0_ovl_01 == TABLE_ARROW_BLINK_FRAMES) {
-    D_802301A0_ovl_01 = 0;
-    D_8023019C_ovl_01 = D_8023019C_ovl_01 == 0;
+  f_TableArrowTimer++;
+  if (f_TableArrowTimer == TABLE_ARROW_BLINK_FRAMES) {
+    f_TableArrowTimer = 0;
+    f_TableArrowFrame = f_TableArrowFrame == 0;
   }
 
   DrawTablePopup(&gfx);
