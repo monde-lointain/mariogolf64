@@ -647,10 +647,8 @@ void SetPaintSeed(u32 seed) {
 /*
  * Fills offsets with up to maxCount column and row offsets less than span
  * from the origin, nearest first, and returns how many it wrote. Distances
- * are in units of 1/OFFSET_DISTANCE_SCALE. Doesn't match: the row
- * counter and the squares pointer swap registers.
+ * are in units of 1/OFFSET_DISTANCE_SCALE.
  */
-#ifdef NON_MATCHING
 s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
   f32 squares[MAX_OFFSET_SPAN + 1];
   u16 distances[span * span * 2];
@@ -666,9 +664,12 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
   squares[0] = 0.0f;
   row = 0;
   while (row < span) {
-    row++;
-    squares[row] =
-        (f32)(row * row) * (OFFSET_DISTANCE_SCALE * OFFSET_DISTANCE_SCALE);
+    /* The loop of one pass gives the row counter its register, to match */
+    do {
+      row++;
+      squares[row] =
+          (f32)(row * row) * (OFFSET_DISTANCE_SCALE * OFFSET_DISTANCE_SCALE);
+    } while (0);
   }
 
   for (row = 0; row < span; row++) {
@@ -736,9 +737,6 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
 
   return count;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ListOffsetsByDistance);
-#endif
 
 /*
  * Fills heights, a band of HEIGHT_BAND_ROW_COUNT map rows by MAP_COLUMN_COUNT
