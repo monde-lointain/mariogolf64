@@ -267,220 +267,220 @@ static Sun f_Suns[7] = {
 /* By course record, then the times of day when dry, then in the rain */
 SkyColors g_SkyColors[COURSE_RECORD_COUNT][SKY_WEATHER_COUNT * SKY_TIME_COUNT] =
     {{{0, {0x0A, 0xC8, 0xFF}, {0xE6, 0xFF, 0xC8}, {0xFF, 0xFF, 0xFF},
-          {0x19, 0x19, 0x19}, 55, TRUE, {0, 0}, &f_Suns[0], {0xBE, 0xDC, 0xBE},
+          {0x19, 0x19, 0x19, 55}, TRUE, {0, 0}, &f_Suns[0], {0xBE, 0xDC, 0xBE},
           974, 1100},
          {0, {0x32, 0x64, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-             {0x19, 0x19, 0x19}, 30, TRUE, {0, 0}, &f_Suns[1],
+             {0x19, 0x19, 0x19, 30}, TRUE, {0, 0}, &f_Suns[1],
              {0xB4, 0xBE, 0xB4}, 974, 1100},
          {0, {0xFF, 0x3C, 0x64}, {0xFF, 0xFF, 0x00}, {0xFF, 0xC8, 0x64},
-             {0x19, 0x0A, 0x00}, 50, TRUE, {0, 0}, &f_Suns[4],
+             {0x19, 0x0A, 0x00, 50}, TRUE, {0, 0}, &f_Suns[4],
              {0xE6, 0xAA, 0x96}, 975, 1100},
          {0, {0x00, 0x00, 0x64}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0xC8},
-             {0x00, 0x00, 0x0A}, 70, FALSE, {0, 0}, &f_Suns[6],
+             {0x00, 0x00, 0x0A, 70}, FALSE, {0, 0}, &f_Suns[6],
              {0x00, 0x00, 0x7F}, 970, 1100},
          {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xFF}, {0x96, 0x96, 0x96},
-             {0x19, 0x19, 0x19}, 65, FALSE, {0, 0}, &f_Suns[0],
+             {0x19, 0x19, 0x19, 65}, FALSE, {0, 0}, &f_Suns[0],
              {0xC8, 0xE6, 0xC8}, 970, 1060},
          {0, {0xB0, 0xB4, 0xCB}, {0xAF, 0xAB, 0xAB}, {0x3F, 0x3F, 0x57},
-             {0x14, 0x14, 0x18}, 60, FALSE, {0, 0}, &f_Suns[1],
+             {0x14, 0x14, 0x18, 60}, FALSE, {0, 0}, &f_Suns[1],
              {0x80, 0x7A, 0xBC}, 970, 1080},
          {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xC8}, {0x96, 0x96, 0x96},
-             {0x19, 0x14, 0x14}, 60, FALSE, {0, 0}, &f_Suns[2],
+             {0x19, 0x14, 0x14, 60}, FALSE, {0, 0}, &f_Suns[2],
              {0xC8, 0xE6, 0xC8}, 970, 1080},
          {0, {0x20, 0x20, 0x2F}, {0x50, 0x50, 0x50}, {0x64, 0x68, 0x50},
-             {0x06, 0x06, 0x08}, 90, FALSE, {0, 0}, &f_Suns[6],
+             {0x06, 0x06, 0x08, 90}, FALSE, {0, 0}, &f_Suns[6],
              {0xC8, 0xE6, 0xC8}, 970, 1080}},
         {{0, {0x32, 0x96, 0xFF}, {0xFF, 0xFF, 0xD7}, {0xFF, 0xFF, 0xFF},
-             {0x19, 0x19, 0x19}, 55, TRUE, {0, 0}, &f_Suns[0],
+             {0x19, 0x19, 0x19, 55}, TRUE, {0, 0}, &f_Suns[0],
              {0xC8, 0xE8, 0xC8}, 970, 1080},
             {0, {0x32, 0x32, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-                {0x19, 0x19, 0x19}, 30, TRUE, {0, 0}, &f_Suns[1],
+                {0x19, 0x19, 0x19, 30}, TRUE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 974, 1120},
             {0, {0xFF, 0x3C, 0x64}, {0xFF, 0xFF, 0x00}, {0x97, 0x1F, 0x00},
-                {0x19, 0x05, 0x01}, 50, TRUE, {0, 0}, &f_Suns[4],
+                {0x19, 0x05, 0x01, 50}, TRUE, {0, 0}, &f_Suns[4],
                 {0xFA, 0x57, 0x50}, 942, 1144},
             {0, {0x00, 0x00, 0x28}, {0x00, 0x00, 0xC8}, {0x00, 0x97, 0x14},
-                {0x00, 0x00, 0x0A}, 85, FALSE, {0, 0}, &f_Suns[6],
+                {0x00, 0x00, 0x0A, 85}, FALSE, {0, 0}, &f_Suns[6],
                 {0x00, 0x00, 0x7F}, 970, 1110},
             {0, {0xA0, 0x96, 0x96}, {0xFF, 0xFF, 0xD7}, {0x96, 0x96, 0x96},
-                {0x16, 0x16, 0x13}, 65, FALSE, {0, 0}, &f_Suns[0],
+                {0x16, 0x16, 0x13, 65}, FALSE, {0, 0}, &f_Suns[0],
                 {0xC8, 0xE6, 0xC8}, 970, 1060},
             {0, {0xAC, 0xB4, 0xCB}, {0xAF, 0xAB, 0xAB}, {0x96, 0x96, 0x96},
-                {0x14, 0x14, 0x16}, 60, FALSE, {0, 0}, &f_Suns[1],
+                {0x14, 0x14, 0x16, 60}, FALSE, {0, 0}, &f_Suns[1],
                 {0x80, 0x7A, 0xA8}, 970, 1080},
             {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xC8}, {0x96, 0x96, 0x64},
-                {0x16, 0x12, 0x12}, 60, FALSE, {0, 0}, &f_Suns[2],
+                {0x16, 0x12, 0x12, 60}, FALSE, {0, 0}, &f_Suns[2],
                 {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x20, 0x20, 0x2F}, {0x64, 0x64, 0x64}, {0x50, 0x50, 0x64},
-                {0x06, 0x06, 0x08}, 85, FALSE, {0, 0}, &f_Suns[6],
+                {0x06, 0x06, 0x08, 85}, FALSE, {0, 0}, &f_Suns[6],
                 {0xC8, 0xE6, 0xC8}, 970, 1080}},
         {{0, {0x1F, 0x1F, 0xFF}, {0xFF, 0xE7, 0x3F}, {0xDF, 0xBF, 0xDF},
-             {0x17, 0x14, 0x11}, 50, TRUE, {0, 0}, &f_Suns[0],
+             {0x17, 0x14, 0x11, 50}, TRUE, {0, 0}, &f_Suns[0],
              {0xC8, 0xE6, 0xC8}, 970, 1100},
             {0, {0x00, 0x1F, 0xFF}, {0xFF, 0xFF, 0xFF}, {0xBF, 0xBF, 0xFF},
-                {0x0F, 0x0F, 0x0F}, 35, TRUE, {0, 0}, &f_Suns[1],
+                {0x0F, 0x0F, 0x0F, 35}, TRUE, {0, 0}, &f_Suns[1],
                 {0xB4, 0xC8, 0xB4}, 974, 1110},
             {0, {0xFF, 0x3F, 0x00}, {0xBF, 0xFF, 0x8F}, {0xFF, 0xBF, 0x00},
-                {0x0A, 0x05, 0x01}, 50, TRUE, {0, 0}, &f_Suns[4],
+                {0x0A, 0x05, 0x01, 50}, TRUE, {0, 0}, &f_Suns[4],
                 {0xFF, 0x96, 0x3C}, 970, 1110},
             {0, {0x00, 0x00, 0x32}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0x96},
-                {0x00, 0x00, 0x0F}, 80, FALSE, {0, 0}, &f_Suns[6],
+                {0x00, 0x00, 0x0F, 80}, FALSE, {0, 0}, &f_Suns[6],
                 {0x00, 0x00, 0x7F}, 970, 1100},
             {0, {0x96, 0x96, 0xC8}, {0xFF, 0xFF, 0xFF}, {0x96, 0x96, 0x96},
-                {0x19, 0x19, 0x19}, 65, FALSE, {0, 0}, &f_Suns[0],
+                {0x19, 0x19, 0x19, 65}, FALSE, {0, 0}, &f_Suns[0],
                 {0xC8, 0xE6, 0xC8}, 970, 1060},
             {0, {0xB4, 0xB4, 0xC8}, {0xAF, 0xAF, 0xA0}, {0x96, 0x96, 0x96},
-                {0x14, 0x14, 0x16}, 60, FALSE, {0, 0}, &f_Suns[1],
+                {0x14, 0x14, 0x16, 60}, FALSE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x96, 0x96, 0x96}, {0xC8, 0x64, 0x96}, {0x50, 0x50, 0x64},
-                {0x12, 0x0C, 0x12}, 60, FALSE, {0, 0}, &f_Suns[2],
+                {0x12, 0x0C, 0x12, 60}, FALSE, {0, 0}, &f_Suns[2],
                 {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x20, 0x03, 0x20}, {0x64, 0x64, 0x64}, {0x50, 0x50, 0x64},
-                {0x06, 0x05, 0x08}, 90, FALSE, {0, 0}, &f_Suns[6],
+                {0x06, 0x05, 0x08, 90}, FALSE, {0, 0}, &f_Suns[6],
                 {0xC8, 0xE6, 0xC8}, 970, 1080}},
         {{0, {0x97, 0x64, 0xFF}, {0xF3, 0xEF, 0x83}, {0xC8, 0xC8, 0xC8},
-             {0x14, 0x14, 0x14}, 55, TRUE, {0, 0}, &f_Suns[0],
+             {0x14, 0x14, 0x14, 55}, TRUE, {0, 0}, &f_Suns[0],
              {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x64, 0xB4, 0xEF}, {0xC8, 0xEF, 0xB4}, {0xC8, 0xC8, 0xC8},
-                {0x14, 0x14, 0x14}, 35, TRUE, {0, 0}, &f_Suns[1],
+                {0x14, 0x14, 0x14, 35}, TRUE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 974, 1100},
             {0, {0x90, 0x32, 0xC8}, {0xFF, 0xC8, 0x50}, {0xFF, 0x64, 0x64},
-                {0x14, 0x05, 0x0A}, 50, TRUE, {0, 0}, &f_Suns[4],
+                {0x14, 0x05, 0x0A, 50}, TRUE, {0, 0}, &f_Suns[4],
                 {0xFA, 0x64, 0x64}, 970, 1100},
             {0, {0x00, 0x00, 0x64}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0x8B},
-                {0x00, 0x02, 0x08}, 80, FALSE, {0, 0}, &f_Suns[6],
+                {0x00, 0x02, 0x08, 80}, FALSE, {0, 0}, &f_Suns[6],
                 {0x00, 0x00, 0x7F}, 970, 1100},
             {0, {0x6F, 0x64, 0xAB}, {0xAF, 0xBF, 0xC8}, {0x64, 0x64, 0x64},
-                {0x10, 0x10, 0x10}, 65, FALSE, {0, 0}, &f_Suns[0],
+                {0x10, 0x10, 0x10, 65}, FALSE, {0, 0}, &f_Suns[0],
                 {0xC8, 0xE6, 0xC8}, 970, 1060},
             {0, {0x9B, 0x9B, 0xDF}, {0xAF, 0xBF, 0xC8}, {0x64, 0x64, 0x64},
-                {0x12, 0x12, 0x12}, 55, FALSE, {0, 0}, &f_Suns[1],
+                {0x12, 0x12, 0x12, 55}, FALSE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 966, 1080},
             {0, {0xB7, 0x64, 0xAB}, {0xBF, 0xBF, 0x9F}, {0x50, 0x50, 0x50},
-                {0x10, 0x0C, 0x0C}, 55, FALSE, {0, 0}, &f_Suns[2],
+                {0x10, 0x0C, 0x0C, 55}, FALSE, {0, 0}, &f_Suns[2],
                 {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x32, 0x32, 0x32}, {0x4B, 0x4B, 0x4B}, {0x00, 0x9F, 0x8B},
-                {0x05, 0x05, 0x07}, 90, FALSE, {0, 0}, &f_Suns[6],
+                {0x05, 0x05, 0x07, 90}, FALSE, {0, 0}, &f_Suns[6],
                 {0xC8, 0xE6, 0xC8}, 970, 1080}},
         {{0, {0x32, 0x96, 0xC8}, {0xFF, 0xEB, 0xC8}, {0x96, 0x96, 0xFF},
-             {0x0F, 0x0F, 0x0F}, 50, TRUE, {0, 0}, &f_Suns[0],
+             {0x0F, 0x0F, 0x0F, 50}, TRUE, {0, 0}, &f_Suns[0],
              {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x00, 0x64, 0xFF}, {0xC8, 0xEB, 0xFF}, {0xC8, 0xC8, 0xFF},
-                {0x0F, 0x0F, 0x0F}, 40, TRUE, {0, 0}, &f_Suns[1],
+                {0x0F, 0x0F, 0x0F, 40}, TRUE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 970, 1100},
             {0, {0xC8, 0x32, 0xC8}, {0xFF, 0xEB, 0x64}, {0xC8, 0xC8, 0xFF},
-                {0x19, 0x05, 0x0A}, 50, TRUE, {0, 0}, &f_Suns[4],
+                {0x19, 0x05, 0x0A, 50}, TRUE, {0, 0}, &f_Suns[4],
                 {0xC8, 0xE6, 0xC8}, 970, 1100},
             {0, {0x00, 0x00, 0x64}, {0x00, 0x1F, 0xFF}, {0x00, 0x00, 0x96},
-                {0x00, 0x02, 0x0F}, 80, FALSE, {0, 0}, &f_Suns[6],
+                {0x00, 0x02, 0x0F, 80}, FALSE, {0, 0}, &f_Suns[6],
                 {0x20, 0x20, 0xBF}, 970, 1100},
             {0, {0x64, 0x96, 0x96}, {0xFF, 0xEB, 0xC8}, {0x64, 0x64, 0x64},
-                {0x14, 0x14, 0x14}, 60, FALSE, {0, 0}, &f_Suns[0],
+                {0x14, 0x14, 0x14, 60}, FALSE, {0, 0}, &f_Suns[0],
                 {0xC8, 0xE6, 0xC8}, 970, 1060},
             {0, {0x96, 0x96, 0x96}, {0xEB, 0xEB, 0xEB}, {0x64, 0x64, 0x96},
-                {0x14, 0x14, 0x14}, 60, FALSE, {0, 0}, &f_Suns[1],
+                {0x14, 0x14, 0x14, 60}, FALSE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x96, 0x64, 0x96}, {0xFF, 0xEB, 0xC8}, {0x64, 0x64, 0x64},
-                {0x12, 0x0F, 0x12}, 60, FALSE, {0, 0}, &f_Suns[2],
+                {0x12, 0x0F, 0x12, 60}, FALSE, {0, 0}, &f_Suns[2],
                 {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x32, 0x20, 0x32}, {0x50, 0x50, 0x50}, {0x64, 0x64, 0x64},
-                {0x08, 0x06, 0x08}, 90, FALSE, {0, 0}, &f_Suns[6],
+                {0x08, 0x06, 0x08, 90}, FALSE, {0, 0}, &f_Suns[6],
                 {0xC8, 0xE6, 0xC8}, 970, 1080}},
         {{0, {0x7B, 0x93, 0xFF}, {0xFF, 0xBF, 0xA3}, {0xDF, 0xFF, 0xE7},
-             {0x14, 0x14, 0x14}, 55, TRUE, {0, 0}, &f_Suns[0],
+             {0x14, 0x14, 0x14, 55}, TRUE, {0, 0}, &f_Suns[0],
              {0xA0, 0xB6, 0xC8}, 962, 1024},
             {0, {0x74, 0x1F, 0xFF}, {0xB7, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-                {0x12, 0x12, 0x12}, 40, TRUE, {0, 0}, &f_Suns[1],
+                {0x12, 0x12, 0x12, 40}, TRUE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 970, 1100},
             {0, {0xDF, 0x1F, 0xFF}, {0xFF, 0xCF, 0x4B}, {0x77, 0x0B, 0xBF},
-                {0x14, 0x0A, 0x08}, 50, TRUE, {0, 0}, &f_Suns[4],
+                {0x14, 0x0A, 0x08, 50}, TRUE, {0, 0}, &f_Suns[4],
                 {0xFF, 0x62, 0xB4}, 970, 1048},
             {0, {0x3F, 0x03, 0x74}, {0x1B, 0x07, 0x9B}, {0x67, 0x77, 0xC8},
-                {0x00, 0x00, 0x09}, 80, FALSE, {0, 0}, &f_Suns[6],
+                {0x00, 0x00, 0x09, 80}, FALSE, {0, 0}, &f_Suns[6],
                 {0x08, 0x00, 0xB4}, 954, 1024},
             {0, {0x93, 0x93, 0x93}, {0xB7, 0xB7, 0x9B}, {0x64, 0x73, 0x97},
-                {0x0C, 0x0C, 0x0E}, 65, FALSE, {0, 0}, &f_Suns[0],
+                {0x0C, 0x0C, 0x0E, 65}, FALSE, {0, 0}, &f_Suns[0],
                 {0x94, 0xA6, 0xBC}, 954, 1016},
             {0, {0x7B, 0x93, 0x9B}, {0xAB, 0xAB, 0xAB}, {0x4B, 0x73, 0x64},
-                {0x0A, 0x0E, 0x0E}, 60, FALSE, {0, 0}, &f_Suns[1],
+                {0x0A, 0x0E, 0x0E, 60}, FALSE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 970, 1048},
             {0, {0x7B, 0x93, 0xA3}, {0xC8, 0x83, 0x7B}, {0x37, 0x73, 0x37},
-                {0x0A, 0x0A, 0x08}, 60, FALSE, {0, 0}, &f_Suns[2],
+                {0x0A, 0x0A, 0x08, 60}, FALSE, {0, 0}, &f_Suns[2],
                 {0x8F, 0x72, 0xB7}, 962, 1040},
             {0, {0x27, 0x33, 0x4C}, {0x37, 0x27, 0x2F}, {0x6F, 0x3F, 0x9C},
-                {0x02, 0x03, 0x07}, 80, FALSE, {0, 0}, &f_Suns[6],
+                {0x02, 0x03, 0x07, 80}, FALSE, {0, 0}, &f_Suns[6],
                 {0x10, 0x34, 0x7C}, 954, 1012}},
         {{0, {0x00, 0x00, 0x9F}, {0xBF, 0xBF, 0xFF}, {0x00, 0x00, 0xB7},
-             {0x17, 0x14, 0x11}, 0, TRUE, {0, 0}, &f_Suns[0],
+             {0x17, 0x14, 0x11, 0}, TRUE, {0, 0}, &f_Suns[0],
              {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x00, 0x00, 0xFF}, {0xBF, 0xEF, 0xFF}, {0xBF, 0xFF, 0xFF},
-                {0x0F, 0x0F, 0x0F}, 0, TRUE, {0, 0}, &f_Suns[1],
+                {0x0F, 0x0F, 0x0F, 0}, TRUE, {0, 0}, &f_Suns[1],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x8F, 0x5F, 0xCF}, {0xFF, 0xDF, 0x00}, {0xFF, 0x3F, 0x00},
-                {0x0A, 0x05, 0x01}, 0, TRUE, {0, 0}, &f_Suns[4],
+                {0x0A, 0x05, 0x01, 0}, TRUE, {0, 0}, &f_Suns[4],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x00, 0x00, 0x7F}, {0x00, 0x00, 0x3F}, {0x7F, 0x7F, 0x7F},
-                {0x0A, 0x05, 0x01}, 0, FALSE, {0, 0}, &f_Suns[6],
+                {0x0A, 0x05, 0x01, 0}, FALSE, {0, 0}, &f_Suns[6],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0xA0, 0xC4, 0xAF}, {0x0F, 0x2F, 0x4B}, {0xFF, 0xDB, 0xBB},
-                {0x0F, 0x0F, 0x0F}, 60, FALSE, {0, 0}, &f_Suns[0],
+                {0x0F, 0x0F, 0x0F, 60}, FALSE, {0, 0}, &f_Suns[0],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x6F, 0x6F, 0x7F}, {0x7F, 0x7F, 0x5F}, {0x40, 0x40, 0x40},
-                {0x1E, 0x1E, 0x1E}, 50, FALSE, {0, 0}, &f_Suns[1],
+                {0x1E, 0x1E, 0x1E, 50}, FALSE, {0, 0}, &f_Suns[1],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0xDF, 0xBF, 0xFF}, {0xFF, 0xEF, 0x3F}, {0x5F, 0x3F, 0x1F},
-                {0x14, 0x0F, 0x0A}, 70, FALSE, {0, 0}, &f_Suns[2],
+                {0x14, 0x0F, 0x0A, 70}, FALSE, {0, 0}, &f_Suns[2],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x00, 0x00, 0x7F}, {0x00, 0x00, 0x3F}, {0x7F, 0x7F, 0x7F},
-                {0x0A, 0x05, 0x01}, 0, FALSE, {0, 0}, &f_Suns[6],
+                {0x0A, 0x05, 0x01, 0}, FALSE, {0, 0}, &f_Suns[6],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128}},
         {{0, {0x00, 0x00, 0x9F}, {0xBF, 0xBF, 0xFF}, {0x00, 0x00, 0xB7},
-             {0x17, 0x14, 0x11}, 0, TRUE, {0, 0}, &f_Suns[0],
+             {0x17, 0x14, 0x11, 0}, TRUE, {0, 0}, &f_Suns[0],
              {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x00, 0x00, 0xFF}, {0xBF, 0xEF, 0xFF}, {0xBF, 0xFF, 0xFF},
-                {0x0F, 0x0F, 0x0F}, 0, TRUE, {0, 0}, &f_Suns[1],
+                {0x0F, 0x0F, 0x0F, 0}, TRUE, {0, 0}, &f_Suns[1],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x8F, 0x5F, 0xCF}, {0xFF, 0xDF, 0x00}, {0xFF, 0x3F, 0x00},
-                {0x0A, 0x05, 0x01}, 0, TRUE, {0, 0}, &f_Suns[4],
+                {0x0A, 0x05, 0x01, 0}, TRUE, {0, 0}, &f_Suns[4],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x00, 0x00, 0x7F}, {0x00, 0x00, 0x3F}, {0x7F, 0x7F, 0x7F},
-                {0x0A, 0x05, 0x01}, 0, FALSE, {0, 0}, &f_Suns[6],
+                {0x0A, 0x05, 0x01, 0}, FALSE, {0, 0}, &f_Suns[6],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0xA0, 0xC4, 0xAF}, {0x0F, 0x2F, 0x4B}, {0xFF, 0xDB, 0xBB},
-                {0x0F, 0x0F, 0x0F}, 60, FALSE, {0, 0}, &f_Suns[0],
+                {0x0F, 0x0F, 0x0F, 60}, FALSE, {0, 0}, &f_Suns[0],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x6F, 0x6F, 0x7F}, {0x7F, 0x7F, 0x5F}, {0x40, 0x40, 0x40},
-                {0x1E, 0x1E, 0x1E}, 50, FALSE, {0, 0}, &f_Suns[1],
+                {0x1E, 0x1E, 0x1E, 50}, FALSE, {0, 0}, &f_Suns[1],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0xDF, 0xBF, 0xFF}, {0xFF, 0xEF, 0x3F}, {0x5F, 0x3F, 0x1F},
-                {0x14, 0x0F, 0x0A}, 70, FALSE, {0, 0}, &f_Suns[2],
+                {0x14, 0x0F, 0x0A, 70}, FALSE, {0, 0}, &f_Suns[2],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128},
             {0, {0x00, 0x00, 0x7F}, {0x00, 0x00, 0x3F}, {0x7F, 0x7F, 0x7F},
-                {0x0A, 0x05, 0x01}, 0, FALSE, {0, 0}, &f_Suns[6],
+                {0x0A, 0x05, 0x01, 0}, FALSE, {0, 0}, &f_Suns[6],
                 {0xFF, 0xFF, 0xFF}, 1070, 1128}},
         {{0, {0x32, 0x64, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-             {0x19, 0x19, 0x19}, 35, TRUE, {0, 0}, &f_Suns[1],
+             {0x19, 0x19, 0x19, 35}, TRUE, {0, 0}, &f_Suns[1],
              {0xC8, 0xE6, 0xC8}, 970, 1100},
             {0, {0x32, 0x64, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-                {0x19, 0x19, 0x19}, 35, TRUE, {0, 0}, &f_Suns[1],
+                {0x19, 0x19, 0x19, 35}, TRUE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 970, 1100},
             {0, {0x32, 0x64, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-                {0x19, 0x19, 0x19}, 35, TRUE, {0, 0}, &f_Suns[1],
+                {0x19, 0x19, 0x19, 35}, TRUE, {0, 0}, &f_Suns[1],
                 {0xC8, 0xE6, 0xC8}, 970, 1100},
             {0, {0x00, 0x00, 0x64}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0xC8},
-                {0x00, 0x00, 0x0F}, 90, FALSE, {0, 0}, &f_Suns[6],
+                {0x00, 0x00, 0x0F, 90}, FALSE, {0, 0}, &f_Suns[6],
                 {0xC8, 0xE6, 0xC8}, 970, 1100},
             {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xFF}, {0x96, 0x96, 0x96},
-                {0x19, 0x19, 0x19}, 65, FALSE, {0, 0}, &f_Suns[0],
+                {0x19, 0x19, 0x19, 65}, FALSE, {0, 0}, &f_Suns[0],
                 {0xC8, 0xE6, 0xC8}, 970, 1060},
             {0, {0xB0, 0xB4, 0xCB}, {0xAF, 0xAB, 0xAB}, {0x3F, 0x3F, 0x57},
-                {0x14, 0x14, 0x18}, 60, FALSE, {0, 0}, &f_Suns[1],
+                {0x14, 0x14, 0x18, 60}, FALSE, {0, 0}, &f_Suns[1],
                 {0x80, 0x7A, 0xBC}, 970, 1080},
             {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xC8}, {0x96, 0x96, 0x96},
-                {0x19, 0x14, 0x14}, 60, FALSE, {0, 0}, &f_Suns[2],
+                {0x19, 0x14, 0x14, 60}, FALSE, {0, 0}, &f_Suns[2],
                 {0xC8, 0xE6, 0xC8}, 970, 1080},
             {0, {0x20, 0x20, 0x2F}, {0x50, 0x50, 0x50}, {0x64, 0x68, 0x50},
-                {0x06, 0x06, 0x08}, 90, FALSE, {0, 0}, &f_Suns[6],
+                {0x06, 0x06, 0x08, 90}, FALSE, {0, 0}, &f_Suns[6],
                 {0xC8, 0xE6, 0xC8}, 970, 1080}}};
 static u16 f_SunDepth = 0;
 static Boolean f_IsSunGlareSettled = FALSE;
@@ -1032,23 +1032,30 @@ void InitSkyColors(void) {
       blue = ((colors->unk7[2] * SKY_IMAGE_UNK7_PARTS) + colors->unk4[2]) /
           SKY_IMAGE_DIVISOR;
     } else {
-      blended[0] = from->unkD[0] +
-          ((to->unkD[0] - from->unkD[0]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT);
-      blended[1] = from->unkD[1] +
-          ((to->unkD[1] - from->unkD[1]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT);
-      blended[2] = from->unkD[2] +
-          ((to->unkD[2] - from->unkD[2]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT);
-      red = ((red * (PERCENT_COUNT - colors->unk10)) +
-                (blended[0] * colors->unk10)) /
+      blended[0] = from->backgroundColor[0] +
+          ((to->backgroundColor[0] - from->backgroundColor[0]) *
+              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+      blended[1] = from->backgroundColor[1] +
+          ((to->backgroundColor[1] - from->backgroundColor[1]) *
+              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+      blended[2] = from->backgroundColor[2] +
+          ((to->backgroundColor[2] - from->backgroundColor[2]) *
+              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+      red = ((red *
+                 (PERCENT_COUNT -
+                     colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                (blended[0] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
           PERCENT_COUNT;
-      green = ((green * (PERCENT_COUNT - colors->unk10)) +
-                  (blended[1] * colors->unk10)) /
+      green =
+          ((green *
+               (PERCENT_COUNT -
+                   colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+              (blended[1] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
           PERCENT_COUNT;
-      blue = ((blue * (PERCENT_COUNT - colors->unk10)) +
-                 (blended[2] * colors->unk10)) /
+      blue = ((blue *
+                  (PERCENT_COUNT -
+                      colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                 (blended[2] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
           PERCENT_COUNT;
     }
 
@@ -1105,7 +1112,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", InitSkyColors);
 #define SKY_EDITOR_BACKGROUND 3
 #define SKY_EDITOR_FOG 4
 /* Rows past blue: the background's alpha, and the fog's near and far */
-#define SKY_EDITOR_ALPHA_ROW 3
+#define SKY_EDITOR_ALPHA_ROW SKY_BACKGROUND_ALPHA
 #define SKY_EDITOR_FAR_ROW 4
 #define SKY_EDITOR_LAST_COLOR_ROW 2
 
@@ -1201,19 +1208,22 @@ s32 UpdateSkyEditor(void) {
         f_EditedSkyColors->unkA[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_BACKGROUND:
-        f_EditedSkyColors->unkD[f_SkyEditorRow]++;
+        f_EditedSkyColors->backgroundColor[f_SkyEditorRow]++;
         isImageChanged = TRUE;
         if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
           /* Wraps the percent past either end */
-          if (f_EditedSkyColors->unkD[f_SkyEditorRow] == PERCENT_COUNT + 1) {
-            f_EditedSkyColors->unkD[f_SkyEditorRow] = 0;
+          if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] ==
+              PERCENT_COUNT + 1) {
+            f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
           }
 
-          if (f_EditedSkyColors->unkD[f_SkyEditorRow] > PERCENT_COUNT + 1) {
-            f_EditedSkyColors->unkD[f_SkyEditorRow] = PERCENT_COUNT;
+          if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] >
+              PERCENT_COUNT + 1) {
+            f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_COUNT;
           }
         } else {
-          f_EditedSkyColors->unkD[f_SkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
+          f_EditedSkyColors->backgroundColor[f_SkyEditorRow] &=
+              SKY_IMAGE_CHANNEL_MAX;
         }
 
         break;
@@ -1236,18 +1246,21 @@ s32 UpdateSkyEditor(void) {
         f_EditedSkyColors->unkA[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_BACKGROUND:
-        f_EditedSkyColors->unkD[f_SkyEditorRow]--;
+        f_EditedSkyColors->backgroundColor[f_SkyEditorRow]--;
         isImageChanged = TRUE;
         if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
-          if (f_EditedSkyColors->unkD[f_SkyEditorRow] == PERCENT_COUNT + 1) {
-            f_EditedSkyColors->unkD[f_SkyEditorRow] = 0;
+          if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] ==
+              PERCENT_COUNT + 1) {
+            f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
           }
 
-          if (f_EditedSkyColors->unkD[f_SkyEditorRow] > PERCENT_COUNT + 1) {
-            f_EditedSkyColors->unkD[f_SkyEditorRow] = PERCENT_COUNT;
+          if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] >
+              PERCENT_COUNT + 1) {
+            f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_COUNT;
           }
         } else {
-          f_EditedSkyColors->unkD[f_SkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
+          f_EditedSkyColors->backgroundColor[f_SkyEditorRow] &=
+              SKY_IMAGE_CHANNEL_MAX;
         }
 
         break;
@@ -1338,14 +1351,29 @@ s32 UpdateSkyEditor(void) {
                    f_EditedSkyColors->unk4[2]) /
             SKY_IMAGE_DIVISOR;
       } else {
-        red = ((red * (PERCENT_COUNT - f_EditedSkyColors->unk10)) +
-                  (f_EditedSkyColors->unkD[0] * f_EditedSkyColors->unk10)) /
+        red =
+            ((red *
+                 (PERCENT_COUNT -
+                     f_EditedSkyColors
+                         ->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                (f_EditedSkyColors->backgroundColor[0] *
+                    f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
             PERCENT_COUNT;
-        green = ((green * (PERCENT_COUNT - f_EditedSkyColors->unk10)) +
-                    (f_EditedSkyColors->unkD[1] * f_EditedSkyColors->unk10)) /
+        green =
+            ((green *
+                 (PERCENT_COUNT -
+                     f_EditedSkyColors
+                         ->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                (f_EditedSkyColors->backgroundColor[1] *
+                    f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
             PERCENT_COUNT;
-        blue = ((blue * (PERCENT_COUNT - f_EditedSkyColors->unk10)) +
-                   (f_EditedSkyColors->unkD[2] * f_EditedSkyColors->unk10)) /
+        blue =
+            ((blue *
+                 (PERCENT_COUNT -
+                     f_EditedSkyColors
+                         ->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                (f_EditedSkyColors->backgroundColor[2] *
+                    f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
             PERCENT_COUNT;
       }
 
@@ -1383,20 +1411,21 @@ s32 UpdateSkyEditor(void) {
       "   T   B   C   BG  FOG", SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW);
   sprintf(g_PrintBuffer, "R: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[0],
       f_EditedSkyColors->unk7[0], f_EditedSkyColors->unkA[0],
-      f_EditedSkyColors->unkD[0], (int)g_DebugFog.color[0]);
+      f_EditedSkyColors->backgroundColor[0], (int)g_DebugFog.color[0]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 1);
   sprintf(g_PrintBuffer, "G: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[1],
       f_EditedSkyColors->unk7[1], f_EditedSkyColors->unkA[1],
-      f_EditedSkyColors->unkD[1], (int)g_DebugFog.color[1]);
+      f_EditedSkyColors->backgroundColor[1], (int)g_DebugFog.color[1]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 2);
   sprintf(g_PrintBuffer, "B: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[2],
       f_EditedSkyColors->unk7[2], f_EditedSkyColors->unkA[2],
-      f_EditedSkyColors->unkD[2], (int)g_DebugFog.color[2]);
+      f_EditedSkyColors->backgroundColor[2], (int)g_DebugFog.color[2]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 3);
-  sprintf(g_PrintBuffer, "A:             %3d %4d  ", f_EditedSkyColors->unk10,
+  sprintf(g_PrintBuffer, "A:             %3d %4d  ",
+      f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA],
       (int)g_DebugFog.near);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 4);

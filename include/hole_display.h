@@ -51,6 +51,13 @@ extern Fog g_SceneFog;
 extern Fog g_DebugFog;
 
 /*
+ * SkyColors' backgroundColor: red, green and blue, then its alpha, the percent
+ * of it that InitSkyColors mixes into g_CourseSkyImage
+ */
+#define SKY_BACKGROUND_ALPHA 3
+#define SKY_BACKGROUND_CHANNEL_COUNT 4
+
+/*
  * The scene's colors at one time of day. The sky's two colors go to its
  * vertices; DeriveSceneColors also derives other colors from them.
  */
@@ -59,9 +66,7 @@ typedef struct SkyColors {
   /* 0x04 */ u8 unk4[3];
   /* 0x07 */ u8 unk7[3];
   /* 0x0A */ u8 unkA[3];
-  /* 0x0D */ u8 unkD[3];
-  /* 0x10 */ u8 unk10; /* Percent of unkD that InitSkyColors mixes into
-                          g_CourseSkyImage */
+  /* 0x0D */ u8 backgroundColor[SKY_BACKGROUND_CHANNEL_COUNT];
   /* 0x11 */ u8 hasLensFlare;
   /* 0x12 */ u8 unk12[2];
   /* 0x14 */ struct Sun* sun;
