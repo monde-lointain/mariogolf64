@@ -55,7 +55,9 @@ extern s32 D_8023BFD0_ovl_01;
 extern s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
 extern s32 D_801B7070;
-extern char D_8022BF70_ovl_01[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
+/* Each character's name, coded, in CharacterChoice order */
+extern char g_MenuCharacterNames[CHARACTER_COUNT]
+                                [IMPORTED_CHARACTER_NAME_LENGTH];
 
 s32 GetOpenCourseCount(void);
 void CheckControllersAndSetPans(void);

@@ -504,7 +504,7 @@ static const char* D_8022BF40_ovl_01[] = {"TOURNAMENT ", "VS CHARACTER",
     "PUTTER GOLF", " HANDI CAP", " BET", "9HOLE MODE  ", "CLUB HANDI"};
 /* Each character's name, with LOWERCASE_CODE_OFFSET added to its lowercase
  * letters */
-char D_8022BF70_ovl_01[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
+char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
     "P\xEC\xF5\xED", /* Plum */
     "C\xE8\xE1\xF2\xEC\xE9\xE5", /* Charlie */
     "P\xE5\xE1\xE3\xE8", /* Peach */
@@ -1766,7 +1766,7 @@ void SetUpChosenGame(void) {
     player->characterIndex = D_8012F480[index];
     player->controllerIndex = g_PlayerControllerIndices[index];
     sprintf(player->name, D_80231514_ovl_01,
-        D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
+        g_MenuCharacterNames[D_8022F8F4_ovl_01[D_8012F480[index]]]);
     if (D_8012F480[index] >= CHARACTER_KID) {
       row = D_801323A0.characterRows[index];
       column = D_801323A0.characterColumns[index];
@@ -1779,7 +1779,7 @@ void SetUpChosenGame(void) {
     } else {
       player->gameBoyCharacterIndex = -1;
       sprintf(player->name, D_80231514_ovl_01,
-          D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
+          g_MenuCharacterNames[D_8022F8F4_ovl_01[D_8012F480[index]]]);
     }
 
     if (player->controllerIndex == MAXCONTROLLERS) {
@@ -5411,7 +5411,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0x7F, 0xFF, 0xFF);
   gDPSetEnvColor(gfx++, 0x00, 0x10, 0x40, 0xFF);
   sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.viewerCharacter + 1,
-      D_8022BF70_ovl_01[D_801323A0.viewerCharacter]);
+      g_MenuCharacterNames[D_801323A0.viewerCharacter]);
   DrawLargeText(&gfx, VIEWER_NAME_X, VIEWER_NAME_Y, g_PrintBuffer);
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     sprintf(g_PrintBuffer, D_80231668_ovl_01, index + 1);
@@ -5420,8 +5420,8 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   }
 
   for (index = 0; index != D_801B7070; index++) {
-    sprintf(
-        g_PrintBuffer, D_80231514_ovl_01, D_8022BF70_ovl_01[D_8012F480[index]]);
+    sprintf(g_PrintBuffer, D_80231514_ovl_01,
+        g_MenuCharacterNames[D_8012F480[index]]);
     DrawTextStub(&gfx, VIEWER_PLAYER_NAME_X,
         VIEWER_PLAYER_TOP + (index * VIEWER_PLAYER_SPACING), g_PrintBuffer);
   }

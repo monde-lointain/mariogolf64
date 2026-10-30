@@ -80,7 +80,7 @@ static s32 D_80230130_ovl_01 = 0;
 static s32 D_80230134_ovl_01 = 0;
 static s32 D_80230138_ovl_01 = 0;
 /* Where each character's face is in D_8023AA44's image, and its name in
- * D_8022BF70 */
+ * g_MenuCharacterNames */
 static s32 D_8023013C_ovl_01[CHARACTER_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 
@@ -457,8 +457,8 @@ void func_802144E4_ovl_01(Gfx** displayListHead, s32 left, s32 top,
   if (drawMode == FACE_WITH_NAME) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    sprintf(
-        g_PrintBuffer, "%s", D_8022BF70_ovl_01[D_8023013C_ovl_01[character]]);
+    sprintf(g_PrintBuffer, "%s",
+        g_MenuCharacterNames[D_8023013C_ovl_01[character]]);
     DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y,
         g_PrintBuffer);
     gDPPipeSync(gfx++);

@@ -2684,7 +2684,7 @@ void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
       SetUpTextDrawing(&gfx);
       SetTextColor(&gfx, 255, 255, 255);
       sprintf(g_PrintBuffer, D_802319E0_ovl_01,
-          D_8022BF70_ovl_01[D_80230A48_ovl_01[character]]);
+          g_MenuCharacterNames[D_80230A48_ovl_01[character]]);
       DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y,
           g_PrintBuffer);
       gDPPipeSync(gfx++);
