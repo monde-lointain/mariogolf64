@@ -400,7 +400,7 @@ extern const char D_802316FC_ovl_01[];
 
 /* Read by no routine */
 static Gfx D_8022BE00_ovl_01[] UNUSED = {gsSPEndDisplayList()};
-static s32 D_8022BE08_ovl_01 = 0;
+s32 g_IsHoleShownInMenuInset = FALSE;
 /* The characters that the animation viewer cycles through and whose taken
  * marks a new game clears; nothing changes it */
 static s32 f_MenuCharacterCount = CHARACTER_COUNT;
@@ -998,7 +998,7 @@ void UpdateMenus(void) {
   g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] = center[AXIS_Y];
   g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] = center[AXIS_Z];
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-  D_8022BE08_ovl_01 = 0;
+  g_IsHoleShownInMenuInset = FALSE;
   g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
   g_InsetView.animation = INSET_VIEW_OPENING;

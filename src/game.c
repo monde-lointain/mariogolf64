@@ -1140,11 +1140,6 @@ enum DrawMode {
 
 /* The next free vertex of the frame's vertex buffer */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
-/*
- * The hole flyover's frame; DrawGame fades the screen out over its last
- * frames, and back in while it is -1
- */
-extern s32 D_8022BE08;
 extern s32 _mus_cpu_last;
 extern s32 _mus_cpu_worst;
 
@@ -1543,7 +1538,7 @@ s32 DrawGame(void) {
           g_Cameras[0].view.eye[1] = 10.0f;
           g_Cameras[0].view.eye[2] = 60.0f;
           SetCharacterHilite(matrices);
-        } else if (D_8022BE08 != 0 && g_HasLoaderFinished == TRUE) {
+        } else if (g_IsHoleShownInMenuInset && g_HasLoaderFinished == TRUE) {
           usesFloatMatrices = TRUE;
           guPerspectiveF(matrices->perspectiveF, &insetPerspNorm,
               g_Cameras[viewIndex].view.fieldOfView,
@@ -1958,7 +1953,8 @@ s32 DrawGame(void) {
         }
       }
     } else if (drawMode == DRAW_MODE_INSET_SCREEN) {
-      if (D_8022BE08 != 0 && viewIndex == 1 && g_HasLoaderFinished == TRUE) {
+      if (g_IsHoleShownInMenuInset && viewIndex == 1 &&
+          g_HasLoaderFinished == TRUE) {
         SetSceneFog(&g_DisplayListHead);
         DrawGround(matrices, terrainStyle);
         DrawBillboards(matrices, viewIndex);

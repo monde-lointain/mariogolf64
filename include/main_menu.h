@@ -35,6 +35,11 @@
 extern void* g_MenuLabelImages[2];
 /* How many pixels wider and taller than its size the chosen label is drawn */
 extern s16 g_ChosenLabelGrowth;
+/*
+ * Whether DrawGame draws the loaded hole in the menus' inset view once the
+ * loader has finished. UpdateMenus clears it, and nothing sets it.
+ */
+extern s32 g_IsHoleShownInMenuInset;
 
 enum LabelGrowthDirection {
   LABEL_GROWING,
