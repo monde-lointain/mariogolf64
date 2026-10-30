@@ -3603,6 +3603,7 @@ D_8022FB58_ovl_01 = 0x8022FB58; // type:s32 size:0x48 segment:ovl_01
 f_HolesBadgeCorners = 0x8022FC20; // size:0x10 segment:ovl_01
 f_WaterScroll = 0x8022FD98; // size:0x4 segment:ovl_01
 f_SelectBufferAssets = 0x8022FF2C; // type:s32 size:0x24 segment:ovl_01
+f_ChoiceCharacters = 0x8022FF50; // size:72 segment:ovl_01
 f_UnreadFaceColumn = 0x8022FFC6; // size:2 segment:ovl_01
 f_UnreadFaceRow = 0x8022FFC8; // size:2 segment:ovl_01
 f_PlayerTagOffsets = 0x8022FFCC; // type:s8 size:0x8 segment:ovl_01

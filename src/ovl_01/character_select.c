@@ -170,7 +170,7 @@ static s32 f_SavedGameBoySlots[GAME_BOY_CHARACTER_COUNT] = {
 static s32 f_SelectBufferAssets[CHARACTER_SELECT_IMAGE_KIND_COUNT] = {
     0x08E8, 0x05E3, 0x08EF, 0x050F, 0x0521, 0x06EF, 0x05FF, 0x0600, 0x08EE};
 /* The CharacterId of each CharacterChoice */
-static CharacterId D_8022FF50_ovl_01[CHARACTER_COUNT] = {CHARACTER_PLUM,
+static CharacterId f_ChoiceCharacters[CHARACTER_COUNT] = {CHARACTER_PLUM,
     CHARACTER_CHARLIE, CHARACTER_PEACH, CHARACTER_BABY_MARIO, CHARACTER_LUIGI,
     CHARACTER_YOSHI, CHARACTER_SONNY, CHARACTER_WARIO, CHARACTER_HARRY,
     CHARACTER_MARIO, CHARACTER_MAPLE, CHARACTER_DONKEY_KONG, CHARACTER_BOWSER,
@@ -745,7 +745,7 @@ s32 UpdateCharacterSelect(
       character += MARKED_CHARACTER_OFFSET;
     }
 
-    character = D_8022FF50_ovl_01[character];
+    character = f_ChoiceCharacters[character];
     if (character >= FIRST_IMPORTED_CHARACTER) {
       /* Only one player may choose each imported character */
       if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen ==
@@ -1090,7 +1090,7 @@ s32 UpdateCharacterSelect(
       character += MARKED_CHARACTER_OFFSET;
     }
 
-    character = D_8022FF50_ovl_01[character];
+    character = f_ChoiceCharacters[character];
     if (character >= FIRST_IMPORTED_CHARACTER) {
       if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen ==
           TRUE) {
@@ -1366,7 +1366,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
     choiceIndex = slot;
   }
 
-  character = &D_8022FF50_ovl_01[choiceIndex];
+  character = &f_ChoiceCharacters[choiceIndex];
   DrawCurveMeter(&gfx, *character);
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
@@ -1573,7 +1573,7 @@ s32 GetUnusedPalette(s32 choiceIndex) {
   s32 freePalette = 0;
   s32 playerIndex = 0;
   s32 sameCount = 0;
-  CharacterId character = D_8022FF50_ovl_01[choiceIndex];
+  CharacterId character = f_ChoiceCharacters[choiceIndex];
   s32 unused[4];
   s32 samePlayers[MAX_PLAYER_COUNT];
   s32 sameIndex;
