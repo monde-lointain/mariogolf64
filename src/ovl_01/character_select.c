@@ -176,8 +176,9 @@ static CharacterId D_8022FF50_ovl_01[CHARACTER_COUNT] = {CHARACTER_PLUM,
 /* Read by no routine */
 static u8 D_8022FF98_ovl_01[8] = {
     0x71, 0x76, 0x81, 0x6C, 0x9D, 0x00, 0x00, 0x00};
-static s32 D_8022FFA0_ovl_01 = 0;
-static s32 D_8022FFA4_ovl_01 = 0;
+/* GetStickDiagonal's count of unchanged readings on each axis */
+static s32 f_StickXHoldTimer = 0;
+static s32 f_StickYHoldTimer = 0;
 /* Read by no routine */
 static char D_8022FFA8_ovl_01[3][10] = {"Straight", "Draw", "Fade"};
 static s16 D_8022FFC6_ovl_01 = 0;
@@ -502,9 +503,9 @@ s32 GetStickDiagonal(void) {
   stickX = f_PreviousStickX ^ anyStick;
   stickX &= anyStick;
   if (f_PreviousStickX == stickX) {
-    D_8022FFA0_ovl_01++;
-    if (D_8022FFA0_ovl_01 >= STICK_HOLD_FRAME_COUNT) {
-      D_8022FFA0_ovl_01 = 0;
+    f_StickXHoldTimer++;
+    if (f_StickXHoldTimer >= STICK_HOLD_FRAME_COUNT) {
+      f_StickXHoldTimer = 0;
       f_PreviousStickX = 0;
     }
   } else {
@@ -517,9 +518,9 @@ s32 GetStickDiagonal(void) {
   stickY = f_PreviousStickY ^ anyStick;
   stickY &= anyStick;
   if (f_PreviousStickY == stickY) {
-    D_8022FFA4_ovl_01++;
-    if (D_8022FFA4_ovl_01 >= STICK_HOLD_FRAME_COUNT) {
-      D_8022FFA4_ovl_01 = 0;
+    f_StickYHoldTimer++;
+    if (f_StickYHoldTimer >= STICK_HOLD_FRAME_COUNT) {
+      f_StickYHoldTimer = 0;
       f_PreviousStickY = 0;
     }
   } else {
