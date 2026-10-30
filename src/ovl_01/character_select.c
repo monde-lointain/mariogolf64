@@ -148,9 +148,11 @@ static u8 D_8022FF01_ovl_01 = FALSE;
 /* Read by no routine */
 static u8 D_8022FF02_ovl_01 = 0;
 static u8 D_8022FF03_ovl_01 = 0;
-static s8 D_8022FF04_ovl_01 = 0;
+/* The animation frame of the face under the choosing player's cursor */
+static s8 f_FaceFrame = 0;
 static u8 D_8022FF05_ovl_01 = 0;
-static u8 D_8022FF06_ovl_01 = 0;
+/* The draws that f_FaceFrame has been shown for */
+static u8 f_FaceFrameTimer = 0;
 static s8 D_8022FF07_ovl_01 = FALSE;
 static s8 D_8022FF08_ovl_01 = FALSE;
 /* A CButtonPalette value */
@@ -323,8 +325,8 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
   memory->characterRows[playerNumber] = row;
   if (column != oldColumn || row != oldRow) {
     character = g_CharacterGrid[oldRow][oldColumn];
-    D_8022FF04_ovl_01 = 0;
-    D_8022FF06_ovl_01 = 0;
+    f_FaceFrame = 0;
+    f_FaceFrameTimer = 0;
     D_8022FF05_ovl_01 ^= 1;
     if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
       character += MARKED_CHARACTER_OFFSET;
@@ -345,7 +347,7 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
       faceAssets = g_FaceAnimationAssets;
     }
 
-    OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
+    OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], (s16)GetAssetFileSize(&file), &file);
@@ -448,8 +450,8 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   memory->characterRows[playerNumber] = row;
   if (column != oldColumn || row != oldRow) {
     character = g_CharacterGrid[oldRow][oldColumn];
-    D_8022FF04_ovl_01 = 0;
-    D_8022FF06_ovl_01 = 0;
+    f_FaceFrame = 0;
+    f_FaceFrameTimer = 0;
     D_8022FF05_ovl_01 ^= 1;
     if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
       character += MARKED_CHARACTER_OFFSET;
@@ -470,7 +472,7 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
       faceAssets = g_FaceAnimationAssets;
     }
 
-    OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
+    OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
@@ -872,8 +874,8 @@ s32 UpdateCharacterSelect(
     column = memory->characterColumns[playerIndex];
     slot = memory->characterRows[playerIndex];
     playerIndex++;
-    D_8022FF04_ovl_01 = 0;
-    D_8022FF06_ovl_01 = 0;
+    f_FaceFrame = 0;
+    f_FaceFrameTimer = 0;
     D_8022FF05_ovl_01 ^= 1;
     if (playerIndex != playerCount) {
       gridMark = g_CharacterGrid[(s16)slot][(s16)column];
@@ -897,8 +899,7 @@ s32 UpdateCharacterSelect(
         faceAssets = g_FaceAnimationAssets;
       }
 
-      OpenEncodedAsset(
-          faceAssets[(s16)faceCharacter][D_8022FF04_ovl_01], &asset);
+      OpenEncodedAsset(faceAssets[(s16)faceCharacter][f_FaceFrame], &asset);
       ReadEncodedAsset(faceImage, &asset);
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
       ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
@@ -926,9 +927,9 @@ s32 UpdateCharacterSelect(
       D_8022FF00_ovl_01 = FALSE;
       FreeAllCharacterSlots();
       D_8022FF03_ovl_01 = 0;
-      D_8022FF04_ovl_01 = 0;
+      f_FaceFrame = 0;
       D_8022FF05_ovl_01 = 0;
-      D_8022FF06_ovl_01 = 0;
+      f_FaceFrameTimer = 0;
     }
 
     D_8022FF09_ovl_01 = NO_PALETTE;
@@ -997,9 +998,9 @@ s32 UpdateCharacterSelect(
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
           TEXT_FLAG_TYPED, 255, 255, 255, 255);
       D_8022FF00_ovl_01 = FALSE;
-      D_8022FF04_ovl_01 = 0;
+      f_FaceFrame = 0;
       D_8022FF05_ovl_01 = 0;
-      D_8022FF06_ovl_01 = 0;
+      f_FaceFrameTimer = 0;
       /* Bring back the Game Boy characters that HideGameBoyCharacters hid */
       if ((u8)canChooseMarked == TRUE) {
         g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0] = D_8022FF1C_ovl_01[0];
@@ -1010,8 +1011,8 @@ s32 UpdateCharacterSelect(
     } else {
       g_Players[playerIndex].unk22 = 0;
       playerIndex--;
-      D_8022FF04_ovl_01 = 0;
-      D_8022FF06_ovl_01 = 0;
+      f_FaceFrame = 0;
+      f_FaceFrameTimer = 0;
       D_8022FF05_ovl_01 ^= 1;
       g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
       g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
@@ -1049,7 +1050,7 @@ s32 UpdateCharacterSelect(
       faceAssets = g_FaceAnimationAssets;
     }
 
-    OpenEncodedAsset(faceAssets[(s16)faceCharacter][D_8022FF04_ovl_01], &asset);
+    OpenEncodedAsset(faceAssets[(s16)faceCharacter][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
@@ -1499,12 +1500,12 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
     }
   }
 
-  D_8022FF06_ovl_01++;
-  if ((s8)D_8022FF06_ovl_01 == FACE_FRAME_DURATION) {
-    D_8022FF06_ovl_01 = 0;
-    D_8022FF04_ovl_01++;
-    if (D_8022FF04_ovl_01 >= FACE_ANIMATION_FRAME_COUNT) {
-      D_8022FF04_ovl_01 = 0;
+  f_FaceFrameTimer++;
+  if ((s8)f_FaceFrameTimer == FACE_FRAME_DURATION) {
+    f_FaceFrameTimer = 0;
+    f_FaceFrame++;
+    if (f_FaceFrame >= FACE_ANIMATION_FRAME_COUNT) {
+      f_FaceFrame = 0;
     }
 
     D_8022FF05_ovl_01 ^= 1;
@@ -1547,7 +1548,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
       faceAssets = g_AlternateFaceAnimationAssets;
     }
 
-    OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
+    OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
     D_8022FFC6_ovl_01 = memory->characterColumns[g_ChoosingPlayerIndex];
     D_8022FFC8_ovl_01 = memory->characterRows[g_ChoosingPlayerIndex];
