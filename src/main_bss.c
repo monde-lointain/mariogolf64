@@ -215,7 +215,7 @@ u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] BSS ALIGNED(
 s32 g_HoleTimeFrames[COURSE_HOLE_COUNT] BSS ALIGNED(8) = {0};
 s32 g_ChosenPlayerCount BSS = {0};
 Vec3 f_FramedEye BSS = {0};
-void* D_80105B78[18] BSS ALIGNED(8) = {0};
+void* g_CharacterFacePalettes[18] BSS ALIGNED(8) = {0};
 OSPiHandle __CartRomHandle BSS ALIGNED(0x8) = {0};
 CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1] BSS ALIGNED(8) = {0};
 TournamentRules D_80105DC0 BSS = {0};

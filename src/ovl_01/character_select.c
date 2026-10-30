@@ -117,7 +117,7 @@ enum CButtonPalette {
   RIGHT_C_PALETTE
 };
 
-extern void* D_80105B78[CHARACTER_COUNT];
+extern void* g_CharacterFacePalettes[CHARACTER_COUNT];
 extern void* D_801B69EC;
 
 /* Where the character cursor's translation is measured from, so that it is
@@ -361,7 +361,8 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
-    ReadAssetFile(D_80105B78[(s16)slot], (s16)GetAssetFileSize(&file), &file);
+    ReadAssetFile(g_CharacterFacePalettes[(s16)slot],
+        (s16)GetAssetFileSize(&file), &file);
   }
 
   return -(column == oldColumn && row == oldRow);
@@ -486,7 +487,8 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
-    ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
+    ReadAssetFile(
+        g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
   }
 
   return -(column == oldColumn && row == oldRow);
@@ -914,7 +916,8 @@ s32 UpdateCharacterSelect(
       OpenEncodedAsset(faceAssets[(s16)faceCharacter][f_FaceFrame], &asset);
       ReadEncodedAsset(faceImage, &asset);
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
-      ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
+      ReadAssetFile(
+          g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
     }
 
     if (playerIndex == playerCount) {
@@ -1065,7 +1068,8 @@ s32 UpdateCharacterSelect(
     OpenEncodedAsset(faceAssets[(s16)faceCharacter][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
-    ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
+    ReadAssetFile(
+        g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
     g_ChoosingPlayerIndex = playerIndex;
     f_IsComButtonHeld = FALSE;
     f_IsLeftyButtonHeld = FALSE;
@@ -1260,8 +1264,9 @@ void PlaceRivalCursor(void) {
 /*
  * Reads the drive shapes' names and the "L:" and "Drive:" labels into the
  * menu's image buffer, then each slot's first face frame and its palette.
- * Doesn't match: the original indexes D_80105B78 afresh in each pass, where
- * this steps a pointer through it and needs one more saved register.
+ * Doesn't match: the original indexes g_CharacterFacePalettes afresh in each
+ * pass, where this steps a pointer through it and needs one more saved
+ * register.
  */
 #ifdef NON_MATCHING
 void LoadCharacterFaces(void) {
@@ -1281,7 +1286,7 @@ void LoadCharacterFaces(void) {
   ReadEncodedAsset(images + CHARACTER_SELECT_FIRST_IMAGE_SIZE, &asset);
   for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
     faceImage = g_CharacterFaceImages[slotIndex];
-    characterFile = D_80105B78[slotIndex];
+    characterFile = g_CharacterFacePalettes[slotIndex];
     if (slotIndex >= FIRST_IMPORTED_CHARACTER) {
       if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER]
               .character >= 0) {
@@ -1474,7 +1479,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
         }
 
         faceImage = g_CharacterFaceImages[(s16)slot];
-        facePalette = D_80105B78[(s16)slot];
+        facePalette = g_CharacterFacePalettes[(s16)slot];
         gDPLoadTLUT_pal256(gfx++, TextureAddress(facePalette));
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         gDPLoadTextureBlock(gfx++, TextureAddress(faceImage), G_IM_FMT_CI,
@@ -1492,7 +1497,8 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
       } else if (isSinglePlayer == TRUE &&
           g_CharacterGrid[row][column] < HIDDEN_MARK_LIMIT) {
         faceImage = g_CharacterFaceImages[(s16)slot + MARKED_CHARACTER_OFFSET];
-        facePalette = D_80105B78[(s16)slot + MARKED_CHARACTER_OFFSET];
+        facePalette =
+            g_CharacterFacePalettes[(s16)slot + MARKED_CHARACTER_OFFSET];
         gDPLoadTLUT_pal256(gfx++, TextureAddress(facePalette));
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 10, 10, 10, 255);
@@ -1538,7 +1544,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
     }
 
     faceImage = g_CharacterFaceImages[(s16)slot];
-    facePalette = D_80105B78[(s16)slot];
+    facePalette = g_CharacterFacePalettes[(s16)slot];
     if (f_PreviewedPalette == 0) {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
     } else if (f_PreviewedPalette == 1) {

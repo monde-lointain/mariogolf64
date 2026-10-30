@@ -84,7 +84,7 @@ extern void* g_MenuTitleImages[2];
 extern void* D_800FF4C4[2];
 extern void* D_80106100;
 extern void* D_800FC898;
-extern void* D_80105B78[18];
+extern void* g_CharacterFacePalettes[18];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
 
@@ -573,11 +573,11 @@ void LoadMenuResources(void) {
     ReadEncodedAsset(g_CharacterFaceImages[index], &asset);
   }
 
-  for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
+  for (index = 0; index != ARRAY_COUNT(g_CharacterFacePalettes); index++) {
     OpenAssetFile(g_CharacterFacePaletteFiles[index][0], &file);
     size = GetAssetFileSize(&file);
-    D_80105B78[index] = AllocMemory(size);
-    ReadAssetFile(D_80105B78[index], size, &file);
+    g_CharacterFacePalettes[index] = AllocMemory(size);
+    ReadAssetFile(g_CharacterFacePalettes[index], size, &file);
   }
 
   for (index = 0; index != ARRAY_COUNT(g_TrophyPalettes); index++) {
@@ -652,8 +652,8 @@ void FreeMenuResources(void) {
     FreeMemory(&g_CharacterFaceImages[index]);
   }
 
-  for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
-    FreeMemory(&D_80105B78[index]);
+  for (index = 0; index != ARRAY_COUNT(g_CharacterFacePalettes); index++) {
+    FreeMemory(&g_CharacterFacePalettes[index]);
   }
 
   FreeMemory(&g_MenuSpareImages[0]);
@@ -1412,7 +1412,7 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
         ReadEncodedAsset(
             g_CharacterFaceImages[FIRST_IMPORTED_CHARACTER + index], &asset);
         OpenAssetFile(g_CharacterFacePaletteFiles[playerCount][0], &file);
-        ReadAssetFile(D_80105B78[FIRST_IMPORTED_CHARACTER + index],
+        ReadAssetFile(g_CharacterFacePalettes[FIRST_IMPORTED_CHARACTER + index],
             GetAssetFileSize(&file), &file);
       }
     }
