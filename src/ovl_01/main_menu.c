@@ -1889,7 +1889,7 @@ void UpdateMenuTitleScreen(void) {
   g_GameState.isMiniGolf = FALSE;
   g_GameState.replayKind = REPLAY_KIND_NONE;
   g_GameState.currentPlayerIndex = 0;
-  if (GetWipeKind() != WIPE_NONE && g_IsMenuWipeOpening == 0) {
+  if (GetWipeKind() != WIPE_NONE && !g_IsMenuWipeOpening) {
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_Scene = SCENE_SWAPPING_MODULES;
       g_SceneModuleToUnload = MODULE_MENU;
@@ -1902,7 +1902,7 @@ void UpdateMenuTitleScreen(void) {
     return;
   }
 
-  if (GetWipeKind() != WIPE_NONE && g_IsMenuWipeOpening == 1) {
+  if (GetWipeKind() != WIPE_NONE && g_IsMenuWipeOpening == TRUE) {
     return;
   }
 
@@ -1939,7 +1939,7 @@ void UpdateMenuTitleScreen(void) {
       }
     } else if (titleChoice == TITLE_CHOICE_SAVED_GAMES) {
       if (g_HasBroughtOverCharacter) {
-        g_IsMenuWipeOpening = 0;
+        g_IsMenuWipeOpening = FALSE;
         LoadWipeShape(TRANSMIT_WIPE_SHAPE);
         StartWipe(WIPE_CLOSING);
         D_801052E8 = 0;
@@ -1969,7 +1969,7 @@ void UpdateMenuTitleScreen(void) {
     }
 
     D_801052E8 = 0;
-    g_IsMenuWipeOpening = 0;
+    g_IsMenuWipeOpening = FALSE;
     D_801B71CC = g_MenuScreen;
     D_800FBE2C = g_MenuMemory.playerCountChoice;
     return;
@@ -2591,7 +2591,7 @@ void UpdateCourseSelect(void) {
     return;
   }
 
-  if (GetWipeKind() != WIPE_NONE && g_IsMenuWipeOpening == 0) {
+  if (GetWipeKind() != WIPE_NONE && !g_IsMenuWipeOpening) {
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
@@ -2633,7 +2633,7 @@ void UpdateCourseSelect(void) {
             0xFF, 0xFF, 0xFF);
       }
 
-      g_IsMenuWipeOpening = 0;
+      g_IsMenuWipeOpening = FALSE;
       FreeAllCharacterSlots();
       LoadWipeShape(g_MenuMemory.courseChoice);
       StartWipe(WIPE_CLOSING);
@@ -2903,7 +2903,7 @@ void UpdateMiniGolfCourseSelect(void) {
     return;
   }
 
-  if (GetWipeKind() != WIPE_NONE && g_IsMenuWipeOpening == 0) {
+  if (GetWipeKind() != WIPE_NONE && !g_IsMenuWipeOpening) {
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
@@ -2923,7 +2923,7 @@ void UpdateMiniGolfCourseSelect(void) {
     }
 
     if (g_MenuMemory.miniGolfRecordChoice < g_MenuCourseCount) {
-      g_IsMenuWipeOpening = 0;
+      g_IsMenuWipeOpening = FALSE;
       FreeAllCharacterSlots();
       LoadWipeShape(g_MenuMemory.miniGolfCourseChoice +
           (g_MenuMemory.miniGolfRecordChoice * MINI_GOLF_COURSES_PER_RECORD) +
@@ -3650,7 +3650,7 @@ void UpdateCaddySelect(void) {
 }
 
 void LeaveMenuWithWipe(void) {
-  if (GetWipeKind() != WIPE_NONE && g_IsMenuWipeOpening == 0) {
+  if (GetWipeKind() != WIPE_NONE && !g_IsMenuWipeOpening) {
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
@@ -3658,12 +3658,12 @@ void LeaveMenuWithWipe(void) {
     LoadWipeShape(0);
     StartWipe(WIPE_CLOSING);
     D_801052E8 = 0;
-    g_IsMenuWipeOpening = 0;
+    g_IsMenuWipeOpening = FALSE;
   }
 }
 
 void LeaveMenuWithCourseWipe(void) {
-  if (GetWipeKind() != WIPE_NONE && g_IsMenuWipeOpening == 0) {
+  if (GetWipeKind() != WIPE_NONE && !g_IsMenuWipeOpening) {
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
@@ -3671,7 +3671,7 @@ void LeaveMenuWithCourseWipe(void) {
     LoadWipeShape(g_MenuMemory.courseIndex);
     StartWipe(WIPE_CLOSING);
     D_801052E8 = 0;
-    g_IsMenuWipeOpening = 0;
+    g_IsMenuWipeOpening = FALSE;
   }
 }
 

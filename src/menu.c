@@ -1978,7 +1978,7 @@ void func_8005D9A0(void) {
 void func_8005DAD4(void) {
   D_800FE334 = 0;
   D_801052E8 = 1;
-  g_IsMenuWipeOpening = 0;
+  g_IsMenuWipeOpening = FALSE;
   D_800C2BD4 = 0;
 }
 
@@ -2027,7 +2027,7 @@ void func_8005DAFC(void) {
   }
 
   D_801052E8 = 1;
-  g_IsMenuWipeOpening = 1;
+  g_IsMenuWipeOpening = TRUE;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
@@ -2036,7 +2036,7 @@ void func_8005DAFC(void) {
 void func_8005DC50(void) {
   func_8005D9A0();
   D_801052E8 = 1;
-  g_IsMenuWipeOpening = 1;
+  g_IsMenuWipeOpening = TRUE;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
   g_ImportedCharacters[0].isChosen = 0;
@@ -2052,7 +2052,7 @@ void func_8005DC50(void) {
 
 void func_8005DCDC(void) {
   D_801052E8 = 1;
-  g_IsMenuWipeOpening = 1;
+  g_IsMenuWipeOpening = TRUE;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
@@ -2060,7 +2060,7 @@ void func_8005DCDC(void) {
 
 void func_8005DD10(void) {
   D_801052E8 = 1;
-  g_IsMenuWipeOpening = 1;
+  g_IsMenuWipeOpening = TRUE;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_MODE_SELECT;
@@ -2068,7 +2068,7 @@ void func_8005DD10(void) {
 
 void func_8005DD44(void) {
   D_801052E8 = 1;
-  g_IsMenuWipeOpening = 1;
+  g_IsMenuWipeOpening = TRUE;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_UNK18;
@@ -2076,7 +2076,7 @@ void func_8005DD44(void) {
 
 void func_8005DD78(void) {
   D_801052E8 = 1;
-  g_IsMenuWipeOpening = 1;
+  g_IsMenuWipeOpening = TRUE;
   D_800FE334 = 0;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
@@ -2086,7 +2086,7 @@ void func_8005DDAC(void) {
   D_800FE334 = 0;
   D_801052E8 = 1;
   D_800C2BD4 = 0;
-  g_IsMenuWipeOpening = 1;
+  g_IsMenuWipeOpening = TRUE;
   g_GameState.replayKind = REPLAY_KIND_NONE;
   ClearGameFlag(GAME_FLAG_UNK1E);
   g_MenuScreen = MENU_SCREEN_BEST_SHOTS;
