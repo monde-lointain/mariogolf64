@@ -1753,7 +1753,8 @@ s32 GetClubTournamentCourseTitleMessage(void) {
   return value;
 }
 
-void func_8005D334(void) {
+/* Empties the slots of the characters imported from the Game Boy Color game */
+void ClearImportedCharacters(void) {
   s32 index;
   s32 byteIndex;
 

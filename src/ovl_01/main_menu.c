@@ -332,7 +332,7 @@ s32 IsMusicOffChosen(void);
 s32 IsMonoChosen(void);
 s32 IsSimpleCameraChosen(void);
 void func_8005C674(s32 arg0, s32 arg1);
-void func_8005D334(void);
+void ClearImportedCharacters(void);
 void func_801F6B20_ovl_01(void);
 void SetUpChosenGame(void);
 void UpdateMenuTitleScreen(void);
@@ -1206,7 +1206,7 @@ void UpdateMenus(void) {
         g_ImportedCharacterColumns[1] = NO_IMPORTED_COLUMN;
         g_ImportedCharacterColumns[2] = NO_IMPORTED_COLUMN;
         g_ImportedCharacterColumns[3] = NO_IMPORTED_COLUMN;
-        func_8005D334();
+        ClearImportedCharacters();
         break;
 
       case MENU_SCREEN_BLANK:
