@@ -260,7 +260,6 @@ u32 FindLargestFreeMemorySize(void) {
   return largestFreeSize;
 }
 
-#ifdef NON_MATCHING
 void* AllocMemory(u32 size) {
   u32 callerAddress;
   u32 largestFreeSize;
@@ -269,7 +268,6 @@ void* AllocMemory(u32 size) {
   MemoryBlock* bestBlock;
   MemoryBlock* block;
   MemoryBlock* rest;
-  MemoryBlock* next;
 
   GET_RETURN_ADDRESS(callerAddress);
   largestFreeSize = 0;
@@ -307,13 +305,12 @@ void* AllocMemory(u32 size) {
   }
 
   if (bestBlock->size - size > sizeof(MemoryBlock)) {
-    rest = BlockAt(bestBlock, size);
-    rest->tag = BLOCK_FREE;
-    rest->size = bestBlock->size - size;
-    bestBlock->next->prev = rest;
-    next = bestBlock->next;
     f_FreeMemorySize -= size;
-    rest->next = next;
+    rest = BlockAt(bestBlock, size);
+    rest->size = bestBlock->size - size;
+    rest->tag = BLOCK_FREE;
+    bestBlock->next->prev = rest;
+    rest->next = bestBlock->next;
     bestBlock->next = rest;
     rest->prev = bestBlock;
     bestBlock->size = size;
@@ -325,10 +322,6 @@ void* AllocMemory(u32 size) {
   osSetIntMask(mask);
   return BlockMemory(bestBlock);
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/heap", AllocMemory);
-#endif
 
 /* "A NULL pointer was passed to free(). Called from %x" */
 static const char f_FreeNullMessage[] =
