@@ -40,9 +40,20 @@ KMC_ALIGN   := -Wa,--force-n64align
 GAME_DEFINES := -D__IS_KMC__=1
 # The game's code was built with -ffast-math
 FAST_MATH   := -ffast-math
-# The matching forms of the code are ones KMC GCC warns about. Set
-# WARNINGS="-Wall -W" to see them.
-WARNINGS    ?= -w
+# KMC GCC checks the code with -Wall, less what the matching forms trip by
+# design or what it checks worse than modern GCC:
+#   -Wunused: statics that only the included assembly reads
+#   -Wuninitialized: locals that the original reads unset, or that KMC GCC
+#     can't tell are set
+#   -Wreturn-type: the original's missing return values (NO_RESULT,
+#     UNSET_RESULT)
+#   -Wformat: the original's format strings, and s32, a long, passed to %d
+#   -Wmissing-braces: the zero initializer {0}
+# The modern build compiles the same functions, with drafts and real return
+# types, and its GCC checks all of these but the formats, as it is
+# freestanding and so doesn't know sprintf.
+WARNINGS    ?= -Wall -Wno-unused -Wno-uninitialized -Wno-return-type -Wno-format \
+               -Wno-missing-braces
 ULTRALIB_COMPILER := gcc
 LIBS        :=
 else
@@ -337,6 +348,10 @@ endif
 # main_bss.c defines libmus's bss objects too, whose types only its sources
 # declare
 $(BUILD_DIR)/src/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src
+# It defines libultra's PIF RAM buffers too, whose type ultralib aligns to 16
+# bytes. KMC GCC aligns nothing past 8 and warns of it whatever the flags, as
+# it would for ultralib's own sources, which build with -w.
+$(BUILD_DIR)/src/main_bss.c.o: WARNINGS := -w
 
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)
