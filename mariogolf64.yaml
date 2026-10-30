@@ -13,6 +13,9 @@ options:
 
   ld_script_path: build/splat/mariogolf64.ld
   ld_dependencies: True
+  # Takes in the sections that modern GCC splits .text, .data, .rodata and
+  # .bss into, such as .rodata.str1.4; KMC GCC writes only the plain ones
+  ld_wildcard_sections: True
   reloc_addrs_path:
     - reloc_addrs.txt
   symbol_addrs_path:

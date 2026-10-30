@@ -2,19 +2,69 @@
 
 TARGET      := mariogolf64
 BASEROM     := baserom.us.z64
-BUILD_DIR   := build
-ROM         := $(BUILD_DIR)/$(TARGET).z64
-ELF         := $(BUILD_DIR)/$(TARGET).elf
-MAP         := $(BUILD_DIR)/$(TARGET).map
-LD_SCRIPT   := $(BUILD_DIR)/splat/$(TARGET).ld
 SPLAT_YAML  := $(TARGET).yaml
+SPLAT_DIR   := build/splat
+SPLAT_LD    := $(SPLAT_DIR)/$(TARGET).ld
+KMC_DIR     := tools/gcc_kmc
 
+# Set MODERN=1 to build with a modern GCC instead of KMC GCC 2.7.2. The
+# ROM it makes doesn't match; it's for checking that the code is portable
+# and, once every address is symbolic, for building a shiftable ROM.
+MODERN      ?= 0
 # Set NON_MATCHING=1 to build with decompiled-but-unmatched C instead of asm
 NON_MATCHING ?= 0
 # Set COMPARE=0 to skip the checksum comparison at the end of the build
 COMPARE      ?= 1
+# Set WARNINGS="-Wall -W" to see the compiler's warnings
+WARNINGS    ?= -w
 
+# The two toolchains, and what differs between their builds
+ifeq ($(MODERN),0)
+BUILD_DIR   := build
 CROSS       := mips-linux-gnu-
+BIN_FORMAT  := elf32-tradbigmips
+CC          := COMPILER_PATH=$(KMC_DIR) $(KMC_DIR)/gcc
+# KMC GCC reads VR4300MUL from the environment to work around the VR4300
+# multiplication bug, as ultralib's build does
+LIB_CC      := VR4300MUL=ON $(CC)
+TARGETFLAGS := -G0 -mips3 -mgp32 -mfp32 -mno-abicalls -fno-PIC
+# Lays out statics the way the KMC assembler did, giving 8-byte alignment
+# to anything of 8 bytes or more
+KMC_ALIGN   := -Wa,--force-n64align
+GAME_CFLAGS := -ffast-math $(KMC_ALIGN)
+# Lets the sources keep the original's quirks that only KMC GCC accepts
+GAME_DEFINES := -D__IS_KMC__=1
+ULTRALIB_COMPILER := gcc
+LD_SCRIPT   := $(SPLAT_LD)
+else
+BUILD_DIR   := build/modern
+COMPARE     := 0
+# The modern GCC's own binutils, whose linker takes its objects' flags
+CROSS       := /opt/crashsdk/bin/mips-n64-
+BIN_FORMAT  := elf32-bigmips
+CC          := $(CROSS)gcc
+LIB_CC      := $(CC)
+# GNU C89 keeps the meaning of the sources' old-style declarations, and
+# -fcommon the shared tentative definitions that the libraries rely on.
+# -fno-toplevel-reorder keeps the statics that only included asm uses.
+TARGETFLAGS := -G0 -march=vr4300 -mabi=32 -mfix4300 -mno-abicalls -fno-PIC -std=gnu89 -fcommon \
+               -ffreestanding -fno-strict-aliasing -mdivide-breaks -fno-toplevel-reorder \
+               -fno-math-errno
+KMC_ALIGN   :=
+GAME_CFLAGS :=
+GAME_DEFINES :=
+# ultralib's own settings for modern GCC
+ULTRALIB_COMPILER := modern_gcc
+ULTRALIB_MODERN := -DMODERN_CC
+# splat's linker script names the objects under build/, so this build
+# links a copy that names them under its own directory
+LD_SCRIPT   := $(BUILD_DIR)/$(TARGET).ld
+endif
+
+ROM         := $(BUILD_DIR)/$(TARGET).z64
+ELF         := $(BUILD_DIR)/$(TARGET).elf
+MAP         := $(BUILD_DIR)/$(TARGET).map
+
 AS          := $(CROSS)as
 LD          := $(CROSS)ld
 OBJCOPY     := $(CROSS)objcopy
@@ -22,24 +72,22 @@ OBJDUMP     := $(CROSS)objdump
 CPP         := $(CROSS)cpp
 PYTHON      := .venv/bin/python3
 
-KMC_DIR     := tools/gcc_kmc
-CC          := COMPILER_PATH=$(KMC_DIR) $(KMC_DIR)/gcc
-
 INCLUDES    := -Iinclude -Iinclude/libc -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/libmus/include -Isrc -I$(BUILD_DIR)
-DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -DBUILD_VERSION=VERSION_J -D__IS_KMC__=1
+DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -DBUILD_VERSION=VERSION_J \
+               $(GAME_DEFINES)
 ifneq ($(NON_MATCHING),0)
 DEFINES     += -DNON_MATCHING
 endif
 
 OPTFLAGS    := -O2
-CFLAGS       = -G0 -mips3 -mgp32 -mfp32 -mno-abicalls -fno-PIC -ffast-math -nostdinc -funsigned-char -w -Wa,--force-n64align $(OPTFLAGS)
+CFLAGS       = $(TARGETFLAGS) $(GAME_CFLAGS) -nostdinc -funsigned-char $(WARNINGS) $(OPTFLAGS)
 ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
 # ld lays out each object's common symbols in the order of its symbol hash
 # table's buckets. The table grows with the symbol count unless it starts big
 # enough, so fix its size to keep the commons where the names put them.
 LD_HASH_SIZE := 8191
-LDFLAGS     := -T $(LD_SCRIPT) -T undefined_syms.txt -T $(BUILD_DIR)/splat/undefined_syms_auto.txt \
-               -T $(BUILD_DIR)/splat/undefined_funcs_auto.txt -Map $(MAP) --no-check-sections \
+LDFLAGS      = -T $(LD_SCRIPT) -T undefined_syms.txt -T $(SPLAT_DIR)/undefined_syms_auto.txt \
+               -T $(SPLAT_DIR)/undefined_funcs_auto.txt -Map $(MAP) --no-check-sections \
                --hash-size=$(LD_HASH_SIZE) -G 0
 
 # Host-side syntax checking of C sources with clang, pretending to be 32-bit MIPS
@@ -48,26 +96,26 @@ CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m
                   -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-braces
 RUN_CC_CHECK   ?= 0
 
-# Every object the linker script asks for
-O_FILES := $(shell test -f $(LD_SCRIPT) && grep -oE '$(BUILD_DIR)/[A-Za-z0-9_./-]+\.o' $(LD_SCRIPT) | sort -u)
+# Every object the linker script asks for, under this build's directory
+O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(shell test -f $(SPLAT_LD) && \
+  grep -oE 'build/[A-Za-z0-9_./-]+\.o' $(SPLAT_LD) | sort -u))
 
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
 # game's copy was compiled with signed chars
 ULTRALIB_DIR      := lib/ultralib
-ULTRALIB_INCLUDES := -I$(ULTRALIB_DIR)/include -I$(ULTRALIB_DIR)/include/compiler/gcc -I$(ULTRALIB_DIR)/include/PR
-ULTRALIB_DEFINES  := -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI -DBUILD_VERSION=VERSION_J \
+ULTRALIB_INCLUDES := -I$(ULTRALIB_DIR)/include -I$(ULTRALIB_DIR)/include/compiler/$(ULTRALIB_COMPILER) -I$(ULTRALIB_DIR)/include/PR
+ULTRALIB_DEFINES  := $(ULTRALIB_MODERN) -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI -DBUILD_VERSION=VERSION_J \
                      -DBUILD_VERSION_STRING=\"2.0J\" -DNDEBUG -D_FINALROM
-ULTRALIB_CFLAGS   := -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C -O3
-ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -P \
+ULTRALIB_CFLAGS   := -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C -O3
+ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc $(TARGETFLAGS) -P \
                      -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64
 
 # libmus, the n_audio build of the Software Creations music library, as its
-# makefile built libn_gmus. The assembler option lays out statics the way the
-# KMC assembler did, giving 8-byte alignment to anything of 8 bytes or more.
+# makefile built libn_gmus.
 LIBMUS_DIR        := lib/libmus
 LIBMUS_INCLUDES   := -I$(LIBMUS_DIR)/src -I$(LIBMUS_DIR)/include $(ULTRALIB_INCLUDES)
 LIBMUS_DEFINES    := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DSUPPORT_NAUDIO
-LIBMUS_CFLAGS     := -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C -O3 -Wa,--force-n64align
+LIBMUS_CFLAGS     := -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C -O3 $(KMC_ALIGN)
 
 # n_audio, built from the SDK's n_audio_sc sources for the n_aspMain
 # microcode as other games of the time built it
@@ -86,7 +134,7 @@ LIBNUSYS_DIR       := lib/libnusys
 LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR) $(ULTRALIB_INCLUDES)
 LIBNUSYS_DEFINES   := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
 LIBNUSYS_OPTFLAGS  := -O2
-LIBNUSYS_CFLAGS     = -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C $(LIBNUSYS_OPTFLAGS) -Wa,--force-n64align
+LIBNUSYS_CFLAGS     = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(LIBNUSYS_OPTFLAGS) $(KMC_ALIGN)
 
 # Per-directory compiler flags
 # libkmc was built without -ffast-math, which turns divisions by constants into multiplications
@@ -154,6 +202,10 @@ clean:
 distclean:
 	rm -rf $(BUILD_DIR) asm assets
 
+$(BUILD_DIR)/$(TARGET).ld: $(SPLAT_LD)
+	@mkdir -p $(dir $@)
+	sed 's|build/|$(BUILD_DIR)/|g' $< > $@
+
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary --gap-fill=0xFF $< $@
 
@@ -166,7 +218,7 @@ $(BUILD_DIR)/%.s.o: %.s
 
 $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
-	$(OBJCOPY) -I binary -O elf32-tradbigmips -B mips $< $@
+	$(OBJCOPY) -I binary -O $(BIN_FORMAT) -B mips $< $@
 
 # Textures in C data come from PNGs that extract_textures.py writes to
 # assets/SOURCE/, where SOURCE is the path of the C file under src/ that
@@ -200,16 +252,14 @@ endif
 # declare
 $(BUILD_DIR)/src/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src
 
-# KMC GCC reads VR4300MUL from the environment to work around the VR4300
-# multiplication bug, as ultralib's build does
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)
-	VR4300MUL=ON $(CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+	$(LIB_CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
 # The game's own variants of libultra objects, built the same way
 $(BUILD_DIR)/src/libultra/%.c.o: src/libultra/%.c
 	@mkdir -p $(dir $@)
-	VR4300MUL=ON $(CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+	$(LIB_CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.s.o: $(ULTRALIB_DIR)/%.s
 	@mkdir -p $(dir $@)
@@ -217,16 +267,16 @@ $(BUILD_DIR)/$(ULTRALIB_DIR)/%.s.o: $(ULTRALIB_DIR)/%.s
 
 $(BUILD_DIR)/$(LIBMUS_DIR)/%.c.o: $(LIBMUS_DIR)/%.c
 	@mkdir -p $(dir $@)
-	VR4300MUL=ON $(CC) -c $(LIBMUS_CFLAGS) $(LIBMUS_INCLUDES) $(LIBMUS_DEFINES) -o $@ $<
+	$(LIB_CC) -c $(LIBMUS_CFLAGS) $(LIBMUS_INCLUDES) $(LIBMUS_DEFINES) -o $@ $<
 
 $(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.c.o: $(LIBNAUDIO_DIR)/%.c
 	@mkdir -p $(dir $@)
-	VR4300MUL=ON $(CC) -c $(LIBNAUDIO_CFLAGS) $(LIBNAUDIO_INCLUDES) $(LIBNAUDIO_DEFINES) -o $@ $<
+	$(LIB_CC) -c $(LIBNAUDIO_CFLAGS) $(LIBNAUDIO_INCLUDES) $(LIBNAUDIO_DEFINES) -o $@ $<
 
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
 	@mkdir -p $(dir $@)
 	tr -d '\r' < $< > $(@:.o=)
-	VR4300MUL=ON $(CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
+	$(LIB_CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
 
 # Game code that includes NuSystem's header needs its converted copy
 $(BUILD_DIR)/src/main.c.o: $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
