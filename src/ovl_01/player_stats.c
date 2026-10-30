@@ -1872,7 +1872,7 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
 /* Draws the blinking green up and down arrows about centerY */
 /*
  * Doesn't match: the original adds the texel offset to the blink frame's
- * offset before the arrow's, and adds the arrow size to the center first.
+ * offset before the arrow's.
  */
 #ifdef NON_MATCHING
 void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
@@ -1892,8 +1892,8 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
   for (arrowIndex = 0; arrowIndex != STATS_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
         TextureAddress(ImageTexels(f_StatsGreenArrows) +
-            (f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE +
-                arrowIndex * GREEN_ARROW_IMAGE_SIZE)),
+            (arrowIndex * GREEN_ARROW_IMAGE_SIZE +
+                f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE)),
         G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
         GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1910,8 +1910,8 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
     gSPScisTextureRectangle(gfx++, QuarterPixels(left),
         QuarterPixels(offsetY + centerY),
         QuarterPixels(left + GREEN_ARROW_SIZE),
-        QuarterPixels(offsetY + (centerY + GREEN_ARROW_SIZE)), G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        QuarterPixels(offsetY + GREEN_ARROW_SIZE + centerY), G_TX_RENDERTILE, 0,
+        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
