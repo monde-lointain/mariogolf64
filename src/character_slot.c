@@ -2627,7 +2627,7 @@ INCLUDE_ASM("asm/nonmatchings/character_slot", AnimateCharacterJoints);
  * .rodata, but INCLUDE_ASM left it in .text. Agree with GCC so the string below
  * lands in .rodata.
  */
-__asm__(".section .rodata");
+RESUME_RODATA_SECTION();
 #endif
 
 /* Returns no value, but is declared s32 because that matches */

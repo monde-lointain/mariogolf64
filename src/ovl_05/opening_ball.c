@@ -168,15 +168,8 @@ s32 func_80206680_ovl_05(u32 slotIndex, s32 character) {
   return TRUE;
 }
 
-/*
- * The opening's copies of the ball simulation's routines keep their names and
- * are static, so they don't clash with the originals. GCC 2.7 only warns when
- * a static definition follows the headers' prototypes. The INCLUDE_ASM
- * routines call them by these names, so they can't be renamed yet.
- */
-
 /* The opening's copy of GetSurfaceInfo, which reads its own surface table */
-static SurfaceInfo* GetSurfaceInfo(Surface surface) {
+static SurfaceInfo* GetOpeningSurfaceInfo(Surface surface) {
   if ((u32)surface >= SURFACE_COUNT) {
     surface = SURFACE_OUT_OF_BOUNDS;
   }
@@ -186,7 +179,7 @@ static SurfaceInfo* GetSurfaceInfo(Surface surface) {
 
 /* An unused copy of ResetBallSimulations, which resets g_BallSimulations as
  * that does */
-static void ResetBallSimulations(void) {
+static void ResetOpeningBallSimulations(void) {
   s32 index;
 
   for (index = 0; index < BALL_SIMULATION_COUNT; index++) {
@@ -578,7 +571,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
       if (g_GameState.isMiniGolf
               ? g_Players[simulation->playerIndex].strokeCount == 1
-              : GetSurfaceInfo(simulation->unkA2)->kind != SURFACE_KIND_GREEN) {
+              : GetOpeningSurfaceInfo(simulation->unkA2)->kind !=
+                  SURFACE_KIND_GREEN) {
         pinHit =
             FindPinHit(startX, startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
@@ -1078,8 +1072,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         }
       }
 
-      softness =
-          THOUSANDTHS_PER_ONE - GetSurfaceInfo(simulation->surface)->bounciness;
+      softness = THOUSANDTHS_PER_ONE -
+          GetOpeningSurfaceInfo(simulation->surface)->bounciness;
       keep = ((f32)THOUSANDTHS_PER_ONE -
                  (softness * (steepness * SOFTNESS_SPEED_LOSS_SCALE) *
                      steepness)) *
@@ -1182,7 +1176,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       }
 
       friction = (THOUSANDTHS_PER_ONE -
-                     GetSurfaceInfo(simulation->surface)->bounciness) *
+                     GetOpeningSurfaceInfo(simulation->surface)->bounciness) *
           ONE_PER_THOUSANDTH;
       if (simulation->surface == SURFACE_BUNKER) {
         BunkerBurial burial = BUNKER_BURIAL_NONE;
@@ -1435,7 +1429,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             break;
         }
 
-        info = GetSurfaceInfo(simulation->surface);
+        info = GetOpeningSurfaceInfo(simulation->surface);
         if (info->kind == SURFACE_KIND_OUT_OF_COURSE) {
           simulation->state = BALL_STATE_STOPPED;
           goto SETTLE;
@@ -1740,7 +1734,7 @@ SETTLE:
 
         simulation->unkA4 = GetSurface(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        kind = GetSurfaceInfo((s8)simulation->unkA4)->kind;
+        kind = GetOpeningSurfaceInfo((s8)simulation->unkA4)->kind;
         if (IsDropKind(kind) &&
             FindGroundTriangle(simulation->position[AXIS_X],
                 simulation->position[AXIS_Z], &ground) == 0 &&
@@ -1855,7 +1849,7 @@ s32 func_8020A488_ovl_05(
   }
 
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    SurfaceInfo* info = GetSurfaceInfo(simulation->unkA2);
+    SurfaceInfo* info = GetOpeningSurfaceInfo(simulation->unkA2);
 
     blend = PickLieBlend();
     GetSurfacePercentRange(info, club, percentRange);

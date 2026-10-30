@@ -1480,6 +1480,6 @@ Boolean IsEasedEyeHeightZero(void) {
 INCLUDE_ASM("asm/nonmatchings/reaction", IsEasedEyeHeightZero);
 #endif
 
-__asm__(".section .rodata");
+RESUME_RODATA_SECTION();
 static const char f_UnusedFloatFormat[] = "            %f";
 static const char f_UnusedEmptyText[] = "";

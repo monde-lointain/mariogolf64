@@ -20,5 +20,10 @@ double sin(double angle);
 double cos(double angle);
 /* Built into GCC, which compiles it to a sqrt.d instruction */
 double sqrt(double value);
+#ifndef __IS_KMC__
+/* The freestanding modern build has no built-ins but those named so, and no
+ * library defines sqrt */
+#define sqrt(value) __builtin_sqrt(value)
+#endif
 
 #endif

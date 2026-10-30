@@ -667,7 +667,7 @@ void WriteBallDistances(void) {
 }
 
 /* As above, so the data below lands in .rodata */
-__asm__(".section .rodata");
+RESUME_RODATA_SECTION();
 
 /* Unreferenced; left by debug output that the routines below no longer have */
 static const char f_UnusedFrameFormat[] = "TA %d : FRAME %d    ";
@@ -939,7 +939,7 @@ INCLUDE_ASM("asm/nonmatchings/character", ResetAnimationTriangleTextures);
  */
 #ifdef NON_MATCHING
 /* As above, so the data below lands in .rodata */
-__asm__(".section .rodata");
+RESUME_RODATA_SECTION();
 
 static const char f_NotDisposedFormat[] =
     "Polychara slot %d not disposed yet!!!!!!!\n";
@@ -1676,7 +1676,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
 }
 #else
 /* As above, so the data below lands in .rodata */
-__asm__(".section .rodata");
+RESUME_RODATA_SECTION();
 
 /* The double 1.0, which UpdateJointKeyframeSpans loads as two words, aligned as
  * a double is */

@@ -26,7 +26,13 @@ extern HolePoints g_HolePoints;
 
 /* Cleared while the loader thread loads a hole; set once it is done or stopped
  */
+#ifdef __IS_KMC__
+/* hole_loader.c defines the flag volatile, but the files that poll it saw it
+ * without the qualifier, which their loops' code depends on */
 extern Boolean g_HasLoaderFinished;
+#else
+extern volatile Boolean g_HasLoaderFinished;
+#endif
 
 /* Each hole's time in Speed Golf. A negative minute count shows as dashes. */
 extern s32

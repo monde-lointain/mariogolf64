@@ -3,25 +3,46 @@
 
 #if !defined(M2CTX) && !defined(PERMUTER)
 
+/*
+ * Modern GCC remembers which section it is emitting into, so included
+ * assembly must give that section back. KMC's assembler has no section
+ * stack, and its compiler emits only into .text around the asm.
+ */
+#ifdef __IS_KMC__
+#define ASM_SECTION_ENTER(SECTION) ".section " SECTION "\n"
+#define ASM_SECTION_LEAVE ".section .text\n"
+/*
+ * After included assembly, KMC GCC still thinks the assembler is in the
+ * section it last wrote. Where that was .rodata, this puts the assembler
+ * back there before the data that follows.
+ */
+#define RESUME_RODATA_SECTION() __asm__(".section .rodata")
+#else
+#define ASM_SECTION_ENTER(SECTION) ".pushsection " SECTION "\n"
+#define ASM_SECTION_LEAVE ".popsection\n"
+#define RESUME_RODATA_SECTION() __asm__("")
+#endif
+
 /* Keep one assembler directive per line */
 /* clang-format off */
 #ifndef INCLUDE_ASM
 #define INCLUDE_ASM(FOLDER, NAME) \
     __asm__( \
-        ".section .text\n" \
+        ASM_SECTION_ENTER(".text") \
         "    .set noat\n" \
         "    .set noreorder\n" \
         "    .include \"" FOLDER "/" #NAME ".s\"\n" \
         "    .set reorder\n" \
         "    .set at\n" \
+        ASM_SECTION_LEAVE \
     )
 #endif
 #ifndef INCLUDE_RODATA
 #define INCLUDE_RODATA(FOLDER, NAME) \
     __asm__( \
-        ".section .rodata\n" \
+        ASM_SECTION_ENTER(".rodata") \
         "    .include \"" FOLDER "/" #NAME ".s\"\n" \
-        ".section .text" \
+        ASM_SECTION_LEAVE \
     )
 #endif
 /* clang-format on */
@@ -40,6 +61,7 @@ __asm__(".include \"include/labels.inc\"\n");
 #ifndef INCLUDE_RODATA
 #define INCLUDE_RODATA(FOLDER, NAME)
 #endif
+#define RESUME_RODATA_SECTION() __asm__("")
 
 #endif /* !defined(M2CTX) && !defined(PERMUTER) */
 

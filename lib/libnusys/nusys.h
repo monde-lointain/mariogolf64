@@ -663,7 +663,13 @@ extern u8	nuDramStack[];
 extern u8	nuYieldBuf[];
 extern NUSched	nusched;		/* Scheduler structure */
 extern OSMesgQueue nuGfxMesgQ;	/* Graphics thread queue */
+/* Defined volatile in nusched.c. GCC 2.7 lets this declaration leave it
+ * out, which the original objects need; modern GCC requires it. */
+#if __GNUC__ >= 3
+extern volatile u32	nuScRetraceCounter;    /* Retrace counter */
+#else
 extern u32	nuScRetraceCounter;    /* Retrace counter */
+#endif
 extern u8	nuScPreNMIFlag;
 /*--------------------------------------*/
 /*  graphics variables 			*/
