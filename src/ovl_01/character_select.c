@@ -49,8 +49,8 @@ enum GridMove {
 #define STICK_DIAGONAL_THRESHOLD 20
 #define STICK_HOLD_FRAME_COUNT 4
 
-/* The bytes of the first of the two images that func_8020B438 reads into the
- * menu's buffer */
+/* The bytes of the first of the two images that LoadCharacterFaces reads
+ * into the menu's buffer */
 #define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
 
 /* func_8020C3B8 draws D_8023A568 in strips, then the right half of the second
@@ -1236,11 +1236,13 @@ void func_8020B3CC_ovl_01(void) {
 }
 
 /*
- * Doesn't match: the original indexes D_80105B78 afresh in each pass,
- * where this steps a pointer through it and needs one more saved register.
+ * Reads the drive shapes' names and the "L:" and "Drive:" labels into the
+ * menu's image buffer, then each slot's first face frame and its palette.
+ * Doesn't match: the original indexes D_80105B78 afresh in each pass, where
+ * this steps a pointer through it and needs one more saved register.
  */
 #ifdef NON_MATCHING
-void func_8020B438_ovl_01(void) {
+void LoadCharacterFaces(void) {
   EncodedAsset asset;
   AssetFile file;
   CharacterId character = 0;
@@ -1281,7 +1283,7 @@ void func_8020B438_ovl_01(void) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B438_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", LoadCharacterFaces);
 #endif
 
 /*

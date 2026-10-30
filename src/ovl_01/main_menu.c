@@ -346,7 +346,7 @@ void UpdateBlankScreen(void);
 void HideGameBoyCharacters(void);
 void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind);
 void func_8020B3CC_ovl_01(void);
-void func_8020B438_ovl_01(void);
+void LoadCharacterFaces(void);
 void LoadCourseStatsIcons(void** buffers);
 void LoadCourseTrophyImages(void** buffers, s32 requestedKind);
 void LoadCourseMenuBuffer(void* buffer, s16 bufferKind);
@@ -1282,7 +1282,7 @@ void UpdateMenus(void) {
             g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
         LoadCharacterSelectBuffer(
             g_MenuSpareImages[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
-        func_8020B438_ovl_01();
+        LoadCharacterFaces();
         break;
 
       case MENU_SCREEN_OPPONENT_SELECT:
@@ -1303,7 +1303,7 @@ void UpdateMenus(void) {
             g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
         LoadCharacterSelectBuffer(
             g_MenuSpareImages[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
-        func_8020B438_ovl_01();
+        LoadCharacterFaces();
         func_8020B3CC_ovl_01();
         break;
 
