@@ -28,7 +28,7 @@
 /* The channel of the sound for unlocking everything */
 #define UNLOCK_SOUND_CHANNEL 13
 
-void func_8005C674(s32, s32);
+void BuildCharacterGrid(s32, s32);
 
 void GrantWinsStarsAndBadges(void);
 void GrantRingShotProgressAndPoints(void);
@@ -76,7 +76,7 @@ void UnlockEverything(void) {
   TransferSaveData(save, TRUE);
 }
 
-/* Ends with func_8005C674, which rebuilds the character grid from the save */
+/* Ends with BuildCharacterGrid, which refills the grid from the save */
 void GrantWinsStarsAndBadges(void) {
   SaveData* save = GetSaveData();
 
@@ -105,7 +105,7 @@ void GrantWinsStarsAndBadges(void) {
     }
   }
 
-  func_8005C674(1, 1);
+  BuildCharacterGrid(1, 1);
 }
 
 void GrantRingShotProgressAndPoints(void) {

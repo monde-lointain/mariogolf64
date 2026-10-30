@@ -92,7 +92,7 @@ extern void* D_801B69EC;
 
 /* f_SlotCells lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
-/* The entries of f_RecordCharacters whose records func_8005C674 checks */
+/* The entries of f_RecordCharacters whose records BuildCharacterGrid checks */
 #define RECORD_CHARACTER_COUNT 13
 
 /* The retail game keeps no save data on the development host */
@@ -1309,8 +1309,14 @@ Boolean IsMetalMarioUnlocked(void) {
   return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
 }
 
-/* arg0 is reused below as a record count and a character id, to match */
-void func_8005C674(s32 arg0, s32 arg1) {
+/*
+ * Fills the character grid from the save: with every character under
+ * GAME_FLAG_ALL_CHARACTERS, or else the starting ones, the first five columns
+ * for more than one player, those whose matchup records show a win, the
+ * unlocked ones and the imported ones, whose faces load too unless arg1 is 1.
+ * arg0 is reused below as a record count and a character id, to match.
+ */
+void BuildCharacterGrid(s32 arg0, s32 arg1) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save;
@@ -1511,7 +1517,7 @@ s32 FindCharacterOnGrid(CharacterId character) {
     return CHARACTER_OFF_GRID;
   }
 
-  func_8005C674(1, 1);
+  BuildCharacterGrid(1, 1);
   slot = f_CharacterSlots[character];
   row = f_SlotCells[slot].row;
   column = f_SlotCells[slot].column;

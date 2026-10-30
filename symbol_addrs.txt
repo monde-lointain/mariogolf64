@@ -1280,6 +1280,7 @@ OpenEncodedAsset = 0x8005062C; // type:func
 ReadEncodedAsset = 0x800506D4; // type:func
 LoadMenuResources = 0x8005A580; // type:func
 FreeMenuResources = 0x8005ACF8; // type:func
+BuildCharacterGrid = 0x8005C674; // type:func
 InvalidateBrokenSavedGames = 0x8005CF78; // type:func
 InvalidateBrokenRingShotRecords = 0x8005D0D8; // type:func
 RememberPlayedHole = 0x8005D1E4; // type:func

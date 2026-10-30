@@ -14,7 +14,7 @@
 #include "screen.h"
 #include "sound.h"
 
-void func_8005C674(s32 arg0, s32 arg1);
+void BuildCharacterGrid(s32 arg0, s32 arg1);
 
 /* The table of screen 15: its columns and rows, and how many of each fit on the
  * screen */
@@ -732,7 +732,7 @@ void func_8021730C_ovl_01(void) {
   s32 row;
   s32 column;
 
-  func_8005C674(1, 0);
+  BuildCharacterGrid(1, 0);
   for (index = 0; index != CHARACTER_COUNT; index++) {
     D_8023AC78_ovl_01[index] = TABLE_CHARACTER_HIDDEN;
   }
