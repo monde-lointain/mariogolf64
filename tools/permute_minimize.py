@@ -6,11 +6,11 @@
 PERMUTER_DIR is the directory permute_setup.py made, holding base.c and
 target.o, and OUTPUT_DIR one of its output-* directories. The permuter
 prints its candidates from a parsed tree, so base.c is printed the same way
-first; otherwise every line differs. Each differing hunk is then put back
-as base.c had it, one at a time, and stays put back when the compiled
-function differs from the original in no more words than before. Prints
-the hunks that remain, and writes the reduced source to minimized.c in
-OUTPUT_DIR.
+first, into printed_base.c; otherwise every line differs. Each differing
+hunk is then put back as base.c had it, one at a time, and stays put back
+when the compiled function differs from the original in no more words
+than before. Prints the hunks that remain, and writes the reduced source
+to minimized.c in OUTPUT_DIR.
 
 decomp-permuter is expected at $PERMUTER_DIR (default ~/src/decomp-permuter).
 """
@@ -47,6 +47,23 @@ def print_like_permuter(source: str) -> str:
         text=True,
         check=True,
     ).stdout
+
+
+def read_printed_base(permuter_dir: Path) -> str:
+    """Return base.c as the permuter prints it.
+
+    The result is kept in printed_base.c, beside base.c, and reused while it
+    is newer, since printing takes longer than the trials.
+    """
+    base_path = permuter_dir / "base.c"
+    printed_path = permuter_dir / "printed_base.c"
+    is_current = (
+        printed_path.exists()
+        and printed_path.stat().st_mtime >= base_path.stat().st_mtime
+    )
+    if not is_current:
+        _ = printed_path.write_text(print_like_permuter(base_path.read_text()))
+    return printed_path.read_text()
 
 
 def splice(
@@ -95,7 +112,7 @@ def main() -> None:
     permuter_dir, output_dir = Path(sys.argv[1]), Path(sys.argv[2])
     function = permuter_dir.resolve().name
     target = fncompare.read_object_file(permuter_dir / "target.o")[function]
-    base = print_like_permuter((permuter_dir / "base.c").read_text())
+    base = read_printed_base(permuter_dir)
     base_lines = base.splitlines(keepends=True)
     output_lines = (output_dir / "source.c").read_text().splitlines(keepends=True)
     matcher = difflib.SequenceMatcher(None, base_lines, output_lines, autojunk=False)
