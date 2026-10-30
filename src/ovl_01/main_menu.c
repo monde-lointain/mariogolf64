@@ -6706,7 +6706,8 @@ void DrawClubhouse(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_80206A2C_ovl_01(Gfx** displayListHead) {
+/* A screen that no menu screen dispatches to, with only the board backdrop */
+void DrawUnusedBoardScreen(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
   DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
