@@ -125,8 +125,9 @@ void DrawTableLines(Gfx** displayListHead);
 void DrawTablePopup(Gfx** displayListHead);
 void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top);
 
-static s32 D_80230190_ovl_01 = TABLE_POPUP_LEFT_X;
-static s32 D_80230194_ovl_01 = TABLE_POPUP_TOP_Y;
+/* The popup's top-left corner on the screen, set with its corner */
+static s32 f_TablePopupLeft = TABLE_POPUP_LEFT_X;
+static s32 f_TablePopupTop = TABLE_POPUP_TOP_Y;
 /* A TABLE_POPUP_* corner */
 static s32 D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
 static s32 D_8023019C_ovl_01 = 0;
@@ -281,8 +282,8 @@ void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
     D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
   }
 
-  D_80230190_ovl_01 = x;
-  D_80230194_ovl_01 = y;
+  f_TablePopupLeft = x;
+  f_TablePopupTop = y;
 }
 
 void UpdateCharacterTable(void) {
@@ -609,23 +610,23 @@ void DrawTablePopup(Gfx** displayListHead) {
                        [memory->tableColumn] == TRUE) {
     switch (D_80230198_ovl_01) {
       case TABLE_POPUP_TOP_LEFT:
-        D_80230190_ovl_01 = TABLE_POPUP_RIGHT_X;
-        D_80230194_ovl_01 = TABLE_POPUP_BOTTOM_Y;
+        f_TablePopupLeft = TABLE_POPUP_RIGHT_X;
+        f_TablePopupTop = TABLE_POPUP_BOTTOM_Y;
         D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_RIGHT;
         break;
       case TABLE_POPUP_TOP_RIGHT:
-        D_80230190_ovl_01 = TABLE_POPUP_LEFT_X;
-        D_80230194_ovl_01 = TABLE_POPUP_BOTTOM_Y;
+        f_TablePopupLeft = TABLE_POPUP_LEFT_X;
+        f_TablePopupTop = TABLE_POPUP_BOTTOM_Y;
         D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_LEFT;
         break;
       case TABLE_POPUP_BOTTOM_LEFT:
-        D_80230190_ovl_01 = TABLE_POPUP_RIGHT_X;
-        D_80230194_ovl_01 = TABLE_POPUP_TOP_Y;
+        f_TablePopupLeft = TABLE_POPUP_RIGHT_X;
+        f_TablePopupTop = TABLE_POPUP_TOP_Y;
         D_80230198_ovl_01 = TABLE_POPUP_TOP_RIGHT;
         break;
       case TABLE_POPUP_BOTTOM_RIGHT:
-        D_80230190_ovl_01 = TABLE_POPUP_LEFT_X;
-        D_80230194_ovl_01 = TABLE_POPUP_TOP_Y;
+        f_TablePopupLeft = TABLE_POPUP_LEFT_X;
+        f_TablePopupTop = TABLE_POPUP_TOP_Y;
         D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
         break;
     }
@@ -643,10 +644,10 @@ void DrawTablePopup(Gfx** displayListHead) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, QuarterPixels(D_80230190_ovl_01),
-        QuarterPixels(D_80230194_ovl_01 + index * TABLE_POPUP_STRIP_HEIGHT),
-        QuarterPixels(D_80230190_ovl_01 + TABLE_POPUP_WIDTH),
-        QuarterPixels(D_80230194_ovl_01 + index * TABLE_POPUP_STRIP_HEIGHT +
+    gSPScisTextureRectangle(gfx++, QuarterPixels(f_TablePopupLeft),
+        QuarterPixels(f_TablePopupTop + index * TABLE_POPUP_STRIP_HEIGHT),
+        QuarterPixels(f_TablePopupLeft + TABLE_POPUP_WIDTH),
+        QuarterPixels(f_TablePopupTop + index * TABLE_POPUP_STRIP_HEIGHT +
             TABLE_POPUP_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / TABLE_POPUP_WIDTH,
         (MENU_BANNER_STRIP_HEIGHT << 10) / TABLE_POPUP_STRIP_HEIGHT);
@@ -668,8 +669,8 @@ void DrawTablePopup(Gfx** displayListHead) {
 
   DrawCharacterFace(&gfx, D_8012D430[rowCharacter],
       D_8023BFF0_ovl_01[rowCharacter],
-      D_80230190_ovl_01 + TABLE_POPUP_ROW_FACE_X,
-      D_80230194_ovl_01 + TABLE_POPUP_FACE_Y, rowCharacter, faceMode);
+      f_TablePopupLeft + TABLE_POPUP_ROW_FACE_X,
+      f_TablePopupTop + TABLE_POPUP_FACE_Y, rowCharacter, faceMode);
   faceMode = FACE_DARKENED;
   if (D_8023AC78_ovl_01[memory->tableFirstColumn + memory->tableColumn] !=
       TABLE_CHARACTER_HIDDEN) {
@@ -678,8 +679,8 @@ void DrawTablePopup(Gfx** displayListHead) {
 
   DrawCharacterFace(&gfx, D_8012D430[columnCharacter],
       D_8023BFF0_ovl_01[columnCharacter],
-      D_80230190_ovl_01 + TABLE_POPUP_COLUMN_FACE_X,
-      D_80230194_ovl_01 + TABLE_POPUP_FACE_Y, columnCharacter, faceMode);
+      f_TablePopupLeft + TABLE_POPUP_COLUMN_FACE_X,
+      f_TablePopupTop + TABLE_POPUP_FACE_Y, columnCharacter, faceMode);
   if (rowWins < 10) {
     index = 20;
   } else if (rowWins >= 10 && rowWins < 100) {
@@ -690,8 +691,8 @@ void DrawTablePopup(Gfx** displayListHead) {
     index = 4;
   }
 
-  DrawUnalignedMenuNumber(&gfx, D_80230190_ovl_01 + index,
-      D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, rowWins, MENU_NUMBER_RED_TINT);
+  DrawUnalignedMenuNumber(&gfx, f_TablePopupLeft + index,
+      f_TablePopupTop + TABLE_POPUP_WINS_Y, rowWins, MENU_NUMBER_RED_TINT);
   if (columnWins < 10) {
     index = 80;
   } else if (columnWins >= 10 && columnWins < 100) {
@@ -702,11 +703,10 @@ void DrawTablePopup(Gfx** displayListHead) {
     index = 58;
   }
 
-  DrawUnalignedMenuNumber(&gfx, D_80230190_ovl_01 + index,
-      D_80230194_ovl_01 + TABLE_POPUP_WINS_Y, columnWins,
-      MENU_NUMBER_GREEN_TINT);
-  func_802123E0_ovl_01(&gfx, D_80230190_ovl_01 + TABLE_POPUP_SIGN_X,
-      D_80230194_ovl_01 + TABLE_POPUP_SIGN_Y, MENU_SIGN_TIMES);
+  DrawUnalignedMenuNumber(&gfx, f_TablePopupLeft + index,
+      f_TablePopupTop + TABLE_POPUP_WINS_Y, columnWins, MENU_NUMBER_GREEN_TINT);
+  func_802123E0_ovl_01(&gfx, f_TablePopupLeft + TABLE_POPUP_SIGN_X,
+      f_TablePopupTop + TABLE_POPUP_SIGN_Y, MENU_SIGN_TIMES);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
