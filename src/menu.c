@@ -86,14 +86,10 @@ extern void* g_MenuLabelImages[2];
 extern void* g_MenuTitleImages[2];
 extern void* D_800FBDFC[2];
 extern void* D_800FF4C4[2];
-extern void* g_MenuArrowSizedImages[5];
-extern void* g_AnimatedIconImages[2];
-extern void* g_SecondAnimatedIconImages[2];
 extern void* D_80106100;
 extern void* D_800FC898;
 extern void* D_8012D430[18];
 extern void* D_80105B78[18];
-extern void* g_MenuSpareImages[2];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
 

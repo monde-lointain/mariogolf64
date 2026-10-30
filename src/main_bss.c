@@ -82,7 +82,7 @@ u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT] BSS ALIGNED(8) = {0};
 s16 D_800FBE2C BSS = {0};
 /* Two buffers, each twice the size of a Toad image, that menu screens read
  * their own images into */
-void* g_MenuSpareImages[2] BSS = {0};
+void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT] BSS = {0};
 void* D_800FBE38[COURSE_FILE_COUNT] BSS = {0};
 CurrentShot g_CurrentShot BSS ALIGNED(8) = {0};
 Billboard g_Billboards[BILLBOARD_COUNT] BSS ALIGNED(16) = {0};
@@ -128,7 +128,7 @@ OSPiHandle* diskrom_handle BSS = {0};
 Gfx* g_GroundTileDisplayLists[GROUND_TILE_COUNT] BSS ALIGNED(8) = {0};
 /* A second animated icon's two frame buffers, the size of a mode icon, which
  * some screens read other images into */
-void* g_SecondAnimatedIconImages[2] BSS = {0};
+void* g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT] BSS = {0};
 NUScTask f_AudioTask BSS ALIGNED(8) = {0};
 u32 __osViIntrCount BSS = {0};
 s32 g_CupViewDepth BSS = {0};
@@ -189,7 +189,7 @@ s32 g_ControllerCount BSS = {0};
 Camera g_MapCamera BSS = {0};
 /* The animated icon's two frame buffers, the size of a mode icon, which some
  * screens read other images into */
-void* g_AnimatedIconImages[2] BSS = {0};
+void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT] BSS = {0};
 u8 __osMaxControllers BSS = {0};
 Mtx D_80105278 BSS ALIGNED(8) = {0};
 u8 g_ConnectedControllerBits BSS = {0};
@@ -374,7 +374,7 @@ Vtx* g_VertexListHead BSS = {0};
 Gfx* g_DisplayListHead BSS = {0};
 /* Five buffers the size of the green arrows image, which menu screens read
  * other images into */
-void* g_MenuArrowSizedImages[5] BSS ALIGNED(8) = {0};
+void* g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT] BSS ALIGNED(8) = {0};
 OSMesgQueue nuGfxTaskMgrMesgQ BSS ALIGNED(8) = {0};
 s8 D_801B9410 BSS = {0};
 Mtx f_DropMatrices[DRAW_BUFFER_COUNT] BSS ALIGNED(8) = {0};

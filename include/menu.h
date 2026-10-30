@@ -94,6 +94,16 @@ typedef struct TrophySize {
 
 extern TrophySize g_TrophySizes[COURSE_COUNT];
 
+/* An animated icon's frame buffers: one is shown while the next frame is read
+ * into the other */
+#define ANIMATED_ICON_BUFFER_COUNT 2
+#define MENU_SPARE_IMAGE_COUNT 2
+#define MENU_ARROW_SIZED_IMAGE_COUNT 5
+extern void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+extern void* g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+extern void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
+extern void* g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
+
 /* The mini-golf disc's images in each of g_MenuIconImages's buffers */
 #define MINI_GOLF_DISC_IMAGE_COUNT 2
 /*

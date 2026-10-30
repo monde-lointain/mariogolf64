@@ -270,7 +270,6 @@ extern const char D_80231514_ovl_01[];
 
 extern s8 D_801052E8;
 extern s32 D_800FE334;
-extern void* g_AnimatedIconImages[2];
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
@@ -306,16 +305,13 @@ extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
 extern void* D_800FBDFC[2];
 
 /* What UpdateMenus reads as the menu screen changes */
-extern void* g_MenuSpareImages[2];
 extern void* D_800FC6A0;
 extern void* D_800FC898;
-extern void* g_SecondAnimatedIconImages[2];
 extern void* D_800FF4C4[2];
 extern void* D_801052C4[2];
 extern void* D_80106100;
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
-extern void* g_MenuArrowSizedImages[5];
 
 void InitPlay(s32 kind);
 void DrawModeSelect(Gfx** displayListHead);
