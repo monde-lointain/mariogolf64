@@ -152,10 +152,13 @@ void DrawMenuNumber(
 
 /* The STAT_* shown on the panel's top row, which Up and Down scroll */
 static s16 f_FirstShownStat = 0;
-static s16 D_802300A2_ovl_01 = 0;
+/* The trophy's frame of g_TrophyFrameAssets, stepped when its timer reaches
+ * TROPHY_FRAME_DELAY */
+static s16 f_StatsTrophyFrame = 0;
 /* Which of D_8023A814's buffers holds the trophy frame shown */
 static s16 D_802300A4_ovl_01 = 0;
-static s16 D_802300A6_ovl_01 = 0;
+/* Counts the trophy's draws since its frame last stepped */
+static s16 f_StatsTrophyFrameTimer = 0;
 static s32 D_802300A8_ovl_01 = 0;
 static s32 D_802300AC_ovl_01 = 0;
 /* Read by no routine */
@@ -326,8 +329,8 @@ void UpdateCourseStats(void) {
 
         memory->statsSpin = -STATS_TURN / (courseCount + 1);
         if (memory->statsCourse != courseCount) {
-          D_802300A6_ovl_01 = 0;
-          D_802300A2_ovl_01 = 0;
+          f_StatsTrophyFrameTimer = 0;
+          f_StatsTrophyFrame = 0;
           D_802300A4_ovl_01 ^= 1;
           OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
@@ -349,8 +352,8 @@ void UpdateCourseStats(void) {
 
         memory->statsSpin = STATS_TURN / (courseCount + 1);
         if (memory->statsCourse != courseCount) {
-          D_802300A6_ovl_01 = 0;
-          D_802300A2_ovl_01 = 0;
+          f_StatsTrophyFrameTimer = 0;
+          f_StatsTrophyFrame = 0;
           D_802300A4_ovl_01 ^= 1;
           OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
@@ -987,22 +990,22 @@ void DrawCourseTrophies(Gfx** displayListHead) {
       }
     }
 
-    D_802300A6_ovl_01++;
-    if (D_802300A6_ovl_01 >= TROPHY_FRAME_DELAY) {
-      D_802300A6_ovl_01 = 0;
-      D_802300A2_ovl_01++;
-      if ((s16)g_TrophyFrameAssets[memory->statsCourse][D_802300A2_ovl_01] ==
+    f_StatsTrophyFrameTimer++;
+    if (f_StatsTrophyFrameTimer >= TROPHY_FRAME_DELAY) {
+      f_StatsTrophyFrameTimer = 0;
+      f_StatsTrophyFrame++;
+      if ((s16)g_TrophyFrameAssets[memory->statsCourse][f_StatsTrophyFrame] ==
           TROPHY_FRAME_END) {
-        D_802300A2_ovl_01 = 0;
+        f_StatsTrophyFrame = 0;
       }
 
-      if (D_802300A2_ovl_01 >= TROPHY_FRAME_LIMIT) {
-        D_802300A2_ovl_01 = 0;
+      if (f_StatsTrophyFrame >= TROPHY_FRAME_LIMIT) {
+        f_StatsTrophyFrame = 0;
       }
 
       D_802300A4_ovl_01 ^= 1;
       OpenEncodedAsset(
-          g_TrophyFrameAssets[memory->statsCourse][D_802300A2_ovl_01], &asset);
+          g_TrophyFrameAssets[memory->statsCourse][f_StatsTrophyFrame], &asset);
       ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
     }
   }
