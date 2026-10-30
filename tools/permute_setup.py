@@ -11,6 +11,8 @@ default), ready for:
     permuter.py OUT_DIR -j 16
 
 decomp-permuter is expected at $PERMUTER_DIR (default ~/src/decomp-permuter).
+Functions that hold a nested function need its nested-functions branch, as
+pycparser rejects them.
 """
 
 import os
@@ -122,7 +124,13 @@ def main() -> None:
     _ = compile_sh.write_text(COMPILE_SH.format(kmc=fncompare.KMC_DIR, flags=flags))
     compile_sh.chmod(SCRIPT_MODE)
 
-    settings = f'func_name = "{function}"\ncompiler_type = "gcc"\n'
+    # KMC GCC emits a nested function into .text ahead of the function that
+    # holds it, so the score covers the named function alone
+    objdump = f"mips-linux-gnu-objdump -drz -m mips:4300 --disassemble={function}"
+    settings = (
+        f'func_name = "{function}"\ncompiler_type = "gcc"\n'
+        f'objdump_command = "{objdump}"\n'
+    )
     _ = (out_dir / "settings.toml").write_text(settings)
     print(out_dir)
 
