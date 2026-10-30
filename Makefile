@@ -22,8 +22,6 @@ COMPARE      ?= 1
 ifneq ($(NON_MATCHING),0)
 override COMPARE := 0
 endif
-# Set WARNINGS="-Wall -W" to see the compiler's warnings
-WARNINGS    ?= -w
 # The two toolchains, and what differs between their builds. Each build has
 # its own directory, so that no build links another's objects.
 ifeq ($(MODERN),0)
@@ -42,6 +40,9 @@ KMC_ALIGN   := -Wa,--force-n64align
 GAME_DEFINES := -D__IS_KMC__=1
 # The game's code was built with -ffast-math
 FAST_MATH   := -ffast-math
+# The matching forms of the code are ones KMC GCC warns about. Set
+# WARNINGS="-Wall -W" to see them.
+WARNINGS    ?= -w
 ULTRALIB_COMPILER := gcc
 LIBS        :=
 else
@@ -70,6 +71,8 @@ GAME_DEFINES :=
 # Modern GCC's -ffast-math reorders the float math enough that the ball
 # lands elsewhere, which throws the opening and the demos off their scripts
 FAST_MATH   :=
+# The game's code and libkmc build cleanly with these
+WARNINGS    ?= -Wall -Wextra
 # ultralib's own settings for modern GCC
 ULTRALIB_COMPILER := modern_gcc
 ULTRALIB_MODERN := -DMODERN_CC
