@@ -60,6 +60,19 @@ enum SaveMenuGame {
 /* The saved games' course image is double buffered */
 #define COURSE_IMAGE_BUFFER_COUNT 2
 
+/* The course image buffers, of which the first is on screen first */
+enum {
+  COURSE_IMAGE_BUFFER_FIRST,
+  COURSE_IMAGE_BUFFER_SECOND
+};
+
+/* The saved games, in the order of their boards */
+enum {
+  SAVED_GAME_FIRST,
+  SAVED_GAME_SECOND,
+  SAVED_GAME_THIRD
+};
+
 /* The images of g_CourseIconAssets that LoadRingShotCourseIcons reads, before
  * one of its own */
 #define SAVE_MENU_IMAGE_COUNT 6
@@ -1061,8 +1074,6 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   s32 gameIndex;
-  void** bufferSlot;
-  void** imageSlot;
   s32 miniGolfIndex;
 
   switch (bufferKind) {
@@ -1077,26 +1088,22 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
       ReadEncodedAsset(f_PlayerLabels, &asset);
       break;
     case SAVE_GAME_BUFFER_FIRST_BOARD:
-      imageSlot = &f_GameBoards[0];
-      *imageSlot = buffer;
+      f_GameBoards[SAVED_GAME_FIRST] = buffer;
       OpenEncodedAsset(ASSET_FIRST_GAME_BOARD, &asset);
-      ReadEncodedAsset(*imageSlot, &asset);
+      ReadEncodedAsset(f_GameBoards[SAVED_GAME_FIRST], &asset);
       break;
     case SAVE_GAME_BUFFER_SECOND_BOARD:
-      imageSlot = &f_GameBoards[1];
-      *imageSlot = buffer;
+      f_GameBoards[SAVED_GAME_SECOND] = buffer;
       OpenEncodedAsset(ASSET_SECOND_GAME_BOARD, &asset);
-      ReadEncodedAsset(*imageSlot, &asset);
+      ReadEncodedAsset(f_GameBoards[SAVED_GAME_SECOND], &asset);
       break;
     case SAVE_GAME_BUFFER_THIRD_BOARD:
-      imageSlot = &f_GameBoards[2];
-      *imageSlot = buffer;
+      f_GameBoards[SAVED_GAME_THIRD] = buffer;
       OpenEncodedAsset(ASSET_THIRD_GAME_BOARD, &asset);
-      ReadEncodedAsset(*imageSlot, &asset);
+      ReadEncodedAsset(f_GameBoards[SAVED_GAME_THIRD], &asset);
       break;
     case SAVE_GAME_BUFFER_COURSE:
-      bufferSlot = &f_CourseImageBuffers[0];
-      *bufferSlot = buffer;
+      f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST] = buffer;
       gameIndex = memory->savedGameIndex;
       if (gameIndex < 0) {
         gameIndex = 0;
@@ -1114,20 +1121,21 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
         OpenEncodedAsset(
             g_CourseIconAssets[save->savedGames[gameIndex].state.courseIndex],
             &asset);
-        ReadEncodedAsset(*bufferSlot, &asset);
+        ReadEncodedAsset(
+            f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST], &asset);
       } else {
         miniGolfIndex = save->savedGames[gameIndex].state.courseIndex -
             MINI_GOLF_COURSE_INDEX;
         OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
-        ReadEncodedAsset(*bufferSlot, &asset);
+        ReadEncodedAsset(
+            f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST], &asset);
         OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file);
         ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
       }
 
       break;
     case SAVE_GAME_BUFFER_CHOSEN_COURSE:
-      bufferSlot = &f_CourseImageBuffers[1];
-      *bufferSlot = buffer;
+      f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND] = buffer;
       gameIndex = memory->savedGameIndex;
       if (gameIndex < 0) {
         gameIndex = 0;
@@ -1145,12 +1153,14 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
         OpenEncodedAsset(
             g_CourseIconAssets[save->savedGames[gameIndex].state.courseIndex],
             &asset);
-        ReadEncodedAsset(*bufferSlot, &asset);
+        ReadEncodedAsset(
+            f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND], &asset);
       } else {
         miniGolfIndex = save->savedGames[gameIndex].state.courseIndex -
             MINI_GOLF_COURSE_INDEX;
         OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
-        ReadEncodedAsset(*bufferSlot, &asset);
+        ReadEncodedAsset(
+            f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND], &asset);
         OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file);
         ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
       }
@@ -1158,7 +1168,7 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
       break;
   }
 
-  f_ShownCourseBufferIndex = 0;
+  f_ShownCourseBufferIndex = COURSE_IMAGE_BUFFER_FIRST;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveGameBuffer);
