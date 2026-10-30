@@ -146,7 +146,7 @@ static OSThread f_LoaderThread;
 extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
 
-void func_8005F1C8(void);
+void ResetShotSetup(void);
 void PlacePlayersOnTee(void);
 void func_80253234(s32);
 void BuildGroundDisplayLists(void);
@@ -929,7 +929,7 @@ void InitHoleState(void) {
   osSyncPrintf("mp2sub1\n");
   PrepareHoleDisplay();
   osSyncPrintf("mp2sub2\n");
-  func_8005F1C8();
+  ResetShotSetup();
   osSyncPrintf("mp2sub3\n");
   ResetBallSimulations();
   g_HoleTimeFrames[g_GameState.holeIndex] = 0;

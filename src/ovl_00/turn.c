@@ -3288,7 +3288,7 @@ void UpdateTurns(void) {
         f_ShotFlightCount = 0;
         f_GreenSongTempo = AIMING_SONG_TEMPO;
         UpdateContest(FALSE);
-        func_8005F1C8();
+        ResetShotSetup();
         g_RoundHud.flags = 0;
         g_RoundHud.unk17 = 0;
         g_RoundHud.unk87 = playerIndex;
@@ -3520,7 +3520,7 @@ void UpdateTurns(void) {
           if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
             nextState = PLAYER_STATE_HOLE_INTRO;
             StartHoleIntroCamera();
-            func_8005F1C8();
+            ResetShotSetup();
           }
         }
 
@@ -3696,7 +3696,7 @@ void UpdateTurns(void) {
             g_LetterboxState = LETTERBOX_STATE_NONE;
             PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
             ResetAimCamera();
-            func_8005F1C8();
+            ResetShotSetup();
             g_RoundHud.unkC = 1;
             g_RoundHud.isLetterboxShown = TRUE;
             SetRoundHudPartsShown(1);

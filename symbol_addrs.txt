@@ -1519,6 +1519,7 @@ LoadSong = 0x8005F090; // type:func
 LoadSampleBank = 0x8005ECC4; // type:func
 LoadSoundEffectBank = 0x8005F11C; // type:func
 IsPlayAdvancingItself = 0x8005F180; // type:func
+ResetShotSetup = 0x8005F1C8; // type:func
 f_SongHandle = 0x800C0E64; // size:0x4
 f_SoundHandles = 0x800C0E6C; // size:0x40
 f_SoundFadeFrameCounts = 0x800C0EAC; // size:0x40

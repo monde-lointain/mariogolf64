@@ -165,7 +165,11 @@ s32 IsPlayAdvancingItself(void) {
   return IsGameFlagSet(GAME_FLAG_UNK32) || IsGameFlagSet(GAME_FLAG_UNK9B);
 }
 
-void func_8005F1C8(void) {
+/*
+ * Clears what the last shot's setup left: the pause screen, the shot button,
+ * flags and headings, the letterbox, the impact point and their frame counts
+ */
+void ResetShotSetup(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
   D_800C3070 = 0;
   g_HasPressedShotButton = FALSE;
