@@ -131,7 +131,6 @@ s16 GetChosenReplaySlot(void);
 s32 GetOpenRingShotCourseCount(void);
 void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
 void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,

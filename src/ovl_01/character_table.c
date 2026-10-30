@@ -117,7 +117,6 @@ void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, CharacterId character, u8 drawMode);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
 void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y);

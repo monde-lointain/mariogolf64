@@ -324,6 +324,8 @@ enum MenuSign {
   MENU_SIGN_CIRCLE
 };
 
+void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign);
+
 /*
  * The cursor of the character table and the player stats: a quad whose corners
  * cycle through the colors, masked by the 48x48 IA4 image of asset 0x6EF
