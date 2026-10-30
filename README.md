@@ -51,7 +51,7 @@ basedpyright and looks for dead code with vulture, using the settings in
 | `symbol_addrs.txt` | Names of functions and variables |
 | `src/` | Decompiled C sources |
 | `include/` | Headers |
-| `lib/ultralib` | Decompiled libultra (submodule) |
+| `lib/ultralib` | Decompiled libultra, the parts the game uses |
 
 The game was compiled with KMC GCC 2.7.2 at `-O2`. Code lives in a main
 segment loaded at `0x80025C00` and in overlays (“module sets”) that the
