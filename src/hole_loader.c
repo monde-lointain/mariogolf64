@@ -152,7 +152,7 @@ s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT];
 
 void ResetShotSetup(void);
 void PlacePlayersOnTee(void);
-void func_80253234(s32);
+void ShadeGround(s32);
 void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
 s32 ChooseHoleConditions(void);
@@ -744,7 +744,7 @@ void PrepareHoleScene(void) {
   }
 
   if (!IsGameFlagSet(GAME_FLAG_UNK11)) {
-    func_80253234(unk);
+    ShadeGround(unk);
   }
 
   D_800BB0E8 = 0;

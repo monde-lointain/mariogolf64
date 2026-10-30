@@ -1161,15 +1161,15 @@ void DrawShotEffect(Gfx** displayListHead);
 void DrawRoundHud(CameraView* view);
 void DrawHoleIntroText(Gfx** displayListHead);
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex);
-void func_801F4AD8(Gfx** displayListHead);
+void RewriteWord(Gfx** displayListHead);
 void DrawTitleScreen(Gfx** displayListHead);
 void DrawBootLogos(Gfx** displayListHead);
 void DrawStaffRoll(Gfx** displayListHead);
-void func_801F8110(Gfx** displayListHead);
+void DrawTransmitMenu(Gfx** displayListHead);
 void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead);
-void func_801FB198(Gfx** displayListHead);
+void DrawMenuScreen(Gfx** displayListHead);
 void DrawRoundResults(Gfx** displayListHead);
-void func_801FD578(Gfx** displayListHead);
+void DrawResultsNotice(Gfx** displayListHead);
 void DrawGolfBalls(CameraMatrices* matrices);
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn);
 void DrawBanner(Gfx** displayListHead);
@@ -1183,9 +1183,9 @@ void DrawAimGuides(CameraMatrices* matrices);
 void DrawGameSaveMenu(Gfx** displayListHead);
 void DrawReplaySaveMenu(Gfx** displayListHead);
 void DrawControlsScreen(Gfx** displayListHead);
-void func_8040BFC8(void);
-void func_8040C124(void);
-void func_8040C360(CameraMatrices* matrices, Gfx** displayListHead);
+void func_8040BFC8_hole_editor(void);
+void func_8040C124_hole_editor(void);
+void func_8040C360_hole_editor(CameraMatrices* matrices, Gfx** displayListHead);
 
 #define SetCameraScissor(view) \
   gDPSetScissor(g_DisplayListHead++, G_SC_NON_INTERLACE, (view).scissorX, \
@@ -1479,7 +1479,7 @@ s32 DrawGame(void) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
           SetCameraScissor(g_Cameras[0].view);
-          func_801F4AD8(&g_DisplayListHead);
+          RewriteWord(&g_DisplayListHead);
         }
 
         break;
@@ -1526,7 +1526,7 @@ s32 DrawGame(void) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
           SetCameraScissor(g_Cameras[0].view);
-          func_801F8110(&g_DisplayListHead);
+          DrawTransmitMenu(&g_DisplayListHead);
         }
 
         break;
@@ -1535,7 +1535,7 @@ s32 DrawGame(void) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
           SetCameraScissor(g_Cameras[0].view);
-          func_801FB198(&g_DisplayListHead);
+          DrawMenuScreen(&g_DisplayListHead);
           g_Cameras[0].view.eye[0] = 0.0f;
           g_Cameras[0].view.lookAt[0] = 0.0f;
           g_Cameras[0].view.lookAt[1] = 0.0f;
@@ -1988,7 +1988,7 @@ s32 DrawGame(void) {
 
       if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE) &&
           g_Scene != SCENE_FLAG_PANEL) {
-        func_8040C360(matrices, &g_DisplayListHead);
+        func_8040C360_hole_editor(matrices, &g_DisplayListHead);
       }
     }
   }
@@ -2032,7 +2032,7 @@ s32 DrawGame(void) {
 
     if (g_IsModuleAlive[MODULE_ROUND_RESULTS]) {
       DrawRoundResults(&g_DisplayListHead);
-      func_801FD578(&g_DisplayListHead);
+      DrawResultsNotice(&g_DisplayListHead);
     }
 
     DrawHalfTurn(&g_DisplayListHead);
@@ -2193,11 +2193,11 @@ s32 DrawGame(void) {
 
   if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
     if (g_ControllerStates[1].pressedButtons & Z_TRIG) {
-      func_8040C124();
+      func_8040C124_hole_editor();
     }
 
     if (g_ControllerStates[1].pressedButtons & R_JPAD) {
-      func_8040BFC8();
+      func_8040BFC8_hole_editor();
     }
   }
 

@@ -95,7 +95,7 @@
 #define SLOPE_FAR_DROP 60.0f
 #define SLOPE_EXTRA_DROP 15.0f
 
-/* func_80404B84's ground height editor */
+/* func_80404B84_hole_editor's ground height editor */
 #define EDITOR_PAD 0
 #define OPTION_PAD 1
 #define SECOND_EDITOR_PAD 2
@@ -144,7 +144,7 @@
 #define HEIGHT_TEXT_COLUMN 25
 #define HEIGHT_TEXT_ROW 3
 
-/* func_80402428's triangle editor */
+/* func_80402428_hole_editor's triangle editor */
 /* What a frame did, kept in f_LastTriangleEditKind */
 enum TriangleEdit {
   TRIANGLE_EDIT_NONE,
@@ -153,7 +153,8 @@ enum TriangleEdit {
   TRIANGLE_EDIT_KIND = 4
 };
 
-/* The last RING_COUNT triangles hold the rings, which func_80402E1C edits */
+/* The last RING_COUNT triangles hold the rings, which func_80402E1C_hole_editor
+ * edits */
 #define FIRST_RING_TRIANGLE (HOLE_TRIANGLE_COUNT - RING_COUNT)
 #define HOLE_TRIANGLE_KIND_COUNT 4
 /* A step moves the corner this far at zoom 1 */
@@ -163,8 +164,8 @@ enum TriangleEdit {
 #define EDIT_KIND_TEXT_ROW 10
 #define CORNER_HEIGHT_TEXT_ROW 11
 
-/* func_80402E1C's ring editor; its corners hold a ring's position, direction
- * and scale */
+/* func_80402E1C_hole_editor's ring editor; its corners hold a ring's position,
+ * direction and scale */
 #define RING_DIRECTION_CORNER 1
 /* In the corner's x, 1024 for the ring's own size */
 #define RING_SCALE_CORNER 2
@@ -175,7 +176,7 @@ enum TriangleEdit {
 #define RING_TEXT_COLUMN 19
 #define RING_TEXT_ROW 4
 
-/* func_80403A04's wall editor */
+/* func_80403A04_hole_editor's wall editor */
 #define WALL_TRIANGLE_COUNT 2
 /* Corners 0 and 1; the others follow them */
 #define WALL_BOTTOM_CORNER_COUNT 2
@@ -189,7 +190,7 @@ enum TriangleEdit {
 #define WALL_TEXT_COLUMN 5
 #define WALL_TEXT_ROW 3
 
-/* func_80406C3C's tree editor */
+/* func_80406C3C_hole_editor's tree editor */
 #define TREE_TEXT_COLUMN 19
 #define TREE_KIND_LABEL_ROW 24
 #define TREE_KIND_TEXT_ROW 25
@@ -213,7 +214,7 @@ enum TriangleEdit {
 #define HEX_DUMP_LINE_BYTES (HEX_DUMP_LINE_WORDS * (s32)sizeof(u32))
 #define HOLE_EDITOR_HEX_DUMP_ASSERT_LINE 3027
 
-/* func_80406818's steps, in f_HoleFileStep */
+/* func_80406818_hole_editor's steps, in f_HoleFileStep */
 #define HOLE_FILE_STEP_ACTION 0
 #define HOLE_FILE_STEP_COURSE 1
 #define HOLE_FILE_STEP_HOLE 2
@@ -234,7 +235,7 @@ enum TriangleEdit {
 #define CELL_COLUMN_COUNT (GROUND_POINT_COLUMN_COUNT - 1)
 #define CELL_ROW_COUNT (GROUND_POINT_ROW_COUNT - 1)
 
-/* func_804002C0's ground point editor */
+/* func_804002C0_hole_editor's ground point editor */
 /* One for each C-button */
 #define POINT_MOVE_COUNT 4
 #define POINT_MOVE_STEP 0x10
@@ -251,7 +252,7 @@ enum TriangleEdit {
 #define POINT_HEIGHT_TEXT_ROW 8
 #define DEAD_TRIANGLE_TEXT_ROW 9
 
-/* func_80400FBC's hole point editor */
+/* func_80400FBC_hole_editor's hole point editor */
 #define HOLE_POINT_MODE_UNSET -1
 #define HOLE_POINT_MODE_PIN_TEE 0
 #define HOLE_POINT_MODE_MESON 1
@@ -345,13 +346,13 @@ enum TriangleEdit {
 
 extern u8 D_80451A60[];
 
-/* func_8040C360's pole: two crossed quads, one in the x-y plane and one in the
- * z-y plane */
+/* func_8040C360_hole_editor's pole: two crossed quads, one in the x-y plane and
+ * one in the z-y plane */
 #define POLE_QUAD_COUNT 2
 #define POLE_QUAD_VERTEX_COUNT 4
 extern Mtx D_8040CC98;
 
-/* func_80407D64's 32x32 IA8 wave pattern */
+/* func_80407D64_hole_editor's 32x32 IA8 wave pattern */
 #define WAVE_TEXTURE_WIDTH 32
 #define WAVE_TEXTURE_HEIGHT 32
 /* A texel step's angle, pi/16, times the texel steps between samples */
@@ -555,7 +556,7 @@ static u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
     {0x04, 0x0D, 0x0E, 0x0F, 0x05},
     {0x82, 0x06, 0x86, 0x07, 0x8A},
 };
-/* func_80400FBC's cursor */
+/* func_80400FBC_hole_editor's cursor */
 static s32 f_HolePointCursor[2] = {0, 0}; /* x, z */
 /* Read by no routine */
 static s32 D_8040C5A4_hole_editor UNUSED = -1;
@@ -568,7 +569,7 @@ static s32 f_PointCursorColumn = 0;
 static s32 f_PointCursorRow = 0;
 static s32 D_8040C5B8_hole_editor = 0;
 static s32 D_8040C5BC_hole_editor = 0;
-/* func_80400FBC's state */
+/* func_80400FBC_hole_editor's state */
 static Radians f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_HolePointCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
@@ -579,7 +580,7 @@ static s32 f_PinTeeIndex = 0;
 static s32 f_MesonPointIndex = 0;
 static s32 f_RoutePointIndex = 0;
 
-/* func_80402428's state */
+/* func_80402428_hole_editor's state */
 static Radians f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TriangleCameraHeadingAngle */
 static Radians f_TriangleCameraHeading = EDITOR_CAMERA_START_ANGLE;
@@ -592,7 +593,7 @@ static s32 f_SavedCornerIndex = 0;
 static s32 f_LastTriangleEditKind = 0; /* A TRIANGLE_EDIT_* */
 extern CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 
-/* func_80402E1C's state */
+/* func_80402E1C_hole_editor's state */
 static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_RingCameraHeadingAngle */
 static Radians f_RingCameraHeading = EDITOR_CAMERA_START_ANGLE;
@@ -605,7 +606,7 @@ static s32 f_RingCornerIndex = 0; /* Always 0 */
 static s32 D_8040C618_hole_editor UNUSED = 0;
 static s32 f_LastRingEditKind = 0; /* A TRIANGLE_EDIT_* */
 
-/* func_80403A04's state */
+/* func_80403A04_hole_editor's state */
 static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_WallCameraHeadingAngle */
 static Radians f_WallCameraHeading = EDITOR_CAMERA_START_ANGLE;
@@ -635,7 +636,7 @@ typedef struct TriangleSlope {
 
 extern TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 
-/* func_80404B84's state */
+/* func_80404B84_hole_editor's state */
 static s32 f_HeightCursorColumn = 0;
 static s32 f_HeightCursorRow = 0;
 /* Read by no routine */
@@ -659,7 +660,7 @@ static s32 f_LastHeightEditKind = 0; /* The last frame's HEIGHT_EDIT_* */
  */
 s32 SetGroundPointHeightAndShade();
 
-/* func_80406818's menu */
+/* func_80406818_hole_editor's menu */
 /* Read by no routine */
 static s32 D_8040C678_hole_editor UNUSED = 1;
 static Boolean f_IsSavingHoleFiles = FALSE;
@@ -668,7 +669,7 @@ static s32 f_HoleFileHoleNumber = 1; /* From 1 */
 static s32 f_HoleFileCourseNumber = 1; /* From 1 */
 static s32 f_HoleFilePromptFrames = 0;
 
-/* func_80406C3C's state */
+/* func_80406C3C_hole_editor's state */
 static Radians f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TreeCameraHeadingAngle */
 static Radians f_TreeCameraHeading = EDITOR_CAMERA_START_ANGLE;

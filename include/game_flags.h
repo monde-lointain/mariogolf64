@@ -66,7 +66,7 @@
 /*
  * Lets the second and fourth controllers' D-pad open and close the inset
  * view, the second's C buttons start screen effects, and its Z and D-pad
- * right call func_8040C124 and func_8040BFC8
+ * right call func_8040C124_hole_editor and func_8040BFC8_hole_editor
  */
 #define GAME_FLAG_SCREEN_TEST_BUTTONS 0x2F
 

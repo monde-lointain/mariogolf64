@@ -419,10 +419,10 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
 /* "%02d:%02d:%02d", which DrawRoundHud also uses */
 extern char D_800D1C84[];
 
-s32 func_80242418(void);
-void func_80242424(Gfx** displayListHead);
-void func_80242D40(Gfx** displayListHead);
-void func_802427E8(Gfx** displayListHead);
+s32 GetClubSlotsState(void);
+void DrawClubSlots(Gfx** displayListHead);
+void DrawHoleSelect(Gfx** displayListHead);
+void DrawRingShotSelect(Gfx** displayListHead);
 
 #define STOPWATCH_X 168
 #define STOPWATCH_Y 176
@@ -434,8 +434,8 @@ void func_802427E8(Gfx** displayListHead);
 
 void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
-void func_80216EDC(void);
-void func_80216F8C(void);
+void LoadShotEffectImages(void);
+void FreeShotEffectImages(void);
 
 /* The asset loaded into an image's buffer, before any is */
 #define NO_IMAGE_ASSET (-1)
@@ -959,7 +959,7 @@ void LoadSceneryImages(void) {
   LoadGolfBallImages();
   LoadEffectImages();
   LoadHoleCreatureImages();
-  func_80216EDC();
+  LoadShotEffectImages();
   AllocMovieBuffer();
   LoadClubPanelImages();
   g_PinFlagImages =
@@ -1035,7 +1035,7 @@ void FreeSceneryImages(void) {
     f_SceneryState = SCENERY_BILLBOARDS_READY;
     FreeEffectImages();
     FreeHoleCreatureImages();
-    func_80216F8C();
+    FreeShotEffectImages();
     FreeMovieBuffer();
     FreeClubPanelImages();
     FreeMemory(&g_PinFlagImages);
@@ -3594,7 +3594,7 @@ void DrawColorTest(Gfx** displayListHead) {
 #define GAME_FLAG_SHOW_MIRROR_TEXTURE 0x70
 /* The shadowed font draws "ft" for this character */
 #define SHADOWED_FEET_GLYPH '['
-void func_80217F54(Gfx** displayListHead);
+void func_80217F54_ovl_00(Gfx** displayListHead);
 
 /* Loads one of the shot panel's labels, which DrawRoundHud does in each branch
  * that picks one */
@@ -4168,7 +4168,7 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_IsModuleAlive[MODULE_SHOT_EFFECTS]) {
-    func_80217F54(&g_DisplayListHead);
+    func_80217F54_ovl_00(&g_DisplayListHead);
   }
 
   /* A debugging aid: B changes the first player's character, and A plays the
@@ -4268,7 +4268,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
   if (g_RoundHud.isHoleIntroTextShown == TRUE) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
-        func_802427E8(&gfx);
+        DrawRingShotSelect(&gfx);
       }
     } else {
       gDPPipeSync(gfx++);
@@ -4348,13 +4348,13 @@ void DrawHoleIntroText(Gfx** displayListHead) {
 
   if (g_RoundHud.isHoleIntroTextShown == TRUE) {
     if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-      if (g_IsModuleAlive[MODULE_CLUB_SLOTS] && func_80242418()) {
-        func_80242424(&gfx);
+      if (g_IsModuleAlive[MODULE_CLUB_SLOTS] && GetClubSlotsState()) {
+        DrawClubSlots(&gfx);
       }
     } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
     } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
-        func_80242D40(&gfx);
+        DrawHoleSelect(&gfx);
       }
     } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
         g_GameState.replayKind == REPLAY_KIND_NONE) {

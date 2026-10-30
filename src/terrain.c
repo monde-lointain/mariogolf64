@@ -269,18 +269,18 @@ static s32 f_SceneMenuSelection;
 
 void ResetMenuChoices(void);
 void ChooseConditionsAndInitHole(void);
-void func_8024F7B0(void);
-void func_8024FF14(void);
-void func_80253234(s32);
-void func_8040000C(void);
-void func_804002C0(void);
-void func_80400FBC(void);
-void func_80402428(void);
-void func_80402E1C(void);
-void func_80403A04(void);
-void func_80404B84(void);
-void func_80406818(void);
-void func_80406C3C(void);
+void LoadToolCodeMap(void);
+void ToggleCodeMapCleanup(void);
+void ShadeGround(s32);
+void func_8040000C_hole_editor(void);
+void func_804002C0_hole_editor(void);
+void func_80400FBC_hole_editor(void);
+void func_80402428_hole_editor(void);
+void func_80402E1C_hole_editor(void);
+void func_80403A04_hole_editor(void);
+void func_80404B84_hole_editor(void);
+void func_80406818_hole_editor(void);
+void func_80406C3C_hole_editor(void);
 
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade);
 void SetGridVertexHeight(s32 column, s32 row, s32 height);
@@ -1726,7 +1726,7 @@ void UpdateDebugScenes(void) {
   }
 
   if (g_Scene == SCENE_UNK11) {
-    func_80406818();
+    func_80406818_hole_editor();
   }
 
   if (g_Scene == SCENE_FLAG_PANEL) {
@@ -1734,25 +1734,25 @@ void UpdateDebugScenes(void) {
   }
 
   if (g_Scene == SCENE_CELL_EDITOR) {
-    func_8040000C();
+    func_8040000C_hole_editor();
   } else if (g_Scene == SCENE_POINT_EDITOR) {
-    func_804002C0();
+    func_804002C0_hole_editor();
   }
 
   if (g_Scene == SCENE_TREES) {
-    func_80406C3C();
+    func_80406C3C_hole_editor();
   }
 
   if (g_Scene == SCENE_TRIANGLES) {
-    func_80402428();
+    func_80402428_hole_editor();
   }
 
   if (g_Scene == SCENE_RINGS) {
-    func_80402E1C();
+    func_80402E1C_hole_editor();
   }
 
   if (g_Scene == SCENE_WALLS) {
-    func_80403A04();
+    func_80403A04_hole_editor();
   }
 
   if (g_Scene == SCENE_MAP_OVERVIEW) {
@@ -1820,17 +1820,17 @@ void UpdateDebugScenes(void) {
     }
 
     if (g_MenuControllerData[0].trigger & D_CBUTTONS) {
-      func_8024F7B0();
+      LoadToolCodeMap();
     }
 
     if (g_MenuControllerData[0].trigger & R_CBUTTONS) {
-      func_8024FF14();
+      ToggleCodeMapCleanup();
     }
 
     if (g_MenuControllerData[0].trigger & U_CBUTTONS) {
       g_HoleSetup.conditions.lightPitch = RESET_LIGHT_PITCH;
       g_HoleSetup.conditions.lightYaw = RESET_LIGHT_YAW;
-      func_80253234(1);
+      ShadeGround(1);
     }
 
     if (g_MenuControllerData[0].trigger & L_CBUTTONS) {
@@ -1844,11 +1844,11 @@ void UpdateDebugScenes(void) {
   }
 
   if (g_Scene == SCENE_HEIGHTS) {
-    func_80404B84();
+    func_80404B84_hole_editor();
   }
 
   if (g_Scene == SCENE_PIN) {
-    func_80400FBC();
+    func_80400FBC_hole_editor();
   }
 }
 

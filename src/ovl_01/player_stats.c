@@ -188,7 +188,16 @@ enum StatsDirection {
 #define HANDICAP_CHOICE_COUNT 37
 #define HANDICAP_SLIDE_START -512
 
+/*
+ * GCC 2.7 emits each string constant once per file, where it is first used,
+ * so the original's "%s" belongs to DrawBestShots. While that is asm, the
+ * routines after it print with the copy in its rodata.
+ */
+#ifdef NON_MATCHING
+#define D_802319E0_ovl_01 "%s"
+#else
 extern const char D_802319E0_ovl_01[];
+#endif
 
 /* A step from one grid cell to its neighbor */
 typedef struct GridStep {
@@ -2210,7 +2219,7 @@ void DrawBestShots(Gfx** displayListHead) {
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
-    sprintf(g_PrintBuffer, D_802319E0_ovl_01, D_80230984_ovl_01[row]);
+    sprintf(g_PrintBuffer, "%s", D_80230984_ovl_01[row]);
     DrawLargeText(&gfx, RECORD_LABEL_X,
         (s16)(RECORD_PLACE_Y + (row * STATS_CURSOR_ROW_HEIGHT)), g_PrintBuffer);
   }
@@ -2218,7 +2227,7 @@ void DrawBestShots(Gfx** displayListHead) {
   chosenRow = memory->bestShotRow;
   chosenColumn = memory->bestShotColumn;
   if (f_BestShotRecords[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
-    sprintf(g_PrintBuffer, D_802319E0_ovl_01,
+    sprintf(g_PrintBuffer, "%s",
         g_CourseRecords
             [(s8)save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
                     .courseIndex]
