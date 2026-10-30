@@ -243,17 +243,18 @@ INCLUDE_ASM("asm/nonmatchings/cpu_projection", ProjectPoint);
 
 /*
  * Like ProjectPoint, without the screen depth. The viewing matrix's [1][0]
- * is left out of x, unlike in y.
+ * is left out of x, unlike in y. The depth is also assigned to viewY, which
+ * the matching code needs: without it, GCC allocates other registers.
  */
-#ifdef NON_MATCHING
 s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint* point) {
   f32 depth;
   f32 viewX;
   f32 viewY;
   f32 perspective;
 
-  depth = (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
-      (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
+  depth = viewY = (f_CpuViewingMatrix[0][2] * x) +
+      (f_CpuViewingMatrix[1][2] * y) + (f_CpuViewingMatrix[2][2] * z) +
+      f_CpuViewingMatrix[3][2];
   if ((s32)depth == 0) {
     return 0;
   }
@@ -285,10 +286,6 @@ s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint* point) {
 
   return depth;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/cpu_projection", ProjectPointToScreen);
-#endif
 
 /* Like BuildTransformMatrix, without a scale */
 void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation) {
