@@ -150,7 +150,8 @@ static u8 D_8022FF02_ovl_01 = 0;
 static u8 D_8022FF03_ovl_01 = 0;
 /* The animation frame of the face under the choosing player's cursor */
 static s8 f_FaceFrame = 0;
-static u8 D_8022FF05_ovl_01 = 0;
+/* Flipped whenever the grid face changes, but read by no routine */
+static u8 f_UnreadFaceToggle = 0;
 /* The draws that f_FaceFrame has been shown for */
 static u8 f_FaceFrameTimer = 0;
 static s8 D_8022FF07_ovl_01 = FALSE;
@@ -327,7 +328,7 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     character = g_CharacterGrid[oldRow][oldColumn];
     f_FaceFrame = 0;
     f_FaceFrameTimer = 0;
-    D_8022FF05_ovl_01 ^= 1;
+    f_UnreadFaceToggle ^= 1;
     if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
       character += MARKED_CHARACTER_OFFSET;
     }
@@ -452,7 +453,7 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     character = g_CharacterGrid[oldRow][oldColumn];
     f_FaceFrame = 0;
     f_FaceFrameTimer = 0;
-    D_8022FF05_ovl_01 ^= 1;
+    f_UnreadFaceToggle ^= 1;
     if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
       character += MARKED_CHARACTER_OFFSET;
     }
@@ -876,7 +877,7 @@ s32 UpdateCharacterSelect(
     playerIndex++;
     f_FaceFrame = 0;
     f_FaceFrameTimer = 0;
-    D_8022FF05_ovl_01 ^= 1;
+    f_UnreadFaceToggle ^= 1;
     if (playerIndex != playerCount) {
       gridMark = g_CharacterGrid[(s16)slot][(s16)column];
       faceCharacter = g_CharacterGrid[(s16)slot][(s16)column];
@@ -928,7 +929,7 @@ s32 UpdateCharacterSelect(
       FreeAllCharacterSlots();
       D_8022FF03_ovl_01 = 0;
       f_FaceFrame = 0;
-      D_8022FF05_ovl_01 = 0;
+      f_UnreadFaceToggle = 0;
       f_FaceFrameTimer = 0;
     }
 
@@ -999,7 +1000,7 @@ s32 UpdateCharacterSelect(
           TEXT_FLAG_TYPED, 255, 255, 255, 255);
       D_8022FF00_ovl_01 = FALSE;
       f_FaceFrame = 0;
-      D_8022FF05_ovl_01 = 0;
+      f_UnreadFaceToggle = 0;
       f_FaceFrameTimer = 0;
       /* Bring back the Game Boy characters that HideGameBoyCharacters hid */
       if ((u8)canChooseMarked == TRUE) {
@@ -1013,7 +1014,7 @@ s32 UpdateCharacterSelect(
       playerIndex--;
       f_FaceFrame = 0;
       f_FaceFrameTimer = 0;
-      D_8022FF05_ovl_01 ^= 1;
+      f_UnreadFaceToggle ^= 1;
       g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
       g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
       gridMark = g_CharacterGrid[memory->characterRows[playerIndex]]
@@ -1508,7 +1509,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
       f_FaceFrame = 0;
     }
 
-    D_8022FF05_ovl_01 ^= 1;
+    f_UnreadFaceToggle ^= 1;
     gridMark = g_CharacterGrid[memory->characterRows[g_ChoosingPlayerIndex]]
                               [memory->characterColumns[g_ChoosingPlayerIndex]];
     character =
