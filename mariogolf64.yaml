@@ -341,15 +341,15 @@ segments:
       - [0x8DF10, c, ../lib/ultralib/src/io/dp]
       - [0x8DF30, c, ../lib/ultralib/src/io/si]
       - [0x8DF50, c, ../lib/ultralib/src/libc/ldiv]
-      - [0x8E110, c, libkmc/atan]
-      - [0x8E550, c, libkmc/memset]
-      - [0x8E620, c, libkmc/rand]
-      - [0x8E660, c, libkmc/trig]
-      - [0x8EAD0, c, libkmc/strcmp]
-      - [0x8EBE0, c, libkmc/matherror]
-      - [0x8EC50, hasm, libkmc/longlong]
-      - [0x8F140, hasm, libkmc/floatdidf]
-      - [0x8F240, c, libkmc/matherr]
+      - [0x8E110, c, ../lib/libkmc/atan]
+      - [0x8E550, c, ../lib/libkmc/memset]
+      - [0x8E620, c, ../lib/libkmc/rand]
+      - [0x8E660, c, ../lib/libkmc/trig]
+      - [0x8EAD0, c, ../lib/libkmc/strcmp]
+      - [0x8EBE0, c, ../lib/libkmc/matherror]
+      - [0x8EC50, hasm, ../lib/libkmc/longlong]
+      - [0x8F140, hasm, ../lib/libkmc/floatdidf]
+      - [0x8F240, c, ../lib/libkmc/matherr]
       - [0x8F250, textbin, rsp_text]
       - [0x91310, .data, overlay_manager]
       - [0x91600, .data, billboard]
@@ -441,7 +441,7 @@ segments:
       - [0xA49C0, .data, ../lib/ultralib/src/vimodes/vimodepallan1]
       - [0xA4A10, .data, ../lib/ultralib/src/vimodes/vimodempallan1]
       - [0xA4A60, .data, ../lib/ultralib/src/libc/xlitob]
-      - [0xA4A90, .data, libkmc/atan]
+      - [0xA4A90, .data, ../lib/libkmc/atan]
       - [0xA4C90, databin, rsp_data]
       - [0xA5360, .rodata, overlay_manager]
       - [0xA54D0, .rodata, billboard]
@@ -509,8 +509,8 @@ segments:
       - [0xADA40, .rodata, ../lib/ultralib/src/gu/libm_vals]
       - [0xADA50, .rodata, ../lib/ultralib/src/libc/xprintf]
       - [0xADBD0, .rodata, ../lib/ultralib/src/libc/xldtob]
-      - [0xADC40, .rodata, libkmc/atan]
-      - [0xADCA0, .rodata, libkmc/trig]
+      - [0xADC40, .rodata, ../lib/libkmc/atan]
+      - [0xADCA0, .rodata, ../lib/libkmc/trig]
       - { start: 0xADD30, type: .bss, vram: 0x800D2930, name: overlay_manager }
       - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/nusched }
       - { type: .bss, vram: 0x800D8980, name: ../lib/libnusys/nugfxtaskmgr }
@@ -563,7 +563,7 @@ segments:
       # build main_bss.c defines those objects, so these take no space here.
       - { type: .bss, vram: 0x800FBD30, name: current_shot }
       - { type: .bss, vram: 0x800FBD30, name: work_area }
-      - { type: .bss, vram: 0x800FBD30, name: libkmc/errno }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/libkmc/errno }
       - { type: .bss, vram: 0x800FBD30, name: ../lib/ultralib/src/debug/kdebugserver }
       - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/nudramstack }
       - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/nurdpoutput }

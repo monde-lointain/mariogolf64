@@ -151,9 +151,12 @@ LIBNUSYS_DEFINES   := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSI
 LIBNUSYS_OPTFLAGS  := -O2
 LIBNUSYS_CFLAGS     = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(LIBNUSYS_OPTFLAGS) $(KMC_ALIGN)
 
-# Per-directory compiler flags
-# libkmc was built without -ffast-math, which turns divisions by constants into multiplications
-$(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1 -fno-fast-math
+# libkmc, KMC's C library, built like the game's code except without
+# -ffast-math, which turns divisions by constants into multiplications
+LIBKMC_DIR := lib/libkmc
+$(BUILD_DIR)/$(LIBKMC_DIR)/%.o: OPTFLAGS := -O1 -fno-fast-math
+
+# Per-object compiler flags
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
@@ -171,7 +174,7 @@ extract:
 setup: tools extract
 
 CLANG_FORMAT ?= clang-format-23
-FORMAT_FILES := $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h')
+FORMAT_FILES := $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h' '$(LIBKMC_DIR)/*.[ch]')
 
 format:
 	$(CLANG_FORMAT) -i $(FORMAT_FILES)
@@ -185,8 +188,8 @@ pycheck:
 	.venv/bin/vulture
 
 CLANG_TIDY ?= run-clang-tidy-23
-# src/libkmc is KMC's C library, which keeps the C library's names
-LINT_FILES := $(filter-out src/libkmc/%,$(filter %.c,$(FORMAT_FILES)))
+# libkmc is KMC's C library, which keeps the C library's names
+LINT_FILES := $(filter-out $(LIBKMC_DIR)/%,$(filter %.c,$(FORMAT_FILES)))
 
 $(BUILD_DIR)/compile_commands.json: tools/compile_commands.py Makefile
 	@mkdir -p $(BUILD_DIR)

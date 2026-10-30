@@ -16,7 +16,7 @@
 # D_8040C5B8_hole_editor) until their meaning is known. File-local
 # data keeps the f_ prefix even where it isn't static. Names from the
 # SDK and the C library (nu*, os*, n_*, _*, mainproc, rand) are fixed
-# by those libraries, and src/libkmc is the C library itself.
+# by those libraries, and lib/libkmc is the C library itself.
 Checks: '-*,readability-identifier-naming'
 HeaderFilterRegex: '^(src|include)/'
 CheckOptions:

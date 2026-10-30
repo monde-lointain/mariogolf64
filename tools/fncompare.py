@@ -47,7 +47,7 @@ CFLAGS = [
     "-w",
 ]
 # Optimization levels by file or directory, as the Makefile sets them
-OPTFLAGS_BY_PATH = {Path("src") / "libkmc": "-O1 -fno-fast-math"}
+OPTFLAGS_BY_PATH = {Path("lib") / "libkmc": "-O1 -fno-fast-math"}
 DEFAULT_OPTFLAGS = os.environ.get("OPTFLAGS", "-O2")
 INCLUDES = [
     "-Iinclude",
