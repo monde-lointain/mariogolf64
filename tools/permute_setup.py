@@ -5,7 +5,7 @@
 
 C_FILE holds the current attempt at FUNCTION and TARGET_ASM its original
 assembly (a single-function splat file). Writes base.c, target.o,
-compile.sh and settings.toml into OUT_DIR (build/permuter/FUNCTION by
+compile.sh, objdump.sh and settings.toml into OUT_DIR (build/permuter/FUNCTION by
 default), ready for:
 
     permuter.py OUT_DIR -j 16
@@ -35,6 +35,24 @@ COMPILE_SH = """#!/bin/bash
 # Invoked by the permuter as: compile.sh INPUT.c -o OUTPUT.o
 COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
 """
+
+# Disassembles the function and the nested functions it holds, which KMC GCC
+# names NAME.N, in a fixed order
+OBJDUMP_SH = """#!/bin/bash
+# Invoked by the permuter as: objdump.sh OBJECT.o
+for name in {names}; do
+  symbol=$(mips-linux-gnu-nm "$1" | grep -m1 -E " $name(\\.[0-9]+)?$" | cut -d" " -f3)
+  mips-linux-gnu-objdump -drz -m mips:4300 --disassemble=$symbol "$1"
+done
+"""
+
+# A function defined inside another, indented as the formatter leaves it: its
+# name follows a return type and precedes a parameter list holding no ";" or
+# braces
+NESTED_DEFINITION = re.compile(
+    r"^[ \t]+[A-Za-z_][\w \t*]*?[ \t*](\w+)\s*\([^;{}]*\)\s*\{", re.MULTILINE
+)
+KEYWORDS = frozenset({"if", "for", "while", "switch", "return", "sizeof"})
 
 
 # A one-parameter macro whose body is a GNU statement expression, as cpp -dM
@@ -159,11 +177,22 @@ def write_base(c_path: str, function: str, base_path: Path) -> None:
     _ = base_path.write_text(base)
 
 
-def write_target(asm_path: str, out_dir: Path) -> None:
-    """Assemble the original function into OUT_DIR/target.o."""
+def find_nested_functions(base_path: Path, asm_path: str) -> list[str]:
+    """List the nested functions in BASE_PATH that ASM_PATH's directory holds."""
+    names = [
+        match.group(1)
+        for match in NESTED_DEFINITION.finditer(base_path.read_text())
+        if match.group(1) not in KEYWORDS
+    ]
+    # Inline ones that were never emitted on their own have no assembly
+    return [name for name in names if (Path(asm_path).parent / f"{name}.s").exists()]
+
+
+def write_target(asm_paths: list[str], out_dir: Path) -> None:
+    """Assemble the original functions into OUT_DIR/target.o."""
     target_s = out_dir / "target.s"
     header = ".set noat\n.set noreorder\n.set gp=64\n"
-    body = Path(asm_path).read_text()
+    body = "".join(Path(path).read_text() for path in asm_paths)
     # Splat writes some low parts as %lo(SYMBOL + (OFFSET & 0xFFFF)), which
     # leaves the assembler unable to pair them with their %hi parts
     body = re.sub(r"(%lo\([\w.]+ \+ )\((0x[0-9A-Fa-f]+) & 0xFFFF\)\)", r"\1\2)", body)
@@ -196,16 +225,21 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     write_base(c_path, function, out_dir / "base.c")
-    write_target(asm_path, out_dir)
+    nested = find_nested_functions(out_dir / "base.c", asm_path)
+    asm_dir = Path(asm_path).parent
+    write_target([str(asm_dir / f"{name}.s") for name in nested] + [asm_path], out_dir)
 
     compile_sh = out_dir / "compile.sh"
     flags = " ".join(fncompare.CFLAGS + fncompare.get_optflags(c_path))
     _ = compile_sh.write_text(COMPILE_SH.format(kmc=fncompare.KMC_DIR, flags=flags))
     compile_sh.chmod(SCRIPT_MODE)
 
-    # KMC GCC emits a nested function into .text ahead of the function that
-    # holds it, so the score covers the named function alone
-    objdump = f"mips-linux-gnu-objdump -drz -m mips:4300 --disassemble={function}"
+    # The score covers the function and its nested functions alone, leaving
+    # out any inline helper emitted from base.c
+    objdump_sh = out_dir / "objdump.sh"
+    _ = objdump_sh.write_text(OBJDUMP_SH.format(names=" ".join([*nested, function])))
+    objdump_sh.chmod(SCRIPT_MODE)
+    objdump = str(objdump_sh.resolve())
     settings = (
         f'func_name = "{function}"\ncompiler_type = "gcc"\n'
         f'objdump_command = "{objdump}"\n'
