@@ -177,8 +177,8 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   firework->unkC = 0xFF;
   originY = random + 64.0f;
   halfWidth = width / 2;
-  for (row = 0; row != height; row++) {
-    for (column = 0; column != width; column++) {
+  for (row = 0; (u32)row != height; row++) {
+    for (column = 0; (u32)column != width; column++) {
       if (firework->shape->cells[column + (row * width)] == 0) {
         firework->particles[particleIndex].x = originX;
         firework->particles[particleIndex].y = originY;

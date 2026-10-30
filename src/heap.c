@@ -94,7 +94,7 @@ s32 GetHeapLargestFreeSize(s32 heapIndex) {
 /* "Unable to allocate memory %x" */
 static const char f_OutOfMemoryMessage[] = "メモリが確保できません %x\n";
 
-void* AllocFromHeap(s32 heapIndex, s32 size) {
+void* AllocFromHeap(s32 heapIndex, u32 size) {
   u32 callerAddress;
   u32 largestFreeSize;
   Heap* heap;

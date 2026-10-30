@@ -38,7 +38,7 @@
 /* The first of six f32 pointers, copied to a slot's unk68 */
 #define CHARACTER_MODEL_UNK9 9
 
-#define END_OF_DISPLAY_LIST_CHOICES -1
+#define END_OF_DISPLAY_LIST_CHOICES 0xFFFFFFFF
 /* The display list choice that draws nothing */
 #define NO_DISPLAY_LIST_CHOICE -1
 

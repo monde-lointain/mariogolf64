@@ -125,7 +125,8 @@ void InitOverlayManager(void) {
     g_ModuleRdpRequestFrames[i] = RDP_REQUEST_FRAME_NEVER;
   }
 
-  for (i = 0; i < sizeof(f_Overlays) / sizeof(f_Overlays[0]); i++) {
+  /* The unsigned compare is there to match */
+  for (i = 0; (u32)i < OVERLAY_COUNT; i++) {
     moduleIds = f_Overlays[i].moduleIds;
     moduleIndex = 0;
     while (moduleIds[moduleIndex] != MODULE_ID_END) {
@@ -174,7 +175,7 @@ Boolean CanLoadOverlay(s32 overlayId) {
 
   for (otherOverlayIndex = 0; otherOverlayIndex < OVERLAY_COUNT;
       otherOverlayIndex++) {
-    if (otherOverlayIndex == overlayIndex) {
+    if (otherOverlayIndex == (u32)overlayIndex) {
       continue;
     }
 

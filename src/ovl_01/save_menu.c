@@ -182,7 +182,7 @@ static SaveMenuModeImage f_ModeImageAssets[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     {0, 0x0665}, {0, 0x05B7}, {0, 0x05DD}, {0, 0x065E}, {0, 0x0599},
     {0, 0x06FC}};
 /* The game mode of each save menu mode that has an image */
-static s32 f_SaveMenuGameModes[SAVE_MENU_MODE_COUNT] = {GAME_MODE_TOURNAMENT,
+static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_COUNT] = {GAME_MODE_TOURNAMENT,
     GAME_MODE_GET_CHARACTER, GAME_MODE_STROKE, GAME_MODE_SPEED_GOLF,
     GAME_MODE_MATCH_GAME, GAME_MODE_CLUB_SLOTS, GAME_MODE_RING_SHOT,
     GAME_MODE_TRAINING, GAME_MODE_SKINS_MATCH, GAME_MODE_UNK1};

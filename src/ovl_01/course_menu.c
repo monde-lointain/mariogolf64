@@ -130,7 +130,7 @@
 
 typedef struct TrophyPosition {
   s32 x;
-  u32 y;
+  s32 y;
 } TrophyPosition;
 
 extern const char f_StatsStringFormat[];

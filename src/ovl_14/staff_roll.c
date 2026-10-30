@@ -321,7 +321,9 @@ static s32 f_StaffRollFrame = 0;
 static Boolean f_IsLeavingStaffRoll = FALSE;
 static s32 f_TextScrollOffset = 0;
 static s32 f_TopLineIndex = 0;
-static s32 f_ShownSceneColorIndex = -1;
+/* The scene colors InitSkyColors last derived, or NO_SCENE_COLOR_INDEX */
+#define NO_SCENE_COLOR_INDEX 0xFFFFFFFF
+static u32 f_ShownSceneColorIndex = NO_SCENE_COLOR_INDEX;
 static Boolean f_IsTextScrolling = TRUE;
 static s32 f_DebugRestartCount = 0;
 /* Negative while fading out; zero when not fading */
@@ -674,7 +676,7 @@ void LoadStaffRoll(void) {
   s32 index;
   s32 textSize;
 
-  f_ShownSceneColorIndex = 11;
+  f_ShownSceneColorIndex = SCENE_COLOR_INDEX_SUDDEN_DEATH;
   ShuffleCastOrder((s8)g_Players[0].characterIndex);
   FreeAllCharacterSlots();
   for (index = 0; index < CAST_BUFFER_COUNT; index++) {

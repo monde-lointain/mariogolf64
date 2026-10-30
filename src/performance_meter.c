@@ -259,6 +259,25 @@ static void DrawDigits(Gfx** gfxP, u16 x, u16 y, char* text) {
 }
 
 /*
+ * Folds a bar's length into its running average, which starts at the first
+ * length, and its maximum. The lengths are compared unsigned, as in the
+ * original. It is a macro so that it updates the statistics by name, rather
+ * than through pointers to them.
+ */
+#define KeepBarStats(average, maximum, length) \
+  { \
+    if ((average) == 0) { \
+      (average) = (length); \
+    } else { \
+      (average) = ((average) + (length)) >> 1; \
+    } \
+\
+    if ((maximum) < (u32)(length)) { \
+      (maximum) = (length); \
+    } \
+  }
+
+/*
  * Draws bars for the time the CPU, the audio and graphics tasks and the RDP
  * counters took, over 1 + extraFrameCount frames, and starts the display list
  * as its own graphics task. cpuStartTime and cpuEndTime are in microseconds.
@@ -357,15 +376,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   taskTime = cpuEndTime - cpuStartTime;
   barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
   cpuBarLength = barLength;
-  if (f_CpuBarAverage == 0) {
-    f_CpuBarAverage = barLength;
-  } else {
-    f_CpuBarAverage = (f_CpuBarAverage + barLength) >> 1;
-  }
-
-  if (f_CpuBarMaximum < barLength) {
-    f_CpuBarMaximum = barLength;
-  }
+  KeepBarStats(f_CpuBarAverage, f_CpuBarMaximum, barLength);
 
   f_CpuBarVertices[0].v.ob[AXIS_X] = startX;
   f_CpuBarVertices[1].v.ob[AXIS_X] = startX + barLength;
@@ -381,15 +392,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
         nuDebTaskPerfPtr->auTaskTime[i].rspStart;
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     audioBarLength = barLength;
-    if (f_AudioBarAverage == 0) {
-      f_AudioBarAverage = barLength;
-    } else {
-      f_AudioBarAverage = (f_AudioBarAverage + barLength) >> 1;
-    }
-
-    if (f_AudioBarMaximum < barLength) {
-      f_AudioBarMaximum = barLength;
-    }
+    KeepBarStats(f_AudioBarAverage, f_AudioBarMaximum, barLength);
 
     f_AudioBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
     f_AudioBarVertices[vertexIndex + 1].v.ob[AXIS_X] = startX + barLength;
@@ -408,15 +411,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
         nuDebTaskPerfPtr->gfxTaskTime[i].rspStart;
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rspBarLength = barLength;
-    if (f_RspBarAverage == 0) {
-      f_RspBarAverage = barLength;
-    } else {
-      f_RspBarAverage = (f_RspBarAverage + barLength) >> 1;
-    }
-
-    if (f_RspBarMaximum < barLength) {
-      f_RspBarMaximum = barLength;
-    }
+    KeepBarStats(f_RspBarAverage, f_RspBarMaximum, barLength);
 
     f_RspBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
     f_RspBarVertices[vertexIndex + 1].v.ob[AXIS_X] = startX + barLength;
@@ -435,15 +430,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
         nuDebTaskPerfPtr->gfxTaskTime[i].rspStart;
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rdpBarLength = barLength;
-    if (f_RdpBarAverage == 0) {
-      f_RdpBarAverage = barLength;
-    } else {
-      f_RdpBarAverage = (f_RdpBarAverage + barLength) >> 1;
-    }
-
-    if (f_RdpBarMaximum < barLength) {
-      f_RdpBarMaximum = barLength;
-    }
+    KeepBarStats(f_RdpBarAverage, f_RdpBarMaximum, barLength);
 
     f_RdpBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
     f_RdpBarVertices[vertexIndex + 1].v.ob[AXIS_X] = barLength;
@@ -462,15 +449,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     taskTime = RdpCountToMicroseconds(taskTime);
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rdpCommandBarLength = barLength;
-    if (f_RdpCommandBarAverage == 0) {
-      f_RdpCommandBarAverage = barLength;
-    } else {
-      f_RdpCommandBarAverage = (f_RdpCommandBarAverage + barLength) >> 1;
-    }
-
-    if (f_RdpCommandBarMaximum < barLength) {
-      f_RdpCommandBarMaximum = barLength;
-    }
+    KeepBarStats(f_RdpCommandBarAverage, f_RdpCommandBarMaximum, barLength);
 
     f_RdpCommandBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
     f_RdpCommandBarVertices[vertexIndex + 1].v.ob[AXIS_X] = barLength;
@@ -489,15 +468,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     taskTime = RdpCountToMicroseconds(taskTime);
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rdpPipeBarLength = barLength;
-    if (f_RdpPipeBarAverage == 0) {
-      f_RdpPipeBarAverage = barLength;
-    } else {
-      f_RdpPipeBarAverage = (f_RdpPipeBarAverage + barLength) >> 1;
-    }
-
-    if (f_RdpPipeBarMaximum < barLength) {
-      f_RdpPipeBarMaximum = barLength;
-    }
+    KeepBarStats(f_RdpPipeBarAverage, f_RdpPipeBarMaximum, barLength);
 
     f_RdpPipeBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
     f_RdpPipeBarVertices[vertexIndex + 1].v.ob[AXIS_X] = barLength;
@@ -516,15 +487,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     taskTime = RdpCountToMicroseconds(taskTime);
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
     rdpTmemBarLength = barLength;
-    if (f_RdpTmemBarAverage == 0) {
-      f_RdpTmemBarAverage = barLength;
-    } else {
-      f_RdpTmemBarAverage = (f_RdpTmemBarAverage + barLength) >> 1;
-    }
-
-    if (f_RdpTmemBarMaximum < barLength) {
-      f_RdpTmemBarMaximum = barLength;
-    }
+    KeepBarStats(f_RdpTmemBarAverage, f_RdpTmemBarMaximum, barLength);
 
     f_RdpTmemBarVertices[vertexIndex + 0].v.ob[AXIS_X] = startX;
     f_RdpTmemBarVertices[vertexIndex + 1].v.ob[AXIS_X] = barLength;
