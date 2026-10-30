@@ -310,7 +310,7 @@ s16 (*f_NoiseGrid)[NOISE_GRID_SIZE] BSS = {0};
 /* Read by no routine */
 static u8 D_801B56F8[0x8] BSS = {0};
 NUDebTaskPerf nuDebTaskPerf[NU_DEB_PERF_BUF_NUM] BSS ALIGNED(16) = {0};
-void* D_801B5CD0[IMAGE_SLOT_COUNT] BSS ALIGNED(8) = {0};
+void* g_ImageSlots[IMAGE_SLOT_COUNT] BSS ALIGNED(8) = {0};
 NUScTask nuGfxTask[NU_GFX_TASK_NUM] BSS ALIGNED(8) = {0};
 s8 g_RingShotCourseOpenedAtStart BSS = {0};
 /* Read by no routine */

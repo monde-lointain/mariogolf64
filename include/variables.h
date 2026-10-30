@@ -138,10 +138,11 @@ extern u8* g_NoiseTexels;
 extern char g_PrintBuffer[PRINT_BUFFER_SIZE];
 
 /*
- * Loaded images: the menus load their title labels into the first two, and
- * the club panel uses the last two as its buffers
+ * Loaded images: the menus load their plain labels, or other images in their
+ * place, into the first two by turns, and the club panel uses the last two as
+ * its buffers
  */
 #define IMAGE_SLOT_COUNT 14
-extern void* D_801B5CD0[IMAGE_SLOT_COUNT];
+extern void* g_ImageSlots[IMAGE_SLOT_COUNT];
 
 #endif

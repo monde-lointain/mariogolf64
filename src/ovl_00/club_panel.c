@@ -37,7 +37,7 @@ enum ClubPanelState {
 #define SHOT_MODE_CHANGE_FRAME_COUNT 4
 #define SHOT_MODE_CHANGE_LAST_FRAME (SHOT_MODE_CHANGE_FRAME_COUNT - 1)
 
-/* Where the two panel buffers are among D_801B5CD0's images */
+/* Where the two panel buffers are among g_ImageSlots's images */
 #define CLUB_PANEL_BUFFER_SLOT 12
 
 #define CLUB_PANEL_IMAGE_ASSET 0x4FF
@@ -152,12 +152,12 @@ void LoadClubPanelImages(void) {
       AllocMemory(OpenEncodedAsset(CLUB_PANEL_IMAGE_ASSET, &asset));
   ReadEncodedAsset(f_ClubPanelImage, &asset);
   /* The first shot mode's image sizes the buffers that each mode's fills */
-  D_801B5CD0[CLUB_PANEL_BUFFER_SLOT] =
+  g_ImageSlots[CLUB_PANEL_BUFFER_SLOT] =
       AllocMemory(OpenEncodedAsset(PANEL_ASSET_POWER, &asset));
-  ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT], &asset);
-  D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + 1] =
+  ReadEncodedAsset(g_ImageSlots[CLUB_PANEL_BUFFER_SLOT], &asset);
+  g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + 1] =
       AllocMemory(OpenEncodedAsset(PANEL_ASSET_POWER, &asset));
-  ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + 1], &asset);
+  ReadEncodedAsset(g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + 1], &asset);
   f_ShotModeImage = AllocMemory(SHOT_MODE_IMAGE_SIZE);
   f_ShownShotMode = PANEL_NOT_SHOWN;
   f_PanelShotMode = PANEL_NOT_SHOWN;
@@ -169,8 +169,8 @@ void FreeClubPanelImages(void) {
   f_ClubPanelState = CLUB_PANEL_FREED;
   FreeMemory(&f_ClubPanelImage);
   FreeMemory(&f_ShotModeImage);
-  FreeMemory(&D_801B5CD0[CLUB_PANEL_BUFFER_SLOT]);
-  FreeMemory(&D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + 1]);
+  FreeMemory(&g_ImageSlots[CLUB_PANEL_BUFFER_SLOT]);
+  FreeMemory(&g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + 1]);
 }
 
 void ResetShotModeChange(void) {
@@ -225,8 +225,9 @@ void UpdateClubPanelImages(void) {
     }
 
     ReadEncodedAsset(
-        D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex], &panelAsset);
-    g_ClubPanelImage = D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex];
+        g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex], &panelAsset);
+    g_ClubPanelImage =
+        g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex];
   }
 
   if (f_ShownShotMode != g_CurrentShot.shotMode) {
@@ -305,9 +306,10 @@ void UpdateClubPanelImages(void) {
     }
 
     ReadEncodedAsset(
-        D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex], &frameAsset);
+        g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex], &frameAsset);
     f_ShotModeChangeFrame++;
-    g_ClubPanelImage = D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex];
+    g_ClubPanelImage =
+        g_ImageSlots[CLUB_PANEL_BUFFER_SLOT + f_PanelBufferIndex];
     if (f_ShotModeChangeFrame == SHOT_MODE_CHANGE_FRAME_COUNT) {
       f_ShotModeChangeFrame = 0;
       f_PanelShotMode = g_CurrentShot.shotMode;

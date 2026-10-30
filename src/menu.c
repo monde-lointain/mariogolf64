@@ -497,23 +497,23 @@ void LoadMenuResources(void) {
   g_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
   ReadEncodedAsset(g_NamePlateImage, &asset);
   g_MenuLabelImages[0] = AllocMemory(0x70A8);
-  D_801B5CD0[0] = AllocMemory(0x70A8);
+  g_ImageSlots[0] = AllocMemory(0x70A8);
   g_MenuLabelImages[1] = AllocMemory(0x70A8);
-  D_801B5CD0[1] = AllocMemory(0x70A8);
+  g_ImageSlots[1] = AllocMemory(0x70A8);
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(g_MenuLabelImages[0], &asset);
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(g_MenuLabelImages[1], &asset);
   if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
     OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
-    ReadEncodedAsset(D_801B5CD0[0], &asset);
+    ReadEncodedAsset(g_ImageSlots[0], &asset);
     OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
-    ReadEncodedAsset(D_801B5CD0[1], &asset);
+    ReadEncodedAsset(g_ImageSlots[1], &asset);
   } else {
     OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
-    ReadEncodedAsset(D_801B5CD0[0], &asset);
+    ReadEncodedAsset(g_ImageSlots[0], &asset);
     OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
-    ReadEncodedAsset(D_801B5CD0[1], &asset);
+    ReadEncodedAsset(g_ImageSlots[1], &asset);
   }
 
   g_MenuTitleImages[0] =
@@ -632,9 +632,9 @@ void FreeMenuResources(void) {
   FreeMemory(&g_MenuBoardImages[1]);
   FreeMemory(&g_NamePlateImage);
   FreeMemory(&g_MenuLabelImages[0]);
-  FreeMemory(&D_801B5CD0[0]);
+  FreeMemory(&g_ImageSlots[0]);
   FreeMemory(&g_MenuLabelImages[1]);
-  FreeMemory(&D_801B5CD0[1]);
+  FreeMemory(&g_ImageSlots[1]);
   FreeMemory(&g_MenuTitleImages[0]);
   FreeMemory(&g_MenuTitleImages[1]);
   FreeMemory(&D_800FBDFC[0]);
