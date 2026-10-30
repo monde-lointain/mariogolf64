@@ -83,9 +83,11 @@ endif
 
 # Each compile lists the headers it read in a .d file beside its object, so
 # that changing a header rebuilds what includes it. Both compilers'
-# preprocessors take the file and target from DEPENDENCIES_OUTPUT, KMC's
-# having no -MF or -MT; it appends, so the old list goes first.
-DEPS         = rm -f $(@:.o=.d); DEPENDENCIES_OUTPUT='$(@:.o=.d) $@'
+# preprocessors take the file and target from SUNPRO_DEPENDENCIES, KMC's
+# having no -MF or -MT. Unlike DEPENDENCIES_OUTPUT, it also lists headers
+# included with angle brackets, such as NuSystem's. KMC's appends to the
+# file, so the old list goes first.
+DEPS         = rm -f $(@:.o=.d); SUNPRO_DEPENDENCIES='$(@:.o=.d) $@'
 
 OPTFLAGS    := -O2
 CFLAGS       = $(TARGETFLAGS) $(GAME_CFLAGS) -nostdinc -funsigned-char $(WARNINGS) $(OPTFLAGS)
@@ -286,8 +288,10 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_
 	tr -d '\r' < $< > $(@:.o=)
 	$(DEPS) $(LIB_CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
 
-# Game code that includes NuSystem's header needs its converted copy
-$(BUILD_DIR)/src/main.c.o: $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
+# Game code includes NuSystem's header through its converted copy, so the
+# copy must exist before any game file compiles. The .d files make the
+# files that include it rebuild when it changes.
+$(filter $(BUILD_DIR)/src/%,$(O_FILES)): | $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
 
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h: $(LIBNUSYS_DIR)/nusys.h
 	@mkdir -p $(dir $@)
