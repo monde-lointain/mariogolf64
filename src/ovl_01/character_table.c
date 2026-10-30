@@ -133,7 +133,8 @@ static s32 f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
 /* The arrows' blink frame, flipped every TABLE_ARROW_BLINK_FRAMES frames */
 static s32 f_TableArrowFrame = 0;
 static s32 f_TableArrowTimer = 0;
-static s32 D_802301A4_ovl_01 = 0;
+/* Reset with the arrows' blink, but read by no routine */
+static s32 f_UnreadTableArrowState = 0;
 /*
  * The character in each place of the table: the CharacterId of each
  * CharacterChoice, as character_select.c keeps its own copy
@@ -255,7 +256,7 @@ void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
       ReadEncodedAsset(f_TableArrows, &asset);
       f_TableArrowFrame = 0;
       f_TableArrowTimer = 0;
-      D_802301A4_ovl_01 = 0;
+      f_UnreadTableArrowState = 0;
       break;
     case TABLE_BUFFER_STAR:
       f_TableStar = buffer;
