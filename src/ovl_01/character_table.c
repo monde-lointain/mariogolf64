@@ -27,7 +27,7 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
  * ASSET_SPINNING_STAR */
 #define ASSET_TABLE_ARROWS 0x94A
 
-/* func_80217464 squeezes the star's image to fit a table cell */
+/* DrawTableStar squeezes the star's image to fit a table cell */
 #define TABLE_STAR_IMAGE_WIDTH 32
 #define TABLE_STAR_IMAGE_HEIGHT 24
 #define TABLE_STAR_WIDTH 24
@@ -123,7 +123,7 @@ void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
 void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y);
 void DrawTableLines(Gfx** displayListHead);
 void DrawTablePopup(Gfx** displayListHead);
-void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top);
+void DrawTableStar(Gfx** displayListHead, s32 left, s32 top);
 
 /* The popup's top-left corner on the screen, set with its corner */
 static s32 f_TablePopupLeft = TABLE_POPUP_LEFT_X;
@@ -427,7 +427,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
        * won more */
       if (save->awards.matchups[rowCharacter][columnCharacter].winBits &
           WON_UNSAVED_FLAG) {
-        func_80217464_ovl_01(&gfx,
+        DrawTableStar(&gfx,
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
             (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_STAR_Y);
       } else if (columnWins != 0) {
@@ -769,7 +769,9 @@ void func_8021730C_ovl_01(void) {
   }
 }
 
-void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
+/* Draws the spinning star's image squeezed into the table cell at (left, top)
+ */
+void DrawTableStar(Gfx** displayListHead, s32 left, s32 top) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
