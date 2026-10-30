@@ -29,10 +29,6 @@
 /* The images of g_CourseIconAssets that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
 
-/* LoadCourseTrophyImages reads the chosen course's first trophy frame into
- * both buffers, so either can be shown while the other is read */
-#define TROPHY_FRAME_BUFFER_COUNT 2
-
 /* DrawCourseBanner squeezes the banner's strips under the course menu's title,
  * with the course's name on it */
 #define COURSE_BANNER_TOP 110
