@@ -161,6 +161,8 @@ Boolean IsTextSlotRevealed(s32 slot);
 s32 MeasureText(char* text, s32 fontSize, TextFlags flags);
 void MeasureMessage(
     MessageId messageId, s32 fontSize, s32* width, s32* height, s32 slot);
+/* The text routines take char* rather than const char*: GCC reads through a
+ * const pointer as unchanging memory, which compiles them differently */
 void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text);
 void BeginShadowedText(Gfx** displayListHead);
 void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text);

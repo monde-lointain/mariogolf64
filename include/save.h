@@ -521,8 +521,8 @@ typedef struct SaveCheck {
 
 /* Where a copy of the save data and its check are kept */
 typedef struct SaveCopyLocation {
-  /* 0x0 */ char* dataFileName; /* On the development host */
-  /* 0x4 */ char* checkFileName; /* On the development host */
+  /* 0x0 */ const char* dataFileName; /* On the development host */
+  /* 0x4 */ const char* checkFileName; /* On the development host */
   /* 0x8 */ u32 dataSramAddress;
   /* 0xC */ u32 checkSramAddress;
 } SaveCopyLocation;

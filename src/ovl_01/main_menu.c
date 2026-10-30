@@ -542,11 +542,11 @@ static const char* D_8022C084_ovl_01[] UNUSED = {"STRAIGHT", "DRAW", "FADE"};
 static const char* D_8022C090_ovl_01[] UNUSED = {
     "DRIVE CON", "NEAR PIN", "STROKE", "SKINS", "NASSO", "LASVEGAS"};
 /* Read by no routine */
-static const char* D_8022C0A8_ovl_01[] UNUSED = {"TEST COURSE1", "TEST COURSE2",
+static const char* f_TestCourseNames[] UNUSED = {"TEST COURSE1", "TEST COURSE2",
     "TEST COURSE3", "TEST COURSE4", "TEST COURSE5", "TEST COURSE6",
     "TEST COURSE7", "TEST COURSE8", "TEST COURSE9", "TEST COURSE10"};
 /* The caddies' names */
-static const char* D_8022C0D0_ovl_01[CADDY_COUNT] = {"MARIO", "PEACH"};
+static const char* f_CaddyNames[CADDY_COUNT] = {"MARIO", "PEACH"};
 /* Read by no routine */
 static const char* D_8022C0D8_ovl_01[] UNUSED = {"1W", "3W", "4W", "2I", "3I",
     "4I", "5I", "6I", "7I", "8I", "9I", "PW", "SW", "PT"};
@@ -4591,7 +4591,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 #define CADDY_SELECT_FIRST_Y 64
 #define CADDY_SELECT_LINE_HEIGHT 8
 
-extern const char D_8023176C_ovl_01[];
+extern const char g_CaddySelectTitle[];
 
 /* The g_BetPagesPhase phase in which the course select's banners slide the
  * other way
@@ -7185,8 +7185,8 @@ void DrawCaddySelect(Gfx** displayListHead) {
   DrawMenuBackdropLayers(&gfx, BOARD_BACKDROP_LAYERS);
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  DrawShadowedText(
-      &gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y, D_8023176C_ovl_01);
+  DrawShadowedText(&gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y,
+      (char*)g_CaddySelectTitle);
   for (caddyIndex = 0; caddyIndex != CADDY_COUNT; caddyIndex++) {
     if (g_MenuMemory.caddyChoice == caddyIndex) {
       SetTextColor(&gfx, 255, 255, 0);
@@ -7196,7 +7196,7 @@ void DrawCaddySelect(Gfx** displayListHead) {
 
     DrawShadowedText(&gfx, CADDY_SELECT_NAME_X,
         (caddyIndex * CADDY_SELECT_LINE_HEIGHT) + CADDY_SELECT_FIRST_Y,
-        D_8022C0D0_ovl_01[caddyIndex]);
+        (char*)f_CaddyNames[caddyIndex]);
   }
 
   gDPPipeSync(gfx++);
@@ -7205,7 +7205,7 @@ void DrawCaddySelect(Gfx** displayListHead) {
 
 /* Defined after the function, as the INCLUDE_ASM before it leaves the assembler
  * in .text */
-const char D_8023176C_ovl_01[] = "CADDY SELECT";
+const char g_CaddySelectTitle[] = "CADDY SELECT";
 
 /* The blank screen draws nothing over the menu's cleared frame */
 void DrawBlankScreen(Gfx** displayListHead UNUSED) {}

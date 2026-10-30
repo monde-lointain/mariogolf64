@@ -300,7 +300,7 @@ void PutDebugText(s8* text, s32 column, s32 row) {
   f_DebugTextHighlight = 0;
 }
 
-void PrintDebugText(char* text, s32 column, s32 row) {
+void PrintDebugText(const char* text, s32 column, s32 row) {
   if (g_IsDebugEnabled) {
     PutDebugText((s8*)text, column, row);
   }

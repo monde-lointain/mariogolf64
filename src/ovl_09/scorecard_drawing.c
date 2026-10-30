@@ -973,7 +973,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
           (u8)((s32)(sinf(f_WinColorAngle + (M_PI / 2)) * WIN_COLOR_SWING) +
               WIN_COLOR_MIDPOINT));
       DrawSmallText(&gfx, g_Scorecard.x + SKINS_WIN_LEFT,
-          SKINS_WIN_TOP + (i * SKINS_ROW_SPACING), f_WinText);
+          SKINS_WIN_TOP + (i * SKINS_ROW_SPACING), (char*)f_WinText);
     }
   }
 

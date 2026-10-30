@@ -698,7 +698,7 @@ enum HostCommand {
   HOST_COMMAND_READ_FILE
 };
 
-s32 WriteHostFile(char* fileName, u32 size) {
+s32 WriteHostFile(const char* fileName, u32 size) {
   u32* command;
   char* nameBuffer;
   u32 nameSize;
@@ -737,7 +737,7 @@ s32 WriteHostFile(char* fileName, u32 size) {
   return result;
 }
 
-s32 ReadHostFile(char* fileName, u32* size) {
+s32 ReadHostFile(const char* fileName, u32* size) {
   u32* command;
   char* nameBuffer;
   u32 nameSize;
