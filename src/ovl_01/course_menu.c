@@ -1536,8 +1536,8 @@ void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
   *displayListHead = gfx;
 }
 
-/* Nothing calls this */
-void func_80212858_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
+/* Draws "OFF" in the large digits' two glyphs for it; nothing calls this */
+void DrawOffLabel(Gfx** displayListHead, s32 x, s32 y) {
   Gfx* gfx = *displayListHead;
   s32 glyphIndex;
 
