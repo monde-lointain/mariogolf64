@@ -10,8 +10,18 @@
 
 #define HEAP_BILLBOARD 1
 
-/* The memory the game gives the general pool */
+/*
+ * The memory the game gives the general pool, from the end of the overlays'
+ * regions. The original builds the start as a constant, which a symbol's
+ * address does not compile to; other builds take it from the link, which
+ * packs the regions.
+ */
+#ifdef __IS_KMC__
 #define MAIN_REGION_START 0x8025D800
+#else
+extern u8 overlay_regions_VRAM_END[];
+#define MAIN_REGION_START ((u32)overlay_regions_VRAM_END)
+#endif
 #define MAIN_REGION_END 0x802EA000
 
 void AddHeapRegion(s32 heapIndex, void* start, void* end);

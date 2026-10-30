@@ -228,9 +228,10 @@ clean:
 distclean:
 	rm -rf $(BUILD_DIR) asm assets
 
-$(BUILD_DIR)/$(TARGET).ld: $(SPLAT_LD)
+# The modern build's script packs the overlays' regions, so code can grow
+$(BUILD_DIR)/$(TARGET).ld: $(SPLAT_LD) tools/shiftable_ld.py
 	@mkdir -p $(dir $@)
-	sed -e '\|$(MATCHING_ONLY_O)|d' -e 's|build/|$(BUILD_DIR)/|g' $< > $@
+	sed -e '\|$(MATCHING_ONLY_O)|d' -e 's|build/|$(BUILD_DIR)/|g' $< | $(PYTHON) tools/shiftable_ld.py > $@
 
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary --gap-fill=0xFF $< $@
