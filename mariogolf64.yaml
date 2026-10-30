@@ -563,6 +563,11 @@ segments:
       # build main_bss.c defines those objects, so these take no space here.
       - { type: .bss, vram: 0x800FBD30, name: current_shot }
       - { type: .bss, vram: 0x800FBD30, name: work_area }
+      - { type: .bss, vram: 0x800FBD30, name: libkmc/errno }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/ultralib/src/debug/kdebugserver }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/nudramstack }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/nurdpoutput }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/nuyieldbuf }
       - { type: .bss, vram: 0x800FBD30, name: main_bss }
 
   - name: ovl_00

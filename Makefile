@@ -36,6 +36,7 @@ GAME_CFLAGS := -ffast-math $(KMC_ALIGN)
 GAME_DEFINES := -D__IS_KMC__=1
 ULTRALIB_COMPILER := gcc
 LD_SCRIPT   := $(SPLAT_LD)
+MATCHING_ONLY_O :=
 else
 BUILD_DIR   := build/modern
 COMPARE     := 0
@@ -46,10 +47,11 @@ CROSS       := $(N64_INST)/bin/mips64-elf-
 BIN_FORMAT  := elf32-bigmips
 CC          := $(CROSS)gcc
 LIB_CC      := $(CC)
-# GNU C89 keeps the meaning of the sources' old-style declarations, and
-# -fcommon the shared tentative definitions that the libraries rely on.
-# -fno-toplevel-reorder keeps the statics that only included asm uses.
-TARGETFLAGS := -G0 -march=vr4300 -mabi=32 -mfix4300 -mno-abicalls -fno-PIC -std=gnu89 -fcommon \
+# GNU C89 keeps the meaning of the sources' old-style declarations.
+# -fno-common makes a second definition of a variable an error, where KMC
+# GCC would merge it. -fno-toplevel-reorder keeps the statics that only
+# included asm uses.
+TARGETFLAGS := -G0 -march=vr4300 -mabi=32 -mfix4300 -mno-abicalls -fno-PIC -std=gnu89 -fno-common \
                -ffreestanding -fno-strict-aliasing -mdivide-breaks -fno-toplevel-reorder \
                -fno-math-errno
 KMC_ALIGN   :=
@@ -61,6 +63,9 @@ ULTRALIB_MODERN := -DMODERN_CC
 # splat's linker script names the objects under build/, so this build
 # links a copy that names them under its own directory
 LD_SCRIPT   := $(BUILD_DIR)/$(TARGET).ld
+# main_bss.c only pins main's common objects at the original's addresses.
+# Without it, each object is placed with the module that defines it.
+MATCHING_ONLY_O := build/src/main_bss.c.o
 endif
 
 ROM         := $(BUILD_DIR)/$(TARGET).z64
@@ -107,8 +112,8 @@ CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m
 RUN_CC_CHECK   ?= 0
 
 # Every object the linker script asks for, under this build's directory
-O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(shell test -f $(SPLAT_LD) && \
-  grep -oE 'build/[A-Za-z0-9_./-]+\.o' $(SPLAT_LD) | sort -u))
+O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(filter-out $(MATCHING_ONLY_O),$(shell \
+  test -f $(SPLAT_LD) && grep -oE 'build/[A-Za-z0-9_./-]+\.o' $(SPLAT_LD) | sort -u)))
 
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
 # game's copy was compiled with signed chars
@@ -214,7 +219,7 @@ distclean:
 
 $(BUILD_DIR)/$(TARGET).ld: $(SPLAT_LD)
 	@mkdir -p $(dir $@)
-	sed 's|build/|$(BUILD_DIR)/|g' $< > $@
+	sed -e '\|$(MATCHING_ONLY_O)|d' -e 's|build/|$(BUILD_DIR)/|g' $< > $@
 
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary --gap-fill=0xFF $< $@

@@ -1,14 +1,15 @@
 /*
  * The end of main's bss: every object that the original's linker allocated
- * from main's common block, defined here in the original's address order.
+ * from main's common block, defined here in the original's address order. Only
+ * the matching build compiles it.
  *
  * The original main segment was one relocatable, whose commons its linker
  * laid out in the order of a 4051-bucket symbol hash table, a layout no
  * per-object link can reproduce from the files that use them. Defining them
  * in .bss here, in that order, fixes their addresses whatever their names,
- * while their types still give their sizes. The game's own files still
- * declare the objects they use, and the library ones keep their commons,
- * which bind to these definitions.
+ * while their types still give their sizes. Each object's own module, game or
+ * library, defines it too, as a common that binds to the definition here.
+ * Other builds place each object with its module instead.
  */
 #include "common.h"
 
