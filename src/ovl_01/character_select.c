@@ -183,7 +183,7 @@ static u8 f_UnreadSelectBytes[8] = {
 static s32 f_StickXHoldTimer = 0;
 static s32 f_StickYHoldTimer = 0;
 /* Read by no routine */
-static char D_8022FFA8_ovl_01[3][10] = {"Straight", "Draw", "Fade"};
+static char f_UnreadCurveNames[3][10] = {"Straight", "Draw", "Fade"};
 /* The cell of the face DrawGridFaces last read, read by no routine */
 static s16 f_UnreadFaceColumn = 0;
 static s16 f_UnreadFaceRow = 0;
