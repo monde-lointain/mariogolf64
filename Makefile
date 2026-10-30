@@ -101,9 +101,11 @@ ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
 # table's buckets. The table grows with the symbol count unless it starts big
 # enough, so fix its size to keep the commons where the names put them.
 LD_HASH_SIZE := 8191
-LDFLAGS      = -T $(LD_SCRIPT) -T undefined_syms.txt -T $(SPLAT_DIR)/undefined_syms_auto.txt \
-               -T $(SPLAT_DIR)/undefined_funcs_auto.txt -Map $(MAP) --no-check-sections \
-               --hash-size=$(LD_HASH_SIZE) -G 0
+# The addresses of the symbols that no object defines
+SYMBOL_SCRIPTS := undefined_syms.txt $(SPLAT_DIR)/undefined_syms_auto.txt \
+                  $(SPLAT_DIR)/undefined_funcs_auto.txt
+LAYOUT_FLAGS   := --no-check-sections --hash-size=$(LD_HASH_SIZE) -G 0
+LDFLAGS         = -T $(LD_SCRIPT) $(addprefix -T ,$(SYMBOL_SCRIPTS)) -Map $(MAP) $(LAYOUT_FLAGS)
 
 # Host-side syntax checking of C sources with clang, pretending to be 32-bit MIPS
 CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m32 -nostdinc \
@@ -160,7 +162,7 @@ $(BUILD_DIR)/$(LIBKMC_DIR)/%.o: OPTFLAGS := -O1 -fno-fast-math
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
-.PHONY: all extract clean distclean setup tools format lint pycheck
+.PHONY: all extract clean distclean setup tools format lint pycheck check-shiftable
 
 all: $(ROM)
 ifneq ($(COMPARE),0)
@@ -186,6 +188,12 @@ pycheck:
 	.venv/bin/ruff check --quiet
 	.venv/bin/basedpyright --level warning
 	.venv/bin/vulture
+
+# Lists the references that hold only while the code and data keep their
+# original addresses. With NON_MATCHING=1, it checks the C drafts in place of
+# the asm, which names far fewer of the addresses.
+check-shiftable: $(ELF)
+	$(PYTHON) tools/check_shiftable.py $(LD) $< $(LD_SCRIPT) $(SYMBOL_SCRIPTS) -- $(LAYOUT_FLAGS)
 
 CLANG_TIDY ?= run-clang-tidy-23
 # libkmc is KMC's C library, which keeps the C library's names
