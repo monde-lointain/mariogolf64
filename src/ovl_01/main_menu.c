@@ -383,7 +383,7 @@ void LoadCodeEntryBuffer(void* buffer, s32 bufferKind);
 void UpdateClubTournament(void);
 s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
-s32 func_8022BDC4_ovl_01(void);
+s32 GetClubTournamentCharacter(void);
 s32 func_8022BDD0_ovl_01(void);
 s32 GetChosenBestShot(void);
 void LoadRingShotRecord(RingShotRecord* record);
@@ -1746,8 +1746,8 @@ void SetUpChosenGame(void) {
       g_ChosenHandicaps[index] = 0;
     }
 
-    if (func_8022BDC4_ovl_01() != -1) {
-      g_ChosenCharacters[0] = func_8022BDC4_ovl_01();
+    if (GetClubTournamentCharacter() != -1) {
+      g_ChosenCharacters[0] = GetClubTournamentCharacter();
       g_ChosenLefties[0] = 0;
     }
   } else {

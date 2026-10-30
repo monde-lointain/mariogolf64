@@ -335,7 +335,7 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead);
 void func_8022B360_ovl_01(Gfx** displayListHead);
 void func_8022B668_ovl_01(Gfx** displayListHead);
 void DrawCodeCursor(Gfx** displayListHead);
-s32 func_8022BDC4_ovl_01(void);
+s32 GetClubTournamentCharacter(void);
 s32 func_8022B46C_ovl_01(void);
 s32 func_8022B5E0_ovl_01(void);
 
@@ -1255,9 +1255,9 @@ void UpdateClubTournament(void) {
         ResetMenuWindow();
         LoadClubCourseIcon(GetClubTournamentCourse());
         D_80230F70_ovl_01 = CLUB_CODE_PHASE_DETAILS;
-        if (func_8022BDC4_ovl_01() >= 0) {
-          LoadMenuWindowImage(func_8022BDC4_ovl_01());
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 0);
+        if (GetClubTournamentCharacter() >= 0) {
+          LoadMenuWindowImage(GetClubTournamentCharacter());
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 0);
         } else {
           LoadMenuWindowImage(CHARACTER_KID);
           LoadMenuWindowPalette(CHARACTER_KID, 0);
@@ -1391,7 +1391,7 @@ void func_80229278_ovl_01(void) {
       PlaySound(SOUND_ENTER_TOURNAMENT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_GameState.isClubTournament = TRUE;
       g_ChosenPlayerCount = 1;
-      if (func_8022BDB0_ovl_01()) {
+      if (IsClubCharacterChoosable()) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         StartLoadingChosenHole();
         g_MenuScreen = MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT;
@@ -1554,7 +1554,7 @@ void DrawClubTournament(Gfx** displayListHead) {
   func_8022B668_ovl_01(&gfx);
   if (D_80230F70_ovl_01 == 1) {
     if (IsNintendoClubTournament()) {
-      windowStyle = (func_8022BDC4_ovl_01() != -1)
+      windowStyle = (GetClubTournamentCharacter() != -1)
           ? CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO
           : CLUB_WINDOW_STYLE_NINTENDO;
       /* The held C buttons pick which of the tournament's pictures shows */
@@ -1565,13 +1565,13 @@ void DrawClubTournament(Gfx** displayListHead) {
             g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
             g_ControllerStates[3].buttons;
         if (buttons & L_CBUTTONS) {
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 1);
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 1);
         } else if (buttons & D_CBUTTONS) {
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 2);
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 2);
         } else if (buttons & R_CBUTTONS) {
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 3);
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 3);
         } else {
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 0);
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 0);
         }
       }
 
@@ -1580,21 +1580,22 @@ void DrawClubTournament(Gfx** displayListHead) {
           windowStyle);
       func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
     } else {
-      windowStyle = (func_8022BDC4_ovl_01() != -1) ? CLUB_WINDOW_STYLE_PICTURE
-                                                   : CLUB_WINDOW_STYLE_PLAIN;
+      windowStyle = (GetClubTournamentCharacter() != -1)
+          ? CLUB_WINDOW_STYLE_PICTURE
+          : CLUB_WINDOW_STYLE_PLAIN;
       if (windowStyle != CLUB_WINDOW_STYLE_PLAIN &&
           GetWipeKind() == WIPE_NONE) {
         buttons = g_ControllerStates[0].buttons |
             g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
             g_ControllerStates[3].buttons;
         if (buttons & L_CBUTTONS) {
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 1);
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 1);
         } else if (buttons & D_CBUTTONS) {
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 2);
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 2);
         } else if (buttons & R_CBUTTONS) {
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 3);
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 3);
         } else {
-          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 0);
+          LoadMenuWindowPalette(GetClubTournamentCharacter(), 0);
         }
       }
 
@@ -2071,11 +2072,16 @@ void DrawCodeCursor(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawCodeCursor);
 #endif
 
-s32 func_8022BDB0_ovl_01(void) {
+/* Returns whether the club tournament lets the player choose a character */
+s32 IsClubCharacterChoosable(void) {
   return D_80105DC0.characterIndex == -1;
 }
 
-s32 func_8022BDC4_ovl_01(void) {
+/*
+ * Returns the character that the club tournament's rules set, or -1 when the
+ * player chooses one
+ */
+s32 GetClubTournamentCharacter(void) {
   return D_80105DC0.characterIndex;
 }
 
