@@ -1279,11 +1279,7 @@ void DrawScorecard(Gfx** displayListHead) {
  * Draws the scorecard's tabs and the table under them. The tab strips are
  * drawn back to front, the last in front at full brightness, and their order
  * depends on the page shown.
- *
- * Doesn't match: the target adds each tab rectangle's top offset to the
- * scorecard's y before adding the row, where this adds the row first.
  */
-#ifdef NON_MATCHING
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   s32 tabStrips[THREE_PAGE_COUNT];
   Gfx* gfx = *displayListHead;
@@ -1293,6 +1289,7 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   s32 texelsOffset;
   s32 loadHeight;
   s32 top;
+  s32 tabTop;
   s32 tabBottom;
 
   gSPDisplayList(gfx++, g_DecalTextureSetup);
@@ -1341,8 +1338,9 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
       LoadTextureBlock(&gfx, g_Scorecard.tableImage + texelsOffset, G_IM_FMT_CI,
           G_IM_SIZ_8b, TABLE_WIDTH, TABLE_LOAD_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       tabBottom = g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT;
+      tabTop = g_Scorecard.y + TAB_TOP;
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + TABLE_LEFT),
-          QuarterPixels(row + (g_Scorecard.y + TAB_TOP) + dropY),
+          QuarterPixels(row + tabTop + dropY),
           QuarterPixels(g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH),
           QuarterPixels(row + tabBottom + dropY), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1374,9 +1372,6 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawScorecardTable);
-#endif
 
 void FreeResultCharacters(void) {
   FreeCharacterSlot(0);
