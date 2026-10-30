@@ -88,7 +88,7 @@ extern void* g_MenuLabelImages[2];
 extern void* g_MenuTitleImages[2];
 extern void* D_800FBDFC[2];
 extern void* D_800FF4C4[2];
-extern void* D_801B93E0[5];
+extern void* g_MenuArrowSizedImages[5];
 extern void* D_8010526C[2];
 extern void* D_800FF180[2];
 extern void* D_80106100;
@@ -561,10 +561,10 @@ void LoadMenuResources(void) {
     ReadEncodedAsset(D_800FF4C4[index], &asset);
   }
 
-  for (index = 0; index != ARRAY_COUNT(D_801B93E0); index++) {
-    D_801B93E0[index] =
+  for (index = 0; index != ARRAY_COUNT(g_MenuArrowSizedImages); index++) {
+    g_MenuArrowSizedImages[index] =
         AllocMemory(OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset));
-    ReadEncodedAsset(D_801B93E0[index], &asset);
+    ReadEncodedAsset(g_MenuArrowSizedImages[index], &asset);
   }
 
   size = OpenEncodedAsset(0x623, &asset);
@@ -648,8 +648,8 @@ void FreeMenuResources(void) {
     FreeMemory(&D_800FBE38[index]);
   }
 
-  for (index = 0; index != ARRAY_COUNT(D_801B93E0); index++) {
-    FreeMemory(&D_801B93E0[index]);
+  for (index = 0; index != ARRAY_COUNT(g_MenuArrowSizedImages); index++) {
+    FreeMemory(&g_MenuArrowSizedImages[index]);
   }
 
   FreeMemory(&D_8010526C[0]);

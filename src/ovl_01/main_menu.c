@@ -126,7 +126,7 @@
 #define TITLE_LABEL_HEIGHT 20
 #define TITLE_LABEL_IMAGE_SIZE (TITLE_LABEL_WIDTH * TITLE_LABEL_HEIGHT / 2)
 /* DrawSpinningStars draws a row of spinning stars, one per hole, from
- * D_801B93E0, and enlarges the chosen hole's */
+ * g_MenuArrowSizedImages, and enlarges the chosen hole's */
 #define STAR_WIDTH 32
 #define STAR_HEIGHT 24
 #define STAR_FRAME_COUNT 15
@@ -315,7 +315,7 @@ extern void* D_801052C4[2];
 extern void* D_80106100;
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
-extern void* D_801B93E0[5];
+extern void* g_MenuArrowSizedImages[5];
 
 void InitPlay(s32 kind);
 void DrawModeSelect(Gfx** displayListHead);
@@ -670,7 +670,7 @@ s32 g_AnimatedIconFrameIndex = 0;
 u8 g_AnimatedIconBufferIndex = 0;
 s8 g_AnimatedIconFrameTime = 0;
 static s32 f_SpinningStarFrameIndex = 0;
-/* Which of D_801B93E0's buffers holds the star frame shown */
+/* Which of g_MenuArrowSizedImages's buffers holds the star frame shown */
 static u8 f_SpinningStarBufferIndex = 0;
 static s8 f_SpinningStarFrameTime = 0;
 static u8 D_8022F8CE_ovl_01 = 0;
@@ -1260,7 +1260,7 @@ void UpdateMenus(void) {
         f_SpinningStarFrameTime = 0;
         OpenEncodedAsset(
             f_MenuStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
-        ReadEncodedAsset(D_801B93E0[0], &asset);
+        ReadEncodedAsset(g_MenuArrowSizedImages[0], &asset);
         break;
 
       case MENU_SCREEN_CHARACTER_SELECT:
@@ -1410,7 +1410,8 @@ void UpdateMenus(void) {
           f_IsViewerModelKindChanged = 0;
         } else {
           LoadHelpBoardImage(g_MenuIconImages[0][0], HELP_BOARD_IMAGE_HAND);
-          LoadHelpBoardImage(D_801B93E0[1], HELP_BOARD_IMAGE_ARROWS);
+          LoadHelpBoardImage(
+              g_MenuArrowSizedImages[1], HELP_BOARD_IMAGE_ARROWS);
           f_MenuBoardImageIndex ^= 1;
           LoadHelpBoardImage(g_MenuBoardImages[f_MenuBoardImageIndex],
               HELP_BOARD_IMAGE_CHALKBOARD);
@@ -1499,13 +1500,15 @@ void UpdateMenus(void) {
         f_MenuBoardImageIndex ^= 1;
         LoadPlayerStatsBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
             PLAYER_STATS_BUFFER_BET_ICONS);
-        LoadPlayerStatsBuffer(D_801B93E0[0], PLAYER_STATS_BUFFER_STAKE_MARK);
+        LoadPlayerStatsBuffer(
+            g_MenuArrowSizedImages[0], PLAYER_STATS_BUFFER_STAKE_MARK);
         LoadPlayerStatsBuffer(g_NamePlateImage, PLAYER_STATS_BUFFER_NAME_PLATE);
         LoadPlayerStatsBuffer(
             D_8010526C[0], PLAYER_STATS_BUFFER_BET_ICON_FIRST_FRAME);
         LoadPlayerStatsBuffer(
             D_8010526C[1], PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME);
-        LoadPlayerStatsBuffer(D_801B93E0[1], PLAYER_STATS_BUFFER_GREEN_ARROWS);
+        LoadPlayerStatsBuffer(
+            g_MenuArrowSizedImages[1], PLAYER_STATS_BUFFER_GREEN_ARROWS);
         LoadPlayerStatsBuffer(D_800FF180[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
         LoadPlayerStatsBuffer(
             D_800FF180[1], PLAYER_STATS_BUFFER_HANDICAP_PLAQUE);
@@ -7217,7 +7220,7 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     u8 enlargesChosenHole) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
-  void* image = D_801B93E0[f_SpinningStarBufferIndex];
+  void* image = g_MenuArrowSizedImages[f_SpinningStarBufferIndex];
   u8 starIndex = 0;
   s32 growWidth = 0;
   s32 growHeight;
@@ -7269,7 +7272,7 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
 
     f_SpinningStarBufferIndex = f_SpinningStarBufferIndex == 0;
     OpenEncodedAsset(f_MenuStarFrameAssets[f_SpinningStarFrameIndex], &asset);
-    ReadEncodedAsset(D_801B93E0[f_SpinningStarBufferIndex], &asset);
+    ReadEncodedAsset(g_MenuArrowSizedImages[f_SpinningStarBufferIndex], &asset);
   }
 
   *displayListHead = gfx;

@@ -364,7 +364,9 @@ u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] BSS ALIGNED(
 OSMesgQueue nuSiMesgQ BSS ALIGNED(8) = {0};
 Vtx* g_VertexListHead BSS = {0};
 Gfx* g_DisplayListHead BSS = {0};
-void* D_801B93E0[5] BSS ALIGNED(8) = {0};
+/* Five buffers the size of the green arrows image, which menu screens read
+ * other images into */
+void* g_MenuArrowSizedImages[5] BSS ALIGNED(8) = {0};
 OSMesgQueue nuGfxTaskMgrMesgQ BSS ALIGNED(8) = {0};
 s8 D_801B9410 BSS = {0};
 Mtx f_DropMatrices[DRAW_BUFFER_COUNT] BSS ALIGNED(8) = {0};
