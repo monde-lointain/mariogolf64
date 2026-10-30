@@ -3411,6 +3411,7 @@ DrawBlankScreen = 0x80207E18; // type:func segment:ovl_01
 UpdateUnusedStrokeStart = 0x801F9BCC; // type:func segment:ovl_01
 UpdateUnusedBackToMain = 0x801FA1B8; // type:func segment:ovl_01
 DrawUnusedBoardScreen = 0x80206A2C; // type:func segment:ovl_01
+DrawPlaceLabel = 0x802149A8; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01

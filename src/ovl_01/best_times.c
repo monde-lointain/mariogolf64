@@ -72,7 +72,7 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
-void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place);
+void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place);
 void func_8021508C_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 frameCount);
 
@@ -377,7 +377,7 @@ void DrawBestTimes(Gfx** displayListHead) {
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   for (otherIndex = 0; otherIndex != BEST_TIME_COUNT; otherIndex++) {
-    func_802149A8_ovl_01(&gfx, BEST_TIME_PLACE_X,
+    DrawPlaceLabel(&gfx, BEST_TIME_PLACE_X,
         BEST_TIME_FIRST_PLACE_Y + (otherIndex * BEST_TIME_PLACE_SPACING),
         otherIndex + 1);
     time = save->bestTimes[memory->bestTimesCourse][otherIndex];
@@ -474,11 +474,13 @@ void func_802144E4_ovl_01(Gfx** displayListHead, s32 left, s32 top,
 }
 
 /*
+ * Draws a place's label, such as 1st, at (left, top): its number and then its
+ * suffix, from the places image, with the place kept within the label's range.
  * Doesn't match: the original needs one register fewer for the display
  * list's pointers, so its frame is 16 bytes smaller.
  */
 #ifdef NON_MATCHING
-void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place) {
+void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   Gfx* gfx = *displayListHead;
 
   if (place <= 0) {
@@ -529,7 +531,7 @@ void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", func_802149A8_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", DrawPlaceLabel);
 #endif
 
 void func_8021508C_ovl_01(
