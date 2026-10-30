@@ -184,7 +184,9 @@ void* g_DistanceSignImage BSS = {0};
 s32 g_ControllerCount BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
 Camera g_MapCamera BSS = {0};
-void* D_8010526C[2] BSS = {0};
+/* The animated icon's two frame buffers, the size of a mode icon, which some
+ * screens read other images into */
+void* g_AnimatedIconImages[2] BSS = {0};
 u8 __osMaxControllers BSS = {0};
 Mtx D_80105278 BSS ALIGNED(8) = {0};
 u8 g_ConnectedControllerBits BSS = {0};

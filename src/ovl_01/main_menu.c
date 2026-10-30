@@ -270,7 +270,7 @@ extern const char D_80231514_ovl_01[];
 
 extern s8 D_801052E8;
 extern s32 D_800FE334;
-extern void* D_8010526C[2];
+extern void* g_AnimatedIconImages[2];
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
@@ -1240,7 +1240,8 @@ void UpdateMenus(void) {
         g_AnimatedIconBufferIndex = 0;
         g_AnimatedIconFrameTime = 0;
         OpenEncodedAsset(g_ModeIconAnimations[iconIndex][0], &asset);
-        ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
+        ReadEncodedAsset(
+            g_AnimatedIconImages[g_AnimatedIconBufferIndex], &asset);
         LoadPlayerStatsBuffer(
             g_MenuSpareImages[0], PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS);
         g_MenuFidgetDelays[0] = guRandom() % FIDGET_DELAY_RANGE;
@@ -1319,7 +1320,7 @@ void UpdateMenus(void) {
         g_AnimatedIconFrameTime = 0;
         ReadSavedGames();
         LoadSaveMenuBuffers(g_MenuIconImages[0], SAVE_MENU_BUFFER_SLOTS);
-        LoadSaveMenuBuffers(D_8010526C, SAVE_MENU_BUFFER_CHOSEN);
+        LoadSaveMenuBuffers(g_AnimatedIconImages, SAVE_MENU_BUFFER_CHOSEN);
         LoadGameModeLabelBuffer(
             g_NamePlateImage, GAME_MODE_LABEL_BUFFER_NAME_PLATE);
         LoadGameModeLabelBuffer(
@@ -1504,9 +1505,9 @@ void UpdateMenus(void) {
             g_MenuArrowSizedImages[0], PLAYER_STATS_BUFFER_STAKE_MARK);
         LoadPlayerStatsBuffer(g_NamePlateImage, PLAYER_STATS_BUFFER_NAME_PLATE);
         LoadPlayerStatsBuffer(
-            D_8010526C[0], PLAYER_STATS_BUFFER_BET_ICON_FIRST_FRAME);
+            g_AnimatedIconImages[0], PLAYER_STATS_BUFFER_BET_ICON_FIRST_FRAME);
         LoadPlayerStatsBuffer(
-            D_8010526C[1], PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME);
+            g_AnimatedIconImages[1], PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME);
         LoadPlayerStatsBuffer(
             g_MenuArrowSizedImages[1], PLAYER_STATS_BUFFER_GREEN_ARROWS);
         LoadPlayerStatsBuffer(D_800FF180[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
@@ -1536,7 +1537,8 @@ void UpdateMenus(void) {
         func_8020E0AC_ovl_01(D_800FF4C4, COURSE_BUFFER_FIRST);
         LoadCourseMenuBuffer(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
         LoadCourseMenuBuffer(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
-        LoadCourseMenuBuffer(D_8010526C[0], COURSE_MENU_BUFFER_SPINNING_BADGE);
+        LoadCourseMenuBuffer(
+            g_AnimatedIconImages[0], COURSE_MENU_BUFFER_SPINNING_BADGE);
         LoadCourseMenuBuffer(
             D_800FF180[0], COURSE_MENU_BUFFER_DIGITS_AND_ARROWS);
         f_ImageSlotIndex ^= 1;
@@ -1612,7 +1614,7 @@ void UpdateMenus(void) {
         LoadRingShotRecordBuffer(g_MenuLabelImages[f_MenuLabelImageIndex],
             RING_SHOT_RECORD_BUFFER_RAINBOW_BOX);
         LoadRingShotRecordBuffer(
-            D_8010526C[0], RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS);
+            g_AnimatedIconImages[0], RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS);
         LoadRingShotCourseIcons(g_MenuIconImages[0]);
         LoadRingShotRecordBuffer(
             g_MenuSpareImages[0], RING_SHOT_RECORD_BUFFER_GREEN_ARROWS);
@@ -2184,7 +2186,8 @@ void UpdateAnimationViewer(void) {
       g_ModeIconAnimations[f_ModeChoiceIcons[g_ChosenPlayerCount - 1] \
                                             [g_MenuMemory.modeChoice]][0], \
       &asset); \
-  ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex ^ 1], &asset); \
+  ReadEncodedAsset( \
+      g_AnimatedIconImages[g_AnimatedIconBufferIndex ^ 1], &asset); \
   g_AnimatedIconBufferIndex ^= 1
 
 /*
@@ -5135,7 +5138,7 @@ void DrawModeIcon(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  image = D_8010526C[g_AnimatedIconBufferIndex];
+  image = g_AnimatedIconImages[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
@@ -5172,7 +5175,7 @@ void DrawModeIcon(Gfx** displayListHead) {
     g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
     OpenEncodedAsset(
         g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex], &asset);
-    ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
+    ReadEncodedAsset(g_AnimatedIconImages[g_AnimatedIconBufferIndex], &asset);
   }
 
   *displayListHead = gfx;
@@ -5192,7 +5195,7 @@ void DrawScaledModeIcon(
   u8 iconIndex;
 
   gDPPipeSync(gfx++);
-  image = D_8010526C[g_AnimatedIconBufferIndex];
+  image = g_AnimatedIconImages[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
@@ -5228,7 +5231,7 @@ void DrawScaledModeIcon(
     g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
     OpenEncodedAsset(
         g_ModeIconAnimations[iconIndex][g_AnimatedIconFrameIndex], &asset);
-    ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
+    ReadEncodedAsset(g_AnimatedIconImages[g_AnimatedIconBufferIndex], &asset);
   }
 
   *displayListHead = gfx;
@@ -7317,7 +7320,7 @@ void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
   s32 left;
   s32 top;
 
-  image = D_8010526C[g_AnimatedIconBufferIndex];
+  image = g_AnimatedIconImages[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal16(gfx++, GOLD_STAR_PALETTE, TextureAddress(ImageBody(image)));
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(image)), G_IM_FMT_CI,
       RING_SHOT_STAR_WIDTH, RING_SHOT_STAR_HEIGHT, GOLD_STAR_PALETTE,
@@ -7368,7 +7371,7 @@ void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
 
     g_AnimatedIconBufferIndex = g_AnimatedIconBufferIndex == 0;
     OpenEncodedAsset(f_MenuStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
-    ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
+    ReadEncodedAsset(g_AnimatedIconImages[g_AnimatedIconBufferIndex], &asset);
     OpenEncodedAsset(
         f_MenuEmptyStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
     ReadEncodedAsset(D_800FF180[g_AnimatedIconBufferIndex], &asset);
