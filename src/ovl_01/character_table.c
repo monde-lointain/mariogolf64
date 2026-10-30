@@ -228,7 +228,8 @@ static void* f_TableCursorBox;
 static void* D_8023AC68_ovl_01;
 static void* D_8023AC6C_ovl_01;
 static void* D_8023AC70_ovl_01;
-static s32 D_8023AC78_ovl_01[CHARACTER_COUNT];
+/* Whether the table shows or darkens each place's character */
+static s32 f_TableCharacterVisibility[CHARACTER_COUNT];
 
 void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -394,7 +395,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
   do {
     rowCharacter = D_802301A8_ovl_01[row];
     drawMode = FACE_DARKENED;
-    if (D_8023AC78_ovl_01[row] == TABLE_CHARACTER_SHOWN) {
+    if (f_TableCharacterVisibility[row] == TABLE_CHARACTER_SHOWN) {
       drawMode = FACE_PLAIN;
     }
 
@@ -407,7 +408,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
     do {
       columnCharacter = D_802301A8_ovl_01[column];
       drawMode = FACE_DARKENED;
-      if (D_8023AC78_ovl_01[column] != TABLE_CHARACTER_HIDDEN) {
+      if (f_TableCharacterVisibility[column] != TABLE_CHARACTER_HIDDEN) {
         drawMode = FACE_PLAIN;
       }
 
@@ -663,7 +664,7 @@ void DrawTablePopup(Gfx** displayListHead) {
   rowWins = save->awards.matchups[rowCharacter][columnCharacter].winBits &
       WIN_COUNT_MASK;
   faceMode = FACE_DARKENED;
-  if (D_8023AC78_ovl_01[rowIndex] != TABLE_CHARACTER_HIDDEN) {
+  if (f_TableCharacterVisibility[rowIndex] != TABLE_CHARACTER_HIDDEN) {
     faceMode = FACE_PLAIN;
   }
 
@@ -672,8 +673,8 @@ void DrawTablePopup(Gfx** displayListHead) {
       f_TablePopupLeft + TABLE_POPUP_ROW_FACE_X,
       f_TablePopupTop + TABLE_POPUP_FACE_Y, rowCharacter, faceMode);
   faceMode = FACE_DARKENED;
-  if (D_8023AC78_ovl_01[memory->tableFirstColumn + memory->tableColumn] !=
-      TABLE_CHARACTER_HIDDEN) {
+  if (f_TableCharacterVisibility[memory->tableFirstColumn +
+          memory->tableColumn] != TABLE_CHARACTER_HIDDEN) {
     faceMode = FACE_PLAIN;
   }
 
@@ -746,14 +747,14 @@ void MarkShownTableCharacters(void) {
 
   BuildCharacterGrid(1, FALSE);
   for (index = 0; index != CHARACTER_COUNT; index++) {
-    D_8023AC78_ovl_01[index] = TABLE_CHARACTER_HIDDEN;
+    f_TableCharacterVisibility[index] = TABLE_CHARACTER_HIDDEN;
   }
 
   for (index = 0; index != GRID_CHARACTER_COUNT; index++) {
     row = cells[index].row;
     column = cells[index].column;
     if (g_CharacterGrid[row][column] >= 0) {
-      D_8023AC78_ovl_01[index] = TABLE_CHARACTER_SHOWN;
+      f_TableCharacterVisibility[index] = TABLE_CHARACTER_SHOWN;
     }
   }
 
@@ -768,7 +769,7 @@ void MarkShownTableCharacters(void) {
     /* The original stores these one entry early, over the grid's last character
      */
     if (recordCount > 0) {
-      D_8023AC78_ovl_01[row - 1] = TABLE_CHARACTER_SHOWN;
+      f_TableCharacterVisibility[row - 1] = TABLE_CHARACTER_SHOWN;
     }
   }
 }
