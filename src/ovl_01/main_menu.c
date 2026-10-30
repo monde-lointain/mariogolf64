@@ -2737,17 +2737,17 @@ void UpdateCourseSelect(void) {
 }
 
 /*
- * Doesn't match: the original loads the -1 and 1 that the last sign test
- * compares with before the test of the slide's sign, leaving 8 diff lines
- * (4 opcodes).
+ * Handles the mini golf course select's input: turning the course disc,
+ * opening the bet pages and choosing the holes to play. It also slides the
+ * course record into place.
  */
-#ifdef NON_MATCHING
 void UpdateMiniGolfCourseSelect(void) {
   EncodedAsset asset;
   Boolean isDone;
   s32 course;
   s32 direction;
   s32 step;
+  s32 positiveSign;
   void*(*buffers)[MINI_GOLF_DISC_IMAGE_COUNT];
 
   isDone = IsHudAnimationDone();
@@ -2990,17 +2990,17 @@ void UpdateMiniGolfCourseSelect(void) {
   if (Abs(g_MenuMemory.miniGolfRecordSlide) != 0) {
     direction = g_MenuMemory.miniGolfRecordSlide >= 0 ? 1 : -1;
     step = MINI_GOLF_RECORD_SLIDE_STEP;
+    /* A variable rather than a constant, to match */
+    positiveSign = 1;
     g_MenuMemory.miniGolfRecordSlide -= direction * step;
 
     /* Stop on reaching the record rather than sliding past it */
-    if ((g_MenuMemory.miniGolfRecordSlide >= 0 ? 1 : -1) != direction) {
+    if ((g_MenuMemory.miniGolfRecordSlide >= 0 ? positiveSign
+                                               : -positiveSign) != direction) {
       g_MenuMemory.miniGolfRecordSlide = 0;
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", UpdateMiniGolfCourseSelect);
-#endif
 
 /*
  * A screen that no menu screen dispatches to: A leaves the menu to continue
