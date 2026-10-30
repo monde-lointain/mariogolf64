@@ -35,7 +35,7 @@ typedef struct CameraEditor {
   /* 0x60 */ f32 zoomSpeed; /* The distance change this frame */
   /* 0x64 */ f32 tiltLeft; /* The pitch change still to make */
   /* 0x68 */ f32 turnLeft; /* The heading change still to make */
-  /* 0x6C */ f32 unk6C;
+  /* 0x6C */ f32 zoomTarget; /* The distance a zoom ends at */
   /* 0x70 */ f32 pointTopSpeeds[EDITOR_POINT_COUNT]; /* Lowered while braking */
   /* 0x78 */ f32 pointAccelerations[EDITOR_POINT_COUNT];
   /* 0x80 */ f32 turnTopSpeed;

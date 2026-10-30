@@ -353,7 +353,7 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
     g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
   }
 
-  g_CameraEditor.unk6C = change;
+  g_CameraEditor.zoomTarget = distance;
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
@@ -472,7 +472,7 @@ void UpdateCameraEditor(void) {
   f32 distance;
   f32 scale;
   f32 gap;
-  f32 zoomChange;
+  f32 zoomTarget;
   f32 left;
   f32 cosPitch;
 
@@ -657,14 +657,19 @@ void UpdateCameraEditor(void) {
   }
 
   if (g_CameraEditor.flags[index] & EDITOR_FLAG_ZOOMING) {
-    /* ZoomEditorCamera stores the change in distance, but this zooms until
-     * the distance equals it */
     z = g_CameraEditor.distance;
-    zoomChange = g_CameraEditor.unk6C;
+    zoomTarget = g_CameraEditor.zoomTarget;
+    /*
+     * In the original, gap is unset when there is no braking distance; this
+     * stops the zoom once a step brings it no closer
+     */
+#ifdef AVOID_UB
+    gap = fabsf(zoomTarget - z);
+#endif
     if (g_CameraEditor.zoomBrakingDistance != 0.0f) {
-      gap = fabsf(zoomChange - z);
+      gap = fabsf(zoomTarget - z);
       if (gap < EDITOR_ARRIVAL_DISTANCE) {
-        g_CameraEditor.distance = zoomChange;
+        g_CameraEditor.distance = zoomTarget;
       } else {
         g_CameraEditor.zoomSpeed += g_CameraEditor.zoomAcceleration;
         if (gap < g_CameraEditor.zoomBrakingDistance) {
@@ -681,18 +686,17 @@ void UpdateCameraEditor(void) {
       }
     }
 
-    /* As in the game, gap is unset when there is no braking distance */
     g_CameraEditor.distance += g_CameraEditor.zoomSpeed;
-    left = zoomChange - g_CameraEditor.distance;
+    left = zoomTarget - g_CameraEditor.distance;
     isDone = FALSE;
     if (gap <= sqrtf(left * left)) {
       isDone = TRUE;
     }
 
     if (isDone) {
-      g_CameraEditor.distance = g_CameraEditor.unk6C;
+      g_CameraEditor.distance = g_CameraEditor.zoomTarget;
       g_CameraEditor.zoomSpeed = 0.0f;
-      g_CameraEditor.unk6C = 0.0f;
+      g_CameraEditor.zoomTarget = 0.0f;
       g_CameraEditor.zoomBrakingDistance = 0.0f;
       g_CameraEditor.flags[index] ^= EDITOR_FLAG_ZOOMING;
     }
