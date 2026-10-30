@@ -262,7 +262,7 @@ static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 
 static s32 f_SceneMenuSelection;
 
-void func_8005D9A0(void);
+void ResetMenuChoices(void);
 void InitPlay(s32);
 void ChooseConditionsAndInitHole(void);
 void func_8024F7B0(void);
@@ -1526,7 +1526,7 @@ s32 UpdateDebugSceneMenu(void) {
     g_Scene = f_SceneMenuSelection;
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     if (f_SceneMenuSelection == SCENE_MENU) {
-      func_8005D9A0();
+      ResetMenuChoices();
     } else {
       PlaySong(SONG_HOLE_OUT_BIRDIE, 0);
     }

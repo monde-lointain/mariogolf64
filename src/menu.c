@@ -116,7 +116,7 @@ typedef struct GridCell {
 } GridCell; /* size = 0x4 */
 
 s32 GetClubTournamentCourse(void);
-void func_8005D9A0(void);
+void ResetMenuChoices(void);
 s32 ReadSaveCopies(SaveData* save, u8 isInSram);
 s32 WriteSaveCopies(SaveData* save, u8 isInSram);
 void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult);
@@ -444,7 +444,7 @@ static ImportedCharacterCell
 static s16 f_CharacterSlots[] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
 s32 g_MenuCourseCount = 6;
-/* Cleared by func_8005D9A0 and each menu entry routine, but read by none */
+/* Cleared by ResetMenuChoices and each menu entry routine, but read by none */
 static s8 f_UnreadMenuEntryFlag = 0;
 u8 g_AreBetPagesBlocked = 0;
 /* Read by no routine */
@@ -1939,7 +1939,11 @@ void ComputeRoundStatistics(void) {
   }
 }
 
-void func_8005D9A0(void) {
+/*
+ * Clears every menu choice made so far, so that the menu starts again from
+ * the title, as when the debug scene menu picks the menu
+ */
+void ResetMenuChoices(void) {
   s8 index;
 
   g_MenuCourseCount = 6;
@@ -2033,7 +2037,7 @@ void func_8005DAFC(void) {
 }
 
 void func_8005DC50(void) {
-  func_8005D9A0();
+  ResetMenuChoices();
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
