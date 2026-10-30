@@ -95,6 +95,16 @@ typedef f32 Mat4[4][4];
 #endif
 
 /*
+ * Marks a char array that a string initializes but that needs no terminating
+ * NUL, which KMC GCC has no attribute for
+ */
+#ifdef __IS_KMC__
+#define NONSTRING
+#else
+#define NONSTRING __attribute__((nonstring))
+#endif
+
+/*
  * Marks a function definition that nothing calls. KMC GCC takes no attribute
  * in front of a definition.
  */

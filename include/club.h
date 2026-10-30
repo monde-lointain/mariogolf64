@@ -91,7 +91,7 @@ typedef struct ClubParameters {
 typedef struct Club {
   /* 0x00 */ u8 mishitScale; /* Scales a mishit's yaw and side spin, and the
                                impact point's side spin */
-  /* 0x01 */ char name[4]; /* Its short name, such as "1W" or "PT" */
+  /* 0x01 */ char name[4] NONSTRING; /* Its short name, such as "1W" or "PT" */
   /* 0x05 */ u8 unk5;
   /* 0x06 */ u8 unk6[2];
   /* 0x08 */ s32 surfaceMask;
