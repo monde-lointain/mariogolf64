@@ -155,8 +155,8 @@ static s16 f_FirstShownStat = 0;
 /* The trophy's frame of g_TrophyFrameAssets, stepped when its timer reaches
  * TROPHY_FRAME_DELAY */
 static s16 f_StatsTrophyFrame = 0;
-/* Which of D_8023A814's buffers holds the trophy frame shown */
-static s16 D_802300A4_ovl_01 = 0;
+/* Which of f_StatsTrophyBuffers holds the trophy frame shown */
+static s16 f_ShownStatsTrophyBufferIndex = 0;
 /* Counts the trophy's draws since its frame last stepped */
 static s16 f_StatsTrophyFrameTimer = 0;
 static s32 D_802300A8_ovl_01 = 0;
@@ -175,7 +175,8 @@ static TrophyPosition D_80230100_ovl_01[COURSE_COUNT] = {
 static Mat4 D_8023A790_ovl_01;
 static Mat4 D_8023A7D0_ovl_01;
 static void* D_8023A810_ovl_01;
-static void** D_8023A814_ovl_01;
+/* The course stats' TROPHY_FRAME_BUFFER_COUNT buffers for the trophy frame */
+static void** f_StatsTrophyBuffers;
 static void** D_8023A818_ovl_01;
 static void** D_8023A81C_ovl_01;
 static void** D_8023A820_ovl_01;
@@ -222,7 +223,7 @@ void LoadCourseTrophyImages(void** buffers, s32 requestedKind) {
 
   switch (bufferKind) {
     case COURSE_BUFFER_FIRST:
-      D_8023A814_ovl_01 = buffers;
+      f_StatsTrophyBuffers = buffers;
       break;
     case COURSE_BUFFER_SECOND:
       D_8023A818_ovl_01 = buffers;
@@ -331,9 +332,10 @@ void UpdateCourseStats(void) {
         if (memory->statsCourse != courseCount) {
           f_StatsTrophyFrameTimer = 0;
           f_StatsTrophyFrame = 0;
-          D_802300A4_ovl_01 ^= 1;
+          f_ShownStatsTrophyBufferIndex ^= 1;
           OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
-          ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
+          ReadEncodedAsset(
+              f_StatsTrophyBuffers[f_ShownStatsTrophyBufferIndex], &asset);
           for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
             OpenAssetFile(
                 g_TrophyPaletteFiles[memory->statsCourse][index], &file);
@@ -354,9 +356,10 @@ void UpdateCourseStats(void) {
         if (memory->statsCourse != courseCount) {
           f_StatsTrophyFrameTimer = 0;
           f_StatsTrophyFrame = 0;
-          D_802300A4_ovl_01 ^= 1;
+          f_ShownStatsTrophyBufferIndex ^= 1;
           OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
-          ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
+          ReadEncodedAsset(
+              f_StatsTrophyBuffers[f_ShownStatsTrophyBufferIndex], &asset);
           for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
             OpenAssetFile(
                 g_TrophyPaletteFiles[memory->statsCourse][index], &file);
@@ -967,7 +970,7 @@ void DrawCourseTrophies(Gfx** displayListHead) {
           palette = g_TrophyPalettes[THIRD_PLACE_INDEX];
         }
 
-        texels = D_8023A814_ovl_01[D_802300A4_ovl_01];
+        texels = f_StatsTrophyBuffers[f_ShownStatsTrophyBufferIndex];
         gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
         gDPLoadTextureTile(gfx++, TextureAddress(texels), G_IM_FMT_CI,
             G_IM_SIZ_8b, g_TrophySizes[memory->statsCourse].width,
@@ -1003,10 +1006,11 @@ void DrawCourseTrophies(Gfx** displayListHead) {
         f_StatsTrophyFrame = 0;
       }
 
-      D_802300A4_ovl_01 ^= 1;
+      f_ShownStatsTrophyBufferIndex ^= 1;
       OpenEncodedAsset(
           g_TrophyFrameAssets[memory->statsCourse][f_StatsTrophyFrame], &asset);
-      ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
+      ReadEncodedAsset(
+          f_StatsTrophyBuffers[f_ShownStatsTrophyBufferIndex], &asset);
     }
   }
 
