@@ -37,11 +37,20 @@ COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
 """
 
 
-def write_base(c_path: str, function: str, base_path: Path) -> None:
-    """Write C_PATH preprocessed, with every function but FUNCTION stripped."""
-    # Preprocess without KMC's cpp quirks; INCLUDE_ASM expands to nothing
-    # under PERMUTER
-    preprocessed = subprocess.run(
+# A one-parameter macro whose body is a GNU statement expression, as cpp -dM
+# prints it: its name, parameter, the type of the body's first declaration, and
+# the body
+STATEMENT_EXPRESSION_MACRO = re.compile(
+    r"^#define (\w+)\((\w+)\) (\(\{ (\w+) .*\}\))$", re.MULTILINE
+)
+
+
+def preprocess(c_path: str, *options: str) -> str:
+    """Return C_PATH preprocessed without KMC's cpp quirks.
+
+    INCLUDE_ASM expands to nothing under PERMUTER.
+    """
+    return subprocess.run(
         [
             "mips-linux-gnu-cpp",
             "-P",
@@ -52,6 +61,7 @@ def write_base(c_path: str, function: str, base_path: Path) -> None:
             *fncompare.DEFINES,
             "-D__GNUC__=2",
             "-D__mips__",
+            *options,
             c_path,
         ],
         cwd=ROOT,
@@ -59,7 +69,70 @@ def write_base(c_path: str, function: str, base_path: Path) -> None:
         capture_output=True,
         text=True,
     ).stdout
-    _ = base_path.write_text(preprocessed)
+
+
+def find_closing_parenthesis(text: str, start: int) -> int:
+    """Return the index of the ")" that closes the "(" before START."""
+    depth = 1
+    index = start
+    while depth > 0:
+        if text[index] == "(":
+            depth += 1
+        elif text[index] == ")":
+            depth -= 1
+        index += 1
+    return index - 1
+
+
+def fold_statement_expressions(c_path: str, source: str) -> tuple[str, str]:
+    """Turn the expansions of statement-expression macros back into calls.
+
+    pycparser can't read GNU statement expressions. The permuter keeps each
+    such macro as a call that its parser sees declared as a function, and puts
+    the definition back from a latedefine block before compiling. Returns the
+    source and that block, which goes after the types it names.
+    """
+    late_defines: list[str] = []
+    for macro in STATEMENT_EXPRESSION_MACRO.finditer(preprocess(c_path, "-dM")):
+        name, parameter, body, result_type = macro.groups()
+        prefix, separator, suffix = body.partition(f"({parameter})")
+        if not separator or parameter in suffix:
+            continue
+        prefix += "("
+        suffix = ")" + suffix
+        # From the last expansion back, so that nested ones fold innermost first
+        start = source.rfind(prefix)
+        if start < 0:
+            continue
+        while start >= 0:
+            argument_start = start + len(prefix)
+            argument_end = find_closing_parenthesis(source, argument_start)
+            if source.startswith(suffix, argument_end):
+                argument = source[argument_start:argument_end]
+                end = argument_end + len(suffix)
+                source = f"{source[:start]}{name}({argument}){source[end:]}"
+            start = source.rfind(prefix, 0, start)
+        late_defines += [
+            f"#pragma _permuter define {name}({parameter}) {body}",
+            f"{result_type} {name}();",
+        ]
+    if not late_defines:
+        return source, ""
+    block = "\n".join(
+        [
+            "#pragma _permuter latedefine start",
+            *late_defines,
+            "#pragma _permuter latedefine end",
+            "",
+        ]
+    )
+    return source, block
+
+
+def write_base(c_path: str, function: str, base_path: Path) -> None:
+    """Write C_PATH preprocessed, with every function but FUNCTION stripped."""
+    source, late_defines = fold_statement_expressions(c_path, preprocess(c_path))
+    _ = base_path.write_text(source)
     _ = subprocess.run(
         [
             sys.executable,
@@ -77,6 +150,12 @@ def write_base(c_path: str, function: str, base_path: Path) -> None:
         base_path.read_text(),
         flags=re.MULTILINE,
     )
+    # The definition is the last line naming the function, the others being
+    # its prototypes
+    definition = list(
+        re.finditer(rf"^.*\b{re.escape(function)}\s*\(", base, re.MULTILINE)
+    )[-1]
+    base = base[: definition.start()] + late_defines + base[definition.start() :]
     _ = base_path.write_text(base)
 
 
