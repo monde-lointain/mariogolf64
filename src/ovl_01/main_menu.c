@@ -361,7 +361,7 @@ void LoadBestTimesFaces(void);
 void LoadCharacterTableBuffer(void* buffer, s16 bufferKind);
 void UpdateCharacterTable(void);
 void MarkShownTableCharacters(void);
-void func_802177D0_ovl_01(void);
+void LoadTableFaces(void);
 void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind);
 void UpdateBetSettings(void);
 /* Defined without parameters, though UpdateMenus passes it two */
@@ -1588,7 +1588,7 @@ void UpdateMenus(void) {
         MarkShownTableCharacters();
         LoadCharacterTableBuffer(g_MenuSpareImages[0], TABLE_BUFFER_ARROWS);
         LoadCharacterTableBuffer(g_MenuSpareImages[1], TABLE_BUFFER_STAR);
-        func_802177D0_ovl_01();
+        LoadTableFaces();
         break;
 
       case MENU_SCREEN_BEST_SHOTS:

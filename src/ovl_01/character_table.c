@@ -794,7 +794,8 @@ void DrawTableStar(Gfx** displayListHead, s32 left, s32 top) {
   *displayListHead = gfx;
 }
 
-void func_802177D0_ovl_01(void) {
+/* Reads every character's face and first palette for the table to draw */
+void LoadTableFaces(void) {
   EncodedAsset asset;
   AssetFile file;
   CharacterId characterIndex;
