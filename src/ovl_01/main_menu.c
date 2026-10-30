@@ -178,6 +178,12 @@ typedef struct ImageCorner {
   s16 y;
 } ImageCorner;
 
+/* A label's top-left corner on the screen */
+typedef struct LabelCorner {
+  /* 0x0 */ s32 x;
+  /* 0x4 */ s32 y;
+} LabelCorner; /* size = 0x8 */
+
 /* The wind and light of the hole that loads behind the menus */
 #define CHOSEN_HOLE_WIND_SPEED_MASK 0x3F
 #define CHOSEN_HOLE_WIND_SPEED_STEP 6000
@@ -697,8 +703,8 @@ static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {CHARACTER_CHOICE_PLUM,
 /* Read by no routine */
 static s32 D_8022F93C_ovl_01 = 0;
 /* The top-left corner of each of the title screen's labels */
-static s32 f_TitleLabelCorners[TITLE_LABEL_COUNT][2] = {{110, 86}, {40, 114},
-    {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
+static LabelCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] = {{110, 86},
+    {40, 114}, {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
 static f32 D_8022F978_ovl_01 = 0.0f;
 /* Where each player's controller icon and label go, by the player count */
 static s32 D_8022F97C_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
@@ -802,15 +808,16 @@ static char D_8022FD9C_ovl_01[4][20] = {
 static const char* D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT] = {
     D_802316FC_ovl_01, D_802316EC_ovl_01};
 /* The top-left corner of each of the main menu's labels */
-static s32 f_MainChoiceLabelCorners[MAIN_CHOICE_COUNT][2] = {
+static LabelCorner f_MainChoiceLabelCorners[MAIN_CHOICE_COUNT] = {
     {96, 84}, {96, 114}, {96, 144}, {96, 174}};
 /* The top-left corner of each of the main menu's labels without Transmit, which
  * skips the CODE ENTRY label */
-static s32 f_ShortMainChoiceLabelCorners[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT]
-                                        [2] = {{96, 84}, {96, 124}, {96, 164}};
+static LabelCorner
+    f_ShortMainChoiceLabelCorners[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT] = {
+        {96, 84}, {96, 124}, {96, 164}};
 /* The top-left corner of each of the clubhouse's room labels */
-static s32 f_ClubhouseLabelCorners[CLUBHOUSE_ROW_PLACE_COUNT][2] = {{76, 80},
-    {76, 102}, {76, 124}, {76, 146}, {76, 168}, {76, 190}, {76, 212},
+static LabelCorner f_ClubhouseLabelCorners[CLUBHOUSE_ROW_PLACE_COUNT] = {
+    {76, 80}, {76, 102}, {76, 124}, {76, 146}, {76, 168}, {76, 190}, {76, 212},
     {76, 234}};
 /* Read by no routine */
 static s32 D_8022FE6C_ovl_01[10][2] = {{48, 76}, {132, 76}, {180, 76}, {48, 98},
@@ -4450,11 +4457,10 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(f_TitleLabelCorners[labelIndex][0]),
-          QuarterPixels(f_TitleLabelCorners[labelIndex][1]),
-          QuarterPixels(f_TitleLabelCorners[labelIndex][0] + TITLE_LABEL_WIDTH),
-          QuarterPixels(
-              f_TitleLabelCorners[labelIndex][1] + TITLE_LABEL_HEIGHT),
+          QuarterPixels(f_TitleLabelCorners[labelIndex].x),
+          QuarterPixels(f_TitleLabelCorners[labelIndex].y),
+          QuarterPixels(f_TitleLabelCorners[labelIndex].x + TITLE_LABEL_WIDTH),
+          QuarterPixels(f_TitleLabelCorners[labelIndex].y + TITLE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -4486,11 +4492,11 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
       }
 
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(f_TitleLabelCorners[labelIndex][0] - (growth / 2)),
-          QuarterPixels(f_TitleLabelCorners[labelIndex][1] - (growth / 2)),
-          QuarterPixels(f_TitleLabelCorners[labelIndex][0] + TITLE_LABEL_WIDTH +
+          QuarterPixels(f_TitleLabelCorners[labelIndex].x - (growth / 2)),
+          QuarterPixels(f_TitleLabelCorners[labelIndex].y - (growth / 2)),
+          QuarterPixels(f_TitleLabelCorners[labelIndex].x + TITLE_LABEL_WIDTH +
               (growth / 2)),
-          QuarterPixels(f_TitleLabelCorners[labelIndex][1] +
+          QuarterPixels(f_TitleLabelCorners[labelIndex].y +
               (TITLE_LABEL_HEIGHT + (growth / 2))),
           G_TX_RENDERTILE, 0, 0,
           (TITLE_LABEL_WIDTH << 10) / (growth + TITLE_LABEL_WIDTH),
@@ -6471,11 +6477,11 @@ void DrawMainMenu(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][0]),
-          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][1]),
-          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][0] +
+          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex].x),
+          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex].y),
+          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex].x +
               MAIN_CHOICE_LABEL_WIDTH),
-          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][1] +
+          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex].y +
               MAIN_CHOICE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -6494,12 +6500,12 @@ void DrawMainMenu(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
       QuarterPixels(
-          f_MainChoiceLabelCorners[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
+          f_MainChoiceLabelCorners[choiceIndex].x - (g_ChosenLabelGrowth / 2)),
       QuarterPixels(
-          f_MainChoiceLabelCorners[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][0] +
+          f_MainChoiceLabelCorners[choiceIndex].y - (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(f_MainChoiceLabelCorners[choiceIndex].x +
           MAIN_CHOICE_LABEL_WIDTH + (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][1] +
+      QuarterPixels(f_MainChoiceLabelCorners[choiceIndex].y +
           (MAIN_CHOICE_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
       (MAIN_CHOICE_LABEL_WIDTH << 10) /
@@ -6550,11 +6556,11 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][0]),
-          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][1]),
-          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][0] +
+          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].x),
+          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].y),
+          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].x +
               MAIN_CHOICE_LABEL_WIDTH),
-          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][1] +
+          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].y +
               MAIN_CHOICE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -6578,13 +6584,13 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][0] -
+      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].x -
           (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][1] -
+      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].y -
           (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][0] +
+      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].x +
           MAIN_CHOICE_LABEL_WIDTH + (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][1] +
+      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].y +
           (MAIN_CHOICE_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
       (MAIN_CHOICE_LABEL_WIDTH << 10) /
@@ -6636,12 +6642,12 @@ void DrawClubhouse(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(f_ClubhouseLabelCorners[choiceIndex][0]),
-          QuarterPixels(f_ClubhouseLabelCorners[choiceIndex][1]),
+          QuarterPixels(f_ClubhouseLabelCorners[choiceIndex].x),
+          QuarterPixels(f_ClubhouseLabelCorners[choiceIndex].y),
           QuarterPixels(
-              f_ClubhouseLabelCorners[choiceIndex][0] + ROOM_LABEL_WIDTH),
+              f_ClubhouseLabelCorners[choiceIndex].x + ROOM_LABEL_WIDTH),
           QuarterPixels(
-              f_ClubhouseLabelCorners[choiceIndex][1] + ROOM_LABEL_HEIGHT),
+              f_ClubhouseLabelCorners[choiceIndex].y + ROOM_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -6659,12 +6665,12 @@ void DrawClubhouse(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
       QuarterPixels(
-          f_ClubhouseLabelCorners[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
+          f_ClubhouseLabelCorners[choiceIndex].x - (g_ChosenLabelGrowth / 2)),
       QuarterPixels(
-          f_ClubhouseLabelCorners[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(f_ClubhouseLabelCorners[choiceIndex][0] + ROOM_LABEL_WIDTH +
+          f_ClubhouseLabelCorners[choiceIndex].y - (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(f_ClubhouseLabelCorners[choiceIndex].x + ROOM_LABEL_WIDTH +
           (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(f_ClubhouseLabelCorners[choiceIndex][1] +
+      QuarterPixels(f_ClubhouseLabelCorners[choiceIndex].y +
           (ROOM_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
       (ROOM_LABEL_WIDTH << 10) / (g_ChosenLabelGrowth + ROOM_LABEL_WIDTH),
