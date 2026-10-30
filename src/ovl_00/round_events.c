@@ -2280,7 +2280,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawLakituMovie);
 #endif
 
 /* Toad waves the out of bounds flag in the inset view */
-#ifdef NON_MATCHING
 void DrawToadMovie(Gfx** displayListHead) {
   EncodedAsset asset;
   Gfx* gfx = *displayListHead;
@@ -2331,8 +2330,9 @@ void DrawToadMovie(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer));
   for (i = 0; i != TOAD_STRIP_COUNT; i++) {
     gDPLoadTextureTile(gfx++,
-        TextureAddress(f_MovieBuffer + TOAD_FRAME_OFFSET +
-            ((f_MovieBackBuffer * TOAD_FRAME_SIZE) + (i * TOAD_STRIP_SIZE))),
+        TextureAddress(f_MovieBuffer +
+            (TOAD_FRAME_OFFSET + (i * TOAD_STRIP_SIZE) +
+                (f_MovieBackBuffer * TOAD_FRAME_SIZE))),
         G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, TOAD_STRIP_HEIGHT, 0, 0,
         TOAD_WIDTH - 1, TOAD_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -2351,9 +2351,6 @@ void DrawToadMovie(Gfx** displayListHead) {
       g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawToadMovie);
-#endif
 
 Boolean IsContactEffectShown(void) {
   return g_ContactEffect != CONTACT_EFFECT_NONE;
