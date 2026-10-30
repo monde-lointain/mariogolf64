@@ -211,8 +211,9 @@ void UpdateBestTimes(void) {
 /*
  * DrawBestTimes turns the open courses' images on the wheel of menu.h, with
  * the chosen course's name on the banner below, then lists that course's best
- * times on a shaded panel: each with its place, its unkD78 as a signed number
- * and its holder's face. A row of dashes stands in for each unset time.
+ * times on a shaded panel: each with its place, its bestTimeScoresToPar as a
+ * signed number and its holder's face. A row of dashes stands in for each unset
+ * time.
  */
 #define BEST_TIME_PLACE_X 22
 #define BEST_TIME_FIRST_PLACE_Y 144
@@ -387,7 +388,7 @@ void DrawBestTimes(Gfx** displayListHead) {
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING), time);
       DrawNarrowTwoDigitMenuNumber(&gfx, BEST_TIME_UNKD78_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING),
-          save->unkD78[memory->bestTimesCourse][otherIndex],
+          save->bestTimeScoresToPar[memory->bestTimesCourse][otherIndex],
           MENU_NUMBER_SIGNED);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
@@ -397,7 +398,7 @@ void DrawBestTimes(Gfx** displayListHead) {
       gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
       gDPPipeSync(gfx++);
       gDPSetTextureFilter(gfx++, G_TF_BILERP);
-      character = save->unkE08[memory->bestTimesCourse][otherIndex];
+      character = save->bestTimeCharacters[memory->bestTimesCourse][otherIndex];
       holderPalettes = D_8023BFF0_ovl_01;
       DrawCharacterFace(&gfx, D_8012D430[character],
           holderPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) +
@@ -640,7 +641,7 @@ void LoadBestTimesFaces(void) {
 
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (rank = 0; rank != BEST_TIME_COUNT; rank++) {
-      character = save->unkE08[courseIndex][rank];
+      character = save->bestTimeCharacters[courseIndex][rank];
       if (character != -1) {
         if (character < 0) {
           character = 0;
@@ -650,7 +651,7 @@ void LoadBestTimesFaces(void) {
           character = CHARACTER_COUNT - 1;
         }
 
-        palette = save->unkE50[courseIndex][rank];
+        palette = save->bestTimePalettes[courseIndex][rank];
       } else {
         character = 0;
         palette = 0;

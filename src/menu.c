@@ -1128,20 +1128,20 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
               save->bestTimes[courseIndex][scanIndex]) {
             save->bestTimes[courseIndex][index] =
                 save->bestTimes[courseIndex][scanIndex];
-            save->unkE08[courseIndex][index] =
-                save->unkE08[courseIndex][scanIndex];
-            save->unkD78[courseIndex][index] =
-                save->unkD78[courseIndex][scanIndex];
-            save->unkE50[courseIndex][index] =
-                save->unkE50[courseIndex][scanIndex];
+            save->bestTimeCharacters[courseIndex][index] =
+                save->bestTimeCharacters[courseIndex][scanIndex];
+            save->bestTimeScoresToPar[courseIndex][index] =
+                save->bestTimeScoresToPar[courseIndex][scanIndex];
+            save->bestTimePalettes[courseIndex][index] =
+                save->bestTimePalettes[courseIndex][scanIndex];
           }
         }
       }
 
       for (index = 0; index != count; index++) {
         for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
-          if (save->unkD78[courseIndex][index] !=
-              save->unkD78[courseIndex][scanIndex]) {
+          if (save->bestTimeScoresToPar[courseIndex][index] !=
+              save->bestTimeScoresToPar[courseIndex][scanIndex]) {
             break;
           }
         }
@@ -1150,16 +1150,16 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
           for (runIndex = index; runIndex != scanIndex; runIndex++) {
             for (otherIndex = runIndex + 1; otherIndex != scanIndex;
                 otherIndex++) {
-              if (save->unkD78[courseIndex][runIndex] >
-                  save->unkD78[courseIndex][otherIndex]) {
+              if (save->bestTimeScoresToPar[courseIndex][runIndex] >
+                  save->bestTimeScoresToPar[courseIndex][otherIndex]) {
                 save->bestTimes[courseIndex][runIndex] =
                     save->bestTimes[courseIndex][otherIndex];
-                save->unkE08[courseIndex][runIndex] =
-                    save->unkE08[courseIndex][otherIndex];
-                save->unkD78[courseIndex][runIndex] =
-                    save->unkD78[courseIndex][otherIndex];
-                save->unkE50[courseIndex][runIndex] =
-                    save->unkE50[courseIndex][otherIndex];
+                save->bestTimeCharacters[courseIndex][runIndex] =
+                    save->bestTimeCharacters[courseIndex][otherIndex];
+                save->bestTimeScoresToPar[courseIndex][runIndex] =
+                    save->bestTimeScoresToPar[courseIndex][otherIndex];
+                save->bestTimePalettes[courseIndex][runIndex] =
+                    save->bestTimePalettes[courseIndex][otherIndex];
               }
             }
           }
@@ -1173,7 +1173,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
           }
 
           if (time == save->bestTimes[courseIndex][index] &&
-              arg2 <= save->unkD78[courseIndex][index]) {
+              arg2 <= save->bestTimeScoresToPar[courseIndex][index]) {
             break;
           }
         }
@@ -1183,24 +1183,24 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
               scanIndex--) {
             save->bestTimes[courseIndex][scanIndex] =
                 save->bestTimes[courseIndex][scanIndex - 1];
-            save->unkE08[courseIndex][scanIndex] =
-                save->unkE08[courseIndex][scanIndex - 1];
-            save->unkD78[courseIndex][scanIndex] =
-                save->unkD78[courseIndex][scanIndex - 1];
-            save->unkE50[courseIndex][scanIndex] =
-                save->unkE50[courseIndex][scanIndex - 1];
+            save->bestTimeCharacters[courseIndex][scanIndex] =
+                save->bestTimeCharacters[courseIndex][scanIndex - 1];
+            save->bestTimeScoresToPar[courseIndex][scanIndex] =
+                save->bestTimeScoresToPar[courseIndex][scanIndex - 1];
+            save->bestTimePalettes[courseIndex][scanIndex] =
+                save->bestTimePalettes[courseIndex][scanIndex - 1];
           }
 
           save->bestTimes[courseIndex][index] = time;
-          save->unkE08[courseIndex][index] = arg3;
-          save->unkD78[courseIndex][index] = arg2;
-          save->unkE50[courseIndex][index] = arg4;
+          save->bestTimeCharacters[courseIndex][index] = arg3;
+          save->bestTimeScoresToPar[courseIndex][index] = arg2;
+          save->bestTimePalettes[courseIndex][index] = arg4;
         }
       } else {
         save->bestTimes[courseIndex][0] = time;
-        save->unkE08[courseIndex][0] = arg3;
-        save->unkD78[courseIndex][0] = arg2;
-        save->unkE50[courseIndex][0] = arg4;
+        save->bestTimeCharacters[courseIndex][0] = arg3;
+        save->bestTimeScoresToPar[courseIndex][0] = arg2;
+        save->bestTimePalettes[courseIndex][0] = arg4;
       }
 
       TransferSaveData(save, TRUE);

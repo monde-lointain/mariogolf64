@@ -3540,10 +3540,10 @@ void DrawPressingHand(Gfx** displayListHead) {
  * to the awards */
 typedef struct SaveRecords {
   Awards awards;
-  s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
+  s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
   s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
-  s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
-  s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
+  s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
+  s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
   CourseStats courseStats[COURSE_COUNT];
   u8 unk1150[0x1320 - 0x1150];
   s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
@@ -3672,9 +3672,11 @@ void BuildStatusData(u8* status) {
                     ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
             HUNDREDTHS_PER_SECOND;
         course->bestTimes[index].hundredths = value;
-        course->bestTimes[index].unk3 = records->unkE08[courseIndex][index];
+        course->bestTimes[index].unk3 =
+            records->bestTimeCharacters[courseIndex][index];
         course->bestTimes[index].unk4 =
-            records->unkD78[courseIndex][index] + STATUS_SCORE_BIAS;
+            records->bestTimeScoresToPar[courseIndex][index] +
+            STATUS_SCORE_BIAS;
       } else {
         course->bestTimes[index].minutes = 0;
         course->bestTimes[index].seconds = 0;

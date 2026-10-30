@@ -494,11 +494,13 @@ typedef struct SaveData {
   /* 0x0218 */ Player modePlayers[MODE_PLAYER_COUNT];
   /* 0x0720 */ PlayRecord modeRecords[MODE_RECORD_COUNT];
   /* 0x0990 */ Awards awards;
-  /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
+  /* Each best time's net score to par, which breaks ties between equal times */
+  /* 0x0D78 */ s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
   /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT]
                             [BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
-  /* 0x0E08 */ s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x0E50 */ s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
+  /* The character and color of each best time's golfer */
+  /* 0x0E08 */ s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
+  /* 0x0E50 */ s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
   /* 0x0E98 */ CourseStats courseStats[COURSE_COUNT];
   /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
   /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
