@@ -38,8 +38,8 @@
 #define CLUB_COURSE_ICON_LIMIT 10
 
 /* The pictures and palettes of f_MenuWindowPaletteFiles */
-#define TOURNAMENT_IMAGE_ROW_COUNT 15
-#define TOURNAMENT_IMAGE_COLUMN_COUNT 4
+#define MENU_WINDOW_PICTURE_COUNT 15
+#define MENU_WINDOW_PALETTE_COUNT 4
 
 /* DrawCodePanels stretches the menu banner of D_80230F44 into the two panels
  * behind the code screen */
@@ -201,8 +201,8 @@ static AssetId f_MenuWindowImageAssets[15] = {0x07C0, 0x0750, 0x07A4, 0x0742,
     0x0988, 0x0958};
 /* Each window picture's palette files, by picture and color */
 // clang-format off
-static s16 f_MenuWindowPaletteFiles[TOURNAMENT_IMAGE_ROW_COUNT]
-                                   [TOURNAMENT_IMAGE_COLUMN_COUNT] = {
+static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT]
+                                   [MENU_WINDOW_PALETTE_COUNT] = {
   { 0x07B8, 0x07B9, 0x07BA, 0x07BB },
   { 0x0748, 0x0749, 0x074A, 0x074B },
   { 0x079C, 0x079D, 0x079E, 0x079F },
@@ -432,7 +432,7 @@ void LoadTournamentBuffer(void* buffer, s16 bufferKind) {
     case TOURNAMENT_BUFFER_ROW_FILE:
       f_MenuWindowPalette = buffer;
       OpenAssetFile(
-          f_MenuWindowPaletteFiles[TOURNAMENT_IMAGE_ROW_COUNT - 1][0], &file);
+          f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT - 1][0], &file);
       ReadAssetFile(f_MenuWindowPalette, (s16)GetAssetFileSize(&file), &file);
       break;
   }
@@ -486,16 +486,16 @@ void LoadMenuWindowPalette(s32 row, s32 column) {
     row = 0;
   }
 
-  if (row >= TOURNAMENT_IMAGE_ROW_COUNT) {
-    row = TOURNAMENT_IMAGE_ROW_COUNT - 1;
+  if (row >= MENU_WINDOW_PICTURE_COUNT) {
+    row = MENU_WINDOW_PICTURE_COUNT - 1;
   }
 
   if (column < 0) {
     column = 0;
   }
 
-  if (column >= TOURNAMENT_IMAGE_COLUMN_COUNT) {
-    column = TOURNAMENT_IMAGE_COLUMN_COUNT - 1;
+  if (column >= MENU_WINDOW_PALETTE_COUNT) {
+    column = MENU_WINDOW_PALETTE_COUNT - 1;
   }
 
   OpenAssetFile(f_MenuWindowPaletteFiles[row][column], &file);
