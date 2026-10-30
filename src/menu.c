@@ -609,7 +609,7 @@ void LoadMenuResources(void) {
   PlaySong(SONG_TITLE, 0);
   SetFramebufferCount(TRIPLE_BUFFERING);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-  D_801323A0.statsCourse = 6;
+  g_MenuMemory.statsCourse = 6;
   InitSram();
   TransferSaveData(save, FALSE);
 }
@@ -678,7 +678,7 @@ SaveData* GetSaveData(void) {
 
 /* Returns what the menus keep between visits, for its callers to share */
 MenuMemory* GetMenuMemory(void) {
-  return &D_801323A0;
+  return &g_MenuMemory;
 }
 
 void ResetSaveData(void) {
@@ -1962,7 +1962,7 @@ void func_8005D9A0(void) {
   D_801B70F0[1] = FALSE;
   D_801B70F0[2] = FALSE;
   D_801B70F0[3] = FALSE;
-  memset(&D_801323A0, 0, sizeof(D_801323A0));
+  memset(&g_MenuMemory, 0, sizeof(g_MenuMemory));
   g_TakenCharacters.unk0 = 0;
   D_801B71CC = 0;
   D_800FBE2C = 0;
@@ -1974,9 +1974,9 @@ void func_8005D9A0(void) {
     D_800FBE08[index] = 0;
   }
 
-  D_801323A0.holesChoice = HOLES_CHOICE_ALL;
+  g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
-  D_801323A0.statsCourse = 6;
+  g_MenuMemory.statsCourse = 6;
   D_801052E8 = 0;
   D_800C2BD4 = 0;
 }
@@ -2117,15 +2117,15 @@ void WriteSaveData(void) {
   TransferSaveData(GetSaveData(), TRUE);
 }
 
-/* Copies the options between the save data and D_801323A0's option bits, in the
- * direction of the transfer */
+/* Copies the options between the save data and g_MenuMemory's option bits, in
+ * the direction of the transfer */
 void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult) {
   u8* bits;
   s8* options;
 
   options = save->options;
   if (!isWrite) {
-    bits = &D_801323A0.optionBits;
+    bits = &g_MenuMemory.optionBits;
     *bits = 0;
     if (readResult > 0) {
       if (options[SAVE_OPTION_MUSIC_OFF]) {
@@ -2142,19 +2142,19 @@ void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult) {
       }
     }
   } else {
-    if (D_801323A0.optionBits & OPTION_BIT_MUSIC_OFF) {
+    if (g_MenuMemory.optionBits & OPTION_BIT_MUSIC_OFF) {
       options[SAVE_OPTION_MUSIC_OFF] = TRUE;
     } else {
       options[SAVE_OPTION_MUSIC_OFF] = FALSE;
     }
 
-    if (D_801323A0.optionBits & OPTION_BIT_MONO) {
+    if (g_MenuMemory.optionBits & OPTION_BIT_MONO) {
       options[SAVE_OPTION_MONO] = TRUE;
     } else {
       options[SAVE_OPTION_MONO] = FALSE;
     }
 
-    if (D_801323A0.optionBits & OPTION_BIT_SIMPLE_CAMERA) {
+    if (g_MenuMemory.optionBits & OPTION_BIT_SIMPLE_CAMERA) {
       options[SAVE_OPTION_SIMPLE_CAMERA] = TRUE;
     } else {
       options[SAVE_OPTION_SIMPLE_CAMERA] = FALSE;

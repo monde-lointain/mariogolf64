@@ -106,7 +106,7 @@ typedef struct MenuMemory {
 
 MenuMemory* GetMenuMemory(void);
 
-extern MenuMemory D_801323A0;
+extern MenuMemory g_MenuMemory;
 
 /* The character select's record of which characters are taken */
 typedef struct TakenCharacters {

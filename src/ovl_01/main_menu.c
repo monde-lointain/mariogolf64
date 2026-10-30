@@ -850,8 +850,8 @@ void StartLoadingChosenHole(void) {
   D_800FE334 = 1;
   if (g_MenuScreen == MENU_SCREEN_RING_SHOT_EXIT ||
       g_MenuScreen == MENU_SCREEN_RING_SHOT_RECORDS) {
-    g_GameState.courseIndex = D_801323A0.courseIndex;
-    g_GameState.holeIndex = D_801323A0.holeIndex;
+    g_GameState.courseIndex = g_MenuMemory.courseIndex;
+    g_GameState.holeIndex = g_MenuMemory.holeIndex;
   } else if (g_MenuScreen == MENU_SCREEN_CLUB_TOURNAMENT) {
     g_GameState.courseIndex = GetClubTournamentCourse();
     g_GameState.isMiniGolf = g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX;
@@ -861,10 +861,10 @@ void StartLoadingChosenHole(void) {
     g_GameState.holeIndex = 0;
   } else {
     if (g_GameState.isMiniGolf) {
-      g_GameState.courseIndex = D_801323A0.unk2C + MINI_GOLF_COURSE_INDEX +
-          (D_801323A0.unk2B * MINI_GOLF_COURSES_PER_RECORD);
+      g_GameState.courseIndex = g_MenuMemory.unk2C + MINI_GOLF_COURSE_INDEX +
+          (g_MenuMemory.unk2B * MINI_GOLF_COURSES_PER_RECORD);
     } else {
-      g_GameState.courseIndex = D_801323A0.courseChoice;
+      g_GameState.courseIndex = g_MenuMemory.courseChoice;
     }
 
     g_GameState.holeIndex = GetFirstHoleIndex();
@@ -886,11 +886,11 @@ void StartLoadingChosenHole(void) {
 
 s32 GetChosenCourseIndex(void) {
   if (g_GameState.isMiniGolf) {
-    return D_801323A0.unk2C + MINI_GOLF_COURSE_INDEX +
-        (D_801323A0.unk2B * MINI_GOLF_COURSES_PER_RECORD);
+    return g_MenuMemory.unk2C + MINI_GOLF_COURSE_INDEX +
+        (g_MenuMemory.unk2B * MINI_GOLF_COURSES_PER_RECORD);
   }
 
-  return D_801323A0.courseChoice;
+  return g_MenuMemory.courseChoice;
 }
 
 /*
@@ -961,8 +961,8 @@ void UpdateMenus(void) {
       StartLoadingChosenHole();
     }
   } else if (g_MenuScreen == MENU_SCREEN_RING_SHOT_EXIT) {
-    if ((g_GameState.holeIndex != D_801323A0.holeIndex) ||
-        (g_GameState.courseIndex != D_801323A0.courseIndex) || !D_800FE334) {
+    if ((g_GameState.holeIndex != g_MenuMemory.holeIndex) ||
+        (g_GameState.courseIndex != g_MenuMemory.courseIndex) || !D_800FE334) {
       StartLoadingChosenHole();
     }
   }
@@ -1147,7 +1147,7 @@ void UpdateMenus(void) {
         ReadEncodedAsset(imageBuffer + OPTIONS_SHADOW_OFFSET, &asset);
         InitSram();
         TransferSaveData(save, FALSE);
-        optionBits = &D_801323A0.optionBits;
+        optionBits = &g_MenuMemory.optionBits;
         *optionBits = 0;
         if (IsMusicOffChosen()) {
           *optionBits |= OPTION_BIT_MUSIC_OFF;
@@ -1216,7 +1216,7 @@ void UpdateMenus(void) {
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
         ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         iconIndex =
-            D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+            D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
         g_AnimatedIconFrameIndex = 0;
         g_AnimatedIconBufferIndex = 0;
         g_AnimatedIconFrameTime = 0;
@@ -1412,13 +1412,13 @@ void UpdateMenus(void) {
         if (g_GameState.isMiniGolf) {
           for (index = 0; index != MINI_GOLF_DISC_IMAGE_COUNT; index++) {
             OpenEncodedAsset(
-                g_MiniGolfDiscFrameAssets[(D_801323A0.unk2C *
+                g_MiniGolfDiscFrameAssets[(g_MenuMemory.unk2C *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     index][MINI_GOLF_FACING_FRAME],
                 &asset);
             ReadEncodedAsset(D_801049A0[0][index], &asset);
             OpenEncodedAsset(
-                g_MiniGolfDiscFrameAssets[(D_801323A0.unk2C *
+                g_MiniGolfDiscFrameAssets[(g_MenuMemory.unk2C *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     index][MINI_GOLF_FACING_FRAME],
                 &asset);
@@ -1427,7 +1427,7 @@ void UpdateMenus(void) {
 
           for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
             OpenAssetFile(
-                g_MiniGolfDiscFiles[(D_801323A0.unk2C * 2) + index], &file);
+                g_MiniGolfDiscFiles[(g_MenuMemory.unk2C * 2) + index], &file);
             ReadAssetFile(D_801052C4[index], GetAssetFileSize(&file), &file);
           }
         } else {
@@ -1449,14 +1449,14 @@ void UpdateMenus(void) {
             &asset);
         D_8022BE80_ovl_01 = 0;
         OpenEncodedAsset(
-            g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
+            g_CourseWheelImageAssets[g_MenuMemory.courseChoice][0], &asset);
         ReadEncodedAsset(D_800FBDFC[0], &asset);
         OpenEncodedAsset(
-            g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
+            g_CourseWheelImageAssets[g_MenuMemory.courseChoice][0], &asset);
         ReadEncodedAsset(D_800FBDFC[1], &asset);
         for (index = 0; index != COURSE_FILE_COUNT; index++) {
           OpenAssetFile(
-              g_CourseTrophyFiles[D_801323A0.courseChoice][index], &file);
+              g_CourseTrophyFiles[g_MenuMemory.courseChoice][index], &file);
           ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
         }
 
@@ -1516,7 +1516,7 @@ void UpdateMenus(void) {
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         LoadCourseMenuBuffer(D_800FBE30[0], COURSE_MENU_BUFFER_GREEN_ARROWS);
         ComputeRoundStatistics();
-        D_801323A0.statsCourse = GetOpenCourseCount();
+        g_MenuMemory.statsCourse = GetOpenCourseCount();
         break;
 
       case MENU_SCREEN_BEST_TIMES:
@@ -1721,7 +1721,7 @@ void SetUpChosenGame(void) {
     }
   } else {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      g_GameState.courseIndex = D_801323A0.courseIndex;
+      g_GameState.courseIndex = g_MenuMemory.courseIndex;
     } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       g_GameState.courseIndex = 0;
     } else {
@@ -1734,7 +1734,7 @@ void SetUpChosenGame(void) {
       holeSelection = &g_GameState.holeSelection;
       *holeSelection = D_8022BE1C_ovl_01;
       if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
-        switch (D_801323A0.holesChoice) {
+        switch (g_MenuMemory.holesChoice) {
           case HOLES_CHOICE_UNK0:
             *holeSelection = HOLE_SELECTION_ALL;
             break;
@@ -1775,8 +1775,8 @@ void SetUpChosenGame(void) {
     sprintf(player->name, D_80231514_ovl_01,
         g_MenuCharacterNames[f_MenuCharacterChoices[D_8012F480[index]]]);
     if (D_8012F480[index] >= CHARACTER_KID) {
-      row = D_801323A0.characterRows[index];
-      column = D_801323A0.characterColumns[index];
+      row = g_MenuMemory.characterRows[index];
+      column = g_MenuMemory.characterColumns[index];
       if (row == GAME_BOY_CHARACTER_ROW) {
         player->gameBoyCharacterIndex = column;
       }
@@ -1870,7 +1870,7 @@ void UpdateMenuTitleScreen(void) {
 
   if (g_MenuPressedButtons & A_BUTTON) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-    titleChoice = D_801323A0.titleChoice;
+    titleChoice = g_MenuMemory.titleChoice;
     if (titleChoice == TITLE_CHOICE_NEW_GAME) {
       for (index = 0; index != MAX_PLAYER_COUNT; index++) {
         memory->characterColumns[index] = 0;
@@ -1890,7 +1890,7 @@ void UpdateMenuTitleScreen(void) {
       memory->courseIndex = 0;
       StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
       g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
-      g_ChosenPlayerCount = D_801323A0.playerCountChoice + 1;
+      g_ChosenPlayerCount = g_MenuMemory.playerCountChoice + 1;
       for (index = 0; index != MAX_PLAYER_COUNT; index++) {
         D_800FBE08[index] = 0;
       }
@@ -1916,24 +1916,24 @@ void UpdateMenuTitleScreen(void) {
           (g_MenuRepeatButtons == TRANSMIT_OTHER_BUTTONS)) {
         PlaySound(
             SOUND_CONTROLS_CLOSE, TRANSMIT_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        D_801323A0.isTransmitShown = TRUE;
+        g_MenuMemory.isTransmitShown = TRUE;
         g_MenuScreen = titleChoice;
       } else {
-        D_801323A0.isTransmitShown = FALSE;
+        g_MenuMemory.isTransmitShown = FALSE;
         g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
       }
     }
 
     if (D_801B71CC != g_MenuScreen ||
-        D_800FBE2C != D_801323A0.playerCountChoice) {
-      D_801323A0.modeChoice = 0;
+        D_800FBE2C != g_MenuMemory.playerCountChoice) {
+      g_MenuMemory.modeChoice = 0;
       g_TakenCharacters.unk0 = 0;
     }
 
     D_801052E8 = 0;
     D_801B9410 = 0;
     D_801B71CC = g_MenuScreen;
-    D_800FBE2C = D_801323A0.playerCountChoice;
+    D_800FBE2C = g_MenuMemory.playerCountChoice;
     return;
   }
 
@@ -1952,52 +1952,52 @@ void UpdateMenuTitleScreen(void) {
   /* titleChoice is moved through the array's bytes, which keeps its address in
    * a register as the original does */
   if (g_MenuRepeatButtons & U_JPAD) {
-    D_801323A0.titleChoice--;
+    g_MenuMemory.titleChoice--;
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
   } else if (g_MenuRepeatButtons & D_JPAD) {
-    D_801323A0.titleChoice++;
+    g_MenuMemory.titleChoice++;
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
   }
 
-  if (D_801323A0.titleChoice < 0) {
-    D_801323A0.titleChoice = TITLE_CHOICE_COUNT - 1;
+  if (g_MenuMemory.titleChoice < 0) {
+    g_MenuMemory.titleChoice = TITLE_CHOICE_COUNT - 1;
   }
 
-  if (D_801323A0.titleChoice >= TITLE_CHOICE_COUNT) {
-    D_801323A0.titleChoice = 0;
+  if (g_MenuMemory.titleChoice >= TITLE_CHOICE_COUNT) {
+    g_MenuMemory.titleChoice = 0;
   }
 
-  if (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME) {
+  if (g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME) {
     if (g_MenuRepeatButtons & L_JPAD) {
-      D_801323A0.playerCountChoice--;
+      g_MenuMemory.playerCountChoice--;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     } else if (g_MenuRepeatButtons & R_JPAD) {
-      D_801323A0.playerCountChoice++;
+      g_MenuMemory.playerCountChoice++;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     }
   }
 
-  if (D_801323A0.playerCountChoice < 0) {
-    D_801323A0.playerCountChoice = MAX_PLAYER_COUNT - 1;
+  if (g_MenuMemory.playerCountChoice < 0) {
+    g_MenuMemory.playerCountChoice = MAX_PLAYER_COUNT - 1;
   }
 
-  if (D_801323A0.playerCountChoice >= MAX_PLAYER_COUNT) {
-    D_801323A0.playerCountChoice = 0;
+  if (g_MenuMemory.playerCountChoice >= MAX_PLAYER_COUNT) {
+    g_MenuMemory.playerCountChoice = 0;
   }
 }
 
 /* Puts the viewer's cursor on the first character not taken. Nothing calls
  * it. */
 void ResetViewerCharacter(void) {
-  D_801323A0.viewerCharacter = 0;
+  g_MenuMemory.viewerCharacter = 0;
   if (g_TakenCharacters.isCharacterTaken[0] == 1) {
     do {
-      D_801323A0.viewerCharacter++;
-      if (D_801323A0.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
-        D_801323A0.viewerCharacter = 0;
+      g_MenuMemory.viewerCharacter++;
+      if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+        g_MenuMemory.viewerCharacter = 0;
       }
     } while (
-        g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1);
+        g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1);
   }
 }
 
@@ -2010,48 +2010,48 @@ void ResetViewerCharacter(void) {
 s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
   if (D_8022BE28_ovl_01 != 0) {
     while (
-        g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-      D_801323A0.viewerCharacter++;
-      if (D_801323A0.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
-        D_801323A0.viewerCharacter = 0;
+        g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+      g_MenuMemory.viewerCharacter++;
+      if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+        g_MenuMemory.viewerCharacter = 0;
       }
     }
 
     if (g_ControllerStates[0].pressedButtons & U_JPAD) {
-      D_801323A0.viewerCharacter--;
+      g_MenuMemory.viewerCharacter--;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      while (
-          g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-        D_801323A0.viewerCharacter--;
-        if (D_801323A0.viewerCharacter < 0) {
-          D_801323A0.viewerCharacter = D_8022BE0C_ovl_01 - 1;
+      while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
+          1) {
+        g_MenuMemory.viewerCharacter--;
+        if (g_MenuMemory.viewerCharacter < 0) {
+          g_MenuMemory.viewerCharacter = D_8022BE0C_ovl_01 - 1;
         }
       }
     } else if (g_ControllerStates[0].pressedButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      D_801323A0.viewerCharacter++;
-      while (
-          g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-        D_801323A0.viewerCharacter++;
-        if (D_801323A0.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
-          D_801323A0.viewerCharacter = 0;
+      g_MenuMemory.viewerCharacter++;
+      while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
+          1) {
+        g_MenuMemory.viewerCharacter++;
+        if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+          g_MenuMemory.viewerCharacter = 0;
         }
       }
     }
 
-    if (D_801323A0.viewerCharacter < 0) {
-      D_801323A0.viewerCharacter = D_8022BE0C_ovl_01 - 1;
-      while (
-          g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-        D_801323A0.viewerCharacter--;
+    if (g_MenuMemory.viewerCharacter < 0) {
+      g_MenuMemory.viewerCharacter = D_8022BE0C_ovl_01 - 1;
+      while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
+          1) {
+        g_MenuMemory.viewerCharacter--;
       }
     }
 
-    if (D_801323A0.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
-      D_801323A0.viewerCharacter = 0;
-      while (
-          g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-        D_801323A0.viewerCharacter++;
+    if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+      g_MenuMemory.viewerCharacter = 0;
+      while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
+          1) {
+        g_MenuMemory.viewerCharacter++;
       }
     }
   } else if (D_8022BE2C_ovl_01 == 1) {
@@ -2063,9 +2063,9 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
     }
   } else if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
     if ((g_MenuPressedButtons & (A_BUTTON | R_TRIG)) &&
-        g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 0) {
-      PlayCharacterSound(D_801323A0.viewerCharacter, 0, CHARACTER_SOUND_CHOSEN,
-          MENU_VOLUME_SOFT, SOUND_FULL_SCALE);
+        g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 0) {
+      PlayCharacterSound(g_MenuMemory.viewerCharacter, 0,
+          CHARACTER_SOUND_CHOSEN, MENU_VOLUME_SOFT, SOUND_FULL_SCALE);
       D_8022BE2C_ovl_01 = 1;
       SetAnimationSpeed(0, 1.0f);
       return 0;
@@ -2076,48 +2076,48 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
       return -1;
     }
     while (
-        g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-      D_801323A0.viewerCharacter++;
-      if (D_801323A0.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
-        D_801323A0.viewerCharacter = 0;
+        g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+      g_MenuMemory.viewerCharacter++;
+      if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+        g_MenuMemory.viewerCharacter = 0;
       }
     }
 
     if (g_MenuRepeatButtons & U_JPAD) {
-      D_801323A0.viewerCharacter--;
+      g_MenuMemory.viewerCharacter--;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      while (
-          g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-        D_801323A0.viewerCharacter--;
-        if (D_801323A0.viewerCharacter < 0) {
-          D_801323A0.viewerCharacter = D_8022BE0C_ovl_01 - 1;
+      while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
+          1) {
+        g_MenuMemory.viewerCharacter--;
+        if (g_MenuMemory.viewerCharacter < 0) {
+          g_MenuMemory.viewerCharacter = D_8022BE0C_ovl_01 - 1;
         }
       }
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_801323A0.viewerCharacter++;
-      while (
-          g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-        D_801323A0.viewerCharacter++;
-        if (D_801323A0.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
-          D_801323A0.viewerCharacter = 0;
+      g_MenuMemory.viewerCharacter++;
+      while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
+          1) {
+        g_MenuMemory.viewerCharacter++;
+        if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+          g_MenuMemory.viewerCharacter = 0;
         }
       }
     }
 
-    if (D_801323A0.viewerCharacter < 0) {
-      D_801323A0.viewerCharacter = D_8022BE0C_ovl_01 - 1;
-      while (
-          g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-        D_801323A0.viewerCharacter--;
+    if (g_MenuMemory.viewerCharacter < 0) {
+      g_MenuMemory.viewerCharacter = D_8022BE0C_ovl_01 - 1;
+      while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
+          1) {
+        g_MenuMemory.viewerCharacter--;
       }
     }
 
-    if (D_801323A0.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
-      D_801323A0.viewerCharacter = 0;
-      while (
-          g_TakenCharacters.isCharacterTaken[D_801323A0.viewerCharacter] == 1) {
-        D_801323A0.viewerCharacter++;
+    if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+      g_MenuMemory.viewerCharacter = 0;
+      while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
+          1) {
+        g_MenuMemory.viewerCharacter++;
       }
     }
   }
@@ -2158,7 +2158,7 @@ void UpdateAnimationViewer(void) {
   g_AnimatedIconFrameTime = 0; \
   OpenEncodedAsset( \
       g_ModeIconAnimations[D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1] \
-                                            [D_801323A0.modeChoice]][0], \
+                                            [g_MenuMemory.modeChoice]][0], \
       &asset); \
   ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex ^ 1], &asset); \
   g_AnimatedIconBufferIndex ^= 1
@@ -2191,8 +2191,8 @@ void UpdateModeSelect(void) {
 
   D_800C2BD5 = 0;
   if (g_MenuPressedButtons & A_BUTTON) {
-    if (D_801323A0.modeSpin != 0) {
-      D_801323A0.modeSpin = 0;
+    if (g_MenuMemory.modeSpin != 0) {
+      g_MenuMemory.modeSpin = 0;
       LoadChosenModeIcon();
       return;
     }
@@ -2207,7 +2207,7 @@ void UpdateModeSelect(void) {
     D_802322F0_ovl_01 = 0;
     D_802322F4_ovl_01 = 0;
     g_GameState.isMiniGolf = FALSE;
-    mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+    mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
     g_GameState.unk2C = rand();
     switch (mode) {
       case MODE_ICON_TOURNAMENT:
@@ -2244,7 +2244,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
@@ -2276,7 +2276,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         g_BetSet = BET_SET_MATCH_GAME;
-        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         ApplyBetPreset(BET_PRESET_MATCH_GAME);
         break;
       case MODE_ICON_SKINS_MATCH:
@@ -2287,7 +2287,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         g_BetSet = BET_SET_SKINS_MATCH;
-        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         ApplyBetPreset(BET_PRESET_SKINS_MATCH);
         break;
       case MODE_ICON_SPEED_GOLF:
@@ -2298,7 +2298,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
-        D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
       case MODE_ICON_MINI_GOLF:
@@ -2317,7 +2317,7 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         g_GameState.isMiniGolf = TRUE;
         D_800FF4C0 = 1;
@@ -2352,7 +2352,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
-        D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
       case MODE_ICON_UNK9:
@@ -2363,7 +2363,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
-        D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
       case MODE_ICON_RING_SHOT:
@@ -2396,7 +2396,7 @@ void UpdateModeSelect(void) {
         D_800FF4C0 = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         g_BetSet = BET_SET_CLUB_SLOTS;
-        D_801323A0.holesChoice = HOLES_CHOICE_ALL;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         ApplyBetPreset(BET_PRESET_CLUB_SLOTS);
         break;
     }
@@ -2414,13 +2414,13 @@ void UpdateModeSelect(void) {
   }
 
   if (g_MenuPressedButtons & B_BUTTON) {
-    if (D_801323A0.modeSpin != 0) {
-      D_801323A0.modeSpin = 0;
+    if (g_MenuMemory.modeSpin != 0) {
+      g_MenuMemory.modeSpin = 0;
       LoadChosenModeIcon();
     }
 
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-    D_801323A0.modeSpin = 0;
+    g_MenuMemory.modeSpin = 0;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT,
         TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -2429,8 +2429,8 @@ void UpdateModeSelect(void) {
     D_800FBE08[D_801B7070] = 0;
     g_TakenCharacters.isCharacterTaken[D_8012F480[D_801B7070]] = 0;
     g_PlayerControllerIndices[D_801B7070] = 0;
-    slot = g_CharacterGrid[D_801323A0.characterRows[D_801B7070]]
-                          [D_801323A0.characterColumns[D_801B7070]];
+    slot = g_CharacterGrid[g_MenuMemory.characterRows[D_801B7070]]
+                          [g_MenuMemory.characterColumns[D_801B7070]];
     if (slot >= FIRST_IMPORTED_CHARACTER) {
       g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].isChosen = 0;
       g_ImportedCharacterColumns[D_801B7070] = NO_IMPORTED_COLUMN;
@@ -2441,14 +2441,15 @@ void UpdateModeSelect(void) {
     return;
   }
 
-  if (D_801323A0.modeSpin == 0) {
+  if (g_MenuMemory.modeSpin == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      if (--D_801323A0.modeChoice < 0) {
-        D_801323A0.modeChoice = D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1;
+      if (--g_MenuMemory.modeChoice < 0) {
+        g_MenuMemory.modeChoice =
+            D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1;
       }
 
-      D_801323A0.modeSpin = AmountPerMode(MODE_SELECT_TURN);
+      g_MenuMemory.modeSpin = AmountPerMode(MODE_SELECT_TURN);
       if (g_ChosenPlayerCount == 1) {
         g_AnimatedIconFrameTime = 0;
         g_AnimatedIconFrameIndex = 0;
@@ -2457,12 +2458,12 @@ void UpdateModeSelect(void) {
       }
     } else if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      if (++D_801323A0.modeChoice >
+      if (++g_MenuMemory.modeChoice >
           D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1) {
-        D_801323A0.modeChoice = 0;
+        g_MenuMemory.modeChoice = 0;
       }
 
-      D_801323A0.modeSpin = AmountPerMode(-MODE_SELECT_TURN);
+      g_MenuMemory.modeSpin = AmountPerMode(-MODE_SELECT_TURN);
       if (g_ChosenPlayerCount == 1) {
         g_AnimatedIconFrameTime = 0;
         g_AnimatedIconFrameIndex = 0;
@@ -2472,26 +2473,26 @@ void UpdateModeSelect(void) {
     }
   }
 
-  if (Abs(D_801323A0.modeSpin) != 0) {
+  if (Abs(g_MenuMemory.modeSpin) != 0) {
     step = AmountPerMode(MODE_SELECT_SPIN_SPEED);
-    direction = D_801323A0.modeSpin < 0 ? -1 : 1;
+    direction = g_MenuMemory.modeSpin < 0 ? -1 : 1;
     if (step == 0) {
       step = 1;
     }
 
-    D_801323A0.modeSpin -= direction * step;
+    g_MenuMemory.modeSpin -= direction * step;
 
     /* Stop on reaching the mode rather than turning past it */
-    if ((D_801323A0.modeSpin < 0 ? -1 : 1) != direction) {
-      D_801323A0.modeSpin = 0;
+    if ((g_MenuMemory.modeSpin < 0 ? -1 : 1) != direction) {
+      g_MenuMemory.modeSpin = 0;
     }
 
-    if (D_801323A0.modeSpin == 0) {
+    if (g_MenuMemory.modeSpin == 0) {
       LoadChosenModeIcon();
     }
   }
 
-  mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+  mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
       break;
@@ -2504,7 +2505,7 @@ void UpdateModeSelect(void) {
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
         0xFF);
   } else if (g_ChosenPlayerCount == 1 &&
-      D_8022BEBC_ovl_01[0][D_801323A0.modeChoice] == MODE_ICON_STROKE) {
+      D_8022BEBC_ovl_01[0][g_MenuMemory.modeChoice] == MODE_ICON_STROKE) {
     SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, MESSAGE_SOLO_STROKE,
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
         0xFF);
@@ -2561,14 +2562,14 @@ void UpdateCourseSelect(void) {
   }
 
   if (g_MenuPressedButtons & A_BUTTON) {
-    if (D_801323A0.courseSpin != 0) {
-      D_801323A0.courseSpin = 0;
+    if (g_MenuMemory.courseSpin != 0) {
+      g_MenuMemory.courseSpin = 0;
       OpenEncodedAsset(
-          g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
+          g_CourseWheelImageAssets[g_MenuMemory.courseChoice][0], &asset);
       ReadEncodedAsset(D_800FBDFC[D_8022BE80_ovl_01 ^ 1], &asset);
       for (index = 0; index != COURSE_FILE_COUNT; index++) {
         OpenAssetFile(
-            g_CourseTrophyFiles[D_801323A0.courseChoice][index], &file);
+            g_CourseTrophyFiles[g_MenuMemory.courseChoice][index], &file);
         ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
       }
 
@@ -2576,10 +2577,10 @@ void UpdateCourseSelect(void) {
       return;
     }
 
-    if (D_801323A0.courseChoice < g_MenuCourseCount) {
+    if (g_MenuMemory.courseChoice < g_MenuCourseCount) {
       openCourseCount = GetOpenCourseCount();
       if (openCourseCount < COURSE_COUNT &&
-          openCourseCount == D_801323A0.courseChoice) {
+          openCourseCount == g_MenuMemory.courseChoice) {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         return;
       }
@@ -2591,7 +2592,7 @@ void UpdateCourseSelect(void) {
 
       D_801B9410 = 0;
       FreeAllCharacterSlots();
-      LoadWipeShape(D_801323A0.courseChoice);
+      LoadWipeShape(g_MenuMemory.courseChoice);
       StartWipe(WIPE_CLOSING);
       D_801052E8 = 0;
     }
@@ -2601,10 +2602,10 @@ void UpdateCourseSelect(void) {
   }
 
   if (g_MenuPressedButtons & B_BUTTON) {
-    D_801323A0.courseSpin = 0;
+    g_MenuMemory.courseSpin = 0;
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-    if (D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice] ==
+    if (D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice] ==
         MODE_ICON_GET_CHARACTER) {
       g_MenuScreen = MENU_SCREEN_OPPONENT_SELECT;
       D_801B7070--;
@@ -2626,25 +2627,25 @@ void UpdateCourseSelect(void) {
   }
 
   /* isDone is still TRUE, and the C-up test compares with it */
-  if (D_801323A0.courseSpin == 0) {
+  if (g_MenuMemory.courseSpin == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      if (--D_801323A0.courseChoice < 0) {
-        D_801323A0.courseChoice = courseCount - 1;
+      if (--g_MenuMemory.courseChoice < 0) {
+        g_MenuMemory.courseChoice = courseCount - 1;
       }
 
-      D_801323A0.courseSpin = COURSE_SELECT_TURN / courseCount;
+      g_MenuMemory.courseSpin = COURSE_SELECT_TURN / courseCount;
       for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
             0xFF, 0xFF, 0xFF);
       }
     } else if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      if (++D_801323A0.courseChoice > courseCount - 1) {
-        D_801323A0.courseChoice = 0;
+      if (++g_MenuMemory.courseChoice > courseCount - 1) {
+        g_MenuMemory.courseChoice = 0;
       }
 
-      D_801323A0.courseSpin = -COURSE_SELECT_TURN / courseCount;
+      g_MenuMemory.courseSpin = -COURSE_SELECT_TURN / courseCount;
       for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
             0xFF, 0xFF, 0xFF);
@@ -2661,45 +2662,45 @@ void UpdateCourseSelect(void) {
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.holesChoice = HOLES_CHOICE_ALL;
+      g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
       g_GameState.holeSelection = HOLE_SELECTION_ALL;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
+      g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
       g_GameState.holeSelection = HOLE_SELECTION_FRONT_NINE;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.holesChoice = HOLES_CHOICE_BACK_NINE;
+      g_MenuMemory.holesChoice = HOLES_CHOICE_BACK_NINE;
       g_GameState.holeSelection = HOLE_SELECTION_BACK_NINE;
       StartLoadingChosenHole();
     }
   }
 
-  if (Abs(D_801323A0.courseSpin) != 0) {
+  if (Abs(g_MenuMemory.courseSpin) != 0) {
     step = COURSE_SELECT_SPIN_SPEED / courseCount;
-    direction = D_801323A0.courseSpin < 0 ? -1 : 1;
+    direction = g_MenuMemory.courseSpin < 0 ? -1 : 1;
     if (step == 0) {
       step = 1;
     }
 
-    D_801323A0.courseSpin -= direction * step;
+    g_MenuMemory.courseSpin -= direction * step;
 
     /* Stop on reaching the course rather than turning past it */
-    if ((D_801323A0.courseSpin < 0 ? -1 : 1) != direction) {
-      D_801323A0.courseSpin = 0;
+    if ((g_MenuMemory.courseSpin < 0 ? -1 : 1) != direction) {
+      g_MenuMemory.courseSpin = 0;
     }
 
-    if (D_801323A0.courseSpin == 0) {
+    if (g_MenuMemory.courseSpin == 0) {
       OpenEncodedAsset(
-          g_CourseWheelImageAssets[D_801323A0.courseChoice][0], &asset);
+          g_CourseWheelImageAssets[g_MenuMemory.courseChoice][0], &asset);
       ReadEncodedAsset(D_800FBDFC[D_8022BE80_ovl_01 ^ 1], &asset);
       for (index = 0; index != COURSE_FILE_COUNT; index++) {
         OpenAssetFile(
-            g_CourseTrophyFiles[D_801323A0.courseChoice][index], &file);
+            g_CourseTrophyFiles[g_MenuMemory.courseChoice][index], &file);
         ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
       }
 
@@ -2739,7 +2740,7 @@ void UpdateMiniGolfCourseSelect(void) {
 
           if (D_8022F8D4_ovl_01 >= 0 &&
               D_8022F8D4_ovl_01 <= MINI_GOLF_FACING_FRAME) {
-            course = D_801323A0.unk2C - 1;
+            course = g_MenuMemory.unk2C - 1;
             if (course < 0) {
               course = MINI_GOLF_COURSES_PER_RECORD - 1;
             }
@@ -2755,7 +2756,7 @@ void UpdateMiniGolfCourseSelect(void) {
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
-            course = D_801323A0.unk2C;
+            course = g_MenuMemory.unk2C;
             buffers = D_801049A0;
             OpenEncodedAsset(g_MiniGolfDiscFrameAssets[course *
                                  MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01],
@@ -2771,8 +2772,8 @@ void UpdateMiniGolfCourseSelect(void) {
 
           D_8022F8DD_ovl_01 ^= 1;
           if (D_8022F8D4_ovl_01 == MINI_GOLF_FACING_FRAME) {
-            if (--D_801323A0.unk2C < 0) {
-              D_801323A0.unk2C = MINI_GOLF_COURSES_PER_RECORD - 1;
+            if (--g_MenuMemory.unk2C < 0) {
+              g_MenuMemory.unk2C = MINI_GOLF_COURSES_PER_RECORD - 1;
             }
 
             D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
@@ -2789,7 +2790,7 @@ void UpdateMiniGolfCourseSelect(void) {
 
           if (D_8022F8D4_ovl_01 >= MINI_GOLF_FACING_FRAME &&
               D_8022F8D4_ovl_01 < MINI_GOLF_TURN_FRAME_COUNT) {
-            course = D_801323A0.unk2C + 1;
+            course = g_MenuMemory.unk2C + 1;
             if (course >= MINI_GOLF_COURSES_PER_RECORD) {
               course = 0;
             }
@@ -2805,7 +2806,7 @@ void UpdateMiniGolfCourseSelect(void) {
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
-            course = D_801323A0.unk2C;
+            course = g_MenuMemory.unk2C;
             buffers = D_801049A0;
             OpenEncodedAsset(g_MiniGolfDiscFrameAssets[course *
                                  MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01],
@@ -2821,8 +2822,8 @@ void UpdateMiniGolfCourseSelect(void) {
 
           D_8022F8DD_ovl_01 ^= 1;
           if (D_8022F8D4_ovl_01 == MINI_GOLF_FACING_FRAME) {
-            if (++D_801323A0.unk2C >= MINI_GOLF_COURSES_PER_RECORD) {
-              D_801323A0.unk2C = 0;
+            if (++g_MenuMemory.unk2C >= MINI_GOLF_COURSES_PER_RECORD) {
+              g_MenuMemory.unk2C = 0;
             }
 
             D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
@@ -2861,16 +2862,16 @@ void UpdateMiniGolfCourseSelect(void) {
   }
 
   if (g_MenuPressedButtons & A_BUTTON) {
-    if (D_801323A0.unk2D != 0) {
-      D_801323A0.unk2D = 0;
+    if (g_MenuMemory.unk2D != 0) {
+      g_MenuMemory.unk2D = 0;
       return;
     }
 
-    if (D_801323A0.unk2B < g_MenuCourseCount) {
+    if (g_MenuMemory.unk2B < g_MenuCourseCount) {
       D_801B9410 = 0;
       FreeAllCharacterSlots();
-      LoadWipeShape(D_801323A0.unk2C +
-          (D_801323A0.unk2B * MINI_GOLF_COURSES_PER_RECORD) +
+      LoadWipeShape(g_MenuMemory.unk2C +
+          (g_MenuMemory.unk2B * MINI_GOLF_COURSES_PER_RECORD) +
           MINI_GOLF_COURSE_INDEX);
       StartWipe(WIPE_CLOSING);
       D_801052E8 = 0;
@@ -2882,7 +2883,7 @@ void UpdateMiniGolfCourseSelect(void) {
 
   if (g_MenuPressedButtons & B_BUTTON) {
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-    D_801323A0.unk2D = 0;
+    g_MenuMemory.unk2D = 0;
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     g_GameState.isMiniGolf = FALSE;
     g_MenuScreen = MENU_SCREEN_MODE_SELECT;
@@ -2894,21 +2895,21 @@ void UpdateMiniGolfCourseSelect(void) {
   }
 
   /* isDone is still TRUE, and the C-up test compares with it */
-  if (D_801323A0.unk2D == 0) {
+  if (g_MenuMemory.unk2D == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      if (--D_801323A0.unk2B < 0) {
-        D_801323A0.unk2B = MINI_GOLF_RECORD_COUNT - 1;
+      if (--g_MenuMemory.unk2B < 0) {
+        g_MenuMemory.unk2B = MINI_GOLF_RECORD_COUNT - 1;
       }
 
-      D_801323A0.unk2D = MINI_GOLF_RECORD_SLIDE;
+      g_MenuMemory.unk2D = MINI_GOLF_RECORD_SLIDE;
     } else if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      if (++D_801323A0.unk2B >= MINI_GOLF_RECORD_COUNT) {
-        D_801323A0.unk2B = 0;
+      if (++g_MenuMemory.unk2B >= MINI_GOLF_RECORD_COUNT) {
+        g_MenuMemory.unk2B = 0;
       }
 
-      D_801323A0.unk2D = -MINI_GOLF_RECORD_SLIDE;
+      g_MenuMemory.unk2D = -MINI_GOLF_RECORD_SLIDE;
     } else if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_PREVIOUS;
@@ -2927,32 +2928,32 @@ void UpdateMiniGolfCourseSelect(void) {
     } else if ((g_MenuRepeatButtons & D_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.holesChoice = HOLES_CHOICE_ALL;
+      g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
       g_GameState.holeSelection = HOLE_SELECTION_ALL;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & L_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.holesChoice = HOLES_CHOICE_FRONT_NINE;
+      g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
       g_GameState.holeSelection = HOLE_SELECTION_FRONT_NINE;
       StartLoadingChosenHole();
     } else if ((g_MenuRepeatButtons & R_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == 1) {
       PlaySound(SOUND_SLICE, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_801323A0.holesChoice = HOLES_CHOICE_BACK_NINE;
+      g_MenuMemory.holesChoice = HOLES_CHOICE_BACK_NINE;
       g_GameState.holeSelection = HOLE_SELECTION_BACK_NINE;
       StartLoadingChosenHole();
     }
   }
 
-  if (Abs(D_801323A0.unk2D) != 0) {
-    direction = D_801323A0.unk2D >= 0 ? 1 : -1;
+  if (Abs(g_MenuMemory.unk2D) != 0) {
+    direction = g_MenuMemory.unk2D >= 0 ? 1 : -1;
     step = MINI_GOLF_RECORD_SLIDE_STEP;
-    D_801323A0.unk2D -= direction * step;
+    g_MenuMemory.unk2D -= direction * step;
 
     /* Stop on reaching the record rather than sliding past it */
-    if ((D_801323A0.unk2D >= 0 ? 1 : -1) != direction) {
-      D_801323A0.unk2D = 0;
+    if ((g_MenuMemory.unk2D >= 0 ? 1 : -1) != direction) {
+      g_MenuMemory.unk2D = 0;
     }
   }
 }
@@ -2982,7 +2983,7 @@ void UpdateMainMenu(void) {
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      switch (D_801323A0.mainChoice) {
+      switch (g_MenuMemory.mainChoice) {
         case MAIN_CHOICE_CLUBHOUSE:
           g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
           break;
@@ -3023,18 +3024,18 @@ void UpdateMainMenu(void) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_801323A0.mainChoice--;
+      g_MenuMemory.mainChoice--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_801323A0.mainChoice++;
+      g_MenuMemory.mainChoice++;
     }
 
-    if (D_801323A0.mainChoice >= MAIN_CHOICE_COUNT) {
-      D_801323A0.mainChoice = 0;
+    if (g_MenuMemory.mainChoice >= MAIN_CHOICE_COUNT) {
+      g_MenuMemory.mainChoice = 0;
     }
 
-    if (D_801323A0.mainChoice < 0) {
-      D_801323A0.mainChoice = MAIN_CHOICE_COUNT - 1;
+    if (g_MenuMemory.mainChoice < 0) {
+      g_MenuMemory.mainChoice = MAIN_CHOICE_COUNT - 1;
     }
   }
 }
@@ -3044,7 +3045,7 @@ void UpdateMainMenuWithoutTransmit(void) {
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      switch (D_801323A0.mainChoiceWithoutTransmit) {
+      switch (g_MenuMemory.mainChoiceWithoutTransmit) {
         case MAIN_CHOICE_CLUBHOUSE:
           g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
           break;
@@ -3080,19 +3081,19 @@ void UpdateMainMenuWithoutTransmit(void) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_801323A0.mainChoiceWithoutTransmit--;
+      g_MenuMemory.mainChoiceWithoutTransmit--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_801323A0.mainChoiceWithoutTransmit++;
+      g_MenuMemory.mainChoiceWithoutTransmit++;
     }
 
-    if (D_801323A0.mainChoiceWithoutTransmit >=
+    if (g_MenuMemory.mainChoiceWithoutTransmit >=
         MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT) {
-      D_801323A0.mainChoiceWithoutTransmit = 0;
+      g_MenuMemory.mainChoiceWithoutTransmit = 0;
     }
 
-    if (D_801323A0.mainChoiceWithoutTransmit < 0) {
-      D_801323A0.mainChoiceWithoutTransmit =
+    if (g_MenuMemory.mainChoiceWithoutTransmit < 0) {
+      g_MenuMemory.mainChoiceWithoutTransmit =
           MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT - 1;
     }
   }
@@ -3103,7 +3104,7 @@ void UpdateClubhouse(void) {
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      switch (D_8022BF1C_ovl_01[D_801323A0.clubhouseChoice]) {
+      switch (D_8022BF1C_ovl_01[g_MenuMemory.clubhouseChoice]) {
         case CLUBHOUSE_ROOM_COURSE_STATS:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_COURSE_STATS;
@@ -3136,7 +3137,7 @@ void UpdateClubhouse(void) {
 
     if (g_MenuPressedButtons & B_BUTTON) {
       PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      if (D_801323A0.isTransmitShown == isDone) {
+      if (g_MenuMemory.isTransmitShown == isDone) {
         g_MenuScreen = MENU_SCREEN_MAIN;
       } else {
         g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
@@ -3148,18 +3149,18 @@ void UpdateClubhouse(void) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_801323A0.clubhouseChoice--;
+      g_MenuMemory.clubhouseChoice--;
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_801323A0.clubhouseChoice++;
+      g_MenuMemory.clubhouseChoice++;
     }
 
-    if (D_801323A0.clubhouseChoice >= CLUBHOUSE_CHOICE_COUNT) {
-      D_801323A0.clubhouseChoice = 0;
+    if (g_MenuMemory.clubhouseChoice >= CLUBHOUSE_CHOICE_COUNT) {
+      g_MenuMemory.clubhouseChoice = 0;
     }
 
-    if (D_801323A0.clubhouseChoice < 0) {
-      D_801323A0.clubhouseChoice = CLUBHOUSE_CHOICE_COUNT - 1;
+    if (g_MenuMemory.clubhouseChoice < 0) {
+      g_MenuMemory.clubhouseChoice = CLUBHOUSE_CHOICE_COUNT - 1;
     }
   }
 }
@@ -3263,7 +3264,7 @@ void UpdateOptionsScreen(void) {
       }
     }
   } else if (g_MenuPressedButtons & A_BUTTON) {
-    switch (D_801323A0.optionsChoice) {
+    switch (g_MenuMemory.optionsChoice) {
       case OPTIONS_CHOICE_MUSIC:
       case OPTIONS_CHOICE_MONO:
       case OPTIONS_CHOICE_CAMERA:
@@ -3297,7 +3298,7 @@ void UpdateOptionsScreen(void) {
   } else if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     TransferSaveData(save, TRUE);
-    if (D_801323A0.isTransmitShown) {
+    if (g_MenuMemory.isTransmitShown) {
       g_MenuScreen = MENU_SCREEN_MAIN;
     } else {
       g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
@@ -3306,37 +3307,37 @@ void UpdateOptionsScreen(void) {
     PlaySong(SONG_TITLE, 0);
   } else {
     if (g_MenuRepeatButtons & U_JPAD) {
-      D_801323A0.optionsChoice--;
+      g_MenuMemory.optionsChoice--;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     } else if (g_MenuRepeatButtons & D_JPAD) {
-      D_801323A0.optionsChoice++;
+      g_MenuMemory.optionsChoice++;
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     }
 
     if (IsGameFlagSet(GAME_FLAG_UNK55)) {
-      if (D_801323A0.optionsChoice >= OPTIONS_SOUND_TEST_CHOICE_COUNT) {
-        D_801323A0.optionsChoice = 0;
+      if (g_MenuMemory.optionsChoice >= OPTIONS_SOUND_TEST_CHOICE_COUNT) {
+        g_MenuMemory.optionsChoice = 0;
       }
 
-      if (D_801323A0.optionsChoice < 0) {
-        D_801323A0.optionsChoice = OPTIONS_SOUND_TEST_CHOICE_COUNT - 1;
+      if (g_MenuMemory.optionsChoice < 0) {
+        g_MenuMemory.optionsChoice = OPTIONS_SOUND_TEST_CHOICE_COUNT - 1;
       }
     } else {
-      if (D_801323A0.optionsChoice >= OPTIONS_CHOICE_COUNT) {
-        D_801323A0.optionsChoice = 0;
+      if (g_MenuMemory.optionsChoice >= OPTIONS_CHOICE_COUNT) {
+        g_MenuMemory.optionsChoice = 0;
       }
 
-      if (D_801323A0.optionsChoice < 0) {
-        D_801323A0.optionsChoice = OPTIONS_CHOICE_COUNT - 1;
+      if (g_MenuMemory.optionsChoice < 0) {
+        g_MenuMemory.optionsChoice = OPTIONS_CHOICE_COUNT - 1;
       }
     }
 
-    switch (D_801323A0.optionsChoice) {
+    switch (g_MenuMemory.optionsChoice) {
       case OPTIONS_CHOICE_MUSIC:
         if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
           PlaySound(
               SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          optionBits = &D_801323A0.optionBits;
+          optionBits = &g_MenuMemory.optionBits;
           *optionBits ^= OPTION_BIT_MUSIC_OFF;
         }
 
@@ -3345,7 +3346,7 @@ void UpdateOptionsScreen(void) {
         if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
           PlaySound(
               SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          optionBits = &D_801323A0.optionBits;
+          optionBits = &g_MenuMemory.optionBits;
           *optionBits ^= OPTION_BIT_MONO;
           g_SoundOptionBits = *optionBits;
           if (*optionBits & OPTION_BIT_MONO) {
@@ -3360,7 +3361,7 @@ void UpdateOptionsScreen(void) {
         if (g_MenuRepeatButtons & (L_JPAD | R_JPAD)) {
           PlaySound(
               SOUND_OPTION_TOGGLED, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-          optionBits = &D_801323A0.optionBits;
+          optionBits = &g_MenuMemory.optionBits;
           *optionBits ^= OPTION_BIT_SIMPLE_CAMERA;
         }
 
@@ -3574,8 +3575,8 @@ void UpdateCaddySelect(void) {
 
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    if (D_801323A0.modeChoice == MENU_SCREEN_MODE_SELECT) {
-      g_MenuScreen = D_801323A0.modeChoice;
+    if (g_MenuMemory.modeChoice == MENU_SCREEN_MODE_SELECT) {
+      g_MenuScreen = g_MenuMemory.modeChoice;
     } else {
       g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
     }
@@ -3583,13 +3584,13 @@ void UpdateCaddySelect(void) {
     return;
   }
 
-  if ((g_MenuRepeatButtons & U_JPAD) && D_801323A0.caddyChoice > 0) {
+  if ((g_MenuRepeatButtons & U_JPAD) && g_MenuMemory.caddyChoice > 0) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    D_801323A0.caddyChoice--;
+    g_MenuMemory.caddyChoice--;
   } else if ((g_MenuRepeatButtons & D_JPAD) &&
-      D_801323A0.caddyChoice < CADDY_COUNT - 1) {
+      g_MenuMemory.caddyChoice < CADDY_COUNT - 1) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    D_801323A0.caddyChoice++;
+    g_MenuMemory.caddyChoice++;
   }
 }
 
@@ -3612,7 +3613,7 @@ void LeaveMenuWithCourseWipe(void) {
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
   } else {
-    LoadWipeShape(D_801323A0.courseIndex);
+    LoadWipeShape(g_MenuMemory.courseIndex);
     StartWipe(WIPE_CLOSING);
     D_801052E8 = 0;
     D_801B9410 = 0;
@@ -3631,7 +3632,7 @@ void func_801FAFEC_ovl_01(void) {
 
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    if (D_801323A0.isTransmitShown) {
+    if (g_MenuMemory.isTransmitShown) {
       g_MenuScreen = MENU_SCREEN_MAIN;
     } else {
       g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
@@ -4342,15 +4343,15 @@ const char D_80231640_ovl_01[] = "%8d:%8d:%8d";
  * count once New Game is chosen, or else the chosen choice's own label
  */
 #define IsChosenTitleLabel(labelIndex) \
-  ((D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME && \
+  ((g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
        (labelIndex) == TITLE_LABEL_NEW_GAME) || \
-      (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME && \
+      (g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
           (labelIndex) == \
-              D_801323A0.playerCountChoice + \
+              g_MenuMemory.playerCountChoice + \
                   TITLE_LABEL_FIRST_PLAYER_COUNT) || \
-      (D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE == \
+      (g_MenuMemory.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE == \
               (labelIndex) && \
-          D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME))
+          g_MenuMemory.titleChoice != TITLE_CHOICE_NEW_GAME))
 
 void DrawMenuTitleScreen(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -4728,7 +4729,7 @@ void DrawModeSelect(Gfx** displayListHead) {
       radiusX = SINGLE_PLAYER_MODE_BOARD_RADIUS_X;
     }
 
-    slot = (D_801323A0.modeChoice - index) % modeCount;
+    slot = (g_MenuMemory.modeChoice - index) % modeCount;
     if (modeCount != 0) {
       angleStep = DEGREES_PER_TURN / modeCount;
     } else {
@@ -4736,7 +4737,7 @@ void DrawModeSelect(Gfx** displayListHead) {
     }
 
     angle = -DegreesToRadians(
-        (slot * angleStep) + (D_801323A0.modeSpin * DEGREES_PER_SPIN_STEP));
+        (slot * angleStep) + (g_MenuMemory.modeSpin * DEGREES_PER_SPIN_STEP));
     circleX = sinf(angle) * radiusX;
     if (ProjectPoint(circleX, 0.0f, cosf(angle) * MODE_BOARD_RADIUS_Z, &point) <
         0) {
@@ -4781,7 +4782,7 @@ void DrawModeSelect(Gfx** displayListHead) {
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8012F4B0[slot])));
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    if ((D_801323A0.modeChoice == slot) && (D_801323A0.modeSpin == 0)) {
+    if ((g_MenuMemory.modeChoice == slot) && (g_MenuMemory.modeSpin == 0)) {
       if (!areCharactersDrawn) {
         DrawMenuCharacters(&gfx);
         areCharactersDrawn = TRUE;
@@ -4803,7 +4804,7 @@ void DrawModeSelect(Gfx** displayListHead) {
       DrawScaledModeIcon(&gfx, boardX[slot] - halfSize,
           boardY[slot] - halfSize + bob, halfSize, step);
     } else {
-      if (D_801323A0.modeChoice == slot) {
+      if (g_MenuMemory.modeChoice == slot) {
         /* The characters go behind the chosen board, and change the state */
         if (!areCharactersDrawn) {
           DrawMenuCharacters(&gfx);
@@ -4909,7 +4910,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   labelIndex =
-      D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+      D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
   gDPLoadTextureBlock_4b(gfx++,
       TextureAddress(ImageTexels(D_801B5CD0[D_8022BE90_ovl_01]) +
           (labelIndex * MODE_LABEL_IMAGE_SIZE)),
@@ -4999,7 +5000,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   DrawCenteredPageArrows(&gfx, MODE_ARROW_GAP, MODE_ARROW_Y);
 
   if ((g_ChosenPlayerCount == 1) &&
-      (D_8022BEBC_ovl_01[0][D_801323A0.modeChoice] == MODE_ICON_TOURNAMENT)) {
+      (D_8022BEBC_ovl_01[0][g_MenuMemory.modeChoice] == MODE_ICON_TOURNAMENT)) {
     badgeCount = 0;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
       for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
@@ -5032,7 +5033,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   }
 
   if ((g_ChosenPlayerCount == 1) &&
-      (D_8022BEBC_ovl_01[0][D_801323A0.modeChoice] == MODE_ICON_RING_SHOT)) {
+      (D_8022BEBC_ovl_01[0][g_MenuMemory.modeChoice] == MODE_ICON_RING_SHOT)) {
     starCount = 0;
     for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT;
         courseIndex++) {
@@ -5119,7 +5120,7 @@ void DrawModeIcon(Gfx** displayListHead) {
   g_AnimatedIconFrameTime++;
   if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
     iconIndex =
-        D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+        D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
     g_AnimatedIconFrameTime = 0;
     g_AnimatedIconFrameIndex++;
     if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
@@ -5175,7 +5176,7 @@ void DrawScaledModeIcon(
   g_AnimatedIconFrameTime++;
   if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
     iconIndex =
-        D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][D_801323A0.modeChoice];
+        D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
     g_AnimatedIconFrameTime = 0;
     g_AnimatedIconFrameIndex++;
     if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
@@ -5417,8 +5418,8 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   SetUpTextDrawing(&gfx);
   gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0x7F, 0xFF, 0xFF);
   gDPSetEnvColor(gfx++, 0x00, 0x10, 0x40, 0xFF);
-  sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.viewerCharacter + 1,
-      g_MenuCharacterNames[D_801323A0.viewerCharacter]);
+  sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuMemory.viewerCharacter + 1,
+      g_MenuCharacterNames[g_MenuMemory.viewerCharacter]);
   DrawLargeText(&gfx, VIEWER_NAME_X, VIEWER_NAME_Y, g_PrintBuffer);
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     sprintf(g_PrintBuffer, D_80231668_ovl_01, index + 1);
@@ -5438,14 +5439,15 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   sprintf(g_PrintBuffer, D_8023166C_ovl_01, D_8022BE24_ovl_01);
   DrawShadowedText(&gfx, VIEWER_ANIMATION_X, VIEWER_ANIMATION_Y, g_PrintBuffer);
   sprintf(g_PrintBuffer, D_80231670_ovl_01,
-      g_Clubs[D_801323A0.viewerCharacter * CLUB_SET_SIZE].distance);
+      g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].distance);
   DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_POWER_Y, g_PrintBuffer);
   sprintf(g_PrintBuffer, D_8023167C_ovl_01,
-      g_Clubs[D_801323A0.viewerCharacter * CLUB_SET_SIZE].spin);
+      g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].spin);
   DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SPIN_Y, g_PrintBuffer);
-  if (g_Clubs[D_801323A0.viewerCharacter * CLUB_SET_SIZE].sideSpin > 0) {
+  if (g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].sideSpin > 0) {
     DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "DRAW");
-  } else if (g_Clubs[D_801323A0.viewerCharacter * CLUB_SET_SIZE].sideSpin < 0) {
+  } else if (g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].sideSpin <
+      0) {
     DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "FADE");
   } else {
     DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "STRAIGHT");
@@ -5572,12 +5574,12 @@ void DrawAnimationViewer(Gfx** displayListHead) {
     }
   }
 
-  if (D_8022FBA0_ovl_01 != D_801323A0.viewerCharacter ||
+  if (D_8022FBA0_ovl_01 != g_MenuMemory.viewerCharacter ||
       D_8022FBA4_ovl_01 == TRUE || D_8022BE94_ovl_01 == TRUE) {
     if (IsCharacterSlotBusy(D_8022FBB4_ovl_01)) {
       FreeCharacterSlot(D_8022FBB4_ovl_01);
     } else {
-      character = D_801323A0.viewerCharacter;
+      character = g_MenuMemory.viewerCharacter;
       D_8022BE94_ovl_01 = FALSE;
       D_8022FBA4_ovl_01 = FALSE;
       D_8022FBA0_ovl_01 = character;
@@ -5771,19 +5773,19 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     if (g_GameState.isMiniGolf) {
-      choice = D_801323A0.unk2B;
+      choice = g_MenuMemory.unk2B;
       courseCount = MINI_GOLF_DISC_IMAGE_COUNT;
       angleStep = DEGREES_PER_TURN / MINI_GOLF_DISC_IMAGE_COUNT;
       texelsOffset = 0;
-      spin = D_801323A0.unk2D;
+      spin = g_MenuMemory.unk2D;
     } else {
       courseCount = GetOpenCourseCount();
       courseCount =
           (courseCount < COURSE_COUNT) ? (courseCount + 1) : COURSE_COUNT;
 
-      choice = D_801323A0.courseChoice;
+      choice = g_MenuMemory.courseChoice;
       angleStep = DEGREES_PER_TURN / courseCount;
-      spin = D_801323A0.courseSpin;
+      spin = g_MenuMemory.courseSpin;
       texelsOffset = LARGE_PALETTED_TEXELS_OFFSET;
     }
 
@@ -5882,7 +5884,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         stripOffset += COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT;
       }
 
-      if ((g_GameState.isMiniGolf == TRUE) && (D_801323A0.unk2B == slot)) {
+      if ((g_GameState.isMiniGolf == TRUE) && (g_MenuMemory.unk2B == slot)) {
         if ((spin == 0) || (D_8022FD44_ovl_01 == 0.0f)) {
           D_8022FD44_ovl_01 = iconY[slot];
         }
@@ -5899,7 +5901,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
       badgeCount = 0;
       for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
         if (save->awards
-                .birdieBadgeCounts[D_801323A0.courseChoice][otherIndex]) {
+                .birdieBadgeCounts[g_MenuMemory.courseChoice][otherIndex]) {
           badgeCount++;
         }
       }
@@ -5964,7 +5966,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           gDPPipeSync(gfx++);
           gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-        } else if (D_801323A0.holesChoice == otherIndex) {
+        } else if (g_MenuMemory.holesChoice == otherIndex) {
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         } else {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -5995,13 +5997,14 @@ void DrawCourseSelect(Gfx** displayListHead) {
     if ((MAP_CAMERA_MODE_TOP_BYTE == 0) && !g_GameState.isMiniGolf) {
       placeCount = 0;
       for (otherIndex = 0; otherIndex != TOURNAMENT_PLACE_COUNT; otherIndex++) {
-        if (g_CourseStatFigures[D_801323A0.courseChoice].hasPlace[otherIndex]) {
+        if (g_CourseStatFigures[g_MenuMemory.courseChoice]
+                .hasPlace[otherIndex]) {
           places[placeCount] = otherIndex;
           placeCount++;
         }
       }
 
-      if (D_801323A0.courseSpin == 0) {
+      if (g_MenuMemory.courseSpin == 0) {
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -6017,25 +6020,25 @@ void DrawCourseSelect(Gfx** displayListHead) {
               gfx++, TextureAddress(D_800FBE38[places[otherIndex]]));
           gDPLoadTextureTile(gfx++,
               TextureAddress(D_800FBDFC[D_8022BE80_ovl_01]), G_IM_FMT_CI,
-              G_IM_SIZ_8b, g_TrophySizes[D_801323A0.courseChoice].width,
-              g_TrophySizes[D_801323A0.courseChoice].height, 0, 0,
-              g_TrophySizes[D_801323A0.courseChoice].width - 1,
-              g_TrophySizes[D_801323A0.courseChoice].height - 1, 0,
+              G_IM_SIZ_8b, g_TrophySizes[g_MenuMemory.courseChoice].width,
+              g_TrophySizes[g_MenuMemory.courseChoice].height, 0, 0,
+              g_TrophySizes[g_MenuMemory.courseChoice].width - 1,
+              g_TrophySizes[g_MenuMemory.courseChoice].height - 1, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
-          left = D_8022FC48_ovl_01[D_801323A0.courseChoice][placeCount - 1]
+          left = D_8022FC48_ovl_01[g_MenuMemory.courseChoice][placeCount - 1]
                                   [otherIndex]
                                       .x;
-          top = D_8022FC48_ovl_01[D_801323A0.courseChoice][placeCount - 1]
+          top = D_8022FC48_ovl_01[g_MenuMemory.courseChoice][placeCount - 1]
                                  [otherIndex]
                                      .y;
           gSPScisTextureRectangle(gfx++, QuarterPixels(left),
               QuarterPixels(top),
               QuarterPixels(
-                  left + g_TrophySizes[D_801323A0.courseChoice].width),
+                  left + g_TrophySizes[g_MenuMemory.courseChoice].width),
               QuarterPixels(
-                  top + g_TrophySizes[D_801323A0.courseChoice].height),
+                  top + g_TrophySizes[g_MenuMemory.courseChoice].height),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }
@@ -6044,7 +6047,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
       badgeCount = 0;
       for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
         if (save->awards
-                .birdieBadgeCounts[D_801323A0.courseChoice][otherIndex]) {
+                .birdieBadgeCounts[g_MenuMemory.courseChoice][otherIndex]) {
           badgeCount++;
         }
       }
@@ -6072,7 +6075,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     DrawPageArrows(&gfx);
     DrawCourseSelectBanners(&gfx);
     if (!g_GameState.isMiniGolf &&
-        (D_801323A0.courseChoice == (courseCount - 1)) &&
+        (g_MenuMemory.courseChoice == (courseCount - 1)) &&
         (GetOpenCourseCount() < COURSE_COUNT)) {
       gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
       gDPPipeSync(gfx++);
@@ -6088,7 +6091,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
       gDPSetEnvColor(gfx++, 191, 191, 255, 255);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
       SetTextSlotValue(
-          GetCoursePointsNeeded(D_801323A0.courseChoice) - save->coursePoints,
+          GetCoursePointsNeeded(g_MenuMemory.courseChoice) - save->coursePoints,
           0, 0);
       SetTextSlot(LOCKED_COURSE_TEXT_X, LOCKED_COURSE_TEXT_Y,
           MESSAGE_POINTS_TO_UNLOCK, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_UNK20,
@@ -6346,22 +6349,22 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   SetTextColor(&gfx, 255, 255, 255);
   if (!g_GameState.isMiniGolf) {
     if (D_800FF4C0 == 1) {
-      sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.courseChoice + 1,
-          g_CourseRecords[D_801323A0.courseChoice].name);
+      sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuMemory.courseChoice + 1,
+          g_CourseRecords[g_MenuMemory.courseChoice].name);
     } else {
-      sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.courseChoice + 1,
-          g_TournamentNames[D_801323A0.courseChoice]);
+      sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuMemory.courseChoice + 1,
+          g_TournamentNames[g_MenuMemory.courseChoice]);
     }
   } else {
-    sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.unk2B + 1,
-        D_8022FDEC_ovl_01[D_801323A0.unk2B]);
+    sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuMemory.unk2B + 1,
+        D_8022FDEC_ovl_01[g_MenuMemory.unk2B]);
   }
 
   SetUpGradientTextDrawing(&gfx, 0);
   if (g_GameState.isMiniGolf == TRUE) {
-    stripIndex = D_801323A0.unk2C + MINI_GOLF_COURSE_INDEX;
+    stripIndex = g_MenuMemory.unk2C + MINI_GOLF_COURSE_INDEX;
   } else {
-    stripIndex = D_801323A0.courseChoice;
+    stripIndex = g_MenuMemory.courseChoice;
   }
 
   DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, slide + COURSE_NAME_Y,
@@ -6375,7 +6378,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     SetTextSlot(SCREEN_WIDTH / 2, slide + HOLES_CHOICE_Y,
-        D_801323A0.holesChoice + HOLES_CHOICE_MESSAGE_BASE,
+        g_MenuMemory.holesChoice + HOLES_CHOICE_MESSAGE_BASE,
         TEXT_SLOT_LARGE_FONT, HOLES_CHOICE_TEXT_SLOT,
         TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, HOLES_CHOICE_TEXT_SLOT);
@@ -6403,7 +6406,7 @@ void DrawMainMenu(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_COUNT; choiceIndex++) {
-    if (D_801323A0.mainChoice != choiceIndex) {
+    if (g_MenuMemory.mainChoice != choiceIndex) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(ImageTexels(D_801B5CD0[D_8022BE90_ovl_01]) +
               (choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE)),
@@ -6425,7 +6428,7 @@ void DrawMainMenu(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_8012D420[D_8022BE8E_ovl_01])));
-  choiceIndex = D_801323A0.mainChoice;
+  choiceIndex = g_MenuMemory.mainChoice;
   gDPLoadTextureBlock_4b(gfx++,
       TextureAddress(ImageTexels(D_8012D420[D_8022BE8E_ovl_01]) +
           (choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE)),
@@ -6474,7 +6477,7 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT;
       choiceIndex++) {
-    if (D_801323A0.mainChoiceWithoutTransmit != choiceIndex) {
+    if (g_MenuMemory.mainChoiceWithoutTransmit != choiceIndex) {
       labelOffset = MAIN_CHOICE_FULL_OPTIONS * MAIN_CHOICE_LABEL_IMAGE_SIZE;
       if (choiceIndex < MAIN_CHOICE_OPTIONS) {
         labelOffset = choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE;
@@ -6501,7 +6504,7 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_8012D420[D_8022BE8E_ovl_01])));
-  choiceIndex = D_801323A0.mainChoiceWithoutTransmit;
+  choiceIndex = g_MenuMemory.mainChoiceWithoutTransmit;
   if (choiceIndex == MAIN_CHOICE_OPTIONS) {
     labelOffset = MAIN_CHOICE_FULL_OPTIONS * MAIN_CHOICE_LABEL_IMAGE_SIZE;
   } else {
@@ -6560,7 +6563,7 @@ void DrawClubhouse(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (choiceIndex = 0; choiceIndex != CLUBHOUSE_CHOICE_COUNT; choiceIndex++) {
-    if (choiceIndex != D_801323A0.clubhouseChoice) {
+    if (choiceIndex != g_MenuMemory.clubhouseChoice) {
       labelOffset = D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE;
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(
@@ -6581,7 +6584,7 @@ void DrawClubhouse(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_8012D420[D_8022BE8E_ovl_01])));
-  choiceIndex = D_801323A0.clubhouseChoice;
+  choiceIndex = g_MenuMemory.clubhouseChoice;
   gDPLoadTextureBlock_4b(gfx++,
       TextureAddress(ImageTexels(D_8012D420[D_8022BE8E_ovl_01]) +
           (D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE)),
@@ -6803,7 +6806,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
               (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);
-      if (D_801323A0.optionsChoice == loopIndex) {
+      if (g_MenuMemory.optionsChoice == loopIndex) {
         stripTop = (loopIndex * OPTION_ROW_SPACING) +
             ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetPrimColor(gfx++, 0, 0, BANNER_SHADOW_COLOR, BANNER_SHADOW_COLOR,
@@ -6853,7 +6856,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(D_801B5CD0[D_8022BE90_ovl_01])));
   for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
-    if (D_801323A0.optionsChoice != loopIndex) {
+    if (g_MenuMemory.optionsChoice != loopIndex) {
       LoadNibbleTextureBlock(&gfx,
           ImageTexels(D_801B5CD0[D_8022BE90_ovl_01]) +
               (loopIndex * OPTION_LABEL_SPACING),
@@ -6870,7 +6873,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(D_8012D420[D_8022BE8E_ovl_01]));
   for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
-    if (D_801323A0.optionsChoice == loopIndex) {
+    if (g_MenuMemory.optionsChoice == loopIndex) {
       LoadNibbleTextureBlock(&gfx,
           ImageTexels(D_8012D420[D_8022BE8E_ovl_01]) +
               (loopIndex * OPTION_LABEL_SPACING),
@@ -6896,19 +6899,19 @@ void DrawOptionsScreen(Gfx** displayListHead) {
     valueOffset = loopIndex * 2 * OPTION_LABEL_IMAGE_SIZE;
     switch (loopIndex) {
       case OPTIONS_CHOICE_MUSIC:
-        if (D_801323A0.optionBits & OPTION_BIT_MUSIC_OFF) {
+        if (g_MenuMemory.optionBits & OPTION_BIT_MUSIC_OFF) {
           valueOffset += OPTION_LABEL_IMAGE_SIZE;
         }
 
         break;
       case OPTIONS_CHOICE_MONO:
-        if (D_801323A0.optionBits & OPTION_BIT_MONO) {
+        if (g_MenuMemory.optionBits & OPTION_BIT_MONO) {
           valueOffset += OPTION_LABEL_IMAGE_SIZE;
         }
 
         break;
       case OPTIONS_CHOICE_CAMERA:
-        if (D_801323A0.optionBits & OPTION_BIT_SIMPLE_CAMERA) {
+        if (g_MenuMemory.optionBits & OPTION_BIT_SIMPLE_CAMERA) {
           valueOffset += OPTION_LABEL_IMAGE_SIZE;
         }
 
@@ -6921,7 +6924,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
             valueOffset,
         G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0, 0,
         0);
-    if (D_801323A0.optionsChoice == loopIndex) {
+    if (g_MenuMemory.optionsChoice == loopIndex) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     } else {
       gDPSetPrimColor(
@@ -6937,7 +6940,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   }
 
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(arrows)));
-  if (D_801323A0.optionsChoice != OPTIONS_CHOICE_ERASE_SAVE_DATA) {
+  if (g_MenuMemory.optionsChoice != OPTIONS_CHOICE_ERASE_SAVE_DATA) {
     D_8022FEFC_ovl_01 = (D_8022FEFC_ovl_01 + 1) % ARROW_TIMER_PERIOD;
     frameIndex = D_8022FEFC_ovl_01 < ARROW_FRAME_DURATION;
     LoadNibbleTextureBlock(&gfx,
@@ -6959,14 +6962,14 @@ void DrawOptionsScreen(Gfx** displayListHead) {
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       }
 
-      rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
+      rowTop = g_MenuMemory.optionsChoice * OPTION_ROW_SPACING;
       DrawTextureRect(&gfx, QuarterPixels(LEFT_ARROW_LEFT + shiftX),
           QuarterPixels(rowTop + ARROW_TOP + shiftY),
           QuarterPixels(LEFT_ARROW_LEFT + GREEN_ARROW_SIZE + shiftX),
           QuarterPixels(rowTop + ARROW_TOP + GREEN_ARROW_SIZE + shiftY),
           G_TX_RENDERTILE, 0, TexelCoordinate(GreenArrowRow(MENU_ARROW_LEFT)),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      rowTop = D_801323A0.optionsChoice * OPTION_ROW_SPACING;
+      rowTop = g_MenuMemory.optionsChoice * OPTION_ROW_SPACING;
       DrawTextureRect(&gfx, QuarterPixels(RIGHT_ARROW_LEFT + shiftX),
           QuarterPixels(rowTop + ARROW_TOP + shiftY),
           QuarterPixels(RIGHT_ARROW_LEFT + GREEN_ARROW_SIZE + shiftX),
@@ -6979,7 +6982,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   if (IsGameFlagSet(GAME_FLAG_UNK55)) {
     BeginShadowedText(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SONG) {
+    if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SONG) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -6997,7 +7000,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
       DrawShadowedText(&gfx, SONG_NAME_X, TEST_NAME_Y, g_PrintBuffer);
     }
 
-    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SONG_REVERB) {
+    if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SONG_REVERB) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -7005,7 +7008,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, " REVERB: %3d", f_SoundTestSongReverb);
     DrawShadowedText(&gfx, SONG_TEST_X, TEST_REVERB_Y, g_PrintBuffer);
-    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SONG_FREQUENCY) {
+    if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SONG_FREQUENCY) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -7013,7 +7016,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, " PICH  : %3.1f", f_SoundTestSongFrequency);
     DrawShadowedText(&gfx, SONG_TEST_X, TEST_PITCH_Y, g_PrintBuffer);
-    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SONG_TEMPO) {
+    if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SONG_TEMPO) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -7021,7 +7024,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, " TEMPO : %3d", f_SoundTestSongTempo);
     DrawShadowedText(&gfx, SONG_TEST_X, TEST_TEMPO_Y, g_PrintBuffer);
-    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SOUND) {
+    if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SOUND) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -7032,7 +7035,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
     sprintf(g_PrintBuffer, D_80231514_ovl_01,
         f_SoundTestSoundNames[f_SoundTestSound]);
     DrawShadowedText(&gfx, SOUND_NAME_X, TEST_NAME_Y, g_PrintBuffer);
-    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SOUND_REVERB) {
+    if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SOUND_REVERB) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -7040,7 +7043,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, " REVERB: %3d", f_SoundTestSoundReverb);
     DrawShadowedText(&gfx, SOUND_TEST_X, TEST_REVERB_Y, g_PrintBuffer);
-    if (D_801323A0.optionsChoice == OPTIONS_CHOICE_SOUND_FREQUENCY) {
+    if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SOUND_FREQUENCY) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -7099,7 +7102,7 @@ void DrawCaddySelect(Gfx** displayListHead) {
   DrawShadowedText(
       &gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y, D_8023176C_ovl_01);
   for (caddyIndex = 0; caddyIndex != CADDY_COUNT; caddyIndex++) {
-    if (D_801323A0.caddyChoice == caddyIndex) {
+    if (g_MenuMemory.caddyChoice == caddyIndex) {
       SetTextColor(&gfx, 255, 255, 0);
     } else {
       SetTextColor(&gfx, 255, 255, 255);
@@ -7190,7 +7193,7 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     growWidth = 0;
     if (enlargesChosenHole == TRUE) {
       growHeight = 0;
-      if (starIndex == D_801323A0.holeIndex) {
+      if (starIndex == g_MenuMemory.holeIndex) {
         growWidth = CHOSEN_STAR_GROWTH;
         growHeight = CHOSEN_STAR_GROWTH;
       }
@@ -7282,7 +7285,7 @@ void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
   gDPPipeSync(gfx++);
   for (holeIndex = 0; holeIndex < RING_SHOT_HOLE_COUNT; holeIndex++) {
     growWidth = 0;
-    if (holeIndex == D_801323A0.holeIndex) {
+    if (holeIndex == g_MenuMemory.holeIndex) {
       growWidth = RING_SHOT_STAR_GROWTH;
       growHeight = RING_SHOT_STAR_GROWTH;
     } else {
@@ -7295,7 +7298,7 @@ void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
     top += centerY - (RING_SHOT_STAR_HEIGHT / 2);
 
     /* A hole without its star draws from the silver star's tile */
-    tile = save->hasRingShotStar[D_801323A0.courseIndex][holeIndex] == FALSE;
+    tile = save->hasRingShotStar[g_MenuMemory.courseIndex][holeIndex] == FALSE;
     gSPScisTextureRectangle(gfx++, QuarterPixels(left - (growWidth / 2)),
         QuarterPixels(top - (growHeight / 2)),
         QuarterPixels(left + RING_SHOT_STAR_WIDTH + (growWidth / 2)),
