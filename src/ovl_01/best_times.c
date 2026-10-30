@@ -61,7 +61,7 @@
 #define TIME_SEPARATOR_SPACING 6
 
 s32 GetOpenCourseCount(void);
-void func_8020F2D0_ovl_01(
+void DrawCourseBanner(
     Gfx** displayListHead, u8 useCourseNames, s32 courseIndex);
 void DrawNarrowTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
@@ -363,7 +363,7 @@ void DrawBestTimes(Gfx** displayListHead) {
         &D_80230134_ovl_01, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
   }
 
-  func_8020F2D0_ovl_01(&gfx, TRUE, memory->bestTimesCourse);
+  DrawCourseBanner(&gfx, TRUE, memory->bestTimesCourse);
   gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);

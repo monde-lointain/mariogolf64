@@ -33,7 +33,7 @@
  * three files */
 #define COURSE_IMAGE_COPY_COUNT 2
 
-/* func_8020F2D0 squeezes the banner's strips under the course menu's title,
+/* DrawCourseBanner squeezes the banner's strips under the course menu's title,
  * with the course's name on it */
 #define COURSE_BANNER_TOP 110
 #define COURSE_BANNER_STRIP_SPACING 8
@@ -525,7 +525,7 @@ void DrawCourseStats(Gfx** displayListHead) {
       &D_802300AC_ovl_01, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
   image = (memory->statsCourse == courseCount) ? COURSE_TOTALS_IMAGE
                                                : memory->statsCourse;
-  func_8020F2D0_ovl_01(&gfx, 0, image);
+  DrawCourseBanner(&gfx, 0, image);
   func_8020F794_ovl_01(&gfx);
   func_8020FEF8_ovl_01(&gfx);
   func_80210190_ovl_01(&gfx);
@@ -537,7 +537,12 @@ void DrawCourseStats(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawCourseStats);
 #endif
 
-void func_8020F2D0_ovl_01(
+/*
+ * Draws the name plate banner squeezed under the screen's title, with the
+ * course's number and its tournament's name, or with the course's own name if
+ * useCourseNames is set. The totals, after the last course, get no number.
+ */
+void DrawCourseBanner(
     Gfx** displayListHead, u8 useCourseNames, s32 courseIndex) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
