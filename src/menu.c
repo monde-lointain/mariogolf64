@@ -1943,7 +1943,7 @@ void func_8005D9A0(void) {
   s8 index;
 
   g_MenuCourseCount = 6;
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   g_MenuScreen = MENU_SCREEN_TITLE;
   g_ChosenPlayerCount = 0;
   g_ChoosingPlayerIndex = 0;
@@ -1975,7 +1975,7 @@ void func_8005D9A0(void) {
 }
 
 void func_8005DAD4(void) {
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   D_801052E8 = 1;
   g_IsMenuWipeOpening = FALSE;
   D_800C2BD4 = 0;
@@ -2027,7 +2027,7 @@ void func_8005DAFC(void) {
 
   D_801052E8 = 1;
   g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
 }
@@ -2036,7 +2036,7 @@ void func_8005DC50(void) {
   func_8005D9A0();
   D_801052E8 = 1;
   g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
   g_ImportedCharacters[0].isChosen = 0;
   g_ImportedCharacters[1].isChosen = 0;
@@ -2052,7 +2052,7 @@ void func_8005DC50(void) {
 void func_8005DCDC(void) {
   D_801052E8 = 1;
   g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
 }
@@ -2060,7 +2060,7 @@ void func_8005DCDC(void) {
 void func_8005DD10(void) {
   D_801052E8 = 1;
   g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_MODE_SELECT;
 }
@@ -2068,7 +2068,7 @@ void func_8005DD10(void) {
 void func_8005DD44(void) {
   D_801052E8 = 1;
   g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_UNK18;
 }
@@ -2076,13 +2076,13 @@ void func_8005DD44(void) {
 void func_8005DD78(void) {
   D_801052E8 = 1;
   g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
   g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
 }
 
 void func_8005DDAC(void) {
-  g_IsChosenHoleLoadStarted = 0;
+  g_IsChosenHoleLoadStarted = FALSE;
   D_801052E8 = 1;
   D_800C2BD4 = 0;
   g_IsMenuWipeOpening = TRUE;

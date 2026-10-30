@@ -232,7 +232,7 @@ void UpdateHelpBoard(void) {
 
       StopLoaderThread();
       FreeAllCharacterSlots();
-      g_IsChosenHoleLoadStarted = 0;
+      g_IsChosenHoleLoadStarted = FALSE;
       f_OpenTopic = 0;
       ClearHelpText();
     } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_TITLE) &&

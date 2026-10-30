@@ -387,7 +387,7 @@ void UpdateRingShotRecords(void) {
               save->ringShotRecords[f_RecordedReplaySlots[index]].holeIndex;
           memory->courseIndex =
               save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex;
-          g_IsChosenHoleLoadStarted = 0;
+          g_IsChosenHoleLoadStarted = FALSE;
           LoadWipeShape((s8)save->ringShotRecords[index].courseIndex);
           StartWipe(WIPE_CLOSING);
           D_801052E8 = 0;
@@ -1410,7 +1410,7 @@ void UpdateSavedGames(void) {
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       StopLoaderThread();
       FreeAllCharacterSlots();
-      g_IsChosenHoleLoadStarted = 0;
+      g_IsChosenHoleLoadStarted = FALSE;
       for (slot = 1; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF, 0xFF,
             0xFF, 0xFF);
@@ -1567,7 +1567,7 @@ void UpdateSavedGames(void) {
         g_MenuScreen = MENU_SCREEN_TITLE;
         StopLoaderThread();
         FreeAllCharacterSlots();
-        g_IsChosenHoleLoadStarted = 0;
+        g_IsChosenHoleLoadStarted = FALSE;
       }
 
       f_AssignedHumanCount--;

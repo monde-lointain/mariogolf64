@@ -1975,7 +1975,7 @@ void UpdateBestShots(void) {
     if (GetWipeKind() != WIPE_NONE && !g_IsMenuWipeOpening) {
       if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         g_MenuScreen = MENU_SCREEN_EXIT;
-        g_IsChosenHoleLoadStarted = 0;
+        g_IsChosenHoleLoadStarted = FALSE;
         g_GameState.replayKind = REPLAY_KIND_BEST_SHOT;
         SetGameFlag(GAME_FLAG_UNK1E);
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {

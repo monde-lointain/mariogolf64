@@ -871,7 +871,7 @@ void StartLoadingChosenHole(void) {
 
     slotIndex++;
   } while (slotIndex != CHARACTER_SLOT_COUNT);
-  g_IsChosenHoleLoadStarted = 1;
+  g_IsChosenHoleLoadStarted = TRUE;
   if (g_MenuScreen == MENU_SCREEN_RING_SHOT_EXIT ||
       g_MenuScreen == MENU_SCREEN_RING_SHOT_RECORDS) {
     g_GameState.courseIndex = g_MenuMemory.courseIndex;
@@ -2450,7 +2450,7 @@ void UpdateModeSelect(void) {
     }
 
     FreeAllCharacterSlots();
-    g_IsChosenHoleLoadStarted = 0;
+    g_IsChosenHoleLoadStarted = FALSE;
     return;
   }
 
@@ -2660,7 +2660,7 @@ void UpdateCourseSelect(void) {
     }
 
     MAP_CAMERA_MODE_TOP_BYTE = 0;
-    g_IsChosenHoleLoadStarted = 0;
+    g_IsChosenHoleLoadStarted = FALSE;
     StopLoaderThread();
     FreeAllCharacterSlots();
     for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
@@ -2944,7 +2944,7 @@ void UpdateMiniGolfCourseSelect(void) {
     g_GameState.isMiniGolf = FALSE;
     g_MenuScreen = MENU_SCREEN_MODE_SELECT;
     MAP_CAMERA_MODE_TOP_BYTE = 0;
-    g_IsChosenHoleLoadStarted = 0;
+    g_IsChosenHoleLoadStarted = FALSE;
     StopLoaderThread();
     FreeAllCharacterSlots();
     return;
@@ -3681,7 +3681,7 @@ void func_801FAFEC_ovl_01(void) {
   if (g_MenuPressedButtons & A_BUTTON) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     g_MenuScreen = MENU_SCREEN_EXIT;
-    g_IsChosenHoleLoadStarted = 0;
+    g_IsChosenHoleLoadStarted = FALSE;
     g_GameState.replayKind = REPLAY_KIND_RING_SHOT;
     return;
   }
