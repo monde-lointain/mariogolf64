@@ -302,8 +302,6 @@ extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
 #define COURSE_SELECT_SPIN_SPEED 18
 #define COURSE_SELECT_TEXT_SLOT_COUNT 4
 
-extern void* g_TrophyFrameBuffers[2];
-
 /* What UpdateMenus reads as the menu screen changes */
 extern void* D_800FC6A0;
 extern void* D_800FC898;

@@ -83,6 +83,9 @@ extern AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT];
 extern s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
 /* The chosen course's trophy palettes, by the place they show */
 extern void* g_TrophyPalettes[TROPHY_PALETTE_COUNT];
+/* The course select's buffers for the chosen course's trophy frame: one is
+ * shown while the next is read */
+extern void* g_TrophyFrameBuffers[2];
 /* The menus' ASSET_COURSE_SCENE: the sky and the course select's backdrops */
 extern void* g_MenuCourseSceneryAsset;
 

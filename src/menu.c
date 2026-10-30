@@ -81,7 +81,6 @@ extern void* g_MenuBoardImages[2];
 extern void* g_NamePlateImage;
 extern void* g_MenuLabelImages[2];
 extern void* g_MenuTitleImages[2];
-extern void* g_TrophyFrameBuffers[2];
 extern void* D_800FF4C4[2];
 extern void* D_80106100;
 extern void* D_800FC898;
