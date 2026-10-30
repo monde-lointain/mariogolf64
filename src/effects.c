@@ -2582,7 +2582,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
 }
 
 /*
- * Starts showing the birdie badge count, which func_8007FEAC draws. Its
+ * Starts showing the birdie badge count, which DrawBirdieBadgeCount draws. Its
  * spinning badge and digit images borrow the cloud and clump images' memory.
  */
 void ShowBirdieBadgeCount(s32 badgeCount) {
