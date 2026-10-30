@@ -85,7 +85,7 @@ GAME_DEFINES :=
 # Modern GCC's -ffast-math reorders the float math enough that the ball
 # lands elsewhere, which throws the opening and the demos off their scripts
 FAST_MATH   :=
-# The game's code and libkmc build cleanly with these
+# All of the code builds cleanly with these
 WARNINGS    ?= -Wall -Wextra
 # ultralib's own settings for modern GCC. The libraries also take its
 # MODERN_CC where only KMC GCC builds the original's form as the original.
@@ -172,8 +172,8 @@ ULTRALIB_DIR      := lib/ultralib
 ULTRALIB_INCLUDES := -I$(ULTRALIB_DIR)/include -I$(ULTRALIB_DIR)/include/compiler/$(ULTRALIB_COMPILER) -I$(ULTRALIB_DIR)/include/PR
 ULTRALIB_DEFINES  := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI -DBUILD_VERSION=VERSION_J \
                      -DBUILD_VERSION_STRING=\"2.0J\" -DNDEBUG -D_FINALROM
-ULTRALIB_CFLAGS    = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS)
-ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc $(TARGETFLAGS) -P \
+ULTRALIB_CFLAGS    = $(WARNINGS) -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS)
+ULTRALIB_ASFLAGS  := -x assembler-with-cpp -nostdinc $(TARGETFLAGS) -P \
                      -DMIPSEB -D_LANGUAGE_ASSEMBLY $(ULTRALIB_ASM_ABI) -D_ULTRA64
 
 # libmus, the n_audio build of the Software Creations music library, as its
@@ -181,7 +181,7 @@ ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc $(TARGETFLAGS) -P \
 LIBMUS_DIR        := lib/libmus
 LIBMUS_INCLUDES   := -I$(LIBMUS_DIR)/src -I$(LIBMUS_DIR)/include $(ULTRALIB_INCLUDES)
 LIBMUS_DEFINES    := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DSUPPORT_NAUDIO
-LIBMUS_CFLAGS      = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
+LIBMUS_CFLAGS      = $(WARNINGS) -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
 # n_audio, built from the SDK's n_audio_sc sources for the n_aspMain
 # microcode as other games of the time built it
@@ -198,7 +198,7 @@ LIBNAUDIO_CFLAGS    = $(LIBMUS_CFLAGS)
 LIBNUSYS_DIR       := lib/libnusys
 LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR) $(ULTRALIB_INCLUDES)
 LIBNUSYS_DEFINES   := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
-LIBNUSYS_CFLAGS     = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
+LIBNUSYS_CFLAGS     = $(WARNINGS) -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
 # libkmc, KMC's C library, built like the game's code except without
 # -ffast-math, which turns divisions by constants into multiplications
