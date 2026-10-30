@@ -38,8 +38,8 @@ static s32 f_FaultThreadUnk;
  * creation was compiled out, but the bss here holds exactly an OSThread and
  * then an 8 KB stack.
  */
-static OSThread f_FaultThread;
-static u8 f_FaultThreadStack[FAULT_THREAD_STACK_SIZE];
+static OSThread f_FaultThread UNUSED;
+static u8 f_FaultThreadStack[FAULT_THREAD_STACK_SIZE] UNUSED;
 
 /* Never created, as its creation was compiled out with the fault thread's */
 static OSMesgQueue f_FaultMessageQueue;

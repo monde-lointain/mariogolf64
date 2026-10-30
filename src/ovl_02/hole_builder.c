@@ -542,11 +542,11 @@ static s32 f_HolePaintLogics[HOLE_FILE_COURSE_COUNT][COURSE_HOLE_COUNT] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 /* Read by no routine */
-static s32 D_80254F1C_ovl_02 = 0;
+static s32 D_80254F1C_ovl_02 UNUSED = 0;
 /* The billboard textures that cast no shadow, ending at a negative index */
 static s8 f_ShadowlessTextures[] = {0x14, 0x15, 0x16, -1};
 /* Read by no routine */
-static s32 D_80254F24_ovl_02[] = {0, 0, 0};
+static s32 D_80254F24_ovl_02[] UNUSED = {0, 0, 0};
 static s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
     {0, 12, 20, 13, 1},
     {14, 4, 5, 6, 16},
@@ -555,7 +555,7 @@ static s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
     {2, 18, 24, 19, 3},
 };
 /* Read by no routine */
-static s32 D_80254F4C_ovl_02 = 0;
+static s32 D_80254F4C_ovl_02 UNUSED = 0;
 /* There is no step for a count of 0 */
 static f32 f_HeightStepScales[HEIGHT_STEP_SCALE_COUNT] = {
     0.0f,
@@ -608,14 +608,14 @@ void MoveRingsToEnd(void);
 static s32 f_PaintLogic;
 
 /* Read by no routine */
-static u8 D_80255324_ovl_02[12];
+static u8 D_80255324_ovl_02[12] UNUSED;
 
 static u8* f_ReadCursor;
 static AssetFile f_HoleAsset;
 
 /* Read by no routine; two objects, as one would be aligned to 16 bytes */
-static u8 D_80255348_ovl_02[8];
-static u8 D_80255350_ovl_02[0x8000];
+static u8 D_80255348_ovl_02[8] UNUSED;
+static u8 D_80255350_ovl_02[0x8000] UNUSED;
 
 static u8* f_BuildBuffer;
 static u8* f_BuildCursor;

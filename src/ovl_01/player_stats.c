@@ -295,12 +295,12 @@ static s32 f_BetSetColumnXs[OFFERING_BET_SET_COUNT]
 };
 // clang-format on
 /* Read by no routine */
-static char D_802305A4_ovl_01[8][10] = {
+static char D_802305A4_ovl_01[8][10] UNUSED = {
     "ﾄﾞﾗｺﾝ", "ﾆｱﾋﾟﾝ", "ｽｺｱ", "ﾀﾃ", "ﾖｺ", "ｽｷﾝｽﾞ", "ﾏｯﾁ", "ﾀﾞﾌﾞﾙｽ"};
 /* The handicap screen's golfers' turn, in degrees about X and Y */
 static f32 f_HandicapGolferAngles[2] = {0.0f, 0.0f};
 /* Read by no routine */
-static s32 D_802305FC_ovl_01[3] = {0, 0, 0};
+static s32 D_802305FC_ovl_01[3] UNUSED = {0, 0, 0};
 /* Each golfer's scale on the handicap screen */
 static f32 f_HandicapGolferScales[MAX_PLAYER_COUNT] = {4.2f, 4.0f, 4.2f, 4.0f};
 /* Where DrawHandicaps stands each golfer, by the player count */
@@ -367,11 +367,11 @@ static Vtx f_TurnedArrowVertices[TURNED_ARROW_VERTEX_COUNT] = {
     {{{16, -16, 0}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{16, 16, 0}, 0, {2048, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
-static s32 D_80230880_ovl_01[2] = {0, 0};
+static s32 D_80230880_ovl_01[2] UNUSED = {0, 0};
 /* Read by no routine; the values of f_BestShotsCursorPhases */
-static f32 D_80230888_ovl_01[4] = {0.0f, 2.0f, 4.0f, 6.0f};
+static f32 D_80230888_ovl_01[4] UNUSED = {0.0f, 2.0f, 4.0f, 6.0f};
 /* Read by no routine */
-static s32 D_80230898_ovl_01[2] = {0, 0};
+static s32 D_80230898_ovl_01[2] UNUSED = {0, 0};
 /* Whether ReadBestShots found any recorded best shot */
 static u8 f_HasBestShots = FALSE;
 AssetId g_CharacterFaceAssets[CHARACTER_COUNT] = {0x07C5, 0x0755, 0x07A9,
@@ -402,9 +402,9 @@ s16 g_CharacterPaletteFiles[CHARACTER_COUNT]
 // clang-format on
 /* Read by no routine; a row like the six that follow the characters' rows of
  * g_CharacterFacePaletteFiles */
-static s16 D_80230958_ovl_01[4] = {0x078E, 0x078E, 0x078E, 0x078E};
+static s16 D_80230958_ovl_01[4] UNUSED = {0x078E, 0x078E, 0x078E, 0x078E};
 /* Read by no routine */
-static s16 D_80230960_ovl_01[18] = {
+static s16 D_80230960_ovl_01[18] UNUSED = {
     0, 0, 1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
 static char D_80230984_ovl_01[STATS_GRID_ROW_COUNT][RECORD_LABEL_SIZE] = {
     "Birdie", "Eagle", "Albatross", "Hole-in-One"};
@@ -412,7 +412,7 @@ static char D_80230984_ovl_01[STATS_GRID_ROW_COUNT][RECORD_LABEL_SIZE] = {
 static GridStep f_BestShotDirectionSteps[STATS_DIRECTION_COUNT] = {
     {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 /* Read by no routine */
-static s32 D_802309CC_ovl_01[8] = {64, 12, 48, 12, 80, 12, 96, 12};
+static s32 D_802309CC_ovl_01[8] UNUSED = {64, 12, 48, 12, 80, 12, 96, 12};
 /* The Best Shots cursor's corners, whose colors DrawBestShotsCursor cycles */
 static Vtx f_BestShotsCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -420,7 +420,7 @@ static Vtx f_BestShotsCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
-static s32 D_80230A30_ovl_01[2] = {0, 0};
+static s32 D_80230A30_ovl_01[2] UNUSED = {0, 0};
 /* The angle, in radians, of each corner's color cycle */
 static f32 f_BestShotsCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
@@ -440,7 +440,7 @@ static Mtx f_HandicapGolfersProjection;
 static LookAt f_HandicapGolfersLookAts[DRAW_BUFFER_COUNT];
 
 /* Read by no routine */
-static u8 D_8023AF40_ovl_01[0x100];
+static u8 D_8023AF40_ovl_01[0x100] UNUSED;
 
 /* The camera and placement of each arrow that DrawTurnedPageArrows draws */
 static Mtx f_TurnedArrowProjections[PAGE_ARROW_COUNT];
@@ -448,7 +448,7 @@ static Mtx f_TurnedArrowTranslations[PAGE_ARROW_COUNT];
 static Mtx f_TurnedArrowRotations[PAGE_ARROW_COUNT];
 
 /* Read by no routine */
-static u8 D_8023B1C0_ovl_01[0x100];
+static u8 D_8023B1C0_ovl_01[0x100] UNUSED;
 
 /* The scale of each arrow that DrawTurnedPageArrows draws */
 static Mtx f_TurnedArrowScales[PAGE_ARROW_COUNT];
@@ -467,7 +467,7 @@ static void* f_StatsPlayerLabels;
 static void* f_BrickWall;
 
 /* Read by no routine */
-static u8 D_8023B370_ovl_01[0xA0];
+static u8 D_8023B370_ovl_01[0xA0] UNUSED;
 
 /* The camera and placement that DrawBestShotsCursor draws the cursor with */
 static Mtx f_BestShotsCursorProjection;
@@ -475,12 +475,12 @@ static Mtx f_BestShotsCursorTranslation;
 static Mtx f_BestShotsCursorRotation;
 
 /* Read by no routine */
-static u8 D_8023B4D0_ovl_01[0x80];
+static u8 D_8023B4D0_ovl_01[0x80] UNUSED;
 
 static Mtx f_BestShotsCursorScale;
 
 /* Read by no routine */
-static u8 D_8023B590_ovl_01[0x50];
+static u8 D_8023B590_ovl_01[0x50] UNUSED;
 
 /* The Best Shots screen's images: each cell's face, then the course icons,
  * the name plate, the cursor box and the score labels */

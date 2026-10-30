@@ -328,7 +328,7 @@ static s32 f_CastIndex = 0;
 static Boolean f_IsReactionShown = FALSE;
 static f32 f_UnreadValue = 0.0f;
 static s32 f_ViewShrinkStartFrame = NEVER_FRAME;
-static s32 f_UnusedWord = 0; /* Unused */
+static s32 f_UnusedWord UNUSED = 0; /* Unused */
 /* How far right each character moves the next one */
 static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
     12,
@@ -590,11 +590,11 @@ static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
 };
 
 /* Read by no routine */
-static u8 D_801F8B50_ovl_14[0x10];
+static u8 D_801F8B50_ovl_14[0x10] UNUSED;
 static s32 f_CastSlot; /* The slot of the character shown, 0 or 1 */
 static CoursePoint f_NearCupPoint;
 /* Read by no routine */
-static u8 D_801F8B70_ovl_14[16];
+static u8 D_801F8B70_ovl_14[16] UNUSED;
 static StaffRollImage f_StaffRollImage;
 static StaffText* f_StaffText;
 static u8* f_StaffFont;

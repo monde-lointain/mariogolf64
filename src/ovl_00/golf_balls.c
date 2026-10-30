@@ -93,12 +93,12 @@ typedef struct BallScreenPoint {
 } BallScreenPoint; /* size = 0xC */
 
 /* Read by no routine */
-static Gfx D_8021FE60_ovl_00[] = {gsSPEndDisplayList()};
+static Gfx D_8021FE60_ovl_00[] UNUSED = {gsSPEndDisplayList()};
 static u16 f_BooMouthTexture[] = {
 #include "assets/ovl_00/golf_balls/boo_mouth_texture.rgba16.inc.c"
 };
 /* Read by no routine */
-static Gfx D_80220E28_ovl_00[] = {gsSPEndDisplayList()};
+static Gfx D_80220E28_ovl_00[] UNUSED = {gsSPEndDisplayList()};
 static u16 f_BooEyeTexture[] = {
 #include "assets/ovl_00/golf_balls/boo_eye_texture.rgba16.inc.c"
 };
@@ -272,9 +272,9 @@ Gfx g_BooDisplayList[] = {
     gsSPEndDisplayList(),
 };
 /* Read by no routine */
-static s32 D_80222428_ovl_00[2] = {0};
+static s32 D_80222428_ovl_00[2] UNUSED = {0};
 /* Read by no routine */
-static Vtx D_80222430_ovl_00[] = {
+static Vtx D_80222430_ovl_00[] UNUSED = {
     {{{-7, 0, 0}, 0, {0, 0x7E0}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{7, 0, 0}, 0, {0x800, 0x7E0}, {0x00, 0x00, 0x00, 0xFF}}},
     {{{7, -14, 0}, 0, {0x800, 0}, {0x00, 0x00, 0xFF, 0x00}}},
@@ -323,7 +323,7 @@ static u8* f_BallMarkerImage;
 static u8* f_BallAfterimageImage;
 
 /* Read by no routine */
-static u8 D_80225830_ovl_00[16];
+static u8 D_80225830_ovl_00[16] UNUSED;
 
 static u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE];
 /* "PIKA" in 4-bit texels, four to a u16 */

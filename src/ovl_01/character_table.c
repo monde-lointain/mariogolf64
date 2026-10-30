@@ -150,7 +150,7 @@ static Vtx f_TableCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
-static s32 f_UnreadTablePair[2] = {0, 0};
+static s32 f_UnreadTablePair[2] UNUSED = {0, 0};
 /* The angle, in radians, of each corner's color cycle */
 static f32 f_TableCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
@@ -175,7 +175,7 @@ static TableCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
 };
 // clang-format on
 /* Read by no routine */
-static s32 f_UnreadTablePoint[2] = {64, 84};
+static s32 f_UnreadTablePoint[2] UNUSED = {64, 84};
 /* Which of the cursor's shown cells each popup corner would cover */
 // clang-format off
 static u8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT]
@@ -218,12 +218,12 @@ static Mtx f_TableCursorTranslation;
 static Mtx f_TableCursorRotation;
 
 /* Read by no routine */
-static u8 f_UnreadTableBytes[0x80];
+static u8 f_UnreadTableBytes[0x80] UNUSED;
 
 static Mtx f_TableCursorScale;
 
 /* Read by no routine */
-static u8 f_UnreadTableWord[0x4];
+static u8 f_UnreadTableWord[0x4] UNUSED;
 
 /* The images that LoadCharacterTableBuffer is given */
 static void* f_TableCursorBox;

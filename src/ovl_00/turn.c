@@ -378,11 +378,11 @@ static s32 f_ReplayAimSettledFrameCount = 0;
 /* A debug tilt of the aim camera, which the C buttons tune */
 static f32 f_DebugAimCameraTilt = 0.0f;
 /* Read by no routine */
-static s32 D_80223E4C_ovl_00 = 0;
+static s32 D_80223E4C_ovl_00 UNUSED = 0;
 /* Frames that the D-pad has turned the aim, negative to the right */
 static s32 f_AimTurnFrameCount = 0;
 /* Read by no routine */
-static s32 D_80223E54_ovl_00 = 0;
+static s32 D_80223E54_ovl_00 UNUSED = 0;
 static u32 f_PlanTimeBudget = INITIAL_PLAN_TIME_BUDGET;
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
@@ -426,9 +426,9 @@ static s32 f_AmbientSoundIdleFrameCount = 0;
  * saved shot */
 static s8 f_ShouldReplaySavedShot = FALSE;
 /* Read by no routine */
-static s8 D_80223FF1_ovl_00 = 0;
-static s8 D_80223FF2_ovl_00 = 0;
-static s8 D_80223FF3_ovl_00 = 0;
+static s8 D_80223FF1_ovl_00 UNUSED = 0;
+static s8 D_80223FF2_ovl_00 UNUSED = 0;
+static s8 D_80223FF3_ovl_00 UNUSED = 0;
 /* The debug guts test's state, character and motion */
 static s8 f_HasGutsTestRun = FALSE;
 static s8 f_GutsTestCharacter = 0;
@@ -449,12 +449,12 @@ static s32 f_PuttSlowdownLead = 0;
 /* The frames by which the slowed swing puts off the impact */
 static s32 f_ImpactDelay = 0;
 /* Read by no routine */
-static s32 D_80224010_ovl_00 = 0;
+static s32 D_80224010_ovl_00 UNUSED = 0;
 /* The angles of FrameBallAndShot's camera */
 static Radians f_DebugFramingYaw = 0.0f;
 static Radians f_DebugFramingPitch = 0.0f;
 /* Read by no routine */
-static s32 D_8022401C_ovl_00 = 0;
+static s32 D_8022401C_ovl_00 UNUSED = 0;
 
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);

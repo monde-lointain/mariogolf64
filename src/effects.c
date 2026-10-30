@@ -196,7 +196,7 @@ static Vtx f_SpreadingCircleVertices[] = {
     {{{7, 0, -7}, 0, {0, 0x1FFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static Boolean f_AreEffectImagesLoaded = FALSE;
-static f32 f_UnreferencedValues[] = {
+static f32 f_UnreferencedValues[] UNUSED = {
     1, 2, 3, 10, 11, 12, 13, 14, 20, 21, 22, 25, 30, 1};
 static u8 f_PingPongFrameIndices[] = {0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1};
 static s32 f_RaindropCount = RAINDROP_COUNT;

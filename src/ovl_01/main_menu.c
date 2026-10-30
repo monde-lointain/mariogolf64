@@ -417,19 +417,19 @@ extern const char D_802316EC_ovl_01[];
 extern const char D_802316FC_ovl_01[];
 
 /* Read by no routine */
-static Gfx D_8022BE00_ovl_01[] = {gsSPEndDisplayList()};
+static Gfx D_8022BE00_ovl_01[] UNUSED = {gsSPEndDisplayList()};
 static s32 D_8022BE08_ovl_01 = 0;
 /* The characters that the animation viewer cycles through and whose taken
  * marks a new game clears; nothing changes it */
 static s32 f_MenuCharacterCount = CHARACTER_COUNT;
 /* Read by no routine */
-static u8 D_8022BE10_ovl_01[8] = {
+static u8 D_8022BE10_ovl_01[8] UNUSED = {
     0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 /* The row that UpdateUnusedList is on */
 static s32 f_UnusedListChoice = 0;
 static s32 D_8022BE1C_ovl_01 = 0;
 /* Read by no routine */
-static s32 D_8022BE20_ovl_01 = 0;
+static s32 D_8022BE20_ovl_01 UNUSED = 0;
 /* The animation that the animation viewer plays, which left and right step */
 static s32 f_ViewerAnimation = VIEWER_STARTING_ANIMATION;
 static s32 D_8022BE28_ovl_01 = 0;
@@ -437,12 +437,12 @@ static s32 D_8022BE2C_ovl_01 = 0;
 /* Each player count's mode count */
 static s32 D_8022BE30_ovl_01[MAX_PLAYER_COUNT] = {7, 5, 4, 4};
 /* Read by no routine; the mode counts of D_8022BEEC */
-static s32 D_8022BE40_ovl_01[4] = {3, 5, 4, 4};
+static s32 D_8022BE40_ovl_01[4] UNUSED = {3, 5, 4, 4};
 /* Each player's clubs, a bit per slot */
 static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
     ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
 /* Read by no routine */
-static s32 D_8022BE58_ovl_01[10] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
+static s32 D_8022BE58_ovl_01[10] UNUSED = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
 /* Which of g_TrophyFrameBuffers shows the chosen course's trophy */
 static u8 f_ShownTrophyBufferIndex = 0;
 /* The model kind that the animation viewer loads, which L cycles */
@@ -491,19 +491,19 @@ static u8 f_ModeChoiceIcons[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT] = {
     {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS,
         MODE_ICON_MINI_GOLF}};
 /* Read by no routine; modes like D_8022BEBC's, as many as D_8022BE40 counts */
-static u8 D_8022BEEC_ovl_01[4][12] = {
+static u8 D_8022BEEC_ovl_01[4][12] UNUSED = {
     {2, 8, 3}, {2, 6, 7, 10, 5}, {2, 7, 10, 5}, {2, 7, 10, 5}};
 static s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_COURSE_STATS, CLUBHOUSE_ROOM_CHARACTER_TABLE,
     CLUBHOUSE_ROOM_BEST_TIMES, CLUBHOUSE_ROOM_RING_SHOT,
     CLUBHOUSE_ROOM_BEST_SHOTS};
 /* Read by no routine; the one room that D_8022BF1C leaves out */
-static s16 D_8022BF26_ovl_01 = CLUBHOUSE_ROOM_BIRDIE_BADGES;
+static s16 D_8022BF26_ovl_01 UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
 /* The plain-text menu's names; DrawMenuTitleScreen prints the first three */
 static const char* D_8022BF28_ovl_01[] = {
     "1P GAME", "2P GAME", "3P GAME", "4P GAME", "CONTINUE", "HOUISE"};
 /* Read by no routine */
-static const char* D_8022BF40_ovl_01[] = {"TOURNAMENT ", "VS CHARACTER",
+static const char* D_8022BF40_ovl_01[] UNUSED = {"TOURNAMENT ", "VS CHARACTER",
     "STROKE PLAY", "MATCH PLAY", "SKINS", "TIME ATTACK", "TRAINING",
     "PUTTER GOLF", " HANDI CAP", " BET", "9HOLE MODE  ", "CLUB HANDI"};
 /* Each character's name, with LOWERCASE_CODE_OFFSET added to its lowercase
@@ -529,26 +529,26 @@ char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
     "J\xEF\xE5" /* Joe */
 };
 /* Read by no routine */
-static const char* D_8022C048_ovl_01[] = {"TOURNAMENT", "MEMORIAL HOLES",
+static const char* D_8022C048_ovl_01[] UNUSED = {"TOURNAMENT", "MEMORIAL HOLES",
     "SPECIAL SHOT", "BIRDIE BADGE", "VS CHARACTER", "TIME ATTACK", "BGM",
     "SOUND", "DATA RESET", "BGM TEST", "SOUND TEST"};
 /* Read by no routine */
-static const char* D_8022C074_ovl_01[] = {
+static const char* D_8022C074_ovl_01[] UNUSED = {
     "GB 00 ", "GB 01 ", "GB 02 ", "GB 03 "};
 /* Read by no routine */
-static const char* D_8022C084_ovl_01[] = {"STRAIGHT", "DRAW", "FADE"};
+static const char* D_8022C084_ovl_01[] UNUSED = {"STRAIGHT", "DRAW", "FADE"};
 /* Read by no routine */
-static const char* D_8022C090_ovl_01[] = {
+static const char* D_8022C090_ovl_01[] UNUSED = {
     "DRIVE CON", "NEAR PIN", "STROKE", "SKINS", "NASSO", "LASVEGAS"};
 /* Read by no routine */
-static const char* D_8022C0A8_ovl_01[] = {"TEST COURSE1", "TEST COURSE2",
+static const char* D_8022C0A8_ovl_01[] UNUSED = {"TEST COURSE1", "TEST COURSE2",
     "TEST COURSE3", "TEST COURSE4", "TEST COURSE5", "TEST COURSE6",
     "TEST COURSE7", "TEST COURSE8", "TEST COURSE9", "TEST COURSE10"};
 /* The caddies' names */
 static const char* D_8022C0D0_ovl_01[CADDY_COUNT] = {"MARIO", "PEACH"};
 /* Read by no routine */
-static const char* D_8022C0D8_ovl_01[] = {"1W", "3W", "4W", "2I", "3I", "4I",
-    "5I", "6I", "7I", "8I", "9I", "PW", "SW", "PT"};
+static const char* D_8022C0D8_ovl_01[] UNUSED = {"1W", "3W", "4W", "2I", "3I",
+    "4I", "5I", "6I", "7I", "8I", "9I", "PW", "SW", "PT"};
 static char f_SoundTestSongNames[][SOUND_TEST_SONG_NAME_LENGTH] = {"jing1",
     "jing02", "jing03", "jing04", "jing05", "jing06", "shori", "make", "hikiwa",
     "mode-ok", "score", "coace3", "trad1", "trad2", "par", "bar", "dan1",
@@ -637,7 +637,7 @@ static char f_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH] = {"AE01 ",
     "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE",
     "NONE_SE", "NONE_SE"};
 /* Read by no routine */
-static Vtx D_8022F7C8_ovl_01[8] = {
+static Vtx D_8022F7C8_ovl_01[8] UNUSED = {
     {{{-32, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-32, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -668,7 +668,7 @@ static u8 f_SpinningStarBufferIndex = 0;
 static s8 f_SpinningStarFrameTime = 0;
 static u8 D_8022F8CE_ovl_01 = 0;
 /* Read by no routine */
-static s32 D_8022F8D0_ovl_01 = 0;
+static s32 D_8022F8D0_ovl_01 UNUSED = 0;
 /* The mini-golf disc's frame */
 static s32 f_MiniGolfDiscFrame = MINI_GOLF_FACING_FRAME;
 /* The frames for which the mini-golf disc has shown its turn frame */
@@ -692,7 +692,7 @@ static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_METAL_MARIO, CHARACTER_CHOICE_KID, CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA, CHARACTER_CHOICE_JOE};
 /* Read by no routine */
-static s32 D_8022F93C_ovl_01 = 0;
+static s32 D_8022F93C_ovl_01 UNUSED = 0;
 /* The top-left corner of each of the title screen's labels */
 static LabelCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] = {{110, 86},
     {40, 114}, {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
@@ -704,7 +704,7 @@ static s32 D_8022F97C_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
 /* Read by no routine */
-static s32 D_8022F9FC_ovl_01[11] = {
+static s32 D_8022F9FC_ovl_01[11] UNUSED = {
     110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 /* How far left of the label's place each row of the modes' label image is
  * drawn */
@@ -714,7 +714,7 @@ static f32 D_8022FA54_ovl_01 = 0.0f;
 static f32 D_8022FA58_ovl_01 = 0.0f;
 static f32 D_8022FA5C_ovl_01 = 0.0f;
 /* Read by no routine */
-static s32 D_8022FA60_ovl_01[2] = {0, 0};
+static s32 D_8022FA60_ovl_01[2] UNUSED = {0, 0};
 static f32 f_MenuCharacterPositions
     [MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT][3] = {
         {{-84.0f, -43.0f, -1000.0f}, {106.0f, -32.0f, -1000.0f},
@@ -749,16 +749,16 @@ static f32 f_ViewerOffsetY = 0.0f;
 /* The front course's bob phase */
 static f32 D_8022FBC0_ovl_01 = 0.0f;
 /* Read by no routine */
-static s16 D_8022FBC4_ovl_01[6] = {0, 3, 4, 1, 5, 2};
+static s16 D_8022FBC4_ovl_01[6] UNUSED = {0, 3, 4, 1, 5, 2};
 /* Read by no routine; katakana for "Bet", "Out: holes 1-9", "In: holes 10-18"
  * and "1 round: 18 holes" */
-static char D_8022FBD0_ovl_01[4][20] = {
+static char D_8022FBD0_ovl_01[4][20] UNUSED = {
     "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
 /* The top-left corner of each holes badge */
 static ImageCorner f_HolesBadgeCorners[HOLES_BADGE_COUNT] = {
     {252, 134}, {230, 150}, {274, 150}, {252, 162}};
 /* Read by no routine */
-static ImageCorner D_8022FC30_ovl_01[6] = {
+static ImageCorner D_8022FC30_ovl_01[6] UNUSED = {
     {24, 173}, {23, 173}, {23, 173}, {29, 161}, {19, 181}, {29, 171}};
 /* Each course's trophies' corners, by the number of trophies */
 static ImageCorner D_8022FC48_ovl_01
@@ -776,10 +776,10 @@ static ImageCorner D_8022FC48_ovl_01
         {{{29, 167}, {29, 171}, {29, 171}}, {{21, 167}, {37, 167}, {29, 171}},
             {{21, 167}, {37, 167}, {29, 171}}}};
 /* Read by no routine */
-static char D_8022FD20_ovl_01[16] = "ｺｰｽｹﾞｯﾄ純ﾞ";
+static char D_8022FD20_ovl_01[16] UNUSED = "ｺｰｽｹﾞｯﾄ純ﾞ";
 /* Read by no routine */
-static u8 D_8022FD30_ovl_01[16] = {0x71, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static u8 D_8022FD30_ovl_01[16] UNUSED = {0x71, 0x84, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 /* The Bet badge's color phase */
 static f32 D_8022FD40_ovl_01 = 0.0f;
 /* The chosen mini-golf image's center Y */
@@ -793,7 +793,7 @@ static Vtx D_8022FD48_ovl_01[WATER_VERTEX_COUNT] = {
 /* How far the course select's water has scrolled; its two layers move apart */
 static s32 f_WaterScroll = 0;
 /* Read by no routine; the values of D_8022FBD0 */
-static char D_8022FD9C_ovl_01[4][20] = {
+static char D_8022FD9C_ovl_01[4][20] UNUSED = {
     "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
 /* The records' names */
 static const char* D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT] = {
@@ -811,10 +811,11 @@ static LabelCorner f_ClubhouseLabelCorners[CLUBHOUSE_ROW_PLACE_COUNT] = {
     {76, 80}, {76, 102}, {76, 124}, {76, 146}, {76, 168}, {76, 190}, {76, 212},
     {76, 234}};
 /* Read by no routine */
-static s32 D_8022FE6C_ovl_01[10][2] = {{48, 76}, {132, 76}, {180, 76}, {48, 98},
-    {72, 118}, {168, 118}, {48, 140}, {60, 160}, {176, 160}, {90, 182}};
+static s32 D_8022FE6C_ovl_01[10][2] UNUSED = {{48, 76}, {132, 76}, {180, 76},
+    {48, 98}, {72, 118}, {168, 118}, {48, 140}, {60, 160}, {176, 160},
+    {90, 182}};
 /* Read by no routine */
-static u8 D_8022FEBC_ovl_01[3][20] = {
+static u8 D_8022FEBC_ovl_01[3][20] UNUSED = {
     {0xC3, 0xDE, 0xB0, 0xC0, 0x66, 0x7D, 0x8D, 0xDE, 0x83, 0x79, 0x7C, 0x83,
         0x72, 0x72, 0x83, 0xDE, 0x7D, 0x76, 0x3F, 0x00},
     {0x8A, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -822,11 +823,11 @@ static u8 D_8022FEBC_ovl_01[3][20] = {
     {0x72, 0x72, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
 /* Read by no routine */
-static s32 D_8022FEF8_ovl_01 = 0;
+static s32 D_8022FEF8_ovl_01 UNUSED = 0;
 static s32 D_8022FEFC_ovl_01 = 0;
 
 /* Read by no routine */
-static u8 D_80231AD0_ovl_01[0x1D0];
+static u8 D_80231AD0_ovl_01[0x1D0] UNUSED;
 static Mat4 D_80231CA0_ovl_01;
 static Mat4 D_80231CE0_ovl_01;
 static LookAt D_80231D20_ovl_01[DRAW_BUFFER_COUNT];
@@ -836,7 +837,7 @@ static f32 f_MenuCharacterScales[MAX_PLAYER_COUNT];
 static Mtx D_80231FB0_ovl_01[DRAW_BUFFER_COUNT];
 static Mtx D_80232030_ovl_01;
 /* Read by no routine */
-static u8 D_80232070_ovl_01[0x180];
+static u8 D_80232070_ovl_01[0x180] UNUSED;
 static Mtx D_802321F0_ovl_01;
 static Mtx D_80232230_ovl_01;
 static Mat4 D_80232270_ovl_01;

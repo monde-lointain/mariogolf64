@@ -133,7 +133,7 @@ static char* f_BetNames[BET_COUNT] = {
     D_8024C848_ovl_09,
 };
 /* Read by no routine */
-static char D_8024C4EC_ovl_09[] = "Carry";
+static char D_8024C4EC_ovl_09[] UNUSED = "Carry";
 /* The headings blink between their two images, a frame each this many draws */
 static s32 f_BetBlinkFrame = 0;
 static s32 f_BetBlinkTime = 0;

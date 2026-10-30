@@ -96,8 +96,8 @@ static void* D_8023AA4C_ovl_01;
 static void* D_8023AA50_ovl_01;
 
 /* Read by no routine; 2 objects, as one would be aligned past its start */
-static u8 D_8023AA54_ovl_01[0x4];
-static u8 D_8023AA58_ovl_01[0x88];
+static u8 D_8023AA54_ovl_01[0x4] UNUSED;
+static u8 D_8023AA58_ovl_01[0x88] UNUSED;
 
 /* Reads every course's icon into the Best Times screen's buffers */
 void LoadBestTimesCourseIcons(void** buffers) {

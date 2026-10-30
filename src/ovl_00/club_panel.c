@@ -119,7 +119,7 @@ static u16 f_ToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
  * Read by no routine. f_PowerToApproachFrames reversed, then the power
  * image
  */
-static u16 f_ApproachToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] = {
+static u16 f_ApproachToPowerFrames[SHOT_MODE_CHANGE_FRAME_COUNT] UNUSED = {
     0x579, 0x57A, 0x57B, PANEL_ASSET_POWER};
 static Radians f_MarkerPulseAngle = 0.0f;
 

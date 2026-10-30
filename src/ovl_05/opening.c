@@ -348,11 +348,11 @@ static Boolean f_IsBurstShown = FALSE;
 static s32 f_ShotBallScale = 0;
 static s32 f_LookAtEaseMode = 0;
 /* Read by no routine */
-static s32 D_8020AD6C_ovl_05 = 0;
+static s32 D_8020AD6C_ovl_05 UNUSED = 0;
 static s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT] = {
     OPENING_BALL_HIDDEN, OPENING_BALL_HIDDEN};
 /* Read by no routine */
-static s32 D_8020AD78_ovl_05[2] = {0, 0};
+static s32 D_8020AD78_ovl_05[2] UNUSED = {0, 0};
 static f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT] = {
     OPENING_BALL_NORMAL_SCALE, OPENING_BALL_NORMAL_SCALE};
 static s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT] = {
@@ -364,7 +364,7 @@ static s32 f_LakituScreenPoint[2] = {0, 230};
 static Boolean f_IsLakituFlying = FALSE;
 static s32 f_LakituTrailNewestIndex = 0;
 /* Read by no routine */
-static s32 D_8020ADB0_ovl_05 = 0;
+static s32 D_8020ADB0_ovl_05 UNUSED = 0;
 /*
  * Whether a slot shows the logo ball, the ball in the title logo. Only this
  * slot's flag is ever set, and setting it also has all balls projected to
@@ -385,7 +385,7 @@ f32 g_LookAtMarkerScale = 1.0f;
 static Boolean f_IsLookAtMarkerShown = FALSE;
 static s32 D_8020AE44_ovl_05 = 0;
 /* Read by no routine; the same as D_8020ADD8_ovl_05 */
-static ShotLaunch D_8020AE48_ovl_05 = {
+static ShotLaunch D_8020AE48_ovl_05 UNUSED = {
     -0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static Vtx f_OpeningShotDashVertices[4] = {
     {{{-15, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
@@ -496,7 +496,7 @@ static f32 f_LogoClubScale[2] = {1.0f, 1.0f};
 static Degrees f_LogoClubAngle = LOGO_CLUB_START_ANGLE;
 static Degrees f_LogoClubOrbitAngle = LOGO_CLUB_START_ORBIT_ANGLE;
 /* Read by no routine */
-static f32 D_8020B290_ovl_05 = 0.0f;
+static f32 D_8020B290_ovl_05 UNUSED = 0.0f;
 /* Its sine is never used */
 static Degrees f_LogoClubUnusedAngle = LOGO_CLUB_START_UNUSED_ANGLE;
 static Degrees f_LogoClubWobbleAngle = 0.0f;
@@ -541,12 +541,12 @@ static Vtx f_OpeningSparkVertices[3] = {
     {{{1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
 
 /* Read by no routine */
-static u8 D_8020C3F0_ovl_05[0x10];
+static u8 D_8020C3F0_ovl_05[0x10] UNUSED;
 static s32 f_CueSlotIndex;
 static CoursePoint D_8020C404_ovl_05;
 
 /* Read by no routine */
-static u8 D_8020C410_ovl_05[0x80];
+static u8 D_8020C410_ovl_05[0x80] UNUSED;
 static Mtx f_LookAtMarkerTranslation;
 static Mtx f_LookAtMarkerScaling;
 static Mtx f_OpeningBallMatrices[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
@@ -559,10 +559,10 @@ static Mtx f_LogoBallMarioRolls[DRAW_BUFFER_COUNT];
 static Mtx f_LogoBallMarioScale;
 static Mtx f_LogoBallMarioOffset;
 /* Read by no routine */
-static u8 D_8020C920_ovl_05[16];
+static u8 D_8020C920_ovl_05[16] UNUSED;
 static Mat4 f_LogoBallRoll;
 /* Read by no routine */
-static u8 D_8020C970_ovl_05[4];
+static u8 D_8020C970_ovl_05[4] UNUSED;
 /* The current projected ball's position and rectangle on the screen */
 static Vec3 f_ProjectedBallPosition;
 static s32 f_ProjectedBallLeft;
@@ -579,13 +579,13 @@ static Mtx f_ProjectedLogoBallMarioRolls[DRAW_BUFFER_COUNT];
 static Mtx f_ProjectedLogoBallMarioScale;
 static Mtx f_ProjectedLogoBallMarioOffset;
 /* Read by no routine */
-static u8 D_8020CCA0_ovl_05[16];
+static u8 D_8020CCA0_ovl_05[16] UNUSED;
 static Mat4 f_ProjectedLogoBallRoll;
 /* 1 when the ball's size is odd, for the pixel that halving it loses */
 static s32 f_ProjectedBallExtraPixel;
 static Vec3 f_ShotBallPosition;
 /* Read by no routine */
-static u8 D_8020CD00_ovl_05[8];
+static u8 D_8020CD00_ovl_05[8] UNUSED;
 static Mtx f_ShotBallShadowTranslation;
 static Mtx f_ShotBallShadowScaling;
 static Mtx f_LogoLetterTranslations[LOGO_LETTER_COUNT][DRAW_BUFFER_COUNT];
@@ -594,7 +594,7 @@ static Mtx f_LogoClubTranslations[DRAW_BUFFER_COUNT];
 static Mtx f_LogoClubScalings[DRAW_BUFFER_COUNT];
 static Mtx f_LogoClubRotations[DRAW_BUFFER_COUNT];
 /* Read by no routine */
-static u8 D_8020D810_ovl_05[8];
+static u8 D_8020D810_ovl_05[8] UNUSED;
 /* While the logo shrinks, each frame's moves, in pixels */
 static s32 f_LogoLetterSteps[LOGO_LETTER_COUNT];
 static s32 f_LogoLetterRises[2]; /* Up; the other letters', then the L's */
@@ -626,8 +626,8 @@ static Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
 static f32 D_80217078_ovl_05;
 
 /* Read by no routine; 2 objects, as one would be aligned past its start */
-static u8 D_8021707C_ovl_05[0x4];
-static u8 D_80217080_ovl_05[0x10];
+static u8 D_8021707C_ovl_05[0x4] UNUSED;
+static u8 D_80217080_ovl_05[0x10] UNUSED;
 
 static u8 f_LogoBallImages[LOGO_BALL_IMAGES_BUFFER_SIZE];
 /* A 32x32 CI8 image with its header and palette */
@@ -637,7 +637,7 @@ static u8 f_LakituTrailImage[LAKITU_TRAIL_IMAGE_BUFFER_SIZE];
 static Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
 static f32 f_LakituTrailStart[2];
 /* Read by no routine */
-static u8 D_8021BEC8_ovl_05[24];
+static u8 D_8021BEC8_ovl_05[24] UNUSED;
 static u8 f_LogoMarioImage[LOGO_MARIO_IMAGE_BUFFER_SIZE];
 static u8 f_LogoLetterImages[LOGO_LETTER_IMAGES_BUFFER_SIZE];
 static u8 f_LogoClubImage[LOGO_CLUB_IMAGE_BUFFER_SIZE];
@@ -651,11 +651,11 @@ static s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];
 static u8 f_LogoShineImage[SHINE_IMAGE_BUFFER_SIZE];
 static Vec3 f_OpeningSparksOrigin;
 /* Read by no routine */
-static u8 D_802259EC_ovl_05[12];
+static u8 D_802259EC_ovl_05[12] UNUSED;
 /* The buffers of character slots 1 and 2 */
 static u8* f_OpeningCharacterBuffers[2];
 /* Read by no routine */
-static u8 D_80225A00_ovl_05[4];
+static u8 D_80225A00_ovl_05[4] UNUSED;
 static void* f_OpeningBillboardHeap;
 static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
                                     [OPENING_SHOT_MAX_DASH_COUNT];

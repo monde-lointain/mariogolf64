@@ -1569,9 +1569,9 @@ static s32 f_ModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
         TRANSMIT_OPTION_MAIN_MENU},
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_EXPERIENCE, TRANSMIT_OPTION_NONE},
 };
-static char* f_UnusedShotTypeNames[SHOT_TYPE_COUNT] = {
+static char* f_UnusedShotTypeNames[SHOT_TYPE_COUNT] UNUSED = {
     "Straight", "Draw", "Fade"};
-static char f_UnusedDriveName[8] = "Drive";
+static char f_UnusedDriveName[8] UNUSED = "Drive";
 static Radians f_StatusPointerAngle = 0.0f;
 static s32 f_CharacterArrowFrame = 0;
 static Radians f_OptionPointerAngle = 0.0f;
@@ -1583,7 +1583,7 @@ static s32 f_NoticeState = NOTICE_HIDDEN;
 static MessageId f_NoticeMessage = 0;
 static s32 f_NoticeSize = 0;
 static s32 f_PressingHandFrame = 0;
-static s32 f_UnusedZeros[2] = {0, 0};
+static s32 f_UnusedZeros[2] UNUSED = {0, 0};
 /* The order in which the status data lists the player's characters */
 static s32 f_StatusCharacterOrder[CHARACTER_COUNT] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};

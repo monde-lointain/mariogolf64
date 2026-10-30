@@ -531,7 +531,7 @@ static Vtx f_LieIconVertices[8] = {
  * Read by no routine. Two display lists of the same triangles, over vertices
  * 0 to 13 and then 14 to 27, where an ArrowShape has its body and its outline
  */
-static Gfx D_800C5928[] = {
+static Gfx D_800C5928[] UNUSED = {
     gsSP2Triangles(10, 13, 12, 0, 10, 12, 11, 0),
     gsSP2Triangles(3, 1, 8, 0, 3, 8, 10, 0),
     gsSP2Triangles(13, 9, 2, 0, 13, 2, 6, 0),
@@ -564,7 +564,7 @@ static s32 f_SceneryState = SCENERY_UNLOADED;
 /* Set while the overlay of the course selection is loaded for the hole */
 static Boolean f_IsCourseSelectLoaded = FALSE;
 /* Read by no routine */
-static Gfx D_800C59E8[] = {
+static Gfx D_800C59E8[] UNUSED = {
     gsDPNoOp(),
     gsSPEndDisplayList(),
 };
@@ -587,7 +587,7 @@ static Vtx f_BallTrailVertices[4] = {
     {{{48, -1, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
     {{{48, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}}};
 /* Read by no routine */
-static s32 D_800C5AA0 = 0;
+static s32 D_800C5AA0 UNUSED = 0;
 static f32 f_GreenGridScroll = 0.0f;
 static s32 f_BallTrailHead = 0; /* The latest position */
 s32 D_800C5AAC = 0;
@@ -659,7 +659,7 @@ static s32 f_SparkTrailFrameTimer = 0;
  * drawn */
 static s32 f_SparkTrailBufferIndex = 0;
 /* Read by no routine */
-static s32 D_800C5E1C = 0;
+static s32 D_800C5E1C UNUSED = 0;
 static f32 f_HoleFlagWavePhase = 0.0f;
 static s32 f_ShotOffsetMarkerFrame = 0;
 static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] = {
@@ -667,7 +667,7 @@ static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] = {
 static s32 f_AnimatedIconFrameTime = 0;
 static s32 f_AnimatedIconFrame = 0;
 /* Read by no routine */
-static s32 D_800C5E50[4] = {0, 1, 2, 1};
+static s32 D_800C5E50[4] UNUSED = {0, 1, 2, 1};
 static s32 f_AnimatedIconImageIndex = 0;
 static f32 f_AnimatedIconX = 0.0f;
 static f32 f_AnimatedIconY = 0.0f;
@@ -680,14 +680,14 @@ static s32 f_TestChannelIndex = 0;
 static s32 f_TestColorIndex = 0;
 static Boolean f_IsTestGradientShown = FALSE;
 /* Read by no routine */
-static s32 D_800C5E98 = 0;
+static s32 D_800C5E98 UNUSED = 0;
 /* The HUD's letterbox height, which DrawLetterbox grows each frame */
 static s32 f_LetterboxHeight = 0;
 static s32 f_PinFlagTime = 0;
 static s32 f_RingFrame = 0;
 static s32 f_RingFrameTime = 0;
 /* Read by no routine */
-static Gfx D_800C5EB0[] = {
+static Gfx D_800C5EB0[] UNUSED = {
     gsSPEndDisplayList(),
 };
 static u16 f_WhiteDistancePalette[] = {
@@ -731,7 +731,7 @@ static s32 f_ShotOffsetMarkerTexelOffset;
 static void* f_LieImage;
 
 /* Read by no routine */
-static u8 D_800E213C[4];
+static u8 D_800E213C[4] UNUSED;
 
 static void* f_ClubHeadImage;
 /* The selected club's name image, loaded into each buffer in turn as

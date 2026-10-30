@@ -92,7 +92,7 @@ static Vtx f_SparkVertices[3] = {
     {{{-12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}},
     {{{12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}}};
 /* Read by no routine */
-static s32 D_80224898_ovl_00[2] = {0};
+static s32 D_80224898_ovl_00[2] UNUSED = {0};
 static s32 f_SwingTrailPathLength = 0;
 static s32 f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES;
 /* The ring of matrices that f_SwingTrailHead turns backwards through */

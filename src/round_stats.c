@@ -47,7 +47,7 @@ s32 g_ScorecardState = SCORECARD_CLOSED;
  */
 static s32 f_ContestWinner = NO_CONTEST_WINNER;
 /* Read by no routine */
-static void* D_800C4148[6] = {NULL, NULL, guPosition, NULL, NULL, NULL};
+static void* D_800C4148[6] UNUSED = {NULL, NULL, guPosition, NULL, NULL, NULL};
 
 /*
  * Sums the player's net strokes over par from the round's first hole to

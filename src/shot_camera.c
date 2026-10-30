@@ -176,7 +176,7 @@ static Radians f_TrailViewAngle = 0.0f;
 static s32 f_CupViewHoldCount = 0;
 static s32 f_FlightCameraFlags = 0;
 /* Read by no routine */
-static u8 D_800BE668[8] = {0};
+static u8 D_800BE668[8] UNUSED = {0};
 static s8 f_PendingResultSound = 0;
 /* Frames left before ChooseFlightCameraKind may change the camera again */
 static s32 f_CameraChangeHoldCount = 0;
@@ -204,7 +204,7 @@ static Boolean f_IsApexViewFar = FALSE;
 static Boolean f_IsTrailViewClose = FALSE;
 static Radians f_CircleAngle = 0.0f;
 /* Read by no routine */
-static u8 D_800BE6B8[8] = {0};
+static u8 D_800BE6B8[8] UNUSED = {0};
 /* The displacement scale at each midpoint displacement level */
 static s16 f_NoiseRoughness[] = {0x80, 0x60, 0x40, 0x20, 8, 4, 4, 2};
 static s16 f_NoiseGridIndex = 0;

@@ -65,7 +65,7 @@ static AssetId f_FireworkShapeAssetIds[8] = {
     0x95F, 0x960, 0x961, 0x962, 0x963, 0x964, 0x965, 0x966};
 static f32 f_FireworkHue = 0.0f;
 /* Read by no routine */
-static u8 D_800C46AC[0xC04] = {0};
+static u8 D_800C46AC[0xC04] UNUSED = {0};
 
 /* Defined in main_bss.c, at their addresses in the original */
 extern FireworkShape* f_FireworkShape;

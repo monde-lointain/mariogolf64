@@ -302,7 +302,7 @@ static s32 f_BannerY = 0;
 static s32 f_CourseNoticeAssets[] = {0x96C, 0x96D, 0x96E, 0x96F, 0x970};
 static s32 f_TallySoundCount = 0;
 /* Read by no routine */
-static s32 D_8021FDBC_ovl_00[6] = {0, 1, 2, 3, 2, 1};
+static s32 D_8021FDBC_ovl_00[6] UNUSED = {0, 1, 2, 3, 2, 1};
 static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {{40, 24, 24, 38},
     {40, 40, 11, 40}, {40, 40, 11, 50}, {32, 32, 32, 64}, {48, 22, 20, 21},
     {36, 40, 11, 40}};
@@ -310,7 +310,7 @@ static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
 static CharacterId f_DebugUnlockCharacter = 0;
 /* Read by no routine */
-static void* D_8021FE40_ovl_00[2] = {NULL, D_80224E10_ovl_00};
+static void* D_8021FE40_ovl_00[2] UNUSED = {NULL, D_80224E10_ovl_00};
 /* The text color of each text slot, from slot 1 */
 static u8 f_TextSlotColors[][3] = {{0xFF, 0xFF, 0xFF}, {0x7F, 0xBF, 0xFF},
     {0x7F, 0xBF, 0xFF}, {0x7F, 0xFF, 0x4B}, {0xFF, 0x7F, 0x9F}};
@@ -320,7 +320,7 @@ static s32 f_HandFrame = 0;
 static Radians f_TitleBobAngle = 0.0f;
 
 /* Read by no routine */
-static u8 D_802256B0_ovl_00[0x10];
+static u8 D_802256B0_ovl_00[0x10] UNUSED;
 static u8* f_ResultsBackdropImage;
 static u8* f_FinalResultsTitleImage;
 static u8* f_ResultsCourseImage;

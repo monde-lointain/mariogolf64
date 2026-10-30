@@ -46,7 +46,7 @@ static Vtx f_ShadedVertices[2][2 * QUAD_VERTEX_COUNT] = {
 s32 g_UnreadDebugSwitch = FALSE;
 static s32 f_PlaneTextureScroll = 0;
 /* Read by no routine */
-static s32 D_800C42C8[2] = {0};
+static s32 D_800C42C8[2] UNUSED = {0};
 static s32 D_800E1C10;
 static s32 D_800E1C14;
 static u8 D_800E1C18;

@@ -141,7 +141,7 @@ static s32 f_CycledCupIndex = 0;
  */
 volatile Boolean g_HasLoaderFinished = TRUE;
 /* Read by no routine */
-static s32 D_800C3FAC = 0;
+static s32 D_800C3FAC UNUSED = 0;
 static OSThread f_LoaderThread;
 extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;

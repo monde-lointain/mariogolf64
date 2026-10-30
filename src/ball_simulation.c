@@ -183,7 +183,7 @@ static ImpactEffect
 
 s32 D_800B7D9C = 0;
 /* Read by no routine */
-static s32 D_800B7DA0[4] = {0};
+static s32 D_800B7DA0[4] UNUSED = {0};
 
 SurfaceInfo* GetSurfaceInfo(Surface surface) {
   if ((u32)surface >= SURFACE_COUNT) {

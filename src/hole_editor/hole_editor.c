@@ -559,7 +559,7 @@ static u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
 /* func_80400FBC's cursor */
 static s32 f_HolePointCursor[2] = {0, 0}; /* x, z */
 /* Read by no routine */
-static s32 D_8040C5A4_hole_editor = -1;
+static s32 D_8040C5A4_hole_editor UNUSED = -1;
 /* The cell that SCENE_CELL_EDITOR's cursor is on */
 static s32 f_CellCursorColumn = 0;
 static s32 f_CellCursorRow = 0;
@@ -573,7 +573,7 @@ static s32 D_8040C5BC_hole_editor = 0;
 static Radians f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_HolePointCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C5C8_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+static s32 D_8040C5C8_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_HolePointCameraHeadingAngle = 0;
 static s32 f_HolePointEditMode = -1;
 static s32 f_PinTeeIndex = 0;
@@ -585,7 +585,7 @@ static Radians f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TriangleCameraHeadingAngle */
 static Radians f_TriangleCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C5E8_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+static s32 D_8040C5E8_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_TriangleCameraHeadingAngle = 0;
 static s32 f_EditedTriangleIndex = 0;
 static s32 f_EditedCornerIndex = 0;
@@ -598,12 +598,12 @@ static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_RingCameraHeadingAngle */
 static Radians f_RingCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C608_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+static s32 D_8040C608_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_RingCameraHeadingAngle = 0;
 static s32 f_RingTriangleIndex = 0x9D;
 static s32 f_RingCornerIndex = 0; /* Always 0 */
 /* Read by no routine */
-static s32 D_8040C618_hole_editor = 0;
+static s32 D_8040C618_hole_editor UNUSED = 0;
 static s32 f_LastRingEditKind = 0; /* A TRIANGLE_EDIT_* */
 
 /* func_80403A04's state */
@@ -611,7 +611,7 @@ static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_WallCameraHeadingAngle */
 static Radians f_WallCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C628_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+static s32 D_8040C628_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_WallCameraHeadingAngle = 0;
 static s32 f_FirstWallTriangle = 0x19;
 static s32 f_WallTriangleIndex =
@@ -640,12 +640,12 @@ extern TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 static s32 f_HeightCursorColumn = 0;
 static s32 f_HeightCursorRow = 0;
 /* Read by no routine */
-static s32 D_8040C64C_hole_editor[] = {6, 0};
+static s32 D_8040C64C_hole_editor[] UNUSED = {6, 0};
 static Radians f_HeightCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_HeightCameraHeadingAngle */
 static Radians f_HeightCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C65C_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+static s32 D_8040C65C_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_HeightCameraHeadingAngle = 0;
 static s32 f_LastSetHeight = 0; /* The height C-up or C-down last set */
 static Boolean f_ShowsGroundWaves = TRUE; /* Copied to g_ShowsGroundWaves */
@@ -662,7 +662,7 @@ s32 SetGroundPointHeightAndShade();
 
 /* func_80406818's menu */
 /* Read by no routine */
-static s32 D_8040C678_hole_editor = 1;
+static s32 D_8040C678_hole_editor UNUSED = 1;
 static Boolean f_IsSavingHoleFiles = FALSE;
 static s32 f_HoleFileStep = 0; /* A HOLE_FILE_STEP_* */
 static s32 f_HoleFileHoleNumber = 1; /* From 1 */
@@ -674,14 +674,14 @@ static Radians f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TreeCameraHeadingAngle */
 static Radians f_TreeCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C698_hole_editor = BINARY_ANGLE_EIGHTH_TURN;
+static s32 D_8040C698_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_TreeCameraHeadingAngle = 0;
 static s32 f_EditedTreeIndex = 0;
 static s32 f_LastTreeEditKind = 0; /* A TRIANGLE_EDIT_*; nothing reads it */
 
 static s32 f_EditorClipRatio = 1;
 /* Read by no routine */
-static s32 D_8040C6AC_hole_editor = 0;
+static s32 D_8040C6AC_hole_editor UNUSED = 0;
 static s8 f_FineTilePointSlots[FINE_TILE_POINT_SPAN][FINE_TILE_POINT_SPAN] = {
     {0, 5, 7, 10, 20},
     {1, 12, 13, 14, 21},

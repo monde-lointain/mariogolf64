@@ -101,7 +101,7 @@ Boolean g_HasThreeFrameBuffers = FALSE;
 s32 g_FramesPerSecond = 0;
 
 /* Read by no routine */
-static u8 D_800B67D4[4] = {0};
+static u8 D_800B67D4[4] UNUSED = {0};
 
 static u16* f_Framebuffers[FRAMEBUFFER_COUNT] = {
     FramebufferAddress(0),

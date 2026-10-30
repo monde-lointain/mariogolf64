@@ -128,7 +128,7 @@
 s32 g_PinVertexScale = PIN_VERTEX_SCALE;
 
 /* Read by no routine */
-static u8 D_800BA704[4] = {0};
+static u8 D_800BA704[4] UNUSED = {0};
 
 static Vtx f_PinVertices[PIN_VERTEX_COUNT] = {
     {{{-16, 0, -16}, 0, {0, 0}, {0xBF, 0xBF, 0xBF, 0xFF}}},
@@ -192,7 +192,7 @@ static u8* f_FlagstickTexture;
 static u8* f_PinShadowTexture;
 static Mtx f_PinMatrices[CAMERA_COUNT][DRAW_BUFFER_COUNT];
 /* Read by no routine */
-static u8 D_800DAE10[0xC0];
+static u8 D_800DAE10[0xC0] UNUSED;
 
 /*
  * Returns the length of (x, z), less CUP_DISTANCE_OFFSET but at least 0.

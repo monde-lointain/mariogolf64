@@ -104,12 +104,12 @@ typedef struct N64Logo {
 static s32 f_BootLogoFrame = 0;
 static s32 f_BootLogoStage = BOOT_LOGO_N64;
 /* Never read or written */
-static s32 f_BootLogoUnusedWord = 0;
+static s32 f_BootLogoUnusedWord UNUSED = 0;
 /* Whether SetUpTitleHole has reset g_GameState during the Camelot logo */
 static Boolean f_HasResetGameState = FALSE;
 
 /* Read by no routine */
-static u8 D_801F57B0_ovl_07[0x20];
+static u8 D_801F57B0_ovl_07[0x20] UNUSED;
 static CamelotLogo f_CamelotLogo;
 static NintendoLogo f_NintendoLogo;
 static N64Logo f_N64Logo;

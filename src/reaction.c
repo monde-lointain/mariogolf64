@@ -159,7 +159,7 @@ typedef struct EasedView {
 
 /* Frames since the reaction began */
 static s32 f_ReactionFrame = 0;
-static s32 f_UnusedReactionWord = 0; /* Unused; it is there to match */
+static s32 f_UnusedReactionWord UNUSED = 0; /* Unused; it is there to match */
 
 /* The third light is set by the framing routines that light the golfer */
 static Lights3 f_ReactionLights =
@@ -174,18 +174,18 @@ static s32 f_ReactionFrameCount;
 static Boolean f_HasReactionLight;
 
 /* Read by no routine */
-static u8 D_800E4C60[24];
+static u8 D_800E4C60[24] UNUSED;
 
 static EasedView f_EasedView;
 
 /* Read by no routine */
-static u8 D_800E4C94[4];
+static u8 D_800E4C94[4] UNUSED;
 
 static CoursePoint f_ReactionSpot;
 static s32 f_ReactionSpotRoughness;
 
 /* Read by no routine */
-static u8 D_800E4CA8[32];
+static u8 D_800E4CA8[32] UNUSED;
 
 static s8 f_HasReactionSpot;
 

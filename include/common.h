@@ -51,6 +51,12 @@ typedef s32 CoursePoint[AXIS_COUNT];
 /* A 4 by 4 matrix of floats, indexed by row and then column */
 typedef f32 Mat4[4][4];
 
+/*
+ * Follows the declarator of a static that no code reads, which the original
+ * still holds, so that -W does not warn of it
+ */
+#define UNUSED __attribute__((unused))
+
 /* Zero is false, and any other value true, as C tests it */
 typedef s32 Boolean;
 

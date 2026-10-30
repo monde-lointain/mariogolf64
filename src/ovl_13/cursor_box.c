@@ -24,7 +24,7 @@ static Vtx f_CursorBoxVertices[] = {
 static f32 f_CursorCornerPhases[] = {0.0f, 1.5707964f, 3.1415927f, 4.712389f};
 
 /* Read by no routine */
-static u8 D_801FC4C0_ovl_13[0x40];
+static u8 D_801FC4C0_ovl_13[0x40] UNUSED;
 static Mtx f_CursorBoxProjection;
 static Mtx f_CursorBoxTranslations[DRAW_BUFFER_COUNT];
 

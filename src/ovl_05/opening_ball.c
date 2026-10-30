@@ -99,8 +99,9 @@ static SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT] = {
 static s32 D_8020B858_ovl_05 = 0;
 /* The opening's copies of f_EarlyImpactEffect and f_LateImpactEffect, which its
  * copy of GetImpactTimingEntry doesn't read */
-static ImpactEffect f_OpeningEarlyImpactEffect = {-90, -64, -40, -10, 100, 1};
-static ImpactEffect f_OpeningLateImpactEffect = {-80, 64, 30, 10, -5, 1};
+static ImpactEffect f_OpeningEarlyImpactEffect UNUSED = {
+    -90, -64, -40, -10, 100, 1};
+static ImpactEffect f_OpeningLateImpactEffect UNUSED = {-80, 64, 30, 10, -5, 1};
 /* The opening's copy of f_ImpactEffects */
 // clang-format off
 static ImpactEffect

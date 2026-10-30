@@ -292,7 +292,7 @@ static char f_NoReplayText[] = "There is no replay data.";
 static char f_EndGameText[] = "End Game";
 static char f_SaveMenuText[] = "Save Menu";
 static s32 f_IconImageIndex = 0;
-static s32 f_UnusedSaveMenuWord = 0;
+static s32 f_UnusedSaveMenuWord UNUSED = 0;
 static SongId f_ResumedSongId = NO_SONG;
 static s16 f_ReplayLabelIds[REPLAY_LABEL_COUNT] = {
     0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C};
@@ -304,7 +304,7 @@ static Radians f_ReplayTitleBobAngle = 0.0f;
 
 static s32 f_SlideOffsets[4];
 /* Read by no routine */
-static u8 D_80245A30_ovl_12[8];
+static u8 D_80245A30_ovl_12[8] UNUSED;
 static void* f_CharacterFiles[CHARACTER_IMAGE_COUNT];
 static void* f_CharacterImages[CHARACTER_IMAGE_COUNT];
 static void* f_ModeIconImages[SAVED_GAME_COUNT][2];

@@ -14,7 +14,7 @@
 #include "text.h"
 
 /* Read by no routine */
-static u8 D_801F4AF0_ovl_08[0x10];
+static u8 D_801F4AF0_ovl_08[0x10] UNUSED;
 
 /*
  * On A or Start, clears the image in slot 0 and swaps this overlay's module

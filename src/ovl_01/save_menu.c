@@ -148,12 +148,12 @@ static s32 f_RingShotArrowFrame = 0;
 static s32 f_RingShotArrowTimer = 0;
 static s32 D_80230A98_ovl_01 = 0;
 /* Read by no routine */
-static s32 D_80230A9C_ovl_01 = 0;
+static s32 D_80230A9C_ovl_01 UNUSED = 0;
 /* The order that the Ring Shot records list the characters in */
 static u8 f_RingShotCharacterOrder[SAVE_UNK1344_ENTRY_COUNT] = {
     0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
 /* Read by no routine */
-static s32 D_80230AB4_ovl_01[11] = {0x000000FF, 0x00FF00FF, 0x000000FF,
+static s32 D_80230AB4_ovl_01[11] UNUSED = {0x000000FF, 0x00FF00FF, 0x000000FF,
     0x00FF00FF, 0x00000000, 0x000000FF, 0x000000FF, 0x000000FF, 0x00000000,
     0x00FF00FF, 0x00FF0000};
 /* The angle, in radians, of the sine waves that tint the chosen replay */
@@ -166,7 +166,7 @@ static s16
         {78, 120, 162, 0, 0, 0, 204}, {60, 102, 144, 186, 0, 0, 226},
         {42, 84, 126, 168, 210, 0, 252}, {22, 60, 102, 144, 186, 228, 268}};
 /* Read by no routine */
-static s32 D_80230B38_ovl_01[2] = {0, 0};
+static s32 D_80230B38_ovl_01[2] UNUSED = {0, 0};
 /* The controller each of the chosen saved game's players takes */
 static s16 f_SavedPlayerControllers[MAX_PLAYER_COUNT] = {
     NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER};
@@ -199,9 +199,9 @@ static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     MODE_ICON_RING_SHOT, MODE_ICON_TRAINING, MODE_ICON_SKINS_MATCH,
     MODE_ICON_UNK9, MODE_ICON_MINI_GOLF};
 /* Read by no routine */
-static s32 D_80230BDC_ovl_01[4] = {0, 0, 0, 0};
+static s32 D_80230BDC_ovl_01[4] UNUSED = {0, 0, 0, 0};
 /* Read by no routine; the values of main_menu.c's f_MenuCharacterChoices */
-static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] = {
+static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] UNUSED = {
     CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_MAPLE,
     CHARACTER_CHOICE_BABY_MARIO, CHARACTER_CHOICE_LUIGI, CHARACTER_CHOICE_PEACH,
     CHARACTER_CHOICE_SONNY, CHARACTER_CHOICE_WARIO, CHARACTER_CHOICE_HARRY,
@@ -212,16 +212,16 @@ static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] = {
 /* The angle, in radians, of the sine wave that bobs the saved games' boards */
 static f32 f_BoardBobPhase = 0.0f;
 /* Read by no routine; the values of f_ControllerIconPositions */
-static s32 D_80230C38_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
+static s32 D_80230C38_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] UNUSED = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
 /* Read by no routine; the values of main_menu.c's D_8022F9FC */
-static s32 D_80230CB8_ovl_01[11] = {
+static s32 D_80230CB8_ovl_01[11] UNUSED = {
     110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 /* Read by no routine */
-static char D_80230CE4_ovl_01[] = "Hole";
+static char D_80230CE4_ovl_01[] UNUSED = "Hole";
 /* How far left of the label's place each mode icon's game mode label is drawn
  */
 static s32 f_GameModeLabelOffsets[MODE_ICON_COUNT] = {
@@ -229,7 +229,7 @@ static s32 f_GameModeLabelOffsets[MODE_ICON_COUNT] = {
 /* The saved games' golfers' turn, in degrees about X and Y */
 static f32 f_SavedGolferAngles[3] = {0.0f, 0.0f, 0.0f};
 /* Read by no routine */
-static s32 D_80230D24_ovl_01 = 0;
+static s32 D_80230D24_ovl_01 UNUSED = 0;
 /* Where DrawSavedGolfers stands each golfer, by the player count */
 static Vec3 f_SavedGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {{-84.0f, -43.0f, -1000.0f}, {64.0f, 0.0f, -1000.0f},
@@ -248,7 +248,7 @@ static s32 f_ControllerIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
 /* Read by no routine */
-static s32 D_80230E68_ovl_01[2] = {0, 0};
+static s32 D_80230E68_ovl_01[2] UNUSED = {0, 0};
 
 static void* f_RingShotNamePlate;
 static void* f_RingShotRainbowBox;
@@ -259,7 +259,7 @@ static void** f_RingShotCourseIcons;
 static s16 f_RecordedReplaySlots[SAVE_MENU_SLOT_COUNT];
 
 /* Read by no routine */
-static u8 D_8023B690_ovl_01[0x3D0];
+static u8 D_8023B690_ovl_01[0x3D0] UNUSED;
 
 /* The camera that DrawSavedGames views the boards with */
 static Mat4 f_BoardProjection;
@@ -278,13 +278,13 @@ static void* f_ControllerIcons;
 static void* f_PlayerLabels;
 
 /* Read by no routine */
-static u8 D_8023BD88_ovl_01[0x4];
+static u8 D_8023BD88_ovl_01[0x4] UNUSED;
 
 /* The chosen game's course image, shown from one while the other loads */
 static void* f_CourseImageBuffers[COURSE_IMAGE_BUFFER_COUNT];
 
 /* Read by no routine */
-static u8 D_8023BD94_ovl_01[0x4];
+static u8 D_8023BD94_ovl_01[0x4] UNUSED;
 
 /* Each saved game's numbered board */
 static void* f_GameBoards[SAVED_GAME_COUNT];
@@ -295,8 +295,8 @@ static s32 f_ChosenModeIconScale;
 static s32 f_ChosenModeIconHalfSize;
 
 /* Read by no routine; 2 objects, as one would be aligned past its start */
-static u8 D_8023BDB4_ovl_01[0x4];
-static u8 D_8023BDB8_ovl_01[0x88];
+static u8 D_8023BDB4_ovl_01[0x4] UNUSED;
+static u8 D_8023BDB8_ovl_01[0x88] UNUSED;
 
 /* Not static: the original left these to the linker's common block */
 u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];

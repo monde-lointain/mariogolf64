@@ -104,8 +104,8 @@ static s16 f_TopicTitleMessages[HELP_TOPIC_COUNT + 1] = {0x0D6, 0x0E7, 0x0EC,
 static f32 f_ListColorPhase = 0.0f;
 static TextListLayout f_HelpListLayout = {84, 22};
 /* Read by no routine */
-static TextListLayout D_800C4350[8] = {{86, 18}, {108, 32}, {98, 24}, {104, 24},
-    {106, 32}, {98, 21}, {80, 20}, {0, 0}};
+static TextListLayout D_800C4350[8] UNUSED = {{86, 18}, {108, 32}, {98, 24},
+    {104, 24}, {106, 32}, {98, 21}, {80, 20}, {0, 0}};
 
 void DrawChalkboard(Gfx** displayListHead);
 

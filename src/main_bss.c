@@ -65,7 +65,7 @@
 
 int f_RandomState BSS = {0};
 /* Read by no routine */
-static u8 D_800FBD38[0x8] BSS = {0};
+static u8 D_800FBD38[0x8] UNUSED BSS = {0};
 TakenCharacters g_TakenCharacters BSS ALIGNED(8) = {0};
 u8 nuScPreNMIFlag BSS = {0};
 NUContData g_ControllerData[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
@@ -116,7 +116,7 @@ ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT] BSS ALIGNED(
     8) = {0};
 s32 g_CurrentAnimationEndFrame BSS = {0};
 /* Read by no routine */
-static u8 D_800FE438[0x18] BSS = {0};
+static u8 D_800FE438[0x18] UNUSED BSS = {0};
 GameBoyTransfer g_GameBoyTransfer BSS ALIGNED(16) = {0};
 OSPiHandle __Dom2SpeedParam BSS ALIGNED(0x8) = {0};
 void* g_LeaderLineImage BSS = {0};
@@ -163,7 +163,7 @@ ControllerState g_MergedController BSS = {0};
 void* g_MenuIconImages[7] BSS ALIGNED(8) = {0};
 s32 g_PlayerControllerPorts[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 /* Read by no routine */
-static u8 D_801049D0[0x2C] BSS = {0};
+static u8 D_801049D0[0x2C] UNUSED BSS = {0};
 f32 f_RainDriftX BSS = {0};
 Mtx f_RingMatrices[RING_COUNT] BSS ALIGNED(8) = {0};
 s32 f_GroundCheckDropIndex BSS = {0};
@@ -175,7 +175,7 @@ u32 nuGfxDisplay BSS = {0};
 s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT] BSS ALIGNED(8) = {0};
 u8 g_IsGroundTileNearby[GROUND_TILE_COUNT] BSS ALIGNED(8) = {0};
 /* Read by no routine */
-static u8 D_80104F38[0xC] BSS = {0};
+static u8 D_80104F38[0xC] UNUSED BSS = {0};
 Vec3 f_RainVelocity BSS = {0};
 NUContRmbCtl nuContRmbCtl[NU_CONT_MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 CurrentShot D_80104F78 BSS ALIGNED(8) = {0};
@@ -223,7 +223,7 @@ s32 D_80105DC4 BSS = {0};
 s32 D_80105DC8 BSS = {0};
 s32 D_80105DCC BSS = {0};
 /* Read by no routine */
-static u8 D_80105DD0[0x40] BSS = {0};
+static u8 D_80105DD0[0x40] UNUSED BSS = {0};
 HolePoints g_HolePoints BSS ALIGNED(8) = {0};
 Vec3 f_FramedLookAt BSS = {0};
 RingShotRecord D_80105F40[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
@@ -240,21 +240,21 @@ s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE] BSS
     ALIGNED(16) = {0};
 s8 g_WasMetalMarioUnlocked BSS = {0};
 /* Read by no routine */
-static u8 D_8010A2C8[0x8] BSS = {0};
+static u8 D_8010A2C8[0x8] UNUSED BSS = {0};
 u64 nuMainStack[NU_MAIN_STACK_SIZE / sizeof(u64)] BSS ALIGNED(16) = {0};
 u32 nuContNum BSS = {0};
 /* Read by no routine */
-static u8 D_8010C2D8[0x8] BSS = {0};
+static u8 D_8010C2D8[0x8] UNUSED BSS = {0};
 u8 nuYieldBuf[NU_GFX_YIELD_BUF_SIZE] BSS ALIGNED(16) = {0};
 u8 D_8010CEE0[0x80] BSS ALIGNED(8) = {0};
 s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT] BSS ALIGNED(8) = {0};
 u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3] BSS = {0};
 /* Read by no routine */
-static u8 D_8010CFB8[0x8] BSS = {0};
+static u8 D_8010CFB8[0x8] UNUSED BSS = {0};
 u8 nuRDPOutputBuf[NU_GFX_RDP_OUTPUTBUFF_SIZE] BSS ALIGNED(16) = {0};
 s32 g_ModuleRdpRequestFrames[MODULE_COUNT] BSS ALIGNED(8) = {0};
 /* Read by no routine */
-static u8 D_8012D0C0[0x8] BSS = {0};
+static u8 D_8012D0C0[0x8] UNUSED BSS = {0};
 Player D_8012D0C8[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 s32 f_LastOpenedAssetId BSS = {0};
 void* D_8012D3AC BSS = {0};
@@ -279,7 +279,7 @@ OSTimer __osGbpakTimer BSS ALIGNED(8) = {0};
 void* D_8012F4B0[7] BSS ALIGNED(8) = {0};
 u8 __osContLastCmd BSS = {0};
 /* Read by no routine */
-static u8 D_8012F4D0[0x4] BSS = {0};
+static u8 D_8012F4D0[0x4] UNUSED BSS = {0};
 volatile u32 nuScGfxTaskStartRetrace BSS = {0};
 OSPiHandle* nuPiSramHandle BSS = {0};
 OSMesg __osEepromTimerMsg BSS = {0};
@@ -307,10 +307,10 @@ s16 g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 1] BSS ALIGNED(8) = {
 u8* g_BlendedTextureStillLayer BSS = {0};
 s32 g_BallFlightStep BSS = {0};
 /* Read by no routine */
-static u8 D_80132CF8[0x8] BSS = {0};
+static u8 D_80132CF8[0x8] UNUSED BSS = {0};
 WorkArea g_WorkArea BSS ALIGNED(16) = {0};
 /* Read by no routine */
-static u8 D_801B54E0[0x8] BSS = {0};
+static u8 D_801B54E0[0x8] UNUSED BSS = {0};
 Camera g_Cameras[CAMERA_COUNT] BSS ALIGNED(8) = {0};
 char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1] BSS ALIGNED(8) = {0};
 OSPiHandle* nuPiCartHandle BSS = {0};
@@ -321,27 +321,27 @@ GameState D_801B55F0 BSS ALIGNED(8) = {0};
 BetSet g_BetSet BSS = {0};
 Mtx g_ScreenOrthoMatrix BSS ALIGNED(8) = {0};
 /* Read by no routine */
-static u8 D_801B5678[0x8] BSS = {0};
+static u8 D_801B5678[0x8] UNUSED BSS = {0};
 /* Read by no routine: UpdateTurns copies f_ShotLaunch here each frame */
 ShotLaunch g_LastShotLaunch BSS ALIGNED(8) = {0};
 ALGlobals __libmus_alglobals BSS ALIGNED(8) = {0};
 /* Read by no routine */
-static u8 D_801B56EC[0x4] BSS = {0};
+static u8 D_801B56EC[0x4] UNUSED BSS = {0};
 s16 (*f_NoiseGrid)[NOISE_GRID_SIZE] BSS = {0};
 /* Read by no routine */
-static u8 D_801B56F8[0x8] BSS = {0};
+static u8 D_801B56F8[0x8] UNUSED BSS = {0};
 NUDebTaskPerf nuDebTaskPerf[NU_DEB_PERF_BUF_NUM] BSS ALIGNED(16) = {0};
 void* g_ImageSlots[IMAGE_SLOT_COUNT] BSS ALIGNED(8) = {0};
 NUScTask nuGfxTask[NU_GFX_TASK_NUM] BSS ALIGNED(8) = {0};
 s8 g_RingShotCourseOpenedAtStart BSS = {0};
 /* Read by no routine */
-static u8 D_801B6080[0x8] BSS = {0};
+static u8 D_801B6080[0x8] UNUSED BSS = {0};
 GameState g_GameState BSS ALIGNED(8) = {0};
 /* Read by no routine */
-static u8 D_801B60CC[0x4] BSS = {0};
+static u8 D_801B60CC[0x4] UNUSED BSS = {0};
 void* g_NamePlateImage BSS = {0};
 /* Read by no routine */
-static u8 D_801B60D8[0x8] BSS = {0};
+static u8 D_801B60D8[0x8] UNUSED BSS = {0};
 u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] BSS ALIGNED(
     16) = {0};
 volatile u32 nuScRetraceTotal BSS = {0};
@@ -349,7 +349,7 @@ __OSInode __osPfsInodeCache BSS ALIGNED(0x8) = {0};
 u16* nuGfxCfb_ptr BSS = {0};
 void* g_ComLeftyIcons BSS = {0};
 /* Read by no routine */
-static u8 D_801B69F0[0x680] BSS = {0};
+static u8 D_801B69F0[0x680] UNUSED BSS = {0};
 /* The player whose character the character select is choosing */
 s32 g_ChoosingPlayerIndex BSS = {0};
 __OSEventState __osEventStateTab[OS_NUM_EVENTS] BSS ALIGNED(0x8) = {0};
@@ -366,7 +366,7 @@ Effect f_Effects[EFFECT_COUNT] BSS ALIGNED(16) = {0};
 u8* g_ShadowTexture BSS = {0};
 u16 g_ScreenEffectPerspNorm BSS = {0};
 /* Read by no routine */
-static u8 D_801B7EE8[0x8] BSS = {0};
+static u8 D_801B7EE8[0x8] UNUSED BSS = {0};
 OSPifRam __osPfsPifRam BSS ALIGNED(8) = {0};
 ScreenRect g_HudScissor BSS = {0};
 SkyState g_SkyState BSS ALIGNED(8) = {0};
@@ -392,17 +392,17 @@ OSMesgQueue nuGfxTaskMgrMesgQ BSS ALIGNED(8) = {0};
 u8 g_IsMenuWipeOpening BSS = {0};
 Mtx f_DropMatrices[DRAW_BUFFER_COUNT] BSS ALIGNED(8) = {0};
 /* Read by no routine */
-static u8 D_801B9498[0x8] BSS = {0};
+static u8 D_801B9498[0x8] UNUSED BSS = {0};
 Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH] BSS ALIGNED(16) = {0};
 s32 g_MenuScreen BSS = {0};
 u8* g_CourseSkyImage BSS = {0};
 Raindrop* f_Raindrops BSS = {0};
 OSMesgQueue __osSiAccessQueue BSS ALIGNED(0x8) = {0};
 /* Read by no routine */
-static u8 D_801EFFC8[0x8] BSS = {0};
+static u8 D_801EFFC8[0x8] UNUSED BSS = {0};
 BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT] BSS ALIGNED(16) = {0};
 OSMesgQueue nuContDataMutexQ BSS ALIGNED(8) = {0};
 /* Read by no routine */
-static u8 D_801F43E8[0x8] BSS = {0};
+static u8 D_801F43E8[0x8] UNUSED BSS = {0};
 CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT] BSS ALIGNED(16) = {0};
 void* g_MenuCourseSceneryAsset BSS = {0};

@@ -542,18 +542,18 @@ static s32 f_CourseSkyImageAssets[COURSE_RECORD_COUNT] = {
     0x4BA, 0x4BB, 0x4BC, 0x4BE, 0x4BD, 0x4BF, 0x4C0, 0x4C1, 0x4BA};
 Fog g_SceneFog = {{0, 0, 0}, 970, 1024};
 /* Read by no routine */
-static s32 D_800C6C88[3] = {0, 0, 1};
+static s32 D_800C6C88[3] UNUSED = {0, 0, 1};
 static s32 f_SkyHorizonColor[RGB_CHANNEL_COUNT] = {
     SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL};
 /* Read by no routine */
-static f32 D_800C6CA0[12] = {0.0f, 0.0f, 0.0f, 4096.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    8192.0f, 4096.0f, 0.0f, 8192.0f};
+static f32 D_800C6CA0[12] UNUSED = {0.0f, 0.0f, 0.0f, 4096.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 8192.0f, 4096.0f, 0.0f, 8192.0f};
 /* The fog SetSceneFog draws while GAME_FLAG_SKY_EDITOR is set */
 Fog g_DebugFog = {{200, 230, 200}, 970, 1100};
 static s32 f_SkyEditorColumn = 0;
 static s32 f_SkyEditorRow = 0;
 /* Read by no routine */
-static s32 D_800C6CEC[3] = {0};
+static s32 D_800C6CEC[3] UNUSED = {0};
 static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] =
     {{{{{-152, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
          {{{-88, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
@@ -1672,7 +1672,7 @@ void UsePrimitiveDepth(Boolean isPrimitiveDepthSet) {
 static Mtx f_SkyModelMatrix;
 
 /* Read by no routine */
-static u8 D_800E39C8[0x88];
+static u8 D_800E39C8[0x88] UNUSED;
 
 static Mtx f_TileMatrices[MATRIX_BUFFER_COUNT][FRAME_TILE_COUNT];
 

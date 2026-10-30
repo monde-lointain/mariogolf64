@@ -81,7 +81,7 @@ typedef struct HoleCreature {
 } HoleCreature; /* size = 0xA8 */
 
 /* Read by no routine */
-static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] = {
+static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] UNUSED = {
     CHEEP_CHEEP_FIRST_VIEW_ASSET, CHEEP_CHEEP_FIRST_VIEW_ASSET + 1,
     CHEEP_CHEEP_FIRST_VIEW_ASSET + 2, CHEEP_CHEEP_FIRST_VIEW_ASSET + 3,
     CHEEP_CHEEP_FIRST_VIEW_ASSET + 4};
@@ -92,7 +92,7 @@ static s32 f_CheepCheepLeapUnk38 = 0;
 static s32 f_CheepCheepLeapUnk3C = 0;
 static s32 f_CheepCheepLeapUnk40 = 0;
 /* Read by no routine */
-static s32 D_80224044_ovl_00 = 0;
+static s32 D_80224044_ovl_00 UNUSED = 0;
 static Vtx f_CheepCheepVertices[4] = {
     {{{-7, -7, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-7, 7, 0}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},

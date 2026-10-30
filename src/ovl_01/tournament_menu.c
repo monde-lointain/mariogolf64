@@ -192,7 +192,7 @@ static s32 f_MenuWindowState = MENU_WINDOW_OPENING;
 static f32 f_MenuWindowScaleX = 0.0f;
 static f32 f_MenuWindowScaleY = 0.0f;
 /* Read by no routine */
-static s32 D_80230E94_ovl_01[2] = {0, 0};
+static s32 D_80230E94_ovl_01[2] UNUSED = {0, 0};
 /* How far the chosen Yes or No button has grown, and a YES_NO_PULSE_* value */
 static s32 f_YesNoPulse = 0;
 static s32 f_YesNoPulseDirection = 0;
@@ -222,7 +222,7 @@ static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT]
 };
 // clang-format on
 /* Read by no routine */
-static s32 D_80230F3C_ovl_01 = 0;
+static s32 D_80230F3C_ovl_01 UNUSED = 0;
 static u8 D_80230F40_ovl_01 = 0;
 static void* D_80230F44_ovl_01 = NULL;
 static void* D_80230F48_ovl_01 = NULL;
@@ -230,7 +230,7 @@ static void* D_80230F4C_ovl_01 = NULL;
 static void* D_80230F50_ovl_01 = NULL;
 static void* f_CodeCursorBox = NULL;
 /* Read by no routine */
-static s32 D_80230F58_ovl_01 = 0;
+static s32 D_80230F58_ovl_01 UNUSED = 0;
 static s32 D_80230F5C_ovl_01 = 0;
 static s32 D_80230F60_ovl_01 = 0;
 static s32 D_80230F64_ovl_01 = 0;
@@ -306,7 +306,7 @@ static u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT]
 };
 // clang-format on
 /* Read by no routine; f_MenuCharacterChoices' first 14 values */
-static s32 f_TournamentCharacterChoices[14] = {CHARACTER_CHOICE_PLUM,
+static s32 f_TournamentCharacterChoices[14] UNUSED = {CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_MAPLE,
     CHARACTER_CHOICE_BABY_MARIO, CHARACTER_CHOICE_LUIGI, CHARACTER_CHOICE_PEACH,
     CHARACTER_CHOICE_SONNY, CHARACTER_CHOICE_WARIO, CHARACTER_CHOICE_HARRY,
@@ -322,7 +322,7 @@ static Vtx f_CodeCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
-static s32 D_80231178_ovl_01[2] = {0, 0};
+static s32 D_80231178_ovl_01[2] UNUSED = {0, 0};
 /* The angle, in radians, of each corner's color cycle */
 static f32 f_CodeCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
@@ -349,7 +349,7 @@ static Mtx f_CodeCursorTranslation;
 static Mtx f_CodeCursorRotation;
 
 /* Read by no routine */
-static u8 D_8023BF00_ovl_01[0x80];
+static u8 D_8023BF00_ovl_01[0x80] UNUSED;
 
 static Mtx f_CodeCursorScale;
 

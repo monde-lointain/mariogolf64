@@ -144,7 +144,7 @@ static u8 f_IsPromptShown = FALSE;
 /* LoadCharacterSelectBuffer clears it, but no routine reads it */
 static u8 f_UnreadBufferFlag = FALSE;
 /* Read by no routine */
-static u8 f_UnreadSelectByte = 0;
+static u8 f_UnreadSelectByte UNUSED = 0;
 /* Cleared once every player has chosen, but read by no routine */
 static u8 f_UnreadSelectDoneByte = 0;
 /* The animation frame of the face under the choosing player's cursor */
@@ -159,7 +159,7 @@ static s8 f_IsLeftyButtonHeld = FALSE;
 /* The CButtonPalette that the grid face previews while a C button is held */
 static s8 f_PreviewedPalette = NO_PALETTE;
 /* Read by no routine */
-static s32 f_UnreadSelectWords[4] = {-1, -1, -1, -1};
+static s32 f_UnreadSelectWords[4] UNUSED = {-1, -1, -1, -1};
 /* The Game Boy row's slots, which HideGameBoyCharacters saves here and
  * UpdateCharacterSelect puts back */
 static s32 f_SavedGameBoySlots[GAME_BOY_CHARACTER_COUNT] = {
@@ -175,18 +175,18 @@ static CharacterId f_ChoiceCharacters[CHARACTER_COUNT] = {CHARACTER_PLUM,
     CHARACTER_METAL_MARIO, CHARACTER_KID, CHARACTER_SHERRY, CHARACTER_AZALEA,
     CHARACTER_JOE};
 /* Read by no routine */
-static u8 f_UnreadSelectBytes[8] = {
+static u8 f_UnreadSelectBytes[8] UNUSED = {
     0x71, 0x76, 0x81, 0x6C, 0x9D, 0x00, 0x00, 0x00};
 /* GetStickDiagonal's count of unchanged readings on each axis */
 static s32 f_StickXHoldTimer = 0;
 static s32 f_StickYHoldTimer = 0;
 /* Read by no routine */
-static char f_UnreadCurveNames[3][10] = {"Straight", "Draw", "Fade"};
+static char f_UnreadCurveNames[3][10] UNUSED = {"Straight", "Draw", "Fade"};
 /* The cell of the face DrawGridFaces last read, read by no routine */
 static s16 f_UnreadFaceColumn = 0;
 static s16 f_UnreadFaceRow = 0;
 /* Read by no routine */
-static s16 f_UnreadSelectHalfword = 0;
+static s16 f_UnreadSelectHalfword UNUSED = 0;
 /* Each player's tag offset from their cursor's grid cell, as x and y */
 static TagOffset f_PlayerTagOffsets[MAX_PLAYER_COUNT] = {
     {0, 0}, {16, 0}, {0, 24}, {16, 24}};
@@ -198,7 +198,7 @@ static s32 f_LinedUpTagLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
  * Read by no routine: an order of 0 to 15, the last 16 values of
  * player_stats.c's D_80230960
  */
-static s16 f_UnreadSelectOrder[16] = {
+static s16 f_UnreadSelectOrder[16] UNUSED = {
     1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
 /* The grid cursor's corners, whose colors DrawCharacterGridCursor cycles */
 static Vtx f_GridCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
@@ -207,12 +207,12 @@ static Vtx f_GridCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{24, -24, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
-static s32 f_UnreadSelectPair[2] = {0, 0};
+static s32 f_UnreadSelectPair[2] UNUSED = {0, 0};
 /* The angle, in radians, of each corner's color cycle */
 static f32 f_GridCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
 /* Read by no routine */
-static s32 f_UnreadSelectQuad[4] = {0, 0, 0, 0};
+static s32 f_UnreadSelectQuad[4] UNUSED = {0, 0, 0, 0};
 
 /* The camera and placements that DrawCharacterGridCursor draws with */
 static Mtx f_GridCursorProjection;
@@ -221,12 +221,12 @@ static Mtx f_GridCursorRotations[DRAW_BUFFER_COUNT];
 static Mtx f_GridCursorScales[DRAW_BUFFER_COUNT];
 
 /* Read by no routine */
-static u8 f_UnreadSelectPad[0x8];
+static u8 f_UnreadSelectPad[0x8] UNUSED;
 
 static void* f_CharacterBoard;
 
 /* Read by no routine */
-static u8 f_UnreadSelectGap[0x4];
+static u8 f_UnreadSelectGap[0x4] UNUSED;
 
 /*
  * Image buffers that LoadCharacterSelectBuffer keeps, as are f_CharacterBoard
@@ -241,7 +241,7 @@ static void* f_UnreadColorBars;
 static void* f_CurveMeterCells;
 
 /* Read by no routine */
-static u8 f_UnreadSelectBlock[0x208];
+static u8 f_UnreadSelectBlock[0x208] UNUSED;
 
 /* Not static: the original left these to the linker's common block */
 s32 f_PreviousStickX;

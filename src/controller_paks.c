@@ -14,7 +14,7 @@ Boolean g_HasBroughtOverCharacter = FALSE;
  * Boy Pak transfer module */
 static Boolean f_IsBootTransmitPending = TRUE;
 /* Read by no routine */
-static s32 D_800C42D8[2] = {0};
+static s32 D_800C42D8[2] UNUSED = {0};
 
 /* Defined in main_bss.c, at its address in the original */
 extern Boolean f_HasRumblePak[MAXCONTROLLERS];
