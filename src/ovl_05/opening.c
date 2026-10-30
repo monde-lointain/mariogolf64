@@ -3234,11 +3234,7 @@ void LoadOpeningBall(s32 ballIndex, s32 slot) {
  * the logo ball is out, every ball is instead projected to the screen and
  * drawn as texture rectangles. The logo ball rolls with its movement, with
  * the Mario image turning on it.
- *
- * Doesn't match: only the stack slots differ. Two pairs of spilled
- * display list pointers swap slots before the Mario image is drawn.
  */
-#ifdef NON_MATCHING
 void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
   Vec3 movement;
   Mat4 turn;
@@ -3391,6 +3387,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         }
 
         if (f_IsLogoBallSlot[slot]) {
+          Gfx* cycleTypeCommand;
+
           if (f_ShouldResetLogoBallRoll) {
             guMtxIdentF(f_LogoBallRoll);
             f_ShouldResetLogoBallRoll = 0;
@@ -3444,9 +3442,19 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               f_OpeningBallPositions[slot][1] - LOGO_BALL_MARIO_DROP,
               f_OpeningBallPositions[slot][2]);
           gDPPipeSync(gfx++);
-          gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-          gDPPipeSync(gfx++);
-          gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+          /*
+           * The original takes these two commands' slots in locals of their
+           * own, which orders the spilled pointers' stack slots
+           */
+          cycleTypeCommand = gfx++;
+          gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
+          {
+            Gfx* renderModeCommand;
+
+            gDPPipeSync(gfx++);
+            renderModeCommand = gfx++;
+            gDPSetRenderMode(renderModeCommand, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+          }
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           gDPPipeSync(gfx++);
           gDPSetAlphaDither(gfx++, G_AD_PATTERN);
@@ -3794,9 +3802,6 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
     *displayListHead = gfx;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningBalls);
-#endif
 
 /* A 64x64 CI8 image of yellow and green lines bursting outwards */
 #define ASSET_IMPACT_LINES_IMAGE 0x908
