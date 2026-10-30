@@ -3772,24 +3772,24 @@ void DrawRoundResults(Gfx** displayListHead) {
   }
 
   for (i = 0; i != g_GameState.playerCount; i++) {
-    AssetFile file;
-    s32 unused[4];
+    EncodedAsset asset;
 
     if (f_PortraitFrames[i] != NO_PORTRAIT_FRAME) {
       if (!(f_PortraitTimers[i] & PORTRAIT_FRAME_DRAWS_MASK)) {
         switch (f_PortraitAnimations[i]) {
           case PORTRAIT_ANIMATION_REST:
             OpenEncodedAsset(
-                g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &file);
-            ReadEncodedAsset(f_PlayerPortraitImages[i], &file);
+                g_CharacterImageAssets[(s8)g_Players[i].characterIndex],
+                &asset);
+            ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
             f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
             break;
           case PORTRAIT_ANIMATION_UNK1:
             OpenEncodedAsset(
                 g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
                     f_PortraitFrames[i],
-                &file);
-            ReadEncodedAsset(f_PlayerPortraitImages[i], &file);
+                &asset);
+            ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
             f_PortraitFrames[i]++;
             if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
               f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
@@ -3802,8 +3802,8 @@ void DrawRoundResults(Gfx** displayListHead) {
             OpenEncodedAsset(
                 g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
                     unk4Faces[f_PortraitFrames[i]],
-                &file);
-            ReadEncodedAsset(f_PlayerPortraitImages[i], &file);
+                &asset);
+            ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
             f_PortraitFrames[i]++;
             if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
               f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
