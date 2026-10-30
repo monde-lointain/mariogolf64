@@ -247,7 +247,11 @@ s32 GetAimCameraGround(s32 x, s32 z) {
   return height;
 }
 
-void func_8005F360(void) {
+/*
+ * Sets up PLAY_KIND_FLAGGED_ROUND's round on the first hole, with the mode and
+ * players that the GAME_FLAG_ROUND_KIND and GAME_FLAG_EXTRA_PLAYERS bits pick
+ */
+void SetUpFlaggedRound(void) {
   switch ((IsGameFlagSet(GAME_FLAG_ROUND_KIND_HIGH_BIT) * 2) +
       IsGameFlagSet(GAME_FLAG_ROUND_KIND_LOW_BIT)) {
     case 0:
@@ -289,7 +293,8 @@ void func_8005F360(void) {
   }
 }
 
-void func_8005F4AC(void) {
+/* Sets up PLAY_KIND_HOLE's one player on the first hole */
+void SetUpOneHole(void) {
   g_GameState.courseIndex = 0;
   g_GameState.playerCount = 1;
   g_GameState.holeIndex = 0;
@@ -393,9 +398,9 @@ void SetUpPlayers(void) {
 
 void InitPlay(PlayKind kind) {
   if (kind == PLAY_KIND_FLAGGED_ROUND) {
-    func_8005F360();
+    SetUpFlaggedRound();
   } else if (kind == PLAY_KIND_HOLE) {
-    func_8005F4AC();
+    SetUpOneHole();
   } else if (kind == PLAY_KIND_BEST_SHOT_REPLAY) {
     LoadBestShotReplay(&D_800FED40);
     g_GameState.unk14 = 0;
