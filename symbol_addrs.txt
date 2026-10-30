@@ -3415,6 +3415,7 @@ DrawPlaceLabel = 0x802149A8; // type:func segment:ovl_01
 LoadCharacterFaceStrip = 0x8021342C; // type:func segment:ovl_01
 LoadBestTimesFaces = 0x8021585C; // type:func segment:ovl_01
 DrawTableLines = 0x802169CC; // type:func segment:ovl_01
+DrawTablePopup = 0x80216C14; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01

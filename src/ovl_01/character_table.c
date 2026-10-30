@@ -122,7 +122,7 @@ void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
 void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y);
 void DrawTableLines(Gfx** displayListHead);
-void func_80216C14_ovl_01(Gfx** displayListHead);
+void DrawTablePopup(Gfx** displayListHead);
 void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top);
 
 static s32 D_80230190_ovl_01 = TABLE_POPUP_LEFT_X;
@@ -479,7 +479,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
     D_8023019C_ovl_01 = D_8023019C_ovl_01 == 0;
   }
 
-  func_80216C14_ovl_01(&gfx);
+  DrawTablePopup(&gfx);
   DrawTableCursor(&gfx,
       (memory->tableColumn * TABLE_CELL_WIDTH) + TABLE_CURSOR_X,
       (memory->tableRow * TABLE_CELL_HEIGHT) + TABLE_CURSOR_Y);
@@ -585,11 +585,14 @@ void DrawTableLines(Gfx** displayListHead) {
 }
 
 /*
+ * Draws the popup with the faces of the cursor cell's two characters and their
+ * wins against each other, first moving it to the opposite corner if it would
+ * cover the cursor.
  * Doesn't match: the row and column characters and their wins swap
  * registers among $s0-$s3, 25 diff lines.
  */
 #ifdef NON_MATCHING
-void func_80216C14_ovl_01(Gfx** displayListHead) {
+void DrawTablePopup(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
@@ -708,7 +711,7 @@ void func_80216C14_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_80216C14_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", DrawTablePopup);
 #endif
 
 void func_8021730C_ovl_01(void) {
