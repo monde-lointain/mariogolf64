@@ -39,5 +39,6 @@ void StartRoundStats(void);
 void RestartRoundStats(void);
 void RecordHoleStats(void);
 s32 RecordDrive(void);
+void RecordCourseRound(void);
 
 #endif

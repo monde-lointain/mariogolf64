@@ -9,6 +9,7 @@
 #include "asset.h"
 #include "camera.h"
 #include "character.h"
+#include "character_slot.h"
 #include "club.h"
 #include "controller.h"
 #include "debug_text.h"
@@ -1423,6 +1424,8 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawCharacterSelect);
 #endif
 
+s32 GetUnusedPalette(s32 choiceIndex);
+
 /* DrawGridFaces draws each grid cell's 32 by 32 face, its row and column 40
  * pixels apart */
 #define FACE_SIZE 32
@@ -1649,6 +1652,8 @@ void DrawCharacterBoard(Gfx** displayListHead) {
       TexelCoordinate(LABEL_SHOWN_WIDTH), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
+
+void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y);
 
 /* How DrawPlayerTags places the tags. Nothing passes PLAYER_TAG_LINED_UP. */
 #define PLAYER_TAG_LINED_UP 0

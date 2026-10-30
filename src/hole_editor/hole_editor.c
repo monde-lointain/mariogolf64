@@ -20,6 +20,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "play.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"

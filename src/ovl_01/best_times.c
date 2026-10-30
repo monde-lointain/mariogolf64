@@ -61,12 +61,8 @@
 #define TIME_SEPARATOR_SPACING 6
 
 s32 GetOpenCourseCount(void);
-void DrawCourseBanner(
-    Gfx** displayListHead, u8 useCourseNames, s32 courseIndex);
 void DrawNarrowTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
-    s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
 void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place);

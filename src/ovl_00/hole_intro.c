@@ -5,6 +5,8 @@
  */
 #include "common.h"
 
+#include "hole_intro.h"
+
 #include "camera.h"
 #include "course.h"
 #include "current_shot.h"

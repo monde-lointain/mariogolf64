@@ -16,6 +16,7 @@
 #include "course.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
+#include "curve.h"
 #include "debug_text.h"
 #include "effects.h"
 #include "fireworks.h"

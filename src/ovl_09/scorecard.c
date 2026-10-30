@@ -30,6 +30,7 @@
 #include "sound.h"
 #include "text.h"
 #include "tournament.h"
+#include "transfer_pak.h"
 #include "variables.h"
 
 /*

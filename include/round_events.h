@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "save.h"
+#include "text.h"
 
 /* ShowWindFlyGuy's argument that hides the Fly Guy */
 #define FLY_GUY_HIDDEN (-1)
@@ -84,5 +85,6 @@ s32 GetContactStyle(Player* player);
 void LoadContactImages(Player* player);
 Boolean IsContactEffectShown(void);
 void StartContactEffect(s32 effect);
+void ShowFlipMessage(MessageId messageId);
 
 #endif

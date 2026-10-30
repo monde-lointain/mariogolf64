@@ -106,5 +106,6 @@ void DrawPrompt(Gfx** displayListHead);
 void ShowHalfTurn(void);
 void HideHalfTurn(void);
 void DrawHalfTurn(Gfx** displayListHead);
+Boolean IsHalfTurnDismissed(ControllerState* controller);
 
 #endif

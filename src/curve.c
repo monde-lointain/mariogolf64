@@ -4,6 +4,8 @@
  */
 #include "common.h"
 
+#include "curve.h"
+
 /* The splines have this many segments, between one more knots */
 #define SPLINE_SEGMENT_COUNT 10
 

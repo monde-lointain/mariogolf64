@@ -12,5 +12,6 @@ void StartFastBallAfterimage(void);
 void ResetBallRotation(void);
 void ResetGolfBalls(void);
 Boolean IsAnyBallInCup(void);
+void UpdateGolfBalls(void);
 
 #endif

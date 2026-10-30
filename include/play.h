@@ -112,5 +112,14 @@ extern s8 g_IsHudTurnAwayRequested;
 #define MAX_GROUND_NOISE_INTENSITY 0xFF
 
 void FillGroundNoise(s32 range, s32 base);
+void CopyDoublePair(f64* from, f64* to);
+s32 GetGaugeFramePower(s32 value);
+void LoadBestShotReplayInputs(s32 index);
+void LoadRingShotReplayInputs(s32 index);
+void MarkNearbyGroundTiles(u32 x, u32 z);
+void QuitPlayToTitle(void);
+void RebuildGroundTextureCoordinates(void);
+void ResetShotSetup(void);
+void PlacePlayersOnTee(void);
 
 #endif

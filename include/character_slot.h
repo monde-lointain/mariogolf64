@@ -363,5 +363,6 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading);
 void DrawCharacter(u32 slotIndex);
 void DrawCharacterAndShadow(
     CameraMatrices* matrices, s32 cameraIndex, s32 slotIndex);
+void SetCharacterHilite(CameraMatrices* matrices UNUSED);
 
 #endif

@@ -25,6 +25,7 @@
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
+#include "scene_colors.h"
 #include "screen.h"
 #include "sound.h"
 #include "variables.h"

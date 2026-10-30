@@ -130,8 +130,6 @@ s16 GetChosenReplaySlot(void);
 s32 GetOpenRingShotCourseCount(void);
 void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
-    s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
 void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
 /* DrawCharacterFace takes a u8 drawMode, but this file calls it without
@@ -1337,6 +1335,8 @@ void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind) {
       break;
   }
 }
+
+s32 ContinueSavedGame(void);
 
 /* The saved-games screen's text slots */
 #define SAVED_GAME_TEXT_SLOT_COUNT 4

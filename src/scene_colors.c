@@ -4,6 +4,8 @@
  */
 #include "common.h"
 
+#include "scene_colors.h"
+
 #include "functions.h"
 #include "game.h"
 #include "hole_display.h"

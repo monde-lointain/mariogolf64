@@ -12,6 +12,7 @@
 #include "controller.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
+#include "curve.h"
 #include "game.h"
 #include "game_flags.h"
 #include "heap.h"

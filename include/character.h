@@ -112,4 +112,10 @@ extern s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];
 extern AssetId g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
 extern AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
 
+void PlaceCharacterForShot(u32 slotIndex);
+s32 ReuseLastCharacterMatrices(u32 slotIndex);
+void SetCharacterSlotAlpha(u32 slotIndex, s32 value);
+void SetCharacterUnk188(u32 slotIndex, s32 value);
+void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 value);
+s32 SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame);
 #endif

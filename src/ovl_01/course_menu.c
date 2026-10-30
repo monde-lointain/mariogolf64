@@ -407,6 +407,14 @@ void UpdateCourseStats(void) {
   }
 }
 
+void DrawCourseTrophies(Gfx** displayListHead);
+
+void DrawStatsBadgeCount(Gfx** displayListHead);
+
+void DrawStatsPanel(Gfx** displayListHead);
+
+void DrawStatsScrollArrows(Gfx** displayListHead);
+
 /* DrawCourseStats turns a totals image on the wheel of menu.h after the open
  * courses' images */
 #define COURSE_TOTALS_IMAGE COURSE_COUNT

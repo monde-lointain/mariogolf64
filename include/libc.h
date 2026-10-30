@@ -12,6 +12,8 @@ s32 strcmp(const char* left, const char* right);
 s32 rand(void);
 void srand(u32 seed);
 double fabs(double value);
+/* Built into GCC, which compiles it to an abs.s instruction */
+float fabsf(float value);
 double atan(double value);
 double atan2(double y, double x);
 double sin(double angle);

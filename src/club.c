@@ -96,13 +96,6 @@ typedef struct ClubSetStats {
                                                 the next set's stats */
 } ClubSetStats; /* The sets' stats are 0x8C bytes apart */
 
-/* A selection for StepToClubChoice to move to */
-typedef struct ClubChoice {
-  /* 0x00 */ u8 unk0[0xC];
-  /* 0x0C */ ShotMode shotMode;
-  /* 0x10 */ s32 clubSlot;
-} ClubChoice;
-
 /* GetPuttPower's putter powers, by shot mode and fraction of its reach */
 static s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT] = {
     {966, 1914, 2742, 3656, 4520, 5457, 6288, 7224, 8056, 8992, 9823, 10758,

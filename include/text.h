@@ -174,5 +174,7 @@ s32 GetDigitGlyphTop(char code);
 void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text);
 void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
     s32 envColor, s32 primColor, TextFlags flags);
+s32 PlaceMessageGlyphGroup(
+    s32 group, s32 fontSize, s32 x, s32 y, MessageId messageId);
 
 #endif

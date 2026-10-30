@@ -1169,6 +1169,8 @@ void ResetCodeEntry(void) {
   D_80230F7C_ovl_01 = 0;
 }
 
+void UpdateClubWindow(void);
+
 /*
  * Doesn't match: when the cursor moves, the original reads the other
  * coordinate before it stores the new one, and adds it to the key's

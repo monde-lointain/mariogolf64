@@ -71,6 +71,16 @@ void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing);
 s32 UpdatePauseMenu(ControllerState* controller);
 void OpenChoiceBox(s32 choiceBoxIndex);
 s32 UpdateChoiceBox(ControllerState* controller);
+void CloseSaveMenu(void);
+void HideRoundHud(void);
+void LeaveGameSaveMenu(void);
+void OpenControlsScreen(void);
+void OpenSaveMenu(s32 kind);
+void ResumeRound(void);
+void SaveGameToSlot(void);
+void SaveReplayToSlot(void);
+void UpdateControlsScreen(ControllerState* controller);
+void UpdateGameSaveMenu(ControllerState* controller);
 
 /* The channels of the pause and Ring Shot retry sounds */
 #define PAUSE_SOUND_CHANNEL 2

@@ -88,6 +88,10 @@ extern char g_MenuCharacterNames[CHARACTER_COUNT]
 
 s32 GetOpenCourseCount(void);
 void CheckControllersAndSetPans(void);
+void DrawCourseBanner(
+    Gfx** displayListHead, u8 useCourseNames, s32 courseIndex);
+void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
+    s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
 s32 UpdateCharacterSelect(
     s32 firstPlayerIndex, s32 playerCount, Boolean canChooseMarked);
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers);

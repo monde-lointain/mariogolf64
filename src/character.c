@@ -10,6 +10,7 @@
 #include "camera.h"
 #include "character_slot.h"
 #include "club.h"
+#include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "functions.h"

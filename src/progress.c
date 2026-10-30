@@ -4,6 +4,8 @@
  */
 #include "common.h"
 
+#include "progress.h"
+
 #include "course.h"
 #include "round_stats.h"
 #include "save.h"

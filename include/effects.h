@@ -71,5 +71,7 @@ void FreeEffectImages(void);
 void ClearEffects(void);
 void StartWeather(s32 weather);
 void EndWeather(void);
+void DrawBirdieBadgeCount(Gfx** displayListHead);
+void SpawnRisingClumps(CoursePoint unusedPoint UNUSED);
 
 #endif

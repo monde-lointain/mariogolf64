@@ -43,5 +43,6 @@ void StopLoaderThread(void);
  * decompressed size */
 s32 LoadLzData(u32 romAddress, void* destination, u32 size);
 s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size);
+void ChooseConditionsAndInitHole(void);
 
 #endif
