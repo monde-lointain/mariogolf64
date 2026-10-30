@@ -69,7 +69,7 @@
 #define STATS_ONE_DIGIT_X 144
 #define STATS_UNIT_X 178
 #define STATS_UNIT_OFFSET_Y 4
-/* The 16x16 CI4 glyphs of ASSET_LARGE_DIGITS in D_8023A82C; two of them spell
+/* The 16x16 CI4 glyphs of ASSET_LARGE_DIGITS in f_MenuGlyphs; two of them spell
  * "OFF" */
 #define MENU_GLYPH_SIZE 16
 #define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
@@ -110,7 +110,7 @@
 #define SIDE_ARROW_FIRST_IMAGE MENU_ARROW_RIGHT
 #define SIDE_ARROW_BLINK_FRAME_COUNT 4
 
-/* The birdie badge icon of D_8023A810 and the count beside it */
+/* The birdie badge icon of f_CourseStatsBadge and the count beside it */
 #define BADGE_ICON_X 222
 #define BADGE_ICON_Y 144
 #define BADGE_COUNT_X 250
