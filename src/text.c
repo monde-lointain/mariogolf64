@@ -1850,7 +1850,7 @@ void PlaceGlyphGroup(
             if (flags & TEXT_FLAG_FIXED_WIDTH) {
               advance += FONT_SIZE_LARGE;
             } else {
-              advance += f_LargeFontWidths[text[placedCount]];
+              advance += f_LargeFontWidths[(u8)text[placedCount]];
             }
           } else {
             advance += fontSize;

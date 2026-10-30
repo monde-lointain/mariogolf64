@@ -171,7 +171,8 @@ s32 func_80206680_ovl_05(u32 slotIndex, s32 character) {
 /*
  * The opening's copies of the ball simulation's routines keep their names and
  * are static, so they don't clash with the originals. GCC 2.7 only warns when
- * a static definition follows the headers' prototypes.
+ * a static definition follows the headers' prototypes. The INCLUDE_ASM
+ * routines call them by these names, so they can't be renamed yet.
  */
 
 /* The opening's copy of GetSurfaceInfo, which reads its own surface table */

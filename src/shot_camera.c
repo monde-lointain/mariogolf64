@@ -1865,7 +1865,6 @@ void PlaceAimCamera(void);
 #define BESIDE_GOLFER_LOOK_AT_RISE 12288.0f
 #define BESIDE_GOLFER_FLIGHT_FIELD_OF_VIEW 80.0f
 #define MAX_EYE_DEPTH_BELOW_GROUND 0x21C0000
-#define MINI_GOLF_GROUND_SIZE 1048576.0f
 
 /*
  * Places the flight camera's eye and look-at point for f_FlightCameraKind at a
