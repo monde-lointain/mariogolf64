@@ -391,7 +391,7 @@ void LoadBestShotReplay(PlayRecord* record);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
 s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber);
 void ApplyBetPreset(s32 requestedPreset);
-void func_80228B60_ovl_01(void);
+void ResetCodeEntry(void);
 void DrawMenuScenery(Gfx** displayListHead);
 void DrawNarrowMenuBoard(Gfx** displayListHead);
 void DrawLargeMenuBanner(Gfx** displayListHead);
@@ -3045,7 +3045,7 @@ void UpdateMainMenu(void) {
           break;
         case MAIN_CHOICE_CLUB_TOURNAMENT:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-          func_80228B60_ovl_01();
+          ResetCodeEntry();
           g_MenuScreen = MENU_SCREEN_CLUB_TOURNAMENT;
           break;
         case MAIN_CHOICE_HELP:

@@ -1130,7 +1130,11 @@ void LoadCodeEntryBuffer(void* buffer, s32 bufferKind) {
   }
 }
 
-void func_80228B60_ovl_01(void) {
+/*
+ * Empties the entered code and puts the keyboard, the hand and the prompt back
+ * to their start
+ */
+void ResetCodeEntry(void) {
   MenuMemory* memory = GetMenuMemory();
   s32 charIndex;
 
@@ -1179,7 +1183,7 @@ void UpdateClubTournament(void) {
     if (g_MenuRepeatButtons & A_BUTTON) {
       D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
       D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
-      func_80228B60_ovl_01();
+      ResetCodeEntry();
     } else if (g_MenuRepeatButtons & B_BUTTON) {
       D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
       D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
@@ -1430,7 +1434,7 @@ void func_80229278_ovl_01(void) {
       }
     } else {
       PlaySound(SOUND_READY, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      func_80228B60_ovl_01();
+      ResetCodeEntry();
       CloseMenuWindow();
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
