@@ -1413,15 +1413,16 @@ void GetReactionSpot(CoursePoint point) {
  * Stands a character on the ground SPOT_PLACE_DISTANCE from the reaction
  * spot, a quarter turn from the shot's aim, facing back along the aim. Its
  * pitch is refined twice so the slope matches the ground there.
+ *
+ * Doesn't match: the original loads the shot's heading unsigned and
+ * sign-extends it, and its saved registers and float temporaries differ.
  */
 #ifdef NON_MATCHING
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   f32 ahead[AXIS_COUNT];
   CoursePoint spot;
   u8 unusedBuffer[0x80] UNUSED; /* Unused; it is there to match */
-  Radians heading =
-      ((g_CurrentShot.heading + QUARTER_BINARY_TURN) & BINARY_ANGLE_MASK) *
-      BINARY_ANGLE_TO_RADIANS;
+  Radians heading;
   Radians pitch;
   f32 distance;
   s32 i;
@@ -1432,6 +1433,8 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   spot[AXIS_X] = f_ReactionSpot[AXIS_X];
   spot[AXIS_Y] = f_ReactionSpot[AXIS_Y];
   spot[AXIS_Z] = f_ReactionSpot[AXIS_Z];
+  heading = (BinaryAngle)(g_CurrentShot.heading + QUARTER_BINARY_TURN) *
+      BINARY_ANGLE_TO_RADIANS;
   ahead[AXIS_X] = (cosf(heading) * radius) + spot[AXIS_X];
   ahead[AXIS_Z] = (sinf(heading) * radius) + spot[AXIS_Z];
   ahead[AXIS_Y] = GetGroundHeight(ahead[AXIS_X], ahead[AXIS_Z]);
