@@ -28,6 +28,7 @@
 #include "aud_sched.h"
 #include "aud_dma.h"
 #include "aud_samples.h"
+#include "PRinternal/macros.h"
 
 #ifdef SUPPORT_FXCHANGE
 #  include "player_fx.h"
@@ -142,7 +143,7 @@ void   __MusIntAudManInit(musConfig *config, int vsyncs_per_second, int fx_type)
   NONE
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
-static void __MusIntThreadProcess(void *ignored)
+static void __MusIntThreadProcess(void *ignored UNUSED)
 {
    static audio_task_t *last_task=NULL;
    static u64 silent_output[2] = { 0 };

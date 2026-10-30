@@ -32,7 +32,7 @@
 /* Fstop - stop data processing   
  * Format: <cmd>
  */
-static unsigned char *Fstop(channel_t *cp, unsigned char *ptr)
+static unsigned char *Fstop(channel_t *cp, unsigned char *ptr UNUSED)
 {
   cp->pvolume = NULL;
   cp->ppitchbend = NULL;
@@ -474,7 +474,7 @@ static unsigned char *Fpan(channel_t *cp, unsigned char *ptr)
 /* Fstereo - OUTDATED
  * Format: <cmd> <ignored> <ignored>
  */
-static unsigned char *Fstereo(channel_t *cp, unsigned char *ptr)
+static unsigned char *Fstereo(channel_t *cp UNUSED, unsigned char *ptr)
 {
   return (ptr+2);
 }
@@ -512,7 +512,7 @@ static unsigned char *Fdrumsoff(channel_t *cp, unsigned char *ptr)
 /* Fprint - display debugging info (DEBUG MODE ONLY!!!)
  * Format: <cmd> <data to print>
  */
-static unsigned char *Fprint(channel_t *cp, unsigned char *ptr)
+static unsigned char *Fprint(channel_t *cp UNUSED, unsigned char *ptr)
 {
 #ifdef _AUDIODEBUG
   osSyncPrintf("PLAYER_COMMANDS.C: Fprint() -  %d (channel frame=%d)\n", *ptr++,  cp->channel_frame);
@@ -660,7 +660,7 @@ static unsigned char *Fsweep(channel_t *cp, unsigned char *ptr)
 
 /* Command : Change FX type
    Format  : Cchangefx, fxtype */
-static unsigned char *Fchangefx(channel_t *cp, unsigned char *ptr)
+static unsigned char *Fchangefx(channel_t *cp UNUSED, unsigned char *ptr)
 {
   int fxtype;
 

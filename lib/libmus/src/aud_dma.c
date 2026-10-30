@@ -25,6 +25,7 @@
 /* include other header files */
 #include "libmus.h"
 #include "lib_memory.h"
+#include "PRinternal/macros.h"
 
 /* include current header file */
 #include "aud_dma.h"
@@ -179,7 +180,7 @@ void __MusIntDmaProcess(void)
   Address of audio library DMA processing function
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
-static ALDMAproc __CallBackDmaNew(void *ignored)
+static ALDMAproc __CallBackDmaNew(void *ignored UNUSED)
 {
 	return (__CallBackDmaProcess);
 }    
@@ -201,7 +202,7 @@ static ALDMAproc __CallBackDmaNew(void *ignored)
   RAM address of sample
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
-static s32 __CallBackDmaProcess(s32 addr, s32 len, void *ignored)
+static s32 __CallBackDmaProcess(s32 addr, s32 len, void *ignored UNUSED)
 {
 	dma_list_t *buffer;
 	unsigned char *ram_addr;;

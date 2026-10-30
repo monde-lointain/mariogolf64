@@ -875,12 +875,12 @@ void *MusPtrBankGetCurrent(void)
 void *MusHandleGetPtrBank(musHandle handle)
 {
   channel_t *cp;
-  int i, count;
+  int i;
 
   if (!handle)
     return (NULL);
 
-  for(i=0, cp=mus_channels, count=0; i<max_channels; i++, cp++)
+  for(i=0, cp=mus_channels; i<max_channels; i++, cp++)
     if (cp->handle==handle)
       return (cp->sample_bank);
   return (NULL);

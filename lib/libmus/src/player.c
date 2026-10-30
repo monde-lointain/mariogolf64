@@ -28,6 +28,7 @@
 #include "aud_sched.h"
 #include "aud_thread.h"
 #include "aud_dma.h"
+#include "PRinternal/macros.h"
 
 /* include current header files */
 #include "player.h"
@@ -165,7 +166,7 @@ unsigned long MusGetFrameCount(void)
   return (mus_frame_count);
 }
 
-static ALMicroTime __MusIntMain(void *node)
+static ALMicroTime __MusIntMain(void *node UNUSED)
 {
   int	x;
   channel_t *cp;
@@ -1236,7 +1237,7 @@ static void __MusIntInitialiseChannel(channel_t *cp)
 
   /* zero out channel */
   work_ptr = (unsigned char *)cp;
-  for (i=0; i<sizeof(channel_t); i++)
+  for (i=0; (unsigned int)i<sizeof(channel_t); i++)
     *work_ptr++ = 0;
 
   /* set none zero values */
@@ -1417,6 +1418,13 @@ static unsigned long __MusIntFindChannelAndStart(fx_header_t *header, int number
    int i, current_priority;
    channel_t *cp, *current_cp;
 
+#ifdef MODERN_CC
+   /*
+    * The loop sets it before the priority test lets it be read, which modern
+    * GCC can't tell. Setting it changes the code that KMC GCC builds.
+    */
+   current_cp = NULL;
+#endif
 	/* get default priority if required */
    if (priority==-1)
       priority = header->effects[number].priority;
