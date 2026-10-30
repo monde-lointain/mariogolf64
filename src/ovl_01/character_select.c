@@ -135,7 +135,7 @@ typedef struct TagOffset {
 
 void DrawMenuScenery(Gfx** displayListHead);
 void DrawMenuBanner(Gfx** displayListHead);
-void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
+void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer);
 void func_8020C3B8_ovl_01(Gfx** displayListHead);
 void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode);
 /* The original passes these a second argument that they ignore */
@@ -1318,7 +1318,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   DrawMenuScenery(&gfx);
   DrawMenuBanner(&gfx);
   func_8020C3B8_ovl_01(&gfx);
-  func_8020BA08_ovl_01(&gfx, (u8)isSinglePlayer);
+  DrawGridFaces(&gfx, (u8)isSinglePlayer);
   if ((u8)isSinglePlayer == TRUE) {
     func_8020C6D8_ovl_01(&gfx, 2);
   } else {
@@ -1405,7 +1405,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawCharacterSelect);
 #endif
 
-/* func_8020BA08 draws each grid cell's 32 by 32 face, its row and column 40
+/* DrawGridFaces draws each grid cell's 32 by 32 face, its row and column 40
  * pixels apart */
 #define FACE_SIZE 32
 #define FACE_SPACING 40
@@ -1418,12 +1418,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawCharacterSelect);
 #define FACE_FRAME_DURATION 4
 
 /*
+ * Draws each grid cell's face, with characters still to be won as dark shapes
+ * in single player, and every few draws steps the current player's face to its
+ * next frame.
  * Doesn't match: the original keeps row in a temporary register and spills the
  * menu memory pointer, where GCC keeps the pointer in a saved register and
  * spills row instead (148 diff lines, 38 opcodes).
  */
 #ifdef NON_MATCHING
-void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
+void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
   EncodedAsset asset;
   AssetFile file;
   Gfx* gfx = *displayListHead;
@@ -1548,7 +1551,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020BA08_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawGridFaces);
 #endif
 
 /* The first palette that no earlier player with the same character uses, so

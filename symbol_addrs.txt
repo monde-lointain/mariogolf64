@@ -3447,6 +3447,7 @@ MoveGridCursorDiagonal = 0x80209894; // type:func segment:ovl_01
 GetStickDiagonal = 0x80209BE0; // type:func segment:ovl_01
 LoadCharacterFaces = 0x8020B438; // type:func segment:ovl_01
 PlaceRivalCursor = 0x8020B3CC; // type:func segment:ovl_01
+DrawGridFaces = 0x8020BA08; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01
