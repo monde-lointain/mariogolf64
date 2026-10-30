@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """List the references that hold only while the ROM keeps its original layout.
 
-    check_shiftable.py LD ELF LD_SCRIPT SYMBOL_SCRIPT... [-- LD_FLAG...]
+    check_shiftable.py LD CONFIG LD_SCRIPT SYMBOL_SCRIPT... [-- LD_FLAG...]
 
 The build links with scripts that give symbols fixed addresses, such as
 the ones splat writes for every address the asm refers to without a name.
@@ -10,23 +10,22 @@ and data before it keep their sizes: those symbols are pins, which a ROM
 whose code can move must do without. Addresses outside every segment, such
 as the boot segment's variables in low memory, stay where they are.
 
-The check links ELF's objects again with LD, through LD_SCRIPT and only the
-SYMBOL_SCRIPTs' fixed addresses. It prints each pinned symbol that is still
-referenced, with the routines that refer to it, and fails while any are.
-ELF, the build's own link, gives the segments' bounds.
+The check links the build's objects again with LD, through LD_SCRIPT and
+only the SYMBOL_SCRIPTs' fixed addresses. It prints each pinned symbol that
+is still referenced, with the routines that refer to it, and fails while
+any are. CONFIG, splat's configuration, gives the original's segments.
 """
 
+import itertools
 import re
 import subprocess
 import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
+from typing import cast
 
-from elftools.elf.elffile import ELFFile
-from elftools.elf.sections import SymbolTableSection
-
-from fncompare import read_entry_int
+import yaml
 
 # An assignment in a linker script: NAME = EXPRESSION;
 ASSIGNMENT = re.compile(r"^\s*([A-Za-z_.$][\w.$]*)\s*=\s*([^;]+);", re.MULTILINE)
@@ -49,30 +48,42 @@ def read_assignments(path: Path) -> dict[str, str]:
     }
 
 
-def read_segment_ranges(elf_path: Path) -> list[tuple[int, int]]:
-    """Return the RAM and ROM ranges of the segments that ELF_PATH places.
+def read_int(entry: dict[object, object], key: str, default: int | None = None) -> int:
+    """Return ENTRY's integer at KEY, or DEFAULT where it has none."""
+    value = entry.get(key, default)
+    if not isinstance(value, int):
+        sys.exit(f"expected an integer {key} in {entry}")
+    return value
 
-    splat's linker script defines NAME_VRAM and NAME_VRAM_END, and
-    NAME_ROM_START and NAME_ROM_END, for every segment.
+
+def read_segment_ranges(config_path: Path) -> list[tuple[int, int]]:
+    """Return the ROM and RAM ranges of the original's segments.
+
+    CONFIG_PATH is splat's configuration. A segment's ROM ends where the next
+    begins, and its RAM, where it has an address there, holds its ROM and
+    then its bss.
     """
-    with elf_path.open("rb") as file:
-        symbols = ELFFile(file).get_section_by_name(".symtab")
-        if not isinstance(symbols, SymbolTableSection):
-            sys.exit(f"{elf_path} has no symbol table")
-        values = {
-            symbol.name: read_entry_int(symbol.entry, "st_value")
-            for symbol in symbols.iter_symbols()
-        }
+    config = cast("object", yaml.safe_load(config_path.read_text()))
+    segments = (
+        cast("dict[object, object]", config).get("segments")
+        if isinstance(config, dict)
+        else None
+    )
+    if not isinstance(segments, list):
+        sys.exit(f"{config_path} lists no segments")
+    entries: list[dict[object, object]] = []
+    for segment in cast("list[object]", segments):
+        if isinstance(segment, dict):
+            entries.append(cast("dict[object, object]", segment))
+        elif isinstance(segment, list):
+            entries.append({"start": cast("list[object]", segment)[0]})
     ranges: list[tuple[int, int]] = []
-    for name, end in values.items():
-        for start_suffix, end_suffix in (
-            ("_VRAM", "_VRAM_END"),
-            ("_ROM_START", "_ROM_END"),
-        ):
-            if name.endswith(end_suffix):
-                start = values.get(name.removesuffix(end_suffix) + start_suffix)
-                if start is not None and start < end:
-                    ranges.append((start, end))
+    for entry, following in itertools.pairwise(entries):
+        start, end = read_int(entry, "start"), read_int(following, "start")
+        ranges.append((start, end))
+        if "vram" in entry:
+            vram = read_int(entry, "vram")
+            ranges.append((vram, vram + end - start + read_int(entry, "bss_size", 0)))
     return ranges
 
 
@@ -125,12 +136,12 @@ def main(args: list[str]) -> int:
         args, ld_flags = args[:split], args[split + 1 :]
     else:
         ld_flags = []
-    if len(args) < 3:  # noqa: PLR2004 - LD, ELF and the linker script
+    if len(args) < 3:  # noqa: PLR2004 - LD, CONFIG and the linker script
         print(__doc__, file=sys.stderr)
         return USAGE_EXIT
-    ld, elf, ld_script, *symbol_scripts = args
+    ld, config, ld_script, *symbol_scripts = args
 
-    segment_ranges = read_segment_ranges(Path(elf))
+    segment_ranges = read_segment_ranges(Path(config))
     fixed: dict[str, str] = {}
     pins: dict[str, str] = {}
     for script in symbol_scripts:

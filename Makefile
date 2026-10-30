@@ -193,7 +193,7 @@ pycheck:
 # original addresses. With NON_MATCHING=1, it checks the C drafts in place of
 # the asm, which names far fewer of the addresses.
 check-shiftable: $(ELF)
-	$(PYTHON) tools/check_shiftable.py $(LD) $< $(LD_SCRIPT) $(SYMBOL_SCRIPTS) -- $(LAYOUT_FLAGS)
+	$(PYTHON) tools/check_shiftable.py $(LD) $(SPLAT_YAML) $(LD_SCRIPT) $(SYMBOL_SCRIPTS) -- $(LAYOUT_FLAGS)
 
 CLANG_TIDY ?= run-clang-tidy-23
 # libkmc is KMC's C library, which keeps the C library's names
