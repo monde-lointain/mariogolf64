@@ -492,9 +492,6 @@ extern BetSet g_BetSet;
 #define MENU_PHASE_CHOOSING 5
 #define MENU_PHASE_CANCELED 6
 #define MENU_PHASE_CONFIRMED 7
-/* Values of g_BetPagesWallSlide */
-#define MENU_UNK89_UNK3 3
-#define MENU_UNK89_UNK4 4
 /* The bet settings screen's phases in g_BetPagesPhase */
 #define BET_PHASE_OPENING 1
 #define BET_PHASE_CHOOSING 2

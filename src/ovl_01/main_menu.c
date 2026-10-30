@@ -453,7 +453,7 @@ static s8 f_ViewerModelKind = 0;
 /* How far the bet settings and handicap pages have slid in */
 static s32 f_BetSlideOffset = 0;
 u8 g_BetPagesPhase = 0;
-u8 g_BetPagesWallSlide = 0;
+u8 g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
 static s16 D_8022BE8A_ovl_01 = 0;
 /* Which of g_MenuTitleImages is shown; a new screen's title is read into the
  * other */
@@ -1851,7 +1851,7 @@ void UpdateMenuTitleScreen(void) {
 
   f_BetSlideOffset = 0;
   g_BetPagesPhase = 0;
-  g_BetPagesWallSlide = 0;
+  g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
   D_8023BFD0_ovl_01 = 0;
   D_802322F0_ovl_01 = 0;
   D_802322F4_ovl_01 = 0;
@@ -2211,7 +2211,7 @@ void UpdateModeSelect(void) {
         TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
     f_BetSlideOffset = 0;
     g_BetPagesPhase = 0;
-    g_BetPagesWallSlide = 0;
+    g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
     D_8023BFD0_ovl_01 = 0;
     D_802322F0_ovl_01 = 0;
     D_802322F4_ovl_01 = 0;
@@ -2549,11 +2549,11 @@ void UpdateCourseSelect(void) {
     PlaySong(SONG_CONTROLS, 0);
     g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
     g_BetPagesPhase = 1;
-    g_BetPagesWallSlide = 0;
+    g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
     return;
   }
 
-  if (g_BetPagesWallSlide != 0 || g_BetPagesPhase != 0) {
+  if (g_BetPagesWallSlide != STATS_SLIDE_CURRENT || g_BetPagesPhase != 0) {
     return;
   }
 
@@ -2664,7 +2664,7 @@ void UpdateCourseSelect(void) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
         PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_BetPagesPhase = 1;
-        g_BetPagesWallSlide = 1;
+        g_BetPagesWallSlide = STATS_SLIDE_OUT_RIGHT;
       } else {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       }
@@ -2855,11 +2855,11 @@ void UpdateMiniGolfCourseSelect(void) {
     PlaySong(SONG_CONTROLS, 0);
     g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
     g_BetPagesPhase = 1;
-    g_BetPagesWallSlide = 0;
+    g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
     return;
   }
 
-  if (g_BetPagesWallSlide != 0 || g_BetPagesPhase != 0) {
+  if (g_BetPagesWallSlide != STATS_SLIDE_CURRENT || g_BetPagesPhase != 0) {
     return;
   }
 
@@ -2936,7 +2936,7 @@ void UpdateMiniGolfCourseSelect(void) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
         PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_BetPagesPhase = 1;
-        g_BetPagesWallSlide = 1;
+        g_BetPagesWallSlide = STATS_SLIDE_OUT_RIGHT;
       } else {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       }
@@ -6128,7 +6128,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     }
 
     switch (g_BetPagesWallSlide) {
-      case 0:
+      case STATS_SLIDE_CURRENT:
         break;
 
       default:
@@ -6138,19 +6138,19 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
         break;
 
-      case MENU_UNK89_UNK3:
+      case STATS_SLIDE_IN_FROM_RIGHT:
         if (SlideBrickWall(&gfx, STATS_SLIDE_IN_FROM_RIGHT) == 0) {
           g_BetPagesPhase = MENU_PHASE_START;
-          g_BetPagesWallSlide = 0;
+          g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
           StartLoadingChosenHole();
         }
 
         break;
 
-      case MENU_UNK89_UNK4:
+      case STATS_SLIDE_IN_FROM_LEFT:
         if (SlideBrickWall(&gfx, STATS_SLIDE_IN_FROM_LEFT) == 0) {
           g_BetPagesPhase = MENU_PHASE_START;
-          g_BetPagesWallSlide = 0;
+          g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
           StartLoadingChosenHole();
         }
 

@@ -642,7 +642,7 @@ void UpdateBetSettings(void) {
   if (g_BetPagesPhase == MENU_PHASE_START) {
     PlaySong(SONG_TITLE, 0);
     g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-    g_BetPagesWallSlide = MENU_UNK89_UNK3;
+    g_BetPagesWallSlide = STATS_SLIDE_IN_FROM_RIGHT;
   }
 
   if (g_BetPagesPhase != BET_PHASE_CHOOSING) {
@@ -1050,7 +1050,7 @@ s32 UpdateHandicaps(void) {
   if (g_BetPagesPhase == MENU_PHASE_START) {
     PlaySong(SONG_TITLE, 0);
     g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-    g_BetPagesWallSlide = MENU_UNK89_UNK4;
+    g_BetPagesWallSlide = STATS_SLIDE_IN_FROM_LEFT;
     FreeAllCharacterSlots();
   }
 
