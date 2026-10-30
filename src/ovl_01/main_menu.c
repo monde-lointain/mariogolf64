@@ -696,7 +696,8 @@ static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_AZALEA, CHARACTER_CHOICE_JOE};
 /* Read by no routine */
 static s32 D_8022F93C_ovl_01 = 0;
-static s32 D_8022F940_ovl_01[TITLE_LABEL_COUNT][2] = {{110, 86}, {40, 114},
+/* The top-left corner of each of the title screen's labels */
+static s32 f_TitleLabelCorners[TITLE_LABEL_COUNT][2] = {{110, 86}, {40, 114},
     {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
 static f32 D_8022F978_ovl_01 = 0.0f;
 /* Where each player's controller icon and label go, by the player count */
@@ -756,7 +757,8 @@ static s16 D_8022FBC4_ovl_01[6] = {0, 3, 4, 1, 5, 2};
  * and "1 round: 18 holes" */
 static char D_8022FBD0_ovl_01[4][20] = {
     "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
-static ImageCorner D_8022FC20_ovl_01[HOLES_BADGE_COUNT] = {
+/* The top-left corner of each holes badge */
+static ImageCorner f_HolesBadgeCorners[HOLES_BADGE_COUNT] = {
     {252, 134}, {230, 150}, {274, 150}, {252, 162}};
 /* Read by no routine */
 static ImageCorner D_8022FC30_ovl_01[6] = {
@@ -799,12 +801,15 @@ static char D_8022FD9C_ovl_01[4][20] = {
 /* The records' names */
 static const char* D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT] = {
     D_802316FC_ovl_01, D_802316EC_ovl_01};
-static s32 D_8022FDF4_ovl_01[MAIN_CHOICE_COUNT][2] = {
+/* The top-left corner of each of the main menu's labels */
+static s32 f_MainChoiceLabelCorners[MAIN_CHOICE_COUNT][2] = {
     {96, 84}, {96, 114}, {96, 144}, {96, 174}};
-/* The menu without Transmit skips the CODE ENTRY label */
-static s32 D_8022FE14_ovl_01[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT][2] = {
-    {96, 84}, {96, 124}, {96, 164}};
-static s32 D_8022FE2C_ovl_01[CLUBHOUSE_ROW_PLACE_COUNT][2] = {{76, 80},
+/* The top-left corner of each of the main menu's labels without Transmit, which
+ * skips the CODE ENTRY label */
+static s32 f_ShortMainChoiceLabelCorners[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT]
+                                        [2] = {{96, 84}, {96, 124}, {96, 164}};
+/* The top-left corner of each of the clubhouse's room labels */
+static s32 f_ClubhouseLabelCorners[CLUBHOUSE_ROW_PLACE_COUNT][2] = {{76, 80},
     {76, 102}, {76, 124}, {76, 146}, {76, 168}, {76, 190}, {76, 212},
     {76, 234}};
 /* Read by no routine */
@@ -4445,10 +4450,11 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(D_8022F940_ovl_01[labelIndex][0]),
-          QuarterPixels(D_8022F940_ovl_01[labelIndex][1]),
-          QuarterPixels(D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH),
-          QuarterPixels(D_8022F940_ovl_01[labelIndex][1] + TITLE_LABEL_HEIGHT),
+          QuarterPixels(f_TitleLabelCorners[labelIndex][0]),
+          QuarterPixels(f_TitleLabelCorners[labelIndex][1]),
+          QuarterPixels(f_TitleLabelCorners[labelIndex][0] + TITLE_LABEL_WIDTH),
+          QuarterPixels(
+              f_TitleLabelCorners[labelIndex][1] + TITLE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -4480,11 +4486,11 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
       }
 
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(D_8022F940_ovl_01[labelIndex][0] - (growth / 2)),
-          QuarterPixels(D_8022F940_ovl_01[labelIndex][1] - (growth / 2)),
-          QuarterPixels(D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH +
+          QuarterPixels(f_TitleLabelCorners[labelIndex][0] - (growth / 2)),
+          QuarterPixels(f_TitleLabelCorners[labelIndex][1] - (growth / 2)),
+          QuarterPixels(f_TitleLabelCorners[labelIndex][0] + TITLE_LABEL_WIDTH +
               (growth / 2)),
-          QuarterPixels(D_8022F940_ovl_01[labelIndex][1] +
+          QuarterPixels(f_TitleLabelCorners[labelIndex][1] +
               (TITLE_LABEL_HEIGHT + (growth / 2))),
           G_TX_RENDERTILE, 0, 0,
           (TITLE_LABEL_WIDTH << 10) / (growth + TITLE_LABEL_WIDTH),
@@ -5992,10 +5998,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
           gSPScisTextureRectangle(gfx++,
-              QuarterPixels(D_8022FC20_ovl_01[otherIndex].x),
-              QuarterPixels(D_8022FC20_ovl_01[otherIndex].y),
-              QuarterPixels(D_8022FC20_ovl_01[otherIndex].x + HOLES_BADGE_SIZE),
-              QuarterPixels(D_8022FC20_ovl_01[otherIndex].y + HOLES_BADGE_SIZE),
+              QuarterPixels(f_HolesBadgeCorners[otherIndex].x),
+              QuarterPixels(f_HolesBadgeCorners[otherIndex].y),
+              QuarterPixels(
+                  f_HolesBadgeCorners[otherIndex].x + HOLES_BADGE_SIZE),
+              QuarterPixels(
+                  f_HolesBadgeCorners[otherIndex].y + HOLES_BADGE_SIZE),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
           D_8022FD40_ovl_01 += BET_BADGE_COLOR_STEP;
@@ -6031,10 +6039,10 @@ void DrawCourseSelect(Gfx** displayListHead) {
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
-            QuarterPixels(D_8022FC20_ovl_01[otherIndex].x),
-            QuarterPixels(D_8022FC20_ovl_01[otherIndex].y),
-            QuarterPixels(D_8022FC20_ovl_01[otherIndex].x + HOLES_BADGE_SIZE),
-            QuarterPixels(D_8022FC20_ovl_01[otherIndex].y + HOLES_BADGE_SIZE),
+            QuarterPixels(f_HolesBadgeCorners[otherIndex].x),
+            QuarterPixels(f_HolesBadgeCorners[otherIndex].y),
+            QuarterPixels(f_HolesBadgeCorners[otherIndex].x + HOLES_BADGE_SIZE),
+            QuarterPixels(f_HolesBadgeCorners[otherIndex].y + HOLES_BADGE_SIZE),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
@@ -6463,12 +6471,12 @@ void DrawMainMenu(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][0]),
-          QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][1]),
-          QuarterPixels(
-              D_8022FDF4_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH),
-          QuarterPixels(
-              D_8022FDF4_ovl_01[choiceIndex][1] + MAIN_CHOICE_LABEL_HEIGHT),
+          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][0]),
+          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][1]),
+          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][0] +
+              MAIN_CHOICE_LABEL_WIDTH),
+          QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][1] +
+              MAIN_CHOICE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -6486,12 +6494,12 @@ void DrawMainMenu(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
       QuarterPixels(
-          D_8022FDF4_ovl_01[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
+          f_MainChoiceLabelCorners[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
       QuarterPixels(
-          D_8022FDF4_ovl_01[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][0] +
+          f_MainChoiceLabelCorners[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][0] +
           MAIN_CHOICE_LABEL_WIDTH + (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][1] +
+      QuarterPixels(f_MainChoiceLabelCorners[choiceIndex][1] +
           (MAIN_CHOICE_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
       (MAIN_CHOICE_LABEL_WIDTH << 10) /
@@ -6542,12 +6550,12 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(D_8022FE14_ovl_01[choiceIndex][0]),
-          QuarterPixels(D_8022FE14_ovl_01[choiceIndex][1]),
-          QuarterPixels(
-              D_8022FE14_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH),
-          QuarterPixels(
-              D_8022FE14_ovl_01[choiceIndex][1] + MAIN_CHOICE_LABEL_HEIGHT),
+          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][0]),
+          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][1]),
+          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][0] +
+              MAIN_CHOICE_LABEL_WIDTH),
+          QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][1] +
+              MAIN_CHOICE_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -6570,13 +6578,13 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      QuarterPixels(
-          D_8022FE14_ovl_01[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(
-          D_8022FE14_ovl_01[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(D_8022FE14_ovl_01[choiceIndex][0] +
+      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][0] -
+          (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][1] -
+          (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][0] +
           MAIN_CHOICE_LABEL_WIDTH + (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(D_8022FE14_ovl_01[choiceIndex][1] +
+      QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex][1] +
           (MAIN_CHOICE_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
       (MAIN_CHOICE_LABEL_WIDTH << 10) /
@@ -6628,10 +6636,12 @@ void DrawClubhouse(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0]),
-          QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1]),
-          QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH),
-          QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1] + ROOM_LABEL_HEIGHT),
+          QuarterPixels(f_ClubhouseLabelCorners[choiceIndex][0]),
+          QuarterPixels(f_ClubhouseLabelCorners[choiceIndex][1]),
+          QuarterPixels(
+              f_ClubhouseLabelCorners[choiceIndex][0] + ROOM_LABEL_WIDTH),
+          QuarterPixels(
+              f_ClubhouseLabelCorners[choiceIndex][1] + ROOM_LABEL_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -6649,12 +6659,12 @@ void DrawClubhouse(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
       QuarterPixels(
-          D_8022FE2C_ovl_01[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
+          f_ClubhouseLabelCorners[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
       QuarterPixels(
-          D_8022FE2C_ovl_01[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH +
+          f_ClubhouseLabelCorners[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(f_ClubhouseLabelCorners[choiceIndex][0] + ROOM_LABEL_WIDTH +
           (g_ChosenLabelGrowth / 2)),
-      QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1] +
+      QuarterPixels(f_ClubhouseLabelCorners[choiceIndex][1] +
           (ROOM_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
       (ROOM_LABEL_WIDTH << 10) / (g_ChosenLabelGrowth + ROOM_LABEL_WIDTH),
