@@ -159,8 +159,9 @@ static s16 f_StatsTrophyFrame = 0;
 static s16 f_ShownStatsTrophyBufferIndex = 0;
 /* Counts the trophy's draws since its frame last stepped */
 static s16 f_StatsTrophyFrameTimer = 0;
-static s32 D_802300A8_ovl_01 = 0;
-static s32 D_802300AC_ovl_01 = 0;
+/* The blink frame and timer of the arrows beside the course wheel */
+static s32 f_StatsArrowFrame = 0;
+static s32 f_StatsArrowTimer = 0;
 /* Read by no routine */
 static s32 D_802300B0_ovl_01 = 0;
 static const char* D_802300B4_ovl_01[STATS_COUNT] = {"Round", "Best Score",
@@ -282,8 +283,8 @@ void LoadCourseMenuBuffer(void* buffer, s16 bufferKind) {
       D_8023A830_ovl_01 = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
       ReadEncodedAsset(D_8023A830_ovl_01, &asset);
-      D_802300A8_ovl_01 = 0;
-      D_802300AC_ovl_01 = 0;
+      f_StatsArrowFrame = 0;
+      f_StatsArrowTimer = 0;
       break;
   }
 }
@@ -527,8 +528,8 @@ void DrawCourseStats(Gfx** displayListHead) {
 
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  DrawBlinkingSideArrows(&gfx, D_8023A830_ovl_01, &D_802300A8_ovl_01,
-      &D_802300AC_ovl_01, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
+  DrawBlinkingSideArrows(&gfx, D_8023A830_ovl_01, &f_StatsArrowFrame,
+      &f_StatsArrowTimer, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
   image = (memory->statsCourse == courseCount) ? COURSE_TOTALS_IMAGE
                                                : memory->statsCourse;
   DrawCourseBanner(&gfx, 0, image);
