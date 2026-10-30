@@ -28,8 +28,8 @@
 /* The keys' glyphs: 0 to 9, A to Z, a back arrow and OK, 16 by 16 each */
 #define ASSET_CODE_ENTRY_GLYPHS 0x942
 
-/* The intensity image of D_80230E70 that DrawUnusedWideCloud draws, in two
- * strips */
+/* The intensity image of f_WideCloudImage that DrawUnusedWideCloud draws, in
+ * two strips */
 #define TOURNAMENT_BANNER_WIDTH 256
 #define TOURNAMENT_BANNER_STRIP_HEIGHT 32
 #define TOURNAMENT_BANNER_STRIP_COUNT 2
@@ -179,13 +179,13 @@ extern s32 D_80105DCC;
 #define CLUB_CHOICE_YES 0
 #define CLUB_CHOICE_NO 1
 
-static void* D_80230E70_ovl_01 = NULL;
-static void* D_80230E74_ovl_01 = NULL;
-static void* D_80230E78_ovl_01 = NULL;
-static void* D_80230E7C_ovl_01 = NULL;
+static void* f_WideCloudImage = NULL;
+static void* f_YesNoButtons = NULL;
+static void* f_NintendoBadge = NULL;
+static void* f_ClubCourseIcon = NULL;
 /* The buffer that holds the image the window shows */
 static void* f_MenuWindowImage = NULL;
-static void* D_80230E84_ovl_01 = NULL;
+static void* f_MenuWindowPalette = NULL;
 /* A MENU_WINDOW_* value */
 static s32 f_MenuWindowState = MENU_WINDOW_OPENING;
 /* How far the window has opened across and down, from 0 to 1 */
@@ -403,24 +403,24 @@ void LoadTournamentBuffer(void* buffer, s16 bufferKind) {
   GetMenuMemory();
   switch (bufferKind) {
     case TOURNAMENT_BUFFER_WIDE_CLOUD:
-      D_80230E70_ovl_01 = buffer;
+      f_WideCloudImage = buffer;
       OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset);
-      ReadEncodedAsset(D_80230E70_ovl_01, &asset);
+      ReadEncodedAsset(f_WideCloudImage, &asset);
       break;
     case TOURNAMENT_BUFFER_YES_NO:
-      D_80230E74_ovl_01 = buffer;
+      f_YesNoButtons = buffer;
       OpenEncodedAsset(ASSET_YES_NO, &asset);
-      ReadEncodedAsset(D_80230E74_ovl_01, &asset);
+      ReadEncodedAsset(f_YesNoButtons, &asset);
       break;
     case TOURNAMENT_BUFFER_NINTENDO_BADGE:
-      D_80230E78_ovl_01 = buffer;
+      f_NintendoBadge = buffer;
       OpenEncodedAsset(ASSET_NINTENDO_BADGE, &asset);
-      ReadEncodedAsset(D_80230E78_ovl_01, &asset);
+      ReadEncodedAsset(f_NintendoBadge, &asset);
       break;
     case TOURNAMENT_BUFFER_ICON:
-      D_80230E7C_ovl_01 = buffer;
+      f_ClubCourseIcon = buffer;
       OpenEncodedAsset(g_TournamentIconAssets[0], &asset);
-      ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
+      ReadEncodedAsset(f_ClubCourseIcon, &asset);
       break;
     case TOURNAMENT_BUFFER_MENU_WINDOW:
       f_MenuWindowImage = buffer;
@@ -430,10 +430,10 @@ void LoadTournamentBuffer(void* buffer, s16 bufferKind) {
       ReadEncodedAsset(f_MenuWindowImage, &asset);
       break;
     case TOURNAMENT_BUFFER_ROW_FILE:
-      D_80230E84_ovl_01 = buffer;
+      f_MenuWindowPalette = buffer;
       OpenAssetFile(
           D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT - 1][0], &file);
-      ReadAssetFile(D_80230E84_ovl_01, (s16)GetAssetFileSize(&file), &file);
+      ReadAssetFile(f_MenuWindowPalette, (s16)GetAssetFileSize(&file), &file);
       break;
   }
 
@@ -457,7 +457,7 @@ void LoadClubCourseIcon(s32 imageIndex) {
   }
 
   OpenEncodedAsset(g_TournamentIconAssets[imageIndex], &asset);
-  ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
+  ReadEncodedAsset(f_ClubCourseIcon, &asset);
 }
 
 void LoadMenuWindowImage(s32 imageIndex) {
@@ -499,7 +499,7 @@ void LoadMenuWindowPalette(s32 row, s32 column) {
   }
 
   OpenAssetFile(D_80230EC4_ovl_01[row][column], &file);
-  ReadAssetFile(D_80230E84_ovl_01, (s16)GetAssetFileSize(&file), &file);
+  ReadAssetFile(f_MenuWindowPalette, (s16)GetAssetFileSize(&file), &file);
 }
 
 /*
@@ -648,7 +648,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   for (index = 0, windowTop = centerY - halfHeight;
       index != MENU_WINDOW_STRIP_COUNT; index++) {
     LoadNibbleTextureBlock(&gfx,
-        ImageBody(D_80230E70_ovl_01) +
+        ImageBody(f_WideCloudImage) +
             (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
         0, 0, 0, 0);
@@ -669,10 +669,10 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  LoadLargePalette(&gfx, ImageBody(D_80230E74_ovl_01));
+  LoadLargePalette(&gfx, ImageBody(f_YesNoButtons));
   for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
     LoadTextureBlock(&gfx,
-        LargeImageTexels(D_80230E74_ovl_01) +
+        LargeImageTexels(f_YesNoButtons) +
             (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
@@ -730,9 +730,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
 #endif
 
 /*
- * DrawClubWindow adds to that window the Nintendo badge of D_80230E78 near its
- * top, the course image of D_80230E7C at its lower left and the picture of
- * f_MenuWindowImage, colored by the palette in D_80230E84, at its lower right
+ * DrawClubWindow adds to that window the Nintendo badge of f_NintendoBadge near
+ * its top, the course image of f_ClubCourseIcon at its lower left and the
+ * picture of f_MenuWindowImage, colored by the palette in f_MenuWindowPalette,
+ * at its lower right
  */
 #define NINTENDO_BADGE_WIDTH 144
 #define NINTENDO_BADGE_STRIP_HEIGHT 10
@@ -913,7 +914,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   for (index = 0, windowTop = centerY - halfHeight;
       index != MENU_WINDOW_STRIP_COUNT; index++) {
     LoadNibbleTextureBlock(&gfx,
-        ImageBody(D_80230E70_ovl_01) +
+        ImageBody(f_WideCloudImage) +
             (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
         0, 0, 0, 0);
@@ -932,10 +933,10 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  LoadLargePalette(&gfx, ImageBody(D_80230E74_ovl_01));
+  LoadLargePalette(&gfx, ImageBody(f_YesNoButtons));
   for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
     LoadTextureBlock(&gfx,
-        LargeImageTexels(D_80230E74_ovl_01) +
+        LargeImageTexels(f_YesNoButtons) +
             (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
@@ -990,13 +991,13 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, ImageBody(D_80230E78_ovl_01));
+    LoadLargePalette(&gfx, ImageBody(f_NintendoBadge));
     badgeTop = (s32)(centerY - windowHalfHeight +
                    (s32)(f_MenuWindowScaleY * NINTENDO_BADGE_OFFSET)) -
         badgeStripRows;
     for (index = 0; index != NINTENDO_BADGE_STRIP_COUNT; index++) {
       LoadTextureBlock(&gfx,
-          LargeImageTexels(D_80230E78_ovl_01) +
+          LargeImageTexels(f_NintendoBadge) +
               (index * NINTENDO_BADGE_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_WIDTH,
           NINTENDO_BADGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -1016,10 +1017,10 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
       courseStripRows;
   courseLeft = centerX - (windowWidth * 0.5f) +
       (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
-  LoadLargePalette(&gfx, ImageBody(D_80230E7C_ovl_01));
+  LoadLargePalette(&gfx, ImageBody(f_ClubCourseIcon));
   for (index = 0; index != COURSE_IMAGE_STRIP_COUNT; index++) {
     LoadTextureBlock(&gfx,
-        LargeImageTexels(D_80230E7C_ovl_01) +
+        LargeImageTexels(f_ClubCourseIcon) +
             (index * COURSE_IMAGE_WIDTH * COURSE_IMAGE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT,
         0, 0, 0, 0, 0, 0, 0);
@@ -1038,7 +1039,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   pictureY = centerY + windowHalfHeight -
       (s32)(f_MenuWindowScaleY + WINDOW_IMAGE_OFFSET_Y);
 
-  LoadLargePalette(&gfx, D_80230E84_ovl_01);
+  LoadLargePalette(&gfx, f_MenuWindowPalette);
   LoadTextureBlock(&gfx, f_MenuWindowImage, G_IM_FMT_CI, G_IM_SIZ_8b,
       WINDOW_PICTURE_SIZE, WINDOW_PICTURE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   DrawTextureRect(&gfx, QuarterPixels(pictureX - pictureHalfWidth),
@@ -1090,7 +1091,7 @@ void DrawUnusedWideCloud(Gfx** displayListHead, s32 centerX, s32 centerY,
   for (stripIndex = 0; stripIndex != TOURNAMENT_BANNER_STRIP_COUNT;
       stripIndex++) {
     LoadNibbleTextureBlock(&gfx,
-        ImageBody(D_80230E70_ovl_01) +
+        ImageBody(f_WideCloudImage) +
             (stripIndex * TOURNAMENT_BANNER_WIDTH *
                 TOURNAMENT_BANNER_STRIP_HEIGHT / 2),
         G_IM_FMT_I, TOURNAMENT_BANNER_WIDTH, TOURNAMENT_BANNER_STRIP_HEIGHT, 0,
