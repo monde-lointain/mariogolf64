@@ -460,7 +460,7 @@ void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
 void PlaceShotCamera(void);
 s32 GetAimCameraGround(s32 x, s32 z);
-void func_8006034C(s8 value);
+void SetRingShotCleared(s8 isCleared);
 s32 GetRecordedScoreKind(s32 strokes);
 Boolean HasNoRingsLeft(Player* player);
 void RecordRingShotClear(s32 playerIndex);
@@ -1778,7 +1778,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
       player->ringStates[i] = RING_STATE_SHOWN;
     }
 
-    func_8006034C(0);
+    SetRingShotCleared(0);
   }
 
   player->unkA8 = 0;
@@ -4638,7 +4638,7 @@ void UpdateTurns(void) {
         } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
           reaction = REACTION_ANIMATION_BOGEY;
           if (HasNoRingsLeft(&g_Players[playerIndex])) {
-            func_8006034C(1);
+            SetRingShotCleared(1);
             reaction = REACTION_ANIMATION_EAGLE;
           }
         } else if (g_Players[playerIndex].strokeCount == 1) {

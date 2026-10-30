@@ -855,6 +855,7 @@ LoadBestShotReplayInputs = 0x800600C0; // type:func
 LoadRingShotReplayInputs = 0x80060128; // type:func
 LoadBestShotReplay = 0x80060210; // type:func
 LoadRingShotRecord = 0x800602B4; // type:func
+SetRingShotCleared = 0x8006034C; // type:func
 QuitPlayToTitle = 0x80060358; // type:func
 BackUpPlayState = 0x80060434; // type:func
 HasWonFinalChallenge = 0x800604F4; // type:func

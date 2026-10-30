@@ -713,8 +713,9 @@ void LoadRingShotRecord(RingShotRecord* record) {
   SetUpPlayers();
 }
 
-void func_8006034C(s8 value) {
-  f_IsRingShotCleared = value;
+/* Sets f_IsRingShotCleared, for the turn in ovl_00 */
+void SetRingShotCleared(s8 isCleared) {
+  f_IsRingShotCleared = isCleared;
 }
 
 /*
