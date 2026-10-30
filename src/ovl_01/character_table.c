@@ -62,8 +62,8 @@ enum TablePopupCorner {
 #define TABLE_POPUP_SIGN_Y 12
 #define TABLE_POPUP_WINS_Y 36
 
-/* The characters that func_8021730C shows on the table, the first ones being
- * those of the character grid */
+/* The characters that MarkShownTableCharacters shows on the table, the first
+ * ones being those of the character grid */
 #define TABLE_CHARACTER_HIDDEN (-1)
 #define TABLE_CHARACTER_SHOWN 1
 #define GRID_CHARACTER_COUNT 13
@@ -714,7 +714,11 @@ void DrawTablePopup(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", DrawTablePopup);
 #endif
 
-void func_8021730C_ovl_01(void) {
+/*
+ * Marks which characters the table shows: those of the character grid that
+ * have been unlocked, and the others once they have won a game.
+ */
+void MarkShownTableCharacters(void) {
   SaveData* save = GetSaveData();
   TableCell cells[TABLE_CELL_COUNT] = {
       {0, 0},

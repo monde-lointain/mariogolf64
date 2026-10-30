@@ -360,7 +360,7 @@ void UpdateBestTimes(void);
 void LoadBestTimesFaces(void);
 void LoadCharacterTableBuffer(void* buffer, s16 bufferKind);
 void UpdateCharacterTable(void);
-void func_8021730C_ovl_01(void);
+void MarkShownTableCharacters(void);
 void func_802177D0_ovl_01(void);
 void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind);
 void UpdateBetSettings(void);
@@ -1585,7 +1585,7 @@ void UpdateMenus(void) {
         LoadCharacterTableBuffer(
             g_ImageSlots[f_ImageSlotIndex], TABLE_BUFFER_CURSOR);
         LoadCharacterTableBuffer(g_NamePlateImage, TABLE_BUFFER_UNREAD);
-        func_8021730C_ovl_01();
+        MarkShownTableCharacters();
         LoadCharacterTableBuffer(g_MenuSpareImages[0], TABLE_BUFFER_ARROWS);
         LoadCharacterTableBuffer(g_MenuSpareImages[1], TABLE_BUFFER_STAR);
         func_802177D0_ovl_01();
