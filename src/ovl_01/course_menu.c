@@ -121,8 +121,8 @@
 #define BADGE_COUNT_Y 146
 #define BADGE_COUNT_DIGIT_WIDTH 16
 
-/* func_802104F0 draws the course's tournament trophies, spinning, or on the
- * totals page the course points */
+/* DrawCourseTrophies draws the course's tournament trophies, spinning, or on
+ * the totals page the course points */
 #define TROPHY_SPACING 24
 #define TROPHY_SHIFT_LEFT 20
 #define TROPHY_FRAME_DELAY 4
@@ -529,7 +529,7 @@ void DrawCourseStats(Gfx** displayListHead) {
   DrawStatsPanel(&gfx);
   DrawStatsBadgeCount(&gfx);
   DrawStatsScrollArrows(&gfx);
-  func_802104F0_ovl_01(&gfx);
+  DrawCourseTrophies(&gfx);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -907,12 +907,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
 #endif
 
 /*
+ * Draws the course's spinning trophy in the color of each place won in its
+ * tournament, stepping the spin's images, or on the totals the points needed to
+ * open the next course.
  * Doesn't match: the original adds the trophies' shift as 0xFFEC, the low half
  * of -20, after reading the course's position, and adds the position to it
  * before the width. "+ (u16)-TROPHY_SHIFT_LEFT" gives that constant.
  */
 #ifdef NON_MATCHING
-void func_802104F0_ovl_01(Gfx** displayListHead) {
+void DrawCourseTrophies(Gfx** displayListHead) {
   EncodedAsset asset;
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
@@ -1010,7 +1013,7 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802104F0_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawCourseTrophies);
 #endif
 
 /* The smallest number of each length */
