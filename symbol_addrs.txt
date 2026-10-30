@@ -3460,6 +3460,7 @@ GetClubTournamentCharacter = 0x8022BDC4; // type:func segment:ovl_01
 IsClubCharacterChoosable = 0x8022BDB0; // type:func segment:ovl_01
 ResetCodeEntry = 0x80228B60; // type:func segment:ovl_01
 UpdateClubWindow = 0x80229278; // type:func segment:ovl_01
+DrawClubNumber = 0x802296C4; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01

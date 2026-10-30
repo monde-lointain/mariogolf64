@@ -326,9 +326,7 @@ s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentModeMessage(void);
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     s32 centerY, s32 okTextShown, s32 chosenButton, s32 windowStyle);
-/* Writes the club tournament's number as an ordinal from the place glyphs */
-void func_802296C4_ovl_01(
-    Gfx** displayListHead, s32 centerX, s32 top, s32 number);
+void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number);
 void func_8022A43C_ovl_01(Gfx** displayListHead);
 void func_8022A8F4_ovl_01(Gfx** displayListHead);
 void func_8022ADE8_ovl_01(Gfx** displayListHead);
@@ -1462,12 +1460,12 @@ void UpdateClubWindow(void) {
 }
 
 /*
+ * Writes the club tournament's number as an ordinal from the place glyphs.
  * Doesn't match: the left edge takes $t4 instead of the center's $s2, which
  * shifts the texel address and the rectangle's halves along a register.
  */
 #ifdef NON_MATCHING
-void func_802296C4_ovl_01(
-    Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
+void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
   Gfx* gfx = *displayListHead;
   u8* image = GetMenuImageBuffer();
   char* digit;
@@ -1541,7 +1539,7 @@ void func_802296C4_ovl_01(
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802296C4_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawClubNumber);
 #endif
 
 void DrawClubTournament(Gfx** displayListHead) {
@@ -1586,7 +1584,7 @@ void DrawClubTournament(Gfx** displayListHead) {
       DrawClubWindow(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
           windowStyle);
-      func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
+      DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
     } else {
       windowStyle = (GetClubTournamentCharacter() != -1)
           ? CLUB_WINDOW_STYLE_PICTURE
@@ -1610,7 +1608,7 @@ void DrawClubTournament(Gfx** displayListHead) {
       DrawClubWindow(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
           windowStyle);
-      func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
+      DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
     }
 
     if (IsMenuWindowOpen() != MENU_WINDOW_CHECK_MOVING &&
