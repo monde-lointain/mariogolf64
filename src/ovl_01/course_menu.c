@@ -150,7 +150,8 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
 
-static s16 D_802300A0_ovl_01 = 0;
+/* The STAT_* shown on the panel's top row, which Up and Down scroll */
+static s16 f_FirstShownStat = 0;
 static s16 D_802300A2_ovl_01 = 0;
 /* Which of D_8023A814's buffers holds the trophy frame shown */
 static s16 D_802300A4_ovl_01 = 0;
@@ -362,13 +363,13 @@ void UpdateCourseStats(void) {
         }
       } else if (g_MenuRepeatButtons & U_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (D_802300A0_ovl_01 > 0) {
-          D_802300A0_ovl_01--;
+        if (f_FirstShownStat > 0) {
+          f_FirstShownStat--;
         }
       } else if (g_MenuRepeatButtons & D_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (D_802300A0_ovl_01 < STATS_COUNT - STATS_SHOWN_ROW_COUNT) {
-          D_802300A0_ovl_01++;
+        if (f_FirstShownStat < STATS_COUNT - STATS_SHOWN_ROW_COUNT) {
+          f_FirstShownStat++;
         }
       }
     }
@@ -622,8 +623,8 @@ void DrawStatsPanel(Gfx** displayListHead) {
       QuarterPixels(STATS_PANEL_BOTTOM), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
-  for (statIndex = D_802300A0_ovl_01;
-      statIndex != D_802300A0_ovl_01 + STATS_SHOWN_ROW_COUNT; statIndex++) {
+  for (statIndex = f_FirstShownStat;
+      statIndex != f_FirstShownStat + STATS_SHOWN_ROW_COUNT; statIndex++) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     sprintf(g_PrintBuffer, D_802318A8_ovl_01, D_802300B4_ovl_01[statIndex]);
@@ -848,9 +849,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsBadgeCount);
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  Boolean hasRowsAbove = D_802300A0_ovl_01 > 0;
-  Boolean hasRowsBelow =
-      D_802300A0_ovl_01 + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
+  Boolean hasRowsAbove = f_FirstShownStat > 0;
+  Boolean hasRowsBelow = f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
   s16 arrowCount = hasRowsAbove;
   s32 firstArrow;
   s16 arrowIndex;
