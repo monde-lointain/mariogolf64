@@ -164,7 +164,8 @@ static s32 f_StatsArrowFrame = 0;
 static s32 f_StatsArrowTimer = 0;
 /* Read by no routine */
 static s32 D_802300B0_ovl_01 = 0;
-static const char* D_802300B4_ovl_01[STATS_COUNT] = {"Round", "Best Score",
+/* The panel's label for each STAT_* */
+static const char* f_StatLabels[STATS_COUNT] = {"Round", "Best Score",
     "Average", "Best Drive", "Avg. Drive", "On Fairway", "Avg. Putt",
     "Par Saves", "Par Ons", "Sand Saves"};
 static f32 D_802300DC_ovl_01 = 0.0f;
@@ -634,7 +635,7 @@ void DrawStatsPanel(Gfx** displayListHead) {
       statIndex != f_FirstShownStat + STATS_SHOWN_ROW_COUNT; statIndex++) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    sprintf(g_PrintBuffer, D_802318A8_ovl_01, D_802300B4_ovl_01[statIndex]);
+    sprintf(g_PrintBuffer, D_802318A8_ovl_01, f_StatLabels[statIndex]);
     DrawLargeText(&gfx, STATS_LABEL_X,
         STATS_FIRST_Y + ((s16)row * STATS_LINE_HEIGHT), g_PrintBuffer);
     DrawStatFigure(&gfx, statIndex, row);
