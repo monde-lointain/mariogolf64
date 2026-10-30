@@ -113,8 +113,8 @@ f32 InterpolateHermite(f32 values[], f32 position);
 static Mtx f_SwingTrailProjections[DRAW_BUFFER_COUNT];
 static Mtx f_SparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
 /* Each spark's offset from its burst's point on screen, and its speed */
-static f32 f_SparkOffsets[SPARK_COUNT][2];
-static f32 f_SparkVelocities[SPARK_COUNT][2];
+static Vec2 f_SparkOffsets[SPARK_COUNT];
+static Vec2 f_SparkVelocities[SPARK_COUNT];
 static Radians f_SparkAngles[SPARK_COUNT];
 /* The frames each spark has left; 0 when unused */
 static u8 f_SparkLives[SPARK_COUNT];
@@ -213,16 +213,16 @@ void StartImpactSparks(void) {
       if (f_SparkLives[i] == 0) {
         f32 speed;
 
-        f_SparkOffsets[i][0] = 0;
-        f_SparkOffsets[i][1] = 0;
+        f_SparkOffsets[i][AXIS_X] = 0;
+        f_SparkOffsets[i][AXIS_Y] = 0;
         f_SparkAngles[i] = ((f32)count * IMPACT_SPARK_SPACING) +
             DegreesToRadians((guRandom() % 20) - 10);
         f_SparkKinds[i] = SPARK_KIND_IMPACT;
         speed =
             (guRandom() % IMPACT_SPARK_SPEED_RANGE) + IMPACT_SPARK_MIN_SPEED;
-        f_SparkVelocities[i][0] = sinf(f_SparkAngles[i]) * speed;
+        f_SparkVelocities[i][AXIS_X] = sinf(f_SparkAngles[i]) * speed;
         count++;
-        f_SparkVelocities[i][1] = -cosf(f_SparkAngles[i]) * speed;
+        f_SparkVelocities[i][AXIS_Y] = -cosf(f_SparkAngles[i]) * speed;
         f_SparkLives[i] = SPARK_LIFE;
         f_SparkBursts[i] = burst;
       }
@@ -274,14 +274,14 @@ void StartFlagstickSparks(CoursePoint point) {
     f_SparkBurstPoints[burst][AXIS_Z] = point[AXIS_Z];
     for (i = 0; i != SPARK_COUNT; i++) {
       if (f_SparkLives[i] == 0) {
-        f_SparkOffsets[i][0] = 0;
-        f_SparkOffsets[i][1] = 0;
+        f_SparkOffsets[i][AXIS_X] = 0;
+        f_SparkOffsets[i][AXIS_Y] = 0;
         f_SparkAngles[i] = (f32)count * FLAGSTICK_SPARK_SPACING;
         f_SparkKinds[i] = SPARK_KIND_FLAGSTICK;
         count++;
-        f_SparkVelocities[i][0] =
+        f_SparkVelocities[i][AXIS_X] =
             sinf(f_SparkAngles[i]) * FLAGSTICK_SPARK_SPEED;
-        f_SparkVelocities[i][1] =
+        f_SparkVelocities[i][AXIS_Y] =
             -cosf(f_SparkAngles[i]) * FLAGSTICK_SPARK_SPEED;
         f_SparkLives[i] = SPARK_LIFE;
         f_SparkBursts[i] = burst;
@@ -421,18 +421,18 @@ void DrawSparks(Gfx** displayListHead) {
   for (i = 0; i != SPARK_COUNT; i++) {
     if (f_SparkLives[i] != 0) {
       burst = f_SparkBursts[i];
-      f_SparkOffsets[i][0] += f_SparkVelocities[i][0];
-      f_SparkOffsets[i][1] += f_SparkVelocities[i][1];
-      f_SparkVelocities[i][0] *= SPARK_DRAG;
-      f_SparkVelocities[i][1] *= SPARK_DRAG;
+      f_SparkOffsets[i][AXIS_X] += f_SparkVelocities[i][AXIS_X];
+      f_SparkOffsets[i][AXIS_Y] += f_SparkVelocities[i][AXIS_Y];
+      f_SparkVelocities[i][AXIS_X] *= SPARK_DRAG;
+      f_SparkVelocities[i][AXIS_Y] *= SPARK_DRAG;
       f_SparkLives[i]--;
       if (burstShown[burst] == SPARK_BURST_SHOWN) {
         rotation[AXIS_X] = 0;
         rotation[AXIS_Y] = 0;
         rotation[AXIS_Z] = f_SparkAngles[i];
-        translation[AXIS_X] = (f_SparkOffsets[i][0] * burstScales[burst]) +
+        translation[AXIS_X] = (f_SparkOffsets[i][AXIS_X] * burstScales[burst]) +
             burstPoints[burst][0] - (SCREEN_WIDTH / 2);
-        translation[AXIS_Y] = (f_SparkOffsets[i][1] * burstScales[burst]) -
+        translation[AXIS_Y] = (f_SparkOffsets[i][AXIS_Y] * burstScales[burst]) -
             burstPoints[burst][1] + (SCREEN_HEIGHT / 2);
         translation[AXIS_Z] = SPARK_MODEL_Z;
         scale[AXIS_X] = burstScales[burst] * SPARK_MODEL_SCALE;
@@ -449,9 +449,9 @@ void DrawSparks(Gfx** displayListHead) {
             burstPoints[burst][0] <= SPARK_MAX_SCREEN_COORD &&
             burstPoints[burst][1] >= -SPARK_MAX_SCREEN_COORD &&
             burstPoints[burst][1] <= SPARK_MAX_SCREEN_COORD) {
-          left = (f_SparkOffsets[i][0] * burstScales[burst]) +
+          left = (f_SparkOffsets[i][AXIS_X] * burstScales[burst]) +
               burstPoints[burst][0];
-          top = (f_SparkOffsets[i][1] * burstScales[burst]) +
+          top = (f_SparkOffsets[i][AXIS_Y] * burstScales[burst]) +
               burstPoints[burst][1];
           gSPScisTextureRectangle(gfx++,
               QuarterPixels(left - burstHalfSizes[burst]),

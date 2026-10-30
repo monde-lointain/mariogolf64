@@ -19,6 +19,10 @@
 #define AXIS_COUNT 3
 /* A point or direction in 3D space */
 typedef f32 Vec3[AXIS_COUNT];
+/* The axes of a point on a plane, x and y */
+#define PLANE_AXIS_COUNT 2
+/* A point or direction on a plane */
+typedef f32 Vec2[PLANE_AXIS_COUNT];
 
 /*
  * A point on the course as the game's logic keeps it, in fixed point:
