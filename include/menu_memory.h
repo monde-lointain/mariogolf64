@@ -63,7 +63,8 @@ typedef struct MenuMemory {
   /* 0x1F */ s8 eraseChoice; /* The erase window's yes or no */
   /* 0x20 */ s8 helpTopicIndex;
   /* 0x21 */ u8 unk21[0x29 - 0x21];
-  /* 0x29 */ s8 unk29;
+  /* The player whose handicap the handicap screen is choosing */
+  /* 0x29 */ s8 handicapPlayer;
   /* 0x2A */ s8 unk2A;
   /* 0x2B */ s8 unk2B;
   /* 0x2C */ s8 unk2C;

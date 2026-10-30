@@ -618,7 +618,7 @@ void ApplyBetPreset(s32 requestedPreset) {
         index < g_ChosenPlayerCount ? 0 : ABSENT_PLAYER_HANDICAP;
   }
 
-  memory->unk29 = 0;
+  memory->handicapPlayer = 0;
   memory->unk2A = 0;
 }
 
@@ -1070,9 +1070,9 @@ s32 UpdateHandicaps(void) {
 
     if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      memory->unk29--;
-      if (memory->unk29 < 0) {
-        memory->unk29 = g_ChosenPlayerCount - 1;
+      memory->handicapPlayer--;
+      if (memory->handicapPlayer < 0) {
+        memory->handicapPlayer = g_ChosenPlayerCount - 1;
       }
 
       f_IsHandicapPromptShown = FALSE;
@@ -1081,9 +1081,9 @@ s32 UpdateHandicaps(void) {
 
     if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      memory->unk29++;
-      if (memory->unk29 > g_ChosenPlayerCount - 1) {
-        memory->unk29 = 0;
+      memory->handicapPlayer++;
+      if (memory->handicapPlayer > g_ChosenPlayerCount - 1) {
+        memory->handicapPlayer = 0;
       }
 
       f_IsHandicapPromptShown = FALSE;
@@ -1092,9 +1092,9 @@ s32 UpdateHandicaps(void) {
 
     if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      g_ChosenHandicaps[memory->unk29]++;
-      if (g_ChosenHandicaps[memory->unk29] >= HANDICAP_CHOICE_COUNT) {
-        g_ChosenHandicaps[memory->unk29] = 0;
+      g_ChosenHandicaps[memory->handicapPlayer]++;
+      if (g_ChosenHandicaps[memory->handicapPlayer] >= HANDICAP_CHOICE_COUNT) {
+        g_ChosenHandicaps[memory->handicapPlayer] = 0;
       }
 
       return;
@@ -1102,9 +1102,9 @@ s32 UpdateHandicaps(void) {
 
     if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      g_ChosenHandicaps[memory->unk29]--;
-      if (g_ChosenHandicaps[memory->unk29] < 0) {
-        g_ChosenHandicaps[memory->unk29] = HANDICAP_CHOICE_COUNT - 1;
+      g_ChosenHandicaps[memory->handicapPlayer]--;
+      if (g_ChosenHandicaps[memory->handicapPlayer] < 0) {
+        g_ChosenHandicaps[memory->handicapPlayer] = HANDICAP_CHOICE_COUNT - 1;
       }
     }
   }
@@ -1164,9 +1164,9 @@ void DrawTwoDigitMenuNumber(
 /*
  * Draws the handicap screen: the players' characters, a column for each player
  * with the player's label and handicap, the banner below them, and the
- * arrows around the column of the player that memory->unk29 picks. All but
- * the banner slide across by slide, and the banner and arrows down by it, or
- * up when reverseVerticalSlide is set. With canShowPrompt set, the prompt
+ * arrows around the column of the player that memory->handicapPlayer picks. All
+ * but the banner slide across by slide, and the banner and arrows down by it,
+ * or up when reverseVerticalSlide is set. With canShowPrompt set, the prompt
  * naming that player is typed once each time f_IsHandicapPromptShown is
  * cleared.
  */
@@ -1332,7 +1332,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   gDPLoadTLUT_pal16(gfx++, HANDICAP_LABEL_PALETTE,
       TextureAddress(ImageBody(f_StatsPlayerLabels)));
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
-    if (columnIndex == memory->unk29) {
+    if (columnIndex == memory->handicapPlayer) {
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     } else {
       gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
@@ -1447,12 +1447,12 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
     /* The left arrow starts at the right edge of its mirrored image */
     gSPScisTextureRectangle(gfx++,
-        QuarterPixels(
-            f_HandicapColumnLefts[g_ChosenPlayerCount - 1][memory->unk29] +
+        QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1]
+                                           [memory->handicapPlayer] +
             arrowX + slide),
         QuarterPixels(offsetY + HANDICAP_COLUMN_TOP + arrowY),
-        QuarterPixels(
-            f_HandicapColumnLefts[g_ChosenPlayerCount - 1][memory->unk29] +
+        QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1]
+                                           [memory->handicapPlayer] +
             arrowX + slide + GREEN_ARROW_SIZE),
         QuarterPixels(
             offsetY + HANDICAP_COLUMN_TOP + arrowY + GREEN_ARROW_SIZE),
@@ -1470,22 +1470,22 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   }
 
   if ((f_IsHandicapPromptShown == FALSE) & (canShowPrompt == TRUE)) {
-    SetTextSlotValue(memory->unk29 + 1, 0, 0);
+    SetTextSlotValue(memory->handicapPlayer + 1, 0, 0);
 
     /* The prompt names the player in the player's own color */
-    if (memory->unk29 == 0) {
+    if (memory->handicapPlayer == 0) {
       SetTextPaletteColor(255, 127, 127, 0);
     }
 
-    if (memory->unk29 == 1) {
+    if (memory->handicapPlayer == 1) {
       SetTextPaletteColor(0, 255, 255, 0);
     }
 
-    if (memory->unk29 == 2) {
+    if (memory->handicapPlayer == 2) {
       SetTextPaletteColor(255, 255, 0, 0);
     }
 
-    if (memory->unk29 == 3) {
+    if (memory->handicapPlayer == 3) {
       SetTextPaletteColor(63, 255, 63, 0);
     }
 
