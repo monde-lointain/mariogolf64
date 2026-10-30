@@ -28,5 +28,10 @@ f32 MeasureGroundTiles(void);
 void BuildHole(s32 course, s32 hole);
 void SaveHoleFiles(s32 course, s32 hole);
 void ToggleGroundTileBorders(void);
+/*
+ * Takes no parameters, but is left unprototyped because PrepareHoleScene and
+ * UpdateDebugScenes pass it a number, which is not used
+ */
+void ShadeGround();
 
 #endif

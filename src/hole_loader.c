@@ -151,7 +151,6 @@ s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT];
 
 void ResetShotSetup(void);
 void PlacePlayersOnTee(void);
-void ShadeGround(s32);
 void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
 NO_RESULT ChooseHoleConditions(void);

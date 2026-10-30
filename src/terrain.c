@@ -271,7 +271,6 @@ void ResetMenuChoices(void);
 void ChooseConditionsAndInitHole(void);
 void LoadToolCodeMap(void);
 void ToggleCodeMapCleanup(void);
-void ShadeGround(s32);
 void func_8040000C_hole_editor(void);
 void func_804002C0_hole_editor(void);
 void func_80400FBC_hole_editor(void);
