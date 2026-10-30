@@ -1083,8 +1083,6 @@ void RecordDisplayListLength(u32 commandCount) {
   }
 }
 
-#define UNKE50_MAX 3
-
 /*
  * Puts a Speed Golf round's time on its course's best times, if it is fast
  * enough, with its golfer's character and color and its net score to par,
@@ -1115,8 +1113,8 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
         palette = 0;
       }
 
-      if (palette > UNKE50_MAX) {
-        palette = UNKE50_MAX;
+      if (palette > CHARACTER_PALETTE_COUNT - 1) {
+        palette = CHARACTER_PALETTE_COUNT - 1;
       }
 
       count = 0;
