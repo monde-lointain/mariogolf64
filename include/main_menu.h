@@ -77,6 +77,8 @@ typedef u8 CourseSelectKind;
 extern CourseSelectKind g_CourseSelectKind;
 /* Whether the running wipe is the one opening onto the menu */
 extern u8 g_IsMenuWipeOpening;
+/* Whether the wipe opens onto the menu, as the Ring Shot records see it */
+extern u8 g_IsRingShotWipeOpening;
 /* Whether the chosen hole has started loading behind the menu */
 extern Boolean g_IsChosenHoleLoadStarted;
 extern s32 g_ChoosingPlayerIndex;

@@ -194,8 +194,6 @@ extern void* D_8012D430[CHARACTER_COUNT];
 extern s32 g_ChosenPlayerCount;
 extern const char D_802319E0_ovl_01[];
 
-extern s8 g_IsRingShotWipeOpening;
-
 /* A step from one grid cell to its neighbor */
 typedef struct GridStep {
   /* 0x0 */ s8 column;

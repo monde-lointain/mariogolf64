@@ -207,7 +207,7 @@ OSMesgQueue nuGfxMesgQ BSS ALIGNED(8) = {0};
  * records see it: set and cleared with g_IsMenuWipeOpening, except that
  * func_8005DAD4 sets it alone
  */
-s8 g_IsRingShotWipeOpening BSS = {0};
+u8 g_IsRingShotWipeOpening BSS = {0};
 OSTime __osCurrentTime BSS = {0};
 u8 f_GameFlagBits[GAME_FLAG_COUNT / 8] BSS ALIGNED(8) = {0};
 u32 g_GroundDrawFrame BSS = {0};

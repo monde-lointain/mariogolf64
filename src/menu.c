@@ -65,7 +65,6 @@ extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
-extern s8 g_IsRingShotWipeOpening;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC4;
 extern s32 D_80105DC8;

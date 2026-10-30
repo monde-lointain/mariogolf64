@@ -126,8 +126,6 @@ extern void* D_8012D430[CHARACTER_COUNT];
 #define NO_CONTROLLER -1
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
-extern u8 g_IsRingShotWipeOpening;
-
 s16 FindNextReplaySlot(s8 startSlot, u8 isForward);
 s16 GetChosenReplaySlot(void);
 s32 GetOpenRingShotCourseCount(void);
