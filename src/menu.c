@@ -85,7 +85,7 @@ extern void* D_800FF4C4[2];
 extern void* D_80106100;
 extern void* D_800FC898;
 extern void* D_800FC6A0;
-extern void* D_801B69EC;
+extern void* g_ComLeftyIcons;
 
 /* f_SlotCells lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
@@ -594,8 +594,8 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(g_MenuSpareImages[1], &asset);
   D_800FC6A0 = AllocMemory(OpenEncodedAsset(0x6F7, &asset) * 2);
   ReadEncodedAsset(D_800FC6A0, &asset);
-  D_801B69EC = AllocMemory(OpenEncodedAsset(0x709, &asset));
-  ReadEncodedAsset(D_801B69EC, &asset);
+  g_ComLeftyIcons = AllocMemory(OpenEncodedAsset(0x709, &asset));
+  ReadEncodedAsset(g_ComLeftyIcons, &asset);
   PlaySong(SONG_TITLE, 0);
   SetFramebufferCount(TRIPLE_BUFFERING);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -658,7 +658,7 @@ void FreeMenuResources(void) {
   FreeMemory(&g_MenuSpareImages[0]);
   FreeMemory(&g_MenuSpareImages[1]);
   FreeMemory(&D_800FC6A0);
-  FreeMemory(&D_801B69EC);
+  FreeMemory(&g_ComLeftyIcons);
 }
 
 SaveData* GetSaveData(void) {

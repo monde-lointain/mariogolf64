@@ -347,7 +347,7 @@ u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] BSS ALIGNED(
 volatile u32 nuScRetraceTotal BSS = {0};
 __OSInode __osPfsInodeCache BSS ALIGNED(0x8) = {0};
 u16* nuGfxCfb_ptr BSS = {0};
-void* D_801B69EC BSS = {0};
+void* g_ComLeftyIcons BSS = {0};
 /* Read by no routine */
 static u8 D_801B69F0[0x680] BSS = {0};
 /* The player whose character the character select is choosing */

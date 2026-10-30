@@ -83,8 +83,7 @@ enum GridMove {
 #define CURVE_LABEL_STRAIGHT 0
 #define CURVE_LABEL_DRAW 1
 #define CURVE_LABEL_FADE 2
-/* Asset 0x709 in D_801B69EC holds the "R: COM" icon above the "L: LEFTY" icon
- */
+/* g_ComLeftyIcons, asset 0x0709, holds the "R: COM" icon above "L: LEFTY" */
 #define BUTTON_ICON_WIDTH 32
 #define BUTTON_ICON_HEIGHT 24
 #define BUTTON_ICON_TOP 20
@@ -117,7 +116,7 @@ enum CButtonPalette {
   RIGHT_C_PALETTE
 };
 
-extern void* D_801B69EC;
+extern void* g_ComLeftyIcons;
 
 /* Where the character cursor's translation is measured from, so that it is
  * placed by its corner */
@@ -1873,9 +1872,9 @@ void DrawComIcon(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_801B69EC)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ComLeftyIcons)));
   gDPPipeSync(gfx++);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(D_801B69EC)),
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(g_ComLeftyIcons)),
       G_IM_FMT_CI, BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1907,13 +1906,13 @@ void DrawLeftyIcon(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_801B69EC)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ComLeftyIcons)));
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(ImageTexels(D_801B69EC) + LEFTY_ICON_OFFSET), G_IM_FMT_CI,
-      BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+      TextureAddress(ImageTexels(g_ComLeftyIcons) + LEFTY_ICON_OFFSET),
+      G_IM_FMT_CI, BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, QuarterPixels(LEFTY_ICON_LEFT),
       QuarterPixels(BUTTON_ICON_TOP),
