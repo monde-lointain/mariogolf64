@@ -325,7 +325,7 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead);
 void DrawClubhouse(Gfx** displayListHead);
 void DrawOptionsScreen(Gfx** displayListHead);
 void DrawCaddySelect(Gfx** displayListHead);
-void func_80207E18_ovl_01(Gfx** displayListHead);
+void DrawBlankScreen(Gfx** displayListHead);
 void DrawBirdieBadgeLabel(Gfx** displayListHead);
 /* Defined as returning s8, but their callers here use the whole register */
 s32 IsMusicOffChosen(void);
@@ -348,7 +348,7 @@ void UpdateCaddySelect(void);
 void LeaveMenuWithWipe(void);
 void LeaveMenuWithCourseWipe(void);
 void UpdateBirdieBadges(void);
-void func_801FB15C_ovl_01(void);
+void UpdateBlankScreen(void);
 void func_80209500_ovl_01(void);
 void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind);
 void func_8020B3CC_ovl_01(void);
@@ -1104,7 +1104,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_BLANK:
-      func_801FB15C_ovl_01();
+      UpdateBlankScreen();
       break;
 
     case MENU_SCREEN_BEST_SHOTS:
@@ -3727,7 +3727,8 @@ void UpdateBirdieBadges(void) {
   }
 }
 
-void func_801FB15C_ovl_01(void) {
+/* Waits for A to go from the blank screen to the title */
+void UpdateBlankScreen(void) {
   if (g_MenuPressedButtons & A_BUTTON) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     g_MenuScreen = MENU_SCREEN_TITLE;
@@ -3807,7 +3808,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       DrawCourseSelect(&gfx);
       break;
     case MENU_SCREEN_BLANK:
-      func_80207E18_ovl_01(&gfx);
+      DrawBlankScreen(&gfx);
       break;
     case MENU_SCREEN_BEST_SHOTS:
       DrawBestShots(&gfx);
@@ -7201,7 +7202,8 @@ void DrawCaddySelect(Gfx** displayListHead) {
  * in .text */
 const char D_8023176C_ovl_01[] = "CADDY SELECT";
 
-void func_80207E18_ovl_01(Gfx** displayListHead) {}
+/* The blank screen draws nothing over the menu's cleared frame */
+void DrawBlankScreen(Gfx** displayListHead) {}
 
 void func_80207E20_ovl_01(void) {}
 
