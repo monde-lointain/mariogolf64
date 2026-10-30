@@ -302,7 +302,11 @@ void mainproc(void* arg UNUSED) {
 
     /* This clears the size of the whole array at each state, which
        runs past the end of the array for every port but the first */
+#ifdef AVOID_UB
+    memset(&g_ControllerStates[portIndex], 0, sizeof(g_ControllerStates[0]));
+#else
     memset(&g_ControllerStates[portIndex], 0, sizeof(g_ControllerStates));
+#endif
   }
 
   InitRumblePaks();

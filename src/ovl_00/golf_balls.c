@@ -786,6 +786,13 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   s32 halfHeight;
   u32 afterimageDepth;
 
+  /*
+   * A shadow stays behind the last ball drawn, which the original leaves
+   * unset until a ball is drawn
+   */
+#ifdef AVOID_UB
+  primDepth = 0;
+#endif
   if (g_GameState.step != GAME_STATE_UNK6 &&
       g_GameState.step != GAME_STATE_UNK11) {
     return;

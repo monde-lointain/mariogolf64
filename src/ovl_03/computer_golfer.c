@@ -1513,8 +1513,12 @@ s32 ChooseHoleStrokeTarget(void) {
     }
   }
 
-  /* Reads past the holes; the original has it */
+  /* The original reads past the holes, into the next course record's name */
+#ifdef AVOID_UB
+  return g_HoleSetup.par;
+#else
   return (s8)g_CourseRecords[g_GameState.courseIndex].holes[index].par;
+#endif
 }
 
 #define NO_ROUTE_POINT (-1)
@@ -2172,6 +2176,7 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
 /* The power gauge frame for a launch power out of 256 */
 s32 GetPowerGaugeFrame(s32 amount) {
   s32 value;
+#ifndef AVOID_UB
   s32 unused;
   s32 uninitialized;
 
@@ -2183,6 +2188,7 @@ s32 GetPowerGaugeFrame(s32 amount) {
    * an uninitialized value is there to match.
    */
   *(&unused) = uninitialized;
+#endif
 
   value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
   if (value < MIN_POWER_GAUGE_FRAME) {

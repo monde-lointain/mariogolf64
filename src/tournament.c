@@ -245,6 +245,17 @@ u32 NextTournamentRandom(void) {
 }
 
 /*
+ * How a contestant's score to par moves toward its final score over the
+ * holes: evenly, or swinging above or below the even line along a sine
+ */
+enum ScoreShape {
+  SCORE_SHAPE_EVEN,
+  SCORE_SHAPE_SWING_ABOVE,
+  SCORE_SHAPE_SWING_BELOW,
+  SCORE_SHAPE_COUNT
+};
+
+/*
  * Makes up the scores of contestants firstIndex to endIndex - 1 after the
  * player's holeCount holes; those up to lastAheadIndex, or all of them if it
  * is negative, are a hole further on. playerScore goes unused.
@@ -265,7 +276,7 @@ NO_RESULT SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
   }
 
   for (index = firstIndex; index < endIndex; index++) {
-    shape = index % 3;
+    shape = index % SCORE_SHAPE_COUNT;
     swing = index % 10;
     if (g_GameState.courseIndex < COURSE_SHY_GUY_DESERT) {
       swing = 13 - swing;
@@ -298,14 +309,17 @@ NO_RESULT SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
     }
 
     switch (shape) {
-      case 0:
+#ifdef AVOID_UB
+      default:
+#endif
+      case SCORE_SHAPE_EVEN:
         score = finalScore * holesPlayed / COURSE_HOLE_COUNT;
         break;
-      case 1:
+      case SCORE_SHAPE_SWING_ABOVE:
         score = (finalScore * holesPlayed / COURSE_HOLE_COUNT) +
             (sin(holesPlayed * RADIANS_PER_HOLE) * swing);
         break;
-      case 2:
+      case SCORE_SHAPE_SWING_BELOW:
         score = (finalScore * holesPlayed / COURSE_HOLE_COUNT) -
             (sin(holesPlayed * RADIANS_PER_HOLE) * swing);
         break;

@@ -2168,7 +2168,10 @@ void DrawScoresPage(Gfx** displayListHead) {
           PRIMITIVE);
       break;
     case SCORES_STYLE_OPAQUE:
-      /* The cells are opaque, so this leaves their alpha unset */
+      /* The cells are opaque, so the original leaves their alpha unset */
+#ifdef AVOID_UB
+      cellAlpha = 0xFF;
+#endif
       gDPSetEnvColor(gfx++, 0, 0x1F, 0, 0xFF);
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x40);
       gDPPipeSync(gfx++);
@@ -2177,6 +2180,9 @@ void DrawScoresPage(Gfx** displayListHead) {
           0, 0, TEXEL0, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0,
           TEXEL0);
       break;
+#ifdef AVOID_UB
+    default:
+#endif
     case SCORES_STYLE_TINTED:
       cellAlpha = 0xFF;
       gDPSetEnvColor(gfx++, 0, 0x40, 0, 0xFF);
@@ -2572,6 +2578,9 @@ void DrawScoresPage(Gfx** displayListHead) {
       }
 
       break;
+#ifdef AVOID_UB
+    default:
+#endif
     case 1:
     case 3:
     case 4:

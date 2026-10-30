@@ -964,6 +964,10 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
       game = &g_SaveData.modeGames[MODE4_GAME_INDEX];
       playerCount = MODE4_PLAYER_COUNT;
       break;
+#ifdef AVOID_UB
+    default:
+      return -1;
+#endif
   }
 
   if (!isContinuing) {
@@ -2246,6 +2250,9 @@ void TransferSaveData(SaveData* save, u8 isWrite) {
   } else {
     /* readResult is never set on this path, but SyncSaveOptions ignores it when
      * writing */
+#ifdef AVOID_UB
+    readResult = SAVE_READ_FAILED;
+#endif
     SyncSaveOptions(save, TRUE, readResult);
     WriteSaveCopies(save, isInSram);
   }

@@ -290,12 +290,24 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
 #define OPENING_WIND_SCALE_PER_HEIGHT (1.0f / (160 * UNITS_PER_YARD))
 
 /*
- * The opening calls FindBillboardHit with a ninth argument, the simulation,
- * which FindBillboardHit does not read
+ * The original calls FindBillboardHit with a ninth argument, the simulation,
+ * which FindBillboardHit does not read. The cast goes through a function of
+ * no arguments, which GCC takes as meant. Calling through it is undefined,
+ * so otherwise the simulation is left out.
  */
+#ifndef AVOID_UB
 typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
     s32 endY, s32 endZ, BillboardCell* cell, f32* fraction,
     BallSimulation* simulation);
+#define FindOpeningBillboardHit( \
+    startX, startY, startZ, endX, endY, endZ, cell, fraction, simulation) \
+  ((BillboardHitFinder)(void (*)(void))FindBillboardHit)( \
+      startX, startY, startZ, endX, endY, endZ, cell, fraction, simulation)
+#else
+#define FindOpeningBillboardHit( \
+    startX, startY, startZ, endX, endY, endZ, cell, fraction, simulation) \
+  FindBillboardHit(startX, startY, startZ, endX, endY, endZ, cell, fraction)
+#endif
 
 /*
  * The opening's copy of StepBallSimulation, which moves the ball through one
@@ -511,10 +523,10 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         if (simulation->state == BALL_STATE_FLYING) {
           if (simulation->lastBounceStep + BILLBOARD_HIT_BOUNCE_GAP <
               simulation->stepCount) {
-            hitsBillboard = ((BillboardHitFinder)FindBillboardHit)(startX,
-                startY, startZ, simulation->position[AXIS_X],
-                simulation->position[AXIS_Y], simulation->position[AXIS_Z],
-                &triangle.unk0, &fraction, simulation);
+            hitsBillboard = FindOpeningBillboardHit(startX, startY, startZ,
+                simulation->position[AXIS_X], simulation->position[AXIS_Y],
+                simulation->position[AXIS_Z], &triangle.unk0, &fraction,
+                simulation);
           } else {
             hitsBillboard = FALSE;
           }

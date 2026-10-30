@@ -1666,6 +1666,10 @@ s32 ContinueModeGame(void) {
       players = &save->modePlayers[MODE0_PLAYER_INDEX];
       playerCount = MODE0_PLAYER_COUNT;
       break;
+#ifdef AVOID_UB
+    default:
+      return -1;
+#endif
   }
 
   if (!game->isValid) {

@@ -508,6 +508,9 @@ s32 GetBallDistance(
   }
 
   switch (kind) {
+#ifdef AVOID_UB
+    default:
+#endif
     case CLUB_KIND_WOOD:
       distance = WOOD_BALL_DISTANCE;
       pointId = WOOD_DISTANCE_POINT;

@@ -2806,7 +2806,11 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
         transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
                                [index]) {
       /* "Write mark violation"; the original passes sum before setting it */
+#ifdef AVOID_UB
+      osSyncPrintf("ライトマーク違反\n");
+#else
       osSyncPrintf("ライトマーク違反\n", sum);
+#endif
       nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
       transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
       return STATUS_WRITE_FAILED;

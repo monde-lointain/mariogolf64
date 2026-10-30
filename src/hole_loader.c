@@ -735,6 +735,9 @@ void PrepareHoleScene(void) {
       unk = 2;
       break;
     case SCENE_COLOR_INDEX_ROUND_END:
+#ifdef AVOID_UB
+    default:
+#endif
       unk = 0;
       break;
     case SCENE_COLOR_INDEX_DRIVING_RANGE:

@@ -935,6 +935,9 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
     /* The original assigns the surface's blue to the ground's and never sets
      * surfaceBlue. */
     groundBlue = (surfaceColor >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
+#ifdef AVOID_UB
+    surfaceBlue = groundBlue;
+#endif
     surfaceRed = surfaceColor >> RGBA16_RED_SHIFT;
     surfaceGreen = (surfaceColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
     osSyncPrintf("c1(%d,%d,%d) c2(%d,%d,%d)\n", groundRed, groundGreen,

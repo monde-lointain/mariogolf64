@@ -275,15 +275,24 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   u32 vertexIndex;
 
   /* The readout never prints these lengths; they are kept to match */
-  s32 audioBarLength;
-  s32 rdpCommandBarLength;
-  s32 rdpPipeBarLength;
-  s32 rdpTmemBarLength;
+  s32 audioBarLength UNUSED;
+  s32 rdpCommandBarLength UNUSED;
+  s32 rdpPipeBarLength UNUSED;
+  s32 rdpTmemBarLength UNUSED;
   f32 posY;
   Gfx* gfx;
   u32 viMode;
   u32 scale;
 
+  /*
+   * The original leaves scale unset in other video modes than NTSC's, and the
+   * readout's lengths unset when no graphics task ran
+   */
+#ifdef AVOID_UB
+  scale = 1;
+  rspBarLength = 0;
+  rdpBarLength = 0;
+#endif
   gfx = f_MeterDisplayLists[f_MeterDisplayListIndex];
   viMode = osViGetCurrentMode();
   if (viMode < OS_VI_NTSC_HPN1) {

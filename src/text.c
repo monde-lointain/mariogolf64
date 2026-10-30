@@ -1997,6 +1997,14 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
   s32 top;
   s32 bottom;
 
+  /*
+   * A code that is neither a glyph nor an icon keeps the last sprite's
+   * texture coordinates, which the original leaves unset before the first
+   */
+#ifdef AVOID_UB
+  s = 0;
+  t = 0;
+#endif
   isIconLoaded = FALSE;
   gDPPipeSync(gfx++);
   for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {

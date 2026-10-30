@@ -789,6 +789,13 @@ void DrawBanner(Gfx** displayListHead) {
   s32 i;
 
   angle = 0.0f;
+#ifdef AVOID_UB
+  /*
+   * Only the zooms read it, and they set it, but the animation is reread
+   * from the global after calls that could change it
+   */
+  alpha = BANNER_MAX_ALPHA;
+#endif
   if (IsGameFlagSet(GAME_FLAG_TEST_BANNERS)) {
     if ((g_ControllerStates[0].pressedButtons & L_JPAD) && f_TestBanner > 0) {
       f_TestBanner--;
@@ -917,6 +924,9 @@ void DrawBanner(Gfx** displayListHead) {
       }
 
       break;
+#ifdef AVOID_UB
+    default:
+#endif
     case BANNER_ANIMATION_ZOOM_STAY:
       letterScale =
           (BANNER_ZOOM_FRAMES - f_BannerFrame) * BANNER_ZOOM_PER_FRAME;
