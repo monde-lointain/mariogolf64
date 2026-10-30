@@ -33,7 +33,7 @@
 #define TOURNAMENT_BANNER_STRIP_HEIGHT 32
 #define TOURNAMENT_BANNER_STRIP_COUNT 2
 
-/* The table of images that func_802269AC picks from */
+/* The table of images that LoadMenuWindowPalette picks from */
 #define TOURNAMENT_IMAGE_ROW_COUNT 15
 #define TOURNAMENT_IMAGE_COLUMN_COUNT 4
 
@@ -194,7 +194,7 @@ static s32 D_80230EA0_ovl_01 = 0;
 static AssetId f_MenuWindowImageAssets[15] = {0x07C0, 0x0750, 0x07A4, 0x0742,
     0x0788, 0x07B2, 0x07CE, 0x07D8, 0x076C, 0x0796, 0x07EA, 0x075E, 0x077A,
     0x0988, 0x0958};
-/* The image files that func_802269AC picks from, by row and column */
+/* The image files that LoadMenuWindowPalette picks from, by row and column */
 // clang-format off
 static s16 D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT]
                             [TOURNAMENT_IMAGE_COLUMN_COUNT] = {
@@ -439,7 +439,10 @@ void LoadTournamentBuffer(void* buffer, s16 bufferKind) {
 
 const s32 D_80231A68_ovl_01[2] = {0, 0};
 
-void func_80226904_ovl_01(s32 imageIndex) {
+/*
+ * Reads the icon of the club tournament's course into the window's course image
+ */
+void LoadClubCourseIcon(s32 imageIndex) {
   EncodedAsset asset;
 
   if (imageIndex < 0) {
@@ -469,7 +472,11 @@ void LoadMenuWindowImage(s32 imageIndex) {
   ReadEncodedAsset(f_MenuWindowImage, &asset);
 }
 
-void func_802269AC_ovl_01(s32 row, s32 column) {
+/*
+ * Reads the palette of the window's picture, a row of D_80230EC4, in the color
+ * that column picks
+ */
+void LoadMenuWindowPalette(s32 row, s32 column) {
   AssetFile file;
 
   if (row < 0) {
@@ -1246,14 +1253,14 @@ void UpdateClubTournament(void) {
             g_TournamentCode[1], g_TournamentCode[2]);
         PlaySound(SOUND_GO, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         ResetMenuWindow();
-        func_80226904_ovl_01(GetClubTournamentCourse());
+        LoadClubCourseIcon(GetClubTournamentCourse());
         D_80230F70_ovl_01 = CLUB_CODE_PHASE_DETAILS;
         if (func_8022BDC4_ovl_01() >= 0) {
           LoadMenuWindowImage(func_8022BDC4_ovl_01());
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 0);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 0);
         } else {
           LoadMenuWindowImage(CHARACTER_KID);
-          func_802269AC_ovl_01(CHARACTER_KID, 0);
+          LoadMenuWindowPalette(CHARACTER_KID, 0);
         }
 
         return;
@@ -1558,13 +1565,13 @@ void DrawClubTournament(Gfx** displayListHead) {
             g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
             g_ControllerStates[3].buttons;
         if (buttons & L_CBUTTONS) {
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 1);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 1);
         } else if (buttons & D_CBUTTONS) {
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 2);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 2);
         } else if (buttons & R_CBUTTONS) {
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 3);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 3);
         } else {
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 0);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 0);
         }
       }
 
@@ -1581,13 +1588,13 @@ void DrawClubTournament(Gfx** displayListHead) {
             g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |
             g_ControllerStates[3].buttons;
         if (buttons & L_CBUTTONS) {
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 1);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 1);
         } else if (buttons & D_CBUTTONS) {
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 2);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 2);
         } else if (buttons & R_CBUTTONS) {
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 3);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 3);
         } else {
-          func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 0);
+          LoadMenuWindowPalette(func_8022BDC4_ovl_01(), 0);
         }
       }
 
