@@ -83,19 +83,15 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
  * and zero for the other players. A hole with no winner carries its skins
  * over to the next. The holes from the round's first to endHole are
  * tallied, with endHole itself once no player is HOLE_STATUS_PLAYING
- *
- * Doesn't match: the loop that clears the totals counts in $a1, where the
- * original counts in $a2.
  */
-#ifdef NON_MATCHING
 void TallySkins(s32 endHole) {
   s32 player;
-  s32 hole;
+  s32 hole; /* Also the player whose total is cleared, to match */
   s32 winner; /* Also whether anyone is still playing, to match */
   s32 skins;
 
-  for (player = 0; player != g_GameState.playerCount; player++) {
-    g_RoundHud.skinsTotals[player] = 0;
+  for (hole = 0; hole != g_GameState.playerCount; hole++) {
+    g_RoundHud.skinsTotals[hole] = 0;
   }
 
   winner = FALSE;
@@ -138,10 +134,6 @@ void TallySkins(s32 endHole) {
       g_Scorecard.skinsCarryover.onLastHole);
   PrintDebugText(g_PrintBuffer, SKINS_DEBUG_COLUMN, SKINS_DEBUG_ROW);
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/round_stats", TallySkins);
-#endif
 
 void StartBets(void) {
   s32 player;
