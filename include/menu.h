@@ -208,6 +208,8 @@ extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 #define MENU_ANIMATION_FIDGET 17
 /* The most frames a character stands before it fidgets again */
 #define FIDGET_DELAY_RANGE 128
+/* A fidget delay while the fidget plays */
+#define FIDGETING -1
 /* The orthographic projection that the menus view their characters with, and
  * the eye of the LookAt that guLookAtReflectF builds for them */
 #define MENU_CHARACTERS_NEAR 1.0f

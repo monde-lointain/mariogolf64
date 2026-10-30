@@ -1230,12 +1230,12 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     }
 
     if (g_MenuFidgetDelays[playerIndex] == 0) {
-      g_MenuFidgetDelays[playerIndex] = -1;
+      g_MenuFidgetDelays[playerIndex] = FIDGETING;
       SetAnimationLooping(playerIndex, FALSE);
       SetNextAnimation(playerIndex, MENU_ANIMATION_FIDGET);
     }
 
-    if (g_MenuFidgetDelays[playerIndex] == -1) {
+    if (g_MenuFidgetDelays[playerIndex] == FIDGETING) {
       if (GetAnimationEndFrame(playerIndex, MENU_ANIMATION_FIDGET) ==
           GetAnimationFrame(playerIndex)) {
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);

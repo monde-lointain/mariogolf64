@@ -5298,12 +5298,12 @@ void DrawMenuCharacters(Gfx** displayListHead) {
     }
 
     if (g_MenuFidgetDelays[slot] == 0) {
-      g_MenuFidgetDelays[slot] = -1;
+      g_MenuFidgetDelays[slot] = FIDGETING;
       SetAnimationLooping(slot, FALSE);
       SetNextAnimation(slot, MENU_ANIMATION_FIDGET);
     }
 
-    if (g_MenuFidgetDelays[slot] == -1) {
+    if (g_MenuFidgetDelays[slot] == FIDGETING) {
       if (GetAnimationEndFrame(slot, MENU_ANIMATION_FIDGET) ==
           GetAnimationFrame(slot)) {
         SetCharacterAnimation(slot, MENU_ANIMATION_STANDING);
