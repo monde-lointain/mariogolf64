@@ -301,6 +301,24 @@ typedef struct StaffText {
   /* 0x4 */ StaffLine lines[1];
 } StaffText;
 
+/*
+ * The text's lines run on past the one declared, and its characters follow
+ * them; the characters are counted from the text's start, past the size and
+ * the line count
+ */
+#define STAFF_LINE(text, index) ((text)->lines + (index))
+#define STAFF_TEXT_HEADER_CHARACTERS 2
+#define CHARACTERS_PER_STAFF_LINE ((s32)(sizeof(StaffLine) / sizeof(u16)))
+/* The index, in characters from the start, of the text's first character */
+#define FIRST_STAFF_CHARACTER(text) \
+  (((text)->lineCount * CHARACTERS_PER_STAFF_LINE) + \
+      STAFF_TEXT_HEADER_CHARACTERS)
+/* The staff text's character at the index, counted from its start */
+#define STAFF_CHARACTER(text, index) (((u16*)(text))[index])
+/* Whether the character is drawn over the one before it */
+#define IS_OVERLAID_CHARACTER(character) \
+  ((u32)((character) - FIRST_OVERLAID_CHARACTER) < OVERLAID_CHARACTER_COUNT)
+
 typedef struct StaffRollEasedView {
   /* 0x00 */ f32 eye[AXIS_COUNT];
   /* 0x0C */ f32 lookAt[AXIS_COUNT];
@@ -1816,22 +1834,18 @@ void DrawStaffRoll(Gfx** displayListHead) {
 void MeasureStaffLine(s32 lineIndex, s32* width, s32* height);
 
 /* Gives the width of the staff text's line; every line is given no height */
-#ifdef NON_MATCHING
 void MeasureStaffLine(s32 lineIndex, s32* width, s32* height) {
   s32 lineWidth = 0;
-  s32 index = 0;
-  StaffText* text = f_StaffText;
-  s32 start;
-  s32 length;
+  s32 index;
+  s32 start = STAFF_LINE(f_StaffText, lineIndex)->start;
+  s32 length = STAFF_LINE(f_StaffText, lineIndex)->length;
+  s32 firstCharacter = FIRST_STAFF_CHARACTER(f_StaffText);
   s32 character;
 
-  start = (text->lineCount * 2) + 2 + text->lines[lineIndex].start;
-  length = text->lines[lineIndex].length;
-  for (; index != length; index++) {
-    character = ((u16*)text)[start + index];
+  for (index = 0; index != length; index++) {
+    character = STAFF_CHARACTER(f_StaffText, firstCharacter + start + index);
     if (character < STAFF_CHARACTER_LIMIT &&
-        (u32)(character - FIRST_OVERLAID_CHARACTER) >=
-            OVERLAID_CHARACTER_COUNT) {
+        !IS_OVERLAID_CHARACTER(character)) {
       lineWidth += STAFF_GLYPH_WIDTH;
     }
   }
@@ -1839,9 +1853,6 @@ void MeasureStaffLine(s32 lineIndex, s32* width, s32* height) {
   *width = lineWidth;
   *height = 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_14/staff_roll", MeasureStaffLine);
-#endif
 
 /* Draws a line of the staff text from left and top, a glyph per character */
 void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
