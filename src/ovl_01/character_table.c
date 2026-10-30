@@ -137,7 +137,7 @@ static s32 D_802301A4_ovl_01 = 0;
  * The character in each place of the table: the CharacterId of each
  * CharacterChoice, as character_select.c keeps its own copy
  */
-static CharacterId D_802301A8_ovl_01[CHARACTER_COUNT] = {CHARACTER_PLUM,
+static CharacterId f_TableCharacters[CHARACTER_COUNT] = {CHARACTER_PLUM,
     CHARACTER_CHARLIE, CHARACTER_PEACH, CHARACTER_BABY_MARIO, CHARACTER_LUIGI,
     CHARACTER_YOSHI, CHARACTER_SONNY, CHARACTER_WARIO, CHARACTER_HARRY,
     CHARACTER_MARIO, CHARACTER_MAPLE, CHARACTER_DONKEY_KONG, CHARACTER_BOWSER,
@@ -393,7 +393,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
   shownRow = 0;
   row = memory->tableFirstRow;
   do {
-    rowCharacter = D_802301A8_ovl_01[row];
+    rowCharacter = f_TableCharacters[row];
     drawMode = FACE_DARKENED;
     if (f_TableCharacterVisibility[row] == TABLE_CHARACTER_SHOWN) {
       drawMode = FACE_PLAIN;
@@ -406,7 +406,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
     shownColumn = 0;
     column = memory->tableFirstColumn;
     do {
-      columnCharacter = D_802301A8_ovl_01[column];
+      columnCharacter = f_TableCharacters[column];
       drawMode = FACE_DARKENED;
       if (f_TableCharacterVisibility[column] != TABLE_CHARACTER_HIDDEN) {
         drawMode = FACE_PLAIN;
@@ -656,9 +656,9 @@ void DrawTablePopup(Gfx** displayListHead) {
   }
 
   rowIndex = memory->tableFirstRow + memory->tableRow;
-  rowCharacter = D_802301A8_ovl_01[rowIndex];
+  rowCharacter = f_TableCharacters[rowIndex];
   columnCharacter =
-      D_802301A8_ovl_01[memory->tableFirstColumn + memory->tableColumn];
+      f_TableCharacters[memory->tableFirstColumn + memory->tableColumn];
   columnWins = save->awards.matchups[rowCharacter][columnCharacter].lossCount &
       WIN_COUNT_MASK;
   rowWins = save->awards.matchups[rowCharacter][columnCharacter].winBits &
