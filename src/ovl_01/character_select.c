@@ -67,7 +67,7 @@ enum GridMove {
 #define LABEL_TOP 200
 
 /*
- * func_8020DB30 shows a character's shot curve as a meter of the 8x8
+ * DrawCurveMeter shows a character's shot curve as a meter of the 8x8
  * cells of asset 0x8EE, filled from the middle one toward the draw or the
  * fade, beside the 64x8 label of asset 0x979 that names it
  */
@@ -141,7 +141,7 @@ void DrawPlayerTags(Gfx** displayListHead, u8 tagMode);
 /* The original passes these a second argument that they ignore */
 void DrawComIcon();
 void DrawLeftyIcon();
-void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet);
+void DrawCurveMeter(Gfx** displayListHead, s32 clubSet);
 
 static u8 D_8022FF00_ovl_01 = FALSE;
 static u8 D_8022FF01_ovl_01 = FALSE;
@@ -1354,7 +1354,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   }
 
   character = &D_8022FF50_ovl_01[choiceIndex];
-  func_8020DB30_ovl_01(&gfx, *character);
+  DrawCurveMeter(&gfx, *character);
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   SetTextName(g_CharacterNames[choiceIndex]);
@@ -1901,7 +1901,11 @@ void DrawLeftyIcon(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
+/*
+ * Draws the shot curve of the club set's driver as a meter filled from its
+ * middle toward the draw or the fade, beside the label that names the curve.
+ */
+void DrawCurveMeter(Gfx** displayListHead, s32 clubSet) {
   Gfx* gfx = *displayListHead;
   s32 curve = g_Clubs[clubSet * CLUB_SET_SIZE].curve;
   s32 firstCell;
