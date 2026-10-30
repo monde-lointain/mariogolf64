@@ -419,10 +419,7 @@ void OpenSaveMenu(s32 kind) {
       }
 
       picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
-      /* The do-while is there to match */
-      do {
-        f_ModeIconImages[slot][1] = picture;
-      } while (0);
+      IN_OWN_BLOCK(f_ModeIconImages[slot][1] = picture);
       ReadEncodedAsset(picture, &encodedAsset);
     }
   } else {

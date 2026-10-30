@@ -3158,10 +3158,7 @@ void DrawSliceAnimation(void) {
           QuarterPixels(y + SLICE_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(g_DisplayListHead++);
-      /* The do-while is there to match */
-      do {
-        y += SLICE_STRIP_HEIGHT;
-      } while (0);
+      IN_OWN_BLOCK(y += SLICE_STRIP_HEIGHT);
     }
 
     column++;

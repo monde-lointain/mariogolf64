@@ -153,10 +153,7 @@ void FrameSpheres(f32 depthOffset) {
   rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
   leftAngle = -rightAngle;
   topAngle = rightAngle * 0.75f;
-  /* The do-while is there to match */
-  do {
-    bottomAngle = leftAngle * 0.75f;
-  } while (0);
+  IN_OWN_BLOCK(bottomAngle = leftAngle * 0.75f);
   minZ = Z_MARGIN;
   if (g_ControllerData[1].trigger & D_CBUTTONS) {
     osSyncPrintf("forv %f\n", g_Cameras[0].view.fieldOfView);
@@ -215,10 +212,8 @@ void FrameSpheres(f32 depthOffset) {
       FramingDegreesToRadians(90);
   distance = -minY / cosf(angle);
   eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * distance;
-  /* The do-while is there to match */
-  do {
-    verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * distance;
-  } while (0);
+  IN_OWN_BLOCK(
+      verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * distance);
   distance = maxY / cosf(-angle);
   eyeY += sinf(FramingDegreesToRadians(topAngle)) * distance;
   verticalEyeZ += cosf(FramingDegreesToRadians(topAngle)) * distance;
@@ -273,10 +268,8 @@ void FrameSpheres(f32 depthOffset) {
 
   depth = (Z_MARGIN - minZ) + eyeZ;
   frontDistance = depth - horizontalEyeZ;
-  /* The do-while is there to match */
-  do {
-    right = frontDistance * tan(FramingDegreesToRadians(rightAngle));
-  } while (0);
+  IN_OWN_BLOCK(
+      right = frontDistance * tan(FramingDegreesToRadians(rightAngle)));
   left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
   frontDistance = depth - verticalEyeZ;
   top = frontDistance * tan(FramingDegreesToRadians(topAngle));

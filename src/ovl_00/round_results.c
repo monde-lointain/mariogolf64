@@ -1003,9 +1003,7 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
           QuarterPixels(y + DISTANCE_GLYPH_HEIGHT), G_TX_RENDERTILE,
           TexelCoordinate((ch - '0') * DISTANCE_DIGIT_WIDTH), 0, TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
-      /* The empty do-while is there to match */
-      do {
-      } while (0);
+      END_BASIC_BLOCK();
     }
 
     c++;
@@ -1634,10 +1632,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
         NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((NOTICE_PORTRAIT_SIZE / 2) << 10) / size;
-    /* The do-while is there to match */
-    do {
-      centerX = f_NoticeLift + NOTICE_CENTER_X;
-    } while (0);
+    IN_OWN_BLOCK(centerX = f_NoticeLift + NOTICE_CENTER_X);
     centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
         QuarterPixels(centerY - size), QuarterPixels(size + centerX),

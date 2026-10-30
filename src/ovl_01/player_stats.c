@@ -2608,10 +2608,7 @@ void LoadBestShotFaces(void) {
   }
 
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
-    /* The do-while is there to match */
-    do {
-      cell = row * STATS_GRID_COLUMN_COUNT;
-    } while (0);
+    IN_OWN_BLOCK(cell = row * STATS_GRID_COLUMN_COUNT);
     for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++, cell++) {
       if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
         character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
@@ -2635,17 +2632,12 @@ void LoadBestShotFaces(void) {
         }
       } else {
         character = 0;
-        /* The do-while is there to match */
-        do {
-          palette = 0;
-        } while (0);
+        IN_OWN_BLOCK(palette = 0);
       }
 
       f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
-      /* The do-while is there to match */
-      do {
-        OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
-      } while (0);
+      IN_OWN_BLOCK(
+          OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file));
       ReadAssetFile(
           f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);
     }

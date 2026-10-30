@@ -1682,10 +1682,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    /* The do-while is there to match */
-    do {
-      bottom = SHRINKING_IMAGE_CENTER_Y;
-    } while (0);
+    IN_OWN_BLOCK(bottom = SHRINKING_IMAGE_CENTER_Y);
     for (i = 0; i != stripCount; i++) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
@@ -1800,10 +1797,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    /* The do-while is there to match */
-    do {
-      bottom = SHRINKING_IMAGE_CENTER_Y;
-    } while (0);
+    IN_OWN_BLOCK(bottom = SHRINKING_IMAGE_CENTER_Y);
     for (i = 0; i != stripCount; i++) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);

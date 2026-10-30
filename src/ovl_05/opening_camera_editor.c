@@ -249,10 +249,7 @@ void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
   f32 speed;
   f32 magnitude;
 
-  /* The do-while is there to match */
-  do {
-    magnitude = fabsf(angle);
-  } while (0);
+  IN_OWN_BLOCK(magnitude = fabsf(angle));
   if (magnitude < 0.001f) {
     g_CameraEditor.heading += angle;
     return;
@@ -292,10 +289,7 @@ void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
   f32 speed;
   f32 magnitude;
 
-  /* The do-while is there to match */
-  do {
-    magnitude = fabsf(angle);
-  } while (0);
+  IN_OWN_BLOCK(magnitude = fabsf(angle));
   if (magnitude < 0.001f) {
     g_CameraEditor.pitch += angle;
     return;
@@ -349,10 +343,7 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
     speed = g_CameraEditor.zoomTopSpeed =
         change / (frameCount - easeFrameCount);
     g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
-    /* The do-while is there to match */
-    do {
-      g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
-    } while (0);
+    IN_OWN_BLOCK(g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25);
   }
 
   g_CameraEditor.zoomTarget = distance;
@@ -925,9 +916,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
     if (g_ControllerStates[SECOND_EDITOR_PAD].buttons & (button)) { \
       if (g_ControllerStates[SECOND_EDITOR_PAD].buttons & START_BUTTON) { \
         g_CameraEditor.points[point][axis] step FAST_PAD_STEP; \
-        /* The empty do-while is there to match */ \
-        do { \
-        } while (0); \
+        END_BASIC_BLOCK(); \
       } else { \
         g_CameraEditor.points[point][axis] step SLOW_PAD_STEP; \
       } \

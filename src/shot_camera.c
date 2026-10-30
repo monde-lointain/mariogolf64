@@ -1421,12 +1421,9 @@ void EaseCameraPosition(Vec3 target) {
 
   offset = target[AXIS_X] - f_CameraPosition[AXIS_X];
 
-  /* The do-while is there to match */
-  do {
-    if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
-      f_CameraPosition[AXIS_X] += offset * CAMERA_EASE_FRACTION;
-    }
-  } while (0);
+  IN_OWN_BLOCK(if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
+    f_CameraPosition[AXIS_X] += offset * CAMERA_EASE_FRACTION;
+  });
   offset = target[AXIS_Y] - f_CameraPosition[AXIS_Y];
   if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
     f_CameraPosition[AXIS_Y] += offset * CAMERA_EASE_FRACTION;
@@ -2327,16 +2324,13 @@ void PlaceFlightCamera(s32 step) {
 
       point[AXIS_X] *= COURSE_TO_WORLD_SCALE;
 
-      /* Computing delta before scaling y and z, and the do-while, are there to
-       * match */
+      /* Computing delta before scaling y and z is there to match */
       delta = point[AXIS_X] - f_CameraPosition[AXIS_X];
       point[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
       point[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
-      do {
-        if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
-          f_CameraPosition[AXIS_X] += delta * FACING_CUP_EASE_FRACTION;
-        }
-      } while (0);
+      IN_OWN_BLOCK(if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
+        f_CameraPosition[AXIS_X] += delta * FACING_CUP_EASE_FRACTION;
+      });
       delta = point[AXIS_Y] - f_CameraPosition[AXIS_Y];
       if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
         f_CameraPosition[AXIS_Y] += delta * FACING_CUP_EASE_FRACTION;

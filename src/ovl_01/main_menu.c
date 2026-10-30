@@ -3931,16 +3931,14 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
           gDPPipeSync(gfx++);
 
           if (stripIndex == CLAMPED_BACKDROP_STRIP_COUNT - 1) {
-            /* The do-while is there to match */
-            do {
-              gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
-                  QuarterPixels(CLAMPED_BACKDROP_LAST_TOP),
-                  QuarterPixels(
-                      BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
-                  QuarterPixels(CLAMPED_BACKDROP_BOTTOM), G_TX_RENDERTILE, 0,
-                  BACKDROP_SECOND_ROW_START, TEXEL_STEP_ONE / BACKDROP_SCALE,
-                  TEXEL_STEP_ONE / BACKDROP_SCALE);
-            } while (0);
+            IN_OWN_BLOCK(
+                gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+                    QuarterPixels(CLAMPED_BACKDROP_LAST_TOP),
+                    QuarterPixels(
+                        BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+                    QuarterPixels(CLAMPED_BACKDROP_BOTTOM), G_TX_RENDERTILE, 0,
+                    BACKDROP_SECOND_ROW_START, TEXEL_STEP_ONE / BACKDROP_SCALE,
+                    TEXEL_STEP_ONE / BACKDROP_SCALE));
           } else {
             stripTop = BACKDROP_TOP +
                 (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);

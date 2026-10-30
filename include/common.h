@@ -148,6 +148,25 @@ typedef f32 Mat4[4][4];
 #define READ_ONLY const
 #endif
 
+/*
+ * Compiles statements in a basic block of their own, to match. KMC GCC
+ * schedules instructions and reuses values only within a block, and the
+ * original's code shows block boundaries around some statements where its
+ * source has none that survives; a loop that runs once gives them back.
+ */
+#define IN_OWN_BLOCK(statements) \
+  do { \
+    statements; \
+  } while (0)
+
+/*
+ * Ends a basic block between two statements, to match. Some boundaries in the
+ * original's code need this empty block instead of IN_OWN_BLOCK.
+ */
+#define END_BASIC_BLOCK() \
+  do { \
+  } while (0)
+
 /* Zero is false, and any other value true, as C tests it */
 typedef s32 Boolean;
 

@@ -517,10 +517,7 @@ void DrawScreenFade(Gfx** displayListHead) {
       alpha = FADE_ALPHA_RANGE - 1;
     }
 
-    /* The do-while is there to match */
-    do {
-      gDPPipeSync(gfx++);
-    } while (0);
+    IN_OWN_BLOCK(gDPPipeSync(gfx++));
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPPipeSync(gfx++);
@@ -661,10 +658,7 @@ void DrawPrompt(Gfx** displayListHead) {
 
   MeasureMessage(
       prompt->messageId, FONT_SIZE_LARGE, &textWidth, &textHeight, 0);
-  /* The do-while is there to match */
-  do {
-    cloudHeight = textHeight + PROMPT_CLOUD_MARGIN;
-  } while (0);
+  IN_OWN_BLOCK(cloudHeight = textHeight + PROMPT_CLOUD_MARGIN);
   if (cloudHeight < PROMPT_CLOUD_SMALLEST_HEIGHT) {
     cloudHeight = PROMPT_CLOUD_SMALLEST_HEIGHT;
   }

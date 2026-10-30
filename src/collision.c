@@ -1836,10 +1836,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
 
     direction[AXIS_X] = startX - hitX;
     direction[AXIS_Y] = 0.0f;
-    /* The do-while is there to match */
-    do {
-      direction[AXIS_Z] = startZ - hitZ;
-    } while (0);
+    IN_OWN_BLOCK(direction[AXIS_Z] = startZ - hitZ);
     if (direction[AXIS_X] != 0.0f || direction[AXIS_Z] != 0.0f) {
       guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
     }

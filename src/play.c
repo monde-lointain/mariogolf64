@@ -643,12 +643,8 @@ void SetNextTeeOrder(void) {
     }
   }
 
-  /* The do-while is there to match */
-  do {
-    for (i = 0; i < g_GameState.playerCount; i++) {
-      g_Players[i].teeOrder = orders[i];
-    }
-  } while (0);
+  IN_OWN_BLOCK(for (i = 0; i < g_GameState.playerCount;
+      i++) { g_Players[i].teeOrder = orders[i]; });
 }
 
 /*

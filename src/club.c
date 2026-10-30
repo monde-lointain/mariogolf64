@@ -1133,10 +1133,7 @@ void GenerateClub(s32 clubIndex) {
         }
 
         if (longPower == 0) {
-          /* The do-while is there to match */
-          do {
-            power = shortPower * 3 / 2;
-          } while (0);
+          IN_OWN_BLOCK(power = shortPower * 3 / 2);
         } else {
           power = InterpolatePower(shortPower, longPower,
               (f32)(targetDistance - shortDistance) /

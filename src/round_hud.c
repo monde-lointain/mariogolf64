@@ -2287,10 +2287,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
     }
   }
 
-  /* The do-while is there to match */
-  do {
-    f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
-  } while (0);
+  IN_OWN_BLOCK(f_WindIconPulseAngle += WIND_ICON_PULSE_STEP);
   speed = (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE /
       WIND_SPEED_TO_METERS_DIVISOR;
   if (speed >= WIND_SPEED_TWO_DIGITS) {
