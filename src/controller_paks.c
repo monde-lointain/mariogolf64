@@ -40,7 +40,7 @@ Boolean IsGameBoyCharacterPresent(s32 characterIndex) {
       GAME_BOY_CHARACTER_STATUS_PRESENT;
 }
 
-u8* GetGameBoyCharacterName(s32 characterIndex) {
+char* GetGameBoyCharacterName(s32 characterIndex) {
   return g_GameBoyCharacters[characterIndex].name;
 }
 

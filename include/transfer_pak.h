@@ -48,7 +48,7 @@ enum GameBoyBallType {
  * Pak */
 typedef struct GameBoyCharacter {
   /* 0x00 */ u8 status;
-  /* 0x01 */ u8 name[GAME_BOY_CHARACTER_NAME_LENGTH];
+  /* 0x01 */ char name[GAME_BOY_CHARACTER_NAME_LENGTH];
   /* 0x0D */ u8 saveName[SAVE_NAME_SIZE]; /* As the Game Boy save spells it */
   /* 0x18 */ u8 unk18;
   /* 0x19 */ u8 character;
@@ -164,7 +164,7 @@ extern GameBoyTransfer g_GameBoyTransfer;
 void AddGameBoyExperience(s32 characterIndex, s32 experience);
 Boolean HasGameBoyPak(void);
 Boolean IsGameBoyCharacterPresent(s32 characterIndex);
-u8* GetGameBoyCharacterName(s32 characterIndex);
+char* GetGameBoyCharacterName(s32 characterIndex);
 void ClearBootTransmitPending(void);
 Boolean IsBootTransmitPending(void);
 void ResetGameBoyTransfer(s32 transferMode);

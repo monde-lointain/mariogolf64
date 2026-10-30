@@ -52,6 +52,13 @@ void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields);
 
 FILE_STATIC char f_FaultText[FAULT_TEXT_SIZE];
 
+/*
+ * Prints f_FaultText at the column and row of the screen. PrintMessage takes
+ * s8 text, as the original reads its characters signed.
+ */
+#define PrintFaultMessage(column, row) \
+  PrintMessage((s8*)f_FaultText, (column), (row))
+
 /* Only cleared; nothing in the code reads it */
 static s32 f_FaultUnk = 0;
 /* The debug text row of the next line of the fault report */
@@ -205,54 +212,54 @@ void PrintFaultContext(OSThread* thread) {
   f_FaultUnk = 0;
   sprintf(f_FaultText, "\nFault in thread %d:\n\n", thread->id);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, FAULT_TITLE_ROW);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, FAULT_TITLE_ROW);
   sprintf(f_FaultText, "epc\t\t0x%08x\n", context->pc);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, FAULT_PC_ROW);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, FAULT_PC_ROW);
   PrintRegisterFields(context->cause, "cause", f_CauseFields);
   PrintRegisterFields(context->sr, "sr", f_StatusFields);
   sprintf(f_FaultText, "badvaddr\t0x%08.8x\n\n", context->badvaddr);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "at 0x%08.8x v0 0x%08.8x v1 0x%08.8x\n", context->at,
       context->v0, context->v1);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "a0 0x%08.8x a1 0x%08.8x a2 0x%08.8x\n", context->a0,
       context->a1, context->a2);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "a3 0x%08.8x t0 0x%08.8x t1 0x%08.8x\n", context->a3,
       context->t0, context->t1);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "t2 0x%08.8x t3 0x%08.8x t4 0x%08.8x\n", context->t2,
       context->t3, context->t4);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "t5 0x%08.8x t6 0x%08.8x t7 0x%08.8x\n", context->t5,
       context->t6, context->t7);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "s0 0x%08.8x s1 0x%08.8x s2 0x%08.8x\n", context->s0,
       context->s1, context->s2);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "s3 0x%08.8x s4 0x%08.8x s5 0x%08.8x\n", context->s3,
       context->s4, context->s5);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "s6 0x%08.8x s7 0x%08.8x t8 0x%08.8x\n", context->s6,
       context->s7, context->t8);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "t9 0x%08.8x gp 0x%08.8x sp 0x%08.8x\n", context->t9,
       context->gp, context->sp);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   sprintf(f_FaultText, "s8 0x%08.8x ra 0x%08.8x\n\n", context->s8, context->ra);
   PrintFaultText();
-  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintFaultMessage(FAULT_TEXT_COLUMN, f_FaultTextRow++);
   PrintRegisterFields(context->fpcsr, "fpcsr", f_FloatStatusFields);
   sprintf(f_FaultText, "\nf0  %.7e f2  %.7e f4  %.7e f6  %.7e\n",
       context->fp0.f.f_even, context->fp2.f.f_even, context->fp4.f.f_even,
@@ -322,7 +329,7 @@ void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields) {
 
       sprintf(f_FaultText, "%s", fields->text);
       PrintFaultText();
-      PrintMessage(f_FaultText, FIELD_TEXT_COLUMN, f_FaultTextRow++);
+      PrintFaultMessage(FIELD_TEXT_COLUMN, f_FaultTextRow++);
     }
 
     fields++;

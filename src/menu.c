@@ -460,18 +460,14 @@ static s16 f_DebugImportedSpins[IMPORTED_CHARACTER_COUNT] = {40, 30, 20, 10};
 static s16 f_DebugImportedSideSpins[IMPORTED_CHARACTER_COUNT] = {
     0, 50, -50, 10};
 /* Spelled with the top bit set on each lowercase letter */
-static u8 f_DebugImportedNames[IMPORTED_CHARACTER_COUNT]
-                              [IMPORTED_CHARACTER_NAME_LENGTH] = {
-                                  {'K', MARK_LOWERCASE('i'),
-                                      MARK_LOWERCASE('d')},
-                                  {'S', MARK_LOWERCASE('h'),
-                                      MARK_LOWERCASE('e'), MARK_LOWERCASE('r'),
-                                      MARK_LOWERCASE('r'), MARK_LOWERCASE('y')},
-                                  {'A', MARK_LOWERCASE('z'),
-                                      MARK_LOWERCASE('a'), MARK_LOWERCASE('l'),
-                                      MARK_LOWERCASE('e'), MARK_LOWERCASE('a')},
-                                  {'J', MARK_LOWERCASE('o'),
-                                      MARK_LOWERCASE('e')}};
+static char f_DebugImportedNames
+    [IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
+        {'K', MARK_LOWERCASE('i'), MARK_LOWERCASE('d')},
+        {'S', MARK_LOWERCASE('h'), MARK_LOWERCASE('e'), MARK_LOWERCASE('r'),
+            MARK_LOWERCASE('r'), MARK_LOWERCASE('y')},
+        {'A', MARK_LOWERCASE('z'), MARK_LOWERCASE('a'), MARK_LOWERCASE('l'),
+            MARK_LOWERCASE('e'), MARK_LOWERCASE('a')},
+        {'J', MARK_LOWERCASE('o'), MARK_LOWERCASE('e')}};
 static ImportedCharacterCell
     f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] = {
         {0, 0, 0, 2}, {0, 1, 0, 2}, {0, 2, 0, 2}, {0, 3, 0, 2}};
@@ -1468,7 +1464,7 @@ void PlaceImportedCharacters(void) {
   s16 index;
   s16 byteIndex;
   s16 count; /* Also the byte index of the first loops, to match */
-  u8* name;
+  char* name;
   u8 letter;
 
   for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
