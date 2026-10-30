@@ -1065,9 +1065,6 @@ s32 GetOpenRingShotCourseCount(void) {
   return 1;
 }
 
-/* Doesn't match: the original keeps the saved game's place in a saved register
- */
-#ifdef NON_MATCHING
 void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
   EncodedAsset asset;
   AssetFile file;
@@ -1124,8 +1121,9 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
         ReadEncodedAsset(
             f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST], &asset);
       } else {
-        miniGolfIndex = save->savedGames[gameIndex].state.courseIndex -
-            MINI_GOLF_COURSE_INDEX;
+        /* Subtracting in a second statement is needed to match */
+        miniGolfIndex = save->savedGames[gameIndex].state.courseIndex;
+        miniGolfIndex -= MINI_GOLF_COURSE_INDEX;
         OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
         ReadEncodedAsset(
             f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST], &asset);
@@ -1156,8 +1154,9 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
         ReadEncodedAsset(
             f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND], &asset);
       } else {
-        miniGolfIndex = save->savedGames[gameIndex].state.courseIndex -
-            MINI_GOLF_COURSE_INDEX;
+        /* Subtracting in a second statement is needed to match */
+        miniGolfIndex = save->savedGames[gameIndex].state.courseIndex;
+        miniGolfIndex -= MINI_GOLF_COURSE_INDEX;
         OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
         ReadEncodedAsset(
             f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND], &asset);
@@ -1170,9 +1169,6 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
 
   f_ShownCourseBufferIndex = COURSE_IMAGE_BUFFER_FIRST;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", LoadSaveGameBuffer);
-#endif
 
 /*
  * Reads the save data from SRAM, finds each saved game's mode image, chooses
