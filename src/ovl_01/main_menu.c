@@ -448,7 +448,8 @@ static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
 static s32 D_8022BE58_ovl_01[10] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
 /* Which of D_800FBDFC's buffers shows the course */
 static u8 D_8022BE80_ovl_01 = 0;
-static s8 D_8022BE81_ovl_01 = 0;
+/* The model kind that the animation viewer loads, which L cycles */
+static s8 f_ViewerModelKind = 0;
 /* How far the bet settings and handicap pages have slid in */
 static s32 f_BetSlideOffset = 0;
 u8 D_8022BE88_ovl_01 = 0;
@@ -466,7 +467,8 @@ static s16 f_ImageSlotIndex = 0;
 /* Which of g_MenuBoardImages is shown; a new screen's board, or other images
  * in its place, are read into the other */
 static s16 f_MenuBoardImageIndex = 0;
-static u8 D_8022BE94_ovl_01 = 0;
+/* Whether the animation viewer must reload its character for a new kind */
+static u8 f_IsViewerModelKindChanged = 0;
 /* Whether the options screen's erase window is up */
 static u8 f_IsEraseWindowUp = FALSE;
 /* The bobbing of the menus' items: the offset that it gives, and its phase */
@@ -731,15 +733,20 @@ static f32 f_MenuCharacterPositions
 /* The character for each grid mark */
 static s32 D_8022FB58_ovl_01[CHARACTER_COUNT] = {
     0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
-static s32 D_8022FBA0_ovl_01 = NO_VIEWER_CHARACTER;
-static s32 D_8022FBA4_ovl_01 = FALSE;
-static f32 D_8022FBA8_ovl_01 = 0.0f;
-static f32 D_8022FBAC_ovl_01 = 0.0f;
-static f32 D_8022FBB0_ovl_01 = 0.0f;
+/* The character that the animation viewer last loaded */
+static s32 f_ViewerLoadedCharacter = NO_VIEWER_CHARACTER;
+/* Whether the animation viewer must reload its character for an animation */
+static s32 f_IsViewerAnimationChanged = FALSE;
+/* The animation viewer's turn of the character, in degrees, from the stick */
+static f32 f_ViewerPitch = 0.0f;
+static f32 f_ViewerYaw = 0.0f;
+/* Added to VIEWER_BASE_SCALE; A and B step it */
+static f32 f_ViewerScaleOffset = 0.0f;
 /* The character slot that the animation viewer draws; nothing changes it */
 static u32 f_ViewerCharacterSlot = 0;
-static f32 D_8022FBB8_ovl_01 = 0.0f;
-static f32 D_8022FBBC_ovl_01 = 0.0f;
+/* Added to VIEWER_BASE_OFFSET; the C buttons step them */
+static f32 f_ViewerOffsetX = 0.0f;
+static f32 f_ViewerOffsetY = 0.0f;
 /* The front course's bob phase */
 static f32 D_8022FBC0_ovl_01 = 0.0f;
 /* Read by no routine */
@@ -1390,7 +1397,7 @@ void UpdateMenus(void) {
           g_AnimatedIconFrameIndex = 0;
           g_AnimatedIconBufferIndex = 0;
           g_AnimatedIconFrameTime = 0;
-          D_8022BE94_ovl_01 = 0;
+          f_IsViewerModelKindChanged = 0;
         } else {
           LoadHelpBoardImage(D_801049A0[0][0], HELP_BOARD_IMAGE_HAND);
           LoadHelpBoardImage(D_801B93E0[1], HELP_BOARD_IMAGE_ARROWS);
@@ -5500,42 +5507,42 @@ void DrawAnimationViewer(Gfx** displayListHead) {
         stickY /= VIEWER_STICK_DIVISOR;
       }
 
-      D_8022FBA8_ovl_01 += stickY;
-      D_8022FBAC_ovl_01 += stickX;
+      f_ViewerPitch += stickY;
+      f_ViewerYaw += stickX;
       if (g_ControllerStates[0].buttons & L_CBUTTONS) {
-        D_8022FBB8_ovl_01 -= 1.0f;
+        f_ViewerOffsetX -= 1.0f;
       }
 
       if (g_ControllerStates[0].buttons & R_CBUTTONS) {
-        D_8022FBB8_ovl_01 += 1.0f;
+        f_ViewerOffsetX += 1.0f;
       }
 
       if (g_ControllerStates[0].buttons & U_CBUTTONS) {
-        D_8022FBBC_ovl_01 += 1.0f;
+        f_ViewerOffsetY += 1.0f;
       }
 
       if (g_ControllerStates[0].buttons & D_CBUTTONS) {
-        D_8022FBBC_ovl_01 -= 1.0f;
+        f_ViewerOffsetY -= 1.0f;
       }
 
       if (g_ControllerStates[0].buttons & B_BUTTON) {
-        D_8022FBB0_ovl_01 -= VIEWER_SCALE_STEP;
+        f_ViewerScaleOffset -= VIEWER_SCALE_STEP;
       }
 
       if (g_ControllerStates[0].buttons & A_BUTTON) {
-        D_8022FBB0_ovl_01 += VIEWER_SCALE_STEP;
+        f_ViewerScaleOffset += VIEWER_SCALE_STEP;
       }
     }
 
     if ((g_MenuPressedButtons & L_JPAD) && f_ViewerAnimation > 0) {
       f_ViewerAnimation--;
-      D_8022FBA4_ovl_01 = TRUE;
+      f_IsViewerAnimationChanged = TRUE;
     }
 
     if ((g_MenuPressedButtons & R_JPAD) &&
         f_ViewerAnimation < VIEWER_LAST_ANIMATION) {
       f_ViewerAnimation++;
-      D_8022FBA4_ovl_01 = TRUE;
+      f_IsViewerAnimationChanged = TRUE;
     }
 
     if (g_ControllerStates[0].buttons & Z_TRIG) {
@@ -5568,34 +5575,35 @@ void DrawAnimationViewer(Gfx** displayListHead) {
       SetAnimationSpeed(f_ViewerCharacterSlot, 1.0f);
     }
 
-    if ((g_MenuRepeatButtons & L_TRIG) && D_8022BE94_ovl_01 == FALSE) {
-      D_8022BE81_ovl_01++;
-      if (D_8022BE81_ovl_01 >= VIEWER_KIND_COUNT) {
-        D_8022BE81_ovl_01 = 0;
+    if ((g_MenuRepeatButtons & L_TRIG) && f_IsViewerModelKindChanged == FALSE) {
+      f_ViewerModelKind++;
+      if (f_ViewerModelKind >= VIEWER_KIND_COUNT) {
+        f_ViewerModelKind = 0;
       }
 
-      if (D_8022BE81_ovl_01 < 0) {
-        D_8022BE81_ovl_01 = VIEWER_KIND_COUNT - 1;
+      if (f_ViewerModelKind < 0) {
+        f_ViewerModelKind = VIEWER_KIND_COUNT - 1;
       }
 
-      D_8022BE94_ovl_01 = TRUE;
+      f_IsViewerModelKindChanged = TRUE;
     }
   }
 
-  if (D_8022FBA0_ovl_01 != g_MenuMemory.viewerCharacter ||
-      D_8022FBA4_ovl_01 == TRUE || D_8022BE94_ovl_01 == TRUE) {
+  if (f_ViewerLoadedCharacter != g_MenuMemory.viewerCharacter ||
+      f_IsViewerAnimationChanged == TRUE ||
+      f_IsViewerModelKindChanged == TRUE) {
     if (IsCharacterSlotBusy(f_ViewerCharacterSlot)) {
       FreeCharacterSlot(f_ViewerCharacterSlot);
     } else {
       character = g_MenuMemory.viewerCharacter;
-      D_8022BE94_ovl_01 = FALSE;
-      D_8022FBA4_ovl_01 = FALSE;
-      D_8022FBA0_ovl_01 = character;
+      f_IsViewerModelKindChanged = FALSE;
+      f_IsViewerAnimationChanged = FALSE;
+      f_ViewerLoadedCharacter = character;
       if (f_ViewerAnimation >= VIEWER_FIRST_SECOND_MODEL_ANIMATION) {
         LoadCharacter(f_ViewerCharacterSlot,
-            character + VIEWER_SECOND_MODEL_OFFSET, D_8022BE81_ovl_01);
+            character + VIEWER_SECOND_MODEL_OFFSET, f_ViewerModelKind);
       } else {
-        LoadCharacter(f_ViewerCharacterSlot, character, D_8022BE81_ovl_01);
+        LoadCharacter(f_ViewerCharacterSlot, character, f_ViewerModelKind);
       }
 
       SetCharacterAnimation(f_ViewerCharacterSlot, f_ViewerAnimation);
@@ -5614,14 +5622,14 @@ void DrawAnimationViewer(Gfx** displayListHead) {
     Mat4 matrix;
 
     rotation[2] = 0;
-    rotation[0] = DegreesToRadians(D_8022FBA8_ovl_01);
-    rotation[1] = DegreesToRadians(D_8022FBAC_ovl_01);
-    translation[0] = D_8022FBB8_ovl_01 + VIEWER_BASE_OFFSET;
-    translation[1] = D_8022FBBC_ovl_01 + VIEWER_BASE_OFFSET;
+    rotation[0] = DegreesToRadians(f_ViewerPitch);
+    rotation[1] = DegreesToRadians(f_ViewerYaw);
+    translation[0] = f_ViewerOffsetX + VIEWER_BASE_OFFSET;
+    translation[1] = f_ViewerOffsetY + VIEWER_BASE_OFFSET;
     translation[2] = VIEWER_DEPTH;
-    scale[0] = D_8022FBB0_ovl_01 + VIEWER_BASE_SCALE;
-    scale[1] = D_8022FBB0_ovl_01 + VIEWER_BASE_SCALE;
-    scale[2] = D_8022FBB0_ovl_01 + VIEWER_BASE_SCALE;
+    scale[0] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
+    scale[1] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
+    scale[2] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
     BuildTransformMatrix(matrix, rotation, translation, scale);
     ConvertMatrixToFixed(matrix, &D_80231FB0_ovl_01[g_DrawBufferIndex]);
   }
