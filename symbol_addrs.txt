@@ -3476,6 +3476,7 @@ f_SoundTestSongReverb = 0x8022BEAC; // type:s32 size:0x4 segment:ovl_01
 f_SoundTestSoundFrequency = 0x8022BEB0; // type:f32 size:0x4 segment:ovl_01
 f_SoundTestSongFrequency = 0x8022BEB4; // type:f32 size:0x4 segment:ovl_01
 f_SoundTestSongTempo = 0x8022BEB8; // type:s32 size:0x4 segment:ovl_01
+f_ModeChoiceIcons = 0x8022BEBC; // type:u8 size:0x30 segment:ovl_01
 f_SoundTestSongNames = 0x8022C110; // size:0x264 segment:ovl_01
 f_SoundTestSoundNames = 0x8022C374; // segment:ovl_01
 DrawNarrowTwoDigitMenuNumber = 0x80210C18; // type:func segment:ovl_01

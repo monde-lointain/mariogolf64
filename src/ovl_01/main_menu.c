@@ -484,7 +484,8 @@ static s32 f_SoundTestSongReverb = 0;
 static f32 f_SoundTestSoundFrequency = 0.0f;
 static f32 f_SoundTestSongFrequency = 0.0f;
 static s32 f_SoundTestSongTempo = NORMAL_SONG_TEMPO;
-static u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT] = {
+/* The mode that each of the mode select's choices picks, by player count */
+static u8 f_ModeChoiceIcons[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT] = {
     {MODE_ICON_TOURNAMENT, MODE_ICON_GET_CHARACTER, MODE_ICON_RING_SHOT,
         MODE_ICON_SPEED_GOLF, MODE_ICON_STROKE, MODE_ICON_MINI_GOLF,
         MODE_ICON_TRAINING},
@@ -1232,7 +1233,7 @@ void UpdateMenus(void) {
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
         ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         iconIndex =
-            D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+            f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
         g_AnimatedIconFrameIndex = 0;
         g_AnimatedIconBufferIndex = 0;
         g_AnimatedIconFrameTime = 0;
@@ -2175,7 +2176,7 @@ void UpdateAnimationViewer(void) {
   g_AnimatedIconFrameIndex = 0; \
   g_AnimatedIconFrameTime = 0; \
   OpenEncodedAsset( \
-      g_ModeIconAnimations[D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1] \
+      g_ModeIconAnimations[f_ModeChoiceIcons[g_ChosenPlayerCount - 1] \
                                             [g_MenuMemory.modeChoice]][0], \
       &asset); \
   ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex ^ 1], &asset); \
@@ -2225,7 +2226,7 @@ void UpdateModeSelect(void) {
     f_BetSettingsSlide = 0;
     f_HandicapsSlide = 0;
     g_GameState.isMiniGolf = FALSE;
-    mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+    mode = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
     g_GameState.unk2C = rand();
     switch (mode) {
       case MODE_ICON_TOURNAMENT:
@@ -2510,7 +2511,7 @@ void UpdateModeSelect(void) {
     }
   }
 
-  mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+  mode = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
       break;
@@ -2523,7 +2524,7 @@ void UpdateModeSelect(void) {
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
         0xFF);
   } else if (g_ChosenPlayerCount == 1 &&
-      D_8022BEBC_ovl_01[0][g_MenuMemory.modeChoice] == MODE_ICON_STROKE) {
+      f_ModeChoiceIcons[0][g_MenuMemory.modeChoice] == MODE_ICON_STROKE) {
     SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, MESSAGE_SOLO_STROKE,
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
         0xFF);
@@ -2624,7 +2625,7 @@ void UpdateCourseSelect(void) {
     g_MenuMemory.courseSpin = 0;
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-    if (D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice] ==
+    if (f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice] ==
         MODE_ICON_GET_CHARACTER) {
       g_MenuScreen = MENU_SCREEN_OPPONENT_SELECT;
       D_801B7070--;
@@ -4941,7 +4942,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
   labelIndex =
-      D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+      f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
   gDPLoadTextureBlock_4b(gfx++,
       TextureAddress(ImageTexels(g_ImageSlots[f_ImageSlotIndex]) +
           (labelIndex * MODE_LABEL_IMAGE_SIZE)),
@@ -5031,7 +5032,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   DrawCenteredPageArrows(&gfx, MODE_ARROW_GAP, MODE_ARROW_Y);
 
   if ((g_ChosenPlayerCount == 1) &&
-      (D_8022BEBC_ovl_01[0][g_MenuMemory.modeChoice] == MODE_ICON_TOURNAMENT)) {
+      (f_ModeChoiceIcons[0][g_MenuMemory.modeChoice] == MODE_ICON_TOURNAMENT)) {
     badgeCount = 0;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
       for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
@@ -5064,7 +5065,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   }
 
   if ((g_ChosenPlayerCount == 1) &&
-      (D_8022BEBC_ovl_01[0][g_MenuMemory.modeChoice] == MODE_ICON_RING_SHOT)) {
+      (f_ModeChoiceIcons[0][g_MenuMemory.modeChoice] == MODE_ICON_RING_SHOT)) {
     starCount = 0;
     for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT;
         courseIndex++) {
@@ -5151,7 +5152,7 @@ void DrawModeIcon(Gfx** displayListHead) {
   g_AnimatedIconFrameTime++;
   if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
     iconIndex =
-        D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+        f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
     g_AnimatedIconFrameTime = 0;
     g_AnimatedIconFrameIndex++;
     if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
@@ -5207,7 +5208,7 @@ void DrawScaledModeIcon(
   g_AnimatedIconFrameTime++;
   if (g_AnimatedIconFrameTime == MODE_ICON_FRAME_DURATION) {
     iconIndex =
-        D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+        f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
     g_AnimatedIconFrameTime = 0;
     g_AnimatedIconFrameIndex++;
     if (g_AnimatedIconFrameIndex >= MODE_ICON_FRAME_COUNT) {
@@ -5253,7 +5254,7 @@ void DrawMenuCharacters(Gfx** displayListHead) {
 
   memory = GetMenuMemory();
   characterCount = g_ChosenPlayerCount;
-  if (D_8022BEBC_ovl_01[characterCount - 1][memory->modeChoice] ==
+  if (f_ModeChoiceIcons[characterCount - 1][memory->modeChoice] ==
       MODE_ICON_GET_CHARACTER) {
     if (characterCount == 1) {
       for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
