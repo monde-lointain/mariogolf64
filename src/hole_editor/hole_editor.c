@@ -1981,9 +1981,6 @@ void func_80402E1C_hole_editor(void) {
  * pick the wall. R zooms in, L or Z with R zooms out, and Z with the stick
  * orbits the camera around the corner.
  */
-/* Doesn't match: the original copies stepUp into stepZ's register before
- * scaling it, where GCC folds the copy */
-#ifdef NON_MATCHING
 void func_80403A04_hole_editor(void) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
   Vtx_t* corners[HOLE_TRIANGLE_VERTEX_COUNT];
@@ -2051,16 +2048,17 @@ void func_80403A04_hole_editor(void) {
   sprintf(text, "EditNo%d   ", f_WallTriangleIndex);
   PrintDebugText(text, WALL_TEXT_COLUMN, WALL_TEXT_ROW);
   if ((editKind == TRIANGLE_EDIT_MOVE) | (isDropping == TRUE)) {
-    /* Left over from the triangle editor; walls move along the world axes */
+    /* Left over from the triangle editor, though walls move along the world
+     * axes: both turned steps are overwritten */
+    stepZ = stepUp;
     stepX = (-cos((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
                 stepUp) -
         (sin((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
             stepRight);
-    stepZ = (-sin((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
+    stepX = (-sin((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
                 stepUp) +
         (cos((u16)f_WallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) *
             stepRight);
-    stepZ = stepUp;
 
     /* Scaled in two steps; in one expression GCC would multiply 10 by the zoom
      * first */
@@ -2267,9 +2265,6 @@ void func_80403A04_hole_editor(void) {
       (sin(f_WallCameraPitch) * (g_MapCamera.view.zoom * cameraDistance)) +
       g_MapCamera.view.lookAt[AXIS_Y];
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80403A04_hole_editor);
-#endif
 
 /*
  * Sets the billboards and the hole's points back on the ground, and
