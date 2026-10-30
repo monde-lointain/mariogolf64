@@ -952,20 +952,17 @@ s32 GetShotDistance(Club* club, u32 shotMode) {
 }
 
 /* Returns the club's reach in the shot mode, in world units */
-#ifdef NON_MATCHING
 s32 GetShotWorldDistance(Club* club, ShotMode shotMode) {
   s32 distance = GetShotDistance(club, shotMode);
-  f32 unitsPerStep = UNITS_PER_YARD;
 
   if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-    unitsPerStep = UNITS_PER_FOOT;
+    distance = distance * UNITS_PER_FOOT;
+  } else {
+    distance = distance * UNITS_PER_YARD;
   }
 
-  return distance * unitsPerStep;
+  return distance;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/club", GetShotWorldDistance);
-#endif
 
 /*
  * Builds the source of f_ClubParameters and f_PutterPowers from the clubs,
