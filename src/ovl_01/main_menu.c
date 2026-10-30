@@ -343,7 +343,7 @@ void LeaveMenuWithWipe(void);
 void LeaveMenuWithCourseWipe(void);
 void UpdateBirdieBadges(void);
 void UpdateBlankScreen(void);
-void func_80209500_ovl_01(void);
+void HideGameBoyCharacters(void);
 void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind);
 void func_8020B3CC_ovl_01(void);
 void func_8020B438_ovl_01(void);
@@ -1287,7 +1287,7 @@ void UpdateMenus(void) {
 
       case MENU_SCREEN_OPPONENT_SELECT:
         BuildCharacterGrid(1, FALSE);
-        func_80209500_ovl_01();
+        HideGameBoyCharacters();
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
         f_MenuBoardImageIndex ^= 1;

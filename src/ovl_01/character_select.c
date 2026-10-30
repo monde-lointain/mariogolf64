@@ -157,7 +157,7 @@ static s8 D_8022FF08_ovl_01 = FALSE;
 static s8 D_8022FF09_ovl_01 = NO_PALETTE;
 /* Read by no routine */
 static s32 D_8022FF0C_ovl_01[4] = {-1, -1, -1, -1};
-/* The Game Boy row's slots, which func_80209500 saves here and
+/* The Game Boy row's slots, which HideGameBoyCharacters saves here and
  * UpdateCharacterSelect puts back */
 static s32 D_8022FF1C_ovl_01[GAME_BOY_CHARACTER_COUNT] = {
     EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT};
@@ -233,7 +233,11 @@ static u8 D_8023A588_ovl_01[0x208];
 s32 f_PreviousStickX;
 s32 f_PreviousStickY;
 
-void func_80209500_ovl_01(void) {
+/*
+ * Empties the Game Boy row of the character grid for the opponent select,
+ * saving its slots to put back afterward
+ */
+void HideGameBoyCharacters(void) {
   s32 firstSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0];
   s32 secondSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1];
   s32 thirdSlot = g_CharacterGrid[GAME_BOY_CHARACTER_ROW][2];
@@ -983,7 +987,7 @@ s32 UpdateCharacterSelect(
       D_8022FF04_ovl_01 = 0;
       D_8022FF05_ovl_01 = 0;
       D_8022FF06_ovl_01 = 0;
-      /* Bring back the Game Boy characters that func_80209500 hid */
+      /* Bring back the Game Boy characters that HideGameBoyCharacters hid */
       if ((u8)canChooseMarked == TRUE) {
         g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0] = D_8022FF1C_ovl_01[0];
         g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1] = D_8022FF1C_ovl_01[1];
