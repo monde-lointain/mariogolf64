@@ -1980,7 +1980,11 @@ void DrawCodePrompt(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-s32 func_8022B75C_ovl_01(void) {
+/*
+ * Returns which of D_80230FDC's codes was entered, or -1 after marking the code
+ * incorrect; no routine calls it
+ */
+s32 FindEnteredCodeIndex(void) {
   s32 foundIndex = -1;
   s32 codeIndex;
   s32 matchCount;

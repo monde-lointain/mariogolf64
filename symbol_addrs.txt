@@ -3469,6 +3469,7 @@ DrawCodeHand = 0x8022A8F4; // type:func segment:ovl_01
 DrawCodePrompt = 0x8022B668; // type:func segment:ovl_01
 PressCodeKey = 0x8022B46C; // type:func segment:ovl_01
 DeleteCodeCharacter = 0x8022B5E0; // type:func segment:ovl_01
+FindEnteredCodeIndex = 0x8022B75C; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01
