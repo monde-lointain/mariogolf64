@@ -2074,7 +2074,7 @@ void func_8005DD44(void) {
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   f_UnreadMenuEntryFlag = 0;
-  g_MenuScreen = MENU_SCREEN_UNK18;
+  g_MenuScreen = MENU_SCREEN_BLANK;
 }
 
 void func_8005DD78(void) {

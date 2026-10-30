@@ -1103,7 +1103,7 @@ void UpdateMenus(void) {
       UpdateBetSettings();
       break;
 
-    case MENU_SCREEN_UNK18:
+    case MENU_SCREEN_BLANK:
       func_801FB15C_ovl_01();
       break;
 
@@ -1209,7 +1209,7 @@ void UpdateMenus(void) {
         func_8005D334();
         break;
 
-      case MENU_SCREEN_UNK18:
+      case MENU_SCREEN_BLANK:
         f_MenuLabelImageIndex ^= 1;
         f_ImageSlotIndex ^= 1;
         OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
@@ -1640,7 +1640,7 @@ void UpdateMenus(void) {
     if (g_GameState.gameMode == GAME_MODE_TRAINING) {
       g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
     } else {
-      g_MenuScreen = MENU_SCREEN_UNK18;
+      g_MenuScreen = MENU_SCREEN_BLANK;
     }
 
     if (g_GameState.unk30) {
@@ -3806,7 +3806,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
     case MENU_SCREEN_BET_SETTINGS:
       DrawCourseSelect(&gfx);
       break;
-    case MENU_SCREEN_UNK18:
+    case MENU_SCREEN_BLANK:
       func_80207E18_ovl_01(&gfx);
       break;
     case MENU_SCREEN_BEST_SHOTS:

@@ -28,7 +28,9 @@ enum MenuScreen {
   /* Get Character's choice of the second player's character */
   MENU_SCREEN_OPPONENT_SELECT,
   MENU_SCREEN_HELP,
-  MENU_SCREEN_UNK18,
+  /* Shows nothing and waits for A to go to the title; the menu is left on it
+   * when it exits for anything but Training */
+  MENU_SCREEN_BLANK,
   /* Loads what the chosen game needs and leaves the menu */
   MENU_SCREEN_EXIT = 19,
   MENU_SCREEN_HANDICAPS,
