@@ -1969,13 +1969,13 @@ void func_8005D9A0(void) {
   g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
   g_MenuMemory.statsCourse = 6;
-  g_IsRingShotWipeOpening = 0;
+  g_IsRingShotWipeOpening = FALSE;
   D_800C2BD4 = 0;
 }
 
 void func_8005DAD4(void) {
   g_IsChosenHoleLoadStarted = FALSE;
-  g_IsRingShotWipeOpening = 1;
+  g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = FALSE;
   D_800C2BD4 = 0;
 }
@@ -2024,7 +2024,7 @@ void func_8005DAFC(void) {
       break;
   }
 
-  g_IsRingShotWipeOpening = 1;
+  g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2033,7 +2033,7 @@ void func_8005DAFC(void) {
 
 void func_8005DC50(void) {
   func_8005D9A0();
-  g_IsRingShotWipeOpening = 1;
+  g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2049,7 +2049,7 @@ void func_8005DC50(void) {
 }
 
 void func_8005DCDC(void) {
-  g_IsRingShotWipeOpening = 1;
+  g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2057,7 +2057,7 @@ void func_8005DCDC(void) {
 }
 
 void func_8005DD10(void) {
-  g_IsRingShotWipeOpening = 1;
+  g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2065,7 +2065,7 @@ void func_8005DD10(void) {
 }
 
 void func_8005DD44(void) {
-  g_IsRingShotWipeOpening = 1;
+  g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2073,7 +2073,7 @@ void func_8005DD44(void) {
 }
 
 void func_8005DD78(void) {
-  g_IsRingShotWipeOpening = 1;
+  g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
   D_800C2BD4 = 0;
@@ -2082,7 +2082,7 @@ void func_8005DD78(void) {
 
 void func_8005DDAC(void) {
   g_IsChosenHoleLoadStarted = FALSE;
-  g_IsRingShotWipeOpening = 1;
+  g_IsRingShotWipeOpening = TRUE;
   D_800C2BD4 = 0;
   g_IsMenuWipeOpening = TRUE;
   g_GameState.replayKind = REPLAY_KIND_NONE;

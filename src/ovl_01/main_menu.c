@@ -1943,7 +1943,7 @@ void UpdateMenuTitleScreen(void) {
         g_IsMenuWipeOpening = FALSE;
         LoadWipeShape(TRANSMIT_WIPE_SHAPE);
         StartWipe(WIPE_CLOSING);
-        g_IsRingShotWipeOpening = 0;
+        g_IsRingShotWipeOpening = FALSE;
       } else {
         g_ChosenPlayerCount = titleChoice;
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
@@ -1969,7 +1969,7 @@ void UpdateMenuTitleScreen(void) {
       g_TakenCharacters.unk0 = 0;
     }
 
-    g_IsRingShotWipeOpening = 0;
+    g_IsRingShotWipeOpening = FALSE;
     g_IsMenuWipeOpening = FALSE;
     D_801B71CC = g_MenuScreen;
     D_800FBE2C = g_MenuMemory.playerCountChoice;
@@ -2639,7 +2639,7 @@ void UpdateCourseSelect(void) {
       FreeAllCharacterSlots();
       LoadWipeShape(g_MenuMemory.courseChoice);
       StartWipe(WIPE_CLOSING);
-      g_IsRingShotWipeOpening = 0;
+      g_IsRingShotWipeOpening = FALSE;
     }
 
     PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -2932,7 +2932,7 @@ void UpdateMiniGolfCourseSelect(void) {
           (g_MenuMemory.miniGolfRecordChoice * MINI_GOLF_COURSES_PER_RECORD) +
           MINI_GOLF_COURSE_INDEX);
       StartWipe(WIPE_CLOSING);
-      g_IsRingShotWipeOpening = 0;
+      g_IsRingShotWipeOpening = FALSE;
     }
 
     PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -3660,7 +3660,7 @@ void LeaveMenuWithWipe(void) {
   } else {
     LoadWipeShape(0);
     StartWipe(WIPE_CLOSING);
-    g_IsRingShotWipeOpening = 0;
+    g_IsRingShotWipeOpening = FALSE;
     g_IsMenuWipeOpening = FALSE;
   }
 }
@@ -3673,7 +3673,7 @@ void LeaveMenuWithCourseWipe(void) {
   } else {
     LoadWipeShape(g_MenuMemory.courseIndex);
     StartWipe(WIPE_CLOSING);
-    g_IsRingShotWipeOpening = 0;
+    g_IsRingShotWipeOpening = FALSE;
     g_IsMenuWipeOpening = FALSE;
   }
 }

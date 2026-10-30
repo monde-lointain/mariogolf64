@@ -1992,7 +1992,7 @@ void UpdateBestShots(void) {
                                                    [column]]
                   .courseIndex);
           StartWipe(WIPE_CLOSING);
-          g_IsRingShotWipeOpening = 0;
+          g_IsRingShotWipeOpening = FALSE;
         }
       } else if (g_MenuPressedButtons & B_BUTTON) {
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
