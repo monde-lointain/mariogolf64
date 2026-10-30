@@ -2122,8 +2122,8 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft >= 0x17 &&
             f_OpeningSceneFramesLeft < 0x2A) {
           GetCharacterPointPosition(2, 2, point);
-          g_CurrentShot.ballPosition[AXIS_X] = (s32)point[0] * 1024;
-          g_CurrentShot.ballPosition[AXIS_Z] = (s32)point[2] * 1024;
+          g_CurrentShot.ballPosition[AXIS_X] = (s32)point[AXIS_X] * 1024;
+          g_CurrentShot.ballPosition[AXIS_Z] = (s32)point[AXIS_Z] * 1024;
           g_CurrentShot.ballPosition[AXIS_Y] =
               GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X],
                   g_CurrentShot.ballPosition[AXIS_Z]) +
@@ -2273,8 +2273,8 @@ void UpdateOpening(void) {
         PlaceEditorCamera(
             2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f, 665.178f);
         MoveEditorPoint(0, 2671.388f, -257.489f, 2351.288f, 0x28);
-        MoveEditorPoint(1, logoBallPoint[0], logoBallPoint[1] - 4.5f,
-            logoBallPoint[2], 0x28);
+        MoveEditorPoint(1, logoBallPoint[AXIS_X], logoBallPoint[AXIS_Y] - 4.5f,
+            logoBallPoint[AXIS_Z], 0x28);
         f_IsLogoBallSlot[1] = 1;
         f_OpeningScene++;
         D_80217078_ovl_05 = 1.0f;
@@ -2310,11 +2310,14 @@ void UpdateOpening(void) {
 
         GetCharacterPointPosition(1, 3, handPoint);
         f_OpeningBallPositions[1][0] +=
-            (handPoint[0] - f_OpeningBallPositions[1][0]) * D_80217078_ovl_05;
+            (handPoint[AXIS_X] - f_OpeningBallPositions[1][0]) *
+            D_80217078_ovl_05;
         f_OpeningBallPositions[1][1] +=
-            (handPoint[1] - f_OpeningBallPositions[1][1]) * D_80217078_ovl_05;
+            (handPoint[AXIS_Y] - f_OpeningBallPositions[1][1]) *
+            D_80217078_ovl_05;
         f_OpeningBallPositions[1][2] +=
-            (handPoint[2] - f_OpeningBallPositions[1][2]) * D_80217078_ovl_05;
+            (handPoint[AXIS_Z] - f_OpeningBallPositions[1][2]) *
+            D_80217078_ovl_05;
         switch (f_OpeningSceneFramesLeft) {
           case 0x61:
             PlaySoundWithEffects(SOUND_LAND_FAIRWAY, f_OpeningSoundChannel,
@@ -2868,9 +2871,12 @@ void UpdateOpening(void) {
       }
     }
 
-    point[0] = f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    point[1] = f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-    point[2] = f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    point[AXIS_X] =
+        f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    point[AXIS_Y] =
+        f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    point[AXIS_Z] =
+        f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     func_80206AA4_ovl_05(&f_OpeningShotSimulation);
   } else if (D_8020AE44_ovl_05 == 2) {
     func_80206AA4_ovl_05(&f_OpeningShotSimulation);
@@ -3392,21 +3398,22 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           }
 
           if (f_HasLogoBallLastPosition) {
-            movement[0] = f_OpeningBallPositions[slot][0] -
+            movement[AXIS_X] = f_OpeningBallPositions[slot][0] -
                 f_LogoBallLastPosition[AXIS_X];
-            movement[1] = f_OpeningBallPositions[slot][1] -
+            movement[AXIS_Y] = f_OpeningBallPositions[slot][1] -
                 f_LogoBallLastPosition[AXIS_Y];
-            movement[2] = f_OpeningBallPositions[slot][2] -
+            movement[AXIS_Z] = f_OpeningBallPositions[slot][2] -
                 f_LogoBallLastPosition[AXIS_Z];
           } else {
             f_HasLogoBallLastPosition = TRUE;
-            movement[0] = 0.0f;
-            movement[1] = 0.0f;
-            movement[2] = 0.0f;
+            movement[AXIS_X] = 0.0f;
+            movement[AXIS_Y] = 0.0f;
+            movement[AXIS_Z] = 0.0f;
           }
 
-          rollAngle = sqrtf((movement[0] * movement[0]) +
-              (movement[1] * movement[1]) + (movement[2] * movement[2]));
+          rollAngle = sqrtf((movement[AXIS_X] * movement[AXIS_X]) +
+              (movement[AXIS_Y] * movement[AXIS_Y]) +
+              (movement[AXIS_Z] * movement[AXIS_Z]));
           rollAngle *= (f32)RADIANS_TO_DEGREES;
           f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
           f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
@@ -3421,8 +3428,9 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
 
           guScale(&f_LogoBallMarioScale, LOGO_BALL_MARIO_SCALE,
               LOGO_BALL_MARIO_SCALE, LOGO_BALL_MARIO_SCALE);
-          if (movement[2] != 0.0f || movement[0] != 0.0f) {
-            guRotateF(turn, rollAngle, -movement[2], 0.0f, movement[0]);
+          if (movement[AXIS_Z] != 0.0f || movement[AXIS_X] != 0.0f) {
+            guRotateF(
+                turn, rollAngle, -movement[AXIS_Z], 0.0f, movement[AXIS_X]);
             guMtxCatF(f_LogoBallRoll, turn, f_LogoBallRoll);
             ConvertMatrixToFixed(
                 f_LogoBallRoll, &f_LogoBallMarioRolls[g_DrawBufferIndex]);
@@ -3683,21 +3691,22 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             }
 
             if (f_HasProjectedLogoBallLastPosition) {
-              movement[0] = f_OpeningBallPositions[slot][0] -
+              movement[AXIS_X] = f_OpeningBallPositions[slot][0] -
                   f_ProjectedLogoBallLastPosition[AXIS_X];
-              movement[1] = f_OpeningBallPositions[slot][1] -
+              movement[AXIS_Y] = f_OpeningBallPositions[slot][1] -
                   f_ProjectedLogoBallLastPosition[AXIS_Y];
-              movement[2] = f_OpeningBallPositions[slot][2] -
+              movement[AXIS_Z] = f_OpeningBallPositions[slot][2] -
                   f_ProjectedLogoBallLastPosition[AXIS_Z];
             } else {
               f_HasProjectedLogoBallLastPosition = TRUE;
-              movement[0] = 0.0f;
-              movement[1] = 0.0f;
-              movement[2] = 0.0f;
+              movement[AXIS_X] = 0.0f;
+              movement[AXIS_Y] = 0.0f;
+              movement[AXIS_Z] = 0.0f;
             }
 
-            rollAngle = sqrtf((movement[0] * movement[0]) +
-                (movement[1] * movement[1]) + (movement[2] * movement[2]));
+            rollAngle = sqrtf((movement[AXIS_X] * movement[AXIS_X]) +
+                (movement[AXIS_Y] * movement[AXIS_Y]) +
+                (movement[AXIS_Z] * movement[AXIS_Z]));
             rollAngle *= (f32)RADIANS_TO_DEGREES;
             f_ProjectedLogoBallLastPosition[AXIS_X] =
                 f_OpeningBallPositions[slot][0];
@@ -3717,9 +3726,9 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 PROJECTED_LOGO_BALL_MARIO_SCALE,
                 PROJECTED_LOGO_BALL_MARIO_SCALE,
                 PROJECTED_LOGO_BALL_MARIO_SCALE);
-            if (movement[2] != 0.0f || movement[0] != 0.0f) {
-              guRotateF(
-                  projectedTurn, rollAngle, -movement[2], 0.0f, movement[0]);
+            if (movement[AXIS_Z] != 0.0f || movement[AXIS_X] != 0.0f) {
+              guRotateF(projectedTurn, rollAngle, -movement[AXIS_Z], 0.0f,
+                  movement[AXIS_X]);
               guMtxCatF(f_ProjectedLogoBallRoll, projectedTurn,
                   f_ProjectedLogoBallRoll);
               ConvertMatrixToFixed(f_ProjectedLogoBallRoll,
@@ -3986,15 +3995,15 @@ void DrawLakitu(Gfx** displayListHead) {
         G_TX_RENDERTILE, TexelCoordinate(LAKITU_IMAGE_SIZE), 0, LAKITU_SCALE,
         LAKITU_SCALE);
     gDPPipeSync(gfx++);
-    rotation[0] = 0.0f;
-    rotation[1] = 0.0f;
-    rotation[2] = atan2(f_LakituTrailStart[0] -
+    rotation[AXIS_X] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = atan2(f_LakituTrailStart[0] -
             (f32)(f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2)),
         f_LakituTrailStart[1] -
             (f32)((SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1]));
-    translation[0] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
-    translation[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
-    translation[2] = -LAKITU_TRAIL_DEPTH;
+    translation[AXIS_X] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
+    translation[AXIS_Y] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
+    translation[AXIS_Z] = -LAKITU_TRAIL_DEPTH;
     BuildRotationMatrix(matrix, rotation, translation);
     ConvertMatrixToFixed(
         matrix, &f_LakituTrailMatrices[f_LakituTrailNewestIndex]);
@@ -5217,15 +5226,15 @@ void DrawOpeningSparks(Gfx** displayListHead) {
           f_OpeningSparkVelocities[sparkIndex][AXIS_Y];
       f_OpeningSparkVelocities[sparkIndex][AXIS_X] *= SPARK_DRAG;
       f_OpeningSparkVelocities[sparkIndex][AXIS_Y] *= SPARK_DRAG;
-      translation[0] = f_OpeningSparkPositions[sparkIndex][AXIS_X];
-      translation[1] = f_OpeningSparkPositions[sparkIndex][AXIS_Y];
-      translation[2] = SPARK_DEPTH;
-      rotation[0] = 0.0f;
-      rotation[1] = 0.0f;
-      rotation[2] = f_OpeningSparkAngles[sparkIndex];
-      scale[0] = f_OpeningSparkScale;
-      scale[1] = f_OpeningSparkScale;
-      scale[2] = f_OpeningSparkScale;
+      translation[AXIS_X] = f_OpeningSparkPositions[sparkIndex][AXIS_X];
+      translation[AXIS_Y] = f_OpeningSparkPositions[sparkIndex][AXIS_Y];
+      translation[AXIS_Z] = SPARK_DEPTH;
+      rotation[AXIS_X] = 0.0f;
+      rotation[AXIS_Y] = 0.0f;
+      rotation[AXIS_Z] = f_OpeningSparkAngles[sparkIndex];
+      scale[AXIS_X] = f_OpeningSparkScale;
+      scale[AXIS_Y] = f_OpeningSparkScale;
+      scale[AXIS_Z] = f_OpeningSparkScale;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(
           matrix, &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]);

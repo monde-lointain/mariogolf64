@@ -1014,20 +1014,20 @@ void EditOpeningCamera(void) {
       g_PrintBuffer, CAMERA_PANEL_COLUMN, FIELD_OF_VIEW_LABEL_ROW + 1);
 
   /* The stick moves across the ground as seen along the heading */
-  offset[0] = 0.0f;
-  offset[1] = 0.0f;
-  offset[2] = 0.0f;
+  offset[AXIS_X] = 0.0f;
+  offset[AXIS_Y] = 0.0f;
+  offset[AXIS_Z] = 0.0f;
   if (f_EditorChoice == EDITOR_CHOICE_SLIDE) {
     if (*(u16*)&g_ControllerStates[EDITOR_PAD].stickX != 0) {
-      offset[0] = (cos(g_CameraEditor.heading) *
-                      g_ControllerStates[EDITOR_PAD].stickY) +
+      offset[AXIS_X] = (cos(g_CameraEditor.heading) *
+                           g_ControllerStates[EDITOR_PAD].stickY) +
           (sin(g_CameraEditor.heading) * g_ControllerStates[EDITOR_PAD].stickX);
-      offset[2] = (sin(g_CameraEditor.heading) *
-                      g_ControllerStates[EDITOR_PAD].stickY) -
+      offset[AXIS_Z] = (sin(g_CameraEditor.heading) *
+                           g_ControllerStates[EDITOR_PAD].stickY) -
           (cos(g_CameraEditor.heading) * g_ControllerStates[EDITOR_PAD].stickX);
       if (!(g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG)) {
-        offset[0] *= SLOW_SLIDE_SCALE;
-        offset[2] *= SLOW_SLIDE_SCALE;
+        offset[AXIS_X] *= SLOW_SLIDE_SCALE;
+        offset[AXIS_Z] *= SLOW_SLIDE_SCALE;
       }
 
       ShiftEditorCamera(offset);
@@ -1035,9 +1035,9 @@ void EditOpeningCamera(void) {
 
     if (g_ControllerStates[EDITOR_PAD].buttons & U_CBUTTONS) {
       if (g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG) {
-        offset[1] = -FAST_HEIGHT_STEP;
+        offset[AXIS_Y] = -FAST_HEIGHT_STEP;
       } else {
-        offset[1] = -SLOW_HEIGHT_STEP;
+        offset[AXIS_Y] = -SLOW_HEIGHT_STEP;
       }
 
       ShiftEditorCamera(offset);
@@ -1045,9 +1045,9 @@ void EditOpeningCamera(void) {
 
     if (g_ControllerStates[EDITOR_PAD].buttons & D_CBUTTONS) {
       if (g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG) {
-        offset[1] = FAST_HEIGHT_STEP;
+        offset[AXIS_Y] = FAST_HEIGHT_STEP;
       } else {
-        offset[1] = SLOW_HEIGHT_STEP;
+        offset[AXIS_Y] = SLOW_HEIGHT_STEP;
       }
 
       ShiftEditorCamera(offset);
@@ -1056,77 +1056,77 @@ void EditOpeningCamera(void) {
 
   if (f_EditorChoice == EDITOR_CHOICE_TARGET) {
     if (*(u16*)&g_ControllerStates[EDITOR_PAD].stickX != 0) {
-      offset[0] = (cos(g_CameraEditor.heading) *
-                      g_ControllerStates[EDITOR_PAD].stickY) +
+      offset[AXIS_X] = (cos(g_CameraEditor.heading) *
+                           g_ControllerStates[EDITOR_PAD].stickY) +
           (sin(g_CameraEditor.heading) * g_ControllerStates[EDITOR_PAD].stickX);
-      offset[2] = (sin(g_CameraEditor.heading) *
-                      g_ControllerStates[EDITOR_PAD].stickY) -
+      offset[AXIS_Z] = (sin(g_CameraEditor.heading) *
+                           g_ControllerStates[EDITOR_PAD].stickY) -
           (cos(g_CameraEditor.heading) * g_ControllerStates[EDITOR_PAD].stickX);
       if (!(g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG)) {
-        offset[0] *= SLOW_SLIDE_SCALE;
-        offset[2] *= SLOW_SLIDE_SCALE;
+        offset[AXIS_X] *= SLOW_SLIDE_SCALE;
+        offset[AXIS_Z] *= SLOW_SLIDE_SCALE;
       }
 
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] += offset[0];
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] += offset[2];
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] += offset[AXIS_X];
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] += offset[AXIS_Z];
     }
 
     if (g_ControllerStates[EDITOR_PAD].buttons & U_CBUTTONS) {
       if (g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG) {
-        offset[1] = -FAST_HEIGHT_STEP;
+        offset[AXIS_Y] = -FAST_HEIGHT_STEP;
       } else {
-        offset[1] = -SLOW_HEIGHT_STEP;
+        offset[AXIS_Y] = -SLOW_HEIGHT_STEP;
       }
 
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[1];
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[AXIS_Y];
     }
 
     if (g_ControllerStates[EDITOR_PAD].buttons & D_CBUTTONS) {
       if (g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG) {
-        offset[1] = FAST_HEIGHT_STEP;
+        offset[AXIS_Y] = FAST_HEIGHT_STEP;
       } else {
-        offset[1] = SLOW_HEIGHT_STEP;
+        offset[AXIS_Y] = SLOW_HEIGHT_STEP;
       }
 
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[1];
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[AXIS_Y];
     }
   }
 
   if (f_EditorChoice == EDITOR_CHOICE_POSITION) {
     if (*(u16*)&g_ControllerStates[EDITOR_PAD].stickX != 0) {
-      offset[0] = (cos(g_CameraEditor.heading) *
-                      g_ControllerStates[EDITOR_PAD].stickY) +
+      offset[AXIS_X] = (cos(g_CameraEditor.heading) *
+                           g_ControllerStates[EDITOR_PAD].stickY) +
           (sin(g_CameraEditor.heading) * g_ControllerStates[EDITOR_PAD].stickX);
-      offset[2] = (sin(g_CameraEditor.heading) *
-                      g_ControllerStates[EDITOR_PAD].stickY) -
+      offset[AXIS_Z] = (sin(g_CameraEditor.heading) *
+                           g_ControllerStates[EDITOR_PAD].stickY) -
           (cos(g_CameraEditor.heading) * g_ControllerStates[EDITOR_PAD].stickX);
       if (!(g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG)) {
-        offset[0] *= SLOW_SLIDE_SCALE;
-        offset[2] *= SLOW_SLIDE_SCALE;
+        offset[AXIS_X] *= SLOW_SLIDE_SCALE;
+        offset[AXIS_Z] *= SLOW_SLIDE_SCALE;
       }
 
-      g_CameraEditor.points[EDITOR_POINT_EYE][0] += offset[0];
-      g_CameraEditor.points[EDITOR_POINT_EYE][2] += offset[2];
+      g_CameraEditor.points[EDITOR_POINT_EYE][0] += offset[AXIS_X];
+      g_CameraEditor.points[EDITOR_POINT_EYE][2] += offset[AXIS_Z];
     }
 
     if (g_ControllerStates[EDITOR_PAD].buttons & U_CBUTTONS) {
       if (g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG) {
-        offset[1] = -FAST_HEIGHT_STEP;
+        offset[AXIS_Y] = -FAST_HEIGHT_STEP;
       } else {
-        offset[1] = -SLOW_HEIGHT_STEP;
+        offset[AXIS_Y] = -SLOW_HEIGHT_STEP;
       }
 
-      g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[1];
+      g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[AXIS_Y];
     }
 
     if (g_ControllerStates[EDITOR_PAD].buttons & D_CBUTTONS) {
       if (g_ControllerStates[EDITOR_PAD].buttons & Z_TRIG) {
-        offset[1] = FAST_HEIGHT_STEP;
+        offset[AXIS_Y] = FAST_HEIGHT_STEP;
       } else {
-        offset[1] = SLOW_HEIGHT_STEP;
+        offset[AXIS_Y] = SLOW_HEIGHT_STEP;
       }
 
-      g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[1];
+      g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[AXIS_Y];
     }
   }
 
@@ -1353,12 +1353,12 @@ void EditOpeningCamera(void) {
 
 /* Moves the whole camera by offset */
 void ShiftEditorCamera(Vec3 offset) {
-  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] += offset[0];
-  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[1];
-  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] += offset[2];
-  g_CameraEditor.points[EDITOR_POINT_EYE][0] += offset[0];
-  g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[1];
-  g_CameraEditor.points[EDITOR_POINT_EYE][2] += offset[2];
+  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] += offset[AXIS_X];
+  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] += offset[AXIS_Y];
+  g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] += offset[AXIS_Z];
+  g_CameraEditor.points[EDITOR_POINT_EYE][0] += offset[AXIS_X];
+  g_CameraEditor.points[EDITOR_POINT_EYE][1] += offset[AXIS_Y];
+  g_CameraEditor.points[EDITOR_POINT_EYE][2] += offset[AXIS_Z];
 }
 
 /* Nothing refers to this */

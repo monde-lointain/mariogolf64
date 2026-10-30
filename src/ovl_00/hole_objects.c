@@ -192,15 +192,15 @@ void StartMonkeyDrop(Radians cameraYaw) {
           g_HoleSetup.cupPosition[AXIS_Y] - MONKEY_DROP_HEIGHT;
       creature->position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
       creature->yaw = -cameraYaw + M_PI;
-      translation[0] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-      translation[1] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-      translation[2] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-      rotation[0] = 0.0f;
-      rotation[1] = creature->yaw;
-      rotation[2] = 0;
-      scale[0] = 1.0f;
-      scale[1] = 1.0f;
-      scale[2] = 1.0f;
+      translation[AXIS_X] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      translation[AXIS_Y] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      translation[AXIS_Z] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+      rotation[AXIS_X] = 0.0f;
+      rotation[AXIS_Y] = creature->yaw;
+      rotation[AXIS_Z] = 0;
+      scale[AXIS_X] = 1.0f;
+      scale[AXIS_Y] = 1.0f;
+      scale[AXIS_Z] = 1.0f;
       BuildTransformMatrix(transform, rotation, translation, scale);
       ConvertMatrixToFixed(transform, &creature->matrices[0]);
       ConvertMatrixToFixed(transform, &creature->matrices[1]);
@@ -266,17 +266,17 @@ void StartCheepCheepLeap(s32 arg0) {
 
       creature->velocity[0] = cosf(creature->yaw) * speed;
       creature->velocity[2] = -sinf(creature->yaw) * speed;
-      rotation[0] = 0;
+      rotation[AXIS_X] = 0;
       creature->velocity[1] = -CHEEP_CHEEP_LEAP_SPEED;
       creature->pitch = -M_PI / 2;
-      translation[0] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-      translation[1] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-      translation[2] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-      rotation[1] = creature->yaw;
-      rotation[2] = creature->pitch + (M_PI / 2);
-      scale[0] = 1.0f;
-      scale[1] = 1.0f;
-      scale[2] = 1.0f;
+      translation[AXIS_X] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      translation[AXIS_Y] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      translation[AXIS_Z] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+      rotation[AXIS_Y] = creature->yaw;
+      rotation[AXIS_Z] = creature->pitch + (M_PI / 2);
+      scale[AXIS_X] = 1.0f;
+      scale[AXIS_Y] = 1.0f;
+      scale[AXIS_Z] = 1.0f;
       BuildTransformMatrix(transform, rotation, translation, scale);
       ConvertMatrixToFixed(transform, &creature->matrices[0]);
       ConvertMatrixToFixed(transform, &creature->matrices[1]);
@@ -342,20 +342,20 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       creature->pitch = ((f32)atan2(creature->velocity[1], horizontalSpeed) -
                             creature->pitch) *
           CHEEP_CHEEP_PITCH_EASING;
-      translation[0] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-      translation[1] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-      translation[2] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-      rotation[0] = 0.0f;
-      rotation[1] = creature->yaw;
-      rotation[2] = 0;
+      translation[AXIS_X] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      translation[AXIS_Y] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      translation[AXIS_Z] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+      rotation[AXIS_X] = 0.0f;
+      rotation[AXIS_Y] = creature->yaw;
+      rotation[AXIS_Z] = 0;
       if (!creature->isFacingBack) {
-        scale[1] = 1.0f;
-        scale[2] = 1.0f;
-        scale[0] = -1.0f;
+        scale[AXIS_Y] = 1.0f;
+        scale[AXIS_Z] = 1.0f;
+        scale[AXIS_X] = -1.0f;
       } else {
-        scale[0] = 1.0f;
-        scale[1] = 1.0f;
-        scale[2] = 1.0f;
+        scale[AXIS_X] = 1.0f;
+        scale[AXIS_Y] = 1.0f;
+        scale[AXIS_Z] = 1.0f;
       }
 
       BuildTransformMatrix(transform, rotation, translation, scale);
@@ -434,15 +434,15 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         creature->state = HOLE_CREATURE_NONE;
       }
 
-      translation[0] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-      translation[1] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-      translation[2] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-      rotation[0] = 0.0f;
-      rotation[1] = GetCameraYaw();
-      rotation[2] = 0;
-      scale[0] = 1.0f;
-      scale[1] = 1.0f;
-      scale[2] = 1.0f;
+      translation[AXIS_X] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+      translation[AXIS_Y] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+      translation[AXIS_Z] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+      rotation[AXIS_X] = 0.0f;
+      rotation[AXIS_Y] = GetCameraYaw();
+      rotation[AXIS_Z] = 0;
+      scale[AXIS_X] = 1.0f;
+      scale[AXIS_Y] = 1.0f;
+      scale[AXIS_Z] = 1.0f;
       BuildTransformMatrix(transform, rotation, translation, scale);
       ConvertMatrixToFixed(transform, &creature->matrices[g_MatrixBufferIndex]);
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);

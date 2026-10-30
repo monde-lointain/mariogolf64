@@ -670,15 +670,15 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   Vtx* vertex;
   s32 rowIndex;
 
-  rotation[0] = 0.0f;
-  rotation[1] = f_SpinAngle;
-  rotation[2] = 0.0f;
-  translation[0] = 0.0f;
-  translation[1] = 0.0f;
-  translation[2] = SPIN_MESH_DISTANCE;
-  scale[0] = SPIN_MESH_SCALE;
-  scale[1] = SPIN_MESH_SCALE;
-  scale[2] = SPIN_MESH_SCALE;
+  rotation[AXIS_X] = 0.0f;
+  rotation[AXIS_Y] = f_SpinAngle;
+  rotation[AXIS_Z] = 0.0f;
+  translation[AXIS_X] = 0.0f;
+  translation[AXIS_Y] = 0.0f;
+  translation[AXIS_Z] = SPIN_MESH_DISTANCE;
+  scale[AXIS_X] = SPIN_MESH_SCALE;
+  scale[AXIS_Y] = SPIN_MESH_SCALE;
+  scale[AXIS_Z] = SPIN_MESH_SCALE;
   BuildTransformMatrix(transform, rotation, translation, scale);
   ConvertMatrixToFixed(transform, &f_SpinMatrices[g_DrawBufferIndex]);
 

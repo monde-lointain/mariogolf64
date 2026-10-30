@@ -292,12 +292,12 @@ INCLUDE_ASM("asm/nonmatchings/cpu_projection", ProjectPointToScreen);
 
 /* Like BuildTransformMatrix, without a scale */
 void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation) {
-  f32 sinX = sinf(rotation[0]);
-  f32 cosX = cosf(rotation[0]);
-  f32 sinY = sinf(rotation[1]);
-  f32 cosY = cosf(rotation[1]);
-  f32 sinZ = sinf(rotation[2]);
-  f32 cosZ = cosf(rotation[2]);
+  f32 sinX = sinf(rotation[AXIS_X]);
+  f32 cosX = cosf(rotation[AXIS_X]);
+  f32 sinY = sinf(rotation[AXIS_Y]);
+  f32 cosY = cosf(rotation[AXIS_Y]);
+  f32 sinZ = sinf(rotation[AXIS_Z]);
+  f32 cosZ = cosf(rotation[AXIS_Z]);
 
   matrix[0][0] = cosY * cosZ;
   matrix[0][1] = cosY * sinZ;
@@ -311,9 +311,9 @@ void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation) {
   matrix[2][1] = (cosX * sinY * sinZ) - (sinX * cosZ);
   matrix[2][2] = cosX * cosY;
   matrix[2][3] = 0;
-  matrix[3][0] = translation[0];
-  matrix[3][1] = translation[1];
-  matrix[3][2] = translation[2];
+  matrix[3][0] = translation[AXIS_X];
+  matrix[3][1] = translation[AXIS_Y];
+  matrix[3][2] = translation[AXIS_Z];
   matrix[3][3] = 1.0f;
 }
 

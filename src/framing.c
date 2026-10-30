@@ -46,12 +46,12 @@ extern Vec3 f_FramedEye;
 extern Vec3 f_FramedLookAt;
 
 void GetFramedView(Vec3 eye, Vec3 lookAt) {
-  eye[0] = f_FramedEye[0];
-  eye[1] = f_FramedEye[1];
-  eye[2] = f_FramedEye[2];
-  lookAt[0] = f_FramedLookAt[0];
-  lookAt[1] = f_FramedLookAt[1];
-  lookAt[2] = f_FramedLookAt[2];
+  eye[AXIS_X] = f_FramedEye[0];
+  eye[AXIS_Y] = f_FramedEye[1];
+  eye[AXIS_Z] = f_FramedEye[2];
+  lookAt[AXIS_X] = f_FramedLookAt[0];
+  lookAt[AXIS_Y] = f_FramedLookAt[1];
+  lookAt[AXIS_Z] = f_FramedLookAt[2];
 }
 
 void ClearFramedSpheres(void) {
@@ -61,9 +61,9 @@ void ClearFramedSpheres(void) {
 /* Adds a sphere for FrameSpheres to keep in view; extra spheres are ignored */
 void AddFramedSphere(Vec3 center, f32 radius) {
   if (f_FramedSphereCount < FRAMED_SPHERE_CAPACITY) {
-    f_FramedSphereCenters[f_FramedSphereCount][0] = center[0];
-    f_FramedSphereCenters[f_FramedSphereCount][1] = center[1];
-    f_FramedSphereCenters[f_FramedSphereCount][2] = center[2];
+    f_FramedSphereCenters[f_FramedSphereCount][0] = center[AXIS_X];
+    f_FramedSphereCenters[f_FramedSphereCount][1] = center[AXIS_Y];
+    f_FramedSphereCenters[f_FramedSphereCount][2] = center[AXIS_Z];
     f_FramedSphereRadii[f_FramedSphereCount] = radius;
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
       osSyncPrintf("ox %f ox %f oz %f\n",
@@ -99,13 +99,13 @@ INCLUDE_ASM("asm/nonmatchings/framing", SetFramingAngles);
 #endif
 
 void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
-  f32 x = point[0];
-  f32 y = point[1];
-  f32 z = point[2];
+  f32 x = point[AXIS_X];
+  f32 y = point[AXIS_Y];
+  f32 z = point[AXIS_Z];
 
-  result[0] = (mf[0][0] * x) + (mf[1][0] * y) + (mf[2][0] * z) + mf[3][0];
-  result[1] = (mf[0][1] * x) + (mf[1][1] * y) + (mf[2][1] * z) + mf[3][1];
-  result[2] = (mf[0][2] * x) + (mf[1][2] * y) + (mf[2][2] * z) + mf[3][2];
+  result[AXIS_X] = (mf[0][0] * x) + (mf[1][0] * y) + (mf[2][0] * z) + mf[3][0];
+  result[AXIS_Y] = (mf[0][1] * x) + (mf[1][1] * y) + (mf[2][1] * z) + mf[3][1];
+  result[AXIS_Z] = (mf[0][2] * x) + (mf[1][2] * y) + (mf[2][2] * z) + mf[3][2];
 }
 
 /*
@@ -165,8 +165,8 @@ void FrameSpheres(f32 depthOffset) {
   guMtxCatF(f_FramingRotation, rotation, rotation);
   for (i = 0; i < f_FramedSphereCount; i++) {
     TransformPoint(rotation, f_FramedSphereCenters[i], point);
-    if (point[0] - f_FramedSphereRadii[i] < minX) {
-      minX = point[0] - f_FramedSphereRadii[i];
+    if (point[AXIS_X] - f_FramedSphereRadii[i] < minX) {
+      minX = point[AXIS_X] - f_FramedSphereRadii[i];
     }
   }
 
@@ -174,8 +174,8 @@ void FrameSpheres(f32 depthOffset) {
   guMtxCatF(f_FramingRotation, rotation, rotation);
   for (i = 0; i < f_FramedSphereCount; i++) {
     TransformPoint(rotation, f_FramedSphereCenters[i], point);
-    if (maxX < point[0] + f_FramedSphereRadii[i]) {
-      maxX = point[0] + f_FramedSphereRadii[i];
+    if (maxX < point[AXIS_X] + f_FramedSphereRadii[i]) {
+      maxX = point[AXIS_X] + f_FramedSphereRadii[i];
     }
   }
 
@@ -183,8 +183,8 @@ void FrameSpheres(f32 depthOffset) {
   guMtxCatF(f_FramingRotation, rotation, rotation);
   for (i = 0; i < f_FramedSphereCount; i++) {
     TransformPoint(rotation, f_FramedSphereCenters[i], point);
-    if (point[1] - f_FramedSphereRadii[i] < minY) {
-      minY = point[1] - f_FramedSphereRadii[i];
+    if (point[AXIS_Y] - f_FramedSphereRadii[i] < minY) {
+      minY = point[AXIS_Y] - f_FramedSphereRadii[i];
     }
   }
 
@@ -192,8 +192,8 @@ void FrameSpheres(f32 depthOffset) {
   guMtxCatF(f_FramingRotation, rotation, rotation);
   for (i = 0; i < f_FramedSphereCount; i++) {
     TransformPoint(rotation, f_FramedSphereCenters[i], point);
-    if (maxY < point[1] + f_FramedSphereRadii[i]) {
-      maxY = point[1] + f_FramedSphereRadii[i];
+    if (maxY < point[AXIS_Y] + f_FramedSphereRadii[i]) {
+      maxY = point[AXIS_Y] + f_FramedSphereRadii[i];
     }
   }
 
@@ -238,32 +238,32 @@ void FrameSpheres(f32 depthOffset) {
   for (i = 0; i < f_FramedSphereCount; i++) {
     TransformPoint(rotation, f_FramedSphereCenters[i], point);
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
-      osSyncPrintf("rZ %f\n", point[2]);
+      osSyncPrintf("rZ %f\n", point[AXIS_Z]);
     }
 
     radius = f_FramedSphereRadii[i];
-    if (point[2] - radius < minZ) {
-      minZ = point[2] - radius;
+    if (point[AXIS_Z] - radius < minZ) {
+      minZ = point[AXIS_Z] - radius;
     }
 
-    if (maxZ < point[2] + radius) {
-      maxZ = point[2] + radius;
+    if (maxZ < point[AXIS_Z] + radius) {
+      maxZ = point[AXIS_Z] + radius;
     }
 
-    if (point[0] - radius < minX) {
-      minX = point[0] - radius;
+    if (point[AXIS_X] - radius < minX) {
+      minX = point[AXIS_X] - radius;
     }
 
-    if (maxX < point[0] + radius) {
-      maxX = point[0] + radius;
+    if (maxX < point[AXIS_X] + radius) {
+      maxX = point[AXIS_X] + radius;
     }
 
-    if (point[1] - radius < minY) {
-      minY = point[1] - radius;
+    if (point[AXIS_Y] - radius < minY) {
+      minY = point[AXIS_Y] - radius;
     }
 
-    if (maxY < point[1] + radius) {
-      maxY = point[1] + radius;
+    if (maxY < point[AXIS_Y] + radius) {
+      maxY = point[AXIS_Y] + radius;
     }
   }
 

@@ -5376,16 +5376,16 @@ void DrawMenuCharacters(Gfx** displayListHead) {
       D_8022FA58_ovl_01 = 0.0f;
     }
 
-    rotation[0] = DegreesToRadians(D_8022FA54_ovl_01);
-    rotation[1] = DegreesToRadians(D_8022FA58_ovl_01);
-    rotation[2] = 0.0f;
-    translation[0] = f_MenuCharacterPositions[layout][slot][0];
+    rotation[AXIS_X] = DegreesToRadians(D_8022FA54_ovl_01);
+    rotation[AXIS_Y] = DegreesToRadians(D_8022FA58_ovl_01);
+    rotation[AXIS_Z] = 0.0f;
+    translation[AXIS_X] = f_MenuCharacterPositions[layout][slot][0];
     raise = (character == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
-    translation[1] = f_MenuCharacterPositions[layout][slot][1] + raise;
-    translation[2] = f_MenuCharacterPositions[layout][slot][2];
-    scale[0] = f_MenuCharacterScales[slot];
-    scale[1] = f_MenuCharacterScales[slot];
-    scale[2] = f_MenuCharacterScales[slot];
+    translation[AXIS_Y] = f_MenuCharacterPositions[layout][slot][1] + raise;
+    translation[AXIS_Z] = f_MenuCharacterPositions[layout][slot][2];
+    scale[AXIS_X] = f_MenuCharacterScales[slot];
+    scale[AXIS_Y] = f_MenuCharacterScales[slot];
+    scale[AXIS_Z] = f_MenuCharacterScales[slot];
     BuildTransformMatrix(transform, rotation, translation, scale);
     ConvertMatrixToFixed(
         transform, &D_80231D60_ovl_01[slot][g_DrawBufferIndex]);
@@ -5663,15 +5663,15 @@ void DrawAnimationViewer(Gfx** displayListHead) {
     Vec3 scale;
     Mat4 matrix;
 
-    rotation[2] = 0;
-    rotation[0] = DegreesToRadians(f_ViewerPitch);
-    rotation[1] = DegreesToRadians(f_ViewerYaw);
-    translation[0] = f_ViewerOffsetX + VIEWER_BASE_OFFSET;
-    translation[1] = f_ViewerOffsetY + VIEWER_BASE_OFFSET;
-    translation[2] = VIEWER_DEPTH;
-    scale[0] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
-    scale[1] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
-    scale[2] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
+    rotation[AXIS_Z] = 0;
+    rotation[AXIS_X] = DegreesToRadians(f_ViewerPitch);
+    rotation[AXIS_Y] = DegreesToRadians(f_ViewerYaw);
+    translation[AXIS_X] = f_ViewerOffsetX + VIEWER_BASE_OFFSET;
+    translation[AXIS_Y] = f_ViewerOffsetY + VIEWER_BASE_OFFSET;
+    translation[AXIS_Z] = VIEWER_DEPTH;
+    scale[AXIS_X] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
+    scale[AXIS_Y] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
+    scale[AXIS_Z] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
     BuildTransformMatrix(matrix, rotation, translation, scale);
     ConvertMatrixToFixed(matrix, &D_80231FB0_ovl_01[g_DrawBufferIndex]);
   }

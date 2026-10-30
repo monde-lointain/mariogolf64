@@ -2340,19 +2340,21 @@ void DrawSavedGolfers(Gfx** displayListHead) {
       }
     }
 
-    rotation[0] = DegreesToRadians(f_SavedGolferAngles[0]);
-    rotation[1] = DegreesToRadians(f_SavedGolferAngles[1]);
-    rotation[2] = 0.0f;
+    rotation[AXIS_X] = DegreesToRadians(f_SavedGolferAngles[0]);
+    rotation[AXIS_Y] = DegreesToRadians(f_SavedGolferAngles[1]);
+    rotation[AXIS_Z] = 0.0f;
     raise = ((s8)players[playerIndex].characterIndex == CHARACTER_BABY_MARIO)
         ? BABY_MARIO_RAISE
         : 0;
-    translation[0] = f_SavedGolferPositions[playerCount - 1][playerIndex][0];
-    translation[1] =
+    translation[AXIS_X] =
+        f_SavedGolferPositions[playerCount - 1][playerIndex][0];
+    translation[AXIS_Y] =
         f_SavedGolferPositions[playerCount - 1][playerIndex][1] + raise;
-    translation[2] = f_SavedGolferPositions[playerCount - 1][playerIndex][2];
-    scale[0] = f_SavedGolferScales[playerIndex];
-    scale[1] = f_SavedGolferScales[playerIndex];
-    scale[2] = f_SavedGolferScales[playerIndex];
+    translation[AXIS_Z] =
+        f_SavedGolferPositions[playerCount - 1][playerIndex][2];
+    scale[AXIS_X] = f_SavedGolferScales[playerIndex];
+    scale[AXIS_Y] = f_SavedGolferScales[playerIndex];
+    scale[AXIS_Z] = f_SavedGolferScales[playerIndex];
     BuildTransformMatrix(transform, rotation, translation, scale);
     ConvertMatrixToFixed(
         transform, &f_SavedGolferTransforms[playerIndex][g_DrawBufferIndex]);

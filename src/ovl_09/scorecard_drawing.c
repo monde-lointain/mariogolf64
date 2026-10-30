@@ -332,15 +332,16 @@ void DrawMatchResult(Gfx** displayListHead) {
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
         G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
-      translation[0] = (i * RESULT_CHARACTER_SPACING) + RESULT_CHARACTER_LEFT;
-      rotation[0] = 0.0f;
-      rotation[1] = 0;
-      rotation[2] = 0;
-      translation[1] = RESULT_CHARACTER_Y;
-      translation[2] = RESULT_CHARACTER_Z;
-      scale[0] = RESULT_CHARACTER_SCALE;
-      scale[1] = RESULT_CHARACTER_SCALE;
-      scale[2] = RESULT_CHARACTER_SCALE;
+      translation[AXIS_X] =
+          (i * RESULT_CHARACTER_SPACING) + RESULT_CHARACTER_LEFT;
+      rotation[AXIS_X] = 0.0f;
+      rotation[AXIS_Y] = 0;
+      rotation[AXIS_Z] = 0;
+      translation[AXIS_Y] = RESULT_CHARACTER_Y;
+      translation[AXIS_Z] = RESULT_CHARACTER_Z;
+      scale[AXIS_X] = RESULT_CHARACTER_SCALE;
+      scale[AXIS_Y] = RESULT_CHARACTER_SCALE;
+      scale[AXIS_Z] = RESULT_CHARACTER_SCALE;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(matrix, &f_ResultCharacterMatrices[i]);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ResultCharacterMatrices[i]),
@@ -1724,17 +1725,17 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
       /* Past a quarter turn, the flap turns a half turn more to show its far
        * side the right way up */
       if (g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE) {
-        rotation[0] = g_Scorecard.content.rowFlipAngles[i] + M_PI;
+        rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[i] + M_PI;
       } else {
-        rotation[0] = g_Scorecard.content.rowFlipAngles[i];
+        rotation[AXIS_X] = g_Scorecard.content.rowFlipAngles[i];
       }
 
-      rotation[1] = 0;
-      rotation[2] = 0;
-      translation[0] = g_Scorecard.x;
-      translation[1] = (SCREEN_HEIGHT / 2.0f) -
+      rotation[AXIS_Y] = 0;
+      rotation[AXIS_Z] = 0;
+      translation[AXIS_X] = g_Scorecard.x;
+      translation[AXIS_Y] = (SCREEN_HEIGHT / 2.0f) -
           (g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP);
-      translation[2] = FLAP_DISTANCE;
+      translation[AXIS_Z] = FLAP_DISTANCE;
       BuildRotationMatrix(matrix, rotation, translation);
       ConvertMatrixToFixed(matrix, &f_FlapMatrices[i][g_MatrixBufferIndex]);
     }

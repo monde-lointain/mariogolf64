@@ -1873,29 +1873,29 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
         READY_GO_SOUND_REVERB, SOUND_FULL_SCALE);
   }
 
-  scale[0] = 1.0f;
-  scale[1] = 1.0f;
-  scale[2] = 1.0f;
+  scale[AXIS_X] = 1.0f;
+  scale[AXIS_Y] = 1.0f;
+  scale[AXIS_Z] = 1.0f;
   if (f_MovieDrawCount < READY_FLIP_DRAW) {
-    rotation[0] = M_PI;
-    rotation[1] =
+    rotation[AXIS_X] = M_PI;
+    rotation[AXIS_Y] =
         (M_PI / 2) - ((f32)f_MovieDrawCount * READY_GO_TURN_PER_FRAME);
-    rotation[2] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
   } else if (f_MovieDrawCount < READY_FACING_DRAW) {
-    rotation[0] = M_PI -
+    rotation[AXIS_X] = M_PI -
         ((f32)(f_MovieDrawCount - READY_FLIP_DRAW) * READY_GO_TURN_PER_FRAME);
-    rotation[1] = 0.0f;
-    rotation[2] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
   } else if (f_MovieDrawCount < GO_DRAW) {
-    rotation[0] = M_PI -
+    rotation[AXIS_X] = M_PI -
         ((f32)(f_MovieDrawCount - READY_FLIP_DRAW) * READY_GO_TURN_PER_FRAME);
-    rotation[1] = 0.0f;
-    rotation[2] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
   } else if (f_MovieDrawCount < GO_GROW_DRAW) {
-    rotation[0] = M_PI -
+    rotation[AXIS_X] = M_PI -
         ((f32)(f_MovieDrawCount - READY_FACING_DRAW) * READY_GO_TURN_PER_FRAME);
-    rotation[1] = 0.0f;
-    rotation[2] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
   } else if (f_MovieDrawCount < READY_GO_END_DRAW) {
     alpha = 255 - ((f_MovieDrawCount - GO_GROW_DRAW) * GO_FADE_PER_FRAME);
     if (alpha < 0) {
@@ -1903,18 +1903,19 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
     }
 
     /* The chained assignment is there to match */
-    rotation[0] = rotation[1] = rotation[2] = 0.0f;
-    scale[2] = (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
-    scale[1] = scale[2];
-    scale[0] = scale[1];
+    rotation[AXIS_X] = rotation[AXIS_Y] = rotation[AXIS_Z] = 0.0f;
+    scale[AXIS_Z] =
+        (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
+    scale[AXIS_Y] = scale[AXIS_Z];
+    scale[AXIS_X] = scale[AXIS_Y];
   } else {
     f_CurrentMovie = MOVIE_NONE;
     return;
   }
 
-  translation[0] = 0.0f;
-  translation[1] = 0.0f;
-  translation[2] = READY_GO_DISTANCE;
+  translation[AXIS_X] = 0.0f;
+  translation[AXIS_Y] = 0.0f;
+  translation[AXIS_Z] = READY_GO_DISTANCE;
   BuildTransformMatrix(matrix, rotation, translation, scale);
   ConvertMatrixToFixed(matrix, &f_ReadyGoMatrices[f_MovieBackBuffer]);
   gDPPipeSync(gfx++);

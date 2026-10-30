@@ -628,15 +628,15 @@ void DrawClubSlots(Gfx** displayListHead) {
       }
     }
 
-    rotation[0] = f_Slots->reelAngles[reelIndex];
-    rotation[1] = 0;
-    rotation[2] = 0;
-    translation[0] = (reelIndex * REEL_SPACING) + FIRST_REEL_X;
-    translation[1] = SLOTS_Y;
-    translation[2] = SLOTS_Z;
-    scale[0] = REEL_SCALE;
-    scale[1] = REEL_SCALE;
-    scale[2] = REEL_SCALE;
+    rotation[AXIS_X] = f_Slots->reelAngles[reelIndex];
+    rotation[AXIS_Y] = 0;
+    rotation[AXIS_Z] = 0;
+    translation[AXIS_X] = (reelIndex * REEL_SPACING) + FIRST_REEL_X;
+    translation[AXIS_Y] = SLOTS_Y;
+    translation[AXIS_Z] = SLOTS_Z;
+    scale[AXIS_X] = REEL_SCALE;
+    scale[AXIS_Y] = REEL_SCALE;
+    scale[AXIS_Z] = REEL_SCALE;
     BuildTransformMatrix(matrix, rotation, translation, scale);
     ConvertMatrixToFixed(
         matrix, &f_ReelMatrices[reelIndex][g_MatrixBufferIndex]);
@@ -648,15 +648,15 @@ void DrawClubSlots(Gfx** displayListHead) {
     PlaySound(SOUND_TICK, REEL_CLICK_CHANNEL, SOUND_FULL_SCALE);
   }
 
-  rotation[0] = 0;
-  rotation[1] = 0;
-  rotation[2] = 0;
-  translation[0] = 0.0f;
-  translation[1] = SLOTS_Y;
-  translation[2] = SLOTS_Z;
-  scale[0] = 1.0f;
-  scale[1] = 1.0f;
-  scale[2] = 1.0f;
+  rotation[AXIS_X] = 0;
+  rotation[AXIS_Y] = 0;
+  rotation[AXIS_Z] = 0;
+  translation[AXIS_X] = 0.0f;
+  translation[AXIS_Y] = SLOTS_Y;
+  translation[AXIS_Z] = SLOTS_Z;
+  scale[AXIS_X] = 1.0f;
+  scale[AXIS_Y] = 1.0f;
+  scale[AXIS_Z] = 1.0f;
   BuildTransformMatrix(matrix, rotation, translation, scale);
   ConvertMatrixToFixed(matrix, &f_ShadeMatrix);
 

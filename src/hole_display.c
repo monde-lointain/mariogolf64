@@ -1454,14 +1454,15 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
     BlendSkyColors();
   }
 
-  direction[0] = view->lookAt[0] - view->eye[0];
-  direction[1] = view->lookAt[1] - view->eye[1];
-  direction[2] = view->lookAt[2] - view->eye[2];
+  direction[AXIS_X] = view->lookAt[0] - view->eye[0];
+  direction[AXIS_Y] = view->lookAt[1] - view->eye[1];
+  direction[AXIS_Z] = view->lookAt[2] - view->eye[2];
   vertices =
       f_SkyVertices[g_MatrixBufferIndex + (viewIndex * MATRIX_BUFFER_COUNT)];
-  g_SkyState.yaws[viewIndex] = atan2(direction[0], direction[2]);
-  g_SkyState.pitches[viewIndex] = -atan2(direction[1],
-      sqrtf((direction[0] * direction[0]) + (direction[2] * direction[2])));
+  g_SkyState.yaws[viewIndex] = atan2(direction[AXIS_X], direction[AXIS_Z]);
+  g_SkyState.pitches[viewIndex] = -atan2(direction[AXIS_Y],
+      sqrtf((direction[AXIS_X] * direction[AXIS_X]) +
+          (direction[AXIS_Z] * direction[AXIS_Z])));
   if (g_SkyState.pitches[viewIndex] < -SKY_PITCH_LIMIT) {
     g_SkyState.pitches[viewIndex] = -SKY_PITCH_LIMIT;
   }
@@ -1472,7 +1473,8 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
 
   slope = (view->lookAt[1] - view->eye[1]) *
       (SKY_SLOPE_DISTANCE /
-          sqrtf((direction[0] * direction[0]) + (direction[2] * direction[2])));
+          sqrtf((direction[AXIS_X] * direction[AXIS_X]) +
+              (direction[AXIS_Z] * direction[AXIS_Z])));
   pitchScale = SKY_REFERENCE_FIELD_OF_VIEW / view->fieldOfView * SCREEN_HEIGHT;
   g_SkyState.horizonLevels[viewIndex] =
       (-g_SkyState.pitches[viewIndex] * pitchScale) +
@@ -1695,12 +1697,12 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   colors = &g_SkyColors[GetCourseRecordIndex()]
                        [(g_HoleSetup.conditions.isRaining * 3) +
                            f_SkyColorTimeIndex];
-  translation[0] = 0.0f;
-  translation[1] = 0.0f;
-  rotation[0] = 0.0f;
-  rotation[1] = 0.0f;
-  rotation[2] = 0.0f;
-  translation[2] = SKY_DOME_DISTANCE;
+  translation[AXIS_X] = 0.0f;
+  translation[AXIS_Y] = 0.0f;
+  rotation[AXIS_X] = 0.0f;
+  rotation[AXIS_Y] = 0.0f;
+  rotation[AXIS_Z] = 0.0f;
+  translation[AXIS_Z] = SKY_DOME_DISTANCE;
   BuildRotationMatrix(matrix, rotation, translation);
   ConvertMatrixToFixed(matrix, &f_SkyModelMatrix);
   gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);

@@ -362,16 +362,17 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
 
   lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
   lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
-  viewDir[0] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
-  viewDir[1] = 0.0f;
-  viewDir[2] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];
-  lightDir[0] = cosf(lightPitch) * cosf(lightYaw);
-  lightDir[2] = cosf(lightPitch) * sinf(lightYaw);
-  lightDir[1] = sinf(lightPitch);
-  if ((f32)fabs(viewDir[0]) + (f32)fabs(viewDir[2]) >= 1.0f) {
-    guNormalize(&viewDir[0], &viewDir[1], &viewDir[2]);
-    guNormalize(&lightDir[0], &lightDir[1], &lightDir[2]);
-    alignment = (viewDir[0] * lightDir[0]) + (viewDir[2] * lightDir[2]);
+  viewDir[AXIS_X] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
+  viewDir[AXIS_Y] = 0.0f;
+  viewDir[AXIS_Z] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];
+  lightDir[AXIS_X] = cosf(lightPitch) * cosf(lightYaw);
+  lightDir[AXIS_Z] = cosf(lightPitch) * sinf(lightYaw);
+  lightDir[AXIS_Y] = sinf(lightPitch);
+  if ((f32)fabs(viewDir[AXIS_X]) + (f32)fabs(viewDir[AXIS_Z]) >= 1.0f) {
+    guNormalize(&viewDir[AXIS_X], &viewDir[AXIS_Y], &viewDir[AXIS_Z]);
+    guNormalize(&lightDir[AXIS_X], &lightDir[AXIS_Y], &lightDir[AXIS_Z]);
+    alignment = (viewDir[AXIS_X] * lightDir[AXIS_X]) +
+        (viewDir[AXIS_Z] * lightDir[AXIS_Z]);
     lightHeight = cosf(lightPitch);
     if (lightHeight >= LIGHT_HEIGHT_MIN) {
       leftAlignment = alignment;
