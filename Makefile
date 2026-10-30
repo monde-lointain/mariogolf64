@@ -79,6 +79,12 @@ ifneq ($(NON_MATCHING),0)
 DEFINES     += -DNON_MATCHING
 endif
 
+# Each compile lists the headers it read in a .d file beside its object, so
+# that changing a header rebuilds what includes it. Both compilers'
+# preprocessors take the file and target from DEPENDENCIES_OUTPUT, KMC's
+# having no -MF or -MT; it appends, so the old list goes first.
+DEPS         = rm -f $(@:.o=.d); DEPENDENCIES_OUTPUT='$(@:.o=.d) $@'
+
 OPTFLAGS    := -O2
 CFLAGS       = $(TARGETFLAGS) $(GAME_CFLAGS) -nostdinc -funsigned-char $(WARNINGS) $(OPTFLAGS)
 ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
@@ -246,7 +252,7 @@ ifneq ($(RUN_CC_CHECK),0)
 	$(CC_CHECK) $(INCLUDES) $(DEFINES) $<
 endif
 	{ echo '# 1 "$<"'; $(ICONV) $<; } > $(BUILD_DIR)/$*.sjis.c
-	$(CC) -c $(CFLAGS) -I$(dir $<) $(INCLUDES) $(DEFINES) -o $@ $(BUILD_DIR)/$*.sjis.c
+	$(DEPS) $(CC) -c $(CFLAGS) -I$(dir $<) $(INCLUDES) $(DEFINES) -o $@ $(BUILD_DIR)/$*.sjis.c
 
 # main_bss.c defines libmus's bss objects too, whose types only its sources
 # declare
@@ -254,29 +260,29 @@ $(BUILD_DIR)/src/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src
 
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(LIB_CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+	$(DEPS) $(LIB_CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
 # The game's own variants of libultra objects, built the same way
 $(BUILD_DIR)/src/libultra/%.c.o: src/libultra/%.c
 	@mkdir -p $(dir $@)
-	$(LIB_CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+	$(DEPS) $(LIB_CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.s.o: $(ULTRALIB_DIR)/%.s
 	@mkdir -p $(dir $@)
-	$(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+	$(DEPS) $(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
 $(BUILD_DIR)/$(LIBMUS_DIR)/%.c.o: $(LIBMUS_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(LIB_CC) -c $(LIBMUS_CFLAGS) $(LIBMUS_INCLUDES) $(LIBMUS_DEFINES) -o $@ $<
+	$(DEPS) $(LIB_CC) -c $(LIBMUS_CFLAGS) $(LIBMUS_INCLUDES) $(LIBMUS_DEFINES) -o $@ $<
 
 $(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.c.o: $(LIBNAUDIO_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(LIB_CC) -c $(LIBNAUDIO_CFLAGS) $(LIBNAUDIO_INCLUDES) $(LIBNAUDIO_DEFINES) -o $@ $<
+	$(DEPS) $(LIB_CC) -c $(LIBNAUDIO_CFLAGS) $(LIBNAUDIO_INCLUDES) $(LIBNAUDIO_DEFINES) -o $@ $<
 
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
 	@mkdir -p $(dir $@)
 	tr -d '\r' < $< > $(@:.o=)
-	$(LIB_CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
+	$(DEPS) $(LIB_CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
 
 # Game code that includes NuSystem's header needs its converted copy
 $(BUILD_DIR)/src/main.c.o: $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
@@ -289,6 +295,10 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h: $(LIBNUSYS_DIR)/nusys.h
 # only hold data (such as gu/libm_vals.s) are found under a .c.o name
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.s
 	@mkdir -p $(dir $@)
-	$(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+	$(DEPS) $(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
 -include $(BUILD_DIR)/splat/$(TARGET).d
+-include $(O_FILES:.o=.d)
+# A header that a .d file lists but that has since gone only forces the
+# rebuild that writes a new list
+%.h: ;
