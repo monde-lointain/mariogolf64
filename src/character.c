@@ -942,6 +942,9 @@ INCLUDE_ASM("asm/nonmatchings/character", ResetAnimationTriangleTextures);
 /*
  * Loads the model of the character of the kind into the slot, sets up its
  * frame data copies, and starts its first animation
+ *
+ * Doesn't match: the original adds the frame data size before the copy's
+ * address, and loads the model's shadow scale before storing unk68[5].
  */
 #ifdef NON_MATCHING
 /* As above, so the data below lands in .rodata */
@@ -986,12 +989,12 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
 
     slot->modelIndex = g_CharacterModelIndex;
     slot->alpha = LOADED_ALPHA;
-    slot->nextAnimationId = NO_NEXT_ANIMATION;
     slot->frameDataIndex = 0;
     slot->animationIndex = 0;
     slot->isTranslucent = FALSE;
     slot->lighting = CHARACTER_LIGHTING_FIXED;
     slot->isLooping = TRUE;
+    slot->nextAnimationId = NO_NEXT_ANIMATION;
     slot->playsRandomTextureAnimation = TRUE;
     slot->randomTextureAnimationDelay = LOADED_RANDOM_TEXTURE_ANIMATION_DELAY;
     slot->unk188 = 0;
