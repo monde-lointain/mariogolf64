@@ -178,8 +178,9 @@ static TableCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
 static s32 D_80230308_ovl_01[2] = {64, 84};
 /* Which of the cursor's shown cells each popup corner would cover */
 // clang-format off
-static u8 D_80230310_ovl_01[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
-                           [TABLE_SHOWN_COLUMN_COUNT] = {
+static u8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT]
+                                   [TABLE_SHOWN_ROW_COUNT]
+                                   [TABLE_SHOWN_COLUMN_COUNT] = {
   {
     { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE },
     { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE },
@@ -607,8 +608,8 @@ void DrawTablePopup(Gfx** displayListHead) {
   s32 columnWins;
   u8 faceMode;
 
-  if (D_80230310_ovl_01[f_TablePopupCorner][memory->tableRow]
-                       [memory->tableColumn] == TRUE) {
+  if (f_DoesTablePopupCoverCell[f_TablePopupCorner][memory->tableRow]
+                               [memory->tableColumn] == TRUE) {
     switch (f_TablePopupCorner) {
       case TABLE_POPUP_TOP_LEFT:
         f_TablePopupLeft = TABLE_POPUP_RIGHT_X;
