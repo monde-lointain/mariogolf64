@@ -66,9 +66,12 @@ typedef struct MenuMemory {
   /* The player whose handicap the handicap screen is choosing */
   /* 0x29 */ s8 handicapPlayer;
   /* 0x2A */ s8 unk2A;
-  /* 0x2B */ s8 unk2B;
-  /* 0x2C */ s8 unk2C;
-  /* 0x2D */ s8 unk2D;
+  /* The mini-golf course select's record of three courses */
+  /* 0x2B */ s8 miniGolfRecordChoice;
+  /* The mini-golf course select's course on its record's disc */
+  /* 0x2C */ s8 miniGolfCourseChoice;
+  /* How far the mini-golf course select still has to slide to the record */
+  /* 0x2D */ s8 miniGolfRecordSlide;
   /* 0x2E */ s8 holeIndex; /* The hole the Ring Shot select points at */
   /* 0x2F */ s8 courseIndex; /* And its course */
   /* 0x30 */ s8 statsCourse; /* The course whose statistics show; one past the
