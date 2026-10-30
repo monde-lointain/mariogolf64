@@ -556,7 +556,7 @@ s32 GetBallDistance(
      * among the declarations, it leaves GetBallDistance's registers as they
      * are in the original.
      */
-    f32 GetVectorLength(f32 x, f32 y, f32 z) {
+    UNUSED_FUNCTION f32 GetVectorLength(f32 x, f32 y, f32 z) {
       return sqrtf(x * x + y * y + z * z);
     }
   }
@@ -806,8 +806,8 @@ INCLUDE_ASM("asm/nonmatchings/character", ResetTriangleTextures);
  * advances each one a frame. The arguments after the slot are unused.
  */
 #ifdef NON_MATCHING
-void AdvanceTextureAnimations(
-    u32 slotIndex, s32 unused, s32 frameLastDigit, s32 frame) {
+void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
+    s32 frameLastDigit UNUSED, s32 frame UNUSED) {
   s32 triangleIndex = 0;
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   AnimatedTriangle* triangle;
@@ -1399,10 +1399,10 @@ void AnimateCharacter(u32 slotIndex) {
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
-  f32 unusedMatrices[3][4][4];
+  f32 unusedMatrices[3][4][4] UNUSED;
   f32 translationMatrix[4][4];
   f32 jointMatrix[4][4];
-  f32 scaleMatrix[4][4];
+  f32 scaleMatrix[4][4] UNUSED;
   f32 rotation[4];
   f32(*rotationMatrix)[4];
   JointAnimation* joint;
@@ -2080,7 +2080,7 @@ void DrawCharacterAndShadow(
   PlaneTriangle triangle;
   TrianglePlane plane;
   Mat4 projection;
-  Mat4 unusedMatrix;
+  Mat4 unusedMatrix UNUSED;
   Gfx* gfx;
   CharacterSlot* slot;
   f32 shadowScale;

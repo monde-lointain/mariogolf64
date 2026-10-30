@@ -719,7 +719,7 @@ void DrawPrompt(Gfx** displayListHead) {
   } while (half != 2);
 
   if (f_PromptState == PROMPT_STATE_CHOOSING) {
-    s32 unused[2]; /* Unused; it is there to match */
+    s32 unused[2] UNUSED; /* Unused; it is there to match */
 
     f_ChoiceBobAngle += DegreesToRadians(CHOICE_BOB_STEP_DEGREES);
     if (f_PromptChoice == PROMPT_CHOICE_YES) {

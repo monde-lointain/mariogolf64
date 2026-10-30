@@ -624,7 +624,7 @@ void SettleHoleBets(void) {
 
   /* Declared after SettleNassau to match the stack layout */
   s32 scores[MAX_PLAYER_COUNT];
-  s32 unused[8]; /* Unused; it is there to match */
+  s32 unused[8] UNUSED; /* Unused; it is there to match */
 
   if (g_GameState.betRates[BET_STROKES] > 0) {
     for (i = 0; i != g_GameState.playerCount; i++) {

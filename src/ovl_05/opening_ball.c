@@ -177,7 +177,7 @@ static SurfaceInfo* GetOpeningSurfaceInfo(Surface surface) {
 
 /* An unused copy of ResetBallSimulations, which resets g_BallSimulations as
  * that does */
-static void ResetOpeningBallSimulations(void) {
+static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
   s32 index;
 
   for (index = 0; index < BALL_SIMULATION_COUNT; index++) {
@@ -1797,7 +1797,7 @@ s32 func_8020A488_ovl_05(
   f32 spinBase;
   f32 spinLoss;
   s32 index;
-  s8 surface;
+  s8 surface UNUSED;
 
   f32 PickLieBlend(void) {
     return 0.0f;

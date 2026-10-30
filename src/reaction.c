@@ -962,7 +962,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(FAR_REACTION_START_DISTANCE,
       REACTION_END_DISTANCE, f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
   f32 highestHeight;
 
   if (f_ReactionAnimation == REACTION_ANIMATION_BOGEY) {
@@ -1419,7 +1419,7 @@ void GetReactionSpot(CoursePoint point) {
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   f32 ahead[AXIS_COUNT];
   CoursePoint spot;
-  u8 unusedBuffer[0x80]; /* Unused; it is there to match */
+  u8 unusedBuffer[0x80] UNUSED; /* Unused; it is there to match */
   Radians heading =
       ((g_CurrentShot.heading + QUARTER_BINARY_TURN) & BINARY_ANGLE_MASK) *
       BINARY_ANGLE_TO_RADIANS;

@@ -94,6 +94,16 @@ typedef f32 Mat4[4][4];
 #define ORDERED_BSS
 #endif
 
+/*
+ * Marks a function definition that nothing calls. KMC GCC takes no attribute
+ * in front of a definition.
+ */
+#ifdef __IS_KMC__
+#define UNUSED_FUNCTION
+#else
+#define UNUSED_FUNCTION UNUSED
+#endif
+
 /* Zero is false, and any other value true, as C tests it */
 typedef s32 Boolean;
 

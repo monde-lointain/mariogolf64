@@ -1740,7 +1740,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
   s32 contactZ;
   Radians angle;
   f32 bounceSpeed;
-  s32 unused[2];
+  s32 unused[2] UNUSED;
 
   for (; i < PIN_COUNT; i++) {
     if (startX < (s32)(g_HoleSetup.cupPosition[AXIS_X] - FLAG_REACH)) {
@@ -3001,7 +3001,7 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 endSide;
   f32 sideChange;
   f32 hitFraction;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
 
   if (IsGameFlagSet(GAME_FLAG_UNK0)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);

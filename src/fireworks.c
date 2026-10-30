@@ -158,7 +158,7 @@ s32 HaveFireworksStayedFreed(void) {
 
 /* Sends every particle of the firework out from one random point */
 #ifdef NON_MATCHING
-void LaunchFirework(Firework* firework, s32 fireworkIndex) {
+void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   s32 particleIndex;
   f32 originX;
   s32 random;
@@ -204,9 +204,9 @@ INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
 #ifdef NON_MATCHING
 void UpdateAndDrawFireworks(Gfx** displayListHead) {
   Gfx* gfx;
-  s32 unused[12]; /* The original frame has room for this */
+  s32 unused[12] UNUSED; /* The original frame has room for this */
   Mat4 transform;
-  s32 unusedAfter[6]; /* The original frame has room for this too */
+  s32 unusedAfter[6] UNUSED; /* The original frame has room for this too */
   s32 fireworkIndex;
   s32 index;
   s32 particleIndex;

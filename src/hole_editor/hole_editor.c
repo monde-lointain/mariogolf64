@@ -1988,7 +1988,8 @@ void func_80403A04_hole_editor(void) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
   Vtx_t* corners[HOLE_TRIANGLE_VERTEX_COUNT];
   Vtx_t* nextCorners[HOLE_TRIANGLE_VERTEX_COUNT];
-  Mat4 unusedMatrices[2]; /* The game's frame has room for two matrices */
+  Mat4
+      unusedMatrices[2] UNUSED; /* The game's frame has room for two matrices */
   f32 stepRight;
   f32 stepUp;
   f32 stepY;
@@ -3859,7 +3860,7 @@ void func_80407F08_hole_editor(u32* words, s32 byteCount, char* fileName) {
  * extension.
  */
 #ifdef NON_MATCHING
-void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
+void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
                                                  fine tile */
   s32 keepsCombineMode;

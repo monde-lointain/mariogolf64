@@ -225,7 +225,7 @@ void DrawShotLabels(Gfx** displayListHead) {
   }
 
   /* Draws tag number tag centered on x and y */
-  void DrawPlayerTag(s32 x, s32 y, s32 corner, s32 tag) {
+  void DrawPlayerTag(s32 x, s32 y, s32 corner UNUSED, s32 tag) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
         TextureAddress(ImageTexels(g_PlayerTagImages) + tag * TAG_IMAGE_SIZE),

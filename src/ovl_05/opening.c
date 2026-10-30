@@ -4608,7 +4608,7 @@ void LoadOpeningLogo(void) {
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   Gfx* gfx = *displayListHead;
-  s32 pad[6];
+  s32 pad[6] UNUSED;
   s32 i;
   s32 j;
   Radians angle;

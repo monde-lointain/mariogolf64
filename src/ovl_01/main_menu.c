@@ -2744,7 +2744,7 @@ void UpdateCourseSelect(void) {
 #ifdef NON_MATCHING
 void UpdateMiniGolfCourseSelect(void) {
   EncodedAsset asset;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
   Boolean isDone;
   s32 course;
   s32 direction;
@@ -4725,7 +4725,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   f32 boardX[WHEEL_SLOT_LIMIT];
   f32 boardY[WHEEL_SLOT_LIMIT];
   f32 boardScale[WHEEL_SLOT_LIMIT];
-  s32 unusedSlots[WHEEL_SLOT_LIMIT];
+  s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
   s32 drawOrder[WHEEL_SLOT_LIMIT];
   s32 position[2];
   SaveData* save = GetSaveData();
@@ -5273,7 +5273,7 @@ void DrawMenuCharacters(Gfx** displayListHead) {
   Vec3 translation;
   Vec3 rotation;
   Vec3 scale;
-  s32 unused[12];
+  s32 unused[12] UNUSED;
   Mat4 transform;
 
   memory = GetMenuMemory();
@@ -5711,11 +5711,11 @@ void DrawCourseSelect(Gfx** displayListHead) {
   Gfx* gfx;
   u16 perspNorm;
   u16 wheelPerspNorm;
-  u8 unusedStack[0x10];
+  u8 unusedStack[0x10] UNUSED;
   f32 iconX[COURSE_COUNT];
   f32 iconY[COURSE_COUNT];
   f32 iconScale[COURSE_COUNT];
-  u8 unusedStack2[0x18];
+  u8 unusedStack2[0x18] UNUSED;
   s32 drawOrder[COURSE_COUNT];
   s16 places[TOURNAMENT_PLACE_COUNT];
   SaveData* save;

@@ -756,7 +756,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
  */
 #ifdef NON_MATCHING
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
-    s32 centerY, s32 okTextShown, s32 chosenButton, s32 windowStyle) {
+    s32 centerY, s32 okTextShown UNUSED, s32 chosenButton, s32 windowStyle) {
   Gfx* gfx = *displayListHead;
   f32 windowWidth;
   f32 windowHalfHeight;

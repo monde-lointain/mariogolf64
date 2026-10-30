@@ -286,7 +286,7 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
   u16 slot;
   u16 character;
   void* faceImage;
-  s32 unused[2];
+  s32 unused[2] UNUSED;
   u16(*faceAssets)[8];
 
   do {
@@ -387,7 +387,7 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   u16 slot;
   u16 character;
   void* faceImage;
-  s32 unused[2];
+  s32 unused[2] UNUSED;
   u16(*faceAssets)[8];
 
   while (TRUE) {
@@ -1269,7 +1269,7 @@ void LoadCharacterFaces(void) {
   u8* images = GetMenuImageBuffer();
   s32 slotIndex;
   void* faceImage;
-  s32 unused[2];
+  s32 unused[2] UNUSED;
   void* characterFile;
   AssetId faceAsset;
 

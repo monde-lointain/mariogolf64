@@ -2335,7 +2335,7 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
-  f32 unusedMatrices[3][4][4];
+  f32 unusedMatrices[3][4][4] UNUSED;
   f32 translationMatrix[4][4];
   f32 jointMatrix[4][4];
   f32 scaleMatrix[4][4];

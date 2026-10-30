@@ -711,7 +711,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
   s32 stripIndex;
   s32 arrowFrame;
   s32 push;
-  u8 unusedBuffer[0x1C]; /* Unused; it is there to match */
+  u8 unusedBuffer[0x1C] UNUSED; /* Unused; it is there to match */
 
   if (f_LoadedScreen == COURSE_SELECT_RING_SHOT) {
     DrawPlanks(&gfx);
@@ -977,14 +977,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawNamePlate);
 /* Spins the chosen hole's star; the position is unused, the stars are always in
  * one place */
 #ifdef NON_MATCHING
-void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
+void DrawRingShotStars(
+    Gfx** displayListHead, s32 centerX UNUSED, s32 centerY UNUSED) {
   EncodedAsset asset;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   Gfx* gfx = *displayListHead;
 
   /* Unused */
-  f32 hexagon[6][2] = {
+  f32 hexagon[6][2] UNUSED = {
       {0.0f, -1.0f},
       {0.89f, -0.45f},
       {0.89f, 0.45f},

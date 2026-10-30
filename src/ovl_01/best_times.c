@@ -236,9 +236,9 @@ void DrawBestTimes(Gfx** displayListHead) {
   f32 iconX[COURSE_COUNT];
   f32 iconY[COURSE_COUNT];
   f32 iconScale[COURSE_COUNT];
-  s32 unusedSlots[COURSE_COUNT];
+  s32 unusedSlots[COURSE_COUNT] UNUSED;
   s32 drawOrder[COURSE_COUNT];
-  s32 unused[2];
+  s32 unused[2] UNUSED;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   s32 courseCount;

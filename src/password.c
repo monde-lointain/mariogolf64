@@ -296,7 +296,7 @@ static u8 ReverseBits(u8 bits) {
 
 #ifdef NON_MATCHING
 s32 WritePasswordSymbols(
-    u8* symbols, char* password, s32 symbolCount, s32 unused) {
+    u8* symbols, char* password, s32 symbolCount, s32 unused UNUSED) {
   s32 i;
 
   for (i = 0; i < symbolCount; i++) {

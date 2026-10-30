@@ -340,11 +340,11 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   Gfx* gfx = g_DisplayListHead;
-  BillboardColor lightColor = g_BillboardLightColor;
+  BillboardColor lightColor UNUSED = g_BillboardLightColor;
   BillboardColor envColor = g_BillboardEnvColor;
   Vec3 viewDir;
   Vec3 lightDir;
-  Vec3 unusedVector;
+  Vec3 unusedVector UNUSED;
   Radians lightPitch;
   Radians lightYaw;
   f32 alignment;

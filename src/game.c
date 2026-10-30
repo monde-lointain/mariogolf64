@@ -1224,7 +1224,7 @@ s32 DrawGame(void) {
   void LoadProjection(void) {
     Mat4 projection;
     Mat4 translation;
-    Mat4 unusedMatrix;
+    Mat4 unusedMatrix UNUSED;
 
     if (usesFloatMatrices) {
       guTranslateF(translation, 0.0f, 0.0f, 0.0f);

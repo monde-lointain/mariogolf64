@@ -1206,7 +1206,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   Vec3 translation;
   Vec3 rotation;
   Vec3 scale;
-  u8 unusedStack[0x30];
+  u8 unusedStack[0x30] UNUSED;
   Mat4 transform;
 
   BuildDynamicTextures(&gfx);
@@ -1693,7 +1693,7 @@ void DrawPageArrows(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 arrowIndex;
   s32 left;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
 
   f_PageArrowTimer++;
   if (f_PageArrowTimer >= PAGE_ARROW_FRAME_DURATION) {

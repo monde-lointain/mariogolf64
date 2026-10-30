@@ -3196,7 +3196,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 #ifdef NON_MATCHING
 void DrawMatchResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
   s32 standingShift[MATCH_PLAYER_COUNT];
   s32 betShift = FOUR_DIGIT_BET_SHIFT;
   s32 standingRow;

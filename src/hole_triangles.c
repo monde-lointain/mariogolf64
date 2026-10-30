@@ -104,8 +104,8 @@ void DimNextTranslucentTriangles(void) {
 
 /* Draws the hole's triangles other than the rings */
 #ifdef NON_MATCHING
-void DrawHoleTriangles(
-    Gfx** displayListHead, CameraMatrices* matrices, Camera* camera) {
+void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
+    Camera* camera UNUSED) {
   Gfx* gfx = *displayListHead;
   s32 index;
   s32 vertexIndex;
@@ -267,8 +267,8 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
 /* Draws the current player's rings; one past RING_STATE_SHOWN fades out while
  * sparkles circle it */
 #ifdef NON_MATCHING
-void DrawRings(
-    Gfx** displayListHead, CameraMatrices* matrices, Camera* camera) {
+void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
+    Camera* camera UNUSED) {
   Gfx* gfx = *displayListHead;
   f32 transform[4][4];
   f32 ringPoint[3];

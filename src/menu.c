@@ -1653,7 +1653,7 @@ void InvalidateBrokenRingShotRecords(void) {
   s32 recordIndex;
   RingShotRecord* record;
   s32 kind;
-  s32 unused[2]; /* The original frame has room for this */
+  s32 unused[2] UNUSED; /* The original frame has room for this */
 
   save = GetSaveData();
   for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {

@@ -3625,7 +3625,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
-  s32 unused[20]; /* Unused; it is there to match */
+  s32 unused[20] UNUSED; /* Unused; it is there to match */
   GroundLightColor light = {24, 22, 16};
   GroundLightColor shade;
 

@@ -1389,7 +1389,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtBelowBall);
  * ball's loads first.
  */
 #ifdef NON_MATCHING
-void EaseLookAtPoint(Radians yaw) {
+void EaseLookAtPoint(Radians yaw UNUSED) {
   f_LookAtPoint[AXIS_X] +=
       ((f_FlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) -
           f_LookAtPoint[AXIS_X]) *
@@ -2575,7 +2575,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
  */
 #ifdef NON_MATCHING
 void ChooseFlightCameraKind(void) {
-  f32 unusedValues[14]; /* Unused; it is there to match */
+  f32 unusedValues[14] UNUSED; /* Unused; it is there to match */
   s32 animation;
   s32 kind;
   s32 pick;

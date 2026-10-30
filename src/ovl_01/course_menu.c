@@ -431,9 +431,9 @@ void DrawCourseStats(Gfx** displayListHead) {
   f32 iconX[WHEEL_SLOT_LIMIT];
   f32 iconY[WHEEL_SLOT_LIMIT];
   f32 iconScale[WHEEL_SLOT_LIMIT];
-  s32 unusedSlots[WHEEL_SLOT_LIMIT];
+  s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
   s32 drawOrder[WHEEL_SLOT_LIMIT];
-  s32 unused[2];
+  s32 unused[2] UNUSED;
   MenuMemory* memory = GetMenuMemory();
   s32 courseCount;
   s32 index;
@@ -884,7 +884,7 @@ void DrawStatsScrollArrows(Gfx** displayListHead) {
   s32 firstArrow;
   s16 arrowIndex;
   s32 top;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
 
   if (hasRowsBelow) {
     arrowCount++;

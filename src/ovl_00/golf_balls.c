@@ -572,7 +572,7 @@ void UpdateGolfBalls(void) {
         for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
             i++, afterimage++) {
           if (afterimage->alpha != AFTERIMAGE_UNUSED) {
-            s32 coursePosition[3];
+            s32 coursePosition[3] UNUSED;
 
             coursePosition[AXIS_X] = afterimage->position[AXIS_X] * 1024.0f;
             coursePosition[AXIS_Y] = afterimage->position[AXIS_Y] * 1024.0f;
@@ -762,7 +762,7 @@ enum BallSprite {
   })
 
 #ifdef NON_MATCHING
-void DrawGolfBalls(CameraMatrices* matrices) {
+void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   Gfx* gfx = g_DisplayListHead;
   ScreenPoint ballPoint;
   ScreenPoint shadowPoint;

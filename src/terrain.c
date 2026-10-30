@@ -507,7 +507,7 @@ void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range) {
  */
 Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
   s8 surfaces[NEAREST_CODE_COUNT];
-  f32 weights[NEAREST_CODE_COUNT];
+  f32 weights[NEAREST_CODE_COUNT] UNUSED;
   PlaneTriangle hit;
   f32 fraction;
   s32 shiftedX;
@@ -682,8 +682,8 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
 
   if (FindHoleTriangleHit(
           x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
-    char unusedText[0x80]; /* Unused, but keeps the stack frame the same size as
-                              the original */
+    char unusedText[0x80] UNUSED; /* Unused, but keeps the stack frame the same
+                              size as the original */
 
     waterBias = WATER_BIAS;
     if (lowersWaterLevel) {

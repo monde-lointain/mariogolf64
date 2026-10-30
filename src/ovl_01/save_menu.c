@@ -1390,7 +1390,7 @@ void UpdateSavedGames(void) {
   SaveData* save = GetSaveData();
   EncodedAsset asset;
   AssetFile file;
-  u8 unusedStack[0xB0];
+  u8 unusedStack[0xB0] UNUSED;
   s32 slot;
   s32 controller;
   s32 humanIndex;
@@ -1841,9 +1841,9 @@ void DrawSavedGames(Gfx** displayListHead) {
   f32 boardX[COURSE_COUNT];
   f32 boardY[COURSE_COUNT];
   f32 boardScale[COURSE_COUNT];
-  s32 unusedSlots[COURSE_COUNT];
+  s32 unusedSlots[COURSE_COUNT] UNUSED;
   s32 drawOrder[COURSE_COUNT];
-  u8 unusedStack[8];
+  u8 unusedStack[8] UNUSED;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;

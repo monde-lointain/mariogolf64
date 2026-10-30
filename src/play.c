@@ -2030,7 +2030,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
    * SetGroundCombineMode is a nested function, a GNU C extension. It
    * blends the noise texture over the tile texture.
    */
-  void SetGroundCombineMode(s32 unused0, s32 unused1) {
+  void SetGroundCombineMode(s32 unused0 UNUSED, s32 unused1 UNUSED) {
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL1, 0, ENVIRONMENT, SHADE, TEXEL1,

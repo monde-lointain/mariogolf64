@@ -938,7 +938,7 @@ void InitSkyColors(void);
 #ifdef NON_MATCHING
 void InitSkyColors(void) {
   EncodedAsset asset;
-  u8 unused[0x10]; /* Pads the frame to the target's size */
+  u8 unused[0x10] UNUSED; /* Pads the frame to the target's size */
   s32 blended[RGB_CHANNEL_COUNT];
   SkyColors* colors;
   SkyColors* from;
@@ -955,7 +955,7 @@ void InitSkyColors(void) {
   s32 innerMix;
 
   /* Unused */
-  s32 Lerp(s32 start, s32 end, f32 fraction) {
+  UNUSED_FUNCTION s32 Lerp(s32 start, s32 end, f32 fraction) {
     return start * (1.0f - fraction) + end * fraction;
   }
 
@@ -2540,7 +2540,7 @@ void SetMenuBackdrop(s32 backdrop) {
 
 /* Starts the plain menu backdrop by capturing the last frame for it */
 #ifdef NON_MATCHING
-void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
+void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
   Gfx* gfx = *displayListHead;
   s32 strip;
   s32 height;
@@ -2724,8 +2724,8 @@ void DrawTileAnimation(void) {
   Vec3 translation;
   Mat4 matrix;
   Radians angle;
-  f32 unusedSine;
-  f32 unusedCosine;
+  f32 unusedSine UNUSED;
+  f32 unusedCosine UNUSED;
   s32 progress;
   s32 tileRow;
   s32 tileColumn;
