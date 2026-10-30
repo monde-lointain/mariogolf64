@@ -331,7 +331,7 @@ void DrawBirdieBadgeLabel(Gfx** displayListHead);
 s32 IsMusicOffChosen(void);
 s32 IsMonoChosen(void);
 s32 IsSimpleCameraChosen(void);
-void BuildCharacterGrid(s32 arg0, s32 arg1);
+void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
 void ClearImportedCharacters(void);
 void func_801F6B20_ovl_01(void);
 void SetUpChosenGame(void);

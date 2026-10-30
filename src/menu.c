@@ -1313,10 +1313,11 @@ Boolean IsMetalMarioUnlocked(void) {
  * Fills the character grid from the save: with every character under
  * GAME_FLAG_ALL_CHARACTERS, or else the starting ones, the first five columns
  * for more than one player, those whose matchup records show a win, the
- * unlocked ones and the imported ones, whose faces load too unless arg1 is 1.
- * arg0 is reused below as a record count and a character id, to match.
+ * unlocked ones and the imported ones, whose faces load too unless
+ * skipsImportedFaces is set. playerCount is reused below as a record count and
+ * a character id, to match.
  */
-void BuildCharacterGrid(s32 arg0, s32 arg1) {
+void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save;
@@ -1343,7 +1344,7 @@ void BuildCharacterGrid(s32 arg0, s32 arg1) {
     return;
   }
 
-  if (arg0 >= 2) {
+  if (playerCount >= 2) {
     for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
       for (column = 0; column != 5; column++) {
         g_CharacterGrid[row][column] = f_EveryCharacterGrid[row][column];
@@ -1353,15 +1354,15 @@ void BuildCharacterGrid(s32 arg0, s32 arg1) {
 
   for (index = 0; index != RECORD_CHARACTER_COUNT; index++) {
     recordIndex = 0;
-    arg0 = 0;
+    playerCount = 0;
     for (; recordIndex != CHARACTER_COUNT; recordIndex++) {
       if (save->awards.matchups[recordIndex][index].winBits & WIN_COUNT_MASK) {
-        arg0++;
+        playerCount++;
         break;
       }
     }
 
-    if (arg0 > 0) {
+    if (playerCount > 0) {
       for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
         for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
           if (f_RecordGrid[row][column] == index) {
@@ -1400,14 +1401,14 @@ void BuildCharacterGrid(s32 arg0, s32 arg1) {
     }
   }
 
-  if ((u8)arg1 != 1) {
+  if ((u8)skipsImportedFaces != 1) {
     for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
       recordIndex = g_CharacterGrid[2][index];
       if (recordIndex >= 0) {
-        arg0 = g_ImportedCharacters[index].character;
-        OpenEncodedAsset(g_FaceAnimationAssets[arg0][0], &asset);
+        playerCount = g_ImportedCharacters[index].character;
+        OpenEncodedAsset(g_FaceAnimationAssets[playerCount][0], &asset);
         ReadEncodedAsset(D_8012D430[FIRST_IMPORTED_CHARACTER + index], &asset);
-        OpenAssetFile(g_CharacterFacePaletteFiles[arg0][0], &file);
+        OpenAssetFile(g_CharacterFacePaletteFiles[playerCount][0], &file);
         ReadAssetFile(D_80105B78[FIRST_IMPORTED_CHARACTER + index],
             GetAssetFileSize(&file), &file);
       }
