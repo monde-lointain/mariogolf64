@@ -1479,7 +1479,7 @@ void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
   u8* image = GetMenuImageBuffer();
   char* digit;
   s32 width;
-  s32 left;
+  s16 left;
   s32 suffix;
   s32 glyph;
   s32 lastDigitSuffix;
