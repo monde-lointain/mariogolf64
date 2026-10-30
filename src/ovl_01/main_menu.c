@@ -299,14 +299,14 @@ extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
 /*
  * The course select. Its wheel shows the open courses and the next one
  * still shut, and turns from one to the next; the chosen course's image
- * is read into the one of D_800FBDFC's buffers not shown, and its trophy
- * files into D_800FBE38.
+ * is read into the one of g_CourseWheelImages's buffers not shown, and its
+ * trophy files into D_800FBE38.
  */
 #define COURSE_SELECT_TURN 90
 #define COURSE_SELECT_SPIN_SPEED 18
 #define COURSE_SELECT_TEXT_SLOT_COUNT 4
 
-extern void* D_800FBDFC[2];
+extern void* g_CourseWheelImages[2];
 
 /* What UpdateMenus reads as the menu screen changes */
 extern void* D_800FC6A0;
@@ -450,8 +450,8 @@ static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
     ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
 /* Read by no routine */
 static s32 D_8022BE58_ovl_01[10] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
-/* Which of D_800FBDFC's buffers shows the course */
-static u8 D_8022BE80_ovl_01 = 0;
+/* Which of g_CourseWheelImages's buffers shows the course */
+static u8 f_CourseWheelBufferIndex = 0;
 /* The model kind that the animation viewer loads, which L cycles */
 static s8 f_ViewerModelKind = 0;
 /* How far the bet settings and handicap pages have slid in */
@@ -1484,13 +1484,13 @@ void UpdateMenus(void) {
         ReadEncodedAsset(
             ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_LAYER_OFFSET),
             &asset);
-        D_8022BE80_ovl_01 = 0;
+        f_CourseWheelBufferIndex = 0;
         OpenEncodedAsset(
             g_CourseWheelImageAssets[g_MenuMemory.courseChoice][0], &asset);
-        ReadEncodedAsset(D_800FBDFC[0], &asset);
+        ReadEncodedAsset(g_CourseWheelImages[0], &asset);
         OpenEncodedAsset(
             g_CourseWheelImageAssets[g_MenuMemory.courseChoice][0], &asset);
-        ReadEncodedAsset(D_800FBDFC[1], &asset);
+        ReadEncodedAsset(g_CourseWheelImages[1], &asset);
         for (index = 0; index != COURSE_FILE_COUNT; index++) {
           OpenAssetFile(
               g_CourseTrophyFiles[g_MenuMemory.courseChoice][index], &file);
@@ -2610,14 +2610,15 @@ void UpdateCourseSelect(void) {
       g_MenuMemory.courseSpin = 0;
       OpenEncodedAsset(
           g_CourseWheelImageAssets[g_MenuMemory.courseChoice][0], &asset);
-      ReadEncodedAsset(D_800FBDFC[D_8022BE80_ovl_01 ^ 1], &asset);
+      ReadEncodedAsset(
+          g_CourseWheelImages[f_CourseWheelBufferIndex ^ 1], &asset);
       for (index = 0; index != COURSE_FILE_COUNT; index++) {
         OpenAssetFile(
             g_CourseTrophyFiles[g_MenuMemory.courseChoice][index], &file);
         ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
       }
 
-      D_8022BE80_ovl_01 ^= 1;
+      f_CourseWheelBufferIndex ^= 1;
       return;
     }
 
@@ -2742,14 +2743,15 @@ void UpdateCourseSelect(void) {
     if (g_MenuMemory.courseSpin == 0) {
       OpenEncodedAsset(
           g_CourseWheelImageAssets[g_MenuMemory.courseChoice][0], &asset);
-      ReadEncodedAsset(D_800FBDFC[D_8022BE80_ovl_01 ^ 1], &asset);
+      ReadEncodedAsset(
+          g_CourseWheelImages[f_CourseWheelBufferIndex ^ 1], &asset);
       for (index = 0; index != COURSE_FILE_COUNT; index++) {
         OpenAssetFile(
             g_CourseTrophyFiles[g_MenuMemory.courseChoice][index], &file);
         ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
       }
 
-      D_8022BE80_ovl_01 ^= 1;
+      f_CourseWheelBufferIndex ^= 1;
     }
   }
 }
@@ -6080,8 +6082,9 @@ void DrawCourseSelect(Gfx** displayListHead) {
           gDPLoadTLUT_pal256(
               gfx++, TextureAddress(D_800FBE38[places[otherIndex]]));
           gDPLoadTextureTile(gfx++,
-              TextureAddress(D_800FBDFC[D_8022BE80_ovl_01]), G_IM_FMT_CI,
-              G_IM_SIZ_8b, g_TrophySizes[g_MenuMemory.courseChoice].width,
+              TextureAddress(g_CourseWheelImages[f_CourseWheelBufferIndex]),
+              G_IM_FMT_CI, G_IM_SIZ_8b,
+              g_TrophySizes[g_MenuMemory.courseChoice].width,
               g_TrophySizes[g_MenuMemory.courseChoice].height, 0, 0,
               g_TrophySizes[g_MenuMemory.courseChoice].width - 1,
               g_TrophySizes[g_MenuMemory.courseChoice].height - 1, 0,
