@@ -517,7 +517,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       imageSlot = &f_ChosenBetIconFrames[0];
       *imageSlot = buffer;
       OpenEncodedAsset(
-          f_BetIconFrameAssets[f_BetSetBets[betSet - 1][memory->unkD]][0],
+          f_BetIconFrameAssets[f_BetSetBets[betSet - 1][memory->betColumn]][0],
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
@@ -526,7 +526,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       imageSlot = &f_ChosenBetIconFrames[1];
       *imageSlot = buffer;
       OpenEncodedAsset(
-          f_BetIconFrameAssets[f_BetSetBets[betSet - 1][memory->unkD]][1],
+          f_BetIconFrameAssets[f_BetSetBets[betSet - 1][memory->betColumn]][1],
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
@@ -612,7 +612,7 @@ void ApplyBetPreset(s32 requestedPreset) {
     }
   }
 
-  memory->unkD = 0;
+  memory->betColumn = 0;
   for (index = 0; index != MAX_PLAYER_COUNT; index++) {
     g_ChosenHandicaps[index] =
         index < g_ChosenPlayerCount ? 0 : ABSENT_PLAYER_HANDICAP;
@@ -690,28 +690,28 @@ void UpdateBetSettings(void) {
 
   if (g_MenuRepeatButtons & U_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    index = f_BetSetStakeSlots[g_BetSet - 1][memory->unkD];
+    index = f_BetSetStakeSlots[g_BetSet - 1][memory->betColumn];
     if (memory->betStakeLevels[index] < BET_STAKE_LEVEL_COUNT - 1) {
       memory->betStakeLevels[index]++;
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    index = f_BetSetStakeSlots[g_BetSet - 1][memory->unkD];
+    index = f_BetSetStakeSlots[g_BetSet - 1][memory->betColumn];
     if (memory->betStakeLevels[index] > 0) {
       memory->betStakeLevels[index]--;
     }
   } else if (g_MenuRepeatButtons & L_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    memory->unkD--;
-    if (memory->unkD < 0) {
-      memory->unkD = f_BetSetColumnCounts[g_BetSet - 1] - 1;
+    memory->betColumn--;
+    if (memory->betColumn < 0) {
+      memory->betColumn = f_BetSetColumnCounts[g_BetSet - 1] - 1;
     }
 
     SetTextSlot(BET_HELP_X, BET_HELP_Y,
-        f_BetSetBets[g_BetSet - 1][memory->unkD] + BET_HELP_MESSAGE,
+        f_BetSetBets[g_BetSet - 1][memory->betColumn] + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
-        f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->unkD]]
+        f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->betColumn]]
                             [g_AnimatedIconFrameIndex],
         &asset);
     ReadEncodedAsset(
@@ -719,16 +719,16 @@ void UpdateBetSettings(void) {
     g_AnimatedIconBufferIndex ^= 1;
   } else if (g_MenuRepeatButtons & R_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    memory->unkD++;
-    if (memory->unkD > f_BetSetColumnCounts[g_BetSet - 1] - 1) {
-      memory->unkD = 0;
+    memory->betColumn++;
+    if (memory->betColumn > f_BetSetColumnCounts[g_BetSet - 1] - 1) {
+      memory->betColumn = 0;
     }
 
     SetTextSlot(BET_HELP_X, BET_HELP_Y,
-        f_BetSetBets[g_BetSet - 1][memory->unkD] + BET_HELP_MESSAGE,
+        f_BetSetBets[g_BetSet - 1][memory->betColumn] + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
-        f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->unkD]]
+        f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->betColumn]]
                             [g_AnimatedIconFrameIndex],
         &asset);
     ReadEncodedAsset(
@@ -818,7 +818,7 @@ void DrawBetSettings(
       break;
     }
 
-    if (columnIndex != memory->unkD) {
+    if (columnIndex != memory->betColumn) {
       icon = ImageAt(f_BetIcons, betIndex * BET_ICON_SLOT_SIZE);
       gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
       /* Bets without a stake are dimmed */
@@ -858,7 +858,7 @@ void DrawBetSettings(
   }
 
   /* The chosen bet's icon is animated */
-  DrawBetIcon(&gfx, f_BetSetColumnXs[g_BetSet - 1][memory->unkD] + slide,
+  DrawBetIcon(&gfx, f_BetSetColumnXs[g_BetSet - 1][memory->betColumn] + slide,
       CHOSEN_BET_ICON_TOP, BET_ICON_SIZE, TEXEL_STEP_ONE);
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -978,7 +978,7 @@ void DrawBetSettings(
     gDPPipeSync(gfx++);
   }
 
-  betIndex = f_BetSetBets[g_BetSet - 1][memory->unkD];
+  betIndex = f_BetSetBets[g_BetSet - 1][memory->betColumn];
   DrawBetLabel(&gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
   if (!f_IsBetHelpShown && isSettled == TRUE) {
     SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE,
@@ -1026,7 +1026,7 @@ void DrawBetIcon(
     }
 
     g_AnimatedIconBufferIndex = !g_AnimatedIconBufferIndex;
-    iconIndex = f_BetSetBets[g_BetSet - 1][memory->unkD];
+    iconIndex = f_BetSetBets[g_BetSet - 1][memory->betColumn];
     OpenEncodedAsset(
         f_BetIconFrameAssets[iconIndex][g_AnimatedIconFrameIndex], &asset);
     ReadEncodedAsset(f_ChosenBetIconFrames[g_AnimatedIconBufferIndex], &asset);

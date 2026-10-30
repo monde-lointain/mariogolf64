@@ -1872,7 +1872,7 @@ void UpdateMenuTitleScreen(void) {
 
       memory->modeChoice = 0;
       memory->modeSpin = 0;
-      memory->unkD = 0;
+      memory->betColumn = 0;
       for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
         memory->betStakeLevels[index] = 0;
       }

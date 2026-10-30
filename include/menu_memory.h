@@ -45,7 +45,8 @@ typedef struct MenuMemory {
   /* 0x0B */ s8 modeChoice; /* The mode select cursor's place in the player
                                count's modes */
   /* 0x0C */ s8 modeSpin; /* How far the modes still have to turn to reach it */
-  /* 0x0D */ s8 unkD;
+  /* The bet settings screen's chosen column of the bet set */
+  /* 0x0D */ s8 betColumn;
   /* 0x0E */ s8 betStakeLevels[BET_STAKE_SLOT_COUNT]; /* Set from one of
                                                     ApplyBetPreset's presets */
   /* 0x16 */ s8 courseChoice; /* The course select's course: an open one, or the
