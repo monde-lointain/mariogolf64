@@ -158,8 +158,8 @@ static u8 f_FaceFrameTimer = 0;
 /* Whether R, or Z or L, is held, which shows the COM or LEFTY icon */
 static s8 f_IsComButtonHeld = FALSE;
 static s8 f_IsLeftyButtonHeld = FALSE;
-/* A CButtonPalette value */
-static s8 D_8022FF09_ovl_01 = NO_PALETTE;
+/* The CButtonPalette that the grid face previews while a C button is held */
+static s8 f_PreviewedPalette = NO_PALETTE;
 /* Read by no routine */
 static s32 D_8022FF0C_ovl_01[4] = {-1, -1, -1, -1};
 /* The Game Boy row's slots, which HideGameBoyCharacters saves here and
@@ -576,7 +576,7 @@ s32 GetClubTournamentCourse(void);
  * chooses the character with the palette of a held C button, and B goes back
  * a player or leaves the screen. Holding R as A is pressed leaves the player
  * without a controller. Holding a C button previews its palette in
- * D_8022FF09, and holding R, or Z or L, sets f_IsComButtonHeld or
+ * f_PreviewedPalette, and holding R, or Z or L, sets f_IsComButtonHeld or
  * f_IsLeftyButtonHeld. Once a club tournament's choice is made, the closing
  * wipe ends the menus and g_GameState.unk2C, which RankTournament takes, gets
  * the tournament code.
@@ -938,7 +938,7 @@ s32 UpdateCharacterSelect(
       f_FaceFrameTimer = 0;
     }
 
-    D_8022FF09_ovl_01 = NO_PALETTE;
+    f_PreviewedPalette = NO_PALETTE;
     g_ChoosingPlayerIndex = playerIndex;
     f_IsComButtonHeld = FALSE;
     f_IsLeftyButtonHeld = FALSE;
@@ -1063,7 +1063,7 @@ s32 UpdateCharacterSelect(
     g_ChoosingPlayerIndex = playerIndex;
     f_IsComButtonHeld = FALSE;
     f_IsLeftyButtonHeld = FALSE;
-    D_8022FF09_ovl_01 = NO_PALETTE;
+    f_PreviewedPalette = NO_PALETTE;
     return 0;
   }
 
@@ -1124,7 +1124,7 @@ s32 UpdateCharacterSelect(
     }
 
     if (index == sameCharacterCount) {
-      D_8022FF09_ovl_01 = palette;
+      f_PreviewedPalette = palette;
     } else {
       for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {
         for (otherIndex = 0; otherIndex != sameCharacterCount; otherIndex++) {
@@ -1135,17 +1135,17 @@ s32 UpdateCharacterSelect(
         }
 
         if (otherIndex == sameCharacterCount) {
-          D_8022FF09_ovl_01 = index;
+          f_PreviewedPalette = index;
           break;
         }
       }
 
       if (index == CHARACTER_PALETTE_COUNT) {
-        D_8022FF09_ovl_01 = 0;
+        f_PreviewedPalette = 0;
       }
     }
   } else {
-    D_8022FF09_ovl_01 = NO_PALETTE;
+    f_PreviewedPalette = NO_PALETTE;
   }
 
   /* Set only where A with R would leave the player without a controller */
@@ -1533,13 +1533,13 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
 
     faceImage = g_CharacterFaceImages[(s16)slot];
     facePalette = D_80105B78[(s16)slot];
-    if (D_8022FF09_ovl_01 == 0) {
+    if (f_PreviewedPalette == 0) {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
-    } else if (D_8022FF09_ovl_01 == 1) {
+    } else if (f_PreviewedPalette == 1) {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][1], &file);
-    } else if (D_8022FF09_ovl_01 == 2) {
+    } else if (f_PreviewedPalette == 2) {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][2], &file);
-    } else if (D_8022FF09_ovl_01 == 3) {
+    } else if (f_PreviewedPalette == 3) {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][3], &file);
     } else {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][(
