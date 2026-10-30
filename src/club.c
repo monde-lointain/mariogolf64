@@ -1429,9 +1429,9 @@ s32 GetSelectedShotWorldDistance(void) {
  * Returns the surface mask bits of the clubs usable on the surface. Unless
  * distinguishesKinds is set, the green is the only kind told apart.
  */
-#ifdef NON_MATCHING
 s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo* info) {
   SurfaceKind kind = info->kind;
+  s32 mask;
 
   if (IsGameFlagSet(GAME_FLAG_ANY_CLUB_ANYWHERE)) {
     return CLUB_SURFACE_ALL;
@@ -1451,29 +1451,35 @@ s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo* info) {
     case SURFACE_KIND_BARE_GROUND:
     case SURFACE_KIND_DEEP_ROUGH:
     case SURFACE_KIND_WASTE_AREA:
-      return CLUB_SURFACE_ROUGH;
+      mask = CLUB_SURFACE_ROUGH;
+      break;
     case SURFACE_KIND_GREEN:
-      return CLUB_SURFACE_GREEN;
+      mask = CLUB_SURFACE_GREEN;
+      break;
     case SURFACE_KIND_ROUGH_POOR_LIE:
     case SURFACE_KIND_BUNKER:
     case SURFACE_KIND_BUNKER_FAIR_LIE:
     case SURFACE_KIND_BUNKER_POOR_LIE:
-      return CLUB_SURFACE_BUNKER;
+      mask = CLUB_SURFACE_BUNKER;
+      break;
     case SURFACE_KIND_TEE_GROUND:
-      return CLUB_SURFACE_TEE_GROUND;
+      mask = CLUB_SURFACE_TEE_GROUND;
+      break;
     case SURFACE_KIND_FAIRWAY:
     case SURFACE_KIND_FAIRWAY_FAIR_LIE:
     case SURFACE_KIND_FAIRWAY_POOR_LIE:
-      return CLUB_SURFACE_FAIRWAY;
+      mask = CLUB_SURFACE_FAIRWAY;
+      break;
     case SURFACE_KIND_SEMI_ROUGH:
-      return CLUB_SURFACE_SEMI_ROUGH;
+      mask = CLUB_SURFACE_SEMI_ROUGH;
+      break;
+    default:
+      mask = CLUB_SURFACE_ALL;
+      break;
   }
 
-  return CLUB_SURFACE_ALL;
+  return mask;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/club", GetSurfaceClubMask);
-#endif
 
 s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds) {
   return GetSurfaceClubMask(
