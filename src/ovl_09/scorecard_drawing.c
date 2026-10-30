@@ -272,16 +272,13 @@ void DrawScorecardLabel(
 /*
  * Shows who won the last hole of a match game, above the two players'
  * characters, once LoadResultCharacters has loaded them.
- *
- * Doesn't match: the target keeps the hole's offset in $s0 and the player's
- * in $s1, where this swaps them.
  */
-#ifdef NON_MATCHING
 void DrawMatchResult(Gfx** displayListHead) {
   s32 holeNumber = g_Scorecard.content.holeIndex;
   s32 i;
   s32 x;
   s32 holeIndex;
+  s32 ownHole; /* holeIndex again, for the player's own record, to match */
   Gfx* gfx = *displayListHead;
 
   SetUpTextDrawing(&gfx);
@@ -290,12 +287,13 @@ void DrawMatchResult(Gfx** displayListHead) {
   sprintf(g_PrintBuffer, f_HoleNumberFormat, holeNumber);
   DrawLargeText(&gfx, MATCH_HOLE_X, MATCH_HOLE_Y, g_PrintBuffer);
   holeIndex = holeNumber - 1;
+  ownHole = holeIndex;
   for (i = 0, x = MATCH_RESULT_LEFT; i != MATCH_PLAYER_COUNT; i++) {
-    if (g_Players[i].holes[holeIndex].strokes ==
+    if (g_Players[i].holes[ownHole].strokes ==
         g_Players[i ^ 1].holes[holeIndex].strokes) {
       SetTextColor(&gfx, 0xFF, 0xFF, 0);
       DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char*)f_DrawText);
-    } else if (g_Players[i].holes[holeIndex].strokes <
+    } else if (g_Players[i].holes[ownHole].strokes <
         g_Players[i ^ 1].holes[holeIndex].strokes) {
       SetTextColor(&gfx, 0xFF, 0x7F, 0x7F);
       DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char*)f_WinText);
@@ -357,9 +355,6 @@ void DrawMatchResult(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawMatchResult);
-#endif
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_HoleNumberFormat);
 
