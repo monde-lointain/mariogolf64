@@ -388,6 +388,7 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   s32 row = oldRow;
   u16 slot;
   u16 character;
+  s32 paletteCharacter; /* A copy of character, to match */
   void* faceImage;
   s32 unused[2] UNUSED;
   u16(*faceAssets)[8];
@@ -484,7 +485,8 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
 
     OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
-    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
+    paletteCharacter = character;
+    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)paletteCharacter][0], &file);
     ReadAssetFile(
         g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
   }
