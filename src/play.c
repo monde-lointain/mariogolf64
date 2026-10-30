@@ -634,7 +634,11 @@ void SetNextTeeOrder(void) {
   } while (0);
 }
 
-void func_800600C0(s32 index) {
+/*
+ * Copies what the player chose for a shot of the Best Shot replay record: its
+ * heading, gauge frames, shot mode, club and offsets, for the replay to repeat
+ */
+void LoadBestShotReplayInputs(s32 index) {
   D_80104F78.heading = D_800FEDD8->shots[index].heading;
   D_80104F78.powerGaugeFrame = D_800FEDD8->shots[index].powerGaugeFrame;
   D_80104F78.impactGaugeFrame = D_800FEDD8->shots[index].impactGaugeFrame;
@@ -644,7 +648,8 @@ void func_800600C0(s32 index) {
   D_80104F78.offsetY = D_800FEDD8->shots[index].offsetY;
 }
 
-void func_80060128(s32 index) {
+/* LoadBestShotReplayInputs for a shot of the Ring Shot record */
+void LoadRingShotReplayInputs(s32 index) {
   D_80104F78.heading = D_80105F40->shots[index].heading;
   D_80104F78.powerGaugeFrame = D_80105F40->shots[index].powerGaugeFrame;
   D_80104F78.impactGaugeFrame = D_80105F40->shots[index].impactGaugeFrame;

@@ -3343,9 +3343,9 @@ void UpdateTurns(void) {
         UpdateGolferTranslucency();
         if (g_GameState.replayKind != REPLAY_KIND_NONE) {
           if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-            func_80060128(g_Players[playerIndex].strokeCount);
+            LoadRingShotReplayInputs(g_Players[playerIndex].strokeCount);
           } else {
-            func_800600C0(g_Players[playerIndex].strokeCount);
+            LoadBestShotReplayInputs(g_Players[playerIndex].strokeCount);
           }
 
           f_ShotSource = SHOT_SOURCE_PREPARED;
