@@ -1000,7 +1000,7 @@ void DrawCourseTrophies(Gfx** displayListHead) {
         D_802300A2_ovl_01 = 0;
       }
 
-      if (D_802300A2_ovl_01 >= COURSE_IMAGE_COUNT) {
+      if (D_802300A2_ovl_01 >= TROPHY_FRAME_LIMIT) {
         D_802300A2_ovl_01 = 0;
       }
 

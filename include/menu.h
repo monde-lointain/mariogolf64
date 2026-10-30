@@ -75,10 +75,10 @@ extern u8 g_AreBetPagesBlocked;
 
 /* Each course's frames of its spinning trophy, and the files of the trophy's
  * place palettes */
-#define COURSE_IMAGE_COUNT 16
+#define TROPHY_FRAME_LIMIT 16
 #define TROPHY_PALETTE_COUNT 3
-extern AssetId g_TrophyFrameAssets[][COURSE_IMAGE_COUNT];
-/* Ends a course's trophy frames before COURSE_IMAGE_COUNT */
+extern AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT];
+/* Ends a course's trophy frames before TROPHY_FRAME_LIMIT */
 #define TROPHY_FRAME_END (-1)
 extern s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
 /* The chosen course's trophy palettes, by the place they show */
