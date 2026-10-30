@@ -174,6 +174,9 @@ typedef struct {
     s16 book[1];        /* Actually variable size. Must be 8-byte aligned */
 } ALADPCMBook;
 
+/* The count of a loop that repeats until the sound stops */
+#define AL_LOOP_FOREVER ((u32)-1)
+
 typedef struct {
     u32         start;
     u32         end;

@@ -18,6 +18,7 @@
 #include <ultralog.h>
 #include <assert.h>
 #include <sched.h>
+#include "PRinternal/macros.h"
 // TODO: this comes from a header
 #ident "$Revision: 1.17 $"
 
@@ -168,7 +169,7 @@ static void __scMain(void *arg)
     OSMesg msg;
     OSSched *sc = (OSSched *)arg;
     OSScClient *client;
-    static int count = 0;
+    static int count UNUSED = 0;
     
     while (1) {
         
@@ -216,7 +217,6 @@ void __scHandleRetrace(OSSched *sc)
 {
     OSScTask    *rspTask;
     OSScClient  *client;
-    s32         i;
     s32         state;
     OSScTask    *sp = 0;
     OSScTask    *dp = 0;
@@ -339,7 +339,6 @@ void __scHandleRDP(OSSched *sc)
  */
 OSScTask *__scTaskReady(OSScTask *t) 
 {
-    int rv = 0;
     void *a;
     void *b;    
 
@@ -366,9 +365,8 @@ OSScTask *__scTaskReady(OSScTask *t)
  * operations have been performed) and sends the done message to the
  * client if it is.
  */
-s32 __scTaskComplete(OSSched *sc, OSScTask *t) 
+s32 __scTaskComplete(OSSched *sc UNUSED, OSScTask *t) 
 {
-    int rv;
     static int firsttime = 1;
 
     if ((t->state & OS_SC_RCP_MASK) == 0) { /* none of the needs bits set */
@@ -382,7 +380,7 @@ s32 __scTaskComplete(OSSched *sc, OSScTask *t)
 #ifdef SC_LOGGING
         osLogEvent(l, 504, 1, t);
 #endif
-        rv = osSendMesg(t->msgQ, t->msg, OS_MESG_BLOCK);
+        osSendMesg(t->msgQ, t->msg, OS_MESG_BLOCK);
 
 	if (t->list.t.type == M_GFXTASK) {
             if ((t->flags & OS_SC_SWAPBUFFER) && (t->flags & OS_SC_LAST_TASK)){
@@ -443,7 +441,8 @@ void __scAppendList(OSSched *sc, OSScTask *t)
  */
 void __scExec(OSSched *sc, OSScTask *sp, OSScTask *dp)
 {
-    int rv;
+    /* Only the assertion reads it */
+    int rv UNUSED;
     
 #ifdef SC_LOGGING
     osLogEvent(l, 511, 2, sp, dp);
@@ -562,7 +561,7 @@ s32 __scSchedule(OSSched *sc, OSScTask **sp, OSScTask **dp, s32 availRCP)
                               *dp = gfx;
                               avail &= ~OS_SC_DP;
 
-                              if (avail & OS_SC_DP == 0)
+                              if ((avail & OS_SC_DP) == 0)
                                   assert(sc->curRDPTask == gfx);
                               
                           }

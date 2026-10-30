@@ -4,6 +4,7 @@
 #include "PR/rdb.h"
 #include "xstdio.h"
 #include "PR/rcp.h"
+#include "PRinternal/macros.h"
 
 extern void* __printfunc;
 
@@ -86,9 +87,11 @@ static void* kmc_proutSyncPrintf(void* str, const char* buf, int n) {
 }
 #endif
 
-void osSyncPrintf(const char* fmt, ...) {
+void osSyncPrintf(const char* fmt UNUSED, ...) {
+#ifndef _FINALROM
     int ans;
     va_list ap;
+#endif
 
 #ifndef _FINALROM
     va_start(ap, fmt);
@@ -101,9 +104,11 @@ void osSyncPrintf(const char* fmt, ...) {
 #endif
 }
 
-void rmonPrintf(const char* fmt, ...) {
+void rmonPrintf(const char* fmt UNUSED, ...) {
+#ifndef _FINALROM
     int ans;
     va_list ap;
+#endif
 
 #ifndef _FINALROM
     va_start(ap, fmt);
@@ -126,9 +131,11 @@ void __osSyncVPrintf(const char* fmt, va_list ap) {
 #endif
 }
 
-void osSyncPrintf(const char* fmt, ...) {
+void osSyncPrintf(const char* fmt UNUSED, ...) {
+#ifndef _FINALROM
     int ans;
     va_list ap;
+#endif
 
 #ifndef _FINALROM
     va_start(ap, fmt);
@@ -137,9 +144,11 @@ void osSyncPrintf(const char* fmt, ...) {
 #endif
 }
 
-void rmonPrintf(const char* fmt, ...) {
+void rmonPrintf(const char* fmt UNUSED, ...) {
+#ifndef _FINALROM
     int ans;
     va_list ap;
+#endif
 
 #ifndef _FINALROM
     va_start(ap, fmt);

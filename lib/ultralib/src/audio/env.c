@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include "PRinternal/macros.h"
 // TODO: these come from headers
 #ident "$Revision: 1.49 $"
 #ident "$Revision: 1.17 $"
@@ -71,7 +72,7 @@ static  f32 _getVol(f32 ivol, s32 samples, s16 ratem, u16 ratel);
 /***********************************************************************
  * Enveloper filter public interfaces
  ***********************************************************************/
-Acmd *alEnvmixerPull(void *filter, s16 *outp, s32 outCount, s32 sampleOffset,
+Acmd *alEnvmixerPull(void *filter, s16 *outp UNUSED, s32 outCount, s32 sampleOffset,
                      Acmd *p) 
 {
     Acmd        *ptr = p;
@@ -537,7 +538,10 @@ s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel)
 	}
     }
 
-    a *= (a *= (a *= a));
+    /* The volume ratio over eight subframes */
+    a *= a;
+    a *= a;
+    a *= a;
     s = (s16) a;
     *ratel = (s16)(0xffff * (a - (f32) s));
 

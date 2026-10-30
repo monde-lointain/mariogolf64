@@ -18,6 +18,7 @@
  *====================================================================*/
 #include <libaudio.h>
 #include <ultraerror.h>
+#include "PRinternal/macros.h"
 #include "synthInternals.h"
 #include <os.h>
 #include <os_internal.h>
@@ -52,7 +53,7 @@ Acmd *_saveBuffer(ALFx *r, s16 *curr_ptr, s32 buff, s32 count, Acmd *p);
 Acmd *_filterBuffer(ALLowPass *lp, s32 buff, s32 count, Acmd *p);
 f32  _doModFunc(ALDelay *d, s32 count);
 
-static s32 L_INC[] = { L0_INC, L1_INC, L2_INC };
+static s32 L_INC[] UNUSED = { L0_INC, L1_INC, L2_INC };
 
 /***********************************************************************
  * Reverb filter public interfaces
@@ -64,8 +65,8 @@ Acmd *alFxPull(void *filter, s16 *outp, s32 outCount, s32 sampleOffset,
     ALFx	*r = (ALFx *)filter;
     ALFilter    *source = r->filter.source;
     s16		i, buff1, buff2, input, output;
-    s16		*in_ptr, *out_ptr, gain, *prev_out_ptr = 0;
-    ALDelay	*d, *pd;
+    s16		*in_ptr, *out_ptr, *prev_out_ptr = 0;
+    ALDelay	*d;
 
 #ifdef AUD_PROFILE
     lastCnt[++cnt_index] = osGetCount();
@@ -239,8 +240,8 @@ Acmd *_loadOutputBuffer(ALFx *r, ALDelay *d, s32 buff, s32 incount, Acmd *p)
     s16         *out_ptr;
     f32         fincount, fratio, delta;
     s32         ramalign = 0, length;
-    static f32  val=0.0, lastval=-10.0;
-    static f32  blob=0;
+    static f32  val UNUSED = 0.0, lastval UNUSED = -10.0;
+    static f32  blob UNUSED = 0;
 /*
  * The following section implements the chorus resampling. Modulate where you pull
  * the samples from, since you need varying amounts of samples.

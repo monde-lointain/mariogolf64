@@ -20,7 +20,7 @@ s32 __osContRamRead(OSMesgQueue* mq, int channel, u16 address, u8* buffer) {
     do {
         ptr = (u8*)&__osPfsPifRam;
 
-        if (__osContLastCmd != CONT_CMD_READ_PAK || (u32)__osPfsLastChannel != channel) {
+        if (__osContLastCmd != CONT_CMD_READ_PAK || __osPfsLastChannel != channel) {
             __osContLastCmd = CONT_CMD_READ_PAK;
             __osPfsLastChannel = channel;
 

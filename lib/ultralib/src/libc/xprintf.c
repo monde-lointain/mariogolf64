@@ -112,7 +112,7 @@ int _Printf(void* pfn(void*,const char*,size_t), void *arg, const char *fmt, va_
                 int i, j;
                 if (0 < (x.width))
                 {
-                    i, j = x.width;
+                    j = x.width;
                     for (; 0 < j; j -= i)
                     {
                         i = MAX_PAD < (unsigned int)j ? (int)MAX_PAD : j;
@@ -124,10 +124,10 @@ int _Printf(void* pfn(void*,const char*,size_t), void *arg, const char *fmt, va_
             PUT(ac, x.n0);
             PAD(zeroes, x.nz0)
 
-            PUT(x.s, x.n1);
+            PUT((char*)x.s, x.n1);
             PAD(zeroes, x.nz1);
 
-            PUT(x.s + x.n1, x.n2);
+            PUT((char*)x.s + x.n1, x.n2);
             PAD(zeroes, x.nz2);
 
             if (x.flags & FLAGS_MINUS) {
@@ -169,7 +169,7 @@ static void _Putfld(_Pft *px, va_list *pap, char code, char *ac) {
                 ac[px->n0++] = ' ';
             }
 
-            px->s = (char *)&ac[px->n0];
+            px->s = (unsigned char*)&ac[px->n0];
 
             _Litob(px, code);
             break;
@@ -199,7 +199,7 @@ static void _Putfld(_Pft *px, va_list *pap, char code, char *ac) {
                 }
             }
 
-            px->s = (char *)&ac[px->n0];
+            px->s = (unsigned char*)&ac[px->n0];
             _Litob(px, code);
             break;
         case 'e':
@@ -216,7 +216,7 @@ static void _Putfld(_Pft *px, va_list *pap, char code, char *ac) {
             else if (px->flags & FLAGS_SPACE)
                 ac[px->n0++] = ' ';
 
-            px->s = (char *)&ac[px->n0];
+            px->s = (unsigned char*)&ac[px->n0];
             _Ldtob(px, code);
             break;
 
@@ -234,12 +234,12 @@ static void _Putfld(_Pft *px, va_list *pap, char code, char *ac) {
             break;
         case 'p':
             px->v.ll = (long)va_arg(*pap, void *);
-            px->s = (char *)&ac[px->n0];
+            px->s = (unsigned char*)&ac[px->n0];
             _Litob(px, 'x');
             break;
         case 's':
-            px->s = va_arg(*pap, char *);
-            px->n1 = strlen(px->s);
+            px->s = va_arg(*pap, unsigned char*);
+            px->n1 = strlen((char*)px->s);
             
             if (px->prec >= 0 && px->prec < px->n1) {
                 px->n1 = px->prec;

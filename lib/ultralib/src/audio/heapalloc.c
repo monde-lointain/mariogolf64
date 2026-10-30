@@ -22,8 +22,9 @@
 #include <libaudio.h>
 #include <os_internal.h>
 #include <ultraerror.h>
+#include "PRinternal/macros.h"
 
-void *alHeapDBAlloc(u8 *file, s32 line, ALHeap *hp, s32 num, s32 size)
+void *alHeapDBAlloc(u8 *file UNUSED, s32 line UNUSED, ALHeap *hp, s32 num, s32 size)
 {
     s32 bytes;
     u8 *ptr = 0;

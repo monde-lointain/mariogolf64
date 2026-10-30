@@ -3,6 +3,7 @@
 #include "PR/sptask.h"
 #include "PR/rcp.h"
 #include "PRinternal/osint.h"
+#include "PRinternal/macros.h"
 
 #if BUILD_VERSION < VERSION_J
 #ident "$Revision: 1.4 $"
@@ -75,7 +76,7 @@ void osSpTaskLoad(OSTask* intp) {
     while (__osSpRawStartDma(1, SP_IMEM_START, tp->t.ucode_boot, tp->t.ucode_boot_size) == -1) {}
 }
 
-void osSpTaskStartGo(OSTask* tp) {
+void osSpTaskStartGo(OSTask* tp UNUSED) {
     while (__osSpDeviceBusy()) {}
 
     __osSpSetStatus(SP_SET_INTR_BREAK | SP_CLR_SSTEP | SP_CLR_BROKE | SP_CLR_HALT);

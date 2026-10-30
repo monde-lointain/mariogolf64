@@ -25,7 +25,7 @@ s32 __osContRamWrite(OSMesgQueue* mq, int channel, u16 address, u8* buffer, int 
     do {
         ptr = (u8*)__osPfsPifRam.ramarray;
 
-        if (__osContLastCmd != CONT_CMD_WRITE_PAK || (u32)__osPfsLastChannel != channel) {
+        if (__osContLastCmd != CONT_CMD_WRITE_PAK || __osPfsLastChannel != channel) {
             __osContLastCmd = CONT_CMD_WRITE_PAK;
             __osPfsLastChannel = channel;
 
