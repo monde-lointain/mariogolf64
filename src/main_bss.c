@@ -104,7 +104,7 @@ u8 D_800FE330 BSS = {0};
  * Whether StartLoadingChosenHole has started the chosen hole loading behind the
  * menu since the loader last stopped, so that the menu need not start it again
  */
-s32 g_IsChosenHoleLoadStarted BSS = {0};
+Boolean g_IsChosenHoleLoadStarted BSS = {0};
 FireworkShape* f_FireworkShape BSS = {0};
 s16 g_ChosenLabelGrowth BSS = {0};
 OSPifRam __osContPifRam BSS ALIGNED(8) = {0};

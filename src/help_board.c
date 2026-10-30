@@ -75,7 +75,6 @@ typedef struct TopicPageTable {
   /* 0x0B */ s8 counts[HELP_TOPIC_COUNT + 1];
 } TopicPageTable; /* size = 0x1D */
 
-extern s32 g_IsChosenHoleLoadStarted;
 static void* f_HandImages;
 static void* f_ArrowImages;
 static void* f_UnusedImage;

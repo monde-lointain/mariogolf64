@@ -127,7 +127,6 @@ extern void* D_8012D430[CHARACTER_COUNT];
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
 extern u8 D_801052E8;
-extern s32 g_IsChosenHoleLoadStarted;
 
 s16 FindNextReplaySlot(s8 startSlot, u8 isForward);
 s16 GetChosenReplaySlot(void);

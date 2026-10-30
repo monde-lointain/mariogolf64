@@ -275,7 +275,6 @@ extern const char D_80231514_ovl_01[];
 #define UNUSED_LIST_CHOICE_COUNT 21
 
 extern s8 D_801052E8;
-extern s32 g_IsChosenHoleLoadStarted;
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;

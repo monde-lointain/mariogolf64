@@ -195,7 +195,6 @@ extern s32 g_ChosenPlayerCount;
 extern const char D_802319E0_ovl_01[];
 
 extern s8 D_801052E8;
-extern s32 g_IsChosenHoleLoadStarted;
 
 /* A step from one grid cell to its neighbor */
 typedef struct GridStep {

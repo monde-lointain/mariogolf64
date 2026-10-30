@@ -63,7 +63,6 @@ typedef struct ImportedCharacterCell {
 
 extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
-extern s32 g_IsChosenHoleLoadStarted;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
 extern s8 D_801052E8;
