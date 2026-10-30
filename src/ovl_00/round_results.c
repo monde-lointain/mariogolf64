@@ -834,7 +834,6 @@ void FreeUnlockNotice(void) {
 
 /* Swings the course in, or raises the character's face; returns whether the
  * notice is done */
-#ifdef NON_MATCHING
 s32 UpdateUnlockNotice(void) {
   EncodedAsset asset;
 
@@ -863,44 +862,38 @@ s32 UpdateUnlockNotice(void) {
 
         return TRUE;
     }
-
-    return FALSE;
-  }
-
-  f_NoticeTime++;
-  if (f_IsNoticeHeld) {
-    return FALSE;
-  }
-
-  if (f_NoticeTime > NOTICE_FACE_DELAY &&
-      !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
-      f_NoticeFaceIndex < NOTICE_LAST_FACE) {
-    f_NoticeFaceIndex++;
-    OpenEncodedAsset(
-        g_CharacterImageAssets[f_PortraitCharacterIndex] + f_NoticeFaceIndex,
-        &asset);
-    ReadEncodedAsset(f_PortraitImage, &asset);
-  }
-
-  if (f_NoticeTime > NOTICE_LIFT_DELAY) {
-    if (f_NoticeLift > NOTICE_LIFT_START_LIMIT) {
-      f_NoticeLift -= NOTICE_LIFT_START_SPEED;
-    } else {
-      f_NoticeLift += f_NoticeLift * NOTICE_LIFT_GROWTH_NUMERATOR /
-          NOTICE_LIFT_GROWTH_DENOMINATOR;
+  } else {
+    f_NoticeTime++;
+    if (f_IsNoticeHeld) {
+      return FALSE;
     }
 
-    if (f_NoticeLift < NOTICE_LIFT_EXIT) {
-      return TRUE;
+    if (f_NoticeTime > NOTICE_FACE_DELAY &&
+        !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
+        f_NoticeFaceIndex < NOTICE_LAST_FACE) {
+      f_NoticeFaceIndex++;
+      OpenEncodedAsset(
+          g_CharacterImageAssets[f_PortraitCharacterIndex] + f_NoticeFaceIndex,
+          &asset);
+      ReadEncodedAsset(f_PortraitImage, &asset);
+    }
+
+    if (f_NoticeTime > NOTICE_LIFT_DELAY) {
+      if (f_NoticeLift > NOTICE_LIFT_START_LIMIT) {
+        f_NoticeLift -= NOTICE_LIFT_START_SPEED;
+      } else {
+        f_NoticeLift += f_NoticeLift * NOTICE_LIFT_GROWTH_NUMERATOR /
+            NOTICE_LIFT_GROWTH_DENOMINATOR;
+      }
+
+      if (f_NoticeLift < NOTICE_LIFT_EXIT) {
+        return TRUE;
+      }
     }
   }
 
   return FALSE;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateUnlockNotice);
-#endif
 
 void FreeRoundResults(void) {
   s32 i;
