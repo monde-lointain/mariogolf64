@@ -1857,11 +1857,9 @@ void MeasureStaffLine(s32 lineIndex, s32* width, s32* height) {
 /* Draws a line of the staff text from left and top, a glyph per character */
 void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
   Gfx* gfx = *displayListHead;
-  s32 start = (f_StaffText->lines + lineIndex)->start;
-  s32 length = (f_StaffText->lines + lineIndex)->length;
-
-  /* In u16s, past the size, the line count and the lines */
-  s32 firstCharacter = (f_StaffText->lineCount * 2) + 2;
+  s32 start = STAFF_LINE(f_StaffText, lineIndex)->start;
+  s32 length = STAFF_LINE(f_StaffText, lineIndex)->length;
+  s32 firstCharacter = FIRST_STAFF_CHARACTER(f_StaffText);
   s32 width; /* Unused; it is there to match */
   s32 height; /* Unused; it is there to match */
   s32 index;
@@ -1874,7 +1872,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
   MeasureStaffLine(lineIndex, &width, &height);
   gDPPipeSync(gfx++);
   for (index = 0; index != length; index++) {
-    character = ((u16*)f_StaffText)[start + index + firstCharacter];
+    character = STAFF_CHARACTER(f_StaffText, start + index + firstCharacter);
     if (character < STAFF_CHARACTER_LIMIT) {
       row = character / STAFF_FONT_COLUMN_COUNT;
       column = character - (row * STAFF_FONT_COLUMN_COUNT);
@@ -1887,8 +1885,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      if ((u32)(character - FIRST_OVERLAID_CHARACTER) <
-          OVERLAID_CHARACTER_COUNT) {
+      if (IS_OVERLAID_CHARACTER(character)) {
         gSPTextureRectangle(gfx++,
             QuarterPixels(left - OVERLAID_CHARACTER_SHIFT_X),
             QuarterPixels(top - OVERLAID_CHARACTER_SHIFT_Y),
