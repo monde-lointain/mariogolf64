@@ -182,8 +182,10 @@ static Mat4 f_WheelView;
 static void* f_CourseStatsBadge;
 /* The course stats' TROPHY_FRAME_BUFFER_COUNT buffers for the trophy frame */
 static void** f_StatsTrophyBuffers;
-static void** D_8023A818_ovl_01;
-static void** D_8023A81C_ovl_01;
+/* LoadCourseTrophyImages keeps these for COURSE_BUFFER_SECOND and
+ * COURSE_BUFFER_LAST, but no routine reads them */
+static void** f_UnreadSecondTrophyBuffers;
+static void** f_UnreadLastTrophyBuffers;
 /* The wheel's icons of each course and the totals, from LoadCourseStatsIcons */
 static void** f_CourseStatsIcons;
 /* The images that LoadCourseMenuBuffer reads, by their assets */
@@ -233,10 +235,10 @@ void LoadCourseTrophyImages(void** buffers, s32 requestedKind) {
       f_StatsTrophyBuffers = buffers;
       break;
     case COURSE_BUFFER_SECOND:
-      D_8023A818_ovl_01 = buffers;
+      f_UnreadSecondTrophyBuffers = buffers;
       break;
     case COURSE_BUFFER_LAST:
-      D_8023A81C_ovl_01 = buffers;
+      f_UnreadLastTrophyBuffers = buffers;
       break;
   }
 
