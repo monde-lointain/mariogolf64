@@ -2252,11 +2252,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShots);
  * Reads the save data from SRAM and lays the recorded best shots out in a grid,
  * a row for each score kind, keeping the cursor on a shot where it can
  */
-/*
- * Doesn't match: the original copies the chosen row's zero into the column
- * rather than loading zero, and so reads the last row into a1 instead of v1.
- */
-#ifdef NON_MATCHING
 void ReadBestShots(void) {
   SaveData* save = GetSaveData();
   s32 kindRecords[STATS_GRID_ROW_COUNT][STATS_KIND_LIST_SIZE];
@@ -2267,7 +2262,7 @@ void ReadBestShots(void) {
   s32 albatrossCount;
   s32 holeInOneCount;
   s32 flags;
-  u8 row;
+  s32 row;
   s32 column;
   MenuMemory* memory;
 
@@ -2316,7 +2311,8 @@ void ReadBestShots(void) {
     }
   }
 
-  row = BEST_SHOT_ROW_BIRDIE;
+  /* Setting the column twice is needed to match */
+  row = column = BEST_SHOT_ROW_BIRDIE;
   memory = GetMenuMemory();
   column = row;
   if (birdieCount == 0) {
@@ -2402,9 +2398,6 @@ void ReadBestShots(void) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", ReadBestShots);
-#endif
 
 /*
  * Returns the column or row of the next shot from (column, row) in direction,
