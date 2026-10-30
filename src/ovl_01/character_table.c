@@ -225,10 +225,11 @@ static Mtx f_TableCursorScale;
 /* Read by no routine */
 static u8 D_8023AC60_ovl_01[0x4];
 
+/* The images that LoadCharacterTableBuffer is given */
 static void* f_TableCursorBox;
-static void* D_8023AC68_ovl_01;
-static void* D_8023AC6C_ovl_01;
-static void* D_8023AC70_ovl_01;
+static void* f_TablePopupBanner;
+static void* f_TableArrows;
+static void* f_TableStar;
 /* Whether the table shows or darkens each place's character */
 static s32 f_TableCharacterVisibility[CHARACTER_COUNT];
 
@@ -245,20 +246,20 @@ void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
       ReadEncodedAsset(f_TableCursorBox, &asset);
       break;
     case TABLE_BUFFER_UNREAD:
-      D_8023AC68_ovl_01 = buffer;
+      f_TablePopupBanner = buffer;
       break;
     case TABLE_BUFFER_ARROWS:
-      D_8023AC6C_ovl_01 = buffer;
+      f_TableArrows = buffer;
       OpenEncodedAsset(ASSET_TABLE_ARROWS, &asset);
-      ReadEncodedAsset(D_8023AC6C_ovl_01, &asset);
+      ReadEncodedAsset(f_TableArrows, &asset);
       D_8023019C_ovl_01 = 0;
       D_802301A0_ovl_01 = 0;
       D_802301A4_ovl_01 = 0;
       break;
     case TABLE_BUFFER_STAR:
-      D_8023AC70_ovl_01 = buffer;
+      f_TableStar = buffer;
       OpenEncodedAsset(ASSET_SPINNING_STAR, &asset);
-      ReadEncodedAsset(D_8023AC70_ovl_01, &asset);
+      ReadEncodedAsset(f_TableStar, &asset);
       break;
   }
 
@@ -456,23 +457,23 @@ void DrawCharacterTable(Gfx** displayListHead) {
     shownRow++;
   } while (shownRow != TABLE_SHOWN_ROW_COUNT);
   if (memory->tableFirstRow > 0) {
-    DrawGreenArrow(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, MENU_ARROW_UP,
+    DrawGreenArrow(&gfx, f_TableArrows, D_8023019C_ovl_01, MENU_ARROW_UP,
         TABLE_ROW_ARROW_X, TABLE_UP_ARROW_Y);
   }
 
   if (memory->tableFirstRow < TABLE_ROW_COUNT - TABLE_SHOWN_ROW_COUNT) {
-    DrawGreenArrow(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, MENU_ARROW_DOWN,
+    DrawGreenArrow(&gfx, f_TableArrows, D_8023019C_ovl_01, MENU_ARROW_DOWN,
         TABLE_ROW_ARROW_X, TABLE_DOWN_ARROW_Y);
   }
 
   if (memory->tableFirstColumn > 0) {
-    DrawGreenArrow(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, MENU_ARROW_LEFT,
+    DrawGreenArrow(&gfx, f_TableArrows, D_8023019C_ovl_01, MENU_ARROW_LEFT,
         TABLE_LEFT_ARROW_X, TABLE_COLUMN_ARROW_Y);
   }
 
   if (memory->tableFirstColumn <
       TABLE_COLUMN_COUNT - TABLE_SHOWN_COLUMN_COUNT) {
-    DrawGreenArrow(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, MENU_ARROW_RIGHT,
+    DrawGreenArrow(&gfx, f_TableArrows, D_8023019C_ovl_01, MENU_ARROW_RIGHT,
         TABLE_RIGHT_ARROW_X, TABLE_COLUMN_ARROW_Y);
   }
 
@@ -637,10 +638,10 @@ void DrawTablePopup(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023AC68_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_TablePopupBanner)));
   for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023AC68_ovl_01) +
+        TextureAddress(LargeImageTexels(f_TablePopupBanner) +
             index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -782,8 +783,8 @@ void DrawTableStar(Gfx** displayListHead, s32 left, s32 top) {
 
   gDPPipeSync(gfx++);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023AC70_ovl_01)));
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(D_8023AC70_ovl_01)),
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_TableStar)));
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(f_TableStar)),
       G_IM_FMT_CI, TABLE_STAR_IMAGE_WIDTH, TABLE_STAR_IMAGE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

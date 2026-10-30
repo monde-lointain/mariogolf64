@@ -3282,6 +3282,7 @@ f_TableCursorTranslation = 0x8023AB20; // size:0x40 segment:ovl_01
 f_TableCursorRotation = 0x8023AB60; // size:0x40 segment:ovl_01
 f_TableCursorScale = 0x8023AC20; // size:0x40 segment:ovl_01
 f_TableCursorBox = 0x8023AC64; // size:0x4 segment:ovl_01
+f_TablePopupBanner = 0x8023AC68; // size:0x4 segment:ovl_01
 f_TableCharacterVisibility = 0x8023AC78; // size:0x48 segment:ovl_01
 f_HandicapGolferTransforms = 0x8023ACC0; // size:0x200 segment:ovl_01
 f_HandicapGolfersProjection = 0x8023AEC0; // size:0x40 segment:ovl_01
