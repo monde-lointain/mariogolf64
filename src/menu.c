@@ -1965,7 +1965,7 @@ void func_8005D9A0(void) {
   g_TakenCharacters.unk0 = 0;
   D_801B71CC = 0;
   D_800FBE2C = 0;
-  g_ChosenLabelGrowthDirection = 0;
+  g_ChosenLabelGrowthDirection = LABEL_GROWING;
   g_ChosenLabelGrowth = 0;
   D_800FF4C0 = 0;
   g_MapCamera[0x4C] = 0;

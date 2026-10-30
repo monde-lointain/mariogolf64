@@ -33,6 +33,7 @@
 #include "game_flags.h"
 #include "hole_loader.h"
 #include "main.h"
+#include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "overlay_manager.h"
@@ -69,7 +70,7 @@ TakenCharacters g_TakenCharacters BSS ALIGNED(8) = {0};
 u8 nuScPreNMIFlag BSS = {0};
 NUContData g_ControllerData[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 s8 D_800FBDB8 BSS = {0};
-u8 g_ChosenLabelGrowthDirection BSS = {0};
+LabelGrowthDirection g_ChosenLabelGrowthDirection BSS = {0};
 ControllerState g_ControllerStates[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 f32 g_CurrentAnimationFrame BSS = {0};
 void* D_800FBDFC[2] BSS = {0};

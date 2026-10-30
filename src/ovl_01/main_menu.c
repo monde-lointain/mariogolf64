@@ -118,8 +118,6 @@
  * shrinks until it passes 0 */
 #define CHOSEN_LABEL_GROWTH_LIMIT 6
 #define CHOSEN_LABEL_GROWTH_STEP 2
-#define LABEL_GROWING 0
-#define LABEL_SHRINKING 1
 
 /* The title screen's labels, 128 by 20 each, plain in g_ImageSlots and lit in
  * g_MenuLabelImages */

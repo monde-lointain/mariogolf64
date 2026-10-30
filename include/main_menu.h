@@ -35,9 +35,16 @@
 extern void* g_MenuLabelImages[2];
 /* How many pixels wider and taller than its size the chosen label is drawn */
 extern s16 g_ChosenLabelGrowth;
-/* Whether the chosen label is growing or shrinking: LABEL_GROWING or
- * LABEL_SHRINKING */
-extern u8 g_ChosenLabelGrowthDirection;
+
+enum LabelGrowthDirection {
+  LABEL_GROWING,
+  LABEL_SHRINKING
+};
+
+typedef u8 LabelGrowthDirection;
+
+/* Whether the chosen label is growing or shrinking */
+extern LabelGrowthDirection g_ChosenLabelGrowthDirection;
 
 extern void* g_NamePlateImage;
 /* The player count chosen on the title screen, which the saved games, the
