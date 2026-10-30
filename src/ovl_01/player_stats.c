@@ -2333,7 +2333,9 @@ void ReadBestShots(void) {
     }
   }
 
-  switch (memory->bestShotRow) {
+  /* The record index is reused for the saved row, to match */
+  recordIndex = memory->bestShotRow;
+  switch (recordIndex) {
     case BEST_SHOT_ROW_BIRDIE:
       if (birdieCount != 0) {
         row = BEST_SHOT_ROW_BIRDIE;
