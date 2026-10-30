@@ -864,9 +864,9 @@ void AimDownRange(void) {
 }
 
 /* Places the aim camera on the aim line, looking at the ball */
-#ifdef NON_MATCHING
 void PlaceAimCamera(void) {
   Vec3 eye;
+  f32 scale;
   Radians heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
 
   eye[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
@@ -890,26 +890,27 @@ void PlaceAimCamera(void) {
     eye[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
   }
 
-  g_Cameras[0].view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+  /*
+   * Holding the scale in a variable, and taking the camera's address for the
+   * first store, both keep the original's register choices and load order
+   */
+  scale = COURSE_TO_WORLD_SCALE;
+  (&g_Cameras[0])->view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
   g_Cameras[0].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-  eye[AXIS_X] *= COURSE_TO_WORLD_SCALE;
-  eye[AXIS_Y] =
-      (eye[AXIS_Y] + g_CurrentShot.aimCameraHeight) * COURSE_TO_WORLD_SCALE;
-  eye[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+  eye[AXIS_X] *= scale;
+  eye[AXIS_Y] = (eye[AXIS_Y] + g_CurrentShot.aimCameraHeight) * scale;
+  eye[AXIS_Z] *= scale;
   g_Cameras[0].view.eye[AXIS_X] = eye[AXIS_X];
   g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
   g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
   g_Cameras[0].view.lookAt[AXIS_Y] =
       (func_8005F30C(g_CurrentShot.ballPosition[AXIS_X],
            g_CurrentShot.ballPosition[AXIS_Z]) *
-          COURSE_TO_WORLD_SCALE) -
+          scale) -
       AIM_LOOK_AT_RISE;
-  g_Cameras[0].view.lookAt[AXIS_X] *= COURSE_TO_WORLD_SCALE;
-  g_Cameras[0].view.lookAt[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+  g_Cameras[0].view.lookAt[AXIS_X] *= scale;
+  g_Cameras[0].view.lookAt[AXIS_Z] *= scale;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceAimCamera);
-#endif
 
 /* Switches from the pause menu to the free-look camera, facing along the aim
  * line */
