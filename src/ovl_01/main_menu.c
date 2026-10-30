@@ -433,7 +433,8 @@ static s32 f_MenuCharacterCount = CHARACTER_COUNT;
 /* Read by no routine */
 static u8 D_8022BE10_ovl_01[8] = {
     0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-static s32 D_8022BE18_ovl_01 = 0;
+/* The row that func_801FAFEC_ovl_01's list is on */
+static s32 f_UnusedListChoice = 0;
 static s32 D_8022BE1C_ovl_01 = 0;
 /* Read by no routine */
 static s32 D_8022BE20_ovl_01 = 0;
@@ -3700,19 +3701,19 @@ void func_801FAFEC_ovl_01(void) {
   }
 
   if (g_MenuRepeatButtons & U_JPAD) {
-    D_8022BE18_ovl_01--;
+    f_UnusedListChoice--;
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
   } else if (g_MenuRepeatButtons & D_JPAD) {
-    D_8022BE18_ovl_01++;
+    f_UnusedListChoice++;
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
   }
 
-  if (D_8022BE18_ovl_01 < 0) {
-    D_8022BE18_ovl_01 = UNUSED_LIST_CHOICE_COUNT - 1;
+  if (f_UnusedListChoice < 0) {
+    f_UnusedListChoice = UNUSED_LIST_CHOICE_COUNT - 1;
   }
 
-  if (D_8022BE18_ovl_01 >= UNUSED_LIST_CHOICE_COUNT) {
-    D_8022BE18_ovl_01 = 0;
+  if (f_UnusedListChoice >= UNUSED_LIST_CHOICE_COUNT) {
+    f_UnusedListChoice = 0;
   }
 }
 
