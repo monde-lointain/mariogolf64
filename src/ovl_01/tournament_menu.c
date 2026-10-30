@@ -301,8 +301,13 @@ static u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT]
 };
 // clang-format on
 /* Read by no routine; f_MenuCharacterChoices' first 14 values */
-static s32 f_TournamentCharacterChoices[14] = {
-    0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13};
+static s32 f_TournamentCharacterChoices[14] = {CHARACTER_CHOICE_PLUM,
+    CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_MAPLE,
+    CHARACTER_CHOICE_BABY_MARIO, CHARACTER_CHOICE_LUIGI, CHARACTER_CHOICE_PEACH,
+    CHARACTER_CHOICE_SONNY, CHARACTER_CHOICE_WARIO, CHARACTER_CHOICE_HARRY,
+    CHARACTER_CHOICE_MARIO, CHARACTER_CHOICE_YOSHI,
+    CHARACTER_CHOICE_DONKEY_KONG, CHARACTER_CHOICE_BOWSER,
+    CHARACTER_CHOICE_METAL_MARIO};
 /* The tournament code byte being edited */
 static s32 D_80231134_ovl_01 = 0;
 /* The code cursor's corners, whose colors DrawCodeCursor cycles */

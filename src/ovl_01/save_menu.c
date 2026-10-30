@@ -206,8 +206,14 @@ static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_MINI_GOLF + 1] = {
 /* Read by no routine */
 static s32 D_80230BDC_ovl_01[4] = {0, 0, 0, 0};
 /* Read by no routine; the values of main_menu.c's f_MenuCharacterChoices */
-static s32 f_SavedGamesCharacterChoices[18] = {
-    0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
+static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] = {
+    CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_MAPLE,
+    CHARACTER_CHOICE_BABY_MARIO, CHARACTER_CHOICE_LUIGI, CHARACTER_CHOICE_PEACH,
+    CHARACTER_CHOICE_SONNY, CHARACTER_CHOICE_WARIO, CHARACTER_CHOICE_HARRY,
+    CHARACTER_CHOICE_MARIO, CHARACTER_CHOICE_YOSHI,
+    CHARACTER_CHOICE_DONKEY_KONG, CHARACTER_CHOICE_BOWSER,
+    CHARACTER_CHOICE_METAL_MARIO, CHARACTER_CHOICE_KID, CHARACTER_CHOICE_SHERRY,
+    CHARACTER_CHOICE_AZALEA, CHARACTER_CHOICE_JOE};
 /* The angle, in radians, of the sine wave that bobs the saved games' boards */
 static f32 f_BoardBobPhase = 0.0f;
 /* Read by no routine; the values of f_ControllerIconPositions */
