@@ -164,7 +164,7 @@ static s8 f_PreviewedPalette = NO_PALETTE;
 static s32 D_8022FF0C_ovl_01[4] = {-1, -1, -1, -1};
 /* The Game Boy row's slots, which HideGameBoyCharacters saves here and
  * UpdateCharacterSelect puts back */
-static s32 D_8022FF1C_ovl_01[GAME_BOY_CHARACTER_COUNT] = {
+static s32 f_SavedGameBoySlots[GAME_BOY_CHARACTER_COUNT] = {
     EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT};
 static s32 D_8022FF2C_ovl_01[CHARACTER_SELECT_IMAGE_KIND_COUNT] = {
     0x08E8, 0x05E3, 0x08EF, 0x050F, 0x0521, 0x06EF, 0x05FF, 0x0600, 0x08EE};
@@ -259,10 +259,10 @@ void HideGameBoyCharacters(void) {
   g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1] = EMPTY_GRID_SLOT;
   g_CharacterGrid[GAME_BOY_CHARACTER_ROW][2] = EMPTY_GRID_SLOT;
   g_CharacterGrid[GAME_BOY_CHARACTER_ROW][3] = EMPTY_GRID_SLOT;
-  D_8022FF1C_ovl_01[0] = firstSlot;
-  D_8022FF1C_ovl_01[1] = secondSlot;
-  D_8022FF1C_ovl_01[2] = thirdSlot;
-  D_8022FF1C_ovl_01[3] = fourthSlot;
+  f_SavedGameBoySlots[0] = firstSlot;
+  f_SavedGameBoySlots[1] = secondSlot;
+  f_SavedGameBoySlots[2] = thirdSlot;
+  f_SavedGameBoySlots[3] = fourthSlot;
 }
 
 /*
@@ -1009,10 +1009,10 @@ s32 UpdateCharacterSelect(
       f_FaceFrameTimer = 0;
       /* Bring back the Game Boy characters that HideGameBoyCharacters hid */
       if ((u8)canChooseMarked == TRUE) {
-        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0] = D_8022FF1C_ovl_01[0];
-        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1] = D_8022FF1C_ovl_01[1];
-        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][2] = D_8022FF1C_ovl_01[2];
-        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][3] = D_8022FF1C_ovl_01[3];
+        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0] = f_SavedGameBoySlots[0];
+        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1] = f_SavedGameBoySlots[1];
+        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][2] = f_SavedGameBoySlots[2];
+        g_CharacterGrid[GAME_BOY_CHARACTER_ROW][3] = f_SavedGameBoySlots[3];
       }
     } else {
       g_Players[playerIndex].unk22 = 0;

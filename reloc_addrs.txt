@@ -29,13 +29,13 @@ rom:0xFA930 reloc:MIPS_HI16 symbol:f_StatsTrophyPositions addend:0x4
 rom:0xFA938 reloc:MIPS_LO16 symbol:f_StatsTrophyPositions addend:0x4
 rom:0xFA9A4 reloc:MIPS_HI16 symbol:f_StatsTrophyPositions addend:0x4
 rom:0xFA9AC reloc:MIPS_LO16 symbol:f_StatsTrophyPositions addend:0x4
-// UpdateCharacterSelect reads D_8022FF1C_ovl_01[1] to [3]; name the table, not its words
-rom:0xF4BB0 reloc:MIPS_HI16 symbol:D_8022FF1C_ovl_01 addend:0x4
-rom:0xF4BB4 reloc:MIPS_LO16 symbol:D_8022FF1C_ovl_01 addend:0x4
-rom:0xF4BB8 reloc:MIPS_HI16 symbol:D_8022FF1C_ovl_01 addend:0x8
-rom:0xF4BBC reloc:MIPS_LO16 symbol:D_8022FF1C_ovl_01 addend:0x8
-rom:0xF4BC0 reloc:MIPS_HI16 symbol:D_8022FF1C_ovl_01 addend:0xC
-rom:0xF4BC4 reloc:MIPS_LO16 symbol:D_8022FF1C_ovl_01 addend:0xC
+// UpdateCharacterSelect reads f_SavedGameBoySlots[1] to [3]; name the table, not its words
+rom:0xF4BB0 reloc:MIPS_HI16 symbol:f_SavedGameBoySlots addend:0x4
+rom:0xF4BB4 reloc:MIPS_LO16 symbol:f_SavedGameBoySlots addend:0x4
+rom:0xF4BB8 reloc:MIPS_HI16 symbol:f_SavedGameBoySlots addend:0x8
+rom:0xF4BBC reloc:MIPS_LO16 symbol:f_SavedGameBoySlots addend:0x8
+rom:0xF4BC0 reloc:MIPS_HI16 symbol:f_SavedGameBoySlots addend:0xC
+rom:0xF4BC4 reloc:MIPS_LO16 symbol:f_SavedGameBoySlots addend:0xC
 // DrawPlayerTags reads D_8022FFD4_ovl_01's row for the tag count less one; name the table, not the place a row before it
 rom:0xF67B8 reloc:MIPS_HI16 symbol:D_8022FFD4_ovl_01 addend:-0x10
 rom:0xF67BC reloc:MIPS_LO16 symbol:D_8022FFD4_ovl_01 addend:-0x10
