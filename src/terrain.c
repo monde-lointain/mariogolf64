@@ -96,6 +96,15 @@ typedef struct MapOverviewControls {
   /* 0x10 */ Boolean isToggled; /* Z flips it */
 } MapOverviewControls; /* size = 0x14 */
 
+/* The flags panel's scroll and cursor */
+typedef struct FlagPanel {
+  /* The first flag row shown */
+  /* 0x0 */ s32 firstRow;
+  /* 0x4 */ s32 column;
+  /* Counted from firstRow */
+  /* 0x8 */ s32 row;
+} FlagPanel; /* size = 0xC */
+
 /*
  * The map image texel at a texel column and row; the first texel row and
  * column of each tile are its border
@@ -219,9 +228,8 @@ static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
 };
 static MapOverviewControls f_MapOverviewControls = {
     0, 0, 0, MAP_OVERVIEW_ADJUSTMENT_START, FALSE};
-static s32 f_FlagPanelFirstRow = 0;
-static s32 f_FlagPanelColumn = 0;
-static s32 f_FlagPanelRow = 0;
+
+static FlagPanel f_FlagPanel = {0, 0, 0};
 static Boolean f_IsSceneMenuOpen = FALSE;
 static AnimatedBox f_SceneMenuBox = {SCENE_MENU_BOX_LEFT, SCENE_MENU_BOX_TOP,
     SCENE_MENU_BOX_RIGHT, SCENE_MENU_BOX_BOTTOM, 0x00, 0x00, 0x00, 0x9F,
@@ -1323,8 +1331,8 @@ void UpdateFlagPanel(void) {
   s32 textColumn;
 
   s32 GetSelectedFlag(void) {
-    return (f_FlagPanelFirstRow + f_FlagPanelRow) * FLAG_PANEL_COLUMN_COUNT +
-        f_FlagPanelColumn;
+    return (f_FlagPanel.firstRow + f_FlagPanel.row) * FLAG_PANEL_COLUMN_COUNT +
+        f_FlagPanel.column;
   }
 
   ClearDebugText();
@@ -1333,7 +1341,7 @@ void UpdateFlagPanel(void) {
   PrintDebugText("SRAM:", BUILD_DATE_LABEL_COLUMN, SAVE_BUILD_DATE_ROW);
   PrintDebugText(g_SaveBuildDate, BUILD_DATE_COLUMN, SAVE_BUILD_DATE_ROW);
   for (row = 0; row < FLAG_PANEL_ROW_COUNT; row++) {
-    sprintf(text, "%x0|", row + f_FlagPanelFirstRow);
+    sprintf(text, "%x0|", row + f_FlagPanel.firstRow);
     PrintDebugText(
         text, FLAG_ROW_LABEL_COLUMN, row + FLAG_PANEL_FIRST_TEXT_ROW);
     for (column = 0, textColumn = FIRST_FLAG_TEXT_COLUMN;
@@ -1346,9 +1354,9 @@ void UpdateFlagPanel(void) {
 
       sprintf(text, "%X",
           IsGameFlagSet(
-              ((row + f_FlagPanelFirstRow) * FLAG_PANEL_COLUMN_COUNT) +
+              ((row + f_FlagPanel.firstRow) * FLAG_PANEL_COLUMN_COUNT) +
               column));
-      if (row == f_FlagPanelRow && column == f_FlagPanelColumn) {
+      if (row == f_FlagPanel.row && column == f_FlagPanel.column) {
         SetDebugTextHighlight(TRUE);
       }
 
@@ -1357,56 +1365,56 @@ void UpdateFlagPanel(void) {
   }
 
   if (g_MenuControllerData[0].button & R_JPAD) {
-    f_FlagPanelColumn++;
+    f_FlagPanel.column++;
   }
 
   if (g_MenuControllerData[0].button & L_JPAD) {
-    f_FlagPanelColumn--;
+    f_FlagPanel.column--;
   }
 
-  if (f_FlagPanelColumn < 0) {
-    f_FlagPanelColumn = FLAG_PANEL_COLUMN_COUNT - 1;
-    f_FlagPanelRow--;
+  if (f_FlagPanel.column < 0) {
+    f_FlagPanel.column = FLAG_PANEL_COLUMN_COUNT - 1;
+    f_FlagPanel.row--;
   }
 
-  if (f_FlagPanelColumn >= FLAG_PANEL_COLUMN_COUNT) {
-    f_FlagPanelColumn = 0;
-    f_FlagPanelRow++;
+  if (f_FlagPanel.column >= FLAG_PANEL_COLUMN_COUNT) {
+    f_FlagPanel.column = 0;
+    f_FlagPanel.row++;
   }
 
   if (g_MenuControllerData[0].button & U_JPAD) {
-    f_FlagPanelRow--;
+    f_FlagPanel.row--;
   }
 
   if (g_MenuControllerData[0].button & D_JPAD) {
-    f_FlagPanelRow++;
+    f_FlagPanel.row++;
   }
 
   if (g_MenuControllerData[0].button & R_TRIG) {
-    f_FlagPanelFirstRow += FLAG_PANEL_ROW_COUNT;
+    f_FlagPanel.firstRow += FLAG_PANEL_ROW_COUNT;
   }
 
   if (g_MenuControllerData[0].button & L_TRIG) {
-    f_FlagPanelFirstRow -= FLAG_PANEL_ROW_COUNT;
+    f_FlagPanel.firstRow -= FLAG_PANEL_ROW_COUNT;
   }
   while (TRUE) {
-    if (f_FlagPanelRow < 0) {
-      f_FlagPanelRow++;
-      f_FlagPanelFirstRow--;
-    } else if (f_FlagPanelRow >= FLAG_PANEL_ROW_COUNT) {
-      f_FlagPanelRow--;
-      f_FlagPanelFirstRow++;
+    if (f_FlagPanel.row < 0) {
+      f_FlagPanel.row++;
+      f_FlagPanel.firstRow--;
+    } else if (f_FlagPanel.row >= FLAG_PANEL_ROW_COUNT) {
+      f_FlagPanel.row--;
+      f_FlagPanel.firstRow++;
     } else {
       break;
     }
   }
 
-  if (f_FlagPanelFirstRow > FLAG_PANEL_FIRST_ROW_MAX) {
-    f_FlagPanelFirstRow = FLAG_PANEL_FIRST_ROW_MAX;
+  if (f_FlagPanel.firstRow > FLAG_PANEL_FIRST_ROW_MAX) {
+    f_FlagPanel.firstRow = FLAG_PANEL_FIRST_ROW_MAX;
   }
 
-  if (f_FlagPanelFirstRow < 0) {
-    f_FlagPanelFirstRow = 0;
+  if (f_FlagPanel.firstRow < 0) {
+    f_FlagPanel.firstRow = 0;
   }
 
   if (g_MenuControllerData[0].button & A_BUTTON) {
