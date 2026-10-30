@@ -67,7 +67,7 @@ void func_8020F2D0_ovl_01(
     Gfx** displayListHead, u8 useCourseNames, s32 courseIndex);
 void DrawNarrowTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
+void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
@@ -408,8 +408,7 @@ void DrawBestTimes(Gfx** displayListHead) {
           FACE_PLAIN);
     } else {
       for (dashIndex = 0; dashIndex != UNSET_TIME_DASH_COUNT; dashIndex++) {
-        func_802123E0_ovl_01(&gfx,
-            BEST_TIME_X + (dashIndex * UNSET_TIME_DASH_SPACING),
+        DrawMenuSign(&gfx, BEST_TIME_X + (dashIndex * UNSET_TIME_DASH_SPACING),
             UNSET_TIME_FIRST_DASH_Y + (otherIndex * BEST_TIME_PLACE_SPACING),
             MENU_SIGN_DASH);
       }

@@ -117,7 +117,7 @@ void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, CharacterId character, u8 drawMode);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
+void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
 void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y);
@@ -436,17 +436,17 @@ void DrawCharacterTable(Gfx** displayListHead) {
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
             (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_STAR_Y);
       } else if (columnWins != 0) {
-        func_802123E0_ovl_01(&gfx,
+        DrawMenuSign(&gfx,
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_SIGN_X,
             (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_SIGN_Y,
             MENU_SIGN_TIMES);
       } else if (rowWins != 0) {
-        func_802123E0_ovl_01(&gfx,
+        DrawMenuSign(&gfx,
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_SIGN_X,
             (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_SIGN_Y,
             MENU_SIGN_CIRCLE);
       } else {
-        func_802123E0_ovl_01(&gfx,
+        DrawMenuSign(&gfx,
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_SIGN_X,
             (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_DASH_Y,
             MENU_SIGN_DASH);
@@ -710,7 +710,7 @@ void DrawTablePopup(Gfx** displayListHead) {
 
   DrawUnalignedMenuNumber(&gfx, f_TablePopupLeft + index,
       f_TablePopupTop + TABLE_POPUP_WINS_Y, columnWins, MENU_NUMBER_GREEN_TINT);
-  func_802123E0_ovl_01(&gfx, f_TablePopupLeft + TABLE_POPUP_SIGN_X,
+  DrawMenuSign(&gfx, f_TablePopupLeft + TABLE_POPUP_SIGN_X,
       f_TablePopupTop + TABLE_POPUP_SIGN_Y, MENU_SIGN_TIMES);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;

@@ -317,7 +317,7 @@ enum MenuNumberStyle {
   MENU_NUMBER_GREEN_TINT
 };
 
-/* The signs that func_802123E0 draws */
+/* The signs that DrawMenuSign draws */
 enum MenuSign {
   MENU_SIGN_DASH,
   MENU_SIGN_TIMES,

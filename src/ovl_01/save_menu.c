@@ -131,7 +131,7 @@ s16 GetChosenReplaySlot(void);
 s32 GetOpenRingShotCourseCount(void);
 void DrawOneDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
+void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
 void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
@@ -691,7 +691,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
             RING_SHOT_FACE_Y + (itemIndex * RING_SHOT_FACE_SPACING), character,
             index);
         if (index == FACE_DARKENED) {
-          func_802123E0_ovl_01(&gfx,
+          DrawMenuSign(&gfx,
               RING_SHOT_CROSS_X + (column * RING_SHOT_COLUMN_SPACING),
               RING_SHOT_CROSS_Y + (itemIndex * RING_SHOT_FACE_SPACING),
               MENU_SIGN_TIMES);
@@ -733,7 +733,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
       } else {
         for (itemIndex = 0; itemIndex != RING_SHOT_EMPTY_DASH_COUNT;
             itemIndex++) {
-          func_802123E0_ovl_01(&gfx,
+          DrawMenuSign(&gfx,
               RING_SHOT_EMPTY_DASH_X +
                   (itemIndex * RING_SHOT_EMPTY_DASH_SPACING),
               RING_SHOT_EMPTY_DASH_Y + (index * RING_SHOT_SLOT_SPACING),

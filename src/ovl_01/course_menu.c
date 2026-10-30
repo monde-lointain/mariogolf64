@@ -1468,7 +1468,8 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
 const char D_802318E8_ovl_01[] = "";
 const char D_802318EC_ovl_01[] = "";
 
-void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
+/* Draws the MENU_SIGN_* sign's glyph with its top-left corner at (x, y) */
+void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
   Gfx* gfx = *displayListHead;
   s32 glyphIndex = MENU_GLYPH_TIMES;
 
