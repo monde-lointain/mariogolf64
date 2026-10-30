@@ -639,13 +639,13 @@ void UpdateBetSettings(void) {
 
   GetSaveData();
   memory = GetMenuMemory();
-  if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
+  if (g_BetPagesPhase == MENU_PHASE_START) {
     PlaySong(SONG_TITLE, 0);
     g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-    D_8022BE89_ovl_01 = MENU_UNK89_UNK3;
+    g_BetPagesWallSlide = MENU_UNK89_UNK3;
   }
 
-  if (D_8022BE88_ovl_01 != BET_PHASE_CHOOSING) {
+  if (g_BetPagesPhase != BET_PHASE_CHOOSING) {
     return;
   }
 
@@ -659,7 +659,7 @@ void UpdateBetSettings(void) {
       D_801B70F0[index] = 0;
     }
 
-    D_8022BE88_ovl_01 = BET_PHASE_CONFIRMED;
+    g_BetPagesPhase = BET_PHASE_CONFIRMED;
     FreeAllCharacterSlots();
     g_MenuScreen = MENU_SCREEN_HANDICAPS;
     f_IsBetHelpShown = FALSE;
@@ -679,7 +679,7 @@ void UpdateBetSettings(void) {
 
   if (g_MenuPressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    D_8022BE88_ovl_01 = BET_PHASE_CANCELED;
+    g_BetPagesPhase = BET_PHASE_CANCELED;
     f_IsBetHelpShown = FALSE;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
         255, 255, 255);
@@ -1047,21 +1047,21 @@ void DrawBetIcon(
 s32 UpdateHandicaps(void) {
   MenuMemory* memory = GetMenuMemory();
 
-  if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
+  if (g_BetPagesPhase == MENU_PHASE_START) {
     PlaySong(SONG_TITLE, 0);
     g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-    D_8022BE89_ovl_01 = MENU_UNK89_UNK4;
+    g_BetPagesWallSlide = MENU_UNK89_UNK4;
     FreeAllCharacterSlots();
   }
 
-  if (D_8022BE88_ovl_01 == MENU_PHASE_CHOOSING) {
+  if (g_BetPagesPhase == MENU_PHASE_CHOOSING) {
     if (g_MenuPressedButtons & A_BUTTON) {
       PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
       D_8023BFD0_ovl_01 = HANDICAP_SLIDE_START;
       f_IsHandicapPromptShown = FALSE;
-      D_8022BE88_ovl_01 = MENU_PHASE_CONFIRMED;
+      g_BetPagesPhase = MENU_PHASE_CONFIRMED;
       return;
     }
 
@@ -1071,7 +1071,7 @@ s32 UpdateHandicaps(void) {
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
       f_IsHandicapPromptShown = FALSE;
-      D_8022BE88_ovl_01 = MENU_PHASE_CANCELED;
+      g_BetPagesPhase = MENU_PHASE_CANCELED;
       return;
     }
 

@@ -288,7 +288,7 @@ extern u8 D_801B9410;
 #define MINI_GOLF_TURN_TO_NEXT 2
 #define MINI_GOLF_RECORD_SLIDE 45
 #define MINI_GOLF_RECORD_SLIDE_STEP 9
-/* D_8022BE88's value once the popup opened with C-up has finished */
+/* g_BetPagesPhase's value once the popup opened with C-up has finished */
 #define MENU_PHASE_UNK2 2
 
 extern void* D_801049A0[][MINI_GOLF_DISC_IMAGE_COUNT];
@@ -452,8 +452,8 @@ static u8 D_8022BE80_ovl_01 = 0;
 static s8 f_ViewerModelKind = 0;
 /* How far the bet settings and handicap pages have slid in */
 static s32 f_BetSlideOffset = 0;
-u8 D_8022BE88_ovl_01 = 0;
-u8 D_8022BE89_ovl_01 = 0;
+u8 g_BetPagesPhase = 0;
+u8 g_BetPagesWallSlide = 0;
 static s16 D_8022BE8A_ovl_01 = 0;
 /* Which of g_MenuTitleImages is shown; a new screen's title is read into the
  * other */
@@ -1850,8 +1850,8 @@ void UpdateMenuTitleScreen(void) {
   }
 
   f_BetSlideOffset = 0;
-  D_8022BE88_ovl_01 = 0;
-  D_8022BE89_ovl_01 = 0;
+  g_BetPagesPhase = 0;
+  g_BetPagesWallSlide = 0;
   D_8023BFD0_ovl_01 = 0;
   D_802322F0_ovl_01 = 0;
   D_802322F4_ovl_01 = 0;
@@ -2210,8 +2210,8 @@ void UpdateModeSelect(void) {
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT,
         TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
     f_BetSlideOffset = 0;
-    D_8022BE88_ovl_01 = 0;
-    D_8022BE89_ovl_01 = 0;
+    g_BetPagesPhase = 0;
+    g_BetPagesWallSlide = 0;
     D_8023BFD0_ovl_01 = 0;
     D_802322F0_ovl_01 = 0;
     D_802322F4_ovl_01 = 0;
@@ -2545,15 +2545,15 @@ void UpdateCourseSelect(void) {
     return;
   }
 
-  if (D_8022BE88_ovl_01 == MENU_PHASE_UNK2) {
+  if (g_BetPagesPhase == MENU_PHASE_UNK2) {
     PlaySong(SONG_CONTROLS, 0);
     g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
-    D_8022BE88_ovl_01 = 1;
-    D_8022BE89_ovl_01 = 0;
+    g_BetPagesPhase = 1;
+    g_BetPagesWallSlide = 0;
     return;
   }
 
-  if (D_8022BE89_ovl_01 != 0 || D_8022BE88_ovl_01 != 0) {
+  if (g_BetPagesWallSlide != 0 || g_BetPagesPhase != 0) {
     return;
   }
 
@@ -2663,8 +2663,8 @@ void UpdateCourseSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
         PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        D_8022BE88_ovl_01 = 1;
-        D_8022BE89_ovl_01 = 1;
+        g_BetPagesPhase = 1;
+        g_BetPagesWallSlide = 1;
       } else {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       }
@@ -2851,15 +2851,15 @@ void UpdateMiniGolfCourseSelect(void) {
     return;
   }
 
-  if (D_8022BE88_ovl_01 == MENU_PHASE_UNK2) {
+  if (g_BetPagesPhase == MENU_PHASE_UNK2) {
     PlaySong(SONG_CONTROLS, 0);
     g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
-    D_8022BE88_ovl_01 = 1;
-    D_8022BE89_ovl_01 = 0;
+    g_BetPagesPhase = 1;
+    g_BetPagesWallSlide = 0;
     return;
   }
 
-  if (D_8022BE89_ovl_01 != 0 || D_8022BE88_ovl_01 != 0) {
+  if (g_BetPagesWallSlide != 0 || g_BetPagesPhase != 0) {
     return;
   }
 
@@ -2935,8 +2935,8 @@ void UpdateMiniGolfCourseSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
         PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        D_8022BE88_ovl_01 = 1;
-        D_8022BE89_ovl_01 = 1;
+        g_BetPagesPhase = 1;
+        g_BetPagesWallSlide = 1;
       } else {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       }
@@ -4541,7 +4541,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 
 extern const char D_8023176C_ovl_01[];
 
-/* The D_8022BE88 phase in which the course select's banners slide the other way
+/* The g_BetPagesPhase phase in which the course select's banners slide the
+ * other way
  */
 #define MENU_PHASE_UNK7 7
 
@@ -5657,13 +5658,13 @@ void DrawAnimationViewer(Gfx** displayListHead) {
  * mini-golf disc's images, the front one bobbing. While the holes are
  * chosen (MAP_CAMERA_MODE_TOP_BYTE is 1) it draws the holes badges;
  * otherwise the course's birdie badge count and tournament trophies. Then
- * SlideBrickWall slides the stats panel's rows the way D_8022BE89 picks; when
- * that is 3 or 4, the chosen hole starts loading once they stop.
+ * SlideBrickWall slides the stats panel's rows the way g_BetPagesWallSlide
+ * picks; when that is 3 or 4, the chosen hole starts loading once they stop.
  */
 /*
  * Doesn't match: the original keeps the chosen course on the stack instead
- * of in a register, and orders the D_8022BE89 switch's branches and the
- * trophies' loads differently.
+ * of in a register, and orders the g_BetPagesWallSlide switch's branches and
+ * the trophies' loads differently.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {
@@ -6126,21 +6127,21 @@ void DrawCourseSelect(Gfx** displayListHead) {
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     }
 
-    switch (D_8022BE89_ovl_01) {
+    switch (g_BetPagesWallSlide) {
       case 0:
         break;
 
       default:
         if (SlideBrickWall(&gfx, STATS_SLIDE_OUT_RIGHT) == 0) {
-          D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
+          g_BetPagesPhase = BET_PHASE_CHOOSING;
         }
 
         break;
 
       case MENU_UNK89_UNK3:
         if (SlideBrickWall(&gfx, STATS_SLIDE_IN_FROM_RIGHT) == 0) {
-          D_8022BE88_ovl_01 = MENU_PHASE_START;
-          D_8022BE89_ovl_01 = 0;
+          g_BetPagesPhase = MENU_PHASE_START;
+          g_BetPagesWallSlide = 0;
           StartLoadingChosenHole();
         }
 
@@ -6148,8 +6149,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
       case MENU_UNK89_UNK4:
         if (SlideBrickWall(&gfx, STATS_SLIDE_IN_FROM_LEFT) == 0) {
-          D_8022BE88_ovl_01 = MENU_PHASE_START;
-          D_8022BE89_ovl_01 = 0;
+          g_BetPagesPhase = MENU_PHASE_START;
+          g_BetPagesWallSlide = 0;
           StartLoadingChosenHole();
         }
 
@@ -6161,13 +6162,13 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
   if ((g_MenuScreen == MENU_SCREEN_BET_SETTINGS) ||
       (g_MenuScreen == MENU_SCREEN_HANDICAPS)) {
-    switch (D_8022BE88_ovl_01) {
+    switch (g_BetPagesPhase) {
       case BET_PHASE_OPENING:
         f_BetSlideOffset += BET_SLIDE_STEP;
         D_8023BFD0_ovl_01 += BET_SLIDE_STEP;
         D_802322F0_ovl_01 += BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
-          D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
+          g_BetPagesPhase = BET_PHASE_CHOOSING;
           f_BetSlideOffset = 0;
           D_802322F0_ovl_01 = 0;
         }
@@ -6179,7 +6180,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         D_802322F0_ovl_01 += BET_SLIDE_STEP;
         D_8023BFD0_ovl_01 -= BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
-          D_8022BE88_ovl_01 = MENU_PHASE_START;
+          g_BetPagesPhase = MENU_PHASE_START;
           f_BetSlideOffset = 0;
           D_802322F0_ovl_01 = 0;
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0,
@@ -6193,7 +6194,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         D_802322F0_ovl_01 -= BET_SLIDE_STEP;
         D_802322F4_ovl_01 += BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
-          D_8022BE88_ovl_01 = MENU_PHASE_CHOOSING;
+          g_BetPagesPhase = MENU_PHASE_CHOOSING;
           f_BetSlideOffset = 0;
           D_802322F0_ovl_01 = 0;
           D_802322F4_ovl_01 = 0;
@@ -6206,7 +6207,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         D_802322F0_ovl_01 += BET_SLIDE_STEP;
         D_802322F4_ovl_01 += BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
-          D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
+          g_BetPagesPhase = BET_PHASE_CHOOSING;
           f_BetSlideOffset = 0;
           D_802322F0_ovl_01 = 0;
           D_802322F4_ovl_01 = 0;
@@ -6219,7 +6220,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         D_802322F4_ovl_01 -= BET_SLIDE_STEP;
         D_8023BFD0_ovl_01 += BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
-          D_8022BE88_ovl_01 = MENU_PHASE_START;
+          g_BetPagesPhase = MENU_PHASE_START;
           f_BetSlideOffset = 0;
           D_802322F4_ovl_01 = 0;
           D_8023BFD0_ovl_01 = 0;
@@ -6229,14 +6230,14 @@ void DrawCourseSelect(Gfx** displayListHead) {
     }
 
     SlideBrickWall(&gfx, STATS_SLIDE_OUT_RIGHT);
-    if ((D_8022BE88_ovl_01 >= BET_PHASE_CHOOSING) &&
-        ((D_8022BE88_ovl_01 != BET_PHASE_CANCELED) &&
-            (D_8022BE88_ovl_01 != MENU_PHASE_CONFIRMED))) {
+    if ((g_BetPagesPhase >= BET_PHASE_CHOOSING) &&
+        ((g_BetPagesPhase != BET_PHASE_CANCELED) &&
+            (g_BetPagesPhase != MENU_PHASE_CONFIRMED))) {
       DrawCourseSelectBanners(&gfx);
     }
 
     DrawMenuBackdropLayers(&gfx, COURSE_SELECT_FRONT_LAYERS);
-    switch (D_8022BE88_ovl_01) {
+    switch (g_BetPagesPhase) {
       case BET_PHASE_OPENING:
         DrawBetSettings(&gfx, BET_SLIDE_DISTANCE - D_802322F0_ovl_01, 0, 0);
         break;
@@ -6313,7 +6314,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   s32 squeeze;
   s32 cameraModeTopByte;
 
-  if (D_8022BE88_ovl_01 == MENU_PHASE_UNK7) {
+  if (g_BetPagesPhase == MENU_PHASE_UNK7) {
     slide = -slide;
   }
 

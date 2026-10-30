@@ -50,8 +50,8 @@ extern void* g_NamePlateImage;
 /* The player count chosen on the title screen, which the saved games, the
  * menus and the club tournament set to 1 */
 extern s32 g_ChosenPlayerCount;
-extern u8 D_8022BE88_ovl_01;
-extern u8 D_8022BE89_ovl_01;
+extern u8 g_BetPagesPhase;
+extern u8 g_BetPagesWallSlide;
 extern s32 g_AnimatedIconFrameIndex;
 extern u8 g_AnimatedIconBufferIndex;
 extern s8 g_AnimatedIconFrameTime;

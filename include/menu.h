@@ -487,15 +487,15 @@ extern BetSet g_BetSet;
 #define STATS_SLIDE_IN_FROM_LEFT 4
 #define STATS_SLIDE_COUNT 5
 
-/* The phases of the handicap screen's update, which D_8022BE88 holds */
+/* The phases of the handicap screen's update, which g_BetPagesPhase holds */
 #define MENU_PHASE_START 0
 #define MENU_PHASE_CHOOSING 5
 #define MENU_PHASE_CANCELED 6
 #define MENU_PHASE_CONFIRMED 7
-/* Values of D_8022BE89 */
+/* Values of g_BetPagesWallSlide */
 #define MENU_UNK89_UNK3 3
 #define MENU_UNK89_UNK4 4
-/* The bet settings screen's phases in D_8022BE88 */
+/* The bet settings screen's phases in g_BetPagesPhase */
 #define BET_PHASE_OPENING 1
 #define BET_PHASE_CHOOSING 2
 #define BET_PHASE_CANCELED 3
