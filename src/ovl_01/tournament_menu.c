@@ -120,7 +120,7 @@ enum ClubCodePhase {
 #define CODE_DEBUG_TEXT_COLUMN 2
 #define CODE_DEBUG_TEXT_FIRST_ROW 3
 
-/* What func_8022B46C reports after a key is pressed */
+/* What PressCodeKey reports after a key is pressed */
 enum CodeKeyResult {
   CODE_KEY_RESULT_TOO_SHORT = -1,
   CODE_KEY_RESULT_TYPING,
@@ -335,8 +335,8 @@ void DrawEnteredCode(Gfx** displayListHead);
 void DrawCodePrompt(Gfx** displayListHead);
 void DrawCodeCursor(Gfx** displayListHead);
 s32 GetClubTournamentCharacter(void);
-s32 func_8022B46C_ovl_01(void);
-s32 func_8022B5E0_ovl_01(void);
+s32 PressCodeKey(void);
+s32 DeleteCodeCharacter(void);
 
 /* The camera and placement that DrawCodeCursor draws the cursor with */
 static Mtx f_CodeCursorProjection;
@@ -1232,7 +1232,7 @@ void UpdateClubTournament(void) {
 
   if (g_MenuRepeatButtons & A_BUTTON) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-    result = func_8022B46C_ovl_01();
+    result = PressCodeKey();
     if (result == CODE_KEY_RESULT_DONE) {
       if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
         isInvalid = FALSE;
@@ -1282,7 +1282,7 @@ void UpdateClubTournament(void) {
 
     /* B first deletes the code's characters, and leaves only once the code is
      * empty */
-    if (func_8022B5E0_ovl_01()) {
+    if (DeleteCodeCharacter()) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       g_MenuScreen = MENU_SCREEN_MAIN;
       D_80230F40_ovl_01 = FALSE;
@@ -1866,10 +1866,14 @@ void DrawEnteredCode(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Doesn't match: the menu memory pointer and the result take each other's
- * registers */
+/*
+ * Types the chosen key's character into the code, or deletes one or ends the
+ * code, and returns a CodeKeyResult.
+ * Doesn't match: the menu memory pointer and the result take each other's
+ * registers.
+ */
 #ifdef NON_MATCHING
-s32 func_8022B46C_ovl_01(void) {
+s32 PressCodeKey(void) {
   MenuMemory* memory = GetMenuMemory();
   s32 result = CODE_KEY_RESULT_TYPING;
   u8 key = D_80230F84_ovl_01[memory->codeKeyRow][memory->codeKeyColumn];
@@ -1915,10 +1919,13 @@ s32 func_8022B46C_ovl_01(void) {
   return result;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B46C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", PressCodeKey);
 #endif
 
-s32 func_8022B5E0_ovl_01(void) {
+/*
+ * Deletes the code's last character, and returns TRUE when it was already empty
+ */
+s32 DeleteCodeCharacter(void) {
   Boolean isEmpty = TRUE;
 
   if (D_80230F68_ovl_01 > 0) {

@@ -3,7 +3,7 @@ rom:0xC0DC4 reloc:MIPS_HI16 symbol:D_8024DD34_ovl_04
 rom:0xC0DC8 reloc:MIPS_LO16 symbol:D_8024DD34_ovl_04
 rom:0xC0E3C reloc:MIPS_HI16 symbol:D_8024DD34_ovl_04
 rom:0xC0E40 reloc:MIPS_LO16 symbol:D_8024DD34_ovl_04
-// func_8022B46C_ovl_01 stores into D_80230FD4_ovl_01[D_80230F68_ovl_01 - 1]; name the array, not the byte before it
+// PressCodeKey stores into D_80230FD4_ovl_01[D_80230F68_ovl_01 - 1]; name the array, not the byte before it
 rom:0x115544 reloc:MIPS_HI16 symbol:D_80230FD4_ovl_01 addend:-0x1
 rom:0x11554C reloc:MIPS_LO16 symbol:D_80230FD4_ovl_01 addend:-0x1
 // DrawRingShotRecords reads f_RingShotIconPositions[openCourseCount - 1]; name the table, not the row before it
