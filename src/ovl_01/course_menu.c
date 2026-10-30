@@ -171,7 +171,8 @@ static const char* f_StatLabels[STATS_COUNT] = {"Round", "Best Score",
 static f32 D_802300DC_ovl_01 = 0.0f;
 /* Read by no routine */
 static char D_802300E0_ovl_01[3][10] = {"EXP", "ｺｰｽｹﾞｯﾄ", "純ﾞ"};
-static TrophyPosition D_80230100_ovl_01[COURSE_COUNT] = {
+/* Where each course's first trophy sits, before its shift for the place */
+static TrophyPosition f_StatsTrophyPositions[COURSE_COUNT] = {
     {230, 177}, {230, 177}, {230, 177}, {236, 165}, {226, 184}, {236, 175}};
 
 /* The camera's matrices that the course wheel's points are projected with */
@@ -989,12 +990,12 @@ void DrawCourseTrophies(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         left = (place * TROPHY_SPACING) + -TROPHY_SHIFT_LEFT;
         gSPScisTextureRectangle(gfx++,
-            QuarterPixels(D_80230100_ovl_01[memory->statsCourse].x + left),
-            QuarterPixels(D_80230100_ovl_01[memory->statsCourse].y),
+            QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].x + left),
+            QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].y),
             QuarterPixels(g_TrophySizes[memory->statsCourse].width +
-                D_80230100_ovl_01[memory->statsCourse].x + left),
+                f_StatsTrophyPositions[memory->statsCourse].x + left),
             QuarterPixels(g_TrophySizes[memory->statsCourse].height +
-                D_80230100_ovl_01[memory->statsCourse].y),
+                f_StatsTrophyPositions[memory->statsCourse].y),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
