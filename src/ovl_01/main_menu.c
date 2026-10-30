@@ -282,7 +282,7 @@ extern u8 D_801B9410;
  * Changing record slides the screen across instead.
  */
 #define MINI_GOLF_TURN_FRAME_DURATION 2
-/* D_8022F8DC values */
+/* f_MiniGolfDiscTurn values */
 #define MINI_GOLF_TURN_NONE 0
 #define MINI_GOLF_TURN_TO_PREVIOUS 1
 #define MINI_GOLF_TURN_TO_NEXT 2
@@ -675,12 +675,12 @@ static u8 D_8022F8CE_ovl_01 = 0;
 static s32 D_8022F8D0_ovl_01 = 0;
 /* The mini-golf disc's frame */
 static s32 f_MiniGolfDiscFrame = MINI_GOLF_FACING_FRAME;
-/* The calls that the mini-golf disc has shown */
-static s32 D_8022F8D8_ovl_01 = 0;
+/* The frames for which the mini-golf disc has shown its turn frame */
+static s32 f_MiniGolfDiscFrameTime = 0;
 /* Which way the mini-golf disc turns */
-static u8 D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
-/* Which buffers the mini-golf disc shows */
-static u8 D_8022F8DD_ovl_01 = 0;
+static u8 f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
+/* Which of g_MenuIconImages' buffer pairs the mini-golf disc shows */
+static u8 f_MiniGolfDiscBufferIndex = 0;
 /* The menus' camera orbit's updates */
 static s32 D_8022F8E0_ovl_01 = 0;
 /* Each player's sound pan, by the player count */
@@ -1514,9 +1514,9 @@ void UpdateMenus(void) {
             g_MenuSpareImages[0], PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS);
         ComputeRoundStatistics();
         f_MiniGolfDiscFrame = MINI_GOLF_FACING_FRAME;
-        D_8022F8D8_ovl_01 = 0;
-        D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
-        D_8022F8DD_ovl_01 = 0;
+        f_MiniGolfDiscFrameTime = 0;
+        f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
+        f_MiniGolfDiscBufferIndex = 0;
         break;
 
       case MENU_SCREEN_COURSE_STATS:
@@ -2748,11 +2748,11 @@ void UpdateMiniGolfCourseSelect(void) {
     return;
   }
 
-  if (D_8022F8DC_ovl_01 != MINI_GOLF_TURN_NONE) {
-    switch (D_8022F8DC_ovl_01) {
+  if (f_MiniGolfDiscTurn != MINI_GOLF_TURN_NONE) {
+    switch (f_MiniGolfDiscTurn) {
       case MINI_GOLF_TURN_TO_PREVIOUS:
-        if (++D_8022F8D8_ovl_01 == MINI_GOLF_TURN_FRAME_DURATION) {
-          D_8022F8D8_ovl_01 = 0;
+        if (++f_MiniGolfDiscFrameTime == MINI_GOLF_TURN_FRAME_DURATION) {
+          f_MiniGolfDiscFrameTime = 0;
           if (++f_MiniGolfDiscFrame >= MINI_GOLF_TURN_FRAME_COUNT) {
             f_MiniGolfDiscFrame = 0;
           }
@@ -2769,14 +2769,14 @@ void UpdateMiniGolfCourseSelect(void) {
                                          [f_MiniGolfDiscFrame],
                 &asset);
             ReadEncodedAsset(
-                g_MenuIconImages[D_8022F8DD_ovl_01 ^ 1][0], &asset);
+                g_MenuIconImages[f_MiniGolfDiscBufferIndex ^ 1][0], &asset);
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[(course *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     1][f_MiniGolfDiscFrame],
                 &asset);
             ReadEncodedAsset(
-                g_MenuIconImages[D_8022F8DD_ovl_01 ^ 1][1], &asset);
+                g_MenuIconImages[f_MiniGolfDiscBufferIndex ^ 1][1], &asset);
           } else {
             course = g_MenuMemory.miniGolfCourseChoice;
             buffers = g_MenuIconImages;
@@ -2784,30 +2784,30 @@ void UpdateMiniGolfCourseSelect(void) {
                 g_MiniGolfDiscFrameAssets[course * MINI_GOLF_DISC_IMAGE_COUNT]
                                          [f_MiniGolfDiscFrame],
                 &asset);
-            ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
+            ReadEncodedAsset(buffers[f_MiniGolfDiscBufferIndex ^ 1][0], &asset);
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[(course *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     1][f_MiniGolfDiscFrame],
                 &asset);
-            ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
+            ReadEncodedAsset(buffers[f_MiniGolfDiscBufferIndex ^ 1][1], &asset);
           }
 
-          D_8022F8DD_ovl_01 ^= 1;
+          f_MiniGolfDiscBufferIndex ^= 1;
           if (f_MiniGolfDiscFrame == MINI_GOLF_FACING_FRAME) {
             if (--g_MenuMemory.miniGolfCourseChoice < 0) {
               g_MenuMemory.miniGolfCourseChoice =
                   MINI_GOLF_COURSES_PER_RECORD - 1;
             }
 
-            D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
+            f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
           }
         }
 
         break;
       case MINI_GOLF_TURN_TO_NEXT:
-        if (++D_8022F8D8_ovl_01 == MINI_GOLF_TURN_FRAME_DURATION) {
-          D_8022F8D8_ovl_01 = 0;
+        if (++f_MiniGolfDiscFrameTime == MINI_GOLF_TURN_FRAME_DURATION) {
+          f_MiniGolfDiscFrameTime = 0;
           if (--f_MiniGolfDiscFrame < 0) {
             f_MiniGolfDiscFrame = MINI_GOLF_TURN_FRAME_COUNT - 1;
           }
@@ -2824,14 +2824,14 @@ void UpdateMiniGolfCourseSelect(void) {
                                          [f_MiniGolfDiscFrame],
                 &asset);
             ReadEncodedAsset(
-                g_MenuIconImages[D_8022F8DD_ovl_01 ^ 1][0], &asset);
+                g_MenuIconImages[f_MiniGolfDiscBufferIndex ^ 1][0], &asset);
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[(course *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     1][f_MiniGolfDiscFrame],
                 &asset);
             ReadEncodedAsset(
-                g_MenuIconImages[D_8022F8DD_ovl_01 ^ 1][1], &asset);
+                g_MenuIconImages[f_MiniGolfDiscBufferIndex ^ 1][1], &asset);
           } else {
             course = g_MenuMemory.miniGolfCourseChoice;
             buffers = g_MenuIconImages;
@@ -2839,23 +2839,23 @@ void UpdateMiniGolfCourseSelect(void) {
                 g_MiniGolfDiscFrameAssets[course * MINI_GOLF_DISC_IMAGE_COUNT]
                                          [f_MiniGolfDiscFrame],
                 &asset);
-            ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
+            ReadEncodedAsset(buffers[f_MiniGolfDiscBufferIndex ^ 1][0], &asset);
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[(course *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     1][f_MiniGolfDiscFrame],
                 &asset);
-            ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
+            ReadEncodedAsset(buffers[f_MiniGolfDiscBufferIndex ^ 1][1], &asset);
           }
 
-          D_8022F8DD_ovl_01 ^= 1;
+          f_MiniGolfDiscBufferIndex ^= 1;
           if (f_MiniGolfDiscFrame == MINI_GOLF_FACING_FRAME) {
             if (++g_MenuMemory.miniGolfCourseChoice >=
                 MINI_GOLF_COURSES_PER_RECORD) {
               g_MenuMemory.miniGolfCourseChoice = 0;
             }
 
-            D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
+            f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
           }
         }
 
@@ -2942,10 +2942,10 @@ void UpdateMiniGolfCourseSelect(void) {
       g_MenuMemory.miniGolfRecordSlide = -MINI_GOLF_RECORD_SLIDE;
     } else if (g_MenuRepeatButtons & U_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_PREVIOUS;
+      f_MiniGolfDiscTurn = MINI_GOLF_TURN_TO_PREVIOUS;
     } else if (g_MenuRepeatButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-      D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_NEXT;
+      f_MiniGolfDiscTurn = MINI_GOLF_TURN_TO_NEXT;
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
@@ -5866,10 +5866,9 @@ void DrawCourseSelect(Gfx** displayListHead) {
       if (g_GameState.isMiniGolf == TRUE) {
         palette = D_801052C4[slot];
         /* Indexed as one row, as that matches the original better */
-        texels =
-            g_MenuIconImages[0]
-                            [(D_8022F8DD_ovl_01 * MINI_GOLF_DISC_IMAGE_COUNT) +
-                                slot];
+        texels = g_MenuIconImages[0][(f_MiniGolfDiscBufferIndex *
+                                         MINI_GOLF_DISC_IMAGE_COUNT) +
+            slot];
       } else {
         palette = ImageBody(g_MenuIconImages[0][slot]);
         texels = g_MenuIconImages[0][slot];
