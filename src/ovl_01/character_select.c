@@ -1220,7 +1220,11 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
   D_8022FF01_ovl_01 = FALSE;
 }
 
-void func_8020B3CC_ovl_01(void) {
+/*
+ * Puts the second player's grid cursor on the last marked slot of the choice
+ * rows, the one that holds the rival.
+ */
+void PlaceRivalCursor(void) {
   MenuMemory* memory = GetMenuMemory();
   s32 row;
   s32 column;

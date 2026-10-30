@@ -345,7 +345,7 @@ void UpdateBirdieBadges(void);
 void UpdateBlankScreen(void);
 void HideGameBoyCharacters(void);
 void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind);
-void func_8020B3CC_ovl_01(void);
+void PlaceRivalCursor(void);
 void LoadCharacterFaces(void);
 void LoadCourseStatsIcons(void** buffers);
 void LoadCourseTrophyImages(void** buffers, s32 requestedKind);
@@ -1304,7 +1304,7 @@ void UpdateMenus(void) {
         LoadCharacterSelectBuffer(
             g_MenuSpareImages[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         LoadCharacterFaces();
-        func_8020B3CC_ovl_01();
+        PlaceRivalCursor();
         break;
 
       case MENU_SCREEN_SAVED_GAMES:
