@@ -28,7 +28,7 @@
 
 BallSimulation g_TurnBallSimulation;
 
-BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {{{0}}};
+BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {0};
 
 s8 g_ClubTestMode = CLUB_TEST_NONE;
 

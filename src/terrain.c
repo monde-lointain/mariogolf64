@@ -197,8 +197,8 @@ static u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8] = {
     {0x82, 0x06, 0x86, 0x07, 0x8A},
 };
 HoleSetup g_HoleSetup = {
-    {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 2},
-    {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 8},
+    .cupPosition = {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 2},
+    .teePosition = {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 8},
 };
 f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT] = {0};
 s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT]
