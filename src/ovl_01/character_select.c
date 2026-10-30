@@ -53,8 +53,8 @@ enum GridMove {
  * into the menu's buffer */
 #define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
 
-/* DrawCharacterBoard draws D_8023A568 in strips, then the right half of the
- * second image */
+/* DrawCharacterBoard draws f_CharacterBoard in strips, then the right half of
+ * the second image */
 #define BOARD_WIDTH 288
 #define BOARD_STRIP_HEIGHT 11
 #define BOARD_STRIP_COUNT 16
@@ -214,17 +214,17 @@ static Mtx f_GridCursorScales[DRAW_BUFFER_COUNT];
 /* Read by no routine */
 static u8 D_8023A560_ovl_01[0x8];
 
-static void* D_8023A568_ovl_01;
+static void* f_CharacterBoard;
 
 /* Read by no routine */
 static u8 D_8023A56C_ovl_01[0x4];
 
-static void* D_8023A570_ovl_01;
+static void* f_PlayerTags;
 static void* f_GridCursorBox;
 static void* D_8023A578_ovl_01;
 static void* D_8023A57C_ovl_01;
 static void* D_8023A580_ovl_01;
-static void* D_8023A584_ovl_01;
+static void* f_CurveMeterCells;
 
 /* Read by no routine */
 static u8 D_8023A588_ovl_01[0x208];
@@ -1186,10 +1186,10 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
 
   switch (bufferKind) {
     case CHARACTER_SELECT_BUFFER_PLAYER_LABELS:
-      D_8023A570_ovl_01 = buffer;
+      f_PlayerTags = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_BOARD:
-      D_8023A568_ovl_01 = buffer;
+      f_CharacterBoard = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_CURSOR_BOX:
       f_GridCursorBox = buffer;
@@ -1201,13 +1201,13 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
       D_8023A580_ovl_01 = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_CURVE_CELLS:
-      D_8023A584_ovl_01 = buffer;
+      f_CurveMeterCells = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_UNREAD:
       D_8023A578_ovl_01 = buffer;
       break;
     default:
-      D_8023A570_ovl_01 = buffer;
+      f_PlayerTags = buffer;
       bufferKind = CHARACTER_SELECT_BUFFER_UNREAD;
       break;
   }
@@ -1602,10 +1602,10 @@ void DrawCharacterBoard(Gfx** displayListHead) {
   u8* labelImage;
 
   GetMenuImageBuffer();
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A568_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_CharacterBoard)));
   for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(D_8023A568_ovl_01) +
+        TextureAddress(ImageTexels(f_CharacterBoard) +
             (stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT / 2)),
         G_IM_FMT_CI, BOARD_WIDTH, BOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1646,7 +1646,7 @@ void DrawCharacterBoard(Gfx** displayListHead) {
  * by side in one image. The two offsets are scaled apart, to match.
  */
 #define PlayerTagTexels(firstTag, playerIndex) \
-  (TextureAddress(ImageTexelsAt(D_8023A570_ovl_01, \
+  (TextureAddress(ImageTexelsAt(f_PlayerTags, \
       ((playerIndex) * PLAYER_TAG_IMAGE_SIZE) + \
           ((firstTag) * PLAYER_TAG_IMAGE_SIZE))))
 #define PLAYER_TAG_WIDTH 16
@@ -1682,7 +1682,7 @@ void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023A570_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PlayerTags)));
   if (g_MenuScreen == MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT) {
     tagCount = 1;
   }
@@ -1937,10 +1937,10 @@ void DrawCurveMeter(Gfx** displayListHead, s32 clubSet) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023A584_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CurveMeterCells)));
   for (cellIndex = firstCell; cellIndex != endCell; cellIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_8023A584_ovl_01) +
+        TextureAddress(LargeImageTexels(f_CurveMeterCells) +
             (cellIndex * CURVE_METER_CELL_SIZE * CURVE_METER_CELL_SIZE)),
         G_IM_FMT_CI, G_IM_SIZ_8b, CURVE_METER_CELL_SIZE, CURVE_METER_CELL_SIZE,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

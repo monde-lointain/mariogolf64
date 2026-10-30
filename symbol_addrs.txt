@@ -3277,6 +3277,7 @@ g_MenuRepeatButtons = 0x800C2000; // size:0x4
 g_MenuPressedButtons = 0x800C2004; // size:0x4
 g_MenuScreen = 0x801EFFA0; // size:0x4
 f_MenuImageBuffer = 0x80232300; // segment:ovl_01
+f_PlayerTags = 0x8023A570; // size:4 segment:ovl_01
 f_WheelProjection = 0x8023A790; // size:0x40 segment:ovl_01
 f_WheelView = 0x8023A7D0; // size:0x40 segment:ovl_01
 f_CourseStatsBadge = 0x8023A810; // size:0x4 segment:ovl_01
