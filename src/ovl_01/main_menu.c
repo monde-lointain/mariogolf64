@@ -306,7 +306,7 @@ extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
 extern void* D_800FBDFC[2];
 
 /* What UpdateMenus reads as the menu screen changes */
-extern void* D_800FBE30[2];
+extern void* g_MenuSpareImages[2];
 extern void* D_800FC6A0;
 extern void* D_800FC898;
 extern void* D_800FF180[2];
@@ -1153,7 +1153,7 @@ void UpdateMenus(void) {
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
         ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
         LoadTournamentBuffer(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
-        LoadTournamentBuffer(D_800FBE30[0], TOURNAMENT_BUFFER_YES_NO);
+        LoadTournamentBuffer(g_MenuSpareImages[0], TOURNAMENT_BUFFER_YES_NO);
         imageBuffer = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_OPTIONS_MARIO, &asset);
         ReadEncodedAsset(imageBuffer, &asset);
@@ -1239,7 +1239,7 @@ void UpdateMenus(void) {
         OpenEncodedAsset(g_ModeIconAnimations[iconIndex][0], &asset);
         ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
         LoadPlayerStatsBuffer(
-            D_800FBE30[0], PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS);
+            g_MenuSpareImages[0], PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS);
         g_MenuFidgetDelays[0] = guRandom() % FIDGET_DELAY_RANGE;
         g_MenuFidgetDelays[1] = guRandom() % FIDGET_DELAY_RANGE;
         g_MenuFidgetDelays[2] = guRandom() % FIDGET_DELAY_RANGE;
@@ -1250,7 +1250,8 @@ void UpdateMenus(void) {
 
         OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
         ReadEncodedAsset(D_800FC898, &asset);
-        LoadCourseMenuBuffer(D_800FBE30[1], COURSE_MENU_BUFFER_LARGE_DIGITS);
+        LoadCourseMenuBuffer(
+            g_MenuSpareImages[1], COURSE_MENU_BUFFER_LARGE_DIGITS);
         f_SpinningStarFrameIndex = 0;
         f_SpinningStarBufferIndex = 0;
         f_SpinningStarFrameTime = 0;
@@ -1274,7 +1275,7 @@ void UpdateMenus(void) {
         LoadCharacterSelectBuffer(
             g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
         LoadCharacterSelectBuffer(
-            D_800FBE30[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
+            g_MenuSpareImages[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         func_8020B438_ovl_01();
         break;
 
@@ -1295,7 +1296,7 @@ void UpdateMenus(void) {
         LoadCharacterSelectBuffer(
             g_NamePlateImage, CHARACTER_SELECT_BUFFER_UNREAD);
         LoadCharacterSelectBuffer(
-            D_800FBE30[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
+            g_MenuSpareImages[0], CHARACTER_SELECT_BUFFER_CURVE_CELLS);
         func_8020B438_ovl_01();
         func_8020B3CC_ovl_01();
         break;
@@ -1322,8 +1323,8 @@ void UpdateMenus(void) {
             g_ImageSlots[f_ImageSlotIndex], GAME_MODE_LABEL_BUFFER_LABELS);
         LoadSaveGameBuffer(D_800FF180[0], SAVE_GAME_BUFFER_CONTROLLER_ICONS);
         LoadSaveGameBuffer(D_800FF180[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
-        LoadSaveGameBuffer(D_800FBE30[0], SAVE_GAME_BUFFER_FIRST_BOARD);
-        LoadSaveGameBuffer(D_800FBE30[1], SAVE_GAME_BUFFER_SECOND_BOARD);
+        LoadSaveGameBuffer(g_MenuSpareImages[0], SAVE_GAME_BUFFER_FIRST_BOARD);
+        LoadSaveGameBuffer(g_MenuSpareImages[1], SAVE_GAME_BUFFER_SECOND_BOARD);
         LoadSaveGameBuffer(D_800FC6A0, SAVE_GAME_BUFFER_THIRD_BOARD);
         LoadSaveGameBuffer(
             g_MenuLabelImages[f_MenuLabelImageIndex], SAVE_GAME_BUFFER_COURSE);
@@ -1373,8 +1374,9 @@ void UpdateMenus(void) {
             g_MenuBoardImages[f_MenuBoardImageIndex], CODE_ENTRY_BUFFER_BAR);
         LoadCodeEntryBuffer(
             g_MenuLabelImages[f_MenuLabelImageIndex], CODE_ENTRY_BUFFER_GLYPHS);
-        LoadCodeEntryBuffer(D_800FBE30[0], CODE_ENTRY_BUFFER_POINTING_HAND);
-        LoadCodeEntryBuffer(D_800FBE30[1], CODE_ENTRY_BUFFER_CURSOR_BOX);
+        LoadCodeEntryBuffer(
+            g_MenuSpareImages[0], CODE_ENTRY_BUFFER_POINTING_HAND);
+        LoadCodeEntryBuffer(g_MenuSpareImages[1], CODE_ENTRY_BUFFER_CURSOR_BOX);
         LoadTournamentBuffer(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
         LoadTournamentBuffer(g_MenuIconImages[0][0], TOURNAMENT_BUFFER_YES_NO);
         LoadTournamentBuffer(
@@ -1509,7 +1511,7 @@ void UpdateMenus(void) {
             PLAYER_STATS_BUFFER_BET_LABELS);
         LoadPlayerStatsBuffer(D_8012D3AC, PLAYER_STATS_BUFFER_BRICK_WALL);
         LoadPlayerStatsBuffer(
-            D_800FBE30[0], PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS);
+            g_MenuSpareImages[0], PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS);
         ComputeRoundStatistics();
         f_MiniGolfDiscFrame = MINI_GOLF_FACING_FRAME;
         D_8022F8D8_ovl_01 = 0;
@@ -1534,7 +1536,8 @@ void UpdateMenus(void) {
         f_ImageSlotIndex ^= 1;
         LoadCourseMenuBuffer(
             g_ImageSlots[f_ImageSlotIndex], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        LoadCourseMenuBuffer(D_800FBE30[0], COURSE_MENU_BUFFER_GREEN_ARROWS);
+        LoadCourseMenuBuffer(
+            g_MenuSpareImages[0], COURSE_MENU_BUFFER_GREEN_ARROWS);
         ComputeRoundStatistics();
         g_MenuMemory.statsCourse = GetOpenCourseCount();
         break;
@@ -1552,7 +1555,8 @@ void UpdateMenus(void) {
         f_MenuBoardImageIndex ^= 1;
         LoadBestTimesBuffer(
             g_MenuBoardImages[f_MenuBoardImageIndex], BEST_TIMES_BUFFER_PLACES);
-        LoadBestTimesBuffer(D_800FBE30[0], BEST_TIMES_BUFFER_GREEN_ARROWS);
+        LoadBestTimesBuffer(
+            g_MenuSpareImages[0], BEST_TIMES_BUFFER_GREEN_ARROWS);
         func_8021585C_ovl_01();
         break;
 
@@ -1567,8 +1571,8 @@ void UpdateMenus(void) {
             g_ImageSlots[f_ImageSlotIndex], TABLE_BUFFER_CURSOR);
         LoadCharacterTableBuffer(g_NamePlateImage, TABLE_BUFFER_UNREAD);
         func_8021730C_ovl_01();
-        LoadCharacterTableBuffer(D_800FBE30[0], TABLE_BUFFER_ARROWS);
-        LoadCharacterTableBuffer(D_800FBE30[1], TABLE_BUFFER_STAR);
+        LoadCharacterTableBuffer(g_MenuSpareImages[0], TABLE_BUFFER_ARROWS);
+        LoadCharacterTableBuffer(g_MenuSpareImages[1], TABLE_BUFFER_STAR);
         func_802177D0_ovl_01();
         break;
 
@@ -1584,7 +1588,7 @@ void UpdateMenus(void) {
         LoadScoreLabelBuffer(
             g_MenuLabelImages[f_ImageSlotIndex], SCORE_LABEL_BUFFER_CURSOR_BOX);
         LoadScoreLabelBuffer(g_NamePlateImage, SCORE_LABEL_BUFFER_NAME_PLATE);
-        LoadScoreLabelBuffer(D_800FBE30[0], SCORE_LABEL_BUFFER_LABELS);
+        LoadScoreLabelBuffer(g_MenuSpareImages[0], SCORE_LABEL_BUFFER_LABELS);
         ReadBestShots();
         LoadBestShotFaces();
         break;
@@ -1605,7 +1609,7 @@ void UpdateMenus(void) {
             D_8010526C[0], RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS);
         LoadRingShotCourseIcons(g_MenuIconImages[0]);
         LoadRingShotRecordBuffer(
-            D_800FBE30[0], RING_SHOT_RECORD_BUFFER_GREEN_ARROWS);
+            g_MenuSpareImages[0], RING_SHOT_RECORD_BUFFER_GREEN_ARROWS);
         ReadRingShotReplays();
         LoadRingShotRecordFaces();
         break;
@@ -7383,7 +7387,7 @@ void DrawWavingToad(Gfx** displayListHead, s32 left, s32 top) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(ImageBody(D_800FBE30[D_8022F8CE_ovl_01])));
+      gfx++, TextureAddress(ImageBody(g_MenuSpareImages[D_8022F8CE_ovl_01])));
   for (stripIndex = 0; stripIndex != TOAD_STRIP_COUNT; stripIndex++) {
     rowCount = TOAD_LAST_STRIP_HEIGHT;
     if (stripIndex == 0) {
@@ -7391,7 +7395,7 @@ void DrawWavingToad(Gfx** displayListHead, s32 left, s32 top) {
     }
 
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_800FBE30[D_8022F8CE_ovl_01]) +
+        TextureAddress(LargeImageTexels(g_MenuSpareImages[D_8022F8CE_ovl_01]) +
             (stripIndex * TOAD_WIDTH * TOAD_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, rowCount, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

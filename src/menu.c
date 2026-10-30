@@ -95,7 +95,7 @@ extern void* D_80106100;
 extern void* D_800FC898;
 extern void* D_8012D430[18];
 extern void* D_80105B78[18];
-extern void* D_800FBE30[2];
+extern void* g_MenuSpareImages[2];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
 
@@ -597,10 +597,12 @@ void LoadMenuResources(void) {
     ReadAssetFile(D_800FBE38[index], size, &file);
   }
 
-  D_800FBE30[0] = AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
-  ReadEncodedAsset(D_800FBE30[0], &asset);
-  D_800FBE30[1] = AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
-  ReadEncodedAsset(D_800FBE30[1], &asset);
+  g_MenuSpareImages[0] =
+      AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
+  ReadEncodedAsset(g_MenuSpareImages[0], &asset);
+  g_MenuSpareImages[1] =
+      AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
+  ReadEncodedAsset(g_MenuSpareImages[1], &asset);
   D_800FC6A0 = AllocMemory(OpenEncodedAsset(0x6F7, &asset) * 2);
   ReadEncodedAsset(D_800FC6A0, &asset);
   D_801B69EC = AllocMemory(OpenEncodedAsset(0x709, &asset));
@@ -664,8 +666,8 @@ void FreeMenuResources(void) {
     FreeMemory(&D_80105B78[index]);
   }
 
-  FreeMemory(&D_800FBE30[0]);
-  FreeMemory(&D_800FBE30[1]);
+  FreeMemory(&g_MenuSpareImages[0]);
+  FreeMemory(&g_MenuSpareImages[1]);
   FreeMemory(&D_800FC6A0);
   FreeMemory(&D_801B69EC);
 }
