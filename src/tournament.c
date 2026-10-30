@@ -247,10 +247,9 @@ u32 NextTournamentRandom(void) {
 /*
  * Makes up the scores of contestants firstIndex to endIndex - 1 after the
  * player's holeCount holes; those up to lastAheadIndex, or all of them if it
- * is negative, are a hole further on. playerScore goes unused, and nothing
- * is returned; the return type is there to match.
+ * is negative, are a hole further on. playerScore goes unused.
  */
-s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
+NO_RESULT SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
     s32 endIndex, s32 playerScore UNUSED) {
   s32 index;
   s32 shape;

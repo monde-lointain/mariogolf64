@@ -21,9 +21,9 @@ enum ReactionAnimation {
 s32 AddReactionLight(Gfx** displayListHead, Lights2* lights);
 void StartReaction(u32 slotIndex, CharacterId character, s32 animation);
 void TurnOffReactionLight(void);
-s32 UpdateReaction(u32 slotIndex);
+NO_RESULT UpdateReaction(u32 slotIndex);
 void ClearReactionSpot(void);
-s32 ConsiderReactionSpot(CoursePoint point);
+NO_RESULT ConsiderReactionSpot(CoursePoint point);
 void GetReactionSpot(CoursePoint point);
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale);
 

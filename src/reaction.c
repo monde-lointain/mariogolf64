@@ -326,10 +326,9 @@ void CueReactionSound(s32 frame, SoundId soundId) {
 }
 
 /*
- * Cues the sounds of the reaction, by character and animation. It returns
- * no value; the s32 is there to match.
+ * Cues the sounds of the reaction, by character and animation
  */
-s32 PlayReactionSounds(void) {
+NO_RESULT PlayReactionSounds(void) {
   if (g_Scene == SCENE_STAFF_ROLL) {
     return;
   }
@@ -1273,9 +1272,9 @@ void FrameKidReaction(u32 slotIndex, CameraView* view) {
 
 /*
  * Advances the reaction in the slot by a frame, and frames it with the
- * first camera. It returns no value; the s32 is there to match.
+ * first camera
  */
-s32 UpdateReaction(u32 slotIndex) {
+NO_RESULT UpdateReaction(u32 slotIndex) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   CameraView* view;
@@ -1348,7 +1347,7 @@ void ClearReactionSpot(void) {
  * of samples around it, the nearer rings counting more, and is high near a
  * billboard.
  */
-s32 ConsiderReactionSpot(CoursePoint point) {
+NO_RESULT ConsiderReactionSpot(CoursePoint point) {
   s32 roughness;
   s32 ring;
   s32 height;

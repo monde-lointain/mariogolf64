@@ -1901,8 +1901,7 @@ s32 PlaceMessageGlyphGroup(
       }
     }
 
-    /* It returns no value here; the plain return is there to match */
-    return;
+    return UNSET_RESULT;
   }
 
   /* The operand order is there to match */

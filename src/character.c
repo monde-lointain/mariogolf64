@@ -869,7 +869,7 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
 INCLUDE_ASM("asm/nonmatchings/character", AdvanceTextureAnimations);
 #endif
 
-s32 SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame) {
+NO_RESULT SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
 
   if (slot != NULL) {
@@ -887,7 +887,7 @@ void StopTextureAnimations(u32 slotIndex) {
   }
 }
 
-s32 PlayTextureAnimation(u32 slotIndex, s32 index) {
+NO_RESULT PlayTextureAnimation(u32 slotIndex, s32 index) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
 
   if (index >= TEXTURE_ANIMATION_COUNT) {
@@ -1280,7 +1280,7 @@ void SetCharacterUnk188(u32 slotIndex, s32 value) {
   }
 }
 
-s32 ReuseLastCharacterMatrices(u32 slotIndex) {
+NO_RESULT ReuseLastCharacterMatrices(u32 slotIndex) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
 
   if (slot != NULL) {

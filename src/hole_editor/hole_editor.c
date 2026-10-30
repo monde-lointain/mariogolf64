@@ -671,7 +671,7 @@ static s32 f_LastHeightEditKind = 0; /* The last frame's HEIGHT_EDIT_* */
  * Declared without a prototype, as func_804077B0 passes it a float height,
  * which goes as a double
  */
-s32 SetGroundPointHeightAndShade();
+NO_RESULT SetGroundPointHeightAndShade();
 
 /* func_80406818_hole_editor's menu */
 /* Read by no routine */

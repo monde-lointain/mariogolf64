@@ -1050,9 +1050,7 @@ void DrawBetIcon(
   *displayListHead = gfx;
 }
 
-/* Returns nothing, but is declared to return a value, which leaves v0 live at
- * its end */
-s32 UpdateHandicaps(void) {
+NO_RESULT UpdateHandicaps(void) {
   MenuMemory* memory = GetMenuMemory();
 
   if (g_BetPagesPhase == MENU_PHASE_START) {
@@ -2455,14 +2453,15 @@ s32 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
     return -1;
   }
 
-  /* No return follows for other directions, which step no cells and so returned
-   * above */
+  /* Other directions step no cells, and so returned above */
   if (direction == STATS_DIRECTION_LEFT || direction == STATS_DIRECTION_RIGHT) {
     return column;
   } else if (direction == STATS_DIRECTION_UP ||
       direction == STATS_DIRECTION_DOWN) {
     return row;
   }
+
+  return UNSET_RESULT;
 }
 
 /* Returns the ranked record under the Best Shots cursor */

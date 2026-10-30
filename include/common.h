@@ -95,6 +95,29 @@ typedef f32 Mat4[4][4];
 #endif
 
 /*
+ * The return type of a function that returns no value but that the original
+ * declared to return one. KMC GCC keeps v0 live to the end of such a function,
+ * which changes its scheduling, so the matching build declares it s32; other
+ * builds declare it void, so that nothing can use the value it never set.
+ */
+#ifdef __IS_KMC__
+#define NO_RESULT s32
+#else
+#define NO_RESULT void
+#endif
+
+/*
+ * What a function that returns a value on some paths returns on the others,
+ * where the original returned whatever v0 held. Returning nothing keeps KMC
+ * GCC's code; other builds return 0.
+ */
+#ifdef __IS_KMC__
+#define UNSET_RESULT
+#else
+#define UNSET_RESULT 0
+#endif
+
+/*
  * Marks a char array that a string initializes but that needs no terminating
  * NUL, which KMC GCC has no attribute for
  */

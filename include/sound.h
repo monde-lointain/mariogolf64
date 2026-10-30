@@ -503,7 +503,7 @@ void PlayCharacterSound(CharacterId character, s32 slot, s32 soundIndex,
 void QueueCharacterSound(CharacterId character, s32 slot, s32 kind,
     SoundVolume volume, SoundPan pan);
 void SetSoundFrequencyOffset(SoundChannel channel, f32 offset);
-s32 UpdateAudio(void);
+NO_RESULT UpdateAudio(void);
 void StopSong(s32 fadeFrameCount);
 void RequestSongStop(void);
 void SetSongVolume(SoundVolume volume);

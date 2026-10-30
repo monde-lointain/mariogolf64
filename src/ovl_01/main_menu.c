@@ -344,7 +344,7 @@ void LoadTableFaces(void);
 void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind);
 void UpdateBetSettings(void);
 /* Defined without parameters, though UpdateMenus passes it two */
-s32 UpdateHandicaps();
+NO_RESULT UpdateHandicaps();
 void LoadBestShotsCourseIcons(void** buffers);
 void LoadScoreLabelBuffer(void* buffer, s16 bufferKind);
 void UpdateBestShots(void);

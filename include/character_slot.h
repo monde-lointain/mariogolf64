@@ -322,7 +322,7 @@ extern const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT];
 
 void SetCharacterAlpha(s32 alpha);
 void AnimateCharacterJoints(u32 slotIndex);
-s32 FreeCharacterSlot(u32 slotIndex);
+NO_RESULT FreeCharacterSlot(u32 slotIndex);
 Boolean IsCharacterSlotBusy(u32 slotIndex);
 Boolean IsAnyCharacterSlotBusy(void);
 CharacterSlot* GetUsedCharacterSlot(u32 slotIndex);

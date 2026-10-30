@@ -2794,7 +2794,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindWallHit);
  * ball near a wall's corner is pushed straight away from the corner. With
  * checksHeight, only walls at the ball's height count, and a ball high
  * above the ground, where course y points down, is left alone. It returns
- * a value only for a ball off the ground; the s32 is there to match.
+ * a value only for a ball off the ground.
  */
 #ifdef NON_MATCHING
 s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
@@ -2972,6 +2972,8 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
     simulation->position[AXIS_X] = x;
     simulation->position[AXIS_Z] = z;
   }
+
+  return UNSET_RESULT;
 }
 
 #else

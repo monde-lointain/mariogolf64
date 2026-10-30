@@ -611,7 +611,7 @@ s32 UpdateCharacterSelect(
   SoundChannel channel;
 
   if (IsHudAnimationDone() != TRUE) {
-    return;
+    return UNSET_RESULT;
   }
 
   if (GetWipeKind() != WIPE_NONE) {
@@ -626,7 +626,7 @@ s32 UpdateCharacterSelect(
           (g_TournamentCode[1] << BITS_PER_BYTE) | g_TournamentCode[2];
     }
 
-    return;
+    return UNSET_RESULT;
   }
 
   playerIndex = g_ChoosingPlayerIndex;
@@ -752,7 +752,7 @@ s32 UpdateCharacterSelect(
           TRUE) {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         f_IsPromptShown = FALSE;
-        return;
+        return UNSET_RESULT;
       }
 
       index = character - FIRST_IMPORTED_CHARACTER;
@@ -1096,7 +1096,7 @@ s32 UpdateCharacterSelect(
     if (character >= FIRST_IMPORTED_CHARACTER) {
       if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen ==
           TRUE) {
-        return;
+        return UNSET_RESULT;
       }
 
       character =

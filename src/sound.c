@@ -536,10 +536,9 @@ void SetSoundFrequencyOffset(SoundChannel channel, f32 offset) {
 
 /*
  * Steps the fades, the character sounds and any song change, once per
- * audio frame. It returns no value; the s32 is there to match, as the
- * original seems to have declared one.
+ * audio frame
  */
-s32 UpdateAudio(void) {
+NO_RESULT UpdateAudio(void) {
   u32 frame;
   u32 frameCount;
   SoundChannel channel;

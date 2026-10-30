@@ -2634,8 +2634,7 @@ INCLUDE_ASM("asm/nonmatchings/character_slot", AnimateCharacterJoints);
 RESUME_RODATA_SECTION();
 #endif
 
-/* Returns no value, but is declared s32 because that matches */
-s32 FreeCharacterSlot(u32 slotIndex) {
+NO_RESULT FreeCharacterSlot(u32 slotIndex) {
   osSyncPrintf("D PC[%d]\n", slotIndex);
   if (slotIndex < CHARACTER_SLOT_COUNT) {
     g_CharacterSlots[slotIndex].modelIndex = NO_CHARACTER_MODEL;

@@ -115,11 +115,11 @@ extern AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
 extern u8* g_ShadowTexture;
 
 void PlaceCharacterForShot(u32 slotIndex);
-s32 ReuseLastCharacterMatrices(u32 slotIndex);
+NO_RESULT ReuseLastCharacterMatrices(u32 slotIndex);
 void SetCharacterSlotAlpha(u32 slotIndex, s32 value);
 void SetCharacterUnk188(u32 slotIndex, s32 value);
 void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 value);
-s32 SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame);
+NO_RESULT SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame);
 void ResetCharacterSlots(void);
 s32 GetCharacterBufferSize(void);
 void SetCharacterBuffer(s32 slotIndex, u8* buffer);

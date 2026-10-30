@@ -154,7 +154,7 @@ void PlacePlayersOnTee(void);
 void ShadeGround(s32);
 void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
-s32 ChooseHoleConditions(void);
+NO_RESULT ChooseHoleConditions(void);
 
 /*
  * Decodes the compressed words from stream->input to stream->inputEnd onto
@@ -756,10 +756,8 @@ void PrepareHoleScene(void) {
  * Chooses the wind, the rain and the scene's colors for the hole about to be
  * played, then its cup from the hole's cup positions. In some scenes and modes
  * the cup comes from D_80105F40 or D_800FEDD8 instead.
- *
- * Returns no value, but is declared s32 because that matches.
  */
-s32 ChooseHoleConditions(void) {
+NO_RESULT ChooseHoleConditions(void) {
   s32 cupIndex;
   s32 attemptCount;
   u32 random;

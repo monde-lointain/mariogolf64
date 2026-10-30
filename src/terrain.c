@@ -1116,9 +1116,9 @@ INCLUDE_ASM("asm/nonmatchings/terrain", GetGroundPoint);
 
 /*
  * Copies a point into the ground point, and into every tile that keeps a
- * copy of it. It returns no value; the s32 is there to match.
+ * copy of it
  */
-s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
+NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
   s32 blockIndex;
   s32 tileIndex;
   Vtx* midpoint;
@@ -1162,9 +1162,9 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
   }
 }
 
-/* SetGroundPoint for just the height and shade. It returns no value; the s32 is
- * there to match. */
-s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
+/* SetGroundPoint for just the height and shade */
+NO_RESULT SetGroundPointHeightAndShade(
+    s32 column, s32 row, s32 height, s32 shade) {
   s32 blockIndex;
   s32 tileIndex;
   Vtx* point;
@@ -1473,10 +1473,9 @@ const char* GetDebugSceneLabel(u32 scene) {
 }
 
 /*
- * Shows the debug scene menu and enters the chosen scene. It returns no
- * value; the s32 is there to match
+ * Shows the debug scene menu and enters the chosen scene
  */
-s32 UpdateDebugSceneMenu(void) {
+NO_RESULT UpdateDebugSceneMenu(void) {
   u32 selectedIndex;
   u32 i;
   s32 row;

@@ -326,7 +326,7 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane);
 
 Vtx* GetGroundPoint(u32 column, u32 row);
 Vtx* GetGridVertex(u32 column, u32 row);
-s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point);
+NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t* point);
 void PrepareHoleTriangles(void);
 Boolean IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
