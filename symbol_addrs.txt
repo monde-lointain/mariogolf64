@@ -806,6 +806,7 @@ UpdateControllerState = 0x8002A144; // type:func
 ReadControllers = 0x8002A310; // type:func
 HandleGfxRetrace = 0x8002A434; // type:func
 ResetMenuChoices = 0x8005D9A0; // type:func
+ResetMenuEntryFlags = 0x8005DAD4; // type:func
 EnterMenuAtCourseSelect = 0x8005DAFC; // type:func
 EnterMenuAtTitle = 0x8005DC50; // type:func
 EnterMenuAtRingShotExit = 0x8005DCDC; // type:func

@@ -205,7 +205,7 @@ OSMesgQueue nuGfxMesgQ BSS ALIGNED(8) = {0};
 /*
  * Whether the running wipe is the one opening onto the menu, as the Ring Shot
  * records see it: set and cleared with g_IsMenuWipeOpening, except that
- * func_8005DAD4 sets it alone
+ * ResetMenuEntryFlags sets it alone
  */
 u8 g_IsRingShotWipeOpening BSS = {0};
 OSTime __osCurrentTime BSS = {0};

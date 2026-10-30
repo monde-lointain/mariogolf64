@@ -1978,7 +1978,11 @@ void ResetMenuChoices(void) {
   f_UnreadMenuEntryFlag = 0;
 }
 
-void func_8005DAD4(void) {
+/*
+ * Clears the hole-load and menu wipe flags and sets the Ring Shot one, without
+ * picking a screen; no routine calls it
+ */
+void ResetMenuEntryFlags(void) {
   g_IsChosenHoleLoadStarted = FALSE;
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = FALSE;
