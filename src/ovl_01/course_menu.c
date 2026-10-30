@@ -174,8 +174,9 @@ static char D_802300E0_ovl_01[3][10] = {"EXP", "ｺｰｽｹﾞｯﾄ", "純ﾞ"
 static TrophyPosition D_80230100_ovl_01[COURSE_COUNT] = {
     {230, 177}, {230, 177}, {230, 177}, {236, 165}, {226, 184}, {236, 175}};
 
-static Mat4 D_8023A790_ovl_01;
-static Mat4 D_8023A7D0_ovl_01;
+/* The camera's matrices that the course wheel's points are projected with */
+static Mat4 f_WheelProjection;
+static Mat4 f_WheelView;
 static void* D_8023A810_ovl_01;
 /* The course stats' TROPHY_FRAME_BUFFER_COUNT buffers for the trophy frame */
 static void** f_StatsTrophyBuffers;
@@ -435,11 +436,11 @@ void DrawCourseStats(Gfx** displayListHead) {
   s32 step;
 
   DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
-  guPerspectiveF(D_8023A790_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
+  guPerspectiveF(f_WheelProjection, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
-  guLookAtF(D_8023A7D0_ovl_01, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE, 0.0f,
-      0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-  SetCpuProjectionF(D_8023A790_ovl_01, D_8023A7D0_ovl_01, g_Viewports);
+  guLookAtF(f_WheelView, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE, 0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f);
+  SetCpuProjectionF(f_WheelProjection, f_WheelView, g_Viewports);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
