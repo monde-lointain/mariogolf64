@@ -13,7 +13,12 @@ typedef struct
 {
     /* 0x0 */ u32 ramarray[15];
     /* 0x3C */ u32 pifstatus;
+#if defined(__GNUC__) && __GNUC__ < 3
+/* KMC GCC aligns no object past 8 bytes, and warns of asking for more */
+} OSPifRam ALIGNED(0x8);
+#else
 } OSPifRam ALIGNED(0x10);
+#endif
 
 typedef struct
 {

@@ -353,10 +353,6 @@ endif
 # main_bss.c defines libmus's bss objects too, whose types only its sources
 # declare
 $(BUILD_DIR)/src/main_bss.c.o: INCLUDES += -I$(LIBMUS_DIR)/src
-# It defines libultra's PIF RAM buffers too, whose type ultralib aligns to 16
-# bytes. KMC GCC aligns nothing past 8 and warns of it whatever the flags, as
-# it would for ultralib's own sources, which build with -w.
-$(BUILD_DIR)/src/main_bss.c.o: WARNINGS := -w
 
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)
