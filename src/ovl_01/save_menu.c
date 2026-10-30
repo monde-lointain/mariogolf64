@@ -1242,8 +1242,8 @@ void ResetSavedGameControllers(void) {
 
   f_AssignedHumanCount = 0;
   gameIndex = memory->savedGameIndex;
-  playerCount = save->savedGames[gameIndex].state.playerCount;
   savedPlayers = save->savedPlayers[gameIndex];
+  playerCount = save->savedGames[gameIndex].state.playerCount;
   f_HumanPlayerCount = save->savedGames[gameIndex].state.playerCount;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (savedPlayers[playerIndex].isComputer) {
