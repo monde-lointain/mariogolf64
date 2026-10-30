@@ -3374,6 +3374,7 @@ DrawChosenGameBoard = 0x80224AFC; // type:func segment:ovl_01
 DrawCharacterGridCursor = 0x8020CD20; // type:func segment:ovl_01
 DrawTableCursor = 0x8021640C; // type:func segment:ovl_01
 DrawCodeCursor = 0x8022B7E0; // type:func segment:ovl_01
+GetUnusedPalette = 0x8020C2D8; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01

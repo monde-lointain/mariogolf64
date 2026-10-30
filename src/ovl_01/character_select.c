@@ -1505,7 +1505,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][3], &file);
     } else {
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][(
-                        s16)func_8020C2D8_ovl_01((s16)character)],
+                        s16)GetUnusedPalette((s16)character)],
           &file);
     }
 
@@ -1528,7 +1528,9 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020BA08_ovl_01);
 #endif
 
-s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
+/* The first palette that no earlier player with the same character uses, so
+ * that players who choose one character still look different */
+s32 GetUnusedPalette(s32 choiceIndex) {
   s32 freePalette = 0;
   s32 playerIndex = 0;
   s32 sameCount = 0;
