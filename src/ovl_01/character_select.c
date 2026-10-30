@@ -39,8 +39,8 @@ enum GridMove {
   GRID_MOVE_RIGHT
 };
 
-/* The diagonals of any controller's stick that func_80209BE0 reports, each once
- * per hold of four frames */
+/* The diagonals of any controller's stick that GetStickDiagonal reports, each
+ * once per hold of four frames */
 #define STICK_DIAGONAL_NONE 0
 #define STICK_DIAGONAL_UP_LEFT 1
 #define STICK_DIAGONAL_UP_RIGHT 2
@@ -477,7 +477,12 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", MoveGridCursorDiagonal);
 #endif
 
-s32 func_80209BE0_ovl_01(void) {
+/*
+ * Returns the STICK_DIAGONAL_* direction of the controllers' sticks combined,
+ * counting only the bits of each axis that its previous reading lacked, so
+ * that a held stick isn't reported every frame.
+ */
+s32 GetStickDiagonal(void) {
   s32 stickX;
   s32 stickY;
   s8 anyStick;

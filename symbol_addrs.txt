@@ -3444,6 +3444,7 @@ LoadCourseTrophyImages = 0x8020E0AC; // type:func segment:ovl_01
 HideGameBoyCharacters = 0x80209500; // type:func segment:ovl_01
 MoveGridCursor = 0x80209568; // type:func segment:ovl_01
 MoveGridCursorDiagonal = 0x80209894; // type:func segment:ovl_01
+GetStickDiagonal = 0x80209BE0; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01
