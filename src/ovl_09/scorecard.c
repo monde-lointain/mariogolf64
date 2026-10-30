@@ -1281,8 +1281,7 @@ void DrawScorecard(Gfx** displayListHead) {
  * depends on the page shown.
  *
  * Doesn't match: the target adds each tab rectangle's top offset to the
- * scorecard's y before adding the row, where this adds the row first, and it
- * steps the texel offset one instruction later.
+ * scorecard's y before adding the row, where this adds the row first.
  */
 #ifdef NON_MATCHING
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
@@ -1363,12 +1362,12 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
         (loadHeight * (TABLE_WIDTH / 2)) - 1,
         CALC_DXT(TABLE_WIDTH, G_IM_SIZ_8b_BYTES));
     top = g_Scorecard.y + TABLE_BODY_TOP;
-    texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + TABLE_LEFT),
         QuarterPixels(row + top),
         QuarterPixels(g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH),
         QuarterPixels(row + loadHeight + top), G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
   }
 
   gDPPipeSync(gfx++);
