@@ -137,7 +137,7 @@ void DrawMenuScenery(Gfx** displayListHead);
 void DrawMenuBanner(Gfx** displayListHead);
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer);
 void DrawCharacterBoard(Gfx** displayListHead);
-void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode);
+void DrawPlayerTags(Gfx** displayListHead, u8 tagMode);
 /* The original passes these a second argument that they ignore */
 void func_8020D338_ovl_01();
 void func_8020D734_ovl_01();
@@ -1320,9 +1320,9 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   DrawCharacterBoard(&gfx);
   DrawGridFaces(&gfx, (u8)isSinglePlayer);
   if ((u8)isSinglePlayer == TRUE) {
-    func_8020C6D8_ovl_01(&gfx, 2);
+    DrawPlayerTags(&gfx, 2);
   } else {
-    func_8020C6D8_ovl_01(&gfx, 1);
+    DrawPlayerTags(&gfx, 1);
   }
 
   if ((D_8022FF07_ovl_01 == TRUE) & ((u8)isSinglePlayer == FALSE)) {
@@ -1631,8 +1631,7 @@ void DrawCharacterBoard(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* How func_8020C6D8 places the player tags. Nothing passes PLAYER_TAG_LINED_UP.
- */
+/* How DrawPlayerTags places the tags. Nothing passes PLAYER_TAG_LINED_UP. */
 #define PLAYER_TAG_LINED_UP 0
 /* The second tag then reads "Com" */
 #define PLAYER_TAG_SINGLE_PLAYER 2
@@ -1663,12 +1662,14 @@ void DrawCharacterBoard(Gfx** displayListHead) {
 #define GRID_CURSOR_SHIFT_LEFT 8
 
 /*
+ * Draws each player's tag on the cell where that player's cursor sits, then the
+ * grid cursor of the player choosing.
  * Doesn't match: the original sign-extends the cursor's x to 16 bits before
- * adding GRID_LEFT, where GCC here sees that it already fits and folds the
- * two offsets together.
+ * adding GRID_LEFT, where GCC here sees that it already fits and folds the two
+ * offsets together.
  */
 #ifdef NON_MATCHING
-void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
+void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
   MenuMemory* memory = GetMenuMemory();
   s16 tagCount = g_ChoosingPlayerIndex + 1;
   Gfx* gfx = *displayListHead;
@@ -1753,7 +1754,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C6D8_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawPlayerTags);
 #endif
 
 /*
