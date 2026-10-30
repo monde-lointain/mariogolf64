@@ -1511,7 +1511,10 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
-    bottom = CONTEST_IMAGE_CENTER_Y;
+    /* The do-while is there to match */
+    do {
+      bottom = CONTEST_IMAGE_CENTER_Y;
+    } while (0);
     for (i = 0; i != stripCount; i++) {
       LoadTextureBlock(&gfx,
           f_MovieBuffer +
@@ -1682,7 +1685,10 @@ void DrawDriveRecord(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    bottom = SHRINKING_IMAGE_CENTER_Y;
+    /* The do-while is there to match */
+    do {
+      bottom = SHRINKING_IMAGE_CENTER_Y;
+    } while (0);
     for (i = 0; i != stripCount; i++) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
@@ -1797,7 +1803,10 @@ void DrawPuttCaption(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    bottom = SHRINKING_IMAGE_CENTER_Y;
+    /* The do-while is there to match */
+    do {
+      bottom = SHRINKING_IMAGE_CENTER_Y;
+    } while (0);
     for (i = 0; i != stripCount; i++) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);

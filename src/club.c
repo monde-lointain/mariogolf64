@@ -1127,13 +1127,19 @@ void GenerateClub(s32 clubIndex) {
         }
       } else {
         shortDistance = distance;
-        shortPower = club->power[shotMode];
+        /* The do-while is there to match */
+        do {
+          shortPower = club->power[shotMode];
+        } while (0);
         if (longDistance == shortDistance) {
           break;
         }
 
         if (longPower == 0) {
-          power = shortPower * 3 / 2;
+          /* The do-while is there to match */
+          do {
+            power = shortPower * 3 / 2;
+          } while (0);
         } else {
           power = InterpolatePower(shortPower, longPower,
               (f32)(targetDistance - shortDistance) /

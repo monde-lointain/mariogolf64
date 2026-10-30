@@ -3143,7 +3143,10 @@ void DrawSliceAnimation(void) {
     PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SOUND_FULL_SCALE);
   }
 
-  sliceY = 0;
+  /* The do-while is there to match */
+  do {
+    sliceY = 0;
+  } while (0);
   for (slice = 0; slice != sliceCount; slice++) {
     y = sliceY;
     for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
@@ -3158,7 +3161,10 @@ void DrawSliceAnimation(void) {
           QuarterPixels(y + SLICE_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(g_DisplayListHead++);
-      y += SLICE_STRIP_HEIGHT;
+      /* The do-while is there to match */
+      do {
+        y += SLICE_STRIP_HEIGHT;
+      } while (0);
     }
 
     column++;

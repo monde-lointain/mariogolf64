@@ -538,9 +538,9 @@ void GetSaveDataAndMenuMemory(void) {
 /*
  * Doesn't match: GCC hoists the window's left and right edges out of the strip
  * loop and keeps centerX in a saved register, where the original works them out
- * in the loop from centerX on the stack (188 diff lines, 24 opcodes). Copying
- * the left edge through the right edge's variable stops the hoist and matches,
- * but nothing suggests the original did that.
+ * in the loop from centerX on the stack. Copying the left edge through the
+ * right edge's variable stops the hoist and matches, but nothing suggests the
+ * original did that.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
@@ -622,7 +622,13 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   buttonHalfHeight = (s32)buttonHeight / 2;
   halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
   halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
-  buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
+  /* The do-while is there to match */
+  do {
+    /* The do-while is there to match */
+    do {
+      buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
+    } while (0);
+  } while (0);
   buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
   windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;
   windowHalfHeight = (windowHalfHeight <= 0.0f) ? 1.0f : windowHalfHeight;

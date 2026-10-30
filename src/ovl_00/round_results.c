@@ -1621,7 +1621,10 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     LoadNibbleTextureBlock(&gfx, ImageTexels(f_NameplateImage), G_IM_FMT_CI,
         NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((NOTICE_NAMEPLATE_SIZE / 2) << 10) / size;
-    centerX = f_NoticeLift + NOTICE_CENTER_X;
+    /* The do-while is there to match */
+    do {
+      centerX = f_NoticeLift + NOTICE_CENTER_X;
+    } while (0);
     centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
         QuarterPixels(centerY - size), QuarterPixels(size + centerX),
@@ -1634,7 +1637,10 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
         NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((NOTICE_PORTRAIT_SIZE / 2) << 10) / size;
-    centerX = f_NoticeLift + NOTICE_CENTER_X;
+    /* The do-while is there to match */
+    do {
+      centerX = f_NoticeLift + NOTICE_CENTER_X;
+    } while (0);
     centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
         QuarterPixels(centerY - size), QuarterPixels(size + centerX),

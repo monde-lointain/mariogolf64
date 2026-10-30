@@ -500,7 +500,10 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_FRAME_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  gDPPipeSync(gfx++);
+  /* The do-while is there to match */
+  do {
+    gDPPipeSync(gfx++);
+  } while (0);
   gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
       QuarterPixels(left + PLACE_LABEL_SIZE),
       QuarterPixels(top + PLACE_LABEL_SIZE), G_TX_RENDERTILE, 0, 0,

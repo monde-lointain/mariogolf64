@@ -1938,14 +1938,23 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   }
 
   if (g_GameState.isMiniGolf) {
-    baseColumn = (x >> MINI_GOLF_TILE_X_SHIFT) * GROUND_TILE_POINT_SPAN;
-    baseRow = (z >> MINI_GOLF_TILE_Z_SHIFT) * GROUND_TILE_POINT_SPAN;
+    /* The do-while is there to match */
+    do {
+      baseColumn = (x >> MINI_GOLF_TILE_X_SHIFT) * GROUND_TILE_POINT_SPAN;
+    } while (0);
+    /* The do-while is there to match */
+    do {
+      baseRow = (z >> MINI_GOLF_TILE_Z_SHIFT) * GROUND_TILE_POINT_SPAN;
+    } while (0);
     slotColumn =
         PointSlot(x >> (MINI_GOLF_TILE_X_SHIFT - TILE_POINT_SPAN_SHIFT));
     slotRow = PointSlot(z >> (MINI_GOLF_TILE_Z_SHIFT - TILE_POINT_SPAN_SHIFT));
   } else {
     baseColumn = (x >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN;
-    baseRow = (z >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN;
+    /* The do-while is there to match */
+    do {
+      baseRow = (z >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN;
+    } while (0);
     slotColumn = PointSlot(x >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
     slotRow = PointSlot(z >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
   }

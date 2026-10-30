@@ -540,7 +540,10 @@ void StartSwingTrail(s32 kind) {
     f_SwingTrailAlpha = SWING_TRAIL_FULL_ALPHA;
     f_SwingTrailLength = 0;
     f_SwingTrailKind = kind;
-    f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES;
+    /* The do-while is there to match */
+    do {
+      f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES;
+    } while (0);
     for (i = 0; i != f_SwingTrailSampleCount; i++) {
       GetCharacterPointPosition(0, SWING_TRAIL_OUTER_POINT, point);
       samples[0][i] = point[AXIS_X];
