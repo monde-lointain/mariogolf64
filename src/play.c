@@ -780,7 +780,7 @@ void func_8024407C(void);
 void func_80242074(void);
 void func_80205C78(void);
 void func_801FDA04(void);
-void func_8005D1E4(void);
+void RememberPlayedHole(void);
 void EnterMenuAtCourseSelect(void);
 void EnterMenuAtTitle(void);
 void EnterMenuAtModeSelect(void);
@@ -1306,7 +1306,7 @@ void UpdatePlay(void) {
             } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
               if (f_PlayExit == PLAY_EXIT_NONE) {
                 g_GameState.holeIndex %= RING_SHOT_HOLE_COUNT;
-                func_8005D1E4();
+                RememberPlayedHole();
               }
 
               if (f_PlayExit == PLAY_EXIT_NONE) {

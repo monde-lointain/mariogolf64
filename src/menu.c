@@ -1647,7 +1647,8 @@ void InvalidateBrokenRingShotRecords(void) {
 INCLUDE_ASM("asm/nonmatchings/menu", InvalidateBrokenRingShotRecords);
 #endif
 
-void func_8005D1E4(void) {
+/* Keeps the hole and course being played in the menu memory */
+void RememberPlayedHole(void) {
   MenuMemory* memory;
 
   memory = GetMenuMemory();
