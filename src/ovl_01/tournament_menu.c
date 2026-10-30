@@ -300,8 +300,8 @@ static u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT]
   { 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z' }
 };
 // clang-format on
-/* Read by no routine; the first 14 values of main_menu.c's D_8022F8F4 */
-static s32 D_802310FC_ovl_01[14] = {
+/* Read by no routine; f_MenuCharacterChoices' first 14 values */
+static s32 f_TournamentCharacterChoices[14] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13};
 /* The tournament code byte being edited */
 static s32 D_80231134_ovl_01 = 0;

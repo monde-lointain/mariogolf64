@@ -678,7 +678,8 @@ static s32 D_8022F8E0_ovl_01 = 0;
 /* Each player's sound pan, by the player count */
 static u8 f_PlayerSoundPans[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {127, 0, 0, 0}, {15, 240, 0, 0}, {15, 127, 240, 0}, {15, 85, 170, 240}};
-static s32 D_8022F8F4_ovl_01[] = {
+/* The CharacterChoice of each CharacterId */
+static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 /* Read by no routine */
 static s32 D_8022F93C_ovl_01 = 0;
@@ -1766,7 +1767,7 @@ void SetUpChosenGame(void) {
     player->characterIndex = D_8012F480[index];
     player->controllerIndex = g_PlayerControllerIndices[index];
     sprintf(player->name, D_80231514_ovl_01,
-        g_MenuCharacterNames[D_8022F8F4_ovl_01[D_8012F480[index]]]);
+        g_MenuCharacterNames[f_MenuCharacterChoices[D_8012F480[index]]]);
     if (D_8012F480[index] >= CHARACTER_KID) {
       row = D_801323A0.characterRows[index];
       column = D_801323A0.characterColumns[index];
@@ -1779,7 +1780,7 @@ void SetUpChosenGame(void) {
     } else {
       player->gameBoyCharacterIndex = -1;
       sprintf(player->name, D_80231514_ovl_01,
-          g_MenuCharacterNames[D_8022F8F4_ovl_01[D_8012F480[index]]]);
+          g_MenuCharacterNames[f_MenuCharacterChoices[D_8012F480[index]]]);
     }
 
     if (player->controllerIndex == MAXCONTROLLERS) {

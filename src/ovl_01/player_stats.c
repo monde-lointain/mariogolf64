@@ -422,7 +422,8 @@ static s32 D_80230A30_ovl_01[2] = {0, 0};
 /* The angle, in radians, of each corner's color cycle */
 static f32 f_BestShotsCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
-static s32 D_80230A48_ovl_01[CHARACTER_COUNT] = {
+/* The CharacterChoice of each CharacterId */
+static s32 f_StatsCharacterChoices[CHARACTER_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 
 /* The camera and placement that DrawHandicaps draws each golfer with */
@@ -2684,7 +2685,7 @@ void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
       SetUpTextDrawing(&gfx);
       SetTextColor(&gfx, 255, 255, 255);
       sprintf(g_PrintBuffer, D_802319E0_ovl_01,
-          g_MenuCharacterNames[D_80230A48_ovl_01[character]]);
+          g_MenuCharacterNames[f_StatsCharacterChoices[character]]);
       DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y,
           g_PrintBuffer);
       gDPPipeSync(gfx++);

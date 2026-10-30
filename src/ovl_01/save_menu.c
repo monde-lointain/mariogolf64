@@ -205,8 +205,8 @@ static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     MODE_ICON_UNK9, MODE_ICON_MINI_GOLF};
 /* Read by no routine */
 static s32 D_80230BDC_ovl_01[4] = {0, 0, 0, 0};
-/* Read by no routine; the values of main_menu.c's D_8022F8F4 */
-static s32 D_80230BEC_ovl_01[18] = {
+/* Read by no routine; the values of main_menu.c's f_MenuCharacterChoices */
+static s32 f_SavedGamesCharacterChoices[18] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 /* The angle, in radians, of the sine wave that bobs the saved games' boards */
 static f32 f_BoardBobPhase = 0.0f;

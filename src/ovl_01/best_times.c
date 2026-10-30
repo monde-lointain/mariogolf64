@@ -81,7 +81,7 @@ static s32 D_80230134_ovl_01 = 0;
 static s32 D_80230138_ovl_01 = 0;
 /* Where each character's face is in D_8023AA44's image, and its name in
  * g_MenuCharacterNames */
-static s32 D_8023013C_ovl_01[CHARACTER_COUNT] = {
+static s32 f_BestTimesCharacterChoices[CHARACTER_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17};
 
 static Mat4 D_8023A9C0_ovl_01;
@@ -445,7 +445,7 @@ void func_802144E4_ovl_01(Gfx** displayListHead, s32 left, s32 top,
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023AA44_ovl_01)));
   gDPLoadTextureBlock(gfx++,
       TextureAddress(LargeImageTexels(D_8023AA44_ovl_01) +
-          (D_8023013C_ovl_01[character] * FACE_WIDTH * FACE_HEIGHT)),
+          (f_BestTimesCharacterChoices[character] * FACE_WIDTH * FACE_HEIGHT)),
       G_IM_FMT_CI, G_IM_SIZ_8b, FACE_WIDTH, FACE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -458,7 +458,7 @@ void func_802144E4_ovl_01(Gfx** displayListHead, s32 left, s32 top,
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     sprintf(g_PrintBuffer, "%s",
-        g_MenuCharacterNames[D_8023013C_ovl_01[character]]);
+        g_MenuCharacterNames[f_BestTimesCharacterChoices[character]]);
     DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y,
         g_PrintBuffer);
     gDPPipeSync(gfx++);
