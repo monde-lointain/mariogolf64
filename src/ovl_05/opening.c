@@ -3006,17 +3006,14 @@ void LoadNameLogo(s32 logoIndex, s32 slot) {
  * Draws the shown name logos in four strips each. Until a logo flips back up,
  * its strips are drawn in reverse order with their rows mirrored, which turns
  * it upside down.
- *
- * Doesn't match: only the stack slots differ. The pointers of the second
- * and third commands swap slots, as in the opening's sparks.
  */
-#ifdef NON_MATCHING
 void DrawNameLogos(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 xEdges[2]; /* Left and right */
   s32 yEdges[NAME_LOGO_STRIP_COUNT + 1]; /* Top to bottom of each strip */
   s32 strip;
   s32 slot;
+  Gfx* cycleTypeCommand;
   s32 stripHeight;
   s32 texelsOffset;
 
@@ -3024,7 +3021,9 @@ void DrawNameLogos(Gfx** displayListHead) {
     if (f_IsNameSlotShown[slot]) {
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
-      gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+      /* The original takes the command's slot first, which orders the stack */
+      cycleTypeCommand = gfx++;
+      gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -3117,9 +3116,6 @@ void DrawNameLogos(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawNameLogos);
-#endif
 
 /* Steps the shown name logos' animations: each unfolds, flips over, then
  * stays */
