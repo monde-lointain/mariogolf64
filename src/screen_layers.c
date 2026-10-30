@@ -797,6 +797,9 @@ void HideHalfTurn(void) {
   f_IsHalfTurnShown = FALSE;
 }
 
+void MarkHalfTurnCircle(
+    u32* texelPairs, s32 centerColumn, s32 centerRow, s32 radius);
+
 /*
  * Changes the alpha bits of the Half Turn picture's texels on a circle
  * around the given texel pair, using the midpoint circle algorithm. Each

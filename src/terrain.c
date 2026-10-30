@@ -309,6 +309,8 @@ void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow);
 void BuildAllTileMidpoints(void);
 s32 GetTerrainHeight(s32 x, s32 z);
 
+s32 GetTerrainCode(s32 column, s32 row);
+
 /*
  * Returns the terrain code at a code column and row, clamped to the grid,
  * or -1 where there is none

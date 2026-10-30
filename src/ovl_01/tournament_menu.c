@@ -1352,6 +1352,8 @@ void UpdateClubTournament(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", UpdateClubTournament);
 #endif
 
+s32 IsClubCharacterChoosable(void);
+
 /*
  * Runs the club tournament's details window: left and right pick Yes or No, A
  * on Yes enters the tournament and A on No or B goes back to the code
@@ -1555,6 +1557,8 @@ void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawClubNumber);
 #endif
+
+void DrawCodeEntryBar(Gfx** displayListHead);
 
 void DrawClubTournament(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

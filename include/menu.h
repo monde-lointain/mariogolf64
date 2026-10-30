@@ -339,6 +339,7 @@ enum MenuSign {
 };
 
 void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign);
+s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
 
 /*
  * The cursor of the character table and the player stats: a quad whose corners

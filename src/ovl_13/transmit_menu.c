@@ -670,6 +670,8 @@ void FreeTransmitMenu(void) {
   }
 }
 
+void ShowTransferError(u32 result);
+
 /*
  * Runs the Bring Characters screen. After a pak check it reads the cartridges'
  * characters, lets the player choose one and, once all four slots are full, the
@@ -2222,6 +2224,10 @@ void DrawSendExperienceScreen(
   *displayListHead = displayList;
 }
 
+void DrawAccessingSign(Gfx** displayListHead);
+void DrawNotice(Gfx** displayListHead);
+void DrawPressingHand(Gfx** displayListHead);
+
 /* Whether DrawTransmitMenu shows the transfer mode's options on a screen */
 #define AreOptionsShown(screen) \
   ((screen) == TRANSMIT_SCREEN_OPTIONS || \
@@ -2758,6 +2764,8 @@ FAILED:
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   return STATUS_CHECK_FAILED;
 }
+
+void BuildStatusData(u8* status);
 
 /*
  * Marks the chosen cartridge's save as holding a status and writes the status

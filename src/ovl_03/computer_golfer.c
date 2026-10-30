@@ -985,6 +985,8 @@ s32 PlanCupDistance(s32 unused) {
           HEIGHT_DISTANCE_FRACTION);
 }
 
+ClubType ChooseApproachClub(s32* targetX, s32* targetZ);
+
 /* Shots from farther than this are long shots */
 #define APPROACH_RANGE (60 * UNITS_PER_YARD)
 /* How much farther than the cup distance a putt is played in the rain */
@@ -2735,6 +2737,8 @@ enum ClubChanceSet {
   CLUB_CHANCE_SET_FOLLOWING_WIND,
   CLUB_CHANCE_SET_HEAD_WIND
 };
+
+s32 RollClubKindChance(s32 chanceSetIndex);
 
 /*
  * Chooses the offset to give the planned shot, from the lie, the golfer's

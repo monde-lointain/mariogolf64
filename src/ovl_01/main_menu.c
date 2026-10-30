@@ -25,6 +25,7 @@
 #include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
+#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "help_board.h"

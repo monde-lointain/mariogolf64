@@ -380,6 +380,8 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", OpenScorecard);
 #endif
 
+void FreeScorecard(void);
+
 /*
  * Closes the scorecard: frees the images that OpenScorecard loaded for the
  * game mode and clears its text slots. It stops any rumble even if the
@@ -857,6 +859,8 @@ void SetScorecardState(s32 state) {
   g_Scorecard.stateTime = 0;
 }
 
+s32 TallyScorecardSkins(void);
+
 /* Slides the scorecard in or out, tallies the last hole, and animates the faces
  * on it */
 void AnimateScorecard(void) {
@@ -958,6 +962,8 @@ void AnimateScorecard(void) {
       break;
   }
 }
+
+void TurnScorecardPage(u16 buttons);
 
 /*
  * Left and right on the control pad turn the pages, round from the last to the

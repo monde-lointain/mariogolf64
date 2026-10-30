@@ -2460,6 +2460,13 @@ s32 GetCoursePaintLogic(CourseRecordIndex course) {
   return PAINT_LOGIC_TOAD_HIGHLANDS;
 }
 
+void ClearHoleBuild(void);
+void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind);
+void ReadBillboards(void);
+void ReadGridVertices(void);
+void ReadHoleTriangles(void);
+void ReadTileMidpoints(void);
+
 /* Does nothing; the course and hole are not read */
 void FinishHolePoints(CourseRecordIndex course, s32 hole) {}
 
@@ -2661,6 +2668,11 @@ void MoveRingsToEnd(void) {
     }
   }
 }
+
+void ClearBillboards(void);
+void ClearHoleTriangles(void);
+void ClearTileBorders(void);
+void ResetBuildBuffer(void);
 
 /* Clears everything a hole is built into */
 void ClearHoleBuild(void) {
@@ -2960,6 +2972,10 @@ void ReadTileUnk992s(void) {
     ReadFileBytes(&g_WorkArea.hole.tiles[i].unk992, sizeof(u16));
   }
 }
+
+void ReadVertexX(s16* coord, s32 flags);
+void ReadVertexY(s16* coord, s32 flags);
+void ReadVertexZ(s16* coord, s32 flags);
 
 /*
  * Reads the grid vertices from the hole's vertex file. A vertex flagged

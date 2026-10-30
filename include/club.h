@@ -138,6 +138,7 @@ Club* GetClub(u32 clubIndex);
 Club* GetSelectedClub(void);
 s32 GetSelectedShotDistance(void);
 s32 GetSelectedShotWorldDistance(void);
+s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo* info);
 s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds);
 s32 GetLieRating(Club* club, Surface surface, ShotMode shotMode);
 void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range);

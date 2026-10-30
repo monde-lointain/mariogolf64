@@ -1118,6 +1118,8 @@ void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   *displayListHead = gfx;
 }
 
+void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank);
+
 /* Ranks from this one draw a banner instead */
 #define RANK_BANNER 100
 #define RANK_BANNER_WIDTH 96

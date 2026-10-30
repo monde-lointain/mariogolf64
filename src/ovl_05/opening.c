@@ -14,6 +14,7 @@
 #include "character_slot.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
+#include "debug_text.h"
 #include "effects.h"
 #include "functions.h"
 #include "game.h"
@@ -814,6 +815,8 @@ void PlayOpeningAmbientSounds(void) {
   }
 }
 
+void LoadOpeningLogo(void);
+
 void LoadOpening(void) {
   EncodedAsset asset;
   s32 bufferIndex;
@@ -1361,6 +1364,10 @@ void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);
 Boolean IsDonkeyKongUnlocked(void);
 void func_80206AA4_ovl_05(BallSimulation* simulation);
+void AnimateNameLogos(void);
+void LoadNameLogo(s32 logoIndex, s32 slot);
+void MoveLakitu(void);
+
 void func_8020A488_ovl_05(
     BallSimulation* simulation, s32 arg1, ShotLaunch* arg2);
 

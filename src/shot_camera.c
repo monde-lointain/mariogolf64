@@ -625,6 +625,9 @@ void EndFlightCamera(void) {
   }
 }
 
+Boolean IsCupPassPoint(s32 cupDistance, s32 height);
+s32 RandomBelow(s32 limit);
+
 /* Random yaws come in steps of a 32768th of a turn */
 #define RANDOM_YAW_RANGE 0x7FFF
 /* The shortest shot length that the cameras work with */

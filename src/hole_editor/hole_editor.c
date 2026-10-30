@@ -798,6 +798,8 @@ void func_8040000C_hole_editor(void) {
       (corner->v.ob[AXIS_Z] + oppositeCorner->v.ob[AXIS_Z]) / 2;
 }
 
+s32 func_804066C8_hole_editor(s32 column, s32 row);
+
 /*
  * SCENE_POINT_EDITOR's ground point editor. The control pad moves the cursor
  * over the ground points, and the C-buttons move the point and its texture
@@ -1425,6 +1427,8 @@ void func_80400FBC_hole_editor(void) {
       (sin(f_HolePointCameraPitch) * (g_MapCamera.view.zoom * cameraDistance)) +
       g_MapCamera.view.lookAt[AXIS_Y];
 }
+
+void func_804079B8_hole_editor(void);
 
 /*
  * Scene SCENE_TRIANGLES's editor for the hole triangles. On the editor pad,

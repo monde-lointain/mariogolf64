@@ -1807,6 +1807,8 @@ void DrawStaffRoll(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
+void MeasureStaffLine(s32 lineIndex, s32* width, s32* height);
+
 /* Gives the width of the staff text's line; every line is given no height */
 #ifdef NON_MATCHING
 void MeasureStaffLine(s32 lineIndex, s32* width, s32* height) {

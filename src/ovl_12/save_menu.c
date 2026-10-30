@@ -544,6 +544,8 @@ void CloseSaveMenu(void) {
       4, 0, 0, 0, 0, 0);
 }
 
+void AnimateModeIcons(Boolean isImmediate);
+
 /*
  * Every few frames, or at once when told to, shows the next frame of the
  * chosen saved game's mode icon and the first frame of the others. Each

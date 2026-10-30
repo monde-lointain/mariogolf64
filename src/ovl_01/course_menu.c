@@ -656,6 +656,9 @@ void DrawStatsPanel(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
+void DrawPercentMark(Gfx** displayListHead, s16 x, s16 y);
+void DrawYardMark(Gfx** displayListHead, s16 x, s16 y);
+
 /*
  * Draws the statistic's figure for the chosen course, or for all courses on the
  * totals, on the panel's row, with its unit; nothing shows before any round has

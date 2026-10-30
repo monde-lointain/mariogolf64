@@ -1660,6 +1660,8 @@ Boolean HasPlanTime(s32 timeBudget) {
 
 s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 
+void PickStartingClub(HoleSetup* hole);
+
 /*
  * Picks the club and the shot mode that the shot starts with. On a green, it is
  * the putter, in the shortest putt mode that reaches the cup. Elsewhere, it is

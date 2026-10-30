@@ -800,6 +800,8 @@ void DrawRingShotRecords(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawRingShotRecords);
 #endif
 
+s32 IsRingShotRecorded(RingShotRecord* record);
+
 /*
  * Reads the save data from SRAM and lists the Ring Shot records that hold a
  * recording, moving the chosen replay onto the last of them if its own is

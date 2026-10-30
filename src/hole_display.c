@@ -918,6 +918,8 @@ void BlendSkyColors(void) {
       ((to->fogFar - from->fogFar) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
 }
 
+void InitSkyColors(void);
+
 /*
  * Sets the sky up for the hole's scene color index: its vertices' colors, the
  * blend between times of day that BlendSkyColors steps through, and
@@ -2174,6 +2176,8 @@ void StartHudAnimation(s32 animation) {
   f_HudAnimationFrame = 0;
 }
 
+void DrawFadeAnimation(Gfx** displayListHead);
+
 void HandleFrameBufferSwap(void) {}
 
 /*
@@ -2811,6 +2815,8 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTileAnimation);
  * point */
 #define LOWER_TILE_TEXCOORD_INSET 8
 static Mtx f_TurnAwayMatrices[MATRIX_BUFFER_COUNT];
+
+void DrawTurnAwayAnimation(void);
 
 /*
  * Draws HUD_ANIMATION_TURN_AWAY.
