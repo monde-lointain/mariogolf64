@@ -3015,7 +3015,11 @@ void UpdateMiniGolfCourseSelect(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", UpdateMiniGolfCourseSelect);
 #endif
 
-void func_801F9BCC_ovl_01(void) {
+/*
+ * A screen that no menu screen dispatches to: A leaves the menu to continue
+ * the saved game of Stroke, and B goes back to the title
+ */
+void UpdateUnusedStrokeStart(void) {
   if (IsHudAnimationDone() == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
       PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
