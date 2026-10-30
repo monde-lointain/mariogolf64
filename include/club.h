@@ -127,12 +127,8 @@ enum ClubTest {
 /* Set while GenerateClub or GetPuttPower test-fires a club */
 extern s8 g_ClubTestMode;
 
-/* A selection for StepToClubChoice to move to */
-typedef struct ClubChoice {
-  /* 0x00 */ u8 unk0[0xC];
-  /* 0x0C */ ShotMode shotMode;
-  /* 0x10 */ s32 clubSlot;
-} ClubChoice;
+/* current_shot.h includes this header, so it can't be included here */
+struct CurrentShot;
 
 const ClubParameters* GetClubParameters(s32 clubIndex);
 s32 GetShotDistance(Club* club, u32 shotMode);
@@ -152,6 +148,6 @@ void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range);
 void GetLieSpan(Club* club, Surface surface, s32* span, ShotMode shotMode);
 void HandleClubInput(void);
 void HandleShotModeInput(void);
-s32 StepToClubChoice(ClubChoice* choice);
+s32 StepToClubChoice(struct CurrentShot* choice);
 
 #endif

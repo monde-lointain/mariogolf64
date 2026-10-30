@@ -1631,7 +1631,7 @@ void GetLieSpan(Club* club, Surface surface, s32* span, ShotMode shotMode) {
  * choice is selected.
  */
 #ifdef NON_MATCHING
-s32 StepToClubChoice(ClubChoice* choice) {
+s32 StepToClubChoice(CurrentShot* choice) {
   Boolean hasStepped = FALSE;
   s32 slot;
 
