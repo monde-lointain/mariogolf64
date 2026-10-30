@@ -459,7 +459,7 @@ enum TableBuffer {
   TABLE_BUFFER_STAR
 };
 
-/* The buffers that func_8020E0AC keeps, by the kind its caller gives */
+/* The buffers LoadCourseTrophyImages keeps, by the kind its caller gives */
 enum CourseBuffer {
   COURSE_BUFFER_FIRST = 1,
   COURSE_BUFFER_SECOND,

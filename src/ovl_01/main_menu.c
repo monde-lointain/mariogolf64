@@ -350,7 +350,7 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind);
 void func_8020B3CC_ovl_01(void);
 void func_8020B438_ovl_01(void);
 void LoadCourseStatsIcons(void** buffers);
-void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind);
+void LoadCourseTrophyImages(void** buffers, s32 requestedKind);
 void LoadCourseMenuBuffer(void* buffer, s16 bufferKind);
 void UpdateCourseStats(void);
 void LoadBestTimesCourseIcons(void** buffers);
@@ -1541,7 +1541,7 @@ void UpdateMenus(void) {
         }
 
         LoadCourseStatsIcons(g_MenuIconImages[0]);
-        func_8020E0AC_ovl_01(D_800FF4C4, COURSE_BUFFER_FIRST);
+        LoadCourseTrophyImages(D_800FF4C4, COURSE_BUFFER_FIRST);
         LoadCourseMenuBuffer(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
         LoadCourseMenuBuffer(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
         LoadCourseMenuBuffer(

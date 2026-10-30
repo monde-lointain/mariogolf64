@@ -29,8 +29,8 @@
 /* The images of g_CourseIconAssets that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
 
-/* func_8020E0AC reads the chosen course's first image into two buffers, and its
- * three files */
+/* LoadCourseTrophyImages reads the chosen course's first image into two
+ * buffers, and its three files */
 #define COURSE_IMAGE_COPY_COUNT 2
 
 /* DrawCourseBanner squeezes the banner's strips under the course menu's title,
@@ -201,7 +201,11 @@ void LoadCourseStatsIcons(void** buffers) {
   }
 }
 
-void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind) {
+/*
+ * Keeps the buffers as the kind's set, then reads the chosen course's first
+ * trophy image into both of them and the trophy's three place palettes
+ */
+void LoadCourseTrophyImages(void** buffers, s32 requestedKind) {
   EncodedAsset asset;
   AssetFile file;
   s8 bufferKind = requestedKind;
