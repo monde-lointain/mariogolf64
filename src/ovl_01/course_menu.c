@@ -527,7 +527,7 @@ void DrawCourseStats(Gfx** displayListHead) {
                                                : memory->statsCourse;
   DrawCourseBanner(&gfx, 0, image);
   DrawStatsPanel(&gfx);
-  func_8020FEF8_ovl_01(&gfx);
+  DrawStatsBadgeCount(&gfx);
   func_80210190_ovl_01(&gfx);
   func_802104F0_ovl_01(&gfx);
   gDPPipeSync(gfx++);
@@ -774,10 +774,14 @@ void DrawPercentMark(Gfx** displayListHead, s16 x, s16 y) {
   *displayListHead = gfx;
 }
 
-/* Doesn't match: the original keeps the badge count in a1 and copies it to s1
- * after counting */
+/*
+ * Draws the spinning badge and how many of the course's holes, or of every
+ * course's on the totals, have a birdie badge.
+ * Doesn't match: the original keeps the badge count in a1 and copies it to s1
+ * after counting
+ */
 #ifdef NON_MATCHING
-void func_8020FEF8_ovl_01(Gfx** displayListHead) {
+void DrawStatsBadgeCount(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
@@ -832,7 +836,7 @@ void func_8020FEF8_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020FEF8_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsBadgeCount);
 #endif
 
 /*
