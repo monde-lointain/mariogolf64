@@ -96,7 +96,7 @@
  */
 #define OPTIONS_ARROWS_OFFSET 0x3408
 #define OPTIONS_SHADOW_OFFSET 0x3830
-/* Where the options' lit values follow their lit labels in D_8012D420 */
+/* Where the options' lit values follow their lit labels in g_MenuLabelImages */
 #define OPTION_VALUES_OFFSET 0x3228
 
 /* Where the course select's images follow the sky in g_MenuCourseSceneryAsset
@@ -122,7 +122,7 @@
 #define LABEL_SHRINKING 1
 
 /* The title screen's labels, 128 by 20 each, plain in D_801B5CD0 and lit in
- * D_8012D420 */
+ * g_MenuLabelImages */
 #define TITLE_LABEL_COUNT 7
 #define TITLE_LABEL_WIDTH 128
 #define TITLE_LABEL_HEIGHT 20
@@ -1127,12 +1127,12 @@ void UpdateMenus(void) {
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_OPTIONS_LABELS, &asset);
-        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuLabelImages[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_OPTIONS_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_OPTION_VALUES, &asset);
         ReadEncodedAsset(
-            ImageAt(D_8012D420[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET),
+            ImageAt(g_MenuLabelImages[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET),
             &asset);
         f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
@@ -1168,7 +1168,7 @@ void UpdateMenus(void) {
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
-        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuLabelImages[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
@@ -1187,7 +1187,7 @@ void UpdateMenus(void) {
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
-        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuLabelImages[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
@@ -1252,7 +1252,7 @@ void UpdateMenus(void) {
             CHARACTER_SELECT_BUFFER_BOARD);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        LoadCharacterSelectBuffer(D_8012D420[D_8022BE8E_ovl_01],
+        LoadCharacterSelectBuffer(g_MenuLabelImages[D_8022BE8E_ovl_01],
             CHARACTER_SELECT_BUFFER_PLAYER_LABELS);
         LoadCharacterSelectBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], CHARACTER_SELECT_BUFFER_CURSOR_BOX);
@@ -1273,7 +1273,7 @@ void UpdateMenus(void) {
             CHARACTER_SELECT_BUFFER_BOARD);
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
-        LoadCharacterSelectBuffer(D_8012D420[D_8022BE8E_ovl_01],
+        LoadCharacterSelectBuffer(g_MenuLabelImages[D_8022BE8E_ovl_01],
             CHARACTER_SELECT_BUFFER_PLAYER_LABELS);
         LoadCharacterSelectBuffer(
             D_801B5CD0[D_8022BE90_ovl_01], CHARACTER_SELECT_BUFFER_CURSOR_BOX);
@@ -1311,7 +1311,7 @@ void UpdateMenus(void) {
         LoadSaveGameBuffer(D_800FBE30[1], SAVE_GAME_BUFFER_SECOND_BOARD);
         LoadSaveGameBuffer(D_800FC6A0, SAVE_GAME_BUFFER_THIRD_BOARD);
         LoadSaveGameBuffer(
-            D_8012D420[D_8022BE8E_ovl_01], SAVE_GAME_BUFFER_COURSE);
+            g_MenuLabelImages[D_8022BE8E_ovl_01], SAVE_GAME_BUFFER_COURSE);
         LoadSaveGameBuffer(D_800FF4C4[0], SAVE_GAME_BUFFER_CHOSEN_COURSE);
         D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
         D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
@@ -1327,7 +1327,7 @@ void UpdateMenus(void) {
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_MAIN_LABELS, &asset);
-        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuLabelImages[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_MAIN_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         f_MenuBoardImageIndex ^= 1;
@@ -1339,7 +1339,7 @@ void UpdateMenus(void) {
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_MAIN_LABELS, &asset);
-        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuLabelImages[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_MAIN_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         f_MenuBoardImageIndex ^= 1;
@@ -1357,7 +1357,7 @@ void UpdateMenus(void) {
         LoadCodeEntryBuffer(
             g_MenuBoardImages[f_MenuBoardImageIndex], CODE_ENTRY_BUFFER_BAR);
         LoadCodeEntryBuffer(
-            D_8012D420[D_8022BE8E_ovl_01], CODE_ENTRY_BUFFER_GLYPHS);
+            g_MenuLabelImages[D_8022BE8E_ovl_01], CODE_ENTRY_BUFFER_GLYPHS);
         LoadCodeEntryBuffer(D_800FBE30[0], CODE_ENTRY_BUFFER_POINTING_HAND);
         LoadCodeEntryBuffer(D_800FBE30[1], CODE_ENTRY_BUFFER_CURSOR_BOX);
         LoadTournamentBuffer(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
@@ -1374,7 +1374,7 @@ void UpdateMenus(void) {
           D_8022BE8E_ovl_01 ^= 1;
           D_8022BE90_ovl_01 ^= 1;
           OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
-          ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+          ReadEncodedAsset(g_MenuLabelImages[D_8022BE8E_ovl_01], &asset);
           OpenEncodedAsset(ASSET_TITLE_LABELS_DIM, &asset);
           ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
           OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
@@ -1401,7 +1401,7 @@ void UpdateMenus(void) {
         D_8022BE8E_ovl_01 ^= 1;
         D_8022BE90_ovl_01 ^= 1;
         OpenEncodedAsset(ASSET_CLUBHOUSE_LABELS, &asset);
-        ReadEncodedAsset(D_8012D420[D_8022BE8E_ovl_01], &asset);
+        ReadEncodedAsset(g_MenuLabelImages[D_8022BE8E_ovl_01], &asset);
         OpenEncodedAsset(ASSET_CLUBHOUSE_LABELS_DIM, &asset);
         ReadEncodedAsset(D_801B5CD0[D_8022BE90_ovl_01], &asset);
         f_MenuBoardImageIndex ^= 1;
@@ -1488,8 +1488,8 @@ void UpdateMenus(void) {
         LoadPlayerStatsBuffer(
             D_800FF180[1], PLAYER_STATS_BUFFER_HANDICAP_PLAQUE);
         D_8022BE8E_ovl_01 ^= 1;
-        LoadPlayerStatsBuffer(
-            D_8012D420[D_8022BE8E_ovl_01], PLAYER_STATS_BUFFER_BET_LABELS);
+        LoadPlayerStatsBuffer(g_MenuLabelImages[D_8022BE8E_ovl_01],
+            PLAYER_STATS_BUFFER_BET_LABELS);
         LoadPlayerStatsBuffer(D_8012D3AC, PLAYER_STATS_BUFFER_BRICK_WALL);
         LoadPlayerStatsBuffer(
             D_800FBE30[0], PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS);
@@ -1564,8 +1564,8 @@ void UpdateMenus(void) {
         D_8022BE90_ovl_01 ^= 1;
         LoadCourseMenuBuffer(
             D_801B5CD0[D_8022BE8E_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
-        LoadScoreLabelBuffer(
-            D_8012D420[D_8022BE90_ovl_01], SCORE_LABEL_BUFFER_CURSOR_BOX);
+        LoadScoreLabelBuffer(g_MenuLabelImages[D_8022BE90_ovl_01],
+            SCORE_LABEL_BUFFER_CURSOR_BOX);
         LoadScoreLabelBuffer(g_NamePlateImage, SCORE_LABEL_BUFFER_NAME_PLATE);
         LoadScoreLabelBuffer(D_800FBE30[0], SCORE_LABEL_BUFFER_LABELS);
         ReadBestShots();
@@ -1582,8 +1582,8 @@ void UpdateMenus(void) {
             D_801B5CD0[D_8022BE90_ovl_01], COURSE_MENU_BUFFER_LARGE_DIGITS);
         LoadRingShotRecordBuffer(
             g_NamePlateImage, RING_SHOT_RECORD_BUFFER_UNREAD);
-        LoadRingShotRecordBuffer(
-            D_8012D420[D_8022BE8E_ovl_01], RING_SHOT_RECORD_BUFFER_RAINBOW_BOX);
+        LoadRingShotRecordBuffer(g_MenuLabelImages[D_8022BE8E_ovl_01],
+            RING_SHOT_RECORD_BUFFER_RAINBOW_BOX);
         LoadRingShotRecordBuffer(
             D_8010526C[0], RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS);
         LoadRingShotCourseIcons(D_801049A0[0]);
@@ -4415,8 +4415,8 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
     }
   }
 
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress(ImageBody(D_8012D420[D_8022BE8E_ovl_01])));
+  gDPLoadTLUT_pal16(gfx++, 0,
+      TextureAddress(ImageBody(g_MenuLabelImages[D_8022BE8E_ovl_01])));
   for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
     if (IsChosenTitleLabel(labelIndex)) {
       if (labelIndex == TITLE_LABEL_SAVED_GAMES &&
@@ -4428,7 +4428,7 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
 
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(
-              ImageTexels(D_8012D420[D_8022BE8E_ovl_01]) + labelOffset),
+              ImageTexels(g_MenuLabelImages[D_8022BE8E_ovl_01]) + labelOffset),
           G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -4488,7 +4488,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
  */
 
 /* The STATUS, HOW TO PLAY, CODE ENTRY and OPTIONS labels, 128 by 20 each, plain
- * in D_801B5CD0 and lit in D_8012D420 */
+ * in D_801B5CD0 and lit in g_MenuLabelImages */
 #define MAIN_CHOICE_LABEL_WIDTH 128
 #define MAIN_CHOICE_LABEL_HEIGHT 20
 #define MAIN_CHOICE_LABEL_IMAGE_SIZE \
@@ -6433,11 +6433,11 @@ void DrawMainMenu(Gfx** displayListHead) {
     }
   }
 
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress(ImageBody(D_8012D420[D_8022BE8E_ovl_01])));
+  gDPLoadTLUT_pal16(gfx++, 0,
+      TextureAddress(ImageBody(g_MenuLabelImages[D_8022BE8E_ovl_01])));
   choiceIndex = g_MenuMemory.mainChoice;
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(ImageTexels(D_8012D420[D_8022BE8E_ovl_01]) +
+      TextureAddress(ImageTexels(g_MenuLabelImages[D_8022BE8E_ovl_01]) +
           (choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE)),
       G_IM_FMT_CI, MAIN_CHOICE_LABEL_WIDTH, MAIN_CHOICE_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -6509,8 +6509,8 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
     }
   }
 
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress(ImageBody(D_8012D420[D_8022BE8E_ovl_01])));
+  gDPLoadTLUT_pal16(gfx++, 0,
+      TextureAddress(ImageBody(g_MenuLabelImages[D_8022BE8E_ovl_01])));
   choiceIndex = g_MenuMemory.mainChoiceWithoutTransmit;
   if (choiceIndex == MAIN_CHOICE_OPTIONS) {
     labelOffset = MAIN_CHOICE_FULL_OPTIONS * MAIN_CHOICE_LABEL_IMAGE_SIZE;
@@ -6519,7 +6519,8 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
   }
 
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(ImageTexels(D_8012D420[D_8022BE8E_ovl_01]) + labelOffset),
+      TextureAddress(
+          ImageTexels(g_MenuLabelImages[D_8022BE8E_ovl_01]) + labelOffset),
       G_IM_FMT_CI, MAIN_CHOICE_LABEL_WIDTH, MAIN_CHOICE_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -6556,7 +6557,7 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
 }
 
 /* The clubhouse's room labels, 192 by 20 each, plain in D_801B5CD0 and lit in
- * D_8012D420 */
+ * g_MenuLabelImages */
 #define ROOM_LABEL_WIDTH 192
 #define ROOM_LABEL_HEIGHT 20
 #define ROOM_LABEL_IMAGE_SIZE (ROOM_LABEL_WIDTH * ROOM_LABEL_HEIGHT / 2)
@@ -6589,11 +6590,11 @@ void DrawClubhouse(Gfx** displayListHead) {
     }
   }
 
-  gDPLoadTLUT_pal16(
-      gfx++, 0, TextureAddress(ImageBody(D_8012D420[D_8022BE8E_ovl_01])));
+  gDPLoadTLUT_pal16(gfx++, 0,
+      TextureAddress(ImageBody(g_MenuLabelImages[D_8022BE8E_ovl_01])));
   choiceIndex = g_MenuMemory.clubhouseChoice;
   gDPLoadTextureBlock_4b(gfx++,
-      TextureAddress(ImageTexels(D_8012D420[D_8022BE8E_ovl_01]) +
+      TextureAddress(ImageTexels(g_MenuLabelImages[D_8022BE8E_ovl_01]) +
           (D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE)),
       G_IM_FMT_CI, ROOM_LABEL_WIDTH, ROOM_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -6678,9 +6679,9 @@ const char D_802316FC_ovl_01[] = "Luigi's Garden";
 #define DIMMED_COLOR 191
 
 /*
- * The options' labels, plain in D_801B5CD0 and lit in D_8012D420. Each label
- * is followed in its image by the option's two values, so the labels lie 60
- * rows apart; the lit values come from their own image
+ * The options' labels, plain in D_801B5CD0 and lit in g_MenuLabelImages. Each
+ * label is followed in its image by the option's two values, so the labels lie
+ * 60 rows apart; the lit values come from their own image
  */
 #define OPTION_LABEL_WIDTH 128
 #define OPTION_LABEL_HEIGHT 20
@@ -6878,11 +6879,11 @@ void DrawOptionsScreen(Gfx** displayListHead) {
     }
   }
 
-  LoadSmallPalette(&gfx, 0, ImageBody(D_8012D420[D_8022BE8E_ovl_01]));
+  LoadSmallPalette(&gfx, 0, ImageBody(g_MenuLabelImages[D_8022BE8E_ovl_01]));
   for (loopIndex = 0; loopIndex != OPTIONS_CHOICE_COUNT; loopIndex++) {
     if (g_MenuMemory.optionsChoice == loopIndex) {
       LoadNibbleTextureBlock(&gfx,
-          ImageTexels(D_8012D420[D_8022BE8E_ovl_01]) +
+          ImageTexels(g_MenuLabelImages[D_8022BE8E_ovl_01]) +
               (loopIndex * OPTION_LABEL_SPACING),
           G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0,
           0, 0);
@@ -6899,8 +6900,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0, PRIMITIVE,
       0, TEXEL0, 0, 0, 0, 0, TEXEL0);
   gDPLoadTLUT_pal16(gfx++, 0,
-      TextureAddress(ImageBody(
-          ImageAt(D_8012D420[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET))));
+      TextureAddress(ImageBody(ImageAt(
+          g_MenuLabelImages[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET))));
   for (loopIndex = 0; loopIndex != OPTION_TOGGLE_COUNT; loopIndex++) {
     /* Each toggle has two values, the second shown while its bit is set */
     valueOffset = loopIndex * 2 * OPTION_LABEL_IMAGE_SIZE;
@@ -6926,8 +6927,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
     }
 
     LoadNibbleTextureBlock(&gfx,
-        ImageTexels(
-            ImageAt(D_8012D420[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET)) +
+        ImageTexels(ImageAt(
+            g_MenuLabelImages[D_8022BE8E_ovl_01], OPTION_VALUES_OFFSET)) +
             valueOffset,
         G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0, 0,
         0);

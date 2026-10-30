@@ -30,7 +30,9 @@
 #define PLAIN_BACKDROP_LAYERS \
   (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER)
 
-extern void* D_8012D420[2];
+/* A screen's lit labels, or other images in their place, read alternately
+ * into each */
+extern void* g_MenuLabelImages[2];
 extern s16 D_800FE33C;
 extern u8 D_800FBDB9;
 
