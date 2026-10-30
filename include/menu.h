@@ -131,7 +131,7 @@ extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 /* The most bytes of each character palette file that the menus keep */
 #define MENU_PALETTE_FILE_SIZE 0x200
 /* Character palette files that the menu screens read, one per slot */
-extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
+extern u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
 
 /* Returns an image buffer of the menu overlay */
 void* GetMenuImageBuffer(void);

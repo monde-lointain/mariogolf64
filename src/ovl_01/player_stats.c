@@ -2636,7 +2636,7 @@ void LoadBestShotFaces(void) {
         palette = 0;
       }
 
-      f_BestShotFaces[row][column] = D_8023BFF0_ovl_01[cell];
+      f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
       ReadAssetFile(
           f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);

@@ -396,7 +396,7 @@ void DrawBestTimes(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureFilter(gfx++, G_TF_BILERP);
       character = save->bestTimeCharacters[memory->bestTimesCourse][otherIndex];
-      holderPalettes = D_8023BFF0_ovl_01;
+      holderPalettes = g_MenuCharacterPalettes;
       DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
           holderPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) +
               otherIndex],
@@ -654,7 +654,8 @@ void LoadBestTimesFaces(void) {
       }
 
       OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
-      ReadAssetFile(D_8023BFF0_ovl_01[(courseIndex * BEST_TIME_COUNT) + rank],
+      ReadAssetFile(
+          g_MenuCharacterPalettes[(courseIndex * BEST_TIME_COUNT) + rank],
           GetAssetFileSize(&file), &file);
     }
   }

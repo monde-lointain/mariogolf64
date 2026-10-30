@@ -3888,6 +3888,7 @@ g_CourseBannersSlide = 0x8023BFD0; // type:s32 size:0x4 segment:ovl_01
 f_PreviousStickX = 0x8023BFD4; // size:0x4 segment:ovl_01
 f_PreviousStickY = 0x8023BFD8; // size:0x4 segment:ovl_01
 g_ChosenHandicaps = 0x8023BFDC; // size:0x8 segment:ovl_01
+g_MenuCharacterPalettes = 0x8023BFF0; // size:0x2400 segment:ovl_01
 D_800FEDD8 = 0x800FEDD8; // size:0x1A0
 D_80104F78 = 0x80104F78; // size:0x58
 D_80105DC0 = 0x80105DC0; // size:0x3

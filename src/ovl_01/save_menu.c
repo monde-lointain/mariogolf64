@@ -299,7 +299,7 @@ static u8 D_8023BDB4_ovl_01[0x4];
 static u8 D_8023BDB8_ovl_01[0x88];
 
 /* Not static: the original left these to the linker's common block */
-u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
+u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
 u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][MENU_PALETTE_FILE_SIZE];
 
 void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind) {
@@ -684,7 +684,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
         }
 
         DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
-            D_8023BFF0_ovl_01[character],
+            g_MenuCharacterPalettes[character],
             RING_SHOT_FACE_X + (column * RING_SHOT_COLUMN_SPACING),
             RING_SHOT_FACE_Y + (itemIndex * RING_SHOT_FACE_SPACING), character,
             index);
@@ -849,7 +849,8 @@ void LoadRingShotRecordFaces(void) {
     OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
     ReadEncodedAsset(g_CharacterFaceImages[index], &asset);
     OpenAssetFile(g_CharacterPaletteFiles[index][0], &file);
-    ReadAssetFile(D_8023BFF0_ovl_01[index], GetAssetFileSize(&file), &file);
+    ReadAssetFile(
+        g_MenuCharacterPalettes[index], GetAssetFileSize(&file), &file);
   }
 
   for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {

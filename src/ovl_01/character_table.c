@@ -402,7 +402,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
     }
 
     DrawCharacterFace(&gfx, g_CharacterFaceImages[rowCharacter],
-        D_8023BFF0_ovl_01[rowCharacter], TABLE_ROW_FACE_X,
+        g_MenuCharacterPalettes[rowCharacter], TABLE_ROW_FACE_X,
         (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_ROW_FACE_Y, rowCharacter,
         drawMode);
     shownColumn = 0;
@@ -416,7 +416,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
 
       if (shownRow == 0) {
         DrawCharacterFace(&gfx, g_CharacterFaceImages[columnCharacter],
-            D_8023BFF0_ovl_01[columnCharacter],
+            g_MenuCharacterPalettes[columnCharacter],
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
             TABLE_COLUMN_FACE_Y, columnCharacter, drawMode);
       }
@@ -671,7 +671,7 @@ void DrawTablePopup(Gfx** displayListHead) {
   }
 
   DrawCharacterFace(&gfx, g_CharacterFaceImages[rowCharacter],
-      D_8023BFF0_ovl_01[rowCharacter],
+      g_MenuCharacterPalettes[rowCharacter],
       f_TablePopupLeft + TABLE_POPUP_ROW_FACE_X,
       f_TablePopupTop + TABLE_POPUP_FACE_Y, rowCharacter, faceMode);
   faceMode = FACE_DARKENED;
@@ -681,7 +681,7 @@ void DrawTablePopup(Gfx** displayListHead) {
   }
 
   DrawCharacterFace(&gfx, g_CharacterFaceImages[columnCharacter],
-      D_8023BFF0_ovl_01[columnCharacter],
+      g_MenuCharacterPalettes[columnCharacter],
       f_TablePopupLeft + TABLE_POPUP_COLUMN_FACE_X,
       f_TablePopupTop + TABLE_POPUP_FACE_Y, columnCharacter, faceMode);
   if (rowWins < 10) {
@@ -809,7 +809,7 @@ void LoadTableFaces(void) {
     OpenEncodedAsset(g_CharacterFaceAssets[characterIndex], &asset);
     ReadEncodedAsset(g_CharacterFaceImages[characterIndex], &asset);
     OpenAssetFile(g_CharacterPaletteFiles[characterIndex][0], &file);
-    ReadAssetFile(
-        D_8023BFF0_ovl_01[characterIndex], GetAssetFileSize(&file), &file);
+    ReadAssetFile(g_MenuCharacterPalettes[characterIndex],
+        GetAssetFileSize(&file), &file);
   }
 }
