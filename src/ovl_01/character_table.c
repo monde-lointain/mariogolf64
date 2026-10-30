@@ -153,8 +153,12 @@ static s32 D_80230230_ovl_01[2] = {0, 0};
 /* The angle, in radians, of each corner's color cycle */
 static f32 f_TableCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
+/*
+ * The top-left and bottom-right corners of each line between the table's
+ * cells: five one-pixel rows, then seven one-pixel columns
+ */
 // clang-format off
-static TableCorner D_80230248_ovl_01[TABLE_LINE_COUNT * 2] = {
+static TableCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
   { 24, 80 }, { 300, 81 },
   { 24, 110 }, { 300, 111 },
   { 24, 140 }, { 300, 141 },
@@ -569,10 +573,10 @@ void DrawTableLines(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gDPPipeSync(gfx++);
   for (index = 0; index != TABLE_LINE_COUNT * 2; index += 2) {
-    gSPScisTextureRectangle(gfx++, QuarterPixels(D_80230248_ovl_01[index].x),
-        QuarterPixels(D_80230248_ovl_01[index].y),
-        D_80230248_ovl_01[index + 1].x << 2,
-        D_80230248_ovl_01[index + 1].y << 2, G_TX_RENDERTILE, 0, 0,
+    gSPScisTextureRectangle(gfx++, QuarterPixels(f_TableLineCorners[index].x),
+        QuarterPixels(f_TableLineCorners[index].y),
+        f_TableLineCorners[index + 1].x << 2,
+        f_TableLineCorners[index + 1].y << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
