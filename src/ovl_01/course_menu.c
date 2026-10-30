@@ -163,7 +163,7 @@ static s16 f_StatsTrophyFrameTimer = 0;
 static s32 f_StatsArrowFrame = 0;
 static s32 f_StatsArrowTimer = 0;
 /* Read by no routine */
-static s32 D_802300B0_ovl_01 = 0;
+static s32 f_UnreadStatsWord = 0;
 /* The panel's label for each STAT_* */
 static const char* f_StatLabels[STATS_COUNT] = {"Round", "Best Score",
     "Average", "Best Drive", "Avg. Drive", "On Fairway", "Avg. Putt",
@@ -171,7 +171,7 @@ static const char* f_StatLabels[STATS_COUNT] = {"Round", "Best Score",
 /* DrawCourseStats adds a tenth to it on every draw, but no routine reads it */
 static f32 f_UnreadStatsDrawTime = 0.0f;
 /* Read by no routine */
-static char D_802300E0_ovl_01[3][10] = {"EXP", "ｺｰｽｹﾞｯﾄ", "純ﾞ"};
+static char f_UnreadStatsTexts[3][10] = {"EXP", "ｺｰｽｹﾞｯﾄ", "純ﾞ"};
 /* Where each course's first trophy sits, before its shift for the place */
 static TrophyPosition f_StatsTrophyPositions[COURSE_COUNT] = {
     {230, 177}, {230, 177}, {230, 177}, {236, 165}, {226, 184}, {236, 175}};
@@ -196,8 +196,8 @@ static void* f_MenuGlyphs;
 static void* f_CourseStatsGreenArrows;
 
 /* Read by no routine; 2 objects, as one would be aligned past its start */
-static u8 D_8023A834_ovl_01[0x4];
-static u8 D_8023A838_ovl_01[0x188];
+static u8 f_UnreadStatsBytes[0x4];
+static u8 f_UnreadStatsBlock[0x188];
 
 /* Reads every course's icon into the course stats' buffers */
 void LoadCourseStatsIcons(void** buffers) {
@@ -1513,8 +1513,8 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
 }
 
 /* Nothing reads these */
-const char D_802318E8_ovl_01[] = "";
-const char D_802318EC_ovl_01[] = "";
+const char f_UnreadFirstEmptyText[] = "";
+const char f_UnreadSecondEmptyText[] = "";
 
 /* Draws the MENU_SIGN_* sign's glyph with its top-left corner at (x, y) */
 void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
