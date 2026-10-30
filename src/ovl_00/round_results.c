@@ -2452,6 +2452,10 @@ enum PointsStep {
 /*
  * Counts the earned course points into the save, showing a notice when they
  * open a course, then returns TRUE once A is pressed
+ *
+ * Doesn't match: when starting the tally, the original reads the player
+ * count through the address of g_GameState.gameMode, which moves the
+ * branches after it by a word.
  */
 #ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {
@@ -2506,7 +2510,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
           for (i = 0; i != g_GameState.playerCount; i++) {
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
             for (j = 0; j != g_GameState.playerCount; j++) {
-              if (i != j && f_PlayerRanks[j] < f_PlayerRanks[i]) {
+              if (i != j && f_PlayerRanks[i] > f_PlayerRanks[j]) {
                 StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, i);
               }
             }
