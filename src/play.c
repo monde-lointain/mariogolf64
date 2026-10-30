@@ -523,8 +523,13 @@ void PlayContestMovies(void) {
   }
 }
 
+/*
+ * Whether play can leave the hole: never while the contest movies play; in
+ * Skins Match, Club Slots and the one-on-one matches, once the hole is decided
+ * and every player is done or waiting; otherwise, once every player is done
+ */
 #ifdef NON_MATCHING
-s32 func_8005FCB8(void) {
+s32 IsHoleOver(void) {
   Boolean isDone = FALSE;
   s32 i;
 
@@ -579,7 +584,7 @@ s32 func_8005FCB8(void) {
 }
 
 #else
-INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
+INCLUDE_ASM("asm/nonmatchings/play", IsHoleOver);
 #endif
 
 /*
@@ -1251,7 +1256,7 @@ void UpdatePlay(void) {
         }
 
         PlayContestMovies();
-        if (func_8005FCB8()) {
+        if (IsHoleOver()) {
           if (g_GameState.step == GAME_STATE_UNK11) {
             ChooseConditionsAndInitHole();
           } else {
