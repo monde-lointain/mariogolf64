@@ -569,7 +569,7 @@ s32 GetStickDiagonal(void) {
 /* R leaves a player without a controller only among this many players */
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
-extern s8 D_800FBE08[MAX_PLAYER_COUNT];
+extern s8 g_ChosenLefties[MAX_PLAYER_COUNT];
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 
 s32 GetClubTournamentCourse(void);
@@ -820,12 +820,12 @@ s32 UpdateCharacterSelect(
     g_Players[playerIndex].characterIndex = character;
     if (g_MenuRepeatButtons & Z_OR_L_BUTTONS) {
       if (character < FIRST_IMPORTED_CHARACTER) {
-        D_800FBE08[playerIndex] = TRUE;
+        g_ChosenLefties[playerIndex] = TRUE;
       }
     }
 
     if (character >= FIRST_IMPORTED_CHARACTER) {
-      D_800FBE08[playerIndex] =
+      g_ChosenLefties[playerIndex] =
           g_GameBoyCharacters[memory->characterColumns[playerIndex]].unk1A;
     }
 

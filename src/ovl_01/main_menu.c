@@ -271,7 +271,7 @@ extern const char D_80231514_ovl_01[];
  * dispatches to */
 #define UNUSED_LIST_CHOICE_COUNT 21
 
-extern s8 D_800FBE08[MAX_PLAYER_COUNT];
+extern s8 g_ChosenLefties[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
 
@@ -1749,7 +1749,7 @@ void SetUpChosenGame(void) {
 
     if (func_8022BDC4_ovl_01() != -1) {
       g_ChosenCharacters[0] = func_8022BDC4_ovl_01();
-      D_800FBE08[0] = 0;
+      g_ChosenLefties[0] = 0;
     }
   } else {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
@@ -1801,7 +1801,7 @@ void SetUpChosenGame(void) {
   for (index = 0; index != g_GameState.playerCount; index++) {
     player = &g_Players[index];
     player->handicap = g_ChosenHandicaps[index];
-    player->unk22 = D_800FBE08[index];
+    player->unk22 = g_ChosenLefties[index];
     player->characterIndex = g_ChosenCharacters[index];
     player->controllerIndex = g_PlayerControllerIndices[index];
     sprintf(player->name, D_80231514_ovl_01,
@@ -1926,7 +1926,7 @@ void UpdateMenuTitleScreen(void) {
       g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
       g_ChosenPlayerCount = g_MenuMemory.playerCountChoice + 1;
       for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-        D_800FBE08[index] = 0;
+        g_ChosenLefties[index] = 0;
       }
 
       g_ChoosingPlayerIndex = 0;
@@ -2462,7 +2462,7 @@ void UpdateModeSelect(void) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
     g_ChoosingPlayerIndex--;
-    D_800FBE08[g_ChoosingPlayerIndex] = 0;
+    g_ChosenLefties[g_ChoosingPlayerIndex] = 0;
     g_TakenCharacters
         .isCharacterTaken[g_ChosenCharacters[g_ChoosingPlayerIndex]] = 0;
     g_PlayerControllerIndices[g_ChoosingPlayerIndex] = 0;

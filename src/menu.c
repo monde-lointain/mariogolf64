@@ -61,7 +61,7 @@ typedef struct ImportedCharacterCell {
 
 /* Mirrors of the save data's options */
 
-extern s8 D_800FBE08[4];
+extern s8 g_ChosenLefties[4];
 extern s16 D_800FBE2C;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
@@ -1988,8 +1988,8 @@ void ResetMenuChoices(void) {
   g_ChosenLabelGrowth = 0;
   g_CourseSelectKind = COURSE_SELECT_KIND_NONE;
   g_MapCamera[0x4C] = 0;
-  for (index = 0; index != ARRAY_COUNT(D_800FBE08); index++) {
-    D_800FBE08[index] = 0;
+  for (index = 0; index != ARRAY_COUNT(g_ChosenLefties); index++) {
+    g_ChosenLefties[index] = 0;
   }
 
   g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
