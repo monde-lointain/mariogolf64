@@ -103,7 +103,7 @@ enum GridMove {
 #define DRIVE_DISTANCE_X 246
 #define DRIVE_DISTANCE_Y 200
 
-/* The buffer kinds that D_8022FF2C has an image for, from 0 */
+/* The buffer kinds that f_SelectBufferAssets has an image for, from 0 */
 #define CHARACTER_SELECT_IMAGE_KIND_COUNT \
   (CHARACTER_SELECT_BUFFER_CURVE_CELLS + 1)
 
@@ -166,7 +166,8 @@ static s32 D_8022FF0C_ovl_01[4] = {-1, -1, -1, -1};
  * UpdateCharacterSelect puts back */
 static s32 f_SavedGameBoySlots[GAME_BOY_CHARACTER_COUNT] = {
     EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT};
-static s32 D_8022FF2C_ovl_01[CHARACTER_SELECT_IMAGE_KIND_COUNT] = {
+/* The AssetId that LoadCharacterSelectBuffer reads for each buffer kind */
+static s32 f_SelectBufferAssets[CHARACTER_SELECT_IMAGE_KIND_COUNT] = {
     0x08E8, 0x05E3, 0x08EF, 0x050F, 0x0521, 0x06EF, 0x05FF, 0x0600, 0x08EE};
 /* The CharacterId of each CharacterChoice */
 static CharacterId D_8022FF50_ovl_01[CHARACTER_COUNT] = {CHARACTER_PLUM,
@@ -1225,7 +1226,7 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
   }
 
   if (bufferKind != CHARACTER_SELECT_BUFFER_UNREAD) {
-    OpenEncodedAsset(D_8022FF2C_ovl_01[bufferKind], &asset);
+    OpenEncodedAsset(f_SelectBufferAssets[bufferKind], &asset);
     ReadEncodedAsset(image, &asset);
   }
 

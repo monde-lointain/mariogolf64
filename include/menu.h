@@ -374,8 +374,8 @@ enum GameModeLabelBuffer {
 };
 
 /* The buffers that LoadCharacterSelectBuffer keeps, by the kind its caller
- * gives, and the image of D_8022FF2C that it reads into each. Callers pass no
- * kind below 1, nor 3, 4 or 9 */
+ * gives, and the image of f_SelectBufferAssets that it reads into each. Callers
+ * pass no kind below 1, nor 3, 4 or 9 */
 enum CharacterSelectBuffer {
   CHARACTER_SELECT_BUFFER_PLAYER_LABELS = 1,
   /* The wooden board of character cells */
