@@ -14,6 +14,24 @@
  * cup */
 #define SHOT_FLAG_NEAR_CUP 8
 
+/* How InitPlay sets up the game state before play starts */
+enum PlayKind {
+  /* One player's hole of Stroke, or of Ring Shot under GAME_FLAG_INIT_RING_SHOT
+   */
+  PLAY_KIND_HOLE,
+  /* A round whose mode and players the GAME_FLAG_ROUND_KIND bits pick */
+  PLAY_KIND_FLAGGED_ROUND,
+  /* The hole of the Best Shot replay that D_800FED40 holds */
+  PLAY_KIND_BEST_SHOT_REPLAY,
+  /* Loads no game state and skips PrepareHoleDisplay, as the menus have set
+   * them up already */
+  PLAY_KIND_WITHOUT_HOLE_DISPLAY
+};
+
+typedef s32 PlayKind;
+
+void InitPlay(PlayKind kind);
+
 /* Which pause screen is shown over the round */
 enum PauseScreen {
   PAUSE_SCREEN_NONE,

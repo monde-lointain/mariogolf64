@@ -36,6 +36,7 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "overlay_manager.h"
+#include "play.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
@@ -190,10 +191,6 @@ typedef struct LabelCorner {
 #define CHOSEN_HOLE_LIGHT_PITCH 0x1000
 #define CHOSEN_HOLE_LIGHT_YAW 0x2000
 
-/* InitPlay's kind that loads no game state and skips PrepareHoleDisplay, as
- * the menus have set them up already */
-#define PLAY_KIND_WITHOUT_HOLE_DISPLAY 3
-
 /* The title screen's rows, which UpdateMenuTitleScreen moves between */
 #define TITLE_CHOICE_NEW_GAME 0
 #define TITLE_CHOICE_SAVED_GAMES 1
@@ -316,7 +313,6 @@ extern void* D_80106100;
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
 
-void InitPlay(s32 kind);
 void DrawModeSelect(Gfx** displayListHead);
 void DrawAnimationViewer(Gfx** displayListHead);
 void DrawCourseSelect(Gfx** displayListHead);

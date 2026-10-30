@@ -21,6 +21,7 @@
 #include "libc.h"
 #include "main.h"
 #include "overlay_manager.h"
+#include "play.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -263,7 +264,6 @@ static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 static s32 f_SceneMenuSelection;
 
 void ResetMenuChoices(void);
-void InitPlay(s32);
 void ChooseConditionsAndInitHole(void);
 void func_8024F7B0(void);
 void func_8024FF14(void);
@@ -1533,18 +1533,18 @@ s32 UpdateDebugSceneMenu(void) {
 
     switch ((u32)g_Scene) {
       case SCENE_PLAY_HOLE:
-        InitPlay(0);
+        InitPlay(PLAY_KIND_HOLE);
         ChooseConditionsAndInitHole();
         InitRoundHud();
         break;
       case SCENE_CELL_EDITOR:
         break;
       case SCENE_PLAY_UNK12:
-        InitPlay(1);
+        InitPlay(PLAY_KIND_FLAGGED_ROUND);
         InitRoundHud();
         break;
       case SCENE_PLAY_UNK13:
-        InitPlay(2);
+        InitPlay(PLAY_KIND_BEST_SHOT_REPLAY);
         InitRoundHud();
         break;
     }

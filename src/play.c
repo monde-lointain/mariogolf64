@@ -391,12 +391,12 @@ void SetUpPlayers(void) {
   }
 }
 
-void InitPlay(s32 kind) {
-  if (kind == 1) {
+void InitPlay(PlayKind kind) {
+  if (kind == PLAY_KIND_FLAGGED_ROUND) {
     func_8005F360();
-  } else if (kind == 0) {
+  } else if (kind == PLAY_KIND_HOLE) {
     func_8005F4AC();
-  } else if (kind == 2) {
+  } else if (kind == PLAY_KIND_BEST_SHOT_REPLAY) {
     LoadBestShotReplay(&D_800FED40);
     g_GameState.unk14 = 0;
     g_GameState.playerCount = 1;
@@ -418,7 +418,7 @@ void InitPlay(s32 kind) {
   }
 
   InitExpansionPakFeatures();
-  if (kind != 3) {
+  if (kind != PLAY_KIND_WITHOUT_HOLE_DISPLAY) {
     PrepareHoleDisplay();
   }
 
