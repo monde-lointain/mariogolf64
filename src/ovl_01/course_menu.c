@@ -528,7 +528,7 @@ void DrawCourseStats(Gfx** displayListHead) {
   DrawCourseBanner(&gfx, 0, image);
   DrawStatsPanel(&gfx);
   DrawStatsBadgeCount(&gfx);
-  func_80210190_ovl_01(&gfx);
+  DrawStatsScrollArrows(&gfx);
   func_802104F0_ovl_01(&gfx);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
@@ -840,12 +840,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsBadgeCount);
 #endif
 
 /*
+ * Draws the arrows beside the panel that show there are more statistics above
+ * or below.
  * Doesn't match: the original counts the arrows and picks the first one with
- * branches, where this version computes them without, so the registers and
- * the spills to the stack differ.
+ * branches, where this version computes them without, so the registers and the
+ * spills to the stack differ.
  */
 #ifdef NON_MATCHING
-void func_80210190_ovl_01(Gfx** displayListHead) {
+void DrawStatsScrollArrows(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   Boolean hasRowsAbove = D_802300A0_ovl_01 > 0;
   Boolean hasRowsBelow =
@@ -901,7 +903,7 @@ void func_80210190_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80210190_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
 #endif
 
 /*
