@@ -57,6 +57,15 @@
 /* Steps that the inset view takes to open or close fully */
 #define INSET_VIEW_STEP_COUNT 8
 
+/* Where SetInsetViewRect puts the inset view, which opens out from its
+ * center */
+typedef struct InsetViewRect {
+  s32 centerX;
+  s32 centerY;
+  s32 width;
+  s32 height;
+} InsetViewRect;
+
 /* Values of f_FadeColor */
 enum FadeColor {
   FADE_COLOR_NONE,
@@ -160,10 +169,8 @@ static s32 f_DebugMenuValues[DEBUG_MENU_VALUE_COUNT] = {
 static s32 f_DebugMenuValueIndex = 0;
 static Boolean f_HasUnloadedSceneModule = FALSE;
 static Boolean f_HasUnloadedSubModule = FALSE;
-static s32 f_InsetViewCenterX = 0;
-static s32 f_InsetViewCenterY = 0;
-static s32 f_InsetViewWidth = 0;
-static s32 f_InsetViewHeight = 0;
+/* The inset view's rectangle when fully open, in screen pixels */
+static InsetViewRect f_InsetViewRect = {0, 0, 0, 0};
 s32 g_DrawBufferIndex = 0;
 
 /* Read by no routine */
@@ -2592,10 +2599,10 @@ void UnloadSubModule(void) {
 }
 
 void SetInsetViewRect(s32 centerX, s32 centerY, s32 width, s32 height) {
-  f_InsetViewWidth = width;
-  f_InsetViewHeight = height;
-  f_InsetViewCenterX = centerX;
-  f_InsetViewCenterY = centerY;
+  f_InsetViewRect.width = width;
+  f_InsetViewRect.height = height;
+  f_InsetViewRect.centerX = centerX;
+  f_InsetViewRect.centerY = centerY;
 }
 
 /* Grows or shrinks the inset view's window by a step and centers it */
@@ -2629,12 +2636,12 @@ void UpdateInsetView(void) {
   }
 
   g_Cameras[INSET_CAMERA].view.scissorWidth =
-      g_InsetView.step * f_InsetViewWidth / INSET_VIEW_STEP_COUNT;
+      g_InsetView.step * f_InsetViewRect.width / INSET_VIEW_STEP_COUNT;
   g_Cameras[INSET_CAMERA].view.scissorHeight =
-      g_InsetView.step * f_InsetViewHeight / INSET_VIEW_STEP_COUNT;
-  g_Cameras[INSET_CAMERA].view.scissorX = f_InsetViewCenterX -
-      (g_InsetView.step * f_InsetViewWidth / (2 * INSET_VIEW_STEP_COUNT));
-  g_Cameras[INSET_CAMERA].view.scissorY = f_InsetViewCenterY -
-      (g_InsetView.step * f_InsetViewHeight / (2 * INSET_VIEW_STEP_COUNT));
+      g_InsetView.step * f_InsetViewRect.height / INSET_VIEW_STEP_COUNT;
+  g_Cameras[INSET_CAMERA].view.scissorX = f_InsetViewRect.centerX -
+      (g_InsetView.step * f_InsetViewRect.width / (2 * INSET_VIEW_STEP_COUNT));
+  g_Cameras[INSET_CAMERA].view.scissorY = f_InsetViewRect.centerY -
+      (g_InsetView.step * f_InsetViewRect.height / (2 * INSET_VIEW_STEP_COUNT));
   g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
 }
