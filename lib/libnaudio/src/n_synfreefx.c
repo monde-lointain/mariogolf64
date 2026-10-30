@@ -20,7 +20,7 @@
 #include "n_synthInternals.h"
 
 
-void n_alSynFreeFX(ALFxRef *fx)
+void n_alSynFreeFX(ALFxRef *fx UNUSED)
 {
 }
 

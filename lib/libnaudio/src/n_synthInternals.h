@@ -23,6 +23,7 @@
 #include <synthInternals.h>
 #include "n_libaudio_sc.h"
 #include "n_abi.h"
+#include "PRinternal/macros.h"
 
 #define SAMPLE_ROUND
 #undef  SAMPLE_ROUND

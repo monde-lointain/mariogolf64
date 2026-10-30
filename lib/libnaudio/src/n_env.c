@@ -138,7 +138,6 @@ Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
     case (AL_FILTER_START_VOICE_ALT):
       {                  
 	ALStartParamAlt *param = (ALStartParamAlt *)e->em_ctrlList;
-	ALFilter     *f = (ALFilter *) e;
 	s32 tmp;
 	
 	if (param->unity) {
@@ -382,16 +381,11 @@ s32
 }
 
 static
-  Acmd* _pullSubFrame(N_PVoice *filter, s16 *inp, s16 *outp, s32 outCount,
+  Acmd* _pullSubFrame(N_PVoice *filter, s16 *inp, s16 *outp UNUSED, s32 outCount,
 		      Acmd *p) 
 {
   Acmd        *ptr = p;
   N_PVoice	*e = filter;
-#ifndef N_MICRO
-  s16 *inpp = AL_RESAMPLER_OUT;
-#else
-  s16 *inpp = N_AL_RESAMPLER_OUT;
-#endif
 
   /* filter must be playing and request non-zero output samples to pull. */
   if (e->em_motion != AL_PLAYING || !outCount)

@@ -25,7 +25,6 @@
 void n_alSynStopVoice(N_ALVoice *v)
 {
     ALParam  *update;
-    ALFilter *f;
     
     if (v->pvoice) {
         

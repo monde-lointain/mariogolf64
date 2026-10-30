@@ -26,7 +26,6 @@ static s32 _allocatePVoice(N_PVoice **pvoice, s16 priority);
 s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 {
     N_PVoice  *pvoice = 0;
-    ALFilter *f;
     ALParam *update;
     s32 stolen;
     

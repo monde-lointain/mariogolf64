@@ -55,8 +55,8 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p)
   Acmd        *ptr = p;
   ALFx	*r = (ALFx *)n_syn->auxBus->fx;
   s16		i, buff1, buff2, input, output;
-  s16		*in_ptr, *out_ptr, gain, *prev_out_ptr = 0;
-  ALDelay	*d, *pd;
+  s16		*in_ptr, *out_ptr, *prev_out_ptr = 0;
+  ALDelay	*d;
   
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
@@ -242,8 +242,8 @@ Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, s32 buff, Acmd *p)
   s16         *out_ptr;
   f32         fincount, fratio, delta;
   s32         ramalign = 0, length;
-  static f32  val=0.0, lastval=-10.0;
-  static f32  blob=0;
+  static f32  val UNUSED = 0.0, lastval UNUSED = -10.0;
+  static f32  blob UNUSED = 0;
   s32 incount = FIXED_SAMPLE;
 
   if (d->rs) {

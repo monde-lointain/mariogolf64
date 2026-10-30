@@ -102,11 +102,13 @@ Acmd *n_alResamplePull(N_PVoice *e, s16 *outp, Acmd *p)
 
 s32 n_alResampleParam(N_PVoice *filter, s32 paramID, void *param)
 {
+#if 0
     N_PVoice   *r = filter;
     union {
         f32             f;
         s32             i;
     } data;
+#endif
     
     switch (paramID) {
 #if 0

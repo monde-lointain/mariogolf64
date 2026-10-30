@@ -24,7 +24,6 @@
 void n_alSynSetVol(N_ALVoice *v, s16 volume, ALMicroTime t)
 {
     ALParam  *update;
-    ALFilter *f;
 
     if (v->pvoice) {
         /*

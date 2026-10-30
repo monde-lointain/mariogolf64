@@ -33,7 +33,9 @@ extern u32 client_num, client_cnt, client_max, client_min;
 #   define MIN(a,b) (((a)<(b))?(a):(b))
 #endif
 
+#ifndef ONLY_ONE_PLAYER
 static s32 __n_nextSampleTime(ALPlayer **client);
+#endif
 static s32 _n_timeToSamplesNoRound(s32 micros);
 
 /***********************************************************************
@@ -42,14 +44,9 @@ static s32 _n_timeToSamplesNoRound(s32 micros);
 void n_alSynNew(ALSynConfig *c)
 {
     s32         i;
-    N_ALVoice  *vv;
     N_PVoice   *pv;
-    N_ALVoice  *vvoices;
     N_PVoice   *pvoices;
     ALHeap      *hp = c->heap;
-    ALSave      *save;
-    ALFilter    *sources;
-    N_PVoice   *m_sources;
     ALParam     *params;
     ALParam     *paramPtr;
     
@@ -118,7 +115,6 @@ void n_alSynNew(ALSynConfig *c)
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen)
 {
     ALPlayer    *client;
-    s16         tmp = 0;        /* Starting buffer in DMEM */
     Acmd        *cmdlEnd = cmdList;
     Acmd        *cmdPtr;
     s32         nOut;
@@ -239,11 +235,8 @@ void _n_freeParam(ALParam *param)
 void _n_collectPVoices(void)
 {
     ALLink       *dl;
-    N_PVoice      *pv;
 
     while ((dl = n_syn->pLameList.next) != 0) {
-        pv = (N_PVoice *)dl;
-
         /* ### remove from mixer */
 
         alUnlink(dl);
