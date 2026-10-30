@@ -66,7 +66,7 @@ extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
-extern u8 D_800FF4C0;
+extern u8 g_CourseSelectKind;
 extern s8 D_801052E8;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC4;
@@ -1969,7 +1969,7 @@ void func_8005D9A0(void) {
   D_800FBE2C = 0;
   g_ChosenLabelGrowthDirection = LABEL_GROWING;
   g_ChosenLabelGrowth = 0;
-  D_800FF4C0 = 0;
+  g_CourseSelectKind = 0;
   g_MapCamera[0x4C] = 0;
   for (index = 0; index != ARRAY_COUNT(D_800FBE08); index++) {
     D_800FBE08[index] = 0;
@@ -1992,12 +1992,12 @@ void func_8005DAD4(void) {
 void func_8005DAFC(void) {
   switch (g_GameState.gameMode) {
     case GAME_MODE_TOURNAMENT:
-      D_800FF4C0 = 2;
+      g_CourseSelectKind = 2;
       g_MapCamera[0x4C] = 0;
       g_BetSet = BET_SET_NONE;
       break;
     case GAME_MODE_STROKE:
-      D_800FF4C0 = 1;
+      g_CourseSelectKind = 1;
       g_MapCamera[0x4C] = 1;
       if (g_ChosenPlayerCount == 4) {
         g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
@@ -2008,12 +2008,12 @@ void func_8005DAFC(void) {
       D_800C2BD5 = 1;
       break;
     case GAME_MODE_MATCH_GAME:
-      D_800FF4C0 = 1;
+      g_CourseSelectKind = 1;
       g_MapCamera[0x4C] = 1;
       g_BetSet = BET_SET_MATCH_GAME;
       break;
     case GAME_MODE_SKINS_MATCH:
-      D_800FF4C0 = 1;
+      g_CourseSelectKind = 1;
       g_MapCamera[0x4C] = 1;
       g_BetSet = BET_SET_SKINS_MATCH;
       break;
@@ -2022,12 +2022,12 @@ void func_8005DAFC(void) {
     case GAME_MODE_UNK6:
     case GAME_MODE_SPEED_GOLF:
     case GAME_MODE_RING_SHOT:
-      D_800FF4C0 = 1;
+      g_CourseSelectKind = 1;
       g_MapCamera[0x4C] = 2;
       g_BetSet = BET_SET_NONE;
       break;
     case GAME_MODE_CLUB_SLOTS:
-      D_800FF4C0 = 1;
+      g_CourseSelectKind = 1;
       g_MapCamera[0x4C] = 1;
       g_BetSet = BET_SET_CLUB_SLOTS;
       break;

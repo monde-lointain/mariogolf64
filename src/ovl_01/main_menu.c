@@ -2248,7 +2248,7 @@ void UpdateModeSelect(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_TOURNAMENT;
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        D_800FF4C0 = 2;
+        g_CourseSelectKind = 2;
         MAP_CAMERA_MODE_TOP_BYTE = 0;
         g_BetSet = BET_SET_NONE;
         ApplyBetPreset(BET_PRESET_NONE);
@@ -2259,7 +2259,7 @@ void UpdateModeSelect(void) {
         g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
         g_GameState.playerCount = 2;
         g_MenuScreen = MENU_SCREEN_OPPONENT_SELECT;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
         ApplyBetPreset(BET_PRESET_NONE);
@@ -2279,7 +2279,7 @@ void UpdateModeSelect(void) {
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
           g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
@@ -2306,7 +2306,7 @@ void UpdateModeSelect(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_MATCH_GAME;
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         g_BetSet = BET_SET_MATCH_GAME;
         g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
@@ -2317,7 +2317,7 @@ void UpdateModeSelect(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_SKINS_MATCH;
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         g_BetSet = BET_SET_SKINS_MATCH;
         g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
@@ -2328,7 +2328,7 @@ void UpdateModeSelect(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_SPEED_GOLF;
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
         g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
@@ -2353,7 +2353,7 @@ void UpdateModeSelect(void) {
         g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         g_GameState.isMiniGolf = TRUE;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
           g_BetSet = BET_SET_MINI_GOLF_FOUR_PLAYER;
@@ -2382,7 +2382,7 @@ void UpdateModeSelect(void) {
         g_GameState.holeSelection = HOLE_SELECTION_ALL;
         StartLoadingChosenHole();
         g_MenuScreen = MENU_SCREEN_TRAINING_EXIT;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
         g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
@@ -2393,7 +2393,7 @@ void UpdateModeSelect(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_UNK1;
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
         g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
@@ -2404,7 +2404,7 @@ void UpdateModeSelect(void) {
         StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         g_GameState.gameMode = GAME_MODE_RING_SHOT;
         g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
         ApplyBetPreset(BET_PRESET_NONE);
@@ -2426,7 +2426,7 @@ void UpdateModeSelect(void) {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_GameState.gameMode = GAME_MODE_CLUB_SLOTS;
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        D_800FF4C0 = 1;
+        g_CourseSelectKind = 1;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         g_BetSet = BET_SET_CLUB_SLOTS;
         g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
@@ -3046,7 +3046,7 @@ void UpdateMainMenu(void) {
           if (IsGameFlagSet(GAME_FLAG_UNK56)) {
             g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
             g_GameState.playerCount = 2;
-            D_800FF4C0 = 1;
+            g_CourseSelectKind = 1;
             MAP_CAMERA_MODE_TOP_BYTE = 2;
             g_BetSet = BET_SET_NONE;
             ApplyBetPreset(BET_PRESET_NONE);
@@ -3103,7 +3103,7 @@ void UpdateMainMenuWithoutTransmit(void) {
           if (IsGameFlagSet(GAME_FLAG_UNK56)) {
             g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
             g_GameState.playerCount = 2;
-            D_800FF4C0 = 1;
+            g_CourseSelectKind = 1;
             MAP_CAMERA_MODE_TOP_BYTE = 2;
             g_BetSet = BET_SET_NONE;
             ApplyBetPreset(BET_PRESET_NONE);
@@ -6399,7 +6399,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   if (!g_GameState.isMiniGolf) {
-    if (D_800FF4C0 == 1) {
+    if (g_CourseSelectKind == 1) {
       sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuMemory.courseChoice + 1,
           g_CourseRecords[g_MenuMemory.courseChoice].name);
     } else {

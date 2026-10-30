@@ -143,7 +143,8 @@ s32 g_ScreenFadeRed BSS = {0};
 s32 g_ScreenFadeGreen BSS = {0};
 s32 g_ScreenFadeBlue BSS = {0};
 u32 nuGfxCfbCounter BSS = {0};
-u8 D_800FF4C0 BSS = {0};
+/* Whether the course select names the courses or the tournaments */
+u8 g_CourseSelectKind BSS = {0};
 void* D_800FF4C4[2] BSS = {0};
 u8* f_RainSplashImage BSS = {0};
 RoundStats g_RoundStats BSS ALIGNED(8) = {0};
