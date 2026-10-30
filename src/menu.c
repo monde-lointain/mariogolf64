@@ -66,7 +66,6 @@ extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
-extern u8 g_CourseSelectKind;
 extern s8 D_801052E8;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC4;
@@ -74,7 +73,6 @@ extern s32 D_80105DC8;
 extern s32 D_80105DCC;
 /* The code of the tournament whose password was entered */
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
-extern s32 g_ChoosingPlayerIndex;
 extern s16 D_801B71CC;
 extern s8 D_801B9410;
 extern u8 g_MapCamera[];

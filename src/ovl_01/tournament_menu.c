@@ -147,7 +147,6 @@ enum CodeKeyResult {
 extern s32 D_80105DC4;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC8;
-extern s32 g_ChoosingPlayerIndex;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 s32 GetClubTournamentCourse(void);
 void StartLoadingChosenHole(void);
