@@ -1085,7 +1085,13 @@ void RecordDisplayListLength(u32 commandCount) {
 
 #define UNKE50_MAX 3
 
-void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
+/*
+ * Puts a Speed Golf round's time on its course's best times, if it is fast
+ * enough, with its golfer's character and color and its net score to par,
+ * which orders equal times, and saves
+ */
+void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
+    CharacterId character, s32 palette) {
   SaveData* save;
   s32 count;
   s32 index;
@@ -1105,12 +1111,12 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
 
   if (time >= 0) {
     if (time <= STOPWATCH_MAX_FRAMES) {
-      if (arg4 < 0) {
-        arg4 = 0;
+      if (palette < 0) {
+        palette = 0;
       }
 
-      if (arg4 > UNKE50_MAX) {
-        arg4 = UNKE50_MAX;
+      if (palette > UNKE50_MAX) {
+        palette = UNKE50_MAX;
       }
 
       count = 0;
@@ -1173,7 +1179,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
           }
 
           if (time == save->bestTimes[courseIndex][index] &&
-              arg2 <= save->bestTimeScoresToPar[courseIndex][index]) {
+              scoreToPar <= save->bestTimeScoresToPar[courseIndex][index]) {
             break;
           }
         }
@@ -1192,15 +1198,15 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
           }
 
           save->bestTimes[courseIndex][index] = time;
-          save->bestTimeCharacters[courseIndex][index] = arg3;
-          save->bestTimeScoresToPar[courseIndex][index] = arg2;
-          save->bestTimePalettes[courseIndex][index] = arg4;
+          save->bestTimeCharacters[courseIndex][index] = character;
+          save->bestTimeScoresToPar[courseIndex][index] = scoreToPar;
+          save->bestTimePalettes[courseIndex][index] = palette;
         }
       } else {
         save->bestTimes[courseIndex][0] = time;
-        save->bestTimeCharacters[courseIndex][0] = arg3;
-        save->bestTimeScoresToPar[courseIndex][0] = arg2;
-        save->bestTimePalettes[courseIndex][0] = arg4;
+        save->bestTimeCharacters[courseIndex][0] = character;
+        save->bestTimeScoresToPar[courseIndex][0] = scoreToPar;
+        save->bestTimePalettes[courseIndex][0] = palette;
       }
 
       TransferSaveData(save, TRUE);
