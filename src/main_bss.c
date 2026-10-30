@@ -84,7 +84,7 @@ s16 D_800FBE2C BSS = {0};
 /* Two buffers, each twice the size of a Toad image, that menu screens read
  * their own images into */
 void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT] BSS = {0};
-void* D_800FBE38[COURSE_FILE_COUNT] BSS = {0};
+void* g_TrophyPalettes[COURSE_FILE_COUNT] BSS = {0};
 CurrentShot g_CurrentShot BSS ALIGNED(8) = {0};
 Billboard g_Billboards[BILLBOARD_COUNT] BSS ALIGNED(16) = {0};
 void* D_800FC6A0 BSS = {0};

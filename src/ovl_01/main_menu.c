@@ -296,7 +296,7 @@ extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
  * The course select. Its wheel shows the open courses and the next one
  * still shut, and turns from one to the next; the chosen course's image
  * is read into the one of g_CourseWheelImages's buffers not shown, and its
- * trophy files into D_800FBE38.
+ * trophy files into g_TrophyPalettes.
  */
 #define COURSE_SELECT_TURN 90
 #define COURSE_SELECT_SPIN_SPEED 18
@@ -1490,7 +1490,8 @@ void UpdateMenus(void) {
         for (index = 0; index != COURSE_FILE_COUNT; index++) {
           OpenAssetFile(
               g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
-          ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+          ReadAssetFile(
+              g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
         }
 
         OpenEncodedAsset(ASSET_HOLES_BADGES, &asset);
@@ -2611,7 +2612,7 @@ void UpdateCourseSelect(void) {
       for (index = 0; index != COURSE_FILE_COUNT; index++) {
         OpenAssetFile(
             g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
-        ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+        ReadAssetFile(g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
       }
 
       f_CourseWheelBufferIndex ^= 1;
@@ -2744,7 +2745,7 @@ void UpdateCourseSelect(void) {
       for (index = 0; index != COURSE_FILE_COUNT; index++) {
         OpenAssetFile(
             g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
-        ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+        ReadAssetFile(g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
       }
 
       f_CourseWheelBufferIndex ^= 1;
@@ -6088,7 +6089,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         for (otherIndex = 0; otherIndex != placeCount; otherIndex++) {
           gDPLoadTLUT_pal256(
-              gfx++, TextureAddress(D_800FBE38[places[otherIndex]]));
+              gfx++, TextureAddress(g_TrophyPalettes[places[otherIndex]]));
           gDPLoadTextureTile(gfx++,
               TextureAddress(g_CourseWheelImages[f_CourseWheelBufferIndex]),
               G_IM_FMT_CI, G_IM_SIZ_8b,

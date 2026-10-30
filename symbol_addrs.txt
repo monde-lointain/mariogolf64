@@ -3906,6 +3906,7 @@ D_80105DC0 = 0x80105DC0; // size:0x3
 g_CourseStatFigures = 0x80105C38; // size:0x188
 g_CourseWheelImages = 0x800FBDFC; // size:0x8
 g_MenuSpareImages = 0x800FBE30; // size:0x8
+g_TrophyPalettes = 0x800FBE38; // size:0xC
 g_MenuArrowSizedImages = 0x801B93E0; // size:0x14
 g_IsMenuWipeOpening = 0x801B9410; // size:0x1
 g_IsRingShotWipeOpening = 0x801052E8; // size:0x1

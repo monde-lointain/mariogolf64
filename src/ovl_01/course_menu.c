@@ -240,7 +240,7 @@ void LoadCourseTrophyImages(void** buffers, s32 requestedKind) {
 
     for (index = 0; index != COURSE_FILE_COUNT; index++) {
       OpenAssetFile(g_TrophyPaletteFiles[memory->statsCourse][index], &file);
-      ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+      ReadAssetFile(g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
     }
   }
 }
@@ -337,7 +337,8 @@ void UpdateCourseStats(void) {
           for (index = 0; index != COURSE_FILE_COUNT; index++) {
             OpenAssetFile(
                 g_TrophyPaletteFiles[memory->statsCourse][index], &file);
-            ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+            ReadAssetFile(
+                g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
           }
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
@@ -359,7 +360,8 @@ void UpdateCourseStats(void) {
           for (index = 0; index != COURSE_FILE_COUNT; index++) {
             OpenAssetFile(
                 g_TrophyPaletteFiles[memory->statsCourse][index], &file);
-            ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+            ReadAssetFile(
+                g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
           }
         }
       } else if (g_MenuRepeatButtons & U_JPAD) {
@@ -955,15 +957,15 @@ void DrawCourseTrophies(Gfx** displayListHead) {
       if (g_CourseStatFigures[memory->statsCourse].hasPlace[place]) {
         gDPPipeSync(gfx++);
         if (place == FIRST_PLACE_INDEX) {
-          palette = D_800FBE38[FIRST_PLACE_INDEX];
+          palette = g_TrophyPalettes[FIRST_PLACE_INDEX];
         }
 
         if (place == SECOND_PLACE_INDEX) {
-          palette = D_800FBE38[SECOND_PLACE_INDEX];
+          palette = g_TrophyPalettes[SECOND_PLACE_INDEX];
         }
 
         if (place == THIRD_PLACE_INDEX) {
-          palette = D_800FBE38[THIRD_PLACE_INDEX];
+          palette = g_TrophyPalettes[THIRD_PLACE_INDEX];
         }
 
         texels = D_8023A814_ovl_01[D_802300A4_ovl_01];

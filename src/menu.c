@@ -581,11 +581,11 @@ void LoadMenuResources(void) {
     ReadAssetFile(D_80105B78[index], size, &file);
   }
 
-  for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
+  for (index = 0; index != ARRAY_COUNT(g_TrophyPalettes); index++) {
     OpenAssetFile(g_TrophyPaletteFiles[0][index], &file);
     size = GetAssetFileSize(&file);
-    D_800FBE38[index] = AllocMemory(size);
-    ReadAssetFile(D_800FBE38[index], size, &file);
+    g_TrophyPalettes[index] = AllocMemory(size);
+    ReadAssetFile(g_TrophyPalettes[index], size, &file);
   }
 
   g_MenuSpareImages[0] =
@@ -635,8 +635,8 @@ void FreeMenuResources(void) {
     FreeMemory(&D_800FF4C4[index]);
   }
 
-  for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
-    FreeMemory(&D_800FBE38[index]);
+  for (index = 0; index != ARRAY_COUNT(g_TrophyPalettes); index++) {
+    FreeMemory(&g_TrophyPalettes[index]);
   }
 
   for (index = 0; index != ARRAY_COUNT(g_MenuArrowSizedImages); index++) {
