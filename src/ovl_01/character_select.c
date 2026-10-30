@@ -1528,9 +1528,6 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020BA08_ovl_01);
 #endif
 
-/* Doesn't match: the first loop's index and count take each other's registers
- */
-#ifdef NON_MATCHING
 s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
   s32 freePalette = 0;
   s32 playerIndex = 0;
@@ -1538,7 +1535,6 @@ s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
   CharacterId character = D_8022FF50_ovl_01[choiceIndex];
   s32 unused[4];
   s32 samePlayers[MAX_PLAYER_COUNT];
-  s32 palette;
   s32 sameIndex;
 
   for (; playerIndex != g_ChoosingPlayerIndex; playerIndex++) {
@@ -1548,15 +1544,18 @@ s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
   }
 
   if (sameCount != 0) {
-    for (palette = 0; palette != CHARACTER_PALETTE_COUNT; palette++) {
+    /* The palette search reuses playerIndex, which the original does to keep
+     * the first loop's index and count in their registers */
+    for (playerIndex = 0; playerIndex != CHARACTER_PALETTE_COUNT;
+        playerIndex++) {
       for (sameIndex = 0; sameIndex != sameCount; sameIndex++) {
-        if ((s8)g_Players[samePlayers[sameIndex]].paletteIndex == palette) {
+        if ((s8)g_Players[samePlayers[sameIndex]].paletteIndex == playerIndex) {
           break;
         }
       }
 
       if (sameIndex == sameCount) {
-        freePalette = palette;
+        freePalette = playerIndex;
         break;
       }
     }
@@ -1566,9 +1565,6 @@ s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
 
   return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C2D8_ovl_01);
-#endif
 
 void func_8020C3B8_ovl_01(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
