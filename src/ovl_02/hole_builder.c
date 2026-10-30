@@ -603,18 +603,25 @@ void ShadeGroundTiles(void);
 void CastBillboardShadows(void);
 void MoveRingsToEnd(void);
 
+/*
+ * The objects before the loader thread's stack are defined in order, as the
+ * stack is global; see ORDERED_BSS. KMC aligns the statics it allocates
+ * more strictly than the others, so the ordered ones state the original's
+ * alignment where it differs.
+ */
 /* A PAINT_LOGIC_* value */
-static s32 f_PaintLogic;
+static s32 f_PaintLogic ORDERED_BSS = 0;
 
 /* Read by no routine */
-static u8 D_80255324_ovl_02[12] UNUSED;
+static u8 D_80255324_ovl_02[12] ORDERED_BSS UNUSED = {0};
 
-static u8* f_ReadCursor;
-static AssetFile f_HoleAsset;
+static u8* f_ReadCursor ORDERED_BSS = NULL;
+static AssetFile f_HoleAsset ORDERED_BSS __attribute__((aligned(8))) = {0};
 
-/* Read by no routine; two objects, as one would be aligned to 16 bytes */
-static u8 D_80255348_ovl_02[8] UNUSED;
-static u8 D_80255350_ovl_02[0x8000] UNUSED;
+/* Read by no routine */
+static u8 D_80255348_ovl_02[8] ORDERED_BSS UNUSED = {0};
+u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE] ORDERED_BSS
+    __attribute__((aligned(16))) = {0};
 
 static u8* f_BuildBuffer;
 static u8* f_BuildCursor;

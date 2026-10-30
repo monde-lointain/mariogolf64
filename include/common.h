@@ -69,6 +69,19 @@ typedef f32 Mat4[4][4];
 #define FILE_STATIC static
 #endif
 
+/*
+ * Follows the declarator of a zero-initialized variable that the original
+ * places in .bss before the file's uninitialized statics. KMC GCC 2.7.2
+ * emits those statics after everything else in .bss, but an initialized
+ * variable where it is defined, and only honours a section attribute on an
+ * initialized variable.
+ */
+#ifdef __IS_KMC__
+#define ORDERED_BSS __attribute__((section(".bss")))
+#else
+#define ORDERED_BSS
+#endif
+
 /* Zero is false, and any other value true, as C tests it */
 typedef s32 Boolean;
 

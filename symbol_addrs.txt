@@ -1846,6 +1846,7 @@ f_PaintLogics = 0x802542A4; // size:0x104 segment:ovl_02
 f_IsCodeMapCleaned = 0x802543A8; // size:0x4 segment:ovl_02
 f_HoleAssetIds = 0x802543AC; // size:0x8A0 segment:ovl_02
 f_PaintLogic = 0x80255320; // size:0x4 segment:ovl_02
+g_LoaderThreadStack = 0x80255350; // size:0x8000 segment:ovl_02
 f_ReadCursor = 0x80255330; // size:0x4 segment:ovl_02
 f_HoleAsset = 0x80255338; // size:0x10 segment:ovl_02
 f_BuildBuffer = 0x8025D350; // size:0x4 segment:ovl_02

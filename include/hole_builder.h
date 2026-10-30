@@ -16,6 +16,13 @@ typedef struct GridOffset {
   /* 0x2 */ u16 distance;
 } GridOffset; /* size = 0x4 */
 
+/*
+ * The stack of the thread that loads a hole, which runs the hole builder, so
+ * the builder's overlay holds it
+ */
+#define LOADER_THREAD_STACK_SIZE 0x8000
+extern u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE];
+
 s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount);
 f32 MeasureGroundTiles(void);
 void BuildHole(s32 course, s32 hole);

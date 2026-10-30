@@ -143,7 +143,6 @@ volatile Boolean g_HasLoaderFinished = TRUE;
 /* Read by no routine */
 static s32 D_800C3FAC UNUSED = 0;
 static OSThread f_LoaderThread;
-extern u8 D_8025D350[];
 HolePoints g_HolePoints;
 s32 g_HoleTimeFrames[COURSE_HOLE_COUNT];
 s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT];
@@ -1030,8 +1029,8 @@ void StartLoaderThread(void) {
   UnloadOverlay(GetOverlayOfModule(MODULE_SHOT_SIMULATION));
   LoadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
   osCreateThread(&f_LoaderThread, LOADER_THREAD_ID,
-      (void (*)(void*))RunLoaderThread, NULL, D_8025D350,
-      LOADER_THREAD_PRIORITY);
+      (void (*)(void*))RunLoaderThread, NULL,
+      &g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE], LOADER_THREAD_PRIORITY);
   osStartThread(&f_LoaderThread);
   g_HasLoaderFinished = FALSE;
   BuildNoiseTexture();
