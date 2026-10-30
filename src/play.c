@@ -695,8 +695,8 @@ void func_80060358(void) {
   SaveOrContinueGameByMode(FALSE);
   ClearShotEffects(CLEAR_KIND_EFFECTS);
   g_GameState.step = GAME_STATE_HOLE_END;
-  f_PlayExit = 3;
-  f_HoleEndStep = 9;
+  f_PlayExit = PLAY_EXIT_TITLE;
+  f_HoleEndStep = HOLE_END_STEP_QUIT;
 }
 
 s32 func_800603A8(void) {
