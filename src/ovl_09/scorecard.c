@@ -1383,11 +1383,7 @@ void FreeResultCharacters(void) {
  * Starts loading the two players' characters to react to who did better on
  * the last hole, and plays the result's song. Returns FALSE while the
  * character slots are still busy.
- *
- * Doesn't match: the target loads the first player's stroke count for the
- * song into $a0, where this uses $a1.
  */
-#ifdef NON_MATCHING
 s32 LoadResultCharacters(void) {
   s32 holeIndex = g_Scorecard.content.holeIndex - 1;
   SongId song;
@@ -1404,8 +1400,9 @@ s32 LoadResultCharacters(void) {
       (s8)g_Players[1].paletteIndex);
   song = SONG_MATCH_RESULT;
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-    if (g_Players[0].holes[holeIndex].strokes <
-        g_Players[1].holes[holeIndex].strokes) {
+    /* The original passes the strokes through song's register */
+    song = g_Players[0].holes[holeIndex].strokes;
+    if (song < g_Players[1].holes[holeIndex].strokes) {
       song = SONG_HOLE_WON;
     } else if (g_Players[1].holes[holeIndex].strokes <
         g_Players[0].holes[holeIndex].strokes) {
@@ -1433,9 +1430,6 @@ s32 LoadResultCharacters(void) {
   SetAnimationSpeed(1, 1.0f);
   return TRUE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", LoadResultCharacters);
-#endif
 
 /*
  * Counts the last hole's result onto the scorecard. Returns TRUE once it is
