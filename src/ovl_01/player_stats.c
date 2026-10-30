@@ -1959,8 +1959,11 @@ void LoadScoreLabelBuffer(void* buffer, s16 bufferKind) {
   }
 }
 
-/* FindNextBestShotCell is called without a prototype; the original extends its
- * result from 16 bits, not 8 */
+/* Returns s32 rather than s8: the callers cast the result to s16, and an s8
+ * result would make GCC first extend it from 8 bits, which the original does
+ * not */
+s32 FindNextBestShotCell(s8 column, s8 row, u8 direction);
+
 void UpdateBestShots(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
@@ -2405,7 +2408,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", ReadBestShots);
  * Returns the column or row of the next shot from (column, row) in direction,
  * wrapping, or -1 if that line holds no shot
  */
-s8 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
+s32 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
   s32 stepCount;
   s32 stepIndex;
 

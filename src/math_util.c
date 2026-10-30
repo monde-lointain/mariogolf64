@@ -6,6 +6,8 @@
 
 #include "math_util.h"
 
+#include "libc.h"
+
 /* The integer lengths halve their components until they are below this
  * magnitude */
 #define INT_LENGTH_COMPONENT_LIMIT 0x20000000
