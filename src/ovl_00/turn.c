@@ -1778,7 +1778,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
       player->ringStates[i] = RING_STATE_SHOWN;
     }
 
-    SetRingShotCleared(0);
+    SetRingShotCleared(FALSE);
   }
 
   player->unkA8 = 0;
@@ -4638,7 +4638,7 @@ void UpdateTurns(void) {
         } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
           reaction = REACTION_ANIMATION_BOGEY;
           if (HasNoRingsLeft(&g_Players[playerIndex])) {
-            SetRingShotCleared(1);
+            SetRingShotCleared(TRUE);
             reaction = REACTION_ANIMATION_EAGLE;
           }
         } else if (g_Players[playerIndex].strokeCount == 1) {
