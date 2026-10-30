@@ -239,7 +239,7 @@ void LoadCourseTrophyImages(void** buffers, s32 requestedKind) {
     }
 
     for (index = 0; index != COURSE_FILE_COUNT; index++) {
-      OpenAssetFile(g_CourseTrophyFiles[memory->statsCourse][index], &file);
+      OpenAssetFile(g_TrophyPaletteFiles[memory->statsCourse][index], &file);
       ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
     }
   }
@@ -336,7 +336,7 @@ void UpdateCourseStats(void) {
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
           for (index = 0; index != COURSE_FILE_COUNT; index++) {
             OpenAssetFile(
-                g_CourseTrophyFiles[memory->statsCourse][index], &file);
+                g_TrophyPaletteFiles[memory->statsCourse][index], &file);
             ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
           }
         }
@@ -358,7 +358,7 @@ void UpdateCourseStats(void) {
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
           for (index = 0; index != COURSE_FILE_COUNT; index++) {
             OpenAssetFile(
-                g_CourseTrophyFiles[memory->statsCourse][index], &file);
+                g_TrophyPaletteFiles[memory->statsCourse][index], &file);
             ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
           }
         }

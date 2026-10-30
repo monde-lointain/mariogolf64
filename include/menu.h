@@ -80,7 +80,7 @@ extern u8 g_AreBetPagesBlocked;
 extern AssetId g_TrophyFrameAssets[][COURSE_IMAGE_COUNT];
 /* Ends a course's images before COURSE_IMAGE_COUNT */
 #define TROPHY_FRAME_END (-1)
-extern s16 g_CourseTrophyFiles[][COURSE_FILE_COUNT];
+extern s16 g_TrophyPaletteFiles[][COURSE_FILE_COUNT];
 extern void* D_800FBE38[COURSE_FILE_COUNT];
 /* The menus' ASSET_COURSE_SCENE: the sky and the course select's backdrops */
 extern void* g_MenuCourseSceneryAsset;

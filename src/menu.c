@@ -188,7 +188,7 @@ AssetId g_TrophyFrameAssets[][COURSE_IMAGE_COUNT] = {
         0x08CE, 0x08CF, 0x08D0, 0x08D1, 0x08D2, 0x08D3, 0x08D4},
     {0x08AE, 0x08AD, 0x08AC, 0x08AB, 0x08AA, 0x08A9, 0x08A8, 0x08A7, 0x08A6,
         0x08A5, 0x08A4, 0x08A3, 0x08A2, 0x08A1, 0x08A0, TROPHY_FRAME_END}};
-s16 g_CourseTrophyFiles[][COURSE_FILE_COUNT] = {{0x088C, 0x088B, 0x088A},
+s16 g_TrophyPaletteFiles[][COURSE_FILE_COUNT] = {{0x088C, 0x088B, 0x088A},
     {0x08B1, 0x08B0, 0x08AF}, {0x0879, 0x0878, 0x0877},
     {0x08D7, 0x08D6, 0x08D5}, {0x08C4, 0x08C3, 0x08C2},
     {0x089F, 0x089E, 0x089D}};
@@ -582,7 +582,7 @@ void LoadMenuResources(void) {
   }
 
   for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
-    OpenAssetFile(g_CourseTrophyFiles[0][index], &file);
+    OpenAssetFile(g_TrophyPaletteFiles[0][index], &file);
     size = GetAssetFileSize(&file);
     D_800FBE38[index] = AllocMemory(size);
     ReadAssetFile(D_800FBE38[index], size, &file);
