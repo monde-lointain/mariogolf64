@@ -201,8 +201,8 @@ static AssetId f_MenuWindowImageAssets[15] = {0x07C0, 0x0750, 0x07A4, 0x0742,
     0x0988, 0x0958};
 /* The image files that LoadMenuWindowPalette picks from, by row and column */
 // clang-format off
-static s16 D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT]
-                            [TOURNAMENT_IMAGE_COLUMN_COUNT] = {
+static s16 f_MenuWindowPaletteFiles[TOURNAMENT_IMAGE_ROW_COUNT]
+                                   [TOURNAMENT_IMAGE_COLUMN_COUNT] = {
   { 0x07B8, 0x07B9, 0x07BA, 0x07BB },
   { 0x0748, 0x0749, 0x074A, 0x074B },
   { 0x079C, 0x079D, 0x079E, 0x079F },
@@ -432,7 +432,7 @@ void LoadTournamentBuffer(void* buffer, s16 bufferKind) {
     case TOURNAMENT_BUFFER_ROW_FILE:
       f_MenuWindowPalette = buffer;
       OpenAssetFile(
-          D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT - 1][0], &file);
+          f_MenuWindowPaletteFiles[TOURNAMENT_IMAGE_ROW_COUNT - 1][0], &file);
       ReadAssetFile(f_MenuWindowPalette, (s16)GetAssetFileSize(&file), &file);
       break;
   }
@@ -476,8 +476,8 @@ void LoadMenuWindowImage(s32 imageIndex) {
 }
 
 /*
- * Reads the palette of the window's picture, a row of D_80230EC4, in the color
- * that column picks
+ * Reads the palette of the window's picture, a row of f_MenuWindowPaletteFiles,
+ * in the color that column picks
  */
 void LoadMenuWindowPalette(s32 row, s32 column) {
   AssetFile file;
@@ -498,7 +498,7 @@ void LoadMenuWindowPalette(s32 row, s32 column) {
     column = TOURNAMENT_IMAGE_COLUMN_COUNT - 1;
   }
 
-  OpenAssetFile(D_80230EC4_ovl_01[row][column], &file);
+  OpenAssetFile(f_MenuWindowPaletteFiles[row][column], &file);
   ReadAssetFile(f_MenuWindowPalette, (s16)GetAssetFileSize(&file), &file);
 }
 
