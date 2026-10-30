@@ -53,8 +53,8 @@ enum GridMove {
  * into the menu's buffer */
 #define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
 
-/* func_8020C3B8 draws D_8023A568 in strips, then the right half of the second
- * image */
+/* DrawCharacterBoard draws D_8023A568 in strips, then the right half of the
+ * second image */
 #define BOARD_WIDTH 288
 #define BOARD_STRIP_HEIGHT 11
 #define BOARD_STRIP_COUNT 16
@@ -136,7 +136,7 @@ typedef struct TagOffset {
 void DrawMenuScenery(Gfx** displayListHead);
 void DrawMenuBanner(Gfx** displayListHead);
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer);
-void func_8020C3B8_ovl_01(Gfx** displayListHead);
+void DrawCharacterBoard(Gfx** displayListHead);
 void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode);
 /* The original passes these a second argument that they ignore */
 void func_8020D338_ovl_01();
@@ -1317,7 +1317,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
   DrawMenuScenery(&gfx);
   DrawMenuBanner(&gfx);
-  func_8020C3B8_ovl_01(&gfx);
+  DrawCharacterBoard(&gfx);
   DrawGridFaces(&gfx, (u8)isSinglePlayer);
   if ((u8)isSinglePlayer == TRUE) {
     func_8020C6D8_ovl_01(&gfx, 2);
@@ -1594,7 +1594,8 @@ s32 GetUnusedPalette(s32 choiceIndex) {
   return 0;
 }
 
-void func_8020C3B8_ovl_01(Gfx** displayListHead) {
+/* Draws the wooden board of character cells, then its "Drive:" label */
+void DrawCharacterBoard(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripTop;
