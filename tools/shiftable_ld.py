@@ -14,6 +14,14 @@ the overlays follow the assets, which stay at their original address, as
 data holds the addresses of files in them, and the padding after the
 assets is dropped. Other segments, such as an overlay of the Expansion
 Pak's memory, keep their addresses.
+
+The routines that the build links from archives, such as the libgcc
+helpers that a modern GCC calls, go at the end of main's code, where
+every segment can call them.
+
+The matching build defines main's common objects in one file at the
+original's addresses, which this layout leaves out. Each object of main
+keeps its commons with its bss instead, as the overlays' objects do.
 """
 
 import re
@@ -29,6 +37,11 @@ ALIGNMENT = 16
 MAIN = "main"
 BUILD_DATE = "build_date"
 PADDING = "padding"
+
+MAIN_TEXT_END = f"        {MAIN}_TEXT_END = .;\n"
+ARCHIVE_SECTIONS = "        *.a:*(.text* .rodata* .data*);\n"
+MAIN_BSS_END = f"        {MAIN}_BSS_END = .;\n"
+OBJECT_BSS = re.compile(r"^(\s*\S+\.o)\(\.bss\*\);$", re.MULTILINE)
 
 BLOCK_NAME = re.compile(r"^\s*(\w+)_ROM_START = __romPos;$", re.MULTILINE)
 SECTION_VRAM = re.compile(r"^(\s*\.\w+) (0x[0-9A-Fa-f]+) :", re.MULTILINE)
@@ -54,6 +67,23 @@ def max_of(symbols: list[str]) -> str:
     return expression
 
 
+def place_unlisted_sections(blocks: list[str], main_index: int) -> None:
+    """Add to main's blocks the archives' sections and the common symbols."""
+    if MAIN_TEXT_END not in blocks[main_index]:
+        sys.exit(f"expected {MAIN} to have code")
+    blocks[main_index] = blocks[main_index].replace(
+        MAIN_TEXT_END, ARCHIVE_SECTIONS + MAIN_TEXT_END, 1
+    )
+    bss_index = next(
+        (index for index, block in enumerate(blocks) if MAIN_BSS_END in block), None
+    )
+    if bss_index is None:
+        sys.exit(f"expected {MAIN} to have bss")
+    blocks[bss_index] = OBJECT_BSS.sub(
+        r"\g<0>\n\1(COMMON .scommon*);", blocks[bss_index]
+    )
+
+
 def lay_out(script: str) -> str:
     """Return SCRIPT, splat's linker script, laid out to let code grow."""
     head, separator, rest = script.partition("SECTIONS\n{\n")
@@ -66,6 +96,7 @@ def lay_out(script: str) -> str:
         sys.exit(f"expected segments named {MAIN} and {BUILD_DATE}")
 
     main_index = names.index(MAIN)
+    place_unlisted_sections(blocks, main_index)
     build_date = blocks[names.index(BUILD_DATE)]
     # Segments without an address of their own, such as the assets, follow
     # the build date in ROM

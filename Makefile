@@ -7,20 +7,27 @@ SPLAT_DIR   := build/splat
 SPLAT_LD    := $(SPLAT_DIR)/$(TARGET).ld
 KMC_DIR     := tools/gcc_kmc
 
-# Set MODERN=1 to build with a modern GCC instead of KMC GCC 2.7.2. The
-# ROM it makes doesn't match; it's for checking that the code is portable
-# and, once every address is symbolic, for building a shiftable ROM.
-MODERN      ?= 0
-# Set NON_MATCHING=1 to build with decompiled-but-unmatched C instead of asm
+# Set NON_MATCHING=1 to build the C drafts of the routines that don't match
+# yet in place of their asm. Its ROM doesn't match, so it's laid out to let
+# code and data move (see the layouts below).
 NON_MATCHING ?= 0
+# Set MODERN=1 to build with a modern GCC instead of KMC GCC 2.7.2. Its code
+# differs in size from the original's, so it builds the drafts too.
+MODERN      ?= 0
+ifneq ($(MODERN),0)
+override NON_MATCHING := 1
+endif
 # Set COMPARE=0 to skip the checksum comparison at the end of the build
 COMPARE      ?= 1
+ifneq ($(NON_MATCHING),0)
+override COMPARE := 0
+endif
 # Set WARNINGS="-Wall -W" to see the compiler's warnings
 WARNINGS    ?= -w
-
-# The two toolchains, and what differs between their builds
+# The two toolchains, and what differs between their builds. Each build has
+# its own directory, so that no build links another's objects.
 ifeq ($(MODERN),0)
-BUILD_DIR   := build
+BUILD_DIR   := build$(if $(filter-out 0,$(NON_MATCHING)),/nonmatching)
 CROSS       := mips-linux-gnu-
 BIN_FORMAT  := elf32-tradbigmips
 CC          := COMPILER_PATH=$(KMC_DIR) $(KMC_DIR)/gcc
@@ -31,15 +38,14 @@ TARGETFLAGS := -G0 -mips3 -mgp32 -mfp32 -mno-abicalls -fno-PIC
 # Lays out statics the way the KMC assembler did, giving 8-byte alignment
 # to anything of 8 bytes or more
 KMC_ALIGN   := -Wa,--force-n64align
-GAME_CFLAGS := -ffast-math $(KMC_ALIGN)
 # Lets the sources keep the original's quirks that only KMC GCC accepts
 GAME_DEFINES := -D__IS_KMC__=1
+# The game's code was built with -ffast-math
+FAST_MATH   := -ffast-math
 ULTRALIB_COMPILER := gcc
-LD_SCRIPT   := $(SPLAT_LD)
-MATCHING_ONLY_O :=
+LIBS        :=
 else
 BUILD_DIR   := build/modern
-COMPARE     := 0
 # libdragon's toolchain, built for the VR4300 with an o32 multilib, and its
 # own binutils, whose linker takes its objects' flags
 N64_INST    ?= /opt/libdragon
@@ -47,25 +53,50 @@ CROSS       := $(N64_INST)/bin/mips64-elf-
 BIN_FORMAT  := elf32-bigmips
 CC          := $(CROSS)gcc
 LIB_CC      := $(CC)
+# The code was written for a compiler that took it as it reads. Where it
+# indexes past an array, such as a row of a 2D array taken as the whole
+# array, or overflows a signed integer, modern GCC would assume it doesn't
+# and cut loops short or drop checks. These keep KMC GCC's meaning.
+KMC_SEMANTICS := -fno-aggressive-loop-optimizations -fwrapv -fno-delete-null-pointer-checks
 # GNU C89 keeps the meaning of the sources' old-style declarations.
 # -fno-common makes a second definition of a variable an error, where KMC
 # GCC would merge it. -fno-toplevel-reorder keeps the statics that only
 # included asm uses.
 TARGETFLAGS := -G0 -march=vr4300 -mabi=32 -mfix4300 -mno-abicalls -fno-PIC -std=gnu89 -fno-common \
                -ffreestanding -fno-strict-aliasing -mdivide-breaks -fno-toplevel-reorder \
-               -fno-math-errno
+               -fno-math-errno $(KMC_SEMANTICS)
 KMC_ALIGN   :=
-GAME_CFLAGS :=
 GAME_DEFINES :=
+# Modern GCC's -ffast-math reorders the float math enough that the ball
+# lands elsewhere, which throws the opening and the demos off their scripts
+FAST_MATH   :=
 # ultralib's own settings for modern GCC
 ULTRALIB_COMPILER := modern_gcc
 ULTRALIB_MODERN := -DMODERN_CC
-# splat's linker script names the objects under build/, so this build
-# links a copy that names them under its own directory
-LD_SCRIPT   := $(BUILD_DIR)/$(TARGET).ld
+# The helpers, such as 64-bit shifts, that GCC calls rather than inlines
+LIBS        := $(shell $(CC) $(TARGETFLAGS) -print-libgcc-file-name)
+endif
+
 # main_bss.c only pins main's common objects at the original's addresses.
 # Without it, each object is placed with the module that defines it.
 MATCHING_ONLY_O := build/src/main_bss.c.o
+# The fixed-address symbols that the original's layout gives the asm
+SYMBOL_SCRIPTS := undefined_syms.txt $(SPLAT_DIR)/undefined_syms_auto.txt \
+                  $(SPLAT_DIR)/undefined_funcs_auto.txt
+
+# The two layouts. The matching build places everything where the original
+# has it, and gives the asm the original's addresses. The shiftable layout
+# packs the overlays (see tools/shiftable_ld.py) and keeps only the symbols
+# outside the original's segments (see tools/fixed_syms.py), so that a
+# reference that holds only at the original's addresses fails to link.
+SHIFTABLE_LD      := $(BUILD_DIR)/shiftable.ld
+SHIFTABLE_SYMBOLS := $(BUILD_DIR)/fixed_syms.ld
+ifeq ($(NON_MATCHING),0)
+LD_SCRIPTS  := $(SPLAT_LD) $(SYMBOL_SCRIPTS)
+LINKED_O_FILTER :=
+else
+LD_SCRIPTS  := $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
+LINKED_O_FILTER := $(MATCHING_ONLY_O)
 endif
 
 ROM         := $(BUILD_DIR)/$(TARGET).z64
@@ -82,8 +113,11 @@ PYTHON      := .venv/bin/python3
 INCLUDES    := -Iinclude -Iinclude/libc -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/libmus/include -Isrc -I$(BUILD_DIR)
 DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -DBUILD_VERSION=VERSION_J \
                $(GAME_DEFINES)
+# A ROM that doesn't match moves the code and data, so it must also avoid
+# the original's undefined behavior, such as accesses past the end of an
+# object, which only hit what happened to follow it
 ifneq ($(NON_MATCHING),0)
-DEFINES     += -DNON_MATCHING
+DEFINES     += -DNON_MATCHING -DAVOID_UB
 endif
 
 # Each compile lists the headers it read in a .d file beside its object, so
@@ -94,18 +128,14 @@ endif
 # file, so the old list goes first.
 DEPS         = rm -f $(@:.o=.d); SUNPRO_DEPENDENCIES='$(@:.o=.d) $@'
 
-OPTFLAGS    := -O2
-CFLAGS       = $(TARGETFLAGS) $(GAME_CFLAGS) -nostdinc -funsigned-char $(WARNINGS) $(OPTFLAGS)
+CFLAGS       = $(TARGETFLAGS) $(FAST_MATH) $(KMC_ALIGN) -nostdinc -funsigned-char $(WARNINGS) $(OPTFLAGS)
 ASFLAGS     := -march=vr4300 -mabi=32 -G0 -EB -no-pad-sections -Iinclude
 # ld lays out each object's common symbols in the order of its symbol hash
 # table's buckets. The table grows with the symbol count unless it starts big
 # enough, so fix its size to keep the commons where the names put them.
 LD_HASH_SIZE := 8191
-# The addresses of the symbols that no object defines
-SYMBOL_SCRIPTS := undefined_syms.txt $(SPLAT_DIR)/undefined_syms_auto.txt \
-                  $(SPLAT_DIR)/undefined_funcs_auto.txt
 LAYOUT_FLAGS   := --no-check-sections --hash-size=$(LD_HASH_SIZE) -G 0
-LDFLAGS         = -T $(LD_SCRIPT) $(addprefix -T ,$(SYMBOL_SCRIPTS)) -Map $(MAP) $(LAYOUT_FLAGS)
+LDFLAGS         = $(addprefix -T ,$(LD_SCRIPTS)) -Map $(MAP) $(LAYOUT_FLAGS)
 
 # Host-side syntax checking of C sources with clang, pretending to be 32-bit MIPS
 CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m32 -nostdinc \
@@ -114,7 +144,7 @@ CC_CHECK       := clang -fsyntax-only -fno-builtin -funsigned-char -std=gnu89 -m
 RUN_CC_CHECK   ?= 0
 
 # Every object the linker script asks for, under this build's directory
-O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(filter-out $(MATCHING_ONLY_O),$(shell \
+O_FILES := $(patsubst build/%,$(BUILD_DIR)/%,$(filter-out $(LINKED_O_FILTER),$(shell \
   test -f $(SPLAT_LD) && grep -oE 'build/[A-Za-z0-9_./-]+\.o' $(SPLAT_LD) | sort -u)))
 
 # libultra 2.0J, built the way ultralib builds libgultra_rom except that the
@@ -123,7 +153,7 @@ ULTRALIB_DIR      := lib/ultralib
 ULTRALIB_INCLUDES := -I$(ULTRALIB_DIR)/include -I$(ULTRALIB_DIR)/include/compiler/$(ULTRALIB_COMPILER) -I$(ULTRALIB_DIR)/include/PR
 ULTRALIB_DEFINES  := $(ULTRALIB_MODERN) -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI -DBUILD_VERSION=VERSION_J \
                      -DBUILD_VERSION_STRING=\"2.0J\" -DNDEBUG -D_FINALROM
-ULTRALIB_CFLAGS   := -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C -O3
+ULTRALIB_CFLAGS    = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS)
 ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc $(TARGETFLAGS) -P \
                      -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64
 
@@ -132,34 +162,46 @@ ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc $(TARGETFLAGS) -P \
 LIBMUS_DIR        := lib/libmus
 LIBMUS_INCLUDES   := -I$(LIBMUS_DIR)/src -I$(LIBMUS_DIR)/include $(ULTRALIB_INCLUDES)
 LIBMUS_DEFINES    := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DSUPPORT_NAUDIO
-LIBMUS_CFLAGS     := -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C -O3 $(KMC_ALIGN)
+LIBMUS_CFLAGS      = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
 # n_audio, built from the SDK's n_audio_sc sources for the n_aspMain
 # microcode as other games of the time built it
 LIBNAUDIO_DIR      := lib/libnaudio
 LIBNAUDIO_INCLUDES := -I$(LIBNAUDIO_DIR)/src -I$(LIBNAUDIO_DIR)/include $(ULTRALIB_INCLUDES)
 LIBNAUDIO_DEFINES  := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DN_MICRO
-LIBNAUDIO_CFLAGS   := $(LIBMUS_CFLAGS)
+LIBNAUDIO_CFLAGS    = $(LIBMUS_CFLAGS)
 
-# NuSystem, with the defines of the SDK makefile's ROM library but at -O2,
-# the level the game's copy was built at. Like the SDK's nusys.o, the boot
-# code is built without optimization. The scheduler is built with NU_DEBUG,
-# which keeps its task performance measurements. The sources keep the SDK's CRLF line
+# NuSystem, with the defines of the SDK makefile's ROM library. The
+# scheduler is built with NU_DEBUG, which keeps its task performance
+# measurements. The sources keep the SDK's CRLF line
 # endings, and KMC's preprocessor doesn't join lines that end in a backslash
 # and a carriage return, so they're compiled from copies without the CRs.
 LIBNUSYS_DIR       := lib/libnusys
 LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR) $(ULTRALIB_INCLUDES)
 LIBNUSYS_DEFINES   := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
-LIBNUSYS_OPTFLAGS  := -O2
-LIBNUSYS_CFLAGS     = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(LIBNUSYS_OPTFLAGS) $(KMC_ALIGN)
+LIBNUSYS_CFLAGS     = -w -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
 # libkmc, KMC's C library, built like the game's code except without
 # -ffast-math, which turns divisions by constants into multiplications
 LIBKMC_DIR := lib/libkmc
-$(BUILD_DIR)/$(LIBKMC_DIR)/%.o: OPTFLAGS := -O1 -fno-fast-math
+$(BUILD_DIR)/$(LIBKMC_DIR)/%.o: FAST_MATH :=
+
+# The matching build gives each part of the game the optimization the
+# original's was built with. The modern build optimizes everything for size.
+ifeq ($(MODERN),0)
+OPTFLAGS := -O2
+$(BUILD_DIR)/$(ULTRALIB_DIR)/%.o: OPTFLAGS := -O3
+$(BUILD_DIR)/src/libultra/%.o: OPTFLAGS := -O3
+$(BUILD_DIR)/$(LIBMUS_DIR)/%.o: OPTFLAGS := -O3
+$(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.o: OPTFLAGS := -O3
+# Like the SDK's nusys.o, NuSystem's boot code is built without optimization
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: OPTFLAGS :=
+$(BUILD_DIR)/$(LIBKMC_DIR)/%.o: OPTFLAGS := -O1
+else
+OPTFLAGS := -Os
+endif
 
 # Per-object compiler flags
-$(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools format lint pycheck check-shiftable
@@ -189,11 +231,11 @@ pycheck:
 	.venv/bin/basedpyright --level warning
 	.venv/bin/vulture
 
-# Lists the references that hold only while the code and data keep their
-# original addresses. With NON_MATCHING=1, it checks the C drafts in place of
-# the asm, which names far fewer of the addresses.
-check-shiftable: $(ELF)
-	$(PYTHON) tools/check_shiftable.py $(LD) $(SPLAT_YAML) $(LD_SCRIPT) $(SYMBOL_SCRIPTS) -- $(LAYOUT_FLAGS)
+# Links this build's objects in the shiftable layout, which fails on each
+# reference that holds only while the code and data keep their original
+# addresses. The shiftable builds link that way already.
+check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
+	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf
 
 CLANG_TIDY ?= run-clang-tidy-23
 # libkmc is KMC's C library, which keeps the C library's names
@@ -228,20 +270,34 @@ clean:
 distclean:
 	rm -rf $(BUILD_DIR) asm assets
 
-# The modern build's script packs the overlays' regions, so code can grow
-$(BUILD_DIR)/$(TARGET).ld: $(SPLAT_LD) tools/shiftable_ld.py
+# splat's script names the objects under build/, so the shiftable script
+# names them under this build's directory
+$(SHIFTABLE_LD): $(SPLAT_LD) tools/shiftable_ld.py
 	@mkdir -p $(dir $@)
 	sed -e '\|$(MATCHING_ONLY_O)|d' -e 's|build/|$(BUILD_DIR)/|g' $< | $(PYTHON) tools/shiftable_ld.py > $@
 
+$(SHIFTABLE_SYMBOLS): $(SPLAT_YAML) $(SYMBOL_SCRIPTS) tools/fixed_syms.py
+	@mkdir -p $(dir $@)
+	$(PYTHON) tools/fixed_syms.py $(SPLAT_YAML) $(SYMBOL_SCRIPTS) > $@
+
+# IPL3 boots only a ROM whose header holds the checksum of the code after it
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary --gap-fill=0xFF $< $@
+	$(PYTHON) -m ipl3checksum sum --update $@ > /dev/null
 
-$(ELF): $(O_FILES) $(LD_SCRIPT) undefined_syms.txt
-	$(LD) $(LDFLAGS) -o $@
+$(ELF): $(O_FILES) $(LD_SCRIPTS)
+	$(LD) $(LDFLAGS) -o $@ $(LIBS)
 
 $(BUILD_DIR)/%.s.o: %.s
 	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) -o $@ $<
+
+# The RSP loads its microcode by DMA from addresses aligned to 8 bytes. The
+# SDK's microcode objects align it to 16, which the original's layout keeps.
+$(BUILD_DIR)/asm/data/%.s.o: asm/data/%.s
+	@mkdir -p $(dir $@)
+	$(AS) $(ASFLAGS) -o $@ $<
+	$(OBJCOPY) --set-section-alignment .text=16 --set-section-alignment .data=16 $@
 
 $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
@@ -320,7 +376,6 @@ $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.s
 	@mkdir -p $(dir $@)
 	$(DEPS) $(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
--include $(BUILD_DIR)/splat/$(TARGET).d
 -include $(O_FILES:.o=.d)
 # A header that a .d file lists but that has since gone only forces the
 # rebuild that writes a new list
