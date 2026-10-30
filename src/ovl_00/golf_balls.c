@@ -85,6 +85,13 @@ typedef struct BallAfterimage {
   /* 0x10 */ Boolean isInCup;
 } BallAfterimage; /* size = 0x14 */
 
+/* A ball's screen pixel and depth, as the start of a ScreenPoint gives them */
+typedef struct BallScreenPoint {
+  /* 0x0 */ s32 x;
+  /* 0x4 */ s32 y;
+  /* 0x8 */ s32 depth;
+} BallScreenPoint; /* size = 0xC */
+
 /* Read by no routine */
 static Gfx D_8021FE60_ovl_00[] = {gsSPEndDisplayList()};
 static u16 f_BooMouthTexture[] = {
@@ -308,9 +315,7 @@ static s32 f_BallRollFrame = 0;
 void func_801FD5F0_ovl_00(void) {}
 
 /* Where the ball of the player whose turn it is was last drawn */
-static s32 f_CurrentBallScreenX;
-static s32 f_CurrentBallScreenY;
-static s32 f_CurrentBallDepth;
+static BallScreenPoint f_CurrentBallScreenPoint;
 static u8* f_BallShadowImage;
 static u8* f_RollingBallImage;
 static u8* f_BallSparkleImage;
@@ -938,9 +943,9 @@ void DrawGolfBalls(CameraMatrices* matrices) {
             primDepth &= ~3;
             if (g_GameState.currentPlayerIndex == i) {
               isCurrentBallAboveGround = isAboveGround;
-              f_CurrentBallDepth = primDepth;
-              f_CurrentBallScreenX = ballPoint.x;
-              f_CurrentBallScreenY = ballPoint.y;
+              f_CurrentBallScreenPoint.depth = primDepth;
+              f_CurrentBallScreenPoint.x = ballPoint.x;
+              f_CurrentBallScreenPoint.y = ballPoint.y;
             }
 
             if (primDepth < 0) {
@@ -1354,8 +1359,8 @@ void DrawGolfBalls(CameraMatrices* matrices) {
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPSetPrimDepth(gfx++, f_CurrentBallDepth - 4, 0);
-    if (f_CurrentBallDepth < PIKA_BALL_DEPTH) {
+    gDPSetPrimDepth(gfx++, f_CurrentBallScreenPoint.depth - 4, 0);
+    if (f_CurrentBallScreenPoint.depth < PIKA_BALL_DEPTH) {
       for (i = 0, ball = f_GolfBalls; i < GOLF_BALL_COUNT; i++, ball++) {
         if (ball->markerPlayerIndex == BALL_NO_MARKER &&
             f_GolfBalls[i].alpha == BALL_SHOWN &&
