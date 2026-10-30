@@ -299,6 +299,10 @@ typedef struct FlyGuyPoint {
   /* 0x8 */ f32 z;
 } FlyGuyPoint;
 
+/* A point's coordinates, and a path of points, as StepAlongPath takes them */
+#define FlyGuyCoordinates(point) ((f32*)&(point))
+#define FlyGuyPathCoordinates(path) ((f32(*)[AXIS_COUNT])(path))
+
 /* Frames since the banner started, or BANNER_FRAME_NONE */
 static s32 f_BannerFrame = BANNER_FRAME_NONE;
 static s32 f_CurrentBanner = BANNER_NONE;
@@ -2922,7 +2926,7 @@ void ShowWindFlyGuy(s32 show) {
 }
 
 #define WIND_FLY_GUY_PATH_POINT_COUNT 17
-#define WIND_FLY_GUY_PATH_PACE 12
+#define WIND_FLY_GUY_PATH_PACE PathPace(1, 2)
 #define WIND_FLY_GUY_FRAME_COUNT 14
 /* f_WindFlyGuyFrame while the Fly Guy flies its path; after it, the frame
  * counts up as the streak fades */
@@ -2980,9 +2984,9 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   OpenEncodedAsset(f_WindFlyGuyAsset, &asset);
   ReadEncodedAsset(f_MovieBuffer, &asset);
   if (f_WindFlyGuyFrame < WIND_FLY_GUY_ARRIVED) {
-    if (StepAlongPath((f32(*)[AXIS_COUNT])f_WindFlyGuyPath,
+    if (StepAlongPath(FlyGuyPathCoordinates(f_WindFlyGuyPath),
             WIND_FLY_GUY_PATH_POINT_COUNT, WIND_FLY_GUY_PATH_PACE,
-            &position.x) == 1) {
+            FlyGuyCoordinates(position)) == PATH_END_REACHED) {
       f_WindFlyGuyFrame = WIND_FLY_GUY_ARRIVED;
     }
 
