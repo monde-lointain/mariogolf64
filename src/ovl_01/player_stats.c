@@ -407,7 +407,8 @@ static s16 D_80230960_ovl_01[18] = {
     0, 0, 1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
 static char D_80230984_ovl_01[STATS_GRID_ROW_COUNT][RECORD_LABEL_SIZE] = {
     "Birdie", "Eagle", "Albatross", "Hole-in-One"};
-static s8 D_802309C4_ovl_01[STATS_DIRECTION_COUNT][2] = {
+/* The column and row step of each way the Best Shots cursor moves */
+static s8 f_BestShotDirectionSteps[STATS_DIRECTION_COUNT][2] = {
     {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 /* Read by no routine */
 static s32 D_802309CC_ovl_01[8] = {64, 12, 48, 12, 80, 12, 96, 12};
@@ -2417,8 +2418,8 @@ s8 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
   }
 
   for (stepIndex = 0; stepIndex != stepCount; stepIndex++) {
-    column += D_802309C4_ovl_01[direction][0];
-    row += D_802309C4_ovl_01[direction][1];
+    column += f_BestShotDirectionSteps[direction][0];
+    row += f_BestShotDirectionSteps[direction][1];
     if (column < 0) {
       column = STATS_GRID_COLUMN_COUNT - 1;
     }
