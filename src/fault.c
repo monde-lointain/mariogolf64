@@ -308,7 +308,7 @@ INCLUDE_ASM("asm/nonmatchings/fault", PrintFaultContext);
 void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields) {
   Boolean isFirst = TRUE;
 
-  sprintf(f_FaultText, "%s\t\t0x%08x ", name, value);
+  sprintf(f_FaultText, "%s\t\t0x%08x ", name, (unsigned int)value);
   PrintFaultText();
   sprintf(f_FaultText, "<");
   PrintFaultText();

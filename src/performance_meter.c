@@ -527,43 +527,43 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   }
 
   if (readoutMode & METER_READOUT_FREE_MEMORY) {
-    sprintf(f_ReadoutText, "%06d", GetFreeMemorySize());
+    sprintf(f_ReadoutText, "%06d", (int)(GetFreeMemorySize()));
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y, f_ReadoutText);
   } else if (readoutMode & METER_READOUT_CURRENT) {
-    sprintf(f_ReadoutText, "%05d", cpuBarLength);
+    sprintf(f_ReadoutText, "%05d", (int)cpuBarLength);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y, f_ReadoutText);
   } else if (readoutMode & METER_READOUT_MAXIMUM) {
-    sprintf(f_ReadoutText, "%05d", f_CpuBarMaximum);
+    sprintf(f_ReadoutText, "%05d", (int)f_CpuBarMaximum);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y, f_ReadoutText);
   } else if (readoutMode & METER_READOUT_AVERAGE) {
-    sprintf(f_ReadoutText, "%05d", f_CpuBarAverage);
+    sprintf(f_ReadoutText, "%05d", (int)f_CpuBarAverage);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y, f_ReadoutText);
   }
 
   if (readoutMode & METER_READOUT_CURRENT) {
-    sprintf(f_ReadoutText, "%05d", rspBarLength);
+    sprintf(f_ReadoutText, "%05d", (int)rspBarLength);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT,
         f_ReadoutText);
   } else if (readoutMode & METER_READOUT_MAXIMUM) {
-    sprintf(f_ReadoutText, "%05d", f_RspBarMaximum);
+    sprintf(f_ReadoutText, "%05d", (int)f_RspBarMaximum);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT,
         f_ReadoutText);
   } else if (readoutMode & METER_READOUT_AVERAGE) {
-    sprintf(f_ReadoutText, "%05d", f_RspBarAverage);
+    sprintf(f_ReadoutText, "%05d", (int)f_RspBarAverage);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT,
         f_ReadoutText);
   }
 
   if (readoutMode & METER_READOUT_CURRENT) {
-    sprintf(f_ReadoutText, "%05d", rdpBarLength);
+    sprintf(f_ReadoutText, "%05d", (int)rdpBarLength);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + (READOUT_LINE_HEIGHT * 2),
         f_ReadoutText);
   } else if (readoutMode & METER_READOUT_MAXIMUM) {
-    sprintf(f_ReadoutText, "%05d", f_RdpBarMaximum);
+    sprintf(f_ReadoutText, "%05d", (int)f_RdpBarMaximum);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + (READOUT_LINE_HEIGHT * 2),
         f_ReadoutText);
   } else if (readoutMode & METER_READOUT_AVERAGE) {
-    sprintf(f_ReadoutText, "%05d", f_RdpBarAverage);
+    sprintf(f_ReadoutText, "%05d", (int)f_RdpBarAverage);
     DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + (READOUT_LINE_HEIGHT * 2),
         f_ReadoutText);
   }
@@ -602,11 +602,11 @@ void DrawMemoryMeter(u32 y, s32 taskFlags) {
   gSPTextureRectangle(gfx++, 250 << 2, QuarterPixels(y - 8), 302 << 2,
       QuarterPixels(y + 20), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
-  sprintf(f_ReadoutText, "% 8d", nuGfxCfbNum);
+  sprintf(f_ReadoutText, "% 8d", (int)nuGfxCfbNum);
   DrawDigits(&gfx, 252, y - 7, f_ReadoutText);
-  sprintf(f_ReadoutText, "%08d", GetFreeMemorySize());
+  sprintf(f_ReadoutText, "%08d", (int)(GetFreeMemorySize()));
   DrawDigits(&gfx, 252, y + 2, f_ReadoutText);
-  sprintf(f_ReadoutText, "%08d", FindLargestFreeMemorySize());
+  sprintf(f_ReadoutText, "%08d", (int)(FindLargestFreeMemorySize()));
   DrawDigits(&gfx, 252, y + 10, f_ReadoutText);
   gDPFullSync(gfx++);
   gSPEndDisplayList(gfx++);

@@ -1434,12 +1434,12 @@ void UpdateOpening(void) {
     }
 
     if (g_IsDebugEnabled) {
-      sprintf(g_PrintBuffer, "%04d", f_OpeningFrameCount);
+      sprintf(g_PrintBuffer, "%04d", (int)f_OpeningFrameCount);
       PrintDebugText(
           g_PrintBuffer, FRAME_COUNT_TEXT_COLUMN, FRAME_COUNT_TEXT_ROW);
-      sprintf(g_PrintBuffer, "CAMERA:%d    ", f_OpeningScene);
+      sprintf(g_PrintBuffer, "CAMERA:%d    ", (int)f_OpeningScene);
       PrintDebugText(g_PrintBuffer, SCENE_TEXT_COLUMN, SCENE_TEXT_ROW);
-      sprintf(g_PrintBuffer, "(%d)    ", f_OpeningSceneFramesLeft);
+      sprintf(g_PrintBuffer, "(%d)    ", (int)f_OpeningSceneFramesLeft);
       PrintDebugText(g_PrintBuffer, FRAMES_LEFT_TEXT_COLUMN, SCENE_TEXT_ROW);
     }
 

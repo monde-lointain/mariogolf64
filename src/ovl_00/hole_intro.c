@@ -180,7 +180,7 @@ s32 UpdateHoleIntroCamera(void) {
     }
   }
 
-  sprintf(g_PrintBuffer, "%3d", f_IntroFrame);
+  sprintf(g_PrintBuffer, "%3d", (int)f_IntroFrame);
   PrintDebugText(g_PrintBuffer, INTRO_FRAME_TEXT_COLUMN, INTRO_FRAME_TEXT_ROW);
   return FALSE;
 }

@@ -2560,22 +2560,29 @@ void BuildHole(s32 course, s32 hole) {
   if (IsGameFlagSet(GAME_FLAG_SKIP_HOST_HOLE_READ)) {
     ClearGameFlag(GAME_FLAG_SKIP_HOST_HOLE_READ);
   } else {
-    sprintf(path, "bin/course%d/hole%d%2.2d.vtx", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.vtx", (int)course, (int)course,
+        (int)hole);
     ReadHostFile(path, &size);
-    sprintf(path, "bin/course%d/hole%d%2.2d.dtx", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.dtx", (int)course, (int)course,
+        (int)hole);
     ReadHostFile(path, &size);
-    sprintf(path, "bin/course%d/hole%d%2.2d.tre", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.tre", (int)course, (int)course,
+        (int)hole);
     ReadHostFile(path, &size);
-    sprintf(path, "bin/course%d/hole%d%2.2d.hol", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.hol", (int)course, (int)course,
+        (int)hole);
     ReadHostFile(path, &size);
-    sprintf(path, "bin/course%d/hole%d%2.2d.pnt", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.pnt", (int)course, (int)course,
+        (int)hole);
     ReadHostFile(path, &size);
-    sprintf(path, "bin/course%d/hole%d%2.2d.tri", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.tri", (int)course, (int)course,
+        (int)hole);
     if (ReadHostFile(path, &size) == HOST_FILE_OK) {
       MoveRingsToEnd();
     }
 
-    sprintf(path, "bin/course%d/hole%d%2.2d.att", course, course, hole);
+    sprintf(path, "bin/course%d/hole%d%2.2d.att", (int)course, (int)course,
+        (int)hole);
     ReadHostFile(path, &size);
   }
 
@@ -2656,7 +2663,7 @@ void MoveRingsToEnd(void) {
     if (g_WorkArea.hole.triangles[i].kind == HOLE_TRIANGLE_KIND_RING) {
       for (slot = HOLE_TRIANGLE_COUNT - RING_COUNT; slot != HOLE_TRIANGLE_COUNT;
           slot++, i++) {
-        sprintf(g_PrintBuffer, "%d <-- %d", slot, i);
+        sprintf(g_PrintBuffer, "%d <-- %d", (int)slot, (int)i);
         PrintDebugText(g_PrintBuffer, RING_MOVE_LOG_COLUMN, RING_MOVE_LOG_ROW);
         g_WorkArea.hole.triangles[slot] = g_WorkArea.hole.triangles[i];
         bzero(&g_WorkArea.hole.triangles[i], sizeof(HoleTriangle));

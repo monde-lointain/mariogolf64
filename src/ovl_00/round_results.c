@@ -2796,7 +2796,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
               f_DebugUnlockCharacter++;
             }
 
-            sprintf(g_PrintBuffer, "CHARA:%2d", f_DebugUnlockCharacter);
+            sprintf(g_PrintBuffer, "CHARA:%2d", (int)f_DebugUnlockCharacter);
             PrintDebugText(g_PrintBuffer, DEBUG_UNLOCK_CHOICE_COLUMN,
                 DEBUG_UNLOCK_CHOICE_ROW);
             if (controller->pressedButtons & B_BUTTON) {
@@ -3093,7 +3093,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
       DrawDigitText(&gfx, f_ResultsSlide + BETTING_RESULTS_SCORE_X,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
-      sprintf(g_PrintBuffer, "%5d", f_PlayerBetTotals[i]);
+      sprintf(g_PrintBuffer, "%5d", (int)f_PlayerBetTotals[i]);
       DrawDigitText(&gfx,
           f_ResultsSlide + BETTING_RESULTS_BET_TOTAL_X + betShift,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),

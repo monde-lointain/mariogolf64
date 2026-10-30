@@ -984,7 +984,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
             0x00FFFF00, 0xFFFFFF00, 0);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-        sprintf(g_PrintBuffer, "Hole%d", state->holeIndex + 1);
+        sprintf(g_PrintBuffer, "Hole%d", (int)(state->holeIndex + 1));
         DrawLargeText(&gfx, f_SlideOffsets[row] + GAME_HOLE_TEXT_LEFT,
             GAME_HOLE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer);
       } else {

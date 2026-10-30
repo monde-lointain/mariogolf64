@@ -512,7 +512,7 @@ static void UpdateCharacterSounds(void) {
     }
   }
 
-  sprintf(g_PrintBuffer, "NO %3d ", f_DelayEditorKind);
+  sprintf(g_PrintBuffer, "NO %3d ", (int)f_DelayEditorKind);
   PrintDebugText(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, DELAY_EDITOR_KIND_ROW);
   for (index = 0; index != CHARACTER_COUNT; index++) {
     sprintf(g_PrintBuffer, "%3d ",

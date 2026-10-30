@@ -140,7 +140,7 @@ void UpdateClubPanelDebugValue(void) {
       f_ClubPanelDebugValue++;
     }
 
-    sprintf(g_PrintBuffer, "%3d", f_ClubPanelDebugValue);
+    sprintf(g_PrintBuffer, "%3d", (int)f_ClubPanelDebugValue);
     PrintDebugText(g_PrintBuffer, DEBUG_VALUE_COLUMN, DEBUG_VALUE_ROW);
   }
 }

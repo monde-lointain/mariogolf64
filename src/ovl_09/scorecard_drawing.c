@@ -403,7 +403,7 @@ void DrawStandingsPage(Gfx** displayListHead) {
   holeIndex = g_Scorecard.content.holeIndex;
   shift = g_Scorecard.hasBets ? 0 : NO_BETS_SHIFT;
   SetUpGradientTextDrawing(&gfx, 0);
-  sprintf(g_PrintBuffer, "Hole %d", holeIndex + g_Scorecard.isTallied);
+  sprintf(g_PrintBuffer, "Hole %d", (int)(holeIndex + g_Scorecard.isTallied));
   DrawLargeTextWithShadow(&gfx, g_Scorecard.x + STANDINGS_HOLE_LEFT,
       g_Scorecard.y + STANDINGS_HOLE_TOP, g_PrintBuffer, HOLE_NUMBER_ENV_COLOR,
       HOLE_NUMBER_PRIM_COLOR, 0);
@@ -1017,7 +1017,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
       G_IM_FMT_CI, DIGIT_GLYPH_SIZE, SKINS_DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0,
       0);
   for (i = 0; i != g_GameState.playerCount; i++) {
-    sprintf(g_PrintBuffer, "* %d", skinCounts[i]);
+    sprintf(g_PrintBuffer, "* %d", (int)skinCounts[i]);
     DrawDigitText(&gfx, g_Scorecard.x + SKINS_COUNT_LEFT,
         SKINS_COUNT_TOP + (i * SKINS_ROW_SPACING), g_PrintBuffer);
   }

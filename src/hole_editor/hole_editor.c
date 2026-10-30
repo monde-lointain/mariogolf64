@@ -995,11 +995,11 @@ void func_804002C0_hole_editor(void) {
   }
 
   sprintf(text, "SuperMacro X:%2d Z:%2d",
-      f_PointCursorColumn / GROUND_TILE_POINT_SPAN,
-      f_PointCursorRow / GROUND_TILE_POINT_SPAN);
+      (int)(f_PointCursorColumn / GROUND_TILE_POINT_SPAN),
+      (int)(f_PointCursorRow / GROUND_TILE_POINT_SPAN));
   PrintDebugText(text, POINT_TEXT_COLUMN, TILE_TEXT_ROW);
-  sprintf(text, "SubX:%d SubZ:%d", f_PointCursorColumn & TILE_POINT_MASK,
-      f_PointCursorRow & TILE_POINT_MASK);
+  sprintf(text, "SubX:%d SubZ:%d", (int)(f_PointCursorColumn & TILE_POINT_MASK),
+      (int)(f_PointCursorRow & TILE_POINT_MASK));
   PrintDebugText(text, POINT_TEXT_COLUMN, TILE_POINT_TEXT_ROW);
   SetDebugTextHighlight(TRUE);
   if (!(f_PointCursorColumn & TILE_POINT_MASK)) {
@@ -1044,8 +1044,8 @@ void func_80400FBC_hole_editor(void) {
   Boolean isStepping;
   f64 cameraDistance;
 
-  sprintf(text, "X:%d Z:%d             ", f_HolePointCursor[0],
-      f_HolePointCursor[1]);
+  sprintf(text, "X:%d Z:%d             ", (int)f_HolePointCursor[0],
+      (int)f_HolePointCursor[1]);
   PrintDebugText(text, CURSOR_TEXT_COLUMN, CURSOR_TEXT_ROW);
   g_ShowsGroundWaves = FALSE;
   isStepping = FALSE;
@@ -1694,7 +1694,7 @@ void func_80402E1C_hole_editor(void) {
   editKind = TRIANGLE_EDIT_NONE;
   stepY = 0.0f;
   g_ShowsGroundWaves = FALSE;
-  sprintf(g_PrintBuffer, "EditNo : %d   ", f_RingTriangleIndex);
+  sprintf(g_PrintBuffer, "EditNo : %d   ", (int)f_RingTriangleIndex);
   PrintDebugText(g_PrintBuffer, RING_TEXT_COLUMN, RING_TEXT_ROW);
   stepRight = 0.0f;
   stepUp = stepRight;
@@ -3339,13 +3339,13 @@ void func_80406818_hole_editor(void) {
   PrintDebugText("Save HoleData", HOLE_FILE_LABEL_COLUMN, HOLE_FILE_SAVE_ROW);
   if (f_HoleFileStep >= HOLE_FILE_STEP_COURSE) {
     PrintDebugText("Course : ", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_COURSE_ROW);
-    sprintf(courseText, "%d", f_HoleFileCourseNumber);
+    sprintf(courseText, "%d", (int)f_HoleFileCourseNumber);
     PrintDebugText(courseText, HOLE_FILE_NUMBER_COLUMN, HOLE_FILE_COURSE_ROW);
   }
 
   if (f_HoleFileStep >= HOLE_FILE_STEP_HOLE) {
     PrintDebugText("Hole   : ", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_HOLE_ROW);
-    sprintf(holeText, "%d", f_HoleFileHoleNumber);
+    sprintf(holeText, "%d", (int)f_HoleFileHoleNumber);
     PrintDebugText(holeText, HOLE_FILE_NUMBER_COLUMN, HOLE_FILE_HOLE_ROW);
   }
 }
@@ -3815,11 +3815,11 @@ void func_80407F08_hole_editor(u32* words, s32 byteCount, char* fileName) {
       line < (byteCount + HEX_DUMP_LINE_BYTES - 1) / HEX_DUMP_LINE_BYTES;
       line++) {
     lineWords = words;
-    sprintf(text, "%4.4X: ", line * HEX_DUMP_LINE_BYTES);
+    sprintf(text, "%4.4X: ", (unsigned int)(line * HEX_DUMP_LINE_BYTES));
     AppendText(text);
     for (wordIndex = 0; wordIndex < HEX_DUMP_LINE_WORDS; wordIndex++) {
-      sprintf(
-          text, "%8.8X ", lineWords[(line * HEX_DUMP_LINE_WORDS) + wordIndex]);
+      sprintf(text, "%8.8X ",
+          (unsigned int)(lineWords[(line * HEX_DUMP_LINE_WORDS) + wordIndex]));
       AppendText(text);
     }
 
@@ -4726,7 +4726,8 @@ void func_8040BFC8_hole_editor(void) {
     }
   }
 
-  sprintf(fileName, "x:\\usgolf64\\capture\\temp%02d.bmp", f_MapCaptureNumber);
+  sprintf(
+      fileName, "x:\\usgolf64\\capture\\temp%02d.bmp", (int)f_MapCaptureNumber);
   WriteHostFile(fileName, MAP_CAPTURE_SIZE);
   FreeMemory(&capture);
   f_MapCaptureNumber++;
@@ -4763,8 +4764,8 @@ void func_8040C124_hole_editor(void) {
     }
   }
 
-  sprintf(
-      g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp", f_ScreenCaptureNumber);
+  sprintf(g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp",
+      (int)f_ScreenCaptureNumber);
   WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
   FreeMemory(&capture);
   f_ScreenCaptureNumber++;
@@ -4805,7 +4806,7 @@ void func_8040C260_hole_editor(s32 captureIndex) {
     }
   }
 
-  sprintf(g_PrintBuffer, "c:/golf/capture/temp%02d.bmp", captureIndex);
+  sprintf(g_PrintBuffer, "c:/golf/capture/temp%02d.bmp", (int)captureIndex);
   WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
 }
 

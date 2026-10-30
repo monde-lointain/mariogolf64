@@ -2476,7 +2476,7 @@ void AdjustHudOffset(void) {
       f_HudOffsetY++;
     }
 
-    sprintf(g_PrintBuffer, "%3d", f_HudOffsetY);
+    sprintf(g_PrintBuffer, "%3d", (int)f_HudOffsetY);
     PrintDebugText(g_PrintBuffer, HUD_OFFSET_TEXT_COLUMN, HUD_OFFSET_TEXT_ROW);
   }
 }
@@ -3481,12 +3481,14 @@ void DrawColorTest(Gfx** displayListHead) {
     f_TestColors[f_TestColorIndex][f_TestChannelIndex] = 0;
   }
 
-  sprintf(g_PrintBuffer, "%3d  %3d  %3d", f_TestColors[COLOR_TEST_PRIM][0],
-      f_TestColors[COLOR_TEST_PRIM][1], f_TestColors[COLOR_TEST_PRIM][2]);
+  sprintf(g_PrintBuffer, "%3d  %3d  %3d", (int)f_TestColors[COLOR_TEST_PRIM][0],
+      (int)f_TestColors[COLOR_TEST_PRIM][1],
+      (int)f_TestColors[COLOR_TEST_PRIM][2]);
   PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN,
       COLOR_TEST_TEXT_ROW + COLOR_TEST_PRIM);
-  sprintf(g_PrintBuffer, "%3d  %3d  %3d", f_TestColors[COLOR_TEST_ENV][0],
-      f_TestColors[COLOR_TEST_ENV][1], f_TestColors[COLOR_TEST_ENV][2]);
+  sprintf(g_PrintBuffer, "%3d  %3d  %3d", (int)f_TestColors[COLOR_TEST_ENV][0],
+      (int)f_TestColors[COLOR_TEST_ENV][1],
+      (int)f_TestColors[COLOR_TEST_ENV][2]);
   PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN,
       COLOR_TEST_TEXT_ROW + COLOR_TEST_ENV);
   PrintDebugText(">",
@@ -4373,7 +4375,7 @@ void DrawHoleIntroText(Gfx** displayListHead) {
       DrawLargeTextWithShadow(&gfx, HOLE_TITLE_X, COURSE_NAME_Y, g_PrintBuffer,
           g_CourseNameEnvColors[g_GameState.courseIndex],
           g_CourseNamePrimColors[g_GameState.courseIndex], TEXT_FLAG_CENTERED);
-      sprintf(g_PrintBuffer, "Hole %d", g_GameState.holeIndex + 1);
+      sprintf(g_PrintBuffer, "Hole %d", (int)(g_GameState.holeIndex + 1));
       DrawLargeTextWithShadow(&gfx, HOLE_TITLE_X, HOLE_NUMBER_Y, g_PrintBuffer,
           g_CourseNameEnvColors[g_GameState.courseIndex],
           g_CourseNamePrimColors[g_GameState.courseIndex], TEXT_FLAG_CENTERED);

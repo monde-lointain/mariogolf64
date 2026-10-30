@@ -647,8 +647,9 @@ void WriteBallDistances(void) {
     }
 
     osSyncPrintf("\n");
-    sprintf(line, "{%d, %d, %d, %d, %d},\n", distances[0], distances[1],
-        distances[2], distances[3], distances[4]);
+    sprintf(line, "{%d, %d, %d, %d, %d},\n", (int)distances[0],
+        (int)distances[1], (int)distances[2], (int)distances[3],
+        (int)distances[4]);
     osSyncPrintf(line);
     AppendDistanceText(line);
     FreeCharacterSlot(MEASURED_SLOT);
@@ -1360,8 +1361,8 @@ void AnimateCharacter(u32 slotIndex) {
     g_CurrentAnimationEndFrame = slot->animationEndFrame;
     g_CurrentAnimationStartFrame = slot->animationStartFrame;
     if (IsGameFlagSet(GAME_FLAG_SHOW_ANIMATION_FRAMES)) {
-      sprintf(text, "[PC%d Frame%d]         ", slotIndex,
-          (s32)(g_CurrentAnimationFrame - slot->animationStartFrame));
+      sprintf(text, "[PC%d Frame%d]         ", (int)slotIndex,
+          (int)(g_CurrentAnimationFrame - slot->animationStartFrame));
       PrintDebugText(text, ANIMATION_FRAME_TEXT_COLUMN,
           slotIndex + ANIMATION_FRAME_TEXT_FIRST_ROW);
     }

@@ -2442,23 +2442,23 @@ s32 LaunchBallSimulation(
       char text[DEBUG_TEXT_BUFFER_SIZE];
 
       sprintf(text, "ANGLEY = %3.3d/360",
-          (s32)(yawRadians * (f32)RADIANS_TO_DEGREES));
+          (int)(yawRadians * (f32)RADIANS_TO_DEGREES));
       PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_YAW);
       sprintf(
-          text, "ANGLEX = %3.3d/360", (s32)(pitch * (f32)RADIANS_TO_DEGREES));
+          text, "ANGLEX = %3.3d/360", (int)(pitch * (f32)RADIANS_TO_DEGREES));
       PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_PITCH);
       sprintf(text, "Velocity = %fm/s     ",
           speed * (1.0f / SPEED_UNITS_PER_METER_PER_SECOND));
       PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPEED);
-      sprintf(text, "SpinY = %d", simulation->sideSpin);
+      sprintf(text, "SpinY = %d", (int)simulation->sideSpin);
       PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SIDE_SPIN);
-      sprintf(text, "SpinX = %d", simulation->spinSpeed);
+      sprintf(text, "SpinX = %d", (int)simulation->spinSpeed);
       PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPIN);
       sprintf(text, "SpinVel = %fRPM      ",
           simulation->spinSpeed * RPM_PER_SPIN_SPEED_UNIT);
       PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPIN_RPM);
       sprintf(text, "SpinAngle = %3.3d/360",
-          (s32)(simulation->spinHeading * (f32)RADIANS_TO_DEGREES));
+          (int)(simulation->spinHeading * (f32)RADIANS_TO_DEGREES));
       PrintDebugText(text, LAUNCH_VALUE_COLUMN, LAUNCH_VALUE_ROW_SPIN_HEADING);
       sprintf(text, "SpinVelX = %fkm/h      ",
           simulation->spinSpeed * KILOMETERS_PER_HOUR_PER_SPEED_UNIT);

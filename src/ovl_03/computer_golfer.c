@@ -571,7 +571,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
 
     osSyncPrintf("wnmTargetScoreOffset = %d\n", f_HoleTargetToPar);
     osSyncPrintf("ClubIndex = %d\n", f_Shot.clubSlot);
-    sprintf(text, "Target %d   ", f_HoleTargetToPar);
+    sprintf(text, "Target %d   ", (int)f_HoleTargetToPar);
     PrintDebugText(text, 3, 12);
     f_PlanStage = PLAN_STAGE_STARTED;
     return PLAN_UNFINISHED;

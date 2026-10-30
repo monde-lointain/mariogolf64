@@ -1377,25 +1377,25 @@ s32 UpdateSkyEditor(void) {
       "   T   B   C   BG  FOG", SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW);
   sprintf(g_PrintBuffer, "R: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[0],
       f_EditedSkyColors->unk7[0], f_EditedSkyColors->unkA[0],
-      f_EditedSkyColors->unkD[0], g_DebugFog.color[0]);
+      f_EditedSkyColors->unkD[0], (int)g_DebugFog.color[0]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 1);
   sprintf(g_PrintBuffer, "G: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[1],
       f_EditedSkyColors->unk7[1], f_EditedSkyColors->unkA[1],
-      f_EditedSkyColors->unkD[1], g_DebugFog.color[1]);
+      f_EditedSkyColors->unkD[1], (int)g_DebugFog.color[1]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 2);
   sprintf(g_PrintBuffer, "B: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[2],
       f_EditedSkyColors->unk7[2], f_EditedSkyColors->unkA[2],
-      f_EditedSkyColors->unkD[2], g_DebugFog.color[2]);
+      f_EditedSkyColors->unkD[2], (int)g_DebugFog.color[2]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 3);
   sprintf(g_PrintBuffer, "A:             %3d %4d  ", f_EditedSkyColors->unk10,
-      g_DebugFog.near);
+      (int)g_DebugFog.near);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 4);
-  sprintf(g_PrintBuffer, "CC:%d               %4d  ", f_EditedSkyColors->unk0,
-      g_DebugFog.far);
+  sprintf(g_PrintBuffer, "CC:%d               %4d  ",
+      (int)f_EditedSkyColors->unk0, (int)g_DebugFog.far);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 5);
   PrintDebugText(">",

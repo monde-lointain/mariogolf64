@@ -1016,8 +1016,8 @@ void WriteClubParameters(void) {
   AppendText(line);
   for (index = 0; index < CLUB_COUNT; index++) {
     club = &g_Clubs[index];
-    sprintf(line, "{{%d, %d, %d}, {%d, %d, %d}},\n", club->power[0],
-        club->power[1], club->power[2], club->deflection[0],
+    sprintf(line, "{{%d, %d, %d}, {%d, %d, %d}},\n", (int)club->power[0],
+        (int)club->power[1], (int)club->power[2], club->deflection[0],
         club->deflection[1], club->deflection[2]);
     AppendText(line);
   }
@@ -1031,7 +1031,8 @@ void WriteClubParameters(void) {
     AppendText("{");
     for (step = 1; step <= PUTT_STEP_COUNT; step++) {
       sprintf(line, "%d,\n",
-          GetPuttPower((step * MAX_LAUNCH_POWER) / PUTT_STEP_COUNT, index));
+          (int)(GetPuttPower(
+              (step * MAX_LAUNCH_POWER) / PUTT_STEP_COUNT, index)));
       AppendText(line);
     }
 

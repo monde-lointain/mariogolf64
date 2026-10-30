@@ -904,7 +904,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
   }
 
   if (g_IsDebugEnabled) {
-    sprintf(g_PrintBuffer, "%3d", f_HalfTurnTimer);
+    sprintf(g_PrintBuffer, "%3d", (int)f_HalfTurnTimer);
     PrintDebugText(g_PrintBuffer, HALF_TURN_DEBUG_COLUMN, HALF_TURN_DEBUG_ROW);
   }
 

@@ -1816,7 +1816,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
 
   SetUpTextDrawing(&displayList);
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
-  sprintf(g_PrintBuffer, "%3d", transfer->screenStep);
+  sprintf(g_PrintBuffer, "%3d", (int)transfer->screenStep);
   PrintDebugText(g_PrintBuffer, STEP_DEBUG_COLUMN, STEP_DEBUG_ROW);
   if (transfer->screenStep == BRING_CHOOSING_SLOT) {
     isCharacterShown = TRUE;
@@ -1872,7 +1872,7 @@ void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   for (slot = 0; slot != g_GameBoyTransfer.characterCount; slot++) {
     GameBoyCharacter* character = &g_GameBoyCharacters[slot];
 
-    sprintf(g_PrintBuffer, "%4d", character->experience);
+    sprintf(g_PrintBuffer, "%4d", (int)character->experience);
     DrawSmallText(&displayList, EXPERIENCE_LEFT + (slot * FACE_SPACING),
         EXPERIENCE_TOP, g_PrintBuffer);
   }

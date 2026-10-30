@@ -1592,7 +1592,7 @@ void UpdateStaffRoll(void) {
       f_StaffRollFrame++;
     }
 
-    sprintf(g_PrintBuffer, "MAX:%d    ", lineCount);
+    sprintf(g_PrintBuffer, "MAX:%d    ", (int)lineCount);
     PrintDebugText(g_PrintBuffer, LINE_COUNT_TEXT_COLUMN, LINE_COUNT_TEXT_ROW);
     StepNoiseTexture();
     g_SkyState.viewedWindAngles[0] = ViewedWindAngle(
@@ -1724,7 +1724,7 @@ void DrawStaffRoll(Gfx** displayListHead) {
     }
   }
 
-  sprintf(g_PrintBuffer, "alpha:%d    ", closingAlpha);
+  sprintf(g_PrintBuffer, "alpha:%d    ", (int)closingAlpha);
   PrintDebugText(g_PrintBuffer, ALPHA_TEXT_COLUMN, ALPHA_TEXT_ROW);
   if (!f_IsPaintingShown) {
     for (pass = 0; pass < TEXT_PASS_COUNT; pass++) {
@@ -1750,7 +1750,7 @@ void DrawStaffRoll(Gfx** displayListHead) {
   }
 
   if (g_IsDebugEnabled) {
-    sprintf(g_PrintBuffer, "%5d", f_StaffRollFrame);
+    sprintf(g_PrintBuffer, "%5d", (int)f_StaffRollFrame);
     PrintDebugText(g_PrintBuffer, FRAME_TEXT_COLUMN, FRAME_TEXT_ROW);
   }
 

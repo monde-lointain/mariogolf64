@@ -2657,7 +2657,7 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
         COUNT_GLYPHS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     DrawDigitText(
         &gfx, BADGE_LEFT + BADGE_SIZE, offsetY + BADGE_COUNT_TOP, "*");
-    sprintf(g_PrintBuffer, "%d", f_ShownBadgeCount);
+    sprintf(g_PrintBuffer, "%d", (int)f_ShownBadgeCount);
     DrawDigitText(
         &gfx, BADGE_COUNT_LEFT, offsetY + BADGE_COUNT_TOP, g_PrintBuffer);
     f_BadgeCountFrame++;

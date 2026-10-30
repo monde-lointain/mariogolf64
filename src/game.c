@@ -2477,11 +2477,11 @@ void UpdateGame(void) {
     g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
     UpdateMenus();
     if (IsGameFlagSet(GAME_FLAG_DEBUG_MENU_VALUES)) {
-      sprintf(g_PrintBuffer, "%3d", f_DebugMenuValues[0]);
+      sprintf(g_PrintBuffer, "%3d", (int)f_DebugMenuValues[0]);
       PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW);
-      sprintf(g_PrintBuffer, "%3d", f_DebugMenuValues[1]);
+      sprintf(g_PrintBuffer, "%3d", (int)f_DebugMenuValues[1]);
       PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 1);
-      sprintf(g_PrintBuffer, "%3d", f_DebugMenuValues[2]);
+      sprintf(g_PrintBuffer, "%3d", (int)f_DebugMenuValues[2]);
       PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 2);
       PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW);
       PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 1);

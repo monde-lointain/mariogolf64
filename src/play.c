@@ -313,7 +313,7 @@ void SetUpOneHole(void) {
 
 /* Writes the name a player of the given index has by default */
 void FormatDefaultPlayerName(s32 index, char* name) {
-  sprintf(name, "MARIO%d", index + 1);
+  sprintf(name, "MARIO%d", (int)(index + 1));
 }
 
 /*

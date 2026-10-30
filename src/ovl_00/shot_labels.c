@@ -618,9 +618,9 @@ OPAQUE:
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-        sprintf(g_PrintBuffer + DISTANCE_TEXT_OFFSET, "%2dm", distance);
+        sprintf(g_PrintBuffer + DISTANCE_TEXT_OFFSET, "%2dm", (int)distance);
       } else {
-        sprintf(g_PrintBuffer + DISTANCE_TEXT_OFFSET, "%2dy", distance);
+        sprintf(g_PrintBuffer + DISTANCE_TEXT_OFFSET, "%2dy", (int)distance);
       }
 
       if (g_LetterboxState != LETTERBOX_STATE_STARTING_LOOK_BACK &&
@@ -641,9 +641,9 @@ OPAQUE:
             255 - (tintYards * TINT_PER_YARD),
             255 - (tintYards * TINT_PER_YARD), 255);
         gDPPipeSync(g_DisplayListHead++);
-        sprintf(g_PrintBuffer, "%dyUP", heightYards);
+        sprintf(g_PrintBuffer, "%dyUP", (int)heightYards);
       } else if (tintYards < 0) {
-        sprintf(g_PrintBuffer, "%dyDW", -heightYards);
+        sprintf(g_PrintBuffer, "%dyDW", (int)-heightYards);
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0,
             255 + (tintYards * TINT_PER_YARD),

@@ -537,7 +537,8 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
       char text[DEBUG_TEXT_BUFFER_SIZE];
 
       sprintf(text, "ratio %f,%x", fraction,
-          (s32)(WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) +
+          (unsigned int)(s32)(WaterProbeHeight(
+                                  fraction, MINI_GOLF_WATER_PROBE_REACH) +
               waterBias));
       PrintDebugText(text, WATER_RATIO_COLUMN, WATER_RATIO_ROW);
     }
@@ -1342,21 +1343,21 @@ void UpdateFlagPanel(void) {
   PrintDebugText("SRAM:", BUILD_DATE_LABEL_COLUMN, SAVE_BUILD_DATE_ROW);
   PrintDebugText(g_SaveBuildDate, BUILD_DATE_COLUMN, SAVE_BUILD_DATE_ROW);
   for (row = 0; row < FLAG_PANEL_ROW_COUNT; row++) {
-    sprintf(text, "%x0|", row + f_FlagPanel.firstRow);
+    sprintf(text, "%x0|", (unsigned int)(row + f_FlagPanel.firstRow));
     PrintDebugText(
         text, FLAG_ROW_LABEL_COLUMN, row + FLAG_PANEL_FIRST_TEXT_ROW);
     for (column = 0, textColumn = FIRST_FLAG_TEXT_COLUMN;
         column < FLAG_PANEL_COLUMN_COUNT;
         column++, textColumn += FLAG_TEXT_SPACING) {
       if (row == 0) {
-        sprintf(text, "%X", column);
+        sprintf(text, "%X", (unsigned int)column);
         PrintDebugText(text, textColumn, FLAG_PANEL_HEADER_ROW);
       }
 
       sprintf(text, "%X",
-          IsGameFlagSet(
+          (unsigned int)(IsGameFlagSet(
               ((row + f_FlagPanel.firstRow) * FLAG_PANEL_COLUMN_COUNT) +
-              column));
+              column)));
       if (row == f_FlagPanel.row && column == f_FlagPanel.column) {
         SetDebugTextHighlight(TRUE);
       }

@@ -687,7 +687,7 @@ void DrawNumberBanner(Gfx** displayListHead) {
   s32 i;
   s32 imageOffset;
 
-  sprintf(g_PrintBuffer, "%d", f_BannerNumber);
+  sprintf(g_PrintBuffer, "%d", (int)f_BannerNumber);
   for (i = 0; i != f_BannerNumberLetterCount; i++) {
     if (i == 0) {
       imageOffset = BANNER_PLUS_IMAGE * BANNER_LETTER_IMAGE_SIZE;

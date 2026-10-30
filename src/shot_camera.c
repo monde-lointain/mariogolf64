@@ -3157,11 +3157,11 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   }
 
   if (g_IsDebugEnabled && IsGameFlagSet(GAME_FLAG_UNK5F)) {
-    sprintf(g_PrintBuffer, "C:%d F:%2d %3d %3d ", f_HasFlightPhaseChanged,
-        f_CameraChangeHoldCount, step, g_BallFlightStep);
+    sprintf(g_PrintBuffer, "C:%d F:%2d %3d %3d ", (int)f_HasFlightPhaseChanged,
+        (int)f_CameraChangeHoldCount, (int)step, (int)g_BallFlightStep);
     PrintDebugText(g_PrintBuffer, 8, 2);
-    sprintf(
-        g_PrintBuffer, "TYPE:%2d TIME:%2d", f_FlightCameraKind, f_FlightPhase);
+    sprintf(g_PrintBuffer, "TYPE:%2d TIME:%2d", (int)f_FlightCameraKind,
+        (int)f_FlightPhase);
     PrintDebugText(g_PrintBuffer, 10, 3);
   }
 

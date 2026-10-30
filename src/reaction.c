@@ -1284,7 +1284,7 @@ s32 UpdateReaction(u32 slotIndex) {
   DimNextTranslucentTriangles();
   TakePinOut();
   if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME)) {
-    sprintf(text, "FRAME %d  ", f_ReactionFrame);
+    sprintf(text, "FRAME %d  ", (int)f_ReactionFrame);
     PrintDebugText(text, REACTION_FRAME_COLUMN, REACTION_FRAME_ROW);
   }
 

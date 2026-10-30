@@ -1924,7 +1924,7 @@ void PrintCoursePoints(void) {
       points += GetShotKindPoints(playerIndex, shotKind);
     }
 
-    sprintf(text, "Player%d EXP %d\n", playerIndex, points);
+    sprintf(text, "Player%d EXP %d\n", (int)playerIndex, (int)points);
     PrintDebugText(text, 2, playerIndex + 3);
   }
 }
@@ -1983,7 +1983,7 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
       f_ShotPreviewStepCount--;
     }
 
-    sprintf(g_PrintBuffer, "prec:%4d", f_ShotPreviewStepCount);
+    sprintf(g_PrintBuffer, "prec:%4d", (int)f_ShotPreviewStepCount);
     PrintDebugText(g_PrintBuffer, 10, 3);
   }
 
