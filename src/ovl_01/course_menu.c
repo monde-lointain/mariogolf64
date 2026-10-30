@@ -156,7 +156,7 @@ void DrawMenuNumber(
 
 static s16 D_802300A0_ovl_01 = 0;
 static s16 D_802300A2_ovl_01 = 0;
-/* Which of D_8023A814's buffers holds the course image shown */
+/* Which of D_8023A814's buffers holds the trophy frame shown */
 static s16 D_802300A4_ovl_01 = 0;
 static s16 D_802300A6_ovl_01 = 0;
 static s32 D_802300A8_ovl_01 = 0;

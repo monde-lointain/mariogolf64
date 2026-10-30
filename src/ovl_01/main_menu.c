@@ -294,9 +294,9 @@ extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
 
 /*
  * The course select. Its wheel shows the open courses and the next one
- * still shut, and turns from one to the next; the chosen course's image
- * is read into the one of g_TrophyFrameBuffers's buffers not shown, and its
- * trophy files into g_TrophyPalettes.
+ * still shut, and turns from one to the next; the chosen course's trophy
+ * frame is read into the one of g_TrophyFrameBuffers not shown, and its
+ * place palettes into g_TrophyPalettes.
  */
 #define COURSE_SELECT_TURN 90
 #define COURSE_SELECT_SPIN_SPEED 18
@@ -446,7 +446,7 @@ static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
     ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
 /* Read by no routine */
 static s32 D_8022BE58_ovl_01[10] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
-/* Which of g_TrophyFrameBuffers's buffers shows the course */
+/* Which of g_TrophyFrameBuffers shows the chosen course's trophy */
 static u8 f_ShownTrophyBufferIndex = 0;
 /* The model kind that the animation viewer loads, which L cycles */
 static s8 f_ViewerModelKind = 0;
