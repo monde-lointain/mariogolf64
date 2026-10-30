@@ -3601,7 +3601,7 @@ void UpdateTurns(void) {
 
           if (choice == PAUSE_ACTION_RETURN_TO_MENU) {
             RequestPauseMenu(0, -1);
-            func_80060358();
+            QuitPlayToTitle();
           } else if (choice == PAUSE_ACTION_START_OVER) {
             RequestPauseMenu(0, -1);
             ResumeRound();
@@ -3670,7 +3670,7 @@ void UpdateTurns(void) {
               SaveReplayToSlot();
               CloseSaveMenu();
               g_PauseScreen = PAUSE_SCREEN_NONE;
-              func_80060358();
+              QuitPlayToTitle();
               break;
             case PROMPT_RESULT_SAVE_GAME:
               SaveGameToSlot();
@@ -3684,7 +3684,7 @@ void UpdateTurns(void) {
             case PROMPT_RESULT_QUIT_GAME:
               g_PauseScreen = PAUSE_SCREEN_NONE;
               ResumeRound();
-              func_80060358();
+              QuitPlayToTitle();
               break;
           }
         } else if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
@@ -4777,7 +4777,7 @@ void UpdateTurns(void) {
               ForceStopRumble();
               break;
             case CHOICE_RESULT_RETURN_TO_MENU:
-              func_80060358();
+              QuitPlayToTitle();
               ForceStopRumble();
               break;
           }
@@ -4799,7 +4799,7 @@ void UpdateTurns(void) {
               ForceStopRumble();
               break;
             case CHOICE_RESULT_RETURN_TO_MENU:
-              func_80060358();
+              QuitPlayToTitle();
               ForceStopRumble();
               break;
           }

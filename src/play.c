@@ -690,7 +690,11 @@ void func_8006034C(s8 value) {
   D_800C30A4 = value;
 }
 
-void func_80060358(void) {
+/*
+ * Ends play for the menu's title, as the pause menu's return to the menu
+ * does: the game is saved or kept by mode, and the hole-end sequence quits
+ */
+void QuitPlayToTitle(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
   SaveOrContinueGameByMode(FALSE);
   ClearShotEffects(CLEAR_KIND_EFFECTS);
@@ -1288,7 +1292,7 @@ void UpdatePlay(void) {
             if (g_GameState.gameMode == GAME_MODE_UNK8 ||
                 g_GameState.replayKind != REPLAY_KIND_NONE) {
               g_GameState.replayKind = REPLAY_KIND_NONE;
-              func_80060358();
+              QuitPlayToTitle();
               if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
                 f_PlayExit = PLAY_EXIT_RING_SHOT;
               } else {

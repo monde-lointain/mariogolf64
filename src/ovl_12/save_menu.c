@@ -241,7 +241,7 @@ void SetTextSlot(
     s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void InvalidateBrokenSavedGames(void);
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
-void func_80060358(void);
+void QuitPlayToTitle(void);
 void CloseControlsScreen(void);
 void SetUpTextDrawing(Gfx** displayListHead);
 void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
@@ -1229,7 +1229,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       if (f_StateFrame == SLIDE_FRAMES) {
         g_PauseScreen = PAUSE_SCREEN_NONE;
         CloseSaveMenu();
-        func_80060358();
+        QuitPlayToTitle();
       }
 
       break;
