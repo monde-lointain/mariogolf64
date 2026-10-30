@@ -196,7 +196,7 @@ extern const char D_802319E0_ovl_01[];
 
 extern s8 D_801052E8;
 extern s32 D_800FE334;
-extern u8 D_801B9410;
+extern u8 g_IsMenuWipeOpening;
 
 /* A step from one grid cell to its neighbor */
 typedef struct GridStep {
@@ -1974,7 +1974,7 @@ void UpdateBestShots(void) {
   s32 column;
 
   if (IsHudAnimationDone() == TRUE) {
-    if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
+    if (GetWipeKind() != WIPE_NONE && g_IsMenuWipeOpening == 0) {
       if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         g_MenuScreen = MENU_SCREEN_EXIT;
         D_800FE334 = 0;
@@ -1985,11 +1985,11 @@ void UpdateBestShots(void) {
               0xFF, 0xFF, 0xFF);
         }
       }
-    } else if (GetWipeKind() == WIPE_NONE || D_801B9410 != 1) {
+    } else if (GetWipeKind() == WIPE_NONE || g_IsMenuWipeOpening != 1) {
       if (g_MenuPressedButtons & A_BUTTON) {
         if (GetChosenBestShot() != STATS_CELL_EMPTY) {
           PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-          D_801B9410 = 0;
+          g_IsMenuWipeOpening = 0;
           column = memory->bestShotColumn;
           LoadWipeShape((s8)save
                   ->rankedRecords[f_BestShotRecords[memory->bestShotRow]

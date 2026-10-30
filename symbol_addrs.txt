@@ -3842,6 +3842,7 @@ g_CourseStatFigures = 0x80105C38; // size:0x188
 D_800FBDFC = 0x800FBDFC; // size:0x8
 g_MenuSpareImages = 0x800FBE30; // size:0x8
 g_MenuArrowSizedImages = 0x801B93E0; // size:0x14
+g_IsMenuWipeOpening = 0x801B9410; // size:0x1
 g_SecondAnimatedIconImages = 0x800FF180; // size:0x8
 g_MenuBoardImages = 0x800FF420; // size:0x8
 g_AnimatedIconImages = 0x8010526C; // size:0x8
