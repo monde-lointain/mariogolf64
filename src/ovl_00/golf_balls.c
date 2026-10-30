@@ -296,8 +296,8 @@ static Vtx f_PikaBallVertices[] = {
     {{{2, -1, 5}, 0, {0x800, 0x200}, {0xFF, 0x80, 0x00, 0xFF}}},
     {{{-2, 1, 5}, 0, {0, 0}, {0xFF, 0x80, 0x00, 0xFF}}},
     {{{2, 1, 5}, 0, {0x800, 0}, {0xFF, 0x80, 0x00, 0xFF}}}};
-static GolfBall f_GolfBalls[GOLF_BALL_COUNT] = {0};
-static BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH] = {0};
+static GolfBall f_GolfBalls[GOLF_BALL_COUNT] = {{{{{{0}}}}}};
+static BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH] = {{{0}}};
 /* The point that the next one is written over */
 static s32 f_BallAfterimageHead = 0;
 static Boolean f_IsBallAfterimageShown = FALSE;

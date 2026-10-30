@@ -198,7 +198,7 @@ HoleSetup g_HoleSetup = {
 };
 f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT] = {0};
 s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT]
-                      [TERRAIN_CODE_CELL_COLUMN_COUNT] = {0};
+                      [TERRAIN_CODE_CELL_COLUMN_COUNT] = {{0}};
 s32 g_TerrainCodeBlockCount = -1;
 
 /* Read by no routine */
