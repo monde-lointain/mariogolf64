@@ -121,11 +121,11 @@ enum GatheredBestShots {
 #define PAGE_ARROW_RIGHT_X 212
 #define PAGE_ARROW_TOP 122
 /*
- * The right arrow's texture starts a whole image in, where the mirrored wrap
- * reads the left arrow's backward
+ * The texel column where the arrow's texture starts. The right arrow's starts
+ * a whole image in, where the mirrored wrap reads the left arrow's backward.
  */
-#define MirroredArrowStart(arrowIndex) \
-  TexelCoordinate(((arrowIndex) == PAGE_ARROW_RIGHT) * PAGE_ARROW_SIZE)
+#define MirroredArrowColumn(arrowIndex) \
+  (((arrowIndex) == PAGE_ARROW_RIGHT) * PAGE_ARROW_SIZE)
 /* DrawTurnedPageArrows turns the page arrows a quarter turn each way, and draws
  * them as squares away from the camera */
 #define TURNED_ARROW_ANGLE 90.0f
@@ -1732,7 +1732,8 @@ void DrawPageArrows(Gfx** displayListHead) {
     gSPTextureRectangle(gfx++, QuarterPixels(left),
         QuarterPixels(PAGE_ARROW_TOP), QuarterPixels(left + PAGE_ARROW_SIZE),
         QuarterPixels(PAGE_ARROW_TOP + PAGE_ARROW_SIZE), G_TX_RENDERTILE,
-        MirroredArrowStart(arrowIndex), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        TexelCoordinate(MirroredArrowColumn(arrowIndex)), 0, TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -1746,15 +1747,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawPageArrows);
  * Draws the animated page arrows gap apart about the screen's middle, centered
  * on centerY
  */
-/*
- * Doesn't match: the original keeps the mirrored arrow's texture start in
- * the register it computes it in, where this moves it to another.
- */
-#ifdef NON_MATCHING
 void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 arrowIndex;
   s32 left;
+  s32 textureColumn;
 
   f_PageArrowTimer++;
   if (f_PageArrowTimer >= PAGE_ARROW_FRAME_DURATION) {
@@ -1792,19 +1789,18 @@ void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
     }
 
     gDPPipeSync(gfx++);
+    /* Computed before the rectangle, which keeps its register, to match */
+    textureColumn = MirroredArrowColumn(arrowIndex);
     gSPScisTextureRectangle(gfx++, QuarterPixels(left),
         QuarterPixels(centerY - (PAGE_ARROW_SIZE / 2)),
         QuarterPixels(left + PAGE_ARROW_SIZE),
         QuarterPixels(centerY + (PAGE_ARROW_SIZE / 2)), G_TX_RENDERTILE,
-        MirroredArrowStart(arrowIndex), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        TexelCoordinate(textureColumn), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawCenteredPageArrows);
-#endif
 
 /* Draws the page arrows spacing apart at y, turned; nothing calls it */
 void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
