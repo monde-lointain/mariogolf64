@@ -894,7 +894,7 @@ s32 UpdateCharacterSelect(
       } else {
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        g_CourseSelectKind = 1;
+        g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
         MAP_CAMERA_MODE_TOP_BYTE = MAP_CAMERA_TOP_BYTE_UNK2;
         g_BetSet = BET_SET_NONE;
       }

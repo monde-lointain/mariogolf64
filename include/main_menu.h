@@ -65,7 +65,16 @@ extern s32 g_CourseBannersSlide;
  * no player
  */
 extern s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
-extern u8 g_CourseSelectKind;
+
+/* What the course select names the courses by */
+enum CourseSelectKind {
+  COURSE_SELECT_KIND_NONE,
+  COURSE_SELECT_KIND_COURSES,
+  COURSE_SELECT_KIND_TOURNAMENTS
+};
+
+typedef u8 CourseSelectKind;
+extern CourseSelectKind g_CourseSelectKind;
 extern s32 g_ChoosingPlayerIndex;
 /* Each character's name, coded, in CharacterChoice order */
 extern char g_MenuCharacterNames[CHARACTER_COUNT]
