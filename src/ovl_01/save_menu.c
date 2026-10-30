@@ -1366,7 +1366,8 @@ s32 ContinueSavedGame(void);
       ReadEncodedAsset( \
           f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
     } else { \
-      miniGolfIndex = CHOSEN_GAME.state.courseIndex - MINI_GOLF_COURSE_INDEX; \
+      miniGolfIndex = CHOSEN_GAME.state.courseIndex; \
+      miniGolfIndex -= MINI_GOLF_COURSE_INDEX; \
       OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset); \
       ReadEncodedAsset( \
           f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
