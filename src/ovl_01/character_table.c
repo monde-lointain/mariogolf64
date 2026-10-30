@@ -121,7 +121,7 @@ void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
 void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y);
-void func_802169CC_ovl_01(Gfx** displayListHead);
+void DrawTableLines(Gfx** displayListHead);
 void func_80216C14_ovl_01(Gfx** displayListHead);
 void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top);
 
@@ -372,7 +372,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
       QuarterPixels(TABLE_PANEL_BOTTOM), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
-  func_802169CC_ovl_01(&gfx);
+  DrawTableLines(&gfx);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -558,7 +558,8 @@ void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", DrawTableCursor);
 #endif
 
-void func_802169CC_ovl_01(Gfx** displayListHead) {
+/* Draws the white lines between the table's cells */
+void DrawTableLines(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 index;
 
