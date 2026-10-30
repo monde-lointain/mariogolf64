@@ -271,7 +271,6 @@ extern const char D_80231514_ovl_01[];
  * dispatches to */
 #define UNUSED_LIST_CHOICE_COUNT 21
 
-extern s8 g_ChosenLefties[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
 

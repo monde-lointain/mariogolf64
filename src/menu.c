@@ -61,7 +61,6 @@ typedef struct ImportedCharacterCell {
 
 /* Mirrors of the save data's options */
 
-extern s8 g_ChosenLefties[4];
 extern s16 D_800FBE2C;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];

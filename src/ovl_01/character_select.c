@@ -569,7 +569,6 @@ s32 GetStickDiagonal(void) {
 /* R leaves a player without a controller only among this many players */
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
-extern s8 g_ChosenLefties[MAX_PLAYER_COUNT];
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 
 s32 GetClubTournamentCourse(void);
