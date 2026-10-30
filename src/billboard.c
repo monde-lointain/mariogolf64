@@ -562,7 +562,7 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
  */
 void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   Gfx* gfx = g_DisplayListHead;
-  BillboardColor lightColor = g_BillboardLightColor;
+  BillboardColor lightColor UNUSED = g_BillboardLightColor;
   BillboardColor envColor = g_BillboardEnvColor;
   Boolean hasTranslucentMode;
   s32 ballDepth;

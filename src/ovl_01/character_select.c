@@ -1580,7 +1580,7 @@ s32 GetUnusedPalette(s32 choiceIndex) {
   s32 playerIndex = 0;
   s32 sameCount = 0;
   CharacterId character = f_ChoiceCharacters[choiceIndex];
-  s32 unused[4];
+  s32 unused[4] UNUSED;
   s32 samePlayers[MAX_PLAYER_COUNT];
   s32 sameIndex;
 

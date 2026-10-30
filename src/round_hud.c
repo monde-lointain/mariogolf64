@@ -1060,7 +1060,7 @@ void FreeSceneryImages(void) {
 
 /* Sets up the billboard manager's heap, once per round */
 void InitScenery(void) {
-  EncodedAsset unusedAsset; /* Left from code that loaded assets here */
+  EncodedAsset unusedAsset UNUSED; /* Left from code that loaded assets here */
 
   if (f_SceneryState == SCENERY_UNLOADED) {
     f_SceneryBillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
@@ -1087,7 +1087,7 @@ void FreeScenery(void) {
  * distance from it, the lie's image, and the scores that the game mode shows.
  */
 void StartShotPanel(void) {
-  u8 unusedStack[0x20];
+  u8 unusedStack[0x20] UNUSED;
   EncodedAsset asset;
   s32 height;
   s32 playerIndex;
@@ -2404,7 +2404,7 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   Vec3 viewDirection;
   Vec3 rotation;
   Vec3 translation;
-  Vec3 unusedScale;
+  Vec3 unusedScale UNUSED;
   Mat4 matrix;
   Mat4 transform;
   Gfx* gfx = *displayListHead;
@@ -2519,9 +2519,9 @@ void AdjustHudOffset(void) {
 void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
   Vec3 rotation;
   Vec3 translation;
-  Vec3 unusedScale;
+  Vec3 unusedScale UNUSED;
   Mat4 matrix;
-  s32 unused[18];
+  s32 unused[18] UNUSED;
   Gfx* gfx;
   Club* club;
   Radians clubHeadAngle;

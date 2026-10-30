@@ -437,10 +437,10 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
  * Mario's bogey reaction throws them from points 3 and 4
  */
 void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
-  Vec3 translation; /* Unused; it is there to match */
-  Vec3 rotation; /* Unused; it is there to match */
-  Vec3 scale; /* Unused; it is there to match */
-  Mat4 matrix; /* Unused; it is there to match */
+  Vec3 translation UNUSED; /* Unused; it is there to match */
+  Vec3 rotation UNUSED; /* Unused; it is there to match */
+  Vec3 scale UNUSED; /* Unused; it is there to match */
+  Mat4 matrix UNUSED; /* Unused; it is there to match */
   Vec3 point;
   s32 index;
   Effect* effect;
@@ -497,10 +497,10 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
 
 /* Starts a sparkle near a character's point; eagle reactions spawn them */
 void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
-  Vec3 translation; /* Unused; it is there to match */
-  Vec3 rotation; /* Unused; it is there to match */
-  Vec3 scale; /* Unused; it is there to match */
-  Mat4 matrix; /* Unused; it is there to match */
+  Vec3 translation UNUSED; /* Unused; it is there to match */
+  Vec3 rotation UNUSED; /* Unused; it is there to match */
+  Vec3 scale UNUSED; /* Unused; it is there to match */
+  Mat4 matrix UNUSED; /* Unused; it is there to match */
   Vec3 point;
   s32 index;
   Effect* effect;
@@ -665,10 +665,10 @@ void SpawnSparkle(CoursePoint position) {
 
 /* Unreferenced */
 void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
-  Vec3 translation; /* Unused; it is there to match */
-  Vec3 rotation; /* Unused; it is there to match */
-  Vec3 scale; /* Unused; it is there to match */
-  Mat4 matrix; /* Unused; it is there to match */
+  Vec3 translation UNUSED; /* Unused; it is there to match */
+  Vec3 rotation UNUSED; /* Unused; it is there to match */
+  Vec3 scale UNUSED; /* Unused; it is there to match */
+  Mat4 matrix UNUSED; /* Unused; it is there to match */
   Vec3 point;
   s32 index;
   s16 riseScale; /* Always 1; the original has it */

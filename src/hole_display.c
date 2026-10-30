@@ -1439,7 +1439,7 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   f32 pitchScale; /* Narrower fields of view move the horizon further for each
                      radian of pitch */
   Vec3 direction;
-  s32 unused[8]; /* The original frame has room for this */
+  s32 unused[8] UNUSED; /* The original frame has room for this */
   Vtx* vertices;
   f32 slope;
   f32 scroll;
@@ -1685,7 +1685,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   Gfx* gfx = *displayListHead;
   SkyColors* colors;
   Mat4 matrix;
-  s32 unused[16];
+  s32 unused[16] UNUSED;
   Vec3 rotation;
   Vec3 translation;
   Radians angle;

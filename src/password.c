@@ -399,7 +399,7 @@ s32 DecodeTournamentPassword(u8* code, char* password) {
 }
 
 void EncodeScorePassword(ScoreReport* source, char* password) {
-  u8 unusedBuffer[8]; /* Unused; it is there to match */
+  u8 unusedBuffer[8] UNUSED; /* Unused; it is there to match */
   u8 symbols[SCORE_PASSWORD_LENGTH];
   ScoreReport report;
   ScoreReport* clamped = &report;

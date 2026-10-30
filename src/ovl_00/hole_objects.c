@@ -292,7 +292,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 i;
   HoleCreature* creature;
-  f32 unused[6];
+  f32 unused[6] UNUSED;
   Vec3 translation;
   Vec3 rotation;
   Vec3 scale;

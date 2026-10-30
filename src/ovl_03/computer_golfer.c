@@ -1223,7 +1223,6 @@ s32 ChooseHoleStrokeTarget(void) {
   s32 targetScore;
   s32 spreadStyle;
   s32 index;
-  s32 par;
   s32 groupCount;
   s32 frontStrokes;
   s32 backStrokes;
@@ -1928,7 +1927,7 @@ void ChooseLandingTarget(
  */
 void ChooseLongShot(s32 unused, ClubType* clubType, s32* targetX, s32* targetZ,
     ShotMode* shotMode) {
-  s32 pad[44]; /* Unused; it is there to match */
+  s32 pad[44] UNUSED; /* Unused; it is there to match */
   ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
   s32 index;
   s32 one; /* one is there to match */

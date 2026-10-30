@@ -189,7 +189,6 @@ static inline void ShowTopicPage(void) {
 /* Opens and pages through topics with A, closes them or leaves with B, and
  * moves through the list */
 void UpdateHelpBoard(void) {
-  s32 index;
   MenuMemory* memory = GetMenuMemory();
 
   if (IsHudAnimationDone() != 1) {

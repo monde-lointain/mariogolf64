@@ -952,7 +952,7 @@ void UpdateImpactPointMode(void) {
 }
 
 void ResetAimCamera(void) {
-  s32 unused[4];
+  s32 unused[4] UNUSED;
 
   g_CurrentShot.aimCameraDistance = AIM_CAMERA_START_DISTANCE;
   g_CurrentShot.aimCameraHeight = AIM_CAMERA_START_HEIGHT;

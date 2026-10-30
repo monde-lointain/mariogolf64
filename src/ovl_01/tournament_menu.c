@@ -1562,7 +1562,6 @@ void DrawClubTournament(Gfx** displayListHead) {
   s32 height = 0;
   s32 windowStyle;
   u16 buttons;
-  s32 pressedButtons;
 
   DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
   DrawCodePanels(&gfx);

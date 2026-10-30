@@ -2265,7 +2265,7 @@ void DrawSavedGolfers(Gfx** displayListHead) {
   Vec3 translation;
   Vec3 rotation;
   Vec3 scale;
-  s32 unused[12];
+  s32 unused[12] UNUSED;
   Mat4 transform;
   Mat4 viewing;
 

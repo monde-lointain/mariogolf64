@@ -851,7 +851,6 @@ SurfaceInfo* GetSurfaceInfoAt(s32 x, s32 z) {
 u16 GetMapColor(s32 x, s32 z) {
   u32 column;
   u32 row;
-  s32 color;
 
   if ((u32)x >= GROUND_WIDTH) {
     return 0;
@@ -2219,8 +2218,8 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
 
   if (FindHoleTriangleHit(
           x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
-    char unusedText[0x80]; /* Unused, but keeps the stack frame the same size as
-                              the original */
+    char unusedText[0x80] UNUSED; /* Unused, but keeps the stack frame the same
+                              size as the original */
 
     waterHeight = WaterProbeHeight(fraction, WATER_PROBE_REACH);
     if (waterHeight < height) {

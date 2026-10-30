@@ -7217,7 +7217,7 @@ void func_80207E20_ovl_01(void) {}
  */
 void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y) {
   Gfx* gfx = *displayListHead;
-  s32 unused[8];
+  s32 unused[8] UNUSED;
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
@@ -7418,7 +7418,7 @@ void DrawWavingToad(Gfx** displayListHead, s32 left, s32 top) {
   Gfx* gfx = *displayListHead;
   s16 stripIndex;
   s32 rowCount;
-  s32 unused[8];
+  s32 unused[8] UNUSED;
 
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);

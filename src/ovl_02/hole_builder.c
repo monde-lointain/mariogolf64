@@ -2305,7 +2305,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintGroundTiles);
  */
 void ToggleCodeMapCleanup(void) {
   /* Unused; it is there to match */
-  u8 unused[0x640];
+  u8 unused[0x640] UNUSED;
 
   if (!f_IsCodeMapCleaned) {
     EncodeCodeMap();
@@ -2929,7 +2929,7 @@ void ReadBillboards(void) {
  * file */
 void ReadHoleTriangles(void) {
   /* Unused; it is there to match */
-  u8 unused[0x10];
+  u8 unused[0x10] UNUSED;
   u8 count;
   s8 kind;
   u8 i;

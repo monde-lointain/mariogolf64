@@ -458,7 +458,7 @@ static s32 D_800C2C00[4] UNUSED = {0};
 void LoadMenuResources(void) {
   EncodedAsset asset;
   AssetFile file;
-  s32 unused[4]; /* The original frame has room for this */
+  s32 unused[4] UNUSED; /* The original frame has room for this */
   SaveData* save;
   s32 index;
   s32 size;
@@ -1091,7 +1091,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
   s32 runIndex;
   s32 scanIndex;
   s32 otherIndex;
-  s32 unused[4]; /* The original frame has room for this */
+  s32 unused[4] UNUSED; /* The original frame has room for this */
 
   save = GetSaveData();
   if (courseIndex < 0) {
@@ -2214,7 +2214,7 @@ void TransferSaveData(SaveData* save, u8 isWrite) {
 
 /* Reads the first intact copy; if neither is, the save data starts over */
 s32 ReadSaveCopies(SaveData* save, u8 isInSram) {
-  u8 unusedBuffer[0x90]; /* Only takes up stack */
+  u8 unusedBuffer[0x90] UNUSED; /* Only takes up stack */
   u8 checkBuffer[0x40];
   SaveCheck* check;
   u32 size;

@@ -878,7 +878,7 @@ void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
   Vec3 eye;
   Vec3 lookAt;
   CoursePoint point;
-  u8 unusedBuffer[0x10]; /* Unused; it is there to match */
+  u8 unusedBuffer[0x10] UNUSED; /* Unused; it is there to match */
   Radians buriedPitch = -QUARTER_TURN_RADIANS;
   s32 step = 0;
   Radians clearPitch = pitch;

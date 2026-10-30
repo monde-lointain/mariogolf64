@@ -388,7 +388,7 @@ static inline f32 AbsoluteF32(f32 value) {
  */
 void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
   Vec3 groundPoint;
-  Mat4 unusedMatrices[2]; /* Unused; it is there to match */
+  Mat4 unusedMatrices[2] UNUSED; /* Unused; it is there to match */
   Player* player;
   SignedBinaryAngle aimYaw;
   f32 distance;

@@ -2937,8 +2937,8 @@ void UpdateOpening(void) {
  * overlays */
 void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   /* Unused; they give the stack frame the original's size */
-  Mat4 unusedMatrix;
-  Vec3 unusedPoints[4];
+  Mat4 unusedMatrix UNUSED;
+  Vec3 unusedPoints[4] UNUSED;
   Gfx* gfx = *displayListHead;
 
   f_OpeningFrameParity ^= 1;

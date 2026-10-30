@@ -202,7 +202,7 @@ static u8 f_UnreadStatsBlock[0x188] UNUSED;
 /* Reads every course's icon into the course stats' buffers */
 void LoadCourseStatsIcons(void** buffers) {
   EncodedAsset asset;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
   s16 imageIndex;
 
   f_CourseStatsIcons = buffers;
@@ -1406,7 +1406,7 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   s32 fraction;
   s32 digitIndex;
   u8 digit;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
 
   if (whole > DECIMAL_WHOLE_LIMIT) {
     whole = DECIMAL_WHOLE_LIMIT;
@@ -1656,7 +1656,6 @@ void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
   Gfx* gfx = *displayListHead;
   s32 top;
   s32 left;
-  void* texels;
   s32 headerSize = IMAGE_HEADER_SIZE;
 
   if (blinkFrame < 0) {

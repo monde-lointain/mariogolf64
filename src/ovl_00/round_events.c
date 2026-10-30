@@ -570,7 +570,7 @@ void DrawLakituMovie(Gfx** displayListHead);
 void DrawToadMovie(Gfx** displayListHead);
 
 void AllocMovieBuffer(void) {
-  EncodedAsset unused;
+  EncodedAsset unused UNUSED;
 
   f_CurrentBanner = BANNER_NONE;
   f_IsMovieBufferAllocated = TRUE;
@@ -2079,7 +2079,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawShrinkingMovieImage);
 void DrawMontyMoleMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
   s32 i;
 
   f_MovieTick++;
@@ -2127,7 +2127,7 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
 void DrawGoombaMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
-  s32 unused[4];
+  s32 unused[4] UNUSED;
   s32 i;
   s32 height;
 

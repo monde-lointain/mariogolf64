@@ -2398,7 +2398,7 @@ enum ScorePasswordStep {
  * TRUE then. */
 s32 ShowScorePassword(ControllerState* controller) {
   ScoreReport report;
-  s32 unused[2];
+  s32 unused[2] UNUSED;
 
   GetSaveData();
   f_ResultsUnk7C++;

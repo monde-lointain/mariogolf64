@@ -809,7 +809,7 @@ void func_804002C0_hole_editor(void) {
   Vtx_t points[POINT_MOVE_COUNT +
       1]; /* Each move saves its point into the next move's slot */
   char text[DEBUG_TEXT_BUFFER_SIZE];
-  Vtx_t unusedPoint; /* The game's frame has room for another point */
+  Vtx_t unusedPoint UNUSED; /* The game's frame has room for another point */
   s32 madeDeadTriangle;
 
   madeDeadTriangle = FALSE;
@@ -1438,7 +1438,8 @@ void func_80400FBC_hole_editor(void) {
  * camera around the corner.
  */
 void func_80402428_hole_editor(void) {
-  Mat4 unusedMatrices[2]; /* The game's frame has room for two matrices */
+  Mat4
+      unusedMatrices[2] UNUSED; /* The game's frame has room for two matrices */
   f32 stepRight;
   f32 stepUp;
   f32 stepY;
@@ -2261,7 +2262,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80403A04_hole_edito
  */
 void func_804045C0_hole_editor(void) {
   Mat4 translation;
-  Mat4 unusedMatrix; /* The game's frame has room for a second matrix */
+  Mat4 unusedMatrix UNUSED; /* The game's frame has room for a second matrix */
   s32 height;
   s32 i;
 
@@ -3355,7 +3356,7 @@ void func_80406818_hole_editor(void) {
  */
 void func_80406C3C_hole_editor(void) {
   Mat4 translation;
-  Mat4 unusedMatrix; /* The game's frame has room for a second matrix */
+  Mat4 unusedMatrix UNUSED; /* The game's frame has room for a second matrix */
   s32 editKind;
   s32 i;
   s32 height;
