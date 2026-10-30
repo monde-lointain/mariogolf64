@@ -143,7 +143,8 @@ void DrawComIcon();
 void DrawLeftyIcon();
 void DrawCurveMeter(Gfx** displayListHead, s32 clubSet);
 
-static u8 D_8022FF00_ovl_01 = FALSE;
+/* Whether DrawCharacterSelect has set the choosing player's prompt */
+static u8 f_IsPromptShown = FALSE;
 static u8 D_8022FF01_ovl_01 = FALSE;
 /* Read by no routine */
 static u8 D_8022FF02_ovl_01 = 0;
@@ -747,7 +748,7 @@ s32 UpdateCharacterSelect(
       if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen ==
           TRUE) {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        D_8022FF00_ovl_01 = FALSE;
+        f_IsPromptShown = FALSE;
         return;
       }
 
@@ -804,7 +805,7 @@ s32 UpdateCharacterSelect(
         g_ChoosingControllerIndices[playerIndex] = controllerIndex;
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
             TEXT_FLAG_TYPED, 255, 255, 255, 255);
-        D_8022FF00_ovl_01 = FALSE;
+        f_IsPromptShown = FALSE;
         break;
       }
     }
@@ -927,7 +928,7 @@ s32 UpdateCharacterSelect(
 
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
           TEXT_FLAG_TYPED, 255, 255, 255, 255);
-      D_8022FF00_ovl_01 = FALSE;
+      f_IsPromptShown = FALSE;
       FreeAllCharacterSlots();
       D_8022FF03_ovl_01 = 0;
       f_FaceFrame = 0;
@@ -1000,7 +1001,7 @@ s32 UpdateCharacterSelect(
 
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
           TEXT_FLAG_TYPED, 255, 255, 255, 255);
-      D_8022FF00_ovl_01 = FALSE;
+      f_IsPromptShown = FALSE;
       f_FaceFrame = 0;
       f_UnreadFaceToggle = 0;
       f_FaceFrameTimer = 0;
@@ -1029,7 +1030,7 @@ s32 UpdateCharacterSelect(
 
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
           TEXT_FLAG_TYPED, 255, 255, 255, 255);
-      D_8022FF00_ovl_01 = FALSE;
+      f_IsPromptShown = FALSE;
     }
 
     /* Put back the first frame of the face the cursor left */
@@ -1376,7 +1377,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   sprintf(g_PrintBuffer, "%dY",
       g_Clubs[(clubSet * CLUB_SET_SIZE) + CLUB_TYPE_DRIVER].distance);
   DrawShadowedText(&gfx, DRIVE_DISTANCE_X, DRIVE_DISTANCE_Y, g_PrintBuffer);
-  if (D_8022FF00_ovl_01 == FALSE) {
+  if (f_IsPromptShown == FALSE) {
     if ((u8)isSinglePlayer == TRUE) {
       SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_CHARACTER,
           TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
@@ -1404,7 +1405,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
           TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     }
 
-    D_8022FF00_ovl_01 = TRUE;
+    f_IsPromptShown = TRUE;
   }
 
   gDPPipeSync(gfx++);

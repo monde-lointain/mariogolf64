@@ -3590,6 +3590,7 @@ f_TitleLabelCorners = 0x8022F940; // type:s32 size:0x38 segment:ovl_01
 f_MainChoiceLabelCorners = 0x8022FDF4; // type:s32 size:0x20 segment:ovl_01
 f_ShortMainChoiceLabelCorners = 0x8022FE14; // type:s32 size:0x18 segment:ovl_01
 f_ClubhouseLabelCorners = 0x8022FE2C; // type:s32 size:0x40 segment:ovl_01
+f_IsPromptShown = 0x8022FF00; // size:1 segment:ovl_01
 f_FaceFrame = 0x8022FF04; // size:1 segment:ovl_01
 f_UnreadFaceToggle = 0x8022FF05; // size:1 segment:ovl_01
 f_FaceFrameTimer = 0x8022FF06; // size:1 segment:ovl_01
