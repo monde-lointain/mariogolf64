@@ -447,7 +447,7 @@ static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
 /* Read by no routine */
 static s32 D_8022BE58_ovl_01[10] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
 /* Which of g_TrophyFrameBuffers's buffers shows the course */
-static u8 f_CourseWheelBufferIndex = 0;
+static u8 f_ShownTrophyBufferIndex = 0;
 /* The model kind that the animation viewer loads, which L cycles */
 static s8 f_ViewerModelKind = 0;
 /* How far the bet settings and handicap pages have slid in */
@@ -1480,7 +1480,7 @@ void UpdateMenus(void) {
         ReadEncodedAsset(
             ImageAt(g_MenuCourseSceneryAsset, COURSE_SELECT_LAYER_OFFSET),
             &asset);
-        f_CourseWheelBufferIndex = 0;
+        f_ShownTrophyBufferIndex = 0;
         OpenEncodedAsset(
             g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
         ReadEncodedAsset(g_TrophyFrameBuffers[0], &asset);
@@ -2608,14 +2608,14 @@ void UpdateCourseSelect(void) {
       OpenEncodedAsset(
           g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
       ReadEncodedAsset(
-          g_TrophyFrameBuffers[f_CourseWheelBufferIndex ^ 1], &asset);
+          g_TrophyFrameBuffers[f_ShownTrophyBufferIndex ^ 1], &asset);
       for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
         OpenAssetFile(
             g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
         ReadAssetFile(g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
       }
 
-      f_CourseWheelBufferIndex ^= 1;
+      f_ShownTrophyBufferIndex ^= 1;
       return;
     }
 
@@ -2741,14 +2741,14 @@ void UpdateCourseSelect(void) {
       OpenEncodedAsset(
           g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
       ReadEncodedAsset(
-          g_TrophyFrameBuffers[f_CourseWheelBufferIndex ^ 1], &asset);
+          g_TrophyFrameBuffers[f_ShownTrophyBufferIndex ^ 1], &asset);
       for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
         OpenAssetFile(
             g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
         ReadAssetFile(g_TrophyPalettes[index], GetAssetFileSize(&file), &file);
       }
 
-      f_CourseWheelBufferIndex ^= 1;
+      f_ShownTrophyBufferIndex ^= 1;
     }
   }
 }
@@ -6091,7 +6091,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
           gDPLoadTLUT_pal256(
               gfx++, TextureAddress(g_TrophyPalettes[places[otherIndex]]));
           gDPLoadTextureTile(gfx++,
-              TextureAddress(g_TrophyFrameBuffers[f_CourseWheelBufferIndex]),
+              TextureAddress(g_TrophyFrameBuffers[f_ShownTrophyBufferIndex]),
               G_IM_FMT_CI, G_IM_SIZ_8b,
               g_TrophySizes[g_MenuMemory.courseChoice].width,
               g_TrophySizes[g_MenuMemory.courseChoice].height, 0, 0,
