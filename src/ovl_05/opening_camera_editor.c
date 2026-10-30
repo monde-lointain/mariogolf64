@@ -244,23 +244,25 @@ void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
 /* Starts turning the camera's heading by angle over frameCount frames, with
  * the other point swinging around point index, or turns it at once when angle
  * is tiny */
-/* Doesn't match: the original loads the threshold after taking the absolute
- * value; GCC schedules it first */
-#ifdef NON_MATCHING
 void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
   s32 easeFrameCount;
-  f32 speed; /* Also the magnitude, to match */
+  f32 speed;
+  f32 magnitude;
 
-  speed = fabsf(angle);
-  if (speed < 0.001f) {
+  /* The do-while is there to match */
+  do {
+    magnitude = fabsf(angle);
+  } while (0);
+  if (magnitude < 0.001f) {
     g_CameraEditor.heading += angle;
     return;
   }
 
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
-    speed = g_CameraEditor.turnTopSpeed = angle / (frameCount - easeFrameCount);
+    speed = angle / (frameCount - easeFrameCount);
     g_CameraEditor.turnBrakingAngle = angle * 0.25;
+    g_CameraEditor.turnTopSpeed = speed;
     g_CameraEditor.turnAcceleration = speed / (easeFrameCount + 1);
   }
 
@@ -281,30 +283,29 @@ void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_TURNING;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", TurnEditorCamera);
-#endif
 
 /* Starts tilting the camera's pitch by angle over frameCount frames, with the
  * other point swinging around point index, or tilts it at once when angle is
  * tiny */
-/* Doesn't match: the original loads the threshold after taking the absolute
- * value; GCC schedules it first */
-#ifdef NON_MATCHING
 void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
   s32 easeFrameCount;
-  f32 speed; /* Also the magnitude, to match */
+  f32 speed;
+  f32 magnitude;
 
-  speed = fabsf(angle);
-  if (speed < 0.001f) {
+  /* The do-while is there to match */
+  do {
+    magnitude = fabsf(angle);
+  } while (0);
+  if (magnitude < 0.001f) {
     g_CameraEditor.pitch += angle;
     return;
   }
 
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
-    speed = g_CameraEditor.tiltTopSpeed = angle / (frameCount - easeFrameCount);
+    speed = angle / (frameCount - easeFrameCount);
     g_CameraEditor.tiltBrakingAngle = angle * 0.25;
+    g_CameraEditor.tiltTopSpeed = speed;
     g_CameraEditor.tiltAcceleration = speed / (easeFrameCount + 1);
   }
 
@@ -325,9 +326,6 @@ void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_TILTING;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", TiltEditorCamera);
-#endif
 
 /* Starts moving the other point to distance from point index over frameCount
  * frames, or moves it at once when it is close */
