@@ -196,8 +196,11 @@ static TagOffset f_PlayerTagOffsets[MAX_PLAYER_COUNT] = {
 static s32 f_LinedUpTagLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {102, -26, -26, -26}, {22, 182, -26, -26}, {38, 102, 166, 230},
     {6, 70, 134, 198}};
-/* Read by no routine; the last 16 values of player_stats.c's D_80230960 */
-static s16 D_80230014_ovl_01[16] = {
+/*
+ * Read by no routine: an order of 0 to 15, the last 16 values of
+ * player_stats.c's D_80230960
+ */
+static s16 f_UnreadSelectOrder[16] = {
     1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};
 /* The grid cursor's corners, whose colors DrawCharacterGridCursor cycles */
 static Vtx f_GridCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
