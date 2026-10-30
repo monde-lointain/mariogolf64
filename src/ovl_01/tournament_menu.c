@@ -499,7 +499,10 @@ void LoadMenuWindowPalette(s32 row, s32 column) {
   ReadAssetFile(D_80230E84_ovl_01, (s16)GetAssetFileSize(&file), &file);
 }
 
-void func_80226A34_ovl_01(void) {
+/*
+ * Fetches the save data and the menu memory but drops both; no routine calls it
+ */
+void GetSaveDataAndMenuMemory(void) {
   GetSaveData();
   GetMenuMemory();
 }

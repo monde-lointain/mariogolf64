@@ -3472,6 +3472,7 @@ DeleteCodeCharacter = 0x8022B5E0; // type:func segment:ovl_01
 FindEnteredCodeIndex = 0x8022B75C; // type:func segment:ovl_01
 TakeClubTournamentEntry = 0x8022BDD0; // type:func segment:ovl_01
 DrawUnusedWideCloud = 0x802287EC; // type:func segment:ovl_01
+GetSaveDataAndMenuMemory = 0x80226A34; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01
