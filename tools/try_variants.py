@@ -41,8 +41,7 @@ def score_variant(
         return error.strip()[-ERROR_TAIL_LENGTH:]
     if function not in compiled:
         return f"{function} missing"
-    value = fncompare.score(target, compiled[function])
-    return f"{function} {value:.3f} {'OK' if value == 1.0 else ''}".rstrip()
+    return f"{function} {fncompare.describe(target, compiled[function])}"
 
 
 def main() -> None:

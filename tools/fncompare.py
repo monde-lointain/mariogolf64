@@ -9,8 +9,10 @@ the original bytes once linked.
 
 ASM_FILE is a splat assembly file holding one or more functions and C_FILE
 the C to compile, or an object file already compiled. Prints one line per
-function: its name, its score (the fraction of equal words) and whether it
-matches exactly. With -v, also prints the instructions that differ.
+function: its name, its score (the fraction of equal words) and either OK
+for an exact match or the count of differing words, which still moves when
+a change is too small to show in the score. With -v, also prints the
+instructions that differ.
 """
 
 import atexit
@@ -260,6 +262,21 @@ def score(target: list[int], compiled: list[int]) -> float:
     return matcher.ratio()
 
 
+def count_differences(target: list[int], compiled: list[int]) -> int:
+    """Return how many words, on either side, fall outside the shared runs."""
+    matcher = difflib.SequenceMatcher(None, target, compiled, autojunk=False)
+    shared = sum(block.size for block in matcher.get_matching_blocks())
+    return len(target) + len(compiled) - 2 * shared
+
+
+def describe(target: list[int], compiled: list[int]) -> str:
+    """Return the score and, short of a match, the count of differing words."""
+    value = score(target, compiled)
+    if value == 1.0:
+        return f"{value:.3f} OK"
+    return f"{value:.3f} ({count_differences(target, compiled)} differ)"
+
+
 def disassemble(word: int) -> str:
     """Return the text of one instruction."""
     return rabbitizer.Instruction(word).disassemble()
@@ -296,9 +313,8 @@ def main() -> None:
         if name not in compiled:
             print(f"{name} missing")
             continue
-        value = score(targets[name], compiled[name])
-        print(f"{name} {value:.3f} {'OK' if value == 1.0 else ''}")
-        if verbose and value != 1.0:
+        print(f"{name} {describe(targets[name], compiled[name])}")
+        if verbose and targets[name] != compiled[name]:
             print_diff(targets[name], compiled[name])
 
 
