@@ -1293,6 +1293,7 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   s32 texelsOffset;
   s32 loadHeight;
   s32 top;
+  s32 tabBottom;
 
   gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
@@ -1339,12 +1340,12 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
     for (row = 0; row < TAB_HEIGHT; row += TABLE_LOAD_HEIGHT) {
       LoadTextureBlock(&gfx, g_Scorecard.tableImage + texelsOffset, G_IM_FMT_CI,
           G_IM_SIZ_8b, TABLE_WIDTH, TABLE_LOAD_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      tabBottom = g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT;
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + TABLE_LEFT),
-          QuarterPixels(row + g_Scorecard.y + TAB_TOP + dropY),
+          QuarterPixels(row + (g_Scorecard.y + TAB_TOP) + dropY),
           QuarterPixels(g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH),
-          QuarterPixels(
-              row + (g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT) + dropY),
-          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          QuarterPixels(row + tabBottom + dropY), G_TX_RENDERTILE, 0, 0,
+          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
     }
   }
