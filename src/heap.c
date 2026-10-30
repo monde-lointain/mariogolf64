@@ -57,7 +57,14 @@ typedef struct Heap {
 } Heap; /* size = 0x18 */
 
 static Heap f_Heaps[HEAP_COUNT];
-static Heap f_Memory;
+/*
+ * The main memory's heap is laid out as a Heap is, but the original keeps
+ * its parts in separate variables, which changes the code that uses them
+ */
+static MemoryBlock f_MemorySentinel;
+static u32 f_FreeMemorySize;
+static u32 f_LargestFreeMemorySize; /* The largest free block, measured by
+                                       the last allocation */
 
 void AddHeapRegion(s32 heapIndex, void* start, void* end) {
   MemoryBlock* block = start;
@@ -209,24 +216,24 @@ void InitHeapRegions(Boolean hasExpansionPak) {
 
     block->size = size;
     block->tag = BLOCK_FREE;
-    block->next = &f_Memory.sentinel;
-    block->prev = f_Memory.sentinel.prev;
-    f_Memory.freeSize += size;
-    f_Memory.sentinel.prev->next = block;
-    f_Memory.sentinel.prev = block;
+    block->next = &f_MemorySentinel;
+    block->prev = f_MemorySentinel.prev;
+    f_FreeMemorySize += size;
+    f_MemorySentinel.prev->next = block;
+    f_MemorySentinel.prev = block;
   }
 
-  f_Memory.sentinel.size = 0;
-  f_Memory.sentinel.tag = BLOCK_SENTINEL;
-  f_Memory.sentinel.prev = &f_Memory.sentinel;
-  f_Memory.freeSize = 0;
-  f_Memory.sentinel.next = f_Memory.sentinel.prev;
+  f_MemorySentinel.size = 0;
+  f_MemorySentinel.tag = BLOCK_SENTINEL;
+  f_MemorySentinel.prev = &f_MemorySentinel;
+  f_FreeMemorySize = 0;
+  f_MemorySentinel.next = f_MemorySentinel.prev;
   AddMemoryRegion((void*)MAIN_REGION_START, (void*)MAIN_REGION_END);
   if (hasExpansionPak == TRUE) {
     AddMemoryRegion((void*)EXPANSION_REGION_START, (void*)EXPANSION_REGION_END);
   }
 
-  f_Memory.largestFreeSize = UNMEASURED_SIZE;
+  f_LargestFreeMemorySize = UNMEASURED_SIZE;
 }
 
 #else
@@ -236,20 +243,20 @@ INCLUDE_ASM("asm/nonmatchings/heap", InitHeapRegions);
 #endif
 
 u32 GetFreeMemorySize(void) {
-  return f_Memory.freeSize;
+  return f_FreeMemorySize;
 }
 
 u32 FindLargestFreeMemorySize(void) {
-  MemoryBlock* block = f_Memory.sentinel.next;
+  MemoryBlock* block = f_MemorySentinel.next;
   u32 largestFreeSize = 0;
 
-  for (; block != &f_Memory.sentinel; block = block->next) {
+  for (; block != &f_MemorySentinel; block = block->next) {
     if (block->tag == BLOCK_FREE && largestFreeSize < block->size) {
       largestFreeSize = block->size;
     }
   }
 
-  f_Memory.largestFreeSize = largestFreeSize;
+  f_LargestFreeMemorySize = largestFreeSize;
   return largestFreeSize;
 }
 
@@ -272,8 +279,8 @@ void* AllocMemory(u32 size) {
   size = RoundUpTo(size + sizeof(MemoryBlock), BLOCK_ALIGNMENT);
   bestSize = NO_BLOCK_SIZE;
   bestBlock = NULL;
-  block = f_Memory.sentinel.next;
-  for (; block != &f_Memory.sentinel; block = block->next) {
+  block = f_MemorySentinel.next;
+  for (; block != &f_MemorySentinel; block = block->next) {
     if (block->tag == BLOCK_FREE && block->size >= size) {
       if (block->size < bestSize) {
         if (largestFreeSize < bestSize && bestSize != NO_BLOCK_SIZE) {
@@ -292,7 +299,7 @@ void* AllocMemory(u32 size) {
     }
   }
 
-  f_Memory.largestFreeSize = largestFreeSize;
+  f_LargestFreeMemorySize = largestFreeSize;
   if (bestBlock == NULL) {
     osSetIntMask(mask);
     osSyncPrintf(f_OutOfMemoryMessage, callerAddress);
@@ -305,13 +312,13 @@ void* AllocMemory(u32 size) {
     rest->size = bestBlock->size - size;
     bestBlock->next->prev = rest;
     next = bestBlock->next;
-    f_Memory.freeSize -= size;
+    f_FreeMemorySize -= size;
     rest->next = next;
     bestBlock->next = rest;
     rest->prev = bestBlock;
     bestBlock->size = size;
   } else {
-    f_Memory.freeSize -= bestSize;
+    f_FreeMemorySize -= bestSize;
   }
 
   bestBlock->tag = BLOCK_USED;
@@ -328,7 +335,6 @@ static const char f_FreeNullMessage[] =
     "NULLポインタがfree()に渡されました. call from %x\n";
 
 /* Frees the block that *pointerToBlock points to and clears the pointer */
-#ifdef NON_MATCHING
 void FreeMemory(void* pointerToBlock) {
   u32 callerAddress;
   void* pointer;
@@ -347,7 +353,7 @@ void FreeMemory(void* pointerToBlock) {
 
   block = BlockOfMemory(pointer);
   prev = block->prev;
-  f_Memory.freeSize += block->size;
+  f_FreeMemorySize += block->size;
   if (prev->tag == BLOCK_FREE && IsBlockFollowedBy(prev, block)) {
     block->next->prev = prev;
     block->prev->next = block->next;
@@ -365,7 +371,3 @@ void FreeMemory(void* pointerToBlock) {
   *(void**)pointerToBlock = NULL;
   osSetIntMask(mask);
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/heap", FreeMemory);
-#endif
