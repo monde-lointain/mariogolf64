@@ -490,7 +490,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
   MenuMemory* memory = func_8005AF74();
   s16 iconIndex;
-  u8 rowNumber; /* g_BetSet counts the index tables' rows from 1 */
+  BetSet betSet;
   AssetId assetId;
   void** imageSlot;
 
@@ -513,20 +513,20 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       f_StatsNamePlate = buffer;
       break;
     case PLAYER_STATS_BUFFER_BET_ICON_FIRST_FRAME:
-      rowNumber = g_BetSet;
+      betSet = g_BetSet;
       imageSlot = &f_ChosenBetIconFrames[0];
       *imageSlot = buffer;
       OpenEncodedAsset(
-          f_BetIconFrameAssets[f_BetSetBets[rowNumber - 1][memory->unkD]][0],
+          f_BetIconFrameAssets[f_BetSetBets[betSet - 1][memory->unkD]][0],
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
     case PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME:
-      rowNumber = g_BetSet;
+      betSet = g_BetSet;
       imageSlot = &f_ChosenBetIconFrames[1];
       *imageSlot = buffer;
       OpenEncodedAsset(
-          f_BetIconFrameAssets[f_BetSetBets[rowNumber - 1][memory->unkD]][1],
+          f_BetIconFrameAssets[f_BetSetBets[betSet - 1][memory->unkD]][1],
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
