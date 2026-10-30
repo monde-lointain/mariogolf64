@@ -1060,22 +1060,21 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawClubWindow);
 /*
  * Stretches the wide cloud image, in two strips, around a center; no routine
  * calls it.
- * Doesn't match: the original keeps the strip height constant in a saved
- * register instead of the step's numerator.
  */
-#ifdef NON_MATCHING
 /* The original never stores the list's end back through displayListHead */
 void DrawUnusedWideCloud(Gfx** displayListHead, s32 centerX, s32 centerY,
     s32 halfWidth, s32 stripHeight, s32 width, s32 shownStripHeight) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
+  s32 filterOrHalfWidth; /* One variable for both, to match */
   s32 stripTop = centerY - stripHeight;
 
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  filterOrHalfWidth = G_TF_BILERP;
+  gDPSetTextureFilter(gfx++, filterOrHalfWidth);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
@@ -1091,8 +1090,9 @@ void DrawUnusedWideCloud(Gfx** displayListHead, s32 centerX, s32 centerY,
                 TOURNAMENT_BANNER_STRIP_HEIGHT / 2),
         G_IM_FMT_I, TOURNAMENT_BANNER_WIDTH, TOURNAMENT_BANNER_STRIP_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
+    filterOrHalfWidth = halfWidth;
     DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
-        QuarterPixels(stripTop), QuarterPixels(centerX + halfWidth),
+        QuarterPixels(stripTop), QuarterPixels(centerX + filterOrHalfWidth),
         QuarterPixels(stripTop + stripHeight), G_TX_RENDERTILE, 0, 0,
         (TOURNAMENT_BANNER_WIDTH << 10) / width,
         (TOURNAMENT_BANNER_STRIP_HEIGHT << 10) / shownStripHeight);
@@ -1100,9 +1100,6 @@ void DrawUnusedWideCloud(Gfx** displayListHead, s32 centerX, s32 centerY,
     gDPPipeSync(gfx++);
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawUnusedWideCloud);
-#endif
 
 void LoadCodeEntryBuffer(void* buffer, s32 bufferKind) {
   EncodedAsset asset;
