@@ -294,14 +294,14 @@ void DrawMatchResult(Gfx** displayListHead) {
     if (g_Players[i].holes[holeIndex].strokes ==
         g_Players[i ^ 1].holes[holeIndex].strokes) {
       SetTextColor(&gfx, 0xFF, 0xFF, 0);
-      DrawLargeText(&gfx, x, MATCH_RESULT_Y, f_DrawText);
+      DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char*)f_DrawText);
     } else if (g_Players[i].holes[holeIndex].strokes <
         g_Players[i ^ 1].holes[holeIndex].strokes) {
       SetTextColor(&gfx, 0xFF, 0x7F, 0x7F);
-      DrawLargeText(&gfx, x, MATCH_RESULT_Y, f_WinText);
+      DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char*)f_WinText);
     } else {
       SetTextColor(&gfx, 0x7F, 0x7F, 0xFF);
-      DrawLargeText(&gfx, x, MATCH_RESULT_Y, f_LoseText);
+      DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char*)f_LoseText);
     }
 
     x += MATCH_RESULT_SPACING;

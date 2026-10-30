@@ -4416,12 +4416,12 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
 
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  DrawShadowedText(
-      &gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y, D_80231634_ovl_01);
+  DrawShadowedText(&gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y,
+      (char*)D_80231634_ovl_01);
   for (labelIndex = 0; labelIndex != PLAIN_MENU_NAME_COUNT; labelIndex++) {
     DrawShadowedText(&gfx, PLAIN_MENU_NAME_X,
         PLAIN_MENU_NAME_TOP + (labelIndex * PLAIN_MENU_NAME_SPACING),
-        D_8022BF28_ovl_01[labelIndex]);
+        (char*)D_8022BF28_ovl_01[labelIndex]);
   }
 
   sprintf(g_PrintBuffer, D_80231640_ovl_01, MemberSize(SaveData, rankedRecords),
