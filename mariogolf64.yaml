@@ -350,7 +350,11 @@ segments:
       - [0x8EC50, hasm, ../lib/libkmc/longlong]
       - [0x8F140, hasm, ../lib/libkmc/floatdidf]
       - [0x8F240, c, ../lib/libkmc/matherr]
-      - [0x8F250, textbin, rsp_text]
+      # The RSP microcode, split where each program starts so that splat
+      # labels it with the name the libraries know it by
+      - [0x8F250, textbin, rspboot_text]
+      - [0x8F320, textbin, n_aspMain_text]
+      - [0x8FF80, textbin, gspF3DEX2_fifo_text]
       - [0x91310, .data, overlay_manager]
       - [0x91600, .data, billboard]
       - [0x91A80, .data, ../lib/libnusys/nugfxinit_ex2]
@@ -442,7 +446,8 @@ segments:
       - [0xA4A10, .data, ../lib/ultralib/src/vimodes/vimodempallan1]
       - [0xA4A60, .data, ../lib/ultralib/src/libc/xlitob]
       - [0xA4A90, .data, ../lib/libkmc/atan]
-      - [0xA4C90, databin, rsp_data]
+      - [0xA4C90, databin, n_aspMain_data]
+      - [0xA4F40, databin, gspF3DEX2_fifo_data]
       - [0xA5360, .rodata, overlay_manager]
       - [0xA54D0, .rodata, billboard]
       - [0xA5584, .rodata, main]

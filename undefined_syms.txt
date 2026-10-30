@@ -1,8 +1,7 @@
 /* Symbols that splat names in the asm but leaves for the linker to define */
 
-/* rspboot ends where the n_audio microcode begins, an address splat already
-   gives to n_aspMainTextStart */
-rspbootTextEnd = 0x800B3F20;
+/* rspboot ends where the n_audio microcode begins */
+rspbootTextEnd = n_aspMainTextStart;
 
 /* Called while the game is halted for debugging. The retail build
    doesn't link it: its calls have a jump target of 0, which is
