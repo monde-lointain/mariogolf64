@@ -75,7 +75,7 @@ typedef struct TopicPageTable {
   /* 0x0B */ s8 counts[HELP_TOPIC_COUNT + 1];
 } TopicPageTable; /* size = 0x1D */
 
-extern s32 D_800FE334;
+extern s32 g_IsChosenHoleLoadStarted;
 static void* f_HandImages;
 static void* f_ArrowImages;
 static void* f_UnusedImage;
@@ -233,7 +233,7 @@ void UpdateHelpBoard(void) {
 
       StopLoaderThread();
       FreeAllCharacterSlots();
-      D_800FE334 = 0;
+      g_IsChosenHoleLoadStarted = 0;
       f_OpenTopic = 0;
       ClearHelpText();
     } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_TITLE) &&

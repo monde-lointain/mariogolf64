@@ -195,7 +195,7 @@ extern s32 g_ChosenPlayerCount;
 extern const char D_802319E0_ovl_01[];
 
 extern s8 D_801052E8;
-extern s32 D_800FE334;
+extern s32 g_IsChosenHoleLoadStarted;
 
 /* A step from one grid cell to its neighbor */
 typedef struct GridStep {
@@ -1976,7 +1976,7 @@ void UpdateBestShots(void) {
     if (GetWipeKind() != WIPE_NONE && !g_IsMenuWipeOpening) {
       if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         g_MenuScreen = MENU_SCREEN_EXIT;
-        D_800FE334 = 0;
+        g_IsChosenHoleLoadStarted = 0;
         g_GameState.replayKind = REPLAY_KIND_BEST_SHOT;
         SetGameFlag(GAME_FLAG_UNK1E);
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {

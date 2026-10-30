@@ -100,7 +100,11 @@ s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT] BSS
 Mtx f_EffectMatrices[EFFECT_COUNT] BSS ALIGNED(16) = {0};
 Mtx g_ScreenEffectProjection BSS ALIGNED(8) = {0};
 u8 D_800FE330 BSS = {0};
-s32 D_800FE334 BSS = {0};
+/*
+ * Whether StartLoadingChosenHole has started the chosen hole loading behind the
+ * menu since the loader last stopped, so that the menu need not start it again
+ */
+s32 g_IsChosenHoleLoadStarted BSS = {0};
 FireworkShape* f_FireworkShape BSS = {0};
 s16 g_ChosenLabelGrowth BSS = {0};
 OSPifRam __osContPifRam BSS ALIGNED(8) = {0};

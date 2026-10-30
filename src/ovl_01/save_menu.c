@@ -127,7 +127,7 @@ extern void* D_8012D430[CHARACTER_COUNT];
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
 extern u8 D_801052E8;
-extern s32 D_800FE334;
+extern s32 g_IsChosenHoleLoadStarted;
 
 s16 FindNextReplaySlot(s8 startSlot, u8 isForward);
 s16 GetChosenReplaySlot(void);
@@ -388,7 +388,7 @@ void UpdateRingShotRecords(void) {
               save->ringShotRecords[f_RecordedReplaySlots[index]].holeIndex;
           memory->courseIndex =
               save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex;
-          D_800FE334 = 0;
+          g_IsChosenHoleLoadStarted = 0;
           LoadWipeShape((s8)save->ringShotRecords[index].courseIndex);
           StartWipe(WIPE_CLOSING);
           D_801052E8 = 0;
@@ -1411,7 +1411,7 @@ void UpdateSavedGames(void) {
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       StopLoaderThread();
       FreeAllCharacterSlots();
-      D_800FE334 = 0;
+      g_IsChosenHoleLoadStarted = 0;
       for (slot = 1; slot != SAVED_GAME_TEXT_SLOT_COUNT; slot++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF, 0xFF,
             0xFF, 0xFF);
@@ -1568,7 +1568,7 @@ void UpdateSavedGames(void) {
         g_MenuScreen = MENU_SCREEN_TITLE;
         StopLoaderThread();
         FreeAllCharacterSlots();
-        D_800FE334 = 0;
+        g_IsChosenHoleLoadStarted = 0;
       }
 
       f_AssignedHumanCount--;

@@ -500,6 +500,7 @@ __libm_qnan_f = 0x800D2640;
 
 // libultra common symbols, which the linker scattered through the end of bss
 __osBaseCounter = 0x800FBE04; // size:0x4
+g_IsChosenHoleLoadStarted = 0x800FE334; // size:0x4
 __osContPifRam = 0x800FE340; // size:0x40
 f_RainDriftZ = 0x800FE380; // size:0x4
 __Dom2SpeedParam = 0x800FEC98; // size:0x74
