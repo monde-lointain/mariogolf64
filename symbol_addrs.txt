@@ -862,6 +862,7 @@ HasWonFinalChallenge = 0x800604F4; // type:func
 FillGroundNoise = 0x800624F0; // type:func
 SetSceneFog = 0x800625FC; // type:func
 CopyDoublePair = 0x800627F8; // type:func
+RebuildGroundTextureCoordinates = 0x800628C4; // type:func
 MarkNearbyGroundTiles = 0x8006280C; // type:func
 f_SongBuffer = 0x800C2FF0; // size:0x4
 f_SoundEffectBuffer = 0x800C2FF4; // size:0x4

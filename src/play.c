@@ -1883,8 +1883,13 @@ static inline s32 GetMirroredOffset(s32 coordinate) {
   return offset;
 }
 
+/*
+ * Gives each ground point texture coordinates from its x and z, mirrored on
+ * every other tile so that the texture tiles seamlessly, under
+ * GAME_FLAG_TEST_GROUND_TEXTURE
+ */
 #ifdef NON_MATCHING
-void func_800628C4(void) {
+void RebuildGroundTextureCoordinates(void) {
   Vtx_t point;
   s32 row;
   s32 column;
@@ -1916,7 +1921,7 @@ void func_800628C4(void) {
 }
 
 #else
-INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
+INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
 #endif
 
 #ifdef NON_MATCHING
@@ -2036,7 +2041,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
 
   g_GroundDrawFrame = g_FrameCount;
   if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
-    func_800628C4();
+    RebuildGroundTextureCoordinates();
   }
 
   if (IsGameFlagSet(GAME_FLAG_CYCLE_CLIP_RATIO)) {

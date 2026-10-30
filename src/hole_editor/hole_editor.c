@@ -3994,7 +3994,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
 
   memset(f_WhiteNoiseTexels, WHITE_TEXEL, sizeof(f_WhiteNoiseTexels));
   if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
-    func_800628C4();
+    RebuildGroundTextureCoordinates();
   }
 
   if (IsGameFlagSet(GAME_FLAG_CYCLE_CLIP_RATIO)) {
