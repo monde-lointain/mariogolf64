@@ -219,11 +219,16 @@ static void* f_CharacterBoard;
 /* Read by no routine */
 static u8 D_8023A56C_ovl_01[0x4];
 
+/*
+ * Image buffers that LoadCharacterSelectBuffer keeps, as are f_CharacterBoard
+ * and f_CurveMeterCells. No routine reads the f_Unread ones, and no caller
+ * passes the kinds of the controller icons or the color bars.
+ */
 static void* f_PlayerTags;
 static void* f_GridCursorBox;
-static void* D_8023A578_ovl_01;
-static void* D_8023A57C_ovl_01;
-static void* D_8023A580_ovl_01;
+static void* f_UnreadNamePlate;
+static void* f_UnreadControllerIcons;
+static void* f_UnreadColorBars;
 static void* f_CurveMeterCells;
 
 /* Read by no routine */
@@ -1195,16 +1200,16 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
       f_GridCursorBox = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_CONTROLLER_ICONS:
-      D_8023A57C_ovl_01 = buffer;
+      f_UnreadControllerIcons = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_COLOR_BARS:
-      D_8023A580_ovl_01 = buffer;
+      f_UnreadColorBars = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_CURVE_CELLS:
       f_CurveMeterCells = buffer;
       break;
     case CHARACTER_SELECT_BUFFER_UNREAD:
-      D_8023A578_ovl_01 = buffer;
+      f_UnreadNamePlate = buffer;
       break;
     default:
       f_PlayerTags = buffer;
