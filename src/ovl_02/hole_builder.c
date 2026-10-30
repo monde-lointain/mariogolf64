@@ -621,7 +621,7 @@ static AssetFile f_HoleAsset ORDERED_BSS __attribute__((aligned(8))) = {0};
 /* Read by no routine */
 static u8 D_80255348_ovl_02[8] ORDERED_BSS UNUSED = {0};
 u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE] ORDERED_BSS
-    __attribute__((aligned(16))) = {0};
+    __attribute__((aligned(8))) = {0};
 
 static u8* f_BuildBuffer;
 static u8* f_BuildCursor;
