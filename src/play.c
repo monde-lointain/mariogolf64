@@ -74,10 +74,10 @@ enum HoleEndStep {
 /* f_PlayExit, the menu that play returns to once the hole ends */
 enum PlayExit {
   PLAY_EXIT_NONE, /* Plays on to the next hole */
-  PLAY_EXIT_UNK1,
-  PLAY_EXIT_UNK2,
-  PLAY_EXIT_UNK3,
-  PLAY_EXIT_UNK4,
+  PLAY_EXIT_COURSE_SELECT,
+  PLAY_EXIT_BLANK_SCREEN,
+  PLAY_EXIT_TITLE,
+  PLAY_EXIT_BEST_SHOTS,
   PLAY_EXIT_RING_SHOT,
   PLAY_EXIT_QUIT,
   PLAY_EXIT_ROUND_OVER
@@ -1292,7 +1292,7 @@ void UpdatePlay(void) {
               if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
                 f_PlayExit = PLAY_EXIT_RING_SHOT;
               } else {
-                f_PlayExit = PLAY_EXIT_UNK4;
+                f_PlayExit = PLAY_EXIT_BEST_SHOTS;
               }
 
               StartWipe(WIPE_CLOSING);
@@ -1634,7 +1634,7 @@ DIM_BACKDROP:
 
               StartWipe(WIPE_CLOSING);
               SetMenuBackdrop(MENU_BACKDROP_STILL);
-              f_PlayExit = PLAY_EXIT_UNK3;
+              f_PlayExit = PLAY_EXIT_TITLE;
             }
 
             break;
@@ -1678,16 +1678,16 @@ DIM_BACKDROP:
                   case PLAY_EXIT_QUIT:
                     EnterMenuAtModeSelect();
                     break;
-                  case PLAY_EXIT_UNK1:
+                  case PLAY_EXIT_COURSE_SELECT:
                     EnterMenuAtCourseSelect();
                     break;
-                  case PLAY_EXIT_UNK2:
+                  case PLAY_EXIT_BLANK_SCREEN:
                     EnterMenuAtBlankScreen();
                     break;
-                  case PLAY_EXIT_UNK3:
+                  case PLAY_EXIT_TITLE:
                     EnterMenuAtTitle();
                     break;
-                  case PLAY_EXIT_UNK4:
+                  case PLAY_EXIT_BEST_SHOTS:
                     EnterMenuAtBestShots();
                     break;
                   case PLAY_EXIT_RING_SHOT:
