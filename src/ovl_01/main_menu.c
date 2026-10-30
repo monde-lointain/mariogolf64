@@ -427,7 +427,9 @@ extern const char D_802316FC_ovl_01[];
 /* Read by no routine */
 static Gfx D_8022BE00_ovl_01[] = {gsSPEndDisplayList()};
 static s32 D_8022BE08_ovl_01 = 0;
-static s32 D_8022BE0C_ovl_01 = CHARACTER_COUNT;
+/* The characters that the animation viewer cycles through and whose taken
+ * marks a new game clears; nothing changes it */
+static s32 f_MenuCharacterCount = CHARACTER_COUNT;
 /* Read by no routine */
 static u8 D_8022BE10_ovl_01[8] = {
     0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -1915,7 +1917,7 @@ void UpdateMenuTitleScreen(void) {
       }
 
       D_801B7070 = 0;
-      for (index = 0; index != D_8022BE0C_ovl_01; index++) {
+      for (index = 0; index != f_MenuCharacterCount; index++) {
         g_TakenCharacters.isCharacterTaken[index] = 0;
       }
     } else if (titleChoice == TITLE_CHOICE_SAVED_GAMES) {
@@ -2012,7 +2014,7 @@ void ResetViewerCharacter(void) {
   if (g_TakenCharacters.isCharacterTaken[0] == 1) {
     do {
       g_MenuMemory.viewerCharacter++;
-      if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+      if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
         g_MenuMemory.viewerCharacter = 0;
       }
     } while (
@@ -2031,7 +2033,7 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
     while (
         g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
       g_MenuMemory.viewerCharacter++;
-      if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+      if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
         g_MenuMemory.viewerCharacter = 0;
       }
     }
@@ -2043,7 +2045,7 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
           1) {
         g_MenuMemory.viewerCharacter--;
         if (g_MenuMemory.viewerCharacter < 0) {
-          g_MenuMemory.viewerCharacter = D_8022BE0C_ovl_01 - 1;
+          g_MenuMemory.viewerCharacter = f_MenuCharacterCount - 1;
         }
       }
     } else if (g_ControllerStates[0].pressedButtons & D_JPAD) {
@@ -2052,21 +2054,21 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
       while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
           1) {
         g_MenuMemory.viewerCharacter++;
-        if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+        if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
           g_MenuMemory.viewerCharacter = 0;
         }
       }
     }
 
     if (g_MenuMemory.viewerCharacter < 0) {
-      g_MenuMemory.viewerCharacter = D_8022BE0C_ovl_01 - 1;
+      g_MenuMemory.viewerCharacter = f_MenuCharacterCount - 1;
       while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
           1) {
         g_MenuMemory.viewerCharacter--;
       }
     }
 
-    if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+    if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
       g_MenuMemory.viewerCharacter = 0;
       while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
           1) {
@@ -2097,7 +2099,7 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
     while (
         g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
       g_MenuMemory.viewerCharacter++;
-      if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+      if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
         g_MenuMemory.viewerCharacter = 0;
       }
     }
@@ -2109,7 +2111,7 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
           1) {
         g_MenuMemory.viewerCharacter--;
         if (g_MenuMemory.viewerCharacter < 0) {
-          g_MenuMemory.viewerCharacter = D_8022BE0C_ovl_01 - 1;
+          g_MenuMemory.viewerCharacter = f_MenuCharacterCount - 1;
         }
       }
     } else if (g_MenuRepeatButtons & D_JPAD) {
@@ -2118,21 +2120,21 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
       while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
           1) {
         g_MenuMemory.viewerCharacter++;
-        if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+        if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
           g_MenuMemory.viewerCharacter = 0;
         }
       }
     }
 
     if (g_MenuMemory.viewerCharacter < 0) {
-      g_MenuMemory.viewerCharacter = D_8022BE0C_ovl_01 - 1;
+      g_MenuMemory.viewerCharacter = f_MenuCharacterCount - 1;
       while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
           1) {
         g_MenuMemory.viewerCharacter--;
       }
     }
 
-    if (g_MenuMemory.viewerCharacter > D_8022BE0C_ovl_01 - 1) {
+    if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
       g_MenuMemory.viewerCharacter = 0;
       while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] ==
           1) {
