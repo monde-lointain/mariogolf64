@@ -546,8 +546,9 @@ SignedBinaryAngle GetAimSlopeAngle(Player* player, ShotLaunch* shot) {
 /* Unreferenced; the original has it, and its zero is in the ROM */
 static const f64 f_UnusedZero = 0.0;
 
-/* The surface under the player's ball */
-SurfaceInfo* GetBallSurfaceInfo(Player* player) {
+/* The surface under the player's ball. Its one caller passes the shot as the
+ * slope angles' routines take it, though the shot is not read. */
+SurfaceInfo* GetBallSurfaceInfo(Player* player, ShotLaunch* shot UNUSED) {
   return GetSurfaceInfoAt(
       player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
 }
