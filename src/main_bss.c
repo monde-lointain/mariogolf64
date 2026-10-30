@@ -126,7 +126,9 @@ OSContStatus nuContStatus[NU_CONT_MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 PlayRecord D_800FEDD8[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 OSPiHandle* diskrom_handle BSS = {0};
 Gfx* g_GroundTileDisplayLists[GROUND_TILE_COUNT] BSS ALIGNED(8) = {0};
-void* D_800FF180[2] BSS = {0};
+/* A second animated icon's two frame buffers, the size of a mode icon, which
+ * some screens read other images into */
+void* g_SecondAnimatedIconImages[2] BSS = {0};
 NUScTask f_AudioTask BSS ALIGNED(8) = {0};
 u32 __osViIntrCount BSS = {0};
 s32 g_CupViewDepth BSS = {0};

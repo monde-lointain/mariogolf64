@@ -90,7 +90,7 @@ extern void* D_800FBDFC[2];
 extern void* D_800FF4C4[2];
 extern void* g_MenuArrowSizedImages[5];
 extern void* g_AnimatedIconImages[2];
-extern void* D_800FF180[2];
+extern void* g_SecondAnimatedIconImages[2];
 extern void* D_80106100;
 extern void* D_800FC898;
 extern void* D_8012D430[18];
@@ -570,8 +570,8 @@ void LoadMenuResources(void) {
   size = OpenEncodedAsset(0x623, &asset);
   g_AnimatedIconImages[0] = AllocMemory(size);
   g_AnimatedIconImages[1] = AllocMemory(size);
-  D_800FF180[0] = AllocMemory(size);
-  D_800FF180[1] = AllocMemory(size);
+  g_SecondAnimatedIconImages[0] = AllocMemory(size);
+  g_SecondAnimatedIconImages[1] = AllocMemory(size);
   ReadEncodedAsset(g_AnimatedIconImages[0], &asset);
   D_80106100 = AllocMemory(OpenEncodedAsset(0x65D, &asset));
   ReadEncodedAsset(D_80106100, &asset);
@@ -654,8 +654,8 @@ void FreeMenuResources(void) {
 
   FreeMemory(&g_AnimatedIconImages[0]);
   FreeMemory(&g_AnimatedIconImages[1]);
-  FreeMemory(&D_800FF180[0]);
-  FreeMemory(&D_800FF180[1]);
+  FreeMemory(&g_SecondAnimatedIconImages[0]);
+  FreeMemory(&g_SecondAnimatedIconImages[1]);
   FreeMemory(&D_80106100);
   FreeMemory(&D_800FC898);
   for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {

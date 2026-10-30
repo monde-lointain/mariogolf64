@@ -309,7 +309,7 @@ extern void* D_800FBDFC[2];
 extern void* g_MenuSpareImages[2];
 extern void* D_800FC6A0;
 extern void* D_800FC898;
-extern void* D_800FF180[2];
+extern void* g_SecondAnimatedIconImages[2];
 extern void* D_800FF4C4[2];
 extern void* D_801052C4[2];
 extern void* D_80106100;
@@ -1223,9 +1223,9 @@ void UpdateMenus(void) {
         }
 
         OpenEncodedAsset(ASSET_CONTROLLER_ICONS, &asset);
-        ReadEncodedAsset(D_800FF180[0], &asset);
+        ReadEncodedAsset(g_SecondAnimatedIconImages[0], &asset);
         OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset);
-        ReadEncodedAsset(D_800FF180[1], &asset);
+        ReadEncodedAsset(g_SecondAnimatedIconImages[1], &asset);
         f_ImageSlotIndex ^= 1;
         OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
         ReadEncodedAsset(g_ImageSlots[f_ImageSlotIndex], &asset);
@@ -1325,8 +1325,10 @@ void UpdateMenus(void) {
             g_NamePlateImage, GAME_MODE_LABEL_BUFFER_NAME_PLATE);
         LoadGameModeLabelBuffer(
             g_ImageSlots[f_ImageSlotIndex], GAME_MODE_LABEL_BUFFER_LABELS);
-        LoadSaveGameBuffer(D_800FF180[0], SAVE_GAME_BUFFER_CONTROLLER_ICONS);
-        LoadSaveGameBuffer(D_800FF180[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
+        LoadSaveGameBuffer(
+            g_SecondAnimatedIconImages[0], SAVE_GAME_BUFFER_CONTROLLER_ICONS);
+        LoadSaveGameBuffer(
+            g_SecondAnimatedIconImages[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
         LoadSaveGameBuffer(g_MenuSpareImages[0], SAVE_GAME_BUFFER_FIRST_BOARD);
         LoadSaveGameBuffer(g_MenuSpareImages[1], SAVE_GAME_BUFFER_SECOND_BOARD);
         LoadSaveGameBuffer(D_800FC6A0, SAVE_GAME_BUFFER_THIRD_BOARD);
@@ -1510,9 +1512,10 @@ void UpdateMenus(void) {
             g_AnimatedIconImages[1], PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME);
         LoadPlayerStatsBuffer(
             g_MenuArrowSizedImages[1], PLAYER_STATS_BUFFER_GREEN_ARROWS);
-        LoadPlayerStatsBuffer(D_800FF180[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
         LoadPlayerStatsBuffer(
-            D_800FF180[1], PLAYER_STATS_BUFFER_HANDICAP_PLAQUE);
+            g_SecondAnimatedIconImages[0], PLAYER_STATS_BUFFER_PLAYER_LABELS);
+        LoadPlayerStatsBuffer(
+            g_SecondAnimatedIconImages[1], PLAYER_STATS_BUFFER_HANDICAP_PLAQUE);
         f_MenuLabelImageIndex ^= 1;
         LoadPlayerStatsBuffer(g_MenuLabelImages[f_MenuLabelImageIndex],
             PLAYER_STATS_BUFFER_BET_LABELS);
@@ -1539,8 +1542,8 @@ void UpdateMenus(void) {
         LoadCourseMenuBuffer(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
         LoadCourseMenuBuffer(
             g_AnimatedIconImages[0], COURSE_MENU_BUFFER_SPINNING_BADGE);
-        LoadCourseMenuBuffer(
-            D_800FF180[0], COURSE_MENU_BUFFER_DIGITS_AND_ARROWS);
+        LoadCourseMenuBuffer(g_SecondAnimatedIconImages[0],
+            COURSE_MENU_BUFFER_DIGITS_AND_ARROWS);
         f_ImageSlotIndex ^= 1;
         LoadCourseMenuBuffer(
             g_ImageSlots[f_ImageSlotIndex], COURSE_MENU_BUFFER_LARGE_DIGITS);
@@ -4980,7 +4983,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
-  image = D_800FF180[0];
+  image = g_SecondAnimatedIconImages[0];
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
@@ -5003,7 +5006,7 @@ void DrawModeSelect(Gfx** displayListHead) {
     }
   }
 
-  image = D_800FF180[1];
+  image = g_SecondAnimatedIconImages[1];
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     position[AXIS_X] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
@@ -7327,7 +7330,7 @@ void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  image = D_800FF180[g_AnimatedIconBufferIndex];
+  image = g_SecondAnimatedIconImages[g_AnimatedIconBufferIndex];
   gDPLoadTLUT_pal16(
       gfx++, SILVER_STAR_PALETTE, TextureAddress(ImageBody(image)));
   gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageTexels(image)),
@@ -7374,7 +7377,8 @@ void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
     ReadEncodedAsset(g_AnimatedIconImages[g_AnimatedIconBufferIndex], &asset);
     OpenEncodedAsset(
         f_MenuEmptyStarFrameAssets[g_AnimatedIconFrameIndex], &asset);
-    ReadEncodedAsset(D_800FF180[g_AnimatedIconBufferIndex], &asset);
+    ReadEncodedAsset(
+        g_SecondAnimatedIconImages[g_AnimatedIconBufferIndex], &asset);
   }
 
   *displayListHead = gfx;
