@@ -433,7 +433,8 @@ static s32 D_8022BE18_ovl_01 = 0;
 static s32 D_8022BE1C_ovl_01 = 0;
 /* Read by no routine */
 static s32 D_8022BE20_ovl_01 = 0;
-static s32 D_8022BE24_ovl_01 = VIEWER_STARTING_ANIMATION;
+/* The animation that the animation viewer plays, which left and right step */
+static s32 f_ViewerAnimation = VIEWER_STARTING_ANIMATION;
 static s32 D_8022BE28_ovl_01 = 0;
 static s32 D_8022BE2C_ovl_01 = 0;
 /* Each player count's mode count */
@@ -735,7 +736,8 @@ static s32 D_8022FBA4_ovl_01 = FALSE;
 static f32 D_8022FBA8_ovl_01 = 0.0f;
 static f32 D_8022FBAC_ovl_01 = 0.0f;
 static f32 D_8022FBB0_ovl_01 = 0.0f;
-static u32 D_8022FBB4_ovl_01 = 0;
+/* The character slot that the animation viewer draws; nothing changes it */
+static u32 f_ViewerCharacterSlot = 0;
 static f32 D_8022FBB8_ovl_01 = 0.0f;
 static f32 D_8022FBBC_ovl_01 = 0.0f;
 /* The front course's bob phase */
@@ -5442,7 +5444,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
 
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  sprintf(g_PrintBuffer, D_8023166C_ovl_01, D_8022BE24_ovl_01);
+  sprintf(g_PrintBuffer, D_8023166C_ovl_01, f_ViewerAnimation);
   DrawShadowedText(&gfx, VIEWER_ANIMATION_X, VIEWER_ANIMATION_Y, g_PrintBuffer);
   sprintf(g_PrintBuffer, D_80231670_ovl_01,
       g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].distance);
@@ -5525,45 +5527,45 @@ void DrawAnimationViewer(Gfx** displayListHead) {
       }
     }
 
-    if ((g_MenuPressedButtons & L_JPAD) && D_8022BE24_ovl_01 > 0) {
-      D_8022BE24_ovl_01--;
+    if ((g_MenuPressedButtons & L_JPAD) && f_ViewerAnimation > 0) {
+      f_ViewerAnimation--;
       D_8022FBA4_ovl_01 = TRUE;
     }
 
     if ((g_MenuPressedButtons & R_JPAD) &&
-        D_8022BE24_ovl_01 < VIEWER_LAST_ANIMATION) {
-      D_8022BE24_ovl_01++;
+        f_ViewerAnimation < VIEWER_LAST_ANIMATION) {
+      f_ViewerAnimation++;
       D_8022FBA4_ovl_01 = TRUE;
     }
 
     if (g_ControllerStates[0].buttons & Z_TRIG) {
-      SetAnimationSpeed(D_8022FBB4_ovl_01, 0.0f);
+      SetAnimationSpeed(f_ViewerCharacterSlot, 0.0f);
       if (g_ControllerStates[0].repeatedButtons & L_CBUTTONS) {
-        SetAnimationSpeed(D_8022FBB4_ovl_01, -VIEWER_STEP_SPEED);
+        SetAnimationSpeed(f_ViewerCharacterSlot, -VIEWER_STEP_SPEED);
       }
 
       if (g_ControllerStates[0].repeatedButtons & R_CBUTTONS) {
-        SetAnimationSpeed(D_8022FBB4_ovl_01, VIEWER_STEP_SPEED);
+        SetAnimationSpeed(f_ViewerCharacterSlot, VIEWER_STEP_SPEED);
       }
 
       if (g_ControllerStates[0].buttons & U_CBUTTONS) {
-        SetAnimationSpeed(D_8022FBB4_ovl_01, VIEWER_FAST_SPEED);
+        SetAnimationSpeed(f_ViewerCharacterSlot, VIEWER_FAST_SPEED);
       }
 
       if (g_ControllerStates[0].buttons & D_CBUTTONS) {
-        SetAnimationSpeed(D_8022FBB4_ovl_01, -VIEWER_FAST_SPEED);
+        SetAnimationSpeed(f_ViewerCharacterSlot, -VIEWER_FAST_SPEED);
       }
 
       AnimateAllCharacters();
-      SetAnimationSpeed(D_8022FBB4_ovl_01, 0.0f);
+      SetAnimationSpeed(f_ViewerCharacterSlot, 0.0f);
     }
 
     if (g_ControllerStates[0].buttons & R_TRIG) {
       if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
-        SetCharacterAnimation(D_8022FBB4_ovl_01, D_8022BE24_ovl_01);
+        SetCharacterAnimation(f_ViewerCharacterSlot, f_ViewerAnimation);
       }
 
-      SetAnimationSpeed(D_8022FBB4_ovl_01, 1.0f);
+      SetAnimationSpeed(f_ViewerCharacterSlot, 1.0f);
     }
 
     if ((g_MenuRepeatButtons & L_TRIG) && D_8022BE94_ovl_01 == FALSE) {
@@ -5582,22 +5584,22 @@ void DrawAnimationViewer(Gfx** displayListHead) {
 
   if (D_8022FBA0_ovl_01 != g_MenuMemory.viewerCharacter ||
       D_8022FBA4_ovl_01 == TRUE || D_8022BE94_ovl_01 == TRUE) {
-    if (IsCharacterSlotBusy(D_8022FBB4_ovl_01)) {
-      FreeCharacterSlot(D_8022FBB4_ovl_01);
+    if (IsCharacterSlotBusy(f_ViewerCharacterSlot)) {
+      FreeCharacterSlot(f_ViewerCharacterSlot);
     } else {
       character = g_MenuMemory.viewerCharacter;
       D_8022BE94_ovl_01 = FALSE;
       D_8022FBA4_ovl_01 = FALSE;
       D_8022FBA0_ovl_01 = character;
-      if (D_8022BE24_ovl_01 >= VIEWER_FIRST_SECOND_MODEL_ANIMATION) {
-        LoadCharacter(D_8022FBB4_ovl_01, character + VIEWER_SECOND_MODEL_OFFSET,
-            D_8022BE81_ovl_01);
+      if (f_ViewerAnimation >= VIEWER_FIRST_SECOND_MODEL_ANIMATION) {
+        LoadCharacter(f_ViewerCharacterSlot,
+            character + VIEWER_SECOND_MODEL_OFFSET, D_8022BE81_ovl_01);
       } else {
-        LoadCharacter(D_8022FBB4_ovl_01, character, D_8022BE81_ovl_01);
+        LoadCharacter(f_ViewerCharacterSlot, character, D_8022BE81_ovl_01);
       }
 
-      SetCharacterAnimation(D_8022FBB4_ovl_01, D_8022BE24_ovl_01);
-      SetAnimationSpeed(D_8022FBB4_ovl_01, 0.0f);
+      SetCharacterAnimation(f_ViewerCharacterSlot, f_ViewerAnimation);
+      SetAnimationSpeed(f_ViewerCharacterSlot, 0.0f);
     }
   }
 
@@ -5635,7 +5637,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
   g_DisplayListHead = gfx;
-  DrawCharacter(D_8022FBB4_ovl_01);
+  DrawCharacter(f_ViewerCharacterSlot);
   *displayListHead = g_DisplayListHead;
   gfx = *displayListHead;
 }
