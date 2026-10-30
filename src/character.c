@@ -482,9 +482,7 @@ static const s32 f_BallDistances[CHARACTER_COUNT][BALL_DISTANCE_COUNT] = {
  * for the club and shot mode. Playable characters' distances come from
  * f_BallDistances unless GAME_FLAG_GENERATE_BALL_DISTANCES is set; otherwise
  * the model is measured, with a default for the club kind if that fails.
- * GetVectorLength is an unused nested function, a GNU C extension.
  */
-#ifdef NON_MATCHING
 s32 GetBallDistance(
     u32 slotIndex, s32 club, Boolean isClubKind, ShotMode shotMode) {
   f32 position[3];
@@ -496,10 +494,6 @@ s32 GetBallDistance(
   CharacterSlot* slot;
   ClubKind kind;
   f32 depth;
-
-  f32 GetVectorLength(f32 x, f32 y, f32 z) {
-    return sqrtf(x * x + y * y + z * z);
-  }
 
   slot = GetUsedCharacterSlot(slotIndex);
   column = CLUB_KIND_WOOD;
@@ -552,20 +546,19 @@ s32 GetBallDistance(
     osSyncPrintf("]");
   }
 
+  {
+    /*
+     * An unused nested function, a GNU C extension. Defined here rather than
+     * among the declarations, it leaves GetBallDistance's registers as they
+     * are in the original.
+     */
+    f32 GetVectorLength(f32 x, f32 y, f32 z) {
+      return sqrtf(x * x + y * y + z * z);
+    }
+  }
+
   return distance;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/character", GetVectorLength);
-INCLUDE_ASM("asm/nonmatchings/character", GetBallDistance);
-#endif
-
-/*
- * GCC last wrote f_BallDistances, so it thinks the assembler is still in
- * .rodata, but INCLUDE_ASM left it in .text. Agree with GCC so the data below
- * lands in .rodata.
- */
-__asm__(".section .rodata");
 
 /* Assertion strings that WriteBallDistances and PlayTextureAnimation share */
 static const char f_AssertionExpression[] = "EX";
