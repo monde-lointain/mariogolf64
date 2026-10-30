@@ -136,8 +136,8 @@ extern char g_PrintBuffer[PRINT_BUFFER_SIZE];
 void LoadTextAssets(void);
 void FreeTextAssets(void);
 void ClearTextSlots(void);
-void PlaceGlyphGroup(
-    s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, char* text);
+void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y,
+    READ_ONLY char* text);
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex);
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex);
 void SetTextName(char* name);
@@ -153,32 +153,38 @@ void SetTextColor(Gfx** displayListHead, s32 red, s32 green, s32 blue);
 void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient);
 void DrawTextSlots(Gfx** displayListHead);
 void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
-void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawTextStub(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawCenteredMediumText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawTextStub(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawFixedWidthLargeText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawCenteredLargeText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawCenteredMediumText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
 void DrawGlyphGroup(Gfx** displayListHead, s32 group);
 void SetUpPerspectiveTextDrawing(Gfx** displayListHead);
 void RevealTextSlot(s32 slot);
 Boolean IsTextSlotRevealed(s32 slot);
-s32 MeasureText(char* text, s32 fontSize, TextFlags flags);
+s32 MeasureText(READ_ONLY char* text, s32 fontSize, TextFlags flags);
 void MeasureMessage(
     MessageId messageId, s32 fontSize, s32* width, s32* height, s32 slot);
-/* The text routines take char* rather than const char*: GCC reads through a
- * const pointer as unchanging memory, which compiles them differently */
-void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
 void BeginShadowedText(Gfx** displayListHead);
-void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawCondensedShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawCenteredSmallText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawShadowedText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawCondensedShadowedText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawCenteredNarrowText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawCenteredShadowedText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
 s32 GetDigitGlyphTop(char code);
-void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text);
-void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
-    s32 envColor, s32 primColor, TextFlags flags);
+void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, READ_ONLY char* text);
+void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y,
+    READ_ONLY char* text, s32 envColor, s32 primColor, TextFlags flags);
 s32 PlaceMessageGlyphGroup(
     s32 group, s32 fontSize, s32 x, s32 y, MessageId messageId);
 

@@ -91,7 +91,7 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
 /* Draws the glyphs of text into a 4-bit texture one glyph tall and length
  * glyphs wide */
 #ifdef NON_MATCHING
-void DrawTextIntoTexture(s8* text, s32 length, u16* texture) {
+void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
   s32 index;
   s32 rowFontIndex;
   s32 y;

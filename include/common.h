@@ -114,6 +114,17 @@ typedef f32 Mat4[4][4];
 #define UNUSED_FUNCTION UNUSED
 #endif
 
+/*
+ * Marks what a pointer parameter points to as unchanged by the routine. KMC
+ * GCC reads through a const pointer as unchanging memory, which compiles the
+ * routine differently, so its pointer stays plain.
+ */
+#ifdef __IS_KMC__
+#define READ_ONLY
+#else
+#define READ_ONLY const
+#endif
+
 /* Zero is false, and any other value true, as C tests it */
 typedef s32 Boolean;
 

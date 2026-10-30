@@ -262,9 +262,10 @@ static Vtx f_SmallGlyphVertices[4] = {
 
 void DrawMediumTextSlot(Gfx** displayListHead, s32 slot);
 void ClearGlyphSprites(void);
-void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
-void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
-s32 GetTextLength(char* text);
+void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+void DrawShadowedText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+s32 GetTextLength(READ_ONLY char* text);
 
 char g_PrintBuffer[PRINT_BUFFER_SIZE];
 void* g_ShadowedFontImage;
@@ -1114,7 +1115,7 @@ void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient) {
  * Measures a string of character codes, at the font size. Only the large
  * font can be proportional. The two loops differ in form to match.
  */
-s32 MeasureText(char* text, s32 fontSize, TextFlags flags) {
+s32 MeasureText(READ_ONLY char* text, s32 fontSize, TextFlags flags) {
   s32 width = 0;
   s32 code;
 
@@ -1259,7 +1260,7 @@ void MeasureMessage(
   *height = lineCount;
 }
 
-s32 GetTextLength(char* text) {
+s32 GetTextLength(READ_ONLY char* text) {
   s32 length = 0;
 
   while (*text != '\0') {
@@ -1275,7 +1276,8 @@ s32 GetTextLength(char* text) {
  * a full stop, which is drawn back and advances less. A mark is drawn over
  * the glyph before it.
  */
-void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawFixedWidthLargeText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 code;
   s32 character;
@@ -1354,7 +1356,7 @@ void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
  * Draws text in the large font, each glyph advancing by its own width. A
  * mark is drawn over the glyph before it.
  */
-void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 code;
   s32 character;
@@ -1430,7 +1432,7 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
  * but a full stop, which is drawn back and advances less. A mark is drawn
  * over the glyph before it.
  */
-void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 character;
   s32 code;
@@ -1506,7 +1508,7 @@ void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
  * Draws text in the small font, each glyph advancing by the font size. A
  * mark is drawn over the glyph before it.
  */
-void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 character;
   s32 code;
@@ -1578,7 +1580,8 @@ void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
 }
 
 /* Draws text in the large font, centered on x */
-void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawCenteredLargeText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
 
   DrawLargeText(&gfx,
@@ -1588,7 +1591,8 @@ void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
 }
 
 /* Draws text in the medium font, centered on x */
-void DrawCenteredMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawCenteredMediumText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
 
   DrawMediumText(&gfx,
@@ -1598,7 +1602,8 @@ void DrawCenteredMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
 }
 
 /* Draws text in the small font, centered on x */
-void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawCenteredSmallText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
 
   DrawSmallText(&gfx,
@@ -1612,7 +1617,7 @@ void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
  * as they would to the other text drawing routines.
  */
 void DrawTextStub(Gfx** displayListHead UNUSED, s16 x UNUSED, s16 y UNUSED,
-    char* text UNUSED) {}
+    READ_ONLY char* text UNUSED) {}
 
 /*
  * Sets up the RDP to draw shadowed text, modulating the font's intensity
@@ -1663,7 +1668,8 @@ void SetTextColor(Gfx** displayListHead, s32 red, s32 green, s32 blue) {
  * Draws text in the shadowed font, which BeginShadowedText loads. A full
  * stop is drawn narrower, over the end of the glyph before it.
  */
-void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawShadowedText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 code;
   s16 glyphLeft;
@@ -1697,7 +1703,8 @@ void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
 }
 
 /* Draws text in the shadowed font, centered on x */
-void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawCenteredShadowedText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
 
   /* The copy of x and the s16 are there to match */
@@ -1721,7 +1728,8 @@ void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
  * Draws text centered on x in the narrow glyphs of the shadowed font's last
  * row, which start at the apostrophe
  */
-void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text) {
+void DrawCenteredNarrowText(
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 length;
   s32 code;
@@ -1752,7 +1760,7 @@ void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text) {
 
 /* Draws text in the shadowed font with its glyphs closer together */
 void DrawCondensedShadowedText(
-    Gfx** displayListHead, s16 x, s16 y, char* text) {
+    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 code;
   s16 glyphLeft;
@@ -1790,8 +1798,8 @@ void ClearGlyphSprites(void) {
  * are placed over the glyph before them. Without GLYPH_FLAG_LEFT_ALIGNED
  * the text is centered on x.
  */
-void PlaceGlyphGroup(
-    s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, char* text) {
+void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y,
+    READ_ONLY char* text) {
   s32 i;
   s32 halfWidth;
   s32 advance;
@@ -2198,7 +2206,7 @@ const s32 g_UnusedTextData[2] = {0, 0};
 
 /* Draws text in the digit font, as long as g_PrintBuffer holds a string at
  * least as long */
-void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text) {
+void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 index;
 
@@ -2221,8 +2229,8 @@ void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text) {
  * down and to the right. The colors are packed as RGBA, but the alpha is
  * ignored.
  */
-void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
-    s32 envColor, s32 primColor, TextFlags flags) {
+void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y,
+    READ_ONLY char* text, s32 envColor, s32 primColor, TextFlags flags) {
   Gfx* gfx = *displayListHead;
   u8 env[3];
   u8 prim[3];
