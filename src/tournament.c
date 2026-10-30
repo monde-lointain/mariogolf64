@@ -274,7 +274,7 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
 
     holesPlayed = holeCount +
         (f_ContestantProfiles[index - 1].holeOffset +
-            (lastAheadIndex < 0 | lastAheadIndex >= index));
+            ((lastAheadIndex < 0) | (lastAheadIndex >= index)));
     if (holesPlayed > COURSE_HOLE_COUNT) {
       holesPlayed = COURSE_HOLE_COUNT;
     }

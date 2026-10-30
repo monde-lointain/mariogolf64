@@ -16,7 +16,7 @@ int strcmp(const char* left, const char* right) {
     for (;;) {
       character = *leftByte++;
       difference = character - *rightByte++;
-      if (difference != 0 | character == 0) {
+      if ((difference != 0) | (character == 0)) {
         return difference;
       }
     }
@@ -24,7 +24,7 @@ int strcmp(const char* left, const char* right) {
   while ((unsigned int)leftByte & 3) {
     character = *leftByte++;
     difference = character - *rightByte++;
-    if (difference != 0 | character == 0) {
+    if ((difference != 0) | (character == 0)) {
       return difference;
     }
   }

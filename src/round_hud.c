@@ -2816,8 +2816,7 @@ void StartShotEffect(s32 effect) {
 
   if (effect == SHOT_EFFECT_LONG_SHOT) {
     contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
-    if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 &
-        contactStyle != CONTACT_STYLE_WARIO) {
+    if (ShowsLongShotEffect(contactStyle)) {
       PlaySoundWithEffects(SOUND_LONG_SHOT, LONG_SHOT_SOUND_CHANNEL,
           LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB, SOUND_FULL_SCALE);
     } else {
@@ -2877,8 +2876,7 @@ void DrawShotEffect(Gfx** displayListHead) {
   }
 
   contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
-  if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 &
-      contactStyle != CONTACT_STYLE_WARIO) {
+  if (ShowsLongShotEffect(contactStyle)) {
     scale = sinf(f_ShotEffectTime) * SHOT_EFFECT_SCALE;
     f_ShotEffectRotation[AXIS_X] = 0.0f;
     f_ShotEffectRotation[AXIS_Y] = 0.0f;
@@ -2914,8 +2912,7 @@ void DrawShotEffect(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetBlendColor(gfx++, 255, 255, 255, 1);
-  if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 &
-      contactStyle != CONTACT_STYLE_WARIO) {
+  if (ShowsLongShotEffect(contactStyle)) {
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
@@ -3323,8 +3320,7 @@ s32 DrawLetterbox(Gfx** gfxP, s32 height) {
   Gfx* gfx = *gfxP;
 
   if (g_RoundHud.isLetterboxShown) {
-    if (g_LetterboxState != LETTERBOX_STATE_NONE &
-        g_LetterboxState != LETTERBOX_STATE_UNK5) {
+    if (IsLetterboxState(g_LetterboxState)) {
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(

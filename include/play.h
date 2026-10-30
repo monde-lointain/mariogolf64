@@ -65,6 +65,11 @@ enum LetterboxState {
   LETTERBOX_STATE_UNK5
 };
 
+/* Whether a LetterboxState letterboxes the view. The original tests with &
+ * rather than && */
+#define IsLetterboxState(state) \
+  (((state) != LETTERBOX_STATE_NONE) & ((state) != LETTERBOX_STATE_UNK5))
+
 /*
  * The state of the black bars that grow over the top and bottom of the
  * HUD's area: the turn steps it and the round HUD draws the bars from it

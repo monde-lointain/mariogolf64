@@ -43,6 +43,13 @@ enum ContactStyle {
   CONTACT_STYLE_GAME_BOY_BALL_7
 };
 
+/* Whether a ContactStyle shows the long-shot effect; Wario's and the Game Boy's
+ * ball 7 show a spark trail instead. The original tests with & rather than &&
+ */
+#define ShowsLongShotEffect(style) \
+  (((style) != CONTACT_STYLE_GAME_BOY_BALL_7) & \
+      ((style) != CONTACT_STYLE_WARIO))
+
 /* The word banners that StartBanner flies in, named after their text */
 /* Hides the banner only if it is BANNER_NICE_SHOT */
 #define BANNER_HIDE_NICE_SHOT (-2)
