@@ -196,9 +196,9 @@ static s32 D_80230E94_ovl_01[2] = {0, 0};
 static s32 D_80230E9C_ovl_01 = 0;
 static s32 D_80230EA0_ovl_01 = 0;
 /* The images that the window can show */
-static AssetId f_MenuWindowImageAssets[15] = {0x07C0, 0x0750, 0x07A4, 0x0742,
-    0x0788, 0x07B2, 0x07CE, 0x07D8, 0x076C, 0x0796, 0x07EA, 0x075E, 0x077A,
-    0x0988, 0x0958};
+static AssetId f_MenuWindowImageAssets[MENU_WINDOW_PICTURE_COUNT] = {0x07C0,
+    0x0750, 0x07A4, 0x0742, 0x0788, 0x07B2, 0x07CE, 0x07D8, 0x076C, 0x0796,
+    0x07EA, 0x075E, 0x077A, 0x0988, 0x0958};
 /* Each window picture's palette files, by picture and color */
 // clang-format off
 static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT]
