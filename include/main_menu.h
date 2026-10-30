@@ -33,8 +33,11 @@
 /* A screen's lit labels, or other images in their place, read alternately
  * into each */
 extern void* g_MenuLabelImages[2];
-extern s16 D_800FE33C;
-extern u8 D_800FBDB9;
+/* How many pixels wider and taller than its size the chosen label is drawn */
+extern s16 g_ChosenLabelGrowth;
+/* Whether the chosen label is growing or shrinking: LABEL_GROWING or
+ * LABEL_SHRINKING */
+extern u8 g_ChosenLabelGrowthDirection;
 
 extern void* g_NamePlateImage;
 /* The player count chosen on the title screen, which the saved games, the

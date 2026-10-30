@@ -60,11 +60,11 @@ typedef struct ImportedCharacterCell {
 
 /* Mirrors of the save data's options */
 
-extern s8 D_800FBDB9;
+extern s8 g_ChosenLabelGrowthDirection;
 extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
 extern s32 D_800FE334;
-extern s16 D_800FE33C;
+extern s16 g_ChosenLabelGrowth;
 extern GameState D_801B55F0;
 extern Player D_8012D0C8[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
@@ -1966,8 +1966,8 @@ void func_8005D9A0(void) {
   g_TakenCharacters.unk0 = 0;
   D_801B71CC = 0;
   D_800FBE2C = 0;
-  D_800FBDB9 = 0;
-  D_800FE33C = 0;
+  g_ChosenLabelGrowthDirection = 0;
+  g_ChosenLabelGrowth = 0;
   D_800FF4C0 = 0;
   g_MapCamera[0x4C] = 0;
   for (index = 0; index != ARRAY_COUNT(D_800FBE08); index++) {

@@ -4441,7 +4441,7 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
       /* NEW GAME stays still */
       growth = 0;
       if (labelIndex != TITLE_LABEL_NEW_GAME) {
-        growth = D_800FE33C;
+        growth = g_ChosenLabelGrowth;
       }
 
       gSPScisTextureRectangle(gfx++,
@@ -4458,20 +4458,20 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
     }
   }
 
-  if (D_800FBDB9 == LABEL_GROWING) {
-    D_800FE33C += CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_GROWING) {
+    g_ChosenLabelGrowth += CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FBDB9 == LABEL_SHRINKING) {
-    D_800FE33C -= CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_SHRINKING) {
+    g_ChosenLabelGrowth -= CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FE33C > CHOSEN_LABEL_GROWTH_LIMIT) {
-    D_800FBDB9 = LABEL_SHRINKING;
+  if (g_ChosenLabelGrowth > CHOSEN_LABEL_GROWTH_LIMIT) {
+    g_ChosenLabelGrowthDirection = LABEL_SHRINKING;
   }
 
-  if (D_800FE33C < 0) {
-    D_800FBDB9 = LABEL_GROWING;
+  if (g_ChosenLabelGrowth < 0) {
+    g_ChosenLabelGrowthDirection = LABEL_GROWING;
   }
 
   *displayListHead = gfx;
@@ -6448,31 +6448,34 @@ void DrawMainMenu(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][0] - (D_800FE33C / 2)),
-      QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][1] - (D_800FE33C / 2)),
+      QuarterPixels(
+          D_8022FDF4_ovl_01[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(
+          D_8022FDF4_ovl_01[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
       QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][0] +
-          MAIN_CHOICE_LABEL_WIDTH + (D_800FE33C / 2)),
+          MAIN_CHOICE_LABEL_WIDTH + (g_ChosenLabelGrowth / 2)),
       QuarterPixels(D_8022FDF4_ovl_01[choiceIndex][1] +
-          (MAIN_CHOICE_LABEL_HEIGHT + (D_800FE33C / 2))),
+          (MAIN_CHOICE_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
-      (MAIN_CHOICE_LABEL_WIDTH << 10) / (D_800FE33C + MAIN_CHOICE_LABEL_WIDTH),
+      (MAIN_CHOICE_LABEL_WIDTH << 10) /
+          (g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_WIDTH),
       (MAIN_CHOICE_LABEL_HEIGHT << 10) /
-          (D_800FE33C + MAIN_CHOICE_LABEL_HEIGHT));
+          (g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_HEIGHT));
   gDPPipeSync(gfx++);
-  if (D_800FBDB9 == LABEL_GROWING) {
-    D_800FE33C += CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_GROWING) {
+    g_ChosenLabelGrowth += CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FBDB9 == LABEL_SHRINKING) {
-    D_800FE33C -= CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_SHRINKING) {
+    g_ChosenLabelGrowth -= CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FE33C > CHOSEN_LABEL_GROWTH_LIMIT) {
-    D_800FBDB9 = LABEL_SHRINKING;
+  if (g_ChosenLabelGrowth > CHOSEN_LABEL_GROWTH_LIMIT) {
+    g_ChosenLabelGrowthDirection = LABEL_SHRINKING;
   }
 
-  if (D_800FE33C < 0) {
-    D_800FBDB9 = LABEL_GROWING;
+  if (g_ChosenLabelGrowth < 0) {
+    g_ChosenLabelGrowthDirection = LABEL_GROWING;
   }
 
   *displayListHead = gfx;
@@ -6530,31 +6533,34 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      QuarterPixels(D_8022FE14_ovl_01[choiceIndex][0] - (D_800FE33C / 2)),
-      QuarterPixels(D_8022FE14_ovl_01[choiceIndex][1] - (D_800FE33C / 2)),
+      QuarterPixels(
+          D_8022FE14_ovl_01[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(
+          D_8022FE14_ovl_01[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
       QuarterPixels(D_8022FE14_ovl_01[choiceIndex][0] +
-          MAIN_CHOICE_LABEL_WIDTH + (D_800FE33C / 2)),
+          MAIN_CHOICE_LABEL_WIDTH + (g_ChosenLabelGrowth / 2)),
       QuarterPixels(D_8022FE14_ovl_01[choiceIndex][1] +
-          (MAIN_CHOICE_LABEL_HEIGHT + (D_800FE33C / 2))),
+          (MAIN_CHOICE_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
-      (MAIN_CHOICE_LABEL_WIDTH << 10) / (D_800FE33C + MAIN_CHOICE_LABEL_WIDTH),
+      (MAIN_CHOICE_LABEL_WIDTH << 10) /
+          (g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_WIDTH),
       (MAIN_CHOICE_LABEL_HEIGHT << 10) /
-          (D_800FE33C + MAIN_CHOICE_LABEL_HEIGHT));
+          (g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_HEIGHT));
   gDPPipeSync(gfx++);
-  if (D_800FBDB9 == LABEL_GROWING) {
-    D_800FE33C += CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_GROWING) {
+    g_ChosenLabelGrowth += CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FBDB9 == LABEL_SHRINKING) {
-    D_800FE33C -= CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_SHRINKING) {
+    g_ChosenLabelGrowth -= CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FE33C > CHOSEN_LABEL_GROWTH_LIMIT) {
-    D_800FBDB9 = LABEL_SHRINKING;
+  if (g_ChosenLabelGrowth > CHOSEN_LABEL_GROWTH_LIMIT) {
+    g_ChosenLabelGrowthDirection = LABEL_SHRINKING;
   }
 
-  if (D_800FE33C < 0) {
-    D_800FBDB9 = LABEL_GROWING;
+  if (g_ChosenLabelGrowth < 0) {
+    g_ChosenLabelGrowthDirection = LABEL_GROWING;
   }
 
   *displayListHead = gfx;
@@ -6605,30 +6611,32 @@ void DrawClubhouse(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0] - (D_800FE33C / 2)),
-      QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1] - (D_800FE33C / 2)),
+      QuarterPixels(
+          D_8022FE2C_ovl_01[choiceIndex][0] - (g_ChosenLabelGrowth / 2)),
+      QuarterPixels(
+          D_8022FE2C_ovl_01[choiceIndex][1] - (g_ChosenLabelGrowth / 2)),
       QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH +
-          (D_800FE33C / 2)),
+          (g_ChosenLabelGrowth / 2)),
       QuarterPixels(D_8022FE2C_ovl_01[choiceIndex][1] +
-          (ROOM_LABEL_HEIGHT + (D_800FE33C / 2))),
+          (ROOM_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
-      (ROOM_LABEL_WIDTH << 10) / (D_800FE33C + ROOM_LABEL_WIDTH),
-      (ROOM_LABEL_HEIGHT << 10) / (D_800FE33C + ROOM_LABEL_HEIGHT));
+      (ROOM_LABEL_WIDTH << 10) / (g_ChosenLabelGrowth + ROOM_LABEL_WIDTH),
+      (ROOM_LABEL_HEIGHT << 10) / (g_ChosenLabelGrowth + ROOM_LABEL_HEIGHT));
   gDPPipeSync(gfx++);
-  if (D_800FBDB9 == LABEL_GROWING) {
-    D_800FE33C += CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_GROWING) {
+    g_ChosenLabelGrowth += CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FBDB9 == LABEL_SHRINKING) {
-    D_800FE33C -= CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_SHRINKING) {
+    g_ChosenLabelGrowth -= CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FE33C > CHOSEN_LABEL_GROWTH_LIMIT) {
-    D_800FBDB9 = LABEL_SHRINKING;
+  if (g_ChosenLabelGrowth > CHOSEN_LABEL_GROWTH_LIMIT) {
+    g_ChosenLabelGrowthDirection = LABEL_SHRINKING;
   }
 
-  if (D_800FE33C < 0) {
-    D_800FBDB9 = LABEL_GROWING;
+  if (g_ChosenLabelGrowth < 0) {
+    g_ChosenLabelGrowthDirection = LABEL_GROWING;
   }
 
   *displayListHead = gfx;
@@ -7066,20 +7074,20 @@ void DrawOptionsScreen(Gfx** displayListHead) {
     DrawShadowedText(&gfx, SOUND_TEST_X, TEST_PITCH_Y, g_PrintBuffer);
   }
 
-  if (D_800FBDB9 == LABEL_GROWING) {
-    D_800FE33C += CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_GROWING) {
+    g_ChosenLabelGrowth += CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FBDB9 == LABEL_SHRINKING) {
-    D_800FE33C -= CHOSEN_LABEL_GROWTH_STEP;
+  if (g_ChosenLabelGrowthDirection == LABEL_SHRINKING) {
+    g_ChosenLabelGrowth -= CHOSEN_LABEL_GROWTH_STEP;
   }
 
-  if (D_800FE33C > CHOSEN_LABEL_GROWTH_LIMIT) {
-    D_800FBDB9 = LABEL_SHRINKING;
+  if (g_ChosenLabelGrowth > CHOSEN_LABEL_GROWTH_LIMIT) {
+    g_ChosenLabelGrowthDirection = LABEL_SHRINKING;
   }
 
-  if (D_800FE33C < 0) {
-    D_800FBDB9 = LABEL_GROWING;
+  if (g_ChosenLabelGrowth < 0) {
+    g_ChosenLabelGrowthDirection = LABEL_GROWING;
   }
 
   if (f_IsEraseWindowUp == TRUE) {
