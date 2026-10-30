@@ -134,8 +134,8 @@ typedef struct TrophyPosition {
   u32 y;
 } TrophyPosition;
 
-extern const char D_802318A8_ovl_01[];
-extern const char D_802318AC_ovl_01[];
+extern const char f_StatsStringFormat[];
+extern const char f_NumberedCourseFormat[];
 
 s32 GetOpenCourseCount(void);
 void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row);
@@ -594,16 +594,17 @@ void DrawCourseBanner(
   SetTextColor(&gfx, 255, 255, 255);
   if (!useCourseNames) {
     if (courseIndex + 1 == COURSE_COUNT + 1) {
-      sprintf(g_PrintBuffer, D_802318A8_ovl_01, g_TournamentNames[courseIndex]);
+      sprintf(
+          g_PrintBuffer, f_StatsStringFormat, g_TournamentNames[courseIndex]);
     } else {
-      sprintf(g_PrintBuffer, D_802318AC_ovl_01, courseIndex + 1,
+      sprintf(g_PrintBuffer, f_NumberedCourseFormat, courseIndex + 1,
           g_TournamentNames[courseIndex]);
     }
   } else if (courseIndex + 1 == COURSE_COUNT + 1) {
     sprintf(
-        g_PrintBuffer, D_802318A8_ovl_01, g_CourseRecords[courseIndex].name);
+        g_PrintBuffer, f_StatsStringFormat, g_CourseRecords[courseIndex].name);
   } else {
-    sprintf(g_PrintBuffer, D_802318AC_ovl_01, courseIndex + 1,
+    sprintf(g_PrintBuffer, f_NumberedCourseFormat, courseIndex + 1,
         g_CourseRecords[courseIndex].name);
   }
 
@@ -611,8 +612,10 @@ void DrawCourseBanner(
   *displayListHead = gfx;
 }
 
-const char D_802318A8_ovl_01[] = "%s";
-const char D_802318AC_ovl_01[] = "%d:%s";
+/* Writes a label or the totals' name as it is */
+const char f_StatsStringFormat[] = "%s";
+/* Writes a course's number before its name */
+const char f_NumberedCourseFormat[] = "%d:%s";
 
 /*
  * Draws the dimmed panel of the course's statistics, with the label and figure
@@ -640,7 +643,7 @@ void DrawStatsPanel(Gfx** displayListHead) {
       statIndex != f_FirstShownStat + STATS_SHOWN_ROW_COUNT; statIndex++) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
-    sprintf(g_PrintBuffer, D_802318A8_ovl_01, f_StatLabels[statIndex]);
+    sprintf(g_PrintBuffer, f_StatsStringFormat, f_StatLabels[statIndex]);
     DrawLargeText(&gfx, STATS_LABEL_X,
         STATS_FIRST_Y + ((s16)row * STATS_LINE_HEIGHT), g_PrintBuffer);
     DrawStatFigure(&gfx, statIndex, row);
@@ -759,7 +762,8 @@ void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row) {
   *displayListHead = gfx;
 }
 
-const char D_802318E0_ovl_01[] = "%c";
+/* Writes the unit mark after a figure */
+const char f_UnitMarkFormat[] = "%c";
 
 /* Draws the green Y that marks a figure in yards */
 void DrawYardMark(Gfx** displayListHead, s16 x, s16 y) {
@@ -767,7 +771,7 @@ void DrawYardMark(Gfx** displayListHead, s16 x, s16 y) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 63, 255, 63);
-  sprintf(g_PrintBuffer, D_802318E0_ovl_01, 'Y');
+  sprintf(g_PrintBuffer, f_UnitMarkFormat, 'Y');
   DrawLargeText(&gfx, x, y, g_PrintBuffer);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
@@ -780,7 +784,7 @@ void DrawPercentMark(Gfx** displayListHead, s16 x, s16 y) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 64, 192);
-  sprintf(g_PrintBuffer, D_802318E0_ovl_01, '%');
+  sprintf(g_PrintBuffer, f_UnitMarkFormat, '%');
   DrawLargeText(&gfx, x, y, g_PrintBuffer);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
@@ -1386,7 +1390,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
  * digit */
 #define DECIMAL_POINT_OFFSET (MENU_GLYPH_SIZE / 2)
 
-const char D_802318E4_ovl_01[] = "%d";
+/* Writes a decimal figure's whole part */
+const char f_DecimalWholeFormat[] = "%d";
 
 /*
  * Draws value to one decimal place in the large digits, its whole part
@@ -1445,7 +1450,7 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
     shift += MENU_GLYPH_SIZE;
   }
 
-  sprintf(g_PrintBuffer, D_802318E4_ovl_01, whole);
+  sprintf(g_PrintBuffer, f_DecimalWholeFormat, whole);
   for (digitIndex = 0; digitIndex != DECIMAL_DIGIT_LIMIT; digitIndex++) {
     digit = g_PrintBuffer[digitIndex];
     if (digit == '\0') {
