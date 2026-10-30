@@ -11,9 +11,19 @@ EnterDevelopmentDebugger = 0x80000000;
 /* DrawPressingHand reads this g_GameBoyTransfer field as a scalar */
 g_PressingHandImage = g_GameBoyTransfer + 0x40;
 
-/* The sound pointer bank ends where the wave bank begins, an address
-   splat already gives to g_SoundWaveBankRomStart */
-g_SoundPointerBankRomEnd = 0x18BE00;
+/* The files that the game reads from the asset segment, by their offsets
+   in it. The songs between the effect bank and the archive are in sound.c's
+   f_SongRomBounds. */
+g_SoundPointerBankRomStart = assets_ROM_START;
+g_SoundWaveBankRomStart = assets_ROM_START + 0x1A670;
+g_SoundEffectBankRomStart = assets_ROM_START + 0xC2A230;
+g_SoundEffectBankRomEnd = assets_ROM_START + 0xC2DCC0;
+g_AssetArchiveRomStart = assets_ROM_START + 0xCD5C60;
+g_GlyphFileRomStart = assets_ROM_START + 0x13AB5B0;
+g_MessageFileRomStart = assets_ROM_START + 0x13AB5C0;
+g_StaffTextRomStart = assets_ROM_START + 0x13B8EF0;
+/* The sound pointer bank ends where the wave bank begins */
+g_SoundPointerBankRomEnd = g_SoundWaveBankRomStart;
 
 /* The hole file path formats, which BuildHole has as string literals and
    the asm of SaveHoleFiles reads under these names */
