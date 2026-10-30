@@ -732,7 +732,7 @@ void func_8021730C_ovl_01(void) {
   s32 row;
   s32 column;
 
-  BuildCharacterGrid(1, 0);
+  BuildCharacterGrid(1, FALSE);
   for (index = 0; index != CHARACTER_COUNT; index++) {
     D_8023AC78_ovl_01[index] = TABLE_CHARACTER_HIDDEN;
   }

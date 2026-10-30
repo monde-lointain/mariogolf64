@@ -105,7 +105,7 @@ void GrantWinsStarsAndBadges(void) {
     }
   }
 
-  BuildCharacterGrid(1, 1);
+  BuildCharacterGrid(1, TRUE);
 }
 
 void GrantRingShotProgressAndPoints(void) {

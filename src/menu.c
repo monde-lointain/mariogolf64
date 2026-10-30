@@ -1401,7 +1401,7 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     }
   }
 
-  if ((u8)skipsImportedFaces != 1) {
+  if ((u8)skipsImportedFaces != TRUE) {
     for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
       recordIndex = g_CharacterGrid[2][index];
       if (recordIndex >= 0) {
@@ -1525,7 +1525,7 @@ s32 FindCharacterOnGrid(CharacterId character) {
     return CHARACTER_OFF_GRID;
   }
 
-  BuildCharacterGrid(1, 1);
+  BuildCharacterGrid(1, TRUE);
   slot = f_CharacterSlots[character];
   row = f_SlotCells[slot].row;
   column = f_SlotCells[slot].column;

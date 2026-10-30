@@ -1274,7 +1274,7 @@ void UpdateMenus(void) {
 
       case MENU_SCREEN_CHARACTER_SELECT:
       case MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT:
-        BuildCharacterGrid(g_ChosenPlayerCount, 0);
+        BuildCharacterGrid(g_ChosenPlayerCount, FALSE);
         f_MenuBoardImageIndex ^= 1;
         LoadCharacterSelectBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
             CHARACTER_SELECT_BUFFER_BOARD);
@@ -1292,7 +1292,7 @@ void UpdateMenus(void) {
         break;
 
       case MENU_SCREEN_OPPONENT_SELECT:
-        BuildCharacterGrid(1, 0);
+        BuildCharacterGrid(1, FALSE);
         func_80209500_ovl_01();
         OpenEncodedAsset(ASSET_COURSE_SCENE, &asset);
         ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
