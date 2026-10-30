@@ -29,9 +29,9 @@
 /* The images of g_CourseIconAssets that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
 
-/* LoadCourseTrophyImages reads the chosen course's first image into two
- * buffers, and its three files */
-#define COURSE_IMAGE_COPY_COUNT 2
+/* LoadCourseTrophyImages reads the chosen course's first trophy frame into
+ * both buffers, so either can be shown while the other is read */
+#define TROPHY_FRAME_BUFFER_COUNT 2
 
 /* DrawCourseBanner squeezes the banner's strips under the course menu's title,
  * with the course's name on it */
@@ -233,7 +233,7 @@ void LoadCourseTrophyImages(void** buffers, s32 requestedKind) {
   }
 
   if (memory->statsCourse != COURSE_COUNT) {
-    for (index = 0; index != COURSE_IMAGE_COPY_COUNT; index++) {
+    for (index = 0; index != TROPHY_FRAME_BUFFER_COUNT; index++) {
       OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
       ReadEncodedAsset(buffers[index], &asset);
     }
