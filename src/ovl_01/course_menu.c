@@ -150,7 +150,7 @@ void DrawFourDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value);
+void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
 
@@ -688,12 +688,12 @@ void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row) {
 
       break;
     case STAT_AVERAGE_SCORE:
-      func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
+      DrawDecimalMenuNumber(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].averageScore);
       break;
     case STAT_BEST_DRIVE:
-      func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
+      DrawDecimalMenuNumber(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].bestDrive);
       gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
@@ -701,40 +701,40 @@ void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row) {
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_DRIVE:
-      func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
+      DrawDecimalMenuNumber(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].averageDrive);
       DrawYardMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_FAIRWAY_PERCENT:
-      func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
+      DrawDecimalMenuNumber(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].fairwayPercent);
       DrawPercentMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_PUTTS:
-      func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
+      DrawDecimalMenuNumber(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].averagePutts);
       break;
     case STAT_PAR_SAVE_PERCENT:
-      func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
+      DrawDecimalMenuNumber(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].parSavePercent);
       DrawPercentMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_PAR_ON_PERCENT:
-      func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
+      DrawDecimalMenuNumber(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].parOnPercent);
       DrawPercentMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_SAND_SAVE_PERCENT:
-      func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
+      DrawDecimalMenuNumber(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].sandSavePercent);
       DrawPercentMark(&gfx, STATS_UNIT_X,
@@ -1365,8 +1365,8 @@ void DrawMenuNumber(
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
 #endif
 
-/* func_80211A5C writes a figure to one decimal place, its whole part lined up
- * on the right */
+/* DrawDecimalMenuNumber writes a figure to one decimal place, its whole part
+ * lined up on the right */
 #define DECIMAL_WHOLE_LIMIT 999
 #define DECIMAL_DIGIT_LIMIT 6
 #define HUNDREDTHS_PER_UNIT 100.0f
@@ -1376,7 +1376,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
 
 const char D_802318E4_ovl_01[] = "%d";
 
-void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
+/*
+ * Draws value to one decimal place in the large digits, its whole part
+ * right-aligned in three digits from x
+ */
+void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   Gfx* gfx = *displayListHead;
   s32 whole = value;
   s32 shift;

@@ -3430,6 +3430,7 @@ DrawPercentMark = 0x8020FE20; // type:func segment:ovl_01
 DrawStatsBadgeCount = 0x8020FEF8; // type:func segment:ovl_01
 DrawStatsScrollArrows = 0x80210190; // type:func segment:ovl_01
 DrawCourseTrophies = 0x802104F0; // type:func segment:ovl_01
+DrawDecimalMenuNumber = 0x80211A5C; // type:func segment:ovl_01
 DrawContinueLabel = 0x80204FF0; // type:func segment:ovl_01
 DrawBirdieBadgeLabel = 0x80209430; // type:func segment:ovl_01
 LeaveMenuWithWipe = 0x801FAF08; // type:func segment:ovl_01
