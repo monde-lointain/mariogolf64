@@ -593,7 +593,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_effects", StartSwingTrail);
  * Advances the swing trail two steps along its path and draws it as a
  * ribbon between the club's two points, fading towards its tail.
  */
-#ifdef NON_MATCHING
 void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 outerPoint[3];
   f32 innerPoint[3];
@@ -694,7 +693,9 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
 
     f_SwingTrailHead--;
     if (f_SwingTrailHead < 0) {
-      f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - 1;
+      /* Storing 1 first keeps the 1 in a register through the loop, to match */
+      f_SwingTrailHead = 1;
+      f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - f_SwingTrailHead;
     }
 
     step++;
@@ -761,7 +762,3 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_effects", LoadSwingTrailSegments);
-INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_effects", DrawSwingTrail);
-#endif
