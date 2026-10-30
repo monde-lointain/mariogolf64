@@ -697,21 +697,21 @@ void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row) {
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].bestDrive);
       gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-      func_8020FD48_ovl_01(&gfx, STATS_UNIT_X,
+      DrawYardMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_DRIVE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].averageDrive);
-      func_8020FD48_ovl_01(&gfx, STATS_UNIT_X,
+      DrawYardMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_FAIRWAY_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].fairwayPercent);
-      func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
+      DrawPercentMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_PUTTS:
@@ -723,21 +723,21 @@ void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row) {
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].parSavePercent);
-      func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
+      DrawPercentMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_PAR_ON_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].parOnPercent);
-      func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
+      DrawPercentMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_SAND_SAVE_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           g_CourseStatFigures[courseIndex].sandSavePercent);
-      func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
+      DrawPercentMark(&gfx, STATS_UNIT_X,
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
   }
@@ -748,7 +748,8 @@ void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row) {
 
 const char D_802318E0_ovl_01[] = "%c";
 
-void func_8020FD48_ovl_01(Gfx** displayListHead, s16 x, s16 y) {
+/* Draws the green Y that marks a figure in yards */
+void DrawYardMark(Gfx** displayListHead, s16 x, s16 y) {
   Gfx* gfx = *displayListHead;
 
   SetUpTextDrawing(&gfx);
@@ -760,7 +761,8 @@ void func_8020FD48_ovl_01(Gfx** displayListHead, s16 x, s16 y) {
   *displayListHead = gfx;
 }
 
-void func_8020FE20_ovl_01(Gfx** displayListHead, s16 x, s16 y) {
+/* Draws the pink percent sign after a percentage */
+void DrawPercentMark(Gfx** displayListHead, s16 x, s16 y) {
   Gfx* gfx = *displayListHead;
 
   SetUpTextDrawing(&gfx);
