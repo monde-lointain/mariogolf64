@@ -3522,7 +3522,8 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", BuildSpotTexels);
  * corner. The outer radius is unused: the ring always ends at
  * RING_OUTER_RADIUS.
  */
-void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius) {
+void BuildRingTexels(
+    u8* texels, s32 width, s32 height, s32 outerRadius UNUSED) {
   s32 row;
   s32 column;
   s32 texelIndex;

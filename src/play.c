@@ -219,7 +219,7 @@ s32 GetGaugeFramePower(s32 value) {
  * surface allows the club, and returns the set's size. The first argument
  * is not read.
  */
-s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable) {
+s32 MarkUsableClubs(s32 unused UNUSED, s16* clubs, s8* isUsable) {
   s32 i;
 
   for (i = 0; i < CLUB_SET_SIZE; i++) {

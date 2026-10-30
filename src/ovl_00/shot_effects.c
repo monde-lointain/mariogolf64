@@ -260,7 +260,7 @@ void FreeShotEffectImages(void) {
 }
 
 /* Does nothing; the flag gives off no sparks */
-void StartFlagSparks(CoursePoint point) {}
+void StartFlagSparks(CoursePoint point UNUSED) {}
 
 /* Throws a ring of sparks off the flagstick at point */
 void StartFlagstickSparks(CoursePoint point) {

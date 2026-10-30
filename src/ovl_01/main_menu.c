@@ -2042,7 +2042,7 @@ void ResetViewerCharacter(void) {
  * 1 once the chosen character's animation ends while g_ChoosingPlayerIndex
  * equals playerNumber, and 0 otherwise. Nothing reads arg0.
  */
-s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
+s32 UpdateViewerCharacter(s32 arg0 UNUSED, s32 playerNumber) {
   if (D_8022BE28_ovl_01 != 0) {
     while (
         g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
@@ -7208,7 +7208,7 @@ void DrawCaddySelect(Gfx** displayListHead) {
 const char D_8023176C_ovl_01[] = "CADDY SELECT";
 
 /* The blank screen draws nothing over the menu's cleared frame */
-void DrawBlankScreen(Gfx** displayListHead) {}
+void DrawBlankScreen(Gfx** displayListHead UNUSED) {}
 
 void func_80207E20_ovl_01(void) {}
 

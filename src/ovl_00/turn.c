@@ -1654,7 +1654,7 @@ void StartTurnTimer(void) {
  * after one try. It gets a time budget after StartTurnTimer, so it
  * presumably once told whether the frame had time left for planning.
  */
-Boolean HasPlanTime(s32 timeBudget) {
+Boolean HasPlanTime(s32 timeBudget UNUSED) {
   return FALSE;
 }
 
@@ -2383,7 +2383,8 @@ void CheckRingShotClear(s32 playerIndex) {
  * roll overlay has its own copies of these four routines, with the same
  * names, so these are static to link beside them.
  */
-static s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
+static s32 GetStanceAnimation(
+    u32 slotIndex, s32 club, ShotMode shotMode UNUSED) {
   s32 animation;
 
   switch (GetCharacterClubKind(slotIndex, club)) {
@@ -2524,7 +2525,7 @@ void StartPlayerShot(s32 playerIndex) {
   ResetShotOffsetMarker();
 }
 
-void func_80207660_ovl_00(Player* player) {}
+void func_80207660_ovl_00(Player* player UNUSED) {}
 
 /*
  * Once every player's shot has finished, picks who plays next. Players still on
@@ -2641,7 +2642,7 @@ void PlayAmbientSound(void) {
 }
 
 /* The slot to free is always the golfer's, whatever the caller passes */
-void FreeCharacterAndReactionLight(s32 slotIndex) {
+void FreeCharacterAndReactionLight(s32 slotIndex UNUSED) {
   FreeCharacterSlot(0);
   TurnOffReactionLight();
 }

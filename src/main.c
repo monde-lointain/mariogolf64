@@ -121,7 +121,7 @@ extern volatile s32 g_MainLoopState;
 extern u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
 
 void ReportFailedAssertion(
-    const char* expression, const char* fileName, s32 lineNumber) {
+    const char* expression UNUSED, const char* fileName, s32 lineNumber) {
   osSyncPrintf("Assertion Fault : File %s Line %d\n", fileName, lineNumber);
 }
 
@@ -236,7 +236,7 @@ void DisableFloatExceptions(void) {
       : "$4", "$5");
 }
 
-void mainproc(void* arg) {
+void mainproc(void* arg UNUSED) {
   u32 buildDateSize;
   s32 portIndex;
 
@@ -345,7 +345,7 @@ HAS_DIRECTION:
 /* PREVIOUSMENUPAD is unused; the caller has already saved the last reading
  * there */
 void UpdateMenuController(
-    NUContData* pad, NUContData* previousMenuPad, s32 portIndex) {
+    NUContData* pad, NUContData* previousMenuPad UNUSED, s32 portIndex) {
   s32 ApplyStickDeadZone(s32 stick) {
     s32 magnitude = Abs(stick);
 

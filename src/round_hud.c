@@ -2516,7 +2516,7 @@ void AdjustHudOffset(void) {
  * Draws the shot panel's wind indicator, club head and lie, or the wind
  * and lie panels beside the pause menu while it sets them
  */
-void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
+void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
   Vec3 rotation;
   Vec3 translation;
   Vec3 unusedScale UNUSED;

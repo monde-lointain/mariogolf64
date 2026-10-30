@@ -352,7 +352,8 @@ Boolean IsPinInCup(void) {
  * to the wind. While the pin is out of the cup, only the cup is drawn.
  * matrices is unused; DrawGame passes it to its other scene drawers too.
  */
-void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
+void DrawPin(
+    CameraMatrices* matrices UNUSED, CameraView* view, s32 cameraIndex) {
   ScreenPoint top;
   ScreenPoint cup;
   ScreenPoint stickFoot;

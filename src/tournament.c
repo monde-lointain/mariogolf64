@@ -248,7 +248,7 @@ u32 NextTournamentRandom(void) {
  * is returned; the return type is there to match.
  */
 s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
-    s32 endIndex, s32 playerScore) {
+    s32 endIndex, s32 playerScore UNUSED) {
   s32 index;
   s32 shape;
   s32 swing;

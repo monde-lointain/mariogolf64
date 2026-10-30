@@ -576,7 +576,7 @@ void DrawSpinMesh(Gfx** displayListHead) {
  * Copies the frame kept in f_SavedFrameBuffer to the screen, through the
  * depth buffer's memory, a strip at a time in copy mode
  */
-void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
+void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view UNUSED) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s16 stripHeight;
@@ -735,7 +735,7 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   *displayListHead = gfx;
 }
 
-void DrawEmptyEffect(Gfx** displayListHead, CameraView* view) {}
+void DrawEmptyEffect(Gfx** displayListHead UNUSED, CameraView* view UNUSED) {}
 
 void DrawScreenEffect(CameraMatrices* matrices, CameraView* view) {
   /* The spin effect pushes a modelview matrix and changes the projection */

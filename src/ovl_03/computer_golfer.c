@@ -327,7 +327,7 @@ void StartShotPlan(void) {
 }
 
 /* The planning thread, which waits to be destroyed once the plan is made */
-void RunShotPlan(void* arg) {
+void RunShotPlan(void* arg UNUSED) {
   while (PlanShot(&f_PlannedShot) == PLAN_UNFINISHED) {
   }
 
@@ -937,7 +937,7 @@ s32 GetBallCupDistance(void) {
  * WIND_ALLOWANCE_MIN_DISTANCE out, plus a part of the ball's height above the
  * cup.
  */
-s32 PlanCupDistance(s32 unused) {
+s32 PlanCupDistance(s32 unused UNUSED) {
   s32 distance;
   f32 cupX;
   f32 cupZ;
@@ -1927,8 +1927,8 @@ void ChooseLandingTarget(
  * Plans a shot from beyond approach range: aims at the cup with the club whose
  * carry covers PlanCupDistance, in the shot mode for the player's stroke count
  */
-void ChooseLongShot(s32 unused, ClubType* clubType, s32* targetX, s32* targetZ,
-    ShotMode* shotMode) {
+void ChooseLongShot(s32 unused UNUSED, ClubType* clubType, s32* targetX,
+    s32* targetZ, ShotMode* shotMode) {
   s32 pad[44] UNUSED; /* Unused; it is there to match */
   ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
   s32 index;
@@ -2646,7 +2646,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", StepTrialShot);
 
 /* Returns the slot of the golfer's club of type clubType, or 0 if there is none
  */
-s32 FindClubSlot(s32 unused, ClubType clubType) {
+s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
   s32 slot;
 
   for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {

@@ -366,7 +366,7 @@ void LoadGolfBallImages(void) {
 }
 
 /* Turns the ball about the horizontal axis across the way that it moved */
-void RollGolfBall(GolfBall* ball, BallSimulation* simulation) {
+void RollGolfBall(GolfBall* ball UNUSED, BallSimulation* simulation) {
   Mat4 rotation;
   s32 movement[3];
   f32 distance;

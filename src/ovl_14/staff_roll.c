@@ -805,7 +805,7 @@ void EaseStaffRollView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
 }
 
 /* The first of the club kind's animations; shotMode is unused */
-s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
+s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode UNUSED) {
   s32 animation;
 
   switch (GetCharacterClubKind(slotIndex, club)) {

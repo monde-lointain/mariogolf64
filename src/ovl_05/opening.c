@@ -857,7 +857,7 @@ void FreeOpening(void) {
 
 /* The caller passes the frame parity too, which goes unused */
 void DrawOpeningCharacters(
-    CameraMatrices* matrices, Gfx** displayListHead, s32 frameParity) {
+    CameraMatrices* matrices, Gfx** displayListHead, s32 frameParity UNUSED) {
   s32 slotIndex = 0;
 
   g_DisplayListHead = *displayListHead;
@@ -909,7 +909,7 @@ void BuildOpeningShotPath(void) {
 }
 
 /* Draws the dashes that BuildOpeningShotPath placed along the shot's path */
-void DrawOpeningShotPath(CameraMatrices* matrices) {
+void DrawOpeningShotPath(CameraMatrices* matrices UNUSED) {
   s32 step;
 
   if (!f_IsOpeningShotPathShown) {

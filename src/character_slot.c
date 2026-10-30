@@ -84,7 +84,7 @@ void SetCharacterAlpha(s32 alpha) {
  * Points the characters' highlights at the scene light, as seen from the main
  * camera. The matrices are unused.
  */
-void SetCharacterHilite(CameraMatrices* matrices) {
+void SetCharacterHilite(CameraMatrices* matrices UNUSED) {
   f32 lookAtMatrix[4][4];
   f32 lightDirection[3];
   Radians lightPitch;

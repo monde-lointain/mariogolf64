@@ -78,7 +78,7 @@ void RunBootHook(void) {
  * Waits for CPU faults and prints the context of each faulted thread.
  * Nothing starts this thread.
  */
-void RunFaultThread(void* arg) {
+void RunFaultThread(void* arg UNUSED) {
   OSMesg message;
 
   osSetEventMesg(OS_EVENT_FAULT, &f_FaultMessageQueue, (OSMesg)FAULT_MESSAGE);

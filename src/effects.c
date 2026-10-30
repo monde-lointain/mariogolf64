@@ -837,7 +837,7 @@ void SpawnImpactEffects(BallSimulation* simulation) {
  * the last, that grow as they fade. The callers pass a point, but the ball's
  * position is used instead.
  */
-void SpawnRisingClumps(CoursePoint unusedPoint) {
+void SpawnRisingClumps(CoursePoint unusedPoint UNUSED) {
   s32 index;
   s32 spawnCount;
   Effect* effect;
@@ -1895,8 +1895,8 @@ void DrawEffectShadow(Gfx** displayListHead, Effect* effect) {
 #define DROP_GRAY 239
 
 /* Draws the drop that LaunchDrop placed, turned to face the camera */
-void DrawDrop(
-    Gfx** displayListHead, CameraMatrices* matrices, Effect* unusedEffect) {
+void DrawDrop(Gfx** displayListHead, CameraMatrices* matrices,
+    Effect* unusedEffect UNUSED) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);

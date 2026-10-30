@@ -1610,7 +1610,8 @@ void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
  * Draws nothing. Its callers pass it a display list, a position and text,
  * as they would to the other text drawing routines.
  */
-void DrawTextStub(Gfx** displayListHead, s16 x, s16 y, char* text) {}
+void DrawTextStub(
+    Gfx** displayListHead UNUSED, s16 x, s16 y, char* text UNUSED) {}
 
 /*
  * Sets up the RDP to draw shadowed text, modulating the font's intensity

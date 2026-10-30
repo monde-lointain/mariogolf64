@@ -400,7 +400,8 @@ Raindrop* f_Raindrops BSS = {0};
 OSMesgQueue __osSiAccessQueue BSS ALIGNED(0x8) = {0};
 /* Read by no routine */
 static u8 D_801EFFC8[0x8] UNUSED BSS = {0};
-BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT] BSS ALIGNED(16) = {{0}};
+BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT] BSS ALIGNED(16) = {
+    {0}};
 OSMesgQueue nuContDataMutexQ BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_801F43E8[0x8] UNUSED BSS = {0};

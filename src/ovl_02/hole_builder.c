@@ -2468,7 +2468,7 @@ void ReadHoleTriangles(void);
 void ReadTileMidpoints(void);
 
 /* Does nothing; the course and hole are not read */
-void FinishHolePoints(CourseRecordIndex course, s32 hole) {}
+void FinishHolePoints(CourseRecordIndex course UNUSED, s32 hole UNUSED) {}
 
 /*
  * Builds a hole: reads its files, either from its assets or, with

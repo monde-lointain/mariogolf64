@@ -4815,7 +4815,7 @@ void func_8040C260_hole_editor(s32 captureIndex) {
  * look-at point
  */
 void func_8040C360_hole_editor(
-    CameraMatrices* matrices, Gfx** displayListHead) {
+    CameraMatrices* matrices UNUSED, Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
   guTranslate(&D_8040CC98, g_MapCamera.view.lookAt[0],

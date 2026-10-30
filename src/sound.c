@@ -721,14 +721,14 @@ void InitAudio(void) {
 }
 
 /* Stand-ins for libaudio's synthesizer, which libmus replaces */
-void alSynNew(ALSynth* synth, ALSynConfig* config) {
+void alSynNew(ALSynth* synth UNUSED, ALSynConfig* config UNUSED) {
   osSyncPrintf("alSynNew\n");
 }
 
-void alSynDelete(ALSynth* synth) {
+void alSynDelete(ALSynth* synth UNUSED) {
   osSyncPrintf("alSynDelete\n");
 }
 
-void __freeParam(struct ALParam_s* param) {}
+void __freeParam(struct ALParam_s* param UNUSED) {}
 
-void _freePVoice(ALSynth* synth, struct PVoice_s* voice) {}
+void _freePVoice(ALSynth* synth UNUSED, struct PVoice_s* voice UNUSED) {}

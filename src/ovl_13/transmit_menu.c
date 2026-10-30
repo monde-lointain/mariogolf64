@@ -1533,8 +1533,9 @@ void DecodeCartridgeCharacter(
 }
 
 /* Would skip a save without characters, but does nothing */
-void SkipCartridgeSave(u8* unusedData, s32 unusedCartridgeIndex,
-    s32 unusedSaveIndex, u8* unusedTitle, s32 unusedUnk34) {}
+void SkipCartridgeSave(u8* unusedData UNUSED, s32 unusedCartridgeIndex UNUSED,
+    s32 unusedSaveIndex UNUSED, u8* unusedTitle UNUSED,
+    s32 unusedUnk34 UNUSED) {}
 
 /* Whether a Game Boy character came from the save that the character data
  * belongs to, by its save name and unkB bytes */

@@ -947,7 +947,7 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
 }
 
 /* The height is unused */
-Boolean IsInWater(s32 x, s32 y, s32 z) {
+Boolean IsInWater(s32 x, s32 y UNUSED, s32 z) {
   return GetSurface(x, z) == SURFACE_WATER_HAZARD;
 }
 

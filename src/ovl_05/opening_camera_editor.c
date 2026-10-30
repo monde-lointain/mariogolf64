@@ -102,19 +102,22 @@ void SetEditorPointSpeeds(s32 index, f32 topSpeed, f32 acceleration) {
 }
 
 /* Sets the top speed and acceleration of turns. Nothing calls it */
-void SetEditorTurnSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
+void SetEditorTurnSpeeds(
+    s32 unusedIndex UNUSED, f32 topSpeed, f32 acceleration) {
   g_CameraEditor.turnTopSpeed = topSpeed;
   g_CameraEditor.turnAcceleration = acceleration;
 }
 
 /* Sets the top speed and acceleration of tilts. Nothing calls it */
-void SetEditorTiltSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
+void SetEditorTiltSpeeds(
+    s32 unusedIndex UNUSED, f32 topSpeed, f32 acceleration) {
   g_CameraEditor.tiltTopSpeed = topSpeed;
   g_CameraEditor.tiltAcceleration = acceleration;
 }
 
 /* Sets the top speed and acceleration of zooms. Nothing calls it */
-void SetEditorZoomSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
+void SetEditorZoomSpeeds(
+    s32 unusedIndex UNUSED, f32 topSpeed, f32 acceleration) {
   g_CameraEditor.zoomTopSpeed = topSpeed;
   g_CameraEditor.zoomAcceleration = acceleration;
 }
