@@ -601,9 +601,9 @@ static s32 f_LogoLetterRises[2]; /* Up; the other letters', then the L's */
 static f32 f_LogoScaleStep;
 static s32 f_LogoClubStepX;
 static s32 f_LogoClubStepY;
-static f32 f_OpeningSparkPositions[SPARK_COUNT][2];
+static Vec2 f_OpeningSparkPositions[SPARK_COUNT];
 static Radians f_OpeningSparkAngles[SPARK_COUNT];
-static f32 f_OpeningSparkVelocities[SPARK_COUNT][2];
+static Vec2 f_OpeningSparkVelocities[SPARK_COUNT];
 static f32 f_OpeningSparkScale;
 static s32 f_OpeningSparkFramesLeft;
 static Mtx f_OpeningSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
@@ -5162,18 +5162,20 @@ void DrawOpeningSparks(Gfx** displayListHead) {
     if (depth < 0) {
       f_OpeningSparkScale = SPARK_SCALE_DEPTH / (f32)-depth;
       for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
-        f_OpeningSparkPositions[sparkIndex][0] = origin.x - (SCREEN_WIDTH / 2);
-        f_OpeningSparkPositions[sparkIndex][1] = (SCREEN_HEIGHT / 2) - origin.y;
+        f_OpeningSparkPositions[sparkIndex][AXIS_X] =
+            origin.x - (SCREEN_WIDTH / 2);
+        f_OpeningSparkPositions[sparkIndex][AXIS_Y] =
+            (SCREEN_HEIGHT / 2) - origin.y;
         f_OpeningSparkAngles[sparkIndex] =
             ((f32)sparkIndex * SPARK_ANGLE_STEP) +
             (f32)DegreesToRadians((guRandom() % SPARK_ANGLE_JITTER_RANGE) -
                 (SPARK_ANGLE_JITTER_RANGE / 2));
         speed = ((guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale) +
             SPARK_MIN_SPEED;
-        f_OpeningSparkVelocities[sparkIndex][0] =
+        f_OpeningSparkVelocities[sparkIndex][AXIS_X] =
             sinf(f_OpeningSparkAngles[sparkIndex]) * speed *
             f_OpeningSparkScale;
-        f_OpeningSparkVelocities[sparkIndex][1] =
+        f_OpeningSparkVelocities[sparkIndex][AXIS_Y] =
             -cosf(f_OpeningSparkAngles[sparkIndex]) * speed *
             f_OpeningSparkScale;
         f_OpeningSparksState = SPARKS_FLYING;
@@ -5209,14 +5211,14 @@ void DrawOpeningSparks(Gfx** displayListHead) {
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
-      f_OpeningSparkPositions[sparkIndex][0] +=
-          f_OpeningSparkVelocities[sparkIndex][0];
-      f_OpeningSparkPositions[sparkIndex][1] +=
-          f_OpeningSparkVelocities[sparkIndex][1];
-      f_OpeningSparkVelocities[sparkIndex][0] *= SPARK_DRAG;
-      f_OpeningSparkVelocities[sparkIndex][1] *= SPARK_DRAG;
-      translation[0] = f_OpeningSparkPositions[sparkIndex][0];
-      translation[1] = f_OpeningSparkPositions[sparkIndex][1];
+      f_OpeningSparkPositions[sparkIndex][AXIS_X] +=
+          f_OpeningSparkVelocities[sparkIndex][AXIS_X];
+      f_OpeningSparkPositions[sparkIndex][AXIS_Y] +=
+          f_OpeningSparkVelocities[sparkIndex][AXIS_Y];
+      f_OpeningSparkVelocities[sparkIndex][AXIS_X] *= SPARK_DRAG;
+      f_OpeningSparkVelocities[sparkIndex][AXIS_Y] *= SPARK_DRAG;
+      translation[0] = f_OpeningSparkPositions[sparkIndex][AXIS_X];
+      translation[1] = f_OpeningSparkPositions[sparkIndex][AXIS_Y];
       translation[2] = SPARK_DEPTH;
       rotation[0] = 0.0f;
       rotation[1] = 0.0f;
