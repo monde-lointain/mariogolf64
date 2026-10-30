@@ -39,8 +39,10 @@ LD_SCRIPT   := $(SPLAT_LD)
 else
 BUILD_DIR   := build/modern
 COMPARE     := 0
-# The modern GCC's own binutils, whose linker takes its objects' flags
-CROSS       := /opt/crashsdk/bin/mips-n64-
+# libdragon's toolchain, built for the VR4300 with an o32 multilib, and its
+# own binutils, whose linker takes its objects' flags
+N64_INST    ?= /opt/libdragon
+CROSS       := $(N64_INST)/bin/mips64-elf-
 BIN_FORMAT  := elf32-bigmips
 CC          := $(CROSS)gcc
 LIB_CC      := $(CC)

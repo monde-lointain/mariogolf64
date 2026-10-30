@@ -47,10 +47,15 @@
 #endif
 /* clang-format on */
 
-#if INCLUDE_ASM_USE_MACRO_INC
-__asm__(".include \"include/macro.inc\"\n");
-#else
+/*
+ * Modern assemblers need macro.inc's aliases for the o32 float register
+ * names, such as $fv0, that the included assembly uses. KMC's assembler
+ * needs labels.inc, which has no blank lines.
+ */
+#ifdef __IS_KMC__
 __asm__(".include \"include/labels.inc\"\n");
+#else
+__asm__(".include \"include/macro.inc\"\n");
 #endif
 
 #else
