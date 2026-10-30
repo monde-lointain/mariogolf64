@@ -1193,7 +1193,7 @@ void UpdateClubTournament(void) {
   }
 
   if (D_80230F70_ovl_01 != CLUB_CODE_PHASE_TYPING) {
-    func_80229278_ovl_01();
+    UpdateClubWindow();
     return;
   }
 
@@ -1340,7 +1340,11 @@ void UpdateClubTournament(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", UpdateClubTournament);
 #endif
 
-void func_80229278_ovl_01(void) {
+/*
+ * Runs the club tournament's details window: left and right pick Yes or No, A
+ * on Yes enters the tournament and A on No or B goes back to the code
+ */
+void UpdateClubWindow(void) {
   Boolean isHudAnimationDone;
   s32 index;
   u16 buttons;
