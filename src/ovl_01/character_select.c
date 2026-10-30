@@ -128,6 +128,12 @@ extern void* D_801B69EC;
 /* Moves the cursor by half a pixel so that its edges sit on pixel centers */
 #define HALF_PIXEL 0.5f
 
+/* A player tag's offset from the corner of its cursor's grid cell */
+typedef struct TagOffset {
+  /* 0x0 */ s8 x;
+  /* 0x1 */ s8 y;
+} TagOffset; /* size = 0x2 */
+
 void DrawMenuScenery(Gfx** displayListHead);
 void DrawMenuBanner(Gfx** displayListHead);
 void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer);
@@ -177,7 +183,7 @@ static s16 D_8022FFC8_ovl_01 = 0;
 /* Read by no routine */
 static s16 D_8022FFCA_ovl_01 = 0;
 /* Each player's tag offset from their cursor's grid cell, as x and y */
-static s8 f_PlayerTagOffsets[MAX_PLAYER_COUNT][2] = {
+static TagOffset f_PlayerTagOffsets[MAX_PLAYER_COUNT] = {
     {0, 0}, {16, 0}, {0, 24}, {16, 24}};
 /* The tags' x when lined up, by the player count less one */
 static s32 D_8022FFD4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
@@ -1662,9 +1668,9 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   for (playerIndex = 0; playerIndex != tagCount; playerIndex++) {
     if (tagMode != PLAYER_TAG_LINED_UP) {
       shiftX = 0;
-      left = f_PlayerTagOffsets[playerIndex][0] +
+      left = f_PlayerTagOffsets[playerIndex].x +
           (memory->characterColumns[playerIndex] * GRID_CELL_SIZE);
-      top = f_PlayerTagOffsets[playerIndex][1] +
+      top = f_PlayerTagOffsets[playerIndex].y +
           (memory->characterRows[playerIndex] * GRID_CELL_SIZE);
     } else {
       left = D_8022FFD4_ovl_01[tagCount - 1][playerIndex];
