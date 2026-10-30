@@ -116,8 +116,6 @@ enum CButtonPalette {
   RIGHT_C_PALETTE
 };
 
-extern void* g_ComLeftyIcons;
-
 /* Where the character cursor's translation is measured from, so that it is
  * placed by its corner */
 #define CHARACTER_CURSOR_ORIGIN_X 140

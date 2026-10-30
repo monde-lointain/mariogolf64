@@ -85,7 +85,6 @@ extern void* D_800FF4C4[2];
 extern void* D_80106100;
 extern void* D_800FC898;
 extern void* D_800FC6A0;
-extern void* g_ComLeftyIcons;
 
 /* f_SlotCells lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
