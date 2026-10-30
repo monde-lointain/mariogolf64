@@ -85,7 +85,6 @@ extern void* g_CourseWheelImages[2];
 extern void* D_800FF4C4[2];
 extern void* D_80106100;
 extern void* D_800FC898;
-extern void* g_CharacterFaceImages[18];
 extern void* D_80105B78[18];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;

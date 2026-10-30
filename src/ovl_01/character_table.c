@@ -110,7 +110,6 @@ typedef struct TableCorner {
 #define TABLE_RIGHT_ARROW_X 296
 #define TABLE_ARROW_BLINK_FRAMES 4
 
-extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 /* DrawCharacterFace takes an s16 character, but this file calls it without
  * narrowing the argument */
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,

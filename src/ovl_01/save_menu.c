@@ -120,7 +120,6 @@ typedef struct {
 #define RING_SHOT_LAST_FIRST_CHARACTER 14
 
 extern void* D_801052C4[2];
-extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 
 /* What D_80230B40 holds for a player with no controller, or for the computer */
 #define NO_CONTROLLER -1

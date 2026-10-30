@@ -125,6 +125,9 @@ extern AssetId g_MiniGolfCourseIconAssets[];
 /* The file read with each mini-golf course's disc image */
 extern s16 g_MiniGolfDiscFiles[];
 
+/* Each character's face image, which the menus draw faces from */
+extern void* g_CharacterFaceImages[CHARACTER_COUNT];
+
 /* The most bytes of each character palette file that the menus keep */
 #define MENU_PALETTE_FILE_SIZE 0x200
 /* Character palette files that the menu screens read, one per slot */

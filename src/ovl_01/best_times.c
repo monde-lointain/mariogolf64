@@ -60,8 +60,6 @@
 #define TIME_SEPARATOR_SHIFT_LEFT 4
 #define TIME_SEPARATOR_SPACING 6
 
-extern void* g_CharacterFaceImages[CHARACTER_COUNT];
-
 s32 GetOpenCourseCount(void);
 void func_8020F2D0_ovl_01(
     Gfx** displayListHead, u8 useCourseNames, s32 courseIndex);

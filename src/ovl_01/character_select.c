@@ -118,7 +118,6 @@ enum CButtonPalette {
 };
 
 extern void* D_80105B78[CHARACTER_COUNT];
-extern void* g_CharacterFaceImages[CHARACTER_COUNT];
 extern void* D_801B69EC;
 
 /* Where the character cursor's translation is measured from, so that it is
