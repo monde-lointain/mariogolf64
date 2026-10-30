@@ -2308,22 +2308,22 @@ void DrawSavedGolfers(Gfx** displayListHead) {
       1.0f, 0.0f);
   gSPLookAt(gfx++, &f_SavedGolfersLookAts[g_DrawBufferIndex]);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
-    if (D_8023BFC0_ovl_01[playerIndex] > 0) {
-      D_8023BFC0_ovl_01[playerIndex]--;
+    if (g_MenuFidgetDelays[playerIndex] > 0) {
+      g_MenuFidgetDelays[playerIndex]--;
     }
 
-    if (D_8023BFC0_ovl_01[playerIndex] == 0) {
-      D_8023BFC0_ovl_01[playerIndex] = -1;
+    if (g_MenuFidgetDelays[playerIndex] == 0) {
+      g_MenuFidgetDelays[playerIndex] = -1;
       SetAnimationLooping(playerIndex, FALSE);
       SetNextAnimation(playerIndex, MENU_ANIMATION_FIDGET);
     }
 
-    if (D_8023BFC0_ovl_01[playerIndex] == -1) {
+    if (g_MenuFidgetDelays[playerIndex] == -1) {
       if (GetAnimationEndFrame(playerIndex, MENU_ANIMATION_FIDGET) ==
           GetAnimationFrame(playerIndex)) {
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
         SetAnimationLooping(playerIndex, TRUE);
-        D_8023BFC0_ovl_01[playerIndex] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[playerIndex] = guRandom() % FIDGET_DELAY_RANGE;
       }
     }
 

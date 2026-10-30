@@ -415,7 +415,8 @@ void DrawSavedGames(Gfx** displayListHead);
 void DrawClubTournament(Gfx** displayListHead);
 
 /* Not static: the original left these to the linker's common block */
-s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
+/* Frames until each menu character fidgets, or FIDGETING while it does */
+s32 g_MenuFidgetDelays[MAX_PLAYER_COUNT];
 /* How far the course select's banners slide as the bet pages come and go */
 s32 g_CourseBannersSlide;
 
@@ -1239,10 +1240,10 @@ void UpdateMenus(void) {
         ReadEncodedAsset(D_8010526C[g_AnimatedIconBufferIndex], &asset);
         LoadPlayerStatsBuffer(
             D_800FBE30[0], PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS);
-        D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
-        D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
-        D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
-        D_8023BFC0_ovl_01[3] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[0] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[1] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[2] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[3] = guRandom() % FIDGET_DELAY_RANGE;
         for (index = 0; index != MAXCONTROLLERS; index++) {
           D_801B70F0[index] = FALSE;
         }
@@ -1327,10 +1328,10 @@ void UpdateMenus(void) {
         LoadSaveGameBuffer(
             g_MenuLabelImages[f_MenuLabelImageIndex], SAVE_GAME_BUFFER_COURSE);
         LoadSaveGameBuffer(D_800FF4C4[0], SAVE_GAME_BUFFER_CHOSEN_COURSE);
-        D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
-        D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
-        D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
-        D_8023BFC0_ovl_01[3] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[0] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[1] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[2] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[3] = guRandom() % FIDGET_DELAY_RANGE;
         for (index = 0; index != MAXCONTROLLERS; index++) {
           D_801B70F0[index] = FALSE;
         }
@@ -5292,22 +5293,22 @@ void DrawMenuCharacters(Gfx** displayListHead) {
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CHARACTERS_NEAR,
       MENU_CHARACTERS_FAR, MENU_CHARACTERS_ORTHO_SCALE);
   for (slot = 0; slot != characterCount; slot++) {
-    if (D_8023BFC0_ovl_01[slot] > 0) {
-      D_8023BFC0_ovl_01[slot]--;
+    if (g_MenuFidgetDelays[slot] > 0) {
+      g_MenuFidgetDelays[slot]--;
     }
 
-    if (D_8023BFC0_ovl_01[slot] == 0) {
-      D_8023BFC0_ovl_01[slot] = -1;
+    if (g_MenuFidgetDelays[slot] == 0) {
+      g_MenuFidgetDelays[slot] = -1;
       SetAnimationLooping(slot, FALSE);
       SetNextAnimation(slot, MENU_ANIMATION_FIDGET);
     }
 
-    if (D_8023BFC0_ovl_01[slot] == -1) {
+    if (g_MenuFidgetDelays[slot] == -1) {
       if (GetAnimationEndFrame(slot, MENU_ANIMATION_FIDGET) ==
           GetAnimationFrame(slot)) {
         SetCharacterAnimation(slot, MENU_ANIMATION_STANDING);
         SetAnimationLooping(slot, TRUE);
-        D_8023BFC0_ovl_01[slot] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[slot] = guRandom() % FIDGET_DELAY_RANGE;
       }
     }
 

@@ -651,10 +651,10 @@ void UpdateBetSettings(void) {
 
   if (g_MenuPressedButtons & A_BUTTON) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-    D_8023BFC0_ovl_01[0] = guRandom() % FIDGET_DELAY_RANGE;
-    D_8023BFC0_ovl_01[1] = guRandom() % FIDGET_DELAY_RANGE;
-    D_8023BFC0_ovl_01[2] = guRandom() % FIDGET_DELAY_RANGE;
-    D_8023BFC0_ovl_01[3] = guRandom() % FIDGET_DELAY_RANGE;
+    g_MenuFidgetDelays[0] = guRandom() % FIDGET_DELAY_RANGE;
+    g_MenuFidgetDelays[1] = guRandom() % FIDGET_DELAY_RANGE;
+    g_MenuFidgetDelays[2] = guRandom() % FIDGET_DELAY_RANGE;
+    g_MenuFidgetDelays[3] = guRandom() % FIDGET_DELAY_RANGE;
     for (index = 0; index != MAXCONTROLLERS; index++) {
       D_801B70F0[index] = 0;
     }
@@ -1225,22 +1225,22 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
   gSPLookAt(gfx++, &f_HandicapGolfersLookAts[g_DrawBufferIndex]);
   for (playerIndex = 0; playerIndex != g_ChosenPlayerCount; playerIndex++) {
-    if (D_8023BFC0_ovl_01[playerIndex] > 0) {
-      D_8023BFC0_ovl_01[playerIndex]--;
+    if (g_MenuFidgetDelays[playerIndex] > 0) {
+      g_MenuFidgetDelays[playerIndex]--;
     }
 
-    if (D_8023BFC0_ovl_01[playerIndex] == 0) {
-      D_8023BFC0_ovl_01[playerIndex] = -1;
+    if (g_MenuFidgetDelays[playerIndex] == 0) {
+      g_MenuFidgetDelays[playerIndex] = -1;
       SetAnimationLooping(playerIndex, FALSE);
       SetNextAnimation(playerIndex, MENU_ANIMATION_FIDGET);
     }
 
-    if (D_8023BFC0_ovl_01[playerIndex] == -1) {
+    if (g_MenuFidgetDelays[playerIndex] == -1) {
       if (GetAnimationEndFrame(playerIndex, MENU_ANIMATION_FIDGET) ==
           GetAnimationFrame(playerIndex)) {
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
         SetAnimationLooping(playerIndex, TRUE);
-        D_8023BFC0_ovl_01[playerIndex] = guRandom() % FIDGET_DELAY_RANGE;
+        g_MenuFidgetDelays[playerIndex] = guRandom() % FIDGET_DELAY_RANGE;
       }
     }
 
