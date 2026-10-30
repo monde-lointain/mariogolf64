@@ -2129,4 +2129,5 @@ s32 TakeClubTournamentEntry(void) {
   return FALSE;
 }
 
-void func_8022BDF8_ovl_01(void) {}
+/* Does nothing; no routine calls it */
+void DoNothingInTournamentMenu(void) {}
