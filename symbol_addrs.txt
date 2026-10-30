@@ -3591,6 +3591,7 @@ f_ShownStatsTrophyBufferIndex = 0x802300A4; // size:0x2 segment:ovl_01
 f_StatsTrophyFrameTimer = 0x802300A6; // size:0x2 segment:ovl_01
 f_StatsArrowFrame = 0x802300A8; // size:0x4 segment:ovl_01
 f_StatsArrowTimer = 0x802300AC; // size:0x4 segment:ovl_01
+f_UnreadStatsDrawTime = 0x802300DC; // size:0x4 segment:ovl_01
 f_StatsTrophyPositions = 0x80230100; // size:0x30 segment:ovl_01
 f_TablePopupLeft = 0x80230190; // size:0x4 segment:ovl_01
 f_TablePopupTop = 0x80230194; // size:0x4 segment:ovl_01

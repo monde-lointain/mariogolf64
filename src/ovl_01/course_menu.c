@@ -168,7 +168,8 @@ static s32 D_802300B0_ovl_01 = 0;
 static const char* f_StatLabels[STATS_COUNT] = {"Round", "Best Score",
     "Average", "Best Drive", "Avg. Drive", "On Fairway", "Avg. Putt",
     "Par Saves", "Par Ons", "Sand Saves"};
-static f32 D_802300DC_ovl_01 = 0.0f;
+/* DrawCourseStats adds a tenth to it on every draw, but no routine reads it */
+static f32 f_UnreadStatsDrawTime = 0.0f;
 /* Read by no routine */
 static char D_802300E0_ovl_01[3][10] = {"EXP", "ｺｰｽｹﾞｯﾄ", "純ﾞ"};
 /* Where each course's first trophy sits, before its shift for the place */
@@ -504,8 +505,7 @@ void DrawCourseStats(Gfx** displayListHead) {
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
-  /* Nothing here reads D_802300DC */
-  D_802300DC_ovl_01 += 0.1f;
+  f_UnreadStatsDrawTime += 0.1f;
   for (index = 0; index != courseCount + 1; index++) {
     slot = drawOrder[index];
     image = (slot == courseCount) ? COURSE_TOTALS_IMAGE : slot;
