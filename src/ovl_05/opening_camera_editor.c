@@ -249,18 +249,18 @@ void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
 #ifdef NON_MATCHING
 void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
   s32 easeFrameCount;
-  f32 speed;
+  f32 speed; /* Also the magnitude, to match */
 
-  if (fabsf(angle) < 0.001f) {
+  speed = fabsf(angle);
+  if (speed < 0.001f) {
     g_CameraEditor.heading += angle;
     return;
   }
 
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
-    speed = angle / (frameCount - easeFrameCount);
+    speed = g_CameraEditor.turnTopSpeed = angle / (frameCount - easeFrameCount);
     g_CameraEditor.turnBrakingAngle = angle * 0.25;
-    g_CameraEditor.turnTopSpeed = speed;
     g_CameraEditor.turnAcceleration = speed / (easeFrameCount + 1);
   }
 
@@ -293,18 +293,18 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", TurnEditorCamera);
 #ifdef NON_MATCHING
 void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
   s32 easeFrameCount;
-  f32 speed;
+  f32 speed; /* Also the magnitude, to match */
 
-  if (fabsf(angle) < 0.001f) {
+  speed = fabsf(angle);
+  if (speed < 0.001f) {
     g_CameraEditor.pitch += angle;
     return;
   }
 
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
-    speed = angle / (frameCount - easeFrameCount);
+    speed = g_CameraEditor.tiltTopSpeed = angle / (frameCount - easeFrameCount);
     g_CameraEditor.tiltBrakingAngle = angle * 0.25;
-    g_CameraEditor.tiltTopSpeed = speed;
     g_CameraEditor.tiltAcceleration = speed / (easeFrameCount + 1);
   }
 
@@ -337,18 +337,19 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", TiltEditorCamera);
 void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
   s32 easeFrameCount;
   f32 change;
-  f32 speed;
+  f32 speed; /* Also the magnitude, to match */
 
   change = distance - g_CameraEditor.distance;
-  if (fabsf(change) < 0.1f) {
+  speed = fabsf(change);
+  if (speed < 0.1f) {
     g_CameraEditor.distance = distance;
     return;
   }
 
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
-    speed = change / (frameCount - easeFrameCount);
-    g_CameraEditor.zoomTopSpeed = speed;
+    speed = g_CameraEditor.zoomTopSpeed =
+        change / (frameCount - easeFrameCount);
     g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
     g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
   }
