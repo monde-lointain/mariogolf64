@@ -3223,7 +3223,11 @@ void UpdateClubhouse(void) {
   }
 }
 
-void func_801FA1B8_ovl_01(void) {
+/*
+ * A screen that no menu screen dispatches to: once the HUD animation is done,
+ * B goes back to the main menu
+ */
+void UpdateUnusedBackToMain(void) {
   if (IsHudAnimationDone() == TRUE && (g_MenuPressedButtons & B_BUTTON)) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     g_MenuScreen = MENU_SCREEN_MAIN;
