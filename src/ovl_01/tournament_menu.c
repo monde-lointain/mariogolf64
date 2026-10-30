@@ -1875,17 +1875,20 @@ void DrawEnteredCode(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
+/* Returns the code keyboard's chosen column; reading it through a call is
+ * needed to match */
+static inline s8 GetCodeKeyColumn(MenuMemory* memory) {
+  return memory->codeKeyColumn;
+}
+
 /*
  * Types the chosen key's character into the code, or deletes one or ends the
  * code, and returns a CodeKeyResult.
- * Doesn't match: the menu memory pointer and the result take each other's
- * registers.
  */
-#ifdef NON_MATCHING
 s32 PressCodeKey(void) {
   MenuMemory* memory = GetMenuMemory();
   s32 result = CODE_KEY_RESULT_TYPING;
-  u8 key = D_80230F84_ovl_01[memory->codeKeyRow][memory->codeKeyColumn];
+  u8 key = D_80230F84_ovl_01[memory->codeKeyRow][GetCodeKeyColumn(memory)];
 
   switch (key) {
     case CODE_KEY_BACK:
@@ -1927,9 +1930,6 @@ s32 PressCodeKey(void) {
 
   return result;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", PressCodeKey);
-#endif
 
 /*
  * Deletes the code's last character, and returns TRUE when it was already empty
