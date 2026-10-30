@@ -97,11 +97,22 @@ enum HoleResultsKind {
   HOLE_RESULTS_SPEED_GOLF
 };
 
-extern CurrentShot D_80104F78; /* The replayed shot */
-extern u8 D_800FE330;
-extern s8 D_800FBDB8;
-extern GameState D_801B55F0;
-extern Player D_8012D0C8[MAX_PLAYER_COUNT];
+CurrentShot D_80104F78;
+u8 D_800FE330;
+s8 D_800FBDB8;
+u32 g_GroundDrawFrame;
+CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
+Player g_SavedPlayers[MAX_PLAYER_COUNT];
+ShotLaunch g_LastShotLaunch;
+u8 D_8012E694[0xDEC];
+
+FILE_STATIC u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
+FILE_STATIC PlayRecord D_800FED40;
+FILE_STATIC s8 g_WasDonkeyKongUnlocked;
+FILE_STATIC s8 g_WasMapleUnlocked;
+FILE_STATIC s8 g_WasMetalMarioUnlocked;
+FILE_STATIC s8 g_HadEveryRingShotStar;
+FILE_STATIC s8 g_RingShotCourseOpenedAtStart;
 
 /* Read by no routine */
 static s32 D_800C3060[2] UNUSED = {0};
@@ -156,15 +167,6 @@ void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
 void LoadBestShotReplay(PlayRecord* record);
-
-/* Defined in main_bss.c, at their addresses in the original */
-extern u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
-extern PlayRecord D_800FED40;
-extern s8 g_WasDonkeyKongUnlocked;
-extern s8 g_WasMapleUnlocked;
-extern s8 g_WasMetalMarioUnlocked;
-extern s8 g_HadEveryRingShotStar;
-extern s8 g_RingShotCourseOpenedAtStart;
 
 /*
  * Whether play's hole intro, flyover and results move on without A, as under
@@ -1986,7 +1988,6 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
       G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, GROUND_NOISE_SIZE, \
       GROUND_NOISE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
-extern u32 g_GroundDrawFrame;
 void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
 
 /*

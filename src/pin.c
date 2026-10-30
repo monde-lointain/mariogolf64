@@ -124,6 +124,8 @@
 /* Prim depths are kept to multiples of 4 */
 #define PRIM_DEPTH_MASK (~3)
 
+s32 g_CupViewDepth;
+
 s32 g_PinVertexScale = PIN_VERTEX_SCALE;
 
 /* Read by no routine */

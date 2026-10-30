@@ -61,6 +61,10 @@ typedef struct BillboardColor {
   {(assetId), TEXTURE_LOADED_ON_DEMAND, BILLBOARD_TEXTURE_WIDTH, \
       BILLBOARD_TEXTURE_HEIGHT, NULL}
 
+Billboard g_Billboards[BILLBOARD_COUNT];
+
+FILE_STATIC BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT];
+
 static Vtx f_BillboardVertices[][SHAPE_VERTEX_COUNT] = {
     {{{{-1, 0, 0}, 0, {0, 4096}, {0x96, 0x96, 0x96, 0xFF}}},
         {{{1, 0, 0}, 0, {8192, 4096}, {0xFF, 0xFF, 0xFF, 0xFF}}},

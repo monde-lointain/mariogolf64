@@ -81,8 +81,6 @@ u8* g_SkyImage BSS = {0};
 NUDebTaskPerf* nuDebTaskPerfPtr BSS = {0};
 u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT] BSS ALIGNED(8) = {0};
 s16 D_800FBE2C BSS = {0};
-/* Two buffers, each twice the size of a Toad image, that menu screens read
- * their own images into */
 void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT] BSS = {0};
 void* g_TrophyPalettes[TROPHY_PALETTE_COUNT] BSS = {0};
 CurrentShot g_CurrentShot BSS ALIGNED(8) = {0};
@@ -101,10 +99,6 @@ s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT] BSS
 Mtx f_EffectMatrices[EFFECT_COUNT] BSS ALIGNED(16) = {{{{0}}}};
 Mtx g_ScreenEffectProjection BSS ALIGNED(8) = {{{0}}};
 u8 D_800FE330 BSS = {0};
-/*
- * Whether StartLoadingChosenHole has started the chosen hole loading behind the
- * menu since the loader last stopped, so that the menu need not start it again
- */
 Boolean g_IsChosenHoleLoadStarted BSS = {0};
 FireworkShape* f_FireworkShape BSS = {0};
 s16 g_ChosenLabelGrowth BSS = {0};
@@ -131,8 +125,6 @@ OSContStatus nuContStatus[NU_CONT_MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
 PlayRecord D_800FEDD8[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {{{{0}}}};
 OSPiHandle* diskrom_handle BSS = {0};
 Gfx* g_GroundTileDisplayLists[GROUND_TILE_COUNT] BSS ALIGNED(8) = {0};
-/* A second animated icon's two frame buffers, the size of a mode icon, which
- * some screens read other images into */
 void* g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT] BSS = {0};
 NUScTask f_AudioTask BSS ALIGNED(8) = {0};
 u32 __osViIntrCount BSS = {0};
@@ -148,7 +140,6 @@ s32 g_ScreenFadeRed BSS = {0};
 s32 g_ScreenFadeGreen BSS = {0};
 s32 g_ScreenFadeBlue BSS = {0};
 u32 nuGfxCfbCounter BSS = {0};
-/* Whether the course select names the courses or the tournaments */
 CourseSelectKind g_CourseSelectKind BSS = {0};
 void* D_800FF4C4[2] BSS = {0};
 u8* f_RainSplashImage BSS = {0};
@@ -159,8 +150,6 @@ u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT] BSS ALIGNED(8) = {0};
 MenuRepeatState g_MenuRepeatStates[MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
 GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT] BSS ALIGNED(16) = {{{{{0}}}}};
 ControllerState g_MergedController BSS = {0};
-/* The menu screen's course or mode icons, whose buffers other screens reuse
- * for their own images */
 void* g_MenuIconImages[7] BSS ALIGNED(8) = {0};
 s32 g_PlayerControllerPorts[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 /* Read by no routine */
@@ -192,8 +181,6 @@ void* g_DistanceSignImage BSS = {0};
 s32 g_ControllerCount BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
 Camera g_MapCamera BSS = {0};
-/* The animated icon's two frame buffers, the size of a mode icon, which some
- * screens read other images into */
 void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT] BSS = {0};
 u8 __osMaxControllers BSS = {0};
 Mtx D_80105278 BSS ALIGNED(8) = {{{0}}};
@@ -202,11 +189,6 @@ void* g_MenuTitleImages[2] BSS = {0};
 void* D_801052C4[2] BSS = {0};
 volatile s32 g_MainLoopState BSS = {0};
 OSMesgQueue nuGfxMesgQ BSS ALIGNED(8) = {0};
-/*
- * Whether the running wipe is the one opening onto the menu, as the Ring Shot
- * records see it: set and cleared with g_IsMenuWipeOpening, except that
- * ResetMenuEntryFlags sets it alone
- */
 u8 g_IsRingShotWipeOpening BSS = {0};
 OSTime __osCurrentTime BSS = {0};
 u8 f_GameFlagBits[GAME_FLAG_COUNT / 8] BSS ALIGNED(8) = {0};
@@ -273,8 +255,6 @@ volatile u32 nuGfxTaskSpool BSS = {0};
 u8 D_8012D47C[0x1218] BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
 u8 D_8012E694[0xDEC] BSS = {0};
-/* The character that each player has chosen on the menus, or
- * NO_CHOSEN_CHARACTER */
 s32 g_ChosenCharacters[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 OSTimer __osGbpakTimer BSS ALIGNED(8) = {0};
 void* D_8012F4B0[7] BSS ALIGNED(8) = {0};
@@ -323,7 +303,6 @@ BetSet g_BetSet BSS = {0};
 Mtx g_ScreenOrthoMatrix BSS ALIGNED(8) = {{{0}}};
 /* Read by no routine */
 static u8 D_801B5678[0x8] UNUSED BSS = {0};
-/* Read by no routine: UpdateTurns copies f_ShotLaunch here each frame */
 ShotLaunch g_LastShotLaunch BSS ALIGNED(8) = {0};
 ALGlobals __libmus_alglobals BSS ALIGNED(8) = {{0}};
 /* Read by no routine */
@@ -351,7 +330,6 @@ u16* nuGfxCfb_ptr BSS = {0};
 void* g_ComLeftyIcons BSS = {0};
 /* Read by no routine */
 static u8 D_801B69F0[0x680] UNUSED BSS = {0};
-/* The player whose character the character select is choosing */
 s32 g_ChoosingPlayerIndex BSS = {0};
 __OSEventState __osEventStateTab[OS_NUM_EVENTS] BSS ALIGNED(0x8) = {{0}};
 u8 D_801B70F0[MAXCONTROLLERS] BSS = {0};
@@ -382,14 +360,8 @@ u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] BSS ALIGNED(
 OSMesgQueue nuSiMesgQ BSS ALIGNED(8) = {0};
 Vtx* g_VertexListHead BSS = {0};
 Gfx* g_DisplayListHead BSS = {0};
-/* Five buffers the size of the green arrows image, which menu screens read
- * other images into */
 void* g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT] BSS ALIGNED(8) = {0};
 OSMesgQueue nuGfxTaskMgrMesgQ BSS ALIGNED(8) = {0};
-/*
- * Whether the running wipe is the one opening onto the menu, which only holds
- * off input, rather than the menu's closing one, which it waits out to leave
- */
 u8 g_IsMenuWipeOpening BSS = {0};
 Mtx f_DropMatrices[DRAW_BUFFER_COUNT] BSS ALIGNED(8) = {{{{0}}}};
 /* Read by no routine */

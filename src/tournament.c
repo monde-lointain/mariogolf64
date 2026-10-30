@@ -26,6 +26,9 @@ typedef struct ContestantProfile {
   /* 0x3 */ s8 holeOffset; /* Holes played ahead of the player */
 } ContestantProfile; /* size = 0x4 */
 
+s16 g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 1];
+TournamentStanding g_TournamentStandings[TOURNAMENT_CONTESTANT_COUNT];
+
 static s32 f_TournamentSeed = 0;
 /* The computer contestants', from the most strokes over par to the fewest */
 static ContestantProfile f_ContestantProfiles[TOURNAMENT_CONTESTANT_COUNT - 1] =

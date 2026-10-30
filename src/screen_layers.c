@@ -169,6 +169,10 @@ typedef struct Prompt {
   /* 0x8 */ s32 results[2];
 } Prompt; /* size = 0x10 */
 
+s32 g_ScreenFadeBlue;
+s32 g_ScreenFadeGreen;
+s32 g_ScreenFadeRed;
+
 Gfx g_DecalTextureSetup[] = {
     gsDPPipeSync(),
     gsDPPipeSync(),

@@ -15,6 +15,7 @@
 #include "camera_editor.h"
 #include "character.h"
 #include "character_slot.h"
+#include "controller.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
@@ -105,7 +106,6 @@ typedef struct OpeningNameLogo {
 #define OPENING_CUES_FINISHED 30
 #define OPENING_CUE_DONE 31
 
-extern u8* g_ShadowTexture;
 /* The sizes of Lakitu's image and his trail's, with header and palette */
 #define LAKITU_IMAGE_BUFFER_SIZE 0x608
 #define LAKITU_TRAIL_IMAGE_BUFFER_SIZE 0xC08

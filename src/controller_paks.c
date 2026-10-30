@@ -16,8 +16,10 @@ static Boolean f_IsBootTransmitPending = TRUE;
 /* Read by no routine */
 static s32 D_800C42D8[2] UNUSED = {0};
 
-/* Defined in main_bss.c, at its address in the original */
-extern Boolean f_HasRumblePak[MAXCONTROLLERS];
+GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT];
+GameBoyTransfer g_GameBoyTransfer;
+
+FILE_STATIC Boolean f_HasRumblePak[MAXCONTROLLERS];
 
 /* Adds experience that a Game Boy character earned, up to what the Game Boy
  * Color version holds */

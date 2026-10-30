@@ -24,6 +24,9 @@
 #include "sound.h"
 #include "surface.h"
 #include "terrain.h"
+#include "turn.h"
+
+BallSimulation g_TurnBallSimulation;
 
 BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {{{0}}};
 

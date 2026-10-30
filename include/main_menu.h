@@ -74,6 +74,7 @@ enum CourseSelectKind {
 };
 
 typedef u8 CourseSelectKind;
+/* Whether the course select names the courses or the tournaments */
 extern CourseSelectKind g_CourseSelectKind;
 /* Whether the running wipe is the one opening onto the menu */
 extern u8 g_IsMenuWipeOpening;

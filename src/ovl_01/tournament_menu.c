@@ -148,13 +148,8 @@ enum CodeKeyResult {
 #define CLUB_CODE_INCORRECT_X 24
 #define CLUB_CODE_MESSAGE_Y 180
 
-extern s32 D_80105DC4;
-extern s32 g_ChosenPlayerCount;
-extern s32 D_80105DC8;
-extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 s32 GetClubTournamentCourse(void);
 void StartLoadingChosenHole(void);
-extern s32 D_80105DCC;
 /* The first club tournament's name; D_80105DC8 picks the tournament */
 #define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F
 /* The club tournament's details window and the text in it */

@@ -42,6 +42,11 @@
 #define MODEL_TO_WORLD_SCALE 0.01f
 #define SLOT_POSITION_SCALE (1.0f / 1024)
 
+CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT];
+s32 g_CurrentAnimationEndFrame;
+f32 g_CurrentAnimationFrame;
+Mtx* g_CurrentJointMatrices;
+
 /* The slot's first rotation is taken away from this roll */
 static LookAt f_HiliteLookAts[DRAW_BUFFER_COUNT];
 static Hilite f_Hilites[DRAW_BUFFER_COUNT];

@@ -111,6 +111,8 @@ extern s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT];
 #define FACE_ANIMATION_FRAME_COUNT 8
 extern AssetId g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
 extern AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT];
+/* A header, then the 32 by 32 intensity texture of shadows */
+extern u8* g_ShadowTexture;
 
 void PlaceCharacterForShot(u32 slotIndex);
 s32 ReuseLastCharacterMatrices(u32 slotIndex);

@@ -559,6 +559,10 @@ segments:
       - { type: .bss, vram: 0x800FAA00, name: ../lib/ultralib/src/io/siacs }
       - { type: .bss, vram: 0x800FAA10, name: ../lib/ultralib/src/io/vimgr }
       - { type: .bss, vram: 0x800FBC30, name: ../lib/ultralib/src/io/motor }
+      # Modules whose objects are all in main's common block. In the matching
+      # build main_bss.c defines those objects, so these take no space here.
+      - { type: .bss, vram: 0x800FBD30, name: current_shot }
+      - { type: .bss, vram: 0x800FBD30, name: work_area }
       - { type: .bss, vram: 0x800FBD30, name: main_bss }
 
   - name: ovl_00

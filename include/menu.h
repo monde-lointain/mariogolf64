@@ -6,6 +6,7 @@
 #include "asset.h"
 #include "character.h"
 #include "course.h"
+#include "password.h"
 #include "save.h"
 
 /* The screens that the menu overlay shows, which g_MenuScreen picks */
@@ -110,9 +111,17 @@ extern TrophySize g_TrophySizes[COURSE_COUNT];
 #define ANIMATED_ICON_BUFFER_COUNT 2
 #define MENU_SPARE_IMAGE_COUNT 2
 #define MENU_ARROW_SIZED_IMAGE_COUNT 5
+/* The animated icon's two frame buffers, the size of a mode icon, which some
+ * screens read other images into */
 extern void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+/* A second animated icon's two frame buffers, the size of a mode icon, which
+ * some screens read other images into */
 extern void* g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+/* Two buffers, each twice the size of a Toad image, that menu screens read
+ * their own images into */
 extern void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
+/* Five buffers the size of the green arrows image, which menu screens read
+ * other images into */
 extern void* g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
 
 /* The mini-golf disc's images in each of g_MenuIconImages's buffers */
@@ -536,6 +545,31 @@ typedef u8 BetSet;
 
 /* The bets that the chosen game offers */
 extern BetSet g_BetSet;
+extern s16 D_800FBE2C;
+extern s32 D_80105DC4;
+extern s32 D_80105DC8;
+extern s32 D_80105DCC;
+/* The code of the tournament whose password was entered */
+extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
+extern s16 D_801B71CC;
+/* The menu screen's course or mode icons, whose buffers other screens reuse
+ * for their own images */
+extern void* g_MenuIconImages[7];
+/* g_MenuIconImages as the main menu uses them, in pairs of buffers */
+#define MENU_ICON_IMAGE_PAIRS \
+  ((void*(*)[MINI_GOLF_DISC_IMAGE_COUNT])g_MenuIconImages)
+extern void* g_MenuBoardImages[2];
+extern void* g_MenuTitleImages[2];
+/* What UpdateMenus reads as the menu screen changes */
+extern void* D_800FC6A0;
+extern void* D_800FC898;
+extern void* D_800FF4C4[2];
+extern void* D_801052C4[2];
+extern void* D_80106100;
+extern void* D_8012D3AC;
+extern void* D_8012F4B0[7];
+
+extern u8 D_8012D47C[0x1218];
 
 /* The ways SlideBrickWall slides the stats panel's rows */
 #define STATS_SLIDE_CURRENT 0

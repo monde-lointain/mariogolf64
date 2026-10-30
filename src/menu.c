@@ -10,6 +10,7 @@
 #include <lib/libnusys/nusys.h>
 
 #include "asset.h"
+#include "camera.h"
 #include "character.h"
 #include "club.h"
 #include "course.h"
@@ -31,6 +32,12 @@
 #include "sound.h"
 #include "sram.h"
 #include "transfer_pak.h"
+
+/*
+ * The menus set a byte of the map camera's mode, its most significant one on
+ * the big-endian N64, as though a flag of their own were kept there
+ */
+#define MAP_CAMERA_MODE_HIGH_BYTE (*(u8*)&g_MapCamera.mode)
 
 /* Keeps the save data on the development host instead of in SRAM */
 #define GAME_FLAG_SAVE_TO_HOST 0x53
@@ -60,29 +67,62 @@ typedef struct ImportedCharacterCell {
 
 /* Mirrors of the save data's options */
 
-extern s16 D_800FBE2C;
-extern GameState D_801B55F0;
-extern Player D_8012D0C8[MAX_PLAYER_COUNT];
-extern s32 g_ChosenPlayerCount;
-extern s32 D_80105DC4;
-extern s32 D_80105DC8;
-extern s32 D_80105DCC;
-/* The code of the tournament whose password was entered */
-extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
-extern s16 D_801B71CC;
-extern u8 g_MapCamera[];
-extern void* D_8012D3AC;
-extern void* D_8012F4B0[7];
-extern void* g_MenuIconImages[7];
-extern void* D_801052C4[2];
-extern void* g_MenuBoardImages[2];
-extern void* g_NamePlateImage;
-extern void* g_MenuLabelImages[2];
-extern void* g_MenuTitleImages[2];
-extern void* D_800FF4C4[2];
-extern void* D_80106100;
-extern void* D_800FC898;
-extern void* D_800FC6A0;
+s16 D_800FBE2C;
+GameState D_801B55F0;
+Player D_8012D0C8[MAX_PLAYER_COUNT];
+s32 g_ChosenPlayerCount;
+s32 D_80105DC4;
+s32 D_80105DC8;
+s32 D_80105DCC;
+u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
+s16 D_801B71CC;
+void* D_8012D3AC;
+void* D_8012F4B0[7];
+void* g_MenuIconImages[7];
+void* D_801052C4[2];
+void* g_MenuBoardImages[2];
+void* g_NamePlateImage;
+void* g_MenuLabelImages[2];
+void* g_MenuTitleImages[2];
+void* D_800FF4C4[2];
+void* D_80106100;
+void* D_800FC898;
+void* D_800FC6A0;
+PlayRecord D_800FEDD8[MAX_PLAYER_COUNT];
+RingShotRecord D_80105F40[MAX_PLAYER_COUNT];
+u8 D_8012D47C[0x1218];
+u8 D_801B70F0[MAXCONTROLLERS];
+void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+BetSet g_BetSet;
+void* g_CharacterFaceImages[18];
+void* g_CharacterFacePalettes[18];
+s32 g_ChoosingPlayerIndex;
+s32 g_ChosenCharacters[MAX_PLAYER_COUNT];
+s16 g_ChosenLabelGrowth;
+LabelGrowthDirection g_ChosenLabelGrowthDirection;
+s8 g_ChosenLefties[4];
+void* g_ComLeftyIcons;
+CourseSelectKind g_CourseSelectKind;
+CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
+GameState g_GameState;
+void* g_ImageSlots[IMAGE_SLOT_COUNT];
+Boolean g_IsChosenHoleLoadStarted;
+u8 g_IsMenuWipeOpening;
+u8 g_IsRingShotWipeOpening;
+void* g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
+void* g_MenuCourseSceneryAsset;
+MenuMemory g_MenuMemory;
+s32 g_MenuScreen;
+void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
+u8* g_PlayerFaceImages[MAX_PLAYER_COUNT];
+u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
+Player g_Players[MAX_PLAYER_COUNT];
+void* g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+TakenCharacters g_TakenCharacters;
+void* g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
+void* g_TrophyPalettes[TROPHY_PALETTE_COUNT];
+
+FILE_STATIC SaveData g_SaveData;
 
 /* f_SlotCells lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
@@ -1985,7 +2025,7 @@ void ResetMenuChoices(void) {
   g_ChosenLabelGrowthDirection = LABEL_GROWING;
   g_ChosenLabelGrowth = 0;
   g_CourseSelectKind = COURSE_SELECT_KIND_NONE;
-  g_MapCamera[0x4C] = 0;
+  MAP_CAMERA_MODE_HIGH_BYTE = 0;
   for (index = 0; index != ARRAY_COUNT(g_ChosenLefties); index++) {
     g_ChosenLefties[index] = 0;
   }
@@ -2016,12 +2056,12 @@ void EnterMenuAtCourseSelect(void) {
   switch (g_GameState.gameMode) {
     case GAME_MODE_TOURNAMENT:
       g_CourseSelectKind = COURSE_SELECT_KIND_TOURNAMENTS;
-      g_MapCamera[0x4C] = 0;
+      MAP_CAMERA_MODE_HIGH_BYTE = 0;
       g_BetSet = BET_SET_NONE;
       break;
     case GAME_MODE_STROKE:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      g_MapCamera[0x4C] = 1;
+      MAP_CAMERA_MODE_HIGH_BYTE = 1;
       if (g_ChosenPlayerCount == 4) {
         g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
       } else {
@@ -2032,12 +2072,12 @@ void EnterMenuAtCourseSelect(void) {
       break;
     case GAME_MODE_MATCH_GAME:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      g_MapCamera[0x4C] = 1;
+      MAP_CAMERA_MODE_HIGH_BYTE = 1;
       g_BetSet = BET_SET_MATCH_GAME;
       break;
     case GAME_MODE_SKINS_MATCH:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      g_MapCamera[0x4C] = 1;
+      MAP_CAMERA_MODE_HIGH_BYTE = 1;
       g_BetSet = BET_SET_SKINS_MATCH;
       break;
     case GAME_MODE_TRAINING:
@@ -2046,12 +2086,12 @@ void EnterMenuAtCourseSelect(void) {
     case GAME_MODE_SPEED_GOLF:
     case GAME_MODE_RING_SHOT:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      g_MapCamera[0x4C] = 2;
+      MAP_CAMERA_MODE_HIGH_BYTE = 2;
       g_BetSet = BET_SET_NONE;
       break;
     case GAME_MODE_CLUB_SLOTS:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      g_MapCamera[0x4C] = 1;
+      MAP_CAMERA_MODE_HIGH_BYTE = 1;
       g_BetSet = BET_SET_CLUB_SLOTS;
       break;
   }

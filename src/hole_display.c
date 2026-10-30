@@ -672,9 +672,13 @@ static Vtx f_LastColumnTileVertices[TILE_VERTEX_COUNT] = {
     {{{16, -16, 0}, 0, {0xBC0, 0x800}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{16, 16, 0}, 0, {0xBC0, 0}, {0xFF, 0x00, 0x00, 0xFF}}}};
 
-/* Defined in main_bss.c, at its address in the original */
+void* g_BackdropPatternImage;
+u8* g_CourseSkyImage;
+u8* g_SkyImage;
+SkyState g_SkyState;
+
 /* The frame buffer of the last frame, kept for the next frame's captures */
-extern u16* f_LastFrameBuffer;
+FILE_STATIC u16* f_LastFrameBuffer;
 
 /* Sets up a single-player game of the hole behind the title screen */
 void SetUpTitleHole(void) {

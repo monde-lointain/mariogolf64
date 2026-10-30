@@ -141,8 +141,16 @@ typedef s32 FlightCameraKind;
       (f32)(f_FlightBallPosition[AXIS_Z] - LANDING_RADIUS) < \
           (f32)f_ShotEndPosition[AXIS_Z])
 
+u8* g_NoiseTexels;
+
 /* The grid that DisplaceNoiseSquare builds */
-extern s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
+FILE_STATIC s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
+/* The step of the simulated path that the ball's flight has reached */
+FILE_STATIC s32 g_BallFlightStep;
+/* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
+ * texture blends */
+FILE_STATIC s16
+    f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
 
 /* Frames waited since the ball's path ended */
 static s32 f_LandingWaitFrame = 0;
@@ -218,10 +226,6 @@ void PlaceFlightCamera(s32 step);
 s32 StepHoleFlyover(void);
 void EaseLookAtBelowBall(f32 drop);
 void EaseLookAtPoint(Radians yaw);
-
-/* Defined in main_bss.c, at its address in the original */
-/* The step of the simulated path that the ball's flight has reached */
-extern s32 g_BallFlightStep;
 
 /* Unused; the original has it */
 static const char f_UnusedFloatFormat[] = "            %f";
@@ -3563,11 +3567,6 @@ void BuildRingTexels(
 #define NOISE_BLEND_STEP_MASK 0x7F
 #define NOISE_INTENSITY_SHIFT 13
 #define NOISE_MAX_INTENSITY 0xFF
-
-/* Defined in main_bss.c, at its address in the original */
-/* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
- * texture blends */
-extern s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
 
 static inline s32 RandomNoiseDisplacement(void) {
   return (rand() & NOISE_DISPLACEMENT_MASK) - NOISE_DISPLACEMENT_BIAS;

@@ -43,13 +43,9 @@ extern ControllerState g_ControllerStates[MAXCONTROLLERS];
 extern NUContData g_ControllerData[MAXCONTROLLERS];
 extern NUContData g_PreviousControllerData[MAXCONTROLLERS];
 
-/* Readings for menus, this frame and the last */
+/* Readings for menus, and the state that repeats their held inputs */
 extern NUContData g_MenuControllerData[MAXCONTROLLERS];
-extern NUContData g_PreviousMenuControllerData[MAXCONTROLLERS];
 extern MenuRepeatState g_MenuRepeatStates[MAXCONTROLLERS];
-
-/* One bit for each port with a controller plugged in, from bit 0 */
-extern u8 g_ConnectedControllerBits;
 
 /* The players' controllers: how many there are and their ports */
 extern s32 g_ControllerCount;
@@ -62,6 +58,7 @@ extern ControllerState g_TurnController;
  * controller's if every player is a computer
  */
 extern ControllerState g_MergedController;
+extern s32 g_HasOwnControllers; /* Set unless two players share a controller */
 
 void ReadControllers(void);
 

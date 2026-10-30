@@ -188,7 +188,6 @@ enum StatsDirection {
 #define HANDICAP_CHOICE_COUNT 37
 #define HANDICAP_SLIDE_START -512
 
-extern s32 g_ChosenPlayerCount;
 extern const char D_802319E0_ovl_01[];
 
 /* A step from one grid cell to its neighbor */

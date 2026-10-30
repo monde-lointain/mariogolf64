@@ -309,7 +309,6 @@ typedef struct StaffRollEasedView {
 } StaffRollEasedView; /* size = 0x1C */
 
 extern u8 g_StaffTextRomStart[];
-extern u8* g_ShadowTexture;
 
 void AssignCharacterBuffers(void);
 void FreeEffectImages(void);

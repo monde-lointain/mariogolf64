@@ -527,8 +527,6 @@ typedef struct SaveCopyLocation {
   /* 0xC */ u32 checkSramAddress;
 } SaveCopyLocation;
 
-extern SaveData g_SaveData;
-
 extern GameState g_GameState;
 
 /* The current game's, which a saved game is loaded into and stored from */
@@ -554,6 +552,8 @@ typedef struct CourseStatFigures {
 } CourseStatFigures; /* size = 0x38 */
 
 extern CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
+extern GameState D_801B55F0;
+extern Player D_8012D0C8[MAX_PLAYER_COUNT];
 
 #define HOLES_PER_ROUND 18.0f
 

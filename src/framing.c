@@ -40,9 +40,8 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result);
 float fabsf(float x);
 double tan(double x);
 
-/* Defined in main_bss.c, at their addresses in the original */
-extern Vec3 f_FramedEye;
-extern Vec3 f_FramedLookAt;
+FILE_STATIC Vec3 f_FramedEye;
+FILE_STATIC Vec3 f_FramedLookAt;
 
 void GetFramedView(Vec3 eye, Vec3 lookAt) {
   eye[AXIS_X] = f_FramedEye[0];

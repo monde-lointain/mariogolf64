@@ -123,9 +123,25 @@ void HandleGfxRetrace(s32 pendingTaskCount);
 /* The development debugger's entry, outside the game's code */
 void EnterDevelopmentDebugger(s32 argument);
 
-/* Defined in main_bss.c, at their addresses in the original */
-extern volatile s32 g_MainLoopState;
-extern u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
+s32 g_HasOwnControllers;
+s32 g_ControllerCount;
+NUContData g_ControllerData[MAXCONTROLLERS];
+ControllerState g_ControllerStates[MAXCONTROLLERS];
+NUContData g_MenuControllerData[MAXCONTROLLERS];
+MenuRepeatState g_MenuRepeatStates[MAXCONTROLLERS];
+ControllerState g_MergedController;
+s32 g_PlayerControllerPorts[MAXCONTROLLERS];
+NUContData g_PreviousControllerData[MAXCONTROLLERS];
+char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
+char g_SaveBuildDate[SAVE_BUILD_DATE_SIZE];
+ControllerState g_TurnController;
+
+FILE_STATIC volatile s32 g_MainLoopState;
+FILE_STATIC u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
+/* The menus' readings from the last frame */
+FILE_STATIC NUContData g_PreviousMenuControllerData[MAXCONTROLLERS];
+/* One bit for each port with a controller plugged in, from bit 0 */
+FILE_STATIC u8 g_ConnectedControllerBits;
 
 void ReportFailedAssertion(
     const char* expression UNUSED, const char* fileName, s32 lineNumber) {

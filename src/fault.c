@@ -50,8 +50,7 @@ void PrintFaultText(void);
 void PrintFaultContext(OSThread* thread);
 void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields);
 
-/* Defined in main_bss.c, at its address in the original */
-extern char f_FaultText[FAULT_TEXT_SIZE];
+FILE_STATIC char f_FaultText[FAULT_TEXT_SIZE];
 
 /* Only cleared; nothing in the code reads it */
 static s32 f_FaultUnk = 0;

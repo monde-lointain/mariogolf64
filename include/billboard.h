@@ -41,6 +41,5 @@ void SortBillboardsByDepth(void);
 s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down);
 
 extern Billboard g_Billboards[BILLBOARD_COUNT];
-extern BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT];
 
 #endif

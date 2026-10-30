@@ -1,6 +1,8 @@
 #ifndef CURRENT_SHOT_H
 #define CURRENT_SHOT_H
 
+#include "common.h"
+
 #include <ultra64.h>
 
 #include "club.h"

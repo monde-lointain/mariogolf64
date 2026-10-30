@@ -337,7 +337,17 @@ enum LandingGlyphGroup {
 #define DISTANCE_POINT_S 112
 #define DISTANCE_POINT_WIDTH 4
 
-extern void* g_ShadowTexture;
+u8* g_ClubPanelImage;
+void* g_DistanceSignImage;
+void* g_LeaderLineImage;
+void* g_PinFlagImages;
+void* g_PlayerTagImages;
+u8* g_RingTexels;
+RoundHud g_RoundHud;
+u8* g_SharedEffectImages;
+void* g_ShotPreviewDashImage;
+
+FILE_STATIC Mtx D_80105278;
 
 #define ANIMATED_ICON_LABEL_COUNT 3
 
@@ -695,9 +705,6 @@ static u16 f_WhiteDistancePalette[] = {
 #include "assets/round_hud/white_distance_palette.rgba16.inc.c"
 };
 static s32 f_LoadedHoleIntroImages = 0;
-
-/* Defined in main_bss.c, at its address in the original */
-extern Mtx D_80105278;
 
 /*
  * The grid drawn over the ground around a shot's target, as

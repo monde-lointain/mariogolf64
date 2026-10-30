@@ -34,6 +34,9 @@
   {FALSE, moduleIds, (u32)name##_ROM_START, (u32)name##_ROM_END, name##_VRAM, \
       name##_TEXT_END, name##_BSS_START, name##_BSS_END, onLoad, onUnload}
 
+s8 g_IsModuleAlive[MODULE_COUNT];
+s32 g_ModuleRdpRequestFrames[MODULE_COUNT];
+
 static s8 f_UnusedModuleIds[] UNUSED = {0x00, MODULE_ID_END};
 static s8 f_ModuleIdsOfOverlays00To02[] = {
     MODULE_ROUND_RESULTS,

@@ -18,6 +18,7 @@
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"
+#include "play.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -143,7 +144,11 @@ volatile Boolean g_HasLoaderFinished = TRUE;
 static s32 D_800C3FAC UNUSED = 0;
 static OSThread f_LoaderThread;
 extern u8 D_8025D350[];
-extern u32 g_GroundDrawFrame;
+HolePoints g_HolePoints;
+s32 g_HoleTimeFrames[COURSE_HOLE_COUNT];
+s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT];
+s32 g_HoleTimeMinutes[COURSE_HOLE_COUNT];
+s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT];
 
 void ResetShotSetup(void);
 void PlacePlayersOnTee(void);

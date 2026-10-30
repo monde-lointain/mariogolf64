@@ -96,11 +96,4 @@ void UpdateInsetView(void);
 /* Looks down on the course for the map views */
 extern Camera g_MapCamera;
 
-/*
- * Set up by StartGame; no code in the main segment draws with it. A view
- * alone rather than a Camera: nothing reaches the four bytes before it, and
- * libc's errno follows it where a Camera's mode would be.
- */
-extern CameraView g_SpareCameraView;
-
 #endif

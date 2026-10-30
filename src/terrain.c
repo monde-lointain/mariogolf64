@@ -184,6 +184,11 @@ enum TerrainColorIndex {
  */
 #define SLOT_GRID_COLUMN_SHIFT 2
 #define SLOT_GRID_MASK 3
+s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
+Gfx* g_GroundTileDisplayLists[GROUND_TILE_COUNT];
+u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
+Vtx* g_VertexListHead;
+
 static u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8] = {
     {0x80, 0x00, 0x84, 0x01, 0x88},
     {0x02, 0x08, 0x09, 0x0A, 0x03},

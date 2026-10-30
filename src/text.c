@@ -14,6 +14,7 @@
 #include "libc.h"
 #include "round_hud.h"
 #include "round_stats.h"
+#include "save.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -265,15 +266,17 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
 void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
 s32 GetTextLength(char* text);
 
-/* Defined in main_bss.c, at their addresses in the original */
+char g_PrintBuffer[PRINT_BUFFER_SIZE];
+void* g_ShadowedFontImage;
+
 /* The index of the first character code in the message table, in halfwords */
-extern s32 g_MessageCodesStart;
-extern TextSlot g_TextSlots[TEXT_SLOT_COUNT];
-extern u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
-extern char g_TextName[TEXT_NAME_SIZE];
-extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
+FILE_STATIC s32 g_MessageCodesStart;
+FILE_STATIC TextSlot g_TextSlots[TEXT_SLOT_COUNT];
+FILE_STATIC u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
+FILE_STATIC char g_TextName[TEXT_NAME_SIZE];
+FILE_STATIC GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 /* How many glyphs each group has */
-extern u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
+FILE_STATIC u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
 
 const char g_TextStringFormat[] = "%s";
 const char g_TextNumberFormat[] = "%d";

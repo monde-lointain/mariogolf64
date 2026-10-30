@@ -195,8 +195,10 @@ static u8 D_800DEA30[120] UNUSED;
 static Mtx f_ModelMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadowMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_ShadowProjections[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
-/* A header, then the 32 by 32 intensity texture of shadows */
-extern u8* g_ShadowTexture;
+u8* g_ShadowTexture;
+ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
+
+FILE_STATIC s32 g_CurrentAnimationStartFrame;
 
 #define SHADOW_TEXTURE_SIZE 32
 #define SHADOW_TEXTURE_SIZE_LOG2 5

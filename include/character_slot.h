@@ -310,7 +310,6 @@ extern Gfx g_CharacterEnvColorDisplayLists[ENV_COLOR_COUNT][2];
 
 /* The animation state AnimateCharacterJoints works on, copied from a slot */
 extern f32 g_CurrentAnimationFrame;
-extern s32 g_CurrentAnimationStartFrame;
 extern s32 g_CurrentAnimationEndFrame;
 extern Mtx* g_CurrentJointMatrices;
 

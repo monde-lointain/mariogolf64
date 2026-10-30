@@ -35,6 +35,10 @@
 /* Drives are compared at this scale, so those nearly as long tie */
 #define DRIVE_COMPARISON_SCALE 7.119878e-05f
 
+s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];
+RoundStats g_RoundStats;
+Scorecard g_Scorecard;
+
 s32 g_LongestDrivePot = 0;
 s32 g_NearestPinPot = 0;
 s32 g_HolePot = 0;

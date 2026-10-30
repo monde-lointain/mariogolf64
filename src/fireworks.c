@@ -65,9 +65,8 @@ static f32 f_FireworkHue = 0.0f;
 /* Read by no routine */
 static u8 D_800C46AC[0xC04] UNUSED = {0};
 
-/* Defined in main_bss.c, at their addresses in the original */
-extern FireworkShape* f_FireworkShape;
-extern Firework f_Fireworks[FIREWORK_CAPACITY];
+FILE_STATIC FireworkShape* f_FireworkShape;
+FILE_STATIC Firework f_Fireworks[FIREWORK_CAPACITY];
 
 /* Makes the first firework launch in 70 frames */
 void StartFireworks(void) {

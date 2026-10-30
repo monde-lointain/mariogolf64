@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "camera.h"
+
 /* The globals that game.c, the game's frame, shares */
 
 /* Values of g_FramePacingMode, which the second controller's Start cycles */
@@ -55,7 +57,6 @@ extern u16 g_ScreenEffectPerspNorm;
 
 /* The display lists, one per draw buffer */
 #define DISPLAY_LIST_LENGTH 14000
-extern Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 
 /*
  * Textures that are drawn every frame and that the course model reads
@@ -75,6 +76,8 @@ extern u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE *
 /* The loaded textures that g_BlendedTexture blends, after 8-byte headers */
 extern u8* g_BlendedTextureScrollingLayer;
 extern u8* g_BlendedTextureStillLayer;
+/* Indexed by view, then by draw buffer */
+extern CameraMatrices f_CameraMatrices[2 * 2];
 
 void StartGame(void);
 void UpdateGame(void);

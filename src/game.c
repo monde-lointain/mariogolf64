@@ -330,8 +330,29 @@ static u8 D_800DAC30[16] UNUSED;
 #define VI_FEATURES \
   (OS_VI_GAMMA_OFF | OS_VI_GAMMA_DITHER_ON | OS_VI_DITHER_FILTER_ON)
 
-/* Defined in main_bss.c, at its address in the original */
-extern s32 g_PerspectiveNormalization;
+CameraMatrices f_CameraMatrices[2 * 2];
+Camera g_MapCamera;
+u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
+u8* g_BlendedTextureScrollingLayer;
+u8* g_BlendedTextureStillLayer;
+Camera g_Cameras[CAMERA_COUNT];
+Gfx* g_DisplayListHead;
+u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
+ScreenRect g_HudScissor;
+InsetView g_InsetView;
+u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE];
+u16 g_ScreenEffectPerspNorm;
+Mtx g_ScreenEffectProjection;
+Mtx g_ScreenOrthoMatrix;
+
+FILE_STATIC s32 g_PerspectiveNormalization;
+/*
+ * Set up by StartGame; no code in the main segment draws with it. A view
+ * alone rather than a Camera: nothing reaches the four bytes before it, and
+ * libc's errno follows it where a Camera's mode would be.
+ */
+FILE_STATIC CameraView g_SpareCameraView;
+FILE_STATIC Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 
 void StartGame(void) {
   g_MapCamera.view.eye[0] = 0.0f;
@@ -1117,8 +1138,6 @@ enum DrawMode {
 
 #define GFX_TASK_FLAGS (NU_SC_TASK_DP_WAIT | NU_SC_SWAPBUFFER)
 
-/* Indexed by view, then by draw buffer */
-extern CameraMatrices f_CameraMatrices[2 * 2];
 /* The next free vertex of the frame's vertex buffer */
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
 /*

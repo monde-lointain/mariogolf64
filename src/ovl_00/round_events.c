@@ -8,6 +8,7 @@
 #include "round_events.h"
 
 #include "asset.h"
+#include "camera.h"
 #include "character.h"
 #include "controller.h"
 #include "cpu_projection.h"

@@ -57,6 +57,18 @@ typedef f32 Mat4[4][4];
  */
 #define UNUSED __attribute__((unused))
 
+/*
+ * Begins the definition of a variable that only its own file uses. The
+ * original made such variables global, so the matching build keeps them
+ * global, for main_bss.c or the overlay's common block to place where the
+ * original's linker did; other builds make them static.
+ */
+#ifdef __IS_KMC__
+#define FILE_STATIC
+#else
+#define FILE_STATIC static
+#endif
+
 /* Zero is false, and any other value true, as C tests it */
 typedef s32 Boolean;
 

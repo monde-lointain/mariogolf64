@@ -3,7 +3,10 @@
 
 #include "common.h"
 
+#include "ball_simulation.h"
+#include "current_shot.h"
 #include "math_util.h"
+#include "save.h"
 
 /* g_ShotFlags's bits, which UpdateShotFlags sets for the shot being set up */
 #define SHOT_FLAG_ON_GREEN 1
@@ -97,6 +100,15 @@ extern s32 g_ShotFlags;
 extern s32 D_800C3094;
 /* Asks for the HUD to turn away when the next player is picked */
 extern s8 g_IsHudTurnAwayRequested;
+extern CurrentShot D_80104F78; /* The replayed shot */
+extern u8 D_800FE330;
+extern s8 D_800FBDB8; /* PlayContestMovies' state */
+extern u32 g_GroundDrawFrame;
+extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
+extern Player g_SavedPlayers[MAX_PLAYER_COUNT];
+/* Read by no routine: UpdateTurns copies f_ShotLaunch here each frame */
+extern ShotLaunch g_LastShotLaunch;
+extern u8 D_8012E694[0xDEC];
 
 /*
  * FillGroundNoise's random intensities run from a base up through a range,

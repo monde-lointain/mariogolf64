@@ -375,9 +375,6 @@ enum ShotSource {
   SHOT_SOURCE_PLANNING
 };
 
-extern s32 g_HasOwnControllers; /* Set unless two players share a controller */
-extern s8 D_800FBDB8; /* PlayContestMovies' state */
-extern CurrentShot D_80104F78; /* The replayed shot */
 /* Set once the shot preview has been built */
 static Boolean f_IsShotPreviewBuilt = FALSE;
 /* Frames that a replayed shot's aim has been settled */
@@ -502,11 +499,6 @@ static f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
 
 /* Not static: the original left it to the linker's common block */
 s32 f_AimFrameCount;
-
-/* Defined in main_bss.c, at their addresses in the original */
-extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
-extern Player g_SavedPlayers[MAX_PLAYER_COUNT];
-extern ShotLaunch g_LastShotLaunch;
 
 /* Lets the Rumble Paks run again after nuContRmbForceStop */
 void EndRumbleForceStop(void) {
@@ -2899,7 +2891,6 @@ void ShowHoleOutBanner(s32 playerIndex) {
  */
 #ifdef NON_MATCHING
 extern s32 D_800B7D9C;
-extern u8 D_800FE330;
 
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
  * it while Z is held */

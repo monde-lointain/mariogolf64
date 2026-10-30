@@ -257,9 +257,6 @@ typedef struct LabelCorner {
 #define BACKDROP_FIRST_TOP 8
 #define BACKDROP_TOP 10
 
-extern void* g_MenuBoardImages[2];
-extern s32 g_HasOwnControllers;
-extern void* g_MenuTitleImages[2];
 extern const char D_80231514_ovl_01[];
 
 #define PLAYER_UNK28_TRAINING (-1)
@@ -269,9 +266,6 @@ extern const char D_80231514_ovl_01[];
 /* The choices of the list that UpdateUnusedList runs, which no menu screen
  * dispatches to */
 #define UNUSED_LIST_CHOICE_COUNT 21
-
-extern s16 D_801B71CC;
-extern s16 D_800FBE2C;
 
 /*
  * The mini-golf course select. A record's three courses lie on a disc that
@@ -288,8 +282,6 @@ extern s16 D_800FBE2C;
 /* g_BetPagesPhase's value once the popup opened with C-up has finished */
 #define MENU_PHASE_UNK2 2
 
-extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
-
 /*
  * The course select. Its wheel shows the open courses and the next one
  * still shut, and turns from one to the next; the chosen course's trophy
@@ -299,15 +291,6 @@ extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
 #define COURSE_SELECT_TURN 90
 #define COURSE_SELECT_SPIN_SPEED 18
 #define COURSE_SELECT_TEXT_SLOT_COUNT 4
-
-/* What UpdateMenus reads as the menu screen changes */
-extern void* D_800FC6A0;
-extern void* D_800FC898;
-extern void* D_800FF4C4[2];
-extern void* D_801052C4[2];
-extern void* D_80106100;
-extern void* D_8012D3AC;
-extern void* D_8012F4B0[7];
 
 void DrawModeSelect(Gfx** displayListHead);
 void DrawAnimationViewer(Gfx** displayListHead);
@@ -1320,7 +1303,7 @@ void UpdateMenus(void) {
         g_AnimatedIconBufferIndex = 0;
         g_AnimatedIconFrameTime = 0;
         ReadSavedGames();
-        LoadSaveMenuBuffers(g_MenuIconImages[0], SAVE_MENU_BUFFER_SLOTS);
+        LoadSaveMenuBuffers(MENU_ICON_IMAGE_PAIRS[0], SAVE_MENU_BUFFER_SLOTS);
         LoadSaveMenuBuffers(g_AnimatedIconImages, SAVE_MENU_BUFFER_CHOSEN);
         LoadGameModeLabelBuffer(
             g_NamePlateImage, GAME_MODE_LABEL_BUFFER_NAME_PLATE);
@@ -1385,14 +1368,16 @@ void UpdateMenus(void) {
             g_MenuSpareImages[0], CODE_ENTRY_BUFFER_POINTING_HAND);
         LoadCodeEntryBuffer(g_MenuSpareImages[1], CODE_ENTRY_BUFFER_CURSOR_BOX);
         LoadTournamentBuffer(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
-        LoadTournamentBuffer(g_MenuIconImages[0][0], TOURNAMENT_BUFFER_YES_NO);
         LoadTournamentBuffer(
-            g_MenuIconImages[0][1], TOURNAMENT_BUFFER_NINTENDO_BADGE);
-        LoadTournamentBuffer(g_MenuIconImages[1][0], TOURNAMENT_BUFFER_ICON);
+            MENU_ICON_IMAGE_PAIRS[0][0], TOURNAMENT_BUFFER_YES_NO);
         LoadTournamentBuffer(
-            g_MenuIconImages[1][1], TOURNAMENT_BUFFER_MENU_WINDOW);
+            MENU_ICON_IMAGE_PAIRS[0][1], TOURNAMENT_BUFFER_NINTENDO_BADGE);
         LoadTournamentBuffer(
-            g_MenuIconImages[2][0], TOURNAMENT_BUFFER_ROW_FILE);
+            MENU_ICON_IMAGE_PAIRS[1][0], TOURNAMENT_BUFFER_ICON);
+        LoadTournamentBuffer(
+            MENU_ICON_IMAGE_PAIRS[1][1], TOURNAMENT_BUFFER_MENU_WINDOW);
+        LoadTournamentBuffer(
+            MENU_ICON_IMAGE_PAIRS[2][0], TOURNAMENT_BUFFER_ROW_FILE);
         break;
 
       case MENU_SCREEN_HELP:
@@ -1413,7 +1398,8 @@ void UpdateMenus(void) {
           g_AnimatedIconFrameTime = 0;
           f_IsViewerModelKindChanged = 0;
         } else {
-          LoadHelpBoardImage(g_MenuIconImages[0][0], HELP_BOARD_IMAGE_HAND);
+          LoadHelpBoardImage(
+              MENU_ICON_IMAGE_PAIRS[0][0], HELP_BOARD_IMAGE_HAND);
           LoadHelpBoardImage(
               g_MenuArrowSizedImages[1], HELP_BOARD_IMAGE_ARROWS);
           f_MenuBoardImageIndex ^= 1;
@@ -1444,13 +1430,13 @@ void UpdateMenus(void) {
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     index][MINI_GOLF_FACING_FRAME],
                 &asset);
-            ReadEncodedAsset(g_MenuIconImages[0][index], &asset);
+            ReadEncodedAsset(MENU_ICON_IMAGE_PAIRS[0][index], &asset);
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[(g_MenuMemory.miniGolfCourseChoice *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     index][MINI_GOLF_FACING_FRAME],
                 &asset);
-            ReadEncodedAsset(g_MenuIconImages[1][index], &asset);
+            ReadEncodedAsset(MENU_ICON_IMAGE_PAIRS[1][index], &asset);
           }
 
           for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
@@ -1463,7 +1449,7 @@ void UpdateMenus(void) {
         } else {
           for (index = 0; index != COURSE_COUNT; index++) {
             OpenEncodedAsset(g_CourseIconAssets[index], &asset);
-            ReadEncodedAsset(g_MenuIconImages[0][index], &asset);
+            ReadEncodedAsset(MENU_ICON_IMAGE_PAIRS[0][index], &asset);
           }
         }
 
@@ -1538,7 +1524,7 @@ void UpdateMenus(void) {
           ReadSavedGames();
         }
 
-        LoadCourseStatsIcons(g_MenuIconImages[0]);
+        LoadCourseStatsIcons(MENU_ICON_IMAGE_PAIRS[0]);
         LoadCourseTrophyImages(D_800FF4C4, COURSE_BUFFER_FIRST);
         LoadCourseMenuBuffer(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
         LoadCourseMenuBuffer(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
@@ -1557,7 +1543,7 @@ void UpdateMenus(void) {
 
       case MENU_SCREEN_BEST_TIMES:
         ReadSavedGames();
-        LoadBestTimesCourseIcons(g_MenuIconImages[0]);
+        LoadBestTimesCourseIcons(MENU_ICON_IMAGE_PAIRS[0]);
         LoadBestTimesBuffer(NULL, BEST_TIMES_BUFFER_FACE_STRIP);
         f_ImageSlotIndex ^= 1;
         LoadCourseMenuBuffer(
@@ -1591,7 +1577,7 @@ void UpdateMenus(void) {
 
       case MENU_SCREEN_BEST_SHOTS:
         ReadSavedGames();
-        LoadBestShotsCourseIcons(g_MenuIconImages[0]);
+        LoadBestShotsCourseIcons(MENU_ICON_IMAGE_PAIRS[0]);
         f_MenuBoardImageIndex ^= 1;
         LoadCharacterFaceStrip(g_MenuBoardImages[f_MenuBoardImageIndex]);
         f_MenuLabelImageIndex ^= 1;
@@ -1620,7 +1606,7 @@ void UpdateMenus(void) {
             RING_SHOT_RECORD_BUFFER_RAINBOW_BOX);
         LoadRingShotRecordBuffer(
             g_AnimatedIconImages[0], RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS);
-        LoadRingShotCourseIcons(g_MenuIconImages[0]);
+        LoadRingShotCourseIcons(MENU_ICON_IMAGE_PAIRS[0]);
         LoadRingShotRecordBuffer(
             g_MenuSpareImages[0], RING_SHOT_RECORD_BUFFER_GREEN_ARROWS);
         ReadRingShotReplays();
@@ -2791,17 +2777,19 @@ void UpdateMiniGolfCourseSelect(void) {
                                          [f_MiniGolfDiscFrame],
                 &asset);
             ReadEncodedAsset(
-                g_MenuIconImages[f_MiniGolfDiscBufferIndex ^ 1][0], &asset);
+                MENU_ICON_IMAGE_PAIRS[f_MiniGolfDiscBufferIndex ^ 1][0],
+                &asset);
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[(course *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     1][f_MiniGolfDiscFrame],
                 &asset);
             ReadEncodedAsset(
-                g_MenuIconImages[f_MiniGolfDiscBufferIndex ^ 1][1], &asset);
+                MENU_ICON_IMAGE_PAIRS[f_MiniGolfDiscBufferIndex ^ 1][1],
+                &asset);
           } else {
             course = g_MenuMemory.miniGolfCourseChoice;
-            buffers = g_MenuIconImages;
+            buffers = MENU_ICON_IMAGE_PAIRS;
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[course * MINI_GOLF_DISC_IMAGE_COUNT]
                                          [f_MiniGolfDiscFrame],
@@ -2846,17 +2834,19 @@ void UpdateMiniGolfCourseSelect(void) {
                                          [f_MiniGolfDiscFrame],
                 &asset);
             ReadEncodedAsset(
-                g_MenuIconImages[f_MiniGolfDiscBufferIndex ^ 1][0], &asset);
+                MENU_ICON_IMAGE_PAIRS[f_MiniGolfDiscBufferIndex ^ 1][0],
+                &asset);
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[(course *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
                     1][f_MiniGolfDiscFrame],
                 &asset);
             ReadEncodedAsset(
-                g_MenuIconImages[f_MiniGolfDiscBufferIndex ^ 1][1], &asset);
+                MENU_ICON_IMAGE_PAIRS[f_MiniGolfDiscBufferIndex ^ 1][1],
+                &asset);
           } else {
             course = g_MenuMemory.miniGolfCourseChoice;
-            buffers = g_MenuIconImages;
+            buffers = MENU_ICON_IMAGE_PAIRS;
             OpenEncodedAsset(
                 g_MiniGolfDiscFrameAssets[course * MINI_GOLF_DISC_IMAGE_COUNT]
                                          [f_MiniGolfDiscFrame],
@@ -5900,12 +5890,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
       if (g_GameState.isMiniGolf == TRUE) {
         palette = D_801052C4[slot];
         /* Indexed as one row, as that matches the original better */
-        texels = g_MenuIconImages[0][(f_MiniGolfDiscBufferIndex *
-                                         MINI_GOLF_DISC_IMAGE_COUNT) +
+        texels = MENU_ICON_IMAGE_PAIRS[0][(f_MiniGolfDiscBufferIndex *
+                                              MINI_GOLF_DISC_IMAGE_COUNT) +
             slot];
       } else {
-        palette = ImageBody(g_MenuIconImages[0][slot]);
-        texels = g_MenuIconImages[0][slot];
+        palette = ImageBody(MENU_ICON_IMAGE_PAIRS[0][slot]);
+        texels = MENU_ICON_IMAGE_PAIRS[0][slot];
       }
 
       gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
