@@ -797,8 +797,8 @@ static Vtx D_8022FD48_ovl_01[WATER_VERTEX_COUNT] = {
     {{{0, -128, 0}, 0, {16384, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
     {{{800, -128, 0}, 0, {32736, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
     {{{800, 64, -1024}, 0, {32736, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
-/* The water's scroll */
-static s32 D_8022FD98_ovl_01 = 0;
+/* How far the course select's water has scrolled; its two layers move apart */
+static s32 f_WaterScroll = 0;
 /* Read by no routine; the values of D_8022FBD0 */
 static char D_8022FD9C_ovl_01[4][20] = {
     "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
@@ -5797,12 +5797,11 @@ void DrawCourseSelect(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, WATER_TEXTURE_MASK, WATER_TEXTURE_MASK,
         WATER_TEXTURE_SHIFT, WATER_TEXTURE_SHIFT);
     gDPPipeSync(gfx++);
-    D_8022FD98_ovl_01++;
-    gDPSetTileSize(gfx++, G_TX_RENDERTILE, D_8022FD98_ovl_01, 0,
-        D_8022FD98_ovl_01 + WATER_TILE_SPAN, WATER_TILE_SPAN);
-    gDPSetTileSize(gfx++, WATER_LAYER_TILE, -D_8022FD98_ovl_01,
-        D_8022FD98_ovl_01, -D_8022FD98_ovl_01 + WATER_TILE_SPAN,
-        D_8022FD98_ovl_01 + WATER_TILE_SPAN);
+    f_WaterScroll++;
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, f_WaterScroll, 0,
+        f_WaterScroll + WATER_TILE_SPAN, WATER_TILE_SPAN);
+    gDPSetTileSize(gfx++, WATER_LAYER_TILE, -f_WaterScroll, f_WaterScroll,
+        -f_WaterScroll + WATER_TILE_SPAN, f_WaterScroll + WATER_TILE_SPAN);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80232230_ovl_01),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
