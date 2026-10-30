@@ -2707,7 +2707,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
       OpenGameBoyPakWithRetries(g_PlayerControllerPorts[g_GameBoyTransfer
                                         .taggedControllers[cartridgeIndex]],
           &transfer->cartridgeHeader, &transfer->pakFile);
-  g_GameBoyTransfer.transferResult = result;
+  transfer->transferResult = result;
   if (result != PAK_RESULT_OK) {
     /* Going to the shared power-off is there to match */
     goto FAILED;
@@ -2718,7 +2718,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
       &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
   if (readResult != 0) {
     osSyncPrintf("head error  2\n");
-    g_GameBoyTransfer.transferResult = readResult;
+    transfer->transferResult = readResult;
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     return STATUS_CHECK_READ_FAILED;
   }
@@ -2785,10 +2785,10 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
   s32 statusSize;
   s32 sum;
 
-  g_GameBoyTransfer.transferResult = OpenGameBoyPakWithRetries(
+  transfer->transferResult = OpenGameBoyPakWithRetries(
       g_PlayerControllerPorts[transfer->taggedControllers[cartridgeIndex]],
       &transfer->cartridgeHeader, &transfer->pakFile);
-  if (g_GameBoyTransfer.transferResult != PAK_RESULT_OK) {
+  if (transfer->transferResult != PAK_RESULT_OK) {
     /* Going to the shared power-off is there to match */
     goto FAILED;
   }
@@ -2797,7 +2797,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
       &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
   if (result != 0) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    g_GameBoyTransfer.transferResult = result;
+    transfer->transferResult = result;
     return STATUS_WRITE_PAK_ERROR;
   }
 
@@ -3326,7 +3326,7 @@ s32 TagCartridges(void) {
   s32 index;
   s32 result;
 
-  g_GameBoyTransfer.taggedCartridgeCount = 0;
+  transfer->taggedCartridgeCount = 0;
   for (controller = 0; controller != MAXCONTROLLERS; controller++) {
     transfer->taggedControllers[controller] = 0;
   }

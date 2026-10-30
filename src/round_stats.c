@@ -544,7 +544,7 @@ void RecordHoleStats(void) {
     if (g_Players[0].strokeCount <= g_HoleSetup.par) {
       stats->sandSaveCount++;
     } else {
-      g_RoundStats.missedSandSaveCount++;
+      stats->missedSandSaveCount++;
     }
   }
 
@@ -568,7 +568,7 @@ s32 RecordDrive(void) {
 
   g_Players[0].lastDriveDistance = g_Players[0].driveDistance;
   if (club->type == CLUB_TYPE_DRIVER && g_Players[0].driveDistance > 0) {
-    g_RoundStats.isDriveAveraged = TRUE;
+    stats->isDriveAveraged = TRUE;
   } else {
     stats->isDriveAveraged = FALSE;
   }
