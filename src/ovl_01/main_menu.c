@@ -2231,7 +2231,7 @@ void UpdateModeSelect(void) {
     return;
   }
 
-  D_800C2BD5 = 0;
+  g_AreBetPagesBlocked = 0;
   if (g_MenuPressedButtons & A_BUTTON) {
     if (g_MenuMemory.modeSpin != 0) {
       g_MenuMemory.modeSpin = 0;
@@ -2306,7 +2306,7 @@ void UpdateModeSelect(void) {
             g_GameState.betRates[index] = UNSET_BET_RATE;
           }
 
-          D_800C2BD5 = 1;
+          g_AreBetPagesBlocked = 1;
         }
 
         break;
@@ -2380,7 +2380,7 @@ void UpdateModeSelect(void) {
             g_GameState.betRates[index] = UNSET_BET_RATE;
           }
 
-          D_800C2BD5 = 1;
+          g_AreBetPagesBlocked = 1;
         }
 
         break;
@@ -2699,7 +2699,7 @@ void UpdateCourseSelect(void) {
       }
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
-      if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
+      if (g_AreBetPagesBlocked != MAP_CAMERA_MODE_TOP_BYTE) {
         PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_BetPagesPhase = BET_PHASE_OPENING;
         g_BetPagesWallSlide = STATS_SLIDE_OUT_RIGHT;
@@ -2977,7 +2977,7 @@ void UpdateMiniGolfCourseSelect(void) {
       f_MiniGolfDiscTurn = MINI_GOLF_TURN_TO_NEXT;
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
-      if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
+      if (g_AreBetPagesBlocked != MAP_CAMERA_MODE_TOP_BYTE) {
         PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_BetPagesPhase = BET_PHASE_OPENING;
         g_BetPagesWallSlide = STATS_SLIDE_OUT_RIGHT;
@@ -4683,7 +4683,7 @@ extern const char D_8023176C_ovl_01[];
 #define COURSE_BADGE_COUNT_X 252
 #define COURSE_BADGE_COUNT_Y 208
 /* The chosen holes badge is lit, and the Bet badge cycles its color unless
- * D_800C2BD5 is set */
+ * g_AreBetPagesBlocked is set */
 #define UNCHOSEN_HOLES_BADGE_SHADE 127
 #define BET_BADGE_COLOR_STEP (M_PI / 18)
 #define BET_BADGE_COLOR_MIDPOINT 127
@@ -5999,7 +5999,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
       gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
       gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_80106100)));
       for (otherIndex = 0; otherIndex != HOLES_BADGE_COUNT; otherIndex++) {
-        if ((otherIndex == HOLES_BADGE_BET) && (D_800C2BD5 != 1)) {
+        if ((otherIndex == HOLES_BADGE_BET) && (g_AreBetPagesBlocked != 1)) {
           gDPPipeSync(gfx++);
           gDPLoadTextureTile_4b(gfx++,
               TextureAddress(ImageTexels(D_80106100) +

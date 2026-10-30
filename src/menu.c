@@ -446,7 +446,7 @@ static s16 f_CharacterSlots[] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
 s32 g_MenuCourseCount = 6;
 static s8 D_800C2BD4 = 0;
-u8 D_800C2BD5 = 0;
+u8 g_AreBetPagesBlocked = 0;
 /* Read by no routine */
 static s32 D_800C2BD8[2] = {0};
 static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
@@ -1997,7 +1997,7 @@ void func_8005DAFC(void) {
         g_BetSet = BET_SET_STROKE;
       }
 
-      D_800C2BD5 = 1;
+      g_AreBetPagesBlocked = 1;
       break;
     case GAME_MODE_MATCH_GAME:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;

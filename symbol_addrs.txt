@@ -813,6 +813,7 @@ RunFaultThread = 0x8005E2CC; // type:func
 PrintFaultText = 0x8005E360; // type:func
 PrintFaultContext = 0x8005E380; // type:func
 PrintRegisterFields = 0x8005EAD4; // type:func
+g_AreBetPagesBlocked = 0x800C2BD5; // size:0x1
 f_FaultUnk = 0x800C2C10; // size:0x4
 f_FaultTextRow = 0x800C2C14; // size:0x4
 f_CauseFields = 0x800C2C18; // size:0x150

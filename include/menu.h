@@ -65,8 +65,11 @@ extern AssetId g_CourseIconAssets[];
 extern AssetId g_TournamentIconAssets[];
 /* How many courses the course select offers */
 extern s32 g_MenuCourseCount;
-/* The holes choice's Bet badge cycles its color unless this is set */
-extern u8 D_800C2BD5;
+/*
+ * Set for a one-player Stroke Play or Mini-Golf round: the course select's
+ * Up-C then can't open the bet pages, and its Bet badge doesn't cycle its color
+ */
+extern u8 g_AreBetPagesBlocked;
 
 /* Each course's images for the menus' turning wheel of courses, and the trophy
  * files read with them */
