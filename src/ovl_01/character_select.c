@@ -145,10 +145,12 @@ void DrawCurveMeter(Gfx** displayListHead, s32 clubSet);
 
 /* Whether DrawCharacterSelect has set the choosing player's prompt */
 static u8 f_IsPromptShown = FALSE;
-static u8 D_8022FF01_ovl_01 = FALSE;
+/* LoadCharacterSelectBuffer clears it, but no routine reads it */
+static u8 f_UnreadBufferFlag = FALSE;
 /* Read by no routine */
 static u8 f_UnreadSelectByte = 0;
-static u8 D_8022FF03_ovl_01 = 0;
+/* Cleared once every player has chosen, but read by no routine */
+static u8 f_UnreadSelectDoneByte = 0;
 /* The animation frame of the face under the choosing player's cursor */
 static s8 f_FaceFrame = 0;
 /* Flipped whenever the grid face changes, but read by no routine */
@@ -936,7 +938,7 @@ s32 UpdateCharacterSelect(
           TEXT_FLAG_TYPED, 255, 255, 255, 255);
       f_IsPromptShown = FALSE;
       FreeAllCharacterSlots();
-      D_8022FF03_ovl_01 = 0;
+      f_UnreadSelectDoneByte = 0;
       f_FaceFrame = 0;
       f_UnreadFaceToggle = 0;
       f_FaceFrameTimer = 0;
@@ -1233,7 +1235,7 @@ void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind) {
     ReadEncodedAsset(image, &asset);
   }
 
-  D_8022FF01_ovl_01 = FALSE;
+  f_UnreadBufferFlag = FALSE;
 }
 
 /*
