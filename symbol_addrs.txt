@@ -3837,6 +3837,7 @@ g_MenuBoardImages = 0x800FF420; // size:0x8
 D_8010526C = 0x8010526C; // size:0x8
 g_HasOwnControllers = 0x801051F0; // size:0x4
 g_MenuTitleImages = 0x801052BC; // size:0x8
+g_MenuIconImages = 0x801049A0; // size:0x1C
 D_80105F40 = 0x80105F40; // size:0x1A0
 g_MenuLabelImages = 0x8012D420; // size:0x8
 D_8012D430 = 0x8012D430; // size:0x48

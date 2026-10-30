@@ -149,7 +149,9 @@ u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT] BSS ALIGNED(8) = {0};
 MenuRepeatState g_MenuRepeatStates[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT] BSS ALIGNED(16) = {0};
 ControllerState g_MergedController BSS = {0};
-void* D_801049A0[7] BSS ALIGNED(8) = {0};
+/* The menu screen's course or mode icons, whose buffers other screens reuse
+ * for their own images */
+void* g_MenuIconImages[7] BSS ALIGNED(8) = {0};
 s32 g_PlayerControllerPorts[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_801049D0[0x2C] BSS = {0};

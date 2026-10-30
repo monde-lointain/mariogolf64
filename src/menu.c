@@ -80,7 +80,7 @@ extern s8 D_801B9410;
 extern u8 g_MapCamera[];
 extern void* D_8012D3AC;
 extern void* D_8012F4B0[7];
-extern void* D_801049A0[7];
+extern void* g_MenuIconImages[7];
 extern void* D_801052C4[2];
 extern void* g_MenuBoardImages[2];
 extern void* g_NamePlateImage;
@@ -521,7 +521,7 @@ void LoadMenuResources(void) {
   g_MenuTitleImages[1] =
       AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
   ReadEncodedAsset(g_MenuTitleImages[1], &asset);
-  for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
+  for (index = 0; index != ARRAY_COUNT(g_MenuIconImages); index++) {
     if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
       size = OpenEncodedAsset(
           g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
@@ -529,8 +529,8 @@ void LoadMenuResources(void) {
       size = OpenEncodedAsset(g_CourseIconAssets[index], &asset);
     }
 
-    D_801049A0[index] = AllocMemory(size);
-    ReadEncodedAsset(D_801049A0[index], &asset);
+    g_MenuIconImages[index] = AllocMemory(size);
+    ReadEncodedAsset(g_MenuIconImages[index], &asset);
     if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
       size = OpenEncodedAsset(
           g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
@@ -620,8 +620,8 @@ void FreeMenuResources(void) {
   g_LoadedMenuScreen = NO_MENU_SCREEN;
   FreeMemory(&g_MenuCourseSceneryAsset);
   FreeMemory(&D_8012D3AC);
-  for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
-    FreeMemory(&D_801049A0[index]);
+  for (index = 0; index != ARRAY_COUNT(g_MenuIconImages); index++) {
+    FreeMemory(&g_MenuIconImages[index]);
     FreeMemory(&D_8012F4B0[index]);
   }
 

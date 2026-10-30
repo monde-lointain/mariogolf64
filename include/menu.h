@@ -94,12 +94,12 @@ typedef struct TrophySize {
 
 extern TrophySize g_TrophySizes[COURSE_COUNT];
 
-/* The mini-golf disc's images in each of D_801049A0's buffers */
+/* The mini-golf disc's images in each of g_MenuIconImages's buffers */
 #define MINI_GOLF_DISC_IMAGE_COUNT 2
 /*
  * The disc's frames as it turns from one course to the next, each two images,
- * read into the buffers of D_801049A0 not shown; the courses face the screen at
- * the middle frame
+ * read into the buffers of g_MenuIconImages not shown; the courses face the
+ * screen at the middle frame
  */
 #define MINI_GOLF_TURN_FRAME_COUNT 5
 #define MINI_GOLF_FACING_FRAME 2
