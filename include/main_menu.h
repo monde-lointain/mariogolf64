@@ -55,7 +55,7 @@ extern u8 g_BetPagesWallSlide;
 extern s32 g_AnimatedIconFrameIndex;
 extern u8 g_AnimatedIconBufferIndex;
 extern s8 g_AnimatedIconFrameTime;
-/* Updates until each character fidgets, or -1 while it does */
+/* Updates until each character fidgets, or FIDGETING while it does */
 extern s32 g_MenuFidgetDelays[MAX_PLAYER_COUNT];
 extern s32 g_CourseBannersSlide;
 /* The handicap of a place that no player takes */
