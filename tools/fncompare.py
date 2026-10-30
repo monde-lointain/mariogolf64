@@ -97,6 +97,24 @@ RELOC_MASKS = {
     R_MIPS_LO16: IMMEDIATE_MASK,
 }
 
+# The offsets of the fields read_symbol_table and read_linked_functions read
+# in a big-endian ELF32 file's header, its section headers and its symbols
+HALF_SIZE = 2
+E_SHOFF = 0x20
+E_SHENTSIZE = 0x2E
+E_SHNUM = 0x30
+SH_TYPE = 0x04
+SH_OFFSET = 0x10
+SH_SIZE = 0x14
+SH_LINK = 0x18
+SHT_SYMTAB = 2
+SYMBOL_SIZE = 16
+ST_NAME = 0x0
+ST_VALUE = 0x4
+ST_INFO = 0xC
+SYMBOL_TYPE_MASK = 0xF
+STT_FUNC = 2
+
 MAX_DIFF_HUNKS = int(os.environ.get("MAX_DIFF_HUNKS", "4"))
 
 Functions = dict[str, list[int]]
@@ -110,26 +128,58 @@ def mask_jump(word: int) -> int:
     return word
 
 
+def read_field(data: bytes, offset: int, size: int) -> int:
+    """Return the big-endian field of SIZE bytes at OFFSET in DATA."""
+    return int.from_bytes(data[offset : offset + size], "big")
+
+
+def read_symbol_table(elf: bytes) -> tuple[bytes, bytes]:
+    """Return a big-endian ELF32 file's symbol table and its names.
+
+    Both are empty when the file has no symbol table.
+    """
+    first_section = read_field(elf, E_SHOFF, WORD_SIZE)
+    section_size = read_field(elf, E_SHENTSIZE, HALF_SIZE)
+    section_count = read_field(elf, E_SHNUM, HALF_SIZE)
+    sections = [
+        elf[start : start + section_size]
+        for start in range(
+            first_section, first_section + section_count * section_size, section_size
+        )
+    ]
+    for section in sections:
+        if read_field(section, SH_TYPE, WORD_SIZE) != SHT_SYMTAB:
+            continue
+        names = sections[read_field(section, SH_LINK, WORD_SIZE)]
+        names_start = read_field(names, SH_OFFSET, WORD_SIZE)
+        names_end = names_start + read_field(names, SH_SIZE, WORD_SIZE)
+        start = read_field(section, SH_OFFSET, WORD_SIZE)
+        end = start + read_field(section, SH_SIZE, WORD_SIZE)
+        return elf[start:end], elf[names_start:names_end]
+    return b"", b""
+
+
 @functools.cache
 def read_linked_functions() -> dict[str, int]:
-    """Return {name: address} of the functions the matching build names once."""
+    """Return {name: address} of the functions the matching build names once.
+
+    Reads the symbol table with struct, since pyelftools takes half a second
+    over the game's thousands of symbols.
+    """
     if not LINKED_ELF.exists():
         return {}
+    symbols, names = read_symbol_table(LINKED_ELF.read_bytes())
     addresses: dict[str, int] = {}
     repeated: set[str] = set()
-    with LINKED_ELF.open("rb") as elf_file:
-        symbols = ELFFile(elf_file).get_section_by_name(".symtab")
-        if not isinstance(symbols, SymbolTableSection):
-            return {}
-        for symbol in symbols.iter_symbols():
-            info = read_entry_field(symbol.entry, "st_info")
-            if not isinstance(info, Container):
-                continue
-            if read_entry_field(info, "type") != "STT_FUNC":
-                continue
-            if symbol.name in addresses:
-                repeated.add(symbol.name)
-            addresses[symbol.name] = read_entry_int(symbol.entry, "st_value")
+    for start in range(0, len(symbols), SYMBOL_SIZE):
+        symbol = symbols[start : start + SYMBOL_SIZE]
+        if symbol[ST_INFO] & SYMBOL_TYPE_MASK != STT_FUNC:
+            continue
+        name_start = read_field(symbol, ST_NAME, WORD_SIZE)
+        name = names[name_start : names.index(0, name_start)].decode()
+        if name in addresses:
+            repeated.add(name)
+        addresses[name] = read_field(symbol, ST_VALUE, WORD_SIZE)
     return {
         name: address for name, address in addresses.items() if name not in repeated
     }
