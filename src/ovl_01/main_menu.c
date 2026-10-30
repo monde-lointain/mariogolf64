@@ -448,7 +448,8 @@ static s32 D_8022BE58_ovl_01[10] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
 /* Which of D_800FBDFC's buffers shows the course */
 static u8 D_8022BE80_ovl_01 = 0;
 static s8 D_8022BE81_ovl_01 = 0;
-static s32 D_8022BE84_ovl_01 = 0;
+/* How far the bet settings and handicap pages have slid in */
+static s32 f_BetSlideOffset = 0;
 u8 D_8022BE88_ovl_01 = 0;
 u8 D_8022BE89_ovl_01 = 0;
 static s16 D_8022BE8A_ovl_01 = 0;
@@ -1845,7 +1846,7 @@ void UpdateMenuTitleScreen(void) {
     return;
   }
 
-  D_8022BE84_ovl_01 = 0;
+  f_BetSlideOffset = 0;
   D_8022BE88_ovl_01 = 0;
   D_8022BE89_ovl_01 = 0;
   D_8023BFD0_ovl_01 = 0;
@@ -2205,7 +2206,7 @@ void UpdateModeSelect(void) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT,
         TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
-    D_8022BE84_ovl_01 = 0;
+    f_BetSlideOffset = 0;
     D_8022BE88_ovl_01 = 0;
     D_8022BE89_ovl_01 = 0;
     D_8023BFD0_ovl_01 = 0;
@@ -6158,24 +6159,24 @@ void DrawCourseSelect(Gfx** displayListHead) {
       (g_MenuScreen == MENU_SCREEN_HANDICAPS)) {
     switch (D_8022BE88_ovl_01) {
       case BET_PHASE_OPENING:
-        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        f_BetSlideOffset += BET_SLIDE_STEP;
         D_8023BFD0_ovl_01 += BET_SLIDE_STEP;
         D_802322F0_ovl_01 += BET_SLIDE_STEP;
-        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+        if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
-          D_8022BE84_ovl_01 = 0;
+          f_BetSlideOffset = 0;
           D_802322F0_ovl_01 = 0;
         }
 
         break;
 
       case BET_PHASE_CANCELED:
-        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        f_BetSlideOffset += BET_SLIDE_STEP;
         D_802322F0_ovl_01 += BET_SLIDE_STEP;
         D_8023BFD0_ovl_01 -= BET_SLIDE_STEP;
-        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+        if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           D_8022BE88_ovl_01 = MENU_PHASE_START;
-          D_8022BE84_ovl_01 = 0;
+          f_BetSlideOffset = 0;
           D_802322F0_ovl_01 = 0;
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0,
               TEXT_FLAG_TYPED, 255, 255, 255, 255);
@@ -6184,12 +6185,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
 
       case BET_PHASE_CONFIRMED:
-        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        f_BetSlideOffset += BET_SLIDE_STEP;
         D_802322F0_ovl_01 -= BET_SLIDE_STEP;
         D_802322F4_ovl_01 += BET_SLIDE_STEP;
-        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+        if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           D_8022BE88_ovl_01 = MENU_PHASE_CHOOSING;
-          D_8022BE84_ovl_01 = 0;
+          f_BetSlideOffset = 0;
           D_802322F0_ovl_01 = 0;
           D_802322F4_ovl_01 = 0;
         }
@@ -6197,12 +6198,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
 
       case MENU_PHASE_CANCELED:
-        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        f_BetSlideOffset += BET_SLIDE_STEP;
         D_802322F0_ovl_01 += BET_SLIDE_STEP;
         D_802322F4_ovl_01 += BET_SLIDE_STEP;
-        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+        if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           D_8022BE88_ovl_01 = BET_PHASE_CHOOSING;
-          D_8022BE84_ovl_01 = 0;
+          f_BetSlideOffset = 0;
           D_802322F0_ovl_01 = 0;
           D_802322F4_ovl_01 = 0;
         }
@@ -6210,12 +6211,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
 
       case MENU_PHASE_CONFIRMED:
-        D_8022BE84_ovl_01 += BET_SLIDE_STEP;
+        f_BetSlideOffset += BET_SLIDE_STEP;
         D_802322F4_ovl_01 -= BET_SLIDE_STEP;
         D_8023BFD0_ovl_01 += BET_SLIDE_STEP;
-        if (D_8022BE84_ovl_01 >= BET_SLIDE_DISTANCE) {
+        if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           D_8022BE88_ovl_01 = MENU_PHASE_START;
-          D_8022BE84_ovl_01 = 0;
+          f_BetSlideOffset = 0;
           D_802322F4_ovl_01 = 0;
           D_8023BFD0_ovl_01 = 0;
         }
