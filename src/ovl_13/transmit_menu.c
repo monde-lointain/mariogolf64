@@ -485,7 +485,7 @@ void UpdateSendStatus(void);
 void UpdateSendExperience(void);
 s32 HaveAllRumblePaks(void);
 void ClearCartridgeCharacters(void);
-void func_8005DC50(void);
+void EnterMenuAtTitle(void);
 void ResetSendStatus(void);
 void ResetSendExperience(void);
 s32 TagCartridges(void);
@@ -1427,7 +1427,7 @@ void UpdateTransmitMenu(void) {
     case TRANSMIT_SCREEN_UNK6:
       if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         StartWipe(WIPE_OPENING);
-        func_8005DC50();
+        EnterMenuAtTitle();
         g_Scene = SCENE_SWAPPING_MODULES;
         g_SceneModuleToUnload = MODULE_TRANSMIT;
         g_NextScene = SCENE_MENU;

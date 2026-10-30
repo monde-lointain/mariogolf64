@@ -777,12 +777,12 @@ void func_80242074(void);
 void func_80205C78(void);
 void func_801FDA04(void);
 void func_8005D1E4(void);
-void func_8005DAFC(void);
-void func_8005DC50(void);
-void func_8005DD10(void);
-void func_8005DD44(void);
-void func_8005DD78(void);
-void func_8005DDAC(void);
+void EnterMenuAtCourseSelect(void);
+void EnterMenuAtTitle(void);
+void EnterMenuAtModeSelect(void);
+void EnterMenuAtBlankScreen(void);
+void EnterMenuAtRingShotRecords(void);
+void EnterMenuAtBestShots(void);
 
 #ifdef NON_MATCHING
 /* The choices that the Training and Ring Shot menus return */
@@ -1650,7 +1650,7 @@ DIM_BACKDROP:
               g_SceneModuleToUnload = MODULE_PLAY;
               g_SceneModuleToLoad = MODULE_STAFF_ROLL;
               UnloadSubModule();
-              func_8005DC50();
+              EnterMenuAtTitle();
               StopLoaderThread();
               f_PlayExit = PLAY_EXIT_NONE;
               SetMenuBackdrop(MENU_BACKDROP_NONE);
@@ -1676,22 +1676,22 @@ DIM_BACKDROP:
                 UnloadSubModule();
                 switch (f_PlayExit) {
                   case PLAY_EXIT_QUIT:
-                    func_8005DD10();
+                    EnterMenuAtModeSelect();
                     break;
                   case PLAY_EXIT_UNK1:
-                    func_8005DAFC();
+                    EnterMenuAtCourseSelect();
                     break;
                   case PLAY_EXIT_UNK2:
-                    func_8005DD44();
+                    EnterMenuAtBlankScreen();
                     break;
                   case PLAY_EXIT_UNK3:
-                    func_8005DC50();
+                    EnterMenuAtTitle();
                     break;
                   case PLAY_EXIT_UNK4:
-                    func_8005DDAC();
+                    EnterMenuAtBestShots();
                     break;
                   case PLAY_EXIT_RING_SHOT:
-                    func_8005DD78();
+                    EnterMenuAtRingShotRecords();
                     break;
                 }
 

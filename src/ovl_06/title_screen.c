@@ -102,7 +102,7 @@ typedef struct ButtonCode {
 #define GAME_FLAG_UNK44 0x44
 #define GAME_FLAG_UNK65 0x65
 
-void func_8005DC50(void);
+void EnterMenuAtTitle(void);
 
 void OnUnlockCodeEntered(void);
 void EnableDebug(void);
@@ -263,7 +263,7 @@ void LoadTitleScreen(void) {
 
   ResetButtonCodes();
   ForceStopRumble();
-  func_8005DC50();
+  EnterMenuAtTitle();
   if (g_ControllerCount == 0) {
     OpenEncodedAsset(NO_CONTROLLER_IMAGE_ASSET, &asset);
     ReadEncodedAsset(&f_TitleImage, &asset);

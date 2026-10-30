@@ -1985,7 +1985,11 @@ void func_8005DAD4(void) {
   f_UnreadMenuEntryFlag = 0;
 }
 
-void func_8005DAFC(void) {
+/*
+ * Enters the menu at the course select, setting its kind and the bet set for
+ * the mode just played
+ */
+void EnterMenuAtCourseSelect(void) {
   switch (g_GameState.gameMode) {
     case GAME_MODE_TOURNAMENT:
       g_CourseSelectKind = COURSE_SELECT_KIND_TOURNAMENTS;
@@ -2036,7 +2040,9 @@ void func_8005DAFC(void) {
   g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
 }
 
-void func_8005DC50(void) {
+/* Enters the menu at the title with every choice, import and controller
+ * assignment cleared */
+void EnterMenuAtTitle(void) {
   ResetMenuChoices();
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
@@ -2053,7 +2059,8 @@ void func_8005DC50(void) {
   g_MenuScreen = MENU_SCREEN_TITLE;
 }
 
-void func_8005DCDC(void) {
+/* Enters the menu at the Ring Shot exit; no routine calls it */
+void EnterMenuAtRingShotExit(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
@@ -2061,7 +2068,8 @@ void func_8005DCDC(void) {
   g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
 }
 
-void func_8005DD10(void) {
+/* Enters the menu at the mode select, as quitting a round does */
+void EnterMenuAtModeSelect(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
@@ -2069,7 +2077,8 @@ void func_8005DD10(void) {
   g_MenuScreen = MENU_SCREEN_MODE_SELECT;
 }
 
-void func_8005DD44(void) {
+/* Enters the menu at the blank screen, which waits for A to go to the title */
+void EnterMenuAtBlankScreen(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
@@ -2077,7 +2086,8 @@ void func_8005DD44(void) {
   g_MenuScreen = MENU_SCREEN_BLANK;
 }
 
-void func_8005DD78(void) {
+/* Enters the menu at the Ring Shot records, as leaving Ring Shot does */
+void EnterMenuAtRingShotRecords(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
@@ -2085,7 +2095,8 @@ void func_8005DD78(void) {
   g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
 }
 
-void func_8005DDAC(void) {
+/* Enters the menu at the Best Shots, ending the replay that it started */
+void EnterMenuAtBestShots(void) {
   g_IsChosenHoleLoadStarted = FALSE;
   g_IsRingShotWipeOpening = TRUE;
   f_UnreadMenuEntryFlag = 0;
