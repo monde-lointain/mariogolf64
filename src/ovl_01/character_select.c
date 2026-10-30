@@ -193,7 +193,7 @@ static s16 D_8022FFCA_ovl_01 = 0;
 static TagOffset f_PlayerTagOffsets[MAX_PLAYER_COUNT] = {
     {0, 0}, {16, 0}, {0, 24}, {16, 24}};
 /* The tags' x when lined up, by the player count less one */
-static s32 D_8022FFD4_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+static s32 f_LinedUpTagLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {102, -26, -26, -26}, {22, 182, -26, -26}, {38, 102, 166, 230},
     {6, 70, 134, 198}};
 /* Read by no routine; the last 16 values of player_stats.c's D_80230960 */
@@ -1708,7 +1708,7 @@ void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
       top = f_PlayerTagOffsets[playerIndex].y +
           (memory->characterRows[playerIndex] * GRID_CELL_SIZE);
     } else {
-      left = D_8022FFD4_ovl_01[tagCount - 1][playerIndex];
+      left = f_LinedUpTagLefts[tagCount - 1][playerIndex];
       top = ((playerIndex & 1) == 0) ? PLAYER_TAG_RAISE : 0;
       if ((tagCount == 2) & (playerIndex == 1)) {
         top = PLAYER_TAG_RAISE;
