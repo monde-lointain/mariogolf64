@@ -181,8 +181,9 @@ static s32 f_StickXHoldTimer = 0;
 static s32 f_StickYHoldTimer = 0;
 /* Read by no routine */
 static char D_8022FFA8_ovl_01[3][10] = {"Straight", "Draw", "Fade"};
-static s16 D_8022FFC6_ovl_01 = 0;
-static s16 D_8022FFC8_ovl_01 = 0;
+/* The cell of the face DrawGridFaces last read, read by no routine */
+static s16 f_UnreadFaceColumn = 0;
+static s16 f_UnreadFaceRow = 0;
 /* Read by no routine */
 static s16 D_8022FFCA_ovl_01 = 0;
 /* Each player's tag offset from their cursor's grid cell, as x and y */
@@ -1552,8 +1553,8 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
 
     OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
-    D_8022FFC6_ovl_01 = memory->characterColumns[g_ChoosingPlayerIndex];
-    D_8022FFC8_ovl_01 = memory->characterRows[g_ChoosingPlayerIndex];
+    f_UnreadFaceColumn = memory->characterColumns[g_ChoosingPlayerIndex];
+    f_UnreadFaceRow = memory->characterRows[g_ChoosingPlayerIndex];
   }
 
   *displayListHead = gfx;
