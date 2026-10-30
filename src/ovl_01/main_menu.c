@@ -270,7 +270,7 @@ extern const char D_80231514_ovl_01[];
 #define PLAYER_UNK28_NINE_HOLES 3
 #define PLAYER_UNK28_EIGHTEEN_HOLES 6
 
-/* The choices of the list that func_801FAFEC runs, which no menu screen
+/* The choices of the list that UpdateUnusedList runs, which no menu screen
  * dispatches to */
 #define UNUSED_LIST_CHOICE_COUNT 21
 
@@ -433,7 +433,7 @@ static s32 f_MenuCharacterCount = CHARACTER_COUNT;
 /* Read by no routine */
 static u8 D_8022BE10_ovl_01[8] = {
     0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-/* The row that func_801FAFEC_ovl_01's list is on */
+/* The row that UpdateUnusedList is on */
 static s32 f_UnusedListChoice = 0;
 static s32 D_8022BE1C_ovl_01 = 0;
 /* Read by no routine */
@@ -3679,7 +3679,11 @@ void LeaveMenuWithCourseWipe(void) {
   }
 }
 
-void func_801FAFEC_ovl_01(void) {
+/*
+ * Runs a list that no menu screen dispatches to: up and down move its choice,
+ * A leaves the menu for a Ring Shot replay and B goes back to the main menu
+ */
+void UpdateUnusedList(void) {
   GetSaveData();
   if (g_MenuPressedButtons & A_BUTTON) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
