@@ -155,8 +155,9 @@ static s8 f_FaceFrame = 0;
 static u8 f_UnreadFaceToggle = 0;
 /* The draws that f_FaceFrame has been shown for */
 static u8 f_FaceFrameTimer = 0;
-static s8 D_8022FF07_ovl_01 = FALSE;
-static s8 D_8022FF08_ovl_01 = FALSE;
+/* Whether R, or Z or L, is held, which shows the COM or LEFTY icon */
+static s8 f_IsComButtonHeld = FALSE;
+static s8 f_IsLeftyButtonHeld = FALSE;
 /* A CButtonPalette value */
 static s8 D_8022FF09_ovl_01 = NO_PALETTE;
 /* Read by no routine */
@@ -575,9 +576,10 @@ s32 GetClubTournamentCourse(void);
  * chooses the character with the palette of a held C button, and B goes back
  * a player or leaves the screen. Holding R as A is pressed leaves the player
  * without a controller. Holding a C button previews its palette in
- * D_8022FF09, and holding R, or Z or L, sets D_8022FF07 or D_8022FF08. Once a
- * club tournament's choice is made, the closing wipe ends the menus and
- * g_GameState.unk2C, which RankTournament takes, gets the tournament code.
+ * D_8022FF09, and holding R, or Z or L, sets f_IsComButtonHeld or
+ * f_IsLeftyButtonHeld. Once a club tournament's choice is made, the closing
+ * wipe ends the menus and g_GameState.unk2C, which RankTournament takes, gets
+ * the tournament code.
  */
 
 /*
@@ -938,8 +940,8 @@ s32 UpdateCharacterSelect(
 
     D_8022FF09_ovl_01 = NO_PALETTE;
     g_ChoosingPlayerIndex = playerIndex;
-    D_8022FF07_ovl_01 = FALSE;
-    D_8022FF08_ovl_01 = FALSE;
+    f_IsComButtonHeld = FALSE;
+    f_IsLeftyButtonHeld = FALSE;
     if (playerIndex == 1) {
       channel = FIRST_CHARACTER_SOUND_CHANNEL;
     } else if (playerIndex == 2) {
@@ -1059,8 +1061,8 @@ s32 UpdateCharacterSelect(
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
     g_ChoosingPlayerIndex = playerIndex;
-    D_8022FF07_ovl_01 = FALSE;
-    D_8022FF08_ovl_01 = FALSE;
+    f_IsComButtonHeld = FALSE;
+    f_IsLeftyButtonHeld = FALSE;
     D_8022FF09_ovl_01 = NO_PALETTE;
     return 0;
   }
@@ -1163,14 +1165,14 @@ s32 UpdateCharacterSelect(
         }
 
         if (index < g_ChosenPlayerCount - 1) {
-          D_8022FF07_ovl_01 = TRUE;
+          f_IsComButtonHeld = TRUE;
         }
       } else {
-        D_8022FF07_ovl_01 = TRUE;
+        f_IsComButtonHeld = TRUE;
       }
     }
   } else {
-    D_8022FF07_ovl_01 = FALSE;
+    f_IsComButtonHeld = FALSE;
   }
 
   if (((g_ControllerStates[3].buttons |
@@ -1179,11 +1181,11 @@ s32 UpdateCharacterSelect(
                    g_ControllerStates[1].buttons))) &
           Z_OR_L_BUTTONS) &&
       memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW) {
-    D_8022FF08_ovl_01 = TRUE;
+    f_IsLeftyButtonHeld = TRUE;
     return 0;
   }
 
-  D_8022FF08_ovl_01 = FALSE;
+  f_IsLeftyButtonHeld = FALSE;
   return 0;
 }
 #else
@@ -1335,11 +1337,11 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
     DrawPlayerTags(&gfx, 1);
   }
 
-  if ((D_8022FF07_ovl_01 == TRUE) & ((u8)isSinglePlayer == FALSE)) {
+  if ((f_IsComButtonHeld == TRUE) & ((u8)isSinglePlayer == FALSE)) {
     DrawComIcon(&gfx, 0);
   }
 
-  if (D_8022FF08_ovl_01 == TRUE) {
+  if (f_IsLeftyButtonHeld == TRUE) {
     DrawLeftyIcon(&gfx, 0);
   }
 
@@ -1725,7 +1727,7 @@ void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
           PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOLOD);
-    } else if (D_8022FF07_ovl_01 == TRUE &&
+    } else if (f_IsComButtonHeld == TRUE &&
         playerIndex == g_ChoosingPlayerIndex) {
       gDPLoadTextureBlock_4b(gfx++,
           PlayerTagTexels(PLAYER_TAG_FIRST_COMPUTER, playerIndex), G_IM_FMT_CI,
