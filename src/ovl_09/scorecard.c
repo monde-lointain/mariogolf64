@@ -1282,7 +1282,7 @@ void DrawScorecard(Gfx** displayListHead) {
  *
  * Doesn't match: the target adds each tab rectangle's top offset to the
  * scorecard's y before adding the row, where this adds the row first, and it
- * swaps two saved registers.
+ * steps the texel offset one instruction later.
  */
 #ifdef NON_MATCHING
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
@@ -1331,7 +1331,10 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   for (tabIndex = 0; tabIndex != pageCount; tabIndex++) {
     texelsOffset = (tabStrips[tabIndex] * TAB_HEIGHT * TABLE_WIDTH) +
         LARGE_PALETTED_TEXELS_OFFSET;
-    dropY = TAB_BACK_DROP;
+    /* The do-while is there to match */
+    do {
+      dropY = TAB_BACK_DROP;
+    } while (0);
     if (tabIndex == pageCount - 1) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       dropY = 0;
