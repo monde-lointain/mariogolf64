@@ -2740,6 +2740,7 @@ g_ShotFlags = 0x800C3084; // size:0x4
 g_LetterboxState = 0x800C308C; // size:0x4
 g_ImpactPointState = 0x800C3090; // size:0x4
 g_IsHudTurnAwayRequested = 0x800C3098; // size:0x1
+f_IsRingShotCleared = 0x800C30A4; // size:0x1
 UpdateImpactPointMode = 0x80203E58; // type:func segment:ovl_00
 GetStanceAnimation = 0x80207250; // type:func segment:ovl_00 allow_duplicated:True
 GetSwingAnimation = 0x802072AC; // type:func segment:ovl_00 allow_duplicated:True

@@ -116,7 +116,11 @@ s32 D_800C3094 = TRUE;
 s8 g_IsHudTurnAwayRequested = FALSE;
 /* Read by no routine */
 static s32 D_800C309C[2] = {0};
-static s8 D_800C30A4 = FALSE;
+/*
+ * Whether the Ring Shot hole was holed out through every ring, which has the
+ * hole's end show the Ring Shot results
+ */
+static s8 f_IsRingShotCleared = FALSE;
 static s32 f_PlayExit = PLAY_EXIT_NONE;
 static s32 f_HoleEndStep = HOLE_END_STEP_START;
 static s32 f_HoleResultsKind = HOLE_RESULTS_STROKE;
@@ -710,7 +714,7 @@ void LoadRingShotRecord(RingShotRecord* record) {
 }
 
 void func_8006034C(s8 value) {
-  D_800C30A4 = value;
+  f_IsRingShotCleared = value;
 }
 
 /*
@@ -1334,7 +1338,7 @@ void UpdatePlay(void) {
               }
 
               if (f_PlayExit == PLAY_EXIT_NONE) {
-                if (!D_800C30A4) {
+                if (!f_IsRingShotCleared) {
                   nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
                 } else if ((IsDonkeyKongUnlocked() &&
                                !g_WasDonkeyKongUnlocked) ||
@@ -1570,7 +1574,7 @@ DIM_BACKDROP:
 
             if (f_PlayExit == PLAY_EXIT_NONE) {
               StartLoaderThread();
-              if (D_800C30A4 && !g_HasBroughtOverCharacter) {
+              if (f_IsRingShotCleared && !g_HasBroughtOverCharacter) {
                 f_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
               } else {
                 StartWipe(WIPE_CLOSING);
