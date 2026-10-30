@@ -88,8 +88,12 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Draws the glyphs of text into a 4-bit texture one glyph tall and length
- * glyphs wide */
+/*
+ * Draws the glyphs of text into a 4-bit texture one glyph tall and length
+ * glyphs wide.
+ * Doesn't match: the original zeroes each glyph's row counter after working
+ * out its font index, and each row's column counter before its row index.
+ */
 #ifdef NON_MATCHING
 void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
   s32 index;
@@ -102,7 +106,8 @@ void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
   s32 character;
 
   for (index = 0; index < length; index++, text++) {
-    character = *text;
+    /* Signed to match; either way a byte past 0x7F is drawn as FIRST_GLYPH */
+    character = (s8)*text;
     if (character == '\0') {
       break;
     }
