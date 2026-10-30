@@ -338,8 +338,8 @@ void ClearAllGameFlags(void);
 /* Has InitPlay's first kind of round play Ring Shot instead of Stroke */
 #define GAME_FLAG_INIT_RING_SHOT 0x35
 
-/* Read as a five-bit number, from the high bit down, by func_800603A8, which
- * nothing calls */
+/* Read as a five-bit number, from the high bit down, by
+ * GetFlaggedFiveBitNumber, which nothing calls */
 #define GAME_FLAG_UNK82 0x82
 #define GAME_FLAG_UNK83 0x83
 #define GAME_FLAG_UNK84 0x84
