@@ -128,8 +128,8 @@ void func_80217464_ovl_01(Gfx** displayListHead, s32 left, s32 top);
 /* The popup's top-left corner on the screen, set with its corner */
 static s32 f_TablePopupLeft = TABLE_POPUP_LEFT_X;
 static s32 f_TablePopupTop = TABLE_POPUP_TOP_Y;
-/* A TABLE_POPUP_* corner */
-static s32 D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
+/* The TABLE_POPUP_* corner where the table's popup is */
+static s32 f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
 static s32 D_8023019C_ovl_01 = 0;
 static s32 D_802301A0_ovl_01 = 0;
 static s32 D_802301A4_ovl_01 = 0;
@@ -265,21 +265,21 @@ void LoadCharacterTableBuffer(void* buffer, s16 bufferKind) {
       memory->tableRow < TABLE_POPUP_TOP_ROW_LIMIT) {
     x = TABLE_POPUP_RIGHT_X;
     y = TABLE_POPUP_BOTTOM_Y;
-    D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_RIGHT;
+    f_TablePopupCorner = TABLE_POPUP_BOTTOM_RIGHT;
   } else if (memory->tableColumn >= TABLE_POPUP_RIGHT_COLUMN &&
       memory->tableRow < TABLE_POPUP_TOP_ROW_LIMIT) {
     x = TABLE_POPUP_LEFT_X;
     y = TABLE_POPUP_BOTTOM_Y;
-    D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_LEFT;
+    f_TablePopupCorner = TABLE_POPUP_BOTTOM_LEFT;
   } else if (memory->tableColumn < TABLE_POPUP_LEFT_COLUMN_LIMIT &&
       memory->tableRow >= TABLE_POPUP_BOTTOM_ROW) {
     x = TABLE_POPUP_RIGHT_X;
     y = TABLE_POPUP_TOP_Y;
-    D_80230198_ovl_01 = TABLE_POPUP_TOP_RIGHT;
+    f_TablePopupCorner = TABLE_POPUP_TOP_RIGHT;
   } else {
     x = TABLE_POPUP_LEFT_X;
     y = TABLE_POPUP_TOP_Y;
-    D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
+    f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
   }
 
   f_TablePopupLeft = x;
@@ -606,28 +606,28 @@ void DrawTablePopup(Gfx** displayListHead) {
   s32 columnWins;
   u8 faceMode;
 
-  if (D_80230310_ovl_01[D_80230198_ovl_01][memory->tableRow]
+  if (D_80230310_ovl_01[f_TablePopupCorner][memory->tableRow]
                        [memory->tableColumn] == TRUE) {
-    switch (D_80230198_ovl_01) {
+    switch (f_TablePopupCorner) {
       case TABLE_POPUP_TOP_LEFT:
         f_TablePopupLeft = TABLE_POPUP_RIGHT_X;
         f_TablePopupTop = TABLE_POPUP_BOTTOM_Y;
-        D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_RIGHT;
+        f_TablePopupCorner = TABLE_POPUP_BOTTOM_RIGHT;
         break;
       case TABLE_POPUP_TOP_RIGHT:
         f_TablePopupLeft = TABLE_POPUP_LEFT_X;
         f_TablePopupTop = TABLE_POPUP_BOTTOM_Y;
-        D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_LEFT;
+        f_TablePopupCorner = TABLE_POPUP_BOTTOM_LEFT;
         break;
       case TABLE_POPUP_BOTTOM_LEFT:
         f_TablePopupLeft = TABLE_POPUP_RIGHT_X;
         f_TablePopupTop = TABLE_POPUP_TOP_Y;
-        D_80230198_ovl_01 = TABLE_POPUP_TOP_RIGHT;
+        f_TablePopupCorner = TABLE_POPUP_TOP_RIGHT;
         break;
       case TABLE_POPUP_BOTTOM_RIGHT:
         f_TablePopupLeft = TABLE_POPUP_LEFT_X;
         f_TablePopupTop = TABLE_POPUP_TOP_Y;
-        D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
+        f_TablePopupCorner = TABLE_POPUP_TOP_LEFT;
         break;
     }
   }
