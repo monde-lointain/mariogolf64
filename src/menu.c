@@ -81,7 +81,7 @@ extern void* g_MenuBoardImages[2];
 extern void* g_NamePlateImage;
 extern void* g_MenuLabelImages[2];
 extern void* g_MenuTitleImages[2];
-extern void* g_CourseWheelImages[2];
+extern void* g_TrophyFrameBuffers[2];
 extern void* D_800FF4C4[2];
 extern void* D_80106100;
 extern void* D_800FC898;
@@ -541,11 +541,11 @@ void LoadMenuResources(void) {
   }
 
   OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-  g_CourseWheelImages[0] = AllocMemory(0xFA0);
-  ReadEncodedAsset(g_CourseWheelImages[0], &asset);
+  g_TrophyFrameBuffers[0] = AllocMemory(0xFA0);
+  ReadEncodedAsset(g_TrophyFrameBuffers[0], &asset);
   OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-  g_CourseWheelImages[1] = AllocMemory(0xFA0);
-  ReadEncodedAsset(g_CourseWheelImages[1], &asset);
+  g_TrophyFrameBuffers[1] = AllocMemory(0xFA0);
+  ReadEncodedAsset(g_TrophyFrameBuffers[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
     OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
     D_800FF4C4[index] = AllocMemory(0x125C);
@@ -629,8 +629,8 @@ void FreeMenuResources(void) {
   FreeMemory(&g_ImageSlots[1]);
   FreeMemory(&g_MenuTitleImages[0]);
   FreeMemory(&g_MenuTitleImages[1]);
-  FreeMemory(&g_CourseWheelImages[0]);
-  FreeMemory(&g_CourseWheelImages[1]);
+  FreeMemory(&g_TrophyFrameBuffers[0]);
+  FreeMemory(&g_TrophyFrameBuffers[1]);
   for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
     FreeMemory(&D_800FF4C4[index]);
   }

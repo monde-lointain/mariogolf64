@@ -74,7 +74,7 @@ LabelGrowthDirection g_ChosenLabelGrowthDirection BSS = {0};
 ControllerState g_ControllerStates[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 f32 g_CurrentAnimationFrame BSS = {0};
 /* The chosen course's wheel image: one is shown while the next is read */
-void* g_CourseWheelImages[2] BSS = {0};
+void* g_TrophyFrameBuffers[2] BSS = {0};
 u32 __osBaseCounter BSS = {0};
 s8 D_800FBE08[4] BSS = {0};
 u8* g_SkyImage BSS = {0};

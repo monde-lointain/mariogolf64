@@ -295,14 +295,14 @@ extern void* g_MenuIconImages[][MINI_GOLF_DISC_IMAGE_COUNT];
 /*
  * The course select. Its wheel shows the open courses and the next one
  * still shut, and turns from one to the next; the chosen course's image
- * is read into the one of g_CourseWheelImages's buffers not shown, and its
+ * is read into the one of g_TrophyFrameBuffers's buffers not shown, and its
  * trophy files into g_TrophyPalettes.
  */
 #define COURSE_SELECT_TURN 90
 #define COURSE_SELECT_SPIN_SPEED 18
 #define COURSE_SELECT_TEXT_SLOT_COUNT 4
 
-extern void* g_CourseWheelImages[2];
+extern void* g_TrophyFrameBuffers[2];
 
 /* What UpdateMenus reads as the menu screen changes */
 extern void* D_800FC6A0;
@@ -446,7 +446,7 @@ static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
     ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
 /* Read by no routine */
 static s32 D_8022BE58_ovl_01[10] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
-/* Which of g_CourseWheelImages's buffers shows the course */
+/* Which of g_TrophyFrameBuffers's buffers shows the course */
 static u8 f_CourseWheelBufferIndex = 0;
 /* The model kind that the animation viewer loads, which L cycles */
 static s8 f_ViewerModelKind = 0;
@@ -1483,10 +1483,10 @@ void UpdateMenus(void) {
         f_CourseWheelBufferIndex = 0;
         OpenEncodedAsset(
             g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
-        ReadEncodedAsset(g_CourseWheelImages[0], &asset);
+        ReadEncodedAsset(g_TrophyFrameBuffers[0], &asset);
         OpenEncodedAsset(
             g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
-        ReadEncodedAsset(g_CourseWheelImages[1], &asset);
+        ReadEncodedAsset(g_TrophyFrameBuffers[1], &asset);
         for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
           OpenAssetFile(
               g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
@@ -2608,7 +2608,7 @@ void UpdateCourseSelect(void) {
       OpenEncodedAsset(
           g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
       ReadEncodedAsset(
-          g_CourseWheelImages[f_CourseWheelBufferIndex ^ 1], &asset);
+          g_TrophyFrameBuffers[f_CourseWheelBufferIndex ^ 1], &asset);
       for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
         OpenAssetFile(
             g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
@@ -2741,7 +2741,7 @@ void UpdateCourseSelect(void) {
       OpenEncodedAsset(
           g_TrophyFrameAssets[g_MenuMemory.courseChoice][0], &asset);
       ReadEncodedAsset(
-          g_CourseWheelImages[f_CourseWheelBufferIndex ^ 1], &asset);
+          g_TrophyFrameBuffers[f_CourseWheelBufferIndex ^ 1], &asset);
       for (index = 0; index != TROPHY_PALETTE_COUNT; index++) {
         OpenAssetFile(
             g_TrophyPaletteFiles[g_MenuMemory.courseChoice][index], &file);
@@ -6091,7 +6091,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
           gDPLoadTLUT_pal256(
               gfx++, TextureAddress(g_TrophyPalettes[places[otherIndex]]));
           gDPLoadTextureTile(gfx++,
-              TextureAddress(g_CourseWheelImages[f_CourseWheelBufferIndex]),
+              TextureAddress(g_TrophyFrameBuffers[f_CourseWheelBufferIndex]),
               G_IM_FMT_CI, G_IM_SIZ_8b,
               g_TrophySizes[g_MenuMemory.courseChoice].width,
               g_TrophySizes[g_MenuMemory.courseChoice].height, 0, 0,
