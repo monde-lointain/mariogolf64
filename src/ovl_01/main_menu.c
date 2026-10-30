@@ -7236,8 +7236,7 @@ void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y) {
 }
 
 /*
- * Doesn't match: the two growths swap registers ($t1 and $t8), and the
- * right and bottom edges add their constants last.
+ * Doesn't match: the right and bottom edges add their constants last.
  */
 #ifdef NON_MATCHING
 void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
@@ -7247,7 +7246,7 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
   void* image = g_MenuArrowSizedImages[f_SpinningStarBufferIndex];
   u8 starIndex = 0;
   s32 growWidth = 0;
-  s32 growHeight;
+  s32 growHeight = 0;
 
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(image)), G_IM_FMT_CI,
