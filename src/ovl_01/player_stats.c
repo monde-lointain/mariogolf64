@@ -198,6 +198,12 @@ extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern u8 D_801B9410;
 
+/* A step from one grid cell to its neighbor */
+typedef struct GridStep {
+  /* 0x0 */ s8 column;
+  /* 0x1 */ s8 row;
+} GridStep; /* size = 0x2 */
+
 void DrawBrickWallRows(Gfx** displayListHead, u8 slide);
 
 s16 GetChosenBestShot(void);
@@ -408,7 +414,7 @@ static s16 D_80230960_ovl_01[18] = {
 static char D_80230984_ovl_01[STATS_GRID_ROW_COUNT][RECORD_LABEL_SIZE] = {
     "Birdie", "Eagle", "Albatross", "Hole-in-One"};
 /* The column and row step of each way the Best Shots cursor moves */
-static s8 f_BestShotDirectionSteps[STATS_DIRECTION_COUNT][2] = {
+static GridStep f_BestShotDirectionSteps[STATS_DIRECTION_COUNT] = {
     {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 /* Read by no routine */
 static s32 D_802309CC_ovl_01[8] = {64, 12, 48, 12, 80, 12, 96, 12};
@@ -2418,8 +2424,8 @@ s8 FindNextBestShotCell(s8 column, s8 row, u8 direction) {
   }
 
   for (stepIndex = 0; stepIndex != stepCount; stepIndex++) {
-    column += f_BestShotDirectionSteps[direction][0];
-    row += f_BestShotDirectionSteps[direction][1];
+    column += f_BestShotDirectionSteps[direction].column;
+    row += f_BestShotDirectionSteps[direction].row;
     if (column < 0) {
       column = STATS_GRID_COLUMN_COUNT - 1;
     }
