@@ -354,7 +354,7 @@ void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind);
 void LoadCourseMenuBuffer(void* buffer, s16 bufferKind);
 void UpdateCourseStats(void);
 void LoadBestTimesCourseIcons(void** buffers);
-void func_8021342C_ovl_01(void* buffer);
+void LoadCharacterFaceStrip(void* buffer);
 void LoadBestTimesBuffer(void* buffer, s16 bufferKind);
 void UpdateBestTimes(void);
 void func_8021585C_ovl_01(void);
@@ -1595,7 +1595,7 @@ void UpdateMenus(void) {
         ReadSavedGames();
         LoadBestShotsCourseIcons(g_MenuIconImages[0]);
         f_MenuBoardImageIndex ^= 1;
-        func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
+        LoadCharacterFaceStrip(g_MenuBoardImages[f_MenuBoardImageIndex]);
         f_MenuLabelImageIndex ^= 1;
         f_ImageSlotIndex ^= 1;
         LoadCourseMenuBuffer(g_ImageSlots[f_MenuLabelImageIndex],
@@ -1611,7 +1611,7 @@ void UpdateMenus(void) {
       case MENU_SCREEN_RING_SHOT_RECORDS:
         ReadSavedGames();
         f_MenuBoardImageIndex ^= 1;
-        func_8021342C_ovl_01(g_MenuBoardImages[f_MenuBoardImageIndex]);
+        LoadCharacterFaceStrip(g_MenuBoardImages[f_MenuBoardImageIndex]);
         f_MenuLabelImageIndex ^= 1;
         f_ImageSlotIndex ^= 1;
         LoadCourseMenuBuffer(

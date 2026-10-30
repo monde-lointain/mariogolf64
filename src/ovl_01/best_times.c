@@ -115,7 +115,8 @@ void LoadBestTimesCourseIcons(void** buffers) {
   }
 }
 
-void func_8021342C_ovl_01(void* buffer) {
+/* Reads the character face strip into buffer, for Best Shots and Ring Shot */
+void LoadCharacterFaceStrip(void* buffer) {
   EncodedAsset asset;
 
   D_8023AA44_ovl_01 = buffer;
