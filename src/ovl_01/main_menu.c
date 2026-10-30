@@ -416,7 +416,8 @@ void DrawClubTournament(Gfx** displayListHead);
 
 /* Not static: the original left these to the linker's common block */
 s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
-s32 D_8023BFD0_ovl_01;
+/* How far the course select's banners slide as the bet pages come and go */
+s32 g_CourseBannersSlide;
 
 /* Defined after the routines whose strings come before theirs */
 extern const char D_802316EC_ovl_01[];
@@ -837,8 +838,9 @@ static Mtx D_802321F0_ovl_01;
 static Mtx D_80232230_ovl_01;
 static Mat4 D_80232270_ovl_01;
 static Mat4 D_802322B0_ovl_01;
-static s32 D_802322F0_ovl_01;
-static s32 D_802322F4_ovl_01;
+/* How far the bet settings and handicap pages have slid in or out */
+static s32 f_BetSettingsSlide;
+static s32 f_HandicapsSlide;
 /* An image buffer of the menu overlay */
 static u8 f_MenuImageBuffer[MENU_IMAGE_BUFFER_SIZE];
 
@@ -1854,9 +1856,9 @@ void UpdateMenuTitleScreen(void) {
   f_BetSlideOffset = 0;
   g_BetPagesPhase = MENU_PHASE_START;
   g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
-  D_8023BFD0_ovl_01 = 0;
-  D_802322F0_ovl_01 = 0;
-  D_802322F4_ovl_01 = 0;
+  g_CourseBannersSlide = 0;
+  f_BetSettingsSlide = 0;
+  f_HandicapsSlide = 0;
   g_GameState.unk30 = 0;
   g_GameState.isSuddenDeath = FALSE;
   g_GameState.isMiniGolf = FALSE;
@@ -2214,9 +2216,9 @@ void UpdateModeSelect(void) {
     f_BetSlideOffset = 0;
     g_BetPagesPhase = MENU_PHASE_START;
     g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
-    D_8023BFD0_ovl_01 = 0;
-    D_802322F0_ovl_01 = 0;
-    D_802322F4_ovl_01 = 0;
+    g_CourseBannersSlide = 0;
+    f_BetSettingsSlide = 0;
+    f_HandicapsSlide = 0;
     g_GameState.isMiniGolf = FALSE;
     mode = D_8022BEBC_ovl_01[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
     g_GameState.unk2C = rand();
@@ -6174,24 +6176,24 @@ void DrawCourseSelect(Gfx** displayListHead) {
     switch (g_BetPagesPhase) {
       case BET_PHASE_OPENING:
         f_BetSlideOffset += BET_SLIDE_STEP;
-        D_8023BFD0_ovl_01 += BET_SLIDE_STEP;
-        D_802322F0_ovl_01 += BET_SLIDE_STEP;
+        g_CourseBannersSlide += BET_SLIDE_STEP;
+        f_BetSettingsSlide += BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           g_BetPagesPhase = BET_PHASE_CHOOSING;
           f_BetSlideOffset = 0;
-          D_802322F0_ovl_01 = 0;
+          f_BetSettingsSlide = 0;
         }
 
         break;
 
       case BET_PHASE_CANCELED:
         f_BetSlideOffset += BET_SLIDE_STEP;
-        D_802322F0_ovl_01 += BET_SLIDE_STEP;
-        D_8023BFD0_ovl_01 -= BET_SLIDE_STEP;
+        f_BetSettingsSlide += BET_SLIDE_STEP;
+        g_CourseBannersSlide -= BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           g_BetPagesPhase = MENU_PHASE_START;
           f_BetSlideOffset = 0;
-          D_802322F0_ovl_01 = 0;
+          f_BetSettingsSlide = 0;
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0,
               TEXT_FLAG_TYPED, 255, 255, 255, 255);
         }
@@ -6200,39 +6202,39 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
       case BET_PHASE_CONFIRMED:
         f_BetSlideOffset += BET_SLIDE_STEP;
-        D_802322F0_ovl_01 -= BET_SLIDE_STEP;
-        D_802322F4_ovl_01 += BET_SLIDE_STEP;
+        f_BetSettingsSlide -= BET_SLIDE_STEP;
+        f_HandicapsSlide += BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           g_BetPagesPhase = MENU_PHASE_CHOOSING;
           f_BetSlideOffset = 0;
-          D_802322F0_ovl_01 = 0;
-          D_802322F4_ovl_01 = 0;
+          f_BetSettingsSlide = 0;
+          f_HandicapsSlide = 0;
         }
 
         break;
 
       case MENU_PHASE_CANCELED:
         f_BetSlideOffset += BET_SLIDE_STEP;
-        D_802322F0_ovl_01 += BET_SLIDE_STEP;
-        D_802322F4_ovl_01 += BET_SLIDE_STEP;
+        f_BetSettingsSlide += BET_SLIDE_STEP;
+        f_HandicapsSlide += BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           g_BetPagesPhase = BET_PHASE_CHOOSING;
           f_BetSlideOffset = 0;
-          D_802322F0_ovl_01 = 0;
-          D_802322F4_ovl_01 = 0;
+          f_BetSettingsSlide = 0;
+          f_HandicapsSlide = 0;
         }
 
         break;
 
       case MENU_PHASE_CONFIRMED:
         f_BetSlideOffset += BET_SLIDE_STEP;
-        D_802322F4_ovl_01 -= BET_SLIDE_STEP;
-        D_8023BFD0_ovl_01 += BET_SLIDE_STEP;
+        f_HandicapsSlide -= BET_SLIDE_STEP;
+        g_CourseBannersSlide += BET_SLIDE_STEP;
         if (f_BetSlideOffset >= BET_SLIDE_DISTANCE) {
           g_BetPagesPhase = MENU_PHASE_START;
           f_BetSlideOffset = 0;
-          D_802322F4_ovl_01 = 0;
-          D_8023BFD0_ovl_01 = 0;
+          f_HandicapsSlide = 0;
+          g_CourseBannersSlide = 0;
         }
 
         break;
@@ -6248,7 +6250,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     DrawMenuBackdropLayers(&gfx, COURSE_SELECT_FRONT_LAYERS);
     switch (g_BetPagesPhase) {
       case BET_PHASE_OPENING:
-        DrawBetSettings(&gfx, BET_SLIDE_DISTANCE - D_802322F0_ovl_01, 0, 0);
+        DrawBetSettings(&gfx, BET_SLIDE_DISTANCE - f_BetSettingsSlide, 0, 0);
         break;
 
       case BET_PHASE_CHOOSING:
@@ -6256,12 +6258,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
 
       case BET_PHASE_CANCELED:
-        DrawBetSettings(&gfx, D_802322F0_ovl_01, 0, 0);
+        DrawBetSettings(&gfx, f_BetSettingsSlide, 0, 0);
         break;
 
       case BET_PHASE_CONFIRMED:
-        DrawBetSettings(&gfx, D_802322F0_ovl_01, 1, 0);
-        DrawHandicaps(&gfx, BET_SLIDE_DISTANCE - D_802322F4_ovl_01, 0, 0);
+        DrawBetSettings(&gfx, f_BetSettingsSlide, 1, 0);
+        DrawHandicaps(&gfx, BET_SLIDE_DISTANCE - f_HandicapsSlide, 0, 0);
         break;
 
       case MENU_PHASE_CHOOSING:
@@ -6269,12 +6271,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
         break;
 
       case MENU_PHASE_CANCELED:
-        DrawBetSettings(&gfx, D_802322F0_ovl_01 - BET_SLIDE_DISTANCE, 1, 0);
-        DrawHandicaps(&gfx, D_802322F4_ovl_01, 0, 0);
+        DrawBetSettings(&gfx, f_BetSettingsSlide - BET_SLIDE_DISTANCE, 1, 0);
+        DrawHandicaps(&gfx, f_HandicapsSlide, 0, 0);
         break;
 
       case MENU_PHASE_CONFIRMED:
-        DrawHandicaps(&gfx, D_802322F4_ovl_01, 1, 0);
+        DrawHandicaps(&gfx, f_HandicapsSlide, 1, 0);
         break;
     }
   }
@@ -6314,7 +6316,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelect);
 #ifdef NON_MATCHING
 void DrawCourseSelectBanners(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  s32 slide = D_8023BFD0_ovl_01;
+  s32 slide = g_CourseBannersSlide;
 
   /* Also the course's index into the name colors, to match the original's
    * registers */

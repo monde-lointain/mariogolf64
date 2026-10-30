@@ -1059,7 +1059,7 @@ s32 UpdateHandicaps(void) {
       PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
           0xFF, 0xFF, 0xFF, 0xFF);
-      D_8023BFD0_ovl_01 = HANDICAP_SLIDE_START;
+      g_CourseBannersSlide = HANDICAP_SLIDE_START;
       f_IsHandicapPromptShown = FALSE;
       g_BetPagesPhase = MENU_PHASE_CONFIRMED;
       return;

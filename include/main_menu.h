@@ -57,7 +57,7 @@ extern u8 g_AnimatedIconBufferIndex;
 extern s8 g_AnimatedIconFrameTime;
 /* Updates until each character fidgets, or -1 while it does */
 extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
-extern s32 D_8023BFD0_ovl_01;
+extern s32 g_CourseBannersSlide;
 /* The handicap of a place that no player takes */
 #define ABSENT_PLAYER_HANDICAP (-1)
 /*
