@@ -37,7 +37,7 @@
 /* LoadClubCourseIcon reads only the first ten of g_TournamentIconAssets' 12 */
 #define CLUB_COURSE_ICON_LIMIT 10
 
-/* The table of images that LoadMenuWindowPalette picks from */
+/* The pictures and palettes of f_MenuWindowPaletteFiles */
 #define TOURNAMENT_IMAGE_ROW_COUNT 15
 #define TOURNAMENT_IMAGE_COLUMN_COUNT 4
 
@@ -199,7 +199,7 @@ static s32 D_80230EA0_ovl_01 = 0;
 static AssetId f_MenuWindowImageAssets[15] = {0x07C0, 0x0750, 0x07A4, 0x0742,
     0x0788, 0x07B2, 0x07CE, 0x07D8, 0x076C, 0x0796, 0x07EA, 0x075E, 0x077A,
     0x0988, 0x0958};
-/* The image files that LoadMenuWindowPalette picks from, by row and column */
+/* Each window picture's palette files, by picture and color */
 // clang-format off
 static s16 f_MenuWindowPaletteFiles[TOURNAMENT_IMAGE_ROW_COUNT]
                                    [TOURNAMENT_IMAGE_COLUMN_COUNT] = {
