@@ -34,6 +34,9 @@
 #define TOURNAMENT_BANNER_STRIP_HEIGHT 32
 #define TOURNAMENT_BANNER_STRIP_COUNT 2
 
+/* LoadClubCourseIcon reads only the first ten of g_TournamentIconAssets' 12 */
+#define CLUB_COURSE_ICON_LIMIT 10
+
 /* The table of images that LoadMenuWindowPalette picks from */
 #define TOURNAMENT_IMAGE_ROW_COUNT 15
 #define TOURNAMENT_IMAGE_COLUMN_COUNT 4
@@ -449,8 +452,8 @@ void LoadClubCourseIcon(s32 imageIndex) {
     imageIndex = 0;
   }
 
-  if (imageIndex >= 10) {
-    imageIndex = 9;
+  if (imageIndex >= CLUB_COURSE_ICON_LIMIT) {
+    imageIndex = CLUB_COURSE_ICON_LIMIT - 1;
   }
 
   OpenEncodedAsset(g_TournamentIconAssets[imageIndex], &asset);
