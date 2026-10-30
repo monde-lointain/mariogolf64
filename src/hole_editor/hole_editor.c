@@ -344,13 +344,10 @@ enum TriangleEdit {
                : ReportFailedAssertion( \
                      f_EditorAssertionText, f_EditorFileName, lineNumber))
 
-extern u8 D_80451A60[];
-
 /* func_8040C360_hole_editor's pole: two crossed quads, one in the x-y plane and
  * one in the z-y plane */
 #define POLE_QUAD_COUNT 2
 #define POLE_QUAD_VERTEX_COUNT 4
-extern Mtx D_8040CC98;
 
 /* func_80407D64_hole_editor's 32x32 IA8 wave pattern */
 #define WAVE_TEXTURE_WIDTH 32
@@ -364,19 +361,15 @@ extern Mtx D_8040CC98;
 #define WAVE_LEVEL_MIN 1
 #define WAVE_LEVEL_MAX 15
 #define IA8_ALPHA_SHIFT 4
-extern u8 D_80491A60[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
 /* DrawHoleEditorGround's display list, one for each draw buffer */
 #define EDITOR_GROUND_LIST_LENGTH 15000
-extern Gfx f_EditorGroundDisplayLists[DRAW_BUFFER_COUNT]
-                                     [EDITOR_GROUND_LIST_LENGTH];
 
 /* An I8 texture as large as DrawGround's noise, all white */
 #define WHITE_TEXTURE_SIZE 32
 #define WHITE_TEXEL 0xFF
 /* DrawGround's clip ratio text buffer is as large */
 #define CLIP_RATIO_TEXT_SIZE 0x98
-extern u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE];
 
 /* Where the wave texture goes in TMEM, past a tile's texels */
 #define WAVE_TMEM 0x180
@@ -469,7 +462,7 @@ enum EditorCombineMode {
 
 /* Loads the wave texture where DrawGround loads its noise texture */
 #define LoadWaveTexture() \
-  gDPLoadMultiBlock(gfx++, TextureAddress(D_80491A60), WAVE_TMEM, \
+  gDPLoadMultiBlock(gfx++, TextureAddress(f_WaveTexels), WAVE_TMEM, \
       G_TX_RENDERTILE, G_IM_FMT_IA, G_IM_SIZ_8b, WAVE_TEXTURE_WIDTH, \
       WAVE_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, \
       G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 15, 15)
@@ -591,7 +584,6 @@ static s32 f_EditedTriangleIndex = 0;
 static s32 f_EditedCornerIndex = 0;
 static s32 f_SavedCornerIndex = 0;
 static s32 f_LastTriangleEditKind = 0; /* A TRIANGLE_EDIT_* */
-extern CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 
 /* func_80402E1C_hole_editor's state */
 static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
@@ -619,7 +611,6 @@ static s32 f_WallTriangleIndex =
 static s32 f_WallCornerIndex = 0;
 static s32 f_SavedWallCornerIndex = 0;
 static s32 f_LastWallEditKind = 0; /* A TRIANGLE_EDIT_* */
-extern CoursePoint f_SavedWallCorners[SAVED_CORNER_COUNT];
 
 void func_80405AF4_hole_editor(s32 column, s32 row);
 
@@ -634,7 +625,29 @@ typedef struct TriangleSlope {
   /* 0x9 */ u8 unk9;
 } TriangleSlope; /* size = 0xA */
 
-extern TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
+/* The size of the buffer that func_80400000_hole_editor returns */
+#define EDITOR_BUFFER_SIZE 0x40000
+
+/*
+ * The editor's bss, in the original's address order: KMC allocates a file's
+ * uninitialized statics in the order they are defined.
+ */
+static CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
+/* Read by no routine */
+static CoursePoint D_8040CBA8_hole_editor[SAVED_CORNER_COUNT] UNUSED;
+static CoursePoint f_SavedWallCorners[SAVED_CORNER_COUNT];
+/* Places func_8040C360_hole_editor's pole at the map camera's target */
+static Mtx f_PoleMatrix;
+/* Read by no routine */
+static s32 D_8040CCD8_hole_editor[2] UNUSED;
+static u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE];
+static TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
+static Gfx f_EditorGroundDisplayLists[DRAW_BUFFER_COUNT]
+                                     [EDITOR_GROUND_LIST_LENGTH];
+/* Reached only through func_80400000_hole_editor, which nothing calls */
+static u8 D_80451A60_hole_editor[EDITOR_BUFFER_SIZE];
+/* func_80407D64_hole_editor's wave pattern */
+static u8 f_WaveTexels[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
 /* func_80404B84_hole_editor's state */
 static s32 f_HeightCursorColumn = 0;
@@ -720,7 +733,7 @@ static Vtx f_PoleVertices[POLE_QUAD_COUNT][POLE_QUAD_VERTEX_COUNT] = {
 };
 
 void* func_80400000_hole_editor(void) {
-  return D_80451A60;
+  return D_80451A60_hole_editor;
 }
 
 /*
@@ -3750,7 +3763,7 @@ void func_804079B8_hole_editor(void) {
 }
 
 /*
- * Fills D_80491A60 with the cube of cos(column * pi/4) * sin(row * pi/4),
+ * Fills f_WaveTexels with the cube of cos(column * pi/4) * sin(row * pi/4),
  * as matching IA8 intensity and alpha levels from 1 to 15
  */
 void func_80407D64_hole_editor(void) {
@@ -3774,7 +3787,7 @@ void func_80407D64_hole_editor(void) {
         level = WAVE_LEVEL_MAX;
       }
 
-      D_80491A60[texelIndex++] = (level << IA8_ALPHA_SHIFT) | level;
+      f_WaveTexels[texelIndex++] = (level << IA8_ALPHA_SHIFT) | level;
     }
   }
 }
@@ -4818,7 +4831,7 @@ void func_8040C360_hole_editor(
     CameraMatrices* matrices UNUSED, Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
-  guTranslate(&D_8040CC98, g_MapCamera.view.lookAt[0],
+  guTranslate(&f_PoleMatrix, g_MapCamera.view.lookAt[0],
       g_MapCamera.view.lookAt[1], g_MapCamera.view.lookAt[2]);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -4828,7 +4841,7 @@ void func_8040C360_hole_editor(
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8040CC98),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_PoleMatrix),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_PoleVertices[0], POLE_QUAD_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);

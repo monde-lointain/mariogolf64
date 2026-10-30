@@ -34,3 +34,7 @@ f_Unk6PathFormat = 0x802551C8;
 f_PointsPathFormat = 0x802551E8;
 f_TrianglesPathFormat = 0x80255208;
 f_AttributesPathFormat = 0x80255228;
+
+/* Main draws from vertex buffers at a fixed place in the Expansion Pak's
+   memory, which the hole editor's memory must end before */
+ASSERT(hole_editor_VRAM_END <= g_ExpansionVertexBuffers, "the hole editor overlaps the expansion vertex buffers");

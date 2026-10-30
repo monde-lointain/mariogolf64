@@ -680,12 +680,14 @@ segments:
     type: code
     start: 0x11BA50
     vram: 0x80400000
+    bss_size: 0x85330
     exclusive_ram_id: debug
     symbol_name_format: $VRAM_$SEG
     subsegments:
       - [0x11BA50, c, hole_editor/hole_editor]
       - [0x127FD0, .data, hole_editor/hole_editor]
       - [0x128250, .rodata, hole_editor/hole_editor]
+      - { start: 0x128580, type: .bss, vram: 0x8040CB30, name: hole_editor/hole_editor }
 
   - name: ovl_02
     type: code
