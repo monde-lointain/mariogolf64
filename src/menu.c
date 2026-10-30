@@ -1429,9 +1429,9 @@ void PlaceImportedCharacters(void) {
 
   for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
     g_ImportedCharacters[index].character = 0;
-    g_ImportedCharacters[index].unk2 = 0;
-    g_ImportedCharacters[index].unk4 = 0;
-    g_ImportedCharacters[index].unk6 = 0;
+    g_ImportedCharacters[index].clubDistance = 0;
+    g_ImportedCharacters[index].clubSpin = 0;
+    g_ImportedCharacters[index].clubSideSpin = 0;
     for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
       g_ImportedCharacters[index].name[count] = 0;
     }
@@ -1480,9 +1480,11 @@ void PlaceImportedCharacters(void) {
       if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
         g_ImportedCharacters[index].character =
             f_DebugImportedCharacters[index];
-        g_ImportedCharacters[index].unk2 = f_DebugImportedDistances[index];
-        g_ImportedCharacters[index].unk4 = f_DebugImportedSpins[index];
-        g_ImportedCharacters[index].unk6 = f_DebugImportedSideSpins[index];
+        g_ImportedCharacters[index].clubDistance =
+            f_DebugImportedDistances[index];
+        g_ImportedCharacters[index].clubSpin = f_DebugImportedSpins[index];
+        g_ImportedCharacters[index].clubSideSpin =
+            f_DebugImportedSideSpins[index];
         g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance =
             f_DebugImportedDistances[index];
         g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin =
@@ -1492,12 +1494,12 @@ void PlaceImportedCharacters(void) {
       } else {
         g_ImportedCharacters[index].character =
             g_GameBoyCharacters[index].character + FIRST_IMPORTED_CHARACTER;
-        g_ImportedCharacters[index].unk2 =
+        g_ImportedCharacters[index].clubDistance =
             g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE]
                 .distance;
-        g_ImportedCharacters[index].unk4 =
+        g_ImportedCharacters[index].clubSpin =
             g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin;
-        g_ImportedCharacters[index].unk6 =
+        g_ImportedCharacters[index].clubSideSpin =
             g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE]
                 .sideSpin;
       }
@@ -1771,9 +1773,9 @@ void ClearImportedCharacters(void) {
 
   for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
     g_ImportedCharacters[index].character = 0;
-    g_ImportedCharacters[index].unk2 = 0;
-    g_ImportedCharacters[index].unk4 = 0;
-    g_ImportedCharacters[index].unk6 = 0;
+    g_ImportedCharacters[index].clubDistance = 0;
+    g_ImportedCharacters[index].clubSpin = 0;
+    g_ImportedCharacters[index].clubSideSpin = 0;
     for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH;
         byteIndex++) {
       g_ImportedCharacters[index].name[byteIndex] = 0;

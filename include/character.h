@@ -85,9 +85,10 @@ extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 /* A character imported from the Game Boy Color version */
 typedef struct ImportedCharacter {
   /* 0x00 */ s16 character;
-  /* 0x02 */ s16 unk2;
-  /* 0x04 */ s16 unk4;
-  /* 0x06 */ s16 unk6;
+  /* The distance, spin and side spin of the character's first club */
+  /* 0x02 */ s16 clubDistance;
+  /* 0x04 */ s16 clubSpin;
+  /* 0x06 */ s16 clubSideSpin;
   /* 0x08 */ s8 name[IMPORTED_CHARACTER_NAME_LENGTH];
   /* 0x14 */ u8 isChosen; /* Set while a player has chosen the character */
 } ImportedCharacter; /* size = 0x16 */
