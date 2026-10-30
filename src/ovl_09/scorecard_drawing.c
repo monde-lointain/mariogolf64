@@ -621,9 +621,11 @@ void DrawMatchPage(Gfx** displayListHead) {
   }
 
   /* An even count of holes to share out can end level */
-  if ((winsNeeded - 1) / 2 != (winsNeeded /= 2)) {
+  if ((winsNeeded - 1) / 2 != winsNeeded / 2) {
     canDraw = TRUE;
   }
+
+  winsNeeded /= 2;
 
   if (winsNeeded <= 0) {
     winsNeeded = 1;
