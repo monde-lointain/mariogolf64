@@ -1926,7 +1926,7 @@ void UpdateMenuTitleScreen(void) {
         D_800FBE08[index] = 0;
       }
 
-      D_801B7070 = 0;
+      g_ChoosingPlayerIndex = 0;
       for (index = 0; index != f_MenuCharacterCount; index++) {
         g_TakenCharacters.isCharacterTaken[index] = 0;
       }
@@ -2035,8 +2035,8 @@ void ResetViewerCharacter(void) {
 /*
  * UpdateViewerCharacter moves the character cursor past the characters marked
  * as taken, and plays the voice of the one chosen. It returns -1 when B leaves,
- * 1 once the chosen character's animation ends while D_801B7070 equals
- * playerNumber, and 0 otherwise. Nothing reads arg0.
+ * 1 once the chosen character's animation ends while g_ChoosingPlayerIndex
+ * equals playerNumber, and 0 otherwise. Nothing reads arg0.
  */
 s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
   if (D_8022BE28_ovl_01 != 0) {
@@ -2088,7 +2088,7 @@ s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber) {
   } else if (D_8022BE2C_ovl_01 == 1) {
     if (GetCurrentAnimationEndFrame(0) == GetAnimationFrame(0)) {
       D_8022BE2C_ovl_01 = 0;
-      if (D_801B7070 == playerNumber) {
+      if (g_ChoosingPlayerIndex == playerNumber) {
         return 1;
       }
     }
@@ -2160,7 +2160,7 @@ void UpdateAnimationViewer(void) {
   Boolean isDone = IsHudAnimationDone();
 
   if (isDone == TRUE && UpdateViewerCharacter(1, 2) == -1) {
-    D_801B7070 = isDone;
+    g_ChoosingPlayerIndex = isDone;
     g_MenuScreen = MENU_SCREEN_TITLE;
     FreeAllCharacterSlots();
   }
@@ -2458,15 +2458,17 @@ void UpdateModeSelect(void) {
         TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
-    D_801B7070--;
-    D_800FBE08[D_801B7070] = 0;
-    g_TakenCharacters.isCharacterTaken[g_ChosenCharacters[D_801B7070]] = 0;
-    g_PlayerControllerIndices[D_801B7070] = 0;
-    slot = g_CharacterGrid[g_MenuMemory.characterRows[D_801B7070]]
-                          [g_MenuMemory.characterColumns[D_801B7070]];
+    g_ChoosingPlayerIndex--;
+    D_800FBE08[g_ChoosingPlayerIndex] = 0;
+    g_TakenCharacters
+        .isCharacterTaken[g_ChosenCharacters[g_ChoosingPlayerIndex]] = 0;
+    g_PlayerControllerIndices[g_ChoosingPlayerIndex] = 0;
+    slot =
+        g_CharacterGrid[g_MenuMemory.characterRows[g_ChoosingPlayerIndex]]
+                       [g_MenuMemory.characterColumns[g_ChoosingPlayerIndex]];
     if (slot >= FIRST_IMPORTED_CHARACTER) {
       g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].isChosen = 0;
-      g_ImportedCharacterColumns[D_801B7070] = NO_IMPORTED_COLUMN;
+      g_ImportedCharacterColumns[g_ChoosingPlayerIndex] = NO_IMPORTED_COLUMN;
     }
 
     StopLoaderThread();
@@ -2642,8 +2644,9 @@ void UpdateCourseSelect(void) {
     if (f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice] ==
         MODE_ICON_GET_CHARACTER) {
       g_MenuScreen = MENU_SCREEN_OPPONENT_SELECT;
-      D_801B7070--;
-      g_TakenCharacters.isCharacterTaken[g_ChosenCharacters[D_801B7070]] = 0;
+      g_ChoosingPlayerIndex--;
+      g_TakenCharacters
+          .isCharacterTaken[g_ChosenCharacters[g_ChoosingPlayerIndex]] = 0;
     } else {
       g_MenuScreen = MENU_SCREEN_MODE_SELECT;
     }
@@ -5473,7 +5476,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
         VIEWER_PLAYER_TOP + (index * VIEWER_PLAYER_SPACING), g_PrintBuffer);
   }
 
-  for (index = 0; index != D_801B7070; index++) {
+  for (index = 0; index != g_ChoosingPlayerIndex; index++) {
     sprintf(g_PrintBuffer, D_80231514_ovl_01,
         g_MenuCharacterNames[g_ChosenCharacters[index]]);
     DrawTextStub(&gfx, VIEWER_PLAYER_NAME_X,

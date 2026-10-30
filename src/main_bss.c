@@ -340,7 +340,8 @@ u16* nuGfxCfb_ptr BSS = {0};
 void* D_801B69EC BSS = {0};
 /* Read by no routine */
 static u8 D_801B69F0[0x680] BSS = {0};
-s32 D_801B7070 BSS = {0};
+/* The player whose character the character select is choosing */
+s32 g_ChoosingPlayerIndex BSS = {0};
 __OSEventState __osEventStateTab[OS_NUM_EVENTS] BSS ALIGNED(0x8) = {0};
 u8 D_801B70F0[MAXCONTROLLERS] BSS = {0};
 OSMesgQueue __osGbpakTimerQ BSS ALIGNED(0x8) = {0};

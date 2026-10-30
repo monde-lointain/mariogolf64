@@ -74,7 +74,7 @@ extern s32 D_80105DC8;
 extern s32 D_80105DCC;
 /* The code of the tournament whose password was entered */
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
-extern s32 D_801B7070;
+extern s32 g_ChoosingPlayerIndex;
 extern s16 D_801B71CC;
 extern s8 D_801B9410;
 extern u8 g_MapCamera[];
@@ -1954,7 +1954,7 @@ void func_8005D9A0(void) {
   D_800FE334 = 0;
   g_MenuScreen = MENU_SCREEN_TITLE;
   g_ChosenPlayerCount = 0;
-  D_801B7070 = 0;
+  g_ChoosingPlayerIndex = 0;
   g_ChosenCharacters[0] = NO_CHOSEN_CHARACTER;
   g_ChosenCharacters[1] = NO_CHOSEN_CHARACTER;
   g_ChosenCharacters[2] = NO_CHOSEN_CHARACTER;

@@ -3857,5 +3857,6 @@ g_TakenCharacters = 0x800FBD40; // size:0x54
 GetRecordedScoreKind = 0x80060190;
 SaveRingShotRecord = 0x8005B28C;
 g_ChosenCharacters = 0x8012F480; // size:0x10
+g_ChoosingPlayerIndex = 0x801B7070; // size:0x4
 D_801B70F0 = 0x801B70F0; // size:0x4
 g_MenuCourseSceneryAsset = 0x801F4A20;

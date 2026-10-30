@@ -147,7 +147,7 @@ enum CodeKeyResult {
 extern s32 D_80105DC4;
 extern s32 g_ChosenPlayerCount;
 extern s32 D_80105DC8;
-extern s32 D_801B7070;
+extern s32 g_ChoosingPlayerIndex;
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 s32 GetClubTournamentCourse(void);
 void StartLoadingChosenHole(void);
@@ -1398,7 +1398,7 @@ void func_80229278_ovl_01(void) {
         }
 
         StartLoadingChosenHole();
-        D_801B7070 = 1;
+        g_ChoosingPlayerIndex = 1;
         g_GameState.playerCount = 1;
         buttons = g_ControllerStates[0].buttons |
             g_ControllerStates[1].buttons | g_ControllerStates[2].buttons |

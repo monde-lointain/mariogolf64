@@ -595,7 +595,7 @@ s32 UpdateCharacterSelect(
     return;
   }
 
-  playerIndex = D_801B7070;
+  playerIndex = g_ChoosingPlayerIndex;
   if (g_MenuRepeatButtons == (U_JPAD | L_JPAD)) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     if (func_80209894_ovl_01(
@@ -910,7 +910,7 @@ s32 UpdateCharacterSelect(
     }
 
     D_8022FF09_ovl_01 = NO_PALETTE;
-    D_801B7070 = playerIndex;
+    g_ChoosingPlayerIndex = playerIndex;
     D_8022FF07_ovl_01 = FALSE;
     D_8022FF08_ovl_01 = FALSE;
     if (playerIndex == 1) {
@@ -1031,7 +1031,7 @@ s32 UpdateCharacterSelect(
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
-    D_801B7070 = playerIndex;
+    g_ChoosingPlayerIndex = playerIndex;
     D_8022FF07_ovl_01 = FALSE;
     D_8022FF08_ovl_01 = FALSE;
     D_8022FF09_ovl_01 = NO_PALETTE;
@@ -1128,8 +1128,8 @@ s32 UpdateCharacterSelect(
       memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW &&
       (u8)canChooseMarked == FALSE) {
     if (g_ChosenPlayerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) {
-      if (D_801B7070 == g_ChosenPlayerCount - 1) {
-        for (index = 0; index != D_801B7070; index++) {
+      if (g_ChoosingPlayerIndex == g_ChosenPlayerCount - 1) {
+        for (index = 0; index != g_ChoosingPlayerIndex; index++) {
           if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
             break;
           }
@@ -1312,7 +1312,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
 
   gDPPipeSync(gfx++);
   if ((u8)isSinglePlayer == FALSE) {
-    playerNumber = D_801B7070;
+    playerNumber = g_ChoosingPlayerIndex;
     if (playerNumber >= g_ChosenPlayerCount) {
       playerNumber = g_ChosenPlayerCount - 1;
     }
@@ -1349,22 +1349,22 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
       SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_CHARACTER,
           TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     } else {
-      SetTextSlotValue(D_801B7070 + 1, 0, 0);
+      SetTextSlotValue(g_ChoosingPlayerIndex + 1, 0, 0);
 
       /* The prompt names the player in the player's own color */
-      if (D_801B7070 == 0) {
+      if (g_ChoosingPlayerIndex == 0) {
         SetTextPaletteColor(255, 127, 127, 0);
       }
 
-      if (D_801B7070 == 1) {
+      if (g_ChoosingPlayerIndex == 1) {
         SetTextPaletteColor(0, 255, 255, 0);
       }
 
-      if (D_801B7070 == 2) {
+      if (g_ChoosingPlayerIndex == 2) {
         SetTextPaletteColor(255, 255, 0, 0);
       }
 
-      if (D_801B7070 == 3) {
+      if (g_ChoosingPlayerIndex == 3) {
         SetTextPaletteColor(63, 255, 63, 0);
       }
 
@@ -1477,10 +1477,11 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
     }
 
     D_8022FF05_ovl_01 ^= 1;
-    gridMark = g_CharacterGrid[memory->characterRows[D_801B7070]]
-                              [memory->characterColumns[D_801B7070]];
-    character = g_CharacterGrid[memory->characterRows[D_801B7070]]
-                               [memory->characterColumns[D_801B7070]];
+    gridMark = g_CharacterGrid[memory->characterRows[g_ChoosingPlayerIndex]]
+                              [memory->characterColumns[g_ChoosingPlayerIndex]];
+    character =
+        g_CharacterGrid[memory->characterRows[g_ChoosingPlayerIndex]]
+                       [memory->characterColumns[g_ChoosingPlayerIndex]];
     if (gridMark < CHOOSABLE_MARK_LIMIT) {
       character += MARKED_CHARACTER_OFFSET;
       slot = character;
@@ -1517,8 +1518,8 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
 
     OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
     ReadEncodedAsset(faceImage, &asset);
-    D_8022FFC6_ovl_01 = memory->characterColumns[D_801B7070];
-    D_8022FFC8_ovl_01 = memory->characterRows[D_801B7070];
+    D_8022FFC6_ovl_01 = memory->characterColumns[g_ChoosingPlayerIndex];
+    D_8022FFC8_ovl_01 = memory->characterRows[g_ChoosingPlayerIndex];
   }
 
   *displayListHead = gfx;
@@ -1540,7 +1541,7 @@ s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
   s32 palette;
   s32 sameIndex;
 
-  for (; playerIndex != D_801B7070; playerIndex++) {
+  for (; playerIndex != g_ChoosingPlayerIndex; playerIndex++) {
     if ((s8)g_Players[playerIndex].characterIndex == character) {
       samePlayers[sameCount++] = playerIndex;
     }
@@ -1644,7 +1645,7 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
 #ifdef NON_MATCHING
 void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   MenuMemory* memory = GetMenuMemory();
-  s16 tagCount = D_801B7070 + 1;
+  s16 tagCount = g_ChoosingPlayerIndex + 1;
   Gfx* gfx = *displayListHead;
   s8 playerIndex;
   s16 left;
@@ -1688,7 +1689,8 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
           PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOLOD);
-    } else if (D_8022FF07_ovl_01 == TRUE && playerIndex == D_801B7070) {
+    } else if (D_8022FF07_ovl_01 == TRUE &&
+        playerIndex == g_ChoosingPlayerIndex) {
       gDPLoadTextureBlock_4b(gfx++,
           PlayerTagTexels(PLAYER_TAG_FIRST_COMPUTER, playerIndex), G_IM_FMT_CI,
           PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1715,7 +1717,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   /* playerIndex now picks whose cursor to draw */
   playerIndex = 0;
   if (g_MenuScreen != MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT) {
-    playerIndex = D_801B7070;
+    playerIndex = g_ChoosingPlayerIndex;
   }
 
   cursorLeft = (memory->characterColumns[playerIndex] * GRID_CELL_SIZE) -

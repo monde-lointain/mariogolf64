@@ -66,7 +66,7 @@ extern s32 g_CourseBannersSlide;
  */
 extern s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
 extern u8 D_800FF4C0;
-extern s32 D_801B7070;
+extern s32 g_ChoosingPlayerIndex;
 /* Each character's name, coded, in CharacterChoice order */
 extern char g_MenuCharacterNames[CHARACTER_COUNT]
                                 [IMPORTED_CHARACTER_NAME_LENGTH];
