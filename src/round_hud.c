@@ -2183,7 +2183,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           deltaY = f_BallTrailPoints[i].y - f_BallTrailPoints[i + 1].y;
 
           /* The empty branch for a segment of no length is there to match */
-          if (deltaX == 0.0f & deltaY == 0.0f) {
+          if ((deltaX == 0.0f) & (deltaY == 0.0f)) {
           } else {
             scale = BALL_TRAIL_HALF_WIDTH /
                 sqrtf((deltaX * deltaX) + (deltaY * deltaY));
@@ -3976,9 +3976,7 @@ void DrawRoundHud(CameraView* view) {
     gDPPipeSync(g_DisplayListHead++);
   }
 
-  if ((g_LetterboxState != LETTERBOX_STATE_NONE &
-          g_LetterboxState != LETTERBOX_STATE_UNK5) &&
-      g_RoundHud.isLetterboxShown) {
+  if (IsLetterboxState(g_LetterboxState) && g_RoundHud.isLetterboxShown) {
     DrawAnimatedIcon(&g_DisplayListHead, f_LetterboxHeight);
   }
 

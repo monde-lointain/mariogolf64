@@ -2299,8 +2299,8 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
         gDPSetPrimColor(gfx++, 0, 0, NEGATIVE_BRIGHTNESS, NEGATIVE_BRIGHTNESS,
             NEGATIVE_BRIGHTNESS, 255);
-      } else if (f_HudAnimation == HUD_ANIMATION_FADE_OUT |
-          f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
+      } else if ((f_HudAnimation == HUD_ANIMATION_FADE_OUT) |
+          (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT)) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_HudAnimationFramesLeft);
@@ -2329,8 +2329,8 @@ void DrawFadeAnimation(Gfx** displayListHead) {
 
         *displayListHead = gfx;
         return;
-      } else if (f_HudAnimation == HUD_ANIMATION_SLIDE_APART |
-          f_HudAnimation == HUD_ANIMATION_SPIRAL) {
+      } else if ((f_HudAnimation == HUD_ANIMATION_SLIDE_APART) |
+          (f_HudAnimation == HUD_ANIMATION_SPIRAL)) {
         /* DrawHudAnimation draws HUD_ANIMATION_SPIRAL with DrawSpiralAnimation
          * instead */
         gDPPipeSync(gfx++);
@@ -2690,8 +2690,8 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPPipeSync(gfx++);
-  } else if (f_MenuBackdrop == MENU_BACKDROP_STILL |
-      f_MenuBackdrop == MENU_BACKDROP_DIMMING) {
+  } else if ((f_MenuBackdrop == MENU_BACKDROP_STILL) |
+      (f_MenuBackdrop == MENU_BACKDROP_DIMMING)) {
     if (f_MenuBackdrop == MENU_BACKDROP_STILL) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     } else {
