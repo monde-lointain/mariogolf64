@@ -118,4 +118,8 @@ void SetCharacterSlotAlpha(u32 slotIndex, s32 value);
 void SetCharacterUnk188(u32 slotIndex, s32 value);
 void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 value);
 s32 SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame);
+void ResetCharacterSlots(void);
+s32 GetCharacterBufferSize(void);
+void SetCharacterBuffer(s32 slotIndex, u8* buffer);
+
 #endif

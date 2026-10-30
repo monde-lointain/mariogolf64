@@ -6,11 +6,10 @@
 
 #include "scene_colors.h"
 
-#include "functions.h"
 #include "game.h"
 #include "hole_display.h"
+#include "play.h"
 #include "save.h"
-#include "variables.h"
 
 /* Each half of f_ShadedVertices is two quads; the second takes the derived
  * color */

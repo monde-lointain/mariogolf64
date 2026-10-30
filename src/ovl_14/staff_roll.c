@@ -5,6 +5,8 @@
  */
 #include "common.h"
 
+#include "staff_roll.h"
+
 #include "asset.h"
 #include "billboard.h"
 #include "camera.h"
@@ -15,9 +17,9 @@
 #include "course.h"
 #include "current_shot.h"
 #include "debug_text.h"
+#include "effects.h"
 #include "framebuffer.h"
 #include "framing.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "heap.h"
@@ -28,12 +30,15 @@
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "pin.h"
+#include "rcp.h"
 #include "reaction.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "shot_camera.h"
 #include "sound.h"
-#include "variables.h"
+#include "terrain.h"
+#include "text.h"
 
 /* The cast leaves out one character, the one after the start ShuffleCastOrder
  * is given */

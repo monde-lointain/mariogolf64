@@ -13,10 +13,9 @@
 #include "character.h"
 #include "controller.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "save.h"
-#include "variables.h"
+#include "text.h"
 
 /* A channel's or the song's handle when there is nothing to control */
 #define NO_HANDLE -1

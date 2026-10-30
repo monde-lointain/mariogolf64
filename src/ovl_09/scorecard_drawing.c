@@ -10,6 +10,7 @@
 #include "course.h"
 #include "cpu_projection.h"
 #include "fireworks.h"
+#include "game.h"
 #include "hole_loader.h"
 #include "math_util.h"
 #include "round_hud.h"
@@ -23,7 +24,6 @@
 #include "sound.h"
 #include "text.h"
 #include "tournament.h"
-#include "variables.h"
 
 #define FACE_SIZE 32
 

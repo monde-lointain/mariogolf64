@@ -8,7 +8,6 @@
 
 #include "camera.h"
 #include "controller.h"
-#include "functions.h"
 #include "math_util.h"
 
 /* How many spheres f_FramedSphereCenters has room for */

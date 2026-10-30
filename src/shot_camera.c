@@ -17,7 +17,6 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "framing.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "golf_balls.h"
 #include "hole_display.h"
@@ -41,7 +40,6 @@
 #include "terrain.h"
 #include "text.h"
 #include "turn.h"
-#include "variables.h"
 
 #define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
 

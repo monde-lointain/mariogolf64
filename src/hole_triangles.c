@@ -14,7 +14,6 @@
 #include "save.h"
 #include "screen.h"
 #include "shot_camera.h"
-#include "variables.h"
 #include "work_area.h"
 
 /* Named like the file-local data it stands in for */

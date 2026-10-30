@@ -15,11 +15,12 @@
 #include "game_flags.h"
 #include "heap.h"
 #include "math_util.h"
+#include "menu.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
-#include "variables.h"
+#include "text.h"
 
 /* Shows the debug value, which the second controller's D-pad changes */
 #define GAME_FLAG_CLUB_PANEL_DEBUG 0x6E

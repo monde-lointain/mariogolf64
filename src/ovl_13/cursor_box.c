@@ -7,7 +7,6 @@
 #include "game.h"
 #include "math_util.h"
 #include "screen.h"
-#include "variables.h"
 
 #define CURSOR_BOX_CORNER_COUNT 4
 /* Half the size of the box the cursor frames, whose top-left corner the callers

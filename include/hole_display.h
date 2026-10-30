@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "math_util.h"
+
 /* SetMenuBackdrop's backdrops */
 enum MenuBackdrop {
   MENU_BACKDROP_NONE = -1,
@@ -91,6 +93,37 @@ typedef struct Sun {
 /* A MENU_BACKDROP_STATE_* value */
 extern s32 g_MenuBackdropState;
 
+/* Images that InitSkyColors loads and recolors with the sky's colors */
+#define ASSET_SKY_IMAGE_0 0x4D4
+#define ASSET_SKY_IMAGE_1 0x4D5
+#define ASSET_SKY_IMAGE_2_FIRST_HALF 0x706
+#define ASSET_SKY_IMAGE_2_SECOND_HALF 0x707
+#define SKY_IMAGE_HALF_OFFSET 0x808
+#define ASSET_COURSE_SKY_IMAGE_0 0x4BA
+extern u8* g_SkyImage;
+extern u8* g_CourseSkyImage;
+
+/* What UpdateSky works out about the main and inset cameras, for drawing the
+ * sky */
+#define SKY_VIEW_COUNT 2
+
+typedef struct SkyState {
+  /* 0x00 */ f32 horizonLevels[SKY_VIEW_COUNT];
+  /* 0x08 */ f32 screenHeights[SKY_VIEW_COUNT]; /* SCREEN_HEIGHT once UpdateSky
+                                                   sets them */
+  /* 0x10 */ f32 lookAtLevels[SKY_VIEW_COUNT];
+  /* 0x18 */ Radians pitches[SKY_VIEW_COUNT];
+  /* 0x20 */ Radians yaws[SKY_VIEW_COUNT];
+  /* 0x28 */ f32
+      scrollX; /* How far the sky's texture has scrolled with the wind */
+  /* 0x2C */ f32 scrollY;
+  /* 0x30 */ f32
+      viewedWindAngles[SKY_VIEW_COUNT]; /* The wind's direction as each camera
+                                           sees it, in radians */
+} SkyState; /* size = 0x38 */
+
+extern SkyState g_SkyState;
+
 void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused);
 void DrawMenuBackdrop(Gfx** displayListHead);
 void DrawLensFlare(Gfx** displayListHead);
@@ -106,5 +139,6 @@ void StartHudAnimation(s32 animation);
 Boolean IsHudAnimationDone(void);
 void DrawHudAnimation(void);
 void ResetHudScissor(void);
+void InitSkyColors(void);
 
 #endif

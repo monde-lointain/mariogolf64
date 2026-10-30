@@ -13,7 +13,6 @@
 #include "current_shot.h"
 #include "effects.h"
 #include "framebuffer.h"
-#include "functions.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "main.h"
@@ -27,10 +26,10 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "surface.h"
+#include "terrain.h"
 #include "text.h"
 #include "transfer_pak.h"
 #include "turn.h"
-#include "variables.h"
 
 /* The small cloud behind a choice box */
 #define CHOICE_BOX_CLOUD_IMAGE_ASSET 0x71F

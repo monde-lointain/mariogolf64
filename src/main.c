@@ -9,23 +9,28 @@
 
 #include <PR/libmus.h>
 
+#include "asset.h"
 #include "ball_simulation.h"
+#include "character.h"
 #include "character_slot.h"
 #include "club.h"
 #include "controller.h"
 #include "debug_text.h"
-#include "functions.h"
+#include "fault.h"
 #include "game.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_loader.h"
 #include "libc.h"
 #include "overlay_manager.h"
+#include "play.h"
 #include "save.h"
+#include "scene.h"
 #include "screen.h"
 #include "segment_symbols.h"
 #include "sound.h"
-#include "variables.h"
+#include "terrain.h"
+#include "transfer_pak.h"
 #include "work_area.h"
 
 /* The audio interface's sample rate, in Hz */
@@ -115,6 +120,8 @@ volatile s32 g_FrameCount = 0;
 static Boolean f_IsOddRetrace = FALSE;
 
 void HandleGfxRetrace(s32 pendingTaskCount);
+/* The development debugger's entry, outside the game's code */
+void EnterDevelopmentDebugger(s32 argument);
 
 /* Defined in main_bss.c, at their addresses in the original */
 extern volatile s32 g_MainLoopState;

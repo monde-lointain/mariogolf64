@@ -13,7 +13,6 @@
 #include "collision.h"
 #include "debug_text.h"
 #include "effects.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_objects.h"
 #include "hole_triangles.h"
@@ -25,7 +24,6 @@
 #include "sound.h"
 #include "surface.h"
 #include "terrain.h"
-#include "variables.h"
 
 BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = {{{0}}};
 

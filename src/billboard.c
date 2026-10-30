@@ -11,14 +11,15 @@
 #include "camera.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
-#include "functions.h"
+#include "game.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "host_file.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
-#include "variables.h"
+#include "shot_camera.h"
+#include "terrain.h"
 
 /* Textures of this type are read from the asset archive when first drawn */
 #define TEXTURE_LOADED_ON_DEMAND 2

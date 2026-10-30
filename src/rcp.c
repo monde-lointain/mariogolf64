@@ -3,11 +3,13 @@
  */
 #include "common.h"
 
+#include "rcp.h"
+
+#include <lib/libnusys/nusys.h>
+
 #include "cpu_projection.h"
-#include "functions.h"
 #include "game.h"
 #include "screen.h"
-#include "variables.h"
 
 /* The farthest depth the 14-bit depth buffer holds */
 #define MAX_DEPTH 0x3FFF

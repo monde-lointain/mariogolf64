@@ -5,13 +5,20 @@
 
 #include "overlay_manager.h"
 
-#include "functions.h"
+#include <lib/libnusys/nusys.h>
+
+#include "boot_logos.h"
+#include "camera_editor.h"
 #include "game_flags.h"
 #include "golf_balls.h"
 #include "main.h"
+#include "menu.h"
+#include "opening.h"
 #include "round_hud.h"
 #include "segment_symbols.h"
-#include "variables.h"
+#include "staff_roll.h"
+#include "title_screen.h"
+#include "transmit_menu.h"
 
 /* A frame long enough ago that no module conflicts with an overlay */
 #define RDP_REQUEST_FRAME_NEVER 0x80000000

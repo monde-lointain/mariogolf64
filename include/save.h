@@ -6,8 +6,8 @@
 #include "character.h"
 #include "club.h"
 #include "course.h"
+#include "hole_conditions.h"
 #include "math_util.h"
-#include "variables.h"
 
 /* Marks save data that has been written at least once */
 #define SAVE_MAGIC 0x12345678

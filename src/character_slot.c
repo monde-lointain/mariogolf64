@@ -13,7 +13,6 @@
 #include "main.h"
 #include "math_util.h"
 #include "save.h"
-#include "variables.h"
 
 /* How many frames a drawn slot stays busy */
 #define BUSY_FRAME_COUNT 2

@@ -30,7 +30,9 @@
 #include "effects.h"
 #include "fault.h"
 #include "fireworks.h"
+#include "game.h"
 #include "game_flags.h"
+#include "hole_display.h"
 #include "hole_loader.h"
 #include "main.h"
 #include "main_menu.h"
@@ -47,7 +49,6 @@
 #include "text.h"
 #include "tournament.h"
 #include "transfer_pak.h"
-#include "variables.h"
 #include "work_area.h"
 
 /*

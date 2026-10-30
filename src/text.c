@@ -10,7 +10,6 @@
 
 #include "asset.h"
 #include "current_shot.h"
-#include "functions.h"
 #include "heap.h"
 #include "libc.h"
 #include "round_hud.h"
@@ -20,7 +19,6 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "text.h"
-#include "variables.h"
 
 /* The messages and their character codes */
 typedef struct MessageEntry {

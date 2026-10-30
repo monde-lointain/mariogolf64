@@ -6,7 +6,7 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "functions.h"
+#include "terrain.h"
 
 /* What FindPinHit returns */
 enum PinHit {
@@ -45,5 +45,18 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight);
 s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     s32 endZ, PlaneTriangle* hitRing, f32* fraction);
+/*
+ * Finds the nearest hole triangle that a path hits. It sets the triangle,
+ * whose unk0 then holds the HOLE_TRIANGLE_KIND_*, and the fraction along
+ * the path, and returns whether one is hit.
+ */
+s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
+    s32 endZ, PlaneTriangle* hit, f32* fraction);
+/*
+ * Finds the nearest ground triangle that a path hits, and sets the triangle
+ * and the fraction along the path. It returns whether one is hit.
+ */
+s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
+    s32 endZ, PlaneTriangle* hit, f32* fraction);
 
 #endif

@@ -6,11 +6,12 @@
  */
 #include "common.h"
 
+#include "boot_logos.h"
+
 #include "asset.h"
 #include "camera.h"
 #include "character_slot.h"
 #include "controller.h"
-#include "functions.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "main.h"
@@ -21,7 +22,6 @@
 #include "sound.h"
 #include "text.h"
 #include "transfer_pak.h"
-#include "variables.h"
 
 /* f_BootLogoStage values */
 enum BootLogo {

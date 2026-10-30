@@ -19,6 +19,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "framebuffer.h"
+#include "game.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"
@@ -45,7 +46,6 @@
 #include "text.h"
 #include "tournament.h"
 #include "transfer_pak.h"
-#include "variables.h"
 #include "work_area.h"
 
 /* f_GroundNoiseTexels is a square of random bytes this many on a side */

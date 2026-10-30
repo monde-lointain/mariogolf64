@@ -11,7 +11,7 @@
 #include "libc.h"
 #include "math_util.h"
 #include "sound.h"
-#include "variables.h"
+#include "text.h"
 
 #define SNAPSHOT_COUNT 32
 /* A snapshot holds the look-at point first, unlike CameraEditor.points */

@@ -11,7 +11,6 @@
 #include "billboard.h"
 #include "course.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
@@ -22,7 +21,7 @@
 #include "scene.h"
 #include "screen.h"
 #include "terrain.h"
-#include "variables.h"
+#include "text.h"
 #include "work_area.h"
 
 /* A ground tile's vertices start at its column and row shifted by this */

@@ -17,9 +17,9 @@
 #include "controller.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
-#include "functions.h"
 #include "game.h"
 #include "heap.h"
+#include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
@@ -31,7 +31,6 @@
 #include "terrain.h"
 #include "text.h"
 #include "turn.h"
-#include "variables.h"
 
 /* Effects spawned around a point are offset by up to half this on each axis, in
  * course units */

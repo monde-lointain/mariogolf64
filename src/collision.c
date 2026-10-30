@@ -10,7 +10,6 @@
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_triangles.h"
 #include "libc.h"

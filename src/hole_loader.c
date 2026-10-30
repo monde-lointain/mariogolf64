@@ -12,7 +12,6 @@
 #include "character_slot.h"
 #include "course.h"
 #include "current_shot.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_builder.h"
 #include "libc.h"
@@ -23,9 +22,9 @@
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
+#include "shot_camera.h"
 #include "terrain.h"
 #include "turn.h"
-#include "variables.h"
 #include "work_area.h"
 
 /* ChooseHoleConditions gives up on finding a set cup position after these */

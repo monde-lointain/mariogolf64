@@ -18,7 +18,6 @@
 #include "screen.h"
 #include "sound.h"
 #include "text.h"
-#include "variables.h"
 
 /* A gold coin with a star, reading HOLE IN ONE */
 #define ASSET_HOLE_IN_ONE_BADGE 0x8EA

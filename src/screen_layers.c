@@ -15,7 +15,6 @@
 #include "screen.h"
 #include "sound.h"
 #include "text.h"
-#include "variables.h"
 
 /* The wipe's shapes are 64 by 64 intensity masks */
 #define DEFAULT_WIPE_SHAPE 0x63F

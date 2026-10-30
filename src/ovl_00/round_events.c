@@ -32,7 +32,6 @@
 #include "text.h"
 #include "transfer_pak.h"
 #include "turn.h"
-#include "variables.h"
 
 /* The buffer that a movie's images, or the wind Fly Guy's, are read into */
 #define MOVIE_BUFFER_SIZE 0x6270

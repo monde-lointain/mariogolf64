@@ -10,10 +10,8 @@
 #include "club.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "save.h"
 #include "surface.h"
-#include "variables.h"
 
 /* Read by no routine */
 static u8 D_8024DD10_ovl_04[0x10] UNUSED;

@@ -5,7 +5,6 @@
 
 #include <ultra64.h>
 
-#include "functions.h"
 #include "surface.h"
 
 /*
@@ -305,6 +304,26 @@ extern s8 g_ShowsGroundWaves;
 extern f32 g_GroundFarthestDepth;
 extern f32 g_GroundNearDepthEighth;
 
+#define TRIANGLE_CORNER_COUNT 3
+
+/* A triangle as GetTrianglePlane takes it: each axis's coordinates, by corner
+ */
+typedef struct PlaneTriangle {
+  /* 0x00 */ s32 unk0;
+  /* 0x04 */ s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
+} PlaneTriangle; /* size = 0x18 */
+
+/* The plane through a triangle: normal . point + distance = 0, with the
+ * normal's y at least 0 */
+typedef struct TrianglePlane {
+  /* 0x00 */ f32 normal[AXIS_COUNT];
+  /* 0x0C */ f32 distance;
+  /* 0x10 */ f32 unk10; /* Always 1 */
+} TrianglePlane; /* size = 0x14 */
+
+/* Returns 0, or -1 for a triangle without area, whose plane is then level */
+s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane);
+
 Vtx* GetGroundPoint(u32 column, u32 row);
 Vtx* GetGridVertex(u32 column, u32 row);
 s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point);
@@ -319,5 +338,11 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel);
 Surface GetSurface(s32 x, s32 z);
 s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle);
 s32 GetGroundOrWaterHeight(s32 x, s32 z);
+void InitTerrainTextures(void);
+/*
+ * Returns the height of the ground under a point. Coordinates are in
+ * 1/1024ths of a unit.
+ */
+s32 GetGroundHeight(s32 x, s32 z);
 
 #endif

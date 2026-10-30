@@ -25,7 +25,6 @@
 #include "fireworks.h"
 #include "framebuffer.h"
 #include "framing.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "golf_balls.h"
@@ -58,8 +57,8 @@
 #include "sound.h"
 #include "surface.h"
 #include "terrain.h"
+#include "text.h"
 #include "transfer_pak.h"
-#include "variables.h"
 
 #define IMPACT_POINT_SOUND_CHANNEL 8
 #define IMPACT_POINT_SOUND_VOLUME 60

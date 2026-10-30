@@ -11,7 +11,6 @@
 #include "camera.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
-#include "functions.h"
 #include "game.h"
 #include "heap.h"
 #include "libc.h"
@@ -21,7 +20,7 @@
 #include "screen.h"
 #include "shot_camera.h"
 #include "surface.h"
-#include "variables.h"
+#include "terrain.h"
 
 /* In 1/1024ths of a unit */
 #define CUP_DISTANCE_OFFSET 0x699

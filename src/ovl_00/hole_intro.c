@@ -17,7 +17,7 @@
 #include "save.h"
 #include "scoring.h"
 #include "sound.h"
-#include "variables.h"
+#include "text.h"
 
 #define INTRO_CAMERA_START_DISTANCE -768000.0f
 #define INTRO_CAMERA_START_HEIGHT -153600.0f

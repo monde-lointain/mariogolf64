@@ -20,11 +20,12 @@
 #include "debug_text.h"
 #include "effects.h"
 #include "fireworks.h"
-#include "functions.h"
+#include "game.h"
 #include "game_flags.h"
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "hole_loader.h"
 #include "hole_objects.h"
 #include "libc.h"
 #include "main.h"
@@ -48,7 +49,6 @@
 #include "terrain.h"
 #include "text.h"
 #include "turn.h"
-#include "variables.h"
 
 /* f_SceneryState values */
 enum SceneryState {

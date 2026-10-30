@@ -23,7 +23,6 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "text_format.h"
-#include "variables.h"
 
 /* What OpenSaveMenu lists, and f_MenuKind */
 enum SaveMenuList {
@@ -254,6 +253,7 @@ void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
  * routines itself rather than including text.h; it is there to match.
  */
 s32 MeasureText(char* text, s32 fontSize);
+extern char g_PrintBuffer[];
 void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
 
 /* The MODE_ICON_* index by GameState.gameMode; modes that the menu never names

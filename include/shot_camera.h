@@ -24,6 +24,10 @@ extern Boolean g_AreCharactersDrawn;
 /* Set while the camera shows the cup up close, at twice the distance from it */
 extern Boolean g_IsCupViewShown;
 
+#define NOISE_GRID_SIZE 64
+/* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
+extern u8* g_NoiseTexels;
+
 void ClearHoleIntroText(void);
 void EndFlightCamera(void);
 void EndHoleFlyover(void);
@@ -37,4 +41,11 @@ void StartHoleCamerasAndSong(void);
 void StartHoleFlyover(void);
 s32 StepHoleFlyover(void);
 s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons);
+/* Whether the view mode that the B button picks in debug builds is on */
+Boolean IsDebugBButtonView(void);
+void BuildNoiseTexture(void);
+void StepNoiseTexture(void);
+/* Sets a character's position, rotation and scale for a shot */
+void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale);
+
 #endif

@@ -7,7 +7,6 @@
 
 #include "club.h"
 #include "math_util.h"
-#include "variables.h"
 
 /* The ball moves its speed in course units each frame */
 typedef f32 BallSpeed;

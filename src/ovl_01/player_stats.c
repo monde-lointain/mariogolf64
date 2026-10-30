@@ -10,7 +10,6 @@
 #include "character_slot.h"
 #include "course.h"
 #include "cpu_projection.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "hole_display.h"
@@ -26,7 +25,6 @@
 #include "sound.h"
 #include "sram.h"
 #include "text.h"
-#include "variables.h"
 
 /* Score labels in Japanese */
 #define ASSET_JAPANESE_BIRDIE_LABEL 0x82D

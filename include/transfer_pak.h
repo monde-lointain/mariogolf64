@@ -169,5 +169,7 @@ void ClearBootTransmitPending(void);
 Boolean IsBootTransmitPending(void);
 void ResetGameBoyTransfer(s32 transferMode);
 void ForceStopRumble(void);
+void InitRumblePaks(void);
+void StopAllRumble(void);
 
 #endif

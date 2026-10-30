@@ -6,6 +6,8 @@
  */
 #include "common.h"
 
+#include "confirm_wait.h"
+
 #include "controller.h"
 #include "hole_display.h"
 #include "overlay_manager.h"

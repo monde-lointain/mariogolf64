@@ -12,7 +12,6 @@
 #include "character_slot.h"
 #include "course.h"
 #include "framebuffer.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_display.h"
@@ -31,7 +30,6 @@
 #include "text.h"
 #include "tournament.h"
 #include "transfer_pak.h"
-#include "variables.h"
 
 /*
  * The tallies of a match's hole happen at these frames of the TALLYING state.

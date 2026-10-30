@@ -88,5 +88,6 @@ void StopEditorMoves(void);
 void ShiftEditorCamera(Vec3 offset);
 void UpdateCameraEditor(void);
 void EditOpeningCamera(void);
+void ResetCameraEditor(void);
 
 #endif

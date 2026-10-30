@@ -6,17 +6,19 @@
  */
 #include "common.h"
 
+#include "opening.h"
+
 #include "asset.h"
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "camera.h"
 #include "camera_editor.h"
+#include "character.h"
 #include "character_slot.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "heap.h"
@@ -25,14 +27,15 @@
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"
+#include "rcp.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "terrain.h"
 #include "text.h"
-#include "variables.h"
 
 /* The view that the opening draws its characters through */
 #define OPENING_VIEW_INDEX 2

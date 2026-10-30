@@ -13,7 +13,6 @@
 #include "collision.h"
 #include "debug_text.h"
 #include "effects.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_triangles.h"
 #include "libc.h"
@@ -23,7 +22,6 @@
 #include "shot_effects.h"
 #include "surface.h"
 #include "terrain.h"
-#include "variables.h"
 
 /* LoadCharacter kinds from the kind count on load one of g_OtherCharacterModels
  */

@@ -144,6 +144,14 @@ extern void* g_ComLeftyIcons;
 /* Character palette files that the menu screens read, one per slot */
 extern u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
 
+/*
+ * Loaded images: the menus load their plain labels, or other images in their
+ * place, into the first two by turns, and the club panel uses the last two as
+ * its buffers
+ */
+#define IMAGE_SLOT_COUNT 14
+extern void* g_ImageSlots[IMAGE_SLOT_COUNT];
+
 /* Returns an image buffer of the menu overlay */
 void* GetMenuImageBuffer(void);
 
@@ -354,6 +362,8 @@ Boolean IsDonkeyKongUnlocked(void);
 Boolean IsMapleUnlocked(void);
 Boolean IsMetalMarioUnlocked(void);
 Boolean IsNintendoClubTournament(void);
+void LoadMenuResources(void);
+void FreeMenuResources(void);
 
 /*
  * The cursor of the character table and the player stats: a quad whose corners

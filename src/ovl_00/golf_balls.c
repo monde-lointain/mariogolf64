@@ -12,7 +12,6 @@
 #include "camera.h"
 #include "cpu_projection.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "heap.h"
@@ -25,7 +24,6 @@
 #include "shot_camera.h"
 #include "surface.h"
 #include "terrain.h"
-#include "variables.h"
 
 #define GOLF_BALL_COUNT 32
 #define AFTERIMAGE_MAX_LENGTH 60

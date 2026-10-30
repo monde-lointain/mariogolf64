@@ -5,8 +5,9 @@
  */
 #include "common.h"
 
+#include <lib/libnusys/nusys.h>
+
 #include "asset.h"
-#include "functions.h"
 #include "game_flags.h"
 
 /* How many files OpenPooledAssetFile can keep open at once */

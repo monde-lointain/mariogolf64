@@ -10,8 +10,10 @@
 #include "camera.h"
 #include "cpu_projection.h"
 #include "effects.h"
+#include "game.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "hole_display.h"
 #include "libc.h"
 #include "math_util.h"
 #include "round_hud.h"
@@ -20,7 +22,6 @@
 #include "sound.h"
 #include "terrain.h"
 #include "turn.h"
-#include "variables.h"
 
 #define HOLE_CREATURE_COUNT 10
 

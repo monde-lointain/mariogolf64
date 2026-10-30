@@ -14,7 +14,7 @@
 #include "scene.h"
 #include "scorecard.h"
 #include "scoring.h"
-#include "variables.h"
+#include "text.h"
 
 #define NO_SKINS_WINNER -1
 /* The course records' totals stop here */

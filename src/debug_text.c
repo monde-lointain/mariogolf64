@@ -8,12 +8,10 @@
 
 #include "debug_text.h"
 
-#include "functions.h"
 #include "game_flags.h"
 #include "main.h"
 #include "screen.h"
 #include "text.h"
-#include "variables.h"
 
 #define TEXT_COLUMN_COUNT 40
 #define TEXT_ROW_COUNT 30

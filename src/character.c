@@ -13,7 +13,6 @@
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "heap.h"
@@ -22,11 +21,13 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "play.h"
+#include "reaction.h"
 #include "save.h"
 #include "screen.h"
 #include "shot_camera.h"
 #include "shot_effects.h"
-#include "variables.h"
+#include "terrain.h"
 
 /* Room for a model's files and, FRAME_DATA_OFFSET in, its frame data copies */
 #define CHARACTER_BUFFER_SIZE 0x23680

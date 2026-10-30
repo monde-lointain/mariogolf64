@@ -21,7 +21,6 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "text.h"
-#include "variables.h"
 
 /* The CODE ENTRY label and the row of key boxes beside it */
 #define ASSET_CODE_ENTRY_BAR 0x93E

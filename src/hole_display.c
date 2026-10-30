@@ -27,8 +27,9 @@
 #include "scene.h"
 #include "scene_colors.h"
 #include "screen.h"
+#include "shot_camera.h"
 #include "sound.h"
-#include "variables.h"
+#include "text.h"
 
 /*
  * The hole that plays behind the title screen: the last hole of the first

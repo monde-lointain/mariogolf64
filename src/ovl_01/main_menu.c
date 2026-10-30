@@ -25,7 +25,6 @@
 #include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "help_board.h"
@@ -49,7 +48,6 @@
 #include "sram.h"
 #include "text.h"
 #include "transfer_pak.h"
-#include "variables.h"
 
 /* The most modes the mode select offers for a player count */
 #define MODE_CHOICE_LIMIT 12

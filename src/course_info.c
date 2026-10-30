@@ -9,7 +9,6 @@
 #include "main.h"
 #include "save.h"
 #include "scene.h"
-#include "variables.h"
 
 /* The radius used for holes not listed in GetHoleRadius */
 #define DEFAULT_HOLE_RADIUS 200

@@ -7,8 +7,8 @@
 
 #include "animated_box.h"
 
+#include "game.h"
 #include "screen.h"
-#include "variables.h"
 
 /* Frames that opening and closing each take */
 #define BOX_ANIMATION_FRAME_COUNT 4

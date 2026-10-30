@@ -107,6 +107,8 @@ extern int MusSetSongFxChange		(musBool onoff);
 
 /* set master volume levels */
 extern void MusSetMasterVolume		(unsigned long flags, int volume);
+/* The game's revision plays silence instead of the audio while this is set */
+extern unsigned char __libmus_output_muted;
 
 /* start songs and sound effects */
 extern musHandle MusStartSong		(void *addr);

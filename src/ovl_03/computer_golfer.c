@@ -8,10 +8,10 @@
 
 #include "ball_simulation.h"
 #include "club.h"
+#include "collision.h"
 #include "course.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_loader.h"
 #include "libc.h"
@@ -19,7 +19,7 @@
 #include "save.h"
 #include "scene.h"
 #include "surface.h"
-#include "variables.h"
+#include "terrain.h"
 
 /* The shot planning thread's states, in f_PlanThreadState */
 #define PLAN_THREAD_RUNNING 0

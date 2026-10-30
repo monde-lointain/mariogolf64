@@ -4,6 +4,8 @@
  */
 #include "common.h"
 
+#include "transmit_menu.h"
+
 #include "asset.h"
 #include "character.h"
 #include "controller.h"
@@ -21,7 +23,6 @@
 #include "sound.h"
 #include "text.h"
 #include "transfer_pak.h"
-#include "variables.h"
 
 /* The options of each transfer mode */
 #define TRANSFER_MODE_COUNT 2

@@ -13,7 +13,6 @@
 #include "character_slot.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_triangles.h"
 #include "libc.h"
@@ -22,6 +21,7 @@
 #include "save.h"
 #include "scene.h"
 #include "sound.h"
+#include "terrain.h"
 
 /* EaseReactionView's easedParts bits */
 #define EASE_LOOK_AT (1 << 0)

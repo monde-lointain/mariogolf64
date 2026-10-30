@@ -13,6 +13,7 @@
 #include "controller.h"
 #include "cpu_projection.h"
 #include "framebuffer.h"
+#include "game.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_display.h"
@@ -22,7 +23,6 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
-#include "variables.h"
 /* f_ClubSlotsState values */
 #define CLUB_SLOTS_DONE 0
 /* Before the reels speed up */

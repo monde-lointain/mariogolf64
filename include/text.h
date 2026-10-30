@@ -128,6 +128,11 @@ enum PlaceSuffix {
 /* The font that DrawShadowedText and its kin draw */
 extern void* g_ShadowedFontImage;
 
+/* Formatted text on its way to the screen. No routine checks the length
+ * against this room, which is all there is before the next object. */
+#define PRINT_BUFFER_SIZE 40
+extern char g_PrintBuffer[PRINT_BUFFER_SIZE];
+
 void LoadTextAssets(void);
 void FreeTextAssets(void);
 void ClearTextSlots(void);

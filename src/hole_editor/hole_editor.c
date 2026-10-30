@@ -10,7 +10,6 @@
 #include "controller.h"
 #include "cpu_projection.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "heap.h"
@@ -27,7 +26,7 @@
 #include "sound.h"
 #include "surface.h"
 #include "terrain.h"
-#include "variables.h"
+#include "text.h"
 #include "work_area.h"
 
 /* The points along a tile's edge, its corners included */

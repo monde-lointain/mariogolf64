@@ -10,13 +10,15 @@
 #include <lib/libnusys/nusys.h>
 
 #include "billboard.h"
+#include "boot_logos.h"
 #include "camera.h"
 #include "character_slot.h"
+#include "confirm_wait.h"
 #include "controller.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "functions.h"
+#include "effects.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_display.h"
@@ -25,12 +27,15 @@
 #include "hole_triangles.h"
 #include "libc.h"
 #include "main.h"
+#include "main_menu.h"
 #include "math_util.h"
 #include "movie.h"
+#include "opening.h"
 #include "overlay_manager.h"
 #include "performance_meter.h"
 #include "pin.h"
 #include "play.h"
+#include "rcp.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -40,9 +45,11 @@
 #include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
+#include "staff_roll.h"
 #include "terrain.h"
 #include "text.h"
-#include "variables.h"
+#include "title_screen.h"
+#include "transmit_menu.h"
 #include "work_area.h"
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F
@@ -2518,13 +2525,13 @@ void UpdateGame(void) {
   } else if (g_Scene == SCENE_BOOT_LOGOS) {
     UpdateBootLogos();
   } else if (g_Scene == SCENE_CONFIRM_WAIT) {
-    func_801F4A40();
+    WaitForConfirmButton();
   } else if (g_Scene == SCENE_TITLE_SCREEN) {
     UpdateTitleScreen();
   } else if (g_Scene == SCENE_STAFF_ROLL) {
     UpdateStaffRoll();
   } else if (g_Scene == SCENE_TRANSMIT) {
-    func_801F5F1C();
+    UpdateTransmitMenu();
   }
 
   g_Cameras[INSET_CAMERA].view.viewportCenterX =

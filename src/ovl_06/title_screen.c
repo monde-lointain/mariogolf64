@@ -7,21 +7,22 @@
  */
 #include "common.h"
 
+#include "title_screen.h"
+
 #include "asset.h"
 #include "controller.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"
+#include "rcp.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
 #include "transfer_pak.h"
 #include "unlocks.h"
-#include "variables.h"
 
 /* f_TitleStage values */
 enum TitleState {

@@ -12,7 +12,6 @@
 #include "course.h"
 #include "debug_text.h"
 #include "effects.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "main.h"
@@ -30,7 +29,6 @@
 #include "text.h"
 #include "tournament.h"
 #include "transfer_pak.h"
-#include "variables.h"
 /* OpenRoundResults's request that frees the results */
 #define CLOSE_ROUND_RESULTS -1
 

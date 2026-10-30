@@ -18,7 +18,6 @@
 #include "screen.h"
 #include "sound.h"
 #include "text.h"
-#include "variables.h"
 #include "work_area.h"
 
 /* Each character's face, 32 by 24, one above another */

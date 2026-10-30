@@ -121,5 +121,9 @@ void QuitPlayToTitle(void);
 void RebuildGroundTextureCoordinates(void);
 void ResetShotSetup(void);
 void PlacePlayersOnTee(void);
+void InitExpansionPakFeatures(void);
+/* Sets the fog factor and fog color */
+void SetSceneFog(Gfx** displayListHead);
+void UpdatePlay(void);
 
 #endif

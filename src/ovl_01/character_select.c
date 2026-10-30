@@ -27,7 +27,6 @@
 #include "sound.h"
 #include "text.h"
 #include "transfer_pak.h"
-#include "variables.h"
 
 /* MoveGridCursor lets the cursor stop on slots below this only when asked to */
 #define CHOOSABLE_MARK_LIMIT (-20)

@@ -11,7 +11,6 @@
 #include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
-#include "functions.h"
 #include "game.h"
 #include "game_flags.h"
 #include "hole_display.h"
@@ -30,7 +29,6 @@
 #include "sound.h"
 #include "sram.h"
 #include "text.h"
-#include "variables.h"
 
 /*
  * The saved game's 64 by 64 course image, shrunk in two strips;

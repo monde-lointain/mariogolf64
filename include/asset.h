@@ -177,5 +177,6 @@ extern u8 g_AssetArchiveRomStart[];
 
 s32 OpenEncodedAsset(AssetId assetId, EncodedAsset* asset);
 void ReadEncodedAsset(void* buffer, EncodedAsset* asset);
+void InitAssetFiles(void);
 
 #endif

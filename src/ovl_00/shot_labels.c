@@ -12,6 +12,7 @@
 #include "club.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
+#include "game.h"
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "play.h"
@@ -20,7 +21,6 @@
 #include "screen.h"
 #include "shot_camera.h"
 #include "surface.h"
-#include "variables.h"
 
 /* The players whose balls are tagged */
 enum ShotLabels {
@@ -163,6 +163,7 @@ void DrawShotPreview(CameraMatrices* matrices);
  */
 void DrawCenteredShadowedText();
 extern void* g_ShadowedFontImage;
+extern char g_PrintBuffer[];
 #define SHADOWED_FONT_IMAGE_WIDTH 256
 #define SHADOWED_FONT_IMAGE_HEIGHT 32
 

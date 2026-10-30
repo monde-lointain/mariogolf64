@@ -8,13 +8,11 @@
 
 #include "asset.h"
 #include "cpu_projection.h"
-#include "functions.h"
 #include "heap.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "screen.h"
 #include "sound.h"
-#include "variables.h"
 
 /* How many of them LoadFireworks sets up */
 #define FIREWORK_COUNT 1

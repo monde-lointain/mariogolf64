@@ -19,7 +19,6 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "text.h"
-#include "variables.h"
 
 /* f_LoadedScreen values */
 enum CourseSelectState {

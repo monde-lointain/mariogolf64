@@ -12,10 +12,10 @@
 #include "camera.h"
 #include "character_slot.h"
 #include "club.h"
+#include "collision.h"
 #include "controller.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "functions.h"
 #include "game_flags.h"
 #include "hole_builder.h"
 #include "libc.h"
@@ -28,7 +28,6 @@
 #include "screen.h"
 #include "sound.h"
 #include "surface.h"
-#include "variables.h"
 #include "work_area.h"
 
 /* The debug scene menu lists SCENE_MENU_LENGTH scenes from text row

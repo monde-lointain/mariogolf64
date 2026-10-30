@@ -31,7 +31,6 @@
 #include "sound.h"
 #include "sram.h"
 #include "transfer_pak.h"
-#include "variables.h"
 
 /* Keeps the save data on the development host instead of in SRAM */
 #define GAME_FLAG_SAVE_TO_HOST 0x53
