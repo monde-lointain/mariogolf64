@@ -329,7 +329,7 @@ void DrawMatchResult(Gfx** displayListHead) {
     Mat4 matrix;
 
     f_MatchResultFrameCount++;
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
       translation[AXIS_X] =
@@ -344,7 +344,7 @@ void DrawMatchResult(Gfx** displayListHead) {
       scale[AXIS_Z] = RESULT_CHARACTER_SCALE;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(matrix, &f_ResultCharacterMatrices[i]);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ResultCharacterMatrices[i]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_ResultCharacterMatrices[i]),
           G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
       g_DisplayListHead = gfx;
       DrawCharacter(i);
@@ -1747,7 +1747,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenEffectProjection),
       G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -1823,8 +1823,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
         g_Scorecard.content.isRowFlipping[i] == TRUE) {
-      gSPMatrix(gfx++,
-          OS_K0_TO_PHYSICAL(&f_FlapMatrices[i][g_MatrixBufferIndex]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_FlapMatrices[i][g_MatrixBufferIndex]),
           G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
       if (g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE) {
         gSPVertex(
@@ -1848,8 +1847,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
                   LARGE_PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, FLAP_NAME_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0,
           0, 0, 0, 0, 0, 0);
-      gSPMatrix(gfx++,
-          OS_K0_TO_PHYSICAL(&f_FlapMatrices[i][g_MatrixBufferIndex]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_FlapMatrices[i][g_MatrixBufferIndex]),
           G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
       gDPPipeSync(gfx++);
       gSPVertex(gfx++, f_FlapVertices[FLAP_NAME_QUAD], QUAD_VERTEX_COUNT, 0);
@@ -1885,7 +1883,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
             GLYPH_FLAG_LEFT_ALIGNED | GLYPH_FLAG_BOTTOM_PART, FLAP_NAME_X, 0,
             g_PrintBuffer);
         gSPMatrix(gfx++,
-            OS_K0_TO_PHYSICAL(&f_FlapMatrices[i][g_MatrixBufferIndex]),
+            PhysicalAddress(&f_FlapMatrices[i][g_MatrixBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         DrawGlyphGroup(&gfx, group);
         DrawGlyphGroup(&gfx, group + 1);

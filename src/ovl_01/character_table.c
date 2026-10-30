@@ -548,13 +548,13 @@ void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TableCursorProjection),
+  gSPMatrix(gfx++, PhysicalAddress(&f_TableCursorProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TableCursorTranslation),
+  gSPMatrix(gfx++, PhysicalAddress(&f_TableCursorTranslation),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TableCursorRotation),
+  gSPMatrix(gfx++, PhysicalAddress(&f_TableCursorRotation),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TableCursorScale),
+  gSPMatrix(gfx++, PhysicalAddress(&f_TableCursorScale),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
   gSPVertex(gfx++, f_TableCursorVertices, MENU_CURSOR_VERTEX_COUNT, 0);

@@ -322,7 +322,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0,
       PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   f_FireworkHue += DegreesToRadians(3);
 
@@ -358,7 +358,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
         if (particle->life > 0) {
           gDPPipeSync(gfx++);
           gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(&particle->matrices[g_MatrixBufferIndex]),
+              PhysicalAddress(&particle->matrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPVertex(gfx++, f_FireworkParticleVertices,
               ARRAY_COUNT(f_FireworkParticleVertices), 0);

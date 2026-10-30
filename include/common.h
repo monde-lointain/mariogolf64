@@ -5,6 +5,18 @@
 
 #include "include_asm.h"
 
+/*
+ * The physical address of a KSEG0 address, which the RCP reads. Ultralib's
+ * OS_K0_TO_PHYSICAL subtracts from a char pointer, which takes it out of its
+ * object, so other builds than the matching one subtract from the address as
+ * a number, which KMC GCC compiles differently.
+ */
+#ifdef __IS_KMC__
+#define PhysicalAddress(address) OS_K0_TO_PHYSICAL(address)
+#else
+#define PhysicalAddress(address) ((u32)(address) - K0BASE)
+#endif
+
 #define BITS_PER_BYTE 8
 /* The base of the decimal numbers the game shows */
 #define DECIMAL_BASE 10

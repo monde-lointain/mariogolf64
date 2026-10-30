@@ -1522,10 +1522,10 @@ void DrawLandingReaction(Gfx** displayListHead) {
     guTranslateF(offset, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
     guMtxCatF(offset, matrix, matrix);
     ConvertMatrixToFixed(matrix, &f_LandingPanelMatrices[g_MatrixBufferIndex]);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_LandingPanelMatrices[g_MatrixBufferIndex]),
+        PhysicalAddress(&f_LandingPanelMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(
         gfx++, f_LandingPanelVertices, ARRAY_COUNT(f_LandingPanelVertices), 0);
@@ -1895,9 +1895,9 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_GreenGridMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&f_GreenGridMatrix),
       G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
   if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
@@ -2052,7 +2052,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
 
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection),
+  gSPMatrix(gfx++, PhysicalAddress(&matrices->projection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
   *displayListHead = gfx;
@@ -2170,9 +2170,9 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
       gDPPipeSync(gfx++);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+      gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BallTrailMatrix),
+      gSPMatrix(gfx++, PhysicalAddress(&f_BallTrailMatrix),
           G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(
           gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
@@ -2218,7 +2218,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       }
 
       gDPPipeSync(gfx++);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection),
+      gSPMatrix(gfx++, PhysicalAddress(&matrices->projection),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       gDPPipeSync(gfx++);
@@ -2456,7 +2456,7 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++,
-      OS_K0_TO_PHYSICAL(&f_WindIndicatorMatrices[g_MatrixBufferIndex]),
+      PhysicalAddress(&f_WindIndicatorMatrices[g_MatrixBufferIndex]),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPSetLights1(gfx++, f_WindArrowLights);
   if (g_IsModuleAlive[MODULE_WIND_BOO]) {
@@ -2536,7 +2536,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
   Radians lieAngle;
 
   gfx = *displayListHead;
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -2563,7 +2563,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
         SHOT_PANEL_WIND_INDICATOR_Y);
   }
 
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gDPPipeSync(gfx++);
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
@@ -2621,7 +2621,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_ClubHeadIconMatrices[g_MatrixBufferIndex]),
+        PhysicalAddress(&f_ClubHeadIconMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_ClubHeadIconVertices, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -2670,7 +2670,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LieIconMatrices[g_MatrixBufferIndex]),
+    gSPMatrix(gfx++, PhysicalAddress(&f_LieIconMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_LieIconVertices, 8, 0);
     gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_LieImage)),
@@ -2804,9 +2804,9 @@ void DrawHoleImageModel(void) {
   gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-  gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
+  gSPMatrix(g_DisplayListHead++, PhysicalAddress(&g_ScreenEffectProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&f_HoleImageMatrix),
+  gSPMatrix(g_DisplayListHead++, PhysicalAddress(&f_HoleImageMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   DrawHoleFlag(FALSE);
   gDPPipeSync(g_DisplayListHead++);
@@ -2935,10 +2935,10 @@ void DrawShotEffect(Gfx** displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
+        PhysicalAddress(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_LongShotVertices, LONG_SHOT_GROUP_COUNT * 8, 0);
     for (i = 0; i != LONG_SHOT_GROUP_COUNT; i++) {
@@ -2977,10 +2977,10 @@ void DrawShotEffect(Gfx** displayListHead) {
     gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
         PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
         PRIMITIVE, 0, TEXEL0, 0);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
+        PhysicalAddress(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_SparkTrailVertices, 16, 0);
     gDPLoadTextureBlock_4b(gfx++,

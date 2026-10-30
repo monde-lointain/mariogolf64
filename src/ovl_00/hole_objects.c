@@ -403,7 +403,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPMatrix(gfx++,
-          OS_K0_TO_PHYSICAL(&creature->matrices[g_MatrixBufferIndex]),
+          PhysicalAddress(&creature->matrices[g_MatrixBufferIndex]),
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_CheepCheepVertices, 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -449,7 +449,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       gDPPipeSync(gfx++);
       gSPMatrix(gfx++,
-          OS_K0_TO_PHYSICAL(&creature->matrices[g_MatrixBufferIndex]),
+          PhysicalAddress(&creature->matrices[g_MatrixBufferIndex]),
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_MonkeyVertices, 8, 0);
       gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_MonkeyImage)),

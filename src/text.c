@@ -2099,7 +2099,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
       }
 
       gDPPipeSync(gfx++);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_GlyphSprites[i].matrix),
+      gSPMatrix(gfx++, PhysicalAddress(&g_GlyphSprites[i].matrix),
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       fontSize = g_GlyphSprites[i].fontSize;
       top = 0;

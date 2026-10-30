@@ -118,10 +118,10 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
   gSPClearGeometryMode(displayList++, 0xFFFFFFFF);
   gSPSetGeometryMode(displayList++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(displayList++);
-  gSPMatrix(displayList++, OS_K0_TO_PHYSICAL(&f_CursorBoxProjection),
+  gSPMatrix(displayList++, PhysicalAddress(&f_CursorBoxProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gSPMatrix(displayList++,
-      OS_K0_TO_PHYSICAL(&f_CursorBoxTranslations[g_DrawBufferIndex]),
+      PhysicalAddress(&f_CursorBoxTranslations[g_DrawBufferIndex]),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gDPPipeSync(displayList++);
   gSPVertex(displayList++, f_CursorBoxVertices, CURSOR_BOX_CORNER_COUNT, 0);

@@ -1914,9 +1914,9 @@ void DrawDrop(Gfx** displayListHead, CameraMatrices* matrices,
       G_IM_FMT_I, DROP_IMAGE_SIZE, DROP_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP,
       6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_DropMatrices[g_DrawBufferIndex]),
+  gSPMatrix(gfx++, PhysicalAddress(&f_DropMatrices[g_DrawBufferIndex]),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->billboard),
+  gSPMatrix(gfx++, PhysicalAddress(&matrices->billboard),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_UprightQuadVertices, 4, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -2012,7 +2012,7 @@ void DrawDivotMark(Gfx** displayListHead) {
           ImageTexelsAt(f_DivotImage, DIVOT_MARK_FRAME * DIVOT_FRAME_SIZE)),
       G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP,
       G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_DivotMarkMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&f_DivotMarkMatrix),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_SmallFlatQuadVertices, 4, 0);
   gDPPipeSync(gfx++);
@@ -2029,7 +2029,7 @@ void DrawRipple(Gfx** displayListHead, Effect* effect) {
   gDPPipeSync(gfx++);
   gDPSetPrimColor(
       gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY, (u32)effect->alpha);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_EffectMatrices[effect->matrixIndex]),
+  gSPMatrix(gfx++, PhysicalAddress(&f_EffectMatrices[effect->matrixIndex]),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_RippleVertices, 4, 0);
   gDPPipeSync(gfx++);
@@ -2046,7 +2046,7 @@ void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect) {
   gDPPipeSync(gfx++);
   gDPSetPrimColor(
       gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY, (u32)effect->alpha);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_EffectMatrices[effect->matrixIndex]),
+  gSPMatrix(gfx++, PhysicalAddress(&f_EffectMatrices[effect->matrixIndex]),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_SpreadingCircleVertices, 4, 0);
   gDPPipeSync(gfx++);
@@ -2453,9 +2453,9 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_RainModelViewMatrix),
+    gSPMatrix(gfx++, PhysicalAddress(&f_RainModelViewMatrix),
         G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(
         gfx++, f_RainStreakVertices, ARRAY_COUNT(f_RainStreakVertices), 0);
@@ -2569,7 +2569,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
     }
 
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection),
+    gSPMatrix(gfx++, PhysicalAddress(&matrices->projection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);

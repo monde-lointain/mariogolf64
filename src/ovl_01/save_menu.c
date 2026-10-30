@@ -2358,10 +2358,10 @@ void DrawSavedGolfers(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SavedGolfersProjection),
+    gSPMatrix(gfx++, PhysicalAddress(&f_SavedGolfersProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(
+        PhysicalAddress(
             &f_SavedGolferTransforms[playerIndex][g_DrawBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);

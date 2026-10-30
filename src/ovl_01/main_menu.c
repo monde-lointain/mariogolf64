@@ -5393,10 +5393,10 @@ void DrawMenuCharacters(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80231F60_ovl_01),
+    gSPMatrix(gfx++, PhysicalAddress(&D_80231F60_ovl_01),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&D_80231D60_ovl_01[slot][g_DrawBufferIndex]),
+        PhysicalAddress(&D_80231D60_ovl_01[slot][g_DrawBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     g_DisplayListHead = gfx;
     DrawCharacter(slot);
@@ -5680,9 +5680,9 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80232030_ovl_01),
+  gSPMatrix(gfx++, PhysicalAddress(&D_80232030_ovl_01),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80231FB0_ovl_01[g_DrawBufferIndex]),
+  gSPMatrix(gfx++, PhysicalAddress(&D_80231FB0_ovl_01[g_DrawBufferIndex]),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
   g_DisplayListHead = gfx;
@@ -5800,9 +5800,9 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPSetTileSize(gfx++, WATER_LAYER_TILE, -f_WaterScroll, f_WaterScroll,
         -f_WaterScroll + WATER_TILE_SPAN, f_WaterScroll + WATER_TILE_SPAN);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80232230_ovl_01),
+    gSPMatrix(gfx++, PhysicalAddress(&D_80232230_ovl_01),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_802321F0_ovl_01),
+    gSPMatrix(gfx++, PhysicalAddress(&D_802321F0_ovl_01),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
     gSPVertex(gfx++, D_8022FD48_ovl_01, WATER_VERTEX_COUNT, 0);

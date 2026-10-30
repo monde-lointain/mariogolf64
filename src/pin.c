@@ -449,7 +449,7 @@ void DrawPin(
         PIN_SHADOW_TEXTURE_WIDTH, PIN_SHADOW_TEXTURE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&f_PinShadowMatrix),
+    gSPMatrix(g_DisplayListHead++, PhysicalAddress(&f_PinShadowMatrix),
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     DrawPinShadow();
     gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
@@ -508,7 +508,7 @@ void DrawPin(
     gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
     gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x01);
     gSPMatrix(g_DisplayListHead++,
-        OS_K0_TO_PHYSICAL(&f_PinMatrices[cameraIndex][g_DrawBufferIndex]),
+        PhysicalAddress(&f_PinMatrices[cameraIndex][g_DrawBufferIndex]),
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     if (g_IsCupViewShown == TRUE) {
       gSPVertex(g_DisplayListHead++, f_LargePinVertices, PIN_VERTEX_COUNT, 0);
@@ -732,7 +732,7 @@ void DrawPin(
     gDPSetRenderMode(
         g_DisplayListHead++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
     gSPMatrix(g_DisplayListHead++,
-        OS_K0_TO_PHYSICAL(&f_FlagMatrices[g_DrawBufferIndex]),
+        PhysicalAddress(&f_FlagMatrices[g_DrawBufferIndex]),
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     DrawHoleFlag(TRUE);
     gDPPipeSync(g_DisplayListHead++);

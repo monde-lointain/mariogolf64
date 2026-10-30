@@ -1288,10 +1288,10 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_HandicapGolfersProjection),
+    gSPMatrix(gfx++, PhysicalAddress(&f_HandicapGolfersProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(
+        PhysicalAddress(
             &f_HandicapGolferTransforms[playerIndex][g_DrawBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -1858,13 +1858,13 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TurnedArrowProjections[arrowIndex]),
+    gSPMatrix(gfx++, PhysicalAddress(&f_TurnedArrowProjections[arrowIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TurnedArrowTranslations[arrowIndex]),
+    gSPMatrix(gfx++, PhysicalAddress(&f_TurnedArrowTranslations[arrowIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TurnedArrowRotations[arrowIndex]),
+    gSPMatrix(gfx++, PhysicalAddress(&f_TurnedArrowRotations[arrowIndex]),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_TurnedArrowScales[arrowIndex]),
+    gSPMatrix(gfx++, PhysicalAddress(&f_TurnedArrowScales[arrowIndex]),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
     gSPVertex(gfx++, f_TurnedArrowVertices, TURNED_ARROW_VERTEX_COUNT, 0);
@@ -2576,13 +2576,13 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BestShotsCursorProjection),
+  gSPMatrix(gfx++, PhysicalAddress(&f_BestShotsCursorProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BestShotsCursorTranslation),
+  gSPMatrix(gfx++, PhysicalAddress(&f_BestShotsCursorTranslation),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BestShotsCursorRotation),
+  gSPMatrix(gfx++, PhysicalAddress(&f_BestShotsCursorRotation),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BestShotsCursorScale),
+  gSPMatrix(gfx++, PhysicalAddress(&f_BestShotsCursorScale),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
   gSPVertex(gfx++, f_BestShotsCursorVertices, MENU_CURSOR_VERTEX_COUNT, 0);

@@ -2141,9 +2141,9 @@ void DrawShotPreview(CameraMatrices* matrices) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(g_DisplayListHead++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
       gDPPipeSync(g_DisplayListHead++);
-      gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+      gSPMatrix(g_DisplayListHead++, PhysicalAddress(&g_ScreenOrthoMatrix),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-      gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&D_80227110_ovl_00),
+      gSPMatrix(g_DisplayListHead++, PhysicalAddress(&D_80227110_ovl_00),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(g_DisplayListHead++, f_PuttPreviewLineVertices, 4, 0);
       offsetX = dy * scale;

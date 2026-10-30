@@ -478,7 +478,7 @@ void DrawSparks(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   for (i = 0; i != SPARK_COUNT; i++) {
     if (f_SparkKinds[i] == SPARK_KIND_IMPACT &&
@@ -486,7 +486,7 @@ void DrawSparks(Gfx** displayListHead) {
       gDPSetPrimDepth(gfx++, burstPoints[f_SparkBursts[i]][2], 0);
       if (f_SparkLives[i] != 0) {
         gSPMatrix(gfx++,
-            OS_K0_TO_PHYSICAL(&f_SparkMatrices[g_MatrixBufferIndex][i]),
+            PhysicalAddress(&f_SparkMatrices[g_MatrixBufferIndex][i]),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPVertex(gfx++, f_SparkVertices, 3, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
@@ -615,11 +615,11 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       f32 nearness;
       f32 fade;
 
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailMatrices[matrixIndex][0]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_SwingTrailMatrices[matrixIndex][0]),
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, &f_SwingTrailVertices[0], 1, step * 2);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailMatrices[matrixIndex][1]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_SwingTrailMatrices[matrixIndex][1]),
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, &f_SwingTrailVertices[1], 1, step * 2 + 1);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -744,7 +744,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   segment = 0;
   gSPMatrix(gfx++, &f_SwingTrailProjections[g_DrawBufferIndex],
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailOrigin),
+  gSPMatrix(gfx++, PhysicalAddress(&f_SwingTrailOrigin),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   LoadSwingTrailSegments(0, SWING_TRAIL_SEGMENTS, 1);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);

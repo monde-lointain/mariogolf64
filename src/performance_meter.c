@@ -299,7 +299,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   /* The chained assignment is there to match */
   f_MeterViewport.vp.vscale[1] = f_MeterViewport.vp.vtrans[1] = 240 * 2 * scale;
   gSPViewport(gfx++, &f_MeterViewport);
-  gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_InitRcpDisplayList));
+  gSPDisplayList(gfx++, PhysicalAddress(f_InitRcpDisplayList));
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320 * scale,
       RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
 
@@ -327,14 +327,14 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   gSPMatrix(
       gfx++, &f_MeterViewMatrix, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
   guMtxIdent(&f_MeterIdentityMatrix);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_MeterIdentityMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&f_MeterIdentityMatrix),
       G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_MeterScaleMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&f_MeterScaleMatrix),
       G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_MeterTranslationMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&f_MeterTranslationMatrix),
       G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
 
-  gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_FrameDisplayList));
+  gSPDisplayList(gfx++, PhysicalAddress(f_FrameDisplayList));
   f_FrameVertices[1].v.ob[AXIS_X] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
   f_FrameVertices[2].v.ob[AXIS_X] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
   for (i = 0; i < extraFrameCount + 1; i++) {
@@ -584,7 +584,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
 void DrawMemoryMeter(u32 y, s32 taskFlags) {
   Gfx* gfx = f_MeterDisplayLists[f_MeterDisplayListIndex];
 
-  gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_InitRcpDisplayList));
+  gSPDisplayList(gfx++, PhysicalAddress(f_InitRcpDisplayList));
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
       RenderTargetAddress(osVirtualToPhysical(nuGfxCfb_ptr)));
   gDPPipeSync(gfx++);

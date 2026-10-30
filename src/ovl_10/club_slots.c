@@ -689,12 +689,12 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gDPPipeSync(gfx++);
   for (reelIndex = 0; reelIndex != REEL_COUNT; reelIndex++) {
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_ReelMatrices[reelIndex][g_MatrixBufferIndex]),
+        PhysicalAddress(&f_ReelMatrices[reelIndex][g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_Slots->reelVertices, REEL_VERTEX_COUNT, 0);
     for (quadIndex = 0; quadIndex != REEL_QUAD_COUNT; quadIndex++) {
@@ -733,7 +733,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShadeMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&f_ShadeMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_Slots->shadeVertices, SHADE_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);

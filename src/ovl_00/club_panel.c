@@ -604,9 +604,9 @@ void DrawClubPanel(Gfx** displayListHead) {
         SPAN_BAR_THICKNESS);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SpanBarTranslation),
+    gSPMatrix(gfx++, PhysicalAddress(&f_SpanBarTranslation),
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SpanBarScale),
+    gSPMatrix(gfx++, PhysicalAddress(&f_SpanBarScale),
         G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gSPVertex(gfx++, f_SpanBarVertices, SPAN_BAR_VERTEX_COUNT, 0);
     gSPDisplayList(gfx++, f_SpanBarDisplayList);

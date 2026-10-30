@@ -4841,7 +4841,7 @@ void func_8040C360_hole_editor(
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_PoleMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&f_PoleMatrix),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_PoleVertices[0], POLE_QUAD_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);

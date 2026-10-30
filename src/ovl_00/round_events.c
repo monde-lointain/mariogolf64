@@ -702,7 +702,7 @@ void DrawNumberBanner(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH,
         BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(
+        PhysicalAddress(
             &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_BannerLetterVertices, 4, 0);
@@ -725,10 +725,10 @@ void DrawBannerLetters(Gfx** displayListHead) {
             (i * BANNER_LETTER_IMAGE_SIZE),
         G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH,
         BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BannerMatrices[g_MatrixBufferIndex]),
+    gSPMatrix(gfx++, PhysicalAddress(&f_BannerMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(
+        PhysicalAddress(
             &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_BannerLetterVertices, 4, 0);
@@ -1034,7 +1034,7 @@ void DrawBanner(Gfx** displayListHead) {
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
     DrawBannerLetters(&gfx);
@@ -1160,7 +1160,7 @@ void DrawFlipMessage(Gfx** displayListHead) {
     guMtxCatF(hingeMatrix, matrix, matrix);
     ConvertMatrixToFixed(matrix, &f_FlipMessageMatrices[g_MatrixBufferIndex]);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_FlipMessageMatrices[g_MatrixBufferIndex]),
+        PhysicalAddress(&f_FlipMessageMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_FlipMessageBoardVertices, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -1946,9 +1946,9 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
             f_MovieBuffer + GO_TEXT_OFFSET + MOVIE_IMAGE_PALETTE_OFFSET));
   }
 
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ReadyGoMatrices[f_MovieBackBuffer]),
+  gSPMatrix(gfx++, PhysicalAddress(&f_ReadyGoMatrices[f_MovieBackBuffer]),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPVertex(gfx++, f_ReadyGoVertices, READY_GO_VERTEX_COUNT, 0);
   for (i = 0; i != READY_GO_STRIP_COUNT; i++) {
@@ -2576,11 +2576,11 @@ void LoadContactImages(Player* player) {
  * firstVertex */
 #define DrawContactSegment(segment, firstVertex) \
   gSPMatrix(gfx++, \
-      OS_K0_TO_PHYSICAL(&f_ContactMatrices[(f_ContactTrailHead + (segment)) % \
+      PhysicalAddress(&f_ContactMatrices[(f_ContactTrailHead + (segment)) % \
           CONTACT_TRAIL_LENGTH]), \
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
   gSPMatrix(gfx++, \
-      OS_K0_TO_PHYSICAL(&f_ContactRibbonMatrices[g_DrawBufferIndex]), \
+      PhysicalAddress(&f_ContactRibbonMatrices[g_DrawBufferIndex]), \
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
   gSPVertex(gfx++, f_ContactVertices, 2, firstVertex); \
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW); \
@@ -2862,12 +2862,12 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
         TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ContactMatrices[f_ContactTrailHead]),
+    gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[f_ContactTrailHead]),
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->antiBillboard),
+    gSPMatrix(gfx++, PhysicalAddress(&matrices->antiBillboard),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(&f_ContactSpinMatrices[g_MatrixBufferIndex]),
+        PhysicalAddress(&f_ContactSpinMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_ContactSpinVertices, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -3033,12 +3033,12 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   LoadNibbleTextureBlock(&gfx, ImageBody(f_MovieBuffer + FLY_GUY_IMAGE_SIZE),
       G_IM_FMT_I, WIND_STREAK_IMAGE_WIDTH, WIND_STREAK_IMAGE_HEIGHT, 0,
       G_TX_MIRROR, G_TX_MIRROR, 0, WIND_STREAK_IMAGE_MASK_T, 0, 0);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
   gDPPipeSync(gfx++);
   for (i = 0; i != WIND_STREAK_FIRST_RUN; i++) {
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(
+        PhysicalAddress(
             &f_ContactMatrices[(f_WindStreakHead + i) % WIND_STREAK_LENGTH]),
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPVertex(gfx++, f_ContactVertices, 2, i * 2);
@@ -3058,7 +3058,7 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   for (i = WIND_STREAK_FIRST_RUN, slotsBack = 0;
       i != WIND_STREAK_SECOND_RUN_END; i++, slotsBack += 2) {
     gSPMatrix(gfx++,
-        OS_K0_TO_PHYSICAL(
+        PhysicalAddress(
             &f_ContactMatrices[(f_WindStreakHead + i) % WIND_STREAK_LENGTH]),
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPVertex(gfx++, f_ContactVertices, 2, WIND_STREAK_LAST_SLOT - slotsBack);

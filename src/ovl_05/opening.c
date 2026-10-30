@@ -2965,9 +2965,9 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LookAtMarkerTranslation),
+    gSPMatrix(gfx++, PhysicalAddress(&f_LookAtMarkerTranslation),
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LookAtMarkerScaling),
+    gSPMatrix(gfx++, PhysicalAddress(&f_LookAtMarkerScaling),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_LookAtMarkerVertices[0], 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -3316,10 +3316,10 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         gSPLoadGeometryMode(gfx++, 0);
         gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
         gSPMatrix(gfx++,
-            OS_K0_TO_PHYSICAL(
+            PhysicalAddress(
                 &f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex]),
             G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_OpeningBallScaleMatrices[slot]),
+        gSPMatrix(gfx++, PhysicalAddress(&f_OpeningBallScaleMatrices[slot]),
             G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
         gSPVertex(gfx++, f_OpeningBallShadowVertices, 4, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -3365,12 +3365,11 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(
-                  &f_OpeningBallMatrices[slot][g_DrawBufferIndex]),
+              PhysicalAddress(&f_OpeningBallMatrices[slot][g_DrawBufferIndex]),
               G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->billboard),
+          gSPMatrix(gfx++, PhysicalAddress(&matrices->billboard),
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_OpeningBallScaleMatrices[slot]),
+          gSPMatrix(gfx++, PhysicalAddress(&f_OpeningBallScaleMatrices[slot]),
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           if (f_IsLogoBallSlot[slot]) {
             gDPLoadTextureBlock(gfx++,
@@ -3487,15 +3486,14 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(
-                  &f_LogoBallMarioTranslations[g_DrawBufferIndex]),
+              PhysicalAddress(&f_LogoBallMarioTranslations[g_DrawBufferIndex]),
               G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(&f_LogoBallMarioRolls[g_DrawBufferIndex]),
+              PhysicalAddress(&f_LogoBallMarioRolls[g_DrawBufferIndex]),
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LogoBallMarioScale),
+          gSPMatrix(gfx++, PhysicalAddress(&f_LogoBallMarioScale),
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LogoBallMarioOffset),
+          gSPMatrix(gfx++, PhysicalAddress(&f_LogoBallMarioOffset),
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           if (f_OpeningScene >= OPENING_SCENE_LOGO_BALL_MARIO &&
               f_OpeningSceneFramesLeft < LOGO_BALL_MARIO_FRAMES_LEFT) {
@@ -3611,11 +3609,11 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(
+              PhysicalAddress(
                   &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot]),
               G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(&f_ProjectedShadowScaleMatrices[slot]),
+              PhysicalAddress(&f_ProjectedShadowScaleMatrices[slot]),
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           gSPVertex(gfx++, f_ProjectedShadowVertices, 4, 0);
           gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -3789,16 +3787,16 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gSPSetGeometryMode(
                 gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
             gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(
+                PhysicalAddress(
                     &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex]),
                 G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gSPMatrix(gfx++,
-                OS_K0_TO_PHYSICAL(
+                PhysicalAddress(
                     &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]),
                 G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ProjectedLogoBallMarioScale),
+            gSPMatrix(gfx++, PhysicalAddress(&f_ProjectedLogoBallMarioScale),
                 G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ProjectedLogoBallMarioOffset),
+            gSPMatrix(gfx++, PhysicalAddress(&f_ProjectedLogoBallMarioOffset),
                 G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
             gSPVertex(gfx++, f_ProjectedLogoBallMarioVertices, 4, 0);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -4044,13 +4042,13 @@ void DrawLakitu(Gfx** displayListHead) {
         G_IM_FMT_I, LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, 7,
         G_TX_NOLOD, G_TX_NOLOD);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gDPPipeSync(gfx++);
     segmentIndex = f_LakituTrailNewestIndex;
     for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
         drawnIndex++) {
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_LakituTrailMatrices[segmentIndex]),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_LakituTrailVertices, 2, drawnIndex * 2);
       gSPModifyVertex(
@@ -4077,7 +4075,7 @@ void DrawLakitu(Gfx** displayListHead) {
      */
     for (drawnIndex = LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
         drawnIndex != LAKITU_TRAIL_DRAWN_SEGMENT_COUNT; drawnIndex++) {
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_LakituTrailMatrices[segmentIndex]),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_LakituTrailVertices, 2,
           LakituTrailSecondBatchSlot(drawnIndex));
@@ -4326,9 +4324,9 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowTranslation),
+      gSPMatrix(gfx++, PhysicalAddress(&f_ShotBallShadowTranslation),
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowScaling),
+      gSPMatrix(gfx++, PhysicalAddress(&f_ShotBallShadowScaling),
           G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_ShotBallShadowVertices, 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -4816,13 +4814,13 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
             LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
-        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+        gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPMatrix(gfx++,
-            OS_K0_TO_PHYSICAL(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
+            PhysicalAddress(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPMatrix(gfx++,
-            OS_K0_TO_PHYSICAL(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
+            PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         gDPSetPrimDepth(
             gfx++, f_LogoLetters[i].depth + LOGO_LETTER_DEPTH_OFFSET, 0);
@@ -4844,16 +4842,14 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
           G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+      gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
           G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
       gSPMatrix(gfx++,
-          OS_K0_TO_PHYSICAL(&f_LogoClubTranslations[g_DrawBufferIndex]),
+          PhysicalAddress(&f_LogoClubTranslations[g_DrawBufferIndex]),
           G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-      gSPMatrix(gfx++,
-          OS_K0_TO_PHYSICAL(&f_LogoClubRotations[g_DrawBufferIndex]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_LogoClubRotations[g_DrawBufferIndex]),
           G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-      gSPMatrix(gfx++,
-          OS_K0_TO_PHYSICAL(&f_LogoClubScalings[g_DrawBufferIndex]),
+      gSPMatrix(gfx++, PhysicalAddress(&f_LogoClubScalings[g_DrawBufferIndex]),
           G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
       gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
       gDPPipeSync(gfx++);
@@ -4899,13 +4895,13 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+        gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPMatrix(gfx++,
-            OS_K0_TO_PHYSICAL(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
+            PhysicalAddress(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPMatrix(gfx++,
-            OS_K0_TO_PHYSICAL(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
+            PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         gDPPipeSync(gfx++);
         gSPVertex(gfx++, f_LogoLetterVertices[j], 4, 0);
@@ -5233,7 +5229,7 @@ void DrawOpeningSparks(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
       f_OpeningSparkPositions[sparkIndex][AXIS_X] +=
@@ -5255,7 +5251,7 @@ void DrawOpeningSparks(Gfx** displayListHead) {
       ConvertMatrixToFixed(
           matrix, &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]);
       gSPMatrix(gfx++,
-          OS_K0_TO_PHYSICAL(
+          PhysicalAddress(
               &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(gfx++, f_OpeningSparkVertices, 3, 0);

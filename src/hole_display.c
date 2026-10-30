@@ -1753,9 +1753,9 @@ void DrawSky(
       G_TX_WRAP, SKY_NOISE_MASK, SKY_NOISE_MASK, G_TX_NOLOD, G_TX_NOLOD);
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
+  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenEffectProjection),
       G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SkyModelMatrix),
+  gSPMatrix(gfx++, PhysicalAddress(&f_SkyModelMatrix),
       G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
   gSPPerspNormalize(gfx++, g_ScreenEffectPerspNorm);
   gSPVertex(gfx++,
@@ -2570,7 +2570,7 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
     f_BackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-        RenderTargetAddress(OS_K0_TO_PHYSICAL(f_CapturedFrame)));
+        RenderTargetAddress(PhysicalAddress(f_CapturedFrame)));
     gDPPipeSync(gfx++);
     source = f_LastFrameBuffer;
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
@@ -2594,7 +2594,7 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
 
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-        RenderTargetAddress(OS_K0_TO_PHYSICAL(nuGfxCfb_ptr)));
+        RenderTargetAddress(PhysicalAddress(nuGfxCfb_ptr)));
   }
 
   *displayListHead = gfx;
@@ -2753,7 +2753,7 @@ void DrawTileAnimation(void) {
     gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-    gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
+    gSPMatrix(g_DisplayListHead++, PhysicalAddress(&g_ScreenEffectProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gDPPipeSync(g_DisplayListHead++);
     rotation[AXIS_X] = 0.0f;
@@ -2777,9 +2777,9 @@ void DrawTileAnimation(void) {
             &f_TileMatrices[g_MatrixBufferIndex]
                            [(tileRow * FRAME_TILE_COLUMN_COUNT) + tileColumn]);
         gSPMatrix(g_DisplayListHead++,
-            OS_K0_TO_PHYSICAL(&f_TileMatrices[g_MatrixBufferIndex][tileRow *
-                    FRAME_TILE_COLUMN_COUNT +
-                tileColumn]),
+            PhysicalAddress(&f_TileMatrices[g_MatrixBufferIndex]
+                                           [tileRow * FRAME_TILE_COLUMN_COUNT +
+                                               tileColumn]),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         if (tileColumn == FRAME_TILE_COLUMN_COUNT - 1) {
           gSPVertex(g_DisplayListHead++, f_LastColumnTileVertices,
@@ -2867,10 +2867,10 @@ void DrawTurnAwayAnimation(void) {
     gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-    gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
+    gSPMatrix(g_DisplayListHead++, PhysicalAddress(&g_ScreenEffectProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(g_DisplayListHead++,
-        OS_K0_TO_PHYSICAL(&f_TurnAwayMatrices[g_MatrixBufferIndex]),
+        PhysicalAddress(&f_TurnAwayMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(g_DisplayListHead++, f_TileGridVertices[g_MatrixBufferIndex],
         (TURN_AWAY_UPPER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
