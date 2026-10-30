@@ -234,8 +234,7 @@ void LoadCourseTrophyImages(void** buffers, s32 requestedKind) {
 
   if (memory->statsCourse != COURSE_COUNT) {
     for (index = 0; index != COURSE_IMAGE_COPY_COUNT; index++) {
-      OpenEncodedAsset(
-          g_CourseWheelImageAssets[memory->statsCourse][0], &asset);
+      OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
       ReadEncodedAsset(buffers[index], &asset);
     }
 
@@ -333,8 +332,7 @@ void UpdateCourseStats(void) {
           D_802300A6_ovl_01 = 0;
           D_802300A2_ovl_01 = 0;
           D_802300A4_ovl_01 ^= 1;
-          OpenEncodedAsset(
-              g_CourseWheelImageAssets[memory->statsCourse][0], &asset);
+          OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
           for (index = 0; index != COURSE_FILE_COUNT; index++) {
             OpenAssetFile(
@@ -356,8 +354,7 @@ void UpdateCourseStats(void) {
           D_802300A6_ovl_01 = 0;
           D_802300A2_ovl_01 = 0;
           D_802300A4_ovl_01 ^= 1;
-          OpenEncodedAsset(
-              g_CourseWheelImageAssets[memory->statsCourse][0], &asset);
+          OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
           ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
           for (index = 0; index != COURSE_FILE_COUNT; index++) {
             OpenAssetFile(
@@ -996,8 +993,7 @@ void DrawCourseTrophies(Gfx** displayListHead) {
     if (D_802300A6_ovl_01 >= TROPHY_FRAME_DELAY) {
       D_802300A6_ovl_01 = 0;
       D_802300A2_ovl_01++;
-      if ((s16)g_CourseWheelImageAssets[memory->statsCourse]
-                                       [D_802300A2_ovl_01] ==
+      if ((s16)g_TrophyFrameAssets[memory->statsCourse][D_802300A2_ovl_01] ==
           TROPHY_FRAME_END) {
         D_802300A2_ovl_01 = 0;
       }
@@ -1008,8 +1004,7 @@ void DrawCourseTrophies(Gfx** displayListHead) {
 
       D_802300A4_ovl_01 ^= 1;
       OpenEncodedAsset(
-          g_CourseWheelImageAssets[memory->statsCourse][D_802300A2_ovl_01],
-          &asset);
+          g_TrophyFrameAssets[memory->statsCourse][D_802300A2_ovl_01], &asset);
       ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
     }
   }

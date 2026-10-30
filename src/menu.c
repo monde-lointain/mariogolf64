@@ -175,7 +175,7 @@ AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
         0x0000, 0x0000, 0x0000},
     {0x0599, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000,
         0x0000, 0x0000, 0x0000}};
-AssetId g_CourseWheelImageAssets[][COURSE_IMAGE_COUNT] = {
+AssetId g_TrophyFrameAssets[][COURSE_IMAGE_COUNT] = {
     {0x088D, 0x088E, 0x088F, 0x0890, 0x0891, 0x0892, 0x0893, 0x0894, 0x0895,
         0x0896, 0x0897, 0x0898, 0x0899, 0x089A, 0x089B, 0x089C},
     {0x08B2, 0x08B3, 0x08B4, 0x08B5, 0x08B6, 0x08B7, 0x08B8, 0x08B9, 0x08BA,
@@ -540,14 +540,14 @@ void LoadMenuResources(void) {
     ReadAssetFile(D_801052C4[index], size, &file);
   }
 
-  OpenEncodedAsset(g_CourseWheelImageAssets[0][0], &asset);
+  OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
   g_CourseWheelImages[0] = AllocMemory(0xFA0);
   ReadEncodedAsset(g_CourseWheelImages[0], &asset);
-  OpenEncodedAsset(g_CourseWheelImageAssets[0][0], &asset);
+  OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
   g_CourseWheelImages[1] = AllocMemory(0xFA0);
   ReadEncodedAsset(g_CourseWheelImages[1], &asset);
   for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
-    OpenEncodedAsset(g_CourseWheelImageAssets[0][0], &asset);
+    OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
     D_800FF4C4[index] = AllocMemory(0x125C);
     ReadEncodedAsset(D_800FF4C4[index], &asset);
   }

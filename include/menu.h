@@ -73,11 +73,11 @@ extern s32 g_MenuCourseCount;
  */
 extern u8 g_AreBetPagesBlocked;
 
-/* Each course's images for the menus' turning wheel of courses, and the trophy
- * files read with them */
+/* Each course's frames of its spinning trophy, and the files of the trophy's
+ * place palettes */
 #define COURSE_IMAGE_COUNT 16
 #define COURSE_FILE_COUNT 3
-extern AssetId g_CourseWheelImageAssets[][COURSE_IMAGE_COUNT];
+extern AssetId g_TrophyFrameAssets[][COURSE_IMAGE_COUNT];
 /* Ends a course's images before COURSE_IMAGE_COUNT */
 #define TROPHY_FRAME_END (-1)
 extern s16 g_CourseTrophyFiles[][COURSE_FILE_COUNT];
