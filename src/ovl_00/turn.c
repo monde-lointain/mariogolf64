@@ -459,7 +459,7 @@ static s32 D_8022401C_ovl_00 = 0;
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
 void PlaceShotCamera(void);
-s32 func_8005F30C(s32 x, s32 z);
+s32 GetAimCameraGround(s32 x, s32 z);
 void func_8006034C(s8 value);
 s32 GetRecordedScoreKind(s32 strokes);
 Boolean HasNoRingsLeft(Player* player);
@@ -693,7 +693,7 @@ void PlaceShotCamera(void) {
       D_800C3070 = 0;
     }
 
-    lowestGround = func_8005F30C(point[AXIS_X], point[AXIS_Z]);
+    lowestGround = GetAimCameraGround(point[AXIS_X], point[AXIS_Z]);
     g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     for (probe = 0; probe < AIM_GROUND_PROBE_COUNT; probe++) {
@@ -704,7 +704,7 @@ void PlaceShotCamera(void) {
       point[AXIS_Z] =
           (sinf(heading) * (g_CurrentShot.aimCameraDistance + offset)) +
           g_CurrentShot.ballPosition[AXIS_Z];
-      ground = func_8005F30C(point[AXIS_X], point[AXIS_Z]);
+      ground = GetAimCameraGround(point[AXIS_X], point[AXIS_Z]);
       if (ground < lowestGround) {
         lowestGround = ground;
       }
@@ -785,7 +785,7 @@ void PlaceShotCamera(void) {
     point[AXIS_Y] = g_CurrentShot.aimCameraHeight + center[AXIS_Y];
     point[AXIS_Z] =
         (sinf(heading) * g_CurrentShot.aimCameraDistance) + center[AXIS_Z];
-    point[AXIS_Y] = func_8005F30C(point[AXIS_X], point[AXIS_Z]) +
+    point[AXIS_Y] = GetAimCameraGround(point[AXIS_X], point[AXIS_Z]) +
         g_CurrentShot.aimCameraHeight;
     g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
@@ -904,7 +904,7 @@ void PlaceAimCamera(void) {
   g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
   g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
   g_Cameras[0].view.lookAt[AXIS_Y] =
-      (func_8005F30C(g_CurrentShot.ballPosition[AXIS_X],
+      (GetAimCameraGround(g_CurrentShot.ballPosition[AXIS_X],
            g_CurrentShot.ballPosition[AXIS_Z]) *
           scale) -
       AIM_LOOK_AT_RISE;

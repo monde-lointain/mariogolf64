@@ -226,7 +226,12 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable) {
   return CLUB_SET_SIZE;
 }
 
-s32 func_8005F30C(s32 x, s32 z) {
+/*
+ * The height that the aim camera keeps above at (x, z): the ground or water
+ * there, or outside Mini-Golf where that is above zero, the ball's height
+ * (at least zero)
+ */
+s32 GetAimCameraGround(s32 x, s32 z) {
   s32 height = GetGroundOrWaterHeight(x, z);
   s32 ballHeight;
 
