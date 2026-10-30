@@ -618,7 +618,11 @@ void func_8021508C_ovl_01(
   *displayListHead = gfx;
 }
 
-void func_8021585C_ovl_01(void) {
+/*
+ * Reads every character's face, and the palette of the character and color
+ * that set each course's best times, or Plum's first for an unset time
+ */
+void LoadBestTimesFaces(void) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save = GetSaveData();

@@ -357,7 +357,7 @@ void LoadBestTimesCourseIcons(void** buffers);
 void LoadCharacterFaceStrip(void* buffer);
 void LoadBestTimesBuffer(void* buffer, s16 bufferKind);
 void UpdateBestTimes(void);
-void func_8021585C_ovl_01(void);
+void LoadBestTimesFaces(void);
 void LoadCharacterTableBuffer(void* buffer, s16 bufferKind);
 void UpdateCharacterTable(void);
 void func_8021730C_ovl_01(void);
@@ -1572,7 +1572,7 @@ void UpdateMenus(void) {
             g_MenuBoardImages[f_MenuBoardImageIndex], BEST_TIMES_BUFFER_PLACES);
         LoadBestTimesBuffer(
             g_MenuSpareImages[0], BEST_TIMES_BUFFER_GREEN_ARROWS);
-        func_8021585C_ovl_01();
+        LoadBestTimesFaces();
         break;
 
       case MENU_SCREEN_CHARACTER_TABLE:
