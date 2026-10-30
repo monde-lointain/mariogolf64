@@ -349,7 +349,10 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
     speed = g_CameraEditor.zoomTopSpeed =
         change / (frameCount - easeFrameCount);
     g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
-    g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
+    /* The do-while is there to match */
+    do {
+      g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
+    } while (0);
   }
 
   g_CameraEditor.zoomTarget = distance;
