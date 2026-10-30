@@ -10,6 +10,7 @@
 /* $Id: nucontrmbmgr.c,v 1.14 1999/01/23 05:44:22 ohki Exp $	*/
 /*======================================================================*/
 #include <nusys.h>
+#include "PRinternal/macros.h"
 
 NUContRmbCtl	nuContRmbCtl[NU_CONT_MAXCONTROLLERS];
 u32		nuContRmbSearchTime = NU_CONT_RMB_AUTO_SEARCHTIME;
@@ -32,7 +33,8 @@ static s32 (*funcList[])(NUSiCommonMesg*) = {
     NULL			/* End of list			*/    
 };
 
-NUCallBackList	nuContRmbCallBack = {NULL, funcList, NU_SI_MAJOR_NO_RMB};
+/* nuSiCallBackAdd counts the functions */
+NUCallBackList	nuContRmbCallBack = {NULL, funcList, NU_SI_MAJOR_NO_RMB, 0};
 
 /*----------------------------------------------------------------------*/
 /*	nuContRmbMgrInit - Initializes the Rumble Pak Manager		*/
@@ -124,7 +126,7 @@ static s32 contRmbControl(NUContRmbCtl* rmbCtl, u32 contNo)
 /*	IN:	mesg	message pointer					*/
 /*	RET:	NU_SI_CALLBACK_CONTINUE					*/
 /*----------------------------------------------------------------------*/
-static s32 contRmbRetrace(NUSiCommonMesg* mesg)
+static s32 contRmbRetrace(NUSiCommonMesg* mesg UNUSED)
 {
     u32		cnt;
     s32		rtn;
@@ -206,7 +208,7 @@ static s32 contRmbCheckMesg(NUSiCommonMesg* mesg)
 /*	IN:	mesg	message pointer				*/
 /*	RET:	error							*/
 /*----------------------------------------------------------------------*/
-static s32 contRmbForceStopMesg(NUSiCommonMesg* mesg)    
+static s32 contRmbForceStopMesg(NUSiCommonMesg* mesg UNUSED)    
 {
     u32 cnt;
     for(cnt = 0; cnt < NU_CONT_MAXCONTROLLERS; cnt++){
@@ -220,7 +222,7 @@ static s32 contRmbForceStopMesg(NUSiCommonMesg* mesg)
 /*	IN:	mesg	message pointer				*/
 /*	RET:	error							*/
 /*----------------------------------------------------------------------*/
-static s32 contRmbForceStopEndMesg(NUSiCommonMesg* mesg)    
+static s32 contRmbForceStopEndMesg(NUSiCommonMesg* mesg UNUSED)    
 {
     u32 cnt;
     for(cnt = 0; cnt < NU_CONT_MAXCONTROLLERS; cnt++){

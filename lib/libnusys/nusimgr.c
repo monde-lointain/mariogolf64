@@ -10,6 +10,7 @@
 /* $Id: nusimgr.c,v 1.10 1999/01/25 05:47:17 ohki Exp $		*/
 /*======================================================================*/
 #include <nusys.h>
+#include "PRinternal/macros.h"
 
 OSMesgQueue	nuSiMesgQ;		/* SI event  message queue */
 static OSMesg	nuSiMesgBuf[8];		/* SI event  message buffer */
@@ -126,7 +127,7 @@ void nuSiMgrRestart(void)
 /*	IN:	*arg	 Argument used in generating thread. None.	*/
 /*	RET:	nothing							*/
 /*----------------------------------------------------------------------*/
-static void nuSiMgrThread(void* arg)
+static void nuSiMgrThread(void* arg UNUSED)
 {
     NUScClient		siClient;
     OSMesg		siMgrMesgBuf[NU_SI_MESG_MAX];
@@ -136,6 +137,14 @@ static void nuSiMgrThread(void* arg)
     u16			majorNo;
     u16			minorNo;
     
+#ifdef MODERN_CC
+    /*
+     * A callback list without a retrace function leaves the original testing
+     * whatever ret last held, unset on the first retrace. Here it passes the
+     * message on. Setting it changes the code that KMC GCC builds.
+     */
+    ret = 0;
+#endif
     /* Create an SI message queue. */
     osCreateMesgQueue(&nuSiMgrMesgQ,siMgrMesgBuf, NU_SI_MESG_MAX);
 

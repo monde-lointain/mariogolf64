@@ -240,6 +240,13 @@ static void nuScEventHandler(void)
     OSMesg	msg;
     s32		beforeResetFrame;
 
+#ifdef MODERN_CC
+    /*
+     * The PRENMI message sets it before the retraces read it, which modern
+     * GCC can't tell. Setting it changes the code that KMC GCC builds.
+     */
+    beforeResetFrame = 0;
+#endif
     nuScRetraceCounter = 0;
     nuScRetraceTotal = 0;
     

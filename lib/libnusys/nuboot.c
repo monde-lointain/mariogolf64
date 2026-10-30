@@ -8,6 +8,7 @@
 /* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
 /*======================================================================*/
 #include <nusys.h>
+#include "PRinternal/macros.h"
 
 static OSThread	IdleThread;		/* Idle thread */
 static OSThread	MainThread;		/* main thread */
@@ -58,7 +59,7 @@ void nuBoot(void)
 /*	IN:	None 										*/
 /*	RET:	None 										*/
 /*----------------------------------------------------------------------*/
-static void idle(void *arg)
+static void idle(void *arg UNUSED)
 {
     /* Initialize the CALLBACK function  */
     nuIdleFunc = NULL;

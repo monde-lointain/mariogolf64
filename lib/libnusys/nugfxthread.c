@@ -8,6 +8,7 @@
 /* $Id: nugfxthread.c,v 1.2 1999/01/14 11:33:56 ohki Exp ohki $		*/
 /*======================================================================*/
 #include <nusys.h>
+#include "PRinternal/macros.h"
 
 NUGfxFunc	nuGfxFunc = NULL;
 NUGfxPreNMIFunc	nuGfxPreNMIFunc = NULL;
@@ -23,7 +24,7 @@ static u64	GfxStack[NU_GFX_STACK_SIZE/8];	/* gfx thread stack  */
 /*	IN:	*arg	The argument of osCreateThread. Nothing in particular*/
 /*	RET:	None							     */
 /*---------------------------------------------------------------------------*/
-static void gfxThread(void *arg)
+static void gfxThread(void *arg UNUSED)
 {
     NUScClient	gfx_client;
     NUScMsg*	mesg_type;

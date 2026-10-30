@@ -10,6 +10,7 @@
 /* $Id: nugfxtaskmgr.c,v 1.8 1999/04/28 12:42:40 ohki Exp ohki $	*/
 /*======================================================================*/
 #include <nusys.h>
+#include "PRinternal/macros.h"
 
 extern u8 g_NextFramebuffer[];
 
@@ -50,7 +51,7 @@ NUGfxTaskEndFunc nuGfxTaskEndFunc = NULL; /* task end callback  ptr */
 /*									*/
 /*	RET:	nothing							*/
 /*----------------------------------------------------------------------*/
-void nuGfxTaskMgr(void *arg)
+void nuGfxTaskMgr(void *arg UNUSED)
 {
     NUScMsg*	mesg_type;
     NUScTask*	gfxTask;

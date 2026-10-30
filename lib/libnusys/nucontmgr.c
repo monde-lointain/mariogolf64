@@ -10,6 +10,7 @@
 /* $Id: nucontmgr.c,v 1.13 1999/01/23 05:43:23 ohki Exp $		*/
 /*======================================================================*/
 #include <nusys.h>
+#include "PRinternal/macros.h"
 
 OSMesgQueue	nuContWaitMesgQ;	/* Queue for Controller read wait */
 static OSMesg	nuContWaitMesgBuf;
@@ -37,7 +38,8 @@ static s32 (*funcList[])(NUSiCommonMesg*) = {
     NULL			/* End of list	*/
 };
 
-NUCallBackList	nuContCallBack = {NULL,funcList, NU_SI_MAJOR_NO_CONT};
+/* nuSiCallBackAdd counts the functions */
+NUCallBackList	nuContCallBack = {NULL,funcList, NU_SI_MAJOR_NO_CONT, 0};
 				  
 /*----------------------------------------------------------------------*/
 /*	nuContMgrInit - Initializes the Controller Manager	*/
@@ -159,7 +161,7 @@ static s32 contReadData(OSContPad *pad,u32 lockflag)
 /*	IN:	*mesg	Pointer to a structure of the same type as NUContQueryMesg */
 /*	RET:	nothing							*/
 /*----------------------------------------------------------------------*/
-static s32 contQuery(NUSiCommonMesg* mesg)
+static s32 contQuery(NUSiCommonMesg* mesg UNUSED)
 {
     s32 rtn;
     

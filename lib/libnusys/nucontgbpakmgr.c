@@ -29,7 +29,8 @@ static s32 (*funcList[])(NUSiCommonMesg*) = {
     contGBPakCheckConnector,	/* NU_CONT_GBPAK_CHECKCONNECTOR_MSG	*/
     NULL			/* End of list */        
 };
-NUCallBackList	nuContGBPakCallBack = {NULL, funcList, NU_SI_MAJOR_NO_GBPAK};
+/* nuSiCallBackAdd counts the functions */
+NUCallBackList	nuContGBPakCallBack = {NULL, funcList, NU_SI_MAJOR_NO_GBPAK, 0};
 
 /*----------------------------------------------------------------------*/
 /*	nuContGBPakMgrInit - Initializes the 64GB Pak Manager		*/
@@ -55,7 +56,7 @@ void nuContGBPakMgrRemove(void)
 }
 
 /*----------------------------------------------------------------------*/
-/*	contGBPakOpen - Checks the 64GB Pak
+/*	contGBPakOpen - Checks the 64GB Pak				*/
 /*	IN:	mesg	message pointer					*/
 /*	RET:	error							*/
 /*----------------------------------------------------------------------*/
