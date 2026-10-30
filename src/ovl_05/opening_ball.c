@@ -1041,7 +1041,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       speed = IntLength3D(simulation->velocity[AXIS_X],
           simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]);
       if (speed != 0) {
-        steepness = AbsoluteValueExpression(impactSpeed) / speed;
+        steepness = AbsFloat(impactSpeed) / speed;
       } else {
         steepness = 1.0f;
       }
@@ -1113,12 +1113,10 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] +
             ((spinVelocityX - simulation->velocity[AXIS_X]) * grip *
-                AbsoluteValueExpression(plane.normal[AXIS_Y]) *
-                TRIANGLE_SPIN_GRIP);
+                AbsFloat(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP);
         simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
             ((spinVelocityZ - simulation->velocity[AXIS_Z]) * grip *
-                AbsoluteValueExpression(plane.normal[AXIS_Y]) *
-                TRIANGLE_SPIN_GRIP);
+                AbsFloat(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP);
         spinVelocityX = spinVelocityX * BOUNCE_SPIN_DECAY;
         spinVelocityZ = spinVelocityZ * BOUNCE_SPIN_DECAY;
         spinVelocityX = spinVelocityX +
@@ -1180,7 +1178,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       speed = IntLength3D(simulation->velocity[AXIS_X],
           simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]);
       if (speed != 0) {
-        steepness = AbsoluteValueExpression(impactSpeed) / speed;
+        steepness = AbsFloat(impactSpeed) / speed;
       } else {
         steepness = 1.0f;
       }
@@ -1268,13 +1266,11 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] +
             ((spinVelocityX - simulation->velocity[AXIS_X]) *
-                AbsoluteValueExpression(plane.normal[AXIS_Y]) *
-                GROUND_SPIN_GRIP);
+                AbsFloat(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
         simulation->spinSpeed = 0;
         simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
             ((spinVelocityZ - simulation->velocity[AXIS_Z]) *
-                AbsoluteValueExpression(plane.normal[AXIS_Y]) *
-                GROUND_SPIN_GRIP);
+                AbsFloat(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
       } else {
         f32 keep = 1.0f - spin;
         s32 bounced[3];
@@ -1316,11 +1312,9 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         grip = 1.0f - restitution;
         driftX = (spinVelocityX - simulation->velocity[AXIS_X]) * grip *
-            AbsoluteValueExpression(plane.normal[AXIS_Y]) *
-            OPENING_GROUND_SPIN_DRIFT_GRIP;
+            AbsFloat(plane.normal[AXIS_Y]) * OPENING_GROUND_SPIN_DRIFT_GRIP;
         driftZ = (spinVelocityZ - simulation->velocity[AXIS_Z]) * grip *
-            AbsoluteValueExpression(plane.normal[AXIS_Y]) *
-            OPENING_GROUND_SPIN_DRIFT_GRIP;
+            AbsFloat(plane.normal[AXIS_Y]) * OPENING_GROUND_SPIN_DRIFT_GRIP;
         driftLimit = impactSpeed * OPENING_MAX_SPIN_DRIFT_SHARE;
         drift = (s32)IntLength2D(driftX, driftZ);
         if (driftLimit < drift && impactSpeed > 1.0f) {
@@ -1459,10 +1453,10 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         }
       }
 
-      slopeX = (-plane.normal[AXIS_X] * GRAVITY) /
-          AbsoluteValueExpression(plane.normal[AXIS_Y]);
-      slopeZ = (-plane.normal[AXIS_Z] * GRAVITY) /
-          AbsoluteValueExpression(plane.normal[AXIS_Y]);
+      slopeX =
+          (-plane.normal[AXIS_X] * GRAVITY) / AbsFloat(plane.normal[AXIS_Y]);
+      slopeZ =
+          (-plane.normal[AXIS_Z] * GRAVITY) / AbsFloat(plane.normal[AXIS_Y]);
       if (plane.normal[AXIS_Y] * plane.normal[AXIS_Y] <=
               (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
                   (plane.normal[AXIS_Z] * plane.normal[AXIS_Z]) &&
@@ -1575,23 +1569,20 @@ ROLLED:
           (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) +
           MIN_AIR_DRAG;
       sideSpin = simulation->sideSpin;
-      sideSpinMagnitude =
-          AbsoluteValueExpression(sideSpin * SIDE_SPIN_SPEED_SCALE);
+      sideSpinMagnitude = AbsFloat(sideSpin * SIDE_SPIN_SPEED_SCALE);
       horizontalSpeed = GetLength2D(relative[AXIS_X], relative[AXIS_Z]);
       ratio = 0.0f;
       if (sideSpinMagnitude != 0.0f) {
         ratio = horizontalSpeed / sideSpinMagnitude;
       }
 
-      weight = 1.0f -
-          (AbsoluteValueExpression(ratio - 1.0f) * SIDE_SPIN_MISMATCH_FALLOFF);
+      weight = 1.0f - (AbsFloat(ratio - 1.0f) * SIDE_SPIN_MISMATCH_FALLOFF);
       if (weight < 0.0f) {
         weight = 0.0f;
       }
 
       curve = sideSpin * (weight * CURVE_PER_SIDE_SPIN);
-      if (horizontalSpeed <
-          AbsoluteValueExpression(curve) * MAX_CURVE_SPEED_RATIO) {
+      if (horizontalSpeed < AbsFloat(curve) * MAX_CURVE_SPEED_RATIO) {
         curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
         if (simulation->sideSpin < 0) {
           curve = -curve;
@@ -1608,16 +1599,14 @@ ROLLED:
       }
 
       simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;
-      spinMagnitude = AbsoluteValueExpression(
-          simulation->spinSpeed * OPENING_SPIN_SPEED_SCALE);
+      spinMagnitude =
+          AbsFloat(simulation->spinSpeed * OPENING_SPIN_SPEED_SCALE);
       ratio = 0.0f;
       if (spinMagnitude != 0.0f) {
         ratio = airSpeed / spinMagnitude;
       }
 
-      weight = 1.0f -
-          (AbsoluteValueExpression(ratio - 1.0f) *
-              OPENING_SPIN_MISMATCH_FALLOFF);
+      weight = 1.0f - (AbsFloat(ratio - 1.0f) * OPENING_SPIN_MISMATCH_FALLOFF);
       if (weight < 0.0f) {
         weight = 0.0f;
       }
@@ -1628,8 +1617,7 @@ ROLLED:
         guMtxXFMF(simulation->liftRotation, relative[AXIS_X], relative[AXIS_Y],
             relative[AXIS_Z], &turned[AXIS_X], &turned[AXIS_Y],
             &turned[AXIS_Z]);
-        if (airSpeed <
-            AbsoluteValueExpression(lift) * OPENING_MAX_LIFT_SPEED_RATIO) {
+        if (airSpeed < AbsFloat(lift) * OPENING_MAX_LIFT_SPEED_RATIO) {
           lift = airSpeed * (1.0f / OPENING_MAX_LIFT_SPEED_RATIO);
         }
 

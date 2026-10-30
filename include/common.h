@@ -183,6 +183,18 @@ typedef s32 Boolean;
     (absValue < 0) ? -absValue : absValue; \
   })
 
+/*
+ * The magnitude of a float, as a compare and branch where fabsf compiles to
+ * abs.s. It is a macro because StepBallSimulation compiles further from the
+ * original when these sites call an inline function instead, whether a static
+ * one or its AbsoluteValue nested one.
+ */
+#define AbsFloat(value) \
+  ({ \
+    f32 absValue = (value); \
+    (absValue < 0.0f) ? -absValue : absValue; \
+  })
+
 /* The bytes from start up to end, which may point at different types */
 #define BytesBetween(start, end) ((u8*)(end) - (u8*)(start))
 /* The address byteCount bytes past pointer, whatever it points at */

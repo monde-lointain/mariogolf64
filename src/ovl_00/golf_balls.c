@@ -755,12 +755,6 @@ enum BallSprite {
   gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, \
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
-#define AbsFloat(value) \
-  ({ \
-    f32 absValue = (value); \
-    (absValue < 0.0f) ? -absValue : absValue; \
-  })
-
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   Gfx* gfx = g_DisplayListHead;

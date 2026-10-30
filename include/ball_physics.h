@@ -12,18 +12,6 @@
 #include "ball_simulation.h"
 #include "sound.h"
 
-/*
- * The absolute value as a statement expression, which compiles to a compare and
- * branch. It is a macro because StepBallSimulation compiles further from the
- * original when these sites call an inline function instead, whether a static
- * one or the AbsoluteValue nested one.
- */
-#define AbsoluteValueExpression(value) \
-  ({ \
-    f32 absValue = (value); \
-    (absValue < 0.0f) ? -absValue : absValue; \
-  })
-
 /* The channels of a rolling ball's sound and of a ring passed through */
 #define ROLL_SOUND_CHANNEL 8
 #define RING_SOUND_CHANNEL 14

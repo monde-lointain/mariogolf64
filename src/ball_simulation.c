@@ -855,8 +855,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             g_HoleSetup.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
 
         if ((toCupX | toCupZ) != 0) {
-          s32 scale = AbsoluteValueExpression(velocity[AXIS_Y]) /
-              IntLength2D(toCupX, toCupZ);
+          s32 scale = AbsFloat(velocity[AXIS_Y]) / IntLength2D(toCupX, toCupZ);
 
           velocity[AXIS_X] = toCupX * scale;
           velocity[AXIS_Z] = toCupZ * scale;
@@ -864,7 +863,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               g_HoleSetup.cupPosition[AXIS_Y] + CUP_CEILING_DEPTH;
         }
 
-        velocity[AXIS_Y] = AbsoluteValueExpression(velocity[AXIS_Y]);
+        velocity[AXIS_Y] = AbsFloat(velocity[AXIS_Y]);
       }
 
       if (simulation->position[AXIS_Y] >=
@@ -986,8 +985,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         guNormalize(&normalX, &normalY, &normalZ);
         inwardSpeed = (-normalZ * velocity[AXIS_X]) +
             (normalY * velocity[AXIS_Y]) + (normalX * velocity[AXIS_Z]);
-        PlayStrokeImpactSound(SOUND_HIT_WALL, FULL_VOLUME_WALL_HIT_SPEED,
-            AbsoluteValueExpression(inwardSpeed));
+        PlayStrokeImpactSound(
+            SOUND_HIT_WALL, FULL_VOLUME_WALL_HIT_SPEED, AbsFloat(inwardSpeed));
         squareX = velocity[AXIS_X] * velocity[AXIS_X];
         squareZ = velocity[AXIS_Z] * velocity[AXIS_Z];
         along = wallFraction;
@@ -1202,9 +1201,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         f32 grip = 1.0f - bounce;
 
         velocity[AXIS_X] += (spinVelocityX - velocity[AXIS_X]) * grip *
-            AbsoluteValueExpression(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP;
+            AbsFloat(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP;
         velocity[AXIS_Z] += (spinVelocityZ - velocity[AXIS_Z]) * grip *
-            AbsoluteValueExpression(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP;
+            AbsFloat(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP;
         spinVelocityX *= BOUNCE_SPIN_DECAY;
         spinVelocityZ *= BOUNCE_SPIN_DECAY;
         spinVelocityX = spinVelocityX +
