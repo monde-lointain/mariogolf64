@@ -1636,11 +1636,6 @@ void UpdateMenus(void) {
  * and the waiting players' calls need one each, and gives each player a sound
  * pan for the player count.
  */
-/*
- * Doesn't match: the original reloads g_GameState.playerCount for each pass of
- * the outer loop, where this keeps it in a register.
- */
-#ifdef NON_MATCHING
 void CheckControllersAndSetPans(void) {
   s32 playerIndex;
   s32 otherIndex;
@@ -1659,13 +1654,12 @@ void CheckControllersAndSetPans(void) {
   }
 
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-    g_Players[playerIndex].soundPan =
+    /* Taking the player's address first makes the loop step a pointer
+     * through g_Players, as the original does */
+    (&g_Players[playerIndex])->soundPan =
         f_PlayerSoundPans[g_GameState.playerCount - 1][playerIndex];
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", CheckControllersAndSetPans);
-#endif
 
 void func_801F6B20_ovl_01(void) {}
 
