@@ -139,8 +139,8 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer);
 void DrawCharacterBoard(Gfx** displayListHead);
 void DrawPlayerTags(Gfx** displayListHead, u8 tagMode);
 /* The original passes these a second argument that they ignore */
-void func_8020D338_ovl_01();
-void func_8020D734_ovl_01();
+void DrawComIcon();
+void DrawLeftyIcon();
 void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet);
 
 static u8 D_8022FF00_ovl_01 = FALSE;
@@ -1326,11 +1326,11 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   }
 
   if ((D_8022FF07_ovl_01 == TRUE) & ((u8)isSinglePlayer == FALSE)) {
-    func_8020D338_ovl_01(&gfx, 0);
+    DrawComIcon(&gfx, 0);
   }
 
   if (D_8022FF08_ovl_01 == TRUE) {
-    func_8020D734_ovl_01(&gfx, 0);
+    DrawLeftyIcon(&gfx, 0);
   }
 
   gDPPipeSync(gfx++);
@@ -1832,7 +1832,8 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y) {
   *displayListHead = gfx;
 }
 
-void func_8020D338_ovl_01(Gfx** displayListHead) {
+/* Draws the "R: COM" icon, shown while R is held outside single player */
+void DrawComIcon(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
@@ -1865,7 +1866,8 @@ void func_8020D338_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8020D734_ovl_01(Gfx** displayListHead) {
+/* Draws the "L: LEFTY" icon, shown while Z or L is held */
+void DrawLeftyIcon(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
