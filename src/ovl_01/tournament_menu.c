@@ -37,7 +37,7 @@
 #define TOURNAMENT_IMAGE_ROW_COUNT 15
 #define TOURNAMENT_IMAGE_COLUMN_COUNT 4
 
-/* func_8022A43C stretches the menu banner of D_80230F44 into the two panels
+/* DrawCodePanels stretches the menu banner of D_80230F44 into the two panels
  * behind the code screen */
 #define CODE_UPPER_PANEL_LEFT 28
 #define CODE_UPPER_PANEL_TOP 56
@@ -47,7 +47,8 @@
 #define CODE_LOWER_PANEL_TOP 160
 #define CODE_LOWER_PANEL_WIDTH 280
 #define CODE_LOWER_PANEL_STRIP_HEIGHT 20
-/* The "CODE ENTRY" bar of D_80230F48 that func_8022A090 draws, in 8-row strips
+/* The "CODE ENTRY" bar of D_80230F48 that DrawCodeEntryBar draws, in 8-row
+ * strips
  */
 #define CODE_ENTRY_BAR_WIDTH 256
 #define CODE_ENTRY_BAR_STRIP_HEIGHT 8
@@ -55,7 +56,7 @@
 #define CODE_ENTRY_BAR_LEFT 32
 #define CODE_ENTRY_BAR_TOP 140
 /*
- * func_8022A8F4 points at the chosen key with the 24x24 hand of
+ * DrawCodeHand points at the chosen key with the 24x24 hand of
  * ASSET_POINTING_HAND in D_80230F50, which sways a pixel to the right each
  * frame and back
  */
@@ -94,7 +95,7 @@ enum ClubCodeState {
 #define CODE_KEY_BACK 0xFE
 #define CODE_KEY_END 0xFF
 /*
- * func_8022ADE8 draws each key's 16x16 glyph from ASSET_CODE_ENTRY_GLYPHS in
+ * DrawCodeKeys draws each key's 16x16 glyph from ASSET_CODE_ENTRY_GLYPHS in
  * D_80230F4C, tinting the chosen one yellow
  */
 #define CODE_GLYPH_SIZE 16
@@ -327,11 +328,11 @@ s32 GetClubTournamentModeMessage(void);
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     s32 centerY, s32 okTextShown, s32 chosenButton, s32 windowStyle);
 void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number);
-void func_8022A43C_ovl_01(Gfx** displayListHead);
-void func_8022A8F4_ovl_01(Gfx** displayListHead);
-void func_8022ADE8_ovl_01(Gfx** displayListHead);
-void func_8022B360_ovl_01(Gfx** displayListHead);
-void func_8022B668_ovl_01(Gfx** displayListHead);
+void DrawCodePanels(Gfx** displayListHead);
+void DrawCodeHand(Gfx** displayListHead);
+void DrawCodeKeys(Gfx** displayListHead);
+void DrawEnteredCode(Gfx** displayListHead);
+void DrawCodePrompt(Gfx** displayListHead);
 void DrawCodeCursor(Gfx** displayListHead);
 s32 GetClubTournamentCharacter(void);
 s32 func_8022B46C_ovl_01(void);
@@ -1551,13 +1552,13 @@ void DrawClubTournament(Gfx** displayListHead) {
   s32 pressedButtons;
 
   DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
-  func_8022A43C_ovl_01(&gfx);
-  func_8022A090_ovl_01(&gfx);
-  func_8022ADE8_ovl_01(&gfx);
-  func_8022B360_ovl_01(&gfx);
-  func_8022A8F4_ovl_01(&gfx);
+  DrawCodePanels(&gfx);
+  DrawCodeEntryBar(&gfx);
+  DrawCodeKeys(&gfx);
+  DrawEnteredCode(&gfx);
+  DrawCodeHand(&gfx);
   DrawCodeCursor(&gfx);
-  func_8022B668_ovl_01(&gfx);
+  DrawCodePrompt(&gfx);
   if (D_80230F70_ovl_01 == 1) {
     if (IsNintendoClubTournament()) {
       windowStyle = (GetClubTournamentCharacter() != -1)
@@ -1635,7 +1636,10 @@ void DrawClubTournament(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8022A090_ovl_01(Gfx** displayListHead) {
+/*
+ * Draws the CODE ENTRY label and the row of boxes that the code is entered in
+ */
+void DrawCodeEntryBar(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
 
@@ -1672,7 +1676,8 @@ void func_8022A090_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8022A43C_ovl_01(Gfx** displayListHead) {
+/* Stretches the menu banner into the panels behind the keyboard and prompt */
+void DrawCodePanels(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
 
@@ -1721,7 +1726,8 @@ void func_8022A43C_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8022A8F4_ovl_01(Gfx** displayListHead) {
+/* Draws the hand that points at the chosen key, swaying it from side to side */
+void DrawCodeHand(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
   s32 left;
@@ -1776,7 +1782,8 @@ void func_8022A8F4_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8022ADE8_ovl_01(Gfx** displayListHead) {
+/* Draws the keyboard's keys */
+void DrawCodeKeys(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
   s32 row;
@@ -1838,7 +1845,8 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8022B360_ovl_01(Gfx** displayListHead) {
+/* Writes the code's characters entered so far in their boxes */
+void DrawEnteredCode(Gfx** displayListHead) {
   s32 charIndex;
   Gfx* gfx = *displayListHead;
 
@@ -1929,7 +1937,8 @@ s32 func_8022B5E0_ovl_01(void) {
   return isEmpty;
 }
 
-void func_8022B668_ovl_01(Gfx** displayListHead) {
+/* Writes the prompt below the code, asking for it or saying it is incorrect */
+void DrawCodePrompt(Gfx** displayListHead) {
   s32 x = 0;
   Gfx* gfx = *displayListHead;
   s32 messageOffset;
