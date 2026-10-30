@@ -107,7 +107,7 @@ extern void* D_801B69EC;
   {NO_HOST_FILE_NAME, NO_HOST_FILE_NAME, PI_DOM2_ADDR2 + (sramOffset), \
       PI_DOM2_ADDR2 + (sramOffset) + sizeof(SaveData)}
 
-void func_8005CA48(void);
+void PlaceImportedCharacters(void);
 
 /* A cell of the character grid */
 typedef struct GridCell {
@@ -1339,7 +1339,7 @@ void BuildCharacterGrid(s32 arg0, s32 arg1) {
       }
     }
 
-    func_8005CA48();
+    PlaceImportedCharacters();
     return;
   }
 
@@ -1384,7 +1384,7 @@ void BuildCharacterGrid(s32 arg0, s32 arg1) {
     g_CharacterGrid[1][6] = CHARACTER_CHOICE_METAL_MARIO;
   }
 
-  func_8005CA48();
+  PlaceImportedCharacters();
   for (index = 0; index != MARKABLE_CHARACTER_COUNT; index++) {
     row = f_SlotCells[index].row;
     column = f_SlotCells[index].column;
@@ -1415,7 +1415,12 @@ void BuildCharacterGrid(s32 arg0, s32 arg1) {
   }
 }
 
-void func_8005CA48(void) {
+/*
+ * Puts the characters brought over from the Game Boy Color game, or the debug
+ * set under GAME_FLAG_ALL_CHARACTERS, in their grid cells with their names
+ * and first clubs
+ */
+void PlaceImportedCharacters(void) {
   s16 index;
   s16 byteIndex;
   s16 count; /* Also the byte index of the first loops, to match */
