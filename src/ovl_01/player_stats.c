@@ -96,7 +96,7 @@ enum GatheredBestShots {
 #define ASSET_DOUBLE_PAGE_ARROWS 0x829
 #define STATS_INDEX_COLUMN_COUNT 6
 /* g_BetSet counts the index tables' rows from 1; columns past a row's count
- * in D_802304B4 hold STATS_INDEX_UNUSED */
+ * in f_BetSetColumnCounts hold STATS_INDEX_UNUSED */
 #define STATS_INDEX_ROW_COUNT 7
 #define STATS_INDEX_UNUSED -1
 /* The bet icons are 24x24, and DrawBetIcon shows each of their two frames
@@ -235,8 +235,9 @@ static u32 f_BetIconFrameAssets[BET_ICON_COUNT]
   { 0x0672, 0x0673 }
 };
 // clang-format on
+/* The bet whose label and icon each column of a bet set shows */
 // clang-format off
-static s16 D_8023040C_ovl_01[STATS_INDEX_ROW_COUNT]
+static s16 f_BetSetBets[STATS_INDEX_ROW_COUNT]
                              [STATS_INDEX_COLUMN_COUNT] = {
   { 0, 1, 2, 3, 5, STATS_INDEX_UNUSED },
   { 0, 1, 2, 3, 5, 7 },
@@ -248,8 +249,8 @@ static s16 D_8023040C_ovl_01[STATS_INDEX_ROW_COUNT]
 };
 // clang-format on
 // clang-format off
-/* Which of betStakeLevels' bets each column of D_8023040C sets */
-static s16 D_80230460_ovl_01[STATS_INDEX_ROW_COUNT]
+/* Which of betStakeLevels' stakes each column of a bet set sets */
+static s16 f_BetSetStakeSlots[STATS_INDEX_ROW_COUNT]
                              [STATS_INDEX_COLUMN_COUNT] = {
   { 0, 1, 2, 3, 4, STATS_INDEX_UNUSED },
   { 0, 1, 2, 3, 4, 6 },
@@ -260,8 +261,8 @@ static s16 D_80230460_ovl_01[STATS_INDEX_ROW_COUNT]
   { 2, 3, 4, 6, STATS_INDEX_UNUSED, STATS_INDEX_UNUSED }
 };
 // clang-format on
-/* How many columns of D_8023040C each row uses */
-static u8 D_802304B4_ovl_01[STATS_INDEX_ROW_COUNT] = {5, 6, 3, 3, 3, 3, 4};
+/* How many columns each bet set uses */
+static u8 f_BetSetColumnCounts[STATS_INDEX_ROW_COUNT] = {5, 6, 3, 3, 3, 3, 4};
 /* Each BET_PRESET_*'s stake level for each bet */
 // clang-format off
 static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT]
@@ -277,8 +278,8 @@ static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT]
 // clang-format on
 static u8 f_BetStakeAmounts[BET_STAKE_LEVEL_COUNT] = {0, 1, 2, 3, 5, 10};
 // clang-format off
-/* The x of each column of D_8023040C */
-static s32 D_802304FC_ovl_01[STATS_INDEX_ROW_COUNT]
+/* The x of each column of a bet set */
+static s32 f_BetSetColumnXs[STATS_INDEX_ROW_COUNT]
                              [STATS_INDEX_COLUMN_COUNT] = {
   { 68, 108, 148, 188, 228, 228 },
   { 48, 88, 128, 168, 208, 248 },
@@ -513,8 +514,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       imageSlot = &f_ChosenBetIconFrames[0];
       *imageSlot = buffer;
       OpenEncodedAsset(
-          f_BetIconFrameAssets[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]]
-                              [0],
+          f_BetIconFrameAssets[f_BetSetBets[rowNumber - 1][memory->unkD]][0],
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
@@ -523,8 +523,7 @@ void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind) {
       imageSlot = &f_ChosenBetIconFrames[1];
       *imageSlot = buffer;
       OpenEncodedAsset(
-          f_BetIconFrameAssets[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]]
-                              [1],
+          f_BetIconFrameAssets[f_BetSetBets[rowNumber - 1][memory->unkD]][1],
           &asset);
       ReadEncodedAsset(*imageSlot, &asset);
       break;
@@ -688,13 +687,13 @@ void UpdateBetSettings(void) {
 
   if (g_MenuRepeatButtons & U_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    index = D_80230460_ovl_01[g_BetSet - 1][memory->unkD];
+    index = f_BetSetStakeSlots[g_BetSet - 1][memory->unkD];
     if (memory->betStakeLevels[index] < BET_STAKE_LEVEL_COUNT - 1) {
       memory->betStakeLevels[index]++;
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    index = D_80230460_ovl_01[g_BetSet - 1][memory->unkD];
+    index = f_BetSetStakeSlots[g_BetSet - 1][memory->unkD];
     if (memory->betStakeLevels[index] > 0) {
       memory->betStakeLevels[index]--;
     }
@@ -702,14 +701,14 @@ void UpdateBetSettings(void) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     memory->unkD--;
     if (memory->unkD < 0) {
-      memory->unkD = D_802304B4_ovl_01[g_BetSet - 1] - 1;
+      memory->unkD = f_BetSetColumnCounts[g_BetSet - 1] - 1;
     }
 
     SetTextSlot(BET_HELP_X, BET_HELP_Y,
-        D_8023040C_ovl_01[g_BetSet - 1][memory->unkD] + BET_HELP_MESSAGE,
+        f_BetSetBets[g_BetSet - 1][memory->unkD] + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
-        f_BetIconFrameAssets[D_8023040C_ovl_01[g_BetSet - 1][memory->unkD]]
+        f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->unkD]]
                             [g_AnimatedIconFrameIndex],
         &asset);
     ReadEncodedAsset(
@@ -718,15 +717,15 @@ void UpdateBetSettings(void) {
   } else if (g_MenuRepeatButtons & R_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     memory->unkD++;
-    if (memory->unkD > D_802304B4_ovl_01[g_BetSet - 1] - 1) {
+    if (memory->unkD > f_BetSetColumnCounts[g_BetSet - 1] - 1) {
       memory->unkD = 0;
     }
 
     SetTextSlot(BET_HELP_X, BET_HELP_Y,
-        D_8023040C_ovl_01[g_BetSet - 1][memory->unkD] + BET_HELP_MESSAGE,
+        f_BetSetBets[g_BetSet - 1][memory->unkD] + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
-        f_BetIconFrameAssets[D_8023040C_ovl_01[g_BetSet - 1][memory->unkD]]
+        f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->unkD]]
                             [g_AnimatedIconFrameIndex],
         &asset);
     ReadEncodedAsset(
@@ -809,9 +808,9 @@ void DrawBetSettings(
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
-  for (columnIndex = 0; columnIndex != D_802304B4_ovl_01[g_BetSet - 1];
+  for (columnIndex = 0; columnIndex != f_BetSetColumnCounts[g_BetSet - 1];
       columnIndex++) {
-    betIndex = D_8023040C_ovl_01[g_BetSet - 1][columnIndex];
+    betIndex = f_BetSetBets[g_BetSet - 1][columnIndex];
     if (betIndex == -1) {
       break;
     }
@@ -821,7 +820,7 @@ void DrawBetSettings(
       gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
       /* Bets without a stake are dimmed */
       if (memory
-              ->betStakeLevels[D_80230460_ovl_01[g_BetSet - 1][columnIndex]] ==
+              ->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][columnIndex]] ==
           0) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
@@ -837,9 +836,9 @@ void DrawBetSettings(
           G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(D_802304FC_ovl_01[g_BetSet - 1][columnIndex] + slide),
+          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide),
           QuarterPixels(BET_ICON_TOP),
-          QuarterPixels(D_802304FC_ovl_01[g_BetSet - 1][columnIndex] + slide +
+          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide +
               BET_ICON_SIZE),
           QuarterPixels(BET_ICON_TOP + BET_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -847,16 +846,16 @@ void DrawBetSettings(
     }
 
     DrawUnalignedMenuNumber(&gfx,
-        D_802304FC_ovl_01[g_BetSet - 1][columnIndex] + slide +
+        f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide +
             BET_AMOUNT_OFFSET_X,
         BET_AMOUNT_Y,
-        (s8)f_BetStakeAmounts[memory
-                ->betStakeLevels[D_80230460_ovl_01[g_BetSet - 1][columnIndex]]],
+        (s8)f_BetStakeAmounts[memory->betStakeLevels
+                [f_BetSetStakeSlots[g_BetSet - 1][columnIndex]]],
         0);
   }
 
   /* The chosen bet's icon is animated */
-  DrawBetIcon(&gfx, D_802304FC_ovl_01[g_BetSet - 1][memory->unkD] + slide,
+  DrawBetIcon(&gfx, f_BetSetColumnXs[g_BetSet - 1][memory->unkD] + slide,
       CHOSEN_BET_ICON_TOP, BET_ICON_SIZE, TEXEL_STEP_ONE);
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -887,12 +886,12 @@ void DrawBetSettings(
       markRaise = LARGEST_STAKE_RAISE;
     }
 
-    for (columnIndex = 0; columnIndex != D_802304B4_ovl_01[g_BetSet - 1];
+    for (columnIndex = 0; columnIndex != f_BetSetColumnCounts[g_BetSet - 1];
         columnIndex++) {
       /* Marks above the bet's stake are dimmed */
       if (stakeLevel >=
           memory
-              ->betStakeLevels[D_80230460_ovl_01[g_BetSet - 1][columnIndex]]) {
+              ->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][columnIndex]]) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
@@ -902,7 +901,7 @@ void DrawBetSettings(
 
       gDPPipeSync(gfx++);
 
-      columnX = D_802304FC_ovl_01[g_BetSet - 1][columnIndex] + slide +
+      columnX = f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide +
           STAKE_MARK_OFFSET_X;
       gSPScisTextureRectangle(gfx++, QuarterPixels(columnX - (markGrowth >> 1)),
           QuarterPixels((STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - markGrowth -
@@ -976,7 +975,7 @@ void DrawBetSettings(
     gDPPipeSync(gfx++);
   }
 
-  betIndex = D_8023040C_ovl_01[g_BetSet - 1][memory->unkD];
+  betIndex = f_BetSetBets[g_BetSet - 1][memory->unkD];
   DrawBetLabel(&gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
   if (!f_IsBetHelpShown && isSettled == TRUE) {
     SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE,
@@ -1024,7 +1023,7 @@ void DrawBetIcon(
     }
 
     g_AnimatedIconBufferIndex = !g_AnimatedIconBufferIndex;
-    iconIndex = D_8023040C_ovl_01[g_BetSet - 1][memory->unkD];
+    iconIndex = f_BetSetBets[g_BetSet - 1][memory->unkD];
     OpenEncodedAsset(
         f_BetIconFrameAssets[iconIndex][g_AnimatedIconFrameIndex], &asset);
     ReadEncodedAsset(f_ChosenBetIconFrames[g_AnimatedIconBufferIndex], &asset);
