@@ -644,7 +644,8 @@ static u8 f_LogoClubImage[LOGO_CLUB_IMAGE_BUFFER_SIZE];
 static LogoLetter f_LogoLetters[LOGO_LETTER_COUNT];
 static s32 f_LogoLetterStates[LOGO_LETTER_COUNT];
 static f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT]; /* Down, in pixels a frame */
-static f32 f_LogoLetterScales[LOGO_LETTER_COUNT][2]; /* Across, then up */
+/* Each logo letter's scale across and up */
+static Vec2 f_LogoLetterScales[LOGO_LETTER_COUNT];
 /* Frames left in a letter's squashing, squashed or stretching state */
 static s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];
 static u8 f_LogoShineImage[SHINE_IMAGE_BUFFER_SIZE];
@@ -4467,8 +4468,8 @@ void LoadOpeningLogo(void) {
     f_LogoLetterSpeeds[letterIndex] = -14.0f;
     f_LogoLetters[letterIndex].x = LOGO_LETTER_HIDDEN;
     f_LogoLetters[letterIndex].y = LOGO_LETTER_HIDDEN;
-    f_LogoLetterScales[letterIndex][0] = 0.1f;
-    f_LogoLetterScales[letterIndex][1] = 0.1f;
+    f_LogoLetterScales[letterIndex][AXIS_X] = 0.1f;
+    f_LogoLetterScales[letterIndex][AXIS_Y] = 0.1f;
     f_LogoLetterSquashFrames[letterIndex] = 0;
   }
 
@@ -4740,7 +4741,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
           (SCREEN_HEIGHT - f_LogoLetters[i].y) - (SCREEN_HEIGHT / 2.0f),
           f_LogoLetters[i].depth + LOGO_Z);
       guScale(&f_LogoLetterScalings[i][g_DrawBufferIndex],
-          f_LogoLetterScales[i][0], f_LogoLetterScales[i][1], 1.0f);
+          f_LogoLetterScales[i][AXIS_X], f_LogoLetterScales[i][AXIS_Y], 1.0f);
     }
 
     guTranslate(&f_LogoClubTranslations[g_DrawBufferIndex],
@@ -4982,18 +4983,18 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
 
       f_LogoLetters[i].y += (s32)f_LogoLetterSpeeds[i];
       f_LogoLetterSpeeds[i] += LOGO_LETTER_GRAVITY;
-      f_LogoLetterScales[i][0] += LOGO_LETTER_GROWTH;
-      f_LogoLetterScales[i][1] += LOGO_LETTER_GROWTH;
-      if (f_LogoLetterScales[i][0] > 1.0f) {
-        f_LogoLetterScales[i][0] = 1.0f;
+      f_LogoLetterScales[i][AXIS_X] += LOGO_LETTER_GROWTH;
+      f_LogoLetterScales[i][AXIS_Y] += LOGO_LETTER_GROWTH;
+      if (f_LogoLetterScales[i][AXIS_X] > 1.0f) {
+        f_LogoLetterScales[i][AXIS_X] = 1.0f;
       }
 
-      if (f_LogoLetterScales[i][1] > 1.0f) {
-        f_LogoLetterScales[i][1] = 1.0f;
+      if (f_LogoLetterScales[i][AXIS_Y] > 1.0f) {
+        f_LogoLetterScales[i][AXIS_Y] = 1.0f;
       }
     } else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHING) {
-      f_LogoLetterScales[i][0] += LOGO_LETTER_SQUASH_STEP;
-      f_LogoLetterScales[i][1] -= LOGO_LETTER_SQUASH_STEP;
+      f_LogoLetterScales[i][AXIS_X] += LOGO_LETTER_SQUASH_STEP;
+      f_LogoLetterScales[i][AXIS_Y] -= LOGO_LETTER_SQUASH_STEP;
       f_LogoLetterSquashFrames[i]--;
       if (f_LogoLetterSquashFrames[i] == 0) {
         f_LogoLetterStates[i] = LOGO_LETTER_SQUASHED;
@@ -5006,8 +5007,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
         f_LogoLetterSquashFrames[i] = LOGO_LETTER_STRETCH_FRAMES;
       }
     } else if (f_LogoLetterStates[i] == LOGO_LETTER_STRETCHING) {
-      f_LogoLetterScales[i][0] -= LOGO_LETTER_STRETCH_STEP;
-      f_LogoLetterScales[i][1] += LOGO_LETTER_STRETCH_STEP;
+      f_LogoLetterScales[i][AXIS_X] -= LOGO_LETTER_STRETCH_STEP;
+      f_LogoLetterScales[i][AXIS_Y] += LOGO_LETTER_STRETCH_STEP;
       f_LogoLetterSquashFrames[i]--;
       if (f_LogoLetterSquashFrames[i] == 0) {
         f_LogoLetterStates[i] = LOGO_LETTER_FALLING;
@@ -5094,7 +5095,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     f_LogoLetterRises[LOGO_LETTER_A] =
         (LOGO_SHRUNK_L_Y - f_LogoLetters[LOGO_LETTER_L].y) / LOGO_SHRINK_FRAMES;
     f_LogoScaleStep =
-        (LOGO_SHRUNK_SCALE - f_LogoLetterScales[LOGO_LETTER_M][0]) *
+        (LOGO_SHRUNK_SCALE - f_LogoLetterScales[LOGO_LETTER_M][AXIS_X]) *
         (1.0f / LOGO_SHRINK_FRAMES);
     f_LogoClubStepX =
         (LOGO_SHRUNK_CLUB_X - f_LogoClubPosition[AXIS_X]) / LOGO_SHRINK_FRAMES;
@@ -5107,8 +5108,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       if (i != LOGO_LETTER_L) {
         f_LogoLetters[i].x += f_LogoLetterSteps[i];
         f_LogoLetters[i].y += f_LogoLetterRises[LOGO_LETTER_M];
-        f_LogoLetterScales[i][0] += f_LogoScaleStep;
-        f_LogoLetterScales[i][1] += f_LogoScaleStep;
+        f_LogoLetterScales[i][AXIS_X] += f_LogoScaleStep;
+        f_LogoLetterScales[i][AXIS_Y] += f_LogoScaleStep;
       }
     }
 
@@ -5116,11 +5117,11 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     f_LogoLetters[LOGO_LETTER_L].y += f_LogoLetterRises[LOGO_LETTER_A];
     f_LogoClubPosition[AXIS_X] += f_LogoClubStepX;
     f_LogoClubPosition[AXIS_Y] += f_LogoClubStepY;
-    f_LogoLetterScales[LOGO_LETTER_L][0] += f_LogoScaleStep;
-    f_LogoLetterScales[LOGO_LETTER_L][1] += f_LogoScaleStep;
+    f_LogoLetterScales[LOGO_LETTER_L][AXIS_X] += f_LogoScaleStep;
+    f_LogoLetterScales[LOGO_LETTER_L][AXIS_Y] += f_LogoScaleStep;
     f_LogoClubScale[0] += f_LogoScaleStep;
     f_LogoClubScale[1] += f_LogoScaleStep;
-    if (f_LogoLetterScales[LOGO_LETTER_M][0] < LOGO_SHRUNK_SCALE) {
+    if (f_LogoLetterScales[LOGO_LETTER_M][AXIS_X] < LOGO_SHRUNK_SCALE) {
       f_LogoState = LOGO_SHRUNK;
     }
   }
