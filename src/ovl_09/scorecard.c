@@ -386,13 +386,15 @@ void FreeScorecard(void);
  * game mode and clears its text slots. It stops any rumble even if the
  * scorecard was already closed.
  *
- * Doesn't match: the target keeps the address it frees the last images from
- * in $s0 and derives $s1 from it, where this keeps it in $s1.
+ * Doesn't match: the original addresses the closing frees from
+ * totalLabelsImage and derives tableImage's address from it, where this
+ * addresses them from tableImage.
  */
 #ifdef NON_MATCHING
 void FreeScorecard(void) {
   s32 i;
   s32 imageIndex;
+  u8** tableImage;
 
   if (g_ScorecardState != SCORECARD_CLOSED) {
     g_ScorecardState = SCORECARD_CLOSED;
@@ -446,13 +448,15 @@ void FreeScorecard(void) {
         break;
     }
 
+    /* Taken before the frees above it, to match */
+    tableImage = &g_Scorecard.tableImage;
     FreeMemory(&g_Scorecard.totalLabelsImage);
     FreeMemory(&g_Scorecard.labelsImage);
     FreeMemory(&g_Scorecard.digitsImage);
     FreeMemory(&g_Scorecard.betSubtitlesImage);
     FreeMemory(&g_Scorecard.scoresPanelImage);
     FreeMemory(&g_Scorecard.unk14);
-    FreeMemory(&g_Scorecard.tableImage);
+    FreeMemory(tableImage);
     for (i = 0; i != g_GameState.playerCount; i++) {
       FreeMemory(&g_Scorecard.faceImages[i]);
       FreeMemory(&g_Scorecard.facePalettes[i]);
