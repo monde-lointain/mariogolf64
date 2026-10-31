@@ -393,6 +393,10 @@ u8 RankTournament(
  * Gives the computer contestants the course's names, skipping any that
  * matches the first player's record and taking the block's last name in
  * its place
+ *
+ * Doesn't match: the original computes the block's last name, lastName + 1,
+ * from the course's product rather than from lastName, and the first name's
+ * index address from the table's base rather than from nameIndex.
  */
 #ifdef NON_MATCHING
 void NameContestants(void) {
@@ -403,12 +407,13 @@ void NameContestants(void) {
   s16* nameIndex;
   u32 isFirstName;
 
-  nameOffset = TOURNAMENT_CONTESTANT_COUNT - 2;
+  index = TOURNAMENT_CONTESTANT_COUNT - 2;
+  nameOffset = index;
   hasSkipped = FALSE;
   nameIndex = &g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 2];
-  lastName = ((g_GameState.courseIndex + 1) * NAMES_PER_COURSE) - 2;
-  for (index = TOURNAMENT_CONTESTANT_COUNT - 2; index >= 0;
-      index--, nameIndex--) {
+  lastName = (g_GameState.courseIndex + 1) * NAMES_PER_COURSE;
+  lastName -= 2; /* In its own statement to match */
+  for (; index >= 0; index--, nameIndex--) {
     if (!hasSkipped &&
         strcmp(g_Players[0].name, g_ContestantNames[lastName - nameOffset]) ==
             0) {
