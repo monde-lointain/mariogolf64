@@ -158,8 +158,8 @@
 
 /* The viewer's animation until the player picks another */
 #define VIEWER_STARTING_ANIMATION 13
-/* What D_8022FBA0 holds before the viewer shows a character, so that no
- * character matches it */
+/* What f_ViewerLoadedCharacter holds before the viewer shows a character, so
+ * that no character matches it */
 #define NO_VIEWER_CHARACTER -1
 /* A club mask with a bit set for every slot */
 #define ALL_CLUB_SLOTS ((1 << CLUB_SLOT_COUNT) - 1)
@@ -398,20 +398,20 @@ extern const char f_PeachsCastleName[];
 extern const char f_LuigisGardenName[];
 
 /* Read by no routine */
-static Gfx D_8022BE00_ovl_01[] UNUSED = {gsSPEndDisplayList()};
+static Gfx f_UnusedEmptyDisplayList[] UNUSED = {gsSPEndDisplayList()};
 s32 g_IsHoleShownInMenuInset = FALSE;
 /* The characters that the animation viewer cycles through and whose taken
  * marks a new game clears; nothing changes it */
 static s32 f_MenuCharacterCount = CHARACTER_COUNT;
 /* Read by no routine */
-static u8 D_8022BE10_ovl_01[8] UNUSED = {
+static u8 f_UnusedBytesAfterCharacterCount[8] UNUSED = {
     0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 /* The row that UpdateUnusedList is on */
 static s32 f_UnusedListChoice = 0;
 /* The hole selection that a hole-choice mode starts with; never changed */
 static s32 f_StartingHoleSelection = 0;
 /* Read by no routine */
-static s32 D_8022BE20_ovl_01 UNUSED = 0;
+static s32 f_UnusedWordAfterHoleSelection UNUSED = 0;
 /* The animation that the animation viewer plays, which left and right step */
 static s32 f_ViewerAnimation = VIEWER_STARTING_ANIMATION;
 /* Whether START has given the viewer's controls to posing the model and
@@ -421,13 +421,13 @@ static s32 f_IsViewerAdjusting = 0;
 static s32 f_IsChosenAnimationPlaying = 0;
 /* Each player count's mode count */
 static s32 f_ModeCounts[MAX_PLAYER_COUNT] = {7, 5, 4, 4};
-/* Read by no routine; the mode counts of D_8022BEEC_ovl_01 */
-static s32 D_8022BE40_ovl_01[4] UNUSED = {3, 5, 4, 4};
+/* Read by no routine; the mode counts of f_UnusedModeChoiceIcons */
+static s32 f_UnusedModeCounts[4] UNUSED = {3, 5, 4, 4};
 /* Each player's clubs, a bit per slot */
 static u16 f_PlayerClubMasks[MAX_PLAYER_COUNT] = {
     ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
 /* Read by no routine */
-static s32 D_8022BE58_ovl_01[10] UNUSED = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
+static s32 f_UnusedFlags[10] UNUSED = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
 /* Which of g_TrophyFrameBuffers shows the chosen course's trophy */
 static u8 f_ShownTrophyBufferIndex = 0;
 /* The model kind that the animation viewer loads, which L cycles */
@@ -476,8 +476,9 @@ static u8 f_ModeChoiceIcons[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT] = {
         MODE_ICON_MINI_GOLF},
     {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS,
         MODE_ICON_MINI_GOLF}};
-/* Read by no routine; modes like D_8022BEBC's, as many as D_8022BE40 counts */
-static u8 D_8022BEEC_ovl_01[4][12] UNUSED = {
+/* Read by no routine; modes like f_ModeChoiceIcons', as many as
+ * f_UnusedModeCounts counts */
+static u8 f_UnusedModeChoiceIcons[4][12] UNUSED = {
     {2, 8, 3}, {2, 6, 7, 10, 5}, {2, 7, 10, 5}, {2, 7, 10, 5}};
 /* The room that each clubhouse row opens */
 static s16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
@@ -485,12 +486,12 @@ static s16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_BEST_TIMES, CLUBHOUSE_ROOM_RING_SHOT,
     CLUBHOUSE_ROOM_BEST_SHOTS};
 /* Read by no routine; the one room that f_ClubhouseRooms leaves out */
-static s16 D_8022BF26_ovl_01 UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
+static s16 f_UnusedBirdieBadgesRoom UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
 /* The plain-text menu's names; DrawMenuTitleScreen prints the first three */
 static const char* f_PlainMenuNames[] = {
     "1P GAME", "2P GAME", "3P GAME", "4P GAME", "CONTINUE", "HOUISE"};
 /* Read by no routine */
-static const char* D_8022BF40_ovl_01[] UNUSED = {"TOURNAMENT ", "VS CHARACTER",
+static const char* f_UnusedModeNames[] UNUSED = {"TOURNAMENT ", "VS CHARACTER",
     "STROKE PLAY", "MATCH PLAY", "SKINS", "TIME ATTACK", "TRAINING",
     "PUTTER GOLF", " HANDI CAP", " BET", "9HOLE MODE  ", "CLUB HANDI"};
 /* Each character's name, with LOWERCASE_CODE_OFFSET added to its lowercase
@@ -516,16 +517,17 @@ char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
     "J\xEF\xE5" /* Joe */
 };
 /* Read by no routine */
-static const char* D_8022C048_ovl_01[] UNUSED = {"TOURNAMENT", "MEMORIAL HOLES",
-    "SPECIAL SHOT", "BIRDIE BADGE", "VS CHARACTER", "TIME ATTACK", "BGM",
-    "SOUND", "DATA RESET", "BGM TEST", "SOUND TEST"};
+static const char* f_UnusedOptionNames[] UNUSED = {"TOURNAMENT",
+    "MEMORIAL HOLES", "SPECIAL SHOT", "BIRDIE BADGE", "VS CHARACTER",
+    "TIME ATTACK", "BGM", "SOUND", "DATA RESET", "BGM TEST", "SOUND TEST"};
 /* Read by no routine */
-static const char* D_8022C074_ovl_01[] UNUSED = {
+static const char* f_UnusedGameBoyNames[] UNUSED = {
     "GB 00 ", "GB 01 ", "GB 02 ", "GB 03 "};
 /* Read by no routine */
-static const char* D_8022C084_ovl_01[] UNUSED = {"STRAIGHT", "DRAW", "FADE"};
+static const char* f_UnusedSideSpinNames[] UNUSED = {
+    "STRAIGHT", "DRAW", "FADE"};
 /* Read by no routine */
-static const char* D_8022C090_ovl_01[] UNUSED = {
+static const char* f_UnusedBetNames[] UNUSED = {
     "DRIVE CON", "NEAR PIN", "STROKE", "SKINS", "NASSO", "LASVEGAS"};
 /* Read by no routine */
 static const char* f_TestCourseNames[] UNUSED = {"TEST COURSE1", "TEST COURSE2",
@@ -534,7 +536,7 @@ static const char* f_TestCourseNames[] UNUSED = {"TEST COURSE1", "TEST COURSE2",
 /* The caddies' names */
 static const char* f_CaddyNames[CADDY_COUNT] = {"MARIO", "PEACH"};
 /* Read by no routine */
-static const char* D_8022C0D8_ovl_01[] UNUSED = {"1W", "3W", "4W", "2I", "3I",
+static const char* f_UnusedClubNames[] UNUSED = {"1W", "3W", "4W", "2I", "3I",
     "4I", "5I", "6I", "7I", "8I", "9I", "PW", "SW", "PT"};
 static char f_SoundTestSongNames[][SOUND_TEST_SONG_NAME_LENGTH] = {"jing1",
     "jing02", "jing03", "jing04", "jing05", "jing06", "shori", "make", "hikiwa",
@@ -624,7 +626,7 @@ static char f_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH] = {"AE01 ",
     "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE", "NONE_SE",
     "NONE_SE", "NONE_SE"};
 /* Read by no routine */
-static Vtx D_8022F7C8_ovl_01[8] UNUSED = {
+static Vtx f_UnusedQuadVertices[8] UNUSED = {
     {{{-32, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-32, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -656,7 +658,7 @@ static s8 f_SpinningStarFrameTime = 0;
 /* Which of g_MenuSpareImages the waving Toad shows; only ever 0 */
 static u8 f_WavingToadImageIndex = 0;
 /* Read by no routine */
-static s32 D_8022F8D0_ovl_01 UNUSED = 0;
+static s32 f_UnusedWordAfterToadImage UNUSED = 0;
 /* The mini-golf disc's frame */
 static s32 f_MiniGolfDiscFrame = MINI_GOLF_FACING_FRAME;
 /* The frames for which the mini-golf disc has shown its turn frame */
@@ -680,7 +682,7 @@ static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_METAL_MARIO, CHARACTER_CHOICE_KID, CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA, CHARACTER_CHOICE_JOE};
 /* Read by no routine */
-static s32 D_8022F93C_ovl_01 UNUSED = 0;
+static s32 f_UnusedWordAfterCharacterChoices UNUSED = 0;
 /* The top-left corner of each of the title screen's labels */
 static LabelCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] = {{110, 86},
     {40, 114}, {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
@@ -695,7 +697,7 @@ static s32
             {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
             {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
 /* Read by no routine */
-static s32 D_8022F9FC_ovl_01[11] UNUSED = {
+static s32 f_UnusedModeIconValues[11] UNUSED = {
     110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 /* How far left of the label's place each row of the modes' label image is
  * drawn. save_menu.c has a copy, f_GameModeLabelOffsets. */
@@ -708,7 +710,7 @@ static f32 f_CharacterYaw = 0.0f;
 /* The rival's angle, which turns while two characters show */
 static f32 f_RivalSpinYaw = 0.0f;
 /* Read by no routine */
-static s32 D_8022FA60_ovl_01[2] UNUSED = {0, 0};
+static s32 f_UnusedWordsAfterRivalSpin[2] UNUSED = {0, 0};
 static f32 f_MenuCharacterPositions
     [MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT][3] = {
         {{-84.0f, -43.0f, -1000.0f}, {106.0f, -32.0f, -1000.0f},
@@ -742,17 +744,18 @@ static f32 f_ViewerOffsetX = 0.0f;
 static f32 f_ViewerOffsetY = 0.0f;
 /* The front course's bob phase */
 static f32 f_FrontCourseBobPhase = 0.0f;
-/* Read by no routine */
-static s16 D_8022FBC4_ovl_01[6] UNUSED = {0, 3, 4, 1, 5, 2};
+/* Read by no routine; an order of the six courses */
+static s16 f_UnusedCourseOrder[6] UNUSED = {0, 3, 4, 1, 5, 2};
 /* Read by no routine; katakana for "Bet", "Out: holes 1-9", "In: holes 10-18"
  * and "1 round: 18 holes" */
-static char D_8022FBD0_ovl_01[4][20] UNUSED = {
+static char f_UnusedHolesChoiceNames[4][20] UNUSED = {
     "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
 /* The top-left corner of each holes badge */
 static ImageCorner f_HolesBadgeCorners[HOLES_BADGE_COUNT] = {
     {252, 134}, {230, 150}, {274, 150}, {252, 162}};
-/* Read by no routine */
-static ImageCorner D_8022FC30_ovl_01[6] UNUSED = {
+/* Read by no routine; a corner for each course, the values of
+ * f_TrophyCorners[course][0][1] */
+static ImageCorner f_UnusedTrophyCorners[6] UNUSED = {
     {24, 173}, {23, 173}, {23, 173}, {29, 161}, {19, 181}, {29, 171}};
 /* Each course's trophies' corners, by the number of trophies */
 static ImageCorner f_TrophyCorners
@@ -769,11 +772,12 @@ static ImageCorner f_TrophyCorners
             {{11, 177}, {27, 177}, {19, 181}}},
         {{{29, 167}, {29, 171}, {29, 171}}, {{21, 167}, {37, 167}, {29, 171}},
             {{21, 167}, {37, 167}, {29, 171}}}};
-/* Read by no routine */
-static char D_8022FD20_ovl_01[16] UNUSED = "ｺｰｽｹﾞｯﾄ純ﾞ";
-/* Read by no routine */
-static u8 D_8022FD30_ovl_01[16] UNUSED = {0x71, 0x84, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+/* Read by no routine; katakana for "Course get" */
+static char f_UnusedCourseGetText[16] UNUSED = "ｺｰｽｹﾞｯﾄ純ﾞ";
+/* Read by no routine; "あと" ("remaining") in the game's text code, whose
+ * hiragana are the half-width katakana's codes less 0x40 */
+static u8 f_UnusedRemainingText[16] UNUSED = {0x71, 0x84, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 /* The Bet badge's color phase */
 static f32 f_BetBadgeColorPhase = 0.0f;
 /* The chosen mini-golf image's center Y */
@@ -787,8 +791,8 @@ static Vtx f_WaterVertices[WATER_VERTEX_COUNT] = {
     {{{800, 64, -1024}, 0, {32736, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
 /* How far the course select's water has scrolled; its two layers move apart */
 static s32 f_WaterScroll = 0;
-/* Read by no routine; the values of D_8022FBD0 */
-static char D_8022FD9C_ovl_01[4][20] UNUSED = {
+/* Read by no routine; the values of f_UnusedHolesChoiceNames */
+static char f_UnusedHolesChoiceNamesCopy[4][20] UNUSED = {
     "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
 /* The records' names */
 static const char* f_MiniGolfRecordNames[MINI_GOLF_RECORD_COUNT] = {
@@ -806,11 +810,12 @@ static LabelCorner f_ClubhouseLabelCorners[CLUBHOUSE_ROW_PLACE_COUNT] = {
     {76, 80}, {76, 102}, {76, 124}, {76, 146}, {76, 168}, {76, 190}, {76, 212},
     {76, 234}};
 /* Read by no routine */
-static s32 D_8022FE6C_ovl_01[10][2] UNUSED = {{48, 76}, {132, 76}, {180, 76},
-    {48, 98}, {72, 118}, {168, 118}, {48, 140}, {60, 160}, {176, 160},
-    {90, 182}};
-/* Read by no routine */
-static u8 D_8022FEBC_ovl_01[3][20] UNUSED = {
+static s32 f_UnusedLabelPositions[10][2] UNUSED = {{48, 76}, {132, 76},
+    {180, 76}, {48, 98}, {72, 118}, {168, 118}, {48, 140}, {60, 160},
+    {176, 160}, {90, 182}};
+/* Read by no routine; "データをすべてけしていいですか?" ("Erase all the
+ * data?"), "はい" ("Yes") and "いいえ" ("No") in the game's text code */
+static u8 f_UnusedEraseAllDataPrompt[3][20] UNUSED = {
     {0xC3, 0xDE, 0xB0, 0xC0, 0x66, 0x7D, 0x8D, 0xDE, 0x83, 0x79, 0x7C, 0x83,
         0x72, 0x72, 0x83, 0xDE, 0x7D, 0x76, 0x3F, 0x00},
     {0x8A, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -818,12 +823,12 @@ static u8 D_8022FEBC_ovl_01[3][20] UNUSED = {
     {0x72, 0x72, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
 /* Read by no routine */
-static s32 D_8022FEF8_ovl_01 UNUSED = 0;
+static s32 f_UnusedWordBeforeArrowTimer UNUSED = 0;
 /* Steps the options' arrows' animation */
 static s32 f_OptionsArrowTimer = 0;
 
 /* Read by no routine */
-static u8 D_80231AD0_ovl_01[0x1D0] UNUSED;
+static u8 f_UnusedBufferBeforeMatrices[0x1D0] UNUSED;
 /* The mode select's camera, which the CPU's projection also takes, and its
  * reflection lighting */
 static Mat4 f_ModeSelectProjection;
@@ -837,7 +842,7 @@ static f32 f_MenuCharacterScales[MAX_PLAYER_COUNT];
 static Mtx f_ViewerTransforms[DRAW_BUFFER_COUNT];
 static Mtx f_ViewerProjection;
 /* Read by no routine */
-static u8 D_80232070_ovl_01[0x180] UNUSED;
+static u8 f_UnusedBufferBeforeWater[0x180] UNUSED;
 /* The course select's water's matrices */
 static Mtx f_WaterTranslation;
 static Mtx f_WaterProjection;
@@ -4662,8 +4667,8 @@ extern const char g_CaddySelectTitle[];
 #define MIN_THREE_DIGIT_WON_COUNT 100
 
 /*
- * The course select's water plane, D_8022FD48, blends the water image and the
- * scrolling layer, which scroll different ways, and is fogged white
+ * The course select's water plane, f_WaterVertices, blends the water image and
+ * the scrolling layer, which scroll different ways, and is fogged white
  */
 #define WATER_PLANE_DISTANCE 300.0f
 #define WATER_FIELD_OF_VIEW 45.0f

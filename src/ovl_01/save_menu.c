@@ -224,7 +224,7 @@ static s32 D_80230C38_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] UNUSED = {
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
-/* Read by no routine; the values of main_menu.c's D_8022F9FC */
+/* Read by no routine; the values of main_menu.c's f_UnusedModeIconValues */
 static s32 D_80230CB8_ovl_01[11] UNUSED = {
     110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 /* Read by no routine */
