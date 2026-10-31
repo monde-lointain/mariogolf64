@@ -948,21 +948,27 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawHoleSelect);
 
 /*
  * Draws the course name plate in strips, centered on centerX and centerY.
- * Doesn't match: GCC masks top to 16 bits each strip, and its registers are
- * allocated in a different order. With an s32 top, GCC strength-reduces the
- * quarter-pixel rows into registers, which the original doesn't.
+ *
+ * Doesn't match: 27 words differ. GCC masks top to 16 bits each strip, and
+ * allocates the loop's registers in a different order. With an s32 top,
+ * GCC strength-reduces the quarter-pixel rows into registers, which the
+ * original doesn't (79). Setting top where it is declared gives 39, and
+ * just before the loop 31; the order of the declarations makes no
+ * difference. Hoisting the right edge out of the loop gives 62, and
+ * stepping a pointer through the strips 55.
  */
 #ifdef NON_MATCHING
 void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   /* 16 bits to match */
-  u16 top = centerY;
+  u16 top;
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   LoadLargePalette(&gfx, ImageBody(f_BoardImage));
-  for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
+  for (stripIndex = 0, top = centerY; stripIndex != NAME_PLATE_STRIP_COUNT;
+      stripIndex++) {
     LoadTextureBlock(&gfx,
         LargeImageTexels(f_BoardImage) +
             (stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH),
