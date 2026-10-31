@@ -1064,6 +1064,10 @@ void DrawBanner(Gfx** displayListHead) {
  * Flips a message in on a board in the middle of the screen, sized to fit it.
  * FLIP_MESSAGE_LEAVE flips the board back out, and FLIP_MESSAGE_RESET takes it
  * away at once.
+ *
+ * Doesn't match: GCC masks out the half height one instruction later, after
+ * subtracting the margin from the negated half width. Working out halfHeight
+ * with halfWidth, casting to u16 or a u16 halfWidth doesn't change it.
  */
 #ifdef NON_MATCHING
 void ShowFlipMessage(MessageId messageId) {
