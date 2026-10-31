@@ -39,6 +39,10 @@
  * Writes symbolCount symbols as characters. It fails with -1 on a symbol
  * outside the alphabet. The caller passes a fourth argument that this
  * routine doesn't read.
+ *
+ * Doesn't match: the original never uses $a3 and keeps the index in $t0,
+ * so each later value sits one register higher than here. It also
+ * advances the password pointer before the index.
  */
 s32 WritePasswordSymbols(
     u8* symbols, char* password, s32 symbolCount, s32 unused);
