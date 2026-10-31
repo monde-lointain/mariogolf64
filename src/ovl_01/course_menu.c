@@ -873,14 +873,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsBadgeCount);
  * or below.
  * Doesn't match: the original counts the arrows and picks the first one with
  * branches, where this version computes them without, so the registers and the
- * spills to the stack differ.
+ * spills to the stack differ. 107 words differ.
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   Boolean hasRowsAbove = f_FirstShownStat > 0;
-  Boolean hasRowsBelow = f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
   s16 arrowCount = hasRowsAbove;
+  Boolean hasRowsBelow = f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
   s32 firstArrow;
   s16 arrowIndex;
   s32 top;

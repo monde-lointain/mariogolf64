@@ -934,7 +934,7 @@ void InitSkyColors(void);
  *
  * Doesn't match: the target keeps &g_HoleSetup.conditions.isRaining in a
  * register across the three GetCourseRecordIndex calls, and allocates other
- * registers. 89 words differ.
+ * registers. 73 words differ.
  */
 #ifdef NON_MATCHING
 void InitSkyColors(void) {
@@ -993,8 +993,8 @@ void InitSkyColors(void) {
       f_SkyVertices[i][2].v.cn[channel] = colors->unk7[channel];
       f_SkyVertices[i][3].v.cn[channel] = colors->unk4[channel];
       f_SkyVertices[i][4].v.cn[channel] = colors->unk4[channel];
-      innerMix = (colors->unk4[channel] + colors->unk7[channel]) * 0.5f;
       outerMix = (colors->unk4[channel] + f_SkyHorizonColor[channel]) * 0.5f;
+      innerMix = (colors->unk4[channel] + colors->unk7[channel]) * 0.5f;
       innerMix = (innerMix + f_SkyHorizonColor[channel]) * 0.5f;
       f_SkyVertices[i][5].v.cn[channel] = outerMix;
       f_SkyVertices[i][6].v.cn[channel] = innerMix;

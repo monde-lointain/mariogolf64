@@ -742,7 +742,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
  *
  * Doesn't match: the nested DrawTriangleHeights allocates its registers
- * differently, using $s7 where the original reloads the static chain. 343
+ * differently, using $s7 where the original reloads the static chain. 333
  * words differ in it.
  */
 #ifdef NON_MATCHING
@@ -888,8 +888,8 @@ void DrawBandHeights(s16* heights, s32 band) {
       shortSlopeHeight = (corners[2]->v.ob[AXIS_Y] - corners[1]->v.ob[AXIS_Y]) *
           cachedReciprocal;
       longXStep = longSlopeX * HEIGHT_ROW_STEP_SCALE;
-      shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
       longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
+      shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
       shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
       shortX = corners[1]->v.ob[AXIS_X] << HEIGHT_FRACTION_BITS;
       shortHeight = corners[1]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
@@ -898,8 +898,8 @@ void DrawBandHeights(s16* heights, s32 band) {
             corners[1]->v.ob[AXIS_Z] + z);
         longX += longXStep;
         shortX += shortXStep;
-        longHeight += longHeightStep;
         shortHeight += shortHeightStep;
+        longHeight += longHeightStep;
       }
     }
   }
@@ -1111,7 +1111,7 @@ s32 PaintMainCourse(
  * match: the original keeps the test between the two equal cart-way colors
  * and has no stack frame.
  *
- * Doesn't match: 22 words differ.
+ * Doesn't match: 18 words differ.
  */
 #ifdef NON_MATCHING
 s32 PaintPaleRoughCourse(
@@ -1167,8 +1167,8 @@ s32 PaintPaleRoughCourse(
     case TERRAIN_CODE_UNK3:
       if (nearestCode == TERRAIN_CODE_UNK3 ||
           nearestDistance >= TERRAIN_BORDER_DISTANCE) {
-        color = 0x3E;
         paintedCode = TERRAIN_CODE_UNK3;
+        color = 0x3E;
       } else {
         /* Both colors are the same in the original */
         if (nearestDistance == 1) {

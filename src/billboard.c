@@ -337,7 +337,7 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * that need to stay see-through. Here, the close ones are only drawn when
  * they stay opaque.
  *
- * Doesn't match: 169 words differ.
+ * Doesn't match: 141 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
@@ -367,8 +367,8 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetEnvColor(gfx++, envColor.red, envColor.green, envColor.blue, 0x20);
 
-  lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
   lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
+  lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
   viewDir[AXIS_X] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
   viewDir[AXIS_Y] = 0.0f;
   viewDir[AXIS_Z] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];

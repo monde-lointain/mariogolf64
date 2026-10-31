@@ -216,10 +216,12 @@ void ResetBallSimulations(void) {
  * against rings, the ground, billboards, the pin, the cup, walls and hole
  * triangles, then bounces, rolls, sinks or stops the ball, and a flying ball
  * feels drag, curve, lift and the wind. Returns the STEP_FLAG_* bits for the
- * step. Doesn't match: the register allocation and instruction scheduling
- * differ in many places, and where the original recomputes abs.s for each use
- * of a float's absolute value, this code shares one abs.s or compiles a compare
- * and branch.
+ * step.
+ *
+ * Doesn't match: the register allocation and instruction scheduling differ in
+ * many places, and where the original recomputes abs.s for each use of a
+ * float's absolute value, this code shares one abs.s or compiles a compare and
+ * branch. 925 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -814,8 +816,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         f32 push;
         f32 scale;
 
-        toCupY = 0.0f;
         toCupX = g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
+        toCupY = 0.0f;
         toCupZ = g_HoleSetup.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
         guNormalize(&toCupX, &toCupY, &toCupZ);
         push = ((toCupX * velocity[AXIS_X]) + (toCupY * velocity[AXIS_Y]) +
@@ -1557,8 +1559,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         if (driftLimit < drift && impactSpeed > 1.0f) {
           f32 scale = driftLimit / drift;
 
-          driftX = driftX * scale;
           driftZ = driftZ * scale;
+          driftX = driftX * scale;
         }
 
         spinVelocityX *= BOUNCE_SPIN_DECAY;

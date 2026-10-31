@@ -805,7 +805,7 @@ void UpdateBetSettings(void) {
  */
 /*
  * Doesn't match: the original keeps its g_BetSet loads in other registers
- * and schedules the stake marks' coordinates differently. 233 words differ.
+ * and schedules the stake marks' coordinates differently. 229 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
@@ -893,8 +893,8 @@ void DrawBetSettings(
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StakeMark)));
   gDPPipeSync(gfx++);
 
-  markGrowth = 0;
   markRaise = 0;
+  markGrowth = 0;
   for (stakeLevel = 0; stakeLevel != STAKE_MARK_COUNT; stakeLevel++) {
     if (stakeLevel == LARGE_STAKE_LEVEL) {
       markGrowth = LARGE_STAKE_GROWTH;

@@ -1044,7 +1044,7 @@ void WriteClubParameters(void) {
  * results, then sets the deflection from where the last test shot landed.
  * InterpolatePower is a nested function, a GNU C extension.
  *
- * Doesn't match: 46 words differ.
+ * Doesn't match: 38 words differ.
  */
 #ifdef NON_MATCHING
 void GenerateClub(s32 clubIndex) {
@@ -1078,8 +1078,8 @@ void GenerateClub(s32 clubIndex) {
         shotMode, targetDistance);
     club->power[shotMode] = targetDistance * 260.096f;
     shortDistance = 0;
-    shortPower = 0;
     longDistance = 0;
+    shortPower = 0;
     longPower = 0;
     if (club->surfaceMask & CLUB_SURFACE_GREEN) {
       targetDistance = targetDistance * 0x3C00;

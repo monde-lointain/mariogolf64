@@ -2569,7 +2569,7 @@ void OnBallStepped(Player* player UNUSED) {}
  *
  * Doesn't match: GCC drops bestDistance = distance from the tee-order branch,
  * where the test has shown the two equal, but the original keeps the copy.
- * 17 words differ.
+ * 10 words differ.
  */
 #ifdef NON_MATCHING
 void PickNextPlayer(void) {
@@ -2623,8 +2623,8 @@ void PickNextPlayer(void) {
     }
 
     if (priority > bestPriority) {
-      bestPriority = priority;
       nextPlayer = i;
+      bestPriority = priority;
       bestTeeOrder = g_Players[nextPlayer].teeOrder;
       bestDistance = distance;
     } else if (priority == bestPriority) {

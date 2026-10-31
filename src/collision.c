@@ -987,7 +987,7 @@ const char g_PathDebugBlankText[] = "          ";
  * that starts on the plane, or, while the ball rolls, barely crosses
  * it, hits it at the path's end.
  *
- * Doesn't match: 180 words differ.
+ * Doesn't match: 142 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
@@ -1056,8 +1056,8 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   tileX = startX >> MINI_GOLF_TILE_X_SHIFT;
   tileZ = startZ >> MINI_GOLF_TILE_Z_SHIFT;
   endTileX = endX >> MINI_GOLF_TILE_X_SHIFT;
-  endTileZ = endZ >> MINI_GOLF_TILE_Z_SHIFT;
   deltaX = endX - startX;
+  endTileZ = endZ >> MINI_GOLF_TILE_Z_SHIFT;
   deltaZ = endZ - startZ;
   tileFraction = 0.0f;
   while (TRUE) {
@@ -1154,8 +1154,8 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
         }
 
         if (hitFraction < nearestFraction) {
-          hitZ = (s32)(deltaZ * hitFraction) + startZ;
           hitX = (s32)(deltaX * hitFraction) + startX;
+          hitZ = (s32)(deltaZ * hitFraction) + startZ;
           if (((triangles[i].corners[AXIS_X][1] -
                    triangles[i].corners[AXIS_X][0]) *
                   (hitZ -
@@ -1258,7 +1258,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
  *
- * Doesn't match: 145 words differ.
+ * Doesn't match: 129 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1326,8 +1326,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   tileX = startX >> GROUND_TILE_SHIFT;
   tileZ = startZ >> GROUND_TILE_SHIFT;
   endTileX = endX >> GROUND_TILE_SHIFT;
-  endTileZ = endZ >> GROUND_TILE_SHIFT;
   deltaX = endX - startX;
+  endTileZ = endZ >> GROUND_TILE_SHIFT;
   deltaZ = endZ - startZ;
   tileFraction = 0.0f;
   while (TRUE) {
@@ -1423,8 +1423,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
 
         if (hitFraction < nearestFraction) {
-          hitZ = (deltaZ * hitFraction) + startZ;
           hitX = (deltaX * hitFraction) + startX;
+          hitZ = (deltaZ * hitFraction) + startZ;
           if (((triangles[i].corners[AXIS_X][1] -
                    triangles[i].corners[AXIS_X][0]) *
                   (hitZ -
@@ -2021,7 +2021,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * the plane together, adding their terms in turn, where this works out the
  * start's first, and so the tests on the sides and the fraction's terms take
  * other registers. The prologue and the triangle lookup are scheduled
- * differently too. 172 words differ.
+ * differently too. 144 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2146,8 +2146,8 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       }
 
       if (hitFraction < nearestFraction) {
-        hitZ = ((endZ - startZ) * hitFraction) + startZ;
         hitX = ((endX - startX) * hitFraction) + startX;
+        hitZ = ((endZ - startZ) * hitFraction) + startZ;
 
         /*
          * Each cross product tells which side of an edge the hit is on,
