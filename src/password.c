@@ -47,7 +47,7 @@
 s32 WritePasswordSymbols(
     u8* symbols, char* password, s32 symbolCount, s32 unused);
 
-TournamentRules D_80105DC0;
+TournamentRules g_ClubTournamentRules;
 
 /*
  * Each symbol's characters. The first one is the one written; the others

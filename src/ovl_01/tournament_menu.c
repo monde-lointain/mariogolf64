@@ -150,7 +150,8 @@ enum CodeKeyResult {
 
 s32 GetClubTournamentCourse(void);
 void StartLoadingChosenHole(void);
-/* The first club tournament's name; D_80105DC8 picks the tournament */
+/* The first club tournament's name; g_ClubTournamentNameIndex picks the
+ * tournament */
 #define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F
 /* The club tournament's details window and the text in it */
 #define CLUB_WINDOW_WIDTH 280
@@ -1253,11 +1254,12 @@ void UpdateClubTournament(void) {
           D_80230F74_ovl_01 = 0;
         }
 
-        D_80105DC4 = g_TournamentCode[0] >> CLUB_CODE_NINTENDO_SHIFT;
-        D_80105DC8 = D_80230F74_ovl_01;
+        g_IsNintendoClubTournament =
+            g_TournamentCode[0] >> CLUB_CODE_NINTENDO_SHIFT;
+        g_ClubTournamentNameIndex = D_80230F74_ovl_01;
         rules = GetTournamentRules(g_TournamentCode[1]);
-        D_80105DC0 = *rules;
-        D_80105DCC = g_TournamentCode[2] + 1;
+        g_ClubTournamentRules = *rules;
+        g_ClubTournamentNumber = g_TournamentCode[2] + 1;
         osSyncPrintf("bkTour %x, %x, %x\n", g_TournamentCode[0],
             g_TournamentCode[1], g_TournamentCode[2]);
         PlaySound(SOUND_GO, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -1292,7 +1294,7 @@ void UpdateClubTournament(void) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       g_MenuScreen = MENU_SCREEN_MAIN;
       D_80230F40_ovl_01 = FALSE;
-      D_80105DC4 = FALSE;
+      g_IsNintendoClubTournament = FALSE;
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
             255, 255);
@@ -1594,7 +1596,7 @@ void DrawClubTournament(Gfx** displayListHead) {
       DrawClubWindow(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
           windowStyle);
-      DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
+      DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, g_ClubTournamentNumber);
     } else {
       windowStyle = (GetClubTournamentCharacter() != -1)
           ? CLUB_WINDOW_STYLE_PICTURE
@@ -1618,20 +1620,22 @@ void DrawClubTournament(Gfx** displayListHead) {
       DrawClubWindow(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
           windowStyle);
-      DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
+      DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, g_ClubTournamentNumber);
     }
 
     if (IsMenuWindowOpen() != MENU_WINDOW_CHECK_MOVING &&
         !IsMenuWindowClosed()) {
-      MeasureMessage(D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME,
+      MeasureMessage(
+          g_ClubTournamentNameIndex + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME,
           FONT_SIZE_LARGE, &width, &height, 0);
       MeasureMessage(GetClubTournamentCourseTitleMessage(), FONT_SIZE_LARGE,
           &width, &height, 0);
       MeasureMessage(
           GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width, &height, 0);
       SetTextSlot(CLUB_TEXT_X, CLUB_NAME_Y,
-          D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME, TEXT_SLOT_LARGE_FONT,
-          CLUB_NAME_SLOT, TEXT_FLAG_CENTERED, 95, 63, 255, 255);
+          g_ClubTournamentNameIndex + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME,
+          TEXT_SLOT_LARGE_FONT, CLUB_NAME_SLOT, TEXT_FLAG_CENTERED, 95, 63, 255,
+          255);
       SetTextSlot(CLUB_TEXT_X, CLUB_COURSE_Y,
           GetClubTournamentCourseTitleMessage(), TEXT_SLOT_LARGE_FONT,
           CLUB_COURSE_SLOT, TEXT_FLAG_CENTERED, 43, 255, 75, 255);
@@ -2109,7 +2113,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawCodeCursor);
 
 /* Returns whether the club tournament lets the player choose a character */
 s32 IsClubCharacterChoosable(void) {
-  return D_80105DC0.characterIndex == -1;
+  return g_ClubTournamentRules.characterIndex == -1;
 }
 
 /*
@@ -2117,7 +2121,7 @@ s32 IsClubCharacterChoosable(void) {
  * player chooses one
  */
 s32 GetClubTournamentCharacter(void) {
-  return D_80105DC0.characterIndex;
+  return g_ClubTournamentRules.characterIndex;
 }
 
 /* Returns, then clears, whether the Club Tournament screen was entered */

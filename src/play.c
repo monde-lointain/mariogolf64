@@ -97,17 +97,17 @@ enum HoleResultsKind {
   HOLE_RESULTS_SPEED_GOLF
 };
 
-CurrentShot D_80104F78;
-u8 D_800FE330;
-s8 D_800FBDB8;
+CurrentShot g_PlannedShot;
+u8 g_ReplayStrokeCount;
+ContestMovieState g_ContestMovieState;
 u32 g_GroundDrawFrame;
 CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
 Player g_SavedPlayers[MAX_PLAYER_COUNT];
 ShotLaunch g_LastShotLaunch;
-u8 D_8012E694[0xDEC];
+u8 g_UnreadPlayBuffer[0xDEC];
 
 FILE_STATIC u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
-FILE_STATIC PlayRecord D_800FED40;
+FILE_STATIC PlayRecord f_BestShotReplayRecord;
 FILE_STATIC s8 g_WasDonkeyKongUnlocked;
 FILE_STATIC s8 g_WasMapleUnlocked;
 FILE_STATIC s8 g_WasMetalMarioUnlocked;
@@ -118,7 +118,7 @@ FILE_STATIC s8 g_RingShotCourseOpenedAtStart;
 static s32 D_800C3060[2] UNUSED = {0};
 s8 g_IsTrainingHeadingKept = FALSE;
 s32 g_PauseScreen = PAUSE_SCREEN_NONE;
-s32 D_800C3070 = 0;
+s32 g_IsAimCameraEasing = 0;
 Boolean g_HasPressedShotButton = FALSE;
 SignedBinaryAngle g_AltHeading = 0;
 SignedBinaryAngle g_FreeLookHeading = 0;
@@ -128,7 +128,7 @@ s32 g_ShotFlags = 0;
 static s32 D_800C3088 = 0;
 s32 g_LetterboxState = LETTERBOX_STATE_NONE;
 s32 g_ImpactPointState = IMPACT_POINT_OFF;
-s32 D_800C3094 = TRUE;
+s32 g_HasShotComeToRest = TRUE;
 s8 g_IsHudTurnAwayRequested = FALSE;
 /* Read by no routine */
 static s32 D_800C309C[2] UNUSED = {0};
@@ -182,7 +182,7 @@ s32 IsPlayAdvancingItself(void) {
  */
 void ResetShotSetup(void) {
   g_PauseScreen = PAUSE_SCREEN_NONE;
-  D_800C3070 = 0;
+  g_IsAimCameraEasing = 0;
   g_HasPressedShotButton = FALSE;
   g_AltHeading = 0;
   g_ShotFlags = 0;
@@ -341,17 +341,17 @@ void SetUpPlayers(void) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       g_Players[0].isComputer = FALSE;
       g_Players[0].teeOrder = 0;
-      g_Players[0].characterIndex = D_80105F40->characterIndex;
-      g_Players[0].unk22 = D_80105F40->unk38;
-      g_Players[0].paletteIndex = D_80105F40->paletteIndex;
-      g_Players[0].unk88 = D_80105F40->unk3C;
+      g_Players[0].characterIndex = g_RingShotRecords->characterIndex;
+      g_Players[0].unk22 = g_RingShotRecords->unk38;
+      g_Players[0].paletteIndex = g_RingShotRecords->paletteIndex;
+      g_Players[0].unk88 = g_RingShotRecords->unk3C;
     } else {
       g_Players[0].isComputer = FALSE;
       g_Players[0].teeOrder = 0;
-      g_Players[0].characterIndex = D_800FEDD8->characterIndex;
-      g_Players[0].unk22 = D_800FEDD8->unk3C;
-      g_Players[0].paletteIndex = D_800FEDD8->paletteIndex;
-      g_Players[0].unk88 = D_800FEDD8->unk40;
+      g_Players[0].characterIndex = g_PlayRecords->characterIndex;
+      g_Players[0].unk22 = g_PlayRecords->unk3C;
+      g_Players[0].paletteIndex = g_PlayRecords->paletteIndex;
+      g_Players[0].unk88 = g_PlayRecords->unk40;
     }
 
     for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
@@ -414,13 +414,13 @@ void InitPlay(PlayKind kind) {
   } else if (kind == PLAY_KIND_HOLE) {
     SetUpOneHole();
   } else if (kind == PLAY_KIND_BEST_SHOT_REPLAY) {
-    LoadBestShotReplay(&D_800FED40);
+    LoadBestShotReplay(&f_BestShotReplayRecord);
     g_GameState.unk14 = 0;
     g_GameState.playerCount = 1;
     g_GameState.step = GAME_STATE_START;
     g_GameState.gameMode = GAME_MODE_STROKE;
-    g_GameState.courseIndex = D_800FEDD8[0].courseIndex;
-    g_GameState.holeIndex = D_800FEDD8[0].holeIndex;
+    g_GameState.courseIndex = g_PlayRecords[0].courseIndex;
+    g_GameState.holeIndex = g_PlayRecords[0].holeIndex;
   }
 
   RenumberHoleHandicaps();
@@ -452,7 +452,7 @@ void PlacePlayersOnTee(void) {
   s32 ring;
   f32 teeHeight;
 
-  D_800C3094 = 0;
+  g_HasShotComeToRest = 0;
   g_IsHudTurnAwayRequested = FALSE;
   if (g_GameState.unk30 != 2) {
     for (i = 0; i < MAX_PLAYER_COUNT; i++) {
@@ -496,7 +496,7 @@ void PlacePlayersOnTee(void) {
 void PlayContestMovies(void) {
   s32 i;
 
-  if (D_800FBDB8 == 0) {
+  if (g_ContestMovieState == CONTEST_MOVIES_WAITING) {
     for (i = 0; i < g_GameState.playerCount; i++) {
       if (g_Players[i].strokeCount == 0) {
         break;
@@ -524,10 +524,10 @@ void PlayContestMovies(void) {
         StartMovie(MOVIE_DRIVE_RECORD);
       }
 
-      D_800FBDB8 = 60;
+      g_ContestMovieState = CONTEST_MOVIES_PLAYING;
     }
   } else if (IsMovieFinished()) {
-    D_800FBDB8 = -1;
+    g_ContestMovieState = CONTEST_MOVIES_DONE;
   }
 }
 
@@ -543,7 +543,7 @@ s32 IsHoleOver(void) {
   Boolean isDone = FALSE;
   s32 i;
 
-  if (D_800FBDB8 == 60) {
+  if (g_ContestMovieState == CONTEST_MOVIES_PLAYING) {
     return FALSE;
   }
 
@@ -661,24 +661,26 @@ void SetNextTeeOrder(void) {
  * heading, gauge frames, shot mode, club and offsets, for the replay to repeat
  */
 void LoadBestShotReplayInputs(s32 index) {
-  D_80104F78.heading = D_800FEDD8->shots[index].heading;
-  D_80104F78.powerGaugeFrame = D_800FEDD8->shots[index].powerGaugeFrame;
-  D_80104F78.impactGaugeFrame = D_800FEDD8->shots[index].impactGaugeFrame;
-  D_80104F78.shotMode = D_800FEDD8->shots[index].shotMode;
-  D_80104F78.clubSlot = D_800FEDD8->shots[index].clubSlot;
-  D_80104F78.offsetX = D_800FEDD8->shots[index].offsetX;
-  D_80104F78.offsetY = D_800FEDD8->shots[index].offsetY;
+  g_PlannedShot.heading = g_PlayRecords->shots[index].heading;
+  g_PlannedShot.powerGaugeFrame = g_PlayRecords->shots[index].powerGaugeFrame;
+  g_PlannedShot.impactGaugeFrame = g_PlayRecords->shots[index].impactGaugeFrame;
+  g_PlannedShot.shotMode = g_PlayRecords->shots[index].shotMode;
+  g_PlannedShot.clubSlot = g_PlayRecords->shots[index].clubSlot;
+  g_PlannedShot.offsetX = g_PlayRecords->shots[index].offsetX;
+  g_PlannedShot.offsetY = g_PlayRecords->shots[index].offsetY;
 }
 
 /* LoadBestShotReplayInputs for a shot of the Ring Shot record */
 void LoadRingShotReplayInputs(s32 index) {
-  D_80104F78.heading = D_80105F40->shots[index].heading;
-  D_80104F78.powerGaugeFrame = D_80105F40->shots[index].powerGaugeFrame;
-  D_80104F78.impactGaugeFrame = D_80105F40->shots[index].impactGaugeFrame;
-  D_80104F78.shotMode = D_80105F40->shots[index].shotMode;
-  D_80104F78.clubSlot = D_80105F40->shots[index].clubSlot;
-  D_80104F78.offsetX = D_80105F40->shots[index].offsetX;
-  D_80104F78.offsetY = D_80105F40->shots[index].offsetY;
+  g_PlannedShot.heading = g_RingShotRecords->shots[index].heading;
+  g_PlannedShot.powerGaugeFrame =
+      g_RingShotRecords->shots[index].powerGaugeFrame;
+  g_PlannedShot.impactGaugeFrame =
+      g_RingShotRecords->shots[index].impactGaugeFrame;
+  g_PlannedShot.shotMode = g_RingShotRecords->shots[index].shotMode;
+  g_PlannedShot.clubSlot = g_RingShotRecords->shots[index].clubSlot;
+  g_PlannedShot.offsetX = g_RingShotRecords->shots[index].offsetX;
+  g_PlannedShot.offsetY = g_RingShotRecords->shots[index].offsetY;
 }
 
 /*
@@ -712,22 +714,22 @@ s32 GetRecordedScoreKind(s32 strokes) {
 
 /* Sets play up to replay a Best Shot record */
 void LoadBestShotReplay(PlayRecord* record) {
-  D_800FEDD8[0] = *record;
+  g_PlayRecords[0] = *record;
   g_GameState.gameMode = record->gameMode;
   g_GameState.courseIndex = record->courseIndex;
   g_GameState.holeIndex = record->holeIndex;
-  D_800FE330 = record->strokeCount;
+  g_ReplayStrokeCount = record->strokeCount;
   SetUpPlayers();
   osSyncPrintf("SetSuperShotReplay\n");
 }
 
 /* Sets play up for the Ring Shot hole of a record */
 void LoadRingShotRecord(RingShotRecord* record) {
-  D_80105F40[0] = *record;
+  g_RingShotRecords[0] = *record;
   g_GameState.gameMode = GAME_MODE_RING_SHOT;
   g_GameState.courseIndex = record->courseIndex;
   g_GameState.holeIndex = record->holeIndex;
-  D_800FE330 = record->strokeCount;
+  g_ReplayStrokeCount = record->strokeCount;
   SetUpPlayers();
 }
 
@@ -760,13 +762,14 @@ s32 GetFlaggedFiveBitNumber(void) {
       (IsGameFlagSet(GAME_FLAG_UNK85) << 1) | IsGameFlagSet(GAME_FLAG_UNK86);
 }
 
-/* Copies the game state and players to D_801B55F0 and D_8012D0C8 */
+/* Copies the game state and players to g_BackedUpGameState and
+ * g_BackedUpPlayers */
 void BackUpPlayState(void) {
   s32 i;
 
-  D_801B55F0 = g_GameState;
+  g_BackedUpGameState = g_GameState;
   for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-    D_8012D0C8[i] = g_Players[i];
+    g_BackedUpPlayers[i] = g_Players[i];
   }
 }
 
@@ -1257,7 +1260,7 @@ void UpdatePlay(void) {
         /* Falls through */
       case GAME_STATE_UNK11:
         if (!f_IsPlayStateBackedUp) {
-          D_800FBDB8 = 0;
+          g_ContestMovieState = CONTEST_MOVIES_WAITING;
           ClearContestWinner();
           f_IsPlayStateBackedUp = TRUE;
           BackUpPlayState();

@@ -277,8 +277,8 @@ typedef struct RingShotRecord {
 extern HoleSetup g_HoleSetup;
 
 /* Each player's last hole, and each player's last Ring Shot hole */
-extern PlayRecord D_800FEDD8[MAX_PLAYER_COUNT];
-extern RingShotRecord D_80105F40[MAX_PLAYER_COUNT];
+extern PlayRecord g_PlayRecords[MAX_PLAYER_COUNT];
+extern RingShotRecord g_RingShotRecords[MAX_PLAYER_COUNT];
 
 /* The current round's statistics, for the course's records */
 typedef struct RoundStats {
@@ -552,8 +552,9 @@ typedef struct CourseStatFigures {
 } CourseStatFigures; /* size = 0x38 */
 
 extern CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
-extern GameState D_801B55F0;
-extern Player D_8012D0C8[MAX_PLAYER_COUNT];
+/* The game state and players as BackUpPlayState last copied them */
+extern GameState g_BackedUpGameState;
+extern Player g_BackedUpPlayers[MAX_PLAYER_COUNT];
 
 #define HOLES_PER_ROUND 18.0f
 

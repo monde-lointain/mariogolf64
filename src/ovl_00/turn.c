@@ -135,8 +135,6 @@
 #define HOLE_RECORD_MAX_STROKES 5
 #define RING_SHOT_RECORD_MAX_STROKES 6
 #define IMPACT_SOUND_VOLUME 0x64
-/* D_800FBDB8 while the contest movies play */
-#define CONTEST_MOVIES_PLAYING 60
 /* The order in which players' lies come up, from the first */
 #define LIE_PRIORITY_TEE 2
 #define LIE_PRIORITY_OFF_GREEN 1
@@ -369,7 +367,7 @@
 enum ShotSource {
   /* The player's controller */
   SHOT_SOURCE_PLAYER,
-  /* D_80104F78: a replayed shot, or the computer golfer's finished plan */
+  /* g_PlannedShot: a replayed shot, or the computer golfer's finished plan */
   SHOT_SOURCE_PREPARED,
   /* The computer golfer, which is still planning */
   SHOT_SOURCE_PLANNING
@@ -554,10 +552,10 @@ void KeepAimCameraOnCourse(void) {
   eye[AXIS_Z] = offset + g_CurrentShot.ballPosition[AXIS_Z];
   overshoot = 0.0f;
   if (eye[AXIS_Z] < minCoord) {
-    D_800C3070 = FALSE;
+    g_IsAimCameraEasing = FALSE;
     overshoot = minCoord - eye[AXIS_Z];
   } else if (eye[AXIS_Z] > maxZ) {
-    D_800C3070 = FALSE;
+    g_IsAimCameraEasing = FALSE;
     overshoot = eye[AXIS_Z] - maxZ;
   }
 
@@ -686,15 +684,15 @@ void PlaceShotCamera(void) {
       point[AXIS_X] = AIM_CAMERA_MIN_COORD;
     } else if (point[AXIS_X] > AIM_CAMERA_MAX_X) {
       point[AXIS_X] = AIM_CAMERA_MAX_X;
-      D_800C3070 = 0;
+      g_IsAimCameraEasing = 0;
     }
 
     if (point[AXIS_Z] < AIM_CAMERA_MIN_COORD) {
       point[AXIS_Z] = AIM_CAMERA_MIN_COORD;
-      D_800C3070 = 0;
+      g_IsAimCameraEasing = 0;
     } else if (point[AXIS_Z] > AIM_CAMERA_MAX_Z) {
       point[AXIS_Z] = AIM_CAMERA_MAX_Z;
-      D_800C3070 = 0;
+      g_IsAimCameraEasing = 0;
     }
 
     lowestGround = GetAimCameraGround(point[AXIS_X], point[AXIS_Z]);
@@ -921,7 +919,7 @@ void PlaceAimCamera(void) {
 void StartFreeLook(void) {
   g_CurrentShot.aimCameraDistance = FREE_LOOK_START_DISTANCE;
   g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
-  D_800C3070 = 0;
+  g_IsAimCameraEasing = 0;
   g_ImpactPointState = IMPACT_POINT_OFF;
   g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
       HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
@@ -960,7 +958,7 @@ void ResetAimCamera(void) {
 
   g_CurrentShot.aimCameraDistance = AIM_CAMERA_START_DISTANCE;
   g_CurrentShot.aimCameraHeight = AIM_CAMERA_START_HEIGHT;
-  D_800C3070 = 0;
+  g_IsAimCameraEasing = 0;
   g_ImpactPointLingerFrameCount = 0;
   PlaceAimCamera();
 }
@@ -1007,7 +1005,7 @@ void EaseAimCamera(void) {
       (targetHeight - g_CurrentShot.aimCameraHeight) * AIM_CAMERA_EASE_FRACTION;
   if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) <
       UNITS_PER_YARD) {
-    D_800C3070 = 0;
+    g_IsAimCameraEasing = 0;
   }
 }
 #else
@@ -1266,10 +1264,10 @@ s32 UpdateAimControls(void) {
   s32 heading;
 
   if (f_ShotSource != SHOT_SOURCE_PLAYER) {
-    headingLeft = (s16)(D_80104F78.heading - g_CurrentShot.heading);
+    headingLeft = (s16)(g_PlannedShot.heading - g_CurrentShot.heading);
     if (IsGameFlagSet(GAME_FLAG_SNAP_REPLAY_AIM) ||
         Abs(headingLeft) < REPLAY_AIM_MIN_STEP) {
-      g_CurrentShot.heading = D_80104F78.heading;
+      g_CurrentShot.heading = g_PlannedShot.heading;
       if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
         SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
         SetFramebufferCount(DOUBLE_BUFFERING);
@@ -1324,7 +1322,7 @@ s32 UpdateAimControls(void) {
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
           } else {
             g_LetterboxState = LETTERBOX_STATE_LOOKING_DOWN_RANGE;
-            D_800C3070 = 1;
+            g_IsAimCameraEasing = 1;
           }
         } else if (g_TurnController.pressedButtons & B_BUTTON) {
           AimDownRange();
@@ -1350,15 +1348,15 @@ s32 UpdateAimControls(void) {
         TurnAim(0);
         break;
       case LETTERBOX_STATE_LOOKING_DOWN_RANGE:
-        D_800C3070 = 1;
+        g_IsAimCameraEasing = 1;
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
-          D_800C3070 = 0;
+          g_IsAimCameraEasing = 0;
           ResetAimCamera();
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           g_LetterboxState = LETTERBOX_STATE_NONE;
-          D_800C3070 = 0;
+          g_IsAimCameraEasing = 0;
           ResetAimCamera();
         } else if (g_TurnController.pressedButtons & B_BUTTON) {
           g_RoundHud.greenGridState++;
@@ -1440,7 +1438,7 @@ s32 UpdateAimControls(void) {
                 LOOK_BACK_EXTRA_DISTANCE;
           } else {
             g_LetterboxState = LETTERBOX_STATE_LOOKING_DOWN_RANGE;
-            D_800C3070 = 1;
+            g_IsAimCameraEasing = 1;
           }
         }
 
@@ -1465,18 +1463,18 @@ s32 UpdateAimControls(void) {
         TurnAim(0);
         break;
       case LETTERBOX_STATE_LOOKING_DOWN_RANGE:
-        D_800C3070 = 1;
+        g_IsAimCameraEasing = 1;
         if (g_TurnController.pressedButtons & A_BUTTON) {
           g_LetterboxState = LETTERBOX_STATE_NONE;
           g_ShotSetupFrameCount = 0;
-          D_800C3070 = 0;
+          g_IsAimCameraEasing = 0;
           ResetAimCamera();
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
         } else if (g_TurnController.pressedButtons & R_TRIG) {
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           g_ShotSetupFrameCount = 0;
           g_LetterboxState = LETTERBOX_STATE_NONE;
-          D_800C3070 = 0;
+          g_IsAimCameraEasing = 0;
           ResetAimCamera();
         }
 
@@ -1527,12 +1525,12 @@ s32 UpdateAimControls(void) {
           g_LetterboxState == LETTERBOX_STATE_UNK5 ||
           g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
         g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
-        D_800C3070 = 0;
+        g_IsAimCameraEasing = 0;
       }
 
       if (g_LetterboxState == LETTERBOX_STATE_STARTING_LOOK_BACK) {
         g_LetterboxState = LETTERBOX_STATE_LOOKING_BACK;
-        D_800C3070 = 0;
+        g_IsAimCameraEasing = 0;
       }
     }
 
@@ -1545,7 +1543,7 @@ s32 UpdateAimControls(void) {
       PlaySound(SOUND_PROMPT_OPEN, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
     }
 
-    if (D_800C3070 == 1) {
+    if (g_IsAimCameraEasing == 1) {
       EaseAimCamera();
     } else {
       if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
@@ -2271,7 +2269,7 @@ void RecordHoleOut(s32 playerIndex) {
   u32 shotIndex = g_Players[playerIndex].strokeCount - 1;
 
   if (shotIndex < HOLE_RECORD_MAX_STROKES) {
-    PlayRecord* record = &D_800FEDD8[playerIndex];
+    PlayRecord* record = &g_PlayRecords[playerIndex];
 
     /* Read through g_GameState, which keeps GCC from loading the fields early,
      * to match */
@@ -2302,7 +2300,7 @@ void RecordRingShotHole(s32 playerIndex) {
   u32 shotIndex = g_Players[playerIndex].strokeCount - 1;
 
   if (shotIndex < RING_SHOT_RECORD_MAX_STROKES) {
-    RingShotRecord* record = &D_80105F40[playerIndex];
+    RingShotRecord* record = &g_RingShotRecords[playerIndex];
 
     record->courseIndex = g_GameState.courseIndex;
     record->holeIndex = g_GameState.holeIndex;
@@ -2555,7 +2553,7 @@ void PickNextPlayer(void) {
   s32 priority;
   s32 distance;
 
-  if (D_800FBDB8 == CONTEST_MOVIES_PLAYING) {
+  if (g_ContestMovieState == CONTEST_MOVIES_PLAYING) {
     return;
   }
 
@@ -3373,7 +3371,7 @@ void UpdateTurns(void) {
           f_ShotSource = SHOT_SOURCE_PLANNING;
         } else if (f_ShouldReplaySavedShot) {
           f_ShotSource = SHOT_SOURCE_PREPARED;
-          D_80104F78 = g_SavedShots[playerIndex];
+          g_PlannedShot = g_SavedShots[playerIndex];
           f_ShouldReplaySavedShot = 0;
         } else {
           f_ShotSource = SHOT_SOURCE_PLAYER;
@@ -3528,7 +3526,7 @@ void UpdateTurns(void) {
 
         StartShotPanel();
         nextState = PLAYER_STATE_PREPARING_AIM;
-        if (!D_800C3094) {
+        if (!g_HasShotComeToRest) {
           nextState = PLAYER_STATE_AIMING;
           if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
             nextState = PLAYER_STATE_HOLE_INTRO;
@@ -3548,7 +3546,7 @@ void UpdateTurns(void) {
           for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
               i < PLAN_PREPARING_POLL_COUNT;
               i++) {
-            IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&D_80104F78) !=
+            IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&g_PlannedShot) !=
                                             PLANNED_SHOT_UNFINISHED)
                     ? SHOT_SOURCE_PREPARED
                     : SHOT_SOURCE_PLANNING);
@@ -3668,7 +3666,7 @@ void UpdateTurns(void) {
         } else if (g_PauseScreen == PAUSE_SCREEN_PROMPT) {
           switch (UpdatePrompt(&g_TurnController)) {
             case PROMPT_RESULT_GIVE_UP_HOLE:
-              D_800C3094 = 1;
+              g_HasShotComeToRest = 1;
               SetMenuBackdrop(MENU_BACKDROP_NONE);
               ResumeRound();
               nextState = PLAYER_STATE_STARTING_REACTION;
@@ -3781,7 +3779,7 @@ void UpdateTurns(void) {
                 i < PLAN_AIMING_POLL_COUNT;
                 i++) {
               f_ShotSource =
-                  (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED)
+                  (GetPlannedShot(&g_PlannedShot) != PLANNED_SHOT_UNFINISHED)
                   ? SHOT_SOURCE_PREPARED
                   : SHOT_SOURCE_PLANNING;
               if (!HasPlanTime(f_PlanTimeBudget)) {
@@ -3806,7 +3804,7 @@ void UpdateTurns(void) {
 
           UnloadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           if (f_ShotSource == SHOT_SOURCE_PREPARED) {
-            isReady = StepToClubChoice(&D_80104F78);
+            isReady = StepToClubChoice(&g_PlannedShot);
           } else {
             if (g_ImpactPointState == IMPACT_POINT_OFF) {
               HandleClubInput();
@@ -3904,7 +3902,7 @@ void UpdateTurns(void) {
 
           g_CurrentShot.gaugeFrame = 0;
           if (IsGameFlagSet(GAME_FLAG_UNK32)) {
-            g_CurrentShot.gaugeFrame = D_80104F78.powerGaugeFrame;
+            g_CurrentShot.gaugeFrame = g_PlannedShot.powerGaugeFrame;
           }
 
           SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
@@ -3980,7 +3978,7 @@ void UpdateTurns(void) {
         f_ShotLaunch.offsetX = g_CurrentShot.offsetX;
         f_ShotLaunch.offsetY = g_CurrentShot.offsetY;
         if ((f_ShotSource != SHOT_SOURCE_PLAYER)
-                ? (D_80104F78.powerGaugeFrame == g_CurrentShot.gaugeFrame)
+                ? (g_PlannedShot.powerGaugeFrame == g_CurrentShot.gaugeFrame)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
           SoundId sound;
 
@@ -4055,19 +4053,19 @@ void UpdateTurns(void) {
           g_CurrentShot.offsetX = GetTurnStickX();
           g_CurrentShot.offsetY = GetTurnStickY();
         } else {
-          s32 framesLeft = D_80104F78.impactGaugeFrame -
+          s32 framesLeft = g_PlannedShot.impactGaugeFrame -
               g_CurrentShot.gaugeFrame - STICK_HOLD_FRAME_COUNT;
 
           if (framesLeft > STICK_TILT_FRAME_COUNT) {
             g_CurrentShot.offsetX = 0;
             g_CurrentShot.offsetY = 0;
           } else if (framesLeft <= 0) {
-            g_CurrentShot.offsetX = D_80104F78.offsetX;
-            g_CurrentShot.offsetY = D_80104F78.offsetY;
+            g_CurrentShot.offsetX = g_PlannedShot.offsetX;
+            g_CurrentShot.offsetY = g_PlannedShot.offsetY;
           } else {
-            g_CurrentShot.offsetX = D_80104F78.offsetX *
+            g_CurrentShot.offsetX = g_PlannedShot.offsetX *
                 (STICK_TILT_FRAME_COUNT - framesLeft) / STICK_TILT_FRAME_COUNT;
-            g_CurrentShot.offsetY = D_80104F78.offsetY *
+            g_CurrentShot.offsetY = g_PlannedShot.offsetY *
                 (STICK_TILT_FRAME_COUNT - framesLeft) / STICK_TILT_FRAME_COUNT;
           }
         }
@@ -4076,7 +4074,8 @@ void UpdateTurns(void) {
         f_ShotLaunch.offsetX = g_CurrentShot.offsetX;
         f_ShotLaunch.offsetY = g_CurrentShot.offsetY;
         if (((f_ShotSource != SHOT_SOURCE_PLAYER)
-                    ? (g_CurrentShot.gaugeFrame == D_80104F78.impactGaugeFrame)
+                    ? (g_CurrentShot.gaugeFrame ==
+                          g_PlannedShot.impactGaugeFrame)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||
             g_CurrentShot.gaugeFrame >= LAST_IMPACT_GAUGE_FRAME) {
           g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
@@ -4382,7 +4381,7 @@ void UpdateTurns(void) {
         if (!g_TurnBallSimulation.state) {
           ClearShotEffects(CLEAR_KIND_EFFECTS);
           nextState = PLAYER_STATE_BALL_AT_REST;
-          D_800C3094 = 1;
+          g_HasShotComeToRest = 1;
           f_StateFrameCounts[playerIndex] = 0;
           ForceStopRumble();
         }
@@ -4516,7 +4515,7 @@ void UpdateTurns(void) {
             FreeCharacterAndReactionLight(0);
             StartBanner(-1);
             if (g_GameState.replayKind != REPLAY_KIND_NONE &&
-                g_Players[playerIndex].strokeCount >= D_800FE330) {
+                g_Players[playerIndex].strokeCount >= g_ReplayStrokeCount) {
               nextState = PLAYER_STATE_STARTING_REACTION;
             } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
               nextState = PLAYER_STATE_STARTING_REACTION;
@@ -4778,7 +4777,7 @@ void UpdateTurns(void) {
             case CHOICE_RESULT_HOLE_OUT:
               if (g_Players[playerIndex].holeStatus == HOLE_STATUS_HOLED_OUT &&
                   IsRecordableHoleOut(playerIndex)) {
-                InsertRankedRecord(&D_800FEDD8[playerIndex]);
+                InsertRankedRecord(&g_PlayRecords[playerIndex]);
               }
 
               nextState = PLAYER_STATE_HOLE_DONE;
@@ -4829,7 +4828,7 @@ void UpdateTurns(void) {
       case PLAYER_STATE_FINISHING_HOLE:
         if (IsRecordableHoleOut(playerIndex) &&
             g_Players[playerIndex].holeStatus == HOLE_STATUS_HOLED_OUT) {
-          InsertRankedRecord(&D_800FEDD8[playerIndex]);
+          InsertRankedRecord(&g_PlayRecords[playerIndex]);
         }
 
         CheckRingShotClear(playerIndex);

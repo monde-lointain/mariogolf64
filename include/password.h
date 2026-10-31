@@ -28,7 +28,7 @@ void EncodeScorePassword(ScoreReport* report, char* password);
 TournamentRules* GetTournamentRules(u8 rulesIndex);
 
 /* The rules of the club tournament whose code was entered */
-extern TournamentRules D_80105DC0;
+extern TournamentRules g_ClubTournamentRules;
 void CopyTournamentCode(u8* destination);
 
 #endif

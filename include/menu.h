@@ -545,13 +545,17 @@ typedef u8 BetSet;
 
 /* The bets that the chosen game offers */
 extern BetSet g_BetSet;
-extern s16 D_800FBE2C;
-extern s32 D_80105DC4;
-extern s32 D_80105DC8;
-extern s32 D_80105DCC;
+/* The player count and screen the main menu last left by; a change of either
+ * resets the mode choice */
+extern s16 g_LastMenuPlayerCountChoice;
+/* The entered club tournament's code fields: whether Nintendo runs it, which
+ * club tournament name it has, and its number from 1 */
+extern s32 g_IsNintendoClubTournament;
+extern s32 g_ClubTournamentNameIndex;
+extern s32 g_ClubTournamentNumber;
 /* The code of the tournament whose password was entered */
 extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
-extern s16 D_801B71CC;
+extern s16 g_LastMenuScreen;
 /* The menu screen's course or mode icons, whose buffers other screens reuse
  * for their own images */
 extern void* g_MenuIconImages[7];
@@ -560,16 +564,22 @@ extern void* g_MenuIconImages[7];
   ((void*(*)[MINI_GOLF_DISC_IMAGE_COUNT])g_MenuIconImages)
 extern void* g_MenuBoardImages[2];
 extern void* g_MenuTitleImages[2];
-/* What UpdateMenus reads as the menu screen changes */
-extern void* D_800FC6A0;
-extern void* D_800FC898;
-extern void* D_800FF4C4[2];
-extern void* D_801052C4[2];
-extern void* D_80106100;
-extern void* D_8012D3AC;
-extern void* D_8012F4B0[7];
+/*
+ * More of the menus' image buffers, named for the image LoadMenuResources
+ * first reads into each. The screens that UpdateMenus switches to reuse them:
+ * g_MenuWideSpareImage holds a wide cloud or the save menu's third board, and
+ * g_CourseTrophyImages a chosen course's images.
+ */
+extern void* g_MenuWideSpareImage;
+extern void* g_SpinningBadgeImage;
+extern void* g_CourseTrophyImages[2];
+extern void* g_MiniGolfDiscImages[2];
+extern void* g_HoleBadgeImages;
+extern void* g_BrickWallImage;
+extern void* g_ModeIconImages[7];
 
-extern u8 D_8012D47C[0x1218];
+/* Read by no routine */
+extern u8 g_UnreadMenuBuffer[0x1218];
 
 /* The ways SlideBrickWall slides the stats panel's rows */
 #define STATS_SLIDE_CURRENT 0

@@ -1128,7 +1128,7 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
         ReadEncodedAsset(
             f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST], &asset);
         OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file);
-        ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
+        ReadAssetFile(g_MiniGolfDiscImages[0], GetAssetFileSize(&file), &file);
       }
 
       break;
@@ -1161,7 +1161,7 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
         ReadEncodedAsset(
             f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND], &asset);
         OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file);
-        ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
+        ReadAssetFile(g_MiniGolfDiscImages[0], GetAssetFileSize(&file), &file);
       }
 
       break;
@@ -1265,7 +1265,7 @@ void ResetSavedGameControllers(void) {
   f_AssignedHumanCount = 0;
   f_IsGameChosen = 0;
   for (playerIndex = 0; playerIndex != MAXCONTROLLERS; playerIndex++) {
-    D_801B70F0[playerIndex] = 0;
+    g_IsMenuCharacterLoaded[playerIndex] = 0;
   }
 }
 #else
@@ -1368,7 +1368,7 @@ s32 ContinueSavedGame(void);
       ReadEncodedAsset( \
           f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
       OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file); \
-      ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file); \
+      ReadAssetFile(g_MiniGolfDiscImages[0], GetAssetFileSize(&file), &file); \
     } \
 \
     f_ShownCourseBufferIndex ^= 1; \
@@ -1686,7 +1686,7 @@ s32 ContinueModeGame(void) {
   playerCount = game->state.playerCount;
   for (index = 0; index != playerCount; index++) {
     g_Players[index] = players[index];
-    D_800FEDD8[index] = records[index];
+    g_PlayRecords[index] = records[index];
   }
 
   g_GameState = game->state;
@@ -2328,14 +2328,14 @@ void DrawSavedGolfers(Gfx** displayListHead) {
       }
     }
 
-    if (!D_801B70F0[playerIndex]) {
+    if (!g_IsMenuCharacterLoaded[playerIndex]) {
       if (IsCharacterSlotBusy(playerIndex)) {
         FreeCharacterSlot(playerIndex);
       } else {
         LoadCharacter(playerIndex,
             (s8)players[playerIndex].characterIndex + CHARACTER_COUNT,
             (s8)players[playerIndex].paletteIndex);
-        D_801B70F0[playerIndex] = TRUE;
+        g_IsMenuCharacterLoaded[playerIndex] = TRUE;
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
         SetAnimationSpeed(playerIndex, 1.0f);
       }
@@ -2524,7 +2524,7 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead) {
 
   GetSaveData();
   GetMenuMemory();
-  palette = D_801052C4[0];
+  palette = g_MiniGolfDiscImages[0];
   gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
   for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT;
       stripIndex++) {

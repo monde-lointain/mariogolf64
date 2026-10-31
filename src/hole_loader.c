@@ -757,7 +757,7 @@ void PrepareHoleScene(void) {
 /*
  * Chooses the wind, the rain and the scene's colors for the hole about to be
  * played, then its cup from the hole's cup positions. In some scenes and modes
- * the cup comes from D_80105F40 or D_800FEDD8 instead.
+ * the cup comes from g_RingShotRecords or g_PlayRecords instead.
  */
 NO_RESULT ChooseHoleConditions(void) {
   s32 cupIndex;
@@ -769,9 +769,9 @@ NO_RESULT ChooseHoleConditions(void) {
   if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
       g_GameState.replayKind != REPLAY_KIND_NONE) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      g_HoleSetup = D_80105F40[0].hole;
+      g_HoleSetup = g_RingShotRecords[0].hole;
     } else {
-      g_HoleSetup = D_800FEDD8[0].hole;
+      g_HoleSetup = g_PlayRecords[0].hole;
     }
 
     return;

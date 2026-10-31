@@ -24,7 +24,7 @@ enum PlayKind {
   PLAY_KIND_HOLE,
   /* A round whose mode and players the GAME_FLAG_ROUND_KIND bits pick */
   PLAY_KIND_FLAGGED_ROUND,
-  /* The hole of the Best Shot replay that D_800FED40 holds */
+  /* The hole of the Best Shot replay that f_BestShotReplayRecord holds */
   PLAY_KIND_BEST_SHOT_REPLAY,
   /* Loads no game state and skips PrepareHoleDisplay, as the menus have set
    * them up already */
@@ -83,7 +83,8 @@ extern s32 g_PauseScreen;
 
 /* Keeps the last heading for the next shot, in Training */
 extern s8 g_IsTrainingHeadingKept;
-extern s32 D_800C3070;
+/* Set while EaseAimCamera moves the aim camera in place of the player */
+extern s32 g_IsAimCameraEasing;
 /* Set once A has been pressed to take the shot */
 extern Boolean g_HasPressedShotButton;
 /* A heading that TurnAim can turn in place of the shot's */
@@ -97,18 +98,38 @@ extern s32 g_ShotSetupFrameCount;
 extern s32 g_ImpactPointLingerFrameCount;
 /* SHOT_FLAG_* bits */
 extern s32 g_ShotFlags;
-extern s32 D_800C3094;
+/* Cleared on the tee, and set once a shot of the hole has come to rest or the
+ * hole has been given up; the hole's first aim skips
+ * PLAYER_STATE_PREPARING_AIM */
+extern s32 g_HasShotComeToRest;
 /* Asks for the HUD to turn away when the next player is picked */
 extern s8 g_IsHudTurnAwayRequested;
-extern CurrentShot D_80104F78; /* The replayed shot */
-extern u8 D_800FE330;
-extern s8 D_800FBDB8; /* PlayContestMovies' state */
+/* A replayed shot, or the computer golfer's finished plan */
+extern CurrentShot g_PlannedShot;
+/* The strokes the replayed record took, after which the replay ends */
+extern u8 g_ReplayStrokeCount;
+
+/* The states of PlayContestMovies */
+enum ContestMovieState {
+  CONTEST_MOVIES_DONE = -1,
+  CONTEST_MOVIES_WAITING = 0,
+  CONTEST_MOVIES_PLAYING = 60
+};
+
+typedef s8 ContestMovieState;
+
+/* A CONTEST_MOVIES_* value */
+extern ContestMovieState g_ContestMovieState;
 extern u32 g_GroundDrawFrame;
 extern CurrentShot g_SavedShots[MAX_PLAYER_COUNT];
 extern Player g_SavedPlayers[MAX_PLAYER_COUNT];
 /* Read by no routine: UpdateTurns copies f_ShotLaunch here each frame */
 extern ShotLaunch g_LastShotLaunch;
-extern u8 D_8012E694[0xDEC];
+/*
+ * Read by no routine. DrawGround's included assembly names it, as splat calls
+ * g_WorkArea's address less a row of tiles after the nearest symbol.
+ */
+extern u8 g_UnreadPlayBuffer[0xDEC];
 
 /*
  * FillGroundNoise's random intensities run from a base up through a range,

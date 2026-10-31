@@ -67,31 +67,31 @@ typedef struct ImportedCharacterCell {
 
 /* Mirrors of the save data's options */
 
-s16 D_800FBE2C;
-GameState D_801B55F0;
-Player D_8012D0C8[MAX_PLAYER_COUNT];
+s16 g_LastMenuPlayerCountChoice;
+GameState g_BackedUpGameState;
+Player g_BackedUpPlayers[MAX_PLAYER_COUNT];
 s32 g_ChosenPlayerCount;
-s32 D_80105DC4;
-s32 D_80105DC8;
-s32 D_80105DCC;
+s32 g_IsNintendoClubTournament;
+s32 g_ClubTournamentNameIndex;
+s32 g_ClubTournamentNumber;
 u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
-s16 D_801B71CC;
-void* D_8012D3AC;
-void* D_8012F4B0[7];
+s16 g_LastMenuScreen;
+void* g_BrickWallImage;
+void* g_ModeIconImages[7];
 void* g_MenuIconImages[7];
-void* D_801052C4[2];
+void* g_MiniGolfDiscImages[2];
 void* g_MenuBoardImages[2];
 void* g_NamePlateImage;
 void* g_MenuLabelImages[2];
 void* g_MenuTitleImages[2];
-void* D_800FF4C4[2];
-void* D_80106100;
-void* D_800FC898;
-void* D_800FC6A0;
-PlayRecord D_800FEDD8[MAX_PLAYER_COUNT];
-RingShotRecord D_80105F40[MAX_PLAYER_COUNT];
-u8 D_8012D47C[0x1218];
-u8 D_801B70F0[MAXCONTROLLERS];
+void* g_CourseTrophyImages[2];
+void* g_HoleBadgeImages;
+void* g_SpinningBadgeImage;
+void* g_MenuWideSpareImage;
+PlayRecord g_PlayRecords[MAX_PLAYER_COUNT];
+RingShotRecord g_RingShotRecords[MAX_PLAYER_COUNT];
+u8 g_UnreadMenuBuffer[0x1218];
+u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 BetSet g_BetSet;
 void* g_CharacterFaceImages[18];
@@ -507,8 +507,8 @@ void LoadMenuResources(void) {
   g_MenuCourseSceneryAsset =
       AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
   ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-  D_8012D3AC = AllocMemory(OpenEncodedAsset(0x721, &asset));
-  ReadEncodedAsset(D_8012D3AC, &asset);
+  g_BrickWallImage = AllocMemory(OpenEncodedAsset(0x721, &asset));
+  ReadEncodedAsset(g_BrickWallImage, &asset);
   g_MenuBoardImages[0] =
       AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
   ReadEncodedAsset(g_MenuBoardImages[0], &asset);
@@ -560,15 +560,15 @@ void LoadMenuResources(void) {
       size = OpenEncodedAsset(g_CourseIconAssets[index], &asset);
     }
 
-    D_8012F4B0[index] = AllocMemory(size);
-    ReadEncodedAsset(D_8012F4B0[index], &asset);
+    g_ModeIconImages[index] = AllocMemory(size);
+    ReadEncodedAsset(g_ModeIconImages[index], &asset);
   }
 
-  for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
+  for (index = 0; index != ARRAY_COUNT(g_MiniGolfDiscImages); index++) {
     OpenAssetFile(g_MiniGolfDiscFiles[index], &file);
     size = GetAssetFileSize(&file);
-    D_801052C4[index] = AllocMemory(size);
-    ReadAssetFile(D_801052C4[index], size, &file);
+    g_MiniGolfDiscImages[index] = AllocMemory(size);
+    ReadAssetFile(g_MiniGolfDiscImages[index], size, &file);
   }
 
   OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
@@ -577,10 +577,10 @@ void LoadMenuResources(void) {
   OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
   g_TrophyFrameBuffers[1] = AllocMemory(0xFA0);
   ReadEncodedAsset(g_TrophyFrameBuffers[1], &asset);
-  for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
+  for (index = 0; index != ARRAY_COUNT(g_CourseTrophyImages); index++) {
     OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-    D_800FF4C4[index] = AllocMemory(0x125C);
-    ReadEncodedAsset(D_800FF4C4[index], &asset);
+    g_CourseTrophyImages[index] = AllocMemory(0x125C);
+    ReadEncodedAsset(g_CourseTrophyImages[index], &asset);
   }
 
   for (index = 0; index != ARRAY_COUNT(g_MenuArrowSizedImages); index++) {
@@ -595,10 +595,11 @@ void LoadMenuResources(void) {
   g_SecondAnimatedIconImages[0] = AllocMemory(size);
   g_SecondAnimatedIconImages[1] = AllocMemory(size);
   ReadEncodedAsset(g_AnimatedIconImages[0], &asset);
-  D_80106100 = AllocMemory(OpenEncodedAsset(0x65D, &asset));
-  ReadEncodedAsset(D_80106100, &asset);
-  D_800FC898 = AllocMemory(OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset));
-  ReadEncodedAsset(D_800FC898, &asset);
+  g_HoleBadgeImages = AllocMemory(OpenEncodedAsset(0x65D, &asset));
+  ReadEncodedAsset(g_HoleBadgeImages, &asset);
+  g_SpinningBadgeImage =
+      AllocMemory(OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset));
+  ReadEncodedAsset(g_SpinningBadgeImage, &asset);
   for (index = 0; index != ARRAY_COUNT(g_CharacterFaceImages); index++) {
     g_CharacterFaceImages[index] =
         AllocMemory(OpenEncodedAsset(g_FaceAnimationAssets[index][0], &asset));
@@ -625,8 +626,8 @@ void LoadMenuResources(void) {
   g_MenuSpareImages[1] =
       AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
   ReadEncodedAsset(g_MenuSpareImages[1], &asset);
-  D_800FC6A0 = AllocMemory(OpenEncodedAsset(0x6F7, &asset) * 2);
-  ReadEncodedAsset(D_800FC6A0, &asset);
+  g_MenuWideSpareImage = AllocMemory(OpenEncodedAsset(0x6F7, &asset) * 2);
+  ReadEncodedAsset(g_MenuWideSpareImage, &asset);
   g_ComLeftyIcons = AllocMemory(OpenEncodedAsset(0x709, &asset));
   ReadEncodedAsset(g_ComLeftyIcons, &asset);
   PlaySong(SONG_TITLE, 0);
@@ -643,14 +644,14 @@ void FreeMenuResources(void) {
 
   g_LoadedMenuScreen = NO_MENU_SCREEN;
   FreeMemory(&g_MenuCourseSceneryAsset);
-  FreeMemory(&D_8012D3AC);
+  FreeMemory(&g_BrickWallImage);
   for (index = 0; index != ARRAY_COUNT(g_MenuIconImages); index++) {
     FreeMemory(&g_MenuIconImages[index]);
-    FreeMemory(&D_8012F4B0[index]);
+    FreeMemory(&g_ModeIconImages[index]);
   }
 
-  FreeMemory(&D_801052C4[0]);
-  FreeMemory(&D_801052C4[1]);
+  FreeMemory(&g_MiniGolfDiscImages[0]);
+  FreeMemory(&g_MiniGolfDiscImages[1]);
   FreeMemory(&g_MenuBoardImages[0]);
   FreeMemory(&g_MenuBoardImages[1]);
   FreeMemory(&g_NamePlateImage);
@@ -662,8 +663,8 @@ void FreeMenuResources(void) {
   FreeMemory(&g_MenuTitleImages[1]);
   FreeMemory(&g_TrophyFrameBuffers[0]);
   FreeMemory(&g_TrophyFrameBuffers[1]);
-  for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
-    FreeMemory(&D_800FF4C4[index]);
+  for (index = 0; index != ARRAY_COUNT(g_CourseTrophyImages); index++) {
+    FreeMemory(&g_CourseTrophyImages[index]);
   }
 
   for (index = 0; index != ARRAY_COUNT(g_TrophyPalettes); index++) {
@@ -678,8 +679,8 @@ void FreeMenuResources(void) {
   FreeMemory(&g_AnimatedIconImages[1]);
   FreeMemory(&g_SecondAnimatedIconImages[0]);
   FreeMemory(&g_SecondAnimatedIconImages[1]);
-  FreeMemory(&D_80106100);
-  FreeMemory(&D_800FC898);
+  FreeMemory(&g_HoleBadgeImages);
+  FreeMemory(&g_SpinningBadgeImage);
   for (index = 0; index != ARRAY_COUNT(g_CharacterFaceImages); index++) {
     FreeMemory(&g_CharacterFaceImages[index]);
   }
@@ -690,7 +691,7 @@ void FreeMenuResources(void) {
 
   FreeMemory(&g_MenuSpareImages[0]);
   FreeMemory(&g_MenuSpareImages[1]);
-  FreeMemory(&D_800FC6A0);
+  FreeMemory(&g_MenuWideSpareImage);
   FreeMemory(&g_ComLeftyIcons);
 }
 
@@ -993,7 +994,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
           break;
       }
 
-      records[index] = D_800FEDD8[index];
+      records[index] = g_PlayRecords[index];
     }
 
     game->state = g_GameState;
@@ -1015,7 +1016,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
     playerCount = game->state.playerCount;
     for (index = 0; index < playerCount; index++) {
       g_Players[index] = players[index];
-      D_800FEDD8[index] = records[index];
+      g_PlayRecords[index] = records[index];
     }
 
     g_GameState = game->state;
@@ -1051,7 +1052,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
     playerCount = g_GameState.playerCount;
     game->isValid = FALSE;
     for (index = 0; index < playerCount; index++) {
-      players[index] = D_8012D0C8[index];
+      players[index] = g_BackedUpPlayers[index];
       switch (players[index].state) {
         case PLAYER_STATE_STARTING_TURN:
         case PLAYER_STATE_AIMING:
@@ -1069,7 +1070,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
       }
     }
 
-    game->state = D_801B55F0;
+    game->state = g_BackedUpGameState;
     if (game->state.saveCount < MAX_SAVE_COUNT) {
       game->state.saveCount++;
     }
@@ -1712,7 +1713,7 @@ void RememberPlayedHole(void) {
 s32 GetClubTournamentGameMode(void) {
   s32 value;
 
-  switch (D_80105DC0.isSpeedGolf) {
+  switch (g_ClubTournamentRules.isSpeedGolf) {
     case 0:
     default:
       value = 0;
@@ -1726,17 +1727,17 @@ s32 GetClubTournamentGameMode(void) {
 }
 
 s32 GetClubTournamentCourse(void) {
-  return D_80105DC0.courseIndex;
+  return g_ClubTournamentRules.courseIndex;
 }
 
 Boolean IsNintendoClubTournament(void) {
-  return D_80105DC4 != 0;
+  return g_IsNintendoClubTournament != 0;
 }
 
 s32 GetClubTournamentNameMessage(void) {
   s32 value;
 
-  value = D_80105DC8;
+  value = g_ClubTournamentNameIndex;
   if (value < 0) {
     value = 0;
   }
@@ -1758,7 +1759,7 @@ s32 GetClubTournamentCourseMessage(void) {
 s32 GetClubTournamentNumber(void) {
   s32 value;
 
-  value = D_80105DCC;
+  value = g_ClubTournamentNumber;
   if (value <= 0) {
     value = 1;
   }
@@ -1777,7 +1778,7 @@ void CopyTournamentCode(u8* destination) {
 s32 GetClubTournamentModeMessage(void) {
   s32 value;
 
-  switch (D_80105DC0.isSpeedGolf) {
+  switch (g_ClubTournamentRules.isSpeedGolf) {
     case 0:
     default:
       value = 0x9E;
@@ -1793,14 +1794,14 @@ s32 GetClubTournamentModeMessage(void) {
 s32 GetClubTournamentCourseTitleMessage(void) {
   s32 value;
 
-  if (D_80105DC0.courseIndex >= MINI_GOLF_COURSE_INDEX) {
+  if (g_ClubTournamentRules.courseIndex >= MINI_GOLF_COURSE_INDEX) {
     value = 0xC7;
-    if (D_80105DC0.courseIndex >=
+    if (g_ClubTournamentRules.courseIndex >=
         MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
       value = 0xC8;
     }
   } else {
-    value = D_80105DC0.courseIndex + 0x1EB;
+    value = g_ClubTournamentRules.courseIndex + 0x1EB;
   }
 
   return value;
@@ -2014,14 +2015,14 @@ void ResetMenuChoices(void) {
   g_ChosenCharacters[1] = NO_CHOSEN_CHARACTER;
   g_ChosenCharacters[2] = NO_CHOSEN_CHARACTER;
   g_ChosenCharacters[3] = NO_CHOSEN_CHARACTER;
-  D_801B70F0[0] = FALSE;
-  D_801B70F0[1] = FALSE;
-  D_801B70F0[2] = FALSE;
-  D_801B70F0[3] = FALSE;
+  g_IsMenuCharacterLoaded[0] = FALSE;
+  g_IsMenuCharacterLoaded[1] = FALSE;
+  g_IsMenuCharacterLoaded[2] = FALSE;
+  g_IsMenuCharacterLoaded[3] = FALSE;
   memset(&g_MenuMemory, 0, sizeof(g_MenuMemory));
   g_TakenCharacters.unk0 = 0;
-  D_801B71CC = 0;
-  D_800FBE2C = 0;
+  g_LastMenuScreen = 0;
+  g_LastMenuPlayerCountChoice = 0;
   g_ChosenLabelGrowthDirection = LABEL_GROWING;
   g_ChosenLabelGrowth = 0;
   g_CourseSelectKind = COURSE_SELECT_KIND_NONE;

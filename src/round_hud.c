@@ -146,7 +146,7 @@ enum SceneryState {
 #define SCREEN_EFFECT_FIELD_OF_VIEW 45.0f
 #define SCREEN_EFFECT_NEAR_PLANE 10.0f
 #define SCREEN_EFFECT_FAR_PLANE 8000.0f
-/* The view of D_80105278, which nothing reads */
+/* The view of f_UnusedNarrowProjection, which nothing reads */
 #define NARROW_FIELD_OF_VIEW 10.0f
 #define NARROW_FAR_PLANE 30000.0f
 
@@ -347,7 +347,7 @@ RoundHud g_RoundHud;
 u8* g_SharedEffectImages;
 void* g_ShotPreviewDashImage;
 
-FILE_STATIC Mtx D_80105278;
+FILE_STATIC Mtx f_UnusedNarrowProjection;
 
 #define ANIMATED_ICON_LABEL_COUNT 3
 
@@ -840,8 +840,9 @@ void InitRoundHud(void) {
   guOrtho(&g_ScreenOrthoMatrix, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
       -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, SCREEN_ORTHO_NEAR,
       SCREEN_ORTHO_FAR, 1.0f);
-  guPerspective(&D_80105278, &g_ScreenEffectPerspNorm, NARROW_FIELD_OF_VIEW,
-      SCREEN_ASPECT_RATIO, SCREEN_EFFECT_NEAR_PLANE, NARROW_FAR_PLANE, 1.0f);
+  guPerspective(&f_UnusedNarrowProjection, &g_ScreenEffectPerspNorm,
+      NARROW_FIELD_OF_VIEW, SCREEN_ASPECT_RATIO, SCREEN_EFFECT_NEAR_PLANE,
+      NARROW_FAR_PLANE, 1.0f);
   guPerspective(&g_ScreenEffectProjection, &g_ScreenEffectPerspNorm,
       SCREEN_EFFECT_FIELD_OF_VIEW, SCREEN_ASPECT_RATIO,
       SCREEN_EFFECT_NEAR_PLANE, SCREEN_EFFECT_FAR_PLANE, 1.0f);

@@ -674,7 +674,7 @@ void UpdateBetSettings(void) {
     g_MenuFidgetDelays[2] = guRandom() % FIDGET_DELAY_RANGE;
     g_MenuFidgetDelays[3] = guRandom() % FIDGET_DELAY_RANGE;
     for (index = 0; index != MAXCONTROLLERS; index++) {
-      D_801B70F0[index] = 0;
+      g_IsMenuCharacterLoaded[index] = 0;
     }
 
     g_BetPagesPhase = BET_PHASE_CONFIRMED;
@@ -1253,14 +1253,14 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
       }
     }
 
-    if (!D_801B70F0[playerIndex]) {
+    if (!g_IsMenuCharacterLoaded[playerIndex]) {
       if (IsCharacterSlotBusy(playerIndex)) {
         FreeCharacterSlot(playerIndex);
       } else {
         LoadCharacter(playerIndex,
             (s8)g_Players[playerIndex].characterIndex + CHARACTER_COUNT,
             (s8)g_Players[playerIndex].paletteIndex);
-        D_801B70F0[playerIndex] = TRUE;
+        g_IsMenuCharacterLoaded[playerIndex] = TRUE;
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
         SetAnimationSpeed(playerIndex, 1.0f);
       }

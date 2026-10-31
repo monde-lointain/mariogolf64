@@ -148,7 +148,7 @@
 #define MENU_CHARACTER_DEFAULT_SCALE 4.0f
 /* The course select's water plane's vertices */
 #define WATER_VERTEX_COUNT 5
-/* The holes badges of D_80106100, 24 by 24 CI4 each */
+/* The holes badges of g_HoleBadgeImages, 24 by 24 CI4 each */
 #define HOLES_BADGE_BET 0
 #define HOLES_BADGE_COUNT 4
 #define HOLES_BADGE_SIZE 24
@@ -1139,7 +1139,8 @@ void UpdateMenus(void) {
         f_MenuBoardImageIndex ^= 1;
         OpenEncodedAsset(ASSET_SQUARE_BOARD, &asset);
         ReadEncodedAsset(g_MenuBoardImages[f_MenuBoardImageIndex], &asset);
-        LoadTournamentBuffer(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
+        LoadTournamentBuffer(
+            g_MenuWideSpareImage, TOURNAMENT_BUFFER_WIDE_CLOUD);
         LoadTournamentBuffer(g_MenuSpareImages[0], TOURNAMENT_BUFFER_YES_NO);
         imageBuffer = GetMenuImageBuffer();
         OpenEncodedAsset(ASSET_OPTIONS_MARIO, &asset);
@@ -1200,10 +1201,10 @@ void UpdateMenus(void) {
         break;
 
       case MENU_SCREEN_MODE_SELECT:
-        for (index = 0; index != ARRAY_COUNT(D_8012F4B0); index++) {
+        for (index = 0; index != ARRAY_COUNT(g_ModeIconImages); index++) {
           OpenEncodedAsset(
               g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
-          ReadEncodedAsset(D_8012F4B0[index], &asset);
+          ReadEncodedAsset(g_ModeIconImages[index], &asset);
         }
 
         OpenEncodedAsset(ASSET_CONTROLLER_ICONS, &asset);
@@ -1233,11 +1234,11 @@ void UpdateMenus(void) {
         g_MenuFidgetDelays[2] = guRandom() % FIDGET_DELAY_RANGE;
         g_MenuFidgetDelays[3] = guRandom() % FIDGET_DELAY_RANGE;
         for (index = 0; index != MAXCONTROLLERS; index++) {
-          D_801B70F0[index] = FALSE;
+          g_IsMenuCharacterLoaded[index] = FALSE;
         }
 
         OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
-        ReadEncodedAsset(D_800FC898, &asset);
+        ReadEncodedAsset(g_SpinningBadgeImage, &asset);
         LoadCourseMenuBuffer(
             g_MenuSpareImages[1], COURSE_MENU_BUFFER_LARGE_DIGITS);
         f_SpinningStarFrameIndex = 0;
@@ -1315,16 +1316,17 @@ void UpdateMenus(void) {
             g_SecondAnimatedIconImages[1], SAVE_GAME_BUFFER_PLAYER_LABELS);
         LoadSaveGameBuffer(g_MenuSpareImages[0], SAVE_GAME_BUFFER_FIRST_BOARD);
         LoadSaveGameBuffer(g_MenuSpareImages[1], SAVE_GAME_BUFFER_SECOND_BOARD);
-        LoadSaveGameBuffer(D_800FC6A0, SAVE_GAME_BUFFER_THIRD_BOARD);
+        LoadSaveGameBuffer(g_MenuWideSpareImage, SAVE_GAME_BUFFER_THIRD_BOARD);
         LoadSaveGameBuffer(
             g_MenuLabelImages[f_MenuLabelImageIndex], SAVE_GAME_BUFFER_COURSE);
-        LoadSaveGameBuffer(D_800FF4C4[0], SAVE_GAME_BUFFER_CHOSEN_COURSE);
+        LoadSaveGameBuffer(
+            g_CourseTrophyImages[0], SAVE_GAME_BUFFER_CHOSEN_COURSE);
         g_MenuFidgetDelays[0] = guRandom() % FIDGET_DELAY_RANGE;
         g_MenuFidgetDelays[1] = guRandom() % FIDGET_DELAY_RANGE;
         g_MenuFidgetDelays[2] = guRandom() % FIDGET_DELAY_RANGE;
         g_MenuFidgetDelays[3] = guRandom() % FIDGET_DELAY_RANGE;
         for (index = 0; index != MAXCONTROLLERS; index++) {
-          D_801B70F0[index] = FALSE;
+          g_IsMenuCharacterLoaded[index] = FALSE;
         }
 
         break;
@@ -1367,7 +1369,8 @@ void UpdateMenus(void) {
         LoadCodeEntryBuffer(
             g_MenuSpareImages[0], CODE_ENTRY_BUFFER_POINTING_HAND);
         LoadCodeEntryBuffer(g_MenuSpareImages[1], CODE_ENTRY_BUFFER_CURSOR_BOX);
-        LoadTournamentBuffer(D_800FC6A0, TOURNAMENT_BUFFER_WIDE_CLOUD);
+        LoadTournamentBuffer(
+            g_MenuWideSpareImage, TOURNAMENT_BUFFER_WIDE_CLOUD);
         LoadTournamentBuffer(
             MENU_ICON_IMAGE_PAIRS[0][0], TOURNAMENT_BUFFER_YES_NO);
         LoadTournamentBuffer(
@@ -1439,12 +1442,13 @@ void UpdateMenus(void) {
             ReadEncodedAsset(MENU_ICON_IMAGE_PAIRS[1][index], &asset);
           }
 
-          for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
+          for (index = 0; index != ARRAY_COUNT(g_MiniGolfDiscImages); index++) {
             OpenAssetFile(
                 g_MiniGolfDiscFiles[(g_MenuMemory.miniGolfCourseChoice * 2) +
                     index],
                 &file);
-            ReadAssetFile(D_801052C4[index], GetAssetFileSize(&file), &file);
+            ReadAssetFile(
+                g_MiniGolfDiscImages[index], GetAssetFileSize(&file), &file);
           }
         } else {
           for (index = 0; index != COURSE_COUNT; index++) {
@@ -1478,9 +1482,9 @@ void UpdateMenus(void) {
         }
 
         OpenEncodedAsset(ASSET_HOLES_BADGES, &asset);
-        ReadEncodedAsset(D_80106100, &asset);
+        ReadEncodedAsset(g_HoleBadgeImages, &asset);
         OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset);
-        ReadEncodedAsset(D_800FC898, &asset);
+        ReadEncodedAsset(g_SpinningBadgeImage, &asset);
         f_ImageSlotIndex ^= 1;
         LoadCourseMenuBuffer(
             g_ImageSlots[f_ImageSlotIndex], COURSE_MENU_BUFFER_LARGE_DIGITS);
@@ -1507,7 +1511,7 @@ void UpdateMenus(void) {
         f_MenuLabelImageIndex ^= 1;
         LoadPlayerStatsBuffer(g_MenuLabelImages[f_MenuLabelImageIndex],
             PLAYER_STATS_BUFFER_BET_LABELS);
-        LoadPlayerStatsBuffer(D_8012D3AC, PLAYER_STATS_BUFFER_BRICK_WALL);
+        LoadPlayerStatsBuffer(g_BrickWallImage, PLAYER_STATS_BUFFER_BRICK_WALL);
         LoadPlayerStatsBuffer(
             g_MenuSpareImages[0], PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS);
         ComputeRoundStatistics();
@@ -1525,8 +1529,9 @@ void UpdateMenus(void) {
         }
 
         LoadCourseStatsIcons(MENU_ICON_IMAGE_PAIRS[0]);
-        LoadCourseTrophyImages(D_800FF4C4, COURSE_BUFFER_FIRST);
-        LoadCourseMenuBuffer(D_800FC898, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
+        LoadCourseTrophyImages(g_CourseTrophyImages, COURSE_BUFFER_FIRST);
+        LoadCourseMenuBuffer(
+            g_SpinningBadgeImage, COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE);
         LoadCourseMenuBuffer(g_NamePlateImage, COURSE_MENU_BUFFER_NAME_PLATE);
         LoadCourseMenuBuffer(
             g_AnimatedIconImages[0], COURSE_MENU_BUFFER_SPINNING_BADGE);
@@ -1945,16 +1950,16 @@ void UpdateMenuTitleScreen(void) {
       }
     }
 
-    if (D_801B71CC != g_MenuScreen ||
-        D_800FBE2C != g_MenuMemory.playerCountChoice) {
+    if (g_LastMenuScreen != g_MenuScreen ||
+        g_LastMenuPlayerCountChoice != g_MenuMemory.playerCountChoice) {
       g_MenuMemory.modeChoice = 0;
       g_TakenCharacters.unk0 = 0;
     }
 
     g_IsRingShotWipeOpening = FALSE;
     g_IsMenuWipeOpening = FALSE;
-    D_801B71CC = g_MenuScreen;
-    D_800FBE2C = g_MenuMemory.playerCountChoice;
+    g_LastMenuScreen = g_MenuScreen;
+    g_LastMenuPlayerCountChoice = g_MenuMemory.playerCountChoice;
     return;
   }
 
@@ -4838,7 +4843,8 @@ void DrawModeSelect(Gfx** displayListHead) {
       bob = 0.0f;
     }
 
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8012F4B0[slot])));
+    gDPLoadTLUT_pal256(
+        gfx++, TextureAddress(ImageBody(g_ModeIconImages[slot])));
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     if ((g_MenuMemory.modeChoice == slot) && (g_MenuMemory.modeSpin == 0)) {
@@ -4881,7 +4887,7 @@ void DrawModeSelect(Gfx** displayListHead) {
           gDPSetTextureLUT(gfx++, G_TT_RGBA16);
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           gDPLoadTLUT_pal256(
-              gfx++, TextureAddress(ImageBody(D_8012F4B0[slot])));
+              gfx++, TextureAddress(ImageBody(g_ModeIconImages[slot])));
           areCharactersDrawn = TRUE;
         }
       } else {
@@ -4893,7 +4899,7 @@ void DrawModeSelect(Gfx** displayListHead) {
 
       for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT; otherIndex++) {
         gDPLoadTextureBlock(gfx++,
-            TextureAddress(LargeImageTexels(D_8012F4B0[slot]) +
+            TextureAddress(LargeImageTexels(g_ModeIconImages[slot]) +
                 (otherIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
             0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
@@ -5083,8 +5089,8 @@ void DrawModeSelect(Gfx** displayListHead) {
       countShift = -WON_COUNT_DIGIT_WIDTH;
     }
 
-    DrawSpinningBadge(
-        &gfx, D_800FC898, WON_COUNT_ICON_X + countShift, WON_COUNT_ICON_Y);
+    DrawSpinningBadge(&gfx, g_SpinningBadgeImage, WON_COUNT_ICON_X + countShift,
+        WON_COUNT_ICON_Y);
     gDPPipeSync(gfx++);
     DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
         badgeCount, MENU_NUMBER_TIMES);
@@ -5352,12 +5358,12 @@ void DrawMenuCharacters(Gfx** displayListHead) {
       palette = (s8)g_Players[slot].paletteIndex;
     }
 
-    if (!D_801B70F0[slot]) {
+    if (!g_IsMenuCharacterLoaded[slot]) {
       if (IsCharacterSlotBusy(slot)) {
         FreeCharacterSlot(slot);
       } else {
         LoadCharacter(slot, character + CHARACTER_COUNT, palette);
-        D_801B70F0[slot] = TRUE;
+        g_IsMenuCharacterLoaded[slot] = TRUE;
         SetCharacterAnimation(slot, MENU_ANIMATION_STANDING);
         SetAnimationSpeed(slot, 1.0f);
         if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
@@ -5891,7 +5897,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
       }
 
       if (g_GameState.isMiniGolf == TRUE) {
-        palette = D_801052C4[slot];
+        palette = g_MiniGolfDiscImages[slot];
         /* Indexed as one row, as that matches the original better */
         texels = MENU_ICON_IMAGE_PAIRS[0][(f_MiniGolfDiscBufferIndex *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
@@ -5979,8 +5985,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
         otherIndex = -WON_COUNT_DIGIT_WIDTH;
       }
 
-      DrawSpinningBadge(&gfx, D_800FC898, otherIndex + COURSE_BADGE_ICON_X,
-          COURSE_BADGE_ICON_Y);
+      DrawSpinningBadge(&gfx, g_SpinningBadgeImage,
+          otherIndex + COURSE_BADGE_ICON_X, COURSE_BADGE_ICON_Y);
     }
 
     if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
@@ -5991,12 +5997,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
       gDPSetTextureFilter(gfx++, G_TF_BILERP);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-      gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_80106100)));
+      gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_HoleBadgeImages)));
       for (otherIndex = 0; otherIndex != HOLES_BADGE_COUNT; otherIndex++) {
         if ((otherIndex == HOLES_BADGE_BET) && (g_AreBetPagesBlocked != 1)) {
           gDPPipeSync(gfx++);
           gDPLoadTextureTile_4b(gfx++,
-              TextureAddress(ImageTexels(D_80106100) +
+              TextureAddress(ImageTexels(g_HoleBadgeImages) +
                   (otherIndex * HOLES_BADGE_IMAGE_SIZE)),
               G_IM_FMT_CI, HOLES_BADGE_SIZE, HOLES_BADGE_SIZE, 0, 0,
               HOLES_BADGE_SIZE - 1, HOLES_BADGE_SIZE - 1, 0,
@@ -6037,7 +6043,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
         gDPPipeSync(gfx++);
         gDPLoadTextureTile_4b(gfx++,
-            TextureAddress(ImageTexels(D_80106100) +
+            TextureAddress(ImageTexels(g_HoleBadgeImages) +
                 (otherIndex * HOLES_BADGE_IMAGE_SIZE)),
             G_IM_FMT_CI, HOLES_BADGE_SIZE, HOLES_BADGE_SIZE, 0, 0,
             HOLES_BADGE_SIZE - 1, HOLES_BADGE_SIZE - 1, 0,

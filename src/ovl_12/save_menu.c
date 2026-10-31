@@ -1083,7 +1083,7 @@ void SaveReplayToSlot(void) {
   RingShotRecord* record;
 
   record = &GetSaveData()->ringShotRecords[f_CursorIndex];
-  SaveRingShotRecord(f_CursorIndex, D_80105F40);
+  SaveRingShotRecord(f_CursorIndex, g_RingShotRecords);
   f_StateFrame = 0;
   InvalidateBrokenRingShotRecords();
   if (record->scoreKind & SCORE_KIND_RECORDED) {

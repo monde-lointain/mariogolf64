@@ -129,6 +129,6 @@ extern s32 g_ChosenCharacters[MAX_PLAYER_COUNT];
 extern s8 g_ChosenLefties[MAX_PLAYER_COUNT];
 
 /* Whether the menus have loaded each character slot's character */
-extern u8 D_801B70F0[MAXCONTROLLERS];
+extern u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 
 #endif

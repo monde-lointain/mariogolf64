@@ -41,6 +41,7 @@
 #include "menu_memory.h"
 #include "overlay_manager.h"
 #include "password.h"
+#include "play.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scorecard.h"
@@ -73,7 +74,7 @@ static u8 D_800FBD38[0x8] UNUSED BSS = {0};
 TakenCharacters g_TakenCharacters BSS ALIGNED(8) = {0};
 u8 nuScPreNMIFlag BSS = {0};
 NUContData g_ControllerData[MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
-s8 D_800FBDB8 BSS = {0};
+ContestMovieState g_ContestMovieState BSS = {0};
 LabelGrowthDirection g_ChosenLabelGrowthDirection BSS = {0};
 ControllerState g_ControllerStates[MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
 f32 g_CurrentAnimationFrame BSS = {0};
@@ -83,15 +84,15 @@ s8 g_ChosenLefties[4] BSS = {0};
 u8* g_SkyImage BSS = {0};
 NUDebTaskPerf* nuDebTaskPerfPtr BSS = {0};
 u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT] BSS ALIGNED(8) = {0};
-s16 D_800FBE2C BSS = {0};
+s16 g_LastMenuPlayerCountChoice BSS = {0};
 void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT] BSS = {0};
 void* g_TrophyPalettes[TROPHY_PALETTE_COUNT] BSS = {0};
 CurrentShot g_CurrentShot BSS ALIGNED(8) = {0};
 Billboard g_Billboards[BILLBOARD_COUNT] BSS ALIGNED(8) = {{0}};
-void* D_800FC6A0 BSS = {0};
+void* g_MenuWideSpareImage BSS = {0};
 OSThread __osThreadSave BSS ALIGNED(8) = {0};
 s8 g_IsModuleAlive[MODULE_COUNT] BSS ALIGNED(8) = {0};
-void* D_800FC898 BSS = {0};
+void* g_SpinningBadgeImage BSS = {0};
 u8* g_BlendedTextureScrollingLayer BSS = {0};
 ShotDebris f_ShotDebris BSS ALIGNED(8) = {0};
 s32 f_SpawnGroundHeight BSS = {0};
@@ -101,7 +102,7 @@ s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT] BSS
     ALIGNED(8) = {{0}};
 Mtx f_EffectMatrices[EFFECT_COUNT] BSS ALIGNED(8) = {{{{0}}}};
 Mtx g_ScreenEffectProjection BSS ALIGNED(8) = {{{0}}};
-u8 D_800FE330 BSS = {0};
+u8 g_ReplayStrokeCount BSS = {0};
 Boolean g_IsChosenHoleLoadStarted BSS = {0};
 FireworkShape* f_FireworkShape BSS = {0};
 s16 g_ChosenLabelGrowth BSS = {0};
@@ -122,10 +123,10 @@ u16* f_LastFrameBuffer BSS = {0};
 u16* nuGfxZBuffer BSS = {0};
 NUContData g_MenuControllerData[MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
 u32 nuContDataLockKey BSS = {0};
-PlayRecord D_800FED40 BSS ALIGNED(8) = {{{0}}};
+PlayRecord f_BestShotReplayRecord BSS ALIGNED(8) = {{{0}}};
 NUContData g_PreviousControllerData[MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
 OSContStatus nuContStatus[NU_CONT_MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
-PlayRecord D_800FEDD8[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {{{{0}}}};
+PlayRecord g_PlayRecords[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {{{{0}}}};
 OSPiHandle* diskrom_handle BSS = {0};
 Gfx* g_GroundTileDisplayLists[GROUND_TILE_COUNT] BSS ALIGNED(8) = {0};
 void* g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT] BSS = {0};
@@ -144,7 +145,7 @@ s32 g_ScreenFadeGreen BSS = {0};
 s32 g_ScreenFadeBlue BSS = {0};
 u32 nuGfxCfbCounter BSS = {0};
 CourseSelectKind g_CourseSelectKind BSS = {0};
-void* D_800FF4C4[2] BSS = {0};
+void* g_CourseTrophyImages[2] BSS = {0};
 u8* f_RainSplashImage BSS = {0};
 RoundStats g_RoundStats BSS ALIGNED(8) = {0};
 s8 g_WasDonkeyKongUnlocked BSS = {0};
@@ -171,7 +172,7 @@ u8 g_IsGroundTileNearby[GROUND_TILE_COUNT] BSS ALIGNED(8) = {0};
 static u8 D_80104F38[0xC] UNUSED BSS = {0};
 Vec3 f_RainVelocity BSS = {0};
 NUContRmbCtl nuContRmbCtl[NU_CONT_MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
-CurrentShot D_80104F78 BSS ALIGNED(8) = {0};
+CurrentShot g_PlannedShot BSS ALIGNED(8) = {0};
 s32 g_MessageCodesStart BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
 Scorecard g_Scorecard BSS = {{0}};
@@ -186,10 +187,10 @@ s32 g_ControllerCount BSS = {0};
 Camera g_MapCamera BSS = {0};
 void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT] BSS = {0};
 u8 __osMaxControllers BSS = {0};
-Mtx D_80105278 BSS ALIGNED(8) = {{{0}}};
+Mtx f_UnusedNarrowProjection BSS ALIGNED(8) = {{{0}}};
 u8 g_ConnectedControllerBits BSS = {0};
 void* g_MenuTitleImages[2] BSS = {0};
-void* D_801052C4[2] BSS = {0};
+void* g_MiniGolfDiscImages[2] BSS = {0};
 volatile s32 g_MainLoopState BSS = {0};
 OSMesgQueue nuGfxMesgQ BSS ALIGNED(8) = {0};
 u8 g_IsRingShotWipeOpening BSS = {0};
@@ -204,17 +205,17 @@ Vec3 f_FramedEye BSS = {0};
 void* g_CharacterFacePalettes[18] BSS ALIGNED(8) = {0};
 OSPiHandle __CartRomHandle BSS ALIGNED(0x8) = {0};
 CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1] BSS ALIGNED(8) = {{0}};
-TournamentRules D_80105DC0 BSS = {0};
-s32 D_80105DC4 BSS = {0};
-s32 D_80105DC8 BSS = {0};
-s32 D_80105DCC BSS = {0};
+TournamentRules g_ClubTournamentRules BSS = {0};
+s32 g_IsNintendoClubTournament BSS = {0};
+s32 g_ClubTournamentNameIndex BSS = {0};
+s32 g_ClubTournamentNumber BSS = {0};
 /* Read by no routine */
 static u8 D_80105DD0[0x40] UNUSED BSS = {0};
 HolePoints g_HolePoints BSS ALIGNED(8) = {{{0}}};
 Vec3 f_FramedLookAt BSS = {0};
-RingShotRecord D_80105F40[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {{{{0}}}};
+RingShotRecord g_RingShotRecords[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {{{{0}}}};
 NUContData g_PreviousMenuControllerData[MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
-void* D_80106100 BSS = {0};
+void* g_HoleBadgeImages BSS = {0};
 Mtx f_DivotMarkMatrix BSS ALIGNED(8) = {{{0}}};
 s32 g_HoleTimeMinutes[COURSE_HOLE_COUNT] BSS ALIGNED(8) = {0};
 f32 g_RainSoundVolume BSS = {0};
@@ -241,9 +242,9 @@ u8 nuRDPOutputBuf[NU_GFX_RDP_OUTPUTBUFF_SIZE] BSS ALIGNED(8) = {0};
 s32 g_ModuleRdpRequestFrames[MODULE_COUNT] BSS ALIGNED(8) = {0};
 /* Read by no routine */
 static u8 D_8012D0C0[0x8] UNUSED BSS = {0};
-Player D_8012D0C8[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {{{0}}};
+Player g_BackedUpPlayers[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {{{0}}};
 s32 f_LastOpenedAssetId BSS = {0};
-void* D_8012D3AC BSS = {0};
+void* g_BrickWallImage BSS = {0};
 Boolean f_HasRumblePak[MAXCONTROLLERS] BSS ALIGNED(8) = {0};
 u8* g_SharedEffectImages BSS = {0};
 s8 g_HadEveryRingShotStar BSS = {0};
@@ -255,12 +256,12 @@ void* g_ShotPreviewDashImage BSS = {0};
 void* g_CharacterFaceImages[18] BSS ALIGNED(8) = {0};
 volatile u32 nuGfxTaskSpool BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
-u8 D_8012D47C[0x1218] BSS = {0};
+u8 g_UnreadMenuBuffer[0x1218] BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
-u8 D_8012E694[0xDEC] BSS = {0};
+u8 g_UnreadPlayBuffer[0xDEC] BSS = {0};
 s32 g_ChosenCharacters[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
 OSTimer __osGbpakTimer BSS ALIGNED(8) = {0};
-void* D_8012F4B0[7] BSS ALIGNED(8) = {0};
+void* g_ModeIconImages[7] BSS ALIGNED(8) = {0};
 u8 __osContLastCmd BSS = {0};
 /* Read by no routine */
 static u8 D_8012F4D0[0x4] UNUSED BSS = {0};
@@ -301,7 +302,7 @@ OSPiHandle* nuPiCartHandle BSS = {0};
 ControllerState g_TurnController BSS = {0};
 void* g_PinFlagImages BSS = {0};
 u8* g_PlayerFaceImages[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {0};
-GameState D_801B55F0 BSS ALIGNED(8) = {0};
+GameState g_BackedUpGameState BSS ALIGNED(8) = {0};
 BetSet g_BetSet BSS = {0};
 Mtx g_ScreenOrthoMatrix BSS ALIGNED(8) = {{{0}}};
 /* Read by no routine */
@@ -335,12 +336,12 @@ void* g_ComLeftyIcons BSS = {0};
 static u8 D_801B69F0[0x680] UNUSED BSS = {0};
 s32 g_ChoosingPlayerIndex BSS = {0};
 __OSEventState __osEventStateTab[OS_NUM_EVENTS] BSS ALIGNED(0x8) = {{0}};
-u8 D_801B70F0[MAXCONTROLLERS] BSS = {0};
+u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS] BSS = {0};
 OSMesgQueue __osGbpakTimerQ BSS ALIGNED(0x8) = {0};
 u16** nuGfxCfb BSS = {0};
 TournamentStanding g_TournamentStandings[TOURNAMENT_CONTESTANT_COUNT] BSS
     ALIGNED(8) = {{0}};
-s16 D_801B71CC BSS = {0};
+s16 g_LastMenuScreen BSS = {0};
 Player g_Players[MAX_PLAYER_COUNT] BSS ALIGNED(8) = {{{0}}};
 REVERB_MEM gReverbFx BSS ALIGNED(8) = {0};
 u32 __osFinalrom BSS = {0};
