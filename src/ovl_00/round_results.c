@@ -3428,8 +3428,15 @@ enum ClubTournamentLine {
 #define SCORE_PASSWORD_ENV_COLOR 0x00FF0000
 #define SCORE_PASSWORD_PRIM_COLOR 0xFFFF0000
 
-/* The results of a club tournament: its course, number, name and mode, the
- * score and the password to send in */
+/*
+ * The results of a club tournament: its course, number, name and mode, the
+ * score and the password to send in.
+ *
+ * Doesn't match: GCC strength-reduces the course strips' top into a register
+ * and ends their loop with slti, where the original adds the strip's offset
+ * to the top each time and compares the counter with its limit held in a
+ * register. Ending the loop with != instead of < gives 34 words, not 20.
+ */
 #ifdef NON_MATCHING
 void DrawClubTournamentResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -3443,6 +3450,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   s32 minutes;
   s32 hundredths;
   s32 i;
+  s32 firstStripBottom;
 
   isNintendo = IsNintendoClubTournament();
   gDPPipeSync(gfx++);
@@ -3458,15 +3466,16 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
                 CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
         CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    firstStripBottom = f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y +
+        CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT;
     DrawTextureRect(&gfx,
         QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X),
         QuarterPixels((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) +
             (f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y)),
         QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X +
             CLUB_TOURNAMENT_COURSE_STRIP_WIDTH),
-        QuarterPixels((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) +
-            (f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y +
-                CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT)),
+        QuarterPixels(
+            (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + firstStripBottom),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
