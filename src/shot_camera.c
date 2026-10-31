@@ -1331,17 +1331,21 @@ void PlayFlightSounds(s32 step) {
 
 /*
  * Eases the look-at point toward the ball, unless it is landing.
- * Doesn't match: the original keeps the loads of the ball's and the
- * look-at point's coordinates in statement order, where this schedules the
- * ball's loads first.
+ *
+ * Doesn't match: for the height and depth, the original subtracts the
+ * look-at point's coordinate before scaling the next axis, where this scales
+ * first, and its floating-point registers differ; 34 words differ. Reading
+ * the other axes through offset too, or not using it, gives 42 to 65.
  */
 #ifdef NON_MATCHING
 void EaseLookAtFlyingBall(void) {
+  f32 offset;
+
   if (!IsBallLanding()) {
-    f_LookAtPoint[AXIS_X] +=
-        ((f_FlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) -
-            f_LookAtPoint[AXIS_X]) *
-        LOOK_AT_EASE_FRACTION;
+    /* offset holds the ball's x first, to match */
+    offset = f_FlightBallPosition[AXIS_X];
+    offset = (offset * COURSE_TO_WORLD_SCALE) - f_LookAtPoint[AXIS_X];
+    f_LookAtPoint[AXIS_X] += offset * LOOK_AT_EASE_FRACTION;
     f_LookAtPoint[AXIS_Y] +=
         ((f_FlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
             f_LookAtPoint[AXIS_Y]) *
