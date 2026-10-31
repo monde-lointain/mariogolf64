@@ -207,7 +207,11 @@ void PrintFaultText(void) {
  *
  * Doesn't match: the original keeps context in $s1 and reads the registers
  * through it, where this folds context into thread and reads them at
- * thread's offsets from $s0. The text buffer's register swaps with it.
+ * thread's offsets from $s0. The text buffer's register swaps with it. The
+ * second CSE pass does the folding, as it knows context to be thread plus
+ * 0x20 throughout a function without branches; setting context after the
+ * first block boundary or in a block of its own leaves it so. 278 words
+ * differ.
  */
 #ifdef NON_MATCHING
 void PrintFaultContext(OSThread* thread) {
