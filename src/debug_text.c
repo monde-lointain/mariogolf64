@@ -154,6 +154,16 @@ void PrintMessage(s8* text, u32 column, u32 row) {
   }
 }
 
+/*
+ * Draws a character of the debug font straight into both framebuffers, at a
+ * column and row of the message grid, and turns the screen back on.
+ *
+ * Doesn't match: GCC copies the glyph's font index into the loop's register
+ * five instructions earlier. Setting it in the outer loop's initializer
+ * changes nothing; setting it next to y or setting y in the loop gives 16
+ * or 19 differing words, not 4. Splat also symbolizes K1BASE's upper half
+ * as D_A0000000, so the comparison counts the identical lui as different.
+ */
 #ifdef NON_MATCHING
 void DrawMessageCharacter(s8 character, u32 column, u32 row) {
   u16* currentFramebuffer =
@@ -194,10 +204,8 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
                   0xF) == FONT_INK
           ? MESSAGE_INK_COLOR
           : MESSAGE_PAPER_COLOR;
-      /* The glyph start is reused for the pixel row, to match */
-      glyphStart = (((row * GLYPH_SIZE) + y) * MESSAGE_SCREEN_WIDTH) +
-          (column * GLYPH_SIZE);
-      pixelIndex = glyphStart + x;
+      pixelIndex = (((row * GLYPH_SIZE) + y) * MESSAGE_SCREEN_WIDTH) +
+          ((column * GLYPH_SIZE) + x);
       currentFramebuffer[pixelIndex] = color;
       nextFramebuffer[pixelIndex] = color;
     }
