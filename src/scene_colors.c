@@ -47,18 +47,22 @@ static Vtx f_ShadedVertices[2][2 * QUAD_VERTEX_COUNT] = {
 s32 g_UnreadDebugSwitch = FALSE;
 static s32 f_PlaneTextureScroll = 0;
 /* Read by no routine */
-static s32 D_800C42C8[2] UNUSED = {0};
-static s32 D_800E1C10;
-static s32 D_800E1C14;
-static u8 D_800E1C18;
-static u8 D_800E1C19;
-static u8 D_800E1C1A;
-static u8 D_800E1C1B;
-static u8 D_800E1C1C;
-static u8 D_800E1C1D;
+static s32 f_UnusedWordsAfterPlaneScroll[2] UNUSED = {0};
+/*
+ * Set by DeriveSceneColors and read by no routine: two words that it clears,
+ * the third of the sky colors dimmed, and the first two blended
+ */
+static s32 f_UnusedFirstClearedWord;
+static s32 f_UnusedSecondClearedWord;
+static u8 f_UnusedDimmedRed;
+static u8 f_UnusedDimmedGreen;
+static u8 f_UnusedDimmedBlue;
+static u8 f_UnusedBlendedRed;
+static u8 f_UnusedBlendedGreen;
+static u8 f_UnusedBlendedBlue;
 
 /*
- * Sets the shaded quads of f_ShadedVertices and two color globals from
+ * Sets the shaded quads of f_ShadedVertices and two unread colors from
  * the colors of the g_SkyColors entry that g_HoleSetup.conditions selects
  */
 void DeriveSceneColors(void) {
@@ -66,8 +70,8 @@ void DeriveSceneColors(void) {
   s32 vertexOffset;
   s32 channelIndex;
 
-  D_800E1C10 = 0;
-  D_800E1C14 = 0;
+  f_UnusedFirstClearedWord = 0;
+  f_UnusedSecondClearedWord = 0;
 
   /* This steps through the table a course of colors at a time, unlike
    * BlendSkyColors */
@@ -82,12 +86,12 @@ void DeriveSceneColors(void) {
     }
   }
 
-  D_800E1C1B = (s32)((entry->unk4[0] + entry->unk7[0]) * 0.35f);
-  D_800E1C1C = (s32)((entry->unk4[1] + entry->unk7[1]) * 0.35f);
-  D_800E1C1D = (s32)((entry->unk4[2] + entry->unk7[2]) * 0.35f);
-  D_800E1C18 = entry->unkA[0] * 0.8;
-  D_800E1C19 = entry->unkA[1] * 0.8;
-  D_800E1C1A = entry->unkA[2] * 0.8;
+  f_UnusedBlendedRed = (s32)((entry->unk4[0] + entry->unk7[0]) * 0.35f);
+  f_UnusedBlendedGreen = (s32)((entry->unk4[1] + entry->unk7[1]) * 0.35f);
+  f_UnusedBlendedBlue = (s32)((entry->unk4[2] + entry->unk7[2]) * 0.35f);
+  f_UnusedDimmedRed = entry->unkA[0] * 0.8;
+  f_UnusedDimmedGreen = entry->unkA[1] * 0.8;
+  f_UnusedDimmedBlue = entry->unkA[2] * 0.8;
 }
 
 void DoNothing(void) {}
