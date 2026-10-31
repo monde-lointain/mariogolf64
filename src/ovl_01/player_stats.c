@@ -812,9 +812,9 @@ void DrawBetSettings(
   s16 columnIndex;
   s16 stakeLevel;
   s16 betIndex;
-  s32 markGrowth;
+  s16 markGrowth;
   s32 markRaise;
-  s32 bannerShift;
+  s16 bannerShift;
   s16 stripIndex;
   s32 columnX;
   u8* icon;
