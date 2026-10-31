@@ -460,7 +460,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
   gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  IN_OWN_BLOCK(gDPSetAlphaCompare(gfx++, G_AC_NONE));
   for (orderIndex = 0; orderIndex < BILLBOARD_COUNT; orderIndex++) {
     s32 textureIndex;
 
