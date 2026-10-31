@@ -1092,14 +1092,23 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point) {
   GetGridVertex(column, row)->v = *point;
 }
 
-/* Returns the ground point at a point column and row: a grid vertex, or a
- * tile's midpoint */
+/*
+ * Returns the ground point at a point column and row: a grid vertex, or a
+ * tile's midpoint.
+ *
+ * Doesn't match: the original adds the tile's offset to the midpoints'
+ * address before adding the slot's, where this adds the slot's first; 2
+ * words differ. Computing tileIndex outside its own block gives 26, other
+ * orders of its terms give 2 to 4, and adding the slot to the tile's
+ * midpoints as a pointer gives 2.
+ */
 #ifdef NON_MATCHING
 Vtx* GetGroundPoint(u32 column, u32 row) {
   u32 tileRow;
   u32 tileColumn;
   s32 slotRow;
   s32 slotColumn;
+  s32 tileIndex;
 
   if ((column | row) & 1) {
     tileRow = PointTile(row);
@@ -1118,8 +1127,10 @@ Vtx* GetGroundPoint(u32 column, u32 row) {
       slotColumn = PointSlot(column);
     }
 
-    return &g_WorkArea.hole.midpoints[TileIndex(tileColumn, tileRow)]
-                                     [f_PointSlots[slotRow][slotColumn]];
+    /* In its own block, to match */
+    IN_OWN_BLOCK(tileIndex = TileIndex(tileColumn, tileRow));
+    return &g_WorkArea.hole
+                .midpoints[tileIndex][f_PointSlots[slotRow][slotColumn]];
   }
 
   return GetGridVertex(column >> 1, row >> 1);
