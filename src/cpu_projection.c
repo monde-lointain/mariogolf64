@@ -181,8 +181,18 @@ s32 GetViewDepth(f32 x, f32 y, f32 z) {
       (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
 }
 
-/* Returns the view depth, which is negative when the point is in front of the
- * camera */
+/*
+ * Projects a point onto the screen, filling in its position, scale and depth.
+ * Returns the view depth, which is negative when the point is in front of the
+ * camera.
+ *
+ * Doesn't match: the original computes viewZ - 1.0f before storing the depth,
+ * where GCC leaves a nop there, and takes the depth step's absolute value into
+ * another register. Computing the difference into a local, before or after
+ * the store, leaves 13 differing words or gives 20; storing the depth after
+ * its step gives 59, (f32)fabs leaves 13, and multiplying by perspective
+ * instead of dividing by viewZ gives 45.
+ */
 #ifdef NON_MATCHING
 s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
   f32 viewX;
