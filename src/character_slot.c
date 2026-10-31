@@ -2332,10 +2332,14 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * g_CurrentJointMatrices. Each joint's translation, rotation and scale is
  * interpolated between the keys around the frame, or held at the nearest key
  * outside them or past g_CurrentAnimationEndFrame.
+ *
+ * Doesn't match: GCC keeps frame in a saved floating-point register, where
+ * the original keeps it in a scratch one, which shifts the other
+ * floating-point registers. 290 words differ.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
-  f32 unusedMatrices[3][4][4] UNUSED;
+  f32 unused[46] UNUSED;
   f32 translationMatrix[4][4];
   f32 jointMatrix[4][4];
   f32 scaleMatrix[4][4];
@@ -2422,7 +2426,12 @@ void AnimateCharacterJoints(u32 slotIndex) {
         y = joint->translations[joint->translationSpan.index][1];
         z = joint->translations[joint->translationSpan.index][2];
       } else {
-        progress = (frame - joint->translationSpan.startFrame) /
+        /*
+         * This and the other two progress fractions read the global again,
+         * though frame holds it, to match
+         */
+        progress =
+            (g_CurrentAnimationFrame - joint->translationSpan.startFrame) /
             (joint->translationSpan.endFrame -
                 joint->translationSpan.startFrame);
         spanIndex = joint->translationSpan.index;
@@ -2493,7 +2502,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 joint->rotations[spanIndex][2]) +
             ((joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
                 joint->rotations[spanIndex][3]);
-        progress = (frame - joint->rotationSpan.startFrame) /
+        progress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
             (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
         /* Nearly equal rotations are blended linearly, where the sines below
          * would be near zero */
@@ -2598,7 +2607,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
         y = joint->scales[joint->scaleSpan.index][1];
         z = joint->scales[joint->scaleSpan.index][2];
       } else {
-        progress = (frame - joint->scaleSpan.startFrame) /
+        progress = (g_CurrentAnimationFrame - joint->scaleSpan.startFrame) /
             (joint->scaleSpan.endFrame - joint->scaleSpan.startFrame);
         spanIndex = joint->scaleSpan.index;
         nextSpanIndex = spanIndex + 1;
