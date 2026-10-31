@@ -204,6 +204,10 @@ void PrintFaultText(void) {
 /*
  * Prints the faulted thread's registers to the host, and all but the
  * floating-point ones to the screen as debug text.
+ *
+ * Doesn't match: the original keeps context in $s1 and reads the registers
+ * through it, where this folds context into thread and reads them at
+ * thread's offsets from $s0. The text buffer's register swaps with it.
  */
 #ifdef NON_MATCHING
 void PrintFaultContext(OSThread* thread) {
