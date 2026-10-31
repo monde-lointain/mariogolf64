@@ -31,6 +31,9 @@
 
 /* The points along a tile's edge, its corners included */
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
+/* Marks a grid vertex in f_TileMidpointSlots, numbered column by column */
+#define GRID_VERTEX_SLOT_FLAG 0x80
+#define GridVertexSlot(index) (GRID_VERTEX_SLOT_FLAG | (index))
 /* UpdateTriangleSlopes goes over the ground in two halves of 8 by 16 blocks */
 #define SLOPE_HALF_COUNT 2
 #define SLOPE_BLOCK_COLUMN_COUNT 8
@@ -243,8 +246,8 @@ enum TriangleEdit {
 #define POINT_MOVE_STEP 0x10
 #define POINT_TEXTURE_STEP 0x40
 #define TILE_POINT_MASK (GROUND_TILE_POINT_SPAN - 1)
-#define UNKNOWN_LIMIT_MIN 2
-#define UNKNOWN_LIMIT_MAX 13
+#define POINT_EDITOR_SETTING_MIN 2
+#define POINT_EDITOR_SETTING_MAX 13
 #define HEIGHT_UNITS_PER_METER 15
 #define POINT_TEXT_COLUMN 2
 #define TILE_TEXT_ROW 4
@@ -545,17 +548,22 @@ void BuildAllTileMidpoints(void);
 s32 CrossProductXZ(
     s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
 void MarkBillboardsOnMap(void);
-static u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
-    {0x80, 0x00, 0x84, 0x01, 0x88},
-    {0x02, 0x08, 0x09, 0x0A, 0x03},
-    {0x81, 0x0B, 0x85, 0x0C, 0x89},
-    {0x04, 0x0D, 0x0E, 0x0F, 0x05},
-    {0x82, 0x06, 0x86, 0x07, 0x8A},
+/*
+ * Each point of a tile's EDGE_POINT_COUNT by EDGE_POINT_COUNT grid's slot among
+ * the tile's midpoints. Entries from GRID_VERTEX_SLOT_FLAG up are its grid
+ * vertices, which have no midpoint slot.
+ */
+static u8 f_TileMidpointSlots[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
+    {GridVertexSlot(0), 0, GridVertexSlot(4), 1, GridVertexSlot(8)},
+    {2, 8, 9, 10, 3},
+    {GridVertexSlot(1), 11, GridVertexSlot(5), 12, GridVertexSlot(9)},
+    {4, 13, 14, 15, 5},
+    {GridVertexSlot(2), 6, GridVertexSlot(6), 7, GridVertexSlot(10)},
 };
 /* UpdateHolePointEditor's cursor */
 static s32 f_HolePointCursor[2] = {0, 0}; /* x, z */
 /* Read by no routine */
-static s32 D_8040C5A4_hole_editor UNUSED = -1;
+static s32 f_UnusedHolePointValue UNUSED = -1;
 /* The cell that SCENE_CELL_EDITOR's cursor is on */
 static s32 f_CellCursorColumn = 0;
 static s32 f_CellCursorRow = 0;
@@ -563,13 +571,15 @@ static s32 f_CellCursorRow = 0;
  * SCENE_CELL_EDITOR's cell */
 static s32 f_PointCursorColumn = 0;
 static s32 f_PointCursorRow = 0;
-static s32 D_8040C5B8_hole_editor = 0;
-static s32 D_8040C5BC_hole_editor = 0;
+/* UpdateGroundPointEditor keeps these between POINT_EDITOR_SETTING_MIN and
+ * POINT_EDITOR_SETTING_MAX, and nothing else uses them */
+static s32 f_PointEditorFirstSetting = 0;
+static s32 f_PointEditorSecondSetting = 0;
 /* UpdateHolePointEditor's state */
 static Radians f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_HolePointCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C5C8_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
+static s32 f_UnusedHolePointAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_HolePointCameraHeadingAngle = 0;
 static s32 f_HolePointEditMode = -1;
 static s32 f_PinTeeIndex = 0;
@@ -581,7 +591,7 @@ static Radians f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TriangleCameraHeadingAngle */
 static Radians f_TriangleCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C5E8_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
+static s32 f_UnusedTriangleAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_TriangleCameraHeadingAngle = 0;
 static s32 f_EditedTriangleIndex = 0;
 static s32 f_EditedCornerIndex = 0;
@@ -593,12 +603,12 @@ static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_RingCameraHeadingAngle */
 static Radians f_RingCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C608_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
+static s32 f_UnusedRingAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_RingCameraHeadingAngle = 0;
 static s32 f_RingTriangleIndex = 0x9D;
 static s32 f_RingCornerIndex = 0; /* Always 0 */
 /* Read by no routine */
-static s32 D_8040C618_hole_editor UNUSED = 0;
+static s32 f_UnusedRingIndex UNUSED = 0;
 static s32 f_LastRingEditKind = 0; /* A TRIANGLE_EDIT_* */
 
 /* UpdateWallEditor's state */
@@ -606,7 +616,7 @@ static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_WallCameraHeadingAngle */
 static Radians f_WallCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C628_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
+static s32 f_UnusedWallAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_WallCameraHeadingAngle = 0;
 static s32 f_FirstWallTriangle = 0x19;
 static s32 f_WallTriangleIndex =
@@ -637,18 +647,18 @@ typedef struct TriangleSlope {
  */
 static CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 /* Read by no routine */
-static CoursePoint D_8040CBA8_hole_editor[SAVED_CORNER_COUNT] UNUSED;
+static CoursePoint f_UnusedSavedCorners[SAVED_CORNER_COUNT] UNUSED;
 static CoursePoint f_SavedWallCorners[SAVED_CORNER_COUNT];
 /* Places DrawTargetPole's pole at the map camera's target */
 static Mtx f_PoleMatrix;
 /* Read by no routine */
-static s32 D_8040CCD8_hole_editor[2] UNUSED;
+static s32 f_UnusedEditorWords[2] UNUSED;
 static u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE];
 static TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 static Gfx f_EditorGroundDisplayLists[DRAW_BUFFER_COUNT]
                                      [EDITOR_GROUND_LIST_LENGTH];
 /* Reached only through GetEditorBuffer, which nothing calls */
-static u8 D_80451A60_hole_editor[EDITOR_BUFFER_SIZE];
+static u8 f_EditorBuffer[EDITOR_BUFFER_SIZE];
 /* FillWaveTexels's wave pattern */
 static u8 f_WaveTexels[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
@@ -656,12 +666,12 @@ static u8 f_WaveTexels[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 static s32 f_HeightCursorColumn = 0;
 static s32 f_HeightCursorRow = 0;
 /* Read by no routine */
-static s32 D_8040C64C_hole_editor[] UNUSED = {6, 0};
+static s32 f_UnusedHeightSettings[] UNUSED = {6, 0};
 static Radians f_HeightCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_HeightCameraHeadingAngle */
 static Radians f_HeightCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C65C_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
+static s32 f_UnusedHeightAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_HeightCameraHeadingAngle = 0;
 static s32 f_LastSetHeight = 0; /* The height C-up or C-down last set */
 static Boolean f_ShowsGroundWaves = TRUE; /* Copied to g_ShowsGroundWaves */
@@ -678,7 +688,7 @@ NO_RESULT SetGroundPointHeightAndShade();
 
 /* UpdateHoleFileMenu's menu */
 /* Read by no routine */
-static s32 D_8040C678_hole_editor UNUSED = 1;
+static s32 f_UnusedHoleFileSetting UNUSED = 1;
 static Boolean f_IsSavingHoleFiles = FALSE;
 static s32 f_HoleFileStep = 0; /* A HOLE_FILE_STEP_* */
 static s32 f_HoleFileHoleNumber = 1; /* From 1 */
@@ -690,14 +700,14 @@ static Radians f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TreeCameraHeadingAngle */
 static Radians f_TreeCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
-static s32 D_8040C698_hole_editor UNUSED = BINARY_ANGLE_EIGHTH_TURN;
+static s32 f_UnusedTreeAngle UNUSED = BINARY_ANGLE_EIGHTH_TURN;
 static s32 f_TreeCameraHeadingAngle = 0;
 static s32 f_EditedTreeIndex = 0;
 static s32 f_LastTreeEditKind = 0; /* A TRIANGLE_EDIT_*; nothing reads it */
 
 static s32 f_EditorClipRatio = 1;
 /* Read by no routine */
-static s32 D_8040C6AC_hole_editor UNUSED = 0;
+static s32 f_UnusedClipRatioValue UNUSED = 0;
 static s8 f_FineTilePointSlots[FINE_TILE_POINT_SPAN][FINE_TILE_POINT_SPAN] = {
     {0, 5, 7, 10, 20},
     {1, 12, 13, 14, 21},
@@ -736,7 +746,7 @@ static Vtx f_PoleVertices[POLE_QUAD_COUNT][POLE_QUAD_VERTEX_COUNT] = {
 };
 
 void* GetEditorBuffer(void) {
-  return D_80451A60_hole_editor;
+  return f_EditorBuffer;
 }
 
 /*
@@ -987,21 +997,20 @@ void UpdateGroundPointEditor(void) {
     g_Scene = SCENE_CELL_EDITOR;
   }
 
-  /* Nothing else uses these two */
-  if (D_8040C5B8_hole_editor < UNKNOWN_LIMIT_MIN) {
-    D_8040C5B8_hole_editor = UNKNOWN_LIMIT_MIN;
+  if (f_PointEditorFirstSetting < POINT_EDITOR_SETTING_MIN) {
+    f_PointEditorFirstSetting = POINT_EDITOR_SETTING_MIN;
   }
 
-  if (D_8040C5B8_hole_editor > UNKNOWN_LIMIT_MAX) {
-    D_8040C5B8_hole_editor = UNKNOWN_LIMIT_MAX;
+  if (f_PointEditorFirstSetting > POINT_EDITOR_SETTING_MAX) {
+    f_PointEditorFirstSetting = POINT_EDITOR_SETTING_MAX;
   }
 
-  if (D_8040C5BC_hole_editor < UNKNOWN_LIMIT_MIN) {
-    D_8040C5BC_hole_editor = UNKNOWN_LIMIT_MIN;
+  if (f_PointEditorSecondSetting < POINT_EDITOR_SETTING_MIN) {
+    f_PointEditorSecondSetting = POINT_EDITOR_SETTING_MIN;
   }
 
-  if (D_8040C5BC_hole_editor > UNKNOWN_LIMIT_MAX) {
-    D_8040C5BC_hole_editor = UNKNOWN_LIMIT_MAX;
+  if (f_PointEditorSecondSetting > POINT_EDITOR_SETTING_MAX) {
+    f_PointEditorSecondSetting = POINT_EDITOR_SETTING_MAX;
   }
   {
     Vtx* point = GetGroundPoint(f_PointCursorColumn, f_PointCursorRow);
@@ -2881,7 +2890,7 @@ void InterpolateColumnPoints(Vtx* vertices, s32 column, s32 row, s32 weight) {
   ends[0] = GetGridVertex(column, row);
   ends[1] = GetGridVertex(column + 1, row);
   for (i = 0; i < EDGE_POINT_COUNT; i++) {
-    Vtx* vertex = &vertices[D_8040C580_hole_editor[i][((column & 1) * 2) + 1]];
+    Vtx* vertex = &vertices[f_TileMidpointSlots[i][((column & 1) * 2) + 1]];
 
     vertex->v.ob[AXIS_X] = ((ends[0]->v.ob[AXIS_X] * firstWeight) +
                                (ends[1]->v.ob[AXIS_X] * weight)) /
@@ -2904,7 +2913,7 @@ void InterpolateRowPoints(Vtx* vertices, s32 column, s32 row, s32 weight) {
   ends[0] = GetGridVertex(column, row);
   ends[1] = GetGridVertex(column, row + 1);
   for (i = 0; i < EDGE_POINT_COUNT; i++) {
-    Vtx* vertex = &vertices[D_8040C580_hole_editor[((row & 1) * 2) + 1][i]];
+    Vtx* vertex = &vertices[f_TileMidpointSlots[((row & 1) * 2) + 1][i]];
 
     vertex->v.ob[AXIS_Z] = ((ends[0]->v.ob[AXIS_Z] * firstWeight) +
                                (ends[1]->v.ob[AXIS_Z] * weight)) /
@@ -3052,7 +3061,7 @@ void ShapeGroundFromCodes(void) {
             edgePoints[1] =
                 &g_WorkArea.hole.midpoints
                      [g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex]
-                     [D_8040C580_hole_editor[edgeRow][edgeColumn]];
+                     [f_TileMidpointSlots[edgeRow][edgeColumn]];
             edgePoints[2] = GetGroundPoint(
                 (column * GROUND_TILE_POINT_SPAN) + edgeColumn + 1,
                 (row * GROUND_TILE_POINT_SPAN) + edgeRow);
@@ -3069,7 +3078,7 @@ void ShapeGroundFromCodes(void) {
             edgePoints[1] =
                 &g_WorkArea.hole.midpoints
                      [g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex]
-                     [D_8040C580_hole_editor[edgeRow][edgeColumn]];
+                     [f_TileMidpointSlots[edgeRow][edgeColumn]];
             edgePoints[2] =
                 GetGroundPoint((column * GROUND_TILE_POINT_SPAN) + edgeColumn,
                     (row * GROUND_TILE_POINT_SPAN) + edgeRow + 1);
