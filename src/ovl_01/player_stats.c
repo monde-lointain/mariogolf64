@@ -637,9 +637,19 @@ void ApplyBetPreset(s32 requestedPreset) {
   memory->unk2A = 0;
 }
 
-/* Doesn't match: the bet icon's index and the frame swap registers ($v0 and
- * $v1) before OpenEncodedAsset. */
-#ifdef NON_MATCHING
+/* The asset of the given frame of the chosen bet column's icon */
+static inline AssetId ChosenBetIconFrame(MenuMemory* memory, s32 frame) {
+  return f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->betColumn]]
+                             [frame];
+}
+
+/*
+ * Handles the bet settings screen's buttons. Up and down raise and lower the
+ * chosen column's stake, and left and right move between columns, showing
+ * the new column's help text and icon. A confirms the stakes and goes on to
+ * the handicaps; B cancels. Either way the stakes become the game's bet
+ * rates.
+ */
 void UpdateBetSettings(void) {
   EncodedAsset asset;
   MenuMemory* memory;
@@ -726,9 +736,7 @@ void UpdateBetSettings(void) {
         f_BetSetBets[g_BetSet - 1][memory->betColumn] + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
-        f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->betColumn]]
-                            [g_AnimatedIconFrameIndex],
-        &asset);
+        ChosenBetIconFrame(memory, g_AnimatedIconFrameIndex), &asset);
     ReadEncodedAsset(
         f_ChosenBetIconFrames[g_AnimatedIconBufferIndex ^ 1], &asset);
     g_AnimatedIconBufferIndex ^= 1;
@@ -743,17 +751,12 @@ void UpdateBetSettings(void) {
         f_BetSetBets[g_BetSet - 1][memory->betColumn] + BET_HELP_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     OpenEncodedAsset(
-        f_BetIconFrameAssets[f_BetSetBets[g_BetSet - 1][memory->betColumn]]
-                            [g_AnimatedIconFrameIndex],
-        &asset);
+        ChosenBetIconFrame(memory, g_AnimatedIconFrameIndex), &asset);
     ReadEncodedAsset(
         f_ChosenBetIconFrames[g_AnimatedIconBufferIndex ^ 1], &asset);
     g_AnimatedIconBufferIndex ^= 1;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", UpdateBetSettings);
-#endif
 
 /*
  * Each bet's column: its icon at the bottom, the stake's amount above it, and
