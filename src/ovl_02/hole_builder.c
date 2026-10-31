@@ -3314,7 +3314,7 @@ void CastBillboardShadows(void) {
     }
 
     for (listIndex = 0;; listIndex++) {
-      if (g_Billboards[index].textureIndex == f_ShadowlessTextures[listIndex]) {
+      if (f_ShadowlessTextures[listIndex] == g_Billboards[index].textureIndex) {
         listIndex = -1;
         break;
       }
