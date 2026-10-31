@@ -367,7 +367,8 @@ enum TriangleEdit {
 
 /* An I8 texture as large as DrawGround's noise, all white */
 #define WHITE_TEXTURE_SIZE 32
-#define WHITE_TEXEL 0xFF
+/* Every bit set, so each texel is white */
+#define WHITE_TEXEL -1
 /* DrawGround's clip ratio text buffer is as large */
 #define CLIP_RATIO_TEXT_SIZE 0x98
 
