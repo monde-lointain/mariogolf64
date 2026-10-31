@@ -257,8 +257,10 @@ check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
 	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf
 
 CLANG_TIDY ?= run-clang-tidy-23
-# libkmc is KMC's C library, which keeps the C library's names
-LINT_FILES := $(filter-out $(LIBKMC_DIR)/%,$(filter %.c,$(FORMAT_FILES)))
+# libkmc is KMC's C library, which keeps the C library's names, and
+# src/libultra holds the SDK's own code, which keeps the SDK's
+LINT_FILES := $(filter-out $(LIBKMC_DIR)/% src/libultra/%,\
+	$(filter %.c,$(FORMAT_FILES)))
 
 $(BUILD_DIR)/compile_commands.json: tools/compile_commands.py Makefile
 	@mkdir -p $(BUILD_DIR)
