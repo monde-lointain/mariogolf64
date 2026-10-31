@@ -269,11 +269,15 @@ $(BUILD_DIR)/compile_commands.json: tools/compile_commands.py Makefile
 LINT_JOBS ?= 4
 
 # clang can't parse everything GCC 2.7 accepts, such as nested functions,
-# so only the naming diagnostics fail the check. The rest stay in the log.
+# so only the naming and macro diagnostics fail the check, each printed
+# once though a header's repeats for every file that includes it. The
+# rest stay in the log.
+LINT_CHECKS := readability-identifier-naming|bugprone-macro-parentheses
+
 lint: $(BUILD_DIR)/compile_commands.json
 	@$(CLANG_TIDY) -p $(BUILD_DIR) -j $(LINT_JOBS) -quiet $(LINT_FILES) \
 		> $(BUILD_DIR)/lint.log 2>&1 || true
-	@! grep -A2 '\[readability-identifier-naming' $(BUILD_DIR)/lint.log
+	@! grep -E '\[($(LINT_CHECKS))' $(BUILD_DIR)/lint.log | sort -u | grep .
 
 tools: $(KMC_DIR)/gcc $(KMC_DIR)/as
 

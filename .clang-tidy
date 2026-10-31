@@ -18,7 +18,10 @@
 # SDK and the C library (nu*, os*, n_*, _*, mainproc, rand, errno,
 # diskrom_handle, gReverbFx) are fixed by those libraries, and
 # lib/libkmc is the C library itself.
-Checks: '-*,readability-identifier-naming'
+#
+# Macros are fully parenthesized, so a macro's body or argument can't
+# combine with the operators around it.
+Checks: '-*,readability-identifier-naming,bugprone-macro-parentheses'
 HeaderFilterRegex: '^(src|include)/'
 CheckOptions:
   readability-identifier-naming.FunctionCase: CamelCase
