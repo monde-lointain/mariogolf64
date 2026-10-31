@@ -2211,14 +2211,24 @@ s32 GetDigitGlyphTop(char code) {
 /* Unused; it is there to match */
 const s32 g_UnusedTextData[2] = {0, 0};
 
-/* Draws text in the digit font, as long as g_PrintBuffer holds a string at
- * least as long */
+/* Draws text in the digit font */
 void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
   s32 index;
 
   gDPPipeSync(gfx++);
+  /*
+   * The original ends at g_PrintBuffer's terminator rather than text's. Most
+   * callers pass g_PrintBuffer, but DrawBirdieBadgeCount passes "*" while
+   * g_PrintBuffer still holds the last frame's count, so the original draws
+   * a glyph for the terminator after the star, and from a three-digit count
+   * on reads past the literal.
+   */
+#ifdef AVOID_UB
+  for (index = 0; text[index] != '\0'; index++) {
+#else
   for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
+#endif
     DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
         QuarterPixels(x + DIGIT_GLYPH_SIZE),
         QuarterPixels(y + DIGIT_GLYPH_SIZE), G_TX_RENDERTILE, 0,
