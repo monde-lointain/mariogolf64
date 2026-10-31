@@ -238,14 +238,10 @@ void FreeRoundResults(void);
 void LoadRoundResults(void);
 void DrawCourseResultsNotice(Gfx** displayListHead);
 void DrawCharacterResultsNotice(Gfx** displayListHead);
-s32 UpdateTournamentResults();
-/*
- * UpdateRoundResults calls this without the controller argument, so it
- * is declared without a prototype
- */
-s32 ShowScorePassword();
-s32 UpdateCoursePointsResults();
-s32 UpdateMatchResults();
+s32 UpdateTournamentResults(ControllerState* controller);
+s32 ShowScorePassword(ControllerState* controller);
+s32 UpdateCoursePointsResults(ControllerState* controller);
+s32 UpdateMatchResults(ControllerState* controller);
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin);
 
 /* The score password shows as two lines of ten symbols */
@@ -1744,7 +1740,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCharacterResultsNotice)
 #endif
 
 /* Returns TRUE once the results have been saved and freed */
-s32 UpdateRoundResults(void) {
+s32 UpdateRoundResults(ControllerState* controller) {
   Boolean isDone;
 
   switch (f_ResultsState) {
@@ -1761,7 +1757,7 @@ s32 UpdateRoundResults(void) {
       break;
     case RESULTS_SHOWN:
       if (g_GameState.isClubTournament) {
-        isDone = ShowScorePassword();
+        isDone = ShowScorePassword(controller);
       } else {
         switch (g_GameState.gameMode) {
           case GAME_MODE_STROKE:
@@ -1769,14 +1765,14 @@ s32 UpdateRoundResults(void) {
           case GAME_MODE_SPEED_GOLF:
           case GAME_MODE_SKINS_MATCH:
           case GAME_MODE_CLUB_SLOTS:
-            isDone = UpdateCoursePointsResults();
+            isDone = UpdateCoursePointsResults(controller);
             break;
           case GAME_MODE_MATCH_GAME:
           case GAME_MODE_GET_CHARACTER:
-            isDone = UpdateMatchResults();
+            isDone = UpdateMatchResults(controller);
             break;
           case GAME_MODE_TOURNAMENT:
-            isDone = UpdateTournamentResults();
+            isDone = UpdateTournamentResults(controller);
             break;
           default:
             return FALSE;
