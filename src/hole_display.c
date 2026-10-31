@@ -2279,7 +2279,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
   Boolean isTileSet;
   s32 strip;
   s32 row;
-  s32 height;
+  s16 height;
   u16* source;
 
   if (f_HudAnimationFramesLeft > 0) {
