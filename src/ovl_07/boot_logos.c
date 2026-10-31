@@ -263,6 +263,14 @@ void UpdateBootLogos(void) {
   }
 }
 
+/*
+ * Draws the boot logo being shown, strip by strip, faded by its frame.
+ *
+ * Doesn't match: GCC clamps the N64 logo's fade-in alpha after storing the
+ * color command's first word, where the original clamps it first, and loads
+ * the strip loops' constants into other registers in another order. Clamping
+ * through alpha, as the Nintendo logo does, gives 60 words, not 58.
+ */
 #ifdef NON_MATCHING
 void DrawBootLogos(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -306,10 +314,11 @@ void DrawBootLogos(Gfx** displayListHead) {
 
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
           0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-      n64Texels = f_N64Logo.texels;
       top = N64_LOGO_TOP << 2;
       bottom = (N64_LOGO_TOP + N64_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != N64_LOGO_STRIP_COUNT; stripIndex++) {
+        n64Texels = f_N64Logo.texels +
+            stripIndex * (N64_LOGO_WIDTH * N64_LOGO_STRIP_HEIGHT);
         LoadTextureBlock(&gfx, n64Texels, G_IM_FMT_RGBA, G_IM_SIZ_16b,
             N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
         DrawTextureRect(&gfx, QuarterPixels(N64_LOGO_LEFT), top,
@@ -317,7 +326,6 @@ void DrawBootLogos(Gfx** displayListHead) {
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += N64_LOGO_STRIP_HEIGHT << 2;
         top += N64_LOGO_STRIP_HEIGHT << 2;
-        n64Texels += N64_LOGO_WIDTH * N64_LOGO_STRIP_HEIGHT;
       }
 
       break;
@@ -339,11 +347,12 @@ void DrawBootLogos(Gfx** displayListHead) {
 
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
           0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-      texelOffset = 0;
       top = NINTENDO_LOGO_TOP << 2;
       bottom = (NINTENDO_LOGO_TOP + NINTENDO_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != NINTENDO_LOGO_STRIP_COUNT;
           stripIndex++) {
+        texelOffset =
+            stripIndex * (NINTENDO_LOGO_WIDTH * NINTENDO_LOGO_STRIP_HEIGHT);
         gDPLoadTextureTile(gfx++,
             TextureAddress(&f_NintendoLogo.texels[texelOffset]), G_IM_FMT_I,
             G_IM_SIZ_8b, NINTENDO_LOGO_WIDTH, NINTENDO_LOGO_STRIP_HEIGHT, 0, 0,
@@ -355,7 +364,6 @@ void DrawBootLogos(Gfx** displayListHead) {
             0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += NINTENDO_LOGO_STRIP_HEIGHT << 2;
         top += NINTENDO_LOGO_STRIP_HEIGHT << 2;
-        texelOffset += NINTENDO_LOGO_WIDTH * NINTENDO_LOGO_STRIP_HEIGHT;
       }
 
       break;
@@ -376,11 +384,12 @@ void DrawBootLogos(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       LoadSmallPalette(&gfx, 0, f_CamelotLogo.palette);
-      texelOffset = 0;
       top = CAMELOT_LOGO_TOP << 2;
       bottom = (CAMELOT_LOGO_TOP + CAMELOT_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != CAMELOT_LOGO_STRIP_COUNT;
           stripIndex++) {
+        texelOffset =
+            stripIndex * (CAMELOT_LOGO_WIDTH / 2 * CAMELOT_LOGO_STRIP_HEIGHT);
         gDPLoadTextureTile_4b(gfx++,
             TextureAddress(&f_CamelotLogo.texels[texelOffset]), G_IM_FMT_CI,
             CAMELOT_LOGO_WIDTH, CAMELOT_LOGO_STRIP_HEIGHT, 0, 0,
@@ -392,7 +401,6 @@ void DrawBootLogos(Gfx** displayListHead) {
             0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         bottom += CAMELOT_LOGO_STRIP_HEIGHT << 2;
         top += CAMELOT_LOGO_STRIP_HEIGHT << 2;
-        texelOffset += CAMELOT_LOGO_WIDTH / 2 * CAMELOT_LOGO_STRIP_HEIGHT;
         gDPPipeSync(gfx++);
       }
 
