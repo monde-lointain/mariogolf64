@@ -4437,7 +4437,9 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * by 5 alongside the label table's pointers, which also moves the title row's
  * pointer from s0 to t7. loop.c turns the offset down because the loop has 268
  * insns after CSE and the offset is worth 252; the original's loop must be 252
- * insns or fewer. 60 words differ; a permuter run found nothing better.
+ * insns or fewer. 60 words differ. A permuter run got to 2 only by testing
+ * f_TitleLabelCorners around two identical labelOffset branches, and an else
+ * if around identical branches gets 16; neither test has any meaning.
  */
 #ifdef NON_MATCHING
 const char f_PlainMenuHeading[] = "MAIN MENU";
