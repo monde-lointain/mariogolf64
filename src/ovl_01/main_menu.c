@@ -7295,9 +7295,10 @@ void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y) {
 }
 
 /*
- * Doesn't match: the right and bottom edges add their constants last.
+ * A row of starCount spinning stars, from one to MAX_STAR_COUNT, the chosen
+ * hole's one larger when enlargesChosenHole. Every second draw it shows the
+ * next frame and starts reading the one after into the other buffer.
  */
-#ifdef NON_MATCHING
 void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     u8 enlargesChosenHole) {
   Gfx* gfx = *displayListHead;
@@ -7337,8 +7338,8 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
         QuarterPixels(left + starIndex * STAR_WIDTH - (growWidth / 2)),
         QuarterPixels(top - (growHeight / 2)),
         QuarterPixels(
-            left + starIndex * STAR_WIDTH + (growWidth / 2) + STAR_WIDTH),
-        QuarterPixels(top + (growHeight / 2) + STAR_HEIGHT), G_TX_RENDERTILE, 0,
+            left + starIndex * STAR_WIDTH + STAR_WIDTH + (growWidth / 2)),
+        QuarterPixels(top + STAR_HEIGHT + (growHeight / 2)), G_TX_RENDERTILE, 0,
         0, (STAR_WIDTH << 10) / (growWidth + STAR_WIDTH),
         (STAR_HEIGHT << 10) / (growHeight + STAR_HEIGHT));
     gDPPipeSync(gfx++);
@@ -7359,9 +7360,6 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawSpinningStars);
-#endif
 
 /*
  * DrawMenuRingShotStars draws the course's Ring Shot holes as stars on a
