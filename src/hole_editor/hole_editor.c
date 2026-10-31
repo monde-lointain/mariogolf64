@@ -4532,7 +4532,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
             }
           } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             /* A medium tile among fine ones loads only its own vertices */
-            gSPVertex(gfx++, GridVertex(column + (k * 2), row * 2), 2, 0);
+            IN_OWN_BLOCK(
+                gSPVertex(gfx++, GridVertex(column + (k * 2), row * 2), 2, 0));
             gSPVertex(gfx++, GridVertex(column + (k * 2) + 1, row * 2), 1, 2);
             gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 1), 2, 3);
             gSPVertex(
