@@ -4386,8 +4386,9 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * Doesn't match: in the lit labels' loop GCC works out labelIndex *
  * TITLE_LABEL_IMAGE_SIZE afresh each pass, where the original steps an offset
  * by 5 alongside the label table's pointers, which also moves the title row's
- * pointer from s0 to t7. 100 diff lines are left, mostly from those registers;
- * a permuter run found nothing better.
+ * pointer from s0 to t7. loop.c turns the offset down because the loop has 268
+ * insns after CSE and the offset is worth 252; the original's loop must be 252
+ * insns or fewer. 60 words differ; a permuter run found nothing better.
  */
 #ifdef NON_MATCHING
 const char D_80231634_ovl_01[] = "MAIN MENU";
