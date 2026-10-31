@@ -229,6 +229,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   f32 directionY;
   f32 inverseSpeed;
   f32 length;
+  f32 tailScale;
   s32 timer;
   s32 red;
   s32 green;
@@ -306,8 +307,9 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
 
           transform[0][0] = -directionY * 0.1f;
           transform[0][1] = directionX * 0.1f;
-          transform[1][0] = -directionX * (length * 0.1f);
-          transform[1][1] = -directionY * (length * 0.1f);
+          tailScale = length * 0.1f;
+          transform[1][0] = -directionX * tailScale;
+          transform[1][1] = -directionY * tailScale;
           transform[3][0] = particle->x;
           transform[3][1] = particle->y;
           transform[3][2] = -100.0f;
