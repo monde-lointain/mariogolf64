@@ -585,7 +585,7 @@ void LoadRoundResults(void) {
           rank = &f_PlayerRanks[i];
           *rank = 0;
           for (j = 0; j != g_GameState.playerCount; j++) {
-            if (i != j && f_PlayerResults[j] < f_PlayerResults[i]) {
+            if (i != j && f_PlayerResults[i] > f_PlayerResults[j]) {
               (*rank)++;
             }
           }
@@ -608,7 +608,7 @@ void LoadRoundResults(void) {
           }
         }
 
-        if (f_PlayerResults[1] < f_PlayerResults[0]) {
+        if (f_PlayerResults[0] > f_PlayerResults[1]) {
           f_PlayerRanks[0] = MATCH_RANK_WON;
           f_PlayerRanks[1] = MATCH_RANK_LOST;
         } else {
