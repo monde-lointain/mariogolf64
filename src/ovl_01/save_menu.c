@@ -563,11 +563,12 @@ void DrawRingShotRecords(Gfx** displayListHead) {
   MenuMemory* memory = GetMenuMemory();
   s32 openCourseCount = GetOpenRingShotCourseCount();
   s16 row;
+  /* Counts a row icon's draws, then the hole columns, as the original's
+   * shared register needs */
   s16 column;
   /* Counts the faces shown in a column, or an empty slot's dashes */
   s16 itemIndex;
   s16 listIndex;
-  s16 drawIndex;
   s16 drop;
   s32 character;
   s8 replayCharacter;
@@ -637,8 +638,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
     drop = (row == memory->ringShotRow) * RING_SHOT_CHOSEN_ICON_DROP;
     if ((row < openCourseCount) || (row == RING_SHOT_REPLAY_ROW)) {
       if (f_RingShotIconPositions[openCourseCount - 1][row] != 0) {
-        for (drawIndex = 0; drawIndex != RING_SHOT_ICON_DRAW_COUNT;
-            drawIndex++) {
+        for (column = 0; column != RING_SHOT_ICON_DRAW_COUNT; column++) {
           if (row == 0) {
             DrawRingShotRowIcon(
                 &gfx, 0, RING_SHOT_FIRST_ICON_X, RING_SHOT_ICON_TOP + drop);
