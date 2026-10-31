@@ -2992,6 +2992,11 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   }
 
   DrawOpeningCharacters(matrices, &gfx, f_OpeningFrameParity);
+  /*
+   * DrawOpeningShotPath draws through g_DisplayListHead, so the list goes to
+   * it through that global rather than through displayListHead. This works
+   * because DrawGame, its only caller, passes &g_DisplayListHead.
+   */
   g_DisplayListHead = gfx;
   DrawOpeningShotPath(matrices);
   gfx = g_DisplayListHead;
