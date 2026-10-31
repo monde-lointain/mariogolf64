@@ -785,7 +785,6 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 courseStripRows;
   s32 pictureHalfWidth;
   s32 pictureHalfHeight;
-  s32 windowTop;
   s16 index;
   s32 buttonX;
   s32 buttonY;
@@ -797,6 +796,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 courseTop;
   s32 pictureX;
   s32 pictureY;
+  s32 windowTop;
 
   GetMenuMemory();
   switch (f_MenuWindowState) {
@@ -1061,6 +1061,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
 
   *displayListHead = gfx;
 }
+
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawClubWindow);
 #endif

@@ -3621,9 +3621,9 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {
+  Boolean hasHandicap;
   s32 percentRange[2];
   Club* club;
-  Boolean hasHandicap;
   s32 scoreboardX;
   s32 i;
   s32 ringCount;
@@ -4193,6 +4193,7 @@ void DrawRoundHud(CameraView* view) {
 
   AdjustHudOffset();
 }
+
 #else
 INCLUDE_ASM("asm/nonmatchings/round_hud", DrawRoundHud);
 #endif

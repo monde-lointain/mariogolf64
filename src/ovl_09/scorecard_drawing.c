@@ -2101,6 +2101,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
+  s32 frontPar = 0;
   Gfx* gfx = *displayListHead;
   s8 handicapStrokes[SCORE_ROW_COUNT][COURSE_HOLE_COUNT];
   s32 firstHole = GetFirstHoleIndex();
@@ -2115,7 +2116,6 @@ void DrawScoresPage(Gfx** displayListHead) {
   Boolean isPuttsShown;
   Boolean isOverShown;
   Boolean isBadgesShown;
-  s32 frontPar = 0;
   s32 backPar = 0;
   s32 shownHoleCount;
   s32 frontTotal;
@@ -3076,6 +3076,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
+
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawScoresPage);
 #endif

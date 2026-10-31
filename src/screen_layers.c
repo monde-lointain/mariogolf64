@@ -829,8 +829,8 @@ void MarkHalfTurnCircle(
     u32* texelPairs, s32 centerColumn, s32 centerRow, s32 radius) {
   s32 step = 0;
   s32 error = radius;
-  s32 radiusOffset;
   s32 stepOffset;
+  s32 radiusOffset;
 
   if (f_HalfTurnState == HALF_TURN_STATE_SHOWING) {
     while (radius >= step) {

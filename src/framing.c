@@ -119,6 +119,7 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
+  f32 maxZ;
   Vec3 point;
   Mat4 rotation;
   Mat4 pitchRotation;
@@ -130,7 +131,6 @@ void FrameSpheres(f32 depthOffset) {
   Degrees topAngle;
   Degrees bottomAngle;
   f32 minZ;
-  f32 maxZ;
   f32 minX;
   f32 maxX;
   f32 minY;
