@@ -173,7 +173,7 @@ static ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT] = {
 };
 static s32 f_PlanThreadState = PLAN_THREAD_RUNNING;
 /* Read by no routine */
-static u32 D_80253C68_ovl_03 UNUSED = 0xD24CC5E5;
+static u32 f_UnusedWordAfterThreadState UNUSED = 0xD24CC5E5;
 /* Whether there is a best evaluation yet */
 static Boolean f_HasBestEvaluation = FALSE;
 /*
@@ -188,7 +188,7 @@ static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT] = {
 };
 static Boolean f_HasUnk3Contact = FALSE;
 /* Read by no routine. The 2W and AW share the 3W's and SW's types. */
-static ClubName D_80253CA4_ovl_03[] UNUSED = {
+static ClubName f_UnusedPlanClubNames[] UNUSED = {
     {"1W", CLUB_TYPE_DRIVER},
     {"3W", CLUB_TYPE_THREE_WOOD},
     {"4W", CLUB_TYPE_FOUR_WOOD},
@@ -230,7 +230,7 @@ static CurrentShot f_PlannedShot;
 /* The direction sectors in which no target is chosen */
 static s8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
 /* Read by no routine */
-static u8 D_80254608_ovl_03[8] UNUSED;
+static u8 f_UnusedBytesAfterExcludedSectors[8] UNUSED;
 static ShotLaunch* f_TrialLaunch;
 static ShotLaunch f_TrialLaunchValues;
 /* The best evaluation so far */
@@ -238,7 +238,7 @@ static s32 f_BestEvaluation;
 static s32 f_AimChangeCount;
 static u8 f_PlanThreadStack[PLAN_THREAD_STACK_SIZE];
 /* Read by no routine */
-static u8 D_8025A640_ovl_03[8192] UNUSED;
+static u8 f_UnusedBufferAfterPlanStack[8192] UNUSED;
 /* f_HoleStrokeTarget less the hole's par */
 static s32 f_HoleTargetToPar;
 /* The strokes the golfer aims to take on the hole */
@@ -252,7 +252,7 @@ static s32 f_Unk658;
 /* The route points nearest the cup first, as PlanRoute orders them */
 static s8 f_RouteOrder[ROUTE_POINT_COUNT];
 /* Read by no routine */
-static u8 D_8025C664_ovl_03[4] UNUSED;
+static u8 f_UnusedBytesAfterRouteOrder[4] UNUSED;
 /* Whether the trial's club is one for the green */
 static Boolean f_IsPutting;
 /* How much worse than ideal an evaluation may be for the trial to be taken */
@@ -288,7 +288,7 @@ static Boolean f_NeedsNewTarget;
 /* The nearest that a putt has come to the target */
 static s32 f_ClosestTargetDistance;
 /* Read by no routine */
-static u8 D_8025C81C_ovl_03[4] UNUSED;
+static u8 f_UnusedBytesAfterClosestDistance[4] UNUSED;
 static f32 f_CarryScale;
 /* The count of trials at this level */
 static s32 f_TrialIndex;
@@ -297,7 +297,7 @@ static Boolean f_NeedsLongerClub;
 /* The trial's evaluation; lower is better */
 static s32 f_TrialEvaluation;
 /* Read by no routine */
-static u8 D_8025C830_ovl_03[4] UNUSED;
+static u8 f_UnusedBytesAfterTrialEvaluation[4] UNUSED;
 /* Where the trial's ball rests, or for a putt where it passes nearest the
  * target */
 static CoursePoint f_TrialEndPoint;
@@ -308,7 +308,7 @@ static s32 f_LostTrialCount;
 static s8 f_PlanStage;
 static Boolean f_NeedsShorterClub;
 /* Read by no routine */
-static u8 D_8025C850_ovl_03[8] UNUSED;
+static u8 f_UnusedBytesAfterShorterClubFlag[8] UNUSED;
 static CurrentShot f_Shot;
 
 void RestartShotPlan(void) {
