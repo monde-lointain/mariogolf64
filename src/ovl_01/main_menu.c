@@ -4288,8 +4288,8 @@ void DrawSmallNamePlate(Gfx** displayListHead, s16 left, s16 top) {
         QuarterPixels(left + SMALL_BANNER_WIDTH),
         QuarterPixels(top + MENU_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
         (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH, TEXEL_STEP_ONE);
-    top += MENU_BANNER_STRIP_HEIGHT;
     gDPPipeSync(gfx++);
+    top += MENU_BANNER_STRIP_HEIGHT;
   }
 
   *displayListHead = gfx;
