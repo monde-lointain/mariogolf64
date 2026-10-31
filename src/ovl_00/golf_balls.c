@@ -607,7 +607,7 @@ void UpdateGolfBalls(void) {
       }
     }
 
-    head = &f_BallAfterimages[f_BallAfterimageHead];
+    IN_OWN_BLOCK(head = &f_BallAfterimages[f_BallAfterimageHead]);
     ball = &f_GolfBalls[currentIndex];
     if (f_BallAfterimageHead == 0) {
       previous = &f_BallAfterimages[f_BallAfterimageLength - 1];
