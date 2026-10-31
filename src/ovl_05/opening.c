@@ -1378,7 +1378,7 @@ s32 UpdateOpeningCharacters(void) {
 void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);
 Boolean IsDonkeyKongUnlocked(void);
-void StepOpeningBallSimulation(BallSimulation* simulation);
+s32 StepOpeningBallSimulation(BallSimulation* simulation);
 void AnimateNameLogos(void);
 void LoadNameLogo(s32 logoIndex, s32 slot);
 void MoveLakitu(void);
