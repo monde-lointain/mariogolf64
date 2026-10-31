@@ -323,9 +323,6 @@ void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
 
 /* Starts moving the other point to distance from point index over frameCount
  * frames, or moves it at once when it is close */
-/* Doesn't match: the original loads the threshold after taking the absolute
- * value; GCC schedules it first */
-#ifdef NON_MATCHING
 void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
   s32 easeFrameCount;
   f32 change;
@@ -333,10 +330,10 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
 
   change = distance - g_CameraEditor.distance;
   speed = fabsf(change);
-  if (speed < 0.1f) {
+  IN_OWN_BLOCK(if (speed < 0.1f) {
     g_CameraEditor.distance = distance;
     return;
-  }
+  });
 
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
@@ -363,9 +360,10 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_ZOOMING;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", ZoomEditorCamera);
-#endif
+
+/* Unreferenced; left by debug output that ZoomEditorCamera no longer has */
+static const char f_UnusedIntegerFormat[] = "%d  ";
+static const char f_UnusedFloatFormat[] = "%f";
 
 /* Returns whether both points have stopped moving */
 Boolean AreEditorMovesDone(void) {
