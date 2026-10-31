@@ -230,9 +230,8 @@ void UpdateBestTimes(void) {
 #define BEST_TIMES_PANEL_BOTTOM 230
 
 /*
- * Doesn't match: for the holder's face the original loads the course with lbu,
- * then sign-extends it and multiplies it by three once for each of its two
- * uses, five instructions more than GCC's single lb and product.
+ * Doesn't match: the holder palettes' address goes in $t8, where the original
+ * uses $v0. 6 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBestTimes(Gfx** displayListHead) {
@@ -263,6 +262,7 @@ void DrawBestTimes(Gfx** displayListHead) {
   s32 time;
   s16 character;
   s16 dashIndex;
+  s16 holderCourse;
   u8(*holderPalettes)[MENU_PALETTE_FILE_SIZE];
 
   DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
@@ -397,7 +397,9 @@ void DrawBestTimes(Gfx** displayListHead) {
       gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
       gDPPipeSync(gfx++);
       gDPSetTextureFilter(gfx++, G_TF_BILERP);
-      character = save->bestTimeCharacters[memory->bestTimesCourse][otherIndex];
+      /* Read into a local of its own to match */
+      holderCourse = memory->bestTimesCourse;
+      character = save->bestTimeCharacters[holderCourse][otherIndex];
       holderPalettes = g_MenuCharacterPalettes;
       DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
           holderPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) +
