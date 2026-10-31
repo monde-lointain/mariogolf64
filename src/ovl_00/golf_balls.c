@@ -452,6 +452,15 @@ void ResetGolfBalls(void) {
   f_GolfBallUnk100 = 0;
 }
 
+/*
+ * Updates each player's ball for the frame: hides the balls of players out
+ * of the hole, places the current player's ball from the ball simulations,
+ * and moves and fades the ball's afterimage.
+ *
+ * Doesn't match: 330 words differ. The original reads g_GameState's fields
+ * through one base register, and its first loop steps its pointers with
+ * other offsets and registers.
+ */
 #ifdef NON_MATCHING
 void UpdateGolfBalls(void) {
   s32 currentIndex;
@@ -524,10 +533,10 @@ void UpdateGolfBalls(void) {
 
         ball->alpha = BALL_SHOWN;
         ball->surface = GetSurfaceInfo(simulation->surface);
-        if (simulation->state != BALL_STATE_IN_CUP) {
-          ball->isInCup = FALSE;
-        } else {
+        if (simulation->state == BALL_STATE_IN_CUP) {
           ball->isInCup = TRUE;
+        } else {
+          ball->isInCup = FALSE;
         }
 
         if (GetCupDistance(
@@ -632,10 +641,10 @@ void UpdateGolfBalls(void) {
         head->position[AXIS_X] = ball->position[AXIS_X];
         head->position[AXIS_Y] = ball->position[AXIS_Y];
         head->position[AXIS_Z] = ball->position[AXIS_Z];
-        if (ball->isInCup != TRUE) {
-          head->isInCup = FALSE;
-        } else {
+        if (ball->isInCup == TRUE) {
           head->isInCup = TRUE;
+        } else {
+          head->isInCup = FALSE;
         }
 
         f_BallAfterimageHead++;
@@ -656,10 +665,10 @@ void UpdateGolfBalls(void) {
         head->position[AXIS_X] = ball->position[AXIS_X];
         head->position[AXIS_Y] = ball->position[AXIS_Y];
         head->position[AXIS_Z] = ball->position[AXIS_Z];
-        if (ball->isInCup != TRUE) {
-          head->isInCup = FALSE;
-        } else {
+        if (ball->isInCup == TRUE) {
           head->isInCup = ball->isInCup;
+        } else {
+          head->isInCup = FALSE;
         }
 
         f_BallAfterimageHead++;
