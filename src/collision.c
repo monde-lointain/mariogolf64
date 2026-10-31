@@ -2362,7 +2362,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     }
 
     if (hitFraction < 0.0f) {
-      hitFraction = 0.0f;
+      IN_OWN_BLOCK(hitFraction = 0.0f);
     }
 
     if (!(hitFraction < nearestFraction)) {
