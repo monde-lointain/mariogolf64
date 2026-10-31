@@ -1545,7 +1545,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             (tangent[AXIS_Z] * keep) + (normalPart[AXIS_Z] * restitution);
         simulation->lastBounceStep = simulation->stepCount;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
-        spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
+        IN_OWN_BLOCK(spinVelocityZ =
+                         simulation->spinSpeed * sinf(simulation->spinHeading));
         grip = 1.0f - restitution;
         driftX = (spinVelocityX - velocity[AXIS_X]) *
             (grip * fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
