@@ -5160,8 +5160,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
  * SPARKS_STARTING. The point is projected to the screen, and the sparks
  * are scaled down the further away it is.
  *
- * The only difference from the original is that the display list
- * pointers spilled after the first and second commands swap stack slots.
+ * Doesn't match: the display list pointers spilled after the first and second
+ * commands swap stack slots. None of 40 orders of the locals' declarations
+ * fixes it.
  */
 #ifdef NON_MATCHING
 void DrawOpeningSparks(Gfx** displayListHead) {
