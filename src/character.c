@@ -1621,7 +1621,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     rotationMatrix[1][3] = 0.0f;
     rotationMatrix[2][0] = xz + wy;
     rotationMatrix[2][1] = yz - wx;
-    rotationMatrix[2][2] = 1.0f - (xx + yy);
+    IN_OWN_BLOCK(rotationMatrix[2][2] = 1.0f - (xx + yy));
     rotationMatrix[2][3] = 0.0f;
     rotationMatrix[3][0] = 0.0f;
     rotationMatrix[3][1] = 0.0f;
