@@ -2232,9 +2232,9 @@ void UpdateAnimationViewer(void) {
 void UpdateModeSelect(void) {
   EncodedAsset asset;
   Boolean isDone = IsHudAnimationDone();
+  /* Also the player and bet loops' index, to match */
   s32 direction;
   s32 step;
-  s32 index;
   s16 slot;
   s32 mode;
 
@@ -2283,13 +2283,14 @@ void UpdateModeSelect(void) {
         MAP_CAMERA_MODE_TOP_BYTE = 2;
         g_BetSet = BET_SET_NONE;
         ApplyBetPreset(BET_PRESET_NONE);
-        for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-          g_ChosenHandicaps[index] = 0;
+        for (direction = 0; direction != MAX_PLAYER_COUNT; direction++) {
+          g_ChosenHandicaps[direction] = 0;
         }
 
         /* The last setting is left as it was */
-        for (index = 0; index != BET_STAKE_SLOT_COUNT - 1; index++) {
-          g_GameState.betRates[index] = UNSET_BET_RATE;
+        for (direction = 0; direction != BET_STAKE_SLOT_COUNT - 1;
+            direction++) {
+          g_GameState.betRates[direction] = UNSET_BET_RATE;
         }
 
         break;
@@ -2309,12 +2310,13 @@ void UpdateModeSelect(void) {
 
         ApplyBetPreset(BET_PRESET_STROKE);
         if (g_ChosenPlayerCount == 1) {
-          for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-            g_ChosenHandicaps[index] = 0;
+          for (direction = 0; direction != MAX_PLAYER_COUNT; direction++) {
+            g_ChosenHandicaps[direction] = 0;
           }
 
-          for (index = 0; index != BET_STAKE_SLOT_COUNT - 1; index++) {
-            g_GameState.betRates[index] = UNSET_BET_RATE;
+          for (direction = 0; direction != BET_STAKE_SLOT_COUNT - 1;
+              direction++) {
+            g_GameState.betRates[direction] = UNSET_BET_RATE;
           }
 
           g_AreBetPagesBlocked = 1;
@@ -2356,13 +2358,13 @@ void UpdateModeSelect(void) {
         break;
       case MODE_ICON_MINI_GOLF:
         /* Mini golf needs every player on a controller */
-        for (index = 0; index != g_ChosenPlayerCount; index++) {
-          if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
+        for (direction = 0; direction != g_ChosenPlayerCount; direction++) {
+          if (g_PlayerControllerIndices[direction] == NO_CONTROLLER_INDEX) {
             break;
           }
         }
 
-        if (index < g_ChosenPlayerCount) {
+        if (direction < g_ChosenPlayerCount) {
           PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           return;
         }
@@ -2383,12 +2385,13 @@ void UpdateModeSelect(void) {
 
         ApplyBetPreset(BET_PRESET_MINI_GOLF);
         if (g_ChosenPlayerCount == 1) {
-          for (index = 0; index != MAX_PLAYER_COUNT; index++) {
-            g_ChosenHandicaps[index] = 0;
+          for (direction = 0; direction != MAX_PLAYER_COUNT; direction++) {
+            g_ChosenHandicaps[direction] = 0;
           }
 
-          for (index = 0; index != BET_STAKE_SLOT_COUNT - 1; index++) {
-            g_GameState.betRates[index] = UNSET_BET_RATE;
+          for (direction = 0; direction != BET_STAKE_SLOT_COUNT - 1;
+              direction++) {
+            g_GameState.betRates[direction] = UNSET_BET_RATE;
           }
 
           g_AreBetPagesBlocked = 1;
@@ -2431,13 +2434,13 @@ void UpdateModeSelect(void) {
         break;
       case MODE_ICON_CLUB_SLOTS:
         /* The club slots need every player on a controller too */
-        for (index = 0; index != g_ChosenPlayerCount; index++) {
-          if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
+        for (direction = 0; direction != g_ChosenPlayerCount; direction++) {
+          if (g_PlayerControllerIndices[direction] == NO_CONTROLLER_INDEX) {
             break;
           }
         }
 
-        if (index < g_ChosenPlayerCount) {
+        if (direction < g_ChosenPlayerCount) {
           PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           return;
         }
@@ -2547,14 +2550,14 @@ void UpdateModeSelect(void) {
   }
 
   mode = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
-  for (index = 0; index != g_ChosenPlayerCount; index++) {
-    if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
+  for (direction = 0; direction != g_ChosenPlayerCount; direction++) {
+    if (g_PlayerControllerIndices[direction] == NO_CONTROLLER_INDEX) {
       break;
     }
   }
 
   if (((mode == MODE_ICON_CLUB_SLOTS) | (mode == MODE_ICON_MINI_GOLF)) &&
-      index < g_ChosenPlayerCount) {
+      direction < g_ChosenPlayerCount) {
     SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, MESSAGE_MODE_NEEDS_CONTROLLERS,
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
         0xFF);

@@ -1204,6 +1204,7 @@ s32 DrawGame(void) {
   s32 commandCount;
   f32 nearZ;
   f32 farClip;
+  /* Also the map camera's look-at z, to match */
   f32 billboardRise;
   f32 eyeX;
   f32 eyeY;
@@ -1213,7 +1214,6 @@ s32 DrawGame(void) {
   f32 topDownEyeZ;
   f32 lookAtX;
   f32 lookAtY;
-  f32 lookAtZ;
   s32 mode;
   Camera* camera;
   CameraView* courseView;
@@ -1450,17 +1450,17 @@ s32 DrawGame(void) {
         lookAtY = g_MapCamera.view.eye[1];
         lookAtY += 1000.0f;
         lookAtX = g_MapCamera.view.eye[0] + 10.0f;
-        lookAtZ = g_MapCamera.view.eye[2];
+        billboardRise = g_MapCamera.view.eye[2];
         guLookAt(&matrices->viewing, g_MapCamera.view.eye[0],
             g_MapCamera.view.eye[1], g_MapCamera.view.eye[2], lookAtX, lookAtY,
-            lookAtZ, 0.0f, -1.0f, 0.0f);
+            billboardRise, 0.0f, -1.0f, 0.0f);
         guAlign(&matrices->billboard, 0.0f, lookAtX - g_MapCamera.view.eye[0],
             lookAtY - g_MapCamera.view.eye[1],
-            lookAtZ - g_MapCamera.view.eye[2]);
+            billboardRise - g_MapCamera.view.eye[2]);
         guAlign(&matrices->antiBillboard, M_PI,
             g_MapCamera.view.eye[0] - lookAtX,
             g_MapCamera.view.eye[1] - lookAtY,
-            g_MapCamera.view.eye[2] - lookAtZ);
+            g_MapCamera.view.eye[2] - billboardRise);
         guOrtho(&matrices->perspective, -MAP_ORTHO_HALF_WIDTH,
             MAP_ORTHO_HALF_WIDTH, -MAP_ORTHO_HALF_HEIGHT, MAP_ORTHO_HALF_HEIGHT,
             1.0f, 30000.0f, 8.0f);

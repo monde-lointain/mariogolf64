@@ -366,10 +366,10 @@ void DrawClubPanel(Gfx** displayListHead) {
   Boolean isPutter;
   s32 value;
   s32 playerState;
-  s32 group;
   s32 tick;
   s32 firstTick;
   s32 x;
+  /* Also the gauge group index, to match */
   s32 fillWidth;
 
   s32 markerOffset;
@@ -427,8 +427,8 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_ClubPanelImage)),
       G_IM_FMT_I, GAUGE_TICK_IMAGE_WIDTH, GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP,
       G_TX_WRAP, 2, 0, 0, 0);
-  for (group = 0, firstTick = 0; group != GAUGE_GROUP_COUNT;
-      group++, firstTick += GAUGE_TICKS_PER_GROUP) {
+  for (fillWidth = 0, firstTick = 0; fillWidth != GAUGE_GROUP_COUNT;
+      fillWidth++, firstTick += GAUGE_TICKS_PER_GROUP) {
     for (tick = 1; tick != GAUGE_TICKS_PER_GROUP; tick++) {
       x = (firstTick + tick) * GAUGE_TICK_SPACING;
       gSPTextureRectangle(gfx++, QuarterPixels(GAUGE_FULL_X + x),

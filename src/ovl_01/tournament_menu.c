@@ -558,7 +558,6 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   f32 windowHalfHeight;
   f32 buttonWidth;
   f32 buttonHeight;
-  s32 halfWidth;
   s32 halfHeight;
   s32 buttonHalfWidth;
   s32 buttonHalfHeight;
@@ -567,6 +566,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 windowRight;
   s16 index;
   s32 buttonX;
+  /* The window's half width first, to match */
   s32 buttonY;
   s32 pulse;
   s32 growth;
@@ -624,11 +624,11 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
       return;
   }
 
-  halfWidth = (s32)windowWidth / 2;
+  buttonY = (s32)windowWidth / 2;
   halfHeight = windowHalfHeight;
   buttonHalfWidth = (s32)buttonWidth / 2;
   buttonHalfHeight = (s32)buttonHeight / 2;
-  halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
+  buttonY = (buttonY <= 0) ? 1 : buttonY;
   halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
   IN_OWN_BLOCK(buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth);
   buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
@@ -655,8 +655,8 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
             (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
         0, 0, 0, 0);
-    windowLeft = centerX - halfWidth;
-    windowRight = centerX + halfWidth;
+    windowLeft = centerX - buttonY;
+    windowRight = centerX + buttonY;
     DrawTextureRect(&gfx, QuarterPixels(windowLeft),
         QuarterPixels(windowTop + (index * halfHeight)),
         QuarterPixels(windowRight),

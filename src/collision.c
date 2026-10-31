@@ -1735,17 +1735,16 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
   s32 endToCupZ;
   f32 hitFraction;
   f32 height;
-  s32 hitX;
-  s32 hitZ;
   Boolean isFlagHit;
   s32 distance;
   s32 speed;
-  f32 chordSquared;
   f32 halfChord;
   Vec3 direction;
+  /* The hit point first, then its offset from the cup, as is contactZ */
   s32 contactX;
   s32 contactZ;
   Radians angle;
+  /* Also the flagstick chord's squared half length, to match */
   f32 bounceSpeed;
   s32 unused[2] UNUSED;
 
@@ -1799,8 +1798,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
 
     height = g_HoleSetup.cupPosition[AXIS_Y] -
         (s32)(startY + (deltaY * hitFraction));
-    hitX = startX + (deltaX * hitFraction);
-    hitZ = startZ + (deltaZ * hitFraction);
+    contactX = startX + (deltaX * hitFraction);
+    contactZ = startZ + (deltaZ * hitFraction);
     isFlagHit = FALSE;
     if (height > FLAGSTICK_HEIGHT) {
       continue;
@@ -1816,8 +1815,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       isFlagHit &= -(IsGameFlagSet(GAME_FLAG_RISING_FLAG_HITS) != 0);
     }
 
-    distance = IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - hitX,
-        g_HoleSetup.cupPosition[AXIS_Z] - hitZ);
+    distance = IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - contactX,
+        g_HoleSetup.cupPosition[AXIS_Z] - contactZ);
     if (distance > FLAG_REACH) {
       continue;
     }
@@ -1833,16 +1832,16 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       hitKind = PIN_HIT_FLAG;
     }
 
-    chordSquared = FLAGSTICK_RADIUS_SQUARED - (distance * distance);
-    if (chordSquared >= 0.0f) {
-      halfChord = sqrtf(chordSquared);
+    bounceSpeed = FLAGSTICK_RADIUS_SQUARED - (distance * distance);
+    if (bounceSpeed >= 0.0f) {
+      halfChord = sqrtf(bounceSpeed);
     } else {
       halfChord = FLAGSTICK_RADIUS;
     }
 
-    direction[AXIS_X] = startX - hitX;
+    direction[AXIS_X] = startX - contactX;
     direction[AXIS_Y] = 0.0f;
-    IN_OWN_BLOCK(direction[AXIS_Z] = startZ - hitZ);
+    IN_OWN_BLOCK(direction[AXIS_Z] = startZ - contactZ);
     if (direction[AXIS_X] != 0.0f || direction[AXIS_Z] != 0.0f) {
       guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
     }
@@ -1851,9 +1850,9 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
     direction[AXIS_Y] *= halfChord;
     direction[AXIS_Z] *= halfChord;
     contactZ =
-        (s32)(hitZ + direction[AXIS_Z]) - g_HoleSetup.cupPosition[AXIS_Z];
+        (s32)(contactZ + direction[AXIS_Z]) - g_HoleSetup.cupPosition[AXIS_Z];
     contactX =
-        (s32)(hitX + direction[AXIS_X]) - g_HoleSetup.cupPosition[AXIS_X];
+        (s32)(contactX + direction[AXIS_X]) - g_HoleSetup.cupPosition[AXIS_X];
     angle = 0.0f;
     if (contactX != 0 || contactZ != 0) {
       angle = atan2(contactZ, contactX);
@@ -2029,8 +2028,8 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   HoleTriangle* candidate;
   f32 nearestFraction;
   f32 startSide;
+  /* Also the side change along the path, to match */
   f32 endSide;
-  f32 sideChange;
   f32 hitFraction;
   s32 hitX;
   s32 hitZ;
@@ -2126,9 +2125,9 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         (plane.normal[AXIS_Z] * endZ) +
         (plane.distance * WORLD_TO_COURSE_SCALE);
     if (DoesPathMeetPlane(startSide, endSide)) {
-      sideChange = startSide - endSide;
-      if ((s32)sideChange != 0) {
-        hitFraction = fabsf(startSide) / fabsf(sideChange);
+      endSide = startSide - endSide;
+      if ((s32)endSide != 0) {
+        hitFraction = fabsf(startSide) / fabsf(endSide);
       } else {
         hitFraction = 0.0f;
       }
