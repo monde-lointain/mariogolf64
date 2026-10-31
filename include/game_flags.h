@@ -240,7 +240,7 @@
 /*
  * Flags that Club Slots reads, whose purpose is not yet known. In a turn, it
  * or UNK9B makes the shot the computer golfer's, and UNK32 also takes the
- * shot's unk40 from g_PlannedShot, turns on FAST_FLIGHT, skips a HUD animation
+ * shot's unk40 from g_ScriptedShot, turns on FAST_FLIGHT, skips a HUD animation
  * and shortens the wait after the reaction.
  */
 #define GAME_FLAG_UNK32 0x32

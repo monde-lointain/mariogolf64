@@ -367,7 +367,7 @@
 enum ShotSource {
   /* The player's controller */
   SHOT_SOURCE_PLAYER,
-  /* g_PlannedShot: a replayed shot, or the computer golfer's finished plan */
+  /* g_ScriptedShot: a replayed shot, or the computer golfer's finished plan */
   SHOT_SOURCE_PREPARED,
   /* The computer golfer, which is still planning */
   SHOT_SOURCE_PLANNING
@@ -1264,10 +1264,10 @@ s32 UpdateAimControls(void) {
   s32 heading;
 
   if (f_ShotSource != SHOT_SOURCE_PLAYER) {
-    headingLeft = (s16)(g_PlannedShot.heading - g_CurrentShot.heading);
+    headingLeft = (s16)(g_ScriptedShot.heading - g_CurrentShot.heading);
     if (IsGameFlagSet(GAME_FLAG_SNAP_REPLAY_AIM) ||
         Abs(headingLeft) < REPLAY_AIM_MIN_STEP) {
-      g_CurrentShot.heading = g_PlannedShot.heading;
+      g_CurrentShot.heading = g_ScriptedShot.heading;
       if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
         SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
         SetFramebufferCount(DOUBLE_BUFFERING);
@@ -3371,7 +3371,7 @@ void UpdateTurns(void) {
           f_ShotSource = SHOT_SOURCE_PLANNING;
         } else if (f_ShouldReplaySavedShot) {
           f_ShotSource = SHOT_SOURCE_PREPARED;
-          g_PlannedShot = g_SavedShots[playerIndex];
+          g_ScriptedShot = g_SavedShots[playerIndex];
           f_ShouldReplaySavedShot = 0;
         } else {
           f_ShotSource = SHOT_SOURCE_PLAYER;
@@ -3546,7 +3546,7 @@ void UpdateTurns(void) {
           for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
               i < PLAN_PREPARING_POLL_COUNT;
               i++) {
-            IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&g_PlannedShot) !=
+            IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&g_ScriptedShot) !=
                                             PLANNED_SHOT_UNFINISHED)
                     ? SHOT_SOURCE_PREPARED
                     : SHOT_SOURCE_PLANNING);
@@ -3779,7 +3779,7 @@ void UpdateTurns(void) {
                 i < PLAN_AIMING_POLL_COUNT;
                 i++) {
               f_ShotSource =
-                  (GetPlannedShot(&g_PlannedShot) != PLANNED_SHOT_UNFINISHED)
+                  (GetPlannedShot(&g_ScriptedShot) != PLANNED_SHOT_UNFINISHED)
                   ? SHOT_SOURCE_PREPARED
                   : SHOT_SOURCE_PLANNING;
               if (!HasPlanTime(f_PlanTimeBudget)) {
@@ -3804,7 +3804,7 @@ void UpdateTurns(void) {
 
           UnloadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           if (f_ShotSource == SHOT_SOURCE_PREPARED) {
-            isReady = StepToClubChoice(&g_PlannedShot);
+            isReady = StepToClubChoice(&g_ScriptedShot);
           } else {
             if (g_ImpactPointState == IMPACT_POINT_OFF) {
               HandleClubInput();
@@ -3902,7 +3902,7 @@ void UpdateTurns(void) {
 
           g_CurrentShot.gaugeFrame = 0;
           if (IsGameFlagSet(GAME_FLAG_UNK32)) {
-            g_CurrentShot.gaugeFrame = g_PlannedShot.powerGaugeFrame;
+            g_CurrentShot.gaugeFrame = g_ScriptedShot.powerGaugeFrame;
           }
 
           SetShotOffsetMarker(g_CurrentShot.offsetX, g_CurrentShot.offsetY);
@@ -3978,7 +3978,7 @@ void UpdateTurns(void) {
         f_ShotLaunch.offsetX = g_CurrentShot.offsetX;
         f_ShotLaunch.offsetY = g_CurrentShot.offsetY;
         if ((f_ShotSource != SHOT_SOURCE_PLAYER)
-                ? (g_PlannedShot.powerGaugeFrame == g_CurrentShot.gaugeFrame)
+                ? (g_ScriptedShot.powerGaugeFrame == g_CurrentShot.gaugeFrame)
                 : (g_TurnController.pressedButtons & A_BUTTON)) {
           SoundId sound;
 
@@ -4053,19 +4053,19 @@ void UpdateTurns(void) {
           g_CurrentShot.offsetX = GetTurnStickX();
           g_CurrentShot.offsetY = GetTurnStickY();
         } else {
-          s32 framesLeft = g_PlannedShot.impactGaugeFrame -
+          s32 framesLeft = g_ScriptedShot.impactGaugeFrame -
               g_CurrentShot.gaugeFrame - STICK_HOLD_FRAME_COUNT;
 
           if (framesLeft > STICK_TILT_FRAME_COUNT) {
             g_CurrentShot.offsetX = 0;
             g_CurrentShot.offsetY = 0;
           } else if (framesLeft <= 0) {
-            g_CurrentShot.offsetX = g_PlannedShot.offsetX;
-            g_CurrentShot.offsetY = g_PlannedShot.offsetY;
+            g_CurrentShot.offsetX = g_ScriptedShot.offsetX;
+            g_CurrentShot.offsetY = g_ScriptedShot.offsetY;
           } else {
-            g_CurrentShot.offsetX = g_PlannedShot.offsetX *
+            g_CurrentShot.offsetX = g_ScriptedShot.offsetX *
                 (STICK_TILT_FRAME_COUNT - framesLeft) / STICK_TILT_FRAME_COUNT;
-            g_CurrentShot.offsetY = g_PlannedShot.offsetY *
+            g_CurrentShot.offsetY = g_ScriptedShot.offsetY *
                 (STICK_TILT_FRAME_COUNT - framesLeft) / STICK_TILT_FRAME_COUNT;
           }
         }
@@ -4075,7 +4075,7 @@ void UpdateTurns(void) {
         f_ShotLaunch.offsetY = g_CurrentShot.offsetY;
         if (((f_ShotSource != SHOT_SOURCE_PLAYER)
                     ? (g_CurrentShot.gaugeFrame ==
-                          g_PlannedShot.impactGaugeFrame)
+                          g_ScriptedShot.impactGaugeFrame)
                     : (g_TurnController.pressedButtons & A_BUTTON)) ||
             g_CurrentShot.gaugeFrame >= LAST_IMPACT_GAUGE_FRAME) {
           g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;

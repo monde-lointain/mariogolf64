@@ -104,8 +104,9 @@ extern s32 g_ShotFlags;
 extern s32 g_HasShotComeToRest;
 /* Asks for the HUD to turn away when the next player is picked */
 extern s8 g_IsHudTurnAwayRequested;
-/* A replayed shot, or the computer golfer's finished plan */
-extern CurrentShot g_PlannedShot;
+/* The shot a turn plays without the player: a replayed shot, or the
+ * computer golfer's finished plan */
+extern CurrentShot g_ScriptedShot;
 /* The strokes the replayed record took, after which the replay ends */
 extern u8 g_ReplayStrokeCount;
 

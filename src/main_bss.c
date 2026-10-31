@@ -177,7 +177,7 @@ u8 g_IsGroundTileNearby[GROUND_TILE_COUNT] BSS ALIGNED(8) = {0};
 UNREAD_COMMON(0xC);
 Vec3 f_RainVelocity BSS = {0};
 NUContRmbCtl nuContRmbCtl[NU_CONT_MAXCONTROLLERS] BSS ALIGNED(8) = {{0}};
-CurrentShot g_PlannedShot BSS ALIGNED(8) = {0};
+CurrentShot g_ScriptedShot BSS ALIGNED(8) = {0};
 s32 g_MessageCodesStart BSS = {0};
 /* Its address is only 4-byte aligned, so it keeps its type's alignment */
 Scorecard g_Scorecard BSS = {{0}};

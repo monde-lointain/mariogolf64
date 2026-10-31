@@ -97,7 +97,7 @@ enum HoleResultsKind {
   HOLE_RESULTS_SPEED_GOLF
 };
 
-CurrentShot g_PlannedShot;
+CurrentShot g_ScriptedShot;
 u8 g_ReplayStrokeCount;
 ContestMovieState g_ContestMovieState;
 u32 g_GroundDrawFrame;
@@ -661,26 +661,27 @@ void SetNextTeeOrder(void) {
  * heading, gauge frames, shot mode, club and offsets, for the replay to repeat
  */
 void LoadBestShotReplayInputs(s32 index) {
-  g_PlannedShot.heading = g_PlayRecords->shots[index].heading;
-  g_PlannedShot.powerGaugeFrame = g_PlayRecords->shots[index].powerGaugeFrame;
-  g_PlannedShot.impactGaugeFrame = g_PlayRecords->shots[index].impactGaugeFrame;
-  g_PlannedShot.shotMode = g_PlayRecords->shots[index].shotMode;
-  g_PlannedShot.clubSlot = g_PlayRecords->shots[index].clubSlot;
-  g_PlannedShot.offsetX = g_PlayRecords->shots[index].offsetX;
-  g_PlannedShot.offsetY = g_PlayRecords->shots[index].offsetY;
+  g_ScriptedShot.heading = g_PlayRecords->shots[index].heading;
+  g_ScriptedShot.powerGaugeFrame = g_PlayRecords->shots[index].powerGaugeFrame;
+  g_ScriptedShot.impactGaugeFrame =
+      g_PlayRecords->shots[index].impactGaugeFrame;
+  g_ScriptedShot.shotMode = g_PlayRecords->shots[index].shotMode;
+  g_ScriptedShot.clubSlot = g_PlayRecords->shots[index].clubSlot;
+  g_ScriptedShot.offsetX = g_PlayRecords->shots[index].offsetX;
+  g_ScriptedShot.offsetY = g_PlayRecords->shots[index].offsetY;
 }
 
 /* LoadBestShotReplayInputs for a shot of the Ring Shot record */
 void LoadRingShotReplayInputs(s32 index) {
-  g_PlannedShot.heading = g_RingShotRecords->shots[index].heading;
-  g_PlannedShot.powerGaugeFrame =
+  g_ScriptedShot.heading = g_RingShotRecords->shots[index].heading;
+  g_ScriptedShot.powerGaugeFrame =
       g_RingShotRecords->shots[index].powerGaugeFrame;
-  g_PlannedShot.impactGaugeFrame =
+  g_ScriptedShot.impactGaugeFrame =
       g_RingShotRecords->shots[index].impactGaugeFrame;
-  g_PlannedShot.shotMode = g_RingShotRecords->shots[index].shotMode;
-  g_PlannedShot.clubSlot = g_RingShotRecords->shots[index].clubSlot;
-  g_PlannedShot.offsetX = g_RingShotRecords->shots[index].offsetX;
-  g_PlannedShot.offsetY = g_RingShotRecords->shots[index].offsetY;
+  g_ScriptedShot.shotMode = g_RingShotRecords->shots[index].shotMode;
+  g_ScriptedShot.clubSlot = g_RingShotRecords->shots[index].clubSlot;
+  g_ScriptedShot.offsetX = g_RingShotRecords->shots[index].offsetX;
+  g_ScriptedShot.offsetY = g_RingShotRecords->shots[index].offsetY;
 }
 
 /*
