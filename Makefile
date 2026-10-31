@@ -223,7 +223,7 @@ endif
 # Per-object compiler flags
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
-.PHONY: all extract clean distclean setup tools format lint pycheck check-shiftable
+.PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable
 
 all: $(ROM)
 ifneq ($(COMPARE),0)
@@ -278,6 +278,20 @@ lint: $(BUILD_DIR)/compile_commands.json
 	@$(CLANG_TIDY) -p $(BUILD_DIR) -j $(LINT_JOBS) -quiet $(LINT_FILES) \
 		> $(BUILD_DIR)/lint.log 2>&1 || true
 	@! grep -E '\[($(LINT_CHECKS))' $(BUILD_DIR)/lint.log | sort -u | grep .
+
+# Linking the game's code as LTO bytecode compares each declaration of a
+# routine or object with its definition, across files, which no single
+# compile can. The modern build compiles the bytecode into its own
+# directory, and any mismatch fails the link.
+TYPECHECK_DIR := build/typecheck
+
+typecheck:
+	@$(MAKE) MODERN=1 BUILD_DIR=$(TYPECHECK_DIR) OPTFLAGS='-Os -flto' \
+		$(TYPECHECK_DIR)/linked.o
+
+$(BUILD_DIR)/linked.o: $(filter $(BUILD_DIR)/src/%.c.o,$(O_FILES))
+	$(CC) -r -nostdlib $(TARGETFLAGS) $(OPTFLAGS) \
+		-Werror=lto-type-mismatch -o $@ $^
 
 tools: $(KMC_DIR)/gcc $(KMC_DIR)/as
 
