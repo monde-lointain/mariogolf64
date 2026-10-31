@@ -1852,7 +1852,6 @@ void DrawSavedGames(Gfx** displayListHead) {
   MenuMemory* memory = GetMenuMemory();
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
   s32 index;
-  s32 otherIndex;
   s32 key;
   Radians angle;
   f32 circleX;
@@ -1865,11 +1864,12 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32 stripLeft;
   s32 stripShownWidth;
   s32 gameIndex;
+  /* Also the game mode label's x, to match */
   s32 courseIndex;
+  /* Also the board and strip index in the loops, to match */
   s32 holeIndex;
   s32* chosenMode;
   s32* labelOffset;
-  s32 labelX;
   f32 radiusX;
   s32 boardDegrees;
 
@@ -1917,14 +1917,14 @@ void DrawSavedGames(Gfx** displayListHead) {
     }
   }
 
-  for (otherIndex = 0; otherIndex != SAVED_GAME_COUNT; otherIndex++) {
-    drawOrder[otherIndex] = otherIndex;
+  for (holeIndex = 0; holeIndex != SAVED_GAME_COUNT; holeIndex++) {
+    drawOrder[holeIndex] = holeIndex;
   }
 
   /* Draw the farthest boards first, so the nearer ones cover them */
-  for (otherIndex = 1; otherIndex != SAVED_GAME_COUNT; otherIndex++) {
-    key = drawOrder[otherIndex];
-    for (index = otherIndex - 1;
+  for (holeIndex = 1; holeIndex != SAVED_GAME_COUNT; holeIndex++) {
+    key = drawOrder[holeIndex];
+    for (index = holeIndex - 1;
         index >= 0 && boardY[drawOrder[index]] > boardY[key]; index--) {
       drawOrder[index + 1] = drawOrder[index];
     }
@@ -1969,18 +1969,18 @@ void DrawSavedGames(Gfx** displayListHead) {
       }
 
       gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_GameBoards[slot])));
-      for (otherIndex = 0; otherIndex != GAME_BOARD_STRIP_COUNT; otherIndex++) {
+      for (holeIndex = 0; holeIndex != GAME_BOARD_STRIP_COUNT; holeIndex++) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress(LargeImageTexels(f_GameBoards[slot]) +
-                (otherIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)),
+                (holeIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT,
             0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++, (s32)(boardX[slot] - halfSize) << 2,
-            (s32)(boardY[slot] - halfSize + (otherIndex * halfSize) + bob) << 2,
+            (s32)(boardY[slot] - halfSize + (holeIndex * halfSize) + bob) << 2,
             (s32)(boardX[slot] + halfSize) << 2,
-            (s32)(boardY[slot] + (otherIndex * halfSize) + bob) << 2,
+            (s32)(boardY[slot] + (holeIndex * halfSize) + bob) << 2,
             G_TX_RENDERTILE, 0, 0, step, step);
         gDPPipeSync(gfx++);
       }
@@ -1988,11 +1988,10 @@ void DrawSavedGames(Gfx** displayListHead) {
       if (f_SavedGameModes[slot] != NO_SAVE_MENU_MODE) {
         IN_OWN_BLOCK(gDPLoadTLUT_pal256(
             gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot]))));
-        for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT;
-            otherIndex++) {
+        for (holeIndex = 0; holeIndex != MODE_ICON_STRIP_COUNT; holeIndex++) {
           gDPLoadTextureBlock(gfx++,
               TextureAddress(LargeImageTexels(f_SavedGameModeImages[slot]) +
-                  (otherIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
+                  (holeIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
               G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
               0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2000,11 +1999,11 @@ void DrawSavedGames(Gfx** displayListHead) {
           gSPScisTextureRectangle(gfx++,
               (s32)(boardX[slot] - iconHalfSize) << 2,
               QuarterPixels((s32)(boardY[slot] - iconHalfSize +
-                                (otherIndex * iconHalfSize) + bob) +
+                                (holeIndex * iconHalfSize) + bob) +
                   MODE_ICON_DROP),
               (s32)(boardX[slot] + iconHalfSize) << 2,
               QuarterPixels(
-                  (s32)(boardY[slot] + (otherIndex * iconHalfSize) + bob) +
+                  (s32)(boardY[slot] + (holeIndex * iconHalfSize) + bob) +
                   MODE_ICON_DROP),
               G_TX_RENDERTILE, 0, 0, iconStep, iconStep);
           gDPPipeSync(gfx++);
@@ -2074,11 +2073,11 @@ void DrawSavedGames(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    labelX = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X
-                                : GAME_MODE_LABEL_X;
-    gSPScisTextureRectangle(gfx++, QuarterPixels(labelX - *labelOffset),
+    courseIndex = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X
+                                     : GAME_MODE_LABEL_X;
+    gSPScisTextureRectangle(gfx++, QuarterPixels(courseIndex - *labelOffset),
         QuarterPixels(GAME_MODE_LABEL_TOP),
-        QuarterPixels(labelX - *labelOffset + GAME_MODE_LABEL_WIDTH),
+        QuarterPixels(courseIndex - *labelOffset + GAME_MODE_LABEL_WIDTH),
         QuarterPixels(GAME_MODE_LABEL_TOP + GAME_MODE_LABEL_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);

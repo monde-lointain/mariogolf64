@@ -2335,7 +2335,7 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  *
  * Doesn't match: GCC keeps frame in a saved floating-point register, where
  * the original keeps it in a scratch one, which shifts the other
- * floating-point registers. 290 words differ.
+ * floating-point registers. 258 words differ.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
@@ -2360,11 +2360,9 @@ void AnimateCharacterJoints(u32 slotIndex) {
   f32 spanWeight;
   f32 sinAngle;
   f32 lengthSquared;
-  f32 scale;
   f32 xs;
   f32 ys;
   f32 zs;
-  f32 wx;
   f32 wy;
   f32 wz;
   f32 xx;
@@ -2533,17 +2531,19 @@ void AnimateCharacterJoints(u32 slotIndex) {
     /* The rotation quaternion (x, y, z, w) as a matrix */
     lengthSquared = (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]) +
         (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]);
+    /* dot holds the quaternion's scale from here, and progress holds the w
+     * and x term, to match */
     if (lengthSquared > 0.0f) {
-      scale = 2.0f / lengthSquared;
+      dot = 2.0f / lengthSquared;
     } else {
-      scale = 0.0f;
+      dot = 0.0f;
     }
 
     rotationMatrix = jointMatrix;
-    xs = rotation[0] * scale;
-    ys = rotation[1] * scale;
-    zs = rotation[2] * scale;
-    wx = rotation[3] * xs;
+    xs = rotation[0] * dot;
+    ys = rotation[1] * dot;
+    zs = rotation[2] * dot;
+    progress = rotation[3] * xs;
     wy = rotation[3] * ys;
     wz = rotation[3] * zs;
     xx = rotation[0] * xs;
@@ -2558,10 +2558,10 @@ void AnimateCharacterJoints(u32 slotIndex) {
     rotationMatrix[0][3] = 0.0f;
     rotationMatrix[1][0] = xy - wz;
     rotationMatrix[1][1] = 1.0f - (xx + zz);
-    rotationMatrix[1][2] = yz + wx;
+    rotationMatrix[1][2] = yz + progress;
     rotationMatrix[1][3] = 0.0f;
     rotationMatrix[2][0] = xz + wy;
-    rotationMatrix[2][1] = yz - wx;
+    rotationMatrix[2][1] = yz - progress;
     rotationMatrix[2][2] = 1.0f - (xx + yy);
     rotationMatrix[2][3] = 0.0f;
     rotationMatrix[3][0] = 0.0f;

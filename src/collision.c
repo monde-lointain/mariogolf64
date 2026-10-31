@@ -2274,7 +2274,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 hitPointV;
   s32 facing;
   s32 k;
-  s32 sides;
 
   if (IsGameFlagSet(GAME_FLAG_UNK0)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -2727,10 +2726,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
                          (hitPointV - (cornersV[0] * WORLD_TO_COURSE_SCALE))) -
         ((cornersV[1] - cornersV[0]) *
             (hitPointU - (cornersU[0] * WORLD_TO_COURSE_SCALE)));
+    /* k holds the sides the edges cross on from here, to match */
     if (edgeCrosses[0] < 0) {
-      sides = EDGE_SIDE_NEGATIVE;
+      k = EDGE_SIDE_NEGATIVE;
     } else {
-      sides = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
+      k = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
     }
 
     edgeCrosses[1] = ((cornersU[2] - cornersU[1]) *
@@ -2738,28 +2738,28 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         ((cornersV[2] - cornersV[1]) *
             (hitPointU - (cornersU[1] * WORLD_TO_COURSE_SCALE)));
     if (edgeCrosses[1] < 0) {
-      sides &= EDGE_SIDE_NEGATIVE;
+      k &= EDGE_SIDE_NEGATIVE;
     } else if (edgeCrosses[1] == 0) {
-      sides &= EDGE_SIDE_ON;
+      k &= EDGE_SIDE_ON;
     } else {
-      sides &= EDGE_SIDE_POSITIVE;
+      k &= EDGE_SIDE_POSITIVE;
     }
 
-    if (sides != 0) {
+    if (k != 0) {
       edgeCrosses[2] =
           ((cornersU[1] - cornersU[0]) *
               (hitPointV - (cornersV[0] * WORLD_TO_COURSE_SCALE))) -
           ((cornersV[1] - cornersV[0]) *
               (hitPointU - (cornersU[0] * WORLD_TO_COURSE_SCALE)));
       if (edgeCrosses[2] < 0) {
-        sides &= EDGE_SIDE_NEGATIVE;
+        k &= EDGE_SIDE_NEGATIVE;
       } else if (edgeCrosses[2] == 0) {
-        sides &= EDGE_SIDE_ON;
+        k &= EDGE_SIDE_ON;
       } else {
-        sides &= EDGE_SIDE_POSITIVE;
+        k &= EDGE_SIDE_POSITIVE;
       }
 
-      if (sides != 0) {
+      if (k != 0) {
         nearestFraction = hitFraction;
         hitIndex = i;
         if (g_IsDebugEnabled) {

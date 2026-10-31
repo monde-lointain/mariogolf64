@@ -135,8 +135,8 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
 #ifdef NON_MATCHING
 s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
   f32 depth;
-  f32 viewX;
-  f32 viewY;
+  /* The point's view-space x, then its y, to match */
+  f32 viewCoordinate;
   f32 perspective;
 
   depth = (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
@@ -145,27 +145,31 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
     return 0;
   }
 
-  viewX = (f_CpuViewingMatrix[0][0] * x) + (f_CpuViewingMatrix[1][0] * y) +
-      (f_CpuViewingMatrix[2][0] * z) + f_CpuViewingMatrix[3][0];
+  viewCoordinate = (f_CpuViewingMatrix[0][0] * x) +
+      (f_CpuViewingMatrix[1][0] * y) + (f_CpuViewingMatrix[2][0] * z) +
+      f_CpuViewingMatrix[3][0];
   if ((s32)f_CpuProjectionMatrix[3][3] == 1) {
     perspective = 1.0f;
   } else {
     perspective = 1.0f / depth;
   }
 
-  if ((viewX > 0.0f) ? f_CpuViewportCenterX <
-              f_CpuScreenScaleX * (viewX - radius) * perspective
-                     : f_CpuScreenScaleX * (viewX + radius) * perspective <
+  if ((viewCoordinate > 0.0f)
+          ? f_CpuViewportCenterX <
+              f_CpuScreenScaleX * (viewCoordinate - radius) * perspective
+          : f_CpuScreenScaleX * (viewCoordinate + radius) * perspective <
               -f_CpuViewportCenterX) {
     return 1;
   }
 
-  viewY = (f_CpuViewingMatrix[0][1] * x) + (f_CpuViewingMatrix[1][1] * y) +
-      (f_CpuViewingMatrix[2][1] * z) + f_CpuViewingMatrix[3][1];
-  if ((viewY > 0.0f) ? f_CpuScreenScaleY * (viewY - radius) * perspective <
+  viewCoordinate = (f_CpuViewingMatrix[0][1] * x) +
+      (f_CpuViewingMatrix[1][1] * y) + (f_CpuViewingMatrix[2][1] * z) +
+      f_CpuViewingMatrix[3][1];
+  if ((viewCoordinate > 0.0f)
+          ? f_CpuScreenScaleY * (viewCoordinate - radius) * perspective <
               -f_CpuViewportCenterY
-                     : f_CpuViewportCenterY <
-              f_CpuScreenScaleY * (viewY + radius) * perspective) {
+          : f_CpuViewportCenterY <
+              f_CpuScreenScaleY * (viewCoordinate + radius) * perspective) {
     return 2;
   }
 

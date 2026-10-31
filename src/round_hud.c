@@ -1702,7 +1702,6 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 centering;
   f32 originX;
   f32 originZ;
-  f32 stepX;
   f32 stepZ;
   f32 scrollX;
   f32 scrollZ;
@@ -1772,7 +1771,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   centering = 0.5f - (columnCount * 0.5f);
   originX = (shift * forwardX) + (sideX * centering);
   originZ = (shift * forwardZ) + (sideZ * centering);
-  stepX = -cosf(yaw) * rowSpacing;
+  /* forwardX holds the row step's x from here, to match */
+  forwardX = -cosf(yaw) * rowSpacing;
   stepZ = -sinf(yaw) * rowSpacing;
   if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
     f_GreenGridScroll -= GREEN_GRID_SCROLL_STEP;
@@ -1785,7 +1785,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
     }
   }
 
-  scrollX = stepX * f_GreenGridScroll;
+  scrollX = forwardX * f_GreenGridScroll;
   scrollZ = stepZ * f_GreenGridScroll;
 
   for (row = 0, rowStart = 0; row != rowCount;) {
@@ -1798,13 +1798,13 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       }
 
       if (isUnscrolledRow || (f_GreenGridScroll < 0.0f && row == 1)) {
-        points[i][AXIS_X] =
-            center[AXIS_X] + originX + (stepX * rowPosition) + (sideX * column);
+        points[i][AXIS_X] = center[AXIS_X] + originX +
+            (forwardX * rowPosition) + (sideX * column);
         points[i][AXIS_Z] =
             center[AXIS_Z] + originZ + (stepZ * rowPosition) + (sideZ * column);
       } else {
-        points[i][AXIS_X] = center[AXIS_X] + originX + (stepX * rowPosition) +
-            (sideX * column) + scrollX;
+        points[i][AXIS_X] = center[AXIS_X] + originX +
+            (forwardX * rowPosition) + (sideX * column) + scrollX;
         IN_OWN_BLOCK(points[i][AXIS_Z] = center[AXIS_Z] + originZ +
                 (stepZ * rowPosition) + (sideZ * column) + scrollZ);
       }

@@ -4765,7 +4765,6 @@ void DrawModeSelect(Gfx** displayListHead) {
   s16 starCount;
   s32 modeCount;
   s32 index;
-  s32 otherIndex;
   s32 key;
   f32 radiusX;
   s32 angleStep;
@@ -4781,6 +4780,8 @@ void DrawModeSelect(Gfx** displayListHead) {
   s32 labelX;
   s32* labelOffset;
   void* image;
+  /* The board and strip index in the loops, then the won count's shift, to
+   * match */
   s32 countShift;
   s32 courseIndex;
   s32 holeIndex;
@@ -4835,14 +4836,14 @@ void DrawModeSelect(Gfx** displayListHead) {
     }
   }
 
-  for (otherIndex = 0; otherIndex != modeCount; otherIndex++) {
-    drawOrder[otherIndex] = otherIndex;
+  for (countShift = 0; countShift != modeCount; countShift++) {
+    drawOrder[countShift] = countShift;
   }
 
   /* Draw the farthest boards first, so the nearer ones cover them */
-  for (otherIndex = 1; otherIndex != modeCount; otherIndex++) {
-    key = drawOrder[otherIndex];
-    for (index = otherIndex - 1;
+  for (countShift = 1; countShift != modeCount; countShift++) {
+    key = drawOrder[countShift];
+    for (index = countShift - 1;
         (index >= 0) && (boardY[drawOrder[index]] > boardY[key]); index--) {
       drawOrder[index + 1] = drawOrder[index];
     }
@@ -4921,18 +4922,18 @@ void DrawModeSelect(Gfx** displayListHead) {
             UNCHOSEN_MODE_BOARD_SHADE, UNCHOSEN_MODE_BOARD_SHADE, 255);
       }
 
-      for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT; otherIndex++) {
+      for (countShift = 0; countShift != MODE_ICON_STRIP_COUNT; countShift++) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress(LargeImageTexels(g_ModeIconImages[slot]) +
-                (otherIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
+                (countShift * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
             0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++, (s32)(boardX[slot] - halfSize) << 2,
-            (s32)(boardY[slot] - halfSize + (otherIndex * halfSize) + bob) << 2,
+            (s32)(boardY[slot] - halfSize + (countShift * halfSize) + bob) << 2,
             (s32)(boardX[slot] + halfSize) << 2,
-            (s32)(boardY[slot] + (otherIndex * halfSize) + bob) << 2,
+            (s32)(boardY[slot] + (countShift * halfSize) + bob) << 2,
             G_TX_RENDERTILE, 0, 0, step, step);
         gDPPipeSync(gfx++);
       }

@@ -142,7 +142,6 @@ void FrameSpheres(f32 depthOffset) {
   f32 eyeZ;
   f32 verticalEyeZ;
   f32 depth;
-  f32 right;
   f32 left;
   f32 top;
   f32 bottom;
@@ -275,8 +274,9 @@ void FrameSpheres(f32 depthOffset) {
 
   depth = (Z_MARGIN - minZ) + eyeZ;
   frontDistance = depth - horizontalEyeZ;
+  /* distance holds the right edge from here, to match */
   IN_OWN_BLOCK(
-      right = frontDistance * tan(FramingDegreesToRadians(rightAngle)));
+      distance = frontDistance * tan(FramingDegreesToRadians(rightAngle)));
   left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
   frontDistance = depth - verticalEyeZ;
   top = frontDistance * tan(FramingDegreesToRadians(topAngle));
@@ -287,8 +287,8 @@ void FrameSpheres(f32 depthOffset) {
     centerX = left;
   }
 
-  if (right < centerX) {
-    centerX = right;
+  if (distance < centerX) {
+    centerX = distance;
   }
 
   if (centerY < bottom) {

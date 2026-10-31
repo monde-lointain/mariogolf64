@@ -456,7 +456,6 @@ void UpdateCameraEditor(void) {
   Boolean hasMoved = FALSE;
   s32 index;
   Boolean isDone;
-  f32 x;
   f32 y;
   f32 z; /* Also the distance before a zoom */
   f32 offsetX;
@@ -467,7 +466,8 @@ void UpdateCameraEditor(void) {
   f32 gap;
   f32 zoomTarget;
   f32 left;
-  f32 cosPitch;
+  /* The point's x, then the pitch's cosine, to match */
+  f32 x;
 
   if (g_CameraEditor.flags[EDITOR_POINT_EYE] == 0 &&
       g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] == 0) {
@@ -616,10 +616,10 @@ void UpdateCameraEditor(void) {
 
   /* The carried point keeps its place from the leader */
   if (hasLeader) {
-    cosPitch = cosf(g_CameraEditor.pitch);
+    x = cosf(g_CameraEditor.pitch);
     y = sinf(g_CameraEditor.pitch);
-    z = sinf(g_CameraEditor.heading) * cosPitch;
-    x = cosPitch * cosf(g_CameraEditor.heading);
+    z = sinf(g_CameraEditor.heading) * x;
+    x = x * cosf(g_CameraEditor.heading);
     distance = sqrtf((x * x) + (y * y) + (z * z));
     x /= distance;
     y /= distance;
@@ -815,10 +815,10 @@ void UpdateCameraEditor(void) {
   }
 
   if (hasMoved) {
-    cosPitch = cosf(g_CameraEditor.pitch);
+    x = cosf(g_CameraEditor.pitch);
     y = sinf(g_CameraEditor.pitch);
-    z = sinf(g_CameraEditor.heading) * cosPitch;
-    x = cosPitch * cosf(g_CameraEditor.heading);
+    z = sinf(g_CameraEditor.heading) * x;
+    x = x * cosf(g_CameraEditor.heading);
     distance = sqrtf((x * x) + (y * y) + (z * z));
     x /= distance;
     y /= distance;

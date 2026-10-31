@@ -3895,11 +3895,11 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 half;
   s32 row;
   s32 k;
-  s32 i;
   s32 j;
   s32 pass;
   s32 tileIndex;
   s32 tileColumn;
+  /* Also the tile, slope and edge index in the early loops, to match */
   s32 column;
   s32 topSlot;
   s32 middleSlot;
@@ -4159,17 +4159,17 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   g_GroundFarthestDepth = 0.0f;
   g_GroundNearDepthEighth = NO_NEAR_DEPTH;
-  for (i = 0; i < GROUND_TILE_COUNT; i++) {
-    tile = &g_WorkArea.hole.tiles[i];
+  for (column = 0; column < GROUND_TILE_COUNT; column++) {
+    tile = &g_WorkArea.hole.tiles[column];
     visibility = GetSphereVisibility(tile->center[0], tile->center[1],
         tile->center[2], MIN_GROUND_TILE_RADIUS);
     detail = GROUND_DETAIL_HIDDEN;
     if (visibility < 0) {
       if (tile->midpointBlockIndex >= 0 &&
-          visibility * FINE_DEPTH_SCALE < g_GroundTileHeightRanges[i]) {
+          visibility * FINE_DEPTH_SCALE < g_GroundTileHeightRanges[column]) {
         detail = GROUND_DETAIL_FINE;
       } else if (visibility * MEDIUM_DEPTH_SCALE <
-          g_GroundTileHeightRanges[i]) {
+          g_GroundTileHeightRanges[column]) {
         detail = GROUND_DETAIL_MEDIUM;
       } else {
         detail = GROUND_DETAIL_COARSE;
@@ -4200,16 +4200,16 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
 
   /* The waves move down each triangle's slope */
   if (g_ShowsGroundWaves) {
-    for (i = 0; i < ARRAY_COUNT(f_TriangleSlopes); i++) {
-      f_TriangleSlopes[i].waveS -= f_TriangleSlopes[i].normalX;
-      f_TriangleSlopes[i].waveT -= f_TriangleSlopes[i].normalZ;
+    for (column = 0; column < ARRAY_COUNT(f_TriangleSlopes); column++) {
+      f_TriangleSlopes[column].waveS -= f_TriangleSlopes[column].normalX;
+      f_TriangleSlopes[column].waveT -= f_TriangleSlopes[column].normalZ;
     }
   }
 
   slopeIndex = 0;
-  for (i = 0; i < ARRAY_COUNT(snapsEdge); i++) {
+  for (column = 0; column < ARRAY_COUNT(snapsEdge); column++) {
     for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
-      snapsEdge[i][j] = FALSE;
+      snapsEdge[column][j] = FALSE;
     }
   }
 

@@ -606,7 +606,6 @@ void DrawPlanks(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 stripHeight;
-  s32 groupIndex;
   s32 slide;
   s32 top;
   s32 bottom;
@@ -663,12 +662,13 @@ void DrawPlanks(Gfx** displayListHead) {
     if (f_PlankMotion == PLANKS_SHUT) {
       slide = PLANKS_MIDDLE;
     } else {
-      groupIndex = stripIndex / PLANK_GROUP_STRIP_COUNT;
-      if (groupIndex > PLANK_LAST_GROUP) {
-        groupIndex = PLANK_LAST_GROUP;
+      /* bottom holds the strip's plank group here, to match */
+      bottom = stripIndex / PLANK_GROUP_STRIP_COUNT;
+      if (bottom > PLANK_LAST_GROUP) {
+        bottom = PLANK_LAST_GROUP;
       }
 
-      slide = f_PlankSlide - (groupIndex * PLANK_GROUP_LAG);
+      slide = f_PlankSlide - (bottom * PLANK_GROUP_LAG);
       if (slide > PLANKS_MIDDLE) {
         slide = PLANKS_MIDDLE;
       }

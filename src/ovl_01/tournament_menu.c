@@ -776,7 +776,6 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   f32 courseStripHeight;
   f32 pictureWidth;
   f32 pictureHeight;
-  s32 halfWidth;
   s32 halfHeight;
   s32 buttonHalfWidth;
   s32 buttonHalfHeight;
@@ -792,6 +791,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 buttonY;
   s32 pulse;
   s32 growth;
+  /* The window's half width, then the badge's top, to match */
   s32 badgeTop;
   s32 courseLeft;
   s32 courseTop;
@@ -869,7 +869,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
       return;
   }
 
-  halfWidth = (s32)windowWidth / 2;
+  badgeTop = (s32)windowWidth / 2;
   halfHeight = windowHalfHeight;
   buttonHalfWidth = (s32)buttonWidth / 2;
   buttonHalfHeight = (s32)buttonHeight / 2;
@@ -880,7 +880,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   pictureHalfWidth = (s32)pictureWidth / 2;
   pictureHalfHeight = (s32)pictureHeight / 2;
 
-  halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
+  badgeTop = (badgeTop <= 0) ? 1 : badgeTop;
   halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
   buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
   buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
@@ -921,9 +921,9 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
             (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
         0, 0, 0, 0);
-    DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
+    DrawTextureRect(&gfx, QuarterPixels(centerX - badgeTop),
         QuarterPixels(windowTop + (index * halfHeight)),
-        QuarterPixels(centerX + halfWidth),
+        QuarterPixels(centerX + badgeTop),
         QuarterPixels(windowTop + (index * halfHeight) + halfHeight),
         G_TX_RENDERTILE, 0, 0,
         (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
