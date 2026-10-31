@@ -2730,7 +2730,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
         g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
   }
 
-  gDPPipeSync(gfx++);
+  IN_OWN_BLOCK(gDPPipeSync(gfx++));
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
