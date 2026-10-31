@@ -3545,10 +3545,10 @@ void UpdateTurns(void) {
           for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
               i < PLAN_PREPARING_POLL_COUNT;
               i++) {
-            f_ShotSource =
-                (GetPlannedShot(&D_80104F78) != PLANNED_SHOT_UNFINISHED)
-                ? SHOT_SOURCE_PREPARED
-                : SHOT_SOURCE_PLANNING;
+            IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&D_80104F78) !=
+                                            PLANNED_SHOT_UNFINISHED)
+                    ? SHOT_SOURCE_PREPARED
+                    : SHOT_SOURCE_PLANNING);
             if (!HasPlanTime(PLAN_PREPARING_TIME_BUDGET)) {
               break;
             }
