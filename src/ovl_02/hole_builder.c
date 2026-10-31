@@ -3342,7 +3342,7 @@ void CastBillboardShadows(void) {
 
     width = g_Billboards[index].width;
     widthScale = 1.0f / width;
-    height = g_Billboards[index].height;
+    IN_OWN_BLOCK(height = g_Billboards[index].height);
     heightScale = 1.0f / height;
     x = g_Billboards[index].x;
     z = g_Billboards[index].z;
