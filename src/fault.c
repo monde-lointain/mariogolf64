@@ -209,7 +209,7 @@ void PrintFaultText(void) {
 void PrintFaultContext(OSThread* thread) {
   __OSThreadContext* context = &thread->context;
 
-  f_FaultUnk = 0;
+  IN_OWN_BLOCK(f_FaultUnk = 0);
   sprintf(f_FaultText, "\nFault in thread %d:\n\n", thread->id);
   PrintFaultText();
   PrintFaultMessage(FAULT_TEXT_COLUMN, FAULT_TITLE_ROW);
