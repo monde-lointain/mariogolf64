@@ -913,8 +913,8 @@ s32 UpdateCharacterSelect(
       OpenEncodedAsset(faceAssets[(s16)faceCharacter][f_FaceFrame], &asset);
       ReadEncodedAsset(faceImage, &asset);
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
-      ReadAssetFile(
-          g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
+      IN_OWN_BLOCK(ReadAssetFile(
+          g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file));
     }
 
     if (playerIndex == playerCount) {
