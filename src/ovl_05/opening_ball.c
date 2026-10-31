@@ -31,11 +31,11 @@
 #define OPENING_CLUB_COUNT 2
 
 /* The opening's copy of g_ClubTestMode */
-static s8 D_8020B560_ovl_05 = CLUB_TEST_NONE;
+static s8 f_OpeningClubTestMode = CLUB_TEST_NONE;
 
 /* The opening's own copy of f_SurfaceInfo, which names the surfaces in
  * half-width katakana and differs from it in eight entries' values */
-static SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT] = {
+static SurfaceInfo f_OpeningSurfaceInfo[SURFACE_COUNT] = {
     /* SURFACE_OUT_OF_BOUNDS */
     {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, 1, 7},
     /* SURFACE_FAIRWAY */
@@ -94,7 +94,7 @@ static SurfaceInfo D_8020B564_ovl_05[SURFACE_COUNT] = {
 
 /* The debug text row, of SPEED_TEXT_ROW_COUNT, that the next ball speed goes in
  */
-static s32 D_8020B858_ovl_05 = 0;
+static s32 f_OpeningSpeedTextRow = 0;
 /* The opening's copies of f_EarlyImpactEffect and f_LateImpactEffect, which its
  * copy of GetImpactTimingEntry doesn't read */
 static ImpactEffect f_OpeningEarlyImpactEffect UNUSED = {
@@ -136,7 +136,7 @@ static ImpactEffect
 // clang-format on
 
 /* The opening's clubs: two drivers that differ only in pitch */
-static Club D_8020B9F8_ovl_05[OPENING_CLUB_COUNT] = {
+static Club f_OpeningClubs[OPENING_CLUB_COUNT] = {
     {0, "1W", 0, {0}, DRIVER_SURFACES, 208, -15, 0, 11, 120, CLUB_TYPE_DRIVER,
         {97608, 84651, 19335}, CLUB_KIND_WOOD, 0, {0, 0, 0},
         ASSET_DRIVER_HEAD_IMAGE, 0, {0}},
@@ -146,12 +146,12 @@ static Club D_8020B9F8_ovl_05[OPENING_CLUB_COUNT] = {
 
 /* LaunchOpeningBallSimulation counts each launch here, and nothing else reads
  * it */
-static s32 D_8020BA60_ovl_05 = 0;
+static s32 f_UnusedOpeningLaunchCount = 0;
 
 /* The opening's copies of the collision triangle and fraction that
  * StepBallSimulation keeps on its stack */
-static PlaneTriangle D_8022BE10_ovl_05;
-static f32 D_8022BE28_ovl_05;
+static PlaneTriangle f_OpeningContactTriangle;
+static f32 f_OpeningContactFraction;
 
 /* Loads one of the other characters into the slot with its birdie animation, or
  * frees a busy slot first */
@@ -173,7 +173,7 @@ static SurfaceInfo* GetOpeningSurfaceInfo(Surface surface) {
     surface = SURFACE_OUT_OF_BOUNDS;
   }
 
-  return &D_8020B564_ovl_05[surface];
+  return &f_OpeningSurfaceInfo[surface];
 }
 
 /* An unused copy of ResetBallSimulations, which resets g_BallSimulations as
@@ -425,10 +425,11 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
               simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]) *
               SPEED_TEXT_KILOMETERS_PER_HOUR_PER_SPEED_UNIT);
       PrintDebugText(speedText, SPEED_TEXT_COLUMN,
-          D_8020B858_ovl_05 + SPEED_TEXT_FIRST_ROW);
-      D_8020B858_ovl_05 = (D_8020B858_ovl_05 + 1) % SPEED_TEXT_ROW_COUNT;
+          f_OpeningSpeedTextRow + SPEED_TEXT_FIRST_ROW);
+      f_OpeningSpeedTextRow =
+          (f_OpeningSpeedTextRow + 1) % SPEED_TEXT_ROW_COUNT;
       PrintDebugText("                            ", SPEED_TEXT_CLEAR_COLUMN,
-          D_8020B858_ovl_05 + SPEED_TEXT_FIRST_ROW);
+          f_OpeningSpeedTextRow + SPEED_TEXT_FIRST_ROW);
     }
 
     if (IsGameFlagSet(GAME_FLAG_SHOW_OPENING_BALL_HEIGHT)) {
@@ -484,9 +485,9 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
                 simulation->purpose == LAUNCH_PURPOSE_TRIAL) &&
             FindRingHit(startX, startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
-                &D_8022BE10_ovl_05, &D_8022BE28_ovl_05) > 0) {
+                &f_OpeningContactTriangle, &f_OpeningContactFraction) > 0) {
           s8* ringState = &g_Players[simulation->playerIndex]
-                               .ringStates[D_8022BE10_ovl_05.unk0];
+                               .ringStates[f_OpeningContactTriangle.unk0];
 
           if (*ringState == RING_STATE_SHOWN &&
               simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -497,8 +498,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         if (g_GameState.isMiniGolf) {
           contact = FindMiniGolfGroundHit(simulation, startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
-              simulation->position[AXIS_Z], &D_8022BE10_ovl_05,
-              &D_8022BE28_ovl_05);
+              simulation->position[AXIS_Z], &f_OpeningContactTriangle,
+              &f_OpeningContactFraction);
           if (g_GameState.isMiniGolf &&
               simulation->state == BALL_STATE_ROLLING) {
             s32 putterContact = FindMiniGolfGroundHit(simulation, startX,
@@ -506,18 +507,18 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
                 simulation->position[AXIS_Y] - MINI_GOLF_ROLL_PROBE_RISE,
                 simulation->position[AXIS_Z], &triangle, &fraction);
 
-            if (putterContact && fraction < D_8022BE28_ovl_05) {
+            if (putterContact && fraction < f_OpeningContactFraction) {
               contact = putterContact;
               osSyncPrintf("PutterSpecialGroundCollision\n");
-              D_8022BE10_ovl_05 = triangle;
-              D_8022BE28_ovl_05 = fraction;
+              f_OpeningContactTriangle = triangle;
+              f_OpeningContactFraction = fraction;
             }
           }
         } else {
           contact = FindGroundHit(startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
-              simulation->position[AXIS_Z], &D_8022BE10_ovl_05,
-              &D_8022BE28_ovl_05);
+              simulation->position[AXIS_Z], &f_OpeningContactTriangle,
+              &f_OpeningContactFraction);
         }
 
         hitsBillboard = FALSE;
@@ -534,18 +535,18 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         }
 
         if (hitsBillboard && contact == STEP_FLAG_GROUND_HIT) {
-          if (D_8022BE28_ovl_05 <= fraction) {
+          if (f_OpeningContactFraction <= fraction) {
             contact = STEP_FLAG_GROUND_HIT;
-            triangle = D_8022BE10_ovl_05;
-            fraction = D_8022BE28_ovl_05;
+            triangle = f_OpeningContactTriangle;
+            fraction = f_OpeningContactFraction;
           } else {
             contact = STEP_FLAG_BILLBOARD_HIT;
           }
         } else if (hitsBillboard) {
           contact = STEP_FLAG_BILLBOARD_HIT;
         } else if (contact == STEP_FLAG_GROUND_HIT) {
-          triangle = D_8022BE10_ovl_05;
-          fraction = D_8022BE28_ovl_05;
+          triangle = f_OpeningContactTriangle;
+          fraction = f_OpeningContactFraction;
         } else {
           contact = 0;
         }
@@ -554,16 +555,16 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
             simulation->state == BALL_STATE_ROLLING) {
           holeHit = FindHoleTriangleHit(startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
-              simulation->position[AXIS_Z], &D_8022BE10_ovl_05,
-              &D_8022BE28_ovl_05);
+              simulation->position[AXIS_Z], &f_OpeningContactTriangle,
+              &f_OpeningContactFraction);
         } else {
           holeHit = FALSE;
         }
 
-        if (holeHit && (contact == 0 || D_8022BE28_ovl_05 <= fraction)) {
+        if (holeHit && (contact == 0 || f_OpeningContactFraction <= fraction)) {
           contact = STEP_FLAG_HOLE_TRIANGLE_HIT;
-          triangle = D_8022BE10_ovl_05;
-          fraction = D_8022BE28_ovl_05;
+          triangle = f_OpeningContactTriangle;
+          fraction = f_OpeningContactFraction;
         }
       }
 
@@ -924,8 +925,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         (g_GameState.isMiniGolf || IsGameFlagSet(GAME_FLAG_WALL_HITS)) &&
         FindWallHit(startX, startY, startZ, simulation->position[AXIS_X],
             simulation->position[AXIS_Y], simulation->position[AXIS_Z],
-            &D_8022BE10_ovl_05, &D_8022BE28_ovl_05) == TRUE &&
-        D_8022BE10_ovl_05.unk0 == HOLE_TRIANGLE_KIND_SHADED) {
+            &f_OpeningContactTriangle, &f_OpeningContactFraction) == TRUE &&
+        f_OpeningContactTriangle.unk0 == HOLE_TRIANGLE_KIND_SHADED) {
       CoursePoint hitPosition;
       f32 normalX;
       f32 normalY;
@@ -935,19 +936,19 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
       f32 edgeZ;
       f32 approach;
 
-      normalX = D_8022BE10_ovl_05.corners[AXIS_X][0];
+      normalX = f_OpeningContactTriangle.corners[AXIS_X][0];
       edgeY = 0.0f;
       normalY = edgeY;
-      normalZ = D_8022BE10_ovl_05.corners[AXIS_Z][0];
-      if (D_8022BE10_ovl_05.corners[AXIS_X][0] ==
-              D_8022BE10_ovl_05.corners[AXIS_X][1] &&
-          D_8022BE10_ovl_05.corners[AXIS_Z][0] ==
-              D_8022BE10_ovl_05.corners[AXIS_Z][1]) {
-        edgeX = D_8022BE10_ovl_05.corners[AXIS_X][2];
-        edgeZ = D_8022BE10_ovl_05.corners[AXIS_Z][2];
+      normalZ = f_OpeningContactTriangle.corners[AXIS_Z][0];
+      if (f_OpeningContactTriangle.corners[AXIS_X][0] ==
+              f_OpeningContactTriangle.corners[AXIS_X][1] &&
+          f_OpeningContactTriangle.corners[AXIS_Z][0] ==
+              f_OpeningContactTriangle.corners[AXIS_Z][1]) {
+        edgeX = f_OpeningContactTriangle.corners[AXIS_X][2];
+        edgeZ = f_OpeningContactTriangle.corners[AXIS_Z][2];
       } else {
-        edgeX = D_8022BE10_ovl_05.corners[AXIS_X][1];
-        edgeZ = D_8022BE10_ovl_05.corners[AXIS_Z][1];
+        edgeX = f_OpeningContactTriangle.corners[AXIS_X][1];
+        edgeZ = f_OpeningContactTriangle.corners[AXIS_Z][1];
       }
 
       normalX -= edgeX;
@@ -957,21 +958,21 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
       approach = (-normalZ * simulation->velocity[AXIS_X]) +
           (normalY * simulation->velocity[AXIS_Y]) +
           (normalX * simulation->velocity[AXIS_Z]);
-      D_8022BE28_ovl_05 -= OPENING_WALL_BACK_OFF /
+      f_OpeningContactFraction -= OPENING_WALL_BACK_OFF /
           GetOpeningLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]);
-      if (D_8022BE28_ovl_05 < 0.0f) {
-        D_8022BE28_ovl_05 = 0.0f;
+      if (f_OpeningContactFraction < 0.0f) {
+        f_OpeningContactFraction = 0.0f;
       }
 
       hitPosition[AXIS_X] = startX +
-          (D_8022BE28_ovl_05 *
+          (f_OpeningContactFraction *
               (simulation->velocity[AXIS_X] * OPENING_WALL_HIT_STEP_SHARE));
       hitPosition[AXIS_Y] = startY +
-          (D_8022BE28_ovl_05 *
+          (f_OpeningContactFraction *
               (simulation->velocity[AXIS_Y] * OPENING_WALL_HIT_STEP_SHARE));
       hitPosition[AXIS_Z] = startZ +
-          (D_8022BE28_ovl_05 *
+          (f_OpeningContactFraction *
               (simulation->velocity[AXIS_Z] * OPENING_WALL_HIT_STEP_SHARE));
       simulation->position[AXIS_X] = hitPosition[AXIS_X];
       simulation->position[AXIS_Y] = hitPosition[AXIS_Y];
@@ -1365,7 +1366,7 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
       isSteep = FALSE;
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
         contact = STEP_FLAG_GROUND_HIT;
-        info = &D_8020B564_ovl_05[SURFACE_GREEN];
+        info = &f_OpeningSurfaceInfo[SURFACE_GREEN];
         triangle.corners[AXIS_X][0] = 0;
         triangle.corners[AXIS_X][1] = 0x100;
         triangle.corners[AXIS_X][2] = 0;
@@ -1375,8 +1376,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         triangle.corners[AXIS_Z][0] = 0;
         triangle.corners[AXIS_Z][1] = 0;
         triangle.corners[AXIS_Z][2] = 0x100;
-        if (D_8020B560_ovl_05 == CLUB_TEST_SHOT) {
-          info = &D_8020B564_ovl_05[SURFACE_FAIRWAY];
+        if (f_OpeningClubTestMode == CLUB_TEST_SHOT) {
+          info = &f_OpeningSurfaceInfo[SURFACE_FAIRWAY];
         }
 
         groundHeight = 0;
@@ -1806,7 +1807,7 @@ s32 LaunchOpeningBallSimulation(
   }
 
   simulation->purpose = purpose;
-  D_8020BA60_ovl_05++;
+  f_UnusedOpeningLaunchCount++;
   sideSign = 1;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     groundHeight = GetGroundHeight(simulation->position[AXIS_X],
@@ -1832,7 +1833,7 @@ s32 LaunchOpeningBallSimulation(
     simulation->playerIndex = 0;
   }
 
-  club = &D_8020B9F8_ovl_05[shot->clubIndex];
+  club = &f_OpeningClubs[shot->clubIndex];
   entry = &f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
   rumbles = f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
   if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
