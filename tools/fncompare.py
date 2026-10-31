@@ -267,6 +267,139 @@ def get_optflags(c_path: StrPath) -> list[str]:
     return DEFAULT_OPTFLAGS.split()
 
 
+# The text that a top-level function definition's body starts after
+DEFINITION_END_RE = re.compile(r"\)\s*$")
+# A function definition's name, the first identifier its header calls
+DEFINITION_NAME_RE = re.compile(r"(\w+)\s*\(")
+# The functions that KMC GCC expands itself when it sees no definition of
+# them, from c-decl.c
+BUILTIN_NAMES = frozenset(
+    (
+        "abort", "abs", "alloca", "cos", "cosf", "cosl", "_exit", "exit",
+        "fabs", "fabsf", "fabsl", "ffs", "labs", "memcmp", "memcpy", "sin",
+        "sinf", "sinl", "sqrt", "sqrtf", "sqrtl", "strcmp", "strcpy", "strlen",
+    )
+)  # fmt: skip
+
+
+# The tokens of preprocessed C that bound declarations and bodies. Strings,
+# characters and line markers are matched whole, so that the braces and
+# semicolons in them are passed over.
+STRUCTURE_RE = re.compile(
+    r""""(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|^#[^\n]*|[{};]""", re.MULTILINE
+)
+
+
+def find_definitions(source: str) -> list[tuple[str, int, int, bool]]:
+    """Return each top-level function definition in the preprocessed SOURCE.
+
+    Each is (name, body start, body end, is inline), in order.
+    """
+    definitions: list[tuple[str, int, int, bool]] = []
+    # Where the declaration being scanned starts
+    header_start = 0
+    body_start = 0
+    depth = 0
+    for token in STRUCTURE_RE.finditer(source):
+        kind = token.group()
+        if kind == "{":
+            if depth == 0:
+                body_start = token.start()
+            depth += 1
+        elif kind == "}":
+            depth -= 1
+            if depth == 0:
+                header = source[header_start:body_start]
+                name = DEFINITION_NAME_RE.search(header)
+                is_function = DEFINITION_END_RE.search(header) is not None
+                if name is not None and is_function:
+                    is_inline = "inline" in header.split()
+                    definitions.append(
+                        (name.group(1), body_start, token.end(), is_inline)
+                    )
+                header_start = token.end()
+        elif depth == 0 and kind[0] in ";#":
+            header_start = token.end()
+    return definitions
+
+
+def isolate_functions(source: str, keep: set[str]) -> str:
+    """Return the preprocessed SOURCE with the bodies it needn't compile cut.
+
+    Each top-level function body becomes a prototype, except those that hold
+    the functions in KEEP, those just before them, inline ones and those of
+    builtins.
+
+    GCC compiles each function on its own at -O2, so the kept functions'
+    code stays the same, and the compile skips the rest. The assembler
+    pads a function's first instruction after a hazard in the last one
+    before it, so that one stays too. A builtin without its definition
+    would be expanded instead of called.
+    """
+    definitions = find_definitions(source)
+    names = "|".join(map(re.escape, keep))
+    nested = re.compile(rf"\b({names})\s*\([^;{{}}]*\)\s*\{{")
+    holds = [
+        name in keep or nested.search(source, start + 1, end) is not None
+        for name, start, end, _ in definitions
+    ]
+    pieces: list[str] = []
+    copied = 0
+    for number, (name, start, end, is_inline) in enumerate(definitions):
+        is_before_kept = number + 1 < len(holds) and holds[number + 1]
+        is_builtin = name in BUILTIN_NAMES
+        if holds[number] or is_before_kept or is_inline or is_builtin:
+            continue
+        pieces.append(source[copied:start].rstrip() + ";")
+        copied = end
+    pieces.append(source[copied:])
+    return "".join(pieces)
+
+
+def run_compiler(
+    c_path: StrPath, optflags: list[str], arguments: list[str]
+) -> subprocess.CompletedProcess[str]:
+    """Run KMC GCC on C_PATH with the project's flags and ARGUMENTS."""
+    return subprocess.run(
+        [
+            str(KMC_DIR / "gcc"),
+            *CFLAGS,
+            *optflags,
+            *INCLUDES,
+            *DEFINES,
+            *arguments,
+            str(Path(c_path).resolve()),
+        ],
+        cwd=get_work_dir(),
+        env=dict(os.environ, COMPILER_PATH=str(KMC_DIR)),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def compile_isolated(
+    c_path: StrPath, keep: set[str], optflags: list[str] | None = None
+) -> tuple[Functions | None, str]:
+    """Compile only the functions in KEEP of C_PATH, as compile_functions does.
+
+    Falls back on compiling all of C_PATH when a function in KEEP is defined
+    under another name, as through a macro, and so was cut.
+    """
+    if optflags is None:
+        optflags = get_optflags(c_path)
+    result = run_compiler(c_path, optflags, ["-E"])
+    if result.returncode != 0:
+        return None, result.stderr
+    with tempfile.TemporaryDirectory() as tmp:
+        isolated = Path(tmp) / "isolated.i"
+        _ = isolated.write_text(isolate_functions(result.stdout, keep))
+        compiled, error = compile_functions(isolated, optflags)
+    if compiled is not None and not keep <= compiled.keys():
+        return compile_functions(c_path, optflags)
+    return compiled, error
+
+
 def compile_functions(
     c_path: StrPath, optflags: list[str] | None = None
 ) -> tuple[Functions | None, str]:
@@ -279,25 +412,7 @@ def compile_functions(
         optflags = get_optflags(c_path)
     with tempfile.TemporaryDirectory() as tmp:
         obj_path = Path(tmp) / "out.o"
-        env = dict(os.environ, COMPILER_PATH=str(KMC_DIR))
-        result = subprocess.run(
-            [
-                str(KMC_DIR / "gcc"),
-                "-c",
-                *CFLAGS,
-                *optflags,
-                *INCLUDES,
-                *DEFINES,
-                "-o",
-                str(obj_path),
-                str(Path(c_path).resolve()),
-            ],
-            cwd=get_work_dir(),
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        result = run_compiler(c_path, optflags, ["-c", "-o", str(obj_path)])
         if result.returncode != 0:
             return None, result.stderr
         return read_object_file(obj_path), ""
@@ -444,6 +559,8 @@ def main() -> None:
     targets = read_target_functions(asm_path)
     if c_path.endswith(".o"):
         compiled, error = read_object_file(c_path), ""
+    elif names:
+        compiled, error = compile_isolated(c_path, set(names))
     else:
         compiled, error = compile_functions(c_path)
     if compiled is None:

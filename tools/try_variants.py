@@ -9,6 +9,7 @@ each variant, so that several guesses cost one compile each.
 
 The target assembly is read once, and the variants compile in parallel,
 one process per CPU, since parsing the objects holds the interpreter lock.
+Each compile cuts the file down to the function and its neighbour.
 """
 
 import os
@@ -34,7 +35,7 @@ def score_variant(
     ) as variant:
         _ = variant.write(source)
     try:
-        compiled, error = fncompare.compile_functions(variant.name, optflags)
+        compiled, error = fncompare.compile_isolated(variant.name, {function}, optflags)
     finally:
         Path(variant.name).unlink()
     if compiled is None:
