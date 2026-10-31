@@ -2541,6 +2541,8 @@ void func_80207660_ovl_00(Player* player UNUSED) {}
  * the farthest from the cup goes first, and the earliest in the tee order
  * breaks ties.
  */
+/* Doesn't match: GCC drops bestDistance = distance from the tee-order branch,
+ * where the test has shown the two equal, but the original keeps the copy */
 #ifdef NON_MATCHING
 void PickNextPlayer(void) {
   s32 i;
@@ -2602,7 +2604,7 @@ void PickNextPlayer(void) {
         nextPlayer = i;
         bestTeeOrder = g_Players[nextPlayer].teeOrder;
         bestDistance = distance;
-      } else if (distance == bestDistance &&
+      } else if (bestDistance == distance &&
           g_Players[i].teeOrder < bestTeeOrder) {
         bestTeeOrder = g_Players[i].teeOrder;
         bestDistance = distance;
