@@ -1668,7 +1668,7 @@ typedef struct GridScreenPoint {
     } \
   }
 
-/* Doesn't match: 486 words differ. */
+/* Doesn't match: 454 words differ. */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
   GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
@@ -1685,7 +1685,6 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 maxPuttDistance;
   s32 row;
   s32 column;
-  s32 i;
   s32 rowStart;
   s32 point;
   s32 rowPosition;
@@ -1795,7 +1794,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
 
   for (row = 0, rowStart = 0; row != rowCount;) {
     for (column = 0; column != columnCount; column++) {
-      i = rowStart + column;
+      s32 i = rowStart + column;
+
       isUnscrolledRow = row == rowCount - 1 || row == 0;
       rowPosition = row;
       if (row != 0) {
@@ -1858,7 +1858,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
 
   for (row = 0, rowStart = 0; row != rowCount; row++, rowStart += columnCount) {
     for (column = 0; column != columnCount; column++) {
-      i = rowStart + column;
+      s32 i = rowStart + column;
+
       if (ProjectPoint(points[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
               points[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
               points[i][AXIS_Z] * COURSE_TO_WORLD_SCALE, &projected) < 0) {

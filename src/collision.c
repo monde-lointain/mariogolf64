@@ -2248,7 +2248,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 840 words differ.
+ * Doesn't match: 792 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2269,7 +2269,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 deltaX;
   s32 deltaY;
   s32 deltaZ;
-  HoleTriangle* candidate;
   f32 nearestFraction;
   f32 startSide;
   f32 endSide;
@@ -2338,7 +2337,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   deltaY = endY - startY;
   hitIndex = NO_HOLE_TRIANGLE;
   for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
-    candidate = &g_WorkArea.hole.triangles[i];
+    HoleTriangle* candidate = &g_WorkArea.hole.triangles[i];
+
     if (candidate->kind != HOLE_TRIANGLE_KIND_SHADED) {
       continue;
     }
@@ -2787,7 +2787,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   }
 
   if (hitIndex >= 0) {
-    candidate = &g_WorkArea.hole.triangles[hitIndex];
+    HoleTriangle* candidate = &g_WorkArea.hole.triangles[hitIndex];
+
     hit->corners[AXIS_X][0] = candidate->vertices[0].v.ob[AXIS_X];
     hit->corners[AXIS_X][1] = candidate->vertices[1].v.ob[AXIS_X];
     hit->corners[AXIS_X][2] = candidate->vertices[2].v.ob[AXIS_X];

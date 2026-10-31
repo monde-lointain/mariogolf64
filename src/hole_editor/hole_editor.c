@@ -3877,7 +3877,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: 2578 words differ.
+ * Doesn't match: 2561 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3919,7 +3919,6 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 st;
   s32* offsets;
   Vtx* midpoints;
-  Vtx* point;
   GroundTile* tile;
 
   /* Sets a vertex halfway between two others */
@@ -4430,11 +4429,12 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                             for (pointColumn = 0;
                                 pointColumn < FINE_TILE_BLOCK_SPAN;
                                 pointColumn++) {
-                              point = GetGroundPoint(
+                              Vtx* point = GetGroundPoint(
                                   (tileColumn * FINE_TILE_CELL_SPAN) +
                                       cellColumn + pointColumn,
                                   (row * FINE_TILE_CELL_SPAN) + cellRow +
                                       pointRow);
+
                               if (IsGameFlagSet(
                                       GAME_FLAG_TEST_GROUND_TEXTURE)) {
                                 gDPSetTileSize(gfx++, 1, MIRRORED_TEST_FIRST_S,
@@ -4525,11 +4525,12 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                             for (pointColumn = 0;
                                 pointColumn < FINE_TILE_BLOCK_SPAN;
                                 pointColumn++) {
-                              point = GetGroundPoint(
+                              Vtx* point = GetGroundPoint(
                                   (tileColumn * FINE_TILE_CELL_SPAN) +
                                       cellColumn + pointColumn,
                                   (row * FINE_TILE_CELL_SPAN) + cellRow +
                                       pointRow);
+
                               st = ((point->v.tc[TEXTURE_AXIS_S] / 2) << 16) |
                                   (point->v.tc[TEXTURE_AXIS_T] / 2);
                               if (IsGameFlagSet(

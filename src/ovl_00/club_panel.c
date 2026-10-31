@@ -362,7 +362,7 @@ s32 GetGaugeFill(void);
 /*
  * Draws the power gauge, its markers, and the bar for the lie's span.
  *
- * Doesn't match: 316 words differ. The stack frame is 8 bytes larger, and
+ * Doesn't match: 286 words differ. The stack frame is 8 bytes larger, and
  * the original copies a tick loop's base index into a temporary register and
  * keeps the loop's 25 in another, so the loops' registers differ.
  */
@@ -374,7 +374,6 @@ void DrawClubPanel(Gfx** displayListHead) {
   s32 playerState;
   s32 tick;
   s32 firstTick;
-  s32 x;
   /* Also the gauge group index, to match */
   s32 fillWidth;
 
@@ -436,7 +435,8 @@ void DrawClubPanel(Gfx** displayListHead) {
   for (fillWidth = 0, firstTick = 0; fillWidth != GAUGE_GROUP_COUNT;
       fillWidth++, firstTick += GAUGE_TICKS_PER_GROUP) {
     for (tick = 1; tick != GAUGE_TICKS_PER_GROUP; tick++) {
-      x = (firstTick + tick) * GAUGE_TICK_SPACING;
+      s32 x = (firstTick + tick) * GAUGE_TICK_SPACING;
+
       gSPTextureRectangle(gfx++, QuarterPixels(GAUGE_FULL_X + x),
           QuarterPixels(GAUGE_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX),
           QuarterPixels(GAUGE_FULL_X + GAUGE_TICK_WIDTH + x),
@@ -447,7 +447,8 @@ void DrawClubPanel(Gfx** displayListHead) {
   }
 
   for (tick = 0; tick != GAUGE_EXTRA_TICK_COUNT; tick++) {
-    x = (firstTick + tick) * GAUGE_TICK_SPACING;
+    s32 x = (firstTick + tick) * GAUGE_TICK_SPACING;
+
     gSPTextureRectangle(gfx++, QuarterPixels(GAUGE_FULL_X + x),
         QuarterPixels(GAUGE_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX),
         QuarterPixels(GAUGE_FULL_X + GAUGE_TICK_WIDTH + x),
