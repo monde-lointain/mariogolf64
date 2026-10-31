@@ -1031,7 +1031,6 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   }
 
 /* Draws place, as in "21st", centered on x */
-#ifdef NON_MATCHING
 void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   Gfx* gfx = *displayListHead;
   char* c;
@@ -1040,7 +1039,6 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   s32 lastDigit;
   u8 character;
   s32 glyph;
-  s32 left;
 
   sprintf(g_PrintBuffer, f_PlaceNumberFormat, place);
   gDPPipeSync(gfx++);
@@ -1051,17 +1049,15 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
     width += PLACE_GLYPH_SPACING;
   }
 
-  left = x + PLACE_NUMBER_X_OFFSET;
-  left -= width / 2;
+  x += PLACE_NUMBER_X_OFFSET - (width / 2);
   width = 0;
-  for (c = g_PrintBuffer; *c != '\0'; c++) {
+  for (c = g_PrintBuffer; *c != '\0'; c++, width += PLACE_GLYPH_SPACING) {
     character = *c;
-    if (character != ' ') {
-      glyph = character - '0';
-      DrawPlaceGlyph(gfx, left + width, y, glyph);
+    if (character == ' ') {
+      continue;
     }
-
-    width += PLACE_GLYPH_SPACING;
+    glyph = character - '0';
+    DrawPlaceGlyph(gfx, x + width, y, glyph);
   }
 
   suffix = place;
@@ -1083,12 +1079,9 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
     }
   }
 
-  DrawPlaceGlyph(gfx, left + width, y, suffix + PLACE_SUFFIX_GLYPH_FIRST);
+  DrawPlaceGlyph(gfx, x + width, y, suffix + PLACE_SUFFIX_GLYPH_FIRST);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawPlaceNumber);
-#endif
 
 void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   Gfx* gfx = *displayListHead;
