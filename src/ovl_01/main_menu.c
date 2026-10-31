@@ -4768,7 +4768,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * stars won.
  */
 /* Doesn't match: the boards' strips and the mode label schedule their
- * address loads differently. 283 words differ. */
+ * address loads differently. 269 words differ. */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -4790,7 +4790,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   s32 angleStep;
   Radians angle;
   f32 circleX;
-  /* A board's turns from the chosen one, then the slot of the board drawn */
+  /* The slot of the board drawn */
   s32 slot;
   s32 halfSize;
   s32 step;
@@ -4832,13 +4832,15 @@ void DrawModeSelect(Gfx** displayListHead) {
   modeCount = f_ModeCounts[g_ChosenPlayerCount - 1];
   for (index = 0; index != modeCount; index++) {
     ScreenPoint point;
+    /* The board's turns from the chosen one */
+    s32 turns;
 
     radiusX = MODE_BOARD_RADIUS_X;
     if (g_ChosenPlayerCount == 1) {
       radiusX = SINGLE_PLAYER_MODE_BOARD_RADIUS_X;
     }
 
-    slot = (g_MenuMemory.modeChoice - index) % modeCount;
+    turns = (g_MenuMemory.modeChoice - index) % modeCount;
     if (modeCount != 0) {
       angleStep = DEGREES_PER_TURN / modeCount;
     } else {
@@ -4846,7 +4848,7 @@ void DrawModeSelect(Gfx** displayListHead) {
     }
 
     angle = -DegreesToRadians(
-        (slot * angleStep) + (g_MenuMemory.modeSpin * DEGREES_PER_SPIN_STEP));
+        (turns * angleStep) + (g_MenuMemory.modeSpin * DEGREES_PER_SPIN_STEP));
     circleX = sinf(angle) * radiusX;
     if (ProjectPoint(circleX, 0.0f, cosf(angle) * MODE_BOARD_RADIUS_Z, &point) <
         0) {
