@@ -906,8 +906,8 @@ void DrawClubSlots(Gfx** displayListHead) {
             row =
                 f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
             if (f_StarCount == REEL_COUNT) {
-              OpenEncodedAsset(
-                  g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
+              IN_OWN_BLOCK(OpenEncodedAsset(
+                  g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset));
               ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
               OpenEncodedAsset(
                   g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
