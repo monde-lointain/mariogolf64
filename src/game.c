@@ -1179,9 +1179,9 @@ void DrawAimGuides(CameraMatrices* matrices);
 void DrawGameSaveMenu(Gfx** displayListHead);
 void DrawReplaySaveMenu(Gfx** displayListHead);
 void DrawControlsScreen(Gfx** displayListHead);
-void func_8040BFC8_hole_editor(void);
-void func_8040C124_hole_editor(void);
-void func_8040C360_hole_editor(CameraMatrices* matrices, Gfx** displayListHead);
+void CaptureMapImage(void);
+void CaptureFrame(void);
+void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 
 #define SetCameraScissor(view) \
   gDPSetScissor(g_DisplayListHead++, G_SC_NON_INTERLACE, (view).scissorX, \
@@ -1985,7 +1985,7 @@ s32 DrawGame(void) {
 
       if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE) &&
           g_Scene != SCENE_FLAG_PANEL) {
-        func_8040C360_hole_editor(matrices, &g_DisplayListHead);
+        DrawTargetPole(matrices, &g_DisplayListHead);
       }
     }
   }
@@ -2190,11 +2190,11 @@ s32 DrawGame(void) {
 
   if (IsGameFlagSet(GAME_FLAG_SCREEN_TEST_BUTTONS)) {
     if (g_ControllerStates[1].pressedButtons & Z_TRIG) {
-      func_8040C124_hole_editor();
+      CaptureFrame();
     }
 
     if (g_ControllerStates[1].pressedButtons & R_JPAD) {
-      func_8040BFC8_hole_editor();
+      CaptureMapImage();
     }
   }
 

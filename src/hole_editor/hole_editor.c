@@ -31,7 +31,7 @@
 
 /* The points along a tile's edge, its corners included */
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
-/* func_804079B8 goes over the ground in two halves of 8 by 16 blocks */
+/* UpdateTriangleSlopes goes over the ground in two halves of 8 by 16 blocks */
 #define SLOPE_HALF_COUNT 2
 #define SLOPE_BLOCK_COLUMN_COUNT 8
 #define SLOPE_BLOCK_ROW_COUNT 16
@@ -41,7 +41,7 @@
 #define SLOPE_SHADE_OFFSET 0x40
 #define SLOPE_SHADE_MAX 0xFF
 
-/* func_80405DB0's ground shaping searches this many nearest offsets */
+/* ShapeGroundFromCodes's ground shaping searches this many nearest offsets */
 #define SHAPE_OFFSET_COUNT 1600
 #define SHAPE_OFFSET_SPAN 20
 #define HOLE_EDITOR_SHAPE_ASSERT_LINE 2191
@@ -72,15 +72,17 @@
 #define TREE_WIDTH 0x80
 #define TREE_HEIGHT 0x100
 
-/* func_804077B0 blends heights over distances of this many units per falloff
- * step */
+/* BlendGroundAroundPoint blends heights over distances of this many units per
+ * falloff step */
 #define BLEND_DISTANCE_SCALE 512.0f
 #define BLENDED_POINT_SHADE 0xFF
 
-/* func_804066C8 rejects cell triangles whose cross product is below this */
+/* HasDeadTriangleNearPoint rejects cell triangles whose cross product is below
+ * this */
 #define MIN_CELL_CROSS_PRODUCT 16
 
-/* func_80404850's out-of-bounds slope searches this many nearest offsets */
+/* SlopeOutOfBoundsGround's out-of-bounds slope searches this many nearest
+ * offsets */
 #define SLOPE_OFFSET_COUNT 400
 #define SLOPE_OFFSET_SPAN 10
 /* The distances, in grid steps, where the slope starts and turns to noise */
@@ -95,7 +97,7 @@
 #define SLOPE_FAR_DROP 60.0f
 #define SLOPE_EXTRA_DROP 15.0f
 
-/* func_80404B84_hole_editor's ground height editor */
+/* UpdateHeightEditor's ground height editor */
 #define EDITOR_PAD 0
 #define OPTION_PAD 1
 #define SECOND_EDITOR_PAD 2
@@ -144,7 +146,7 @@
 #define HEIGHT_TEXT_COLUMN 25
 #define HEIGHT_TEXT_ROW 3
 
-/* func_80402428_hole_editor's triangle editor */
+/* UpdateTriangleEditor's triangle editor */
 /* What a frame did, kept in f_LastTriangleEditKind */
 enum TriangleEdit {
   TRIANGLE_EDIT_NONE,
@@ -153,7 +155,7 @@ enum TriangleEdit {
   TRIANGLE_EDIT_KIND = 4
 };
 
-/* The last RING_COUNT triangles hold the rings, which func_80402E1C_hole_editor
+/* The last RING_COUNT triangles hold the rings, which UpdateRingEditor
  * edits */
 #define FIRST_RING_TRIANGLE (HOLE_TRIANGLE_COUNT - RING_COUNT)
 #define HOLE_TRIANGLE_KIND_COUNT 4
@@ -164,7 +166,7 @@ enum TriangleEdit {
 #define EDIT_KIND_TEXT_ROW 10
 #define CORNER_HEIGHT_TEXT_ROW 11
 
-/* func_80402E1C_hole_editor's ring editor; its corners hold a ring's position,
+/* UpdateRingEditor's ring editor; its corners hold a ring's position,
  * direction and scale */
 #define RING_DIRECTION_CORNER 1
 /* In the corner's x, 1024 for the ring's own size */
@@ -176,7 +178,7 @@ enum TriangleEdit {
 #define RING_TEXT_COLUMN 19
 #define RING_TEXT_ROW 4
 
-/* func_80403A04_hole_editor's wall editor */
+/* UpdateWallEditor's wall editor */
 #define WALL_TRIANGLE_COUNT 2
 /* Corners 0 and 1; the others follow them */
 #define WALL_BOTTOM_CORNER_COUNT 2
@@ -190,7 +192,7 @@ enum TriangleEdit {
 #define WALL_TEXT_COLUMN 5
 #define WALL_TEXT_ROW 3
 
-/* func_80406C3C_hole_editor's tree editor */
+/* UpdateTreeEditor's tree editor */
 #define TREE_TEXT_COLUMN 19
 #define TREE_KIND_LABEL_ROW 24
 #define TREE_KIND_TEXT_ROW 25
@@ -207,14 +209,14 @@ enum TriangleEdit {
 /* Along x */
 #define COPIED_TREE_OFFSET 0x100
 
-/* func_80407F08's hex dump */
+/* WriteHexDumpFile's hex dump */
 #define HEX_DUMP_BUFFER_SIZE 0x40000
 #define HEX_DUMP_TEXT_SIZE 0x100
 #define HEX_DUMP_LINE_WORDS 4
 #define HEX_DUMP_LINE_BYTES (HEX_DUMP_LINE_WORDS * (s32)sizeof(u32))
 #define HOLE_EDITOR_HEX_DUMP_ASSERT_LINE 3027
 
-/* func_80406818_hole_editor's steps, in f_HoleFileStep */
+/* UpdateHoleFileMenu's steps, in f_HoleFileStep */
 #define HOLE_FILE_STEP_ACTION 0
 #define HOLE_FILE_STEP_COURSE 1
 #define HOLE_FILE_STEP_HOLE 2
@@ -235,7 +237,7 @@ enum TriangleEdit {
 #define CELL_COLUMN_COUNT (GROUND_POINT_COLUMN_COUNT - 1)
 #define CELL_ROW_COUNT (GROUND_POINT_ROW_COUNT - 1)
 
-/* func_804002C0_hole_editor's ground point editor */
+/* UpdateGroundPointEditor's ground point editor */
 /* One for each C-button */
 #define POINT_MOVE_COUNT 4
 #define POINT_MOVE_STEP 0x10
@@ -252,7 +254,7 @@ enum TriangleEdit {
 #define POINT_HEIGHT_TEXT_ROW 8
 #define DEAD_TRIANGLE_TEXT_ROW 9
 
-/* func_80400FBC_hole_editor's hole point editor */
+/* UpdateHolePointEditor's hole point editor */
 #define HOLE_POINT_MODE_UNSET -1
 #define HOLE_POINT_MODE_PIN_TEE 0
 #define HOLE_POINT_MODE_MESON 1
@@ -275,10 +277,10 @@ enum TriangleEdit {
 #define CURSOR_ZOOM_MAX 10.0f
 #define CURSOR_ZOOM_MIN 0.1f
 
-/* func_80405870 gathers the terrain codes of cells at least this far from a
+/* ShouldMirrorCell gathers the terrain codes of cells at least this far from a
  * diagonal */
 #define DIAGONAL_MIN_DISTANCE 3.0f
-/* The sides of the two diagonals that func_80405870 gathers codes for */
+/* The sides of the two diagonals that ShouldMirrorCell gathers codes for */
 #define DIAGONAL_SIDE_COUNT 4
 /* How many different codes each side keeps */
 #define SIDE_CODE_COUNT 2
@@ -344,12 +346,12 @@ enum TriangleEdit {
                : ReportFailedAssertion( \
                      f_EditorAssertionText, f_EditorFileName, lineNumber))
 
-/* func_8040C360_hole_editor's pole: two crossed quads, one in the x-y plane and
+/* DrawTargetPole's pole: two crossed quads, one in the x-y plane and
  * one in the z-y plane */
 #define POLE_QUAD_COUNT 2
 #define POLE_QUAD_VERTEX_COUNT 4
 
-/* func_80407D64_hole_editor's 32x32 IA8 wave pattern */
+/* FillWaveTexels's 32x32 IA8 wave pattern */
 #define WAVE_TEXTURE_WIDTH 32
 #define WAVE_TEXTURE_HEIGHT 32
 /* A texel step's angle, pi/16, times the texel steps between samples */
@@ -550,7 +552,7 @@ static u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT] = {
     {0x04, 0x0D, 0x0E, 0x0F, 0x05},
     {0x82, 0x06, 0x86, 0x07, 0x8A},
 };
-/* func_80400FBC_hole_editor's cursor */
+/* UpdateHolePointEditor's cursor */
 static s32 f_HolePointCursor[2] = {0, 0}; /* x, z */
 /* Read by no routine */
 static s32 D_8040C5A4_hole_editor UNUSED = -1;
@@ -563,7 +565,7 @@ static s32 f_PointCursorColumn = 0;
 static s32 f_PointCursorRow = 0;
 static s32 D_8040C5B8_hole_editor = 0;
 static s32 D_8040C5BC_hole_editor = 0;
-/* func_80400FBC_hole_editor's state */
+/* UpdateHolePointEditor's state */
 static Radians f_HolePointCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 static Radians f_HolePointCameraHeading = EDITOR_CAMERA_START_ANGLE;
 /* Read by no routine */
@@ -574,7 +576,7 @@ static s32 f_PinTeeIndex = 0;
 static s32 f_MesonPointIndex = 0;
 static s32 f_RoutePointIndex = 0;
 
-/* func_80402428_hole_editor's state */
+/* UpdateTriangleEditor's state */
 static Radians f_TriangleCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TriangleCameraHeadingAngle */
 static Radians f_TriangleCameraHeading = EDITOR_CAMERA_START_ANGLE;
@@ -586,7 +588,7 @@ static s32 f_EditedCornerIndex = 0;
 static s32 f_SavedCornerIndex = 0;
 static s32 f_LastTriangleEditKind = 0; /* A TRIANGLE_EDIT_* */
 
-/* func_80402E1C_hole_editor's state */
+/* UpdateRingEditor's state */
 static Radians f_RingCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_RingCameraHeadingAngle */
 static Radians f_RingCameraHeading = EDITOR_CAMERA_START_ANGLE;
@@ -599,7 +601,7 @@ static s32 f_RingCornerIndex = 0; /* Always 0 */
 static s32 D_8040C618_hole_editor UNUSED = 0;
 static s32 f_LastRingEditKind = 0; /* A TRIANGLE_EDIT_* */
 
-/* func_80403A04_hole_editor's state */
+/* UpdateWallEditor's state */
 static Radians f_WallCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_WallCameraHeadingAngle */
 static Radians f_WallCameraHeading = EDITOR_CAMERA_START_ANGLE;
@@ -613,9 +615,9 @@ static s32 f_WallCornerIndex = 0;
 static s32 f_SavedWallCornerIndex = 0;
 static s32 f_LastWallEditKind = 0; /* A TRIANGLE_EDIT_* */
 
-void func_80405AF4_hole_editor(s32 column, s32 row);
+void ToggleCellMirroring(s32 column, s32 row);
 
-/* A ground triangle's slope, from func_804079B8 */
+/* A ground triangle's slope, from UpdateTriangleSlopes */
 typedef struct TriangleSlope {
   /* 0x0 */ s16 waveS; /* The wave texture's scroll, which moves by the
                          normal each frame */
@@ -626,7 +628,7 @@ typedef struct TriangleSlope {
   /* 0x9 */ u8 unk9;
 } TriangleSlope; /* size = 0xA */
 
-/* The size of the buffer that func_80400000_hole_editor returns */
+/* The size of the buffer that GetEditorBuffer returns */
 #define EDITOR_BUFFER_SIZE 0x40000
 
 /*
@@ -637,7 +639,7 @@ static CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 /* Read by no routine */
 static CoursePoint D_8040CBA8_hole_editor[SAVED_CORNER_COUNT] UNUSED;
 static CoursePoint f_SavedWallCorners[SAVED_CORNER_COUNT];
-/* Places func_8040C360_hole_editor's pole at the map camera's target */
+/* Places DrawTargetPole's pole at the map camera's target */
 static Mtx f_PoleMatrix;
 /* Read by no routine */
 static s32 D_8040CCD8_hole_editor[2] UNUSED;
@@ -645,12 +647,12 @@ static u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE];
 static TriangleSlope f_TriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 static Gfx f_EditorGroundDisplayLists[DRAW_BUFFER_COUNT]
                                      [EDITOR_GROUND_LIST_LENGTH];
-/* Reached only through func_80400000_hole_editor, which nothing calls */
+/* Reached only through GetEditorBuffer, which nothing calls */
 static u8 D_80451A60_hole_editor[EDITOR_BUFFER_SIZE];
-/* func_80407D64_hole_editor's wave pattern */
+/* FillWaveTexels's wave pattern */
 static u8 f_WaveTexels[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
-/* func_80404B84_hole_editor's state */
+/* UpdateHeightEditor's state */
 static s32 f_HeightCursorColumn = 0;
 static s32 f_HeightCursorRow = 0;
 /* Read by no routine */
@@ -669,12 +671,12 @@ static s32 f_CUpPickedHeight = 0;
 static s32 f_LastHeightEditKind = 0; /* The last frame's HEIGHT_EDIT_* */
 
 /*
- * Declared without a prototype, as func_804077B0 passes it a float height,
- * which goes as a double
+ * Declared without a prototype, as BlendGroundAroundPoint passes it a float
+ * height, which goes as a double
  */
 NO_RESULT SetGroundPointHeightAndShade();
 
-/* func_80406818_hole_editor's menu */
+/* UpdateHoleFileMenu's menu */
 /* Read by no routine */
 static s32 D_8040C678_hole_editor UNUSED = 1;
 static Boolean f_IsSavingHoleFiles = FALSE;
@@ -683,7 +685,7 @@ static s32 f_HoleFileHoleNumber = 1; /* From 1 */
 static s32 f_HoleFileCourseNumber = 1; /* From 1 */
 static s32 f_HoleFilePromptFrames = 0;
 
-/* func_80406C3C_hole_editor's state */
+/* UpdateTreeEditor's state */
 static Radians f_TreeCameraPitch = -EDITOR_CAMERA_START_ANGLE;
 /* In radians, from f_TreeCameraHeadingAngle */
 static Radians f_TreeCameraHeading = EDITOR_CAMERA_START_ANGLE;
@@ -733,7 +735,7 @@ static Vtx f_PoleVertices[POLE_QUAD_COUNT][POLE_QUAD_VERTEX_COUNT] = {
     },
 };
 
-void* func_80400000_hole_editor(void) {
+void* GetEditorBuffer(void) {
   return D_80451A60_hole_editor;
 }
 
@@ -743,7 +745,7 @@ void* func_80400000_hole_editor(void) {
  * cell to SCENE_POINT_EDITOR. The map camera's eye stays over the cell's
  * middle.
  */
-void func_8040000C_hole_editor(void) {
+void UpdateCellEditor(void) {
   Vtx* corner;
   Vtx* oppositeCorner;
 
@@ -794,7 +796,7 @@ void func_8040000C_hole_editor(void) {
   }
 
   if (g_MenuControllerData[0].button & A_BUTTON) {
-    func_80405AF4_hole_editor(f_CellCursorColumn, f_CellCursorRow);
+    ToggleCellMirroring(f_CellCursorColumn, f_CellCursorRow);
   }
 
   if (g_MenuControllerData[0].trigger & Z_TRIG) {
@@ -812,7 +814,7 @@ void func_8040000C_hole_editor(void) {
       (corner->v.ob[AXIS_Z] + oppositeCorner->v.ob[AXIS_Z]) / 2;
 }
 
-s32 func_804066C8_hole_editor(s32 column, s32 row);
+s32 HasDeadTriangleNearPoint(s32 column, s32 row);
 
 /*
  * SCENE_POINT_EDITOR's ground point editor. The control pad moves the cursor
@@ -821,7 +823,7 @@ s32 func_804066C8_hole_editor(s32 column, s32 row);
  * move that would make a dead triangle is undone. R and L zoom the map camera,
  * and Z hands the point back to SCENE_CELL_EDITOR.
  */
-void func_804002C0_hole_editor(void) {
+void UpdateGroundPointEditor(void) {
   Vtx_t points[POINT_MOVE_COUNT +
       1]; /* Each move saves its point into the next move's slot */
   char text[DEBUG_TEXT_BUFFER_SIZE];
@@ -870,7 +872,7 @@ void func_804002C0_hole_editor(void) {
       points[0].ob[AXIS_Z] -= POINT_MOVE_STEP;
       points[0].tc[TEXTURE_AXIS_T] -= POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[0]);
-      if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
+      if (HasDeadTriangleNearPoint(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
         SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[1]);
       }
@@ -883,7 +885,7 @@ void func_804002C0_hole_editor(void) {
       points[1].ob[AXIS_Z] += POINT_MOVE_STEP;
       points[1].tc[TEXTURE_AXIS_T] += POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[1]);
-      if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
+      if (HasDeadTriangleNearPoint(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
         SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[2]);
       }
@@ -896,7 +898,7 @@ void func_804002C0_hole_editor(void) {
       points[2].ob[AXIS_X] -= POINT_MOVE_STEP;
       points[2].tc[TEXTURE_AXIS_S] -= POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[2]);
-      if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
+      if (HasDeadTriangleNearPoint(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
         SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[3]);
       }
@@ -909,7 +911,7 @@ void func_804002C0_hole_editor(void) {
       points[3].ob[AXIS_X] += POINT_MOVE_STEP;
       points[3].tc[TEXTURE_AXIS_S] += POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[3]);
-      if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
+      if (HasDeadTriangleNearPoint(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
         SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[4]);
       }
@@ -921,7 +923,7 @@ void func_804002C0_hole_editor(void) {
       points[1] = points[0];
       points[0].tc[TEXTURE_AXIS_T] -= POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[0]);
-      if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
+      if (HasDeadTriangleNearPoint(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
         SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[1]);
       }
@@ -933,7 +935,7 @@ void func_804002C0_hole_editor(void) {
       points[2] = points[1];
       points[1].tc[TEXTURE_AXIS_T] += POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[1]);
-      if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
+      if (HasDeadTriangleNearPoint(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
         SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[2]);
       }
@@ -945,7 +947,7 @@ void func_804002C0_hole_editor(void) {
       points[3] = points[2];
       points[2].tc[TEXTURE_AXIS_S] -= POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[2]);
-      if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
+      if (HasDeadTriangleNearPoint(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
         SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[3]);
       }
@@ -957,7 +959,7 @@ void func_804002C0_hole_editor(void) {
       points[4] = points[3];
       points[3].tc[TEXTURE_AXIS_S] += POINT_TEXTURE_STEP;
       SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[3]);
-      if (func_804066C8_hole_editor(f_PointCursorColumn, f_PointCursorRow)) {
+      if (HasDeadTriangleNearPoint(f_PointCursorColumn, f_PointCursorRow)) {
         madeDeadTriangle = TRUE;
         SetGroundPoint(f_PointCursorColumn, f_PointCursorRow, &points[4]);
       }
@@ -1051,7 +1053,7 @@ void func_804002C0_hole_editor(void) {
  * ground under the cursor (B places the tee). The first pin and tee also become
  * the hole's own.
  */
-void func_80400FBC_hole_editor(void) {
+void UpdateHolePointEditor(void) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
   s32 stepX;
   s32 stepZ;
@@ -1442,7 +1444,7 @@ void func_80400FBC_hole_editor(void) {
       g_MapCamera.view.lookAt[AXIS_Y];
 }
 
-void func_804079B8_hole_editor(void);
+void UpdateTriangleSlopes(void);
 
 /*
  * Scene SCENE_TRIANGLES's editor for the hole triangles. On the editor pad,
@@ -1455,7 +1457,7 @@ void func_804079B8_hole_editor(void);
  * zooms in, L or Z with R zooms out, and Z with the stick orbits the
  * camera around the corner.
  */
-void func_80402428_hole_editor(void) {
+void UpdateTriangleEditor(void) {
   Mat4
       unusedMatrices[2] UNUSED; /* The game's frame has room for two matrices */
   f32 stepRight;
@@ -1657,7 +1659,7 @@ void func_80402428_hole_editor(void) {
   /* The first frame without an edit rebuilds the slopes */
   if ((f_LastTriangleEditKind != TRIANGLE_EDIT_NONE) &
       (editKind == TRIANGLE_EDIT_NONE)) {
-    func_804079B8_hole_editor();
+    UpdateTriangleSlopes();
   }
 
   cameraDistance = EDITOR_CAMERA_DISTANCE;
@@ -1691,7 +1693,7 @@ void func_80402428_hole_editor(void) {
  * the control pad pick the ring. R zooms in, L or Z with R zooms out, and
  * Z with the stick orbits the camera around the ring.
  */
-void func_80402E1C_hole_editor(void) {
+void UpdateRingEditor(void) {
   Vec3 direction;
   f32 stepRight;
   f32 stepUp;
@@ -1948,7 +1950,7 @@ void func_80402E1C_hole_editor(void) {
   /* The first frame without an edit rebuilds the slopes */
   if ((f_LastRingEditKind != TRIANGLE_EDIT_NONE) &
       (editKind == TRIANGLE_EDIT_NONE)) {
-    func_804079B8_hole_editor();
+    UpdateTriangleSlopes();
   }
 
   cameraDistance = EDITOR_CAMERA_DISTANCE;
@@ -1982,7 +1984,7 @@ void func_80402E1C_hole_editor(void) {
  * pick the wall. R zooms in, L or Z with R zooms out, and Z with the stick
  * orbits the camera around the corner.
  */
-void func_80403A04_hole_editor(void) {
+void UpdateWallEditor(void) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
   Vtx_t* corners[HOLE_TRIANGLE_VERTEX_COUNT];
   Vtx_t* nextCorners[HOLE_TRIANGLE_VERTEX_COUNT];
@@ -2243,7 +2245,7 @@ void func_80403A04_hole_editor(void) {
   /* The first frame without an edit rebuilds the slopes */
   if ((f_LastWallEditKind != TRIANGLE_EDIT_NONE) &
       (editKind == TRIANGLE_EDIT_NONE)) {
-    func_804079B8_hole_editor();
+    UpdateTriangleSlopes();
   }
 
   cameraDistance = EDITOR_CAMERA_DISTANCE;
@@ -2274,7 +2276,7 @@ void func_80403A04_hole_editor(void) {
  * billboard builds goes unused, and PlaceBillboards places them all again
  * for each one.
  */
-void func_804045C0_hole_editor(void) {
+void PutObjectsOnGround(void) {
   Mat4 translation;
   Mat4 unusedMatrix UNUSED; /* The game's frame has room for a second matrix */
   s32 height;
@@ -2335,7 +2337,7 @@ void func_804045C0_hole_editor(void) {
  * noise from SLOPE_NOISE_DISTANCE on. The height editor's option pad calls
  * it with C-down.
  */
-void func_80404850_hole_editor(void) {
+void SlopeOutOfBoundsGround(void) {
   Vtx_t point;
   GridOffset* offsets;
   s32 offsetCount;
@@ -2407,11 +2409,11 @@ void func_80404850_hole_editor(void) {
  * repeats the last height and C-left adds noise to it, and A and B add
  * noise to the point. On the second pad, C-left and C-up pick up two
  * heights and C-right and C-down move the point by their difference. The
- * option pad toggles f_ShowsGroundWaves and calls func_804045C0 and
- * func_80404850. After a frame of edits, the next frame without one rebuilds
- * the slopes.
+ * option pad toggles f_ShowsGroundWaves and calls PutObjectsOnGround and
+ * SlopeOutOfBoundsGround. After a frame of edits, the next frame without one
+ * rebuilds the slopes.
  */
-void func_80404B84_hole_editor(void) {
+void UpdateHeightEditor(void) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
   s32 baseHeight;
   s32 editKind;
@@ -2445,7 +2447,7 @@ void func_80404B84_hole_editor(void) {
   }
 
   if (g_MenuControllerData[OPTION_PAD].button & D_CBUTTONS) {
-    func_80404850_hole_editor();
+    SlopeOutOfBoundsGround();
   }
 
   if (g_MenuControllerData[SECOND_EDITOR_PAD].button & L_CBUTTONS) {
@@ -2489,7 +2491,7 @@ void func_80404B84_hole_editor(void) {
   }
 
   if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
-    func_804045C0_hole_editor();
+    PutObjectsOnGround();
   }
 
   if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
@@ -2728,7 +2730,7 @@ void func_80404B84_hole_editor(void) {
 
   f_HeightCameraHeading = f_HeightCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
   if (f_LastHeightEditKind && editKind == HEIGHT_EDIT_NONE) {
-    func_804079B8_hole_editor();
+    UpdateTriangleSlopes();
   }
 
   f_LastHeightEditKind = editKind;
@@ -2769,7 +2771,7 @@ static const char f_EditorFileName[] = "c:/usgolf64/hiedit.c";
  * and 3 those of the one through (0, height) and (width, 0). Returns
  * whether sides 0 and 1 both have two codes while side 2 or 3 does not.
  */
-s32 func_80405870_hole_editor(s32 column, s32 row, s32 endColumn, s32 endRow) {
+s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
   s32 sideCodes[DIAGONAL_SIDE_COUNT][SIDE_CODE_COUNT];
   s32 width;
   s32 height;
@@ -2850,7 +2852,7 @@ s32 func_80405870_hole_editor(s32 column, s32 row, s32 endColumn, s32 endRow) {
       (column) >= GROUND_TILE_COLUMN_COUNT * GROUND_TILE_POINT_SPAN || \
       (row) >= GROUND_TILE_ROW_COUNT * GROUND_TILE_POINT_SPAN || (row) < 0)
 
-void func_80405AF4_hole_editor(s32 column, s32 row) {
+void ToggleCellMirroring(s32 column, s32 row) {
   s32 tileIndex;
   s32 cellBits;
 
@@ -2867,7 +2869,7 @@ void func_80405AF4_hole_editor(s32 column, s32 row) {
 
 /* Sets the x and s of a column of points between grid vertices (column, row)
  * and (column + 1, row) */
-void func_80405B80_hole_editor(Vtx* vertices, s32 column, s32 row, s32 weight) {
+void InterpolateColumnPoints(Vtx* vertices, s32 column, s32 row, s32 weight) {
   Vtx* ends[2];
   s32 firstWeight;
   s32 i;
@@ -2890,7 +2892,7 @@ void func_80405B80_hole_editor(Vtx* vertices, s32 column, s32 row, s32 weight) {
 
 /* Sets the z and t of a row of points between grid vertices (column, row) and
  * (column, row + 1) */
-void func_80405C94_hole_editor(Vtx* vertices, s32 column, s32 row, s32 weight) {
+void InterpolateRowPoints(Vtx* vertices, s32 column, s32 row, s32 weight) {
   Vtx* ends[2];
   s32 firstWeight;
   s32 i;
@@ -2919,7 +2921,7 @@ void func_80405C94_hole_editor(Vtx* vertices, s32 column, s32 row, s32 weight) {
  * neighbors, and trees go in the rough TREE_MIN_DISTANCE to
  * TREE_MAX_DISTANCE code cells from its edge. Nothing calls it.
  */
-void func_80405DB0_hole_editor(void) {
+void ShapeGroundFromCodes(void) {
   Vtx* edgePoints[3];
   s32 treePositions[BILLBOARD_COUNT][2];
   GridOffset* offsets;
@@ -3163,9 +3165,9 @@ PLANTED:
 
 /*
  * Sets each ground tile's unk992 bits, one for each of its cells, to
- * func_80405870 of the codes between the cell's opposite corners
+ * ShouldMirrorCell of the codes between the cell's opposite corners
  */
-void func_80406570_hole_editor(void) {
+void ChooseMirroredCells(void) {
   s32 tileRow;
   s32 tileColumn;
   s32 cellRow;
@@ -3187,11 +3189,11 @@ void func_80406570_hole_editor(void) {
           corners[1] = GetGroundPoint(
               (tileColumn * GROUND_TILE_POINT_SPAN) + cellColumn + 1,
               (tileRow * GROUND_TILE_POINT_SPAN) + cellRow + 1);
-          cellBits |= func_80405870_hole_editor(
-                          corners[0]->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
-                          corners[0]->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE,
-                          corners[1]->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
-                          corners[1]->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE)
+          cellBits |=
+              ShouldMirrorCell(corners[0]->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
+                  corners[0]->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE,
+                  corners[1]->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE,
+                  corners[1]->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE)
               << ((cellRow * GROUND_TILE_POINT_SPAN) + cellColumn);
         }
       }
@@ -3206,7 +3208,7 @@ void func_80406570_hole_editor(void) {
  * ground point has a cross product below MIN_CELL_CROSS_PRODUCT, so is
  * too thin or turned over, or 0 if none does
  */
-s32 func_804066C8_hole_editor(s32 column, s32 row) {
+s32 HasDeadTriangleNearPoint(s32 column, s32 row) {
   Vtx* corners[4];
   s32 rowOffset;
   s32 columnOffset;
@@ -3243,7 +3245,7 @@ s32 func_804066C8_hole_editor(s32 column, s32 row) {
  * one in memory with SaveHoleFiles. The D-pad picks the action, then the
  * course and the hole; A goes on to the next step and B goes back.
  */
-void func_80406818_hole_editor(void) {
+void UpdateHoleFileMenu(void) {
   char courseText[DEBUG_TEXT_BUFFER_SIZE];
   char holeText[DEBUG_TEXT_BUFFER_SIZE];
 
@@ -3368,7 +3370,7 @@ void func_80406818_hole_editor(void) {
  * pick the tree, and B copies it. R zooms in, L or Z with R zooms out, and Z
  * with the stick orbits the camera around the tree.
  */
-void func_80406C3C_hole_editor(void) {
+void UpdateTreeEditor(void) {
   Mat4 translation;
   Mat4 unusedMatrix UNUSED; /* The game's frame has room for a second matrix */
   s32 editKind;
@@ -3580,7 +3582,7 @@ void func_80406C3C_hole_editor(void) {
  * height: the farther a point, the more it keeps its own height, fully
  * from BLEND_DISTANCE_SCALE / falloff away. Nothing calls it.
  */
-void func_804077B0_hole_editor(u32 column, u32 row, s32 radius, s32 falloff) {
+void BlendGroundAroundPoint(u32 column, u32 row, s32 radius, s32 falloff) {
   Vtx* center;
   Vtx* point;
   s32 rowOffset;
@@ -3628,7 +3630,7 @@ void func_804077B0_hole_editor(u32 column, u32 row, s32 radius, s32 falloff) {
  * Fills f_TriangleSlopes from the ground. It goes over the cells in blocks
  * of 2 columns by 4 rows; each cell's two triangles take an entry each.
  */
-void func_804079B8_hole_editor(void) {
+void UpdateTriangleSlopes(void) {
   PlaneTriangle firstTriangle;
   PlaneTriangle secondTriangle;
   IntegerPlane plane;
@@ -3763,7 +3765,7 @@ void func_804079B8_hole_editor(void) {
  * Fills f_WaveTexels with the cube of cos(column * pi/4) * sin(row * pi/4),
  * as matching IA8 intensity and alpha levels from 1 to 15
  */
-void func_80407D64_hole_editor(void) {
+void FillWaveTexels(void) {
   s32 row;
   s32 column;
   s32 texelIndex;
@@ -3793,7 +3795,7 @@ void func_80407D64_hole_editor(void) {
  * Writes a hex dump of words to the host as a text file: lines of four
  * words, each line led by its byte offset. Nothing calls it.
  */
-void func_80407F08_hole_editor(u32* words, s32 byteCount, char* fileName) {
+void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
   char text[HEX_DUMP_TEXT_SIZE];
   char* cursor;
   char* end;
@@ -4691,7 +4693,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", DrawHoleEditorGround);
  * Marks the billboards on the map, then writes the whole map image to
  * the host as x:\usgolf64\capture\tempNN.bmp
  */
-void func_8040BFC8_hole_editor(void) {
+void CaptureMapImage(void) {
   char fileName[CAPTURE_FILE_NAME_SIZE];
   u8* capture;
   s32 byteIndex;
@@ -4745,7 +4747,7 @@ void func_8040BFC8_hole_editor(void) {
 }
 
 /* Writes the whole frame to the host as the next numbered capture file */
-void func_8040C124_hole_editor(void) {
+void CaptureFrame(void) {
   u16* frame;
   u8* capture;
   s32 byteIndex;
@@ -4786,7 +4788,7 @@ void func_8040C124_hole_editor(void) {
  * Writes the frame's top-left corner to the host as capture file
  * captureIndex. The size written is that of a whole-screen capture.
  */
-void func_8040C260_hole_editor(s32 captureIndex) {
+void CaptureFrameCorner(s32 captureIndex) {
   u16* frame;
   u8* capture;
   s32 byteIndex;
@@ -4825,8 +4827,7 @@ void func_8040C260_hole_editor(s32 captureIndex) {
  * Draws a pole, red at the foot and blue at the top, at the map camera's
  * look-at point
  */
-void func_8040C360_hole_editor(
-    CameraMatrices* matrices UNUSED, Gfx** displayListHead) {
+void DrawTargetPole(CameraMatrices* matrices UNUSED, Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
   guTranslate(&f_PoleMatrix, g_MapCamera.view.lookAt[0],

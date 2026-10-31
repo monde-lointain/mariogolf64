@@ -162,7 +162,7 @@ static s32 f_GroundTimingRow = 0;
 static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
 
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
-void func_80407D64_hole_editor(void);
+void FillWaveTexels(void);
 void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
@@ -1827,7 +1827,7 @@ void FillGroundNoise(s32 range, s32 base) {
 
 void InitExpansionPakFeatures(void) {
   if (g_HasExpansionPak) {
-    func_80407D64_hole_editor();
+    FillWaveTexels();
   }
 
   FillGroundNoise(GROUND_NOISE_RANGE, GROUND_NOISE_BASE);

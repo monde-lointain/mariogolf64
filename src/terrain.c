@@ -271,15 +271,15 @@ void ResetMenuChoices(void);
 void ChooseConditionsAndInitHole(void);
 void LoadToolCodeMap(void);
 void ToggleCodeMapCleanup(void);
-void func_8040000C_hole_editor(void);
-void func_804002C0_hole_editor(void);
-void func_80400FBC_hole_editor(void);
-void func_80402428_hole_editor(void);
-void func_80402E1C_hole_editor(void);
-void func_80403A04_hole_editor(void);
-void func_80404B84_hole_editor(void);
-void func_80406818_hole_editor(void);
-void func_80406C3C_hole_editor(void);
+void UpdateCellEditor(void);
+void UpdateGroundPointEditor(void);
+void UpdateHolePointEditor(void);
+void UpdateTriangleEditor(void);
+void UpdateRingEditor(void);
+void UpdateWallEditor(void);
+void UpdateHeightEditor(void);
+void UpdateHoleFileMenu(void);
+void UpdateTreeEditor(void);
 
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade);
 void SetGridVertexHeight(s32 column, s32 row, s32 height);
@@ -1729,7 +1729,7 @@ void UpdateDebugScenes(void) {
   }
 
   if (g_Scene == SCENE_UNK11) {
-    func_80406818_hole_editor();
+    UpdateHoleFileMenu();
   }
 
   if (g_Scene == SCENE_FLAG_PANEL) {
@@ -1737,25 +1737,25 @@ void UpdateDebugScenes(void) {
   }
 
   if (g_Scene == SCENE_CELL_EDITOR) {
-    func_8040000C_hole_editor();
+    UpdateCellEditor();
   } else if (g_Scene == SCENE_POINT_EDITOR) {
-    func_804002C0_hole_editor();
+    UpdateGroundPointEditor();
   }
 
   if (g_Scene == SCENE_TREES) {
-    func_80406C3C_hole_editor();
+    UpdateTreeEditor();
   }
 
   if (g_Scene == SCENE_TRIANGLES) {
-    func_80402428_hole_editor();
+    UpdateTriangleEditor();
   }
 
   if (g_Scene == SCENE_RINGS) {
-    func_80402E1C_hole_editor();
+    UpdateRingEditor();
   }
 
   if (g_Scene == SCENE_WALLS) {
-    func_80403A04_hole_editor();
+    UpdateWallEditor();
   }
 
   if (g_Scene == SCENE_MAP_OVERVIEW) {
@@ -1847,11 +1847,11 @@ void UpdateDebugScenes(void) {
   }
 
   if (g_Scene == SCENE_HEIGHTS) {
-    func_80404B84_hole_editor();
+    UpdateHeightEditor();
   }
 
   if (g_Scene == SCENE_PIN) {
-    func_80400FBC_hole_editor();
+    UpdateHolePointEditor();
   }
 }
 
