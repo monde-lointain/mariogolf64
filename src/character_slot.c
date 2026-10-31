@@ -2335,7 +2335,7 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  *
  * Doesn't match: GCC keeps frame in a saved floating-point register, where
  * the original keeps it in a scratch one, which shifts the other
- * floating-point registers. 258 words differ.
+ * floating-point registers. 254 words differ.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
@@ -2565,8 +2565,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
     rotationMatrix[2][2] = 1.0f - (xx + yy);
     rotationMatrix[2][3] = 0.0f;
     rotationMatrix[3][0] = 0.0f;
-    rotationMatrix[3][1] = 0.0f;
-    rotationMatrix[3][2] = 0.0f;
+    rotationMatrix[3][2] = rotationMatrix[3][1] = 0.0f;
     rotationMatrix[3][3] = 1.0f;
 
     frame = g_CurrentAnimationFrame;
