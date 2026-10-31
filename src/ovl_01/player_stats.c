@@ -1414,7 +1414,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
   for (arrowIndex = 0; arrowIndex != MENU_ARROW_COUNT; arrowIndex++) {
     if (arrowIndex == MENU_ARROW_LEFT) {
-      gDPLoadTextureTile_4b(gfx++,
+      IN_OWN_BLOCK(gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)f_StatsGreenArrows +
               ((f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE) +
                   PALETTED_TEXELS_OFFSET +
@@ -1422,7 +1422,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
           GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
           G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, HANDICAP_ARROW_MASK,
-          HANDICAP_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD);
+          HANDICAP_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD));
     } else {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)f_StatsGreenArrows +
