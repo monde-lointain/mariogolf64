@@ -220,7 +220,14 @@ void ClearHoleCreatures(void) {
   }
 }
 
-/* Sends a Cheep Cheep leaping across the wind from below the ball */
+/*
+ * Sends a Cheep Cheep leaping across the wind from below the ball.
+ *
+ * Doesn't match: GCC schedules the store of the rotation's zero X angle
+ * right after the Cheep Cheep's velocity, where the original stores it after
+ * converting the translation. Clearing it at any later point between the
+ * velocity and the matrix build gives 10 to 26 differing words, not 2.
+ */
 #ifdef NON_MATCHING
 void StartCheepCheepLeap(s32 arg0) {
   EncodedAsset asset;
