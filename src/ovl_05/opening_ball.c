@@ -1797,7 +1797,6 @@ s32 func_8020A488_ovl_05(
   f32 spinBase;
   f32 spinLoss;
   s32 index;
-  s8 surface UNUSED;
 
   f32 PickLieBlend(void) {
     return 0.0f;
