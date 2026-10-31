@@ -2919,6 +2919,8 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * the parent's playerIndex through it. The debug helpers before it are
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
+ *
+ * Doesn't match: 766 words differ, spread through the routine's states.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -4673,9 +4675,7 @@ void UpdateTurns(void) {
             SetRingShotCleared(TRUE);
             reaction = REACTION_ANIMATION_EAGLE;
           }
-        } else if (g_Players[playerIndex].strokeCount == 1) {
-          reaction = REACTION_ANIMATION_EAGLE;
-        } else {
+        } else if (g_Players[playerIndex].strokeCount != 1) {
           switch (g_Players[playerIndex].strokeCount - g_HoleSetup.par) {
             case SCORE_TO_PAR_ALBATROSS:
             case SCORE_TO_PAR_EAGLE:
@@ -4691,6 +4691,8 @@ void UpdateTurns(void) {
               reaction = REACTION_ANIMATION_BOGEY;
               break;
           }
+        } else {
+          reaction = REACTION_ANIMATION_EAGLE;
         }
 
         StartReaction(0, g_Players[playerIndex].characterIndex, reaction);
