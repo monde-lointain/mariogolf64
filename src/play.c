@@ -30,11 +30,14 @@
 #include "menu.h"
 #include "movie.h"
 #include "overlay_manager.h"
+#include "pause_menu.h"
 #include "progress.h"
+#include "round_events.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
+#include "scorecard.h"
 #include "scoring.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -810,21 +813,17 @@ Boolean HasWonFinalChallenge(void) {
 }
 
 void LoadClubSlots(void);
-void OpenScorecard();
-void SetPlankMotion();
-s32 UpdateHoleSelect();
-s32 UpdateRingShotSelect();
-void LoadUnlockNotice();
+void SetPlankMotion(s32 motion);
+s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons);
+s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons);
+void LoadUnlockNotice(s32 unlock);
 s32 UpdateUnlockNotice(void);
 void FreeUnlockNotice(void);
-void ShowFlipMessage();
-void StartScorecardTally();
-void OpenSaveMenu();
-s32 UpdateReplaySaveMenu();
-s32 UpdateRoundResults();
-s32 UpdateShownScorecard();
-void ClearShotEffects();
-void OpenRoundResults();
+void StartScorecardTally(s32 layout);
+s32 UpdateReplaySaveMenu(ControllerState* controller);
+s32 UpdateRoundResults(ControllerState* controller);
+s32 UpdateShownScorecard(u16 buttons);
+void OpenRoundResults(s32 request);
 void UpdateTurns(void);
 s32 UpdateClubSlots(void);
 s32 ArePlanksOpen(void);
