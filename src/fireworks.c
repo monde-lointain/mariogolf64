@@ -156,7 +156,20 @@ s32 HaveFireworksStayedFreed(void) {
   return f_FireworkState < -2;
 }
 
-/* Sends every particle of the firework out from one random point */
+/*
+ * The random part of a firework's launch height, 0 to 3. A function rather
+ * than inline code to match.
+ */
+static inline s32 RandomLaunchHeightJitter(void) {
+  return guRandom() % 4;
+}
+
+/*
+ * Sends every particle of the firework out from one random point.
+ * Doesn't match: GCC swaps the registers of width and height, and keeps the
+ * halves of both on the stack, where the original keeps half the height in a
+ * register.
+ */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   s32 particleIndex;
@@ -171,7 +184,7 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
 
   particleIndex = 0;
   originX = guRandom() % 32;
-  random = guRandom() % 4;
+  random = RandomLaunchHeightJitter();
   width = firework->shape->width;
   height = firework->shape->height;
   firework->unkC = 0xFF;
