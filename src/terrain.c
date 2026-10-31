@@ -315,14 +315,25 @@ s32 GetTerrainHeight(s32 x, s32 z);
 
 s32 GetTerrainCode(s32 column, s32 row);
 
+/* The byte in the terrain codes that holds a code in a block of cells */
+static inline s32 GetPackedCodeOffset(s32 column, s32 row, s32 block) {
+  return ((column & (TERRAIN_CODE_CELL_SPAN - 1)) >> 1) +
+      ((row & (TERRAIN_CODE_CELL_SPAN - 1)) * (TERRAIN_CODE_CELL_SPAN / 2)) +
+      ((block & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
+}
+
 /*
  * Returns the terrain code at a code column and row, clamped to the grid,
- * or -1 where there is none
+ * or -1 where there is none.
+ *
+ * Doesn't match: the original scales the cell's column and row to bytes
+ * separately and adds them, where this adds them and scales the sum; 8 words
+ * differ. Indexing the cells by row and column gives 27, the other orders of
+ * the flat index give 18, and keeping the packed offset in a local gives 24.
  */
 #ifdef NON_MATCHING
 s32 GetTerrainCode(s32 column, s32 row) {
   s32 block;
-  s32 offset;
 
   if (column < 0) {
     column = 0;
@@ -336,9 +347,8 @@ s32 GetTerrainCode(s32 column, s32 row) {
     row = CODE_GRID_ROW_COUNT - 1;
   }
 
-  block = (g_TerrainCodeCells[0] +
-      (column / TERRAIN_CODE_CELL_SPAN))[(row / TERRAIN_CODE_CELL_SPAN) *
-      TERRAIN_CODE_CELL_COLUMN_COUNT];
+  block = g_TerrainCodeCells[0][(column / TERRAIN_CODE_CELL_SPAN) +
+      ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_COLUMN_COUNT)];
   if (block == NO_CELL_TERRAIN_CODE) {
     return NO_CELL_TERRAIN_CODE;
   }
@@ -347,14 +357,14 @@ s32 GetTerrainCode(s32 column, s32 row) {
     return block;
   }
 
-  offset = ((column & (TERRAIN_CODE_CELL_SPAN - 1)) >> 1) +
-      ((row & (TERRAIN_CODE_CELL_SPAN - 1)) * (TERRAIN_CODE_CELL_SPAN / 2)) +
-      ((block & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
   if (!(column & 1)) {
-    return g_WorkArea.hole.terrainCodes[offset] >> TERRAIN_CODE_BITS;
+    return g_WorkArea.hole
+               .terrainCodes[GetPackedCodeOffset(column, row, block)] >>
+        TERRAIN_CODE_BITS;
   }
 
-  return g_WorkArea.hole.terrainCodes[offset] & TERRAIN_CODE_MASK;
+  return g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(column, row, block)] &
+      TERRAIN_CODE_MASK;
 }
 
 #else
