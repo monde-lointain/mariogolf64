@@ -2142,7 +2142,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
     end.x *= QUARTER_PIXELS_PER_PIXEL;
     end.y *= QUARTER_PIXELS_PER_PIXEL;
     dx = end.x - ball.x;
-    dy = end.y - ball.y;
+    IN_OWN_BLOCK(dy = end.y - ball.y);
     if (fabsf(dx) > 1.0f || fabsf(dy) > 1.0f) {
       scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
       gSPLoadGeometryMode(g_DisplayListHead++, 0);
