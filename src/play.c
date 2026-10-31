@@ -118,7 +118,7 @@ FILE_STATIC s8 g_HadEveryRingShotStar;
 FILE_STATIC s8 g_RingShotCourseOpenedAtStart;
 
 /* Read by no routine */
-static s32 D_800C3060[2] UNUSED = {0};
+static s32 f_UnusedWordsBeforeTrainingHeading[2] UNUSED = {0};
 s8 g_IsTrainingHeadingKept = FALSE;
 s32 g_PauseScreen = PAUSE_SCREEN_NONE;
 s32 g_IsAimCameraEasing = 0;
@@ -128,13 +128,14 @@ SignedBinaryAngle g_FreeLookHeading = 0;
 s32 g_ShotSetupFrameCount = 0;
 s32 g_ImpactPointLingerFrameCount = 0;
 s32 g_ShotFlags = 0;
-static s32 D_800C3088 = 0;
+/* Cleared by ResetShotSetup, and read by no routine */
+static s32 f_UnusedClearedPlayWord = 0;
 s32 g_LetterboxState = LETTERBOX_STATE_NONE;
 s32 g_ImpactPointState = IMPACT_POINT_OFF;
 s32 g_HasShotComeToRest = TRUE;
 s8 g_IsHudTurnAwayRequested = FALSE;
 /* Read by no routine */
-static s32 D_800C309C[2] UNUSED = {0};
+static s32 f_UnusedWordsAfterTurnAwayRequest[2] UNUSED = {0};
 /*
  * Whether the Ring Shot hole was holed out through every ring, which has the
  * hole's end show the Ring Shot results
@@ -148,9 +149,8 @@ static s32 f_PlayFrameCount = 0;
 static s8 f_IsPlayStateBackedUp = FALSE;
 static s32 f_DebugCupIndex = 0;
 /* Read by no routine */
-static s32 D_800C30C4[3] UNUSED = {0};
-/* Read by no routine */
-static s8 D_800C30D0 UNUSED = 0;
+static s32 f_UnusedWordsAfterDebugCup[3] UNUSED = {0};
+static s8 f_UnusedByteBeforeGroundWaves UNUSED = 0;
 s8 g_ShowsGroundWaves = FALSE;
 f32 g_GroundFarthestDepth = 0.0f;
 f32 g_GroundNearDepthEighth = 0.0f;
@@ -158,8 +158,8 @@ f32 g_GroundNearDepthEighth = 0.0f;
  * GAME_FLAG_CYCLE_CLIP_RATIO */
 static s32 f_GroundClipRatio = 1;
 /* Read by no routine; holds each of 0 to 24 once */
-static u8 D_800C30E0[25] UNUSED = {0, 5, 7, 10, 20, 1, 12, 13, 14, 21, 2, 15, 8,
-    16, 22, 3, 17, 18, 19, 23, 4, 6, 9, 11, 24};
+static u8 f_UnusedShuffledIndices[25] UNUSED = {0, 5, 7, 10, 20, 1, 12, 13, 14,
+    21, 2, 15, 8, 16, 22, 3, 17, 18, 19, 23, 4, 6, 9, 11, 24};
 static s32 f_GroundTimingRow = 0;
 
 static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
@@ -189,7 +189,7 @@ void ResetShotSetup(void) {
   g_HasPressedShotButton = FALSE;
   g_AltHeading = 0;
   g_ShotFlags = 0;
-  D_800C3088 = 0;
+  f_UnusedClearedPlayWord = 0;
   g_LetterboxState = LETTERBOX_STATE_NONE;
   g_ImpactPointState = IMPACT_POINT_OFF;
   g_FreeLookHeading = 0;
