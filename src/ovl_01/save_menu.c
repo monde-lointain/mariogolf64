@@ -93,7 +93,7 @@ enum {
 /* An empty saved game's mode */
 #define NO_SAVE_MENU_MODE -1
 
-extern const char D_80231A3C_ovl_01[];
+extern const char f_SaveMenuNameFormat[];
 
 void ResetSavedGameControllers(void);
 
@@ -130,7 +130,8 @@ typedef struct {
 /* The furthest a course's list of characters scrolls */
 #define RING_SHOT_LAST_FIRST_CHARACTER 14
 
-/* What D_80230B40 holds for a player with no controller, or for the computer */
+/* What f_SavedPlayerControllers holds for a player with no controller, or for
+ * the computer */
 #define NO_CONTROLLER -1
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
@@ -153,14 +154,15 @@ void DrawRingShotRowIcon(
 /* The Ring Shot records' blinking arrows' frame and its time shown */
 static s32 f_RingShotArrowFrame = 0;
 static s32 f_RingShotArrowTimer = 0;
-static s32 D_80230A98_ovl_01 = 0;
+/* Cleared with the Ring Shot arrows' frame, and read by no routine */
+static s32 f_UnusedRingShotArrowWord = 0;
 /* Read by no routine */
-static s32 D_80230A9C_ovl_01 UNUSED = 0;
+static s32 f_UnusedWordAfterArrowTimer UNUSED = 0;
 /* The order that the Ring Shot records list the characters in */
 static u8 f_RingShotCharacterOrder[SAVE_UNK1344_ENTRY_COUNT] = {
     0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
-/* Read by no routine */
-static s32 D_80230AB4_ovl_01[11] UNUSED = {0x000000FF, 0x00FF00FF, 0x000000FF,
+/* Read by no routine; words holding 0xFF, 0xFF00FF, 0xFF0000 or 0 */
+static s32 f_UnusedColorWords[11] UNUSED = {0x000000FF, 0x00FF00FF, 0x000000FF,
     0x00FF00FF, 0x00000000, 0x000000FF, 0x000000FF, 0x000000FF, 0x00000000,
     0x00FF00FF, 0x00FF0000};
 /* The angle, in radians, of the sine waves that tint the chosen replay */
@@ -173,7 +175,7 @@ static s16
         {78, 120, 162, 0, 0, 0, 204}, {60, 102, 144, 186, 0, 0, 226},
         {42, 84, 126, 168, 210, 0, 252}, {22, 60, 102, 144, 186, 228, 268}};
 /* Read by no routine */
-static s32 D_80230B38_ovl_01[2] UNUSED = {0, 0};
+static s32 f_UnusedWordsAfterIconPositions[2] UNUSED = {0, 0};
 /* The controller each of the chosen saved game's players takes */
 static s16 f_SavedPlayerControllers[MAX_PLAYER_COUNT] = {
     NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER, NO_CONTROLLER};
@@ -206,7 +208,7 @@ static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     MODE_ICON_RING_SHOT, MODE_ICON_TRAINING, MODE_ICON_SKINS_MATCH,
     MODE_ICON_UNK9, MODE_ICON_MINI_GOLF};
 /* Read by no routine */
-static s32 D_80230BDC_ovl_01[4] UNUSED = {0, 0, 0, 0};
+static s32 f_UnusedWordsAfterModeIcons[4] UNUSED = {0, 0, 0, 0};
 /* Read by no routine; the values of main_menu.c's f_MenuCharacterChoices */
 static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] UNUSED = {
     CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_MAPLE,
@@ -219,16 +221,17 @@ static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] UNUSED = {
 /* The angle, in radians, of the sine wave that bobs the saved games' boards */
 static f32 f_BoardBobPhase = 0.0f;
 /* Read by no routine; the values of f_ControllerIconPositions */
-static s32 D_80230C38_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] UNUSED = {
-    {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
-    {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
+static s32 f_UnusedSaveMenuIconPositions
+    [MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] UNUSED = {
+        {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
+        {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
+        {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
+        {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
 /* Read by no routine; the values of main_menu.c's f_UnusedModeIconValues */
-static s32 D_80230CB8_ovl_01[11] UNUSED = {
+static s32 f_UnusedSaveMenuModeIconValues[11] UNUSED = {
     110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 /* Read by no routine */
-static char D_80230CE4_ovl_01[] UNUSED = "Hole";
+static char f_UnusedHoleLabel[] UNUSED = "Hole";
 /* How far left of the label's place each mode icon's game mode label is drawn
  */
 static s32 f_GameModeLabelOffsets[MODE_ICON_COUNT] = {
@@ -236,7 +239,7 @@ static s32 f_GameModeLabelOffsets[MODE_ICON_COUNT] = {
 /* The saved games' golfers' turn, in degrees about X and Y */
 static f32 f_SavedGolferAngles[3] = {0.0f, 0.0f, 0.0f};
 /* Read by no routine */
-static s32 D_80230D24_ovl_01 UNUSED = 0;
+static s32 f_UnusedWordAfterSavedGolferAngles UNUSED = 0;
 /* Where DrawSavedGolfers stands each golfer, by the player count */
 static Vec3 f_SavedGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {{-84.0f, -43.0f, -1000.0f}, {64.0f, 0.0f, -1000.0f},
@@ -255,7 +258,7 @@ static s32 f_ControllerIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
 /* Read by no routine */
-static s32 D_80230E68_ovl_01[2] UNUSED = {0, 0};
+static s32 f_UnusedWordsAfterControllerIcons[2] UNUSED = {0, 0};
 
 static void* f_RingShotNamePlate;
 static void* f_RingShotRainbowBox;
@@ -266,7 +269,7 @@ static void** f_RingShotCourseIcons;
 static s16 f_RecordedReplaySlots[SAVE_MENU_SLOT_COUNT];
 
 /* Read by no routine */
-static u8 D_8023B690_ovl_01[0x3D0] UNUSED;
+static u8 f_UnusedBufferBeforeBoardCamera[0x3D0] UNUSED;
 
 /* The camera that DrawSavedGames views the boards with */
 static Mat4 f_BoardProjection;
@@ -285,13 +288,13 @@ static void* f_ControllerIcons;
 static void* f_PlayerLabels;
 
 /* Read by no routine */
-static u8 D_8023BD88_ovl_01[0x4] UNUSED;
+static u8 f_UnusedBytesAfterPlayerLabels[0x4] UNUSED;
 
 /* The chosen game's course image, shown from one while the other loads */
 static void* f_CourseImageBuffers[COURSE_IMAGE_BUFFER_COUNT];
 
 /* Read by no routine */
-static u8 D_8023BD94_ovl_01[0x4] UNUSED;
+static u8 f_UnusedBytesAfterCourseImages[0x4] UNUSED;
 
 /* Each saved game's numbered board */
 static void* f_GameBoards[SAVED_GAME_COUNT];
@@ -302,12 +305,13 @@ static s32 f_ChosenModeIconScale;
 static s32 f_ChosenModeIconHalfSize;
 
 /* Read by no routine; 2 objects, as one would be aligned past its start */
-static u8 D_8023BDB4_ovl_01[0x4] UNUSED;
-static u8 D_8023BDB8_ovl_01[0x88] UNUSED;
+static u8 f_UnusedBytesAfterModeIconSize[0x4] UNUSED;
+static u8 f_UnusedBufferAfterModeIconSize[0x88] UNUSED;
 
 /* Not static: the original left these to the linker's common block */
 u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
-u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][MENU_PALETTE_FILE_SIZE];
+/* The face palette of each Ring Shot record's replay character */
+u8 g_ReplayFacePalettes[SAVE_MENU_SLOT_COUNT][MENU_PALETTE_FILE_SIZE];
 
 void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
@@ -332,7 +336,7 @@ void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind) {
       ReadEncodedAsset(f_RingShotGreenArrows, &asset);
       f_RingShotArrowFrame = 0;
       f_RingShotArrowTimer = 0;
-      D_80230A98_ovl_01 = 0;
+      f_UnusedRingShotArrowWord = 0;
       break;
   }
 }
@@ -728,7 +732,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
         replayCharacter =
             save->ringShotRecords[f_RecordedReplaySlots[index]].characterIndex;
         DrawCharacterFace(&gfx, g_CharacterFaceImages[replayCharacter],
-            D_8023E3F0_ovl_01[index], RING_SHOT_REPLAY_FACE_X,
+            g_ReplayFacePalettes[index], RING_SHOT_REPLAY_FACE_X,
             RING_SHOT_REPLAY_FACE_Y + (index * RING_SHOT_SLOT_SPACING),
             replayCharacter, FACE_PLAIN);
         DrawCourseLabel(&gfx,
@@ -889,7 +893,7 @@ void LoadRingShotRecordFaces(void) {
     }
 
     OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
-    ReadAssetFile(D_8023E3F0_ovl_01[index], GetAssetFileSize(&file), &file);
+    ReadAssetFile(g_ReplayFacePalettes[index], GetAssetFileSize(&file), &file);
   }
 }
 
@@ -1723,7 +1727,8 @@ s32 ContinueSavedGame(void) {
     controller = f_SavedPlayerControllers[playerIndex];
     g_PlayerControllerIndices[playerIndex] = controller;
     g_Players[playerIndex].controllerIndex = controller;
-    sprintf(g_Players[playerIndex].name, D_80231A3C_ovl_01, savedPlayer->name);
+    sprintf(
+        g_Players[playerIndex].name, f_SaveMenuNameFormat, savedPlayer->name);
     character = (s8)savedPlayer->characterIndex;
     g_ChosenCharacters[playerIndex] = character;
     g_Players[playerIndex].characterIndex = character;
@@ -1739,7 +1744,7 @@ s32 ContinueSavedGame(void) {
   return 0;
 }
 
-const char D_80231A3C_ovl_01[] = "%s";
+const char f_SaveMenuNameFormat[] = "%s";
 
 /* The backdrop layers that DrawLargeBannerBackdropLayers draws behind the saved
  * games */
@@ -2123,8 +2128,8 @@ void DrawSavedGames(Gfx** displayListHead) {
             : COURSE_RECORD_LUIGIS_GARDEN;
       }
 
-      sprintf(
-          g_PrintBuffer, D_80231A3C_ovl_01, g_CourseRecords[courseIndex].name);
+      sprintf(g_PrintBuffer, f_SaveMenuNameFormat,
+          g_CourseRecords[courseIndex].name);
       DrawLargeText(
           &gfx, SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y, g_PrintBuffer);
     }
