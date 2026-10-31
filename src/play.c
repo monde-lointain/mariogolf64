@@ -534,7 +534,9 @@ void PlayContestMovies(void) {
 /*
  * Whether play can leave the hole: never while the contest movies play; in
  * Skins Match, Club Slots and the one-on-one matches, once the hole is decided
- * and every player is done or waiting; otherwise, once every player is done
+ * and every player is done or waiting; otherwise, once every player is done.
+ * Doesn't match: GCC computes the first mode's result with a set-on-equal,
+ * where the original branches to return 1 or 0.
  */
 #ifdef NON_MATCHING
 s32 IsHoleOver(void) {
@@ -546,36 +548,43 @@ s32 IsHoleOver(void) {
   }
 
   if (g_GameState.replayKind == REPLAY_KIND_NONE) {
-    if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
-        g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-      if (!GetGroupHoleResult(NULL)) {
-        return FALSE;
-      }
+    /* In its own block to match */
+    IN_OWN_BLOCK(
+        if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+            g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+          if (!GetGroupHoleResult(NULL)) {
+            return FALSE;
+          }
 
-      for (i = 0; i < g_GameState.playerCount; i++) {
-        if (g_Players[i].state != PLAYER_STATE_HOLE_DONE &&
-            g_Players[i].state != PLAYER_STATE_WAITING) {
-          break;
+          for (i = 0; i < g_GameState.playerCount; i++) {
+            if (g_Players[i].state != PLAYER_STATE_HOLE_DONE &&
+                g_Players[i].state != PLAYER_STATE_WAITING) {
+              break;
+            }
+          }
+
+          return i == g_GameState.playerCount;
         }
-      }
 
-      return i == g_GameState.playerCount;
-    }
+        if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
+          if (!GetMatchHoleResult(0, 1)) {
+            return FALSE;
+          }
 
-    if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
-      if (!GetMatchHoleResult(0, 1)) {
-        return FALSE;
-      }
+          for (i = 0; i < g_GameState.playerCount; i++) {
+            if (g_Players[i].state != PLAYER_STATE_HOLE_DONE &&
+                g_Players[i].state != PLAYER_STATE_WAITING) {
+              break;
+            }
+          }
 
-      for (i = 0; i < g_GameState.playerCount; i++) {
-        if (g_Players[i].state != PLAYER_STATE_HOLE_DONE &&
-            g_Players[i].state != PLAYER_STATE_WAITING) {
-          break;
-        }
-      }
+          /* Through isDone, unlike the return above, to match */
+          if (i == g_GameState.playerCount) {
+            isDone = TRUE;
+          }
 
-      return i == g_GameState.playerCount;
-    }
+          return isDone;
+        });
   }
 
   for (i = 0; i < g_GameState.playerCount; i++) {
