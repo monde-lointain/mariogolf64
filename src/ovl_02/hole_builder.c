@@ -3916,7 +3916,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ShadeGroundTiles);
 #endif
 
 /* Shades the ground tiles, then darkens them under the billboards' shadows */
-void ShadeGround(void) {
+void ShadeGround(s32 shadeVariant UNUSED) {
   ShadeGroundTiles();
   osSyncPrintf("TR");
   CastBillboardShadows();

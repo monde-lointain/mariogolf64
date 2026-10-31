@@ -29,9 +29,9 @@ void BuildHole(s32 course, s32 hole);
 void SaveHoleFiles(s32 course, s32 hole);
 void ToggleGroundTileBorders(void);
 /*
- * Takes no parameters, but is left unprototyped because PrepareHoleScene and
- * UpdateDebugScenes pass it a number, which is not used
+ * shadeVariant is 2 at a round's start, 0 at its end and 1 for the driving
+ * range, but the original ignores it
  */
-void ShadeGround();
+void ShadeGround(s32 shadeVariant);
 
 #endif

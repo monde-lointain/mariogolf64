@@ -726,26 +726,26 @@ void ShrinkMiniGolfHole(void) {
 }
 
 void PrepareHoleScene(void) {
-  s32 unk;
+  s32 shadeVariant;
 
   D_800BB0E8 = 1;
   switch (g_HoleSetup.conditions.sceneColorIndex) {
     case SCENE_COLOR_INDEX_ROUND_START:
-      unk = 2;
+      shadeVariant = 2;
       break;
     case SCENE_COLOR_INDEX_ROUND_END:
 #ifdef AVOID_UB
     default:
 #endif
-      unk = 0;
+      shadeVariant = 0;
       break;
     case SCENE_COLOR_INDEX_DRIVING_RANGE:
-      unk = 1;
+      shadeVariant = 1;
       break;
   }
 
   if (!IsGameFlagSet(GAME_FLAG_UNK11)) {
-    ShadeGround(unk);
+    ShadeGround(shadeVariant);
   }
 
   D_800BB0E8 = 0;

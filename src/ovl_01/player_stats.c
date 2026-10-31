@@ -1053,7 +1053,11 @@ void DrawBetIcon(
   *displayListHead = gfx;
 }
 
-NO_RESULT UpdateHandicaps(void) {
+/*
+ * Runs the handicap screen. UpdateMenus passes it the first player and the
+ * player count, as it does UpdateCharacterSelect, but it ignores them.
+ */
+NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
   MenuMemory* memory = GetMenuMemory();
 
   if (g_BetPagesPhase == MENU_PHASE_START) {

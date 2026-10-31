@@ -134,9 +134,8 @@ void DrawMenuBanner(Gfx** displayListHead);
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer);
 void DrawCharacterBoard(Gfx** displayListHead);
 void DrawPlayerTags(Gfx** displayListHead, u8 tagMode);
-/* The original passes these a second argument that they ignore */
-void DrawComIcon();
-void DrawLeftyIcon();
+void DrawComIcon(Gfx** displayListHead, s32 unused);
+void DrawLeftyIcon(Gfx** displayListHead, s32 unused);
 void DrawCurveMeter(Gfx** displayListHead, s32 clubSet);
 
 /* Whether DrawCharacterSelect has set the choosing player's prompt */
@@ -1854,8 +1853,9 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y) {
   *displayListHead = gfx;
 }
 
-/* Draws the "R: COM" icon, shown while R is held outside single player */
-void DrawComIcon(Gfx** displayListHead) {
+/* Draws the "R: COM" icon, shown while R is held outside single player. Its
+ * caller passes a second argument that it ignores. */
+void DrawComIcon(Gfx** displayListHead, s32 unused UNUSED) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
@@ -1888,8 +1888,9 @@ void DrawComIcon(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Draws the "L: LEFTY" icon, shown while Z or L is held */
-void DrawLeftyIcon(Gfx** displayListHead) {
+/* Draws the "L: LEFTY" icon, shown while Z or L is held. Its caller passes a
+ * second argument that it ignores. */
+void DrawLeftyIcon(Gfx** displayListHead, s32 unused UNUSED) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
