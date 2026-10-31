@@ -128,6 +128,20 @@ typedef f32 Mat4[4][4];
 #endif
 
 /*
+ * The length to declare a struct's last array with when it runs on past the
+ * struct. The original declares one element and reads past it, which is
+ * undefined; with AVOID_UB it is a flexible array, which KMC GCC writes as a
+ * zero-length array.
+ */
+#ifndef AVOID_UB
+#define TRAILING_ARRAY_LENGTH 1
+#elif defined(__IS_KMC__)
+#define TRAILING_ARRAY_LENGTH 0
+#else
+#define TRAILING_ARRAY_LENGTH
+#endif
+
+/*
  * Marks a function definition that nothing calls. KMC GCC takes no attribute
  * in front of a definition.
  */

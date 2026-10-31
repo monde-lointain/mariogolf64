@@ -298,7 +298,7 @@ typedef struct StaffLine {
 typedef struct StaffText {
   /* 0x0 */ u16 size;
   /* 0x2 */ u16 lineCount;
-  /* 0x4 */ StaffLine lines[1];
+  /* 0x4 */ StaffLine lines[TRAILING_ARRAY_LENGTH];
 } StaffText;
 
 /*

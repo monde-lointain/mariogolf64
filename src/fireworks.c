@@ -36,7 +36,7 @@ struct FireworkShape {
   /* 0x4 */ u8 unk4;
   /* 0x5 */ u8 height;
   /* 0x6 */ u8 unk6[2];
-  /* 0x8 */ u8 cells[1]; /* width * height, by rows */
+  /* 0x8 */ u8 cells[TRAILING_ARRAY_LENGTH]; /* width * height, by rows */
 };
 
 struct FireworkParticle {
