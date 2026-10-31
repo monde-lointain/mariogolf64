@@ -1470,7 +1470,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
 
   for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
     for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
-      slot = g_CharacterGrid[row][column];
+      IN_OWN_BLOCK(slot = g_CharacterGrid[row][column]);
       if (g_MenuScreen == MENU_SCREEN_OPPONENT_SELECT &&
           row == memory->characterRows[0] &&
           column == memory->characterColumns[0] &&
