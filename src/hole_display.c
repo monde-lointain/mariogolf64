@@ -2701,14 +2701,14 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
 
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
       height = StripHeight(strip);
-      gDPLoadTextureTile(gfx++,
+      IN_OWN_BLOCK(gDPLoadTextureTile(gfx++,
           (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP *
               FRAME_WORDS_PER_ROW] &
               ~7,
           G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER,
           BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD));
       gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
           QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
           QuarterPixels(BACKDROP_RIGHT + 1),
