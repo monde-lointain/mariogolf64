@@ -4254,11 +4254,7 @@ void FreeHoleIntroImages(void) {
 /*
  * Draws the images that LoadHoleIntroImages loaded, a strip at a time, while
  * the hole's intro text is shown. Ring shot draws its own intro instead.
- *
- * Doesn't match: the match standing image's loop keeps different constants
- * in registers.
  */
-#ifdef NON_MATCHING
 void DrawHoleIntroImages(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 strip;
@@ -4295,8 +4291,8 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
               QuarterPixels(
                   CONTEST_IMAGE_Y + strip * CONTEST_IMAGE_STRIP_HEIGHT),
               QuarterPixels(CONTEST_IMAGE_X + CONTEST_IMAGE_WIDTH),
-              QuarterPixels(
-                  CONTEST_IMAGE_Y + (strip + 1) * CONTEST_IMAGE_STRIP_HEIGHT),
+              QuarterPixels(CONTEST_IMAGE_Y + CONTEST_IMAGE_STRIP_HEIGHT +
+                  strip * CONTEST_IMAGE_STRIP_HEIGHT),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }
@@ -4318,8 +4314,8 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
           gSPScisTextureRectangle(gfx++, QuarterPixels(MATCH_IMAGE_X),
               QuarterPixels(MATCH_IMAGE_Y + strip * MATCH_IMAGE_STRIP_HEIGHT),
               QuarterPixels(MATCH_IMAGE_X + MATCH_IMAGE_WIDTH),
-              QuarterPixels(
-                  MATCH_IMAGE_Y + (strip + 1) * MATCH_IMAGE_STRIP_HEIGHT),
+              QuarterPixels(MATCH_IMAGE_Y + MATCH_IMAGE_STRIP_HEIGHT +
+                  strip * MATCH_IMAGE_STRIP_HEIGHT),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
         }
@@ -4329,9 +4325,6 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleIntroImages);
-#endif
 
 /*
  * Draws the course's name and the hole's number, or in the timed modes a
