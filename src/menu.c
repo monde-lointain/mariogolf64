@@ -1645,7 +1645,11 @@ void InvalidateBrokenSavedGames(void) {
 
 /*
  * Takes the recorded mark off Ring Shot records whose score, character,
- * palette, course or hole is out of range
+ * palette, course or hole is out of range.
+ *
+ * Doesn't match: 17 words differ. The original copies the score kind into a
+ * second register before testing its recorded bit, and the last loop's two
+ * pointers take each other's registers.
  */
 #ifdef NON_MATCHING
 void InvalidateBrokenRingShotRecords(void) {
@@ -1665,8 +1669,11 @@ void InvalidateBrokenRingShotRecords(void) {
     record = &save->ringShotRecords[recordIndex];
     kind = record->scoreKind;
     if (record->scoreKind & SCORE_KIND_RECORDED) {
-      kind &= SCORE_KIND_MASK;
-      if (kind >= SCORE_KIND_COUNT || kind < 0) {
+      /*
+       * Masking within the test keeps GCC from merging the two bounds into
+       * one unsigned test, to match
+       */
+      if ((kind &= SCORE_KIND_MASK) >= SCORE_KIND_COUNT || kind < 0) {
         isInvalid[recordIndex] = TRUE;
       }
     }
