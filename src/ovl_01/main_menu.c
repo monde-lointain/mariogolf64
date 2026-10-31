@@ -63,8 +63,8 @@
 #define MAIN_CHOICE_COUNT 4
 
 /*
- * The clubhouse's rows, and the rooms that D_8022BF1C gives each of them. The
- * rooms index ASSET_CLUBHOUSE_LABELS, whose labels read Tournament, Best
+ * The clubhouse's rows, and the rooms that f_ClubhouseRooms gives each of them.
+ * The rooms index ASSET_CLUBHOUSE_LABELS, whose labels read Tournament, Best
  * Shots, Ring Shot, a blank for the birdie badges, VS. Records and Speed Golf.
  */
 #define CLUBHOUSE_CHOICE_COUNT 5
@@ -477,11 +477,12 @@ static u8 f_ModeChoiceIcons[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT] = {
 /* Read by no routine; modes like D_8022BEBC's, as many as D_8022BE40 counts */
 static u8 D_8022BEEC_ovl_01[4][12] UNUSED = {
     {2, 8, 3}, {2, 6, 7, 10, 5}, {2, 7, 10, 5}, {2, 7, 10, 5}};
-static s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT] = {
+/* The room that each clubhouse row opens */
+static s16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_COURSE_STATS, CLUBHOUSE_ROOM_CHARACTER_TABLE,
     CLUBHOUSE_ROOM_BEST_TIMES, CLUBHOUSE_ROOM_RING_SHOT,
     CLUBHOUSE_ROOM_BEST_SHOTS};
-/* Read by no routine; the one room that D_8022BF1C leaves out */
+/* Read by no routine; the one room that f_ClubhouseRooms leaves out */
 static s16 D_8022BF26_ovl_01 UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
 /* The plain-text menu's names; DrawMenuTitleScreen prints the first three */
 static const char* D_8022BF28_ovl_01[] = {
@@ -650,7 +651,8 @@ static s32 f_SpinningStarFrameIndex = 0;
 /* Which of g_MenuArrowSizedImages's buffers holds the star frame shown */
 static u8 f_SpinningStarBufferIndex = 0;
 static s8 f_SpinningStarFrameTime = 0;
-static u8 D_8022F8CE_ovl_01 = 0;
+/* Which of g_MenuSpareImages the waving Toad shows; only ever 0 */
+static u8 f_WavingToadImageIndex = 0;
 /* Read by no routine */
 static s32 D_8022F8D0_ovl_01 UNUSED = 0;
 /* The mini-golf disc's frame */
@@ -662,7 +664,7 @@ static u8 f_MiniGolfDiscTurn = MINI_GOLF_TURN_NONE;
 /* Which of g_MenuIconImages' buffer pairs the mini-golf disc shows */
 static u8 f_MiniGolfDiscBufferIndex = 0;
 /* The menus' camera orbit's updates */
-static s32 D_8022F8E0_ovl_01 = 0;
+static s32 f_CameraOrbitUpdateCount = 0;
 /* Each player's sound pan, by the player count */
 static u8 f_PlayerSoundPans[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {127, 0, 0, 0}, {15, 240, 0, 0}, {15, 127, 240, 0}, {15, 85, 170, 240}};
@@ -680,13 +682,16 @@ static s32 D_8022F93C_ovl_01 UNUSED = 0;
 /* The top-left corner of each of the title screen's labels */
 static LabelCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] = {{110, 86},
     {40, 114}, {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
-static f32 D_8022F978_ovl_01 = 0.0f;
-/* Where each player's controller icon and label go, by the player count */
-static s32 D_8022F97C_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
-    {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
-    {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
+/* The mode board's bob phase */
+static f32 f_ModeBoardBobPhase = 0.0f;
+/* Where the mode select puts each player's controller icon and label, by the
+ * player count. save_menu.c has a copy, f_ControllerIconPositions. */
+static s32
+    f_ModeSelectControllerIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] =
+        {{{42, 140}, {76, 120}, {206, 120}, {248, 140}},
+            {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
+            {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
+            {{42, 140}, {76, 120}, {211, 120}, {248, 140}}};
 /* Read by no routine */
 static s32 D_8022F9FC_ovl_01[11] UNUSED = {
     110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
@@ -694,9 +699,12 @@ static s32 D_8022F9FC_ovl_01[11] UNUSED = {
  * drawn */
 static s32 D_8022FA28_ovl_01[MODE_ICON_COUNT] = {
     85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
-static f32 D_8022FA54_ovl_01 = 0.0f;
-static f32 D_8022FA58_ovl_01 = 0.0f;
-static f32 D_8022FA5C_ovl_01 = 0.0f;
+/* The menu characters' angles, in degrees. The pitch is never changed; the
+ * yaw is the rival's spin for the rival and 0 for the others. */
+static f32 f_CharacterPitch = 0.0f;
+static f32 f_CharacterYaw = 0.0f;
+/* The rival's angle, which turns while two characters show */
+static f32 f_RivalSpinYaw = 0.0f;
 /* Read by no routine */
 static s32 D_8022FA60_ovl_01[2] UNUSED = {0, 0};
 static f32 f_MenuCharacterPositions
@@ -731,7 +739,7 @@ static u32 f_ViewerCharacterSlot = 0;
 static f32 f_ViewerOffsetX = 0.0f;
 static f32 f_ViewerOffsetY = 0.0f;
 /* The front course's bob phase */
-static f32 D_8022FBC0_ovl_01 = 0.0f;
+static f32 f_FrontCourseBobPhase = 0.0f;
 /* Read by no routine */
 static s16 D_8022FBC4_ovl_01[6] UNUSED = {0, 3, 4, 1, 5, 2};
 /* Read by no routine; katakana for "Bet", "Out: holes 1-9", "In: holes 10-18"
@@ -745,7 +753,7 @@ static ImageCorner f_HolesBadgeCorners[HOLES_BADGE_COUNT] = {
 static ImageCorner D_8022FC30_ovl_01[6] UNUSED = {
     {24, 173}, {23, 173}, {23, 173}, {29, 161}, {19, 181}, {29, 171}};
 /* Each course's trophies' corners, by the number of trophies */
-static ImageCorner D_8022FC48_ovl_01
+static ImageCorner f_TrophyCorners
     [COURSE_COUNT][TOURNAMENT_PLACE_COUNT][TOURNAMENT_PLACE_COUNT] = {
         {{{24, 169}, {24, 173}, {24, 173}}, {{16, 169}, {32, 169}, {24, 173}},
             {{16, 169}, {32, 169}, {24, 173}}},
@@ -765,9 +773,9 @@ static char D_8022FD20_ovl_01[16] UNUSED = "ｺｰｽｹﾞｯﾄ純ﾞ";
 static u8 D_8022FD30_ovl_01[16] UNUSED = {0x71, 0x84, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 /* The Bet badge's color phase */
-static f32 D_8022FD40_ovl_01 = 0.0f;
+static f32 f_BetBadgeColorPhase = 0.0f;
 /* The chosen mini-golf image's center Y */
-static f32 D_8022FD44_ovl_01 = 0.0f;
+static f32 f_MiniGolfChoiceCenterY = 0.0f;
 static Vtx D_8022FD48_ovl_01[WATER_VERTEX_COUNT] = {
     {{{-800, 64, -1024}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-800, -128, 0}, 0, {0, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
@@ -808,7 +816,8 @@ static u8 D_8022FEBC_ovl_01[3][20] UNUSED = {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
 /* Read by no routine */
 static s32 D_8022FEF8_ovl_01 UNUSED = 0;
-static s32 D_8022FEFC_ovl_01 = 0;
+/* Steps the options' arrows' animation */
+static s32 f_OptionsArrowTimer = 0;
 
 /* Read by no routine */
 static u8 D_80231AD0_ovl_01[0x1D0] UNUSED;
@@ -972,7 +981,7 @@ void UpdateMenus(void) {
     }
   }
 
-  D_8022F8E0_ovl_01++;
+  f_CameraOrbitUpdateCount++;
   center[AXIS_X] =
       (g_HoleSetup.cupPosition[AXIS_X] + g_HoleSetup.teePosition[AXIS_X]) *
       MIDPOINT_TO_WORLD_SCALE;
@@ -982,16 +991,16 @@ void UpdateMenus(void) {
   center[AXIS_Z] =
       (g_HoleSetup.cupPosition[AXIS_Z] + g_HoleSetup.teePosition[AXIS_Z]) *
       MIDPOINT_TO_WORLD_SCALE;
-  eye[AXIS_X] =
-      (cosf(((D_8022F8E0_ovl_01 * ORBIT_ANGLE_PER_UPDATE) & BINARY_ANGLE_MASK) *
-           BINARY_ANGLE_TO_RADIANS) *
-          ORBIT_RADIUS) +
+  eye[AXIS_X] = (cosf(((f_CameraOrbitUpdateCount * ORBIT_ANGLE_PER_UPDATE) &
+                          BINARY_ANGLE_MASK) *
+                     BINARY_ANGLE_TO_RADIANS) *
+                    ORBIT_RADIUS) +
       center[AXIS_X];
   eye[AXIS_Y] = center[AXIS_Y] + ORBIT_EYE_OFFSET_Y;
-  eye[AXIS_Z] =
-      (sinf(((D_8022F8E0_ovl_01 * ORBIT_ANGLE_PER_UPDATE) & BINARY_ANGLE_MASK) *
-           BINARY_ANGLE_TO_RADIANS) *
-          ORBIT_RADIUS) +
+  eye[AXIS_Z] = (sinf(((f_CameraOrbitUpdateCount * ORBIT_ANGLE_PER_UPDATE) &
+                          BINARY_ANGLE_MASK) *
+                     BINARY_ANGLE_TO_RADIANS) *
+                    ORBIT_RADIUS) +
       center[AXIS_Z];
   g_Cameras[INSET_CAMERA].view.eye[AXIS_X] = eye[AXIS_X];
   g_Cameras[INSET_CAMERA].view.eye[AXIS_Y] = eye[AXIS_Y];
@@ -1410,7 +1419,7 @@ void UpdateMenus(void) {
           f_MenuBoardImageIndex ^= 1;
           LoadHelpBoardImage(g_MenuBoardImages[f_MenuBoardImageIndex],
               HELP_BOARD_IMAGE_CHALKBOARD);
-          D_8022F8CE_ovl_01 = 0;
+          f_WavingToadImageIndex = 0;
         }
 
         break;
@@ -3157,7 +3166,7 @@ void UpdateClubhouse(void) {
 
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & A_BUTTON) {
-      switch (D_8022BF1C_ovl_01[g_MenuMemory.clubhouseChoice]) {
+      switch (f_ClubhouseRooms[g_MenuMemory.clubhouseChoice]) {
         case CLUBHOUSE_ROOM_COURSE_STATS:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_COURSE_STATS;
@@ -4832,14 +4841,14 @@ void DrawModeSelect(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
   areCharactersDrawn = FALSE;
-  D_8022F978_ovl_01 += MODE_BOARD_BOB_PHASE_STEP;
+  f_ModeBoardBobPhase += MODE_BOARD_BOB_PHASE_STEP;
   for (index = 0; index != modeCount; index++) {
     slot = drawOrder[index];
     halfSize = boardScale[slot] * MODE_BOARD_HALF_SIZE;
     step = (f32)(MODE_ICON_STRIP_HEIGHT << 10) / halfSize;
     /* The loop stops before modeCount, so no board bobs */
     if (index == modeCount) {
-      bob = sinf(D_8022F978_ovl_01) * MODE_BOARD_BOB_HEIGHT;
+      bob = sinf(f_ModeBoardBobPhase) * MODE_BOARD_BOB_HEIGHT;
     } else {
       bob = 0.0f;
     }
@@ -5010,8 +5019,12 @@ void DrawModeSelect(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
   for (index = 0; index != g_ChosenPlayerCount; index++) {
     if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
-      position[AXIS_X] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
-      position[AXIS_Y] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
+      position[AXIS_X] =
+          f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][index]
+                                             [0];
+      position[AXIS_Y] =
+          f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][index]
+                                             [1];
       gDPLoadTextureBlock(gfx++,
           TextureAddress(LargeImageTexels(image) +
               (g_ChoosingControllerIndices[index] *
@@ -5032,8 +5045,10 @@ void DrawModeSelect(Gfx** displayListHead) {
   image = g_SecondAnimatedIconImages[1];
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   for (index = 0; index != g_ChosenPlayerCount; index++) {
-    position[AXIS_X] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][0];
-    position[AXIS_Y] = D_8022F97C_ovl_01[g_ChosenPlayerCount - 1][index][1];
+    position[AXIS_X] =
+        f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][index][0];
+    position[AXIS_Y] =
+        f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][index][1];
     if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(ImageTexels(image) +
@@ -5379,14 +5394,14 @@ void DrawMenuCharacters(Gfx** displayListHead) {
     }
 
     if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
-      D_8022FA5C_ovl_01 -= RIVAL_SPIN_STEP;
-      D_8022FA58_ovl_01 = D_8022FA5C_ovl_01;
+      f_RivalSpinYaw -= RIVAL_SPIN_STEP;
+      f_CharacterYaw = f_RivalSpinYaw;
     } else {
-      D_8022FA58_ovl_01 = 0.0f;
+      f_CharacterYaw = 0.0f;
     }
 
-    rotation[AXIS_X] = DegreesToRadians(D_8022FA54_ovl_01);
-    rotation[AXIS_Y] = DegreesToRadians(D_8022FA58_ovl_01);
+    rotation[AXIS_X] = DegreesToRadians(f_CharacterPitch);
+    rotation[AXIS_Y] = DegreesToRadians(f_CharacterYaw);
     rotation[AXIS_Z] = 0.0f;
     translation[AXIS_X] = f_MenuCharacterPositions[column][slot][0];
     raise = (character == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
@@ -5886,13 +5901,13 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    D_8022FBC0_ovl_01 += FRONT_COURSE_BOB_PHASE_STEP;
+    f_FrontCourseBobPhase += FRONT_COURSE_BOB_PHASE_STEP;
     for (index = 0; index != courseCount; index++) {
       IN_OWN_BLOCK(slot = drawOrder[index]);
       halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
       step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
       if (index == (courseCount - 1)) {
-        bob = sinf(D_8022FBC0_ovl_01) * FRONT_COURSE_BOB_HEIGHT;
+        bob = sinf(f_FrontCourseBobPhase) * FRONT_COURSE_BOB_HEIGHT;
       } else {
         bob = 0.0f;
       }
@@ -5951,11 +5966,11 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
       if ((g_GameState.isMiniGolf == TRUE) &&
           (g_MenuMemory.miniGolfRecordChoice == slot)) {
-        if ((spin == 0) || (D_8022FD44_ovl_01 == 0.0f)) {
-          D_8022FD44_ovl_01 = iconY[slot];
+        if ((spin == 0) || (f_MiniGolfChoiceCenterY == 0.0f)) {
+          f_MiniGolfChoiceCenterY = iconY[slot];
         }
 
-        DrawUpDownArrows(&gfx, D_8022FD44_ovl_01 + bob);
+        DrawUpDownArrows(&gfx, f_MiniGolfChoiceCenterY + bob);
       }
     }
 
@@ -6019,14 +6034,14 @@ void DrawCourseSelect(Gfx** displayListHead) {
                   f_HolesBadgeCorners[otherIndex].y + HOLES_BADGE_SIZE),
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           gDPPipeSync(gfx++);
-          D_8022FD40_ovl_01 += BET_BADGE_COLOR_STEP;
-          red = (s32)(sinf(D_8022FD40_ovl_01) * BET_BADGE_COLOR_SWING) +
+          f_BetBadgeColorPhase += BET_BADGE_COLOR_STEP;
+          red = (s32)(sinf(f_BetBadgeColorPhase) * BET_BADGE_COLOR_SWING) +
               BET_BADGE_COLOR_MIDPOINT;
-          blue = (s32)(sinf(D_8022FD40_ovl_01 + (M_PI / 2)) *
+          blue = (s32)(sinf(f_BetBadgeColorPhase + (M_PI / 2)) *
                      BET_BADGE_COLOR_SWING) +
               BET_BADGE_COLOR_MIDPOINT;
           green =
-              (s32)(sinf(D_8022FD40_ovl_01 + M_PI) * BET_BADGE_COLOR_SWING) +
+              (s32)(sinf(f_BetBadgeColorPhase + M_PI) * BET_BADGE_COLOR_SWING) +
               BET_BADGE_COLOR_MIDPOINT;
           gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 128);
           gDPSetEnvColor(gfx++, red / BET_BADGE_ENV_DIVISOR,
@@ -6096,12 +6111,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
-          left = D_8022FC48_ovl_01[g_MenuMemory.courseChoice][placeCount - 1]
-                                  [otherIndex]
-                                      .x;
-          top = D_8022FC48_ovl_01[g_MenuMemory.courseChoice][placeCount - 1]
-                                 [otherIndex]
-                                     .y;
+          left = f_TrophyCorners[g_MenuMemory.courseChoice][placeCount - 1]
+                                [otherIndex]
+                                    .x;
+          top = f_TrophyCorners[g_MenuMemory.courseChoice][placeCount - 1]
+                               [otherIndex]
+                                   .y;
           gSPScisTextureRectangle(gfx++, QuarterPixels(left),
               QuarterPixels(top),
               QuarterPixels(
@@ -6643,7 +6658,7 @@ void DrawClubhouse(Gfx** displayListHead) {
       gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
   for (choiceIndex = 0; choiceIndex != CLUBHOUSE_CHOICE_COUNT; choiceIndex++) {
     if (choiceIndex != g_MenuMemory.clubhouseChoice) {
-      labelOffset = D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE;
+      labelOffset = f_ClubhouseRooms[choiceIndex] * ROOM_LABEL_IMAGE_SIZE;
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(
               ImageTexels(g_ImageSlots[f_ImageSlotIndex]) + labelOffset),
@@ -6668,7 +6683,7 @@ void DrawClubhouse(Gfx** displayListHead) {
   choiceIndex = g_MenuMemory.clubhouseChoice;
   gDPLoadTextureBlock_4b(gfx++,
       TextureAddress(ImageTexels(g_MenuLabelImages[f_MenuLabelImageIndex]) +
-          (D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE)),
+          (f_ClubhouseRooms[choiceIndex] * ROOM_LABEL_IMAGE_SIZE)),
       G_IM_FMT_CI, ROOM_LABEL_WIDTH, ROOM_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -7026,8 +7041,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(arrows)));
   if (g_MenuMemory.optionsChoice != OPTIONS_CHOICE_ERASE_SAVE_DATA) {
-    D_8022FEFC_ovl_01 = (D_8022FEFC_ovl_01 + 1) % ARROW_TIMER_PERIOD;
-    frameIndex = D_8022FEFC_ovl_01 < ARROW_FRAME_DURATION;
+    f_OptionsArrowTimer = (f_OptionsArrowTimer + 1) % ARROW_TIMER_PERIOD;
+    frameIndex = f_OptionsArrowTimer < ARROW_FRAME_DURATION;
     LoadNibbleTextureBlock(&gfx,
         ImageTexels(arrows) + (frameIndex * GREEN_ARROW_FRAME_SIZE),
         G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0,
@@ -7428,8 +7443,8 @@ void DrawWavingToad(Gfx** displayListHead, s32 left, s32 top) {
   gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(ImageBody(g_MenuSpareImages[D_8022F8CE_ovl_01])));
+  gDPLoadTLUT_pal256(gfx++,
+      TextureAddress(ImageBody(g_MenuSpareImages[f_WavingToadImageIndex])));
   for (stripIndex = 0; stripIndex != TOAD_STRIP_COUNT; stripIndex++) {
     rowCount = TOAD_LAST_STRIP_HEIGHT;
     if (stripIndex == 0) {
@@ -7437,7 +7452,8 @@ void DrawWavingToad(Gfx** displayListHead, s32 left, s32 top) {
     }
 
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(g_MenuSpareImages[D_8022F8CE_ovl_01]) +
+        TextureAddress(
+            LargeImageTexels(g_MenuSpareImages[f_WavingToadImageIndex]) +
             (stripIndex * TOAD_WIDTH * TOAD_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, rowCount, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
