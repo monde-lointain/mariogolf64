@@ -244,8 +244,8 @@ s32 UpdateCoursePointsResults(ControllerState* controller);
 s32 UpdateMatchResults(ControllerState* controller);
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin);
 
-/* The score password shows as two lines of ten symbols */
-#define SCORE_PASSWORD_LINE_LENGTH 10
+/* The score password shows as two lines of equal length */
+#define SCORE_PASSWORD_LINE_LENGTH (SCORE_PASSWORD_LENGTH / 2)
 
 /* The images of the trophy a course's tournament gives its top three */
 typedef struct TrophyAssets {
@@ -353,7 +353,7 @@ static s32 f_NoticeFaceIndex;
 static s32 f_NoticeLift;
 static s32 f_NoticeUnk6C;
 /* The score password of a round of a tournament entered by password */
-static char f_ScorePassword[2 * SCORE_PASSWORD_LINE_LENGTH];
+static char f_ScorePassword[SCORE_PASSWORD_LENGTH];
 static s32 f_PlayerResults[MAX_PLAYER_COUNT];
 static s32 f_PlayerPoints[MAX_PLAYER_COUNT];
 static s32 f_PlayerBetTotals[MAX_PLAYER_COUNT];

@@ -6,6 +6,14 @@
 /* The bytes a tournament password decodes to */
 #define TOURNAMENT_CODE_SIZE 3
 
+/*
+ * The characters in each password, which has no terminating null. A score
+ * password holds three numbers of five symbols, and five symbols of their
+ * checksums.
+ */
+#define TOURNAMENT_PASSWORD_LENGTH 8
+#define SCORE_PASSWORD_LENGTH 20
+
 /* What a tournament password's rules index picks */
 typedef struct TournamentRules {
   /* 0x0 */ s8 characterIndex; /* -1 for none; it picks a portrait */

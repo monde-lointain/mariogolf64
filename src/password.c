@@ -16,12 +16,7 @@
 /* Symbols that hold a number of up to three bytes, in base 28 */
 #define NUMBER_SYMBOL_COUNT 5
 
-#define TOURNAMENT_PASSWORD_LENGTH 8
 #define TOURNAMENT_RULES_COUNT 192
-
-/* The score password's three numbers and their checksums */
-#define SCORE_NUMBER_COUNT 4
-#define SCORE_PASSWORD_LENGTH (SCORE_NUMBER_COUNT * NUMBER_SYMBOL_COUNT)
 
 /* Scores are stored with this added, so that they fit in SCORE_RANGE */
 #define SCORE_PASSWORD_BIAS 56
