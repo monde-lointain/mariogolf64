@@ -3115,13 +3115,14 @@ void DrawBetTallies(Gfx** displayListHead) {
   s32 total;
   s32 column;
   s32 left;
-  s32 x;
   char* text;
+  s32 rowOffset;
 
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.digitsImage),
       G_IM_FMT_CI, DIGIT_GLYPH_SIZE, DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+    rowOffset = playerIndex * BET_TALLY_ROW_SPACING;
     total = 0;
     column = BET_TALLY_LEFT;
     for (betIndex = 0; betIndex != BET_COUNT; betIndex++) {
@@ -3130,13 +3131,10 @@ void DrawBetTallies(Gfx** displayListHead) {
         if (g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {
           for (text = g_PrintBuffer, left = column; *text != '\0';
               left += DIGIT_GLYPH_SIZE) {
-            x = left + g_Scorecard.x;
-            DrawTextureRect(&gfx, QuarterPixels(x),
-                QuarterPixels(
-                    BET_TALLY_TOP + (playerIndex * BET_TALLY_ROW_SPACING)),
-                QuarterPixels(x + DIGIT_GLYPH_SIZE),
-                QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE +
-                    (playerIndex * BET_TALLY_ROW_SPACING)),
+            DrawTextureRect(&gfx, QuarterPixels(left + g_Scorecard.x),
+                QuarterPixels(BET_TALLY_TOP + rowOffset),
+                QuarterPixels(left + g_Scorecard.x + DIGIT_GLYPH_SIZE),
+                QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE + rowOffset),
                 G_TX_RENDERTILE, 0, TexelCoordinate(GetDigitGlyphTop(*text++)),
                 TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           }
@@ -3149,12 +3147,10 @@ void DrawBetTallies(Gfx** displayListHead) {
     sprintf(g_PrintBuffer, f_DecimalFormat, total);
     for (text = g_PrintBuffer, left = BET_TOTAL_LEFT; *text != '\0';
         left += DIGIT_GLYPH_SIZE) {
-      x = left + g_Scorecard.x;
-      DrawTextureRect(&gfx, QuarterPixels(x),
-          QuarterPixels(BET_TALLY_TOP + (playerIndex * BET_TALLY_ROW_SPACING)),
-          QuarterPixels(x + DIGIT_GLYPH_SIZE),
-          QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE +
-              (playerIndex * BET_TALLY_ROW_SPACING)),
+      DrawTextureRect(&gfx, QuarterPixels(left + g_Scorecard.x),
+          QuarterPixels(BET_TALLY_TOP + rowOffset),
+          QuarterPixels(left + g_Scorecard.x + DIGIT_GLYPH_SIZE),
+          QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE + rowOffset),
           G_TX_RENDERTILE, 0, TexelCoordinate(GetDigitGlyphTop(*text++)),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
