@@ -1008,9 +1008,9 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   s32 row;
   s32 column;
   s32 triangleCount;
+  /* One index for the triangles and the search steps, to match */
   s32 i;
   s32 hitIndex;
-  s32 steps;
   s32 startSide;
   s32 endSide;
   s32 hitX;
@@ -1208,7 +1208,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
     if ((tileX != endTileX) | (tileZ != endTileZ)) {
       step = (1.0f - tileFraction) * 0.5f;
       hitFraction = tileFraction + step;
-      for (steps = 0; steps < TILE_SEARCH_STEP_COUNT; steps++) {
+      for (i = 0; i < TILE_SEARCH_STEP_COUNT; i++) {
         nextTileX =
             (s32)((deltaX * hitFraction) + startX) >> MINI_GOLF_TILE_X_SHIFT;
         nextTileZ =
@@ -1227,7 +1227,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
       }
 
       tileX = nextTileX;
-      if (steps != TILE_SEARCH_STEP_COUNT) {
+      if (i != TILE_SEARCH_STEP_COUNT) {
         tileZ = nextTileZ;
         tileFraction = hitFraction;
       } else {
@@ -1276,9 +1276,9 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 row;
   s32 column;
   s32 triangleCount;
+  /* One index for the triangles and the search steps, to match */
   s32 i;
   s32 hitIndex;
-  s32 steps;
   s32 startSide;
   s32 endSide;
   s32 hitX;
@@ -1475,7 +1475,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     if ((tileX != endTileX) | (tileZ != endTileZ)) {
       step = (1.0f - tileFraction) * 0.5f;
       hitFraction = tileFraction + step;
-      for (steps = 0; steps < TILE_SEARCH_STEP_COUNT; steps++) {
+      for (i = 0; i < TILE_SEARCH_STEP_COUNT; i++) {
         nextTileX = (s32)((deltaX * hitFraction) + startX) >> GROUND_TILE_SHIFT;
         nextTileZ = (s32)((deltaZ * hitFraction) + startZ) >> GROUND_TILE_SHIFT;
         tileDistance = Abs(nextTileX - tileX) + Abs(nextTileZ - tileZ);
@@ -1492,7 +1492,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       }
 
       tileX = nextTileX;
-      if (steps != TILE_SEARCH_STEP_COUNT) {
+      if (i != TILE_SEARCH_STEP_COUNT) {
         tileZ = nextTileZ;
         tileFraction = hitFraction;
       } else {
