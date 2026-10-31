@@ -2105,8 +2105,9 @@ void ResetBallTrail(void) {
  * that fade out with age. While g_BallTrailState is BALL_TRAIL_RECORDING it
  * also adds the ball's current position.
  *
- * Doesn't match: a display list pointer's spill is scheduled differently,
- * and the offsets' floating-point registers are swapped.
+ * Doesn't match: the offsets' floating-point registers are swapped, in 6
+ * words. Swapping the offsets' operands or the squares' order, or dividing
+ * after a separate sqrtf, does not help.
  */
 #ifdef NON_MATCHING
 void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
@@ -2119,6 +2120,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 scale;
   f32 offsetX;
   f32 offsetY;
+  Gfx* cycleTypeCommand;
 
   if (g_BallTrailState != BALL_TRAIL_OFF && g_RoundHud.unk17) {
     if (g_BallTrailState == BALL_TRAIL_RECORDING) {
@@ -2157,7 +2159,9 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       guMtxIdent(&f_BallTrailMatrix);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
-      gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+      /* Through a pointer of its own, to match */
+      cycleTypeCommand = gfx++;
+      gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
       gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
       gSPSetGeometryMode(
           gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
