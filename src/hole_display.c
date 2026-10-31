@@ -2094,8 +2094,8 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
     bottom =
         (f32)y + (f_BackdropStripHeight * zoom) + view->scissorY - centerShift;
     for (row = 0;; row++, top = bottom,
-        bottom = bottom + (f_BackdropStripHeight * view->zoom)) {
-      if (top < view->scissorY - (f_BackdropStripHeight * view->zoom)) {
+        bottom = bottom + (view->zoom * f_BackdropStripHeight)) {
+      if (top < view->scissorY - (view->zoom * f_BackdropStripHeight)) {
         continue;
       }
 
