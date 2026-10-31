@@ -5050,7 +5050,7 @@ void DrawModeSelect(Gfx** displayListHead) {
         QuarterPixels(
             position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gDPPipeSync(gfx++);
+    IN_OWN_BLOCK(gDPPipeSync(gfx++));
   }
 
   DrawCenteredPageArrows(&gfx, MODE_ARROW_GAP, MODE_ARROW_Y);
