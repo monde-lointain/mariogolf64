@@ -523,7 +523,7 @@ void LoadRoundResults(void) {
             (s8)g_Players[i].paletteIndex,
         &file);
     size = GetAssetFileSize(&file);
-    f_PlayerPortraitPalettes[i] = AllocMemory(size);
+    IN_OWN_BLOCK(f_PlayerPortraitPalettes[i] = AllocMemory(size));
     ReadAssetFile(f_PlayerPortraitPalettes[i], size, &file);
     f_PlayerPoints[i] = !g_Players[i].isComputer ? g_Players[i].points : -1;
     f_PlayerBetTotals[i] = 0;
