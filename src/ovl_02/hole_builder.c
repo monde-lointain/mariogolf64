@@ -2166,7 +2166,8 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     if (g_TerrainCodeBlockCount < TERRAIN_CODE_BLOCK_COUNT) {
       /* Repeats the cell's code in every half byte of a word */
       fill = (cell << TERRAIN_CODE_BITS) | cell;
-      block = g_TerrainCodeBlockCount++;
+      /* In its own block to match */
+      IN_OWN_BLOCK(block = g_TerrainCodeBlockCount++);
       fill |= fill << BITS_PER_BYTE;
       fill |= fill << (BITS_PER_BYTE * 2);
       word =
@@ -2199,11 +2200,11 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
 /*
  * Paints the map's texels from the code map with the course's paint logic,
  * sets each terrain code's color, and stores the painted terrain codes in
- * their cells. Doesn't match: ours keeps the painting in other
- * registers, sets up the neighbor search's offset pointer before the
- * scaled search span, and when the blocks run out it branches to the texel
- * loop's increment, where the original's branch-likely does the increment
- * in its delay slot.
+ * their cells. Doesn't match: ours keeps the cell's offset and code in
+ * other registers, copies the new block's index before repeating the code
+ * across the fill word rather than after, and when the blocks run out it
+ * branches to the texel loop's increment, where the original's branch-likely
+ * does the increment in its delay slot.
  */
 #ifdef NON_MATCHING
 void PaintGroundTiles(void) {
