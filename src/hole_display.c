@@ -199,7 +199,7 @@ enum SpiralDirection {
 #define TILE_ANIMATION_GAP_X 64
 #define TILE_ANIMATION_GAP_Y 32
 #define TILE_ANIMATION_OFFSET_X 8
-#define TILE_ANIMATION_DEPTH -290.0f
+#define TILE_ANIMATION_DEPTH (-290.0f)
 #define TILE_ANIMATION_SPEED_Z 2
 #define TILE_ANIMATION_UNUSED_ANGLE_OFFSET 0.2f
 #define TILE_VERTEX_COUNT 4
@@ -1690,7 +1690,7 @@ void UsePrimitiveDepth(Boolean isPrimitiveDepthSet) {
 }
 
 /* The sky dome is drawn this far in front of the camera */
-#define SKY_DOME_DISTANCE -300.0f
+#define SKY_DOME_DISTANCE (-300.0f)
 #define SKY_NOISE_IMAGE_SIZE 64
 #define SKY_NOISE_MASK 6
 #define SKY_DEPTH 0x7FFB
@@ -2237,29 +2237,29 @@ void HandleFrameBufferSwap(void) {}
   { \
     if (!(isTileSet)) { \
       gDPSetTextureImage( \
-          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
-      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, \
+          (gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
+      gDPSetTile((gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, \
           0, 0, 0, 0, 0, 0); \
-      gDPLoadSync(gfx++); \
-      gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, \
+      gDPLoadSync((gfx)++); \
+      gDPLoadBlock((gfx)++, G_TX_LOADTILE, 0, 0, \
           ((height) * FADE_FRAME_WIDTH) - 1, \
           CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES)); \
-      gDPPipeSync(gfx++); \
-      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, \
+      gDPPipeSync((gfx)++); \
+      gDPSetTile((gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, \
           ((FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES) + 7) >> 3, 0, \
           G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0); \
-      gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, \
+      gDPSetTileSize((gfx)++, G_TX_RENDERTILE, 0, 0, \
           (FADE_FRAME_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC, \
           ((height) - 1) << G_TEXTURE_IMAGE_FRAC); \
-      isTileSet = TRUE; \
+      (isTileSet) = TRUE; \
     } else { \
       gDPSetTextureImage( \
-          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
-      gDPLoadSync(gfx++); \
-      gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, \
+          (gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
+      gDPLoadSync((gfx)++); \
+      gDPLoadBlock((gfx)++, G_TX_LOADTILE, 0, 0, \
           ((height) * FADE_FRAME_WIDTH) - 1, \
           CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES)); \
-      gDPPipeSync(gfx++); \
+      gDPPipeSync((gfx)++); \
     } \
   }
 

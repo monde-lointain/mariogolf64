@@ -26,7 +26,7 @@
 
 #define SPARK_COUNT 30
 #define SPARK_BURST_COUNT 5
-#define NO_SPARK_BURST -1
+#define NO_SPARK_BURST (-1)
 /* The frames a spark lives and a burst's timer starts at */
 #define SPARK_LIFE 10
 #define SPARK_BURST_TIME 20
@@ -80,7 +80,7 @@ enum SwingTrailState {
 
 #define SPARK_IMAGE_SIZE 32
 #define SPARK_DRAG 0.98f
-#define SPARK_MODEL_Z -100.0f
+#define SPARK_MODEL_Z (-100.0f)
 #define SPARK_MODEL_SCALE 0.1f
 /* Texture rectangles beyond these screen coordinates would overflow */
 #define SPARK_MAX_SCREEN_COORD 511
@@ -300,7 +300,7 @@ void StartFlagstickSparks(CoursePoint point) {
 #define IMPACT_FLASH_FADE_STEP 32
 #define IMPACT_FLASH_LOWEST_LEVEL 1
 #define SPARK_BURST_SHOWN 1
-#define SPARK_BURST_HIDDEN -1
+#define SPARK_BURST_HIDDEN (-1)
 #define SPARK_BURST_MAX_AGE 127
 /* A burst's sparks are sized by its distance and grow with its age */
 #define SPARK_DISTANCE_SCALE 0.3f

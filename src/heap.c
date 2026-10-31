@@ -17,12 +17,12 @@
 /* A block's tag */
 #define BLOCK_FREE 0
 #define BLOCK_USED 0x12345678
-#define BLOCK_SENTINEL -1
+#define BLOCK_SENTINEL (-1)
 
 /* Larger than any block, so the first block that fits is the smallest so far */
 #define NO_BLOCK_SIZE S32_MAX
 /* The largest free size before any allocation has measured it */
-#define UNMEASURED_SIZE -1
+#define UNMEASURED_SIZE (-1)
 
 /* The Expansion Pak's memory */
 #define EXPANSION_REGION_START 0x80600000

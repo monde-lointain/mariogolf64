@@ -39,7 +39,7 @@
 /* SetCharacterBuffer's warning is printed this many times, so it stands out */
 #define WARNING_REPEAT_COUNT 10
 /* Long enough ago that IsCharacterSlotBusy finds a slot not busy */
-#define LONG_AGO_FRAME -4
+#define LONG_AGO_FRAME (-4)
 
 static inline CharacterAnimation* ModelAnimations(const CharacterModel* model) {
   u32 address = model->segmentAddresses[CHARACTER_MODEL_ANIMATIONS];

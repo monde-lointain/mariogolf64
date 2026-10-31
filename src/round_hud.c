@@ -201,11 +201,11 @@ typedef struct ArrowShape {
 #define HOLE_INTRO_MATCH_IMAGE_LOADED (1 << 1)
 /* The intro images are drawn opaque, keeping the coverage of their alpha */
 #define HOLE_INTRO_IMAGE_RENDER_MODE \
-  AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-      GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+  (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
+      GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
 #define HOLE_INTRO_IMAGE_RENDER_MODE2 \
-  AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-      GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+  (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
+      GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
 /* The contest image is 256x64 and the match standing image 160x40, centered */
 #define CONTEST_IMAGE_WIDTH 256
 #define CONTEST_IMAGE_STRIP_HEIGHT 8
@@ -355,9 +355,9 @@ FILE_STATIC Mtx f_UnusedNarrowProjection;
  * The wind indicator is a model in module 9, lit by f_WindArrowLights. It
  * sits in front of the camera, tilted to its pitch and turned to the wind.
  */
-#define WIND_INDICATOR_DEPTH -300.0f
+#define WIND_INDICATOR_DEPTH (-300.0f)
 #define WIND_INDICATOR_TILT 0.3f
-#define WIND_INDICATOR_SCALE -0.07f
+#define WIND_INDICATOR_SCALE (-0.07f)
 #define WIND_INDICATOR_FACING_DEGREES 180.0
 
 /*
@@ -397,11 +397,11 @@ FILE_STATIC Mtx f_UnusedNarrowProjection;
 #define WIND_METERS_GLYPH_WIDTH 14
 #define WIND_TEXT_RAISE 1
 #define WIND_TEXT_RENDER_MODE \
-  IM_RD | CLR_ON_CVG | CVG_X_ALPHA | \
-      GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
+  (IM_RD | CLR_ON_CVG | CVG_X_ALPHA | \
+      GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
 #define WIND_TEXT_RENDER_MODE2 \
-  IM_RD | CLR_ON_CVG | CVG_X_ALPHA | \
-      GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
+  (IM_RD | CLR_ON_CVG | CVG_X_ALPHA | \
+      GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
 #define WIND_TEXT_PRIM_RED 0x3F
 #define WIND_TEXT_PRIM_GREEN 0x3F
 #define WIND_TEXT_PRIM_BLUE 0xFF
@@ -414,7 +414,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
 /* Heights in meters or feet nearer zero than this */
 #define LEVEL_HEIGHT 0.01f
 /* On the tee ground, the shot panel sits this much higher */
-#define TEE_GROUND_PANEL_OFFSET_Y -3
+#define TEE_GROUND_PANEL_OFFSET_Y (-3)
 #define SHOT_PANEL_START_OFFSET_X 64
 /* "%02d:%02d:%02d", which DrawRoundHud also uses */
 extern char f_ElapsedTimeFormat[];
@@ -2513,11 +2513,11 @@ void AdjustHudOffset(void) {
 #define PAUSE_PANEL_ARROWS_GAP 64
 /* The shot panel's icons, in the centered orthographic view and in front of the
  * camera */
-#define CLUB_HEAD_ICON_X -128.0f
-#define CLUB_HEAD_ICON_Y -76.0f
+#define CLUB_HEAD_ICON_X (-128.0f)
+#define CLUB_HEAD_ICON_Y (-76.0f)
 #define LIE_ICON_X 112
-#define LIE_ICON_Y -70.0f
-#define SHOT_PANEL_ICON_Z -300.0f
+#define LIE_ICON_Y (-70.0f)
+#define SHOT_PANEL_ICON_Z (-300.0f)
 /* The icons tilt by half of their angle */
 #define SHOT_PANEL_ICON_TILT 0.5f
 #define SHOT_PANEL_ICON_DIM 191
@@ -2849,7 +2849,7 @@ void StartShotEffect(s32 effect) {
 #define SHOT_EFFECT_SCALE 0.5f
 #define SHOT_EFFECT_SPIN_START 0.7f
 #define SHOT_EFFECT_SPIN_RATE 0.5f
-#define SHOT_EFFECT_Z -100.0f
+#define SHOT_EFFECT_Z (-100.0f)
 /* The spark trail of the Wario and Game Boy ball 7 contact styles: six frames
  * of a lightning bolt, tinted purple or a random color, that flicker round */
 #define SPARK_TRAIL_SCALE 0.4f

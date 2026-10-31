@@ -255,7 +255,7 @@ extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 /* The most frames a character stands before it fidgets again */
 #define FIDGET_DELAY_RANGE 128
 /* A fidget delay while the fidget plays */
-#define FIDGETING -1
+#define FIDGETING (-1)
 /* The orthographic projection that the menus view their characters with, and
  * the eye of the LookAt that guLookAtReflectF builds for them */
 #define MENU_CHARACTERS_NEAR 1.0f
@@ -276,13 +276,13 @@ extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 #define MODE_ICON_RING_SHOT 8
 #define MODE_ICON_UNK9 9
 #define MODE_ICON_CLUB_SLOTS 10
-#define NO_MODE_ICON -1
+#define NO_MODE_ICON (-1)
 #define MODE_ICON_COUNT 11
 /* The table holds three rows past the last icon, copies of rows 2, 2 and 5 */
 #define MODE_ICON_ANIMATION_COUNT 14
 /* Each icon's frames are asset ids, ended by END_OF_ICON_FRAMES */
 #define MODE_ICON_FRAME_COUNT 27
-#define END_OF_ICON_FRAMES -1
+#define END_OF_ICON_FRAMES (-1)
 
 extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT]
                                [MODE_ICON_FRAME_COUNT];
@@ -385,7 +385,7 @@ void FreeMenuResources(void);
 #define MENU_CURSOR_COLOR_MIDDLE 127
 #define MENU_CURSOR_NEAR 10.0f
 #define MENU_CURSOR_FAR 2000.0f
-#define MENU_CURSOR_Z -100.0f
+#define MENU_CURSOR_Z (-100.0f)
 #define MENU_CURSOR_SCALE_Y 0.87f
 
 /* The buffers of LoadSaveGameBuffer, and what it reads into them */

@@ -33,7 +33,7 @@ enum ShotLabels {
 
 /* The corners of the ball that a tag sits off, clockwise from the lower right
  */
-#define NO_CORNER -1
+#define NO_CORNER (-1)
 #define CORNER_LOWER_RIGHT 0
 #define CORNER_LOWER_LEFT 1
 #define CORNER_UPPER_LEFT 2
@@ -81,8 +81,8 @@ typedef struct ShotLabel {
 #define SIGN_HEIGHT_TEXT_Y 23
 #define OUT_OF_BOUNDS_TEXT_Y 31
 /* The sign fades from where ProjectPoint returns these */
-#define SIGN_FADE_START_DEPTH -2000
-#define SIGN_FADE_END_DEPTH -149
+#define SIGN_FADE_START_DEPTH (-2000)
+#define SIGN_FADE_END_DEPTH (-149)
 #define SIGN_MIN_ALPHA 64
 #define SIGN_FADE_ALPHA_RANGE (255 - SIGN_MIN_ALPHA)
 #define SIGN_FADE_DEPTH_RANGE 1850
@@ -121,11 +121,11 @@ typedef struct ShotLabel {
 
 /* Draws the flag opaque, keeping the coverage of its alpha */
 #define PIN_FLAG_RENDER_MODE \
-  AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-      GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+  (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
+      GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
 #define PIN_FLAG_RENDER_MODE2 \
-  AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-      GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+  (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
+      GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
 
 enum SpotState {
   SPOT_HIDDEN = -1,

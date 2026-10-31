@@ -93,7 +93,7 @@ enum PlanksState {
  * front */
 #define COURSE_IMAGE_FRONT 2
 /* f_CourseTurnFrames' entry for the image between two courses */
-#define COURSE_IMAGE_BLANK -1
+#define COURSE_IMAGE_BLANK (-1)
 #define COURSE_TURN_FRAME_COUNT 7
 /* The turn shows the course it leaves until this entry */
 #define COURSE_TURN_MIDDLE 4
@@ -108,7 +108,7 @@ enum PlanksState {
 #define ARROW_SIZE 16
 /* The up arrow moves back this far while up repeats, and the down arrow this
  * far down */
-#define ARROW_PUSH_UP -6
+#define ARROW_PUSH_UP (-6)
 #define ARROW_PUSH_DOWN 6
 /* A chosen direction's arrow moves out this far */
 #define ARROW_STEP 4

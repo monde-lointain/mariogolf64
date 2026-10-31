@@ -232,7 +232,7 @@ static u8 f_UnusedBytesAfterSpinMatrices[16] UNUSED;
 #define SPIN_MESH_ROW_COUNT 42
 #define SPIN_MESH_HALF_WIDTH (((SCREEN_WIDTH / 2) - SCREEN_BORDER) * 10)
 #define SPIN_MESH_SCALE 0.1f
-#define SPIN_MESH_DISTANCE -290.0f
+#define SPIN_MESH_DISTANCE (-290.0f)
 #define IsLastSpinStrip(batchIndex, stripIndex) \
   (((batchIndex) == SPIN_BATCH_COUNT - 1) & \
       ((stripIndex) == SPIN_LAST_BATCH_STRIP_COUNT - 1))

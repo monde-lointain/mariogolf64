@@ -47,7 +47,7 @@
 #define CLUB_SYMBOL_COUNT CLUB_TYPE_PUTTER
 #define SYMBOL_STAR CLUB_SYMBOL_COUNT
 #define SYMBOL_COUNT (CLUB_SYMBOL_COUNT + 1)
-#define NO_SYMBOL -1
+#define NO_SYMBOL (-1)
 /* The reel shows the symbol this many places before its position in the middle
  */
 #define SHOWN_SYMBOL_OFFSET 3
@@ -75,15 +75,15 @@
 #define REEL_RADIUS 512.0f
 #define REEL_VERTEX_BUFFER_SIZE 0x180
 #define REEL_SPACING 34
-#define FIRST_REEL_X -34.0f
+#define FIRST_REEL_X (-34.0f)
 #define REEL_SCALE 0.1f
 #define SLOTS_Y 8.0f
-#define SLOTS_Z -100.0f
+#define SLOTS_Z (-100.0f)
 
 /* Two quads shade the top and bottom of the reels' window */
 #define SHADE_VERTEX_COUNT 8
 #define SHADE_HALF_WIDTH 50
-#define SHADE_Z -10
+#define SHADE_Z (-10)
 #define SHADE_ALPHA 230
 
 /* The symbols' images are 32 by 32 RGBA16 texels */

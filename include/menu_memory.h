@@ -122,7 +122,7 @@ typedef struct TakenCharacters {
 extern TakenCharacters g_TakenCharacters;
 
 /* The character each player has chosen, or NO_CHOSEN_CHARACTER */
-#define NO_CHOSEN_CHARACTER -1
+#define NO_CHOSEN_CHARACTER (-1)
 extern s32 g_ChosenCharacters[MAX_PLAYER_COUNT];
 
 /* Whether each player swings left-handed, which becomes g_Players[].unk22 */

@@ -30,7 +30,7 @@
 #include "tournament.h"
 #include "transfer_pak.h"
 /* OpenRoundResults's request that frees the results */
-#define CLOSE_ROUND_RESULTS -1
+#define CLOSE_ROUND_RESULTS (-1)
 
 /* f_ResultsState values */
 enum ResultsState {
@@ -98,7 +98,7 @@ enum PortraitAnimation {
  */
 #define NOTICE_SWING_HEIGHT 160.0f
 /* Nearly a quarter turn back, so that the swing starts at its full height */
-#define NOTICE_SWING_START_ANGLE -1.57f
+#define NOTICE_SWING_START_ANGLE (-1.57f)
 #define NOTICE_SWING_STEP (M_PI / 9)
 #define NOTICE_SWING_FRAMES 46
 #define NOTICE_DONE_FRAME 51
@@ -117,10 +117,10 @@ enum PortraitAnimation {
  * Until the lift passes this, it rises NOTICE_LIFT_START_SPEED a frame; after,
  * it grows each frame by this fraction of itself
  */
-#define NOTICE_LIFT_START_LIMIT -2
+#define NOTICE_LIFT_START_LIMIT (-2)
 #define NOTICE_LIFT_GROWTH_NUMERATOR 2
 #define NOTICE_LIFT_GROWTH_DENOMINATOR 3
-#define NOTICE_LIFT_EXIT -200
+#define NOTICE_LIFT_EXIT (-200)
 
 /* The places image's 32x32 icons, after its 256-color palette */
 #define PLACE_ICON_SIZE 32
@@ -213,7 +213,7 @@ enum PrizeBracket {
 #define RESULTS_HEADING_Y 54
 /* Bet totals of four digits all shift left, so that the column stays centered
  */
-#define FOUR_DIGIT_BET_SHIFT -16
+#define FOUR_DIGIT_BET_SHIFT (-16)
 #define FOUR_DIGIT_BET_MIN 999
 #define FOUR_DIGIT_BET_MAX 9999
 extern const char f_NumberFormat[];
@@ -1017,14 +1017,14 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
 /* Loads glyph from f_PlaceDigitsImage and draws it at x, y */
 #define DrawPlaceGlyph(gfx, x, y, glyph) \
   { \
-    gDPLoadTextureTile(gfx++, \
+    gDPLoadTextureTile((gfx)++, \
         TextureAddress(LargeImageTexels(f_PlaceDigitsImage)), G_IM_FMT_CI, \
         G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0, (glyph) * PLACE_GLYPH_SIZE, \
         PLACE_GLYPH_SIZE - 1, \
         ((glyph) * PLACE_GLYPH_SIZE) + PLACE_GLYPH_SIZE - 1, 0, \
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
-    gSPScisTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y), \
+    gSPScisTextureRectangle((gfx)++, QuarterPixels(x), QuarterPixels(y), \
         ((x) + PLACE_GLYPH_SIZE) << 2, QuarterPixels((y) + PLACE_GLYPH_SIZE), \
         G_TX_RENDERTILE, 0, TexelCoordinate((glyph) * PLACE_GLYPH_SIZE), \
         TEXEL_STEP_ONE, TEXEL_STEP_ONE); \
@@ -3177,9 +3177,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 #define STANDING_WORD_DOWN_ROW 16
 #define STANDING_WORD_EVEN_ROW 32
 /* Shifts the hole count and its word left, so that the pair stays centered */
-#define STANDING_ONE_DIGIT_UP_SHIFT -8
-#define STANDING_ONE_DIGIT_DOWN_SHIFT -20
-#define STANDING_TWO_DIGIT_DOWN_SHIFT -12
+#define STANDING_ONE_DIGIT_UP_SHIFT (-8)
+#define STANDING_ONE_DIGIT_DOWN_SHIFT (-20)
+#define STANDING_TWO_DIGIT_DOWN_SHIFT (-12)
 
 /* The match play results of two players: place, portrait, holes up or down, any
  * bets and Course Points */

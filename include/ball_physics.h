@@ -376,7 +376,7 @@ typedef s32 BunkerBurial;
 #define FAIRWAY_LANDING_FRICTION_PER_SPEED (1.6f / KilometersPerHour(100))
 #define OTHER_LANDING_FRICTION_PER_SPEED (1.0f / KilometersPerHour(100))
 #define MAX_GRASS_LANDING_SPIN 0.01f
-#define MIN_GRASS_LANDING_SPIN -0.2f
+#define MIN_GRASS_LANDING_SPIN (-0.2f)
 #define BUNKER_LANDING_SPIN 0.7f
 #define ROUGH_LANDING_SPIN 0.4f
 #define OTHER_LANDING_SPIN 0.2f

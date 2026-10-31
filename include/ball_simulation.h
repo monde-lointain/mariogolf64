@@ -137,7 +137,7 @@ typedef struct ShotLaunch {
 } ShotLaunch; /* size = 0x20 */
 
 /* BallSimulation's lastBounceStep before the ball's first bounce */
-#define NO_BOUNCE_STEP -2
+#define NO_BOUNCE_STEP (-2)
 
 #define UNKA8_COUNT 8
 

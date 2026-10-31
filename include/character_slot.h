@@ -40,7 +40,7 @@
 
 #define END_OF_DISPLAY_LIST_CHOICES 0xFFFFFFFF
 /* The display list choice that draws nothing */
-#define NO_DISPLAY_LIST_CHOICE -1
+#define NO_DISPLAY_LIST_CHOICE (-1)
 
 /* Where SetMultiTlb maps a slot's model buffer, in TLB_PAGE_MODE_4K pages */
 #define CHARACTER_MODEL_ADDRESS 0x02000000
@@ -71,7 +71,7 @@ typedef struct CharacterModel {
 
 #define CHARACTER_SLOT_COUNT 4
 /* A slot's model index when no character is loaded into it */
-#define NO_CHARACTER_MODEL -1
+#define NO_CHARACTER_MODEL (-1)
 
 /* A point on a character model, found by moving through a path of joints */
 typedef struct CharacterPoint {
@@ -81,7 +81,7 @@ typedef struct CharacterPoint {
   /* 0x10 */ s16 id;
 } CharacterPoint; /* size = 0x14 */
 
-#define END_OF_JOINT_PATH -1
+#define END_OF_JOINT_PATH (-1)
 
 /* The CharacterPoint.id of the point the shadow lies under */
 #define CHARACTER_POINT_SHADOW 2
@@ -114,10 +114,10 @@ typedef struct JointAnimation {
 
 /* A KeyframeSpan frame that makes AnimateCharacterJoints look for the keys
  * again */
-#define UNSET_KEYFRAME_SPAN -1
+#define UNSET_KEYFRAME_SPAN (-1)
 
 /* The translation key count of the joint ending a model's list */
-#define END_OF_JOINT_ANIMATIONS -1
+#define END_OF_JOINT_ANIMATIONS (-1)
 
 /* Rotation keys are quaternions in units of QUATERNION_SCALE */
 #define QUATERNION_SCALE (1.0f / 16384)
@@ -132,7 +132,7 @@ typedef struct AnimationEvent {
   /* 0x3 */ u8 value;
 } AnimationEvent; /* size = 0x4 */
 
-#define END_OF_ANIMATION_EVENTS -1
+#define END_OF_ANIMATION_EVENTS (-1)
 
 /* AnimationEvent kinds */
 enum AnimationEventKind {
@@ -272,7 +272,7 @@ typedef struct CharacterSlot {
   /* 0x189 */ s8 reusesLastMatrices; /* For the next draw, which clears it */
 } CharacterSlot; /* size = 0x18C */
 
-#define NO_NEXT_ANIMATION -1
+#define NO_NEXT_ANIMATION (-1)
 
 /* Each club kind has three animations in a row: a stance, a swing and an
  * approach swing */

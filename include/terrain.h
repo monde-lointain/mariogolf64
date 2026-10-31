@@ -164,7 +164,7 @@ extern u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
 #define CODE_GRID_ROW_COUNT \
   (TERRAIN_CODE_CELL_ROW_COUNT * TERRAIN_CODE_CELL_SPAN)
 /* Marks a cell with no terrain code */
-#define NO_CELL_TERRAIN_CODE -1
+#define NO_CELL_TERRAIN_CODE (-1)
 /* Marks a cell whose codes are in a block, with the block's index */
 #define TERRAIN_CODE_CELL_BLOCK 0x8000
 /* The size of a block of packed codes, two to a byte, and how many there are */

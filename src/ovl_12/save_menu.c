@@ -64,7 +64,7 @@ enum SaveMenuState {
 #define SLIDE_FRAMES 14
 #define SLIDE_SOUND_FRAME 3
 /* Rows slide out slowly until past this, then speed up */
-#define SLIDE_OUT_START_OFFSET -1
+#define SLIDE_OUT_START_OFFSET (-1)
 #define SLIDE_OUT_START_STEP 4
 
 /* A character image for each player of each saved game, or for each replay
@@ -82,7 +82,7 @@ enum SaveMenuState {
 #define MESSAGE_CENTER_X 160
 #define MESSAGE_CENTER_Y 114
 /* Given this as its text, SetTextSlot clears the slot */
-#define NO_TEXT -1
+#define NO_TEXT (-1)
 
 /* What UpdateReplaySaveMenu returns */
 enum ReplayMenuState {
@@ -227,7 +227,7 @@ enum ModeName {
 #define REPLAY_LABEL_EAGLE 2
 #define REPLAY_LABEL_BIRDIE 3
 #define REPLAY_LABEL_PAR 4
-#define NO_REPLAY_LABEL -1
+#define NO_REPLAY_LABEL (-1)
 
 /*
  * This overlay reads the characters and variants of saved players and

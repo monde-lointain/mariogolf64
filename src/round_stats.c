@@ -16,13 +16,13 @@
 #include "scoring.h"
 #include "text.h"
 
-#define NO_SKINS_WINNER -1
+#define NO_SKINS_WINNER (-1)
 /* The course records' totals stop here */
 #define RECORD_TOTAL_LIMIT S32_MAX
 #define NO_BEST_SCORE RECORD_TOTAL_LIMIT
 #define ROUND_COUNT_LIMIT 9999
 /* Three under par on every hole */
-#define LOWEST_SCORE_TO_PAR -54
+#define LOWEST_SCORE_TO_PAR (-54)
 /* A green reached in regulation leaves two strokes of par for putting */
 #define PAR_ON_SPARE_STROKES 2
 /* Every hole score is lower */

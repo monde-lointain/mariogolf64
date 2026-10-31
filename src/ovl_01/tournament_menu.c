@@ -104,7 +104,7 @@ enum ClubCodeState {
 #define CODE_GLYPH_SIZE 16
 #define CODE_GLYPH_FIRST_X 40
 #define CODE_GLYPH_FIRST_Y 62
-#define CODE_GLYPH_NONE -1
+#define CODE_GLYPH_NONE (-1)
 
 /* What UpdateClubTournament is doing, in f_ClubTournamentPhase */
 enum ClubCodePhase {
@@ -139,8 +139,8 @@ enum CodeKeyResult {
 
 /* DrawCodeCursor marks the next character to type with a shrunken menu cursor
  */
-#define CODE_CURSOR_FIRST_X -42
-#define CODE_CURSOR_Y -50.0f
+#define CODE_CURSOR_FIRST_X (-42)
+#define CODE_CURSOR_Y (-50.0f)
 #define CODE_CURSOR_SCALE 0.6f
 
 /* Where the prompt's two messages are drawn */
@@ -541,7 +541,7 @@ void GetSaveDataAndMenuMemory(void) {
 #define OK_TEXT_GREEN 63
 #define OK_TEXT_BLUE 255
 #define OK_TEXT_ALPHA 255
-#define NO_OK_TEXT -1
+#define NO_OK_TEXT (-1)
 
 /*
  * Doesn't match: GCC hoists the window's left and right edges out of the strip

@@ -52,7 +52,7 @@
 #define GROUND_NOISE_MASK 0xF
 /* A point's y changes by this per course unit between its code and the green's
  * middle */
-#define HEIGHT_PER_COURSE_UNIT -0.00000390625f
+#define HEIGHT_PER_COURSE_UNIT (-0.00000390625f)
 /* Bunker codes with no other code nearer than this get BUNKER_INNER_OFFSET
  * added to y */
 #define BUNKER_INNER_DISTANCE 2
@@ -258,7 +258,7 @@ enum TriangleEdit {
 #define DEAD_TRIANGLE_TEXT_ROW 9
 
 /* UpdateHolePointEditor's hole point editor */
-#define HOLE_POINT_MODE_UNSET -1
+#define HOLE_POINT_MODE_UNSET (-1)
 #define HOLE_POINT_MODE_PIN_TEE 0
 #define HOLE_POINT_MODE_MESON 1
 #define HOLE_POINT_MODE_ROUTE 2
@@ -373,7 +373,7 @@ enum TriangleEdit {
 /* An I8 texture as large as DrawGround's noise, all white */
 #define WHITE_TEXTURE_SIZE 32
 /* Every bit set, so each texel is white */
-#define WHITE_TEXEL -1
+#define WHITE_TEXEL (-1)
 /* DrawGround's clip ratio text buffer is as large */
 #define CLIP_RATIO_TEXT_SIZE 0x98
 

@@ -160,7 +160,7 @@
 #define VIEWER_STARTING_ANIMATION 13
 /* What f_ViewerLoadedCharacter holds before the viewer shows a character, so
  * that no character matches it */
-#define NO_VIEWER_CHARACTER -1
+#define NO_VIEWER_CHARACTER (-1)
 /* A club mask with a bit set for every slot */
 #define ALL_CLUB_SLOTS ((1 << CLUB_SLOT_COUNT) - 1)
 /* The size of the image buffer that GetMenuImageBuffer returns */
@@ -4596,7 +4596,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 
 /* DrawMenuCharacters draws the players' characters, and in Get Character the
  * rival as a spinning silhouette */
-#define NO_RIVAL -1
+#define NO_RIVAL (-1)
 #define RIVAL_SLOT 1
 #define RIVAL_SPIN_STEP 10.0f
 
@@ -5488,8 +5488,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuCharacters);
 #define VIEWER_FAR 3000.0f
 #define VIEWER_PERSPECTIVE_SCALE 10.0f
 #define VIEWER_BASE_SCALE 5.0f
-#define VIEWER_BASE_OFFSET -64.0f
-#define VIEWER_DEPTH -1000.0f
+#define VIEWER_BASE_OFFSET (-64.0f)
+#define VIEWER_DEPTH (-1000.0f)
 
 const char f_NumberedNameFormat[] = "%d:%s";
 const char f_PlayerNumberFormat[] = "%d:";
@@ -6833,7 +6833,7 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define ERASE_WINDOW_HEIGHT 160
 #define ERASE_WINDOW_CENTER_X 160
 #define ERASE_WINDOW_CENTER_Y 120
-#define NO_OK_TEXT -1
+#define NO_OK_TEXT (-1)
 #define ERASE_MESSAGE 0xC9
 #define ERASE_MESSAGE_X 160
 #define ERASE_MESSAGE_Y 106

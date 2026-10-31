@@ -499,7 +499,7 @@ s32 GetNoticeState(void);
 /* Results of opening and accessing the Game Boy cartridges, after the notice
  * each shows */
 /* ReadCartridgeCharacters has more saves to read */
-#define PAK_RESULT_STILL_READING -1
+#define PAK_RESULT_STILL_READING (-1)
 #define PAK_RESULT_CONNECTOR_PROBLEM 0
 #define PAK_RESULT_OK 1
 #define PAK_RESULT_NO_CHARACTERS 2

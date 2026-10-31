@@ -35,9 +35,9 @@
   ((u32*)(model)->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST_CHOICES])
 
 /* osMapTLB's physical address for a page left unmapped */
-#define NO_PHYSICAL_PAGE -1
+#define NO_PHYSICAL_PAGE (-1)
 /* osMapTLB's address space id for a global mapping */
-#define NO_TLB_ASID -1
+#define NO_TLB_ASID (-1)
 
 #define MODEL_TO_WORLD_SCALE 0.01f
 #define SLOT_POSITION_SCALE (1.0f / 1024)

@@ -63,8 +63,8 @@ enum ClubPanelState {
 
 /* The bar that shows the lie's span below the gauge */
 #define SPAN_BAR_X 38.0f
-#define SPAN_BAR_Y -103.0f
-#define SPAN_BAR_Z -100.0f
+#define SPAN_BAR_Y (-103.0f)
+#define SPAN_BAR_Z (-100.0f)
 #define SPAN_BAR_SCALE_PER_SPAN 0.032857146f
 #define SPAN_BAR_THICKNESS 0.1f
 #define SPAN_BAR_VERTEX_COUNT 8

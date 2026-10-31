@@ -91,7 +91,7 @@ enum {
 #define SAVE_MENU_MODE_COUNT 10
 #define SAVE_MENU_MODE_MINI_GOLF 10
 /* An empty saved game's mode */
-#define NO_SAVE_MENU_MODE -1
+#define NO_SAVE_MENU_MODE (-1)
 
 extern const char f_SaveMenuNameFormat[];
 
@@ -112,7 +112,7 @@ void ResetSavedGameControllers(void);
 #define COURSE_LABEL_HEIGHT 16
 #define COURSE_DIGIT_WIDTH 16
 #define COURSE_WORD_WIDTH 40
-#define COURSE_WORD_OFFSET_X -5
+#define COURSE_WORD_OFFSET_X (-5)
 #define COURSE_DIGIT_OFFSET_X 33
 
 /* The image of each game mode that a saved game can be in */
@@ -132,7 +132,7 @@ typedef struct {
 
 /* What f_SavedPlayerControllers holds for a player with no controller, or for
  * the computer */
-#define NO_CONTROLLER -1
+#define NO_CONTROLLER (-1)
 #define COMPUTER_CONTROLLER MAXCONTROLLERS
 
 s16 FindNextReplaySlot(s8 startSlot, u8 isForward);

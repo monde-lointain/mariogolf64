@@ -13,10 +13,10 @@ extern s32 g_LongestDrivePot;
 extern s32 g_NearestPinPot;
 extern s32 g_HolePot;
 
-#define NO_LAST_HOLE_SKINS -1
+#define NO_LAST_HOLE_SKINS (-1)
 
 /* What GetContestWinner returns when nobody won the contest outright */
-#define NO_CONTEST_WINNER -1
+#define NO_CONTEST_WINNER (-1)
 
 /* How TallySkins left the skins at the last tallied hole */
 typedef struct SkinsCarryover {

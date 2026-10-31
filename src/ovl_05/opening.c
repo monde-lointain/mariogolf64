@@ -995,11 +995,15 @@ enum OpeningModel {
 
 s32 ToggleOpeningCharacter(u32 slotIndex, s32 character);
 
-/* Places the cue slot's character, leaving the point's height unset */
+/*
+ * Places the cue slot's character, leaving the point's height unset. It is
+ * three bare statements, to match, so it must not be the body of an
+ * unbraced if.
+ */
 #define PlaceCueCharacter(point, x, z, heading) \
-  point[0] = x; \
-  point[2] = z; \
-  PlaceCharacter(f_CueSlotIndex, point, DegreesToRadians(heading))
+  (point)[0] = (x); \
+  (point)[2] = (z); \
+  PlaceCharacter(f_CueSlotIndex, (point), DegreesToRadians(heading))
 
 /*
  * Sets up the opening's characters for the cue that its script has given, and
@@ -5175,7 +5179,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
 /* How much of its speed a spark keeps each frame */
 #define SPARK_DRAG 0.98
 /* The depth the sparks are drawn at under the screen's projection */
-#define SPARK_DEPTH -100.0f
+#define SPARK_DEPTH (-100.0f)
 
 /*
  * Draws sparks flying out from a point once f_OpeningSparksState is set to

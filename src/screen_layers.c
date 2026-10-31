@@ -20,7 +20,7 @@
 #define DEFAULT_WIPE_SHAPE 0x63F
 #define WIPE_SHAPE_COUNT 14
 #define WIPE_CLOSE_START_PROGRESS 12.0f
-#define WIPE_OPEN_START_PROGRESS -2.0f
+#define WIPE_OPEN_START_PROGRESS (-2.0f)
 #define WIPE_SOUND_CHANNEL 2
 #define WIPE_SOUND_VOLUME 0x28
 #define WIPE_SOUND_REVERB 0x14
@@ -97,6 +97,11 @@
     } \
     step++; \
   } while (0)
+/*
+ * operation is the rest of an assignment, such as |= HALF_TURN_ALPHA_BITS,
+ * which parentheses would break.
+ */
+/* NOLINTBEGIN(bugprone-macro-parentheses) */
 #define MarkOctantPoints(column, row, operation) \
   do { \
     HALF_TURN_PAIR(centerColumn + (column), centerRow + (row)) operation; \
@@ -108,6 +113,7 @@
     HALF_TURN_PAIR(centerColumn - (column), centerRow + (row) + 1) operation; \
     HALF_TURN_PAIR(centerColumn - (column), centerRow - (row) + 1) operation; \
   } while (0)
+/* NOLINTEND(bugprone-macro-parentheses) */
 
 enum HalfTurnState {
   HALF_TURN_STATE_SHOWING,
@@ -119,7 +125,7 @@ enum HalfTurnState {
 /* The fade's opacity runs over this many steps */
 #define FADE_ALPHA_RANGE 256
 
-#define PROMPT_STATE_CLOSED -1
+#define PROMPT_STATE_CLOSED (-1)
 #define PROMPT_STATE_OPENING 0
 #define PROMPT_STATE_CHOOSING 1
 #define PROMPT_STATE_CHOSEN 2
@@ -286,17 +292,17 @@ void LoadNibbleTextureBlock(Gfx** displayListHead, void* texels, s32 format,
     height, pal, cms, cmt, masks, maskt, shifts, shiftt) \
   { \
     gDPSetTextureImage( \
-        pkt++, fmt, loadSiz##_LOAD_BLOCK, 1, TextureAddress(timg)); \
-    gDPSetTile(pkt++, fmt, loadSiz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE, 0, cmt, \
-        maskt, shiftt, cms, masks, shifts); \
-    gDPLoadSync(pkt++); \
-    gDPLoadBlock(pkt++, G_TX_LOADTILE, 0, 0, \
+        (pkt)++, fmt, loadSiz##_LOAD_BLOCK, 1, TextureAddress(timg)); \
+    gDPSetTile((pkt)++, fmt, loadSiz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE, 0, \
+        cmt, maskt, shiftt, cms, masks, shifts); \
+    gDPLoadSync((pkt)++); \
+    gDPLoadBlock((pkt)++, G_TX_LOADTILE, 0, 0, \
         ((((width) * (height)) + loadSiz##_INCR) >> loadSiz##_SHIFT) - 1, \
         CALC_DXT(width, loadSiz##_BYTES)); \
-    gDPPipeSync(pkt++); \
-    gDPSetTile(pkt++, fmt, siz, (((width) * loadSiz##_LINE_BYTES) + 7) >> 3, \
+    gDPPipeSync((pkt)++); \
+    gDPSetTile((pkt)++, fmt, siz, (((width) * loadSiz##_LINE_BYTES) + 7) >> 3, \
         0, G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, shifts); \
-    gDPSetTileSize(pkt++, G_TX_RENDERTILE, 0, 0, \
+    gDPSetTileSize((pkt)++, G_TX_RENDERTILE, 0, 0, \
         ((width) - 1) << G_TEXTURE_IMAGE_FRAC, \
         ((height) - 1) << G_TEXTURE_IMAGE_FRAC); \
   }

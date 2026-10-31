@@ -373,7 +373,7 @@ static SurfaceInfo* f_EndSurfaceInfo;
 static FlightPhase f_FlightPhase;
 
 /* How far the golfer stands along the shot's yaw from the ball */
-#define STANCE_AIM_OFFSET -921.60004f
+#define STANCE_AIM_OFFSET (-921.60004f)
 #define STANCE_SLOPE_PASS_COUNT 2
 
 static inline f32 AbsoluteF32(f32 value) {
@@ -1787,14 +1787,14 @@ void PlaceAimCamera(void);
 
 /* PlaceFlightCamera's distances are in course units unless they say otherwise;
  * y points down */
-#define CUP_FRAMING_PITCH -0.14f
+#define CUP_FRAMING_PITCH (-0.14f)
 /* Above the cup, of both framed spheres */
 #define CUP_FRAMING_RISE 0xC00
 #define CUP_FRAMING_RADIUS 3.0f
-#define CUP_FRAMING_DEPTH_OFFSET -1.5f
-#define PATH_FRAMING_PITCH -0.7853982f
-#define PATH_FRAMING_RADIUS -15.0f
-#define PATH_FRAMING_DEPTH_OFFSET -150.0f
+#define CUP_FRAMING_DEPTH_OFFSET (-1.5f)
+#define PATH_FRAMING_PITCH (-0.7853982f)
+#define PATH_FRAMING_RADIUS (-15.0f)
+#define PATH_FRAMING_DEPTH_OFFSET (-150.0f)
 #define LAUNCH_VIEW_STEP 11
 #define LAUNCH_VIEW_MIN_RISE 0x6600
 /* In world units */
@@ -3562,7 +3562,7 @@ void BuildRingTexels(
 #define MIN_UNDIVIDED_NOISE_SIZE 2
 #define NOISE_DISPLACEMENT_MASK 0xFF
 #define NOISE_DISPLACEMENT_BIAS 0x80
-#define NOISE_CORNER_SEED -0xFE0
+#define NOISE_CORNER_SEED (-0xFE0)
 #define NOISE_CENTER_SEED 0x3F80
 #define NOISE_EDGE_SEED 1
 #define NOISE_MAX_BLEND_WEIGHT 0x3F

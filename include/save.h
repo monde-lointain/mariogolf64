@@ -125,8 +125,8 @@ enum SaveReadResult {
 #define UNSET_BET_RATE (-1)
 
 /* The contest distances that are not measured yet, or do not count */
-#define UNCOUNTED_DISTANCE -1
-#define UNMEASURED_DISTANCE -2
+#define UNCOUNTED_DISTANCE (-1)
+#define UNMEASURED_DISTANCE (-2)
 
 /* Indices of GameState.carriedPots */
 #define CARRIED_POT_LONGEST_DRIVE 0
@@ -334,7 +334,7 @@ typedef struct SavedGame {
 } SavedGame; /* size = 0xA0 */
 
 /* PlayerHole.putts when they were not counted */
-#define UNCOUNTED_PUTTS -1
+#define UNCOUNTED_PUTTS (-1)
 
 /* A player's results on one hole */
 typedef struct PlayerHole {

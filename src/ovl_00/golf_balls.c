@@ -30,12 +30,12 @@
 #define AFTERIMAGE_FAST_LENGTH 10
 
 /* A ball's alpha while it is hidden */
-#define BALL_HIDDEN -1
+#define BALL_HIDDEN (-1)
 #define BALL_SHOWN 0xFF
 /* A ball's markerPlayerIndex while no number is shown over it */
-#define BALL_NO_MARKER -1
+#define BALL_NO_MARKER (-1)
 /* An afterimage's alpha while it is unused */
-#define AFTERIMAGE_UNUSED -1
+#define AFTERIMAGE_UNUSED (-1)
 #define AFTERIMAGE_ALPHA 0x80
 #define AFTERIMAGE_FAST_ALPHA 0xC0
 #define AFTERIMAGE_FAST_FADE 0x10

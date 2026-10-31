@@ -49,7 +49,7 @@
 #define FLAGSTICK_HEIGHT 46080.0f
 #define FLAG_BOTTOM_HEIGHT 39936.0f
 /* A ball that hits the flag keeps only this speed along y, which points down */
-#define FLAG_HIT_SPEED_Y -524
+#define FLAG_HIT_SPEED_Y (-524)
 /* A ball bounces off the flagstick with between these fractions of its speed */
 #define FLAGSTICK_MOST_BOUNCE 0.8f
 #define FLAGSTICK_LEAST_BOUNCE 0.2f
@@ -61,7 +61,7 @@
 #define PATH_MOST_RISE 153.6f
 /* A path that ends this near a triangle's plane, in course units, touches it */
 #define PLANE_TOUCH_DISTANCE 15.36f
-#define NO_HOLE_TRIANGLE -1
+#define NO_HOLE_TRIANGLE (-1)
 /* The triangles in a ground tile: two for each cell */
 #define GROUND_TILE_TRIANGLE_COUNT \
   (GROUND_TILE_POINT_SPAN * GROUND_TILE_POINT_SPAN * 2)
@@ -94,7 +94,7 @@
 #define WALL_WIDENING 0.15f
 /* Farther than any corner, in course units */
 #define FARTHEST_CORNER_DISTANCE 153600.0f
-#define CORNER_HIT_FRACTION -0.1f
+#define CORNER_HIT_FRACTION (-0.1f)
 #define WALL_DEBUG_COLUMN 10
 #define WALL_DEBUG_ROW 10
 
@@ -111,7 +111,7 @@
 /* A ring's hit radius in units for each unit of its scale's x, which is 1024 at
  * full size */
 #define RING_HIT_RADIUS_PER_SCALE 0.1274414f
-#define NO_RING_NUMBER -1
+#define NO_RING_NUMBER (-1)
 /* The fraction along a path that the plane hit tests return when nothing is hit
  */
 #define NO_PLANE_HIT_FRACTION 2.0f

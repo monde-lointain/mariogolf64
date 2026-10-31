@@ -432,7 +432,7 @@ enum Song {
 #define SONG_FLAG_RESTART 0x80
 
 /* The song id when no song is playing */
-#define NO_SONG -1
+#define NO_SONG (-1)
 /* libmus scales a song's own tempo by SetSongTempo's value over this */
 #define NORMAL_SONG_TEMPO 0x80
 

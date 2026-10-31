@@ -78,7 +78,7 @@
 #define BETS_PAGE_TALLY_LEFT 53
 #define BETS_PAGE_TALLY_TOP 112
 
-#define NO_BET_SUBTITLE -1
+#define NO_BET_SUBTITLE (-1)
 /* The rows of the subtitles image */
 #define BET_SUBTITLE_SCORE 0
 #define BET_SUBTITLE_SKINS 1
@@ -183,10 +183,10 @@ static Radians f_BadgeGlowAngle = 0.0f;
 #define MATCH_RESULT_SPACING 128
 #define MATCH_RESULT_Y 64
 /* And where it draws the characters */
-#define RESULT_CHARACTER_LEFT -56.0f
+#define RESULT_CHARACTER_LEFT (-56.0f)
 #define RESULT_CHARACTER_SPACING 112.0f
-#define RESULT_CHARACTER_Y -80.0f
-#define RESULT_CHARACTER_Z -500.0f
+#define RESULT_CHARACTER_Y (-80.0f)
+#define RESULT_CHARACTER_Z (-500.0f)
 #define RESULT_CHARACTER_SCALE 5.0f
 extern const char f_DecimalFormat[];
 
@@ -1575,7 +1575,7 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
 #define FLAP_SHADE_RANGE 63.0f
 #define FLAP_LIT_SHADE 255.0f
 #define FLAP_FACING_SHADE (FLAP_LIT_SHADE - FLAP_SHADE_RANGE - 1.0f)
-#define FLAP_DISTANCE -290.0f
+#define FLAP_DISTANCE (-290.0f)
 #define FLAP_NAME_X (-62)
 #define FLAP_GLYPH_GROUP_COUNT 10
 #define LEADERBOARD_FACE_LEFT 66

@@ -30,7 +30,7 @@
 /* Reaction sounds take turns on the channels from the first up to the last */
 #define FIRST_REACTION_CHANNEL 4
 #define LAST_REACTION_CHANNEL 7
-#define NO_REACTION_SOUND -1
+#define NO_REACTION_SOUND (-1)
 
 /* The camera keeps this many course units above the ground */
 #define CAMERA_GROUND_CLEARANCE 0x1E00

@@ -13,7 +13,7 @@
 #define SOUND_AT_FULL_SCALE(soundId) (soundId), SOUND_FULL_SCALE
 
 /* The volume argument that asks for the sound's own volume */
-#define CHARACTER_SOUND_VOLUME -1
+#define CHARACTER_SOUND_VOLUME (-1)
 
 /* The one character whose sounds play without reverb */
 #define DRY_CHARACTER CHARACTER_BABY_MARIO

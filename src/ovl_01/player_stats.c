@@ -50,7 +50,7 @@
  * cells */
 #define STATS_GRID_COLUMN_COUNT 5
 #define STATS_GRID_ROW_COUNT 4
-#define STATS_CELL_EMPTY -1
+#define STATS_CELL_EMPTY (-1)
 
 /* The rows of the Best Shots grid, by score kind */
 enum BestShotRow {
@@ -99,7 +99,7 @@ enum GatheredBestShots {
  * UNUSED_BET_COLUMN
  */
 #define OFFERING_BET_SET_COUNT BET_SET_MINI_GOLF_FOUR_PLAYER
-#define UNUSED_BET_COLUMN -1
+#define UNUSED_BET_COLUMN (-1)
 /* The bet icons are 24x24, and DrawBetIcon shows each of their two frames
  * for 4 video frames */
 #define BET_ICON_SIZE 24
@@ -129,7 +129,7 @@ enum GatheredBestShots {
 /* DrawTurnedPageArrows turns the page arrows a quarter turn each way, and draws
  * them as squares away from the camera */
 #define TURNED_ARROW_ANGLE 90.0f
-#define TURNED_ARROW_Z -100.0f
+#define TURNED_ARROW_Z (-100.0f)
 #define TURNED_ARROW_NEAR 10.0f
 #define TURNED_ARROW_FAR 2000.0f
 #define TURNED_ARROW_VERTEX_COUNT 4
@@ -176,7 +176,7 @@ enum StatsDirection {
  * an amount */
 #define BET_STAKE_LEVEL_COUNT 6
 /* The betStakeLevels value of a bet that ApplyBetPreset's preset leaves out */
-#define NO_BET -1
+#define NO_BET (-1)
 /* Where UpdateBetSettings types the chosen bet's explanation, and its first
  * message
  */
@@ -186,7 +186,7 @@ enum StatsDirection {
 
 /* Each player's choice of handicap, and where the screen's slide starts */
 #define HANDICAP_CHOICE_COUNT 37
-#define HANDICAP_SLIDE_START -512
+#define HANDICAP_SLIDE_START (-512)
 
 /*
  * GCC 2.7 emits each string constant once per file, where it is first used,

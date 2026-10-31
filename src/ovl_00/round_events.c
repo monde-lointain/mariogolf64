@@ -171,11 +171,11 @@ typedef struct LakituVelocity {
 /* The effect sits a little below the ball's center */
 #define CONTACT_DROP_PER_PIN_SCALE 0.3f
 #define CONTACT_STYLE_SOUND_CHANNEL 15
-#define CONTACT_PUTT_Y -2
+#define CONTACT_PUTT_Y (-2)
 /* The banner that shows "+N", which BANNER_STROKES_OVER_PAR + N starts */
 #define BANNER_OVER_PAR_NUMBER (BANNER_STROKES_OVER_PAR + 1)
 #define BANNER_LETTER_SPACING 32
-#define BANNER_Z -300.0f
+#define BANNER_Z (-300.0f)
 /* The board starts face down and turns this far each frame until it faces the
  * camera */
 #define FLIP_MESSAGE_DEGREES_PER_FRAME 18.0f
@@ -183,7 +183,7 @@ typedef struct LakituVelocity {
 #define FLIP_MESSAGE_GROWTH_PER_FRAME 0.1f
 /* The board hinges on its left edge */
 #define FLIP_MESSAGE_BOARD_Y 20.0f
-#define FLIP_MESSAGE_BOARD_Z -300.0f
+#define FLIP_MESSAGE_BOARD_Z (-300.0f)
 #define FLIP_MESSAGE_BOARD_ALPHA 159
 
 /* Each letter image follows the images' header and palette */
@@ -227,7 +227,7 @@ typedef struct LakituVelocity {
 #define ASSET_LAKITU 0x64E
 #define LAKITU_BACK_IMAGE_OFFSET 0x1008
 #define LAKITU_START_X 384.0f
-#define LAKITU_START_Y -64.0f
+#define LAKITU_START_Y (-64.0f)
 #define LAKITU_START_SCALE 0.7f
 /* Lakitu flies in to its hover point over LAKITU_ARRIVE_DRAW draws */
 #define LAKITU_HOVER_X 192.0f
@@ -241,7 +241,7 @@ typedef struct LakituVelocity {
 #define LAKITU_LEAVE_ACCELERATION_X 0.2f
 #define LAKITU_LEAVE_ACCELERATION_Y 0.1f
 #define LAKITU_LEAVE_GROWTH 0.01f
-#define LAKITU_GONE_X -64.0f
+#define LAKITU_GONE_X (-64.0f)
 #define LAKITU_FRAME_SIZE 0x1008
 #define LAKITU_WIDTH 56
 #define LAKITU_STRIP_HEIGHT 32
@@ -1865,7 +1865,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawPuttCaption);
 #define READY_GO_TURN_PER_FRAME (M_PI / 12)
 #define GO_GROWTH_PER_FRAME 2.0f
 #define GO_FADE_PER_FRAME 32
-#define READY_GO_DISTANCE -300.0f
+#define READY_GO_DISTANCE (-300.0f)
 #define READY_GO_VERTEX_COUNT 12
 #define READY_GO_STRIP_COUNT 5
 #define READY_WIDTH 160
@@ -2960,7 +2960,7 @@ void ShowWindFlyGuy(s32 show) {
 #define WIND_STREAK_IMAGE_WIDTH 48
 #define WIND_STREAK_IMAGE_HEIGHT 128
 #define WIND_STREAK_IMAGE_MASK_T 7
-#define WIND_STREAK_DEPTH -300.0f
+#define WIND_STREAK_DEPTH (-300.0f)
 #define FLY_GUY_IMAGE_WIDTH 32
 #define FLY_GUY_IMAGE_HEIGHT 32
 #define WIND_FLY_GUY_SOUND_CHANNEL 10
