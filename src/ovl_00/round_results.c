@@ -1136,7 +1136,6 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank);
  * Draws the place icon for a rank. With RANK_AS_PLACE, places past 3rd
  * are written as digits followed by a suffix.
  */
-#ifdef NON_MATCHING
 void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
   Gfx* gfx = *displayListHead;
   s32 suffix;
@@ -1208,8 +1207,10 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
     }
 
     LoadLargePalette(&gfx, ImageBody(image));
-    for (i = 0, stripY = y, offset = LARGE_PALETTED_TEXELS_OFFSET;
-        i != RANK_BANNER_STRIP_COUNT; i++) {
+    for (i = 0; i != RANK_BANNER_STRIP_COUNT; i++) {
+      offset = LARGE_PALETTED_TEXELS_OFFSET +
+          (i * RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT);
+      stripY = y + (i * RANK_BANNER_STRIP_HEIGHT);
       LoadTextureBlock(&gfx, image + offset, G_IM_FMT_CI, G_IM_SIZ_8b,
           RANK_BANNER_WIDTH, RANK_BANNER_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&gfx, QuarterPixels(x + RANK_BANNER_X_OFFSET),
@@ -1217,8 +1218,6 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
           QuarterPixels(x + RANK_BANNER_X_OFFSET + RANK_BANNER_WIDTH),
           QuarterPixels(stripY + RANK_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
           0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      stripY += RANK_BANNER_STRIP_HEIGHT;
-      offset += RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT;
     }
   } else {
     LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
@@ -1239,9 +1238,6 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRank);
-#endif
 
 void DrawResultsLabel(Gfx** displayListHead, s32 x, s32 y, s32 label) {
   Gfx* gfx = *displayListHead;
