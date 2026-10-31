@@ -116,7 +116,7 @@ extern const char f_DrawText[];
 extern const char f_WinText[];
 extern const char f_LoseText[];
 /* " ", still in the assembly's rodata */
-extern char D_8024C848_ovl_09[];
+extern char f_BlankBetName[];
 
 static s32 f_MatchResultFrameCount = 0;
 static u8 f_WinMarkFrames[] = {3, 4, 5, 0, 1, 2, 3, 4, 5, 0};
@@ -124,16 +124,16 @@ static char f_CarryOverText[] = "Carry over";
 /* The angle the colors of "Win" are at */
 static Radians f_WinColorAngle = 0.0f;
 static char* f_BetNames[BET_COUNT] = {
-    D_8024C848_ovl_09,
-    D_8024C848_ovl_09,
-    D_8024C848_ovl_09,
-    D_8024C848_ovl_09,
-    D_8024C848_ovl_09,
-    D_8024C848_ovl_09,
-    D_8024C848_ovl_09,
+    f_BlankBetName,
+    f_BlankBetName,
+    f_BlankBetName,
+    f_BlankBetName,
+    f_BlankBetName,
+    f_BlankBetName,
+    f_BlankBetName,
 };
-/* Read by no routine */
-static char D_8024C4EC_ovl_09[] UNUSED = "Carry";
+/* Read by no routine; the start of f_CarryOverText */
+static char f_UnusedCarryText[] UNUSED = "Carry";
 /* The headings blink between their two images, a frame each this many draws */
 static s32 f_BetBlinkFrame = 0;
 static s32 f_BetBlinkTime = 0;
@@ -1028,7 +1028,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C848_ovl_09);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BlankBetName);
 
 /* The bets page: a grid with a column for each bet being played and one for the
  * totals */
@@ -1404,7 +1404,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawBetsPage);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_TwoDigitFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C86C_ovl_09);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BetDashText);
 
 /* The Speed Golf page: the front nine's times on the left, the back nine's on
  * the right */
@@ -3083,20 +3083,20 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawScoresPage);
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_DecimalFormat);
 
 #ifndef NON_MATCHING
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C964_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C968_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C96C_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C974_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C97C_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C984_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C988_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C990_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C994_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C998_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C9A0_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C9A8_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C9B0_ovl_09);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C9B8_ovl_09);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoreTotalFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_EmptyFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_EvenStandingText);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_UpStandingFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_DownStandingFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoreGlyphFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_PointsStandingFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_EvenParText);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_OverParFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_UnderParFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresTwentyDegrees);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresPi);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresHalfPi);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresTenDegrees);
 #endif
 
 /*
