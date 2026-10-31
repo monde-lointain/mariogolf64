@@ -375,21 +375,21 @@ void ConvertMatrixToFixed(Mat4 matrix, Mtx* fixedMatrix) {
 }
 
 /* No code calls this */
-#ifdef NON_MATCHING
 void SetTriangleNormal(Vtx* vertices, s32 firstIndex, s32 secondIndex,
     s32 thirdIndex, s32 target) {
   Vtx_tn* first = (Vtx_tn*)((firstIndex * sizeof(Vtx)) + (u32)vertices);
   Vtx_tn* second = (Vtx_tn*)((secondIndex * sizeof(Vtx)) + (u32)vertices);
   Vtx_tn* third = (Vtx_tn*)((thirdIndex * sizeof(Vtx)) + (u32)vertices);
   s32 firstEdgeX = second->ob[AXIS_X] - first->ob[AXIS_X];
-  s32 firstEdgeY = second->ob[AXIS_Y] - first->ob[AXIS_Y];
+  /* Written to read first's coordinate first, to match */
+  s32 firstEdgeY = -first->ob[AXIS_Y] + second->ob[AXIS_Y];
   s32 firstEdgeZ = second->ob[AXIS_Z] - first->ob[AXIS_Z];
   s32 secondEdgeX = third->ob[AXIS_X] - second->ob[AXIS_X];
   s32 secondEdgeY = third->ob[AXIS_Y] - second->ob[AXIS_Y];
   s32 secondEdgeZ = third->ob[AXIS_Z] - second->ob[AXIS_Z];
   f32 normalX = (firstEdgeY * secondEdgeZ) - (firstEdgeZ * secondEdgeY);
   f32 normalY = (firstEdgeZ * secondEdgeX) - (firstEdgeX * secondEdgeZ);
-  f32 normalZ = (firstEdgeX * secondEdgeY) - (secondEdgeX * firstEdgeY);
+  f32 normalZ = (firstEdgeX * secondEdgeY) - (firstEdgeY * secondEdgeX);
   f32 scale = NORMAL_LENGTH /
       sqrtf((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
   s8 scaledX;
@@ -428,7 +428,3 @@ void SetTriangleNormal(Vtx* vertices, s32 firstIndex, s32 secondIndex,
       break;
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/cpu_projection", SetTriangleNormal);
-#endif
