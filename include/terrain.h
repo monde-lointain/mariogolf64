@@ -187,7 +187,7 @@ extern s32 g_TerrainCodeBlockCount;
  * Set before some ground height queries and around PrepareHoleScene's
  * scene set-up, but read by no routine
  */
-extern s32 D_800BB0E8;
+extern s32 g_UnusedGroundQueryFlag;
 
 /*
  * The vertices of a ground tile's edge or middle-line midpoints go through a

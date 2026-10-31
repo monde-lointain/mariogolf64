@@ -609,7 +609,7 @@ void EndFlightCamera(void) {
   g_AreCharactersDrawn = TRUE;
   g_IsCupViewShown = FALSE;
   f_CupViewHoldCount = 0;
-  D_800C5AAC = 0;
+  g_BallTrailState = BALL_TRAIL_OFF;
   g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
   StartHudAnimation(HUD_ANIMATION_NONE);
   g_InsetView.animation = INSET_VIEW_STILL;
@@ -3228,7 +3228,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
       StartContactEffect(CONTACT_EFFECT_NONE);
     }
   } else if (g_SimulatedShot.pathFlags[step]) {
-    D_800C5AAC = 2;
+    g_BallTrailState = BALL_TRAIL_HELD;
     StartContactEffect(CONTACT_EFFECT_FADE);
     if (g_IsModuleAlive[MODULE_GOLF_BALLS] ||
         ReportModuleNotAlive(MODULE_GOLF_BALLS)) {

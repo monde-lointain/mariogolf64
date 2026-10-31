@@ -114,8 +114,17 @@ extern RoundHud g_RoundHud;
 extern s32 g_MatrixBufferIndex;
 /* How far the shot panel still has to slide in, down to 0 */
 extern s32 g_ShotPanelOffsetX;
-/* The ball trail's state; DrawBallTrail draws nothing while it is 0 */
-extern s32 D_800C5AAC;
+
+/* What DrawBallTrail does with the ball's trail each frame */
+enum BallTrailStateValue {
+  BALL_TRAIL_OFF, /* Not drawn */
+  BALL_TRAIL_RECORDING, /* Drawn, adding the ball's position; never set */
+  BALL_TRAIL_HELD /* Drawn as it is */
+};
+
+typedef s32 BallTrailState;
+/* The ball trail's state */
+extern BallTrailState g_BallTrailState;
 
 void PrepareHoleDisplay(void);
 void InitRoundHud(void);

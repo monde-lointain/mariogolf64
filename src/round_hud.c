@@ -417,7 +417,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
 #define TEE_GROUND_PANEL_OFFSET_Y -3
 #define SHOT_PANEL_START_OFFSET_X 64
 /* "%02d:%02d:%02d", which DrawRoundHud also uses */
-extern char D_800D1C84[];
+extern char f_ElapsedTimeFormat[];
 
 s32 GetClubSlotsState(void);
 void DrawClubSlots(Gfx** displayListHead);
@@ -454,7 +454,8 @@ void FreeShotEffectImages(void);
 
 static void* f_SceneryBillboardHeap = NULL;
 static s32 f_ClubNameImageIndex = 0;
-static s32 D_800C5478 = 0;
+/* Cleared by InitRoundHud, and read by no routine */
+static s32 f_UnusedHudInitWord = 0;
 AssetId g_CharacterImageAssets[CHARACTER_COUNT] = {0x7BC, 0x74C, 0x7A0, 0x73E,
     0x784, 0x7AE, 0x7CA, 0x7D8, 0x768, 0x792, 0x7E6, 0x75A, 0x776, 0x984, 0x7F4,
     0x802, 0x810, 0x81E};
@@ -542,7 +543,7 @@ static Vtx f_LieIconVertices[8] = {
  * Read by no routine. Two display lists of the same triangles, over vertices
  * 0 to 13 and then 14 to 27, where an ArrowShape has its body and its outline
  */
-static Gfx D_800C5928[] UNUSED = {
+static Gfx f_UnusedArrowTriangles[] UNUSED = {
     gsSP2Triangles(10, 13, 12, 0, 10, 12, 11, 0),
     gsSP2Triangles(3, 1, 8, 0, 3, 8, 10, 0),
     gsSP2Triangles(13, 9, 2, 0, 13, 2, 6, 0),
@@ -575,7 +576,7 @@ static s32 f_SceneryState = SCENERY_UNLOADED;
 /* Set while the overlay of the course selection is loaded for the hole */
 static Boolean f_IsCourseSelectLoaded = FALSE;
 /* Read by no routine */
-static Gfx D_800C59E8[] UNUSED = {
+static Gfx f_UnusedNoOpDisplayList[] UNUSED = {
     gsDPNoOp(),
     gsSPEndDisplayList(),
 };
@@ -598,10 +599,10 @@ static Vtx f_BallTrailVertices[4] = {
     {{{48, -1, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
     {{{48, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}}};
 /* Read by no routine */
-static s32 D_800C5AA0 UNUSED = 0;
+static s32 f_UnusedWordBeforeGridScroll UNUSED = 0;
 static f32 f_GreenGridScroll = 0.0f;
 static s32 f_BallTrailHead = 0; /* The latest position */
-s32 D_800C5AAC = 0;
+BallTrailState g_BallTrailState = BALL_TRAIL_OFF;
 static Radians f_WindIconPulseAngle = 0.0f;
 static Lights1 f_WindArrowLights =
     gdSPDefLights1(0x80, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 80, -80, 73);
@@ -670,7 +671,7 @@ static s32 f_SparkTrailFrameTimer = 0;
  * drawn */
 static s32 f_SparkTrailBufferIndex = 0;
 /* Read by no routine */
-static s32 D_800C5E1C UNUSED = 0;
+static s32 f_UnusedWordAfterSparkTrailIndex UNUSED = 0;
 static f32 f_HoleFlagWavePhase = 0.0f;
 static s32 f_ShotOffsetMarkerFrame = 0;
 static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] = {
@@ -678,7 +679,7 @@ static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] = {
 static s32 f_AnimatedIconFrameTime = 0;
 static s32 f_AnimatedIconFrame = 0;
 /* Read by no routine */
-static s32 D_800C5E50[4] UNUSED = {0, 1, 2, 1};
+static s32 f_UnusedIconFrameOrder[4] UNUSED = {0, 1, 2, 1};
 static s32 f_AnimatedIconImageIndex = 0;
 static f32 f_AnimatedIconX = 0.0f;
 static f32 f_AnimatedIconY = 0.0f;
@@ -691,14 +692,14 @@ static s32 f_TestChannelIndex = 0;
 static s32 f_TestColorIndex = 0;
 static Boolean f_IsTestGradientShown = FALSE;
 /* Read by no routine */
-static s32 D_800C5E98 UNUSED = 0;
+static s32 f_UnusedWordAfterTestGradient UNUSED = 0;
 /* The HUD's letterbox height, which DrawLetterbox grows each frame */
 static s32 f_LetterboxHeight = 0;
 static s32 f_PinFlagTime = 0;
 static s32 f_RingFrame = 0;
 static s32 f_RingFrameTime = 0;
 /* Read by no routine */
-static Gfx D_800C5EB0[] UNUSED = {
+static Gfx f_UnusedEmptyHudDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
 static u16 f_WhiteDistancePalette[] = {
@@ -739,7 +740,7 @@ static s32 f_ShotOffsetMarkerTexelOffset;
 static void* f_LieImage;
 
 /* Read by no routine */
-static u8 D_800E213C[4] UNUSED;
+static u8 f_UnusedBytesBeforeClubHead[4] UNUSED;
 
 static void* f_ClubHeadImage;
 /* The selected club's name image, loaded into each buffer in turn as
@@ -755,14 +756,16 @@ static void* f_RingImages;
 static void* f_RestLabelImage;
 static void* f_FlatLabelImage;
 static void* f_DownLabelImage;
-static void* D_800E2178;
+/* Loaded and freed with the HUD's images, but never drawn */
+static void* f_UnusedRoundImage;
 static void* f_UpLabelImage;
 static void* f_ParImage;
 static void* f_ShotOffsetMarkerImage;
 static void* f_WindIconImage;
 static s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT];
 static s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT];
-static s32 D_800E21BC;
+/* Cleared by InitRoundHud as it sets the scissor, and read by no routine */
+static s32 f_UnusedHudScissorWord;
 static void* f_HoleImage;
 static Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT]
                              [HOLE_FLAG_VERTEX_COUNT];
@@ -803,7 +806,7 @@ void InitRoundHud(void) {
   s32 column;
   Vtx* vertex;
 
-  D_800C5478 = 0;
+  f_UnusedHudInitWord = 0;
   for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
     vertex = f_HoleFlagVertices[0][grid];
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
@@ -1022,8 +1025,9 @@ void LoadSceneryImages(void) {
   ReadEncodedAsset(f_DownLabelImage, &asset);
   f_UpLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_569, &asset));
   ReadEncodedAsset(f_UpLabelImage, &asset);
-  D_800E2178 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_723, &asset));
-  ReadEncodedAsset(D_800E2178, &asset);
+  f_UnusedRoundImage =
+      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_723, &asset));
+  ReadEncodedAsset(f_UnusedRoundImage, &asset);
   g_DistanceSignImage =
       AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_SIGN_IMAGE, &asset));
   ReadEncodedAsset(g_DistanceSignImage, &asset);
@@ -1061,7 +1065,7 @@ void FreeSceneryImages(void) {
     FreeMemory(&f_FlatLabelImage);
     FreeMemory(&f_DownLabelImage);
     FreeMemory(&f_UpLabelImage);
-    FreeMemory(&D_800E2178);
+    FreeMemory(&f_UnusedRoundImage);
     FreeMemory(&g_DistanceSignImage);
     FreeFireworks();
   }
@@ -1224,7 +1228,7 @@ void LoadRoundHud(void) {
   g_HudScissor.left = HUD_MARGIN;
   g_HudScissor.top = HUD_MARGIN;
   g_HudScissor.right = SCREEN_WIDTH - HUD_MARGIN;
-  D_800E21BC = 0;
+  f_UnusedHudScissorWord = 0;
   g_HudScissor.bottom = SCREEN_HEIGHT - HUD_MARGIN;
   g_NoiseTexels = AllocMemory(NOISE_GRID_SIZE * NOISE_GRID_SIZE);
   g_BlendedTextureScrollingLayer = AllocMemory(
@@ -1753,7 +1757,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
     rowSpacing = GREEN_GRID_LANDING_ROW_SPACING;
     center[AXIS_Z] =
         (sinf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_Z];
-    D_800BB0E8 = 1;
+    g_UnusedGroundQueryFlag = 1;
     center[AXIS_Y] = GetGroundHeight(center[AXIS_X], center[AXIS_Z]);
     rowCount = GREEN_GRID_LANDING_ROW_COUNT;
     columnSpacing = GREEN_GRID_LANDING_WIDTH / columnCount;
@@ -1806,7 +1810,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       }
 
       if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
-        D_800BB0E8 = 1;
+        g_UnusedGroundQueryFlag = 1;
         points[i][AXIS_Y] =
             GetGroundHeight(points[i][AXIS_X], points[i][AXIS_Z]);
         f_GreenGridHeights[i] = points[i][AXIS_Y];
@@ -2059,7 +2063,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1B10);
+INCLUDE_RODATA("asm/nonmatchings/round_hud", f_GreenGridLandingColumnCount);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", DrawGreenGrid);
 #endif
@@ -2079,8 +2083,6 @@ void ResetBallTrail(void) {
   }
 }
 
-/* Adds the ball's position to its trail each frame */
-#define BALL_TRAIL_RECORDING 1
 /* The trail is drawn this far below the ball's center, scaled like the pin */
 #define BALL_TRAIL_DROP 0.27f
 /* And this many depth steps nearer the camera, scaled like the pin */
@@ -2100,8 +2102,8 @@ void ResetBallTrail(void) {
 
 /*
  * Draws the ball's trail through its recent positions as screen-space quads
- * that fade out with age. While D_800C5AAC is BALL_TRAIL_RECORDING it also
- * adds the ball's current position.
+ * that fade out with age. While g_BallTrailState is BALL_TRAIL_RECORDING it
+ * also adds the ball's current position.
  *
  * Doesn't match: a display list pointer's spill is scheduled differently,
  * and the offsets' floating-point registers are swapped.
@@ -2118,8 +2120,8 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 offsetX;
   f32 offsetY;
 
-  if (D_800C5AAC != 0 && g_RoundHud.unk17) {
-    if (D_800C5AAC == BALL_TRAIL_RECORDING) {
+  if (g_BallTrailState != BALL_TRAIL_OFF && g_RoundHud.unk17) {
+    if (g_BallTrailState == BALL_TRAIL_RECORDING) {
       if (++f_BallTrailHead == BALL_TRAIL_LENGTH) {
         f_BallTrailHead = 0;
       }
@@ -4137,8 +4139,9 @@ void DrawRoundHud(CameraView* view) {
                      ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
         HUNDREDTHS_PER_SECOND;
     totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
-    sprintf(g_PrintBuffer, D_800D1C84, totalSeconds / SECONDS_PER_MINUTE,
-        totalSeconds % SECONDS_PER_MINUTE, hundredths);
+    sprintf(g_PrintBuffer, f_ElapsedTimeFormat,
+        totalSeconds / SECONDS_PER_MINUTE, totalSeconds % SECONDS_PER_MINUTE,
+        hundredths);
     DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - g_ShotPanelOffsetX,
         PANEL_STOPWATCH_Y, g_PrintBuffer);
   }
@@ -4190,11 +4193,11 @@ void DrawRoundHud(CameraView* view) {
 INCLUDE_ASM("asm/nonmatchings/round_hud", DrawRoundHud);
 #endif
 
-INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1C84);
+INCLUDE_RODATA("asm/nonmatchings/round_hud", f_ElapsedTimeFormat);
 
 /* DrawRoundHud's, which the C version generates itself */
 #ifndef NON_MATCHING
-INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1C98);
+INCLUDE_RODATA("asm/nonmatchings/round_hud", f_TwoToThe32);
 
 INCLUDE_RODATA("asm/nonmatchings/round_hud", jtbl_800D1CA0);
 #endif
@@ -4357,7 +4360,7 @@ void DrawHoleIntroText(Gfx** displayListHead) {
       seconds = totalSeconds % SECONDS_PER_MINUTE;
       minutes = totalSeconds / SECONDS_PER_MINUTE;
       SetUpGradientTextDrawing(&gfx, 0);
-      sprintf(g_PrintBuffer, D_800D1C84, minutes, seconds, hundredths);
+      sprintf(g_PrintBuffer, f_ElapsedTimeFormat, minutes, seconds, hundredths);
       DrawLargeTextWithShadow(&gfx, STOPWATCH_X, STOPWATCH_Y, g_PrintBuffer,
           STOPWATCH_ENV_COLOR, STOPWATCH_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
     } else {
