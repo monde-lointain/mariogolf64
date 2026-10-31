@@ -1926,7 +1926,7 @@ void DrawCharacter(u32 slotIndex) {
           lights =
               g_HoleSetup.conditions.isRaining ? f_RainLights : f_DryLights;
           if (!AddReactionLight(&gfx, &lights[g_DrawBufferIndex])) {
-            gSPSetLights2(gfx++, lights[g_DrawBufferIndex]);
+            IN_OWN_BLOCK(gSPSetLights2(gfx++, lights[g_DrawBufferIndex]));
             SaveLights(lights[g_DrawBufferIndex]);
           }
 
