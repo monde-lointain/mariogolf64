@@ -3221,9 +3221,8 @@ void DrawShotOffsetMarker(void) {
           (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X)),
       QuarterPixels(f_ShotOffsetMarkerYs[0] +
           (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y) + f_HudOffsetY),
-      QuarterPixels(f_ShotOffsetMarkerXs[0] +
-          (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X) +
-          SHOT_OFFSET_MARKER_SIZE),
+      QuarterPixels(f_ShotOffsetMarkerXs[0] + SHOT_OFFSET_MARKER_SIZE +
+          (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X)),
       QuarterPixels(f_ShotOffsetMarkerYs[0] +
           (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y +
               SHOT_OFFSET_MARKER_SIZE) +

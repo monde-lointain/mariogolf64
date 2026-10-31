@@ -913,9 +913,9 @@ void DrawStatsScrollArrows(Gfx** displayListHead) {
 
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress((u32)f_CourseStatsDigitsAndArrows +
-              (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE +
               (PALETTED_TEXELS_OFFSET +
-                  (STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE))),
+                  (STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE)) +
+              (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE),
           G_IM_FMT_CI, STATS_ARROW_WIDTH, STATS_ARROW_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

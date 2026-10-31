@@ -765,7 +765,7 @@ void DrawPrompt(Gfx** displayListHead) {
     DrawTextureRect(&gfx, QuarterPixels(YES_CENTER_X - halfWidth),
         QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
         QuarterPixels(YES_CENTER_X + halfWidth),
-        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight),
+        QuarterPixels(halfHeight + (cloudHeight / 4) + CHOICES_MIDDLE_Y),
         G_TX_RENDERTILE, 0, 0,
         CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);

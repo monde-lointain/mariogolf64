@@ -804,8 +804,8 @@ void DrawClubSlots(Gfx** displayListHead) {
       LoadTextureBlock(&gfx,
           f_Slots->buttonsImage +
               (LARGE_PALETTED_TEXELS_OFFSET +
-                  (buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH) +
-                  (stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH)),
+                  (stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH) +
+                  (buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH)),
           G_IM_FMT_CI, G_IM_SIZ_8b, BUTTON_WIDTH, BUTTON_STRIP_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       gDPPipeSync(gfx++);

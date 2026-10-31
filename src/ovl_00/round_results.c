@@ -2056,8 +2056,8 @@ void DrawResultsBanner(Gfx** displayListHead) {
             QuarterPixels(top + TROPHY_BOTTOM),
             QuarterPixels(TROPHY_CENTER_X + f_BannerX +
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-            QuarterPixels(f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] +
-                TROPHY_BOTTOM + top),
+            QuarterPixels(f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] + top +
+                TROPHY_BOTTOM),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
       }

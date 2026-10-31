@@ -1338,9 +1338,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
         QuarterPixels(offsetY + HANDICAP_BANNER_TOP +
             (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT)),
         QuarterPixels(HANDICAP_BANNER_RIGHT),
-        QuarterPixels(offsetY + HANDICAP_BANNER_TOP +
-            (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT) +
-            HANDICAP_BANNER_STRIP_HEIGHT),
+        QuarterPixels(offsetY + (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT) +
+            HANDICAP_BANNER_TOP + HANDICAP_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0, HANDICAP_BANNER_STEP_X, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -1419,10 +1418,10 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   for (arrowIndex = 0; arrowIndex != MENU_ARROW_COUNT; arrowIndex++) {
     if (arrowIndex == MENU_ARROW_LEFT) {
       IN_OWN_BLOCK(gDPLoadTextureTile_4b(gfx++,
-          TextureAddress((u32)f_StatsGreenArrows +
-              ((f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE) +
-                  PALETTED_TEXELS_OFFSET +
-                  (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE))),
+          TextureAddress(((f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE) +
+                             PALETTED_TEXELS_OFFSET +
+                             (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE)) +
+              (u32)f_StatsGreenArrows),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
           GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
           G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, HANDICAP_ARROW_MASK,
@@ -1431,8 +1430,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)f_StatsGreenArrows +
               ((f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE) +
-                  PALETTED_TEXELS_OFFSET +
-                  (arrowIndex * GREEN_ARROW_IMAGE_SIZE))),
+                  (arrowIndex * GREEN_ARROW_IMAGE_SIZE) +
+                  PALETTED_TEXELS_OFFSET)),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
           GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

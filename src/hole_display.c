@@ -2050,14 +2050,14 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         }
 
         gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
-            QuarterPixels(SCREEN_BORDER + clip + y),
+            QuarterPixels(SCREEN_BORDER + y + clip),
             QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
             QuarterPixels(bottom), G_TX_RENDERTILE, yawOffset,
             TexelCoordinate(clip), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
       } else {
         /* The last strip stretches to the bottom of the screen */
         gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
-            QuarterPixels(SCREEN_BORDER + clip + y),
+            QuarterPixels(SCREEN_BORDER + y + clip),
             QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
             QuarterPixels(SCREEN_HEIGHT - SCREEN_BORDER), G_TX_RENDERTILE,
             yawOffset, TexelCoordinate(clip), COPY_MODE_TEXEL_STEP,

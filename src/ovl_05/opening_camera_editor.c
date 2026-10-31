@@ -508,7 +508,7 @@ void UpdateCameraEditor(void) {
       offsetY = g_CameraEditor.targets[index][1] - y;
       offsetZ = g_CameraEditor.targets[index][2] - z;
       distance = sqrtf(
-          (offsetX * offsetX) + (offsetY * offsetY) + (offsetZ * offsetZ));
+          (offsetX * offsetX) + (offsetZ * offsetZ) + (offsetY * offsetY));
       if (distance < EDITOR_ARRIVAL_DISTANCE) {
         x = g_CameraEditor.targets[index][0];
         y = g_CameraEditor.targets[index][1];

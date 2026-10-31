@@ -734,7 +734,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, QuarterPixels(COURSE_IMAGE_LEFT),
           QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
-              f_SlideOffset + RING_SHOT_COURSE_IMAGE_TOP),
+              RING_SHOT_COURSE_IMAGE_TOP + f_SlideOffset),
           QuarterPixels(COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH),
           QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
               f_SlideOffset + RING_SHOT_COURSE_IMAGE_TOP +
@@ -852,7 +852,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, QuarterPixels(COURSE_IMAGE_LEFT),
           QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
-              f_SlideOffset + HOLE_COURSE_IMAGE_TOP),
+              HOLE_COURSE_IMAGE_TOP + f_SlideOffset),
           QuarterPixels(COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH),
           QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
               f_SlideOffset + HOLE_COURSE_IMAGE_TOP +
