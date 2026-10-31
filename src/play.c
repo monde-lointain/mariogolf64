@@ -539,10 +539,10 @@ void PlayContestMovies(void) {
  * Skins Match, Club Slots and the one-on-one matches, once the hole is decided
  * and every player is done or waiting; otherwise, once every player is done.
  *
- * Doesn't match: in the one-on-one matches' test, GCC fills the branch's delay
- * slot with the TRUE result where the original fills it with the FALSE one, and
- * so branches one word short. Returning through isDone in both tests is
- * needed for even that: the plain i == playerCount gives a set-on-equal.
+ * Doesn't match: in the one-on-one matches' test, the original returns FALSE
+ * as a literal 0, where GCC copies isDone's register, which holds 0 there; 2
+ * words differ. Returning FALSE instead gives 24, and the other forms tried
+ * give 6 or more.
  */
 #ifdef NON_MATCHING
 s32 IsHoleOver(void) {
@@ -590,9 +590,10 @@ s32 IsHoleOver(void) {
             }
           }
 
-          /* Returning isDone, unlike the FALSE above, to match */
+          /* Returning isDone, unlike the FALSE above, and setting it in its
+           * own block, to match */
           if (i == g_GameState.playerCount) {
-            isDone = TRUE;
+            IN_OWN_BLOCK(isDone = TRUE);
             return isDone;
           }
 
