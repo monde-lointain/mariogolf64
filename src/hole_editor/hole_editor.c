@@ -681,10 +681,18 @@ static s32 f_CUpPickedHeight = 0;
 static s32 f_LastHeightEditKind = 0; /* The last frame's HEIGHT_EDIT_* */
 
 /*
- * Declared without a prototype, as BlendGroundAroundPoint passes it a float
- * height, which goes as a double
+ * The original declares this without a prototype, so BlendGroundAroundPoint's
+ * float height goes as a double, in the registers of both the height and the
+ * shade: the routine takes the double's high word as the height and its low
+ * word as the shade, and BLENDED_POINT_SHADE is lost. AVOID_UB gives it its
+ * prototype, so that the height arrives as an s32.
  */
+#ifdef AVOID_UB
+NO_RESULT SetGroundPointHeightAndShade(
+    s32 column, s32 row, s32 height, s32 shade);
+#else
 NO_RESULT SetGroundPointHeightAndShade();
+#endif
 
 /* UpdateHoleFileMenu's menu */
 /* Read by no routine */
