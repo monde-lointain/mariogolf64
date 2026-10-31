@@ -1560,6 +1560,12 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  * hits, treating each billboard as standing across the ball's path. It
  * sets the hit mask cell there and the fraction of the way along the path,
  * which stays above 1 when nothing is hit, and returns whether something is.
+ *
+ * Doesn't match: GCC puts fabsf's abs.s in the delay slot of the branch for
+ * the first Abs, inverting it, where the original issues it before a
+ * branch-likely, and it stores startY to its argument slot one instruction
+ * earlier. Casting either side of the division or swapping the Abs terms
+ * changes nothing or makes it worse.
  */
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
