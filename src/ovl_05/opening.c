@@ -4205,7 +4205,7 @@ void DrawOpeningBurst(Gfx** displayListHead) {
         G_IM_FMT_CI, BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
+    IN_OWN_BLOCK(gDPPipeSync(gfx++));
     gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
         QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
         (BURST_IMAGE_SIZE << 10) / (right - left),
