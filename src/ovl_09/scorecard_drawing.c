@@ -1603,7 +1603,7 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * Doesn't match: the target keeps displayListHead in a saved register, where
  * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps'
  * loop also reads the flip angles through the stagger's index instead of a
- * pointer of their own. 224 words differ.
+ * pointer of their own. 206 words differ.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -1763,8 +1763,9 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
         g_Scorecard.content.isRowFlipping[i] == TRUE) {
-      shade = 0xFF;
-      if (!(g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE)) {
+      if (g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE) {
+        shade = 0xFF;
+      } else {
         shade = FLAP_LIT_SHADE -
             (sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) *
                 FLAP_SHADE_RANGE);

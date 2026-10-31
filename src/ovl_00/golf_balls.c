@@ -457,7 +457,7 @@ void ResetGolfBalls(void) {
  * of the hole, places the current player's ball from the ball simulations,
  * and moves and fades the ball's afterimage.
  *
- * Doesn't match: 330 words differ. The original reads g_GameState's fields
+ * Doesn't match: 236 words differ. The original reads g_GameState's fields
  * through one base register, and its first loop steps its pointers with
  * other offsets and registers.
  */
@@ -478,9 +478,10 @@ void UpdateGolfBalls(void) {
   f32 distance;
   s8 markerPlayerIndex;
 
-  currentIndex = 0;
   if (g_GameState.step == GAME_STATE_UNK6) {
     currentIndex = g_GameState.currentPlayerIndex;
+  } else {
+    currentIndex = 0;
   }
 
   for (i = 0, player = g_Players, ball = f_GolfBalls;
@@ -554,11 +555,12 @@ void UpdateGolfBalls(void) {
         ball->state = simulation->state;
         ball->unk9E = simulation->hasEnteredWater;
         ball->purpose = simulation->purpose;
-        markerPlayerIndex = BALL_NO_MARKER;
         if (currentIndex != simulation->playerIndex &&
             (GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN ||
                 g_GameState.isMiniGolf)) {
           markerPlayerIndex = simulation->playerIndex;
+        } else {
+          markerPlayerIndex = BALL_NO_MARKER;
         }
 
         ball->markerPlayerIndex = markerPlayerIndex;

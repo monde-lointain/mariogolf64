@@ -3920,7 +3920,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
  *
  * Doesn't match: the game keeps 0xFD500000 in a register and spills
  * 0x073DB06C where this spills the other way, and it reads g_MenuScreen for
- * MENU_LAYER_UNK20 where this drops the read. 376 words differ.
+ * MENU_LAYER_UNK20 where this drops the read. 373 words differ.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
@@ -4115,9 +4115,10 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
     }
   }
 
-  bobOffset = 0;
   if (IsBannerBobScreen(g_MenuScreen)) {
     bobOffset = (f_MenuBobOffset + BANNER_BOB_LOWERING) - BANNER_BOB_RAISING;
+  } else {
+    bobOffset = 0;
   }
 
   if (layers & MENU_LAYER_BANNER) {
@@ -4768,7 +4769,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * stars won.
  */
 /* Doesn't match: the boards' strips and the mode label schedule their
- * address loads differently. 269 words differ. */
+ * address loads differently. 261 words differ. */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -4835,9 +4836,10 @@ void DrawModeSelect(Gfx** displayListHead) {
     /* The board's turns from the chosen one */
     s32 turns;
 
-    radiusX = MODE_BOARD_RADIUS_X;
     if (g_ChosenPlayerCount == 1) {
       radiusX = SINGLE_PLAYER_MODE_BOARD_RADIUS_X;
+    } else {
+      radiusX = MODE_BOARD_RADIUS_X;
     }
 
     turns = (g_MenuMemory.modeChoice - index) % modeCount;

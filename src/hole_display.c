@@ -1924,7 +1924,7 @@ void DrawSky(
  * Draws the sky and, below it, the course's backdrop in strips that follow the
  * camera's yaw and pitch
  *
- * Doesn't match: 165 words differ.
+ * Doesn't match: 159 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
@@ -2042,8 +2042,9 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
             imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, f_BackdropWidthMask, 0);
       }
 
-      clip = 0;
-      if (y < 0) {
+      if (y >= 0) {
+        clip = 0;
+      } else {
         clip = -y;
       }
 

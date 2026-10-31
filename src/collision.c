@@ -2246,7 +2246,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 792 words differ.
+ * Doesn't match: 756 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2393,14 +2393,13 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     cornersV[0] = triangle.corners[AXIS_Z][0];
     cornersV[1] = triangle.corners[AXIS_Z][1];
     cornersV[2] = triangle.corners[AXIS_Z][2];
+    facing = TRIANGLE_FACING_NONE;
     if (candidate->kind == HOLE_TRIANGLE_KIND_SHADED) {
       facing = GetTriangleFacing(triangle.corners[AXIS_X][0],
           triangle.corners[AXIS_Y][0], triangle.corners[AXIS_Z][0],
           triangle.corners[AXIS_X][1], triangle.corners[AXIS_Y][1],
           triangle.corners[AXIS_Z][1], triangle.corners[AXIS_X][2],
           triangle.corners[AXIS_Y][2], triangle.corners[AXIS_Z][2]);
-    } else {
-      facing = TRIANGLE_FACING_NONE;
     }
 
     if (facing == TRIANGLE_FACING_Z) {
