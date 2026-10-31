@@ -953,8 +953,15 @@ void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
   }
 }
 
-/* Frames Bowser from farther away, with effects at three frames of the bogey
- * animation */
+/*
+ * Frames Bowser from farther away, with effects at three frames of the bogey
+ * animation.
+ *
+ * Doesn't match: after the switch, GCC stores the eye's height before the
+ * call that keeps it above the ground, where the original stores it in the
+ * call's delay slot. Storing a height computed in each case once after the
+ * switch gives 14 differing words, not 4.
+ */
 #ifdef NON_MATCHING
 void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
