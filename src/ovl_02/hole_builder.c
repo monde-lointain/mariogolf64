@@ -978,21 +978,21 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", DrawBandHeights);
 #endif
 
 /* Empties every terrain code cell and frees the packed code blocks */
-#ifdef NON_MATCHING
 void ResetTerrainCodeCells(void) {
   s32 row;
   s32 column;
+  s32 cellOffset;
 
   g_TerrainCodeBlockCount = 0;
   for (row = 0; row < TERRAIN_CODE_CELL_ROW_COUNT; row++) {
     for (column = TERRAIN_CODE_CELL_COLUMN_COUNT - 1; column >= 0; column--) {
-      g_TerrainCodeCells[row][column] = -1;
+      /* Addressed by byte offset to match */
+      cellOffset = (row * TERRAIN_CODE_CELL_ROW_SIZE) +
+          (column * TERRAIN_CODE_CELL_SIZE);
+      *(s16*)AddressPast(g_TerrainCodeCells, cellOffset) = -1;
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ResetTerrainCodeCells);
-#endif
 
 /*
  * The paint logic of Toad Highlands, Koopa Park and Mario's Star. It returns
