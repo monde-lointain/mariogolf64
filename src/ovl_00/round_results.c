@@ -3447,7 +3447,7 @@ enum ClubTournamentLine {
  * and ends their loop with slti, where the original adds the strip's offset
  * to the top each time and compares the counter with its limit held in a
  * register. Ending the loop with != instead of < gives 34 words, not 20.
- * 20 words differ.
+ * 14 words differ.
  */
 #ifdef NON_MATCHING
 void DrawClubTournamentResults(Gfx** displayListHead) {
@@ -3483,7 +3483,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
     DrawTextureRect(&gfx,
         QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X),
         QuarterPixels((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) +
-            (f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y)),
+            CLUB_TOURNAMENT_COURSE_Y + f_ResultsTop),
         QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X +
             CLUB_TOURNAMENT_COURSE_STRIP_WIDTH),
         QuarterPixels(

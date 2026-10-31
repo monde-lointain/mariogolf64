@@ -1090,7 +1090,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BlankBetName);
  * grayed out.
  *
  * Doesn't match: the target adds each grid row's offset to its line's top
- * before adding the card's top, where this adds the card's top first. 263
+ * before adding the card's top, where this adds the card's top first. 259
  * words differ.
  */
 #ifdef NON_MATCHING
@@ -1263,7 +1263,7 @@ void DrawBetsPage(Gfx** displayListHead) {
         }
 
         DrawTextureRect(&gfx,
-            QuarterPixels(g_Scorecard.x + BET_SUBTITLE_LEFT + left),
+            QuarterPixels(BET_SUBTITLE_LEFT + left + g_Scorecard.x),
             QuarterPixels(BET_SUBTITLE_TOP),
             QuarterPixels(
                 g_Scorecard.x + left + BET_SUBTITLE_LEFT + BET_SUBTITLE_WIDTH),

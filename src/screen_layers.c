@@ -660,7 +660,7 @@ s32 UpdatePrompt(ControllerState* controller) {
  * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
  * and No under its message once it has opened. The chosen answer bobs.
  *
- * Doesn't match: 39 words differ.
+ * Doesn't match: 35 words differ.
  */
 #ifdef NON_MATCHING
 void DrawPrompt(Gfx** displayListHead) {
@@ -765,7 +765,7 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(YES_CENTER_X - halfWidth),
-        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
+        QuarterPixels((cloudHeight / 4) - halfHeight + CHOICES_MIDDLE_Y),
         QuarterPixels(YES_CENTER_X + halfWidth),
         QuarterPixels(halfHeight + (cloudHeight / 4) + CHOICES_MIDDLE_Y),
         G_TX_RENDERTILE, 0, 0,
@@ -786,7 +786,7 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(NO_CENTER_X - halfWidth),
-        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
+        QuarterPixels((cloudHeight / 4) - halfHeight + CHOICES_MIDDLE_Y),
         QuarterPixels(NO_CENTER_X + halfWidth),
         QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight),
         G_TX_RENDERTILE, 0, 0,

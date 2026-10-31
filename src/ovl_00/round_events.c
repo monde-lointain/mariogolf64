@@ -1631,7 +1631,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #define DRIVE_RECORD_DISTANCE_ENV_COLOR 0xFF600000
 #define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
 
-/* Doesn't match: 57 words differ. */
+/* Doesn't match: 53 words differ. */
 #ifdef NON_MATCHING
 void DrawDriveRecord(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1695,7 +1695,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
     IN_OWN_BLOCK(bottom = SHRINKING_IMAGE_CENTER_Y);
-    for (i = 0; i != stripCount; i++) {
+    for (i = 0; i != stripCount; i++, bottom += stripHeight) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
       if (slide < 0) {
@@ -1712,22 +1712,22 @@ void DrawDriveRecord(Gfx** displayListHead) {
       DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
           QuarterPixels(
               bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
-          QuarterPixels(centerX + halfWidth),
+          QuarterPixels(halfWidth + centerX),
           QuarterPixels(bottom -
               (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
               stripHeight),
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
-      if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-        centerX = SHRINKING_IMAGE_CENTER_X - slide;
-        copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-        DrawTextureRect(&gfx, QuarterPixels(centerX - (s32)(width >> 1)),
-            QuarterPixels(copyTop), QuarterPixels(centerX + (s32)(width >> 1)),
-            QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE,
-            0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      if (f_MovieDrawCount >= CAPTION_MEET_DRAW) {
+        continue;
       }
 
-      bottom += stripHeight;
+      centerX = SHRINKING_IMAGE_CENTER_X - slide;
+      copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
+      DrawTextureRect(&gfx, QuarterPixels(centerX - (s32)(width >> 1)),
+          QuarterPixels(copyTop), QuarterPixels(centerX + (s32)(width >> 1)),
+          QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
+          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
@@ -1748,7 +1748,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawDriveRecord);
 #endif
 
-/* Doesn't match: 37 words differ. */
+/* Doesn't match: 31 words differ. */
 #ifdef NON_MATCHING
 void DrawPuttCaption(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1811,7 +1811,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
     IN_OWN_BLOCK(bottom = SHRINKING_IMAGE_CENTER_Y);
-    for (i = 0; i != stripCount; i++) {
+    for (i = 0; i != stripCount; i++, bottom += stripHeight) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
       if (slide < 0) {
@@ -1828,22 +1828,22 @@ void DrawPuttCaption(Gfx** displayListHead) {
       DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
           QuarterPixels(
               bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
-          QuarterPixels(centerX + halfWidth),
+          QuarterPixels(halfWidth + centerX),
           QuarterPixels(bottom -
               (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
               stripHeight),
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
-      if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-        centerX = SHRINKING_IMAGE_CENTER_X - slide;
-        copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-        DrawTextureRect(&gfx, QuarterPixels(centerX - (s32)(width >> 1)),
-            QuarterPixels(copyTop), QuarterPixels(centerX + (s32)(width >> 1)),
-            QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE,
-            0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      if (f_MovieDrawCount >= CAPTION_MEET_DRAW) {
+        continue;
       }
 
-      bottom += stripHeight;
+      centerX = SHRINKING_IMAGE_CENTER_X - slide;
+      copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
+      DrawTextureRect(&gfx, QuarterPixels(centerX - (s32)(width >> 1)),
+          QuarterPixels(copyTop), QuarterPixels(centerX + (s32)(width >> 1)),
+          QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
+          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
 
