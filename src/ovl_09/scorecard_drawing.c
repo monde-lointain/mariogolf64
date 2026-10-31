@@ -3104,8 +3104,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C9B8_ovl_09);
  * are skipped when the bet rate at the player's index is zero or unset.
  *
  * Doesn't match: this keeps loop values on the stack that the target keeps in
- * saved registers, and it tests the bet rate as a range where the target
- * compares it with zero and UNSET_BET_RATE in turn.
+ * saved registers. The nested ifs make GCC compare the bet rate with zero and
+ * UNSET_BET_RATE in turn, as the original does, rather than as a range.
  */
 #ifdef NON_MATCHING
 void DrawBetTallies(Gfx** displayListHead) {
@@ -3126,19 +3126,20 @@ void DrawBetTallies(Gfx** displayListHead) {
     column = BET_TALLY_LEFT;
     for (betIndex = 0; betIndex != BET_COUNT; betIndex++) {
       total += g_BetTallies[playerIndex][betIndex];
-      if (g_GameState.betRates[playerIndex] != 0 &&
-          g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {
-        for (text = g_PrintBuffer, left = column; *text != '\0';
-            left += DIGIT_GLYPH_SIZE) {
-          x = left + g_Scorecard.x;
-          DrawTextureRect(&gfx, QuarterPixels(x),
-              QuarterPixels(
-                  BET_TALLY_TOP + (playerIndex * BET_TALLY_ROW_SPACING)),
-              QuarterPixels(x + DIGIT_GLYPH_SIZE),
-              QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE +
-                  (playerIndex * BET_TALLY_ROW_SPACING)),
-              G_TX_RENDERTILE, 0, TexelCoordinate(GetDigitGlyphTop(*text++)),
-              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      if (g_GameState.betRates[playerIndex] != 0) {
+        if (g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {
+          for (text = g_PrintBuffer, left = column; *text != '\0';
+              left += DIGIT_GLYPH_SIZE) {
+            x = left + g_Scorecard.x;
+            DrawTextureRect(&gfx, QuarterPixels(x),
+                QuarterPixels(
+                    BET_TALLY_TOP + (playerIndex * BET_TALLY_ROW_SPACING)),
+                QuarterPixels(x + DIGIT_GLYPH_SIZE),
+                QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE +
+                    (playerIndex * BET_TALLY_ROW_SPACING)),
+                G_TX_RENDERTILE, 0, TexelCoordinate(GetDigitGlyphTop(*text++)),
+                TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          }
         }
       }
 
