@@ -3058,7 +3058,7 @@ void CaptureHudAnimationFrame(void) {
           column != TILE_GRID_COLUMN_COUNT; column++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = y;
-        vertex->v.ob[AXIS_Z] = 0;
+        IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
         nextVertex->v.ob[AXIS_X] = x;
         nextVertex->v.ob[AXIS_Y] = y;
         nextVertex->v.ob[AXIS_Z] = 0;
