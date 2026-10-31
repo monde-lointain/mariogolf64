@@ -812,13 +812,13 @@ void DrawBetSettings(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
-  s16 columnIndex;
+  /* One index for the bet columns and the banner strips, to match */
+  s16 i;
   s16 stakeLevel;
   s16 betIndex;
   s16 markGrowth;
   s32 markRaise;
   s16 bannerShift;
-  s16 stripIndex;
   s32 columnX;
   u8* icon;
 
@@ -832,20 +832,17 @@ void DrawBetSettings(
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
-  for (columnIndex = 0; columnIndex != f_BetSetColumnCounts[g_BetSet - 1];
-      columnIndex++) {
-    betIndex = f_BetSetBets[g_BetSet - 1][columnIndex];
+  for (i = 0; i != f_BetSetColumnCounts[g_BetSet - 1]; i++) {
+    betIndex = f_BetSetBets[g_BetSet - 1][i];
     if (betIndex == -1) {
       break;
     }
 
-    if (columnIndex != memory->betColumn) {
+    if (i != memory->betColumn) {
       icon = ImageAt(f_BetIcons, betIndex * BET_ICON_SLOT_SIZE);
       gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(icon)));
       /* Bets without a stake are dimmed */
-      if (memory
-              ->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][columnIndex]] ==
-          0) {
+      if (memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]] == 0) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
@@ -860,21 +857,20 @@ void DrawBetSettings(
           G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide),
+          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] + slide),
           QuarterPixels(BET_ICON_TOP),
-          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide +
-              BET_ICON_SIZE),
+          QuarterPixels(
+              f_BetSetColumnXs[g_BetSet - 1][i] + slide + BET_ICON_SIZE),
           QuarterPixels(BET_ICON_TOP + BET_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
 
     DrawUnalignedMenuNumber(&gfx,
-        f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide +
-            BET_AMOUNT_OFFSET_X,
+        f_BetSetColumnXs[g_BetSet - 1][i] + slide + BET_AMOUNT_OFFSET_X,
         BET_AMOUNT_Y,
-        (s8)f_BetStakeAmounts[memory->betStakeLevels
-                [f_BetSetStakeSlots[g_BetSet - 1][columnIndex]]],
+        (s8)f_BetStakeAmounts[memory
+                ->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]]],
         0);
   }
 
@@ -910,12 +906,10 @@ void DrawBetSettings(
       markRaise = LARGEST_STAKE_RAISE;
     }
 
-    for (columnIndex = 0; columnIndex != f_BetSetColumnCounts[g_BetSet - 1];
-        columnIndex++) {
+    for (i = 0; i != f_BetSetColumnCounts[g_BetSet - 1]; i++) {
       /* Marks above the bet's stake are dimmed */
       if (stakeLevel >=
-          memory
-              ->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][columnIndex]]) {
+          memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]]) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
@@ -925,8 +919,7 @@ void DrawBetSettings(
 
       IN_OWN_BLOCK(gDPPipeSync(gfx++));
 
-      columnX = f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide +
-          STAKE_MARK_OFFSET_X;
+      columnX = f_BetSetColumnXs[g_BetSet - 1][i] + slide + STAKE_MARK_OFFSET_X;
       gSPScisTextureRectangle(gfx++, QuarterPixels(columnX - (markGrowth >> 1)),
           QuarterPixels((STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - markGrowth -
               (stakeLevel * STAKE_MARK_SPACING) - markRaise),
@@ -956,21 +949,21 @@ void DrawBetSettings(
     bannerShift = -slide;
   }
 
-  for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+  for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
     gDPLoadTextureBlock(gfx++,
         TextureAddress(LargeImageTexels(f_StatsNamePlate) +
-            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
+            (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, QuarterPixels(WIDE_BANNER_LEFT),
         QuarterPixels(bannerShift +
-            ((stripIndex * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP) -
+            ((i * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP) -
             WIDE_BANNER_RAISE),
         QuarterPixels(WIDE_BANNER_RIGHT),
         QuarterPixels(bannerShift +
-            ((stripIndex * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP) -
+            ((i * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP) -
             WIDE_BANNER_RAISE + WIDE_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
         (MENU_BANNER_WIDTH << 10) / (WIDE_BANNER_RIGHT - WIDE_BANNER_LEFT),
@@ -978,20 +971,20 @@ void DrawBetSettings(
     gDPPipeSync(gfx++);
   }
 
-  for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+  for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
     gDPLoadTextureBlock(gfx++,
         TextureAddress(LargeImageTexels(f_StatsNamePlate) +
-            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
+            (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, QuarterPixels(BET_BANNER_LEFT),
-        QuarterPixels(bannerShift +
-            ((stripIndex * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP)),
+        QuarterPixels(
+            bannerShift + ((i * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP)),
         QuarterPixels(BET_BANNER_RIGHT),
         QuarterPixels(bannerShift +
-            ((stripIndex * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP) +
+            ((i * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP) +
             MENU_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
         (MENU_BANNER_WIDTH << 10) / (BET_BANNER_RIGHT - BET_BANNER_LEFT),
