@@ -112,8 +112,13 @@ typedef struct TableCorner {
 
 /* DrawCharacterFace takes an s16 character, but this file calls it without
  * narrowing the argument */
+#ifdef AVOID_UB
+void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
+    s32 left, s32 top, s16 character, u8 drawMode);
+#else
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, CharacterId character, u8 drawMode);
+#endif
 void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,

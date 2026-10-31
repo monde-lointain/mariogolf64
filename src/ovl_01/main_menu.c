@@ -303,9 +303,15 @@ void DrawCaddySelect(Gfx** displayListHead);
 void DrawBlankScreen(Gfx** displayListHead);
 void DrawBirdieBadgeLabel(Gfx** displayListHead);
 /* Defined as returning s8, but their callers here use the whole register */
+#ifdef AVOID_UB
+s8 IsMusicOffChosen(void);
+s8 IsMonoChosen(void);
+s8 IsSimpleCameraChosen(void);
+#else
 s32 IsMusicOffChosen(void);
 s32 IsMonoChosen(void);
 s32 IsSimpleCameraChosen(void);
+#endif
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
 void ClearImportedCharacters(void);
 void OnMenuResourcesLoaded(void);
@@ -366,7 +372,12 @@ s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
 s32 GetClubTournamentCharacter(void);
 s32 TakeClubTournamentEntry(void);
+/* Defined as returning s16, but its caller here uses the whole register */
+#ifdef AVOID_UB
+s16 GetChosenBestShot(void);
+#else
 s32 GetChosenBestShot(void);
+#endif
 void LoadRingShotRecord(RingShotRecord* record);
 void LoadBestShotReplay(PlayRecord* record);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);

@@ -234,7 +234,12 @@ void LoadSong(u32 romAddress, u32 size);
 void LoadSampleBank(u8* pointerBankRom, u32 pointerBankSize, u8* waveBankRom);
 void LoadSoundEffectBank(u8* rom, u32 size);
 void InitMusic(musConfig* config);
+/* Defined as returning s8, but its caller here uses the whole register */
+#ifdef AVOID_UB
+s8 IsMusicOffChosen(void);
+#else
 s32 IsMusicOffChosen(void);
+#endif
 s32 ChangeCustomEffect(s32 type);
 
 void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {

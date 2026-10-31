@@ -144,8 +144,13 @@ void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
     s32 direction, s32 centerX, s32 centerY);
 /* DrawCharacterFace takes a u8 drawMode, but this file calls it without
  * narrowing the argument */
+#ifdef AVOID_UB
+void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
+    s32 left, s32 top, s16 character, u8 drawMode);
+#else
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, s32 drawMode);
+#endif
 void DrawCourseLabel(Gfx** displayListHead, s32 courseIndex, s32 left, s32 top,
     u8 showsCourseWord);
 void DrawRingShotRowIcon(

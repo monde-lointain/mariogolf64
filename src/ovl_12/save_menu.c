@@ -236,8 +236,13 @@ enum ModeName {
  */
 void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record);
 void InvalidateBrokenRingShotRecords(void);
+/* Its colors are u8s, which these calls pass as ints, to match */
+#ifdef AVOID_UB
+void SetTextSlot(s32 x, s32 y, s32 image, s32, s32 slot, s32, u8, u8, u8, u8);
+#else
 void SetTextSlot(
     s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
+#endif
 void InvalidateBrokenSavedGames(void);
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
 void QuitPlayToTitle(void);

@@ -220,7 +220,11 @@ static s8 f_NoiseRow = 0;
 
 /* menu.c returns an s8, but the original calls it without truncating, as if
  * undeclared */
+#ifdef AVOID_UB
+s8 IsSimpleCameraChosen(void);
+#else
 s32 IsSimpleCameraChosen();
+#endif
 void ChooseFlightCameraKind(void);
 void PlaceFlightCamera(s32 step);
 s32 StepHoleFlyover(void);

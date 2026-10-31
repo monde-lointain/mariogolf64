@@ -2128,7 +2128,11 @@ ImpactEffect* GetImpactTimingEntry(
 
 SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot);
 /* It returns a SignedBinaryAngle; declaring it s32 here is there to match */
+#ifdef AVOID_UB
+SignedBinaryAngle GetAimSlopeAngle(Player* player, ShotLaunch* shot);
+#else
 s32 GetAimSlopeAngle(Player* player, ShotLaunch* shot);
+#endif
 
 /*
  * Sets the simulation's start, velocity and wind from the shot.
