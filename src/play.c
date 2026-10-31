@@ -538,8 +538,11 @@ void PlayContestMovies(void) {
  * Whether play can leave the hole: never while the contest movies play; in
  * Skins Match, Club Slots and the one-on-one matches, once the hole is decided
  * and every player is done or waiting; otherwise, once every player is done.
- * Doesn't match: GCC computes the first mode's result with a set-on-equal,
- * where the original branches to return 1 or 0.
+ *
+ * Doesn't match: in the one-on-one matches' test, GCC fills the branch's delay
+ * slot with the TRUE result where the original fills it with the FALSE one, and
+ * so branches one word short. Returning through isDone in both tests is
+ * needed for even that: the plain i == playerCount gives a set-on-equal.
  */
 #ifdef NON_MATCHING
 s32 IsHoleOver(void) {
@@ -566,7 +569,13 @@ s32 IsHoleOver(void) {
             }
           }
 
-          return i == g_GameState.playerCount;
+          /* Through isDone to match */
+          if (i == g_GameState.playerCount) {
+            isDone = TRUE;
+            return isDone;
+          }
+
+          return FALSE;
         }
 
         if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
@@ -581,9 +590,10 @@ s32 IsHoleOver(void) {
             }
           }
 
-          /* Through isDone, unlike the return above, to match */
+          /* Returning isDone, unlike the FALSE above, to match */
           if (i == g_GameState.playerCount) {
             isDone = TRUE;
+            return isDone;
           }
 
           return isDone;
