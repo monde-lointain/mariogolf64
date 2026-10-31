@@ -546,10 +546,19 @@ void CloseSaveMenu(void) {
 
 void AnimateModeIcons(Boolean isImmediate);
 
+/* Steps slot's mode icon to its next frame */
+static inline s32 NextIconFrame(s32 slot) {
+  return ++f_IconFrames[slot];
+}
+
 /*
  * Every few frames, or at once when told to, shows the next frame of the
  * chosen saved game's mode icon and the first frame of the others. Each
  * icon has two images, read into in turn.
+ *
+ * Doesn't match: GCC loads the tables' addresses into other registers, and
+ * tests whether a saved game is valid with beqz instead of beql, which would
+ * step to the next slot's images in the delay slot.
  */
 #ifdef NON_MATCHING
 void AnimateModeIcons(Boolean isImmediate) {
@@ -571,7 +580,7 @@ void AnimateModeIcons(Boolean isImmediate) {
 
       if (game->state.isMiniGolf) {
         if (f_CursorIndex == slot) {
-          if (g_ModeIconAnimations[MODE_ICON_MINI_GOLF][++f_IconFrames[slot]] ==
+          if (g_ModeIconAnimations[MODE_ICON_MINI_GOLF][NextIconFrame(slot)] ==
               END_OF_ICON_FRAMES) {
             f_IconFrames[slot] = 0;
           }
@@ -585,7 +594,7 @@ void AnimateModeIcons(Boolean isImmediate) {
         }
       } else if (f_CursorIndex == slot) {
         if (g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]]
-                                [++f_IconFrames[slot]] == END_OF_ICON_FRAMES) {
+                                [NextIconFrame(slot)] == END_OF_ICON_FRAMES) {
           f_IconFrames[slot] = 0;
         }
 
