@@ -706,10 +706,10 @@ void InitAudio(void) {
   f_SongHandle = NO_HANDLE;
   f_SongId = NO_SONG;
   LoadSampleBank(g_SoundPointerBankRomStart,
-      g_SoundPointerBankRomEnd - g_SoundPointerBankRomStart,
+      BytesBetween(g_SoundPointerBankRomStart, g_SoundPointerBankRomEnd),
       g_SoundWaveBankRomStart);
   LoadSoundEffectBank(g_SoundEffectBankRomStart,
-      g_SoundEffectBankRomEnd - g_SoundEffectBankRomStart);
+      BytesBetween(g_SoundEffectBankRomStart, g_SoundEffectBankRomEnd));
   for (channel = 0; channel < SOUND_CHANNEL_COUNT; channel++) {
     f_SoundHandles[channel] = 0;
     f_SoundFadeFrameCounts[channel] = 0;

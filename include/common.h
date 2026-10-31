@@ -195,8 +195,12 @@ typedef s32 Boolean;
     (absValue < 0.0f) ? -absValue : absValue; \
   })
 
-/* The bytes from start up to end, which may point at different types */
-#define BytesBetween(start, end) ((u8*)(end) - (u8*)(start))
+/*
+ * The bytes from start up to end, which may point at different types or into
+ * different objects, such as the linker's symbols. It subtracts addresses, as
+ * subtracting pointers into different objects is undefined.
+ */
+#define BytesBetween(start, end) ((u32)(end) - (u32)(start))
 /* The address byteCount bytes past pointer, whatever it points at */
 #define AddressPast(pointer, byteCount) ((u8*)(pointer) + (byteCount))
 /* value rounded up to a multiple of alignment, which is a power of two */
