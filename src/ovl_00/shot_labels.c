@@ -382,7 +382,7 @@ void DrawShotLabels(Gfx** displayListHead) {
 
       f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
       f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
-      f_ShotLabels[i].corner = corner;
+      IN_OWN_BLOCK(f_ShotLabels[i].corner = corner);
 
 NEXT:;
     }
