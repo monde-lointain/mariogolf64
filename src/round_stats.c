@@ -574,6 +574,11 @@ s32 RecordDrive(void) {
  * Settles the bets on the hole just played and keeps the tallies and pots
  * in the game state, for the game to be continued. SettleNassau is a
  * nested function, a GNU C extension.
+ *
+ * Doesn't match: in the stroke bets, the original loads j before i, as GCC
+ * does, but compares i with j, where GCC compares j with i. Writing i != j
+ * loads i first (6 words differ, not 2); continue or an empty if branch
+ * changes nothing.
  */
 #ifdef NON_MATCHING
 void SettleHoleBets(void) {
