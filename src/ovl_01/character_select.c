@@ -1310,11 +1310,16 @@ void LoadCharacterFaces(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", LoadCharacterFaces);
 #endif
 
+/* A byte's address as an integer, for adding a player number to */
+static inline s32 ByteAddress(s8* byte) {
+  return (s32)byte;
+}
+
 /*
  * Doesn't match: the original schedules the shift of the choice index for
  * the character table lookup one instruction later. The menu memory fields
- * are read through integer addresses because the original adds the player
- * number before the field offset.
+ * are read through ByteAddress because the original adds the player number
+ * before the field offset.
  */
 #ifdef NON_MATCHING
 void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
@@ -1363,10 +1368,11 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
     playerNumber = 1;
   }
 
-  column = *(
-      s8*)((s32)&GetMenuMemory()->characterColumns[1] + (s16)playerNumber - 1);
-  slot = g_CharacterGrid[*(s8*)((s32)&GetMenuMemory()->characterRows[1] +
-      (s16)playerNumber - 1)][column];
+  column = *(s8*)(ByteAddress(&GetMenuMemory()->characterColumns[1]) +
+      (s16)playerNumber - 1);
+  slot =
+      g_CharacterGrid[*(s8*)(ByteAddress(&GetMenuMemory()->characterRows[1]) +
+          (s16)playerNumber - 1)][column];
   if (slot < CHOOSABLE_MARK_LIMIT) {
     choiceIndex = slot + MARKED_CHARACTER_OFFSET;
   } else {
