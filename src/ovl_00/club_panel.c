@@ -359,7 +359,13 @@ Boolean IsShotModeChangeDone(void) {
 
 s32 GetGaugeFill(void);
 
-/* Draws the power gauge, its markers, and the bar for the lie's span */
+/*
+ * Draws the power gauge, its markers, and the bar for the lie's span.
+ *
+ * Doesn't match: 316 words differ. The stack frame is 8 bytes larger, and
+ * the original copies a tick loop's base index into a temporary register and
+ * keeps the loop's 25 in another, so the loops' registers differ.
+ */
 void DrawClubPanel(Gfx** displayListHead) {
   s32 span;
   Gfx* gfx;

@@ -3181,8 +3181,13 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 #define STANDING_ONE_DIGIT_DOWN_SHIFT (-20)
 #define STANDING_TWO_DIGIT_DOWN_SHIFT (-12)
 
-/* The match play results of two players: place, portrait, holes up or down, any
- * bets and Course Points */
+/*
+ * The match play results of two players: place, portrait, holes up or down,
+ * any bets and Course Points.
+ *
+ * Doesn't match: 28 words differ. Two pairs of loads come in the other order,
+ * and a few registers and additions' operand orders differ.
+ */
 #ifdef NON_MATCHING
 void DrawMatchResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

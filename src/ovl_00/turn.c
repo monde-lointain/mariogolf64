@@ -1686,6 +1686,10 @@ void PickStartingClub(HoleSetup* hole);
  * the putter, in the shortest putt mode that reaches the cup. Elsewhere, it is
  * the club whose normal shot comes nearest the cup, out of those with a good
  * enough lie, and preferring those that reach.
+ *
+ * Doesn't match: 116 words differ. GCC fills the green test's delay slot with
+ * bestGap's S32_MAX, where the original clears a register, and the slot index
+ * and g_Players' address take other saved registers.
  */
 #ifdef NON_MATCHING
 void PickStartingClub(HoleSetup* hole) {
