@@ -2842,16 +2842,16 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
   return FALSE;
 }
 
-/*
- * Toggles whether one cell of the ground is drawn mirrored. The cells are
- * GROUND_TILE_POINT_SPAN a side in each tile.
- */
 /* Whether a ground point is off the ground tiles */
 #define IsOffGroundPoints(column, row) \
   ((column) < 0 || \
       (column) >= GROUND_TILE_COLUMN_COUNT * GROUND_TILE_POINT_SPAN || \
       (row) >= GROUND_TILE_ROW_COUNT * GROUND_TILE_POINT_SPAN || (row) < 0)
 
+/*
+ * Toggles whether one cell of the ground is drawn mirrored. The cells are
+ * GROUND_TILE_POINT_SPAN a side in each tile.
+ */
 void ToggleCellMirroring(s32 column, s32 row) {
   s32 tileIndex;
   s32 cellBits;
@@ -2860,11 +2860,14 @@ void ToggleCellMirroring(s32 column, s32 row) {
     return;
   }
 
-  tileIndex = ((row >> 2) * GROUND_TILE_COLUMN_COUNT) +
+  /* Shifts the row but divides the column, to match */
+  tileIndex =
+      ((row >> GROUND_TILE_POINT_SPAN_SHIFT) * GROUND_TILE_COLUMN_COUNT) +
       (column / GROUND_TILE_POINT_SPAN);
   cellBits = g_WorkArea.hole.tiles[tileIndex].mirroredCells;
-  g_WorkArea.hole.tiles[tileIndex].mirroredCells =
-      cellBits ^ (1 << (((row & 3) * GROUND_TILE_POINT_SPAN) + (column & 3)));
+  g_WorkArea.hole.tiles[tileIndex].mirroredCells = cellBits ^
+      (1 << (((row & (GROUND_TILE_POINT_SPAN - 1)) * GROUND_TILE_POINT_SPAN) +
+           (column & (GROUND_TILE_POINT_SPAN - 1))));
 }
 
 /* Sets the x and s of a column of points between grid vertices (column, row)
