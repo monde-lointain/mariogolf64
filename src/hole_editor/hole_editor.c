@@ -3876,6 +3876,8 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  *
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
+ *
+ * Doesn't match: 2578 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -4660,24 +4662,22 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
 
         gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
-        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
-          if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-            for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LoadEditorTileTexture(tileIndex,
-                  (half * GROUND_TILE_GROUP_SIZE) + k, row, pass,
-                  GROUND_OVERLAY_NOISE);
-              gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
-                  topSlot + 1, bottomSlot + 1, bottomSlot, 0);
-              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
-                break;
-              }
-            }
+        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++, topSlot++, bottomSlot++,
+            tileIndex++, slopeIndex += TILE_TRIANGLE_COUNT) {
+          if (g_WorkArea.hole.tiles[tileIndex].detail < 0) {
+            continue;
           }
 
-          topSlot++;
-          bottomSlot++;
-          tileIndex++;
-          slopeIndex += TILE_TRIANGLE_COUNT;
+          for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+            LoadEditorTileTexture(tileIndex,
+                (half * GROUND_TILE_GROUP_SIZE) + k, row, pass,
+                GROUND_OVERLAY_NOISE);
+            gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
+                topSlot + 1, bottomSlot + 1, bottomSlot, 0);
+            if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+              break;
+            }
+          }
         }
 
         topSlot -= GROUND_TILE_GROUP_SIZE;
