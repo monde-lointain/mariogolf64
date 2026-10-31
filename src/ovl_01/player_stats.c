@@ -805,7 +805,7 @@ void UpdateBetSettings(void) {
  */
 /*
  * Doesn't match: the original keeps its g_BetSet loads in other registers
- * and schedules the stake marks' coordinates differently
+ * and schedules the stake marks' coordinates differently. 233 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
@@ -922,7 +922,7 @@ void DrawBetSettings(
       columnX = f_BetSetColumnXs[g_BetSet - 1][i] + slide + STAKE_MARK_OFFSET_X;
       gSPScisTextureRectangle(gfx++, QuarterPixels(columnX - (markGrowth >> 1)),
           QuarterPixels((STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - markGrowth -
-              (stakeLevel * STAKE_MARK_SPACING) - markRaise),
+              markRaise - (stakeLevel * STAKE_MARK_SPACING)),
           QuarterPixels(columnX + ((markGrowth >> 1) + STAKE_MARK_SIZE)),
           QuarterPixels(STAKE_MARK_BOTTOM - markRaise -
               (stakeLevel * STAKE_MARK_SPACING)),

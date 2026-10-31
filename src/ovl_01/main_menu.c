@@ -4762,7 +4762,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * stars won.
  */
 /* Doesn't match: the boards' strips and the mode label schedule their
- * address loads differently */
+ * address loads differently. 283 words differ. */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -4906,7 +4906,7 @@ void DrawModeSelect(Gfx** displayListHead) {
 
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       DrawScaledModeIcon(&gfx, boardX[slot] - halfSize,
-          boardY[slot] - halfSize + bob, halfSize, step);
+          boardY[slot] + bob - halfSize, halfSize, step);
     } else {
       if (g_MenuMemory.modeChoice == slot) {
         /* The characters go behind the chosen board, and change the state */
