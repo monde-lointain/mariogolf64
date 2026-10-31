@@ -498,11 +498,22 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
   g_ScreenFadeBlue = blue;
 }
 
-/* Covers the screen with the fade's color, at the opacity it has reached */
+/*
+ * Covers the screen with the fade's color, at the opacity it has reached.
+ *
+ * Doesn't match: near the color loads, the original loads a value from a
+ * stack slot, sets bit 0x400 in it and stores it back, where this sets the
+ * bit earlier and keeps the value in $s7; 12 words differ. Reading blue as an
+ * int gives 15, putting the first pipe sync in its own block gives 196, and
+ * other orders of the color loads give 12 to 34.
+ */
 #ifdef NON_MATCHING
 void DrawScreenFade(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 alpha;
+  u8 red;
+  u8 green;
+  u8 blue;
 
   if (g_ScreenFadeKind != FADE_NONE) {
     if (g_ScreenFadeKind == FADE_OUT) {
@@ -517,7 +528,7 @@ void DrawScreenFade(Gfx** displayListHead) {
       alpha = FADE_ALPHA_RANGE - 1;
     }
 
-    IN_OWN_BLOCK(gDPPipeSync(gfx++));
+    gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPPipeSync(gfx++);
@@ -531,8 +542,11 @@ void DrawScreenFade(Gfx** displayListHead) {
     gDPSetBlendColor(gfx++, 255, 255, 255, 1);
     gDPPipeSync(gfx++);
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-    gDPSetPrimColor(gfx++, 0, 0, g_ScreenFadeRed, g_ScreenFadeGreen,
-        g_ScreenFadeBlue, alpha);
+    /* Through bytes, to match */
+    red = g_ScreenFadeRed;
+    green = g_ScreenFadeGreen;
+    blue = g_ScreenFadeBlue;
+    gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
