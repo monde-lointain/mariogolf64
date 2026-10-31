@@ -365,8 +365,9 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
  * Moves the player's grid cursor a step in the STICK_DIAGONAL_* direction, then
  * sideways only if that slot can't be chosen, as MoveGridCursor does. Returns
  * -1 if it couldn't move, otherwise 0.
- * Doesn't match: as in MoveGridCursor, the original sign-extends the slot and
- * character afresh at each use and adds the player number the other way round.
+ * Doesn't match: GCC sign-extends oldColumn for the return value into $v0 and
+ * works the comparison out in $v1, where the original swaps the two. So the
+ * moved test branches to the return with beq rather than beql.
  */
 #ifdef NON_MATCHING
 s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
@@ -380,10 +381,8 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   s32 row = oldRow;
   u16 slot;
   u16 character;
-  s32 paletteCharacter; /* A copy of character, to match */
   void* faceImage;
   s32 unused[2] UNUSED;
-  u16(*faceAssets)[8];
 
   while (TRUE) {
     if (retryCount == 0) {
@@ -460,25 +459,25 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
       character += MARKED_CHARACTER_OFFSET;
     }
 
-    slot = character;
-    if ((s16)slot >= FIRST_IMPORTED_CHARACTER) {
+    if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
+      slot = character; /* Set in each branch to match */
       character =
           g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
     } else {
-      character = slot;
+      slot = character;
     }
 
     faceImage = g_CharacterFaceImages[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-      faceAssets = g_AlternateFaceAnimationAssets;
+      OpenEncodedAsset(
+          g_AlternateFaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
     } else {
-      faceAssets = g_FaceAnimationAssets;
+      OpenEncodedAsset(
+          g_FaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
     }
 
-    OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
-    paletteCharacter = character;
-    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)paletteCharacter][0], &file);
+    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
     ReadAssetFile(
         g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
   }
