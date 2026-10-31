@@ -2561,8 +2561,9 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
  * if it is greater than the current kind. The picks depend on the simulated
  * shot, save option 3 and chance. A switch ends StartHudAnimation's effect and
  * may start another one. In debug builds, the second controller's B and A
- * buttons pick FLIGHT_CAMERA_BESIDE_GOLFER and FLIGHT_CAMERA_CIRCLING_BALL. It
- * does not match: cross-jumping sends the second switch's case 5
+ * buttons pick FLIGHT_CAMERA_BESIDE_GOLFER and FLIGHT_CAMERA_CIRCLING_BALL.
+ *
+ * Doesn't match: cross-jumping sends the second switch's case 5
  * trouble-surface branch through the identical "kind =
  * FLIGHT_CAMERA_AROUND_END" tail of the first switch's case 3, where the
  * original branches straight to the end. The other instructions are the same.
