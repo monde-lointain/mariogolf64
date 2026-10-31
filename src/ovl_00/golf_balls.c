@@ -971,13 +971,13 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                     BALL_TILE_STILL, 0, 0, BALL_TEXTURE_SIZE,
                     (exposure + 1) * (BALL_TEXTURE_SIZE / 2));
               } else {
-                gSPStretchedTextureRectangle(gfx++,
+                IN_OWN_BLOCK(gSPStretchedTextureRectangle(gfx++,
                     QuarterPixels(ballPoint.x - size),
                     QuarterPixels(ballPoint.y - size),
                     QuarterPixels(ballPoint.x + size),
                     QuarterPixels(ballPoint.y + (exposure * size)),
                     BALL_TILE_ROLLING, 0, 0, BALL_TEXTURE_SIZE,
-                    (exposure + 1) * (BALL_TEXTURE_SIZE / 2));
+                    (exposure + 1) * (BALL_TEXTURE_SIZE / 2)));
               }
             } else if (ballDepth >= BALL_FULL_SPRITE_DEPTH) {
               gSPStretchedTextureRectangle(gfx++,
