@@ -322,7 +322,7 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * Doesn't match: the nested helpers match, but the routine keeps 614.4f and
  * 1996.8f in saved registers where the original reloads them, so 0.5f loses
  * the register it had and the floating-point registers are allocated
- * differently. 803 words differ.
+ * differently. 789 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -724,8 +724,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
                   alignment = 0.0f;
                 }
 
-                depth = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
                 angle = atan2(toCup[AXIS_Z], toCup[AXIS_X]);
+                depth = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
                 if (depth > CUP_PULL_DEPTH_RANGE) {
                   depth = CUP_PULL_DEPTH_RANGE;
                 }
