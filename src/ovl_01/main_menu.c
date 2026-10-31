@@ -169,8 +169,8 @@
 /* Divides a turn among the player count's modes, keeping it whole should a
  * count be zero */
 #define AmountPerMode(amount) \
-  (D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] != 0 \
-          ? (amount) / D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] \
+  (f_ModeCounts[g_ChosenPlayerCount - 1] != 0 \
+          ? (amount) / f_ModeCounts[g_ChosenPlayerCount - 1] \
           : (amount))
 
 typedef struct ImageCorner {
@@ -257,7 +257,7 @@ typedef struct LabelCorner {
 #define BACKDROP_FIRST_TOP 8
 #define BACKDROP_TOP 10
 
-extern const char D_80231514_ovl_01[];
+extern const char f_NameFormat[];
 
 #define PLAYER_UNK28_TRAINING (-1)
 #define PLAYER_UNK28_NINE_HOLES 3
@@ -413,11 +413,14 @@ static s32 D_8022BE1C_ovl_01 = 0;
 static s32 D_8022BE20_ovl_01 UNUSED = 0;
 /* The animation that the animation viewer plays, which left and right step */
 static s32 f_ViewerAnimation = VIEWER_STARTING_ANIMATION;
-static s32 D_8022BE28_ovl_01 = 0;
-static s32 D_8022BE2C_ovl_01 = 0;
+/* Whether START has given the viewer's controls to posing the model and
+ * stepping its animation */
+static s32 f_IsViewerAdjusting = 0;
+/* Whether the chosen character's animation plays before the choice is made */
+static s32 f_IsChosenAnimationPlaying = 0;
 /* Each player count's mode count */
-static s32 D_8022BE30_ovl_01[MAX_PLAYER_COUNT] = {7, 5, 4, 4};
-/* Read by no routine; the mode counts of D_8022BEEC */
+static s32 f_ModeCounts[MAX_PLAYER_COUNT] = {7, 5, 4, 4};
+/* Read by no routine; the mode counts of D_8022BEEC_ovl_01 */
 static s32 D_8022BE40_ovl_01[4] UNUSED = {3, 5, 4, 4};
 /* Each player's clubs, a bit per slot */
 static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
@@ -1686,7 +1689,7 @@ void CheckControllersAndSetPans(void) {
  * is loaded from the menu */
 void OnMenuResourcesLoaded(void) {}
 
-const char D_80231514_ovl_01[] = "%s";
+const char f_NameFormat[] = "%s";
 
 /* Whether a game mode plays the holes chosen on the menu */
 #define IsHoleChoiceMode(mode) \
@@ -1795,7 +1798,7 @@ void SetUpChosenGame(void) {
     player->unk22 = g_ChosenLefties[index];
     player->characterIndex = g_ChosenCharacters[index];
     player->controllerIndex = g_PlayerControllerIndices[index];
-    sprintf(player->name, D_80231514_ovl_01,
+    sprintf(player->name, f_NameFormat,
         g_MenuCharacterNames
             [f_MenuCharacterChoices[g_ChosenCharacters[index]]]);
     if (g_ChosenCharacters[index] >= CHARACTER_KID) {
@@ -1805,11 +1808,11 @@ void SetUpChosenGame(void) {
         player->gameBoyCharacterIndex = column;
       }
 
-      sprintf(player->name, D_80231514_ovl_01,
+      sprintf(player->name, f_NameFormat,
           g_GameBoyCharacters[player->gameBoyCharacterIndex].name);
     } else {
       player->gameBoyCharacterIndex = -1;
-      sprintf(player->name, D_80231514_ovl_01,
+      sprintf(player->name, f_NameFormat,
           g_MenuCharacterNames
               [f_MenuCharacterChoices[g_ChosenCharacters[index]]]);
     }
@@ -2033,7 +2036,7 @@ void ResetViewerCharacter(void) {
  * equals playerNumber, and 0 otherwise. Nothing reads arg0.
  */
 s32 UpdateViewerCharacter(s32 arg0 UNUSED, s32 playerNumber) {
-  if (D_8022BE28_ovl_01 != 0) {
+  if (f_IsViewerAdjusting != 0) {
     while (
         g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
       g_MenuMemory.viewerCharacter++;
@@ -2079,9 +2082,9 @@ s32 UpdateViewerCharacter(s32 arg0 UNUSED, s32 playerNumber) {
         g_MenuMemory.viewerCharacter++;
       }
     }
-  } else if (D_8022BE2C_ovl_01 == 1) {
+  } else if (f_IsChosenAnimationPlaying == 1) {
     if (GetCurrentAnimationEndFrame(0) == GetAnimationFrame(0)) {
-      D_8022BE2C_ovl_01 = 0;
+      f_IsChosenAnimationPlaying = 0;
       if (g_ChoosingPlayerIndex == playerNumber) {
         return 1;
       }
@@ -2091,7 +2094,7 @@ s32 UpdateViewerCharacter(s32 arg0 UNUSED, s32 playerNumber) {
         g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 0) {
       PlayCharacterSound(g_MenuMemory.viewerCharacter, 0,
           CHARACTER_SOUND_CHOSEN, MENU_VOLUME_SOFT, SOUND_FULL_SCALE);
-      D_8022BE2C_ovl_01 = 1;
+      f_IsChosenAnimationPlaying = 1;
       SetAnimationSpeed(0, 1.0f);
       return 0;
     }
@@ -2474,8 +2477,7 @@ void UpdateModeSelect(void) {
     if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (--g_MenuMemory.modeChoice < 0) {
-        g_MenuMemory.modeChoice =
-            D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1;
+        g_MenuMemory.modeChoice = f_ModeCounts[g_ChosenPlayerCount - 1] - 1;
       }
 
       g_MenuMemory.modeSpin = AmountPerMode(MODE_SELECT_TURN);
@@ -2488,7 +2490,7 @@ void UpdateModeSelect(void) {
     } else if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       if (++g_MenuMemory.modeChoice >
-          D_8022BE30_ovl_01[g_ChosenPlayerCount - 1] - 1) {
+          f_ModeCounts[g_ChosenPlayerCount - 1] - 1) {
         g_MenuMemory.modeChoice = 0;
       }
 
@@ -4783,7 +4785,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
 
-  modeCount = D_8022BE30_ovl_01[g_ChosenPlayerCount - 1];
+  modeCount = f_ModeCounts[g_ChosenPlayerCount - 1];
   for (index = 0; index != modeCount; index++) {
     ScreenPoint point;
 
@@ -5456,11 +5458,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuCharacters);
 #define VIEWER_BASE_OFFSET -64.0f
 #define VIEWER_DEPTH -1000.0f
 
-const char D_80231660_ovl_01[] = "%d:%s";
-const char D_80231668_ovl_01[] = "%d:";
-const char D_8023166C_ovl_01[] = "%d";
-const char D_80231670_ovl_01[] = "POWER:%3d";
-const char D_8023167C_ovl_01[] = "SPIN :%3d";
+const char f_NumberedNameFormat[] = "%d:%s";
+const char f_PlayerNumberFormat[] = "%d:";
+const char f_ViewerAnimationFormat[] = "%d";
+const char f_PowerFormat[] = "POWER:%3d";
+const char f_SpinFormat[] = "SPIN :%3d";
 
 void DrawAnimationViewer(Gfx** displayListHead) {
   Gfx* gfx;
@@ -5472,27 +5474,27 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   gfx = *displayListHead;
 
   if (g_ControllerStates[0].pressedButtons & START_BUTTON) {
-    D_8022BE28_ovl_01 ^= 1;
+    f_IsViewerAdjusting ^= 1;
   }
 
-  if (D_8022BE28_ovl_01 == 0) {
+  if (f_IsViewerAdjusting == 0) {
     DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
   }
 
   SetUpTextDrawing(&gfx);
   gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0x7F, 0xFF, 0xFF);
   gDPSetEnvColor(gfx++, 0x00, 0x10, 0x40, 0xFF);
-  sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuMemory.viewerCharacter + 1,
+  sprintf(g_PrintBuffer, f_NumberedNameFormat, g_MenuMemory.viewerCharacter + 1,
       g_MenuCharacterNames[g_MenuMemory.viewerCharacter]);
   DrawLargeText(&gfx, VIEWER_NAME_X, VIEWER_NAME_Y, g_PrintBuffer);
   for (index = 0; index != g_ChosenPlayerCount; index++) {
-    sprintf(g_PrintBuffer, D_80231668_ovl_01, index + 1);
+    sprintf(g_PrintBuffer, f_PlayerNumberFormat, index + 1);
     DrawTextStub(&gfx, VIEWER_PLAYER_NUMBER_X,
         VIEWER_PLAYER_TOP + (index * VIEWER_PLAYER_SPACING), g_PrintBuffer);
   }
 
   for (index = 0; index != g_ChoosingPlayerIndex; index++) {
-    sprintf(g_PrintBuffer, D_80231514_ovl_01,
+    sprintf(g_PrintBuffer, f_NameFormat,
         g_MenuCharacterNames[g_ChosenCharacters[index]]);
     DrawTextStub(&gfx, VIEWER_PLAYER_NAME_X,
         VIEWER_PLAYER_TOP + (index * VIEWER_PLAYER_SPACING), g_PrintBuffer);
@@ -5500,12 +5502,12 @@ void DrawAnimationViewer(Gfx** displayListHead) {
 
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  sprintf(g_PrintBuffer, D_8023166C_ovl_01, f_ViewerAnimation);
+  sprintf(g_PrintBuffer, f_ViewerAnimationFormat, f_ViewerAnimation);
   DrawShadowedText(&gfx, VIEWER_ANIMATION_X, VIEWER_ANIMATION_Y, g_PrintBuffer);
-  sprintf(g_PrintBuffer, D_80231670_ovl_01,
+  sprintf(g_PrintBuffer, f_PowerFormat,
       g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].distance);
   DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_POWER_Y, g_PrintBuffer);
-  sprintf(g_PrintBuffer, D_8023167C_ovl_01,
+  sprintf(g_PrintBuffer, f_SpinFormat,
       g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].spin);
   DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SPIN_Y, g_PrintBuffer);
   if (g_Clubs[g_MenuMemory.viewerCharacter * CLUB_SET_SIZE].sideSpin > 0) {
@@ -5517,7 +5519,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
     DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, "STRAIGHT");
   }
 
-  if (D_8022BE28_ovl_01 == 0) {
+  if (f_IsViewerAdjusting == 0) {
     ClearGameFlag(GAME_FLAG_SHOW_ANIMATION_FRAMES);
   } else {
     stickX = g_ControllerStates[0].stickX;
@@ -6416,14 +6418,16 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   SetTextColor(&gfx, 255, 255, 255);
   if (!g_GameState.isMiniGolf) {
     if (g_CourseSelectKind == COURSE_SELECT_KIND_COURSES) {
-      sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuMemory.courseChoice + 1,
+      sprintf(g_PrintBuffer, f_NumberedNameFormat,
+          g_MenuMemory.courseChoice + 1,
           g_CourseRecords[g_MenuMemory.courseChoice].name);
     } else {
-      sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuMemory.courseChoice + 1,
+      sprintf(g_PrintBuffer, f_NumberedNameFormat,
+          g_MenuMemory.courseChoice + 1,
           g_TournamentNames[g_MenuMemory.courseChoice]);
     }
   } else {
-    sprintf(g_PrintBuffer, D_80231660_ovl_01,
+    sprintf(g_PrintBuffer, f_NumberedNameFormat,
         g_MenuMemory.miniGolfRecordChoice + 1,
         D_8022FDEC_ovl_01[g_MenuMemory.miniGolfRecordChoice]);
   }
@@ -7076,8 +7080,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
     } else {
       sprintf(g_PrintBuffer, "BGM TEST : %2d", f_SoundTestSong);
       DrawShadowedText(&gfx, SONG_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
-      sprintf(g_PrintBuffer, D_80231514_ovl_01,
-          f_SoundTestSongNames[f_SoundTestSong]);
+      sprintf(
+          g_PrintBuffer, f_NameFormat, f_SoundTestSongNames[f_SoundTestSong]);
       DrawShadowedText(&gfx, SONG_NAME_X, TEST_NAME_Y, g_PrintBuffer);
     }
 
@@ -7113,8 +7117,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 
     sprintf(g_PrintBuffer, "SE TEST : %3d", f_SoundTestSound);
     DrawShadowedText(&gfx, SOUND_TEST_X, TEST_NUMBER_Y, g_PrintBuffer);
-    sprintf(g_PrintBuffer, D_80231514_ovl_01,
-        f_SoundTestSoundNames[f_SoundTestSound]);
+    sprintf(
+        g_PrintBuffer, f_NameFormat, f_SoundTestSoundNames[f_SoundTestSound]);
     DrawShadowedText(&gfx, SOUND_NAME_X, TEST_NAME_Y, g_PrintBuffer);
     if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SOUND_REVERB) {
       SetTextColor(&gfx, 255, 255, CHOSEN_TEXT_BLUE);
