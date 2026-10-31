@@ -261,8 +261,8 @@ typedef struct TrophyAssets {
 #define TROPHY_SHINE_HEIGHT 3
 #define TROPHY_SIZE_COUNT 4
 
-/* An unread pointer to one of this file's strings */
-extern char D_80224E10_ovl_00[];
+/* "StrokeSpeedGolfMini-Golf", which only an unread pointer points to */
+extern char f_UnusedModeNamesText[];
 
 static Boolean f_AreResultsLoaded = FALSE;
 static s32 f_ResultsState = RESULTS_SLIDING_IN;
@@ -296,7 +296,7 @@ static s32 f_BannerY = 0;
 static s32 f_CourseNoticeAssets[] = {0x96C, 0x96D, 0x96E, 0x96F, 0x970};
 static s32 f_TallySoundCount = 0;
 /* Read by no routine */
-static s32 D_8021FDBC_ovl_00[6] UNUSED = {0, 1, 2, 3, 2, 1};
+static s32 f_UnusedPingPongFrames[6] UNUSED = {0, 1, 2, 3, 2, 1};
 static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {{40, 24, 24, 38},
     {40, 40, 11, 40}, {40, 40, 11, 50}, {32, 32, 32, 64}, {48, 22, 20, 21},
     {36, 40, 11, 40}};
@@ -304,7 +304,8 @@ static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
 static CharacterId f_DebugUnlockCharacter = 0;
 /* Read by no routine */
-static void* D_8021FE40_ovl_00[2] UNUSED = {NULL, D_80224E10_ovl_00};
+static void* f_UnusedModeNamesPointers[2] UNUSED = {
+    NULL, f_UnusedModeNamesText};
 /* The text color of each text slot, from slot 1 */
 static u8 f_TextSlotColors[][3] = {{0xFF, 0xFF, 0xFF}, {0x7F, 0xBF, 0xFF},
     {0x7F, 0xBF, 0xFF}, {0x7F, 0xFF, 0x4B}, {0xFF, 0x7F, 0x9F}};
@@ -314,7 +315,7 @@ static s32 f_HandFrame = 0;
 static Radians f_TitleBobAngle = 0.0f;
 
 /* Read by no routine */
-static u8 D_802256B0_ovl_00[0x10] UNUSED;
+static u8 f_UnusedBufferBeforeBackdrop[0x10] UNUSED;
 static u8* f_ResultsBackdropImage;
 static u8* f_FinalResultsTitleImage;
 static u8* f_ResultsCourseImage;
@@ -326,12 +327,14 @@ static u8* f_ResultsCloudImage;
 static u8* f_ResultsLabelsImage;
 static u8* f_ResultsLargeDigitsImage;
 static u8* f_ResultsPlacesImage;
-static u8* D_80225708_ovl_00;
+/* The banner that DrawRank draws for a rank past RANK_BANNER */
+static u8* f_SecondBannerImage;
 static u8* f_NameplateImage;
 static u8* f_NoticeTitleImage;
 static u8* f_ResultsShineImage;
-static u8* D_80225718_ovl_00;
-static u8* D_8022571C_ovl_00;
+/* An image and palette that are loaded and freed, but never drawn */
+static u8* f_UnusedResultsImage;
+static u8* f_UnusedResultsPalette;
 static u8* f_TrophyImage;
 static u8* f_TrophyPalette;
 static u8* f_ResultsHandImage;
@@ -502,13 +505,13 @@ void LoadRoundResults(void) {
     f_ResultsShineImage =
         AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
     ReadEncodedAsset(f_ResultsShineImage, &asset);
-    D_80225718_ovl_00 =
+    f_UnusedResultsImage =
         AllocMemory(OpenEncodedAsset(RESULTS_UNK72C_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(D_80225718_ovl_00, &asset);
+    ReadEncodedAsset(f_UnusedResultsImage, &asset);
     OpenAssetFile(RESULTS_UNK72D_PALETTE_ASSET, &file);
     size = GetAssetFileSize(&file);
-    D_8022571C_ovl_00 = AllocMemory(size);
-    ReadAssetFile(D_8022571C_ovl_00, size, &file);
+    f_UnusedResultsPalette = AllocMemory(size);
+    ReadAssetFile(f_UnusedResultsPalette, size, &file);
   }
 
   for (i = 0; i != g_GameState.playerCount; i++) {
@@ -533,9 +536,9 @@ void LoadRoundResults(void) {
       f_ResultsPlacesImage =
           AllocMemory(OpenEncodedAsset(MATCH_PLACES_IMAGE_ASSET, &asset));
       ReadEncodedAsset(f_ResultsPlacesImage, &asset);
-      D_80225708_ovl_00 =
+      f_SecondBannerImage =
           AllocMemory(OpenEncodedAsset(MATCH_UNK6A3_ASSET, &asset));
-      ReadEncodedAsset(D_80225708_ovl_00, &asset);
+      ReadEncodedAsset(f_SecondBannerImage, &asset);
       f_NameplateImage =
           AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
       ReadEncodedAsset(f_NameplateImage, &asset);
@@ -649,9 +652,9 @@ void LoadRoundResults(void) {
         AddRoundPoints(save);
         break;
       case GAME_MODE_TOURNAMENT:
-        D_80225708_ovl_00 =
+        f_SecondBannerImage =
             AllocMemory(OpenEncodedAsset(TOURNAMENT_UNK6A1_ASSET, &asset));
-        ReadEncodedAsset(D_80225708_ovl_00, &asset);
+        ReadEncodedAsset(f_SecondBannerImage, &asset);
         f_PlayerResults[0] =
             GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
         RankTournament(
@@ -911,8 +914,8 @@ void FreeRoundResults(void) {
       FreeMemory(&f_ResultsCourseImage);
       FreeMemory(&f_NoticeTitleImage);
       FreeMemory(&f_ResultsShineImage);
-      FreeMemory(&D_80225718_ovl_00);
-      FreeMemory(&D_8022571C_ovl_00);
+      FreeMemory(&f_UnusedResultsImage);
+      FreeMemory(&f_UnusedResultsPalette);
     }
 
     for (i = 0; i != g_GameState.playerCount; i++) {
@@ -923,7 +926,7 @@ void FreeRoundResults(void) {
     if (!g_GameState.isClubTournament) {
       if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
         FreeMemory(&f_ResultsPlacesImage);
-        FreeMemory(&D_80225708_ovl_00);
+        FreeMemory(&f_SecondBannerImage);
         FreeMemory(&f_NameplateImage);
         FreeMemory(&f_MatchStandingWordsImage);
       } else {
@@ -947,7 +950,7 @@ void FreeRoundResults(void) {
           FreeMemory(&f_PortraitPalette);
           break;
         case GAME_MODE_TOURNAMENT:
-          FreeMemory(&D_80225708_ovl_00);
+          FreeMemory(&f_SecondBannerImage);
           if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
             FreeMemory(&f_TrophyImage);
             FreeMemory(&f_TrophyPalette);
@@ -1170,7 +1173,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     if (rank >= RANK_FOURTH) {
       sprintf(g_PrintBuffer, f_PlaceNumberFormat, rank + 1);
-      LoadSmallPalette(&gfx, 0, ImageBody(D_80225708_ovl_00));
+      LoadSmallPalette(&gfx, 0, ImageBody(f_SecondBannerImage));
       if (rank >= RANK_TENTH) {
         x -= PLACE_TWO_DIGIT_SHIFT;
       }
@@ -1179,7 +1182,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         digit = g_PrintBuffer[i] - '0';
         digitX = (i * PLACE_DIGIT_SPACING) + PLACE_DIGIT_X;
         gDPLoadTextureTile_4b(gfx++,
-            TextureAddress(ImageTexels(D_80225708_ovl_00)), G_IM_FMT_CI,
+            TextureAddress(ImageTexels(f_SecondBannerImage)), G_IM_FMT_CI,
             PLACE_DIGIT_WIDTH, 0, 0, digit * PLACE_DIGIT_WIDTH,
             PLACE_DIGIT_WIDTH - 1,
             digit * PLACE_DIGIT_WIDTH + PLACE_DIGIT_WIDTH - 1, 0,
@@ -1199,7 +1202,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
     if (rank == RANK_BANNER) {
       image = f_ResultsPlacesImage;
     } else {
-      image = D_80225708_ovl_00;
+      image = f_SecondBannerImage;
     }
 
     LoadLargePalette(&gfx, ImageBody(image));
@@ -3364,7 +3367,7 @@ void DrawMatchResults(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawMatchResults);
 #endif
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E10_ovl_00);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_UnusedModeNamesText);
 
 #define CLUB_TOURNAMENT_COURSE_STRIP_WIDTH 64
 #define CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT 32
@@ -3824,7 +3827,7 @@ void DrawRoundResults(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E3C_ovl_00);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_Unk4FaceFrames);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRoundResults);
 #endif
