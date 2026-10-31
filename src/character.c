@@ -1399,6 +1399,10 @@ void AnimateCharacter(u32 slotIndex) {
  * Moves each joint's keyframe spans on to g_CurrentAnimationFrame as
  * AnimateCharacterJoints does, working out the joint transforms but leaving
  * them unused. Nothing calls it.
+ *
+ * Doesn't match: GCC keeps other values in saved registers across the joint
+ * loop. The original keeps the two words of a double constant, where GCC
+ * keeps 1.0f and a stack address. 252 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
@@ -1487,7 +1491,12 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         y = joint->translations[joint->translationSpan.index][1];
         z = joint->translations[joint->translationSpan.index][2];
       } else {
-        progress = (frame - joint->translationSpan.startFrame) /
+        /*
+         * This and the other two progress fractions read the global again,
+         * though frame holds it, to match
+         */
+        progress =
+            (g_CurrentAnimationFrame - joint->translationSpan.startFrame) /
             (joint->translationSpan.endFrame -
                 joint->translationSpan.startFrame);
         spanIndex = joint->translationSpan.index;
@@ -1558,7 +1567,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
                 joint->rotations[spanIndex][2]) +
             ((joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
                 joint->rotations[spanIndex][3]);
-        progress = (frame - joint->rotationSpan.startFrame) /
+        progress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
             (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
         /* Nearly equal rotations are blended linearly, where the sines below
          * would be near zero */
@@ -1663,7 +1672,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         y = joint->scales[joint->scaleSpan.index][1];
         z = joint->scales[joint->scaleSpan.index][2];
       } else {
-        progress = (frame - joint->scaleSpan.startFrame) /
+        progress = (g_CurrentAnimationFrame - joint->scaleSpan.startFrame) /
             (joint->scaleSpan.endFrame - joint->scaleSpan.startFrame);
         spanIndex = joint->scaleSpan.index;
         nextSpanIndex = spanIndex + 1;
