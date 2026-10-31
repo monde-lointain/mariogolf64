@@ -2843,7 +2843,7 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
 }
 
 /*
- * Toggles the unk992 bit of one cell of the ground. The cells are
+ * Toggles whether one cell of the ground is drawn mirrored. The cells are
  * GROUND_TILE_POINT_SPAN a side in each tile.
  */
 /* Whether a ground point is off the ground tiles */
@@ -2862,8 +2862,8 @@ void ToggleCellMirroring(s32 column, s32 row) {
 
   tileIndex = ((row >> 2) * GROUND_TILE_COLUMN_COUNT) +
       (column / GROUND_TILE_POINT_SPAN);
-  cellBits = g_WorkArea.hole.tiles[tileIndex].unk992;
-  g_WorkArea.hole.tiles[tileIndex].unk992 =
+  cellBits = g_WorkArea.hole.tiles[tileIndex].mirroredCells;
+  g_WorkArea.hole.tiles[tileIndex].mirroredCells =
       cellBits ^ (1 << (((row & 3) * GROUND_TILE_POINT_SPAN) + (column & 3)));
 }
 
@@ -3164,7 +3164,7 @@ PLANTED:
 }
 
 /*
- * Sets each ground tile's unk992 bits, one for each of its cells, to
+ * Sets whether each cell of each ground tile is drawn mirrored, to
  * ShouldMirrorCell of the codes between the cell's opposite corners
  */
 void ChooseMirroredCells(void) {
@@ -3198,7 +3198,7 @@ void ChooseMirroredCells(void) {
         }
       }
 
-      g_WorkArea.hole.tiles[tileIndex].unk992 = cellBits;
+      g_WorkArea.hole.tiles[tileIndex].mirroredCells = cellBits;
     }
   }
 }
@@ -4393,9 +4393,11 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                           cellColumn < blockColumn + FINE_TILE_BLOCK_SPAN;
                           cellColumn++) {
                         if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
-                          isMirrored = g_WorkArea.hole.tiles[tileIndex].unk992;
+                          isMirrored =
+                              g_WorkArea.hole.tiles[tileIndex].mirroredCells;
                         } else {
-                          isMirrored = g_WorkArea.hole.tiles[tileIndex].unk992;
+                          isMirrored =
+                              g_WorkArea.hole.tiles[tileIndex].mirroredCells;
                         }
 
                         isMirrored &= 1

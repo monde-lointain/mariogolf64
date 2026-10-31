@@ -2755,14 +2755,14 @@ void ClearHoleTriangles(void) {
   bzero(g_WorkArea.hole.triangles, sizeof(g_WorkArea.hole.triangles));
 }
 
-/* Clears each ground tile's last texel and unk992 */
+/* Clears each ground tile's last texel and mirrored cells */
 void ClearTileBorders(void) {
   s32 i;
 
   for (i = 0; i < GROUND_TILE_COUNT; i++) {
     g_WorkArea.hole.tiles[i].texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
                                    [GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
-    g_WorkArea.hole.tiles[i].unk992 = 0;
+    g_WorkArea.hole.tiles[i].mirroredCells = 0;
   }
 }
 
@@ -2973,12 +2973,12 @@ void ReadHoleTriangles(void) {
   }
 }
 
-/* Reads each ground tile's unk992 from the file */
+/* Reads each ground tile's mirrored cells from the file */
 void ReadTileUnk992s(void) {
   s32 i;
 
   for (i = 0; i < GROUND_TILE_COUNT; i++) {
-    ReadFileBytes(&g_WorkArea.hole.tiles[i].unk992, sizeof(u16));
+    ReadFileBytes(&g_WorkArea.hole.tiles[i].mirroredCells, sizeof(u16));
   }
 }
 

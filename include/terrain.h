@@ -107,7 +107,8 @@ typedef struct GroundTile {
   /* 0x000 */ u16 texels[GROUND_TILE_TEXEL_ROW_COUNT]
                         [GROUND_TILE_TEXEL_ROW_LENGTH]; /* RGBA16 */
   /* 0x990 */ s16 unk990;
-  /* 0x992 */ u16 unk992;
+  /* 0x992 */ u16 mirroredCells; /* A bit for each of the tile's cells, row by
+                                   row, set when the cell is drawn mirrored */
   /* 0x994 */ s32 detail; /* How finely the tile is drawn this frame, negative
                              when hidden */
   /* 0x998 */ Vec3 center; /* The tile's middle grid vertex */
