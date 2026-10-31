@@ -1451,9 +1451,9 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
   }
 
   sprintf(g_PrintBuffer, "Time");
-  DrawLargeTextWithShadow(&gfx, g_Scorecard.x + ROUND_TOTAL_LABEL_LEFT,
-      g_Scorecard.y + ROUND_TIME_TOP, g_PrintBuffer, HEADING_ENV_COLOR,
-      HEADING_PRIM_COLOR, 0);
+  IN_OWN_BLOCK(DrawLargeTextWithShadow(&gfx,
+      g_Scorecard.x + ROUND_TOTAL_LABEL_LEFT, g_Scorecard.y + ROUND_TIME_TOP,
+      g_PrintBuffer, HEADING_ENV_COLOR, HEADING_PRIM_COLOR, 0));
   sprintf(g_PrintBuffer, "Score");
   DrawLargeTextWithShadow(&gfx, g_Scorecard.x + ROUND_TOTAL_LABEL_LEFT,
       g_Scorecard.y + ROUND_SCORE_TOP, g_PrintBuffer, HEADING_ENV_COLOR,
