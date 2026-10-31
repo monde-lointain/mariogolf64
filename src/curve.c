@@ -42,6 +42,14 @@ void ResetPath(void) {
  * takes one step per call through each line, and the position covers
  * a fraction of its remaining distance each step, in whole units, as pace
  * sets them (see PathPace); other paces keep the last path's.
+ *
+ * Doesn't match: the original schedules the z distance's multiplication by
+ * the catch-up fraction earlier, and loads f_PathProgressStep before
+ * f_PathStepIndex, storing the step index before the y and z copies to
+ * position. Swapping the step index and progress updates leaves 18
+ * differing words, and moving them before the copies gives 61 to 114;
+ * writing f_PathProgressStep + progress gives 24, and adding the step to
+ * progress first 22.
  */
 #ifdef NON_MATCHING
 s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
