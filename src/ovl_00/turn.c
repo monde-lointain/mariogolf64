@@ -1159,6 +1159,10 @@ void MoveAimCameraDistance(void) {
  * shot's heading with the D-pad, faster the longer it is held. While the
  * heading holds still, the scene is drawn from a saved frame, through two
  * framebuffers.
+ *
+ * Doesn't match: 57 words differ, in the stick's step. The original keeps the
+ * stick's 16-bit value and its pointers in other registers, and schedules the
+ * divisions and the heading's load differently.
  */
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
@@ -1246,10 +1250,10 @@ void TurnAim(s32 turnsAltHeading) {
   }
 
   if (IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
-    if (rand() & 1) {
-      SetFramebufferCount(TRIPLE_BUFFERING);
-    } else {
+    if ((rand() & 1) == 0) {
       SetFramebufferCount(DOUBLE_BUFFERING);
+    } else {
+      SetFramebufferCount(TRIPLE_BUFFERING);
     }
   }
 }
