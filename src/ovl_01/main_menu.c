@@ -5878,7 +5878,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     D_8022FBC0_ovl_01 += FRONT_COURSE_BOB_PHASE_STEP;
     for (index = 0; index != courseCount; index++) {
-      slot = drawOrder[index];
+      IN_OWN_BLOCK(slot = drawOrder[index]);
       halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
       step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
       if (index == (courseCount - 1)) {
