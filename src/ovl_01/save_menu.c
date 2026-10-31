@@ -1989,8 +1989,8 @@ void DrawSavedGames(Gfx** displayListHead) {
       }
 
       if (f_SavedGameModes[slot] != NO_SAVE_MENU_MODE) {
-        gDPLoadTLUT_pal256(
-            gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot])));
+        IN_OWN_BLOCK(gDPLoadTLUT_pal256(
+            gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot]))));
         for (otherIndex = 0; otherIndex != MODE_ICON_STRIP_COUNT;
             otherIndex++) {
           gDPLoadTextureBlock(gfx++,
