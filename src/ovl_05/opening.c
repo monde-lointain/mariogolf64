@@ -4984,8 +4984,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
               continue;
             }
 
-            f_LogoLetterSpeeds[LOGO_LETTER_L] =
-                -f_LogoLetterSpeeds[LOGO_LETTER_L];
+            IN_OWN_BLOCK(f_LogoLetterSpeeds[LOGO_LETTER_L] =
+                             -f_LogoLetterSpeeds[LOGO_LETTER_L]);
             f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_SQUASHING;
             f_LogoLetterSquashFrames[LOGO_LETTER_L] = LOGO_LETTER_SQUASH_FRAMES;
           }
