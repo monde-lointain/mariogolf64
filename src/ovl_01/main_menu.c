@@ -5921,10 +5921,11 @@ void DrawCourseSelect(Gfx** displayListHead) {
         }
       }
 
-      stripTop = 0;
-      stripOffset = texelsOffset;
       for (otherIndex = 0; otherIndex != COURSE_ICON_STRIP_COUNT;
           otherIndex++) {
+        stripOffset = texelsOffset +
+            (otherIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT);
+        stripTop = otherIndex * halfSize;
         gDPLoadTextureBlock(gfx++, TextureAddress(texels + stripOffset),
             G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH,
             COURSE_ICON_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -5937,8 +5938,6 @@ void DrawCourseSelect(Gfx** displayListHead) {
             (s32)(iconY[slot] + stripTop + bob) << 2, G_TX_RENDERTILE, 0, 0,
             step, step);
         gDPPipeSync(gfx++);
-        stripTop += halfSize;
-        stripOffset += COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT;
       }
 
       if ((g_GameState.isMiniGolf == TRUE) &&
