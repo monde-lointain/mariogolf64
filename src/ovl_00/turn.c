@@ -965,12 +965,21 @@ void ResetAimCamera(void) {
   PlaceAimCamera();
 }
 
-/* Eases the aim camera towards the place that suits the shot, and stops once it
- * is close */
+/*
+ * Eases the aim camera towards the place that suits the shot, and stops once it
+ * is close.
+ *
+ * Doesn't match: the original loads one float constant five instructions
+ * later, and stores the eased height before taking the distance error's
+ * absolute value, where this stores it after; 17 words differ. Testing the
+ * absolute value directly gives 27, and taking it before easing the height
+ * gives 57.
+ */
 #ifdef NON_MATCHING
 void EaseAimCamera(void) {
   s32 targetDistance;
   s32 targetHeight;
+  f32 distanceError;
 
   if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     targetDistance = AIM_CAMERA_PUTT_DISTANCE;
@@ -1005,8 +1014,10 @@ void EaseAimCamera(void) {
 
   g_CurrentShot.aimCameraHeight +=
       (targetHeight - g_CurrentShot.aimCameraHeight) * AIM_CAMERA_EASE_FRACTION;
-  if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) <
-      UNITS_PER_YARD) {
+  distanceError = fabsf(g_CurrentShot.aimCameraDistance - targetDistance);
+  /* The test in its own block, to match */
+  END_BASIC_BLOCK();
+  if (distanceError < UNITS_PER_YARD) {
     g_IsAimCameraEasing = 0;
   }
 }
