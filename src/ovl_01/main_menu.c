@@ -394,8 +394,8 @@ s32 g_MenuFidgetDelays[MAX_PLAYER_COUNT];
 s32 g_CourseBannersSlide;
 
 /* Defined after the routines whose strings come before theirs */
-extern const char D_802316EC_ovl_01[];
-extern const char D_802316FC_ovl_01[];
+extern const char f_PeachsCastleName[];
+extern const char f_LuigisGardenName[];
 
 /* Read by no routine */
 static Gfx D_8022BE00_ovl_01[] UNUSED = {gsSPEndDisplayList()};
@@ -408,7 +408,8 @@ static u8 D_8022BE10_ovl_01[8] UNUSED = {
     0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 /* The row that UpdateUnusedList is on */
 static s32 f_UnusedListChoice = 0;
-static s32 D_8022BE1C_ovl_01 = 0;
+/* The hole selection that a hole-choice mode starts with; never changed */
+static s32 f_StartingHoleSelection = 0;
 /* Read by no routine */
 static s32 D_8022BE20_ovl_01 UNUSED = 0;
 /* The animation that the animation viewer plays, which left and right step */
@@ -423,7 +424,7 @@ static s32 f_ModeCounts[MAX_PLAYER_COUNT] = {7, 5, 4, 4};
 /* Read by no routine; the mode counts of D_8022BEEC_ovl_01 */
 static s32 D_8022BE40_ovl_01[4] UNUSED = {3, 5, 4, 4};
 /* Each player's clubs, a bit per slot */
-static u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT] = {
+static u16 f_PlayerClubMasks[MAX_PLAYER_COUNT] = {
     ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS, ALL_CLUB_SLOTS};
 /* Read by no routine */
 static s32 D_8022BE58_ovl_01[10] UNUSED = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1};
@@ -435,7 +436,8 @@ static s8 f_ViewerModelKind = 0;
 static s32 f_BetSlideOffset = 0;
 u8 g_BetPagesPhase = MENU_PHASE_START;
 u8 g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
-static s16 D_8022BE8A_ovl_01 = 0;
+/* Cleared with the spinning star's state; no routine reads it */
+static s16 f_UnusedSpinningStarCounter = 0;
 /* Which of g_MenuTitleImages is shown; a new screen's title is read into the
  * other */
 static s16 f_MenuTitleImageIndex = 0;
@@ -485,7 +487,7 @@ static s16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
 /* Read by no routine; the one room that f_ClubhouseRooms leaves out */
 static s16 D_8022BF26_ovl_01 UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
 /* The plain-text menu's names; DrawMenuTitleScreen prints the first three */
-static const char* D_8022BF28_ovl_01[] = {
+static const char* f_PlainMenuNames[] = {
     "1P GAME", "2P GAME", "3P GAME", "4P GAME", "CONTINUE", "HOUISE"};
 /* Read by no routine */
 static const char* D_8022BF40_ovl_01[] UNUSED = {"TOURNAMENT ", "VS CHARACTER",
@@ -696,8 +698,8 @@ static s32
 static s32 D_8022F9FC_ovl_01[11] UNUSED = {
     110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
 /* How far left of the label's place each row of the modes' label image is
- * drawn */
-static s32 D_8022FA28_ovl_01[MODE_ICON_COUNT] = {
+ * drawn. save_menu.c has a copy, f_GameModeLabelOffsets. */
+static s32 f_ModeSelectLabelOffsets[MODE_ICON_COUNT] = {
     85, 85, 41, 60, 55, 60, 75, 66, 59, 0, 61};
 /* The menu characters' angles, in degrees. The pitch is never changed; the
  * yaw is the rival's spin for the rival and 0 for the others. */
@@ -722,7 +724,7 @@ static f32 f_MenuCharacterPositions
             {76.0f, -8.0f, -1700.0f}, {106.0f, -52.0f, -1000.0f},
             {0.0f, 0.0f, 0.0f}}};
 /* The character for each grid mark */
-static s32 D_8022FB58_ovl_01[CHARACTER_COUNT] = {
+static s32 f_MarkedCharacters[CHARACTER_COUNT] = {
     0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
 /* The character that the animation viewer last loaded */
 static s32 f_ViewerLoadedCharacter = NO_VIEWER_CHARACTER;
@@ -776,7 +778,8 @@ static u8 D_8022FD30_ovl_01[16] UNUSED = {0x71, 0x84, 0x00, 0x00, 0x00, 0x00,
 static f32 f_BetBadgeColorPhase = 0.0f;
 /* The chosen mini-golf image's center Y */
 static f32 f_MiniGolfChoiceCenterY = 0.0f;
-static Vtx D_8022FD48_ovl_01[WATER_VERTEX_COUNT] = {
+/* The course select's water surface */
+static Vtx f_WaterVertices[WATER_VERTEX_COUNT] = {
     {{{-800, 64, -1024}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-800, -128, 0}, 0, {0, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
     {{{0, -128, 0}, 0, {16384, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
@@ -788,8 +791,8 @@ static s32 f_WaterScroll = 0;
 static char D_8022FD9C_ovl_01[4][20] UNUSED = {
     "ﾍﾞｯﾄ", "ｱｳﾄ : 1-9ﾎｰﾙﾌﾟﾚｲ", "ｲﾝ : 10-18ﾎｰﾙﾌﾟﾚｲ", "1ﾗｳﾝﾄﾞ : 18ﾎｰﾙﾌﾟﾚｲ"};
 /* The records' names */
-static const char* D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT] = {
-    D_802316FC_ovl_01, D_802316EC_ovl_01};
+static const char* f_MiniGolfRecordNames[MINI_GOLF_RECORD_COUNT] = {
+    f_LuigisGardenName, f_PeachsCastleName};
 /* The top-left corner of each of the main menu's labels */
 static LabelCorner f_MainChoiceLabelCorners[MAIN_CHOICE_COUNT] = {
     {96, 84}, {96, 114}, {96, 144}, {96, 174}};
@@ -1502,7 +1505,7 @@ void UpdateMenus(void) {
         f_SpinningStarFrameIndex = 0;
         f_SpinningStarBufferIndex = 0;
         f_SpinningStarFrameTime = 0;
-        D_8022BE8A_ovl_01 = 0;
+        f_UnusedSpinningStarCounter = 0;
         f_MenuBoardImageIndex ^= 1;
         LoadPlayerStatsBuffer(g_MenuBoardImages[f_MenuBoardImageIndex],
             PLAYER_STATS_BUFFER_BET_ICONS);
@@ -1767,7 +1770,7 @@ void SetUpChosenGame(void) {
       /* Through a pointer, as the original keeps the address in a register for
        * every store */
       holeSelection = &g_GameState.holeSelection;
-      *holeSelection = D_8022BE1C_ovl_01;
+      *holeSelection = f_StartingHoleSelection;
       if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
         switch (g_MenuMemory.holesChoice) {
           case HOLES_CHOICE_UNK0:
@@ -1833,7 +1836,7 @@ void SetUpChosenGame(void) {
     }
 
     for (slot = 0; slot != CLUB_SET_SIZE; slot++) {
-      if (!((D_8022BE50_ovl_01[index] >> slot) & 1)) {
+      if (!((f_PlayerClubMasks[index] >> slot) & 1)) {
         player->clubs[slot] = NO_CLUB;
       } else {
         clubSet = g_ChosenCharacters[index];
@@ -4408,8 +4411,8 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * insns or fewer. 60 words differ; a permuter run found nothing better.
  */
 #ifdef NON_MATCHING
-const char D_80231634_ovl_01[] = "MAIN MENU";
-const char D_80231640_ovl_01[] = "%8d:%8d:%8d";
+const char f_PlainMenuHeading[] = "MAIN MENU";
+const char f_SaveSizesFormat[] = "%8d:%8d:%8d";
 
 /*
  * Whether a title label is the chosen one: New Game and the chosen player
@@ -4435,14 +4438,14 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   DrawShadowedText(&gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y,
-      (char*)D_80231634_ovl_01);
+      (char*)f_PlainMenuHeading);
   for (labelIndex = 0; labelIndex != PLAIN_MENU_NAME_COUNT; labelIndex++) {
     DrawShadowedText(&gfx, PLAIN_MENU_NAME_X,
         PLAIN_MENU_NAME_TOP + (labelIndex * PLAIN_MENU_NAME_SPACING),
-        (char*)D_8022BF28_ovl_01[labelIndex]);
+        (char*)f_PlainMenuNames[labelIndex]);
   }
 
-  sprintf(g_PrintBuffer, D_80231640_ovl_01, MemberSize(SaveData, rankedRecords),
+  sprintf(g_PrintBuffer, f_SaveSizesFormat, MemberSize(SaveData, rankedRecords),
       MemberSize(SaveData, ringShotRecords), (s32)sizeof(SaveData));
   DrawShadowedText(
       &gfx, PLAIN_MENU_FIGURES_X, PLAIN_MENU_FIGURES_Y, g_PrintBuffer);
@@ -4541,8 +4544,8 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Nothing reads this */
-const char D_8023164C_ovl_01[] = "";
+/* Read by no routine */
+const char f_UnusedEmptyString[] = "";
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 #endif
@@ -4994,7 +4997,7 @@ void DrawModeSelect(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
 
-  labelOffset = &D_8022FA28_ovl_01[labelIndex];
+  labelOffset = &f_ModeSelectLabelOffsets[labelIndex];
   labelX =
       (g_ChosenPlayerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
   gSPScisTextureRectangle(gfx++, QuarterPixels(labelX - *labelOffset),
@@ -5309,7 +5312,7 @@ void DrawMenuCharacters(Gfx** displayListHead) {
       for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
         for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
           if (g_CharacterGrid[row][column] < MARKED_CHARACTER_LIMIT) {
-            rival = D_8022FB58_ovl_01[g_CharacterGrid[row][column] +
+            rival = f_MarkedCharacters[g_CharacterGrid[row][column] +
                 MARKED_CHARACTER_OFFSET];
           }
         }
@@ -5830,7 +5833,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gSPMatrix(gfx++, PhysicalAddress(&D_802321F0_ovl_01),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
-    gSPVertex(gfx++, D_8022FD48_ovl_01, WATER_VERTEX_COUNT, 0);
+    gSPVertex(gfx++, f_WaterVertices, WATER_VERTEX_COUNT, 0);
     gDPPipeSync(gfx++);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     gSP1Triangle(gfx++, 4, 2, 3, 0);
@@ -6444,7 +6447,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   } else {
     sprintf(g_PrintBuffer, f_NumberedNameFormat,
         g_MenuMemory.miniGolfRecordChoice + 1,
-        D_8022FDEC_ovl_01[g_MenuMemory.miniGolfRecordChoice]);
+        f_MiniGolfRecordNames[g_MenuMemory.miniGolfRecordChoice]);
   }
 
   SetUpGradientTextDrawing(&gfx, 0);
@@ -6728,8 +6731,8 @@ void DrawUnusedBoardScreen(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-const char D_802316EC_ovl_01[] = "Peach's Castle";
-const char D_802316FC_ovl_01[] = "Luigi's Garden";
+const char f_PeachsCastleName[] = "Peach's Castle";
+const char f_LuigisGardenName[] = "Luigi's Garden";
 
 /* The options draw the narrow board in place of the board */
 #define OPTIONS_BACKDROP_LAYERS \
