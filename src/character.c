@@ -183,7 +183,7 @@ static Mtx f_RollMatrix;
 static Mtx f_HeadingMatrix;
 
 /* Read by no routine */
-static u8 D_800DEA30[120] UNUSED;
+static u8 f_UnusedBufferAfterHeadingMatrix[120] UNUSED;
 
 #define MODEL_SCALE 0.01f
 #define HALF_TURN_DEGREES 180
@@ -360,7 +360,7 @@ Gfx g_CharacterHiliteDisplayList[3] = {
     gsSPEndDisplayList(),
 };
 /* Read by no routine */
-static Gfx D_800C1D18[] UNUSED = {
+static Gfx f_UnusedDoubleEndDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
     gsSPEndDisplayList(),
 };
@@ -389,14 +389,14 @@ Gfx g_CharacterEnvColorDisplayLists[ENV_COLOR_COUNT][2] = {
     {gsDPSetEnvColor(0, 0, 0, OPAQUE_ALPHA), gsSPEndDisplayList()},
 };
 /* Read by no routine */
-static s32 D_800C1DE8 UNUSED = 1;
+static s32 f_UnusedWordBeforeModelIndex UNUSED = 1;
 s32 g_CharacterModelIndex = 1;
 /* The animation LoadCharacter starts */
-static s32 D_800C1DF0 = 0;
+static s32 f_StartedAnimationIndex = 0;
 /* Set to the model buffer of the slot last set up or animated */
-static void* D_800C1DF4 = NULL;
+static void* f_CurrentModelBuffer = NULL;
 /* Read by no routine */
-static Gfx D_800C1DF8[] UNUSED = {
+static Gfx f_UnusedCharacterEndDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
 /* For CHARACTER_LIGHTING_FIXED and CHARACTER_LIGHTING_BLACK */
@@ -420,7 +420,7 @@ static Lights2 f_DryLights[DRAW_BUFFER_COUNT] = {
         0x96, 120, -120, 0),
 };
 /* Read by no routine */
-static Lights2 D_800C1EF0[DRAW_BUFFER_COUNT] UNUSED = {
+static Lights2 f_UnusedCharacterLights[DRAW_BUFFER_COUNT] UNUSED = {
     gdSPDefLights2(0x64, 0x64, 0x64, 0x9B, 0x78, 0x78, 0, -120, 20, 0x96, 0x96,
         0x96, 20, -120, 0),
     gdSPDefLights2(0x78, 0x5A, 0x5A, 0xB9, 0x78, 0x78, 0, -120, 120, 0xB4, 0x96,
@@ -443,7 +443,7 @@ static Boolean f_IsMatrixSetupPending = TRUE;
 /* Flips between 0 and 1 on each draw */
 static s32 f_DrawParity = 0;
 /* Read by no routine */
-static s32 D_800C1FA4 UNUSED = 0;
+static s32 f_UnusedWordAfterDrawParity UNUSED = 0;
 /* A square, textured with g_ShadowTexture, laid on the ground plane by
  * f_ShadowMatrices */
 static Vtx f_ShadowVertices[4] = {
@@ -1014,19 +1014,19 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     slot->randomTextureAnimationDelay = LOADED_RANDOM_TEXTURE_ANIMATION_DELAY;
     slot->unk188 = 0;
     slot->reusesLastMatrices = 0;
-    D_800C1DF4 = slot->modelBuffer;
+    f_CurrentModelBuffer = slot->modelBuffer;
     if (isPatched) {
-      LoadLzData(slot->model->baseRomStart, D_800C1DF4,
+      LoadLzData(slot->model->baseRomStart, f_CurrentModelBuffer,
           slot->model->baseRomEnd - slot->model->baseRomStart);
-      LoadPatchedLzData(slot->model->romStart, D_800C1DF4,
+      LoadPatchedLzData(slot->model->romStart, f_CurrentModelBuffer,
           slot->model->romEnd - slot->model->romStart);
     } else {
-      LoadLzData(slot->model->romStart, D_800C1DF4,
+      LoadLzData(slot->model->romStart, f_CurrentModelBuffer,
           slot->model->romEnd - slot->model->romStart);
     }
 
     SetMultiTlb(0, TLB_PAGE_MODE_4K, CHARACTER_MODEL_PAGE_COUNT,
-        CHARACTER_MODEL_ADDRESS, osVirtualToPhysical(D_800C1DF4));
+        CHARACTER_MODEL_ADDRESS, osVirtualToPhysical(f_CurrentModelBuffer));
     frameDataSize = slot->model->frameDataEnd - slot->model->frameDataStart;
     if (frameDataSize < FRAME_DATA_COPY_SIZE) {
       frameDataSize = FRAME_DATA_COPY_SIZE;
@@ -1040,22 +1040,23 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     memcpy(slot->frameData[1], slot->frameData[0], frameDataSize);
     memcpy(slot->frameData[2], slot->frameData[0], frameDataSize);
     g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
-    D_800C1DF0 = slot->animationIndex;
+    f_StartedAnimationIndex = slot->animationIndex;
     if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
       osSyncPrintf("complete2 anims_addr %x\n", ModelAnimations(slot->model));
     }
 
     slot->animationStartFrame =
-        ModelAnimations(slot->model)[D_800C1DF0].startFrame;
+        ModelAnimations(slot->model)[f_StartedAnimationIndex].startFrame;
     slot->animationFrame = slot->animationStartFrame;
     slot->animationEndFrame = slot->animationStartFrame +
-        ModelAnimations(slot->model)[D_800C1DF0].frameCount;
+        ModelAnimations(slot->model)[f_StartedAnimationIndex].frameCount;
     g_CurrentAnimationFrame = slot->animationFrame;
     g_CurrentAnimationStartFrame = slot->animationStartFrame;
     g_CurrentAnimationEndFrame = slot->animationEndFrame;
     if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
-      osSyncPrintf("loop %d, loop_min = %d, loop_max = %d\n", D_800C1DF0,
-          g_CurrentAnimationStartFrame, g_CurrentAnimationEndFrame);
+      osSyncPrintf("loop %d, loop_min = %d, loop_max = %d\n",
+          f_StartedAnimationIndex, g_CurrentAnimationStartFrame,
+          g_CurrentAnimationEndFrame);
     }
 
     ResetTriangleTextures(slotIndex);
@@ -1403,7 +1404,7 @@ void AnimateCharacter(u32 slotIndex) {
     AdvanceTextureAnimations(slotIndex, 0, (s32)g_CurrentAnimationFrame % 10,
         g_CurrentAnimationFrame);
     g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
-    D_800C1DF4 = slot->modelBuffer;
+    f_CurrentModelBuffer = slot->modelBuffer;
     slot->frameDataIndex = (slot->frameDataIndex + 1) % FRAME_DATA_COPY_COUNT;
     AnimateCharacterJoints(slotIndex);
     slot->jointMatrices = g_CurrentJointMatrices;
@@ -1710,8 +1711,8 @@ RESUME_RODATA_SECTION();
 
 /* The double 1.0, which UpdateJointKeyframeSpans loads as two words, aligned as
  * a double is */
-const u32 D_800D07E8 __attribute__((aligned(8))) = 0x3FF00000;
-const u32 D_800D07EC = 0;
+const u32 f_KeyframeOneHighWord __attribute__((aligned(8))) = 0x3FF00000;
+const u32 f_KeyframeOneLowWord = 0;
 
 INCLUDE_ASM("asm/nonmatchings/character", UpdateJointKeyframeSpans);
 #endif
@@ -1795,7 +1796,7 @@ void AnimateCharacterInSameCopy(u32 slotIndex) {
     AdvanceTextureAnimations(slotIndex, 0, (s32)g_CurrentAnimationFrame % 10,
         g_CurrentAnimationFrame);
     g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
-    D_800C1DF4 = slot->modelBuffer;
+    f_CurrentModelBuffer = slot->modelBuffer;
     AnimateCharacterJoints(slotIndex);
     slot->jointMatrices = g_CurrentJointMatrices;
   }
