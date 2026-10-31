@@ -3984,7 +3984,7 @@ static inline u16 ReadTileTexel(
  * where ReadTileTexel reads a tile, the original adds the tile's address
  * after the layout test, and ours adds it before; ours also masks the texel
  * coordinates in another order, and is two instructions shorter.
- * 198 words differ.
+ * 186 words differ.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {
@@ -4062,11 +4062,11 @@ void ToggleGroundTileBorders(void) {
 
       texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
             [GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
-      source = (f64*)texels;
       destination =
           (f64*)g_WorkArea.hole
               .tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
               .texels;
+      source = (f64*)texels;
       while (source != (f64*)&texels[GROUND_TILE_TEXEL_ROW_COUNT]) {
         *destination++ = *source++;
         *destination++ = *source++;
