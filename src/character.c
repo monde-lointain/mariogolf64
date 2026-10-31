@@ -943,14 +943,6 @@ void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
 INCLUDE_ASM("asm/nonmatchings/character", ResetAnimationTriangleTextures);
 #endif
 
-/*
- * Loads the model of the character of the kind into the slot, sets up its
- * frame data copies, and starts its first animation
- *
- * Doesn't match: the original adds the frame data size before the copy's
- * address.
- */
-#ifdef NON_MATCHING
 /* As above, so the data below lands in .rodata */
 RESUME_RODATA_SECTION();
 
@@ -961,6 +953,10 @@ static const char f_UnusedReadRomFormat[] =
     "nuPiReadRom(%x, %x, %x) [bufsiz %x]\n";
 static const char f_UnusedCompleteText[] = "complete\n";
 
+/*
+ * Loads the model of the character of the kind into the slot, sets up its
+ * frame data copies, and starts its first animation
+ */
 void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
   Boolean isPatched = FALSE;
   CharacterSlot* slot = &g_CharacterSlots[slotIndex];
@@ -1023,8 +1019,9 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
 
     slot->frameData[0] = OS_PHYSICAL_TO_K0(
         osVirtualToPhysical((void*)slot->model->frameDataStart));
-    slot->frameData[1] = AddressPast(slot->frameData[0], frameDataSize);
-    slot->frameData[2] = AddressPast(slot->frameData[1], frameDataSize);
+    /* Added as integers, the size first, to match */
+    slot->frameData[1] = (void*)(frameDataSize + (u32)slot->frameData[0]);
+    slot->frameData[2] = (void*)(frameDataSize + (u32)slot->frameData[1]);
     memcpy(slot->frameData[1], slot->frameData[0], frameDataSize);
     memcpy(slot->frameData[2], slot->frameData[0], frameDataSize);
     g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
@@ -1093,10 +1090,6 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/character", LoadCharacter);
-#endif
 
 s32 GetAnimationIndex(u32 slotIndex, s32 id) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
