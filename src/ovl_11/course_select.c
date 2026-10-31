@@ -757,13 +757,13 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-      DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
+      IN_OWN_BLOCK(DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
           QuarterPixels(
               f_PressedDirection == DIRECTION_UP ? push + 128 : push + 132),
           QuarterPixels(ARROW_LEFT + ARROW_SIZE),
           QuarterPixels(
               f_PressedDirection == DIRECTION_UP ? push + 144 : push + 148),
-          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE));
       push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
       DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
           QuarterPixels(
