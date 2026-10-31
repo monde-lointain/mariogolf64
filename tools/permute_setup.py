@@ -10,16 +10,21 @@ default), ready for:
 
     permuter.py OUT_DIR -j 16
 
-decomp-permuter is expected at $PERMUTER_DIR (default ~/src/decomp-permuter).
-Functions that hold a nested function need its nested-functions branch, as
-pycparser rejects them.
+decomp-permuter is expected at $PERMUTER_DIR (default ~/src/decomp-permuter),
+on its nested-functions branch: pycparser rejects nested functions, and the
+display-list macros that base.c keeps as calls need the branch's importer,
+which keeps braced macro bodies and attributes.
 """
 
+import contextlib
+import importlib.util
 import os
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import cast
 
 import fncompare
 
@@ -54,6 +59,22 @@ NESTED_DEFINITION = re.compile(
 )
 KEYWORDS = frozenset({"if", "for", "while", "switch", "return", "sizeof"})
 
+# The importer's preprocess_c_with_macros, given the cpp command, its working
+# directory, and the names of the macros to keep with the function naming the
+# type each is declared as. Returns the source and the macros kept.
+PreprocessWithMacros = Callable[
+    [list[str], str, tuple[re.Pattern[str], Callable[[str], str]]],
+    tuple[str, list[str]],
+]
+
+# The display-list macros, kept as calls so that the permuter changes their
+# arguments and not their expansions. Its changes within an expansion only
+# split the command words into temporaries, which no readable source holds.
+# The constants whose names the macros paste together, G_ and FR_ ones, are
+# kept too, as the definitions of the others go with the expansion. So are
+# _SHIFTL and _SHIFTR and their old name _SHIFT, which "siz##_SHIFT" holds.
+DISPLAY_LIST_MACROS = re.compile(r"^(?:g[A-Za-z]\w*|G_\w+|FR_\w+|_SHIFT[LR]?)$")
+
 
 # A one-parameter macro whose body is a GNU statement expression, as cpp -dM
 # prints it: its name, parameter, the type of the body's first declaration, and
@@ -63,30 +84,65 @@ STATEMENT_EXPRESSION_MACRO = re.compile(
 )
 
 
-def preprocess(c_path: str, *options: str) -> str:
-    """Return C_PATH preprocessed without KMC's cpp quirks.
+def get_cpp_command(c_path: str, *options: str) -> list[str]:
+    """Return the command that preprocesses C_PATH without KMC's cpp quirks.
 
     INCLUDE_ASM expands to nothing under PERMUTER.
     """
+    return [
+        "mips-linux-gnu-cpp",
+        "-undef",
+        "-nostdinc",
+        "-DPERMUTER",
+        *fncompare.INCLUDES,
+        *fncompare.DEFINES,
+        "-D__GNUC__=2",
+        "-D__mips__",
+        *options,
+        c_path,
+    ]
+
+
+def preprocess(c_path: str, *options: str) -> str:
+    """Return C_PATH preprocessed, with every macro expanded."""
     return subprocess.run(
-        [
-            "mips-linux-gnu-cpp",
-            "-P",
-            "-undef",
-            "-nostdinc",
-            "-DPERMUTER",
-            *fncompare.INCLUDES,
-            *fncompare.DEFINES,
-            "-D__GNUC__=2",
-            "-D__mips__",
-            *options,
-            c_path,
-        ],
+        get_cpp_command(c_path, "-P", *options),
         cwd=ROOT,
         check=True,
         capture_output=True,
         text=True,
     ).stdout
+
+
+def preprocess_keeping_display_list_macros(c_path: str) -> str:
+    """Return C_PATH preprocessed, with the display-list macros kept as calls.
+
+    The permuter's importer does this, declaring each macro for its parser and
+    putting the definitions back in a latedefine block before compiling.
+    """
+    # The importer is a script named import.py, which no import statement names
+    sys.path.insert(0, str(PERMUTER_DIR))
+    importer_path = PERMUTER_DIR / "import.py"
+    spec = importlib.util.spec_from_file_location("permuter_import", importer_path)
+    if spec is None or spec.loader is None:
+        message = f"{importer_path} is no Python module"
+        raise ImportError(message)
+    importer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(importer)
+    preprocess_with_macros = cast(
+        PreprocessWithMacros,  # noqa: TC006 - unquoted, so vulture sees it used
+        importer.preprocess_c_with_macros,
+    )
+
+    def get_macro_type(name: str) -> str:
+        return "int" if name.startswith("G_") else "void"
+
+    # It lists the macros it keeps, which stdout leaves for the directory made
+    with contextlib.redirect_stdout(sys.stderr):
+        source, _macros = preprocess_with_macros(
+            get_cpp_command(c_path), str(ROOT), (DISPLAY_LIST_MACROS, get_macro_type)
+        )
+    return source
 
 
 def find_closing_parenthesis(text: str, start: int) -> int:
@@ -149,7 +205,9 @@ def fold_statement_expressions(c_path: str, source: str) -> tuple[str, str]:
 
 def write_base(c_path: str, function: str, base_path: Path) -> None:
     """Write C_PATH preprocessed, with every function but FUNCTION stripped."""
-    source, late_defines = fold_statement_expressions(c_path, preprocess(c_path))
+    source, late_defines = fold_statement_expressions(
+        c_path, preprocess_keeping_display_list_macros(c_path)
+    )
     _ = base_path.write_text(source)
     _ = subprocess.run(
         [
