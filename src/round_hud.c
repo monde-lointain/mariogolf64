@@ -3628,7 +3628,7 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
  *
- * Doesn't match: 169 words differ.
+ * Doesn't match: 131 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {
@@ -3640,7 +3640,6 @@ void DrawRoundHud(CameraView* view) {
   s32 ringCount;
   s32 hundredths;
   s32 height;
-  Player* player;
   Player* shooter;
   Club* selectedClub;
   SurfaceInfo* surface;
@@ -4010,6 +4009,8 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
+    Player* player;
+
     selectedClub = GetSelectedClub();
     player = &g_Players[g_RoundHud.unk87];
     if (selectedClub->surfaceMask & CLUB_SURFACE_GREEN) {
@@ -4032,6 +4033,8 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_RoundHud.unk13 && !g_IsCupViewShown) {
+    Player* player;
+
     player = &g_Players[g_RoundHud.unk87];
     shotLength = IntLength2D(g_CurrentShot.ballPosition[AXIS_X] -
             g_TurnBallSimulation.position[AXIS_X],
