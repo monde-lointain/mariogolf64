@@ -1412,6 +1412,10 @@ void DrawMovie(Gfx** displayListHead) {
 
 /* The caption of a longest drive or nearest pin contest, then its winner's face
  */
+/* Doesn't match: GCC moves the strips' left edge, centerX - halfWidth, out of
+ * the strip loop, where the original works it out for each strip. The loop
+ * comes to 52 insns, so the cost model finds the move worthwhile; with one
+ * register fewer it doesn't, and 40 words still differ. */
 #ifdef NON_MATCHING
 void DrawContestWinnerMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
