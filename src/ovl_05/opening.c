@@ -4600,15 +4600,16 @@ void LoadOpeningLogo(void) {
  * into place. Meanwhile the screen behind it fades to gray and then white.
  * The logo is only drawn when isDrawn is 1, but moves on every call.
  *
- * Doesn't match: the register allocation and stack slots differ. Some
- * spilled display list pointers swap slots, a few addresses are kept in
- * registers instead of reloaded, and the letters' texture offsets are folded
- * into their relocations.
+ * Doesn't match: the register allocation and instruction order differ. In
+ * the letter loops GCC works out the texel offset before stepping the display
+ * list pointer, where the original steps it first, and in the falling letters'
+ * loop it derives f_LogoLetters' address from another table's instead of
+ * loading it. 276 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   Gfx* gfx = *displayListHead;
-  s32 pad[6] UNUSED;
+  s32 texelsOffset;
   s32 i;
   s32 j;
   Radians angle;
@@ -4805,15 +4806,14 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
+        texelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
+                           LOGO_LETTER_HALF_HEIGHT) +
+            LARGE_PALETTED_TEXELS_OFFSET;
         gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_LogoLetterImages +
-                (((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
-                     LOGO_LETTER_HALF_HEIGHT) +
-                    LARGE_PALETTED_TEXELS_OFFSET)),
-            G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
-            LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+            TextureAddress(f_LogoLetterImages + texelsOffset), G_IM_FMT_CI,
+            G_IM_SIZ_8b, LOGO_LETTER_WIDTH, LOGO_LETTER_HALF_HEIGHT, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPMatrix(gfx++,
@@ -4835,10 +4835,9 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoClubImage)));
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_CLUB_STRIP_COUNT; i++) {
-      gDPLoadTextureBlock(gfx++,
-          TextureAddress(f_LogoClubImage +
-              ((i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
-                  LARGE_PALETTED_TEXELS_OFFSET)),
+      texelsOffset = (i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
+          LARGE_PALETTED_TEXELS_OFFSET;
+      gDPLoadTextureBlock(gfx++, TextureAddress(f_LogoClubImage + texelsOffset),
           G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -4885,15 +4884,14 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
+        texelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
+                           LOGO_LETTER_HALF_HEIGHT) +
+            LARGE_PALETTED_TEXELS_OFFSET;
         gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_LogoLetterImages +
-                (((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
-                     LOGO_LETTER_HALF_HEIGHT) +
-                    LARGE_PALETTED_TEXELS_OFFSET)),
-            G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
-            LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+            TextureAddress(f_LogoLetterImages + texelsOffset), G_IM_FMT_CI,
+            G_IM_SIZ_8b, LOGO_LETTER_WIDTH, LOGO_LETTER_HALF_HEIGHT, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
