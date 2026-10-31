@@ -778,7 +778,7 @@ void PlaceShotCamera(void) {
         ((g_HoleSetup.cupPosition[AXIS_X] -
              g_CurrentShot.ballPosition[AXIS_X]) *
             0.5f);
-    center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+    IN_OWN_BLOCK(center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X]);
     center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] +
         ((g_HoleSetup.cupPosition[AXIS_Z] -
              g_CurrentShot.ballPosition[AXIS_Z]) *
