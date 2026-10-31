@@ -1254,8 +1254,14 @@ void PlaceRivalCursor(void) {
 /*
  * Reads the drive shapes' names and the "L:" and "Drive:" labels into the
  * menu's image buffer, then each slot's first face frame and its palette.
- * Doesn't match: the original indexes g_CharacterFaceImages afresh in each
- * pass, where this steps a pointer through it.
+ *
+ * Doesn't match: the original reads the slot's palette pointer at the top of
+ * each pass, indexing g_CharacterFacePalettes afresh, where this steps a
+ * pointer through the table and reads it at the call; 19 words differ.
+ * Reading the palette pointer into a variable at the top gives 36, as GCC
+ * then steps a pointer for it. A permuter run matched only by testing
+ * slotIndex around the alternate face's identical assignments, a branch with
+ * no meaning, which keeps GCC from stepping the pointer.
  */
 #ifdef NON_MATCHING
 void LoadCharacterFaces(void) {
