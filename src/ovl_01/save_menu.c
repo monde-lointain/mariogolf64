@@ -1393,7 +1393,7 @@ void UpdateSavedGames(void) {
   SaveData* save = GetSaveData();
   EncodedAsset asset;
   AssetFile file;
-  u8 unusedStack[0xB0] UNUSED;
+  u8 unusedStack[0xA0] UNUSED;
   s32 slot;
   s32 controller;
   s32 humanIndex;
