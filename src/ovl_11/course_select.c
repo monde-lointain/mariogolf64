@@ -704,12 +704,15 @@ void DrawPlanks(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
 #endif
 
+/* Doesn't match: the original sets each arrow coordinate's second choice in
+ * the branch's delay slot and shifts it in each arm, where GCC picks the sum
+ * first and shifts it once after the arms join */
 #ifdef NON_MATCHING
 void DrawRingShotSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
   s32 stripIndex;
-  s32 arrowFrame;
+  s16 arrowFrame;
   s32 push;
   u8 unusedBuffer[0x1C] UNUSED; /* Unused; it is there to match */
 
