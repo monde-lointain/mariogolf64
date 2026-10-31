@@ -580,7 +580,8 @@ s32 GetClubTournamentCourse(void);
 
 /*
  * Doesn't match: the original sign-extends the cursor's column and row as
- * soon as it loads them, and schedules the face's reload differently.
+ * soon as it loads them, and sets up the chosen character's sound with the
+ * stack argument first.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
@@ -602,7 +603,6 @@ s32 UpdateCharacterSelect(
   u16 slot; /* The cursor's row, then the face's slot */
   u16 faceCharacter;
   void* faceImage;
-  u16(*faceAssets)[8];
   SoundChannel channel;
 
   if (IsHudAnimationDone() != TRUE) {
@@ -885,23 +885,24 @@ s32 UpdateCharacterSelect(
       if (gridMark < CHOOSABLE_MARK_LIMIT) {
         slot = faceCharacter + MARKED_CHARACTER_OFFSET;
         faceCharacter = slot;
+      } else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
+        slot = faceCharacter; /* Set in each branch to match */
+        faceCharacter =
+            g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
       } else {
         slot = faceCharacter;
-        if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-          faceCharacter =
-              g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER]
-                  .character;
-        }
       }
 
       faceImage = g_CharacterFaceImages[(s16)slot];
       if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-        faceAssets = g_AlternateFaceAnimationAssets;
+        OpenEncodedAsset(
+            g_AlternateFaceAnimationAssets[(s16)faceCharacter][f_FaceFrame],
+            &asset);
       } else {
-        faceAssets = g_FaceAnimationAssets;
+        OpenEncodedAsset(
+            g_FaceAnimationAssets[(s16)faceCharacter][f_FaceFrame], &asset);
       }
 
-      OpenEncodedAsset(faceAssets[(s16)faceCharacter][f_FaceFrame], &asset);
       ReadEncodedAsset(faceImage, &asset);
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
       IN_OWN_BLOCK(ReadAssetFile(
@@ -1038,22 +1039,24 @@ s32 UpdateCharacterSelect(
     if (gridMark < CHOOSABLE_MARK_LIMIT) {
       slot = faceCharacter + MARKED_CHARACTER_OFFSET;
       faceCharacter = slot;
+    } else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
+      slot = faceCharacter; /* Set in each branch to match */
+      faceCharacter =
+          g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
     } else {
       slot = faceCharacter;
-      if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-        faceCharacter =
-            g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
-      }
     }
 
     faceImage = g_CharacterFaceImages[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-      faceAssets = g_AlternateFaceAnimationAssets;
+      OpenEncodedAsset(
+          g_AlternateFaceAnimationAssets[(s16)faceCharacter][f_FaceFrame],
+          &asset);
     } else {
-      faceAssets = g_FaceAnimationAssets;
+      OpenEncodedAsset(
+          g_FaceAnimationAssets[(s16)faceCharacter][f_FaceFrame], &asset);
     }
 
-    OpenEncodedAsset(faceAssets[(s16)faceCharacter][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
     ReadAssetFile(
