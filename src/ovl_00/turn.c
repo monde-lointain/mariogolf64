@@ -3821,7 +3821,7 @@ void UpdateTurns(void) {
               ANIMATION_EVENT_IMPACT);
           f_IsSwingAnimationStarted = FALSE;
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
-            DebugPlaceBall(playerIndex);
+            IN_OWN_BLOCK(DebugPlaceBall(playerIndex));
           }
 
           if (isReady) {
