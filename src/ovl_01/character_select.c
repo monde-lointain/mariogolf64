@@ -1261,9 +1261,8 @@ void PlaceRivalCursor(void) {
 /*
  * Reads the drive shapes' names and the "L:" and "Drive:" labels into the
  * menu's image buffer, then each slot's first face frame and its palette.
- * Doesn't match: the original indexes g_CharacterFacePalettes afresh in each
- * pass, where this steps a pointer through it and needs one more saved
- * register.
+ * Doesn't match: the original indexes g_CharacterFaceImages afresh in each
+ * pass, where this steps a pointer through it.
  */
 #ifdef NON_MATCHING
 void LoadCharacterFaces(void) {
@@ -1273,8 +1272,6 @@ void LoadCharacterFaces(void) {
   u8* images = GetMenuImageBuffer();
   s32 slotIndex;
   void* faceImage;
-  s32 unused[2] UNUSED;
-  void* characterFile;
   AssetId faceAsset;
 
   OpenEncodedAsset(0x979, &asset);
@@ -1283,7 +1280,6 @@ void LoadCharacterFaces(void) {
   ReadEncodedAsset(images + CHARACTER_SELECT_FIRST_IMAGE_SIZE, &asset);
   for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
     faceImage = g_CharacterFaceImages[slotIndex];
-    characterFile = g_CharacterFacePalettes[slotIndex];
     if (slotIndex >= FIRST_IMPORTED_CHARACTER) {
       if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER]
               .character >= 0) {
@@ -1303,7 +1299,8 @@ void LoadCharacterFaces(void) {
     OpenEncodedAsset(faceAsset, &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(g_CharacterFacePaletteFiles[character][0], &file);
-    ReadAssetFile(characterFile, GetAssetFileSize(&file), &file);
+    ReadAssetFile(
+        g_CharacterFacePalettes[slotIndex], GetAssetFileSize(&file), &file);
   }
 }
 #else
