@@ -1251,6 +1251,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TurnAim);
  * range, at the cup and back from past the ball, and moving the camera. A
  * replay instead turns the aim to the recorded heading, and returns TRUE once
  * it has settled there for a while.
+ *
+ * Doesn't match: outside the look-back view, the original keeps the address of
+ * aimCameraHeight in one register from the lower clamp through the upper one.
+ * This holds it in another register for the lower clamp and loads it again.
  */
 #ifdef NON_MATCHING
 s32 UpdateAimControls(void) {
