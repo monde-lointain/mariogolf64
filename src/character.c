@@ -41,8 +41,12 @@
 /* Long enough ago that IsCharacterSlotBusy finds a slot not busy */
 #define LONG_AGO_FRAME -4
 
-#define ModelAnimations(model) \
-  ((CharacterAnimation*)(model)->segmentAddresses[CHARACTER_MODEL_ANIMATIONS])
+static inline CharacterAnimation* ModelAnimations(const CharacterModel* model) {
+  u32 address = model->segmentAddresses[CHARACTER_MODEL_ANIMATIONS];
+
+  return (CharacterAnimation*)address;
+}
+
 #define ModelJointAnimations(model) \
   ((JointAnimation*)(model)->segmentAddresses[CHARACTER_MODEL_JOINTS])
 #define ModelAnimatedTriangles(model) \
@@ -944,7 +948,7 @@ INCLUDE_ASM("asm/nonmatchings/character", ResetAnimationTriangleTextures);
  * frame data copies, and starts its first animation
  *
  * Doesn't match: the original adds the frame data size before the copy's
- * address, and loads the model's shadow scale before storing unk68[5].
+ * address.
  */
 #ifdef NON_MATCHING
 /* As above, so the data below lands in .rodata */
