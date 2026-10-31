@@ -6439,7 +6439,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   }
 
   squeeze = MAP_CAMERA_MODE_TOP_BYTE != 0 ? COURSE_NAME_BANNER_SQUEEZE : 0;
-  for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+  for (stripIndex = 0; stripIndex < MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         TextureAddress(LargeImageTexels(g_NamePlateImage) +
             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),

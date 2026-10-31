@@ -844,7 +844,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
 
   /* The last code's weight has gone to another's or been dropped */
   bestWeight = 0.0f;
-  for (i = 0; i < NEAREST_CODE_COUNT - 1; i++) {
+  for (i = 0; i != NEAREST_CODE_COUNT - 1; i++) {
     if (bestWeight < weights[i]) {
       bestIndex = i;
       bestWeight = weights[i];

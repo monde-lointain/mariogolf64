@@ -4630,7 +4630,7 @@ void LoadOpeningLogo(void) {
  * the letter loops GCC works out the texel offset before stepping the display
  * list pointer, where the original steps it first, and in the falling letters'
  * loop it derives f_LogoLetters' address from another table's instead of
- * loading it. 276 words differ.
+ * loading it. 270 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
@@ -5139,7 +5139,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   }
 
   if (f_LogoState == LOGO_SHRINKING) {
-    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+    for (i = 0; i != LOGO_LETTER_COUNT; i++) {
       if (i != LOGO_LETTER_L) {
         f_LogoLetters[i].x += f_LogoLetterSteps[i];
         f_LogoLetters[i].y += f_LogoLetterRises[LOGO_LETTER_M];

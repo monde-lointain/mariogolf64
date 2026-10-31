@@ -1348,7 +1348,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_HandicapPlaque)));
   gDPLoadTLUT_pal16(gfx++, HANDICAP_LABEL_PALETTE,
       TextureAddress(ImageBody(f_StatsPlayerLabels)));
-  for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
+  for (columnIndex = 0; columnIndex < g_ChosenPlayerCount; columnIndex++) {
     if (columnIndex == memory->handicapPlayer) {
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     } else {
@@ -2217,7 +2217,7 @@ void DrawBestShots(Gfx** displayListHead) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
+  for (row = 0; row < STATS_GRID_ROW_COUNT; row++) {
     sprintf(g_PrintBuffer, "%s", f_RecordLabels[row]);
     DrawLargeText(&gfx, RECORD_LABEL_X,
         (s16)(RECORD_PLACE_Y + (row * STATS_CURSOR_ROW_HEIGHT)), g_PrintBuffer);

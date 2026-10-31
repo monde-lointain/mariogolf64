@@ -700,7 +700,7 @@ void PlaceShotCamera(void) {
     lowestGround = GetAimCameraGround(point[AXIS_X], point[AXIS_Z]);
     g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    for (probe = 0; probe < AIM_GROUND_PROBE_COUNT; probe++) {
+    for (probe = 0; probe != AIM_GROUND_PROBE_COUNT; probe++) {
       offset = probe * AIM_GROUND_PROBE_STEP;
       point[AXIS_X] =
           (cosf(heading) * (g_CurrentShot.aimCameraDistance + offset)) +

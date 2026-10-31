@@ -846,7 +846,7 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
     MapModelBuffer(slot);
     for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
         triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
-      for (keySetIndex = 0; keySetIndex < triangle->keySetCount;
+      for (keySetIndex = 0; keySetIndex != triangle->keySetCount;
           keySetIndex++) {
         keySet = &triangle->keySets[keySetIndex];
         state = &slot->textureAnimations[keySet->textureAnimationIndex];
