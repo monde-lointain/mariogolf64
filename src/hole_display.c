@@ -2856,6 +2856,10 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTileAnimation);
 /* The lower rows' texture coordinates stop a quarter texel short, in 10.5 fixed
  * point */
 #define LOWER_TILE_TEXCOORD_INSET 8
+/* The index of the tile grid vertex at a row and column. It is a macro because
+   DrawTurnAwayAnimation compiles further from the original with an inline
+   function. */
+#define GridVertex(row, column) ((column) + ((row) * TILE_GRID_COLUMN_COUNT))
 static Mtx f_TurnAwayMatrices[MATRIX_BUFFER_COUNT];
 
 void DrawTurnAwayAnimation(void);
@@ -2863,8 +2867,12 @@ void DrawTurnAwayAnimation(void);
 /*
  * Draws HUD_ANIMATION_TURN_AWAY.
  *
- * Doesn't match: the target computes each corner's vertex index from its own
- * per-row induction variable, and registers are allocated differently.
+ * Doesn't match: the original keeps the texture image command in a saved
+ * register and adds the lower corners' offsets to the row's first vertex
+ * inside the loops, and registers are allocated differently. GCC's loop
+ * optimizer moves more out of the loops when its threshold is one higher.
+ * Writing the corners' expressions differently in each loop gets closer, but
+ * no single form matches.
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
@@ -2875,7 +2883,6 @@ void DrawTurnAwayAnimation(void) {
   s32 row;
   s32 column;
   s32 width;
-  s32 vertex;
 
   if (f_HudAnimationFramesLeft > 0) {
     rotation[AXIS_X] = 0.0f;
@@ -2924,20 +2931,19 @@ void DrawTurnAwayAnimation(void) {
           width = LAST_TILE_TEXEL_WIDTH;
         }
 
-        vertex = (row * TILE_GRID_COLUMN_COUNT) + column;
-        gSPModifyVertex(g_DisplayListHead++, vertex, G_MWO_POINT_ST, 0);
-        gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT,
-            G_MWO_POINT_ST, TexelCoordinate(FRAME_TILE_ROWS));
-        gSPModifyVertex(g_DisplayListHead++,
-            vertex + TILE_GRID_COLUMN_COUNT + 1, G_MWO_POINT_ST,
-            (width << 21) + TexelCoordinate(FRAME_TILE_ROWS));
         gSPModifyVertex(
-            g_DisplayListHead++, vertex + 1, G_MWO_POINT_ST, width << 21);
+            g_DisplayListHead++, GridVertex(row, column), G_MWO_POINT_ST, 0);
+        gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column),
+            G_MWO_POINT_ST, TexelCoordinate(FRAME_TILE_ROWS));
+        gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column + 1),
+            G_MWO_POINT_ST, (width << 21) + TexelCoordinate(FRAME_TILE_ROWS));
+        gSPModifyVertex(g_DisplayListHead++, GridVertex(row, column + 1),
+            G_MWO_POINT_ST, width << 21);
         gDPPipeSync(g_DisplayListHead++);
-        gSP2Triangles(g_DisplayListHead++, vertex,
-            vertex + TILE_GRID_COLUMN_COUNT,
-            vertex + TILE_GRID_COLUMN_COUNT + 1, 0, vertex,
-            vertex + TILE_GRID_COLUMN_COUNT + 1, vertex + 1, 0);
+        gSP2Triangles(g_DisplayListHead++, GridVertex(row, column),
+            GridVertex(row + 1, column), GridVertex(row + 1, column + 1), 0,
+            GridVertex(row, column), GridVertex(row + 1, column + 1),
+            GridVertex(row, column + 1), 0);
         gDPPipeSync(g_DisplayListHead++);
       }
     }
@@ -2947,10 +2953,10 @@ void DrawTurnAwayAnimation(void) {
     gDPPipeSync(g_DisplayListHead++);
     for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
       for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
-        vertex = (row * TILE_GRID_COLUMN_COUNT) + column;
-        gSP2Triangles(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT + 1,
-            vertex + TILE_GRID_COLUMN_COUNT, vertex, 0, vertex + 1,
-            vertex + TILE_GRID_COLUMN_COUNT + 1, vertex, 0);
+        gSP2Triangles(g_DisplayListHead++, GridVertex(row + 1, column + 1),
+            GridVertex(row + 1, column), GridVertex(row, column), 0,
+            GridVertex(row, column + 1), GridVertex(row + 1, column + 1),
+            GridVertex(row, column), 0);
       }
     }
 
@@ -2974,23 +2980,24 @@ void DrawTurnAwayAnimation(void) {
           width = LAST_TILE_TEXEL_WIDTH;
         }
 
-        vertex = (row * TILE_GRID_COLUMN_COUNT) + column;
         gDPPipeSync(g_DisplayListHead++);
-        gSPModifyVertex(g_DisplayListHead++, vertex, G_MWO_POINT_ST, 0);
-        gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT,
+        gSPModifyVertex(
+            g_DisplayListHead++, GridVertex(row, column), G_MWO_POINT_ST, 0);
+        gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column),
             G_MWO_POINT_ST,
             TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET);
-        gSPModifyVertex(g_DisplayListHead++,
-            vertex + TILE_GRID_COLUMN_COUNT + 1, G_MWO_POINT_ST,
+        gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column + 1),
+            G_MWO_POINT_ST,
             TexcoordWord(TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET,
                 TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET));
-        gSPModifyVertex(g_DisplayListHead++, vertex + 1, G_MWO_POINT_ST,
+        gSPModifyVertex(g_DisplayListHead++, GridVertex(row, column + 1),
+            G_MWO_POINT_ST,
             TexcoordWord(
                 TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET, 0));
-        gSP2Triangles(g_DisplayListHead++, vertex,
-            vertex + TILE_GRID_COLUMN_COUNT,
-            vertex + TILE_GRID_COLUMN_COUNT + 1, 0, vertex,
-            vertex + TILE_GRID_COLUMN_COUNT + 1, vertex + 1, 0);
+        gSP2Triangles(g_DisplayListHead++, GridVertex(row, column),
+            GridVertex(row + 1, column), GridVertex(row + 1, column + 1), 0,
+            GridVertex(row, column), GridVertex(row + 1, column + 1),
+            GridVertex(row, column + 1), 0);
         gDPPipeSync(g_DisplayListHead++);
       }
     }
