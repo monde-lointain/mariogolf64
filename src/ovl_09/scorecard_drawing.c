@@ -1603,7 +1603,7 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * Doesn't match: the target keeps displayListHead in a saved register, where
  * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps'
  * loop also reads the flip angles through the stagger's index instead of a
- * pointer of their own. 206 words differ.
+ * pointer of their own. 195 words differ.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -1773,10 +1773,10 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
 
       gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + ROW_LEFT),
-          QuarterPixels(g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) +
-              ROW_TOP + ROW_BOTTOM_HALF_ROW),
+          QuarterPixels((i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
+              ROW_BOTTOM_HALF_ROW + g_Scorecard.y),
           QuarterPixels(g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH),
-          QuarterPixels(g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) +
+          QuarterPixels((i * LEADERBOARD_ROW_SPACING) + g_Scorecard.y +
               ROW_TOP + ROW_IMAGE_HEIGHT),
           G_TX_RENDERTILE, 0, TexelCoordinate(ROW_BOTTOM_HALF_ROW),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
