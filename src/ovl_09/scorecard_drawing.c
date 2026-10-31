@@ -755,8 +755,8 @@ void DrawMatchPage(Gfx** displayListHead) {
             QuarterPixels((j * TILE_SPACING) +
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2))),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
-            QuarterPixels((j * TILE_SPACING) +
-                (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 3))),
+            QuarterPixels((j * TILE_SPACING) + g_Scorecard.x + TILE_LEFT +
+                (TILE_PIECE_WIDTH * 3)),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
             G_TX_RENDERTILE, TexelCoordinate(TILE_PIECE_WIDTH),
             TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT), TEXEL_STEP_ONE,
@@ -782,8 +782,9 @@ void DrawMatchPage(Gfx** displayListHead) {
   for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
     for (j = 0; j != wins[i]; j++) {
       DrawTextureRect(&gfx,
-          QuarterPixels(g_Scorecard.x + (j * TILE_SPACING) + TILE_LEFT),
-          QuarterPixels(g_Scorecard.y + (i * MATCH_ROW_SPACING) + WIN_MARK_TOP),
+          QuarterPixels(((j * TILE_SPACING) + TILE_LEFT) + g_Scorecard.x),
+          QuarterPixels(
+              ((i * MATCH_ROW_SPACING) + WIN_MARK_TOP) + g_Scorecard.y),
           QuarterPixels(g_Scorecard.x + (j * TILE_SPACING) + TILE_LEFT +
               WIN_MARK_SHOWN_WIDTH),
           QuarterPixels(g_Scorecard.y + (i * MATCH_ROW_SPACING) + WIN_MARK_TOP +
@@ -1656,7 +1657,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
 
     gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + ROW_LEFT),
-        QuarterPixels(g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_TOP),
+        QuarterPixels(
+            ((i * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
         QuarterPixels(g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH),
         QuarterPixels(g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
             ROW_IMAGE_HEIGHT),
@@ -1677,9 +1679,9 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
           0, 0, 0, 0, 0, 0);
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
           QuarterPixels(
-              g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_TOP),
+              ((i * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
           QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT + FLAP_NAME_IMAGE_WIDTH),
-          QuarterPixels(g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) +
+          QuarterPixels((i * LEADERBOARD_ROW_SPACING) + g_Scorecard.y +
               ROW_TOP + ROW_IMAGE_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
@@ -1955,7 +1957,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
         DrawTextureRect(&gfx,
             QuarterPixels(g_Scorecard.x - (roundedHalfSize - ARROW_CENTER_X)),
             QuarterPixels(top - roundedHalfSize),
-            QuarterPixels(g_Scorecard.x + (roundedHalfSize + ARROW_CENTER_X)),
+            QuarterPixels(g_Scorecard.x + ARROW_CENTER_X + roundedHalfSize),
             QuarterPixels(top + roundedHalfSize), G_TX_RENDERTILE, texelStart,
             texelStart +
                 TexelCoordinate(g_Scorecard.placeChange * ARROW_IMAGE_SIZE),
@@ -2373,8 +2375,8 @@ void DrawScoresPage(Gfx** displayListHead) {
       if (j & 1) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           DrawTextureRect(&gfx,
-              QuarterPixels(g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT),
-              QuarterPixels(g_Scorecard.y + CELL_TOP + (i * CELL_HEIGHT)),
+              QuarterPixels(((j * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
+              QuarterPixels(g_Scorecard.y + (CELL_TOP + (i * CELL_HEIGHT))),
               QuarterPixels(
                   g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH),
               QuarterPixels(
@@ -2455,7 +2457,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawTextureRect(&gfx,
-              QuarterPixels(g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT),
+              QuarterPixels(((j * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
               QuarterPixels(
                   g_Scorecard.y + CELL_TOP + (i * CELL_HEIGHT) + NINE_SPACING),
               QuarterPixels(
@@ -2652,7 +2654,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       extraTop = EXTRA_ROW_TOP;
       if (isPuttsShown) {
         DrawSmallText(&gfx, g_Scorecard.x + PUTTS_LABEL_LEFT,
-            frontTop + EXTRA_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
+            frontTop + (EXTRA_ROW_TOP + (i * rowSpacing)) + g_Scorecard.y,
             "Putts");
         extraTop += PLAYER_ROW_SPACING;
       }
@@ -2673,7 +2675,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       extraTop = EXTRA_ROW_TOP;
       if (isPuttsShown) {
         DrawSmallText(&gfx, g_Scorecard.x + PUTTS_LABEL_LEFT,
-            backTop + EXTRA_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
+            backTop + (EXTRA_ROW_TOP + (i * rowSpacing)) + g_Scorecard.y,
             "Putts");
         extraTop += PLAYER_ROW_SPACING;
       }
@@ -2974,14 +2976,14 @@ void DrawScoresPage(Gfx** displayListHead) {
         if (shownHoleCount > 0) {
           sprintf(g_PrintBuffer, "%3d", frontTotal);
           DrawCondensedShadowedText(&gfx, g_Scorecard.x + FRONT_TOTAL_LEFT,
-              frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+              frontTop + (i * rowSpacing) + (PLAYER_ROW_TOP + g_Scorecard.y),
               g_PrintBuffer);
         }
 
         if (shownHoleCount > HOLES_PER_NINE) {
           sprintf(g_PrintBuffer, "%3d", backTotal);
           DrawCondensedShadowedText(&gfx, g_Scorecard.x + BACK_TOTAL_LEFT,
-              backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+              backTop + (i * rowSpacing) + (PLAYER_ROW_TOP + g_Scorecard.y),
               g_PrintBuffer);
         }
       }
@@ -2995,7 +2997,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
       if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
         DrawShadowedText(&gfx, g_Scorecard.x + NET_SCORE_LEFT,
-            frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+            frontTop + (i * rowSpacing) + (PLAYER_ROW_TOP + g_Scorecard.y),
             g_PrintBuffer);
       } else if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
         DrawShadowedText(&gfx, g_Scorecard.x + NET_SCORE_LEFT,
@@ -3004,7 +3006,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       } else {
         DrawCondensedShadowedText(&gfx,
             g_Scorecard.x + CONDENSED_NET_SCORE_LEFT,
-            backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+            backTop + (i * rowSpacing) + (PLAYER_ROW_TOP + g_Scorecard.y),
             g_PrintBuffer);
       }
     }

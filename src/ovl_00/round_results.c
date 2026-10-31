@@ -1500,11 +1500,11 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
     if (f_NoticeFrameCount < NOTICE_SHINE_END) {
       DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-          QuarterPixels(lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP)),
+          QuarterPixels(lift + f_NoticeUnk54 + NOTICE_TITLE_TOP),
           QuarterPixels(
               f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
           QuarterPixels(
-              lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE)),
+              lift + f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE),
           G_TX_RENDERTILE,
           TexelCoordinate(NOTICE_SHINE_SIZE -
               ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)),
@@ -3185,8 +3185,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
  * The match play results of two players: place, portrait, holes up or down,
  * any bets and Course Points.
  *
- * Doesn't match: 28 words differ. Two pairs of loads come in the other order,
- * and a few registers and additions' operand orders differ.
+ * Doesn't match: 12 words differ. Two pairs of loads come in the other order,
+ * swapping the registers they load.
  */
 #ifdef NON_MATCHING
 void DrawMatchResults(Gfx** displayListHead) {
@@ -3308,13 +3308,14 @@ void DrawMatchResults(Gfx** displayListHead) {
 
         sprintf(g_PrintBuffer, "%2d", holeCount);
         DrawDigitText(&gfx,
-            standingShift[i] + f_ResultsSlide + BETTING_MATCH_HOLE_COUNT_X,
+            (f_ResultsSlide + BETTING_MATCH_HOLE_COUNT_X) + standingShift[i],
             f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
             g_PrintBuffer);
       }
 
       sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[i]);
-      DrawDigitText(&gfx, betShift + BETTING_MATCH_BET_TOTAL_X + f_ResultsSlide,
+      DrawDigitText(&gfx,
+          (BETTING_MATCH_BET_TOTAL_X + f_ResultsSlide) + betShift,
           f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
           g_PrintBuffer);
       if (f_PlayerPoints[i] < 0) {
@@ -3335,7 +3336,7 @@ void DrawMatchResults(Gfx** displayListHead) {
 
         sprintf(g_PrintBuffer, "%2d", holeCount);
         DrawDigitText(&gfx,
-            standingShift[i] + f_ResultsSlide + PLAIN_MATCH_HOLE_COUNT_X,
+            (f_ResultsSlide + PLAIN_MATCH_HOLE_COUNT_X) + standingShift[i],
             f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
             g_PrintBuffer);
       }

@@ -660,7 +660,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     DrawTextureRect(&gfx, QuarterPixels(windowLeft),
         QuarterPixels(windowTop + (index * halfHeight)),
         QuarterPixels(windowRight),
-        QuarterPixels(windowTop + (index * halfHeight) + halfHeight),
+        QuarterPixels(windowTop + ((index * halfHeight) + halfHeight)),
         G_TX_RENDERTILE, 0, 0,
         (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
         (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
