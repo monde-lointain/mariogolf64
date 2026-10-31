@@ -1765,8 +1765,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   sideZ = -sinf(sideAngle) * columnSpacing;
   shift = (rowShift - rowCount) * rowSpacing;
   centering = 0.5f - (columnCount * 0.5f);
-  originX = (forwardX * shift) + (sideX * centering);
-  originZ = (forwardZ * shift) + (sideZ * centering);
+  originX = (shift * forwardX) + (sideX * centering);
+  originZ = (shift * forwardZ) + (sideZ * centering);
   stepX = -cosf(yaw) * rowSpacing;
   stepZ = -sinf(yaw) * rowSpacing;
   if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
