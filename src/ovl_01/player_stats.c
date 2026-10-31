@@ -917,7 +917,7 @@ void DrawBetSettings(
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       }
 
-      gDPPipeSync(gfx++);
+      IN_OWN_BLOCK(gDPPipeSync(gfx++));
 
       columnX = f_BetSetColumnXs[g_BetSet - 1][columnIndex] + slide +
           STAKE_MARK_OFFSET_X;
