@@ -2010,6 +2010,12 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * the way along the path, and returns whether one is hit. Paths that rise
  * by more than PATH_MOST_RISE, as course y points down, or that start or
  * end off the ground hit nothing.
+ *
+ * Doesn't match: the original works out the start's and the end's sides of
+ * the plane together, adding their terms in turn, where this works out the
+ * start's first, and so the tests on the sides and the fraction's terms take
+ * other registers. The prologue and the triangle lookup are scheduled
+ * differently too. 172 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2118,8 +2124,9 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     triangle.corners[AXIS_Z][1] = candidate->vertices[1].v.ob[AXIS_Z];
     triangle.corners[AXIS_Z][2] = candidate->vertices[2].v.ob[AXIS_Z];
     GetTrianglePlane(&triangle, &plane);
+    /* The start's z comes before its normal component, to match */
     startSide = (plane.normal[AXIS_X] * startX) +
-        (plane.normal[AXIS_Y] * startY) + (plane.normal[AXIS_Z] * startZ) +
+        (plane.normal[AXIS_Y] * startY) + (startZ * plane.normal[AXIS_Z]) +
         (plane.distance * WORLD_TO_COURSE_SCALE);
     endSide = (plane.normal[AXIS_X] * endX) + (plane.normal[AXIS_Y] * endY) +
         (plane.normal[AXIS_Z] * endZ) +
