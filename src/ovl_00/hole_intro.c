@@ -55,11 +55,19 @@ static f32 f_IntroCameraDistance = 0.0f;
 /* How far above the ball the camera is; negative values are above */
 static f32 f_IntroCameraHeight = 0.0f;
 
-/* Places the camera for the start of the hole intro */
+/*
+ * Places the camera for the start of the hole intro. The heading is worked
+ * out in double precision and narrowed once for sinf and cosf.
+ *
+ * Doesn't match: the original stores the look-at point's Z through its
+ * pointer and its Y through the camera's address, where GCC stores both
+ * through the camera's address. Storing Z before Y, or Y straight into
+ * g_Cameras, doesn't help.
+ */
 #ifdef NON_MATCHING
 void StartHoleIntroCamera(void) {
   Vec3* lookAt = &g_Cameras[1].view.lookAt;
-  Radians heading;
+  f64 heading;
   f32 offsetX;
   f32 scale = COURSE_TO_WORLD_SCALE;
 
