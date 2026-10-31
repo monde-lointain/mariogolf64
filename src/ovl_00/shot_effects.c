@@ -92,7 +92,7 @@ static Vtx f_SparkVertices[3] = {
     {{{-12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}},
     {{{12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}}};
 /* Read by no routine */
-static s32 D_80224898_ovl_00[2] UNUSED = {0};
+static s32 f_UnusedWordsAfterSparkVertices[2] UNUSED = {0};
 static s32 f_SwingTrailPathLength = 0;
 static s32 f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES;
 /* The ring of matrices that f_SwingTrailHead turns backwards through */
@@ -132,7 +132,7 @@ static f32 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 
 /* Read by no routine */
 /* Not static: the original left it to the linker's common block */
-u8 D_8022D660_ovl_00[0x18];
+u8 g_UnusedBytesAfterInnerTrailPath[0x18];
 
 void ResetShotEffects(void) {
   s32 i;

@@ -251,7 +251,7 @@ static u8* f_PlanksImage;
 static s32 f_PressedButtons;
 static u32 f_RepeatedButtons;
 /* Read by no routine */
-static u8 D_80243FC0_ovl_11[0x40] UNUSED;
+static u8 f_UnusedBufferAfterRepeatedButtons[0x40] UNUSED;
 
 s32 CountOpenRingShotCourses(void) {
   SaveData* save = GetSaveData();

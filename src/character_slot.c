@@ -2631,8 +2631,8 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
 #else
 /* The double 1.0, which AnimateCharacterJoints loads as two words */
-const u32 D_800D0478 = 0x3FF00000;
-const u32 D_800D047C = 0;
+const u32 f_JointAnimationOneHighWord = 0x3FF00000;
+const u32 f_JointAnimationOneLowWord = 0;
 
 INCLUDE_ASM("asm/nonmatchings/character_slot", AnimateCharacterJoints);
 /*

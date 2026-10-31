@@ -210,7 +210,7 @@ static Vtx f_SpinVertices[1];
 static Mtx f_SpinMatrices[DRAW_BUFFER_COUNT];
 
 /* Read by no routine */
-static u8 D_800DAC30[16] UNUSED;
+static u8 f_UnusedBytesAfterSpinMatrices[16] UNUSED;
 
 /* How the saved-frame effect splits the screen into strips, in rows */
 #define SAVED_FRAME_STRIP_HEIGHT 6

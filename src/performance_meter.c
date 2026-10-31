@@ -189,7 +189,7 @@ static f32 f_FrameScales[MAX_EXTRA_FRAME_COUNT + 1] = {
     1.0f, 0.5f, 0.3333f, 0.25f, 0.2f, 0.16667f};
 static u32 f_MeterDisplayListIndex = 0;
 /* Read by no routine */
-static Gfx D_800C0D08[] UNUSED = {
+static Gfx f_UnusedMeterDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
 /* The digits, each DIGIT_WIDTH wide, in a 64x8 IA4 texture */

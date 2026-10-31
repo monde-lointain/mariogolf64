@@ -968,7 +968,7 @@ static u8 f_BillboardMaskIndices[BILLBOARD_MASK_INDEX_COUNT] = {0, 0, 0, 0, 0,
     21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
     40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 /* Read by no routine */
-static s32 D_800BA6F0[4] UNUSED = {0};
+static s32 f_UnusedWordsAfterBillboardMasks[4] UNUSED = {0};
 
 /* The hit mask cell of a billboard texture */
 static inline s8 GetBillboardMaskCell(s32 textureIndex, s32 row, s32 column) {
@@ -2984,10 +2984,10 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
 
 #else
 INCLUDE_ASM("asm/nonmatchings/collision", PushBallOutOfWalls);
-INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA890);
-INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA898);
-INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA8B0);
-INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA8C4);
+INCLUDE_RODATA("asm/nonmatchings/collision", f_WallUghText);
+INCLUDE_RODATA("asm/nonmatchings/collision", f_WallInsideOutCornerText);
+INCLUDE_RODATA("asm/nonmatchings/collision", f_WallInsideOutTwoText);
+INCLUDE_RODATA("asm/nonmatchings/collision", f_WallInsideOutText);
 #endif
 
 /*

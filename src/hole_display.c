@@ -544,18 +544,18 @@ static s32 f_CourseSkyImageAssets[COURSE_RECORD_COUNT] = {
     0x4BA, 0x4BB, 0x4BC, 0x4BE, 0x4BD, 0x4BF, 0x4C0, 0x4C1, 0x4BA};
 Fog g_SceneFog = {{0, 0, 0}, 970, 1024};
 /* Read by no routine */
-static s32 D_800C6C88[3] UNUSED = {0, 0, 1};
+static s32 f_UnusedWordsAfterSceneFog[3] UNUSED = {0, 0, 1};
 static s32 f_SkyHorizonColor[RGB_CHANNEL_COUNT] = {
     SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL};
 /* Read by no routine */
-static f32 D_800C6CA0[12] UNUSED = {0.0f, 0.0f, 0.0f, 4096.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 8192.0f, 4096.0f, 0.0f, 8192.0f};
+static f32 f_UnusedPlaneCornerPoints[12] UNUSED = {0.0f, 0.0f, 0.0f, 4096.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, 8192.0f, 4096.0f, 0.0f, 8192.0f};
 /* The fog SetSceneFog draws while GAME_FLAG_SKY_EDITOR is set */
 Fog g_DebugFog = {{200, 230, 200}, 970, 1100};
 static s32 f_SkyEditorColumn = 0;
 static s32 f_SkyEditorRow = 0;
 /* Read by no routine */
-static s32 D_800C6CEC[3] UNUSED = {0};
+static s32 f_UnusedWordsAfterSkyEditorRow[3] UNUSED = {0};
 static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] =
     {{{{{-152, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
          {{{-88, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
@@ -657,7 +657,8 @@ static Boolean f_IsFrameCapturePending = FALSE;
 static s32 f_HudAnimationFrame = 0;
 s32 g_CapturedSliceCount = 0;
 s32 g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
-static s32 D_800C7308 = 0;
+/* Counted by DrawFadeAnimation, and read by no other routine */
+static s32 f_UnusedFadeEndCount = 0;
 static s32 f_MenuBackdrop = MENU_BACKDROP_STILL;
 static s32 f_BackdropFadeLevel = 0;
 static s32 f_BackdropPatternScroll = 0;
@@ -1709,7 +1710,7 @@ void UsePrimitiveDepth(Boolean isPrimitiveDepthSet) {
 static Mtx f_SkyModelMatrix;
 
 /* Read by no routine */
-static u8 D_800E39C8[0x88] UNUSED;
+static u8 f_UnusedBufferAfterSkyMatrix[0x88] UNUSED;
 
 static Mtx f_TileMatrices[MATRIX_BUFFER_COUNT][FRAME_TILE_COUNT];
 
@@ -2267,7 +2268,7 @@ void HandleFrameBufferSwap(void) {}
  * Draws the HUD animations that show the whole frame: fading it out,
  * drawing it at half brightness, blurring the scene with the last frame, or
  * splitting the frame into halves that slide apart. When a fade ends,
- * D_800C7308 counts up, wrapping at FADE_COUNT_PERIOD.
+ * the unread f_UnusedFadeEndCount counts up, wrapping at FADE_COUNT_PERIOD.
  *
  * Doesn't match: registers are allocated differently, and f_CapturedFrame is
  * kept in a saved register and on the stack.
@@ -2391,7 +2392,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
     }
 
     if (f_HudAnimationFramesLeft < 0) {
-      D_800C7308 = (D_800C7308 + 1) % FADE_COUNT_PERIOD;
+      f_UnusedFadeEndCount = (f_UnusedFadeEndCount + 1) % FADE_COUNT_PERIOD;
     }
   }
 

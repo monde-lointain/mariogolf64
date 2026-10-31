@@ -299,7 +299,7 @@ static Radians f_PauseGlowAngle = 0.0f;
 static Radians f_PauseCursorAngle = 0.0f;
 static s32 f_ChoiceBoxState = CHOICE_BOX_CLOSED;
 /* Read by no routine */
-static s32 D_80224A94_ovl_00 UNUSED = 0;
+static s32 f_UnusedWordAfterChoiceBoxState UNUSED = 0;
 static s32 f_ChoiceBoxIndex = CHOICE_BOX_CLOSED;
 static s32 f_ChoiceBoxSelection = 0;
 /* Cycles the selected label's color */

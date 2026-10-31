@@ -63,7 +63,7 @@ static AssetId f_FireworkShapeAssetIds[8] = {
     0x95F, 0x960, 0x961, 0x962, 0x963, 0x964, 0x965, 0x966};
 static f32 f_FireworkHue = 0.0f;
 /* Read by no routine */
-static u8 D_800C46AC[0xC04] UNUSED = {0};
+static u8 f_UnusedBufferAfterFireworkHue[0xC04] UNUSED = {0};
 
 FILE_STATIC FireworkShape* f_FireworkShape;
 FILE_STATIC Firework f_Fireworks[FIREWORK_CAPACITY];

@@ -1360,4 +1360,4 @@ void ShiftEditorCamera(Vec3 offset) {
 }
 
 /* Nothing refers to this */
-const char D_8020C18C_ovl_05[] = "";
+const char f_UnusedCameraEditorEmptyText[] = "";

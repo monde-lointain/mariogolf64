@@ -14,7 +14,7 @@
 #include "surface.h"
 
 /* Read by no routine */
-static u8 D_8024DD10_ovl_04[0x10] UNUSED;
+static u8 f_UnusedBytesBeforeSimulatedShot[0x10] UNUSED;
 /* Not static: the original left it to the linker's common block */
 SimulatedShot g_SimulatedShot;
 

@@ -304,7 +304,7 @@ static Radians f_ReplayTitleBobAngle = 0.0f;
 
 static s32 f_SlideOffsets[4];
 /* Read by no routine */
-static u8 D_80245A30_ovl_12[8] UNUSED;
+static u8 f_UnusedBytesAfterSlideOffsets[8] UNUSED;
 static void* f_CharacterFiles[CHARACTER_IMAGE_COUNT];
 static void* f_CharacterImages[CHARACTER_IMAGE_COUNT];
 static void* f_ModeIconImages[SAVED_GAME_COUNT][2];

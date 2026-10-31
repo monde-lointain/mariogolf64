@@ -164,7 +164,7 @@ u8 g_SoundOptionBits = 0;
 s32 g_MenuRepeatButtons = 0;
 s32 g_MenuPressedButtons = 0;
 /* Read by no routine */
-static s32 D_800C2008 UNUSED = 0;
+static s32 f_UnusedWordAfterPressedButtons UNUSED = 0;
 s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT] = {NO_IMPORTED_COLUMN,
     NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN};
 /* The menus' label images, of which LoadMenuResources reads the first two */
@@ -192,7 +192,7 @@ s16 g_MiniGolfDiscFiles[] = {0x0876, 0x0876, 0x0876, 0x0876, 0x0876, 0x0876};
 TrophySize g_TrophySizes[COURSE_COUNT] = {
     {40, 48}, {40, 51}, {40, 51}, {32, 64}, {48, 42}, {36, 51}};
 /* Read by no routine */
-static u8 D_800C20EC[12] UNUSED = {0};
+static u8 f_UnusedBytesAfterTrophySizes[12] UNUSED = {0};
 AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
     {0x0623, 0x0629, 0x05B7, 0x05AF, 0x0599, 0x06FC, 0x05DD, 0x0000, 0x0000,
         0x0000, 0x0000, 0x0000},
@@ -389,7 +389,7 @@ AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
 static AssetId f_ToadImageAssets[] = {0x0710, 0x0711, 0x0712, 0x0713, 0x0714,
     0x0715, 0x0716, 0x0717, 0x0718, 0x0719, 0x071A, 0x071B, 0x071C};
 /* Read by no routine */
-static s32 D_800C28CC[] UNUSED = {
+static s32 f_UnusedToadAssetIds[] UNUSED = {
     0x00000710, 0x00000711, 0x00000712, 0x00000713, 0x00000714, 0x00000715};
 s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
     {CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_PEACH, EMPTY_GRID_SLOT,
@@ -478,13 +478,13 @@ s32 g_MenuCourseCount = 6;
 static s8 f_UnreadMenuEntryFlag = 0;
 u8 g_AreBetPagesBlocked = 0;
 /* Read by no routine */
-static s32 D_800C2BD8[2] UNUSED = {0};
+static s32 f_UnusedWordsAfterBetPagesFlag[2] UNUSED = {0};
 static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
     SAVE_COPY_LOCATION(0),
     SAVE_COPY_LOCATION(SAVE_COPY_SRAM_SIZE),
 };
 /* Read by no routine */
-static s32 D_800C2C00[4] UNUSED = {0};
+static s32 f_UnusedWordsAfterSaveCopyLocations[4] UNUSED = {0};
 
 /*
  * Allocates and reads the menu's assets, then reads the save. Overlay 3

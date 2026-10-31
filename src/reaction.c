@@ -174,18 +174,18 @@ static s32 f_ReactionFrameCount;
 static Boolean f_HasReactionLight;
 
 /* Read by no routine */
-static u8 D_800E4C60[24] UNUSED;
+static u8 f_UnusedBufferAfterReactionLight[24] UNUSED;
 
 static EasedView f_EasedView;
 
 /* Read by no routine */
-static u8 D_800E4C94[4] UNUSED;
+static u8 f_UnusedBytesAfterEasedView[4] UNUSED;
 
 static CoursePoint f_ReactionSpot;
 static s32 f_ReactionSpotRoughness;
 
 /* Read by no routine */
-static u8 D_800E4CA8[32] UNUSED;
+static u8 f_UnusedBufferAfterSpotRoughness[32] UNUSED;
 
 static s8 f_HasReactionSpot;
 

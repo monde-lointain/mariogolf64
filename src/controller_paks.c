@@ -14,7 +14,7 @@ Boolean g_HasBroughtOverCharacter = FALSE;
  * Boy Pak transfer module */
 static Boolean f_IsBootTransmitPending = TRUE;
 /* Read by no routine */
-static s32 D_800C42D8[2] UNUSED = {0};
+static s32 f_UnusedWordsAfterBootTransmitFlag[2] UNUSED = {0};
 
 GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT];
 GameBoyTransfer g_GameBoyTransfer;

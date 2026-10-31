@@ -80,12 +80,12 @@ typedef struct RingCorners {
 
 static s8 f_DimsTranslucentTriangles = FALSE;
 /* Read by no routine */
-static s32 D_800C3104 UNUSED = 0;
+static s32 f_UnusedWordAfterDimmingFlag UNUSED = 0;
 static Boolean f_HasTestRing = FALSE;
 static s32 f_TextureScroll = 0;
 static Degrees f_RingAngle = 0.0f;
 /* Read by no routine */
-static s32 D_800C3114 UNUSED = 0;
+static s32 f_UnusedWordAfterRingAngle UNUSED = 0;
 static Lights1 f_RingLights =
     gdSPDefLights1(0x7F, 0x7F, 0x7F, 0xFF, 0xFF, 0xFF, -73, 73, 73);
 static Mtx f_RingSpinMatrices[DRAW_BUFFER_COUNT];

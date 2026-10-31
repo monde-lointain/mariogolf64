@@ -153,7 +153,7 @@ static s32 f_PinFlagWaveFrame = 0;
 
 /* Read by no routine */
 /* Not static: the original left it to the linker's common block */
-u8 D_8022D68C_ovl_00[4];
+u8 g_UnusedBytesAfterFlagWaveFrame[4];
 
 void DrawShotLabels(Gfx** displayListHead);
 void DrawShotPreview(CameraMatrices* matrices);

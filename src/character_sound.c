@@ -202,7 +202,7 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
         SOUND_AT_FULL_SCALE(0x112)},
 };
 /* Read by no routine */
-static s32 D_800C35F8[2] UNUSED = {0};
+static s32 f_UnusedWordsAfterCharacterSounds[2] UNUSED = {0};
 
 /* Plays a character's sound, where soundIndex is the sound's pair's first value
  */

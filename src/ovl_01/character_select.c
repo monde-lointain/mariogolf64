@@ -195,7 +195,7 @@ static s32 f_LinedUpTagLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
     {6, 70, 134, 198}};
 /*
  * Read by no routine: an order of 0 to 15, the last 16 values of
- * player_stats.c's D_80230960
+ * player_stats.c's f_UnusedCharacterOrder
  */
 static s16 f_UnreadSelectOrder[16] UNUSED = {
     1, 4, 5, 6, 3, 2, 7, 9, 12, 10, 13, 15, 14, 11, 8, 0};

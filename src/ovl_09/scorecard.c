@@ -119,7 +119,7 @@ void SetScorecardState(s32 state);
 #define PAGE_TITLE_COUNT 3
 
 /* Read by no routine */
-static s32 D_8024C450_ovl_09[] UNUSED = {0, 1, 2, 3, 5, 10};
+static s32 f_UnusedWordsBeforePageTitles[] UNUSED = {0, 1, 2, 3, 5, 10};
 static AssetId f_PageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT] = {
     {SPEED_GOLF_TITLE_ASSET, SCORECARD_TITLE_ASSET, SCORECARD_TITLE_ASSET},
     {SCORECARD_TITLE_ASSET, BET_TITLE_ASSET, BET_TITLE_ASSET},

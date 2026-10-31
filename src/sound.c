@@ -78,7 +78,7 @@ extern u8 g_SoundEffectBankRomEnd[];
 SoundChannel g_NextSoundChannel = 0;
 static s32 f_SongHandle = NO_HANDLE;
 /* Read by no routine */
-static s32 D_800C0E68 UNUSED = -1;
+static s32 f_UnusedWordAfterSongHandle UNUSED = -1;
 /* Only the first handle starts as NO_HANDLE */
 static s32 f_SoundHandles[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
 static u32 f_SoundFadeFrameCounts[SOUND_CHANNEL_COUNT] = {0};
@@ -224,7 +224,8 @@ static u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2] = {
     (u32)g_AssetArchiveRomStart,
 };
 /* Read by no routine */
-static s32 D_800C1348[10] UNUSED = {5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
+static s32 f_UnusedWordsAfterSongRomBounds[10] UNUSED = {
+    5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
 static u32 f_LastAudioFrame;
 
 musHandle StartSoundEffect(SoundId soundId);

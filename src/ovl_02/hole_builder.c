@@ -541,11 +541,11 @@ static s32 f_HolePaintLogics[HOLE_FILE_COURSE_COUNT][COURSE_HOLE_COUNT] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 /* Read by no routine */
-static s32 D_80254F1C_ovl_02 UNUSED = 0;
+static s32 f_UnusedWordAfterPaintLogics UNUSED = 0;
 /* The billboard textures that cast no shadow, ending at a negative index */
 static s8 f_ShadowlessTextures[] = {0x14, 0x15, 0x16, -1};
 /* Read by no routine */
-static s32 D_80254F24_ovl_02[] UNUSED = {0, 0, 0};
+static s32 f_UnusedWordsAfterShadowlessTextures[] UNUSED = {0, 0, 0};
 static s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
     {0, 12, 20, 13, 1},
     {14, 4, 5, 6, 16},
@@ -554,7 +554,7 @@ static s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
     {2, 18, 24, 19, 3},
 };
 /* Read by no routine */
-static s32 D_80254F4C_ovl_02 UNUSED = 0;
+static s32 f_UnusedWordAfterTileVertexSlots UNUSED = 0;
 /* There is no step for a count of 0 */
 static f32 f_HeightStepScales[HEIGHT_STEP_SCALE_COUNT] = {
     0.0f,
@@ -613,13 +613,13 @@ void MoveRingsToEnd(void);
 static s32 f_PaintLogic ORDERED_BSS = 0;
 
 /* Read by no routine */
-static u8 D_80255324_ovl_02[12] ORDERED_BSS UNUSED = {0};
+static u8 f_UnusedBytesBeforeReadCursor[12] ORDERED_BSS UNUSED = {0};
 
 static u8* f_ReadCursor ORDERED_BSS = NULL;
 static AssetFile f_HoleAsset ORDERED_BSS __attribute__((aligned(8))) = {0};
 
 /* Read by no routine */
-static u8 D_80255348_ovl_02[8] ORDERED_BSS UNUSED = {0};
+static u8 f_UnusedBytesAfterHoleAsset[8] ORDERED_BSS UNUSED = {0};
 u8 g_LoaderThreadStack[LOADER_THREAD_STACK_SIZE] ORDERED_BSS
     __attribute__((aligned(8))) = {0};
 

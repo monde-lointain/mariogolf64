@@ -2680,9 +2680,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", WriteExperienceToCartridge)
 
 #ifndef NON_MATCHING
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_WriteSumFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF18_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF24_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF30_ovl_13);
+INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_PhaseTwelveText);
+INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_PhaseThirteenText);
+INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_PhaseFourteenText);
 #else
 const char f_WriteSumFormat[] = "write sum %04x\n";
 #endif

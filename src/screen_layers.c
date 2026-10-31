@@ -195,7 +195,7 @@ static s32 f_WipeShapeIds[WIPE_SHAPE_COUNT] = {0x643, 0x645, 0x642, 0x641,
     0x644, 0x646, 0x90D, 0x90D, 0x90D, 0x90E, 0x90E, 0x90E, DEFAULT_WIPE_SHAPE,
     0x640};
 /* Read by no routine */
-static s32 D_800C405C UNUSED = 0x63E;
+static s32 f_UnusedWordAfterWipeShapeIds UNUSED = 0x63E;
 s32 g_ScreenFadeDuration = 0;
 s32 g_ScreenFadeFramesLeft = 0;
 s32 g_ScreenFadeKind = FADE_NONE;

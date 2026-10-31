@@ -614,11 +614,11 @@ static u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
 };
 
 /* Read by no routine */
-static u8 D_801F8B50_ovl_14[0x10] UNUSED;
+static u8 f_UnusedBytesBeforeCastSlot[0x10] UNUSED;
 static s32 f_CastSlot; /* The slot of the character shown, 0 or 1 */
 static CoursePoint f_NearCupPoint;
 /* Read by no routine */
-static u8 D_801F8B70_ovl_14[16] UNUSED;
+static u8 f_UnusedBytesAfterNearCupPoint[16] UNUSED;
 static StaffRollImage f_StaffRollImage;
 static StaffText* f_StaffText;
 static u8* f_StaffFont;

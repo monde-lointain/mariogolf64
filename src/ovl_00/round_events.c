@@ -314,7 +314,7 @@ static s32 f_BannerNumberLetterCount = 0;
 static s32 f_LoadedBanner = BANNER_NONE;
 static Boolean f_IsMovieBufferAllocated = FALSE;
 /* Read by no routine */
-static s32 D_80224128_ovl_00 UNUSED = -1;
+static s32 f_UnusedWordAfterMovieBufferFlag UNUSED = -1;
 static Vtx f_BannerLetterVertices[4] = {
     {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -32, 0}, 0, {0, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -522,7 +522,7 @@ static s32 f_ContactStyle = 0;
 static s32 f_ContactTextureS = 0;
 static s32 f_ContactTextureT = 0;
 /* Read by no routine */
-static Mtx D_80224710_ovl_00 UNUSED = IDENTITY_MTX;
+static Mtx f_UnusedRoundEventsIdentity UNUSED = IDENTITY_MTX;
 static s32 f_ContactTrailHead = 0;
 static Degrees f_ContactSpinAngle = 0.0f;
 /*
@@ -543,7 +543,7 @@ static FlyGuyPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};
 static s32 f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
 static s32 f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
 /* Read by no routine */
-static s32 D_80224850_ovl_00 UNUSED = 0;
+static s32 f_UnusedWordAfterFlyGuyAsset UNUSED = 0;
 /* The contact matrix that the streak starts from; the streak's matrices form a
  * ring behind it */
 static s32 f_WindStreakHead = 0;
@@ -555,7 +555,7 @@ static Mtx f_ContactSpinMatrices[MATRIX_BUFFER_COUNT];
 static FlyGuyPoint f_WindFlyGuyLastPosition;
 static Mtx f_BannerMatrices[MATRIX_BUFFER_COUNT];
 /* Read by no routine */
-static u8 D_80227F30_ovl_00[0xD0] UNUSED;
+static u8 f_UnusedBufferAfterBannerMatrices[0xD0] UNUSED;
 
 /* Not static: the original left these to the linker's common block */
 BannerLetter f_ActiveBannerLetters[BANNER_LETTER_SLOT_COUNT];

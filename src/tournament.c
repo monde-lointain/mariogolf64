@@ -230,7 +230,7 @@ char g_ContestantNames[COURSE_COUNT *
     "M\xE9\xE4\xEF", /* Mido */
 };
 /* Read by no routine */
-static s32 D_800C3F9C UNUSED = 0;
+static s32 f_UnusedWordAfterContestantProfiles UNUSED = 0;
 
 void SortIndicesDescending(s32* values, s32* order, s32 count);
 double sin(double angle);

@@ -141,7 +141,7 @@ static s32 f_CycledCupIndex = 0;
  */
 volatile Boolean g_HasLoaderFinished = TRUE;
 /* Read by no routine */
-static s32 D_800C3FAC UNUSED = 0;
+static s32 f_UnusedWordAfterLoaderFinished UNUSED = 0;
 static OSThread f_LoaderThread;
 HolePoints g_HolePoints;
 s32 g_HoleTimeFrames[COURSE_HOLE_COUNT];

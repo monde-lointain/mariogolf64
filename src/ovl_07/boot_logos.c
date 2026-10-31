@@ -109,7 +109,7 @@ static s32 f_BootLogoUnusedWord UNUSED = 0;
 static Boolean f_HasResetGameState = FALSE;
 
 /* Read by no routine */
-static u8 D_801F57B0_ovl_07[0x20] UNUSED;
+static u8 f_UnusedBufferBeforeCamelotLogo[0x20] UNUSED;
 static CamelotLogo f_CamelotLogo;
 static NintendoLogo f_NintendoLogo;
 static N64Logo f_N64Logo;

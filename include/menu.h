@@ -483,7 +483,7 @@ enum TournamentBuffer {
   TOURNAMENT_BUFFER_ICON,
   /* The last of f_MenuWindowImageAssets */
   TOURNAMENT_BUFFER_MENU_WINDOW,
-  /* The file of D_80230EC4's last row */
+  /* The file of f_MenuWindowPaletteFiles's last row */
   TOURNAMENT_BUFFER_ROW_FILE
 };
 
