@@ -116,6 +116,8 @@ SYMBOL_TYPE_MASK = 0xF
 STT_FUNC = 2
 
 MAX_DIFF_HUNKS = int(os.environ.get("MAX_DIFF_HUNKS", "4"))
+# How many matching instructions -v prints around each run, as diff -U does
+DIFF_CONTEXT = int(os.environ.get("DIFF_CONTEXT", "0"))
 
 Functions = dict[str, list[int]]
 StrPath = str | os.PathLike[str]
@@ -542,10 +544,14 @@ def print_diff(target: list[int], compiled: list[int]) -> None:
     matcher = difflib.SequenceMatcher(None, target, compiled, autojunk=False)
     hunks = [opcode for opcode in matcher.get_opcodes() if opcode[0] != "equal"]
     for _, t1, t2, c1, c2 in hunks[:MAX_DIFF_HUNKS]:
+        for index in range(max(0, t1 - DIFF_CONTEXT), t1):
+            print(f"   {index:4} {disassemble(target[index])}")
         for index in range(t1, t2):
             print(f"  -{index:4} {disassemble(target[index])}")
         for index in range(c1, c2):
             print(f"  +{index:4} {disassemble(compiled[index])}")
+        for index in range(t2, min(len(target), t2 + DIFF_CONTEXT)):
+            print(f"   {index:4} {disassemble(target[index])}")
         print("  --")
     if len(hunks) > MAX_DIFF_HUNKS:
         print(f"  ({len(hunks) - MAX_DIFF_HUNKS} more)")
