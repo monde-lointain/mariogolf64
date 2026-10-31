@@ -108,7 +108,6 @@ void ReportBirdieBadgeCount(void) {
 
 /* Flags the course's statistics with the player's place in the tournament, if
  * third or better, and saves */
-#ifdef NON_MATCHING
 void RecordTournamentPlace(void) {
   CourseStats* stats;
   s32* placeFlag;
@@ -144,6 +143,10 @@ void RecordTournamentPlace(void) {
         placeFlag = &stats->hasPlace[THIRD_PLACE_INDEX];
         hasPlace = TRUE;
         break;
+      default:
+        /* Not written, since hasPlace stays FALSE */
+        placeFlag = &stats->hasPlace[THIRD_PLACE_INDEX];
+        break;
     }
 
     if (hasPlace) {
@@ -153,6 +156,3 @@ void RecordTournamentPlace(void) {
     TransferSaveData(GetSaveData(), TRUE);
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/progress", RecordTournamentPlace);
-#endif
