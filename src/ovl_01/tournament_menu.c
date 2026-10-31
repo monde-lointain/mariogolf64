@@ -40,8 +40,8 @@
 #define MENU_WINDOW_PICTURE_COUNT 15
 #define MENU_WINDOW_PALETTE_COUNT 4
 
-/* DrawCodePanels stretches the menu banner of D_80230F44 into the two panels
- * behind the code screen */
+/* DrawCodePanels stretches the menu banner of f_NamePlateImage into the two
+ * panels behind the code screen */
 #define CODE_UPPER_PANEL_LEFT 28
 #define CODE_UPPER_PANEL_TOP 56
 #define CODE_UPPER_PANEL_WIDTH 264
@@ -50,8 +50,8 @@
 #define CODE_LOWER_PANEL_TOP 160
 #define CODE_LOWER_PANEL_WIDTH 280
 #define CODE_LOWER_PANEL_STRIP_HEIGHT 20
-/* The "CODE ENTRY" bar of D_80230F48 that DrawCodeEntryBar draws, in 8-row
- * strips
+/* The "CODE ENTRY" bar of f_CodeEntryBarImage that DrawCodeEntryBar draws, in
+ * 8-row strips
  */
 #define CODE_ENTRY_BAR_WIDTH 256
 #define CODE_ENTRY_BAR_STRIP_HEIGHT 8
@@ -60,8 +60,8 @@
 #define CODE_ENTRY_BAR_TOP 140
 /*
  * DrawCodeHand points at the chosen key with the 24x24 hand of
- * ASSET_POINTING_HAND in D_80230F50, which sways a pixel to the right each
- * frame and back
+ * ASSET_POINTING_HAND in f_PointingHandImage, which sways a pixel to the right
+ * each frame and back
  */
 #define CODE_HAND_SIZE 24
 #define CODE_HAND_FIRST_X 16
@@ -99,14 +99,14 @@ enum ClubCodeState {
 #define CODE_KEY_END 0xFF
 /*
  * DrawCodeKeys draws each key's 16x16 glyph from ASSET_CODE_ENTRY_GLYPHS in
- * D_80230F4C, tinting the chosen one yellow
+ * f_CodeGlyphsImage, tinting the chosen one yellow
  */
 #define CODE_GLYPH_SIZE 16
 #define CODE_GLYPH_FIRST_X 40
 #define CODE_GLYPH_FIRST_Y 62
 #define CODE_GLYPH_NONE -1
 
-/* What UpdateClubTournament is doing, in D_80230F70 */
+/* What UpdateClubTournament is doing, in f_ClubTournamentPhase */
 enum ClubCodePhase {
   CLUB_CODE_PHASE_TYPING,
   CLUB_CODE_PHASE_DETAILS,
@@ -170,7 +170,7 @@ void StartLoadingChosenHole(void);
 #define CLUB_COURSE_SLOT 4
 #define CLUB_MODE_SLOT 5
 #define CLUB_TEXT_SLOT_COUNT 11
-/* The window's choice in D_80230F80, which left and right toggle */
+/* The window's choice in f_ClubWindowChoice, which left and right toggle */
 #define CLUB_CHOICE_YES 0
 #define CLUB_CHOICE_NO 1
 
@@ -187,7 +187,7 @@ static s32 f_MenuWindowState = MENU_WINDOW_OPENING;
 static f32 f_MenuWindowScaleX = 0.0f;
 static f32 f_MenuWindowScaleY = 0.0f;
 /* Read by no routine */
-static s32 D_80230E94_ovl_01[2] UNUSED = {0, 0};
+static s32 f_UnusedWordsAfterWindowScale[2] UNUSED = {0, 0};
 /* How far the chosen Yes or No button has grown, and a YES_NO_PULSE_* value */
 static s32 f_YesNoPulse = 0;
 static s32 f_YesNoPulseDirection = 0;
@@ -217,50 +217,56 @@ static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT]
 };
 // clang-format on
 /* Read by no routine */
-static s32 D_80230F3C_ovl_01 UNUSED = 0;
-static u8 D_80230F40_ovl_01 = 0;
-static void* D_80230F44_ovl_01 = NULL;
-static void* D_80230F48_ovl_01 = NULL;
-static void* D_80230F4C_ovl_01 = NULL;
-static void* D_80230F50_ovl_01 = NULL;
+static s32 f_UnusedWordAfterPaletteFiles UNUSED = 0;
+/* Whether the Club Tournament screen was entered since TakeClubTournamentEntry
+ * last asked */
+static u8 f_IsClubTournamentEntered = 0;
+/* The code entry's images, which LoadCodeEntryBuffer reads */
+static void* f_NamePlateImage = NULL;
+static void* f_CodeEntryBarImage = NULL;
+static void* f_CodeGlyphsImage = NULL;
+static void* f_PointingHandImage = NULL;
 static void* f_CodeCursorBox = NULL;
 /* Read by no routine */
-static s32 D_80230F58_ovl_01 UNUSED = 0;
-static s32 D_80230F5C_ovl_01 = 0;
-static s32 D_80230F60_ovl_01 = 0;
-static s32 D_80230F64_ovl_01 = 0;
-static s32 D_80230F68_ovl_01 = 0;
+static s32 f_UnusedWordAfterCursorBox UNUSED = 0;
+/* The pointing hand's CODE_HAND_* motion, how far it has reached, and the
+ * frames until its next step */
+static s32 f_CodeHandMotion = 0;
+static s32 f_CodeHandReach = 0;
+static s32 f_CodeHandStepTimer = 0;
+/* The characters of f_EnteredCode entered so far */
+static s32 f_EnteredCodeLength = 0;
 /* A CLUB_CODE_STATE_* value */
-static s32 D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
+static s32 f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
 /* A CLUB_CODE_PHASE_* value */
-static s32 D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
-static s32 D_80230F74_ovl_01 = 0;
-static s32 D_80230F78_ovl_01 = 0;
-static s32 D_80230F7C_ovl_01 = 0;
+static s32 f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
+/* The club tournament name that the entered password picks */
+static s32 f_DecodedNameIndex = 0;
+/* Set to twice f_CodeHandReach, and read by no routine */
+static s32 f_UnusedDoubledHandReach = 0;
+/* Cleared by ResetCodeEntry, and read by no routine */
+static s32 f_UnusedCodeEntryWord = 0;
 /* A CLUB_CHOICE_* value */
-static u8 D_80230F80_ovl_01 = CLUB_CHOICE_YES;
+static u8 f_ClubWindowChoice = CLUB_CHOICE_YES;
 /* The keyboard's keys */
-static u8
-    D_80230F84_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
-        {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'},
-        {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'},
-        {'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'},
-        {'U', 'V', 'W', 'X', 'Y', 'Z', CODE_KEY_BLANK, CODE_KEY_BLANK,
-            CODE_KEY_BACK, CODE_KEY_END}};
+static u8 f_CodeKeys[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
+    {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'},
+    {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'},
+    {'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'},
+    {'U', 'V', 'W', 'X', 'Y', 'Z', CODE_KEY_BLANK, CODE_KEY_BLANK,
+        CODE_KEY_BACK, CODE_KEY_END}};
 /* Each key's glyph */
-static s8
-    D_80230FAC_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
-        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-        {10, 11, 12, 13, 14, 15, 16, 17, 18, 19},
+static s8 f_CodeKeyGlyphs[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] =
+    {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, {10, 11, 12, 13, 14, 15, 16, 17, 18, 19},
         {20, 21, 22, 23, 24, 25, 26, 27, 28, 29},
         {30, 31, 32, 33, 34, 35, CODE_GLYPH_NONE, CODE_GLYPH_NONE, 36, 37}};
 /* The code entered so far */
-static u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH] = {CLUB_CODE_NO_CHAR,
+static u8 f_EnteredCode[CLUB_TOURNAMENT_CODE_LENGTH] = {CLUB_CODE_NO_CHAR,
     CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR,
     CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR};
 /* The codes, each padded with CLUB_CODE_NO_CHAR */
 // clang-format off
-static u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT]
+static u8 f_ClubTournamentCodes[CLUB_TOURNAMENT_CODE_COUNT]
                            [CLUB_TOURNAMENT_CODE_LENGTH] = {
   { '0', '0', '0', '0', '0', '0', '0', '0' },
   { 'K', 'O', 'D', 'E', 'R', 'A', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR },
@@ -309,7 +315,7 @@ static s32 f_TournamentCharacterChoices[14] UNUSED = {CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_DONKEY_KONG, CHARACTER_CHOICE_BOWSER,
     CHARACTER_CHOICE_METAL_MARIO};
 /* The tournament code byte being edited */
-static s32 D_80231134_ovl_01 = 0;
+static s32 f_EditedCodeByteIndex = 0;
 /* The code cursor's corners, whose colors DrawCodeCursor cycles */
 static Vtx f_CodeCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -317,7 +323,7 @@ static Vtx f_CodeCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}};
 /* Read by no routine */
-static s32 D_80231178_ovl_01[2] UNUSED = {0, 0};
+static s32 f_UnusedWordsAfterCursorVertices[2] UNUSED = {0, 0};
 /* The angle, in radians, of each corner's color cycle */
 static f32 f_CodeCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
@@ -344,7 +350,7 @@ static Mtx f_CodeCursorTranslation;
 static Mtx f_CodeCursorRotation;
 
 /* Read by no routine */
-static u8 D_8023BF00_ovl_01[0x80] UNUSED;
+static u8 f_UnusedBufferBeforeCursorScale[0x80] UNUSED;
 
 static Mtx f_CodeCursorScale;
 
@@ -436,7 +442,8 @@ void LoadTournamentBuffer(void* buffer, s16 bufferKind) {
   ResetMenuWindow();
 }
 
-const s32 D_80231A68_ovl_01[2] = {0, 0};
+/* Read by no routine */
+const s32 f_UnusedConstantWords[2] = {0, 0};
 
 /*
  * Reads the icon of the club tournament's course into the window's course image
@@ -1107,24 +1114,24 @@ void LoadCodeEntryBuffer(void* buffer, s32 bufferKind) {
 
   switch (bufferKind) {
     case CODE_ENTRY_BUFFER_NAME_PLATE:
-      D_80230F44_ovl_01 = buffer;
+      f_NamePlateImage = buffer;
       OpenEncodedAsset(ASSET_NAME_PLATE, &asset);
-      ReadEncodedAsset(D_80230F44_ovl_01, &asset);
+      ReadEncodedAsset(f_NamePlateImage, &asset);
       break;
     case CODE_ENTRY_BUFFER_BAR:
-      D_80230F48_ovl_01 = buffer;
+      f_CodeEntryBarImage = buffer;
       OpenEncodedAsset(ASSET_CODE_ENTRY_BAR, &asset);
-      ReadEncodedAsset(D_80230F48_ovl_01, &asset);
+      ReadEncodedAsset(f_CodeEntryBarImage, &asset);
       break;
     case CODE_ENTRY_BUFFER_GLYPHS:
-      D_80230F4C_ovl_01 = buffer;
+      f_CodeGlyphsImage = buffer;
       OpenEncodedAsset(ASSET_CODE_ENTRY_GLYPHS, &asset);
-      ReadEncodedAsset(D_80230F4C_ovl_01, &asset);
+      ReadEncodedAsset(f_CodeGlyphsImage, &asset);
       break;
     case CODE_ENTRY_BUFFER_POINTING_HAND:
-      D_80230F50_ovl_01 = buffer;
+      f_PointingHandImage = buffer;
       OpenEncodedAsset(ASSET_POINTING_HAND, &asset);
-      ReadEncodedAsset(D_80230F50_ovl_01, &asset);
+      ReadEncodedAsset(f_PointingHandImage, &asset);
       break;
     case CODE_ENTRY_BUFFER_CURSOR_BOX:
       f_CodeCursorBox = buffer;
@@ -1144,21 +1151,21 @@ void ResetCodeEntry(void) {
 
   memory->codeKeyColumn = 0;
   memory->codeKeyRow = 0;
-  D_80230F74_ovl_01 = 0;
+  f_DecodedNameIndex = 0;
   for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
-    D_80230FD4_ovl_01[charIndex] = CLUB_CODE_NO_CHAR;
+    f_EnteredCode[charIndex] = CLUB_CODE_NO_CHAR;
   }
 
-  D_80230F68_ovl_01 = 0;
-  D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
-  D_80230F5C_ovl_01 = 0;
-  D_80230F60_ovl_01 = 0;
-  D_80230F64_ovl_01 = 0;
-  D_80230F78_ovl_01 = 0;
-  D_80230F70_ovl_01 = 0;
-  D_80230F80_ovl_01 = 0;
-  D_80230F40_ovl_01 = TRUE;
-  D_80230F7C_ovl_01 = 0;
+  f_EnteredCodeLength = 0;
+  f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
+  f_CodeHandMotion = 0;
+  f_CodeHandReach = 0;
+  f_CodeHandStepTimer = 0;
+  f_UnusedDoubledHandReach = 0;
+  f_ClubTournamentPhase = 0;
+  f_ClubWindowChoice = 0;
+  f_IsClubTournamentEntered = TRUE;
+  f_UnusedCodeEntryWord = 0;
 }
 
 void UpdateClubWindow(void);
@@ -1181,24 +1188,24 @@ void UpdateClubTournament(void) {
     return;
   }
 
-  if (D_80230F70_ovl_01 == CLUB_CODE_PHASE_INCORRECT) {
+  if (f_ClubTournamentPhase == CLUB_CODE_PHASE_INCORRECT) {
     if (!IsTextSlotRevealed(0)) {
       return;
     }
 
     if (g_MenuRepeatButtons & A_BUTTON) {
-      D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
-      D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
+      f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
+      f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
       ResetCodeEntry();
     } else if (g_MenuRepeatButtons & B_BUTTON) {
-      D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
-      D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
+      f_ClubTournamentPhase = CLUB_CODE_PHASE_TYPING;
+      f_ClubCodeState = CLUB_CODE_STATE_ENTERING;
     }
 
     return;
   }
 
-  if (D_80230F70_ovl_01 != CLUB_CODE_PHASE_TYPING) {
+  if (f_ClubTournamentPhase != CLUB_CODE_PHASE_TYPING) {
     UpdateClubWindow();
     return;
   }
@@ -1206,28 +1213,30 @@ void UpdateClubTournament(void) {
   /* The second controller edits the tournament code digit by digit */
   if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
     if (g_MenuControllerData[1].button & L_JPAD) {
-      D_80231134_ovl_01 =
-          (D_80231134_ovl_01 + TOURNAMENT_CODE_SIZE - 1) % TOURNAMENT_CODE_SIZE;
+      f_EditedCodeByteIndex =
+          (f_EditedCodeByteIndex + TOURNAMENT_CODE_SIZE - 1) %
+          TOURNAMENT_CODE_SIZE;
     }
 
     if (g_MenuControllerData[1].button & R_JPAD) {
-      D_80231134_ovl_01 = (D_80231134_ovl_01 + 1) % TOURNAMENT_CODE_SIZE;
+      f_EditedCodeByteIndex =
+          (f_EditedCodeByteIndex + 1) % TOURNAMENT_CODE_SIZE;
     }
 
     /* The original's unconditional steps cancel out, so a held direction
      * changes the digit every frame */
     if (g_MenuControllerData[1].button & U_JPAD) {
-      g_TournamentCode[D_80231134_ovl_01]++;
+      g_TournamentCode[f_EditedCodeByteIndex]++;
     }
 
-    g_TournamentCode[D_80231134_ovl_01]++;
+    g_TournamentCode[f_EditedCodeByteIndex]++;
     if (g_MenuControllerData[1].button & D_JPAD) {
-      g_TournamentCode[D_80231134_ovl_01]--;
+      g_TournamentCode[f_EditedCodeByteIndex]--;
     }
 
-    g_TournamentCode[D_80231134_ovl_01]--;
+    g_TournamentCode[f_EditedCodeByteIndex]--;
     for (index = 0; index < TOURNAMENT_CODE_SIZE; index++) {
-      if (D_80231134_ovl_01 == index) {
+      if (f_EditedCodeByteIndex == index) {
         SetDebugTextHighlight(TRUE);
       }
 
@@ -1244,19 +1253,19 @@ void UpdateClubTournament(void) {
       if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
         isInvalid = FALSE;
       } else {
-        isInvalid = DecodeTournamentPassword(
-            g_TournamentCode, (char*)D_80230FD4_ovl_01);
+        isInvalid =
+            DecodeTournamentPassword(g_TournamentCode, (char*)f_EnteredCode);
       }
 
       if (!isInvalid) {
-        D_80230F74_ovl_01 = g_TournamentCode[0] & CLUB_CODE_NAME_MASK;
-        if (D_80230F74_ovl_01 >= CLUB_TOURNAMENT_NAME_COUNT) {
-          D_80230F74_ovl_01 = 0;
+        f_DecodedNameIndex = g_TournamentCode[0] & CLUB_CODE_NAME_MASK;
+        if (f_DecodedNameIndex >= CLUB_TOURNAMENT_NAME_COUNT) {
+          f_DecodedNameIndex = 0;
         }
 
         g_IsNintendoClubTournament =
             g_TournamentCode[0] >> CLUB_CODE_NINTENDO_SHIFT;
-        g_ClubTournamentNameIndex = D_80230F74_ovl_01;
+        g_ClubTournamentNameIndex = f_DecodedNameIndex;
         rules = GetTournamentRules(g_TournamentCode[1]);
         g_ClubTournamentRules = *rules;
         g_ClubTournamentNumber = g_TournamentCode[2] + 1;
@@ -1265,7 +1274,7 @@ void UpdateClubTournament(void) {
         PlaySound(SOUND_GO, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         ResetMenuWindow();
         LoadClubCourseIcon(GetClubTournamentCourse());
-        D_80230F70_ovl_01 = CLUB_CODE_PHASE_DETAILS;
+        f_ClubTournamentPhase = CLUB_CODE_PHASE_DETAILS;
         if (GetClubTournamentCharacter() >= 0) {
           LoadMenuWindowImage(GetClubTournamentCharacter());
           LoadMenuWindowPalette(GetClubTournamentCharacter(), 0);
@@ -1278,12 +1287,12 @@ void UpdateClubTournament(void) {
       }
 
       PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_80230F70_ovl_01 = CLUB_CODE_PHASE_INCORRECT;
-      D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
+      f_ClubTournamentPhase = CLUB_CODE_PHASE_INCORRECT;
+      f_ClubCodeState = CLUB_CODE_STATE_INCORRECT;
     } else if (result == CODE_KEY_RESULT_TOO_SHORT) {
       PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-      D_80230F70_ovl_01 = CLUB_CODE_PHASE_INCORRECT;
-      D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
+      f_ClubTournamentPhase = CLUB_CODE_PHASE_INCORRECT;
+      f_ClubCodeState = CLUB_CODE_STATE_INCORRECT;
     }
   } else if (g_MenuRepeatButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -1293,7 +1302,7 @@ void UpdateClubTournament(void) {
     if (DeleteCodeCharacter()) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       g_MenuScreen = MENU_SCREEN_MAIN;
-      D_80230F40_ovl_01 = FALSE;
+      f_IsClubTournamentEntered = FALSE;
       g_IsNintendoClubTournament = FALSE;
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
@@ -1307,13 +1316,13 @@ void UpdateClubTournament(void) {
       memory->codeKeyRow = CODE_KEYBOARD_ROW_COUNT - 1;
     }
 
-    if (D_80230F84_ovl_01[memory->codeKeyRow][memory->codeKeyColumn] ==
+    if (f_CodeKeys[memory->codeKeyRow][memory->codeKeyColumn] ==
         CODE_KEY_BLANK) {
       memory->codeKeyRow = CODE_KEYBOARD_END_ROW - 1;
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (D_80230F84_ovl_01[++memory->codeKeyRow][memory->codeKeyColumn] ==
+    if (f_CodeKeys[++memory->codeKeyRow][memory->codeKeyColumn] ==
         CODE_KEY_BLANK) {
       memory->codeKeyRow = 0;
     }
@@ -1323,7 +1332,7 @@ void UpdateClubTournament(void) {
     }
   } else if (g_MenuRepeatButtons & L_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (D_80230F84_ovl_01[memory->codeKeyRow][--memory->codeKeyColumn] ==
+    if (f_CodeKeys[memory->codeKeyRow][--memory->codeKeyColumn] ==
         CODE_KEY_BLANK) {
       memory->codeKeyColumn = CODE_KEYBOARD_FIRST_BLANK_COLUMN - 1;
     }
@@ -1333,7 +1342,7 @@ void UpdateClubTournament(void) {
     }
   } else if (g_MenuRepeatButtons & R_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (D_80230F84_ovl_01[memory->codeKeyRow][++memory->codeKeyColumn] ==
+    if (f_CodeKeys[memory->codeKeyRow][++memory->codeKeyColumn] ==
         CODE_KEY_BLANK) {
       memory->codeKeyColumn = CODE_KEYBOARD_BACK_COLUMN;
     }
@@ -1390,21 +1399,21 @@ void UpdateClubWindow(void) {
   }
 
   if (IsMenuWindowClosed()) {
-    D_80230F80_ovl_01 = CLUB_CHOICE_NO;
+    f_ClubWindowChoice = CLUB_CHOICE_NO;
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
       SetTextSlot(
           0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
     }
 
-    D_80230F70_ovl_01 = FALSE;
-    D_80230F80_ovl_01 = CLUB_CHOICE_YES;
+    f_ClubTournamentPhase = FALSE;
+    f_ClubWindowChoice = CLUB_CHOICE_YES;
     return;
   }
 
   pressedButtons = g_MenuRepeatButtons;
   if (pressedButtons & A_BUTTON) {
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-    if (D_80230F80_ovl_01 == CLUB_CHOICE_YES) {
+    if (f_ClubWindowChoice == CLUB_CHOICE_YES) {
       PlaySound(SOUND_ENTER_TOURNAMENT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       g_GameState.isClubTournament = TRUE;
       g_ChosenPlayerCount = 1;
@@ -1456,8 +1465,8 @@ void UpdateClubWindow(void) {
     }
   } else if (pressedButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    D_80230F80_ovl_01 = CLUB_CHOICE_YES;
-    D_80230F70_ovl_01 = FALSE;
+    f_ClubWindowChoice = CLUB_CHOICE_YES;
+    f_ClubTournamentPhase = FALSE;
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
       SetTextSlot(
           0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
@@ -1466,7 +1475,7 @@ void UpdateClubWindow(void) {
     /* The cast above stops the compiler from merging the two tests, which the
      * original keeps apart */
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    D_80230F80_ovl_01 ^= 1;
+    f_ClubWindowChoice ^= 1;
   }
 }
 
@@ -1570,7 +1579,7 @@ void DrawClubTournament(Gfx** displayListHead) {
   DrawCodeHand(&gfx);
   DrawCodeCursor(&gfx);
   DrawCodePrompt(&gfx);
-  if (D_80230F70_ovl_01 == 1) {
+  if (f_ClubTournamentPhase == 1) {
     if (IsNintendoClubTournament()) {
       windowStyle = (GetClubTournamentCharacter() != -1)
           ? CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO
@@ -1594,7 +1603,7 @@ void DrawClubTournament(Gfx** displayListHead) {
       }
 
       DrawClubWindow(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
-          CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
+          CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, f_ClubWindowChoice,
           windowStyle);
       DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, g_ClubTournamentNumber);
     } else {
@@ -1618,7 +1627,7 @@ void DrawClubTournament(Gfx** displayListHead) {
       }
 
       DrawClubWindow(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
-          CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
+          CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, f_ClubWindowChoice,
           windowStyle);
       DrawClubNumber(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, g_ClubTournamentNumber);
     }
@@ -1664,11 +1673,11 @@ void DrawCodeEntryBar(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_80230F48_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CodeEntryBarImage)));
   gDPPipeSync(gfx++);
   for (stripIndex = 0; stripIndex != CODE_ENTRY_BAR_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_80230F48_ovl_01) +
+        TextureAddress(LargeImageTexels(f_CodeEntryBarImage) +
             (stripIndex * CODE_ENTRY_BAR_WIDTH * CODE_ENTRY_BAR_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, CODE_ENTRY_BAR_WIDTH,
         CODE_ENTRY_BAR_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1702,11 +1711,11 @@ void DrawCodePanels(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_80230F44_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_NamePlateImage)));
   gDPPipeSync(gfx++);
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
-        TextureAddress(LargeImageTexels(D_80230F44_ovl_01) +
+        TextureAddress(LargeImageTexels(f_NamePlateImage) +
             (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1753,40 +1762,40 @@ void DrawCodeHand(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_80230F50_ovl_01)));
-  gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(D_80230F50_ovl_01)),
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_PointingHandImage)));
+  gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(f_PointingHandImage)),
       G_IM_FMT_CI, CODE_HAND_SIZE, CODE_HAND_SIZE, 0, 0, CODE_HAND_SIZE - 1,
       CODE_HAND_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  D_80230F64_ovl_01++;
-  if (D_80230F64_ovl_01 == CODE_HAND_STEP_FRAMES) {
-    D_80230F64_ovl_01 = 0;
-    switch (D_80230F5C_ovl_01) {
+  f_CodeHandStepTimer++;
+  if (f_CodeHandStepTimer == CODE_HAND_STEP_FRAMES) {
+    f_CodeHandStepTimer = 0;
+    switch (f_CodeHandMotion) {
       case CODE_HAND_MOVING_RIGHT:
-        D_80230F60_ovl_01++;
-        if (D_80230F60_ovl_01 == CODE_HAND_REACH) {
-          D_80230F5C_ovl_01 = CODE_HAND_MOVING_LEFT;
+        f_CodeHandReach++;
+        if (f_CodeHandReach == CODE_HAND_REACH) {
+          f_CodeHandMotion = CODE_HAND_MOVING_LEFT;
         }
 
         break;
       case CODE_HAND_MOVING_LEFT:
-        D_80230F60_ovl_01--;
-        if (D_80230F60_ovl_01 == 0) {
-          D_80230F5C_ovl_01 = CODE_HAND_MOVING_RIGHT;
+        f_CodeHandReach--;
+        if (f_CodeHandReach == 0) {
+          f_CodeHandMotion = CODE_HAND_MOVING_RIGHT;
         }
 
         break;
       default:
-        D_80230F5C_ovl_01 = CODE_HAND_MOVING_RIGHT;
-        D_80230F60_ovl_01 = 0;
+        f_CodeHandMotion = CODE_HAND_MOVING_RIGHT;
+        f_CodeHandReach = 0;
         break;
     }
   }
 
   left = (memory->codeKeyColumn * CODE_KEY_SPACING_X) + CODE_HAND_FIRST_X +
-      D_80230F60_ovl_01;
+      f_CodeHandReach;
   top = (memory->codeKeyRow * CODE_KEY_SPACING_Y) + CODE_HAND_FIRST_Y;
   gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
       QuarterPixels(left + CODE_HAND_SIZE), QuarterPixels(top + CODE_HAND_SIZE),
@@ -1810,10 +1819,10 @@ void DrawCodeKeys(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_80230F4C_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_CodeGlyphsImage)));
   for (row = 0; row != CODE_KEYBOARD_ROW_COUNT; row++) {
     for (column = 0; column != CODE_KEYBOARD_COLUMN_COUNT; column++) {
-      glyph = D_80230FAC_ovl_01[row][column];
+      glyph = f_CodeKeyGlyphs[row][column];
       if (glyph == CODE_GLYPH_NONE) {
         continue;
       }
@@ -1833,7 +1842,7 @@ void DrawCodeKeys(Gfx** displayListHead) {
       }
 
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(ImageTexels(D_80230F4C_ovl_01) +
+          TextureAddress(ImageTexels(f_CodeGlyphsImage) +
               (glyph * (CODE_GLYPH_SIZE * CODE_GLYPH_SIZE / 2))),
           G_IM_FMT_CI, CODE_GLYPH_SIZE, CODE_GLYPH_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1854,7 +1863,7 @@ void DrawCodeKeys(Gfx** displayListHead) {
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
-  D_80230F78_ovl_01 = D_80230F60_ovl_01 * 2;
+  f_UnusedDoubledHandReach = f_CodeHandReach * 2;
   *displayListHead = gfx;
 }
 
@@ -1867,8 +1876,8 @@ void DrawEnteredCode(Gfx** displayListHead) {
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
-    if (D_80230FD4_ovl_01[charIndex] != CLUB_CODE_NO_CHAR) {
-      sprintf(g_PrintBuffer, "%c", D_80230FD4_ovl_01[charIndex]);
+    if (f_EnteredCode[charIndex] != CLUB_CODE_NO_CHAR) {
+      sprintf(g_PrintBuffer, "%c", f_EnteredCode[charIndex]);
       DrawLargeTextWithShadow(&gfx,
           (charIndex * CLUB_CODE_CHAR_WIDTH) + CLUB_CODE_FIRST_X, CLUB_CODE_Y,
           g_PrintBuffer, -1, -1, 0);
@@ -1892,41 +1901,41 @@ static inline s8 GetCodeKeyColumn(MenuMemory* memory) {
 s32 PressCodeKey(void) {
   MenuMemory* memory = GetMenuMemory();
   s32 result = CODE_KEY_RESULT_TYPING;
-  u8 key = D_80230F84_ovl_01[memory->codeKeyRow][GetCodeKeyColumn(memory)];
+  u8 key = f_CodeKeys[memory->codeKeyRow][GetCodeKeyColumn(memory)];
 
   switch (key) {
     case CODE_KEY_BACK:
-      if (D_80230F68_ovl_01 > 0) {
-        if (D_80230F68_ovl_01 == CLUB_TOURNAMENT_CODE_LENGTH) {
-          D_80230F68_ovl_01 = CLUB_TOURNAMENT_CODE_LENGTH - 1;
+      if (f_EnteredCodeLength > 0) {
+        if (f_EnteredCodeLength == CLUB_TOURNAMENT_CODE_LENGTH) {
+          f_EnteredCodeLength = CLUB_TOURNAMENT_CODE_LENGTH - 1;
         }
 
-        D_80230FD4_ovl_01[D_80230F68_ovl_01] = CLUB_CODE_NO_CHAR;
-        D_80230F68_ovl_01--;
+        f_EnteredCode[f_EnteredCodeLength] = CLUB_CODE_NO_CHAR;
+        f_EnteredCodeLength--;
       } else {
-        D_80230FD4_ovl_01[0] = CLUB_CODE_NO_CHAR;
+        f_EnteredCode[0] = CLUB_CODE_NO_CHAR;
       }
 
       break;
     case CODE_KEY_BLANK:
       break;
     case CODE_KEY_END:
-      if (D_80230F68_ovl_01 < CLUB_TOURNAMENT_CODE_LENGTH) {
+      if (f_EnteredCodeLength < CLUB_TOURNAMENT_CODE_LENGTH) {
         return CODE_KEY_RESULT_TOO_SHORT;
       }
 
       result = CODE_KEY_RESULT_DONE;
       break;
     default:
-      if (D_80230F68_ovl_01 < CLUB_TOURNAMENT_CODE_LENGTH) {
-        D_80230FD4_ovl_01[D_80230F68_ovl_01] = key;
-        D_80230F68_ovl_01++;
-        if (D_80230F68_ovl_01 == CLUB_TOURNAMENT_CODE_LENGTH) {
+      if (f_EnteredCodeLength < CLUB_TOURNAMENT_CODE_LENGTH) {
+        f_EnteredCode[f_EnteredCodeLength] = key;
+        f_EnteredCodeLength++;
+        if (f_EnteredCodeLength == CLUB_TOURNAMENT_CODE_LENGTH) {
           memory->codeKeyColumn = CODE_KEYBOARD_END_COLUMN;
           memory->codeKeyRow = CODE_KEYBOARD_END_ROW;
         }
       } else {
-        D_80230FD4_ovl_01[D_80230F68_ovl_01 - 1] = key;
+        f_EnteredCode[f_EnteredCodeLength - 1] = key;
       }
 
       break;
@@ -1941,16 +1950,16 @@ s32 PressCodeKey(void) {
 s32 DeleteCodeCharacter(void) {
   Boolean isEmpty = TRUE;
 
-  if (D_80230F68_ovl_01 > 0) {
-    if (D_80230F68_ovl_01 == CLUB_TOURNAMENT_CODE_LENGTH) {
-      D_80230F68_ovl_01 = CLUB_TOURNAMENT_CODE_LENGTH - 1;
+  if (f_EnteredCodeLength > 0) {
+    if (f_EnteredCodeLength == CLUB_TOURNAMENT_CODE_LENGTH) {
+      f_EnteredCodeLength = CLUB_TOURNAMENT_CODE_LENGTH - 1;
     }
 
-    D_80230FD4_ovl_01[D_80230F68_ovl_01] = CLUB_CODE_NO_CHAR;
-    D_80230F68_ovl_01--;
+    f_EnteredCode[f_EnteredCodeLength] = CLUB_CODE_NO_CHAR;
+    f_EnteredCodeLength--;
     isEmpty = FALSE;
-  } else if (D_80230FD4_ovl_01[0] != CLUB_CODE_NO_CHAR) {
-    D_80230FD4_ovl_01[0] = CLUB_CODE_NO_CHAR;
+  } else if (f_EnteredCode[0] != CLUB_CODE_NO_CHAR) {
+    f_EnteredCode[0] = CLUB_CODE_NO_CHAR;
     isEmpty = FALSE;
   }
 
@@ -1964,7 +1973,7 @@ void DrawCodePrompt(Gfx** displayListHead) {
   s32 messageOffset;
   s32 flags;
 
-  switch (D_80230F6C_ovl_01) {
+  switch (f_ClubCodeState) {
     case CLUB_CODE_STATE_ENTERING:
       messageOffset = 0;
       x = CLUB_CODE_PROMPT_X;
@@ -1994,8 +2003,8 @@ void DrawCodePrompt(Gfx** displayListHead) {
 }
 
 /*
- * Returns which of D_80230FDC's codes was entered, or -1 after marking the code
- * incorrect; no routine calls it
+ * Returns which of f_ClubTournamentCodes's codes was entered, or -1 after
+ * marking the code incorrect; no routine calls it
  */
 s32 FindEnteredCodeIndex(void) {
   s32 foundIndex = -1;
@@ -2006,8 +2015,8 @@ s32 FindEnteredCodeIndex(void) {
   for (codeIndex = 0; codeIndex != CLUB_TOURNAMENT_CODE_COUNT; codeIndex++) {
     matchCount = 0;
     for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
-      if (D_80230FD4_ovl_01[charIndex] !=
-          D_80230FDC_ovl_01[codeIndex][charIndex]) {
+      if (f_EnteredCode[charIndex] !=
+          f_ClubTournamentCodes[codeIndex][charIndex]) {
         break;
       }
 
@@ -2021,7 +2030,7 @@ s32 FindEnteredCodeIndex(void) {
   }
 
   if (foundIndex == -1) {
-    D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
+    f_ClubCodeState = CLUB_CODE_STATE_INCORRECT;
   }
 
   return foundIndex;
@@ -2064,7 +2073,7 @@ void DrawCodeCursor(Gfx** displayListHead) {
   guOrtho(&f_CodeCursorProjection, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
-  charIndex = D_80230F68_ovl_01;
+  charIndex = f_EnteredCodeLength;
   if (charIndex >= CLUB_TOURNAMENT_CODE_LENGTH) {
     charIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
   }
@@ -2126,8 +2135,8 @@ s32 GetClubTournamentCharacter(void) {
 
 /* Returns, then clears, whether the Club Tournament screen was entered */
 s32 TakeClubTournamentEntry(void) {
-  if (D_80230F40_ovl_01) {
-    D_80230F40_ovl_01 = FALSE;
+  if (f_IsClubTournamentEntered) {
+    f_IsClubTournamentEntered = FALSE;
     return TRUE;
   }
 
