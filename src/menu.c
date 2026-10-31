@@ -1647,16 +1647,16 @@ void InvalidateBrokenSavedGames(void) {
  * Takes the recorded mark off Ring Shot records whose score, character,
  * palette, course or hole is out of range.
  *
- * Doesn't match: 17 words differ. The original copies the score kind into a
- * second register before testing its recorded bit, and the last loop's two
- * pointers take each other's registers.
+ * Doesn't match: 7 words differ. The original copies the score kind into a
+ * second register before testing its recorded bit, where combine folds the
+ * copy into the mask. Reading the kind through an s8 or s32 local gives 7 to
+ * 18 words; a u8 local gives the copy, but as an unsigned load.
  */
 #ifdef NON_MATCHING
 void InvalidateBrokenRingShotRecords(void) {
   SaveData* save;
   Boolean isInvalid[RING_SHOT_RECORD_COUNT];
   s32 recordIndex;
-  RingShotRecord* record;
   s32 kind;
   s32 unused[2] UNUSED; /* The original frame has room for this */
 
@@ -1666,7 +1666,8 @@ void InvalidateBrokenRingShotRecords(void) {
   }
 
   for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
-    record = &save->ringShotRecords[recordIndex];
+    RingShotRecord* record = &save->ringShotRecords[recordIndex];
+
     kind = record->scoreKind;
     if (record->scoreKind & SCORE_KIND_RECORDED) {
       /*
@@ -1698,7 +1699,8 @@ void InvalidateBrokenRingShotRecords(void) {
   /* Toggling rather than clearing sets the flag on records that fail with it
    * clear */
   for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
-    record = &save->ringShotRecords[recordIndex];
+    RingShotRecord* record = &save->ringShotRecords[recordIndex];
+
     if (isInvalid[recordIndex] == TRUE) {
       record->scoreKind ^= SCORE_KIND_RECORDED;
     }
