@@ -1227,9 +1227,6 @@ void ReadSavedGames(void) {
  * Marks the chosen saved game's computer players as such and its other players
  * as having no controller yet, and lists those other players in order.
  */
-/* Doesn't match: the original loads the whole player count rather than its low
- * half, and the second loop's two counters take each other's registers */
-#ifdef NON_MATCHING
 void ResetSavedGameControllers(void) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
@@ -1247,8 +1244,9 @@ void ResetSavedGameControllers(void) {
   f_AssignedHumanCount = 0;
   gameIndex = memory->savedGameIndex;
   savedPlayers = save->savedPlayers[gameIndex];
-  playerCount = f_HumanPlayerCount =
-      save->savedGames[gameIndex].state.playerCount;
+  /* Through f_HumanPlayerCount, to match */
+  f_HumanPlayerCount = save->savedGames[gameIndex].state.playerCount;
+  playerCount = f_HumanPlayerCount;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (savedPlayers[playerIndex].isComputer) {
       f_SavedPlayerControllers[playerIndex] = COMPUTER_CONTROLLER;
@@ -1258,8 +1256,9 @@ void ResetSavedGameControllers(void) {
     }
   }
 
-  humanCount = 0;
-  for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
+  /* Chained, to match */
+  for (humanCount = playerIndex = 0; playerIndex != playerCount;
+      playerIndex++) {
     if (f_SavedPlayerControllers[playerIndex] != COMPUTER_CONTROLLER) {
       f_HumanPlayerIndices[humanCount] = playerIndex;
       humanCount++;
@@ -1272,9 +1271,6 @@ void ResetSavedGameControllers(void) {
     g_IsMenuCharacterLoaded[playerIndex] = 0;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", ResetSavedGameControllers);
-#endif
 
 /* Keeps the save menu's buffers of bufferKind and reads the saved games'
  * mode images, and the frame, or the chosen game's icons into them */
