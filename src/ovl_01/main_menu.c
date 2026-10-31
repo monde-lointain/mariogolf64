@@ -824,20 +824,26 @@ static s32 f_OptionsArrowTimer = 0;
 
 /* Read by no routine */
 static u8 D_80231AD0_ovl_01[0x1D0] UNUSED;
-static Mat4 D_80231CA0_ovl_01;
-static Mat4 D_80231CE0_ovl_01;
-static LookAt D_80231D20_ovl_01[DRAW_BUFFER_COUNT];
-static Mtx D_80231D60_ovl_01[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
-static Mtx D_80231F60_ovl_01;
+/* The mode select's camera, which the CPU's projection also takes, and its
+ * reflection lighting */
+static Mat4 f_ModeSelectProjection;
+static Mat4 f_ModeSelectView;
+static LookAt f_ModeSelectLookAts[DRAW_BUFFER_COUNT];
+/* Each menu character's model matrix, and the projection they share */
+static Mtx f_MenuCharacterTransforms[MAX_PLAYER_COUNT][DRAW_BUFFER_COUNT];
+static Mtx f_MenuCharacterProjection;
 static f32 f_MenuCharacterScales[MAX_PLAYER_COUNT];
-static Mtx D_80231FB0_ovl_01[DRAW_BUFFER_COUNT];
-static Mtx D_80232030_ovl_01;
+/* The animation viewer's model matrix and projection */
+static Mtx f_ViewerTransforms[DRAW_BUFFER_COUNT];
+static Mtx f_ViewerProjection;
 /* Read by no routine */
 static u8 D_80232070_ovl_01[0x180] UNUSED;
-static Mtx D_802321F0_ovl_01;
-static Mtx D_80232230_ovl_01;
-static Mat4 D_80232270_ovl_01;
-static Mat4 D_802322B0_ovl_01;
+/* The course select's water's matrices */
+static Mtx f_WaterTranslation;
+static Mtx f_WaterProjection;
+/* The course select's camera, for the CPU's projection */
+static Mat4 f_CourseSelectProjection;
+static Mat4 f_CourseSelectView;
 /* How far the bet settings and handicap pages have slid in or out */
 static s32 f_BetSettingsSlide;
 static s32 f_HandicapsSlide;
@@ -4777,13 +4783,13 @@ void DrawModeSelect(Gfx** displayListHead) {
   g_HoleSetup.conditions.lightYaw = MODE_SELECT_LIGHT_YAW;
   g_HoleSetup.conditions.lightPitch = MODE_SELECT_LIGHT_PITCH;
   DrawLargeBannerBackdropLayers(&gfx, MODE_SELECT_BACKDROP_LAYERS);
-  guPerspectiveF(D_80231CA0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
+  guPerspectiveF(f_ModeSelectProjection, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
-  guLookAtReflectF(D_80231CE0_ovl_01, &D_80231D20_ovl_01[g_DrawBufferIndex],
+  guLookAtReflectF(f_ModeSelectView, &f_ModeSelectLookAts[g_DrawBufferIndex],
       0.0f, MODE_BOARD_EYE_HEIGHT, MODE_BOARD_EYE_DISTANCE, 0.0f, 0.0f, 0.0f,
       0.0f, 1.0f, 0.0f);
-  gSPLookAt(gfx++, &D_80231D20_ovl_01[g_DrawBufferIndex]);
-  SetCpuProjectionF(D_80231CA0_ovl_01, D_80231CE0_ovl_01, g_Viewports);
+  gSPLookAt(gfx++, &f_ModeSelectLookAts[g_DrawBufferIndex]);
+  SetCpuProjectionF(f_ModeSelectProjection, f_ModeSelectView, g_Viewports);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -5346,7 +5352,7 @@ void DrawMenuCharacters(Gfx** displayListHead) {
       break;
   }
 
-  guOrtho(&D_80231F60_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
+  guOrtho(&f_MenuCharacterProjection, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CHARACTERS_NEAR,
       MENU_CHARACTERS_FAR, MENU_CHARACTERS_ORTHO_SCALE);
   for (slot = 0; slot != characterCount; slot++) {
@@ -5415,16 +5421,16 @@ void DrawMenuCharacters(Gfx** displayListHead) {
     scale[AXIS_Z] = f_MenuCharacterScales[slot];
     BuildTransformMatrix(transform, rotation, translation, scale);
     ConvertMatrixToFixed(
-        transform, &D_80231D60_ovl_01[slot][g_DrawBufferIndex]);
+        transform, &f_MenuCharacterTransforms[slot][g_DrawBufferIndex]);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, PhysicalAddress(&D_80231F60_ovl_01),
+    gSPMatrix(gfx++, PhysicalAddress(&f_MenuCharacterProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-        PhysicalAddress(&D_80231D60_ovl_01[slot][g_DrawBufferIndex]),
+        PhysicalAddress(&f_MenuCharacterTransforms[slot][g_DrawBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     g_DisplayListHead = gfx;
     DrawCharacter(slot);
@@ -5681,7 +5687,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   }
 
   AnimateAllCharacters();
-  guOrtho(&D_80232030_ovl_01, -VIEWER_HALF_WIDTH, VIEWER_HALF_WIDTH,
+  guOrtho(&f_ViewerProjection, -VIEWER_HALF_WIDTH, VIEWER_HALF_WIDTH,
       -VIEWER_HALF_HEIGHT, VIEWER_HALF_HEIGHT, VIEWER_NEAR, VIEWER_FAR,
       VIEWER_PERSPECTIVE_SCALE);
   {
@@ -5700,7 +5706,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
     scale[AXIS_Y] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
     scale[AXIS_Z] = f_ViewerScaleOffset + VIEWER_BASE_SCALE;
     BuildTransformMatrix(matrix, rotation, translation, scale);
-    ConvertMatrixToFixed(matrix, &D_80231FB0_ovl_01[g_DrawBufferIndex]);
+    ConvertMatrixToFixed(matrix, &f_ViewerTransforms[g_DrawBufferIndex]);
   }
 
   gDPPipeSync(gfx++);
@@ -5708,9 +5714,9 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, PhysicalAddress(&D_80232030_ovl_01),
+  gSPMatrix(gfx++, PhysicalAddress(&f_ViewerProjection),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, PhysicalAddress(&D_80231FB0_ovl_01[g_DrawBufferIndex]),
+  gSPMatrix(gfx++, PhysicalAddress(&f_ViewerTransforms[g_DrawBufferIndex]),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
   g_DisplayListHead = gfx;
@@ -5779,8 +5785,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
   gfx = *displayListHead;
   if (g_MenuScreen == MENU_SCREEN_COURSE_SELECT) {
     DrawMenuBackdropLayers(&gfx, COURSE_SELECT_BACK_LAYERS);
-    guTranslate(&D_802321F0_ovl_01, 0.0f, 0.0f, -WATER_PLANE_DISTANCE);
-    guPerspective(&D_80232230_ovl_01, &perspNorm, WATER_FIELD_OF_VIEW,
+    guTranslate(&f_WaterTranslation, 0.0f, 0.0f, -WATER_PLANE_DISTANCE);
+    guPerspective(&f_WaterProjection, &perspNorm, WATER_FIELD_OF_VIEW,
         SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE,
         WATER_PERSPECTIVE_SCALE);
     gSPPerspNormalize(gfx++, perspNorm);
@@ -5828,9 +5834,9 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPSetTileSize(gfx++, WATER_LAYER_TILE, -f_WaterScroll, f_WaterScroll,
         -f_WaterScroll + WATER_TILE_SPAN, f_WaterScroll + WATER_TILE_SPAN);
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, PhysicalAddress(&D_80232230_ovl_01),
+    gSPMatrix(gfx++, PhysicalAddress(&f_WaterProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++, PhysicalAddress(&D_802321F0_ovl_01),
+    gSPMatrix(gfx++, PhysicalAddress(&f_WaterTranslation),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
     gSPVertex(gfx++, f_WaterVertices, WATER_VERTEX_COUNT, 0);
@@ -5839,11 +5845,13 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gSP1Triangle(gfx++, 4, 2, 3, 0);
     gSP1Triangle(gfx++, 0, 2, 4, 0);
     gDPPipeSync(gfx++);
-    guPerspectiveF(D_80232270_ovl_01, &wheelPerspNorm, WHEEL_FIELD_OF_VIEW,
-        SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
-    guLookAtF(D_802322B0_ovl_01, 0.0f, COURSE_SELECT_EYE_HEIGHT,
+    guPerspectiveF(f_CourseSelectProjection, &wheelPerspNorm,
+        WHEEL_FIELD_OF_VIEW, SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE,
+        WHEEL_FAR_PLANE, 1.0f);
+    guLookAtF(f_CourseSelectView, 0.0f, COURSE_SELECT_EYE_HEIGHT,
         COURSE_SELECT_EYE_DISTANCE, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-    SetCpuProjectionF(D_80232270_ovl_01, D_802322B0_ovl_01, g_Viewports);
+    SetCpuProjectionF(
+        f_CourseSelectProjection, f_CourseSelectView, g_Viewports);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
