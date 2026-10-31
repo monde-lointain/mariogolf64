@@ -45,8 +45,8 @@
 
 /*
  * DrawStopwatchTime writes a best time as minutes, seconds and hundredths, two
- * digits each, from the 16 by 16 CI4 glyphs of D_8023AA48: the digits follow a
- * first glyph, and a separator follows each group but the last
+ * digits each, from the 16 by 16 CI4 glyphs of f_StopwatchGlyphs: the digits
+ * follow a first glyph, and a separator follows each group but the last
  */
 #define TIME_GROUP_COUNT 3
 #define TIME_GROUP_DIGIT_COUNT 2
@@ -68,11 +68,13 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place);
 void DrawStopwatchTime(
     Gfx** displayListHead, s32 left, s32 top, s32 frameCount);
 
-static s32 D_80230130_ovl_01 = 0;
-static s32 D_80230134_ovl_01 = 0;
-static s32 D_80230138_ovl_01 = 0;
-/* Where each character's face is in D_8023AA44's image, and its name in
- * g_MenuCharacterNames */
+/* The side arrows' blinking frame and its time shown; the third word is cleared
+ * with them and read by no routine */
+static s32 f_BestTimesArrowFrame = 0;
+static s32 f_BestTimesArrowTimer = 0;
+static s32 f_UnusedBestTimesArrowWord = 0;
+/* Where each character's face is in f_CharacterFaceStrip's image, and its name
+ * in g_MenuCharacterNames */
 static s32 f_BestTimesCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_MAPLE,
     CHARACTER_CHOICE_BABY_MARIO, CHARACTER_CHOICE_LUIGI, CHARACTER_CHOICE_PEACH,
@@ -82,17 +84,20 @@ static s32 f_BestTimesCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_METAL_MARIO, CHARACTER_CHOICE_KID, CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA, CHARACTER_CHOICE_JOE};
 
-static Mat4 D_8023A9C0_ovl_01;
-static Mat4 D_8023AA00_ovl_01;
-static void** D_8023AA40_ovl_01;
-static void* D_8023AA44_ovl_01;
-static void* D_8023AA48_ovl_01;
-static void* D_8023AA4C_ovl_01;
-static void* D_8023AA50_ovl_01;
+/* The camera that DrawBestTimes views the course wheel with */
+static Mat4 f_BestTimesWheelProjection;
+static Mat4 f_BestTimesWheelView;
+/* The images that the Load routines read: the course icons, the face strip,
+ * the stopwatch's glyphs, the place labels and the side arrows */
+static void** f_BestTimesCourseIcons;
+static void* f_CharacterFaceStrip;
+static void* f_StopwatchGlyphs;
+static void* f_PlaceLabels;
+static void* f_BestTimesGreenArrows;
 
 /* Read by no routine; 2 objects, as one would be aligned past its start */
-static u8 D_8023AA54_ovl_01[0x4] UNUSED;
-static u8 D_8023AA58_ovl_01[0x88] UNUSED;
+static u8 f_UnusedBytesAfterGreenArrows[0x4] UNUSED;
+static u8 f_UnusedBufferAfterGreenArrows[0x88] UNUSED;
 
 /* Reads every course's icon into the Best Times screen's buffers */
 void LoadBestTimesCourseIcons(void** buffers) {
@@ -100,10 +105,10 @@ void LoadBestTimesCourseIcons(void** buffers) {
 
   s16 imageIndex;
 
-  D_8023AA40_ovl_01 = buffers;
+  f_BestTimesCourseIcons = buffers;
   for (imageIndex = 0; imageIndex != BEST_TIMES_IMAGE_COUNT; imageIndex++) {
     OpenEncodedAsset(g_CourseIconAssets[imageIndex], &asset);
-    ReadEncodedAsset(D_8023AA40_ovl_01[imageIndex], &asset);
+    ReadEncodedAsset(f_BestTimesCourseIcons[imageIndex], &asset);
   }
 }
 
@@ -111,9 +116,9 @@ void LoadBestTimesCourseIcons(void** buffers) {
 void LoadCharacterFaceStrip(void* buffer) {
   EncodedAsset asset;
 
-  D_8023AA44_ovl_01 = buffer;
+  f_CharacterFaceStrip = buffer;
   OpenEncodedAsset(ASSET_CHARACTER_FACE_STRIP, &asset);
-  ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
+  ReadEncodedAsset(f_CharacterFaceStrip, &asset);
 }
 
 void LoadBestTimesBuffer(void* buffer, s16 bufferKind) {
@@ -121,25 +126,25 @@ void LoadBestTimesBuffer(void* buffer, s16 bufferKind) {
 
   switch (bufferKind) {
     case BEST_TIMES_BUFFER_FACE_STRIP:
-      D_8023AA44_ovl_01 = &g_WorkArea;
+      f_CharacterFaceStrip = &g_WorkArea;
       OpenEncodedAsset(ASSET_CHARACTER_FACE_STRIP, &asset);
-      ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
+      ReadEncodedAsset(f_CharacterFaceStrip, &asset);
       break;
     case BEST_TIMES_BUFFER_UNREAD:
-      D_8023AA48_ovl_01 = buffer;
+      f_StopwatchGlyphs = buffer;
       break;
     case BEST_TIMES_BUFFER_PLACES:
-      D_8023AA4C_ovl_01 = buffer;
+      f_PlaceLabels = buffer;
       OpenEncodedAsset(ASSET_PLACES, &asset);
-      ReadEncodedAsset(D_8023AA4C_ovl_01, &asset);
+      ReadEncodedAsset(f_PlaceLabels, &asset);
       break;
     case BEST_TIMES_BUFFER_GREEN_ARROWS:
-      D_8023AA50_ovl_01 = buffer;
+      f_BestTimesGreenArrows = buffer;
       OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset);
-      ReadEncodedAsset(D_8023AA50_ovl_01, &asset);
-      D_80230130_ovl_01 = 0;
-      D_80230134_ovl_01 = 0;
-      D_80230138_ovl_01 = 0;
+      ReadEncodedAsset(f_BestTimesGreenArrows, &asset);
+      f_BestTimesArrowFrame = 0;
+      f_BestTimesArrowTimer = 0;
+      f_UnusedBestTimesArrowWord = 0;
       break;
   }
 }
@@ -261,11 +266,12 @@ void DrawBestTimes(Gfx** displayListHead) {
   u8(*holderPalettes)[MENU_PALETTE_FILE_SIZE];
 
   DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
-  guPerspectiveF(D_8023A9C0_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW,
+  guPerspectiveF(f_BestTimesWheelProjection, &perspNorm, WHEEL_FIELD_OF_VIEW,
       SCREEN_ASPECT_RATIO, WHEEL_NEAR_PLANE, WHEEL_FAR_PLANE, 1.0f);
-  guLookAtF(D_8023AA00_ovl_01, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE, 0.0f,
-      0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-  SetCpuProjectionF(D_8023A9C0_ovl_01, D_8023AA00_ovl_01, g_Viewports);
+  guLookAtF(f_BestTimesWheelView, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE,
+      0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+  SetCpuProjectionF(
+      f_BestTimesWheelProjection, f_BestTimesWheelView, g_Viewports);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -328,12 +334,12 @@ void DrawBestTimes(Gfx** displayListHead) {
     halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
     step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
     gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(ImageBody(D_8023AA40_ovl_01[slot])));
+        gfx++, TextureAddress(ImageBody(f_BestTimesCourseIcons[slot])));
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     for (otherIndex = 0; otherIndex != COURSE_ICON_STRIP_COUNT; otherIndex++) {
       gDPLoadTextureBlock(gfx++,
-          TextureAddress(LargeImageTexels(D_8023AA40_ovl_01[slot]) +
+          TextureAddress(LargeImageTexels(f_BestTimesCourseIcons[slot]) +
               otherIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH, COURSE_ICON_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -354,8 +360,9 @@ void DrawBestTimes(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   if (courseCount >= 2) {
-    DrawBlinkingSideArrows(&gfx, D_8023AA50_ovl_01, &D_80230130_ovl_01,
-        &D_80230134_ovl_01, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X, WHEEL_ARROW_Y);
+    DrawBlinkingSideArrows(&gfx, f_BestTimesGreenArrows, &f_BestTimesArrowFrame,
+        &f_BestTimesArrowTimer, WHEEL_ARROW_WIDTH, WHEEL_ARROW_X,
+        WHEEL_ARROW_Y);
   }
 
   DrawCourseBanner(&gfx, TRUE, memory->bestTimesCourse);
@@ -441,9 +448,9 @@ void DrawBestTimeFace(Gfx** displayListHead, s32 left, s32 top,
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   }
 
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023AA44_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_CharacterFaceStrip)));
   gDPLoadTextureBlock(gfx++,
-      TextureAddress(LargeImageTexels(D_8023AA44_ovl_01) +
+      TextureAddress(LargeImageTexels(f_CharacterFaceStrip) +
           (f_BestTimesCharacterChoices[character] * FACE_WIDTH * FACE_HEIGHT)),
       G_IM_FMT_CI, G_IM_SIZ_8b, FACE_WIDTH, FACE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -492,11 +499,11 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(D_8023AA4C_ovl_01)));
+  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_PlaceLabels)));
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock(gfx++,
       TextureAddress(LargeImageTexelsAt(
-          D_8023AA4C_ovl_01, (place - 1) * PLACE_LABEL_FRAME_BYTES)),
+          f_PlaceLabels, (place - 1) * PLACE_LABEL_FRAME_BYTES)),
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_FRAME_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -508,7 +515,7 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
       (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE);
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock(gfx++,
-      TextureAddress(LargeImageTexelsAt(D_8023AA4C_ovl_01,
+      TextureAddress(LargeImageTexelsAt(f_PlaceLabels,
           (place + PLACE_LABEL_DIGIT_COUNT - 1) * PLACE_LABEL_FRAME_BYTES)),
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_FRAME_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -556,11 +563,11 @@ void DrawStopwatchTime(
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(D_8023AA48_ovl_01)));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StopwatchGlyphs)));
   for (group = 0; group != TIME_GROUP_COUNT; group++) {
     for (digit = 0; digit != TIME_GROUP_DIGIT_COUNT; digit++) {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(ImageTexels(D_8023AA48_ovl_01) +
+          TextureAddress(ImageTexels(f_StopwatchGlyphs) +
               ((digits[group][digit] + TIME_FIRST_DIGIT_GLYPH) *
                   TIME_GLYPH_BYTES)),
           G_IM_FMT_CI, TIME_GLYPH_SIZE, TIME_GLYPH_SIZE, 0,
@@ -583,7 +590,7 @@ void DrawStopwatchTime(
 
     if (group != TIME_GROUP_COUNT - 1) {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress((u32)D_8023AA48_ovl_01 +
+          TextureAddress((u32)f_StopwatchGlyphs +
               (TIME_SEPARATOR_GLYPH * TIME_GLYPH_BYTES) +
               PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, TIME_GLYPH_SIZE, TIME_GLYPH_SIZE, 0,
