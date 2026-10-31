@@ -182,12 +182,12 @@ static Radians f_TrailViewAngle = 0.0f;
 static s32 f_CupViewHoldCount = 0;
 static s32 f_FlightCameraFlags = 0;
 /* Read by no routine */
-static u8 D_800BE668[8] UNUSED = {0};
+static u8 f_UnusedBytesAfterFlightFlags[8] UNUSED = {0};
 static s8 f_PendingResultSound = 0;
 /* Frames left before ChooseFlightCameraKind may change the camera again */
 static s32 f_CameraChangeHoldCount = 0;
 /* Read by no routine: 1 for a shot from the green, 3 for one into water */
-static s32 D_800BE678 = 0;
+static s32 f_UnusedFlightStartKind = 0;
 /* Whether the HUD shows during the flight, chosen at random after the first */
 static Boolean f_IsFlightHudShown = FALSE;
 /* Set from five steps ahead of a pin hit until the hit */
@@ -210,7 +210,7 @@ static Boolean f_IsApexViewFar = FALSE;
 static Boolean f_IsTrailViewClose = FALSE;
 static Radians f_CircleAngle = 0.0f;
 /* Read by no routine */
-static u8 D_800BE6B8[8] UNUSED = {0};
+static u8 f_UnusedBytesAfterCircleAngle[8] UNUSED = {0};
 /* The displacement scale at each midpoint displacement level */
 static s16 f_NoiseRoughness[] = {0x80, 0x60, 0x40, 0x20, 8, 4, 4, 2};
 static s16 f_NoiseGridIndex = 0;
@@ -359,12 +359,14 @@ static Radians f_ShotFlightYaw;
 static Radians f_BillboardHitYaw;
 static Radians f_EndYawFromCup;
 static Radians f_StartYawFromCup;
-static s32 D_800DAF20;
+/* Whether the shot's flight has been shown before, so that the HUD may hide */
+static s32 f_IsLaterFlight;
 static Vec3 f_CameraPosition;
 static Vec3 f_LookAtPoint;
 static s32 f_GreenSoundCount;
 static Boolean f_IsLandingSoundPlayed;
-static s32 D_800DAF44;
+/* Cleared by StartFlightCamera, and read by no routine */
+static s32 f_UnusedClearedFlightWord;
 static s8 f_PassedPathFlags;
 static SurfaceInfo* f_EndSurfaceInfo;
 /* How far the flight camera has followed the shot */
@@ -705,28 +707,28 @@ void StartFlightCamera(s32 earlierFlightCount) {
   f_CupViewHoldCount = 0;
   f_GreenSoundCount = 0;
   f_IsLandingSoundPlayed = FALSE;
-  D_800DAF44 = 0;
+  f_UnusedClearedFlightWord = 0;
   f_EndReaction = END_REACTION_NONE;
   f_CameraYaw = (f32)RandomBelow(RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
   f_TrailViewAngle = (f32)(rand() & RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
   f_CupViewYaw = (f32)(rand() & RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
   if (earlierFlightCount == 0) {
-    D_800DAF20 = FALSE;
+    f_IsLaterFlight = FALSE;
   } else {
-    D_800DAF20 = TRUE;
+    f_IsLaterFlight = TRUE;
   }
 
-  D_800BE678 = 0;
+  f_UnusedFlightStartKind = 0;
   if (g_SimulatedShot.startsOnGreen) {
-    D_800BE678 = 1;
+    f_UnusedFlightStartKind = 1;
   } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
-    D_800BE678 = 3;
+    f_UnusedFlightStartKind = 3;
   }
 
   f_PassedPathFlags = 0;
   f_PendingResultSound = RESULT_SOUND_NONE;
   f_IsFlightHudShown = 1;
-  if (D_800DAF20) {
+  if (f_IsLaterFlight) {
     f_IsFlightHudShown = RandomBelow(2);
     g_RoundHud.unkC = f_IsFlightHudShown;
     g_RoundHud.isWindIndicatorShown = f_IsFlightHudShown;
