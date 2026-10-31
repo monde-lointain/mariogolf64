@@ -1202,7 +1202,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   s32 arrowIndex;
   s32 labelIndex;
   s32 offsetY;
-  s32 arrowX = 0;
+  s32 arrowX;
   s32 arrowY = 0;
   Vec3 translation;
   Vec3 rotation;
@@ -1233,6 +1233,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   }
 
   gSPLookAt(gfx++, &f_HandicapGolfersLookAts[g_DrawBufferIndex]);
+  arrowX = 0;
   for (playerIndex = 0; playerIndex != g_ChosenPlayerCount; playerIndex++) {
     if (g_MenuFidgetDelays[playerIndex] > 0) {
       g_MenuFidgetDelays[playerIndex]--;
@@ -1512,6 +1513,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
   *displayListHead = gfx;
 }
+
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawHandicaps);
 #endif

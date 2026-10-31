@@ -762,7 +762,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   ScreenPoint ballPoint;
   ScreenPoint shadowPoint;
   s32 i;
-  Boolean isCurrentBallAboveGround = FALSE;
+  Boolean isCurrentBallAboveGround;
   GolfBall* ball;
   BallAfterimage* afterimage;
   SurfaceInfo* surface;
@@ -840,6 +840,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
     gDPPipeSync(gfx++);
+    isCurrentBallAboveGround = FALSE;
     for (i = 0; i < GOLF_BALL_COUNT; i++) {
       ball = &f_GolfBalls[i];
       if (ball->alpha > 0) {
@@ -1391,6 +1392,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
     g_DisplayListHead = gfx;
   }
 }
+
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", DrawGolfBalls);
 #endif

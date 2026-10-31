@@ -782,14 +782,15 @@ s32 GetImpactEventFrame(u32 slotIndex) {
 /*
  * Gives each of the slot's animated triangles its default texture.
  *
- * Doesn't match: the original's frame has 0x40 unused bytes from 0x18 and
- * keeps the slot at 0x58, reloading it at the top of the triangle loop, where
- * GCC keeps the slot in a saved register. Making SetTriangleTexture a static
- * inline function leaves the frame as it is and gives 137 words, not 87.
+ * Doesn't match: 75 words differ. The original's frame has 0x40 unused bytes
+ * from 0x18 and keeps the slot at 0x58, reloading it at the top of the
+ * triangle loop, where GCC keeps the slot in a saved register. Making
+ * SetTriangleTexture a static inline function left the frame as it is, but
+ * 137 words differed where 87 did without it.
  */
 #ifdef NON_MATCHING
 void ResetTriangleTextures(u32 slotIndex) {
-  s32 triangleIndex = 0;
+  s32 triangleIndex;
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   AnimatedTriangle* triangle;
   AnimatedTexture* texture;
@@ -799,6 +800,7 @@ void ResetTriangleTextures(u32 slotIndex) {
 
   if (slot != NULL) {
     MapModelBuffer(slot);
+    triangleIndex = 0;
     for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
         triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
       texture = ModelAnimatedTextures(slot->model);
@@ -929,7 +931,7 @@ NO_RESULT PlayTextureAnimation(u32 slotIndex, s32 index) {
  */
 #ifdef NON_MATCHING
 void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
-  s32 triangleIndex = 0;
+  s32 triangleIndex;
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   AnimatedTriangle* triangle;
   AnimatedTexture* texture;
@@ -940,6 +942,7 @@ void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
 
   if (slot != NULL) {
     MapModelBuffer(slot);
+    triangleIndex = 0;
     for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
         triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
       texture = &ModelAnimatedTextures(slot->model)[triangle->textureIndex];

@@ -2876,7 +2876,7 @@ void DrawTurnAwayAnimation(void) {
   Vec3 rotation;
   Vec3 translation;
   Mat4 matrix;
-  s32 wordIndex = 0;
+  s32 wordIndex;
   s32 row;
   s32 column;
   s32 width;
@@ -2915,6 +2915,7 @@ void DrawTurnAwayAnimation(void) {
         (TURN_AWAY_UPPER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
     gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
     gDPPipeSync(g_DisplayListHead++);
+    wordIndex = 0;
     for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
       for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
         gDPLoadTextureBlock(g_DisplayListHead++,
@@ -3005,6 +3006,7 @@ void DrawTurnAwayAnimation(void) {
     f_HudAnimationFramesLeft -= TILE_ANIMATION_STEP;
   }
 }
+
 #else
 INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
 #endif

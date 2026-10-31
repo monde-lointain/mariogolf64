@@ -2249,7 +2249,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 highestY;
   s32 lowestZ;
   s32 highestZ;
-  s32 hitIndex = NO_HOLE_TRIANGLE;
+  s32 hitIndex;
   s32 i;
   s32 deltaX;
   s32 deltaY;
@@ -2321,6 +2321,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   deltaX = endX - startX;
   deltaZ = endZ - startZ;
   deltaY = endY - startY;
+  hitIndex = NO_HOLE_TRIANGLE;
   for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
     candidate = &g_WorkArea.hole.triangles[i];
     if (candidate->kind != HOLE_TRIANGLE_KIND_SHADED) {
