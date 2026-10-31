@@ -5053,22 +5053,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TickStopwatches);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GiveUpHole);
 
-/* Shows or hides the HUD's parts, apart from the club panel and the letterbox
- */
-void SetRoundHudPartsShown(s8 isShown) {
-  /* Stands in for the static chain that the original, nested in UpdateTurns,
-   * saves */
-  volatile s32 unused;
-  s32 garbage;
-
-  unused = garbage;
-  g_RoundHud.isWindIndicatorShown = isShown;
-  g_RoundHud.unk8 = isShown;
-  g_RoundHud.isLieIconShown = isShown;
-  g_RoundHud.isClubHeadIconShown = isShown;
-  g_RoundHud.unkB = isShown;
-  g_RoundHud.unkD = isShown;
-}
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", SetRoundHudPartsShown);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", DoesImpactRumble);
 
