@@ -74,7 +74,14 @@ void AddFramedSphere(Vec3 center, f32 radius) {
   }
 }
 
-/* Sets the direction, in radians, from which FrameSpheres looks */
+/*
+ * Sets the direction, in radians, from which FrameSpheres looks.
+ *
+ * Doesn't match: GCC loads STEEP_PITCH_COSINE before taking the cosine's
+ * magnitude, where the original takes it first. Swapping the comparison or
+ * taking the cosine or its magnitude into a local changes nothing, and
+ * fabs or a double constant makes it worse.
+ */
 #ifdef NON_MATCHING
 void SetFramingAngles(Radians pitch, Radians yaw) {
   Mat4 pitchRotation;
