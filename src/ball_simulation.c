@@ -182,7 +182,7 @@ static ImpactEffect
 };
 // clang-format on
 
-s32 D_800B7D9C = 0;
+s32 g_UnusedLaunchCount = 0;
 /* Read by no routine */
 static s32 D_800B7DA0[4] UNUSED = {0};
 
@@ -2177,7 +2177,7 @@ s32 LaunchBallSimulation(
   impactTiming = shot->impactTiming;
   simulation->purpose = purpose;
   sideSign = 1;
-  D_800B7D9C++;
+  g_UnusedLaunchCount++;
   slopeSpin = 0;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     groundHeight = GetGroundHeight(simulation->position[AXIS_X],

@@ -380,11 +380,11 @@ static s32 f_ReplayAimSettledFrameCount = 0;
 /* A debug tilt of the aim camera, which the C buttons tune */
 static f32 f_DebugAimCameraTilt = 0.0f;
 /* Read by no routine */
-static s32 D_80223E4C_ovl_00 UNUSED = 0;
+static s32 f_UnusedWordAfterAimTilt UNUSED = 0;
 /* Frames that the D-pad has turned the aim, negative to the right */
 static s32 f_AimTurnFrameCount = 0;
 /* Read by no routine */
-static s32 D_80223E54_ovl_00 UNUSED = 0;
+static s32 f_UnusedWordAfterAimTurn UNUSED = 0;
 static u32 f_PlanTimeBudget = INITIAL_PLAN_TIME_BUDGET;
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
@@ -427,10 +427,10 @@ static s32 f_AmbientSoundIdleFrameCount = 0;
 /* No routine sets it; while it is set, the next turn replays the player's
  * saved shot */
 static s8 f_ShouldReplaySavedShot = FALSE;
-/* Read by no routine */
-static s8 D_80223FF1_ovl_00 UNUSED = 0;
-static s8 D_80223FF2_ovl_00 UNUSED = 0;
-static s8 D_80223FF3_ovl_00 UNUSED = 0;
+/* Read by no routine; three objects, as an array is laid out differently */
+static s8 f_UnusedFirstByteAfterReplayFlag UNUSED = 0;
+static s8 f_UnusedSecondByteAfterReplayFlag UNUSED = 0;
+static s8 f_UnusedThirdByteAfterReplayFlag UNUSED = 0;
 /* The debug guts test's state, character and motion */
 static s8 f_HasGutsTestRun = FALSE;
 static s8 f_GutsTestCharacter = 0;
@@ -451,12 +451,12 @@ static s32 f_PuttSlowdownLead = 0;
 /* The frames by which the slowed swing puts off the impact */
 static s32 f_ImpactDelay = 0;
 /* Read by no routine */
-static s32 D_80224010_ovl_00 UNUSED = 0;
+static s32 f_UnusedWordAfterImpactDelay UNUSED = 0;
 /* The angles of FrameBallAndShot's camera */
 static Radians f_DebugFramingYaw = 0.0f;
 static Radians f_DebugFramingPitch = 0.0f;
 /* Read by no routine */
-static s32 D_8022401C_ovl_00 UNUSED = 0;
+static s32 f_UnusedWordAfterFramingAngles UNUSED = 0;
 
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
@@ -467,7 +467,7 @@ s32 GetRecordedScoreKind(s32 strokes);
 Boolean HasNoRingsLeft(Player* player);
 void RecordRingShotClear(s32 playerIndex);
 
-static Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
+static Mtx f_PuttPreviewIdentity; /* An identity matrix for the putt preview */
 /*
  * The launch of the shot being taken, which the shot preview and the ball
  * simulation start from. impactTiming is how far from the meter's impact mark
@@ -482,8 +482,10 @@ static f32 f_PuttSwingSpeed;
 /* The song's tempo while aiming on the green, which rises the longer the
  * player aims */
 static f32 f_GreenSongTempo;
-static s32 D_80227188_ovl_00;
-static s32 D_8022718C_ovl_00;
+/* The course and hole that the debug ball placing last ran on; read by no
+ * routine */
+static s32 f_UnusedDebugCourseIndex;
+static s32 f_UnusedDebugHoleIndex;
 /* The frames that replays after the first skip of the swing animation, found on
  * the second, so that the impact comes at most SKIPPED_SWING_IMPACT_FRAME
  * frames in */
@@ -491,9 +493,9 @@ static s32 f_SkippedSwingFrames;
 static s32 f_ShotSource; /* A SHOT_SOURCE_* value */
 static s32 f_TurnTimerStart; /* Nothing reads it */
 /* The shot preview's matrices, by draw buffer */
-static Mtx D_802271A0_ovl_00[DRAW_BUFFER_COUNT][SHOT_PREVIEW_MAX_STEPS];
+static Mtx f_ShotPreviewMatrices[DRAW_BUFFER_COUNT][SHOT_PREVIEW_MAX_STEPS];
 /* The shot preview's points */
-static f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
+static f32 f_ShotPreviewPoints[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT];
 
 /* Not static: the original left it to the linker's common block */
 s32 f_AimFrameCount;
@@ -2032,11 +2034,11 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
     guTranslateF(dash, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
         (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
         start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
-    D_80227BA0_ovl_00[step][AXIS_X] =
+    f_ShotPreviewPoints[step][AXIS_X] =
         simulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    D_80227BA0_ovl_00[step][AXIS_Y] =
+    f_ShotPreviewPoints[step][AXIS_Y] =
         simulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-    D_80227BA0_ovl_00[step][AXIS_Z] =
+    f_ShotPreviewPoints[step][AXIS_Z] =
         simulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
       guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
@@ -2050,7 +2052,7 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
       guMtxCatF(dash, align, dash);
     }
 
-    guMtxF2L(dash, &D_802271A0_ovl_00[g_DrawBufferIndex][step]);
+    guMtxF2L(dash, &f_ShotPreviewMatrices[g_DrawBufferIndex][step]);
     if (!*isMiniGolf && simulation.bounceCount) {
       break;
     }
@@ -2127,14 +2129,14 @@ void DrawShotPreview(CameraMatrices* matrices) {
     }
 
     if (ProjectPoint(
-            D_80227BA0_ovl_00[f_ShownShotPreviewPointCount - 1][AXIS_X],
-            D_80227BA0_ovl_00[f_ShownShotPreviewPointCount - 1][AXIS_Y],
-            D_80227BA0_ovl_00[f_ShownShotPreviewPointCount - 1][AXIS_Z],
+            f_ShotPreviewPoints[f_ShownShotPreviewPointCount - 1][AXIS_X],
+            f_ShotPreviewPoints[f_ShownShotPreviewPointCount - 1][AXIS_Y],
+            f_ShotPreviewPoints[f_ShownShotPreviewPointCount - 1][AXIS_Z],
             &end) >= 0) {
       return;
     }
 
-    guMtxIdent(&D_80227110_ovl_00);
+    guMtxIdent(&f_PuttPreviewIdentity);
     ball.x *= QUARTER_PIXELS_PER_PIXEL;
     ball.y *= QUARTER_PIXELS_PER_PIXEL;
     end.x *= QUARTER_PIXELS_PER_PIXEL;
@@ -2152,7 +2154,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
       gDPPipeSync(g_DisplayListHead++);
       gSPMatrix(g_DisplayListHead++, PhysicalAddress(&g_ScreenOrthoMatrix),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-      gSPMatrix(g_DisplayListHead++, PhysicalAddress(&D_80227110_ovl_00),
+      gSPMatrix(g_DisplayListHead++, PhysicalAddress(&f_PuttPreviewIdentity),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
       gSPVertex(g_DisplayListHead++, f_PuttPreviewLineVertices, 4, 0);
       offsetX = dy * scale;
@@ -2191,7 +2193,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
         SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0);
     for (step = 0; step < f_ShownShotPreviewPointCount; step++) {
       gSPMatrix(g_DisplayListHead++,
-          &D_802271A0_ovl_00[g_DrawBufferIndex][step],
+          &f_ShotPreviewMatrices[g_DrawBufferIndex][step],
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(g_DisplayListHead++, f_ShotPreviewDashVertices, 4, 0);
       gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -2900,15 +2902,13 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * original's frame.
  */
 #ifdef NON_MATCHING
-extern s32 D_800B7D9C;
-
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
  * it while Z is held */
 static inline void DebugPlaceBall(s32 playerIndex) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
 
-  D_80227188_ovl_00 = g_GameState.courseIndex;
-  D_8022718C_ovl_00 = g_GameState.holeIndex;
+  f_UnusedDebugCourseIndex = g_GameState.courseIndex;
+  f_UnusedDebugHoleIndex = g_GameState.holeIndex;
   SetGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
   sprintf(text, "X:%X Y:%X Z:%X  Attr%d             ",
       g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Y],
@@ -3366,7 +3366,7 @@ void UpdateTurns(void) {
           g_Players[playerIndex].unk1F = -9;
           LoadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           StartShotPlan();
-          D_800B7D9C = 0;
+          g_UnusedLaunchCount = 0;
           f_PlanTimeBudget = PLAN_START_TIME_BUDGET;
           f_ShotSource = SHOT_SOURCE_PLANNING;
         } else if (f_ShouldReplaySavedShot) {

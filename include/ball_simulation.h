@@ -210,6 +210,9 @@ typedef struct BallSimulation {
 #define SHOT_PREVIEW_DROP 0x133
 
 extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
+/* The launches since the computer golfer started planning, which
+ * LaunchBallSimulation counts and UpdateTurns clears; read by no routine */
+extern s32 g_UnusedLaunchCount;
 
 void ResetBallSimulations(void);
 ImpactEffect* GetImpactTimingEntry(
