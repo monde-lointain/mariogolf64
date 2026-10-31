@@ -645,6 +645,8 @@ f32 ConvertToFloat(s32 value) {
 /*
  * Returns the surface at a point: water if the water is above the ground,
  * otherwise the heaviest of the four nearest codes' surfaces
+ * Doesn't match: the original tests whether the steps are equal by XORing
+ * each plus one, and branches first on a register it has just zeroed.
  */
 #ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
@@ -782,7 +784,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
 
   distanceX = Abs(GROUND_TEXEL_SIZE / 2 - fractionX);
   distanceZ = Abs(GROUND_TEXEL_SIZE / 2 - fractionZ);
-  if (((stepColumn + 1) ^ (stepRow + 1)) == 0) {
+  if (stepColumn == stepRow) {
     weights[0] = weights[0] *
         ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
             ((f32)(GROUND_TEXEL_SIZE - distanceX) *
