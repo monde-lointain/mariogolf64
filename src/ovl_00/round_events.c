@@ -1416,10 +1416,9 @@ void DrawMovie(Gfx** displayListHead) {
 
 /* The caption of a longest drive or nearest pin contest, then its winner's face
  */
-/* Doesn't match: GCC moves the strips' left edge, centerX - halfWidth, out of
- * the strip loop, where the original works it out for each strip. The loop
- * comes to 52 insns, so the cost model finds the move worthwhile; with one
- * register fewer it doesn't, and 40 words still differ. */
+/* Doesn't match: GCC swaps the saved registers of the image's width and the
+ * strips' right edge, and sets up the loop's texel offset and edge in the
+ * other order. Writing halfWidth + centerX changes nothing. */
 #ifdef NON_MATCHING
 void DrawContestWinnerMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1519,8 +1518,8 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
-    bottom = CONTEST_IMAGE_CENTER_Y;
     for (i = 0; i != stripCount; i++) {
+      bottom = CONTEST_IMAGE_CENTER_Y + i * MOVIE_IMAGE_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
           f_MovieBuffer +
               ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
@@ -1537,7 +1536,6 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
               MOVIE_IMAGE_STRIP_HEIGHT),
           G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
           (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
-      bottom += MOVIE_IMAGE_STRIP_HEIGHT;
     }
   }
 
