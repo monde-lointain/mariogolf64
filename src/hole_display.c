@@ -2567,12 +2567,17 @@ void SetMenuBackdrop(s32 backdrop) {
   f_MenuBackdrop = backdrop;
 }
 
-/* Starts the plain menu backdrop by capturing the last frame for it */
+/*
+ * Starts the plain menu backdrop by capturing the last frame for it.
+ *
+ * Doesn't match: GCC loads f_LastFrameBuffer and f_CapturedFrame in the other
+ * order before the strip loop, and places the loop's stores differently.
+ */
 #ifdef NON_MATCHING
 void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
   Gfx* gfx = *displayListHead;
   s32 strip;
-  s32 height;
+  s16 height;
   u16* source;
 
   gDPPipeSync(gfx++);
@@ -2646,13 +2651,14 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
  * border.
  *
  * Doesn't match: registers are allocated differently in the pattern's display
- * list, and the strip height is chosen with a branch instead of without one.
+ * list, and GCC works out the second strip loop's height before loading the
+ * strip's texels rather than after.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdrop(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 strip;
-  s32 height;
+  s16 height;
 
   if (f_BackdropFadeLevel > BACKDROP_LAST_FADE_LEVEL) {
     f_BackdropFadeLevel -= BACKDROP_FADE_STEP;
