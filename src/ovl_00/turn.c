@@ -1718,11 +1718,11 @@ void PickStartingClub(HoleSetup* hole) {
 
       if (GetShotWorldDistance(club, PUTT_MODE_SHORT) >= cupDistance) {
         g_CurrentShot.shotMode = PUTT_MODE_SHORT;
-      } else if (g_CurrentShot.unk54 &&
-          GetShotWorldDistance(club, PUTT_MODE_MIDDLE) < cupDistance) {
-        g_CurrentShot.shotMode = PUTT_MODE_LONG;
-      } else {
+      } else if (!g_CurrentShot.unk54 ||
+          GetShotWorldDistance(club, PUTT_MODE_MIDDLE) >= cupDistance) {
         g_CurrentShot.shotMode = PUTT_MODE_MIDDLE;
+      } else {
+        g_CurrentShot.shotMode = PUTT_MODE_LONG;
       }
 
       g_CurrentShot.clubSlot = slot;

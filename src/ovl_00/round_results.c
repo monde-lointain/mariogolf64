@@ -3239,10 +3239,10 @@ void DrawMatchResults(Gfx** displayListHead) {
       0);
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_PlayerResults[i] > 0) {
-      if (f_PlayerResults[i] < MIN_TWO_DIGIT_HOLE_COUNT) {
-        standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
-      } else {
+      if (f_PlayerResults[i] >= MIN_TWO_DIGIT_HOLE_COUNT) {
         standingShift[i] = 0;
+      } else {
+        standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
       }
     } else if (f_PlayerResults[i] < 0) {
       if (f_PlayerResults[i] <= -MIN_TWO_DIGIT_HOLE_COUNT) {

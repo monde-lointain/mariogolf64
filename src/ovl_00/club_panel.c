@@ -551,10 +551,10 @@ void DrawClubPanel(Gfx** displayListHead) {
       absValue = -absValue;
     }
 
-    if (span / 2 < absValue) {
-      gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
+    if (absValue <= span / 2) {
       gDPSetEnvColor(gfx++, 0, 0, 0, 255);
     } else {
+      gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
       gDPSetEnvColor(gfx++, 0, 0, 0, 255);
     }
   }
