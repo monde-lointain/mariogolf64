@@ -1467,13 +1467,18 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
 INCLUDE_ASM("asm/nonmatchings/reaction", PlaceAtReactionSpot);
 #endif
 
+/*
+ * Whether the eased eye sits at height zero.
+ * Doesn't match: the original loads the height into one register and its
+ * magnitude into another, where this reuses the first for both.
+ */
 #ifdef NON_MATCHING
 Boolean IsEasedEyeHeightZero(void) {
   Boolean isZero = FALSE;
+  f32 height;
 
-  if (fabsf(f_EasedView.eye[AXIS_Y]) == 0.0f) {
-    isZero = TRUE;
-  }
+  height = fabsf(f_EasedView.eye[AXIS_Y]);
+  IN_OWN_BLOCK(if (height == 0.0f) { isZero = TRUE; });
 
   return isZero;
 }
