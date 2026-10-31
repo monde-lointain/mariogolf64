@@ -1746,7 +1746,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
   s32 speed;
   f32 halfChord;
   Vec3 direction;
-  /* The hit point first, then its offset from the cup, as is contactZ */
+  /* The hit point first, then its offset from the cup, as is contactZ, to
+   * match */
   s32 contactX;
   s32 contactZ;
   Radians angle;
