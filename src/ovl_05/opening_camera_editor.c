@@ -446,7 +446,9 @@ void StopEditorMoves(void) {
  */
 /* Doesn't match: GCC folds the eight flag tests before letting go of the pivot
  * into one mask test, keeps the zoom's gap in a float register rather than
- * $s6, and allocates the fabsf operands to other registers */
+ * $s6, and allocates the fabsf operands to other registers. It also reads
+ * turnLeft and tiltLeft once before stepping them, where the original reads
+ * each twice. */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
   /* Whether a point carries the other, and later whether one is a pivot */
@@ -720,11 +722,11 @@ void UpdateCameraEditor(void) {
       }
     }
 
-    left = g_CameraEditor.turnLeft - g_CameraEditor.turnSpeed;
     isDone = TRUE;
-    if (!(fabsf(g_CameraEditor.turnLeft) < fabsf(left))) {
+    if (!(fabsf(g_CameraEditor.turnLeft) <
+            fabsf(g_CameraEditor.turnLeft - g_CameraEditor.turnSpeed))) {
       isDone = FALSE;
-      g_CameraEditor.turnLeft = left;
+      g_CameraEditor.turnLeft -= g_CameraEditor.turnSpeed;
       g_CameraEditor.heading += g_CameraEditor.turnSpeed;
     }
 
@@ -764,11 +766,11 @@ void UpdateCameraEditor(void) {
       }
     }
 
-    left = g_CameraEditor.tiltLeft - g_CameraEditor.tiltSpeed;
     isDone = TRUE;
-    if (!(fabsf(g_CameraEditor.tiltLeft) < fabsf(left))) {
+    if (!(fabsf(g_CameraEditor.tiltLeft) <
+            fabsf(g_CameraEditor.tiltLeft - g_CameraEditor.tiltSpeed))) {
       isDone = FALSE;
-      g_CameraEditor.tiltLeft = left;
+      g_CameraEditor.tiltLeft -= g_CameraEditor.tiltSpeed;
       g_CameraEditor.pitch += g_CameraEditor.tiltSpeed;
       if (g_CameraEditor.pitch > EDITOR_PITCH_LIMIT) {
         g_CameraEditor.pitch = EDITOR_PITCH_LIMIT;
