@@ -3632,13 +3632,18 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
 #define PORTRAIT_ANIMATION_REST 0
 #define NO_PORTRAIT_FRAME (-1)
 
+/* The index of the last of stripCount strips */
+static inline s32 GetLastStripIndex(s32 stripCount) {
+  return stripCount - 1;
+}
+
 /*
  * The results card, its game mode's results, the bobbing title and the players'
  * portraits.
  *
  * Doesn't match: GCC merges the doubling of the title's texture coordinates
- * into the shift that packs them, where the original shifts twice, and doesn't
- * keep the loop's limit of 3 in a register.
+ * into the shift that packs them, where the original shifts twice. 8 words
+ * differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundResults(Gfx** displayListHead) {
@@ -3673,14 +3678,12 @@ void DrawRoundResults(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
           CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + BACKDROP_X),
-          QuarterPixels(f_ResultsTop +
-              ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
-                  CLUB_TOURNAMENT_BACKDROP_Y)),
+          QuarterPixels((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
+              CLUB_TOURNAMENT_BACKDROP_Y + f_ResultsTop),
           QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
-          QuarterPixels(f_ResultsTop +
-              ((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
-                  CLUB_TOURNAMENT_BACKDROP_Y +
-                  CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT)),
+          QuarterPixels((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
+              CLUB_TOURNAMENT_BACKDROP_Y +
+              CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + f_ResultsTop),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   } else {
@@ -3761,7 +3764,8 @@ void DrawRoundResults(Gfx** displayListHead) {
     right = left + FINAL_RESULTS_TITLE_WIDTH;
     for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
       stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
-      if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
+      /* The helper keeps the limit of 3 in a register, to match */
+      if (i == GetLastStripIndex(FINAL_RESULTS_TITLE_STRIP_COUNT)) {
         stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
       }
 
