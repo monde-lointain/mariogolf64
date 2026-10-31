@@ -518,7 +518,7 @@ void FirstUnusedShotEffectsStub(void) {}
 
 void SecondUnusedShotEffectsStub(void) {}
 
-void DrawShotEffectsHud(void) {}
+void DrawShotEffectsHud(Gfx** displayListHead UNUSED) {}
 
 /*
  * Starts the trail of a swing of the given kind, recording the path of the
