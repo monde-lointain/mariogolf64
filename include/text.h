@@ -35,14 +35,6 @@ typedef s32 MessageId;
 #define YARDS_GLYPH 0xF9
 #define FEET_GLYPH 0xFB
 
-/* MeasureText flag: use each character's own width rather than the font size */
-#define MEASURE_TEXT_PROPORTIONAL 0x02
-/*
- * MeasureText only tests for MEASURE_TEXT_PROPORTIONAL, so this
- * measures each character at the font size
- */
-#define MEASURE_TEXT_FIXED_WIDTH 0x01
-
 #define TEXT_NAME_SIZE 20
 /* Added to a lowercase letter to give its character code */
 #define LOWERCASE_CODE_OFFSET 0x80

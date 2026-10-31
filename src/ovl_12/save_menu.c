@@ -257,7 +257,11 @@ void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
  * The call leaves out MeasureText's flags, so this file declares its text
  * routines itself rather than including text.h; it is there to match.
  */
+#ifdef AVOID_UB
+s32 MeasureText(char* text, s32 fontSize, TextFlags flags);
+#else
 s32 MeasureText(char* text, s32 fontSize);
+#endif
 extern char g_PrintBuffer[];
 void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
 
@@ -1001,7 +1005,15 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               g_PrintBuffer, "%s", g_CourseRecords[state->courseIndex].name);
         }
 
+#ifdef AVOID_UB
+        MeasureText(g_PrintBuffer, FONT_SIZE_LARGE, MEASURE_TEXT_FIXED_WIDTH);
+#else
+        /*
+         * MeasureText reads its missing flags from whatever the register
+         * holds. Its width is thrown away, so the call does nothing.
+         */
         MeasureText(g_PrintBuffer, FONT_SIZE_LARGE);
+#endif
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
             COURSE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer,
             0x00FFFF00, 0xFFFFFF00, 0);

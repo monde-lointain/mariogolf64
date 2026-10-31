@@ -22,6 +22,14 @@ typedef s32 TextFlags;
 /* Each glyph of the large font takes the same width */
 #define TEXT_FLAG_FIXED_WIDTH 0x80
 
+/* MeasureText flag: use each character's own width rather than the font size */
+#define MEASURE_TEXT_PROPORTIONAL 0x02
+/*
+ * MeasureText only tests for MEASURE_TEXT_PROPORTIONAL, so this
+ * measures each character at the font size
+ */
+#define MEASURE_TEXT_FIXED_WIDTH 0x01
+
 /* The font size, in pixels, of the font whose characters differ in width */
 #define FONT_SIZE_LARGE 12
 #define FONT_SIZE_MEDIUM 10
