@@ -721,8 +721,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               guNormalize(&fromCup[AXIS_X], &fromCup[AXIS_Y], &fromCup[AXIS_Z]);
               guNormalize(
                   &direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
-              outwardSpeed = (velocity[AXIS_X] * fromCup[AXIS_X]) +
-                  (velocity[AXIS_Z] * fromCup[AXIS_Z]);
+              outwardSpeed = (fromCup[AXIS_X] * velocity[AXIS_X]) +
+                  (fromCup[AXIS_Z] * velocity[AXIS_Z]);
               alignment = (direction[AXIS_X] * fromCup[AXIS_X]) +
                   (direction[AXIS_Z] * fromCup[AXIS_Z]);
               osSyncPrintf("InnerMult %f, %f, %d\n", alignment, outwardSpeed,
