@@ -779,7 +779,14 @@ s32 GetImpactEventFrame(u32 slotIndex) {
       slotIndex, IMPACT_EVENT_ANIMATION_INDEX, ANIMATION_EVENT_IMPACT);
 }
 
-/* Gives each of the slot's animated triangles its default texture */
+/*
+ * Gives each of the slot's animated triangles its default texture.
+ *
+ * Doesn't match: the original's frame has 0x40 unused bytes from 0x18 and
+ * keeps the slot at 0x58, reloading it at the top of the triangle loop, where
+ * GCC keeps the slot in a saved register. Making SetTriangleTexture a static
+ * inline function leaves the frame as it is and gives 137 words, not 87.
+ */
 #ifdef NON_MATCHING
 void ResetTriangleTextures(u32 slotIndex) {
   s32 triangleIndex = 0;
@@ -811,6 +818,10 @@ INCLUDE_ASM("asm/nonmatchings/character", ResetTriangleTextures);
 /*
  * Shows the keyed textures of the slot's playing texture animations, then
  * advances each one a frame. The arguments after the slot are unused.
+ *
+ * Doesn't match: the original's frame leaves 0x18 to 0x57 and 0x5C to 0xF7
+ * unused and keeps the slot at 0x58, reloading it at the top of the triangle
+ * loop, where GCC keeps the slot in a saved register.
  */
 #ifdef NON_MATCHING
 void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
@@ -911,6 +922,10 @@ NO_RESULT PlayTextureAnimation(u32 slotIndex, s32 index) {
 /*
  * Gives the slot's triangles that the texture animation changes their default
  * texture. Nothing calls it.
+ *
+ * Doesn't match: the original's frame has 0x40 unused bytes from 0x18 and
+ * keeps the slot at 0x58, reloading it at the top of the triangle loop, where
+ * GCC keeps the slot in a saved register.
  */
 #ifdef NON_MATCHING
 void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
