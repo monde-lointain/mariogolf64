@@ -2601,13 +2601,13 @@ EVALUATE:
       }
     }
 
-    f_Shot.heading +=
+    IN_OWN_BLOCK(f_Shot.heading +=
         (s32)(atan2(f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
                   f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
             RADIANS_TO_BINARY_ANGLE) -
-        (s32)(atan2(f_TrialEndPoint[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
-                  f_TrialEndPoint[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
-            RADIANS_TO_BINARY_ANGLE);
+            (s32)(atan2(f_TrialEndPoint[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
+                      f_TrialEndPoint[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
+                RADIANS_TO_BINARY_ANGLE));
     return 1;
   }
 
