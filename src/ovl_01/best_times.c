@@ -44,7 +44,7 @@
 #define PLACE_LABEL_LAST_PLACE 3
 
 /*
- * func_8021508C writes a best time as minutes, seconds and hundredths, two
+ * DrawStopwatchTime writes a best time as minutes, seconds and hundredths, two
  * digits each, from the 16 by 16 CI4 glyphs of D_8023AA48: the digits follow a
  * first glyph, and a separator follows each group but the last
  */
@@ -65,7 +65,7 @@ void DrawNarrowTwoDigitMenuNumber(
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
 void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place);
-void func_8021508C_ovl_01(
+void DrawStopwatchTime(
     Gfx** displayListHead, s32 left, s32 top, s32 frameCount);
 
 static s32 D_80230130_ovl_01 = 0;
@@ -376,7 +376,7 @@ void DrawBestTimes(Gfx** displayListHead) {
         otherIndex + 1);
     time = save->bestTimes[memory->bestTimesCourse][otherIndex];
     if (time > 0) {
-      func_8021508C_ovl_01(&gfx, BEST_TIME_X,
+      DrawStopwatchTime(&gfx, BEST_TIME_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING), time);
       DrawNarrowTwoDigitMenuNumber(&gfx, BEST_TIME_UNKD78_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING),
@@ -414,7 +414,7 @@ void DrawBestTimes(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", DrawBestTimes);
 #endif
 
-void func_802144E4_ovl_01(Gfx** displayListHead, s32 left, s32 top,
+void DrawBestTimeFace(Gfx** displayListHead, s32 left, s32 top,
     CharacterId character, u8 drawMode) {
   Gfx* gfx = *displayListHead;
 
@@ -527,7 +527,7 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", DrawPlaceLabel);
 #endif
 
-void func_8021508C_ovl_01(
+void DrawStopwatchTime(
     Gfx** displayListHead, s32 left, s32 top, s32 frameCount) {
   s32 digits[TIME_GROUP_COUNT][TIME_GROUP_DIGIT_COUNT];
   Gfx* gfx = *displayListHead;

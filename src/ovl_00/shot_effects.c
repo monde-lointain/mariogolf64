@@ -512,11 +512,13 @@ void DrawSparks(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_effects", DrawSparks);
 #endif
 
-void func_80217F44_ovl_00(void) {}
+/* Left empty in the original, as are the two routines after it. Only the last
+ * is called, by the round HUD while the shot effects module is loaded. */
+void FirstUnusedShotEffectsStub(void) {}
 
-void func_80217F4C_ovl_00(void) {}
+void SecondUnusedShotEffectsStub(void) {}
 
-void func_80217F54_ovl_00(void) {}
+void DrawShotEffectsHud(void) {}
 
 /*
  * Starts the trail of a swing of the given kind, recording the path of the

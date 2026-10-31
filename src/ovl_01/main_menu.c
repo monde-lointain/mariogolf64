@@ -308,7 +308,7 @@ s32 IsMonoChosen(void);
 s32 IsSimpleCameraChosen(void);
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
 void ClearImportedCharacters(void);
-void func_801F6B20_ovl_01(void);
+void OnMenuResourcesLoaded(void);
 void SetUpChosenGame(void);
 void UpdateMenuTitleScreen(void);
 void UpdateAnimationViewer(void);
@@ -1637,7 +1637,7 @@ void UpdateMenus(void) {
     SetGameFlag(GAME_FLAG_HOLE_LOADED);
     if (IsGameFlagSet(GAME_FLAG_UNK2E)) {
       LoadMenuResources();
-      func_801F6B20_ovl_01();
+      OnMenuResourcesLoaded();
     } else {
       g_Scene = SCENE_SWAPPING_MODULES;
       g_NextScene = SCENE_PLAY_UNK12;
@@ -1678,7 +1678,9 @@ void CheckControllersAndSetPans(void) {
   }
 }
 
-void func_801F6B20_ovl_01(void) {}
+/* Left empty in the original; called after LoadMenuResources when a hole
+ * is loaded from the menu */
+void OnMenuResourcesLoaded(void) {}
 
 const char D_80231514_ovl_01[] = "%s";
 
@@ -7198,7 +7200,8 @@ const char g_CaddySelectTitle[] = "CADDY SELECT";
 /* The blank screen draws nothing over the menu's cleared frame */
 void DrawBlankScreen(Gfx** displayListHead UNUSED) {}
 
-void func_80207E20_ovl_01(void) {}
+/* Left empty in the original, and nothing calls it */
+void UnusedMenuStub(void) {}
 
 /*
  * Draws the current frame of a spinning badge's image at (x, y), and turns it

@@ -985,7 +985,7 @@ enum OpeningModel {
   OPENING_MODEL_UNK16 = 16
 };
 
-s32 func_80206680_ovl_05(u32 slotIndex, s32 character);
+s32 ToggleOpeningCharacter(u32 slotIndex, s32 character);
 
 /* Places the cue slot's character, leaving the point's height unset */
 #define PlaceCueCharacter(point, x, z, heading) \
@@ -1037,7 +1037,7 @@ s32 UpdateOpeningCharacters(void) {
     case 0:
       SetCharacterLights();
       f_CueSlotIndex = 0;
-      if (func_80206680_ovl_05(0, OPENING_MODEL_MARIO)) {
+      if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
         PlaceCueCharacter(point0, 0xF3400, 0x490000, -30);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1047,7 +1047,7 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 1:
       f_CueSlotIndex = 1;
-      if (func_80206680_ovl_05(1, OPENING_MODEL_PEACH)) {
+      if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
         PlaceCueCharacter(point1, 0xA0B58, 0x4A28BF, 80);
         f_OpeningCue = OPENING_CUE_DONE;
@@ -1058,7 +1058,7 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 2:
       f_CueSlotIndex = 2;
-      if (func_80206680_ovl_05(2, OPENING_MODEL_LUIGI)) {
+      if (ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
         PlaceCueCharacter(point2, 0x1368A0, 0x49D208, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1071,7 +1071,7 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
       f_CueSlotIndex = 3;
-      if (func_80206680_ovl_05(3, OPENING_MODEL_PEACH)) {
+      if (ToggleOpeningCharacter(3, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
         PlaceCueCharacter(point3, 0xF3400, 0x490000, -30);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1081,7 +1081,7 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 5:
       f_CueSlotIndex = 0;
-      if (func_80206680_ovl_05(0, OPENING_MODEL_PLUM)) {
+      if (ToggleOpeningCharacter(0, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
         PlaceCueCharacter(point4, 0xB2A34, 0x4F9800, 10);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1093,7 +1093,7 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(0);
       FreeCharacterSlot(3);
       f_CueSlotIndex = 1;
-      if (func_80206680_ovl_05(1, OPENING_MODEL_PLUM)) {
+      if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
         PlaceCueCharacter(point5, 0xF3400, 0x490000, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1103,7 +1103,7 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 8:
       f_CueSlotIndex = 2;
-      if (func_80206680_ovl_05(2, OPENING_MODEL_MARIO)) {
+      if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
         PlaceCueCharacter(point6, 0x1610CF, 0x4AFA34, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1115,7 +1115,7 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
       f_CueSlotIndex = 0;
-      if (func_80206680_ovl_05(0, OPENING_MODEL_LUIGI)) {
+      if (ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
         PlaceCueCharacter(point7, 0xF3400, 0x490000, -45);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1126,13 +1126,13 @@ s32 UpdateOpeningCharacters(void) {
     case 11:
       FreeCharacterSlot(0);
       f_CueSlotIndex = 1;
-      if (func_80206680_ovl_05(1, OPENING_MODEL_PLUM)) {
+      if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
         PlaceCueCharacter(point8, 0x29EB94, 0x26DDDA, 0);
       }
 
       f_CueSlotIndex = 2;
-      if (func_80206680_ovl_05(2, OPENING_MODEL_PEACH)) {
+      if (ToggleOpeningCharacter(2, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
         PlaceCueCharacter(point9, 0x29EB94, 0x26DDDA, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1144,13 +1144,13 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
       f_CueSlotIndex = 0;
-      if (func_80206680_ovl_05(0, OPENING_MODEL_MARIO)) {
+      if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
         PlaceCueCharacter(point10, 0x2709F8, 0x1CF4B4, 10);
       }
 
       f_CueSlotIndex = 3;
-      if (func_80206680_ovl_05(3, OPENING_MODEL_LUIGI)) {
+      if (ToggleOpeningCharacter(3, OPENING_MODEL_LUIGI)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
         PlaceCueCharacter(point11, 0x2709F8, 0x1CF4B4, 55);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1161,7 +1161,7 @@ s32 UpdateOpeningCharacters(void) {
     case 13:
       FreeCharacterSlot(0);
       f_CueSlotIndex = 1;
-      if (func_80206680_ovl_05(1, OPENING_MODEL_MARIO)) {
+      if (ToggleOpeningCharacter(1, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
         PlaceCueCharacter(point12, 0x2709F8, 0x1CF4B4, 10);
       }
@@ -1172,13 +1172,13 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(1);
       FreeCharacterSlot(3);
       f_CueSlotIndex = 0;
-      if (func_80206680_ovl_05(0, OPENING_MODEL_PEACH)) {
+      if (ToggleOpeningCharacter(0, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
         PlaceCueCharacter(point13, 0x2CA5D3, 0x22A928, -98);
       }
 
       f_CueSlotIndex = 2;
-      if (func_80206680_ovl_05(2, OPENING_MODEL_MARIO)) {
+      if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x14);
         PlaceCueCharacter(point14, 0x2C42D6, 0x22A832, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1190,13 +1190,13 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(0);
       FreeCharacterSlot(2);
       f_CueSlotIndex = 1;
-      if (func_80206680_ovl_05(1, OPENING_MODEL_PEACH)) {
+      if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x14);
         PlaceCueCharacter(point15, 0x2B1194, 0x249320, -98);
       }
 
       f_CueSlotIndex = 3;
-      if (func_80206680_ovl_05(3, OPENING_MODEL_MARIO)) {
+      if (ToggleOpeningCharacter(3, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x15);
         PlaceCueCharacter(point16, 0x2B1194, 0x249320, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1208,13 +1208,13 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(1);
       FreeCharacterSlot(3);
       f_CueSlotIndex = 0;
-      if (func_80206680_ovl_05(0, OPENING_MODEL_PEACH)) {
+      if (ToggleOpeningCharacter(0, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x15);
         PlaceCueCharacter(point17, 0x2B1194, 0x249320, -98);
       }
 
       f_CueSlotIndex = 2;
-      if (func_80206680_ovl_05(2, OPENING_MODEL_MARIO)) {
+      if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x16);
         PlaceCueCharacter(point18, 0x2B1194, 0x249320, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1225,7 +1225,7 @@ s32 UpdateOpeningCharacters(void) {
     case 18:
       FreeCharacterSlot(2);
       f_CueSlotIndex = 1;
-      func_80206680_ovl_05(1, OPENING_MODEL_MARIO);
+      ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
       SetCharacterAnimation(f_CueSlotIndex, 0x17);
       PlaceCueCharacter(point19, 0x2B1194, 0x249320, -98);
       f_OpeningCue = OPENING_CUE_DONE;
@@ -1246,9 +1246,9 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(1);
       f_CueSlotIndex = 2;
       if (f_IsDonkeyKongShown) {
-        func_80206680_ovl_05(2, OPENING_MODEL_DONKEY_KONG);
+        ToggleOpeningCharacter(2, OPENING_MODEL_DONKEY_KONG);
       } else {
-        func_80206680_ovl_05(2, OPENING_MODEL_YOSHI);
+        ToggleOpeningCharacter(2, OPENING_MODEL_YOSHI);
       }
 
       SetAnimationSpeed(2, 0.0f);
@@ -1260,7 +1260,7 @@ s32 UpdateOpeningCharacters(void) {
 
       PlaceCueCharacter(point20, 0x202B29, 0xCE7DA, -165);
       f_CueSlotIndex = 3;
-      func_80206680_ovl_05(3, OPENING_MODEL_BABY_MARIO);
+      ToggleOpeningCharacter(3, OPENING_MODEL_BABY_MARIO);
       SetAnimationSpeed(3, 0.0f);
       if (f_IsDonkeyKongShown) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
@@ -1278,11 +1278,11 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 23:
       f_CueSlotIndex = 0;
-      func_80206680_ovl_05(0, OPENING_MODEL_PEACH);
+      ToggleOpeningCharacter(0, OPENING_MODEL_PEACH);
       SetCharacterAnimation(f_CueSlotIndex, 0x16);
       PlaceCueCharacter(point22, 0x2B1194, 0x249320, -98);
       f_CueSlotIndex = 1;
-      func_80206680_ovl_05(1, OPENING_MODEL_MARIO);
+      ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
       SetCharacterAnimation(f_CueSlotIndex, 0x18);
       PlaceCueCharacter(point23, 0x2B1194, 0x249320, -98);
       f_OpeningCue = OPENING_CUE_DONE;
@@ -1294,7 +1294,7 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 25:
       f_CueSlotIndex = 0;
-      func_80206680_ovl_05(0, OPENING_MODEL_LUIGI);
+      ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI);
       SetCharacterAnimation(f_CueSlotIndex, 0x13);
       PlaceCueCharacter(point24, 0x16308C, 0x183EDA, 170);
       f_OpeningCue = OPENING_CUE_DONE;
@@ -1302,7 +1302,7 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 26:
       f_CueSlotIndex = 1;
-      func_80206680_ovl_05(1, OPENING_MODEL_UNK16);
+      ToggleOpeningCharacter(1, OPENING_MODEL_UNK16);
       SetCharacterAnimation(f_CueSlotIndex, 0x10);
       PlaceCueCharacter(point25, 0xE3F2C, 0x1D98E6, 70);
       f_OpeningCue = OPENING_CUE_DONE;
@@ -1312,12 +1312,12 @@ s32 UpdateOpeningCharacters(void) {
       FreeCharacterSlot(0);
       FreeCharacterSlot(1);
       f_CueSlotIndex = 2;
-      func_80206680_ovl_05(2, OPENING_MODEL_LUIGI);
+      ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI);
       SetCharacterAnimation(f_CueSlotIndex, 0x14);
       PlaceCueCharacter(point26, 0x16308C, 0x183EDA, 185);
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       f_CueSlotIndex = 3;
-      if (func_80206680_ovl_05(3, OPENING_MODEL_PEACH)) {
+      if (ToggleOpeningCharacter(3, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x17);
         PlaceCueCharacter(point27, 0x16806D, 0x17E632, 200);
       }
@@ -1326,13 +1326,13 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 28:
       f_CueSlotIndex = 0;
-      if (func_80206680_ovl_05(0, OPENING_MODEL_MARIO)) {
+      if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x19);
         PlaceCueCharacter(point28, 0x15E14D, 0x18155C, 170);
       }
 
       f_CueSlotIndex = 1;
-      if (func_80206680_ovl_05(1, OPENING_MODEL_PLUM)) {
+      if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
         PlaceCueCharacter(point29, 0x166EDF, 0x1838C7, 200);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -1366,12 +1366,12 @@ s32 UpdateOpeningCharacters(void) {
 void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);
 Boolean IsDonkeyKongUnlocked(void);
-void func_80206AA4_ovl_05(BallSimulation* simulation);
+void StepOpeningBallSimulation(BallSimulation* simulation);
 void AnimateNameLogos(void);
 void LoadNameLogo(s32 logoIndex, s32 slot);
 void MoveLakitu(void);
 
-void func_8020A488_ovl_05(
+void LaunchOpeningBallSimulation(
     BallSimulation* simulation, s32 arg1, ShotLaunch* arg2);
 
 /* Fades the screen to white when a button skips the rest of the opening */
@@ -1526,7 +1526,8 @@ void UpdateOpening(void) {
           f_OpeningShotSimulation.isHoledOut = 0;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
           f_OpeningShotSimulation.surface = 0x17;
-          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADB8_ovl_05);
+          LaunchOpeningBallSimulation(
+              &f_OpeningShotSimulation, 0, &D_8020ADB8_ovl_05);
           D_8020AE44_ovl_05 = 1;
           f_ShotBallScale = 1;
         }
@@ -1604,7 +1605,8 @@ void UpdateOpening(void) {
         f_OpeningShotSimulation.isHoledOut = 0;
         f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
         f_OpeningShotSimulation.surface = 0x17;
-        func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADB8_ovl_05);
+        LaunchOpeningBallSimulation(
+            &f_OpeningShotSimulation, 0, &D_8020ADB8_ovl_05);
         D_8020AE44_ovl_05 = 1;
         f_ShotBallScale = 1;
         f_OpeningSparksState = 1;
@@ -1675,7 +1677,8 @@ void UpdateOpening(void) {
           f_OpeningShotSimulation.isHoledOut = 0;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
           f_OpeningShotSimulation.surface = 0x17;
-          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
+          LaunchOpeningBallSimulation(
+              &f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
           D_8020AE44_ovl_05 = 1;
         }
 
@@ -1732,7 +1735,8 @@ void UpdateOpening(void) {
           f_OpeningShotSimulation.isHoledOut = 0;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
           f_OpeningShotSimulation.surface = 0x17;
-          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
+          LaunchOpeningBallSimulation(
+              &f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
           D_8020AE44_ovl_05 = 1;
         }
 
@@ -1797,7 +1801,8 @@ void UpdateOpening(void) {
           f_OpeningShotSimulation.isHoledOut = 0;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
           f_OpeningShotSimulation.surface = 0x17;
-          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADF8_ovl_05);
+          LaunchOpeningBallSimulation(
+              &f_OpeningShotSimulation, 0, &D_8020ADF8_ovl_05);
           D_8020AE44_ovl_05 = 1;
         }
 
@@ -1898,7 +1903,8 @@ void UpdateOpening(void) {
           f_OpeningShotSimulation.isHoledOut = 0;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
           f_OpeningShotSimulation.surface = 0x17;
-          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020AE18_ovl_05);
+          LaunchOpeningBallSimulation(
+              &f_OpeningShotSimulation, 0, &D_8020AE18_ovl_05);
           D_8020AE44_ovl_05 = 1;
           f_ShotBallScale = 1;
           ZoomEditorCamera(1, 33.056084f, 0x28);
@@ -1913,7 +1919,7 @@ void UpdateOpening(void) {
 
         break;
       case 0x70:
-        func_80206AA4_ovl_05(&f_OpeningShotSimulation);
+        StepOpeningBallSimulation(&f_OpeningShotSimulation);
         if (AreEditorMovesDone()) {
           PlaceEditorCamera(934.786f, -128.501f, 4716.105f,
               f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
@@ -2888,9 +2894,9 @@ void UpdateOpening(void) {
         f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     point[AXIS_Z] =
         f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    func_80206AA4_ovl_05(&f_OpeningShotSimulation);
+    StepOpeningBallSimulation(&f_OpeningShotSimulation);
   } else if (D_8020AE44_ovl_05 == 2) {
-    func_80206AA4_ovl_05(&f_OpeningShotSimulation);
+    StepOpeningBallSimulation(&f_OpeningShotSimulation);
   }
 
   if (f_OpeningScene != OPENING_SCENE_END && !f_HasLogoStarted &&

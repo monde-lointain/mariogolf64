@@ -3594,7 +3594,7 @@ void DrawColorTest(Gfx** displayListHead) {
 #define GAME_FLAG_SHOW_MIRROR_TEXTURE 0x70
 /* The shadowed font draws "ft" for this character */
 #define SHADOWED_FEET_GLYPH '['
-void func_80217F54_ovl_00(Gfx** displayListHead);
+void DrawShotEffectsHud(Gfx** displayListHead);
 
 /* Loads one of the shot panel's labels, which DrawRoundHud does in each branch
  * that picks one */
@@ -4166,7 +4166,7 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_IsModuleAlive[MODULE_SHOT_EFFECTS]) {
-    func_80217F54_ovl_00(&g_DisplayListHead);
+    DrawShotEffectsHud(&g_DisplayListHead);
   }
 
   /* A debugging aid: B changes the first player's character, and A plays the

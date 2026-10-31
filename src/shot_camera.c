@@ -3433,9 +3433,9 @@ void GetViewSidePoints(CoursePoint center, CoursePoint plusQuarterPoint,
 /* Left empty in the original, as are the two routines after it */
 void OnShotCameraPlaced(void) {}
 
-void func_8004C6B0(void) {}
+void FirstUnusedCameraStub(void) {}
 
-void func_8004C6B8(void) {}
+void SecondUnusedCameraStub(void) {}
 
 #define SPOT_QUARTER_SIZE 32
 #define SPOT_PEAK_INTENSITY 210

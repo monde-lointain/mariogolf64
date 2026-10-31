@@ -310,7 +310,8 @@ static s32 f_BallAfterimageLength = AFTERIMAGE_MAX_LENGTH;
 static s32 f_UnusedBallFrame = 0;
 static s32 f_BallRollFrame = 0;
 
-void func_801FD5F0_ovl_00(void) {}
+/* Left empty in the original, and nothing calls it */
+void UnusedGolfBallStub(void) {}
 
 /* Where the ball of the player whose turn it is was last drawn */
 static BallScreenPoint f_CurrentBallScreenPoint;

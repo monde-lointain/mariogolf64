@@ -2533,7 +2533,8 @@ void StartPlayerShot(s32 playerIndex) {
   ResetShotOffsetMarker();
 }
 
-void func_80207660_ovl_00(Player* player UNUSED) {}
+/* Left empty in the original; called after each step of a flying ball */
+void OnBallStepped(Player* player UNUSED) {}
 
 /*
  * Once every player's shot has finished, picks who plays next. Players still on
@@ -4297,7 +4298,7 @@ void UpdateTurns(void) {
         previousPosition[AXIS_Y] = g_TurnBallSimulation.position[AXIS_Y];
         previousPosition[AXIS_Z] = g_TurnBallSimulation.position[AXIS_Z];
         StepBallSimulation(&g_TurnBallSimulation);
-        func_80207660_ovl_00(&g_Players[playerIndex]);
+        OnBallStepped(&g_Players[playerIndex]);
         isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
         if (f_StateFrameCounts[playerIndex] == RANDOM_TEXTURE_RESUME_FRAME) {
           SetPlaysRandomTextureAnimation(0, 1);
@@ -4343,7 +4344,7 @@ void UpdateTurns(void) {
             if ((g_MergedController.buttons & (Z_TRIG | L_TRIG)) &&
                 !isCameraDone) {
               StepBallSimulation(&g_TurnBallSimulation);
-              func_80207660_ovl_00(&g_Players[playerIndex]);
+              OnBallStepped(&g_Players[playerIndex]);
               isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
             }
 
@@ -4353,7 +4354,7 @@ void UpdateTurns(void) {
                 if (!isCameraDone) {
                   StepBallSimulation(&g_TurnBallSimulation);
                   TickStopwatches();
-                  func_80207660_ovl_00(&g_Players[playerIndex]);
+                  OnBallStepped(&g_Players[playerIndex]);
                   isCameraDone =
                       UpdateFlightCamera(TRUE, g_TurnController.buttons);
                 }
@@ -4436,7 +4437,7 @@ void UpdateTurns(void) {
           StartLandingReaction(-1);
           player = &g_Players[playerIndex];
           surfaceInfo = GetSurfaceInfo(g_TurnBallSimulation.surface);
-          func_80207660_ovl_00(player);
+          OnBallStepped(player);
           ClearPassedRings(player);
           if (IsOutOfBoundsKind(surfaceInfo->kind) &&
               !IsGameFlagSet(GAME_FLAG_NO_OUT_OF_BOUNDS_PENALTY)) {

@@ -144,7 +144,8 @@ static Club D_8020B9F8_ovl_05[OPENING_CLUB_COUNT] = {
         {97608, 84651, 19335}, CLUB_KIND_WOOD, 0, {0, 0, 0},
         ASSET_DRIVER_HEAD_IMAGE, 0, {0}}};
 
-/* func_8020A488_ovl_05 counts each launch here, and nothing else reads it */
+/* LaunchOpeningBallSimulation counts each launch here, and nothing else reads
+ * it */
 static s32 D_8020BA60_ovl_05 = 0;
 
 /* The opening's copies of the collision triangle and fraction that
@@ -154,7 +155,7 @@ static f32 D_8022BE28_ovl_05;
 
 /* Loads one of the other characters into the slot with its birdie animation, or
  * frees a busy slot first */
-s32 func_80206680_ovl_05(u32 slotIndex, s32 character) {
+s32 ToggleOpeningCharacter(u32 slotIndex, s32 character) {
   if (IsCharacterSlotBusy(slotIndex)) {
     FreeCharacterSlot(slotIndex);
     return FALSE;
@@ -324,10 +325,10 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * differently.
  */
 #ifdef NON_MATCHING
-s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
+s32 StepOpeningBallSimulation(BallSimulation* simulation) {
   PlaneTriangle triangle;
 
-  f32 GetStepNoise(void) {
+  f32 GetOpeningStepNoise(void) {
     return ((u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                       g_Players[simulation->playerIndex].unk88) &
                 NOISE_BYTE_MASK) *
@@ -338,15 +339,15 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             (1.0f / MAX_NOISE_BYTE_PAIR_SUM));
   }
 
-  f32 GetLength3D(f32 x, f32 y, f32 z) {
+  f32 GetOpeningLength3D(f32 x, f32 y, f32 z) {
     return sqrtf((x * x) + (y * y) + (z * z));
   }
 
-  f32 GetLength2D(f32 x, f32 z) {
+  f32 GetOpeningLength2D(f32 x, f32 z) {
     return sqrtf((x * x) + (z * z));
   }
 
-  void ScaleToLength(f32 length, f32 * x, f32 * y, f32 * z) {
+  void ScaleToOpeningLength(f32 length, f32 * x, f32 * y, f32 * z) {
     f32 scale = length / sqrtf((*x * *x) + (*y * *y) + (*z * *z));
 
     *x *= scale;
@@ -358,7 +359,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
    * Points the lift rotation about the ball\'s spin axis, the level axis across
    * spinHeading, turning a negative spin into a positive one the other way
    */
-  void BuildLiftRotation(void) {
+  void BuildOpeningLiftRotation(void) {
     f32 axisX;
     f32 axisZ;
 
@@ -378,7 +379,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         0.0f, axisZ);
   }
 
-  f32 GetPositionNoise(void) {
+  f32 GetOpeningPositionNoise(void) {
     return (((simulation->position[AXIS_X] + simulation->position[AXIS_Z]) &
                 NOISE_BYTE_MASK) -
                NOISE_BYTE_MIDPOINT) *
@@ -444,7 +445,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     }
 
     if (simulation->stepCount == 0) {
-      BuildLiftRotation();
+      BuildOpeningLiftRotation();
     }
 
     simulation->stepCount++;
@@ -611,14 +612,14 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           }
 
           if (pinHit == PIN_HIT_FLAGSTICK) {
-            GetLength2D(
+            GetOpeningLength2D(
                 simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
           }
 
           if (simulation->state == BALL_STATE_ROLLING) {
             simulation->state = BALL_STATE_FLYING;
             simulation->velocity[AXIS_Y] =
-                -GetLength2D(simulation->velocity[AXIS_X],
+                -GetOpeningLength2D(simulation->velocity[AXIS_X],
                     simulation->velocity[AXIS_Z]) *
                 PIN_HIT_RISE_SCALE;
             contact = 0;
@@ -646,7 +647,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           }
 
           MoveBallToCupEdge(simulation);
-          BuildLiftRotation();
+          BuildOpeningLiftRotation();
         }
       }
 
@@ -778,7 +779,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
                       LIP_OUT_SPIN_SCALE;
                   flags |= STEP_FLAG_LIPPED_OUT;
                   contact = 0;
-                  BuildLiftRotation();
+                  BuildOpeningLiftRotation();
                 }
               }
             }
@@ -807,7 +808,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
     if (simulation->state == BALL_STATE_IN_CUP) {
       f32 cupDistance;
 
-      GetLength3D(
+      GetOpeningLength3D(
           simulation->velocity[AXIS_X], 0.0f, simulation->velocity[AXIS_Z]);
       simulation->surface = SURFACE_GREEN;
       cupDistance = (s32)IntLength2D(
@@ -957,7 +958,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           (normalY * simulation->velocity[AXIS_Y]) +
           (normalX * simulation->velocity[AXIS_Z]);
       D_8022BE28_ovl_05 -= OPENING_WALL_BACK_OFF /
-          GetLength3D(simulation->velocity[AXIS_X],
+          GetOpeningLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]);
       if (D_8022BE28_ovl_05 < 0.0f) {
         D_8022BE28_ovl_05 = 0.0f;
@@ -991,7 +992,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         simulation->spinSpeed = 0;
         simulation->velocity[AXIS_Z] = reflected[AXIS_Z];
       }
-      BuildLiftRotation();
+      BuildOpeningLiftRotation();
       contact &= ~STEP_FLAG_HOLE_TRIANGLE_HIT;
     }
 
@@ -1072,7 +1073,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       } else if (simulation->surface == SURFACE_WATER_HAZARD) {
         if (simulation->state == BALL_STATE_ROLLING ||
             impactSpeed <= OPENING_MIN_SKIP_IMPACT_SPEED ||
-            GetLength2D(
+            GetOpeningLength2D(
                 simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]) *
                     OPENING_SKIP_SPEED_RATIO <=
                 impactSpeed) {
@@ -1125,7 +1126,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             ((previousVelocityZ - spinVelocityZ) * TRIANGLE_SPIN_FOLLOW);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
-        BuildLiftRotation();
+        BuildOpeningLiftRotation();
       }
 
       simulation->sideSpin = 0;
@@ -1144,8 +1145,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
       simulation->bounceCount++;
       GetTrianglePlane(&triangle, &plane);
-      GetLength3D(simulation->velocity[AXIS_X], simulation->velocity[AXIS_Y],
-          simulation->velocity[AXIS_Z]);
+      GetOpeningLength3D(simulation->velocity[AXIS_X],
+          simulation->velocity[AXIS_Y], simulation->velocity[AXIS_Z]);
       simulation->position[AXIS_X] =
           startX + (fraction * simulation->velocity[AXIS_X]);
       simulation->position[AXIS_Y] =
@@ -1220,10 +1221,10 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       switch (simulation->surface) {
         case SURFACE_GREEN:
         case SURFACE_GREEN_EDGE:
-          friction *=
-              ((impactSpeed +
-                   (impactSpeed * GetPositionNoise() * LANDING_NOISE_SCALE)) *
-                  OPENING_GREEN_LANDING_FRICTION_PER_SPEED) +
+          friction *= ((impactSpeed +
+                           (impactSpeed * GetOpeningPositionNoise() *
+                               LANDING_NOISE_SCALE)) *
+                          OPENING_GREEN_LANDING_FRICTION_PER_SPEED) +
               OPENING_GREEN_LANDING_FRICTION_BASE;
           spin = ((impactSpeed * steepness) - OPENING_SPINLESS_LANDING_SPEED) *
               (1.0f / OPENING_LANDING_SPIN_SPEED_RANGE);
@@ -1231,7 +1232,8 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         default:
           friction *= (impactSpeed * OTHER_LANDING_FRICTION_PER_SPEED) +
               LANDING_FRICTION_BASE;
-          friction += friction * GetPositionNoise() * LANDING_NOISE_SCALE;
+          friction +=
+              friction * GetOpeningPositionNoise() * LANDING_NOISE_SCALE;
           spin = ((impactSpeed * steepness) - OPENING_SPINLESS_LANDING_SPEED) *
               (1.0f / OPENING_LANDING_SPIN_SPEED_RANGE);
           break;
@@ -1334,7 +1336,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
             ((previousVelocityZ - spinVelocityZ) * GROUND_SPIN_FOLLOW);
         simulation->spinHeading = atan2(spinVelocityZ, spinVelocityX);
         simulation->spinSpeed = IntLength2D(spinVelocityX, spinVelocityZ);
-        BuildLiftRotation();
+        BuildOpeningLiftRotation();
         simulation->sideSpin = 0;
         simulation->velocity[AXIS_Y] += (s32)GRAVITY;
       }
@@ -1346,7 +1348,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           atan2(simulation->velocity[AXIS_Z], simulation->velocity[AXIS_X]);
       simulation->spinSpeed = IntLength2D(
           simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
-      BuildLiftRotation();
+      BuildOpeningLiftRotation();
     }
 
     if (simulation->state == BALL_STATE_ROLLING && !isNearCup) {
@@ -1358,7 +1360,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       f32 friction;
       Boolean isSteep;
 
-      rollSpeed = GetLength2D(
+      rollSpeed = GetOpeningLength2D(
           simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
       isSteep = FALSE;
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
@@ -1414,7 +1416,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
         switch (simulation->surface) {
           case SURFACE_FAIRWAY:
             if (!g_GameState.isMiniGolf) {
-              f32 lie = GetStepNoise();
+              f32 lie = GetOpeningStepNoise();
 
               if (lie < FAIRWAY_POOR_LIE_CHANCE) {
                 simulation->surface = SURFACE_FAIRWAY_POOR_LIE;
@@ -1426,7 +1428,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
 
             break;
           case SURFACE_ROUGH:
-            if (GetStepNoise() < ROUGH_POOR_LIE_CHANCE) {
+            if (GetOpeningStepNoise() < ROUGH_POOR_LIE_CHANCE) {
               simulation->surface = SURFACE_ROUGH_POOR_LIE;
             }
 
@@ -1448,7 +1450,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
           contact = 0;
           simulation->spinSpeed = IntLength2D(
               simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
-          BuildLiftRotation();
+          BuildOpeningLiftRotation();
           goto ROLLED;
         }
       }
@@ -1530,7 +1532,7 @@ s32 func_80206AA4_ovl_05(BallSimulation* simulation) {
       if (!isSteep && info->kind != SURFACE_KIND_GREEN &&
           simulation->lastBounceStep + OFF_GREEN_STOP_STEPS <
               simulation->stepCount &&
-          GetLength3D(simulation->velocity[AXIS_X],
+          GetOpeningLength3D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Y],
               simulation->velocity[AXIS_Z]) < (f64)MAX_OFF_GREEN_STOP_SPEED) {
         simulation->state = BALL_STATE_STOPPED;
@@ -1563,14 +1565,14 @@ ROLLED:
       relative[AXIS_Y] = simulation->velocity[AXIS_Y];
       relative[AXIS_Z] =
           simulation->velocity[AXIS_Z] - simulation->windVelocityZ;
-      airSpeed =
-          GetLength3D(relative[AXIS_X], relative[AXIS_Y], relative[AXIS_Z]);
+      airSpeed = GetOpeningLength3D(
+          relative[AXIS_X], relative[AXIS_Y], relative[AXIS_Z]);
       drag =
           (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) +
           MIN_AIR_DRAG;
       sideSpin = simulation->sideSpin;
       sideSpinMagnitude = AbsFloat(sideSpin * SIDE_SPIN_SPEED_SCALE);
-      horizontalSpeed = GetLength2D(relative[AXIS_X], relative[AXIS_Z]);
+      horizontalSpeed = GetOpeningLength2D(relative[AXIS_X], relative[AXIS_Z]);
       ratio = 0.0f;
       if (sideSpinMagnitude != 0.0f) {
         ratio = horizontalSpeed / sideSpinMagnitude;
@@ -1621,7 +1623,8 @@ ROLLED:
           lift = airSpeed * (1.0f / OPENING_MAX_LIFT_SPEED_RATIO);
         }
 
-        ScaleToLength(lift, &turned[AXIS_X], &turned[AXIS_Y], &turned[AXIS_Z]);
+        ScaleToOpeningLength(
+            lift, &turned[AXIS_X], &turned[AXIS_Y], &turned[AXIS_Z]);
         simulation->velocity[AXIS_X] =
             simulation->velocity[AXIS_X] + turned[AXIS_X];
         simulation->velocity[AXIS_Y] =
@@ -1750,19 +1753,19 @@ SETTLE:
   return flags;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206800_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", GetOpeningStepNoise);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_802068B4_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", GetOpeningLength3D);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_802068EC_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", GetOpeningLength2D);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206910_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", ScaleToOpeningLength);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206968_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", BuildOpeningLiftRotation);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206A50_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", GetOpeningPositionNoise);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
 #endif
 
 /*
@@ -1782,7 +1785,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206AA4_ovl_05);
  * moves the unk40 and sideSpin stores and swaps two float registers there.
  */
 #ifdef NON_MATCHING
-s32 func_8020A488_ovl_05(
+s32 LaunchOpeningBallSimulation(
     BallSimulation* simulation, s32 purpose, ShotLaunch* shot) {
   s32 percentRange[2];
   Club* club;
@@ -1798,7 +1801,7 @@ s32 func_8020A488_ovl_05(
   f32 spinLoss;
   s32 index;
 
-  f32 PickLieBlend(void) {
+  f32 PickOpeningLieBlend(void) {
     return 0.0f;
   }
 
@@ -1848,7 +1851,7 @@ s32 func_8020A488_ovl_05(
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     SurfaceInfo* info = GetOpeningSurfaceInfo(simulation->unkA2);
 
-    blend = PickLieBlend();
+    blend = PickOpeningLieBlend();
     GetSurfacePercentRange(info, club, percentRange);
     speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) *
         speed * ONE_PER_PERCENT;
@@ -1963,7 +1966,7 @@ s32 func_8020A488_ovl_05(
   return 0;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_8020A474_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", PickOpeningLieBlend);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_8020A488_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", LaunchOpeningBallSimulation);
 #endif

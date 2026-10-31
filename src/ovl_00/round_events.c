@@ -743,7 +743,9 @@ void DrawBannerLetters(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-void func_8020EEEC_ovl_00(Gfx** displayListHead) {
+/* Left with nothing between taking and storing the display list head in the
+ * original; called after a letter banner is drawn */
+void DrawLetterBannerExtras(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
   *displayListHead = gfx;
@@ -1052,7 +1054,7 @@ void DrawBanner(Gfx** displayListHead) {
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
     DrawBannerLetters(&gfx);
-    func_8020EEEC_ovl_00(&gfx);
+    DrawLetterBannerExtras(&gfx);
   } else {
     DrawNumberBanner(&gfx);
   }
