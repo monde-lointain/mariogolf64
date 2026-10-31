@@ -1173,19 +1173,14 @@ void DrawUnalignedMenuNumber(
  * shift depends only on the field, so a number two or three digits long in a
  * wider field moves as far right as a one-digit one. Numbers past four digits
  * draw nothing.
- *
- * Doesn't match: the original keeps the digit count in a register through the
- * digit loop and sign-extends the index separately for each use, where GCC
- * reloads the count from the stack each pass and reuses one extended copy.
  */
-#ifdef NON_MATCHING
 void DrawMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field) {
   Gfx* gfx = *displayListHead;
   s16 digits[MENU_NUMBER_DIGIT_LIMIT];
-  u16 digitCount = 0;
+  s16 digitCount = 0;
   s32 shift;
-  s32 spacing;
+  s16 spacing;
   s16 index; /* The mark's glyph, then the digit being drawn */
 
   if (value > MENU_NUMBER_LIMIT) {
@@ -1389,9 +1384,6 @@ void DrawMenuNumber(
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
-#endif
 
 /* DrawDecimalMenuNumber writes a figure to one decimal place, its whole part
  * lined up on the right */
