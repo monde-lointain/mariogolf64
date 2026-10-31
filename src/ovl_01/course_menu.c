@@ -815,7 +815,8 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   s16 badgeCount = 0;
-  s16 index; /* A hole, then a course, then where the count moves to */
+  /* A hole, then a course, then where the count moves to, to match */
+  s16 index;
   s16 holeIndex;
 
   if (GetOpenCourseCount() != memory->statsCourse) {

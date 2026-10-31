@@ -599,7 +599,7 @@ s32 UpdateCharacterSelect(
   u16 button;
   s32 palette;
   s8 column;
-  u16 slot; /* The cursor's row, then the face's slot */
+  u16 slot; /* The cursor's row, then the face's slot, to match */
   u16 faceCharacter;
   void* faceImage;
   SoundChannel channel;

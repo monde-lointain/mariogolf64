@@ -606,8 +606,9 @@ void DrawTablePopup(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
-  s32 index; /* Counts the banner strips, then holds the x of each count of wins
-              */
+  /* Counts the banner strips, then holds the x of each count of wins, to
+   * match */
+  s32 index;
   s32 rowIndex;
   CharacterId rowCharacter;
   CharacterId columnCharacter;
