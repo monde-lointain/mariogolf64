@@ -2008,6 +2008,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * Draws the ground's tiles, each at a detail that its distance picks. The
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
+ *
+ * Doesn't match: 1358 words differ. The original's frame is 0x38 bytes
+ * larger, so every stack offset differs, and terrainStyle and the locals
+ * take other saved registers.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2405,9 +2409,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
         topSlot -= GROUND_TILE_GROUP_SIZE;
         bottomSlot -= GROUND_TILE_GROUP_SIZE;
         middleSlot -= GROUND_TILE_GROUP_SIZE;
-      } else if (groupDetail < GROUND_DETAIL_COARSE) {
-        tileIndex += GROUND_TILE_GROUP_SIZE;
-      } else {
+      } else if (groupDetail >= GROUND_DETAIL_COARSE) {
         spareSlot = middleSlot;
         middleSlot = topSlot;
         topSlot = bottomSlot;
@@ -2439,6 +2441,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
 
         topSlot -= GROUND_TILE_GROUP_SIZE;
         bottomSlot -= GROUND_TILE_GROUP_SIZE;
+      } else {
+        tileIndex += GROUND_TILE_GROUP_SIZE;
       }
 
       previousDetail = groupDetail;
