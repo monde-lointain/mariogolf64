@@ -943,11 +943,18 @@ void DrawHoleSelect(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawHoleSelect);
 #endif
 
+/*
+ * Draws the course name plate in strips, centered on centerX and centerY.
+ * Doesn't match: GCC masks top to 16 bits each strip, and its registers are
+ * allocated in a different order. With an s32 top, GCC strength-reduces the
+ * quarter-pixel rows into registers, which the original doesn't.
+ */
 #ifdef NON_MATCHING
 void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
-  s32 top = centerY;
+  /* 16 bits to match */
+  u16 top = centerY;
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
