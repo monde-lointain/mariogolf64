@@ -3623,8 +3623,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
 #define PORTRAIT_ANIMATION_REST 0
 #define NO_PORTRAIT_FRAME (-1)
 
-/* The results card, its game mode's results, the bobbing title and the players'
- * portraits */
+/*
+ * The results card, its game mode's results, the bobbing title and the players'
+ * portraits.
+ *
+ * Doesn't match: GCC merges the doubling of the title's texture coordinates
+ * into the shift that packs them, where the original shifts twice, and doesn't
+ * keep the loop's limit of 3 in a register.
+ */
 #ifdef NON_MATCHING
 void DrawRoundResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -3634,7 +3640,7 @@ void DrawRoundResults(Gfx** displayListHead) {
   s32 top;
   s32 right;
   s32 stripHeight;
-  s32 textureS;
+  s16 textureS;
   s32 textureT;
   s32 i;
 
