@@ -482,7 +482,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-  gDPPipeSync(gfx++);
+  IN_OWN_BLOCK(gDPPipeSync(gfx++));
   fillWidth = GAUGE_FILL_IMAGE_WIDTH;
   value = GetGaugeFill();
   gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_ShotModeImage)),
