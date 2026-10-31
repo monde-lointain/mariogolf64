@@ -1973,6 +1973,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * The scores page: the front nine above the back nine, each with a row of
  * hole numbers, a row of pars and a row for each player
  */
+/* Some tests compare it with FALSE rather than negate it, to match */
 #define IsMatchPlayMode() \
   (g_GameState.gameMode == GAME_MODE_MATCH_GAME || \
       g_GameState.gameMode == GAME_MODE_GET_CHARACTER || \
@@ -2405,7 +2406,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   gDPPipeSync(gfx++);
-  if (!IsMatchPlayMode() &&
+  if (IsMatchPlayMode() == FALSE &&
       !(g_GameState.holeSelection &
           (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + NET_PANEL_LEFT),
@@ -2419,7 +2420,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_EDGE_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   gDPPipeSync(gfx++);
-  if (!IsMatchPlayMode() &&
+  if (IsMatchPlayMode() == FALSE &&
       !(g_GameState.holeSelection &
           (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + NET_PANEL_RIGHT),
@@ -2635,7 +2636,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     isPuttsShown = !g_GameState.isMiniGolf;
   }
 
-  if (g_GameState.playerCount == 2 && !IsMatchPlayMode()) {
+  if (g_GameState.playerCount == 2 && IsMatchPlayMode() == FALSE) {
     if (g_GameState.isMiniGolf) {
       isOverShown = TRUE;
     } else {
@@ -2727,7 +2728,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     }
   }
 
-  if (!IsMatchPlayMode() &&
+  if (IsMatchPlayMode() == FALSE &&
       !(g_GameState.holeSelection &
           (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
     sprintf(g_PrintBuffer, "%3d", frontPar);
