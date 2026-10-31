@@ -443,12 +443,13 @@ void StopEditorMoves(void) {
  * then the turn, tilt and zoom around the pivot point do the same. The
  * point that moves around the pivot is then placed from the heading, pitch
  * and distance.
- */
-/* Doesn't match: GCC folds the eight flag tests before letting go of the pivot
+ *
+ * Doesn't match: GCC folds the eight flag tests before letting go of the pivot
  * into one mask test, keeps the zoom's gap in a float register rather than
  * $s6, and allocates the fabsf operands to other registers. It also reads
  * turnLeft and tiltLeft once before stepping them, where the original reads
- * each twice. */
+ * each twice. 306 words differ.
+ */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
   /* Whether a point carries the other, and later whether one is a pivot */

@@ -336,6 +336,8 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * the nearest to the farthest; DrawFadingBillboards draws the close ones
  * that need to stay see-through. Here, the close ones are only drawn when
  * they stay opaque.
+ *
+ * Doesn't match: 169 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {

@@ -1070,6 +1070,7 @@ void DrawBanner(Gfx** displayListHead) {
  * Doesn't match: GCC masks out the half height one instruction later, after
  * subtracting the margin from the negated half width. Working out halfHeight
  * with halfWidth, casting to u16 or a u16 halfWidth doesn't change it.
+ * 2 words differ.
  */
 #ifdef NON_MATCHING
 void ShowFlipMessage(MessageId messageId) {
@@ -1416,11 +1417,13 @@ void DrawMovie(Gfx** displayListHead) {
 #define WINNER_BLINK_FRAME 8
 #define WINNER_FACE_FRAME_COUNT 4
 
-/* The caption of a longest drive or nearest pin contest, then its winner's face
- */
-/* Doesn't match: GCC swaps the saved registers of the image's width and the
+/*
+ * The caption of a longest drive or nearest pin contest, then its winner's face
+ *
+ * Doesn't match: GCC swaps the saved registers of the image's width and the
  * strips' right edge, and sets up the loop's texel offset and edge in the
- * other order. Writing halfWidth + centerX changes nothing. */
+ * other order. Writing halfWidth + centerX changes nothing. 16 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawContestWinnerMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1628,6 +1631,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #define DRIVE_RECORD_DISTANCE_ENV_COLOR 0xFF600000
 #define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
 
+/* Doesn't match: 57 words differ. */
 #ifdef NON_MATCHING
 void DrawDriveRecord(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1744,6 +1748,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawDriveRecord);
 #endif
 
+/* Doesn't match: 37 words differ. */
 #ifdef NON_MATCHING
 void DrawPuttCaption(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -2025,8 +2030,12 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
- * to its own size */
+/*
+ * Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
+ * to its own size
+ *
+ * Doesn't match: 106 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -2199,8 +2208,12 @@ void DrawGoombaMovie(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Lakitu flies in, counts down to the start on its starting light, then flies
- * off */
+/*
+ * Lakitu flies in, counts down to the start on its starting light, then flies
+ * off
+ *
+ * Doesn't match: 93 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
   EncodedAsset asset;
@@ -2639,6 +2652,8 @@ void LoadContactImages(Player* player) {
 /*
  * Draws the contact effect as a ribbon through the ball's last positions, and
  * Mario's as a spinning image, while it fades
+ *
+ * Doesn't match: 478 words differ.
  */
 void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   Mat4 scale;
@@ -2966,8 +2981,12 @@ void ShowWindFlyGuy(s32 show) {
 #define WIND_FLY_GUY_SOUND_CHANNEL 10
 #define WIND_FLY_GUY_SOUND_VOLUME 63
 
-/* The Fly Guy that warns of a strong wind, flying across the screen and
- * trailing a streak of wind */
+/*
+ * The Fly Guy that warns of a strong wind, flying across the screen and
+ * trailing a streak of wind
+ *
+ * Doesn't match: 106 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawWindFlyGuy(Gfx** displayListHead) {
   EncodedAsset asset;

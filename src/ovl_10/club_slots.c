@@ -532,6 +532,7 @@ s32 GetClubSlotsState(void) {
   return f_ClubSlotsState;
 }
 
+/* Doesn't match: 205 words differ. */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
   Mat4 matrix;

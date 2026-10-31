@@ -293,6 +293,7 @@ static u8 ReverseBits(u8 bits) {
   return reversed;
 }
 
+/* Doesn't match: 34 words differ. */
 #ifdef NON_MATCHING
 s32 WritePasswordSymbols(
     u8* symbols, char* password, s32 symbolCount, s32 unused UNUSED) {

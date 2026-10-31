@@ -554,6 +554,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat)
  * Doesn't match: the target reads the images through a pointer into
  * g_Scorecard that it keeps in a saved register, where this loads each from
  * its address, and it halves winsNeeded before it subtracts one.
+ * 230 words differ.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -1602,7 +1603,7 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * Doesn't match: the target keeps displayListHead in a saved register, where
  * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps'
  * loop also reads the flip angles through the stagger's index instead of a
- * pointer of their own.
+ * pointer of their own. 229 words differ.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -3111,6 +3112,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresTenDegrees);
  * Doesn't match: this keeps loop values on the stack that the target keeps in
  * saved registers. The nested ifs make GCC compare the bet rate with zero and
  * UNSET_BET_RATE in turn, as the original does, rather than as a range.
+ * 55 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBetTallies(Gfx** displayListHead) {

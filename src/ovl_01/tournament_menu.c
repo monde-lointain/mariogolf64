@@ -548,7 +548,7 @@ void GetSaveDataAndMenuMemory(void) {
  * loop and keeps centerX in a saved register, where the original works them out
  * in the loop from centerX on the stack. Copying the left edge through the
  * right edge's variable stops the hoist and matches, but nothing suggests the
- * original did that.
+ * original did that. 132 words differ.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
@@ -1174,7 +1174,7 @@ void UpdateClubWindow(void);
 /*
  * Doesn't match: when the cursor moves, the original reads the other
  * coordinate before it stores the new one, and adds it to the key's
- * address last.
+ * address last. 68 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateClubTournament(void) {
@@ -1484,6 +1484,7 @@ void UpdateClubWindow(void) {
  * Writes the club tournament's number as an ordinal from the place glyphs.
  * Doesn't match: the left edge takes $t4 instead of the center's $s2, which
  * shifts the texel address and the rectangle's halves along a register.
+ * 22 words differ.
  */
 #ifdef NON_MATCHING
 void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
@@ -2040,10 +2041,9 @@ s32 FindEnteredCodeIndex(void) {
 /*
  * Draws the color-cycling cursor on the club tournament code's character
  * being entered, the last one once the code is full
- */
-/*
+ *
  * Doesn't match: the stack slots of the pointers to the second pipe sync
- * after the image and the cycle type are swapped.
+ * after the image and the cycle type are swapped. 8 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCodeCursor(Gfx** displayListHead) {

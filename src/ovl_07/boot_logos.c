@@ -270,6 +270,7 @@ void UpdateBootLogos(void) {
  * color command's first word, where the original clamps it first, and loads
  * the strip loops' constants into other registers in another order. Clamping
  * through alpha, as the Nintendo logo does, gives 60 words, not 58.
+ * 58 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBootLogos(Gfx** displayListHead) {

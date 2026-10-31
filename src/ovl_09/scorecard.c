@@ -148,6 +148,7 @@ s32 f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
  * Doesn't match: the target copies the arguments to other registers before
  * it saves its own and stores them after it reads $sp, and it loads
  * g_TournamentStandings after setting up the loops' other registers.
+ * 30 words differ.
  */
 #ifdef NON_MATCHING
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
@@ -388,7 +389,7 @@ void FreeScorecard(void);
  *
  * Doesn't match: the original addresses the closing frees from
  * totalLabelsImage and derives tableImage's address from it, where this
- * addresses them from tableImage.
+ * addresses them from tableImage. 19 words differ.
  */
 #ifdef NON_MATCHING
 void FreeScorecard(void) {
@@ -974,6 +975,7 @@ void TurnScorecardPage(u16 buttons);
  *
  * Doesn't match: the target addresses the page through $a0 and reuses it for
  * the last read, where this uses $v1 and loads the address again.
+ * 19 words differ.
  */
 #ifdef NON_MATCHING
 void TurnScorecardPage(u16 buttons) {

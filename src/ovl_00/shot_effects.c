@@ -317,6 +317,8 @@ void StartFlagstickSparks(CoursePoint point) {
  * Moves the sparks and draws them at their bursts' points on screen, the
  * flagstick's as sprites and the impact's as triangles, and steps the impact
  * flash that lights the golfer
+ *
+ * Doesn't match: 24 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSparks(Gfx** displayListHead) {

@@ -1188,7 +1188,11 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
       (view).scissorY, (view).scissorX + (view).scissorWidth, \
       (view).scissorY + (view).scissorHeight)
 
-/* Returns the frame count, which the caller ignores */
+/*
+ * Returns the frame count, which the caller ignores
+ *
+ * Doesn't match: 167 words differ.
+ */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
   Boolean usesFloatMatrices;

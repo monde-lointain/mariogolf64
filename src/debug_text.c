@@ -93,6 +93,7 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
  * glyphs wide.
  * Doesn't match: the original zeroes each glyph's row counter after working
  * out its font index, and each row's column counter before its row index.
+ * 4 words differ.
  */
 #ifdef NON_MATCHING
 void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {

@@ -496,10 +496,11 @@ void DrawCharacterTable(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Draws the color-cycling cursor at (x, y), on the chosen table cell */
 /*
+ * Draws the color-cycling cursor at (x, y), on the chosen table cell
+ *
  * Doesn't match: the stack slots of the pointers to the second pipe sync
- * after the image and the cycle type are swapped.
+ * after the image and the cycle type are swapped. 8 words differ.
  */
 #ifdef NON_MATCHING
 void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
@@ -598,7 +599,7 @@ void DrawTableLines(Gfx** displayListHead) {
  * wins against each other, first moving it to the opposite corner if it would
  * cover the cursor.
  * Doesn't match: the row and column characters and their wins swap
- * registers among $s0-$s3, 25 diff lines.
+ * registers among $s0-$s3, 25 diff lines. 48 words differ.
  */
 #ifdef NON_MATCHING
 void DrawTablePopup(Gfx** displayListHead) {

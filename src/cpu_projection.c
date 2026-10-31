@@ -131,6 +131,8 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
  * Returns 0 if the sphere is not in front of the camera, 1 if it is off the
  * left or right of the screen, 2 if it is off the top or bottom, or else its
  * view depth, which is negative
+ *
+ * Doesn't match: 66 words differ.
  */
 #ifdef NON_MATCHING
 s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {

@@ -560,8 +560,10 @@ void UpdateRingShotRecords(void) {
 #define REPLAY_HUE_SWING 127.0f
 #define REPLAY_GLOW_DIVISOR 4
 
-/* Doesn't match: the original gives several values other saved registers,
- * and keeps memory on the stack */
+/*
+ * Doesn't match: the original gives several values other saved registers,
+ * and keeps memory on the stack. 54 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1836,11 +1838,10 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * Draws the saved-games screen: the characters, the three numbered boards
  * turning on their circle with each game's mode icon, the chosen game's mode,
  * course and hole, and the prompt for giving out the controllers.
- */
-/*
+ *
  * Doesn't match: the original keeps the menu memory pointer on the stack
  * and the mode icons' texel step in a saved register, and doesn't keep
- * the degrees-to-radians factor in a register.
+ * the degrees-to-radians factor in a register. 489 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {

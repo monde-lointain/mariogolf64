@@ -1477,7 +1477,7 @@ INCLUDE_ASM("asm/nonmatchings/reaction", PlaceAtReactionSpot);
 /*
  * Whether the eased eye sits at height zero.
  * Doesn't match: the original loads the height into one register and its
- * magnitude into another, where this reuses the first for both.
+ * magnitude into another, where this reuses the first for both. 4 words differ.
  */
 #ifdef NON_MATCHING
 Boolean IsEasedEyeHeightZero(void) {

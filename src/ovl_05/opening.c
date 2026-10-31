@@ -3870,6 +3870,8 @@ void LoadOpeningImpactLines(void) {
  *
  * The original keeps the bottom edge's 88 in one register for both of a
  * strip's edges, where this folds the top edge into a separate constant.
+ *
+ * Doesn't match: 237 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -5188,7 +5190,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
  *
  * Doesn't match: the display list pointers spilled after the first and second
  * commands swap stack slots. None of 40 orders of the locals' declarations
- * fixes it.
+ * fixes it. 8 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningSparks(Gfx** displayListHead) {

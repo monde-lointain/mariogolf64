@@ -658,6 +658,7 @@ f32 ConvertToFloat(s32 value) {
  * otherwise the heaviest of the four nearest codes' surfaces
  * Doesn't match: the original tests whether the steps are equal by XORing
  * each plus one, and branches first on a register it has just zeroed.
+ * 34 words differ.
  */
 #ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
@@ -1909,6 +1910,8 @@ s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ,
 /*
  * Finds the ground triangle under a point and copies its corners. Returns
  * 0, or -1 off the ground.
+ *
+ * Doesn't match: 34 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
@@ -2159,6 +2162,8 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
 /*
  * Returns the ground's height at a point, clamped to the ground, or
  * NO_GROUND_HEIGHT where no ground triangle holds it
+ *
+ * Doesn't match: 64 words differ.
  */
 #ifdef NON_MATCHING
 s32 GetTerrainHeight(s32 x, s32 z) {

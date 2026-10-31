@@ -168,12 +168,14 @@ extern char g_PrintBuffer[];
 #define SHADOWED_FONT_IMAGE_HEIGHT 32
 
 /*
- * DrawLeaderLine and DrawPlayerTag are nested functions, a GNU C extension.
- * The tag loop keeps its corner pointer and label offsets in other registers.
+ * Draws the tags of the players' balls, moving each to a corner that is clear
+ * of the others. DrawLeaderLine and DrawPlayerTag are nested functions, a GNU
+ * C extension.
+ *
+ * Doesn't match: the tag loop keeps its corner pointer and label offsets in
+ * other registers. 215 words differ.
  */
 #ifdef NON_MATCHING
-/* Draws the tags of the players' balls, moving each to a corner that is clear
- * of the others */
 void DrawShotLabels(Gfx** displayListHead) {
   ScreenPoint point;
   ScreenSpot cup;

@@ -798,7 +798,11 @@ void PrepareHoleDisplay(void) {
   InitSkyColors();
 }
 
-/* Lays out the wind flag and builds the projections the HUD draws with */
+/*
+ * Lays out the wind flag and builds the projections the HUD draws with
+ *
+ * Doesn't match: 58 words differ.
+ */
 #ifdef NON_MATCHING
 void InitRoundHud(void) {
   s32 grid;
@@ -1664,6 +1668,7 @@ typedef struct GridScreenPoint {
     } \
   }
 
+/* Doesn't match: 486 words differ. */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
   GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
@@ -2107,7 +2112,7 @@ void ResetBallTrail(void) {
  *
  * Doesn't match: the offsets' floating-point registers are swapped, in 6
  * words. Swapping the offsets' operands or the squares' order, or dividing
- * after a separate sqrtf, does not help.
+ * after a separate sqrtf, does not help. 6 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
@@ -2246,7 +2251,7 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawBallTrail);
  * Doesn't match: the target reads *displayListHead before the other loads and
  * schedules the last commands before reading
  * g_RoundHud.areWindSpeedArrowsShown. Its rodata also has an empty string after
- * "%dm", which this doesn't emit.
+ * "%dm", which this doesn't emit. 20 words differ.
  */
 #ifdef NON_MATCHING
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
@@ -3192,8 +3197,12 @@ void SetShotOffsetMarker(s32 x, s32 y) {
   f_ShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
 }
 
-/* Draws the shot offset marker, animated while HUD_FLAG_ANIMATE_OFFSET_MARKER
- * is set */
+/*
+ * Draws the shot offset marker, animated while HUD_FLAG_ANIMATE_OFFSET_MARKER
+ * is set
+ *
+ * Doesn't match: 37 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawShotOffsetMarker(void) {
   gDPPipeSync(g_DisplayListHead++);
@@ -3617,6 +3626,8 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * Draws the round's HUD over the course: the letterbox, the players' faces
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
+ *
+ * Doesn't match: 169 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {

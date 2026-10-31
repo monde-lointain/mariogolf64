@@ -2458,6 +2458,7 @@ void ClearCartridgeCharacters(void) {
  * from, looking through every controller's pak for it, and rewrites the save's
  * checksums. Doesn't match: the original copies the experience sum from a
  * scratch register into the one that holds the character data's experience.
+ * 20 words differ.
  */
 #ifdef NON_MATCHING
 s32 WriteExperienceToCartridge(s32 characterIndex) {

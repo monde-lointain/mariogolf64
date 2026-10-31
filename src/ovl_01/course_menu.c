@@ -807,7 +807,7 @@ void DrawPercentMark(Gfx** displayListHead, s16 x, s16 y) {
  * Draws the spinning badge and how many of the course's holes, or of every
  * course's on the totals, have a birdie badge.
  * Doesn't match: the original keeps the badge count in a1 and copies it to s1
- * after counting
+ * after counting. 46 words differ.
  */
 #ifdef NON_MATCHING
 void DrawStatsBadgeCount(Gfx** displayListHead) {
@@ -942,6 +942,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * Doesn't match: the original adds the trophies' shift as 0xFFEC, the low half
  * of -20, after reading the course's position, and adds the position to it
  * before the width. "+ (u16)-TROPHY_SHIFT_LEFT" gives that constant.
+ * 43 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
@@ -1593,11 +1594,10 @@ void DrawOffLabel(Gfx** displayListHead, s32 x, s32 y) {
 /*
  * Draws the green left and right arrows either side of a width centered on a
  * point, switching their blink frame every SIDE_ARROW_BLINK_FRAME_COUNT calls
- */
-/*
+ *
  * Doesn't match: the original spills displayListHead to its argument slot,
  * keeps the arrow top in a register only for the lower edge, and needs one
- * stack slot fewer.
+ * stack slot fewer. 288 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,

@@ -765,6 +765,7 @@ enum BallSprite {
   gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, \
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
+/* Doesn't match: 1809 words differ. */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   Gfx* gfx = g_DisplayListHead;

@@ -397,6 +397,7 @@ u8 RankTournament(
  * Doesn't match: the original computes the block's last name, lastName + 1,
  * from the course's product rather than from lastName, and the first name's
  * index address from the table's base rather than from nameIndex.
+ * 25 words differ.
  */
 #ifdef NON_MATCHING
 void NameContestants(void) {

@@ -601,6 +601,7 @@ void SetPlankMotion(s32 motion) {
   }
 }
 
+/* Doesn't match: 48 words differ. */
 #ifdef NON_MATCHING
 void DrawPlanks(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -704,9 +705,11 @@ void DrawPlanks(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
 #endif
 
-/* Doesn't match: the original sets each arrow coordinate's second choice in
+/*
+ * Doesn't match: the original sets each arrow coordinate's second choice in
  * the branch's delay slot and shifts it in each arm, where GCC picks the sum
- * first and shifts it once after the arms join */
+ * first and shifts it once after the arms join. 80 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawRingShotSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -797,6 +800,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotSelect);
 #endif
 
+/* Doesn't match: 209 words differ. */
 #ifdef NON_MATCHING
 void DrawHoleSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -990,8 +994,12 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawNamePlate);
 #endif
 
-/* Spins the chosen hole's star; the position is unused, the stars are always in
- * one place */
+/*
+ * Spins the chosen hole's star; the position is unused, the stars are always in
+ * one place
+ *
+ * Doesn't match: 308 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
     Gfx** displayListHead, s32 centerX UNUSED, s32 centerY UNUSED) {

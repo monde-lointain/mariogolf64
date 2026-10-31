@@ -1043,6 +1043,8 @@ void WriteClubParameters(void) {
  * mode's reach, closing in by interpolating between the shortest and longest
  * results, then sets the deflection from where the last test shot landed.
  * InterpolatePower is a nested function, a GNU C extension.
+ *
+ * Doesn't match: 46 words differ.
  */
 #ifdef NON_MATCHING
 void GenerateClub(s32 clubIndex) {
@@ -1287,6 +1289,8 @@ void InitClubs(void) {
  * MAX_LAUNCH_POWER, of the shot mode's reach. With GAME_FLAG_GENERATE_CLUBS
  * set, it is found by test-firing the first set's putter instead.
  * InterpolatePuttPower is a nested function, a GNU C extension.
+ *
+ * Doesn't match: 114 words differ.
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {

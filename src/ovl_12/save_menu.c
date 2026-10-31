@@ -576,7 +576,7 @@ static inline s32 NextIconFrame(s32 slot) {
  *
  * Doesn't match: GCC loads the tables' addresses into other registers, and
  * tests whether a saved game is valid with beqz instead of beql, which would
- * step to the next slot's images in the delay slot.
+ * step to the next slot's images in the delay slot. 31 words differ.
  */
 #ifdef NON_MATCHING
 void AnimateModeIcons(Boolean isImmediate) {

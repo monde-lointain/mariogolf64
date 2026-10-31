@@ -1185,11 +1185,11 @@ void DrawTwoDigitMenuNumber(
  * or up when reverseVerticalSlide is set. With canShowPrompt set, the prompt
  * naming that player is typed once each time f_IsHandicapPromptShown is
  * cleared.
- */
-/*
+ *
  * Doesn't match: the original adds the label's offset to the slide, and the
  * columns' top to the vertical slide, once before their loops, and adds the
  * texel offset to the blink frame's offset before the arrow's.
+ * 248 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1685,10 +1685,12 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
   *displayListHead = gfx;
 }
 
-/* Draws the animated page arrows either side of the course select screen */
 /*
+ * Draws the animated page arrows either side of the course select screen
+ *
  * Doesn't match: the original computes the mirrored arrow's start without a
  * branch, and keeps the display list head in its argument slot.
+ * 22 words differ.
  */
 #ifdef NON_MATCHING
 void DrawPageArrows(Gfx** displayListHead) {
@@ -1873,10 +1875,11 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
   *displayListHead = gfx;
 }
 
-/* Draws the blinking green up and down arrows about centerY */
 /*
+ * Draws the blinking green up and down arrows about centerY
+ *
  * Doesn't match: the original adds the texel offset to the blink frame's
- * offset before the arrow's.
+ * offset before the arrow's. 2 words differ.
  */
 #ifdef NON_MATCHING
 void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
@@ -2083,7 +2086,7 @@ void UpdateBestShots(void) {
 /*
  * Doesn't match: the original works out the chosen cell's address again after
  * checking that it holds a record, before drawing its course's image and name,
- * where GCC reuses the address from the check.
+ * where GCC reuses the address from the check. 107 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx** displayListHead) {
@@ -2510,10 +2513,11 @@ void DrawScoreLabel(Gfx** displayListHead, s32 left, s32 top, s32 labelIndex) {
   *displayListHead = gfx;
 }
 
-/* Draws the color-cycling cursor on the chosen Best Shots cell */
 /*
+ * Draws the color-cycling cursor on the chosen Best Shots cell
+ *
  * Doesn't match: the stack slots of the pointers to the second pipe sync
- * after the image and the cycle type are swapped.
+ * after the image and the cycle type are swapped. 8 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBestShotsCursor(Gfx** displayListHead) {
@@ -2591,9 +2595,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShotsCursor);
 /*
  * Reads every character's face, then the palette of each best shot's character
  * in the grid, clamped to the known ones
+ *
+ * Doesn't match: the original keeps the row and column counters in other saved
+ * registers. 44 words differ.
  */
-/* Doesn't match: the original keeps the row and column counters in other saved
- * registers */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
   EncodedAsset asset;

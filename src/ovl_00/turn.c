@@ -511,6 +511,7 @@ void EndRumbleForceStop(void) {
  *
  * Doesn't match: the original takes both absolute values of the offset
  * before subtracting the overshoot, where this subtracts between them.
+ * 4 words differ.
  */
 #ifdef NON_MATCHING
 void KeepAimCameraOnCourse(void) {
@@ -595,6 +596,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * Places the camera for the shot being set up: circling the ball on the pause
  * screen, behind the ball while aiming, or looking back at it from past the
  * ball.
+ *
+ * Doesn't match: 228 words differ.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -1270,6 +1273,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TurnAim);
  * Doesn't match: outside the look-back view, the original keeps the address of
  * aimCameraHeight in one register from the lower clamp through the upper one.
  * This holds it in another register for the lower clamp and loads it again.
+ * 20 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateAimControls(void) {
@@ -2093,6 +2097,8 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
 /*
  * Draws the shot preview that BuildShotPreview built. On the pause screen it is
  * instead a straight line on screen, from the ball to the preview's last point.
+ *
+ * Doesn't match: 73 words differ.
  */
 #ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices* matrices) {
@@ -2560,9 +2566,11 @@ void OnBallStepped(Player* player UNUSED) {}
  * the tee go first, then those off the green, then those on it. Among those,
  * the farthest from the cup goes first, and the earliest in the tee order
  * breaks ties.
+ *
+ * Doesn't match: GCC drops bestDistance = distance from the tee-order branch,
+ * where the test has shown the two equal, but the original keeps the copy.
+ * 17 words differ.
  */
-/* Doesn't match: GCC drops bestDistance = distance from the tee-order branch,
- * where the test has shown the two equal, but the original keeps the copy */
 #ifdef NON_MATCHING
 void PickNextPlayer(void) {
   s32 i;

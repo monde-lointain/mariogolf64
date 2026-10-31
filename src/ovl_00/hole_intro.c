@@ -62,7 +62,7 @@ static f32 f_IntroCameraHeight = 0.0f;
  * Doesn't match: the original stores the look-at point's Z through its
  * pointer and its Y through the camera's address, where GCC stores both
  * through the camera's address. Storing Z before Y, or Y straight into
- * g_Cameras, doesn't help.
+ * g_Cameras, doesn't help. 37 words differ.
  */
 #ifdef NON_MATCHING
 void StartHoleIntroCamera(void) {

@@ -434,6 +434,7 @@ void OpenRoundResults(s32 request) {
     } \
   }
 
+/* Doesn't match: 250 words differ. */
 void LoadRoundResults(void) {
   EncodedAsset asset;
   AssetFile file;
@@ -1352,8 +1353,12 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_CHEER_SOUND_CHANNEL 3
 #define NOTICE_SOUND_PAN_RIGHT 255
 
-/* The notice that a course has opened: its picture and title swing in, then a
- * shine sweeps the title */
+/*
+ * The notice that a course has opened: its picture and title swing in, then a
+ * shine sweeps the title
+ *
+ * Doesn't match: 67 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1572,8 +1577,12 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CHARACTER_VOICE_FRAME 14
 #define NOTICE_CHARACTER_VOICE_SLOT 1
 
-/* The notice that a character has been beaten: their nameplate, face and title
- * pop open, then a shine sweeps the title */
+/*
+ * The notice that a character has been beaten: their nameplate, face and title
+ * pop open, then a shine sweeps the title
+ *
+ * Doesn't match: 82 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawCharacterResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1862,8 +1871,12 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define TROPHY_SHINE_SPEED 16
 #define TROPHY_SHINE_DSDX 0x800
 
-/* Draws the banner of a round's result, and the trophy above a top three
- * tournament place */
+/*
+ * Draws the banner of a round's result, and the trophy above a top three
+ * tournament place
+ *
+ * Doesn't match: 71 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawResultsBanner(Gfx** displayListHead) {
   Gfx* gfx;
@@ -2441,7 +2454,7 @@ enum PointsStep {
  *
  * Doesn't match: when starting the tally, the original reads the player
  * count through the address of g_GameState.gameMode, which moves the
- * branches after it by a word.
+ * branches after it by a word. 11 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {
@@ -3430,6 +3443,7 @@ enum ClubTournamentLine {
  * and ends their loop with slti, where the original adds the strip's offset
  * to the top each time and compares the counter with its limit held in a
  * register. Ending the loop with != instead of < gives 34 words, not 20.
+ * 20 words differ.
  */
 #ifdef NON_MATCHING
 void DrawClubTournamentResults(Gfx** displayListHead) {

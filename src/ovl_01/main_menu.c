@@ -2231,13 +2231,12 @@ void UpdateAnimationViewer(void) {
  * can play. A starts the chosen mode, or first stops the wheel on it while it
  * still turns; B goes back to the character select, undoing the last player's
  * character.
- */
-/*
+ *
  * Doesn't match: the stroke and mini golf cases load their 1 and store
  * g_GameState.gameMode in another order, the B button's path loads
  * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
- * the step.
+ * the step. 117 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -3915,11 +3914,14 @@ void DrawMenuScreen(Gfx** displayListHead) {
       (screen) == MENU_SCREEN_MAIN_WITHOUT_TRANSMIT || \
       (screen) == MENU_SCREEN_CLUBHOUSE)
 
-/* Doesn't match: the game keeps 0xFD500000 in a register and spills
+/*
+ * Draws the chosen layers of the menu's backdrop: the course backdrop, the
+ * board and the banner
+ *
+ * Doesn't match: the game keeps 0xFD500000 in a register and spills
  * 0x073DB06C where this spills the other way, and it reads g_MenuScreen for
- * MENU_LAYER_UNK20 where this drops the read */
-/* Draws the chosen layers of the menu's backdrop: the course backdrop, the
- * board and the banner */
+ * MENU_LAYER_UNK20 where this drops the read. 376 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   Gfx* gfx = *displayListHead;
@@ -4311,8 +4313,10 @@ void DrawNamePlateBanner(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Doesn't match: the original tests the s32 top << 2 for the texture's row
- * offset, not the s16 top */
+/*
+ * Doesn't match: the original tests the s32 top << 2 for the texture's row
+ * offset, not the s16 top. 4 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawSmallNamePlate(Gfx** displayListHead, s16 left, s16 top) {
   Gfx* gfx = *displayListHead;
@@ -5309,7 +5313,7 @@ void DrawScaledModeIcon(
 
 /*
  * Doesn't match: the original keeps the layout of the positions in $a0, where
- * this uses $a1.
+ * this uses $a1. 8 words differ.
  */
 #ifdef NON_MATCHING
 void DrawMenuCharacters(Gfx** displayListHead) {
@@ -6397,7 +6401,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelect);
 /*
  * Doesn't match: the original sets the text drawing's argument before the
  * mini-golf test that picks the name's colors, and keeps the course name
- * banner's strip top in one register instead of copying it.
+ * banner's strip top in one register instead of copying it. 7 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelectBanners(Gfx** displayListHead) {
@@ -6864,10 +6868,9 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * toggles' values on their banners with arrows beside the chosen one, the
  * sound test's lines when game flag 0x55 is set, and the erase window while it
  * is up
- */
-/*
+ *
  * Doesn't match: the original adds each value banner strip's row in both
- * branches without masking it to a byte
+ * branches without masking it to a byte. 131 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {

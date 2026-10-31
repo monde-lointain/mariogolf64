@@ -763,7 +763,7 @@ GROW:
  * Draws the sun's lens flare, as rings along a line through the sun.
  *
  * Doesn't match: four of the display list pointers kept on the stack are
- * given each other's slots.
+ * given each other's slots. 16 words differ.
  */
 #ifdef NON_MATCHING
 void DrawLensFlare(Gfx** displayListHead) {
@@ -934,7 +934,7 @@ void InitSkyColors(void);
  *
  * Doesn't match: the target keeps &g_HoleSetup.conditions.isRaining in a
  * register across the three GetCourseRecordIndex calls, and allocates other
- * registers.
+ * registers. 89 words differ.
  */
 #ifdef NON_MATCHING
 void InitSkyColors(void) {
@@ -1920,8 +1920,12 @@ void DrawSky(
 #define FULL_VIEW_WIDTH (SCREEN_WIDTH - (2 * SCREEN_BORDER))
 #define FULL_VIEW_HEIGHT (SCREEN_HEIGHT - (2 * SCREEN_BORDER))
 
-/* Draws the sky and, below it, the course's backdrop in strips that follow the
- * camera's yaw and pitch */
+/*
+ * Draws the sky and, below it, the course's backdrop in strips that follow the
+ * camera's yaw and pitch
+ *
+ * Doesn't match: 165 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   Gfx* gfx;
@@ -2749,7 +2753,11 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/hole_display", DrawMenuBackdrop);
 #endif
 
-/* Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart */
+/*
+ * Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart
+ *
+ * Doesn't match: 73 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawTileAnimation(void) {
   Vec3 rotation;
@@ -3011,7 +3019,11 @@ void DrawTurnAwayAnimation(void) {
 INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
 #endif
 
-/* Copies the frame that a HUD animation that has just started breaks apart */
+/*
+ * Copies the frame that a HUD animation that has just started breaks apart
+ *
+ * Doesn't match: 188 words differ.
+ */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
   u32* frame;
@@ -3121,7 +3133,9 @@ void CaptureHudAnimationFrame(void) {
 INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
 #endif
 
-/* Draws the slice animation, which fills the screen with copies of its middle
+/*
+ *
+ * Doesn't match: 104 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {

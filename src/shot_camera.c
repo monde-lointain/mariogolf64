@@ -1368,7 +1368,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtFlyingBall);
  * Eases the look-at point toward a point drop below the ball, unless it is
  * landing. Doesn't match: the original keeps the loads of the ball's and
  * the look-at point's coordinates in statement order, where this schedules the
- * ball's loads first and copies drop to another register.
+ * ball's loads first and copies drop to another register. 61 words differ.
  */
 #ifdef NON_MATCHING
 void EaseLookAtBelowBall(f32 drop) {
@@ -1396,7 +1396,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtBelowBall);
  * It ignores yaw, which PlaceFlightCamera passes.
  * Doesn't match: the original keeps the loads of the ball's and the
  * look-at point's coordinates in statement order, where this schedules the
- * ball's loads first.
+ * ball's loads first. 63 words differ.
  */
 #ifdef NON_MATCHING
 void EaseLookAtPoint(Radians yaw UNUSED) {
@@ -2577,6 +2577,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
  * trouble-surface branch through the identical "kind =
  * FLIGHT_CAMERA_AROUND_END" tail of the first switch's case 3, where the
  * original branches straight to the end. The other instructions are the same.
+ * 2 words differ.
  */
 #ifdef NON_MATCHING
 void ChooseFlightCameraKind(void) {
@@ -3461,7 +3462,7 @@ void SecondUnusedCameraStub(void) {}
  * SPOT_QUARTER_SIZE I8 texels. A soft spot is a disc that fades out toward its
  * edge. Otherwise it is a disc, a dark gap and a ring that brightens outward.
  * Doesn't match: the soft spot converts its squared distance in $f2
- * rather than $f0.
+ * rather than $f0. 6 words differ.
  */
 #ifdef NON_MATCHING
 void BuildSpotTexels(u8* texels, Boolean isSoft) {

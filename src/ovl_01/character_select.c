@@ -366,7 +366,7 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
  * -1 if it couldn't move, otherwise 0.
  * Doesn't match: GCC sign-extends oldColumn for the return value into $v0 and
  * works the comparison out in $v1, where the original swaps the two. So the
- * moved test branches to the return with beq rather than beql.
+ * moved test branches to the return with beq rather than beql. 16 words differ.
  */
 #ifdef NON_MATCHING
 s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
@@ -580,7 +580,7 @@ s32 GetClubTournamentCourse(void);
 /*
  * Doesn't match: the original sign-extends the cursor's column and row as
  * soon as it loads them, and sets up the chosen character's sound with the
- * stack argument first.
+ * stack argument first. 78 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
@@ -1315,7 +1315,7 @@ static inline s32 ByteAddress(s8* byte) {
  * Doesn't match: the original schedules the shift of the choice index for
  * the character table lookup one instruction later. The menu memory fields
  * are read through ByteAddress because the original adds the player number
- * before the field offset.
+ * before the field offset. 2 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
@@ -1447,7 +1447,7 @@ s32 GetUnusedPalette(s32 choiceIndex);
  * next frame.
  * Doesn't match: the original keeps row in a temporary register and spills the
  * menu memory pointer, where GCC keeps the pointer in a saved register and
- * spills row instead (148 diff lines, 38 opcodes).
+ * spills row instead (148 diff lines, 38 opcodes). 97 words differ.
  */
 #ifdef NON_MATCHING
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
@@ -1693,7 +1693,7 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y);
  * grid cursor of the player choosing.
  * Doesn't match: the original sign-extends the cursor's x to 16 bits before
  * adding GRID_LEFT, where GCC here sees that it already fits and folds the two
- * offsets together.
+ * offsets together. 5 words differ.
  */
 #ifdef NON_MATCHING
 void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {

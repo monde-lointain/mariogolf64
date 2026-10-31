@@ -876,8 +876,12 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
 /* The tee frames follow the glove in the cursor image */
 #define PAUSE_TEES_T TexelCoordinate(PAUSE_CURSOR_SIZE)
 
-/* Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
- * while it is loaded */
+/*
+ * Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
+ * while it is loaded
+ *
+ * Doesn't match: 69 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawPauseMenu(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1137,6 +1141,7 @@ s32 UpdateChoiceBox(ControllerState* controller) {
   return CHOICE_RESULT_NONE;
 }
 
+/* Doesn't match: 77 words differ. */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

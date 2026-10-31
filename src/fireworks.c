@@ -168,7 +168,7 @@ static inline s32 RandomLaunchHeightJitter(void) {
  * Sends every particle of the firework out from one random point.
  * Doesn't match: GCC swaps the registers of width and height, and keeps the
  * halves of both on the stack, where the original keeps half the height in a
- * register.
+ * register. 50 words differ.
  */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
@@ -212,8 +212,12 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
 INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
 #endif
 
-/* Moves the active fireworks' particles and draws each as a triangle along its
- * path */
+/*
+ * Moves the active fireworks' particles and draws each as a triangle along its
+ * path
+ *
+ * Doesn't match: 108 words differ.
+ */
 #ifdef NON_MATCHING
 void UpdateAndDrawFireworks(Gfx** displayListHead) {
   Gfx* gfx;

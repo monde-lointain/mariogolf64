@@ -909,6 +909,8 @@ enum HoleMenuChoice {
  * Runs play for a frame: loads each hole, shows its intro and flyover, takes
  * the turns, and steps through the scorecard, notices and menus between
  * holes until the round ends and play returns to a menu or the staff roll.
+ *
+ * Doesn't match: 48 words differ.
  */
 void UpdatePlay(void) {
   s32 repeat;
@@ -1912,6 +1914,8 @@ static inline s32 GetMirroredOffset(s32 coordinate) {
  * Gives each ground point texture coordinates from its x and z, mirrored on
  * every other tile so that the texture tiles seamlessly, under
  * GAME_FLAG_TEST_GROUND_TEXTURE
+ *
+ * Doesn't match: 44 words differ.
  */
 #ifdef NON_MATCHING
 void RebuildGroundTextureCoordinates(void) {

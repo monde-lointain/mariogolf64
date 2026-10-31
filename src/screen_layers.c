@@ -659,6 +659,8 @@ s32 UpdatePrompt(ControllerState* controller) {
 /*
  * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
  * and No under its message once it has opened. The chosen answer bobs.
+ *
+ * Doesn't match: 39 words differ.
  */
 #ifdef NON_MATCHING
 void DrawPrompt(Gfx** displayListHead) {
@@ -829,6 +831,8 @@ void MarkHalfTurnCircle(
  * point covers two texels across and two rows down. While the picture is
  * showing the bits are cleared, which reveals the texels; otherwise they
  * are set, which hides them again.
+ *
+ * Doesn't match: 222 words differ.
  */
 #ifdef NON_MATCHING
 void MarkHalfTurnCircle(
