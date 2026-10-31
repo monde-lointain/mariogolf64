@@ -271,10 +271,7 @@ void HideGameBoyCharacters(void) {
  * Moves the player's grid cursor a step in the GRID_MOVE_* direction, wrapping
  * at the edges and skipping slots that can't be chosen, and reads the face of
  * the character it leaves. Returns -1 if it couldn't move, otherwise 0.
- * Doesn't match: the original sign-extends the slot and character afresh at
- * each use.
  */
-#ifdef NON_MATCHING
 s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
   EncodedAsset asset;
   AssetFile file;
@@ -285,10 +282,8 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
   s16 row = oldRow;
   u16 slot;
   u16 character;
-  s32 paletteCharacter; /* A copy of character, to match */
   void* faceImage;
   s32 unused[2] UNUSED;
-  u16(*faceAssets)[8];
 
   do {
     if (direction == GRID_MOVE_UP) {
@@ -340,34 +335,31 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
       character += MARKED_CHARACTER_OFFSET;
     }
 
-    slot = character;
-    if ((s16)slot >= FIRST_IMPORTED_CHARACTER) {
+    if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
+      slot = character; /* Set in each branch to match */
       character =
           g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
     } else {
-      character = slot;
+      slot = character;
     }
 
     faceImage = g_CharacterFaceImages[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
-      faceAssets = g_AlternateFaceAnimationAssets;
+      OpenEncodedAsset(
+          g_AlternateFaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
     } else {
-      faceAssets = g_FaceAnimationAssets;
+      OpenEncodedAsset(
+          g_FaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
     }
 
-    OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
     ReadEncodedAsset(faceImage, &asset);
-    paletteCharacter = character;
-    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)paletteCharacter][0], &file);
+    OpenAssetFile(g_CharacterFacePaletteFiles[(s16)character][0], &file);
     ReadAssetFile(g_CharacterFacePalettes[(s16)slot],
         (s16)GetAssetFileSize(&file), &file);
   }
 
   return -(column == oldColumn && row == oldRow);
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", MoveGridCursor);
-#endif
 
 /*
  * Moves the player's grid cursor a step in the STICK_DIAGONAL_* direction, then
