@@ -538,13 +538,7 @@ void PlayContestMovies(void) {
  * Whether play can leave the hole: never while the contest movies play; in
  * Skins Match, Club Slots and the one-on-one matches, once the hole is decided
  * and every player is done or waiting; otherwise, once every player is done.
- *
- * Doesn't match: in the one-on-one matches' test, the original returns FALSE
- * as a literal 0, where GCC copies isDone's register, which holds 0 there; 2
- * words differ. Returning FALSE instead gives 24, and the other forms tried
- * give 6 or more.
  */
-#ifdef NON_MATCHING
 s32 IsHoleOver(void) {
   Boolean isDone = FALSE;
   s32 i;
@@ -569,10 +563,10 @@ s32 IsHoleOver(void) {
             }
           }
 
-          /* Through isDone to match */
+          /* Through isDone, returning in its own block, to match */
           if (i == g_GameState.playerCount) {
             isDone = TRUE;
-            return isDone;
+            IN_OWN_BLOCK(return isDone);
           }
 
           return FALSE;
@@ -590,8 +584,9 @@ s32 IsHoleOver(void) {
             }
           }
 
-          /* Returning isDone, unlike the FALSE above, and setting it in its
-           * own block, to match */
+          /* Clearing isDone, though it is clear already, returning it, unlike
+           * the FALSE above, and setting it in its own block, to match */
+          isDone = FALSE;
           if (i == g_GameState.playerCount) {
             IN_OWN_BLOCK(isDone = TRUE);
             return isDone;
@@ -613,10 +608,6 @@ s32 IsHoleOver(void) {
 
   return isDone;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/play", IsHoleOver);
-#endif
 
 /*
  * Whether the first player tees off after the second on the next hole.
