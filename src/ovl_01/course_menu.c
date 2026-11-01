@@ -120,6 +120,9 @@
  * the totals page the course points */
 #define TROPHY_SPACING 24
 #define TROPHY_SHIFT_LEFT 20
+/* How far right of the course's trophy position a place's trophy is drawn */
+#define PlaceTrophyOffsetX(place) \
+  (((place) * TROPHY_SPACING) - TROPHY_SHIFT_LEFT)
 #define TROPHY_FRAME_DELAY 4
 #define POINTS_NEEDED_X 192
 #define POINTS_NEEDED_Y 174
@@ -936,10 +939,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * Draws the course's spinning trophy in the color of each place won in its
  * tournament, stepping the spin's images, or on the totals the points needed to
  * open the next course.
- * Doesn't match: the original adds the trophies' shift as 0xFFEC, the low half
- * of -20, after reading the course's position, and adds the position to it
- * before the width. "+ (u16)-TROPHY_SHIFT_LEFT" gives that constant.
- * 43 words differ.
+ * Doesn't match: the original loads the trophies' shift once as 0xFFEC, the low
+ * half of -20, and adds it in a register, where this adds -20 to each edge,
+ * and this works out the clipped top edge a second time where the original
+ * reuses it. Writing the place's offset in place of a local brings 43 differing
+ * words down to 33. 33 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
@@ -949,7 +953,6 @@ void DrawCourseTrophies(Gfx** displayListHead) {
   MenuMemory* memory = GetMenuMemory();
   void* palette = NULL;
   s32 openCourseCount;
-  s32 left;
   void* texels;
   s16 place;
 
@@ -1002,12 +1005,14 @@ void DrawCourseTrophies(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        left = (place * TROPHY_SPACING) + -TROPHY_SHIFT_LEFT;
+        /* The right edge adds the offset before the position, to match */
         gSPScisTextureRectangle(gfx++,
-            QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].x + left),
+            QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].x +
+                PlaceTrophyOffsetX(place)),
             QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].y),
             QuarterPixels(g_TrophySizes[memory->statsCourse].width +
-                f_StatsTrophyPositions[memory->statsCourse].x + left),
+                PlaceTrophyOffsetX(place) +
+                f_StatsTrophyPositions[memory->statsCourse].x),
             QuarterPixels(g_TrophySizes[memory->statsCourse].height +
                 f_StatsTrophyPositions[memory->statsCourse].y),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
