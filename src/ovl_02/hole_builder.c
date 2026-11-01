@@ -3984,8 +3984,7 @@ static inline u16 ReadTileTexel(
  * row, or inside a border of their neighbors' texels. Doesn't match:
  * where ReadTileTexel reads a tile, the original adds the tile's address
  * after the layout test, and ours adds it before; ours also masks the texel
- * coordinates in another order, and is two instructions shorter.
- * 180 words differ.
+ * coordinates in another order. 106 words differ.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {
@@ -3994,7 +3993,6 @@ void ToggleGroundTileBorders(void) {
   s32 tileRow;
   s32 texelColumn;
   s32 texelRow;
-  s32 i;
   u16* texel;
   u16* tileTexel;
   f64* source;
@@ -4002,14 +4000,24 @@ void ToggleGroundTileBorders(void) {
 
   if (g_WorkArea.hole.tiles[0].texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
                                      [GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
-    for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
-      for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT;
-          tileColumn++) {
-        for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
-          for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN;
-              texelColumn++) {
-            texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn] =
-                ReadTileTexel(tileColumn, tileRow, texelColumn, texelRow);
+    s32 strippedTileColumn;
+    s32 strippedTileRow;
+    s32 strippedTexelColumn;
+    s32 strippedTexelRow;
+    s32 i;
+
+    for (strippedTileRow = 0; strippedTileRow < GROUND_TILE_ROW_COUNT;
+        strippedTileRow++) {
+      for (strippedTileColumn = 0;
+          strippedTileColumn < GROUND_TILE_COLUMN_COUNT; strippedTileColumn++) {
+        for (strippedTexelRow = 0; strippedTexelRow < GROUND_TILE_TEXEL_SPAN;
+            strippedTexelRow++) {
+          for (strippedTexelColumn = 0;
+              strippedTexelColumn < GROUND_TILE_TEXEL_SPAN;
+              strippedTexelColumn++) {
+            texels[0][(strippedTexelRow * GROUND_TILE_TEXEL_SPAN) +
+                strippedTexelColumn] = ReadTileTexel(strippedTileColumn,
+                strippedTileRow, strippedTexelColumn, strippedTexelRow);
           }
         }
 
@@ -4017,7 +4025,8 @@ void ToggleGroundTileBorders(void) {
               [GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
         for (i = 0; i < BORDERED_TILE_TEXEL_COUNT; i++) {
           g_WorkArea.hole
-              .tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
+              .tiles[(strippedTileRow * GROUND_TILE_COLUMN_COUNT) +
+                  strippedTileColumn]
               .texels[0][i] = texels[0][i];
         }
       }
