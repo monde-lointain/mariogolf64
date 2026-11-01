@@ -3640,7 +3640,7 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
  *
- * Doesn't match: 67 words differ.
+ * Doesn't match: 61 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {
@@ -3679,7 +3679,7 @@ void DrawRoundHud(CameraView* view) {
 
   /* The faces move out of the letterbox's way */
   scoreboardX = (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) +
-      (SCOREBOARD_X + g_ShotPanelOffsetX);
+      SCOREBOARD_X + g_ShotPanelOffsetX;
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (g_Players[i].handicap > 0) {
       hasHandicap = TRUE;
