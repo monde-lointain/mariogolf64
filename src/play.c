@@ -910,7 +910,7 @@ enum HoleMenuChoice {
  * the turns, and steps through the scorecard, notices and menus between
  * holes until the round ends and play returns to a menu or the staff roll.
  *
- * Doesn't match: 50 words differ.
+ * Doesn't match: 48 words differ.
  */
 void UpdatePlay(void) {
   s32 repeat;
@@ -1160,11 +1160,11 @@ void UpdatePlay(void) {
           /* Debug: circles the chosen cup position instead, and moves the cup
            * there */
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
-            if (g_ControllerData[1].button & L_TRIG) {
+            if (g_ControllerData[0].trigger & L_TRIG) {
               f_DebugCupIndex--;
             }
 
-            if (g_ControllerData[1].button & R_TRIG) {
+            if (g_ControllerData[0].trigger & R_TRIG) {
               f_DebugCupIndex++;
             }
 
