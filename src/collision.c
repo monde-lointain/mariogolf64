@@ -1848,7 +1848,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
 
     direction[AXIS_X] = startX - contactX;
     direction[AXIS_Y] = 0.0f;
-    IN_OWN_BLOCK(direction[AXIS_Z] = startZ - contactZ);
+    direction[AXIS_Z] = startZ - contactZ;
     if (direction[AXIS_X] != 0.0f || direction[AXIS_Z] != 0.0f) {
       guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
     }
@@ -2378,7 +2378,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     }
 
     if (hitFraction < 0.0f) {
-      IN_OWN_BLOCK(hitFraction = 0.0f);
+      hitFraction = 0.0f;
     }
 
     if (!(hitFraction < nearestFraction)) {

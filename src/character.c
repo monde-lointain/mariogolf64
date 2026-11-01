@@ -2128,8 +2128,8 @@ void DrawCharacterAndShadow(
     viewDirection[AXIS_X] =
         g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
     viewDirection[AXIS_Y] = 0.0f;
-    IN_OWN_BLOCK(viewDirection[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] -
-            g_Cameras[0].view.eye[AXIS_Z]);
+    viewDirection[AXIS_Z] =
+        g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
     if (fabsf(viewDirection[AXIS_X]) + fabsf(viewDirection[AXIS_Z]) >= 1.0f) {
       guNormalize(&viewDirection[AXIS_X], &viewDirection[AXIS_Y],
           &viewDirection[AXIS_Z]);

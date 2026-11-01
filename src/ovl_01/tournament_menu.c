@@ -630,7 +630,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
   buttonY = (buttonY <= 0) ? 1 : buttonY;
   isButtonWidthEmpty = buttonHalfWidth <= 0;
-  IN_OWN_BLOCK(buttonHalfWidth = isButtonWidthEmpty ? 1 : buttonHalfWidth);
+  buttonHalfWidth = isButtonWidthEmpty ? 1 : buttonHalfWidth;
   isButtonHeightEmpty = buttonHalfHeight <= 0;
   buttonHalfHeight = isButtonHeightEmpty ? 1 : buttonHalfHeight;
   windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;

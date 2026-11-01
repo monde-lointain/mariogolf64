@@ -904,8 +904,8 @@ s32 UpdateCharacterSelect(
 
       ReadEncodedAsset(faceImage, &asset);
       OpenAssetFile(g_CharacterFacePaletteFiles[(s16)faceCharacter][0], &file);
-      IN_OWN_BLOCK(ReadAssetFile(
-          g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file));
+      ReadAssetFile(
+          g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
     }
 
     if (playerIndex == playerCount) {
