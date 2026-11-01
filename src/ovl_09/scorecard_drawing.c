@@ -554,7 +554,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat)
  * Doesn't match: the target reads the images through a pointer into
  * g_Scorecard that it keeps in a saved register, where this loads each from
  * its address, and it halves winsNeeded before it subtracts one.
- * 230 words differ.
+ * 226 words differ.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -842,25 +842,29 @@ void DrawMatchPage(Gfx** displayListHead) {
     holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
     if (g_Players[0].holes[holeIndex].strokes <
         g_Players[1].holes[holeIndex].strokes) {
+      /* In a local, to match */
+      s32 arrowRight = g_Scorecard.x + ARROW_LEFT + ARROW_WIDTH;
+
       DrawTextureRect(&gfx,
           QuarterPixels(
               (wins[0] * TILE_SPACING) + (g_Scorecard.x + ARROW_LEFT)),
           QuarterPixels(-g_Scorecard.skinsCarryover.onLastHole +
               (g_Scorecard.y + ARROW_TOP)),
-          QuarterPixels((wins[0] * TILE_SPACING) +
-              (g_Scorecard.x + ARROW_LEFT + ARROW_WIDTH)),
+          QuarterPixels((wins[0] * TILE_SPACING) + arrowRight),
           QuarterPixels(-g_Scorecard.skinsCarryover.onLastHole +
               (g_Scorecard.y + ARROW_TOP + ARROW_HEIGHT)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else if (g_Players[1].holes[holeIndex].strokes <
         g_Players[0].holes[holeIndex].strokes) {
+      /* In a local, to match */
+      s32 arrowRight = g_Scorecard.x + ARROW_LEFT + ARROW_WIDTH;
+
       DrawTextureRect(&gfx,
           QuarterPixels(
               (wins[1] * TILE_SPACING) + (g_Scorecard.x + ARROW_LEFT)),
           QuarterPixels(-g_Scorecard.skinsCarryover.onLastHole +
               (g_Scorecard.y + ARROW_TOP + MATCH_ROW_SPACING)),
-          QuarterPixels((wins[1] * TILE_SPACING) +
-              (g_Scorecard.x + ARROW_LEFT + ARROW_WIDTH)),
+          QuarterPixels((wins[1] * TILE_SPACING) + arrowRight),
           QuarterPixels(-g_Scorecard.skinsCarryover.onLastHole +
               (g_Scorecard.y + ARROW_TOP + MATCH_ROW_SPACING + ARROW_HEIGHT)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
