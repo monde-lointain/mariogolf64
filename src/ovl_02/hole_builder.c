@@ -3623,7 +3623,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * the leading height row last and keeps a second, spilled copy of the trailing
  * one, and it reads the fade flags from the stack for each tile, where ours
  * extends isHighGroundFaded once per row and keeps it in another stack slot.
- * 114 words differ.
+ * 110 words differ.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
@@ -3753,7 +3753,8 @@ void ShadeGroundTiles(void) {
         leading = &leadingHeights[column + lightColumnOffset];
       }
 
-      for (count = GROUND_TILE_TEXEL_SPAN; count != 0; count--) {
+      for (count = GROUND_TILE_TEXEL_SPAN; count != 0;
+          count--, column++, texel++, heights++) {
         if (isMapEdge) {
           trailingColumn = column - lightColumnOffset;
           leadingColumn = column + lightColumnOffset;
@@ -3908,10 +3909,6 @@ FADED:
 
           *texel = texelColor;
         }
-
-        column++;
-        texel++;
-        heights++;
       }
     } while (column < MAP_COLUMN_COUNT);
   }
