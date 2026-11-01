@@ -4265,6 +4265,8 @@ void LoadOpeningShotBall(void) {
 #define SHOT_BALL_STRIP_ROWS_FIXED 0x7FA0
 /* Half the ball's width on the screen, in pixels, for each step of scale */
 #define SHOT_BALL_HALF_WIDTH_PER_SCALE 2
+/* Half the ball's width on the screen at f_ShotBallScale, in pixels */
+#define ShotBallHalfWidth() (f_ShotBallScale * SHOT_BALL_HALF_WIDTH_PER_SCALE)
 /* The ball is projected this far above the look-at point */
 #define SHOT_BALL_LIFT 0.1f
 /* Beyond this camera distance, the ball is a fading dot */
@@ -4281,9 +4283,9 @@ void LoadOpeningShotBall(void) {
  * strips, at f_ShotBallScale times the image's size. When the camera is far
  * away, the ball is instead a dot that fades with distance.
  *
- * Doesn't match: only the register and stack slot choices differ. Some
- * pairs of spilled display list pointers swap slots, and the far branch
- * uses other registers.
+ * Doesn't match: some pairs of spilled display list pointers swap stack
+ * slots, and the near branch works out its corners in another order, with
+ * one more instruction. 89 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningShotBall(Gfx** displayListHead) {
@@ -4392,7 +4394,8 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
         if (g_CameraEditor.distance > SHOT_BALL_FAR_DISTANCE) {
-          size = f_ShotBallScale * SHOT_BALL_HALF_WIDTH_PER_SCALE;
+          /* Kept in a local, unlike the near branch's, to match */
+          size = ShotBallHalfWidth();
           left = ballPoint.x - size;
           right = left + SHOT_BALL_DOT_SIZE;
           top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * size);
@@ -4403,12 +4406,13 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
             f_ShotBallAlpha = 0;
           }
         } else {
-          size = f_ShotBallScale * SHOT_BALL_HALF_WIDTH_PER_SCALE;
           f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA;
-          left = ballPoint.x - size;
-          right = ballPoint.x + size;
-          top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * size);
-          bottom = ballPoint.y + (stripIndex * size) - size;
+          left = ballPoint.x - ShotBallHalfWidth();
+          right = ballPoint.x + ShotBallHalfWidth();
+          top = ballPoint.y -
+              ((SHOT_BALL_STRIP_COUNT - stripIndex) * ShotBallHalfWidth());
+          bottom = ballPoint.y + (stripIndex * ShotBallHalfWidth()) -
+              ShotBallHalfWidth();
         }
 
         gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
