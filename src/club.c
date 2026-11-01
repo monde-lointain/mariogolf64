@@ -1290,7 +1290,7 @@ void InitClubs(void) {
  * set, it is found by test-firing the first set's putter instead.
  * InterpolatePuttPower is a nested function, a GNU C extension.
  *
- * Doesn't match: 114 words differ.
+ * Doesn't match: 94 words differ.
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
@@ -1372,10 +1372,12 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
 
       if (shortPower == 0) {
         power = longPower * 3 / 4;
+        putter->power[shotMode] = power;
       } else {
         power = InterpolatePuttPower(shortPower, longPower,
             (f32)(targetDistance - shortDistance) /
                 (f32)(longDistance - shortDistance));
+        putter->power[shotMode] = power;
       }
     } else {
       shortDistance = distance;
@@ -1391,9 +1393,8 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
             (f32)(targetDistance - shortDistance) /
                 (f32)(longDistance - shortDistance));
       }
+      putter->power[shotMode] = power;
     }
-
-    putter->power[shotMode] = power;
   }
 
   g_ClubTestMode = CLUB_TEST_NONE;
