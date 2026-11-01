@@ -803,9 +803,9 @@ void UpdateBetSettings(void) {
  * when isSlideReversed is set). Once the screen has settled it types the
  * chosen bet's explanation
  *
- * Doesn't match: the original sets up the stake number's arguments in
- * another order and keeps the stake marks' coordinates in other
- * registers. 62 words differ.
+ * Doesn't match: the original keeps the stake marks' coordinates in other
+ * registers, and uses markGrowth without masking it to 16 bits. 32 words
+ * differ.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
@@ -823,6 +823,7 @@ void DrawBetSettings(
   s32 stripTop;
   /* The wide banner's strips, kept apart from stripTop to match */
   s32 wideStripTop;
+  s8 stakeAmount;
 
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -868,12 +869,11 @@ void DrawBetSettings(
       gDPPipeSync(gfx++);
     }
 
+    stakeAmount = f_BetStakeAmounts[memory
+            ->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]]];
     DrawUnalignedMenuNumber(&gfx,
         f_BetSetColumnXs[g_BetSet - 1][i] + slide + BET_AMOUNT_OFFSET_X,
-        BET_AMOUNT_Y,
-        (s8)f_BetStakeAmounts[memory
-                ->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]]],
-        0);
+        BET_AMOUNT_Y, stakeAmount, 0);
   }
 
   /* The chosen bet's icon is animated */
