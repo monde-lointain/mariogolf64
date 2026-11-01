@@ -1919,7 +1919,7 @@ void DrawSky(
  * Draws the sky and, below it, the course's backdrop in strips that follow the
  * camera's yaw and pitch
  *
- * Doesn't match: 141 words differ.
+ * Doesn't match: 137 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
@@ -2012,11 +2012,11 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
                         (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
             2;
       } else {
-        imageRow = f_BackdropStripCount - 1;
         texelWord = ((f_BackdropImageWidth * (f_BackdropStripCount - 1) *
                          f_BackdropStripHeight) +
                         (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
             2;
+        imageRow = f_BackdropStripCount - 1;
       }
 
       if (!isNibbleImage) {
