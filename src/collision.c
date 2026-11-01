@@ -2251,7 +2251,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 616 words differ.
+ * Doesn't match: 612 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2410,12 +2410,12 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         edgeLength =
             Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2],
                 triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2]);
-        if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][2]) {
-          farEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-        } else {
+        if (triangle.corners[AXIS_X][0] >= triangle.corners[AXIS_X][2]) {
           farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
           nearEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
+        } else {
+          farEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
         }
 
         if (endX < startX) {
@@ -2471,12 +2471,12 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         edgeLength =
             Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1],
                 triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1]);
-        if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][1]) {
-          farEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-        } else {
+        if (triangle.corners[AXIS_X][0] >= triangle.corners[AXIS_X][1]) {
           farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
           nearEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
+        } else {
+          farEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
         }
 
         if (endX < startX) {
