@@ -800,7 +800,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotSelect);
 #endif
 
-/* Doesn't match: 209 words differ. */
+/* Doesn't match: 138 words differ. */
 #ifdef NON_MATCHING
 void DrawHoleSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -808,6 +808,8 @@ void DrawHoleSelect(Gfx** displayListHead) {
   s32 arrowFrame;
   s32 push;
   s32 colorIndex;
+  s32 topOffset;
+  s32 bottomOffset;
 
   GetMenuMemory();
   f_SlideOffset -= HOLE_SELECT_SLIDE_STEP;
@@ -836,12 +838,12 @@ void DrawHoleSelect(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
+      topOffset = f_SlideOffset - HOLE_SIGN_TOP;
+      bottomOffset = topOffset - HOLE_SIGN_STRIP_HEIGHT;
       DrawTextureRect(&gfx, QuarterPixels(HOLE_SIGN_LEFT),
-          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) -
-              (f_SlideOffset - HOLE_SIGN_TOP)),
+          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) - topOffset),
           QuarterPixels(HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH),
-          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) -
-              (f_SlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT))),
+          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) - bottomOffset),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
