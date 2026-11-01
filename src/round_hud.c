@@ -1669,7 +1669,10 @@ typedef struct GridScreenPoint {
     } \
   }
 
-/* Doesn't match: 361 words differ. */
+/*
+ * Doesn't match: the club and the shot's distance take each other's saved
+ * registers, and registers differ through the grid's loops. 373 words differ.
+ */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
   GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
@@ -1725,8 +1728,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   club = GetSelectedClub();
   yaw = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
   distance = GetSelectedShotDistance();
+  worldDistance = GetSelectedShotWorldDistance();
   if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-    worldDistance = GetSelectedShotWorldDistance();
     maxPuttDistance = GREEN_GRID_MAX_PUTT_DISTANCE;
     if (distance == maxPuttDistance) {
       rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
@@ -1746,7 +1749,6 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       rowSpacing = distance * GREEN_GRID_PUTT_ROW_SPACING / maxPuttDistance;
     }
   } else if (distance < GREEN_GRID_LANDING_DISTANCE) {
-    worldDistance = GetSelectedShotWorldDistance();
     rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
     columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
     rowCount = GREEN_GRID_MAX_ROW_COUNT;
@@ -1756,7 +1758,6 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
     rowSpacing =
         distance * GREEN_GRID_ROW_SPACING / GREEN_GRID_MAX_PUTT_DISTANCE;
   } else {
-    worldDistance = GetSelectedShotWorldDistance();
     center[AXIS_X] =
         (cosf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_X];
     rowShift = GREEN_GRID_LANDING_ROW_SHIFT;
