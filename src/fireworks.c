@@ -216,7 +216,7 @@ INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
  * Moves the active fireworks' particles and draws each as a triangle along its
  * path
  *
- * Doesn't match: 108 words differ.
+ * Doesn't match: 104 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateAndDrawFireworks(Gfx** displayListHead) {
@@ -285,12 +285,12 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
 
           speed = sqrtf((particle->velocityX * particle->velocityX) +
               (particle->velocityY * particle->velocityY));
-          directionX = 0.0f;
           if (speed != 0.0f) {
             inverseSpeed = 1.0f / speed;
             directionX = particle->velocityX * inverseSpeed;
             directionY = particle->velocityY * inverseSpeed;
           } else {
+            directionX = 0.0f;
             directionY = 0.1f;
             speed = 0.5f;
           }
