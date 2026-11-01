@@ -544,11 +544,9 @@ void GetSaveDataAndMenuMemory(void) {
 #define NO_OK_TEXT (-1)
 
 /*
- * Doesn't match: GCC hoists the window's left and right edges out of the strip
- * loop and keeps centerX in a saved register, where the original works them out
- * in the loop from centerX on the stack. Copying the left edge through the
- * right edge's variable stops the hoist and matches, but nothing suggests the
- * original did that. 132 words differ.
+ * Doesn't match: GCC gives the four halves other registers and spills one to
+ * the stack, where the original keeps them all in saved registers. 89 words
+ * differ.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
@@ -563,7 +561,6 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 buttonHalfHeight;
   s32 windowTop;
   s32 windowLeft;
-  s32 windowRight;
   s16 index;
   s32 buttonX;
   /* The window's half width first, to match */
@@ -656,10 +653,9 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
         0, 0, 0, 0);
     windowLeft = centerX - buttonY;
-    windowRight = centerX + buttonY;
     DrawTextureRect(&gfx, QuarterPixels(windowLeft),
         QuarterPixels(windowTop + (index * halfHeight)),
-        QuarterPixels(windowRight),
+        QuarterPixels(centerX + buttonY),
         QuarterPixels(windowTop + ((index * halfHeight) + halfHeight)),
         G_TX_RENDERTILE, 0, 0,
         (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
