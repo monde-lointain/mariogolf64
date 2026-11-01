@@ -4767,9 +4767,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * boards turning on their circle, the chosen mode's label, each player's
  * controller icon and label, and for a single player the birdie badges or
  * stars won.
+ *
+ * Doesn't match: the boards' strips schedule their address loads differently.
+ * 211 words differ.
  */
-/* Doesn't match: the boards' strips and the mode label schedule their
- * address loads differently. 261 words differ. */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -4799,7 +4800,6 @@ void DrawModeSelect(Gfx** displayListHead) {
   u8 areCharactersDrawn;
   s32 labelIndex;
   s32 labelX;
-  s32* labelOffset;
   void* image;
   /* The board and strip index in the loops, then the won count's shift, to
    * match */
@@ -5033,12 +5033,13 @@ void DrawModeSelect(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
 
-  labelOffset = &f_ModeSelectLabelOffsets[labelIndex];
   labelX =
       (g_ChosenPlayerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
-  gSPScisTextureRectangle(gfx++, QuarterPixels(labelX - *labelOffset),
+  gSPScisTextureRectangle(gfx++,
+      QuarterPixels(labelX - f_ModeSelectLabelOffsets[labelIndex]),
       QuarterPixels(MODE_LABEL_TOP),
-      QuarterPixels(labelX - *labelOffset + MODE_LABEL_WIDTH),
+      QuarterPixels(
+          labelX - f_ModeSelectLabelOffsets[labelIndex] + MODE_LABEL_WIDTH),
       QuarterPixels(MODE_LABEL_TOP + MODE_LABEL_HEIGHT), G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
