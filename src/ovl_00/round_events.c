@@ -1621,7 +1621,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #define DRIVE_RECORD_DISTANCE_ENV_COLOR 0xFF600000
 #define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
 
-/* Doesn't match: 42 words differ. */
+/* Doesn't match: 38 words differ. */
 #ifdef NON_MATCHING
 void DrawDriveRecord(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1714,7 +1714,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
 
       copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
       DrawTextureRect(&gfx,
-          QuarterPixels(SHRINKING_IMAGE_CENTER_X - (slide + (s32)(width >> 1))),
+          QuarterPixels(SHRINKING_IMAGE_CENTER_X - (s32)(width >> 1) - slide),
           QuarterPixels(copyTop),
           QuarterPixels(SHRINKING_IMAGE_CENTER_X + (s32)(width >> 1) - slide),
           QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
@@ -1739,7 +1739,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawDriveRecord);
 #endif
 
-/* Doesn't match: 16 words differ. */
+/* Doesn't match: 12 words differ. */
 #ifdef NON_MATCHING
 void DrawPuttCaption(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1831,7 +1831,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
 
       copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
       DrawTextureRect(&gfx,
-          QuarterPixels(SHRINKING_IMAGE_CENTER_X - (slide + (s32)(width >> 1))),
+          QuarterPixels(SHRINKING_IMAGE_CENTER_X - (s32)(width >> 1) - slide),
           QuarterPixels(copyTop),
           QuarterPixels(SHRINKING_IMAGE_CENTER_X + (s32)(width >> 1) - slide),
           QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
