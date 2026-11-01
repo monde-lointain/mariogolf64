@@ -24,6 +24,8 @@
 
 /* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
 #define TEXEL_STEP_ONE (1 << 10)
+/* The step that draws a run of texels across a run of pixels */
+#define TexelRunStep(texels, pixels) (((texels) << 10) / (pixels))
 /* Indices of a vertex's texture coordinates */
 #define TEXTURE_AXIS_S 0
 #define TEXTURE_AXIS_T 1
