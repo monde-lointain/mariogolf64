@@ -2987,7 +2987,7 @@ void ShowWindFlyGuy(s32 show) {
  * The Fly Guy that warns of a strong wind, flying across the screen and
  * trailing a streak of wind
  *
- * Doesn't match: 106 words differ.
+ * Doesn't match: 86 words differ.
  */
 #ifdef NON_MATCHING
 void DrawWindFlyGuy(Gfx** displayListHead) {
@@ -3000,6 +3000,7 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   s32 alpha;
   s32 i;
   s32 slotsBack;
+  s32 streakSlot;
 
   if (f_WindFlyGuyFrame == FLY_GUY_HIDDEN || g_PauseScreen) {
     return;
@@ -3080,9 +3081,9 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
       G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
   gDPPipeSync(gfx++);
   for (i = 0; i != WIND_STREAK_FIRST_RUN; i++) {
+    streakSlot = f_WindStreakHead + i;
     gSPMatrix(gfx++,
-        PhysicalAddress(
-            &f_ContactMatrices[(f_WindStreakHead + i) % WIND_STREAK_LENGTH]),
+        PhysicalAddress(&f_ContactMatrices[streakSlot % WIND_STREAK_LENGTH]),
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPVertex(gfx++, f_ContactVertices, 2, i * 2);
     gSPModifyVertex(
@@ -3100,9 +3101,9 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
    * the first */
   for (i = WIND_STREAK_FIRST_RUN, slotsBack = 0;
       i != WIND_STREAK_SECOND_RUN_END; i++, slotsBack += 2) {
+    streakSlot = f_WindStreakHead + i;
     gSPMatrix(gfx++,
-        PhysicalAddress(
-            &f_ContactMatrices[(f_WindStreakHead + i) % WIND_STREAK_LENGTH]),
+        PhysicalAddress(&f_ContactMatrices[streakSlot % WIND_STREAK_LENGTH]),
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPVertex(gfx++, f_ContactVertices, 2, WIND_STREAK_LAST_SLOT - slotsBack);
     gSPModifyVertex(gfx++, WIND_STREAK_LAST_SLOT - slotsBack, G_MWO_POINT_ST,
