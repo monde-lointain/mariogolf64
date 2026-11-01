@@ -4645,7 +4645,7 @@ void LoadOpeningLogo(void) {
  * the letter loops GCC works out the texel offset before stepping the display
  * list pointer, where the original steps it first, and in the falling letters'
  * loop it derives f_LogoLetters' address from another table's instead of
- * loading it. 268 words differ.
+ * loading it. 206 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
@@ -4653,6 +4653,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   s32 texelsOffset;
   s32 letterTexelsOffset; /* Kept apart, unlike the shine pass's, to match */
   s32 i;
+  s32 letterIndex;
+  s32 clubStripIndex;
   s32 j;
   Radians angle;
   f32 wobble;
@@ -4877,8 +4879,10 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoClubImage)));
     gDPPipeSync(gfx++);
-    for (i = 0; i < LOGO_CLUB_STRIP_COUNT; i++) {
-      texelsOffset = (i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
+    for (clubStripIndex = 0; clubStripIndex < LOGO_CLUB_STRIP_COUNT;
+        clubStripIndex++) {
+      texelsOffset =
+          (clubStripIndex * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
           LARGE_PALETTED_TEXELS_OFFSET;
       gDPLoadTextureBlock(gfx++, TextureAddress(f_LogoClubImage + texelsOffset),
           G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
@@ -4895,7 +4899,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
           G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
       gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
       gDPPipeSync(gfx++);
-      gSPVertex(gfx++, f_LogoClubVertices[i], 4, 0);
+      gSPVertex(gfx++, f_LogoClubVertices[clubStripIndex], 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gDPPipeSync(gfx++);
     }
@@ -5156,12 +5160,12 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   }
 
   if (f_LogoState == LOGO_SHRINKING) {
-    for (i = 0; i != LOGO_LETTER_COUNT; i++) {
-      if (i != LOGO_LETTER_L) {
-        f_LogoLetters[i].x += f_LogoLetterSteps[i];
-        f_LogoLetters[i].y += f_LogoLetterRises[LOGO_LETTER_M];
-        f_LogoLetterScales[i][AXIS_X] += f_LogoScaleStep;
-        f_LogoLetterScales[i][AXIS_Y] += f_LogoScaleStep;
+    for (letterIndex = 0; letterIndex != LOGO_LETTER_COUNT; letterIndex++) {
+      if (letterIndex != LOGO_LETTER_L) {
+        f_LogoLetters[letterIndex].x += f_LogoLetterSteps[letterIndex];
+        f_LogoLetters[letterIndex].y += f_LogoLetterRises[LOGO_LETTER_M];
+        f_LogoLetterScales[letterIndex][AXIS_X] += f_LogoScaleStep;
+        f_LogoLetterScales[letterIndex][AXIS_Y] += f_LogoScaleStep;
       }
     }
 
