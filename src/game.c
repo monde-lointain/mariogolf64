@@ -1191,7 +1191,7 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 /*
  * Returns the frame count, which the caller ignores
  *
- * Doesn't match: 167 words differ.
+ * Doesn't match: 119 words differ.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
@@ -1630,14 +1630,17 @@ s32 DrawGame(void) {
             if (g_GameState.isMiniGolf) {
               billboardRise =
                   (courseView->lookAt[1] - courseView->eye[1]) * 0.125f;
+              guAlign(&matrices->billboard, 0.0f,
+                  courseView->lookAt[0] - courseView->eye[0], billboardRise,
+                  courseView->lookAt[2] - courseView->eye[2]);
             } else {
               billboardRise =
                   (courseView->lookAt[1] - courseView->eye[1]) * 0.5f;
+              guAlign(&matrices->billboard, 0.0f,
+                  courseView->lookAt[0] - courseView->eye[0], billboardRise,
+                  courseView->lookAt[2] - courseView->eye[2]);
             }
 
-            guAlign(&matrices->billboard, 0.0f,
-                courseView->lookAt[0] - courseView->eye[0], billboardRise,
-                courseView->lookAt[2] - courseView->eye[2]);
             guAlign(&matrices->antiBillboard, 0.0f,
                 -(target[0] - courseView->eye[0]),
                 -(target[1] - courseView->eye[1]),
