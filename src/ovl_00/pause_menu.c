@@ -880,7 +880,7 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
  * Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
  * while it is loaded
  *
- * Doesn't match: 69 words differ.
+ * Doesn't match: 53 words differ.
  */
 #ifdef NON_MATCHING
 void DrawPauseMenu(Gfx** displayListHead) {
@@ -959,12 +959,12 @@ void DrawPauseMenu(Gfx** displayListHead) {
       i++, y += PAUSE_LABEL_SPACING) {
     message = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].message;
     kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind;
-    red = PAUSE_LABEL_RED;
     if (f_PauseSelection == i) {
       red = glowRed;
       green = glowGreen;
       blue = glowBlue;
     } else {
+      red = PAUSE_LABEL_RED;
       green = PAUSE_LABEL_GREEN;
       blue = PAUSE_LABEL_BLUE;
     }
