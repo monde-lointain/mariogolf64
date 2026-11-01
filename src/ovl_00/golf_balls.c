@@ -769,7 +769,7 @@ enum BallSprite {
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
 /*
- * Doesn't match: 1417 words differ. The stack frame is 8 bytes smaller, so
+ * Doesn't match: 1342 words differ. The stack frame is 8 bytes smaller, so
  * the register saves move, and the display list pointers take other
  * registers.
  */
@@ -1217,7 +1217,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, ENVIRONMENT, PRIMITIVE, 0,
         TEXEL0, 0, PRIMITIVE, 0, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
     gDPSetEnvColor(gfx++, 0x00, 0x00, 0x80, 0x1E);
-    for (i = 0; i != f_BallAfterimageLength; i++) {
+    for (i = 0; i < f_BallAfterimageLength; i++) {
       afterimage = &f_BallAfterimages[i];
       if (afterimage->alpha > 0) {
         afterimageProjectedDepth = ProjectPoint(afterimage->position[AXIS_X],
