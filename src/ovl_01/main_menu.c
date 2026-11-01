@@ -6430,7 +6430,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelect);
 /*
  * Doesn't match: the original ends the course name banner's strip loop with
  * stripIndex != MENU_BANNER_STRIP_COUNT, where this compiles the < test as
- * written; writing != here gives 7. 4 words differ.
+ * written. Writing != here gives 5, where the loop copies stripTop into
+ * another register. 4 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelectBanners(Gfx** displayListHead) {
