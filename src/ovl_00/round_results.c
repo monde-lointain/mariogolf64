@@ -1365,9 +1365,8 @@ void UpdateCourseResultsNotice(void) {
  *
  * Doesn't match: in the picture's loop the original adds the center to the
  * product before taking away the size, where this takes the size from the
- * center first, and in the title's loops it keeps each strip's top in $s0
- * where this works it out in temporaries, so registers and order differ
- * through the loops. 37 words differ.
+ * center first, so registers and order differ through the loop. A title
+ * strip's top and the shine's lift also take other registers. 29 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
@@ -1377,7 +1376,6 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   s32 lift;
   s32 shineLift;
   s32 depthLift;
-  s32 top;
   SoundPan pan;
   s32 centerX;
   s32 i;
@@ -1403,6 +1401,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
 
   LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
   for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
+    s32 top;
     size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) *
         NOTICE_COURSE_STRIP_HEIGHT;
     step = (NOTICE_COURSE_STRIP_HEIGHT << 10) / size;
@@ -1421,6 +1420,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
 
   LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
+    s32 top;
     lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
     lift -= (s32)NOTICE_TITLE_LIFT;
     LoadTextureBlock(&gfx,
