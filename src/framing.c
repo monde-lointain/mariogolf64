@@ -117,7 +117,7 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * Places the eye and look-at point so that the first camera's field of view
  * takes in every framed sphere, looking from the framing angles
  *
- * Doesn't match: 349 words differ.
+ * Doesn't match: 286 words differ.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
@@ -139,6 +139,8 @@ void FrameSpheres(f32 depthOffset) {
   f32 maxY;
   Radians angle;
   f32 distance;
+  f32 topDistance;
+  f32 bottomDistance;
   f32 eyeX;
   f32 eyeY;
   f32 eyeZ;
@@ -151,6 +153,7 @@ void FrameSpheres(f32 depthOffset) {
   f32 centerY;
   f32 radius;
   f64 frontDistance;
+  f64 verticalFrontDistance;
   s32 i;
   f32 rightRadians;
 
@@ -219,12 +222,12 @@ void FrameSpheres(f32 depthOffset) {
 
   angle = FramingDegreesToRadians(topAngle - bottomAngle) -
       FramingDegreesToRadians(90);
-  distance = -minY / cosf(angle);
-  eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * distance;
-  verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * distance;
-  distance = maxY / cosf(-angle);
-  eyeY += sinf(FramingDegreesToRadians(topAngle)) * distance;
-  verticalEyeZ += cosf(FramingDegreesToRadians(topAngle)) * distance;
+  bottomDistance = -minY / cosf(angle);
+  eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
+  verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
+  topDistance = maxY / cosf(-angle);
+  eyeY += sinf(FramingDegreesToRadians(topAngle)) * topDistance;
+  verticalEyeZ += cosf(FramingDegreesToRadians(topAngle)) * topDistance;
   if (g_ControllerData[1].trigger & D_CBUTTONS) {
     osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ,
         verticalEyeZ);
@@ -280,11 +283,11 @@ void FrameSpheres(f32 depthOffset) {
   rightRadians = FramingDegreesToRadians(rightAngle);
   distance = frontDistance * tan(rightRadians);
   left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
-  frontDistance = depth - verticalEyeZ;
-  top = frontDistance * tan(FramingDegreesToRadians(topAngle));
+  verticalFrontDistance = depth - verticalEyeZ;
+  top = verticalFrontDistance * tan(FramingDegreesToRadians(topAngle));
   centerX = (minX + maxX) * 0.5f;
   centerY = (minY + maxY) * 0.5f;
-  bottom = frontDistance * tan(FramingDegreesToRadians(bottomAngle));
+  bottom = verticalFrontDistance * tan(FramingDegreesToRadians(bottomAngle));
   if (centerX < left) {
     centerX = left;
   }
