@@ -873,7 +873,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsBadgeCount);
  * or below.
  * Doesn't match: the original counts the arrows and picks the first one with
  * branches, where this version computes them without, so the registers and the
- * spills to the stack differ. 107 words differ.
+ * spills to the stack differ. GCC's jump pass turns the copy of hasRowsBelow
+ * into branchless code because it is a single instruction; copying
+ * hasRowsBelow != FALSE keeps the branch but gives 109 differing words, not
+ * 107. 107 words differ.
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx** displayListHead) {
