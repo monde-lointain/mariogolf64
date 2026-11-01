@@ -1,7 +1,7 @@
 #ifndef INCLUDE_ASM_H
 #define INCLUDE_ASM_H
 
-#if !defined(M2CTX) && !defined(PERMUTER)
+#ifndef PERMUTER
 
 /*
  * Modern GCC remembers which section it is emitting into, so included
@@ -68,6 +68,6 @@ __asm__(".include \"include/macro.inc\"\n");
 #endif
 #define RESUME_RODATA_SECTION() __asm__("")
 
-#endif /* !defined(M2CTX) && !defined(PERMUTER) */
+#endif /* PERMUTER */
 
 #endif /* INCLUDE_ASM_H */
