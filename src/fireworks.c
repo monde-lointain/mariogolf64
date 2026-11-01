@@ -216,7 +216,7 @@ INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
  * Moves the active fireworks' particles and draws each as a triangle along its
  * path
  *
- * Doesn't match: 90 words differ.
+ * Doesn't match: 42 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateAndDrawFireworks(Gfx** displayListHead) {
@@ -228,6 +228,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   s32 i;
   s32 index;
   FireworkParticle* particle;
+  FireworkParticle* drawnParticle;
   f32 speed;
   f32 directionX;
   f32 directionY;
@@ -235,6 +236,8 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   f32 length;
   f32 tailScale;
   s32 timer;
+  s32 fadeTimer;
+  s32 trailTimer;
   s32 red;
   s32 green;
   s32 blue;
@@ -295,13 +298,13 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
             speed = 0.5f;
           }
 
-          timer = f_Fireworks[index].timer;
-          if (timer < 8) {
-            length = speed * 0.5f * timer;
-          } else if (timer > 64) {
-            length = ((timer - 64) * 0.04f) + 1.0f;
+          trailTimer = f_Fireworks[index].timer;
+          if (trailTimer < 8) {
+            length = speed * 0.5f * trailTimer;
+          } else if (trailTimer > 64) {
+            length = ((trailTimer - 64) * 0.04f) + 1.0f;
           } else {
-            length = speed * (4.0f - ((timer - 8) * 0.5f));
+            length = speed * (4.0f - ((trailTimer - 8) * 0.5f));
           }
 
           if (length < 1.0f) {
@@ -350,13 +353,13 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   blue = (s32)(sinf(f_FireworkHue + 4.0f + index) * 64.0f) + 127;
   for (index = 0; index != f_FireworkCount; index++) {
     if (f_Fireworks[index].isActive == TRUE) {
-      timer = f_Fireworks[index].timer;
+      fadeTimer = f_Fireworks[index].timer;
       alpha = 0xFF;
 
       /* Fades out from frame 40, flickering on odd frames */
-      if (timer >= 40) {
-        alpha = 0xFF - ((timer - 40) * 8);
-        if (timer & 1) {
+      if (fadeTimer >= 40) {
+        alpha = 0xFF - ((fadeTimer - 40) * 8);
+        if (fadeTimer & 1) {
           alpha += 0x18;
         }
       }
@@ -371,11 +374,11 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
 
       gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
       for (i = 0; i != f_Fireworks[index].particleCount; i++) {
-        particle = &f_Fireworks[index].particles[i];
-        if (particle->life > 0) {
+        drawnParticle = &f_Fireworks[index].particles[i];
+        if (drawnParticle->life > 0) {
           gDPPipeSync(gfx++);
           gSPMatrix(gfx++,
-              PhysicalAddress(&particle->matrices[g_MatrixBufferIndex]),
+              PhysicalAddress(&drawnParticle->matrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPVertex(gfx++, f_FireworkParticleVertices,
               ARRAY_COUNT(f_FireworkParticleVertices), 0);
