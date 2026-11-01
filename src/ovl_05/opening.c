@@ -4285,7 +4285,7 @@ void LoadOpeningShotBall(void) {
  *
  * Doesn't match: some pairs of spilled display list pointers swap stack
  * slots, and each pointer is stored before it is stepped, where the
- * original steps it first. 64 words differ.
+ * original steps it first. 56 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningShotBall(Gfx** displayListHead) {
@@ -4298,6 +4298,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
   s32 right;
   s32 bottom;
   s32 stripHeight;
+  Gfx* renderModeCommand;
 
   if (f_ShotBallScale != 0) {
     f_ShotBallPosition[AXIS_X] =
@@ -4331,7 +4332,9 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE,
           f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE);
       gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+      /* The original takes the command's slot first, which orders the stack */
+      renderModeCommand = gfx++;
+      gDPSetRenderMode(renderModeCommand, G_RM_CLD_SURF, G_RM_CLD_SURF2);
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0,
           0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
       gDPPipeSync(gfx++);
