@@ -88,6 +88,8 @@ GLABEL_RE = re.compile(r"^glabel (\w+)")
 ENDLABEL_RE = re.compile(r"^endlabel (\w+)")
 # The label number GCC appends to a nested function's or static local's name
 LABEL_NUMBER_RE = re.compile(r"\.\d+$")
+# A %hi or %lo operand's symbol and addend
+HALF_OPERAND_RE = re.compile(r"%(?:hi|lo)\((\w+)(?: \+ (0x[0-9A-Fa-f]+|\d+))?\)")
 
 WORD_SIZE = 4
 OPCODE_SHIFT = 26
@@ -97,6 +99,15 @@ JUMP_TARGET_MASK = 0x03FFFFFF
 # The bits a jump's target keeps from the jump's own address, its 256 MB region
 JUMP_REGION_MASK = 0xF0000000
 IMMEDIATE_MASK = 0xFFFF
+WORD_MASK = 0xFFFFFFFF
+# Where KSEG0, through which the game reaches its code and data, starts and
+# ends, and the ROM's size, above the physical addresses of RAM. A relocated
+# field whose value can be none of these addresses, such as a KSEG1 address
+# or a display list command, is compared by its value, as C may write it as a
+# constant; the rest must be relocated, so that the game can be shifted.
+K0BASE = 0x80000000
+K1BASE = 0xA0000000
+ROM_SIZE = 0x2000000
 HALF_SHIFT = 16
 # What %hi adds before it shifts, so that %lo's sign extension takes it away
 HIGH_HALF_ROUNDING = 0x8000
@@ -248,6 +259,23 @@ def read_linked_symbols() -> dict[str, int]:
     }
 
 
+def is_address(value: int) -> bool:
+    """Whether VALUE can be a KSEG0 or physical address, or a ROM offset."""
+    return K0BASE <= value < K1BASE or value < ROM_SIZE
+
+
+def is_compared_by_value(text: str) -> bool:
+    """Whether the relocated field of an instruction's TEXT keeps its value."""
+    operand = HALF_OPERAND_RE.search(text)
+    if operand is None:
+        return False
+    address = read_linked_symbols().get(operand.group(1))
+    if address is None:
+        return False
+    addend = int(operand.group(2), 0) if operand.group(2) else 0
+    return not is_address((address + addend) & WORD_MASK)
+
+
 def read_listing(listing: list[tuple[int, int, str]]) -> Routine:
     """Return the routine of a splat LISTING of (address, word, text)."""
     start = listing[0][0] if listing else 0
@@ -257,7 +285,7 @@ def read_listing(listing: list[tuple[int, int, str]]) -> Routine:
     for index, (address, word, text) in enumerate(listing):
         reference = None
         relocated_mask = 0
-        if "%hi(" in text or "%lo(" in text:
+        if ("%hi(" in text or "%lo(" in text) and not is_compared_by_value(text):
             reference = word & IMMEDIATE_MASK
             relocated_mask = IMMEDIATE_MASK
         elif word >> OPCODE_SHIFT == JAL_OPCODE:
@@ -543,27 +571,41 @@ def read_holders(symbols: SymbolTableSection) -> Holders:
     return holders
 
 
+def find_holder(
+    held_symbols: tuple[list[int], list[tuple[int, int, str]]], addend: int
+) -> tuple[str, int] | None:
+    """Return the name of the symbol holding ADDEND and the offset into it."""
+    starts, held = held_symbols
+    position = bisect.bisect_right(starts, addend) - 1
+    if position < 0:
+        return None
+    start, size, name = held[position]
+    offset = addend - start
+    return (name, offset) if offset < max(size, 1) else None
+
+
 def get_linked_address(symbol: Symbol, addend: int, holders: Holders) -> int | None:
     """Return the matching build's address of SYMBOL plus ADDEND, if it has one.
 
     A relocation against a section, as one to a static variable is, takes the
-    address from the object's symbol that holds it.
+    address from the object's symbol that holds it. One whose addend has had
+    K0BASE taken off, as PhysicalAddress takes it, gives the physical address.
     """
     name, offset = symbol.name, addend
     if read_symbol_type(symbol) == "STT_SECTION":
         section_index = read_entry_field(symbol.entry, "st_shndx")
         if not isinstance(section_index, int) or section_index not in holders:
             return None
-        starts, held = holders[section_index]
-        position = bisect.bisect_right(starts, addend) - 1
-        if position < 0:
+        shift = 0
+        found = find_holder(holders[section_index], addend)
+        if found is None:
+            shift = -K0BASE
+            found = find_holder(holders[section_index], (addend - shift) & WORD_MASK)
+        if found is None:
             return None
-        start, size, name = held[position]
-        offset = addend - start
-        if offset >= max(size, 1):
-            return None
+        name, offset = found[0], found[1] + shift
     address = read_linked_symbols().get(LABEL_NUMBER_RE.sub("", name))
-    return None if address is None else address + offset
+    return None if address is None else (address + offset) & WORD_MASK
 
 
 def sign_extend_half(half: int) -> int:
@@ -579,6 +621,8 @@ class Relocated:
     references: list[int | None]
     # {word: destination word} of the jumps within .text
     jumps: dict[int, int]
+    # {word: the full address its half makes} of the resolved %hi and %lo halves
+    addresses: dict[int, int] = field(default_factory=dict)
 
 
 def relocate(words: list[int], elf: ELFFile, symbols: SymbolTableSection) -> Relocated:
@@ -615,9 +659,11 @@ def relocate(words: list[int], elf: ELFFile, symbols: SymbolTableSection) -> Rel
             address = get_linked_address(symbol, addend, holders)
             if address is not None:
                 references[index] = address & IMMEDIATE_MASK
+                relocated.addresses[index] = address
                 high = (address + HIGH_HALF_ROUNDING) >> HALF_SHIFT & IMMEDIATE_MASK
                 for high_index in waiting.get(symbol_index, []):
                     references[high_index] = high
+                    relocated.addresses[high_index] = address
             _ = waiting.pop(symbol_index, None)
             words[index] = word & ~IMMEDIATE_MASK
         elif kind == R_MIPS_26:
@@ -633,6 +679,18 @@ def relocate(words: list[int], elf: ELFFile, symbols: SymbolTableSection) -> Rel
     return relocated
 
 
+def keep_constant_values(words: list[int], relocated: Relocated) -> None:
+    """Give the halves of values that can't be addresses their values in WORDS.
+
+    Their references become None, as is_compared_by_value makes a listing's.
+    """
+    for index, address in relocated.addresses.items():
+        reference = relocated.references[index]
+        if reference is not None and not is_address(address):
+            words[index] |= reference
+            relocated.references[index] = None
+
+
 def read_object_functions(elf: ELFFile) -> Functions:
     """Return {name: routine} of each function in an object's .text."""
     text_index = elf.get_section_index(".text")
@@ -645,6 +703,7 @@ def read_object_functions(elf: ELFFile) -> Functions:
         for i in range(0, len(text), WORD_SIZE)
     ]
     relocated = relocate(words, elf, symbols)
+    keep_constant_values(words, relocated)
     functions: Functions = {}
     for start, (name, size) in read_function_spans(symbols, text_index).items():
         end = start + size
