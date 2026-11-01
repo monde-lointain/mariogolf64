@@ -229,11 +229,6 @@ void UpdateBestTimes(void) {
 #define BEST_TIMES_PANEL_RIGHT 302
 #define BEST_TIMES_PANEL_BOTTOM 230
 
-/*
- * Doesn't match: the holder palettes' address goes in $t8, where the original
- * uses $v0. 6 words differ.
- */
-#ifdef NON_MATCHING
 void DrawBestTimes(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u16 perspNorm;
@@ -263,7 +258,6 @@ void DrawBestTimes(Gfx** displayListHead) {
   s16 character;
   s16 dashIndex;
   s16 holderCourse;
-  u8(*holderPalettes)[MENU_PALETTE_FILE_SIZE];
 
   DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
   guPerspectiveF(f_BestTimesWheelProjection, &perspNorm, WHEEL_FIELD_OF_VIEW,
@@ -400,9 +394,8 @@ void DrawBestTimes(Gfx** displayListHead) {
       /* Read into a local of its own to match */
       holderCourse = memory->bestTimesCourse;
       character = save->bestTimeCharacters[holderCourse][otherIndex];
-      holderPalettes = g_MenuCharacterPalettes;
       DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
-          holderPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) +
+          g_MenuCharacterPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) +
               otherIndex],
           BEST_TIME_FACE_X,
           BEST_TIME_FIRST_FACE_Y + (otherIndex * BEST_TIME_SPACING), character,
@@ -419,9 +412,6 @@ void DrawBestTimes(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", DrawBestTimes);
-#endif
 
 void DrawBestTimeFace(Gfx** displayListHead, s32 left, s32 top,
     CharacterId character, u8 drawMode) {
