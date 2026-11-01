@@ -578,8 +578,8 @@ s32 RecordDrive(void) {
  *
  * Doesn't match: in the stroke bets, the original loads j before i, as GCC
  * does, but compares i with j, where GCC compares j with i. Writing i != j
- * loads i first (6 words differ, not 2); continue or an empty if branch
- * changes nothing.
+ * loads i first, and 6 words differ; continue or an empty if branch changes
+ * nothing. 2 words differ.
  */
 #ifdef NON_MATCHING
 void SettleHoleBets(void) {
