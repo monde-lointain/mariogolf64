@@ -554,7 +554,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat)
  * Doesn't match: the target reads the images through a pointer into
  * g_Scorecard that it keeps in a saved register, where this loads each from
  * its address, and it halves winsNeeded before it subtracts one.
- * 218 words differ.
+ * 182 words differ.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -743,8 +743,8 @@ void DrawMatchPage(Gfx** displayListHead) {
             TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT), TEXEL_STEP_ONE,
             TEXEL_STEP_ONE);
         DrawTextureRect(&gfx,
-            QuarterPixels(g_Scorecard.x + (j * TILE_SPACING) + TILE_LEFT +
-                TILE_PIECE_WIDTH),
+            QuarterPixels(g_Scorecard.x +
+                ((j * TILE_SPACING) + TILE_LEFT + TILE_PIECE_WIDTH)),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
             QuarterPixels((j * TILE_SPACING) +
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2))),
@@ -786,10 +786,10 @@ void DrawMatchPage(Gfx** displayListHead) {
           QuarterPixels(((j * TILE_SPACING) + TILE_LEFT) + g_Scorecard.x),
           QuarterPixels(
               ((i * MATCH_ROW_SPACING) + WIN_MARK_TOP) + g_Scorecard.y),
-          QuarterPixels(g_Scorecard.x + (j * TILE_SPACING) + TILE_LEFT +
-              WIN_MARK_SHOWN_WIDTH),
-          QuarterPixels(g_Scorecard.y + (i * MATCH_ROW_SPACING) + WIN_MARK_TOP +
-              WIN_MARK_HEIGHT),
+          QuarterPixels((j * TILE_SPACING) + TILE_LEFT + WIN_MARK_SHOWN_WIDTH +
+              g_Scorecard.x),
+          QuarterPixels((i * MATCH_ROW_SPACING) + WIN_MARK_TOP +
+              WIN_MARK_HEIGHT + g_Scorecard.y),
           G_TX_RENDERTILE, 0,
           (j < wins[i ^ 1]) ? TexelCoordinate(WIN_MARK_HEIGHT) : 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1093,9 +1093,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BlankBetName);
  * and what each player has won on it and in total. A bet with a rate of zero is
  * grayed out.
  *
- * Doesn't match: the target adds each grid row's offset to its line's top
- * before adding the card's top, where this adds the card's top first. 251
- * words differ.
+ * Doesn't match: GCC's loop pass hoists a table address into $s2 before
+ * the bet rates' loop, which the original doesn't, and the loop's
+ * registers differ from there. 232 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
@@ -1129,7 +1129,7 @@ void DrawBetsPage(Gfx** displayListHead) {
   for (i = 0; i != GRID_ROW_COUNT; i++) {
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + GRID_ROW_LINE_LEFT),
         QuarterPixels(
-            g_Scorecard.y + (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP),
+            (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP + g_Scorecard.y),
         QuarterPixels(g_Scorecard.x + GRID_RIGHT),
         QuarterPixels(g_Scorecard.y + (i * GRID_ROW_HEIGHT) +
             GRID_ROW_LINE_TOP + GRID_LINE_WIDTH),
@@ -1137,7 +1137,7 @@ void DrawBetsPage(Gfx** displayListHead) {
         GRID_STRETCHED_STEP, TEXEL_STEP_ONE);
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + GRID_ROW_LINE_LEFT),
         QuarterPixels(
-            g_Scorecard.y + (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP),
+            (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP + g_Scorecard.y),
         QuarterPixels(g_Scorecard.x + GRID_ROW_LINE_LEFT + GRID_LINE_WIDTH),
         QuarterPixels(g_Scorecard.y + (i * GRID_ROW_HEIGHT) +
             GRID_ROW_LINE_TOP + GRID_LINE_WIDTH),
@@ -1145,10 +1145,10 @@ void DrawBetsPage(Gfx** displayListHead) {
     DrawTextureRect(&gfx,
         QuarterPixels(g_Scorecard.x + GRID_RIGHT - GRID_LINE_WIDTH),
         QuarterPixels(
-            g_Scorecard.y + (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP),
+            (i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP + g_Scorecard.y),
         QuarterPixels(g_Scorecard.x + GRID_RIGHT),
-        QuarterPixels(g_Scorecard.y + (i * GRID_ROW_HEIGHT) +
-            GRID_ROW_LINE_TOP + GRID_LINE_WIDTH),
+        QuarterPixels((i * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP +
+            GRID_LINE_WIDTH + g_Scorecard.y),
         G_TX_RENDERTILE, 0, TexelCoordinate(GRID_TEXEL_LINE), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
   }
@@ -1198,8 +1198,8 @@ void DrawBetsPage(Gfx** displayListHead) {
               g_Scorecard.y + GRID_ROW_LINE_TOP + (j * GRID_ROW_HEIGHT)),
           QuarterPixels(
               g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
-          QuarterPixels(g_Scorecard.y + (j * GRID_ROW_HEIGHT) +
-              GRID_ROW_LINE_TOP + GRID_LINE_WIDTH),
+          QuarterPixels((j * GRID_ROW_HEIGHT) + GRID_ROW_LINE_TOP +
+              GRID_LINE_WIDTH + g_Scorecard.y),
           G_TX_RENDERTILE, 0, TexelCoordinate(GRID_TEXEL_CROSSING),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
@@ -1245,7 +1245,7 @@ void DrawBetsPage(Gfx** displayListHead) {
       G_TX_NOLOD);
   DrawTextureRect(&gfx,
       QuarterPixels(
-          g_Scorecard.x + (column * BET_COLUMN_SPACING) + BET_IMAGE_LEFT),
+          (column * BET_COLUMN_SPACING) + BET_IMAGE_LEFT + g_Scorecard.x),
       QuarterPixels(BET_IMAGE_TOP),
       QuarterPixels(g_Scorecard.x + BET_IMAGE_LEFT +
           (column * BET_COLUMN_SPACING) + BET_IMAGE_SIZE),
@@ -1616,7 +1616,7 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * Doesn't match: the target keeps displayListHead in a saved register, where
  * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps'
  * loop also reads the flip angles through the stagger's index instead of a
- * pointer of their own. 171 words differ.
+ * pointer of their own. 152 words differ.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -1674,8 +1674,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
         QuarterPixels(
             ((i * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
         QuarterPixels(g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH),
-        QuarterPixels(g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
-            ROW_IMAGE_HEIGHT),
+        QuarterPixels((i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
+            ROW_IMAGE_HEIGHT + g_Scorecard.y),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -1750,7 +1750,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
 
       translation[AXIS_X] = g_Scorecard.x;
       translation[AXIS_Y] = (SCREEN_HEIGHT / 2.0f) -
-          (g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP);
+          ((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y);
       translation[AXIS_Z] = FLAP_DISTANCE;
       BuildRotationMatrix(matrix, rotation, translation);
       ConvertMatrixToFixed(matrix, &f_FlapMatrices[i][g_MatrixBufferIndex]);
@@ -1818,11 +1818,11 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, FLAP_NAME_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0,
           0, 0, 0, 0, 0, 0);
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
-          QuarterPixels(g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) +
-              ROW_TOP + ROW_BOTTOM_HALF_ROW),
+          QuarterPixels((i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
+              ROW_BOTTOM_HALF_ROW + g_Scorecard.y),
           QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT + FLAP_NAME_IMAGE_WIDTH),
-          QuarterPixels(g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) +
-              ROW_TOP + ROW_IMAGE_HEIGHT),
+          QuarterPixels((i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
+              ROW_IMAGE_HEIGHT + g_Scorecard.y),
           G_TX_RENDERTILE, 0, TexelCoordinate(ROW_BOTTOM_HALF_ROW),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
