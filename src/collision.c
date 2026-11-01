@@ -993,7 +993,7 @@ const char g_PathDebugBlankText[] = "          ";
  * that starts on the plane, or, while the ball rolls, barely crosses
  * it, hits it at the path's end.
  *
- * Doesn't match: 100 words differ.
+ * Doesn't match: 96 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
@@ -1026,6 +1026,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   f32 hitFraction;
   f32 tileFraction;
   f32 step;
+  s32 sideChange;
 
   if (IsGameFlagSet(GAME_FLAG_UNK0)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -1149,8 +1150,8 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
       if ((endSide >= 0) & (startSide <= 0)) {
         if (startSide < 0 && !IsBareCrossing(simulation, startSide, endSide) &&
             startSide != endSide) {
-          hitFraction =
-              fabsf((f32)startSide) / fabsf((f32)(startSide - endSide));
+          sideChange = startSide - endSide;
+          hitFraction = fabsf((f32)startSide) / fabsf((f32)sideChange);
         } else {
           hitFraction = 1.0f;
         }
@@ -1260,7 +1261,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
  *
- * Doesn't match: 87 words differ.
+ * Doesn't match: 83 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1292,6 +1293,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 hitFraction;
   f32 tileFraction;
   f32 step;
+  s32 sideChange;
 
   if (IsGameFlagSet(GAME_FLAG_UNK0)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -1414,8 +1416,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             (plane.normal[AXIS_Y] * startY) + (plane.normal[AXIS_Z] * startZ) +
             planeOffset;
         if (startSide != endSide) {
-          hitFraction =
-              fabsf((f32)startSide) / fabsf((f32)(startSide - endSide));
+          sideChange = startSide - endSide;
+          hitFraction = fabsf((f32)startSide) / fabsf((f32)sideChange);
         } else {
           hitFraction = 0.0f;
         }
