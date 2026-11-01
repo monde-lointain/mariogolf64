@@ -448,13 +448,13 @@ void StopEditorMoves(void) {
  * into one mask test, keeps the zoom's gap in a float register rather than
  * $s6, and allocates the fabsf operands to other registers. It also reads
  * turnLeft and tiltLeft once before stepping them, where the original reads
- * each twice. 302 words differ.
+ * each twice. 298 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
+  Boolean hasMoved = FALSE;
   /* Whether a point carries the other, and later whether one is a pivot */
   Boolean hasLeader = FALSE;
-  Boolean hasMoved = FALSE;
   s32 index;
   Boolean isDone;
   f32 y;
