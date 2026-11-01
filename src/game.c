@@ -1191,7 +1191,7 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 /*
  * Returns the frame count, which the caller ignores
  *
- * Doesn't match: 83 words differ.
+ * Doesn't match: 80 words differ.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
@@ -1604,10 +1604,10 @@ s32 DrawGame(void) {
 
             /* Only chooses between two fixed planes; the computed distance
              * itself is dropped */
-            if (farClip < SHORT_FAR_CLIP) {
-              farClip = SHORT_FAR_CLIP;
-            } else {
+            if (farClip >= SHORT_FAR_CLIP) {
               farClip = COURSE_FAR_CLIP;
+            } else {
+              farClip = SHORT_FAR_CLIP;
             }
 
             guPerspectiveF(matrices->perspectiveF, &perspNorm,
