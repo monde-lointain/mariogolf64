@@ -5787,9 +5787,9 @@ void DrawAnimationViewer(Gfx** displayListHead) {
  * picks; when that is 3 or 4, the chosen hole starts loading once they stop.
  */
 /*
- * Doesn't match: the original keeps the chosen course on the stack instead
- * of in a register, and orders the g_BetPagesWallSlide switch's branches and
- * the trophies' loads differently. 81 words differ.
+ * Doesn't match: GCC reloads the chosen course from the stack in the icon
+ * loop, where the original keeps it in a register, and orders the
+ * g_BetPagesWallSlide switch's branches differently. 51 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {
@@ -5832,6 +5832,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
   s16 left;
   s16 top;
   u32 trophyPalette;
+  u32 trophyImage;
 
   save = GetSaveData();
   gfx = *displayListHead;
@@ -6162,11 +6163,11 @@ void DrawCourseSelect(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         for (otherIndex = 0; otherIndex != placeCount; otherIndex++) {
+          trophyImage =
+              TextureAddress(g_TrophyFrameBuffers[f_ShownTrophyBufferIndex]);
           trophyPalette = TextureAddress(g_TrophyPalettes[places[otherIndex]]);
           gDPLoadTLUT_pal256(gfx++, trophyPalette);
-          gDPLoadTextureTile(gfx++,
-              TextureAddress(g_TrophyFrameBuffers[f_ShownTrophyBufferIndex]),
-              G_IM_FMT_CI, G_IM_SIZ_8b,
+          gDPLoadTextureTile(gfx++, trophyImage, G_IM_FMT_CI, G_IM_SIZ_8b,
               g_TrophySizes[g_MenuMemory.courseChoice].width,
               g_TrophySizes[g_MenuMemory.courseChoice].height, 0, 0,
               g_TrophySizes[g_MenuMemory.courseChoice].width - 1,
