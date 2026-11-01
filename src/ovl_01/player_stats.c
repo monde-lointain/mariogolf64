@@ -805,7 +805,7 @@ void UpdateBetSettings(void) {
  *
  * Doesn't match: the original sets up the stake number's arguments in
  * another order and keeps the stake marks' coordinates in other
- * registers. 71 words differ.
+ * registers. 62 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
@@ -821,6 +821,8 @@ void DrawBetSettings(
   s16 bannerShift;
   u8* icon;
   s32 stripTop;
+  /* The wide banner's strips, kept apart from stripTop to match */
+  s32 wideStripTop;
 
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -959,14 +961,12 @@ void DrawBetSettings(
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
+    wideStripTop = (i * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP;
     gSPScisTextureRectangle(gfx++, QuarterPixels(WIDE_BANNER_LEFT),
-        QuarterPixels(bannerShift +
-            ((i * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP) -
-            WIDE_BANNER_RAISE),
+        QuarterPixels(bannerShift + wideStripTop - WIDE_BANNER_RAISE),
         QuarterPixels(WIDE_BANNER_RIGHT),
-        QuarterPixels(bannerShift +
-            ((i * WIDE_BANNER_STRIP_SPACING) + WIDE_BANNER_TOP) -
-            WIDE_BANNER_RAISE + WIDE_BANNER_STRIP_HEIGHT),
+        QuarterPixels(bannerShift + wideStripTop - WIDE_BANNER_RAISE +
+            WIDE_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
         (MENU_BANNER_WIDTH << 10) / (WIDE_BANNER_RIGHT - WIDE_BANNER_LEFT),
         (MENU_BANNER_STRIP_HEIGHT << 10) / WIDE_BANNER_STRIP_HEIGHT);
