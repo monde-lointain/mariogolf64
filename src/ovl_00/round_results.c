@@ -1596,7 +1596,7 @@ void UpdateCharacterResultsNotice(void) {
  * The notice that a character has been beaten: their nameplate, face and title
  * pop open, then a shine sweeps the title
  *
- * Doesn't match: 44 words differ.
+ * Doesn't match: 30 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCharacterResultsNotice(Gfx** displayListHead) {
@@ -1673,7 +1673,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
       /* This pass mirrors the slide, unlike the depth pass and the shine */
       liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
       DrawTextureRect(&gfx,
-          QuarterPixels(NOTICE_CENTER_X - (f_NoticeLift + width)),
+          QuarterPixels(NOTICE_CENTER_X - width - f_NoticeLift),
           QuarterPixels(top + f_NoticeUnk6C),
           QuarterPixels(width - liftFromCenter),
           QuarterPixels(top + height + f_NoticeUnk6C), G_TX_RENDERTILE, 0, 0,
