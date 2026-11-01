@@ -322,7 +322,7 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * Doesn't match: the nested helpers match, but the routine keeps 614.4f and
  * 1996.8f in saved registers where the original reloads them, so 0.5f loses
  * the register it had and the floating-point registers are allocated
- * differently. 789 words differ.
+ * differently. 780 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -514,14 +514,15 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
               f_OpeningContactFraction = fraction;
             }
           }
+          hitsBillboard = FALSE;
         } else {
           contact = FindGroundHit(startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
               simulation->position[AXIS_Z], &f_OpeningContactTriangle,
               &f_OpeningContactFraction);
+          hitsBillboard = FALSE;
         }
 
-        hitsBillboard = FALSE;
         if (simulation->state == BALL_STATE_FLYING) {
           if (simulation->lastBounceStep + BILLBOARD_HIT_BOUNCE_GAP <
               simulation->stepCount) {
