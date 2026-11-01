@@ -6898,7 +6898,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * is up
  *
  * Doesn't match: the original adds each value banner strip's row in both
- * branches without masking it to a byte. 129 words differ.
+ * branches without masking it to a byte. 115 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {
@@ -6909,6 +6909,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   u8* shadow = GetMenuImageBuffer();
   /* Counts the options' rows, then the arrows' passes */
   s32 loopIndex;
+  s32 toggleIndex;
   s32 stripIndex;
   u8 stripTop;
   s32 valueOffset;
@@ -6960,15 +6961,15 @@ void DrawOptionsScreen(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, DIMMED_COLOR);
-  for (loopIndex = 0; loopIndex != OPTION_TOGGLE_COUNT; loopIndex++) {
+  for (toggleIndex = 0; toggleIndex != OPTION_TOGGLE_COUNT; toggleIndex++) {
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
           LargeImageTexels(g_NamePlateImage) +
               (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);
-      if (g_MenuMemory.optionsChoice == loopIndex) {
-        stripTop = (loopIndex * OPTION_ROW_SPACING) +
+      if (g_MenuMemory.optionsChoice == toggleIndex) {
+        stripTop = (toggleIndex * OPTION_ROW_SPACING) +
             ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetPrimColor(gfx++, 0, 0, BANNER_SHADOW_COLOR, BANNER_SHADOW_COLOR,
             BANNER_SHADOW_COLOR, BANNER_SHADOW_ALPHA);
@@ -6995,7 +6996,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
             (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
             (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
       } else {
-        stripTop = (loopIndex * OPTION_ROW_SPACING) +
+        stripTop = (toggleIndex * OPTION_ROW_SPACING) +
             ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0,
             PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0);
