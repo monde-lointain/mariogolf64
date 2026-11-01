@@ -457,7 +457,7 @@ void ResetGolfBalls(void) {
  * of the hole, places the current player's ball from the ball simulations,
  * and moves and fades the ball's afterimage.
  *
- * Doesn't match: 98 words differ. In the first loop the original steps the
+ * Doesn't match: 89 words differ. In the first loop the original steps the
  * ball pointer from the table's start rather than from the marker field and
  * branches the other way on the marker test, and registers differ through the
  * rest.
@@ -471,6 +471,7 @@ void UpdateGolfBalls(void) {
   BallSimulation* simulation;
   BallAfterimage* head;
   BallAfterimage* afterimage;
+  BallAfterimage* pulledAfterimage;
   BallAfterimage* previous;
   Mat4 scaling;
   Mat4 rotated;
@@ -602,18 +603,18 @@ void UpdateGolfBalls(void) {
     } else if (f_IsBallAfterimageZoomed == TRUE) {
       f_IsBallAfterimageZoomed = FALSE;
       for (i = 0; i != f_BallAfterimageLength; i++) {
-        afterimage = &f_BallAfterimages[i];
-        if (afterimage->alpha != AFTERIMAGE_UNUSED) {
-          afterimage->position[AXIS_X] -=
-              (afterimage->position[AXIS_X] -
+        pulledAfterimage = &f_BallAfterimages[i];
+        if (pulledAfterimage->alpha != AFTERIMAGE_UNUSED) {
+          pulledAfterimage->position[AXIS_X] -=
+              (pulledAfterimage->position[AXIS_X] -
                   (g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
-          afterimage->position[AXIS_Y] -=
-              (afterimage->position[AXIS_Y] -
+          pulledAfterimage->position[AXIS_Y] -=
+              (pulledAfterimage->position[AXIS_Y] -
                   (g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
-          afterimage->position[AXIS_Z] -=
-              (afterimage->position[AXIS_Z] -
+          pulledAfterimage->position[AXIS_Z] -=
+              (pulledAfterimage->position[AXIS_Z] -
                   (g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE)) *
               0.5f;
         }
