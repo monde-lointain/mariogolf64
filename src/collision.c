@@ -2813,7 +2813,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindWallHit);
  * above the ground, where course y points down, is left alone. It returns
  * a value only for a ball off the ground.
  *
- * Doesn't match: 78 words differ.
+ * Doesn't match: 70 words differ.
  */
 #ifdef NON_MATCHING
 s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
@@ -2971,12 +2971,12 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
       if (side < 0.0f) {
         pushDistance = -WALL_PUSH_DISTANCE - side;
         x = x + (plane.normal[AXIS_X] * pushDistance);
-        z = z + (plane.normal[AXIS_Z] * pushDistance);
       } else {
         pushDistance = WALL_PUSH_DISTANCE - side;
         x = x + (plane.normal[AXIS_X] * pushDistance);
-        z = z + (plane.normal[AXIS_Z] * pushDistance);
       }
+
+      z = z + (plane.normal[AXIS_Z] * pushDistance);
 
       if (isPushed) {
         osSyncPrintf("WallInsideOut2!\n");
