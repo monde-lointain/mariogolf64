@@ -562,7 +562,7 @@ void UpdateRingShotRecords(void) {
 
 /*
  * Doesn't match: the original gives several values other saved registers,
- * and keeps memory on the stack. 42 words differ.
+ * and keeps memory on the stack. 26 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx** displayListHead) {
@@ -646,21 +646,24 @@ void DrawRingShotRecords(Gfx** displayListHead) {
     drop = (row == memory->ringShotRow) * RING_SHOT_CHOSEN_ICON_DROP;
     if ((row < openCourseCount) || (row == RING_SHOT_REPLAY_ROW)) {
       if (f_RingShotIconPositions[openCourseCount - 1][row] != 0) {
-        for (column = 0; column != RING_SHOT_ICON_DRAW_COUNT; column++) {
-          if (row == 0) {
-            DrawRingShotRowIcon(
-                &gfx, 0, RING_SHOT_FIRST_ICON_X, RING_SHOT_ICON_TOP + drop);
-          } else if (row == RING_SHOT_REPLAY_ROW) {
-            DrawRingShotRowIcon(&gfx, RING_SHOT_REPLAY_ROW,
-                RING_SHOT_REPLAY_ICON_X, RING_SHOT_ICON_TOP + drop);
-          } else {
-            DrawRingShotRowIcon(&gfx, row,
-                (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ICON_OFFSET_X,
-                RING_SHOT_ICON_TOP + drop);
-          }
+        /* The icon loop in a block of its own, as a macro's do-while would
+         * make it, to match */
+        IN_OWN_BLOCK(
+            for (column = 0; column != RING_SHOT_ICON_DRAW_COUNT; column++) {
+              if (row == 0) {
+                DrawRingShotRowIcon(
+                    &gfx, 0, RING_SHOT_FIRST_ICON_X, RING_SHOT_ICON_TOP + drop);
+              } else if (row == RING_SHOT_REPLAY_ROW) {
+                DrawRingShotRowIcon(&gfx, RING_SHOT_REPLAY_ROW,
+                    RING_SHOT_REPLAY_ICON_X, RING_SHOT_ICON_TOP + drop);
+              } else {
+                DrawRingShotRowIcon(&gfx, row,
+                    (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ICON_OFFSET_X,
+                    RING_SHOT_ICON_TOP + drop);
+              }
 
-          gDPPipeSync(gfx++);
-        }
+              gDPPipeSync(gfx++);
+            });
       }
     }
 
