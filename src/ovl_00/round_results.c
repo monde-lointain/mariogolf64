@@ -260,10 +260,6 @@ typedef struct TrophyAssets {
 #define TROPHY_PART_HEIGHTS 1
 #define TROPHY_SHINE_HEIGHT 3
 #define TROPHY_SIZE_COUNT 4
-/* The height of a course's trophy, its two parts stacked */
-#define TrophyHeight(course) \
-  (f_TrophySizes[course][TROPHY_PART_HEIGHTS] + \
-      f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1])
 
 /* "StrokeSpeedGolfMini-Golf", which only an unread pointer points to */
 extern char f_UnusedModeNamesText[];
@@ -1885,7 +1881,7 @@ void SetResultsBanner(s32 state, s32 kind) {
  * Draws the banner of a round's result, and the trophy above a top three
  * tournament place
  *
- * Doesn't match: 55 words differ.
+ * Doesn't match: 49 words differ.
  */
 #ifdef NON_MATCHING
 void DrawResultsBanner(Gfx** displayListHead) {
@@ -1895,6 +1891,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
   s32 place;
   s32 course;
   s32 top;
+  s32 trophyHeight;
 
   gfx = *displayListHead;
 
@@ -2135,13 +2132,16 @@ void DrawResultsBanner(Gfx** displayListHead) {
 
       if (f_TrophyShineFrame >= TROPHY_SHINE_START) {
         if (f_TrophyShineFrame < TROPHY_SHINE_CYCLE) {
+          /* The trophy's height, its two parts stacked */
+          trophyHeight = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
+              f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
           DrawTextureRect(&gfx,
               QuarterPixels(TROPHY_CENTER_X + f_BannerX -
                   (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-              QuarterPixels(TROPHY_BOTTOM - TrophyHeight(course)),
+              QuarterPixels(TROPHY_BOTTOM - trophyHeight),
               QuarterPixels(TROPHY_CENTER_X + f_BannerX +
                   (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-              QuarterPixels(TROPHY_BOTTOM - TrophyHeight(course) +
+              QuarterPixels(TROPHY_BOTTOM - trophyHeight +
                   f_TrophySizes[course][TROPHY_SHINE_HEIGHT]),
               G_TX_RENDERTILE,
               TexelCoordinate(NOTICE_SHINE_SIZE -
