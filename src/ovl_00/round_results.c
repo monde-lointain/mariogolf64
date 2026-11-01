@@ -3446,14 +3446,7 @@ enum ClubTournamentLine {
 /*
  * The results of a club tournament: its course, number, name and mode, the
  * score and the password to send in.
- *
- * Doesn't match: GCC strength-reduces the course strips' top into a register
- * and ends their loop with slti, where the original adds the strip's offset
- * to the top each time and compares the counter with its limit held in a
- * register. Ending the loop with != instead of < gives 34 words, not 20.
- * 14 words differ.
  */
-#ifdef NON_MATCHING
 void DrawClubTournamentResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 width;
@@ -3475,7 +3468,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gameMode = GetClubTournamentGameMode();
   LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
-  for (i = 0; i < CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
+  for (i = 0; i != CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
     LoadTextureBlock(&gfx,
         LargeImageTexels(f_ResultsCourseImage) +
             (i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH *
@@ -3608,9 +3601,6 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
       TEXT_FLAG_FIXED_WIDTH);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
-#endif
 
 #define BACKDROP_X 16
 #define BACKDROP_Y 24
