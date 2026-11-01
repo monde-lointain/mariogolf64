@@ -322,7 +322,7 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * Doesn't match: the nested helpers match, but the routine keeps 614.4f and
  * 1996.8f in saved registers where the original reloads them, so 0.5f loses
  * the register it had and the floating-point registers are allocated
- * differently. 702 words differ.
+ * differently. 698 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1647,10 +1647,12 @@ ROLLED:
         windZ = simulation->windVelocityZ * scale;
       }
 
-      simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] +
-          ((windX - simulation->velocity[AXIS_X]) * drag);
-      simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
-          ((windZ - simulation->velocity[AXIS_Z]) * drag);
+      simulation->velocity[AXIS_X] =
+          ((windX - simulation->velocity[AXIS_X]) * drag) +
+          simulation->velocity[AXIS_X];
+      simulation->velocity[AXIS_Z] =
+          ((windZ - simulation->velocity[AXIS_Z]) * drag) +
+          simulation->velocity[AXIS_Z];
       simulation->velocity[AXIS_Y] = simulation->velocity[AXIS_Y] +
           ((-simulation->velocity[AXIS_Y] * drag) + GRAVITY);
     }
