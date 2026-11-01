@@ -942,7 +942,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * Doesn't match: the original loads the trophies' shift once as 0xFFEC, the low
  * half of -20, and adds it in a register, where this adds -20 to each edge,
  * and this works out the clipped top edge a second time where the original
- * reuses it. 31 words differ.
+ * reuses it. An unsigned TrophyPosition y leaves 19, but makes the rectangle
+ * macro's clamp of a negative top edge dead, which -Wextra reports in the
+ * modern build. 31 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
