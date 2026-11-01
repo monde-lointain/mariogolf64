@@ -2985,10 +2985,7 @@ void ShowWindFlyGuy(s32 show) {
 /*
  * The Fly Guy that warns of a strong wind, flying across the screen and
  * trailing a streak of wind
- *
- * Doesn't match: 86 words differ.
  */
-#ifdef NON_MATCHING
 void DrawWindFlyGuy(Gfx** displayListHead) {
   EncodedAsset asset;
   FlyGuyPoint position;
@@ -3080,9 +3077,8 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
       G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
   gDPPipeSync(gfx++);
   for (i = 0; i != WIND_STREAK_FIRST_RUN; i++) {
-    streakSlot = f_WindStreakHead + i;
-    gSPMatrix(gfx++,
-        PhysicalAddress(&f_ContactMatrices[streakSlot % WIND_STREAK_LENGTH]),
+    streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;
+    gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[streakSlot]),
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPVertex(gfx++, f_ContactVertices, 2, i * 2);
     gSPModifyVertex(
@@ -3098,11 +3094,10 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
 
   /* The second run reuses the vertex slots backwards from the last vertex of
    * the first */
-  for (i = WIND_STREAK_FIRST_RUN, slotsBack = 0;
-      i != WIND_STREAK_SECOND_RUN_END; i++, slotsBack += 2) {
-    streakSlot = f_WindStreakHead + i;
-    gSPMatrix(gfx++,
-        PhysicalAddress(&f_ContactMatrices[streakSlot % WIND_STREAK_LENGTH]),
+  for (i = WIND_STREAK_FIRST_RUN; i != WIND_STREAK_SECOND_RUN_END; i++) {
+    slotsBack = (i - WIND_STREAK_FIRST_RUN) * 2;
+    streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;
+    gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[streakSlot]),
         G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPVertex(gfx++, f_ContactVertices, 2, WIND_STREAK_LAST_SLOT - slotsBack);
     gSPModifyVertex(gfx++, WIND_STREAK_LAST_SLOT - slotsBack, G_MWO_POINT_ST,
@@ -3141,6 +3136,3 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawWindFlyGuy);
-#endif
