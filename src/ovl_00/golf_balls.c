@@ -767,7 +767,7 @@ enum BallSprite {
   gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, \
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
-/* Doesn't match: 1809 words differ. */
+/* Doesn't match: 1773 words differ. */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   Gfx* gfx = g_DisplayListHead;
@@ -995,6 +995,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                     (BALL_TEXTURE_SIZE / 2) +
                         (exposure * (BALL_TEXTURE_SIZE / 2))));
               }
+              gDPPipeSync(gfx++);
             } else if (ballDepth >= BALL_FULL_SPRITE_DEPTH) {
               gSPStretchedTextureRectangle(gfx++,
                   QuarterPixels(ballPoint.x - size),
@@ -1005,6 +1006,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                   (SMALL_BALL_TEXTURE_SIZE / 2) +
                       (exposure * (SMALL_BALL_TEXTURE_SIZE / 2)));
               spriteKind = BALL_SPRITE_SMALL;
+              gDPPipeSync(gfx++);
             } else if (ballDepth > BALL_DOT_DEPTH) {
               gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
               gDPPipeSync(gfx++);
@@ -1033,6 +1035,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               } else {
                 spriteKind = BALL_SPRITE_DOT;
               }
+              gDPPipeSync(gfx++);
             } else {
               gDPPipeSync(gfx++);
               gDPSetRenderMode(
@@ -1053,9 +1056,9 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               if (isAboveGround == TRUE) {
                 spriteKind = BALL_SPRITE_FAR_DOT_SHADOWED;
               }
+              gDPPipeSync(gfx++);
             }
 
-            gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
             gDPSetCombineMode(
