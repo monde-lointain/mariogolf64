@@ -419,12 +419,10 @@ void DrawStatsScrollArrows(Gfx** displayListHead);
 #define COURSE_TOTALS_IMAGE COURSE_COUNT
 
 /*
- * Doesn't match: the original copies the wheel's slot count to a saved register
- * after working out the spin's angle, where GCC copies it first (2 diff lines,
- * no opcode differences). Putting the spin first in the angle's sum moves the
- * copy but swaps two registers and the sum's operands. 2 words differ.
+ * Draws the course stats menu: the open courses' images and the totals image
+ * on a turning wheel, nearest last, then the arrows, the chosen course's
+ * banner, its stats panel, badge count and trophies.
  */
-#ifdef NON_MATCHING
 void DrawCourseStats(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u16 perspNorm;
@@ -481,10 +479,11 @@ void DrawCourseStats(Gfx** displayListHead) {
   angleStep = DEGREES_PER_TURN / (courseCount + 1);
   for (index = 0; index != courseCount + 1; index++) {
     ScreenPoint point;
+    s32 spinDegrees = spin * DEGREES_PER_SPIN_STEP;
 
     angle = -DegreesToRadians(
         (((statsCourse - index) % (courseCount + 1)) * angleStep) +
-        (spin * DEGREES_PER_SPIN_STEP));
+        spinDegrees);
     wheelX = sinf(angle) * WHEEL_RADIUS_X;
     if (ProjectPoint(wheelX, 0.0f, cosf(angle) * WHEEL_RADIUS_Z, &point) < 0) {
       iconX[index] = point.x;
@@ -555,9 +554,6 @@ void DrawCourseStats(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawCourseStats);
-#endif
 
 /*
  * Draws the name plate banner squeezed under the screen's title, with the
