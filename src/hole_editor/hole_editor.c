@@ -3878,7 +3878,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: 2434 words differ.
+ * Doesn't match: 2412 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3898,7 +3898,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 half;
   s32 row;
   s32 k;
+  s32 detailTileIndex;
+  s32 groupTileIndex;
   s32 j;
+  s32 segmentIndex;
   s32 pass;
   s32 tileIndex;
   s32 tileColumn;
@@ -4210,8 +4213,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
 
   slopeIndex = 0;
   for (column = 0; column != ARRAY_COUNT(snapsEdge); column++) {
-    for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
-      snapsEdge[column][j] = FALSE;
+    for (segmentIndex = 0; segmentIndex < TILE_VERTEX_SEGMENT_COUNT;
+        segmentIndex++) {
+      snapsEdge[column][segmentIndex] = FALSE;
     }
   }
 
@@ -4242,9 +4246,12 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
     column = half * GROUND_HALF_VERTEX_COLUMNS;
     for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
       groupDetail = GROUND_DETAIL_COARSE;
-      for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
-        if (groupDetail < g_WorkArea.hole.tiles[tileIndex + k].detail) {
-          groupDetail = g_WorkArea.hole.tiles[tileIndex + k].detail;
+      for (detailTileIndex = 0; detailTileIndex < GROUND_TILE_GROUP_SIZE;
+          detailTileIndex++) {
+        if (groupDetail <
+            g_WorkArea.hole.tiles[tileIndex + detailTileIndex].detail) {
+          groupDetail =
+              g_WorkArea.hole.tiles[tileIndex + detailTileIndex].detail;
         }
       }
 
@@ -4624,11 +4631,12 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
               GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
         }
 
-        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+        for (groupTileIndex = 0; groupTileIndex < GROUND_TILE_GROUP_SIZE;
+            groupTileIndex++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
               LoadEditorTileTexture(tileIndex,
-                  (half * GROUND_TILE_GROUP_SIZE) + k, row, pass,
+                  (half * GROUND_TILE_GROUP_SIZE) + groupTileIndex, row, pass,
                   GROUND_OVERLAY_NOISE);
               DrawTileQuads(topSlot, topSlot + ODD_SLOT, topSlot + 1,
                   middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
