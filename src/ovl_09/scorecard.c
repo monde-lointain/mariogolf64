@@ -146,9 +146,9 @@ s32 f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
  * after the hole to see which way their place moved.
  *
  * Doesn't match: the target copies the arguments to other registers before
- * it saves its own and stores them after it reads $sp, and it loads
- * g_TournamentStandings after setting up the loops' other registers.
- * 30 words differ.
+ * it saves its own and stores them after it reads $sp, and the first
+ * standings loop loads g_TournamentStandings after setting up its other
+ * registers. 26 words differ.
  */
 #ifdef NON_MATCHING
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
@@ -321,9 +321,9 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
         RankTournament(shownHoleCount, 0,
             GetNetScoreToPar(g_Scorecard.content.holeIndex, 0),
             g_GameState.unk2C);
-        for (standingIndex = 0, standing = g_TournamentStandings;
-            standingIndex != TOURNAMENT_CONTESTANT_COUNT;
-            standingIndex++, standing++) {
+        for (standingIndex = 0; standingIndex != TOURNAMENT_CONTESTANT_COUNT;
+            standingIndex++) {
+          standing = &g_TournamentStandings[standingIndex];
           if (standing->contestantId == PLAYER_CONTESTANT) {
             newPlace = standing->place & PLACE_MASK;
             if (oldPlace < newPlace) {
