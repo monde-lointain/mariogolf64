@@ -2130,12 +2130,7 @@ void ResetBallTrail(void) {
  * Draws the ball's trail through its recent positions as screen-space quads
  * that fade out with age. While g_BallTrailState is BALL_TRAIL_RECORDING it
  * also adds the ball's current position.
- *
- * Doesn't match: the offsets' floating-point registers are swapped, in 6
- * words. Swapping the offsets' operands or the squares' order, or dividing
- * after a separate sqrtf, does not help. 6 words differ.
  */
-#ifdef NON_MATCHING
 void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   Gfx* gfx = *displayListHead;
   ScreenPoint point;
@@ -2144,8 +2139,6 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 deltaX;
   f32 deltaY;
   f32 scale;
-  f32 offsetX;
-  f32 offsetY;
   Gfx* cycleTypeCommand;
 
   if (g_BallTrailState != BALL_TRAIL_OFF && g_RoundHud.unk17) {
@@ -2220,8 +2213,10 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           } else {
             scale = BALL_TRAIL_HALF_WIDTH /
                 sqrtf((deltaX * deltaX) + (deltaY * deltaY));
-            offsetX = deltaY * scale;
-            offsetY = deltaX * scale;
+            /* The delta, scaled to the trail's half width and turned a
+             * quarter, offsets the segment's corners */
+            deltaX *= scale;
+            deltaY *= scale;
             gDPPipeSync(gfx++);
             gDPSetPrimDepth(gfx++, f_BallTrailPoints[i].depth, 0);
             gDPPipeSync(gfx++);
@@ -2234,17 +2229,17 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
             gSPModifyVertex(
                 gfx++, 3, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
             gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-                ScreenPointWord(f_BallTrailPoints[i].x + (s32)offsetX,
-                    f_BallTrailPoints[i].y - (s32)offsetY));
+                ScreenPointWord(f_BallTrailPoints[i].x + (s32)deltaY,
+                    f_BallTrailPoints[i].y - (s32)deltaX));
             gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-                ScreenPointWord(f_BallTrailPoints[i].x - (s32)offsetX,
-                    f_BallTrailPoints[i].y + (s32)offsetY));
+                ScreenPointWord(f_BallTrailPoints[i].x - (s32)deltaY,
+                    f_BallTrailPoints[i].y + (s32)deltaX));
             gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-                ScreenPointWord(f_BallTrailPoints[i + 1].x + (s32)offsetX,
-                    f_BallTrailPoints[i + 1].y - (s32)offsetY));
+                ScreenPointWord(f_BallTrailPoints[i + 1].x + (s32)deltaY,
+                    f_BallTrailPoints[i + 1].y - (s32)deltaX));
             gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-                ScreenPointWord(f_BallTrailPoints[i + 1].x - (s32)offsetX,
-                    f_BallTrailPoints[i + 1].y + (s32)offsetY));
+                ScreenPointWord(f_BallTrailPoints[i + 1].x - (s32)deltaY,
+                    f_BallTrailPoints[i + 1].y + (s32)deltaX));
             gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
           }
         }
@@ -2261,9 +2256,6 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawBallTrail);
-#endif
 
 /*
  * Draws the wind's icon, which pulses in size, and the wind's speed in
