@@ -1188,7 +1188,7 @@ void DrawTwoDigitMenuNumber(
  * Doesn't match: the original adds the label's offset to the slide, and the
  * columns' top to the vertical slide, once before their loops, and adds the
  * texel offset to the blink frame's offset before the arrow's.
- * 248 words differ.
+ * 238 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1208,6 +1208,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   Vec3 scale;
   u8 unusedStack[0x30] UNUSED;
   Mat4 transform;
+  s32 numberOffsetX;
 
   BuildDynamicTextures(&gfx);
   gDPPipeSync(gfx++);
@@ -1478,9 +1479,10 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   }
 
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
+    numberOffsetX = slide + HANDICAP_NUMBER_OFFSET_X;
     DrawTwoDigitMenuNumber(&gfx,
         f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
-            (slide + HANDICAP_NUMBER_OFFSET_X),
+            numberOffsetX,
         HANDICAP_NUMBER_Y, g_ChosenHandicaps[columnIndex], MENU_NUMBER_PLAIN);
   }
 
