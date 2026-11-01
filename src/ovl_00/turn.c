@@ -2932,7 +2932,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 612 words differ, spread through the routine's states.
+ * Doesn't match: 610 words differ, spread through the routine's states.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3656,10 +3656,10 @@ void UpdateTurns(void) {
             nextState = PLAYER_STATE_WAITING;
           } else if (choice == PAUSE_ACTION_HOLE_OUT) {
             RequestPauseMenu(0, -1);
-            nextState = PLAYER_STATE_HOLE_DONE;
             EndFlightCamera();
             ClearShotEffects(CLEAR_KIND_ALL);
             FreeCharacterAndReactionLight(0);
+            nextState = PLAYER_STATE_HOLE_DONE;
           }
         } else if (g_PauseScreen == PAUSE_SCREEN_LOADING_SCORECARD) {
           if (g_IsModuleAlive[MODULE_SCORECARD]) {
