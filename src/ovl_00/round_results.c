@@ -1363,10 +1363,8 @@ void UpdateCourseResultsNotice(void) {
  * The notice that a course has opened: its picture and title swing in, then a
  * shine sweeps the title
  *
- * Doesn't match: in the picture's loop the original adds the center to the
- * product before taking away the size, where this takes the size from the
- * center first, so registers and order differ through the loop. A title
- * strip's top and the shine's lift also take other registers. 29 words differ.
+ * Doesn't match: a title strip's top and the shine's lift take other
+ * registers. 9 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
@@ -1410,7 +1408,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
             (i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_COURSE_STRIP_WIDTH,
         NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-    top = (i * size) + NOTICE_COURSE_CENTER_Y - size;
+    top = NOTICE_COURSE_CENTER_Y - size + (i * size);
     centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
         QuarterPixels(top + f_NoticeUnk54), QuarterPixels(size + centerX),
