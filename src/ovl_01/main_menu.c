@@ -6406,9 +6406,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelect);
 #define HOLES_CHOICE_TEXT_SLOT 1
 
 /*
- * Doesn't match: the original sets the text drawing's argument before the
- * mini-golf test that picks the name's colors, and keeps the course name
- * banner's strip top in one register instead of copying it. 7 words differ.
+ * Doesn't match: the original ends the course name banner's strip loop with
+ * stripIndex != MENU_BANNER_STRIP_COUNT, where this compiles the < test as
+ * written; writing != here gives 7. 4 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelectBanners(Gfx** displayListHead) {
@@ -6492,13 +6492,16 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   SetUpGradientTextDrawing(&gfx, 0);
   if (g_GameState.isMiniGolf == TRUE) {
     stripIndex = g_MenuMemory.miniGolfCourseChoice + MINI_GOLF_COURSE_INDEX;
+    DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, slide + COURSE_NAME_Y,
+        g_PrintBuffer, g_CourseNameEnvColors[stripIndex],
+        g_CourseNamePrimColors[stripIndex], TEXT_FLAG_CENTERED);
   } else {
     stripIndex = g_MenuMemory.courseChoice;
+    DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, slide + COURSE_NAME_Y,
+        g_PrintBuffer, g_CourseNameEnvColors[stripIndex],
+        g_CourseNamePrimColors[stripIndex], TEXT_FLAG_CENTERED);
   }
 
-  DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, slide + COURSE_NAME_Y,
-      g_PrintBuffer, g_CourseNameEnvColors[stripIndex],
-      g_CourseNamePrimColors[stripIndex], TEXT_FLAG_CENTERED);
   cameraModeTopByte = MAP_CAMERA_MODE_TOP_BYTE;
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
