@@ -65,6 +65,10 @@ PATTERN_END_RE = re.compile(r"\) (?:-1|\d+ \{\S+\}) ")
 # The start of an insn's header in an RTL dump, before its UID
 INSN_HEADER_START = r"^ *\((?:insn|jump_insn|call_insn)(?:/\w+)? "
 PSEUDO_RE = re.compile(r"\(reg(?:/\w+)?:\w+ (\d+)\)")
+# An insn's header in an RTL dump, with its UID
+INSN_HEADER_RE = re.compile(INSN_HEADER_START + r"(\d+) ", re.MULTILINE)
+# A line number note of a -g dump: its file and line
+LINE_NOTE_RE = re.compile(r'^\(note \d+ \d+ \d+ \("([^"]*)"\) (\d+)\)$', re.MULTILINE)
 DISPOSITION_RE = re.compile(r"(\d+) in (\d+)")
 
 
@@ -78,6 +82,8 @@ class Compilation:
     routine: fncompare.Routine
     # {pass: the function's part of that pass's dump}
     dumps: dict[str, str]
+    # {pass: {insn UID: the source line that made it}}
+    insn_lines: dict[str, dict[int, str]]
 
 
 def register_name(number: int) -> str:
@@ -189,6 +195,59 @@ def run(c_path: StrPath, optflags: list[str], arguments: list[str], work: Path) 
         sys.exit(result.stderr)
 
 
+def read_dumps(work: Path, function: str) -> dict[str, str]:
+    """Return {pass: FUNCTION's part of that pass's dump} from WORK."""
+    return {
+        path.suffix[1:]: split_dump(path.read_text(errors="replace"), function)
+        for path in work.glob("unit.*")
+        if path.suffix[1:] in PASSES
+    }
+
+
+def map_insn_lines(dump: str, noted_dump: str) -> dict[int, str]:
+    """Return {insn UID of DUMP: its source line} from NOTED_DUMP.
+
+    NOTED_DUMP is the same pass's dump from a -g compile. -g leaves the
+    insns as they were but adds line notes, which take UIDs of their own, so
+    the insns are paired by their order. Each takes the last line note
+    before it.
+    """
+    uids = [int(uid) for uid in INSN_HEADER_RE.findall(dump)]
+    noted = list(INSN_HEADER_RE.finditer(noted_dump))
+    if len(uids) != len(noted):
+        return {}
+    notes = list(LINE_NOTE_RE.finditer(noted_dump))
+    lines: dict[int, str] = {}
+    note_index = -1
+    for uid, header in zip(uids, noted, strict=True):
+        while (
+            note_index + 1 < len(notes)
+            and notes[note_index + 1].start() < header.start()
+        ):
+            note_index += 1
+        if note_index >= 0:
+            file, line = notes[note_index].groups()
+            lines[uid] = f"{Path(file).name}:{line}"
+    return lines
+
+
+def read_insn_lines(
+    c_path: str, optflags: list[str], dumps: dict[str, str], work: Path, function: str
+) -> dict[str, dict[int, str]]:
+    """Return {pass: {insn UID: source line}} for the insns of DUMPS."""
+    noted_work = work / "noted"
+    noted_work.mkdir()
+    _ = (noted_work / "unit.i").write_text((work / "unit.i").read_text())
+    run(
+        noted_work / "unit.i", optflags, ["-S", "-g", "-da", "-o", "unit.s"], noted_work
+    )
+    noted_dumps = read_dumps(noted_work, function)
+    return {
+        name: map_insn_lines(dump, noted_dumps.get(name, ""))
+        for name, dump in dumps.items()
+    }
+
+
 def compile_function(c_path: str, function: str, work: Path) -> Compilation:
     """Compile FUNCTION of C_PATH in WORK with -dp and -da."""
     optflags = fncompare.get_optflags(c_path)
@@ -207,13 +266,13 @@ def compile_function(c_path: str, function: str, work: Path) -> Compilation:
     if fncompare.read_object_file(work / "marked.o")[function].words != routine.words:
         sys.exit("marking the lines changed the code")
     start, ends = read_line_ends(work / "marked.o", function)
-    dumps = {
-        path.suffix[1:]: split_dump(path.read_text(errors="replace"), function)
-        for path in work.glob("unit.*")
-        if path.suffix[1:] in PASSES
-    }
+    dumps = read_dumps(work, function)
     return Compilation(
-        lines, read_word_lines(lines, routine, start, ends), routine, dumps
+        lines,
+        read_word_lines(lines, routine, start, ends),
+        routine,
+        dumps,
+        read_insn_lines(c_path, optflags, dumps, work, function),
     )
 
 
@@ -277,7 +336,9 @@ def blame(compilation: Compilation, index: int) -> str:
     uid, pattern = insn
     made, *changed = find_changes(compilation, uid)
     shaped = f", changed by {' '.join(changed)}" if changed else ""
-    return f"insn {uid} {pattern}, from {made}{shaped}"
+    line = compilation.insn_lines.get(made, {}).get(uid)
+    at = f" at {line}" if line else ""
+    return f"insn {uid} {pattern}{at}, from {made}{shaped}"
 
 
 def find_pseudos(compilation: Compilation, indices: list[int]) -> list[int]:
