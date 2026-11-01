@@ -823,7 +823,7 @@ INCLUDE_ASM("asm/nonmatchings/character", ResetTriangleTextures);
  *
  * Doesn't match: the original's frame leaves 0x18 to 0x57 and 0x5C to 0xF7
  * unused and keeps the slot at 0x58, reloading it at the top of the triangle
- * loop, where GCC keeps the slot in a saved register. 177 words differ.
+ * loop, where GCC keeps the slot in a saved register. 170 words differ.
  */
 #ifdef NON_MATCHING
 void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
@@ -871,10 +871,11 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
       state = &slot->textureAnimations[animation->index];
       if (state->pendingCopyCount >= TEXTURE_ANIMATION_PLAYING) {
         if (++state->frame >= animation->frameCount) {
-          state->pendingCopyCount = FRAME_DATA_COPY_COUNT;
           if (animation->index == RANDOM_TEXTURE_ANIMATION) {
+            state->pendingCopyCount = FRAME_DATA_COPY_COUNT;
             slot->textureAnimations[RANDOM_TEXTURE_ANIMATION].frame = 0;
           } else {
+            state->pendingCopyCount = FRAME_DATA_COPY_COUNT;
             state->frame = animation->frameCount;
           }
         }
