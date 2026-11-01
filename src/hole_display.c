@@ -77,7 +77,6 @@ enum SkyImageKind {
 
 /* The sky's vertices, for each view and each matrix buffer */
 #define SKY_VERTEX_COUNT 10
-#define SKY_COLORED_VERTEX_COUNT 5
 /* f_SkyBlendStep counts to this at most */
 #define SKY_BLEND_STEP_COUNT 1000
 

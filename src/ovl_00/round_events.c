@@ -1415,7 +1415,6 @@ void DrawMovie(Gfx** displayListHead) {
 /* The face's later frames, which g_CharacterImageAssets lists after its first
  */
 #define WINNER_BLINK_FRAME 8
-#define WINNER_FACE_FRAME_COUNT 4
 
 /*
  * The caption of a longest drive or nearest pin contest, then its winner's face

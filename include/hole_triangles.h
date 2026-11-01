@@ -15,8 +15,6 @@
 
 #define HOLE_TRIANGLE_COUNT 160
 #define HOLE_TRIANGLE_VERTEX_COUNT 3
-/* In g_WorkArea.bytes */
-#define HOLE_TRIANGLE_OFFSET 0x5A520
 
 /* The ends of each axis's range in HoleTriangle.bounds */
 enum BoundEnd {

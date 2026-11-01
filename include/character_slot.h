@@ -35,8 +35,6 @@
  * unk68 */
 #define CHARACTER_MODEL_UNK68 9
 #define UNK68_COUNT 6
-/* The first of six f32 pointers, copied to a slot's unk68 */
-#define CHARACTER_MODEL_UNK9 9
 
 #define END_OF_DISPLAY_LIST_CHOICES 0xFFFFFFFF
 /* The display list choice that draws nothing */

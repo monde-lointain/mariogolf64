@@ -135,10 +135,10 @@
 #define HOLE_RECORD_MAX_STROKES 5
 #define RING_SHOT_RECORD_MAX_STROKES 6
 #define IMPACT_SOUND_VOLUME 0x64
-/* The order in which players' lies come up, from the first */
+/* The order in which players' lies come up, from the first: the tee, then off
+ * the green (1) and on it (0), which comparing the lie's surface kind with
+ * SURFACE_KIND_GREEN gives */
 #define LIE_PRIORITY_TEE 2
-#define LIE_PRIORITY_OFF_GREEN 1
-#define LIE_PRIORITY_ON_GREEN 0
 /* Under GAME_FLAG_FEWEST_STROKES_FIRST, a priority that falls with each stroke
  */
 #define STROKE_PRIORITY_BASE 200
