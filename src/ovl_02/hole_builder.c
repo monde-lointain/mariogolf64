@@ -3984,7 +3984,7 @@ static inline u16 ReadTileTexel(
  * row, or inside a border of their neighbors' texels. Doesn't match:
  * where ReadTileTexel reads a tile, the original adds the tile's address
  * after the layout test, and ours adds it before; ours also masks the texel
- * coordinates in another order. 106 words differ.
+ * coordinates in another order. 97 words differ.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {
@@ -4013,7 +4013,7 @@ void ToggleGroundTileBorders(void) {
         for (strippedTexelRow = 0; strippedTexelRow < GROUND_TILE_TEXEL_SPAN;
             strippedTexelRow++) {
           for (strippedTexelColumn = 0;
-              strippedTexelColumn < GROUND_TILE_TEXEL_SPAN;
+              strippedTexelColumn != GROUND_TILE_TEXEL_SPAN;
               strippedTexelColumn++) {
             texels[0][(strippedTexelRow * GROUND_TILE_TEXEL_SPAN) +
                 strippedTexelColumn] = ReadTileTexel(strippedTileColumn,
