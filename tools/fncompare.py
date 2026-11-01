@@ -236,7 +236,9 @@ def read_symbol_table(elf: bytes) -> tuple[bytes, bytes]:
 def read_linked_symbols() -> dict[str, int]:
     """Return {name: address} of the symbols the matching build names once.
 
-    The symbols are those of REFERENCED_TYPES. Reads the symbol table with
+    The symbols are those of REFERENCED_TYPES, named without the label number
+    GCC appends to a nested function or static local, as objects number them
+    differently. Reads the symbol table with
     struct, since pyelftools takes half a second over the game's thousands of
     symbols.
     """
@@ -251,9 +253,11 @@ def read_linked_symbols() -> dict[str, int]:
             continue
         name_start = read_field(symbol, ST_NAME, WORD_SIZE)
         name = names[name_start : names.index(0, name_start)].decode()
-        if name in addresses:
+        name = LABEL_NUMBER_RE.sub("", name)
+        address = read_field(symbol, ST_VALUE, WORD_SIZE)
+        if addresses.get(name, address) != address:
             repeated.add(name)
-        addresses[name] = read_field(symbol, ST_VALUE, WORD_SIZE)
+        addresses[name] = address
     return {
         name: address for name, address in addresses.items() if name not in repeated
     }
