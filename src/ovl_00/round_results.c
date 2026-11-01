@@ -1363,8 +1363,10 @@ void UpdateCourseResultsNotice(void) {
  * The notice that a course has opened: its picture and title swing in, then a
  * shine sweeps the title
  *
- * Doesn't match: a title strip's top and the shine's lift take other
- * registers. 9 words differ.
+ * Doesn't match: in the title's second loop GCC adds a strip's height in $s0
+ * where the original uses $v0, and for the shine the original adds its lift,
+ * kept in $t0, to each edge last, where GCC adds the lift and f_NoticeUnk54
+ * once for both edges. 7 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
@@ -1419,8 +1421,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
     s32 top;
-    lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
-    lift -= (s32)NOTICE_TITLE_LIFT;
+    lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) -
+        (s32)NOTICE_TITLE_LIFT;
     LoadTextureBlock(&gfx,
         LargeImageTexels(f_NoticeTitleImage) +
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
@@ -1447,8 +1449,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
       G_RM_AA_ZB_TEX_EDGE2);
   LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
-    depthLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
-    depthLift -= (s32)NOTICE_TITLE_LIFT;
+    depthLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) -
+        (s32)NOTICE_TITLE_LIFT;
     LoadTextureBlock(&gfx,
         LargeImageTexels(f_NoticeTitleImage) +
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
@@ -1507,8 +1509,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     SetSoundPan(NOTICE_SWING_SOUND_CHANNEL, pan);
   }
 
-  shineLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
-  shineLift -= (s32)NOTICE_TITLE_LIFT;
+  shineLift =
+      -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) - (s32)NOTICE_TITLE_LIFT;
   if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
     if (f_NoticeFrameCount < NOTICE_SHINE_END) {
       shineTexelX = TexelCoordinate(NOTICE_SHINE_SIZE -
