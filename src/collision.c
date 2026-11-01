@@ -2022,7 +2022,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * the plane together, adding their terms in turn, where this works out the
  * start's first, and so the tests on the sides and the fraction's terms take
  * other registers. The prologue and the triangle lookup are scheduled
- * differently too. 144 words differ.
+ * differently too. 140 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2047,6 +2047,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 hitX;
   s32 hitZ;
   s32 sides;
+  f32 endDistance;
 
   if (IsGameFlagSet(GAME_FLAG_UNK0)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -2141,7 +2142,8 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     if (DoesPathMeetPlane(startSide, endSide)) {
       endSide = startSide - endSide;
       if ((s32)endSide != 0) {
-        hitFraction = fabsf(startSide) / fabsf(endSide);
+        endDistance = fabsf(endSide);
+        hitFraction = fabsf(startSide) / endDistance;
       } else {
         hitFraction = 0.0f;
       }
