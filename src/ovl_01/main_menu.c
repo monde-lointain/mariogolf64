@@ -2236,7 +2236,7 @@ void UpdateAnimationViewer(void) {
  * g_GameState.gameMode in another order, the B button's path loads
  * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
- * the step. 113 words differ.
+ * the step. 109 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -3921,7 +3921,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
  *
  * Doesn't match: the game keeps 0xFD500000 in a register and spills
  * 0x073DB06C where this spills the other way, and it reads g_MenuScreen for
- * MENU_LAYER_UNK20 where this drops the read. 364 words differ.
+ * MENU_LAYER_UNK20 where this drops the read. 360 words differ.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
@@ -4445,7 +4445,7 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * by 5 alongside the label table's pointers, which also moves the title row's
  * pointer from s0 to t7. loop.c turns the offset down because the loop has 268
  * insns after CSE and the offset is worth 252; the original's loop must be 252
- * insns or fewer. 60 words differ. A permuter run got to 2 only by testing
+ * insns or fewer. 62 words differ. A permuter run got to 2 only by testing
  * f_TitleLabelCorners around two identical labelOffset branches, and an else
  * if around identical branches gets 16; neither test has any meaning.
  */
@@ -4776,7 +4776,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * stars won.
  *
  * Doesn't match: the boards' strips schedule their address loads differently.
- * 207 words differ.
+ * 199 words differ.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -6891,7 +6891,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * is up
  *
  * Doesn't match: the original adds each value banner strip's row in both
- * branches without masking it to a byte. 131 words differ.
+ * branches without masking it to a byte. 129 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {

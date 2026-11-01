@@ -942,8 +942,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * Doesn't match: the original loads the trophies' shift once as 0xFFEC, the low
  * half of -20, and adds it in a register, where this adds -20 to each edge,
  * and this works out the clipped top edge a second time where the original
- * reuses it. Writing the place's offset in place of a local brings 43 differing
- * words down to 33. 33 words differ.
+ * reuses it. 31 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
@@ -1600,9 +1599,7 @@ void DrawOffLabel(Gfx** displayListHead, s32 x, s32 y) {
  * Doesn't match: the original reloads displayListHead from its stack slot
  * at once, keeps blinkFrame in a temporary register and works out the
  * arrows' top inside the loop, where this keeps both in saved registers, so
- * most registers differ. Holding the top in a local brings 288 differing
- * words down to 264; computing it in the loop gives 288 to 298. 264 words
- * differ.
+ * most registers differ. 264 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,

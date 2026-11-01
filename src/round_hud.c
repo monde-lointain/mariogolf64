@@ -801,7 +801,7 @@ void PrepareHoleDisplay(void) {
 /*
  * Lays out the wind flag and builds the projections the HUD draws with
  *
- * Doesn't match: 58 words differ.
+ * Doesn't match: 64 words differ.
  */
 #ifdef NON_MATCHING
 void InitRoundHud(void) {
@@ -1669,7 +1669,7 @@ typedef struct GridScreenPoint {
     } \
   }
 
-/* Doesn't match: 389 words differ. */
+/* Doesn't match: 361 words differ. */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
   GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
@@ -3207,7 +3207,7 @@ void SetShotOffsetMarker(s32 x, s32 y) {
  * Draws the shot offset marker, animated while HUD_FLAG_ANIMATE_OFFSET_MARKER
  * is set
  *
- * Doesn't match: 37 words differ.
+ * Doesn't match: 49 words differ.
  */
 #ifdef NON_MATCHING
 void DrawShotOffsetMarker(void) {
@@ -3633,7 +3633,7 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
  *
- * Doesn't match: 125 words differ.
+ * Doesn't match: 119 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {

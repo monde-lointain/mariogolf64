@@ -49,7 +49,7 @@ void ResetPath(void) {
  * position. Swapping the step index and progress updates leaves 18
  * differing words, and moving them before the copies gives 61 to 114;
  * writing f_PathProgressStep + progress gives 24, and adding the step to
- * progress first 22. 18 words differ.
+ * progress first 22. 20 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,

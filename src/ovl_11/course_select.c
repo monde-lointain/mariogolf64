@@ -601,7 +601,7 @@ void SetPlankMotion(s32 motion) {
   }
 }
 
-/* Doesn't match: 48 words differ. */
+/* Doesn't match: 56 words differ. */
 #ifdef NON_MATCHING
 void DrawPlanks(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -708,7 +708,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
 /*
  * Doesn't match: the original sets each arrow coordinate's second choice in
  * the branch's delay slot and shifts it in each arm, where GCC picks the sum
- * first and shifts it once after the arms join. 80 words differ.
+ * first and shifts it once after the arms join. 74 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRingShotSelect(Gfx** displayListHead) {
@@ -800,7 +800,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotSelect);
 #endif
 
-/* Doesn't match: 138 words differ. */
+/* Doesn't match: 134 words differ. */
 #ifdef NON_MATCHING
 void DrawHoleSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -955,7 +955,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawHoleSelect);
 /*
  * Draws the course name plate in strips, centered on centerX and centerY.
  *
- * Doesn't match: 27 words differ. GCC masks top to 16 bits each strip, and
+ * Doesn't match: 25 words differ. GCC masks top to 16 bits each strip, and
  * allocates the loop's registers in a different order. With an s32 top,
  * GCC strength-reduces the quarter-pixel rows into registers, which the
  * original doesn't (79). Setting top where it is declared gives 39, and
@@ -1000,7 +1000,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawNamePlate);
  * Spins the chosen hole's star; the position is unused, the stars are always in
  * one place
  *
- * Doesn't match: 268 words differ.
+ * Doesn't match: 266 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(

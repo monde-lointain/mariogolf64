@@ -132,7 +132,7 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
  * left or right of the screen, 2 if it is off the top or bottom, or else its
  * view depth, which is negative
  *
- * Doesn't match: 66 words differ.
+ * Doesn't match: 62 words differ.
  */
 #ifdef NON_MATCHING
 s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
@@ -197,7 +197,7 @@ s32 GetViewDepth(f32 x, f32 y, f32 z) {
  * another register. Computing the difference into a local, before or after
  * the store, leaves 13 differing words or gives 20; storing the depth after
  * its step gives 59, (f32)fabs leaves 13, and multiplying by perspective
- * instead of dividing by viewZ gives 45. 13 words differ.
+ * instead of dividing by viewZ gives 45. 11 words differ.
  */
 #ifdef NON_MATCHING
 s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {

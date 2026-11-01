@@ -173,7 +173,7 @@ extern char g_PrintBuffer[];
  * C extension.
  *
  * Doesn't match: the tag loop keeps its corner pointer and label offsets in
- * other registers. 201 words differ.
+ * other registers. 193 words differ.
  */
 #ifdef NON_MATCHING
 void DrawShotLabels(Gfx** displayListHead) {

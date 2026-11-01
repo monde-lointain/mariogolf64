@@ -742,7 +742,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
  *
  * Doesn't match: the nested DrawTriangleHeights allocates its registers
- * differently, using $s7 where the original reloads the static chain. 333
+ * differently, using $s7 where the original reloads the static chain. 323
  * words differ in it.
  */
 #ifdef NON_MATCHING
@@ -1111,7 +1111,7 @@ s32 PaintMainCourse(
  * match: the original keeps the test between the two equal cart-way colors
  * and has no stack frame.
  *
- * Doesn't match: 12 words differ.
+ * Doesn't match: 14 words differ.
  */
 #ifdef NON_MATCHING
 s32 PaintPaleRoughCourse(
@@ -1927,7 +1927,7 @@ static inline u16 ReadMapTexel(s32 column, s32 row) {
  * Encodes the map's texels as terrain codes, a byte each, in the hole file
  * buffer. Doesn't match: the original adds the work area's address to
  * the tile offset after it computes the texel offset, so it reads the texel
- * into $v0 rather than $v1. 27 words differ.
+ * into $v0 rather than $v1. 19 words differ.
  */
 #ifdef NON_MATCHING
 void EncodeCodeMap(void) {
@@ -2063,7 +2063,7 @@ static inline void FillCodeGap(
  * Doesn't match: the encoding has EncodeCodeMap's texel address order,
  * and the passes compute each neighbor's index from one strength-reduced
  * index and read the previous code's address once, where the original
- * computes it for both reads. 163 words differ.
+ * computes it for both reads. 149 words differ.
  */
 #ifdef NON_MATCHING
 void CleanCodeMap(void) {
@@ -2208,7 +2208,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
  * other registers, copies the new block's index before repeating the code
  * across the fill word rather than after, and when the blocks run out it
  * branches to the texel loop's increment, where the original's branch-likely
- * does the increment in its delay slot. 99 words differ.
+ * does the increment in its delay slot. 95 words differ.
  */
 #ifdef NON_MATCHING
 void PaintGroundTiles(void) {
@@ -2603,7 +2603,7 @@ void BuildHole(s32 course, s32 hole) {
 /*
  * Writes a hole's files to the host, the attributes as the map's terrain
  * codes, a byte each. A cleaned code map is first restored from its backup.
- * Doesn't match: for the same reason as EncodeCodeMap. 27 words differ.
+ * Doesn't match: for the same reason as EncodeCodeMap. 19 words differ.
  */
 #ifdef NON_MATCHING
 void SaveHoleFiles(s32 course, s32 hole) {
@@ -3262,7 +3262,7 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texture in f_ShadowlessTextures cast no shadow.
  * Doesn't match: ours keeps heightScale in a float register and loads
  * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
- * $s2 and $f22, and the other registers differ from there. 303 words differ.
+ * $s2 and $f22, and the other registers differ from there. 279 words differ.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
@@ -3624,7 +3624,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * the leading height row last and keeps a second, spilled copy of the trailing
  * one, and it reads the fade flags from the stack for each tile, where ours
  * extends isHighGroundFaded once per row and keeps it in another stack slot.
- * 110 words differ.
+ * 114 words differ.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
@@ -3986,7 +3986,7 @@ static inline u16 ReadTileTexel(
  * where ReadTileTexel reads a tile, the original adds the tile's address
  * after the layout test, and ours adds it before; ours also masks the texel
  * coordinates in another order, and is two instructions shorter.
- * 186 words differ.
+ * 180 words differ.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {

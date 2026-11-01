@@ -823,7 +823,7 @@ INCLUDE_ASM("asm/nonmatchings/character", ResetTriangleTextures);
  *
  * Doesn't match: the original's frame leaves 0x18 to 0x57 and 0x5C to 0xF7
  * unused and keeps the slot at 0x58, reloading it at the top of the triangle
- * loop, where GCC keeps the slot in a saved register. 170 words differ.
+ * loop, where GCC keeps the slot in a saved register. 166 words differ.
  */
 #ifdef NON_MATCHING
 void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
@@ -928,7 +928,7 @@ NO_RESULT PlayTextureAnimation(u32 slotIndex, s32 index) {
  *
  * Doesn't match: the original's frame has 0x40 unused bytes from 0x18 and
  * keeps the slot at 0x58, reloading it at the top of the triangle loop, where
- * GCC keeps the slot in a saved register. 89 words differ.
+ * GCC keeps the slot in a saved register. 87 words differ.
  */
 #ifdef NON_MATCHING
 void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
@@ -1910,7 +1910,7 @@ void SetCharacterLights(void) {
 /*
  * Draws the character in the slot with its lights, alpha and culling
  *
- * Doesn't match: 121 words differ.
+ * Doesn't match: 113 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {
@@ -2096,7 +2096,7 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  * The shadow lies on the ground plane under three points around the
  * character's shadow point.
  *
- * Doesn't match: 45 words differ.
+ * Doesn't match: 37 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(

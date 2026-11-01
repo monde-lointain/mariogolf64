@@ -457,7 +457,7 @@ void ResetGolfBalls(void) {
  * of the hole, places the current player's ball from the ball simulations,
  * and moves and fades the ball's afterimage.
  *
- * Doesn't match: 236 words differ. The original reads g_GameState's fields
+ * Doesn't match: 224 words differ. The original reads g_GameState's fields
  * through one base register, and its first loop steps its pointers with
  * other offsets and registers.
  */
@@ -767,7 +767,7 @@ enum BallSprite {
   gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, \
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
-/* Doesn't match: 1773 words differ. */
+/* Doesn't match: 1747 words differ. */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   Gfx* gfx = g_DisplayListHead;

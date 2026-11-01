@@ -597,7 +597,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * screen, behind the ball while aiming, or looking back at it from past the
  * ball.
  *
- * Doesn't match: 228 words differ.
+ * Doesn't match: 234 words differ.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -1163,7 +1163,7 @@ void MoveAimCameraDistance(void) {
  * heading holds still, the scene is drawn from a saved frame, through two
  * framebuffers.
  *
- * Doesn't match: 57 words differ, in the stick's step. The original keeps the
+ * Doesn't match: 55 words differ, in the stick's step. The original keeps the
  * stick's 16-bit value and its pointers in other registers, and schedules the
  * divisions and the heading's load differently.
  */
@@ -1273,7 +1273,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TurnAim);
  * Doesn't match: outside the look-back view, the original keeps the address of
  * aimCameraHeight in one register from the lower clamp through the upper one.
  * This holds it in another register for the lower clamp and loads it again.
- * 20 words differ.
+ * 24 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateAimControls(void) {
@@ -1695,7 +1695,7 @@ void PickStartingClub(HoleSetup* hole);
  * the club whose normal shot comes nearest the cup, out of those with a good
  * enough lie, and preferring those that reach.
  *
- * Doesn't match: 116 words differ. GCC fills the green test's delay slot with
+ * Doesn't match: 108 words differ. GCC fills the green test's delay slot with
  * bestGap's S32_MAX, where the original clears a register, and the slot index
  * and g_Players' address take other saved registers.
  */
@@ -2570,7 +2570,7 @@ void OnBallStepped(Player* player UNUSED) {}
  *
  * Doesn't match: GCC drops bestDistance = distance from the tee-order branch,
  * where the test has shown the two equal, but the original keeps the copy.
- * 10 words differ.
+ * 6 words differ.
  */
 #ifdef NON_MATCHING
 void PickNextPlayer(void) {
@@ -2929,7 +2929,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 728 words differ, spread through the routine's states.
+ * Doesn't match: 612 words differ, spread through the routine's states.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves

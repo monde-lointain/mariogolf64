@@ -1647,7 +1647,7 @@ void InvalidateBrokenSavedGames(void) {
  * Takes the recorded mark off Ring Shot records whose score, character,
  * palette, course or hole is out of range.
  *
- * Doesn't match: 7 words differ. The original copies the score kind into a
+ * Doesn't match: 5 words differ. The original copies the score kind into a
  * second register before testing its recorded bit, where combine folds the
  * copy into the mask. Reading the kind through an s8 or s32 local gives 7 to
  * 18 words; a u8 local gives the copy, but as an unsigned load.

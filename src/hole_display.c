@@ -1919,7 +1919,7 @@ void DrawSky(
  * Draws the sky and, below it, the course's backdrop in strips that follow the
  * camera's yaw and pitch
  *
- * Doesn't match: 143 words differ.
+ * Doesn't match: 141 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
@@ -2272,7 +2272,7 @@ void HandleFrameBufferSwap(void) {}
  * the unread f_UnusedFadeEndCount counts up, wrapping at FADE_COUNT_PERIOD.
  *
  * Doesn't match: registers are allocated differently, and f_CapturedFrame is
- * kept in a saved register and on the stack. 186 words differ.
+ * kept in a saved register and on the stack. 174 words differ.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
@@ -2755,7 +2755,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawMenuBackdrop);
 /*
  * Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart
  *
- * Doesn't match: 73 words differ.
+ * Doesn't match: 67 words differ.
  */
 #ifdef NON_MATCHING
 void DrawTileAnimation(void) {
@@ -2876,7 +2876,7 @@ void DrawTurnAwayAnimation(void);
  * inside the loops, and registers are allocated differently. GCC's loop
  * optimizer moves more out of the loops when its threshold is one higher.
  * Writing the corners' expressions differently in each loop gets closer, but
- * no single form matches. 124 words differ.
+ * no single form matches. 120 words differ.
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
@@ -3021,7 +3021,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
 /*
  * Copies the frame that a HUD animation that has just started breaks apart
  *
- * Doesn't match: 188 words differ.
+ * Doesn't match: 176 words differ.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
@@ -3134,7 +3134,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
 
 /*
  *
- * Doesn't match: 104 words differ.
+ * Doesn't match: 100 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {

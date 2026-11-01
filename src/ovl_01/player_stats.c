@@ -1188,7 +1188,7 @@ void DrawTwoDigitMenuNumber(
  * Doesn't match: the original adds the label's offset to the slide, and the
  * columns' top to the vertical slide, once before their loops, and adds the
  * texel offset to the blink frame's offset before the arrow's.
- * 238 words differ.
+ * 236 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -2087,7 +2087,7 @@ void UpdateBestShots(void) {
 /*
  * Doesn't match: the original works out the chosen cell's address again after
  * checking that it holds a record, before drawing its course's image and name,
- * where GCC reuses the address from the check. 107 words differ.
+ * where GCC reuses the address from the check. 103 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx** displayListHead) {

@@ -910,7 +910,7 @@ enum HoleMenuChoice {
  * the turns, and steps through the scorecard, notices and menus between
  * holes until the round ends and play returns to a menu or the staff roll.
  *
- * Doesn't match: 48 words differ.
+ * Doesn't match: 50 words differ.
  */
 void UpdatePlay(void) {
   s32 repeat;
@@ -2013,7 +2013,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 1358 words differ. The original's frame is 0x38 bytes
+ * Doesn't match: 1330 words differ. The original's frame is 0x38 bytes
  * larger, so every stack offset differs, and terrainStyle and the locals
  * take other saved registers.
  */

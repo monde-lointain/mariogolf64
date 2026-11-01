@@ -3871,7 +3871,7 @@ void LoadOpeningImpactLines(void) {
  * The original keeps the bottom edge's 88 in one register for both of a
  * strip's edges, where this folds the top edge into a separate constant.
  *
- * Doesn't match: 237 words differ.
+ * Doesn't match: 229 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -4203,7 +4203,7 @@ void LoadOpeningBurst(void) {
  * the size is set the same way in both arms of an if, which cse cannot see
  * through but cross-jumping later merges, so the original likely chose the
  * size by some condition. Placing such an if here keeps the divisions, but
- * its arms spill the size differently and are not merged. 395 words differ.
+ * its arms spill the size differently and are not merged. 391 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx** displayListHead) {
@@ -4645,7 +4645,7 @@ void LoadOpeningLogo(void) {
  * the letter loops GCC works out the texel offset before stepping the display
  * list pointer, where the original steps it first, and in the falling letters'
  * loop it derives f_LogoLetters' address from another table's instead of
- * loading it. 270 words differ.
+ * loading it. 276 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {

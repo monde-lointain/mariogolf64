@@ -105,7 +105,7 @@ void DimNextTranslucentTriangles(void) {
 /*
  * Draws the hole's triangles other than the rings
  *
- * Doesn't match: 73 words differ.
+ * Doesn't match: 69 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
@@ -272,7 +272,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
  * Draws the current player's rings; one past RING_STATE_SHOWN fades out while
  * sparkles circle it
  *
- * Doesn't match: 103 words differ.
+ * Doesn't match: 93 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,

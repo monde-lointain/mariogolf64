@@ -370,7 +370,7 @@ s32 GetModeIconIndex(GameState* state) {
  * gives 44 differing words, and storing it plainly or reading it back 30.
  * Stepping a pointer to the second image gives the two pointers but swaps
  * their registers and copies one (19); pointers to the slot's row give 31
- * to 120. 13 words differ.
+ * to 120. 11 words differ.
  */
 #ifdef NON_MATCHING
 void OpenSaveMenu(s32 kind) {
@@ -578,7 +578,7 @@ static inline s32 NextIconFrame(s32 slot) {
  *
  * Doesn't match: GCC loads the tables' addresses into other registers, and
  * tests whether a saved game is valid with beqz instead of beql, which would
- * step to the next slot's images in the delay slot. 23 words differ.
+ * step to the next slot's images in the delay slot. 19 words differ.
  */
 #ifdef NON_MATCHING
 void AnimateModeIcons(Boolean isImmediate) {

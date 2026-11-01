@@ -580,7 +580,7 @@ s32 GetClubTournamentCourse(void);
 /*
  * Doesn't match: the original sign-extends the cursor's column and row as
  * soon as it loads them, and sets up the chosen character's sound with the
- * stack argument first. 78 words differ.
+ * stack argument first. 62 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
@@ -1257,7 +1257,7 @@ void PlaceRivalCursor(void) {
  *
  * Doesn't match: the original reads the slot's palette pointer at the top of
  * each pass, indexing g_CharacterFacePalettes afresh, where this steps a
- * pointer through the table and reads it at the call; 19 words differ.
+ * pointer through the table and reads it at the call; 17 words differ.
  * Reading the palette pointer into a variable at the top gives 36, as GCC
  * then steps a pointer for it. A permuter run matched only by testing
  * slotIndex around the alternate face's identical assignments, a branch with
@@ -1447,7 +1447,7 @@ s32 GetUnusedPalette(s32 choiceIndex);
  * next frame.
  * Doesn't match: the original keeps row in a temporary register and spills the
  * menu memory pointer, where GCC keeps the pointer in a saved register and
- * spills row instead (148 diff lines, 38 opcodes). 97 words differ.
+ * spills row instead (148 diff lines, 38 opcodes). 91 words differ.
  */
 #ifdef NON_MATCHING
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {

@@ -434,7 +434,7 @@ void OpenRoundResults(s32 request) {
     } \
   }
 
-/* Doesn't match: 231 words differ. */
+/* Doesn't match: 219 words differ. */
 void LoadRoundResults(void) {
   EncodedAsset asset;
   AssetFile file;
@@ -1368,8 +1368,7 @@ void UpdateCourseResultsNotice(void) {
  * product before taking away the size, where this takes the size from the
  * center first, and in the title's loops it keeps each strip's top in $s0
  * where this works it out in temporaries, so registers and order differ
- * through the loops. Writing the depth pass's top out and keeping its bottom's
- * offset in a local brings 63 differing words down to 57. 57 words differ.
+ * through the loops. 55 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
@@ -1596,7 +1595,7 @@ void UpdateCharacterResultsNotice(void) {
  * The notice that a character has been beaten: their nameplate, face and title
  * pop open, then a shine sweeps the title
  *
- * Doesn't match: 44 words differ.
+ * Doesn't match: 48 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCharacterResultsNotice(Gfx** displayListHead) {
@@ -2474,7 +2473,7 @@ enum PointsStep {
  *
  * Doesn't match: when starting the tally, the original reads the player
  * count through the address of g_GameState.gameMode, which moves the
- * branches after it by a word. 11 words differ.
+ * branches after it by a word. 5 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {

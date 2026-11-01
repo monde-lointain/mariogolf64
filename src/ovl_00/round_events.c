@@ -1748,7 +1748,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawDriveRecord);
 #endif
 
-/* Doesn't match: 18 words differ. */
+/* Doesn't match: 16 words differ. */
 #ifdef NON_MATCHING
 void DrawPuttCaption(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -2035,7 +2035,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
  * to its own size
  *
- * Doesn't match: 106 words differ.
+ * Doesn't match: 102 words differ.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
@@ -2213,7 +2213,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
  * Lakitu flies in, counts down to the start on its starting light, then flies
  * off
  *
- * Doesn't match: 93 words differ.
+ * Doesn't match: 91 words differ.
  */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
@@ -2654,7 +2654,7 @@ void LoadContactImages(Player* player) {
  * Draws the contact effect as a ribbon through the ball's last positions, and
  * Mario's as a spinning image, while it fades
  *
- * Doesn't match: 478 words differ.
+ * Doesn't match: 476 words differ.
  */
 void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   Mat4 scale;
@@ -2986,7 +2986,7 @@ void ShowWindFlyGuy(s32 show) {
  * The Fly Guy that warns of a strong wind, flying across the screen and
  * trailing a streak of wind
  *
- * Doesn't match: 86 words differ.
+ * Doesn't match: 90 words differ.
  */
 #ifdef NON_MATCHING
 void DrawWindFlyGuy(Gfx** displayListHead) {

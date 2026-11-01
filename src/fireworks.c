@@ -216,7 +216,7 @@ INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
  * Moves the active fireworks' particles and draws each as a triangle along its
  * path
  *
- * Doesn't match: 104 words differ.
+ * Doesn't match: 90 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateAndDrawFireworks(Gfx** displayListHead) {

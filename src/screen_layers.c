@@ -509,7 +509,7 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
  *
  * Doesn't match: near the color loads, the original loads a value from a
  * stack slot, sets bit 0x400 in it and stores it back, where this sets the
- * bit earlier and keeps the value in $s7; 12 words differ. Reading blue as an
+ * bit earlier and keeps the value in $s7; 10 words differ. Reading blue as an
  * int gives 15, putting the first pipe sync in its own block gives 196, and
  * other orders of the color loads give 12 to 34.
  */
@@ -660,7 +660,7 @@ s32 UpdatePrompt(ControllerState* controller) {
  * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
  * and No under its message once it has opened. The chosen answer bobs.
  *
- * Doesn't match: 30 words differ.
+ * Doesn't match: 24 words differ.
  */
 #ifdef NON_MATCHING
 void DrawPrompt(Gfx** displayListHead) {

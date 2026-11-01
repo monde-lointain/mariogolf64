@@ -362,7 +362,7 @@ s32 GetGaugeFill(void);
 /*
  * Draws the power gauge, its markers, and the bar for the lie's span.
  *
- * Doesn't match: 270 words differ. The stack frame is 8 bytes larger, and
+ * Doesn't match: 332 words differ. The stack frame is 8 bytes larger, and
  * the original copies a tick loop's base index into a temporary register and
  * keeps the loop's 25 in another, so the loops' registers differ.
  */

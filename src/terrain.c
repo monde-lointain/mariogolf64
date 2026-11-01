@@ -658,7 +658,7 @@ f32 ConvertToFloat(s32 value) {
  * otherwise the heaviest of the four nearest codes' surfaces
  * Doesn't match: the original tests whether the steps are equal by XORing
  * each plus one, and branches first on a register it has just zeroed.
- * 34 words differ.
+ * 30 words differ.
  */
 #ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {

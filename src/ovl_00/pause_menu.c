@@ -880,7 +880,7 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
  * Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
  * while it is loaded
  *
- * Doesn't match: 53 words differ.
+ * Doesn't match: 59 words differ.
  */
 #ifdef NON_MATCHING
 void DrawPauseMenu(Gfx** displayListHead) {
@@ -1141,7 +1141,7 @@ s32 UpdateChoiceBox(ControllerState* controller) {
   return CHOICE_RESULT_NONE;
 }
 
-/* Doesn't match: 73 words differ. */
+/* Doesn't match: 67 words differ. */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;

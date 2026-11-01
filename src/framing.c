@@ -117,7 +117,7 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * Places the eye and look-at point so that the first camera's field of view
  * takes in every framed sphere, looking from the framing angles
  *
- * Doesn't match: 344 words differ.
+ * Doesn't match: 352 words differ.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {

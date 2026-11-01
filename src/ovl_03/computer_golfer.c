@@ -2226,7 +2226,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * Doesn't match: ours gives some values other saved registers than the
  * original does, and it keeps the address of f_Shot.ballPosition's z in a saved
  * register across the atan2 calls, where the original loads it again.
- * 187 words differ.
+ * 203 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
@@ -2954,7 +2954,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * Doesn't match: ours reads the simulation's state in the loop test from
  * its address, where the original reads it through the register that holds the
  * simulation's address, and the original places the fault report after the
- * surface test. 30 words differ.
+ * surface test. 24 words differ.
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {

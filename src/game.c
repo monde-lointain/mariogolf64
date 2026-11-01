@@ -1191,7 +1191,7 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 /*
  * Returns the frame count, which the caller ignores
  *
- * Doesn't match: 119 words differ.
+ * Doesn't match: 83 words differ.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {

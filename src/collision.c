@@ -993,7 +993,7 @@ const char g_PathDebugBlankText[] = "          ";
  * that starts on the plane, or, while the ball rolls, barely crosses
  * it, hits it at the path's end.
  *
- * Doesn't match: 96 words differ.
+ * Doesn't match: 80 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
@@ -1261,7 +1261,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
  *
- * Doesn't match: 83 words differ.
+ * Doesn't match: 73 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1725,7 +1725,7 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * flagstick or the flag. It sets the ball's new velocity and the fraction
  * of the way along the path, and returns which it hits as a PIN_HIT_*.
  *
- * Doesn't match: 149 words differ.
+ * Doesn't match: 151 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
@@ -2022,7 +2022,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * the plane together, adding their terms in turn, where this works out the
  * start's first, and so the tests on the sides and the fraction's terms take
  * other registers. The prologue and the triangle lookup are scheduled
- * differently too. 140 words differ.
+ * differently too. 116 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2251,7 +2251,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 682 words differ.
+ * Doesn't match: 616 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2817,7 +2817,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindWallHit);
  * above the ground, where course y points down, is left alone. It returns
  * a value only for a ball off the ground.
  *
- * Doesn't match: 70 words differ.
+ * Doesn't match: 40 words differ.
  */
 #ifdef NON_MATCHING
 s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
@@ -3013,7 +3013,7 @@ INCLUDE_RODATA("asm/nonmatchings/collision", f_WallInsideOutText);
  * hit ring's index, and the fraction of the way along the path. It returns
  * 1 for a hit, 0 for none and -1 for a start or end off the ground.
  *
- * Doesn't match: 48 words differ.
+ * Doesn't match: 32 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
