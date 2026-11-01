@@ -1596,7 +1596,9 @@ void UpdateCharacterResultsNotice(void) {
  * The notice that a character has been beaten: their nameplate, face and title
  * pop open, then a shine sweeps the title
  *
- * Doesn't match: 30 words differ.
+ * Doesn't match: in both title loops, GCC schedules the strip's top, which
+ * the loop pass reduces to a subtraction of two saved registers, two
+ * instructions before the original does. 4 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCharacterResultsNotice(Gfx** displayListHead) {
@@ -1608,9 +1610,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   s32 width;
   s32 height;
   s32 top;
-  s32 centerX;
   s32 titleCenterX;
-  s32 centerY;
   s32 i;
   s32 liftFromCenter;
   s32 shineTexelX;
@@ -1630,6 +1630,9 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   size = pop * NOTICE_NAMEPLATE_POP_SIZE;
   if (size > 0) {
+    s32 centerX;
+    s32 centerY;
+
     LoadSmallPalette(&gfx, 0, ImageBody(f_NameplateImage));
     LoadNibbleTextureBlock(&gfx, ImageTexels(f_NameplateImage), G_IM_FMT_CI,
         NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0, 0, 0, 0);
@@ -1644,12 +1647,15 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
 
   size = pop * NOTICE_PORTRAIT_POP_SIZE;
   if (size > 0) {
+    s32 centerX;
+    s32 centerY;
+
     LoadLargePalette(&gfx, f_PortraitPalette);
     LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
         NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0, 0, 0);
     /* Kept in a local, unlike the nameplate's, to match */
     step = TexelRunStep(NOTICE_PORTRAIT_SIZE / 2, size);
-    IN_OWN_BLOCK(centerX = f_NoticeLift + NOTICE_CENTER_X);
+    centerX = f_NoticeLift + NOTICE_CENTER_X;
     centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
         QuarterPixels(centerY - size), QuarterPixels(size + centerX),
