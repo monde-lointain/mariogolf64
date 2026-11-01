@@ -786,7 +786,10 @@ s32 GetImpactEventFrame(u32 slotIndex) {
  * from 0x18 and keeps the slot at 0x58, reloading it at the top of the
  * triangle loop, where GCC keeps the slot in a saved register. Making
  * SetTriangleTexture a static inline function left the frame as it is, but
- * 137 words differed where 87 did without it.
+ * 137 words differed where 87 did without it. Making it an inline function
+ * nested here keeps the slot on the stack and reloads it as the original
+ * does, but leaves out the unused bytes and computes the slot's address for
+ * the static chain: 133 words differ.
  */
 #ifdef NON_MATCHING
 void ResetTriangleTextures(u32 slotIndex) {
