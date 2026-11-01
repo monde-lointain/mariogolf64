@@ -5779,7 +5779,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
 /*
  * Doesn't match: the original keeps the chosen course on the stack instead
  * of in a register, and orders the g_BetPagesWallSlide switch's branches and
- * the trophies' loads differently. 85 words differ.
+ * the trophies' loads differently. 81 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {
@@ -5821,6 +5821,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
   s32 blue;
   s16 left;
   s16 top;
+  u32 trophyPalette;
 
   save = GetSaveData();
   gfx = *displayListHead;
@@ -6151,8 +6152,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         for (otherIndex = 0; otherIndex != placeCount; otherIndex++) {
-          gDPLoadTLUT_pal256(
-              gfx++, TextureAddress(g_TrophyPalettes[places[otherIndex]]));
+          trophyPalette = TextureAddress(g_TrophyPalettes[places[otherIndex]]);
+          gDPLoadTLUT_pal256(gfx++, trophyPalette);
           gDPLoadTextureTile(gfx++,
               TextureAddress(g_TrophyFrameBuffers[f_ShownTrophyBufferIndex]),
               G_IM_FMT_CI, G_IM_SIZ_8b,
