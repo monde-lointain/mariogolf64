@@ -1631,7 +1631,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #define DRIVE_RECORD_DISTANCE_ENV_COLOR 0xFF600000
 #define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
 
-/* Doesn't match: 53 words differ. */
+/* Doesn't match: 42 words differ. */
 #ifdef NON_MATCHING
 void DrawDriveRecord(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1722,10 +1722,11 @@ void DrawDriveRecord(Gfx** displayListHead) {
         continue;
       }
 
-      centerX = SHRINKING_IMAGE_CENTER_X - slide;
       copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-      DrawTextureRect(&gfx, QuarterPixels(centerX - (s32)(width >> 1)),
-          QuarterPixels(copyTop), QuarterPixels(centerX + (s32)(width >> 1)),
+      DrawTextureRect(&gfx,
+          QuarterPixels(SHRINKING_IMAGE_CENTER_X - (slide + (s32)(width >> 1))),
+          QuarterPixels(copyTop),
+          QuarterPixels(SHRINKING_IMAGE_CENTER_X + (s32)(width >> 1) - slide),
           QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
           0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
@@ -1748,7 +1749,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawDriveRecord);
 #endif
 
-/* Doesn't match: 31 words differ. */
+/* Doesn't match: 18 words differ. */
 #ifdef NON_MATCHING
 void DrawPuttCaption(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1838,10 +1839,11 @@ void DrawPuttCaption(Gfx** displayListHead) {
         continue;
       }
 
-      centerX = SHRINKING_IMAGE_CENTER_X - slide;
       copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-      DrawTextureRect(&gfx, QuarterPixels(centerX - (s32)(width >> 1)),
-          QuarterPixels(copyTop), QuarterPixels(centerX + (s32)(width >> 1)),
+      DrawTextureRect(&gfx,
+          QuarterPixels(SHRINKING_IMAGE_CENTER_X - (slide + (s32)(width >> 1))),
+          QuarterPixels(copyTop),
+          QuarterPixels(SHRINKING_IMAGE_CENTER_X + (s32)(width >> 1) - slide),
           QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
           0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
