@@ -2596,7 +2596,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShotsCursor);
  * in the grid, clamped to the known ones
  *
  * Doesn't match: the original keeps the row and column counters in other saved
- * registers. 44 words differ.
+ * registers. 38 words differ.
  */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
@@ -2638,12 +2638,13 @@ void LoadBestShotFaces(void) {
         if (palette >= CHARACTER_PALETTE_COUNT) {
           palette = CHARACTER_PALETTE_COUNT - 1;
         }
+        f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       } else {
         character = 0;
         IN_OWN_BLOCK(palette = 0);
+        f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       }
 
-      f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       IN_OWN_BLOCK(
           OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file));
       ReadAssetFile(
