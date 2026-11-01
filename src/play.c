@@ -2011,7 +2011,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 1330 words differ. The original's frame is 0x38 bytes
+ * Doesn't match: 1249 words differ. The original's frame is 0x38 bytes
  * larger, so every stack offset differs, and terrainStyle and the locals
  * take other saved registers.
  */
@@ -2031,10 +2031,15 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   s32 groupDetail;
   s32 previousDetail;
   s32 i;
+  s32 culledTileIndex;
   s32 j;
+  s32 segmentIndex;
   s32 row;
   s32 k;
+  s32 groupTileIndex;
+  s32 detailTileIndex;
   s32 pass;
+  s32 passIndex;
   s32 tileIndex;
   s32 tileColumn;
   s32 column;
@@ -2171,20 +2176,24 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
 
   maxDetail = GROUND_DETAIL_COARSE;
   tiles = g_WorkArea.hole.tiles;
-  for (i = 0; i < GROUND_TILE_COUNT; i++) {
-    radius = (g_GroundTileHeightRanges[i] >= MIN_GROUND_TILE_RADIUS)
-        ? g_GroundTileHeightRanges[i]
+  for (culledTileIndex = 0; culledTileIndex < GROUND_TILE_COUNT;
+      culledTileIndex++) {
+    radius =
+        (g_GroundTileHeightRanges[culledTileIndex] >= MIN_GROUND_TILE_RADIUS)
+        ? g_GroundTileHeightRanges[culledTileIndex]
         : MIN_GROUND_TILE_RADIUS;
-    visibility = GetSphereVisibility(
-        tiles[i].center[0], tiles[i].center[1], tiles[i].center[2], radius);
+    visibility = GetSphereVisibility(tiles[culledTileIndex].center[0],
+        tiles[culledTileIndex].center[1], tiles[culledTileIndex].center[2],
+        radius);
     detail = GROUND_DETAIL_HIDDEN;
     if (visibility < 0) {
-      if (tiles[i].midpointBlockIndex >= 0 &&
-          (g_IsGroundTileNearby[i] ||
-              visibility * fineScale < g_GroundTileHeightRanges[i])) {
+      if (tiles[culledTileIndex].midpointBlockIndex >= 0 &&
+          (g_IsGroundTileNearby[culledTileIndex] ||
+              visibility * fineScale <
+                  g_GroundTileHeightRanges[culledTileIndex])) {
         detail = GROUND_DETAIL_FINE;
       } else if (visibility * MEDIUM_DEPTH_SCALE <
-          g_GroundTileHeightRanges[i]) {
+          g_GroundTileHeightRanges[culledTileIndex]) {
         detail = GROUND_DETAIL_MEDIUM;
       } else {
         detail = GROUND_DETAIL_COARSE;
@@ -2201,13 +2210,14 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
       maxDetail = detail;
     }
 
-    tiles[i].detail = detail;
-    if ((i & (GROUND_TILE_GROUP_SIZE - 1)) == GROUND_TILE_GROUP_SIZE - 1) {
+    tiles[culledTileIndex].detail = detail;
+    if ((culledTileIndex & (GROUND_TILE_GROUP_SIZE - 1)) ==
+        GROUND_TILE_GROUP_SIZE - 1) {
       /* Coarse tiles in a group with finer ones are drawn at medium detail */
       if (maxDetail > GROUND_DETAIL_COARSE) {
         for (j = 0; j < GROUND_TILE_GROUP_SIZE; j++) {
-          if (tiles[i - j].detail == GROUND_DETAIL_COARSE) {
-            tiles[i - j].detail = GROUND_DETAIL_MEDIUM;
+          if (tiles[culledTileIndex - j].detail == GROUND_DETAIL_COARSE) {
+            tiles[culledTileIndex - j].detail = GROUND_DETAIL_MEDIUM;
           }
         }
       }
@@ -2232,8 +2242,9 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   }
 
   for (i = 0; i < ARRAY_COUNT(snapsEdge); i++) {
-    for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
-      snapsEdge[i][j] = FALSE;
+    for (segmentIndex = 0; segmentIndex < TILE_VERTEX_SEGMENT_COUNT;
+        segmentIndex++) {
+      snapsEdge[i][segmentIndex] = FALSE;
     }
   }
 
@@ -2264,9 +2275,12 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
     column = half * GROUND_HALF_VERTEX_COLUMNS;
     for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
       groupDetail = GROUND_DETAIL_COARSE;
-      for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
-        if (groupDetail < g_WorkArea.hole.tiles[tileIndex + k].detail) {
-          groupDetail = g_WorkArea.hole.tiles[tileIndex + k].detail;
+      for (detailTileIndex = 0; detailTileIndex < GROUND_TILE_GROUP_SIZE;
+          detailTileIndex++) {
+        if (groupDetail <
+            g_WorkArea.hole.tiles[tileIndex + detailTileIndex].detail) {
+          groupDetail =
+              g_WorkArea.hole.tiles[tileIndex + detailTileIndex].detail;
         }
       }
 
@@ -2423,11 +2437,13 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
 
         gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
-        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+        for (groupTileIndex = 0; groupTileIndex < GROUND_TILE_GROUP_SIZE;
+            groupTileIndex++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-            for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LoadTileTexture(
-                  tileIndex, (half * GROUND_TILE_GROUP_SIZE) + k, row);
+            for (passIndex = 0; passIndex < GROUND_TILE_MAX_PASSES;
+                passIndex++) {
+              LoadTileTexture(tileIndex,
+                  (half * GROUND_TILE_GROUP_SIZE) + groupTileIndex, row);
               gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
                   topSlot + 1, bottomSlot + 1, bottomSlot, 0);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
