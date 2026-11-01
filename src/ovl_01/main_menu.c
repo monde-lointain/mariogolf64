@@ -4786,8 +4786,9 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * controller icon and label, and for a single player the birdie badges or
  * stars won.
  *
- * Doesn't match: the boards' strips schedule their address loads differently.
- * 199 words differ.
+ * Doesn't match: the boards' strips schedule their address loads differently,
+ * and values take other registers through the boards' and the players' loops.
+ * 189 words differ.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -5176,8 +5177,7 @@ void DrawModeSelect(Gfx** displayListHead) {
 
   if ((g_ChosenPlayerCount == 1) &&
       (f_ModeChoiceIcons[0][g_MenuMemory.modeChoice] == MODE_ICON_RING_SHOT)) {
-    starCount = 0;
-    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT;
+    for (courseIndex = 0, starCount = 0; courseIndex != RING_SHOT_COURSE_COUNT;
         courseIndex++) {
       for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
         if (save->hasRingShotStar[courseIndex][holeIndex] > 0) {

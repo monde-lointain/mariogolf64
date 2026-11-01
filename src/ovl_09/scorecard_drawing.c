@@ -3135,10 +3135,11 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresTenDegrees);
  * at the end. The bet columns show g_PrintBuffer as it already stands, and
  * are skipped when the bet rate at the player's index is zero or unset.
  *
- * Doesn't match: this keeps loop values on the stack that the target keeps in
- * saved registers. The nested ifs make GCC compare the bet rate with zero and
- * UNSET_BET_RATE in turn, as the original does, rather than as a range.
- * 47 words differ.
+ * Doesn't match: the original counts the bet column from 0 and adds
+ * BET_TALLY_LEFT where it sets each digit's left edge, and tests
+ * g_PrintBuffer's first character at its own address before the digits' loop.
+ * The nested ifs make GCC compare the bet rate with zero and UNSET_BET_RATE in
+ * turn, as the original does, rather than as a range. 35 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBetTallies(Gfx** displayListHead) {
@@ -3157,8 +3158,8 @@ void DrawBetTallies(Gfx** displayListHead) {
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     rowOffset = playerIndex * BET_TALLY_ROW_SPACING;
     total = 0;
-    column = BET_TALLY_LEFT;
-    for (betIndex = 0; betIndex != BET_COUNT; betIndex++) {
+    for (betIndex = 0, column = BET_TALLY_LEFT; betIndex != BET_COUNT;
+        betIndex++) {
       total += g_BetTallies[playerIndex][betIndex];
       if (g_GameState.betRates[playerIndex] != 0) {
         if (g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {

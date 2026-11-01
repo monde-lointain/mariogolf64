@@ -3131,7 +3131,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
 
 /*
  *
- * Doesn't match: 100 words differ.
+ * Doesn't match: 96 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
@@ -3165,8 +3165,7 @@ void DrawSliceAnimation(void) {
     PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SOUND_FULL_SCALE);
   }
 
-  sliceY = 0;
-  for (slice = 0; slice != sliceCount; slice++) {
+  for (slice = 0, sliceY = 0; slice != sliceCount; slice++) {
     y = sliceY;
     for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
       gDPLoadTextureBlock(g_DisplayListHead++,
