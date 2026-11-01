@@ -117,7 +117,7 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * Places the eye and look-at point so that the first camera's field of view
  * takes in every framed sphere, looking from the framing angles
  *
- * Doesn't match: 348 words differ.
+ * Doesn't match: 344 words differ.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
@@ -152,6 +152,7 @@ void FrameSpheres(f32 depthOffset) {
   f32 radius;
   f64 frontDistance;
   s32 i;
+  f32 rightRadians;
 
   minY = FAR_EXTENT;
   minX = minY;
@@ -277,8 +278,8 @@ void FrameSpheres(f32 depthOffset) {
   depth = (Z_MARGIN - minZ) + eyeZ;
   frontDistance = depth - horizontalEyeZ;
   /* distance holds the right edge from here, to match */
-  IN_OWN_BLOCK(
-      distance = frontDistance * tan(FramingDegreesToRadians(rightAngle)));
+  rightRadians = FramingDegreesToRadians(rightAngle);
+  IN_OWN_BLOCK(distance = frontDistance * tan(rightRadians));
   left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
   frontDistance = depth - verticalEyeZ;
   top = frontDistance * tan(FramingDegreesToRadians(topAngle));
