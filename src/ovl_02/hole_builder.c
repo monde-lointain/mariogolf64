@@ -1111,7 +1111,7 @@ s32 PaintMainCourse(
  * match: the original keeps the test between the two equal cart-way colors
  * and has no stack frame.
  *
- * Doesn't match: 18 words differ.
+ * Doesn't match: 12 words differ.
  */
 #ifdef NON_MATCHING
 s32 PaintPaleRoughCourse(
@@ -1173,11 +1173,11 @@ s32 PaintPaleRoughCourse(
         /* Both colors are the same in the original */
         if (nearestDistance == 1) {
           color = 0x94A5;
+          paintedCode = TERRAIN_CODE_CART_WAY;
         } else {
           color = 0x94A5;
+          paintedCode = TERRAIN_CODE_CART_WAY;
         }
-
-        paintedCode = TERRAIN_CODE_CART_WAY;
       }
 
       break;
