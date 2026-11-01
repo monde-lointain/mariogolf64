@@ -3640,7 +3640,7 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
  *
- * Doesn't match: 119 words differ.
+ * Doesn't match: 67 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {
@@ -3650,7 +3650,6 @@ void DrawRoundHud(CameraView* view) {
   s32 scoreboardX;
   s32 i;
   s32 ringCount;
-  s32 hundredths;
   s32 height;
   Player* shooter;
   Club* selectedClub;
@@ -3909,10 +3908,11 @@ void DrawRoundHud(CameraView* view) {
     }
 
     if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-      hundredths = g_RoundHud.cupDistance *
+      s32 restHundredths = g_RoundHud.cupDistance *
           (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
-      sprintf(g_PrintBuffer, "%3d.%02df", hundredths / HUNDREDTHS_PER_UNIT,
-          hundredths % HUNDREDTHS_PER_UNIT);
+
+      sprintf(g_PrintBuffer, "%3d.%02df", restHundredths / HUNDREDTHS_PER_UNIT,
+          restHundredths % HUNDREDTHS_PER_UNIT);
       DrawDistanceText(&g_DisplayListHead,
           SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, REST_LABEL_Y,
           g_PrintBuffer);
@@ -4149,11 +4149,12 @@ void DrawRoundHud(CameraView* view) {
           if (contestDistance == UNCOUNTED_DISTANCE) {
             sprintf(g_PrintBuffer, "miss");
           } else {
-            hundredths = contestDistance *
+            s32 pinHundredths = contestDistance *
                 (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+
             sprintf(g_PrintBuffer, "%2d.%02d%c",
-                hundredths / HUNDREDTHS_PER_UNIT,
-                hundredths % HUNDREDTHS_PER_UNIT, SHADOWED_FEET_GLYPH);
+                pinHundredths / HUNDREDTHS_PER_UNIT,
+                pinHundredths % HUNDREDTHS_PER_UNIT, SHADOWED_FEET_GLYPH);
           }
 
           DrawShadowedText(&g_DisplayListHead, scoreboardX + PIN_DISTANCE_X,
@@ -4167,9 +4168,10 @@ void DrawRoundHud(CameraView* view) {
   if (g_RoundHud.unkD && !IsOnDrivingRange() &&
       g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
       g_GameState.replayKind == REPLAY_KIND_NONE) {
-    hundredths = (s32)(g_GameState.stopwatchFrameCount *
-                     ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+    s32 hundredths = (s32)(g_GameState.stopwatchFrameCount *
+                         ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
         HUNDREDTHS_PER_SECOND;
+
     totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
     sprintf(g_PrintBuffer, f_ElapsedTimeFormat,
         totalSeconds / SECONDS_PER_MINUTE, totalSeconds % SECONDS_PER_MINUTE,
