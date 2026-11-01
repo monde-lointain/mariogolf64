@@ -2649,12 +2649,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
 /*
  * Draws the menu backdrop that SetMenuBackdrop chose, inside the backdrop's
  * border.
- *
- * Doesn't match: registers are allocated differently in the pattern's display
- * list, and GCC works out the second strip loop's height before loading the
- * strip's texels rather than after. 274 words differ.
  */
-#ifdef NON_MATCHING
 void DrawMenuBackdrop(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 strip;
@@ -2707,14 +2702,15 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
 
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
       height = StripHeight(strip);
-      IN_OWN_BLOCK(gDPLoadTextureTile(gfx++,
+      gDPLoadTextureTile(gfx++,
           (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP *
               FRAME_WORDS_PER_ROW] &
               ~7,
           G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER,
           BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD));
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
           QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
           QuarterPixels(BACKDROP_RIGHT + 1),
@@ -2736,6 +2732,7 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
           BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
           QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
           QuarterPixels(BACKDROP_RIGHT + 1),
@@ -2748,9 +2745,6 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", DrawMenuBackdrop);
-#endif
 
 /*
  * Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart
