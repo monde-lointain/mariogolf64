@@ -3461,8 +3461,13 @@ void SecondUnusedCameraStub(void) {}
  * Builds the top-left quarter of a spot, as SPOT_QUARTER_SIZE x
  * SPOT_QUARTER_SIZE I8 texels. A soft spot is a disc that fades out toward its
  * edge. Otherwise it is a disc, a dark gap and a ring that brightens outward.
- * Doesn't match: the soft spot converts its squared distance in $f2
- * rather than $f0. 6 words differ.
+ * Doesn't match: the original converts the soft spot's squared distance
+ * into a temporary, takes its root there and copies the root to distance,
+ * which radius then reads. Here the conversion goes into distance itself.
+ * Taking sqrtf of the sum directly gives 10 differing words, as cse2 makes
+ * radius read the root and the copy moves into a delay slot. Setting
+ * distance before the loops gives 3, as cse then makes the root's insn set
+ * distance directly. 6 words differ.
  */
 #ifdef NON_MATCHING
 void BuildSpotTexels(u8* texels, Boolean isSoft) {
