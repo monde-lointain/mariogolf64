@@ -769,7 +769,7 @@ enum BallSprite {
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
 /*
- * Doesn't match: 1485 words differ. The stack frame is 8 bytes smaller, so
+ * Doesn't match: 1417 words differ. The stack frame is 8 bytes smaller, so
  * the register saves move, and the display list pointers take other
  * registers.
  */
@@ -789,6 +789,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   s32 exposure;
   Boolean isAboveCup;
   s32 ballDepth;
+  s32 afterimageProjectedDepth;
   s32 shadowDepth;
   s32 primDepth;
   s32 shadowPrimDepth;
@@ -1219,20 +1220,20 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
     for (i = 0; i != f_BallAfterimageLength; i++) {
       afterimage = &f_BallAfterimages[i];
       if (afterimage->alpha > 0) {
-        ballDepth = ProjectPoint(afterimage->position[AXIS_X],
+        afterimageProjectedDepth = ProjectPoint(afterimage->position[AXIS_X],
             afterimage->position[AXIS_Y] - (g_PinVertexScale * 0.27f),
             afterimage->position[AXIS_Z], &ballPoint);
-        if (ballDepth < BALL_NEAREST_DEPTH) {
+        if (afterimageProjectedDepth < BALL_NEAREST_DEPTH) {
           if (g_IsCupViewShown == TRUE) {
             afterimageDepth = 0x402F;
-            if (ballDepth >= g_CupViewDepth) {
+            if (afterimageProjectedDepth >= g_CupViewDepth) {
               afterimageDepth = afterimage->isInCup == TRUE ? 0x401F : 0x4007;
             }
 
             gDPSetPrimColor(
                 gfx++, 0, 0, 0xA0, 0xA0, 0xFF, afterimage->alpha / 2);
           } else {
-            if (ballDepth < g_CupViewDepth) {
+            if (afterimageProjectedDepth < g_CupViewDepth) {
               afterimageDepth = ballPoint.depth -
                   (ballPoint.depthStep * (10.5f * g_PinVertexScale)) + 48.0f -
                   BALL_DEPTH_BIAS;
