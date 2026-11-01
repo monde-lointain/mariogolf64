@@ -769,7 +769,7 @@ enum BallSprite {
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
 /*
- * Doesn't match: 1342 words differ. The stack frame is 8 bytes smaller, so
+ * Doesn't match: 1322 words differ. The stack frame is 8 bytes smaller, so
  * the register saves move, and the display list pointers take other
  * registers.
  */
@@ -992,14 +992,14 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                     (BALL_TEXTURE_SIZE / 2) +
                         (exposure * (BALL_TEXTURE_SIZE / 2)));
               } else {
-                IN_OWN_BLOCK(gSPStretchedTextureRectangle(gfx++,
+                gSPStretchedTextureRectangle(gfx++,
                     QuarterPixels(ballPoint.x - size),
                     QuarterPixels(ballPoint.y - size),
                     QuarterPixels(ballPoint.x + size),
                     QuarterPixels(ballPoint.y + (exposure * size)),
                     BALL_TILE_ROLLING, 0, 0, BALL_TEXTURE_SIZE,
                     (BALL_TEXTURE_SIZE / 2) +
-                        (exposure * (BALL_TEXTURE_SIZE / 2))));
+                        (exposure * (BALL_TEXTURE_SIZE / 2)));
               }
               gDPPipeSync(gfx++);
             } else if (ballDepth >= BALL_FULL_SPRITE_DEPTH) {
