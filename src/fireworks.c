@@ -387,4 +387,3 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-
