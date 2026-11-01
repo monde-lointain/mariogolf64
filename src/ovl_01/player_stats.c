@@ -803,8 +803,9 @@ void UpdateBetSettings(void) {
  * when isSlideReversed is set). Once the screen has settled it types the
  * chosen bet's explanation
  *
- * Doesn't match: the original keeps its g_BetSet loads in other registers
- * and schedules the stake marks' coordinates differently. 208 words differ.
+ * Doesn't match: the original sets up the stake number's arguments in
+ * another order and keeps the stake marks' coordinates in other
+ * registers. 71 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
@@ -815,10 +816,11 @@ void DrawBetSettings(
   s16 i;
   s16 stakeLevel;
   s16 betIndex;
-  s16 markGrowth;
+  u16 markGrowth;
   s32 markRaise;
   s16 bannerShift;
   u8* icon;
+  s32 stripTop;
 
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -915,7 +917,7 @@ void DrawBetSettings(
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       }
 
-      IN_OWN_BLOCK(gDPPipeSync(gfx++));
+      gDPPipeSync(gfx++);
 
       gSPScisTextureRectangle(gfx++,
           QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] + slide +
@@ -979,13 +981,10 @@ void DrawBetSettings(
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
+    stripTop = (i * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP;
     gSPScisTextureRectangle(gfx++, QuarterPixels(BET_BANNER_LEFT),
-        QuarterPixels(
-            bannerShift + ((i * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP)),
-        QuarterPixels(BET_BANNER_RIGHT),
-        QuarterPixels(bannerShift +
-            ((i * MENU_BANNER_STRIP_HEIGHT) + BET_BANNER_TOP) +
-            MENU_BANNER_STRIP_HEIGHT),
+        QuarterPixels(bannerShift + stripTop), QuarterPixels(BET_BANNER_RIGHT),
+        QuarterPixels(bannerShift + stripTop + MENU_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
         (MENU_BANNER_WIDTH << 10) / (BET_BANNER_RIGHT - BET_BANNER_LEFT),
         TEXEL_STEP_ONE);
