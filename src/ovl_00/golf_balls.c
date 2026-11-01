@@ -767,7 +767,11 @@ enum BallSprite {
   gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, \
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
-/* Doesn't match: 1747 words differ. */
+/*
+ * Doesn't match: 1485 words differ. The stack frame is 8 bytes smaller, so
+ * the register saves move, and the display list pointers take other
+ * registers.
+ */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   Gfx* gfx = g_DisplayListHead;
@@ -1380,7 +1384,8 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPSetPrimDepth(gfx++, f_CurrentBallScreenPoint.depth - 4, 0);
     if (f_CurrentBallScreenPoint.depth < PIKA_BALL_DEPTH) {
-      for (i = 0, ball = f_GolfBalls; i < GOLF_BALL_COUNT; i++, ball++) {
+      for (i = 0; i < GOLF_BALL_COUNT; i++) {
+        ball = &f_GolfBalls[i];
         if (ball->markerPlayerIndex == BALL_NO_MARKER &&
             f_GolfBalls[i].alpha == BALL_SHOWN &&
             (g_IsCupViewShown || ball->isInCup != TRUE) &&
