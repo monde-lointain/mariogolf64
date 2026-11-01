@@ -597,7 +597,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * screen, behind the ball while aiming, or looking back at it from past the
  * ball.
  *
- * Doesn't match: 234 words differ.
+ * Doesn't match: 224 words differ.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -746,7 +746,10 @@ void PlaceShotCamera(void) {
           g_CurrentShot.ballPosition[AXIS_Z];
       g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     } else {
-      tilt = (AIM_TILT_FULL_DISTANCE - GetSelectedClub()->distance) *
+      tilt = (AIM_TILT_FULL_DISTANCE -
+                 GetClub(g_Players[g_CurrentShot.playerIndex]
+                             .clubs[g_CurrentShot.clubSlot])
+                     ->distance) *
           AIM_TILT_PER_YARD;
       if (tilt < 0.0f) {
         tilt = 0.0f;
