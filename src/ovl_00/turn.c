@@ -2934,7 +2934,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 610 words differ, spread through the routine's states.
+ * Doesn't match: 564 words differ, spread through the routine's states.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3091,6 +3091,11 @@ void UpdateTurns(void) {
   s32 nextState;
   Boolean areCallsAllowed;
   s32 i;
+  s32 aimingPollIndex;
+  s32 preparingPollIndex;
+  s32 extraStepIndex;
+  s32 debugPlayerIndex;
+  s32 groupPlayerIndex;
 
   /* Returns whether the B button is held */
   Boolean IsBButtonHeld(void) {
@@ -3294,8 +3299,10 @@ void UpdateTurns(void) {
   }
 
   if (IsGameFlagSet(GAME_FLAG_SHOW_PLAYER_UNKC)) {
-    for (i = 0; i < g_GameState.playerCount; i++) {
-      PrintDebugPaddedHex(g_Players[i].state, 2, i + 10);
+    for (debugPlayerIndex = 0; debugPlayerIndex < g_GameState.playerCount;
+        debugPlayerIndex++) {
+      PrintDebugPaddedHex(
+          g_Players[debugPlayerIndex].state, 2, debugPlayerIndex + 10);
     }
   }
 
@@ -3578,9 +3585,9 @@ void UpdateTurns(void) {
         f_ShotLaunch.heading = g_CurrentShot.heading;
         if (f_ShotSource == SHOT_SOURCE_PLANNING) {
           StartTurnTimer();
-          for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
-              i < PLAN_PREPARING_POLL_COUNT;
-              i++) {
+          for (preparingPollIndex = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
+              preparingPollIndex < PLAN_PREPARING_POLL_COUNT;
+              preparingPollIndex++) {
             IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&g_ScriptedShot) !=
                                             PLANNED_SHOT_UNFINISHED)
                     ? SHOT_SOURCE_PREPARED
@@ -3810,9 +3817,9 @@ void UpdateTurns(void) {
             }
 
             StartTurnTimer();
-            for (i = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
-                i < PLAN_AIMING_POLL_COUNT;
-                i++) {
+            for (aimingPollIndex = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
+                aimingPollIndex < PLAN_AIMING_POLL_COUNT;
+                aimingPollIndex++) {
               f_ShotSource =
                   (GetPlannedShot(&g_ScriptedShot) != PLANNED_SHOT_UNFINISHED)
                   ? SHOT_SOURCE_PREPARED
@@ -4386,7 +4393,8 @@ void UpdateTurns(void) {
 
             if (IsGameFlagSet(GAME_FLAG_FAST_FLIGHT) ||
                 (g_TurnController.buttons & (Z_TRIG | L_TRIG))) {
-              for (i = 0; i < FAST_FLIGHT_EXTRA_STEPS; i++) {
+              for (extraStepIndex = 0; extraStepIndex < FAST_FLIGHT_EXTRA_STEPS;
+                  extraStepIndex++) {
                 if (!isCameraDone) {
                   StepBallSimulation(&g_TurnBallSimulation);
                   TickStopwatches();
@@ -4880,10 +4888,13 @@ void UpdateTurns(void) {
             Boolean isAnyOut = FALSE;
             s32 holeResult = GetGroupHoleResult(results);
 
-            for (i = 0; i < g_GameState.playerCount; i++) {
-              if (results[i] == GROUP_PLAYER_OUT &&
-                  g_Players[i].holeStatus == HOLE_STATUS_PLAYING) {
-                g_Players[i].holeStatus = HOLE_STATUS_NEWLY_OUT;
+            for (groupPlayerIndex = 0;
+                groupPlayerIndex < g_GameState.playerCount;
+                groupPlayerIndex++) {
+              if (results[groupPlayerIndex] == GROUP_PLAYER_OUT &&
+                  g_Players[groupPlayerIndex].holeStatus ==
+                      HOLE_STATUS_PLAYING) {
+                g_Players[groupPlayerIndex].holeStatus = HOLE_STATUS_NEWLY_OUT;
                 isAnyOut = TRUE;
               }
             }
