@@ -993,7 +993,7 @@ const char g_PathDebugBlankText[] = "          ";
  * that starts on the plane, or, while the ball rolls, barely crosses
  * it, hits it at the path's end.
  *
- * Doesn't match: 142 words differ.
+ * Doesn't match: 100 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
@@ -1010,8 +1010,6 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   s32 nextTileX;
   s32 nextTileZ;
   s32 tileDistance;
-  s32 deltaX;
-  s32 deltaZ;
   s32 pathBottomY;
   s32 row;
   s32 column;
@@ -1062,9 +1060,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   tileX = startX >> MINI_GOLF_TILE_X_SHIFT;
   tileZ = startZ >> MINI_GOLF_TILE_Z_SHIFT;
   endTileX = endX >> MINI_GOLF_TILE_X_SHIFT;
-  deltaX = endX - startX;
   endTileZ = endZ >> MINI_GOLF_TILE_Z_SHIFT;
-  deltaZ = endZ - startZ;
   tileFraction = 0.0f;
   while (TRUE) {
     hitIndex = NO_HOLE_TRIANGLE;
@@ -1160,8 +1156,8 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
         }
 
         if (hitFraction < nearestFraction) {
-          hitX = (s32)(deltaX * hitFraction) + startX;
-          hitZ = (s32)(deltaZ * hitFraction) + startZ;
+          hitX = (s32)((endX - startX) * hitFraction) + startX;
+          hitZ = (s32)((endZ - startZ) * hitFraction) + startZ;
           if (((triangles[i].corners[AXIS_X][1] -
                    triangles[i].corners[AXIS_X][0]) *
                   (hitZ -
@@ -1217,10 +1213,10 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
       step = (1.0f - tileFraction) * 0.5f;
       hitFraction = tileFraction + step;
       for (i = 0; i < TILE_SEARCH_STEP_COUNT; i++) {
-        nextTileX =
-            (s32)((deltaX * hitFraction) + startX) >> MINI_GOLF_TILE_X_SHIFT;
-        nextTileZ =
-            (s32)((deltaZ * hitFraction) + startZ) >> MINI_GOLF_TILE_Z_SHIFT;
+        nextTileX = (s32)(((endX - startX) * hitFraction) + startX) >>
+            MINI_GOLF_TILE_X_SHIFT;
+        nextTileZ = (s32)(((endZ - startZ) * hitFraction) + startZ) >>
+            MINI_GOLF_TILE_Z_SHIFT;
         tileDistance = Abs(nextTileX - tileX) + Abs(nextTileZ - tileZ);
         if (tileDistance == 1) {
           break;
@@ -1264,7 +1260,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
  *
- * Doesn't match: 129 words differ.
+ * Doesn't match: 87 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1280,8 +1276,6 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 nextTileX;
   s32 nextTileZ;
   s32 tileDistance;
-  s32 deltaX;
-  s32 deltaZ;
   s32 pathBottomY;
   s32 row;
   s32 column;
@@ -1332,9 +1326,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   tileX = startX >> GROUND_TILE_SHIFT;
   tileZ = startZ >> GROUND_TILE_SHIFT;
   endTileX = endX >> GROUND_TILE_SHIFT;
-  deltaX = endX - startX;
   endTileZ = endZ >> GROUND_TILE_SHIFT;
-  deltaZ = endZ - startZ;
   tileFraction = 0.0f;
   while (TRUE) {
     hitIndex = NO_HOLE_TRIANGLE;
@@ -1429,8 +1421,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
 
         if (hitFraction < nearestFraction) {
-          hitX = (deltaX * hitFraction) + startX;
-          hitZ = (deltaZ * hitFraction) + startZ;
+          hitX = ((endX - startX) * hitFraction) + startX;
+          hitZ = ((endZ - startZ) * hitFraction) + startZ;
           if (((triangles[i].corners[AXIS_X][1] -
                    triangles[i].corners[AXIS_X][0]) *
                   (hitZ -
@@ -1486,8 +1478,10 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       step = (1.0f - tileFraction) * 0.5f;
       hitFraction = tileFraction + step;
       for (i = 0; i < TILE_SEARCH_STEP_COUNT; i++) {
-        nextTileX = (s32)((deltaX * hitFraction) + startX) >> GROUND_TILE_SHIFT;
-        nextTileZ = (s32)((deltaZ * hitFraction) + startZ) >> GROUND_TILE_SHIFT;
+        nextTileX = (s32)(((endX - startX) * hitFraction) + startX) >>
+            GROUND_TILE_SHIFT;
+        nextTileZ = (s32)(((endZ - startZ) * hitFraction) + startZ) >>
+            GROUND_TILE_SHIFT;
         tileDistance = Abs(nextTileX - tileX) + Abs(nextTileZ - tileZ);
         if (tileDistance == 1) {
           break;
