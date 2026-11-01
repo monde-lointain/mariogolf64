@@ -1429,7 +1429,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BetDashText);
  *
  * Doesn't match: the target indexes the minute arrays from the offset it
  * shares with the other time arrays, where this steps pointers through them,
- * and it adds the rows' offsets to the scorecard's y in a different order. 214
+ * and it adds the rows' offsets to the scorecard's y in a different order. 183
  * words differ.
  */
 #ifdef NON_MATCHING
@@ -1470,29 +1470,33 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
       minutes = g_HoleTimeMinutes[i];
       if (minutes < 0) {
         sprintf(g_PrintBuffer, f_StringFormat, "--------");
+        DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT,
+            (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
+            g_PrintBuffer);
       } else {
         sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, g_HoleTimeSeconds[i],
             g_HoleTimeHundredths[i]);
+        DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT,
+            (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
+            g_PrintBuffer);
       }
-
-      DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT,
-          (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
-          g_PrintBuffer);
     }
 
     if (i + NINE_HOLE_COUNT < shownHoleCount) {
       minutes = g_HoleTimeMinutes[i + NINE_HOLE_COUNT];
       if (minutes < 0) {
         sprintf(g_PrintBuffer, f_StringFormat, "--------");
+        DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
+            (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
+            g_PrintBuffer);
       } else {
         sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes,
             g_HoleTimeSeconds[i + NINE_HOLE_COUNT],
             g_HoleTimeHundredths[i + NINE_HOLE_COUNT]);
+        DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
+            (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
+            g_PrintBuffer);
       }
-
-      DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
-          (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
-          g_PrintBuffer);
     }
   }
 
