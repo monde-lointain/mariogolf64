@@ -36,7 +36,7 @@ import subprocess
 import sys
 import tempfile
 import threading
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -144,6 +144,8 @@ REFERENCED_TYPE_NAMES = frozenset(("STT_NOTYPE", "STT_OBJECT", "STT_FUNC"))
 MAX_DIFF_HUNKS = int(os.environ.get("MAX_DIFF_HUNKS", "4"))
 # How many matching instructions -v prints around each run, as diff -U does
 DIFF_CONTEXT = int(os.environ.get("DIFF_CONTEXT", "0"))
+# The width an annotated instruction's text is padded to
+ANNOTATION_COLUMN = 32
 
 StrPath = str | os.PathLike[str]
 
@@ -451,9 +453,15 @@ def isolate_functions(source: str, keep: set[str]) -> str:
 
 
 def run_compiler(
-    c_path: StrPath, optflags: list[str], arguments: list[str]
+    c_path: StrPath,
+    optflags: list[str],
+    arguments: list[str],
+    cwd: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    """Run KMC GCC on C_PATH with the project's flags and ARGUMENTS."""
+    """Run KMC GCC on C_PATH with the project's flags and ARGUMENTS.
+
+    Runs in CWD, by default the work directory, which also takes any dumps.
+    """
     return subprocess.run(
         [
             str(KMC_DIR / "gcc"),
@@ -464,7 +472,7 @@ def run_compiler(
             *arguments,
             str(Path(c_path).resolve()),
         ],
-        cwd=get_work_dir(),
+        cwd=cwd or get_work_dir(),
         env=dict(os.environ, COMPILER_PATH=str(KMC_DIR)),
         capture_output=True,
         text=True,
@@ -867,14 +875,27 @@ def print_call_differences(target: Routine, compiled: Routine) -> None:
             print(f"  {sign}call {name} x{count}")
 
 
-def print_diff(target: Routine, compiled: Routine) -> None:
-    """Print the first few runs of instructions that differ."""
+def find_diff_runs(target: Routine, compiled: Routine) -> list[list[Row]]:
+    """Return the runs of rows whose instructions differ."""
     pairing = pair_words(target, compiled)
-    runs = [
+    return [
         list(group)
         for is_equal, group in itertools.groupby(pairing.rows, pairing.is_equal)
         if not is_equal
     ]
+
+
+def print_diff(
+    target: Routine,
+    compiled: Routine,
+    annotate: Callable[[int], str] | None = None,
+) -> None:
+    """Print the first few runs of instructions that differ.
+
+    ANNOTATE, given the index of one of our instructions, returns a note to
+    print after it.
+    """
+    runs = find_diff_runs(target, compiled)
     for run in runs[:MAX_DIFF_HUNKS]:
         target_indices = [index for index, _ in run if index is not None]
         compiled_indices = [index for _, index in run if index is not None]
@@ -886,7 +907,10 @@ def print_diff(target: Routine, compiled: Routine) -> None:
         for index in target_indices:
             print(f"  -{index:4} {disassemble(target, index)}")
         for index in compiled_indices:
-            print(f"  +{index:4} {disassemble(compiled, index)}")
+            text = disassemble(compiled, index)
+            if annotate:
+                text = f"{text:{ANNOTATION_COLUMN}} ; {annotate(index)}"
+            print(f"  +{index:4} {text}")
         if last is not None:
             for index in range(last, min(len(target.words), last + DIFF_CONTEXT)):
                 print(f"   {index:4} {disassemble(target, index)}")
