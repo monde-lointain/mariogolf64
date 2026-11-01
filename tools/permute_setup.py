@@ -42,14 +42,17 @@ COMPILE_SH = """#!/bin/bash
 COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
 """
 
-# Disassembles the function and the nested functions it holds, which KMC GCC
-# names NAME.N, in a fixed order
+# Disassembles the nested functions the function holds, which KMC GCC names
+# NAME.N and so are looked up, and then the function, in a fixed order. The
+# permuter runs this for every candidate, and the lookup's four extra programs
+# took longer than objdump itself.
 OBJDUMP_SH = """#!/bin/bash
 # Invoked by the permuter as: objdump.sh OBJECT.o
-for name in {names}; do
+for name in {nested}; do
   symbol=$(mips-linux-gnu-nm "$1" | grep -m1 -E " $name(\\.[0-9]+)?$" | cut -d" " -f3)
   mips-linux-gnu-objdump -drz -m mips:4300 --disassemble=$symbol "$1"
 done
+exec mips-linux-gnu-objdump -drz -m mips:4300 --disassemble={function} "$1"
 """
 
 # A function defined inside another, indented as the formatter leaves it: its
@@ -375,7 +378,9 @@ def main() -> None:
     # The score covers the function and its nested functions alone, leaving
     # out any inline helper emitted from base.c
     objdump_sh = out_dir / "objdump.sh"
-    _ = objdump_sh.write_text(OBJDUMP_SH.format(names=" ".join([*nested, function])))
+    _ = objdump_sh.write_text(
+        OBJDUMP_SH.format(nested=" ".join(nested), function=function)
+    )
     objdump_sh.chmod(SCRIPT_MODE)
     prune_base(out_dir, function)
     objdump = str(objdump_sh.resolve())
