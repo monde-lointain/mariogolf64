@@ -532,7 +532,7 @@ s32 GetClubSlotsState(void) {
   return f_ClubSlotsState;
 }
 
-/* Doesn't match: 187 words differ. */
+/* Doesn't match: 147 words differ. */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
   Mat4 matrix;
@@ -547,6 +547,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   s32 symbolIndex;
   s32 top;
   s32 stripHeight;
+  s32 loadedStripHeight;
   s32 texelOffset;
   s32 buttonIndex;
   s32 stripIndex;
@@ -854,13 +855,13 @@ void DrawClubSlots(Gfx** displayListHead) {
     for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, stripIndex = 0;
         stripIndex != START_STRIP_COUNT;
         stripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {
-      stripHeight = (stripIndex != START_STRIP_COUNT - 1)
+      loadedStripHeight = (stripIndex != START_STRIP_COUNT - 1)
           ? START_STRIP_HEIGHT
           : START_LAST_STRIP_HEIGHT;
       gDPLoadTextureTile(gfx++,
           TextureAddress(f_Slots->startImage + texelOffset), G_IM_FMT_CI,
-          G_IM_SIZ_8b, START_WIDTH, stripHeight, 0, 0, START_WIDTH - 1,
-          stripHeight - 1, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
+          G_IM_SIZ_8b, START_WIDTH, loadedStripHeight, 0, 0, START_WIDTH - 1,
+          loadedStripHeight - 1, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, (s32)((SCREEN_WIDTH / 2) - halfWidth) << 2,
           (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
