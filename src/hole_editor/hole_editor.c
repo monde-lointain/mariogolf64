@@ -490,10 +490,11 @@ enum EditorCombineMode {
 \
     if (HasTileBorders(tileIndex)) { \
       if ((pass) == 0 || g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) { \
-        SetEditorCombineMode((g_WorkArea.hole.tiles[tileIndex].unk990 != 0) \
-                ? TILE_PASS_FIRST \
-                : TILE_PASS_ONLY, \
-            overlay); \
+        if (g_WorkArea.hole.tiles[tileIndex].unk990 != 0) { \
+          SetEditorCombineMode(TILE_PASS_FIRST, overlay); \
+        } else { \
+          SetEditorCombineMode(TILE_PASS_ONLY, overlay); \
+        } \
         gDPLoadMultiBlock(gfx++, \
             TextureAddress(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
             G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, \
@@ -3877,7 +3878,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: 2529 words differ.
+ * Doesn't match: 2434 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
