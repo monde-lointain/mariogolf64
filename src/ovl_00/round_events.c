@@ -1066,13 +1066,7 @@ void DrawBanner(Gfx** displayListHead) {
  * Flips a message in on a board in the middle of the screen, sized to fit it.
  * FLIP_MESSAGE_LEAVE flips the board back out, and FLIP_MESSAGE_RESET takes it
  * away at once.
- *
- * Doesn't match: GCC masks out the half height one instruction later, after
- * subtracting the margin from the negated half width. Working out halfHeight
- * with halfWidth, casting to u16 or a u16 halfWidth doesn't change it.
- * 2 words differ.
  */
-#ifdef NON_MATCHING
 void ShowFlipMessage(MessageId messageId) {
   s32 halfSize;
   s32 halfWidth;
@@ -1096,6 +1090,8 @@ void ShowFlipMessage(MessageId messageId) {
       FLIP_MESSAGE_GLYPH_GROUP, FONT_SIZE_LARGE, 0, 0, messageId);
   halfWidth = (u32)halfSize >> 16;
   f_FlipMessageHalfWidth = halfWidth;
+  halfHeight = halfSize & 0xFFFF;
+  f_FlipMessageHalfHeight = halfHeight;
   f_FlipMessageBoardVertices[0].v.ob[AXIS_X] =
       -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
   f_FlipMessageBoardVertices[1].v.ob[AXIS_X] =
@@ -1104,8 +1100,6 @@ void ShowFlipMessage(MessageId messageId) {
       halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
   f_FlipMessageBoardVertices[3].v.ob[AXIS_X] =
       halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
-  halfHeight = halfSize & 0xFFFF;
-  f_FlipMessageHalfHeight = halfHeight;
   f_FlipMessageBoardVertices[0].v.ob[AXIS_Y] =
       halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
   f_FlipMessageBoardVertices[3].v.ob[AXIS_Y] =
@@ -1118,9 +1112,6 @@ void ShowFlipMessage(MessageId messageId) {
       TEXT_SLOT_LARGE_FONT, FLIP_MESSAGE_TEXT_SLOT,
       TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 127, 255, 127, 255);
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", ShowFlipMessage);
-#endif
 
 /* Turns the flip message board a frame further in or out, then draws it and its
  * text */
