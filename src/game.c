@@ -1191,7 +1191,7 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 /*
  * Returns the frame count, which the caller ignores
  *
- * Doesn't match: 80 words differ.
+ * Doesn't match: 75 words differ.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
@@ -1572,8 +1572,7 @@ s32 DrawGame(void) {
           gDPPipeSync(g_DisplayListHead++);
           gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
           UsePrimitiveDepth(1);
-          DrawBackdrop(
-              &g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
+          DrawBackdrop(&g_DisplayListHead, &camera->view, INSET_CAMERA);
           LoadProjection();
         }
 
