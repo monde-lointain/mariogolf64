@@ -434,7 +434,7 @@ void OpenRoundResults(s32 request) {
     } \
   }
 
-/* Doesn't match: 219 words differ. */
+/* Doesn't match: 215 words differ. */
 void LoadRoundResults(void) {
   EncodedAsset asset;
   AssetFile file;
@@ -525,10 +525,10 @@ void LoadRoundResults(void) {
     size = GetAssetFileSize(&file);
     IN_OWN_BLOCK(f_PlayerPortraitPalettes[i] = AllocMemory(size));
     ReadAssetFile(f_PlayerPortraitPalettes[i], size, &file);
-    if (!g_Players[i].isComputer) {
-      f_PlayerPoints[i] = g_Players[i].points;
-    } else {
+    if (g_Players[i].isComputer) {
       f_PlayerPoints[i] = -1;
+    } else {
+      f_PlayerPoints[i] = g_Players[i].points;
     }
     f_PlayerBetTotals[i] = 0;
     for (j = 0; j != BET_COUNT; j++) {
@@ -599,8 +599,7 @@ void LoadRoundResults(void) {
         break;
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_GET_CHARACTER:
-        f_PlayerResults[1] = 0;
-        f_PlayerResults[0] = 0;
+        f_PlayerResults[1] = f_PlayerResults[0] = 0;
         for (i = GetFirstHoleIndex(); i != g_GameState.holeIndex; i++) {
           if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
             f_PlayerResults[0]++;
