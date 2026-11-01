@@ -430,7 +430,8 @@ def isolate_functions(source: str, keep: set[str]) -> str:
     code stays the same, and the compile skips the rest. The assembler
     pads a function's first instruction after a hazard in the last one
     before it, so that one stays too. A builtin without its definition
-    would be expanded instead of called.
+    would be expanded instead of called. A cut body leaves its newlines,
+    so the lines after it keep their numbers.
     """
     definitions = find_definitions(source)
     names = "|".join(map(re.escape, keep))
@@ -446,7 +447,9 @@ def isolate_functions(source: str, keep: set[str]) -> str:
         is_builtin = name in BUILTIN_NAMES
         if holds[number] or is_before_kept or is_inline or is_builtin:
             continue
-        pieces.append(source[copied:start].rstrip() + ";")
+        prototype = source[copied:start].rstrip() + ";"
+        cut_line_count = source.count("\n", copied, end) - prototype.count("\n")
+        pieces.append(prototype + "\n" * cut_line_count)
         copied = end
     pieces.append(source[copied:])
     return "".join(pieces)
