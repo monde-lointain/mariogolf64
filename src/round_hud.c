@@ -1828,8 +1828,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       } else {
         points[i][AXIS_X] = center[AXIS_X] + originX +
             (forwardX * rowPosition) + (sideX * column) + scrollX;
-        IN_OWN_BLOCK(points[i][AXIS_Z] = center[AXIS_Z] + originZ +
-                (stepZ * rowPosition) + (sideZ * column) + scrollZ);
+        points[i][AXIS_Z] = center[AXIS_Z] + originZ + (stepZ * rowPosition) +
+            (sideZ * column) + scrollZ;
       }
 
       if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {

@@ -680,7 +680,7 @@ void DrawPrompt(Gfx** displayListHead) {
 
   MeasureMessage(
       prompt->messageId, FONT_SIZE_LARGE, &textWidth, &textHeight, 0);
-  IN_OWN_BLOCK(cloudHeight = textHeight + PROMPT_CLOUD_MARGIN);
+  cloudHeight = textHeight + PROMPT_CLOUD_MARGIN;
   if (cloudHeight < PROMPT_CLOUD_SMALLEST_HEIGHT) {
     cloudHeight = PROMPT_CLOUD_SMALLEST_HEIGHT;
   }

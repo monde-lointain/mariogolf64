@@ -2618,7 +2618,7 @@ void LoadBestShotFaces(void) {
   }
 
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
-    IN_OWN_BLOCK(cell = row * STATS_GRID_COLUMN_COUNT);
+    cell = row * STATS_GRID_COLUMN_COUNT;
     for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++, cell++) {
       if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
         character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
@@ -2643,7 +2643,7 @@ void LoadBestShotFaces(void) {
         f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       } else {
         character = 0;
-        IN_OWN_BLOCK(palette = 0);
+        palette = 0;
         f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       }
 
