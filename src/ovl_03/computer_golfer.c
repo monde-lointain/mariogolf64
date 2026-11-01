@@ -2226,7 +2226,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * Doesn't match: ours gives some values other saved registers than the
  * original does, and it keeps the address of f_Shot.ballPosition's z in a saved
  * register across the atan2 calls, where the original loads it again.
- * 157 words differ.
+ * 137 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
@@ -2349,7 +2349,7 @@ s32 StepTrialShot(void) {
         f_LandingPosition[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
       }
 
-      if (f_TrialEvaluation < f_BestEvaluation) {
+      if (f_BestEvaluation > f_TrialEvaluation) {
         f_PlanStage = PLAN_STAGE_TRIAL_RUNNING;
         return 0;
       }
@@ -2433,7 +2433,7 @@ EVALUATE:
     }
 
     osSyncPrintf("BestEval = %d\n", f_BestEvaluation);
-    if (f_TrialEvaluation < f_BestEvaluation) {
+    if (f_BestEvaluation > f_TrialEvaluation) {
       f_HasBestEvaluation = TRUE;
       f_BestEvaluation = f_TrialEvaluation;
       f_TrialShot = f_Shot;
