@@ -1884,7 +1884,7 @@ void PlaceAimCamera(void);
  * differently, and orders three spots differently: the load of
  * CHASE_FIELD_OF_VIEW, the move of cosf's argument for
  * FLIGHT_CAMERA_BEHIND_START, and the stores of point for
- * FLIGHT_CAMERA_FACING_CUP.
+ * FLIGHT_CAMERA_FACING_CUP. 220 words differ.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {

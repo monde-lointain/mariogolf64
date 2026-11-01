@@ -2063,7 +2063,7 @@ static inline void FillCodeGap(
  * Doesn't match: the encoding has EncodeCodeMap's texel address order,
  * and the passes compute each neighbor's index from one strength-reduced
  * index and read the previous code's address once, where the original
- * computes it for both reads.
+ * computes it for both reads. 163 words differ.
  */
 #ifdef NON_MATCHING
 void CleanCodeMap(void) {
@@ -3262,7 +3262,7 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texture in f_ShadowlessTextures cast no shadow.
  * Doesn't match: ours keeps heightScale in a float register and loads
  * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
- * $s2 and $f22, and the other registers differ from there.
+ * $s2 and $f22, and the other registers differ from there. 309 words differ.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {

@@ -370,7 +370,7 @@ s32 GetModeIconIndex(GameState* state) {
  * gives 44 differing words, and storing it plainly or reading it back 30.
  * Stepping a pointer to the second image gives the two pointers but swaps
  * their registers and copies one (19); pointers to the slot's row give 31
- * to 120.
+ * to 120. 18 words differ.
  */
 #ifdef NON_MATCHING
 void OpenSaveMenu(s32 kind) {

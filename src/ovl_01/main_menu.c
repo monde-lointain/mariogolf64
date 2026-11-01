@@ -5769,7 +5769,7 @@ void DrawAnimationViewer(Gfx** displayListHead) {
 /*
  * Doesn't match: the original keeps the chosen course on the stack instead
  * of in a register, and orders the g_BetPagesWallSlide switch's branches and
- * the trophies' loads differently.
+ * the trophies' loads differently. 85 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {

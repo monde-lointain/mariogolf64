@@ -163,7 +163,8 @@ void PrintMessage(s8* text, u32 column, u32 row) {
  * five instructions earlier. Setting it in the outer loop's initializer
  * changes nothing; setting it next to y or setting y in the loop gives 16
  * or 19 differing words, not 4. Splat also symbolizes K1BASE's upper half
- * as D_A0000000, so the comparison counts the identical lui as different.
+ * as D_A0000000, so the comparison counts the identical lui as different. 4
+ * words differ.
  */
 #ifdef NON_MATCHING
 void DrawMessageCharacter(s8 character, u32 column, u32 row) {

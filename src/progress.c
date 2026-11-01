@@ -29,7 +29,7 @@ void ShowBirdieBadgeCount(s32 badgeCount);
  * Doesn't match: GCC masks the new win bits to a byte before printing them,
  * where the original prints the unmasked value. Building them in newValue
  * gives 19 differing words, not 3; dropping newValue or printing the stored
- * byte gives 5, and an s32 or u32 value gives 9.
+ * byte gives 5, and an s32 or u32 value gives 9. 3 words differ.
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {

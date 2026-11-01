@@ -532,7 +532,8 @@ void DrawShotEffectsHud(Gfx** displayListHead UNUSED) {}
  * the count and uses the loop's index. It also sets the trail's state from
  * another register. Testing i < f_SwingTrailSampleCount gives 23 differing
  * words, not 16, and storing the count without IN_OWN_BLOCK gives 25. Only a
- * volatile count reproduces the reloads, and the count isn't hardware.
+ * volatile count reproduces the reloads, and the count isn't hardware. 16 words
+ * differ.
  */
 #ifdef NON_MATCHING
 void StartSwingTrail(s32 kind) {

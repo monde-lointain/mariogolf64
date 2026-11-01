@@ -2275,7 +2275,7 @@ void HandleFrameBufferSwap(void) {}
  * the unread f_UnusedFadeEndCount counts up, wrapping at FADE_COUNT_PERIOD.
  *
  * Doesn't match: registers are allocated differently, and f_CapturedFrame is
- * kept in a saved register and on the stack.
+ * kept in a saved register and on the stack. 186 words differ.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
@@ -2573,7 +2573,8 @@ void SetMenuBackdrop(s32 backdrop) {
  * Starts the plain menu backdrop by capturing the last frame for it.
  *
  * Doesn't match: GCC loads f_LastFrameBuffer and f_CapturedFrame in the other
- * order before the strip loop, and places the loop's stores differently.
+ * order before the strip loop, and places the loop's stores differently. 48
+ * words differ.
  */
 #ifdef NON_MATCHING
 void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
@@ -2654,7 +2655,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
  *
  * Doesn't match: registers are allocated differently in the pattern's display
  * list, and GCC works out the second strip loop's height before loading the
- * strip's texels rather than after.
+ * strip's texels rather than after. 274 words differ.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdrop(Gfx** displayListHead) {
@@ -2878,7 +2879,7 @@ void DrawTurnAwayAnimation(void);
  * inside the loops, and registers are allocated differently. GCC's loop
  * optimizer moves more out of the loops when its threshold is one higher.
  * Writing the corners' expressions differently in each loop gets closer, but
- * no single form matches.
+ * no single form matches. 124 words differ.
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {

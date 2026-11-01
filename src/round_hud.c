@@ -1440,7 +1440,8 @@ void StartLandingReaction(s32 reaction) {
  * is drawn as glyph groups in its perspective; after that the text is drawn
  * flat.
  *
- * Doesn't match: the hundredths of the distance go in a different register.
+ * Doesn't match: the hundredths of the distance go in a different register. 22
+ * words differ.
  */
 #ifdef NON_MATCHING
 void DrawLandingReaction(Gfx** displayListHead) {
@@ -2709,7 +2710,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
  * back's and mirroring its shades around HOLE_FLAG_START_SHADE.
  *
  * Doesn't match: the loop that modifies the back's vertices allocates its
- * registers differently.
+ * registers differently. 18 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleFlag(Boolean isBackDrawn) {

@@ -422,7 +422,7 @@ void DrawStatsScrollArrows(Gfx** displayListHead);
  * Doesn't match: the original copies the wheel's slot count to a saved register
  * after working out the spin's angle, where GCC copies it first (2 diff lines,
  * no opcode differences). Putting the spin first in the angle's sum moves the
- * copy but swaps two registers and the sum's operands.
+ * copy but swaps two registers and the sum's operands. 2 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseStats(Gfx** displayListHead) {

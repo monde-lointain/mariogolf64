@@ -212,7 +212,7 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
  * set next, where GCC reuses the address it has just stored. Writing through
  * a MemoryBlock pointer, const or not, leaves 6 or gives 13 differing words.
  * Only volatile accesses to the sentinel reproduce the load, and the sentinel
- * isn't hardware.
+ * isn't hardware. 6 words differ.
  */
 #ifdef NON_MATCHING
 void InitHeapRegions(Boolean hasExpansionPak) {

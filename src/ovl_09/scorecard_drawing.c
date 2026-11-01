@@ -1429,7 +1429,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BetDashText);
  *
  * Doesn't match: the target indexes the minute arrays from the offset it
  * shares with the other time arrays, where this steps pointers through them,
- * and it adds the rows' offsets to the scorecard's y in a different order.
+ * and it adds the rows' offsets to the scorecard's y in a different order. 214
+ * words differ.
  */
 #ifdef NON_MATCHING
 void DrawSpeedGolfPage(Gfx** displayListHead) {

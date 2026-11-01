@@ -1783,7 +1783,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * prints the launch velocity to the debug output.
  *
  * Doesn't match: GCC schedules the block that sets the spin differently, which
- * moves the unk40 and sideSpin stores and swaps two float registers there.
+ * moves the unk40 and sideSpin stores and swaps two float registers there. 46
+ * words differ.
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(

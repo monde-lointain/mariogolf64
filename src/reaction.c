@@ -960,7 +960,7 @@ void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
  * Doesn't match: after the switch, GCC stores the eye's height before the
  * call that keeps it above the ground, where the original stores it in the
  * call's delay slot. Storing a height computed in each case once after the
- * switch gives 14 differing words, not 4.
+ * switch gives 14 differing words, not 4. 4 words differ.
  */
 #ifdef NON_MATCHING
 void FrameBowserReaction(u32 slotIndex, CameraView* view) {
@@ -1422,7 +1422,8 @@ void GetReactionSpot(CoursePoint point) {
  * pitch is refined twice so the slope matches the ground there.
  *
  * Doesn't match: the original loads the shot's heading unsigned and
- * sign-extends it, and its saved registers and float temporaries differ.
+ * sign-extends it, and its saved registers and float temporaries differ. 20
+ * words differ.
  */
 #ifdef NON_MATCHING
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
