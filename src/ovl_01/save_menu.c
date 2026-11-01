@@ -1368,6 +1368,7 @@ s32 ContinueSavedGame(void);
           g_CourseIconAssets[CHOSEN_GAME.state.courseIndex], &asset); \
       ReadEncodedAsset( \
           f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
+      f_ShownCourseBufferIndex ^= 1; \
     } else { \
       miniGolfIndex = CHOSEN_GAME.state.courseIndex; \
       miniGolfIndex -= MINI_GOLF_COURSE_INDEX; \
@@ -1376,9 +1377,8 @@ s32 ContinueSavedGame(void);
           f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
       OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file); \
       ReadAssetFile(g_MiniGolfDiscImages[0], GetAssetFileSize(&file), &file); \
+      f_ShownCourseBufferIndex ^= 1; \
     } \
-\
-    f_ShownCourseBufferIndex ^= 1; \
   }
 
 /*
@@ -1389,12 +1389,7 @@ s32 ContinueSavedGame(void);
  * closes the wipe to continue the game. B steps back through the players,
  * then leaves for the title screen. A press while the boards turn finishes
  * the turn instead.
- *
- * Doesn't match: the original merges the two mini golf course loads and
- * keeps both other course loads, where this merges the other course loads,
- * and one argument's load is scheduled 4 instructions early; 36 words differ.
  */
-#ifdef NON_MATCHING
 void UpdateSavedGames(void) {
   MenuMemory* memory = GetMenuMemory();
   SaveData* save = GetSaveData();
@@ -1499,10 +1494,10 @@ void UpdateSavedGames(void) {
           if (f_HumanPlayerCount == 1) {
             for (i = 0; i != g_ControllerCount; i++) {
               if (g_MenuControllerData[i].button & A_BUTTON) {
-                f_AreControllersAssigned = TRUE;
                 f_SavedPlayerControllers
                     [f_HumanPlayerIndices[f_AssignedHumanCount]] = i;
                 f_AssignedHumanCount++;
+                f_AreControllersAssigned = TRUE;
                 for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
                   SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0,
                       0xFF, 0xFF, 0xFF, 0xFF);
@@ -1626,9 +1621,6 @@ void UpdateSavedGames(void) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", UpdateSavedGames);
-#endif
 
 /* Returns -1 when the chosen saved game slot holds no game, and 0 otherwise */
 s32 IsChosenGameEmpty(void) {
