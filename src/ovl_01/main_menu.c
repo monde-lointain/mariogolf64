@@ -4769,7 +4769,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * stars won.
  *
  * Doesn't match: the boards' strips schedule their address loads differently.
- * 211 words differ.
+ * 207 words differ.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -4845,13 +4845,16 @@ void DrawModeSelect(Gfx** displayListHead) {
     turns = (g_MenuMemory.modeChoice - index) % modeCount;
     if (modeCount != 0) {
       angleStep = DEGREES_PER_TURN / modeCount;
+      angle = -DegreesToRadians((turns * angleStep) +
+          (g_MenuMemory.modeSpin * DEGREES_PER_SPIN_STEP));
+      circleX = sinf(angle) * radiusX;
     } else {
       angleStep = DEGREES_PER_TURN;
+      angle = -DegreesToRadians((turns * angleStep) +
+          (g_MenuMemory.modeSpin * DEGREES_PER_SPIN_STEP));
+      circleX = sinf(angle) * radiusX;
     }
 
-    angle = -DegreesToRadians(
-        (turns * angleStep) + (g_MenuMemory.modeSpin * DEGREES_PER_SPIN_STEP));
-    circleX = sinf(angle) * radiusX;
     if (ProjectPoint(circleX, 0.0f, cosf(angle) * MODE_BOARD_RADIUS_Z, &point) <
         0) {
       boardX[index] = point.x;
