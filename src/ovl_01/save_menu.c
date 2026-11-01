@@ -1841,7 +1841,7 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  *
  * Doesn't match: the original keeps the menu memory pointer on the stack
  * and the mode icons' texel step in a saved register, and doesn't keep
- * the degrees-to-radians factor in a register. 489 words differ.
+ * the degrees-to-radians factor in a register. 483 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -1876,7 +1876,6 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32 holeIndex;
   s32* chosenMode;
   s32* labelOffset;
-  f32 radiusX;
   s32 boardDegrees;
 
   DrawLargeBannerBackdropLayers(&gfx, SAVED_GAMES_BACKDROP_LAYERS);
@@ -1907,7 +1906,6 @@ void DrawSavedGames(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
 
-  radiusX = BOARD_RADIUS_X;
   boardDegrees = DEGREES_PER_TURN / SAVED_GAME_COUNT;
   for (index = 0; index != SAVED_GAME_COUNT; index++) {
     ScreenPoint point;
@@ -1915,7 +1913,7 @@ void DrawSavedGames(Gfx** displayListHead) {
     angle = -DegreesToRadians(
         (((memory->savedGameIndex - index) % SAVED_GAME_COUNT) * boardDegrees) +
         (memory->savedGameTurn * BOARD_TURN_STEP_DEGREES));
-    circleX = sinf(angle) * radiusX;
+    circleX = sinf(angle) * BOARD_RADIUS_X;
     if (ProjectPoint(circleX, 0.0f, cosf(angle) * BOARD_RADIUS_Z, &point) < 0) {
       boardX[index] = point.x;
       boardY[index] = point.y - WHEEL_RAISE;
