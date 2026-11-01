@@ -1621,7 +1621,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #define DRIVE_RECORD_DISTANCE_ENV_COLOR 0xFF600000
 #define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
 
-/* Doesn't match: 35 words differ. */
+/*
+ * Doesn't match: before the strip loop the original sets the first strip's
+ * bottom after the strip edges that GCC's loop pass hoists, where this sets it
+ * before them, so the loop's registers differ. 31 words differ.
+ */
 #ifdef NON_MATCHING
 void DrawDriveRecord(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1684,8 +1688,8 @@ void DrawDriveRecord(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    IN_OWN_BLOCK(bottom = SHRINKING_IMAGE_CENTER_Y);
-    for (i = 0; i != stripCount; i++, bottom += stripHeight) {
+    for (i = 0, bottom = SHRINKING_IMAGE_CENTER_Y; i != stripCount;
+        i++, bottom += stripHeight) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
       if (slide < 0) {
