@@ -3,7 +3,7 @@ spimdisasm>=1.42.4
 rabbitizer
 ipl3checksum
 mapfile-parser
-# fncompare.py and progress_report.py
+# blame.py and fncompare.py
 pyelftools
 # decode_asset.py
 pillow

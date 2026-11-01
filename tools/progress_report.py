@@ -28,23 +28,23 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import rabbitizer
-from elftools.construct.lib.container import Container
-from elftools.elf.elffile import ELFFile
-from elftools.elf.sections import SymbolTableSection
 
 from fncompare import (
+    STT_FUNC,
+    ObjectFile,
     Pairing,
     Routine,
     pair_rows,
-    read_entry_field,
-    read_entry_int,
     read_linked_symbols,
+    read_object,
     read_object_file,
+    read_object_functions,
 )
 
 MARKER_SUFFIX = ".NON_MATCHING"
 CODE_SECTION = ".text"
 DATA_SECTIONS = (".data", ".rodata")
+STB_GLOBAL = 1
 PERCENT = 100.0
 
 # objdiff's penalties (objdiff-core/src/diff/code.rs)
@@ -187,33 +187,27 @@ class Measures:
         }
 
 
-def read_symbols(elf: ELFFile) -> list[Symbol]:
-    """Return the symbols ELF defines in its sections."""
-    table = elf.get_section_by_name(".symtab")
-    if not isinstance(table, SymbolTableSection):
-        return []
-    symbols: list[Symbol] = []
-    for symbol in table.iter_symbols():
-        index = read_entry_field(symbol.entry, "st_shndx")
-        info = read_entry_field(symbol.entry, "st_info")
-        if not isinstance(index, int) or not isinstance(info, Container):
-            continue
-        symbols.append(
-            Symbol(
-                name=symbol.name,
-                section=elf.get_section(index).name,
-                size=read_entry_int(symbol.entry, "st_size"),
-                is_function=read_entry_field(info, "type") == "STT_FUNC",
-                is_global=read_entry_field(info, "bind") == "STB_GLOBAL",
-            )
+def read_symbols(obj: ObjectFile) -> list[Symbol]:
+    """Return the symbols OBJ defines in its sections."""
+    return [
+        Symbol(
+            name=symbol.name,
+            section=obj.section_names[symbol.section],
+            size=symbol.size,
+            is_function=symbol.type == STT_FUNC,
+            is_global=symbol.bind == STB_GLOBAL,
         )
-    return symbols
+        for symbol in obj.symbols
+        if symbol.section is not None
+    ]
 
 
-def get_section_size(elf: ELFFile, names: tuple[str, ...]) -> int:
-    """Return the total size of ELF's sections named NAMES."""
+def get_section_size(obj: ObjectFile, names: tuple[str, ...]) -> int:
+    """Return the total size of OBJ's sections named NAMES."""
     return sum(
-        section.data_size for section in elf.iter_sections() if section.name in names
+        obj.get_section_size(index)
+        for index, name in enumerate(obj.section_names)
+        if name in names
     )
 
 
@@ -229,10 +223,9 @@ class Unit:
 
 def measure_unit(obj_path: Path, draft_path: Path) -> Unit:
     """Measure the unit built as OBJ_PATH, whose drafts are in DRAFT_PATH."""
-    with obj_path.open("rb") as obj_file:
-        elf = ELFFile(obj_file)
-        symbols = read_symbols(elf)
-        unit = Unit(Measures(total_data=get_section_size(elf, DATA_SECTIONS)))
+    obj = read_object(obj_path)
+    symbols = read_symbols(obj)
+    unit = Unit(Measures(total_data=get_section_size(obj, DATA_SECTIONS)))
     unmatched = {
         symbol.name.removesuffix(MARKER_SUFFIX)
         for symbol in symbols
@@ -248,7 +241,7 @@ def measure_unit(obj_path: Path, draft_path: Path) -> Unit:
         and symbol.size
         and not symbol.name.endswith(MARKER_SUFFIX)
     ]
-    originals = read_object_file(obj_path) if unmatched else {}
+    originals = read_object_functions(obj) if unmatched else {}
     drafts = read_object_file(draft_path) if unmatched else {}
     addresses = read_linked_symbols()
     measures = unit.measures

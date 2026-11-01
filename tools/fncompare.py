@@ -32,6 +32,7 @@ import itertools
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -39,12 +40,10 @@ import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import cast
 
 import rabbitizer
 from elftools.construct.lib.container import Container
-from elftools.elf.elffile import ELFFile
-from elftools.elf.relocation import RelocationSection
-from elftools.elf.sections import Symbol, SymbolTableSection
 
 ROOT = Path(__file__).resolve().parent.parent
 LINKED_ELF = ROOT / "build" / "mariogolf64.elf"
@@ -134,12 +133,31 @@ ST_NAME = 0x0
 ST_VALUE = 0x4
 ST_INFO = 0xC
 SYMBOL_TYPE_MASK = 0xF
+SYMBOL_BIND_SHIFT = 4
 STT_NOTYPE = 0
 STT_OBJECT = 1
 STT_FUNC = 2
+STT_SECTION = 3
+# The section indices that name no section: undefined, absolute and common
+SHN_UNDEF = 0
+SHN_LORESERVE = 0xFF00
+# What read_object reads with struct: the header's index of the section
+# names, and each section header, symbol, relocation and word, whose
+# relocation info holds the symbol's index above the type
+E_SHSTRNDX = 0x32
+SECTION_HEADER = struct.Struct(">10I")
+SH_NAME_FIELD = 0
+SH_TYPE_FIELD = 1
+SH_OFFSET_FIELD = 4
+SH_SIZE_FIELD = 5
+SH_LINK_FIELD = 6
+SYMBOL = struct.Struct(">3I2BH")
+RELOCATION = struct.Struct(">2I")
+RELOCATION_TYPE_MASK = 0xFF
+RELOCATION_SYMBOL_SHIFT = 8
+WORD = struct.Struct(">I")
 # The symbols a relocated field can refer to: assembly labels, data and code
 REFERENCED_TYPES = frozenset((STT_NOTYPE, STT_OBJECT, STT_FUNC))
-REFERENCED_TYPE_NAMES = frozenset(("STT_NOTYPE", "STT_OBJECT", "STT_FUNC"))
 
 MAX_DIFF_HUNKS = int(os.environ.get("MAX_DIFF_HUNKS", "4"))
 # How many matching instructions -v prints around each run, as diff -U does
@@ -523,10 +541,112 @@ def compile_functions(
         return read_object_file(obj_path), ""
 
 
+@dataclass(frozen=True)
+class ObjectSymbol:
+    """A symbol in an object file's symbol table."""
+
+    name: str
+    value: int
+    size: int
+    # Its STT_ type and STB_ binding
+    type: int
+    bind: int
+    # The index of the section that defines it, or None for an undefined,
+    # absolute or common symbol
+    section: int | None
+
+
+@dataclass(frozen=True)
+class ObjectFile:
+    """A big-endian ELF32 object file, read with struct.
+
+    pyelftools parses each symbol and relocation through construct, which
+    takes seconds over the build's objects.
+    """
+
+    data: bytes
+    # The name and header of each section, by index
+    section_names: list[str]
+    section_headers: list[tuple[int, ...]]
+    symbols: list[ObjectSymbol]
+
+    def find_section(self, name: str) -> int | None:
+        """Return the index of the first section named NAME, if there is one."""
+        return self.section_names.index(name) if name in self.section_names else None
+
+    def get_section_size(self, index: int) -> int:
+        """Return the size of the section at INDEX."""
+        return self.section_headers[index][SH_SIZE_FIELD]
+
+    def read_section(self, index: int) -> bytes:
+        """Return the contents of the section at INDEX."""
+        header = self.section_headers[index]
+        start = header[SH_OFFSET_FIELD]
+        return self.data[start : start + header[SH_SIZE_FIELD]]
+
+    def read_relocations(self, name: str) -> list[tuple[int, int, int]]:
+        """Return (offset, type, symbol index) of each relocation in NAME."""
+        index = self.find_section(name)
+        if index is None:
+            return []
+        return [
+            (offset, info & RELOCATION_TYPE_MASK, info >> RELOCATION_SYMBOL_SHIFT)
+            for offset, info in unpack_all(RELOCATION, self.read_section(index))
+        ]
+
+
+def unpack_all(layout: struct.Struct, data: bytes) -> list[tuple[int, ...]]:
+    """Return the records of LAYOUT in DATA, whose fields are all integers."""
+    return cast("list[tuple[int, ...]]", list(layout.iter_unpack(data)))
+
+
+def read_name(names: bytes, start: int) -> str:
+    """Return the name at START in the string table NAMES."""
+    return names[start : names.index(0, start)].decode()
+
+
+def read_object(obj_path: StrPath) -> ObjectFile:
+    """Read the sections and symbols of the object file at OBJ_PATH."""
+    data = Path(obj_path).read_bytes()
+    first_section = read_field(data, E_SHOFF, WORD_SIZE)
+    section_count = read_field(data, E_SHNUM, HALF_SIZE)
+    headers = unpack_all(
+        SECTION_HEADER,
+        data[first_section : first_section + section_count * SECTION_HEADER.size],
+    )
+    names_header = headers[read_field(data, E_SHSTRNDX, HALF_SIZE)]
+    names_start = names_header[SH_OFFSET_FIELD]
+    section_names = data[names_start : names_start + names_header[SH_SIZE_FIELD]]
+    obj = ObjectFile(
+        data,
+        [read_name(section_names, header[SH_NAME_FIELD]) for header in headers],
+        headers,
+        [],
+    )
+    for header in headers:
+        if header[SH_TYPE_FIELD] != SHT_SYMTAB:
+            continue
+        names = obj.read_section(header[SH_LINK_FIELD])
+        start = header[SH_OFFSET_FIELD]
+        table = data[start : start + header[SH_SIZE_FIELD]]
+        obj.symbols.extend(
+            ObjectSymbol(
+                name=read_name(names, name),
+                value=value,
+                size=size,
+                type=info & SYMBOL_TYPE_MASK,
+                bind=info >> SYMBOL_BIND_SHIFT,
+                section=section if SHN_UNDEF < section < SHN_LORESERVE else None,
+            )
+            for name, value, size, info, _, section in unpack_all(SYMBOL, table)
+        )
+        break
+    return obj
+
+
 def read_object_file(obj_path: StrPath) -> Functions:
     """Return the functions in an object file, as read_object_functions does."""
-    with Path(obj_path).open("rb") as obj_file:
-        return read_object_functions(ELFFile(obj_file))
+    return read_object_functions(read_object(obj_path))
 
 
 def read_entry_field(entry: Container, field: str) -> object:
@@ -548,40 +668,29 @@ def read_entry_int(entry: Container, field: str) -> int:
 Spans = dict[int, tuple[str, int]]
 
 
-def read_function_spans(symbols: SymbolTableSection, text_index: int) -> Spans:
+def read_function_spans(symbols: list[ObjectSymbol], text_index: int) -> Spans:
     """Return where each function in the .text at TEXT_INDEX starts and ends."""
     spans: Spans = {}
-    for symbol in symbols.iter_symbols():
-        if read_symbol_type(symbol) != "STT_FUNC":
-            continue
-        if read_entry_field(symbol.entry, "st_shndx") == text_index:
-            start = read_entry_int(symbol.entry, "st_value") // WORD_SIZE
-            size = read_entry_int(symbol.entry, "st_size") // WORD_SIZE
-            spans[start] = (symbol.name, size)
+    for symbol in symbols:
+        if symbol.type == STT_FUNC and symbol.section == text_index:
+            spans[symbol.value // WORD_SIZE] = (symbol.name, symbol.size // WORD_SIZE)
     return spans
-
-
-def read_symbol_type(symbol: Symbol) -> object:
-    """Return a symbol's type, such as "STT_FUNC"."""
-    info = read_entry_field(symbol.entry, "st_info")
-    return read_entry_field(info, "type") if isinstance(info, Container) else None
 
 
 # {section index: ([start of each symbol], [(start, size, name)])}, in order
 Holders = dict[int, tuple[list[int], list[tuple[int, int, str]]]]
 
 
-def read_holders(symbols: SymbolTableSection) -> Holders:
+def read_holders(symbols: list[ObjectSymbol]) -> Holders:
     """Return the named symbols an object defines, by section."""
     found: dict[int, list[tuple[int, int, str]]] = {}
-    for symbol in symbols.iter_symbols():
-        section_index = read_entry_field(symbol.entry, "st_shndx")
-        if not symbol.name or not isinstance(section_index, int):
+    for symbol in symbols:
+        if not symbol.name or symbol.section is None:
             continue
-        if read_symbol_type(symbol) in REFERENCED_TYPE_NAMES:
-            start = read_entry_int(symbol.entry, "st_value")
-            size = read_entry_int(symbol.entry, "st_size")
-            found.setdefault(section_index, []).append((start, size, symbol.name))
+        if symbol.type in REFERENCED_TYPES:
+            found.setdefault(symbol.section, []).append(
+                (symbol.value, symbol.size, symbol.name)
+            )
     holders: Holders = {}
     for section_index, held in found.items():
         held.sort()
@@ -602,7 +711,9 @@ def find_holder(
     return (name, offset) if offset < max(size, 1) else None
 
 
-def get_linked_address(symbol: Symbol, addend: int, holders: Holders) -> int | None:
+def get_linked_address(
+    symbol: ObjectSymbol, addend: int, holders: Holders
+) -> int | None:
     """Return the matching build's address of SYMBOL plus ADDEND, if it has one.
 
     A relocation against a section, as one to a static variable is, takes the
@@ -610,9 +721,9 @@ def get_linked_address(symbol: Symbol, addend: int, holders: Holders) -> int | N
     K0BASE taken off, as PhysicalAddress takes it, gives the physical address.
     """
     name, offset = symbol.name, addend
-    if read_symbol_type(symbol) == "STT_SECTION":
-        section_index = read_entry_field(symbol.entry, "st_shndx")
-        if not isinstance(section_index, int) or section_index not in holders:
+    if symbol.type == STT_SECTION:
+        section_index = symbol.section
+        if section_index is None or section_index not in holders:
             return None
         shift = 0
         found = find_holder(holders[section_index], addend)
@@ -643,28 +754,23 @@ class Relocated:
     addresses: dict[int, int] = field(default_factory=dict)
 
 
-def relocate(words: list[int], elf: ELFFile, symbols: SymbolTableSection) -> Relocated:
+def relocate(words: list[int], obj: ObjectFile, text_index: int) -> Relocated:
     """Mask the relocated halves of WORDS and find what their fields refer to.
 
     A %lo half is paired with the %hi halves before it against the same
     symbol, as the linker pairs them, to give the address they make.
     """
     relocated = Relocated([None] * len(words), {})
-    relocations = elf.get_section_by_name(".rel.text")
-    if not isinstance(relocations, RelocationSection):
-        return relocated
+    symbols = obj.symbols
     holders = read_holders(symbols)
-    text_index = elf.get_section_index(".text")
     references = relocated.references
     # {symbol index: the %hi halves that wait for their %lo}
     waiting: dict[int, list[int]] = {}
     # {symbol index: the latest %hi half's field}
     high_fields: dict[int, int] = {}
-    for reloc in relocations.iter_relocations():
-        kind = read_entry_int(reloc.entry, "r_info_type")
-        index = read_entry_int(reloc.entry, "r_offset") // WORD_SIZE
-        symbol_index = read_entry_int(reloc.entry, "r_info_sym")
-        symbol = symbols.get_symbol(symbol_index)
+    for offset, kind, symbol_index in obj.read_relocations(".rel.text"):
+        index = offset // WORD_SIZE
+        symbol = symbols[symbol_index]
         word = words[index]
         if kind == R_MIPS_HI16:
             waiting.setdefault(symbol_index, []).append(index)
@@ -686,9 +792,9 @@ def relocate(words: list[int], elf: ELFFile, symbols: SymbolTableSection) -> Rel
             words[index] = word & ~IMMEDIATE_MASK
         elif kind == R_MIPS_26:
             addend = (word & JUMP_TARGET_MASK) * WORD_SIZE
-            is_local = read_entry_field(symbol.entry, "st_shndx") == text_index
+            is_local = symbol.section == text_index
             if word >> OPCODE_SHIFT == J_OPCODE and is_local:
-                target = read_entry_int(symbol.entry, "st_value") + addend
+                target = symbol.value + addend
                 relocated.jumps[index] = target // WORD_SIZE
                 continue
             address = get_linked_address(symbol, addend, holders)
@@ -709,21 +815,17 @@ def keep_constant_values(words: list[int], relocated: Relocated) -> None:
             relocated.references[index] = None
 
 
-def read_object_functions(elf: ELFFile) -> Functions:
-    """Return {name: routine} of each function in an object's .text."""
-    text_index = elf.get_section_index(".text")
-    symbols = elf.get_section_by_name(".symtab")
-    if text_index is None or not isinstance(symbols, SymbolTableSection):
+def read_object_functions(obj: ObjectFile) -> Functions:
+    """Return {name: routine} of each function in OBJ's .text."""
+    text_index = obj.find_section(".text")
+    if text_index is None or not obj.symbols:
         return {}
-    text = elf.get_section(text_index).data()
-    words = [
-        int.from_bytes(text[i : i + WORD_SIZE], "big")
-        for i in range(0, len(text), WORD_SIZE)
-    ]
-    relocated = relocate(words, elf, symbols)
+    text = obj.read_section(text_index)
+    words = [word for (word,) in unpack_all(WORD, text)]
+    relocated = relocate(words, obj, text_index)
     keep_constant_values(words, relocated)
     functions: Functions = {}
-    for start, (name, size) in read_function_spans(symbols, text_index).items():
+    for start, (name, size) in read_function_spans(obj.symbols, text_index).items():
         end = start + size
         jumps = {
             index - start: target - start
