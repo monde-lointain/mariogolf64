@@ -1621,7 +1621,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #define DRIVE_RECORD_DISTANCE_ENV_COLOR 0xFF600000
 #define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
 
-/* Doesn't match: 38 words differ. */
+/* Doesn't match: 35 words differ. */
 #ifdef NON_MATCHING
 void DrawDriveRecord(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1648,12 +1648,12 @@ void DrawDriveRecord(Gfx** displayListHead) {
         CAPTION_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
   }
 
-  stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
   halfWidth = width >> 1;
   gDPPipeSync(gfx++);
   gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT,
       ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
       ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
+  stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
   stripCount = height / stripHeight;
   if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
