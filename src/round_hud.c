@@ -3640,7 +3640,12 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
  *
- * Doesn't match: 61 words differ.
+ * Doesn't match: the original's branches show the stroke counts' loop
+ * testing i != playerCount, as the faces' loop does. Written that way, its
+ * loop matches, but the frame comes out 8 bytes smaller and hasHandicap's
+ * spill slot comes before club's and scoreboardX's, which moves every stack
+ * offset, so 96 words differ. Moving hasHandicap's declaration doesn't
+ * reorder the slots. 61 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {
