@@ -33,9 +33,6 @@ __pycache__/
 *.pyc
 .splat/
 nonmatchings/
-ctx.c
-ctx.c.m2c
-expected/
 
 # uv writes this on every run; the tools project has no dependencies to lock
 uv.lock
