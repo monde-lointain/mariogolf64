@@ -1101,7 +1101,10 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point) {
  * address before adding the slot's, where this adds the slot's first; 2
  * words differ. Computing tileIndex outside its own block gives 26, other
  * orders of its terms give 2 to 4, and adding the slot to the tile's
- * midpoints as a pointer gives 2.
+ * midpoints as a pointer gives 2. A midpoints local, as SetGroundPoint has,
+ * gives the original's order of instructions but 38 differing words: local
+ * allocation ties tileIndex, its offset and midpoints into one quantity that
+ * takes $v0 ahead of the slot's lookup, and the rest of the registers follow.
  */
 #ifdef NON_MATCHING
 Vtx* GetGroundPoint(u32 column, u32 row) {
