@@ -1433,8 +1433,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BetDashText);
  *
  * Doesn't match: the target indexes the minute arrays from the offset it
  * shares with the other time arrays, where this steps pointers through them,
- * and it adds the rows' offsets to the scorecard's y in a different order. 147
- * words differ.
+ * and it adds the rows' offsets to the scorecard's y in a different order.
+ * Keeping the round's seconds in scoreToPar, which the original may share
+ * with them, leaves 95. 104 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSpeedGolfPage(Gfx** displayListHead) {
@@ -1443,6 +1444,7 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 i;
   s32 minutes;
+  s32 seconds;
   s32 scoreToPar;
 
   SetUpGradientTextDrawing(&gfx, 0);
@@ -1504,9 +1506,11 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
     }
   }
 
+  seconds =
+      g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE;
   sprintf(g_PrintBuffer, "%02d:%02d:%02d",
       g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND / SECONDS_PER_MINUTE,
-      g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE,
+      seconds,
       (s32)(g_GameState.stopwatchFrameCount *
           ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
           HUNDREDTHS_PER_SECOND);
