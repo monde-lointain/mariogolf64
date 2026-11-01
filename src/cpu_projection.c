@@ -128,11 +128,27 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
 }
 
 /*
- * Returns 0 if the sphere is not in front of the camera, 1 if it is off the
- * left or right of the screen, 2 if it is off the top or bottom, or else its
- * view depth, which is negative
+ * Whether the screen offset OFFSET, stored in EDGE as it is tested, lies
+ * past the screen's edge CENTER from its center on the positive side, or on
+ * the negative side
+ */
+#define IsPastPositiveEdge(edge, offset, center) \
+  (((edge) = (offset)), ((center) < (edge)))
+#define IsPastNegativeEdge(edge, offset, center) \
+  (((edge) = (offset)), ((edge) < -(center)))
+
+/*
+ * Returns SPHERE_BEHIND_CAMERA if the sphere is not in front of the camera,
+ * SPHERE_PAST_SIDE if it is off the left or right of the screen,
+ * SPHERE_PAST_TOP_OR_BOTTOM if it is off the top or bottom, or else its view
+ * depth, which is negative. The side of the sphere nearest the screen's
+ * center is the one tested against each edge.
  *
- * Doesn't match: 62 words differ.
+ * Doesn't match: for the left edge and the top, GCC adds or subtracts the
+ * radius into a new register, where the original does it in place in the
+ * coordinate's, and loads the scale into the other. Writing those offsets
+ * with the scale last, as the other two are, gives 12 differing words, not
+ * 8. 8 words differ.
  */
 #ifdef NON_MATCHING
 s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
@@ -140,11 +156,15 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
   /* The point's view-space x, then its y, to match */
   f32 viewCoordinate;
   f32 perspective;
+  /* The screen offset of the side tested, kept in one local to match */
+  f32 screenEdge;
 
   depth = (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
-      (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2] - radius;
+      (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
+  /* The depth of the sphere's nearest point, taken apart to match */
+  depth -= radius;
   if ((s32)depth >= 0) {
-    return 0;
+    return SPHERE_BEHIND_CAMERA;
   }
 
   viewCoordinate = (f_CpuViewingMatrix[0][0] * x) +
@@ -156,26 +176,37 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
     perspective = 1.0f / depth;
   }
 
-  if ((viewCoordinate > 0.0f)
-          ? f_CpuViewportCenterX <
-              f_CpuScreenScaleX * (viewCoordinate - radius) * perspective
-          : f_CpuScreenScaleX * (viewCoordinate + radius) * perspective <
-              -f_CpuViewportCenterX) {
-    return 1;
+  /*
+   * Tested as whether the sphere is on screen, so that each edge's test
+   * branches to the one return, to match
+   */
+  if (!((viewCoordinate > 0.0f)
+              ? IsPastPositiveEdge(screenEdge,
+                    (viewCoordinate - radius) * f_CpuScreenScaleX * perspective,
+                    f_CpuViewportCenterX)
+              : IsPastNegativeEdge(screenEdge,
+                    f_CpuScreenScaleX * (viewCoordinate + radius) * perspective,
+                    f_CpuViewportCenterX))) {
+    /* The screen's y runs down, opposite the view's */
+    viewCoordinate = (f_CpuViewingMatrix[0][1] * x) +
+        (f_CpuViewingMatrix[1][1] * y) + (f_CpuViewingMatrix[2][1] * z) +
+        f_CpuViewingMatrix[3][1];
+    if (!((viewCoordinate > 0.0f)
+                ? IsPastNegativeEdge(screenEdge,
+                      f_CpuScreenScaleY * (viewCoordinate - radius) *
+                          perspective,
+                      f_CpuViewportCenterY)
+                : IsPastPositiveEdge(screenEdge,
+                      (viewCoordinate + radius) * f_CpuScreenScaleY *
+                          perspective,
+                      f_CpuViewportCenterY))) {
+      return depth;
+    }
+
+    return SPHERE_PAST_TOP_OR_BOTTOM;
   }
 
-  viewCoordinate = (f_CpuViewingMatrix[0][1] * x) +
-      (f_CpuViewingMatrix[1][1] * y) + (f_CpuViewingMatrix[2][1] * z) +
-      f_CpuViewingMatrix[3][1];
-  if ((viewCoordinate > 0.0f)
-          ? f_CpuScreenScaleY * (viewCoordinate - radius) * perspective <
-              -f_CpuViewportCenterY
-          : f_CpuViewportCenterY <
-              f_CpuScreenScaleY * (viewCoordinate + radius) * perspective) {
-    return 2;
-  }
-
-  return depth;
+  return SPHERE_PAST_SIDE;
 }
 
 #else

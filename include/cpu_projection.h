@@ -25,6 +25,14 @@ typedef struct ScreenPoint {
 
 void SetCpuProjection(Mtx* projection, Mtx* viewing, Vp* viewport);
 void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport);
+
+/* What GetSphereVisibility returns for a sphere it can't see */
+enum SphereVisibility {
+  SPHERE_BEHIND_CAMERA,
+  SPHERE_PAST_SIDE,
+  SPHERE_PAST_TOP_OR_BOTTOM
+};
+
 s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius);
 s32 GetViewDepth(f32 x, f32 y, f32 z);
 s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point);
