@@ -3262,7 +3262,7 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texture in f_ShadowlessTextures cast no shadow.
  * Doesn't match: ours keeps heightScale in a float register and loads
  * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
- * $s2 and $f22, and the other registers differ from there. 309 words differ.
+ * $s2 and $f22, and the other registers differ from there. 303 words differ.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
@@ -3304,6 +3304,7 @@ void CastBillboardShadows(void) {
   u32 blue;
   f32 viewX;
   f32 viewY;
+  u32 alpha;
 
   lastTextureIndex = -1;
   lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
@@ -3477,7 +3478,8 @@ void CastBillboardShadows(void) {
           blue &= TEXEL_BLUE_MASK;
         }
 
-        color = red | green | blue | (color & TEXEL_ALPHA_MASK);
+        alpha = color & TEXEL_ALPHA_MASK;
+        color = red | green | blue | alpha;
         *GetShadowedTexel(column, row) = color;
       }
 
