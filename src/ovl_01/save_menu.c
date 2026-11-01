@@ -1833,7 +1833,7 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  *
  * Doesn't match: the original keeps the menu memory pointer on the stack
  * and the mode icons' texel step in a saved register, and doesn't keep
- * the degrees-to-radians factor in a register. 431 words differ.
+ * the degrees-to-radians factor in a register. 417 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -1984,8 +1984,8 @@ void DrawSavedGames(Gfx** displayListHead) {
       }
 
       if (f_SavedGameModes[slot] != NO_SAVE_MENU_MODE) {
-        IN_OWN_BLOCK(gDPLoadTLUT_pal256(
-            gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot]))));
+        gDPLoadTLUT_pal256(
+            gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot])));
         for (holeIndex = 0; holeIndex != MODE_ICON_STRIP_COUNT; holeIndex++) {
           gDPLoadTextureBlock(gfx++,
               TextureAddress(LargeImageTexels(f_SavedGameModeImages[slot]) +
