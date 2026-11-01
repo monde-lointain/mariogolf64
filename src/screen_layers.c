@@ -660,7 +660,7 @@ s32 UpdatePrompt(ControllerState* controller) {
  * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
  * and No under its message once it has opened. The chosen answer bobs.
  *
- * Doesn't match: 35 words differ.
+ * Doesn't match: 30 words differ.
  */
 #ifdef NON_MATCHING
 void DrawPrompt(Gfx** displayListHead) {
@@ -716,8 +716,8 @@ void DrawPrompt(Gfx** displayListHead) {
   half = 0;
   texelOffset = IMAGE_HEADER_SIZE;
   do {
-    halfHeight = cloudHeight;
     if (f_PromptState == PROMPT_STATE_CHOOSING) {
+      halfHeight = cloudHeight;
       halfWidth = PROMPT_CLOUD_HALF_WIDTH;
     } else {
       halfWidth =
@@ -731,7 +731,7 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     texelOffset += PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2;
     DrawTextureRect(&gfx, QuarterPixels(PROMPT_CENTER_X - halfWidth),
-        QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight) - halfHeight),
+        QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + ((half - 1) * halfHeight)),
         QuarterPixels(PROMPT_CENTER_X + halfWidth),
         QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight)),
         G_TX_RENDERTILE, 0, 0,
