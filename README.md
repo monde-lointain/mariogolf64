@@ -26,13 +26,15 @@ make -j       # build and verify build/mariogolf64.z64
 ## Progress
 
 `make progress` builds the drafts of the routines that don't match yet
-(`NON_MATCHING=1`) and writes a progress map to `build/progress`: a
-treemap of the code by source file, coloured by how much of it matches
-(`progress.svg`, `index.html`), and the matched code over time
-(`history.svg`), one point per measured commit. `tools/progress_report.py`
-measures the build into objdiff's `report.json` format, and
-`tools/progress_map.py`, a copy of a tool kept elsewhere, draws it with
-the names in `tools/progress_map.json`.
+(`NON_MATCHING=1`) and writes the progress images and page to
+`build/progress`: a treemap of the code by source file (`progress.svg`),
+every routine by state (`functions.svg`), the matched code over time
+(`history.svg`, `day.svg`, `daily.svg`) and all of them on one page
+(`index.html`). Each run adds the measured commit to `history.json`.
+`tools/progress_report.py` measures the build into objdiff's
+`report.json` format, scoring each draft as objdiff does, and lists the
+drafts that differ in register numbers only. `tools/progress_map.py`, a
+copy of a tool kept elsewhere with this project's settings, draws them.
 
 ## Formatting
 

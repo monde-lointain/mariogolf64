@@ -261,10 +261,10 @@ PROGRESS_O_FILES := $(filter $(BUILD_DIR)/src/% $(BUILD_DIR)/lib/%,$(O_FILES))
 progress: $(ROM)
 	$(MAKE) NON_MATCHING=1
 	@mkdir -p $(PROGRESS_DIR)
-	$(PYTHON) tools/progress_report.py $(DRAFTS_DIR) $(PROGRESS_O_FILES) \
-	    > $(PROGRESS_DIR)/report.json
+	$(PYTHON) tools/progress_report.py $(PROGRESS_DIR) $(DRAFTS_DIR) \
+	    $(PROGRESS_O_FILES)
 	$(PYTHON) tools/progress_map.py $(PROGRESS_DIR)/report.json -o $(PROGRESS_DIR) \
-	    --config tools/progress_map.json --history $(PROGRESS_DIR)/history.json \
+	    --regs $(PROGRESS_DIR)/regs.json --history $(PROGRESS_DIR)/history.json \
 	    --commit $$(git rev-parse HEAD) --date $$(git log -1 --format=%cI)
 
 # Links this build's objects in the shiftable layout, which fails on each
