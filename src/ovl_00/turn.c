@@ -2936,7 +2936,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 564 words differ, spread through the routine's states.
+ * Doesn't match: 550 words differ, spread through the routine's states.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -4810,16 +4810,16 @@ void UpdateTurns(void) {
             case CHOICE_RESULT_CONTINUE:
               EndFlightCamera();
               StartHudAnimation(2);
-              nextState = PLAYER_STATE_WAITING;
               ForceStopRumble();
+              nextState = PLAYER_STATE_WAITING;
               break;
             case CHOICE_RESULT_MULLIGAN:
               g_IsTrainingHeadingKept = TRUE;
               g_Players[playerIndex] = g_SavedPlayers[playerIndex];
               EndFlightCamera();
               StartHudAnimation(2);
-              nextState = PLAYER_STATE_WAITING;
               ForceStopRumble();
+              nextState = PLAYER_STATE_WAITING;
               break;
             case CHOICE_RESULT_HOLE_OUT:
               if (g_Players[playerIndex].holeStatus == HOLE_STATUS_HOLED_OUT &&
@@ -4849,8 +4849,8 @@ void UpdateTurns(void) {
                   SOUND_FULL_SCALE);
               SkipNextPinDraw();
               PlacePlayersOnTee();
-              nextState = PLAYER_STATE_WAITING;
               ForceStopRumble();
+              nextState = PLAYER_STATE_WAITING;
               break;
             case CHOICE_RESULT_RING_SHOT_HOLE_OUT:
               nextState = PLAYER_STATE_HOLE_DONE;
