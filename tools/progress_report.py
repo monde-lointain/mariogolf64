@@ -27,7 +27,9 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import numpy as np
 import rabbitizer
+from numpy.typing import NDArray
 
 from fncompare import (
     STT_FUNC,
@@ -52,6 +54,14 @@ PENALTY_IMMEDIATE = 1
 PENALTY_REGISTER = 5
 PENALTY_REPLACE = 60
 PENALTY_INSERT_DELETE = 100
+
+# The base of the hashes LongestMatcher compares runs of opcodes by. It's
+# odd, so that it has an inverse modulo 2**64, at which numpy's uint64 wraps.
+HASH_BASE = 0x9E3779B97F4A7C15
+HASH_MODULUS = 1 << 64
+# The smallest window, in pairs of opcodes, that LongestMatcher searches by
+# hashing; difflib's own search is faster in smaller ones.
+MIN_HASHED_WINDOW = 50000
 
 # An instruction's operands: registers and immediates. A branch's offset is
 # masked, so the parts of its destination compare equal.
@@ -96,6 +106,93 @@ def get_pair_penalty(original: int, draft: int) -> tuple[int, bool]:
     return penalty, is_registers_only
 
 
+class LongestMatcher(difflib.SequenceMatcher[str]):
+    """A SequenceMatcher without junk that finds long matches by hashing.
+
+    difflib's search for the longest match visits each pair of equal opcodes
+    in the window, millions in a routine of thousands of instructions, and
+    searches each window it splits off again. This one binary-searches the
+    match's length, comparing the hashes of the runs of that length on each
+    side, and takes the match difflib's search takes: the earliest in A, then
+    in B. A match whose hashes are equal but whose opcodes aren't, which is
+    vanishingly rare, falls back on difflib's search.
+    """
+
+    def __init__(self, a: list[str], b: list[str]) -> None:
+        """Match A with B."""
+        super().__init__(None, a, b, autojunk=False)
+        # SequenceMatcher's stubs don't type its own a and b
+        self.sides: tuple[list[str], list[str]] = (a, b)
+        codes: dict[str, int] = {}
+        length = max(len(a), len(b))
+        # B**i, and the sums of each side's codes times B**-i up to each index,
+        # so that a run's hash is the difference of two sums times B**start
+        self.powers: NDArray[np.uint64] = np.ones(length + 1, dtype=np.uint64)
+        self.powers[1:] = np.cumprod(np.full(length, HASH_BASE, dtype=np.uint64))
+        inverse_powers = np.cumprod(
+            np.full(length, pow(HASH_BASE, -1, HASH_MODULUS), dtype=np.uint64)
+        )
+        self.sums: list[NDArray[np.uint64]] = []
+        for sequence in (a, b):
+            sequence_codes = np.array(
+                [codes.setdefault(opcode, len(codes) + 1) for opcode in sequence],
+                dtype=np.uint64,
+            )
+            sums = np.zeros(len(sequence) + 1, dtype=np.uint64)
+            sums[1:] = (sequence_codes * inverse_powers[: len(sequence)]).cumsum()
+            self.sums.append(sums)
+
+    def hash_runs(
+        self, side: int, start: int, end: int, length: int
+    ) -> NDArray[np.uint64]:
+        """Return the hash of each run of LENGTH in [START, END) of SIDE."""
+        sums = self.sums[side]
+        starts = slice(start, end - length + 1)
+        return (sums[start + length : end + 1] - sums[starts]) * self.powers[starts]
+
+    def find_longest_match(  # pyright: ignore[reportImplicitOverride]
+        self, alo: int = 0, ahi: int | None = None, blo: int = 0, bhi: int | None = None
+    ) -> difflib.Match:
+        """Return the longest match in the window, as difflib's search does.
+
+        typing.override is newer than the tools' Python 3.10.
+        """
+        a, b = self.sides
+        ahi = len(a) if ahi is None else ahi
+        bhi = len(b) if bhi is None else bhi
+        if (ahi - alo) * (bhi - blo) < MIN_HASHED_WINDOW:
+            return super().find_longest_match(alo, ahi, blo, bhi)
+        # A run as long as SHORTEST is in both, as far as the hashes tell, and
+        # none as long as LONGEST is.
+        shortest, longest = 0, min(ahi - alo, bhi - blo) + 1
+        while longest - shortest > 1:
+            length = (shortest + longest) // 2
+            in_both = find_shared(
+                self.hash_runs(0, alo, ahi, length), self.hash_runs(1, blo, bhi, length)
+            )
+            if in_both.any():
+                shortest = length
+            else:
+                longest = length
+        if not shortest:
+            return difflib.Match(alo, blo, 0)
+        a_hashes = self.hash_runs(0, alo, ahi, shortest)
+        b_hashes = self.hash_runs(1, blo, bhi, shortest)
+        i = alo + int(find_shared(a_hashes, b_hashes).argmax())
+        j = blo + int(find_shared(b_hashes, a_hashes[i - alo : i - alo + 1]).argmax())
+        if a[i : i + shortest] != b[j : j + shortest]:
+            return super().find_longest_match(alo, ahi, blo, bhi)
+        return difflib.Match(i, j, shortest)
+
+
+def find_shared(
+    hashes: NDArray[np.uint64], others: NDArray[np.uint64]
+) -> NDArray[np.bool_]:
+    """Return whether each of HASHES is among OTHERS."""
+    # numpy's stubs leave part of isin's signature untyped.
+    return np.isin(hashes, others)  # pyright: ignore[reportUnknownMemberType]
+
+
 def compare_routine(original: Routine, draft: Routine) -> Comparison:
     """Compare DRAFT with ORIGINAL, as objdiff's diff_code does.
 
@@ -108,7 +205,7 @@ def compare_routine(original: Routine, draft: Routine) -> Comparison:
         [read_instruction(word)[0] for word in routine.words]
         for routine in (original, draft)
     ]
-    matcher = difflib.SequenceMatcher(None, *opcodes, autojunk=False)
+    matcher = LongestMatcher(*opcodes)
     pairing = Pairing(original, draft, pair_rows(matcher.get_opcodes()))
     penalty = 0
     is_registers_only = True

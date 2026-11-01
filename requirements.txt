@@ -5,6 +5,8 @@ ipl3checksum
 mapfile-parser
 # blame.py and fncompare.py
 pyelftools
+# progress_report.py
+numpy
 # decode_asset.py
 pillow
 # make pycheck
