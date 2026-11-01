@@ -362,7 +362,7 @@ s32 GetGaugeFill(void);
 /*
  * Draws the power gauge, its markers, and the bar for the lie's span.
  *
- * Doesn't match: 286 words differ. The stack frame is 8 bytes larger, and
+ * Doesn't match: 270 words differ. The stack frame is 8 bytes larger, and
  * the original copies a tick loop's base index into a temporary register and
  * keeps the loop's 25 in another, so the loops' registers differ.
  */
@@ -376,6 +376,9 @@ void DrawClubPanel(Gfx** displayListHead) {
   s32 firstTick;
   /* Also the gauge group index, to match */
   s32 fillWidth;
+  s32 emptyLeft;
+  s32 endTickLeft;
+  s32 mediumTickLeft;
 
   s32 markerOffset;
   s32 pulse;
@@ -458,8 +461,8 @@ void DrawClubPanel(Gfx** displayListHead) {
   }
 
   for (tick = 0; tick < GAUGE_END_TICK_COUNT; tick++) {
-    gSPTextureRectangle(gfx++,
-        QuarterPixels(GAUGE_FULL_X + tick * GAUGE_LENGTH),
+    endTickLeft = QuarterPixels(GAUGE_FULL_X + tick * GAUGE_LENGTH);
+    gSPTextureRectangle(gfx++, endTickLeft,
         QuarterPixels(
             GAUGE_MARKER_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX),
         QuarterPixels(GAUGE_FULL_X + tick * GAUGE_LENGTH + GAUGE_TICK_WIDTH),
@@ -469,9 +472,9 @@ void DrawClubPanel(Gfx** displayListHead) {
   }
 
   for (tick = 1; tick <= GAUGE_MEDIUM_TICK_COUNT; tick++) {
-    gSPTextureRectangle(gfx++,
-        QuarterPixels(
-            GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING),
+    mediumTickLeft = QuarterPixels(
+        GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING);
+    gSPTextureRectangle(gfx++, mediumTickLeft,
         QuarterPixels(
             GAUGE_MEDIUM_TICK_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX),
         QuarterPixels(GAUGE_FULL_X +
@@ -503,9 +506,9 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   if (playerState != PLAYER_STATE_AIMING) {
-    gSPTextureRectangle(gfx++,
-        QuarterPixels(
-            GAUGE_EMPTY_X - f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE),
+    emptyLeft = QuarterPixels(
+        GAUGE_EMPTY_X - f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE);
+    gSPTextureRectangle(gfx++, emptyLeft,
         QuarterPixels(GAUGE_TOP + f_ClubPanelDebugValue + g_ShotPanelOffsetX),
         QuarterPixels(GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH),
         QuarterPixels(
