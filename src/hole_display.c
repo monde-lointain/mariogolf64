@@ -2570,8 +2570,10 @@ void SetMenuBackdrop(s32 backdrop) {
  * Starts the plain menu backdrop by capturing the last frame for it.
  *
  * Doesn't match: GCC loads f_LastFrameBuffer and f_CapturedFrame in the other
- * order before the strip loop, and places the loop's stores differently. 45
- * words differ.
+ * order before the strip loop, and places the loop's stores differently.
+ * Copying f_LastFrameBuffer into a second local before source leaves 2; a
+ * block-local source, or one set in the declaration or loop, changes nothing
+ * or more. 45 words differ.
  */
 #ifdef NON_MATCHING
 void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
