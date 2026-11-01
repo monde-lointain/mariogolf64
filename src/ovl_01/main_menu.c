@@ -3921,7 +3921,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
  *
  * Doesn't match: the game keeps 0xFD500000 in a register and spills
  * 0x073DB06C where this spills the other way, and it reads g_MenuScreen for
- * MENU_LAYER_UNK20 where this drops the read. 373 words differ.
+ * MENU_LAYER_UNK20 where this drops the read. 364 words differ.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
@@ -3931,6 +3931,9 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   s32 stripTop;
   s32 bobOffset;
   u8* image;
+  u8* sceneryTexels;
+  u32 firstStripTexels;
+  s32 stripTopQuarters;
 
   /* The menu memory goes unused */
   GetMenuMemory();
@@ -3952,9 +3955,10 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
       for (stripIndex = 0; stripIndex != CLAMPED_BACKDROP_STRIP_COUNT;
           stripIndex++) {
         if (stripIndex == 0) {
-          gDPLoadTextureBlock(gfx++,
-              TextureAddress(LargeImageTexels(g_MenuCourseSceneryAsset)),
-              G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
+          firstStripTexels =
+              TextureAddress(LargeImageTexels(g_MenuCourseSceneryAsset));
+          gDPLoadTextureBlock(gfx++, firstStripTexels, G_IM_FMT_CI, G_IM_SIZ_8b,
+              BACKDROP_WIDTH,
               BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3969,8 +3973,9 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
               TEXEL_STEP_ONE / BACKDROP_SCALE);
         } else {
           gDPPipeSync(gfx++);
+          sceneryTexels = LargeImageTexels(g_MenuCourseSceneryAsset);
           gDPLoadTextureBlock(gfx++,
-              TextureAddress(LargeImageTexels(g_MenuCourseSceneryAsset) +
+              TextureAddress(sceneryTexels +
                   (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)),
               G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
               BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
@@ -3990,8 +3995,9 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
           } else {
             stripTop = BACKDROP_TOP +
                 (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
+            stripTopQuarters = QuarterPixels(stripTop);
             gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
-                QuarterPixels(stripTop),
+                stripTopQuarters,
                 QuarterPixels(
                     BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
                 QuarterPixels(
