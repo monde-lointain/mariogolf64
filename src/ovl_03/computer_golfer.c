@@ -2226,7 +2226,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * Doesn't match: ours gives some values other saved registers than the
  * original does, and it keeps the address of f_Shot.ballPosition's z in a saved
  * register across the atan2 calls, where the original loads it again.
- * 175 words differ.
+ * 157 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
@@ -2440,8 +2440,8 @@ EVALUATE:
     }
 
     if (f_TrialIndex != 0) {
-      par = g_HoleSetup.par;
       strokes = g_Players[f_Shot.playerIndex].strokeCount;
+      par = g_HoleSetup.par;
       if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
           SURFACE_KIND_GREEN) {
         strokesOver = strokes + 1;
