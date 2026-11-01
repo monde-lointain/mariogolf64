@@ -1347,6 +1347,9 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_TITLE_STRIP_COUNT 8
 #define NOTICE_TITLE_LEFT 80
 #define NOTICE_TITLE_TOP 56
+/* The top of the title's strip I, lifted by LIFT */
+#define TitleStripTop(lift, i) \
+  ((lift) + NOTICE_TITLE_TOP + ((i) * NOTICE_TITLE_STRIP_HEIGHT))
 #define NOTICE_TITLE_LIFT 96.0f
 /* Wider than the shine texture, so that it sweeps across the title */
 #define NOTICE_SHINE_DSDX ((NOTICE_SHINE_SIZE << 10) / NOTICE_TITLE_STRIP_WIDTH)
@@ -1361,7 +1364,12 @@ void UpdateCourseResultsNotice(void) {
  * The notice that a course has opened: its picture and title swing in, then a
  * shine sweeps the title
  *
- * Doesn't match: 63 words differ.
+ * Doesn't match: in the picture's loop the original adds the center to the
+ * product before taking away the size, where this takes the size from the
+ * center first, and in the title's loops it keeps each strip's top in $s0
+ * where this works it out in temporaries, so registers and order differ
+ * through the loops. Writing the depth pass's top out and keeping its bottom's
+ * offset in a local brings 63 differing words down to 57. 57 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
@@ -1374,6 +1382,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   s32 centerX;
   s32 i;
   s32 shineTexelX;
+  s32 stripBottomOffset;
 
   gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
@@ -1419,7 +1428,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-    top = lift + NOTICE_TITLE_TOP + (i * NOTICE_TITLE_STRIP_HEIGHT);
+    top = TitleStripTop(lift, i);
     DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
         QuarterPixels(top + f_NoticeUnk54),
         QuarterPixels(
@@ -1447,12 +1456,14 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-    top = lift + NOTICE_TITLE_TOP + (i * NOTICE_TITLE_STRIP_HEIGHT);
+    /* The top is written out and the bottom's offset kept in a local, unlike
+     * the colored title's, to match */
+    stripBottomOffset = f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT;
     DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-        QuarterPixels(top + f_NoticeUnk54),
+        QuarterPixels(TitleStripTop(lift, i) + f_NoticeUnk54),
         QuarterPixels(
             f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-        QuarterPixels(top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)),
+        QuarterPixels(TitleStripTop(lift, i) + stripBottomOffset),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
