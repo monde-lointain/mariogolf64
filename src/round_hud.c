@@ -814,7 +814,7 @@ void PrepareHoleDisplay(void) {
 /*
  * Lays out the wind flag and builds the projections the HUD draws with
  *
- * Doesn't match: 58 words differ.
+ * Doesn't match: 46 words differ.
  */
 #ifdef NON_MATCHING
 void InitRoundHud(void) {
@@ -827,7 +827,7 @@ void InitRoundHud(void) {
   for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
     vertex = HoleFlagGridVertices(grid);
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-      for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+      for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
         vertex->v.ob[AXIS_X] = column * HOLE_FLAG_CELL_SIZE;
         vertex->v.ob[AXIS_Y] = -row * HOLE_FLAG_CELL_SIZE;
         vertex->v.ob[AXIS_Z] = 0;
@@ -837,7 +837,6 @@ void InitRoundHud(void) {
         vertex->v.cn[1] = HOLE_FLAG_START_SHADE;
         vertex->v.cn[2] = HOLE_FLAG_START_SHADE;
         vertex->v.cn[3] = HOLE_FLAG_START_SHADE;
-        vertex++;
       }
     }
   }
@@ -846,10 +845,9 @@ void InitRoundHud(void) {
       grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
     vertex = HoleFlagGridVertices(grid);
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-      for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+      for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
         vertex->v.tc[TEXTURE_AXIS_S] =
             HOLE_FLAG_BACK_TEXEL_START - (column * HOLE_FLAG_TEXEL_COLUMN_STEP);
-        vertex++;
       }
     }
   }
